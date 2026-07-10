@@ -4714,4 +4714,304 @@ end MarkedChartData
 
 end TopGlue
 
+section GluedClauses
+
+/-! ### The clauses of the glued classifying square (recipe step 4)
+
+The glued top map fits in a commuting square over the glued base map; the square is
+cartesian (the comparison into the pullback is an isomorphism because it is one over
+every chart, and being an isomorphism is Zariski-local on the target); it is pointed and
+carries the section to the atlas marking (both checked over the chart cover). -/
+
+namespace MarkedChartData
+
+variable {R : CommRingCat.{u}} {Y : EllObj R}
+
+/-- The glued square commutes. -/
+theorem gluedTopMap_π (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    gluedTopMap P hP ≫ projModelπ (tateCurveLocOver R) =
+      Y.curve.π ≫ gluedBaseMap P hP := by
+  have hs : ∀ s : ↥Y.base,
+      pullback.fst Y.curve.π (chartAt Y s).U.1.ι ≫
+        (gluedTopMap P hP ≫ projModelπ (tateCurveLocOver R)) =
+      pullback.fst Y.curve.π (chartAt Y s).U.1.ι ≫ (Y.curve.π ≫ gluedBaseMap P hP) := by
+    intro s
+    letI := (chartAt Y s).chartAlgebra
+    have h1 : pullback.fst Y.curve.π (chartAt Y s).U.1.ι ≫
+        (gluedTopMap P hP ≫ projModelπ (tateCurveLocOver R)) =
+        coverTopMap P hP s ≫ projModelπ (tateCurveLocOver R) := by
+      rw [← Category.assoc, ι_gluedTopMap]
+    have h2 : coverTopMap P hP s ≫ projModelπ (tateCurveLocOver R) =
+        pullback.snd Y.curve.π (chartAt Y s).U.1.ι ≫ (chartAt Y s).baseMap P hP :=
+      ((chartAt Y s).topMap_isPullback P hP).w
+    have h3 : pullback.fst Y.curve.π (chartAt Y s).U.1.ι ≫
+        (Y.curve.π ≫ gluedBaseMap P hP) =
+        pullback.snd Y.curve.π (chartAt Y s).U.1.ι ≫
+          ((chartAt Y s).U.1.ι ≫ gluedBaseMap P hP) := by
+      rw [← Category.assoc, pullback.condition (f := Y.curve.π) (g := (chartAt Y s).U.1.ι),
+        Category.assoc]
+    rw [h1, h2, h3, ι_gluedBaseMap]
+    exact rfl
+  apply Scheme.Cover.hom_ext (curveCover Y)
+  intro s
+  exact hs s
+
+/-- The glued square is pointed. -/
+theorem gluedTopMap_zero (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    Y.curve.zero ≫ gluedTopMap P hP =
+      gluedBaseMap P hP ≫ projModelZero (tateCurveLocOver R) := by
+  have hs : ∀ s : ↥Y.base,
+      (chartAt Y s).U.1.ι ≫ (Y.curve.zero ≫ gluedTopMap P hP) =
+      (chartAt Y s).U.1.ι ≫ (gluedBaseMap P hP ≫ projModelZero (tateCurveLocOver R)) := by
+    intro s
+    letI := (chartAt Y s).chartAlgebra
+    have hlift : (pullback.lift ((chartAt Y s).U.1.ι ≫ Y.curve.zero) (𝟙 _)
+        (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id, Category.id_comp]) :
+          (chartAt Y s).U.1.toScheme ⟶ pullback Y.curve.π (chartAt Y s).U.1.ι) ≫
+        pullback.fst Y.curve.π (chartAt Y s).U.1.ι =
+        (chartAt Y s).U.1.ι ≫ Y.curve.zero := pullback.lift_fst _ _ _
+    calc (chartAt Y s).U.1.ι ≫ (Y.curve.zero ≫ gluedTopMap P hP)
+        = ((chartAt Y s).U.1.ι ≫ Y.curve.zero) ≫ gluedTopMap P hP :=
+          (Category.assoc _ _ _).symm
+      _ = (pullback.lift ((chartAt Y s).U.1.ι ≫ Y.curve.zero) (𝟙 _)
+            (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id, Category.id_comp]) ≫
+            pullback.fst Y.curve.π (chartAt Y s).U.1.ι) ≫ gluedTopMap P hP := by
+          rw [hlift]
+      _ = pullback.lift ((chartAt Y s).U.1.ι ≫ Y.curve.zero) (𝟙 _)
+            (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id, Category.id_comp]) ≫
+            (pullback.fst Y.curve.π (chartAt Y s).U.1.ι ≫ gluedTopMap P hP) :=
+          Category.assoc _ _ _
+      _ = pullback.lift ((chartAt Y s).U.1.ι ≫ Y.curve.zero) (𝟙 _)
+            (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id, Category.id_comp]) ≫
+            coverTopMap P hP s := by rw [ι_gluedTopMap]
+      _ = (chartAt Y s).baseMap P hP ≫ projModelZero (tateCurveLocOver R) :=
+          (chartAt Y s).topMap_zero P hP
+      _ = ((chartAt Y s).U.1.ι ≫ gluedBaseMap P hP) ≫
+            projModelZero (tateCurveLocOver R) := by rw [ι_gluedBaseMap]; exact rfl
+      _ = (chartAt Y s).U.1.ι ≫ (gluedBaseMap P hP ≫ projModelZero (tateCurveLocOver R)) :=
+          Category.assoc _ _ _
+  apply Scheme.Cover.hom_ext (chartCover Y)
+  intro s
+  exact hs s
+
+/-- The glued square carries the section to the atlas marking. -/
+theorem gluedTopMap_marking (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    P.1 ≫ gluedTopMap P hP = gluedBaseMap P hP ≫ tateP0mor R := by
+  have hs : ∀ s : ↥Y.base,
+      (chartAt Y s).U.1.ι ≫ (P.1 ≫ gluedTopMap P hP) =
+      (chartAt Y s).U.1.ι ≫ (gluedBaseMap P hP ≫ tateP0mor R) := by
+    intro s
+    letI := (chartAt Y s).chartAlgebra
+    have hres : (chartAt Y s).restrictSection P ≫
+        pullback.fst Y.curve.π (chartAt Y s).U.1.ι = (chartAt Y s).U.1.ι ≫ P.1 :=
+      pullback.lift_fst _ _ _
+    calc (chartAt Y s).U.1.ι ≫ (P.1 ≫ gluedTopMap P hP)
+        = ((chartAt Y s).U.1.ι ≫ P.1) ≫ gluedTopMap P hP := (Category.assoc _ _ _).symm
+      _ = ((chartAt Y s).restrictSection P ≫
+            pullback.fst Y.curve.π (chartAt Y s).U.1.ι) ≫ gluedTopMap P hP := by
+          rw [hres]
+      _ = (chartAt Y s).restrictSection P ≫
+            (pullback.fst Y.curve.π (chartAt Y s).U.1.ι ≫ gluedTopMap P hP) :=
+          Category.assoc _ _ _
+      _ = (chartAt Y s).restrictSection P ≫ coverTopMap P hP s := by rw [ι_gluedTopMap]
+      _ = (chartAt Y s).baseMap P hP ≫ tateP0mor R := (chartAt Y s).topMap_marking P hP
+      _ = ((chartAt Y s).U.1.ι ≫ gluedBaseMap P hP) ≫ tateP0mor R := by
+          rw [ι_gluedBaseMap]; exact rfl
+      _ = (chartAt Y s).U.1.ι ≫ (gluedBaseMap P hP ≫ tateP0mor R) := Category.assoc _ _ _
+  apply Scheme.Cover.hom_ext (chartCover Y)
+  intro s
+  exact hs s
+
+/-- **The glued square is cartesian**: the comparison into the pullback is an isomorphism
+chart-locally (by `topMap_isPullback`), and being an isomorphism is Zariski-local on the
+target. -/
+theorem gluedTopMap_isPullback (P : Y.curve.Section)
+    (hP : Y.curve.NowhereGeomOrderLEThree P) :
+    IsPullback (gluedTopMap P hP) Y.curve.π (projModelπ (tateCurveLocOver R))
+      (gluedBaseMap P hP) := by
+  set χ : Y.curve.E ⟶ pullback (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP) :=
+    pullback.lift (gluedTopMap P hP) Y.curve.π (gluedTopMap_π P hP) with hχdef
+  have hχfst : χ ≫ pullback.fst (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP) =
+      gluedTopMap P hP := by rw [hχdef]; exact pullback.lift_fst _ _ _
+  have hχsnd : χ ≫ pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP) =
+      Y.curve.π := by rw [hχdef]; exact pullback.lift_snd _ _ _
+  have hpiece : ∀ s : ↥Y.base, IsIso (pullback.snd χ
+      (pullback.fst (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+        (chartAt Y s).U.1.ι)) := by
+    intro s
+    letI := (chartAt Y s).chartAlgebra
+    -- the W-piece square, pasted to the cospan (projModelπ, baseMap)
+    have hW : IsPullback
+        (pullback.fst (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+          (chartAt Y s).U.1.ι ≫
+          pullback.fst (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+        (pullback.snd (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+          (chartAt Y s).U.1.ι)
+        (projModelπ (tateCurveLocOver R)) ((chartAt Y s).baseMap P hP) := by
+      have h3 := (IsPullback.of_hasPullback
+          (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+          (chartAt Y s).U.1.ι).paste_horiz
+        (IsPullback.of_hasPullback (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+      rw [ι_gluedBaseMap P hP s] at h3
+      exact h3
+    -- the two pullback presentations over the chart
+    have htop := (chartAt Y s).topMap_isPullback P hP
+    -- the Q-side pasting: the χ-pullback of the piece is a pullback of π along the chart
+    have hQ2 := (IsPullback.of_hasPullback χ
+        (pullback.fst (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+          (chartAt Y s).U.1.ι)).paste_vert
+      (IsPullback.of_hasPullback
+        (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+        (chartAt Y s).U.1.ι)
+    rw [hχsnd] at hQ2
+    -- the comparison equals the composite of the two canonical pullback isomorphisms
+    set σ := htop.isoIsPullback _ _ hW with hσdef
+    set τ := hQ2.isoIsPullback _ _
+      (IsPullback.of_hasPullback Y.curve.π (chartAt Y s).U.1.ι) with hτdef
+    have hσfst : σ.hom ≫
+        (pullback.fst (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+          (chartAt Y s).U.1.ι ≫
+          pullback.fst (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP)) =
+        (chartAt Y s).topMap P hP := by
+      rw [hσdef]; exact IsPullback.isoIsPullback_hom_fst _ _ _ _
+    have hσsnd : σ.hom ≫
+        pullback.snd (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+          (chartAt Y s).U.1.ι =
+        pullback.snd Y.curve.π (chartAt Y s).U.1.ι := by
+      rw [hσdef]; exact IsPullback.isoIsPullback_hom_snd _ _ _ _
+    have hτfst : τ.hom ≫ pullback.fst Y.curve.π (chartAt Y s).U.1.ι =
+        pullback.fst χ (pullback.fst
+          (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+          (chartAt Y s).U.1.ι) := by
+      rw [hτdef]; exact IsPullback.isoIsPullback_hom_fst _ _ _ _
+    have hτsnd : τ.hom ≫ pullback.snd Y.curve.π (chartAt Y s).U.1.ι =
+        pullback.snd χ (pullback.fst
+          (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+          (chartAt Y s).U.1.ι) ≫
+          pullback.snd (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+            (chartAt Y s).U.1.ι := by
+      rw [hτdef]; exact IsPullback.isoIsPullback_hom_snd _ _ _ _
+    have hQcond : pullback.fst χ (pullback.fst
+          (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+          (chartAt Y s).U.1.ι) ≫ χ =
+        pullback.snd χ (pullback.fst
+          (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+          (chartAt Y s).U.1.ι) ≫
+          pullback.fst (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+            (chartAt Y s).U.1.ι := pullback.condition
+    have hkey : pullback.snd χ
+        (pullback.fst (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+          (chartAt Y s).U.1.ι) = τ.hom ≫ σ.hom := by
+      refine pullback.hom_ext ?_ ?_
+      · -- compare into the W-piece, itself by the universal property of W
+        refine pullback.hom_ext ?_ ?_
+        · -- the projModel component
+          calc (pullback.snd χ (pullback.fst
+                (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+                (chartAt Y s).U.1.ι) ≫
+                pullback.fst (pullback.snd (projModelπ (tateCurveLocOver R))
+                  (gluedBaseMap P hP)) (chartAt Y s).U.1.ι) ≫
+                pullback.fst (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP)
+              = (pullback.fst χ (pullback.fst
+                  (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+                  (chartAt Y s).U.1.ι) ≫ χ) ≫
+                  pullback.fst (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP) := by
+                rw [hQcond]
+            _ = pullback.fst χ (pullback.fst
+                  (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+                  (chartAt Y s).U.1.ι) ≫
+                  (χ ≫ pullback.fst (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP)) :=
+                Category.assoc _ _ _
+            _ = pullback.fst χ (pullback.fst
+                  (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+                  (chartAt Y s).U.1.ι) ≫ gluedTopMap P hP := by rw [hχfst]
+            _ = (τ.hom ≫ pullback.fst Y.curve.π (chartAt Y s).U.1.ι) ≫
+                  gluedTopMap P hP := by rw [hτfst]
+            _ = τ.hom ≫ (pullback.fst Y.curve.π (chartAt Y s).U.1.ι ≫
+                  gluedTopMap P hP) := Category.assoc _ _ _
+            _ = τ.hom ≫ coverTopMap P hP s := by rw [ι_gluedTopMap]
+            _ = τ.hom ≫ (σ.hom ≫
+                  (pullback.fst (pullback.snd (projModelπ (tateCurveLocOver R))
+                    (gluedBaseMap P hP)) (chartAt Y s).U.1.ι ≫
+                    pullback.fst (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))) := by
+                rw [hσfst]; rfl
+            _ = ((τ.hom ≫ σ.hom) ≫
+                  pullback.fst (pullback.snd (projModelπ (tateCurveLocOver R))
+                    (gluedBaseMap P hP)) (chartAt Y s).U.1.ι) ≫
+                  pullback.fst (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP) := by
+                simp only [Category.assoc]
+        · -- the base component
+          calc (pullback.snd χ (pullback.fst
+                (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+                (chartAt Y s).U.1.ι) ≫
+                pullback.fst (pullback.snd (projModelπ (tateCurveLocOver R))
+                  (gluedBaseMap P hP)) (chartAt Y s).U.1.ι) ≫
+                pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP)
+              = (pullback.fst χ (pullback.fst
+                  (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+                  (chartAt Y s).U.1.ι) ≫ χ) ≫
+                  pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP) := by
+                rw [hQcond]
+            _ = pullback.fst χ (pullback.fst
+                  (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+                  (chartAt Y s).U.1.ι) ≫
+                  (χ ≫ pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP)) :=
+                Category.assoc _ _ _
+            _ = pullback.fst χ (pullback.fst
+                  (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+                  (chartAt Y s).U.1.ι) ≫ Y.curve.π := by rw [hχsnd]
+            _ = (τ.hom ≫ pullback.fst Y.curve.π (chartAt Y s).U.1.ι) ≫ Y.curve.π := by
+                rw [hτfst]
+            _ = τ.hom ≫ (pullback.fst Y.curve.π (chartAt Y s).U.1.ι ≫ Y.curve.π) :=
+                Category.assoc _ _ _
+            _ = τ.hom ≫ (pullback.snd Y.curve.π (chartAt Y s).U.1.ι ≫
+                  (chartAt Y s).U.1.ι) := by
+                rw [pullback.condition (f := Y.curve.π) (g := (chartAt Y s).U.1.ι)]
+            _ = τ.hom ≫ ((σ.hom ≫
+                  pullback.snd (pullback.snd (projModelπ (tateCurveLocOver R))
+                    (gluedBaseMap P hP)) (chartAt Y s).U.1.ι) ≫
+                  (chartAt Y s).U.1.ι) := by rw [hσsnd]
+            _ = (τ.hom ≫ σ.hom) ≫
+                  (pullback.snd (pullback.snd (projModelπ (tateCurveLocOver R))
+                    (gluedBaseMap P hP)) (chartAt Y s).U.1.ι ≫
+                    (chartAt Y s).U.1.ι) := by simp only [Category.assoc]
+            _ = (τ.hom ≫ σ.hom) ≫
+                  (pullback.fst (pullback.snd (projModelπ (tateCurveLocOver R))
+                    (gluedBaseMap P hP)) (chartAt Y s).U.1.ι ≫
+                    pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP)) := by
+                rw [pullback.condition (f := pullback.snd (projModelπ (tateCurveLocOver R))
+                  (gluedBaseMap P hP)) (g := (chartAt Y s).U.1.ι)]
+            _ = ((τ.hom ≫ σ.hom) ≫
+                  pullback.fst (pullback.snd (projModelπ (tateCurveLocOver R))
+                    (gluedBaseMap P hP)) (chartAt Y s).U.1.ι) ≫
+                  pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP) :=
+                (Category.assoc _ _ _).symm
+      · -- the chart component
+        calc pullback.snd χ (pullback.fst
+              (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP))
+              (chartAt Y s).U.1.ι) ≫
+              pullback.snd (pullback.snd (projModelπ (tateCurveLocOver R))
+                (gluedBaseMap P hP)) (chartAt Y s).U.1.ι
+            = τ.hom ≫ pullback.snd Y.curve.π (chartAt Y s).U.1.ι := hτsnd.symm
+          _ = τ.hom ≫ (σ.hom ≫
+                pullback.snd (pullback.snd (projModelπ (tateCurveLocOver R))
+                  (gluedBaseMap P hP)) (chartAt Y s).U.1.ι) := by rw [hσsnd]
+          _ = (τ.hom ≫ σ.hom) ≫
+                pullback.snd (pullback.snd (projModelπ (tateCurveLocOver R))
+                  (gluedBaseMap P hP)) (chartAt Y s).U.1.ι := (Category.assoc _ _ _).symm
+    rw [hkey]
+    infer_instance
+  haveI hiso : IsIso χ := by
+    have h := IsZariskiLocalAtTarget.of_openCover
+      (P := MorphismProperty.isomorphisms Scheme)
+      (f := χ) ((chartCover Y).pullback₁
+        (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP)))
+      (fun s => hpiece s)
+    exact h
+  exact IsPullback.of_iso_pullback ⟨gluedTopMap_π P hP⟩ (asIso χ) hχfst hχsnd
+
+end MarkedChartData
+
+end GluedClauses
+
 end ModularCurves
