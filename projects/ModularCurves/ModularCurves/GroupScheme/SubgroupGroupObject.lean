@@ -203,6 +203,33 @@ theorem invOver_mulOver_left :
     G.invOver_comp_ιOver, _root_.inv_mul_cancel, Category.assoc,
     G.unitOver_comp_ιOver, MonObj.comp_one]
 
+/-! ### The action diagrams
+
+The translation action `act = (ι ⊗ 𝟙) ≫ μ[E]` of `G` on `E` satisfies the two axioms of a
+group-object action. Both are hom-group computations against `translationAction_eq_mul`,
+using that `ι` carries `μ_G` and `e_G` to the group law of `E` (`mulOver_comp_ιOver`,
+`unitOver_comp_ιOver`). They are the scheme-level sources of the two `IsCoaction` axioms
+for the chart co-action `[HG-C1c]`. -/
+
+/-- **The action-unit axiom**: acting by the unit section is the identity,
+`act ∘ (e ⊗ 𝟙) = λ`. -/
+theorem translationAction_unit :
+    (G.unitOver ⊗ₘ 𝟙 E.asOver) ≫ G.translationAction = (λ_ E.asOver).hom := by
+  rw [G.translationAction_eq_mul, MonObj.comp_mul]
+  simp only [tensorHom_fst_assoc, tensorHom_snd, Category.id_comp, Category.comp_id,
+    G.unitOver_comp_ιOver, MonObj.comp_one, _root_.one_mul, leftUnitor_hom]
+
+/-- **The action-associativity axiom**: `act ∘ (μ ⊗ 𝟙) = act ∘ (𝟙 ⊗ act) ∘ α`. -/
+theorem translationAction_assoc :
+    (α_ (Over.mk G.π) (Over.mk G.π) E.asOver).hom
+        ≫ (𝟙 (Over.mk G.π) ⊗ₘ G.translationAction) ≫ G.translationAction
+      = (G.mulOver ⊗ₘ 𝟙 E.asOver) ≫ G.translationAction := by
+  simp only [G.translationAction_eq_mul, MonObj.comp_mul, G.mulOver_comp_ιOver,
+    tensorHom_fst_assoc, tensorHom_snd_assoc, tensorHom_snd, tensorHom_fst,
+    associator_hom_fst_assoc, associator_hom_snd_fst_assoc, associator_hom_snd_snd_assoc,
+    associator_hom_snd_snd, Category.id_comp, Category.comp_id, Category.assoc]
+  rw [_root_.mul_assoc]
+
 end FiniteLocallyFreeSubgroup
 
 end EllipticCurve
