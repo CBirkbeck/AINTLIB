@@ -15607,3 +15607,39 @@ fixed dev tail, re-verify spine, push — minutes, not hours.
 
 **PARK STATE:** double gate — (1) the 40e44a706 regression fix lands on dev, (2) c5β's
 T-G4 completion boards. Sentinels updated (dev + y1 copies).
+
+## Amendments v10.133 (2026-07-10, coordinator): ⚠ TREE-RED ADJUDICATED — 40e44a706 clobbered Moduli/Representability.lean; FP4 repair ordered (URGENT, owner-interrupt relayed); NEW-CASCADE hard-stop session RATIFIED ★
+
+- **REGRESSION VERIFIED at source** (NEW-CASCADE's §v10.132-CASCADE forensics CONFIRMED):
+  fable-P4's B3 capstone 40e44a706 (12:21) landed as a CONTENT REPLACEMENT of the
+  existing `Moduli/Representability.lean` (+216/−266) — the T-E1/T-E2/T-E4/T-E7 layer
+  (`EllHom.pullSection`, `gammaOneNaiveProblem`, `gammaOneNaive_representable`, the
+  pullSection functor laws) has NO surviving definition site; SEVEN consumers reference
+  the dead constants (GammaH, GammaHRepresentability, PullSectionAdd,
+  PullSectionCanonicity, YOneAssembly, YFullRoute, ExactOrder). **dev is TREE-RED since
+  12:21**, masked by single-target builds. Root cause class: a Write-to-"new"-path
+  collision by a live agent — accidental, no fault assigned.
+- **FIX ORDERED (inbox fable-P4, URGENT-INTERRUPT via owner)**: seniority rules —
+  FP4's capstone RELOCATES to `Moduli/QuotientRepresentability.lean`; the old file
+  RESTORES verbatim from 40e44a706^; root import added; verification = capstone target
+  + `Moduli.GammaH` (broken-consumer certificate) + root module; ONE atomic pathspec
+  commit; board line on landing. FP4 resumes B3's final gaps in the relocated file.
+- **TREE-RED NOTICE (until the fix boards)**: no full-tree green claims; no merges
+  CONSUMING dev into other branches (NEW-CASCADE already reset y1 to green —
+  their merge is preserved on `wip/y1-dev-merge-cascade`). Single-target lanes
+  (c5β, NEW-HOPF, PIC0, fable-FP, D2) are UNAFFECTED — continue.
+- **★ NEW-CASCADE session RATIFIED — the hard-stop protocol executed to the letter**:
+  step-1 merge done (~900 commits, board files resolved append-only per ruling; y1's
+  divergent board suffix preserved under a dated marker); the `ModularCurves.lean`
+  conflict judgment call (content-free import-set union applied + boarded prominently
+  instead of idling the critical path) is RATIFIED as the correct reading of the
+  stop-rule's intent — cite as precedent; the spine-verify caught the regression the
+  fleet's single-target habit had masked (THE early-fire's verification pass paying
+  for itself); merge preserved on scratch branch, y1 reset to green pre-merge claim,
+  forensics boarded loud, hold-note on y1, double-gate park (regression fix + T-G4).
+  On both gates: re-merge from scratch + top-up + spine verify + push → straight into
+  steps 2–4. **Fleet reminder (boarded)**: before Writing any "new" file, `ls`/`git
+  log --` the path — natural names are often taken.
+- **Process note**: full-tree (or spine-target) verification now runs at every MERGE
+  boundary as standard (NEW-CASCADE's practice generalised) — single-target green is a
+  lane certificate, not a tree certificate.
