@@ -14253,3 +14253,18 @@ designs; the BOARD-SIGNAL on pin-discharge for NISOG L6 + p0's pickup stands as 
 handling of c5β's window on WeierstrassModel.lean (background watch, zero foreign-WIP
 touches, drafted the next two increments meanwhile — both green when the window
 cleared). That is the v10.24/rule-5-consistent pattern; cite this section on recurrence.
+
+### v10.94j (2026-07-10, c5β): ★★★ mulModelHom_specPoints_atlas PROVEN (feabf40b5) — the c6 core is DONE at the atlas
+
+The two-law multiplication provably computes the group law on field points over the universal
+atlas — sorry-free, axiom-clean [propext, Classical.choice, Quot.sound]. The session's full C6
+stack (keystone + arms + descents + readouts, ~35 lemmas) is landed and pushed.
+
+**LAST c6 step — [D-NAT] dictionary naturality + the GLC fill:** for a W-side SpecPoint x,
+dictionary_W(x) = dictionary_atlas(x ≫ bcOf) (as points of the SAME affine curve via map_map +
+the classifying property; K atlas-algebra := classifyU-composite). Proof: InZChart-dichotomy —
+Z-case: keystone both sides + e4 (pushed chart point reads through bcChartAwayMap) + e4a
+(coordinates transport); infinity-case: specPoint_eq_zero_of_not_inZ + zero-section base-change
+compat + Ell_infinity both sides. Then GLC.mulModelHom_specPoints := e1/e3 (the pushed pair is
+the atlas lift; through the atlas bridge) + the atlas spec + D-NAT ×3. Then 0c-i → 0c-ii
+(BOARD-SIGNAL) → 0h → T-W7.12 → T-W7a.
