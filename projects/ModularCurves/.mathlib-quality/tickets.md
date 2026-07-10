@@ -14718,3 +14718,48 @@ CONCLUSION: fable-P4's Phase-B critical path is B3 (the engine's representabilit
 are gated on other lanes (universal curves) — consume the engine when they're unblocked; do NOT
 duplicate T-E14/T-E15. Once B3 lands (modulo T-W7), the fable-P4 Phase-B mandate is
 mathematically complete pending those external universal-curve inputs.
+
+## HOLDER-LOOK: PR #5224 ([OWNER-FLW] codex branch) — semantic verdict (beastmode-A, 2026-07-10)
+
+Pre-merge holder review per v10.110/v10.116. Read/diff only (tip `4cdd3f8c2` vs merge-base
+`a4b8bd6`; pre-rebase ref `ca22ffd12`). PR is purely additive: +3292, **zero deletions**.
+**OVERALL VERDICT: CLEAN — no semantic duplication with beastmode-A's landed Comparison work;
+merge-clear on semantic grounds.** The three items:
+
+- **(1) Comparison.lean +202 vs my landed work — CLEAN (consumes, not duplicates).** Decl sets are
+  disjoint by name AND subject. Mine = pointed-iso → variable-change comparison of *two* models
+  (`pointedIso_exists_variableChange` + the faith-infra `pointedIsoΓ`/`coordEquiv`). Theirs = the
+  fibrewise ⟷ locally-Weierstrass ⟷ elliptic characterization of *one* `projModel`
+  (`locallyWeierstrass_projModel`, `fibrewiseElliptic_*`, `isElliptic_of_fibrewiseElliptic_projModel`).
+  Decisive: `isElliptic_of_fibrewiseElliptic_projModel` **CONSUMES** my theorem —
+  `obtain ⟨C, hC, -⟩ := pointedIso_exists_variableChange` (docstring: "the pointed comparison theorem
+  makes the isomorphism a variable change"). So the T-W7.1b interface is validated + now load-bearing
+  for [OWNER-FLW], not re-derived. My faith-infra machinery is untouched (grep of the +diff for
+  `pointedIsoΓ`/`coordEquiv`/`VCIso` = empty apart from the one consuming call). Merge-hygiene note:
+  the +202 lands inside my held `Comparison.lean` text region, but additive-only (no edit/deletion to
+  my decls), so structurally safe — a straight append; file-placement is the coordinator/owner call.
+
+- **(2) WeierstrassAtlas.lean +73 absorption claim — VERIFIED (for-cause absorbed, NOT salvage).**
+  The substance = `locallyWeierstrass_projModel` (the general top-chart locally-Weierstrass theorem):
+  CONFIRMED present in the rebased `Comparison.lean`. The omitted +73 was a *consumer* edit only —
+  a "universal curve is locally Weierstrass" lemma whose whole body is
+  `:= locallyWeierstrass_projModel universalWeierstrassLoc` (trivially re-derivable) plus a `crux_test`
+  rewrite. Current `origin/dev` `WeierstrassAtlas.lean` is **sorry-free** (0 sorries, `crux_test:103`
+  intact) — omission breaks nothing. The other non-survivors (`locallyWeierstrass_iff_abstractConditions`,
+  `FibrewiseElliptic.locallyWeierstrass`, `LocallyWeierstrass.{isProper,smoothOfRelativeDimension,
+  abstractConditions}`) lived in `Basic.lean`, also dropped in the trim (with PullbackTensorMonoidal
+  +808 / SheafOfModulesMonoidal +227 / InvertibleSheaf +195) — scope-trim, not critical-path math. The
+  PR body's claim is accurate; **no salvage needed** (any consumer lemma is a one-liner off the landed
+  theorem if later wanted).
+
+- **(3) PoleSheaf.lean (new, +1861) vs PoleFiltration.lean — DISTINCT.** Different layers, no overlap:
+  PoleSheaf packages a *section's ideal as a sheaf-of-modules* object (`idealModule : Y.Modules`,
+  `sectionBaseChange`, `principalIdealEquiv`; Picard/`SheafOfModules` layer, feeds `Dual.lean`);
+  PoleFiltration is the *pole-order filtration of the coordinate ring* `R[x,y]/(W)` (`coordX`/`coordY`,
+  `poleOrderFiltration_one/two/three`; chart-algebra, feeds my T-W7.1b). Shared word "pole", disjoint
+  subjects/decls. No duplication. (Dual.lean +950 and the `commute duals with over restriction` +
+  `pole restriction` board-claim commits are new Picard-layer material, no beastmode-A overlap.)
+
+**Recommendation:** merge-clear from the holder's seat — the PR builds *on* T-W7.1b and adds distinct
+subjects; no dedup/adapt required. Green-verify + axiom audit at merge time per v10.116 (taken as read).
+Re-armed on T-W7a / c5β handshake.

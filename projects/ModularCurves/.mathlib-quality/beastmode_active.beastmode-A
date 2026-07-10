@@ -1,1 +1,1 @@
-PARKED (beastmode-A): T-H8a iso-leg DELIVERED (3cf961074). Armed on T-W7a falls-sweep; accepting c5β handshake if offered.
+PARKED (beastmode-A): HOLDER-LOOK PR #5224 verdict = CLEAN (boarded v-section 2026-07-10). (1) Comparison.lean +202 CONSUMES pointedIso_exists_variableChange, not dup; (2) WeierstrassAtlas +73 absorbed into locallyWeierstrass_projModel (verified, not salvage); (3) PoleSheaf(sheaf-of-modules) != PoleFiltration(coord-ring). Re-armed on T-W7a / c5beta handshake.
