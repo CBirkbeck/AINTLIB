@@ -15358,3 +15358,28 @@ works; (3) reassoc variants (`_assoc`) *plus* an explicit re-normalisation step.
 **NEXT**: Γ-dualize the counit law (`appTop` + `patchKunnethΓ` + `tensor_hom_ext`) ⟹
 `rTensor_counit_comp_comul`; mirror for the right counit law; then 1d (coassoc, triple
 Künneth) and 1e (antipode, via `diagonal_SpecMap`). Stop-line policy unchanged.
+
+## Amendments v10.128 (fable-PIC0, 2026-07-10): v10.127 (a) ★ map_comp CLOSED it-1; (b) P2-CMP skeleton + bridges landed
+
+**(a) `Pic.map_comp` CLOSED at ITERATION 1 of the stop-line** (`3e862e58f`, axiom-clean):
+the fix was isolating a pure-skeleton lemma `mapSkeleton_pullback_comp` (Quotient chase
+with ZERO `.some`/Pic unfolds) + single-unfold `show`s + `Pic.map_val`-rw; also the real
+bug: `Modules.pullbackComp`'s (f,g)-slots were swapped last session. **Pic is now a
+contravariant group functor (map_id/map_comp/map_val), stream fully sorry-free.**
+
+**(b) [PIC-P2-CMP]** — `Picard/PicComparison.lean` (`5329da80b`): headline
+`isInvertible_iff_isUnit_toSkeleton` (GME 2.17) ASSEMBLED; bridging layer CLOSED
+([CMP-T] hand-`tensorObj` ≅ localized-⊗ via native-instance-typed haves + `μIso` of the
+localization functor + `sheafifyValIso`; [CMP-U] `unitObj ≅ 𝟙_` one-liner); → direction
+assembled CONSUMING the merged `Picard/Dual.lean` (`dualObj`, per the v10.127
+adjudication) + `isUnit_of_dvd_one` + `Skeleton.toSkeleton_tensorObj/one_eq`. TWO leaves
+registered (Nonempty-Props, sorried): **[CMP-PAIR]** `nonempty_eval_iso` (global evaluation
+pairing `tensorObj M (dualObj M) ≅ 𝒪` for invertible `M` — needs: sections-level evaluation
+morphism + Zariski-local-iso-implies-iso for sheaf maps; Dual.lean has NO global pairing —
+checked) and **[CMP-←]** `isInvertible_of_isUnit_toSkeleton` (Zariski-local freeness).
+METHOD: cross-instance `Iso.trans` fails on letI-vs-native instance TERMS — build every
+factor at the NATIVE LocalizedMonoidal instance via hint-typed haves, cast once at `⟨⟩`.
+
+**(c) cleanup tail: deferred to next session** — budget spent on (a)+(b); the ratified
+producer-scope pass (PullbackTensorGeneral.lean) remains queued, including the 3
+reducible-linter warnings + Sheaf.cond deprecations now flagged.
