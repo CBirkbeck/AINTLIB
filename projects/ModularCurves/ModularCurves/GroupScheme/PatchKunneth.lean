@@ -265,4 +265,84 @@ theorem tensor_hom_ext {R A B C : CommRingCat.{u}} [Algebra R A] [Algebra R B]
 
 end
 
+/-! ### The affine Künneth identification
+
+The `⊤`-level version: two affine schemes over an affine base. This is the reusable
+citizen (the opens-level `patchKunneth` is the special case `W.toScheme → V.toScheme`),
+and it iterates — which is what the coassociativity of the group-scheme's Hopf algebra
+needs (a triple product). -/
+
+section Affine
+
+variable {B X Y : Scheme.{u}} [IsAffine B] [IsAffine X] [IsAffine Y]
+variable (f : X ⟶ B) (g : Y ⟶ B)
+variable [Algebra Γ(B, ⊤) Γ(X, ⊤)] [Algebra Γ(B, ⊤) Γ(Y, ⊤)]
+
+/-- **The affine Künneth identification**: `X ×_B Y ≅ Spec (Γ(X) ⊗[Γ(B)] Γ(Y))`, when the
+algebra structures are the pullbacks of sections. -/
+noncomputable def affineKunneth
+    (h₁ : CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(X, ⊤)) = f.appTop)
+    (h₂ : CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(Y, ⊤)) = g.appTop) :
+    pullback f g ≅ Spec (.of (Γ(X, ⊤) ⊗[Γ(B, ⊤)] Γ(Y, ⊤))) :=
+  (asIso (pullback.map f g
+    (Spec.map (CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(X, ⊤))))
+    (Spec.map (CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(Y, ⊤))))
+    X.isoSpec.hom Y.isoSpec.hom B.isoSpec.hom
+    (by rw [h₁]; exact (Scheme.isoSpec_hom_naturality f).symm)
+    (by rw [h₂]; exact (Scheme.isoSpec_hom_naturality g).symm)))
+    ≪≫ pullbackSpecIso Γ(B, ⊤) Γ(X, ⊤) Γ(Y, ⊤)
+
+@[reassoc]
+theorem affineKunneth_hom_comp_includeLeft
+    (h₁ : CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(X, ⊤)) = f.appTop)
+    (h₂ : CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(Y, ⊤)) = g.appTop) :
+    (affineKunneth f g h₁ h₂).hom
+        ≫ Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+          (R := Γ(B, ⊤)) (A := Γ(X, ⊤)) (B := Γ(Y, ⊤))))
+      = pullback.fst f g ≫ X.isoSpec.hom := by
+  rw [affineKunneth, Iso.trans_hom, asIso_hom, Category.assoc,
+    pullbackSpecIso_hom_fst]
+  exact pullback.lift_fst _ _ _
+
+@[reassoc]
+theorem affineKunneth_hom_comp_includeRight
+    (h₁ : CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(X, ⊤)) = f.appTop)
+    (h₂ : CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(Y, ⊤)) = g.appTop) :
+    (affineKunneth f g h₁ h₂).hom
+        ≫ Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+          (R := Γ(B, ⊤)) (A := Γ(X, ⊤)) (B := Γ(Y, ⊤))).toRingHom)
+      = pullback.snd f g ≫ Y.isoSpec.hom := by
+  rw [affineKunneth, Iso.trans_hom, asIso_hom, Category.assoc]
+  rw [show Spec.map (CommRingCat.ofHom
+        (Algebra.TensorProduct.includeRight (R := Γ(B, ⊤)) (A := Γ(X, ⊤))
+          (B := Γ(Y, ⊤))).toRingHom)
+      = Spec.map (CommRingCat.ofHom (RingHomClass.toRingHom
+        (Algebra.TensorProduct.includeRight (R := Γ(B, ⊤)) (A := Γ(X, ⊤))
+          (B := Γ(Y, ⊤))))) from rfl]
+  rw [pullbackSpecIso_hom_snd]
+  exact pullback.lift_snd _ _ _
+
+/-- The section-level transport across the affine Künneth identification. -/
+noncomputable def affineKunnethΓ
+    (h₁ : CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(X, ⊤)) = f.appTop)
+    (h₂ : CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(Y, ⊤)) = g.appTop) :
+    Γ(pullback f g, ⊤) ⟶ CommRingCat.of (Γ(X, ⊤) ⊗[Γ(B, ⊤)] Γ(Y, ⊤)) :=
+  (affineKunneth f g h₁ h₂).inv.appTop
+    ≫ (Scheme.ΓSpecIso (.of (Γ(X, ⊤) ⊗[Γ(B, ⊤)] Γ(Y, ⊤)))).hom
+
+instance isIso_affineKunnethΓ
+    (h₁ : CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(X, ⊤)) = f.appTop)
+    (h₂ : CommRingCat.ofHom (algebraMap Γ(B, ⊤) Γ(Y, ⊤)) = g.appTop) :
+    IsIso (affineKunnethΓ f g h₁ h₂) := by
+  rw [affineKunnethΓ]
+  haveI : IsIso ((affineKunneth f g h₁ h₂).inv.appTop) := by
+    refine ⟨(affineKunneth f g h₁ h₂).hom.appTop, ?_, ?_⟩
+    · rw [← Scheme.Hom.comp_appTop, Iso.hom_inv_id,
+        AlgebraicGeometry.Scheme.Hom.id_appTop]
+    · rw [← Scheme.Hom.comp_appTop, Iso.inv_hom_id,
+        AlgebraicGeometry.Scheme.Hom.id_appTop]
+  infer_instance
+
+end Affine
+
 end AlgebraicGeometry
