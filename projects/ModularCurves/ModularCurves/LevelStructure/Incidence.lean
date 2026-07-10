@@ -287,19 +287,6 @@ theorem localized'_restrictScalars_eq_restrictScalars_map
 
 end SubmoduleVanishing
 
-section VanishingLocus
-
-variable {W S : Scheme.{u}} (p : W ⟶ S) [IsFinite p] [Flat p]
-  [LocallyOfFinitePresentation p] (E : W.IdealSheafData)
-
-/-- The preimage of an affine open under a finite (hence affine) morphism, as an
-affine open. -/
-def affinePreimage (U : S.affineOpens) : W.affineOpens :=
-  ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩
-
-/-- **(T-D14c-1)** The vanishing locus on `S` of an ideal sheaf `E` on a scheme `W`
-finite locally free over `S`: over an affine `U ⊆ S` it is the vanishing ideal of the
-sections of `E` inside the finite locally free `Γ(S, U)`-module `Γ(W, p⁻¹U)`. This is
 /-- **([T-SG3-LFP-3])** A closed subscheme whose ideal sheaf is finitely generated on
 every affine is locally of finite presentation over the ambient scheme — the converse
 packaging of KM's "defined locally by finitely many equations". -/
@@ -323,14 +310,31 @@ theorem lfp_subschemeι_of_fg {S : Scheme.{u}} {Z : S.IdealSheafData}
       (P := @LocallyOfFinitePresentation)).mp
       (inferInstance : LocallyOfFinitePresentation (𝟙 Z.subscheme))
       ⟨_, U.2.preimage Z.subschemeι⟩ V (by simpa using e)
-    rwa [show (𝟙 Z.subscheme).appLE (Z.subschemeι ⁻¹ᵁ U.1) V.1 (by simpa using e) =
-        Z.subscheme.presheaf.map (homOfLE e).op from by
-      rw [Scheme.Hom.appLE, Scheme.id_app, Category.id_comp]] at h1
+    have hidapp : Scheme.Hom.appLE (𝟙 Z.subscheme) (Z.subschemeι ⁻¹ᵁ U.1) V.1
+        (by simpa using e) = Z.subscheme.presheaf.map (homOfLE e).op := by
+      show Scheme.Hom.app (𝟙 Z.subscheme) _ ≫ _ = _
+      rw [Scheme.Hom.id_app]
+      exact Category.id_comp _
+    rwa [hidapp] at h1
   -- assemble: `appLE = app ≫ restriction`
   rw [show Z.subschemeι.appLE U.1 V.1 e =
       Z.subschemeι.app U.1 ≫ Z.subscheme.presheaf.map (homOfLE e).op from by
     rw [Scheme.Hom.app_eq_appLE, Scheme.Hom.appLE_map], CommRingCat.hom_comp]
   exact RingHom.finitePresentation_stableUnderComposition _ _ happ hmap
+
+section VanishingLocus
+
+variable {W S : Scheme.{u}} (p : W ⟶ S) [IsFinite p] [Flat p]
+  [LocallyOfFinitePresentation p] (E : W.IdealSheafData)
+
+/-- The preimage of an affine open under a finite (hence affine) morphism, as an
+affine open. -/
+def affinePreimage (U : S.affineOpens) : W.affineOpens :=
+  ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩
+
+/-- **(T-D14c-1)** The vanishing locus on `S` of an ideal sheaf `E` on a scheme `W`
+finite locally free over `S`: over an affine `U ⊆ S` it is the vanishing ideal of the
+sections of `E` inside the finite locally free `Γ(S, U)`-module `Γ(W, p⁻¹U)`. This is
 
 KM 1.3.4's locus of "simultaneous vanishing of the coordinates", in the basis-free
 form; its universal property is `vanishingLocus_le_ker_iff` (T-D14c-2). -/
@@ -909,6 +913,37 @@ theorem vanishingLocus_le_ker_iff {T : Scheme.{u}} (t : T ⟶ S) :
     Scheme.IdealSheafData.map_bot]
   exact ⟨fun h => vanishingLocusAux_le_ker_snd p E t h,
     fun h => vanishingLocusAux_le_tker p E t h⟩
+
+/-- **([T-SG3-LFP-4a])** The vanishing locus of an affine-locally finitely generated
+ideal sheaf on the source is itself affine-locally finitely generated — KM's "defined
+locally by finitely many equations" — hence locally of finite presentation over `S`. -/
+theorem vanishingLocus_subschemeι_lfp (hE : ∀ U : W.affineOpens, (E.ideal U).FG) :
+    LocallyOfFinitePresentation (vanishingLocus p E).subschemeι := by
+  refine lfp_subschemeι_of_fg fun U => ?_
+  show (letI := ((p.app U.1).hom).toAlgebra
+    submoduleVanishingIdeal Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1)
+      ((E.ideal ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩).restrictScalars Γ(S, U.1))).FG
+  letI := ((p.app U.1).hom).toAlgebra
+  haveI hfin : Module.Finite Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1) := p.finite_app U.1 U.2
+  haveI hfpR : RingHom.FinitePresentation (p.appLE U.1 (p ⁻¹ᵁ U.1) le_rfl).hom :=
+    HasRingHomProperty.appLE @LocallyOfFinitePresentation p ‹_› U (affinePreimage p U) le_rfl
+  rw [← Scheme.Hom.app_eq_appLE] at hfpR
+  haveI : Algebra.FinitePresentation Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1) := hfpR
+  haveI hfpM : Module.FinitePresentation Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1) :=
+    Module.FinitePresentation.of_finite_of_finitePresentation _ _
+  haveI hflatR : RingHom.Flat (p.appLE U.1 (p ⁻¹ᵁ U.1) le_rfl).hom :=
+    HasRingHomProperty.appLE @Flat p ‹_› U (affinePreimage p U) le_rfl
+  rw [← Scheme.Hom.app_eq_appLE] at hflatR
+  haveI : Module.Flat Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1) := hflatR
+  haveI : Module.Projective Γ(S, U.1) Γ(W, p ⁻¹ᵁ U.1) :=
+    Module.Flat.projective_of_finitePresentation
+  refine submoduleVanishingIdeal_fg ?_
+  haveI : Module.Finite Γ(W, p ⁻¹ᵁ U.1) (E.ideal ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩) :=
+    Module.Finite.iff_fg.mpr (hE _)
+  haveI : Module.Finite Γ(S, U.1) (E.ideal ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩) :=
+    Module.Finite.trans Γ(W, p ⁻¹ᵁ U.1) _
+  exact Module.Finite.iff_fg.mp
+    (inferInstanceAs (Module.Finite Γ(S, U.1) (E.ideal ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩)))
 
 end VanishingLocus
 
