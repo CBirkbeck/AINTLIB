@@ -2,6 +2,7 @@ import Mathlib.RingTheory.FinitePresentation
 import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
 import Mathlib.RingTheory.RingHom.FaithfullyFlat
 import Mathlib.RingTheory.TensorProduct.Basic
+import Mathlib.RingTheory.TensorProduct.Maps
 import Mathlib.RingTheory.Ideal.Quotient.Operations
 import Mathlib.Tactic.Algebraize
 import ModularCurves.ForMathlib.FaithfullyFlatEqualizer
@@ -803,6 +804,226 @@ theorem IsFilteredAlgColimit.congr (H : IsFilteredAlgColimit R 𝒮 t A u)
     exact H.eq_at_stage x y (e.injective (by simpa using hxy))
 
 end Spread
+
+/-! ### Concatenation of presentations ([KL-5c]) -/
+
+section Concat
+
+variable {S : Type u} [CommRing S] {σ₁ σ₂ κ₁ κ₂ : Type}
+variable (g₁ : κ₁ → MvPolynomial σ₁ S) (g₂ : κ₂ → MvPolynomial σ₂ S)
+
+/-- The concatenated presentation: disjoint unions of variables and of relations. -/
+noncomputable abbrev concatGen : κ₁ ⊕ κ₂ → MvPolynomial (σ₁ ⊕ σ₂) S :=
+  Sum.elim (fun j => MvPolynomial.rename Sum.inl (g₁ j))
+    (fun j => MvPolynomial.rename Sum.inr (g₂ j))
+
+/-- Left inclusion of presented algebras into the concatenated presentation. -/
+noncomputable def concatInl :
+    (MvPolynomial σ₁ S ⧸ Ideal.span (Set.range g₁)) →ₐ[S]
+      (MvPolynomial (σ₁ ⊕ σ₂) S ⧸ Ideal.span (Set.range (concatGen g₁ g₂))) :=
+  Ideal.Quotient.liftₐ _ ((Ideal.Quotient.mkₐ S _).comp
+    (MvPolynomial.rename (Sum.inl : σ₁ → σ₁ ⊕ σ₂)))
+    (fun p hp => by
+      have h1 := Ideal.mem_map_of_mem
+        (MvPolynomial.rename (Sum.inl : σ₁ → σ₁ ⊕ σ₂) : _ →ₐ[S] _) hp
+      rw [Ideal.map_span, ← Set.range_comp] at h1
+      simp only [AlgHom.comp_apply, Ideal.Quotient.mkₐ_eq_mk]
+      refine Ideal.Quotient.eq_zero_iff_mem.2 (Ideal.span_mono ?_ h1)
+      rintro - ⟨j, rfl⟩
+      exact ⟨Sum.inl j, rfl⟩)
+
+/-- Right inclusion of presented algebras into the concatenated presentation. -/
+noncomputable def concatInr :
+    (MvPolynomial σ₂ S ⧸ Ideal.span (Set.range g₂)) →ₐ[S]
+      (MvPolynomial (σ₁ ⊕ σ₂) S ⧸ Ideal.span (Set.range (concatGen g₁ g₂))) :=
+  Ideal.Quotient.liftₐ _ ((Ideal.Quotient.mkₐ S _).comp
+    (MvPolynomial.rename (Sum.inr : σ₂ → σ₁ ⊕ σ₂)))
+    (fun p hp => by
+      have h1 := Ideal.mem_map_of_mem
+        (MvPolynomial.rename (Sum.inr : σ₂ → σ₁ ⊕ σ₂) : _ →ₐ[S] _) hp
+      rw [Ideal.map_span, ← Set.range_comp] at h1
+      simp only [AlgHom.comp_apply, Ideal.Quotient.mkₐ_eq_mk]
+      refine Ideal.Quotient.eq_zero_iff_mem.2 (Ideal.span_mono ?_ h1)
+      rintro - ⟨j, rfl⟩
+      exact ⟨Sum.inr j, rfl⟩)
+
+theorem concatInl_mk (p : MvPolynomial σ₁ S) :
+    concatInl g₁ g₂ (Ideal.Quotient.mk _ p)
+      = Ideal.Quotient.mk _ (MvPolynomial.rename Sum.inl p) :=
+  Ideal.Quotient.lift_mk _ _ _
+
+theorem concatInr_mk (p : MvPolynomial σ₂ S) :
+    concatInr g₁ g₂ (Ideal.Quotient.mk _ p)
+      = Ideal.Quotient.mk _ (MvPolynomial.rename Sum.inr p) :=
+  Ideal.Quotient.lift_mk _ _ _
+
+open TensorProduct in
+/-- The concatenated presentation maps to the tensor product: variables to pure tensors. -/
+noncomputable def concatToTensor :
+    (MvPolynomial (σ₁ ⊕ σ₂) S ⧸ Ideal.span (Set.range (concatGen g₁ g₂))) →ₐ[S]
+      ((MvPolynomial σ₁ S ⧸ Ideal.span (Set.range g₁)) ⊗[S]
+        (MvPolynomial σ₂ S ⧸ Ideal.span (Set.range g₂))) :=
+  Ideal.Quotient.liftₐ _ (MvPolynomial.aeval (Sum.elim
+      (fun v => Ideal.Quotient.mk (Ideal.span (Set.range g₁)) (MvPolynomial.X v) ⊗ₜ[S]
+        (1 : MvPolynomial σ₂ S ⧸ Ideal.span (Set.range g₂)))
+      (fun w => (1 : MvPolynomial σ₁ S ⧸ Ideal.span (Set.range g₁)) ⊗ₜ[S]
+        Ideal.Quotient.mk (Ideal.span (Set.range g₂)) (MvPolynomial.X w))))
+    (by
+      intro p hp
+      refine (Ideal.span_le.2 ?_ : Ideal.span (Set.range (concatGen g₁ g₂)) ≤ RingHom.ker _) hp
+      rintro - ⟨j, rfl⟩
+      rw [SetLike.mem_coe, RingHom.mem_ker]
+      cases j with
+      | inl j =>
+        have hL : (MvPolynomial.aeval (Sum.elim
+              (fun v => Ideal.Quotient.mk (Ideal.span (Set.range g₁)) (MvPolynomial.X v) ⊗ₜ[S]
+                (1 : MvPolynomial σ₂ S ⧸ Ideal.span (Set.range g₂)))
+              (fun w => (1 : MvPolynomial σ₁ S ⧸ Ideal.span (Set.range g₁)) ⊗ₜ[S]
+                Ideal.Quotient.mk (Ideal.span (Set.range g₂)) (MvPolynomial.X w))) :
+                MvPolynomial (σ₁ ⊕ σ₂) S →ₐ[S] _).comp
+            (MvPolynomial.rename (Sum.inl : σ₁ → σ₁ ⊕ σ₂))
+            = (Algebra.TensorProduct.includeLeft :
+                (MvPolynomial σ₁ S ⧸ Ideal.span (Set.range g₁)) →ₐ[S] _).comp
+              (Ideal.Quotient.mkₐ S (Ideal.span (Set.range g₁))) := by
+          apply MvPolynomial.algHom_ext
+          intro v
+          simp [MvPolynomial.aeval_rename]
+        have hthis := AlgHom.congr_fun hL (g₁ j)
+        simp only [AlgHom.comp_apply] at hthis
+        have hj : concatGen g₁ g₂ (Sum.inl j) = MvPolynomial.rename Sum.inl (g₁ j) := rfl
+        have hz : Ideal.Quotient.mk (Ideal.span (Set.range g₁)) (g₁ j) = 0 :=
+          Ideal.Quotient.eq_zero_iff_mem.2 (Ideal.subset_span ⟨j, rfl⟩)
+        rw [hj, hthis, Ideal.Quotient.mkₐ_eq_mk, hz, map_zero]
+      | inr j =>
+        have hR : (MvPolynomial.aeval (Sum.elim
+              (fun v => Ideal.Quotient.mk (Ideal.span (Set.range g₁)) (MvPolynomial.X v) ⊗ₜ[S]
+                (1 : MvPolynomial σ₂ S ⧸ Ideal.span (Set.range g₂)))
+              (fun w => (1 : MvPolynomial σ₁ S ⧸ Ideal.span (Set.range g₁)) ⊗ₜ[S]
+                Ideal.Quotient.mk (Ideal.span (Set.range g₂)) (MvPolynomial.X w))) :
+                MvPolynomial (σ₁ ⊕ σ₂) S →ₐ[S] _).comp
+            (MvPolynomial.rename (Sum.inr : σ₂ → σ₁ ⊕ σ₂))
+            = (Algebra.TensorProduct.includeRight :
+                (MvPolynomial σ₂ S ⧸ Ideal.span (Set.range g₂)) →ₐ[S] _).comp
+              (Ideal.Quotient.mkₐ S (Ideal.span (Set.range g₂))) := by
+          apply MvPolynomial.algHom_ext
+          intro w
+          simp [MvPolynomial.aeval_rename]
+        have hthis := AlgHom.congr_fun hR (g₂ j)
+        simp only [AlgHom.comp_apply] at hthis
+        have hj : concatGen g₁ g₂ (Sum.inr j) = MvPolynomial.rename Sum.inr (g₂ j) := rfl
+        have hz : Ideal.Quotient.mk (Ideal.span (Set.range g₂)) (g₂ j) = 0 :=
+          Ideal.Quotient.eq_zero_iff_mem.2 (Ideal.subset_span ⟨j, rfl⟩)
+        rw [hj, hthis, Ideal.Quotient.mkₐ_eq_mk, hz, map_zero])
+
+open TensorProduct in
+theorem concatToTensor_mk (h : MvPolynomial (σ₁ ⊕ σ₂) S) :
+    concatToTensor g₁ g₂ (Ideal.Quotient.mk _ h)
+      = MvPolynomial.aeval (Sum.elim
+          (fun v => Ideal.Quotient.mk (Ideal.span (Set.range g₁)) (MvPolynomial.X v) ⊗ₜ[S]
+            (1 : MvPolynomial σ₂ S ⧸ Ideal.span (Set.range g₂)))
+          (fun w => (1 : MvPolynomial σ₁ S ⧸ Ideal.span (Set.range g₁)) ⊗ₜ[S]
+            Ideal.Quotient.mk (Ideal.span (Set.range g₂)) (MvPolynomial.X w))) h :=
+  Ideal.Quotient.lift_mk _ _ _
+
+theorem concatToTensor_comp_concatInl :
+    (concatToTensor g₁ g₂).comp (concatInl g₁ g₂) = Algebra.TensorProduct.includeLeft := by
+  apply Ideal.Quotient.algHom_ext
+  apply MvPolynomial.algHom_ext
+  intro v
+  simp only [AlgHom.comp_apply, Ideal.Quotient.mkₐ_eq_mk]
+  rw [concatInl_mk, MvPolynomial.rename_X, concatToTensor_mk, MvPolynomial.aeval_X,
+    Sum.elim_inl]
+  rfl
+
+theorem concatToTensor_comp_concatInr :
+    (concatToTensor g₁ g₂).comp (concatInr g₁ g₂) = Algebra.TensorProduct.includeRight := by
+  apply Ideal.Quotient.algHom_ext
+  apply MvPolynomial.algHom_ext
+  intro w
+  simp only [AlgHom.comp_apply, Ideal.Quotient.mkₐ_eq_mk]
+  rw [concatInr_mk, MvPolynomial.rename_X, concatToTensor_mk, MvPolynomial.aeval_X,
+    Sum.elim_inr]
+  rfl
+
+open TensorProduct in
+/-- **[KL-5c].** The concatenated presentation realizes the tensor product of the two
+presented algebras, intertwining the inclusions with `includeLeft`/`includeRight`
+(`concatToTensor_comp_concatInl/r`). -/
+noncomputable def concatEquiv :
+    (MvPolynomial (σ₁ ⊕ σ₂) S ⧸ Ideal.span (Set.range (concatGen g₁ g₂))) ≃ₐ[S]
+      ((MvPolynomial σ₁ S ⧸ Ideal.span (Set.range g₁)) ⊗[S]
+        (MvPolynomial σ₂ S ⧸ Ideal.span (Set.range g₂))) :=
+  AlgEquiv.ofAlgHom (concatToTensor g₁ g₂)
+    (Algebra.TensorProduct.productMap (concatInl g₁ g₂) (concatInr g₁ g₂))
+    (by
+      apply Algebra.TensorProduct.ext'
+      intro a b
+      obtain ⟨pa, rfl⟩ := Ideal.Quotient.mk_surjective a
+      obtain ⟨pb, rfl⟩ := Ideal.Quotient.mk_surjective b
+      have hpm : Algebra.TensorProduct.productMap (concatInl g₁ g₂) (concatInr g₁ g₂)
+          (Ideal.Quotient.mk _ pa ⊗ₜ[S] Ideal.Quotient.mk _ pb)
+          = concatInl g₁ g₂ (Ideal.Quotient.mk _ pa)
+            * concatInr g₁ g₂ (Ideal.Quotient.mk _ pb) := rfl
+      rw [AlgHom.comp_apply, AlgHom.id_apply, hpm, map_mul]
+      have hA : concatToTensor g₁ g₂ (concatInl g₁ g₂ (Ideal.Quotient.mk _ pa))
+          = Algebra.TensorProduct.includeLeft (R := S)
+              (Ideal.Quotient.mk (Ideal.span (Set.range g₁)) pa) :=
+        AlgHom.congr_fun (concatToTensor_comp_concatInl g₁ g₂)
+          (Ideal.Quotient.mk (Ideal.span (Set.range g₁)) pa)
+      have hB : concatToTensor g₁ g₂ (concatInr g₁ g₂ (Ideal.Quotient.mk _ pb))
+          = Algebra.TensorProduct.includeRight (R := S)
+              (Ideal.Quotient.mk (Ideal.span (Set.range g₂)) pb) :=
+        AlgHom.congr_fun (concatToTensor_comp_concatInr g₁ g₂)
+          (Ideal.Quotient.mk (Ideal.span (Set.range g₂)) pb)
+      rw [hA, hB, Algebra.TensorProduct.includeLeft_apply,
+        Algebra.TensorProduct.includeRight_apply, Algebra.TensorProduct.tmul_mul_tmul,
+        mul_one, one_mul])
+    (by
+      apply Ideal.Quotient.algHom_ext
+      apply MvPolynomial.algHom_ext
+      intro v
+      simp only [AlgHom.comp_apply, Ideal.Quotient.mkₐ_eq_mk, AlgHom.coe_id, id_eq]
+      cases v with
+      | inl v =>
+        have h1 : (Ideal.Quotient.mk (Ideal.span (Set.range (concatGen g₁ g₂))))
+            (MvPolynomial.X (Sum.inl v))
+            = concatInl g₁ g₂ (Ideal.Quotient.mk _ (MvPolynomial.X v)) := by
+          rw [concatInl_mk, MvPolynomial.rename_X]
+        rw [h1]
+        have h2 : concatToTensor g₁ g₂
+            (concatInl g₁ g₂ (Ideal.Quotient.mk _ (MvPolynomial.X v)))
+            = Algebra.TensorProduct.includeLeft (R := S)
+                (Ideal.Quotient.mk (Ideal.span (Set.range g₁)) (MvPolynomial.X v)) :=
+          AlgHom.congr_fun (concatToTensor_comp_concatInl g₁ g₂)
+            (Ideal.Quotient.mk (Ideal.span (Set.range g₁)) (MvPolynomial.X v))
+        rw [h2, Algebra.TensorProduct.includeLeft_apply]
+        have h3 : Algebra.TensorProduct.productMap (concatInl g₁ g₂) (concatInr g₁ g₂)
+            (Ideal.Quotient.mk (Ideal.span (Set.range g₁)) (MvPolynomial.X v) ⊗ₜ[S] 1)
+            = concatInl g₁ g₂ (Ideal.Quotient.mk _ (MvPolynomial.X v))
+              * concatInr g₁ g₂ 1 := rfl
+        rw [h3, map_one, mul_one, concatInl_mk, MvPolynomial.rename_X]
+      | inr w =>
+        have h1 : (Ideal.Quotient.mk (Ideal.span (Set.range (concatGen g₁ g₂))))
+            (MvPolynomial.X (Sum.inr w))
+            = concatInr g₁ g₂ (Ideal.Quotient.mk _ (MvPolynomial.X w)) := by
+          rw [concatInr_mk, MvPolynomial.rename_X]
+        rw [h1]
+        have h2 : concatToTensor g₁ g₂
+            (concatInr g₁ g₂ (Ideal.Quotient.mk _ (MvPolynomial.X w)))
+            = Algebra.TensorProduct.includeRight (R := S)
+                (Ideal.Quotient.mk (Ideal.span (Set.range g₂)) (MvPolynomial.X w)) :=
+          AlgHom.congr_fun (concatToTensor_comp_concatInr g₁ g₂)
+            (Ideal.Quotient.mk (Ideal.span (Set.range g₂)) (MvPolynomial.X w))
+        rw [h2, Algebra.TensorProduct.includeRight_apply]
+        have h3 : Algebra.TensorProduct.productMap (concatInl g₁ g₂) (concatInr g₁ g₂)
+            ((1 : MvPolynomial σ₁ S ⧸ Ideal.span (Set.range g₁)) ⊗ₜ[S]
+              Ideal.Quotient.mk (Ideal.span (Set.range g₂)) (MvPolynomial.X w))
+            = concatInl g₁ g₂ 1
+              * concatInr g₁ g₂ (Ideal.Quotient.mk _ (MvPolynomial.X w)) := rfl
+        rw [h3, map_one, one_mul, concatInr_mk, MvPolynomial.rename_X])
+
+end Concat
+
 
 /-! ### The target statements -/
 
