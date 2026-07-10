@@ -13935,3 +13935,17 @@ packaging; AB4/coproduct-exactness instance for SheafOfModules. **FEASIBLE, boun
 B1 → B2 → G1 → G3 → G2/A. [YF-GEOM] ordering note: its full discharge still gates on BB-DIFF
 (P3b3's T-W7a trigger) + T-E15a/T-E14; the engine-pin consumption folds into that discharge when
 the étale legs land — deferred behind this decompose per dispatch discretion.
+
+## Amendments v10.100 (2026-07-10, coordinator): D2 at T-SG3's final approach (two designed assemblies); L6-label reconciliation
+
+- **D2 absorbed**: [L1-e0] complete (v10.97); T-SG3 now rests on exactly TWO designed
+  consumer assemblies inside exists_locallyFreeRankLocus — [L1-e2] fibre-dichotomy
+  translation (the K ≅ Γ(Spec K) hop needs NO cross-base gadget: the ring iso is
+  R-linear by intertwining, same-ring TensorProduct.congr + finrank_span_le_card close
+  it — insight banked) and [L1-e3 fwd/bwd] locality (designs at f2292b0ac). Continue
+  per sentinel.
+- **L6-label reconciliation CONFIRMED (D2's read is right)**: D2's proven
+  `isGammaZeroFppf_of_generatorSpace_finiteLocallyFree` is a different item sharing the
+  L6 label; the NEW-HOPF signal opens NISOG's **L6 layer = the E → E/C construction
+  consumers** (DS-NISOG-1/2 data + the 10 pins citing [T-G3D-INFRA]) — reconcile
+  against that layer when the signal fires.
