@@ -15762,3 +15762,33 @@ b3bij.lean scratch is SUPERSEDED by the QuotientRepresentability integration (si
   oneOver_mulOver derives via comm next, then assoc, inv (A's negModelHom_baseChange
   in place). On the T-G4 line: NEW-CASCADE re-merges from `wip/y1-dev-merge-cascade`
   + top-up + spine verify + straight into fill steps 2–4.
+
+## Amendments v10.135 (2026-07-10, coordinator): ★ NEW-CASCADE re-merge RATIFIED — y1 carries all of dev, spine green, fill fully staged at the single T-G4 gate; merge-boundary dedup doctrine validated
+
+- **Re-merge session RATIFIED end-to-end** (y1 tip c8b207b2d): scratch-branch merge +
+  top-up of repaired dev landed with ONE board-file conflict (union-resolved per their
+  own precedent; root module auto-merged). **The spine-verify caught its SECOND find in
+  two runs** — two ENVIRONMENT collisions invisible to the textual merge: (1)
+  `projModelVCIso_one` duplicate (their atlas-era copy vs the upstream
+  ModelVariableChange copy grown on dev during T-G4) — resolved by DELETING their own
+  and consuming upstream (cardinal rule at the merge boundary; coordinator-verified:
+  exactly one public definition survives, ModelVariableChange:604 — the MellWeierstrass
+  hit is a private `_hom` helper, distinct); (2) `projModelBaseChange_comp` name
+  collision with dev's DIFFERENT endo-only statement — theirs renamed
+  `projModelBaseChange_comp_eqToHom` (3 sites), equivalent-forms coexistence boarded +
+  `_comp'` unification registered as cleanup debt. Both resolutions are the model:
+  dedup-by-deletion when identical, rename-and-board when genuinely different.
+- **Verification set WIDENED (ratified as the fill's entry bar)**: spine green at 3,230
+  jobs now INCLUDING GroupLawAxioms + MulByHomUnramified — i.e. the C6 dictionary layer
+  and the BB-DIFF funnel are PROVEN TO BUILD on y1, the fill's home branch. Pushed.
+- **Park state**: single gate (c5β T-G4 board line; at check time comm done, assoc/inv
+  landing). The gate-fire session is now MINIMAL: trivial top-up merge → step 2
+  (mulOver record packaging at fields) → step 3 (hz-fix + map_add' fill, same-commit,
+  b2_log #3 quoted) → step 4 (hfib discharge → L-BC → BB-DIFF MASTER →
+  torsionπ_etale) ⟹ six Y1-E leaves OPEN + [T-B6′] RETIRES. Sentinels carry the
+  ready-state on both branches.
+- Historical note absorbed: the atlas-era `projModelVCIso_one` (proven by the -3
+  session to close a then-parked T-W7 gap) was independently re-proven on dev hours
+  later — the dedup lands it at its canonical upstream home; no lesson beyond the
+  standing check-before-proving rule, which cross-BRANCH work structurally cannot
+  fully satisfy; the merge-boundary dedup pass is exactly the compensating control.
