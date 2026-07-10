@@ -696,6 +696,74 @@ lemma equation_chartPointTriple (W : WeierstrassCurve R) (k : Fin 3)
       algebraMap R (chartAway W k) from (chartCoordAlgEquiv W k).toAlgHom.comp_algebraMap]
     exact hφ
 
+
+/-- [k1] Ring maps out of a chart ring are determined by the base and the coordinates. -/
+lemma chartAwayHom_ext (W : WeierstrassCurve R) (k : Fin 3)
+    {K : Type u} [CommRing K] (χ₁ χ₂ : chartAway W k →+* K)
+    (hR : χ₁.comp (algebraMap R (chartAway W k)) = χ₂.comp (algebraMap R (chartAway W k)))
+    (hcoord : ∀ m : {l : Fin 3 // l ≠ k},
+      χ₁ (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W m)) =
+      χ₂ (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W m))) :
+    χ₁ = χ₂ := by
+  have hsurj : Function.Surjective (chartCoordAlgEquiv W k).toRingHom :=
+    (chartCoordAlgEquiv W k).surjective
+  rw [← RingHom.cancel_right hsurj]
+  apply Ideal.Quotient.ringHom_ext
+  apply MvPolynomial.ringHom_ext
+  · intro r
+    show χ₁ ((chartCoordAlgEquiv W k) (Ideal.Quotient.mk _ (MvPolynomial.C r))) =
+      χ₂ ((chartCoordAlgEquiv W k) (Ideal.Quotient.mk _ (MvPolynomial.C r)))
+    rw [show ((chartCoordAlgEquiv W k) (Ideal.Quotient.mk _ (MvPolynomial.C r)) :
+        chartAway W k) = chartCoordEquiv W k (Ideal.Quotient.mk _ (MvPolynomial.C r)) from rfl,
+      chartCoordEquiv_mk_C, ← chartAway_algebraMap_apply]
+    exact RingHom.congr_fun hR r
+  · intro m
+    simp only [RingHom.comp_apply]
+    show χ₁ ((chartCoordAlgEquiv W k) (Ideal.Quotient.mk _ (MvPolynomial.X m))) =
+      χ₂ ((chartCoordAlgEquiv W k) (Ideal.Quotient.mk _ (MvPolynomial.X m)))
+    rw [show ((chartCoordAlgEquiv W k) (Ideal.Quotient.mk _ (MvPolynomial.X m)) :
+        chartAway W k) = chartCoordEquiv W k (Ideal.Quotient.mk _ (MvPolynomial.X m)) from rfl,
+      chartCoordEquiv_mk_X]
+    exact hcoord m
+
+/-- Generic coordinate action of a chart-triple morphism on the localization coordinates. -/
+lemma chartAwayHomOfTriple_isLocalizationElem (W : WeierstrassCurve R) (k : Fin 3)
+    {K : Type u} [CommRing K] [Algebra R K] (t : Fin 3 → K) (u : K) (hu : t k * u = 1)
+    (ht : (W.map (algebraMap R K)).toProjective.Equation t) (m : {l : Fin 3 // l ≠ k}) :
+    chartAwayHomOfTriple W k t u hu ht (HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W m)) =
+      t m * u := by
+  rw [← chartCoordEquiv_mk_X]
+  unfold chartAwayHomOfTriple
+  have hround : (chartCoordAlgEquiv W k).symm (chartCoordEquiv W k (Ideal.Quotient.mk _
+      (MvPolynomial.X m))) = Ideal.Quotient.mk _ (MvPolynomial.X m) :=
+    (chartCoordEquiv W k).symm_apply_apply _
+  show (chartHomOfTriple W k t u hu ht)
+      ((chartCoordAlgEquiv W k).symm (chartCoordEquiv W k (Ideal.Quotient.mk _
+        (MvPolynomial.X m)))) = _
+  rw [hround, chartHomOfTriple_coord]
+
+/-- [k2] An `R`-compatible ring map out of a chart ring IS the chart morphism of its own
+coordinate triple. -/
+lemma eq_chartAwayHomOfTriple_chartPointTriple (W : WeierstrassCurve R) (k : Fin 3)
+    {K : Type u} [CommRing K] [Algebra R K] (φ : chartAway W k →+* K)
+    (hφ : φ.comp (algebraMap R (chartAway W k)) = algebraMap R K)
+    (hu : chartPointTriple W k φ k * 1 = 1)
+    (hT : (W.map (algebraMap R K)).toProjective.Equation (chartPointTriple W k φ)) :
+    φ = (chartAwayHomOfTriple W k (chartPointTriple W k φ) 1 hu hT).toRingHom := by
+  refine chartAwayHom_ext W k _ _ ?_ ?_
+  · rw [hφ]
+    exact ((chartAwayHomOfTriple W k (chartPointTriple W k φ) 1 hu hT).comp_algebraMap).symm
+  · intro m
+    rw [show ((chartAwayHomOfTriple W k (chartPointTriple W k φ) 1 hu hT).toRingHom :
+        chartAway W k →+* K) (HomogeneousLocalization.Away.isLocalizationElem
+          (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W m)) =
+      chartPointTriple W k φ m * 1 from
+        chartAwayHomOfTriple_isLocalizationElem W k _ 1 hu hT m, mul_one]
+    rfl
+
 end ChartPointTriple
 
 end ChartNaturality
