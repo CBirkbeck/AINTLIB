@@ -69,6 +69,7 @@ import ModularCurves.Moduli.Representability
 import ModularCurves.ForMathlib.QuotientTorsor
 import ModularCurves.Moduli.QuotientRepresentability
 import ModularCurves.Moduli.Stack
+import ModularCurves.Picard.DualPullback
 import ModularCurves.Picard.DualRestrict
 import ModularCurves.Picard.InvertibleSheaf
 import ModularCurves.Picard.PicComparison
