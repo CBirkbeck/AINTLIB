@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.EngineDescent
+import ModularCurves.ForMathlib.QuotientTorsor
 import ModularCurves.Moduli.GlobalModelTransport
 import ModularCurves.ForMathlib.TorsorMap
 import ModularCurves.EllipticCurve.GroupLawDescent
@@ -72,6 +73,8 @@ structure CoreData (P Q : ModuliProblem R) {G : Type u} [Group G] [Finite G]
   /-- `q`'s base map lifts invariant morphisms (quotient universal property). -/
   hqlift : ∀ {W : Scheme.{u}} (F : XM.base ⟶ W),
     (∀ γ, (P.simulSchemeAction Q φ rM).hom γ ≫ F = F) → ∃! F₀, q.baseHom ≫ F₀ = F
+  /-- `q`'s base map is a geometric `G`-torsor (`∐_G XM.base ≅ XM.base ×_{X₀.base} XM.base`). -/
+  hqtors : IsIso (ModularCurves.torsorCompare q.baseHom (P.simulSchemeAction Q φ rM) hqinv)
   /-- The descended universal `P`-class over `X₀`. -/
   α₀ : P.obj (op X₀)
   /-- It pulls back along `q` to the universal `P`-class of the simultaneous problem. -/
@@ -166,6 +169,8 @@ theorem exists_coreData (P Q : ModuliProblem R) {G : Type u} [Group G] [Finite G
            hqinv := fun γ => σ.hom_quotientπ V hVs hVa hVmem γ
            hqepi := hepi
            hqlift := fun {W} F hF => σ.existsUnique_quotientπ_lift V hVs hVa hVmem F hF
+           hqtors := σ.isIso_torsorCompare_quotientπ V hVs hVa hVmem
+             (P.free_simulSchemeAction Q φ rM hrig htors)
            α₀ := α₀, hα₀ := hα₀ }⟩
 
 /-! ### The representability bijection (KM pp. 114–116) -/
