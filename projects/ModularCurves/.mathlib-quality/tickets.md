@@ -18069,3 +18069,10 @@ the closure theorem is one-exact against `yOneRepresentableBy`.
 
 *(Cleanup-lane note: two `unusedSimpArgs` lint warnings in the new `haLa/haRa` and a
 pre-existing unused-binder warning — cosmetic, on `main`-merge cleanup.)*
+
+## Amendments v10.139-CLOSER (2026-07-11, Y1-CLOSER): CHARTER-Y1-CLOSER-2 CLAIMED (rule-5, y1 side) — the three residual lanes are mine
+
+Per v10.139 (dev board): (L1) T-W7 tail audit-first; (L2) [T-A6b]/[T-A6c] + T-E4-primitive
+(A's prep by import); (L3) BB-QF/FLAT/DEG (decompose-first, HasseWeil bridge
+check-then-cite). Bar: `gammaOneNaive_representable` at the clean triple; the one-exact
+closure is already staged (v10.128-Y1). Sentinel re-set both worktrees.
