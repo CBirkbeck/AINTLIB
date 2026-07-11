@@ -17982,3 +17982,17 @@ ModelRecord.lean (the mulOver record + rigidity driver); [T-A6b] retired from th
 proven); S4 T-E4-collapse (NaiveProblems split + membership fills); E1–E4 + F1 proven;
 E5/E6 wrapped-and-ledgered; both cap theorems relocated per doctrine. All pushed
 (dev f83…→ y1 705c2ec9d).
+
+## Amendments v10.126-Y1 (2026-07-11, Y1-CLOSER): E5 reduced to its pure core; the MASTER's remaining set is FOUR crisply-stated lemmas
+
+E5 (`yOne_infinitesimal_lifting`): steps 1–2 + the ENTIRE assembly PROVEN (classify with
+R-linearity from the over-square, coefficient+Δ-unit lift, renormalised-witness wiring,
+killing-clause assembly, fibrewise transport via quotient-factoring of geometric points).
+Sole remaining sorry: the PURE CORE ∃ — `ψ' : tateRingOver R →ₐ[R] A` with
+`mkₐ ∘ ψ' = ψ₀` and `(N:ℤ) • pull (tateBaseSpecMap ψ') (tatePoint R) = 0` — the étale
+torsion-point lift + T-E1 renormalisation, with the raw lift `(α, β, hΔ, ψ)` in scope.
+
+**The `gammaOneNaive_representable` residual set is now exactly**: {E5-pure-core,
+E6-FormallySmooth-leg (adjunction transport of E5), T-E4-primitive (route a/c — other
+lanes), hfib 6f/6g (drafts banked), BB-QF/FLAT/DEG (other lane)}. Root module green at
+3,798 jobs with all of it.
