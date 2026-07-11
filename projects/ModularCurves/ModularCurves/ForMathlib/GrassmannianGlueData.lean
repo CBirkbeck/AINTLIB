@@ -775,6 +775,21 @@ theorem evalAtR_column (ι : Fin k ↪ Fin n) (N : G(k, (Fin n → A); A))
   rw [evalAtR_eq_comp_map, RingHom.comp_apply]
   exact congrArg (evalAt ι N h) (congrFun (column_map (R := R) (A := A) ι j) i)
 
+/-- The generic transition matrix is stable under coefficient base change. -/
+theorem matrix_map (ι ι' : Fin k ↪ Fin n) :
+    (Transition.matrix (R := R) ι ι').map (MvPolynomial.map (algebraMap R A))
+      = Transition.matrix (R := A) ι ι' := by
+  funext i₁ i₂
+  rw [Matrix.map_apply, Transition.matrix_apply, Transition.matrix_apply]
+  exact congrFun (column_map (R := R) (A := A) ι (ι' i₂)) i₁
+
+/-- The transition determinant is stable under coefficient base change: `det R` maps to
+`det A`. -/
+theorem det_map (ι ι' : Fin k ↪ Fin n) :
+    MvPolynomial.map (algebraMap R A) (Transition.det (R := R) ι ι')
+      = Transition.det (R := A) ι ι' := by
+  rw [Transition.det, Transition.det, RingHom.map_det, RingHom.mapMatrix_apply, matrix_map]
+
 end Points
 
 end Module.Grassmannian
