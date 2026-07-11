@@ -607,4 +607,47 @@ noncomputable def bcT (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W)) :
 
 end MuDescent
 
+/-! ## Stage vocabulary -/
+
+section Stage
+
+variable {R} (W : WeierstrassCurve R) [W.IsElliptic]
+
+/-- The subalgebra of a stage index. -/
+noncomputable def stageAlg (T : Over (wStageOp W)) : Subalgebra ℤ R := T.left.unop.1
+
+/-- The inclusion of the first stage into a stage. -/
+theorem wStage_le_stage (T : Over (wStageOp W)) : (wStage W).1 ≤ stageAlg W T :=
+  leOfHom T.hom.unop
+
+/-- The Weierstrass curve at a stage. -/
+noncomputable def stageW (T : Over (wStageOp W)) : WeierstrassCurve ↥(stageAlg W T) :=
+  (wZero W).map (Subalgebra.inclusion (wStage_le_stage W T)).toRingHom
+
+/-- The stage curve maps to `W` under the stage inclusion. -/
+theorem stageW_map (T : Over (wStageOp W)) :
+    (stageW W T).map (stageAlg W T).val.toRingHom = W := by
+  show ((wZero W).map _).map _ = W
+  rw [WeierstrassCurve.map_map]
+  rw [show (stageAlg W T).val.toRingHom.comp
+      (Subalgebra.inclusion (wStage_le_stage W T)).toRingHom =
+      (wStage W).1.val.toRingHom from rfl]
+  exact wZero_map W
+
+/-- The stage curve restricts the first-stage curve. -/
+theorem stageW_map₀ (T : Over (wStageOp W)) :
+    (wZero W).map (Subalgebra.inclusion (wStage_le_stage W T)).toRingHom = stageW W T :=
+  rfl
+
+instance (T : Over (wStageOp W)) : (stageW W T).IsElliptic := by
+  constructor
+  have h : (stageW W T).Δ =
+      (Subalgebra.inclusion (wStage_le_stage W T)).toRingHom (wZero W).Δ := by
+    show ((wZero W).map _).Δ = _
+    rw [WeierstrassCurve.map_Δ]
+  rw [h]
+  exact (wZero W).isUnit_Δ.map _
+
+end Stage
+
 end ModularCurves
