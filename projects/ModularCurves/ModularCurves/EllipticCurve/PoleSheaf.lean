@@ -1967,6 +1967,26 @@ theorem overTrivializationCoefficient_restrict {X : Scheme.{u}} (M : X.Modules)
   rw [← M.presheaf.map_comp_apply] at hnat
   exact hnat
 
+/-- Coefficients transform by the same scalar as their over-site
+trivializations. -/
+theorem overTrivializationCoefficient_eq_mul_of_transition
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (r : Γ(X, U))
+    (h : e.hom = g.hom ≫
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r)
+    (m : Γ(M, (⊤ : X.Opens))) :
+    overTrivializationCoefficient M U e m =
+      overTrivializationCoefficient M U g m * r := by
+  unfold overTrivializationCoefficient
+  rw [h]
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply]
+  rw [SheafOfModules.overUnitScalarEnd_app_apply]
+  change _ * X.presheaf.map (𝟙 (.op U)) r = _ * r
+  rw [X.presheaf.map_id]
+  rw [ConcreteCategory.id_apply]
+
 /-- An over-site trivialization gives the corresponding trivialization on the open
 subscheme. -/
 noncomputable def restrictTrivializationOfOverIso
