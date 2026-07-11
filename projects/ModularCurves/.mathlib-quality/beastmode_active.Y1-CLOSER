@@ -1,1 +1,1 @@
-FOCUS: Y1-CLOSER — E1-E4 done; next: S4 split (NaiveProblems.lean) then E5 lifting, E6, F1, S6
+FOCUS: Y1-CLOSER — E5 step 1 (classify leg: t0 := f0 >> yOneBase, tateRing_homEquiv roundtrip); ledger in-file at the sorry

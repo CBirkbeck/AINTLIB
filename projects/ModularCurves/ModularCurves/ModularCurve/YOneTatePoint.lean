@@ -701,4 +701,21 @@ theorem gammaOneNaive_representable_closure (N : ℕ) [NeZero N] (hN : 4 ≤ N)
         (Smooth X.structMap ∧ IsAffineHom X.structMap) :=
   gammaOneNaive_representable_assembly R N hN hinv
 
+/-- **(T-E7 MASTER, relocated per v10.111/117 — Y1-CLOSER S6)** = Loeffler Thm 3.4.4 + Def 3.3.6; KM 5.x for the Drinfeld upgrade)** For
+`N ≥ 4` and `N` invertible in `R`, the naive `Γ₁(N)` problem is representable, and the
+representing base scheme is smooth and affine over `Spec R`.
+Loeffler (verbatim, Thm 3.4.4): "`Y₁(N)_{ℤ[1/N]}` is smooth over `ℤ[1/N]`."
+
+Notes (adversarial pass 2026-07-06): TRUE only after `IsNaiveGammaOne` gained its
+global killing clause (without it a `ℚ̄[ε]`-family gave pro-representation
+`ℚ̄[[t,s]]`, contradicting smooth + quasi-finite-over-j). General `R` follows from
+`ℤ[1/N]` by base change (`Smooth`, `IsAffineHom` stable). Affineness for general `N`
+is QUOTE-PARTIAL: Loeffler's `Spec` display is verbatim only for `N = 5`; attach the
+KM affine-over-the-j-line locator when the full text lands. -/
+theorem gammaOneNaive_representable (N : ℕ) [NeZero N] (hN : 4 ≤ N)
+    (hinv : IsUnit (N : R)) :
+    (gammaOneNaiveProblem R N).Representable ∧
+      ∀ X : EllObj R, Nonempty ((gammaOneNaiveProblem R N).RepresentableBy X) →
+        (Smooth X.structMap ∧ IsAffineHom X.structMap) := gammaOneNaive_representable_assembly R N hN hinv
+
 end ModularCurves
