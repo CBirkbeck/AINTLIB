@@ -365,6 +365,72 @@ noncomputable def sqComparison :
     Limits.pullback (projModelπ W) (projModelπ W) ≅ (bcCone W (sqStruct W)).pt :=
   (sqIsPullback (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)).flip.isoPullback
 
+/-- The transition maps of the base-changed square system are pullbacks of the (affine)
+`Spec` transitions. -/
+theorem bcSq_transition_isPullback {T T' : Over (wStageOp W)} (φ : T ⟶ T') :
+    IsPullback
+      ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+        Over.pullback (sqStruct W) ⋙ Over.forget _).map φ)
+      (Limits.pullback.fst _ _) (Limits.pullback.fst _ _)
+      ((fgSys.specDiagram R).map φ.left) := by
+  refine IsPullback.of_right ?_ ?_
+    ((IsPullback.of_hasPullback ((Over.post (X := wStageOp W)
+      (fgSys.specDiagram R)).obj T').hom (sqStruct W)).flip)
+  · have hsnd' : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+        Over.pullback (sqStruct W) ⋙ Over.forget _).map φ ≫ Limits.pullback.snd _ _ =
+        Limits.pullback.snd _ _ :=
+      Limits.pullback.lift_snd _ _ _
+    have hw : (fgSys.specDiagram R).map φ.left ≫
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T').hom =
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom :=
+      Over.w ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).map φ)
+    rw [hsnd']
+    convert (IsPullback.of_hasPullback ((Over.post (X := wStageOp W)
+      (fgSys.specDiagram R)).obj T).hom (sqStruct W)).flip using 2
+    all_goals first | rfl | exact hw
+  · exact Limits.pullback.lift_fst _ _ _
+
+instance bcSq_transition_affine {T T' : Over (wStageOp W)} (φ : T ⟶ T') :
+    IsAffineHom ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (sqStruct W) ⋙ Over.forget _).map φ) :=
+ by
+  haveI : IsAffine ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).left :=
+    inferInstanceAs (IsAffine ((fgSys.specDiagram R).obj T.left))
+  haveI : IsAffine ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T').left :=
+    inferInstanceAs (IsAffine ((fgSys.specDiagram R).obj T'.left))
+  exact MorphismProperty.of_isPullback (bcSq_transition_isPullback W φ).flip
+    (isAffineHom_of_isAffine _)
+
+instance sqStruct_proper : IsProper (sqStruct W) := by
+  haveI : IsProper (Limits.pullback.fst (projModelπ (wZero W)) (projModelπ (wZero W))) :=
+    MorphismProperty.pullback_fst _ _ (projModelπ_isProper (wZero W))
+  exact MorphismProperty.comp_mem _ _ _ inferInstance (projModelπ_isProper (wZero W))
+
+instance bcSq_obj_compact (T : Over (wStageOp W)) :
+    CompactSpace ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (sqStruct W) ⋙ Over.forget _).obj T) := by
+  haveI : UniversallyClosed (sqStruct W) := inferInstance
+  haveI : QuasiCompact (sqStruct W) := inferInstance
+  haveI : CompactSpace ((Over.post (X := wStageOp W)
+      (fgSys.specDiagram R)).obj T).left :=
+    inferInstanceAs (CompactSpace ((fgSys.specDiagram R).obj T.left))
+  exact inferInstanceAs (CompactSpace ↑(Limits.pullback ((Over.post (X := wStageOp W)
+    (fgSys.specDiagram R)).obj T).hom (sqStruct W)))
+
+instance bcSq_obj_qsep (T : Over (wStageOp W)) :
+    QuasiSeparatedSpace ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (sqStruct W) ⋙ Over.forget _).obj T) := by
+  haveI : IsSeparated (sqStruct W) := inferInstance
+  haveI : QuasiSeparated (sqStruct W) := inferInstance
+  haveI : QuasiSeparatedSpace ((Over.post (X := wStageOp W)
+      (fgSys.specDiagram R)).obj T).left :=
+    inferInstanceAs (QuasiSeparatedSpace ((fgSys.specDiagram R).obj T.left))
+  exact @quasiSeparatedSpace_of_quasiSeparated _ _
+    (Limits.pullback.fst ((Over.post (X := wStageOp W)
+      (fgSys.specDiagram R)).obj T).hom (sqStruct W))
+    inferInstance (MorphismProperty.pullback_fst _ _ inferInstance)
+
+set_option maxSynthPendingDepth 3 in
 /-- **(K2 step 5, μ-descent)** Any multiplication-shaped morphism on the `R`-square
 descends to a finitely generated stage, compatibly over the first stage. -/
 theorem mu_descends (μl : Limits.pullback (projModelπ W) (projModelπ W) ⟶ projModel W)
@@ -376,23 +442,51 @@ theorem mu_descends (μl : Limits.pullback (projModelπ W) (projModelπ W) ⟶ p
         (sqComparison W).inv ≫ μl ≫
           projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) ∧
       g' ≫ projModelπ (wZero W) = (sqT W).app T := by
-  /- CONTINUATION NOTE (Y1-CLOSER, K2 step 5): apply
-  `Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation _ (sqT W)
-    (projModelπ (wZero W)) _ (bcIsLimit W (sqStruct W)) (a := (sqComparison W).inv ≫ μl ≫
-    projModelBaseChangeOf …) ha`. The probe above shows Smooth ⟹ lfp fires in a clean
-  goal; the application additionally needs the D-SIDE instance-args synthesized for the
-  COMPOSITE system (Over.post ⋙ Over.pullback (sqStruct W) ⋙ Over.forget):
-  (i) [∀ φ, IsAffineHom (D.map φ)] — each transition is a base change of the affine
-      Spec-transition (exhibit the Over.pullback-map square as a pullback, then
-      `isAffineHom_isStableUnderBaseChange`);
-  (ii) [∀ T, CompactSpace/QuasiSeparatedSpace (D.obj T)] — the objects are pullbacks of
-      qcqs over affine (`pullback (T-structure) (sqStruct W)`); derive from
-      QuasiCompact/QuasiSeparated of `sqStruct W` (the model square is proper-over-affine)
-      base-changed;
-  (iii) `ha` — componentwise: the cone-leg is an Over-SQ₀ morphism (`Over.w`), so
-      LHS = pullback.snd ≫ sqStruct; RHS via `(wPB …).w`, `hμπ`, and the
-      `sqComparison`-leg identities (`IsPullback.isoPullback_inv_fst/snd` on the flip). -/
-  sorry
+  haveI : SmoothOfRelativeDimension 1 (projModelπ (wZero W)) := projModel_smooth (wZero W)
+  haveI : Smooth (projModelπ (wZero W)) :=
+    SmoothOfRelativeDimension.smooth (n := 1) (f := projModelπ (wZero W))
+  haveI hlfp : LocallyOfFinitePresentation (projModelπ (wZero W)) := by infer_instance
+  refine @Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation
+    (Over (wStageOp W)) _ _ _
+    (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (sqStruct W) ⋙ Over.forget _)
+    (sqT W) (projModelπ (wZero W)) (bcCone W (sqStruct W)) (bcIsLimit W (sqStruct W))
+    inferInstance hlfp (fun {i j} φ => bcSq_transition_affine W φ)
+    (fun T => bcSq_obj_compact W T) (fun T => bcSq_obj_qsep W T)
+    ((sqComparison W).inv ≫ μl ≫
+      projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)) ?_
+  ext T
+  show (bcCone W (sqStruct W)).π.app T ≫ (sqT W).app T = _
+  -- the cone leg is an `Over SQ₀`-morphism: its structure square collapses the left side
+  have hw : (bcCone W (sqStruct W)).π.app T ≫ ((Over.pullback (sqStruct W)).obj
+      ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T)).hom =
+      Limits.pullback.snd ((slicedCone W).pt).hom (sqStruct W) :=
+    Over.w ((Over.pullback (sqStruct W)).map ((slicedCone W).π.app T))
+  have hLHS : (bcCone W (sqStruct W)).π.app T ≫ (sqT W).app T =
+      Limits.pullback.snd ((slicedCone W).pt).hom (sqStruct W) ≫ sqStruct W := by
+    show (bcCone W (sqStruct W)).π.app T ≫ (_ ≫ sqStruct W) = _
+    rw [← Category.assoc, hw]
+    rfl
+  rw [hLHS]
+  -- the right side collapses along the comparison and the two structure squares
+  have hisoinv : (sqComparison W).inv ≫
+      (Limits.pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W) =
+      Limits.pullback.fst ((slicedCone W).pt).hom (sqStruct W) :=
+    (sqIsPullback (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)).flip.isoPullback_inv_fst
+  have hRHS : ((sqComparison W).inv ≫ μl ≫
+      projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)) ≫
+      projModelπ (wZero W) =
+      Limits.pullback.fst ((slicedCone W).pt).hom (sqStruct W) ≫ ((slicedCone W).pt).hom := by
+    rw [Category.assoc, Category.assoc,
+      (wPB (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)).w, ← Category.assoc μl,
+      hμπ, Category.assoc, ← Category.assoc, ← Category.assoc]
+    rw [show ((sqComparison W).inv ≫ Limits.pullback.fst (projModelπ W) (projModelπ W)) ≫
+        projModelπ W = Limits.pullback.fst ((slicedCone W).pt).hom (sqStruct W) from
+      (Category.assoc _ _ _).trans hisoinv]
+    rfl
+  show _ = ((sqComparison W).inv ≫ μl ≫ projModelBaseChangeOf _ _ _ _) ≫
+    projModelπ (wZero W)
+  rw [hRHS, ← Limits.pullback.condition]
 
 end MuDescent
 
