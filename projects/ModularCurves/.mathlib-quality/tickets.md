@@ -16251,3 +16251,34 @@ Genuine open leaves (partly pre-wired consumers filtered out):
   statement changes — cooldown/interleave.
 Order: [CMP-a5] → [CMP-YFGEOM] → [CMP-Mell] → [CMP-DEBT]. **T-W7a closer-backup interrupt outranks all.**
 Next: start [CMP-a5] — locate FP4's recorded compat-hypotheses, build the bridge in ComparisonConsumers.lean.
+
+### v10.142 (2026-07-11, NEW-HOPF): [CHARTER-HOPF] [HG-C1c-1d-coassoc] — the coassoc substrate + the Künneth naturality lemma (the crux tool)
+
+*Zero sorries, axiom-clean; five atomic commits. Stop-line hit at 4 measured iterations
+on the coassoc route; ledgered precisely.*
+
+The ⊤-level design's payoff began: the iterated `affineKunneth` and the naturality that
+coassoc turns on both came together cleanly.
+
+- **Substrate**: `squareToBase` + `Γ(square)` R'-algebra + `IsAffine groupSquare`
+  instances; **`cube := pullback groupToBaseRes squareToBase`** + **`cubeΓ`** (iterated
+  `affineKunneth`, `Γ(cube) ≅ A' ⊗ Γ(square)`, IsIso — the triple identification, trivial
+  by reapplying the generic citizen); `cubeInnerMul` (`id ×_V squareMulRes`) + legs;
+  `squareMulResAlg : A' →ₐ[R'] Γ(square)`.
+- ★ **`cubeInnerMul_appTop_cubeΓ`** — the **Künneth naturality lemma**:
+  `cubeInnerMul.appTop ≫ cubeΓ = squareΓTop ≫ map(id, squareMulResAlg)`. This is the hard
+  reusable piece (transports the inner multiplication across both identifications); it
+  proves coassoc will assemble from `mulOver_assoc` (already proven) once the two
+  iterated-comul sides are expressed through it.
+
+Remaining (ledgered in decomposition doc §coassoc): Δ₂R via this naturality, Δ₂L via the
+mirror + the associator dualisation, then `Δ₂R = Δ₂L` from restricted `mulOver_assoc` ⟹
+the `Bialgebra` coassoc field. ~1–2 routes.
+
+**Lean-ops**: `IsIso.comp_inv_eq` to hoist `includeLeft ≫ inv iso = leg.appTop` into a
+`have` (the "inv-blocks-motive" escape, generalising the `reassoc_of% hinv` entry) — the
+clean way to precompose an iso-inverse before `tensor_hom_ext`.
+
+**Fleet note** (boarded): D2/c5β/NEW-GH consume HOPF pins hypothesis-wired as they land
+(per their inboxes), so coassoc-first does not hard-block them; proceeding to prove
+coassoc methodically per the coordinator's v10.141 sequencing (no hypothesis-wire).
