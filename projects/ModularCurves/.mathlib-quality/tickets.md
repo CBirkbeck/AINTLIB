@@ -16438,3 +16438,30 @@ finite-étale-torsor structure. Root module green (3767 jobs).
 NEXT (fable-P4): B4 = T-E5c (amended representable_iff) → B5 = Y(N) route A + Γ_H (Legendre/Hesse
 TorsorData + global models), then seam with NEW-GH on KM 7.1.2 gammaH wiring. Watching Y1-CLOSER's
 T-W7a board line for the gate flip.
+
+## Amendments v10.149 (2026-07-11, coordinator): ★★★★-minus-one — CLOSER-2 block RATIFIED (K2/K3/K4/BB-QF; residual = ONE box); ★★★ FP4 B3 COMPLETE absorbed
+
+- **Y1-CLOSER-2 block (their v10.144–147-Y1 + v10.148 ledger) RATIFIED**: ★ K2
+  `modelGrpObj_unique` (any pointed group structure on the model = the T-G4
+  multiplication, every ring, clean triple) · ★ K3 `grpObj_mul_unique` +
+  `isMonHom_of_pointedIso_records` (the records primitive — [T-A6c]-layer content) ·
+  ★ K4 the swap: PullSectionCanonicity h64 consumes K3 ⟹ **the representability half
+  of the MASTER is CLEAN** (`yOne_representableBy` + the T-E4 family at the exact
+  triple; the sorried route-(a) primitive has zero proof-term consumers) · ★ L3/BB-QF
+  discharged (invertible case — the strength the MASTER consumes) via the LIVE
+  cross-project bridge (atlas → baseChangeEquiv → pointAddEquiv (hμ fired by K3) →
+  geomFibrePointAddEquiv → HasseWeil torsion_genN_addEquiv, VERIFIED-CLEAN before
+  citing) + the new Jacobson bridge (scheme-level Zariski lemma). **BB-DEG ruled
+  OFF-TRAIL** — the residual attribution SHRANK. **MASTER residual = ONE box: BB-FLAT,
+  reduced by route (G) to the `KernelNDivisible` funnel** (MulByHomFlat.lean opened
+  sorry-free; the TUF co-multiplication layer is the in-repo template, field-use
+  isolated to one units-step; miracle flatness + fibrewise criterion CHECKED-ABSENT
+  from mathlib). The MulByHomEtale QUARANTINE (heavy closure isolated; GammaH broke
+  once mid-session and was protected) is cited — the clobber lesson institutionalised.
+  Registry accepted: endpoint-free refine-trans chains vs calc-instability; have-split
+  before exact on whnf walls. Sentinel on the BB-FLAT campaign; no dispatch.
+- **★★★ fable-P4: [B3] COMPLETE absorbed** (43744af03):
+  `representable_of_rigid_of_torsor_of_globalModel` — KM 4.7.0 ⇐ PROVEN modulo the
+  inherited T-W7 trail ONLY, and that trail is dissolving in the closer's lane (K-chain).
+  The Y(N)/Γ_H engine's central theorem is in. FP4 continues per CHARTER-FP4-2: B4
+  (T-E5c) → B5 (Y(N) route A + Γ_H). On charter, no dispatch.
