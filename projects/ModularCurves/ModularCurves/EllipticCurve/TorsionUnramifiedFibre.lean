@@ -886,7 +886,44 @@ private theorem pointSharp_add {U : (F.E).Opens} (hU : IsAffineOpen U)
         (Spec.map (CommRingCat.ofHom (axisL ε').toRingHom) ≫ q).base pₑ := rfl
     rw [h2, hlaw']
     exact htautU pₑ
-  sorry
+  -- 6e. the stalk of the box at the augmentation prime
+  letI : Algebra (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U))
+      ↑((Spec (.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U)))).presheaf.stalk
+        p𝔭) :=
+    (AlgebraicGeometry.StructureSheaf.toStalk _ p𝔭).hom.toAlgebra
+  haveI hLoc : IsLocalization.AtPrime
+      ↑((Spec (.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U)))).presheaf.stalk
+        p𝔭) p𝔭.asIdeal :=
+    AlgebraicGeometry.StructureSheaf.IsLocalization.to_stalk _ p𝔭
+  set ψ := F.E.presheaf.germ U (q.base p𝔭) hqp ≫ q.stalkMap p𝔭 with hψ
+  set φL := IsLocalization.lift (M := p𝔭.asIdeal.primeCompl)
+    (S := ↑((Spec (.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U)))).presheaf.stalk
+      p𝔭))
+    (g := pT.toRingHom) hunits with hφL
+  have hφLalg : ∀ y, φL (algebraMap _ _ y) = pT y := fun y => IsLocalization.lift_eq hunits y
+  -- 6f. the sum's evaluation factors through the stalk
+  have hkey : ∀ c : ↑Γ(F.E, U),
+      (pointSharp ((P₁ + P₂ : F.Point t) : Spec R ⟶ F.E) hp₁₂).hom c = φL (ψ.hom c) := by
+    sorry
+  -- 6g. the kill on the augmentation ideal
+  have hψf : φL (ψ.hom f) = pT (f ⊗ₜ 1) + pT (1 ⊗ₜ f) := by
+    sorry
+  rw [show (pointSharp ((P₁ + P₂ : F.Point t) : Spec R ⟶ F.E) hp₁₂) f =
+    (pointSharp ((P₁ + P₂ : F.Point t) : Spec R ⟶ F.E) hp₁₂).hom f from rfl, hkey f, hψf]
+  have hpT1 : pT (f ⊗ₜ 1) = (pointSharp P₁.1 hp₁).hom f := by
+    have h1 : (f ⊗ₜ[↑Γ(Spec (CommRingCat.of k), ⊤)] (1 : ↑Γ(F.E, U))) =
+        Algebra.TensorProduct.includeLeftRingHom f := rfl
+    rw [h1]
+    have h2 := congrArg (fun (m : _ ⟶ R) => m.hom f) hidL
+    simpa using h2
+  have hpT2 : pT (1 ⊗ₜ f) = (pointSharp P₂.1 hp₂).hom f := by
+    have h1 : ((1 : ↑Γ(F.E, U)) ⊗ₜ[↑Γ(Spec (CommRingCat.of k), ⊤)] f) =
+        (Algebra.TensorProduct.includeRight (R := ↑Γ(Spec (CommRingCat.of k), ⊤))
+          (A := ↑Γ(F.E, U))).toRingHom f := rfl
+    rw [h1]
+    have h2 := congrArg (fun (m : _ ⟶ R) => m.hom f) hidR
+    simpa using h2
+  rw [hpT1, hpT2]
 
 end Box
 
