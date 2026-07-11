@@ -7,6 +7,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.FiniteType
 import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
 import Mathlib.FieldTheory.IsAlgClosed.Basic
 import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
+import Mathlib.AlgebraicGeometry.PullbackCarrier
 
 /-!
 # Point counting on Jacobson schemes (BB-QF bridge, ForMathlib)
@@ -88,5 +89,49 @@ theorem Scheme.exists_section_through_closedPoint {k : Type u} [Field k] [IsAlgC
         ((Spec.map (CommRingCat.ofHom (e.symm : F.residueField z →+* k))).base pt) ∈
         ({z} : Set F) := h2 ▸ Set.mem_range_self _
     exact h3
+
+/-- A scheme locally of finite type over an algebraically closed field with finitely many
+sections has finite underlying space. -/
+theorem Scheme.finite_of_finite_sections {k : Type u} [Field k] [IsAlgClosed k]
+    {F : Scheme.{u}} (f : F ⟶ Spec (CommRingCat.of k)) [LocallyOfFiniteType f]
+    (h : Finite {g : Spec (CommRingCat.of k) ⟶ F // g ≫ f = 𝟙 _}) : Finite F := by
+  haveI : JacobsonSpace F := LocallyOfFiniteType.jacobsonSpace f
+  refine finite_of_jacobsonSpace_of_finite_closedPoints ?_
+  rw [← Set.finite_coe_iff]
+  -- inject the closed points into the sections
+  have hsec : ∀ z : closedPoints F,
+      ∃ g : {g : Spec (CommRingCat.of k) ⟶ F // g ≫ f = 𝟙 _}, z.1 ∈ Set.range g.1.base :=
+    fun z => by
+      obtain ⟨g, hgf, hgz⟩ := Scheme.exists_section_through_closedPoint f z.2
+      exact ⟨⟨g, hgf⟩, hgz⟩
+  choose c hc using hsec
+  haveI : Finite {g : Spec (CommRingCat.of k) ⟶ F // g ≫ f = 𝟙 _} := h
+  refine Finite.of_injective c (fun z₁ z₂ hz => ?_)
+  obtain ⟨p₁, hp₁⟩ := hc z₁
+  obtain ⟨p₂, hp₂⟩ := hc z₂
+  have hpp : p₁ = p₂ := Subsingleton.elim _ _
+  refine Subtype.ext ?_
+  rw [← hp₁, ← hp₂, hz, hpp]
+
+/-- Sections of the second projection of a pullback along a point are morphisms into the
+first factor with prescribed composite. -/
+noncomputable def Scheme.pullbackSndSectionEquiv {X Z W : Scheme.{u}}
+    (q : X ⟶ Z) (w : W ⟶ Z) :
+    {g : W ⟶ Limits.pullback q w // g ≫ Limits.pullback.snd q w = 𝟙 _} ≃
+    {h : W ⟶ X // h ≫ q = w} where
+  toFun g := ⟨g.1 ≫ Limits.pullback.fst q w, by
+    rw [Category.assoc, Limits.pullback.condition, ← Category.assoc, g.2,
+      Category.id_comp]⟩
+  invFun h := ⟨Limits.pullback.lift h.1 (𝟙 _) (by rw [h.2, Category.id_comp]), by
+    rw [Limits.pullback.lift_snd]⟩
+  left_inv g := by
+    refine Subtype.ext ?_
+    refine Limits.pullback.hom_ext ?_ ?_
+    · rw [Limits.pullback.lift_fst]
+    · rw [Limits.pullback.lift_snd, g.2]
+  right_inv h := by
+    refine Subtype.ext ?_
+    show Limits.pullback.lift _ _ _ ≫ Limits.pullback.fst q w = h.1
+    rw [Limits.pullback.lift_fst]
 
 end ModularCurves
