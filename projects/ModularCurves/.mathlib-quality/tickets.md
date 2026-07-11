@@ -16061,3 +16061,34 @@ forward well-definedness delivered — the two hardest pieces.*
   (`exists_isChartAt_localizationAway`), `OpenCover.glueMorphisms` with compat = chart-
   independence + `GlueData.glue_condition`, spec via `ι_glueMorphisms`, then the round-trip
   identities. Scheme-representability; not gating [L15]. Continuing.
+
+### v10.99f (2026-07-10, fable-FP): ★★★★ [GR-G-ASM] — every forward-map INGREDIENT delivered; only the glueMorphisms pullback-assembly (L15-scale) remains
+
+*Commits through 76460b578. `ForMathlib/GrassmannianGlueData.lean`; all new decls axiom-clean
+`[propext, Classical.choice, Quot.sound]`, sorry-free.*
+
+- **DELIVERED (the full algebraic + well-definedness substrate of the T-point forward map):**
+  1. **R-coefficient SPEC** `evalAwayAtR_comp_ringHom` (recipe step 1) — chart evaluations
+     intertwine via the R-coefficient glueData transition `ringHom`; base-change factorization
+     `evalAtR = evalAt ∘ map` + column/matrix/det `map`-naturality transfer the A-SPEC down.
+  2. **chart-independence** `pointOfChartMember_eq` — a member charted at ι AND ι' gives the
+     same A-point through either chart (glue_condition + `pointOverlap_comp_overlapTransition`,
+     the scheme shadow of the SPEC).
+  3. **covering foundation** `exists_spanning_chart_witnesses` — the chart-witnesses `f_p` span
+     ⊤ (⟹ `D(f_p)` cover `Spec A`), each localized member charted in the exact `Pi.single`-tuple
+     form `pointOfChartMember` consumes (via `exists_isChartAt_congr_localizationAway`).
+  4. **naturality** `pointOfChartMember_naturality` — the A-point transports under `g:A→ₐB` to
+     the B-point of `normMap g N` (via `chartMatrix_normMap` + `comp_eval₂Hom`).
+
+- **REMAINING = the `OpenCover.glueMorphisms` assembly (L15-scale pullback plumbing, NOT
+  gating [L15]'s start):** instantiate `affineOpenCoverOfSpanRangeEqTop` on (3)'s spanning
+  family; the forward map `pointOfMember N := (that cover).glueMorphisms (fun p => point
+  OfChartMember (ι p) (member p) (hchart p)) hcompat`. The compat `hcompat` on the pullback
+  `Spec(Loc f_p) ×_{Spec A} Spec(Loc f_q) = Spec(Loc f_p ⊗_A Loc f_q)`: both projections
+  transport via **naturality (4)** to the double-localization `D`, giving `normMap incl_L
+  (member p) = N.map→D = normMap incl_R (member q)` (member-localization functoriality), both
+  charted at ι_p and ι_q, so **chart-independence (2)** over `D` closes it — modulo the
+  `pullbackSpecIso` identification of fst/snd with `Spec.map (includeLeft/Right)` (same
+  machinery as the proven glueData cocycle). Then the INVERSE + round-trips for the full
+  T-point ≃. **All mathematical content is discharged; the remainder is scheme-pullback
+  bookkeeping = the [NISOG-GRASS] L15 representability proper.**
