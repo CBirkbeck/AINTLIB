@@ -710,7 +710,7 @@ noncomputable def grassmannianScheme (R : Type u) [CommRing R] (k n : ℕ) : Sch
 
 section Points
 
-open MvPolynomial
+open MvPolynomial Matrix
 
 variable {R} {A : Type u} [CommRing A] [Algebra R A] {n : ℕ}
 
@@ -832,6 +832,82 @@ theorem evalAtR_matrix (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N)
   funext i₁ i₂
   rw [Matrix.map_apply, Transition.matrix_apply, evalAtR_column]
   exact congrFun (congrFun (evalAt_matrix ι ι' N h h') i₁) i₂
+
+/-- **[GR-G-ASM], the R-coefficient SPEC.** Extending the `R`-coefficient ι-evaluation over
+the overlap and precomposing with the *generic* (`R`-coefficient) transition map — the
+actual `glueData` transition datum — recovers the `R`-coefficient ι'-evaluation. The
+`R`-coefficient counterpart of `evalAwayAt_comp_ringHom`; the algebraic heart of chart-
+independence of `pointOfChartMember`. Proof mirrors the `A`-coefficient SPEC with the
+base-changed infrastructure (`evalAwayAtR_algebraMap`, `evalAtR_matrix`). -/
+theorem evalAwayAtR_comp_ringHom (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N)
+    (hι' : IsChartAt (fun i => Pi.single (ι' i) (1 : A)) N) :
+    (evalAwayAtR ι ι' N h hι').comp (Transition.ringHom (R := R) ι ι')
+      = evalAtR (R := R) ι' N hι' := by
+  classical
+  have h'ι : Function.Bijective
+      ⇑(N.toSubmodule.mkQ ∘ₗ coordMap (fun i => Pi.single (ι i) (1 : A))) := h
+  have h'ι' : Function.Bijective
+      ⇑(N.toSubmodule.mkQ ∘ₗ coordMap (fun i => Pi.single (ι' i) (1 : A))) := hι'
+  set T := transitionMatrixAt ι ι' N h with hT
+  have hdetT : IsUnit T.det := (isChartAt_iff_isUnit_det ι ι' N h).mp hι'
+  -- the extended R-evaluation carries the localized R-transition matrix to `T`
+  have hMap : (Transition.matrixAway (R := R) ι ι').map ⇑(evalAwayAtR ι ι' N h hι') = T := by
+    funext i₁ i₂
+    simp only [Transition.matrixAway, Matrix.map_apply]
+    rw [evalAwayAtR_algebraMap]
+    exact congrFun (congrFun (evalAtR_matrix ι ι' N h h'ι) i₁) i₂
+  apply MvPolynomial.ringHom_ext
+  · intro a
+    rw [RingHom.comp_apply, Transition.ringHom, eval₂Hom_C, RingHom.comp_apply,
+      evalAwayAtR_algebraMap]
+    rw [evalAtR, eval₂Hom_C, evalAtR, eval₂Hom_C]
+  · intro p
+    obtain ⟨⟨j', hj'⟩, i'⟩ := p
+    rw [RingHom.comp_apply, Transition.ringHom, eval₂Hom_X']
+    set u : Fin k → Localization.Away (Transition.det (R := R) ι ι') :=
+      (Transition.matrixAway (R := R) ι ι')⁻¹ *ᵥ
+        (fun i₁ => algebraMap (ChartRing R ι) _ (Transition.column ι j' i₁)) with hu
+    -- the evaluated solution solves `T *ᵥ ? = (ι-retraction of the j'-column)`
+    have hTu : T *ᵥ (⇑(evalAwayAtR ι ι' N h hι') ∘ u)
+        = fun i₁ => evalAt ι N h (Transition.column (R := A) ι j' i₁) := by
+      funext i₁
+      rw [← hMap, ← RingHom.map_mulVec, hu]
+      rw [show (Transition.matrixAway (R := R) ι ι') *ᵥ
+          ((Transition.matrixAway (R := R) ι ι')⁻¹ *ᵥ
+            (fun i₁ => algebraMap (ChartRing R ι) _ (Transition.column ι j' i₁)))
+          = fun i₁ => algebraMap (ChartRing R ι) _ (Transition.column ι j' i₁) by
+        rw [Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _
+          (Transition.isUnit_det_matrixAway ι ι'), Matrix.one_mulVec]]
+      show evalAwayAtR ι ι' N h hι'
+          (algebraMap (ChartRing R ι) _ (Transition.column ι j' i₁))
+        = evalAt ι N h (Transition.column (R := A) ι j' i₁)
+      rw [evalAwayAtR_algebraMap, evalAtR_column]
+    -- the ι'-chart matrix solves the same equation
+    have hTw : T *ᵥ chartMatrix n ι' N hι' ⟨j', hj'⟩
+        = fun i₁ => evalAt ι N h (Transition.column (R := A) ι j' i₁) := by
+      rw [hT, transitionMatrixAt_mulVec ι ι' N h h'ι]
+      have hmk : N.toSubmodule.mkQ
+          (coordMap (fun i => Pi.single (ι' i) (1 : A))
+            (chartMatrix n ι' N hι' ⟨j', hj'⟩))
+          = N.toSubmodule.mkQ (Pi.single j' 1) := by
+        show (N.toSubmodule.mkQ ∘ₗ coordMap (fun i => Pi.single (ι' i) (1 : A)))
+          (chartMatrix n ι' N hι' ⟨j', hj'⟩) = _
+        rw [show chartMatrix n ι' N hι' ⟨j', hj'⟩
+            = (LinearEquiv.ofBijective _ h'ι').symm
+              (N.toSubmodule.mkQ (Pi.single j' 1)) from rfl]
+        exact (LinearEquiv.ofBijective _ h'ι').apply_symm_apply _
+      rw [hmk]
+      exact (evalAt_column ι N h h'ι j').symm
+    -- cancel the invertible matrix
+    have hcancel : ⇑(evalAwayAtR ι ι' N h hι') ∘ u
+        = chartMatrix n ι' N hι' ⟨j', hj'⟩ := by
+      have hEq := hTu.trans hTw.symm
+      have := congrArg (fun v => T⁻¹ *ᵥ v) hEq
+      simpa [Matrix.mulVec_mulVec, Matrix.nonsing_inv_mul _ hdetT,
+        Matrix.one_mulVec] using this
+    have hfin := congrFun hcancel i'
+    rw [Function.comp_apply] at hfin
+    rw [hfin, evalAtR, eval₂Hom_X']
 
 end Points
 

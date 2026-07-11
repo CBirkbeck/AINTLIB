@@ -149,8 +149,9 @@ noncomputable def evalAwayAt (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) 
     (isUnit_evalAt_det ι ι' N h hι')
 
 /-- The pointwise transition matrix acting on coordinates, expressed through the chart
-isomorphism: `T *ᵥ w` is the ι-retraction of the ι'-combination of `w`. -/
-private lemma transitionMatrixAt_mulVec
+isomorphism: `T *ᵥ w` is the ι-retraction of the ι'-combination of `w` (public: consumed
+by the R-coefficient SPEC in `GrassmannianGlueData`). -/
+lemma transitionMatrixAt_mulVec
     (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N)
     (h' : Function.Bijective
       ⇑(N.toSubmodule.mkQ ∘ₗ coordMap (fun i => Pi.single (ι i) (1 : A))))
