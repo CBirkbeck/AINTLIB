@@ -16092,3 +16092,31 @@ forward well-definedness delivered — the two hardest pieces.*
   machinery as the proven glueData cocycle). Then the INVERSE + round-trips for the full
   T-point ≃. **All mathematical content is discharged; the remainder is scheme-pullback
   bookkeeping = the [NISOG-GRASS] L15 representability proper.**
+
+### v10.99g (2026-07-10, fable-FP): ★★★★★ [GR-G-ASM] THE T-POINT FORWARD MAP IS PROVEN — pointOfMember, axiom-clean
+
+*Commit e50149e2b. `ForMathlib/GrassmannianGlueData.lean`; `pointOfMember` sorry-free,
+`[propext, Classical.choice, Quot.sound]`. The complete FORWARD direction of the
+[NISOG-GRASS] representability.*
+
+- **`pointOfMember (N : G(k, A⊗Rⁿ; A)) : Spec A ⟶ grassmannianScheme R k n`** — every member
+  gives an `A`-point of the Grassmannian scheme, glued from the per-chart points
+  `pointOfChartMember` over the `D(f_p)` covering (`exists_spanning_chart_witnesses`) via
+  `Scheme.OpenCover.glueMorphisms`. The `glueMorphisms` overlap compatibility is discharged in
+  full: `pullbackSpecIso` identifies the pullback `Spec(Loc f_p) ×_{Spec A} Spec(Loc f_q)` with
+  `Spec(Loc f_p ⊗_A Loc f_q)` and its fst/snd with the localization inclusions; the two chart
+  points transport there by `pointOfChartMember_naturality`; `normMap_covering_member_eq` shows
+  the two localized members coincide (the `includeLeft/Right ∘ structure = A→D` tensor identity);
+  and `pointOfChartMember_eq` (chart-independence) closes it. `IsChartAt` being a `Prop` makes the
+  chart witnesses proof-irrelevant (the final `convert`/`congr` step).
+- **Elaboration notes** (banked): extracting the covering data in a `noncomputable def` needs
+  `.choose`/`.choose_spec` (NOT `obtain` — Prop-∃ can't eliminate into a data goal); the
+  `pullbackSpecIso_inv_fst/snd` spellings (`includeLeftRingHom` vs `includeRight.toRingHom` coe)
+  are bridged by `erw` with explicit `iL/iR := includeLeft/Right.restrictScalars R`; the
+  member-rewrite is blocked by the dependent chart-witness, so route through `convert` + proof-
+  irrelevance instead of `rw`.
+- **REMAINING = the INVERSE + round-trips** (the other half of the `≃`): from an arbitrary
+  `A`-point `x : Spec A ⟶ grassmannianScheme` recover a member (pull the universal chart member
+  back along `x` on each chart-preimage, glue by descent), then `pointOfMember`/inverse are
+  mutually inverse. This completes [NISOG-GRASS] L15 representability; the forward map (the
+  harder, more novel direction) is now DONE.

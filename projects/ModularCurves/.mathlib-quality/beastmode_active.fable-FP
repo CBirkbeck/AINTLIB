@@ -1,1 +1,1 @@
-FOCUS: [GR-G-ASM] inverse direction — prime-indexed OpenCover of Spec A from covering f_p (exists_isChartAt_localizationAway), OpenCover.glueMorphisms with compat=chart-independence, then round-trips. R-SPEC + chart-independence DONE. [02KL-CORE] parked (KL-3=T-DEV/T-FLAT lane B3).
+FOCUS: [GR-G-ASM] FORWARD MAP pointOfMember DONE (axiom-clean). Remaining: INVERSE (A-point of grassmannianScheme -> member, via pullback along charts) + round-trip identities = the other half of the NISOG representability equivalence.
