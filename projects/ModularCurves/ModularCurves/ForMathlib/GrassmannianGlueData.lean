@@ -1111,6 +1111,22 @@ noncomputable def pointOfMember (N : G(k, A ⊗[R] (Fin n → R); A)) :
     (hM ▸ isChartAt_normMap n (ιc q) iR _ (hchart q))).trans ?_
   congr 1
 
+/-- **[GR-G-ASM], round-trip seed.** The point of the *universal* chart member is the chart
+inclusion itself: `evalAtR` of the universal member is the identity (its chart matrix is the
+generic variable matrix), so `Spec.map` of it is `𝟙`. This is the fixed point that makes
+`pointOfMember`/inverse a genuine round trip on each chart. -/
+theorem pointOfChartMember_universalChartMember (ι : Fin k ↪ Fin n) :
+    pointOfChartMember (R := R) ι (universalChartMember R n ι).1
+        (universalChartMember R n ι).2
+      = (glueData R k n).ι (ULift.up ι) := by
+  have hid : evalAtR (R := R) ι (universalChartMember R n ι).1
+      (universalChartMember R n ι).2 = RingHom.id (ChartRing R ι) := by
+    refine MvPolynomial.ringHom_ext (fun a => ?_) (fun p => ?_)
+    · rw [evalAtR, eval₂Hom_C, RingHom.id_apply]; rfl
+    · rw [evalAtR, eval₂Hom_X', RingHom.id_apply,
+        chartMatrix_universalChartMember (R := R) n ι]
+  rw [pointOfChartMember, hid, CommRingCat.ofHom_id, Spec.map_id, Category.id_comp]
+
 end Points
 
 end Module.Grassmannian
