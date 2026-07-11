@@ -64,6 +64,57 @@ noncomputable def evalSection (M : _root_.SheafOfModules R) (U : C)
   (overUnitSectionEquiv R U).symm
     (_root_.SheafOfModules.sectionsMap φ (overSection R M U m))
 
+@[simp]
+theorem evalSection_eq (M : _root_.SheafOfModules R) (U : C)
+    (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
+    (m : M.val.obj (op U)) :
+    evalSection R M U φ m = φ.val.app (op (Over.mk (𝟙 U))) (M.val.map (𝟙 U).op m) :=
+  rfl
+
+theorem evalSection_add_right (M : _root_.SheafOfModules R) (U : C)
+    (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
+    (m m' : M.val.obj (op U)) :
+    evalSection R M U φ (m + m') = evalSection R M U φ m + evalSection R M U φ m' := by
+  simp only [evalSection_eq, map_add]
+  exact map_add _ _ _
+
+theorem evalSection_smul_right (M : _root_.SheafOfModules R) (U : C)
+    (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
+    (r : R.obj.obj (op U)) (m : M.val.obj (op U)) :
+    evalSection R M U φ (r • m) = r • evalSection R M U φ m := by
+  simp only [evalSection_eq]
+  rw [PresheafOfModules.map_smul]
+  erw [(φ.val.app (op (Over.mk (𝟙 U)))).hom.map_smul]
+  congr 1
+  rw [op_id, R.obj.map_id]
+  rfl
+
+theorem evalSection_add_left (M : _root_.SheafOfModules R) (U : C)
+    (φ ψ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
+    (m : M.val.obj (op U)) :
+    evalSection R M U (φ + ψ) m = evalSection R M U φ m + evalSection R M U ψ m := by
+  simp only [evalSection_eq]
+  rfl
+
+theorem evalSection_smul_left (M : _root_.SheafOfModules R) (U : C)
+    [∀ V, IsMulCommutative (R.obj.obj V)]
+    (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
+    (r : R.obj.obj (op U)) (m : M.val.obj (op U)) :
+    evalSection R M U (letI := dualSectionsModule R M U; r • φ) m =
+      r • evalSection R M U φ m := by
+  show evalSection R M U (φ ≫ overUnitScalarEnd R U r) m = _
+  simp only [evalSection_eq]
+  show (overUnitScalarEnd R U r).val.app (op (Over.mk (𝟙 U)))
+    (φ.val.app (op (Over.mk (𝟙 U))) (M.val.map (𝟙 U).op m)) = _
+  rw [overUnitScalarEnd_app_apply]
+  simp only [Over.mk_hom]
+  have hr : (ConcreteCategory.hom (R.obj.map (𝟙 U).op)) r = r := by
+    rw [op_id, R.obj.map_id]
+    rfl
+  rw [smul_eq_mul]
+  erw [hr]
+  exact (mul_comm' r _).symm
+
 end ModularCurves.SheafOfModules
 
 namespace AlgebraicGeometry.Scheme.Modules
