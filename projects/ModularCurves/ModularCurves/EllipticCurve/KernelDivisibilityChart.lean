@@ -564,6 +564,109 @@ private theorem pointSharp_specMap_comp {R' R'' : CommRingCat.{u}} (g : R'' ⟶ 
   rfl
 
 
+/-! ### The separating section `y₀` and the localized evaluation -/
+
+/-- The chart-valued composite of the box: `Spec (C ⊗ C) → E`. -/
+private noncomputable def boxMul (hU : IsAffineOpen U) :
+    Spec (.of (↑Γ(F.E, U) ⊗[↑Γ(Spec B, ⊤)] ↑Γ(F.E, U))) ⟶ F.E :=
+  (boxIso hU).inv ≫ boxι ≫ (μ[F.asOver]).left
+
+/-- **The separating section**: a tensor `y₀` with both axis values `1` whose basic open
+maps into the chart under the box multiplication. Comaximality of the vanishing ideal of
+the non-chart locus with the two axis kernels (the axis laws land the axis primes inside
+the chart). -/
+private theorem exists_sep (hU : IsAffineOpen U)
+    (heU : ∀ x : ↑(Spec B), (F.zero).base x ∈ U)
+    (htaut : ∀ x : ↑(Spec Γ(F.E, U)), (hU.fromSpec).base x ∈ U)
+    (hz : ∀ x : ↑(Spec Γ(F.E, U)),
+      ((0 : F.Point (hU.fromSpec ≫ F.π)) : Spec Γ(F.E, U) ⟶ F.E).base x ∈ U) :
+    ∃ y₀ : ↑Γ(F.E, U) ⊗[↑Γ(Spec B, ⊤)] ↑Γ(F.E, U),
+      axisL (chartAug heU) y₀ = 1 ∧ axisR (chartAug heU) y₀ = 1 ∧
+      ∀ x : ↑(Spec (.of (↑Γ(F.E, U) ⊗[↑Γ(Spec B, ⊤)] ↑Γ(F.E, U)))),
+        y₀ ∉ x.asIdeal → (boxMul hU).base x ∈ U := by
+  classical
+  -- the non-chart locus is closed; take a vanishing ideal
+  have hopen : IsOpen ((boxMul hU).base ⁻¹' (U : Set F.E)) :=
+    U.2.preimage (boxMul hU).continuous
+  obtain ⟨I₀, hI₀⟩ := (PrimeSpectrum.isClosed_iff_zeroLocus_ideal _).mp
+    hopen.isClosed_compl
+  -- the two axis kernels
+  set JL := RingHom.ker (axisL (chartAug heU)).toRingHom with hJL
+  set JR := RingHom.ker (axisR (chartAug heU)).toRingHom with hJR
+  -- axis primes are chart primes
+  have haxL : ∀ p, JL ≤ p.asIdeal → (boxMul hU).base p ∈ U := by
+    intro p hp
+    have hsurj : Function.Surjective (axisL (chartAug heU)).toRingHom := fun c =>
+      ⟨1 ⊗ₜ c, by simp⟩
+    have hrange : p ∈ Set.range (PrimeSpectrum.comap (axisL (chartAug heU)).toRingHom) := by
+      rw [range_comap_of_surjective _ _ hsurj]
+      exact (PrimeSpectrum.mem_zeroLocus _ _).mpr hp
+    obtain ⟨p', hp'⟩ := hrange
+    have h1 : (Spec.map (CommRingCat.ofHom (axisL (chartAug heU)).toRingHom) ≫
+        boxMul hU).base p' = (hU.fromSpec).base p' :=
+      congrArg (fun m : Spec Γ(F.E, U) ⟶ F.E => m.base p')
+        (show Spec.map (CommRingCat.ofHom (axisL (chartAug heU)).toRingHom) ≫
+          boxMul hU = hU.fromSpec from axisL_spec_law hU heU htaut hz)
+    rw [Scheme.Hom.comp_apply] at h1
+    have hbase : (Spec.map (CommRingCat.ofHom (axisL (chartAug heU)).toRingHom)).base p' =
+        p := hp'
+    rw [hbase] at h1
+    rw [h1]
+    have hr := IsAffineOpen.range_fromSpec hU
+    have : (hU.fromSpec).base p' ∈ Set.range (hU.fromSpec).base := Set.mem_range_self p'
+    rwa [hr] at this
+  have haxR : ∀ p, JR ≤ p.asIdeal → (boxMul hU).base p ∈ U := by
+    intro p hp
+    have hsurj : Function.Surjective (axisR (chartAug heU)).toRingHom := fun c =>
+      ⟨c ⊗ₜ 1, by simp⟩
+    have hrange : p ∈ Set.range (PrimeSpectrum.comap (axisR (chartAug heU)).toRingHom) := by
+      rw [range_comap_of_surjective _ _ hsurj]
+      exact (PrimeSpectrum.mem_zeroLocus _ _).mpr hp
+    obtain ⟨p', hp'⟩ := hrange
+    have h1 : (Spec.map (CommRingCat.ofHom (axisR (chartAug heU)).toRingHom) ≫
+        boxMul hU).base p' = (hU.fromSpec).base p' :=
+      congrArg (fun m : Spec Γ(F.E, U) ⟶ F.E => m.base p')
+        (show Spec.map (CommRingCat.ofHom (axisR (chartAug heU)).toRingHom) ≫
+          boxMul hU = hU.fromSpec from axisR_spec_law hU heU htaut hz)
+    rw [Scheme.Hom.comp_apply] at h1
+    have hbase : (Spec.map (CommRingCat.ofHom (axisR (chartAug heU)).toRingHom)).base p' =
+        p := hp'
+    rw [hbase] at h1
+    rw [h1]
+    have hr := IsAffineOpen.range_fromSpec hU
+    have : (hU.fromSpec).base p' ∈ Set.range (hU.fromSpec).base := Set.mem_range_self p'
+    rwa [hr] at this
+  -- comaximality
+  have htop : I₀ ⊔ JL ⊓ JR = ⊤ := by
+    rw [← PrimeSpectrum.zeroLocus_empty_iff_eq_top]
+    rw [Set.eq_empty_iff_forall_notMem]
+    intro p hp
+    have hle : I₀ ⊔ JL ⊓ JR ≤ p.asIdeal := (PrimeSpectrum.mem_zeroLocus _ _).mp hp
+    have hp₀ : I₀ ≤ p.asIdeal := le_trans le_sup_left hle
+    have hpLR : JL ⊓ JR ≤ p.asIdeal := le_trans le_sup_right hle
+    have hpZ : p ∈ ((boxMul hU).base ⁻¹' (U : Set F.E))ᶜ := by
+      rw [hI₀]
+      exact (PrimeSpectrum.mem_zeroLocus _ _).mpr hp₀
+    rcases (p.isPrime.inf_le).mp hpLR with hL | hR
+    · exact hpZ (haxL p hL)
+    · exact hpZ (haxR p hR)
+  -- extract the separating element
+  have hmem : (1 : ↑Γ(F.E, U) ⊗[↑Γ(Spec B, ⊤)] ↑Γ(F.E, U)) ∈ I₀ ⊔ JL ⊓ JR := by
+    rw [htop]; trivial
+  obtain ⟨z, hz', j, hj, hzj⟩ := Submodule.mem_sup.mp hmem
+  have h1 : z = 1 - j := by rw [← hzj]; ring
+  refine ⟨z, ?_, ?_, ?_⟩
+  · have hjL : (axisL (chartAug heU)) j = 0 := RingHom.mem_ker.mp hj.1
+    rw [h1, map_sub, map_one, hjL, sub_zero]
+  · have hjR : (axisR (chartAug heU)) j = 0 := RingHom.mem_ker.mp hj.2
+    rw [h1, map_sub, map_one, hjR, sub_zero]
+  · intro x hx
+    by_contra hnot
+    have hxZ : x ∈ PrimeSpectrum.zeroLocus (I₀ : Set _) := by
+      rw [← hI₀]
+      exact hnot
+    exact hx ((PrimeSpectrum.mem_zeroLocus _ _).mp hxZ hz')
+
 end Box
 
 end AugmentationScheme
