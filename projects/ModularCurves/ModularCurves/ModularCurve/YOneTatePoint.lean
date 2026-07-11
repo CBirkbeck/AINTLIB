@@ -625,6 +625,96 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
         ((tateUniversal R).baseChange t).IsNaiveGammaOne N
           (EllipticCurve.Point.asSection (tateUniversal R) t
             (EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R))) := by
+    -- ledger steps 1–2: the algebra form of `t₀` and an arbitrary coefficient lift
+    letI : Algebra ↑R A := φ.hom.toAlgebra
+    letI : Algebra ↑R (A ⧸ I) :=
+      ((φ ≫ CommRingCat.ofHom (Ideal.Quotient.mk I))).hom.toAlgebra
+    have hover₀ : t₀ ≫ tateStructMap R =
+        Spec.map (φ ≫ CommRingCat.ofHom (Ideal.Quotient.mk I)) := by
+      rw [ht₀, Category.assoc]
+      exact hf₀
+    set ψ₀r := Spec.preimage t₀ with hψ₀r
+    have hspec₀ : Spec.map ψ₀r = t₀ := Spec.map_preimage t₀
+    have hcomp₀ : CommRingCat.ofHom ((algebraMap (MvPolynomial (Fin 2) R)
+        (tateRingOver R)).comp MvPolynomial.C) ≫ ψ₀r =
+        φ ≫ CommRingCat.ofHom (Ideal.Quotient.mk I) := by
+      refine Spec.map_injective ?_
+      rw [Spec.map_comp, hspec₀]
+      exact hover₀
+    have hcomm₀ : ∀ r : ↑R, ψ₀r.hom (algebraMap ↑R (tateRingOver R) r) =
+        algebraMap ↑R (A ⧸ I) r := fun r =>
+      congrArg (fun (m : R ⟶ CommRingCat.of (A ⧸ I)) => m.hom r) hcomp₀
+    set ψ₀ : tateRingOver R →ₐ[↑R] (A ⧸ I) :=
+      { toRingHom := ψ₀r.hom, commutes' := hcomm₀ } with hψ₀
+    -- the classified coefficients and their lift
+    set α₀ := ψ₀ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R)
+      (MvPolynomial.X 0)) with hα₀
+    set β₀ := ψ₀ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R)
+      (MvPolynomial.X 1)) with hβ₀
+    obtain ⟨α, hα⟩ := Ideal.Quotient.mk_surjective (I := I) α₀
+    obtain ⟨β, hβ⟩ := Ideal.Quotient.mk_surjective (I := I) β₀
+    -- Δ of the lift is a unit: its image mod the nilpotent `I` is `ψ₀` of the atlas unit
+    have hΔ₀unit : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom
+        (algebraMap ↑R (A ⧸ I)) (fun i : Fin 2 => if i = 0 then α₀ else β₀))).Δ) := by
+      have hev : (MvPolynomial.eval₂Hom (algebraMap ↑R (A ⧸ I))
+          (fun i : Fin 2 => if i = 0 then α₀ else β₀)) =
+          (ψ₀ : tateRingOver R →+* (A ⧸ I)).comp
+            (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R)) := by
+        apply MvPolynomial.ringHom_ext
+        · intro r
+          simp only [MvPolynomial.eval₂Hom_C, RingHom.comp_apply]
+          exact (ψ₀.commutes r).symm
+        · intro i
+          fin_cases i <;> simp [hα₀, hβ₀]
+      rw [WeierstrassCurve.map_Δ, hev]
+      have h1 : IsUnit ((algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R))
+          (tateCurveOver R).Δ) := IsLocalization.Away.algebraMap_isUnit (tateCurveOver R).Δ
+      have h2 := h1.map (ψ₀ : tateRingOver R →+* (A ⧸ I))
+      simpa [RingHom.comp_apply] using h2
+    have hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom
+        (algebraMap ↑R A) (fun i : Fin 2 => if i = 0 then α else β))).Δ) := by
+      rw [← IsNilpotent.isUnit_quotient_mk_iff (I := I) hI]
+      have hmkev : (Ideal.Quotient.mk I).comp (MvPolynomial.eval₂Hom (algebraMap ↑R A)
+          (fun i : Fin 2 => if i = 0 then α else β)) =
+          MvPolynomial.eval₂Hom (algebraMap ↑R (A ⧸ I))
+            (fun i : Fin 2 => if i = 0 then α₀ else β₀) := by
+        apply MvPolynomial.ringHom_ext
+        · intro r
+          simp only [RingHom.comp_apply, MvPolynomial.eval₂Hom_C]
+          rfl
+        · intro i
+          fin_cases i <;> simp [hα, hβ]
+      have h3 : (Ideal.Quotient.mk I) (((tateCurveOver R).map (MvPolynomial.eval₂Hom
+          (algebraMap ↑R A) (fun i : Fin 2 => if i = 0 then α else β))).Δ) =
+          ((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap ↑R (A ⧸ I))
+            (fun i : Fin 2 => if i = 0 then α₀ else β₀))).Δ := by
+        rw [WeierstrassCurve.map_Δ, WeierstrassCurve.map_Δ, ← hmkev]
+        rfl
+      rw [h3]
+      exact hΔ₀unit
+    -- the RAW lifted classifying map (its (0,0) need not be N-torsion; steps 3–4 correct it)
+    set ψ := tateRingOverAlgLift R α β hΔ with hψ
+    /- REMAINING (ledger steps 3–4, producing the FINAL witness): lift the N-torsion point
+    `P₀ := pull t₀ (tatePoint R)` through the étale torsion of the RAW curve
+    `modelEllipticCurve (E(α,β))` (nilpotent lifting against `I`), read its chart
+    coordinates `(x, y) : A²` (`chartSolutionsEquiv`/`zChartEval`), T-E1-renormalise
+    (`exists_unique_variableChange_isTateNormal` — `NowhereOrderLEThree` holds fibrewise
+    since `Spec A` and `Spec (A⧸I)` share fibres), and witness with
+    `tateBaseSpecMap R ψ'` of the CORRECTED coefficients. The restriction leg then follows
+    the PROVEN raw-leg template above (tateBaseSpecMap + Spec.map_comp + hom_ext +
+    tateRingOver_algHom_ext at the corrected coordinates, which restrict to `(α₀, β₀)` by
+    T-E1-uniqueness over `A⧸I` — the classified `P₀` is ALREADY `(0,0)`-marked); the
+    over-φ leg is `tateBaseSpecMap_tateStructMap` verbatim; the structure leg is
+    `killedLocus_spec` + the fibrewise persistence + `factors_yOne_iff`-shape. Proven
+    template for the two plumbing legs (raw form, compiles green — transplant with ψ'):
+      · rw [tateBaseSpecMap, ← Spec.map_comp, ← hspec₀]
+        refine congrArg Spec.map (CommRingCat.hom_ext ?_)
+        <h0/h1 coordinate lemmas via tateRingOverAlgLift_X_zero/_one>
+        <hmkψ : (Ideal.Quotient.mkₐ ↑R I).comp ψ = ψ₀ via tateRingOver_algHom_ext +
+          hα.trans hα₀ / hβ.trans hβ₀>
+        exact congrArg AlgHom.toRingHom hmkψ
+      · exact (tateBaseSpecMap_tateStructMap R ψ).trans
+          (congrArg Spec.map (CommRingCat.hom_ext rfl)) -/
     sorry
   obtain ⟨f, hf⟩ := (factors_yOne_iff R N hN hinv t).mpr hstruct
   refine ⟨f, ?_, ?_⟩
