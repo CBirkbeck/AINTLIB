@@ -351,6 +351,49 @@ theorem ker_ideal_fg_of_section {C Y : Scheme.{u}} (π : C ⟶ Y)
   rw [hka]
   exact hker
 
+/-- **([T-SG3-LFP-4b], general divisors)** The ideal sheaf of a relative effective
+Cartier divisor is finitely generated on every affine lying over an affine of the base:
+the divisor's structure fields make its total space finitely presented over the base, so
+the surjection from the (finitely presented) curve sections has finitely generated
+kernel. This is the general-`D` form feeding the cyclicity capstone. -/
+theorem releff_ideal_fg {C S : Scheme.{u}} {π : C ⟶ S} [LocallyOfFinitePresentation π]
+    (D : RelEffCartierDiv π) (W : S.affineOpens) (U : C.affineOpens)
+    (hU : U.1 ≤ π ⁻¹ᵁ W.1) :
+    ((D.ideal).ideal U).FG := by
+  haveI := D.lfp
+  have hle : D.ideal.subschemeι ⁻¹ᵁ U.1 ≤ (D.ideal.subschemeι ≫ π) ⁻¹ᵁ W.1 := fun x hx =>
+    hU hx
+  -- the tower: (composite-pullback) = (π-pullback) ≫ (inclusion piece)
+  have htower : π.appLE W.1 U.1 hU ≫ D.ideal.subschemeι.app U.1 =
+      (D.ideal.subschemeι ≫ π).appLE W.1 (D.ideal.subschemeι ⁻¹ᵁ U.1) hle := by
+    rw [Scheme.Hom.app_eq_appLE, Scheme.Hom.appLE_comp_appLE]
+  letI : Algebra Γ(S, W.1) Γ(C, U.1) := ((π.appLE W.1 U.1 hU).hom).toAlgebra
+  letI : Algebra Γ(S, W.1) Γ(↑D.ideal.subscheme, D.ideal.subschemeι ⁻¹ᵁ U.1) :=
+    (((D.ideal.subschemeι ≫ π).appLE W.1 (D.ideal.subschemeι ⁻¹ᵁ U.1) hle).hom).toAlgebra
+  haveI : Algebra.FinitePresentation Γ(S, W.1) Γ(C, U.1) :=
+    HasRingHomProperty.appLE @LocallyOfFinitePresentation π ‹_› W U hU
+  haveI : Algebra.FinitePresentation Γ(S, W.1)
+      Γ(↑D.ideal.subscheme, D.ideal.subschemeι ⁻¹ᵁ U.1) :=
+    HasRingHomProperty.appLE @LocallyOfFinitePresentation (D.ideal.subschemeι ≫ π) ‹_› W
+      ⟨D.ideal.subschemeι ⁻¹ᵁ U.1, U.2.preimage D.ideal.subschemeι⟩ hle
+  have hcommutes : ∀ r : Γ(S, W.1),
+      (D.ideal.subschemeι.app U.1).hom (algebraMap Γ(S, W.1) Γ(C, U.1) r) =
+        algebraMap Γ(S, W.1) Γ(↑D.ideal.subscheme, D.ideal.subschemeι ⁻¹ᵁ U.1) r := by
+    intro r
+    have := congrArg
+      (fun ψ : Γ(S, W.1) ⟶ Γ(↑D.ideal.subscheme, D.ideal.subschemeι ⁻¹ᵁ U.1) =>
+        ψ.hom r) htower
+    rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra]
+    simpa using this
+  let φ : Γ(C, U.1) →ₐ[Γ(S, W.1)] Γ(↑D.ideal.subscheme, D.ideal.subschemeι ⁻¹ᵁ U.1) :=
+    { (D.ideal.subschemeι.app U.1).hom with commutes' := hcommutes }
+  have hφ : Function.Surjective φ := D.ideal.subschemeι.app_surjective _ U.2
+  have hker := Algebra.FinitePresentation.ker_fG_of_surjective φ hφ
+  have hka := Scheme.Hom.ker_apply D.ideal.subschemeι U
+  rw [Scheme.IdealSheafData.ker_subschemeι] at hka
+  rw [hka]
+  exact hker
+
 /-- **([T-SG3-LFP-3], cover form)** For the inclusion of a closed subscheme to be locally
 of finite presentation it suffices that its ideal sheaf is finitely generated on the
 members of a single affine cover: lfp is Zariski-local on the target, and over each
