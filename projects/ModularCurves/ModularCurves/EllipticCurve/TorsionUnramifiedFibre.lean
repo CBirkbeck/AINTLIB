@@ -617,6 +617,69 @@ private theorem pairBox_boxIso_eq_specMap (hU : IsAffineOpen U)
   · have h1 := congrArg (fun (m : _ ⟶ R) => m.hom b) (hRu.trans hR.symm)
     exact h1
 
+/-- The augmentation of the chart, as an algebra map over the base sections. -/
+private noncomputable def chartAug
+    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U) :
+    ↑Γ(F.E, U) →ₐ[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(Spec (CommRingCat.of k), ⊤) :=
+  { toRingHom := (F.zero.appLE U ⊤ (fun x _ => heU x)).hom
+    commutes' := fun c => zero_appLE_π_appLE heU c }
+
+/-- **The left axis law, `Spec` form**: `Spec` of the left axis restriction, through the
+Künneth box and the multiplication, is the tautological chart inclusion (the geometric
+content of `0 + X = X`). -/
+private theorem axisL_spec_law (hU : IsAffineOpen U)
+    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U)
+    (htaut : ∀ x : ↑(Spec Γ(F.E, U)), (hU.fromSpec).base x ∈ U)
+    (hz : ∀ x : ↑(Spec Γ(F.E, U)),
+      ((0 : F.Point (hU.fromSpec ≫ F.π)) : Spec Γ(F.E, U) ⟶ F.E).base x ∈ U) :
+    Spec.map (CommRingCat.ofHom (axisL (chartAug heU)).toRingHom) ≫ (boxIso hU).inv ≫
+        boxι ≫ (μ[F.asOver]).left = hU.fromSpec := by
+  have hident : pairBox (0 : F.Point (hU.fromSpec ≫ F.π)) (tautPoint hU) hz htaut ≫
+      (boxIso hU).hom = Spec.map (CommRingCat.ofHom (axisL (chartAug heU)).toRingHom) := by
+    refine pairBox_boxIso_eq_specMap hU _ _ hz htaut ?_ ?_
+    · rw [pointSharp_zero_taut hU heU htaut hz]
+      refine CommRingCat.hom_ext (RingHom.ext fun c => ?_)
+      show axisL (chartAug heU) (c ⊗ₜ 1) = _
+      rw [axisL_tmul, _root_.mul_one]
+      rfl
+    · rw [pointSharp_congr (show ((tautPoint hU : F.Point (hU.fromSpec ≫ F.π)) :
+          Spec Γ(F.E, U) ⟶ F.E) = hU.fromSpec from rfl) htaut htaut,
+        pointSharp_fromSpec hU htaut]
+      refine CommRingCat.hom_ext (RingHom.ext fun c => ?_)
+      show axisL (chartAug heU) (1 ⊗ₜ c) = c
+      rw [axisL_tmul, map_one, map_one, _root_.one_mul]
+  rw [← hident]
+  simp only [Category.assoc, Iso.hom_inv_id_assoc]
+  rw [← Category.assoc, ← pairing_eq_pairBox]
+  exact zero_pairing_mul hU
+
+/-- **The right axis law, `Spec` form** (the geometric content of `X + 0 = X`). -/
+private theorem axisR_spec_law (hU : IsAffineOpen U)
+    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U)
+    (htaut : ∀ x : ↑(Spec Γ(F.E, U)), (hU.fromSpec).base x ∈ U)
+    (hz : ∀ x : ↑(Spec Γ(F.E, U)),
+      ((0 : F.Point (hU.fromSpec ≫ F.π)) : Spec Γ(F.E, U) ⟶ F.E).base x ∈ U) :
+    Spec.map (CommRingCat.ofHom (axisR (chartAug heU)).toRingHom) ≫ (boxIso hU).inv ≫
+        boxι ≫ (μ[F.asOver]).left = hU.fromSpec := by
+  have hident : pairBox (tautPoint hU) (0 : F.Point (hU.fromSpec ≫ F.π)) htaut hz ≫
+      (boxIso hU).hom = Spec.map (CommRingCat.ofHom (axisR (chartAug heU)).toRingHom) := by
+    refine pairBox_boxIso_eq_specMap hU _ _ htaut hz ?_ ?_
+    · rw [pointSharp_congr (show ((tautPoint hU : F.Point (hU.fromSpec ≫ F.π)) :
+          Spec Γ(F.E, U) ⟶ F.E) = hU.fromSpec from rfl) htaut htaut,
+        pointSharp_fromSpec hU htaut]
+      refine CommRingCat.hom_ext (RingHom.ext fun c => ?_)
+      show axisR (chartAug heU) (c ⊗ₜ 1) = c
+      rw [axisR_tmul, map_one, map_one, _root_.mul_one]
+    · rw [pointSharp_zero_taut hU heU htaut hz]
+      refine CommRingCat.hom_ext (RingHom.ext fun c => ?_)
+      show axisR (chartAug heU) (1 ⊗ₜ c) = _
+      rw [axisR_tmul, _root_.one_mul]
+      rfl
+  rw [← hident]
+  simp only [Category.assoc, Iso.hom_inv_id_assoc]
+  rw [← Category.assoc, ← pairing_eq_pairBox]
+  exact pairing_zero_mul hU
+
 end Box
 
 end AugmentationScheme
