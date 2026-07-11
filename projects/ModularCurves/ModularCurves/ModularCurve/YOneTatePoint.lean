@@ -641,7 +641,23 @@ nilpotent, `R` noetherian" is *upgraded*, soundly, because Y1-E5's proof never u
 artifact §E6). `FormallySmooth + FinitePresentation = Algebra.Smooth = RingHom.Smooth`, and
 `HasRingHomProperty.Spec_iff` transports to the scheme morphism. -/
 theorem yOneStructMap_smooth [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
-    Smooth (yOneStructMap R N) := by sorry
+    Smooth (yOneStructMap R N) := by
+  haveI := yOne_isAffine R N hN hinv
+  rw [HasRingHomProperty.iff_of_isAffine (P := @Smooth)]
+  have hFP : RingHom.FinitePresentation ((yOneStructMap R N).appTop).hom := by
+    have h := yOneStructMap_locallyOfFinitePresentation R N hN hinv
+    rwa [HasRingHomProperty.iff_of_isAffine (P := @LocallyOfFinitePresentation)] at h
+  show RingHom.Smooth _
+  rw [RingHom.Smooth]
+  letI : Algebra ↑Γ(Spec R, ⊤) ↑Γ(yOne R N, ⊤) := ((yOneStructMap R N).appTop).hom.toAlgebra
+  refine ⟨?_, hFP⟩
+  /- The `FormallySmooth` leg: transport E5's nilpotent lifting through the Γ–Spec
+  adjunction (mathlib quantifies over square-zero `I`, a special case of nilpotent).
+  For each test pair `(B, I)` with `I² = ⊥` and `g₀ : Γ(Y₁(N)) →ₐ B⧸I`: `Spec.map`-side
+  gives `f₀ : Spec (B⧸I) ⟶ yOne` over `Spec R` (through `isoSpec`); E5 lifts it to
+  `f : Spec B ⟶ yOne`; the adjoint `AlgHom` lifts `g₀`. Plumbing: `Scheme.isoSpec`,
+  `ΓSpecIso`-naturality, `Algebra.FormallySmooth`-constructor `comp_surjective`. -/
+  sorry
 
 /-! ### F. Transport to arbitrary representing objects, and the T-E7 bridge -/
 
