@@ -890,6 +890,98 @@ theorem axBC_cone (T : Over (wStageOp W)) :
       h4.symm.trans <|
       (congrArg (axApex W ≫ ·) hwSQ.symm).trans (Category.assoc _ _ _).symm
 
+/-- Axis naturality under base change, scheme level. -/
+theorem axNat : projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W
+    (wZero_map W) ≫ axL₀ W =
+    (axInclL W).left ≫ pullbackMapBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W
+      (wZero_map W) := by
+  refine Limits.pullback.hom_ext ?_ ?_
+  · -- fst leg: both sides are the zero section after the base
+    have hL1 : axL₀ W ≫ Limits.pullback.fst (projModelπ (wZero W)) (projModelπ (wZero W)) =
+        (toUnit (modelOver (wZero W)) ≫ oneOver (wZero W)).left :=
+      congrArg CommaMorphism.left
+        (lift_fst (toUnit (modelOver (wZero W)) ≫ oneOver (wZero W)) (𝟙 _))
+    have hR1 : (axInclL W).left ≫ Limits.pullback.fst (projModelπ W) (projModelπ W) =
+        (toUnit (modelOver W) ≫ oneOver W).left :=
+      congrArg CommaMorphism.left (lift_fst (toUnit (modelOver W) ≫ oneOver W) (𝟙 _))
+    have hcompL : (toUnit (modelOver (wZero W)) ≫ oneOver (wZero W)).left =
+        projModelπ (wZero W) ≫ projModelZero (wZero W) := by
+      show (toUnit (modelOver (wZero W))).left ≫ (oneOver (wZero W)).left = _
+      rw [oneOver_left]
+      exact (Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ projModelZero (wZero W)) (Over.w (toUnit (modelOver (wZero W)))))
+    have hcompR : (toUnit (modelOver W) ≫ oneOver W).left =
+        projModelπ W ≫ projModelZero W := by
+      show (toUnit (modelOver W)).left ≫ (oneOver W).left = _
+      rw [oneOver_left]
+      exact (Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ projModelZero W) (Over.w (toUnit (modelOver W))))
+    calc (projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) ≫
+            axL₀ W) ≫ Limits.pullback.fst _ _
+        = projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) ≫
+            (axL₀ W ≫ Limits.pullback.fst _ _) := Category.assoc _ _ _
+      _ = projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) ≫
+            (projModelπ (wZero W) ≫ projModelZero (wZero W)) := by rw [hL1, hcompL]
+      _ = (projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) ≫
+            projModelπ (wZero W)) ≫ projModelZero (wZero W) := (Category.assoc _ _ _).symm
+      _ = (projModelπ W ≫ Spec.map (CommRingCat.ofHom (wStage W).1.val.toRingHom)) ≫
+            projModelZero (wZero W) := by
+          rw [(wPB (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)).w]
+      _ = projModelπ W ≫ (Spec.map (CommRingCat.ofHom (wStage W).1.val.toRingHom) ≫
+            projModelZero (wZero W)) := Category.assoc _ _ _
+      _ = projModelπ W ≫ (projModelZero W ≫
+            projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)) := by
+          rw [projModelZero_baseChangeOf]
+      _ = (projModelπ W ≫ projModelZero W) ≫
+            projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) :=
+          (Category.assoc _ _ _).symm
+      _ = (toUnit (modelOver W) ≫ oneOver W).left ≫
+            projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) :=
+          congrArg (· ≫ projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W
+            (wZero_map W)) hcompR.symm
+      _ = ((axInclL W).left ≫ Limits.pullback.fst (projModelπ W) (projModelπ W)) ≫
+            projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) :=
+          congrArg (· ≫ projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W
+            (wZero_map W)) hR1.symm
+      _ = (axInclL W).left ≫ (Limits.pullback.fst (projModelπ W) (projModelπ W) ≫
+            projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)) :=
+          Category.assoc _ _ _
+      _ = (axInclL W).left ≫ (pullbackMapBaseChangeOf (wStage W).1.val.toRingHom (wZero W)
+            W (wZero_map W) ≫ Limits.pullback.fst (projModelπ (wZero W))
+              (projModelπ (wZero W))) :=
+          congrArg ((axInclL W).left ≫ ·)
+            (hfst (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)).symm
+      _ = ((axInclL W).left ≫ pullbackMapBaseChangeOf (wStage W).1.val.toRingHom (wZero W)
+            W (wZero_map W)) ≫ Limits.pullback.fst _ _ := (Category.assoc _ _ _).symm
+  · have hL2 : axL₀ W ≫ Limits.pullback.snd (projModelπ (wZero W)) (projModelπ (wZero W)) =
+        𝟙 _ := congrArg CommaMorphism.left
+          (lift_snd (toUnit (modelOver (wZero W)) ≫ oneOver (wZero W)) (𝟙 _))
+    have hR2 : (axInclL W).left ≫ Limits.pullback.snd (projModelπ W) (projModelπ W) =
+        𝟙 _ := congrArg CommaMorphism.left
+          (lift_snd (toUnit (modelOver W) ≫ oneOver W) (𝟙 _))
+    calc (projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) ≫
+            axL₀ W) ≫ Limits.pullback.snd _ _
+        = projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) ≫
+            (axL₀ W ≫ Limits.pullback.snd _ _) := Category.assoc _ _ _
+      _ = projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) := by
+          rw [hL2, Category.comp_id]
+      _ = (𝟙 ((modelOver W).left)) ≫ projModelBaseChangeOf (wStage W).1.val.toRingHom
+            (wZero W) W (wZero_map W) := (Category.id_comp _).symm
+      _ = ((axInclL W).left ≫ Limits.pullback.snd (projModelπ W) (projModelπ W)) ≫
+            projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) :=
+          congrArg (· ≫ projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W
+            (wZero_map W)) hR2.symm
+      _ = (axInclL W).left ≫ (Limits.pullback.snd (projModelπ W) (projModelπ W) ≫
+            projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)) :=
+          Category.assoc _ _ _
+      _ = (axInclL W).left ≫ (pullbackMapBaseChangeOf (wStage W).1.val.toRingHom (wZero W)
+            W (wZero_map W) ≫ Limits.pullback.snd (projModelπ (wZero W))
+              (projModelπ (wZero W))) :=
+          congrArg ((axInclL W).left ≫ ·)
+            (hsnd (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)).symm
+      _ = ((axInclL W).left ≫ pullbackMapBaseChangeOf (wStage W).1.val.toRingHom (wZero W)
+            W (wZero_map W)) ≫ Limits.pullback.snd _ _ := (Category.assoc _ _ _).symm
+
 end AxisBC
 
 /-! ## The uniqueness theorem ([U-MODEL]) -/
