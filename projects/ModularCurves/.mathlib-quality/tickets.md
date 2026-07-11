@@ -17904,3 +17904,18 @@ T-B5 boxes unless they land in parallel — the charter bar is reachable modulo 
 
 Seat credits: NEW-CASCADE (audit + staging + funnel), c5β (T-G4 laws), NEW-HOPF
 (patchKunneth consumed), beastmode-A (negModelHom_baseChange in invOver), P4 (rigidity).
+
+## Amendments v10.122-Y1 (2026-07-11, Y1-CLOSER): ★★★★ S3 — exists_tatePoint AXIOM-CLEAN; [T-A6b] retired from the Y1 trail by the model-record swap
+
+**AUDIT VERDICT (charter S3, audit-first)**: `abelEnrichment_exists` at GENERAL base still
+needs T-W7a descent (stays sorried, c5β's lane). BUT both Y1-consumers sit at GLOBAL-MODEL
+geometries — `tateGeom` (projModel of tateCurveLocOver over Spec tateRingOver) and
+`fibreGeom` (projModel of the mapped chart curve over Spec k) — where `modelEllipticCurve`
+(S2's T-G4 packaging) IS the record with `toGeom = rfl`. EXECUTED: `tateUniversal` and
+`fibreCurve` redefined := modelEllipticCurve; `_geom` pins := rfl; `tateUniversal_hz` zero
+pin (definitional) added + threaded.
+
+**BAR ITEM 1 MET**: `#print axioms exists_tatePoint = [propext, Classical.choice,
+Quot.sound]` — both designed trails ([T-A6b], [T-B6′]) RETIRED. Consumers all green
+(YOneAssembly, YOneAtlasClassify, GammaH — which also gained the MulByHomUnramified import
+as a rank_two-relocation consumer the truncated grep missed; full `-l`-grep this time).
