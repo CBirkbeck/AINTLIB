@@ -818,3 +818,38 @@ The old opens-level maps are recovered by conjugating with `topIso` (`ε = topIs
 Cost estimate: ~1 session for the ⊤-level restatement + coassoc; the counit/antipode laws
 transfer mechanically (their scheme identities are already proven and are stated purely in
 terms of `unitSection`, `leftUnitSection`, `squareMul`).
+
+## [HG-C1c-1d] coassoc: precise remaining path (ledgered 2026-07-11, stop-line hit)
+
+SUBSTRATE DONE (all committed, axiom-clean, reusable):
+- `squareToBase` + `Γ(square)` R'-algebra instance + `IsAffine groupSquare` instance;
+- `cube := pullback groupToBaseRes squareToBase` + `cubeΓ` (iterated affineKunneth,
+  `Γ(cube) ≅ A' ⊗ Γ(square)`, IsIso);
+- `cubeInnerMul : cube → square` (`id ×_V squareMulRes`) + its two legs;
+- `squareMulResAlg : A' →ₐ[R'] Γ(square)`;
+- ★ **`cubeInnerMul_appTop_cubeΓ`** — the KÜNNETH NATURALITY lemma:
+  `cubeInnerMul.appTop ≫ cubeΓ = squareΓTop ≫ map(id, squareMulResAlg)`.
+  (Proven via `tensor_hom_ext` + `IsIso.comp_inv_eq`-hoisted inv-composites + the fst/snd
+  Γ-dual legs. This is the hard reusable piece — it did come together cleanly, ~1 route.)
+
+REMAINING (next session, ~1–2 routes; the naturality tool makes both tractable):
+- **Δ₂R side**: `(id ⊗ Δ) ∘ Δ`. With `Δ = squareMulRes.appTop ≫ squareΓTop` and
+  `map(id,Δ) = map(id,squareMulRes.appTop) ≫ map(id,squareΓTop)`, the naturality lemma
+  rewrites `squareΓTop ≫ map(id,squareMulRes.appTop) = cubeInnerMul.appTop ≫ cubeΓ`.
+  Net: `Δ₂R = squareMulRes.appTop ≫ cubeInnerMul.appTop ≫ cubeΓ ≫ map(id,squareΓTop)`
+  = `(cubeInnerMul ≫ squareMulRes-ish).appTop ≫ (fixed triple iso)` — i.e. the Γ-dual of
+  the scheme map `cube → G|_V, (g₁,(g₂,g₃)) ↦ g₁·(g₂·g₃)` = `rightAssocMul`.
+- **Δ₂L side**: `assoc ∘ (Δ ⊗ id) ∘ Δ`. Needs the MIRROR naturality
+  (`cubeOuterMul : cube' → square` on the left factor, via the associator-reassociated
+  cube) + the dualisation of `Algebra.TensorProduct.assoc` = the pullback associator
+  `pullbackRightPullbackFstIso`/`pullbackLeftPullbackSndIso`. Net: Γ-dual of
+  `leftAssocMul : (g₁,(g₂,g₃)) ↦ (g₁·g₂)·g₃`.
+- **assembly**: `rightAssocMul = leftAssocMul` (from `mulOver_assoc` restricted — the
+  associativity of the group-object multiplication, already PROVEN in
+  SubgroupGroupObject), hence `Δ₂R = Δ₂L`, i.e. `comulAlgTop` is coassociative. Package
+  as the `Bialgebra` coassoc field.
+
+FLEET NOTE (v10.35b, no filing): D2/c5β/NEW-GH consume HOPF pins hypothesis-wired as they
+land (their inboxes confirm), so coassoc-first (coordinator's v10.141 sequencing) does NOT
+hard-block them. Proceeding to prove coassoc methodically per the sequencing — no
+hypothesis-wire needed. Stop-line respected: 4 measured iterations done, ledgered, hard-stop.
