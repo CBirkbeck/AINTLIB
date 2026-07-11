@@ -17946,3 +17946,18 @@ work): {E5, E6, F1} (this charter, in progress) + {T-E4 primitive: route (a) or 
 {hfib 6f/6g tail (wall-ledgered)} + {BB-QF, BB-FLAT, BB-DEG} (T-B5 family, other lane).
 `exists_tatePoint` is DONE-clean (v10.122-Y1). The coordinator should sequence route-(a)/(c)
 and the T-B5 boxes; everything else is Y1-CLOSER's continuing execution.
+
+## Amendments v10.124-Y1 (2026-07-11, Y1-CLOSER): S4 COMPLETE + F1 — the MASTER path is now {E5, E6} plus the boarded externals
+
+- ★ **S4 COMPLETE**: `pullSection_add` := A's FP transport; `gammaOneNaiveProblem.map`
+  membership FILLED (the v10.117 split `Moduli/NaiveProblems.lean` + relocated D2-iff +
+  NEW `isNaiveGammaOne_asSection_pull`); Representability.lean is now SORRY-FREE (T-E1 was
+  already proven in-file); the whole T-E4 family sits on the single designed primitive
+  (route (a) RigiditySpreadingOut:94 / route (c) T-W7a — other lanes).
+- ★ **F1 FILLED**: `representableBy_smooth_isAffineHom` := `YFull.smooth_affine_of_representableBy`
+  (already-proven transport) at `yOne_representableBy` — wires E6.
+- **E5 execution ledger banked in-place** (six steps, every gate proven: T-E1, T-E2,
+  `factors_yOne_iff`, `torsionπ_etale`, chart dictionaries, `IsNilpotent.isUnit_quotient_mk_iff`).
+- **Y1-MASTER remaining, exact**: E5 (lifting, ledgered) → E6 (smooth assembly) → S6
+  (relocation + bar). Externals (boarded v10.123-Y1): T-E4-primitive route (a)/(c),
+  hfib 6f/6g tail (wall-ledgered, .lean.full/.tail2 drafts), BB-QF/FLAT/DEG.
