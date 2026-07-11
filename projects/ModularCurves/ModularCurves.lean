@@ -66,6 +66,7 @@ import ModularCurves.Moduli.LevelSpaces
 import ModularCurves.Moduli.MellWeierstrass
 import ModularCurves.Moduli.MellWStack
 import ModularCurves.Moduli.Representability
+import ModularCurves.ForMathlib.QuotientTorsor
 import ModularCurves.Moduli.QuotientRepresentability
 import ModularCurves.Moduli.Stack
 import ModularCurves.Picard.InvertibleSheaf
