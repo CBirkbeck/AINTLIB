@@ -17866,3 +17866,41 @@ consumed by invOver), Y1-CLOSER (assoc execution + the hoisting pattern).
 their return; **the NEW-CASCADE/Y1-CLOSER [T-B6′] gate is OPEN** — S2 (the map_add' fill
 on y1) begins NOW per CHARTER-Y1-CLOSER. NEW-Y1's E-track gate advances when S2 lands
 torsionπ_etale.
+
+## Amendments v10.121-Y1 (2026-07-11, Y1-CLOSER): S2 — [T-B6′] FILLED + BB-DIFF discharged modulo ONE crisply-isolated lemma-tail; the augmentation-ideal route replaces differentials entirely
+
+**DONE, axiom-clean {propext, Classical.choice, Quot.sound}:**
+- ★★ **`geomFibrePointAddEquiv.map_add'` FILLED + hz-fix SAME COMMIT quoting b2_log #3**
+  ([T-B6′]-IFACE retires): route = `ModelRecord.lean` (NEW: `modelEllipticCurve` — the
+  mulOver-record at every R off T-G4; `point_add_val_of_geom_eq` — the rigidity driver via
+  `Point.baseChangeEquiv` + `abelEnrichment_unique_of_isLocallyNoetherian`;
+  `EllipticCurveGeom.ext_of_eqToHom`) + C6 `mulModelHom_specPoints`. Consumers threaded
+  (`fibreCurve_hz`, pt_hord ×2). Lean-ops (registry): structure-literal records DEFEAT
+  `pointAddCommGroup` synthesis — keep records as variables; eqToHom-spell cross-record
+  morphism equalities (never HEq); instance-free destructuring helpers.
+- **BB-DIFF chain relocated + DISCHARGED modulo hfib-tail**: `mulByHom_formallyUnramified`
+  (was Torsion.lean:228 sorry), `mulBy_etale`, `torsionπ_etale`, `rank_two` now live PROVEN
+  in `MulByHomUnramified.lean` (v10.111/117 doctrine, pointers at old sites; L-BC
+  `formallyUnramified_torsionπ` := the NEW `TorsionUnramifiedFibre.lean`).
+- **`TorsionUnramifiedFibre.lean` (NEW, the hfib discharge)** — the KM 2.3.1 fibre fact by
+  the **augmentation-ideal argument** (NO invariant differentials, NO degree counts, NO
+  algebraic closure, NO HasseWeil dependency): torsion points reducing to zero along a
+  square-zero thickening die because chart evaluation on the augmentation ideal is additive
+  mod I²=0 and N is a unit. PROVEN: the 𝔴-operator algebra layer (`pairLift_key`,
+  `pairLift_eq_zero_of_axes` — pure 20-line linear algebra replacing all flatness/splitting),
+  the θ/N endgame, `of_hom_ext` glue, T-DISC funnel to every base, the affine Künneth box
+  (consumes NEW-HOPF's `patchKunneth` — first cross-charter consumption), the chart
+  correspondence, BOTH axis laws as `Spec`-shadows of `0+X=X`/`X+0=X` (the group law does
+  the unit-law work — no Hopf axioms needed), pT-units, the prime-in-chart. **ONE sorry
+  left**: `pointSharp_add` steps 6e–6g (stalk assembly; exact recipe in-file as the
+  EXECUTION LEDGER — every ingredient it references is already proven in-file).
+
+**Axiom state**: `torsionπ_etale` now = {this one sorry} + the pre-existing T-B5 boxes
+BB-QF/BB-FLAT/BB-DEG (Torsion.lean:140/147/152 — NOT this charter's scope; they gate
+`mulBy_etale`'s flatness leg). ⚠ COORDINATOR VISIBILITY: the Y1 E-track (S5) consumes
+`torsionπ_etale`, so the final ★★★★ bar on `gammaOneNaive_representable` inherits those
+T-B5 boxes unless they land in parallel — the charter bar is reachable modulo exactly
+{6e–6g tail, BB-QF, BB-FLAT, BB-DEG}.
+
+Seat credits: NEW-CASCADE (audit + staging + funnel), c5β (T-G4 laws), NEW-HOPF
+(patchKunneth consumed), beastmode-A (negModelHom_baseChange in invOver), P4 (rigidity).
