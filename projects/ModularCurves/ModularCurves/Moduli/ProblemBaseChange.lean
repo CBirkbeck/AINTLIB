@@ -45,4 +45,41 @@ noncomputable def ModuliProblem.baseChange (P : ModuliProblem R) : ModuliProblem
 theorem ModuliProblem.baseChange_obj (P : ModuliProblem R) (X : (EllObj R')ᵒᵖ) :
     (P.baseChange ρ).obj X = P.obj (op ((EllObj.restrictScalars ρ).obj X.unop)) := rfl
 
+
+/-- Restriction of scalars is faithful (it preserves `baseHom` and `top`, which determine an
+`EllHom`). -/
+instance : (EllObj.restrictScalars ρ).Faithful where
+  map_injective {X Y} {f g} h := by
+    have hb : f.baseHom = g.baseHom := congrArg (·.baseHom) h
+    have ht : f.top = g.top := congrArg (·.top) h
+    exact EllHom.ext hb ht
+
+/-- **Rigidity transfers forward under base change**: if `P` is rigid, so is `P.baseChange ρ`. -/
+theorem ModuliProblem.Rigid.baseChange {P : ModuliProblem R} (hP : P.Rigid) :
+    (P.baseChange ρ).Rigid := by
+  intro X e hb hne a hfix
+  refine hP ((EllObj.restrictScalars ρ).obj X) ((EllObj.restrictScalars ρ).mapIso e) hb ?_ a hfix
+  intro hrefl
+  apply hne
+  apply Iso.ext
+  apply (EllObj.restrictScalars ρ).map_injective
+  have h1 := congrArg Iso.hom hrefl
+  simpa using h1
+
+
+/-- **Relative representability transfers under base change**: the same representing datum works
+(the `Ell/R'`-pullbacks agree, over `R`, with the `Ell/R`-pullbacks — `rfl`). -/
+theorem ModuliProblem.RelativelyRepresentable.baseChange {P : ModuliProblem R}
+    (hP : P.RelativelyRepresentable) : (P.baseChange ρ).RelativelyRepresentable := by
+  intro X'
+  obtain ⟨Z, f, eqv, hnat⟩ := hP ((EllObj.restrictScalars ρ).obj X')
+  exact ⟨Z, f, eqv, hnat⟩
+
+/-- **Affine-over-`(Ell)` transfers under base change** (same affine representing morphism). -/
+theorem ModuliProblem.AffineOverEll.baseChange {P : ModuliProblem R}
+    (hP : P.AffineOverEll) : (P.baseChange ρ).AffineOverEll := by
+  intro X'
+  obtain ⟨Z, f, haff, eqv, hnat⟩ := hP ((EllObj.restrictScalars ρ).obj X')
+  exact ⟨Z, f, haff, eqv, hnat⟩
+
 end ModularCurves
