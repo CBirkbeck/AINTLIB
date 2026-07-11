@@ -115,6 +115,25 @@ theorem overEquiv_map_dualRestrict (M : X.Modules) {U V : X.Opens}
         E.inv.app (_root_.SheafOfModules.unit (X.ringCatSheaf.over U)) ≫ b := by
       simp only [Category.assoc]
 
+/-- Pulling back after restriction to a smaller target open agrees with restricting
+after pullback to the inverse-image open. -/
+noncomputable def openPullbackRestrictIso (f : Y ⟶ X) {U V : X.Opens}
+    (i : V ⟶ U) :
+    restrictFunctor (X.homOfLE (leOfHom i)) ⋙ pullback (f ∣_ V) ≅
+      pullback (f ∣_ U) ⋙
+        restrictFunctor
+          (Y.homOfLE (f.preimage_mono (leOfHom i))) :=
+  Functor.isoWhiskerRight
+      (restrictFunctorIsoPullback (X.homOfLE (leOfHom i)))
+      (pullback (f ∣_ V)) ≪≫
+    pullbackComp (f ∣_ V) (X.homOfLE (leOfHom i)) ≪≫
+    pullbackCongr (morphismRestrict_homOfLE f V U (leOfHom i)) ≪≫
+    (pullbackComp
+      (Y.homOfLE (f.preimage_mono (leOfHom i))) (f ∣_ U)).symm ≪≫
+    Functor.isoWhiskerLeft (pullback (f ∣_ U))
+      (restrictFunctorIsoPullback
+        (Y.homOfLE (f.preimage_mono (leOfHom i)))).symm
+
 theorem overEquiv_map_add (U : X.Opens)
     {A B : _root_.SheafOfModules (X.ringCatSheaf.over U)} (p q : A ⟶ B) :
     (overEquiv U).functor.map (p + q) =
