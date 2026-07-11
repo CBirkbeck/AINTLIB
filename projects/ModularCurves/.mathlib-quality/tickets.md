@@ -7644,7 +7644,62 @@ gate note, commit 90ed0986); this amendment turns the lift into dispatched work 
 idle capacity. Housekeeping done in this pass: the unpushed `dev/modular-curves` commits were
 PUSHED (`66300bb4..5f4829dc`, 238 commits).*
 
-### v10.144-CLOSER — ★ K2 [U-MODEL] COMPLETE: `modelGrpObj_unique` at the clean triple (Y1-CLOSER)
+### v10.145-CLOSER — ★★ K3+K4 LANDED; MASTER-bar audit: residual = exactly {BB-QF, BB-FLAT}; L3 decomposition (Y1-CLOSER)
+
+**K3 (`RecordGroupUnique.lean`, sorry-free):** `grpObj_mul_unique` — two pointed `GrpObj`
+structures on any `EllipticCurveGeom` agree over an ARBITRARY base. Chart machinery:
+`chartToBase/chartLegIso/chartTotalIso` (+π/zero compat), `bcGrp` (mathlib
+`grpObjMkPullbackSnd`), `bcGrp_one_left` (GroupLaw one_eq_zero-transplant), `chartGrp :=
+GrpObj.ofIso ∘ chartOverIso` (mathlib HAS `MonObj.ofIso`/`GrpObj.ofIso` — no transport
+needed), `chart_mul_eq` ([U-MODEL] ×2 per chart), `chartSqCmp/chartRestrict/chartOpen` +
+`Scheme.hom_ext_of_forall` glue. Wrapper: `isMonHom_of_pointedIso_records` (pointed record
+iso ⟹ group hom). **Registry lesson (new):** the 200k-whnf walls on
+`grpObjMkPullbackSnd_mul_left_fst`-consumption dissolve with a **have-split** (`have h :=
+lemma; exact h.symm`) — term-mode `.symm`-coercions against declared statements re-run the
+instance unification; tactic-mode have-chains don't.
+
+**K4 (swap landed):** PullSectionCanonicity:167's h64 is now the K3 primitive;
+`transportSection_add_of_finitePresentation` AND `yOne_representableBy` (the entire
+representability half of the MASTER) are at `{propext, Classical.choice, Quot.sound}`.
+Route (a) (`isMonHom_of_one_comp_eq'_of_finitePresentation`, RigiditySpreadingOut:94) has
+ZERO proof-term consumers on the MASTER trail — [T-A6b]-as-axiom RETIRED from the trail.
+Root green 3,801 jobs, RecordGroupUnique root-imported.
+
+**MASTER-bar audit (the residual, traced by #print axioms bisect):**
+`gammaOneNaive_representable` = assembly(representability ✓CLEAN, smooth/affine ✗) →
+`yOne_isAffine` → `killedLocus_preimage_isOpen` → `torsionπ_etale` → `mulBy_etale` →
+{`mulByHom_flat` = **BB-FLAT** (Torsion:147)} ∪ {`mulByHom_formallyUnramified'` →
+`formallyUnramified_torsionπ_of_nIsInvertible` → `torsionπ_isFinite` →
+`mulByHom_locallyQuasiFinite` = **BB-QF** (Torsion:140)}. The field-case leaf
+`formallyUnramified_torsionπ_of_isUnit` is CLEAN; `geomFibrePointAddEquiv` ([T-B6′]) is
+CLEAN (v10.123-CASCADE really landed); **BB-DEG is OFF the MASTER trail** (feeds only
+`torsion_rank`). So the bar = exactly two boxes.
+
+**Cross-project bridge boarded (check-then-cite):** HasseWeil `mulByInt_degree (W : Affine F)
+[W.IsElliptic] (n : ℤ) (hn : n ≠ 0) : (mulByInt W n).degree = (n^2).toNat`
+(`projects/HasseWeil/HasseWeil/Foundation/Basic.lean:727`) — VERIFIED at
+`{propext, Classical.choice, Quot.sound}` (built in-workspace). Never re-derive.
+
+**L3 decomposition (/develop --decompose, KM 2.3.1 — MASTER-minimal):**
+- **[QF-1]** fibre reduction: mathlib `LocallyQuasiFinite.of_fiberToSpecResidueField`
+  (VERIFIED present) — reduce BB-QF to: each fibre of `[N]` over a point of `E.E` is
+  quasi-finite over the residue field.
+- **[QF-2]** fibre finiteness via geometric points: the `[N]`-fibre is a coset of the
+  `N`-torsion in `E(k̄)`; `geomFibrePointAddEquiv` (CLEAN) + HasseWeil field-level torsion
+  finiteness bound the k̄-points; jacobson/closed-point argument upgrades finite-k̄-points
+  to finite fibre space. RISK: the "finite-type over a field + finitely many k̄-points ⟹
+  finite space" supply needs a mathlib hunt (JacobsonSpace).
+- **[FLAT]** mathlib has NO miracle flatness (no CM theory) and NO fibrewise flatness
+  criterion (EGA IV 11.3.10) — the charter's presumed routes are dead. Chosen route (G),
+  Loeffler's argument in lifting form: `[N]` is FORMALLY SMOOTH when `N` invertible — the
+  square-zero lifting kernel `ker(E(A') → E(A))` is an `I`-module on which `[N]` acts as
+  `N·` (invertible), so lifts adjust; smooth = fs + lfp (lfp PROVEN) ⟹ flat (mathlib
+  smooth⟹flat). The kernel-module linearity is the augmentation-ideal/invariant-
+  differential layer ALREADY BUILT for BB-DIFF (TorsionUnramifiedFibre L-BC) — audit that
+  toolkit for reuse before building.
+- Order: QF first (supplies torsionπ_isFinite for the unramified funnel), then FLAT.
+
+## v10.144-CLOSER — ★ K2 [U-MODEL] COMPLETE: `modelGrpObj_unique` at the clean triple (Y1-CLOSER)
 
 **`ModelGroupUniq.lean` is sorry-free.** `#print axioms ModularCurves.modelGrpObj_unique` =
 `{propext, Classical.choice, Quot.sound}`. Statement: over an **arbitrary** ring `R`, any
