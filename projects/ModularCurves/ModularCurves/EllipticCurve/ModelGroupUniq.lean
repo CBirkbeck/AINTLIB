@@ -591,6 +591,20 @@ theorem eq_descends (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W))
     (fun T => bc_obj_compact W g T) inferInstance inferInstance
     (fun {i j} φ => bc_transition_affine W g φ) T u v hu hv huv
 
+/-- The structural transformation of any base-changed stage system. -/
+noncomputable def bcT (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W)) :
+    (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback g ⋙ Over.forget _) ⟶
+    (Functor.const (Over (wStageOp W))).obj ((fgSys.specDiagram R).obj (wStageOp W)) where
+  app T := ((Over.pullback g).obj
+    ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T)).hom ≫ g
+  naturality {T T'} φ := by
+    have hw := Over.w ((Over.pullback g).map
+      ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).map φ))
+    show _ ≫ _ ≫ g = (_ ≫ g) ≫ 𝟙 _
+    rw [Category.comp_id, ← Category.assoc]
+    exact congrArg (· ≫ g) hw
+
 end MuDescent
 
 end ModularCurves
