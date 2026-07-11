@@ -16465,3 +16465,21 @@ T-W7a board line for the gate flip.
   inherited T-W7 trail ONLY, and that trail is dissolving in the closer's lane (K-chain).
   The Y(N)/Γ_H engine's central theorem is in. FP4 continues per CHARTER-FP4-2: B4
   (T-E5c) → B5 (Y(N) route A + Γ_H). On charter, no dispatch.
+
+## BOARD (fable-P4, 2026-07-11, post-B3): base-change foundation landed; B4/B5 frontier = cross-lane
+Beyond B3 (KM 4.7.0 ⇐ engine COMPLETE, modulo T-W7), landed the clearly-mine, non-cross-lane
+T-E5f foundation (Moduli/ProblemBaseChange.lean, 5efd63212 + 6a1d38043, all axiom-clean):
+`ModuliProblem.baseChange` (restrict-scalars functor) + `EllObj.restrictScalars` (Faithful) +
+`Rigid`/`RelativelyRepresentable`/`AffineOverEll` `.baseChange` transfers — the plumbing to
+instantiate the engine over R[1/2]/R[1/3] for the KM recollement over Spec R = D(2) ∪ D(3).
+FRONTIER: every remaining B4/B5 piece is CROSS-LANE and consume-not-duplicate:
+* B4 engine-application over the localizations ← the naive-level-3/Legendre universal curves
+  T-E15 (`ℰ₃`, needs stream-C Weil pairing, Bootstrap.lean sorry) + T-E14 (Legendre, blocked
+  T-E-OMEGA) — other lanes.
+* B4 recollement gluing (glue the two representing objects along D(2)∪D(3)) = NEW-Y1's "curve
+  assembly" per the seam ("FP4 builds engine application, NEW-Y1 builds curve assembly").
+* B5 Γ_H ← NEW-GH's GHB4/GHB5/GHB7 (~1000 LOC) + the EllCategory:279 wiring (NEW-GH's, clears GHC6).
+* Full axiom-cleanness of the engine ← T-W7 (grpObj, Y1-CLOSER's lane).
+CONCLUSION: fable-P4's provable-now, non-cross-lane dispatchable frontier is exhausted. Resumes
+when any cross-lane input lands (watch: Y1-CLOSER T-W7a for the engine axiom-flip; NEW-GH's GHC/GHB
+for the B5 Γ_H seam; T-E14/T-E15 for the B4 instantiations).
