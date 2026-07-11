@@ -16325,3 +16325,21 @@ build window.*
   + background-polling for a green window to commit basePullball/GHB2. **The Incidence lane
   should commit-early its green increments** (the uncommitted-broken state blocks GH + all
   Incidence consumers). p0 reclaim provision stands.
+
+### v10.141b (2026-07-11, fable-FP): [KL-3] frontier CONFIRMED + precisely mapped; decomposition-kl3.md is the execution map; pivoting to [02KM-CORE]
+
+*Flat-locus-spreading residual = a MAJOR 95%-done homological development by the (now unstaffed)
+GF7 lane: `Grade`/`FittingIdeals`/`Acyclicity`/`Depth`/`LocalCriterion`/`HilbertSyzygy`/
+`FiniteFreeResolution` ALL PROVEN & axiom-clean; the Buchsbaum–Eisenbud acyclicity engine
+(00N0/00LW/00LX/00MH/00MY/00MW) is done. `Depth.lean`'s "skeleton := sorry" docstring is STALE.*
+
+**Frontier = exactly 6 sorries + 2 consumers** (full map in `decomposition-kl3.md`):
+`local_criterion_twoTerm` (00ME, needs Tor₁=0⟹flat) · `localBE_homology_disjunction` @846
+(00MW split-top) + @858 (gap-truncation) — the only 2 sorries tainting `buchsbaumEisenbud_acyclic`
+· `fibreExact_spreads` (00RB) · `coker_flat_of_specialFibreExact` (00MI) ·
+`flatLocus_spreads_reduce_to_polynomial` (localization + a mathlib-absent `M_{q^P}≅M_q`
+iso; carries a **universe wrinkle**: `H` quantifies `P:Type` but the polynomial ring is `Type*`)
+· `flatLocus_spreads_of_flat_viaBE` (final assembly). Each ~60-150 lines of deep homological/
+localization/strong-induction work; several need mathlib-absent machinery or complex-reconstruction.
+Wire → `flatLocus_spreads_of_flat` → `isOpen_flatLocus` → `exists_subalgebra_flat_baseChange`
+(07RF/00R6) → `exists_noetherian_descent_flat` → KL-3 `SpreadData.exists_flat_stage`.
