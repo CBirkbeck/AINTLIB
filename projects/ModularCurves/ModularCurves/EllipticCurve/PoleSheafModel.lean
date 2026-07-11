@@ -144,6 +144,133 @@ noncomputable abbrev projModelSectionNeighborhood (W : WeierstrassCurve R) :
     (projModel W).affineOpens :=
   (projModel W).affineBasicOpen (projModelSectionUnitSection W)
 
+/-- Under the standard `Y`-chart identification, the localized `X₂` coordinate
+is the section corresponding to `t`. -/
+lemma awayToSection_X2_eq_infChartTElemSection (W : WeierstrassCurve R) :
+    (Proj.awayToSection (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))).hom
+        (HomogeneousLocalization.Away.isLocalizationElem
+          (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2)) =
+      (chartYSectionsRingEquiv W).symm (infChartTElem W) := by
+  have hsymm : (chartYRingEquiv W).symm (infChartTElem W) =
+      HomogeneousLocalization.Away.isLocalizationElem
+        (mk_X_mem_quotientGrading_one W 1)
+        (mk_X_mem_quotientGrading_one W 2) :=
+    (RingEquiv.symm_apply_eq _).mpr
+      (chartYRingEquiv_isLocalizationElem W).symm
+  have hval : (chartYSectionsRingEquiv W).symm (infChartTElem W) =
+      ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        (mk_X_mem_quotientGrading_one W 1) one_pos).hom).hom
+          (HomogeneousLocalization.Away.isLocalizationElem
+            (mk_X_mem_quotientGrading_one W 1)
+            (mk_X_mem_quotientGrading_one W 2)) := by
+    show ((chartYRingEquiv W).symm.trans
+      (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+        (mk_X_mem_quotientGrading_one W 1)
+        one_pos).commRingCatIsoToRingEquiv) (infChartTElem W) = _
+    rw [RingEquiv.trans_apply, hsymm]
+    rfl
+  exact hval.symm
+
+/-- A point of the `Y`-chart lies in the `Z`-chart exactly when its chart prime
+avoids the coordinate `t`. -/
+lemma mem_projModelZChart_iff_not_mem_infChartTElem (W : WeierstrassCurve R)
+    (x : projModel W) (hx : x ∈ (projModelYChart W : (projModel W).Opens)) :
+    x ∈ (projModelZChart W : (projModel W).Opens) ↔
+      (chartYSectionsRingEquiv W).symm (infChartTElem W) ∉
+        ((projModelYChart W).2.primeIdealOf ⟨x, hx⟩).asIdeal := by
+  let q := (projModelYChart W).2.primeIdealOf ⟨x, hx⟩
+  have hxq : (projModelYChart W).2.fromSpec.base q = x := by
+    simpa only [q] using
+      (projModelYChart W).2.fromSpec_primeIdealOf ⟨x, hx⟩
+  change x ∈ (projModelZChart W : (projModel W).Opens) ↔
+    (chartYSectionsRingEquiv W).symm (infChartTElem W) ∉ q.asIdeal
+  rw [← hxq, Proj_fromSpec_awayToSection_awayι]
+  change (Proj.awayι (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+      (mk_X_mem_quotientGrading_one W 1) one_pos).base
+        ((Spec.map (Proj.awayToSection (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).base q) ∈
+      Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ↔ _
+  rw [← Scheme.Hom.mem_preimage,
+    Proj.awayι_preimage_basicOpen (quotientGrading (projIdeal W))
+      (mk_X_mem_quotientGrading_one W 1) one_pos
+      (mk_X_mem_quotientGrading_one W 2) one_pos]
+  change HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2) ∉
+        ((Spec.map (Proj.awayToSection (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).base q).asIdeal ↔ _
+  change HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W 1) (mk_X_mem_quotientGrading_one W 2) ∉
+        Ideal.comap (Proj.awayToSection (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))).hom q.asIdeal ↔ _
+  rw [Ideal.mem_comap, awayToSection_X2_eq_infChartTElemSection]
+
+/-- The canonical section neighborhood and the affine `Z`-chart cover the
+projective Weierstrass model. -/
+theorem projModelZChart_sup_sectionNeighborhood_eq_top (W : WeierstrassCurve R) :
+    (projModelZChart W : (projModel W).Opens) ⊔
+      (projModelSectionNeighborhood W : (projModel W).Opens) = ⊤ := by
+  rw [_root_.eq_top_iff]
+  intro x _
+  rw [TopologicalSpace.Opens.mem_sup]
+  have hYZ : x ∈ (projModelYChart W : (projModel W).Opens) ∨
+      x ∈ (projModelZChart W : (projModel W).Opens) := by
+    have hcover : (projModelYChart W : (projModel W).Opens) ⊔
+        (projModelZChart W : (projModel W).Opens) = ⊤ :=
+      basicOpen_X1_sup_basicOpen_X2_eq_top W
+    rw [← TopologicalSpace.Opens.mem_sup, hcover]
+    trivial
+  rcases hYZ with hxY | hxZ
+  · by_cases hxZ : x ∈ (projModelZChart W : (projModel W).Opens)
+    · exact Or.inl hxZ
+    · right
+      let q := (projModelYChart W).2.primeIdealOf ⟨x, hxY⟩
+      have htq : (chartYSectionsRingEquiv W).symm (infChartTElem W) ∈ q.asIdeal := by
+        by_contra htq
+        exact hxZ ((mem_projModelZChart_iff_not_mem_infChartTElem W x hxY).mpr htq)
+      let P : Ideal (AdjoinRoot (infChartCubic W)) :=
+        Ideal.map (chartYSectionsRingEquiv W) q.asIdeal
+      letI : P.IsPrime := Ideal.map_isPrime_of_equiv (chartYSectionsRingEquiv W)
+      have htP : infChartTElem W ∈ P := by
+        have hmap := Ideal.mem_map_of_mem (chartYSectionsRingEquiv W) htq
+        simpa only [RingEquiv.apply_symm_apply] using hmap
+      have hsP : AdjoinRoot.root (infChartCubic W) ∈ P :=
+        root_mem_of_tel_mem W P htP
+      have huSub : sectionUnitElem W - 1 ∈ P := by
+        apply (Ideal.span_le.mpr ?_) (sectionUnitElem_sub_one_mem W)
+        rintro a (rfl | rfl)
+        · exact hsP
+        · exact htP
+      have huq : (chartYSectionsRingEquiv W).symm (sectionUnitElem W) ∉ q.asIdeal := by
+        intro huq
+        have huP : sectionUnitElem W ∈ P := by
+          have hmap := Ideal.mem_map_of_mem (chartYSectionsRingEquiv W) huq
+          simpa only [RingEquiv.apply_symm_apply] using hmap
+        have h1 : (1 : AdjoinRoot (infChartCubic W)) ∈ P := by
+          have := P.sub_mem huP huSub
+          simpa only [sub_sub_cancel] using this
+        exact (inferInstance : P.IsPrime).ne_top ((Ideal.eq_top_iff_one P).mpr h1)
+      show x ∈ (projModel W).basicOpen (projModelSectionUnitSection W)
+      have hkey : (chartYSectionsRingEquiv W).symm (sectionUnitElem W) ∉ q.asIdeal ↔
+          x ∈ (projModel W).basicOpen
+            ((chartYSectionsRingEquiv W).symm (sectionUnitElem W)) := by
+        change (chartYSectionsRingEquiv W).symm (sectionUnitElem W) ∉
+            ((projModelYChart W).2.primeIdealOf ⟨x, hxY⟩).asIdeal ↔ _
+        rw [← PrimeSpectrum.mem_basicOpen, IsAffineOpen.primeIdealOf,
+          ← (projModelYChart W).2.fromSpec_preimage_basicOpen]
+        show (projModelYChart W).2.fromSpec.base
+            ((projModelYChart W).1.toSpecΓ.base ⟨x, hxY⟩) ∈
+              (projModel W).basicOpen
+                ((chartYSectionsRingEquiv W).symm (sectionUnitElem W)) ↔ _
+        rw [← Scheme.Hom.comp_apply, IsAffineOpen.toSpecΓ_fromSpec,
+          Scheme.Opens.ι_apply]
+      exact hkey.mp huq
+  · exact Or.inl hxZ
+
 /-- The root coordinate `s`, restricted to the canonical section neighborhood. -/
 noncomputable def projModelSectionRoot (W : WeierstrassCurve R) :
     Γ(projModel W, projModelSectionNeighborhood W) :=
