@@ -16,7 +16,7 @@ over a basic-open cover of the test.
 -/
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
-  MonObj WeierstrassCurve
+  MonObj WeierstrassCurve TensorProduct
 
 attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
   CategoryTheory.Over.braidedCategory MvPolynomial.gradedAlgebra
@@ -456,6 +456,98 @@ theorem kernelNDivisible_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :
     fun p => kernel_div_of_chartFactor E A (ii p) (hφpsurj p) (hφp2 p) (tB p) N (hNp p)
       _ (hεp p)
   choose δp hδpK hδpN using hsol
+  -- value forms of the piece data
+  have hvπ : ∀ p : ↑(Spec A'), (δp p).1 ≫ E.π = tB p ≫ chartToBase A (ii p) :=
+    fun p => (δp p).2
+  have hvK : ∀ p : ↑(Spec A'),
+      Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk
+        (I.map (algebraMap ↑A' (Localization.Away (aa p)))))) ≫ (δp p).1 =
+      (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk
+        (I.map (algebraMap ↑A' (Localization.Away (aa p)))))) ≫
+        (tB p ≫ chartToBase A (ii p))) ≫ E.zero := by
+    intro p
+    have h1 := congrArg Subtype.val (hδpK p)
+    rw [show ((0 : E.Point (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk
+      (I.map (algebraMap ↑A' (Localization.Away (aa p)))))) ≫
+      (tB p ≫ chartToBase A (ii p)))) :
+      Spec (CommRingCat.of ((Localization.Away (aa p)) ⧸
+        (I.map (algebraMap ↑A' (Localization.Away (aa p)))))) ⟶ E.E) =
+      (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk
+        (I.map (algebraMap ↑A' (Localization.Away (aa p)))))) ≫
+        (tB p ≫ chartToBase A (ii p))) ≫ E.zero from E.point_zero_val _] at h1
+    exact h1
+  have hvN : ∀ p : ↑(Spec A'), (δp p).1 ≫ E.mulByHom (N : ℤ) =
+      Spec.map (CommRingCat.ofHom (algebraMap ↑A' (Localization.Away (aa p)))) ≫ ε.1 := by
+    intro p
+    have h1 := congrArg Subtype.val (hδpN p)
+    rw [E.point_smul_eq_comp_mulBy] at h1
+    rw [h1, Point.castBase_coe]
+    rfl
+  -- the overlap agreement
+  have hcompat : ∀ p q : ↑(Spec A'),
+      pullback.fst (Spec.map (CommRingCat.ofHom (algebraMap ↑A'
+          (Localization.Away (aa p)))))
+        (Spec.map (CommRingCat.ofHom (algebraMap ↑A' (Localization.Away (aa q))))) ≫
+        (δp p).1 =
+      pullback.snd _ _ ≫ (δp q).1 := by
+    intro p q
+    -- work through the affine identification of the overlap
+    rw [← cancel_epi (pullbackSpecIso ↑A' (Localization.Away (aa p))
+      (Localization.Away (aa q))).inv]
+    rw [← Category.assoc, ← Category.assoc, pullbackSpecIso_inv_fst,
+      pullbackSpecIso_inv_snd]
+    -- the two tensor inclusions
+    set inL := CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+      (R := ↑A') (A := Localization.Away (aa p)) (B := Localization.Away (aa q)))
+      with hinL
+    set inR := CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+      (R := ↑A') (A := Localization.Away (aa p))
+      (B := Localization.Away (aa q))).toRingHom with hinR
+    -- the algebra triangles
+    have htriL : Spec.map inL ≫ Spec.map (CommRingCat.ofHom
+        (algebraMap ↑A' (Localization.Away (aa p)))) =
+        Spec.map (CommRingCat.ofHom (algebraMap ↑A'
+          (Localization.Away (aa p) ⊗[↑A'] Localization.Away (aa q)))) := by
+      rw [← Spec.map_comp]
+      refine congrArg Spec.map (CommRingCat.hom_ext (RingHom.ext fun a => ?_))
+      rfl
+    have htriR : Spec.map inR ≫ Spec.map (CommRingCat.ofHom
+        (algebraMap ↑A' (Localization.Away (aa q)))) =
+        Spec.map (CommRingCat.ofHom (algebraMap ↑A'
+          (Localization.Away (aa p) ⊗[↑A'] Localization.Away (aa q)))) := by
+      rw [← Spec.map_comp]
+      refine congrArg Spec.map (CommRingCat.hom_ext (RingHom.ext fun a => ?_))
+      show (1 : Localization.Away (aa p)) ⊗ₜ[↑A']
+        (algebraMap ↑A' (Localization.Away (aa q)) a) =
+        algebraMap ↑A' (Localization.Away (aa p) ⊗[↑A'] Localization.Away (aa q)) a
+      exact (Algebra.TensorProduct.algebraMap_apply' a).symm
+    -- the overlap chart factorisation (through the p-chart)
+    have hrangeT : Set.range ((Spec.map (CommRingCat.ofHom (algebraMap ↑A'
+        (Localization.Away (aa p) ⊗[↑A'] Localization.Away (aa q)))) ≫ b')).base ⊆
+        Set.range (A.U (ii p)).1.ι.base := by
+      rintro _ ⟨x, rfl⟩
+      rw [Scheme.Opens.range_ι, Scheme.Hom.comp_apply]
+      refine hsubA p _ ?_
+      -- the image prime avoids `aa p` since its image is a unit in the tensor
+      have hunit : IsUnit (algebraMap ↑A'
+          (Localization.Away (aa p) ⊗[↑A'] Localization.Away (aa q)) (aa p)) := by
+        have h1 : IsUnit (algebraMap ↑A' (Localization.Away (aa p)) (aa p)) :=
+          IsLocalization.Away.algebraMap_isUnit (aa p)
+        have h2 := h1.map (Algebra.TensorProduct.includeLeftRingHom
+          (R := ↑A') (A := Localization.Away (aa p)) (B := Localization.Away (aa q)))
+        exact h2
+      intro hy
+      exact x.isPrime.ne_top (Ideal.eq_top_of_isUnit_mem _ hy hunit)
+    set tT : Spec (CommRingCat.of (Localization.Away (aa p) ⊗[↑A']
+        Localization.Away (aa q))) ⟶ Spec Γ(S, (A.U (ii p)).1) :=
+      IsOpenImmersion.lift (A.U (ii p)).1.ι _ hrangeT ≫ (A.U (ii p)).2.isoSpec.hom
+      with htT_def
+    have htT : tT ≫ chartToBase A (ii p) =
+        Spec.map (CommRingCat.ofHom (algebraMap ↑A'
+          (Localization.Away (aa p) ⊗[↑A'] Localization.Away (aa q)))) ≫ b' := by
+      rw [htT_def, chartToBase, Category.assoc, Iso.hom_inv_id_assoc]
+      exact IsOpenImmersion.lift_fac _ _ hrangeT
+    sorry
   sorry
 
 end Glue
