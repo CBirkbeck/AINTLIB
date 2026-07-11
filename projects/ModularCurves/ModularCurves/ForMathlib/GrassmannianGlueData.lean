@@ -713,6 +713,7 @@ noncomputable def grassmannianScheme (R : Type u) [CommRing R] (k n : ℕ) : Sch
 section Points
 
 open MvPolynomial Matrix
+open scoped TensorProduct
 
 variable {R} {A : Type u} [CommRing A] [Algebra R A] {n : ℕ}
 
@@ -985,6 +986,27 @@ theorem pointOfChartMember_eq (h : IsChartAt (fun i => Pi.single (ι i) (1 : A))
   erw [← hgc]
   erw [pointOverlap_comp_overlapTransition_assoc]
   rfl
+
+/-! ### [GR-G-ASM] inverse-direction foundation: the chart covering as a spanning family -/
+
+/-- **[GR-G-ASM], the covering.** For any member `N` over `A`, the chart-witnessing elements
+`f_p` (one per prime `p`, from `exists_isChartAt_localizationAway`) span the unit ideal — so
+the basic opens `D(f_p)` cover `Spec A`, and on each the localized member is charted. This is
+the spanning family feeding `affineOpenCoverOfSpanRangeEqTop` for the prime-indexed
+`Scheme.OpenCover` of `Spec A` (recipe step 2). -/
+theorem exists_spanning_chart_witnesses (N : G(k, A ⊗[R] (Fin n → R); A)) :
+    ∃ (s : PrimeSpectrum A → A), Ideal.span (Set.range s) = ⊤ ∧
+      ∀ p : PrimeSpectrum A, ∃ (ι : Fin k ↪ Fin n), s p ∉ p.asIdeal ∧
+        IsChartAt (fun i =>
+            (1 : Localization.Away (s p)) ⊗ₜ[R] (Pi.single (ι i) 1 : Fin n → R))
+          (N.map (IsScalarTower.toAlgHom R A (Localization.Away (s p)))) := by
+  classical
+  choose ι fw hfw hchart using
+    fun p : PrimeSpectrum A => exists_isChartAt_localizationAway n N p.asIdeal
+  refine ⟨fw, ?_, fun p => ⟨ι p, hfw p, hchart p⟩⟩
+  by_contra hne
+  obtain ⟨M, hM, hle⟩ := Ideal.exists_le_maximal _ hne
+  exact hfw ⟨M, hM.isPrime⟩ (hle (Ideal.subset_span ⟨⟨M, hM.isPrime⟩, rfl⟩))
 
 end Points
 
