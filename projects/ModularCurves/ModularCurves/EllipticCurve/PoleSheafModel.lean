@@ -361,6 +361,180 @@ noncomputable def projModelZeroIdealTrivializationZ (W : WeierstrassCurve R) :
   exact localIdealGeneratorIso (projModelZero W) (projModelZChart W)
     1 hr hspan (by exact one_mem (nonZeroDivisors _))
 
+/-- The overlap of the canonical section neighborhood with the affine `Z`-chart. -/
+noncomputable def projModelPoleOverlap (W : WeierstrassCurve R) :
+    (projModel W).Opens :=
+  (projModelSectionNeighborhood W : (projModel W).Opens) ⊓
+    (projModelZChart W : (projModel W).Opens)
+
+theorem projModelPoleOverlap_le_sectionNeighborhood (W : WeierstrassCurve R) :
+    projModelPoleOverlap W ≤
+      (projModelSectionNeighborhood W : (projModel W).Opens) :=
+  inf_le_left
+
+theorem projModelPoleOverlap_le_ZChart (W : WeierstrassCurve R) :
+    projModelPoleOverlap W ≤ (projModelZChart W : (projModel W).Opens) :=
+  inf_le_right
+
+/-- The section parameter `s`, restricted to the overlap with the `Z`-chart. -/
+noncomputable def projModelSectionRootOverlap (W : WeierstrassCurve R) :
+    Γ(projModel W, projModelPoleOverlap W) :=
+  (projModel W).presheaf.map
+    (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op
+    (projModelSectionRoot W)
+
+/-- The section-neighborhood ideal trivialization, expressed on its over-site. -/
+noncomputable def projModelZeroIdealOverTrivialization (W : WeierstrassCurve R) :
+    (idealModule (projModelZero W)).over (projModelSectionNeighborhood W) ≅
+      SheafOfModules.unit
+        ((projModel W).ringCatSheaf.over (projModelSectionNeighborhood W)) :=
+  Scheme.Modules.overTrivializationOfRestrictIso
+    (idealModule (projModelZero W)) (projModelSectionNeighborhood W)
+    (projModelZeroIdealTrivialization W).symm
+
+/-- The `Z`-chart ideal trivialization, expressed on its over-site. -/
+noncomputable def projModelZeroIdealOverTrivializationZ (W : WeierstrassCurve R) :
+    (idealModule (projModelZero W)).over (projModelZChart W) ≅
+      SheafOfModules.unit ((projModel W).ringCatSheaf.over (projModelZChart W)) :=
+  Scheme.Modules.overTrivializationOfRestrictIso
+    (idealModule (projModelZero W)) (projModelZChart W)
+    (projModelZeroIdealTrivializationZ W).symm
+
+theorem projModelZeroIdealOverTrivialization_inv_comp
+    (W : WeierstrassCurve R) :
+    (projModelZeroIdealOverTrivialization W).inv ≫
+        (idealModuleToUnit (projModelZero W)).over
+          (projModelSectionNeighborhood W) =
+      SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
+        (projModelSectionNeighborhood W) (projModelSectionRoot W) := by
+  let r := projModelSectionRoot W
+  have hspan := projModelZero_ker_ideal_sectionNeighborhood W
+  have hr : r ∈ (projModelZero W).ker.ideal
+      (projModelSectionNeighborhood W) := by
+    rw [hspan]
+    exact Ideal.mem_span_singleton_self r
+  simpa only [projModelZeroIdealOverTrivialization,
+    projModelZeroIdealTrivialization] using
+    localIdealGeneratorOverTrivialization_inv_comp
+      (projModelZero W) (projModelSectionNeighborhood W) r hr hspan
+        (projModelSectionRoot_mem_nonZeroDivisors W)
+
+theorem projModelZeroIdealOverTrivializationZ_inv_comp
+    (W : WeierstrassCurve R) :
+    (projModelZeroIdealOverTrivializationZ W).inv ≫
+        (idealModuleToUnit (projModelZero W)).over (projModelZChart W) =
+      SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
+        (projModelZChart W) (1 : Γ(projModel W, projModelZChart W)) := by
+  have hspan := projModelZero_ker_ideal_chartZ W
+  have hr : (1 : Γ(projModel W, projModelZChart W)) ∈
+      (projModelZero W).ker.ideal (projModelZChart W) := by
+    rw [hspan]
+    exact Ideal.mem_span_singleton_self 1
+  simpa only [projModelZeroIdealOverTrivializationZ,
+    projModelZeroIdealTrivializationZ] using
+    localIdealGeneratorOverTrivialization_inv_comp
+      (projModelZero W) (projModelZChart W) 1 hr hspan
+        (one_mem (nonZeroDivisors _))
+
+/-- The section-neighborhood ideal trivialization, restricted to the overlap. -/
+noncomputable def projModelZeroIdealOverlapTrivialization
+    (W : WeierstrassCurve R) :
+    (idealModule (projModelZero W)).over (projModelPoleOverlap W) ≅
+      SheafOfModules.unit
+        ((projModel W).ringCatSheaf.over (projModelPoleOverlap W)) :=
+  SheafOfModules.restrictOverTrivialization (projModel W).ringCatSheaf
+    (idealModule (projModelZero W)) (projModelSectionNeighborhood W)
+    (projModelZeroIdealOverTrivialization W)
+    (Over.mk (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)))
+
+/-- The `Z`-chart ideal trivialization, restricted to the overlap. -/
+noncomputable def projModelZeroIdealOverlapTrivializationZ
+    (W : WeierstrassCurve R) :
+    (idealModule (projModelZero W)).over (projModelPoleOverlap W) ≅
+      SheafOfModules.unit
+        ((projModel W).ringCatSheaf.over (projModelPoleOverlap W)) :=
+  SheafOfModules.restrictOverTrivialization (projModel W).ringCatSheaf
+    (idealModule (projModelZero W)) (projModelZChart W)
+    (projModelZeroIdealOverTrivializationZ W)
+    (Over.mk (homOfLE (projModelPoleOverlap_le_ZChart W)))
+
+theorem projModelZeroIdealOverlapTrivialization_inv_comp
+    (W : WeierstrassCurve R) :
+    (projModelZeroIdealOverlapTrivialization W).inv ≫
+        (idealModuleToUnit (projModelZero W)).over (projModelPoleOverlap W) =
+      SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
+        (projModelPoleOverlap W) (projModelSectionRootOverlap W) := by
+  have hres := restrictOverTrivialization_inv_comp_over
+    (idealModuleToUnit (projModelZero W)) (projModelSectionNeighborhood W)
+      (projModelZeroIdealOverTrivialization W) (projModelSectionRoot W)
+        (projModelZeroIdealOverTrivialization_inv_comp W)
+          (projModelPoleOverlap_le_sectionNeighborhood W)
+  convert hres using 1
+  all_goals simp only [projModelZeroIdealOverlapTrivialization,
+    projModelSectionRootOverlap]
+  all_goals rfl
+
+theorem projModelZeroIdealOverlapTrivializationZ_inv_comp
+    (W : WeierstrassCurve R) :
+    (projModelZeroIdealOverlapTrivializationZ W).inv ≫
+        (idealModuleToUnit (projModelZero W)).over (projModelPoleOverlap W) =
+      SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
+        (projModelPoleOverlap W) (1 : Γ(projModel W, projModelPoleOverlap W)) := by
+  have hres := restrictOverTrivialization_inv_comp_over
+    (idealModuleToUnit (projModelZero W)) (projModelZChart W)
+      (projModelZeroIdealOverTrivializationZ W)
+        (1 : Γ(projModel W, projModelZChart W))
+          (projModelZeroIdealOverTrivializationZ_inv_comp W)
+            (projModelPoleOverlap_le_ZChart W)
+  convert hres using 1
+  all_goals simp only [projModelZeroIdealOverlapTrivializationZ, map_one]
+  all_goals rfl
+
+section
+
+local instance (X : Scheme.{u}) :
+    ∀ U, IsMulCommutative (X.ringCatSheaf.obj.obj U) :=
+  fun U ↦ by
+    change IsMulCommutative (X.presheaf.obj U)
+    exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
+
+/-- On the overlap, the ideal trivializations differ by multiplication by the
+section parameter `s`. -/
+theorem projModelZeroIdealOverlap_transition (W : WeierstrassCurve R) :
+    (projModelZeroIdealOverlapTrivializationZ W).hom =
+      (projModelZeroIdealOverlapTrivialization W).hom ≫
+        SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
+          (projModelPoleOverlap W) (projModelSectionRootOverlap W) := by
+  let eU := projModelZeroIdealOverlapTrivialization W
+  let eZ := projModelZeroIdealOverlapTrivializationZ W
+  let i := (idealModuleToUnit (projModelZero W)).over (projModelPoleOverlap W)
+  let s := projModelSectionRootOverlap W
+  change eZ.hom = eU.hom ≫
+    SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
+      (projModelPoleOverlap W) s
+  have hone := map_one
+    (SheafOfModules.overUnitScalarEndRingHom (projModel W).ringCatSheaf
+      (projModelPoleOverlap W))
+  have hZ : eZ.inv ≫ i = 𝟙 _ := by
+    rw [show eZ.inv ≫ i =
+      SheafOfModules.overUnitScalarEnd (projModel W).ringCatSheaf
+        (projModelPoleOverlap W) 1 from
+          projModelZeroIdealOverlapTrivializationZ_inv_comp W]
+    exact hone
+  have hi : i = eZ.hom := by
+    calc
+      i = 𝟙 _ ≫ i := (Category.id_comp i).symm
+      _ = (eZ.hom ≫ eZ.inv) ≫ i := by rw [eZ.hom_inv_id]
+      _ = eZ.hom ≫ (eZ.inv ≫ i) := Category.assoc _ _ _
+      _ = eZ.hom ≫ 𝟙 _ := congrArg (fun q ↦ eZ.hom ≫ q) hZ
+      _ = eZ.hom := Category.comp_id _
+  apply (cancel_epi eU.inv).1
+  rw [eU.inv_hom_id_assoc]
+  rw [← hi]
+  exact projModelZeroIdealOverlapTrivialization_inv_comp W
+
+end
+
 /-- The simple-pole sheaf is trivial on the canonical neighborhood of the zero
 section, by dualizing the ideal generated by `s`. -/
 noncomputable def projModelSectionPoleSheafTrivialization (W : WeierstrassCurve R) :
