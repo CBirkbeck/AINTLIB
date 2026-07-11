@@ -785,6 +785,20 @@ noncomputable def affineOpenAmbientSection {Y : Scheme.{u}} (U : Y.affineOpens)
     ((U.1.ι.appIso ⊤).inv r)
 
 @[simp]
+theorem affineOpenAmbientSection_add {Y : Scheme.{u}} (U : Y.affineOpens)
+    (r s : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))) :
+    affineOpenAmbientSection U (r + s) =
+      affineOpenAmbientSection U r + affineOpenAmbientSection U s := by
+  unfold affineOpenAmbientSection
+  rw [map_add, map_add]
+
+@[simp]
+theorem affineOpenAmbientSection_zero {Y : Scheme.{u}} (U : Y.affineOpens) :
+    affineOpenAmbientSection U 0 = 0 := by
+  unfold affineOpenAmbientSection
+  rw [map_zero, map_zero]
+
+@[simp]
 theorem affineOpenTopSection_ambientSection {Y : Scheme.{u}}
     (U : Y.affineOpens) (r : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))) :
     affineOpenTopSection U (affineOpenAmbientSection U r) = r := by
@@ -1743,6 +1757,84 @@ noncomputable def sectionPoleSheafPowerTrivialization
           (monoidalUnitObjIso U.toScheme).symm) ≪≫
         λ_ (𝟙_ U.toScheme.Modules) ≪≫
         monoidalUnitObjIso U.toScheme
+
+/-- A global module section, restricted to the top open of an affine open
+subscheme. -/
+noncomputable def localTrivializationRestriction {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens) (m : Γ(M, (⊤ : X.Opens))) :
+    Γ(M.restrict U.1.ι, (⊤ : U.1.toScheme.Opens)) :=
+  (M.restrictAppIso U.1.ι (⊤ : U.1.toScheme.Opens)).inv
+    (M.presheaf.map (eqToHom U.1.ι_image_top).op
+      (M.presheaf.map (homOfLE le_top).op m))
+
+@[simp]
+theorem localTrivializationRestriction_add {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens) (m n : Γ(M, (⊤ : X.Opens))) :
+    localTrivializationRestriction M U (m + n) =
+      localTrivializationRestriction M U m +
+        localTrivializationRestriction M U n := by
+  simp [localTrivializationRestriction, map_add]
+
+@[simp]
+theorem localTrivializationRestriction_zero {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens) : localTrivializationRestriction M U 0 = 0 := by
+  simp [localTrivializationRestriction, map_zero]
+
+/-- A restricted section, expressed in the trivial unit module. -/
+noncomputable def localTrivializationTopSection {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (m : Γ(M, (⊤ : X.Opens))) :
+    Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) :=
+  e.hom.val.app (.op ⊤) (localTrivializationRestriction M U m)
+
+@[simp]
+theorem localTrivializationTopSection_add {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (m n : Γ(M, (⊤ : X.Opens))) :
+    localTrivializationTopSection M U e (m + n) =
+      localTrivializationTopSection M U e m +
+        localTrivializationTopSection M U e n := by
+  unfold localTrivializationTopSection
+  rw [localTrivializationRestriction_add]
+  exact (e.hom.val.app (.op ⊤)).hom.map_add _ _
+
+@[simp]
+theorem localTrivializationTopSection_zero {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme) :
+    localTrivializationTopSection M U e 0 = 0 := by
+  unfold localTrivializationTopSection
+  rw [localTrivializationRestriction_zero]
+  exact (e.hom.val.app (.op ⊤)).hom.map_zero
+
+/-- The coefficient of a global module section in a chosen trivialization on an
+affine open. -/
+noncomputable def localTrivializationCoefficient {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (m : Γ(M, (⊤ : X.Opens))) : Γ(X, U.1) :=
+  affineOpenAmbientSection U (localTrivializationTopSection M U e m)
+
+@[simp]
+theorem localTrivializationCoefficient_add {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (m n : Γ(M, (⊤ : X.Opens))) :
+    localTrivializationCoefficient M U e (m + n) =
+      localTrivializationCoefficient M U e m +
+        localTrivializationCoefficient M U e n := by
+  unfold localTrivializationCoefficient
+  rw [localTrivializationTopSection_add, affineOpenAmbientSection_add]
+
+@[simp]
+theorem localTrivializationCoefficient_zero {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme) :
+    localTrivializationCoefficient M U e 0 = 0 := by
+  unfold localTrivializationCoefficient
+  rw [localTrivializationTopSection_zero, affineOpenAmbientSection_zero]
 
 /-- Every tensor power of the pole sheaf commutes with restriction along an open
 immersion of the base. -/

@@ -412,4 +412,27 @@ noncomputable def projModelSectionPoleSheafPowerTrivializationZ
     (projModelZero_projModelπ W) (projModelZChart W)
     (projModelSectionPoleSheafTrivializationZ W) n
 
+/-- The coefficient near the zero section of a global section of `O(n[0])`. -/
+noncomputable def projModelSectionPoleCoefficient (W : WeierstrassCurve R) (n : ℕ)
+    (m : Γ(sectionPoleSheafPower (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W) n, (⊤ : (projModel W).Opens))) :
+    Γ(projModel W, projModelSectionNeighborhood W) :=
+  localTrivializationCoefficient
+    (sectionPoleSheafPower (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W) n)
+    (projModelSectionNeighborhood W)
+    (projModelSectionPoleSheafPowerTrivialization W n) m
+
+/-- The affine coordinate of a global section of `O(n[0])` on the `Z`-chart. -/
+noncomputable def projModelSectionPoleCoefficientZ (W : WeierstrassCurve R) (n : ℕ)
+    (m : Γ(sectionPoleSheafPower (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W) n, (⊤ : (projModel W).Opens))) :
+    W.toAffine.CoordinateRing :=
+  chartZSectionsRingEquiv W
+    (localTrivializationCoefficient
+      (sectionPoleSheafPower (projModelπ W) (projModelZero W)
+        (projModelZero_projModelπ W) n)
+      (projModelZChart W)
+      (projModelSectionPoleSheafPowerTrivializationZ W n) m)
+
 end ModularCurves
