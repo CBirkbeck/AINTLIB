@@ -358,3 +358,33 @@ packagers (Functor.lean:710/733); `Adjunction.corepresentableBy` exists (Basic.l
 Sheaf fields are now `.obj`/`.cond`→`.property` (deprecation incoming), Hom field `.hom`;
 legacy `ringCatSheaf.obj`-spelled statements elaborate their ⊗ at
 `(sheafToPresheaf …).obj`-clothing where NO monoidal instance matches — respell, don't fight.
+
+## [CMP-PAIR] decomposition (fable-PIC0, 2026-07-11, CHARTER-PIC-3 session open)
+
+Target: `nonempty_eval_iso : IsInvertible M → Nonempty (tensorObj M (dualObj M) ≅ unitObj X)`
+(PicComparison.lean:106). Route A (canonical evaluation) adjudicated: local-glue routes are
+non-canonical (cocycle debt); the canonical `ev` has restriction-compat for free
+(`ambientDual_map_dualToAmbient`, Dual.lean:157).
+
+Leaves:
+- **[PAIR-1] sections evaluation** — for `m ∈ M(U)`, `φ ∈ dualSections(U) = (M.over U ⟶
+  unit (R.over U))`: evaluate via the over-machinery Dual.lean already ships
+  (`overUnitSectionEquiv` :44 = unit-over sections ≃ R(U); the :43 idiom "evaluation at the
+  terminal object U ⟶ U"). Bilinear in (m, φ) over R(U).
+- **[PAIR-2] the evaluation morphism** `ev : tensorObj M (dualObj M) ⟶ unitObj X` — maps
+  out of the sheafified tensor = presheaf-level maps into the (already-sheaf) unit via
+  `sheafificationAdjunction.homEquiv` + `sheafifyValIso`; presheaf-level map := pointwise
+  `TensorProduct.lift` of [PAIR-1], naturality from `ambientDual_map_dualToAmbient` +
+  `dualRestrict`-compat lemmas (:166-210).
+- **[PAIR-3 = CMP-LOC] cover-local iso ⟹ iso** (independent, reusable): a map `g : A ⟶ B`
+  of `X.Modules` whose restriction to each member of an open cover is iso, is iso. Route:
+  cover-local iso ⟹ `IsLocallyInjective/Surjective` of `g.val` (the trivializing sieve
+  elements witness both) ⟹ `sheafificationW`-membership ⟹ `IsIso (sh.map g.val)` ⟹ IsIso g
+  by the `sheafifyValIso`-naturality square (sheaves are sh-local objects).
+- **[PAIR-4] local identification** — `(restrictFunctor (U i).ι).map ev` is iso: conjugate
+  by the trivialization `e` and the owner's `dualRestrictIsoOfRestrictIso` (Dual.lean:928);
+  the conjugated map is the unit self-pairing `unit ⊗ unit ⟶ unit` (multiplication), an iso
+  via the unitor. Consumes Dual.lean restriction API; check-then-cite.
+- **[PAIR-ASM]** = [PAIR-3] applied to ev with [PAIR-4] on hM's cover.
+
+[CMP-←] (Zariski-local freeness) queued after; independent.
