@@ -668,6 +668,19 @@ theorem squareMulRes_comp_ι : P.squareMulRes ≫ P.groupOpen.ι = P.squareMul :
   rw [show (⊤ : P.groupSquare.Opens).ι = P.groupSquare.topIso.hom from rfl,
     ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
 
+/-- The corestricted multiplication over the base: `squareMulRes ≫ groupToBaseRes` is the
+square's projection to the base, i.e. `fst ≫ groupToBaseRes`. -/
+@[reassoc]
+theorem squareMulRes_comp_groupToBaseRes :
+    P.squareMulRes ≫ P.groupToBaseRes
+      = pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupToBaseRes := by
+  rw [← cancel_mono P.V.ι, Category.assoc, Category.assoc]
+  rw [show P.groupToBaseRes ≫ P.V.ι = P.groupOpen.ι ≫ G.π from
+    Scheme.Hom.resLE_comp_ι _ _]
+  rw [← Category.assoc P.squareMulRes, P.squareMulRes_comp_ι, P.squareMul_π]
+  rw [show P.groupToBaseRes ≫ P.V.ι = P.groupOpen.ι ≫ G.π from
+    Scheme.Hom.resLE_comp_ι _ _]
+
 /-- The affine Künneth transport for the group square, `⊤`-level. -/
 noncomputable abbrev squareΓTop :
     Γ(P.groupSquare, ⊤) ⟶ CommRingCat.of (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) :=
@@ -677,6 +690,60 @@ noncomputable abbrev squareΓTop :
 noncomputable def comulTop :
     P.groupRingTop ⟶ CommRingCat.of (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) :=
   P.squareMulRes.appTop ≫ P.squareΓTop
+
+/-- The left unit section is a section of the corestricted multiplication. -/
+@[reassoc]
+theorem leftUnitSection_comp_squareMulRes :
+    P.leftUnitSection ≫ P.squareMulRes = 𝟙 P.groupOpen.toScheme := by
+  rw [← cancel_mono P.groupOpen.ι, Category.assoc, P.squareMulRes_comp_ι,
+    P.leftUnitSection_comp_squareMul, Category.id_comp]
+
+/-- The right unit section is a section of the corestricted multiplication. -/
+@[reassoc]
+theorem rightUnitSection_comp_squareMulRes :
+    P.rightUnitSection ≫ P.squareMulRes = 𝟙 P.groupOpen.toScheme := by
+  rw [← cancel_mono P.groupOpen.ι, Category.assoc, P.squareMulRes_comp_ι,
+    P.rightUnitSection_comp_squareMul, Category.id_comp]
+
+/-! #### The `⊤`-level counit laws -/
+
+/-- The `⊤`-level counit lift, dual of the left unit section. -/
+noncomputable def counitLiftTop :
+    CommRingCat.of (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) ⟶ P.groupRingTop :=
+  inv P.squareΓTop ≫ P.leftUnitSection.appTop
+
+theorem comulTop_comp_counitLiftTop :
+    P.comulTop ≫ P.counitLiftTop = 𝟙 P.groupRingTop := by
+  rw [comulTop, counitLiftTop, Category.assoc, ← Category.assoc P.squareΓTop,
+    IsIso.hom_inv_id, Category.id_comp, ← Scheme.Hom.comp_appTop,
+    P.leftUnitSection_comp_squareMulRes, AlgebraicGeometry.Scheme.Hom.id_appTop]
+
+/-- **Left inclusion, `⊤`-level**: dualises to `ε'` followed by the base inclusion. -/
+theorem includeLeft_comp_counitLiftTop :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := P.baseRingTop) (A := P.groupRingTop) (B := P.groupRingTop))
+      ≫ P.counitLiftTop
+      = P.counitTop ≫ P.groupToBaseRes.appTop := by
+  have hleg := fst_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+  have hinv : affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+      ≫ inv P.squareΓTop = 𝟙 _ :=
+    IsIso.hom_inv_id _
+  rw [counitLiftTop, ← Category.assoc, ← hleg, Category.assoc, Category.assoc,
+    reassoc_of% hinv, ← Scheme.Hom.comp_appTop,
+    P.leftUnitSection_fst, Scheme.Hom.comp_appTop, counitTop]
+
+/-- **Right inclusion, `⊤`-level**: dualises to the identity. -/
+theorem includeRight_comp_counitLiftTop :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := P.baseRingTop) (A := P.groupRingTop) (B := P.groupRingTop)).toRingHom
+      ≫ P.counitLiftTop = 𝟙 P.groupRingTop := by
+  have hleg := snd_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+  have hinv : affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+      ≫ inv P.squareΓTop = 𝟙 _ :=
+    IsIso.hom_inv_id _
+  rw [counitLiftTop, ← Category.assoc, ← hleg, Category.assoc, Category.assoc,
+    reassoc_of% hinv, ← Scheme.Hom.comp_appTop,
+    P.leftUnitSection_snd, AlgebraicGeometry.Scheme.Hom.id_appTop]
 
 end AffineChartPatch
 
