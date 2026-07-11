@@ -1012,6 +1012,26 @@ theorem exists_spanning_chart_witnesses (N : G(k, A ⊗[R] (Fin n → R); A)) :
   obtain ⟨M, hM, hle⟩ := Ideal.exists_le_maximal _ hne
   exact hfw ⟨M, hM.isPrime⟩ (hle (Ideal.subset_span ⟨⟨M, hM.isPrime⟩, rfl⟩))
 
+/-- **[GR-G-ASM], functoriality of the point construction.** The `A`-point of a globally-
+charted member, transported by a base-change `g : A →ₐ[R] B`, is the `B`-point of the pushed
+member `normMap g N` — the naturality that discharges the `glueMorphisms` compatibility
+obligation on overlaps. Reduces to `chartMatrix_normMap` (entrywise chart-matrix naturality)
+through `comp_eval₂Hom`. -/
+theorem pointOfChartMember_naturality {B : Type u} [CommRing B] [Algebra R B]
+    (ι : Fin k ↪ Fin n) (N : G(k, (Fin n → A); A)) (g : A →ₐ[R] B)
+    (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N) :
+    Spec.map (CommRingCat.ofHom g.toRingHom) ≫ pointOfChartMember (R := R) ι N h
+      = pointOfChartMember (R := R) ι (normMap n g N) (isChartAt_normMap n ι g N h) := by
+  have hring : (g.toRingHom).comp (evalAtR (R := R) ι N h)
+      = evalAtR (R := R) ι (normMap n g N) (isChartAt_normMap n ι g N h) := by
+    rw [evalAtR, evalAtR, comp_eval₂Hom]
+    congr 1
+    · exact g.comp_algebraMap
+    · funext p
+      exact (congrFun (congrFun (chartMatrix_normMap n ι g N h) p.1) p.2).symm
+  rw [pointOfChartMember, pointOfChartMember, ← Category.assoc, ← Spec.map_comp,
+    ← CommRingCat.ofHom_comp, hring]
+
 end Points
 
 end Module.Grassmannian
