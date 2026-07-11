@@ -1127,6 +1127,22 @@ theorem pointOfChartMember_universalChartMember (ι : Fin k ↪ Fin n) :
         chartMatrix_universalChartMember (R := R) n ι]
   rw [pointOfChartMember, hid, CommRingCat.ofHom_id, Spec.map_id, Category.id_comp]
 
+/-- **[GR-G-ASM], the chart-local round-trip.** A chart-ring point `φ : ChartRing R ι → A'`
+(i.e. an `A'`-point of the ι-chart) recovers the member `normMap φ (universal)`, whose
+`pointOfMember`-style point is `φ` composed with the chart inclusion. Together with
+`pointOfChartMember_universalChartMember` this exhibits `pointOfChartMember` as inverse to the
+chart projection on each chart — the local half of the T-point equivalence's inverse. -/
+theorem pointOfChartMember_normMap_universal {A' : Type u} [CommRing A'] [Algebra R A']
+    (ι : Fin k ↪ Fin n) (φ : ChartRing R ι →ₐ[R] A') :
+    pointOfChartMember (R := R) ι (normMap n φ (universalChartMember R n ι).1)
+        (isChartAt_normMap n ι φ (universalChartMember R n ι).1
+          (universalChartMember R n ι).2)
+      = Spec.map (CommRingCat.ofHom φ.toRingHom) ≫ (glueData R k n).ι (ULift.up ι) := by
+  rw [← pointOfChartMember_naturality ι (universalChartMember R n ι).1 φ
+      (universalChartMember R n ι).2]
+  congr 1
+  exact pointOfChartMember_universalChartMember (R := R) ι
+
 end Points
 
 end Module.Grassmannian
