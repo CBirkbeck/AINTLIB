@@ -313,6 +313,14 @@ theorem isIso_of_isIso_restrict {A B : X.Modules} (g : A ⟶ B) {ι : Type u}
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- **[PAIR-4b]** The evaluation on the unit module is an isomorphism: the presheaf-level
+pairing is pointwise invertible (every endomorphism of the unit is a scalar), so the
+sheafified evaluation is a composition of isomorphisms. -/
+theorem isIso_ev_unitObj (Y : Scheme.{u}) : IsIso (ev (unitObj Y)) := by
+  sorry
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **[PAIR-4]** On an open where `M` trivializes, the restriction of the evaluation
 morphism is an isomorphism: conjugate by the trivialization and the induced trivialization
 of the dual (`Picard/Dual.lean`'s restriction layer); the conjugated map is the unit
