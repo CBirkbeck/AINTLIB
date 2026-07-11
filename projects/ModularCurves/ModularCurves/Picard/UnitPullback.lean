@@ -39,6 +39,31 @@ theorem unitEndomorphismOfTopSection_app_apply {X : Scheme.{u}}
       a * X.presheaf.map (homOfLE (le_top : W ≤ (⊤ : X.Opens))).op r := by
   rfl
 
+/-- Composition of structure-sheaf scalar endomorphisms is multiplication of
+their defining top-open sections. -/
+theorem unitEndomorphismOfTopSection_comp {X : Scheme.{u}}
+    (r s : Γ(X, (⊤ : X.Opens))) :
+    unitEndomorphismOfTopSection r ≫ unitEndomorphismOfTopSection s =
+      unitEndomorphismOfTopSection (r * s) := by
+  apply SheafOfModules.hom_ext
+  ext U
+  change (1 * X.presheaf.map
+      (homOfLE (le_top : U.unop ≤ (⊤ : X.Opens))).op r) *
+      X.presheaf.map
+        (homOfLE (le_top : U.unop ≤ (⊤ : X.Opens))).op s =
+    1 * X.presheaf.map
+      (homOfLE (le_top : U.unop ≤ (⊤ : X.Opens))).op (r * s)
+  rw [map_mul, mul_assoc]
+
+/-- Multiplication by the unit section is the identity of the structure sheaf. -/
+theorem unitEndomorphismOfTopSection_one {X : Scheme.{u}} :
+    unitEndomorphismOfTopSection (1 : Γ(X, (⊤ : X.Opens))) = 𝟙 _ := by
+  apply SheafOfModules.hom_ext
+  ext U
+  change 1 * X.presheaf.map
+      (homOfLE (le_top : U.unop ≤ (⊤ : X.Opens))).op 1 = 1
+  rw [map_one, mul_one]
+
 theorem unitEndomorphismOfTopSection_comp_unitToPushforward
     {X Y : Scheme.{u}} (f : X ⟶ Y) (r : Γ(Y, (⊤ : Y.Opens))) :
     unitEndomorphismOfTopSection r ≫
