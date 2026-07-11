@@ -745,6 +745,53 @@ theorem includeRight_comp_counitLiftTop :
     reassoc_of% hinv, ← Scheme.Hom.comp_appTop,
     P.leftUnitSection_snd, AlgebraicGeometry.Scheme.Hom.id_appTop]
 
+/-! #### `⊤`-level algebra-map packaging -/
+
+theorem algebraMapTop_eq :
+    CommRingCat.ofHom (algebraMap P.baseRingTop P.groupRingTop)
+      = P.groupToBaseRes.appTop := rfl
+
+/-- **`Δ'` is `R'`-linear.** -/
+theorem algebraMap_comp_comulTop :
+    P.groupToBaseRes.appTop ≫ P.comulTop
+      = CommRingCat.ofHom
+          (algebraMap P.baseRingTop (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop)) := by
+  rw [comulTop, ← Category.assoc]
+  rw [show P.groupToBaseRes.appTop ≫ P.squareMulRes.appTop
+      = (P.squareMulRes ≫ P.groupToBaseRes).appTop from
+    (Scheme.Hom.comp_appTop _ _).symm]
+  rw [P.squareMulRes_comp_groupToBaseRes, Scheme.Hom.comp_appTop, Category.assoc]
+  exact base_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+
+/-- **`ε'` is `R'`-linear** (in fact the base-restriction of `𝟙 R'`): the unit section is
+a section of the structure map, so `ε' ∘ algebraMap = 𝟙`. -/
+theorem algebraMap_comp_counitTop :
+    P.groupToBaseRes.appTop ≫ P.counitTop = 𝟙 P.baseRingTop := by
+  rw [counitTop, ← Scheme.Hom.comp_appTop, P.unitSection_comp_groupToBase,
+    AlgebraicGeometry.Scheme.Hom.id_appTop]
+
+/-- The `⊤`-level counit as an `R'`-algebra map. -/
+noncomputable def counitAlgTop : P.groupRingTop →ₐ[P.baseRingTop] P.baseRingTop where
+  toRingHom := P.counitTop.hom
+  commutes' := fun r => by
+    have h := congrArg (fun m : P.baseRingTop ⟶ P.baseRingTop => m.hom r)
+      (P.algebraMapTop_eq ▸ P.algebraMap_comp_counitTop)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_id,
+      RingHom.id_apply, CommRingCat.hom_ofHom] at h
+    exact h
+
+/-- The `⊤`-level comultiplication as an `R'`-algebra map. -/
+noncomputable def comulAlgTop :
+    P.groupRingTop →ₐ[P.baseRingTop]
+      (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) where
+  toRingHom := P.comulTop.hom
+  commutes' := fun r => by
+    have h := congrArg (fun m : P.baseRingTop ⟶ CommRingCat.of
+      (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) => m.hom r)
+      (P.algebraMapTop_eq ▸ P.algebraMap_comp_comulTop)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h
+    exact h
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
