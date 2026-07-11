@@ -5,6 +5,7 @@ import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 import Mathlib.AlgebraicGeometry.AlgClosed.Basic
 import Mathlib.LinearAlgebra.Matrix.SpecialLinearGroup
 import ModularCurves.EllipticCurve.MulByHomUnramified
+import ModularCurves.Moduli.NaiveProblems
 
 /-!
 # General level structures P_H, and full level N over an arbitrary base

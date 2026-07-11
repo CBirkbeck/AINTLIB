@@ -11,6 +11,7 @@ import ModularCurves.EllipticCurve.TorsionFibre
 import ModularCurves.EllipticCurve.GroupLawConstruction
 import ModularCurves.ForMathlib.GeometricFibreComparison
 import Mathlib.NumberTheory.Divisors
+import ModularCurves.Moduli.NaiveProblems
 
 /-!
 # The Y₁(N) assembly (T-E7 / STREAM-Y1): Loeffler Def 3.3.6 + Thm 3.4.4

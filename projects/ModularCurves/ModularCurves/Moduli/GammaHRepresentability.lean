@@ -11,6 +11,7 @@ import ModularCurves.Moduli.QuotientProblem
 import ModularCurves.Moduli.LevelSpaces
 import ModularCurves.ModularCurve.YFullRoute
 import ModularCurves.GroupScheme.DeligneOrder
+import ModularCurves.Moduli.NaiveProblems
 
 /-!
 # Γ_H relative representability (Loeffler 3.8.2 / KM 3.7.1 + 7.1) — corrected statements

@@ -1,1 +1,1 @@
-FOCUS: Y1-CLOSER S2 hfib — 6a-6d GREEN+pushed; 6e-6g complete draft in .lean.full (whnf-timeout when inline: HOIST as standalone private lemma with explicit args - the session registry pattern); then S3-S6
+FOCUS: Y1-CLOSER — E1-E4 done; next: S4 split (NaiveProblems.lean) then E5 lifting, E6, F1, S6

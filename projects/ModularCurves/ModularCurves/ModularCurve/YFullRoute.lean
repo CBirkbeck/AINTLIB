@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.ForMathlib.SmoothDescent
 import ModularCurves.Moduli.GammaH
 import ModularCurves.Moduli.LevelSpaces
+import ModularCurves.Moduli.NaiveProblems
 
 /-!
 # STREAM-YFULL: the Y(N) representability route (T-E9)

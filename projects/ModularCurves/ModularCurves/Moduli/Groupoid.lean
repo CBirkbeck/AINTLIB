@@ -1,5 +1,6 @@
 import ModularCurves.Moduli.EllCategory
 import ModularCurves.EllipticCurve.EndomorphismDegree
+import ModularCurves.Moduli.NaiveProblems
 
 /-!
 # Groupoid-valued moduli (expert-review addition, Q7)
