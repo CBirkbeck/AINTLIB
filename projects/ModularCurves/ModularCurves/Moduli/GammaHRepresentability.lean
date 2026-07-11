@@ -1231,7 +1231,8 @@ theorem gammaH_representable_of_rigid (N : ℕ) [NeZero N]
     (pkg : ModuliProblem.QuotientProblemData (gammaHAut R N H))
     (hrig : pkg.prob.Rigid) :
     pkg.prob.Representable := by
-  sorry
+  have haff := pkg.affineOverEll
+  exact (ModuliProblem.representable_iff pkg.prob haff).mpr ⟨haff.relativelyRepresentable, hrig⟩
 
 end PartC
 
