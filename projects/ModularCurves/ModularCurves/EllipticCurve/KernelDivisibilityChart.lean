@@ -1307,4 +1307,64 @@ private theorem exists_kernel_div (hU : IsAffineOpen U)
   rw [h9]
   exact Subtype.ext (eq_of_pointSharp_eq hU hNδmem hp hfinal)
 
+/-- **(CHART-INJ)** `N`-multiplication is injective on square-zero kernel points in the
+chart, for `N` a unit: a kernel point killed by `N` is zero. -/
+private theorem kernel_eq_zero_of_nsmul_eq_zero (hU : IsAffineOpen U)
+    (heU : ∀ x : ↑(Spec B), (F.zero).base x ∈ U)
+    (htaut : ∀ x : ↑(Spec Γ(F.E, U)), (hU.fromSpec).base x ∈ U)
+    (hz : ∀ x : ↑(Spec Γ(F.E, U)),
+      ((0 : F.Point (hU.fromSpec ≫ F.π)) : Spec Γ(F.E, U) ⟶ F.E).base x ∈ U)
+    (hφ : Function.Surjective φ.hom) (hφ2 : RingHom.ker φ.hom ^ 2 = ⊥)
+    {t : Spec R ⟶ Spec B} (N : ℕ) (hN : IsUnit ((N : ℕ) : ↑R))
+    (P : F.Point t) (hP : Point.restrict F (Spec.map φ) P = 0)
+    (h0 : (N • P : F.Point t) = 0) : P = 0 := by
+  classical
+  have hp := kernel_mem heU hφ hφ2 P hP
+  have h0K : Point.restrict F (Spec.map φ) (0 : F.Point t) = 0 :=
+    restrict_zero F (Spec.map φ)
+  have hz₀ := kernel_mem heU hφ hφ2 (0 : F.Point t) h0K
+  have hNmem := kernel_mem heU hφ hφ2 _ (kernel_nsmul P hP N)
+  refine Subtype.ext (eq_of_pointSharp_eq hU hp hz₀ ?_)
+  refine CommRingCat.hom_ext (RingHom.ext fun c => ?_)
+  set c₀ := F.π.appLE ⊤ U (fun x _ => trivial)
+    (F.zero.appLE U ⊤ (fun x _ => heU x) c) with hc₀
+  have haug : F.zero.appLE U ⊤ (fun x _ => heU x) (c - c₀) = 0 := by
+    rw [map_sub, hc₀, zero_appLE_π_appLE, sub_self]
+  -- base parts agree for any two points
+  have hbaseP : (pointSharp P.1 hp).hom c₀ =
+      ((t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom)).hom
+        ((F.zero.appLE U ⊤ (fun x _ => heU x)) c) :=
+    pointSharp_comp_π P hp _
+  have hbase0 : (pointSharp ((0 : F.Point t) : Spec R ⟶ F.E) hz₀).hom c₀ =
+      ((t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom)).hom
+        ((F.zero.appLE U ⊤ (fun x _ => heU x)) c) :=
+    pointSharp_comp_π (0 : F.Point t) hz₀ _
+  -- the augmentation part of `P` vanishes, from `N • P = 0` and `N` a unit
+  have haug0 : (pointSharp ((0 : F.Point t) : Spec R ⟶ F.E) hz₀).hom (c - c₀) = 0 := by
+    rw [pointSharp_zero_point heU t hz₀ (c - c₀), haug, map_zero]
+  have haugP : (pointSharp P.1 hp).hom (c - c₀) = 0 := by
+    have h1 : (pointSharp ((N • P : F.Point t) : Spec R ⟶ F.E) hNmem).hom (c - c₀) =
+        N • (pointSharp P.1 (kernel_mem heU hφ hφ2 P hP)).hom (c - c₀) :=
+      pointSharp_nsmul_of_kernel hU heU htaut hz hφ hφ2 P hP (c - c₀) haug N
+    have h2 : (pointSharp ((N • P : F.Point t) : Spec R ⟶ F.E) hNmem).hom (c - c₀) = 0 := by
+      have h3 : ((N • P : F.Point t) : Spec R ⟶ F.E) =
+          ((0 : F.Point t) : Spec R ⟶ F.E) := congrArg Subtype.val h0
+      rw [(congrArg (fun (m : Γ(F.E, U) ⟶ R) => m.hom (c - c₀))
+        (pointSharp_congr h3 hNmem hz₀))]
+      exact haug0
+    have h4 : (N : ↑R) * (pointSharp P.1 hp).hom (c - c₀) = 0 := by
+      have h5 := h1.symm.trans h2
+      rwa [nsmul_eq_mul] at h5
+    have h6 := congrArg (fun r => (↑hN.unit⁻¹ : ↑R) * r) h4
+    simpa [← _root_.mul_assoc, IsUnit.val_inv_mul hN] using h6
+  -- assemble on the split
+  have hcP : (pointSharp P.1 hp).hom c =
+      (pointSharp P.1 hp).hom c₀ + (pointSharp P.1 hp).hom (c - c₀) := by
+    rw [← map_add]; congr 1; ring
+  have hc0 : (pointSharp ((0 : F.Point t) : Spec R ⟶ F.E) hz₀).hom c =
+      (pointSharp ((0 : F.Point t) : Spec R ⟶ F.E) hz₀).hom c₀ +
+      (pointSharp ((0 : F.Point t) : Spec R ⟶ F.E) hz₀).hom (c - c₀) := by
+    rw [← map_add]; congr 1; ring
+  rw [hcP, hc0, hbaseP, hbase0, haugP, haug0]
+
 end Box
