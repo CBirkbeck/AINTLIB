@@ -1131,7 +1131,7 @@ private theorem exists_point_of_sharp (hU : IsAffineOpen U)
 /-- **(CHART-DIV)** Square-zero kernel points are `N`-divisible in the chart, for `N` a
 unit: the `β + N⁻¹·(sharp − β)` comorphism is a ring map by the square-zero kill, and its
 point is the required `δ`. -/
-private theorem exists_kernel_div (hU : IsAffineOpen U)
+theorem exists_kernel_div (hU : IsAffineOpen U)
     (heU : ∀ x : ↑(Spec B), (F.zero).base x ∈ U)
     (htaut : ∀ x : ↑(Spec Γ(F.E, U)), (hU.fromSpec).base x ∈ U)
     (hz : ∀ x : ↑(Spec Γ(F.E, U)),
@@ -1309,7 +1309,7 @@ private theorem exists_kernel_div (hU : IsAffineOpen U)
 
 /-- **(CHART-INJ)** `N`-multiplication is injective on square-zero kernel points in the
 chart, for `N` a unit: a kernel point killed by `N` is zero. -/
-private theorem kernel_eq_zero_of_nsmul_eq_zero (hU : IsAffineOpen U)
+theorem kernel_eq_zero_of_nsmul_eq_zero (hU : IsAffineOpen U)
     (heU : ∀ x : ↑(Spec B), (F.zero).base x ∈ U)
     (htaut : ∀ x : ↑(Spec Γ(F.E, U)), (hU.fromSpec).base x ∈ U)
     (hz : ∀ x : ↑(Spec Γ(F.E, U)),
