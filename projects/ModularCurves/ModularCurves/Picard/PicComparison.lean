@@ -122,7 +122,14 @@ theorem evalSection_naturality (M : _root_.SheafOfModules R) {U V : Cᵒᵖ} (i 
     (m : M.val.obj U) :
     evalSection R M V.unop (dualRestrict R M i φ) (M.val.map i m) =
       R.obj.map i (evalSection R M U.unop φ m) := by
-  sorry
+  simp only [evalSection_eq]
+  dsimp [dualRestrict, _root_.SheafOfModules.overMapUnitIso, _root_.SheafOfModules.overMap,
+    _root_.SheafOfModules.pushforward, _root_.SheafOfModules.overFunctorMap]
+  simp
+  exact PresheafOfModules.naturality_apply φ.val
+    ((Over.homMk i.unop (by show i.unop ≫ 𝟙 (Opposite.unop U) = 𝟙 (Opposite.unop V) ≫ i.unop; simp) :
+      (Over.map i.unop).obj (Over.mk (𝟙 (Opposite.unop V))) ⟶
+        Over.mk (𝟙 (Opposite.unop U))).op) m
 
 end ModularCurves.SheafOfModules
 
@@ -160,7 +167,16 @@ noncomputable def evPre (M : X.Modules) :
       (fun m φ ψ => evalSection_add_left X.ringCatSheaf M U.unop φ ψ m)
       (fun r m φ => evalSection_smul_left X.ringCatSheaf M U.unop φ r m)))
   naturality {U V} i := by
-    sorry
+    refine ModuleCat.MonoidalCategory.tensor_ext (fun m φ => ?_)
+    exact ModularCurves.SheafOfModules.evalSection_naturality X.ringCatSheaf M i φ m
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[PAIR-2, sheaf level]** The evaluation morphism `M ⊗ M^∨ ⟶ 𝒪ₓ` on the sheafified
+tensor: the sheafification of `evPre`, collapsed onto the unit by the counit. -/
+noncomputable def ev (M : X.Modules) : tensorObj M (dualObj M) ⟶ unitObj X :=
+  (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).map (evPre M) ≫
+    (sheafifyValIso (unitObj X)).hom
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
