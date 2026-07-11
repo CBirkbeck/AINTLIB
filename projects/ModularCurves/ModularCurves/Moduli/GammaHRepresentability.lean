@@ -676,7 +676,8 @@ theorem gammaFullNaive_equivariantRelRepData (N : ℕ) [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
     (hinv : IsUnit (N : R)) (X : EllObj R) :
     Nonempty (ModuliProblem.EquivariantRelRepData (gammaHAut R N H) X) := by
-  sorry
+  obtain ⟨d, hfin, het⟩ := gammaFullNaive_relRepData R N hinv X
+  exact ModuliProblem.RelRepData.exists_equivariant (gammaHAut R N H) d hfin het
 
 end PartAModuli
 
