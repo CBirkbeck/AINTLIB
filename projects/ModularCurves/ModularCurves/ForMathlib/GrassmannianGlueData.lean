@@ -990,19 +990,23 @@ theorem pointOfChartMember_eq (h : IsChartAt (fun i => Pi.single (ι i) (1 : A))
 /-! ### [GR-G-ASM] inverse-direction foundation: the chart covering as a spanning family -/
 
 /-- **[GR-G-ASM], the covering.** For any member `N` over `A`, the chart-witnessing elements
-`f_p` (one per prime `p`, from `exists_isChartAt_localizationAway`) span the unit ideal — so
-the basic opens `D(f_p)` cover `Spec A`, and on each the localized member is charted. This is
-the spanning family feeding `affineOpenCoverOfSpanRangeEqTop` for the prime-indexed
-`Scheme.OpenCover` of `Spec A` (recipe step 2). -/
+`f_p` (one per prime `p`, from `exists_isChartAt_congr_localizationAway`) span the unit ideal
+— so the basic opens `D(f_p)` cover `Spec A`, and on each the localized-and-`piScalarRight`-
+normalized member is charted at `ι_p` in the exact `Pi.single`-tuple form that
+`pointOfChartMember` consumes. This is the spanning family + per-piece chart data feeding
+`affineOpenCoverOfSpanRangeEqTop` for the prime-indexed `Scheme.OpenCover` of `Spec A` and its
+`glueMorphisms` assembly (recipe steps 2-4). -/
 theorem exists_spanning_chart_witnesses (N : G(k, A ⊗[R] (Fin n → R); A)) :
     ∃ (s : PrimeSpectrum A → A), Ideal.span (Set.range s) = ⊤ ∧
       ∀ p : PrimeSpectrum A, ∃ (ι : Fin k ↪ Fin n), s p ∉ p.asIdeal ∧
-        IsChartAt (fun i =>
-            (1 : Localization.Away (s p)) ⊗ₜ[R] (Pi.single (ι i) 1 : Fin n → R))
-          (N.map (IsScalarTower.toAlgHom R A (Localization.Away (s p)))) := by
+        IsChartAt (fun i => Pi.single (ι i) (1 : Localization.Away (s p)))
+          (Module.Grassmannian.congr
+            (TensorProduct.piScalarRight R (Localization.Away (s p))
+              (Localization.Away (s p)) (Fin n))
+            (N.map (IsScalarTower.toAlgHom R A (Localization.Away (s p))))) := by
   classical
   choose ι fw hfw hchart using
-    fun p : PrimeSpectrum A => exists_isChartAt_localizationAway n N p.asIdeal
+    fun p : PrimeSpectrum A => exists_isChartAt_congr_localizationAway n N p.asIdeal
   refine ⟨fw, ?_, fun p => ⟨ι p, hfw p, hchart p⟩⟩
   by_contra hne
   obtain ⟨M, hM, hle⟩ := Ideal.exists_le_maximal _ hne
