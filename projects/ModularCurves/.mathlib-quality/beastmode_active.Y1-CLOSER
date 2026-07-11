@@ -1,1 +1,1 @@
-FOCUS: Y1-CLOSER K3: grpObj_mul_unique PROVEN (records-level U-MODEL). Now Stage 5 wrapper isMonHom_of_pointedIso_records (GrpObj.ofIso + uniqueness), then K4 swap at PullSectionCanonicity:167 + bar-audit gammaOneNaive_representable.
+FOCUS: Y1-CLOSER K4 DONE — swap landed: transportSection_add_of_finitePresentation + yOne_representableBy at CLEAN TRIPLE; MASTER residual = exactly BB-QF/BB-FLAT/BB-DEG (Torsion.lean:140/147/152) via torsionπ_etale→yOne_isAffine→smooth/affine halves. Now L3: check-then-cite HasseWeil mulByInt_degree, then discharge the boxes.

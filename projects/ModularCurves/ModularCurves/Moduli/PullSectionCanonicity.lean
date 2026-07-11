@@ -5,6 +5,7 @@ Authors: The AINTLIB Authors
 -/
 import ModularCurves.Moduli.PullSectionAdd
 import ModularCurves.EllipticCurve.RigiditySpreadingOut
+import ModularCurves.EllipticCurve.RecordGroupUnique
 
 /-!
 # The T-E4 transport, reduced to the single canonicity primitive (Y1-D2)
@@ -163,10 +164,10 @@ theorem transportSection_add_of_finitePresentation (s s' : X.curve.Section) :
     inferInstanceAs (IsSeparated (Y.curve.baseChange f.baseHom).π)
   haveI : LocallyOfFinitePresentation (Y.curve.baseChange f.baseHom).asOver.hom :=
     inferInstanceAs (LocallyOfFinitePresentation (Y.curve.baseChange f.baseHom).π)
-  exact transportSection_add_of_isMonHom R f
-    (isMonHom_of_one_comp_eq'_of_finitePresentation
-      X.curve.toEllipticCurveGeom.universallyOConnected
-      (curveIsoPullbackOver R f) (curveIsoPullbackOver_one R f)) s s'
+  have hmon := isMonHom_of_pointedIso_records X.curve (Y.curve.baseChange f.baseHom)
+    (Over.isoMk (curveIsoPullback R f) (f.isPullback.isoPullback_hom_snd))
+    (curveIsoPullbackOver_one R f)
+  exact transportSection_add_of_isMonHom R f hmon s s'
 
 /-- **(T-E4a, `pullSection_add` over an arbitrary base)** Section-pullback is additive over an
 arbitrary base — the unrestricted statement, modulo the single route (a)/(c) canonicity
