@@ -265,6 +265,47 @@ theorem kernel_inj_of_chartFactor (A : WeierstrassAtlasData E.toEllipticCurveGeo
   have h2 := congrArg eqc.symm hzero
   rwa [AddEquiv.symm_apply_apply, map_zero] at h2
 
+/-- **(PIECE-UNIQ, value form)** Two kernel-valued solutions of the same `[N]`-equation
+over a chart-factoring test have equal underlying morphisms — the cast-free interface for
+the gluing. -/
+theorem kernel_val_unique_of_chartFactor (A : WeierstrassAtlasData E.toEllipticCurveGeom)
+    (i : A.ι) {R S' : CommRingCat.{u}} {φ : R ⟶ S'}
+    (hφ : Function.Surjective φ.hom) (hφ2 : RingHom.ker φ.hom ^ 2 = ⊥)
+    (tB : Spec R ⟶ Spec Γ(S, (A.U i).1))
+    (N : ℕ) (hN : IsUnit ((N : ℕ) : ↑R))
+    (v₁ v₂ : Spec R ⟶ E.E)
+    (hπ₁ : v₁ ≫ E.π = tB ≫ chartToBase A i) (hπ₂ : v₂ ≫ E.π = tB ≫ chartToBase A i)
+    (hK₁ : Spec.map φ ≫ v₁ = (Spec.map φ ≫ (tB ≫ chartToBase A i)) ≫ E.zero)
+    (hK₂ : Spec.map φ ≫ v₂ = (Spec.map φ ≫ (tB ≫ chartToBase A i)) ≫ E.zero)
+    (hNv : v₁ ≫ E.mulByHom (N : ℤ) = v₂ ≫ E.mulByHom (N : ℤ)) : v₁ = v₂ := by
+  set P₁ : E.Point (tB ≫ chartToBase A i) := ⟨v₁, hπ₁⟩ with hP₁
+  set P₂ : E.Point (tB ≫ chartToBase A i) := ⟨v₂, hπ₂⟩ with hP₂
+  have hK₁' : Point.restrict E (Spec.map φ) P₁ = 0 := by
+    refine Subtype.ext ?_
+    show Spec.map φ ≫ v₁ = _
+    rw [E.point_zero_val]
+    exact hK₁
+  have hK₂' : Point.restrict E (Spec.map φ) P₂ = 0 := by
+    refine Subtype.ext ?_
+    show Spec.map φ ≫ v₂ = _
+    rw [E.point_zero_val]
+    exact hK₂
+  have hsmul : ((N : ℤ) • P₁ : E.Point _) = (N : ℤ) • P₂ := by
+    refine Subtype.ext ?_
+    rw [E.point_smul_eq_comp_mulBy, E.point_smul_eq_comp_mulBy]
+    exact hNv
+  have hdK : Point.restrict E (Spec.map φ) (P₁ - P₂) = 0 := by
+    rw [E.restrict_sub, hK₁', hK₂', sub_zero]
+  have hd0 : (N • (P₁ - P₂) : E.Point _) = 0 := by
+    have h1 : ((N : ℤ) • (P₁ - P₂) : E.Point _) = 0 := by
+      rw [smul_sub, hsmul, sub_self]
+    rwa [natCast_zsmul] at h1
+  have hd := kernel_inj_of_chartFactor E A i hφ hφ2 tB N hN (P₁ - P₂) hdK hd0
+  have h2 : P₁ = P₂ := by
+    have h3 := congrArg (· + P₂) hd
+    simpa [sub_add_cancel] using h3
+  exact congrArg Subtype.val h2
+
 end PieceTransport
 
 section Glue
