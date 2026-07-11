@@ -138,6 +138,19 @@ private theorem foldε_eq_axisL (ε : C →ₐ[k'] k') (x : C ⊗[k'] C) :
   | tmul c c' => simp [mul_comm]
   | add x y hx hy => simp only [map_add, hx, hy]
 
+/-- Ring maps out of a tensor product agree if they agree on both inclusions. -/
+private theorem tensor_ringHom_ext {A B T : Type u} [CommRing A] [CommRing B] [CommRing T]
+    [Algebra k' A] [Algebra k' B] {u v : A ⊗[k'] B →+* T}
+    (hL : ∀ a, u (a ⊗ₜ 1) = v (a ⊗ₜ 1)) (hR : ∀ b, u (1 ⊗ₜ b) = v (1 ⊗ₜ b)) : u = v := by
+  refine RingHom.ext fun x => ?_
+  induction x using TensorProduct.induction_on with
+  | zero => simp
+  | tmul a b =>
+      have h : (a ⊗ₜ[k'] b : A ⊗[k'] B) = (a ⊗ₜ 1) * (1 ⊗ₜ b) := by
+        rw [Algebra.TensorProduct.tmul_mul_tmul, _root_.mul_one, _root_.one_mul]
+      rw [h, map_mul, map_mul, hL, hR]
+  | add x y hx hy => rw [map_add, map_add, hx, hy]
+
 /-- The final kill: if both axis restrictions of `x` vanish, so does the pair-lift. -/
 private theorem pairLift_eq_zero_of_axes (ε : C →ₐ[k'] k') (p₁ p₂ : C →ₐ[k'] R) {I : Ideal R}
     (h₁ : ∀ c, p₁ c - algebraMap k' R (ε c) ∈ I)
@@ -357,6 +370,49 @@ private theorem pairing_zero_mul {U : (F.E).Opens} (hU : IsAffineOpen U) :
   rw [add_zero] at h
   exact h.symm
 
+/-- `pointSharp` only depends on the morphism. -/
+private theorem pointSharp_congr {U : (F.E).Opens} {w w' : Spec R ⟶ F.E} (h : w = w')
+    (hw : ∀ x : ↑(Spec R), w.base x ∈ U) (hw' : ∀ x : ↑(Spec R), w'.base x ∈ U) :
+    pointSharp w hw = pointSharp w' hw' := by
+  subst h; rfl
+
+/-- Evaluation of the zero point: the chart comorphism of `t ≫ zero` is the augmentation
+followed by the structure map of `R`. -/
+private theorem pointSharp_zero_point {U : (F.E).Opens}
+    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U) (t : Spec R ⟶ Spec (CommRingCat.of k))
+    (hz : ∀ x : ↑(Spec R), ((0 : F.Point t) : Spec R ⟶ F.E).base x ∈ U)
+    (f : Γ(F.E, U)) :
+    pointSharp ((0 : F.Point t) : Spec R ⟶ F.E) hz f =
+      (t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom)
+        (F.zero.appLE U ⊤ (fun x _ => heU x) f) := by
+  have hz' : ∀ x : ↑(Spec R), (t ≫ F.zero).base x ∈ U := by
+    intro x
+    simpa using heU (t.base x)
+  rw [pointSharp_congr (F.point_zero_val t) hz hz']
+  show ((t ≫ F.zero).appLE U ⊤ _ ≫ (Scheme.ΓSpecIso R).hom) f = _
+  rw [← Scheme.Hom.appLE_comp_appLE t F.zero U ⊤ ⊤ (fun x _ => heU x) le_top]
+  rfl
+
+/-- The chart comorphism of a point over `t` restricts along `π` to the `t`-comorphism. -/
+private theorem pointSharp_comp_π {U : (F.E).Opens} {t : Spec R ⟶ Spec (CommRingCat.of k)} (P : F.Point t)
+    (hp : ∀ x : ↑(Spec R), (P.1).base x ∈ U) (c : Γ(Spec (CommRingCat.of k), ⊤)) :
+    pointSharp P.1 hp (F.π.appLE ⊤ U (fun x _ => trivial) c) =
+      (t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom) c := by
+  show ((F.π.appLE ⊤ U _ ≫ P.1.appLE U ⊤ _) ≫ (Scheme.ΓSpecIso R).hom) c = _
+  rw [Scheme.Hom.appLE_comp_appLE P.1 F.π ⊤ U ⊤ _ _,
+    FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_congr_hom P.2 ⊤ ⊤]
+
+/-- The augmentation retracts the structure map: `ζ ∘ π♯ = id` (`Γ`-dual of `zero ≫ π = 𝟙`). -/
+private theorem zero_appLE_π_appLE {U : (F.E).Opens}
+    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U) (c : Γ(Spec (CommRingCat.of k), ⊤)) :
+    F.zero.appLE U ⊤ (fun x _ => heU x) (F.π.appLE ⊤ U (fun x _ => trivial) c) = c := by
+  show (F.π.appLE ⊤ U _ ≫ F.zero.appLE U ⊤ _) c = c
+  rw [Scheme.Hom.appLE_comp_appLE F.zero F.π ⊤ U ⊤ _ _,
+    FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_congr_hom F.zero_π ⊤ ⊤,
+    FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_id]
+  rfl
+
+
 section Box
 
 variable {U : (F.E).Opens}
@@ -482,49 +538,86 @@ private theorem pairBox_boxIso_includeRight (hU : IsAffineOpen U)
   rw [boxIso, patchKunneth_hom_comp_includeRight, ← Category.assoc, pairBox_snd,
     liftU_toSpecΓ hU]
 
+/-- **(TAUT-SHARP)** The chart comorphism of `fromSpec` is the identity. -/
+private theorem pointSharp_fromSpec (hU : IsAffineOpen U)
+    (htaut : ∀ x : ↑(Spec Γ(F.E, U)), (hU.fromSpec).base x ∈ U) :
+    pointSharp (R := Γ(F.E, U)) hU.fromSpec htaut = 𝟙 Γ(F.E, U) := by
+  show hU.fromSpec.appLE U ⊤ _ ≫ (Scheme.ΓSpecIso Γ(F.E, U)).hom = 𝟙 _
+  have hdef : hU.fromSpec = hU.isoSpec.inv ≫ U.ι := rfl
+  rw [FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_congr_hom hdef U ⊤,
+    ← Scheme.Hom.appLE_comp_appLE hU.isoSpec.inv U.ι U ⊤ ⊤
+      U.ι_preimage_self.ge le_top,
+    FiniteLocallyFreeSubgroup.AffineChartPatch.ι_appLE_top,
+    FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_top_top]
+  have h1 : hU.isoSpec.inv.appTop ≫ hU.isoSpec.hom.appTop = 𝟙 _ := by
+    rw [← Scheme.Hom.comp_appTop, Iso.hom_inv_id, Scheme.Hom.id_appTop]
+  have h2 : hU.isoSpec.hom.appTop =
+      (Scheme.ΓSpecIso Γ(F.E, U)).hom ≫ U.topIso.inv := by
+    rw [hU.isoSpec_hom, Scheme.Opens.toSpecΓ_appTop]
+  rw [h2] at h1
+  have h3 : hU.isoSpec.inv.appTop ≫ (Scheme.ΓSpecIso Γ(F.E, U)).hom = U.topIso.hom := by
+    have h4 := congrArg (· ≫ U.topIso.hom) h1
+    simp only [Category.assoc, Iso.inv_hom_id, Category.comp_id, Category.id_comp] at h4
+    exact h4
+  rw [Category.assoc, h3, Iso.inv_hom_id]
+
+/-- **(TAUT-ZERO)** The chart comorphism of the zero point over the tautological base is the
+structure map composed with the augmentation. -/
+private theorem pointSharp_zero_taut (hU : IsAffineOpen U)
+    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U)
+    (htaut : ∀ x : ↑(Spec Γ(F.E, U)), (hU.fromSpec).base x ∈ U)
+    (hz : ∀ x : ↑(Spec Γ(F.E, U)),
+      ((0 : F.Point (hU.fromSpec ≫ F.π)) : Spec Γ(F.E, U) ⟶ F.E).base x ∈ U) :
+    pointSharp (R := Γ(F.E, U)) ((0 : F.Point (hU.fromSpec ≫ F.π)) : _ ⟶ F.E) hz =
+      F.zero.appLE U ⊤ (fun x _ => heU x) ≫ F.π.appLE ⊤ U (fun x _ => trivial) := by
+  refine CommRingCat.hom_ext (RingHom.ext fun c => ?_)
+  have h0 := pointSharp_zero_point (R := Γ(F.E, U)) heU (hU.fromSpec ≫ F.π) hz c
+  rw [h0]
+  show ((hU.fromSpec ≫ F.π).appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso Γ(F.E, U)).hom)
+      (F.zero.appLE U ⊤ (fun x _ => heU x) c) = _
+  rw [← Scheme.Hom.appLE_comp_appLE hU.fromSpec F.π ⊤ U ⊤ (fun x _ => trivial)
+    (fun x _ => htaut x)]
+  show (pointSharp (R := Γ(F.E, U)) hU.fromSpec htaut)
+      ((F.π.appLE ⊤ U (fun x _ => trivial)) (F.zero.appLE U ⊤ (fun x _ => heU x) c)) = _
+  rw [pointSharp_fromSpec hU htaut]
+  rfl
+
+/-- The Künneth identification of the pairing, map form (instance-free statement: the
+target ring map is characterised by its two inclusion legs). -/
+private theorem pairBox_boxIso_eq_specMap (hU : IsAffineOpen U)
+    {t : Spec R ⟶ Spec (CommRingCat.of k)} (P Q : F.Point t)
+    (hp : ∀ x : ↑(Spec R), (P.1).base x ∈ U) (hq : ∀ x : ↑(Spec R), (Q.1).base x ∈ U)
+    {pT : CommRingCat.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U)) ⟶ R}
+    (hL : CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := ↑Γ(Spec (CommRingCat.of k), ⊤))) ≫ pT = pointSharp P.1 hp)
+    (hR : CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := ↑Γ(Spec (CommRingCat.of k), ⊤)) (A := ↑Γ(F.E, U))).toRingHom ≫ pT =
+      pointSharp Q.1 hq) :
+    pairBox P Q hp hq ≫ (boxIso hU).hom = Spec.map pT := by
+  have hu : pairBox P Q hp hq ≫ (boxIso hU).hom =
+      Spec.map (Spec.preimage (pairBox P Q hp hq ≫ (boxIso hU).hom)) :=
+    (Spec.map_preimage _).symm
+  rw [hu]
+  refine congrArg Spec.map ?_
+  have hLu : CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+      (R := ↑Γ(Spec (CommRingCat.of k), ⊤))) ≫
+        Spec.preimage (pairBox P Q hp hq ≫ (boxIso hU).hom) = pointSharp P.1 hp := by
+    refine Spec.map_injective ?_
+    rw [Spec.map_comp, Spec.map_preimage, ← pairBox_boxIso_includeLeft hU P Q hp hq,
+      Category.assoc]
+  have hRu : CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+      (R := ↑Γ(Spec (CommRingCat.of k), ⊤)) (A := ↑Γ(F.E, U))).toRingHom ≫
+        Spec.preimage (pairBox P Q hp hq ≫ (boxIso hU).hom) = pointSharp Q.1 hq := by
+    refine Spec.map_injective ?_
+    rw [Spec.map_comp, Spec.map_preimage, ← pairBox_boxIso_includeRight hU P Q hp hq,
+      Category.assoc]
+  refine CommRingCat.hom_ext (tensor_ringHom_ext (fun a => ?_) (fun b => ?_))
+  · have h1 := congrArg (fun (m : _ ⟶ R) => m.hom a) (hLu.trans hL.symm)
+    exact h1
+  · have h1 := congrArg (fun (m : _ ⟶ R) => m.hom b) (hRu.trans hR.symm)
+    exact h1
+
 end Box
-
-/-- `pointSharp` only depends on the morphism. -/
-private theorem pointSharp_congr {U : (F.E).Opens} {w w' : Spec R ⟶ F.E} (h : w = w')
-    (hw : ∀ x : ↑(Spec R), w.base x ∈ U) (hw' : ∀ x : ↑(Spec R), w'.base x ∈ U) :
-    pointSharp w hw = pointSharp w' hw' := by
-  subst h; rfl
-
-/-- Evaluation of the zero point: the chart comorphism of `t ≫ zero` is the augmentation
-followed by the structure map of `R`. -/
-private theorem pointSharp_zero_point {U : (F.E).Opens}
-    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U) (t : Spec R ⟶ Spec (CommRingCat.of k))
-    (hz : ∀ x : ↑(Spec R), ((0 : F.Point t) : Spec R ⟶ F.E).base x ∈ U)
-    (f : Γ(F.E, U)) :
-    pointSharp ((0 : F.Point t) : Spec R ⟶ F.E) hz f =
-      (t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom)
-        (F.zero.appLE U ⊤ (fun x _ => heU x) f) := by
-  have hz' : ∀ x : ↑(Spec R), (t ≫ F.zero).base x ∈ U := by
-    intro x
-    simpa using heU (t.base x)
-  rw [pointSharp_congr (F.point_zero_val t) hz hz']
-  show ((t ≫ F.zero).appLE U ⊤ _ ≫ (Scheme.ΓSpecIso R).hom) f = _
-  rw [← Scheme.Hom.appLE_comp_appLE t F.zero U ⊤ ⊤ (fun x _ => heU x) le_top]
-  rfl
-
-/-- The chart comorphism of a point over `t` restricts along `π` to the `t`-comorphism. -/
-private theorem pointSharp_comp_π {U : (F.E).Opens} {t : Spec R ⟶ Spec (CommRingCat.of k)} (P : F.Point t)
-    (hp : ∀ x : ↑(Spec R), (P.1).base x ∈ U) (c : Γ(Spec (CommRingCat.of k), ⊤)) :
-    pointSharp P.1 hp (F.π.appLE ⊤ U (fun x _ => trivial) c) =
-      (t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom) c := by
-  show ((F.π.appLE ⊤ U _ ≫ P.1.appLE U ⊤ _) ≫ (Scheme.ΓSpecIso R).hom) c = _
-  rw [Scheme.Hom.appLE_comp_appLE P.1 F.π ⊤ U ⊤ _ _,
-    FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_congr_hom P.2 ⊤ ⊤]
-
-/-- The augmentation retracts the structure map: `ζ ∘ π♯ = id` (`Γ`-dual of `zero ≫ π = 𝟙`). -/
-private theorem zero_appLE_π_appLE {U : (F.E).Opens}
-    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U) (c : Γ(Spec (CommRingCat.of k), ⊤)) :
-    F.zero.appLE U ⊤ (fun x _ => heU x) (F.π.appLE ⊤ U (fun x _ => trivial) c) = c := by
-  show (F.π.appLE ⊤ U _ ≫ F.zero.appLE U ⊤ _) c = c
-  rw [Scheme.Hom.appLE_comp_appLE F.zero F.π ⊤ U ⊤ _ _,
-    FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_congr_hom F.zero_π ⊤ ⊤,
-    FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_id]
-  rfl
 
 end AugmentationScheme
 
