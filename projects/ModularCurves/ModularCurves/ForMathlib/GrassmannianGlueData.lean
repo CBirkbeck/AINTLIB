@@ -1,5 +1,6 @@
 import ModularCurves.ForMathlib.GrassmannianTransition
 import ModularCurves.ForMathlib.GrassmannianChart
+import ModularCurves.ForMathlib.GrassmannianOverlap
 import Mathlib.AlgebraicGeometry.Gluing
 import Mathlib.AlgebraicGeometry.Pullbacks
 
@@ -726,6 +727,53 @@ noncomputable def pointOfChartMember (ι : Fin k ↪ Fin n) (N : G(k, (Fin n →
     (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N) :
     Spec (CommRingCat.of A) ⟶ grassmannianScheme R k n :=
   Spec.map (CommRingCat.ofHom (evalAtR ι N h)) ≫ (glueData R k n).ι (ULift.up ι)
+
+/-! ### [GR-G-ASM] The R-coefficient evaluation SPEC (coefficient-change naturality)
+
+The point construction evaluates the `R`-coefficient chart ring `ChartRing R ι` at a chart
+member over `A`. Chart-independence of the resulting glued point (the heart of the T-point
+equivalence) needs the `R`-coefficient transition `Transition.ringHom (R := R)` — the actual
+`glueData` datum — to intertwine the two chart evaluations. Everything transfers from the
+already-proven `A`-coefficient SPEC (`evalAwayAt_comp_ringHom`, `GrassmannianOverlap.lean`)
+through the base-change `MvPolynomial.map (algebraMap R A) : ChartRing R ι →+* ChartRing A ι`,
+because `column`/`matrix`/`det`/`ringHom` are all `map`-stable and `evalAtR` factors as the
+`A`-coefficient `evalAt` after this base change (`eval₂_map` naturality). -/
+
+/-- `evalAtR` (evaluation of the `R`-coefficient chart ring at an `A`-member) factors as
+base change to `A`-coefficients followed by the `A`-coefficient evaluation `evalAt`. This is
+the `MvPolynomial.eval₂_map` naturality that carries the whole `A`-coefficient SPEC down to
+`R`-coefficients. -/
+theorem evalAtR_eq_comp_map (ι : Fin k ↪ Fin n) (N : G(k, (Fin n → A); A))
+    (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N) :
+    evalAtR ι N h = (evalAt ι N h).comp (MvPolynomial.map (algebraMap R A)) := by
+  refine RingHom.ext fun p => ?_
+  show evalAtR ι N h p = (evalAt ι N h) (MvPolynomial.map (algebraMap R A) p)
+  simp only [evalAtR, evalAt, MvPolynomial.coe_eval₂Hom]
+  rw [MvPolynomial.eval₂_map, RingHom.id_comp]
+
+/-- The generic ι-column is stable under coefficient base change: the `R`-column maps to the
+`A`-column. -/
+theorem column_map (ι : Fin k ↪ Fin n) (j : Fin n) :
+    (fun i => MvPolynomial.map (algebraMap R A) (Transition.column ι j i))
+      = Transition.column (R := A) ι j := by
+  classical
+  funext i
+  by_cases hj : j ∈ Set.range ι
+  · obtain ⟨i₀, rfl⟩ := hj
+    rw [congrFun (Transition.column_mem (R := R) ι i₀) i,
+      congrFun (Transition.column_mem (R := A) ι i₀) i, Pi.single_apply, Pi.single_apply,
+      apply_ite (MvPolynomial.map (algebraMap R A)), map_one, map_zero]
+  · rw [congrFun (Transition.column_notMem (R := R) ι hj) i,
+      congrFun (Transition.column_notMem (R := A) ι hj) i, MvPolynomial.map_X]
+
+/-- `evalAtR` on the `R`-column equals `evalAt` on the `A`-column — the bridge that carries
+`evalAt_column`/`evalAt_matrix` to `R`-coefficients. -/
+theorem evalAtR_column (ι : Fin k ↪ Fin n) (N : G(k, (Fin n → A); A))
+    (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N) (j : Fin n) (i : Fin k) :
+    evalAtR (R := R) ι N h (Transition.column (R := R) ι j i)
+      = evalAt ι N h (Transition.column (R := A) ι j i) := by
+  rw [evalAtR_eq_comp_map, RingHom.comp_apply]
+  exact congrArg (evalAt ι N h) (congrFun (column_map (R := R) (A := A) ι j) i)
 
 end Points
 
