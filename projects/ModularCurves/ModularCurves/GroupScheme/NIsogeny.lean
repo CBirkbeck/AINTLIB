@@ -1687,16 +1687,19 @@ back `D`, plus the `orderDivisor_baseChange`/`IsSubgroup.baseChange` dictionarie
 theorem exists_generatorLocus (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
     (hD : D.IsSubgroup E) :
     ∃ Z : D.ideal.subscheme.IdealSheafData,
-      ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S) (P : E.Point t)
+      (∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S) (P : E.Point t)
         (h : T ⟶ D.ideal.subscheme), h ≫ D.ideal.subschemeι = P.1 →
         ((∃ k : T ⟶ Z.subscheme, k ≫ Z.subschemeι = h) ↔
-          E.IsDivisorGenerator N D t (Point.asSection E t P)) := by
-  obtain ⟨Z, hZ⟩ := RelEffCartierDiv.exists_incidenceLocusEQ
+          E.IsDivisorGenerator N D t (Point.asSection E t P))) ∧
+      ∀ V : D.ideal.subscheme.affineOpens, (Z.ideal V).FG := by
+  haveI : Smooth (E.baseChange (D.ideal.subschemeι ≫ E.π)).π :=
+    SmoothOfRelativeDimension.smooth 1 _
+  obtain ⟨Z, hZ, hfg⟩ := RelEffCartierDiv.exists_incidenceLocusEQ'
     (E.baseChange (D.ideal.subschemeι ≫ E.π)).smooth
     (Section.orderDivisor (E.baseChange (D.ideal.subschemeι ≫ E.π))
       (Point.asSection E (D.ideal.subschemeι ≫ E.π) (E.divisorTautPoint D)) N)
     (D.baseChange (D.ideal.subschemeι ≫ E.π))
-  refine ⟨Z, fun T t P h hcomp => ?_⟩
+  refine ⟨Z, fun T t P h hcomp => ?_, hfg⟩
   refine Iff.trans (hZ h) ?_
   rw [RelEffCartierDiv.isSubdivisor_iff_le, RelEffCartierDiv.isSubdivisor_iff_le,
     ← le_antisymm_iff, RelEffCartierDiv.baseChange_ideal, RelEffCartierDiv.baseChange_ideal]
@@ -1785,7 +1788,15 @@ theorem generatorSpace_spec (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
       (h : T ⟶ D.ideal.subscheme), h ≫ D.ideal.subschemeι = P.1 →
       ((∃ k : T ⟶ E.generatorSpace N D hD, k ≫ E.generatorSpaceι N D hD = h) ↔
         E.IsDivisorGenerator N D t (Point.asSection E t P)) :=
-  (E.exists_generatorLocus N D hD).choose_spec
+  (E.exists_generatorLocus N D hD).choose_spec.1
+
+/-- **([T-SG3-LFP], the equations pin)** The generator locus is affine-locally finitely
+generated — KM's *"defined, locally on `S`, by finitely many equations"* — hence its
+inclusion `D^× ↪ D` is locally of finite presentation. -/
+theorem generatorSpaceι_locallyOfFinitePresentation (N : ℕ) [NeZero N]
+    (D : RelEffCartierDiv E.π) (hD : D.IsSubgroup E) :
+    LocallyOfFinitePresentation (E.generatorSpaceι N D hD) :=
+  lfp_subschemeι_of_fg (E.exists_generatorLocus N D hD).choose_spec.2
 
 /-- Kernels of closed immersions transport along a postcomposed isomorphism (sealed;
 the per-factor step of the order-divisor pasting naturality). -/
