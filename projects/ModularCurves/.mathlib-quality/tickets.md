@@ -15966,3 +15966,42 @@ torsionπ_etale.
 - **Y1 state line**: unconditional representability ✓; full MASTER = lane (1) + lane
   (2) + A's sweep, all designed, zero open math beyond the boxes' KM-standard
   arguments.
+
+### v10.138 (2026-07-11, NEW-HOPF): [CHARTER-HOPF] [HG-C1c-1d] — the ⊤-level Hopf presentation + BOTH ⊤-level counit laws
+
+*Zero sorries, axiom-clean; nine atomic commits. The banked ⊤-level restatement (v10.134)
+executed, and its promise confirmed: the dualisation is materially shorter (no `topIso`
+conjugation anywhere).*
+
+- **`PatchKunneth.lean`**: `base_appTop_affineKunnethΓ` — the third Γ-dual leg (base
+  algebra map dualises to `fst`-then-structure), a pure tensor-algebra `rfl` after the
+  `fst`-leg.
+- **`PatchHopf.lean`**, the ⊤-level presentation: `baseRingTop R' := Γ(V,⊤)`,
+  `groupRingTop A' := Γ(G|_V,⊤)`, the `Algebra R' A'` instance (= `groupToBaseRes.appTop`),
+  `counitTop ε' := unitSection.appTop`, `squareΓTop`,
+  **`comulTop Δ' := squareMulRes.appTop ≫ affineKunnethΓ`**; the corestricted
+  multiplication `squareMulRes` with `squareMulRes_comp_ι` and
+  **`squareMulRes_comp_groupToBaseRes`** (over-base identity, via `squareMul_π`);
+  `isAffine_groupSquare`.
+- R-linearity, ⊤-level: `algebraMap_comp_counitTop` (ε′; from `unitSection_comp_groupToBase`)
+  and `algebraMap_comp_comulTop` (Δ′; via `base_appTop_affineKunnethΓ`), packaged as
+  `counitAlgTop`, `comulAlgTop`.
+- **Both counit laws**: `counitLiftTop(')` + their three inclusion laws (each shorter than
+  the opens-level analogue), then `tensor_hom_ext` ⟹ `counitLiftAlgTop(')` ⟹
+  **`counitLiftAlgTop_comp_comulAlgTop`** and **`counitLiftAlgTop'_comp_comulAlgTop`** —
+  `(ε' ⊗ id) ∘ Δ' = id = (id ⊗ ε') ∘ Δ'`, AlgHom form.
+
+**Record correction** (self-caught): one intermediate commit's message claimed the
+`counitLiftAlgTop` block that a silently-no-op'd heredoc edit had not actually written;
+caught by `#print axioms` failing on the name, corrected in the next commit with an
+explicit note. The build was green throughout (the missing block was additive) — no
+sorried or broken state was ever pushed.
+
+**Lean-ops**: `reassoc_of% hinv` for `IsIso.hom_inv_id` cancellation inside a threefold
+associativity (avoids the `inv`-blocks-motive failure); after it fires, the trailing
+`Category.id_comp` is superfluous.
+
+**NEXT**: (2) coassoc — the payoff case: iterate `affineKunneth` for the triple
+`A' ⊗ (A' ⊗ A')`, dualise the restricted `mulOver_assoc`. Then 1e antipode
+(`diagonal_SpecMap`), `[HopfAlgebra R' A']`, the `topIso` bridge back to the opens-level
+`A = Γ(G, groupOpen)`, `IsCoaction chartCoaction`, C1d → C3 → C4 ⟹ pins ⟹ BOARD-SIGNAL.
