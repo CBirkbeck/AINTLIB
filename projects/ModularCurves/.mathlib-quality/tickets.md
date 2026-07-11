@@ -7644,7 +7644,46 @@ gate note, commit 90ed0986); this amendment turns the lift into dispatched work 
 idle capacity. Housekeeping done in this pass: the unpushed `dev/modular-curves` commits were
 PUSHED (`66300bb4..5f4829dc`, 238 commits).*
 
-### v10.147-CLOSER — BB-FLAT route-(G) campaign map (audit complete; TUF template confirmed) (Y1-CLOSER)
+### v10.150-CLOSER — ★★ BB-FLAT core COMPLETE: the square-zero kernel calculus, base-generic and sorry-free (Y1-CLOSER)
+
+**`KernelDivisibilityChart.lean` is done** (root target green, 0 sorries): the entire
+mathematical content of BB-FLAT route (G), over an **arbitrary** affine base `Spec B`:
+
+1. **Transplant** (≈530 lines, compiles verbatim with `k → B : CommRingCat`, field
+   instance dropped): the whole TUF augmentation/box/axis layer — `axisL/R/foldε`,
+   **`pairLift_key`** (the decomposition-kill — already proven, already base-generic!),
+   `pointSharp`/`liftU`/`boxIso`/`pairBox`/`pairing_eq_pairBox`, the axis `Spec`-laws,
+   `pointSharp_specMap_comp`. The v10.147 field-isolation audit is verified in code.
+2. **`exists_sep`** — the separating tensor `y₀`: axis values `1`, basic open inside the
+   chart. Comaximality of the non-chart vanishing ideal with `ker(axisL) ⊓ ker(axisR)`;
+   the axis `Spec`-laws land the axis primes in the chart (`range_comap_of_surjective` +
+   `range_fromSpec`).
+3. **`pointSharp_add_of_kernel` (ADD)** — co-multiplication additivity on square-zero
+   kernel points. The `y₀`-localized evaluation (`BoxLoc` registered-def; `locLift` =
+   `IsLocalization.Away.lift`) replaces TUF's field-only stalk/units dance: `pT(y₀) = 1`
+   exactly (`pairLift_key` + axis values), the denominators clear, and the kill
+   evaluates `pT(num) = sharp_P f + sharp_Q f`.
+4. **`pointSharp_nsmul_of_kernel`**, **`exists_kernel_div` (CHART-DIV)** — `δ` via the
+   divided comorphism `divSharpHom := β + N⁻¹·(sharp − β)` (ring map by a
+   `linear_combination` square-zero kill), `exists_point_of_sharp` (base-compatible
+   comorphisms are chart points — hoisted per the 200k discipline after a monolith
+   timeout), kernel membership + `(N:ℤ) • δ = P` by sharp-agreement on the
+   `base ⊕ augmentation` split.
+5. **`kernel_eq_zero_of_nsmul_eq_zero` (CHART-INJ)** — `N•`-injectivity on kernels.
+
+**Remaining to the MASTER close (the N5–N7 ladder, sentinel-tracked):**
+- **N5 (glue)**: `KernelNDivisible E N` for arbitrary records/tests — localize the test
+  `Spec A'` to basic opens landing in atlas charts, transport along
+  `Point.baseChangeEquiv` + `pointAddEquiv` (K3-hμ — the BB-QF chain!) to
+  `modelEllipticCurve W` with its z-chart, apply CHART-DIV, glue by CHART-INJ-uniqueness
+  + morphism gluing over the cover.
+- **N6 ((LIFT) + plumbing)**: `mulByHom_flat_of_nIsInvertible` — RingHom.Smooth on
+  `[N]`-affine pairs via the translation argument consuming `KernelNDivisible`;
+  Smooth ⟹ Flat.
+- **N7**: swap `mulBy_etale'`'s flat input; bar-audit `gammaOneNaive_representable` at
+  the triple; ★★★★ boards.
+
+## v10.147-CLOSER — BB-FLAT route-(G) campaign map (audit complete; TUF template confirmed) (Y1-CLOSER)
 
 **Route (G) concretized after full audit.** `[N]` is AFFINE on the trail (finite — proven,
 invertible case), so `Flat`/`Smooth` are affine-local ring questions
