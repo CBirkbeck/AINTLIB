@@ -1488,6 +1488,118 @@ theorem axBCR_natural {S T : Over (wStageOp W)} (σ : S ⟶ T) :
     refine (congrArg (axBCR W S ≫ ·) hwSQ.symm).trans ?_
     exact (Category.assoc _ _ _).symm
 
+/-- The stage left axis corresponds to the base-changed left axis through the bridges. -/
+theorem stage_axis_bridgeL (T : Over (wStageOp W)) :
+    (axInclL (stageW W T)).left ≫ (stageSqIso W T).hom =
+    (stageModelIso W T).hom ≫ axBC W T := by
+  refine Limits.pullback.hom_ext ?_ ?_
+  · have h1 : axBC W T ≫ Limits.pullback.fst
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        Limits.pullback.fst _ _ ≫ 𝟙 _ := Limits.pullback.lift_fst _ _ _
+    have h5 : (axInclL (stageW W T)).left ≫
+        Limits.pullback.fst (projModelπ (stageW W T)) (projModelπ (stageW W T)) =
+        (toUnit (modelOver (stageW W T)) ≫ oneOver (stageW W T)).left :=
+      congrArg CommaMorphism.left
+        (lift_fst (toUnit (modelOver (stageW W T)) ≫ oneOver (stageW W T)) (𝟙 _))
+    have hA : ((axInclL (stageW W T)).left ≫ (stageSqIso W T).hom) ≫
+        Limits.pullback.fst
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        projModelπ (stageW W T) := by
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg ((axInclL (stageW W T)).left ≫ ·)
+        (stageSqPB W T).flip.isoPullback_hom_fst).trans ?_
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      refine (congrArg (· ≫ projModelπ (stageW W T)) h5).trans ?_
+      exact Over.w (toUnit (modelOver (stageW W T)) ≫ oneOver (stageW W T))
+    have hB : ((stageModelIso W T).hom ≫ axBC W T) ≫
+        Limits.pullback.fst
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        projModelπ (stageW W T) := by
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg ((stageModelIso W T).hom ≫ ·) h1).trans ?_
+      refine (congrArg ((stageModelIso W T).hom ≫ ·) (Category.comp_id _)).trans ?_
+      exact (stageModelPB W T).flip.isoPullback_hom_fst
+    exact hA.trans hB.symm
+  · have h1 : axBC W T ≫ Limits.pullback.snd
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        Limits.pullback.snd _ _ ≫ axL₀ W := Limits.pullback.lift_snd _ _ _
+    have hA : ((axInclL (stageW W T)).left ≫ (stageSqIso W T).hom) ≫
+        Limits.pullback.snd
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        projModelBaseChangeOf (Subalgebra.inclusion (wStage_le_stage W T)).toRingHom
+          (wZero W) (stageW W T) rfl ≫ (axInclL (wZero W)).left := by
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg ((axInclL (stageW W T)).left ≫ ·)
+        (stageSqPB W T).flip.isoPullback_hom_snd).trans ?_
+      exact (axNatL_of (Subalgebra.inclusion (wStage_le_stage W T)).toRingHom
+        (wZero W) (stageW W T) rfl).symm
+    have hB : ((stageModelIso W T).hom ≫ axBC W T) ≫
+        Limits.pullback.snd
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        projModelBaseChangeOf (Subalgebra.inclusion (wStage_le_stage W T)).toRingHom
+          (wZero W) (stageW W T) rfl ≫ (axInclL (wZero W)).left := by
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg ((stageModelIso W T).hom ≫ ·) h1).trans ?_
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      exact congrArg (· ≫ axL₀ W) (stageModelPB W T).flip.isoPullback_hom_snd
+    exact hA.trans hB.symm
+
+/-- The stage right axis corresponds to the base-changed right axis through the bridges. -/
+theorem stage_axis_bridgeR (T : Over (wStageOp W)) :
+    (axInclR (stageW W T)).left ≫ (stageSqIso W T).hom =
+    (stageModelIso W T).hom ≫ axBCR W T := by
+  refine Limits.pullback.hom_ext ?_ ?_
+  · have h1 : axBCR W T ≫ Limits.pullback.fst
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        Limits.pullback.fst _ _ ≫ 𝟙 _ := Limits.pullback.lift_fst _ _ _
+    have h5 : (axInclR (stageW W T)).left ≫
+        Limits.pullback.fst (projModelπ (stageW W T)) (projModelπ (stageW W T)) =
+        𝟙 _ :=
+      congrArg CommaMorphism.left
+        (lift_fst (𝟙 _) (toUnit (modelOver (stageW W T)) ≫ oneOver (stageW W T)))
+    have hA : ((axInclR (stageW W T)).left ≫ (stageSqIso W T).hom) ≫
+        Limits.pullback.fst
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        projModelπ (stageW W T) := by
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg ((axInclR (stageW W T)).left ≫ ·)
+        (stageSqPB W T).flip.isoPullback_hom_fst).trans ?_
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      refine (congrArg (· ≫ projModelπ (stageW W T)) h5).trans ?_
+      exact Category.id_comp _
+    have hB : ((stageModelIso W T).hom ≫ axBCR W T) ≫
+        Limits.pullback.fst
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        projModelπ (stageW W T) := by
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg ((stageModelIso W T).hom ≫ ·) h1).trans ?_
+      refine (congrArg ((stageModelIso W T).hom ≫ ·) (Category.comp_id _)).trans ?_
+      exact (stageModelPB W T).flip.isoPullback_hom_fst
+    exact hA.trans hB.symm
+  · have h1 : axBCR W T ≫ Limits.pullback.snd
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        Limits.pullback.snd _ _ ≫ axR₀ W := Limits.pullback.lift_snd _ _ _
+    have hA : ((axInclR (stageW W T)).left ≫ (stageSqIso W T).hom) ≫
+        Limits.pullback.snd
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        projModelBaseChangeOf (Subalgebra.inclusion (wStage_le_stage W T)).toRingHom
+          (wZero W) (stageW W T) rfl ≫ (axInclR (wZero W)).left := by
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg ((axInclR (stageW W T)).left ≫ ·)
+        (stageSqPB W T).flip.isoPullback_hom_snd).trans ?_
+      exact (axNatR_of (Subalgebra.inclusion (wStage_le_stage W T)).toRingHom
+        (wZero W) (stageW W T) rfl).symm
+    have hB : ((stageModelIso W T).hom ≫ axBCR W T) ≫
+        Limits.pullback.snd
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        projModelBaseChangeOf (Subalgebra.inclusion (wStage_le_stage W T)).toRingHom
+          (wZero W) (stageW W T) rfl ≫ (axInclR (wZero W)).left := by
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg ((stageModelIso W T).hom ≫ ·) h1).trans ?_
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      exact congrArg (· ≫ axR₀ W) (stageModelPB W T).flip.isoPullback_hom_snd
+    exact hA.trans hB.symm
+
 end StageBridge
 
 /-! ## Rigidity: a map on the square with both axis collapses is constant -/
