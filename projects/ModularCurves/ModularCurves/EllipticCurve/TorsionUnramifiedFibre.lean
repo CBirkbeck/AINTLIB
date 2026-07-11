@@ -804,6 +804,88 @@ private theorem pointSharp_add {U : (F.E).Opens} (hU : IsAffineOpen U)
     rw [point_add_val_mu F P₁ P₂, pairing_eq_pairBox P₁ P₂ hp₁ hp₂]
     simp only [Category.assoc, Iso.hom_inv_id_assoc]
     exact Category.assoc _ _ _
+  -- 6c. units of the pair-lift away from the augmentation prime
+  have hfold : ∀ x, pT x - algebraMap _ ↑R (foldε ε' x) ∈ I := by
+    intro x
+    have hkey := pairLift_key ε' p₁ p₂ (hclose P₁ hp₁ h₁) (hclose P₂ hp₂ h₂) hII x
+    have e1 := hclose P₂ hp₂ h₂ (axisL ε' x)
+    have e2 := hclose P₁ hp₁ h₁ (axisR ε' x)
+    have hsplit : pT x - algebraMap _ ↑R (foldε ε' x) =
+        (p₂ (axisL ε' x) - algebraMap _ ↑R (ε' (axisL ε' x))) +
+        (p₁ (axisR ε' x) - algebraMap _ ↑R (ε' (axisR ε' x))) := by
+      rw [hkey, ← foldε_eq_axisL, ← foldε_eq_axisR]
+      ring
+    rw [hsplit]
+    exact I.add_mem e1 e2
+  haveI hdom : IsDomain ↑Γ(Spec (CommRingCat.of k), ⊤) :=
+    Function.Injective.isDomain
+      (Scheme.ΓSpecIso (CommRingCat.of k)).commRingCatIsoToRingEquiv.toRingHom
+      (Scheme.ΓSpecIso (CommRingCat.of k)).commRingCatIsoToRingEquiv.injective
+  haveI h𝔭 : (RingHom.ker (foldε ε').toRingHom).IsPrime := RingHom.ker_isPrime _
+  haveI h𝔢 : (RingHom.ker ε'.toRingHom).IsPrime := RingHom.ker_isPrime _
+  have hunits : ∀ y : (RingHom.ker (foldε ε').toRingHom).primeCompl, IsUnit (pT y) := by
+    rintro ⟨y, hy⟩
+    have hy0 : foldε ε' y ≠ 0 := by
+      intro h0
+      exact hy (by simpa [RingHom.mem_ker] using h0)
+    have hyk : IsUnit (foldε ε' y) := by
+      set e := (Scheme.ΓSpecIso (CommRingCat.of k)).commRingCatIsoToRingEquiv with he
+      have h1 : e (foldε ε' y) ≠ 0 := fun h0 => hy0 (by
+        have h2 := congrArg e.symm h0
+        simpa using h2)
+      have h2 : IsUnit (e (foldε ε' y)) := isUnit_iff_ne_zero.mpr h1
+      have h3 := e.symm.toRingHom.isUnit_map h2
+      simpa using h3
+    have halg : IsUnit (algebraMap ↑Γ(Spec (CommRingCat.of k), ⊤) ↑R (foldε ε' y)) :=
+      hyk.map (algebraMap ↑Γ(Spec (CommRingCat.of k), ⊤) ↑R)
+    have hnil : IsNilpotent (pT y - algebraMap _ ↑R (foldε ε' y)) := by
+      refine ⟨2, ?_⟩
+      have hm := hfold y
+      have h2 := hII _ hm _ hm
+      rw [sq]
+      exact h2
+    have hdecomp : pT y = algebraMap ↑Γ(Spec (CommRingCat.of k), ⊤) ↑R (foldε ε' y) +
+        (pT y - algebraMap _ ↑R (foldε ε' y)) := by ring
+    rw [hdecomp]
+    exact hnil.isUnit_add_left_of_commute halg (Commute.all _ _)
+  -- 6d. the augmentation prime lands in the chart
+  set p𝔭 : ↑(Spec (.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U)))) :=
+    ⟨RingHom.ker (foldε ε').toRingHom, h𝔭⟩ with hp𝔭
+  set pₑ : ↑(Spec Γ(F.E, U)) := ⟨RingHom.ker ε'.toRingHom, h𝔢⟩ with hpₑ
+  have htautU : ∀ x : ↑(Spec Γ(F.E, U)), (hU.fromSpec).base x ∈ U := by
+    intro x
+    have h1 : (hU.fromSpec).base x ∈ Set.range (hU.fromSpec).base := Set.mem_range_self x
+    rwa [hU.range_fromSpec] at h1
+  have hzT : ∀ x : ↑(Spec Γ(F.E, U)),
+      ((0 : F.Point (hU.fromSpec ≫ F.π)) : Spec Γ(F.E, U) ⟶ F.E).base x ∈ U := by
+    intro x
+    have h0 : ((0 : F.Point (hU.fromSpec ≫ F.π)) : Spec Γ(F.E, U) ⟶ F.E) =
+        (hU.fromSpec ≫ F.π) ≫ F.zero := F.point_zero_val _
+    rw [h0]
+    simpa using heU (((hU.fromSpec ≫ F.π)).base x)
+  have hcomap : (Spec.map (CommRingCat.ofHom (axisL ε').toRingHom)).base pₑ = p𝔭 := by
+    rw [hp𝔭, hpₑ]
+    refine PrimeSpectrum.ext ?_
+    show Ideal.comap (axisL ε').toRingHom (RingHom.ker ε'.toRingHom) =
+      RingHom.ker (foldε ε').toRingHom
+    refine Ideal.ext fun x => ?_
+    simp only [Ideal.mem_comap, RingHom.mem_ker]
+    constructor
+    · intro hx
+      rw [show (foldε ε').toRingHom x = ε' ((axisL ε') x) from foldε_eq_axisL ε' x]
+      exact hx
+    · intro hx
+      rw [show (foldε ε').toRingHom x = ε' ((axisL ε') x) from foldε_eq_axisL ε' x] at hx
+      exact hx
+  have hqp : q.base p𝔭 ∈ U := by
+    rw [← hcomap]
+    have hlaw' : Spec.map (CommRingCat.ofHom (axisL ε').toRingHom) ≫ q = hU.fromSpec := by
+      rw [hq]
+      exact axisL_spec_law hU heU htautU hzT
+    have h2 : q.base ((Spec.map (CommRingCat.ofHom (axisL ε').toRingHom)).base pₑ) =
+        (Spec.map (CommRingCat.ofHom (axisL ε').toRingHom) ≫ q).base pₑ := rfl
+    rw [h2, hlaw']
+    exact htautU pₑ
   sorry
 
 end Box
