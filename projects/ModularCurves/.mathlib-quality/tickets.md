@@ -18186,3 +18186,30 @@ equality-descent (`exists_hom_comp_eq_comp_of_locallyOfFiniteType`), stage `GrpO
 assembly + K1-pattern rigidity, base-change back up ⟹ `modelGrpObj_unique` ([U-MODEL]).
 Then K3 (records-primitive via localModel charts + comparison + K1 + K2) and the K4
 supply-swap at PullSectionCanonicity:167 (+ IsoTransport). L3 boxes untouched.
+
+## Amendments v10.143-CLOSER (2026-07-11, Y1-CLOSER): ★ K2 step 5 — `mu_descends` PROVEN (the stage-descent keystone application works)
+
+Arbitrary multiplication-shaped morphisms on the model square over ANY `R` descend to a
+noetherian f.g. stage: mathlib's `Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation`
+consumed at the base-changed square system. The full instance layer landed:
+`bcSq_transition_isPullback` (transitions are pullbacks of the affine `Spec` transitions —
+`IsPullback.of_right` + a `convert`-recast), affinity via `MorphismProperty.of_isPullback`,
+qcqs objects via mathlib's pullback instances + `quasiSeparatedSpace_of_quasiSeparated`,
+`sqT` (the structural transformation), `sqComparison` (the flip-isoPullback), `ha`
+componentwise (`Over.w` + `wPB.w` + `hμπ` + `pullback.condition`).
+
+**Registry**: an `@`-application with ALL instance args explicit beat an unexplained
+instance-resolution failure where the same instance synthesized standalone (elaboration
+order with a postponed `?_`; the `haveI` was visible but unused by the `refine`-form).
+
+**K2 remaining (step 6, the closing arc)**:
+(a) equality-descent of the group axioms (`exists_hom_comp_eq_comp_of_locallyOfFiniteType`;
+needs the instance layer GENERALIZED from `sqStruct` to arbitrary proper structure maps —
+the triple-product system for associativity);
+(b) stage `GrpObj` assembly + the K1-noetherian rigidity at the stage (the pointed `𝟙`)
+identifying the descended μ with `mulOver (W-at-T)`;
+(c) base-change back up (`mulModelHom_map` + the descent-compat equations + `wPB.hom_ext`)
+⟹ `modelGrpObj_unique` ([U-MODEL]).
+Then K3 (records-primitive: base-local + localModel charts + comparison-theorem (1b ✓) +
+K1 (0h ✓) + [U-MODEL]) → K4 supply-swap (PullSectionCanonicity:167 + IsoTransport hμ) →
+T-E4-family clean → bar-audit. L3 (BB-QF/FLAT/DEG) independent, untouched.
