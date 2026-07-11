@@ -590,6 +590,21 @@ noncomputable def normMap (n : ℕ) (f : A →ₐ[R] B) (N : G(k, (Fin n → A);
   congr (TensorProduct.piScalarRight R B B (Fin n))
     ((congr (TensorProduct.piScalarRight R A A (Fin n)).symm N).map f)
 
+/-- `congr` round-trips: `congr e.symm (congr e N) = N`. -/
+@[simp] lemma congr_symm_congr {M' : Type*} [AddCommGroup M'] [Module R M']
+    (e : M ≃ₗ[R] M') (N : G(k, M; R)) : congr e.symm (congr e N) = N := by
+  ext : 1
+  simp only [congr_toSubmodule, ← Submodule.map_comp]
+  simp
+
+/-- **Functoriality of `normMap`** (member-localization composition): `normMap` of a composite
+algebra map is the composite of `normMap`s. Reduces to mathlib's `Grassmannian.map_comp` after
+cancelling the inner `piScalarRight` round-trip (`congr_symm_congr`). -/
+theorem normMap_comp (n : ℕ) {C : Type w''} [CommRing C] [Algebra R C]
+    (f : A →ₐ[R] B) (g : B →ₐ[R] C) (N : G(k, (Fin n → A); A)) :
+    normMap n (g.comp f) N = normMap n g (normMap n f N) := by
+  rw [normMap, normMap, normMap, congr_symm_congr, Module.Grassmannian.map_comp]
+
 /-- **[GR-B2n]** `normMap` preserves coordinate charts. -/
 theorem isChartAt_normMap (n : ℕ) (ι : Fin k ↪ Fin n) (f : A →ₐ[R] B)
     (N : G(k, (Fin n → A); A))
