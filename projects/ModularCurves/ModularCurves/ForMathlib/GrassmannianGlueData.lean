@@ -26,13 +26,15 @@ open AlgebraicGeometry CategoryTheory CategoryTheory.Limits
 
 variable (R : Type u) [CommRing R] {k n : ℕ}
 
-/-- The ι-chart of `Grass(k, R^n)` as an affine scheme: `Spec R[X_{j,i}]`. -/
-noncomputable def chartScheme (ι : Fin k ↪ Fin n) : Scheme.{u} :=
+/-- The ι-chart of `Grass(k, R^n)` as an affine scheme: `Spec R[X_{j,i}]`. Reducible so that
+`chartScheme R ι` and `Spec (of (ChartRing R ι))` are interchangeable for the point-atlas
+morphism algebra. -/
+noncomputable abbrev chartScheme (ι : Fin k ↪ Fin n) : Scheme.{u} :=
   Spec (CommRingCat.of (ChartRing R ι))
 
 /-- The (ι,ι')-overlap: the basic open `D(det ι ι')` of the ι-chart, as the Spec of the
-localization. -/
-noncomputable def overlapScheme (ι ι' : Fin k ↪ Fin n) : Scheme.{u} :=
+localization. Reducible (see `chartScheme`). -/
+noncomputable abbrev overlapScheme (ι ι' : Fin k ↪ Fin n) : Scheme.{u} :=
   Spec (CommRingCat.of (Localization.Away (Transition.det (R := R) ι ι')))
 
 /-- **[GR-D]** The overlap's structure map into the ι-chart — an open immersion onto
@@ -908,6 +910,81 @@ theorem evalAwayAtR_comp_ringHom (h : IsChartAt (fun i => Pi.single (ι i) (1 : 
     have hfin := congrFun hcancel i'
     rw [Function.comp_apply] at hfin
     rw [hfin, evalAtR, eval₂Hom_X']
+
+/-- The localized-transition composite of the two chart evaluations: precomposing the
+ι-evaluation with the localized transition `ringHomAway ι ι'` recovers the ι'-evaluation
+over the reverse overlap. Lift-uniqueness reduces this to the SPEC. -/
+theorem evalAwayAtR_comp_ringHomAway (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N)
+    (hι' : IsChartAt (fun i => Pi.single (ι' i) (1 : A)) N) :
+    (evalAwayAtR ι ι' N h hι').comp (Transition.ringHomAway (R := R) ι ι')
+      = evalAwayAtR ι' ι N hι' h := by
+  refine IsLocalization.ringHom_ext (Submonoid.powers (Transition.det (R := R) ι' ι))
+    (RingHom.ext fun q => ?_)
+  show evalAwayAtR ι ι' N h hι' (Transition.ringHomAway (R := R) ι ι'
+      (algebraMap (ChartRing R ι') (Localization.Away (Transition.det (R := R) ι' ι)) q))
+    = evalAwayAtR ι' ι N hι' h
+      (algebraMap (ChartRing R ι') (Localization.Away (Transition.det (R := R) ι' ι)) q)
+  rw [Transition.ringHomAway_algebraMap, evalAwayAtR_algebraMap]
+  exact RingHom.congr_fun (evalAwayAtR_comp_ringHom ι ι' N h hι') q
+
+/-- The evaluation `A`-point of the ι-chart, extended over the (ι,ι')-overlap: an
+`A`-point of the overlap scheme `overlapScheme R ι ι'`. -/
+noncomputable def pointOverlap (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N)
+    (hι' : IsChartAt (fun i => Pi.single (ι' i) (1 : A)) N) :
+    Spec (CommRingCat.of A) ⟶ overlapScheme R ι ι' :=
+  Spec.map (CommRingCat.ofHom (evalAwayAtR ι ι' N h hι'))
+
+/-- The evaluation `A`-point of the ι-chart factors through the (ι,ι')-overlap open
+immersion: `evalAtR ι` sends `det ι ι'` to a unit, so it extends over the localization. -/
+theorem specEvalAtR_eq_overlapι (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N)
+    (hι' : IsChartAt (fun i => Pi.single (ι' i) (1 : A)) N) :
+    Spec.map (CommRingCat.ofHom (evalAtR (R := R) ι N h))
+      = pointOverlap (R := R) ι ι' N h hι' ≫ overlapι R ι ι' := by
+  have he : CommRingCat.ofHom (evalAtR (R := R) ι N h)
+      = CommRingCat.ofHom (algebraMap (ChartRing R ι)
+          (Localization.Away (Transition.det (R := R) ι ι')))
+        ≫ CommRingCat.ofHom (evalAwayAtR ι ι' N h hι') := by
+    rw [← CommRingCat.ofHom_comp]
+    exact congrArg CommRingCat.ofHom
+      (RingHom.ext (evalAwayAtR_algebraMap ι ι' N h hι')).symm
+  rw [he, Spec.map_comp]
+  rfl
+
+/-- The overlap point transported by the glue transition is the reverse-chart overlap
+point (the scheme-level shadow of `evalAwayAtR_comp_ringHomAway`). -/
+@[reassoc]
+theorem pointOverlap_comp_overlapTransition
+    (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N)
+    (hι' : IsChartAt (fun i => Pi.single (ι' i) (1 : A)) N) :
+    pointOverlap (R := R) ι ι' N h hι' ≫ overlapTransition R ι ι'
+      = pointOverlap (R := R) ι' ι N hι' h := by
+  have key : CommRingCat.ofHom (Transition.ringHomAway (R := R) ι ι')
+        ≫ CommRingCat.ofHom (evalAwayAtR ι ι' N h hι')
+      = CommRingCat.ofHom (evalAwayAtR ι' ι N hι' h) := by
+    rw [← CommRingCat.ofHom_comp]
+    exact congrArg CommRingCat.ofHom (evalAwayAtR_comp_ringHomAway ι ι' N h hι')
+  show Spec.map (CommRingCat.ofHom (evalAwayAtR ι ι' N h hι'))
+      ≫ Spec.map (CommRingCat.ofHom (Transition.ringHomAway (R := R) ι ι'))
+    = Spec.map (CommRingCat.ofHom (evalAwayAtR ι' ι N hι' h))
+  rw [← Spec.map_comp, key]
+
+/-- **[GR-G-ASM], chart-independence of the point construction.** A member charted at both
+`ι` and `ι'` gives the same `A`-point of the Grassmannian scheme through either chart —
+the well-definedness heart of the T-point map. The two chart evaluations are intertwined
+by the glue transition (`evalAwayAtR_comp_ringHomAway`, itself the SPEC), and the two glued
+inclusions agree on the overlap by `GlueData.glue_condition`. -/
+theorem pointOfChartMember_eq (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N)
+    (hι' : IsChartAt (fun i => Pi.single (ι' i) (1 : A)) N) :
+    pointOfChartMember (R := R) ι N h = pointOfChartMember (R := R) ι' N hι' := by
+  have hgc : overlapTransition R ι ι' ≫ overlapι R ι' ι ≫ (glueData R k n).ι (ULift.up ι')
+      = overlapι R ι ι' ≫ (glueData R k n).ι (ULift.up ι) :=
+    (glueData R k n).glue_condition (ULift.up ι) (ULift.up ι')
+  rw [pointOfChartMember, pointOfChartMember,
+    specEvalAtR_eq_overlapι ι ι' N h hι', specEvalAtR_eq_overlapι ι' ι N hι' h]
+  simp only [Category.assoc]
+  erw [← hgc]
+  erw [pointOverlap_comp_overlapTransition_assoc]
+  rfl
 
 end Points
 
