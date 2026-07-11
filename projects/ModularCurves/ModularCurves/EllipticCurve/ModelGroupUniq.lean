@@ -650,4 +650,31 @@ instance (T : Over (wStageOp W)) : (stageW W T).IsElliptic := by
 
 end Stage
 
+/-! ## Stage comparison isomorphisms -/
+
+section StageIso
+
+variable {R} (W : WeierstrassCurve R) [W.IsElliptic]
+
+/-- The stage model against the base-changed system object (at `g := projModelπ (wZero W)`). -/
+noncomputable def stageModelPB (T : Over (wStageOp W)) : IsPullback
+    (projModelBaseChangeOf (Subalgebra.inclusion (wStage_le_stage W T)).toRingHom
+      (wZero W) (stageW W T) rfl)
+    (projModelπ (stageW W T)) (projModelπ (wZero W))
+    (Spec.map (CommRingCat.ofHom (Subalgebra.inclusion (wStage_le_stage W T)).toRingHom)) :=
+  isPullback_projModelBaseChangeOf _ (wZero W) (stageW W T) rfl
+
+/-- The stage square against the base-changed square system object. -/
+noncomputable def stageSqPB (T : Over (wStageOp W)) : IsPullback
+    (pullbackMapBaseChangeOf (Subalgebra.inclusion (wStage_le_stage W T)).toRingHom
+      (wZero W) (stageW W T) rfl)
+    (Limits.pullback.fst (projModelπ (stageW W T)) (projModelπ (stageW W T)) ≫
+      projModelπ (stageW W T))
+    (Limits.pullback.fst (projModelπ (wZero W)) (projModelπ (wZero W)) ≫
+      projModelπ (wZero W))
+    (Spec.map (CommRingCat.ofHom (Subalgebra.inclusion (wStage_le_stage W T)).toRingHom)) :=
+  sqIsPullback _ (wZero W) (stageW W T) rfl
+
+end StageIso
+
 end ModularCurves
