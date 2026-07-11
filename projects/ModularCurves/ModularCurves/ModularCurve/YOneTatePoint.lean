@@ -261,83 +261,10 @@ theorem factors_yOne_iff [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R))
     exact hne (((tateUniversal R).zsmul_pull_baseChange_asSection_iff (tatePoint R) t τ (d : ℤ)).mpr
       hτkill)
 
-/-- **(Y1-D2 bridge)** A pulled section vanishes on the fibre over `τ` iff its `transportSection`
-(along the `Ell/R`-morphism's cartesian comparison iso `curveIsoPullback`) does — pure
-iso-cancellation on the total spaces (`curveIsoPullback` is an iso, hence mono). This is the
-"barehanded" fibrewise transport of the wiring note. -/
-private lemma pull_transportSection_eq_zero_iff {X Y : EllObj R} (f : X ⟶ Y) {k : Type u} [Field k]
-    (τ : Spec (CommRingCat.of k) ⟶ X.base) (w : X.curve.Section) :
-    EllipticCurve.Point.pull X.curve τ w = 0 ↔
-      EllipticCurve.Point.pull (Y.curve.baseChange f.baseHom) τ (EllHom.transportSection R f w) = 0 := by
-  -- `iso.hom`'s codomain is inferred as `(baseChange).E` from these equations, matching
-  -- `zero_curveIsoPullback` (avoiding the `pullback … = (baseChange).E` syntactic mismatch).
-  have key : (EllipticCurve.Point.pull (Y.curve.baseChange f.baseHom) τ
-        (EllHom.transportSection R f w)).1
-      = (EllipticCurve.Point.pull X.curve τ w).1 ≫ (EllHom.curveIsoPullback R f).hom :=
-    (Category.assoc _ _ _).symm
-  have keyzero : (0 : (Y.curve.baseChange f.baseHom).Point τ).1
-      = (0 : X.curve.Point τ).1 ≫ (EllHom.curveIsoPullback R f).hom := by
-    rw [EllipticCurve.point_zero_val, EllipticCurve.point_zero_val, Category.assoc]
-    exact congrArg (τ ≫ ·) (EllHom.zero_curveIsoPullback R f).symm
-  rw [Subtype.ext_iff, Subtype.ext_iff, key, keyzero]
-  exact (CategoryTheory.cancel_mono (EllHom.curveIsoPullback R f).hom).symm
-
-/-- **(Y1-D2, naive-structure transport along `Ell/R`-morphisms)** For an `Ell/R`-morphism
-`f : X ⟶ Y` and a section `Q` of `Y.curve`, the pulled section `pullSection f Q` is naive-`Γ₁(N)`
-on `X.curve` iff the pulled *point* is naive-`Γ₁(N)` on the base-changed curve
-`Y.curve ×_{Y.base} X.base`. The cartesian square of `f` identifies the two curves pointedly;
-the group-compatibility of that identification is the GME 2.2.5 canonicity chain — the same
-**[T-E4-family]** machinery as `EllHom.pullSection_add` and the membership sorry inside
-`gammaOneNaiveProblem.map` (held file), with which the discharge must be coordinated (prove
-once, consume twice). -/
-theorem isNaiveGammaOne_pullSection_iff [NeZero N] {X Y : EllObj R} (f : X ⟶ Y)
-    (Q : Y.curve.Section) :
-    X.curve.IsNaiveGammaOne N (EllHom.pullSection R f Q) ↔
-      (Y.curve.baseChange f.baseHom).IsNaiveGammaOne N
-        (EllipticCurve.Point.asSection Y.curve f.baseHom
-          (EllipticCurve.Point.pull Y.curve f.baseHom Q)) := by
-  -- `transportSection` (along `f`'s cartesian comparison iso) as an additive hom — additivity is
-  -- A's `T-E4-family` primitive (`transportSection_add_of_finitePresentation`), the "prove once".
-  set Φ : X.curve.Section →+ (Y.curve.baseChange f.baseHom).Section :=
-    AddMonoidHom.mk' (EllHom.transportSection R f)
-      (EllHom.transportSection_add_of_finitePresentation R f) with hΦ
-  have hinj : Function.Injective Φ := EllHom.transportSection_injective R f
-  have hΦ0 : ∀ y, Φ y = 0 ↔ y = 0 := fun y => by rw [← map_zero Φ]; exact hinj.eq_iff
-  -- dictionary: the transport of the pulled section IS the base-changed pulled point-section.
-  have hdict : Φ (EllHom.pullSection R f Q)
-      = EllipticCurve.Point.asSection Y.curve f.baseHom (EllipticCurve.Point.pull Y.curve f.baseHom Q) := by
-    refine Subtype.ext ?_
-    show (EllHom.transportSection R f (EllHom.pullSection R f Q)).1 = _
-    rw [EllHom.transportSection_pullSection]
-    rfl
-  -- section-level killing transports through the injective additive hom.
-  have killing_iff : ((N : ℤ) • EllHom.pullSection R f Q = 0) ↔
-      ((N : ℤ) • EllipticCurve.Point.asSection Y.curve f.baseHom
-        (EllipticCurve.Point.pull Y.curve f.baseHom Q) = 0) := by
-    rw [← hdict, ← map_zsmul Φ, hΦ0]
-  -- fibrewise, any integer scalar: pull ∘ (a • ·) then iso-cancel (`pull_transportSection_eq_zero_iff`).
-  have hbridge : ∀ (a : ℤ) {k : Type u} [Field k] (t : Spec (CommRingCat.of k) ⟶ X.base),
-      (a • EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f Q) = 0 ↔
-        a • EllipticCurve.Point.pull (Y.curve.baseChange f.baseHom) t
-          (EllipticCurve.Point.asSection Y.curve f.baseHom
-            (EllipticCurve.Point.pull Y.curve f.baseHom Q)) = 0) := by
-    intro a k _ t
-    rw [← EllipticCurve.Point.pull_zsmul, ← EllipticCurve.Point.pull_zsmul,
-      pull_transportSection_eq_zero_iff (R := R) (f := f) (τ := t)
-        (w := a • EllHom.pullSection R f Q),
-      show EllHom.transportSection R f (a • EllHom.pullSection R f Q)
-        = a • Φ (EllHom.pullSection R f Q) from map_zsmul Φ a _, hdict]
-  constructor
-  · rintro ⟨hkill, hfib⟩
-    refine ⟨killing_iff.mp hkill, ?_⟩
-    intro k _ _ t
-    exact ⟨(hbridge (N : ℤ) t).mp (hfib k t).1,
-      fun a ha haN => (not_congr (hbridge (a : ℤ) t)).mp ((hfib k t).2 a ha haN)⟩
-  · rintro ⟨hkill, hfib⟩
-    refine ⟨killing_iff.mpr hkill, ?_⟩
-    intro k _ _ t
-    exact ⟨(hbridge (N : ℤ) t).mpr (hfib k t).1,
-      fun a ha haN => (not_congr (hbridge (a : ℤ) t)).mpr ((hfib k t).2 a ha haN)⟩
+/- **RELOCATED (Y1-CLOSER S4)**: `pull_transportSection_eq_zero_iff` and
+`isNaiveGammaOne_pullSection_iff` now live byte-identical in `Moduli/NaiveProblems.lean`
+(needed by the `gammaOneNaiveProblem.map` membership fill there — the "prove once, consume
+twice" coordination of A's wiring note). -/
 
 /-- **(Y1-D3 — Loeffler Def 3.3.6, representability half of T-E7)** `(Y₁(N), universal curve,
 (0,0))` represents the naive `Γ₁(N)` moduli problem: for every `Y : Ell/R`,
