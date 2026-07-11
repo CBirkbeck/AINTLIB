@@ -904,12 +904,63 @@ theorem yOneStructMap_smooth [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
   letI : Algebra ↑Γ(Spec R, ⊤) ↑Γ(yOne R N, ⊤) := ((yOneStructMap R N).appTop).hom.toAlgebra
   refine ⟨?_, hFP⟩
   /- The `FormallySmooth` leg: transport E5's nilpotent lifting through the Γ–Spec
-  adjunction (mathlib quantifies over square-zero `I`, a special case of nilpotent).
-  For each test pair `(B, I)` with `I² = ⊥` and `g₀ : Γ(Y₁(N)) →ₐ B⧸I`: `Spec.map`-side
-  gives `f₀ : Spec (B⧸I) ⟶ yOne` over `Spec R` (through `isoSpec`); E5 lifts it to
-  `f : Spec B ⟶ yOne`; the adjoint `AlgHom` lifts `g₀`. Plumbing: `Scheme.isoSpec`,
-  `ΓSpecIso`-naturality, `Algebra.FormallySmooth`-constructor `comp_surjective`. -/
-  sorry
+  adjunction. Constructor: `comp_surjective` over square-zero test pairs. -/
+  rw [Algebra.FormallySmooth.iff_comp_surjective]
+  intro B _ _ I hI g₀
+  -- the test pair, Spec-side
+  set φB : R ⟶ CommRingCat.of B := (Scheme.ΓSpecIso R).inv ≫
+    CommRingCat.ofHom (algebraMap ↑Γ(Spec R, ⊤) B) with hφB
+  set s₀ : Spec (CommRingCat.of (B ⧸ I)) ⟶ yOne R N :=
+    Spec.map (CommRingCat.ofHom g₀.toRingHom) ≫ CategoryTheory.inv (yOne R N).toSpecΓ
+    with hs₀def
+  haveI : IsIso (yOne R N).toSpecΓ := IsAffine.affine
+  -- the structure triangle of `yOneStructMap` (the hftri pattern)
+  have hytri : yOneStructMap R N = (yOne R N).toSpecΓ ≫
+      Spec.map ((Scheme.ΓSpecIso R).inv ≫ (yOneStructMap R N).appTop) := by
+    have h1 := Scheme.toSpecΓ_naturality (yOneStructMap R N)
+    rw [show (Spec R).toSpecΓ = Spec.map (Scheme.ΓSpecIso R).hom from
+      Scheme.isoSpec_Spec_hom R] at h1
+    have h2 := congrArg (fun m => m ≫ Spec.map (Scheme.ΓSpecIso R).inv) h1
+    simp only [Category.assoc, ← Spec.map_comp] at h2
+    rw [show Spec.map ((Scheme.ΓSpecIso R).inv ≫ (Scheme.ΓSpecIso R).hom) = 𝟙 _ by
+      rw [Iso.inv_hom_id, Spec.map_id], Category.comp_id] at h2
+    exact h2
+  have hinvy : CategoryTheory.inv (yOne R N).toSpecΓ ≫ yOneStructMap R N =
+      Spec.map ((Scheme.ΓSpecIso R).inv ≫ (yOneStructMap R N).appTop) := by
+    have h3 := congrArg (fun m => CategoryTheory.inv (yOne R N).toSpecΓ ≫ m) hytri
+    simp only [← Category.assoc, IsIso.inv_hom_id, Category.id_comp] at h3
+    exact h3
+  have hf₀ : s₀ ≫ yOneStructMap R N =
+      Spec.map (φB ≫ CommRingCat.ofHom (Ideal.Quotient.mk I)) := by
+    rw [hs₀def, Category.assoc, hinvy, ← Spec.map_comp]
+    refine congrArg Spec.map (CommRingCat.hom_ext (RingHom.ext fun r => ?_))
+    have hc := g₀.commutes ((Scheme.ΓSpecIso R).inv.hom r)
+    exact hc
+  obtain ⟨fL, hfLrest, hfLover⟩ :=
+    yOne_infinitesimal_lifting R N hN hinv φB I ⟨2, hI⟩ s₀ hf₀
+  set qf := Spec.preimage (fL ≫ (yOne R N).toSpecΓ) with hqf
+  have hqfspec : Spec.map qf = fL ≫ (yOne R N).toSpecΓ := Spec.map_preimage _
+  have hqfcomp : ((Scheme.ΓSpecIso R).inv ≫ (yOneStructMap R N).appTop) ≫ qf = φB := by
+    refine Spec.map_injective ?_
+    rw [Spec.map_comp, hqfspec, Category.assoc, ← hytri]
+    exact hfLover
+  refine ⟨{ toRingHom := qf.hom
+            commutes' := fun c => ?_ }, ?_⟩
+  · obtain ⟨r, rfl⟩ : ∃ r, (Scheme.ΓSpecIso R).inv.hom r = c :=
+      ⟨(Scheme.ΓSpecIso R).hom.hom c, by
+        have h1 := congrArg (fun (m : Γ(Spec R, ⊤) ⟶ Γ(Spec R, ⊤)) => m.hom c)
+          (Iso.hom_inv_id (Scheme.ΓSpecIso R))
+        exact h1⟩
+    exact congrArg (fun (m : R ⟶ CommRingCat.of B) => m.hom r) hqfcomp
+  · refine AlgHom.ext fun c => ?_
+    have hmkqf : qf ≫ CommRingCat.ofHom (Ideal.Quotient.mk I) =
+        CommRingCat.ofHom g₀.toRingHom := by
+      refine Spec.map_injective ?_
+      rw [Spec.map_comp, hqfspec]
+      have h1 := congrArg (fun m => m ≫ (yOne R N).toSpecΓ) hfLrest
+      simp only [Category.assoc] at h1
+      rw [h1, hs₀def, Category.assoc, IsIso.inv_hom_id, Category.comp_id]
+    exact congrArg (fun (m : Γ(yOne R N, ⊤) ⟶ CommRingCat.of (B ⧸ I)) => m.hom c) hmkqf
 
 /-! ### F. Transport to arbitrary representing objects, and the T-E7 bridge -/
 
