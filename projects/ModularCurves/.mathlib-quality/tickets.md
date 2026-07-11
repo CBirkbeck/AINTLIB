@@ -16172,3 +16172,34 @@ direction of the NISOG Grassmannian representability.
   round-trip halves — the long-parked assembly residual is closing; global Zariski
   descent (a mathlib-representability-TODO-shaped leaf) remains. NEW-HOPF: coassoc via
   iterated affineKunneth in flight (both counit laws + Δ/ε top-level done). On charter.
+
+## Amendments v10.141 (2026-07-11, coordinator): ★ THE GENERAL-CURVES RE-TASKING — nine charters issued toward Y(N) / Γ_H / Γ₀(N) (owner directive); Y1 endgame unaffected (Y1-CLOSER runs)
+
+**Owner directive**: with Y₁(N)'s representability unconditional and its MASTER close
+running (Y1-CLOSER-2), the fleet re-points at the general modular curves. Priority
+ranking v10.37/v10.94 stands: Y1 (closer) > YFULL > GH > NISOG. Per v10.8, every NEW
+stream's first act is the worker's own `/develop --decompose` — charters state goals,
+gates, seams, and boundaries only. All nine in inboxes; openers with the owner.
+
+| Seat | Charter | Serves |
+|---|---|---|
+| **Y1-CLOSER** | (running) CLOSER-2: K2 → K3/K4 → L3 → MASTER clean | Y1 ★ |
+| **c5β** | C5B-2: E[N] finite-locally-free group scheme + cyclic/H-orbit substrate + GL₂(ℤ/N) action at scheme level (BB boxes consumed hypothesis-wired; instantiates NEW-HOPF's FiniteLocallyFreeSubgroup; p2's Weil-pairing claim UNTOUCHED) | GH + NISOG substrate |
+| **fable-P4** | FP4-2 (confirmed): B3-g3 close → B4 (T-E5c) → B5 (Y(N) route A + Γ_H) → instantiate vs NEW-GH's corrected statements | Y(N) + Γ_H engine |
+| **NEW-Y1** | YFULL: the Y(N) curve assembly (D-track pattern at the next curve); first act = the four-gate audit (GEOM flipped; QSM closing via FP-2; ETALE fed mod BB; CLOPEN two-route audit) + decompose; seam with FP4's B5 = engine/assembly split | YFULL ★ |
+| **NEW-GH** | GH-2: MellW tail → [A711-BC] check → the KM 7.1.2 quotient-problem wiring (corrected T-H4/T-H6, b2_log #1/#2 targets) vs FP4's clean engine; HOPF pins + C5B-2 package consumed as they land; p0 reclaim provision stands | Γ_H ★ |
+| **NEW-HOPF** | (running) charter + horizon: pins → BOARD-SIGNAL → the E/C quotient-existence application (consumable for L6 + C5B-2) → ★★ | Γ₀ enabler |
+| **fable-FP** | FP-2: KL-3 (ownership-audit first — the cross-referenced T-DEV/T-FLAT lane appears unstaffed; rule-5 claim if so) + [02KM-CORE] ⟹ [YF-QSM] CLOSES (a YFULL gate falls) | YFULL gate |
+| **D2** | (running) T-SG3-LFP capstone → NISOG M2 [L15] on the delivered Grassmannian (forward map proven; global-descent leaf hypothesis-wired, not built) → L6 on HOPF signal → the Y₀(N) assembly plan | Γ₀/NISOG ★ |
+| **beastmode-A** | A-CMP: the fibrewise⟷LW consumer layer (FP4 chartless [a5] bridge; M_ell^W eso-upgrade; [YF-GEOM] general form) + the PoleSheaf 9-raise debt (/buzz-decompose); REMAINS closer-backup on T-W7a (interrupt outranks) | cross-cutting |
+
+- **Ratifications folded in**: fable-FP terminal ★★ (12/13 of 02KK + the NISOG forward
+  map; the KL-3 cross-reference discipline = the standard); beastmode-A's repair
+  stand-down (live-agent buffer analysis — exactly right); NEW-HOPF's ⊤-level session
+  (design promise held; the self-caught heredoc overclaim + explicit record correction
+  = the record-integrity standard, cited).
+- **Seams boarded** (collision-prevention): C5B-2 ∌ Weil pairing (p2's claim stands,
+  sentinel stale — boundary handshake on their return); YFULL(NEW-Y1) vs B5(FP4) =
+  assembly vs engine, seam boarded at session starts; GH-2 consumes C5B-2 + HOPF pins
+  hypothesis-wired; D2's L15 consumes FP's delivered gate. NOTHING assigned touches
+  Y1-CLOSER's lanes.
