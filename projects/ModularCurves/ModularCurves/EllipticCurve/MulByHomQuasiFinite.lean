@@ -136,6 +136,103 @@ theorem point_torsionBy_finite_of_geometric {k : Type u} [Field k] [IsAlgClosed 
       (fun x y hxy => Subtype.ext (congrArg Subtype.val hxy))
   exact Finite.of_equiv _ (torsionByCongr eqchain (N : ℤ)).symm
 
+/-- **(BB-QF, invertible case — KM 2.3.1 quasi-finiteness)** `[N] : E ⟶ E` is locally
+quasi-finite when `N` is invertible on the base. -/
+theorem mulByHom_locallyQuasiFinite_of_nIsInvertible (N : ℕ) [NeZero N]
+    (h : NIsInvertible S N) : LocallyQuasiFinite (E.mulByHom N) := by
+  classical
+  haveI : Smooth E.π := SmoothOfRelativeDimension.smooth (n := 1) E.π
+  haveI := E.mulByHom_locallyOfFinitePresentation N
+  haveI hlft : LocallyOfFiniteType (E.mulByHom N) := inferInstance
+  refine LocallyQuasiFinite.of_finite_preimage_singleton _ (fun y => ?_)
+  -- the geometric point over `y`
+  set k : Type u := AlgebraicClosure ↑(E.E.residueField y) with hk
+  set yg : Spec (CommRingCat.of k) ⟶ E.E :=
+    Spec.map (CommRingCat.ofHom (algebraMap ↑(E.E.residueField y) k)) ≫
+      E.E.fromSpecResidueField y with hyg
+  have hygy : ∀ p, yg.base p = y := fun p => by
+    rw [hyg, Scheme.Hom.comp_apply]
+    have h2 := Scheme.range_fromSpecResidueField (X := E.E) y
+    have h3 : (E.E.fromSpecResidueField y).base
+        ((Spec.map (CommRingCat.ofHom (algebraMap ↑(E.E.residueField y) k))).base p) ∈
+        ({y} : Set E.E) := h2 ▸ Set.mem_range_self _
+    exact h3
+  -- `N` is invertible in `k`
+  have hNk : (N : k) ≠ 0 := by
+    have hEE : NIsInvertible E.E N := by
+      have h2 := h.map (E.π.appTop).hom
+      rwa [map_natCast] at h2
+    have h1 : IsUnit (N : ↑(E.E.residueField y)) := by
+      have h1' := ((E.E.presheaf.germ ⊤ y trivial) ≫ E.E.residue y).hom.isUnit_map hEE
+      rwa [map_natCast] at h1'
+    have h2 := h1.map (algebraMap ↑(E.E.residueField y) k)
+    rw [map_natCast] at h2
+    exact isUnit_iff_ne_zero.mp h2
+  -- the preimage is the range of the first projection of the geometric fibre
+  have hpre : (E.mulByHom N).base ⁻¹' {y} =
+      Set.range (pullback.fst (E.mulByHom N) yg).base := by
+    apply subset_antisymm
+    · intro x hx
+      obtain ⟨pt⟩ : Nonempty ↑(Spec (CommRingCat.of k)) := inferInstance
+      obtain ⟨z, hz1, hz2⟩ := Scheme.Pullback.exists_preimage_pullback x pt
+        (by rw [Set.mem_preimage, Set.mem_singleton_iff] at hx; rw [hx, hygy pt])
+      exact ⟨z, hz1⟩
+    · rintro _ ⟨z, rfl⟩
+      rw [Set.mem_preimage, Set.mem_singleton_iff]
+      have hc : (pullback.fst (E.mulByHom N) yg ≫ E.mulByHom N).base z =
+          (pullback.snd (E.mulByHom N) yg ≫ yg).base z := by
+        rw [pullback.condition]
+      rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hc
+      rw [hc, hygy]
+  rw [hpre]
+  -- the geometric fibre has finitely many sections, hence finite space
+  haveI : LocallyOfFiniteType (pullback.snd (E.mulByHom N) yg) :=
+    MorphismProperty.pullback_snd _ _ hlft
+  haveI hsol : Finite {h : Spec (CommRingCat.of k) ⟶ E.E // h ≫ E.mulByHom N = yg} := by
+    by_cases hne : Nonempty {h : Spec (CommRingCat.of k) ⟶ E.E // h ≫ E.mulByHom N = yg}
+    · obtain ⟨h₀⟩ := hne
+      set t : Spec (CommRingCat.of k) ⟶ S := yg ≫ E.π with ht
+      have hpt : ∀ hh : {h : Spec (CommRingCat.of k) ⟶ E.E // h ≫ E.mulByHom N = yg},
+          hh.1 ≫ E.π = t := by
+        rintro ⟨hv, hp⟩
+        show hv ≫ E.π = t
+        rw [ht, ← hp, Category.assoc, E.mulByHom_π]
+      have hsmul : ∀ hh : {h : Spec (CommRingCat.of k) ⟶ E.E // h ≫ E.mulByHom N = yg},
+          ((N : ℤ) • (⟨hh.1, hpt hh⟩ : E.Point t) : E.Point t) = ⟨yg, rfl⟩ := fun hh => by
+        apply Subtype.ext
+        rw [E.point_smul_eq_comp_mulBy]
+        exact hh.2
+      haveI := E.point_torsionBy_finite_of_geometric t N hNk
+      refine Finite.of_injective (fun hh => (⟨(⟨hh.1, hpt hh⟩ : E.Point t) -
+        (⟨h₀.1, hpt h₀⟩ : E.Point t), ?_⟩ :
+          Submodule.torsionBy ℤ (E.Point t) (N : ℤ))) ?_
+      · rw [Submodule.mem_torsionBy_iff, smul_sub, hsmul hh, hsmul h₀, sub_self]
+      · intro h₁ h₂ h12
+        have h3 := congrArg Subtype.val h12
+        have h4 : (⟨h₁.1, hpt h₁⟩ : E.Point t) = ⟨h₂.1, hpt h₂⟩ := by
+          have := sub_left_injective (G := E.Point t) h3
+          exact this
+        have h5 : h₁.1 = h₂.1 := congrArg (fun P : E.Point t => P.1) h4
+        exact Subtype.ext h5
+    · haveI := not_nonempty_iff.mp hne
+      infer_instance
+  haveI hFfin : Finite ↑(pullback (E.mulByHom N) yg) := by
+    refine Scheme.finite_of_finite_sections (pullback.snd (E.mulByHom N) yg) ?_
+    exact Finite.of_equiv _ (Scheme.pullbackSndSectionEquiv (E.mulByHom N) yg).symm
+  exact Set.finite_range _
+
+/-- **(KM 2.3.1 finiteness, invertible case)** `[N]` is finite when `N` is invertible:
+proper + quasi-finite via Zariski's Main Theorem. -/
+theorem mulByHom_isFinite_of_nIsInvertible (N : ℕ) [NeZero N] (h : NIsInvertible S N) :
+    IsFinite (E.mulByHom N) := by
+  haveI := E.mulByHom_locallyQuasiFinite_of_nIsInvertible N h
+  exact IsFinite.of_isProper_of_locallyQuasiFinite _
+
+/-- **(T-B4 finiteness, invertible case)** `E[N] ⟶ S` is finite when `N` is invertible. -/
+theorem torsionπ_isFinite_of_nIsInvertible (N : ℕ) [NeZero N] (h : NIsInvertible S N) :
+    IsFinite (E.torsionπ N) :=
+  MorphismProperty.pullback_snd _ _ (E.mulByHom_isFinite_of_nIsInvertible N h)
+
 end EllipticCurve
 
 end ModularCurves

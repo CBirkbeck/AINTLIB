@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.ModularCurve.YOneAtlasClassify
+import ModularCurves.EllipticCurve.MulByHomEtale
 import ModularCurves.ModularCurve.YFullRoute
 
 /-!
@@ -364,7 +365,7 @@ theorem killedLocus_preimage_isOpen {S : Scheme.{u}} (E : EllipticCurve S) (P : 
   have hz0 : ((0 : E.Point (𝟙 S)) : S ⟶ E.E) ≫ E.mulByHom N = 𝟙 S ≫ E.zero := by
     rw [← E.smul_eq_zero_iff_comp_mulByHom, smul_zero]
   set zT := E.pointToTorsion _ hz0 with hzT
-  haveI hEt : Etale (E.torsionπ N) := E.torsionπ_etale N hN
+  haveI hEt : Etale (E.torsionπ N) := E.torsionπ_etale' N hN
   haveI : IsOpenImmersion (Limits.pullback.diagonal (E.torsionπ N)) :=
     AlgebraicGeometry.FormallyUnramified.isOpenImmersion_diagonal _
   have hsq := Limits.pullback_lift_diagonal_isPullback zT (E.torsionπ N)
@@ -631,6 +632,26 @@ theorem pullSection_pullbackAlongπ {R : CommRingCat.{u}} (X : EllObj R)
     exact (EllipticCurve.Point.asSection X.curve g
       (EllipticCurve.Point.pull X.curve g P)).2.symm
 
+/-- `Point.baseChangeEquiv` commutes with `ℤ`-scalars, concrete-hom form (avoids the
+`AddMonoidHomClass`-with-metavariable synthesis that times out under heavy import
+closures). -/
+private theorem bcEquiv_zsmul {S : Scheme.{u}} (E : EllipticCurve S) {T T' : Scheme.{u}}
+    (σ : T ⟶ S) (t : T' ⟶ T) (n : ℤ) (P : (E.baseChange σ).Point t) :
+    EllipticCurve.Point.baseChangeEquiv E σ t (n • P) =
+      n • EllipticCurve.Point.baseChangeEquiv E σ t P :=
+  map_zsmul (EllipticCurve.Point.baseChangeEquiv E σ t).toAddMonoidHom n P
+
+private theorem bcEquiv_zero {S : Scheme.{u}} (E : EllipticCurve S) {T T' : Scheme.{u}}
+    (σ : T ⟶ S) (t : T' ⟶ T) :
+    EllipticCurve.Point.baseChangeEquiv E σ t 0 = 0 :=
+  map_zero (EllipticCurve.Point.baseChangeEquiv E σ t).toAddMonoidHom
+
+private theorem bcEquiv_nsmul {S : Scheme.{u}} (E : EllipticCurve S) {T T' : Scheme.{u}}
+    (σ : T ⟶ S) (t : T' ⟶ T) (n : ℕ) (P : (E.baseChange σ).Point t) :
+    EllipticCurve.Point.baseChangeEquiv E σ t (n • P) =
+      n • EllipticCurve.Point.baseChangeEquiv E σ t P :=
+  map_nsmul (EllipticCurve.Point.baseChangeEquiv E σ t).toAddMonoidHom n P
+
 /-- **(Y1-E5 pure core)** The étale torsion-point lift against a nilpotent ideal, packaged
 through the marked-atlas classification: an atlas algebra map to `A⧸I` whose marked point is
 `N`-killed lifts, after T-E1-style renormalisation by the classifying morphism of the lifted
@@ -679,7 +700,7 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (hN : 4 ≤ N)
   have hP₀Akill : (N : ℤ) • P₀A = 0 := by
     refine (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t
       (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)))).injective ?_
-    rw [map_zsmul, map_zero, hP₀A, AddEquiv.apply_symm_apply]
+    rw [bcEquiv_zsmul, bcEquiv_zero, hP₀A, AddEquiv.apply_symm_apply]
     refine Subtype.ext ?_
     have h2 := congrArg Subtype.val hkill₀
     have h3 : (((N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) t₀
@@ -709,7 +730,7 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (hN : 4 ≤ N)
   set PTbc := (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t
     (𝟙 (Spec (CommRingCat.of A)))) PTfa.1 with hPTbc
   have hPTbckill : (N : ℤ) • PTbc = 0 := by
-    rw [hPTbc, ← map_zsmul, (Submodule.mem_torsionBy_iff _ _).mp PTfa.2, map_zero]
+    rw [hPTbc, ← bcEquiv_zsmul, (Submodule.mem_torsionBy_iff _ _).mp PTfa.2, bcEquiv_zero]
   have hPTbcval : (PTbc : Spec (CommRingCat.of A) ⟶ (tateUniversal R).E) =
       (sT ≫ FA.torsionι N) ≫ Limits.pullback.fst (tateUniversal R).π t := rfl
   set PT : (tateUniversal R).Point t := ⟨(PTbc : _ ⟶ (tateUniversal R).E), by
@@ -787,7 +808,7 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (hN : 4 ≤ N)
       exact (Spec.map_preimage τ).symm
     have h1 : (a : ℤ) • (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t τ)
         (EllipticCurve.Point.pull ((tateUniversal R).baseChange t) τ PA) = 0 := by
-      rw [← map_zsmul, h0, map_zero]
+      rw [← bcEquiv_zsmul, h0, bcEquiv_zero]
     have hQval : ((EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t τ)
         (EllipticCurve.Point.pull ((tateUniversal R).baseChange t) τ PA) :
           Spec (CommRingCat.of k) ⟶ (tateUniversal R).E) =
@@ -894,7 +915,7 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (hN : 4 ≤ N)
           (EllipticCurve.Point.pull ((tateUniversal R).baseChange
             (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ t)) τ P₀sec)
           = 0 := by
-        rw [← map_zsmul, h0, map_zero]
+        rw [← bcEquiv_zsmul, h0, bcEquiv_zero]
       rw [hP₀sec, pullAsSection_dict R _ τ] at h1
       exact h1
     have hrestPT : EllipticCurve.Point.restrict (tateUniversal R)
@@ -1154,7 +1175,7 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
           (EllipticCurve.Point.pull (tateUniversal R) t' (tatePoint R)) = 0 := by
         refine (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t'
           (𝟙 _)).injective ?_
-        rw [map_zsmul, map_zero]
+        rw [bcEquiv_zsmul, bcEquiv_zero]
         refine Subtype.ext ?_
         have hval : ((EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t' (𝟙 _))
             (EllipticCurve.Point.asSection (tateUniversal R) t'
@@ -1221,20 +1242,20 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
               = 0 := fun P => by
           constructor
           · intro h0
-            rw [← map_zsmul, h0, map_zero]
+            rw [← bcEquiv_zsmul, h0, bcEquiv_zero]
           · intro h0
             refine (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t' τ).injective ?_
-            rw [map_zsmul, map_zero]
+            rw [bcEquiv_zsmul, bcEquiv_zero]
             exact h0
         have h2 : ∀ (P : ((tateUniversal R).baseChange t₀).Point τ₀),
             a • P = 0 ↔ a • (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t₀ τ₀) P
               = 0 := fun P => by
           constructor
           · intro h0
-            rw [← map_zsmul, h0, map_zero]
+            rw [← bcEquiv_zsmul, h0, bcEquiv_zero]
           · intro h0
             refine (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t₀ τ₀).injective ?_
-            rw [map_zsmul, map_zero]
+            rw [bcEquiv_zsmul, bcEquiv_zero]
             exact h0
         rw [h1, h2, pullAsSection_dict R t' τ, pullAsSection_dict R t₀ τ₀, hcomp]
       obtain ⟨hk₀, hord₀⟩ := hstruct₀.2 k τ₀

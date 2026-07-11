@@ -23,6 +23,8 @@ import ModularCurves.EllipticCurve.Comparison
 import ModularCurves.EllipticCurve.GroupLaw
 import ModularCurves.EllipticCurve.NegModelBaseChange
 import ModularCurves.EllipticCurve.PointsDictionary
+import ModularCurves.EllipticCurve.MulByHomEtale
+import ModularCurves.EllipticCurve.MulByHomQuasiFinite
 import ModularCurves.EllipticCurve.PoleSheaf
 import ModularCurves.EllipticCurve.RecordGroupUnique
 import ModularCurves.EllipticCurve.Torsion
