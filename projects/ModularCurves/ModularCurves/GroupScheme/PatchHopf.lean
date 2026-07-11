@@ -901,6 +901,20 @@ theorem counitLiftAlgTop'_comp_comulAlgTop :
     CommRingCat.hom_id, RingHom.id_apply] at h2
   exact h2
 
+/-! #### The triple product and coassociativity -/
+
+/-- The cube `G|_V ×_V (G|_V ×_V G|_V)`. -/
+noncomputable abbrev cube : Scheme.{u} :=
+  pullback P.groupToBaseRes P.squareToBase
+
+/-- The iterated (triple) Künneth transport:
+`Γ(cube, ⊤) ≅ A' ⊗[R'] Γ(square, ⊤)`. -/
+noncomputable abbrev cubeΓ :
+    Γ(P.cube, ⊤) ⟶ CommRingCat.of (P.groupRingTop ⊗[P.baseRingTop] Γ(P.groupSquare, ⊤)) :=
+  affineKunnethΓ P.groupToBaseRes P.squareToBase rfl rfl
+
+instance : IsIso P.cubeΓ := isIso_affineKunnethΓ _ _ rfl rfl
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
