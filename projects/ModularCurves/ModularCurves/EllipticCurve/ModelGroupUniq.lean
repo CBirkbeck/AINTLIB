@@ -1086,10 +1086,28 @@ theorem modelGrpObj_unique (G : GrpObj (modelOver W))
       Limits.pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W :=
     Over.w F
   obtain ⟨T, g', hg'cone, hg'π⟩ := mu_descends W F.left hFπ
-  -- STAGE + UP (continuation): descend the two collapses along the axis naturality,
-  -- apply the noetherian seesaw (factor_mul_of_tensor_of_forall_component) at the stage,
-  -- conclude g'-related F_T = 1 there, pull the equality back up through the cone leg and
-  -- wPB.hom_ext.
+  -- the comparison shuffle for the axis
+  have hshuffle : axApex W ≫ (sqComparison W).inv =
+      (modelComparison W).inv ≫ (axInclL W).left := by
+    have h1 := axApex_comparison W
+    have h2 := congrArg (fun m => (modelComparison W).inv ≫ m ≫ (sqComparison W).inv) h1
+    simp only [Category.assoc, Iso.hom_inv_id, Category.comp_id, Iso.inv_hom_id_assoc]
+      at h2
+    exact h2.trans (congrArg ((modelComparison W).inv ≫ ·)
+      ((Category.assoc _ _ _).trans ((congrArg ((axInclL W).left ≫ ·)
+        (Iso.hom_inv_id (sqComparison W))).trans (Category.comp_id _))))
+  -- the stage collapse data: u := the axis then the descended difference; v := the
+  -- constant zero
+  set u : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).obj T ⟶ projModel (wZero W) :=
+    axBC W T ≫ g' with hu_def
+  set v : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).obj T ⟶ projModel (wZero W) :=
+    (bcT W (projModelπ (wZero W))).app T ≫ projModelZero (wZero W) with hv_def
+  -- the cone composites agree (the R-collapse transported)
+  have hcone_uv : (bcCone W (projModelπ (wZero W))).π.app T ≫ u =
+      (bcCone W (projModelπ (wZero W))).π.app T ≫ v := by
+    sorry
   sorry
 
 end Unique
