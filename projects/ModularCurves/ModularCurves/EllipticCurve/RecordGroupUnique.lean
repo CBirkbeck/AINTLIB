@@ -299,5 +299,132 @@ theorem chart_mul_eq (G₁ G₂ : GrpObj (Over.mk G.π))
 
 end ChartTransport
 
+/-! ## The chart restriction of the square -/
+
+section ChartSquare
+
+/-- The chart square comparison: the base-changed square maps to the record square. -/
+noncomputable def chartSqCmp (i : A.ι) :
+    pullback (pullback.snd G.π (chartToBase A i)) (pullback.snd G.π (chartToBase A i)) ⟶
+    pullback G.π G.π :=
+  pullback.lift
+    (pullback.fst (pullback.snd G.π (chartToBase A i))
+      (pullback.snd G.π (chartToBase A i)) ≫ pullback.fst G.π (chartToBase A i))
+    (pullback.snd (pullback.snd G.π (chartToBase A i))
+      (pullback.snd G.π (chartToBase A i)) ≫ pullback.fst G.π (chartToBase A i))
+    (by
+      simp only [Category.assoc]
+      rw [pullback.condition (f := G.π) (g := chartToBase A i), ← Category.assoc,
+        pullback.condition (f := pullback.snd G.π (chartToBase A i))
+          (g := pullback.snd G.π (chartToBase A i)), Category.assoc])
+
+/-- Chart evaluation of a base-changed multiplication: through the comparison, the
+record multiplication restricts to the base-changed one. -/
+theorem chartSqCmp_mul (Gj : GrpObj (Over.mk G.π)) (i : A.ι) :
+    chartSqCmp A i ≫ (letI := Gj;
+      (μ[Over.mk G.π] : Over.mk G.π ⊗ Over.mk G.π ⟶ Over.mk G.π)).left =
+    (letI := bcGrp A Gj i;
+      (μ[chartOver A i] : chartOver A i ⊗ chartOver A i ⟶ chartOver A i)).left ≫
+      pullback.fst G.π (chartToBase A i) := by
+  letI := Gj
+  have h := Over.grpObjMkPullbackSnd_mul_left_fst G.π (chartToBase A i)
+  exact h.symm
+
+/-- The chart open of the record square: pairs lying over the chart. -/
+noncomputable def chartOpen (i : A.ι) : (pullback G.π G.π).Opens :=
+  (pullback.fst G.π G.π ≫ G.π) ⁻¹ᵁ (A.U i).1
+
+/-- The chart section of the square open into the chart base. -/
+noncomputable def chartOpenToBase (i : A.ι) :
+    ((chartOpen A i : (pullback G.π G.π).Opens) : Scheme) ⟶ Spec Γ(S, (A.U i).1) :=
+  ((pullback.fst G.π G.π ≫ G.π) ∣_ (A.U i).1) ≫ (A.U i).2.isoSpec.hom
+
+theorem chartOpenToBase_w (i : A.ι) :
+    chartOpenToBase A i ≫ chartToBase A i =
+    (chartOpen A i).ι ≫ pullback.fst G.π G.π ≫ G.π := by
+  show (((pullback.fst G.π G.π ≫ G.π) ∣_ (A.U i).1) ≫ (A.U i).2.isoSpec.hom) ≫
+    ((A.U i).2.isoSpec.inv ≫ (A.U i).1.ι) = _
+  rw [Category.assoc, Iso.hom_inv_id_assoc, morphismRestrict_ι]
+  rfl
+
+/-- The chart restriction of the record square into the base-changed square. -/
+noncomputable def chartRestrict (i : A.ι) :
+    ((chartOpen A i : (pullback G.π G.π).Opens) : Scheme) ⟶
+    pullback (pullback.snd G.π (chartToBase A i)) (pullback.snd G.π (chartToBase A i)) :=
+  pullback.lift
+    (pullback.lift ((chartOpen A i).ι ≫ pullback.fst G.π G.π) (chartOpenToBase A i)
+      (by rw [chartOpenToBase_w, Category.assoc]))
+    (pullback.lift ((chartOpen A i).ι ≫ pullback.snd G.π G.π) (chartOpenToBase A i)
+      (by rw [chartOpenToBase_w, Category.assoc, ← pullback.condition]))
+    (by rw [pullback.lift_snd, pullback.lift_snd])
+
+/-- The chart restriction factors the open inclusion through the comparison. -/
+theorem chartRestrict_cmp (i : A.ι) :
+    chartRestrict A i ≫ chartSqCmp A i = (chartOpen A i).ι := by
+  refine pullback.hom_ext ?_ ?_
+  · rw [Category.assoc]
+    show chartRestrict A i ≫ chartSqCmp A i ≫ pullback.fst G.π G.π = _
+    rw [chartSqCmp, pullback.lift_fst, ← Category.assoc, chartRestrict,
+      pullback.lift_fst, pullback.lift_fst]
+  · rw [Category.assoc]
+    show chartRestrict A i ≫ chartSqCmp A i ≫ pullback.snd G.π G.π = _
+    rw [chartSqCmp, pullback.lift_snd, ← Category.assoc, chartRestrict,
+      pullback.lift_snd, pullback.lift_fst]
+
+/-- The per-chart agreement of the two multiplications, restricted to the chart open. -/
+theorem chartOpen_mul_eq (G₁ G₂ : GrpObj (Over.mk G.π))
+    (h₁ : (letI := G₁; (η[Over.mk G.π] : 𝟙_ (Over S) ⟶ Over.mk G.π).left) =
+      (𝟙_ (Over S)).hom ≫ G.zero)
+    (h₂ : (letI := G₂; (η[Over.mk G.π] : 𝟙_ (Over S) ⟶ Over.mk G.π).left) =
+      (𝟙_ (Over S)).hom ≫ G.zero) (i : A.ι) :
+    (chartOpen A i).ι ≫ (letI := G₁;
+      (μ[Over.mk G.π] : Over.mk G.π ⊗ Over.mk G.π ⟶ Over.mk G.π)).left =
+    (chartOpen A i).ι ≫ (letI := G₂;
+      (μ[Over.mk G.π] : Over.mk G.π ⊗ Over.mk G.π ⟶ Over.mk G.π)).left := by
+  have hchain : ∀ (Gj : GrpObj (Over.mk G.π)),
+      (chartOpen A i).ι ≫ (letI := Gj;
+        (μ[Over.mk G.π] : Over.mk G.π ⊗ Over.mk G.π ⟶ Over.mk G.π)).left =
+      chartRestrict A i ≫ ((letI := bcGrp A Gj i;
+        (μ[chartOver A i] : chartOver A i ⊗ chartOver A i ⟶ chartOver A i)).left ≫
+        pullback.fst G.π (chartToBase A i)) := by
+    intro Gj
+    have h1 := chartSqCmp_mul A Gj i
+    have h2 := congrArg (chartRestrict A i ≫ ·) h1
+    have h3 := congrArg (· ≫ (letI := Gj;
+      (μ[Over.mk G.π] : Over.mk G.π ⊗ Over.mk G.π ⟶ Over.mk G.π)).left)
+      (chartRestrict_cmp A i).symm
+    exact h3.trans ((Category.assoc _ _ _).trans h2)
+  have hmul := chart_mul_eq A G₁ G₂ h₁ h₂ i
+  have hml := congrArg (fun m => chartRestrict A i ≫
+    (Over.Hom.left m ≫ pullback.fst G.π (chartToBase A i))) hmul
+  exact (hchain G₁).trans (hml.trans (hchain G₂).symm)
+
+end ChartSquare
+
+/-! ## The glue: uniqueness over the arbitrary base -/
+
+section Unique
+
+/-- **(K3, the records-level [U-MODEL])** Any two group-object structures on a geometric
+elliptic curve record with the zero section as unit have the same multiplication — over an
+arbitrary base scheme. Chart-locally both transport to the projective model, where
+`modelGrpObj_unique` pins each to the T-G4 multiplication; equality of scheme morphisms is
+Zariski-local on the source. -/
+theorem grpObj_mul_unique {S : Scheme.{u}} (G : EllipticCurveGeom S)
+    (G₁ G₂ : GrpObj (Over.mk G.π))
+    (h₁ : (letI := G₁; (η[Over.mk G.π] : 𝟙_ (Over S) ⟶ Over.mk G.π).left) =
+      (𝟙_ (Over S)).hom ≫ G.zero)
+    (h₂ : (letI := G₂; (η[Over.mk G.π] : 𝟙_ (Over S) ⟶ Over.mk G.π).left) =
+      (𝟙_ (Over S)).hom ≫ G.zero) :
+    (letI := G₁; (μ[Over.mk G.π] : Over.mk G.π ⊗ Over.mk G.π ⟶ Over.mk G.π)) =
+    (letI := G₂; (μ[Over.mk G.π] : Over.mk G.π ⊗ Over.mk G.π ⟶ Over.mk G.π)) := by
+  apply Over.OverMorphism.ext
+  refine Scheme.hom_ext_of_forall _ _ (fun x => ?_)
+  obtain ⟨i, hi⟩ := (G.atlas).covers ((pullback.fst G.π G.π ≫ G.π).base x)
+  exact ⟨chartOpen G.atlas i, hi, chartOpen_mul_eq G.atlas G₁ G₂ h₁ h₂ i⟩
+
+end Unique
+
+
 
 end ModularCurves
