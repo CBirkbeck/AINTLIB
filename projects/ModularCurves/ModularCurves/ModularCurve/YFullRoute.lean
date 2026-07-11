@@ -389,7 +389,7 @@ private theorem dictPoint₂_of_lift (h : T ⟶ levelSpaceΓ E N) (g : T ⟶ S)
 /-- Section-pullback along the base-change comparison morphism restricts the point:
 the naturality bridge between the moduli functor's `map` (`EllHom.pullSection`) and
 the dictionary's tautological pairs (`Point.restrict`). -/
-private theorem pullSection_asSection {R : CommRingCat.{u}} (X : EllObj R)
+theorem pullSection_asSection {R : CommRingCat.{u}} (X : EllObj R)
     {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T) (P : X.curve.Point g) :
     EllHom.pullSection R (X.pullbackAlongMap g k)
         (EllipticCurve.Point.asSection X.curve g P) =

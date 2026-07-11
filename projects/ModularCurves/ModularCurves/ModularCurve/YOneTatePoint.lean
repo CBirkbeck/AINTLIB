@@ -755,46 +755,44 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
     -- (affine ring-level, against the nilpotent I) + T-E1 renormalisation; the raw lift
     -- (α, β, hΔ, ψ := tateRingOverAlgLift) above feeds it.
     set ψ := tateRingOverAlgLift R α β hΔ with hψ
+    -- the `baseChangeEquiv` dictionary at any base point (inline `pull∘asSection` bridge)
+    have hdict : ∀ {T T' : Scheme.{u}} (s : T' ⟶ tateBase R) (τ : T ⟶ T'),
+        EllipticCurve.Point.baseChangeEquiv (tateUniversal R) s τ
+          (EllipticCurve.Point.pull ((tateUniversal R).baseChange s) τ
+            (EllipticCurve.Point.asSection (tateUniversal R) s
+              (EllipticCurve.Point.pull (tateUniversal R) s (tatePoint R)))) =
+        EllipticCurve.Point.pull (tateUniversal R) (τ ≫ s) (tatePoint R) := by
+      intro T T' s τ
+      refine Subtype.ext ?_
+      rw [EllipticCurve.Point.baseChangeEquiv_apply_coe]
+      show (τ ≫ (EllipticCurve.Point.asSection (tateUniversal R) s
+        (EllipticCurve.Point.pull (tateUniversal R) s (tatePoint R))).1) ≫ _ = _
+      rw [Category.assoc, EllipticCurve.Point.asSection_val_fst]
+      rfl
     obtain ⟨ψ', hψ'res, hψ'kill⟩ :
         ∃ ψ' : tateRingOver R →ₐ[↑R] A,
           (Ideal.Quotient.mkₐ ↑R I).comp ψ' = ψ₀ ∧
           (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) (tateBaseSpecMap R ψ')
             (tatePoint R) = 0 := by
-      /- PURE-CORE SKELETON (machinery staged): -/
-      -- (i) the raw lifted curve and its étale-affine torsion
-      set W' := (tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap ↑R A)
-        (fun i : Fin 2 => if i = 0 then α else β)) with hW'
-      haveI : W'.IsElliptic := ⟨hΔ⟩
-      set F' := modelEllipticCurve W' with hF'
-      have hNinvA : NIsInvertible (Spec (CommRingCat.of A)) N := by
-        show IsUnit ((N : ℕ) : Γ(Spec (CommRingCat.of A), ⊤))
-        have h1 : IsUnit ((N : ℕ) : A) := by
-          have h2 := hinv.map φ.hom
-          rwa [map_natCast] at h2
-        have h3 := h1.map (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom
-        rwa [map_natCast] at h3
-      haveI hEt : Etale (F'.torsionπ N) := F'.torsionπ_etale N hNinvA
-      haveI : IsFinite (F'.torsionπ N) := F'.torsionπ_isFinite N
-      haveI : IsAffine (F'.torsion N) := isAffine_of_isAffineHom (F'.torsionπ N)
-      -- (ii) the killed `t₀`-point, transported into the torsion of the `t`-base-change
+      /- PURE-CORE (the étale torsion-point lift + atlas classification): -/
       set t := tateBaseSpecMap R ψ with htdef
-      have hrestRaw : Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ t = t₀ := by
-        rw [htdef, tateBaseSpecMap, ← Spec.map_comp, ← hspec₀]
-        refine congrArg Spec.map (CommRingCat.hom_ext ?_)
+      have hmkψ : (Ideal.Quotient.mkₐ ↑R I).comp ψ = ψ₀ := by
         have h0 : ψ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R)
             (MvPolynomial.X 0)) = α := by
           rw [hψ]; exact tateRingOverAlgLift_X_zero R α β hΔ
         have h1 : ψ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R)
             (MvPolynomial.X 1)) = β := by
           rw [hψ]; exact tateRingOverAlgLift_X_one R α β hΔ
-        have hmkψ : (Ideal.Quotient.mkₐ ↑R I).comp ψ = ψ₀ := by
-          apply tateRingOver_algHom_ext
-          · rw [AlgHom.comp_apply, h0]
-            show Ideal.Quotient.mk I α = _
-            exact hα.trans hα₀
-          · rw [AlgHom.comp_apply, h1]
-            show Ideal.Quotient.mk I β = _
-            exact hβ.trans hβ₀
+        apply tateRingOver_algHom_ext
+        · rw [AlgHom.comp_apply, h0]
+          show Ideal.Quotient.mk I α = _
+          exact hα.trans hα₀
+        · rw [AlgHom.comp_apply, h1]
+          show Ideal.Quotient.mk I β = _
+          exact hβ.trans hβ₀
+      have hrestRaw : Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ t = t₀ := by
+        rw [htdef, tateBaseSpecMap, ← Spec.map_comp, ← hspec₀]
+        refine congrArg Spec.map (CommRingCat.hom_ext ?_)
         exact congrArg AlgHom.toRingHom hmkψ
       set FA := (tateUniversal R).baseChange t with hFA
       have hNinvA : NIsInvertible (Spec (CommRingCat.of A)) N := by
@@ -912,20 +910,6 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
       have hrest' : Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ t' = t₀ := by
         rw [ht', tateBaseSpecMap, ← Spec.map_comp, ← hspec₀]
         exact congrArg Spec.map (CommRingCat.hom_ext (congrArg AlgHom.toRingHom hψ'res))
-      -- the `baseChangeEquiv` dictionary at any base point (inline `pull∘asSection` bridge)
-      have hdict : ∀ {T T' : Scheme.{u}} (s : T' ⟶ tateBase R) (τ : T ⟶ T'),
-          EllipticCurve.Point.baseChangeEquiv (tateUniversal R) s τ
-            (EllipticCurve.Point.pull ((tateUniversal R).baseChange s) τ
-              (EllipticCurve.Point.asSection (tateUniversal R) s
-                (EllipticCurve.Point.pull (tateUniversal R) s (tatePoint R)))) =
-          EllipticCurve.Point.pull (tateUniversal R) (τ ≫ s) (tatePoint R) := by
-        intro T T' s τ
-        refine Subtype.ext ?_
-        rw [EllipticCurve.Point.baseChangeEquiv_apply_coe]
-        show (τ ≫ (EllipticCurve.Point.asSection (tateUniversal R) s
-          (EllipticCurve.Point.pull (tateUniversal R) s (tatePoint R))).1) ≫ _ = _
-        rw [Category.assoc, EllipticCurve.Point.asSection_val_fst]
-        rfl
       have hkill' : (N : ℤ) • EllipticCurve.Point.asSection (tateUniversal R) t'
           (EllipticCurve.Point.pull (tateUniversal R) t' (tatePoint R)) = 0 := by
         refine (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t'
