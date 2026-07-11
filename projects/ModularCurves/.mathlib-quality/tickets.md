@@ -15929,3 +15929,40 @@ consumed by invOver), Y1-CLOSER (assoc execution + the hoisting pattern).
 their return; **the NEW-CASCADE/Y1-CLOSER [T-B6′] gate is OPEN** — S2 (the map_add' fill
 on y1) begins NOW per CHARTER-Y1-CLOSER. NEW-Y1's E-track gate advances when S2 lands
 torsionπ_etale.
+
+## Amendments v10.138 (2026-07-11, coordinator): ★★★★ CHARTER-Y1-CLOSER COMPLETE RATIFIED — exists_tatePoint AXIOM-CLEAN (Y₁(N) representability unconditional); MASTER residue = TWO lanes, both dispatched
+
+- **★★★★ Y1-CLOSER RATIFIED IN FULL** (their §v10.129-Y1 scorecard verified at source;
+  y1 tip 72eb763e8; root tree 3,798 jobs green): S1 T-G4 ✓ (all five group laws +
+  Over-transports axiom-clean at every R — c5β's banked option-(b) plan executed with
+  attribution) · S2 [T-B6′] map_add′ + hz-fix (B2 #3 quoted) ✓ + the hfib ψ-wall DOWN
+  (TorsionUnramifiedFibre sorry-free; `formallyUnramified_torsionπ` proven mod
+  finiteness) · S3 ✓ **`#print axioms exists_tatePoint` = {propext, Classical.choice,
+  Quot.sound} — THE Y₁(N) REPRESENTABILITY THEOREM IS UNCONDITIONAL** (BAR ITEM 1) ·
+  S4 T-E4 collapse ✓ · S5 all E-leaves incl. E5 (`exists_tateAlgLift_core`) ✓ · S6
+  relocation + MASTER one-exact staged ✓. Zero sorries in every Y1-owned file; no
+  maxHeartbeats. **Registry (wall-breaking pattern, third hoist-small-context
+  confirmation)**: no `set` on localization-typed terms (kabstract sweep = 200k alone);
+  structure-refine over ∃-telescope-refine for localization witnesses;
+  `IsLocalization.map_comp` over elementwise ext; `specMap_square_comp` abstract.
+  ACCEPTED. Cosmetic lint notes → main-merge cleanup. Sentinel released; seat closed
+  with honor — chartered 17:10, ★★★★ at 04:58.
+- **BAR ITEM 2 residue ADJUDICATED (verified against Torsion.lean docstrings)**:
+  `gammaOneNaive_representable`'s sorryAx = exactly {BB-QF :140, BB-FLAT :147,
+  BB-DEG :152 (⟹ torsionπ_isFinite ⟹ T-DISC finite leg), [T-A6b]/[T-A6c]
+  (GroupLaw:75/80, ⟹ pullSection-canonicity), T-E4-primitive (route (a)
+  RigiditySpreadingOut:94 / route (c) T-W7a)}. The closer's other-lane scoping is
+  CORRECT — none were in-charter. **When these land, the MASTER closes with zero
+  further Y1-side work** (one-exact staged).
+- **THE FINAL PUSH = TWO PARALLEL LANES, DISPATCHED**:
+  (1) **c5β RESUMED** (inbox v10.138): the chain remnant 0h → T-W7.12 → T-W7a —
+  audit-first (T-G4/T-G5 done may collapse it to packaging); T-W7a board arms
+  beastmode-A's falls-sweep ([T-A6b]/[T-A6c] + T-E4 route (c)). A's trigger unchanged.
+  (2) **NEW-CASCADE seat REVIVED — CHARTER-BB-FIN** (inbox v10.138): the three KM 2.3.1
+  boxes; the designed route's main ingredient (the fibre comparison) is NOW PROVEN
+  (their own fill), BB-DEG anchors on HasseWeil `mulByInt_degree` — CROSS-PROJECT
+  import per AINTLIB design (check-then-cite, board the bridge + axiom profile);
+  BB-FLAT via miracle flatness. /develop --decompose first act.
+- **Y1 state line**: unconditional representability ✓; full MASTER = lane (1) + lane
+  (2) + A's sweep, all designed, zero open math beyond the boxes' KM-standard
+  arguments.
