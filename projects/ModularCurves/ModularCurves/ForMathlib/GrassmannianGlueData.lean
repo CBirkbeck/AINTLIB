@@ -1032,6 +1032,32 @@ theorem pointOfChartMember_naturality {B : Type u} [CommRing B] [Algebra R B]
   rw [pointOfChartMember, pointOfChartMember, ← Category.assoc, ← Spec.map_comp,
     ← CommRingCat.ofHom_comp, hring]
 
+/-- `normMap g` of a covering member `congr piScalarRight (N.map a)` is again a covering
+member, for the composite structure map `g ∘ a`. -/
+theorem normMap_covering_member {S T : Type u} [CommRing S] [Algebra R S] [CommRing T]
+    [Algebra R T] (a : A →ₐ[R] S) (g : S →ₐ[R] T)
+    (N : G(k, A ⊗[R] (Fin n → R); A)) :
+    normMap n g (Module.Grassmannian.congr (TensorProduct.piScalarRight R S S (Fin n))
+        (N.map a))
+      = Module.Grassmannian.congr (TensorProduct.piScalarRight R T T (Fin n))
+        (N.map (g.comp a)) := by
+  rw [normMap, congr_symm_congr, Module.Grassmannian.map_comp]
+
+/-- **[GR-G-ASM], the member-agreement heart of the `glueMorphisms` compat.** Two covering
+members `congr piScalarRight (N.map a)` and `congr piScalarRight (N.map b)`, pushed by
+`g : S →ₐ D` and `g' : T →ₐ D` whose composites with the structure maps agree
+(`g ∘ a = g' ∘ b` — the double-localization tensor structure), become the *same* member over
+`D`. Feeds chart-independence to close the compat. -/
+theorem normMap_covering_member_eq {S T D : Type u} [CommRing S] [Algebra R S] [CommRing T]
+    [Algebra R T] [CommRing D] [Algebra R D] (a : A →ₐ[R] S) (b : A →ₐ[R] T)
+    (g : S →ₐ[R] D) (g' : T →ₐ[R] D) (hcompat : g.comp a = g'.comp b)
+    (N : G(k, A ⊗[R] (Fin n → R); A)) :
+    normMap n g (Module.Grassmannian.congr (TensorProduct.piScalarRight R S S (Fin n))
+        (N.map a))
+      = normMap n g' (Module.Grassmannian.congr (TensorProduct.piScalarRight R T T (Fin n))
+        (N.map b)) := by
+  rw [normMap_covering_member, normMap_covering_member, hcompat]
+
 end Points
 
 end Module.Grassmannian
