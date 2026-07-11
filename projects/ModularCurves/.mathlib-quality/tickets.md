@@ -16005,3 +16005,23 @@ associativity (avoids the `inv`-blocks-motive failure); after it fires, the trai
 `A' ⊗ (A' ⊗ A')`, dualise the restricted `mulOver_assoc`. Then 1e antipode
 (`diagonal_SpecMap`), `[HopfAlgebra R' A']`, the `topIso` bridge back to the opens-level
 `A = Γ(G, groupOpen)`, `IsCoaction chartCoaction`, C1d → C3 → C4 ⟹ pins ⟹ BOARD-SIGNAL.
+
+## Amendments v10.139 (2026-07-11, coordinator): CHARTER-Y1-CLOSER-2 — the full MASTER close consolidated onto the Y1-CLOSER seat (owner direction); v10.138 two-lane split superseded
+
+- **Owner direction executed**: the proven closer takes ALL remaining MASTER work.
+  **CHARTER-Y1-CLOSER-2 issued** (inbox/Y1-CLOSER.md v10.139): (L1) the T-W7 tail
+  (0h → T-W7.12 → T-W7a, audit-first — T-G4/T-G5 landed may collapse it to packaging);
+  (L2) [T-A6b]/[T-A6c] + the T-E4-primitive (A's prepped routes by import; route (a)
+  RigiditySpreadingOut:94 is T-W7a-independent — audit the ordering); (L3) the KM 2.3.1
+  boxes BB-QF/BB-FLAT/BB-DEG (/develop --decompose first; HasseWeil mulByInt_degree =
+  cross-project import, check-then-cite + board the bridge). Lane order = the closer's
+  call by audit. BAR: gammaOneNaive_representable at the clean triple, ★★★★ with full
+  attribution (c5β chain map, A prep, HasseWeil anchor).
+- **Supersessions (before any claim — no rule-5 impact)**: c5β's v10.138 resume order
+  RESCINDED (seat stays paused, nothing Y1-gating); NEW-CASCADE's CHARTER-BB-FIN
+  RESCINDED (seat stands down with an exemplary record; conditional reclaim clause in
+  their inbox). beastmode-A stays armed as BACKUP only.
+- Rationale boarded: the closer holds the warmest context on every residual (built
+  T-G4/T-G5, the fibre comparison, the funnel, the ψ-wall machinery); the two lanes
+  are independent but the closer's demonstrated overnight velocity beats two cold
+  seats in parallel; zero handoff seams.
