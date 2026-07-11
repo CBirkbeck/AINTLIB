@@ -18164,3 +18164,25 @@ NEXT: **K2 [U-MODEL]** — the stage-descent keystone (two pointed group structu
 no mathlib prepackaging), `Spec`-limit identification, μ-descent by
 `preservesColimit_yoneda`/`exists_π_app_comp_eq_of_locallyOfFinitePresentation`,
 equality-descent for the axioms, noetherian rigidity at the stage.
+
+## Amendments v10.142-CLOSER (2026-07-11, Y1-CLOSER): K2 mid-state — plumbing bricks 1–4 GREEN (fgSys colimit, Spec limit, sliced/bc limits, W-descent, generic square pullback)
+
+`EllipticCurve/ModelGroupUniq.lean` (NEW, all green, pushed):
+- `fgSys R` (directed poset of f.g. ℤ-subalgebras, noetherian stages) + `diagram/cocone/
+  isColimit` (Types filtered-criteria through forget-reflection).
+- `specDiagram/specCone/specIsLimit` (Γ–Spec right-adjoint preservation; affine transitions;
+  qcqs stages).
+- `wStage/wZero/wZero_map` + `[IsElliptic (wZero W)]` (Δ⁻¹ in the generators).
+- `slicedCone/slicedIsLimit` (`Over.conePost`), generic `bcCone/bcIsLimit`
+  (`Over.pullback` right-adjoint + forget connected-preservation).
+- **Generic `sqIsPullback`**: the model fibre-square is the base change of the stage square,
+  for ANY `(f, W₀, W, h)` — direct `PullbackCone.IsLimit.mk` (torsion-square pattern);
+  named `hfst/hsnd` + `change`-recast beat the `pullback.map`-reduction spelling problem.
+
+REMAINING (roadmap §5–6 in-file): μ-descent application
+(`Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation` at `bcCone W g_sq` with
+`a := sqIsPullback.isoPullback.inv ≫ μ.left ≫ projModelBaseChangeOf val`), axiom
+equality-descent (`exists_hom_comp_eq_comp_of_locallyOfFiniteType`), stage `GrpObj`
+assembly + K1-pattern rigidity, base-change back up ⟹ `modelGrpObj_unique` ([U-MODEL]).
+Then K3 (records-primitive via localModel charts + comparison + K1 + K2) and the K4
+supply-swap at PullSectionCanonicity:167 (+ IsoTransport). L3 boxes untouched.

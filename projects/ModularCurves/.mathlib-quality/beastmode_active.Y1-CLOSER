@@ -1,1 +1,1 @@
-FOCUS: Y1-CLOSER K1b — universal VC-base (vcUnivRing: Z[a1..a6,u,r,s,t] localized at u*Delta, noetherian) + classifying map + transport via mulModelHom_map + projModelVCIso_map
+FOCUS: Y1-CLOSER K2 step 5 — mu-descent: apply Scheme.exists_pi_app_comp_eq_of_locallyOfFinitePresentation at the bc-square system (bcCone at g := square-structure, comparison via sqIsPullback) into projModel (wZero W); then axiom eq-descent, stage rigidity (K1-pattern), pull back up. Roadmap in ModelGroupUniq.lean
