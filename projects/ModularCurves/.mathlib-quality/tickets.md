@@ -18129,3 +18129,38 @@ closure is already staged (v10.128-Y1). Sentinel re-set both worktrees.
   1a ✓ 1b ✓ 0g ✓ 0h ⟸ K1) retires [T-A6b]; [T-A6c] from K2+charts.
 
 **Sequence**: K1 → K2 → K3+K4 → bar-audit → K5 → follow-through. Starting K1.
+
+## Amendments v10.141-CLOSER (2026-07-11, Y1-CLOSER): ★ K1 = T-W7.0h COMPLETE — `mulModelHom_vc` PROVEN at every base, axiom-clean; the T-W7 chain below the descent layer is sorry-free
+
+**`EllipticCurve/ModelVCEquivariance.lean` (NEW)**: the 0h theorem
+`mulModelHom_vc` = {propext, Classical.choice, Quot.sound}, superseding the designed
+field-points-extensionality route:
+- **Noetherian case** = GIT Cor 6.4 (`isMonHom_of_one_comp_eq'`, PROVEN, Rigidity.lean)
+  applied to the pointed Over-iso `vcOver` between the T-G4 `modelGrpObj` structures — every
+  hypothesis is an instance at the model (`projModelπ_isProper`, smooth ⟹ flat,
+  `EllipticCurveGeom.universallyOConnected`, proper ⟹ separated).
+- **Every base** by classifying from the universal VC-base `vcUnivRing` :=
+  (`ULift`-ℤ)[a₁..a₆,u,r,s,t] localized away Δ·u — noetherian — with `vcClassify` recovering
+  any pair (W, C) over any ring; transport = `hom_ext` on the base-change pullback square
+  (`isPullback_projModelBaseChangeOf`) with the γ/β/N calc-chase
+  (`projModelVCIso_map` + `mulModelHom_map` + the noetherian case).
+- Sorried original at GroupLawConstruction:922 relocated per v10.117 (pointer; zero
+  consumers).
+
+**Registry additions**: (i) `vcUnivRing` is a `def`, NOT `abbrev`, with its four instances
+registered once — abbrev-transparency lets every instance search unfold into the
+localization (the eps-wall at ring level; measured 200k on a single `have`). (ii) The
+rigidity application needs INLINE `GrpObj`-instance-args (`@`-application) — letI-fvar vs
+inline-term unification churns past 200k. (iii) Universe: the model machinery is
+`Type u`-uniform ⟹ finite-type-ℤ universal bases must be `ULift`'d; classifiers via
+`eval₂Hom` (no `Algebra (ULift ℤ) R` needed).
+
+**Chain effect**: T-W7.12's dependencies (0b ✓ 0c-ii ✓ 0h ✓ 1a ✓ 1b ✓) are ALL DISCHARGED —
+the descent gluing (GroupLawDescent's 8 sorries) is unblocked, pure assembly ahead.
+c5β's chain plan credited (their mvc/1a/1b + the banked machinery carry this).
+
+NEXT: **K2 [U-MODEL]** — the stage-descent keystone (two pointed group structures on
+`projModel W` over arbitrary `R` agree): the f.g.-ℤ-subalgebra cofiltered system (to build —
+no mathlib prepackaging), `Spec`-limit identification, μ-descent by
+`preservesColimit_yoneda`/`exists_π_app_comp_eq_of_locallyOfFinitePresentation`,
+equality-descent for the axioms, noetherian rigidity at the stage.
