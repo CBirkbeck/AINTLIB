@@ -525,12 +525,60 @@ locus is clopen in `Y_N`, so `Y₁(N)` is a *clopen* subscheme of the closed sub
 idempotent (`PrimeSpectrum.exists_idempotent_basicOpen_eq_of_isClopen`), hence affine.
 (Derived — Loeffler displays `Spec` only for `N = 5`; see section header.) -/
 theorem yOne_isAffine [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
-    IsAffine (yOne R N) := by sorry
+    IsAffine (yOne R N) := by
+  classical
+  -- the ambient killed locus is affine (closed in the affine Tate atlas)
+  haveI hci : IsClosedImmersion ((tateUniversal R).killedLocusπ (tatePoint R) N) :=
+    (tateUniversal R).killedLocusπ_isClosedImmersion (tatePoint R) N
+  haveI hXaff : IsAffine ((tateUniversal R).killedLocus (tatePoint R) N) :=
+    isAffine_of_isAffineHom ((tateUniversal R).killedLocusπ (tatePoint R) N)
+  -- `N` is invertible on the Tate atlas
+  have hNinv : NIsInvertible (tateBase R) N := by
+    show IsUnit ((N : ℕ) : Γ(tateBase R, ⊤))
+    have h1 : IsUnit ((N : ℕ) : tateRingOver R) := by
+      have h2 := hinv.map (algebraMap R (tateRingOver R))
+      rwa [map_natCast] at h2
+    have h3 := h1.map (Scheme.ΓSpecIso (CommRingCat.of (tateRingOver R))).inv.hom
+    rwa [map_natCast] at h3
+  -- `Y₁(N)` is clopen in the killed locus: open by construction, closed by Y1-E1
+  have hclopen : IsClopen (yOneSet R N) := by
+    constructor
+    · rw [yOneSet]
+      rw [isClosed_compl_iff]
+      refine isOpen_biUnion fun d hd => ?_
+      have hdN : d ∣ N := (Nat.mem_properDivisors.mp (Finset.mem_filter.mp hd).1).1
+      exact killedLocus_preimage_isOpen (N := N) (tateUniversal R) (tatePoint R) hNinv hdN
+    · exact yOneSet_isOpen R N
+  -- transport to the spectrum: a clopen of an affine scheme is an idempotent basic open
+  set X := (tateUniversal R).killedLocus (tatePoint R) N with hXdef
+  haveI : IsIso X.toSpecΓ := hXaff.affine
+  set s' := (CategoryTheory.inv X.toSpecΓ).base ⁻¹' (yOneSet R N) with hs'
+  have hs'clopen : IsClopen s' :=
+    hclopen.preimage (CategoryTheory.inv X.toSpecΓ).continuous
+  obtain ⟨e, he, hse⟩ := PrimeSpectrum.exists_idempotent_basicOpen_eq_of_isClopen hs'clopen
+  have hy1 : yOneSet R N = X.toSpecΓ.base ⁻¹' s' := by
+    rw [hs', ← Set.preimage_comp]
+    have h1 : X.toSpecΓ ≫ CategoryTheory.inv X.toSpecΓ = 𝟙 X := IsIso.hom_inv_id _
+    have h2 : (CategoryTheory.inv X.toSpecΓ).base ∘ X.toSpecΓ.base = id := by
+      funext x
+      show (X.toSpecΓ ≫ CategoryTheory.inv X.toSpecΓ).base x = x
+      rw [h1]
+      rfl
+    rw [h2, Set.preimage_id]
+  have hy2 : yOneSet R N = SetLike.coe (X.basicOpen e) := by
+    rw [hy1, hse]
+    exact X.toΓSpec_preimage_basicOpen_eq e
+  have hopens : yOneOpens R N = X.basicOpen e := TopologicalSpace.Opens.ext hy2
+  have haff : IsAffineOpen (X.basicOpen e) := (isAffineOpen_top X).basicOpen e
+  rw [← hopens] at haff
+  exact haff
 
 /-- **(Y1-E3)** The structure morphism of `Y₁(N)` is an affine morphism — source affine
 (Y1-E2) and target `Spec R` affine (`HasAffineProperty @IsAffineHom`). -/
 theorem yOneStructMap_isAffineHom [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
-    IsAffineHom (yOneStructMap R N) := by sorry
+    IsAffineHom (yOneStructMap R N) := by
+  haveI := yOne_isAffine R N hN hinv
+  exact (HasAffineProperty.iff_of_isAffine (P := @IsAffineHom)).mpr inferInstance
 
 /-- **(Y1-E4 — finite presentation)** `Y₁(N) ⟶ Spec R` is locally of finite presentation: the
 atlas ring is a localized polynomial ring; the zero section of the (smooth, separated,
