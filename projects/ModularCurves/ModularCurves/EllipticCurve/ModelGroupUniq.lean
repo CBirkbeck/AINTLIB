@@ -333,7 +333,7 @@ section MuDescent
 
 attribute [local instance] IsCofiltered.isConnected
 
-variable {R} (W : WeierstrassCurve R) [W.IsElliptic]
+variable {R} (W : WeierstrassCurve R) [W.IsElliptic] {X : Scheme.{u}}
 
 /-- The structure morphism of the first-stage model square. -/
 noncomputable def sqStruct :
@@ -389,6 +389,64 @@ theorem bcSq_transition_isPullback {T T' : Over (wStageOp W)} (φ : T ⟶ T') :
       (fgSys.specDiagram R)).obj T).hom (sqStruct W)).flip using 2
     all_goals first | rfl | exact hw
   · exact Limits.pullback.lift_fst _ _ _
+
+/-- Generic transition square for the base-changed system along any `g`. -/
+theorem bc_transition_isPullback (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W))
+    {T T' : Over (wStageOp W)} (φ : T ⟶ T') :
+    IsPullback
+      ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+        Over.pullback g ⋙ Over.forget _).map φ)
+      (Limits.pullback.fst _ _) (Limits.pullback.fst _ _)
+      ((fgSys.specDiagram R).map φ.left) := by
+  refine IsPullback.of_right ?_ ?_
+    ((IsPullback.of_hasPullback ((Over.post (X := wStageOp W)
+      (fgSys.specDiagram R)).obj T').hom g).flip)
+  · have hsnd' : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+        Over.pullback g ⋙ Over.forget _).map φ ≫ Limits.pullback.snd _ _ =
+        Limits.pullback.snd _ _ :=
+      Limits.pullback.lift_snd _ _ _
+    have hw : (fgSys.specDiagram R).map φ.left ≫
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T').hom =
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom :=
+      Over.w ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).map φ)
+    rw [hsnd']
+    convert (IsPullback.of_hasPullback ((Over.post (X := wStageOp W)
+      (fgSys.specDiagram R)).obj T).hom g).flip using 2
+    all_goals first | rfl | exact hw
+  · exact Limits.pullback.lift_fst _ _ _
+
+instance bc_transition_affine (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W))
+    {T T' : Over (wStageOp W)} (φ : T ⟶ T') :
+    IsAffineHom ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback g ⋙ Over.forget _).map φ) := by
+  haveI : IsAffine ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).left :=
+    inferInstanceAs (IsAffine ((fgSys.specDiagram R).obj T.left))
+  haveI : IsAffine ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T').left :=
+    inferInstanceAs (IsAffine ((fgSys.specDiagram R).obj T'.left))
+  exact MorphismProperty.of_isPullback (bc_transition_isPullback W g φ).flip
+    (isAffineHom_of_isAffine _)
+
+instance bc_obj_compact (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W))
+    [QuasiCompact g] (T : Over (wStageOp W)) :
+    CompactSpace ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback g ⋙ Over.forget _).obj T) := by
+  haveI : CompactSpace ((Over.post (X := wStageOp W)
+      (fgSys.specDiagram R)).obj T).left :=
+    inferInstanceAs (CompactSpace ((fgSys.specDiagram R).obj T.left))
+  exact inferInstanceAs (CompactSpace ↑(Limits.pullback ((Over.post (X := wStageOp W)
+    (fgSys.specDiagram R)).obj T).hom g))
+
+instance bc_obj_qsep (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W))
+    [QuasiSeparated g] (T : Over (wStageOp W)) :
+    QuasiSeparatedSpace ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback g ⋙ Over.forget _).obj T) := by
+  haveI : QuasiSeparatedSpace ((Over.post (X := wStageOp W)
+      (fgSys.specDiagram R)).obj T).left :=
+    inferInstanceAs (QuasiSeparatedSpace ((fgSys.specDiagram R).obj T.left))
+  exact @quasiSeparatedSpace_of_quasiSeparated _ _
+    (Limits.pullback.fst ((Over.post (X := wStageOp W)
+      (fgSys.specDiagram R)).obj T).hom g)
+    inferInstance (MorphismProperty.pullback_fst _ _ inferInstance)
 
 instance bcSq_transition_affine {T T' : Over (wStageOp W)} (φ : T ⟶ T') :
     IsAffineHom ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
