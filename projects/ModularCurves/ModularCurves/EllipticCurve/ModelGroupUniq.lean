@@ -1307,6 +1307,189 @@ theorem axApexR_comparison :
 
 end AxisBCR
 
+/-! ## Stage bridges: the base-changed system objects against the stage model -/
+
+section StageBridge
+
+variable {R} (W : WeierstrassCurve R) [W.IsElliptic]
+
+/-- The system object's structure map is the Spec of the stage inclusion (definitional). -/
+theorem post_obj_hom (T : Over (wStageOp W)) :
+    ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom =
+    Spec.map (CommRingCat.ofHom
+      (Subalgebra.inclusion (wStage_le_stage W T)).toRingHom) :=
+  rfl
+
+/-- The stage model against the base-changed model system object. -/
+noncomputable def stageModelIso (T : Over (wStageOp W)) :
+    projModel (stageW W T) ≅
+    (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).obj T :=
+  (stageModelPB W T).flip.isoPullback
+
+/-- The stage square against the base-changed square system object. -/
+noncomputable def stageSqIso (T : Over (wStageOp W)) :
+    Limits.pullback (projModelπ (stageW W T)) (projModelπ (stageW W T)) ≅
+    (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (sqStruct W) ⋙ Over.forget _).obj T :=
+  (stageSqPB W T).flip.isoPullback
+
+/-- Naturality of the left-axis map along stage transitions. -/
+theorem axBC_natural {S T : Over (wStageOp W)} (σ : S ⟶ T) :
+    (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫ axBC W T =
+    axBC W S ≫ (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (sqStruct W) ⋙ Over.forget _).map σ := by
+  refine Limits.pullback.hom_ext ?_ ?_
+  · have h1 : axBC W T ≫ Limits.pullback.fst
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        Limits.pullback.fst _ _ ≫ 𝟙 _ := Limits.pullback.lift_fst _ _ _
+    have h2 : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+        Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫
+        Limits.pullback.fst
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom
+          (projModelπ (wZero W)) =
+        Limits.pullback.fst
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj S).hom
+          (projModelπ (wZero W)) ≫
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).map σ).left :=
+      Limits.pullback.lift_fst _ _ _
+    have h3 : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+        Over.pullback (sqStruct W) ⋙ Over.forget _).map σ ≫
+        Limits.pullback.fst
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        Limits.pullback.fst
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj S).hom (sqStruct W) ≫
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).map σ).left :=
+      Limits.pullback.lift_fst _ _ _
+    have h4 : axBC W S ≫ Limits.pullback.fst
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj S).hom (sqStruct W) =
+        Limits.pullback.fst _ _ ≫ 𝟙 _ := Limits.pullback.lift_fst _ _ _
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫ ·) h1).trans ?_
+    refine (congrArg ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫ ·)
+      (Category.comp_id _)).trans ?_
+    refine h2.trans ?_
+    refine (congrArg (· ≫ ((Over.post (X := wStageOp W)
+      (fgSys.specDiagram R)).map σ).left)
+      ((Category.comp_id _).symm.trans h4.symm)).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (axBC W S ≫ ·) h3.symm).trans ?_
+    exact (Category.assoc _ _ _).symm
+  · have h1 : axBC W T ≫ Limits.pullback.snd
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        Limits.pullback.snd _ _ ≫ axL₀ W := Limits.pullback.lift_snd _ _ _
+    have hwM : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+        Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫
+        Limits.pullback.snd
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom
+          (projModelπ (wZero W)) =
+        Limits.pullback.snd
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj S).hom
+          (projModelπ (wZero W)) :=
+      Over.w ((Over.pullback (projModelπ (wZero W))).map
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).map σ))
+    have hwSQ : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+        Over.pullback (sqStruct W) ⋙ Over.forget _).map σ ≫
+        Limits.pullback.snd
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        Limits.pullback.snd
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj S).hom (sqStruct W) :=
+      Over.w ((Over.pullback (sqStruct W)).map
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).map σ))
+    have h4 : axBC W S ≫ Limits.pullback.snd
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj S).hom (sqStruct W) =
+        Limits.pullback.snd _ _ ≫ axL₀ W := Limits.pullback.lift_snd _ _ _
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫ ·) h1).trans ?_
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    refine (congrArg (· ≫ axL₀ W) hwM).trans ?_
+    refine h4.symm.trans ?_
+    refine (congrArg (axBC W S ≫ ·) hwSQ.symm).trans ?_
+    exact (Category.assoc _ _ _).symm
+
+/-- Naturality of the right-axis map along stage transitions. -/
+theorem axBCR_natural {S T : Over (wStageOp W)} (σ : S ⟶ T) :
+    (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫ axBCR W T =
+    axBCR W S ≫ (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (sqStruct W) ⋙ Over.forget _).map σ := by
+  refine Limits.pullback.hom_ext ?_ ?_
+  · have h1 : axBCR W T ≫ Limits.pullback.fst
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        Limits.pullback.fst _ _ ≫ 𝟙 _ := Limits.pullback.lift_fst _ _ _
+    have h2 : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+        Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫
+        Limits.pullback.fst
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom
+          (projModelπ (wZero W)) =
+        Limits.pullback.fst
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj S).hom
+          (projModelπ (wZero W)) ≫
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).map σ).left :=
+      Limits.pullback.lift_fst _ _ _
+    have h3 : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+        Over.pullback (sqStruct W) ⋙ Over.forget _).map σ ≫
+        Limits.pullback.fst
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        Limits.pullback.fst
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj S).hom (sqStruct W) ≫
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).map σ).left :=
+      Limits.pullback.lift_fst _ _ _
+    have h4 : axBCR W S ≫ Limits.pullback.fst
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj S).hom (sqStruct W) =
+        Limits.pullback.fst _ _ ≫ 𝟙 _ := Limits.pullback.lift_fst _ _ _
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫ ·) h1).trans ?_
+    refine (congrArg ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫ ·)
+      (Category.comp_id _)).trans ?_
+    refine h2.trans ?_
+    refine (congrArg (· ≫ ((Over.post (X := wStageOp W)
+      (fgSys.specDiagram R)).map σ).left)
+      ((Category.comp_id _).symm.trans h4.symm)).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (axBCR W S ≫ ·) h3.symm).trans ?_
+    exact (Category.assoc _ _ _).symm
+  · have h1 : axBCR W T ≫ Limits.pullback.snd
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        Limits.pullback.snd _ _ ≫ axR₀ W := Limits.pullback.lift_snd _ _ _
+    have hwM : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+        Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫
+        Limits.pullback.snd
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom
+          (projModelπ (wZero W)) =
+        Limits.pullback.snd
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj S).hom
+          (projModelπ (wZero W)) :=
+      Over.w ((Over.pullback (projModelπ (wZero W))).map
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).map σ))
+    have hwSQ : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+        Over.pullback (sqStruct W) ⋙ Over.forget _).map σ ≫
+        Limits.pullback.snd
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        Limits.pullback.snd
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj S).hom (sqStruct W) :=
+      Over.w ((Over.pullback (sqStruct W)).map
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).map σ))
+    have h4 : axBCR W S ≫ Limits.pullback.snd
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj S).hom (sqStruct W) =
+        Limits.pullback.snd _ _ ≫ axR₀ W := Limits.pullback.lift_snd _ _ _
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫ ·) h1).trans ?_
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    refine (congrArg (· ≫ axR₀ W) hwM).trans ?_
+    refine h4.symm.trans ?_
+    refine (congrArg (axBCR W S ≫ ·) hwSQ.symm).trans ?_
+    exact (Category.assoc _ _ _).symm
+
+end StageBridge
+
 /-! ## Rigidity: a map on the square with both axis collapses is constant -/
 
 section AxisRigidity
