@@ -7644,7 +7644,47 @@ gate note, commit 90ed0986); this amendment turns the lift into dispatched work 
 idle capacity. Housekeeping done in this pass: the unpushed `dev/modular-curves` commits were
 PUSHED (`66300bb4..5f4829dc`, 238 commits).*
 
-### v10.145-CLOSER — ★★ K3+K4 LANDED; MASTER-bar audit: residual = exactly {BB-QF, BB-FLAT}; L3 decomposition (Y1-CLOSER)
+### v10.146-CLOSER — ★ BB-QF DISCHARGED (invertible case) and rewired off the trail; MASTER residual = exactly BB-FLAT (Y1-CLOSER)
+
+**`mulByHom_locallyQuasiFinite_of_nIsInvertible` is PROVEN at `{propext, Classical.choice,
+Quot.sound}`** (`MulByHomQuasiFinite.lean`). Root green 4,183 jobs, all pushed. The trail
+audit now shows: `gammaOneNaive_representable`'s sorryAx enters ONLY through
+`mulBy_etale'`'s flat input — **BB-FLAT is the last box**.
+
+**The proof stack (all new, all clean):**
+- `ForMathlib/JacobsonPointCount.lean`: `finite_of_jacobsonSpace_of_finite_closedPoints`
+  (a Jacobson space with finitely many closed points IS its closed points);
+  `Scheme.exists_section_through_closedPoint` (Zariski's lemma scheme-level, via
+  `IsClosedImmersion.of_isPreimmersion` on the residue morphism +
+  `finite_of_finite_type_of_isJacobsonRing` + `IsAlgClosed.algebraMap_bijective_of_isIntegral`);
+  `Scheme.finite_of_finite_sections`; `pullbackSndSectionEquiv`.
+- `MulByHomQuasiFinite.lean`: `point_torsionBy_finite_of_geometric` — the **cross-project
+  count**: `E.Point t` (t geometric) N-torsion is finite via atlas chart →
+  `Point.baseChangeEquiv` → `pointAddEquiv` with **hμ supplied by K3's
+  `isMonHom_of_pointedIso_records`** (the IsoTransport funnel fires!) →
+  `geomFibrePointAddEquiv` ([T-B6′], clean) → **HasseWeil `torsion_genN_addEquiv`**
+  (`E[N] ≃+ (ZMod N)²`). Then the QF assembly: `LocallyQuasiFinite.of_finite_preimage_singleton`,
+  geometric fibre `pullback([N], ŷ)` at `k̄ := AlgebraicClosure κ(y)`, preimage = range of
+  `fst` (`Scheme.Pullback.exists_preimage_pullback`), sections = torsion-coset. ZMT wrappers
+  `mulByHom_isFinite_of_nIsInvertible` / `torsionπ_isFinite_of_nIsInvertible`.
+- `MulByHomEtale.lean`: primed chain `formallyUnramified_torsionπ_of_nIsInvertible'`
+  (TorsionUnramifiedFibre body + proven finiteness), `mulByHom_formallyUnramified''`,
+  `mulBy_etale'` (flat input still BB-FLAT), `torsionπ_etale'`. Lives downstream so the
+  HasseWeil/IsoTransport closure stays out of sibling files (GammaH broke under instance
+  pollution on the first attempt — reverted, quarantined).
+- YOneTatePoint: `killedLocus`-consumption rewired to `torsionπ_etale'`; **9 fragile
+  `map_zsmul`/`map_zero` sites** (AddMonoidHomClass-with-mvars synthesis, 20k-timeout under
+  the heavier closure) hardened with concrete-hom helpers `bcEquiv_zsmul/nsmul/zero` —
+  registry-grade: generic `map_*` rewrites on `≃+`-valued terms are load-bearing fragile;
+  spell the `toAddMonoidHom`.
+
+**Boxes status**: BB-QF full-generality (Torsion:140) stays sorried off-trail (char-p
+torsion needs p-isogeny theory — boarded WIP); BB-DEG off-trail; **BB-FLAT next** via
+route (G): `[N]` formally smooth for `N` invertible (square-zero kernel is an `I`-module
+where `[N]` acts by `N`), + lfp (proven) ⟹ smooth ⟹ flat; swap into `mulBy_etale'` and
+the MASTER closes at the triple.
+
+## v10.145-CLOSER — ★★ K3+K4 LANDED; MASTER-bar audit: residual = exactly {BB-QF, BB-FLAT}; L3 decomposition (Y1-CLOSER)
 
 **K3 (`RecordGroupUnique.lean`, sorry-free):** `grpObj_mul_unique` — two pointed `GrpObj`
 structures on any `EllipticCurveGeom` agree over an ARBITRARY base. Chart machinery:
