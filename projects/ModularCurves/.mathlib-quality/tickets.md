@@ -16203,3 +16203,32 @@ gates, seams, and boundaries only. All nine in inboxes; openers with the owner.
   assembly vs engine, seam boarded at session starts; GH-2 consumes C5B-2 + HOPF pins
   hypothesis-wired; D2's L15 consumes FP's delivered gate. NOTHING assigned touches
   Y1-CLOSER's lanes.
+
+### v10.141a (2026-07-11, fable-FP): CHARTER-FP-2 — KL-3 / flat-locus-spreading residual tree CLAIMED (rule-5; T-DEV/T-FLAT/GF7 lane confirmed unstaffed)
+
+*Per inbox v10.141 authorization. Ownership audit: NO active sentinel for T-DEV/T-FLAT/GF7
+(active fleet = beastmode-A, c5beta, D2, fable-FP, fable-P4, NEW-CASCADE, NEW-HOPF, p0, p2,
+P3b3, PIC0, Y1-CLOSER). Last flat-locus commits 7b15980a7/e037338a8/b49846b3c are all that
+lane's, now dormant. The sorry-carriers are fleet-unowned ⟹ claimed by rule-5.*
+
+- **The residual (precisely, from the GF7 lane's own isolation)**: two sorries, both reducing
+  to the SAME deep homological core —
+  · `NoethApprox.exists_subalgebra_flat_baseChange` (Stacks 07RF/00R6): colimit flat descent.
+    Its colimit/noetherian-approximation half IS covered by my 02KK toolkit
+    (`IsFilteredAlgColimit`, `exists_common_lift/eq`, presented systems); its irreducible core
+    is the pointwise local criterion below.
+  · `FlatLocus.flatLocus_spreads_of_flat` (Stacks 00MK + 00RB/00MI): the local criterion of
+    flatness (`Tor₁(M,κ(𝔭))=0 ⟹ flat` for f.p. `M`) + openness of the fibre-exact locus.
+- **HONEST SCOPE CORRECTION for the coordinator**: the gap is NOT colimit-descent (which my
+  toolkit closes) — it is the **Buchsbaum–Eisenbud acyclicity criterion (Stacks 00N1) + depth
+  theory + the local flatness criterion**. The GF7 lane already built the FULL dependency-tree
+  STRUCTURE toward it (`BuchsbaumEisenbud.lean` — `local_criterion_twoTerm`,
+  `buchsbaumEisenbud_acyclic`, `fibreExact_spreads`, `coker_flat_of_specialFibreExact`,
+  `flatLocus_spreads_reduce_to_polynomial`, `flatLocus_spreads_of_flat_viaBE`; `Depth.lean` —
+  `HasDepthGE` API) but left every deep leaf `:= sorry`. This is a genuine multi-file homological
+  development (BE + depth-via-Ext + local criterion), mathlib-TODO-class in aggregate.
+- **PLAN (/develop --decompose first act, next)**: (a) map the BE/Depth dependency-tree frontier
+  (proven vs. sorried, critical path); (b) fill the tractable frontier upward — the Depth API
+  lemmas (noetherian CA, Ext-vanishing) first, then the local criterion, then BE acyclicity, then
+  the reductions; (c) wire `exists_noetherian_descent_flat` → KL-3 via the banked bridge; then
+  (2) [02KM-CORE]. Grinding per /beastmode; honest frontier reports as the tree closes.
