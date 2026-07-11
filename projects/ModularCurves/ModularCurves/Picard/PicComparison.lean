@@ -97,10 +97,22 @@ theorem nonempty_unitObj_iso_unit :
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- **[PAIR-3 / CMP-LOC]** Being an isomorphism of `𝒪ₓ`-modules is Zariski-local: a
+morphism whose restriction to every member of an open cover is an isomorphism is an
+isomorphism. (Route: cover-local isomorphy makes the underlying presheaf map locally
+bijective, hence a `sheafificationW`-member, hence inverted by sheafification — and
+sheaves are local objects for the sheafification.) -/
+theorem isIso_of_isIso_restrict {A B : X.Modules} (g : A ⟶ B) {ι : Type u}
+    (U : ι → X.Opens) (hU : iSup U = ⊤)
+    (h : ∀ i, IsIso ((restrictFunctor (U i).ι).map g)) : IsIso g := by
+  sorry
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **[CMP-PAIR]** For an invertible module the evaluation pairing against the sheaf dual
 (consumed from `Picard/Dual.lean`) is an isomorphism onto the unit: on a trivializing open
 both factors are trivial and the pairing is the multiplication; the isomorphism property
-of the global evaluation morphism is Zariski-local. -/
+of the global evaluation morphism is Zariski-local (`isIso_of_isIso_restrict`). -/
 theorem nonempty_eval_iso {M : X.Modules} (hM : IsInvertible M) :
     Nonempty (tensorObj M (dualObj M) ≅ unitObj X) := by
   sorry
