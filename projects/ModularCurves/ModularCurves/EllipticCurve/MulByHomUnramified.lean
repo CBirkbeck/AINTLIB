@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.TorsionFibre
+import ModularCurves.EllipticCurve.TorsionUnramifiedFibre
 import ModularCurves.ForMathlib.NilpotentKerSpecMap
 import ModularCurves.ForMathlib.FormallyUnramifiedFibre
 import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
@@ -62,27 +63,9 @@ namespace EllipticCurve
 
 variable {S : Scheme.{u}} (E : EllipticCurve S)
 
-/-- `pointEquivOverHom` carries point-subtraction to the division of `Over`-homs (companion to
-`pointEquivOverHom_add`). -/
-theorem pointEquivOverHom_sub {T : Scheme.{u}} (g : T ⟶ S) (P Q : E.Point g) :
-    letI : CommGroup (Over.mk g ⟶ E.asOver) := Hom.commGroup
-    (E.pointEquivOverHom g) (P - Q) =
-      (E.pointEquivOverHom g) P / (E.pointEquivOverHom g) Q := rfl
-
-/-- Restriction of a point along `k` corresponds, under `pointEquivOverHom`, to precomposition by
-the induced `Over`-morphism `Over.mk (k ≫ g) ⟶ Over.mk g`. -/
-theorem pointEquivOverHom_restrict {T T' : Scheme.{u}} {g : T ⟶ S} (k : T' ⟶ T) (P : E.Point g) :
-    E.pointEquivOverHom (k ≫ g) (Point.restrict E k P) =
-      (Over.homMk k : Over.mk (k ≫ g) ⟶ Over.mk g) ≫ E.pointEquivOverHom g P := by
-  apply Over.OverMorphism.ext
-  simp only [pointEquivOverHom, Equiv.coe_fn_mk, Point.restrict, Over.comp_left, Over.homMk_left]
-  rfl
-
-/-- `Point.restrict` is additive on subtraction (precomposition is a group homomorphism). -/
-theorem restrict_sub {T T' : Scheme.{u}} {g : T ⟶ S} (k : T' ⟶ T) (P Q : E.Point g) :
-    Point.restrict E k (P - Q) = Point.restrict E k P - Point.restrict E k Q := by
-  apply (E.pointEquivOverHom (k ≫ g)).injective
-  simp only [E.pointEquivOverHom_restrict, E.pointEquivOverHom_sub, GrpObj.comp_div]
+/- `pointEquivOverHom_sub`, `pointEquivOverHom_restrict`, `restrict_sub` RELOCATED
+byte-identically to `EllipticCurve/TorsionUnramifiedFibre.lean` (imported above) — they are
+needed on both sides of the L-A/L-BC split (Y1-CLOSER S2, hfib session). -/
 
 /-- **(T-B5D, L-A — the self-contained core, build first)** If the `N`-torsion `E[N] → S` is formally
 unramified, then so is `[N] : E ⟶ E`. Route-independent: `[N]` is an f.p.p.f `E[N]`-torsor (KM Cor.
@@ -147,15 +130,17 @@ theorem formallyUnramified_mulByHom_of_torsionπ (N : ℕ)
   have hP : (P₁ : E.Point s) = P₂ := sub_eq_zero.mp (Subtype.ext hfin)
   exact congrArg Subtype.val hP
 
-/-- **(T-B5D, L-BC — the arithmetic input, API-gap sub-tree)** If `N` is invertible on `S`, then the
-`N`-torsion `E[N] → S` is formally unramified. Route: `E[N] → S` is finite (`torsionπ_isFinite`,
-proven) and its geometric fibres `E[N]_{k̄}` are étale — the latter from AINTLIB's **HasseWeil**
-field-level theory (`[N]` separable when `char k̄ ∤ N` via the invariant differential
-`OmegaPullbackCoeff`/`card_kernel_eq_degree_of_separable`; `TorsionGeneralN` gives `E[N]_{k̄} ≅
-(ℤ/N)²`), transported across the crux **T-B6** scheme-fibre ↔ `WeierstrassCurve k̄` comparison — plus
-the **T-DISC** "finite + geometric fibres unramified ⟹ unramified" criterion. Source: KM Thm 2.3.1. -/
+/-- **(T-B5D, L-BC — the arithmetic input, PROVEN)** If `N` is invertible on `S`, then the
+`N`-torsion `E[N] → S` is formally unramified. Route (Y1-CLOSER S2, augmentation-ideal form of
+KM Thm 2.3.1): `E[N] → S` is finite (`torsionπ_isFinite`, proven) and its residue-field fibres
+are formally unramified — over a field, torsion points reducing to zero along a square-zero
+thickening vanish, because evaluation on the augmentation ideal of a chart at the zero section
+is additive mod `I² = 0` and `N` is a unit (`TorsionUnramifiedFibre.lean`; no differentials,
+no degree counts, no algebraic closure) — plus the **T-DISC** "finite + fibres unramified ⟹
+unramified" criterion. -/
 theorem formallyUnramified_torsionπ (N : ℕ) (h : NIsInvertible S N) :
-    FormallyUnramified (E.torsionπ N) := by sorry
+    FormallyUnramified (E.torsionπ N) :=
+  E.formallyUnramified_torsionπ_of_nIsInvertible N h
 
 /-- **(L-BC funnel — hypothesis-funneled pre-wire, v10.123-CASCADE)** L-BC from its single
 remaining fibre input: once every residue-field fibre of `E[N] ⟶ S` is formally unramified,
@@ -191,6 +176,85 @@ assembled from L-A ∘ L-BC. Term-mode (no `sorry` of its own): discharging `for
 theorem mulByHom_formallyUnramified' (N : ℕ) (h : NIsInvertible S N) :
     FormallyUnramified (E.mulByHom N) :=
   E.formallyUnramified_mulByHom_of_torsionπ N (E.formallyUnramified_torsionπ N h)
+
+/-! ## The discharged BB-DIFF chain (relocated from `Torsion.lean`, Y1-CLOSER S2)
+
+The three theorems below are relocated byte-identically (statements unchanged) from
+`EllipticCurve/Torsion.lean` — pointer comments at the old site. Their proofs need the
+L-A/L-BC machinery of this file and `TorsionUnramifiedFibre.lean`, which import
+`Torsion.lean`, so the discharge must live here. `torsion_geometricFibre_rank_two` follows
+its consumer `torsionπ_etale` down from `TorsionFibre.lean` for the same reason. -/
+
+/-- **Black box `BB-DIFF` (T-B5 = Loeffler 3.4.2(2), unramifiedness) — DISCHARGED
+(Y1-CLOSER S2)**: if `N` is invertible on `S` then `[N]` is formally unramified.
+Loeffler (verbatim): *"The morphism `[N]` multiplies a global differential by `N`, so it
+induces an isomorphism of tangent space."* Proven differential-free: L-A (the `E[N]`-torsor
+reduction) ∘ L-BC (the augmentation-ideal fibre argument + T-DISC). -/
+theorem mulByHom_formallyUnramified (N : ℕ) (h : NIsInvertible S N) :
+    FormallyUnramified (E.mulByHom N) :=
+  E.mulByHom_formallyUnramified' N h
+
+/-- **(T-B5 = Loeffler 3.4.2(2))** If `N` is invertible on `S`, then `[N] : E ⟶ E` is étale
+(it induces multiplication by `N`, an isomorphism, on the invariant differential). -/
+theorem mulBy_etale (N : ℕ) (h : NIsInvertible S N) :
+    Etale (E.mulByHom N) := by
+  rcases eq_or_ne N 0 with rfl | hN
+  · haveI hS : IsEmpty S := ModularCurves.isEmpty_of_nIsInvertible_zero h
+    haveI hE : IsEmpty E.E := ⟨fun x => hS.false (E.π x)⟩
+    infer_instance
+  · haveI : NeZero N := ⟨hN⟩
+    haveI := E.mulByHom_flat N
+    haveI := E.mulByHom_formallyUnramified N h
+    haveI := E.mulByHom_locallyOfFinitePresentation N
+    exact Etale.of_formallyUnramified_of_flat (E.mulByHom N)
+
+/-- **(T-B5′)** If `N` is invertible on `S`, then `E[N] ⟶ S` is (finite) étale.
+Source: Loeffler §3.4; KM 2.3.5. -/
+theorem torsionπ_etale (N : ℕ) (h : NIsInvertible S N) :
+    Etale (E.torsionπ N) := by
+  have he := E.mulBy_etale N h
+  exact MorphismProperty.pullback_snd _ _ he
+
+/-- **(T-B6 headline)** Over an algebraically closed field in which `N` is invertible,
+the `N`-torsion of the geometric point group is `(ℤ/N)²`. Proof route: counting
+(KM 2.3.5/[Sil] III.6.4) — étale rank-`d²` kernels over `k̄` have exactly `d ^ 2`
+points, and the divisor-count spectrum pins the group. Rests on the registered
+KM 2.3.1/3.4.2 black boxes (`BB-QF`/`BB-FLAT`/`BB-DEG`/`BB-DIFF`) via
+`torsionπ_isFinite`/`torsionπ_etale`/`torsion_rank`. -/
+theorem torsion_geometricFibre_rank_two (N : ℕ) [NeZero N] (k : Type u) [Field k]
+    [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S) (hN : (N : k) ≠ 0) :
+    Nonempty (Submodule.torsionBy ℤ (E.Point t) (N : ℤ) ≃+ (Fin 2 → ZMod N)) := by
+  obtain ⟨x₀⟩ : Nonempty ↑(Spec (CommRingCat.of k)) := inferInstance
+  refine addEquiv_pi_fin_two_zmod_of_natCard N (NeZero.ne N) _ (fun x => ?_)
+    (fun d hd hdN => ?_)
+  · apply Subtype.ext
+    have h2 : ((N • x : Submodule.torsionBy ℤ (E.Point t) (N : ℤ)) : E.Point t) =
+        N • (x : E.Point t) :=
+      map_nsmul (Submodule.torsionBy ℤ (E.Point t) (N : ℤ)).subtype N x
+    rw [h2, ZeroMemClass.coe_zero, ← natCast_zsmul]
+    exact (Submodule.mem_torsionBy_iff _ _).mp x.2
+  · haveI : NeZero d := ⟨hd.ne'⟩
+    have hdk : (d : k) ≠ 0 := by
+      obtain ⟨c, hc⟩ := hdN
+      intro h0
+      apply hN
+      rw [hc, Nat.cast_mul, h0, zero_mul]
+    haveI hEt : Etale ((E.baseChange t).torsionπ d) :=
+      (E.baseChange t).torsionπ_etale d ((nIsInvertible_spec_iff k d).mpr hdk)
+    haveI hFin : IsFinite ((E.baseChange t).torsionπ d) :=
+      (E.baseChange t).torsionπ_isFinite d
+    calc Nat.card {x : Submodule.torsionBy ℤ (E.Point t) (N : ℤ) // d • x = 0}
+        = Nat.card (Submodule.torsionBy ℤ (E.Point t) (d : ℤ)) :=
+          Nat.card_congr (torsionByNsmulKerEquiv (E.Point t) N d hdN)
+      _ = Nat.card {h : Spec (CommRingCat.of k) ⟶ E.torsion d //
+            h ≫ E.torsionπ d = t} :=
+          (Nat.card_congr (E.torsionPointsEquiv d t)).symm
+      _ = Nat.card {s : Spec (CommRingCat.of k) ⟶ (E.baseChange t).torsion d //
+            s ≫ (E.baseChange t).torsionπ d = 𝟙 (Spec (CommRingCat.of k))} :=
+          (Nat.card_congr (E.sectionsEquivOverPoints d t)).symm
+      _ = ((E.baseChange t).torsionπ d).finrank x₀ :=
+          natCard_sections_eq_finrank ((E.baseChange t).torsionπ d) x₀
+      _ = d ^ 2 := (E.baseChange t).torsion_rank d x₀
 
 end EllipticCurve
 

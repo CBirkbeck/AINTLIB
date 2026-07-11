@@ -312,7 +312,7 @@ noncomputable def torsionPointsEquiv (N : ℕ) {T : Scheme.{u}} (t : T ⟶ S) :
 
 /-- Sections of the base-changed torsion over `T` are the `E[N]`-points over `t`
 (the two legs of `torsion_baseChange_isPullback`). -/
-private noncomputable def sectionsEquivOverPoints (N : ℕ) {T : Scheme.{u}} (t : T ⟶ S) :
+noncomputable def sectionsEquivOverPoints (N : ℕ) {T : Scheme.{u}} (t : T ⟶ S) :
     {s : T ⟶ (E.baseChange t).torsion N // s ≫ (E.baseChange t).torsionπ N = 𝟙 T} ≃
       {h : T ⟶ E.torsion N // h ≫ E.torsionπ N = t} where
   toFun s := ⟨s.1 ≫ E.torsionBaseChangeHom N t, by
@@ -333,7 +333,7 @@ private lemma torsionByNsmulKer_mem (G : Type u) [AddCommGroup G] {N d : ℕ}
   obtain ⟨c, hc⟩ := hdN
   rw [hc, Nat.cast_mul, mul_comm, mul_zsmul, hy, smul_zero]
 
-private def torsionByNsmulKerEquiv (G : Type u) [AddCommGroup G] (N d : ℕ)
+def torsionByNsmulKerEquiv (G : Type u) [AddCommGroup G] (N d : ℕ)
     (hdN : d ∣ N) :
     {x : Submodule.torsionBy ℤ G (N : ℤ) // d • x = 0} ≃
       Submodule.torsionBy ℤ G (d : ℤ) where
@@ -354,46 +354,11 @@ private def torsionByNsmulKerEquiv (G : Type u) [AddCommGroup G] (N d : ℕ)
   left_inv x := Subtype.ext (Subtype.ext rfl)
   right_inv y := Subtype.ext rfl
 
-/-- **(T-B6 headline)** Over an algebraically closed field in which `N` is invertible,
-the `N`-torsion of the geometric point group is `(ℤ/N)²`. Proof route: counting
-(KM 2.3.5/[Sil] III.6.4) — étale rank-`d²` kernels over `k̄` have exactly `d ^ 2`
-points, and the divisor-count spectrum pins the group. Rests on the registered
-KM 2.3.1/3.4.2 black boxes (`BB-QF`/`BB-FLAT`/`BB-DEG`/`BB-DIFF`) via
-`torsionπ_isFinite`/`torsionπ_etale`/`torsion_rank`. -/
-theorem torsion_geometricFibre_rank_two (N : ℕ) [NeZero N] (k : Type u) [Field k]
-    [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S) (hN : (N : k) ≠ 0) :
-    Nonempty (Submodule.torsionBy ℤ (E.Point t) (N : ℤ) ≃+ (Fin 2 → ZMod N)) := by
-  obtain ⟨x₀⟩ : Nonempty ↑(Spec (CommRingCat.of k)) := inferInstance
-  refine addEquiv_pi_fin_two_zmod_of_natCard N (NeZero.ne N) _ (fun x => ?_)
-    (fun d hd hdN => ?_)
-  · apply Subtype.ext
-    have h2 : ((N • x : Submodule.torsionBy ℤ (E.Point t) (N : ℤ)) : E.Point t) =
-        N • (x : E.Point t) :=
-      map_nsmul (Submodule.torsionBy ℤ (E.Point t) (N : ℤ)).subtype N x
-    rw [h2, ZeroMemClass.coe_zero, ← natCast_zsmul]
-    exact (Submodule.mem_torsionBy_iff _ _).mp x.2
-  · haveI : NeZero d := ⟨hd.ne'⟩
-    have hdk : (d : k) ≠ 0 := by
-      obtain ⟨c, hc⟩ := hdN
-      intro h0
-      apply hN
-      rw [hc, Nat.cast_mul, h0, zero_mul]
-    haveI hEt : Etale ((E.baseChange t).torsionπ d) :=
-      (E.baseChange t).torsionπ_etale d ((nIsInvertible_spec_iff k d).mpr hdk)
-    haveI hFin : IsFinite ((E.baseChange t).torsionπ d) :=
-      (E.baseChange t).torsionπ_isFinite d
-    calc Nat.card {x : Submodule.torsionBy ℤ (E.Point t) (N : ℤ) // d • x = 0}
-        = Nat.card (Submodule.torsionBy ℤ (E.Point t) (d : ℤ)) :=
-          Nat.card_congr (torsionByNsmulKerEquiv (E.Point t) N d hdN)
-      _ = Nat.card {h : Spec (CommRingCat.of k) ⟶ E.torsion d //
-            h ≫ E.torsionπ d = t} :=
-          (Nat.card_congr (E.torsionPointsEquiv d t)).symm
-      _ = Nat.card {s : Spec (CommRingCat.of k) ⟶ (E.baseChange t).torsion d //
-            s ≫ (E.baseChange t).torsionπ d = 𝟙 (Spec (CommRingCat.of k))} :=
-          (Nat.card_congr (E.sectionsEquivOverPoints d t)).symm
-      _ = ((E.baseChange t).torsionπ d).finrank x₀ :=
-          natCard_sections_eq_finrank ((E.baseChange t).torsionπ d) x₀
-      _ = d ^ 2 := (E.baseChange t).torsion_rank d x₀
+/- `torsion_geometricFibre_rank_two` RELOCATED byte-identically to
+`EllipticCurve/MulByHomUnramified.lean` (Y1-CLOSER S2): its proof consumes `torsionπ_etale`,
+which moved there when BB-DIFF was discharged (pointer at `Torsion.lean`; v10.111/v10.117
+relocation doctrine). Its ingredients (`torsionPointsEquiv`, `sectionsEquivOverPoints`,
+`torsionByNsmulKerEquiv` — the latter two de-privatised for the relocation) stay here. -/
 
 end EllipticCurve
 

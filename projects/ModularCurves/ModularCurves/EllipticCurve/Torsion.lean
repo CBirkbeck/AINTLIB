@@ -219,35 +219,12 @@ theorem mulByHom_locallyOfFinitePresentation (N : ℕ) :
     infer_instance
   exact LocallyOfFinitePresentation.of_comp_of_locallyOfFiniteType h inferInstance
 
-/-- **Black box `BB-DIFF` (T-B5 = Loeffler 3.4.2(2), unramifiedness)**: if `N` is
-invertible on `S` then `[N]` is formally unramified — Loeffler (verbatim): *"The
-morphism `[N]` multiplies a global differential by `N`, so it induces an isomorphism
-of tangent space."* Discharge needs the invariant-differential API (relative `Ω¹` +
-group-translation invariance) — sub-development gated on mathlib's scheme-level
-differentials. -/
-theorem mulByHom_formallyUnramified (N : ℕ) (h : NIsInvertible S N) :
-    FormallyUnramified (E.mulByHom N) := by sorry
-
-/-- **(T-B5 = Loeffler 3.4.2(2))** If `N` is invertible on `S`, then `[N] : E ⟶ E` is étale
-(it induces multiplication by `N`, an isomorphism, on the invariant differential). -/
-theorem mulBy_etale (N : ℕ) (h : NIsInvertible S N) :
-    Etale (E.mulByHom N) := by
-  rcases eq_or_ne N 0 with rfl | hN
-  · haveI hS : IsEmpty S := ModularCurves.isEmpty_of_nIsInvertible_zero h
-    haveI hE : IsEmpty E.E := ⟨fun x => hS.false (E.π x)⟩
-    infer_instance
-  · haveI : NeZero N := ⟨hN⟩
-    haveI := E.mulByHom_flat N
-    haveI := E.mulByHom_formallyUnramified N h
-    haveI := E.mulByHom_locallyOfFinitePresentation N
-    exact Etale.of_formallyUnramified_of_flat (E.mulByHom N)
-
-/-- **(T-B5′)** If `N` is invertible on `S`, then `E[N] ⟶ S` is (finite) étale.
-Source: Loeffler §3.4; KM 2.3.5. -/
-theorem torsionπ_etale (N : ℕ) (h : NIsInvertible S N) :
-    Etale (E.torsionπ N) := by
-  have he := E.mulBy_etale N h
-  exact MorphismProperty.pullback_snd _ _ he
+/- **BB-DIFF DISCHARGED (Y1-CLOSER S2)**: `mulByHom_formallyUnramified` (was the sorried
+black box), `mulBy_etale`, and `torsionπ_etale` are RELOCATED byte-identically (statements
+unchanged) to `EllipticCurve/MulByHomUnramified.lean`, where they are now PROVEN — the
+discharge (L-A ∘ L-BC, with L-BC the augmentation-ideal fibre argument of
+`TorsionUnramifiedFibre.lean` funneled through T-DISC) lives in files that import this one,
+so the proofs cannot live here. Pointer per the v10.111/v10.117 relocation doctrine. -/
 
 end EllipticCurve
 
