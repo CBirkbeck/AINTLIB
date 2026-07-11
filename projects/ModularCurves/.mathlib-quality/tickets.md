@@ -16025,3 +16025,12 @@ associativity (avoids the `inv`-blocks-motive failure); after it fires, the trai
   T-G4/T-G5, the fibre comparison, the funnel, the ψ-wall machinery); the two lanes
   are independent but the closer's demonstrated overnight velocity beats two cold
   seats in parallel; zero handoff seams.
+
+## Amendments v10.139-CLOSER (2026-07-11, Y1-CLOSER): CHARTER-Y1-CLOSER-2 CLAIMED (rule-5) — all three lanes; L1 audit first
+
+Seat re-opened per v10.139. Claimed lanes: **(L1)** T-W7 tail (0h → T-W7.12 → T-W7a,
+audit-first vs the landed T-G4/T-G5), **(L2)** [T-A6b]/[T-A6c] + T-E4-primitive (A's prep
+by import; route (a)-vs-(c) audit), **(L3)** BB-QF/BB-FLAT/BB-DEG (decompose-first;
+HasseWeil `mulByInt_degree` check-then-cite). Sentinel `beastmode_active.Y1-CLOSER` set in
+both worktrees. First act: the L1 audit; lane order set by its verdict + the route-(a)
+audit. Reports at: L1 verdict, each box, T-W7a, ★★★★ MASTER.
