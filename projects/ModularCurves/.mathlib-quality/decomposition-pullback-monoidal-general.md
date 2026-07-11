@@ -405,3 +405,25 @@ transpose through `sheafificationAdjunction.homEquiv` + `sheafifyValIso` to
 `ev : tensorObj M (dualObj M) ⟶ unitObj X`. [PAIR-3] CLOSED (`isIso_of_isIso_restrict`,
 c3e0971b8, it-3). [PAIR-4] then conjugates ev's restriction by the owner's
 `dualRestrictIsoOfRestrictIso` + `overTrivializationOfRestrictIso`.
+
+### [PAIR-4] refinement (2026-07-11, post eval_iso-assembly)
+
+Sub-leaves (attack order 4b → 4c → 4a):
+- **[4b] `isIso_ev_unitObj (Y) : IsIso (ev (unitObj Y))`** — NO restriction machinery:
+  `evPre (unitObj)` is POINTWISE iso (sections: `R(V) ⊗ End(unit-over) → R(V)`, with
+  `dualUnitObjIso`'s app-isos + the pairing = multiplication ≅ unitor) ⟹ locally bijective
+  ⟹ `sheafificationW` ⟹ `ev` iso by the counit square (mirror the isIso_of_isIso_restrict
+  step-4 pattern; the factorization square is one sections-compute of evalSection-at-unit).
+- **[4c] ev-naturality in `M` along isos**: `tensorObjCongr e (dual-congr e) ≫ ev M' = ev M`
+  — from `evalSection`-naturality-in-M (`evalSection (dualMapObj f-ish φ) m = evalSection φ
+  (f m)` — same-site over-chase, 1c-shaped but without the site-crossing) + `dualMapObj`
+  (Dual.lean:909). Gives: M ≅ unit ⟹ (ev M iso ⟺ ev unit iso).
+- **[4a] restriction-compat**: `(restrictFunctor W.ι).map (ev M)` conjugate to
+  `ev (M.restrict)` — restriction (a pushforward!) vs sh (pushforward-sheafification
+  square), vs `dualObj` (owner's `dualRestrictIsoOfRestrictIso` at
+  `overTrivializationOfRestrictIso`), vs ⊗ᵖ (`pushforwardTensorIso`, PTM's restricted lax
+  layer). Then [PAIR-4] = 4a-reduce + 4c-transport(e) + 4b. NOTE: 4a may be dodgeable —
+  ALTERNATIVE: prove [PAIR-4] directly per-app on W-opens (restrictFunctor = pushforward ⟹
+  apps of restrict(ev) are apps of ev at image-opens) IF ev's apps were computable — they
+  are NOT (sh intervenes on the non-sheaf tensor presheaf) — 4a stands unless a
+  sections-of-sh identification (sheafify-sections-equiv on the W-cover) is cheaper.
