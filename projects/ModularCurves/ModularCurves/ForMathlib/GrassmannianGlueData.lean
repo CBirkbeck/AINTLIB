@@ -790,6 +790,49 @@ theorem det_map (ι ι' : Fin k ↪ Fin n) :
       = Transition.det (R := A) ι ι' := by
   rw [Transition.det, Transition.det, RingHom.map_det, RingHom.mapMatrix_apply, matrix_map]
 
+variable (ι ι' : Fin k ↪ Fin n) (N : G(k, (Fin n → A); A))
+
+/-- `evalAtR` on the `R`-transition determinant equals `evalAt` on the `A`-transition
+determinant (base-change factorization + `det_map`). -/
+theorem evalAtR_det (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N) :
+    evalAtR (R := R) ι N h (Transition.det (R := R) ι ι')
+      = evalAt ι N h (Transition.det (R := A) ι ι') := by
+  rw [evalAtR_eq_comp_map, RingHom.comp_apply, det_map]
+
+/-- The `R`-transition determinant evaluates to a unit at a chart member charted at both
+`ι` and `ι'`. -/
+theorem isUnit_evalAtR_det (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N)
+    (hι' : IsChartAt (fun i => Pi.single (ι' i) (1 : A)) N) :
+    IsUnit (evalAtR (R := R) ι N h (Transition.det (R := R) ι ι')) := by
+  rw [evalAtR_det]
+  exact isUnit_evalAt_det ι ι' N h hι'
+
+/-- **[GR-G-ASM]** The `R`-coefficient evaluation extended over the overlap localization —
+the `R`-coefficient counterpart of `evalAwayAt`. -/
+noncomputable def evalAwayAtR (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N)
+    (hι' : IsChartAt (fun i => Pi.single (ι' i) (1 : A)) N) :
+    Localization.Away (Transition.det (R := R) ι ι') →+* A :=
+  IsLocalization.Away.lift (Transition.det (R := R) ι ι') (isUnit_evalAtR_det ι ι' N h hι')
+
+/-- `evalAwayAtR` restricts to `evalAtR` on the chart ring. -/
+theorem evalAwayAtR_algebraMap (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N)
+    (hι' : IsChartAt (fun i => Pi.single (ι' i) (1 : A)) N) (q : ChartRing R ι) :
+    evalAwayAtR ι ι' N h hι'
+        (algebraMap (ChartRing R ι) (Localization.Away (Transition.det (R := R) ι ι')) q)
+      = evalAtR (R := R) ι N h q :=
+  IsLocalization.Away.lift_eq _ (isUnit_evalAtR_det ι ι' N h hι') q
+
+/-- `evalAtR` carries the generic transition matrix to the pointwise one — the
+`R`-coefficient counterpart of `evalAt_matrix`. -/
+theorem evalAtR_matrix (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N)
+    (h' : Function.Bijective
+      ⇑(N.toSubmodule.mkQ ∘ₗ coordMap (fun i => Pi.single (ι i) (1 : A)))) :
+    (Transition.matrix (R := R) ι ι').map ⇑(evalAtR (R := R) ι N h)
+      = transitionMatrixAt ι ι' N h := by
+  funext i₁ i₂
+  rw [Matrix.map_apply, Transition.matrix_apply, evalAtR_column]
+  exact congrFun (congrFun (evalAt_matrix ι ι' N h h') i₁) i₂
+
 end Points
 
 end Module.Grassmannian
