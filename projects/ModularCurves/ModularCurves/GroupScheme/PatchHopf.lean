@@ -915,6 +915,25 @@ noncomputable abbrev cubeΓ :
 
 instance : IsIso P.cubeΓ := isIso_affineKunnethΓ _ _ rfl rfl
 
+/-- The inner-multiplication `cube → square`: `(g₁,(g₂,g₃)) ↦ (g₁, g₂·g₃)`. -/
+noncomputable def cubeInnerMul : P.cube ⟶ P.groupSquare :=
+  pullback.map P.groupToBaseRes P.squareToBase P.groupToBaseRes P.groupToBaseRes
+    (𝟙 P.groupOpen.toScheme) P.squareMulRes (𝟙 P.V.toScheme)
+    (by rw [Category.id_comp, Category.comp_id])
+    (by rw [Category.comp_id]; exact P.squareMulRes_comp_groupToBaseRes.symm)
+
+@[reassoc]
+theorem cubeInnerMul_fst :
+    P.cubeInnerMul ≫ pullback.fst P.groupToBaseRes P.groupToBaseRes
+      = pullback.fst P.groupToBaseRes P.squareToBase := by
+  rw [cubeInnerMul, pullback.lift_fst, Category.comp_id]
+
+@[reassoc]
+theorem cubeInnerMul_snd :
+    P.cubeInnerMul ≫ pullback.snd P.groupToBaseRes P.groupToBaseRes
+      = pullback.snd P.groupToBaseRes P.squareToBase ≫ P.squareMulRes := by
+  rw [cubeInnerMul, pullback.lift_snd]
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
