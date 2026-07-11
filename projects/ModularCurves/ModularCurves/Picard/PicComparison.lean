@@ -313,13 +313,29 @@ theorem isIso_of_isIso_restrict {A B : X.Modules} (g : A ⟶ B) {ι : Type u}
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- **[PAIR-4]** On an open where `M` trivializes, the restriction of the evaluation
+morphism is an isomorphism: conjugate by the trivialization and the induced trivialization
+of the dual (`Picard/Dual.lean`'s restriction layer); the conjugated map is the unit
+self-pairing, an isomorphism by the unitor. -/
+theorem isIso_restrict_ev {M : X.Modules} {W : X.Opens}
+    (e : (Modules.pullback W.ι).obj M ≅ unitObj W.toScheme) :
+    IsIso ((restrictFunctor W.ι).map (ev M)) := by
+  sorry
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **[CMP-PAIR]** For an invertible module the evaluation pairing against the sheaf dual
 (consumed from `Picard/Dual.lean`) is an isomorphism onto the unit: on a trivializing open
 both factors are trivial and the pairing is the multiplication; the isomorphism property
 of the global evaluation morphism is Zariski-local (`isIso_of_isIso_restrict`). -/
 theorem nonempty_eval_iso {M : X.Modules} (hM : IsInvertible M) :
     Nonempty (tensorObj M (dualObj M) ≅ unitObj X) := by
-  sorry
+  obtain ⟨ι, U, hU, htriv⟩ := hM
+  haveI : IsIso (ev M) := by
+    refine isIso_of_isIso_restrict (ev M) U hU (fun i => ?_)
+    obtain ⟨e⟩ := htriv i
+    exact isIso_restrict_ev e
+  exact ⟨asIso (ev M)⟩
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
