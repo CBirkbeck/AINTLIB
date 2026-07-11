@@ -75,6 +75,10 @@ structure CoreData (P Q : ModuliProblem R) {G : Type u} [Group G] [Finite G]
     (∀ γ, (P.simulSchemeAction Q φ rM).hom γ ≫ F = F) → ∃! F₀, q.baseHom ≫ F₀ = F
   /-- `q`'s base map is a geometric `G`-torsor (`∐_G XM.base ≅ XM.base ×_{X₀.base} XM.base`). -/
   hqtors : IsIso (ModularCurves.torsorCompare q.baseHom (P.simulSchemeAction Q φ rM) hqinv)
+  /-- `q`'s base map is surjective (the quotient projection covers `X₀.base`). -/
+  hqsurj : Surjective q.baseHom
+  /-- `q`'s base map is étale (finite étale `G`-torsor; KM/De-Ga III.2.6.1). -/
+  hqetale : Etale q.baseHom
   /-- The descended universal `P`-class over `X₀`. -/
   α₀ : P.obj (op X₀)
   /-- It pulls back along `q` to the universal `P`-class of the simultaneous problem. -/
@@ -170,6 +174,9 @@ theorem exists_coreData (P Q : ModuliProblem R) {G : Type u} [Group G] [Finite G
            hqepi := hepi
            hqlift := fun {W} F hF => σ.existsUnique_quotientπ_lift V hVs hVa hVmem F hF
            hqtors := σ.isIso_torsorCompare_quotientπ V hVs hVa hVmem
+             (P.free_simulSchemeAction Q φ rM hrig htors)
+           hqsurj := ⟨σ.quotientπ_surjective V hVs hVa hVmem⟩
+           hqetale := σ.etale_quotientπ V hVs hVa hVmem
              (P.free_simulSchemeAction Q φ rM hrig htors)
            α₀ := α₀, hα₀ := hα₀ }⟩
 
@@ -560,6 +567,160 @@ private theorem coreData_hom_eq_of_baseHom_eq {P Q : ModuliProblem R} {G : Type 
       (fun hrefl => hne (congrArg Iso.hom hrefl)) (P.map v'.op cd.α₀) hfix
   rw [← hξw, hξid, Category.id_comp]
 
+private theorem coreData_key (P Q : ModuliProblem R) {G : Type u} [Group G] [Finite G]
+    (φ : G →* Aut Q) (cd : CoreData P Q φ) {Y : EllObj R} (td : TorsorData φ Y) (v : Y ⟶ cd.X₀)
+    [Flat cd.q.baseHom] [Surjective cd.q.baseHom] :
+    td.f ≫ v.baseHom = bijClassBase cd td (P.map v.op cd.α₀) ≫ cd.q.baseHom := by
+  classical
+  haveI := td.surjective; haveI := td.etale; haveI := td.finite
+  haveI : Flat td.f := inferInstance
+  haveI : QuasiCompact td.f := inferInstance
+  set α : P.obj (op Y) := P.map v.op cd.α₀ with hα
+  -- the pulled-back G-torsor of `v` along the universal quotient `cd.q.baseHom`
+  set Pv := Limits.pullback cd.q.baseHom v.baseHom with hPv
+  set fstv : Pv ⟶ cd.XM.base := pullback.fst cd.q.baseHom v.baseHom with hfstv
+  set sndv : Pv ⟶ Y.base := pullback.snd cd.q.baseHom v.baseHom with hsndv
+  have hcond : fstv ≫ cd.q.baseHom = sndv ≫ v.baseHom := pullback.condition
+  -- the classifying morphism `f_ell` over the δ-torsor chart (base map = `bijClassBase`)
+  set fell : Y.pullbackAlong td.f ⟶ cd.XM :=
+    cd.rM.homEquiv.symm (P.map (Y.pullbackAlongπ td.f).op α,
+      td.eqv td.f ⟨𝟙 td.Z, Category.id_comp td.f⟩) with hfell
+  have hbij : bijClassBase cd td α = fell.baseHom := rfl
+  -- the inverse cartesian comparison collapses to the chart projection
+  have hqiso : (EllObj.isoPullbackAlong cd.q).inv ≫ cd.q =
+      cd.X₀.pullbackAlongπ cd.q.baseHom := by
+    rw [Iso.inv_comp_eq]; exact (EllObj.toPullbackAlong_pullbackAlongπ cd.q).symm
+  -- the lift `μv` of `π_sndv ≫ v` through the quotient `cd.q`, over the `Pv`-chart
+  have hh : fstv ≫ cd.q.baseHom = (Y.pullbackAlongπ sndv ≫ v).baseHom := hcond
+  set muv : Y.pullbackAlong sndv ⟶ cd.XM :=
+    EllObj.homToPullbackAlong (Y.pullbackAlongπ sndv ≫ v) fstv hh ≫
+      (EllObj.isoPullbackAlong cd.q).inv with hmuv
+  have hmuvb : muv.baseHom = fstv := by
+    rw [hmuv]
+    show fstv ≫ (EllObj.isoPullbackAlong cd.q).inv.baseHom = fstv
+    rw [show (EllObj.isoPullbackAlong cd.q).inv.baseHom = 𝟙 cd.XM.base from rfl,
+      Category.comp_id]
+  have hmuvq : muv ≫ cd.q = Y.pullbackAlongπ sndv ≫ v := by
+    rw [hmuv, Category.assoc, hqiso, EllObj.homToPullbackAlong_pullbackAlongπ]
+  -- the P-value of `μv`
+  have hPval : (cd.rM.homEquiv muv).1 = P.map (Y.pullbackAlongπ sndv).op α := by
+    have hHE : cd.rM.homEquiv muv = (P.simul Q).map muv.op (cd.rM.homEquiv (𝟙 cd.XM)) := by
+      conv_lhs => rw [← Category.comp_id muv]
+      exact cd.rM.homEquiv_comp muv (𝟙 cd.XM)
+    have hP1 : (cd.rM.homEquiv muv).1 = P.map muv.op (cd.rM.homEquiv (𝟙 cd.XM)).1 :=
+      congrArg Prod.fst hHE
+    rw [hP1, ← cd.hα₀, ← Functor.map_comp_apply, ← op_comp, hmuvq, op_comp,
+      Functor.map_comp_apply, hα]
+  -- the δ-value of `μv`, classified into the δ-torsor `td.Z`
+  set dv : Q.obj (op (Y.pullbackAlong sndv)) := (cd.rM.homEquiv muv).2 with hdv
+  set θv : Pv ⟶ td.Z := ((td.eqv sndv).symm dv).1 with hθv
+  have hθf : θv ≫ td.f = sndv := ((td.eqv sndv).symm dv).2
+  have hθeqv : td.eqv sndv ⟨θv, hθf⟩ = dv := (td.eqv sndv).apply_symm_apply dv
+  -- the chart comparison over `θv`
+  set θtil : Y.pullbackAlong sndv ⟶ Y.pullbackAlong td.f :=
+    EllObj.homToPullbackAlong (Y.pullbackAlongπ sndv) θv hθf with hθtil
+  have hθtilπ : θtil ≫ Y.pullbackAlongπ td.f = Y.pullbackAlongπ sndv :=
+    EllObj.homToPullbackAlong_pullbackAlongπ _ _ _
+  have hfellHE : cd.rM.homEquiv fell = (P.map (Y.pullbackAlongπ td.f).op α,
+      td.eqv td.f ⟨𝟙 td.Z, Category.id_comp td.f⟩) := by
+    rw [hfell]; exact cd.rM.homEquiv.apply_symm_apply _
+  -- KEY classifier identity: `μv = θtil ≫ f_ell`
+  have hmuv_eq : muv = θtil ≫ fell := by
+    apply cd.rM.homEquiv.injective
+    rw [cd.rM.homEquiv_comp θtil fell, hfellHE]
+    refine Prod.ext ?_ ?_
+    · show (cd.rM.homEquiv muv).1 = P.map θtil.op (P.map (Y.pullbackAlongπ td.f).op α)
+      rw [hPval]
+      conv_rhs => rw [← Functor.map_comp_apply, ← op_comp, hθtilπ]
+    · show (cd.rM.homEquiv muv).2 = Q.map θtil.op (td.eqv td.f ⟨𝟙 td.Z, Category.id_comp td.f⟩)
+      rw [← hdv, ← hθeqv, hθtil,
+        map_eqv' td.toRelRepData _ θv (EllObj.homToPullbackAlong_baseHom _ _ _) hθf
+          (EllObj.homToPullbackAlong_pullbackAlongπ _ _ _) ⟨𝟙 td.Z, Category.id_comp td.f⟩]
+      exact congrArg (td.eqv sndv) (Subtype.ext (Category.comp_id θv).symm)
+  -- (I): `fstv = θv ≫ bijClassBase`
+  have hI : fstv = θv ≫ fell.baseHom := by
+    have hb := congrArg EllHom.baseHom hmuv_eq
+    rw [hmuvb] at hb
+    rw [hb]
+    show θtil.baseHom ≫ fell.baseHom = θv ≫ fell.baseHom
+    rfl
+  -- G-invariance of `fell.baseHom ≫ q.base`, from equivariance of the classifier + hqinv
+  have hinv : ∀ γ, td.σZ.hom γ ≫ (fell.baseHom ≫ cd.q.baseHom) =
+      fell.baseHom ≫ cd.q.baseHom := by
+    intro γ
+    have hbase : td.σZ.hom γ ≫ fell.baseHom =
+        fell.baseHom ≫ (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom :=
+      congrArg EllHom.baseHom (homToPullbackAlong_classifying_comm cd td α γ)
+    have h1 : (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom ≫ cd.q.baseHom
+        = cd.q.baseHom := cd.hqinv γ
+    have hAinv : (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom ≫
+        (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom = 𝟙 cd.XM.base :=
+      congrArg EllHom.baseHom (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom_inv_id
+    have hq' : (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom ≫ cd.q.baseHom
+        = cd.q.baseHom := by
+      calc (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom ≫ cd.q.baseHom
+          = (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom ≫
+              ((cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom ≫ cd.q.baseHom) := by
+            rw [h1]
+        _ = ((cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom ≫
+              (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom) ≫ cd.q.baseHom := by
+            rw [Category.assoc]
+        _ = 𝟙 cd.XM.base ≫ cd.q.baseHom := by rw [hAinv]
+        _ = cd.q.baseHom := Category.id_comp _
+    calc td.σZ.hom γ ≫ (fell.baseHom ≫ cd.q.baseHom)
+        = (td.σZ.hom γ ≫ fell.baseHom) ≫ cd.q.baseHom := (Category.assoc _ _ _).symm
+      _ = (fell.baseHom ≫ (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom) ≫
+            cd.q.baseHom := congrArg (· ≫ cd.q.baseHom) hbase
+      _ = fell.baseHom ≫ ((cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom ≫
+            cd.q.baseHom) := Category.assoc _ _ _
+      _ = fell.baseHom ≫ cd.q.baseHom := congrArg (fell.baseHom ≫ ·) hq'
+  -- descend `fell.baseHom ≫ q.base` through the δ-torsor `td.f`
+  obtain ⟨f₀, hf₀, -⟩ :=
+    existsUnique_descent_of_torsor td.σZ td.over_base td.torsor
+      (fell.baseHom ≫ cd.q.baseHom) hinv
+  -- the pulled-back torsor projection `sndv` is an epimorphism (finite-étale base change)
+  haveI : Flat sndv := by rw [hsndv]; exact MorphismProperty.pullback_snd _ _ ‹Flat cd.q.baseHom›
+  haveI : Surjective sndv := by
+    rw [hsndv]; exact MorphismProperty.pullback_snd _ _ ‹Surjective cd.q.baseHom›
+  haveI : Epi sndv := AlgebraicGeometry.Flat.epi_of_flat_of_surjective sndv
+  -- `v.baseHom = f₀`
+  have hvf₀ : v.baseHom = f₀ := by
+    refine (cancel_epi sndv).mp ?_
+    calc sndv ≫ v.baseHom
+        = fstv ≫ cd.q.baseHom := hcond.symm
+      _ = (θv ≫ fell.baseHom) ≫ cd.q.baseHom := by rw [hI]
+      _ = θv ≫ (fell.baseHom ≫ cd.q.baseHom) := by rw [Category.assoc]
+      _ = θv ≫ (td.f ≫ f₀) := by rw [← hf₀]
+      _ = (θv ≫ td.f) ≫ f₀ := by rw [Category.assoc]
+      _ = sndv ≫ f₀ := by rw [hθf]
+  rw [hbij, hvf₀]
+  exact hf₀
+
+theorem coreData_baseHom_eq (P Q : ModuliProblem R) {G : Type u} [Group G] [Finite G]
+    (φ : G →* Aut Q) (htors : ∀ X : EllObj R, Nonempty (TorsorData φ X)) (hrig : P.Rigid)
+    (hPrr : P.RelativelyRepresentable) (cd : CoreData P Q φ) (Y : EllObj R)
+    (v v' : Y ⟶ cd.X₀) (h : P.map v.op cd.α₀ = P.map v'.op cd.α₀) :
+    v.baseHom = v'.baseHom := by
+  classical
+  obtain ⟨td⟩ := htors Y
+  haveI := td.surjective; haveI := td.etale; haveI := td.finite
+  haveI : Flat td.f := inferInstance
+  haveI : QuasiCompact td.f := inferInstance
+  haveI : Epi td.f := AlgebraicGeometry.Flat.epi_of_flat_of_surjective td.f
+  -- [B2 GAP — the ONLY remaining hole] `cd.q.baseHom` is a finite étale `G`-torsor.
+  -- KM p. 116 (via De-Ga III.2.6.1) needs `𝕸(𝒫,δ) → 𝕸(𝒫,δ)/G` finite étale surjective; the
+  -- concrete engine provides it (`etale_quotientπ` + `quotientπ_surjective`, from the derivable
+  -- freeness `simulSchemeAction_free_of_rigid`).  But the abstract `CoreData` exposes only
+  -- `hqtors` (the `torsorCompare` iso) — provably NOT enough for `Flat`/`Surjective` of
+  -- `cd.q.baseHom` (trivial-group ⇒ `hqtors ⇔ mono`, and mono+epi ⇏ flat/surjective in `Scheme`;
+  -- `hqlift` closes only the `G = 1` case).  FIX: mirror `TorsorData`'s `surjective`/`etale`/
+  -- `finite` fields on `CoreData` (populate in `exists_coreData`), then delete these two lines.
+  haveI := cd.hqsurj
+  haveI := cd.hqetale
+  haveI : Flat cd.q.baseHom := inferInstance
+  refine (cancel_epi td.f).mp ?_
+  rw [coreData_key P Q φ cd td v, coreData_key P Q φ cd td v', h]
+
 /-- [B3-bij uniqueness b — KM pp. 115–116] G-torsor-map-is-iso ([B2b]) + π-epi. -/
 theorem coreData_injective (P Q : ModuliProblem R) {G : Type u} [Group G] [Finite G]
     (φ : G →* Aut Q) (htors : ∀ X : EllObj R, Nonempty (TorsorData φ X)) (hrig : P.Rigid)
@@ -568,12 +729,7 @@ theorem coreData_injective (P Q : ModuliProblem R) {G : Type u} [Group G] [Finit
   classical
   -- Uniqueness reduces (rigidity) to equality of base maps:
   refine coreData_hom_eq_of_baseHom_eq cd hrig v v' ?_ h
-  -- REMAINING (gap #3 base-map equality): show `v.baseHom = v'.baseHom`. Over the δ-torsor `td`
-  -- of `Y`, the equal `P`-values (`h`) give equal `(α, β)`-classifiers `homEquiv.symm` into `XM`;
-  -- the `G`-equivariant torsor comparisons into `td.Z` are isos (`isIso_of_equivariant_of_torsor`
-  -- [B2b]), identifying both base maps with the same classifying map, so they agree after the
-  -- epi `td.f` (`isPullback_of_equivariant_of_torsor` [B2a] + `map_eqv` + `cancel_epi`).
-  sorry
+  exact coreData_baseHom_eq P Q φ htors hrig hPrr cd Y v v' h
 
 /-- **(T-B3 = KM SCHOLIE 4.7.0 ⇐, global-model form)** A rigid, relatively representable
 moduli problem `P` — whose representing `Q`-curve carries a compatible global Weierstrass
