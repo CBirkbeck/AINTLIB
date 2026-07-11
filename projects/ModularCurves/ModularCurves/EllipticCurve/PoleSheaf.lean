@@ -2085,6 +2085,57 @@ theorem overTrivializationOfRestrictIso_hom_eq_comp_scalar
       _ = d ≫ C.inv := by rw [Category.id_comp]
   exact (congrArg (fun k ↦ A ≫ k) hconj).symm
 
+/-- Converting an over-site trivialization to the open subscheme and back
+recovers the original trivialization. -/
+theorem overTrivializationOfRestrictTrivializationOfOverIso
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)) :
+    Scheme.Modules.overTrivializationOfRestrictIso M U
+        (restrictTrivializationOfOverIso M U e) = e := by
+  apply Iso.ext
+  let G := (Scheme.Modules.overEquiv U).functor
+  apply G.map_injective
+  simp only [Scheme.Modules.overTrivializationOfRestrictIso,
+    restrictTrivializationOfOverIso,
+    Functor.FullyFaithful.preimageIso_hom,
+    Functor.FullyFaithful.map_preimage, Iso.trans_hom,
+    Functor.mapIso_hom]
+  let F := Scheme.Modules.overFunctorEquiv U
+  let C := U.sheafOfModulesEquivOverUnit X.ringCatSheaf
+  change F.hom.app M ≫ F.inv.app M ≫ G.map e.hom ≫ C.hom ≫ C.inv =
+    G.map e.hom
+  rw [F.hom_inv_id_app_assoc]
+  calc
+    G.map e.hom ≫ C.hom ≫ C.inv =
+        G.map e.hom ≫ (C.hom ≫ C.inv) :=
+      (Category.assoc _ _ _).symm
+    _ = G.map e.hom ≫ 𝟙 _ :=
+      congrArg (fun k ↦ G.map e.hom ≫ k) C.hom_inv_id
+    _ = G.map e.hom := Category.comp_id _
+
+/-- Converting an open-subscheme trivialization to the over-site and back
+recovers the original trivialization. -/
+theorem restrictTrivializationOfOverTrivializationOfRestrictIso
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e : M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme) :
+    restrictTrivializationOfOverIso M U
+        (Scheme.Modules.overTrivializationOfRestrictIso M U e) = e := by
+  apply Iso.ext
+  unfold restrictTrivializationOfOverIso
+  simp only [Scheme.Modules.overTrivializationOfRestrictIso,
+    Iso.trans_hom, Functor.mapIso_hom,
+    Functor.FullyFaithful.preimageIso_hom,
+    Functor.FullyFaithful.map_preimage]
+  let F := Scheme.Modules.overFunctorEquiv U
+  let C := U.sheafOfModulesEquivOverUnit X.ringCatSheaf
+  change F.inv.app M ≫ F.hom.app M ≫ e.hom ≫ C.inv ≫ C.hom = e.hom
+  rw [F.inv_hom_id_app_assoc]
+  calc
+    e.hom ≫ C.inv ≫ C.hom = e.hom ≫ (C.inv ≫ C.hom) :=
+      (Category.assoc _ _ _).symm
+    _ = e.hom ≫ 𝟙 _ := congrArg (fun k ↦ e.hom ≫ k) C.inv_hom_id
+    _ = e.hom := Category.comp_id _
+
 /-- An equation expressing an ideal generator in an over-site trivialization
 restricts to the corresponding equation for the restricted generator. -/
 theorem restrictOverTrivialization_inv_comp_over
