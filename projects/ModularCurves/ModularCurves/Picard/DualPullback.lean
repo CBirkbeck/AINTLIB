@@ -22,6 +22,99 @@ local instance (X : Scheme.{u}) :
     change IsMulCommutative (X.presheaf.obj U)
     exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
 
+/-- Transport an ambient module restriction from the over-site presentation to the
+corresponding open subscheme. -/
+noncomputable def overRestrictModuleIso (M : X.Modules) {U V : X.Opens}
+    (i : V ⟶ U) :
+    (overEquiv V).functor.obj (M.over V) ≅
+      (restrictFunctor (X.homOfLE (leOfHom i))).obj
+        ((overEquiv U).functor.obj (M.over U)) :=
+  (overEquiv V).functor.mapIso
+      (((_root_.SheafOfModules.overFunctorMap X.ringCatSheaf i).app M).symm) ≪≫
+    (overMapCompOverEquiv i).app (M.over U)
+
+/-- Transport the restriction of the local structure module from an open subscheme
+back to its over-site presentation. -/
+noncomputable def overRestrictUnitIso {U V : X.Opens} (i : V ⟶ U) :
+    (restrictFunctor (X.homOfLE (leOfHom i))).obj
+        ((overEquiv U).functor.obj
+          (_root_.SheafOfModules.unit (X.ringCatSheaf.over U))) ≅
+      (overEquiv V).functor.obj
+        (_root_.SheafOfModules.unit (X.ringCatSheaf.over V)) :=
+  ((overMapCompOverEquiv i).app
+      (_root_.SheafOfModules.unit (X.ringCatSheaf.over U))).symm ≪≫
+    (overEquiv V).functor.mapIso
+      (_root_.SheafOfModules.overMapUnitIso i)
+
+/-- Restriction of a local functional, expressed after transporting both over-sites to
+their open subschemes. -/
+theorem overEquiv_map_dualRestrict (M : X.Modules) {U V : X.Opens}
+    (i : V ⟶ U)
+    (α : M.over U ⟶
+      _root_.SheafOfModules.unit (X.ringCatSheaf.over U)) :
+    (overEquiv V).functor.map
+        (ModularCurves.SheafOfModules.dualRestrict X.ringCatSheaf M i.op α) =
+      (overRestrictModuleIso M i).hom ≫
+        (restrictFunctor (X.homOfLE (leOfHom i))).map
+          ((overEquiv U).functor.map α) ≫
+        (overRestrictUnitIso i).hom := by
+  let E := overMapCompOverEquiv i
+  have hmid : E.hom.app (M.over U) ≫
+        (restrictFunctor (X.homOfLE (leOfHom i))).map
+          ((overEquiv U).functor.map α) ≫
+        E.inv.app (_root_.SheafOfModules.unit (X.ringCatSheaf.over U)) =
+      (overEquiv V).functor.map
+        ((_root_.SheafOfModules.overMap X.ringCatSheaf i).map α) := by
+    let F := _root_.SheafOfModules.overMap X.ringCatSheaf i ⋙
+      (overEquiv V).functor
+    let G := (overEquiv U).functor ⋙
+      restrictFunctor (X.homOfLE (leOfHom i))
+    let O := _root_.SheafOfModules.unit (X.ringCatSheaf.over U)
+    let p := F.map α
+    change E.hom.app (M.over U) ≫ G.map α ≫ E.inv.app O = p
+    have hnat : p ≫ E.hom.app O = E.hom.app (M.over U) ≫ G.map α :=
+      E.hom.naturality α
+    calc
+      E.hom.app (M.over U) ≫ G.map α ≫ E.inv.app O =
+          (E.hom.app (M.over U) ≫ G.map α) ≫ E.inv.app O :=
+        (Category.assoc _ _ _).symm
+      _ = (p ≫ E.hom.app O) ≫ E.inv.app O :=
+        congrArg (fun r ↦ r ≫ E.inv.app O) hnat.symm
+      _ = p ≫ (E.hom.app O ≫ E.inv.app O) :=
+        Category.assoc _ _ _
+      _ = p ≫ 𝟙 (F.obj O) :=
+        congrArg (fun r ↦ p ≫ r) (E.hom_inv_id_app O)
+      _ = p :=
+        Category.comp_id _
+  simp only [ModularCurves.SheafOfModules.dualRestrict,
+    overRestrictModuleIso, overRestrictUnitIso, Functor.map_comp,
+    Iso.trans_hom, Functor.mapIso_hom,
+    Category.assoc, Quiver.Hom.unop_op]
+  let a := (overEquiv V).functor.map
+    ((_root_.SheafOfModules.overFunctorMap X.ringCatSheaf i).inv.app M)
+  let b := (overEquiv V).functor.map
+    (_root_.SheafOfModules.overMapUnitIso i).hom
+  change a ≫ (overEquiv V).functor.map
+        ((_root_.SheafOfModules.overMap X.ringCatSheaf i).map α) ≫ b =
+    a ≫ (E.hom.app (M.over U) ≫
+      (restrictFunctor (X.homOfLE (leOfHom i))).map
+        ((overEquiv U).functor.map α) ≫
+      E.inv.app (_root_.SheafOfModules.unit (X.ringCatSheaf.over U))) ≫ b
+  calc
+    a ≫ (overEquiv V).functor.map
+          ((_root_.SheafOfModules.overMap X.ringCatSheaf i).map α) ≫ b =
+        a ≫ (E.hom.app (M.over U) ≫
+          (restrictFunctor (X.homOfLE (leOfHom i))).map
+            ((overEquiv U).functor.map α) ≫
+          E.inv.app
+            (_root_.SheafOfModules.unit (X.ringCatSheaf.over U))) ≫ b :=
+      (congrArg (fun q ↦ a ≫ q ≫ b) hmid).symm
+    _ = a ≫ E.hom.app (M.over U) ≫
+        (restrictFunctor (X.homOfLE (leOfHom i))).map
+          ((overEquiv U).functor.map α) ≫
+        E.inv.app (_root_.SheafOfModules.unit (X.ringCatSheaf.over U)) ≫ b := by
+      simp only [Category.assoc]
+
 theorem overEquiv_map_add (U : X.Opens)
     {A B : _root_.SheafOfModules (X.ringCatSheaf.over U)} (p q : A ⟶ B) :
     (overEquiv U).functor.map (p + q) =
