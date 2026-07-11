@@ -915,6 +915,17 @@ noncomputable abbrev cubeΓ :
 
 instance : IsIso P.cubeΓ := isIso_affineKunnethΓ _ _ rfl rfl
 
+/-- The corestricted multiplication as an `R'`-algebra map `A' →ₐ Γ(square)`. -/
+noncomputable def squareMulResAlg : P.groupRingTop →ₐ[P.baseRingTop] Γ(P.groupSquare, ⊤) where
+  toRingHom := P.squareMulRes.appTop.hom
+  commutes' := fun r => by
+    have h : P.groupToBaseRes.appTop ≫ P.squareMulRes.appTop
+        = P.squareToBase.appTop := by
+      rw [← Scheme.Hom.comp_appTop, P.squareMulRes_comp_groupToBaseRes]
+      rfl
+    have h2 := congrArg (fun m : P.baseRingTop ⟶ Γ(P.groupSquare, ⊤) => m.hom r) h
+    exact h2
+
 /-- The inner-multiplication `cube → square`: `(g₁,(g₂,g₃)) ↦ (g₁, g₂·g₃)`. -/
 noncomputable def cubeInnerMul : P.cube ⟶ P.groupSquare :=
   pullback.map P.groupToBaseRes P.squareToBase P.groupToBaseRes P.groupToBaseRes
@@ -933,6 +944,46 @@ theorem cubeInnerMul_snd :
     P.cubeInnerMul ≫ pullback.snd P.groupToBaseRes P.groupToBaseRes
       = pullback.snd P.groupToBaseRes P.squareToBase ≫ P.squareMulRes := by
   rw [cubeInnerMul, pullback.lift_snd]
+
+/-- **Künneth naturality (inner multiplication)**: transporting the inner-multiplication
+across the two Künneth identifications is `id ⊗ (Γ-dual of squareMulRes)`. -/
+theorem cubeInnerMul_appTop_cubeΓ :
+    P.cubeInnerMul.appTop ≫ P.cubeΓ
+      = P.squareΓTop ≫ CommRingCat.ofHom
+          (Algebra.TensorProduct.map (AlgHom.id P.baseRingTop P.groupRingTop)
+            P.squareMulResAlg).toRingHom := by
+  -- both sides out of Γ(groupSquare); precompose with the iso squareΓTop⁻¹
+  rw [← cancel_epi (inv P.squareΓTop), ← Category.assoc, ← Category.assoc,
+    IsIso.inv_hom_id, Category.id_comp]
+  have hLinv : CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := P.baseRingTop) (A := P.groupRingTop) (B := P.groupRingTop))
+      ≫ inv P.squareΓTop
+      = (pullback.fst P.groupToBaseRes P.groupToBaseRes).appTop := by
+    rw [IsIso.comp_inv_eq]
+    exact (fst_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl).symm
+  have hRinv : CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := P.baseRingTop) (A := P.groupRingTop) (B := P.groupRingTop)).toRingHom
+      ≫ inv P.squareΓTop
+      = (pullback.snd P.groupToBaseRes P.groupToBaseRes).appTop := by
+    rw [IsIso.comp_inv_eq]
+    exact (snd_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl).symm
+  refine tensor_hom_ext ?_ ?_
+  · rw [← Category.assoc, ← Category.assoc, hLinv, ← Scheme.Hom.comp_appTop,
+      P.cubeInnerMul_fst]
+    rw [show P.cubeΓ = affineKunnethΓ P.groupToBaseRes P.squareToBase rfl rfl from rfl,
+      fst_appTop_affineKunnethΓ]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show _ = Algebra.TensorProduct.map _ _ (a ⊗ₜ[P.baseRingTop] 1)
+    rw [Algebra.TensorProduct.map_tmul, map_one]
+    rfl
+  · rw [← Category.assoc, ← Category.assoc, hRinv, ← Scheme.Hom.comp_appTop,
+      P.cubeInnerMul_snd, Scheme.Hom.comp_appTop, Category.assoc]
+    rw [show P.cubeΓ = affineKunnethΓ P.groupToBaseRes P.squareToBase rfl rfl from rfl,
+      snd_appTop_affineKunnethΓ]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show _ = Algebra.TensorProduct.map _ _ (1 ⊗ₜ[P.baseRingTop] a)
+    rw [Algebra.TensorProduct.map_tmul, map_one]
+    rfl
 
 end AffineChartPatch
 
