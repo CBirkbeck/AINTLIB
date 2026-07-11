@@ -1192,14 +1192,15 @@ set_option backward.isDefEq.respectTransparency false in
 monoidal, then the sheaf-level pullback is monoidal for the localized monoidal structures:
 `functorMonoidalOfComp` along the sheafification localization, with the lifting supplied by
 mathlib's `sheafificationCompPullback`. -/
-theorem nonempty_sheafPullback_monoidal
+@[implicit_reducible]
+noncomputable def sheafPullbackMonoidal
     (hmono : (PresheafOfModules.pullback.{u} φ₀).Monoidal) :
     letI := PresheafOfModules.sheafOfModulesMonoidalCategory S hS
     letI := PresheafOfModules.sheafOfModulesMonoidalCategory R hR
-    Nonempty ((SheafOfModules.pullback.{u}
+    (SheafOfModules.pullback.{u}
       (⟨φ₀⟩ : (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}) ⟶
         (F.sheafPushforwardContinuous RingCat.{u} J K).obj
-          ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩)).Monoidal) := by
+          ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩)).Monoidal := by
   letI := PresheafOfModules.sheafOfModulesMonoidalCategory S hS
   letI := PresheafOfModules.sheafOfModulesMonoidalCategory R hR
   letI := hmono
@@ -1233,7 +1234,7 @@ theorem nonempty_sheafPullback_monoidal
       (⟨φ₀⟩ : (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}) ⟶
         (F.sheafPushforwardContinuous RingCat.{u} J K).obj
           ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩))⟩
-  exact ⟨(Localization.Monoidal.functorMonoidalOfComp
+  exact Localization.Monoidal.functorMonoidalOfComp
     (Localization.Monoidal.toMonoidalCategory
       (L := PresheafOfModules.sheafification.{u}
         (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj))
@@ -1252,11 +1253,18 @@ theorem nonempty_sheafPullback_monoidal
           (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
         (W := PresheafOfModules.sheafificationW.{u}
           (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
-        (Iso.refl _)) :
-    (SheafOfModules.pullback.{u}
+        (Iso.refl _))
+
+/-- The sheaf-level pullback monoidal structure exists. -/
+theorem nonempty_sheafPullback_monoidal
+    (hmono : (PresheafOfModules.pullback.{u} φ₀).Monoidal) :
+    letI := PresheafOfModules.sheafOfModulesMonoidalCategory S hS
+    letI := PresheafOfModules.sheafOfModulesMonoidalCategory R hR
+    Nonempty ((SheafOfModules.pullback.{u}
       (⟨φ₀⟩ : (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}) ⟶
         (F.sheafPushforwardContinuous RingCat.{u} J K).obj
-          ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩)).Monoidal)⟩
+          ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩)).Monoidal) :=
+  ⟨sheafPullbackMonoidal S hS R hR φ₀ hmono⟩
 
 end SheafDescent
 
@@ -1274,18 +1282,26 @@ free-yoneda generators by two single-variable presentation passes in the abelian
 `SheafOfModules`), packaged through `functorMonoidalOfComp` with the `Lifting` instance
 `sheafificationCompPullback`. Consumer: `Skeleton.monoidHom` then gives
 `Pic(f) : Pic X →* Pic Y` — the GME (2.16) Picard functor. -/
-theorem nonempty_pullback_monoidal (f : Y ⟶ X) :
+@[implicit_reducible]
+noncomputable def pullbackMonoidal (f : Y ⟶ X) :
     letI := Modules.monoidalCategory X
     letI := Modules.monoidalCategory Y
-    Nonempty ((Modules.pullback f).Monoidal) := by
+    (Modules.pullback f).Monoidal := by
   letI := Modules.monoidalCategory X
   letI := Modules.monoidalCategory Y
-  exact (_root_.PresheafOfModules.nonempty_sheafPullback_monoidal
+  exact _root_.PresheafOfModules.sheafPullbackMonoidal
     (F := TopologicalSpace.Opens.map f.base)
     X.sheaf.obj X.ringCatSheaf.property Y.sheaf.obj Y.ringCatSheaf.property
     (_root_.PresheafOfModules.schemeRingPresheafHom f)
-    (_root_.PresheafOfModules.pullbackMonoidal f) :
-    Nonempty ((Modules.pullback f).Monoidal))
+    (_root_.PresheafOfModules.pullbackMonoidal f)
+
+/-- Pullback of sheaves of modules admits the canonical monoidal structure constructed
+through presheaf pullback and sheafification. -/
+theorem nonempty_pullback_monoidal (f : Y ⟶ X) :
+    letI := Modules.monoidalCategory X
+    letI := Modules.monoidalCategory Y
+    Nonempty ((Modules.pullback f).Monoidal) :=
+  ⟨pullbackMonoidal f⟩
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
