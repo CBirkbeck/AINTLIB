@@ -308,6 +308,55 @@ theorem kernel_val_unique_of_chartFactor (A : WeierstrassAtlasData E.toEllipticC
 
 end PieceTransport
 
+section Overlap
+
+variable {A' : CommRingCat.{u}} (a b : ↑A')
+
+/-- The overlap ring of two basic localizations — a registered `def` (v10.129 registry:
+inline tensor-of-localizations churns instance paths). -/
+private def OverlapRing : Type u :=
+  Localization.Away a ⊗[↑A'] Localization.Away b
+
+private noncomputable instance : CommRing (OverlapRing a b) :=
+  inferInstanceAs (CommRing (Localization.Away a ⊗[↑A'] Localization.Away b))
+
+private noncomputable instance : Algebra ↑A' (OverlapRing a b) :=
+  inferInstanceAs (Algebra ↑A' (Localization.Away a ⊗[↑A'] Localization.Away b))
+
+/-- The left inclusion of the overlap. -/
+private noncomputable def overlapInL : Localization.Away a →+* OverlapRing a b :=
+  Algebra.TensorProduct.includeLeftRingHom
+
+/-- The right inclusion of the overlap. -/
+private noncomputable def overlapInR : Localization.Away b →+* OverlapRing a b :=
+  (Algebra.TensorProduct.includeRight (R := ↑A') (A := Localization.Away a)
+    (B := Localization.Away b)).toRingHom
+
+private theorem overlapInL_alg :
+    (overlapInL a b).comp (algebraMap ↑A' (Localization.Away a)) =
+      algebraMap ↑A' (OverlapRing a b) :=
+  RingHom.ext fun _ => rfl
+
+private theorem overlapInR_alg :
+    (overlapInR a b).comp (algebraMap ↑A' (Localization.Away b)) =
+      algebraMap ↑A' (OverlapRing a b) :=
+  RingHom.ext fun x => (Algebra.TensorProduct.algebraMap_apply' x).symm
+
+/-- The pullback-of-Spec identification, restated at the overlap spelling. -/
+private theorem overlap_inv_fst :
+    (pullbackSpecIso ↑A' (Localization.Away a) (Localization.Away b)).inv ≫
+      pullback.fst _ _ = Spec.map (CommRingCat.ofHom (overlapInL a b)) := by
+  have h := pullbackSpecIso_inv_fst ↑A' (Localization.Away a) (Localization.Away b)
+  exact h
+
+private theorem overlap_inv_snd :
+    (pullbackSpecIso ↑A' (Localization.Away a) (Localization.Away b)).inv ≫
+      pullback.snd _ _ = Spec.map (CommRingCat.ofHom (overlapInR a b)) := by
+  have h := pullbackSpecIso_inv_snd ↑A' (Localization.Away a) (Localization.Away b)
+  exact h
+
+end Overlap
+
 section Glue
 
 variable {S : Scheme.{u}} (E : EllipticCurve S)
@@ -491,63 +540,153 @@ theorem kernelNDivisible_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :
         (δp p).1 =
       pullback.snd _ _ ≫ (δp q).1 := by
     intro p q
-    -- work through the affine identification of the overlap
     rw [← cancel_epi (pullbackSpecIso ↑A' (Localization.Away (aa p))
       (Localization.Away (aa q))).inv]
-    rw [← Category.assoc, ← Category.assoc, pullbackSpecIso_inv_fst,
-      pullbackSpecIso_inv_snd]
-    -- the two tensor inclusions
-    set inL := CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
-      (R := ↑A') (A := Localization.Away (aa p)) (B := Localization.Away (aa q)))
-      with hinL
-    set inR := CommRingCat.ofHom (Algebra.TensorProduct.includeRight
-      (R := ↑A') (A := Localization.Away (aa p))
-      (B := Localization.Away (aa q))).toRingHom with hinR
-    -- the algebra triangles
-    have htriL : Spec.map inL ≫ Spec.map (CommRingCat.ofHom
-        (algebraMap ↑A' (Localization.Away (aa p)))) =
-        Spec.map (CommRingCat.ofHom (algebraMap ↑A'
-          (Localization.Away (aa p) ⊗[↑A'] Localization.Away (aa q)))) := by
+    rw [← Category.assoc, ← Category.assoc, overlap_inv_fst, overlap_inv_snd]
+    -- the algebra triangles at the overlap spelling
+    have htriL : Spec.map (CommRingCat.ofHom (overlapInL (aa p) (aa q))) ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑A' (Localization.Away (aa p)))) =
+        Spec.map (CommRingCat.ofHom (algebraMap ↑A' (OverlapRing (aa p) (aa q)))) := by
       rw [← Spec.map_comp]
-      refine congrArg Spec.map (CommRingCat.hom_ext (RingHom.ext fun a => ?_))
-      rfl
-    have htriR : Spec.map inR ≫ Spec.map (CommRingCat.ofHom
-        (algebraMap ↑A' (Localization.Away (aa q)))) =
-        Spec.map (CommRingCat.ofHom (algebraMap ↑A'
-          (Localization.Away (aa p) ⊗[↑A'] Localization.Away (aa q)))) := by
+      refine congrArg Spec.map ?_
+      refine CommRingCat.hom_ext ?_
+      exact overlapInL_alg (aa p) (aa q)
+    have htriR : Spec.map (CommRingCat.ofHom (overlapInR (aa p) (aa q))) ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑A' (Localization.Away (aa q)))) =
+        Spec.map (CommRingCat.ofHom (algebraMap ↑A' (OverlapRing (aa p) (aa q)))) := by
       rw [← Spec.map_comp]
-      refine congrArg Spec.map (CommRingCat.hom_ext (RingHom.ext fun a => ?_))
-      show (1 : Localization.Away (aa p)) ⊗ₜ[↑A']
-        (algebraMap ↑A' (Localization.Away (aa q)) a) =
-        algebraMap ↑A' (Localization.Away (aa p) ⊗[↑A'] Localization.Away (aa q)) a
-      exact (Algebra.TensorProduct.algebraMap_apply' a).symm
+      refine congrArg Spec.map ?_
+      refine CommRingCat.hom_ext ?_
+      exact overlapInR_alg (aa p) (aa q)
     -- the overlap chart factorisation (through the p-chart)
     have hrangeT : Set.range ((Spec.map (CommRingCat.ofHom (algebraMap ↑A'
-        (Localization.Away (aa p) ⊗[↑A'] Localization.Away (aa q)))) ≫ b')).base ⊆
+        (OverlapRing (aa p) (aa q)))) ≫ b')).base ⊆
         Set.range (A.U (ii p)).1.ι.base := by
       rintro _ ⟨x, rfl⟩
       rw [Scheme.Opens.range_ι, Scheme.Hom.comp_apply]
       refine hsubA p _ ?_
-      -- the image prime avoids `aa p` since its image is a unit in the tensor
-      have hunit : IsUnit (algebraMap ↑A'
-          (Localization.Away (aa p) ⊗[↑A'] Localization.Away (aa q)) (aa p)) := by
+      have hunit : IsUnit (algebraMap ↑A' (OverlapRing (aa p) (aa q)) (aa p)) := by
         have h1 : IsUnit (algebraMap ↑A' (Localization.Away (aa p)) (aa p)) :=
           IsLocalization.Away.algebraMap_isUnit (aa p)
-        have h2 := h1.map (Algebra.TensorProduct.includeLeftRingHom
-          (R := ↑A') (A := Localization.Away (aa p)) (B := Localization.Away (aa q)))
-        exact h2
+        have h2 := h1.map (overlapInL (aa p) (aa q))
+        rwa [show (overlapInL (aa p) (aa q)) (algebraMap ↑A'
+          (Localization.Away (aa p)) (aa p)) =
+          algebraMap ↑A' (OverlapRing (aa p) (aa q)) (aa p) from
+          congrArg (fun (m : ↑A' →+* OverlapRing (aa p) (aa q)) => m (aa p))
+            (overlapInL_alg (aa p) (aa q))] at h2
       intro hy
       exact x.isPrime.ne_top (Ideal.eq_top_of_isUnit_mem _ hy hunit)
-    set tT : Spec (CommRingCat.of (Localization.Away (aa p) ⊗[↑A']
-        Localization.Away (aa q))) ⟶ Spec Γ(S, (A.U (ii p)).1) :=
+    set tT : Spec (CommRingCat.of (OverlapRing (aa p) (aa q))) ⟶
+        Spec Γ(S, (A.U (ii p)).1) :=
       IsOpenImmersion.lift (A.U (ii p)).1.ι _ hrangeT ≫ (A.U (ii p)).2.isoSpec.hom
       with htT_def
     have htT : tT ≫ chartToBase A (ii p) =
-        Spec.map (CommRingCat.ofHom (algebraMap ↑A'
-          (Localization.Away (aa p) ⊗[↑A'] Localization.Away (aa q)))) ≫ b' := by
+        Spec.map (CommRingCat.ofHom (algebraMap ↑A' (OverlapRing (aa p) (aa q)))) ≫ b' := by
       rw [htT_def, chartToBase, Category.assoc, Iso.hom_inv_id_assoc]
       exact IsOpenImmersion.lift_fac _ _ hrangeT
-    sorry
+    -- square-zero data over the overlap
+    have hφT2 : RingHom.ker (CommRingCat.ofHom (Ideal.Quotient.mk (I.map (algebraMap ↑A'
+        (OverlapRing (aa p) (aa q)))))).hom ^ 2 = ⊥ := by
+      show RingHom.ker (Ideal.Quotient.mk _) ^ 2 = ⊥
+      rw [Ideal.mk_ker, ← Ideal.map_pow, hI, Ideal.map_bot]
+    have hNT : IsUnit ((N : ℕ) : OverlapRing (aa p) (aa q)) := by
+      have h2 := hNA'.map (algebraMap ↑A' (OverlapRing (aa p) (aa q)))
+      rwa [map_natCast] at h2
+    -- the kernel squares
+    have hmapL : I.map (algebraMap ↑A' (OverlapRing (aa p) (aa q))) =
+        (I.map (algebraMap ↑A' (Localization.Away (aa p)))).map
+          (overlapInL (aa p) (aa q)) := by
+      rw [Ideal.map_map, overlapInL_alg]
+    have hleL : I.map (algebraMap ↑A' (Localization.Away (aa p))) ≤
+        (I.map (algebraMap ↑A' (OverlapRing (aa p) (aa q)))).comap
+          (overlapInL (aa p) (aa q)) := by
+      rw [hmapL]
+      exact Ideal.le_comap_map
+    have hsqL : Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk (I.map (algebraMap ↑A'
+        (OverlapRing (aa p) (aa q)))))) ≫
+        Spec.map (CommRingCat.ofHom (overlapInL (aa p) (aa q))) =
+        Spec.map (CommRingCat.ofHom (Ideal.quotientMap _ (overlapInL (aa p) (aa q))
+          hleL)) ≫
+        Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk (I.map (algebraMap ↑A'
+          (Localization.Away (aa p)))))) := by
+      rw [← Spec.map_comp, ← Spec.map_comp]
+      refine congrArg Spec.map (CommRingCat.hom_ext ?_)
+      exact (Ideal.quotientMap_comp_mk hleL).symm
+    have hmapR : I.map (algebraMap ↑A' (OverlapRing (aa p) (aa q))) =
+        (I.map (algebraMap ↑A' (Localization.Away (aa q)))).map
+          (overlapInR (aa p) (aa q)) := by
+      rw [Ideal.map_map, overlapInR_alg]
+    have hleR : I.map (algebraMap ↑A' (Localization.Away (aa q))) ≤
+        (I.map (algebraMap ↑A' (OverlapRing (aa p) (aa q)))).comap
+          (overlapInR (aa p) (aa q)) := by
+      rw [hmapR]
+      exact Ideal.le_comap_map
+    have hsqR : Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk (I.map (algebraMap ↑A'
+        (OverlapRing (aa p) (aa q)))))) ≫
+        Spec.map (CommRingCat.ofHom (overlapInR (aa p) (aa q))) =
+        Spec.map (CommRingCat.ofHom (Ideal.quotientMap _ (overlapInR (aa p) (aa q))
+          hleR)) ≫
+        Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk (I.map (algebraMap ↑A'
+          (Localization.Away (aa q)))))) := by
+      rw [← Spec.map_comp, ← Spec.map_comp]
+      refine congrArg Spec.map (CommRingCat.hom_ext ?_)
+      exact (Ideal.quotientMap_comp_mk hleR).symm
+    -- the composed base facts
+    have hbaseL : Spec.map (CommRingCat.ofHom (overlapInL (aa p) (aa q))) ≫
+        (tB p ≫ chartToBase A (ii p)) = tT ≫ chartToBase A (ii p) := by
+      rw [htB p, htT, ← Category.assoc, htriL]
+    have hbaseR : Spec.map (CommRingCat.ofHom (overlapInR (aa p) (aa q))) ≫
+        (tB q ≫ chartToBase A (ii q)) = tT ≫ chartToBase A (ii p) := by
+      rw [htB q, htT, ← Category.assoc, htriR]
+    -- apply the value uniqueness at the overlap
+    refine kernel_val_unique_of_chartFactor E A (ii p) Ideal.Quotient.mk_surjective hφT2
+      tT N hNT _ _ ?_ ?_ ?_ ?_ ?_
+    · refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg (Spec.map (CommRingCat.ofHom (overlapInL (aa p) (aa q))) ≫ ·)
+        (hvπ p)).trans ?_
+      exact hbaseL
+    · refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg (Spec.map (CommRingCat.ofHom (overlapInR (aa p) (aa q))) ≫ ·)
+        (hvπ q)).trans ?_
+      exact hbaseR
+    · refine ((Category.assoc _ _ _).symm).trans ?_
+      refine (congrArg (· ≫ (δp p).1) hsqL).trans ?_
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg (Spec.map (CommRingCat.ofHom (Ideal.quotientMap _
+        (overlapInL (aa p) (aa q)) hleL)) ≫ ·) (hvK p)).trans ?_
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      refine (congrArg (· ≫ E.zero) ((Category.assoc _ _ _).symm)).trans ?_
+      refine (congrArg (fun m => (m ≫ (tB p ≫ chartToBase A (ii p))) ≫ E.zero)
+        hsqL.symm).trans ?_
+      refine (congrArg (· ≫ E.zero) (Category.assoc _ _ _)).trans ?_
+      refine (congrArg (fun m => (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk
+        (I.map (algebraMap ↑A' (OverlapRing (aa p) (aa q)))))) ≫ m) ≫ E.zero)
+        hbaseL).trans ?_
+      rfl
+    · refine ((Category.assoc _ _ _).symm).trans ?_
+      refine (congrArg (· ≫ (δp q).1) hsqR).trans ?_
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg (Spec.map (CommRingCat.ofHom (Ideal.quotientMap _
+        (overlapInR (aa p) (aa q)) hleR)) ≫ ·) (hvK q)).trans ?_
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      refine (congrArg (· ≫ E.zero) ((Category.assoc _ _ _).symm)).trans ?_
+      refine (congrArg (fun m => (m ≫ (tB q ≫ chartToBase A (ii q))) ≫ E.zero)
+        hsqR.symm).trans ?_
+      refine (congrArg (· ≫ E.zero) (Category.assoc _ _ _)).trans ?_
+      refine (congrArg (fun m => (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk
+        (I.map (algebraMap ↑A' (OverlapRing (aa p) (aa q)))))) ≫ m) ≫ E.zero)
+        hbaseR).trans ?_
+      rfl
+    · refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg (Spec.map (CommRingCat.ofHom (overlapInL (aa p) (aa q))) ≫ ·)
+        (hvN p)).trans ?_
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      refine (congrArg (· ≫ ε.1) htriL).trans ?_
+      refine (congrArg (· ≫ ε.1) htriR.symm).trans ?_
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg (Spec.map (CommRingCat.ofHom (overlapInR (aa p) (aa q))) ≫ ·)
+        (hvN q).symm).trans ?_
+      exact (Category.assoc _ _ _).symm
   sorry
 
 end Glue
