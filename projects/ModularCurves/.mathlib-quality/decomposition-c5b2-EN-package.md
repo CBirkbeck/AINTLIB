@@ -85,3 +85,25 @@ Feasible and small **conditional on the scope confirmation above**. The package 
 built; C5B-2's incremental value is the scheme-level GL₂ action (reading (1)) + closing the seam
 for NEW-GH. Re-planning the built E[N]/cyclic/H-orbit layer would violate reuse-not-duplicate and
 collide with GH-2. Recommend: confirm reading (1), then `/develop --continue` to ticket L1–L4.
+
+## Scope CONFIRMED (owner, 2026-07-11): reading (1) — build glSchemeSmul
+
+## Refined design after adversarial provability check (L2/L3)
+
+`FullLevelPt = {(P,Q) : E.Section² // IsNaiveFullLevel N}`; `IsNaiveFullLevel` (LevelStructure/
+Basic.lean:45) = `(N•P=0 ∧ N•Q=0)` ∧ fibrewise-generation (every geom-fibre N-torsion pt is an
+ℤ-combo of P,Q) — the **N-invertible** setting (E[N] finite étale ≅ (ℤ/N)², KM 2.3.1). So:
+
+- **L2 feasible for N invertible**: a naive full level (P,Q) trivializes E[N] fibrewise; via the
+  finite-étale structure this yields the scheme iso `(ℤ/N)²_S ≅ E[N]`. Discharge substrate:
+  `torsionSubgroup` + `torsion_rank`/`natCard_sections_eq_finrank` (TorsionFibre) + BB étale box.
+- **L3 core is genuinely NEW infra**: `glSchemeSmul g L : E.torsion N ≅ E.torsion N` (Scheme iso,
+  ideally in `Over S`) — the automorphism sending section `aP+bQ ↦ a·(gL).P + b·(gL).Q`. Building a
+  Scheme morphism from its action on the generating sections needs the finite-étale universal
+  property. `_one`/`_mul` transport from `glSmul_one`/`glSmul_mul` (landed); base-change compat from
+  `pullAlong`. This is the real green-field content of C5B-2.
+- **L1** (torsionSubgroup base-change / T-SG1b) only if L3's functoriality needs it — check at build.
+- **L4** seam: `glSchemeSmul`-vs-`hOrbitSetoid` compatibility (NEW-GH consumes; they own the quotient).
+
+NEXT: `/develop --continue` to ticket L1–L4, then `/beastmode`. L3's finite-étale scheme-morphism
+construction is the sizing driver (the rest is transport from landed `glSmul`/substrate).
