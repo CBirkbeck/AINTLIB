@@ -2163,7 +2163,129 @@ theorem modelGrpObj_unique (G : GrpObj (modelOver W))
       exact hRdS.trans honeSt_left.symm
     exact @eq_one_of_axis_collapse _ _ _ _
       (modelGrpObj (stageW W S₂)) (modelGrpObj (stageW W S₂)) _ _ hO _ qS hLq hRq
-  sorry
+  -- unpack: the packaged difference is the constant zero composite
+  have hdS1 : dS = (Limits.pullback.fst (projModelπ (stageW W S₂))
+      (projModelπ (stageW W S₂)) ≫ projModelπ (stageW W S₂)) ≫
+      projModelZero (stageW W S₂) := by
+    have h := congrArg CommaMorphism.left hq1
+    refine h.trans ?_
+    show (modelOver (stageW W S₂) ⊗ modelOver (stageW W S₂)).hom ≫
+      (oneOver (stageW W S₂)).left = _
+    rw [oneOver_left]
+    show (Limits.pullback.fst _ _ ≫ projModelπ (stageW W S₂)) ≫
+      (𝟙 _ ≫ projModelZero (stageW W S₂)) = _
+    rw [Category.id_comp]
+    rfl
+  -- hence the descended difference is the constant zero composite
+  have hg''zero : g'' = (sqT W).app S₂ ≫ projModelZero (wZero W) := by
+    have hfstlaw : dS ≫ projModelBaseChangeOf
+        (Subalgebra.inclusion (wStage_le_stage W S₂)).toRingHom
+        (wZero W) (stageW W S₂) rfl = (stageSqIso W S₂).hom ≫ g'' :=
+      (stageModelPB W S₂).lift_fst _ _ _
+    have hconst : (stageSqIso W S₂).hom ≫ g'' =
+        ((Limits.pullback.fst (projModelπ (stageW W S₂)) (projModelπ (stageW W S₂)) ≫
+          projModelπ (stageW W S₂)) ≫
+          Spec.map (CommRingCat.ofHom
+            (Subalgebra.inclusion (wStage_le_stage W S₂)).toRingHom)) ≫
+          projModelZero (wZero W) := by
+      refine hfstlaw.symm.trans ?_
+      refine (congrArg (· ≫ projModelBaseChangeOf
+        (Subalgebra.inclusion (wStage_le_stage W S₂)).toRingHom
+        (wZero W) (stageW W S₂) rfl) hdS1).trans ?_
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg ((Limits.pullback.fst (projModelπ (stageW W S₂))
+        (projModelπ (stageW W S₂)) ≫ projModelπ (stageW W S₂)) ≫ ·)
+        (projModelZero_baseChangeOf
+          (Subalgebra.inclusion (wStage_le_stage W S₂)).toRingHom
+          (wZero W) (stageW W S₂) rfl)).trans ?_
+      exact (Category.assoc _ _ _).symm
+    have hg''form : g'' = (stageSqIso W S₂).inv ≫
+        ((Limits.pullback.fst (projModelπ (stageW W S₂)) (projModelπ (stageW W S₂)) ≫
+          projModelπ (stageW W S₂)) ≫
+          Spec.map (CommRingCat.ofHom
+            (Subalgebra.inclusion (wStage_le_stage W S₂)).toRingHom)) ≫
+          projModelZero (wZero W) := by
+      have h := congrArg ((stageSqIso W S₂).inv ≫ ·) hconst
+      rw [Iso.inv_hom_id_assoc] at h
+      exact h
+    refine hg''form.trans ?_
+    refine (congrArg ((stageSqIso W S₂).inv ≫ ·)
+      (congrArg (· ≫ projModelZero (wZero W)) (stageSqPB W S₂).w.symm)).trans ?_
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    refine (congrArg (· ≫ projModelZero (wZero W))
+      ((Category.assoc _ _ _).symm)).trans ?_
+    refine (congrArg (· ≫ projModelZero (wZero W))
+      (congrArg (· ≫ (Limits.pullback.fst (projModelπ (wZero W))
+        (projModelπ (wZero W)) ≫ projModelπ (wZero W)))
+        (stageSqPB W S₂).flip.isoPullback_inv_snd)).trans ?_
+    rfl
+  -- transport back to `R`: the difference against the comparison collapses
+  have hwS₂ : (bcCone W (sqStruct W)).π.app S₂ ≫
+      ((Over.pullback (sqStruct W)).obj
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj S₂)).hom =
+      Limits.pullback.snd ((slicedCone W).pt).hom (sqStruct W) :=
+    Over.w ((Over.pullback (sqStruct W)).map ((slicedCone W).π.app S₂))
+  have hFconst : (sqComparison W).inv ≫ F.left ≫
+      projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) =
+      (Limits.pullback.snd ((slicedCone W).pt).hom (sqStruct W) ≫ sqStruct W) ≫
+        projModelZero (wZero W) := by
+    have hLHS₂ : (bcCone W (sqStruct W)).π.app S₂ ≫ (sqT W).app S₂ =
+        Limits.pullback.snd ((slicedCone W).pt).hom (sqStruct W) ≫ sqStruct W := by
+      show (bcCone W (sqStruct W)).π.app S₂ ≫ (_ ≫ sqStruct W) = _
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      exact congrArg (· ≫ sqStruct W) hwS₂
+    refine hg'cone.symm.trans ?_
+    refine (congrArg (· ≫ g') ((bcCone W (sqStruct W)).w σ).symm).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg ((bcCone W (sqStruct W)).π.app S₂ ≫ ·) hg''zero).trans ?_
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    exact congrArg (· ≫ projModelZero (wZero W)) hLHS₂
+  -- resolve `F.left` against the constant through the base-change square
+  have hFpBC : F.left ≫ projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W
+      (wZero_map W) =
+      ((Limits.pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W) ≫
+        projModelZero W) ≫
+        projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) := by
+    have h := congrArg ((sqComparison W).hom ≫ ·) hFconst
+    rw [Iso.hom_inv_id_assoc] at h
+    refine h.trans ?_
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    refine (congrArg (· ≫ projModelZero (wZero W))
+      ((Category.assoc _ _ _).symm)).trans ?_
+    refine (congrArg (· ≫ projModelZero (wZero W)) (congrArg (· ≫ sqStruct W)
+      (sqIsPullback (wStage W).1.val.toRingHom (wZero W) W
+        (wZero_map W)).flip.isoPullback_hom_snd)).trans ?_
+    refine (congrArg (· ≫ projModelZero (wZero W))
+      (sqIsPullback (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)).w).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg ((Limits.pullback.fst (projModelπ W) (projModelπ W) ≫
+      projModelπ W) ≫ ·)
+      (projModelZero_baseChangeOf (wStage W).1.val.toRingHom (wZero W) W
+        (wZero_map W)).symm).trans ?_
+    exact (Category.assoc _ _ _).symm
+  have hFπ' : F.left ≫ projModelπ W =
+      ((Limits.pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W) ≫
+        projModelZero W) ≫ projModelπ W := by
+    refine hFπ.trans ?_
+    refine Eq.symm ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg ((Limits.pullback.fst (projModelπ W) (projModelπ W) ≫
+      projModelπ W) ≫ ·) (projModelZero_projModelπ W)).trans ?_
+    exact Category.comp_id _
+  have hF1left : F.left = (Limits.pullback.fst (projModelπ W) (projModelπ W) ≫
+      projModelπ W) ≫ projModelZero W :=
+    (wPB (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)).hom_ext hFpBC hFπ'
+  have hone_left : (toUnit (modelOver W ⊗ modelOver W) ≫ oneOver W).left =
+      (Limits.pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W) ≫
+        projModelZero W := by
+    show (modelOver W ⊗ modelOver W).hom ≫ (oneOver W).left = _
+    rw [oneOver_left]
+    show (Limits.pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W) ≫
+      (𝟙 _ ≫ projModelZero W) = _
+    rw [Category.id_comp]
+  refine Over.OverMorphism.ext ?_
+  show F.left = (toUnit (modelOver W ⊗ modelOver W) ≫ oneOver W).left
+  exact hF1left.trans hone_left.symm
 
 end Unique
 
