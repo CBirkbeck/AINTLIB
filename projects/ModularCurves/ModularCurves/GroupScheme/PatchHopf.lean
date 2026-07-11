@@ -792,6 +792,40 @@ noncomputable def comulAlgTop :
     simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h
     exact h
 
+/-! #### The `⊤`-level counit laws, `AlgHom` form -/
+
+/-- The algebraic left counit lift `A' ⊗[R'] A' →ₐ[R'] A'`, `a ⊗ b ↦ ε'(a) • b`. -/
+noncomputable def counitLiftAlgTop :
+    (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) →ₐ[P.baseRingTop] P.groupRingTop :=
+  Algebra.TensorProduct.lift
+    ((Algebra.ofId P.baseRingTop P.groupRingTop).comp P.counitAlgTop)
+    (AlgHom.id P.baseRingTop P.groupRingTop) (fun _ _ => Commute.all _ _)
+
+theorem counitLiftAlgTop_eq :
+    CommRingCat.ofHom P.counitLiftAlgTop.toRingHom = P.counitLiftTop := by
+  refine tensor_hom_ext ?_ ?_
+  · rw [P.includeLeft_comp_counitLiftTop]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show counitLiftAlgTop G P (a ⊗ₜ[P.baseRingTop] (1 : P.groupRingTop)) = _
+    rw [counitLiftAlgTop, Algebra.TensorProduct.lift_tmul, map_one, _root_.mul_one]
+    rfl
+  · rw [P.includeRight_comp_counitLiftTop]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show counitLiftAlgTop G P ((1 : P.groupRingTop) ⊗ₜ[P.baseRingTop] a) = _
+    rw [counitLiftAlgTop, Algebra.TensorProduct.lift_tmul, map_one, _root_.one_mul]
+    rfl
+
+/-- **The left counit law, `⊤`-level, `AlgHom` form**: `(ε' ⊗ id) ∘ Δ' = id`. -/
+theorem counitLiftAlgTop_comp_comulAlgTop :
+    P.counitLiftAlgTop.comp P.comulAlgTop = AlgHom.id P.baseRingTop P.groupRingTop := by
+  have h := P.comulTop_comp_counitLiftTop
+  rw [← P.counitLiftAlgTop_eq] at h
+  refine AlgHom.ext fun a => ?_
+  have h2 := congrArg (fun m : P.groupRingTop ⟶ P.groupRingTop => m.hom a) h
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom,
+    CommRingCat.hom_id, RingHom.id_apply] at h2
+  exact h2
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
