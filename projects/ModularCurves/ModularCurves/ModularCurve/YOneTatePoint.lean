@@ -610,7 +610,27 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
      and `f₀` classify equal data ⟹ equal by `yOne`'s open-immersion mono + `Y_N`-closed
      mono + `tateRing_homEquiv`-injectivity. `f ≫ yOneStructMap = Spec.map φ` by the
      `t'`-construction over `φ`. -/
-  sorry
+  classical
+  haveI : Mono (yOneBase R N) := by
+    haveI : IsClosedImmersion ((tateUniversal R).killedLocusπ (tatePoint R) N) :=
+      (tateUniversal R).killedLocusπ_isClosedImmersion (tatePoint R) N
+    exact mono_comp _ _
+  set t₀ := f₀ ≫ yOneBase R N with ht₀
+  have hstruct₀ := (factors_yOne_iff R N hN hinv t₀).mp ⟨f₀, rfl⟩
+  -- THE LIFT-CORE (ledger steps 2–4): lift the classifying map with its structure, over `φ`
+  obtain ⟨t, hrest, hover, hstruct⟩ :
+      ∃ t : Spec (CommRingCat.of A) ⟶ tateBase R,
+        Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ t = t₀ ∧
+        t ≫ tateStructMap R = Spec.map φ ∧
+        ((tateUniversal R).baseChange t).IsNaiveGammaOne N
+          (EllipticCurve.Point.asSection (tateUniversal R) t
+            (EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R))) := by
+    sorry
+  obtain ⟨f, hf⟩ := (factors_yOne_iff R N hN hinv t).mpr hstruct
+  refine ⟨f, ?_, ?_⟩
+  · rw [← cancel_mono (yOneBase R N), Category.assoc, hf, hrest]
+  · rw [show yOneStructMap R N = yOneBase R N ≫ tateStructMap R from rfl, ← Category.assoc,
+      hf, hover]
 
 /-- **(Y1-E6 = Loeffler Thm 3.4.4, smoothness half of T-E7)** `Y₁(N) ⟶ Spec R` is smooth.
 Loeffler (verbatim, p. 15): *"`Y₁(N)_{ℤ[1/N]}` is smooth over `ℤ[1/N]`."* Assembly: `Y₁(N)`
