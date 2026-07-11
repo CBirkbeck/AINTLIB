@@ -17919,3 +17919,30 @@ pin (definitional) added + threaded.
 Quot.sound]` — both designed trails ([T-A6b], [T-B6′]) RETIRED. Consumers all green
 (YOneAssembly, YOneAtlasClassify, GammaH — which also gained the MulByHomUnramified import
 as a rank_two-relocation consumer the truncated grep missed; full `-l`-grep this time).
+
+## Amendments v10.123-Y1 (2026-07-11, Y1-CLOSER): S5 E1–E4 PROVEN; S4 split-plan + the honest MASTER-bar map
+
+**E-track (S5)**: ★ E1 `killedLocus_preimage_isOpen` PROVEN (torsion classifier + zero-section
+open-immersion via `pullback_lift_diagonal_isPullback` + `isOpenImmersion_diagonal` +
+pullback-snd-iso decomposition + `Pullback.range_fst` set-chase). ★ E2 `yOne_isAffine` PROVEN
+(clopen via E1, idempotent basic open via `exists_idempotent_basicOpen_eq_of_isClopen`,
+`toΓSpec_preimage_basicOpen_eq` transport). ★ E3 `yOneStructMap_isAffineHom` PROVEN. E4 was
+already in. REMAINING E-leaves: E5 (infinitesimal lifting — the Loeffler 3.4.4 body), E6
+(smooth assembly), F1 (representing-object transport).
+
+**S4 finding (falls-sweep consumption)**: A's `pullSection_add_of_finitePresentation` is the
+designed fill for Representability's THREE parked sorries (:207 pullSection_add + the two
+functor-law memberships), per A's in-file wiring note — BUT (i) the import is CYCLIC
+(PullSectionCanonicity → PullSectionAdd → Representability), so the fill requires the
+v10.117 SPLIT: relocate the problem-functors + held theorems from Representability down to a
+new `Moduli/NaiveProblems.lean` importing PSC (consumers: 9 files' imports); and (ii) the
+FP-route primitive `isMonHom_of_one_comp_eq'_of_finitePresentation` is ITSELF sorried
+(RigiditySpreadingOut:94 — route (a) T-W7.8, unlanded; route (c) = c5β's T-W7a, unlanded),
+so the consumption COLLAPSES the three sorries to that ONE designed primitive rather than
+clearing them.
+
+**HONEST MASTER-BAR MAP** (`gammaOneNaive_representable` axiom trail after all in-flight
+work): {E5, E6, F1} (this charter, in progress) + {T-E4 primitive: route (a) or (c)} +
+{hfib 6f/6g tail (wall-ledgered)} + {BB-QF, BB-FLAT, BB-DEG} (T-B5 family, other lane).
+`exists_tatePoint` is DONE-clean (v10.122-Y1). The coordinator should sequence route-(a)/(c)
+and the T-B5 boxes; everything else is Y1-CLOSER's continuing execution.
