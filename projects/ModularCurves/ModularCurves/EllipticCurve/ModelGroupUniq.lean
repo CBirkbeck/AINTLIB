@@ -225,4 +225,106 @@ noncomputable def bcIsLimit : IsLimit (bcCone W g) := by
 
 end Sliced
 
+/-! ## The square base-change pullback -/
+
+section Square
+
+variable {R} (W : WeierstrassCurve R) [W.IsElliptic]
+
+/-- Shorthand: the base-change pullback square of the model along the first-stage
+inclusion. -/
+noncomputable def wPB : IsPullback
+    (projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W))
+    (projModelπ W) (projModelπ (wZero W))
+    (Spec.map (CommRingCat.ofHom (wStage W).1.val.toRingHom)) :=
+  isPullback_projModelBaseChangeOf _ (wZero W) W (wZero_map W)
+
+/-- The base-change square of fibre squares: the square-level comparison morphism is a
+pullback over the stage inclusion. -/
+theorem hfst : pullbackMapBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W
+    (wZero_map W) ≫ Limits.pullback.fst (projModelπ (wZero W)) (projModelπ (wZero W)) =
+    Limits.pullback.fst (projModelπ W) (projModelπ W) ≫
+      projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) :=
+  Limits.pullback.lift_fst _ _ _
+
+theorem hsnd : pullbackMapBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W
+    (wZero_map W) ≫ Limits.pullback.snd (projModelπ (wZero W)) (projModelπ (wZero W)) =
+    Limits.pullback.snd (projModelπ W) (projModelπ W) ≫
+      projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) :=
+  Limits.pullback.lift_snd _ _ _
+
+noncomputable def sqIsPullback : IsPullback
+    (pullbackMapBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W))
+    (pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W)
+    (pullback.fst (projModelπ (wZero W)) (projModelπ (wZero W)) ≫ projModelπ (wZero W))
+    (Spec.map (CommRingCat.ofHom (wStage W).1.val.toRingHom)) := by
+  refine IsPullback.of_isLimit (PullbackCone.IsLimit.mk ?_ ?_ ?_ ?_ ?_)
+  · -- commutativity of the comparison square
+    calc pullbackMapBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) ≫
+          Limits.pullback.fst (projModelπ (wZero W)) (projModelπ (wZero W)) ≫
+            projModelπ (wZero W)
+        = (pullbackMapBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) ≫
+            Limits.pullback.fst (projModelπ (wZero W)) (projModelπ (wZero W))) ≫
+            projModelπ (wZero W) := (Category.assoc _ _ _).symm
+      _ = (Limits.pullback.fst (projModelπ W) (projModelπ W) ≫
+            projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)) ≫
+            projModelπ (wZero W) := by rw [hfst W]
+      _ = Limits.pullback.fst (projModelπ W) (projModelπ W) ≫
+            (projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) ≫
+              projModelπ (wZero W)) := Category.assoc _ _ _
+      _ = Limits.pullback.fst (projModelπ W) (projModelπ W) ≫
+            (projModelπ W ≫ Spec.map (CommRingCat.ofHom (wStage W).1.val.toRingHom)) := by
+          rw [(wPB W).w]
+      _ = (Limits.pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W) ≫
+            Spec.map (CommRingCat.ofHom (wStage W).1.val.toRingHom) :=
+          (Category.assoc _ _ _).symm
+  · -- the lift
+    intro s
+    exact Limits.pullback.lift
+      ((wPB W).lift (s.fst ≫ Limits.pullback.fst _ _) s.snd (by
+        rw [Category.assoc]; exact s.condition))
+      ((wPB W).lift (s.fst ≫ Limits.pullback.snd _ _) s.snd (by
+        rw [Category.assoc, ← Limits.pullback.condition]
+        exact s.condition))
+      (by rw [(wPB W).lift_snd, (wPB W).lift_snd])
+  · -- fst-compat
+    intro s
+    change _ ≫ pullbackMapBaseChangeOf _ _ _ (wZero_map W) = _
+    refine Limits.pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, hfst W, ← Category.assoc, Limits.pullback.lift_fst,
+        (wPB W).lift_fst]
+    · rw [Category.assoc, hsnd W, ← Category.assoc, Limits.pullback.lift_snd,
+        (wPB W).lift_fst]
+  · -- snd-compat
+    intro s
+    exact (Category.assoc _ _ _).symm.trans <|
+      (congrArg (· ≫ projModelπ W) (Limits.pullback.lift_fst _ _ _)).trans
+        ((wPB W).lift_snd _ _ _)
+  · -- uniqueness
+    intro s m h1 h2
+    have h1' : m ≫ pullbackMapBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W
+        (wZero_map W) = s.fst := h1
+    refine Limits.pullback.hom_ext (f := projModelπ W) (g := projModelπ W) ?_ ?_
+    · rw [Limits.pullback.lift_fst]
+      refine (wPB W).hom_ext ?_ ?_
+      · exact (Category.assoc _ _ _).trans <|
+          (congrArg (m ≫ ·) (hfst W).symm).trans <|
+          (Category.assoc _ _ _).symm.trans <|
+          (congrArg (· ≫ Limits.pullback.fst (projModelπ (wZero W)) (projModelπ (wZero W)))
+            h1').trans ((wPB W).lift_fst _ _ _).symm
+      · exact (Category.assoc _ _ _).trans <| h2.trans ((wPB W).lift_snd _ _ _).symm
+    · rw [Limits.pullback.lift_snd]
+      refine (wPB W).hom_ext ?_ ?_
+      · exact (Category.assoc _ _ _).trans <|
+          (congrArg (m ≫ ·) (hsnd W).symm).trans <|
+          (Category.assoc _ _ _).symm.trans <|
+          (congrArg (· ≫ Limits.pullback.snd (projModelπ (wZero W)) (projModelπ (wZero W)))
+            h1').trans ((wPB W).lift_fst _ _ _).symm
+      · exact (Category.assoc _ _ _).trans <|
+          (congrArg (m ≫ ·) (Limits.pullback.condition (f := projModelπ W)
+            (g := projModelπ W)).symm).trans <|
+          (Category.assoc _ _ _).symm.trans <| h2.trans ((wPB W).lift_snd _ _ _).symm
+
+end Square
+
 end ModularCurves
