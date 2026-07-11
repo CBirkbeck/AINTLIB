@@ -1107,7 +1107,61 @@ theorem modelGrpObj_unique (G : GrpObj (modelOver W))
   -- the cone composites agree (the R-collapse transported)
   have hcone_uv : (bcCone W (projModelπ (wZero W))).π.app T ≫ u =
       (bcCone W (projModelπ (wZero W))).π.app T ≫ v := by
-    sorry
+    -- the model-side η evaluated
+    have hη : (modelOver W).hom ≫
+        (η[modelOver W] : 𝟙_ (Over (Spec (CommRingCat.of R))) ⟶ modelOver W).left =
+        projModelπ W ≫ projModelZero W := by
+      show (modelOver W).hom ≫ (oneOver W).left = _
+      rw [oneOver_left]
+      show projModelπ W ≫ 𝟙 _ ≫ projModelZero W = _
+      rw [Category.id_comp]
+    -- the cone-leg structure facts
+    have hw : (bcCone W (projModelπ (wZero W))).π.app T ≫
+        ((Over.pullback (projModelπ (wZero W))).obj
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T)).hom =
+        Limits.pullback.snd ((slicedCone W).pt).hom (projModelπ (wZero W)) :=
+      Over.w ((Over.pullback (projModelπ (wZero W))).map ((slicedCone W).π.app T))
+    have hinvfst : (modelComparison W).inv ≫ projModelπ W =
+        Limits.pullback.fst ((slicedCone W).pt).hom (projModelπ (wZero W)) :=
+      (wPB (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)).flip.isoPullback_inv_fst
+    -- LHS chain (refine-trans style: no calc endpoint unification)
+    have hstep : (bcCone W (projModelπ (wZero W))).π.app T ≫ u =
+        (Limits.pullback.snd ((slicedCone W).pt).hom (projModelπ (wZero W)) ≫
+          projModelπ (wZero W)) ≫ projModelZero (wZero W) := by
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      refine (congrArg (· ≫ g') (axBC_cone W T)).trans ?_
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg (axApex W ≫ ·) hg'cone).trans ?_
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      refine (congrArg (· ≫ (F.left ≫ projModelBaseChangeOf (wStage W).1.val.toRingHom
+        (wZero W) W (wZero_map W))) hshuffle).trans ?_
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg ((modelComparison W).inv ≫ ·)
+        ((Category.assoc _ _ _).symm)).trans ?_
+      refine (congrArg (fun m => (modelComparison W).inv ≫ m ≫
+        projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W))
+        hcolL).trans ?_
+      refine (congrArg (fun m => (modelComparison W).inv ≫ m ≫
+        projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W))
+        hη).trans ?_
+      refine (congrArg ((modelComparison W).inv ≫ ·) (Category.assoc _ _ _)).trans ?_
+      refine (congrArg (fun m => (modelComparison W).inv ≫ projModelπ W ≫ m)
+        (projModelZero_baseChangeOf (wStage W).1.val.toRingHom (wZero W) W
+          (wZero_map W))).trans ?_
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      refine (congrArg (· ≫ (Spec.map (CommRingCat.ofHom (wStage W).1.val.toRingHom) ≫
+        projModelZero (wZero W))) hinvfst).trans ?_
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      exact congrArg (· ≫ projModelZero (wZero W)) Limits.pullback.condition
+    have hstepv : (bcCone W (projModelπ (wZero W))).π.app T ≫ v =
+        (Limits.pullback.snd ((slicedCone W).pt).hom (projModelπ (wZero W)) ≫
+          projModelπ (wZero W)) ≫ projModelZero (wZero W) := by
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      refine (congrArg (· ≫ projModelZero (wZero W))
+        ((Category.assoc _ _ _).symm)).trans ?_
+      exact congrArg (· ≫ projModelZero (wZero W))
+        (congrArg (· ≫ projModelπ (wZero W)) hw)
+    exact hstep.trans hstepv.symm
   sorry
 
 end Unique
