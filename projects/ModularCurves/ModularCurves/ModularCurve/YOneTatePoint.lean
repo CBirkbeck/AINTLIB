@@ -847,6 +847,56 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
         ⟨P₀A, (Submodule.mem_torsionBy_iff _ _).mpr hP₀Akill⟩ with hs₀T
       obtain ⟨sT, hsTπ, hsTrest⟩ := exists_section_lift_of_smooth (FA.torsionπ N) I hI
         s₀T.1 s₀T.2
+      -- the lifted N-torsion point of the pulled universal curve over `A`
+      set PTfa := (FA.torsionPointsEquiv N (𝟙 (Spec (CommRingCat.of A)))) ⟨sT, hsTπ⟩
+        with hPTfa
+      set PTbc := (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t
+        (𝟙 (Spec (CommRingCat.of A)))) PTfa.1 with hPTbc
+      have hPTbckill : (N : ℤ) • PTbc = 0 := by
+        rw [hPTbc, ← map_zsmul, (Submodule.mem_torsionBy_iff _ _).mp PTfa.2, map_zero]
+      have hPTbcval : (PTbc : Spec (CommRingCat.of A) ⟶ (tateUniversal R).E) =
+          (sT ≫ FA.torsionι N) ≫ Limits.pullback.fst (tateUniversal R).π t := rfl
+      set PT : (tateUniversal R).Point t := ⟨(PTbc : _ ⟶ (tateUniversal R).E), by
+        rw [PTbc.2, Category.id_comp]⟩ with hPT
+      have hPTval : (PT : Spec (CommRingCat.of A) ⟶ (tateUniversal R).E) =
+          (PTbc : Spec (CommRingCat.of A) ⟶ (tateUniversal R).E) := rfl
+      have hPTkill : (N : ℤ) • PT = 0 := by
+        apply Subtype.ext
+        have h2 := congrArg Subtype.val hPTbckill
+        rw [(tateUniversal R).point_smul_eq_comp_mulBy,
+          (tateUniversal R).point_zero_val] at h2
+        rw [show (𝟙 (Spec (CommRingCat.of A)) ≫ t) ≫ (tateUniversal R).zero
+            = t ≫ (tateUniversal R).zero by rw [Category.id_comp]] at h2
+        rw [(tateUniversal R).point_smul_eq_comp_mulBy,
+          (tateUniversal R).point_zero_val, hPTval]
+        exact h2
+      -- restriction of `PT` along the thickening is the killed `t₀`-pull point
+      have hPTrest : Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ (PT :
+            Spec (CommRingCat.of A) ⟶ (tateUniversal R).E) =
+          ((EllipticCurve.Point.pull (tateUniversal R) t₀ (tatePoint R)) :
+            Spec (CommRingCat.of (↑A ⧸ I)) ⟶ (tateUniversal R).E) := by
+        have hsval : (s₀T.1 ≫ FA.torsionι N) ≫ Limits.pullback.fst (tateUniversal R).π t
+            = ((EllipticCurve.Point.pull (tateUniversal R) t₀ (tatePoint R)) :
+              Spec (CommRingCat.of (↑A ⧸ I)) ⟶ (tateUniversal R).E) := by
+          have h3 : s₀T.1 ≫ FA.torsionι N =
+              ((P₀A : FA.Point (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)))) :
+                Spec (CommRingCat.of (↑A ⧸ I)) ⟶ FA.E) := by
+            have h4 := (FA.torsionPointsEquiv N
+              (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)))).apply_symm_apply
+              ⟨P₀A, (Submodule.mem_torsionBy_iff _ _).mpr hP₀Akill⟩
+            have h5 := congrArg (fun z =>
+              ((z.1 : FA.Point (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)))) :
+                Spec (CommRingCat.of (↑A ⧸ I)) ⟶ FA.E)) h4
+            rw [hs₀T]
+            exact h5
+          rw [h3, hP₀A]
+          exact congrArg Subtype.val
+            ((EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t
+              (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)))).apply_symm_apply _)
+        rw [hPTval, hPTbcval, ← Category.assoc, ← Category.assoc, hsTrest,
+          Category.assoc]
+        rw [Category.assoc] at hsval
+        exact hsval
       sorry
     -- assembly: witness with the renormalised map
     refine ⟨tateBaseSpecMap R ψ', ?_, ?_, ?_⟩
