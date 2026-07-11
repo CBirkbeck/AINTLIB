@@ -1,1 +1,1 @@
-PARKED (beastmode-A): negModelHom_baseChange LANDED green + axiom-clean (EllipticCurve/NegModelBaseChange.lean, v10.128). c5beta invOver blocker cleared - import directly. Re-armed on T-W7a / c5beta handshake.
+CHARTER-A-CMP (v10.141): scoping pass DONE + leaf plan boarded (survey-charter-a-cmp.md). Leaves: [CMP-a5] locallyWeierstrass_quotientpi (foundational, FP4 seam) > [CMP-YFGEOM] (NEW-Y1 seam) > [CMP-Mell] eso-upgrade > [CMP-DEBT] PoleSheaf 9 raises. NEXT: build [CMP-a5] bridge in ComparisonConsumers.lean. Closer-backup on T-W7a outranks.

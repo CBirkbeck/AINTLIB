@@ -16232,3 +16232,22 @@ lane's, now dormant. The sorry-carriers are fleet-unowned ⟹ claimed by rule-5.
   lemmas (noetherian CA, Ext-vanishing) first, then the local criterion, then BE acyclicity, then
   the reductions; (c) wire `exists_noetherian_descent_flat` → KL-3 via the banked bridge; then
   (2) [02KM-CORE]. Grinding per /beastmode; honest frontier reports as the tree closes.
+
+## v10.141 — beastmode-A CHARTER-A-CMP scoping pass + leaf plan (`.mathlib-quality/survey-charter-a-cmp.md`)
+
+Verify-before-work applied. Merged characterization (`fibrewiseElliptic ⟺ locallyWeierstrass ⟺
+isElliptic` for `projModel W`, Comparison.lean:243/300/414/427; consumes my `pointedIso_exists_variableChange`).
+Genuine open leaves (partly pre-wired consumers filtered out):
+- **[CMP-a5]** `locallyWeierstrass_quotientπ` (EngineDescent.lean:633, **SORRY**) — the sole open leaf in
+  FP4's route-(a) engine (`isProper_/smoothOfRel_of_locallyWeierstrass` already proven, smooth wired to
+  T-A3). Bridge: Zariski-local Weierstrass-eq for the quotient `E/G` + the characterization chart-wise
+  (the docstring's "unresolved general comparison"). FOUNDATIONAL; **seam: fable-P4** (build bridge in my
+  new `ComparisonConsumers.lean`, they consume — no shared edit).
+- **[CMP-YFGEOM]** `exists_representing_smooth_affine` (YFullRoute.lean, SORRY) — depends on [CMP-a5];
+  **seam: NEW-Y1** (CHARTER-YFULL).
+- **[CMP-Mell]** M_ell^W eso-**upgrade** — `presentationFunctor_essSurj` already proven for PresentedCurve;
+  the abstract-curve eso is the broader target (locate at execution; not a fresh sorry). **seam: PIC0.**
+- **[CMP-DEBT]** PoleSheaf 9 heartbeat raises (5×800k + 4×1200k) via /buzz-decompose, one at a time, no
+  statement changes — cooldown/interleave.
+Order: [CMP-a5] → [CMP-YFGEOM] → [CMP-Mell] → [CMP-DEBT]. **T-W7a closer-backup interrupt outranks all.**
+Next: start [CMP-a5] — locate FP4's recorded compat-hypotheses, build the bridge in ComparisonConsumers.lean.
