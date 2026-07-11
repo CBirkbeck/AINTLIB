@@ -2016,6 +2016,101 @@ theorem dualTrivializationLinearEquiv_eq_mul_of_transition
   rw [hgen, (alpha.val.app (.op T)).hom.map_smul]
   rfl
 
+/-- Restriction of over-site trivializations preserves a scalar transition. -/
+theorem restrictOverTrivialization_hom_eq_comp_scalar
+    {X : Scheme.{u}} (M : X.Modules) {U V : X.Opens} (hVU : V ≤ U)
+    (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (s : Γ(X, U))
+    (h : g.hom = e.hom ≫
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s) :
+    let j : Over U := Over.mk (homOfLE hVU)
+    (SheafOfModules.restrictOverTrivialization
+        X.ringCatSheaf M U g j).hom =
+      (SheafOfModules.restrictOverTrivialization
+          X.ringCatSheaf M U e j).hom ≫
+        SheafOfModules.overUnitScalarEnd X.ringCatSheaf V
+          (X.presheaf.map (homOfLE hVU).op s) := by
+  dsimp only
+  let j : Over U := Over.mk (homOfLE hVU)
+  apply SheafOfModules.hom_ext
+  ext Z x
+  change g.hom.val.app (.op ((Over.map j.hom).obj Z.unop)) x = _
+  have happ := congrArg (fun q ↦ q.val.app
+    (.op ((Over.map j.hom).obj Z.unop))) h
+  have hx := ConcreteCategory.congr_hom happ x
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply] at hx
+  rw [SheafOfModules.overUnitScalarEnd_app_apply] at hx
+  erw [SheafOfModules.overUnitScalarEnd_app_apply]
+  have hmap : X.presheaf.map Z.unop.hom.op
+      (X.presheaf.map (homOfLE hVU).op s) =
+    X.presheaf.map ((Over.map j.hom).obj Z.unop).hom.op s := by
+    have hc := congrArg (fun φ ↦ CommRingCat.Hom.hom φ s)
+      ((X.presheaf.map_comp (homOfLE hVU).op Z.unop.hom.op).symm)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hc
+    refine hc.trans ?_
+    exact congrArg (fun ψ ↦ (CommRingCat.Hom.hom (X.presheaf.map ψ)) s)
+      (Subsingleton.elim _ _)
+  have he :
+      (SheafOfModules.restrictOverTrivialization
+        X.ringCatSheaf M U e (Over.mk (homOfLE hVU))).hom.val.app Z x =
+      e.hom.val.app (.op ((Over.map j.hom).obj Z.unop)) x := by
+    rfl
+  convert hx using 1
+  all_goals first | exact congrArg₂ (fun a b ↦ a * b) he hmap | rfl
+
+/-- Dualization reverses a scalar transition between trivializations. -/
+theorem dualOverIsoOfIso_hom_eq_comp_scalar
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (s : Γ(X, U))
+    (h : g.hom = e.hom ≫
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s) :
+    (SheafOfModules.dualOverIsoOfIso X.ringCatSheaf M U e).hom =
+      (SheafOfModules.dualOverIsoOfIso X.ringCatSheaf M U g).hom ≫
+        SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s := by
+  apply SheafOfModules.hom_ext
+  ext V alpha
+  let eV := SheafOfModules.restrictOverTrivialization
+    X.ringCatSheaf M U e V.unop
+  let gV := SheafOfModules.restrictOverTrivialization
+    X.ringCatSheaf M U g V.unop
+  let sV : X.ringCatSheaf.obj.obj (.op V.unop.left) :=
+    X.presheaf.map V.unop.hom.op s
+  have hV : gV.hom = eV.hom ≫
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf V.unop.left sV := by
+    have hV' := restrictOverTrivialization_hom_eq_comp_scalar
+      M (leOfHom V.unop.hom) e g s h
+    convert hV' using 1
+    all_goals rfl
+  have hcoord := dualTrivializationLinearEquiv_eq_mul_of_transition
+    M V.unop.left eV gV sV hV alpha
+  change SheafOfModules.dualTrivializationLinearEquiv
+      X.ringCatSheaf M V.unop.left eV alpha = _
+  change SheafOfModules.dualTrivializationLinearEquiv
+      X.ringCatSheaf M V.unop.left eV alpha =
+    (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s).val.app V
+      ((SheafOfModules.dualOverIsoOfIso
+        X.ringCatSheaf M U g).hom.val.app V alpha)
+  rw [SheafOfModules.overUnitScalarEnd_app_apply]
+  have hg : (SheafOfModules.dualOverIsoOfIso
+      X.ringCatSheaf M U g).hom.val.app V alpha =
+    SheafOfModules.dualTrivializationLinearEquiv
+      X.ringCatSheaf M V.unop.left gV alpha := by
+    rfl
+  rw [hg]
+  change SheafOfModules.dualTrivializationLinearEquiv
+      X.ringCatSheaf M V.unop.left eV alpha =
+    SheafOfModules.dualTrivializationLinearEquiv
+      X.ringCatSheaf M V.unop.left gV alpha * sV
+  change SheafOfModules.dualTrivializationLinearEquiv
+      X.ringCatSheaf M V.unop.left eV alpha =
+    sV * SheafOfModules.dualTrivializationLinearEquiv
+      X.ringCatSheaf M V.unop.left gV alpha at hcoord
+  exact hcoord.trans (mul_comm' sV
+    (SheafOfModules.dualTrivializationLinearEquiv
+      X.ringCatSheaf M V.unop.left gV alpha))
+
 /-- The over-site trivialization induced by a principal generator identifies the
 inclusion of the ideal module with multiplication by that generator. -/
 theorem localIdealGeneratorOverTrivialization_inv_comp
