@@ -904,21 +904,10 @@ theorem invOver_left : (invOver W).left = negModelHom W :=
 
 /-! ## Lane P1 (with P3): variable-change equivariance -/
 
-/-- **(T-W7.0h)** Global variable-change equivariance of the multiplication morphism:
-the model isomorphism of a variable change intertwines the two glued multiplications —
-including the diagonal, anti-diagonal and infinity loci (reviewer round 1 caveat: the affine
-cocycle alone is not enough). Proof route: field-points extensionality over the universal
-VC-base `R ⊗ ℤ[u^±, r, s, t]` (a domain) + the affine cocycle (`pointEquiv` machinery,
-project, DONE) at points. Source: audit item 8; `ForMathlib/AffinePointVariableChange`. -/
-theorem mulModelHom_vc (C : VariableChange R) (W : WeierstrassCurve R)
-    [W.IsElliptic] [(C • W).IsElliptic] :
-    mulModelHom (C • W) ≫ (projModelVCIso C W).hom =
-      pullback.map (projModelπ (C • W)) (projModelπ (C • W))
-          (projModelπ W) (projModelπ W)
-          (projModelVCIso C W).hom (projModelVCIso C W).hom (𝟙 (Spec (CommRingCat.of R)))
-          (by rw [Category.comp_id]; exact (projModelVCIso_π C W).symm)
-          (by rw [Category.comp_id]; exact (projModelVCIso_π C W).symm) ≫
-        mulModelHom W := by
-  sorry
+/- **(T-W7.0h)** `mulModelHom_vc` — global variable-change equivariance of the
+multiplication morphism — is PROVEN in `EllipticCurve/ModelVCEquivariance.lean` (which
+must sit above `ModelRecord.lean`/`Rigidity.lean`: the proof is GIT Cor 6.4 at the T-G4
+group objects over the noetherian universal VC-base, transported along the classifying
+map). Statement relocated verbatim per the v10.117 doctrine. -/
 
 end ModularCurves

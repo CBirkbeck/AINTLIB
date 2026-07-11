@@ -121,8 +121,12 @@ The pair (Weierstrass curve, variable change) with invertible discriminant is cl
 a map from a fixed noetherian ring: the polynomial ring over `ℤ` on the five coefficients
 and the four variable-change parameters, localized at `Δ · u`. -/
 
-/-- The nine-variable polynomial base over `ℤ`: `a₁ a₂ a₃ a₄ a₆ u r s t`. -/
-abbrev vcUnivPoly : Type := MvPolynomial (Fin 9) ℤ
+/-- The nine-variable polynomial base over `ℤ` (universe-lifted so the model machinery,
+which is `Type u`-uniform, applies): `a₁ a₂ a₃ a₄ a₆ u r s t`. -/
+abbrev vcUnivPoly : Type u := MvPolynomial (Fin 9) (ULift.{u} ℤ)
+
+instance : IsNoetherianRing (ULift.{u} ℤ) :=
+  isNoetherianRing_of_ringEquiv ℤ ULift.ringEquiv.symm
 
 /-- The generic Weierstrass curve over the nine-variable base. -/
 noncomputable def vcUnivW : WeierstrassCurve vcUnivPoly :=
@@ -132,8 +136,19 @@ noncomputable def vcUnivW : WeierstrassCurve vcUnivPoly :=
 noncomputable def vcUnivElt : vcUnivPoly := vcUnivW.Δ * MvPolynomial.X 5
 
 /-- The universal VC-base: the nine-variable ring with `Δ · u` inverted — a localization of
-a finite-variable polynomial ring over `ℤ`, hence noetherian. -/
-abbrev vcUnivRing : Type := Localization.Away vcUnivElt
+a finite-variable polynomial ring over `ℤ`, hence noetherian. A `def` (not an `abbrev`), with
+its instances registered once below: instance searches must stop at the atom, never unfold
+into the localization (the localization-instance whnf wall). -/
+def vcUnivRing : Type u := Localization.Away vcUnivElt
+
+noncomputable instance : CommRing vcUnivRing :=
+  inferInstanceAs (CommRing (Localization.Away vcUnivElt))
+
+noncomputable instance : Algebra vcUnivPoly vcUnivRing :=
+  inferInstanceAs (Algebra vcUnivPoly (Localization.Away vcUnivElt))
+
+instance : IsLocalization.Away vcUnivElt vcUnivRing :=
+  inferInstanceAs (IsLocalization.Away vcUnivElt (Localization.Away vcUnivElt))
 
 /-- The generic Weierstrass curve over the universal VC-base. -/
 noncomputable def vcUnivW₀ : WeierstrassCurve vcUnivRing :=
@@ -170,7 +185,7 @@ instance : (vcUnivC • vcUnivW₀).IsElliptic := by
   exact (IsUnit.pow 12 (vcUnivC.u⁻¹).isUnit).mul vcUniv_isUnit_Δ
 
 instance : IsNoetherianRing vcUnivRing :=
-  IsLocalization.isNoetherianRing (Submonoid.powers vcUnivElt) _ inferInstance
+  IsLocalization.isNoetherianRing (Submonoid.powers vcUnivElt) vcUnivRing inferInstance
 
 /-! ## The classifying map -/
 
@@ -180,8 +195,8 @@ variable (C : VariableChange R) (W : WeierstrassCurve R)
 
 /-- The evaluation of the nine-variable polynomial base at a concrete pair `(W, C)`. -/
 noncomputable def vcClassifyPoly : vcUnivPoly →+* R :=
-  (MvPolynomial.aeval
-    ![W.a₁, W.a₂, W.a₃, W.a₄, W.a₆, ↑C.u, C.r, C.s, C.t]).toRingHom
+  MvPolynomial.eval₂Hom ((Int.castRingHom R).comp ULift.ringEquiv.toRingHom)
+    ![W.a₁, W.a₂, W.a₃, W.a₄, W.a₆, ↑C.u, C.r, C.s, C.t]
 
 /-- The evaluation classifies the Weierstrass curve. -/
 theorem vcClassifyPoly_W : vcUnivW.map (vcClassifyPoly C W) = W := by
@@ -234,3 +249,219 @@ theorem vcClassify_C : vcUnivC.map (vcClassify C W) = C := by
     simp [vcClassifyPoly]
 
 end Classify
+
+/-! ## The transport to every base -/
+
+/-- `mulModelHom` transported along an equality of curves. -/
+private theorem mulModelHom_congr {X Y : WeierstrassCurve R} (h : X = Y)
+    [X.IsElliptic] [Y.IsElliptic] :
+    mulModelHom X ≫ eqToHom (congrArg projModel h) =
+      pullback.map (projModelπ X) (projModelπ X) (projModelπ Y) (projModelπ Y)
+        (eqToHom (congrArg projModel h)) (eqToHom (congrArg projModel h))
+        (𝟙 (Spec (CommRingCat.of R)))
+        (by cases h; simp) (by cases h; simp) ≫ mulModelHom Y := by
+  cases h
+  have hid : pullback.map (projModelπ X) (projModelπ X) (projModelπ X) (projModelπ X)
+      (eqToHom (congrArg projModel rfl)) (eqToHom (congrArg projModel rfl))
+      (𝟙 (Spec (CommRingCat.of R)))
+      (by simp) (by simp) = 𝟙 _ := by
+    refine Limits.pullback.hom_ext ?_ ?_ <;> simp
+  rw [hid, eqToHom_refl, Category.comp_id, Category.id_comp]
+
+private theorem vcUniv_basechange_isPullback (φ : vcUnivRing →+* R) :
+    IsPullback (projModelBaseChangeOf φ vcUnivW₀ (vcUnivW₀.map φ) rfl)
+      (projModelπ (vcUnivW₀.map φ)) (projModelπ vcUnivW₀)
+      (Spec.map (CommRingCat.ofHom φ)) :=
+  isPullback_projModelBaseChangeOf φ vcUnivW₀ (vcUnivW₀.map φ) rfl
+
+/-- π-compatibility of the `eqToHom` of an equality of curves. -/
+private theorem projModelπ_eqToHom_w {X Y : WeierstrassCurve R} (h : X = Y) :
+    projModelπ X ≫ 𝟙 (Spec (CommRingCat.of R)) =
+      eqToHom (congrArg projModel h) ≫ projModelπ Y := by
+  cases h; simp
+
+/-- **(T-W7.0h)** Global variable-change equivariance of the multiplication morphism:
+the model isomorphism of a variable change intertwines the two glued multiplications —
+including the diagonal, anti-diagonal and infinity loci (reviewer round 1 caveat: the affine
+cocycle alone is not enough). PROVEN (Y1-CLOSER K1, superseding the designed field-points
+route): the noetherian case is GIT Cor 6.4 at the T-G4 group objects
+(`mulModelHom_vc_of_noetherian`), transported to every base along the classifying map from
+the noetherian universal VC-base (`hom_ext` on the base-change pullback square; statement
+relocated verbatim from `GroupLawConstruction.lean` per the v10.117 doctrine). -/
+theorem mulModelHom_vc (C : VariableChange R) (W : WeierstrassCurve R)
+    [W.IsElliptic] [(C • W).IsElliptic] :
+    mulModelHom (C • W) ≫ (projModelVCIso C W).hom =
+      pullback.map (projModelπ (C • W)) (projModelπ (C • W))
+          (projModelπ W) (projModelπ W)
+          (projModelVCIso C W).hom (projModelVCIso C W).hom (𝟙 (Spec (CommRingCat.of R)))
+          (by rw [Category.comp_id]; exact (projModelVCIso_π C W).symm)
+          (by rw [Category.comp_id]; exact (projModelVCIso_π C W).symm) ≫
+        mulModelHom W := by
+  obtain ⟨φ, hW, hC⟩ : ∃ φ : vcUnivRing →+* R,
+      vcUnivW₀.map φ = W ∧ vcUnivC.map φ = C :=
+    ⟨vcClassify C W, vcClassify_W C W, vcClassify_C C W⟩
+  subst hW
+  subst hC
+  letI : Algebra vcUnivRing R := φ.toAlgebra
+  have e : (vcUnivC.map φ) • (vcUnivW₀.map φ) = (vcUnivC • vcUnivW₀).map φ :=
+    map_variableChange ..
+  haveI : ((vcUnivC • vcUnivW₀).map φ).IsElliptic := by rw [← e]; infer_instance
+  have hpb := vcUniv_basechange_isPullback φ
+  refine hpb.hom_ext ?_ ?_
+  · -- the base-change leg
+    have hOf : projModelBaseChangeOf φ vcUnivW₀ (vcUnivW₀.map φ) rfl =
+        projModelBaseChange φ vcUnivW₀ := by
+      rw [projModelBaseChangeOf]
+      simp
+    rw [hOf]
+    -- γ, φ-spelled and solved for the (VCIsoₘ ≫ pBC) composite
+    have hγ := projModelVCIso_map (R' := R) vcUnivC vcUnivW₀
+    have hγ'' : (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom ≫
+        projModelBaseChange φ vcUnivW₀ =
+        eqToHom (congrArg projModel e) ≫
+          projModelBaseChange φ (vcUnivC • vcUnivW₀) ≫
+            (projModelVCIso vcUnivC vcUnivW₀).hom := by
+      have h2 := congrArg (fun m => eqToHom (congrArg projModel e) ≫ m) hγ
+      simp only [← Category.assoc, eqToHom_trans, eqToHom_refl, Category.id_comp] at h2
+      rw [Category.assoc] at h2
+      exact h2.symm
+    have hβ := mulModelHom_map φ (vcUnivC • vcUnivW₀)
+    have hN := mulModelHom_vc_of_noetherian vcUnivC vcUnivW₀
+    have hα := mulModelHom_map φ vcUnivW₀
+    calc (mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
+            (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom) ≫
+          projModelBaseChange φ vcUnivW₀
+        = mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
+            ((projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom ≫
+              projModelBaseChange φ vcUnivW₀) := Category.assoc _ _ _
+      _ = mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
+            (eqToHom (congrArg projModel e) ≫
+              projModelBaseChange φ (vcUnivC • vcUnivW₀) ≫
+                (projModelVCIso vcUnivC vcUnivW₀).hom) := by rw [hγ'']
+      _ = (mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫ eqToHom (congrArg projModel e)) ≫
+            projModelBaseChange φ (vcUnivC • vcUnivW₀) ≫
+              (projModelVCIso vcUnivC vcUnivW₀).hom := (Category.assoc _ _ _).symm
+      _ = (pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
+              (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e) (projModelπ_eqToHom_w e) ≫
+            mulModelHom ((vcUnivC • vcUnivW₀).map φ)) ≫
+            projModelBaseChange φ (vcUnivC • vcUnivW₀) ≫
+              (projModelVCIso vcUnivC vcUnivW₀).hom := by rw [mulModelHom_congr e]
+      _ = pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
+              (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e) (projModelπ_eqToHom_w e) ≫
+            (mulModelHom ((vcUnivC • vcUnivW₀).map φ) ≫
+              projModelBaseChange φ (vcUnivC • vcUnivW₀)) ≫
+              (projModelVCIso vcUnivC vcUnivW₀).hom := by
+          simp only [Category.assoc]
+      _ = pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
+              (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e) (projModelπ_eqToHom_w e) ≫
+            (pullback.map _ _ _ _ (projModelBaseChange φ (vcUnivC • vcUnivW₀))
+                (projModelBaseChange φ (vcUnivC • vcUnivW₀))
+                (Spec.map (CommRingCat.ofHom φ))
+                (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm
+                (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm ≫
+              mulModelHom (vcUnivC • vcUnivW₀)) ≫
+              (projModelVCIso vcUnivC vcUnivW₀).hom := by rw [hβ]
+      _ = pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
+              (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e) (projModelπ_eqToHom_w e) ≫
+            pullback.map _ _ _ _ (projModelBaseChange φ (vcUnivC • vcUnivW₀))
+                (projModelBaseChange φ (vcUnivC • vcUnivW₀))
+                (Spec.map (CommRingCat.ofHom φ))
+                (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm
+                (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm ≫
+              (mulModelHom (vcUnivC • vcUnivW₀) ≫
+                (projModelVCIso vcUnivC vcUnivW₀).hom) := by
+          simp only [Category.assoc]
+      _ = pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
+              (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e) (projModelπ_eqToHom_w e) ≫
+            pullback.map _ _ _ _ (projModelBaseChange φ (vcUnivC • vcUnivW₀))
+                (projModelBaseChange φ (vcUnivC • vcUnivW₀))
+                (Spec.map (CommRingCat.ofHom φ))
+                (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm
+                (projModelBaseChange_π φ (vcUnivC • vcUnivW₀)).symm ≫
+              (pullback.map _ _ _ _ (projModelVCIso vcUnivC vcUnivW₀).hom
+                  (projModelVCIso vcUnivC vcUnivW₀).hom (𝟙 _)
+                  (by rw [Category.comp_id]; exact (projModelVCIso_π vcUnivC vcUnivW₀).symm)
+                  (by rw [Category.comp_id]; exact (projModelVCIso_π vcUnivC vcUnivW₀).symm) ≫
+                mulModelHom vcUnivW₀) := by rw [hN]
+      _ = (pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
+              (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
+              (by rw [Category.comp_id]
+                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
+              (by rw [Category.comp_id]
+                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
+            pullback.map _ _ _ _ (projModelBaseChange φ vcUnivW₀)
+              (projModelBaseChange φ vcUnivW₀) (Spec.map (CommRingCat.ofHom φ))
+              (projModelBaseChange_π φ vcUnivW₀).symm
+              (projModelBaseChange_π φ vcUnivW₀).symm) ≫
+            mulModelHom vcUnivW₀ := by
+          simp only [← Category.assoc]
+          congr 1
+          refine Limits.pullback.hom_ext ?_ ?_ <;>
+            simp only [Category.assoc, Limits.pullback.lift_fst, Limits.pullback.lift_snd,
+              Limits.pullback.lift_fst_assoc, Limits.pullback.lift_snd_assoc,
+              Category.comp_id, Category.id_comp] <;>
+            rw [← hγ'']
+      _ = pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
+              (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
+              (by rw [Category.comp_id]
+                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
+              (by rw [Category.comp_id]
+                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
+            (mulModelHom (vcUnivW₀.map φ) ≫ projModelBaseChange φ vcUnivW₀) := by
+          rw [hα]
+          simp only [Category.assoc]
+      _ = (pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
+              (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
+              (by rw [Category.comp_id]
+                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
+              (by rw [Category.comp_id]
+                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
+            mulModelHom (vcUnivW₀.map φ)) ≫ projModelBaseChange φ vcUnivW₀ := by
+          simp only [Category.assoc]
+  · -- the π leg
+    calc (mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
+            (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom) ≫
+          projModelπ (vcUnivW₀.map φ)
+        = mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
+            ((projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom ≫
+              projModelπ (vcUnivW₀.map φ)) := Category.assoc _ _ _
+      _ = mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
+            projModelπ (vcUnivC.map φ • vcUnivW₀.map φ) := by
+          rw [projModelVCIso_π]
+      _ = pullback.fst _ _ ≫ projModelπ (vcUnivC.map φ • vcUnivW₀.map φ) :=
+          mulModelHom_π _
+      _ = pullback.fst _ _ ≫ ((projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom ≫
+            projModelπ (vcUnivW₀.map φ)) := by rw [projModelVCIso_π]
+      _ = (pullback.fst _ _ ≫ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom) ≫
+            projModelπ (vcUnivW₀.map φ) := (Category.assoc _ _ _).symm
+      _ = (pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
+              (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
+              (by rw [Category.comp_id]
+                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
+              (by rw [Category.comp_id]
+                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
+            pullback.fst _ _) ≫ projModelπ (vcUnivW₀.map φ) := by
+          rw [Limits.pullback.lift_fst]
+      _ = pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
+              (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
+              (by rw [Category.comp_id]
+                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
+              (by rw [Category.comp_id]
+                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
+            (pullback.fst _ _ ≫ projModelπ (vcUnivW₀.map φ)) := Category.assoc _ _ _
+      _ = pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
+              (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
+              (by rw [Category.comp_id]
+                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
+              (by rw [Category.comp_id]
+                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
+            (mulModelHom (vcUnivW₀.map φ) ≫ projModelπ (vcUnivW₀.map φ)) := by
+          rw [mulModelHom_π]
+      _ = (pullback.map _ _ _ _ (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
+              (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 _)
+              (by rw [Category.comp_id]
+                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
+              (by rw [Category.comp_id]
+                  exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
+            mulModelHom (vcUnivW₀.map φ)) ≫ projModelπ (vcUnivW₀.map φ) :=
+          (Category.assoc _ _ _).symm
