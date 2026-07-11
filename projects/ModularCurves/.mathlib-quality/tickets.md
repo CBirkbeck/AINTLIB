@@ -16034,3 +16034,30 @@ by import; route (a)-vs-(c) audit), **(L3)** BB-QF/BB-FLAT/BB-DEG (decompose-fir
 HasseWeil `mulByInt_degree` check-then-cite). Sentinel `beastmode_active.Y1-CLOSER` set in
 both worktrees. First act: the L1 audit; lane order set by its verdict + the route-(a)
 audit. Reports at: L1 verdict, each box, T-W7a, ★★★★ MASTER.
+
+### v10.99e (2026-07-10, fable-FP): ★★★ [GR-G-ASM] — R-coefficient SPEC + chart-independence PROVEN (the well-definedness core)
+
+*Commits 5cb105fd8, 86344fb60. `ForMathlib/GrassmannianGlueData.lean` extended; all new decls
+axiom-clean `[propext, Classical.choice, Quot.sound]`, sorry-free. Recipe step (1) + the
+forward well-definedness delivered — the two hardest pieces.*
+
+- **R-coefficient SPEC (recipe step 1)**: `evalAwayAtR_comp_ringHom` — the chart evaluations
+  intertwine via the *R-coefficient* glueData transition `ringHom` (the actual glue datum).
+  Route: base-change factorization `evalAtR = evalAt ∘ MvPolynomial.map (algebraMap R A)`
+  (`eval₂_map` naturality) + column/matrix/det `map`-stability (`column_map`, `matrix_map`,
+  `det_map`) transfer the proven A-coefficient SPEC down to R-coefficients. Infrastructure:
+  `evalAtR_det`, `isUnit_evalAtR_det`, `evalAwayAtR` (localized R-eval), `evalAtR_matrix`.
+  (`transitionMatrixAt_mulVec` un-privated in Overlap for reuse.)
+- **Chart-independence** (`pointOfChartMember_eq`): a member charted at `ι` AND `ι'` gives the
+  SAME `A`-point of `grassmannianScheme` through either chart — the well-definedness heart of
+  the T-point map. Proof: factor each chart-point through the overlap
+  (`specEvalAtR_eq_overlapι` via `evalAwayAtR`), apply `GlueData.glue_condition`, and collapse
+  the transition composite by `pointOverlap_comp_overlapTransition` (the scheme shadow of the
+  SPEC, `evalAwayAtR_comp_ringHomAway`). Elaboration note: `chartScheme`/`overlapScheme` made
+  `abbrev` (reducible) to align the `Spec (of …)`/named-scheme ascriptions that were breaking
+  `Category.assoc` rewrites; the glueData J/`ULift` projection ascriptions need `erw` (not `rw`).
+- **REMAINING for the full T-point equivalence**: the INVERSE direction (recipe steps 2-4) —
+  prime-indexed `Scheme.OpenCover` of `Spec A` from the covering `f_p`
+  (`exists_isChartAt_localizationAway`), `OpenCover.glueMorphisms` with compat = chart-
+  independence + `GlueData.glue_condition`, spec via `ι_glueMorphisms`, then the round-trip
+  identities. Scheme-representability; not gating [L15]. Continuing.
