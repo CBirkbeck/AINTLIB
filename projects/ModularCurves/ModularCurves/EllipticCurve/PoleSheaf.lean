@@ -21,7 +21,7 @@ identify this kernel sheaf locally with the structure sheaf.
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory SheafOfModules
   TopologicalSpace
 
-universe u
+universe v u
 
 local instance (X : Scheme.{u}) :
     (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).IsLocalization
@@ -1703,6 +1703,59 @@ private noncomputable def monoidalUnitObjIso (X : Scheme.{u}) :
     𝟙_ X.Modules ≅ Scheme.Modules.unitObj X :=
   Scheme.Modules.sheafifyValIso (Scheme.Modules.unitObj X)
 
+/-- The explicit structure module is the monoidal unit, so its tensor square is
+canonically the structure module again. -/
+private noncomputable def unitObjTensorIso (X : Scheme.{u}) :
+    Scheme.Modules.unitObj X ⊗ Scheme.Modules.unitObj X ≅
+      Scheme.Modules.unitObj X :=
+  ((monoidalUnitObjIso X).symm ⊗ᵢ (monoidalUnitObjIso X).symm) ≪≫
+    λ_ (𝟙_ X.Modules) ≪≫ monoidalUnitObjIso X
+
+/-- Conjugating the tensor of two endomorphisms through an identification with the
+monoidal unit gives their composite. -/
+private theorem tensorUnitIso_hom_naturality
+    {D : Type u} [Category.{v} D] [MonoidalCategory D]
+    {X : D} (e : 𝟙_ D ≅ X) (f g : X ⟶ X) :
+    (f ⊗ₘ g) ≫ (e.inv ⊗ₘ e.inv) ≫ (λ_ (𝟙_ D)).hom ≫ e.hom =
+      (e.inv ⊗ₘ e.inv) ≫ (λ_ (𝟙_ D)).hom ≫ e.hom ≫ f ≫ g := by
+  let a : 𝟙_ D ⟶ 𝟙_ D := e.hom ≫ f ≫ e.inv
+  let b : 𝟙_ D ⟶ 𝟙_ D := e.hom ≫ g ≫ e.inv
+  have hf : f ≫ e.inv = e.inv ≫ a := by
+    simp [a]
+  have hg : g ≫ e.inv = e.inv ≫ b := by
+    simp [b]
+  have hab : (a ⊗ₘ b) ≫ (λ_ (𝟙_ D)).hom =
+      (λ_ (𝟙_ D)).hom ≫ a ≫ b := by
+    rw [tensorHom_def, Category.assoc, leftUnitor_naturality]
+    rw [unitors_equal, ← Category.assoc, rightUnitor_naturality]
+    rw [Category.assoc]
+  rw [← Category.assoc, tensorHom_comp_tensorHom]
+  rw [hf, hg, ← tensorHom_comp_tensorHom]
+  rw [Category.assoc]
+  rw [← Category.assoc (a ⊗ₘ b) (λ_ (𝟙_ D)).hom e.hom, hab]
+  simp [a, b, Category.assoc]
+
+/-- Under `𝒪_X ⊗ 𝒪_X ≅ 𝒪_X`, tensoring multiplication by `r` and by `s`
+is multiplication by `r * s`. -/
+private theorem unitObjTensorIso_hom_comp_scalars (X : Scheme.{u})
+    (r s : Γ(X, (⊤ : X.Opens))) :
+    (unitEndomorphismOfTopSection r ⊗ₘ
+        unitEndomorphismOfTopSection s) ≫ (unitObjTensorIso X).hom =
+      (unitObjTensorIso X).hom ≫ unitEndomorphismOfTopSection (r * s) := by
+  change (unitEndomorphismOfTopSection r ⊗ₘ
+      unitEndomorphismOfTopSection s) ≫
+      ((monoidalUnitObjIso X).inv ⊗ₘ (monoidalUnitObjIso X).inv) ≫
+        (λ_ (𝟙_ X.Modules)).hom ≫ (monoidalUnitObjIso X).hom =
+    ((monoidalUnitObjIso X).inv ⊗ₘ (monoidalUnitObjIso X).inv) ≫
+      (λ_ (𝟙_ X.Modules)).hom ≫ (monoidalUnitObjIso X).hom ≫
+        unitEndomorphismOfTopSection (r * s)
+  calc
+    _ = ((monoidalUnitObjIso X).inv ⊗ₘ (monoidalUnitObjIso X).inv) ≫
+        (λ_ (𝟙_ X.Modules)).hom ≫ (monoidalUnitObjIso X).hom ≫
+          unitEndomorphismOfTopSection r ≫ unitEndomorphismOfTopSection s :=
+      tensorUnitIso_hom_naturality (monoidalUnitObjIso X) _ _
+    _ = _ := by rw [unitEndomorphismOfTopSection_comp]
+
 /-- The localized coherent tensor agrees with the explicit sheafified tensor used by
 the cover-local invertibility API. -/
 private noncomputable def monoidalTensorObjIso {X : Scheme.{u}} (M N : X.Modules) :
@@ -1753,10 +1806,34 @@ noncomputable def sectionPoleSheafPowerTrivialization
       restrictMonoidalTensorIso U.ι
           (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≪≫
         (sectionPoleSheafPowerTrivialization z hz U e n ⊗ᵢ e) ≪≫
-        ((monoidalUnitObjIso U.toScheme).symm ⊗ᵢ
-          (monoidalUnitObjIso U.toScheme).symm) ≪≫
-        λ_ (𝟙_ U.toScheme.Modules) ≪≫
-        monoidalUnitObjIso U.toScheme
+        unitObjTensorIso U.toScheme
+
+/-- A scalar transition between simple-pole trivializations raises to its `n`th
+power on the induced trivializations of `𝒪(n[0])`. -/
+theorem sectionPoleSheafPowerTrivialization_hom_eq_comp_scalar
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.Opens)
+    (e g : (sectionPoleSheaf π z hz).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme)
+    (r : Γ(U.toScheme, (⊤ : U.toScheme.Opens)))
+    (h : e.hom = g.hom ≫ unitEndomorphismOfTopSection r) :
+    ∀ n : ℕ,
+      (sectionPoleSheafPowerTrivialization z hz U e n).hom =
+        (sectionPoleSheafPowerTrivialization z hz U g n).hom ≫
+          unitEndomorphismOfTopSection (r ^ n)
+  | 0 => by
+      rw [pow_zero, unitEndomorphismOfTopSection_one, Category.comp_id]
+      rfl
+  | n + 1 => by
+      have hn := sectionPoleSheafPowerTrivialization_hom_eq_comp_scalar
+        z hz U e g r h n
+      simp only [sectionPoleSheafPowerTrivialization, Iso.trans_hom,
+        MonoidalCategory.tensorIso_hom, Category.assoc]
+      rw [hn, h]
+      rw [← MonoidalCategory.tensorHom_comp_tensorHom]
+      rw [Category.assoc]
+      slice_lhs 3 4 => rw [unitObjTensorIso_hom_comp_scalars]
+      rw [pow_succ]
 
 /-- A global module section, restricted to the top open of an affine open
 subscheme. -/
