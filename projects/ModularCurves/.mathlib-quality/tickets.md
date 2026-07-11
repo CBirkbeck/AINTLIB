@@ -18005,3 +18005,30 @@ AlgHom-packaging). With F1 already wired, **the entire `gammaOneNaive_representa
 now rests on: {E5-pure-core (étale torsion lift + T-E1, all machinery staged:
 `exists_section_lift_of_smooth` PROVEN, `tateBaseSpecMapOfPoint` + comparison lemmas
 pre-existing)} + the boarded externals {T-E4 route (a)/(c), hfib 6f/6g, BB-QF/FLAT/DEG}.**
+
+## Amendments v10.128-Y1 (2026-07-11, Y1-CLOSER): ★★★ E5 COMPLETE — the pure core PROVEN; `yOne_infinitesimal_lifting` contributes no sorry of its own
+
+**`exists_tateAlgLift_core` (private, YOneTatePoint) fully proven** — the étale torsion lift +
+atlas classification, closing the last E-leaf:
+
+1. **(ii) transport** — killed `t₀`-point into `FA := baseChange t` over the thickening immersion
+   (`baseChangeEquiv.symm`; N-kill via `point_smul_eq_comp_mulBy` value-chase).
+2. **(iii) lift** — `torsionPointsEquiv.symm` section + `exists_section_lift_of_smooth (FA.torsionπ N)`
+   against nilpotent `I`; `PT : Point t` with `hPTkill` + `hPTrest` (double `apply_symm_apply`).
+3. **(iv) classification** — `PA := asSection t PT`; `hordPA` by τ-factoring geometric points through
+   the quotient (nilpotents don't change fibres) + `tatePoint_nowhereGeomOrderLEThree`;
+   `tatePoint_classifies` at `pullbackAlong t` ⟹ `fc`; `ψ' := Spec.preimage fc.baseHom`.
+   Clause (b): `pullSection` ℤ-linearity (`AddMonoidHom.mk'` on `EllHom.pullSection_add`) + `zero_w`.
+   Clause (a): classification uniqueness over `A⧸I` — `ι₀ ≫ fc` (de-privatised
+   `YFull.pullSection_asSection` + `hPTrest`) vs tautological `pullbackAlongπ` (NEW generic
+   `pullSection_pullbackAlongπ`) ⟹ `Spec.map_injective` ⟹ ring-level reduction identity.
+
+**Registry lesson**: the 200k heartbeat budget is per-DECLARATION — inlining the core blew the E5
+theorem's budget (previously-green outer parts began timing out). Fix: hoist as `private theorem`
+with a RING-LEVEL interface (`ψ₀r : →+*` — no `A⧸I`-algebra structure), dodging the caller's
+`letI`-diamond and buying a fresh budget. `hdict` hoisted as `pullAsSection_dict`.
+
+**BAR**: root GREEN (3,798 jobs); `exists_tatePoint` = {propext, Classical.choice, Quot.sound} ✓;
+`gammaOneNaive_representable` residual (shrunk): {**hfib ψ-wall** (`pointSharp_add_tail`,
+TorsionUnramifiedFibre:733 — the last in-charter item), BB-QF/FLAT/DEG (other lane), T-E4 primitive
+route (a)/(c) (other lanes)}.
