@@ -570,6 +570,46 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
     ∃ f : Spec (CommRingCat.of A) ⟶ yOne R N,
       Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ f = f₀ ∧
       f ≫ yOneStructMap R N = Spec.map φ := by
+  /- E5 EXECUTION LEDGER (all gates PROVEN as of v10.123-Y1):
+  1. CLASSIFY: `t₀ := f₀ ≫ yOneBase R N : Spec (A⧸I) ⟶ tateBase R`; `tateRing_homEquiv`
+     (T-E2) turns `Spec.preimage t₀`-side into `(α₀, β₀) : (A⧸I)²` with `Δ(α₀,β₀)` unit;
+     the classified point is `pull t₀ (tatePoint R)`, killed by `N` and of fibrewise exact
+     order `N` (`factors_yOne_iff` applied to `f₀`'s factoring, via
+     `factors_yOne_iff_exists_range`).
+  2. LIFT COEFFICIENTS: choose preimages `(α, β) : A²` (`Ideal.Quotient.mk_surjective`);
+     `Δ(α, β)` is a unit since its `A⧸I`-image is and `I` is nilpotent
+     (`IsNilpotent.isUnit_of_isUnit_map`-style: unit mod nilpotent ⟹ unit — mathlib
+     `IsNilpotent.isUnit_quotient_mk_iff`-ish; hunt). Get `t : Spec A ⟶ tateBase R` with
+     `Spec.map (mk I) ≫ ... = t₀`-square via `tateRing_homEquiv`-naturality.
+  3. LIFT THE POINT: `T := (tateUniversal R).baseChange`-free route — work with the killed
+     locus: `f₀` factors through `Y_N`; the lifting needed is against
+     `κN := killedLocusπ (tatePoint R) N`, whose base change to `Spec A` along `t` is... —
+     SIMPLER: lift through the étale `(E(α,β))[N] ⟶ Spec A` directly:
+     `haveI := torsionπ_etale` at the `modelEllipticCurve (tateCurve-of α β)`; étale =
+     formally étale ⟹ the `A⧸I`-torsion-point `P₀` (from step 1 transported through the
+     `t₀`-pullback dictionary) lifts uniquely to an `A`-torsion point `P`
+     (`FormallyUnramified.hom_ext` gives uniqueness; existence via `Smooth`/`FormallySmooth`
+     scheme-level nilpotent lifting — mathlib `Etale` + `IsSmooth.exists_lift`-family; if
+     the scheme-level lifting API is thin, run it affinely: the torsion of the model over
+     `Spec A` is affine (closed in the projective model's affine chart around zero... or
+     directly: finite over affine ⟹ affine) and `Algebra.FormallySmooth`/`Algebra.Etale`
+     ring-level lifting applies).
+  4. RENORMALISE: `P` gives `(x, y) : A²` through the `Z`-chart dictionary
+     (`chartSolutionsEquiv`/`zChartEval` as in `pt_hord`); `NowhereOrderLEThree` holds
+     because orders are fibrewise and `Spec A`, `Spec (A⧸I)` share fibres (nilpotent `I`);
+     T-E1 `exists_unique_variableChange_isTateNormal` yields the unique `vc` with
+     `vc • E(α,β)` Tate-normal marking `(x,y) ↦ (0,0)`; the corrected coefficients define
+     `t' : Spec A ⟶ tateBase R`.
+  5. LAND IN `Y₁(N)`: `t'` factors through `Y_N` (`killedLocus_spec`, the killing is
+     `N • P = 0` transported through the `vc`-action) and through the open `yOneSet`
+     (exact order persists fibrewise; `factors_yOne_iff`) — giving `f : Spec A ⟶ yOne R N`.
+  6. RESTRICTION: over `A⧸I` the lifted-then-renormalised datum reduces to the original
+     `(α₀, β₀, (0,0))`: `P` restricts to `P₀` (uniqueness of the étale lift against `f₀`'s
+     own witness), so the T-E1 `vc` over `A⧸I` compares two Tate-normal presentations of
+     the SAME marked curve and is the identity by T-E1-uniqueness ⟹ `Spec.map (mk I) ≫ f`
+     and `f₀` classify equal data ⟹ equal by `yOne`'s open-immersion mono + `Y_N`-closed
+     mono + `tateRing_homEquiv`-injectivity. `f ≫ yOneStructMap = Spec.map φ` by the
+     `t'`-construction over `φ`. -/
   sorry
 
 /-- **(Y1-E6 = Loeffler Thm 3.4.4, smoothness half of T-E7)** `Y₁(N) ⟶ Spec R` is smooth.
