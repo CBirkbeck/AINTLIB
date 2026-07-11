@@ -1,1 +1,1 @@
-FOCUS: [GR-G-ASM] FORWARD MAP pointOfMember DONE (axiom-clean). Remaining: INVERSE (A-point of grassmannianScheme -> member, via pullback along charts) + round-trip identities = the other half of the NISOG representability equivalence.
+FOCUS: [GR-G-ASM] forward map + local round-trip structure DONE. Remaining: GLOBAL inverse via Zariski descent of submodules (mathlib representability TODO) = the deep half. [02KL-CORE] KL-3=B3 (T-DEV/T-FLAT lane).

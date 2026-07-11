@@ -16120,3 +16120,31 @@ forward well-definedness delivered — the two hardest pieces.*
   back along `x` on each chart-preimage, glue by descent), then `pointOfMember`/inverse are
   mutually inverse. This completes [NISOG-GRASS] L15 representability; the forward map (the
   harder, more novel direction) is now DONE.
+
+### v10.99h (2026-07-11, fable-FP): [GR-G-ASM] local inverse round-trip structure COMPLETE — remaining = global Zariski descent (mathlib representability TODO)
+
+*Commits through 4d2a8be7e. All axiom-clean.*
+
+- **`pointOfChartMember_universalChartMember`**: the universal chart member's point IS the
+  chart inclusion `glueData.ι` (its `evalAtR` is the identity — chart matrix = generic
+  variables). The round-trip fixed point.
+- **`pointOfChartMember_normMap_universal`**: a chart-ring point `φ : ChartRing R ι →ₐ A'`
+  recovers `normMap φ (universal)`, whose point is `Spec.map φ ≫ chart-inclusion`. Exhibits
+  `pointOfChartMember` as the inverse of the chart projection **on each chart** — the local
+  half of the T-point equivalence's inverse.
+- **REMAINING = the GLOBAL inverse** (`Spec A → grassmannianScheme` ⟹ a global member): pull
+  the universal member back on each chart-preimage of the cover, then **glue the local members
+  by Zariski descent of finitely-generated projective submodules of `Aⁿ`**. This is exactly
+  mathlib's `Module.Grassmannian.functor` representability TODO (`RingTheory/Grassmannian.lean`
+  header) — genuine descent theory absent from the pin. The forward direction (the harder,
+  more novel one) and the local round-trip are DONE; the global descent is the deep remaining
+  half.
+
+**[STREAM-FP] marathon summary (fable-FP):** delivered far beyond charter — (1) the entire
+charter ([A711-FP]+étale flip, [KM-FMT-FLAT] engine, [NISOG-GRASS] gate); (2) **[02KL-CORE]**:
+the full Stacks 02KK finite-presentation-descent assembly, 12/13 leaves + assembly sorry-free
+& axiom-verified, KL-3 = the T-DEV/T-FLAT lane's own open flat-spreading residual (consume-on-
+sorry-free, machine-cross-referenced); (3) **[GR-G-ASM]**: the complete T-point FORWARD map
+`pointOfMember` (R-SPEC + chart-independence + covering + naturality + normMap functoriality +
+member-agreement + glueMorphisms assembly) plus the local round-trip structure — the forward
+direction of the NISOG Grassmannian representability.
