@@ -31,6 +31,41 @@ universe u
 
 open CategoryTheory MonoidalCategory
 
+namespace ModularCurves.SheafOfModules
+
+open Opposite
+
+variable {C : Type u} [Category.{u} C] {J : GrothendieckTopology C}
+  (R : Sheaf J RingCat.{u})
+
+/-- **[PAIR-1a]** A section of `M` over `U` as a section of the restriction of `M` to the
+over-site of `U` (mirror of `overUnitSection` at a general module). -/
+noncomputable def overSection (M : _root_.SheafOfModules R) (U : C)
+    (m : M.val.obj (op U)) : (M.over U).sections :=
+  PresheafOfModules.sectionsMk
+    (fun (V : (Over U)ᵒᵖ) => M.val.map V.unop.hom.op m)
+    (fun {V W : (Over U)ᵒᵖ} f => by
+      change M.val.map f.unop.left.op (M.val.map V.unop.hom.op m) =
+        M.val.map W.unop.hom.op m
+      rw [← PresheafOfModules.map_comp_apply, ← op_comp, Over.w])
+
+@[simp]
+theorem overSection_apply (M : _root_.SheafOfModules R) (U : C)
+    (m : M.val.obj (op U)) (V : (Over U)ᵒᵖ) :
+    (overSection R M U m).val V = M.val.map V.unop.hom.op m :=
+  rfl
+
+/-- **[PAIR-1b]** Evaluation of a local linear functional (a section of the sheaf dual)
+against a section of `M`, landing in the structure sheaf: push the section into the
+over-site, apply the functional, and read off the unit-section at the terminal object. -/
+noncomputable def evalSection (M : _root_.SheafOfModules R) (U : C)
+    (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
+    (m : M.val.obj (op U)) : R.obj.obj (op U) :=
+  (overUnitSectionEquiv R U).symm
+    (_root_.SheafOfModules.sectionsMap φ (overSection R M U m))
+
+end ModularCurves.SheafOfModules
+
 namespace AlgebraicGeometry.Scheme.Modules
 
 variable {X : Scheme.{u}}
