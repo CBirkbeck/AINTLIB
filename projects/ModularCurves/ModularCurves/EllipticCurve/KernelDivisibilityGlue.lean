@@ -336,6 +336,85 @@ theorem kernelNDivisible_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :
     rw [chartToBase, Category.assoc, Iso.hom_inv_id_assoc]
     exact IsOpenImmersion.lift_fac _ _ hrange
   choose tB htB using hfac
+  -- the per-piece square-zero data
+  have hφpsurj : ∀ p : ↑(Spec A'), Function.Surjective (CommRingCat.ofHom
+      (Ideal.Quotient.mk (I.map (algebraMap ↑A' (Localization.Away (aa p)))))).hom :=
+    fun p => Ideal.Quotient.mk_surjective
+  have hφp2 : ∀ p : ↑(Spec A'), RingHom.ker (CommRingCat.ofHom
+      (Ideal.Quotient.mk (I.map (algebraMap ↑A' (Localization.Away (aa p)))))).hom ^ 2 =
+      ⊥ := by
+    intro p
+    show RingHom.ker (Ideal.Quotient.mk _) ^ 2 = ⊥
+    rw [Ideal.mk_ker, ← Ideal.map_pow, hI, Ideal.map_bot]
+  -- `N` is a unit on each piece
+  have hNp : ∀ p : ↑(Spec A'), IsUnit ((N : ℕ) :
+      Localization.Away (aa p)) := by
+    intro p
+    have h2 := hNA'.map (algebraMap ↑A' (Localization.Away (aa p)))
+    rwa [map_natCast] at h2
+  -- the per-piece kernel points
+  have hεp : ∀ p : ↑(Spec A'),
+      Point.restrict E (Spec.map (CommRingCat.ofHom
+        (Ideal.Quotient.mk (I.map (algebraMap ↑A' (Localization.Away (aa p)))))))
+        ((Point.castBase E (htB p).symm) (Point.restrict E
+          (Spec.map (CommRingCat.ofHom (algebraMap ↑A' (Localization.Away (aa p))))) ε)) =
+      0 := by
+    intro p
+    refine Subtype.ext ?_
+    show Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk
+      (I.map (algebraMap ↑A' (Localization.Away (aa p)))))) ≫
+      ((Point.castBase E (htB p).symm) (Point.restrict E
+        (Spec.map (CommRingCat.ofHom (algebraMap ↑A' (Localization.Away (aa p))))) ε)).1 =
+      _
+    rw [E.point_zero_val, Point.castBase_coe]
+    show Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk
+      (I.map (algebraMap ↑A' (Localization.Away (aa p)))))) ≫
+      (Spec.map (CommRingCat.ofHom (algebraMap ↑A' (Localization.Away (aa p)))) ≫ ε.1) = _
+    -- the quotientMap square
+    have hle : I ≤ (I.map (algebraMap ↑A' (Localization.Away (aa p)))).comap
+        (algebraMap ↑A' (Localization.Away (aa p))) := Ideal.le_comap_map
+    have hsq : CommRingCat.ofHom (algebraMap ↑A' (Localization.Away (aa p))) ≫
+        CommRingCat.ofHom (Ideal.Quotient.mk
+          (I.map (algebraMap ↑A' (Localization.Away (aa p))))) =
+        φ ≫ CommRingCat.ofHom (Ideal.quotientMap _
+          (algebraMap ↑A' (Localization.Away (aa p))) hle) := by
+      refine CommRingCat.hom_ext ?_
+      exact (Ideal.quotientMap_comp_mk hle).symm
+    have hspec : Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk
+        (I.map (algebraMap ↑A' (Localization.Away (aa p)))))) ≫
+        Spec.map (CommRingCat.ofHom (algebraMap ↑A' (Localization.Away (aa p)))) =
+        Spec.map (CommRingCat.ofHom (Ideal.quotientMap _
+          (algebraMap ↑A' (Localization.Away (aa p))) hle)) ≫ Spec.map φ := by
+      rw [← Spec.map_comp, ← Spec.map_comp, hsq]
+    have hεval : Spec.map φ ≫ ε.1 = (Spec.map φ ≫ b') ≫ E.zero := by
+      have h1 := congrArg Subtype.val hε
+      rw [show ((0 : E.Point (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ b')) :
+        Spec (CommRingCat.of (↑A' ⧸ I)) ⟶ E.E) =
+        (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ b') ≫ E.zero from
+        E.point_zero_val _] at h1
+      exact h1
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    refine (congrArg (· ≫ ε.1) hspec).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (Spec.map (CommRingCat.ofHom (Ideal.quotientMap _
+      (algebraMap ↑A' (Localization.Away (aa p))) hle)) ≫ ·) hεval).trans ?_
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    refine (congrArg (· ≫ E.zero) ((Category.assoc _ _ _).symm)).trans ?_
+    refine (congrArg (fun m => (m ≫ b') ≫ E.zero) hspec.symm).trans ?_
+    refine (congrArg (· ≫ E.zero) (Category.assoc _ _ _)).trans ?_
+    refine (congrArg (fun m => (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk
+      (I.map (algebraMap ↑A' (Localization.Away (aa p)))))) ≫ m) ≫ E.zero)
+      (htB p).symm).trans ?_
+    rfl
+  -- the per-piece solutions
+  have hsol : ∀ p : ↑(Spec A'), ∃ δp : E.Point (tB p ≫ chartToBase A (ii p)),
+      Point.restrict E (Spec.map (CommRingCat.ofHom
+        (Ideal.Quotient.mk (I.map (algebraMap ↑A' (Localization.Away (aa p))))))) δp = 0 ∧
+      (N : ℤ) • δp = (Point.castBase E (htB p).symm) (Point.restrict E
+        (Spec.map (CommRingCat.ofHom (algebraMap ↑A' (Localization.Away (aa p))))) ε) :=
+    fun p => kernel_div_of_chartFactor E A (ii p) (hφpsurj p) (hφp2 p) (tB p) N (hNp p)
+      _ (hεp p)
+  choose δp hδpK hδpN using hsol
   sorry
 
 end Glue
