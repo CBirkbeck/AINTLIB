@@ -7644,7 +7644,22 @@ gate note, commit 90ed0986); this amendment turns the lift into dispatched work 
 idle capacity. Housekeeping done in this pass: the unpushed `dev/modular-curves` commits were
 PUSHED (`66300bb4..5f4829dc`, 238 commits).*
 
-### v10.0 Fleet ground truth (2026-07-08)
+### v10.148 — Y1-CLOSER charter-2 session ledger: K2★ K3★ K4★ BB-QF★; MASTER residual = BB-FLAT funnel (cross-board pointer)
+
+Y1-CLOSER (dev/modular-curves-y1, boards v10.144–147 there): **[U-MODEL]
+`modelGrpObj_unique` PROVEN** at the clean triple (K2); **records-primitive
+`grpObj_mul_unique` + `isMonHom_of_pointedIso_records` PROVEN** (K3,
+`RecordGroupUnique.lean`); **K4 supply-swap landed** — `transportSection_add_of_finitePresentation`
+and `yOne_representableBy` (the MASTER's representability half) now at
+`{propext, Classical.choice, Quot.sound}`; route (a) `isMonHom_of_one_comp_eq'_of_finitePresentation`
+has no proof-term consumers on the trail. **BB-QF discharged** (invertible case,
+`MulByHomQuasiFinite.lean`) with the HasseWeil `torsion_genN_addEquiv` bridge live
+(check-then-cite verified clean); étale chain rewired (`MulByHomEtale.lean`);
+`gammaOneNaive_representable`'s sole remaining sorryAx input is **BB-FLAT**, funneled to
+`KernelNDivisible` (`MulByHomFlat.lean`), discharge route boarded (v10.147: the
+TorsionUnramifiedFibre co-multiplication layer off the field base). Root 4,183 jobs green.
+
+## v10.0 Fleet ground truth (2026-07-08)
 | Worker | On | State / v10 action |
 |---|---|---|
 | c5β (A-lane, W7) | T-W7.0c-c5β triple→morphism; β2b ladder landed (cfae244c) | active — unchanged (next: single-chart `IsDomain` leaf, β1, β3, β4, then W7.0c-i inc. 2) |
