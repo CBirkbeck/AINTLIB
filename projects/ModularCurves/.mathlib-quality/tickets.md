@@ -16148,3 +16148,27 @@ sorry-free, machine-cross-referenced); (3) **[GR-G-ASM]**: the complete T-point 
 `pointOfMember` (R-SPEC + chart-independence + covering + naturality + normMap functoriality +
 member-agreement + glueMorphisms assembly) plus the local round-trip structure — the forward
 direction of the NISOG Grassmannian representability.
+
+## Amendments v10.140 (2026-07-11, coordinator): ★ CLOSER-2 milestone RATIFIED — K1/T-W7.0h COMPLETE (rigidity + universal-VC-base route); K2 at 70%; fable-FP [GR-G-ASM] forward map proven
+
+- **Y1-CLOSER-2 (their §v10.141–143-CLOSER, y1 through bbd40f1cf) RATIFIED**: ★ **K1 =
+  T-W7.0h COMPLETE** — `mulModelHom_vc` at every base, axiom-clean at the exact triple:
+  GIT Cor 6.4 rigidity applied to the pointed VC-iso between T-G4 modelGrpObj structures
+  (universallyOConnected already an instance) at the noetherian case, transported to
+  arbitrary rings via the NEW noetherian universal VC-base `vcUnivRing`, closed by
+  hom_ext on the bc-pullback square; sorried original relocated per doctrine.
+  **T-W7.12 is now PURE ASSEMBLY (all five dependencies done).** K2 [U-MODEL] ~70%:
+  ModelGroupUniq.lean — fg-ℤ-subalgebra colimit / Spec cofiltered limit machinery,
+  W-descent to a noetherian first stage, ★ `mu_descends` PROVEN (mathlib
+  AffineTransitionLimit consumed; the risk item), hom_descends/eq_descends fully
+  generic with the instance layer. Remaining: ι-descent + five equality-descents +
+  stage rigidity (K1 pattern) + pull-up → K3/K4 (T-E4 family) → L3 (BB boxes).
+  **Registry ACCEPTED (three)**: localization rings = def + registered instances,
+  never abbrev; rigidity applications need inline GrpObj instance args; finite-type-ℤ
+  universal bases ULift into Type u. Tree green 3,798 throughout; charter mode —
+  no dispatch, marathon continues.
+- **fable-FP (absorb)**: ★ [GR-G-ASM] the T-point FORWARD map `pointOfMember` PROVEN
+  axiom-clean (glued from per-chart points over the D(f_p) covering) + the chart-local
+  round-trip halves — the long-parked assembly residual is closing; global Zariski
+  descent (a mathlib-representability-TODO-shaped leaf) remains. NEW-HOPF: coassoc via
+  iterated affineKunneth in flight (both counit laws + Δ/ε top-level done). On charter.
