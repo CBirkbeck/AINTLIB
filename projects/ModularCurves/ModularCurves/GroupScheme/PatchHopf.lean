@@ -826,6 +826,71 @@ theorem counitLiftAlgTop_comp_comulAlgTop :
     CommRingCat.hom_id, RingHom.id_apply] at h2
   exact h2
 
+/-- The right unit lift, `⊤`-level, dual of the right unit section. -/
+noncomputable def counitLiftTop' :
+    CommRingCat.of (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) ⟶ P.groupRingTop :=
+  inv P.squareΓTop ≫ P.rightUnitSection.appTop
+
+theorem comulTop_comp_counitLiftTop' :
+    P.comulTop ≫ P.counitLiftTop' = 𝟙 P.groupRingTop := by
+  rw [comulTop, counitLiftTop', Category.assoc, ← Category.assoc P.squareΓTop,
+    IsIso.hom_inv_id, Category.id_comp, ← Scheme.Hom.comp_appTop,
+    P.rightUnitSection_comp_squareMulRes, AlgebraicGeometry.Scheme.Hom.id_appTop]
+
+theorem includeLeft_comp_counitLiftTop' :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := P.baseRingTop) (A := P.groupRingTop) (B := P.groupRingTop))
+      ≫ P.counitLiftTop' = 𝟙 P.groupRingTop := by
+  have hleg := fst_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+  have hinv : affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+      ≫ inv P.squareΓTop = 𝟙 _ := IsIso.hom_inv_id _
+  rw [counitLiftTop', ← Category.assoc, ← hleg, Category.assoc, Category.assoc,
+    reassoc_of% hinv, ← Scheme.Hom.comp_appTop, P.rightUnitSection_fst,
+    AlgebraicGeometry.Scheme.Hom.id_appTop]
+
+theorem includeRight_comp_counitLiftTop' :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := P.baseRingTop) (A := P.groupRingTop) (B := P.groupRingTop)).toRingHom
+      ≫ P.counitLiftTop' = P.counitTop ≫ P.groupToBaseRes.appTop := by
+  have hleg := snd_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+  have hinv : affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+      ≫ inv P.squareΓTop = 𝟙 _ := IsIso.hom_inv_id _
+  rw [counitLiftTop', ← Category.assoc, ← hleg, Category.assoc, Category.assoc,
+    reassoc_of% hinv, ← Scheme.Hom.comp_appTop, P.rightUnitSection_snd,
+    Scheme.Hom.comp_appTop, counitTop]
+
+/-- The algebraic right counit lift `A' ⊗[R'] A' →ₐ[R'] A'`, `a ⊗ b ↦ a • ε'(b)`. -/
+noncomputable def counitLiftAlgTop' :
+    (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) →ₐ[P.baseRingTop] P.groupRingTop :=
+  Algebra.TensorProduct.lift (AlgHom.id P.baseRingTop P.groupRingTop)
+    ((Algebra.ofId P.baseRingTop P.groupRingTop).comp P.counitAlgTop)
+    (fun _ _ => Commute.all _ _)
+
+theorem counitLiftAlgTop'_eq :
+    CommRingCat.ofHom P.counitLiftAlgTop'.toRingHom = P.counitLiftTop' := by
+  refine tensor_hom_ext ?_ ?_
+  · rw [P.includeLeft_comp_counitLiftTop']
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show counitLiftAlgTop' G P (a ⊗ₜ[P.baseRingTop] (1 : P.groupRingTop)) = _
+    rw [counitLiftAlgTop', Algebra.TensorProduct.lift_tmul, map_one, _root_.mul_one]
+    rfl
+  · rw [P.includeRight_comp_counitLiftTop']
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show counitLiftAlgTop' G P ((1 : P.groupRingTop) ⊗ₜ[P.baseRingTop] a) = _
+    rw [counitLiftAlgTop', Algebra.TensorProduct.lift_tmul, map_one, _root_.one_mul]
+    rfl
+
+/-- **The right counit law, `⊤`-level, `AlgHom` form**: `(id ⊗ ε') ∘ Δ' = id`. -/
+theorem counitLiftAlgTop'_comp_comulAlgTop :
+    P.counitLiftAlgTop'.comp P.comulAlgTop = AlgHom.id P.baseRingTop P.groupRingTop := by
+  have h := P.comulTop_comp_counitLiftTop'
+  rw [← P.counitLiftAlgTop'_eq] at h
+  refine AlgHom.ext fun a => ?_
+  have h2 := congrArg (fun m : P.groupRingTop ⟶ P.groupRingTop => m.hom a) h
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom,
+    CommRingCat.hom_id, RingHom.id_apply] at h2
+  exact h2
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
