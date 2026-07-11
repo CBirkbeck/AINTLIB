@@ -717,17 +717,17 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
         rw [ht', tateBaseSpecMap, ← Spec.map_comp, ← hspec₀]
         exact congrArg Spec.map (CommRingCat.hom_ext (congrArg AlgHom.toRingHom hψ'res))
       -- the `baseChangeEquiv` dictionary at any base point (inline `pull∘asSection` bridge)
-      have hdict : ∀ {T : Scheme.{u}} (τ : T ⟶ Spec (CommRingCat.of A)),
-          EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t' τ
-            (EllipticCurve.Point.pull ((tateUniversal R).baseChange t') τ
-              (EllipticCurve.Point.asSection (tateUniversal R) t'
-                (EllipticCurve.Point.pull (tateUniversal R) t' (tatePoint R)))) =
-          EllipticCurve.Point.pull (tateUniversal R) (τ ≫ t') (tatePoint R) := by
-        intro T τ
+      have hdict : ∀ {T T' : Scheme.{u}} (s : T' ⟶ tateBase R) (τ : T ⟶ T'),
+          EllipticCurve.Point.baseChangeEquiv (tateUniversal R) s τ
+            (EllipticCurve.Point.pull ((tateUniversal R).baseChange s) τ
+              (EllipticCurve.Point.asSection (tateUniversal R) s
+                (EllipticCurve.Point.pull (tateUniversal R) s (tatePoint R)))) =
+          EllipticCurve.Point.pull (tateUniversal R) (τ ≫ s) (tatePoint R) := by
+        intro T T' s τ
         refine Subtype.ext ?_
         rw [EllipticCurve.Point.baseChangeEquiv_apply_coe]
-        show (τ ≫ (EllipticCurve.Point.asSection (tateUniversal R) t'
-          (EllipticCurve.Point.pull (tateUniversal R) t' (tatePoint R))).1) ≫ _ = _
+        show (τ ≫ (EllipticCurve.Point.asSection (tateUniversal R) s
+          (EllipticCurve.Point.pull (tateUniversal R) s (tatePoint R))).1) ≫ _ = _
         rw [Category.assoc, EllipticCurve.Point.asSection_val_fst]
         rfl
       have hkill' : (N : ℤ) • EllipticCurve.Point.asSection (tateUniversal R) t'
@@ -777,7 +777,49 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
         have h2 : (u.hom x) ^ n = 0 := by
           rw [← map_pow, hxn, map_zero]
         exact IsNilpotent.eq_zero (⟨n, h2⟩ : IsNilpotent (u.hom x))
-      sorry
+      set ū := Ideal.Quotient.lift I u.hom hIu with hū
+      set τ₀ : Spec (CommRingCat.of k) ⟶ Spec (CommRingCat.of (A ⧸ I)) :=
+        Spec.map (CommRingCat.ofHom ū) with hτ₀
+      have hτfac : τ = τ₀ ≫ Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) := by
+        rw [hτ₀, ← Spec.map_comp]
+        rw [show CommRingCat.ofHom (Ideal.Quotient.mk I) ≫ CommRingCat.ofHom ū = u from
+          CommRingCat.hom_ext (RingHom.ext fun x => Ideal.Quotient.lift_mk I u.hom hIu)]
+        exact (Spec.map_preimage τ).symm
+      have hcomp : τ ≫ t' = τ₀ ≫ t₀ := by
+        rw [hτfac, Category.assoc, hrest']
+      have hbridge : ∀ (a : ℤ),
+          a • EllipticCurve.Point.pull ((tateUniversal R).baseChange t') τ
+            (EllipticCurve.Point.asSection (tateUniversal R) t'
+              (EllipticCurve.Point.pull (tateUniversal R) t' (tatePoint R))) = 0 ↔
+          a • EllipticCurve.Point.pull ((tateUniversal R).baseChange t₀) τ₀
+            (EllipticCurve.Point.asSection (tateUniversal R) t₀
+              (EllipticCurve.Point.pull (tateUniversal R) t₀ (tatePoint R))) = 0 := by
+        intro a
+        have e1 := EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t' τ
+        have h1 : ∀ (P : ((tateUniversal R).baseChange t').Point τ),
+            a • P = 0 ↔ a • (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t' τ) P
+              = 0 := fun P => by
+          constructor
+          · intro h0
+            rw [← map_zsmul, h0, map_zero]
+          · intro h0
+            refine (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t' τ).injective ?_
+            rw [map_zsmul, map_zero]
+            exact h0
+        have h2 : ∀ (P : ((tateUniversal R).baseChange t₀).Point τ₀),
+            a • P = 0 ↔ a • (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t₀ τ₀) P
+              = 0 := fun P => by
+          constructor
+          · intro h0
+            rw [← map_zsmul, h0, map_zero]
+          · intro h0
+            refine (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t₀ τ₀).injective ?_
+            rw [map_zsmul, map_zero]
+            exact h0
+        rw [h1, h2, hdict t' τ, hdict t₀ τ₀, hcomp]
+      obtain ⟨hk₀, hord₀⟩ := hstruct₀.2 k τ₀
+      exact ⟨(hbridge (N : ℤ)).mpr hk₀,
+        fun a ha haN h0 => hord₀ a ha haN ((hbridge (a : ℤ)).mp h0)⟩
   obtain ⟨f, hf⟩ := (factors_yOne_iff R N hN hinv t).mpr hstruct
   refine ⟨f, ?_, ?_⟩
   · rw [← cancel_mono (yOneBase R N), Category.assoc, hf, hrest]
