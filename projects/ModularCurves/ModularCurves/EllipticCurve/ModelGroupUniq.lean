@@ -546,6 +546,51 @@ theorem mu_descends (μl : Limits.pullback (projModelπ W) (projModelπ W) ⟶ p
     projModelπ (wZero W)
   rw [hRHS, ← Limits.pullback.condition]
 
+/-- Generic morphism descent along the base-changed stage system. -/
+theorem hom_descends (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W))
+    [QuasiCompact g] [QuasiSeparated g]
+    {Y : Scheme.{u}} (f : Y ⟶ (fgSys.specDiagram R).obj (wStageOp W))
+    [LocallyOfFinitePresentation f]
+    (t : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback g ⋙ Over.forget _) ⟶
+      (Functor.const (Over (wStageOp W))).obj ((fgSys.specDiagram R).obj (wStageOp W)))
+    (a : (bcCone W g).pt ⟶ Y)
+    (ha : (bcCone W g).π ≫ t = (Functor.const _).map (a ≫ f)) :
+    ∃ (T : Over (wStageOp W)) (g' : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback g ⋙ Over.forget _).obj T ⟶ Y),
+      (bcCone W g).π.app T ≫ g' = a ∧ g' ≫ f = t.app T :=
+  @Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation
+    (Over (wStageOp W)) _ _ _
+    (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback g ⋙ Over.forget _) t f (bcCone W g) (bcIsLimit W g)
+    inferInstance inferInstance (fun {i j} φ => bc_transition_affine W g φ)
+    (fun T => bc_obj_compact W g T) (fun T => bc_obj_qsep W g T) a ha
+
+/-- Generic equality descent along the base-changed stage system. -/
+theorem eq_descends (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W))
+    [QuasiCompact g] [QuasiSeparated g]
+    {Y : Scheme.{u}} (f : Y ⟶ (fgSys.specDiagram R).obj (wStageOp W))
+    [LocallyOfFiniteType f]
+    (t : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback g ⋙ Over.forget _) ⟶
+      (Functor.const (Over (wStageOp W))).obj ((fgSys.specDiagram R).obj (wStageOp W)))
+    {T : Over (wStageOp W)}
+    (u v : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback g ⋙ Over.forget _).obj T ⟶ Y)
+    (hu : t.app T = u ≫ f) (hv : t.app T = v ≫ f)
+    (huv : (bcCone W g).π.app T ≫ u = (bcCone W g).π.app T ≫ v) :
+    ∃ (T' : Over (wStageOp W)) (ψ : T' ⟶ T),
+      (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+        Over.pullback g ⋙ Over.forget _).map ψ ≫ u =
+      (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+        Over.pullback g ⋙ Over.forget _).map ψ ≫ v :=
+  @Scheme.exists_hom_comp_eq_comp_of_locallyOfFiniteType
+    (Over (wStageOp W)) _ _ _
+    (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback g ⋙ Over.forget _) t f (bcCone W g) (bcIsLimit W g)
+    (fun T => bc_obj_compact W g T) inferInstance inferInstance
+    (fun {i j} φ => bc_transition_affine W g φ) T u v hu hv huv
+
 end MuDescent
 
 end ModularCurves
