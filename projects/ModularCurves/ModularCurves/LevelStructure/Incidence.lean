@@ -1021,7 +1021,8 @@ theorem vanishingLocus_le_ker_iff {T : Scheme.{u}} (t : T ⟶ S) :
 /-- **([T-SG3-LFP-4a])** The vanishing locus of an affine-locally finitely generated
 ideal sheaf on the source is itself affine-locally finitely generated — KM's "defined
 locally by finitely many equations" — hence locally of finite presentation over `S`. -/
-theorem vanishingLocus_subschemeι_lfp (hE : ∀ U : W.affineOpens, (E.ideal U).FG) :
+theorem vanishingLocus_subschemeι_lfp
+    (hE : ∀ U : S.affineOpens, (E.ideal ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩).FG) :
     LocallyOfFinitePresentation (vanishingLocus p E).subschemeι := by
   refine lfp_subschemeι_of_fg fun U => ?_
   show (letI := ((p.app U.1).hom).toAlgebra
@@ -1043,7 +1044,7 @@ theorem vanishingLocus_subschemeι_lfp (hE : ∀ U : W.affineOpens, (E.ideal U).
     Module.Flat.projective_of_finitePresentation
   refine submoduleVanishingIdeal_fg ?_
   haveI : Module.Finite Γ(W, p ⁻¹ᵁ U.1) (E.ideal ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩) :=
-    Module.Finite.iff_fg.mpr (hE _)
+    Module.Finite.iff_fg.mpr (hE U)
   haveI : Module.Finite Γ(S, U.1) (E.ideal ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩) :=
     Module.Finite.trans Γ(W, p ⁻¹ᵁ U.1) _
   exact Module.Finite.iff_fg.mp
