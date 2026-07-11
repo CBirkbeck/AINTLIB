@@ -1803,6 +1803,190 @@ theorem modelGrpObj_unique (G : GrpObj (modelOver W))
       exact congrArg (· ≫ projModelZero (wZero W))
         (congrArg (· ≫ projModelπ (wZero W)) hw)
     exact hstep.trans hstepv.symm
+  -- the R-axis comparison shuffle
+  have hshuffleR : axApexR W ≫ (sqComparison W).inv =
+      (modelComparison W).inv ≫ (axInclR W).left := by
+    have h1 := axApexR_comparison W
+    have h2 := congrArg (fun m => (modelComparison W).inv ≫ m ≫ (sqComparison W).inv) h1
+    simp only [Category.assoc, Iso.hom_inv_id, Category.comp_id, Iso.inv_hom_id_assoc]
+      at h2
+    exact h2.trans (congrArg ((modelComparison W).inv ≫ ·)
+      ((Category.assoc _ _ _).trans ((congrArg ((axInclR W).left ≫ ·)
+        (Iso.hom_inv_id (sqComparison W))).trans (Category.comp_id _))))
+  -- the R-axis collapse datum
+  set uR : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).obj T ⟶ projModel (wZero W) :=
+    axBCR W T ≫ g' with huR_def
+  -- the R-axis cone equation (mirror of `hcone_uv`)
+  have hcone_uvR : (bcCone W (projModelπ (wZero W))).π.app T ≫ uR =
+      (bcCone W (projModelπ (wZero W))).π.app T ≫ v := by
+    have hη : (modelOver W).hom ≫
+        (η[modelOver W] : 𝟙_ (Over (Spec (CommRingCat.of R))) ⟶ modelOver W).left =
+        projModelπ W ≫ projModelZero W := by
+      show (modelOver W).hom ≫ (oneOver W).left = _
+      rw [oneOver_left]
+      show projModelπ W ≫ 𝟙 _ ≫ projModelZero W = _
+      rw [Category.id_comp]
+    have hw : (bcCone W (projModelπ (wZero W))).π.app T ≫
+        ((Over.pullback (projModelπ (wZero W))).obj
+          ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T)).hom =
+        Limits.pullback.snd ((slicedCone W).pt).hom (projModelπ (wZero W)) :=
+      Over.w ((Over.pullback (projModelπ (wZero W))).map ((slicedCone W).π.app T))
+    have hinvfst : (modelComparison W).inv ≫ projModelπ W =
+        Limits.pullback.fst ((slicedCone W).pt).hom (projModelπ (wZero W)) :=
+      (wPB (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)).flip.isoPullback_inv_fst
+    have hstep : (bcCone W (projModelπ (wZero W))).π.app T ≫ uR =
+        (Limits.pullback.snd ((slicedCone W).pt).hom (projModelπ (wZero W)) ≫
+          projModelπ (wZero W)) ≫ projModelZero (wZero W) := by
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      refine (congrArg (· ≫ g') (axBCR_cone W T)).trans ?_
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg (axApexR W ≫ ·) hg'cone).trans ?_
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      refine (congrArg (· ≫ (F.left ≫ projModelBaseChangeOf (wStage W).1.val.toRingHom
+        (wZero W) W (wZero_map W))) hshuffleR).trans ?_
+      refine (Category.assoc _ _ _).trans ?_
+      refine (congrArg ((modelComparison W).inv ≫ ·)
+        ((Category.assoc _ _ _).symm)).trans ?_
+      refine (congrArg (fun m => (modelComparison W).inv ≫ m ≫
+        projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W))
+        hcolR).trans ?_
+      refine (congrArg (fun m => (modelComparison W).inv ≫ m ≫
+        projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W))
+        hη).trans ?_
+      refine (congrArg ((modelComparison W).inv ≫ ·) (Category.assoc _ _ _)).trans ?_
+      refine (congrArg (fun m => (modelComparison W).inv ≫ projModelπ W ≫ m)
+        (projModelZero_baseChangeOf (wStage W).1.val.toRingHom (wZero W) W
+          (wZero_map W))).trans ?_
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      refine (congrArg (· ≫ (Spec.map (CommRingCat.ofHom (wStage W).1.val.toRingHom) ≫
+        projModelZero (wZero W))) hinvfst).trans ?_
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      exact congrArg (· ≫ projModelZero (wZero W)) Limits.pullback.condition
+    have hstepv : (bcCone W (projModelπ (wZero W))).π.app T ≫ v =
+        (Limits.pullback.snd ((slicedCone W).pt).hom (projModelπ (wZero W)) ≫
+          projModelπ (wZero W)) ≫ projModelZero (wZero W) := by
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      refine (congrArg (· ≫ projModelZero (wZero W))
+        ((Category.assoc _ _ _).symm)).trans ?_
+      exact congrArg (· ≫ projModelZero (wZero W))
+        (congrArg (· ≫ projModelπ (wZero W)) hw)
+    exact hstep.trans hstepv.symm
+  -- instance supply for the descents
+  haveI : SmoothOfRelativeDimension 1 (projModelπ (wZero W)) := projModel_smooth (wZero W)
+  haveI : Smooth (projModelπ (wZero W)) :=
+    SmoothOfRelativeDimension.smooth (n := 1) (f := projModelπ (wZero W))
+  haveI : IsProper (projModelπ (wZero W)) := projModelπ_isProper (wZero W)
+  haveI : UniversallyClosed (projModelπ (wZero W)) := inferInstance
+  haveI hqc : QuasiCompact (projModelπ (wZero W)) := by infer_instance
+  haveI hqs : QuasiSeparated (projModelπ (wZero W)) := by infer_instance
+  haveI hlfp : LocallyOfFinitePresentation (projModelπ (wZero W)) := by infer_instance
+  haveI hlft : LocallyOfFiniteType (projModelπ (wZero W)) := by infer_instance
+  -- over-compatibility of the three collapse data
+  have hu : (bcT W (projModelπ (wZero W))).app T = u ≫ projModelπ (wZero W) := by
+    refine Eq.symm ?_
+    show (axBC W T ≫ g') ≫ projModelπ (wZero W) = _
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (axBC W T ≫ ·) hg'π).trans ?_
+    show axBC W T ≫ (Limits.pullback.snd _ _ ≫ sqStruct W) = _
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    refine (congrArg (· ≫ sqStruct W) (Limits.pullback.lift_snd _ _ _)).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    exact congrArg (Limits.pullback.snd _ _ ≫ ·) (axL₀_sqStruct W)
+  have huR : (bcT W (projModelπ (wZero W))).app T = uR ≫ projModelπ (wZero W) := by
+    refine Eq.symm ?_
+    show (axBCR W T ≫ g') ≫ projModelπ (wZero W) = _
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (axBCR W T ≫ ·) hg'π).trans ?_
+    show axBCR W T ≫ (Limits.pullback.snd _ _ ≫ sqStruct W) = _
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    refine (congrArg (· ≫ sqStruct W) (Limits.pullback.lift_snd _ _ _)).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    exact congrArg (Limits.pullback.snd _ _ ≫ ·) (axR₀_sqStruct W)
+  have hv : (bcT W (projModelπ (wZero W))).app T = v ≫ projModelπ (wZero W) := by
+    refine Eq.symm ?_
+    show ((bcT W (projModelπ (wZero W))).app T ≫ projModelZero (wZero W)) ≫
+      projModelπ (wZero W) = _
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg ((bcT W (projModelπ (wZero W))).app T ≫ ·)
+      (projModelZero_projModelπ (wZero W))).trans ?_
+    exact Category.comp_id _
+  -- descend both collapse equations, then meet at a common stage
+  obtain ⟨T₁, ψ₁, hψ₁⟩ := eq_descends W (projModelπ (wZero W)) hqc hqs
+    (projModelπ (wZero W)) hlft (bcT W (projModelπ (wZero W))) u v hu hv hcone_uv
+  obtain ⟨T₂, ψ₂, hψ₂⟩ := eq_descends W (projModelπ (wZero W)) hqc hqs
+    (projModelπ (wZero W)) hlft (bcT W (projModelπ (wZero W))) uR v huR hv hcone_uvR
+  obtain ⟨S₂, α, β, hαβ⟩ := IsCofiltered.cospan ψ₁ ψ₂
+  set σ : S₂ ⟶ T := α ≫ ψ₁ with hσ_def
+  -- both collapse equations hold after the transition to `S₂`
+  have hLσ : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫ u =
+      (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫ v := by
+    show (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map (α ≫ ψ₁) ≫ u = _
+    refine (congrArg (· ≫ u) (Functor.map_comp _ _ _)).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map α ≫ ·) hψ₁).trans ?_
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    exact congrArg (· ≫ v) (Functor.map_comp _ _ _).symm
+  have hRσ : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫ uR =
+      (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫ v := by
+    have hswap : σ = β ≫ ψ₂ := hαβ
+    rw [hswap]
+    refine (congrArg (· ≫ uR) (Functor.map_comp _ _ _)).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map β ≫ ·) hψ₂).trans ?_
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    exact congrArg (· ≫ v) (Functor.map_comp _ _ _).symm
+  -- the descended difference and its stage collapse equations
+  set g'' : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (sqStruct W) ⋙ Over.forget _).obj S₂ ⟶ projModel (wZero W) :=
+    (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (sqStruct W) ⋙ Over.forget _).map σ ≫ g' with hg''_def
+  have hbcTσ : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫
+      (bcT W (projModelπ (wZero W))).app T =
+      (bcT W (projModelπ (wZero W))).app S₂ :=
+    ((bcT W (projModelπ (wZero W))).naturality σ).trans (Category.comp_id _)
+  have hLS : axBC W S₂ ≫ g'' =
+      (bcT W (projModelπ (wZero W))).app S₂ ≫ projModelZero (wZero W) := by
+    show axBC W S₂ ≫ ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (sqStruct W) ⋙ Over.forget _).map σ ≫ g') = _
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    refine (congrArg (· ≫ g') (axBC_natural W σ).symm).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine hLσ.trans ?_
+    show (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫
+      ((bcT W (projModelπ (wZero W))).app T ≫ projModelZero (wZero W)) = _
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    exact congrArg (· ≫ projModelZero (wZero W)) hbcTσ
+  have hRS : axBCR W S₂ ≫ g'' =
+      (bcT W (projModelπ (wZero W))).app S₂ ≫ projModelZero (wZero W) := by
+    show axBCR W S₂ ≫ ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (sqStruct W) ⋙ Over.forget _).map σ ≫ g') = _
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    refine (congrArg (· ≫ g') (axBCR_natural W σ).symm).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine hRσ.trans ?_
+    show (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).map σ ≫
+      ((bcT W (projModelπ (wZero W))).app T ≫ projModelZero (wZero W)) = _
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    exact congrArg (· ≫ projModelZero (wZero W)) hbcTσ
+  have hg''π : g'' ≫ projModelπ (wZero W) = (sqT W).app S₂ := by
+    show ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (sqStruct W) ⋙ Over.forget _).map σ ≫ g') ≫
+      projModelπ (wZero W) = _
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (sqStruct W) ⋙ Over.forget _).map σ ≫ ·) hg'π).trans ?_
+    exact ((sqT W).naturality σ).trans (Category.comp_id _)
   sorry
 
 end Unique
