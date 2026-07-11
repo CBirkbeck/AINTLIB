@@ -681,6 +681,16 @@ theorem squareMulRes_comp_groupToBaseRes :
   rw [show P.groupToBaseRes ≫ P.V.ι = P.groupOpen.ι ≫ G.π from
     Scheme.Hom.resLE_comp_ι _ _]
 
+/-- The structure map of the group square to the base patch. -/
+noncomputable def squareToBase : P.groupSquare ⟶ P.V.toScheme :=
+  pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupToBaseRes
+
+/-- `Γ(square)` is an `R'`-algebra via the structure map to the base. -/
+noncomputable instance : Algebra P.baseRingTop (Γ(P.groupSquare, ⊤)) :=
+  P.squareToBase.appTop.hom.toAlgebra
+
+instance : IsAffine P.groupSquare := P.isAffine_groupSquare
+
 /-- The affine Künneth transport for the group square, `⊤`-level. -/
 noncomputable abbrev squareΓTop :
     Γ(P.groupSquare, ⊤) ⟶ CommRingCat.of (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) :=
