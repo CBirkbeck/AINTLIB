@@ -327,4 +327,73 @@ noncomputable def sqIsPullback : IsPullback
 
 end Square
 
+/-! ## The μ-descent -/
+
+section MuDescent
+
+attribute [local instance] IsCofiltered.isConnected
+
+variable {R} (W : WeierstrassCurve R) [W.IsElliptic]
+
+/-- The structure morphism of the first-stage model square. -/
+noncomputable def sqStruct :
+    Limits.pullback (projModelπ (wZero W)) (projModelπ (wZero W)) ⟶
+      (fgSys.specDiagram R).obj (wStageOp W) :=
+  Limits.pullback.fst _ _ ≫ projModelπ (wZero W)
+
+/-- The structural transformation of the base-changed square system. -/
+noncomputable def sqT : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+    Over.pullback (sqStruct W) ⋙ Over.forget _) ⟶
+    (Functor.const (Over (wStageOp W))).obj ((fgSys.specDiagram R).obj (wStageOp W)) where
+  app T := ((Over.pullback (sqStruct W)).obj
+    ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T)).hom ≫ sqStruct W
+  naturality {T T'} φ := by
+    have hw := Over.w ((Over.pullback (sqStruct W)).map
+      ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).map φ))
+    show _ ≫ _ ≫ sqStruct W = (_ ≫ sqStruct W) ≫ 𝟙 _
+    rw [Category.comp_id, ← Category.assoc]
+    exact congrArg (· ≫ sqStruct W) hw
+
+example : LocallyOfFinitePresentation (projModelπ (wZero W)) := by
+  haveI : SmoothOfRelativeDimension 1 (projModelπ (wZero W)) := projModel_smooth (wZero W)
+  haveI hsm : Smooth (projModelπ (wZero W)) :=
+    SmoothOfRelativeDimension.smooth (n := 1) (f := projModelπ (wZero W))
+  infer_instance
+
+/-- The comparison isomorphism: the `R`-square is the base-changed-square-system's apex. -/
+noncomputable def sqComparison :
+    Limits.pullback (projModelπ W) (projModelπ W) ≅ (bcCone W (sqStruct W)).pt :=
+  (sqIsPullback (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)).flip.isoPullback
+
+/-- **(K2 step 5, μ-descent)** Any multiplication-shaped morphism on the `R`-square
+descends to a finitely generated stage, compatibly over the first stage. -/
+theorem mu_descends (μl : Limits.pullback (projModelπ W) (projModelπ W) ⟶ projModel W)
+    (hμπ : μl ≫ projModelπ W = Limits.pullback.fst _ _ ≫ projModelπ W) :
+    ∃ (T : Over (wStageOp W))
+      (g' : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+        Over.pullback (sqStruct W) ⋙ Over.forget _).obj T ⟶ projModel (wZero W)),
+      (bcCone W (sqStruct W)).π.app T ≫ g' =
+        (sqComparison W).inv ≫ μl ≫
+          projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) ∧
+      g' ≫ projModelπ (wZero W) = (sqT W).app T := by
+  /- CONTINUATION NOTE (Y1-CLOSER, K2 step 5): apply
+  `Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation _ (sqT W)
+    (projModelπ (wZero W)) _ (bcIsLimit W (sqStruct W)) (a := (sqComparison W).inv ≫ μl ≫
+    projModelBaseChangeOf …) ha`. The probe above shows Smooth ⟹ lfp fires in a clean
+  goal; the application additionally needs the D-SIDE instance-args synthesized for the
+  COMPOSITE system (Over.post ⋙ Over.pullback (sqStruct W) ⋙ Over.forget):
+  (i) [∀ φ, IsAffineHom (D.map φ)] — each transition is a base change of the affine
+      Spec-transition (exhibit the Over.pullback-map square as a pullback, then
+      `isAffineHom_isStableUnderBaseChange`);
+  (ii) [∀ T, CompactSpace/QuasiSeparatedSpace (D.obj T)] — the objects are pullbacks of
+      qcqs over affine (`pullback (T-structure) (sqStruct W)`); derive from
+      QuasiCompact/QuasiSeparated of `sqStruct W` (the model square is proper-over-affine)
+      base-changed;
+  (iii) `ha` — componentwise: the cone-leg is an Over-SQ₀ morphism (`Over.w`), so
+      LHS = pullback.snd ≫ sqStruct; RHS via `(wPB …).w`, `hμπ`, and the
+      `sqComparison`-leg identities (`IsPullback.isoPullback_inv_fst/snd` on the flip). -/
+  sorry
+
+end MuDescent
+
 end ModularCurves
