@@ -7644,7 +7644,39 @@ gate note, commit 90ed0986); this amendment turns the lift into dispatched work 
 idle capacity. Housekeeping done in this pass: the unpushed `dev/modular-curves` commits were
 PUSHED (`66300bb4..5f4829dc`, 238 commits).*
 
-### v10.150-CLOSER — ★★ BB-FLAT core COMPLETE: the square-zero kernel calculus, base-generic and sorry-free (Y1-CLOSER)
+### v10.151-CLOSER — N5 G1/G2 landed; G3 (cover-glue) fully designed with iso-dodges (Y1-CLOSER)
+
+**Landed (KernelDivisibilityGlue.lean, sorry-free):** `modelYChart` (+ affine + zero-lands
+via `projModelZero_preimage_yChart = ⊤`), MODEL-DIV/MODEL-INJ (the chart calculus at the
+model's Y-chart), **PIECE-DIV/PIECE-INJ** (`kernel_div_of_chartFactor` /
+`kernel_inj_of_chartFactor`): divisibility/injectivity over any chart-factoring test,
+transported along `Point.baseChangeEquiv.symm ≪ pointAddEquiv (chartOverIso, hμ-K3)` with
+restrict-compat by val-chases (`chartZero_totalIso`, `chartZero_fst`; the restricted
+pullback-lift IS the chart zero lift).
+
+**G3 design (the remaining N5 content), with the two plumbing-dodges:**
+1. Cover: per `p : Spec A'` choose `a_p` with `p ∈ D(a_p) ⊆ b'⁻¹(atlas U_{i_p})`
+   (basic-open basis); `TestLoc a := Localization.Away a` (registered def); the cover
+   `ρ_p := Spec.map (algebraMap A' Λ_p)` is an OpenCover (localization-away open
+   immersion + joint surjectivity).
+2. Per piece: `I_p := I.map`, `ker² = ⊥` by `Ideal.map_mul`; kernel-membership of
+   `ε_p := castBase (restrict ρ_p ε)` val-wise via the `Ideal.quotientMap` square
+   (NO quotient-localization iso needed); N-unit by `b'`-pull; PIECE-DIV ⟹ `δ_p`.
+3. Overlap-agreement: over `Spec(Λ_p ⊗_{A'} Λ_q)` via `pullbackSpecIso`; both
+   restrictions solve the same problem (the overlap factors through the `p`-chart);
+   PIECE-INJ on the difference.
+4. Glue: `Scheme.OpenCover.glueMorphisms` ⟹ `w`; `δ := ⟨w, over⟩` with over/`N•δ = ε`
+   via `Cover.hom_ext` val-wise.
+5. **restrict-0 dodge** (avoids the `Λ_p/I_p ≅ (A'/I)-Away` iso): cover `Spec(A'/I)` by
+   the PULLBACKS `𝒱_p := pullback(Spec.map φ, ρ_p)` (open immersion by base change,
+   jointly surjective by `exists_preimage_pullback`); the obligation
+   `snd ≫ v_p = (snd ≫ ρ_p ≫ b') ≫ zero` factors through `Spec.map φ_p` via
+   `θ := Spec`-side of the tensor-lift `((A'/I) → Λ_p/I_p [quotientMap], Λ_p → Λ_p/I_p [mk])`
+   through `pullbackSpecIso` — consuming `δ_p`'s restrict-0.
+
+Then N6 ((LIFT) + RingHom.Smooth affine pairs) and N7 (swap + bar + ★★★★).
+
+## v10.150-CLOSER — ★★ BB-FLAT core COMPLETE: the square-zero kernel calculus, base-generic and sorry-free (Y1-CLOSER)
 
 **`KernelDivisibilityChart.lean` is done** (root target green, 0 sorries): the entire
 mathematical content of BB-FLAT route (G), over an **arbitrary** affine base `Spec B`:
