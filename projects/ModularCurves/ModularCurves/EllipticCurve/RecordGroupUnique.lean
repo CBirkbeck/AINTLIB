@@ -6,6 +6,7 @@ Authors: The AINTLIB Authors
 import ModularCurves.EllipticCurve.ModelGroupUniq
 import ModularCurves.EllipticCurve.WeierstrassAtlasBundle
 import ModularCurves.ForMathlib.OverPullbackMul
+import ModularCurves.EllipticCurve.GroupLaw
 
 /-!
 # Uniqueness of the pointed group structure on a locally Weierstrass record (K3)
@@ -424,6 +425,45 @@ theorem grpObj_mul_unique {S : Scheme.{u}} (G : EllipticCurveGeom S)
   exact ⟨chartOpen G.atlas i, hi, chartOpen_mul_eq G.atlas G₁ G₂ h₁ h₂ i⟩
 
 end Unique
+
+/-! ## The pointed-isomorphism corollary (the K4 supply) -/
+
+section PointedIso
+
+/-- **(K4 supply — the records-level canonicity primitive)** A pointed isomorphism of
+working records is a homomorphism of their group structures: the transported structure
+`GrpObj.ofIso` shares the unit with the target's, so the records-level [U-MODEL]
+(`grpObj_mul_unique`) identifies the multiplications, and conjugating back gives the
+`IsMonHom` equation. This replaces the sorried route (a) primitive
+(`isMonHom_of_one_comp_eq'_of_finitePresentation`) at its MASTER-trail consumption sites. -/
+theorem isMonHom_of_pointedIso_records {S : Scheme.{u}}
+    (E E' : EllipticCurve S) (e : E.asOver ≅ E'.asOver)
+    (hη : (η[E.asOver] : 𝟙_ (Over S) ⟶ E.asOver) ≫ e.hom = η[E'.asOver]) :
+    (μ[E.asOver] : E.asOver ⊗ E.asOver ⟶ E.asOver) ≫ e.hom =
+      MonoidalCategory.tensorHom e.hom e.hom ≫
+        (μ[E'.asOver] : E'.asOver ⊗ E'.asOver ⟶ E'.asOver) := by
+  letI Gt : GrpObj E'.asOver := GrpObj.ofIso e
+  have ht : (letI := Gt;
+      (η[E'.asOver] : 𝟙_ (Over S) ⟶ E'.asOver).left) =
+      (𝟙_ (Over S)).hom ≫ E'.zero := by
+    have h0 : (letI := Gt; (η[E'.asOver] : 𝟙_ (Over S) ⟶ E'.asOver)) =
+        (η[E.asOver] : 𝟙_ (Over S) ⟶ E.asOver) ≫ e.hom := rfl
+    rw [h0, hη]
+    exact E'.one_eq_zero
+  have h' : (letI := E'.grp;
+      (η[E'.asOver] : 𝟙_ (Over S) ⟶ E'.asOver).left) =
+      (𝟙_ (Over S)).hom ≫ E'.zero := E'.one_eq_zero
+  have huniq := grpObj_mul_unique E'.toEllipticCurveGeom Gt E'.grp ht h'
+  have hofiso : (letI := Gt;
+      (μ[E'.asOver] : E'.asOver ⊗ E'.asOver ⟶ E'.asOver)) =
+      (e.inv ⊗ₘ e.inv) ≫ (μ[E.asOver] : E.asOver ⊗ E.asOver ⟶ E.asOver) ≫ e.hom := rfl
+  have hcon := hofiso.symm.trans huniq
+  have h2 := congrArg (fun m => (e.hom ⊗ₘ e.hom) ≫ m) hcon
+  rw [← Category.assoc, tensorHom_comp_tensorHom, Iso.hom_inv_id, id_tensorHom_id,
+    Category.id_comp] at h2
+  exact h2
+
+end PointedIso
 
 
 
