@@ -7644,7 +7644,45 @@ gate note, commit 90ed0986); this amendment turns the lift into dispatched work 
 idle capacity. Housekeeping done in this pass: the unpushed `dev/modular-curves` commits were
 PUSHED (`66300bb4..5f4829dc`, 238 commits).*
 
-### v10.146-CLOSER — ★ BB-QF DISCHARGED (invertible case) and rewired off the trail; MASTER residual = exactly BB-FLAT (Y1-CLOSER)
+### v10.147-CLOSER — BB-FLAT route-(G) campaign map (audit complete; TUF template confirmed) (Y1-CLOSER)
+
+**Route (G) concretized after full audit.** `[N]` is AFFINE on the trail (finite — proven,
+invertible case), so `Flat`/`Smooth` are affine-local ring questions
+(`HasRingHomProperty`); mathlib has NO scheme-level `FormallySmooth`, NO miracle flatness,
+NO fibrewise criterion (all checked) — but HAS `Flat.of_stalkMap`, ring-level
+`Algebra.FormallySmooth` with full lifting API, and Dedekind/torsion-free⟹flat.
+
+**The (LIFT) core**: for square-zero `A' ↠ A` and a lifting problem for `[N]` (a point
+`x' ∈ E(A')` and `y ∈ E(A)` with `[N]y = x'|_A`): E-smoothness lifts `y` to some
+`ỹ ∈ E(A')`; the defect `ε := x' − [N]ỹ` lies in `K := ker(E(A') → E(A))` (a point-group);
+since the point-group is abelian, `[N](ỹ + δ) = [N]ỹ + N•δ`, so the lift exists iff
+`N• : K → K` is surjective — **kernel N-divisibility**, the ONLY remaining mathematical
+content of BB-FLAT.
+
+**The divisibility template EXISTS in-repo**: `TorsionUnramifiedFibre.lean`'s L-BC layer
+(`pointSharp`/`pairBox`/`boxIso`/`chartAug`/`axisL_spec_law`/`pointSharp_add`,
+:325–1280) proves the co-multiplication linearization — `sharp(P₁+P₂) = sharp P₁ + sharp P₂`
+for points restricting to zero mod a square-zero kernel — over a FIELD base with ARBITRARY
+square-zero tests `(φ : R' ⟶ R, ker² = ⊥)`. Iterating gives `sharp(N•P) = N·sharp(P)`; with
+`N` invertible this makes `N•` invertible on the kernel — at field-fibres. The
+generalization needed: the same layer with `Spec k` replaced by the affine chart base
+(field-ness enters ONLY at the 6c units-step `foldε y ≠ 0 ⟹ unit`; over a general base
+work at the local rings / use the `A'`-module structure instead). Alternatively:
+K ≅ Hom(e*Ω_{E/S}, I) via the formal-smoothness derivation-torsor + `d[N] = N`
+(the invariant differential — same content, cotangent form).
+
+**Consumption once landed**: swap the flat input of `mulBy_etale'`
+(`MulByHomEtale.lean`) from the sorried `mulByHom_flat` to the invertible-case theorem;
+the MASTER (`gammaOneNaive_representable`) then reads `{propext, Classical.choice,
+Quot.sound}` — the CHARTER bar. Follow-through after: T-W7a retirement + ★★★★ attribution
+(c5β chain, A's prep, HasseWeil anchor).
+
+**Session ledger (this block)**: K2 [U-MODEL] ★ → K3 records-primitive ★ → K4 swap ★
+(T-E4 family + representability half CLEAN) → BB-QF ★ (clean triple; HasseWeil bridge
+live) → BB-FLAT mapped to one funnel. Root 4,183 jobs green throughout; both boards
+current; everything pushed.
+
+## v10.146-CLOSER — ★ BB-QF DISCHARGED (invertible case) and rewired off the trail; MASTER residual = exactly BB-FLAT (Y1-CLOSER)
 
 **`mulByHom_locallyQuasiFinite_of_nIsInvertible` is PROVEN at `{propext, Classical.choice,
 Quot.sound}`** (`MulByHomQuasiFinite.lean`). Root green 4,183 jobs, all pushed. The trail
