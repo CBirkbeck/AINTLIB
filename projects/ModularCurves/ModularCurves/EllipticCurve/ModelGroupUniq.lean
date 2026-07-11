@@ -149,4 +149,80 @@ Remaining steps to `modelGrpObj_unique`:
    `μ_T = mulOver`, base-change back up with `mulModelHom_map`.
 -/
 
+/-! ## Descending the curve to the first stage -/
+
+section WDescent
+
+variable {R} (W : WeierstrassCurve R) [W.IsElliptic]
+
+/-- The first stage: the coefficients and `Δ⁻¹` generate a finitely generated subalgebra. -/
+noncomputable def wStage : fgSys R :=
+  ⟨Algebra.adjoin ℤ {W.a₁, W.a₂, W.a₃, W.a₄, W.a₆, ↑W.isUnit_Δ.unit⁻¹},
+   Subalgebra.fg_def.mpr ⟨_, Set.toFinite _, rfl⟩⟩
+
+/-- Membership of the six generators. -/
+theorem wStage_mem (x : R)
+    (hx : x ∈ ({W.a₁, W.a₂, W.a₃, W.a₄, W.a₆, ↑W.isUnit_Δ.unit⁻¹} : Set R)) :
+    x ∈ (wStage W).1 :=
+  Algebra.subset_adjoin hx
+
+/-- The curve at the first stage. -/
+noncomputable def wZero : WeierstrassCurve ↥(wStage W).1 :=
+  ⟨⟨W.a₁, wStage_mem W _ (by simp)⟩, ⟨W.a₂, wStage_mem W _ (by simp)⟩,
+   ⟨W.a₃, wStage_mem W _ (by simp)⟩, ⟨W.a₄, wStage_mem W _ (by simp)⟩,
+   ⟨W.a₆, wStage_mem W _ (by simp)⟩⟩
+
+/-- The stage curve maps to `W` under the inclusion. -/
+theorem wZero_map : (wZero W).map (wStage W).1.val.toRingHom = W := by
+  ext <;> rfl
+
+instance : (wZero W).IsElliptic := by
+  constructor
+  have hval : (wStage W).1.val.toRingHom (wZero W).Δ = W.Δ := by
+    rw [← WeierstrassCurve.map_Δ, wZero_map]
+  have hmul : (wZero W).Δ * ⟨↑W.isUnit_Δ.unit⁻¹, wStage_mem W _ (by simp)⟩ = 1 := by
+    have hinj : Function.Injective (wStage W).1.val.toRingHom := Subtype.val_injective
+    apply hinj
+    rw [map_mul, hval, map_one]
+    show W.Δ * ↑W.isUnit_Δ.unit⁻¹ = 1
+    rw [IsUnit.mul_val_inv]
+  exact ⟨⟨(wZero W).Δ, _, hmul, (mul_comm _ _).trans hmul⟩, rfl⟩
+
+end WDescent
+
+/-! ## The sliced limit and base-changed systems -/
+
+section Sliced
+
+attribute [local instance] IsCofiltered.isConnected
+
+variable {R} (W : WeierstrassCurve R) [W.IsElliptic]
+
+/-- The first-stage index in the opposite category. -/
+noncomputable def wStageOp : (fgSys R)ᵒᵖ := Opposite.op (wStage W)
+
+/-- The sliced stage system: a limit cone in `Over (Spec ↥(wStage W).1)` with apex
+`Spec R` (over the inclusion). -/
+noncomputable def slicedCone : Cone (Over.post (X := wStageOp W) (fgSys.specDiagram R)) :=
+  (Over.conePost (fgSys.specDiagram R) (wStageOp W)).obj (fgSys.specCone R)
+
+noncomputable def slicedIsLimit : IsLimit (slicedCone W) :=
+  Over.isLimitConePost _ (fgSys.specIsLimit R)
+
+variable {X : Scheme.{u}} (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W))
+
+/-- The base-changed stage system along `g`, with apex `pullback g (Spec.map val)`
+(as schemes). -/
+noncomputable def bcCone : Cone (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+    Over.pullback g ⋙ Over.forget X) :=
+  (Over.pullback g ⋙ Over.forget X).mapCone (slicedCone W)
+
+noncomputable def bcIsLimit : IsLimit (bcCone W g) := by
+  haveI : IsCofiltered (Over (wStageOp W)) := inferInstance
+  haveI : PreservesLimitsOfSize.{u, u} (Over.pullback g) :=
+    (Over.mapPullbackAdj g).rightAdjoint_preservesLimits
+  exact isLimitOfPreserves (Over.pullback g ⋙ Over.forget X) (slicedIsLimit W)
+
+end Sliced
+
 end ModularCurves
