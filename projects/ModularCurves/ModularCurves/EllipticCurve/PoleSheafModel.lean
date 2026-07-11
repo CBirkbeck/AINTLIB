@@ -1,5 +1,6 @@
 import ModularCurves.EllipticCurve.PoleFiltration
 import ModularCurves.EllipticCurve.PoleSheaf
+import ModularCurves.Picard.DualPullback.TrivializationRestriction
 
 /-!
 # Pole sheaves on a projective Weierstrass model
@@ -498,6 +499,62 @@ local instance (X : Scheme.{u}) :
     change IsMulCommutative (X.presheaf.obj U)
     exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
 
+private theorem restrictOpenTrivialization_dualRestrictIsoOfRestrictIso
+    {X : Scheme.{u}} (M : X.Modules) {U V : X.Opens} (hVU : V ≤ U)
+    (e : M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme) :
+    Scheme.Modules.restrictOpenTrivialization hVU
+        (Scheme.Modules.dualRestrictIsoOfRestrictIso M U e) =
+      restrictTrivializationOfOverIso (Scheme.Modules.dualObj M) V
+        (SheafOfModules.dualOverIsoOfIso X.ringCatSheaf M V
+          (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M U
+            (Scheme.Modules.overTrivializationOfRestrictIso M U e)
+              (Over.mk (homOfLE hVU)))) := by
+  have hdual :
+      Scheme.Modules.overTrivializationOfRestrictIso
+          (Scheme.Modules.dualObj M) U
+            (Scheme.Modules.dualRestrictIsoOfRestrictIso M U e) =
+        SheafOfModules.dualOverIsoOfIso X.ringCatSheaf M U
+          (Scheme.Modules.overTrivializationOfRestrictIso M U e) := by
+    change Scheme.Modules.overTrivializationOfRestrictIso
+        (Scheme.Modules.dualObj M) U
+          (restrictTrivializationOfOverIso (Scheme.Modules.dualObj M) U
+            (SheafOfModules.dualOverIsoOfIso X.ringCatSheaf M U
+              (Scheme.Modules.overTrivializationOfRestrictIso M U e))) = _
+    exact overTrivializationOfRestrictTrivializationOfOverIso
+      (Scheme.Modules.dualObj M) U _
+  have hres :=
+    Scheme.Modules.overTrivializationOfRestrictOpenTrivialization hVU
+      (Scheme.Modules.dualRestrictIsoOfRestrictIso M U e)
+  rw [hdual] at hres
+  have hcompat :=
+    SheafOfModules.restrictOverTrivialization_dualOverIsoOfIso
+      X.ringCatSheaf M U
+        (Scheme.Modules.overTrivializationOfRestrictIso M U e)
+          (Over.mk (homOfLE hVU))
+  change SheafOfModules.restrictOverTrivialization X.ringCatSheaf
+      (Scheme.Modules.dualObj M) U
+        (SheafOfModules.dualOverIsoOfIso X.ringCatSheaf M U
+          (Scheme.Modules.overTrivializationOfRestrictIso M U e))
+            (Over.mk (homOfLE hVU)) =
+    SheafOfModules.dualOverIsoOfIso X.ringCatSheaf M V
+      (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M U
+        (Scheme.Modules.overTrivializationOfRestrictIso M U e)
+          (Over.mk (homOfLE hVU))) at hcompat
+  rw [hcompat] at hres
+  have htarget :=
+    overTrivializationOfRestrictTrivializationOfOverIso
+      (Scheme.Modules.dualObj M) V
+        (SheafOfModules.dualOverIsoOfIso X.ringCatSheaf M V
+          (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M U
+            (Scheme.Modules.overTrivializationOfRestrictIso M U e)
+              (Over.mk (homOfLE hVU))))
+  have hover := hres.trans htarget.symm
+  have hopen := congrArg
+    (restrictTrivializationOfOverIso (Scheme.Modules.dualObj M) V) hover
+  rw [restrictTrivializationOfOverTrivializationOfRestrictIso,
+    restrictTrivializationOfOverTrivializationOfRestrictIso] at hopen
+  exact hopen
+
 /-- On the overlap, the ideal trivializations differ by multiplication by the
 section parameter `s`. -/
 theorem projModelZeroIdealOverlap_transition (W : WeierstrassCurve R) :
@@ -764,6 +821,54 @@ noncomputable def projModelSectionPoleSheafTrivializationZ (W : WeierstrassCurve
   change (idealModule (projModelZero W)).restrict (projModelZChart W).1.ι ≅
     Scheme.Modules.unitObj (projModelZChart W).1.toScheme
   exact (projModelZeroIdealTrivializationZ W).symm
+
+section
+
+local instance (X : Scheme.{u}) :
+    ∀ U, IsMulCommutative (X.ringCatSheaf.obj.obj U) :=
+  fun U ↦ by
+    change IsMulCommutative (X.presheaf.obj U)
+    exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
+
+/-- Restricting the section-neighborhood simple-pole trivialization to the overlap
+recovers the canonical overlap trivialization. -/
+theorem projModelSectionPoleSheafTrivialization_restrict
+    (W : WeierstrassCurve R) :
+    Scheme.Modules.restrictOpenTrivialization
+        (projModelPoleOverlap_le_sectionNeighborhood W)
+        (projModelSectionPoleSheafTrivialization W) =
+      projModelSectionPoleOverlapRestrictTrivialization W := by
+  let M := sectionIdealModule (projModelπ W) (projModelZero W)
+    (projModelZero_projModelπ W)
+  have h := restrictOpenTrivialization_dualRestrictIsoOfRestrictIso
+    M (projModelPoleOverlap_le_sectionNeighborhood W)
+      (projModelZeroIdealTrivialization W).symm
+  change Scheme.Modules.restrictOpenTrivialization
+      (projModelPoleOverlap_le_sectionNeighborhood W)
+        (projModelSectionPoleSheafTrivialization W) =
+    projModelSectionPoleOverlapRestrictTrivialization W at h
+  exact h
+
+/-- Restricting the `Z`-chart simple-pole trivialization to the overlap recovers
+the canonical `Z`-chart overlap trivialization. -/
+theorem projModelSectionPoleSheafTrivializationZ_restrict
+    (W : WeierstrassCurve R) :
+    Scheme.Modules.restrictOpenTrivialization
+        (projModelPoleOverlap_le_ZChart W)
+        (projModelSectionPoleSheafTrivializationZ W) =
+      projModelSectionPoleOverlapRestrictTrivializationZ W := by
+  let M := sectionIdealModule (projModelπ W) (projModelZero W)
+    (projModelZero_projModelπ W)
+  have h := restrictOpenTrivialization_dualRestrictIsoOfRestrictIso
+    M (projModelPoleOverlap_le_ZChart W)
+      (projModelZeroIdealTrivializationZ W).symm
+  change Scheme.Modules.restrictOpenTrivialization
+      (projModelPoleOverlap_le_ZChart W)
+        (projModelSectionPoleSheafTrivializationZ W) =
+    projModelSectionPoleOverlapRestrictTrivializationZ W at h
+  exact h
+
+end
 
 /-- The induced trivialization of `O(n[0])` on the canonical section
 neighborhood. -/
