@@ -330,11 +330,31 @@ theorem isIso_ev_unitObj (Y : Scheme.{u}) : IsIso (ev (unitObj Y)) := by
         _root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat))).hom := by
     ext1 V
     refine ModuleCat.MonoidalCategory.tensor_ext (fun r φ => ?_)
-    -- LHS is already the evaluated form (evalSection φ r); the RHS composite needs the
-    -- congrArg₂-assembly (comp_app motive-fails here) — continuation: evaluate
-    -- (refl ⊗ᵢ hd).hom-app on the generator via tensorHom_app_tmul-as-have, then
-    -- rightUnitor_hom_app, then close by evalSection_smul_right at r = r • 1 +
-    -- the dualUnitLinearEquiv-component defeq (φ-at-terminal-1).
+    have h2 := PresheafOfModules.tensorHom_app_tmul
+      (T := Y.sheaf.obj) (𝟙 ((unitObj Y).val :
+        _root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat)))
+      hd.hom V r φ
+    have h1 : (ModuleCat.Hom.hom (((Iso.refl ((unitObj Y).val :
+        _root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) ⊗ᵢ hd).hom ≫
+        (ρ_ ((unitObj Y).val :
+          _root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat))).hom).app V))
+        (r ⊗ₜ[((Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj V)] φ) =
+        (ModuleCat.Hom.hom ((ρ_ ((unitObj Y).val :
+          _root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat))).hom.app V))
+          ((ConcreteCategory.hom ((𝟙 ((unitObj Y).val :
+            _root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) ⊗ₘ
+              hd.hom).app V))
+            (r ⊗ₜ[((Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj V)] φ)) := rfl
+    refine Eq.trans ?_ ((h1.trans (congrArg (fun z =>
+      (ModuleCat.Hom.hom ((ρ_ ((unitObj Y).val :
+        _root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat))).hom.app V)) z)
+      h2)).symm)
+    show ModularCurves.SheafOfModules.evalSection Y.ringCatSheaf (unitObj Y) (Opposite.unop V) φ r =
+      (ConcreteCategory.hom (hd.hom.app V)) φ • r
+    -- remaining: evalSection φ r = (hd-app φ) • r. Route (instances fight the r•1-detour
+    -- at scheme-clothing): add a GENERIC-section lemma `evalSection_unit_mul`
+    -- (eval φ r = eval φ 1 * r, proven with the show-from-1 idiom like Dual.lean's own
+    -- unit-proofs), then close here by defeq (hd-app φ ≡ eval φ 1) + mul_comm'.
     sorry
   haveI : IsIso (evPre (unitObj Y)) := by
     rw [hfac]
