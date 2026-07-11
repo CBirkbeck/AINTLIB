@@ -798,4 +798,49 @@ theorem axInclR_mul (G : GrpObj (modelOver W))
 
 end Difference
 
+/-! ## The uniqueness theorem ([U-MODEL]) -/
+
+section Unique
+
+variable {R} (W : WeierstrassCurve R) [W.IsElliptic]
+
+/-- **([U-MODEL], K2)** Any group structure on the projective model with the model zero
+section as unit has the T-G4 multiplication — over an ARBITRARY ring. -/
+theorem modelGrpObj_unique (G : GrpObj (modelOver W))
+    (hone : (letI := G; (η[modelOver W] : 𝟙_ (Over (Spec (CommRingCat.of R))) ⟶
+      modelOver W)) = oneOver W) :
+    (letI := G; (μ[modelOver W] : modelOver W ⊗ modelOver W ⟶ modelOver W)) =
+      mulOver W := by
+  letI := modelGrpObj W
+  set μG : modelOver W ⊗ modelOver W ⟶ modelOver W :=
+    (letI := G; (μ[modelOver W] : modelOver W ⊗ modelOver W ⟶ modelOver W)) with hμGdef
+  show μG = mulOver W
+  -- the difference in the Hom-group of the model structure
+  set F : modelOver W ⊗ modelOver W ⟶ modelOver W := μG * (mulOver W)⁻¹ with hFdef
+  suffices hF1 : F = 1 by
+    have h2 := congrArg (· * mulOver W) hF1
+    simp only [hFdef] at h2
+    rwa [_root_.mul_assoc, inv_mul_cancel, _root_.mul_one, _root_.one_mul] at h2
+  -- the two axis collapses of the difference
+  have hcolL : (axInclL W).left ≫ F.left =
+      (modelOver W).hom ≫ (η[modelOver W] : 𝟙_ _ ⟶ modelOver W).left :=
+    comp_mul_inv_left (axInclL W) μG (mulOver W)
+      ((axInclL_mul W G hone).trans (axInclL_mul W (modelGrpObj W) rfl).symm)
+  have hcolR : (axInclR W).left ≫ F.left =
+      (modelOver W).hom ≫ (η[modelOver W] : 𝟙_ _ ⟶ modelOver W).left :=
+    comp_mul_inv_left (axInclR W) μG (mulOver W)
+      ((axInclR_mul W G hone).trans (axInclR_mul W (modelGrpObj W) rfl).symm)
+  -- descend the difference to a stage
+  have hFπ : F.left ≫ projModelπ W =
+      Limits.pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W :=
+    Over.w F
+  obtain ⟨T, g', hg'cone, hg'π⟩ := mu_descends W F.left hFπ
+  -- STAGE + UP (continuation): descend the two collapses along the axis naturality,
+  -- apply the noetherian seesaw (factor_mul_of_tensor_of_forall_component) at the stage,
+  -- conclude g'-related F_T = 1 there, pull the equality back up through the cone leg and
+  -- wPB.hom_ext.
+  sorry
+
+end Unique
+
 end ModularCurves
