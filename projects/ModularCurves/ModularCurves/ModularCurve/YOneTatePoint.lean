@@ -424,7 +424,100 @@ family is an open immersion (its diagonal is; mathlib `FormallyUnramified` +
 theorem killedLocus_preimage_isOpen {S : Scheme.{u}} (E : EllipticCurve S) (P : E.Section)
     [NeZero N] (hN : NIsInvertible S N) {d : ℕ} (hd : d ∣ N) :
     IsOpen ((E.killedLocusπ P N).base ⁻¹' Set.range (E.killedLocusπ P d).base) := by
-  sorry
+  classical
+  -- the tautological `N`-killed point of `Y_N` and its `d`-multiple's torsion classifier
+  have hNP : (N : ℤ) • EllipticCurve.Point.pull E (E.killedLocusπ P N) P = 0 :=
+    (E.killedLocus_spec P N (E.killedLocusπ P N)).mp ⟨𝟙 _, Category.id_comp _⟩
+  have hkill : ((d : ℤ) • EllipticCurve.Point.pull E (E.killedLocusπ P N) P :
+      E.Point (E.killedLocusπ P N)).1 ≫ E.mulByHom N = (E.killedLocusπ P N) ≫ E.zero := by
+    rw [← E.smul_eq_zero_iff_comp_mulByHom, smul_comm, hNP, smul_zero]
+  set gd := E.pointToTorsion _ hkill with hgd
+  -- the zero section of the (étale) torsion family is an open immersion
+  have hz0 : ((0 : E.Point (𝟙 S)) : S ⟶ E.E) ≫ E.mulByHom N = 𝟙 S ≫ E.zero := by
+    rw [← E.smul_eq_zero_iff_comp_mulByHom, smul_zero]
+  set zT := E.pointToTorsion _ hz0 with hzT
+  haveI hEt : Etale (E.torsionπ N) := E.torsionπ_etale N hN
+  haveI : IsOpenImmersion (Limits.pullback.diagonal (E.torsionπ N)) :=
+    AlgebraicGeometry.FormallyUnramified.isOpenImmersion_diagonal _
+  have hsq := Limits.pullback_lift_diagonal_isPullback zT (E.torsionπ N)
+  have hzTsec : zT ≫ E.torsionπ N = 𝟙 S := E.pointToTorsion_torsionπ _ _
+  haveI hliftP : IsOpenImmersion
+      (Limits.pullback.lift (𝟙 S) zT (by simp) :
+        S ⟶ Limits.pullback (zT ≫ E.torsionπ N) (E.torsionπ N)) :=
+    MorphismProperty.of_isPullback (P := @IsOpenImmersion) hsq inferInstance
+  haveI : IsIso (zT ≫ E.torsionπ N) := by rw [hzTsec]; infer_instance
+  haveI hzTopen : IsOpenImmersion zT := by
+    have hdec : zT = (Limits.pullback.lift (𝟙 S) zT (by simp) :
+        S ⟶ Limits.pullback (zT ≫ E.torsionπ N) (E.torsionπ N)) ≫
+        Limits.pullback.snd _ _ := (Limits.pullback.lift_snd _ _ _).symm
+    rw [hdec]
+    infer_instance
+  -- the two `ι`-composites
+  have hι : gd ≫ E.torsionι N =
+      ((d : ℤ) • EllipticCurve.Point.pull E (E.killedLocusπ P N) P :
+        E.Point (E.killedLocusπ P N)).1 := E.pointToTorsion_torsionι _ _
+  have hzι : zT ≫ E.torsionι N = ((0 : E.Point (𝟙 S)) : S ⟶ E.E) :=
+    E.pointToTorsion_torsionι _ _
+  have hιπ : E.torsionι N ≫ E.π = E.torsionπ N := by
+    have hcond : E.torsionι N ≫ E.mulByHom (N : ℤ) = E.torsionπ N ≫ E.zero :=
+      Limits.pullback.condition
+    have h2 := congrArg (fun m => m ≫ E.π) hcond
+    simpa [E.mulByHom_π, E.zero_π] using h2
+  -- the zero locus of the torsion is exactly the range of the zero section
+  have hrange_z : Set.range zT.base = (E.torsionι N).base ⁻¹' Set.range E.zero.base := by
+    refine subset_antisymm ?_ ?_
+    · rintro _ ⟨y, rfl⟩
+      rw [Set.mem_preimage]
+      have h1 : (E.torsionι N).base (zT.base y) = ((0 : E.Point (𝟙 S)) : S ⟶ E.E).base y := by
+        show (zT ≫ E.torsionι N).base y = _
+        rw [hzι]
+      rw [h1, E.point_zero_val, Category.id_comp]
+      exact ⟨y, rfl⟩
+    · intro tpt htpt
+      obtain ⟨y, hy⟩ := htpt
+      refine ⟨(E.torsionπ N).base tpt, ?_⟩
+      haveI := E.torsionι_isClosedImmersion N
+      have hinj : Function.Injective (E.torsionι N).base :=
+        (Scheme.Hom.isClosedEmbedding (E.torsionι N)).injective
+      apply hinj
+      have hπtpt : (E.torsionπ N).base tpt = E.π.base ((E.torsionι N).base tpt) := by
+        rw [← hιπ]; rfl
+      have hy' : E.π.base ((E.torsionι N).base tpt) = y := by
+        rw [← hy]
+        show (E.zero ≫ E.π).base y = y
+        rw [E.zero_π]
+        rfl
+      have h1 : (E.torsionι N).base (zT.base ((E.torsionπ N).base tpt)) =
+          ((0 : E.Point (𝟙 S)) : S ⟶ E.E).base ((E.torsionπ N).base tpt) := by
+        show (zT ≫ E.torsionι N).base _ = _
+        rw [hzι]
+      rw [h1, E.point_zero_val, Category.id_comp]
+      show E.zero.base ((E.torsionπ N).base tpt) = _
+      rw [hπtpt, hy', hy]
+  -- the set identity
+  have hrange_d : Set.range (E.killedLocusπ P d).base =
+      (((d : ℤ) • P : E.Section).1).base ⁻¹' Set.range E.zero.base :=
+    AlgebraicGeometry.Scheme.Pullback.range_fst _ _
+  have hset : (E.killedLocusπ P N).base ⁻¹' Set.range (E.killedLocusπ P d).base =
+      gd.base ⁻¹' Set.range zT.base := by
+    ext x
+    show (E.killedLocusπ P N).base x ∈ Set.range (E.killedLocusπ P d).base ↔ _
+    rw [hrange_d, hrange_z]
+    have hpt : (((d : ℤ) • P : E.Section).1).base ((E.killedLocusπ P N).base x) =
+        (E.torsionι N).base (gd.base x) := by
+      show ((E.killedLocusπ P N) ≫ (((d : ℤ) • P : E.Section)).1).base x =
+        (gd ≫ E.torsionι N).base x
+      rw [hι]
+      have h2 : (E.killedLocusπ P N) ≫ (((d : ℤ) • P : E.Section)).1 =
+          ((d : ℤ) • EllipticCurve.Point.pull E (E.killedLocusπ P N) P :
+            E.Point (E.killedLocusπ P N)).1 := by
+        rw [← EllipticCurve.Point.pull_zsmul]
+        rfl
+      rw [h2]
+    show _ ∈ (((d : ℤ) • P : E.Section).1).base ⁻¹' Set.range E.zero.base ↔ _
+    simp only [Set.mem_preimage, hpt]
+  rw [hset]
+  exact (IsOpenImmersion.isOpen_range zT).preimage gd.continuous
 
 /-- **(Y1-E2 — affineness, gate [BB-DIFF] via Y1-E1)** `Y₁(N)` is affine: by Y1-E1 the removed
 locus is clopen in `Y_N`, so `Y₁(N)` is a *clopen* subscheme of the closed subscheme
