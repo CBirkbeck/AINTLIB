@@ -692,30 +692,92 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
         rfl
       rw [h3]
       exact hΔ₀unit
-    -- the RAW lifted classifying map (its (0,0) need not be N-torsion; steps 3–4 correct it)
-    set ψ := tateRingOverAlgLift R α β hΔ with hψ
-    /- REMAINING (ledger steps 3–4, producing the FINAL witness): lift the N-torsion point
-    `P₀ := pull t₀ (tatePoint R)` through the étale torsion of the RAW curve
-    `modelEllipticCurve (E(α,β))` (nilpotent lifting against `I`), read its chart
-    coordinates `(x, y) : A²` (`chartSolutionsEquiv`/`zChartEval`), T-E1-renormalise
-    (`exists_unique_variableChange_isTateNormal` — `NowhereOrderLEThree` holds fibrewise
-    since `Spec A` and `Spec (A⧸I)` share fibres), and witness with
-    `tateBaseSpecMap R ψ'` of the CORRECTED coefficients. The restriction leg then follows
-    the PROVEN raw-leg template above (tateBaseSpecMap + Spec.map_comp + hom_ext +
-    tateRingOver_algHom_ext at the corrected coordinates, which restrict to `(α₀, β₀)` by
-    T-E1-uniqueness over `A⧸I` — the classified `P₀` is ALREADY `(0,0)`-marked); the
-    over-φ leg is `tateBaseSpecMap_tateStructMap` verbatim; the structure leg is
-    `killedLocus_spec` + the fibrewise persistence + `factors_yOne_iff`-shape. Proven
-    template for the two plumbing legs (raw form, compiles green — transplant with ψ'):
-      · rw [tateBaseSpecMap, ← Spec.map_comp, ← hspec₀]
-        refine congrArg Spec.map (CommRingCat.hom_ext ?_)
-        <h0/h1 coordinate lemmas via tateRingOverAlgLift_X_zero/_one>
-        <hmkψ : (Ideal.Quotient.mkₐ ↑R I).comp ψ = ψ₀ via tateRingOver_algHom_ext +
-          hα.trans hα₀ / hβ.trans hβ₀>
-        exact congrArg AlgHom.toRingHom hmkψ
-      · exact (tateBaseSpecMap_tateStructMap R ψ).trans
-          (congrArg Spec.map (CommRingCat.hom_ext rfl)) -/
-    sorry
+    -- THE PURE CORE (ledger steps 3–4): a renormalised classifying algebra map whose
+    -- marked point is globally N-killed. Its production = the étale torsion-point lift
+    -- (affine ring-level, against the nilpotent I) + T-E1 renormalisation; the raw lift
+    -- (α, β, hΔ, ψ := tateRingOverAlgLift) above feeds it.
+    obtain ⟨ψ', hψ'res, hψ'kill⟩ :
+        ∃ ψ' : tateRingOver R →ₐ[↑R] A,
+          (Ideal.Quotient.mkₐ ↑R I).comp ψ' = ψ₀ ∧
+          (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) (tateBaseSpecMap R ψ')
+            (tatePoint R) = 0 := by
+      sorry
+    -- assembly: witness with the renormalised map
+    refine ⟨tateBaseSpecMap R ψ', ?_, ?_, ?_⟩
+    · -- restriction (the proven raw-leg template, at ψ')
+      rw [tateBaseSpecMap, ← Spec.map_comp, ← hspec₀]
+      refine congrArg Spec.map (CommRingCat.hom_ext ?_)
+      exact congrArg AlgHom.toRingHom hψ'res
+    · exact (tateBaseSpecMap_tateStructMap R ψ').trans
+        (congrArg Spec.map (CommRingCat.hom_ext rfl))
+    · -- the naive structure: killing from the core, fibrewise clauses transported from
+      -- `hstruct₀` (every geometric point of `Spec A` factors through `Spec (A⧸I)`)
+      set t' := tateBaseSpecMap R ψ' with ht'
+      have hrest' : Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ t' = t₀ := by
+        rw [ht', tateBaseSpecMap, ← Spec.map_comp, ← hspec₀]
+        exact congrArg Spec.map (CommRingCat.hom_ext (congrArg AlgHom.toRingHom hψ'res))
+      -- the `baseChangeEquiv` dictionary at any base point (inline `pull∘asSection` bridge)
+      have hdict : ∀ {T : Scheme.{u}} (τ : T ⟶ Spec (CommRingCat.of A)),
+          EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t' τ
+            (EllipticCurve.Point.pull ((tateUniversal R).baseChange t') τ
+              (EllipticCurve.Point.asSection (tateUniversal R) t'
+                (EllipticCurve.Point.pull (tateUniversal R) t' (tatePoint R)))) =
+          EllipticCurve.Point.pull (tateUniversal R) (τ ≫ t') (tatePoint R) := by
+        intro T τ
+        refine Subtype.ext ?_
+        rw [EllipticCurve.Point.baseChangeEquiv_apply_coe]
+        show (τ ≫ (EllipticCurve.Point.asSection (tateUniversal R) t'
+          (EllipticCurve.Point.pull (tateUniversal R) t' (tatePoint R))).1) ≫ _ = _
+        rw [Category.assoc, EllipticCurve.Point.asSection_val_fst]
+        rfl
+      have hkill' : (N : ℤ) • EllipticCurve.Point.asSection (tateUniversal R) t'
+          (EllipticCurve.Point.pull (tateUniversal R) t' (tatePoint R)) = 0 := by
+        refine (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t'
+          (𝟙 _)).injective ?_
+        rw [map_zsmul, map_zero]
+        refine Subtype.ext ?_
+        have hval : ((EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t' (𝟙 _))
+            (EllipticCurve.Point.asSection (tateUniversal R) t'
+              (EllipticCurve.Point.pull (tateUniversal R) t' (tatePoint R)))).1 =
+            (EllipticCurve.Point.pull (tateUniversal R) t' (tatePoint R)).1 := by
+          rw [EllipticCurve.Point.baseChangeEquiv_apply_coe]
+          exact EllipticCurve.Point.asSection_val_fst _ _ _
+        have hsmulval : (((N : ℤ) • (EllipticCurve.Point.baseChangeEquiv (tateUniversal R)
+            t' (𝟙 _)) (EllipticCurve.Point.asSection (tateUniversal R) t'
+              (EllipticCurve.Point.pull (tateUniversal R) t' (tatePoint R)))) :
+            _ ⟶ (tateUniversal R).E) =
+            (EllipticCurve.Point.pull (tateUniversal R) t' (tatePoint R)).1 ≫
+              (tateUniversal R).mulByHom (N : ℤ) := by
+          rw [(tateUniversal R).point_smul_eq_comp_mulBy]
+          rw [hval]
+        rw [hsmulval]
+        have hkval : (EllipticCurve.Point.pull (tateUniversal R) t' (tatePoint R)).1 ≫
+            (tateUniversal R).mulByHom (N : ℤ) =
+            ((((N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) t' (tatePoint R)) :
+              (tateUniversal R).Point t') : _ ⟶ (tateUniversal R).E) :=
+          ((tateUniversal R).point_smul_eq_comp_mulBy _ _ _).symm
+        rw [hkval, hψ'kill]
+        show ((0 : (tateUniversal R).Point t') :
+            Spec (CommRingCat.of A) ⟶ (tateUniversal R).E) =
+          ((0 : (tateUniversal R).Point (𝟙 (Spec (CommRingCat.of A)) ≫ t')) :
+            Spec (CommRingCat.of A) ⟶ (tateUniversal R).E)
+        rw [(tateUniversal R).point_zero_val, (tateUniversal R).point_zero_val,
+          Category.id_comp]
+      refine ⟨hkill', ?_⟩
+      -- fibrewise clauses: geometric points of `Spec A` factor through the quotient
+      intro k _ _ τ
+      set u := Spec.preimage τ with hu
+      have hIu : ∀ x ∈ I, u.hom x = 0 := by
+        intro x hx
+        obtain ⟨n, hn⟩ := hI
+        have hxn : x ^ n = 0 := by
+          have h1 : x ^ n ∈ I ^ n := Ideal.pow_mem_pow hx n
+          rw [hn] at h1
+          simpa using h1
+        have h2 : (u.hom x) ^ n = 0 := by
+          rw [← map_pow, hxn, map_zero]
+        exact IsNilpotent.eq_zero (⟨n, h2⟩ : IsNilpotent (u.hom x))
+      sorry
   obtain ⟨f, hf⟩ := (factors_yOne_iff R N hN hinv t).mpr hstruct
   refine ⟨f, ?_, ?_⟩
   · rw [← cancel_mono (yOneBase R N), Category.assoc, hf, hrest]
