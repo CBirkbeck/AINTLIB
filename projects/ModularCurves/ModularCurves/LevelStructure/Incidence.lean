@@ -287,6 +287,70 @@ theorem localized'_restrictScalars_eq_restrictScalars_map
 
 end SubmoduleVanishing
 
+/-- Restriction maps between affine opens are of finite presentation (read off from the
+identity morphism through the affine-local characterization). -/
+theorem restriction_finitePresentation {X : Scheme.{u}} {U V : X.affineOpens}
+    (e : V.1 ≤ U.1) :
+    RingHom.FinitePresentation ((X.presheaf.map (homOfLE e).op).hom) := by
+  have h1 := (HasRingHomProperty.iff_appLE
+    (P := @LocallyOfFinitePresentation)).mp
+    (inferInstance : LocallyOfFinitePresentation (𝟙 X)) U V (by simpa using e)
+  have hidapp : Scheme.Hom.appLE (𝟙 X) U.1 V.1 (by simpa using e) =
+      X.presheaf.map (homOfLE e).op := by
+    show Scheme.Hom.app (𝟙 X) _ ≫ _ = _
+    rw [Scheme.Hom.id_app]
+    exact Category.id_comp _
+  rwa [hidapp] at h1
+
+/-- **([T-SG3-LFP-4b], kernel core)** The kernel ideal sheaf of a section of a locally
+finitely presented morphism is finitely generated on every affine lying over an affine of
+the base: the section's affine piece is a surjection of finitely presented algebras over
+the base affine, so its kernel is finitely generated (KM's "the divisor `[P]` is cut out
+by finitely many equations"). -/
+theorem ker_ideal_fg_of_section {C Y : Scheme.{u}} (π : C ⟶ Y)
+    [LocallyOfFinitePresentation π] (σ : Y ⟶ C) (hσ : σ ≫ π = 𝟙 Y) [IsClosedImmersion σ]
+    (W : Y.affineOpens) (U : C.affineOpens) (hU : U.1 ≤ π ⁻¹ᵁ W.1) :
+    ((Scheme.Hom.ker σ).ideal U).FG := by
+  have hWle : σ ⁻¹ᵁ U.1 ≤ W.1 := by
+    intro x hx
+    have h1 : x ∈ σ ⁻¹ᵁ (π ⁻¹ᵁ W.1) := hU hx
+    have h2 : x ∈ (σ ≫ π) ⁻¹ᵁ W.1 := h1
+    rw [hσ] at h2
+    simpa using h2
+  -- the tower: base-restriction = (π-pullback) ≫ (σ-restriction)
+  have htower : π.appLE W.1 U.1 hU ≫ σ.app U.1 = Y.presheaf.map (homOfLE hWle).op := by
+    rw [Scheme.Hom.app_eq_appLE, Scheme.Hom.appLE_comp_appLE]
+    have hcast : ∀ (e : σ ⁻¹ᵁ U.1 ≤ (σ ≫ π) ⁻¹ᵁ W.1),
+        Scheme.Hom.appLE (σ ≫ π) W.1 (σ ⁻¹ᵁ U.1) e =
+          Y.presheaf.map (homOfLE hWle).op := by
+      rw [hσ]
+      intro e
+      show Scheme.Hom.app (𝟙 Y) _ ≫ _ = _
+      rw [Scheme.Hom.id_app]
+      exact Category.id_comp _
+    exact hcast _
+  letI : Algebra Γ(Y, W.1) Γ(C, U.1) := ((π.appLE W.1 U.1 hU).hom).toAlgebra
+  letI : Algebra Γ(Y, W.1) Γ(Y, σ ⁻¹ᵁ U.1) :=
+    ((Y.presheaf.map (homOfLE hWle).op).hom).toAlgebra
+  haveI : Algebra.FinitePresentation Γ(Y, W.1) Γ(C, U.1) :=
+    HasRingHomProperty.appLE @LocallyOfFinitePresentation π ‹_› W U hU
+  haveI : Algebra.FinitePresentation Γ(Y, W.1) Γ(Y, σ ⁻¹ᵁ U.1) :=
+    restriction_finitePresentation (U := W) (V := ⟨σ ⁻¹ᵁ U.1, U.2.preimage σ⟩) hWle
+  -- the section's affine piece as an algebra map over the base
+  have hcommutes : ∀ r : Γ(Y, W.1), (σ.app U.1).hom (algebraMap Γ(Y, W.1) Γ(C, U.1) r) =
+      algebraMap Γ(Y, W.1) Γ(Y, σ ⁻¹ᵁ U.1) r := by
+    intro r
+    have := congrArg (fun ψ : Γ(Y, W.1) ⟶ Γ(Y, σ ⁻¹ᵁ U.1) => ψ.hom r) htower
+    rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra]
+    simpa using this
+  let φ : Γ(C, U.1) →ₐ[Γ(Y, W.1)] Γ(Y, σ ⁻¹ᵁ U.1) :=
+    { (σ.app U.1).hom with commutes' := hcommutes }
+  have hφ : Function.Surjective φ := σ.app_surjective _ U.2
+  have hker := Algebra.FinitePresentation.ker_fG_of_surjective φ hφ
+  have hka := Scheme.Hom.ker_apply σ U
+  rw [hka]
+  exact hker
+
 /-- **([T-SG3-LFP-3], cover form)** For the inclusion of a closed subscheme to be locally
 of finite presentation it suffices that its ideal sheaf is finitely generated on the
 members of a single affine cover: lfp is Zariski-local on the target, and over each
