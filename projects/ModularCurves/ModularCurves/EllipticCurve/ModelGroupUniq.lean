@@ -798,6 +798,100 @@ theorem axInclR_mul (G : GrpObj (modelOver W))
 
 end Difference
 
+/-! ## Axis base-change maps -/
+
+section AxisBC
+
+variable {R} (W : WeierstrassCurve R) [W.IsElliptic]
+
+/-- The left axis of the first-stage model, scheme level. -/
+noncomputable def axL₀ : projModel (wZero W) ⟶
+    Limits.pullback (projModelπ (wZero W)) (projModelπ (wZero W)) :=
+  (axInclL (wZero W)).left
+
+theorem axL₀_sqStruct : axL₀ W ≫ sqStruct W = projModelπ (wZero W) := by
+  have h1 : axL₀ W ≫ Limits.pullback.fst (projModelπ (wZero W)) (projModelπ (wZero W)) =
+      (toUnit (modelOver (wZero W)) ≫ oneOver (wZero W)).left :=
+    congrArg CommaMorphism.left
+      (lift_fst (toUnit (modelOver (wZero W)) ≫ oneOver (wZero W)) (𝟙 _))
+  have h2 : (toUnit (modelOver (wZero W)) ≫ oneOver (wZero W)).left ≫
+      projModelπ (wZero W) = projModelπ (wZero W) :=
+    Over.w (toUnit (modelOver (wZero W)) ≫ oneOver (wZero W))
+  exact ((Category.assoc (axL₀ W)
+      (Limits.pullback.fst (projModelπ (wZero W)) (projModelπ (wZero W)))
+      (projModelπ (wZero W))).symm.trans
+    (congrArg (· ≫ projModelπ (wZero W)) h1)).trans h2
+
+/-- The axis map between the base-changed systems, at a stage. -/
+noncomputable def axBC (T : Over (wStageOp W)) :
+    (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).obj T ⟶
+    (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+      Over.pullback (sqStruct W) ⋙ Over.forget _).obj T :=
+  Limits.pullback.map _ _ _ _ (𝟙 _) (axL₀ W) (𝟙 _)
+    (by rw [Category.comp_id, Category.id_comp])
+    (by rw [Category.comp_id, axL₀_sqStruct])
+
+/-- The apex-level axis map. -/
+noncomputable def axApex :
+    (bcCone W (projModelπ (wZero W))).pt ⟶ (bcCone W (sqStruct W)).pt :=
+  Limits.pullback.map _ _ _ _ (𝟙 _) (axL₀ W) (𝟙 _)
+    (by rw [Category.comp_id, Category.id_comp])
+    (by rw [Category.comp_id, axL₀_sqStruct])
+
+/-- The cross-cone square: the axis map intertwines the two cone legs. -/
+theorem axBC_cone (T : Over (wStageOp W)) :
+    (bcCone W (projModelπ (wZero W))).π.app T ≫ axBC W T =
+      axApex W ≫ (bcCone W (sqStruct W)).π.app T := by
+  refine Limits.pullback.hom_ext ?_ ?_
+  · have h1 : axBC W T ≫ Limits.pullback.fst
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        Limits.pullback.fst _ _ ≫ 𝟙 _ := Limits.pullback.lift_fst _ _ _
+    have h2 : (bcCone W (projModelπ (wZero W))).π.app T ≫ Limits.pullback.fst
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom
+        (projModelπ (wZero W)) =
+        Limits.pullback.fst ((slicedCone W).pt).hom (projModelπ (wZero W)) ≫
+          ((slicedCone W).π.app T).left := Limits.pullback.lift_fst _ _ _
+    have h3 : (bcCone W (sqStruct W)).π.app T ≫ Limits.pullback.fst
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        Limits.pullback.fst ((slicedCone W).pt).hom (sqStruct W) ≫
+          ((slicedCone W).π.app T).left := Limits.pullback.lift_fst _ _ _
+    have h4 : axApex W ≫ Limits.pullback.fst ((slicedCone W).pt).hom (sqStruct W) =
+        Limits.pullback.fst _ _ ≫ 𝟙 _ := Limits.pullback.lift_fst _ _ _
+    exact (Category.assoc _ _ _).trans <|
+      ((congrArg ((bcCone W (projModelπ (wZero W))).π.app T ≫ ·) h1).trans <|
+        ((congrArg ((bcCone W (projModelπ (wZero W))).π.app T ≫ ·)
+          (Category.comp_id _)).trans <|
+          h2.trans <|
+            ((congrArg (· ≫ ((slicedCone W).π.app T).left)
+              ((Category.comp_id _).symm.trans h4.symm)).trans <|
+              ((Category.assoc _ _ _).trans <|
+                (congrArg (axApex W ≫ ·) h3.symm).trans <|
+                  (Category.assoc _ _ _).symm))))
+  · have h1 : axBC W T ≫ Limits.pullback.snd
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        Limits.pullback.snd _ _ ≫ axL₀ W := Limits.pullback.lift_snd _ _ _
+    have hwM : (bcCone W (projModelπ (wZero W))).π.app T ≫
+        Limits.pullback.snd ((Over.post (X := wStageOp W)
+          (fgSys.specDiagram R)).obj T).hom (projModelπ (wZero W)) =
+        Limits.pullback.snd ((slicedCone W).pt).hom (projModelπ (wZero W)) :=
+      Over.w ((Over.pullback (projModelπ (wZero W))).map ((slicedCone W).π.app T))
+    have hwSQ : (bcCone W (sqStruct W)).π.app T ≫
+        Limits.pullback.snd ((Over.post (X := wStageOp W)
+          (fgSys.specDiagram R)).obj T).hom (sqStruct W) =
+        Limits.pullback.snd ((slicedCone W).pt).hom (sqStruct W) :=
+      Over.w ((Over.pullback (sqStruct W)).map ((slicedCone W).π.app T))
+    have h4 : axApex W ≫ Limits.pullback.snd ((slicedCone W).pt).hom (sqStruct W) =
+        Limits.pullback.snd _ _ ≫ axL₀ W := Limits.pullback.lift_snd _ _ _
+    exact (Category.assoc _ _ _).trans <|
+      (congrArg ((bcCone W (projModelπ (wZero W))).π.app T ≫ ·) h1).trans <|
+      (Category.assoc _ _ _).symm.trans <|
+      (congrArg (· ≫ axL₀ W) hwM).trans <|
+      h4.symm.trans <|
+      (congrArg (axApex W ≫ ·) hwSQ.symm).trans (Category.assoc _ _ _).symm
+
+end AxisBC
+
 /-! ## The uniqueness theorem ([U-MODEL]) -/
 
 section Unique
