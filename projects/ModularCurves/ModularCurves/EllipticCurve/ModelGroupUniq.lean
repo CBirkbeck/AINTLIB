@@ -548,9 +548,9 @@ theorem mu_descends (μl : Limits.pullback (projModelπ W) (projModelπ W) ⟶ p
 
 /-- Generic morphism descent along the base-changed stage system. -/
 theorem hom_descends (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W))
-    [QuasiCompact g] [QuasiSeparated g]
+    (hqc : QuasiCompact g) (hqs : QuasiSeparated g)
     {Y : Scheme.{u}} (f : Y ⟶ (fgSys.specDiagram R).obj (wStageOp W))
-    [LocallyOfFinitePresentation f]
+    (hlfp : LocallyOfFinitePresentation f)
     (t : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
       Over.pullback g ⋙ Over.forget _) ⟶
       (Functor.const (Over (wStageOp W))).obj ((fgSys.specDiagram R).obj (wStageOp W)))
@@ -558,19 +558,22 @@ theorem hom_descends (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W))
     (ha : (bcCone W g).π ≫ t = (Functor.const _).map (a ≫ f)) :
     ∃ (T : Over (wStageOp W)) (g' : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
       Over.pullback g ⋙ Over.forget _).obj T ⟶ Y),
-      (bcCone W g).π.app T ≫ g' = a ∧ g' ≫ f = t.app T :=
-  @Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation
+      (bcCone W g).π.app T ≫ g' = a ∧ g' ≫ f = t.app T := by
+  haveI := hqc
+  haveI := hqs
+  haveI := hlfp
+  exact @Scheme.exists_π_app_comp_eq_of_locallyOfFinitePresentation
     (Over (wStageOp W)) _ _ _
     (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
       Over.pullback g ⋙ Over.forget _) t f (bcCone W g) (bcIsLimit W g)
-    inferInstance inferInstance (fun {i j} φ => bc_transition_affine W g φ)
+    inferInstance hlfp (fun {i j} φ => bc_transition_affine W g φ)
     (fun T => bc_obj_compact W g T) (fun T => bc_obj_qsep W g T) a ha
 
 /-- Generic equality descent along the base-changed stage system. -/
 theorem eq_descends (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W))
-    [QuasiCompact g] [QuasiSeparated g]
+    (hqc : QuasiCompact g) (hqs : QuasiSeparated g)
     {Y : Scheme.{u}} (f : Y ⟶ (fgSys.specDiagram R).obj (wStageOp W))
-    [LocallyOfFiniteType f]
+    (hlft : LocallyOfFiniteType f)
     (t : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
       Over.pullback g ⋙ Over.forget _) ⟶
       (Functor.const (Over (wStageOp W))).obj ((fgSys.specDiagram R).obj (wStageOp W)))
@@ -583,12 +586,14 @@ theorem eq_descends (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W))
       (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
         Over.pullback g ⋙ Over.forget _).map ψ ≫ u =
       (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
-        Over.pullback g ⋙ Over.forget _).map ψ ≫ v :=
-  @Scheme.exists_hom_comp_eq_comp_of_locallyOfFiniteType
+        Over.pullback g ⋙ Over.forget _).map ψ ≫ v := by
+  haveI := hqc
+  haveI := hqs
+  exact @Scheme.exists_hom_comp_eq_comp_of_locallyOfFiniteType
     (Over (wStageOp W)) _ _ _
     (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
       Over.pullback g ⋙ Over.forget _) t f (bcCone W g) (bcIsLimit W g)
-    (fun T => bc_obj_compact W g T) inferInstance inferInstance
+    (fun T => bc_obj_compact W g T) hlft inferInstance
     (fun {i j} φ => bc_transition_affine W g φ) T u v hu hv huv
 
 /-- The structural transformation of any base-changed stage system. -/
@@ -676,5 +681,70 @@ noncomputable def stageSqPB (T : Over (wStageOp W)) : IsPullback
   sqIsPullback _ (wZero W) (stageW W T) rfl
 
 end StageIso
+
+/-! ## The inverse descent -/
+
+section IotaDescent
+
+attribute [local instance] IsCofiltered.isConnected
+
+variable {R} (W : WeierstrassCurve R) [W.IsElliptic]
+
+/-- The comparison isomorphism for the plain model system. -/
+noncomputable def modelComparison :
+    projModel W ≅ (bcCone W (projModelπ (wZero W))).pt :=
+  (wPB (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)).flip.isoPullback
+
+/-- **(K2, ι-descent)** Any endomorphism-shaped morphism of the model over `R` descends to
+a finitely generated stage. -/
+theorem iota_descends (il : projModel W ⟶ projModel W)
+    (hiπ : il ≫ projModelπ W = projModelπ W) :
+    ∃ (T : Over (wStageOp W))
+      (i' : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
+        Over.pullback (projModelπ (wZero W)) ⋙ Over.forget _).obj T ⟶ projModel (wZero W)),
+      (bcCone W (projModelπ (wZero W))).π.app T ≫ i' =
+        (modelComparison W).inv ≫ il ≫
+          projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W) ∧
+      i' ≫ projModelπ (wZero W) = (bcT W (projModelπ (wZero W))).app T := by
+  haveI : SmoothOfRelativeDimension 1 (projModelπ (wZero W)) := projModel_smooth (wZero W)
+  haveI : Smooth (projModelπ (wZero W)) :=
+    SmoothOfRelativeDimension.smooth (n := 1) (f := projModelπ (wZero W))
+  haveI : IsProper (projModelπ (wZero W)) := projModelπ_isProper (wZero W)
+  haveI : UniversallyClosed (projModelπ (wZero W)) := inferInstance
+  haveI hqc : QuasiCompact (projModelπ (wZero W)) := by infer_instance
+  haveI hqs : QuasiSeparated (projModelπ (wZero W)) := by infer_instance
+  haveI hlfp : LocallyOfFinitePresentation (projModelπ (wZero W)) := by infer_instance
+  refine hom_descends W (projModelπ (wZero W)) hqc hqs (projModelπ (wZero W)) hlfp
+    (bcT W (projModelπ (wZero W)))
+    ((modelComparison W).inv ≫ il ≫
+      projModelBaseChangeOf (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)) ?_
+  ext T
+  have hw : (bcCone W (projModelπ (wZero W))).π.app T ≫
+      ((Over.pullback (projModelπ (wZero W))).obj
+        ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T)).hom =
+      Limits.pullback.snd ((slicedCone W).pt).hom (projModelπ (wZero W)) :=
+    Over.w ((Over.pullback (projModelπ (wZero W))).map ((slicedCone W).π.app T))
+  show (bcCone W (projModelπ (wZero W))).π.app T ≫
+      (bcT W (projModelπ (wZero W))).app T =
+    ((modelComparison W).inv ≫ il ≫ projModelBaseChangeOf (wStage W).1.val.toRingHom
+      (wZero W) W (wZero_map W)) ≫ projModelπ (wZero W)
+  have hLHS : (bcCone W (projModelπ (wZero W))).π.app T ≫
+      (bcT W (projModelπ (wZero W))).app T =
+      Limits.pullback.snd ((slicedCone W).pt).hom (projModelπ (wZero W)) ≫
+        projModelπ (wZero W) :=
+    (Category.assoc _ _ _).symm.trans (congrArg (· ≫ projModelπ (wZero W)) hw)
+  have hRHS : ((modelComparison W).inv ≫ il ≫ projModelBaseChangeOf
+      (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)) ≫ projModelπ (wZero W) =
+      Limits.pullback.fst ((slicedCone W).pt).hom (projModelπ (wZero W)) ≫
+        ((slicedCone W).pt).hom := by
+    rw [Category.assoc, Category.assoc,
+      (wPB (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)).w, ← Category.assoc il,
+      hiπ, ← Category.assoc]
+    exact congrArg (· ≫ Spec.map (CommRingCat.ofHom (wStage W).1.val.toRingHom))
+      ((wPB (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)).flip.isoPullback_inv_fst)
+  rw [hLHS, hRHS, Limits.pullback.condition]
+  rfl
+
+end IotaDescent
 
 end ModularCurves
