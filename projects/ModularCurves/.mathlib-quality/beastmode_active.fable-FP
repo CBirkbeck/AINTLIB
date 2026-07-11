@@ -1,1 +1,1 @@
-FOCUS: [GR-G-ASM] forward map + local round-trip structure DONE. Remaining: GLOBAL inverse via Zariski descent of submodules (mathlib representability TODO) = the deep half. [02KL-CORE] KL-3=B3 (T-DEV/T-FLAT lane).
+FOCUS: [KL-3] BE tree frontier = 6 sorries (local_criterion_twoTerm 118, localBE_homology_disjunction 846/858 T-BE-TAIL, fibreExact_spreads 1146, coker_flat 1165, reduce_to_polynomial 1187, viaBE 1206). Attacking bottom-up. Deep BE acyclicity DONE.
