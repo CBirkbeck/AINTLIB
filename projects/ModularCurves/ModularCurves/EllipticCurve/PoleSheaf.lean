@@ -2032,6 +2032,59 @@ theorem restrictTrivializationOfOverIso_hom_eq_comp_scalar
     _ = (F.inv.app M ≫ G.map g.hom ≫ C₀) ≫ d := by
       simp only [Category.assoc]
 
+/-- Passing from open-subscheme trivializations back to over-site
+trivializations preserves scalar transitions. -/
+theorem overTrivializationOfRestrictIso_hom_eq_comp_scalar
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e g : M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme)
+    (r : Γ(X, U))
+    (h : e.hom = g.hom ≫
+      unitEndomorphismOfTopSection (Scheme.Modules.openTopSection U r)) :
+    (Scheme.Modules.overTrivializationOfRestrictIso M U e).hom =
+      (Scheme.Modules.overTrivializationOfRestrictIso M U g).hom ≫
+        SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r := by
+  let G := (Scheme.Modules.overEquiv U).functor
+  let F := Scheme.Modules.overFunctorEquiv U
+  let C := U.sheafOfModulesEquivOverUnit X.ringCatSheaf
+  let q := SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r
+  let d := unitEndomorphismOfTopSection (Scheme.Modules.openTopSection U r)
+  apply G.map_injective
+  change G.map (Scheme.Modules.overTrivializationOfRestrictIso M U e).hom =
+    G.map ((Scheme.Modules.overTrivializationOfRestrictIso M U g).hom ≫ q)
+  rw [Functor.map_comp]
+  simp only [Scheme.Modules.overTrivializationOfRestrictIso,
+    Functor.FullyFaithful.preimageIso_hom,
+    Functor.FullyFaithful.map_preimage, Iso.trans_hom]
+  change (F.hom.app M ≫ e.hom ≫ C.inv) =
+    (F.hom.app M ≫ g.hom ≫ C.inv) ≫ G.map q
+  rw [h]
+  have hs := Scheme.Modules.overEquiv_unitScalarEnd U r
+  change G.map q ≫ C.hom = C.hom ≫ d at hs
+  have hsC := congrArg (fun k ↦ k ≫ C.inv) hs
+  have hsC' : G.map q = (C.hom ≫ d) ≫ C.inv := by
+    have hcancel : G.map q = (G.map q ≫ C.hom) ≫ C.inv := by
+      calc
+        G.map q = G.map q ≫ 𝟙 _ := (Category.comp_id _).symm
+        _ = G.map q ≫ (C.hom ≫ C.inv) :=
+          congrArg (fun k ↦ G.map q ≫ k) C.hom_inv_id.symm
+        _ = (G.map q ≫ C.hom) ≫ C.inv :=
+          (Category.assoc _ _ _).symm
+    exact hcancel.trans hsC
+  let A := F.hom.app M ≫ g.hom
+  change A ≫ d ≫ C.inv = A ≫ C.inv ≫ G.map q
+  rw [hsC']
+  have hconj : C.inv ≫ ((C.hom ≫ d) ≫ C.inv) = d ≫ C.inv := by
+    calc
+      C.inv ≫ ((C.hom ≫ d) ≫ C.inv) =
+          (C.inv ≫ (C.hom ≫ d)) ≫ C.inv :=
+        (Category.assoc _ _ _).symm
+      _ = ((C.inv ≫ C.hom) ≫ d) ≫ C.inv :=
+        congrArg (fun k ↦ k ≫ C.inv) (Category.assoc _ _ _).symm
+      _ = ((𝟙 _) ≫ d) ≫ C.inv :=
+        congrArg (fun k ↦ (k ≫ d) ≫ C.inv) C.inv_hom_id
+      _ = d ≫ C.inv := by rw [Category.id_comp]
+  exact (congrArg (fun k ↦ A ≫ k) hconj).symm
+
 /-- An equation expressing an ideal generator in an over-site trivialization
 restricts to the corresponding equation for the restricted generator. -/
 theorem restrictOverTrivialization_inv_comp_over
