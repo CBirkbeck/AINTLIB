@@ -267,6 +267,81 @@ theorem kernel_inj_of_chartFactor (A : WeierstrassAtlasData E.toEllipticCurveGeo
 
 end PieceTransport
 
+section Glue
+
+variable {S : Scheme.{u}} (E : EllipticCurve S)
+
+/-- Transport of points along an equality of base morphisms. -/
+noncomputable def Point.castBase {T : Scheme.{u}} {g g' : T ⟶ S} (h : g = g') :
+    E.Point g ≃+ E.Point g' := by subst h; exact AddEquiv.refl _
+
+@[simp] theorem Point.castBase_coe {T : Scheme.{u}} {g g' : T ⟶ S} (h : g = g')
+    (P : E.Point g) : (Point.castBase E h P).1 = P.1 := by subst h; rfl
+
+@[simp] theorem Point.castBase_symm_coe {T : Scheme.{u}} {g g' : T ⟶ S} (h : g = g')
+    (P : E.Point g') : ((Point.castBase E h).symm P).1 = P.1 := by subst h; rfl
+
+/-- **(N5, the KernelNDivisible discharge)** The square-zero point kernels of a working
+record are `N`-divisible when `N` is invertible on the base. -/
+theorem kernelNDivisible_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :
+    E.KernelNDivisible N := by
+  classical
+  intro A' I hI b' ε hε
+  set φ : A' ⟶ CommRingCat.of (↑A' ⧸ I) := CommRingCat.ofHom (Ideal.Quotient.mk I) with hφdef
+  have hφ : Function.Surjective φ.hom := Ideal.Quotient.mk_surjective
+  have hφ2 : RingHom.ker φ.hom ^ 2 = ⊥ := by
+    show RingHom.ker (Ideal.Quotient.mk I) ^ 2 = ⊥
+    rw [Ideal.mk_ker]
+    exact hI
+  -- `N` is a unit on the test
+  have hNA' : IsUnit ((N : ℕ) : ↑A') := by
+    have h1 : IsUnit ((N : ℕ) : ↑Γ(S, ⊤)) := h
+    have h2 := h1.map (b'.appTop ≫ (Scheme.ΓSpecIso A').hom).hom
+    rwa [map_natCast] at h2
+  -- the atlas and the basic-open cover adapted to it
+  set A : WeierstrassAtlasData E.toEllipticCurveGeom := E.toEllipticCurveGeom.atlas with hA
+  have hcover : ∀ p : ↑(Spec A'), ∃ (a : ↑A') (i : A.ι),
+      p ∈ PrimeSpectrum.basicOpen a ∧
+      ∀ q : ↑(Spec A'), q ∈ PrimeSpectrum.basicOpen a → b'.base q ∈ (A.U i).1 := by
+    intro p
+    obtain ⟨i, hi⟩ := A.covers (b'.base p)
+    have hopen : IsOpen (b'.base ⁻¹' ((A.U i).1 : Set S)) :=
+      (A.U i).1.2.preimage b'.continuous
+    have hmem : p ∈ b'.base ⁻¹' ((A.U i).1 : Set S) := hi
+    obtain ⟨V, ⟨a, rfl⟩, haV, hVsub⟩ :=
+      PrimeSpectrum.isTopologicalBasis_basic_opens.exists_subset_of_mem_open hmem hopen
+    exact ⟨a, i, haV, fun q hq => hVsub hq⟩
+  choose aa ii hmemA hsubA using hcover
+  -- the per-piece localized tests and their chart factorisations
+  have hfac : ∀ p : ↑(Spec A'), ∃ tB : Spec (CommRingCat.of
+        (Localization.Away (aa p))) ⟶ Spec Γ(S, (A.U (ii p)).1),
+      tB ≫ chartToBase A (ii p) =
+        Spec.map (CommRingCat.ofHom (algebraMap ↑A' (Localization.Away (aa p)))) ≫ b' := by
+    intro p
+    have hrange : Set.range ((Spec.map (CommRingCat.ofHom
+        (algebraMap ↑A' (Localization.Away (aa p)))) ≫ b')).base ⊆
+        Set.range (A.U (ii p)).1.ι.base := by
+      rintro _ ⟨x, rfl⟩
+      rw [Scheme.Opens.range_ι]
+      rw [Scheme.Hom.comp_apply]
+      refine hsubA p _ ?_
+      have h2 := PrimeSpectrum.localization_away_comap_range
+        (Localization.Away (aa p)) (aa p)
+      have h3 : (Spec.map (CommRingCat.ofHom
+          (algebraMap ↑A' (Localization.Away (aa p))))).base x ∈
+          Set.range (PrimeSpectrum.comap (algebraMap ↑A' (Localization.Away (aa p)))) :=
+        Set.mem_range_self x
+      rwa [h2] at h3
+    refine ⟨IsOpenImmersion.lift (A.U (ii p)).1.ι _ hrange ≫ (A.U (ii p)).2.isoSpec.hom, ?_⟩
+    rw [chartToBase, Category.assoc, Iso.hom_inv_id_assoc]
+    exact IsOpenImmersion.lift_fac _ _ hrange
+  choose tB htB using hfac
+  sorry
+
+end Glue
+
+
+
 
 
 end EllipticCurve
