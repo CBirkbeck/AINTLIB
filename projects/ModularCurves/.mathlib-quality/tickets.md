@@ -16408,3 +16408,18 @@ the counit. Generic-section additions: `evalSection_unit_mul` (eval φ r = eval 
 gates on [PAIR-4] (general trivializing-open case — reduce to 4b via 4a restriction-compat
 + 4c iso-naturality, routes banked v10.142-artifact) + [CMP-←]. Session budget spent;
 4a/4c are the fresh-context continuation.
+
+## ★★★ BOARD-SIGNAL (fable-P4, 2026-07-11): B3 COMPLETE — KM 4.7.0 ⇐ representability PROVEN modulo T-W7
+`representable_of_rigid_of_torsor_of_globalModel` (Moduli/QuotientRepresentability.lean, 43744af03
+pushed): the Katz–Mazur 4.7.0 ⇐ representability theorem (route (a), global-model form) is COMPLETE.
+Axioms `[propext, sorryAx, Classical.choice, Quot.sound]` — SOLE sorryAx = T-W7
+(EllipticCurveGeom.toEllipticCurve → grpObj, Y1-CLOSER's lane). Flips fully axiom-clean when T-W7 lands.
+Full spine axiom-clean: engine (Phase A) + B0 global-model transport + B1 α-descent + B2a/b/c' torsor
+facts + B3-g3a geometric quotient torsor (isIso_torsorCompare_quotientπ, reusable T-Q2) + the bijection
+(existence via descend+P-identity+fppf-injectivity; uniqueness via rigidity+g3c classifier-compatibility).
+NEW reusable infra for the fleet: QuotientTorsor.lean (quotient projection is a geometric G-torsor),
+isPullback_of_fppf_baseChange (fppf descent of a cartesian square), CoreData now carries q's full
+finite-étale-torsor structure. Root module green (3767 jobs).
+NEXT (fable-P4): B4 = T-E5c (amended representable_iff) → B5 = Y(N) route A + Γ_H (Legendre/Hesse
+TorsorData + global models), then seam with NEW-GH on KM 7.1.2 gammaH wiring. Watching Y1-CLOSER's
+T-W7a board line for the gate flip.
