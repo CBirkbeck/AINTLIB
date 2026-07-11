@@ -208,7 +208,17 @@ invertible in `R`, the Γ(N)-presentation is étale over the base: open immersio
 KM 3.7.1 (verbatim, p. 104): *"Each is represented by a finite etale S-scheme."* -/
 theorem etale_fullLevelSpaceStruct (X : EllObj R) (N : ℕ) [NeZero N]
     (hinv : IsUnit (N : R)) : Etale (fullLevelSpaceStruct X N) := by
-  sorry
+  show Etale (levelSpaceΓι X.curve N ≫
+    pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N) ≫ X.curve.torsionπ N)
+  have hinvS : NIsInvertible X.base N := nIsInvertible_over_spec R X.structMap hinv
+  have hι : Etale (levelSpaceΓι X.curve N) := by
+    have hoi : IsOpenImmersion (levelSpaceΓι X.curve N) :=
+      isOpenImmersion_levelSpaceΓι X.curve N hinvS
+    infer_instance
+  have hπ : Etale (X.curve.torsionπ N) := X.curve.torsionπ_etale N hinvS
+  have hfst : Etale (pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N)) :=
+    MorphismProperty.pullback_fst _ _ hπ
+  infer_instance
 
 /-! ### The points dictionary: factorizations through `U_{Γ(N)}` are level structures -/
 
