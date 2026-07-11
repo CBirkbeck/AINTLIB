@@ -687,7 +687,117 @@ theorem kernelNDivisible_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :
       refine (congrArg (Spec.map (CommRingCat.ofHom (overlapInR (aa p) (aa q))) ≫ ·)
         (hvN q).symm).trans ?_
       exact (Category.assoc _ _ _).symm
-  sorry
+  -- the open cover by the pieces and the glued value
+  set 𝒰 : (Spec A').OpenCover :=
+    Scheme.Cover.mkOfCovers (↑(Spec A'))
+      (fun p => Spec (CommRingCat.of (Localization.Away (aa p))))
+      (fun p => Spec.map (CommRingCat.ofHom (algebraMap ↑A' (Localization.Away (aa p)))))
+      (fun x => by
+        have h2 := PrimeSpectrum.localization_away_comap_range
+          (Localization.Away (aa x)) (aa x)
+        have h3 : x ∈ Set.range (PrimeSpectrum.comap
+            (algebraMap ↑A' (Localization.Away (aa x)))) := by
+          rw [h2]; exact hmemA x
+        obtain ⟨y, hy⟩ := h3
+        exact ⟨x, y, hy⟩) with h𝒰
+  set w : Spec A' ⟶ E.E := 𝒰.glueMorphisms (fun p => (δp p).1) hcompat with hw
+  have hι : ∀ p : ↑(Spec A'),
+      Spec.map (CommRingCat.ofHom (algebraMap ↑A' (Localization.Away (aa p)))) ≫ w =
+      (δp p).1 := fun p => Scheme.Cover.ι_glueMorphisms 𝒰 (fun p => (δp p).1) hcompat p
+  have hover : w ≫ E.π = b' := by
+    refine Scheme.Cover.hom_ext 𝒰 _ _ (fun p => ?_)
+    show Spec.map (CommRingCat.ofHom (algebraMap ↑A' (Localization.Away (aa p)))) ≫
+      (w ≫ E.π) = _ ≫ b'
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    refine (congrArg (· ≫ E.π) (hι p)).trans ?_
+    exact (hvπ p).trans (htB p)
+  refine ⟨⟨w, hover⟩, ?_, ?_⟩
+  · -- the kernel membership of the glued point
+    refine Subtype.ext ?_
+    show Spec.map φ ≫ w = _
+    rw [E.point_zero_val]
+    refine Scheme.Cover.hom_ext (𝒰.pullback₁ (Spec.map φ)) _ _ (fun p => ?_)
+    show pullback.fst (Spec.map φ) (𝒰.f p) ≫ (Spec.map φ ≫ w) =
+      pullback.fst (Spec.map φ) (𝒰.f p) ≫ ((Spec.map φ ≫ b') ≫ E.zero)
+    -- both sides through the pullback condition
+    have hcond : pullback.fst (Spec.map φ) (𝒰.f p) ≫ Spec.map φ =
+        pullback.snd (Spec.map φ) (𝒰.f p) ≫ 𝒰.f p := pullback.condition
+    -- LHS
+    have hLHS : pullback.fst (Spec.map φ) (𝒰.f p) ≫ (Spec.map φ ≫ w) =
+        pullback.snd (Spec.map φ) (𝒰.f p) ≫ (δp p).1 := by
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      refine (congrArg (· ≫ w) hcond).trans ?_
+      refine (Category.assoc _ _ _).trans ?_
+      exact congrArg (pullback.snd (Spec.map φ) (𝒰.f p) ≫ ·) (hι p)
+    rw [hLHS]
+    -- RHS
+    have hRHS : pullback.fst (Spec.map φ) (𝒰.f p) ≫
+        ((Spec.map φ ≫ b') ≫ E.zero) =
+        (pullback.snd (Spec.map φ) (𝒰.f p) ≫ (tB p ≫ chartToBase A (ii p))) ≫ E.zero := by
+      refine ((Category.assoc _ _ _).symm).trans ?_
+      refine (congrArg (· ≫ E.zero) ((Category.assoc _ _ _).symm)).trans ?_
+      refine (congrArg (fun m => (m ≫ b') ≫ E.zero) hcond).trans ?_
+      refine (congrArg (· ≫ E.zero) (Category.assoc _ _ _)).trans ?_
+      refine congrArg (· ≫ E.zero) ?_
+      refine congrArg (pullback.snd (Spec.map φ) (𝒰.f p) ≫ ·) (htB p).symm
+    rw [hRHS]
+    -- factor the reduced piece through the quotient of the localization
+    show pullback.snd (Spec.map (CommRingCat.ofHom (algebraMap ↑A' (↑A' ⧸ I))))
+        (Spec.map (CommRingCat.ofHom (algebraMap ↑A' (Localization.Away (aa p))))) ≫
+        (δp p).1 =
+      (pullback.snd (Spec.map (CommRingCat.ofHom (algebraMap ↑A' (↑A' ⧸ I))))
+        (Spec.map (CommRingCat.ofHom (algebraMap ↑A' (Localization.Away (aa p))))) ≫
+        (tB p ≫ chartToBase A (ii p))) ≫ E.zero
+    rw [← cancel_epi (pullbackSpecIso ↑A' (↑A' ⧸ I) (Localization.Away (aa p))).inv]
+    have hks := pullbackSpecIso_inv_snd ↑A' (↑A' ⧸ I) (Localization.Away (aa p))
+    have hkill : ∀ a ∈ I.map (algebraMap ↑A' (Localization.Away (aa p))),
+        (Algebra.TensorProduct.includeRight (R := ↑A') (A := ↑A' ⧸ I)
+          (B := Localization.Away (aa p))).toRingHom a = 0 := by
+      have hle : I.map (algebraMap ↑A' (Localization.Away (aa p))) ≤
+          RingHom.ker (Algebra.TensorProduct.includeRight (R := ↑A') (A := ↑A' ⧸ I)
+            (B := Localization.Away (aa p))).toRingHom := by
+        rw [Ideal.map_le_iff_le_comap]
+        intro i hi
+        show (1 : ↑A' ⧸ I) ⊗ₜ[↑A'] (algebraMap ↑A' (Localization.Away (aa p)) i) = 0
+        rw [Algebra.algebraMap_eq_smul_one, TensorProduct.tmul_smul,
+          TensorProduct.smul_tmul', Algebra.smul_def, _root_.mul_one,
+          Ideal.Quotient.algebraMap_eq, Ideal.Quotient.eq_zero_iff_mem.mpr hi,
+          TensorProduct.zero_tmul]
+      exact fun a ha => hle ha
+    set ψ' : (Localization.Away (aa p)) ⧸ (I.map (algebraMap ↑A'
+        (Localization.Away (aa p)))) →+* ((↑A' ⧸ I) ⊗[↑A'] Localization.Away (aa p)) :=
+      Ideal.Quotient.lift _ _ hkill with hψ'
+    have hfact : Spec.map (CommRingCat.ofHom ((Algebra.TensorProduct.includeRight
+        (R := ↑A') (A := ↑A' ⧸ I) (B := Localization.Away (aa p))).toRingHom)) =
+        Spec.map (CommRingCat.ofHom ψ') ≫ Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk
+          (I.map (algebraMap ↑A' (Localization.Away (aa p)))))) := by
+      rw [← Spec.map_comp]
+      refine congrArg Spec.map (CommRingCat.hom_ext (RingHom.ext fun a => ?_))
+      show _ = ψ' (Ideal.Quotient.mk _ a)
+      exact (Ideal.Quotient.lift_mk _ _ _).symm
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    refine (congrArg (· ≫ (δp p).1) hks).trans ?_
+    refine (congrArg (· ≫ (δp p).1) hfact).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg (Spec.map (CommRingCat.ofHom ψ') ≫ ·) (hvK p)).trans ?_
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    refine (congrArg (· ≫ E.zero) ((Category.assoc _ _ _).symm)).trans ?_
+    refine (congrArg (fun m => (m ≫ (tB p ≫ chartToBase A (ii p))) ≫ E.zero)
+      hfact.symm).trans ?_
+    refine (congrArg (fun m => (m ≫ (tB p ≫ chartToBase A (ii p))) ≫ E.zero)
+      hks.symm).trans ?_
+    refine (congrArg (· ≫ E.zero) (Category.assoc _ _ _)).trans ?_
+    exact Category.assoc _ _ _
+  · -- the scalar identity of the glued point
+    refine Subtype.ext ?_
+    show ((N : ℤ) • (⟨w, hover⟩ : E.Point b') : E.Point b').1 = ε.1
+    rw [E.point_smul_eq_comp_mulBy]
+    refine Scheme.Cover.hom_ext 𝒰 _ _ (fun p => ?_)
+    show Spec.map (CommRingCat.ofHom (algebraMap ↑A' (Localization.Away (aa p)))) ≫
+      (w ≫ E.mulByHom (N : ℤ)) = _ ≫ ε.1
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    refine (congrArg (· ≫ E.mulByHom (N : ℤ)) (hι p)).trans ?_
+    exact hvN p
 
 end Glue
 
