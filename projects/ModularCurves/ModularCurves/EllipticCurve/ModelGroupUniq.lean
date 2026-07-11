@@ -1987,6 +1987,182 @@ theorem modelGrpObj_unique (G : GrpObj (modelOver W))
     refine (congrArg ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
       Over.pullback (sqStruct W) ⋙ Over.forget _).map σ ≫ ·) hg'π).trans ?_
     exact ((sqT W).naturality σ).trans (Category.comp_id _)
+  -- package the descended difference over the stage base
+  have hwdS : ((stageSqIso W S₂).hom ≫ g'') ≫ projModelπ (wZero W) =
+      (Limits.pullback.fst (projModelπ (stageW W S₂)) (projModelπ (stageW W S₂)) ≫
+        projModelπ (stageW W S₂)) ≫
+        Spec.map (CommRingCat.ofHom
+          (Subalgebra.inclusion (wStage_le_stage W S₂)).toRingHom) := by
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg ((stageSqIso W S₂).hom ≫ ·) hg''π).trans ?_
+    show (stageSqIso W S₂).hom ≫ (Limits.pullback.snd _ _ ≫ sqStruct W) = _
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    refine (congrArg (· ≫ sqStruct W)
+      (stageSqPB W S₂).flip.isoPullback_hom_snd).trans ?_
+    exact (stageSqPB W S₂).w
+  set dS : Limits.pullback (projModelπ (stageW W S₂)) (projModelπ (stageW W S₂)) ⟶
+      projModel (stageW W S₂) :=
+    (stageModelPB W S₂).lift ((stageSqIso W S₂).hom ≫ g'')
+      (Limits.pullback.fst _ _ ≫ projModelπ (stageW W S₂)) hwdS with hdS_def
+  -- the structural evaluation of the model bridge
+  have hbcT_eval : (stageModelIso W S₂).hom ≫ (bcT W (projModelπ (wZero W))).app S₂ =
+      projModelπ (stageW W S₂) ≫
+        Spec.map (CommRingCat.ofHom
+          (Subalgebra.inclusion (wStage_le_stage W S₂)).toRingHom) := by
+    show (stageModelIso W S₂).hom ≫
+      (Limits.pullback.snd _ _ ≫ projModelπ (wZero W)) = _
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    refine (congrArg (· ≫ projModelπ (wZero W))
+      (stageModelPB W S₂).flip.isoPullback_hom_snd).trans ?_
+    exact (stageModelPB W S₂).w
+  -- the unit constant at the stage, scheme level
+  have honeSt_left : (toUnit (modelOver (stageW W S₂)) ≫ oneOver (stageW W S₂)).left =
+      projModelπ (stageW W S₂) ≫ projModelZero (stageW W S₂) := by
+    show (toUnit (modelOver (stageW W S₂))).left ≫ (oneOver (stageW W S₂)).left = _
+    rw [oneOver_left]
+    exact (Category.assoc _ _ _).symm.trans
+      (congrArg (· ≫ projModelZero (stageW W S₂))
+        (Over.w (toUnit (modelOver (stageW W S₂)))))
+  -- the left axis collapses the packaged difference
+  have hLdS : (axInclL (stageW W S₂)).left ≫ dS =
+      projModelπ (stageW W S₂) ≫ projModelZero (stageW W S₂) := by
+    refine (stageModelPB W S₂).hom_ext ?_ ?_
+    · have hA : ((axInclL (stageW W S₂)).left ≫ dS) ≫
+          projModelBaseChangeOf (Subalgebra.inclusion (wStage_le_stage W S₂)).toRingHom
+            (wZero W) (stageW W S₂) rfl =
+          (projModelπ (stageW W S₂) ≫
+            Spec.map (CommRingCat.ofHom
+              (Subalgebra.inclusion (wStage_le_stage W S₂)).toRingHom)) ≫
+            projModelZero (wZero W) := by
+        refine (Category.assoc _ _ _).trans ?_
+        refine (congrArg ((axInclL (stageW W S₂)).left ≫ ·)
+          ((stageModelPB W S₂).lift_fst _ _ _)).trans ?_
+        refine ((Category.assoc _ _ _).symm).trans ?_
+        refine (congrArg (· ≫ g'') (stage_axis_bridgeL W S₂)).trans ?_
+        refine (Category.assoc _ _ _).trans ?_
+        refine (congrArg ((stageModelIso W S₂).hom ≫ ·) hLS).trans ?_
+        refine ((Category.assoc _ _ _).symm).trans ?_
+        exact congrArg (· ≫ projModelZero (wZero W)) hbcT_eval
+      have hB : (projModelπ (stageW W S₂) ≫ projModelZero (stageW W S₂)) ≫
+          projModelBaseChangeOf (Subalgebra.inclusion (wStage_le_stage W S₂)).toRingHom
+            (wZero W) (stageW W S₂) rfl =
+          (projModelπ (stageW W S₂) ≫
+            Spec.map (CommRingCat.ofHom
+              (Subalgebra.inclusion (wStage_le_stage W S₂)).toRingHom)) ≫
+            projModelZero (wZero W) := by
+        refine (Category.assoc _ _ _).trans ?_
+        refine (congrArg (projModelπ (stageW W S₂) ≫ ·)
+          (projModelZero_baseChangeOf
+            (Subalgebra.inclusion (wStage_le_stage W S₂)).toRingHom
+            (wZero W) (stageW W S₂) rfl)).trans ?_
+        exact (Category.assoc _ _ _).symm
+      exact hA.trans hB.symm
+    · have hA : ((axInclL (stageW W S₂)).left ≫ dS) ≫ projModelπ (stageW W S₂) =
+          projModelπ (stageW W S₂) := by
+        refine (Category.assoc _ _ _).trans ?_
+        refine (congrArg ((axInclL (stageW W S₂)).left ≫ ·)
+          ((stageModelPB W S₂).lift_snd _ _ _)).trans ?_
+        refine ((Category.assoc _ _ _).symm).trans ?_
+        refine (congrArg (· ≫ projModelπ (stageW W S₂))
+          (congrArg CommaMorphism.left
+            (lift_fst (toUnit (modelOver (stageW W S₂)) ≫ oneOver (stageW W S₂))
+              (𝟙 _)))).trans ?_
+        exact Over.w (toUnit (modelOver (stageW W S₂)) ≫ oneOver (stageW W S₂))
+      have hB : (projModelπ (stageW W S₂) ≫ projModelZero (stageW W S₂)) ≫
+          projModelπ (stageW W S₂) = projModelπ (stageW W S₂) := by
+        refine (Category.assoc _ _ _).trans ?_
+        refine (congrArg (projModelπ (stageW W S₂) ≫ ·)
+          (projModelZero_projModelπ (stageW W S₂))).trans ?_
+        exact Category.comp_id _
+      exact hA.trans hB.symm
+  -- the right axis collapses the packaged difference
+  have hRdS : (axInclR (stageW W S₂)).left ≫ dS =
+      projModelπ (stageW W S₂) ≫ projModelZero (stageW W S₂) := by
+    refine (stageModelPB W S₂).hom_ext ?_ ?_
+    · have hA : ((axInclR (stageW W S₂)).left ≫ dS) ≫
+          projModelBaseChangeOf (Subalgebra.inclusion (wStage_le_stage W S₂)).toRingHom
+            (wZero W) (stageW W S₂) rfl =
+          (projModelπ (stageW W S₂) ≫
+            Spec.map (CommRingCat.ofHom
+              (Subalgebra.inclusion (wStage_le_stage W S₂)).toRingHom)) ≫
+            projModelZero (wZero W) := by
+        refine (Category.assoc _ _ _).trans ?_
+        refine (congrArg ((axInclR (stageW W S₂)).left ≫ ·)
+          ((stageModelPB W S₂).lift_fst _ _ _)).trans ?_
+        refine ((Category.assoc _ _ _).symm).trans ?_
+        refine (congrArg (· ≫ g'') (stage_axis_bridgeR W S₂)).trans ?_
+        refine (Category.assoc _ _ _).trans ?_
+        refine (congrArg ((stageModelIso W S₂).hom ≫ ·) hRS).trans ?_
+        refine ((Category.assoc _ _ _).symm).trans ?_
+        exact congrArg (· ≫ projModelZero (wZero W)) hbcT_eval
+      have hB : (projModelπ (stageW W S₂) ≫ projModelZero (stageW W S₂)) ≫
+          projModelBaseChangeOf (Subalgebra.inclusion (wStage_le_stage W S₂)).toRingHom
+            (wZero W) (stageW W S₂) rfl =
+          (projModelπ (stageW W S₂) ≫
+            Spec.map (CommRingCat.ofHom
+              (Subalgebra.inclusion (wStage_le_stage W S₂)).toRingHom)) ≫
+            projModelZero (wZero W) := by
+        refine (Category.assoc _ _ _).trans ?_
+        refine (congrArg (projModelπ (stageW W S₂) ≫ ·)
+          (projModelZero_baseChangeOf
+            (Subalgebra.inclusion (wStage_le_stage W S₂)).toRingHom
+            (wZero W) (stageW W S₂) rfl)).trans ?_
+        exact (Category.assoc _ _ _).symm
+      exact hA.trans hB.symm
+    · have hA : ((axInclR (stageW W S₂)).left ≫ dS) ≫ projModelπ (stageW W S₂) =
+          projModelπ (stageW W S₂) := by
+        refine (Category.assoc _ _ _).trans ?_
+        refine (congrArg ((axInclR (stageW W S₂)).left ≫ ·)
+          ((stageModelPB W S₂).lift_snd _ _ _)).trans ?_
+        refine ((Category.assoc _ _ _).symm).trans ?_
+        refine (congrArg (· ≫ projModelπ (stageW W S₂))
+          (congrArg CommaMorphism.left
+            (lift_fst (𝟙 _)
+              (toUnit (modelOver (stageW W S₂)) ≫ oneOver (stageW W S₂))))).trans ?_
+        exact Category.id_comp _
+      have hB : (projModelπ (stageW W S₂) ≫ projModelZero (stageW W S₂)) ≫
+          projModelπ (stageW W S₂) = projModelπ (stageW W S₂) := by
+        refine (Category.assoc _ _ _).trans ?_
+        refine (congrArg (projModelπ (stageW W S₂) ≫ ·)
+          (projModelZero_projModelπ (stageW W S₂))).trans ?_
+        exact Category.comp_id _
+      exact hA.trans hB.symm
+  -- the packaged stage difference is the unit constant (noetherian rigidity)
+  set qS : modelOver (stageW W S₂) ⊗ modelOver (stageW W S₂) ⟶
+      modelOver (stageW W S₂) :=
+    Over.homMk dS ((stageModelPB W S₂).lift_snd _ _ _) with hqS_def
+  have hq1 : qS = (letI := modelGrpObj (stageW W S₂);
+      (1 : modelOver (stageW W S₂) ⊗ modelOver (stageW W S₂) ⟶
+        modelOver (stageW W S₂))) := by
+    letI := modelGrpObj (stageW W S₂)
+    haveI : SmoothOfRelativeDimension 1 (projModelπ (stageW W S₂)) :=
+      projModel_smooth (stageW W S₂)
+    haveI : Smooth (projModelπ (stageW W S₂)) :=
+      SmoothOfRelativeDimension.smooth (n := 1) (f := projModelπ (stageW W S₂))
+    haveI : IsProper (modelOver (stageW W S₂)).hom :=
+      inferInstanceAs (IsProper (projModelπ (stageW W S₂)))
+    haveI : Flat (modelOver (stageW W S₂)).hom :=
+      inferInstanceAs (Flat (projModelπ (stageW W S₂)))
+    haveI : IsSeparated (modelOver (stageW W S₂)).hom :=
+      inferInstanceAs (IsSeparated (projModelπ (stageW W S₂)))
+    haveI : IsNoetherianRing ↥(stageAlg W S₂) :=
+      inferInstanceAs (IsNoetherianRing ↥(S₂.left.unop.1))
+    haveI : IsLocallyNoetherian (Spec (CommRingCat.of ↥(stageAlg W S₂))) := by
+      infer_instance
+    have hO : UniversallyOConnected (modelOver (stageW W S₂)).hom :=
+      (modelEllipticCurve (stageW W S₂)).toEllipticCurveGeom.universallyOConnected
+    have hLq : axInclL (stageW W S₂) ≫ qS = 1 := by
+      refine Over.OverMorphism.ext ?_
+      show (axInclL (stageW W S₂)).left ≫ dS =
+        (toUnit (modelOver (stageW W S₂)) ≫ oneOver (stageW W S₂)).left
+      exact hLdS.trans honeSt_left.symm
+    have hRq : axInclR (stageW W S₂) ≫ qS = 1 := by
+      refine Over.OverMorphism.ext ?_
+      show (axInclR (stageW W S₂)).left ≫ dS =
+        (toUnit (modelOver (stageW W S₂)) ≫ oneOver (stageW W S₂)).left
+      exact hRdS.trans honeSt_left.symm
+    exact @eq_one_of_axis_collapse _ _ _ _
+      (modelGrpObj (stageW W S₂)) (modelGrpObj (stageW W S₂)) _ _ hO _ qS hLq hRq
   sorry
 
 end Unique
