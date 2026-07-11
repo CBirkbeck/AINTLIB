@@ -249,7 +249,19 @@ theorem EquivariantRelRepData.free_on_points {Q : ModuliProblem R} {G : Type*}
     (e : EquivariantRelRepData φ X) (hfree : FreeAction φ) :
     ∀ {T : Scheme.{u}} (t : T ⟶ e.Z) (γ : G), γ ≠ 1 →
       t ≫ e.σZ.hom γ = t → IsEmpty T := by
-  sorry
+  intro T t γ hγ hfix
+  rw [isEmpty_iff]
+  intro x
+  -- The base composite and the value it classifies over `E ×_S T`.
+  set g : T ⟶ X.base := t ≫ e.f with hg
+  set a := e.eqv g ⟨t, hg.symm⟩ with ha
+  -- `equivariant` + the fixed-point hypothesis: `a` is fixed by `φ γ⁻¹`.
+  have heq := e.equivariant g ⟨t, hg.symm⟩ γ
+  have hcongr : e.eqv g ⟨t ≫ e.σZ.hom γ, by rw [Category.assoc, e.over_base, hg.symm]⟩ = a :=
+    congrArg (e.eqv g) (Subtype.ext hfix)
+  rw [hcongr] at heq
+  -- Freeness over the nonempty base `T` kills the fixed point.
+  exact hfree (X.pullbackAlong g) ⟨x⟩ γ⁻¹ (inv_ne_one.mpr hγ) a heq.symm
 
 end ModuliProblem
 
@@ -273,8 +285,16 @@ noncomputable def _root_.AlgebraicGeometry.SchemeAction.basePullback
     (g : T ⟶ S) : SchemeAction G (pullback f g) where
   hom γ := pullback.map f g f g (σ.hom γ) (𝟙 T) (𝟙 S)
     (by rw [Category.comp_id, hover γ]) (by rw [Category.comp_id, Category.id_comp])
-  hom_one := by sorry
-  hom_mul := by sorry
+  hom_one := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [pullback.lift_fst, σ.hom_one, Category.comp_id, Category.id_comp]
+    · rw [pullback.lift_snd, Category.comp_id, Category.id_comp]
+  hom_mul := fun a b => by
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, pullback.lift_fst, pullback.lift_fst, pullback.lift_fst_assoc,
+        σ.hom_mul, Category.assoc]
+    · rw [Category.assoc, pullback.lift_snd, pullback.lift_snd, pullback.lift_snd_assoc,
+        Category.comp_id, Category.comp_id]
 
 /-- **[GHB3] (KM 7.1.3(3) existence half; Loeffler Prop 3.6.1's affine patching)** —
 "For any E/S/R, the quotient scheme 𝒫_{E/S}/G exists"; Loeffler 3.6.1 (verbatim): "for
