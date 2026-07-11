@@ -276,6 +276,55 @@ private theorem pointSharp_add {U : (F.E).Opens} (hU : IsAffineOpen U)
       pointSharp P₁.1 hp₁ f + pointSharp P₂.1 hp₂ f := by
   sorry
 
+/-! #### The chunk-(i) scheme identities for `pointSharp_add`
+
+`pointSharp_add`'s proof (the stalk design): the pairing of `P₁ P₂` factors through the
+affine Künneth box `κ : pullback (π.resLE) (π.resLE) ≅ Spec (C ⊗ C)` as
+`Spec.map pairTensor`; the sum's comorphism is then computed at the stalk of `C ⊗ C` at the
+double augmentation prime, where the two axis laws — the `Γ`-shadows of `0 + X = X` and
+`X + 0 = X` for the tautological chart point — force the `μ`-comorphism of an augmentation
+element into the kernels of both axis stalk maps; the `(1 ⊗ u)(v ⊗ 1)`-cleared numerator then
+dies under `pairTensor` by `pairLift_eq_zero_of_axes`, and units transport the vanishing to
+`R`. -/
+
+/-- The `Spec`-shadow of the zero section through the chart. -/
+private theorem specMap_zero_appLE_fromSpec {U : (F.E).Opens} (hU : IsAffineOpen U)
+    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U) :
+    Spec.map (F.zero.appLE U ⊤ (fun x _ => heU x)) ≫ hU.fromSpec =
+      (isAffineOpen_top (Spec (CommRingCat.of k))).fromSpec ≫ F.zero :=
+  hU.SpecMap_appLE_fromSpec F.zero (isAffineOpen_top _) _
+
+/-- The `Spec`-shadow of the structure morphism through the chart. -/
+private theorem specMap_π_appLE_fromSpec {U : (F.E).Opens} (hU : IsAffineOpen U) :
+    Spec.map (F.π.appLE ⊤ U (fun x _ => trivial)) ≫
+      (isAffineOpen_top (Spec (CommRingCat.of k))).fromSpec = hU.fromSpec ≫ F.π :=
+  (isAffineOpen_top _).SpecMap_appLE_fromSpec F.π hU _
+
+/-- The tautological point of the chart: `fromSpec` as a point of `E` over its own
+`π`-composite. -/
+private noncomputable def tautPoint {U : (F.E).Opens} (hU : IsAffineOpen U) :
+    F.Point (hU.fromSpec ≫ F.π) :=
+  ⟨hU.fromSpec, rfl⟩
+
+/-- **The left axis law** (the value shadow of `0 + X = X`): pairing the zero point with the
+tautological point and multiplying is `fromSpec`. -/
+private theorem zero_pairing_mul {U : (F.E).Opens} (hU : IsAffineOpen U) :
+    (lift (F.pointEquivOverHom _ (0 : F.Point (hU.fromSpec ≫ F.π)))
+        (F.pointEquivOverHom _ (tautPoint hU))).left ≫ (μ[F.asOver]).left =
+      hU.fromSpec := by
+  have h := point_add_val_mu F ((0 : F.Point (hU.fromSpec ≫ F.π))) (tautPoint hU)
+  rw [zero_add] at h
+  exact h.symm
+
+/-- **The right axis law** (the value shadow of `X + 0 = X`). -/
+private theorem pairing_zero_mul {U : (F.E).Opens} (hU : IsAffineOpen U) :
+    (lift (F.pointEquivOverHom _ (tautPoint hU))
+        (F.pointEquivOverHom _ (0 : F.Point (hU.fromSpec ≫ F.π)))).left ≫
+      (μ[F.asOver]).left = hU.fromSpec := by
+  have h := point_add_val_mu F (tautPoint hU) ((0 : F.Point (hU.fromSpec ≫ F.π)))
+  rw [add_zero] at h
+  exact h.symm
+
 /-- `pointSharp` only depends on the morphism. -/
 private theorem pointSharp_congr {U : (F.E).Opens} {w w' : Spec R ⟶ F.E} (h : w = w')
     (hw : ∀ x : ↑(Spec R), w.base x ∈ U) (hw' : ∀ x : ↑(Spec R), w'.base x ∈ U) :
