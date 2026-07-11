@@ -328,6 +328,13 @@ theorem isIso_ev_unitObj (Y : Scheme.{u}) : IsIso (ev (unitObj Y)) := by
         _root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat))) hd).hom ≫
       (ρ_ ((unitObj Y).val :
         _root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat))).hom := by
+    ext1 V
+    refine ModuleCat.MonoidalCategory.tensor_ext (fun r φ => ?_)
+    -- LHS is already the evaluated form (evalSection φ r); the RHS composite needs the
+    -- congrArg₂-assembly (comp_app motive-fails here) — continuation: evaluate
+    -- (refl ⊗ᵢ hd).hom-app on the generator via tensorHom_app_tmul-as-have, then
+    -- rightUnitor_hom_app, then close by evalSection_smul_right at r = r • 1 +
+    -- the dualUnitLinearEquiv-component defeq (φ-at-terminal-1).
     sorry
   haveI : IsIso (evPre (unitObj Y)) := by
     rw [hfac]
