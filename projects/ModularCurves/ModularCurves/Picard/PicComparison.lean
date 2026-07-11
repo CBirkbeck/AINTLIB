@@ -317,7 +317,25 @@ set_option backward.isDefEq.respectTransparency false in
 pairing is pointwise invertible (every endomorphism of the unit is a scalar), so the
 sheafified evaluation is a composition of isomorphisms. -/
 theorem isIso_ev_unitObj (Y : Scheme.{u}) : IsIso (ev (unitObj Y)) := by
-  sorry
+  -- the dual-unit identification, cast to the clean clothing
+  have hd : ((dualObj (unitObj Y)).val :
+      _root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) ≅
+      𝟙_ (_root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) :=
+    ModularCurves.SheafOfModules.dualUnitPresheafIso Y.ringCatSheaf
+  -- the factorization of the presheaf evaluation
+  have hfac : evPre (unitObj Y) =
+      (tensorIso (Iso.refl ((unitObj Y).val :
+        _root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat))) hd).hom ≫
+      (ρ_ ((unitObj Y).val :
+        _root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat))).hom := by
+    sorry
+  haveI : IsIso (evPre (unitObj Y)) := by
+    rw [hfac]
+    infer_instance
+  haveI : IsIso ((PresheafOfModules.sheafification
+      (𝟙 Y.ringCatSheaf.obj)).map (evPre (unitObj Y))) :=
+    inferInstance
+  exact inferInstanceAs (IsIso (_ ≫ (sheafifyValIso (unitObj Y)).hom))
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
