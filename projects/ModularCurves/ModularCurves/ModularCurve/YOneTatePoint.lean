@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.ModularCurve.YOneAtlasClassify
+import ModularCurves.ModularCurve.YFullRoute
 
 /-!
 # The marked Tate point and `Y₁(N)` (STREAM-Y1 cap file)
@@ -591,7 +592,10 @@ bases compatible with the structure morphisms, and `Smooth`/`IsAffineHom` respec
 Instantiated at the explicit representative `yOneEllObj` with Y1-E6 + Y1-E3. -/
 theorem representableBy_smooth_isAffineHom [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R))
     (X : EllObj R) (hX : Nonempty ((gammaOneNaiveProblem R N).RepresentableBy X)) :
-    Smooth X.structMap ∧ IsAffineHom X.structMap := by sorry
+    Smooth X.structMap ∧ IsAffineHom X.structMap := by
+  obtain ⟨r₀⟩ := yOne_representableBy R N hN hinv
+  exact YFull.smooth_affine_of_representableBy R r₀ (yOneStructMap_smooth R N hN hinv)
+    (yOneStructMap_isAffineHom R N hN hinv) X hX
 
 /-- **(Y1-MASTER — the T-E7 bridge; statement identical to the held
 `gammaOneNaive_representable`, `Moduli/Representability.lean:250`)** For `N ≥ 4` invertible in
