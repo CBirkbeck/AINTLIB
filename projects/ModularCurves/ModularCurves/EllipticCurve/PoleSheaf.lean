@@ -1770,10 +1770,11 @@ private noncomputable def monoidalTensorObjIso {X : Scheme.{u}} (M N : X.Modules
 /-- Restriction along an open immersion preserves the localized monoidal unit. -/
 private noncomputable def restrictMonoidalUnitIso
     {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f] :
-    (Scheme.Modules.restrictFunctor f).obj (𝟙_ Y.Modules) ≅ 𝟙_ X.Modules :=
-  (Scheme.Modules.restrictFunctor f).mapIso (monoidalUnitObjIso Y) ≪≫
-    Scheme.Modules.restrictUnitIso f ≪≫
-      (monoidalUnitObjIso X).symm
+    (Scheme.Modules.restrictFunctor f).obj (𝟙_ Y.Modules) ≅ 𝟙_ X.Modules := by
+  letI : (Scheme.Modules.pullback f).Monoidal :=
+    Scheme.Modules.pullbackMonoidal f
+  exact (Scheme.Modules.restrictFunctorIsoPullback f).app (𝟙_ Y.Modules) ≪≫
+    (Functor.Monoidal.εIso (Scheme.Modules.pullback f)).symm
 
 /-- Restriction along an open immersion preserves the localized tensor product. -/
 private noncomputable def restrictMonoidalTensorIso
@@ -1781,15 +1782,13 @@ private noncomputable def restrictMonoidalTensorIso
     (M N : Y.Modules) :
     (Scheme.Modules.restrictFunctor f).obj (M ⊗ N) ≅
       (Scheme.Modules.restrictFunctor f).obj M ⊗
-        (Scheme.Modules.restrictFunctor f).obj N :=
-  (Scheme.Modules.restrictFunctor f).mapIso (monoidalTensorObjIso M N) ≪≫
-    (Scheme.Modules.restrictFunctorIsoPullback f).app
-      (Scheme.Modules.tensorObj M N) ≪≫
-    (Scheme.Modules.nonempty_pullback_tensorObj f M N).some ≪≫
-    Scheme.Modules.tensorObjCongr
-      ((Scheme.Modules.restrictFunctorIsoPullback f).symm.app M)
-      ((Scheme.Modules.restrictFunctorIsoPullback f).symm.app N) ≪≫
-    (monoidalTensorObjIso _ _).symm
+        (Scheme.Modules.restrictFunctor f).obj N := by
+  letI : (Scheme.Modules.pullback f).Monoidal :=
+    Scheme.Modules.pullbackMonoidal f
+  exact (Scheme.Modules.restrictFunctorIsoPullback f).app (M ⊗ N) ≪≫
+    (Functor.Monoidal.μIso (Scheme.Modules.pullback f) M N).symm ≪≫
+    ((Scheme.Modules.restrictFunctorIsoPullback f).symm.app M ⊗ᵢ
+      (Scheme.Modules.restrictFunctorIsoPullback f).symm.app N)
 
 /-- A trivialization of the simple-pole sheaf on an open induces compatible
 trivializations of all of its tensor powers on that open. -/
@@ -2491,7 +2490,7 @@ noncomputable def sectionPoleSheafPowerBaseChangeIso
   letI : MonoidalCategory (pullback π t).Modules :=
     Scheme.Modules.monoidalCategory (pullback π t)
   letI : (Scheme.Modules.pullback (pullback.fst π t)).Monoidal :=
-    (Scheme.Modules.nonempty_pullback_monoidal (pullback.fst π t)).some
+    Scheme.Modules.pullbackMonoidal (pullback.fst π t)
   induction n with
   | zero =>
       exact (Functor.Monoidal.εIso
