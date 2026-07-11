@@ -1058,6 +1058,59 @@ theorem normMap_covering_member_eq {S T D : Type u} [CommRing S] [Algebra R S] [
         (N.map b)) := by
   rw [normMap_covering_member, normMap_covering_member, hcompat]
 
+/-- **[GR-G-ASM], the T-point forward map.** Every member `N ∈ G(k, A^n; A)` (in the
+`A ⊗[R] R^n` presentation) gives an `A`-point of `grassmannianScheme R k n`, glued from the
+per-chart points `pointOfChartMember` over the covering `D(f_p)` (`exists_spanning_chart_
+witnesses`) via `OpenCover.glueMorphisms`. The overlap compatibility is discharged by
+`pullbackSpecIso` (identifying the pullback fst/snd with the localization inclusions),
+`pointOfChartMember_naturality`, `normMap_covering_member_eq` (the two localized members agree
+over the double localization), and `pointOfChartMember_eq` (chart-independence). -/
+noncomputable def pointOfMember (N : G(k, A ⊗[R] (Fin n → R); A)) :
+    Spec (CommRingCat.of A) ⟶ grassmannianScheme R k n := by
+  classical
+  set s := (exists_spanning_chart_witnesses N).choose with hs_def
+  have hspan : Ideal.span (Set.range s) = ⊤ := (exists_spanning_chart_witnesses N).choose_spec.1
+  have hdata := (exists_spanning_chart_witnesses N).choose_spec.2
+  choose ιc hs hchart using hdata
+  refine (Scheme.affineOpenCoverOfSpanRangeEqTop (R := CommRingCat.of A) s hspan).openCover.glueMorphisms
+      (fun p => pointOfChartMember (R := R) (ιc p) _ (hchart p)) ?_
+  intro p q
+  show pullback.fst (Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away (s p)))))
+      (Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away (s q)))))
+      ≫ pointOfChartMember (R := R) (ιc p) _ (hchart p)
+    = pullback.snd _ _ ≫ pointOfChartMember (R := R) (ιc q) _ (hchart q)
+  set S := Localization.Away (s p)
+  set T := Localization.Away (s q)
+  -- the two localization inclusions, as R-algebra homs into the double localization
+  set iL : S →ₐ[R] TensorProduct A S T :=
+    (Algebra.TensorProduct.includeLeft : S →ₐ[A] TensorProduct A S T).restrictScalars R with hiL
+  set iR : T →ₐ[R] TensorProduct A S T :=
+    (Algebra.TensorProduct.includeRight : T →ₐ[A] TensorProduct A S T).restrictScalars R with hiR
+  -- cancel the pullbackSpecIso and reduce fst/snd to those inclusions
+  rw [← cancel_epi (pullbackSpecIso A S T).inv, pullbackSpecIso_inv_fst_assoc,
+    pullbackSpecIso_inv_snd_assoc]
+  -- naturality: transport the two chart points to the double localization
+  erw [pointOfChartMember_naturality (ιc p) _ iL (hchart p),
+    pointOfChartMember_naturality (ιc q) _ iR (hchart q)]
+  -- the structure composites agree: both are the `A → S ⊗[A] T` map
+  have hcompat : iL.comp (IsScalarTower.toAlgHom R A S)
+      = iR.comp (IsScalarTower.toAlgHom R A T) := by
+    ext a
+    show iL (algebraMap A S a) = iR (algebraMap A T a)
+    rw [hiL, hiR, AlgHom.restrictScalars_apply, AlgHom.restrictScalars_apply,
+      Algebra.TensorProduct.includeLeft_apply, Algebra.TensorProduct.includeRight_apply,
+      Algebra.algebraMap_eq_smul_one, Algebra.algebraMap_eq_smul_one, TensorProduct.smul_tmul]
+  -- the two members agree over the double localization
+  have hM := normMap_covering_member_eq (IsScalarTower.toAlgHom R A S)
+    (IsScalarTower.toAlgHom R A T) iL iR hcompat N
+  -- chart-independence on the common member (witnesses are `Prop`s, so proof-irrelevant)
+  refine (pointOfChartMember_eq (ιc p) (ιc q) (normMap n iL
+      (Module.Grassmannian.congr (TensorProduct.piScalarRight R S S (Fin n))
+        (N.map (IsScalarTower.toAlgHom R A S))))
+    (isChartAt_normMap n (ιc p) iL _ (hchart p))
+    (hM ▸ isChartAt_normMap n (ιc q) iR _ (hchart q))).trans ?_
+  congr 1
+
 end Points
 
 end Module.Grassmannian
