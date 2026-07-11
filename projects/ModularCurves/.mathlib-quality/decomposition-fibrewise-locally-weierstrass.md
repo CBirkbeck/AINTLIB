@@ -121,17 +121,21 @@ structure on scheme modules. Restriction along an open immersion is now proved t
 with module sheafification and the sheafified tensor product; this removes the old general
 pullback/tensor `sorry` from `IsInvertible.tensorObj`. Consequently
 `sectionPoleSheafPower_isInvertible` proves every `O(n[0])` locally trivial and invertible,
-axiom-clean. Missing: arbitrary-base-change compatibility and fibrewise identification with
-`poleOrderFiltration`. The generic
-Cartier-divisor part of base change is now complete:
+axiom-clean. The generic Cartier-divisor part of base change is complete:
 `RelEffCartierDiv.sectionDivisor_baseChange` identifies the divisor of the base-changed
 section for every morphism of bases. At the bundled module level,
 `restrictIdealModuleIso` proves that an open restriction of a quasi-compact morphism's
 kernel module is the module of the pulled-back kernel ideal; specializing gives
 `sectionIdealModuleRestrictIso`. Thus Zariski localization on the base is now compatible
 with the zero ideal, without an exactness hypothesis on a general pullback functor.
-Both results are axiom-clean. Still missing: arbitrary pullback of the bundled ideal and
-pole sheaves, and the residue-fibre identification with `poleOrderFiltration`. The generic
+Both results are axiom-clean. The arbitrary-base layer is now also complete:
+`dualPullbackIsoOfIsInvertible` proves that the canonical pullback map on duals is an
+isomorphism for invertible modules; `sectionPoleSheafBaseChangeIso` and
+`sectionPoleSheafPowerBaseChangeIso` apply it to `O([0])` and all `O(n[0])`; and
+`sectionPoleSheafFiberIso` specializes the construction to residue fibres. All are
+axiom-clean and introduce no noetherianity or flatness hypothesis. Still missing is the
+model-side comparison identifying the resulting fibre sheaves and their global sections
+with the algebraic `poleOrderFiltration`. The generic
 `RelEffCartierDiv.isOfficial` still depends on the registered
 `officialAux_exists_finite_chart` `sorry`; it is not needed for the zero section and must
 not be treated as an axiom-clean discharge.

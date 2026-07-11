@@ -1,5 +1,7 @@
 import ModularCurves.LevelStructure.CartierDivisor
+import ModularCurves.EllipticCurve.Basic
 import ModularCurves.Picard.Pic
+import ModularCurves.Picard.DualPullback.Iso
 import ModularCurves.Picard.DualRestrict
 import ModularCurves.Picard.PullbackTensorObj
 import ModularCurves.Picard.UnitPullback
@@ -1745,6 +1747,76 @@ noncomputable def sectionPoleSheafPowerRestrictIso
           (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≪≫
         (sectionPoleSheafPowerRestrictIso z hz t n ⊗ᵢ
           sectionPoleSheafRestrictIso z hz t)
+
+/-- The simple-pole sheaf of a section commutes with arbitrary base change. -/
+noncomputable def sectionPoleSheafBaseChangeIso
+    {C S T : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (t : T ⟶ S) :
+    (Scheme.Modules.pullback (pullback.fst π t)).obj
+        (sectionPoleSheaf π z hz) ≅
+      sectionPoleSheaf (pullback.snd π t) (sectionBaseChange z hz t)
+        (sectionBaseChange_snd z hz t) := by
+  let g := pullback.fst π t
+  let I := sectionIdealModule π z hz
+  letI : IsSeparated (pullback.snd π t) :=
+    MorphismProperty.pullback_snd π t inferInstance
+  exact Scheme.Modules.dualPullbackIsoOfIsInvertible g I
+      (sectionIdealModule_isInvertible hsm z hz) ≪≫
+    (Scheme.Modules.dualIsoObj
+      (sectionIdealModuleBaseChangeIso hsm z hz t)).symm
+
+/-- Every tensor power of the pole sheaf commutes with arbitrary base change. -/
+noncomputable def sectionPoleSheafPowerBaseChangeIso
+    {C S T : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (t : T ⟶ S) (n : ℕ) :
+    (Scheme.Modules.pullback (pullback.fst π t)).obj
+        (sectionPoleSheafPower π z hz n) ≅
+      sectionPoleSheafPower (pullback.snd π t) (sectionBaseChange z hz t)
+        (sectionBaseChange_snd z hz t) n := by
+  letI : MonoidalCategory C.Modules := Scheme.Modules.monoidalCategory C
+  letI : MonoidalCategory (pullback π t).Modules :=
+    Scheme.Modules.monoidalCategory (pullback π t)
+  letI : (Scheme.Modules.pullback (pullback.fst π t)).Monoidal :=
+    (Scheme.Modules.nonempty_pullback_monoidal (pullback.fst π t)).some
+  induction n with
+  | zero =>
+      exact (Functor.Monoidal.εIso
+        (Scheme.Modules.pullback (pullback.fst π t))).symm
+  | succ n ih =>
+      exact (Functor.Monoidal.μIso
+          (Scheme.Modules.pullback (pullback.fst π t))
+          (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz)).symm ≪≫
+        (ih ⊗ᵢ sectionPoleSheafBaseChangeIso hsm z hz t)
+
+/-- The restriction of `O([0])` to a residue fibre is the pole sheaf of the induced
+marked point on that fibre. -/
+noncomputable def sectionPoleSheafFiberIso
+    {E S : Scheme.{u}} {π : E ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) (s : S) :
+    letI : IsSeparated (π.fiberToSpecResidueField s) :=
+      MorphismProperty.pullback_snd π (S.fromSpecResidueField s) inferInstance
+    (Scheme.Modules.pullback (π.fiberι s)).obj (sectionPoleSheaf π z hz) ≅
+      sectionPoleSheaf (π.fiberToSpecResidueField s)
+        (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _) :=
+  sectionPoleSheafBaseChangeIso hsm z hz (S.fromSpecResidueField s)
+
+/-- The restriction of `O(n[0])` to a residue fibre is the corresponding tensor power
+of the pole sheaf of the induced marked point. -/
+noncomputable def sectionPoleSheafPowerFiberIso
+    {E S : Scheme.{u}} {π : E ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) (s : S) (n : ℕ) :
+    letI : IsSeparated (π.fiberToSpecResidueField s) :=
+      MorphismProperty.pullback_snd π (S.fromSpecResidueField s) inferInstance
+    (Scheme.Modules.pullback (π.fiberι s)).obj
+          (sectionPoleSheafPower π z hz n) ≅
+        sectionPoleSheafPower (π.fiberToSpecResidueField s)
+          (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _) n :=
+  sectionPoleSheafPowerBaseChangeIso hsm z hz
+    (S.fromSpecResidueField s) n
 
 /-- Cover-local invertibility is invariant under isomorphism. -/
 private theorem isInvertible_of_iso {X : Scheme.{u}} {M N : X.Modules}
