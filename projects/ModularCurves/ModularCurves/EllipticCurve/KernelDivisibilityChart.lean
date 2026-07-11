@@ -991,10 +991,320 @@ private theorem pointSharp_add_of_kernel (hU : IsAffineOpen U)
   show (pointSharp Q.1 hq).hom f + (pointSharp P.1 hp).hom f = _
   ring
 
+/-- Kernel points land in the zero chart. -/
+private theorem kernel_mem (heU : ∀ x : ↑(Spec B), (F.zero).base x ∈ U)
+    (hφ : Function.Surjective φ.hom) (hφ2 : RingHom.ker φ.hom ^ 2 = ⊥)
+    {t : Spec R ⟶ Spec B} (P : F.Point t)
+    (hP : Point.restrict F (Spec.map φ) P = 0) :
+    ∀ x : ↑(Spec R), (P.1).base x ∈ U := by
+  refine range_base_subset_of_reduction (t := t) heU hφ hφ2 ?_
+  have hval : Spec.map φ ≫ P.1 = ((0 : F.Point (Spec.map φ ≫ t)) : Spec S' ⟶ F.E) :=
+    congrArg Subtype.val hP
+  rw [hval, F.point_zero_val, Category.assoc]
+
+/-- Kernels are closed under `ℕ`-scalars. -/
+private theorem kernel_nsmul {t : Spec R ⟶ Spec B} (P : F.Point t)
+    (hP : Point.restrict F (Spec.map φ) P = 0) (n : ℕ) :
+    Point.restrict F (Spec.map φ) ((n • P : F.Point t)) = 0 := by
+  induction n with
+  | zero => simpa using restrict_zero F (Spec.map φ)
+  | succ k ih =>
+      rw [succ_nsmul, restrict_add, ih, hP, add_zero]
+
+/-- Chart comorphisms are `ℕ`-linear on kernel points over augmentation elements. -/
+private theorem pointSharp_nsmul_of_kernel (hU : IsAffineOpen U)
+    (heU : ∀ x : ↑(Spec B), (F.zero).base x ∈ U)
+    (htaut : ∀ x : ↑(Spec Γ(F.E, U)), (hU.fromSpec).base x ∈ U)
+    (hz : ∀ x : ↑(Spec Γ(F.E, U)),
+      ((0 : F.Point (hU.fromSpec ≫ F.π)) : Spec Γ(F.E, U) ⟶ F.E).base x ∈ U)
+    (hφ : Function.Surjective φ.hom) (hφ2 : RingHom.ker φ.hom ^ 2 = ⊥)
+    {t : Spec R ⟶ Spec B} (P : F.Point t)
+    (hP : Point.restrict F (Spec.map φ) P = 0)
+    (f : Γ(F.E, U)) (hf : F.zero.appLE U ⊤ (fun x _ => heU x) f = 0) (n : ℕ) :
+    (pointSharp ((n • P : F.Point t) : Spec R ⟶ F.E)
+      (kernel_mem heU hφ hφ2 _ (kernel_nsmul P hP n))).hom f =
+      n • (pointSharp P.1 (kernel_mem heU hφ hφ2 P hP)).hom f := by
+  induction n with
+  | zero =>
+      have h0 : ((0 • P : F.Point t) : Spec R ⟶ F.E) =
+          ((0 : F.Point t) : Spec R ⟶ F.E) := by
+        rw [zero_nsmul]
+      rw [pointSharp_congr h0 _ (kernel_mem heU hφ hφ2 _ (by
+        simpa using restrict_zero F (Spec.map φ)))]
+      have h1 := pointSharp_zero_point heU t (kernel_mem heU hφ hφ2 _ (by
+        simpa using restrict_zero F (Spec.map φ))) f
+      rw [h1, hf, map_zero, zero_smul]
+  | succ k ih =>
+      have hsucc : (((k + 1) • P : F.Point t) : Spec R ⟶ F.E) =
+          (((k • P : F.Point t) + P : F.Point t) : Spec R ⟶ F.E) := by
+        rw [succ_nsmul]
+      rw [pointSharp_congr hsucc _ (kernel_mem heU hφ hφ2 _ (by
+        rw [restrict_add, kernel_nsmul P hP k, hP, add_zero]))]
+      rw [pointSharp_add_of_kernel hU heU htaut hz hφ hφ2 (k • P) P
+        (kernel_nsmul P hP k) hP
+        (kernel_mem heU hφ hφ2 _ (kernel_nsmul P hP k))
+        (kernel_mem heU hφ hφ2 P hP) _ f hf]
+      rw [ih, succ_nsmul]
+
+/-! The divided comorphism, hoisted (small context) per the 200k discipline. -/
+
+private noncomputable def divSharpHom (sh βr : ↑Γ(F.E, U) →+* ↑R) (u : ↑R)
+    (hII : ∀ c c', (sh c - βr c) * (sh c' - βr c') = 0) : ↑Γ(F.E, U) →+* ↑R where
+  toFun := fun c => βr c + u * (sh c - βr c)
+  map_one' := by rw [map_one, map_one, sub_self, mul_zero, add_zero]
+  map_mul' := by
+    intro c c'
+    have h2 := hII c c'
+    show βr (c * c') + u * (sh (c * c') - βr (c * c')) =
+      (βr c + u * (sh c - βr c)) * (βr c' + u * (sh c' - βr c'))
+    rw [map_mul sh, map_mul βr]
+    linear_combination (u - u * u) * h2
+  map_zero' := by rw [map_zero, map_zero, sub_self, mul_zero, add_zero]
+  map_add' := by
+    intro c c'
+    show βr (c + c') + u * (sh (c + c') - βr (c + c')) = _
+    rw [map_add sh, map_add βr]
+    ring
+
+/-- Points of the chart from base-compatible comorphisms. -/
+private theorem exists_point_of_sharp (hU : IsAffineOpen U)
+    (htaut : ∀ x : ↑(Spec Γ(F.E, U)), (hU.fromSpec).base x ∈ U)
+    {t : Spec R ⟶ Spec B} (g : ↑Γ(F.E, U) →+* ↑R)
+    (hgπ : ∀ c₀, g (F.π.appLE ⊤ U (fun x _ => trivial) c₀) =
+      ((t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom)).hom c₀) :
+    ∃ (δ : F.Point t) (hmem : ∀ x : ↑(Spec R), (δ.1).base x ∈ U),
+      pointSharp δ.1 hmem = CommRingCat.ofHom g := by
+  set w : Spec R ⟶ F.E := Spec.map (CommRingCat.ofHom g) ≫ hU.fromSpec with hw
+  have hwU : ∀ x : ↑(Spec R), w.base x ∈ U := by
+    intro x
+    rw [hw, Scheme.Hom.comp_apply]
+    have hr := IsAffineOpen.range_fromSpec hU
+    have h2 : (hU.fromSpec).base ((Spec.map (CommRingCat.ofHom g)).base x) ∈
+        Set.range (hU.fromSpec).base := Set.mem_range_self _
+    rwa [hr] at h2
+  have hwsharp : pointSharp w hwU = CommRingCat.ofHom g := by
+    have h2 := pointSharp_specMap_comp (CommRingCat.ofHom g) htaut hwU
+    rw [(pointSharp_congr (show w = Spec.map (CommRingCat.ofHom g) ≫ hU.fromSpec from hw)
+      hwU (fun x => by rw [← hw]; exact hwU x)).trans h2, pointSharp_fromSpec hU htaut,
+      Category.id_comp]
+  have hwπ : w ≫ F.π = t := by
+    have h0 := hU.SpecMap_appLE_fromSpec w (isAffineOpen_top (Spec R)) (fun x _ => hwU x)
+    rw [IsAffineOpen.fromSpec_top] at h0
+    have hwfac : w = (Spec R).isoSpec.hom ≫ Spec.map (w.appLE U ⊤ (fun x _ => hwU x)) ≫
+        hU.fromSpec := by rw [h0, Iso.hom_inv_id_assoc]
+    have happ : F.π.appLE ⊤ U (fun x _ => trivial) ≫ w.appLE U ⊤ (fun x _ => hwU x) =
+        t.appLE ⊤ ⊤ le_top := by
+      have h1 : w.appLE U ⊤ (fun x _ => hwU x) =
+          CommRingCat.ofHom g ≫ (Scheme.ΓSpecIso R).inv := by
+        have h3 : pointSharp w hwU ≫ (Scheme.ΓSpecIso R).inv =
+            w.appLE U ⊤ (fun x _ => hwU x) := by
+          show (w.appLE U ⊤ (fun x _ => hwU x) ≫ (Scheme.ΓSpecIso R).hom) ≫
+            (Scheme.ΓSpecIso R).inv = _
+          rw [Category.assoc, Iso.hom_inv_id, Category.comp_id]
+        rw [← h3, hwsharp]
+      rw [h1]
+      refine CommRingCat.hom_ext (RingHom.ext fun c₀ => ?_)
+      show (Scheme.ΓSpecIso R).inv.hom (g (F.π.appLE ⊤ U (fun x _ => trivial) c₀)) =
+        (t.appLE ⊤ ⊤ le_top).hom c₀
+      rw [hgπ c₀]
+      have h3 := congrArg (fun (m : Γ(Spec R, ⊤) ⟶ Γ(Spec R, ⊤)) =>
+        m.hom ((t.appLE ⊤ ⊤ le_top).hom c₀)) (Scheme.ΓSpecIso R).hom_inv_id
+      exact h3
+    refine (congrArg (· ≫ F.π) hwfac).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg ((Spec R).isoSpec.hom ≫ ·) (Category.assoc _ _ _)).trans ?_
+    refine (congrArg ((Spec R).isoSpec.hom ≫ ·)
+      (congrArg (Spec.map (w.appLE U ⊤ (fun x _ => hwU x)) ≫ ·)
+        (specMap_π_appLE_fromSpec (F := F) hU).symm)).trans ?_
+    refine (congrArg ((Spec R).isoSpec.hom ≫ ·) ((Category.assoc _ _ _).symm)).trans ?_
+    refine (congrArg ((Spec R).isoSpec.hom ≫ ·) (congrArg
+      (· ≫ (isAffineOpen_top (Spec B)).fromSpec)
+      ((Spec.map_comp _ _).symm))).trans ?_
+    refine (congrArg ((Spec R).isoSpec.hom ≫ ·) (congrArg
+      (fun m => Spec.map m ≫ (isAffineOpen_top (Spec B)).fromSpec) happ)).trans ?_
+    refine (congrArg ((Spec R).isoSpec.hom ≫ ·)
+      ((isAffineOpen_top (Spec B)).SpecMap_appLE_fromSpec t
+        (isAffineOpen_top (Spec R)) le_top)).trans ?_
+    rw [IsAffineOpen.fromSpec_top, Iso.hom_inv_id_assoc]
+  exact ⟨⟨w, hwπ⟩, hwU, hwsharp⟩
+
+/-- **(CHART-DIV)** Square-zero kernel points are `N`-divisible in the chart, for `N` a
+unit: the `β + N⁻¹·(sharp − β)` comorphism is a ring map by the square-zero kill, and its
+point is the required `δ`. -/
+private theorem exists_kernel_div (hU : IsAffineOpen U)
+    (heU : ∀ x : ↑(Spec B), (F.zero).base x ∈ U)
+    (htaut : ∀ x : ↑(Spec Γ(F.E, U)), (hU.fromSpec).base x ∈ U)
+    (hz : ∀ x : ↑(Spec Γ(F.E, U)),
+      ((0 : F.Point (hU.fromSpec ≫ F.π)) : Spec Γ(F.E, U) ⟶ F.E).base x ∈ U)
+    (hφ : Function.Surjective φ.hom) (hφ2 : RingHom.ker φ.hom ^ 2 = ⊥)
+    {t : Spec R ⟶ Spec B} (N : ℕ) (hN : IsUnit ((N : ℕ) : ↑R))
+    (P : F.Point t) (hP : Point.restrict F (Spec.map φ) P = 0) :
+    ∃ δ : F.Point t, Point.restrict F (Spec.map φ) δ = 0 ∧ (N : ℤ) • δ = P := by
+  classical
+  have hp := kernel_mem heU hφ hφ2 P hP
+  have h0K : Point.restrict F (Spec.map φ) (0 : F.Point t) = 0 :=
+    restrict_zero F (Spec.map φ)
+  have hz₀ := kernel_mem heU hφ hφ2 (0 : F.Point t) h0K
+  -- the unit inverse
+  set u : ↑R := ↑hN.unit⁻¹ with hu_def
+  have huN : ((N : ℕ) : ↑R) * u = 1 := by
+    rw [hu_def]
+    exact hN.mul_val_inv
+  -- the difference and its square-zero bounds
+  set β : ↑Γ(F.E, U) →+* ↑R := (pointSharp ((0 : F.Point t) : Spec R ⟶ F.E) hz₀).hom
+    with hβ
+  set i : ↑Γ(F.E, U) → ↑R := fun c => (pointSharp P.1 hp).hom c - β c with hi
+  have hII : ∀ a ∈ RingHom.ker φ.hom, ∀ b ∈ RingHom.ker φ.hom, a * b = 0 := by
+    intro a ha b hb
+    have h1 : a * b ∈ RingHom.ker φ.hom ^ 2 := by
+      rw [sq]; exact Ideal.mul_mem_mul ha hb
+    simpa [hφ2] using h1
+  have hiI : ∀ c, i c ∈ RingHom.ker φ.hom := by
+    intro c
+    have h1 := pointSharp_sub_mem_ker heU hφ hφ2 P hP hp c
+    have h2 : β c = ((t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom)).hom
+        ((F.zero.appLE U ⊤ (fun x _ => heU x)) c) := by
+      rw [hβ]
+      exact pointSharp_zero_point heU t hz₀ c
+    rw [hi]
+    show (pointSharp P.1 hp).hom c - β c ∈ RingHom.ker φ.hom
+    rw [h2]
+    exact h1
+  have hi_mul : ∀ c c', i (c * c') = β c * i c' + i c * β c' := by
+    intro c c'
+    have h1 : (pointSharp P.1 hp).hom (c * c') = (β c + i c) * (β c' + i c') := by
+      rw [map_mul]
+      congr 1 <;> · rw [hi]; ring
+    have h2 : i c * i c' = 0 := hII _ (hiI c) _ (hiI c')
+    rw [hi]
+    show (pointSharp P.1 hp).hom (c * c') - β (c * c') = _
+    rw [h1, map_mul]
+    have h3 : (β c + i c) * (β c' + i c') =
+        β c * β c' + β c * i c' + i c * β c' + i c * i c' := by ring
+    rw [h3, h2]
+    ring
+  -- the divided comorphism (hoisted)
+  have hII' : ∀ c c', ((pointSharp P.1 hp).hom c - β c) *
+      ((pointSharp P.1 hp).hom c' - β c') = 0 := fun c c' =>
+    hII _ (hiI c) _ (hiI c')
+  set g : ↑Γ(F.E, U) →+* ↑R := divSharpHom (pointSharp P.1 hp).hom β u hII' with hg
+  have hg_eval : ∀ c, g c = β c + u * i c := fun c => rfl
+  -- the base compatibility
+  have hgπ : ∀ c₀, g (F.π.appLE ⊤ U (fun x _ => trivial) c₀) =
+      ((t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom)).hom c₀ := by
+    intro c₀
+    have h1 : (pointSharp P.1 hp).hom (F.π.appLE ⊤ U (fun x _ => trivial) c₀) =
+        ((t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom)).hom c₀ :=
+      pointSharp_comp_π P hp c₀
+    have h2 : β (F.π.appLE ⊤ U (fun x _ => trivial) c₀) =
+        ((t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom)).hom c₀ := by
+      rw [hβ]
+      exact pointSharp_comp_π (0 : F.Point t) hz₀ c₀
+    rw [hg_eval]
+    have h3 : i (F.π.appLE ⊤ U (fun x _ => trivial) c₀) = 0 := by
+      rw [hi]
+      show (pointSharp P.1 hp).hom _ - β _ = 0
+      rw [h1, h2, sub_self]
+    rw [h2, h3, mul_zero, add_zero]
+  obtain ⟨δ, hδmem, hδsharp⟩ := exists_point_of_sharp hU htaut g hgπ
+  have hδsharpφ : ∀ c, φ.hom (g c) = φ.hom (β c) := by
+    intro c
+    rw [hg_eval, map_add, map_mul]
+    have h1 : φ.hom (i c) = 0 := hiI c
+    rw [h1, mul_zero, add_zero]
+  -- δ is a kernel point
+  have hδK : Point.restrict F (Spec.map φ) δ = 0 := by
+    refine Subtype.ext ?_
+    show Spec.map φ ≫ δ.1 = ((0 : F.Point (Spec.map φ ≫ t)) : Spec S' ⟶ F.E)
+    have hcomp : ∀ x : ↑(Spec S'), (Spec.map φ ≫ δ.1).base x ∈ U := fun x => by
+      rw [Scheme.Hom.comp_apply]; exact hδmem _
+    have hz0' : ∀ x : ↑(Spec S'),
+        ((0 : F.Point (Spec.map φ ≫ t)) : Spec S' ⟶ F.E).base x ∈ U := by
+      intro x
+      rw [F.point_zero_val]
+      rw [Scheme.Hom.comp_apply]
+      exact heU _
+    refine eq_of_pointSharp_eq hU hcomp hz0' ?_
+    refine CommRingCat.hom_ext (RingHom.ext fun c => ?_)
+    have hL : (pointSharp (Spec.map φ ≫ δ.1) hcomp).hom c = φ.hom (g c) := by
+      have h2 := pointSharp_specMap_comp φ hδmem hcomp
+      have h3 := congrArg (fun (m : Γ(F.E, U) ⟶ S') => m.hom c) h2
+      have h4 := congrArg (fun (m : Γ(F.E, U) ⟶ R) => φ.hom (m.hom c)) hδsharp
+      exact h3.trans h4
+    have hR : (pointSharp ((0 : F.Point (Spec.map φ ≫ t)) : Spec S' ⟶ F.E) hz0').hom c =
+        φ.hom (β c) := by
+      rw [pointSharp_zero_point heU (Spec.map φ ≫ t) hz0' c]
+      have h6 : (Spec.map φ).appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso S').hom =
+          (Scheme.ΓSpecIso R).hom ≫ φ := by
+        rw [show (Spec.map φ).appLE ⊤ ⊤ le_top = (Spec.map φ).appTop from rfl]
+        exact Scheme.ΓSpecIso_naturality φ
+      have h5 : ((Spec.map φ ≫ t).appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso S').hom) =
+          (t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom) ≫ φ := by
+        rw [← Scheme.Hom.appLE_comp_appLE (Spec.map φ) t ⊤ ⊤ ⊤ le_top le_top]
+        rw [Category.assoc, h6, Category.assoc]
+      have h7 := congrArg (fun (m : Γ(Spec B, ⊤) ⟶ S') =>
+        m.hom ((F.zero.appLE U ⊤ (fun x _ => heU x)) c)) h5
+      refine h7.trans ?_
+      have h8 : β c = ((t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom)).hom
+          ((F.zero.appLE U ⊤ (fun x _ => heU x)) c) := by
+        rw [hβ]
+        exact pointSharp_zero_point heU t hz₀ c
+      rw [h8]
+      rfl
+    rw [hL, hR, hδsharpφ c]
+  -- the scalar identity
+  have hNδK : Point.restrict F (Spec.map φ) ((N • δ : F.Point t)) = 0 :=
+    kernel_nsmul δ hδK N
+  have hNδmem := kernel_mem heU hφ hφ2 _ hNδK
+  have hsharpδ_eval : ∀ c, (pointSharp δ.1 hδmem).hom c = g c := fun c =>
+    congrArg (fun (m : Γ(F.E, U) ⟶ R) => m.hom c) hδsharp
+  have hfinal : pointSharp ((N • δ : F.Point t) : Spec R ⟶ F.E) hNδmem =
+      pointSharp P.1 hp := by
+    refine CommRingCat.hom_ext (RingHom.ext fun c => ?_)
+    set c₀ := F.π.appLE ⊤ U (fun x _ => trivial)
+      (F.zero.appLE U ⊤ (fun x _ => heU x) c) with hc₀
+    have haug : F.zero.appLE U ⊤ (fun x _ => heU x) (c - c₀) = 0 := by
+      rw [map_sub, hc₀, zero_appLE_π_appLE, sub_self]
+    have hbaseN : (pointSharp ((N • δ : F.Point t) : Spec R ⟶ F.E) hNδmem).hom c₀ =
+        ((t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom)).hom
+          ((F.zero.appLE U ⊤ (fun x _ => heU x)) c) :=
+      pointSharp_comp_π (N • δ : F.Point t) hNδmem _
+    have hbaseP : (pointSharp P.1 hp).hom c₀ =
+        ((t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom)).hom
+          ((F.zero.appLE U ⊤ (fun x _ => heU x)) c) :=
+      pointSharp_comp_π P hp _
+    have haugN : (pointSharp ((N • δ : F.Point t) : Spec R ⟶ F.E) hNδmem).hom (c - c₀) =
+        N • (pointSharp δ.1 (kernel_mem heU hφ hφ2 δ hδK)).hom (c - c₀) :=
+      pointSharp_nsmul_of_kernel hU heU htaut hz hφ hφ2 δ hδK (c - c₀) haug N
+    have hδmem_eq : (pointSharp δ.1 (kernel_mem heU hφ hφ2 δ hδK)).hom (c - c₀) =
+        g (c - c₀) := hsharpδ_eval (c - c₀)
+    have hβaug : β (c - c₀) = 0 := by
+      rw [hβ, pointSharp_zero_point heU t hz₀ (c - c₀), haug, map_zero]
+    have hgaug : g (c - c₀) = u * i (c - c₀) := by
+      rw [hg_eval, hβaug, zero_add]
+    have haugP : i (c - c₀) = (pointSharp P.1 hp).hom (c - c₀) := by
+      rw [hi]
+      show _ - β _ = _
+      rw [hβaug, sub_zero]
+    have hNu : N • (u * i (c - c₀)) = i (c - c₀) := by
+      rw [nsmul_eq_mul, ← _root_.mul_assoc, huN, _root_.one_mul]
+    have hcN : (pointSharp ((N • δ : F.Point t) : Spec R ⟶ F.E) hNδmem).hom c =
+        (pointSharp ((N • δ : F.Point t) : Spec R ⟶ F.E) hNδmem).hom c₀ +
+        (pointSharp ((N • δ : F.Point t) : Spec R ⟶ F.E) hNδmem).hom (c - c₀) := by
+      rw [← map_add]
+      congr 1
+      ring
+    have hcP : (pointSharp P.1 hp).hom c =
+        (pointSharp P.1 hp).hom c₀ + (pointSharp P.1 hp).hom (c - c₀) := by
+      rw [← map_add]
+      congr 1
+      ring
+    rw [hcN, hcP, hbaseN, hbaseP, haugN]
+    congr 1
+    rw [hδmem_eq, hgaug, hNu, haugP]
+  refine ⟨δ, hδK, ?_⟩
+  have h9 : ((N : ℤ) • δ : F.Point t) = (N • δ : F.Point t) := natCast_zsmul δ N
+  rw [h9]
+  exact Subtype.ext (eq_of_pointSharp_eq hU hNδmem hp hfinal)
+
 end Box
-
-end AugmentationScheme
-
-end EllipticCurve
-
-end ModularCurves
