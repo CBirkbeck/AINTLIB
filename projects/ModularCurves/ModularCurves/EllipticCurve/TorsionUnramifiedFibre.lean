@@ -653,6 +653,193 @@ private theorem pointSharp_specMap_comp {R' R'' : CommRingCat.{u}} (g : R'' ⟶ 
   rw [hnat]
   rfl
 
+/-- `Spec` of a commuting `CommRingCat` square, composed with a classified base leg
+(abstract objects: no localization unfolds). -/
+private theorem specMap_square_comp {A B C D : CommRingCat.{u}} {f : A ⟶ B} {g : B ⟶ C}
+    {f' : A ⟶ D} {g' : D ⟶ C} (hsq : f ≫ g = f' ≫ g') {X : Scheme.{u}}
+    {q : Spec A ⟶ X} {m : Spec D ⟶ X} (hq : Spec.map f' ≫ q = m) :
+    Spec.map g ≫ Spec.map f ≫ q = Spec.map g' ≫ m := by
+  rw [← hq, ← Category.assoc, ← Spec.map_comp, hsq, Spec.map_comp, Category.assoc]
+
+/-- The abstract localization package for the `pointSharp_add` tail: the two localizations
+(at the double-augmentation prime of the box ring and at the augmentation prime of the
+chart ring) exported as OPAQUE `CommRingCat` objects carrying exactly the facts the tail
+consumes. The tail's `pointSharp` elaborations then never unfold a localization — the
+`whnf` wall of the ledger stops at the fvars. -/
+private structure AugLocPackage {U : (F.E).Opens} (hU : IsAffineOpen U)
+    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U)
+    [Algebra ↑Γ(Spec (CommRingCat.of k), ⊤) ↑R]
+    [hker : (RingHom.ker (foldε (chartAug heU)).toRingHom).IsPrime]
+    [hkerε : (RingHom.ker (chartAug heU).toRingHom).IsPrime]
+    (pT : ↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U) →ₐ[↑Γ(Spec
+      (CommRingCat.of k), ⊤)] ↑R)
+    (q : Spec (.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U))) ⟶ F.E) where
+  L : CommRingCat.{u}
+  LεL : CommRingCat.{u}
+  LεR : CommRingCat.{u}
+  algL : CommRingCat.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U)) ⟶ L
+  algLεL : Γ(F.E, U) ⟶ LεL
+  algLεR : Γ(F.E, U) ⟶ LεR
+  φL : L ⟶ R
+  aL : L ⟶ LεL
+  aR : L ⟶ LεR
+  hφLalg : ∀ y, φL.hom (algL.hom y) = pT y
+  hrangeL : ∀ x : ↑(Spec L), (Spec.map algL ≫ q).base x ∈ U
+  hsurj : ∀ a : ↑L, ∃ (y : ↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U))
+    (sden : (RingHom.ker (foldε (chartAug heU)).toRingHom).primeCompl),
+    a * algL.hom ↑sden = algL.hom y
+  haLalg : ∀ y, aL.hom (algL.hom y) = algLεL.hom ((axisL (chartAug heU)) y)
+  haRalg : ∀ y, aR.hom (algL.hom y) = algLεR.hom ((axisR (chartAug heU)) y)
+  hkerLεL : ∀ c : ↑Γ(F.E, U), algLεL.hom c = 0 →
+    ∃ u : (RingHom.ker (chartAug heU).toRingHom).primeCompl, (u : ↑Γ(F.E, U)) * c = 0
+  hkerLεR : ∀ c : ↑Γ(F.E, U), algLεR.hom c = 0 →
+    ∃ u : (RingHom.ker (chartAug heU).toRingHom).primeCompl, (u : ↑Γ(F.E, U)) * c = 0
+  haxSpecL : Spec.map aL ≫ Spec.map algL ≫ q = Spec.map algLεL ≫ hU.fromSpec
+  haxSpecR : Spec.map aR ≫ Spec.map algL ≫ q = Spec.map algLεR ≫ hU.fromSpec
+
+/-- One axis-side of the chart-prime localization data (fields abstract for the tail). -/
+private structure EpsHalf {U : (F.E).Opens} (hU : IsAffineOpen U)
+    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U)
+    [hker : (RingHom.ker (foldε (chartAug heU)).toRingHom).IsPrime]
+    [hkerε : (RingHom.ker (chartAug heU).toRingHom).IsPrime]
+    (ax : ↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U) →ₐ[↑Γ(Spec
+      (CommRingCat.of k), ⊤)] ↑Γ(F.E, U))
+    (q : Spec (.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U))) ⟶ F.E)
+    where
+  Lε : CommRingCat.{u}
+  algLε : Γ(F.E, U) ⟶ Lε
+  a : CommRingCat.of (Localization.AtPrime
+    (RingHom.ker (foldε (chartAug heU)).toRingHom)) ⟶ Lε
+  halg : ∀ y, a.hom (algebraMap _ (Localization.AtPrime
+      (RingHom.ker (foldε (chartAug heU)).toRingHom)) y) = algLε.hom (ax y)
+  hker' : ∀ c : ↑Γ(F.E, U), algLε.hom c = 0 →
+    ∃ u : (RingHom.ker (chartAug heU).toRingHom).primeCompl, (u : ↑Γ(F.E, U)) * c = 0
+  hspec : Spec.map a ≫ Spec.map (CommRingCat.ofHom (algebraMap _ (Localization.AtPrime
+    (RingHom.ker (foldε (chartAug heU)).toRingHom)))) ≫ q = Spec.map algLε ≫ hU.fromSpec
+
+/-- The commuting square of the axis localization map (own heartbeat budget). -/
+private theorem epsHalf_square {U : (F.E).Opens}
+    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U)
+    [hker : (RingHom.ker (foldε (chartAug heU)).toRingHom).IsPrime]
+    [hkerε : (RingHom.ker (chartAug heU).toRingHom).IsPrime]
+    (ax : ↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U) →ₐ[↑Γ(Spec
+      (CommRingCat.of k), ⊤)] ↑Γ(F.E, U))
+    (hcompat : (RingHom.ker (foldε (chartAug heU)).toRingHom).primeCompl ≤
+      Submonoid.comap ax.toRingHom (RingHom.ker (chartAug heU).toRingHom).primeCompl) :
+    CommRingCat.ofHom (algebraMap (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)]
+        ↑Γ(F.E, U)) (Localization.AtPrime
+      (RingHom.ker (foldε (chartAug heU)).toRingHom))) ≫
+      CommRingCat.ofHom (IsLocalization.map
+        (M := (RingHom.ker (foldε (chartAug heU)).toRingHom).primeCompl)
+        (T := (RingHom.ker (chartAug heU).toRingHom).primeCompl)
+        (Localization.AtPrime (RingHom.ker (chartAug heU).toRingHom))
+        ax.toRingHom hcompat) =
+    CommRingCat.ofHom ax.toRingHom ≫ CommRingCat.ofHom (algebraMap ↑Γ(F.E, U)
+      (Localization.AtPrime (RingHom.ker (chartAug heU).toRingHom))) := by
+  have hraw : (IsLocalization.map
+      (M := (RingHom.ker (foldε (chartAug heU)).toRingHom).primeCompl)
+      (T := (RingHom.ker (chartAug heU).toRingHom).primeCompl)
+      (Localization.AtPrime (RingHom.ker (chartAug heU).toRingHom))
+      ax.toRingHom hcompat).comp (algebraMap (↑Γ(F.E, U) ⊗[↑Γ(Spec
+        (CommRingCat.of k), ⊤)] ↑Γ(F.E, U)) (Localization.AtPrime
+        (RingHom.ker (foldε (chartAug heU)).toRingHom))) =
+      (algebraMap ↑Γ(F.E, U) (Localization.AtPrime
+        (RingHom.ker (chartAug heU).toRingHom))).comp ax.toRingHom :=
+    IsLocalization.map_comp hcompat
+  rw [← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp, hraw]
+
+/-- Constructor of one axis-side (own heartbeat budget; generic in the axis map). -/
+private theorem epsHalf_exists {U : (F.E).Opens} (hU : IsAffineOpen U)
+    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U)
+    [hker : (RingHom.ker (foldε (chartAug heU)).toRingHom).IsPrime]
+    [hkerε : (RingHom.ker (chartAug heU).toRingHom).IsPrime]
+    (ax : ↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U) →ₐ[↑Γ(Spec
+      (CommRingCat.of k), ⊤)] ↑Γ(F.E, U))
+    {q : Spec (.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U))) ⟶ F.E}
+    (hcompat : (RingHom.ker (foldε (chartAug heU)).toRingHom).primeCompl ≤
+      Submonoid.comap ax.toRingHom (RingHom.ker (chartAug heU).toRingHom).primeCompl)
+    (haxq : Spec.map (CommRingCat.ofHom ax.toRingHom) ≫ q = hU.fromSpec) :
+    Nonempty (EpsHalf hU heU ax q) := by
+  classical
+  refine ⟨⟨CommRingCat.of (Localization.AtPrime
+      (RingHom.ker (chartAug heU).toRingHom)),
+    CommRingCat.ofHom (algebraMap ↑Γ(F.E, U) (Localization.AtPrime
+      (RingHom.ker (chartAug heU).toRingHom))),
+    CommRingCat.ofHom (IsLocalization.map
+      (M := (RingHom.ker (foldε (chartAug heU)).toRingHom).primeCompl)
+      (T := (RingHom.ker (chartAug heU).toRingHom).primeCompl)
+      (Localization.AtPrime (RingHom.ker (chartAug heU).toRingHom))
+      ax.toRingHom hcompat),
+    fun y => IsLocalization.map_eq hcompat y,
+    fun c hc => (IsLocalization.map_eq_zero_iff
+      (RingHom.ker (chartAug heU).toRingHom).primeCompl _ _).mp hc,
+    specMap_square_comp (epsHalf_square heU ax hcompat) haxq⟩⟩
+
+/-- Constructor of the localization package (own heartbeat budget: every localization
+unfolding happens here, in a small context). -/
+private theorem augLocPackage_exists {U : (F.E).Opens} (hU : IsAffineOpen U)
+    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U)
+    [Algebra ↑Γ(Spec (CommRingCat.of k), ⊤) ↑R]
+    [hker : (RingHom.ker (foldε (chartAug heU)).toRingHom).IsPrime]
+    [hkerε : (RingHom.ker (chartAug heU).toRingHom).IsPrime]
+    (pT : ↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U) →ₐ[↑Γ(Spec
+      (CommRingCat.of k), ⊤)] ↑R)
+    (hunits : ∀ y : (RingHom.ker (foldε (chartAug heU)).toRingHom).primeCompl,
+      IsUnit (pT y))
+    {q : Spec (.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U))) ⟶ F.E}
+    (hqp : q.base ⟨RingHom.ker (foldε (chartAug heU)).toRingHom, hker⟩ ∈ U)
+    (haxLq : Spec.map (CommRingCat.ofHom (axisL (chartAug heU)).toRingHom) ≫ q =
+      hU.fromSpec)
+    (haxRq : Spec.map (CommRingCat.ofHom (axisR (chartAug heU)).toRingHom) ≫ q =
+      hU.fromSpec) :
+    Nonempty (AugLocPackage hU heU pT q) := by
+  classical
+  set ε' := chartAug heU with hε'
+  set p𝔭 : ↑(Spec (.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U)))) :=
+    ⟨RingHom.ker (foldε ε').toRingHom, hε' ▸ hker⟩ with hp𝔭
+  set L := CommRingCat.of (Localization.AtPrime (RingHom.ker (foldε ε').toRingHom))
+    with hLdef
+  set algL : CommRingCat.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U)) ⟶
+      L := CommRingCat.ofHom
+    (algebraMap _ (Localization.AtPrime (RingHom.ker (foldε ε').toRingHom))) with halgL
+  set φL : ↑L →+* ↑R := IsLocalization.lift
+    (M := (RingHom.ker (foldε ε').toRingHom).primeCompl) (g := pT.toRingHom) hunits
+    with hφLdef
+  have hφLalg : ∀ y, φL (algL.hom y) = pT y := fun y => IsLocalization.lift_eq hunits y
+  have hrangeL : ∀ x : ↑(Spec L), (Spec.map algL ≫ q).base x ∈ U := by
+    intro x
+    have hle : ((Spec.map algL).base x).asIdeal ≤ p𝔭.asIdeal := by
+      intro a ha
+      by_contra hnot
+      have hu : IsUnit (algL.hom a) := IsLocalization.map_units
+        (M := (RingHom.ker (foldε ε').toRingHom).primeCompl) _ ⟨a, hnot⟩
+      exact x.isPrime.ne_top (Ideal.eq_top_of_isUnit_mem _ ha hu)
+    have hspec : ((Spec.map algL).base x) ⤳ p𝔭 :=
+      (PrimeSpectrum.le_iff_specializes _ _).mp hle
+    have hspec2 : (q.base ((Spec.map algL).base x)) ⤳ (q.base p𝔭) :=
+      hspec.map q.continuous
+    exact hspec2.mem_open U.2 hqp
+  have hcompatL : (RingHom.ker (foldε ε').toRingHom).primeCompl ≤
+      Submonoid.comap (axisL ε').toRingHom (RingHom.ker ε'.toRingHom).primeCompl := by
+    intro y hy h0
+    refine hy (RingHom.mem_ker.mpr ?_)
+    have h1 : ε' ((axisL ε') y) = 0 := RingHom.mem_ker.mp h0
+    rw [show (foldε ε').toRingHom y = ε' ((axisL ε') y) from foldε_eq_axisL ε' y, h1]
+  have hcompatR : (RingHom.ker (foldε ε').toRingHom).primeCompl ≤
+      Submonoid.comap (axisR ε').toRingHom (RingHom.ker ε'.toRingHom).primeCompl := by
+    intro y hy h0
+    refine hy (RingHom.mem_ker.mpr ?_)
+    have h1 : ε' ((axisR ε') y) = 0 := RingHom.mem_ker.mp h0
+    rw [show (foldε ε').toRingHom y = ε' ((axisR ε') y) from foldε_eq_axisR ε' y, h1]
+  obtain ⟨eL⟩ := epsHalf_exists hU heU (axisL ε') hcompatL haxLq
+  obtain ⟨eR⟩ := epsHalf_exists hU heU (axisR ε') hcompatR haxRq
+  refine ⟨⟨L, eL.Lε, eR.Lε, algL, eL.algLε, eR.algLε, CommRingCat.ofHom φL, eL.a, eR.a,
+    hφLalg, hrangeL, ?_, eL.halg, eR.halg, eL.hker', eR.hker', eL.hspec, eR.hspec⟩⟩
+  intro a
+  obtain ⟨⟨y, sden⟩, hys⟩ := IsLocalization.surj
+    (M := (RingHom.ker (foldε ε').toRingHom).primeCompl) a
+  exact ⟨y, sden, hys⟩
+
 /-- **The hoisted tail of `pointSharp_add`** (6e′–6g): standalone so the localization
 `set`s run against a small context (the inline form blows the `whnf` budget). All
 box-geometry enters through the five morphism-level hypotheses. -/
@@ -693,44 +880,137 @@ private theorem pointSharp_add_tail {U : (F.E).Opens} (hU : IsAffineOpen U)
     pointSharp (P₁ + P₂ : F.Point t).1 hp₁₂ f =
       pointSharp P₁.1 hp₁ f + pointSharp P₂.1 hp₂ f := by
   classical
+  obtain ⟨pkg⟩ := augLocPackage_exists hU heU pT hunits hqp haxLq haxRq
   set ε' := chartAug heU with hε'
-  set p𝔭 : ↑(Spec (.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U)))) :=
-    ⟨RingHom.ker (foldε ε').toRingHom, hε' ▸ hker⟩ with hp𝔭
   have hεf : ε' f = 0 := hf
-  -- 6e′ (germ-free): the localization at the augmentation prime
-  set L := CommRingCat.of (Localization.AtPrime (RingHom.ker (foldε ε').toRingHom)) with hLdef
-  set algL : CommRingCat.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U)) ⟶ L :=
-    CommRingCat.ofHom
-      (algebraMap _ (Localization.AtPrime (RingHom.ker (foldε ε').toRingHom))) with halgL
-  set φL : ↑L →+* ↑R := IsLocalization.lift
-    (M := (RingHom.ker (foldε ε').toRingHom).primeCompl) (g := pT.toRingHom) hunits with hφLdef
-  have hφLalg : ∀ y, φL (algL.hom y) = pT y := fun y => IsLocalization.lift_eq hunits y
-  -- the localized box point lands in the chart (generization stability)
-  have hrangeL : ∀ x : ↑(Spec L), (Spec.map algL ≫ q).base x ∈ U := by
-    intro x
-    have hle : ((Spec.map algL).base x).asIdeal ≤ p𝔭.asIdeal := by
-      intro a ha
-      by_contra hnot
-      have hu : IsUnit (algL.hom a) := IsLocalization.map_units
-        (M := (RingHom.ker (foldε ε').toRingHom).primeCompl) _ ⟨a, hnot⟩
-      exact x.isPrime.ne_top (Ideal.eq_top_of_isUnit_mem _ ha hu)
-    have hspec : ((Spec.map algL).base x) ⤳ p𝔭 := (PrimeSpectrum.le_iff_specializes _ _).mp hle
-    have hspec2 : (q.base ((Spec.map algL).base x)) ⤳ (q.base p𝔭) := hspec.map q.continuous
-    exact hspec2.mem_open U.2 hqp
-  /- WALL-LEDGER (stop-line, 6+ measured iterations): `set ψ' := pointSharp
-  (Spec.map algL ≫ q) hrangeL` ALONE blows the 200k whnf budget — the `fun x _ => hw x`
-  membership-coercion inside `pointSharp`'s appLE-argument whnf-unfolds
-  `(Spec.map algL ≫ q) ⁻¹ᵁ U`-membership through the localization's `algebraMap`-comap.
-  Everything ABOVE this line is GREEN (φL, hφLalg, hrangeL included); the remaining
-  content is ψ' + hfacSpec + hkey (6f, drafted in .tail2/.tailbody) + the 6g kill
-  (drafted ibid., adapted unbundled forms in .tail2). CANDIDATE FIXES for the next
-  attempt: (1) restate `pointSharp` to take the `⊤ ≤ w ⁻¹ᵁ U`-form directly and convert
-  ONCE at each call site with a `show`-cast; (2) mark `Spec.map`/`algL` combination
-  irreducible locally (`set_option` allowed? NO maxHeartbeats — but `seal`/`irreducible`
-  attributes are fair game: `attribute [local irreducible] Localization` before the set);
-  (3) hoist ψ'-BUNDLE: a private def ψdef (args: algL-abstract as a CommRingCat-hom +
-  q + the ≤-proof) so the coercion elaborates once in a tiny context. -/
-  sorry
+  -- 6e′ (abstract): the chart evaluation of the localized box point
+  set ψ' := pointSharp (Spec.map pkg.algL ≫ q) pkg.hrangeL with hψ'
+  -- 6f. the sum's chart evaluation factors through the localization
+  have hfacSpec : Spec.map (CommRingCat.ofHom pT.toRingHom) =
+      Spec.map pkg.φL ≫ Spec.map pkg.algL := by
+    rw [← Spec.map_comp]
+    refine congrArg Spec.map ?_
+    refine CommRingCat.hom_ext (RingHom.ext fun y => ?_)
+    exact (pkg.hφLalg y).symm
+  have hkey : pointSharp ((P₁ + P₂ : F.Point t) : Spec R ⟶ F.E) hp₁₂ =
+      ψ' ≫ pkg.φL := by
+    have hcomp2 : ∀ x : ↑(Spec R),
+        (Spec.map pkg.φL ≫ Spec.map pkg.algL ≫ q).base x ∈ U := by
+      intro x
+      have h0 : (Spec.map pkg.φL ≫ Spec.map pkg.algL ≫ q).base x =
+          (Spec.map pkg.algL ≫ q).base ((Spec.map pkg.φL).base x) := rfl
+      rw [h0]
+      exact pkg.hrangeL _
+    rw [pointSharp_congr (show ((P₁ + P₂ : F.Point t) : Spec R ⟶ F.E) =
+        Spec.map pkg.φL ≫ Spec.map pkg.algL ≫ q by
+      rw [hsum, hfacSpec, Category.assoc]) hp₁₂ hcomp2]
+    exact pointSharp_specMap_comp pkg.φL pkg.hrangeL hcomp2
+  -- 6g. the axis moves kill the augmentation defect
+  have haxψ : ∀ (Lε' : CommRingCat.{u}) (ā : pkg.L ⟶ Lε') (algLε' : Γ(F.E, U) ⟶ Lε')
+      (axSpec : Spec.map ā ≫ Spec.map pkg.algL ≫ q = Spec.map algLε' ≫ hU.fromSpec),
+      ψ' ≫ ā = pointSharp hU.fromSpec htautU ≫ algLε' := by
+    intro Lε' ā algLε' axSpec
+    have hcomp3 : ∀ x : ↑(Spec Lε'),
+        (Spec.map ā ≫ Spec.map pkg.algL ≫ q).base x ∈ U := by
+      intro x
+      have h0 : (Spec.map ā ≫ Spec.map pkg.algL ≫ q).base x =
+          (Spec.map pkg.algL ≫ q).base ((Spec.map ā).base x) := rfl
+      rw [h0]
+      exact pkg.hrangeL _
+    have h1 := pointSharp_specMap_comp ā pkg.hrangeL hcomp3
+    have hcomp4 : ∀ x : ↑(Spec Lε'),
+        (Spec.map algLε' ≫ hU.fromSpec).base x ∈ U := by
+      intro x
+      exact htautU _
+    have h2 : pointSharp (Spec.map ā ≫ Spec.map pkg.algL ≫ q) hcomp3 =
+        pointSharp (Spec.map algLε' ≫ hU.fromSpec) hcomp4 :=
+      pointSharp_congr axSpec hcomp3 hcomp4
+    have h3 := pointSharp_specMap_comp algLε' htautU hcomp4
+    rw [← h1, h2, h3]
+  have haxLψ := haxψ _ pkg.aL pkg.algLεL pkg.haxSpecL
+  have haxRψ := haxψ _ pkg.aR pkg.algLεR pkg.haxSpecR
+  rw [pointSharp_fromSpec hU htautU, Category.id_comp] at haxLψ haxRψ
+  have haxL := congrArg (fun (m : Γ(F.E, U) ⟶ pkg.LεL) => m.hom f) haxLψ
+  have haxR := congrArg (fun (m : Γ(F.E, U) ⟶ pkg.LεR) => m.hom f) haxRψ
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at haxL haxR
+  -- the defect and its kill
+  set a : ↑pkg.L := ψ'.hom f - pkg.algL.hom (f ⊗ₜ 1) - pkg.algL.hom (1 ⊗ₜ f) with hadef
+  have haLa : pkg.aL.hom a = 0 := by
+    rw [hadef, map_sub, map_sub, pkg.haLalg, pkg.haLalg, haxL, axisL_tmul, axisL_tmul,
+      hεf]
+    simp only [map_zero, map_one, zero_mul, mul_zero, _root_.one_mul, _root_.mul_one,
+      sub_zero, zero_sub, sub_self, neg_zero]
+  have haRa : pkg.aR.hom a = 0 := by
+    rw [hadef, map_sub, map_sub, pkg.haRalg, pkg.haRalg, haxR, axisR_tmul, axisR_tmul,
+      hεf]
+    simp only [map_zero, map_one, zero_mul, mul_zero, _root_.one_mul, _root_.mul_one,
+      sub_zero, zero_sub, sub_self, neg_zero]
+  obtain ⟨y, sden, hys⟩ := pkg.hsurj a
+  have hyL0 : pkg.algLεL.hom ((axisL ε') y) = 0 := by
+    have h1 := congrArg pkg.aL.hom hys
+    rw [map_mul, haLa, zero_mul, pkg.haLalg] at h1
+    exact h1.symm
+  have hyR0 : pkg.algLεR.hom ((axisR ε') y) = 0 := by
+    have h1 := congrArg pkg.aR.hom hys
+    rw [map_mul, haRa, zero_mul, pkg.haRalg] at h1
+    exact h1.symm
+  obtain ⟨u, hu⟩ := pkg.hkerLεL _ hyL0
+  obtain ⟨v, hv⟩ := pkg.hkerLεR _ hyR0
+  set y' := ((1 : ↑Γ(F.E, U)) ⊗ₜ[↑Γ(Spec (CommRingCat.of k), ⊤)] (u : ↑Γ(F.E, U))) *
+    ((((v : ↑Γ(F.E, U)) ⊗ₜ[↑Γ(Spec (CommRingCat.of k), ⊤)] (1 : ↑Γ(F.E, U)))) * y)
+    with hy'
+  have haxLy' : (axisL ε') y' = 0 := by
+    rw [hy', map_mul, map_mul, axisL_tmul, axisL_tmul]
+    linear_combination (algebraMap _ ↑Γ(F.E, U) (ε' (1 : ↑Γ(F.E, U))) *
+      algebraMap _ ↑Γ(F.E, U) (ε' (v : ↑Γ(F.E, U)))) * hu
+  have haxRy' : (axisR ε') y' = 0 := by
+    rw [hy', map_mul, map_mul, axisR_tmul, axisR_tmul]
+    linear_combination (algebraMap _ ↑Γ(F.E, U) (ε' (1 : ↑Γ(F.E, U))) *
+      algebraMap _ ↑Γ(F.E, U) (ε' (u : ↑Γ(F.E, U)))) * hv
+  have hpTy' : pT y' = 0 := by
+    rw [hpTdef]
+    exact pairLift_eq_zero_of_axes ε' p₁ p₂ hcl₁ hcl₂ hII haxLy' haxRy'
+  have hpTy : pT y = pkg.φL.hom a * pT sden := by
+    have h1 := congrArg pkg.φL.hom hys
+    rw [map_mul, pkg.hφLalg, pkg.hφLalg] at h1
+    exact h1.symm
+  have hunit_u : IsUnit (pT ((1 : ↑Γ(F.E, U)) ⊗ₜ (u : ↑Γ(F.E, U)))) := by
+    refine hunits ⟨_, fun h0 => u.2 (RingHom.mem_ker.mpr ?_)⟩
+    have h1 : ε' (1 : ↑Γ(F.E, U)) * ε' (u : ↑Γ(F.E, U)) = 0 :=
+      (foldε_tmul ε' (1 : ↑Γ(F.E, U)) (u : ↑Γ(F.E, U))).symm.trans
+        (RingHom.mem_ker.mp h0)
+    rwa [map_one, _root_.one_mul] at h1
+  have hunit_v : IsUnit (pT ((v : ↑Γ(F.E, U)) ⊗ₜ (1 : ↑Γ(F.E, U)))) := by
+    refine hunits ⟨_, fun h0 => v.2 (RingHom.mem_ker.mpr ?_)⟩
+    have h1 : ε' (v : ↑Γ(F.E, U)) * ε' (1 : ↑Γ(F.E, U)) = 0 :=
+      (foldε_tmul ε' (v : ↑Γ(F.E, U)) (1 : ↑Γ(F.E, U))).symm.trans
+        (RingHom.mem_ker.mp h0)
+    rwa [map_one, _root_.mul_one] at h1
+  have hφLa : pkg.φL.hom a = 0 := by
+    have h0 : pT ((1 : ↑Γ(F.E, U)) ⊗ₜ (u : ↑Γ(F.E, U))) *
+        (pT ((v : ↑Γ(F.E, U)) ⊗ₜ (1 : ↑Γ(F.E, U))) * (pkg.φL.hom a * pT sden)) = 0 := by
+      rw [← hpTy, ← map_mul, ← map_mul, ← hy']
+      exact hpTy'
+    have h1 := (hunit_u.mul_right_eq_zero).mp h0
+    have h2 := (hunit_v.mul_right_eq_zero).mp h1
+    have h3 : pkg.φL.hom a * pT sden = 0 := h2
+    exact (hunits sden).mul_left_eq_zero.mp h3
+  have hψ'f : pkg.φL.hom (ψ'.hom f) = pT (f ⊗ₜ 1) + pT (1 ⊗ₜ f) := by
+    have h1 : pkg.φL.hom a = pkg.φL.hom (ψ'.hom f) - pT (f ⊗ₜ 1) - pT (1 ⊗ₜ f) := by
+      rw [hadef, map_sub, map_sub, pkg.hφLalg, pkg.hφLalg]
+    rw [hφLa] at h1
+    linear_combination h1.symm
+  have hfinal := congrArg (fun (m : Γ(F.E, U) ⟶ R) => m.hom f) hkey
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hfinal
+  show (pointSharp ((P₁ + P₂ : F.Point t) : Spec R ⟶ F.E) hp₁₂).hom f = _
+  rw [hfinal, hψ'f]
+  have hpT1 : pT (f ⊗ₜ 1) = (pointSharp P₁.1 hp₁).hom f := by
+    have h2 := congrArg (fun (m : _ ⟶ R) => m.hom f) hidL
+    simpa using h2
+  have hpT2 : pT (1 ⊗ₜ f) = (pointSharp P₂.1 hp₂).hom f := by
+    have h2 := congrArg (fun (m : _ ⟶ R) => m.hom f) hidR
+    simpa using h2
+  rw [hpT1, hpT2]
 
 /-- **Additivity of the chart evaluation on kernel-of-reduction points** (the geometric
 heart): for `P₁ P₂` reducing to zero along the square-zero `φ` and `f` in the augmentation
