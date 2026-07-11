@@ -16282,3 +16282,46 @@ clean way to precompose an iso-inverse before `tensor_hom_ext`.
 **Fleet note** (boarded): D2/c5β/NEW-GH consume HOPF pins hypothesis-wired as they land
 (per their inboxes), so coassoc-first does not hard-block them; proceeding to prove
 coassoc methodically per the coordinator's v10.141 sequencing (no hypothesis-wire).
+
+### v10.142 (2026-07-11, NEW-GH): CHARTER-GH-2 first act — gate audit + /develop --decompose of the KM 7.1.2 wiring; shared-worktree collision flagged
+
+*Session opened on CHARTER-GH-2. Gate audit + decompose done; code progress blocked by a
+live shared-worktree collision (see below). basePullback + GHB2 drafted, awaiting a green
+build window.*
+
+- **★ GATE AUDIT (the unblock): [A711-FP] AND [A711-BC] are BOTH OPEN (code-sorry-free).**
+  `InvariantTorsor.lean` has ZERO code sorries (the 2 grep hits are docstring text:
+  "the last sorry [A711-FP] closed by FinitePresentationOfFinite.lean" / "ALL PROVEN
+  2026-07-08"). So `Algebra.Etale.of_isFreeAlgebraAction` (A711-FP) and
+  `fixedPointsBaseChange_bijective_of_isFreeAlgebraAction` (A711-BC) are PROVEN ⟹ **GHB4,
+  GHB5, GHB7 are now ungated.** Combined with FP4's axiom-clean engine flipping GHC6's
+  ⛩[T-E5-engine], the ONLY gates remaining under the headline are [DS4/T-C1] (weilPairing,
+  via GHA3's étale conjunct — p2's CHARTER-C5B-2 / [T-C1-KM28]) and [T-E4a]
+  (gammaHAut/pullSection_add) — both inherited (statements stand; wiring proceeds).
+- **/develop --decompose (updated dependency order, b2_log #T-H4/#T-H6 targets):** the
+  headline is proving the staged GHC1 `gammaH_relativelyRepresentable`, GHC3
+  `gammaHNaive_toQuotient`, GHC6 `gammaH_representable_of_rigid`. Execution order (NOW-lane
+  first, gates open):
+  1. **PART B scheme layer** (bottom-up): `basePullback` hom_one/hom_mul (DRAFTED, small) →
+     GHB2 `free_on_points` (DRAFTED: equivariant + FreeAction over nonempty base) →
+     GHB4 `quotientπ_finite_etale_surjective` (chart-local: finite+projective+torsor+étale
+     via the now-proven InvariantTorsor lemmas; globalize) → GHB5
+     `exists_quotient_baseChange_of_free` (fixedPointsBaseChange + affine gluing) → GHB7
+     `exists_quotientProblemData` (THE ASSEMBLY, ~400 LOC — functor from chosen quotients +
+     couniversal + geom clauses).
+     [GHB6 `isFinite_etale_of_comp...` stays [GH-DESC-GAP]-gated abstractly; its Y(N)
+     discharge is chart-local inside GHB4/GHB7 — not the abstract lemma.]
+  2. **PART A→C**: GHA5 `gammaFullNaive_equivariantRelRepData` (GHB1∘GHA4) → GHC5
+     `affineOverEll` (finite⟹affine repackage) → **GHC1** (GHA5+GH2+GHB7) → **GHC3**
+     (package + geom bijectivity) → **GHC6** (GHC5 + `representable_iff` engine, now clean).
+  Estimated ~2000 LOC (PART B ≈1300 + PART C ≈680) — genuinely multi-session; this session
+  targets the PART B bottom.
+- **⚠ SHARED-WORKTREE COLLISION (per NEW-HOPF's ratified pattern — flagging, not touching):**
+  `LevelStructure/Incidence.lean` (a transitive dep of GammaHRepresentability) has
+  UNCOMMITTED foreign edits (the T-SG3-LFP / cyclicity-lfp lane — D2/fable-FP) that don't
+  compile (type errors shifting between builds: 317/336 → 2562/2574/2576 = active live
+  editing). Also `Picard/PicComparison.lean` (PIC0) uncommitted. This transiently blocks any
+  build depending on Incidence, including mine. Not touching the foreign WIP; drafting ahead
+  + background-polling for a green window to commit basePullball/GHB2. **The Incidence lane
+  should commit-early its green increments** (the uncommitted-broken state blocks GH + all
+  Incidence consumers). p0 reclaim provision stands.
