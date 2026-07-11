@@ -1,3 +1,15 @@
+/- CONTINUATION DIAGNOSIS (Y1-CLOSER, bisected): even the four `set L/algL/Lε/algLε` lines
+alone blow the 200k whnf budget INSIDE pointSharp_add — `set`'s kabstract folds the
+Localization-typed terms against the huge 6a-6d context. FIX (confirmed pattern): HOIST
+the whole 6e′-6g tail (from `-- 6e′` in this draft to the final `rw [hpT1, hpT2]`) as a
+STANDALONE private lemma with explicit arguments (fresh small context): parameters
+(U hU heU htautU hzT) (t P₁ P₂ hp₁ hp₂ hp₁₂ h₁ h₂ hz f hf) (ε' p₁ p₂ pT hunits hclose
+hII) (q hq-def-free: pass q abstract + hqp + hsum + hidL + hidR + the two axis-law
+instances axisL_spec_law/axisR_spec_law applied — or re-derive in the lemma from hU heU
+since they're theorem-applications). Then pointSharp_add's body ends at 6d + one
+application of the hoisted lemma. The draft below is the COMPLETE proof text to
+transplant. -/
+
 import ModularCurves.EllipticCurve.TorsionFibre
 import ModularCurves.ForMathlib.FormallyUnramifiedFibre
 import ModularCurves.ForMathlib.NilpotentKerSpecMap
