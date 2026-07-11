@@ -1209,7 +1209,9 @@ theorem ModuliProblem.QuotientProblemData.affineOverEll {Q : ModuliProblem R}
     {G : Type*} [Group G] [Finite G] {φ : G →* Aut Q}
     (pkg : ModuliProblem.QuotientProblemData φ) :
     pkg.prob.AffineOverEll := by
-  sorry
+  intro X
+  obtain ⟨d, hfin, het⟩ := pkg.relRep X
+  exact ⟨d.Z, d.f, hfin.toIsAffineHom, @d.eqv, @d.nat⟩
 
 /-- **[GHC6] = T-H6 CORRECTED, route (gate [T-E5-engine])** — KM COROLLARY 4.7.1
 (verbatim): "Any relatively representable moduli problem 𝒫 which is affine and etale
