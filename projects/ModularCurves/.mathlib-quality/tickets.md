@@ -7644,7 +7644,51 @@ gate note, commit 90ed0986); this amendment turns the lift into dispatched work 
 idle capacity. Housekeeping done in this pass: the unpushed `dev/modular-curves` commits were
 PUSHED (`66300bb4..5f4829dc`, 238 commits).*
 
-### v10.0 Fleet ground truth (2026-07-08)
+### v10.144-CLOSER — ★ K2 [U-MODEL] COMPLETE: `modelGrpObj_unique` at the clean triple (Y1-CLOSER)
+
+**`ModelGroupUniq.lean` is sorry-free.** `#print axioms ModularCurves.modelGrpObj_unique` =
+`{propext, Classical.choice, Quot.sound}`. Statement: over an **arbitrary** ring `R`, any
+`GrpObj (modelOver W)` whose unit is `oneOver W` has `μ = mulOver W` — the noetherian
+hypothesis is gone. Root tree green (3,031 jobs).
+
+**The endgame that landed (bricks, in commit order):**
+1. **hcone_uv** — the L-collapse cone equation, closed by converting the calc chase to a
+   **refine-trans chain** (endpoint-free: no `Trans`-instance unification; this sidesteps
+   the recurring calc-endpoint-mvar disease for good — registry-grade).
+2. **axNatL_of/axNatR_of** — axis naturality made **generic** over any base change
+   `(f, W₀, W, h)` (the R-instance `axNat` stays untouched); + the full R-mirror block
+   `axR₀/axR₀_sqStruct/axBCR/axApexR/axBCR_cone/axApexR_comparison`.
+3. **eq_one_of_axis_collapse** — new rigidity corollary (GIT 6.3 consumption): over a
+   locally noetherian base, `q : A ⊗ A ⟶ G` with both axis collapses `= 1` is `1`.
+   Seesaw (`factor_mul_of_tensor_of_forall_component`, c5β's) + Hom-group algebra
+   (`GrpObj.comp_inv`, `mul_inv_rev`, `eq_inv_of_mul_eq_one_left/right`).
+4. **Stage bridges** — `post_obj_hom` (rfl! the system object's hom IS Spec of the stage
+   inclusion — proof-irrelevance + delta), `stageModelIso/stageSqIso` (isoPullback of
+   stageModelPB/stageSqPB flips against the bc-system objects), `axBC_natural/axBCR_natural`
+   (axis maps intertwine transitions), `stage_axis_bridgeL/R` (stage `axIncl` ∘ sqIso =
+   mIso ∘ axBC; snd-leg = the generic axNat at the inclusion).
+5. **Double descent** — `hu/huR/hv` over-compats; `eq_descends` on (u,v) and (uR,v);
+   `IsCofiltered.cospan ψ₁ ψ₂` meets at S₂; σ-transport gives the stage collapse equations
+   `hLS/hRS` + `hg''π`.
+6. **Stage rigidity** — `dS := (stageModelPB S₂).lift (sqIso.hom ≫ g'') (fst ≫ π_st)`;
+   `hLdS/hRdS` by `stageModelPB.hom_ext` (pBC-leg through the bridge + hbcT_eval + zero
+   naturality; π-leg by the axis laws); `qS := homMk dS`; `hq1 : qS = 1` by
+   `eq_one_of_axis_collapse` at `modelGrpObj (stageW S₂)` (noetherian stage:
+   `IsNoetherianRing ↥(stageAlg)` via the fgSys instance + mathlib
+   `IsLocallyNoetherian (Spec _)`).
+7. **Up-transport** — `hg''zero : g'' = (sqT).app S₂ ≫ zero₀` (iso-invert + `stageSqPB.w`
+   + `isoPullback_inv_snd`); cone-factor `hg'cone` through S₂; `wPB.hom_ext` on
+   `F.left` vs the constant; `F = 1`; Hom-group cancel finishes `μG = mulOver W`.
+
+**Attribution:** c5β's seesaw + Hom-group layer (Rigidity.lean) carries the stage step; the
+descent rides mathlib's `AffineTransitionLimit` pair; K1 (v10.141) supplies nothing here
+directly — [U-MODEL] is its independent sibling, both feed K3.
+
+**Next (per v10.140 route):** K3 records-primitive — audit RigiditySpreadingOut:94 route (a)
+against what K1+[U-MODEL] now make possible; K4 supply-swap at PullSectionCanonicity:167
+(h64) + IsoTransport hμ; then the bar-audit on `gammaOneNaive_representable`; then L3.
+
+## v10.0 Fleet ground truth (2026-07-08)
 | Worker | On | State / v10 action |
 |---|---|---|
 | c5β (A-lane, W7) | T-W7.0c-c5β triple→morphism; β2b ladder landed (cfae244c) | active — unchanged (next: single-chart `IsDomain` leaf, β1, β3, β4, then W7.0c-i inc. 2) |
