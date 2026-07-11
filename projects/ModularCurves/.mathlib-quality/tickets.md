@@ -16343,3 +16343,28 @@ iso; carries a **universe wrinkle**: `H` quantifies `P:Type` but the polynomial 
 localization/strong-induction work; several need mathlib-absent machinery or complex-reconstruction.
 Wire → `flatLocus_spreads_of_flat` → `isOpen_flatLocus` → `exists_subalgebra_flat_baseChange`
 (07RF/00R6) → `exists_noetherian_descent_flat` → KL-3 `SpreadData.exists_flat_stage`.
+
+## Amendments v10.142 (fable-PIC0, 2026-07-11): CHARTER-PIC-3 session 1 — PAIR substantially closed
+
+**[CMP-PAIR] route-A executed** (decomposition banked in the artifact; every commit pushed):
+- ★ **[PAIR-3/CMP-LOC] `isIso_of_isIso_restrict`** CLOSED it-3, axiom-clean (`c3e0971b8`) —
+  isomorphy of `𝒪ₓ`-module maps is Zariski-local: cover-local iso ⟹ locally-bijective
+  (pointwise sieve arguments on `Opens.mem_grothendieckTopology`) ⟹ `sheafificationW` ⟹
+  counit-conjugate to the inverted sheafification. Reusable; the T-PIC1c per-app-IsIso
+  anomaly is dodged via the `sheafifyValIso`-Iso-form.
+- ★ **[PAIR-1] complete** (`8f6880c78`): `overSection` (M-mirror of `overUnitSection`),
+  `evalSection` + `evalSection_eq` (rfl normal form) + the four bilinearities (the
+  compHom-End smul unfolds by `show φ ≫ overUnitScalarEnd r`; `mul_comm'` is mathlib-generic).
+- ★ **[PAIR-1c] `evalSection_naturality`** CLOSED it-3 (`10c8157a6`): after
+  `dsimp [dualRestrict, overMapUnitIso, overMap, pushforward, overFunctorMap]` + `simp`,
+  the square IS one `naturality_apply` of `φ.val` along `Over.homMk i.unop` (triangle by
+  show-forced `i ≫ 𝟙 = 𝟙 ≫ i`).
+- ★ **[PAIR-2] complete**: `evPre : M ⊗ᵖ M^∨ ⟶ 𝟙` (pointwise `mk₂`-lift; target = the
+  monoidal unit — the `unitObj.val`-spelling poisons instance search; naturality field =
+  single defeq-`exact` of 1c!) + sheaf-level `ev := sh(evPre) ≫ counit`.
+- **`nonempty_eval_iso` ASSEMBLED** — [CMP-PAIR] now gates on ONE leaf:
+  **[PAIR-4] `isIso_restrict_ev`** (restriction of `ev` on a trivializing open is iso;
+  route: restrict-vs-ev compat (4a: restriction commutes with sh + dual + ⊗ — consumes
+  Dual.lean's `dualRestrictIsoOfRestrictIso` + PTM's restricted tensor layer) + ev-of-unit
+  is the multiplication (4b: `dualUnitObjIso` + unitor) + iso-conjugation (4c: `dualMapObj`
+  functoriality)). [CMP-←] (Zariski-local freeness) unchanged, independent.
