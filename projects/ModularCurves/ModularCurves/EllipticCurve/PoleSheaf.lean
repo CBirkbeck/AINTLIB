@@ -1967,6 +1967,51 @@ theorem overTrivializationCoefficient_restrict {X : Scheme.{u}} (M : X.Modules)
   rw [← M.presheaf.map_comp_apply] at hnat
   exact hnat
 
+/-- An over-site trivialization gives the corresponding trivialization on the open
+subscheme. -/
+noncomputable def restrictTrivializationOfOverIso
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)) :
+    M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme :=
+  (Scheme.Modules.overFunctorEquiv U).symm.app M ≪≫
+    (Scheme.Modules.overEquiv U).functor.mapIso e ≪≫
+      U.sheafOfModulesEquivOverUnit X.ringCatSheaf
+
+/-- Passing from over-site trivializations to open-subscheme trivializations
+preserves scalar transitions. -/
+theorem restrictTrivializationOfOverIso_hom_eq_comp_scalar
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (r : Γ(X, U))
+    (h : e.hom = g.hom ≫
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r) :
+    (restrictTrivializationOfOverIso M U e).hom =
+      (restrictTrivializationOfOverIso M U g).hom ≫
+        unitEndomorphismOfTopSection (Scheme.Modules.openTopSection U r) := by
+  unfold restrictTrivializationOfOverIso
+  simp only [Iso.trans_hom, Functor.mapIso_hom]
+  let F := Scheme.Modules.overFunctorEquiv U
+  let G := (Scheme.Modules.overEquiv U).functor
+  let C₀ := (U.sheafOfModulesEquivOverUnit X.ringCatSheaf).hom
+  let q := SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r
+  let d := unitEndomorphismOfTopSection (Scheme.Modules.openTopSection U r)
+  change F.inv.app M ≫ G.map e.hom ≫ C₀ =
+    (F.inv.app M ≫ G.map g.hom ≫ C₀) ≫ d
+  have hs : G.map q ≫ C₀ = C₀ ≫ d := by
+    exact Scheme.Modules.overEquiv_unitScalarEnd U r
+  calc
+    F.inv.app M ≫ G.map e.hom ≫ C₀ =
+        F.inv.app M ≫ G.map (g.hom ≫ q) ≫ C₀ := by rw [h]
+    _ = F.inv.app M ≫ (G.map g.hom ≫ G.map q) ≫ C₀ := by
+      rw [Functor.map_comp]
+      rfl
+    _ = F.inv.app M ≫ G.map g.hom ≫ (G.map q ≫ C₀) := by
+      simp only [Category.assoc]
+    _ = F.inv.app M ≫ G.map g.hom ≫ (C₀ ≫ d) :=
+      congrArg (fun p ↦ F.inv.app M ≫ G.map g.hom ≫ p) hs
+    _ = (F.inv.app M ≫ G.map g.hom ≫ C₀) ≫ d := by
+      simp only [Category.assoc]
+
 /-- An equation expressing an ideal generator in an over-site trivialization
 restricts to the corresponding equation for the restricted generator. -/
 theorem restrictOverTrivialization_inv_comp_over
