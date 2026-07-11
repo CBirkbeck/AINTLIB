@@ -16368,3 +16368,30 @@ Wire → `flatLocus_spreads_of_flat` → `isOpen_flatLocus` → `exists_subalgeb
   Dual.lean's `dualRestrictIsoOfRestrictIso` + PTM's restricted tensor layer) + ev-of-unit
   is the multiplication (4b: `dualUnitObjIso` + unitor) + iso-conjugation (4c: `dualMapObj`
   functoriality)). [CMP-←] (Zariski-local freeness) unchanged, independent.
+
+### v10.143 (2026-07-11, NEW-GH): CHARTER-GH-2 — PART B bottom + ★ corrected T-H6 (GHC6) landed; 5 leaves this session
+
+*Once the T-SG3-LFP lane committed its green Incidence (8e965b614), the build cleared and
+I landed the drafted + pkg-consuming leaves. Commits 2eb0843af (basePullback+GHB2),
++GHA5, GHC5, 00bd56fa4 (GHC6). All pushed; each single-target-green; zero heartbeat bumps.*
+
+- **basePullback** (SchemeAction laws on `pullback f g`) + **GHB2**
+  `EquivariantRelRepData.free_on_points` (equivariant + FreeAction over the nonempty
+  pullbackAlong base) — PROVEN.
+- **GHA5** `gammaFullNaive_equivariantRelRepData` = GHB1 (proven) ∘ GHA4 — PROVEN.
+- **GHC5** `QuotientProblemData.affineOverEll` (finite⟹affine via `IsFinite.toIsAffineHom`,
+  repackaging `relRep`) — PROVEN.
+- **★ GHC6 = corrected T-H6** `gammaH_representable_of_rigid` (b2_log #T-H6 target): `P_H`
+  rigid ⟹ representable, via `representable_iff` + GHC5 + `AffineOverEll.
+  relativelyRepresentable`. Own term gate-free; inherits `representable_iff`'s residual
+  engine-sorry (EllCategory:279 — FP4's engine landed but the EllCategory-level wiring to
+  it is that lane's; clears GHC6 automatically when done). The corrected T-H6 is now a
+  theorem on the quotient problem.
+- **KEY unblock (v10.142):** [A711-FP]/[A711-BC] both proven ⟹ GHB4/GHB5/GHB7 ungated.
+- **REMAINING headline:** GHC3 `gammaHNaive_toQuotient` (pkg-consuming bridge, ~120 LOC —
+  Quotient.lift of proj + geom bijectivity from geom_surjective/geom_orbits; inherits GH1's
+  [T-E4a]); **GHC1 = corrected T-H4** `gammaH_relativelyRepresentable` — the one that
+  CONSTRUCTS the package, needs **GHB7** (THE ASSEMBLY) ← GHB4 (chart-local
+  T-Q5↔InvariantTorsor: invariantsπ finite/étale/surjective) + GHB5 (base-change via
+  fixedPointsBaseChange). GHB4/GHB5/GHB7 ≈ the ~1000-LOC multi-session remainder (gates now
+  open). p0 reclaim provision stands.
