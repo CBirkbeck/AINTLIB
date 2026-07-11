@@ -702,6 +702,34 @@ private theorem pointSharp_add_tail {U : (F.E).Opens} (hU : IsAffineOpen U)
   set algL : CommRingCat.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U)) ⟶ L :=
     CommRingCat.ofHom
       (algebraMap _ (Localization.AtPrime (RingHom.ker (foldε ε').toRingHom))) with halgL
+  set φL : ↑L →+* ↑R := IsLocalization.lift
+    (M := (RingHom.ker (foldε ε').toRingHom).primeCompl) (g := pT.toRingHom) hunits with hφLdef
+  have hφLalg : ∀ y, φL (algL.hom y) = pT y := fun y => IsLocalization.lift_eq hunits y
+  -- the localized box point lands in the chart (generization stability)
+  have hrangeL : ∀ x : ↑(Spec L), (Spec.map algL ≫ q).base x ∈ U := by
+    intro x
+    have hle : ((Spec.map algL).base x).asIdeal ≤ p𝔭.asIdeal := by
+      intro a ha
+      by_contra hnot
+      have hu : IsUnit (algL.hom a) := IsLocalization.map_units
+        (M := (RingHom.ker (foldε ε').toRingHom).primeCompl) _ ⟨a, hnot⟩
+      exact x.isPrime.ne_top (Ideal.eq_top_of_isUnit_mem _ ha hu)
+    have hspec : ((Spec.map algL).base x) ⤳ p𝔭 := (PrimeSpectrum.le_iff_specializes _ _).mp hle
+    have hspec2 : (q.base ((Spec.map algL).base x)) ⤳ (q.base p𝔭) := hspec.map q.continuous
+    exact hspec2.mem_open U.2 hqp
+  /- WALL-LEDGER (stop-line, 6+ measured iterations): `set ψ' := pointSharp
+  (Spec.map algL ≫ q) hrangeL` ALONE blows the 200k whnf budget — the `fun x _ => hw x`
+  membership-coercion inside `pointSharp`'s appLE-argument whnf-unfolds
+  `(Spec.map algL ≫ q) ⁻¹ᵁ U`-membership through the localization's `algebraMap`-comap.
+  Everything ABOVE this line is GREEN (φL, hφLalg, hrangeL included); the remaining
+  content is ψ' + hfacSpec + hkey (6f, drafted in .tail2/.tailbody) + the 6g kill
+  (drafted ibid., adapted unbundled forms in .tail2). CANDIDATE FIXES for the next
+  attempt: (1) restate `pointSharp` to take the `⊤ ≤ w ⁻¹ᵁ U`-form directly and convert
+  ONCE at each call site with a `show`-cast; (2) mark `Spec.map`/`algL` combination
+  irreducible locally (`set_option` allowed? NO maxHeartbeats — but `seal`/`irreducible`
+  attributes are fair game: `attribute [local irreducible] Localization` before the set);
+  (3) hoist ψ'-BUNDLE: a private def ψdef (args: algL-abstract as a CommRingCat-hom +
+  q + the ≤-proof) so the coercion elaborates once in a tiny context. -/
   sorry
 
 /-- **Additivity of the chart evaluation on kernel-of-reduction points** (the geometric
