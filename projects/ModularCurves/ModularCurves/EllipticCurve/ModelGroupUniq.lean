@@ -747,4 +747,55 @@ theorem iota_descends (il : projModel W ⟶ projModel W)
 
 end IotaDescent
 
+/-! ## The difference morphism and its axis collapses (R-side) -/
+
+section Difference
+
+variable {R} (W : WeierstrassCurve R) [W.IsElliptic]
+
+/-- The two axis inclusions of the model square. -/
+noncomputable def axInclL : modelOver W ⟶ modelOver W ⊗ modelOver W :=
+  lift (toUnit _ ≫ oneOver W) (𝟙 _)
+
+noncomputable def axInclR : modelOver W ⟶ modelOver W ⊗ modelOver W :=
+  lift (𝟙 _) (toUnit _ ≫ oneOver W)
+
+/-- Any pointed group multiplication collapses the left axis to the identity. -/
+theorem axInclL_mul (G : GrpObj (modelOver W))
+    (hone : (letI := G; (η[modelOver W] : 𝟙_ (Over (Spec (CommRingCat.of R))) ⟶
+      modelOver W)) = oneOver W) :
+    axInclL W ≫ (letI := G; (μ[modelOver W] : modelOver W ⊗ modelOver W ⟶ modelOver W)) =
+      𝟙 (modelOver W) := by
+  letI := G
+  have hax : axInclL W = (λ_ (modelOver W)).inv ≫ (η[modelOver W] ▷ modelOver W) := by
+    apply CartesianMonoidalCategory.hom_ext
+    · show lift (toUnit (modelOver W) ≫ oneOver W) (𝟙 (modelOver W)) ≫ fst _ _ = _
+      rw [lift_fst, Category.assoc, whiskerRight_fst, ← Category.assoc,
+        show (λ_ (modelOver W)).inv ≫ fst _ _ = toUnit _ from toUnit_unique _ _, hone]
+    · show lift (toUnit (modelOver W) ≫ oneOver W) (𝟙 (modelOver W)) ≫ snd _ _ = _
+      rw [lift_snd, Category.assoc, whiskerRight_snd,
+        show snd (𝟙_ (Over (Spec (CommRingCat.of R)))) (modelOver W) =
+          (λ_ (modelOver W)).hom from (leftUnitor_hom _).symm, Iso.inv_hom_id]
+  rw [hax, Category.assoc, MonObj.one_mul, Iso.inv_hom_id]
+
+/-- Any pointed group multiplication collapses the right axis to the identity. -/
+theorem axInclR_mul (G : GrpObj (modelOver W))
+    (hone : (letI := G; (η[modelOver W] : 𝟙_ (Over (Spec (CommRingCat.of R))) ⟶
+      modelOver W)) = oneOver W) :
+    axInclR W ≫ (letI := G; (μ[modelOver W] : modelOver W ⊗ modelOver W ⟶ modelOver W)) =
+      𝟙 (modelOver W) := by
+  letI := G
+  have hax : axInclR W = (ρ_ (modelOver W)).inv ≫ (modelOver W ◁ η[modelOver W]) := by
+    apply CartesianMonoidalCategory.hom_ext
+    · show lift (𝟙 (modelOver W)) (toUnit (modelOver W) ≫ oneOver W) ≫ fst _ _ = _
+      rw [lift_fst, Category.assoc, whiskerLeft_fst,
+        show fst (modelOver W) (𝟙_ (Over (Spec (CommRingCat.of R)))) =
+          (ρ_ (modelOver W)).hom from (rightUnitor_hom _).symm, Iso.inv_hom_id]
+    · show lift (𝟙 (modelOver W)) (toUnit (modelOver W) ≫ oneOver W) ≫ snd _ _ = _
+      rw [lift_snd, Category.assoc, whiskerLeft_snd, ← Category.assoc,
+        show (ρ_ (modelOver W)).inv ≫ snd _ _ = toUnit _ from toUnit_unique _ _, hone]
+  rw [hax, Category.assoc, MonObj.mul_one, Iso.inv_hom_id]
+
+end Difference
+
 end ModularCurves
