@@ -754,6 +754,7 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
     -- marked point is globally N-killed. Its production = the étale torsion-point lift
     -- (affine ring-level, against the nilpotent I) + T-E1 renormalisation; the raw lift
     -- (α, β, hΔ, ψ := tateRingOverAlgLift) above feeds it.
+    set ψ := tateRingOverAlgLift R α β hΔ with hψ
     obtain ⟨ψ', hψ'res, hψ'kill⟩ :
         ∃ ψ' : tateRingOver R →ₐ[↑R] A,
           (Ideal.Quotient.mkₐ ↑R I).comp ψ' = ψ₀ ∧
@@ -775,15 +776,43 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
       haveI hEt : Etale (F'.torsionπ N) := F'.torsionπ_etale N hNinvA
       haveI : IsFinite (F'.torsionπ N) := F'.torsionπ_isFinite N
       haveI : IsAffine (F'.torsion N) := isAffine_of_isAffineHom (F'.torsionπ N)
-      -- (ii) the A⧸I-point of the torsion, from the classified `t₀`-datum
-      obtain ⟨s₀T, hs₀T⟩ : ∃ s₀T : Spec (CommRingCat.of (↑A ⧸ I)) ⟶ F'.torsion N,
-          s₀T ≫ F'.torsionπ N =
-            Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) := by
-        sorry
-      -- (iii) lift the torsion point along the nilpotent thickening
-      obtain ⟨sT, hsTπ, hsTrest⟩ := exists_section_lift_of_smooth (F'.torsionπ N) I hI s₀T
-        hs₀T
-      -- (iv) chart coordinates + T-E1 renormalisation + the two clauses
+      -- (ii) the killed `t₀`-point, transported into the torsion of the `t`-base-change
+      set t := tateBaseSpecMap R ψ with htdef
+      have hrestRaw : Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ t = t₀ := by
+        rw [htdef, tateBaseSpecMap, ← Spec.map_comp, ← hspec₀]
+        refine congrArg Spec.map (CommRingCat.hom_ext ?_)
+        have h0 : ψ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R)
+            (MvPolynomial.X 0)) = α := by
+          rw [hψ]; exact tateRingOverAlgLift_X_zero R α β hΔ
+        have h1 : ψ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R)
+            (MvPolynomial.X 1)) = β := by
+          rw [hψ]; exact tateRingOverAlgLift_X_one R α β hΔ
+        have hmkψ : (Ideal.Quotient.mkₐ ↑R I).comp ψ = ψ₀ := by
+          apply tateRingOver_algHom_ext
+          · rw [AlgHom.comp_apply, h0]
+            show Ideal.Quotient.mk I α = _
+            exact hα.trans hα₀
+          · rw [AlgHom.comp_apply, h1]
+            show Ideal.Quotient.mk I β = _
+            exact hβ.trans hβ₀
+        exact congrArg AlgHom.toRingHom hmkψ
+      set FA := (tateUniversal R).baseChange t with hFA
+      have hNinvA : NIsInvertible (Spec (CommRingCat.of A)) N := by
+        show IsUnit ((N : ℕ) : Γ(Spec (CommRingCat.of A), ⊤))
+        have h1 : IsUnit ((N : ℕ) : A) := by
+          have h2 := hinv.map φ.hom
+          rwa [map_natCast] at h2
+        have h3 := h1.map (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom
+        rwa [map_natCast] at h3
+      haveI hEt : Etale (FA.torsionπ N) := FA.torsionπ_etale N hNinvA
+      haveI : IsFinite (FA.torsionπ N) := FA.torsionπ_isFinite N
+      haveI : IsAffine (FA.torsion N) := isAffine_of_isAffineHom (FA.torsionπ N)
+      -- the killed point over A⧸I, into the universal torsion then lifted through the
+      -- base-change square
+      have hkill₀ : (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) t₀ (tatePoint R)
+          = 0 :=
+        ((tateUniversal R).zsmul_asSection_pull_eq_zero_iff (tatePoint R) t₀ (N : ℤ)).mp
+          hstruct₀.1
       sorry
     -- assembly: witness with the renormalised map
     refine ⟨tateBaseSpecMap R ψ', ?_, ?_, ?_⟩
