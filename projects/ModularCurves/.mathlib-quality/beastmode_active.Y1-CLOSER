@@ -1,1 +1,1 @@
-FOCUS: BB-FLAT N6 — mulByHom_flat_of_nIsInvertible: consume KernelNDivisible (N5 DONE, glue proven) via LIFT-translation to RingHom.Smooth/FormallySmooth on [N]-affine pairs, then Smooth⟹Flat; audit mathlib surface first (AlgebraicGeometry.Flat HasRingHomProperty, FormallySmooth⟹Flat)
+FOCUS: N7 — swap mulBy_etale (MulByHomEtale.lean:76) haveI mulByHom_flat → mulByHom_flat_of_nIsInvertible + import MulByHomSmooth; root build; bar-audit #print axioms gammaOneNaive_representable = clean triple; ★★★★ boards both branches with attribution
