@@ -1890,6 +1890,66 @@ theorem overTrivializationCoefficient_restrict {X : Scheme.{u}} (M : X.Modules)
   rw [← M.presheaf.map_comp_apply] at hnat
   exact hnat
 
+/-- An equation expressing an ideal generator in an over-site trivialization
+restricts to the corresponding equation for the restricted generator. -/
+theorem restrictOverTrivialization_inv_comp_over
+    {X : Scheme.{u}} {M : X.Modules}
+    (i : M ⟶ Scheme.Modules.unitObj X) (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (r : Γ(X, U))
+    (h : e.inv ≫ i.over U =
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r)
+    {V : X.Opens} (hVU : V ≤ U) :
+    let j : Over U := Over.mk (homOfLE hVU)
+    let eV := SheafOfModules.restrictOverTrivialization
+      X.ringCatSheaf M U e j
+    eV.inv ≫ i.over V =
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf V
+        (X.presheaf.map (homOfLE hVU).op r) := by
+  dsimp only
+  let j : Over U := Over.mk (homOfLE hVU)
+  let eV := SheafOfModules.restrictOverTrivialization
+    X.ringCatSheaf M U e j
+  change eV.inv ≫ i.over V =
+    SheafOfModules.overUnitScalarEnd X.ringCatSheaf V
+      (X.presheaf.map (homOfLE hVU).op r)
+  apply SheafOfModules.hom_ext
+  ext Z
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply]
+  rw [SheafOfModules.restrictOverTrivialization_inv_app_apply]
+  have happ := congrArg (fun q ↦ q.val.app
+    (.op ((Over.map j.hom).obj Z.unop))) h
+  have hx := ConcreteCategory.congr_hom happ
+    (show (X.ringCatSheaf.over U).obj.obj
+      (.op ((Over.map j.hom).obj Z.unop)) from 1)
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply] at hx
+  change i.val.app (.op Z.unop.left)
+      (e.inv.val.app (.op ((Over.map j.hom).obj Z.unop))
+        (show (X.ringCatSheaf.over U).obj.obj
+          (.op ((Over.map j.hom).obj Z.unop)) from 1)) =
+    (1 : X.presheaf.obj (.op Z.unop.left)) *
+      X.presheaf.map Z.unop.hom.op
+        (X.presheaf.map (homOfLE hVU).op r)
+  change i.val.app (.op ((Over.map j.hom).obj Z.unop).left)
+      (e.inv.val.app (.op ((Over.map j.hom).obj Z.unop))
+        (show (X.ringCatSheaf.over U).obj.obj
+          (.op ((Over.map j.hom).obj Z.unop)) from 1)) =
+    (1 : X.presheaf.obj (.op ((Over.map j.hom).obj Z.unop).left)) *
+      X.presheaf.map ((Over.map j.hom).obj Z.unop).hom.op r at hx
+  have hmap : X.presheaf.map Z.unop.hom.op
+      (X.presheaf.map (homOfLE hVU).op r) =
+    X.presheaf.map ((Over.map j.hom).obj Z.unop).hom.op r := by
+    have hc := congrArg (fun φ ↦ CommRingCat.Hom.hom φ r)
+      ((X.presheaf.map_comp (homOfLE hVU).op Z.unop.hom.op).symm)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hc
+    refine hc.trans ?_
+    exact congrArg (fun ψ ↦ (CommRingCat.Hom.hom (X.presheaf.map ψ)) r)
+      (Subsingleton.elim _ _)
+  rw [hmap]
+  exact hx
+
 section
 
 local instance (X : Scheme.{u}) :
