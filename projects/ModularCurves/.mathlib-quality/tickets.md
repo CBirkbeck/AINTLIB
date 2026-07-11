@@ -18076,3 +18076,56 @@ Per v10.139 (dev board): (L1) T-W7 tail audit-first; (L2) [T-A6b]/[T-A6c] + T-E4
 (A's prep by import); (L3) BB-QF/FLAT/DEG (decompose-first, HasseWeil bridge
 check-then-cite). Bar: `gammaOneNaive_representable` at the clean triple; the one-exact
 closure is already staged (v10.128-Y1). Sentinel re-set both worktrees.
+
+## Amendments v10.140-CLOSER (2026-07-11, Y1-CLOSER): THE L1/L2 AUDIT VERDICT — the MASTER's true critical path is narrower than the charter's lane map; a records-level canonicity route replaces both route (a)-in-full and the T-W7a-gate
+
+**Verified at source (file-truth over board-truth, per the twice-validated lesson):**
+1. **T-W7.1b IS PROVEN**: `pointedIso_exists_variableChange` (Comparison.lean:162) is
+   axiom-clean — the v10.mvc board note "main PENDING / faithfulness gap" is STALE; the
+   whole comparison stack (Comparison/Coefficients/Bridge/Injective + ModelVariableChange)
+   is sorry-free. The chain below Descent has exactly ONE sorry: **0h**
+   (`mulModelHom_vc`, GroupLawConstruction:922).
+2. **Nothing on the MASTER trail consumes the sorried `abelEnrichment_exists/unique`**
+   (GroupLaw:75/80): consumers-grep = docstrings + GroupLawDescent only. The trail's
+   canonicity sorryAx enters through `isMonHom_of_one_comp_eq'_of_finitePresentation`
+   (RigiditySpreadingOut:94) via PullSectionCanonicity:167 — my v10.129 attribution
+   conflated the two. **[T-A6b]/[T-A6c] are NOT MASTER-gating.**
+3. **All rigidity inputs exist at the model, at every base**: noetherian
+   `isMonHom_of_one_comp_eq'` PROVEN (Rigidity:1443, hconn-free);
+   `EllipticCurveGeom.universallyOConnected` PROVEN (T-W7.7a-hyp-supply);
+   `projModelπ_isProper` instance; mathlib `[Smooth f] : Flat f`;
+   `abelEnrichment_unique_of_isLocallyNoetherian` PROVEN (Rigidity:1577); T-G4
+   `modelGrpObj` at every base (my S1).
+4. **Mathlib has the scheme-level limit kit** (`AffineTransitionLimit`):
+   `Scheme.preservesColimit_yoneda` (Hom into lfp targets sends the cofiltered limit to a
+   filtered colimit = Stacks 01ZC), `exists_hom_comp_eq_comp_of_locallyOfFiniteType`
+   (equality-descent), `exists_π_app_comp_eq_of_locallyOfFinitePresentation`
+   (morphism-descent).
+
+**THE ROUTE (supersedes executing route (a) in generality AND the T-W7a-gate for the bar):**
+- **(K1) 0h** (`mulModelHom_vc`): noetherian case = `isMonHom_of_one_comp_eq'` at the
+  pointed Over-iso `projModelVCIso` between `modelGrpObj`-structures (all instances listed
+  in 3); arbitrary `R` by the DESIGNED universal-VC-base transport (`projModelVCIso_map`,
+  boarded for exactly this; the pair (W, C) is finitely classified, the universal VC-base
+  is finite-type-ℤ ⟹ noetherian).
+- **(K2) [U-MODEL], the keystone**: two pointed group structures on `projModel W` over
+  ARBITRARY `R` are equal — `R = colim` (finite-type-ℤ subalgebras, Spec-cofiltered with
+  affine transitions), `W` and both μ's descend to a noetherian stage (μ-descent by
+  yoneda-preservation into the lfp model; the group axioms + pointedness descend by
+  equality-descent), noetherian rigidity at the stage, base-change back. NO general
+  configuration-descent: the scheme is CLASSIFIED at every stage, so
+  proper/flat/O-connected are instances, never descended.
+- **(K3) the records-primitive**: for pointed morphisms between WORKING RECORDS (which are
+  `LocallyWeierstrass`), is-hom-ness = base-local + per-chart comparison theorem (1b ✓)
+  turns the morphism into `eqToHom ≫ projModelVCIso` + K1 intertwines the MODEL structures
+  + K2 identifies the transported record-structures with the model ones.
+- **(K4) supply-swap**: `transportSection_add_of_isMonHom` takes h64 as a HYPOTHESIS — feed
+  it the records-primitive at `curveIsoPullbackOver` (+ IsoTransport's `hμ` analogously).
+  T-E4-family goes clean; RigiditySpreadingOut:94 and GroupLaw:75/80 leave the trail
+  (unconsumed, like abelEnrichment already is).
+- **(K5) L3 boxes** (independent): decompose-first per charter; HasseWeil bridge
+  check-then-cite.
+- Follow-through after the bar: T-W7.12/T-W7a (the Descent gluing now has ALL inputs:
+  1a ✓ 1b ✓ 0g ✓ 0h ⟸ K1) retires [T-A6b]; [T-A6c] from K2+charts.
+
+**Sequence**: K1 → K2 → K3+K4 → bar-audit → K5 → follow-through. Starting K1.
