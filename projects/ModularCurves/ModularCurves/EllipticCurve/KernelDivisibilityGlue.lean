@@ -201,6 +201,70 @@ theorem kernel_div_of_chartFactor (A : WeierstrassAtlasData E.toEllipticCurveGeo
       rw [map_zsmul, AddEquiv.apply_symm_apply, hδmN]
     exact eqc.injective h1
 
+/-- **(PIECE-INJ)** Kernel `N`-injectivity over a chart-factoring test. -/
+theorem kernel_inj_of_chartFactor (A : WeierstrassAtlasData E.toEllipticCurveGeom)
+    (i : A.ι) {R S' : CommRingCat.{u}} {φ : R ⟶ S'}
+    (hφ : Function.Surjective φ.hom) (hφ2 : RingHom.ker φ.hom ^ 2 = ⊥)
+    (tB : Spec R ⟶ Spec Γ(S, (A.U i).1))
+    (N : ℕ) (hN : IsUnit ((N : ℕ) : ↑R))
+    (P : E.Point (tB ≫ chartToBase A i))
+    (hP : Point.restrict E (Spec.map φ) P = 0)
+    (h0 : (N • P : E.Point (tB ≫ chartToBase A i)) = 0) : P = 0 := by
+  classical
+  haveI := A.elliptic i
+  have hη : (η[(E.baseChange (chartToBase A i)).asOver] :
+      𝟙_ (Over (Spec Γ(S, (A.U i).1))) ⟶ (E.baseChange (chartToBase A i)).asOver) ≫
+      (chartOverIso A i).hom = η[(modelEllipticCurve (A.W i)).asOver] :=
+    chartGrp_one A E.grp E.one_eq_zero i
+  have hμ := isMonHom_of_pointedIso_records (E.baseChange (chartToBase A i))
+    (modelEllipticCurve (A.W i)) (chartOverIso A i) hη
+  set eqc : E.Point (tB ≫ chartToBase A i) ≃+
+      (modelEllipticCurve (A.W i)).Point tB :=
+    (Point.baseChangeEquiv E (chartToBase A i) tB).symm.trans
+      (pointAddEquiv (chartOverIso A i) hμ tB) with heqc
+  have heqc_coe : ∀ Q : E.Point (tB ≫ chartToBase A i),
+      (eqc Q).1 = pullback.lift Q.1 tB Q.2 ≫ (chartTotalIso A i).hom := fun Q => rfl
+  have hPm : Point.restrict (modelEllipticCurve (A.W i)) (Spec.map φ) (eqc P) = 0 := by
+    refine Subtype.ext ?_
+    show Spec.map φ ≫ (eqc P).1 = _
+    rw [(modelEllipticCurve (A.W i)).point_zero_val]
+    rw [heqc_coe]
+    have hPval : Spec.map φ ≫ P.1 =
+        (Spec.map φ ≫ (tB ≫ chartToBase A i)) ≫ E.zero := by
+      have h1 := congrArg Subtype.val hP
+      rw [show ((0 : E.Point (Spec.map φ ≫ (tB ≫ chartToBase A i))) :
+        Spec S' ⟶ E.E) = (Spec.map φ ≫ (tB ≫ chartToBase A i)) ≫ E.zero from
+        E.point_zero_val _] at h1
+      exact h1
+    have hliftres : Spec.map φ ≫ pullback.lift P.1 tB P.2 =
+        (Spec.map φ ≫ tB) ≫ chartZero A i := by
+      refine pullback.hom_ext ?_ ?_
+      · rw [Category.assoc, pullback.lift_fst, Category.assoc, Category.assoc]
+        rw [show chartZero A i ≫ pullback.fst E.toEllipticCurveGeom.π (chartToBase A i) =
+          chartToBase A i ≫ E.toEllipticCurveGeom.zero from chartZero_fst A i]
+        rw [hPval]
+        simp only [Category.assoc]
+      · rw [Category.assoc, pullback.lift_snd, Category.assoc, Category.assoc]
+        rw [show chartZero A i ≫ pullback.snd E.toEllipticCurveGeom.π (chartToBase A i) =
+          𝟙 _ from chartZero_snd A i]
+        rw [Category.comp_id]
+    refine ((Category.assoc _ _ _).symm).trans ?_
+    refine (congrArg (· ≫ (chartTotalIso A i).hom) hliftres).trans ?_
+    refine (Category.assoc _ _ _).trans ?_
+    refine (congrArg ((Spec.map φ ≫ tB) ≫ ·) (chartZero_totalIso A i)).trans ?_
+    rfl
+  have h0m : (N • eqc P : (modelEllipticCurve (A.W i)).Point tB) = 0 := by
+    have h1 := congrArg eqc h0
+    rw [show (N • P : E.Point (tB ≫ chartToBase A i)) = ((N : ℤ) • P : E.Point _) from
+      (natCast_zsmul P N).symm, map_zsmul, map_zero] at h1
+    rw [show (N • eqc P : (modelEllipticCurve (A.W i)).Point tB) =
+      ((N : ℤ) • eqc P : (modelEllipticCurve (A.W i)).Point tB) from
+      (natCast_zsmul (eqc P) N).symm]
+    exact h1
+  have hzero := modelKernel_inj (A.W i) hφ hφ2 N hN (eqc P) hPm h0m
+  have h2 := congrArg eqc.symm hzero
+  rwa [AddEquiv.symm_apply_apply, map_zero] at h2
+
 end PieceTransport
 
 
