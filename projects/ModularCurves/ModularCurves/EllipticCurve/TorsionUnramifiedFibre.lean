@@ -151,6 +151,14 @@ private theorem tensor_ringHom_ext {A B T : Type u} [CommRing A] [CommRing B] [C
       rw [h, map_mul, map_mul, hL, hR]
   | add x y hx hy => rw [map_add, map_add, hx, hy]
 
+/-- The double augmentation factors through the right axis. -/
+private theorem foldε_eq_axisR (ε : C →ₐ[k'] k') (x : C ⊗[k'] C) :
+    foldε ε x = ε (axisR ε x) := by
+  induction x using TensorProduct.induction_on with
+  | zero => simp
+  | tmul c c' => simp
+  | add x y hx hy => simp only [map_add, hx, hy]
+
 /-- The final kill: if both axis restrictions of `x` vanish, so does the pair-lift. -/
 private theorem pairLift_eq_zero_of_axes (ε : C →ₐ[k'] k') (p₁ p₂ : C →ₐ[k'] R) {I : Ideal R}
     (h₁ : ∀ c, p₁ c - algebraMap k' R (ε c) ∈ I)
@@ -271,87 +279,7 @@ private theorem eq_of_pointSharp_eq {U : (F.E).Opens} (hU : IsAffineOpen U)
   have h3 := h1.symm.trans h2
   exact (cancel_epi (Spec R).isoSpec.inv).mp h3
 
-/-- **Additivity of the chart evaluation on kernel-of-reduction points** (the geometric
-heart): for `P₁ P₂` reducing to zero along the square-zero `φ` and `f` in the augmentation
-ideal of the chart, `(P₁+P₂)♯ f = P₁♯ f + P₂♯ f`. Through the affine Künneth box and
-`pairLift_key`. -/
-private theorem pointSharp_add {U : (F.E).Opens} (hU : IsAffineOpen U)
-    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U)
-    (hφ : Function.Surjective φ.hom) (hφ2 : RingHom.ker φ.hom ^ 2 = ⊥)
-    {t : Spec R ⟶ Spec (CommRingCat.of k)} (P₁ P₂ : F.Point t)
-    (h₁ : Point.restrict F (Spec.map φ) P₁ = 0) (h₂ : Point.restrict F (Spec.map φ) P₂ = 0)
-    (hz : ∀ x : ↑(Spec R), ((0 : F.Point t) : Spec R ⟶ F.E).base x ∈ U)
-    (hp₁ : ∀ x : ↑(Spec R), (P₁ : Spec R ⟶ F.E).base x ∈ U)
-    (hp₂ : ∀ x : ↑(Spec R), (P₂ : Spec R ⟶ F.E).base x ∈ U)
-    (hp₁₂ : ∀ x : ↑(Spec R), ((P₁ + P₂ : F.Point t) : Spec R ⟶ F.E).base x ∈ U)
-    (f : Γ(F.E, U)) (hf : F.zero.appLE U ⊤ (fun x _ => heU x) f = 0) :
-    pointSharp (P₁ + P₂ : F.Point t).1 hp₁₂ f =
-      pointSharp P₁.1 hp₁ f + pointSharp P₂.1 hp₂ f := by
-  /- EXECUTION LEDGER (chunk (iii), the only remaining gap; chunks (i)/(ii) proven below):
-  0. `letI` k'-algebra on `R` via `t.appLE ⊤ ⊤ ≫ ΓSpecIso`; AlgHoms `p₁ p₂` from
-     `pointSharp` (commutes' := `pointSharp_comp_π`); `pT := Algebra.TensorProduct.lift p₁ p₂`;
-     `ε'` from `F.zero.appLE` (commutes' := `zero_appLE_π_appLE`).
-  1. I-closeness `h₁ h₂`: `φ.hom (sharp P c) = φ.hom (sharp 0 c)` via
-     `appLE_comp_appLE` on `Spec.map φ ≫ P.1 = Spec.map φ ≫ (0).1` (from the `restrict`
-     hypotheses) + `ΓSpecIso_naturality`; then `pointSharp_zero_point` computes `sharp 0`.
-  2. Identification: `pairBox P₁ P₂ ≫ (boxIso hU).hom = Spec.map (ofHom pT.toRingHom)` —
-     `Spec.preimage`-injectivity + `tensor_ringHom_ext` (add to algebra layer: two ring maps
-     out of `C ⊗ C` agreeing on `a⊗1`/`1⊗b` are equal, by `tmul_mul_tmul`-induction) with
-     legs `pairBox_boxIso_includeLeft/Right` + `Algebra.TensorProduct.lift_comp_includeLeft`.
-  3. `(P₁+P₂).1 = Spec.map pT ≫ q̃` for `q̃ := (boxIso hU).inv ≫ boxι ≫ (μ[F.asOver]).left`
-     — `point_add_val_mu` + `pairing_eq_pairBox` + `Iso.hom_inv_id_assoc`.
-  4. Stalk: `𝔭 := ker (foldε ε')` prime (`IsDomain ↑Γ(Spec k,⊤)` transported across
-     `ΓSpecIso` via `Function.Injective.isDomain`); `q̃.base p𝔭 ∈ U` from step 5's axis law:
-     `p𝔭 = aL.base pₑ` (`comap`-of-`ker` + `foldε_eq_axisL`), so `q̃(p𝔭) ∈ range fromSpec = U`
-     (`IsAffineOpen.range_fromSpec`).
-  5. Axis laws, `Spec`-form: `aL := Spec.map (ofHom (axisL ε').toRingHom)` satisfies
-     `aL ≫ q̃ = hU.fromSpec`: `aL ≫ (boxIso hU).inv = pairBox 0 taut` (tensor-ext, legs:
-     `lift_comp_includeLeft/Right` vs (TAUT-ZERO) `sharp (0 over tC) = πC ∘ ζ` and
-     (TAUT-SHARP) `sharp fromSpec = 𝟙 C`, both via `IsAffineOpen.fromSpec_app_self` +
-     `appLE_comp_appLE`), then `pairing_eq_pairBox`.symm + `zero_pairing_mul`. Mirror for
-     `aR` with `pairing_zero_mul`.
-  6. Assembly (REFINED after chunks i-iii landed; everything referenced is now PROVEN):
-     6a. `letI` k'-algebra on `R`; `p₁ p₂` AlgHoms (commutes' = `pointSharp_comp_π`, defeq);
-         `pT := lift p₁ p₂`; `hclose : sharp P c − alg (ε' c) ∈ I := ker φ` for P ∈ K, via
-         (H-φ) `φ ∘ sharp w = φ ∘ sharp w'` when `Spec.map φ ≫ w = Spec.map φ ≫ w'`
-         (appLE_comp_appLE + `Scheme.ΓSpecIso_naturality`) at w' := 0-point +
-         `pointSharp_zero_point`; `hII` from `hφ2`.
-     6b. `hid := pairBox_boxIso_eq_specMap` at pT (legs: `lift_comp_includeLeft/Right` +
-         `CommRingCat.ofHom_comp`); `q := (boxIso hU).inv ≫ boxι ≫ μ.left`;
-         `hsum : (P₁+P₂).1 = Spec.map (ofHom pT) ≫ q` via `point_add_val_mu` +
-         `pairing_eq_pairBox` + `Iso.hom_inv_id_assoc`.
-     6c. `foldε_eq_axisR` (mirror of `foldε_eq_axisL`, add to algebra layer);
-         `hfoldCong : pT x − alg (foldε ε' x) ∈ I` from `pairLift_key` + `hclose` +
-         `foldε_eq_axisL/R`; units: `y ∉ 𝔭 := ker (foldε ε')` ⟹ `foldε y ≠ 0` ⟹ unit in k'
-         (transport along `(ΓSpecIso (of k)).commRingCatIsoToRingEquiv`, field k) ⟹
-         `alg (fold y)` unit in R ⟹ `pT y` = unit + I-nilpotent = unit
-         (`IsNilpotent.isUnit_add_right_of_commute`-family; I-elements nilpotent since I²=⊥).
-     6d. `𝔭` prime (`RingHom.ker_isPrime`, `IsDomain k'` via `Function.Injective.isDomain`
-         along the ΓSpecIso equiv); `p𝔭 := ⟨𝔭, _⟩`; `hqp : q.base p𝔭 ∈ U`: `p𝔭 =
-         (Spec.map (ofHom (axisL ε'))).base pₑ` (PrimeSpectrum.ext, comap-of-ker,
-         `foldε_eq_axisL`) then `axisL_spec_law` + `IsAffineOpen.range_fromSpec`.
-     6e. `L := stalk p𝔭` with `IsLocalization.AtPrime L 𝔭`
-         (`StructureSheaf.IsLocalization.to_stalk`, transported to the Scheme-Spec);
-         `ψ := germ U (q p𝔭) hqp ≫ q.stalkMap p𝔭 : Γ(F.E,U) ⟶ L`;
-         `φL := IsLocalization.lift (units from 6c)`.
-     6f. `hkey : sharp (P₁+P₂) c = φL (ψ c)`: both sides' `(ΓSpecIso R).inv`-images have
-         equal germs at every `x : Spec R` — LHS-germ = `((P₁+P₂).1).stalkMap x ∘ germ` and
-         `(P₁+P₂).1.stalkMap = q.stalkMap ∘ (Spec.map pT).stalkMap`-chain (`stalkMap_comp`
-         along `hsum`, `stalkMap_germ` twice); RHS-germ: `germ ∘ iso.inv ∘ φL = (Spec.map
-         (ofHom pT)).stalkMap x` on L by `IsLocalization.ringHom_ext` (both invert
-         𝔭-complement, agree on `algebraMap` by `stalkMap_germ`-at-⊤ + `IsLocalization.lift_eq`);
-         conclude by sheaf `section_ext` (`(Spec R).sheaf`) + `ΓSpecIso`-injectivity.
-     6g. Kill: `a := ψ f − algL (f ⊗ 1) − algL (1 ⊗ f)`; the two axis stalk maps
-         `rL := (Spec.map (ofHom axisL)).stalkMap pₑ`-forms kill `a`: `rL (ψ f) = algLₑ f`
-         from `axisL_spec_law`-stalk-functoriality (`stalkMap_comp` + `stalkMap_germ` +
-         `IsAffineOpen.fromSpec`-germ = localization-map), `rL (algL (f⊗1)) = algLₑ (ιε f) = 0`
-         (hf), `rL (algL (1⊗f)) = algLₑ f`; then `IsLocalization.surj`-clear denominators,
-         `IsLocalization.map_eq_zero_iff` twice, the `(1⊗u)(v⊗1)`-trick,
-         `pairLift_eq_zero_of_axes`, and 6c-units transport `φL a = 0`; unwind
-         `φL (algL _) = pT _` (`IsLocalization.lift_eq`) + `Algebra.TensorProduct.lift_tmul`:
-         `sharp-sum f = φL (ψ f) = pT (f⊗1) + pT (1⊗f) = sharp P₁ f + sharp P₂ f`. 
--/
-  sorry
+
 
 /-! #### The chunk-(i) scheme identities for `pointSharp_add`
 
@@ -711,6 +639,172 @@ private theorem axisR_spec_law (hU : IsAffineOpen U)
   simp only [Category.assoc, Iso.hom_inv_id_assoc]
   rw [← Category.assoc, ← pairing_eq_pairBox]
   exact pairing_zero_mul hU
+
+/-- **Additivity of the chart evaluation on kernel-of-reduction points** (the geometric
+heart): for `P₁ P₂` reducing to zero along the square-zero `φ` and `f` in the augmentation
+ideal of the chart, `(P₁+P₂)♯ f = P₁♯ f + P₂♯ f`. Through the affine Künneth box and
+`pairLift_key`. -/
+private theorem pointSharp_add {U : (F.E).Opens} (hU : IsAffineOpen U)
+    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U)
+    (hφ : Function.Surjective φ.hom) (hφ2 : RingHom.ker φ.hom ^ 2 = ⊥)
+    {t : Spec R ⟶ Spec (CommRingCat.of k)} (P₁ P₂ : F.Point t)
+    (h₁ : Point.restrict F (Spec.map φ) P₁ = 0) (h₂ : Point.restrict F (Spec.map φ) P₂ = 0)
+    (hz : ∀ x : ↑(Spec R), ((0 : F.Point t) : Spec R ⟶ F.E).base x ∈ U)
+    (hp₁ : ∀ x : ↑(Spec R), (P₁ : Spec R ⟶ F.E).base x ∈ U)
+    (hp₂ : ∀ x : ↑(Spec R), (P₂ : Spec R ⟶ F.E).base x ∈ U)
+    (hp₁₂ : ∀ x : ↑(Spec R), ((P₁ + P₂ : F.Point t) : Spec R ⟶ F.E).base x ∈ U)
+    (f : Γ(F.E, U)) (hf : F.zero.appLE U ⊤ (fun x _ => heU x) f = 0) :
+    pointSharp (P₁ + P₂ : F.Point t).1 hp₁₂ f =
+      pointSharp P₁.1 hp₁ f + pointSharp P₂.1 hp₂ f := by
+  /- EXECUTION LEDGER (chunk (iii), the only remaining gap; chunks (i)/(ii) proven below):
+  0. `letI` k'-algebra on `R` via `t.appLE ⊤ ⊤ ≫ ΓSpecIso`; AlgHoms `p₁ p₂` from
+     `pointSharp` (commutes' := `pointSharp_comp_π`); `pT := Algebra.TensorProduct.lift p₁ p₂`;
+     `ε'` from `F.zero.appLE` (commutes' := `zero_appLE_π_appLE`).
+  1. I-closeness `h₁ h₂`: `φ.hom (sharp P c) = φ.hom (sharp 0 c)` via
+     `appLE_comp_appLE` on `Spec.map φ ≫ P.1 = Spec.map φ ≫ (0).1` (from the `restrict`
+     hypotheses) + `ΓSpecIso_naturality`; then `pointSharp_zero_point` computes `sharp 0`.
+  2. Identification: `pairBox P₁ P₂ ≫ (boxIso hU).hom = Spec.map (ofHom pT.toRingHom)` —
+     `Spec.preimage`-injectivity + `tensor_ringHom_ext` (add to algebra layer: two ring maps
+     out of `C ⊗ C` agreeing on `a⊗1`/`1⊗b` are equal, by `tmul_mul_tmul`-induction) with
+     legs `pairBox_boxIso_includeLeft/Right` + `Algebra.TensorProduct.lift_comp_includeLeft`.
+  3. `(P₁+P₂).1 = Spec.map pT ≫ q̃` for `q̃ := (boxIso hU).inv ≫ boxι ≫ (μ[F.asOver]).left`
+     — `point_add_val_mu` + `pairing_eq_pairBox` + `Iso.hom_inv_id_assoc`.
+  4. Stalk: `𝔭 := ker (foldε ε')` prime (`IsDomain ↑Γ(Spec k,⊤)` transported across
+     `ΓSpecIso` via `Function.Injective.isDomain`); `q̃.base p𝔭 ∈ U` from step 5's axis law:
+     `p𝔭 = aL.base pₑ` (`comap`-of-`ker` + `foldε_eq_axisL`), so `q̃(p𝔭) ∈ range fromSpec = U`
+     (`IsAffineOpen.range_fromSpec`).
+  5. Axis laws, `Spec`-form: `aL := Spec.map (ofHom (axisL ε').toRingHom)` satisfies
+     `aL ≫ q̃ = hU.fromSpec`: `aL ≫ (boxIso hU).inv = pairBox 0 taut` (tensor-ext, legs:
+     `lift_comp_includeLeft/Right` vs (TAUT-ZERO) `sharp (0 over tC) = πC ∘ ζ` and
+     (TAUT-SHARP) `sharp fromSpec = 𝟙 C`, both via `IsAffineOpen.fromSpec_app_self` +
+     `appLE_comp_appLE`), then `pairing_eq_pairBox`.symm + `zero_pairing_mul`. Mirror for
+     `aR` with `pairing_zero_mul`.
+  6. Assembly (REFINED after chunks i-iii landed; everything referenced is now PROVEN):
+     6a. `letI` k'-algebra on `R`; `p₁ p₂` AlgHoms (commutes' = `pointSharp_comp_π`, defeq);
+         `pT := lift p₁ p₂`; `hclose : sharp P c − alg (ε' c) ∈ I := ker φ` for P ∈ K, via
+         (H-φ) `φ ∘ sharp w = φ ∘ sharp w'` when `Spec.map φ ≫ w = Spec.map φ ≫ w'`
+         (appLE_comp_appLE + `Scheme.ΓSpecIso_naturality`) at w' := 0-point +
+         `pointSharp_zero_point`; `hII` from `hφ2`.
+     6b. `hid := pairBox_boxIso_eq_specMap` at pT (legs: `lift_comp_includeLeft/Right` +
+         `CommRingCat.ofHom_comp`); `q := (boxIso hU).inv ≫ boxι ≫ μ.left`;
+         `hsum : (P₁+P₂).1 = Spec.map (ofHom pT) ≫ q` via `point_add_val_mu` +
+         `pairing_eq_pairBox` + `Iso.hom_inv_id_assoc`.
+     6c. `foldε_eq_axisR` (mirror of `foldε_eq_axisL`, add to algebra layer);
+         `hfoldCong : pT x − alg (foldε ε' x) ∈ I` from `pairLift_key` + `hclose` +
+         `foldε_eq_axisL/R`; units: `y ∉ 𝔭 := ker (foldε ε')` ⟹ `foldε y ≠ 0` ⟹ unit in k'
+         (transport along `(ΓSpecIso (of k)).commRingCatIsoToRingEquiv`, field k) ⟹
+         `alg (fold y)` unit in R ⟹ `pT y` = unit + I-nilpotent = unit
+         (`IsNilpotent.isUnit_add_right_of_commute`-family; I-elements nilpotent since I²=⊥).
+     6d. `𝔭` prime (`RingHom.ker_isPrime`, `IsDomain k'` via `Function.Injective.isDomain`
+         along the ΓSpecIso equiv); `p𝔭 := ⟨𝔭, _⟩`; `hqp : q.base p𝔭 ∈ U`: `p𝔭 =
+         (Spec.map (ofHom (axisL ε'))).base pₑ` (PrimeSpectrum.ext, comap-of-ker,
+         `foldε_eq_axisL`) then `axisL_spec_law` + `IsAffineOpen.range_fromSpec`.
+     6e. `L := stalk p𝔭` with `IsLocalization.AtPrime L 𝔭`
+         (`StructureSheaf.IsLocalization.to_stalk`, transported to the Scheme-Spec);
+         `ψ := germ U (q p𝔭) hqp ≫ q.stalkMap p𝔭 : Γ(F.E,U) ⟶ L`;
+         `φL := IsLocalization.lift (units from 6c)`.
+     6f. `hkey : sharp (P₁+P₂) c = φL (ψ c)`: both sides' `(ΓSpecIso R).inv`-images have
+         equal germs at every `x : Spec R` — LHS-germ = `((P₁+P₂).1).stalkMap x ∘ germ` and
+         `(P₁+P₂).1.stalkMap = q.stalkMap ∘ (Spec.map pT).stalkMap`-chain (`stalkMap_comp`
+         along `hsum`, `stalkMap_germ` twice); RHS-germ: `germ ∘ iso.inv ∘ φL = (Spec.map
+         (ofHom pT)).stalkMap x` on L by `IsLocalization.ringHom_ext` (both invert
+         𝔭-complement, agree on `algebraMap` by `stalkMap_germ`-at-⊤ + `IsLocalization.lift_eq`);
+         conclude by sheaf `section_ext` (`(Spec R).sheaf`) + `ΓSpecIso`-injectivity.
+     6g. Kill: `a := ψ f − algL (f ⊗ 1) − algL (1 ⊗ f)`; the two axis stalk maps
+         `rL := (Spec.map (ofHom axisL)).stalkMap pₑ`-forms kill `a`: `rL (ψ f) = algLₑ f`
+         from `axisL_spec_law`-stalk-functoriality (`stalkMap_comp` + `stalkMap_germ` +
+         `IsAffineOpen.fromSpec`-germ = localization-map), `rL (algL (f⊗1)) = algLₑ (ιε f) = 0`
+         (hf), `rL (algL (1⊗f)) = algLₑ f`; then `IsLocalization.surj`-clear denominators,
+         `IsLocalization.map_eq_zero_iff` twice, the `(1⊗u)(v⊗1)`-trick,
+         `pairLift_eq_zero_of_axes`, and 6c-units transport `φL a = 0`; unwind
+         `φL (algL _) = pT _` (`IsLocalization.lift_eq`) + `Algebra.TensorProduct.lift_tmul`:
+         `sharp-sum f = φL (ψ f) = pT (f⊗1) + pT (1⊗f) = sharp P₁ f + sharp P₂ f`. 
+-/
+  classical
+  -- 6a. the algebra package
+  letI : Algebra ↑Γ(Spec (CommRingCat.of k), ⊤) ↑R :=
+    ((t.appLE ⊤ ⊤ le_top) ≫ (Scheme.ΓSpecIso R).hom).hom.toAlgebra
+  set ε' := chartAug heU with hε'
+  set p₁ : ↑Γ(F.E, U) →ₐ[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑R :=
+    { toRingHom := (pointSharp P₁.1 hp₁).hom
+      commutes' := fun c => pointSharp_comp_π P₁ hp₁ c } with hp₁'
+  set p₂ : ↑Γ(F.E, U) →ₐ[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑R :=
+    { toRingHom := (pointSharp P₂.1 hp₂).hom
+      commutes' := fun c => pointSharp_comp_π P₂ hp₂ c } with hp₂'
+  set pT := Algebra.TensorProduct.lift p₁ p₂ (fun _ _ => Commute.all _ _) with hpT
+  set I : Ideal ↑R := RingHom.ker φ.hom with hI
+  have hII : ∀ a ∈ I, ∀ b ∈ I, a * b = 0 := by
+    intro a ha b hb
+    have h2 : a * b ∈ RingHom.ker φ.hom ^ 2 := by
+      rw [sq]; exact Ideal.mul_mem_mul ha hb
+    rw [hφ2, Ideal.mem_bot] at h2
+    exact h2
+  -- (H-φ): the reduction collapses chart evaluations
+  have hφsharp : ∀ (w w' : Spec R ⟶ F.E) (hw : ∀ x : ↑(Spec R), w.base x ∈ U)
+      (hw' : ∀ x : ↑(Spec R), w'.base x ∈ U)
+      (hval : Spec.map φ ≫ w = Spec.map φ ≫ w') (c : ↑Γ(F.E, U)),
+      φ.hom ((pointSharp w hw).hom c) = φ.hom ((pointSharp w' hw').hom c) := by
+    intro w w' hw hw' hval c
+    have hnat : ∀ (v : Spec R ⟶ F.E) (hv : ∀ x : ↑(Spec R), v.base x ∈ U),
+        pointSharp v hv ≫ φ = (Spec.map φ ≫ v).appLE U ⊤
+            (fun x _ => by simpa using hv ((Spec.map φ).base x)) ≫
+          (Scheme.ΓSpecIso S').hom := by
+      intro v hv
+      rw [pointSharp, Category.assoc, ← Scheme.ΓSpecIso_naturality, ← Category.assoc,
+        ← FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_top_top (Spec.map φ),
+        Scheme.Hom.appLE_comp_appLE]
+    have h1 := congrArg (fun (m : Γ(F.E, U) ⟶ S') => m.hom c) (hnat w hw)
+    have h2 := congrArg (fun (m : Γ(F.E, U) ⟶ S') => m.hom c) (hnat w' hw')
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h1 h2
+    rw [h1, h2]
+    congr 1
+    have h5 := FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_congr_hom hval U ⊤
+      (fun x _ => by simpa using hw ((Spec.map φ).base x))
+    exact congrArg (fun (m : Γ(F.E, U) ⟶ Γ(Spec S', ⊤)) => m.hom c) h5
+  have hclose : ∀ (P : F.Point t) (hp : ∀ x : ↑(Spec R), (P.1).base x ∈ U)
+      (hres0 : Point.restrict F (Spec.map φ) P = 0) (c : ↑Γ(F.E, U)),
+      (pointSharp P.1 hp).hom c - algebraMap _ ↑R (ε' c) ∈ I := by
+    intro P hp hres0 c
+    have hval : Spec.map φ ≫ P.1 = Spec.map φ ≫ ((0 : F.Point t) : Spec R ⟶ F.E) := by
+      have h := congrArg Subtype.val hres0
+      simp only [Point.restrict] at h
+      rw [h, F.point_zero_val, F.point_zero_val, ← Category.assoc]
+    have h1 := hφsharp P.1 ((0 : F.Point t) : Spec R ⟶ F.E) hp hz hval c
+    have h2 := pointSharp_zero_point heU t hz c
+    have h3 : algebraMap ↑Γ(Spec (CommRingCat.of k), ⊤) ↑R (ε' c) =
+        (t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom).hom
+          ((F.zero.appLE U ⊤ (fun x _ => heU x)).hom c) := rfl
+    rw [hI, RingHom.mem_ker, map_sub]
+    have h4 : φ.hom ((pointSharp P.1 hp).hom c) =
+        φ.hom (algebraMap ↑Γ(Spec (CommRingCat.of k), ⊤) ↑R (ε' c)) := by
+      rw [h1]
+      exact congrArg φ.hom (h2.trans h3.symm)
+    rw [h4, sub_self]
+  -- 6b. the sum through the box
+  have hidL : CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+      (R := ↑Γ(Spec (CommRingCat.of k), ⊤))) ≫ CommRingCat.ofHom pT.toRingHom =
+      pointSharp P₁.1 hp₁ := by
+    rw [← CommRingCat.ofHom_comp]
+    exact congrArg CommRingCat.ofHom
+      (congrArg AlgHom.toRingHom
+        (Algebra.TensorProduct.lift_comp_includeLeft p₁ p₂ (fun _ _ => Commute.all _ _)))
+  have hidR : CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+      (R := ↑Γ(Spec (CommRingCat.of k), ⊤)) (A := ↑Γ(F.E, U))).toRingHom ≫
+      CommRingCat.ofHom pT.toRingHom = pointSharp P₂.1 hp₂ := by
+    rw [← CommRingCat.ofHom_comp]
+    exact congrArg CommRingCat.ofHom
+      (congrArg AlgHom.toRingHom
+        (Algebra.TensorProduct.lift_comp_includeRight p₁ p₂ (fun _ _ => Commute.all _ _)))
+  have hid := pairBox_boxIso_eq_specMap hU P₁ P₂ hp₁ hp₂ hidL hidR
+  set q : Spec (.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U))) ⟶ F.E :=
+    (boxIso hU).inv ≫ boxι ≫ (μ[F.asOver]).left with hq
+  have hsum : ((P₁ + P₂ : F.Point t) : Spec R ⟶ F.E) =
+      Spec.map (CommRingCat.ofHom pT.toRingHom) ≫ q := by
+    rw [← hid, hq]
+    rw [point_add_val_mu F P₁ P₂, pairing_eq_pairBox P₁ P₂ hp₁ hp₂]
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    exact Category.assoc _ _ _
+  sorry
 
 end Box
 
