@@ -16395,3 +16395,16 @@ I landed the drafted + pkg-consuming leaves. Commits 2eb0843af (basePullback+GHB
   T-Q5↔InvariantTorsor: invariantsπ finite/étale/surjective) + GHB5 (base-change via
   fixedPointsBaseChange). GHB4/GHB5/GHB7 ≈ the ~1000-LOC multi-session remainder (gates now
   open). p0 reclaim provision stands.
+
+## Amendments v10.143 (fable-PIC0, 2026-07-11): ★★ [PAIR-4b] CLOSED — ev(unit) is an iso
+
+`isIso_ev_unitObj` axiom-clean (`5f82d2aa1`): `evPre (unitObj Y)` factors as
+`(𝟙 ⊗ᵢ dualUnitPresheafIso) ≫ ρ_` (hfac: ext1 + tensor_ext, Eq.trans/congrArg-assembly for
+the wart-blocked rewrites, terminal `show` collapse) — all-iso ⟹ sh-map iso ⟹ ev iso by
+the counit. Generic-section additions: `evalSection_unit_mul` (eval φ r = eval φ 1 · r) +
+`evalSection_unit_one` (map-𝟙 collapse), both via Dual.lean's show-from-1 idiom. METHOD
+(banked, bit twice now): `have`-bound DATA is defeq-OPAQUE — the terminal rfl-hop
+(`hd.hom.app`-applied ≡ `dualUnitSectionsEquiv`-applied) required `let hd`. STATE: file
+gates on [PAIR-4] (general trivializing-open case — reduce to 4b via 4a restriction-compat
++ 4c iso-naturality, routes banked v10.142-artifact) + [CMP-←]. Session budget spent;
+4a/4c are the fresh-context continuation.
