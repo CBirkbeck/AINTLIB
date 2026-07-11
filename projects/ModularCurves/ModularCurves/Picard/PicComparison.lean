@@ -96,6 +96,38 @@ theorem evalSection_add_left (M : _root_.SheafOfModules R) (U : C)
   simp only [evalSection_eq]
   rfl
 
+theorem evalSection_unit_mul (U : C) [∀ V, IsMulCommutative (R.obj.obj V)]
+    (φ : (_root_.SheafOfModules.unit R).over U ⟶
+      _root_.SheafOfModules.unit (R.over U))
+    (r : (_root_.SheafOfModules.unit R).val.obj (op U)) :
+    evalSection R (_root_.SheafOfModules.unit R) U φ r =
+      evalSection R (_root_.SheafOfModules.unit R) U φ
+        (show (_root_.SheafOfModules.unit R).val.obj (op U) from (1 : R.obj.obj (op U))) *
+        (show R.obj.obj (op U) from r) := by
+  have h := evalSection_smul_right R (_root_.SheafOfModules.unit R) U φ
+    (show R.obj.obj (op U) from r)
+    (show (_root_.SheafOfModules.unit R).val.obj (op U) from (1 : R.obj.obj (op U)))
+  rw [show ((show R.obj.obj (op U) from r) •
+      (show (_root_.SheafOfModules.unit R).val.obj (op U) from (1 : R.obj.obj (op U))) :
+        (_root_.SheafOfModules.unit R).val.obj (op U)) = r from by
+    show (show R.obj.obj (op U) from r) * (1 : R.obj.obj (op U)) = r
+    rw [mul_one]] at h
+  rw [h, smul_eq_mul]
+  exact mul_comm' _ _
+
+theorem evalSection_unit_one (U : C)
+    (φ : (_root_.SheafOfModules.unit R).over U ⟶
+      _root_.SheafOfModules.unit (R.over U)) :
+    evalSection R (_root_.SheafOfModules.unit R) U φ
+        (show (_root_.SheafOfModules.unit R).val.obj (op U) from (1 : R.obj.obj (op U))) =
+      φ.val.app (op (Over.mk (𝟙 U)))
+        (show (R.over U).obj.obj (op (Over.mk (𝟙 U))) from 1) := by
+  simp only [evalSection_eq]
+  congr 1
+  show R.obj.map (𝟙 U).op (1 : R.obj.obj (op U)) = (1 : R.obj.obj (op U))
+  rw [op_id, R.obj.map_id]
+  rfl
+
 theorem evalSection_smul_left (M : _root_.SheafOfModules R) (U : C)
     [∀ V, IsMulCommutative (R.obj.obj V)]
     (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U))
@@ -318,7 +350,7 @@ pairing is pointwise invertible (every endomorphism of the unit is a scalar), so
 sheafified evaluation is a composition of isomorphisms. -/
 theorem isIso_ev_unitObj (Y : Scheme.{u}) : IsIso (ev (unitObj Y)) := by
   -- the dual-unit identification, cast to the clean clothing
-  have hd : ((dualObj (unitObj Y)).val :
+  let hd : ((dualObj (unitObj Y)).val :
       _root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) ≅
       𝟙_ (_root_.PresheafOfModules (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) :=
     ModularCurves.SheafOfModules.dualUnitPresheafIso Y.ringCatSheaf
@@ -351,11 +383,16 @@ theorem isIso_ev_unitObj (Y : Scheme.{u}) : IsIso (ev (unitObj Y)) := by
       h2)).symm)
     show ModularCurves.SheafOfModules.evalSection Y.ringCatSheaf (unitObj Y) (Opposite.unop V) φ r =
       (ConcreteCategory.hom (hd.hom.app V)) φ • r
-    -- remaining: evalSection φ r = (hd-app φ) • r. Route (instances fight the r•1-detour
-    -- at scheme-clothing): add a GENERIC-section lemma `evalSection_unit_mul`
-    -- (eval φ r = eval φ 1 * r, proven with the show-from-1 idiom like Dual.lean's own
-    -- unit-proofs), then close here by defeq (hd-app φ ≡ eval φ 1) + mul_comm'.
-    sorry
+    have hφ : (ConcreteCategory.hom (hd.hom.app V)) φ =
+        ModularCurves.SheafOfModules.dualUnitSectionsEquiv Y.ringCatSheaf
+          (Opposite.unop V) φ := rfl
+    exact Eq.trans (ModularCurves.SheafOfModules.evalSection_unit_mul Y.ringCatSheaf
+      (Opposite.unop V) φ r)
+      (congrArg (fun c => c * (show Y.ringCatSheaf.obj.obj V from r))
+        ((ModularCurves.SheafOfModules.evalSection_unit_one Y.ringCatSheaf
+          (Opposite.unop V) φ).trans
+          (((ModularCurves.SheafOfModules.dualUnitSectionsEquiv_apply Y.ringCatSheaf
+            (Opposite.unop V) φ).symm).trans hφ.symm)))
   haveI : IsIso (evPre (unitObj Y)) := by
     rw [hfac]
     infer_instance
