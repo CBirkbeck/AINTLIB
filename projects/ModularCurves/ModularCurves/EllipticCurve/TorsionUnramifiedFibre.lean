@@ -653,6 +653,57 @@ private theorem pointSharp_specMap_comp {R' R'' : CommRingCat.{u}} (g : R'' ⟶ 
   rw [hnat]
   rfl
 
+/-- **The hoisted tail of `pointSharp_add`** (6e′–6g): standalone so the localization
+`set`s run against a small context (the inline form blows the `whnf` budget). All
+box-geometry enters through the five morphism-level hypotheses. -/
+private theorem pointSharp_add_tail {U : (F.E).Opens} (hU : IsAffineOpen U)
+    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U)
+    (htautU : ∀ x : ↑(Spec Γ(F.E, U)), (hU.fromSpec).base x ∈ U)
+    [Algebra ↑Γ(Spec (CommRingCat.of k), ⊤) ↑R]
+    [hker : (RingHom.ker (foldε (chartAug heU)).toRingHom).IsPrime]
+    [hkerε : (RingHom.ker (chartAug heU).toRingHom).IsPrime]
+    {t : Spec R ⟶ Spec (CommRingCat.of k)} {P₁ P₂ : F.Point t}
+    (hp₁ : ∀ x : ↑(Spec R), (P₁.1).base x ∈ U)
+    (hp₂ : ∀ x : ↑(Spec R), (P₂.1).base x ∈ U)
+    (hp₁₂ : ∀ x : ↑(Spec R), ((P₁ + P₂ : F.Point t) : Spec R ⟶ F.E).base x ∈ U)
+    (p₁ p₂ : ↑Γ(F.E, U) →ₐ[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑R)
+    (pT : ↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U) →ₐ[↑Γ(Spec
+      (CommRingCat.of k), ⊤)] ↑R)
+    (hpTdef : pT = Algebra.TensorProduct.lift p₁ p₂ (fun _ _ => Commute.all _ _))
+    (hcl₁ : ∀ c, p₁ c - algebraMap _ ↑R (chartAug heU c) ∈ RingHom.ker φ.hom)
+    (hcl₂ : ∀ c, p₂ c - algebraMap _ ↑R (chartAug heU c) ∈ RingHom.ker φ.hom)
+    (hII : ∀ a ∈ RingHom.ker φ.hom, ∀ b ∈ RingHom.ker φ.hom, a * b = 0)
+    (hunits : ∀ y : (RingHom.ker (foldε (chartAug heU)).toRingHom).primeCompl,
+      IsUnit (pT y))
+    {q : Spec (.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U))) ⟶ F.E}
+    (hqp : q.base ⟨RingHom.ker (foldε (chartAug heU)).toRingHom, hker⟩ ∈ U)
+    (hsum : ((P₁ + P₂ : F.Point t) : Spec R ⟶ F.E) =
+      Spec.map (CommRingCat.ofHom pT.toRingHom) ≫ q)
+    (haxLq : Spec.map (CommRingCat.ofHom (axisL (chartAug heU)).toRingHom) ≫ q =
+      hU.fromSpec)
+    (haxRq : Spec.map (CommRingCat.ofHom (axisR (chartAug heU)).toRingHom) ≫ q =
+      hU.fromSpec)
+    (hidL : CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := ↑Γ(Spec (CommRingCat.of k), ⊤))) ≫ CommRingCat.ofHom pT.toRingHom =
+      pointSharp P₁.1 hp₁)
+    (hidR : CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := ↑Γ(Spec (CommRingCat.of k), ⊤)) (A := ↑Γ(F.E, U))).toRingHom ≫
+        CommRingCat.ofHom pT.toRingHom = pointSharp P₂.1 hp₂)
+    (f : Γ(F.E, U)) (hf : F.zero.appLE U ⊤ (fun x _ => heU x) f = 0) :
+    pointSharp (P₁ + P₂ : F.Point t).1 hp₁₂ f =
+      pointSharp P₁.1 hp₁ f + pointSharp P₂.1 hp₂ f := by
+  classical
+  set ε' := chartAug heU with hε'
+  set p𝔭 : ↑(Spec (.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U)))) :=
+    ⟨RingHom.ker (foldε ε').toRingHom, hε' ▸ hker⟩ with hp𝔭
+  have hεf : ε' f = 0 := hf
+  -- 6e′ (germ-free): the localization at the augmentation prime
+  set L := CommRingCat.of (Localization.AtPrime (RingHom.ker (foldε ε').toRingHom)) with hLdef
+  set algL : CommRingCat.of (↑Γ(F.E, U) ⊗[↑Γ(Spec (CommRingCat.of k), ⊤)] ↑Γ(F.E, U)) ⟶ L :=
+    CommRingCat.ofHom
+      (algebraMap _ (Localization.AtPrime (RingHom.ker (foldε ε').toRingHom))) with halgL
+  sorry
+
 /-- **Additivity of the chart evaluation on kernel-of-reduction points** (the geometric
 heart): for `P₁ P₂` reducing to zero along the square-zero `φ` and `f` in the augmentation
 ideal of the chart, `(P₁+P₂)♯ f = P₁♯ f + P₂♯ f`. Through the affine Künneth box and
@@ -899,7 +950,18 @@ private theorem pointSharp_add {U : (F.E).Opens} (hU : IsAffineOpen U)
         (Spec.map (CommRingCat.ofHom (axisL ε').toRingHom) ≫ q).base pₑ := rfl
     rw [h2, hlaw']
     exact htautU pₑ
-  sorry
+  -- the hoisted tail closes it
+  haveI hkerI : (RingHom.ker (foldε (chartAug heU)).toRingHom).IsPrime :=
+    RingHom.ker_isPrime _
+  haveI hkerεI : (RingHom.ker (chartAug heU).toRingHom).IsPrime :=
+    RingHom.ker_isPrime _
+  exact pointSharp_add_tail hU heU htautU hp₁ hp₂ hp₁₂ p₁ p₂ pT hpT
+    (fun c => hI.symm ▸ hclose P₁ hp₁ h₁ c)
+    (fun c => hI.symm ▸ hclose P₂ hp₂ h₂ c)
+    (fun a ha b hb => hII a (hI.symm ▸ ha) b (hI.symm ▸ hb)) hunits hqp hsum
+    (by rw [hq]; exact axisL_spec_law hU heU htautU hzT)
+    (by rw [hq]; exact axisR_spec_law hU heU htautU hzT)
+    hidL hidR f hf
 
 end Box
 
