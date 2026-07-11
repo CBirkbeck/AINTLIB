@@ -388,3 +388,20 @@ Leaves:
 - **[PAIR-ASM]** = [PAIR-3] applied to ev with [PAIR-4] on hM's cover.
 
 [CMP-←] (Zariski-local freeness) queued after; independent.
+
+### [PAIR-1] route refinement (post PAIR-3 closure, 2026-07-11)
+
+Over-machinery recon: the dual's sections at `U` are `M.over U ⟶ unit (R.over U)` with
+`Over U` the comma-category site; `overUnitSectionEquiv : R(U) ≃ (unit (R.over U)).sections`
+(evaluation at `Over.mk (𝟙 U)`, Dual.lean:44). [PAIR-1] evaluation therefore:
+`ev_U(m, φ) := overUnitSectionEquiv.symm ((φ on sections) (overSection M U m))` where
+`overSection M U m : (M.over U).sections := sectionsMk (fun V => M-map V.hom.op m) _`
+(mirror of Dual.lean's `overUnitSection` at M; check for an existing M-version/sectionsMap
+first). Bilinearity: sections-action is additive + the R(U)-action matches
+`dualSectionsModule`'s compHom. Naturality-in-U: `dualRestrict`-compat lemmas
+(Dual.lean:166-210) + `ambientDual_map_dualToAmbient`. [PAIR-2] then: pointwise
+`TensorProduct.lift ev_U`, package as presheaf-map `M.val ⊗ (dualObj M).val ⟶ 𝟙_pre`,
+transpose through `sheafificationAdjunction.homEquiv` + `sheafifyValIso` to
+`ev : tensorObj M (dualObj M) ⟶ unitObj X`. [PAIR-3] CLOSED (`isIso_of_isIso_restrict`,
+c3e0971b8, it-3). [PAIR-4] then conjugates ev's restriction by the owner's
+`dualRestrictIsoOfRestrictIso` + `overTrivializationOfRestrictIso`.
