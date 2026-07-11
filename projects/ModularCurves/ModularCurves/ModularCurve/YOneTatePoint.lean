@@ -759,6 +759,31 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
           (Ideal.Quotient.mkₐ ↑R I).comp ψ' = ψ₀ ∧
           (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) (tateBaseSpecMap R ψ')
             (tatePoint R) = 0 := by
+      /- PURE-CORE SKELETON (machinery staged): -/
+      -- (i) the raw lifted curve and its étale-affine torsion
+      set W' := (tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap ↑R A)
+        (fun i : Fin 2 => if i = 0 then α else β)) with hW'
+      haveI : W'.IsElliptic := ⟨hΔ⟩
+      set F' := modelEllipticCurve W' with hF'
+      have hNinvA : NIsInvertible (Spec (CommRingCat.of A)) N := by
+        show IsUnit ((N : ℕ) : Γ(Spec (CommRingCat.of A), ⊤))
+        have h1 : IsUnit ((N : ℕ) : A) := by
+          have h2 := hinv.map φ.hom
+          rwa [map_natCast] at h2
+        have h3 := h1.map (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom
+        rwa [map_natCast] at h3
+      haveI hEt : Etale (F'.torsionπ N) := F'.torsionπ_etale N hNinvA
+      haveI : IsFinite (F'.torsionπ N) := F'.torsionπ_isFinite N
+      haveI : IsAffine (F'.torsion N) := isAffine_of_isAffineHom (F'.torsionπ N)
+      -- (ii) the A⧸I-point of the torsion, from the classified `t₀`-datum
+      obtain ⟨s₀T, hs₀T⟩ : ∃ s₀T : Spec (CommRingCat.of (↑A ⧸ I)) ⟶ F'.torsion N,
+          s₀T ≫ F'.torsionπ N =
+            Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) := by
+        sorry
+      -- (iii) lift the torsion point along the nilpotent thickening
+      obtain ⟨sT, hsTπ, hsTrest⟩ := exists_section_lift_of_smooth (F'.torsionπ N) I hI s₀T
+        hs₀T
+      -- (iv) chart coordinates + T-E1 renormalisation + the two clauses
       sorry
     -- assembly: witness with the renormalised map
     refine ⟨tateBaseSpecMap R ψ', ?_, ?_, ?_⟩
