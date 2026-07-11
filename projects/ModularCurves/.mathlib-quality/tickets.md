@@ -17996,3 +17996,12 @@ torsion-point lift + T-E1 renormalisation, with the raw lift `(α, β, hΔ, ψ)`
 E6-FormallySmooth-leg (adjunction transport of E5), T-E4-primitive (route a/c — other
 lanes), hfib 6f/6g (drafts banked), BB-QF/FLAT/DEG (other lane)}. Root module green at
 3,798 jobs with all of it.
+
+## Amendments v10.127-Y1 (2026-07-11, Y1-CLOSER): ★★ E6 PROVEN — the MASTER's in-charter remainder is E5's pure core ALONE
+
+`yOneStructMap_smooth` COMPLETE (FP from E4; FormallySmooth by transporting E5 through the
+Γ–Spec adjunction — `iff_comp_surjective`, the structure-triangle, `Spec.preimage`
+AlgHom-packaging). With F1 already wired, **the entire `gammaOneNaive_representable` trail
+now rests on: {E5-pure-core (étale torsion lift + T-E1, all machinery staged:
+`exists_section_lift_of_smooth` PROVEN, `tateBaseSpecMapOfPoint` + comparison lemmas
+pre-existing)} + the boarded externals {T-E4 route (a)/(c), hfib 6f/6g, BB-QF/FLAT/DEG}.**
