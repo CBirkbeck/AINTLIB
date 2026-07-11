@@ -38,6 +38,7 @@ import ModularCurves.ForMathlib.MonicQuotientDescent
 import ModularCurves.ForMathlib.OpensMapFinal
 import ModularCurves.ForMathlib.ProjIntegral
 import ModularCurves.ForMathlib.PullbackLocalAtTarget
+import ModularCurves.ForMathlib.PullbackUnitMonoidal
 import ModularCurves.ForMathlib.QuotientCurveModel
 import ModularCurves.ForMathlib.SchemeActionFree
 import ModularCurves.ForMathlib.SheafOfModulesMonoidal
