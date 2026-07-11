@@ -3032,13 +3032,15 @@ noncomputable def fibreGeom : EllipticCurveGeom (Spec (CommRingCat.of k)) where
   proper := projModelπ_isProper _
   localModel := projModel_locallyWeierstrass _
 
-/-- **[T-A6b]** The fibre working record, through `abelEnrichment_exists`. -/
+/-- The fibre working record: the mulOver-based model record (Y1-CLOSER S3 — the [T-A6b]
+gate `abelEnrichment_exists` is NO LONGER on this trail: the fibre geometry is a global
+model). -/
 noncomputable def fibreCurve : EllipticCurve (Spec (CommRingCat.of k)) :=
-  (EllipticCurve.abelEnrichment_exists (D.fibreGeom k)).choose
+  modelEllipticCurve (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
 
 /-- **Opaque interface** for the fibre record: its geometry is the fibre model. -/
 theorem fibreCurve_geom : (D.fibreCurve k).toEllipticCurveGeom = D.fibreGeom k :=
-  (EllipticCurve.abelEnrichment_exists (D.fibreGeom k)).choose_spec
+  rfl
 
 theorem fibreCurve_E_eq : (D.fibreCurve k).E =
     projModel (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) :=

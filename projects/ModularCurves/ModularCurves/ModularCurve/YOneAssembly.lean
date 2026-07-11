@@ -292,16 +292,18 @@ noncomputable def tateGeom : EllipticCurveGeom (tateBase R) where
   proper := projModelπ_isProper (tateCurveLocOver R)
   localModel := projModel_locallyWeierstrass (tateCurveLocOver R)
 
-/-- The universal Tate curve as a **working record** (with its group law), through the
-canonicity gate **[T-A6b]** `abelEnrichment_exists`. Heavy definition: downstream leaves consume
-only the pin `tateUniversal_geom` (opaque-interface discipline, v10.24(b)). -/
+/-- The universal Tate curve as a **working record** (with its group law): the mulOver-based
+model record `modelEllipticCurve` (T-G4 laws at every ring; Y1-CLOSER S3 — the [T-A6b] gate
+`abelEnrichment_exists` is NO LONGER on this trail: the Tate geometry is a global model, so
+the record needs no descent). Downstream leaves consume only the pin `tateUniversal_geom`
+(opaque-interface discipline, v10.24(b)). -/
 noncomputable def tateUniversal : EllipticCurve (tateBase R) :=
-  (EllipticCurve.abelEnrichment_exists (tateGeom R)).choose
+  modelEllipticCurve (tateCurveLocOver R)
 
 /-- **Opaque interface** for `tateUniversal`: its geometry is `tateGeom` — total space the
 projective Tate model, zero section the point at infinity `(0:1:0)`. -/
 theorem tateUniversal_geom : (tateUniversal R).toEllipticCurveGeom = tateGeom R :=
-  (EllipticCurve.abelEnrichment_exists (tateGeom R)).choose_spec
+  rfl
 
 /-! #### The marked point `P₀ = (0,0)` of the atlas (Loeffler's `(0:0:1)`)
 
@@ -353,6 +355,14 @@ private lemma eqToHom_toGeom_π' {S : Scheme.{u}} {G₁ G₂ : EllipticCurveGeom
 /-- The total space of `tateUniversal` is the projective atlas model (through the bridge). -/
 lemma tateUniversal_E_eq : (tateUniversal R).E = projModel (tateCurveLocOver R) :=
   congrArg EllipticCurveGeom.E (tateUniversal_geom R)
+
+/-- The zero pin of the Tate record (the `hz` hypothesis of `geomFibrePointAddEquiv`,
+B2 EVENT #3): definitional after the S3 model-record swap. -/
+theorem tateUniversal_hz : (tateUniversal R).zero ≫ eqToHom (tateUniversal_E_eq R) =
+    projModelZero (tateCurveLocOver R) := by
+  show (tateUniversal R).zero ≫ eqToHom rfl = projModelZero (tateCurveLocOver R)
+  rw [eqToHom_refl, Category.comp_id]
+  rfl
 
 /-- The atlas `π`, seen through the `tateUniversal ≟ tateGeom` bridge, is `projModelπ`. -/
 lemma tateUniversal_eqToHom_π :
@@ -582,7 +592,7 @@ theorem tateMarkedPoint_nowhereGeomOrderLEThree :
     inferInstanceAs ((tateCurveLocOver R).map (algebraMap (tateRingOver R) k)).IsElliptic
   have hns := baseChange_nonsingular_zero R k
   have htransfer : EllipticCurve.geomFibrePointAddEquiv (tateCurveLocOver R) (tateUniversal R)
-      (tateUniversal_E_eq R) (tateUniversal_π_eq R) k
+      (tateUniversal_E_eq R) (tateUniversal_π_eq R) (tateUniversal_hz R) k
       (EllipticCurve.Point.pull (tateUniversal R) (EllipticCurve.geomPoint (tateRingOver R) k)
         (tateMarkedPoint R)) = WeierstrassCurve.Affine.Point.some 0 0 hns := by
     rw [EllipticCurve.geomFibrePointAddEquiv_apply]
@@ -593,7 +603,7 @@ theorem tateMarkedPoint_nowhereGeomOrderLEThree :
     (baseChange_tateA₄_eq_zero R k) (baseChange_isUnit_tateA₂ R k) (baseChange_isUnit_tateA₃ R k)
     hns a ha0 ha3
   have key : (EllipticCurve.geomFibrePointAddEquiv (tateCurveLocOver R) (tateUniversal R)
-      (tateUniversal_E_eq R) (tateUniversal_π_eq R) k)
+      (tateUniversal_E_eq R) (tateUniversal_π_eq R) (tateUniversal_hz R) k)
       ((a : ℤ) • EllipticCurve.Point.pull (tateUniversal R)
         (EllipticCurve.geomPoint (tateRingOver R) k) (tateMarkedPoint R)) = 0 := by
     rw [hzero]; exact map_zero _
