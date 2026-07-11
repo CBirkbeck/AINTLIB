@@ -18032,3 +18032,40 @@ with a RING-LEVEL interface (`ψ₀r : →+*` — no `A⧸I`-algebra structure),
 `gammaOneNaive_representable` residual (shrunk): {**hfib ψ-wall** (`pointSharp_add_tail`,
 TorsionUnramifiedFibre:733 — the last in-charter item), BB-QF/FLAT/DEG (other lane), T-E4 primitive
 route (a)/(c) (other lanes)}.
+
+## Amendments v10.129-Y1 (2026-07-11, Y1-CLOSER): ★★★★ CHARTER-Y1-CLOSER COMPLETE — every in-charter item discharged; the Y1 trail's residual is exactly the boarded other-lane set
+
+**The hfib ψ-wall is DOWN**: `pointSharp_add_tail` PROVEN, `TorsionUnramifiedFibre.lean`
+**sorry-free** (was: 1 wall-ledgered sorry). The wall-breaking pattern (registry-grade, third
+confirmation of hoist-small-context this charter):
+- `set` on localization-typed terms = kabstract over the big goal — measured 200k ALONE. Fix:
+  no `set`; abstract packages behind structure fvars.
+- ∃-telescope refine of localization witnesses = 200k where the SAME witnesses in a
+  **structure refine** pass — `EpsHalf` structure (fields `Lε/algLε/a/halg/hker'/hspec`,
+  generic in the axis map) + `epsHalf_exists` constructor.
+- Elementwise `RingHom.ext … IsLocalization.map_eq` at these instances = 200k; the canonical
+  square lemma **`IsLocalization.map_comp`** is free. `CommRingCat`-level via `ofHom_comp`.
+- `specMap_square_comp`: `Spec` of a commuting `CommRingCat` square over abstract objects.
+- 6f/6g landed from the banked drafts, fully abstract: `hkey` (factorisation through the
+  box-prime localization), `haxψ` (axis evaluations via `pointSharp_specMap_comp/congr/
+  fromSpec`), defect kill (`pairLift_eq_zero_of_axes` + primeCompl annihilators + unit
+  cancellation, `linear_combination` closes the axis kills).
+
+**CHARTER SCORECARD (all in-charter stages ★)**: S1 T-G4 ✓ (dev, d87d40737) · S2 [T-B6′]
+map_add'+hz ✓ + hfib ✓✓ (this pass — the funnel is fully fed, `formallyUnramified_torsionπ`
+PROVEN mod finiteness) · S3 ✓ `exists_tatePoint` = {propext, Classical.choice, Quot.sound}
+(BAR ITEM 1 MET) · S4 ✓ (T-E4 collapse) · S5 ✓ (E1–E4+F1+E6+**E5 complete**) · S6 ✓
+(relocation + `gammaOneNaive_representable_closure` one-exact). Zero sorries on every
+Y1-owned file; NO maxHeartbeats anywhere; both branches pushed.
+
+**BAR ITEM 2 (final attribution)**: `#print axioms gammaOneNaive_representable` = + sorryAx
+entering EXACTLY through the boarded other-lane black boxes:
+{**BB-QF** `mulByHom_locallyQuasiFinite` Torsion:140, **BB-FLAT** `mulByHom_flat` Torsion:147,
+**BB-DEG** `mulByHom_finrank` Torsion:152 (⟹ `torsionπ_isFinite` ⟹ the T-DISC finite leg),
+**[T-A6b]/[T-A6c]** `abelEnrichment_exists/unique` GroupLaw:75/80 (⟹ pullSection-canonicity),
+**T-E4-primitive** route (a) RigiditySpreadingOut:94 / route (c) T-W7a}. None transferred to
+this seat. When those lanes land, the MASTER's bar closes with **no further Y1-side work** —
+the closure theorem is one-exact against `yOneRepresentableBy`.
+
+*(Cleanup-lane note: two `unusedSimpArgs` lint warnings in the new `haLa/haRa` and a
+pre-existing unused-binder warning — cosmetic, on `main`-merge cleanup.)*
