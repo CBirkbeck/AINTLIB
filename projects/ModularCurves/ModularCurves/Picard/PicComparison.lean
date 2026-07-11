@@ -115,11 +115,52 @@ theorem evalSection_smul_left (M : _root_.SheafOfModules R) (U : C)
   erw [hr]
   exact (mul_comm' r _).symm
 
+/-- **[PAIR-1c]** Naturality of the evaluation: evaluating the restricted functional on the
+restricted section is the restriction of the evaluation. -/
+theorem evalSection_naturality (M : _root_.SheafOfModules R) {U V : Cᵒᵖ} (i : U ⟶ V)
+    (φ : M.over U.unop ⟶ _root_.SheafOfModules.unit (R.over U.unop))
+    (m : M.val.obj U) :
+    evalSection R M V.unop (dualRestrict R M i φ) (M.val.map i m) =
+      R.obj.map i (evalSection R M U.unop φ m) := by
+  sorry
+
 end ModularCurves.SheafOfModules
 
 namespace AlgebraicGeometry.Scheme.Modules
 
 variable {X : Scheme.{u}}
+
+local instance (X : Scheme.{u}) :
+    ∀ U, IsMulCommutative (X.ringCatSheaf.obj.obj U) :=
+  fun U ↦ by
+    change IsMulCommutative (X.presheaf.obj U)
+    exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
+
+open ModularCurves.SheafOfModules in
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[PAIR-2]** The evaluation morphism of presheaves: `M ⊗ᵖ M^∨ ⟶ 𝒪ₓ`,
+pointwise the lift of the bilinear evaluation pairing. -/
+noncomputable def evPre (M : X.Modules) :
+    (M.val ⊗ (dualObj M).val :
+      _root_.PresheafOfModules (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) ⟶
+      𝟙_ (_root_.PresheafOfModules (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)) where
+  app U := ModuleCat.ofHom (TensorProduct.lift (by
+    letI := dualSectionsModule X.ringCatSheaf M U.unop
+    letI : SMulCommClass ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U)
+        ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U)
+        ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U) :=
+      ⟨fun a b c => by
+        show a * (b * c) = b * (a * c)
+        rw [← mul_assoc, mul_comm' a b, mul_assoc]⟩
+    exact LinearMap.mk₂ ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj U)
+      (fun m φ => evalSection X.ringCatSheaf M U.unop φ m)
+      (fun m m' φ => evalSection_add_right X.ringCatSheaf M U.unop φ m m')
+      (fun r m φ => evalSection_smul_right X.ringCatSheaf M U.unop φ r m)
+      (fun m φ ψ => evalSection_add_left X.ringCatSheaf M U.unop φ ψ m)
+      (fun r m φ => evalSection_smul_left X.ringCatSheaf M U.unop φ r m)))
+  naturality {U V} i := by
+    sorry
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
