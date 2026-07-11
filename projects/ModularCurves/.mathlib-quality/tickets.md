@@ -18213,3 +18213,47 @@ identifying the descended μ with `mulOver (W-at-T)`;
 Then K3 (records-primitive: base-local + localModel charts + comparison-theorem (1b ✓) +
 K1 (0h ✓) + [U-MODEL]) → K4 supply-swap (PullSectionCanonicity:167 + IsoTransport hμ) →
 T-E4-family clean → bar-audit. L3 (BB-QF/FLAT/DEG) independent, untouched.
+
+---
+
+## ★ CHARTER-YFULL — the four-gate audit VERDICT (NEW-Y1, 2026-07-11, v10.141 first act, scoping)
+
+Y(N)/T-E9 on `ModularCurve/YFullRoute.lean`. Top-level `gammaFullNaive_representable_assembly`
+(:771) is ALREADY assembled; it consumes `gammaFullNaive_rigid` ([YF-NOETH], ~1 gate),
+`gammaFullNaive_representable_of_engine` (FP4 engine pin), and `exists_representing_smooth_affine`
+([YF-GEOM], sorried). Dependency into MY lane: **[YF-GEOM] ← [YF-ETALE] ← [YF-CLOPEN]** (curve
+structure); GEOM's engine/route-A part is FP4's B5.
+
+**Gate-by-gate (feeders verified against code, not just the v10.94 map):**
+- **GEOM** (`exists_representing_smooth_affine`:755): feeder
+  `exists_ellipticCurveGeom_quotient_of_globalModel` EXISTS (EngineDescent:1850, FP4). CONSUMED,
+  not built (FP4's B5). Fed mod FP4's smooth-leaf wiring + T-E15a/T-E14. **Not my leaf.**
+- **QSM** ([YF-QSM]:735): PROVEN in-file (`smooth_of_etale_surjective`, T-Q3). 02KL near-done (one
+  sorry, FinitePresentationDescent:1038), 02KM closing (fable-FP). Hypothesis-wire; not a blocker.
+- **ETALE** (`etale_fullLevelSpaceStruct`:209, sorry): a CLEAN composition assembly mirroring the
+  PROVEN [YF-AFF]/[YF-FIN] — `levelSpaceΓι ≫ pullback.fst torsionπ ≫ torsionπ`, all étale. Feeders:
+  `torsionπ_etale` PROVEN (MulByHomUnramified:213 = pullback of `mulBy_etale`, mod BB/T-W7a);
+  `levelSpaceΓι` étale ⟸ open-imm ⟸ [YF-CLOPEN]. **BUILDABLE NOW modulo CLOPEN.**
+- **CLOPEN** (`isOpenImmersion_levelSpaceΓι`:199, sorry): the ROOT. Route α (Weil, [Loe] 3.8.2) ⟵
+  `weilPairing` (T-C1 / p2 phase-2, behind p2's Milestone 1 — FAR). Route β (étale, KM 3.7.1) feeders:
+  `torsionπ_etale` ✓ + `torsion_geometricFibre_rank_two` (E[N]≅(ℤ/N)² FIBREWISE,
+  MulByHomUnramified:224) ✓ (both mod BB); **residual blocker = the étale-local SCHEME trivialization
+  E[N]≅const(ℤ/N)² (T-F1*/T-B6-family) — only partial in YRho (ℚ-specific, 5 sorries), NOT built for
+  general S.** β CLOSER than α. ⚠ **the general étale-local trivialization looks UNSTAFFED — rule-5
+  flag to coordinator.**
+
+**VERDICT**: CLOPEN via route β is the strategic root (α behind an entire subsystem); its sole
+residual is the general étale-local scheme trivialization (T-F1*-general). ETALE is buildable NOW
+modulo CLOPEN — the D-track assembly move, first leaf.
+
+**LEAF PLAN** (`/develop --decompose` vs KM 3.6.0/3.7.1 + [Loe] 3.8.2):
+1. **[YF-ETALE]** — composition assembly (open-imm ≫ pullback-étale ≫ étale) consuming
+   `isOpenImmersion_levelSpaceΓι` (CLOPEN pin) + `torsionπ_etale`. **NOW.**
+2. **CLOPEN-β** (KM 3.7.1): (a) étale-local trivialization E[N]≅const(ℤ/N)² [PIN — T-F1*-general,
+   flag staffing]; (b) constant case: `levelSpaceΓ` = union of connected components (bases of (ℤ/N)²)
+   → clopen; (c) clopen descends along the étale cover ⟹ open immersion. Build (b),(c) on the pin.
+3. **[YF-NOETH]** `gammaFullNaive_rigid` (one gate from done, Groupoid.lean) — closeability check.
+
+**SEAM with FP4's B5**: FP4 builds the engine application (route A); I deliver **[YF-ETALE] (+ CLOPEN)**,
+the curve's étale structure that FP4's `exists_representing_smooth_affine` consumes for "𝕸(𝒫,δ) étale
+over 𝕸(δ) at the bootstrap object" (KM 4.7.1). Interface = [YF-ETALE]; board at each session start.
