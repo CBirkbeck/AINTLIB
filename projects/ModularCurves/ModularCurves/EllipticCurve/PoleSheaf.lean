@@ -1724,6 +1724,26 @@ private noncomputable def restrictMonoidalTensorIso
       ((Scheme.Modules.restrictFunctorIsoPullback f).symm.app N) ≪≫
     (monoidalTensorObjIso _ _).symm
 
+/-- A trivialization of the simple-pole sheaf on an open induces compatible
+trivializations of all of its tensor powers on that open. -/
+noncomputable def sectionPoleSheafPowerTrivialization
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.Opens)
+    (e : (sectionPoleSheaf π z hz).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme) :
+    ∀ n : ℕ,
+      (sectionPoleSheafPower π z hz n).restrict U.ι ≅
+        Scheme.Modules.unitObj U.toScheme
+  | 0 => restrictMonoidalUnitIso U.ι ≪≫ monoidalUnitObjIso U.toScheme
+  | n + 1 =>
+      restrictMonoidalTensorIso U.ι
+          (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≪≫
+        (sectionPoleSheafPowerTrivialization z hz U e n ⊗ᵢ e) ≪≫
+        ((monoidalUnitObjIso U.toScheme).symm ⊗ᵢ
+          (monoidalUnitObjIso U.toScheme).symm) ≪≫
+        λ_ (𝟙_ U.toScheme.Modules) ≪≫
+        monoidalUnitObjIso U.toScheme
+
 /-- Every tensor power of the pole sheaf commutes with restriction along an open
 immersion of the base. -/
 noncomputable def sectionPoleSheafPowerRestrictIso

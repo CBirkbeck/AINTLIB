@@ -390,4 +390,26 @@ noncomputable def projModelSectionPoleSheafTrivializationZ (W : WeierstrassCurve
     Scheme.Modules.unitObj (projModelZChart W).1.toScheme
   exact (projModelZeroIdealTrivializationZ W).symm
 
+/-- The induced trivialization of `O(n[0])` on the canonical section
+neighborhood. -/
+noncomputable def projModelSectionPoleSheafPowerTrivialization
+    (W : WeierstrassCurve R) (n : ℕ) :
+    (sectionPoleSheafPower (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W) n).restrict
+        (projModelSectionNeighborhood W).1.ι ≅
+      Scheme.Modules.unitObj (projModelSectionNeighborhood W).1.toScheme :=
+  sectionPoleSheafPowerTrivialization (projModelZero W)
+    (projModelZero_projModelπ W) (projModelSectionNeighborhood W)
+    (projModelSectionPoleSheafTrivialization W) n
+
+/-- The induced trivialization of `O(n[0])` on the affine `Z`-chart. -/
+noncomputable def projModelSectionPoleSheafPowerTrivializationZ
+    (W : WeierstrassCurve R) (n : ℕ) :
+    (sectionPoleSheafPower (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W) n).restrict (projModelZChart W).1.ι ≅
+      Scheme.Modules.unitObj (projModelZChart W).1.toScheme :=
+  sectionPoleSheafPowerTrivialization (projModelZero W)
+    (projModelZero_projModelπ W) (projModelZChart W)
+    (projModelSectionPoleSheafTrivializationZ W) n
+
 end ModularCurves
