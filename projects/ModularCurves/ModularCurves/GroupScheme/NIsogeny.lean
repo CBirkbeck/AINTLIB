@@ -1,4 +1,5 @@
 import ModularCurves.GroupScheme.CyclicSubgroup
+import ModularCurves.GroupScheme.DeligneOrder
 import ModularCurves.GroupScheme.SubgroupQuotient
 import ModularCurves.LevelStructure.Incidence
 
@@ -2257,7 +2258,97 @@ theorem exists_cyclicityLocus (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
     ∃ Z : S.IdealSheafData, ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S),
       (∃ h : T ⟶ Z.subscheme, h ≫ Z.subschemeι = t) ↔
         (E.baseChange t).IsGammaZeroFppf N (D.baseChange t) := by
-  sorry
+  classical
+  -- the generator scheme is finite and finitely presented over `S`
+  haveI hιfin : IsFinite (E.generatorSpaceι N D hD) :=
+    show IsFinite ((E.exists_generatorLocus N D hD).choose.subschemeι) from inferInstance
+  haveI hιlfp := E.generatorSpaceι_locallyOfFinitePresentation N D hD
+  haveI hDfin := D.finite
+  haveI hDlfp := D.lfp
+  haveI hπfin : IsFinite (E.generatorSpaceπ N D hD) :=
+    show IsFinite (E.generatorSpaceι N D hD ≫ D.ideal.subschemeι ≫ E.π) from inferInstance
+  haveI hπlfp : LocallyOfFinitePresentation (E.generatorSpaceπ N D hD) :=
+    show LocallyOfFinitePresentation
+      (E.generatorSpaceι N D hD ≫ D.ideal.subschemeι ≫ E.π) from inferInstance
+  -- the fibre dichotomy for the flattening theorem
+  have hb : ∀ (k : Type u) [Field k] (t : Spec (CommRingCat.of k) ⟶ S),
+      IsEmpty (pullback (E.generatorSpaceπ N D hD) t : Scheme.{u}) ∨
+        (Flat (pullback.snd (E.generatorSpaceπ N D hD) t) ∧
+          ∀ x : Spec (CommRingCat.of k),
+            (pullback.snd (E.generatorSpaceπ N D hD) t).finrank x = N.totient) := by
+    intro k _ t
+    by_cases hc : (E.baseChange t).IsGammaZeroFppf N (D.baseChange t)
+    · right
+      obtain ⟨hf', hfl', hlfp', hrk'⟩ :=
+        (E.baseChange t).generatorSpace_finiteLocallyFree_of_isGammaZeroFppf N
+          (D.baseChange t) (RelEffCartierDiv.IsSubgroup.baseChange E hD t) hc
+      obtain ⟨e, he⟩ := E.generatorSpace_baseChange N D hD t
+      have hsnd : pullback.snd (E.generatorSpaceπ N D hD) t =
+          e.hom ≫ (E.baseChange t).generatorSpaceπ N (D.baseChange t)
+            (RelEffCartierDiv.IsSubgroup.baseChange E hD t) := he.symm
+      constructor
+      · rw [hsnd, MorphismProperty.cancel_left_of_respectsIso (P := @Flat)]
+        exact hfl'
+      · intro x
+        rw [hsnd, Scheme.Hom.finrank_comp_left_of_isIso]
+        exact hrk' x
+    · left
+      exact E.generatorSpace_fibre_isEmpty_of_not_isGammaZeroFppf N D hD k t hc
+  obtain ⟨Z, hZ⟩ := ModularCurves.exists_locallyFreeRankLocus
+    (E.generatorSpaceπ N D hD) N.totient hb
+  refine ⟨Z, fun T t => ?_⟩
+  rw [hZ t]
+  obtain ⟨e, he⟩ := E.generatorSpace_baseChange N D hD t
+  have hπ' : (E.baseChange t).generatorSpaceπ N (D.baseChange t)
+      (RelEffCartierDiv.IsSubgroup.baseChange E hD t) =
+      e.inv ≫ pullback.snd (E.generatorSpaceπ N D hD) t :=
+    (Iso.eq_inv_comp e).mpr he
+  constructor
+  · rintro ⟨hfl, hrk⟩
+    refine (E.baseChange t).isGammaZeroFppf_of_generatorSpace_finiteLocallyFree N
+      (D.baseChange t) (RelEffCartierDiv.IsSubgroup.baseChange E hD t)
+      (fun s => degree_baseChange_eq E hdeg t s) ?_ ?_ ?_ ?_
+    · -- finiteness of the base-changed generator projection
+      haveI : IsFinite ((E.baseChange t).generatorSpaceι N (D.baseChange t)
+          (RelEffCartierDiv.IsSubgroup.baseChange E hD t)) :=
+        show IsFinite (((E.baseChange t).exists_generatorLocus N (D.baseChange t)
+          (RelEffCartierDiv.IsSubgroup.baseChange E hD t)).choose.subschemeι)
+          from inferInstance
+      haveI : IsFinite ((D.baseChange t).ideal.subschemeι ≫ pullback.snd E.π t) :=
+        (D.baseChange t).finite
+      exact show IsFinite ((E.baseChange t).generatorSpaceι N (D.baseChange t)
+        (RelEffCartierDiv.IsSubgroup.baseChange E hD t) ≫
+          ((D.baseChange t).ideal.subschemeι ≫ pullback.snd E.π t)) from
+        MorphismProperty.IsStableUnderComposition.comp_mem (P := @IsFinite) _ _ ‹_› ‹_›
+    · rw [hπ', MorphismProperty.cancel_left_of_respectsIso (P := @Flat)]
+      exact hfl
+    · haveI := (E.baseChange t).generatorSpaceι_locallyOfFinitePresentation N
+        (D.baseChange t) (RelEffCartierDiv.IsSubgroup.baseChange E hD t)
+      haveI : LocallyOfFinitePresentation
+          ((D.baseChange t).ideal.subschemeι ≫ pullback.snd E.π t) :=
+        (D.baseChange t).lfp
+      exact show LocallyOfFinitePresentation
+        ((E.baseChange t).generatorSpaceι N (D.baseChange t)
+          (RelEffCartierDiv.IsSubgroup.baseChange E hD t) ≫
+          ((D.baseChange t).ideal.subschemeι ≫ pullback.snd E.π t)) from
+        MorphismProperty.IsStableUnderComposition.comp_mem
+          (P := @LocallyOfFinitePresentation) _ _ ‹_› ‹_›
+    · intro s
+      rw [hπ', Scheme.Hom.finrank_comp_left_of_isIso]
+      exact hrk s
+  · intro hc
+    obtain ⟨hf', hfl', hlfp', hrk'⟩ :=
+      (E.baseChange t).generatorSpace_finiteLocallyFree_of_isGammaZeroFppf N
+        (D.baseChange t) (RelEffCartierDiv.IsSubgroup.baseChange E hD t) hc
+    have hsnd : pullback.snd (E.generatorSpaceπ N D hD) t =
+        e.hom ≫ (E.baseChange t).generatorSpaceπ N (D.baseChange t)
+          (RelEffCartierDiv.IsSubgroup.baseChange E hD t) := he.symm
+    constructor
+    · rw [hsnd, MorphismProperty.cancel_left_of_respectsIso (P := @Flat)]
+      exact hfl'
+    · intro x
+      rw [hsnd, Scheme.Hom.finrank_comp_left_of_isIso]
+      exact hrk' x
 
 /-! ## §4 The moduli problem `[N-Isog]` (KM 6.5 — review-Q8 named block)
 
