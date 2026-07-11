@@ -901,6 +901,36 @@ private theorem pointSharp_add {U : (F.E).Opens} (hU : IsAffineOpen U)
       p𝔭))
     (g := pT.toRingHom) hunits with hφL
   have hφLalg : ∀ y, φL (algebraMap _ _ y) = pT y := fun y => IsLocalization.lift_eq hunits y
+  /- REMAINING (6f/6g) — GERM-FREE REFRAME via `Scheme.fromSpecStalk` (Stalk.lean:138
+  naturality `Spec.map (f.stalkMap x) ≫ Y.fromSpecStalk _ = X.fromSpecStalk x ≫ f`):
+  * Work at `x₀ := (Spec.map aL).base pₑ` (≡ p𝔭 by hcomap; avoids all stalk-casts) with
+    `ψ' := pointSharp (R := L) ((Spec (of A)).fromSpecStalk x₀ ≫ q) hrangeL` where
+    `hrangeL`: image of fromSpecStalk = generizations of x₀, opens generization-stable,
+    `q x₀ ∈ U` (hqp + hcomap-rw).
+  * MINI-LEMMA `pointSharp_specMap_comp` (extract hφsharp's hnat, general ring map
+    g : R' ⟶ R''): `pointSharp (Spec.map g ≫ v) h = pointSharp v h' ≫ g`.
+  * 6f `hkey`: sharp-sum = pointSharp (Spec.map (ofHom pT) ≫ q) [pointSharp_congr hsum]
+    = pointSharp (Spec.map (ofHom φL) ≫ fromSpecStalk x₀ ≫ q) [pT = φL ∘ algL ring-level
+    (IsLocalization.lift_comp / hφLalg-ext) + Spec.map_comp + `Spec.map (toStalk) =
+    fromSpecStalk`-for-Spec (hunt: `Scheme.fromSpecStalk`-Spec-case / `SpecMap_toStalk...`;
+    fallback: prove via IsAffineOpen.fromSpecStalk-def + SpecMap_appLE_fromSpec)]
+    = ψ' ≫ ofHom φL [the mini-lemma] — NO germs, NO section_ext.
+  * 6g `hψf`: the axis relation `rψ : (axisL-side) pointSharp (R := stalk-C-pₑ)
+    ((Spec C).fromSpecStalk pₑ ≫ hU.fromSpec) h = ψ' ≫ (ofHom (aL.stalkMap pₑ))`-shaped:
+    from fromSpecStalk-naturality + `hlaw'` (aL ≫ q = fromSpec, ALREADY PROVEN as hlaw'
+    inside hqp — re-derive outside) + pointSharp_specMap_comp; evaluate at f: the
+    LHS = localization-map-of (TAUT-SHARP-value f) = algLₑ f; unfold ψ' f-relation ⟹
+    `(aL.stalkMap pₑ) (ψ' f) = algLₑ f` and similarly the aR-version. Then a := ψ' f −
+    algL (f⊗1) − algL (1⊗f): stalkMap-of-a: aL.stalkMap a = algLₑ f − algLₑ (axisL (f⊗1))
+    − algLₑ (axisL (1⊗f)) [stalkMap∘algL = algLₑ∘axisL: toStalk-naturality — hunt
+    `StructureSheaf.toStalk`-stalkMap-square; fallback via fromSpecStalk-naturality +
+    Spec-faithfulness] = algLₑ f − 0 − algLₑ f = 0 [hf]; same aR. Then
+    `IsLocalization.surj` at x₀-primeCompl: a·alg s = alg y; push through both axis
+    stalkMaps + `IsLocalization.map_eq_zero_iff` ⟹ ∃ u ∉ 𝔢, u·axisL y = 0 and v-version;
+    y' := (1⊗u)(v⊗1)y has both axes zero [multiplicativity + commutativity] ⟹
+    pairLift_eq_zero_of_axes ⟹ pT y' = 0 ⟹ φL a · pT ((1⊗u)(v⊗1)s) = pT y' = 0 with the
+    cofactor a unit [hunits: (1⊗u),(v⊗1),s ∉ ker fold] ⟹ φL a = 0 ⟹
+    φL (ψ' f) = pT (f⊗1) + pT (1⊗f). -/
   -- 6f. the sum's evaluation factors through the stalk
   have hkey : ∀ c : ↑Γ(F.E, U),
       (pointSharp ((P₁ + P₂ : F.Point t) : Spec R ⟶ F.E) hp₁₂).hom c = φL (ψ.hom c) := by
