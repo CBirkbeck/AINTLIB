@@ -1307,6 +1307,94 @@ theorem axApexR_comparison :
 
 end AxisBCR
 
+/-! ## Rigidity: a map on the square with both axis collapses is constant -/
+
+section AxisRigidity
+
+/-- **(K2 rigidity corollary, GIT 6.3 consumption)** Over a locally noetherian base, a
+morphism `A ⊗ A ⟶ G` into a group object which collapses both axes to the unit is the
+unit constant. Seesaw (`factor_mul_of_tensor_of_forall_component`) plus Hom-group
+algebra. -/
+theorem eq_one_of_axis_collapse {S : Scheme.{u}} [IsLocallyNoetherian S]
+    {A G : Over S} [GrpObj A] [GrpObj G]
+    [IsProper A.hom] [Flat A.hom] (hO : UniversallyOConnected A.hom)
+    [IsSeparated G.hom] (q : A ⊗ A ⟶ G)
+    (hL : lift (toUnit A ≫ η[A]) (𝟙 A) ≫ q = 1)
+    (hR : lift (𝟙 A) (toUnit A ≫ η[A]) ≫ q = 1) : q = 1 := by
+  haveI : IsLocallyNoetherian ↑A.left := LocallyOfFiniteType.isLocallyNoetherian A.hom
+  have heA : η[A].left ≫ A.hom = 𝟙 S := Over.w η[A]
+  -- every component of the total space contains a fixed point of `η ∘ π`
+  have hcorr := connectedComponent_eq_preimage_connectedComponent
+    (f := (A.hom.base : _ → ↥S)) A.hom.base.hom.continuous A.hom.isOpenMap A.hom.isClosedMap
+    (fun y => isConnected_fibre_of_universallyOConnected hO η[A].left heA y)
+  have hπη : ∀ s : ↥S, A.hom.base (η[A].left.base s) = s := fun s => by
+    exact congrArg (fun m : S ⟶ S => m.base s) heA
+  have hfix : ∀ t : ↥A.left, ∃ b ∈ connectedComponent t,
+      η[A].left.base (A.hom.base b) = b := by
+    intro t
+    refine ⟨η[A].left.base (A.hom.base t), ?_, ?_⟩
+    · rw [hcorr t]
+      show A.hom.base (η[A].left.base (A.hom.base t)) ∈ connectedComponent (A.hom.base t)
+      rw [hπη (A.hom.base t)]
+      exact mem_connectedComponent
+    · exact congrArg (fun s => η[A].left.base s) (hπη (A.hom.base t))
+  -- the seesaw decomposition of `q`
+  obtain ⟨g, h, hgh⟩ := factor_mul_of_tensor_of_forall_component hO η[A] η[A] hfix q
+  have hF : q = (fst A A ≫ g) * (snd A A ≫ h) := hgh
+  -- axis restrictions of the decomposition
+  have h1 : (1 : A ⟶ G) = g * (toUnit A ≫ (η[A] ≫ h)) := by
+    calc (1 : A ⟶ G) = lift (𝟙 A) (toUnit A ≫ η[A]) ≫ q := hR.symm
+      _ = lift (𝟙 A) (toUnit A ≫ η[A]) ≫ ((fst A A ≫ g) * (snd A A ≫ h)) := by rw [hF]
+      _ = (lift (𝟙 A) (toUnit A ≫ η[A]) ≫ (fst A A ≫ g))
+            * (lift (𝟙 A) (toUnit A ≫ η[A]) ≫ (snd A A ≫ h)) := MonObj.comp_mul _ _ _
+      _ = g * (toUnit A ≫ (η[A] ≫ h)) := by
+          rw [← Category.assoc, ← Category.assoc, lift_fst, lift_snd, Category.id_comp,
+            Category.assoc]
+  have h2 : (1 : A ⟶ G) = (toUnit A ≫ (η[A] ≫ g)) * h := by
+    calc (1 : A ⟶ G) = lift (toUnit A ≫ η[A]) (𝟙 A) ≫ q := hL.symm
+      _ = lift (toUnit A ≫ η[A]) (𝟙 A) ≫ ((fst A A ≫ g) * (snd A A ≫ h)) := by rw [hF]
+      _ = (lift (toUnit A ≫ η[A]) (𝟙 A) ≫ (fst A A ≫ g))
+            * (lift (toUnit A ≫ η[A]) (𝟙 A) ≫ (snd A A ≫ h)) := MonObj.comp_mul _ _ _
+      _ = (toUnit A ≫ (η[A] ≫ g)) * h := by
+          rw [← Category.assoc, ← Category.assoc, lift_fst, lift_snd, Category.id_comp,
+            Category.assoc]
+  -- the unit identity
+  have hone : (η[A] ≫ g) * (η[A] ≫ h) = 1 := by
+    have h3 : η[A] ≫ (1 : A ⟶ G) = (η[A] ≫ g) * (η[A] ≫ h) := by
+      calc η[A] ≫ (1 : A ⟶ G)
+          = (η[A] ≫ g) * (η[A] ≫ (toUnit A ≫ (η[A] ≫ h))) := by
+            rw [h1]; exact MonObj.comp_mul _ _ _
+        _ = (η[A] ≫ g) * (η[A] ≫ h) := by
+            congr 1
+            rw [← Category.assoc, comp_toUnit, toUnit_unit, Category.id_comp]
+    rw [← h3, MonObj.comp_one]
+  -- solve for the two factors: both are constant
+  have hg_eq : g = (toUnit A ≫ (η[A] ≫ h))⁻¹ := eq_inv_of_mul_eq_one_left h1.symm
+  have hh_eq : h = (toUnit A ≫ (η[A] ≫ g))⁻¹ := eq_inv_of_mul_eq_one_right h2.symm
+  -- assemble: `q` is the inverse of a constant unit
+  calc q = (fst A A ≫ g) * (snd A A ≫ h) := hF
+    _ = (fst A A ≫ (toUnit A ≫ (η[A] ≫ h))⁻¹)
+          * (snd A A ≫ (toUnit A ≫ (η[A] ≫ g))⁻¹) := by rw [← hg_eq, ← hh_eq]
+    _ = (fst A A ≫ toUnit A ≫ (η[A] ≫ h))⁻¹
+          * (snd A A ≫ toUnit A ≫ (η[A] ≫ g))⁻¹ := by
+        rw [GrpObj.comp_inv, GrpObj.comp_inv]
+    _ = (toUnit (A ⊗ A) ≫ (η[A] ≫ h))⁻¹ * (toUnit (A ⊗ A) ≫ (η[A] ≫ g))⁻¹ := by
+        have hfstU : fst A A ≫ toUnit A ≫ (η[A] ≫ h) =
+            toUnit (A ⊗ A) ≫ (η[A] ≫ h) := by
+          rw [← Category.assoc, comp_toUnit]
+        have hsndU : snd A A ≫ toUnit A ≫ (η[A] ≫ g) =
+            toUnit (A ⊗ A) ≫ (η[A] ≫ g) := by
+          rw [← Category.assoc, comp_toUnit]
+        rw [hfstU, hsndU]
+    _ = ((toUnit (A ⊗ A) ≫ (η[A] ≫ g)) * (toUnit (A ⊗ A) ≫ (η[A] ≫ h)))⁻¹ :=
+        (mul_inv_rev _ _).symm
+    _ = (toUnit (A ⊗ A) ≫ ((η[A] ≫ g) * (η[A] ≫ h)))⁻¹ := by rw [MonObj.comp_mul]
+    _ = ((toUnit (A ⊗ A) ≫ (1 : 𝟙_ (Over S) ⟶ G)))⁻¹ := by rw [hone]
+    _ = ((1 : A ⊗ A ⟶ G))⁻¹ := by rw [MonObj.comp_one]
+    _ = 1 := inv_one
+
+end AxisRigidity
+
 /-! ## The uniqueness theorem ([U-MODEL]) -/
 
 section Unique
