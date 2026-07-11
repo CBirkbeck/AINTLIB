@@ -310,15 +310,47 @@ private theorem pointSharp_add {U : (F.E).Opens} (hU : IsAffineOpen U)
      (TAUT-SHARP) `sharp fromSpec = 𝟙 C`, both via `IsAffineOpen.fromSpec_app_self` +
      `appLE_comp_appLE`), then `pairing_eq_pairBox`.symm + `zero_pairing_mul`. Mirror for
      `aR` with `pairing_zero_mul`.
-  6. Assembly at the stalk `L := (Spec (C⊗C)).presheaf.stalk p𝔭` (`IsLocalization.AtPrime`
-     via `StructureSheaf.IsLocalization.to_stalk`): `ψ := germ_U(e) ≫ q̃.stalkMap p𝔭`;
-     `φL := IsLocalization.lift pT` (units: `pairLift_key`-congruence mod `I` + field-unit
-     transport + `IsNilpotent.isUnit_add`); `sharp (P₁+P₂) = φL ∘ ψ` via `stalkMap_germ`,
-     `stalkMap_comp`, `IsLocalization.ringHom_ext`, and sheaf-`section_ext` over `Spec R`;
-     `a := ψ f − alg (f⊗1) − alg (1⊗f)` killed: axis-stalk maps vanish on `a` (step 5
-     localized + `hf`), `IsLocalization.surj`-clear denominators, the `(1⊗u)(v⊗1)`-trick,
-     `pairLift_eq_zero_of_axes`, and `pT`-units transport `φL a = 0`; unwind with
-     `Algebra.TensorProduct.lift_tmul`. -/
+  6. Assembly (REFINED after chunks i-iii landed; everything referenced is now PROVEN):
+     6a. `letI` k'-algebra on `R`; `p₁ p₂` AlgHoms (commutes' = `pointSharp_comp_π`, defeq);
+         `pT := lift p₁ p₂`; `hclose : sharp P c − alg (ε' c) ∈ I := ker φ` for P ∈ K, via
+         (H-φ) `φ ∘ sharp w = φ ∘ sharp w'` when `Spec.map φ ≫ w = Spec.map φ ≫ w'`
+         (appLE_comp_appLE + `Scheme.ΓSpecIso_naturality`) at w' := 0-point +
+         `pointSharp_zero_point`; `hII` from `hφ2`.
+     6b. `hid := pairBox_boxIso_eq_specMap` at pT (legs: `lift_comp_includeLeft/Right` +
+         `CommRingCat.ofHom_comp`); `q := (boxIso hU).inv ≫ boxι ≫ μ.left`;
+         `hsum : (P₁+P₂).1 = Spec.map (ofHom pT) ≫ q` via `point_add_val_mu` +
+         `pairing_eq_pairBox` + `Iso.hom_inv_id_assoc`.
+     6c. `foldε_eq_axisR` (mirror of `foldε_eq_axisL`, add to algebra layer);
+         `hfoldCong : pT x − alg (foldε ε' x) ∈ I` from `pairLift_key` + `hclose` +
+         `foldε_eq_axisL/R`; units: `y ∉ 𝔭 := ker (foldε ε')` ⟹ `foldε y ≠ 0` ⟹ unit in k'
+         (transport along `(ΓSpecIso (of k)).commRingCatIsoToRingEquiv`, field k) ⟹
+         `alg (fold y)` unit in R ⟹ `pT y` = unit + I-nilpotent = unit
+         (`IsNilpotent.isUnit_add_right_of_commute`-family; I-elements nilpotent since I²=⊥).
+     6d. `𝔭` prime (`RingHom.ker_isPrime`, `IsDomain k'` via `Function.Injective.isDomain`
+         along the ΓSpecIso equiv); `p𝔭 := ⟨𝔭, _⟩`; `hqp : q.base p𝔭 ∈ U`: `p𝔭 =
+         (Spec.map (ofHom (axisL ε'))).base pₑ` (PrimeSpectrum.ext, comap-of-ker,
+         `foldε_eq_axisL`) then `axisL_spec_law` + `IsAffineOpen.range_fromSpec`.
+     6e. `L := stalk p𝔭` with `IsLocalization.AtPrime L 𝔭`
+         (`StructureSheaf.IsLocalization.to_stalk`, transported to the Scheme-Spec);
+         `ψ := germ U (q p𝔭) hqp ≫ q.stalkMap p𝔭 : Γ(F.E,U) ⟶ L`;
+         `φL := IsLocalization.lift (units from 6c)`.
+     6f. `hkey : sharp (P₁+P₂) c = φL (ψ c)`: both sides' `(ΓSpecIso R).inv`-images have
+         equal germs at every `x : Spec R` — LHS-germ = `((P₁+P₂).1).stalkMap x ∘ germ` and
+         `(P₁+P₂).1.stalkMap = q.stalkMap ∘ (Spec.map pT).stalkMap`-chain (`stalkMap_comp`
+         along `hsum`, `stalkMap_germ` twice); RHS-germ: `germ ∘ iso.inv ∘ φL = (Spec.map
+         (ofHom pT)).stalkMap x` on L by `IsLocalization.ringHom_ext` (both invert
+         𝔭-complement, agree on `algebraMap` by `stalkMap_germ`-at-⊤ + `IsLocalization.lift_eq`);
+         conclude by sheaf `section_ext` (`(Spec R).sheaf`) + `ΓSpecIso`-injectivity.
+     6g. Kill: `a := ψ f − algL (f ⊗ 1) − algL (1 ⊗ f)`; the two axis stalk maps
+         `rL := (Spec.map (ofHom axisL)).stalkMap pₑ`-forms kill `a`: `rL (ψ f) = algLₑ f`
+         from `axisL_spec_law`-stalk-functoriality (`stalkMap_comp` + `stalkMap_germ` +
+         `IsAffineOpen.fromSpec`-germ = localization-map), `rL (algL (f⊗1)) = algLₑ (ιε f) = 0`
+         (hf), `rL (algL (1⊗f)) = algLₑ f`; then `IsLocalization.surj`-clear denominators,
+         `IsLocalization.map_eq_zero_iff` twice, the `(1⊗u)(v⊗1)`-trick,
+         `pairLift_eq_zero_of_axes`, and 6c-units transport `φL a = 0`; unwind
+         `φL (algL _) = pT _` (`IsLocalization.lift_eq`) + `Algebra.TensorProduct.lift_tmul`:
+         `sharp-sum f = φL (ψ f) = pT (f⊗1) + pT (1⊗f) = sharp P₁ f + sharp P₂ f`. 
+-/
   sorry
 
 /-! #### The chunk-(i) scheme identities for `pointSharp_add`
