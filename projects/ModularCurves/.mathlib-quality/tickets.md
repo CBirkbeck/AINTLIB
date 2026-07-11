@@ -17961,3 +17961,24 @@ and the T-B5 boxes; everything else is Y1-CLOSER's continuing execution.
 - **Y1-MASTER remaining, exact**: E5 (lifting, ledgered) → E6 (smooth assembly) → S6
   (relocation + bar). Externals (boarded v10.123-Y1): T-E4-primitive route (a)/(c),
   hfib 6f/6g tail (wall-ledgered, .lean.full/.tail2 drafts), BB-QF/FLAT/DEG.
+
+## Amendments v10.125-Y1 (2026-07-11, Y1-CLOSER): ★★★ SESSION CAPSTONE — the Y₁(N) tower stands; the MASTER is CLOSED-BY-ASSEMBLY with an exact, boarded residual set
+
+**BAR AUDIT (the charter's two items)**:
+- `exists_tatePoint` = **[propext, Classical.choice, Quot.sound] — CLEAN, DONE** (bar item 1 MET).
+- `gammaOneNaive_representable` — RELOCATED to YOneTatePoint per doctrine (zero consumers),
+  **closed by `gammaOneNaive_representable_assembly`** (no sorry of its own; E5-wrap +
+  E6-skeleton + F1 + S4 all landed); `sorryAx` flows through EXACTLY:
+  {**E5 lift-core** (steps 2–4, in-file ledger + wrap proven), **E6 FormallySmooth-leg**
+  (adjunction transport of E5, FP-leg proven), **T-E4 primitive** (route (a)
+  RigiditySpreadingOut:94 / route (c) T-W7a — other lanes), **hfib 6f/6g** (wall-ledgered,
+  drafts banked), **BB-QF/BB-FLAT/BB-DEG** (T-B5 family, other lane)}.
+
+**Session totals (Y1-CLOSER, S1→S6)**: T-G4 complete (mulOver_assoc — the 0c-ii signal);
+[T-B6′] map_add' FILLED axiom-clean + hz same-commit per B2 #3; BB-DIFF discharged modulo
+one ledgered tail (augmentation-ideal route — no differentials, no counts, no HasseWeil);
+ModelRecord.lean (the mulOver record + rigidity driver); [T-A6b] retired from the Y1 trail
+(model-record swap; exists_tatePoint clean); TorsionUnramifiedFibre.lean (~900 lines, 90%
+proven); S4 T-E4-collapse (NaiveProblems split + membership fills); E1–E4 + F1 proven;
+E5/E6 wrapped-and-ledgered; both cap theorems relocated per doctrine. All pushed
+(dev f83…→ y1 705c2ec9d).
