@@ -813,6 +813,40 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
           = 0 :=
         ((tateUniversal R).zsmul_asSection_pull_eq_zero_iff (tatePoint R) t₀ (N : ℤ)).mp
           hstruct₀.1
+      -- the killed point as an `FA`-point over the thickening's closed immersion
+      set P₀A : FA.Point (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I))) :=
+        (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t
+          (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)))).symm
+          ⟨(EllipticCurve.Point.pull (tateUniversal R) t₀ (tatePoint R)).1, by
+            have h1 := (EllipticCurve.Point.pull (tateUniversal R) t₀ (tatePoint R)).2
+            rw [h1, ← hrestRaw]⟩ with hP₀A
+      have hP₀Akill : (N : ℤ) • P₀A = 0 := by
+        refine (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t
+          (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)))).injective ?_
+        rw [map_zsmul, map_zero, hP₀A, AddEquiv.apply_symm_apply]
+        refine Subtype.ext ?_
+        have h2 := congrArg Subtype.val hkill₀
+        have h3 : (((N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) t₀
+            (tatePoint R) : (tateUniversal R).Point t₀)) =
+            (0 : (tateUniversal R).Point t₀) := hkill₀
+        have h4 : (((N : ℤ) • (⟨(EllipticCurve.Point.pull (tateUniversal R) t₀
+            (tatePoint R)).1, by
+              have h1 := (EllipticCurve.Point.pull (tateUniversal R) t₀ (tatePoint R)).2
+              rw [h1, ← hrestRaw]⟩ : (tateUniversal R).Point
+              (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ t))) :
+              (tateUniversal R).Point _).1 =
+            (((N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) t₀ (tatePoint R) :
+              (tateUniversal R).Point t₀)).1 := by
+          rw [(tateUniversal R).point_smul_eq_comp_mulBy,
+            (tateUniversal R).point_smul_eq_comp_mulBy]
+        rw [h4, h3, (tateUniversal R).point_zero_val, (tateUniversal R).point_zero_val,
+          hrestRaw]
+      -- into the torsion, then lift the section along the thickening
+      set s₀T := (FA.torsionPointsEquiv N
+        (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)))).symm
+        ⟨P₀A, (Submodule.mem_torsionBy_iff _ _).mpr hP₀Akill⟩ with hs₀T
+      obtain ⟨sT, hsTπ, hsTrest⟩ := exists_section_lift_of_smooth (FA.torsionπ N) I hI
+        s₀T.1 s₀T.2
       sorry
     -- assembly: witness with the renormalised map
     refine ⟨tateBaseSpecMap R ψ', ?_, ?_, ?_⟩
