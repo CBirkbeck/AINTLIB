@@ -225,6 +225,17 @@ layer. -/
 
 section ZeroSection
 
+/-- **[KM-W2 · L1]** The order divisor `[0] + [2·0] + ⋯ + [N·0]` of the zero section has
+ideal `(ker 0)^N`: every constituent section `(a+1)·0` collapses to `0`, so the defining
+product `∏ₐ ker((a+1)·0)` of the `sectionsDivisor` is the `N`-th power of the single
+zero-section kernel. This is the divisor side of KM 5.3.3's "the Cartier divisor `pⁿ[0]`". -/
+private lemma orderDivisor_zero_ideal {S : Scheme.{u}} (E : EllipticCurve S) (N : ℕ) :
+    (EllipticCurve.Section.orderDivisor E 0 N).ideal
+      = (Scheme.Hom.ker (0 : E.Section).1) ^ N := by
+  have hpos : IsSeparated E.π ∧ SmoothOfRelativeDimension 1 E.π := ⟨inferInstance, E.smooth⟩
+  rw [EllipticCurve.Section.orderDivisor, RelEffCartierDiv.sectionsDivisor, dif_pos hpos]
+  simp only [smul_zero, Finset.prod_const, Finset.card_univ, Fintype.card_fin]
+
 /-- **[KM-W2-1] (KM 5.3.3, first conclusion, elliptic affine case).** If the zero
 section of an elliptic curve over `Spec A` has Drinfeld exact order `pⁿ`, then
 `p = 0` in `A`. -/
@@ -255,7 +266,11 @@ theorem CharP.p_eq_zero_of_isGammaOne_zero_artinLocal (p n : ℕ) [NeZero (p ^ n
     (hn : 1 ≤ n) (A : Type u) [CommRing A] [IsArtinianRing A] [IsLocalRing A]
     (E : EllipticCurve (Spec (CommRingCat.of A)))
     (h : E.IsGammaOne (p ^ n) 0) :
-    (p : A) = 0 := by sorry
+    (p : A) = 0 :=
+  -- KM 5.3.5: Rigid II is Prop 5.3.3 (= [KM-W2-1]) applied to `E/R`; the artin-local
+  -- hypotheses are unused here (they feed W4's constancy half). Auto-completes once
+  -- [KM-W2-1] is discharged.
+  CharP.p_eq_zero_of_isGammaOne_zero p n hp hn A E h
 
 end RigidII
 
