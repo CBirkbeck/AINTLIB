@@ -692,6 +692,31 @@ noncomputable def pairingElem {M N : X.Modules} (ε : tensorObj M N ≅ unitObj 
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- The pairing is additive. -/
+theorem pairingElem_add {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X) (V : X.Opens)
+    (t t' : ((M.val ⊗ N.val : _root_.PresheafOfModules
+      (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (Opposite.op V))) :
+    pairingElem ε V (t + t') = pairingElem ε V t + pairingElem ε V t' := by
+  simp only [pairingElem, map_add]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The pairing is homogeneous (both layers are morphisms of modules). -/
+theorem pairingElem_smul {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X) (V : X.Opens)
+    (c : (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V))
+    (t : ((M.val ⊗ N.val : _root_.PresheafOfModules
+      (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (Opposite.op V))) :
+    pairingElem ε V (c • t) = c • pairingElem ε V t := by
+  refine (congrArg (ε.hom.val.app (Opposite.op V)) (_root_.map_smul
+    (ConcreteCategory.hom ((PresheafOfModules.toSheafify (𝟙 X.ringCatSheaf.obj)
+      (CategoryTheory.toSheafify (Opens.grothendieckTopology ↥X)
+        (M.val ⊗ N.val : _root_.PresheafOfModules
+          (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).presheaf)).app (Opposite.op V)))
+    c t)).trans ?_
+  exact _root_.map_smul (ConcreteCategory.hom (ε.hom.val.app (Opposite.op V))) c _
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- The pairing is additive (both layers are morphisms of modules). -/
 theorem pairingElem_sum {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X) (V : X.Opens)
     {ι : Type*} (s : Finset ι)
@@ -816,17 +841,8 @@ theorem exists_pairingElem_tmul_eq_one {M N : X.Modules} (ε : tensorObj M N ≅
     (congrArg (pairingElem ε V)
       (PresheafOfModules.Monoidal.tensorObj_map_tmul iV.op p.1 p.2).symm).trans
       (pairingElem_map ε iV.op (p.1 ⊗ₜ p.2))
-  have hsm : pairingElem ε V
-        (c • (m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁)) =
-      c • pairingElem ε V
-        (m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁) := by
-    refine (congrArg (ε.hom.val.app (Opposite.op V)) (_root_.map_smul
-      (ConcreteCategory.hom ((PresheafOfModules.toSheafify (𝟙 X.ringCatSheaf.obj)
-        (CategoryTheory.toSheafify (Opens.grothendieckTopology ↥X)
-          (M.val ⊗ N.val : _root_.PresheafOfModules
-            (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).presheaf)).app (Opposite.op V)))
-      c _)).trans ?_
-    exact _root_.map_smul (ConcreteCategory.hom (ε.hom.val.app (Opposite.op V))) c _
+  have hsm := pairingElem_smul ε V c
+    (m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁)
   calc pairingElem ε V
         (m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] (c • n₁))
       = pairingElem ε V (c •
