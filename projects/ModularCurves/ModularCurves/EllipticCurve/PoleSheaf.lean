@@ -2522,6 +2522,63 @@ theorem overTrivializationSection_restrict {X : Scheme.{u}} (M : X.Modules)
       (X.presheaf.map (Over.mkIdTerminal.from VU).left.op r)
   exact hnat.symm
 
+/-- Ring sections satisfying the scalar transition equation define the same
+module section through the corresponding trivializations. -/
+theorem overTrivializationSection_eq_of_transition
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (r a b : Γ(X, U))
+    (h : e.hom = g.hom ≫
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r)
+    (hab : a = b * r) :
+    overTrivializationSection M U e a =
+      overTrivializationSection M U g b := by
+  have hright : e.hom.val.app (.op (Over.mk (𝟙 U)))
+      (overTrivializationSection M U g b) = b * r := by
+    have happ := congrArg
+      (fun q => q.val.app (.op (Over.mk (𝟙 U)))) h
+    have hx := ConcreteCategory.congr_hom happ
+      (overTrivializationSection M U g b)
+    change e.hom.val.app (.op (Over.mk (𝟙 U)))
+        (g.inv.val.app (.op (Over.mk (𝟙 U))) b) =
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).val.app
+        (.op (Over.mk (𝟙 U)))
+        (g.hom.val.app (.op (Over.mk (𝟙 U)))
+          (g.inv.val.app (.op (Over.mk (𝟙 U))) b)) at hx
+    have hg : g.hom.val.app (.op (Over.mk (𝟙 U)))
+        (g.inv.val.app (.op (Over.mk (𝟙 U))) b) = b := by
+      have hcomp := congrArg
+        (fun q => q.val.app (.op (Over.mk (𝟙 U)))) g.inv_hom_id
+      exact ConcreteCategory.congr_hom hcomp b
+    rw [hg] at hx
+    rw [SheafOfModules.overUnitScalarEnd_app_apply] at hx
+    change e.hom.val.app (.op (Over.mk (𝟙 U)))
+        (overTrivializationSection M U g b) =
+      b * X.presheaf.map (𝟙 (.op U)) r at hx
+    rw [X.presheaf.map_id, ConcreteCategory.id_apply] at hx
+    exact hx
+  have heq : e.hom.val.app (.op (Over.mk (𝟙 U)))
+      (overTrivializationSection M U e a) =
+      e.hom.val.app (.op (Over.mk (𝟙 U)))
+        (overTrivializationSection M U g b) := by
+    rw [overTrivializationSection_coefficient, hright, hab]
+  have heq' := congrArg
+    (fun x => e.inv.val.app (.op (Over.mk (𝟙 U))) x) heq
+  have hcancel (x : (M.over U).val.obj (.op (Over.mk (𝟙 U)))) :
+      e.inv.val.app (.op (Over.mk (𝟙 U)))
+          (e.hom.val.app (.op (Over.mk (𝟙 U))) x) = x := by
+    have hcomp := congrArg
+      (fun q => q.val.app (.op (Over.mk (𝟙 U)))) e.hom_inv_id
+    have hx := ConcreteCategory.congr_hom hcomp x
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply] at hx
+    exact hx
+  change (show (M.over U).val.obj (.op (Over.mk (𝟙 U))) from
+      overTrivializationSection M U e a) =
+    (show (M.over U).val.obj (.op (Over.mk (𝟙 U))) from
+      overTrivializationSection M U g b)
+  simpa only [hcancel] using heq'
+
 /-- The coefficient of a global section in a trivialization on the over-site of an
 open subset. -/
 noncomputable def overTrivializationCoefficient {X : Scheme.{u}} (M : X.Modules)
