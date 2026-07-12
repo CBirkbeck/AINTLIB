@@ -452,6 +452,18 @@ native Cech complex. This supplies the degree-one horizontal exactness needed on
 injective rows; the full Cech-to-derived double-complex comparison remains open, and no
 generic exactness of open-immersion pushforward is asserted.
 
+The degree-one Cech-to-derived comparison is now complete in
+`ForMathlib/SheafCechHOneComparison.lean`.
+`TopCat.Sheaf.cechHomologyOneIso` identifies degree-one homology of mathlib's native
+Cech complex with genuine `Sheaf.H F 1` whenever the opens cover the space and the
+degree-zero sheaf Cech term has vanishing `H¹`. Global sections preserve the cycle
+kernel; the resulting cycle isomorphism identifies the boundary maps, and the cokernel
+presentation from the long exact sequence identifies the two homology objects.
+Consequently `subsingleton_H_one_iff_cechComplex_exactAt_one` characterizes genuine
+`H¹`-vanishing by exactness of the native Cech complex in degree one. This is the
+source-faithful degree-one edge of Stacks 20.11.5--6 and introduces neither a spectral
+sequence surrogate nor an open-pushforward exactness assertion.
+
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
 `n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of

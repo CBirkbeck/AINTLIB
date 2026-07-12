@@ -22,19 +22,24 @@ variable {X : TopCat.{u}}
 variable (F : Sheaf AddCommGrpCat.{u} X)
 variable {ι : Type u} (U : ι → Opens X)
 
-private noncomputable abbrev cechOneShortComplex :
+/-- The first two differentials of the sheaf-level Cech complex. -/
+noncomputable abbrev cechOneShortComplex :
     ShortComplex (Sheaf AddCommGrpCat.{u} X) :=
   ShortComplex.mk (cechDifferential F U 0) (cechDifferential F U 1)
     (cechDifferential_comp F U 0)
 
-private noncomputable abbrev cechCycleShortComplex :
+/-- The augmentation followed by the induced map to the cycles of the first two
+sheaf-level Cech differentials. -/
+noncomputable abbrev cechCycleShortComplex :
     ShortComplex (Sheaf AddCommGrpCat.{u} X) :=
   let T := cechOneShortComplex F U
   ShortComplex.mk (cechAugmentation F U) T.toCycles (by
     rw [← cancel_mono T.iCycles, Category.assoc, T.toCycles_i, zero_comp,
       cechAugmentation_comp])
 
-private theorem cechCycleShortComplex_shortExact (hU : ⨆ i, U i = ⊤) :
+/-- For an open cover, the augmentation and the induced map to degree-one cycles form
+a short exact sequence. -/
+theorem cechCycleShortComplex_shortExact (hU : ⨆ i, U i = ⊤) :
     (cechCycleShortComplex F U).ShortExact := by
   let T := cechOneShortComplex F U
   let A := cechCycleShortComplex F U
