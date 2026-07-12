@@ -16515,3 +16515,5 @@ Attribution: c5β (representability chain/seesaw), A (Over-monoidal prep), NEW-C
 HasseWeil (`mulByInt_degree` anchor). CHARTER-Y1-CLOSER-2 COMPLETE.
 
 ### DONE (rule 5, OWNER-FLW-MODEL, 2026-07-11, 4b78308f5): proved `projModelZero_ker_ideal_chartY`, `projModelZero_ker_ideal_chartZ`, the canonical section-neighborhood ideal trivialization, and `sectionPoleSheafPower_projModel_sectionsEquiv` identifying `Γ(O(n[0]))` with `poleOrderFiltration`; focused builds green and axiom audit is `propext`/`Classical.choice`/`Quot.sound` only (consumes T-W7 chart algebra; no Pic⁰/group-law route or new options).
+
+### CLAIM (rule 2, OWNER-FLW-POLE-RANK, codex/fibrewise-weierstrass-pole-rank, 2026-07-11): prove `poleOrderFiltrationBasis`, `poleOrderFiltration_finrank`, and `sectionPoleSheafPower_projModel_finrank`, giving the explicit rank-`n` model/fibre pole-module input for T-W-cmp.POLE (`n ≥ 1`); no cohomology-foundation duplication, extra family hypotheses, or options.
