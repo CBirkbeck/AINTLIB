@@ -56,3 +56,33 @@ Ker(Fⁿ)"; ordinary: `E[pⁿ] ≅ μ_{pⁿ} × ℤ/pⁿℤ`, `G ≅ G^conn × G
 3. [L15-d] bi-ideal locus (LFP-toolbox).
 4. [L15-e] classification wiring (pointOfMember + hypothesis-wired descent).
 5. [L15-f] finiteness assembly.
+
+## EXECUTION LEDGER (beastmode-D2, 2026-07-12, v10.162 marathon)
+
+**Buildable-by-D2-now, DONE (axiom-clean, `GroupScheme/NIsogSpace.lean`):**
+- [L15-a] `IsBiIdeal` (the cut condition) + `IsBiIdeal.toIdeal` (F-ideal structure) +
+  `IsBiIdeal.counit_eq_zero` accessors.
+- [L15-b] `NIsogRepresentation` pins-record + `exists_nIsogSpace_of_representation`
+  assembly — `exists_nIsogSpace` closes with zero wiring the moment the record is populated.
+
+**WALL-LEDGER — remaining leaves are blocked on OTHER LANES' unbuilt infrastructure (charter:
+"hypothesis-wire ... don't build it"):**
+- [L15-c] relativize the Grassmannian → needs 𝓕 = O(E[N]) as a concrete locally-free sheaf
+  with trivialization/transition data. The `torsionπ_isFinite/_flat/torsion_rank` facts are
+  STATED but sorry-backed (c5β's BB-boxes) AND expose no local-trivialization data; a general
+  "relative Grassmannian of a finite locally free sheaf" is mathlib-absent and overlaps
+  fable-FP's Grassmannian domain. **Gate: c5β E[N]-package + a relative-Grassmannian scheme.**
+- [L15-d] cut the bi-ideal locus → needs (i) the **universal member/quotient family** of the
+  Grassmannian exposed as a sheaf map (fable-FP's `GrassmannianGlueData` exposes `ChartRing`
+  but not the universal family) and (ii) 𝓕's comultiplication/counit Δ,ε (**NEW-HOPF's
+  C-layer, unbuilt**). My LFP/T-D15 toolbox cuts it the moment both are present.
+- [L15-e] classify → `pointOfMember` forward map is PROVEN; the inverse is fable-FP's boarded
+  global-descent leaf. Wires once [L15-c/d] land.
+- [L15-f] finiteness → KM's prime-power fibre count needs c5β's ordinary/supersingular E[N]
+  fibre structure. **Gate: c5β substrate.**
+
+**Verdict**: L15 is a genuine multi-lane dependency wall. D2's buildable core ([L15-a/b]) is
+complete and axiom-clean; the assembly interface makes `exists_nIsogSpace` a one-line
+extraction once the record is populated by c5β (E[N] + fibre structure) + NEW-HOPF (comul +
+dictionary) + fable-FP (relative representability). No D2-buildable leaf remains that does not
+require constructing another lane's chartered gate.
