@@ -105,6 +105,26 @@ noncomputable def _root_.ModularCurves.EllipticCurve.NIsogenyStructure.baseChang
   subgroup := nis.subgroup.baseChange g
   hasRank := nis.hasRank.baseChange g
 
+/-- **The subgroup-divisor commutes with base change (ideal form)** — the keystone for the
+Y₀(N) assembly. The divisor of the base-changed subgroup scheme equals the base change of
+the subgroup's divisor: both are `G.ι.ker` pulled back along `pullback.fst E.π g`. This lets
+the cyclicity of a base-changed subgroup be read off the universal cyclicity locus. -/
+theorem FiniteLocallyFreeSubgroup.toRelEffCartierDiv_baseChange_ideal
+    {E : EllipticCurve S} (G : FiniteLocallyFreeSubgroup E) {T : Scheme.{u}} (g : T ⟶ S) :
+    (G.baseChange g).toRelEffCartierDiv.ideal = (G.toRelEffCartierDiv.baseChange g).ideal := by
+  haveI := G.closedImmersion
+  rw [FiniteLocallyFreeSubgroup.toRelEffCartierDiv_ideal,
+    RelEffCartierDiv.baseChange_ideal,
+    FiniteLocallyFreeSubgroup.toRelEffCartierDiv_ideal]
+  show (Limits.pullback.snd G.ι (Limits.pullback.fst E.π g)).ker =
+      (Scheme.Hom.ker G.ι).comap (Limits.pullback.fst E.π g)
+  rw [show (Limits.pullback.snd G.ι (Limits.pullback.fst E.π g)) =
+      (Limits.pullbackSymmetry G.ι (Limits.pullback.fst E.π g)).hom ≫
+        Limits.pullback.fst (Limits.pullback.fst E.π g) G.ι from
+    (Limits.pullbackSymmetry_hom_comp_fst _ _).symm,
+    Scheme.Hom.ker_comp_of_isIso,
+    Scheme.IdealSheafData.ker_fst_of_isClosedImmersion]
+
 /-- **[L15] the `N`-isogeny moduli representation** (hypothesis-wired pins-record). A finite
 `S`-scheme `W` whose `T`-points classify `N`-isogeny data on `E ×_S T` — exactly the closed
 subscheme of the Grassmannian of `𝓕` cut by the bi-ideal condition (KM 6.5.1). This bundles
