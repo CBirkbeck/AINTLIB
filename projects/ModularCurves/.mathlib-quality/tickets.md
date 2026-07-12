@@ -16630,3 +16630,29 @@ GHB2, GHA5, GHC5, GHC6, GHB4 + first-act audit.*
   (GHA5+GH2+GHB7). GHC3 (bridge) also remains (pkg-consuming, ~120 LOC).
 - **Status:** the pkg-CONSUMING tier is 2/3 done (GHC5, GHC6); GHC3 + the pkg-CONSTRUCTING
   GHB5→GHB7→GHC1 chain is the multi-session remainder, all gates open. p0 reclaim stands.
+
+### v10.143 (2026-07-12, NEW-HOPF): [CHARTER-HOPF] [HG-C1c-1d-coassoc] — both naturalities, both Δ₂ sides, and the associator
+
+*Zero sorries, axiom-clean; seven atomic commits. The ⊤-level payoff case is now
+~75% done — all conceptual content landed, remaining is assembly.*
+
+- `squareΓTopAlg` (Künneth transport as R'-alghom) + `comulAlgTop_eq`;
+- ★ **`comulTop_comp_map_id_comulTop`** (Δ₂R): `(id⊗Δ')∘Δ' = rightMulScheme.appTop ≫
+  tripleΓ` — the RHS of coassoc is the Γ-dual of `g₁·(g₂·g₃)`, via the Künneth naturality;
+- ★ **`cubeOuterMul_appTop_cubeLΓ`** — the mirror naturality (square on the left), clean
+  parallel, first-try;
+- **`comulTop_comp_map_comulTop_id`** (Δ₂L'): `(Δ'⊗id)∘Δ' = leftMulSchemeL.appTop ≫
+  tripleΓL`;
+- **`assocScheme`** (`cube → cubeL` pullback associator) + its three legs.
+
+Remaining (ledgered, ~3 assembly routes): the associator-Künneth compat (R1, the one
+genuinely-new lemma — a nested triple `tensor_hom_ext`), Δ₂L (R2, immediate from Δ₂L'+R1),
+associativity + Bialgebra/Hopf assembly (R3). Then `[HopfAlgebra R′ A′]` → topIso bridge →
+`IsCoaction chartCoaction` → C1d/C3/C4 → pins → BOARD-SIGNAL.
+
+**Lean-ops**: for the `pullback.lift` associator whose base map (`squareToBase`) appears in
+both the pullback *type-index* and as a *term*, `rw [show squareToBase = … from rfl]` hits
+the motive-not-type-correct wall (rewrites the type too) — use **`show`** to restate the
+goal with the def unfolded only in term positions (defeq, no motive), then the pullback
+lemmas fire; close residual `squareToBase = fst ≫ gtb` with explicit `rfl` (definitional,
+not syntactic, so `rw`'s auto-rfl misses it).
