@@ -179,6 +179,17 @@ sequence of additive sheaves, so the remaining work can use mathlib's genuine
 `Sheaf.H`/`Ext` definitions. This bridge does not assert affine vanishing or the missing
 proper cohomology comparison.
 
+The exact-sequence layer for genuine sheaf cohomology is now also complete in
+`ForMathlib/SheafCohomologyExact.lean`: `Sheaf.H.δ` constructs the connecting map,
+`longSequence_exact` gives a six-term window of the long exact sequence, and the
+`longSequence_exact₁/₂/₃` lemmas expose its elementwise lifting consequences.
+The terminal-object bridge `longSequence_surjective_of_subsingleton_H` turns an `H¹`
+vanishing statement for the kernel sheaf into surjectivity on global sections. This is
+the exact formal mechanism needed for the pole-filtration restriction maps. The port is
+option-free and axiom-clean; it deliberately omits the option-heavy functoriality layer
+of upstream mathlib PR #36218. Affine vanishing and proper cohomology/base change remain
+the unresolved geometric inputs.
+
 No theorem in this stream may replace this leaf by a `CohomologyPackage` hypothesis,
 an axiom, or an unboarded `sorry`.
 
