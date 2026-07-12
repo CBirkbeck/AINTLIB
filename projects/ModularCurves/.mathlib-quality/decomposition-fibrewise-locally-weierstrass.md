@@ -697,6 +697,14 @@ concrete product isomorphism in every Cech degree. It remains to prove that the 
 module of the invertible pole sheaf on each affine intersection is flat over the affine
 base; no finiteness or projectivity of the raw Cech terms is inferred.
 
+The cover may now be chosen compatibly with the line-bundle trivializations:
+`Scheme.Modules.IsInvertible.exists_finite_affine_trivializingCover` refines the defining
+trivializing cover of an invertible sheaf on a compact scheme through the affine-open
+basis and extracts a finite subcover. Consequently every finite intersection in the
+separated proper curve is affine and inherits a trivialization of `O(n[0])`. What remains
+for termwise Cech flatness is the scalar-compatible identification of its section module
+with that intersection's coordinate ring, followed by smooth flatness over the base.
+
 The elementary Mayer--Vietoris seam is now complete in both directions.
 `HPrimeZeroAddEquivSections` identifies `H'⁰(U,F)` with sections naturally in `U`, while
 `HPrimeAddEquivHOfIsTerminal` identifies `H'ⁿ(T,F)` with genuine `Sheaf.H F n` when `T`
