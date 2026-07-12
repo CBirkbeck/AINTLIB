@@ -277,24 +277,12 @@ morphism whose restriction to every member of an open cover is an isomorphism is
 isomorphism. (Route: cover-local isomorphy makes the underlying presheaf map locally
 bijective, hence a `sheafificationW`-member, hence inverted by sheafification — and
 sheaves are local objects for the sheafification.) -/
-theorem isIso_of_isIso_restrict {A B : X.Modules} (g : A ⟶ B) {ι : Type u}
-    (U : ι → X.Opens) (hU : iSup U = ⊤)
-    (h : ∀ i, IsIso ((restrictFunctor (U i).ι).map g)) : IsIso g := by
-  -- Step 1: the section maps inside cover members are bijective
-  have happ : ∀ (i : ι) (W : X.Opens), W ≤ U i → IsIso (g.app W) := by
-    intro i W hW
-    have h1 := Hom.isIso_iff_isIso_app.mp (h i) ((U i).ι ⁻¹ᵁ W)
-    have h2 : (U i).ι ''ᵁ ((U i).ι ⁻¹ᵁ W) = W := by
-      rw [Scheme.Hom.image_preimage_eq_opensRange_inf, Scheme.Opens.opensRange_ι,
-        inf_eq_right.mpr hW]
-    rw [← h2]
-    exact h1
-  have hbij : ∀ (i : ι) (W : X.Opens), W ≤ U i →
-      Function.Bijective (g.app W) := by
-    intro i W hW
-    haveI := happ i W hW
-    exact (ConcreteCategory.isIso_iff_bijective _).mp inferInstance
-  -- Step 2: the cover-sieve is covering
+theorem sheafificationW_of_bijective_on_cover {A B : X.PresheafOfModules}
+    (g : A ⟶ B) {ι : Type u} (U : ι → X.Opens) (hU : iSup U = ⊤)
+    (hbij : ∀ (i : ι) (W : X.Opens), W ≤ U i →
+      Function.Bijective (g.app (Opposite.op W))) :
+    PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj) g := by
+  -- the cover-sieve is covering
   have hsieve : ∀ (V : (TopologicalSpace.Opens ↥X)ᵒᵖ) (S : Sieve V.unop),
       (∀ (i : ι) (W : X.Opens) (hWi : W ≤ U i) (hWV : W ≤ V.unop), S (homOfLE hWV)) →
       S ∈ Opens.grothendieckTopology ↥X V.unop := by
@@ -305,32 +293,50 @@ theorem isIso_of_isIso_restrict {A B : X.Modules} (g : A ⟶ B) {ι : Type u}
     obtain ⟨i, hi⟩ := TopologicalSpace.Opens.mem_iSup.mp hxT
     exact ⟨V.unop ⊓ U i, homOfLE inf_le_left,
       hS i (V.unop ⊓ U i) inf_le_right inf_le_left, ⟨hx, hi⟩⟩
-  -- Step 3: locally bijective
-  haveI hinj : Presheaf.IsLocallyInjective
-      (Opens.grothendieckTopology ↥X)
-      ((PresheafOfModules.toPresheaf _).map g.val) := by
+  -- locally bijective
+  haveI hinj : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥X)
+      ((PresheafOfModules.toPresheaf _).map g) := by
     constructor
     intro V x y hxy
     refine hsieve V _ (fun i W hWi hWV => ?_)
     refine (hbij i W hWi).injective ?_
-    have hnx := PresheafOfModules.naturality_apply g.val (homOfLE hWV).op x
-    have hny := PresheafOfModules.naturality_apply g.val (homOfLE hWV).op y
-    calc g.app W (A.val.map (homOfLE hWV).op x)
-        = B.val.map (homOfLE hWV).op (g.val.app V x) := hnx
-      _ = B.val.map (homOfLE hWV).op (g.val.app V y) := by rw [show g.val.app V x =
-            g.val.app V y from hxy]
-      _ = g.app W (A.val.map (homOfLE hWV).op y) := hny.symm
-  haveI hsurj : Presheaf.IsLocallySurjective
-      (Opens.grothendieckTopology ↥X)
-      ((PresheafOfModules.toPresheaf _).map g.val) := by
+    have hnx := PresheafOfModules.naturality_apply g (homOfLE hWV).op x
+    have hny := PresheafOfModules.naturality_apply g (homOfLE hWV).op y
+    calc g.app (Opposite.op W) (A.map (homOfLE hWV).op x)
+        = B.map (homOfLE hWV).op (g.app V x) := hnx
+      _ = B.map (homOfLE hWV).op (g.app V y) := by rw [show g.app V x =
+            g.app V y from hxy]
+      _ = g.app (Opposite.op W) (A.map (homOfLE hWV).op y) := hny.symm
+  haveI hsurj : Presheaf.IsLocallySurjective (Opens.grothendieckTopology ↥X)
+      ((PresheafOfModules.toPresheaf _).map g) := by
     constructor
     intro V s
     refine hsieve (Opposite.op V) _ (fun i W hWi hWV => ?_)
-    obtain ⟨t, ht⟩ := (hbij i W hWi).surjective (B.val.map (homOfLE hWV).op s)
+    obtain ⟨t, ht⟩ := (hbij i W hWi).surjective (B.map (homOfLE hWV).op s)
     exact ⟨t, ht⟩
-  -- Step 4: the sheafification inverts g.val, and g is conjugate to it by the counit
-  have hw : PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj) g.val :=
-    (PresheafOfModules.sheafificationW_iff_isLocallyBijective _ g.val).mpr ⟨hinj, hsurj⟩
+  exact (PresheafOfModules.sheafificationW_iff_isLocallyBijective _ g).mpr ⟨hinj, hsurj⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[PAIR-3 / CMP-LOC]** Being an isomorphism of `𝒪ₓ`-modules is Zariski-local: a
+morphism whose restriction to every member of an open cover is an isomorphism is an
+isomorphism. -/
+theorem isIso_of_isIso_restrict {A B : X.Modules} (g : A ⟶ B) {ι : Type u}
+    (U : ι → X.Opens) (hU : iSup U = ⊤)
+    (h : ∀ i, IsIso ((restrictFunctor (U i).ι).map g)) : IsIso g := by
+  -- the section maps inside cover members are bijective
+  have happ : ∀ (i : ι) (W : X.Opens), W ≤ U i → IsIso (g.app W) := by
+    intro i W hW
+    have h1 := Hom.isIso_iff_isIso_app.mp (h i) ((U i).ι ⁻¹ᵁ W)
+    have h2 : (U i).ι ''ᵁ ((U i).ι ⁻¹ᵁ W) = W := by
+      rw [Scheme.Hom.image_preimage_eq_opensRange_inf, Scheme.Opens.opensRange_ι,
+        inf_eq_right.mpr hW]
+    rw [← h2]
+    exact h1
+  have hw : PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj) g.val := by
+    refine sheafificationW_of_bijective_on_cover g.val U hU (fun i W hW => ?_)
+    haveI := happ i W hW
+    exact (ConcreteCategory.isIso_iff_bijective (g.app W)).mp inferInstance
   rw [PresheafOfModules.sheafificationW_iff] at hw
   have hnat := (PresheafOfModules.sheafificationAdjunction
     (𝟙 X.ringCatSheaf.obj)).counit.naturality g
