@@ -26,6 +26,41 @@ open CategoryTheory AlgebraicGeometry AlgebraicGeometry.Scheme
 
 namespace AlgebraicGeometry.Scheme.Modules
 
+variable {X' X : Scheme.{u}} (f : X' ⟶ X) (J : X.IdealSheafData)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- A section of the ideal pulls back to a section of the comap ideal:
+`fst♯ (f♯ g) = snd♯ (ι♯ g) = 0` by the pullback square defining the comap. -/
+theorem app_mem_idealSections_comap (U : (TopologicalSpace.Opens ↥X)ᵒᵖ)
+    {g : Γ(X, U.unop)} (hg : g ∈ idealSections J U) :
+    f.app U.unop g ∈ idealSections (J.comap f)
+      (Opposite.op ((TopologicalSpace.Opens.map f.base).obj U.unop)) := by
+  refine RingHom.mem_ker.mpr ?_
+  have hι : (J.comap f).subschemeι =
+      (J.comapIso f).hom ≫ Limits.pullback.fst f J.subschemeι := by
+    rw [← Scheme.IdealSheafData.comapIso_inv_subschemeι J f, ← Category.assoc,
+      Iso.hom_inv_id, Category.id_comp]
+  have hstep1 : ((Limits.pullback.fst f J.subschemeι ≫ f).app U.unop).hom g = 0 := by
+    rw [Scheme.Hom.congr_app Limits.pullback.condition U.unop]
+    have hz : ((Limits.pullback.snd f J.subschemeι ≫ J.subschemeι).app U.unop).hom g
+        = 0 := by
+      show ((Limits.pullback.snd f J.subschemeι).app _).hom
+        ((J.subschemeι.app U.unop).hom g) = 0
+      rw [RingHom.mem_ker.mp hg]
+      exact map_zero _
+    show ((Limits.pullback f J.subschemeι).presheaf.map _).hom
+      (((Limits.pullback.snd f J.subschemeι ≫ J.subschemeι).app U.unop).hom g) = 0
+    rw [hz]
+    exact map_zero _
+  rw [hι]
+  show ((J.comapIso f).hom.app _).hom
+    (((Limits.pullback.fst f J.subschemeι).app _).hom ((f.app U.unop).hom g)) = 0
+  have h1 : ((Limits.pullback.fst f J.subschemeι).app _).hom
+      ((f.app U.unop).hom g) = 0 := hstep1
+  rw [h1]
+  exact map_zero _
+
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
 /-- **Pullback of a locally principal ideal module** (KM 1.1.2 shape: effective Cartier

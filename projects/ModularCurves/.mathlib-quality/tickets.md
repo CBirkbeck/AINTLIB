@@ -17368,3 +17368,23 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
      open immersion — so cover Q' by its own affines; this is why `_of_isOpenImmersion`'s
      scaffolding does not adapt).
 - Then GHB5a (glue over quotientGlueData) → GHB5 (transfer) → GHB7 → GHC1 unconditional.
+
+## Amendments v10.167 (2026-07-12, fable-PIC0): [NAT] leaf decomposed — route through the adjunction transpose; sub-leaves cut
+
+- **`nonempty_pullback_idealModule` route (post-audit)**: mathlib `IdealSheafData.comap
+  I f := (pullback.fst f I.subschemeι).ker` + `comapIso`; presheaf adjunction
+  `PresheafOfModules.pullbackPushforwardAdjunction : pullback φ ⊣ pushforward φ`
+  EXISTS. Sub-leaves:
+  - **[NAT-1]** `idealPushHom : idealPresheaf J ⟶ (pushforward f♯).obj
+    (idealPresheaf (J.comap f))` — elementwise `g ↦ f♯g`; membership via
+    `pullback.condition`-naturality (fst♯(f♯g) = snd♯(ι♯g) = 0).
+  - **[NAT-2]** ψ := adjunction transpose; target iso :=
+    `pullbackIsoSheafifyPresheafPullback` ≪≫ sh(ψ)-collapse ≪≫ `sheafifyValIso`.
+  - **[NAT-3]** W-membership of ψ via chart bijectivity; irreducible ring core =
+    the affine base-change kernel computation, mathlib-backed:
+    `Algebra.TensorProduct.quotientTensorEquiv/tensorQuotientEquiv`
+    (RingTheory/TensorProduct/Quotient.lean) — comap-ideal on affine charts of the
+    base change = span of f♯(generator). CONSUMER-NARROWING NOTE: for the
+    sectionToPicRel-naturality consumer, f = pullback.fst π t and J = section-divisor
+    ideals; the engine supplies both-sides Cartier data (isOfficial + baseChange).
+- Executing [NAT-1] now.
