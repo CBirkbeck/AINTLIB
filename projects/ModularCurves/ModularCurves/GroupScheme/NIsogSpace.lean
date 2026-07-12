@@ -109,7 +109,7 @@ noncomputable def _root_.ModularCurves.EllipticCurve.NIsogenyStructure.baseChang
 Y₀(N) assembly. The divisor of the base-changed subgroup scheme equals the base change of
 the subgroup's divisor: both are `G.ι.ker` pulled back along `pullback.fst E.π g`. This lets
 the cyclicity of a base-changed subgroup be read off the universal cyclicity locus. -/
-theorem FiniteLocallyFreeSubgroup.toRelEffCartierDiv_baseChange_ideal
+theorem EllipticCurve.FiniteLocallyFreeSubgroup.toRelEffCartierDiv_baseChange_ideal
     {E : EllipticCurve S} (G : FiniteLocallyFreeSubgroup E) {T : Scheme.{u}} (g : T ⟶ S) :
     (G.baseChange g).toRelEffCartierDiv.ideal = (G.toRelEffCartierDiv.baseChange g).ideal := by
   haveI := G.closedImmersion
@@ -124,6 +124,25 @@ theorem FiniteLocallyFreeSubgroup.toRelEffCartierDiv_baseChange_ideal
     (Limits.pullbackSymmetry_hom_comp_fst _ _).symm,
     Scheme.Hom.ker_comp_of_isIso,
     Scheme.IdealSheafData.ker_fst_of_isClosedImmersion]
+
+/-- **Cyclicity depends only on the divisor ideal.** `IsGammaZeroFppf` (hence `IsCyclic`)
+reads the divisor purely through its ideal sheaf — via `RelEffCartierDiv.ext`. This transfers
+cyclicity across the keystone `toRelEffCartierDiv_baseChange_ideal` in the Y₀(N) assembly. -/
+theorem isGammaZeroFppf_congr {E : EllipticCurve S} {N : ℕ} [NeZero N]
+    {D₁ D₂ : RelEffCartierDiv E.π} (h : D₁.ideal = D₂.ideal) :
+    E.IsGammaZeroFppf N D₁ ↔ E.IsGammaZeroFppf N D₂ := by
+  rw [RelEffCartierDiv.ext h]
+
+/-- **The base-changed subgroup is cyclic iff its divisor is `IsGammaZeroFppf` after the
+same base change** — combining the keystone `toRelEffCartierDiv_baseChange_ideal` with
+`isGammaZeroFppf_congr`. This is the exact shape `exists_cyclicityLocus` consumes: the
+cyclicity of `(G.baseChange g)` over `T` is `IsGammaZeroFppf` of `(G.toRelEffCartierDiv).baseChange g`. -/
+theorem isCyclic_baseChange_iff {E : EllipticCurve S} (G : FiniteLocallyFreeSubgroup E)
+    {N : ℕ} [NeZero N] {T : Scheme.{u}} (g : T ⟶ S) :
+    (G.baseChange g).IsCyclic N ↔
+      (E.baseChange g).IsGammaZeroFppf N (G.toRelEffCartierDiv.baseChange g) := by
+  rw [FiniteLocallyFreeSubgroup.isCyclic_iff_isGammaZeroFppf]
+  exact isGammaZeroFppf_congr (G.toRelEffCartierDiv_baseChange_ideal g)
 
 /-- **[L15] the `N`-isogeny moduli representation** (hypothesis-wired pins-record). A finite
 `S`-scheme `W` whose `T`-points classify `N`-isogeny data on `E ×_S T` — exactly the closed
