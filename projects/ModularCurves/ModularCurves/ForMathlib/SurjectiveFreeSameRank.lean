@@ -88,4 +88,30 @@ theorem injective_of_surjective_of_flat_rankAtStalk_eq {R : Type u} [CommRing R]
   have hfy := (hex (LocalizedModule.map P.primeCompl (LinearMap.ker f).subtype y)).mpr ⟨y, rfl⟩
   rw [hfx, hfy]
 
+/-- A surjection of finite flat modules of equal stalkwise rank is bijective. -/
+theorem bijective_of_surjective_of_flat_rankAtStalk_eq {R : Type u} [CommRing R]
+    {M Q : Type u} [AddCommGroup M] [Module R M] [Module.Finite R M] [Module.Flat R M]
+    [AddCommGroup Q] [Module R Q] [Module.Finite R Q] [Module.Flat R Q]
+    (h : ∀ p : PrimeSpectrum R, Module.rankAtStalk (R := R) M p = Module.rankAtStalk (R := R) Q p)
+    (f : M →ₗ[R] Q) (hf : Function.Surjective f) : Function.Bijective f :=
+  ⟨injective_of_surjective_of_flat_rankAtStalk_eq h f hf, hf⟩
+
+/-- **A surjective ring homomorphism of finite flat algebras of equal stalkwise rank over a
+base is an isomorphism.** For `φ : A →+* B` surjective with `A`, `B` finite flat over `R₀`
+of the same rank at every prime of `R₀`, `φ` is bijective. This is the affine/ring form of
+"a closed immersion of finite locally free schemes of equal rank over the base is an
+isomorphism" — the same-degree-divisor-equality step of the `Y(N)` clopen argument. -/
+theorem bijective_of_surjective_ringHom_of_flat_rankAtStalk_eq {R₀ : Type u} [CommRing R₀]
+    {A B : Type u} [CommRing A] [CommRing B] [Algebra R₀ A] [Algebra R₀ B]
+    [Module.Finite R₀ A] [Module.Flat R₀ A] [Module.Finite R₀ B] [Module.Flat R₀ B]
+    (h : ∀ p : PrimeSpectrum R₀,
+      Module.rankAtStalk (R := R₀) A p = Module.rankAtStalk (R := R₀) B p)
+    (φ : A →+* B) (hφR₀ : ∀ r : R₀, φ (algebraMap R₀ A r) = algebraMap R₀ B r)
+    (hφ : Function.Surjective φ) : Function.Bijective φ := by
+  let φₗ : A →ₗ[R₀] B :=
+    { toFun := φ, map_add' := map_add φ,
+      map_smul' := fun r a => by
+        simp only [Algebra.smul_def, map_mul, hφR₀, RingHom.id_apply, Algebra.smul_def] }
+  exact bijective_of_surjective_of_flat_rankAtStalk_eq h φₗ hφ
+
 end ModularCurves
