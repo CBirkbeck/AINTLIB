@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.ForMathlib.SmoothDescent
+import ModularCurves.EllipticCurve.MulByHomEtale
 import ModularCurves.Moduli.GammaH
 import ModularCurves.Moduli.LevelSpaces
 import ModularCurves.Moduli.NaiveProblems
@@ -215,7 +216,7 @@ theorem etale_fullLevelSpaceStruct (X : EllObj R) (N : ℕ) [NeZero N]
     have hoi : IsOpenImmersion (levelSpaceΓι X.curve N) :=
       isOpenImmersion_levelSpaceΓι X.curve N hinvS
     infer_instance
-  have hπ : Etale (X.curve.torsionπ N) := X.curve.torsionπ_etale N hinvS
+  have hπ : Etale (X.curve.torsionπ N) := X.curve.torsionπ_etale' N hinvS
   have hfst : Etale (pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N)) :=
     MorphismProperty.pullback_fst _ _ hπ
   infer_instance
