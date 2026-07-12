@@ -16811,3 +16811,23 @@ localModel glues (LocallyWeierstrass.baseChange + it's Zariski-local).
   pullback API + landed Pic.map machinery + one ~15-line abelian splitting lemma.
 - LEAN-OP: `Pic.map` lives in ForMathlib/PullbackTensorGeneral.lean (namespace
   AlgebraicGeometry.Scheme), NOT Picard/Pic.lean; mathlib category is `CommGrpCat` now.
+
+## Amendments v10.160 (2026-07-12, fable-PIC0): ★ Pic_{E/S} L-A functor layer COMPLETE sorry-free — `picRelFunctor` lands same-session as its decompose
+
+- ★ **RelativePic.lean SORRY-FREE** (0 sorries; build green; `#print axioms
+  picRelFunctor` + `nonempty_picRel_mulEquiv_quotient` = propext/choice/quot only).
+  The relative Picard functor exists: `picRelFunctor : (Over S)ᵒᵖ ⥤ CommGrpCat.{u+1}`
+  for ANY retraction pair (p : E ⟶ S, z : S ⟶ E, hz), with `picRel := (Pic.map z_T).ker`
+  (GME p.109 kernel model) and the displayed-quotient comparison
+  `Pic(E_T)/f_T^*Pic(T) ≃* Ker(z_T^*)` (abelian splitting: π := id * (sec∘r)⁻¹,
+  ker π' = range sec, first-iso via QuotientGroup.quotientKerEquivOfSurjective).
+- LEAN-OPS: `pullback.map` is an ABBREV of `pullback.lift` — simp needs BOTH the delta
+  (`Limits.pullback.map`) and the projection lemmas (`lift_fst/lift_snd/+_assoc` — not
+  simp-tagged) explicitly; in functor-law `show`s spell op-identities `(𝟙 T).unop.left`
+  (NOT `(𝟙 T.unop).left` — field-projection dies on the unresolved Quiver-hom);
+  `ext L` on CommGrpCat-subgroup-valued homs already gives val-level goals (no
+  Subtype.ext). 3 unusedSimpArgs lint-warnings left for the fleet cleanup lane.
+- **Banked-queue status: [PAIR-4]-general ✓ / [CMP-←] ✓ / Pic⁰ decompose ✓ — AND the
+  decompose's own L-A leaves all closed. Queue EMPTY.** Next frontier: L-B degree
+  layer (T-PIC-DEG0 audit: fibre-restriction + degree anchor; HasseWeil survey) as its
+  own /develop pass; L-C (Abel) stays pinned on relative cohomology.

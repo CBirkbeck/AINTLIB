@@ -63,7 +63,40 @@ identifies the quotient with the kernel model. -/
 theorem nonempty_picRel_mulEquiv_quotient (t : T ⟶ S) :
     Nonempty ((Pic (Limits.pullback p t) ⧸ (Pic.map (Limits.pullback.snd p t)).range) ≃*
       picRel p z hz t) := by
-  sorry
+  set r := Pic.map (baseChangeZero p z hz t) with hr
+  set sec := Pic.map (Limits.pullback.snd p t) with hsec
+  have hrs : ∀ y, r (sec y) = y := by
+    intro y
+    calc r (sec y)
+        = Pic.map (baseChangeZero p z hz t ≫ Limits.pullback.snd p t) y := by
+          rw [Pic.map_comp]; rfl
+      _ = y := by rw [baseChangeZero_snd, Pic.map_id]; rfl
+  let π : Pic (Limits.pullback p t) →* Pic (Limits.pullback p t) :=
+    MonoidHom.id _ * (sec.comp r)⁻¹
+  have hπ_apply : ∀ x, π x = x * (sec (r x))⁻¹ := fun x => rfl
+  have hπ_mem : ∀ x, π x ∈ picRel p z hz t := by
+    intro x
+    refine MonoidHom.mem_ker.mpr ?_
+    show r (x * (sec (r x))⁻¹) = 1
+    rw [map_mul, map_inv, hrs, mul_inv_cancel]
+  let π' : Pic (Limits.pullback p t) →* picRel p z hz t := π.codRestrict _ hπ_mem
+  have hsurj : Function.Surjective π' := by
+    rintro ⟨k, hk⟩
+    refine ⟨k, Subtype.ext ?_⟩
+    show k * (sec (r k))⁻¹ = k
+    rw [MonoidHom.mem_ker.mp hk, map_one, inv_one, mul_one]
+  have hker : π'.ker = sec.range := by
+    ext x
+    constructor
+    · intro hx
+      have hx1 : x * (sec (r x))⁻¹ = 1 := congrArg Subtype.val hx
+      exact ⟨r x, (mul_inv_eq_one.mp hx1).symm⟩
+    · rintro ⟨y, rfl⟩
+      refine Subtype.ext ?_
+      show sec y * (sec (r (sec y)))⁻¹ = 1
+      rw [hrs, mul_inv_cancel]
+  exact ⟨(QuotientGroup.quotientMulEquivOfEq hker.symm).trans
+    (QuotientGroup.quotientKerEquivOfSurjective π' hsurj)⟩
 
 /-- The base change `g_E = 1_E ×_S g` of `g : T' ⟶ T` over `S` (GME p. 108: "If
 `g : T' → T` is an `S`-morphism, we have `g_E = 1_E ×_S g : E'_T → E_T`"). -/
@@ -119,8 +152,24 @@ noncomputable def picRelFunctor : (Over S)ᵒᵖ ⥤ CommGrpCat.{u + 1} where
       (picRel p z hz T.unop.hom).subtype).codRestrict _
       (fun L => pic_map_baseChangeMap_mem p z hz g.unop.left (Over.w g.unop) L.2))
   map_id := by
-    sorry
+    intro T
+    ext L
+    show Pic.map (baseChangeMap p (𝟙 T).unop.left (Over.w (𝟙 T).unop)) L.1 = L.1
+    rw [show baseChangeMap p (𝟙 T).unop.left (Over.w (𝟙 T).unop) =
+        𝟙 (Limits.pullback p T.unop.hom) from baseChangeMap_id p T.unop.hom,
+      Pic.map_id]
+    rfl
   map_comp := by
-    sorry
+    intro T T' T'' g g'
+    ext L
+    show Pic.map (baseChangeMap p (g ≫ g').unop.left (Over.w (g ≫ g').unop)) L.1 =
+      Pic.map (baseChangeMap p g'.unop.left (Over.w g'.unop))
+        (Pic.map (baseChangeMap p g.unop.left (Over.w g.unop)) L.1)
+    rw [show baseChangeMap p (g ≫ g').unop.left (Over.w (g ≫ g').unop) =
+        baseChangeMap p g'.unop.left (Over.w g'.unop) ≫
+          baseChangeMap p g.unop.left (Over.w g.unop) from
+      baseChangeMap_comp p g.unop.left (Over.w g.unop) g'.unop.left (Over.w g'.unop),
+      Pic.map_comp]
+    rfl
 
 end AlgebraicGeometry.Scheme.Modules

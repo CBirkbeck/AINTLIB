@@ -125,7 +125,7 @@ theorem negModelHom_vc {R : Type u} [CommRing R] (C : WeierstrassCurve.VariableC
         rw [Over.comp_left, Over.comp_left, Over.tensorHom_left]
         exact mulModelHom_vc C W }
   have hinv := congrArg CommaMorphism.left (GrpObj.inv_hom (vcOver C W))
-  rw [Over.comp_left, Over.comp_left] at hinv
+  simp only [Over.comp_left, vcOver_left] at hinv
   exact hinv
 
 /-! ## Negation, glued from the per-chart model negations -/
