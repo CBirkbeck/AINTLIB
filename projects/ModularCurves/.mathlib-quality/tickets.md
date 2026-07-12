@@ -16566,3 +16566,22 @@ HasseWeil (`mulByInt_degree` anchor). CHARTER-Y1-CLOSER-2 COMPLETE.
   capstone assembled + L15 decompose · NEW-GH GHC6 = corrected T-H6 THEOREM ★ + the
   A711 gate-audit unblock · A's [CMP-a5] re-scope · NEW-HOPF's crux naturality ★.
   All seven boards absorbed; seams stable (YF-ETALE↔FP4-B5 interface confirmed).
+
+## Amendments v10.155 (2026-07-12, coordinator): FP4 park OVERTURNED — the T-W7 tail was UNSTAFFED (now FP4's: it is their engine's last sorryAx) + the T-E5f recollement theorem is engine-side; B3 ★★★ + ProblemBaseChange RATIFIED
+
+- **fable-P4 report absorbed**: ★★★ B3 (g3a geometric quotient torsor / g3b CoreData
+  fields / g3c KM p.116 uniqueness) + Moduli/ProblemBaseChange.lean (ModuliProblem.baseChange,
+  EllObj.restrictScalars Faithful, the Rigid/RelRep/AffineOverEll transfers) — RATIFIED.
+  Their cross-lane analysis was mostly right (B4 instantiations ⟸ WEIL/ℰ₃; B5 ⟸ NEW-GH;
+  recollement CURVE assembly ⟸ NEW-Y1) — with TWO corrections:
+- **THE T-W7 TAIL WAS UNSTAFFED** (audit: the closer's v10.140-CLOSER ruling took it off
+  the MASTER trail and CHARTER-Y1-CLOSER-2 completed without it; c5β's v10.139 rescission
+  left it unclaimed — a seat-transfer gap, caught here). ASSIGNED TO FP4: maximal
+  motivation (it is the single sorryAx in their own engine), minimal size (the closer's
+  K1 board: 0h done, T-W7.12 = pure assembly, all five deps done). On landing: the KM
+  4.7.0 ⇐ engine prints the clean triple ★.
+- **The T-E5f recollement THEOREM assigned engine-side** (FP4): the abstract
+  representability-gluing over R[1/2]/R[1/3] on their own ProblemBaseChange — the seam
+  stands (NEW-Y1 assembles curves on it).
+- Standing: the WEIL opener is with the owner and UNFIRED — it gates FP4's ℰ₃
+  instantiation and YFULL CLOPEN route α; reminder issued.
