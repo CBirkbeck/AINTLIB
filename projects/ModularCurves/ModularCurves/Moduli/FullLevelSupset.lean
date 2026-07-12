@@ -111,6 +111,22 @@ theorem sectionsDivisor_ideal_eq_torsionIdeal
   exact congrArg RelEffCartierDiv.ideal
     (RelEffCartierDiv.eq_of_isSubdivisor_of_degree_eq _ _ hsub hdeg)
 
+/-- Base-change reduction for pointwise-distinctness: if the base-changed sections
+`asSection P`, `asSection Q` agree topologically at `u`, then so do the underlying
+`E`-points `P, Q` (the first pullback projection of `asSection` is the point itself,
+`asSection_val_fst`). Contrapositive: pointwise-distinct `E`-points give pointwise-distinct
+base-changed sections — the form consumed by `sectionsDivisor_ideal_eq_torsionIdeal`. -/
+theorem asSection_base_eq_imp {T : Scheme.{u}} (g : T ⟶ S) (P Q : E.Point g) (u : T)
+    (h : (Point.asSection E g P).1.base u = (Point.asSection E g Q).1.base u) :
+    P.1.base u = Q.1.base u :=
+  have eP : P.1.base u
+      = (Limits.pullback.fst E.π g).base ((Point.asSection E g P).1.base u) :=
+    (congrArg (fun m : T ⟶ E.E => m.base u) (Point.asSection_val_fst E g P)).symm
+  have eQ : Q.1.base u
+      = (Limits.pullback.fst E.π g).base ((Point.asSection E g Q).1.base u) :=
+    (congrArg (fun m : T ⟶ E.E => m.base u) (Point.asSection_val_fst E g Q)).symm
+  eP.trans ((congrArg (Limits.pullback.fst E.π g).base h).trans eQ.symm)
+
 end EllipticCurve
 
 end ModularCurves
