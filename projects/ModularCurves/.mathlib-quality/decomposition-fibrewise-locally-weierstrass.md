@@ -286,10 +286,14 @@ to the residue fibres. The `H⁰` conclusion is now complete as
 `FibrewiseElliptic.sectionPoleSheafPower_fiber_finrank`: for every residue fibre and
 `n ≥ 1`, the global pole sections have dimension `n`. The model-side geometric
 `H¹` vanishing is now also proved by
-`sectionPoleSheafPower_projModel_subsingleton_H_one`. The remaining work in this step
-is to transport that vanishing across the pointed fibre isomorphism and then prove the
-proper cohomology-and-base-change theorem which upgrades the fibrewise dimensions to
-local freeness and base change on the family.
+`sectionPoleSheafPower_projModel_subsingleton_H_one`. The transport is now complete as
+`FibrewiseElliptic.sectionPoleSheafPower_fiber_subsingleton_H_one`: the generic theorem
+`TopCat.Sheaf.subsingleton_H_of_iso` compares constant sheaves and Ext across a
+homeomorphism, while the scheme-level application identifies pullback of the pole module
+with pushforward of its additive sheaf along the inverse homeomorphism. Thus every
+residue fibre has `H¹(O(n[0])) = 0` for `n ≥ 1`. The remaining work in this step is
+the proper cohomology-and-base-change theorem which upgrades these fibrewise dimensions
+to local freeness and base change on the family.
 
 ### 4. Choose `x` and `y` -- `T-W-cmp.XY`
 
