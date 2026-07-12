@@ -1,0 +1,4 @@
+    -W'.a₁ ^ 4 * P x - 6 * W'.a₁ ^ 2 * W'.a₂ * P x - 8 * W'.a₂ ^ 2 * P x - 3 * W'.a₄ * P x -
+      W'.a₁ ^ 3 * P y - 4 * W'.a₁ * W'.a₂ * P y + 12 * W'.a₃ * P y - W'.a₁ ^ 3 * W'.a₃ * P z -
+      W'.a₁ ^ 2 * W'.a₄ * P z - 4 * W'.a₁ * W'.a₂ * W'.a₃ * P z - 4 * W'.a₂ * W'.a₄ * P z + 6
+      * W'.a₃ ^ 2 * P z + 9 * W'.a₆ * P z

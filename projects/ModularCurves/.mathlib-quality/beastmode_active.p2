@@ -1,0 +1,1 @@
+FOCUS: [CHARTER-P2] BB-DELIGNE affine core — L6c crux dualPt_mul + sum_fac PROVEN in scratch. Building dualPt_unit + dualPt_injective, then AddMonoidHom Ψ + finrank=N + Deligne assembly → free affine core; then L5 localise + L1a section-cover.

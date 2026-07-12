@@ -1,0 +1,23 @@
+FOCUS: [STREAM-GH] first wave (coordinator v10.50). Γ_H relative representability via KM 7.1.2/7.1.3.
+File: Moduli/GammaHRepresentability.lean.
+DONE this session (committed): GHA2 (24a5ae551), GHB3, GH2-core glSmul_eq_one_of_eq_self, GH2, GHA4
+(4aa25b563), GHB1 RelRepData.exists_equivariant axiom-CLEAN (ab97b2074, twist (φγ)→(φγ⁻¹)).
+GHC4-SEP relRepData_sep_coprod PROVED axiom-CLEAN (this commit): separation lemma = injectivity/
+separated-presheaf half of sheaf cond over Bool-coproduct, via d.nat + eqv.injective + Sigma.hom_ext.
+NOW WORKING: GHC4 gammaHNaiveProblem_not_relativelyRepresentable (line ~751, still sorry). Decomposed:
+  [SEP] DONE. Remaining sub-tickets:
+  [GHC4-COPROD-GLUE] build M : (baseChange g).FullLevelPt N over T=∐Bool that is L on true-cmpt,
+    glSmul γ̄ L on false-cmpt; sections via Sigma.desc; IsNaiveFullLevel: killing componentwise
+    (asSection_zsmul), generation via geometric-pt-factors-through-one-summand (isClopen_range_sigmaι
+    + IsOpenImmersion.lift_fac template QuotientStack:678-706 + Subsingleton(PrimeSpectrum k̄)). ~150L.
+  [GHC4-FIBER-CORE] refactor glSmul_eq_one_of_eq_self: extract geometric-pt core (2 matrix eqns
+    m00•pp+m10•pq=pp, m01•pp+m11•pq=pq + gen(L.2.2) ⟹ m=1) as reusable lemma. Lets orbit-distinctness
+    reuse it at a geom pt WITHOUT asSection_add.
+  [GHC4-ASM] orbit-distinctness a=⟦L.pullAlong g⟧ ≠ b=⟦M⟧ via FIBER route (Point.pull additive via
+    pull_add/pull_zsmul; baseChangeEquiv fiber-transport hcompatP-style; t_true=s≫ι_true, t_true≫g=s)
+    → δ=1 then γ̄=1. + restrictions-agree (⟦γ̄L⟧=⟦L⟧, γ̄∈H) → sep_coprod → a=b contra.
+GATE NOTE: clean section-level route needs asSection_add (NOT in mathlib, needs abelEnrichment box) +
+  pullSection_add (sorried Representability:204). FIBER route AVOIDS both (uses Point.pull, additive).
+  Q.map itself carries gammaHNaiveProblem.map well-def sorry (GammaH:384) — inherent, GHC4 not axiom-clean.
+CONSTRAINTS: new files only (edit GammaHRepresentability.lean); Held GammaH/Representability/InvariantTorsor
+READ-ONLY; p2/fable-FP READ-ONLY; HEAD-guard+pathspec commits; grep -nE "error[:(]"+#print axioms verify.
