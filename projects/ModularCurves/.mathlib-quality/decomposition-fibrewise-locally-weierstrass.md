@@ -521,8 +521,24 @@ the only further input. The proof decomposes total cycles and boundaries into
 their `(0,1)` and `(1,0)` components, kills and lifts them by those exactness
 hypotheses, and uses the two monomorphisms to reflect the remaining cycle and
 boundary equations. This closes the horizontal collapse without a spectral
-sequence surrogate. The vertical comparison using acyclicity on every finite
-intersection remains.
+sequence surrogate; the generic vertical comparison is obtained next by
+symmetry.
+
+The corresponding generic vertical comparison is now proved in
+`ForMathlib/TotalComplexUpNatVerticalEdge.lean` without a second component
+chase. `HomologicalComplex₂.totalUpNatVerticalEdge` applies the horizontal edge
+map to the flipped bicomplex and transports it through mathlib's
+`totalFlipIso`; its component is the augmentation followed by the `(0,p)`
+summand inclusion. `totalUpNatVerticalEdge_quasiIsoAt_one` reuses the landed
+horizontal theorem with exactly the transposed low-degree inputs: augmented
+column exactness in Cech degrees zero and one, exactness at resolution degree
+one in Cech degree zero, and monicity of the augmentations in Cech degrees one
+and two. For the injective-resolution Cech bicomplex, only the third input is a
+positive-cohomology condition: it is the `H^1`-vanishing of the degree-zero
+Cech term, hence of the individual cover opens after the finite-product
+comparison. The remaining task is to construct the native Cech augmentation
+into the injective resolution and discharge these column hypotheses; no
+cover-wide higher-exactness assumption has been introduced.
 
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
