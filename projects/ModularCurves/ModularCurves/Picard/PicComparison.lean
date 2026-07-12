@@ -572,13 +572,34 @@ theorem IsInvertible.isUnit_toSkeleton {M : X.Modules} (hM : IsInvertible M) :
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- **[CMP-L1]** Unfolding a ⊗-unit: a ⊗-inverse module together with an isomorphism
+`M ⊗ N ≅ 𝒪ₓ` for the hand-rolled sheafified tensor (skeleton quotient unfold, then the
+[CMP-T]/[CMP-U] bridges backwards). -/
+theorem exists_tensorObj_iso_unitObj_of_isUnit_toSkeleton {M : X.Modules}
+    (hM : letI := Modules.monoidalCategory X
+      IsUnit (toSkeleton M)) :
+    ∃ N : X.Modules, Nonempty (tensorObj M N ≅ unitObj X) := by
+  letI := Modules.monoidalCategory X
+  obtain ⟨v, hv, -⟩ := isUnit_iff_exists.mp hM
+  refine ⟨(fromSkeleton X.Modules).obj v, ?_⟩
+  rw [← toSkeleton_fromSkeleton_obj (C := X.Modules) v, ← Skeleton.toSkeleton_tensorObj,
+    Skeleton.one_eq] at hv
+  obtain ⟨e⟩ := toSkeleton_eq_toSkeleton_iff.mp hv
+  obtain ⟨eT⟩ := nonempty_tensorObj_iso_tensor M ((fromSkeleton X.Modules).obj v)
+  obtain ⟨eU⟩ := nonempty_unitObj_iso_unit (X := X)
+  exact ⟨eT ≪≫ e ≪≫ eU.symm⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **[CMP-←]** A ⊗-invertible module is cover-locally trivial (Zariski-local freeness:
-the stalks of a ⊗-unit are invertible modules over local rings, hence free of rank one,
-and a generator spreads out to a trivialization on an open neighbourhood). -/
+around every point a pure-tensor decomposition of the unit section exhibits, over the
+local ring at the point, a unit pairing value, and rescaling gives a section pair with
+pairing exactly 1 on a neighbourhood, which trivializes `M` there). -/
 theorem isInvertible_of_isUnit_toSkeleton {M : X.Modules}
     (hM : letI := Modules.monoidalCategory X
       IsUnit (toSkeleton M)) :
     IsInvertible M := by
+  obtain ⟨N, ⟨ε⟩⟩ := exists_tensorObj_iso_unitObj_of_isUnit_toSkeleton hM
   sorry
 
 set_option backward.defeqAttrib.useBackward true in
