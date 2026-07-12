@@ -481,7 +481,54 @@ content of `isIso_ev_unitObj`). Section-level — no functor conjugation. -/
 theorem bijective_evPre_app_of_triv {M : X.Modules} {W : X.Opens}
     (e : (Modules.pullback W.ι).obj M ≅ unitObj W.toScheme) :
     Function.Bijective ((evPre M).app (Opposite.op W)) := by
-  sorry
+  letI := ModularCurves.SheafOfModules.dualSectionsModule X.ringCatSheaf M W
+  -- the over-trivialization and the packaged bijective evaluation against it
+  let ψ : M.over W ≅ SheafOfModules.unit (X.ringCatSheaf.over W) :=
+    overTrivializationOfRestrictIso M W ((restrictFunctorIsoPullback W.ι).app M ≪≫ e)
+  let hL : M.val.obj (Opposite.op W) ≃ₗ[X.ringCatSheaf.obj.obj (Opposite.op W)]
+      X.ringCatSheaf.obj.obj (Opposite.op W) :=
+    LinearEquiv.ofBijective
+      { toFun := fun m => ModularCurves.SheafOfModules.evalSection X.ringCatSheaf M W ψ.hom m
+        map_add' := fun a b =>
+          ModularCurves.SheafOfModules.evalSection_add_right X.ringCatSheaf M W ψ.hom a b
+        map_smul' := fun c a =>
+          ModularCurves.SheafOfModules.evalSection_smul_right X.ringCatSheaf M W ψ.hom c a }
+      (ModularCurves.SheafOfModules.bijective_evalSection_iso X.ringCatSheaf M W ψ)
+  letI : CommSemiring ↑(X.ringCatSheaf.obj.obj (Opposite.op W)) :=
+    inferInstanceAs (CommSemiring ↑(X.sheaf.obj.obj (Opposite.op W)))
+  -- the inverse component `c ↦ hL⁻¹ c ⊗ ψ.hom`, as a hom of module categories
+  let k : (𝟙_ (_root_.PresheafOfModules
+        (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat))).obj (Opposite.op W) ⟶
+      (M.val ⊗ (dualObj M).val : _root_.PresheafOfModules
+        (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (Opposite.op W) :=
+    ModuleCat.ofHom
+      (((TensorProduct.mk (X.ringCatSheaf.obj.obj (Opposite.op W))
+        (M.val.obj (Opposite.op W)) ((dualObj M).val.obj (Opposite.op W))).flip ψ.hom) ∘ₗ
+        hL.symm.toLinearMap)
+  have hki : k ≫ (evPre M).app (Opposite.op W) = 𝟙 _ := by
+    refine ModuleCat.hom_ext (LinearMap.ext fun c => ?_)
+    simp only [ModuleCat.hom_comp, ModuleCat.hom_id, LinearMap.comp_apply, LinearMap.id_apply]
+    exact hL.apply_symm_apply c
+  have hik : (evPre M).app (Opposite.op W) ≫ k = 𝟙 _ := by
+    refine ModuleCat.MonoidalCategory.tensor_ext fun m φ => ?_
+    have hc := ModularCurves.SheafOfModules.evalSection_factor X.ringCatSheaf M W ψ φ m
+    -- the inverse image of the evaluation is the scalar times the section
+    have hsm : hL.symm (ModularCurves.SheafOfModules.evalSection X.ringCatSheaf M W φ m) =
+        ModularCurves.SheafOfModules.dualUnitSectionsEquiv X.ringCatSheaf W (ψ.inv ≫ φ) • m :=
+      hL.injective ((hL.apply_symm_apply _).trans (hc.trans
+        ((_root_.map_smul hL _ m).trans (smul_eq_mul _ _)).symm))
+    -- the scalar times the trivialization is the functional
+    have hcψ : ModularCurves.SheafOfModules.dualUnitSectionsEquiv X.ringCatSheaf W
+        (ψ.inv ≫ φ) • ψ.hom = φ := by
+      show ψ.hom ≫ ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf W
+        (ModularCurves.SheafOfModules.dualUnitSectionsEquiv X.ringCatSheaf W (ψ.inv ≫ φ)) = φ
+      exact (congrArg (fun t => ψ.hom ≫ t)
+        ((ModularCurves.SheafOfModules.dualUnitSectionsEquiv
+          X.ringCatSheaf W).symm_apply_apply (ψ.inv ≫ φ))).trans (Iso.hom_inv_id_assoc ψ φ)
+    exact (congrArg (fun x => x ⊗ₜ[X.ringCatSheaf.obj.obj (Opposite.op W)] ψ.hom) hsm).trans
+      ((TensorProduct.smul_tmul _ m ψ.hom).trans (congrArg (fun y => m ⊗ₜ y) hcψ))
+  haveI : IsIso ((evPre M).app (Opposite.op W)) := ⟨k, hik, hki⟩
+  exact (ConcreteCategory.isIso_iff_bijective _).mp inferInstance
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
