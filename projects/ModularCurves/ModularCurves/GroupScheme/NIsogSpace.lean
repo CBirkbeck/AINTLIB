@@ -30,11 +30,13 @@ This file executes the decomposition `.mathlib-quality/decomposition-nisog-L15.m
 * [L15-f] finiteness (KM's fibre count; c5β substrate hypothesis-wired).
 -/
 
-open AlgebraicGeometry CategoryTheory Limits TensorProduct
+open AlgebraicGeometry CategoryTheory Limits TensorProduct ModularCurves.EllipticCurve
 
 universe u
 
 namespace ModularCurves
+
+variable {S : Scheme.{u}}
 
 /-! ## The bi-ideal condition (KM 6.5.1's "is a bi-ideal in 𝓕")
 
@@ -53,5 +55,69 @@ def IsBiIdeal {A : Type u} [CommRing A] {F : Type u} [CommRing F] [Algebra A F]
       ∀ k ∈ K, Δ k ∈
         LinearMap.range (TensorProduct.map K.subtype (LinearMap.id (R := A) (M := F))) ⊔
           LinearMap.range (TensorProduct.map (LinearMap.id (R := A) (M := F)) K.subtype)
+
+variable {A : Type u} [CommRing A] {F : Type u} [CommRing F] [Algebra A F]
+  {Δ : F →ₐ[A] F ⊗[A] F} {ε : F →ₐ[A] A} {K : Submodule A F}
+
+/-- The ideal clause of `IsBiIdeal`: `K` is closed under multiplication by `F`, so it is an
+ideal of the ring `F` (KM's *"the kernel `𝒦 ⊆ 𝓕`"* is an ideal — the algebra half of
+bi-ideal). Its underlying `A`-submodule is `K`. -/
+def IsBiIdeal.toIdeal (h : IsBiIdeal Δ ε K) : Ideal F where
+  carrier := K
+  add_mem' := K.add_mem
+  zero_mem' := K.zero_mem
+  smul_mem' c x hx := by
+    rw [smul_eq_mul]; exact h.1 c x hx
+
+@[simp] theorem IsBiIdeal.mem_toIdeal (h : IsBiIdeal Δ ε K) {x : F} :
+    x ∈ h.toIdeal ↔ x ∈ K := Iff.rfl
+
+/-- The counit kills a bi-ideal. -/
+theorem IsBiIdeal.counit_eq_zero (h : IsBiIdeal Δ ε K) {k : F} (hk : k ∈ K) : ε k = 0 :=
+  h.2.1 k hk
+
+/-! ## The `N`-isogeny moduli representation (the hypothesis-wired assembly interface)
+
+KM 6.5.1 relatively represents `[N-Isog]` by a closed subscheme of the Grassmannian of
+rank-`N` quotients of `𝓕 = O(E[N])`, cut by the bi-ideal condition, and shows it is finite
+over the base. Three external inputs gate this construction, none yet landed:
+
+* the **bialgebra sheaf** `𝓕` with its comultiplication/counit — c5β's E[N]-package
+  (`CHARTER-C5B-2`) for the rank-`N²` local-freeness (`torsionπ_isFinite`/`_flat`/`torsion_rank`,
+  stated, sorry-backed via the BB-boxes) and NEW-HOPF's C-layer for the comultiplication;
+* the **subgroup ↔ bi-ideal dictionary** (Hopf-ideal correspondence) — NEW-HOPF's pins;
+* **relative representability** of the Grassmannian — fable-FP's `grassmannianScheme`
+  (forward `pointOfMember` proven) plus its boarded global-descent leaf.
+
+Per charter (`v10.162`), these are hypothesis-wired into the record below; when the gates
+close it is populated and `exists_nIsogSpace` is axiom-clean. -/
+
+variable (E : EllipticCurve S) (N : ℕ) [NeZero N]
+
+/-- **[L15] the `N`-isogeny moduli representation** (hypothesis-wired pins-record). A finite
+`S`-scheme `W` whose `T`-points classify `N`-isogeny data on `E ×_S T` — exactly the closed
+subscheme of the Grassmannian of `𝓕` cut by the bi-ideal condition (KM 6.5.1). This bundles
+the three gated inputs above; everything downstream lands on it. -/
+structure NIsogRepresentation where
+  /-- The moduli scheme of `N`-isogeny data. -/
+  W : Scheme.{u}
+  /-- Its structure morphism to the base. -/
+  w : W ⟶ S
+  /-- Finiteness over the base (KM 6.5.1: finite fibres via the prime-power fibre count). -/
+  finite : IsFinite w
+  /-- The classifying equivalence (KM 6.5.1's relative representability, through the bi-ideal
+  Grassmannian and `pointOfMember`). -/
+  classify : ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S),
+    Nonempty (NIsogenyStructure (E.baseChange t) N ≃ { h : T ⟶ W // h ≫ w = t })
+
+/-- **[L15] the assembly** — `exists_nIsogSpace` follows from any `N`-isogeny moduli
+representation. The representation is the hypothesis-wired composite of the three gates;
+this theorem is the mechanical extraction, so `exists_nIsogSpace` closes with zero further
+wiring the moment the gates land. -/
+theorem exists_nIsogSpace_of_representation (r : NIsogRepresentation E N) :
+    ∃ (W : Scheme.{u}) (w : W ⟶ S), IsFinite w ∧
+      ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S),
+        Nonempty (NIsogenyStructure (E.baseChange t) N ≃ { h : T ⟶ W // h ≫ w = t }) :=
+  ⟨r.W, r.w, r.finite, r.classify⟩
 
 end ModularCurves
