@@ -166,8 +166,14 @@ half of the Grothendieck-complex theorem in Stacks 0A1G / Mumford §5.
 The module-theoretic half is already formalized and axiom-clean in
 `ForMathlib/BaseChangeKerCoker.lean`: cokernel base change, kernel base change under the
 flat-cokernel condition, finite projectivity, and the algebra-form base-change
-equivalence. What is absent is the comparison from scheme/sheaf cohomology to that
-finite complex. The affine-vanishing part of draft mathlib PR #36345 is now proved
+equivalence. Its vanishing-cokernel endpoint is now arbitrary-base:
+`Module.Projective.ker_of_surjective` and
+`Module.Finite.ker_of_surjective_of_projective` identify the kernel of a surjective
+differential between finite projectives as finite projective, while
+`kerBaseChangeComparison_bijective_of_surjective` proves that this kernel commutes with
+every algebra base change. Thus the older noetherian flat-cokernel fallback is not needed
+for the pole sheaves. What is absent is the comparison from scheme/sheaf cohomology to
+that finite complex. The affine-vanishing part of draft mathlib PR #36345 is now proved
 option-free in this project, but that draft does not provide proper pushforward or
 arbitrary-base cohomology and base change.
 
