@@ -16712,3 +16712,19 @@ Legendre, b=3 naive-3).
     (`Module.Invertible`, finite+projective instances, `free_iff_linearEquiv`) exists —
     right shape for a STALK route, but that needs a stalk theory for sheaves of modules
     (absent in mathlib); the element route dodges it. Cite if L2 ever localizes to rings.
+
+## [T-E5f-glue] recollement gluing core (fable-P4, 2026-07-12) — the 1 sorry in representable_of_baseChange_cover
+KEY INSIGHT (avoids the "no group-scheme-gluing API" wall the recollement agent hit): glue the
+GEOMETRIC EllipticCurveGeom (E via Scheme.GlueData, π, zero, localModel), NOT the group-enriched
+EllipticCurve — the group law is RE-DERIVED via toEllipticCurve (T-W7), so no group-scheme gluing.
+localModel glues (LocallyWeierstrass.baseChange + it's Zariski-local).
+* **[R-glue-obj]** glue Xa.base/Xb.base (over D(a)/D(b) ⊆ Spec R via Spec(Away)→Spec R open imm)
+  along D(ab) → base scheme over Spec R (Scheme.GlueData, 2 charts); glue the curve E likewise
+  (E_a, E_b agree over D(ab) by the base-change uniqueness iso); π/zero/localModel; toEllipticCurve
+  → EllObj R. Consumer: R-glue-repr + main.
+* **[R-glue-repr]** the glued EllObj represents P: RepresentableBy X_glued via functor descent along
+  the Zariski cover of the TEST object Y.base = (a-part) ∪ (b-part); local bijections from
+  RepresentableBy Xa/Xb of P.baseChange; agree on D(ab) via baseChange_comp + representing-object
+  uniqueness (Functor.RepresentableBy unique).
+* base-change⊣restrictScalars adjunction / representability-preserved-under-base-change — the
+  gluing-datum-over-D(ab) primitive.
