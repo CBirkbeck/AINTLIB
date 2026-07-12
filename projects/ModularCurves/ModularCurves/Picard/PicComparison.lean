@@ -591,6 +591,49 @@ theorem exists_tensorObj_iso_unitObj_of_isUnit_toSkeleton {M : X.Modules}
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
+/-- The pairing of an isomorphism `ε : M ⊗ N ≅ 𝒪ₓ` on presheaf-tensor elements over an
+open `V`: apply the sheafification unit, then `ε.hom`, landing in `𝒪(V)`. -/
+noncomputable def pairingElem {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X)
+    (V : X.Opens)
+    (t : ((M.val ⊗ N.val : _root_.PresheafOfModules
+      (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (Opposite.op V))) :
+    X.ringCatSheaf.obj.obj (Opposite.op V) :=
+  ε.hom.val.app (Opposite.op V)
+    ((PresheafOfModules.toSheafify (𝟙 X.ringCatSheaf.obj)
+      (CategoryTheory.toSheafify (Opens.grothendieckTopology ↥X)
+        (M.val ⊗ N.val : _root_.PresheafOfModules
+          (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).presheaf)).app (Opposite.op V) t)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The pairing is additive (both layers are morphisms of modules). -/
+theorem pairingElem_sum {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X) (V : X.Opens)
+    {ι : Type*} (s : Finset ι)
+    (f : ι → ((M.val ⊗ N.val : _root_.PresheafOfModules
+      (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (Opposite.op V))) :
+    pairingElem ε V (∑ i ∈ s, f i) = ∑ i ∈ s, pairingElem ε V (f i) := by
+  simp only [pairingElem, map_sum]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The pairing commutes with restriction (naturality of both layers). -/
+theorem pairingElem_map {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X)
+    {V W : X.Opens} (i : Opposite.op V ⟶ Opposite.op W)
+    (t : ((M.val ⊗ N.val : _root_.PresheafOfModules
+      (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (Opposite.op V))) :
+    pairingElem ε W ((M.val ⊗ N.val : _root_.PresheafOfModules
+      (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).map i t) =
+      X.ringCatSheaf.obj.map i (pairingElem ε V t) := by
+  simp only [pairingElem]
+  exact (congrArg (ε.hom.val.app (Opposite.op W))
+    (PresheafOfModules.naturality_apply (PresheafOfModules.toSheafify (𝟙 X.ringCatSheaf.obj)
+      (CategoryTheory.toSheafify (Opens.grothendieckTopology ↥X)
+        (M.val ⊗ N.val : _root_.PresheafOfModules
+          (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).presheaf)) i t)).trans
+    (PresheafOfModules.naturality_apply ε.hom.val i _)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
 /-- **[CMP-←]** A ⊗-invertible module is cover-locally trivial (Zariski-local freeness:
 around every point a pure-tensor decomposition of the unit section exhibits, over the
 local ring at the point, a unit pairing value, and rescaling gives a section pair with

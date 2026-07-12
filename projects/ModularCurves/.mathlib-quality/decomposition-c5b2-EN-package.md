@@ -141,3 +141,44 @@ Committed `GroupScheme/GLSchemeAction.lean` (compiling; one sorry = L2):
     pairing (p2) — consume the *criterion* if it factors out, else build via `torsionπ_etale`.
   - **L2** `fullLevelIso := asIso fullLevelHom` given L2b.
 - **L4** seam (`glSchemeSmul` ↔ `hOrbitSetoid`, NEW-GH's consumption) — state once L2 lands + NEW-GH pins the form.
+
+## v10.155 EXECUTION — interface pushed, L2a landed, T-F1/L2b root identified
+
+DONE this session (committed):
+- **T-F1 INTERFACE** `torsion_etaleLocal_triv` (GroupScheme/TorsionEtaleTriv.lean) — sorried,
+  boarded v10.155, **NEW-Y1 CLOPEN-β unblocked** (the priority first act).
+- **glSchemeSmul group-action layer** (GLSchemeAction.lean) — glEquiv/constGL/glSchemeSmul +
+  _one/_mul, all proven.
+- **L2a `fullLevelHom`** — the map φ, proven (Sigma.desc ∘ pointToTorsion ∘ N-killed combo).
+- `fullLevelIso := asIso fullLevelHom` given L2b.
+
+THE SHARED CRUX (root of both remaining sorries — L2b `fullLevelHom_isIso` AND T-F1
+`torsion_etaleLocal_triv`):
+- `isIso_of_isPullback_of_fppf` (h : IsPullback fst snd f g, f fppf [Surj+Flat+QuasiCompact],
+  IsIso fst ⟹ IsIso g) needs a **trivialising fppf cover** of E[N]. That cover IS T-F1.
+- **T-F1 is the true root**: construct the étale cover over which the finite-étale `E[N]`
+  (`torsionπ_etale`, N inv) becomes constant `(ℤ/N)²` — KM 2.3.1's étale-locally-constant
+  structure. Route: the finite-étale Galois/fundamental-group structure
+  (`ForMathlib/FiniteEtaleFundamentalGroup.lean` `finiteEtaleEquivContAction`) — E[N] as a
+  π₁-set trivialises on the cover killing the action; OR a direct rank-N² finite-étale
+  structure lemma. This is the deep sub-development (the KM 2.3.1 local structure) — its own
+  focused pass; NEW-Y1 codes to the pushed interface meanwhile.
+- Once T-F1 lands: L2b = base-change φ along the cover (becomes iso between two constant
+  (ℤ/N)², by the full-level bijection) + `isIso_of_isPullback_of_fppf`; then L4 seam for NEW-GH.
+
+## T-F1 UNLOCKED — the 8-link assembly (all mathlib lemmas named; execution plan)
+
+The crux `torsion_etaleLocal_triv` = scheme-level globalisation of mathlib's ring-level
+`Algebra.IsFiniteSplit.exists_tensorProduct_of_etale` (Lenstra 5.10). NO scheme-level shortcut
+(mathlib Galois category is field-level; confirmed). Assembly, all links named:
+1. `isAffine_of_isAffineHom` — for S affine, E[N]=E.torsion N is affine (IsFinite extends IsAffineHom).
+2. `HasRingHomProperty.iff_of_isAffine` (the `@Etale` instance) — Etale (E.torsionπ N) → RingHom.Etale (R→A), A:=Γ(E.torsion N).
+3. `torsionπ_isFinite` + `Scheme.Hom.finrank`/`torsion_rank` (=N²) — Module.Finite R A + rankAtStalk A = N².
+4. **`exists_tensorProduct_of_etale`** — the totally-split cover T (étale FaithfullyFlat R-algebra, IsFiniteSplit T (T⊗A)).
+5. `IsFiniteSplit.nonempty_algEquiv_fun` — T⊗A ≅ (Fin N² → T); Spec ⟹ E[N]×_S Spec T ≅ ∐_{N²} Spec T.
+6. `∐_{N²} Spec T = constScheme (Spec T) (Fin 2 → ZMod N)` (N² = card, scheme-level; (ℤ/N)² labels irrelevant here).
+7. Spec T → S étale (FaithfullyFlat+Etale) surjective — the cover.
+8. General S: affine `OpenCover` + `∐_i` the local covers, Sigma-commute reindex (rank N² constant ⟹ global const iso).
+Then L2b `fullLevelHom_isIso` = base-change φ along the cover (iso of two const N²-sheet schemes) +
+`isIso_of_isPullback_of_fppf`; then L4 seam. Execution effort: substantial (multi-build), but each
+link is a named lemma — no open mathematical gap remains.
