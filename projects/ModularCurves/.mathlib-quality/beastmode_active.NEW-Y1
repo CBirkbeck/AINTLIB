@@ -1,1 +1,1 @@
-FOCUS: [YF-ISOLOC] landed clean; now [YF-OI-CRIT] — clopen image + section ⟹ open immersion criterion (the CLOPEN assembly shape): closed immersion ι whose image = clopen set + a section over that clopen ⟹ ι open immersion; audit mathlib IsClopen→open subscheme + isPullback/section API
+FOCUS: route-γ foundations landed ([YF-ISOLOC],[YF-OI-CRIT],[YF-TAUT] all clean/rooted); remaining = [YF-CLASSIFIER] (divisor↔iso, heavy, needs /develop --decompose) + [YF-RANGE] + final assembly of isOpenImmersion_levelSpaceΓι

@@ -67,6 +67,7 @@ import ModularCurves.Moduli.Coarse
 import ModularCurves.Moduli.EllCategory
 import ModularCurves.Moduli.EngineDescent
 import ModularCurves.Moduli.GammaH
+import ModularCurves.Moduli.FullLevelTautSection
 import ModularCurves.Moduli.GammaHRepresentability
 import ModularCurves.Moduli.Groupoid
 import ModularCurves.Moduli.LevelSpaces
