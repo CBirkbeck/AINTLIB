@@ -720,6 +720,14 @@ using smoothness, properness, and pole-sheaf invertibility. This is now the conc
 to the future perfect-complex construction; it does not infer finite generation or
 projectivity of the raw Cech terms.
 
+The next base-change dependency is affine-local and independent of proper perfectness.
+For an affine open `U ⊆ X` and an affine base change `T → S`, first identify
+`(X ×_S T)|_{U_T}` with `U ×_S T` using `pullbackRestrictIsoRestrict` and pullback
+pasting. Then `patchKunnethΓ` identifies its section ring with
+`Γ(U,⊤) ⊗_{Γ(S,⊤)} Γ(T,⊤)`. These are the geometric and scalar interfaces needed to
+compare the factors, differentials, and kernels of the base-linear Cech complexes after
+base change; they do not by themselves assert perfectness or cohomology base change.
+
 The elementary Mayer--Vietoris seam is now complete in both directions.
 `HPrimeZeroAddEquivSections` identifies `H'⁰(U,F)` with sections naturally in `U`, while
 `HPrimeAddEquivHOfIsTerminal` identifies `H'ⁿ(T,F)` with genuine `Sheaf.H F n` when `T`
