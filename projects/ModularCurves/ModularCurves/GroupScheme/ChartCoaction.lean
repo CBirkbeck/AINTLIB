@@ -360,7 +360,22 @@ theorem chartCoaction_isCoaction : IsCoaction P.chartCoaction where
         P.chartRing).toAlgHom.comp P.coactionAlgLeft from rfl,
       ← AlgHom.comp_assoc, ← AlgHom.comp_assoc, hcollapse,
       chartCounitCollapse_comp_coactionAlgLeft]
-  coassoc := by sorry
+  coassoc := by
+    -- REMAINING (WIP): the Γ-dual of `translationAction_assoc`, mirroring PatchHopf's
+    -- `comulTop_coassoc`. Plan (analogous to the completed `counit` field above):
+    --  1. Build the triple identification `Spec(A ⊗ (A ⊗ B)) ≅ G|_V ×_V (G|_V ×_V U)` by
+    --     layering `pullbackSpecIso P.baseRing P.groupRing (A⊗B)` on `chartSpecIso`, with
+    --     its three inclusion-leg duals (reuse `chartSpecIso_hom_includeLeft/Right`).
+    --  2. Build the two triple-action scheme maps `m_twice = α∘(id_G ×_V α)` and
+    --     `m_prod = α∘(μ ×_V id_U)∘assoc` on the triple, where α = `chartCoactionSpec`,
+    --     μ = `squareMul` (from PatchHopf).
+    --  3. Prove `m_twice = m_prod` by `cancel_mono P.U.ι` + the E.Point route (cube points
+    --     `cubePt₁/₂/₃`, `point_restrictT_add_eq`), finishing with `add_assoc` — mirroring
+    --     `assocScheme_leftMulSchemeL`.
+    --  4. Γ-dualise (through the triple legs + `ΓSpecIso_inv_naturality`) to the AlgHom
+    --     coassoc for `coactionAlgLeft`, then convert to `chartCoaction` via `comm`/`assoc`
+    --     coherence (pure tensor algebra), and rewrite `comulAlgHom` via `comulAlgHom_eq_opens`.
+    sorry
 
 end AffineChartPatch
 
