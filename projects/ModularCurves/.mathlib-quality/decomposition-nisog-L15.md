@@ -107,3 +107,26 @@ universal property. **So Y₀(N) is transitively wall-blocked on a naturality-st
 `classify` field of `NIsogRepresentation` should be upgraded to a natural-iso / representable
 form when L15 is built (noted for the construction lane). All other Y₀(N) handles
 (`toRelEffCartierDiv`, `GammaZeroStructure`/`IsCyclic`, `exists_cyclicityLocus`) are HAVE.
+
+## Y₀(N) CYCLICITY-TRANSFER CRUX — DELIVERED (D2, 2026-07-12, continuation)
+
+The Y₀(N) assembly's hardest compatibility (flagged in the finding above) is now PROVEN
+(`GroupScheme/NIsogSpace.lean`):
+- `FiniteLocallyFreeSubgroup.toRelEffCartierDiv_baseChange_ideal` — the subgroup-divisor
+  commutes with base change: `(G.baseChange g).toRelEffCartierDiv.ideal =
+  (G.toRelEffCartierDiv.baseChange g).ideal` (both `= G.ι.ker.comap (pullback.fst E.π g)`,
+  via the pullbackSymmetry + `ker_fst_of_isClosedImmersion` route). [sorryAx via upstream
+  T-SG1b `subgroup.baseChange`, not D2.]
+- `isGammaZeroFppf_congr` — cyclicity is ideal-determined (via `RelEffCartierDiv.ext`).
+  **Fully axiom-clean.**
+- `isCyclic_baseChange_iff` — `(G.baseChange g).IsCyclic N ↔ IsGammaZeroFppf N
+  (G.toRelEffCartierDiv.baseChange g)` — **the exact shape `exists_cyclicityLocus` consumes.**
+
+So the Y₀(N) assembly `exists_gammaZeroSpace = cut cyclicity locus on [N-Isog]` now has its
+cyclicity-transfer step DONE. **Remaining** (not a wall — a design+coherence build whose
+interface shape L15's real construction dictates): (i) the functorial `NIsogRepresentation`
+(a `classify` that is natural, so a `T`-structure is the pullback of the universal one); (ii)
+the classify-naturality / L5-style curve-composition coherence (`E.baseChange (h≫w)` vs
+`(E.baseChange w).baseChange h` for the subgroup). With those, the equivalence chain
+`GammaZeroStructure_T ≃ cyclic-NIsog_T ≃ {h through Z}` closes via `isCyclic_baseChange_iff`
++ `exists_cyclicityLocus` + the functorial classify.
