@@ -136,6 +136,148 @@ theorem basicOpen_sup_basicOpen_eq_top (a b : R) (hab : ∃ x y : R, x * a + y *
   have hcover := (PrimeSpectrum.iSup_basicOpen_eq_top_iff' (s := ({a, b} : Set R))).mpr hspan
   rw [← hcover, iSup_pair]
 
+/-! ## [T-E5f-g0] the base-change ⊣ restrict-scalars hom-equivalence
+
+For `X : Ell/R'` and a ring map `τ : R' ⟶ R''`, morphisms `Y ⟶ X.baseChangeRing τ` in `Ell/R''`
+biject naturally with morphisms `(restrictScalars τ) Y ⟶ X` in `Ell/R'`. This is the universal
+property of `baseChangeRing` as a pullback — the base-change ⊣ restrict-scalars adjunction — and is
+the primitive from which representability transfers under base change, giving the gluing datum over
+`D(ab)` in the recollement. -/
+
+section BaseChangeAdjunction
+
+variable {R' R'' : CommRingCat.{u}}
+
+set_option backward.isDefEq.respectTransparency false
+
+/-- The zero section of the ring-base-changed curve, composed with the first projection, is the
+base pullback map composed with the original zero section. -/
+theorem baseChangeRing_curve_zero_comp_fst (X : EllObj R') (τ : R' ⟶ R'') :
+    (X.baseChangeRing τ).curve.zero ≫
+        pullback.fst X.curve.π (pullback.fst X.structMap (Spec.map τ))
+      = pullback.fst X.structMap (Spec.map τ) ≫ X.curve.zero :=
+  pullback.lift_fst _ _ _
+
+/-- The zero section of the ring-base-changed curve, composed with the second projection, is the
+identity (it is a section of `π`). -/
+theorem baseChangeRing_curve_zero_comp_snd (X : EllObj R') (τ : R' ⟶ R'') :
+    (X.baseChangeRing τ).curve.zero ≫
+        pullback.snd X.curve.π (pullback.fst X.structMap (Spec.map τ))
+      = 𝟙 (X.baseChangeRing τ).base :=
+  pullback.lift_snd _ _ _
+
+/-! ### Forward map -/
+
+/-- Forward map of the base-change hom-equivalence: post-compose the base and curve legs of
+`f : Y ⟶ X.baseChangeRing τ` with the pullback first-projections. -/
+@[simps]
+noncomputable def baseChangeRingHomEquivFwd (X : EllObj R') (τ : R' ⟶ R'') (Y : EllObj R'')
+    (f : Y ⟶ X.baseChangeRing τ) : (EllObj.restrictScalars τ).obj Y ⟶ X where
+  baseHom := f.baseHom ≫ pullback.fst X.structMap (Spec.map τ)
+  base_w := by
+    have hbw : f.baseHom ≫ pullback.snd X.structMap (Spec.map τ) = Y.structMap := f.base_w
+    show (f.baseHom ≫ pullback.fst X.structMap (Spec.map τ)) ≫ X.structMap
+      = Y.structMap ≫ Spec.map τ
+    rw [Category.assoc, pullback.condition, ← Category.assoc, hbw]
+  top := f.top ≫ pullback.fst X.curve.π (pullback.fst X.structMap (Spec.map τ))
+  isPullback :=
+    f.isPullback.paste_horiz
+      (IsPullback.of_hasPullback X.curve.π (pullback.fst X.structMap (Spec.map τ)))
+  zero_w := by
+    have hz : Y.curve.zero ≫ f.top = f.baseHom ≫ (X.baseChangeRing τ).curve.zero := f.zero_w
+    show Y.curve.zero ≫ f.top ≫ pullback.fst X.curve.π (pullback.fst X.structMap (Spec.map τ))
+      = (f.baseHom ≫ pullback.fst X.structMap (Spec.map τ)) ≫ X.curve.zero
+    rw [← Category.assoc, hz, Category.assoc, Category.assoc]
+    congr 1
+    exact pullback.lift_fst _ _ _
+
+/-! ### Inverse map (via base/curve pullback lifts) -/
+
+/-- Base leg of the inverse map: lift `g.baseHom` and `Y.structMap` through the base pullback. -/
+noncomputable def bcInvBase (X : EllObj R') (τ : R' ⟶ R'') (Y : EllObj R'')
+    (g : (EllObj.restrictScalars τ).obj Y ⟶ X) : Y.base ⟶ (X.baseChangeRing τ).base :=
+  pullback.lift g.baseHom Y.structMap g.base_w
+
+@[simp]
+theorem bcInvBase_fst (X : EllObj R') (τ : R' ⟶ R'') (Y : EllObj R'')
+    (g : (EllObj.restrictScalars τ).obj Y ⟶ X) :
+    bcInvBase X τ Y g ≫ pullback.fst X.structMap (Spec.map τ) = g.baseHom :=
+  pullback.lift_fst _ _ _
+
+@[simp]
+theorem bcInvBase_snd (X : EllObj R') (τ : R' ⟶ R'') (Y : EllObj R'')
+    (g : (EllObj.restrictScalars τ).obj Y ⟶ X) :
+    bcInvBase X τ Y g ≫ pullback.snd X.structMap (Spec.map τ) = Y.structMap :=
+  pullback.lift_snd _ _ _
+
+/-- Curve leg of the inverse map: lift `g.top` and `Y.curve.π ≫ bcInvBase` through the curve
+pullback. -/
+noncomputable def bcInvTop (X : EllObj R') (τ : R' ⟶ R'') (Y : EllObj R'')
+    (g : (EllObj.restrictScalars τ).obj Y ⟶ X) : Y.curve.E ⟶ (X.baseChangeRing τ).curve.E :=
+  pullback.lift g.top (Y.curve.π ≫ bcInvBase X τ Y g) (by
+    have hgw : g.top ≫ X.curve.π = Y.curve.π ≫ g.baseHom := g.isPullback.w
+    rw [Category.assoc, bcInvBase_fst]; exact hgw)
+
+@[simp]
+theorem bcInvTop_fst (X : EllObj R') (τ : R' ⟶ R'') (Y : EllObj R'')
+    (g : (EllObj.restrictScalars τ).obj Y ⟶ X) :
+    bcInvTop X τ Y g ≫ pullback.fst X.curve.π (pullback.fst X.structMap (Spec.map τ)) = g.top :=
+  pullback.lift_fst _ _ _
+
+@[simp]
+theorem bcInvTop_snd (X : EllObj R') (τ : R' ⟶ R'') (Y : EllObj R'')
+    (g : (EllObj.restrictScalars τ).obj Y ⟶ X) :
+    bcInvTop X τ Y g ≫ pullback.snd X.curve.π (pullback.fst X.structMap (Spec.map τ))
+      = Y.curve.π ≫ bcInvBase X τ Y g :=
+  pullback.lift_snd _ _ _
+
+/-- Inverse map of the base-change hom-equivalence. -/
+@[simps]
+noncomputable def baseChangeRingHomEquivInv (X : EllObj R') (τ : R' ⟶ R'') (Y : EllObj R'')
+    (g : (EllObj.restrictScalars τ).obj Y ⟶ X) : Y ⟶ X.baseChangeRing τ where
+  baseHom := bcInvBase X τ Y g
+  base_w := bcInvBase_snd X τ Y g
+  top := bcInvTop X τ Y g
+  isPullback := by
+    have hgpb : IsPullback g.top Y.curve.π X.curve.π g.baseHom := g.isPullback
+    refine IsPullback.of_right
+      (h₁₂ := pullback.fst X.curve.π (pullback.fst X.structMap (Spec.map τ)))
+      ?_ (bcInvTop_snd X τ Y g)
+      (IsPullback.of_hasPullback X.curve.π (pullback.fst X.structMap (Spec.map τ)))
+    rw [bcInvTop_fst, bcInvBase_fst]; exact hgpb
+  zero_w := by
+    have hgz : Y.curve.zero ≫ g.top = g.baseHom ≫ X.curve.zero := g.zero_w
+    apply pullback.hom_ext
+    · rw [Category.assoc, bcInvTop_fst, Category.assoc, baseChangeRing_curve_zero_comp_fst,
+        hgz, ← bcInvBase_fst, Category.assoc]
+    · rw [Category.assoc, bcInvTop_snd, Category.assoc, baseChangeRing_curve_zero_comp_snd,
+        Category.comp_id, ← Category.assoc, Y.curve.zero_π, Category.id_comp]
+
+/-! ### The hom-equivalence -/
+
+/-- **[T-E5f-g0]** The base-change ⊣ restrict-scalars hom-equivalence. -/
+noncomputable def baseChangeRingHomEquiv (X : EllObj R') (τ : R' ⟶ R'') (Y : EllObj R'') :
+    (Y ⟶ X.baseChangeRing τ) ≃ ((EllObj.restrictScalars τ).obj Y ⟶ X) where
+  toFun := baseChangeRingHomEquivFwd X τ Y
+  invFun := baseChangeRingHomEquivInv X τ Y
+  left_inv f := by
+    have hbase : bcInvBase X τ Y (baseChangeRingHomEquivFwd X τ Y f) = f.baseHom := by
+      apply pullback.hom_ext
+      · rw [bcInvBase_fst, baseChangeRingHomEquivFwd_baseHom]
+      · rw [bcInvBase_snd]
+        exact f.base_w.symm
+    refine EllHom.ext hbase ?_
+    apply pullback.hom_ext
+    · rw [baseChangeRingHomEquivInv_top, bcInvTop_fst, baseChangeRingHomEquivFwd_top]
+    · rw [baseChangeRingHomEquivInv_top, bcInvTop_snd, hbase]
+      exact f.isPullback.w.symm
+  right_inv g := by
+    refine EllHom.ext ?_ ?_
+    · rw [baseChangeRingHomEquivFwd_baseHom, baseChangeRingHomEquivInv_baseHom, bcInvBase_fst]
+    · rw [baseChangeRingHomEquivFwd_top, baseChangeRingHomEquivInv_top, bcInvTop_fst]
+
+end BaseChangeAdjunction
+
 /-! ## [T-E5f-main] the recollement theorem -/
 
 /-- **[T-E5f] The Katz–Mazur recollement theorem (KM Cor. 4.7.1).**
