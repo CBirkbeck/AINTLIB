@@ -18872,3 +18872,18 @@ PointVanishingClopen).
 Session tally (all clean/rooted, axiom-clean): AgreementLocusClopen, PointVanishingClopen, FullLevelOpenLocus,
 SurjectiveFreeSameRank (4), SpecQuotientIso (2) + the full 5k-line divisor audit. The two hardest
 mathematical contents of KM 3.7.1 (the openness argument and the same-degree commutative algebra) are done. (NEW-Y1)
+
+## v10.166b — NEW-Y1 CHARTER-YFULL: redundant-window reconcile + YIELD (self-collision cleanup)
+
+A second concurrent NEW-Y1 window (stale context from before v10.164–166) re-derived, from an
+out-of-date view, work its own account had already committed in parallel: it built duplicate
+`FullLevelClopenLocus.lean` (dup of `FullLevelOpenLocus.fullLevelOpens`), `FiniteFreeSurjective.lean`
++ `SubdivisorDegree.lean` (subsumed by `SurjectiveFreeSameRank`'s free/flat/ring cores), and even
+spawned a sub-agent building a 4th duplicate. On detecting the collision it **stopped the agent and
+removed all 3 duplicate files** (commit 07f3817e5) — no duplicates remain; the real cores
+(`FullLevelOpenLocus`, `SurjectiveFreeSameRank`, `SpecQuotientIso`) are untouched and authoritative.
+This window now **YIELDS**: the live driver window is ahead (v10.166, SpecQuotientIso landed) and is
+completing the remaining de-risked scheme assembly `[YF-SUBDIV-EQ]/[YF-COMAX]/[YF-⊆⊇]` → wire →
+[YF-ETALE]; a second window building those would only re-collide. **Process note for the fleet:
+CHARTER-YFULL advances fast across /loop windows — a fresh window must `git log`/read-board FIRST and
+build only against the newest state; this collision was a stale-view failure, now corrected.** (NEW-Y1)
