@@ -17108,3 +17108,28 @@ model_mul_assoc_lift over atlasCubeCover). Consumers: Y(N)/Γ_H (NEW-GH, NEW-Y1)
 the engine you consume is now unconditional. NOTE: fixed T-W7 for the fleet; also flagged the shared-clone
 concurrent-clobber hazard (commit frequently / use worktrees per CLAUDE.md).
 NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLEAN toEllipticCurve).
+
+## Amendments v10.163 (2026-07-12, fable-PIC0): L-B divisor-degree arc — D2 seam boarded; decomposition (AG-LB closure plan)
+
+- **D2 SEAM (boarded per v10.162 dispatch)**: consuming `LevelStructure/CartierDivisor.lean`
+  (D2's engine): `RelEffCartierDiv` (ideal : IdealSheafData + flf-over-S),
+  `IsOfficialCartier` (KM 1.1.1 verbatim: flat + affine-locally span{f}, f nzd),
+  `RelEffCartierDiv.isOfficial` (:2573 — EVERY divisor on a separated smooth-rel-dim-1
+  curve is official), `sectionDivisor(_degree)`, `sectionsDivisor_degree = n`,
+  `baseChange`/`flatPullback` + laws. The seam theorem = **AG-LB itself** (plan.md:168,
+  blocks D2's T-D1/T-D19): ideal sheaves as invertible modules. Cross-stream ★ when done.
+- **[LB] decomposition** (sources: KM 1.1.1 verbatim in the engine's docstring; GME
+  §2.1.4/pp. 106-108 [P ↦ I(P) invertible] read this session; mathlib
+  `IdealSheaf/Subscheme.lean` `ker_subschemeι_app : ker(ι♯-app at affine U) = J.ideal U`):
+  - **[LB-1a]** `idealPresheaf J` — subpresheaf-of-O with sections = ker(subschemeι.app),
+    a presheaf of modules (restriction-compat from ι♯-naturality).
+  - **[LB-1b]** sheaf-property (amalgamate in O; ι♯g = 0 is local since the target
+    presheaf is a sheaf, hence separated) → `idealModule J : C.Modules`.
+  - **[LB-2a]** per-principal-affine trivialization: mult-by-generator hom
+    `unitObj V ⟶ (restrict) idealModule`; bijective on basic-open covers
+    (`map_ideal_basicOpen` + nzd-localizes); iso via the [PAIR-3/4] cover-template.
+  - **[LB-2]** `IsInvertible (idealModule J)` from `IsOfficialCartier π J` (choice-cover).
+  - **[LB-3]** `picClass D : Pic C` via **[PIC-P2-CMP]'s `IsInvertible.isUnit_toSkeleton`**
+    (first consumer!) + section-divisor degree statements; feeds the Pic⁰-assembly map
+    `E(T) → Pic_{E/S}(T)` (ν-grading = the remaining degree-functor tail).
+- EXECUTE same-session per v10.162 marathon norm.
