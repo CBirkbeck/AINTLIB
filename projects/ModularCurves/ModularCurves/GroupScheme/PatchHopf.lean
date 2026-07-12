@@ -802,6 +802,41 @@ noncomputable def comulAlgTop :
     simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h
     exact h
 
+/-! #### The `⊤`-level antipode -/
+
+/-- The corestricted inversion `G|_V ⟶ G|_V` (the group patch is inversion-stable). -/
+noncomputable def invRes : P.groupOpen.toScheme ⟶ P.groupOpen.toScheme :=
+  G.invHom.resLE P.groupOpen P.groupOpen P.le_preimage_groupOpen_invHom
+
+/-- The corestricted inversion is a morphism over the base patch. -/
+@[reassoc]
+theorem invRes_comp_groupToBaseRes : P.invRes ≫ P.groupToBaseRes = P.groupToBaseRes := by
+  rw [invRes, groupToBaseRes]
+  simp only [Scheme.Hom.resLE_comp_resLE, G.invHom_π]
+
+/-- The corestricted inversion recovers `invHom` after including the patch. -/
+@[reassoc]
+theorem invRes_comp_ι : P.invRes ≫ P.groupOpen.ι = P.groupOpen.ι ≫ G.invHom := by
+  rw [invRes, Scheme.Hom.resLE_comp_ι]
+
+/-- The `⊤`-level antipode `S' : A' ⟶ A'`. -/
+noncomputable def antipodeTop : P.groupRingTop ⟶ P.groupRingTop :=
+  P.invRes.appTop
+
+theorem algebraMap_comp_antipodeTop :
+    P.groupToBaseRes.appTop ≫ P.antipodeTop
+      = CommRingCat.ofHom (algebraMap P.baseRingTop P.groupRingTop) := by
+  rw [antipodeTop, ← Scheme.Hom.comp_appTop, P.invRes_comp_groupToBaseRes, algebraMapTop_eq]
+
+/-- The `⊤`-level antipode as an `R'`-algebra map. -/
+noncomputable def antipodeAlgTop : P.groupRingTop →ₐ[P.baseRingTop] P.groupRingTop where
+  toRingHom := P.antipodeTop.hom
+  commutes' := fun r => by
+    have h := congrArg (fun m : P.baseRingTop ⟶ P.groupRingTop => m.hom r)
+      (P.algebraMapTop_eq ▸ P.algebraMap_comp_antipodeTop)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h
+    exact h
+
 /-! #### The `⊤`-level counit laws, `AlgHom` form -/
 
 /-- The algebraic left counit lift `A' ⊗[R'] A' →ₐ[R'] A'`, `a ⊗ b ↦ ε'(a) • b`. -/

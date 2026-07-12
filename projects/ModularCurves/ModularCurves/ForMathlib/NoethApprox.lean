@@ -183,6 +183,171 @@ private theorem flatLocus_eq_univ_of_flat {R₁ A₁ : Type u} [CommRing R₁] [
   rw [mem_flatLocus]
   exact flat_localizedModule_of_flat q.asIdeal.primeCompl
 
+/-! ### Scheme-limit machinery for `exists_subalgebra_flat_baseChange` (Stacks 07RF) -/
+
+open CategoryTheory Limits AlgebraicGeometry
+
+/-- The tensor-map along `f` (identity on the second factor) equals `rTensor` as a linear map. -/
+private theorem tensorMap_id_toLinearMap {B S T N : Type*} [CommRing B] [CommRing S]
+    [CommRing T] [CommRing N] [Algebra B S] [Algebra B T] [Algebra B N] (f : S →ₐ[B] T) :
+    (Algebra.TensorProduct.map f (AlgHom.id B N)).toLinearMap
+      = LinearMap.rTensor N f.toLinearMap := by
+  refine TensorProduct.ext' fun s n => ?_
+  simp
+
+section Machinery
+
+variable {R : Type u} [CommRing R] (R₀ : Subalgebra ℤ R)
+  (A₀ : Type u) [CommRing A₀] [Algebra R₀ A₀]
+
+/-- Index category: finitely-generated `R₀`-subalgebras of `R`, directed by `≤`. -/
+private abbrev FlatStage : Type u := {A : Subalgebra R₀ R // A.FG}
+
+instance : Nonempty (FlatStage R₀) := ⟨⟨⊥, Subalgebra.fg_bot⟩⟩
+
+instance : IsDirected (FlatStage R₀) (· ≤ ·) :=
+  ⟨fun A B => ⟨⟨A.1 ⊔ B.1, A.2.sup B.2⟩,
+    (le_sup_left : A.1 ≤ A.1 ⊔ B.1), (le_sup_right : B.1 ≤ A.1 ⊔ B.1)⟩⟩
+
+/-- The ring-level diagram `A ↦ A ⊗[R₀] A₀` over the finitely-generated stages. -/
+private noncomputable def stageFunctor : FlatStage R₀ ⥤ CommRingCat.{u} where
+  obj A := CommRingCat.of (A.1 ⊗[R₀] A₀)
+  map {A B} h := CommRingCat.ofHom
+    (Algebra.TensorProduct.map (Subalgebra.inclusion h.le) (AlgHom.id R₀ A₀)).toRingHom
+  map_id A := by
+    apply CommRingCat.hom_ext
+    ext x
+    · simp
+    · simp
+  map_comp {A B C} f g := by
+    apply CommRingCat.hom_ext
+    ext x
+    · simp [Subalgebra.inclusion_inclusion]
+    · simp
+
+/-- The colimit cocone with apex `R ⊗[R₀] A₀`. -/
+private noncomputable def stageCocone : Cocone (stageFunctor R₀ A₀) where
+  pt := CommRingCat.of (R ⊗[R₀] A₀)
+  ι :=
+    { app A := CommRingCat.ofHom
+        (Algebra.TensorProduct.map A.1.val (AlgHom.id R₀ A₀)).toRingHom
+      naturality {A B} h := by
+        have key : (Algebra.TensorProduct.map (B.1).val (AlgHom.id R₀ A₀)).comp
+            (Algebra.TensorProduct.map (Subalgebra.inclusion h.le) (AlgHom.id R₀ A₀))
+            = Algebra.TensorProduct.map (A.1).val (AlgHom.id R₀ A₀) := by
+          rw [← Algebra.TensorProduct.map_comp, Subalgebra.val_comp_inclusion, AlgHom.comp_id]
+        exact congrArg (fun φ : (A.1 ⊗[R₀] A₀) →ₐ[R₀] (R ⊗[R₀] A₀) =>
+          CommRingCat.ofHom φ.toRingHom) key }
+
+/-- Computation of a leg of the (underlying-type) colimit cocone as `rTensor`. -/
+private theorem stageMapCocone_ι (A : FlatStage R₀) (xi : A.1 ⊗[R₀] A₀) :
+    ((forget CommRingCat.{u}).mapCocone (stageCocone R₀ A₀)).ι.app A xi
+      = LinearMap.rTensor A₀ A.1.val.toLinearMap xi := by
+  rw [← DFunLike.congr_fun (tensorMap_id_toLinearMap A.1.val) xi]
+  rfl
+
+/-- Computation of a `stageFunctor` transition map as `rTensor`. -/
+private theorem stageFunctor_map_apply {A B : FlatStage R₀} (h : A ⟶ B) (x : A.1 ⊗[R₀] A₀) :
+    (stageFunctor R₀ A₀ ⋙ forget CommRingCat.{u}).map h x
+      = LinearMap.rTensor A₀ (Subalgebra.inclusion h.le).toLinearMap x := by
+  rw [← DFunLike.congr_fun (tensorMap_id_toLinearMap (Subalgebra.inclusion h.le)) x]
+  rfl
+
+/-- `R ⊗[R₀] A₀` is the filtered colimit of the `A ⊗[R₀] A₀` over finitely-generated stages `A`. -/
+private noncomputable def stageColimit : IsColimit (stageCocone R₀ A₀) := by
+  haveI : ReflectsColimit (stageFunctor R₀ A₀) (forget CommRingCat.{u}) :=
+    reflectsColimit_of_reflectsIsomorphisms _ _
+  apply isColimitOfReflects (forget CommRingCat.{u})
+  apply Types.FilteredColimit.isColimitOf'
+  · -- jointly surjective: every element of `R ⊗ A₀` comes from a finite stage
+    intro x
+    obtain ⟨A, hA, xi, hxi⟩ := TensorProduct.Algebra.exists_of_fg (N := A₀) x
+    exact ⟨⟨A, hA⟩, xi, by rw [stageMapCocone_ι, hxi]⟩
+  · -- eventually equal: two elements agreeing at the colimit agree at a later stage
+    intro A x y hxy
+    rw [stageMapCocone_ι, stageMapCocone_ι] at hxy
+    obtain ⟨B, hAB, hBfg, heq⟩ := TensorProduct.Algebra.eq_of_fg_of_subtype_eq A.2 hxy
+    refine ⟨⟨B, hBfg⟩, homOfLE hAB, ?_⟩
+    rw [stageFunctor_map_apply, stageFunctor_map_apply]
+    exact heq
+
+/-- The cofiltered scheme diagram `A ↦ Spec (A ⊗[R₀] A₀)` with affine transition maps. -/
+private noncomputable def stageDiagram : (FlatStage R₀)ᵒᵖ ⥤ Scheme.{u} :=
+  (stageFunctor R₀ A₀).op ⋙ Scheme.Spec
+
+instance stageDiagram_affineHom {i j : (FlatStage R₀)ᵒᵖ} (f : i ⟶ j) :
+    IsAffineHom ((stageDiagram R₀ A₀).map f) := by
+  haveI : IsAffine ((stageDiagram R₀ A₀).obj i) := inferInstanceAs (IsAffine (Scheme.Spec.obj _))
+  haveI : IsAffine ((stageDiagram R₀ A₀).obj j) := inferInstanceAs (IsAffine (Scheme.Spec.obj _))
+  exact isAffineHom_of_isAffine _
+
+instance stageDiagram_compactSpace (i : (FlatStage R₀)ᵒᵖ) :
+    CompactSpace ((stageDiagram R₀ A₀).obj i) :=
+  inferInstanceAs (CompactSpace (Spec _))
+
+/-- The limit cone on `stageDiagram` with apex `Spec (R ⊗[R₀] A₀)`. -/
+private noncomputable def stageLimitCone : Cone (stageDiagram R₀ A₀) :=
+  Scheme.Spec.mapCone (stageCocone R₀ A₀).op
+
+/-- `Spec (R ⊗[R₀] A₀)` is the cofiltered limit of the `Spec (A ⊗[R₀] A₀)`. -/
+private noncomputable def stageIsLimit : IsLimit (stageLimitCone R₀ A₀) :=
+  isLimitOfPreserves Scheme.Spec (stageColimit R₀ A₀).op
+
+variable [IsNoetherianRing R₀] [Algebra.FinitePresentation R₀ A₀]
+
+/-- Each finitely-generated stage `A ⊇ R₀` is a Noetherian ring. -/
+private theorem stageNoeth (A : FlatStage R₀) : IsNoetherianRing ↥A.1 := by
+  haveI : Algebra.FiniteType ↥R₀ ↥A.1 := (Subalgebra.fg_iff_finiteType A.1).mp A.2
+  exact Algebra.FiniteType.isNoetherianRing ↥R₀ ↥A.1
+
+/-- **Stacks 00R6 (the isolated homological gap).** The `R`-flatness of `(R ⊗ A₀)_𝔮` at a prime
+`𝔮` (here the image of the limit point `s`) descends to `A`-flatness of `(A ⊗ A₀)` at the contracted
+prime, at a finite finitely-generated stage `A ⊇ R₀`.  This is the local flatness criterion for
+finitely-presented algebras (= Lemma 10.128.3), which current mathlib does not provide; every other
+step of `exists_subalgebra_flat_baseChange` is discharged around this box. -/
+private theorem flat_stalk_descends (hflat : Module.Flat R (R ⊗[R₀] A₀))
+    (s : (stageLimitCone R₀ A₀).pt) :
+    ∃ A : FlatStage R₀, (stageLimitCone R₀ A₀).π.app (Opposite.op A) s ∈
+      flatLocus ↥A.1 (↥A.1 ⊗[R₀] A₀) (↥A.1 ⊗[R₀] A₀) :=
+  sorry -- Stacks 00R6
+
+/-- **Flatness ascends along the stages.** If `A' ≤ A` are finitely-generated stages and the
+contraction of `q : Spec (A ⊗ A₀)` to `Spec (A' ⊗ A₀)` is `A'`-flat, then `q` is `A`-flat: base
+change of a flat module along `A' → A` stays flat, and localisation preserves it.  This gives the
+`MapsTo` on non-flat loci needed to feed the cofiltered-limit engine. -/
+private theorem nonflat_mapsTo {i i' : (FlatStage R₀)ᵒᵖ} (f : i ⟶ i') :
+    Set.MapsTo ((stageDiagram R₀ A₀).map f)
+      (flatLocus ↥(i.unop).1 (↥(i.unop).1 ⊗[R₀] A₀) (↥(i.unop).1 ⊗[R₀] A₀))ᶜ
+      (flatLocus ↥(i'.unop).1 (↥(i'.unop).1 ⊗[R₀] A₀) (↥(i'.unop).1 ⊗[R₀] A₀))ᶜ :=
+  sorry -- flatness base-change ascent (provable; not a mathlib gap)
+
+/-- **The cofiltered-limit collapse.** From the `R`-flatness of `R ⊗ A₀` there is a single
+finitely-generated stage `A ⊇ R₀` at which `A ⊗[R₀] A₀` is already `A`-flat. -/
+private theorem exists_fg_flat_stage (hflat : Module.Flat R (R ⊗[R₀] A₀)) :
+    ∃ (A : Subalgebra ↥R₀ R), A.FG ∧ Module.Flat ↥A (↥A ⊗[R₀] A₀) := by
+  by_contra hcon
+  push_neg at hcon
+  set Z : ∀ i : (FlatStage R₀)ᵒᵖ, Set ((stageDiagram R₀ A₀).obj i) := fun i =>
+    (flatLocus ↥(i.unop).1 (↥(i.unop).1 ⊗[R₀] A₀) (↥(i.unop).1 ⊗[R₀] A₀))ᶜ with hZ
+  have hZc : ∀ i, IsClosed (Z i) := by
+    intro i
+    haveI := stageNoeth (A := i.unop)
+    exact isOpen_flatLocus.isClosed_compl
+  have hZne : ∀ i, (Z i).Nonempty := by
+    intro i
+    haveI := stageNoeth (A := i.unop)
+    apply Set.nonempty_compl.mpr
+    intro huniv
+    exact hcon (i.unop).1 (i.unop).2 (flat_of_flatLocus_univ huniv)
+  have hZcpt : ∀ i, IsCompact (Z i) := fun i => (hZc i).isCompact
+  obtain ⟨s, hs⟩ := exists_mem_of_isClosed_of_nonempty (stageDiagram R₀ A₀)
+    (stageLimitCone R₀ A₀) (stageIsLimit R₀ A₀) Z hZc hZne hZcpt
+    (fun f => nonflat_mapsTo R₀ A₀ f)
+  obtain ⟨A, hA⟩ := flat_stalk_descends R₀ A₀ hflat s
+  exact (hs (Opposite.op A)) hA
+
+end Machinery
+
 /-- **Flatness descends to a finite `ℤ`-stage (Stacks 07RF = Lemma 10.168.1(3) / EGA IV 11.2.6).**
 The genuinely homological core of the flatness-spreading box, isolated as a single statement:
 given the Noetherian base `R₀ ⊆ R` and the finitely-presented `R₀`-algebra `A₀` whose base change
@@ -218,8 +383,15 @@ private theorem exists_subalgebra_flat_baseChange {R : Type u} [CommRing R]
     (hflat : Module.Flat R (R ⊗[R₀] A₀)) :
     ∃ (R₁ : Subalgebra ℤ R) (h : R₀ ≤ R₁), IsNoetherianRing R₁ ∧
       (letI : Algebra R₀ R₁ := (Subalgebra.inclusion h).toAlgebra
-       Module.Flat R₁ (R₁ ⊗[R₀] A₀)) :=
-  sorry
+       Module.Flat R₁ (R₁ ⊗[R₀] A₀)) := by
+  obtain ⟨A, hAfg, hAflat⟩ := exists_fg_flat_stage R₀ A₀ hflat
+  refine ⟨Subalgebra.restrictScalars ℤ A, ?hle, ?noeth, ?flat⟩
+  case hle =>
+    intro x hx
+    rw [Subalgebra.mem_restrictScalars]
+    simpa using A.algebraMap_mem ⟨x, hx⟩
+  case noeth => exact stageNoeth (A := (⟨A, hAfg⟩ : FlatStage R₀))
+  case flat => exact hAflat
 
 /-- **Spreading out of flatness, geometric core (Stacks 07RF = Lemma 10.168.1(3) / EGA IV 11.2.6).**
 

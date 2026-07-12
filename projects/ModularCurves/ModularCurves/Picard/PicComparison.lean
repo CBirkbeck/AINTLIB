@@ -928,6 +928,62 @@ theorem unitHomEquiv_symm_overSection_comp_pairingHom {M N : X.Modules}
         (map_one (ConcreteCategory.hom ((X.sheaf.obj ⋙ forget₂ CommRingCat
           RingCat).map ((Opposite.unop V).hom).op)))))
 
+open ModularCurves.SheafOfModules in
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[CMP-L3]** A section pair with pairing value `1` trivializes `M` on `W`:
+pair-with-`n` and multiply-by-`m` are transported through the over-site equivalence and
+are mutually inverse — one composite by the sections computation, the other by the
+generic monoidal split-pair cancellation against the ⊗-invertibility supplied by `ε`. -/
+theorem nonempty_pullback_iso_unitObj_of_pairingElem {M N : X.Modules}
+    (ε : tensorObj M N ≅ unitObj X) {W : X.Opens} (m : M.val.obj (Opposite.op W))
+    (n : N.val.obj (Opposite.op W))
+    (h1 : pairingElem ε W (m ⊗ₜ n) = 1) :
+    Nonempty ((Modules.pullback W.ι).obj M ≅ unitObj ↑W) := by
+  letI := Modules.monoidalCategory (↑W : Scheme.{u})
+  letI := Modules.symmetricCategory (↑W : Scheme.{u})
+  -- the transported split pair
+  let α : SheafOfModules.unit (X.ringCatSheaf.over W) ⟶ M.over W :=
+    (M.over W).unitHomEquiv.symm (overSection X.ringCatSheaf M W m)
+  let β : M.over W ⟶ SheafOfModules.unit (X.ringCatSheaf.over W) := pairingHom ε n
+  let eM : (overEquiv W).functor.obj (M.over W) ≅ (Modules.pullback W.ι).obj M :=
+    (overFunctorEquiv W).app M ≪≫ (restrictFunctorIsoPullback W.ι).app M
+  let eO : (overEquiv W).functor.obj (SheafOfModules.unit (X.ringCatSheaf.over W)) ≅
+      unitObj ↑W := W.sheafOfModulesEquivOverUnit X.ringCatSheaf
+  let αs : unitObj ↑W ⟶ (Modules.pullback W.ι).obj M :=
+    eO.inv ≫ (overEquiv W).functor.map α ≫ eM.hom
+  let βs : (Modules.pullback W.ι).obj M ⟶ unitObj ↑W :=
+    eM.inv ≫ (overEquiv W).functor.map β ≫ eO.hom
+  have hαβs : αs ≫ βs = 𝟙 (unitObj ↑W) := by
+    show (eO.inv ≫ (overEquiv W).functor.map α ≫ eM.hom) ≫
+      (eM.inv ≫ (overEquiv W).functor.map β ≫ eO.hom) = _
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    rw [← Functor.map_comp_assoc,
+      unitHomEquiv_symm_overSection_comp_pairingHom ε m n h1,
+      CategoryTheory.Functor.map_id, Category.id_comp, Iso.inv_hom_id]
+  -- ⊗-invertibility of the pullback, and the cancellation
+  obtain ⟨ePT⟩ := nonempty_pullback_tensorObj W.ι M N
+  obtain ⟨eT⟩ := nonempty_tensorObj_iso_tensor
+    ((Modules.pullback W.ι).obj M) ((Modules.pullback W.ι).obj N)
+  obtain ⟨eU⟩ := nonempty_unitObj_iso_unit (X := (↑W : Scheme.{u}))
+  let e : ((Modules.pullback W.ι).obj M ⊗ (Modules.pullback W.ι).obj N :
+      (↑W : Scheme.{u}).Modules) ≅ 𝟙_ ((↑W : Scheme.{u}).Modules) :=
+    eT.symm ≪≫ ePT.symm ≪≫ (Modules.pullback W.ι).mapIso ε ≪≫
+      pullbackUnitIso W.ι ≪≫ eU
+  let e' : ((Modules.pullback W.ι).obj N ⊗ (Modules.pullback W.ι).obj M :
+      (↑W : Scheme.{u}).Modules) ≅ 𝟙_ ((↑W : Scheme.{u}).Modules) :=
+    (β_ ((Modules.pullback W.ι).obj N) ((Modules.pullback W.ι).obj M)) ≪≫ e
+  have hab : (eU.inv ≫ αs) ≫ (βs ≫ eU.hom) = 𝟙 (𝟙_ ((↑W : Scheme.{u}).Modules)) := by
+    simp only [Category.assoc]
+    rw [← Category.assoc αs βs, hαβs, Category.id_comp, Iso.inv_hom_id]
+  have hba := CategoryTheory.MonoidalCategory.whiskerRight_comp_eq_id_of_split e e'
+    (eU.inv ≫ αs) (βs ≫ eU.hom) hab
+  have hβαs : βs ≫ αs = 𝟙 ((Modules.pullback W.ι).obj M) := by
+    have h3 : (βs ≫ eU.hom) ≫ (eU.inv ≫ αs) = βs ≫ αs := by
+      simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    exact h3.symm.trans hba
+  exact ⟨⟨βs, αs, hβαs, hαβs⟩⟩
+
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
 /-- **[CMP-←]** A ⊗-invertible module is cover-locally trivial (Zariski-local freeness:
@@ -939,7 +995,11 @@ theorem isInvertible_of_isUnit_toSkeleton {M : X.Modules}
       IsUnit (toSkeleton M)) :
     IsInvertible M := by
   obtain ⟨N, ⟨ε⟩⟩ := exists_tensorObj_iso_unitObj_of_isUnit_toSkeleton hM
-  sorry
+  choose V hxV m n h1 using fun x => exists_pairingElem_tmul_eq_one ε x
+  refine ⟨↥X, V, ?_, fun x => ?_⟩
+  · rw [eq_top_iff]
+    exact fun x _ => TopologicalSpace.Opens.mem_iSup.mpr ⟨x, hxV x⟩
+  · exact nonempty_pullback_iso_unitObj_of_pairingElem ε (m x) (n x) (h1 x)
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in

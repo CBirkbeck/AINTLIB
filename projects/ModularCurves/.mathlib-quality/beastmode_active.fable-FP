@@ -1,1 +1,1 @@
-FOCUS: [KL-3] GRIND (coordinator override). Attack: 858 gap-truncation + 846 00MW-split (clean buchsbaumEisenbud_acyclic) → local-criterion Tier-A1 spawn → local_criterion_twoTerm → coker_flat → fibreExact_spreads → reduce_to_polynomial(ULift) → viaBE → wire.
+FOCUS: [KL-3] GRIND. LocalFlatnessCriterion COMPLETE (0 sorry, axiom-clean) — 00MK local criterion DONE. Agents 2(BE846/858),3(exists_subalgebra) running. exists_flat_stage ∀j-reduction + LocalizedModuleComap banked. NEXT: integrate on agent completion; 00ME S-version + single-stage bridge downstream.

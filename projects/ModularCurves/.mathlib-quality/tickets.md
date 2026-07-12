@@ -16758,3 +16758,36 @@ localModel glues (LocallyWeierstrass.baseChange + it's Zariski-local).
   over-iso → restrict-iso (overTrivializationOfRestrictIso-equivalences reversed) →
   pullback-iso (restrictFunctorIsoPullback) and assemble IsInvertible from L2's pointwise data
   (cover = the V's over all x).
+
+## Amendments v10.158 (2026-07-12, fable-PIC0): ★★ [PIC-P2-CMP] COMPLETE — GME 2.17 `isInvertible_iff_isUnit_toSkeleton` SORRY-FREE both directions, axiom-clean
+
+- ★★ **[CMP-←] CLOSED, [PIC-P2-CMP] COMPLETE**: `PicComparison.lean` has ZERO sorries;
+  `lake build` green (2563 jobs); `#print axioms isInvertible_iff_isUnit_toSkeleton` =
+  [propext, Classical.choice, Quot.sound]. **GME 2.2.2 (2.17) — "the formation of an
+  invertible sheaf is local" — is fully formalized**: cover-local triviality ⟺
+  ⊗-invertibility in `Skeleton (X.Modules)`.
+- Closing pieces this session (all landed + pushed):
+  - **[CMP-L3a]** `pairingHom` — pair-with-`n` as an over-site morphism
+    `M.over W ⟶ unit (R.over W)` (componentwise `pairingElem`; naturality via
+    `pairingElem_map` + `tensorObj_map_tmul` + `Over.w`-functoriality; smul via
+    `let`-recast of the over-ring scalar + `← TensorProduct.smul_tmul'`).
+  - **[CMP-L3b]** `unitHomEquiv_symm_overSection_comp_pairingHom` — the split identity
+    α ≫ β = 𝟙 via `unitHomEquiv_symm_comp` + `sections_ext` componentwise compute to
+    `pairingElem = 1` (exact-trans chain; the rw form hits the kabstract wart).
+  - **[CMP-L3c]** generic `CategoryTheory.MonoidalCategory.whiskerRight_comp_eq_id_of_split`
+    (+ `unitEndAct` action machinery + `comp_eq_id_of_comp_eq_id`): a split pair against a
+    ⊗-invertible object is two-sided. Faithfulness of `tensorRight` via `tensorRightTensor`
+    + `rightUnitorNatIso` + a whisker-exchange congruence NatIso. FOR-MATHLIB candidate.
+  - **[CMP-L3]** `nonempty_pullback_iso_unitObj_of_pairingElem` — transport α/β through
+    `overEquiv`/`overFunctorEquiv`/`restrictFunctorIsoPullback`/`sheafOfModulesEquivOverUnit`
+    (the owner's dualRestrictIsoOfRestrictIso composite pattern), build
+    e : pbM ⊗ pbN ≅ 𝟙_ from `nonempty_pullback_tensorObj` + `pullbackUnitIso` + T/U
+    bridges, e′ by braiding, cancel with L3c, `Iso.mk βs αs`.
+  - **[CMP-←]** assembled: L1-unfold + per-point L2 (`choose`) + L3 per cover member;
+    cover indexed by the points, `iSup = ⊤` via `mem_iSup`.
+- LEAN-OPS (new registry entries): bare `Functor.map_id` in rw resolves to the CONTROL
+  functor (`id <$> x`) inside scheme-files — qualify `CategoryTheory.Functor.map_id`;
+  `Presheaf.imageSieve_mem` needs `(U := Opposite.op ⊤)` pinned (unop-meta sticks);
+  structure-literal `by`-fields need parens before `}`.
+- **Next (banked queue)**: Pic⁰_{E/S} stream — `/develop --decompose` vs GME 2.16/2.17 +
+  KM 2.4 with verbatim quotes; ecosystem re-check for upstream Pic movement FIRST.

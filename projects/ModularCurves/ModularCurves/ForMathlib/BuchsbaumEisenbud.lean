@@ -759,6 +759,123 @@ private theorem hasDepthGE_congr {L : Type u} [CommRing L] [IsLocalRing L]
   obtain ⟨rs, hlen, hreg, hmem⟩ := h
   exact ⟨rs, hlen, (e.isRegular_congr rs).mp hreg, hmem⟩
 
+/-- Reindexing equivalence of standard free modules from an equality of ranks. -/
+private noncomputable def finPiLinearEquiv {L : Type*} [CommRing L] {a b : ℕ} (h : a = b) :
+    (Fin a → L) ≃ₗ[L] (Fin b → L) :=
+  LinearEquiv.piCongrLeft' L (fun _ => L) (finCongr h)
+
+/-- **Homology transports across a ladder of linear equivalences.**  Two two-term complexes
+`P₁ →g₁→ F₁ →f₁→ G₁` and `P₂ →g₂→ F₂ →f₂→ G₂` related by linear equivalences `eP, eF, eG` making both
+squares commute have `L`-linearly isomorphic homologies `ker f / (range g).comap _` at the middle
+spot.  This is the transport used to move the acyclicity disjunction between a complex and its
+truncation / peel (whose modules differ by rank-equality reindexings). -/
+private noncomputable def homologyLadderEquiv {L : Type*} [CommRing L]
+    {P₁ F₁ G₁ P₂ F₂ G₂ : Type*}
+    [AddCommGroup P₁] [Module L P₁] [AddCommGroup F₁] [Module L F₁] [AddCommGroup G₁] [Module L G₁]
+    [AddCommGroup P₂] [Module L P₂] [AddCommGroup F₂] [Module L F₂] [AddCommGroup G₂] [Module L G₂]
+    (g₁ : P₁ →ₗ[L] F₁) (f₁ : F₁ →ₗ[L] G₁) (g₂ : P₂ →ₗ[L] F₂) (f₂ : F₂ →ₗ[L] G₂)
+    (eP : P₁ ≃ₗ[L] P₂) (eF : F₁ ≃ₗ[L] F₂) (eG : G₁ ≃ₗ[L] G₂)
+    (sqf : f₂ ∘ₗ (eF : F₁ →ₗ[L] F₂) = (eG : G₁ →ₗ[L] G₂) ∘ₗ f₁)
+    (sqg : g₂ ∘ₗ (eP : P₁ →ₗ[L] P₂) = (eF : F₁ →ₗ[L] F₂) ∘ₗ g₁) :
+    (LinearMap.ker f₁ ⧸ (LinearMap.range g₁).comap (LinearMap.ker f₁).subtype) ≃ₗ[L]
+      (LinearMap.ker f₂ ⧸ (LinearMap.range g₂).comap (LinearMap.ker f₂).subtype) := by
+  have hsqf : ∀ x, f₂ (eF x) = eG (f₁ x) := fun x => by
+    have := LinearMap.congr_fun sqf x; simpa using this
+  have hsqg : ∀ p, g₂ (eP p) = eF (g₁ p) := fun p => by
+    have := LinearMap.congr_fun sqg p; simpa using this
+  -- `eF` maps `ker f₁` onto `ker f₂`.
+  have hker : Submodule.map (eF : F₁ →ₗ[L] F₂) (LinearMap.ker f₁) = LinearMap.ker f₂ := by
+    have h1 : Submodule.comap (eF : F₁ →ₗ[L] F₂) (LinearMap.ker f₂) = LinearMap.ker f₁ := by
+      rw [← LinearMap.ker_comp, sqf, LinearMap.ker_comp, LinearEquiv.ker, Submodule.comap_bot]
+    rw [← h1, Submodule.map_comap_eq_of_surjective eF.surjective]
+  -- `eF` maps `range g₁` onto `range g₂`.
+  have hrange : Submodule.map (eF : F₁ →ₗ[L] F₂) (LinearMap.range g₁) = LinearMap.range g₂ := by
+    apply le_antisymm
+    · rintro _ ⟨_, ⟨p, rfl⟩, rfl⟩
+      refine ⟨eP p, ?_⟩
+      simp only [LinearEquiv.coe_coe]; rw [hsqg]
+    · rintro _ ⟨p, rfl⟩
+      refine ⟨g₁ (eP.symm p), ⟨eP.symm p, rfl⟩, ?_⟩
+      simp only [LinearEquiv.coe_coe]; rw [← hsqg]; simp
+  -- The induced iso on kernels, and its underlying action.
+  set κ : (LinearMap.ker f₁) ≃ₗ[L] (LinearMap.ker f₂) :=
+    (Submodule.equivMapOfInjective (eF : F₁ →ₗ[L] F₂) eF.injective (LinearMap.ker f₁)).trans
+      (LinearEquiv.ofEq _ _ hker) with hκ
+  have hκcoe : ∀ z : LinearMap.ker f₁, ((κ z : LinearMap.ker f₂) : F₂) = eF (z : F₁) := by
+    intro z; rw [hκ]
+    simp only [LinearEquiv.trans_apply, LinearEquiv.coe_ofEq_apply,
+      Submodule.coe_equivMapOfInjective_apply, LinearEquiv.coe_coe]
+  refine Submodule.Quotient.equiv _ _ κ (le_antisymm ?_ ?_)
+  · rintro _ ⟨z, hz, rfl⟩
+    simp only [Submodule.mem_comap, Submodule.coe_subtype, LinearEquiv.coe_coe] at hz ⊢
+    rw [hκcoe, ← hrange]
+    exact Submodule.mem_map_of_mem (f := (eF : F₁ →ₗ[L] F₂)) hz
+  · intro w hw
+    simp only [Submodule.mem_comap, Submodule.coe_subtype] at hw
+    have hcoe : ((κ.symm w : LinearMap.ker f₁) : F₁) = eF.symm (w : F₂) := by
+      apply eF.injective; rw [← hκcoe]; simp
+    have hg1 : eF.symm (w : F₂) ∈ LinearMap.range g₁ := by
+      obtain ⟨q, hq, hqeq⟩ :=
+        (hrange ▸ hw : (w : F₂) ∈ Submodule.map (eF : F₁ →ₗ[L] F₂) (LinearMap.range g₁))
+      rw [← hqeq]; simpa using hq
+    have hmemA1 : κ.symm w ∈ (LinearMap.range g₁).comap (LinearMap.ker f₁).subtype := by
+      rw [Submodule.mem_comap, Submodule.coe_subtype, hcoe]; exact hg1
+    have hmap := Submodule.mem_map_of_mem (f := (κ : LinearMap.ker f₁ →ₗ[L] LinearMap.ker f₂)) hmemA1
+    simpa using hmap
+
+@[simp] private lemma finPiLinearEquiv_rfl {L : Type*} [CommRing L] {a : ℕ} :
+    finPiLinearEquiv (L := L) (rfl : a = a) = LinearEquiv.refl L (Fin a → L) := by
+  ext v i
+  simp [finPiLinearEquiv, LinearEquiv.piCongrLeft'_apply]
+
+/-- Conjugating a map of standard free modules by rank-equality reindexings leaves its minor ideal
+unchanged (proof: substitute the rank equalities, collapsing the reindexings to the identity). -/
+private lemma idealOfMinors_finPiLinearEquiv_conj {L : Type*} [CommRing L] {a a' b b' : ℕ}
+    (h₁ : a = a') (h₂ : b = b') (ψ : (Fin a' → L) →ₗ[L] (Fin b' → L)) (r : ℕ) :
+    LinearMap.idealOfMinors r
+        ((finPiLinearEquiv h₂).symm.toLinearMap ∘ₗ ψ ∘ₗ (finPiLinearEquiv h₁).toLinearMap)
+      = LinearMap.idealOfMinors r ψ := by
+  subst h₁; subst h₂
+  have hid : (finPiLinearEquiv (L := L) (rfl : b = b)).symm.toLinearMap ∘ₗ ψ ∘ₗ
+      (finPiLinearEquiv (L := L) (rfl : a = a)).toLinearMap = ψ := by simp
+  rw [hid]
+
+/-- The acyclicity disjunction `Exact ∨ depth ≥ 1` at the middle spot is a property of the homology
+module alone: exactness is `Subsingleton` of the homology. -/
+private lemma exact_iff_subsingleton_homology {L : Type*} [CommRing L]
+    {P F G : Type*} [AddCommGroup P] [Module L P] [AddCommGroup F] [Module L F]
+    [AddCommGroup G] [Module L G] (g : P →ₗ[L] F) (f : F →ₗ[L] G) (hc : f ∘ₗ g = 0) :
+    Function.Exact g f ↔
+      Subsingleton (LinearMap.ker f ⧸ (LinearMap.range g).comap (LinearMap.ker f).subtype) := by
+  rw [LinearMap.exact_iff, Submodule.Quotient.subsingleton_iff, Submodule.comap_subtype_eq_top]
+  exact ⟨fun h => h.le, fun h => le_antisymm h (LinearMap.range_le_ker_iff.mpr hc)⟩
+
+/-- **Transport the acyclicity disjunction across a ladder of linear equivalences.**  If two-term
+complexes `P₁ →g₁→ F₁ →f₁→ G₁` and `P₂ →g₂→ F₂ →f₂→ G₂` are related by commuting linear equivalences,
+the disjunction `Exact ∨ depth(homology) ≥ 1` transfers from the first to the second. -/
+private theorem exact_or_depth_of_ladder {L : Type u} [CommRing L] [IsLocalRing L]
+    {P₁ F₁ G₁ P₂ F₂ G₂ : Type u}
+    [AddCommGroup P₁] [Module L P₁] [AddCommGroup F₁] [Module L F₁] [AddCommGroup G₁] [Module L G₁]
+    [AddCommGroup P₂] [Module L P₂] [AddCommGroup F₂] [Module L F₂] [AddCommGroup G₂] [Module L G₂]
+    (g₁ : P₁ →ₗ[L] F₁) (f₁ : F₁ →ₗ[L] G₁) (g₂ : P₂ →ₗ[L] F₂) (f₂ : F₂ →ₗ[L] G₂)
+    (hc₁ : f₁ ∘ₗ g₁ = 0) (hc₂ : f₂ ∘ₗ g₂ = 0)
+    (eP : P₁ ≃ₗ[L] P₂) (eF : F₁ ≃ₗ[L] F₂) (eG : G₁ ≃ₗ[L] G₂)
+    (sqf : f₂ ∘ₗ (eF : F₁ →ₗ[L] F₂) = (eG : G₁ →ₗ[L] G₂) ∘ₗ f₁)
+    (sqg : g₂ ∘ₗ (eP : P₁ →ₗ[L] P₂) = (eF : F₁ →ₗ[L] F₂) ∘ₗ g₁)
+    (h : Function.Exact g₁ f₁ ∨
+        Module.HasDepthGE L (LinearMap.ker f₁ ⧸
+          (LinearMap.range g₁).comap (LinearMap.ker f₁).subtype) 1) :
+    Function.Exact g₂ f₂ ∨
+      Module.HasDepthGE L (LinearMap.ker f₂ ⧸
+        (LinearMap.range g₂).comap (LinearMap.ker f₂).subtype) 1 := by
+  have E := homologyLadderEquiv g₁ f₁ g₂ f₂ eP eF eG sqf sqg
+  rcases h with hex | hd
+  · left
+    rw [exact_iff_subsingleton_homology g₂ f₂ hc₂]
+    rw [exact_iff_subsingleton_homology g₁ f₁ hc₁] at hex
+    exact (Equiv.subsingleton_congr E.toEquiv).mp hex
+  · exact Or.inr (hasDepthGE_congr E hd)
+
 /-- **[Core over the local ring `L` — the acyclicity disjunction].**  For the standard-free complex
 `ψ` over a local Noetherian ring `L` with the (already localised) grade conditions `hcondL`, exact at
 every spot `> i`: either `ψ` is exact at `F_{i+1}` too, or the homology `ker(ψ i)/im(ψ (i+1))` has
@@ -843,6 +960,14 @@ private theorem localBE_homology_disjunction {L : Type*} [CommRing L] [IsLocalRi
         · -- **No gaps in `[i, e)`.**
           by_cases htop : LinearMap.idealOfMinors (rnk (e - 1)) (ψ (e - 1 - 1)) = ⊤
           · -- **Split (`= ⊤`) top differential: peel it (Stacks 00MW).**
+            -- RESIDUAL (peel): over the local ring `L`, `idealOfMinors (rnk (e-1)) (ψ (e-2)) = ⊤`
+            -- with `rnk (e-1) = rk (e-1)` (the maximal *column* minors) means some `rk(e-1)×rk(e-1)`
+            -- minor of `ψ (e-2)` is a unit, so `ψ (e-2) : L^{rk(e-1)} → L^{rk(e-2)}` is *split*
+            -- injective with free cokernel `C ≅ L^{rk(e-2)-rk(e-1)}`.  Peel the trivial subcomplex
+            -- `0 → L^{rk(e-1)} →≅→ (image) → 0` off the top: the complement is a length-`(e-1)`
+            -- BE-complex with the *same* homology at spot `i`, closed by `IH (e-1)` and transported
+            -- back with `exact_or_depth_of_ladder`.  Needs the cokernel-basis identification +
+            -- the factoring `ψ (e-3) = χ (e-3) ∘ π` (`π : F_{e-2} ↠ C`).
             sorry
           · -- **Proper top minor ideal** ⟹ `depth L ≥ e-1 ≥ e-i-1`, then `localAcyclicity_shift`.
             have hgrade : (LinearMap.idealOfMinors (rnk (e - 1)) (ψ (e - 1 - 1))).gradeGE (e - 1) := by
@@ -854,8 +979,143 @@ private theorem localBE_homology_disjunction {L : Type*} [CommRing L] [IsLocalRi
                 (hasDepthGE_of_gradeGE_le_maximalIdeal hgrade (IsLocalRing.le_maximalIdeal htop))
                 (by omega)
             exact localAcyclicity_shift e rk hrk ψ hcomplex i hie hgap hdepth habove
-        · -- **Gap in `[i, e)`: truncate at the first zero (or handle the cokernel `rk i = 0`).**
-          sorry
+        · -- **Gap in `[i, e)`.**  Either there is a zero above `i + 2` (truncate the complex there
+          -- and apply `IH`), or the only zero is at `i` itself — the cokernel case, in which the
+          -- complex is gap-free above `i`.
+          by_cases hgap3 : ∃ j₀, i + 3 ≤ j₀ ∧ j₀ < e ∧ rk j₀ = 0
+          · -- **Gap `j₀ ≥ i + 3`: truncate at `j₀`, apply `IH`** (independent of `rk i`).
+            obtain ⟨j₀, hj₀lb, hj₀e, hrkj₀⟩ := hgap3
+            have hrnkj₀ : rnk j₀ = 0 := by
+              have h := hrnk j₀ (by omega) hj₀e; rw [hrkj₀] at h; omega
+            set rk' : ℕ → ℕ := fun k => if k < j₀ then rk k else 0 with hrk'def
+            set rnk' : ℕ → ℕ := fun k => if k < j₀ then rnk k else 0 with hrnk'def
+            have hrk'_eq : ∀ k, k ≤ j₀ → rk' k = rk k := by
+              intro k hk
+              rcases eq_or_lt_of_le hk with rfl | hlt
+              · simp only [hrk'def, lt_irrefl, if_false]; exact hrkj₀.symm
+              · simp only [hrk'def, if_pos hlt]
+            have hrnk'_eq : ∀ k, k ≤ j₀ → rnk' k = rnk k := by
+              intro k hk
+              rcases eq_or_lt_of_le hk with rfl | hlt
+              · simp only [hrnk'def, lt_irrefl, if_false]; exact hrnkj₀.symm
+              · simp only [hrnk'def, if_pos hlt]
+            have hrk'_IH : ∀ k, j₀ ≤ k → rk' k = 0 := by
+              intro k hk
+              rcases eq_or_lt_of_le hk with rfl | h
+              · simp only [hrk'def, lt_irrefl, if_false]
+              · simp only [hrk'def, if_neg (by omega : ¬ k < j₀)]
+            have hrnk_top'_IH : ∀ k, j₀ ≤ k → rnk' k = 0 := by
+              intro k hk
+              rcases eq_or_lt_of_le hk with rfl | h
+              · simp only [hrnk'def, lt_irrefl, if_false]
+              · simp only [hrnk'def, if_neg (by omega : ¬ k < j₀)]
+            set ψ' : (k : ℕ) → (Fin (rk' (k + 1)) → L) →ₗ[L] (Fin (rk' k) → L) := fun k =>
+              if h : k + 1 ≤ j₀ then
+                (finPiLinearEquiv (hrk'_eq k (by omega))).symm.toLinearMap ∘ₗ ψ k ∘ₗ
+                  (finPiLinearEquiv (hrk'_eq (k + 1) h)).toLinearMap
+              else 0 with hψ'def
+            have hψ'_conj : ∀ k (h : k + 1 ≤ j₀), ψ' k =
+                (finPiLinearEquiv (hrk'_eq k (by omega))).symm.toLinearMap ∘ₗ ψ k ∘ₗ
+                  (finPiLinearEquiv (hrk'_eq (k + 1) h)).toLinearMap := by
+              intro k h; rw [hψ'def]; exact dif_pos h
+            have hψ'_zero : ∀ k, j₀ < k + 1 → ψ' k = 0 := by
+              intro k h; rw [hψ'def]; exact dif_neg (by omega)
+            have hsq : ∀ k (h : k + 1 ≤ j₀),
+                ψ k ∘ₗ (finPiLinearEquiv (hrk'_eq (k + 1) h)).toLinearMap
+                  = (finPiLinearEquiv (hrk'_eq k (by omega))).toLinearMap ∘ₗ ψ' k := by
+              intro k h; rw [hψ'_conj k h]; ext v; simp
+            have hrnk'_IH : ∀ k, 1 ≤ k → k < j₀ → rnk' k + rnk' (k + 1) = rk' k := by
+              intro k hk1 hklt
+              rw [hrnk'_eq k (by omega), hrnk'_eq (k + 1) (by omega), hrk'_eq k (by omega)]
+              exact hrnk k hk1 (by omega)
+            have hcomplex'_IH : ∀ k, ψ' k ∘ₗ ψ' (k + 1) = 0 := by
+              intro k
+              by_cases hk : k + 1 + 1 ≤ j₀
+              · rw [hψ'_conj k (by omega), hψ'_conj (k + 1) hk]
+                ext v
+                simp only [LinearMap.comp_apply, LinearMap.zero_apply, LinearEquiv.coe_coe,
+                  LinearEquiv.apply_symm_apply]
+                rw [← LinearMap.comp_apply, hcomplex k, LinearMap.zero_apply, map_zero]
+              · rw [hψ'_zero (k + 1) (by omega), LinearMap.comp_zero]
+            have hcondL'_IH : ∀ k, 1 ≤ k → k ≤ j₀ →
+                (LinearMap.idealOfMinors (rnk' k) (ψ' (k - 1))).gradeGE k ∨
+                  LinearMap.idealOfMinors (rnk' k) (ψ' (k - 1)) = ⊤ := by
+              intro k hk1 hkj₀
+              rw [hrnk'_eq k hkj₀, hψ'_conj (k - 1) (by omega), idealOfMinors_finPiLinearEquiv_conj]
+              exact hcondL k hk1 (by omega)
+            have habove'_IH : ∀ j, i < j → Function.Exact (ψ' (j + 1)) (ψ' j) := by
+              intro j hj
+              by_cases hj2 : j + 1 + 1 ≤ j₀
+              · exact (Function.Exact.iff_of_ladder_linearEquiv (hsq (j + 1) hj2)
+                  (hsq j (by omega))).mp (habove j hj)
+              · haveI : Subsingleton (Fin (rk' (j + 1)) → L) :=
+                  subsingleton_pi_fin_of_eq_zero (hrk'_IH (j + 1) (by omega))
+                exact exact_of_subsingleton_mid _ _
+            have IH_res := IH j₀ hj₀e rk' rnk' hrk'_IH hrnk_top'_IH hrnk'_IH ψ' hcomplex'_IH
+              hcondL'_IH i habove'_IH
+            exact exact_or_depth_of_ladder (ψ' (i + 1)) (ψ' i) (ψ (i + 1)) (ψ i)
+              (hcomplex'_IH i) (hcomplex i)
+              (finPiLinearEquiv (hrk'_eq (i + 2) (by omega)))
+              (finPiLinearEquiv (hrk'_eq (i + 1) (by omega)))
+              (finPiLinearEquiv (hrk'_eq i (by omega)))
+              (hsq i (by omega)) (hsq (i + 1) (by omega)) IH_res
+          · -- **No zero above `i + 2`.**  With `rk (i+1), rk (i+2) ≠ 0` and a zero in `[i, e)`
+            -- (`hgap`), the zero is forced to be at `i`: the **cokernel case** `rk i = 0`, with the
+            -- complex gap-free above `i`.
+            rw [not_forall] at hgap
+            obtain ⟨jg, hjg⟩ := hgap
+            push_neg at hjg
+            obtain ⟨hijg, hjge, hrkjg⟩ := hjg
+            push_neg at hgap3
+            have hi0 : rk i = 0 := by
+              rcases (show jg = i ∨ jg = i + 1 ∨ jg = i + 2 ∨ i + 3 ≤ jg by omega)
+                with rfl | rfl | rfl | h
+              · exact hrkjg
+              · exact absurd hrkjg hi1
+              · exact absurd hrkjg htop2
+              · exact absurd hrkjg (hgap3 jg h hjge)
+            have hnz : ∀ j, i + 1 ≤ j → j < e → rk j ≠ 0 := by
+              intro j hj1 hje'
+              rcases (show j = i + 1 ∨ j = i + 2 ∨ i + 3 ≤ j by omega) with rfl | rfl | h
+              · exact hi1
+              · exact htop2
+              · exact hgap3 j h hje'
+            -- `ψ i = 0` (its target `F_i = L^{rk i}` is `0`), so `ker (ψ i) = ⊤` and the homology at
+            -- spot `i` is the cokernel `coker (ψ (i+1)) = F_{i+1} / im (ψ (i+1))`.
+            haveI hFi0 : Subsingleton (Fin (rk i) → L) := subsingleton_pi_fin_of_eq_zero hi0
+            have hψi0 : ψ i = 0 := Subsingleton.elim _ _
+            -- `hcondL (i+1)` forces `rnk (i+1) = 0`: otherwise the `rnk (i+1)`-minor ideal of the
+            -- zero-row map `ψ i` (matrix with `rk i = 0` rows) is `⊥`, which is neither of grade
+            -- `≥ i+1` nor `⊤` over the nontrivial local ring `L`.
+            have hrnki1 : rnk (i + 1) = 0 := by
+              by_contra hrne
+              have hpos : 0 < rnk (i + 1) := Nat.pos_of_ne_zero hrne
+              have hbot : LinearMap.idealOfMinors (rnk (i + 1)) (ψ i) = ⊥ := by
+                rw [LinearMap.idealOfMinors_eq, Matrix.idealOfMinors_eq_bot_iff]
+                intro ri ci
+                haveI : IsEmpty (Fin (rk i)) := by rw [hi0]; infer_instance
+                exact isEmptyElim (ri ⟨0, hpos⟩)
+              have hc := hcondL (i + 1) (by omega) (by omega)
+              rw [show i + 1 - 1 = i from rfl, hbot] at hc
+              rcases hc with hg | ht
+              · obtain ⟨rs, hlen, hreg, hmem⟩ := hg
+                have hne : rs ≠ [] := by rintro rfl; simp only [List.length_nil] at hlen; omega
+                obtain ⟨r, rest, rfl⟩ := List.exists_cons_of_ne_nil hne
+                have hr0 : r = 0 := Ideal.mem_bot.mp (hmem r (by simp))
+                rw [RingTheory.Sequence.isRegular_cons_iff] at hreg
+                have hreg1 : IsSMulRegular L r := hreg.1
+                rw [hr0] at hreg1
+                exact zero_ne_one (hreg1 (show (0 : L) • (0 : L) = (0 : L) • (1 : L) by simp))
+              · exact absurd ht (by simp [bot_ne_top])
+            -- Hence `rnk (i+2) = rk (i+1)`, so `hcondL (i+2)` is about the maximal minors of `ψ (i+1)`.
+            have hrnki2 : rnk (i + 2) = rk (i + 1) := by
+              have h := hrnk (i + 1) (by omega) hie
+              rw [hrnki1, zero_add] at h; exact h
+            -- RESIDUAL: the cokernel `coker (ψ (i+1))` is subsingleton (⟹ exact) or has depth ≥ 1.
+            -- The maximal minors `idealOfMinors (rk (i+1)) (ψ (i+1))` (from `hcondL (i+2)`) are `⊤`
+            -- (⟹ `ψ (i+1)` surjective ⟹ cokernel `= 0`) or of grade `≥ i+2` (⟹ depth of the
+            -- cokernel `≥ 1` via the acyclicity lemma over the gap-free block `[i+1, e)`).
+            sorry
 
 /-- **[RESIDUAL — the grade-via-primes depth bridge; Stacks 00N1 (2)⟹(1) last paragraph + 00N0]**
 The single genuinely mathlib+branch-absent step of the backward acyclicity criterion, isolated.
