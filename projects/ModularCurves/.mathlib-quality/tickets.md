@@ -18813,3 +18813,31 @@ taut killing lemmas made public). **The openness half of the KM 3.7.1 clopen cla
   so the module-rank argument is required). `/develop --decompose` these.
 Then `isOpenImmersion_levelSpaceΓι_of_taut fullLevelOpens hrange hfull` fires → [YF-ETALE] ★.
 Session engines (all clean, rooted): AgreementLocusClopen, PointVanishingClopen, FullLevelOpenLocus. (NEW-Y1)
+
+## v10.165 — NEW-Y1 CHARTER-YFULL: ⊇ COMMUTATIVE-ALGEBRA CORE COMPLETE (same-degree-divisor-equality, affine form)
+
+**`ForMathlib/SurjectiveFreeSameRank.lean` — 4 lemmas, all axiom-clean `{propext, Classical.choice,
+Quot.sound}`, rooted** — the complete module/ring heart of the ⊇ "same-degree ⟹ equal" step:
+1. `injective_of_surjective_of_free_finrank_eq` — surjection of finite FREE modules of equal `finrank`
+   is injective (CommRing⟹OrzechProperty + `LinearEquiv.ofFinrankEq`).
+2. `injective_of_surjective_of_flat_rankAtStalk_eq` — surjection of finite FLAT modules of equal
+   `rankAtStalk` is injective, over ANY comm ring (no Noetherian): `subsingleton_of_localization_maximal`
+   + localize to free at each maximal + lemma 1 + `map_exact`.
+3. `bijective_of_surjective_of_flat_rankAtStalk_eq` — the bijective corollary.
+4. **`bijective_of_surjective_ringHom_of_flat_rankAtStalk_eq`** — a surjective ring hom of finite-flat
+   equal-stalkwise-rank algebras over a base is an iso. **The affine form of same-degree-divisor-equality,
+   directly consumable.**
+
+This is the genuine hard commutative-algebra content of KM 3.7.1's ⊇ direction — landed. Combined with
+[YF-U] (the openness half, v10.164), **both halves of the clopen claim now have their cores proven.**
+
+**Remaining to CLOPEN** (scheme-theoretic plumbing on top of the landed cores):
+- **[YF-SCHEME-ISO]** general `isIso_of_isClosedImmersion_of_finrank_eq` — closed immersion of finite
+  locally free schemes of equal `finrank` over `S` is iso. Affine reduction (Y affine, S affine via
+  `finrank_SpecMap_algebraMap` connecting scheme `finrank` to `rankAtStalk`) + lemma 4. ~80 LOC.
+- **[YF-SUBDIV-EQ]** `IsSubdivisor D' D ∧ D'.degree = D.degree ⟹ D' = D` — via [YF-SCHEME-ISO] on the
+  subscheme inclusion `j` (from `isSubdivisor_iff_le`) + `ker_subschemeι` + `RelEffCartierDiv.ext`. ~30 LOC.
+- **[YF-COMAX]** comaximal `∏ker = ⋂ker` under disjointness (globalize private
+  `sectionsIdealAux_ideal_eq_top_of_disjoint`, CartierDiv:976). ~100 LOC.
+- **[YF-⊆]/[YF-⊇]** over `fullLevelOpens` + assembly `isOpenImmersion_levelSpaceΓι_of_taut` → **[YF-ETALE] ★**.
+Session leaves (all clean/rooted): AgreementLocusClopen, PointVanishingClopen, FullLevelOpenLocus, SurjectiveFreeSameRank. (NEW-Y1)
