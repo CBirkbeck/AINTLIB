@@ -899,6 +899,35 @@ noncomputable def pairingHom {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X
             (N.val.map ((Opposite.unop Vf).hom).op n)).symm).trans ?_
       exact pairingElem_map ε (i.unop.left).op _) }⟩
 
+open ModularCurves.SheafOfModules in
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[CMP-L3b]** When the pairing value of `(m, n)` is `1`, multiplication by `m`
+splits the pairing against `n`: the composite on the over-site is the identity of the
+unit. -/
+theorem unitHomEquiv_symm_overSection_comp_pairingHom {M N : X.Modules}
+    (ε : tensorObj M N ≅ unitObj X) {W : X.Opens} (m : M.val.obj (Opposite.op W))
+    (n : N.val.obj (Opposite.op W)) (h1 : pairingElem ε W (m ⊗ₜ n) = 1) :
+    (M.over W).unitHomEquiv.symm (overSection X.ringCatSheaf M W m) ≫ pairingHom ε n =
+      𝟙 (SheafOfModules.unit (X.ringCatSheaf.over W)) := by
+  refine (SheafOfModules.unitHomEquiv_symm_comp (overSection X.ringCatSheaf M W m)
+    (pairingHom ε n)).trans ?_
+  refine Eq.trans
+    (congrArg (SheafOfModules.unit (X.ringCatSheaf.over W)).unitHomEquiv.symm ?_)
+    (Equiv.symm_apply_apply _ (𝟙 _))
+  refine PresheafOfModules.sections_ext _ _ (fun V => ?_)
+  show pairingElem ε (Opposite.unop V).left
+      ((M.val.map (Opposite.unop V).hom.op m) ⊗ₜ
+        N.val.map (Opposite.unop V).hom.op n) = _
+  exact (congrArg (pairingElem ε (Opposite.unop V).left)
+      (PresheafOfModules.Monoidal.tensorObj_map_tmul
+        ((Opposite.unop V).hom).op m n).symm).trans
+    ((pairingElem_map ε ((Opposite.unop V).hom).op (m ⊗ₜ n)).trans
+      ((congrArg ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).map
+          ((Opposite.unop V).hom).op) h1).trans
+        (map_one (ConcreteCategory.hom ((X.sheaf.obj ⋙ forget₂ CommRingCat
+          RingCat).map ((Opposite.unop V).hom).op)))))
+
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
 /-- **[CMP-←]** A ⊗-invertible module is cover-locally trivial (Zariski-local freeness:
