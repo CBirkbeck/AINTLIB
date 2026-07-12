@@ -905,21 +905,12 @@ theorem antipodeLiftAlgTop_eq :
 followed by multiplication is the constant unit map `g ↦ g⁻¹·g = e`, i.e. the base
 projection followed by the unit section. Dualises `invOver_mulOver_left`; proven by the
 same `ι`-cancellation as `assocScheme_leftMulSchemeL`. -/
-/-- The antipode pairing, transported into the `S`-level square, is `⟨S, 𝟙⟩` on the group
-object precomposed with the patch inclusion. -/
-theorem antipodePair_comp_groupSquareToSquare :
-    P.antipodePair ≫ P.groupSquareToSquare
-      = P.groupOpen.ι ≫ (CartesianMonoidalCategory.lift G.invOver
-          (𝟙 (Over.mk G.π))).left := by
-  apply pullback.hom_ext
-  · rw [Category.assoc,
-      show P.groupSquareToSquare ≫ pullback.fst G.π G.π
-        = P.antipodePair.groupSquareToSquare_placeholder from rfl]
-    sorry
-  · sorry
-
 theorem antipodePair_comp_squareMulRes :
     P.antipodePair ≫ P.squareMulRes = P.groupToBaseRes ≫ P.unitSection := by
+  rw [← cancel_mono P.groupOpen.ι, Category.assoc, P.squareMulRes_comp_ι, Category.assoc,
+    P.unitSection_comp_ι, squareMul, ← cancel_mono G.ι]
+  simp only [Category.assoc]
+  rw [G.mulHom_ι, G.unitHom_ι]
   sorry
 
 /-- **The antipode-multiplication law, `⊤`-level `CommRingCat` form.** -/
