@@ -25,6 +25,17 @@ open AlgebraicGeometry CategoryTheory
 
 universe u
 
+namespace AlgebraicGeometry
+
+/-- `finrank` is compatible with restriction to an open of the target (`morphismRestrict` is
+a base change along the open immersion). -/
+lemma Scheme.Hom.finrank_morphismRestrict {X Y : Scheme.{u}} (f : X ⟶ Y) (U : Y.Opens)
+    [Flat f] [IsFinite f] (u : ↥U) :
+    (f ∣_ U).finrank u = f.finrank (U.ι.base u) :=
+  Scheme.Hom.finrank_of_isPullback _ _ _ _ (isPullback_morphismRestrict f U).flip u
+
+end AlgebraicGeometry
+
 namespace ModularCurves
 
 /-- A closed immersion `j : X ⟶ Y` of schemes finite flat locally-of-finite-presentation over
