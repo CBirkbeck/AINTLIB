@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.LevelStructure.CartierDivisor
 import ModularCurves.Picard.IdealModule
+import ModularCurves.Picard.RelativePic
 
 /-!
 # The Picard class of a relative effective Cartier divisor (the D2 seam)
@@ -54,5 +55,45 @@ noncomputable def picClass [IsSeparated π] (hsm : SmoothOfRelativeDimension 1 �
   ((D.isInvertible_idealModule hsm).isUnit_toSkeleton).unit⁻¹
 
 end RelEffCartierDiv
+
+section Assembly
+
+open AlgebraicGeometry.Scheme.Modules CategoryTheory.Limits
+
+variable {S E : Scheme.{u}} (p : E ⟶ S) (z : S ⟶ E) (hz : z ≫ p = 𝟙 S)
+variable {T : Scheme.{u}}
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The GME (2.16) assembly map** `E(T) → Pic_{E/S}(T)`: a section `P` of the
+base-changed curve goes to the normalized class of `I(P)⁻¹ ⊗ I(0)` (GME p. 108:
+"`P ↦ I(P)⁻¹ ↦ I(P)⁻¹ ⊗ I(0)`"), projected into the kernel model by the zero-section
+splitting. -/
+noncomputable def sectionToPicRel [IsSeparated p]
+    (hsm : SmoothOfRelativeDimension 1 p) (t : T ⟶ S)
+    (P : T ⟶ Limits.pullback p t) (hP : P ≫ Limits.pullback.snd p t = 𝟙 T) :
+    picRel p z hz t :=
+  haveI hsep : IsSeparated (Limits.pullback.snd p t) :=
+    MorphismProperty.pullback_snd (P := @IsSeparated) p t ‹_›
+  have hsm' : SmoothOfRelativeDimension 1 (Limits.pullback.snd p t) :=
+    haveI := smoothOfRelativeDimension_isStableUnderBaseChange (n := 1)
+    MorphismProperty.pullback_snd (P := @SmoothOfRelativeDimension 1) p t hsm
+  picRelProj p z hz t
+    ((RelEffCartierDiv.sectionDivisor (Limits.pullback.snd p t) P hP).picClass hsm' *
+      ((RelEffCartierDiv.sectionDivisor (Limits.pullback.snd p t)
+        (baseChangeZero p z hz t) (baseChangeZero_snd p z hz t)).picClass hsm')⁻¹)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The zero section is sent to the identity class (GME p. 108: "`Pic⁰` is a group
+functor with the identity `O_E`"). -/
+theorem sectionToPicRel_zero [IsSeparated p] (hsm : SmoothOfRelativeDimension 1 p)
+    (t : T ⟶ S) :
+    sectionToPicRel p z hz hsm t (baseChangeZero p z hz t) (baseChangeZero_snd p z hz t) =
+      1 := by
+  show picRelProj p z hz t _ = 1
+  rw [mul_inv_cancel, map_one]
+
+end Assembly
 
 end ModularCurves
