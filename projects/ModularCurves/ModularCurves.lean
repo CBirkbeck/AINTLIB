@@ -38,6 +38,7 @@ import ModularCurves.ForMathlib.GaloisDescentModule
 import ModularCurves.ForMathlib.HomogeneousEval
 import ModularCurves.ForMathlib.HopfGalois
 import ModularCurves.ForMathlib.HopfGaloisQuotient
+import ModularCurves.ForMathlib.KempfInduction
 import ModularCurves.ForMathlib.KempfLocalKilling
 import ModularCurves.ForMathlib.MonicQuotientDescent
 import ModularCurves.ForMathlib.OpensMapFinal

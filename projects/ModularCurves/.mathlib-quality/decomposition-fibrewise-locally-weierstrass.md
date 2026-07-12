@@ -218,8 +218,17 @@ containing `x` on which the class restricts to zero. The proof takes an injectiv
 presentation of `F`, represents the class by a global section of its cokernel, lifts that
 section locally using local surjectivity, and compares the restricted cokernel sequence
 with the restriction of the presentation. The comparison and section calculation are
-separated into an option-free private helper. The higher-degree Kempf induction and the
-application to quasicoherent sheaves on affine schemes remain to be proved.
+separated into an option-free private helper. This is the base case for the higher-degree
+induction recorded next; the application to quasicoherent sheaves on affine schemes remains.
+
+The higher-degree induction is now complete as `TopCat.Sheaf.kempfProp1` in
+`ForMathlib/KempfInduction.lean`. If a basis is closed under intersections and the
+restrictions of `F` have vanishing cohomology in degrees `1` through `n`, every class in
+`H^(n+1)(X,F)` restricts to zero on a cover by basis opens. The proof separates dimension
+shifting for the cokernel of an injective presentation, short exactness after open
+restriction and pushforward, and naturality of the connecting map. It reuses mathlib's
+existing `IsOpenCover` API and needs no transparency options. Applying this induction to
+quasicoherent sheaves on affine schemes still requires the affine localization input.
 
 No theorem in this stream may replace this leaf by a `CohomologyPackage` hypothesis,
 an axiom, or an unboarded `sorry`.
