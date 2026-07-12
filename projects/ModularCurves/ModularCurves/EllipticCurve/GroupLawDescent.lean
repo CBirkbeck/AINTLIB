@@ -110,17 +110,21 @@ theorem negModelHom_vc {R : Type u} [CommRing R] (C : WeierstrassCurve.VariableC
     (W : WeierstrassCurve R) [W.IsElliptic] [(C • W).IsElliptic] :
     negModelHom (C • W) ≫ (projModelVCIso C W).hom =
       (projModelVCIso C W).hom ≫ negModelHom W := by
-  let e : (modelEllipticCurve (C • W)).asOver ≅ (modelEllipticCurve W).asOver :=
-    Over.isoMk (projModelVCIso C W) (projModelVCIso_π C W)
-  have hη : (η[(modelEllipticCurve (C • W)).asOver] :
-        𝟙_ (Over (Spec (CommRingCat.of R))) ⟶ (modelEllipticCurve (C • W)).asOver) ≫ e.hom =
-      η[(modelEllipticCurve W).asOver] :=
-    vcOver_one C W
-  haveI : IsMonHom e.hom :=
-    { one_hom := hη
-      mul_hom := isMonHom_of_pointedIso_records (modelEllipticCurve (C • W))
-        (modelEllipticCurve W) e hη }
-  have hinv := congrArg CommaMorphism.left (GrpObj.inv_hom e.hom)
+  letI := modelGrpObj (C • W)
+  letI := modelGrpObj W
+  haveI : IsMonHom (vcOver C W) :=
+    { one_hom := by
+        apply Over.OverMorphism.ext
+        show ((𝟙_ (Over (Spec (CommRingCat.of R)))).hom ≫ projModelZero (C • W)) ≫
+          (projModelVCIso C W).hom =
+            (𝟙_ (Over (Spec (CommRingCat.of R)))).hom ≫ projModelZero W
+        exact (Category.assoc _ _ _).trans
+          (congrArg ((𝟙_ (Over (Spec (CommRingCat.of R)))).hom ≫ ·) (projModelVCIso_zero C W))
+      mul_hom := by
+        apply Over.OverMorphism.ext
+        rw [Over.comp_left, Over.comp_left, Over.tensorHom_left]
+        exact mulModelHom_vc C W }
+  have hinv := congrArg CommaMorphism.left (GrpObj.inv_hom (vcOver C W))
   rw [Over.comp_left, Over.comp_left] at hinv
   exact hinv
 

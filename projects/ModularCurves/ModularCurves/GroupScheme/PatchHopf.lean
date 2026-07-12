@@ -837,6 +837,182 @@ noncomputable def antipodeAlgTop : P.groupRingTop →ₐ[P.baseRingTop] P.groupR
     simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h
     exact h
 
+/-- The antipode pairing `⟨S, 𝟙⟩ : G|_V ⟶ G|_V ×_V G|_V`, `g ↦ (g⁻¹, g)`. -/
+noncomputable def antipodePair : P.groupOpen.toScheme ⟶ P.groupSquare :=
+  pullback.lift P.invRes (𝟙 P.groupOpen.toScheme)
+    (by rw [Category.id_comp, P.invRes_comp_groupToBaseRes])
+
+@[reassoc (attr := simp)]
+theorem antipodePair_fst :
+    P.antipodePair ≫ pullback.fst P.groupToBaseRes P.groupToBaseRes = P.invRes :=
+  pullback.lift_fst _ _ _
+
+@[reassoc (attr := simp)]
+theorem antipodePair_snd :
+    P.antipodePair ≫ pullback.snd P.groupToBaseRes P.groupToBaseRes = 𝟙 _ :=
+  pullback.lift_snd _ _ _
+
+/-- The `⊤`-level dual of the antipode pairing: `A' ⊗ A' ⟶ A'`. -/
+noncomputable def antipodeLiftTop :
+    CommRingCat.of (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) ⟶ P.groupRingTop :=
+  inv P.squareΓTop ≫ P.antipodePair.appTop
+
+/-- **Left inclusion, `⊤`-level**: dualises the `fst` leg to the antipode. -/
+theorem includeLeft_comp_antipodeLiftTop :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := P.baseRingTop) (A := P.groupRingTop) (B := P.groupRingTop))
+      ≫ P.antipodeLiftTop = P.antipodeTop := by
+  have hleg := fst_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+  have hinv : affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+      ≫ inv P.squareΓTop = 𝟙 _ := IsIso.hom_inv_id _
+  rw [antipodeLiftTop, ← Category.assoc, ← hleg, Category.assoc, Category.assoc,
+    reassoc_of% hinv, ← Scheme.Hom.comp_appTop, antipodePair_fst, antipodeTop]
+
+/-- **Right inclusion, `⊤`-level**: dualises the `snd` leg to the identity. -/
+theorem includeRight_comp_antipodeLiftTop :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := P.baseRingTop) (A := P.groupRingTop) (B := P.groupRingTop)).toRingHom
+      ≫ P.antipodeLiftTop = 𝟙 P.groupRingTop := by
+  have hleg := snd_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+  have hinv : affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+      ≫ inv P.squareΓTop = 𝟙 _ := IsIso.hom_inv_id _
+  rw [antipodeLiftTop, ← Category.assoc, ← hleg, Category.assoc, Category.assoc,
+    reassoc_of% hinv, ← Scheme.Hom.comp_appTop, antipodePair_snd,
+    AlgebraicGeometry.Scheme.Hom.id_appTop]
+
+/-- The algebraic antipode lift `A' ⊗[R'] A' →ₐ[R'] A'`, `a ⊗ b ↦ S'(a) · b`. -/
+noncomputable def antipodeLiftAlgTop :
+    (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) →ₐ[P.baseRingTop] P.groupRingTop :=
+  Algebra.TensorProduct.lift P.antipodeAlgTop (AlgHom.id P.baseRingTop P.groupRingTop)
+    (fun _ _ => Commute.all _ _)
+
+theorem antipodeLiftAlgTop_eq :
+    CommRingCat.ofHom P.antipodeLiftAlgTop.toRingHom = P.antipodeLiftTop := by
+  refine tensor_hom_ext ?_ ?_
+  · rw [P.includeLeft_comp_antipodeLiftTop]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show antipodeLiftAlgTop G P (a ⊗ₜ[P.baseRingTop] (1 : P.groupRingTop)) = _
+    rw [antipodeLiftAlgTop, Algebra.TensorProduct.lift_tmul, map_one, _root_.mul_one]
+    rfl
+  · rw [P.includeRight_comp_antipodeLiftTop]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show antipodeLiftAlgTop G P ((1 : P.groupRingTop) ⊗ₜ[P.baseRingTop] a) = _
+    rw [antipodeLiftAlgTop, Algebra.TensorProduct.lift_tmul, map_one, _root_.one_mul,
+      AlgHom.coe_id, id_eq]
+    rfl
+
+/-- **The left inverse law, chart form** `⟨S, 𝟙⟩ ≫ μ = e ∘ !`: the antipode pairing
+followed by multiplication is the constant unit map `g ↦ g⁻¹·g = e`, i.e. the base
+projection followed by the unit section. Dualises `invOver_mulOver_left`; proven by the
+same `ι`-cancellation as `assocScheme_leftMulSchemeL`. -/
+theorem antipodePair_comp_squareMulRes :
+    P.antipodePair ≫ P.squareMulRes = P.groupToBaseRes ≫ P.unitSection := by
+  sorry
+
+/-- **The antipode-multiplication law, `⊤`-level `CommRingCat` form.** -/
+theorem comulTop_comp_antipodeLiftTop :
+    P.comulTop ≫ P.antipodeLiftTop = P.counitTop ≫ P.groupToBaseRes.appTop := by
+  rw [comulTop, antipodeLiftTop, Category.assoc, ← Category.assoc P.squareΓTop,
+    IsIso.hom_inv_id, Category.id_comp, ← Scheme.Hom.comp_appTop,
+    P.antipodePair_comp_squareMulRes, Scheme.Hom.comp_appTop, counitTop]
+
+/-- **The left antipode law, `AlgHom` form**: `(S' ⊗ id) ∘ Δ' = ofId ∘ ε'` (the convolution
+inverse condition), in the shape `HopfAlgebra.ofAlgHom` consumes. -/
+theorem antipodeLiftAlgTop_comp_comulAlgTop :
+    P.antipodeLiftAlgTop.comp P.comulAlgTop
+      = (Algebra.ofId P.baseRingTop P.groupRingTop).comp P.counitAlgTop := by
+  have h := P.comulTop_comp_antipodeLiftTop
+  rw [← P.antipodeLiftAlgTop_eq] at h
+  refine AlgHom.ext fun a => ?_
+  have h2 := congrArg (fun m : P.groupRingTop ⟶ P.groupRingTop => m.hom a) h
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h2
+  exact h2
+
+/-- The right antipode pairing `⟨𝟙, S⟩ : G|_V ⟶ G|_V ×_V G|_V`, `g ↦ (g, g⁻¹)`. -/
+noncomputable def antipodePairR : P.groupOpen.toScheme ⟶ P.groupSquare :=
+  pullback.lift (𝟙 P.groupOpen.toScheme) P.invRes
+    (by rw [Category.id_comp, P.invRes_comp_groupToBaseRes])
+
+@[reassoc (attr := simp)]
+theorem antipodePairR_fst :
+    P.antipodePairR ≫ pullback.fst P.groupToBaseRes P.groupToBaseRes = 𝟙 _ :=
+  pullback.lift_fst _ _ _
+
+@[reassoc (attr := simp)]
+theorem antipodePairR_snd :
+    P.antipodePairR ≫ pullback.snd P.groupToBaseRes P.groupToBaseRes = P.invRes :=
+  pullback.lift_snd _ _ _
+
+/-- The `⊤`-level dual of the right antipode pairing. -/
+noncomputable def antipodeLiftTopR :
+    CommRingCat.of (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) ⟶ P.groupRingTop :=
+  inv P.squareΓTop ≫ P.antipodePairR.appTop
+
+theorem includeLeft_comp_antipodeLiftTopR :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := P.baseRingTop) (A := P.groupRingTop) (B := P.groupRingTop))
+      ≫ P.antipodeLiftTopR = 𝟙 P.groupRingTop := by
+  have hleg := fst_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+  have hinv : affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+      ≫ inv P.squareΓTop = 𝟙 _ := IsIso.hom_inv_id _
+  rw [antipodeLiftTopR, ← Category.assoc, ← hleg, Category.assoc, Category.assoc,
+    reassoc_of% hinv, ← Scheme.Hom.comp_appTop, antipodePairR_fst,
+    AlgebraicGeometry.Scheme.Hom.id_appTop]
+
+theorem includeRight_comp_antipodeLiftTopR :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := P.baseRingTop) (A := P.groupRingTop) (B := P.groupRingTop)).toRingHom
+      ≫ P.antipodeLiftTopR = P.antipodeTop := by
+  have hleg := snd_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+  have hinv : affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+      ≫ inv P.squareΓTop = 𝟙 _ := IsIso.hom_inv_id _
+  rw [antipodeLiftTopR, ← Category.assoc, ← hleg, Category.assoc, Category.assoc,
+    reassoc_of% hinv, ← Scheme.Hom.comp_appTop, antipodePairR_snd, antipodeTop]
+
+/-- The algebraic right antipode lift `A' ⊗[R'] A' →ₐ[R'] A'`, `a ⊗ b ↦ a · S'(b)`. -/
+noncomputable def antipodeLiftAlgTopR :
+    (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) →ₐ[P.baseRingTop] P.groupRingTop :=
+  Algebra.TensorProduct.lift (AlgHom.id P.baseRingTop P.groupRingTop) P.antipodeAlgTop
+    (fun _ _ => Commute.all _ _)
+
+theorem antipodeLiftAlgTopR_eq :
+    CommRingCat.ofHom P.antipodeLiftAlgTopR.toRingHom = P.antipodeLiftTopR := by
+  refine tensor_hom_ext ?_ ?_
+  · rw [P.includeLeft_comp_antipodeLiftTopR]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show antipodeLiftAlgTopR G P (a ⊗ₜ[P.baseRingTop] (1 : P.groupRingTop)) = _
+    rw [antipodeLiftAlgTopR, Algebra.TensorProduct.lift_tmul, map_one, _root_.mul_one,
+      AlgHom.coe_id, id_eq]
+    rfl
+  · rw [P.includeRight_comp_antipodeLiftTopR]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show antipodeLiftAlgTopR G P ((1 : P.groupRingTop) ⊗ₜ[P.baseRingTop] a) = _
+    rw [antipodeLiftAlgTopR, Algebra.TensorProduct.lift_tmul, map_one, _root_.one_mul]
+    rfl
+
+/-- **The right inverse law, chart form** `⟨𝟙, S⟩ ≫ μ = e ∘ !` (`g ↦ g·g⁻¹ = e`).
+Dualises `invOver_mulOver_right`. -/
+theorem antipodePairR_comp_squareMulRes :
+    P.antipodePairR ≫ P.squareMulRes = P.groupToBaseRes ≫ P.unitSection := by
+  sorry
+
+theorem comulTop_comp_antipodeLiftTopR :
+    P.comulTop ≫ P.antipodeLiftTopR = P.counitTop ≫ P.groupToBaseRes.appTop := by
+  rw [comulTop, antipodeLiftTopR, Category.assoc, ← Category.assoc P.squareΓTop,
+    IsIso.hom_inv_id, Category.id_comp, ← Scheme.Hom.comp_appTop,
+    P.antipodePairR_comp_squareMulRes, Scheme.Hom.comp_appTop, counitTop]
+
+/-- **The right antipode law, `AlgHom` form**: `(id ⊗ S') ∘ Δ' = ofId ∘ ε'`. -/
+theorem antipodeLiftAlgTopR_comp_comulAlgTop :
+    P.antipodeLiftAlgTopR.comp P.comulAlgTop
+      = (Algebra.ofId P.baseRingTop P.groupRingTop).comp P.counitAlgTop := by
+  have h := P.comulTop_comp_antipodeLiftTopR
+  rw [← P.antipodeLiftAlgTopR_eq] at h
+  refine AlgHom.ext fun a => ?_
+  have h2 := congrArg (fun m : P.groupRingTop ⟶ P.groupRingTop => m.hom a) h
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h2
+  exact h2
+
 /-! #### The `⊤`-level counit laws, `AlgHom` form -/
 
 /-- The algebraic left counit lift `A' ⊗[R'] A' →ₐ[R'] A'`, `a ⊗ b ↦ ε'(a) • b`. -/
@@ -1498,6 +1674,24 @@ laws `map_counit_id_comp_comul` / `map_id_counit_comp_comul`. -/
 noncomputable instance instBialgebra : Bialgebra P.baseRingTop P.groupRingTop :=
   Bialgebra.ofAlgHom P.comulAlgTop P.counitAlgTop
     P.comulAlgTop_coassoc P.map_counit_id_comp_comul P.map_id_counit_comp_comul
+
+/-- The canonical `comulAlgHom` of `instBialgebra` is our `comulAlgTop`. -/
+theorem comulAlgHom_eq :
+    Bialgebra.comulAlgHom P.baseRingTop P.groupRingTop = P.comulAlgTop :=
+  AlgHom.ext fun _ => rfl
+
+/-- The canonical `counitAlgHom` of `instBialgebra` is our `counitAlgTop`. -/
+theorem counitAlgHom_eq :
+    Bialgebra.counitAlgHom P.baseRingTop P.groupRingTop = P.counitAlgTop :=
+  AlgHom.ext fun _ => rfl
+
+/-- **`[HopfAlgebra R' A']`** — the chart Hopf-algebra structure, upgrading `instBialgebra`
+with the ⊤-level antipode `antipodeAlgTop` and the two antipode laws
+`antipodeLiftAlgTop_comp_comulAlgTop` / `antipodeLiftAlgTopR_comp_comulAlgTop`. -/
+noncomputable instance instHopfAlgebra : HopfAlgebra P.baseRingTop P.groupRingTop :=
+  HopfAlgebra.ofAlgHom P.antipodeAlgTop
+    (by rw [comulAlgHom_eq, counitAlgHom_eq]; exact P.antipodeLiftAlgTop_comp_comulAlgTop)
+    (by rw [comulAlgHom_eq, counitAlgHom_eq]; exact P.antipodeLiftAlgTopR_comp_comulAlgTop)
 
 end AffineChartPatch
 

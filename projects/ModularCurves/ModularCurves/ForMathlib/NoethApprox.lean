@@ -42,13 +42,22 @@ the noetherian stage (where annihilators are finitely generated) and base-changi
   locality (`flat_of_flatLocus_univ`, from `Module.flat_of_isLocalized_maximal`) and re-expresses
   the base change through `Algebra.TensorProduct.cancelBaseChange`. Enlargement is genuinely
   necessary (`A₀ = ℤ ⧸ pℤ` over `R₀ = ℤ` is not flat although `ℚ ⊗ A₀ = 0` is). The geometric step
-  `exists_flatLocus_univ_stage` is now a thin wrapper (via `flatLocus_eq_univ_of_flat`) around the
-  single remaining **registered box** `exists_subalgebra_flat_baseChange`: *flatness of the
-  colimit descends to a finite `ℤ`-stage*. Its irreducible missing ingredient is the pointwise
-  flat descent of **Stacks 00R6** (the local flatness criterion for finitely-presented algebras),
-  which mathlib does not yet support; the surrounding directed-colimit + quasi-compactness assembly
-  (*openness of the flat locus*, `isOpen_flatLocus`, and the cofiltered limit of affine schemes,
-  `AlgebraicGeometry.exists_mem_of_isClosed_of_nonempty`) is available in mathlib.
+  `exists_flatLocus_univ_stage` is a thin wrapper (via `flatLocus_eq_univ_of_flat`) around
+  `exists_subalgebra_flat_baseChange`: *flatness of the colimit descends to a finite `ℤ`-stage*.
+
+  The **directed-colimit + quasi-compactness assembly** for that descent is built in the
+  `### Scheme-limit machinery` section below and is otherwise axiom-clean:
+  `R ⊗[R₀] A₀ = colimᵢ (Rᵢ ⊗[R₀] A₀)` over the finitely-generated stages (`stageColimit`, via
+  `TensorProduct.Algebra.exists_of_fg` and the filtered-colimit recognition
+  `Types.FilteredColimit.isColimitOf'`); `Spec (R ⊗[R₀] A₀) = limᵢ Spec (Rᵢ ⊗[R₀] A₀)` as a
+  cofiltered limit of affine schemes (`stageIsLimit`, via `Scheme.Spec` preserving limits); the
+  non-flat loci are closed (`isOpen_flatLocus`) and the cofiltered-limit engine
+  `AlgebraicGeometry.exists_mem_of_isClosed_of_nonempty` collapses them to a single stage
+  (`exists_fg_flat_stage`). Two *local* facts are isolated as named boxes: `flat_stalk_descends` —
+  the pointwise flat descent of **Stacks 00R6** (the local flatness criterion for
+  finitely-presented algebras), the one genuinely mathlib-absent ingredient — and `nonflat_mapsTo`,
+  the base-change *ascent* of stalk flatness (`Module.Flat.baseChange` + localisation; provable,
+  not a mathlib gap).
 
 ## References
 

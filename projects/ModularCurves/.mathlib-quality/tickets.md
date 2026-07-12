@@ -16791,3 +16791,23 @@ localModel glues (LocallyWeierstrass.baseChange + it's Zariski-local).
   structure-literal `by`-fields need parens before `}`.
 - **Next (banked queue)**: Pic⁰_{E/S} stream — `/develop --decompose` vs GME 2.16/2.17 +
   KM 2.4 with verbatim quotes; ecosystem re-check for upstream Pic movement FIRST.
+
+## Amendments v10.159 (2026-07-12, fable-PIC0): Pic⁰ stream FIRST ACT done — /develop --decompose for Pic_{E/S} (L-A functor layer skeleton + sourced decomposition)
+
+- **Ecosystem re-check (watch duty)**: mathlib still ring-level-only (`CommRing.Pic`;
+  its TODO lists Spec-connection as absent); NO scheme-level/relative Pic upstream. Clear.
+- **`/develop --decompose` artifact**: `.mathlib-quality/decomposition-pic-rel-functor.md`
+  — six verbatim GME quotes (pp. 108-109, read from the PDF this session), three-layer
+  cut: **L-A functor layer** (skeleton NOW: `Picard/RelativePic.lean`, compiles, 8
+  sorries) / **L-B degree layer** (deferred → T-PIC-DEG0 audit) / **L-C Abel (2.16)
+  proper** (deferred, pinned out — needs relative cohomology, per the standing stage-P2
+  pin). KEY DESIGN (source-faithful, [Q4]): `picRel := (Pic.map z_T).ker` — Hida's own
+  `Pic(E) = Ker(0*) ⊕ Im(f*)` kernel model as the DEFINITION; the displayed quotient
+  `Pic(E_T)/f_T^*Pic(T)` kept honest via `nonempty_picRel_mulEquiv_quotient`. Whole
+  L-A layer stated for ANY retraction pair (p, z, hz) — no elliptic hypotheses needed.
+- Skeleton decls: baseChangeZero(+_snd), picRel, quotient-comparison, baseChangeMap
+  (+zero-compat, +ker-preservation, +id/comp), `picRelFunctor : (Over S)ᵒᵖ ⥤
+  CommGrpCat.{u+1}` (data complete; laws sorried). All leaves discharge from mathlib
+  pullback API + landed Pic.map machinery + one ~15-line abelian splitting lemma.
+- LEAN-OP: `Pic.map` lives in ForMathlib/PullbackTensorGeneral.lean (namespace
+  AlgebraicGeometry.Scheme), NOT Picard/Pic.lean; mathlib category is `CommGrpCat` now.
