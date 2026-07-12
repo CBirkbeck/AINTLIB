@@ -190,6 +190,16 @@ option-free and axiom-clean; it deliberately omits the option-heavy functorialit
 of upstream mathlib PR #36218. Affine vanishing and proper cohomology/base change remain
 the unresolved geometric inputs.
 
+The first acyclicity dependency is now complete in
+`ForMathlib/FlasqueCohomology.lean`. Free abelian sheaves represented by opens detect
+restriction maps, injective additive sheaves are flasque, and
+`TopCat.Sheaf.IsFlasque.H_isZero` proves that every positive cohomology group of a
+flasque sheaf vanishes. The proof is split into the degree-one lifting argument and an
+elementwise dimension-shifting step, so it needs none of the transparency options used
+by upstream mathlib PR #35790. This result is one input to the local-killing/Kempf
+argument for affine vanishing; it does not by itself prove that a quasicoherent sheaf on
+an affine scheme is acyclic.
+
 No theorem in this stream may replace this leaf by a `CohomologyPackage` hypothesis,
 an axiom, or an unboarded `sorry`.
 
