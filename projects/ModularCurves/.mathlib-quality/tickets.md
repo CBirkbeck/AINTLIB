@@ -16588,3 +16588,15 @@ HasseWeil (`mulByInt_degree` anchor). CHARTER-Y1-CLOSER-2 COMPLETE.
 
 ### v10.155 (2026-07-12, c5β): [T-F1-general] `torsion_etaleLocal_triv` INTERFACE PUSHED — NEW-Y1 pin ready
 Sorried interface committed: `GroupScheme/TorsionEtaleTriv.lean` — `torsion_etaleLocal_triv (N) (hinv : NIsInvertible S N) : ∃ (T) (p : T ⟶ S), Etale p ∧ Surjective p ∧ Nonempty (Over.mk (pullback.snd (E.torsionπ N) p) ≅ Over.mk (constSchemeπ T (Fin 2 → ZMod N)))`. **NEW-Y1: CLOPEN-β codes to this pin NOW** (v10.154). Proof = c5β's L2b (via `isIso_of_isPullback_of_fppf` on `torsionπ_etale`), in flight. glSchemeSmul group-action layer already landed (GLSchemeAction.lean). Weil untouched.
+
+## Amendments v10.155 (fable-PIC0, 2026-07-12): [PAIR-4] route-upgrade — 4a/4c DODGED
+
+The functor-level restriction-conjugation (4a) and iso-naturality (4c) are ELIMINATED:
+`sheafificationW_of_bijective_on_cover` extracted as the presheaf-level sieve-core
+(`isIso_of_isIso_restrict` reproven over it, statement-identical, `1abf37ee5`), and
+`nonempty_eval_iso` rewired to feed it per-component bijectivity directly — cover-member
+opens are themselves trivializing via `restrictTrivialization`, so [CMP-PAIR] now gates on
+ONE section-level leaf: **`bijective_evPre_app_of_triv`** (the trivialized pairing
+component is the unit multiplication — the component content of the CLOSED
+`isIso_ev_unitObj`, conjugated by `e`'s section-isos + the dual-trivialization). Then
+[CMP-←]. Function-level `Bijective`-casts cross the scheme-app/val-app forget₂ defeq.
