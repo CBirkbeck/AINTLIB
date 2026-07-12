@@ -133,4 +133,41 @@ theorem isIso_of_isClosedImmersion_of_finrank_eq_isAffineBase
     ← Scheme.Hom.finrank_eq_rankAtStalk_isAffineBase (j ≫ g) p]
   exact (h (S.isoSpec.inv.base p)).symm
 
+/-- **Same-degree closed immersion is an isomorphism (general base).** A closed immersion
+`j : X ⟶ Y` between schemes finite, flat, and locally of finite presentation over `S`, whose
+scheme-ranks over `S` agree everywhere, is an isomorphism. Reduces to the affine-base case on
+the preimages of an affine cover of `S`. -/
+theorem isIso_of_isClosedImmersion_of_finrank_eq
+    {X Y S : Scheme.{u}} (g : Y ⟶ S) (j : X ⟶ Y)
+    [IsClosedImmersion j] [IsFinite g] [Flat g] [LocallyOfFinitePresentation g]
+    [IsFinite (j ≫ g)] [Flat (j ≫ g)] [LocallyOfFinitePresentation (j ≫ g)]
+    (h : ∀ s : S, (j ≫ g).finrank s = g.finrank s) : IsIso j := by
+  rw [← MorphismProperty.isomorphisms.iff,
+    IsZariskiLocalAtTarget.iff_of_iSup_eq_top (P := MorphismProperty.isomorphisms Scheme)
+      (fun i => g ⁻¹ᵁ (S.affineCover.f i).opensRange) ?cover]
+  case cover =>
+    rw [← Scheme.Hom.preimage_iSup, Scheme.OpenCover.iSup_opensRange, Scheme.Hom.preimage_top]
+  intro i
+  rw [MorphismProperty.isomorphisms.iff]
+  set W : S.Opens := (S.affineCover.f i).opensRange with hW
+  haveI : IsAffine W := isAffineOpen_opensRange _
+  haveI : IsClosedImmersion (j ∣_ (g ⁻¹ᵁ W)) :=
+    IsZariskiLocalAtTarget.restrict (inferInstance : IsClosedImmersion j) _
+  haveI : IsFinite (g ∣_ W) := IsZariskiLocalAtTarget.restrict (inferInstance : IsFinite g) _
+  haveI : Flat (g ∣_ W) := IsZariskiLocalAtTarget.restrict (inferInstance : Flat g) _
+  haveI : LocallyOfFinitePresentation (g ∣_ W) :=
+    IsZariskiLocalAtTarget.restrict (inferInstance : LocallyOfFinitePresentation g) _
+  have hcomp : (j ∣_ (g ⁻¹ᵁ W)) ≫ (g ∣_ W) = (j ≫ g) ∣_ W := (morphismRestrict_comp j g W).symm
+  haveI : IsFinite ((j ∣_ (g ⁻¹ᵁ W)) ≫ (g ∣_ W)) := by
+    rw [hcomp]; exact IsZariskiLocalAtTarget.restrict (inferInstance : IsFinite (j ≫ g)) _
+  haveI : Flat ((j ∣_ (g ⁻¹ᵁ W)) ≫ (g ∣_ W)) := by
+    rw [hcomp]; exact IsZariskiLocalAtTarget.restrict (inferInstance : Flat (j ≫ g)) _
+  haveI : LocallyOfFinitePresentation ((j ∣_ (g ⁻¹ᵁ W)) ≫ (g ∣_ W)) := by
+    rw [hcomp]; exact IsZariskiLocalAtTarget.restrict
+      (inferInstance : LocallyOfFinitePresentation (j ≫ g)) _
+  refine isIso_of_isClosedImmersion_of_finrank_eq_isAffineBase (g ∣_ W) (j ∣_ (g ⁻¹ᵁ W)) ?_
+  intro s
+  rw [hcomp, Scheme.Hom.finrank_morphismRestrict g W s]
+  exact (Scheme.Hom.finrank_morphismRestrict (j ≫ g) W s).trans (h (W.ι.base s))
+
 end ModularCurves
