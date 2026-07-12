@@ -17494,3 +17494,5 @@ seats' reclaim clauses are VOID.
 - **Cleanup fleet note**: the priority:modular-curves wave (#5282–#5316, 33 tickets) runs
   on MAIN concurrently — producer streams work dev/y1; rebase awareness at session starts;
   rename-heavy tickets are serialized by the main-side manager.
+
+## Amendments v10.172 (2026-07-12, coordinator): MAIN-PR CADENCE formalized (owner confirmation of the system) — whole-branch dev→main PRs at every boarded ★; cleanup fleet works main continuously under its own coordinator
