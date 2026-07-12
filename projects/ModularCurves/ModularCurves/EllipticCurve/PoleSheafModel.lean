@@ -2007,4 +2007,30 @@ noncomputable def sectionPoleSheafPower_projModel_sectionsEquiv
     refine ⟨m, ?_⟩
     exact Subtype.ext hm
 
+/-- For `n ≥ 1`, global sections of `O(n[0])` on a projective Weierstrass model have
+the basis transported from the pole monomials `xⁱ` and `xⁱy`. -/
+noncomputable def sectionPoleSheafPower_projModel_basis
+    (W : WeierstrassCurve R) {n : ℕ} (hn : 1 ≤ n) :
+    letI : Module R (projModelPoleSections W n) :=
+      Module.compHom _ (projModelBaseScalarHom W)
+    Module.Basis (Fin n) R (projModelPoleSections W n) := by
+  letI : Module R (projModelPoleSections W n) :=
+    Module.compHom _ (projModelBaseScalarHom W)
+  exact (poleOrderFiltrationBasis W hn).map
+    (sectionPoleSheafPower_projModel_sectionsEquiv W n).symm
+
+/-- For a nonzero base ring and `n ≥ 1`, global sections of `O(n[0])` on a projective
+Weierstrass model have rank `n`. -/
+theorem sectionPoleSheafPower_projModel_finrank [Nontrivial R]
+    (W : WeierstrassCurve R) {n : ℕ} (hn : 1 ≤ n) :
+    letI : Module R (projModelPoleSections W n) :=
+      Module.compHom _ (projModelBaseScalarHom W)
+    Module.finrank R (projModelPoleSections W n) = n := by
+  letI : Module R (projModelPoleSections W n) :=
+    Module.compHom _ (projModelBaseScalarHom W)
+  let b := sectionPoleSheafPower_projModel_basis W hn
+  letI : Module.Free R (projModelPoleSections W n) := Module.Free.of_basis b
+  letI : Module.Finite R (projModelPoleSections W n) := Module.Finite.of_basis b
+  rw [Module.finrank_eq_card_basis b, Fintype.card_fin]
+
 end ModularCurves
