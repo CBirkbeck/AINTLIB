@@ -941,4 +941,35 @@ noncomputable def projModelSectionPoleCoefficientZ (W : WeierstrassCurve R) (n :
       (projModelZChart W)
       (projModelSectionPoleSheafPowerTrivializationZ W n) m)
 
+/-- The section-neighborhood coefficient restricts to its canonical overlap
+coefficient. -/
+theorem projModelSectionPoleCoefficient_restrict (W : WeierstrassCurve R) (n : ℕ)
+    (m : Γ(sectionPoleSheafPower (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W) n, (⊤ : (projModel W).Opens))) :
+    overTrivializationCoefficient _ (projModelPoleOverlap W)
+        (projModelSectionPolePowerOverlapOverTrivialization W n) m =
+      (projModel W).presheaf.map
+        (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op
+        (projModelSectionPoleCoefficient W n m) := by
+  unfold projModelSectionPolePowerOverlapOverTrivialization
+  unfold projModelSectionPoleCoefficient
+  rw [← projModelSectionPoleSheafPowerTrivialization_restrict]
+  exact localTrivializationCoefficient_restrict _ _ _ _ _
+
+/-- The affine `Z`-coordinate restricts to its canonical overlap coefficient. -/
+theorem projModelSectionPoleCoefficientZ_restrict (W : WeierstrassCurve R) (n : ℕ)
+    (m : Γ(sectionPoleSheafPower (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W) n, (⊤ : (projModel W).Opens))) :
+    overTrivializationCoefficient _ (projModelPoleOverlap W)
+        (projModelSectionPolePowerOverlapOverTrivializationZ W n) m =
+      (projModel W).presheaf.map
+        (homOfLE (projModelPoleOverlap_le_ZChart W)).op
+        ((chartZSectionsRingEquiv W).symm
+          (projModelSectionPoleCoefficientZ W n m)) := by
+  unfold projModelSectionPolePowerOverlapOverTrivializationZ
+  unfold projModelSectionPoleCoefficientZ
+  rw [RingEquiv.symm_apply_apply]
+  rw [← projModelSectionPoleSheafPowerTrivializationZ_restrict]
+  exact localTrivializationCoefficient_restrict _ _ _ _ _
+
 end ModularCurves
