@@ -17186,3 +17186,29 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
   IsSeparated/SmoothOfRelativeDimension-1 on `pullback p t ⟶ T` (check the engine +
   mathlib first), then `sectionDivisor` + `picClass` + `picRelProj`; (b) degree grading
   (`sectionsDivisor_degree` consumer → Pic^ν); (c) rigidified bundles; (d) DS-END0.
+## Amendments v10.166 (2026-07-12, NEW-GH): ★★ GHC1 = corrected T-H4 as a THEOREM; GHC3 proven; GHB5 crux isolated
+
+- **★★ GHC1 `gammaH_relativelyRepresentable` (corrected T-H4) is a THEOREM** (commit
+  9a27d2574). For `N` invertible and any `H ≤ GL₂(ℤ/N)`, `P_H = [Γ(N)]/H` exists as a
+  `QuotientProblemData`. Proof = the direct KM 7.1.2/7.1.3 assembly
+  `exists_quotientProblemData [GHB7] (gammaFullNaive_freeAction [GH2]) (…_equivariantRelRepData
+  [GHA5])`; `Finite ↥H` auto-inferred. GHC1's own proof is complete — residual sorries are the
+  infrastructure gates below. Replaces the held (FALSE-for-`H≠⊥`) `gammaHNaive_relativelyRepresentable`.
+- **GHC3 `gammaHNaive_toQuotient` (Loeffler Fact 3.8.1) PROVEN** (commit b8d1b875d), body
+  sorry-free: θ = `Quotient.lift pkg.proj.app` (well-def from `proj_invariant` + the `γ⁻¹`
+  pin), naturality via `ConcreteCategory.congr_hom (pkg.proj.naturality f)` with the orbit-map
+  step closing by proof irrelevance on the `FullLevelPt` subtype (T-H3-sorried functor defs
+  NEVER unfolded — bump-free; the whnf/pullSection blow-up was the whole fight), geom
+  bijectivity from `geom_surjective`/`geom_orbits`.
+- **GHB5 `exists_quotient_baseChange_of_free`: construction + all three easy clauses PROVEN**
+  (commit 094db09df) — `πT`, `πT ≫ snd = snd`, `πT ≫ fst = fst ≫ π`, G-invariance. Sole
+  remaining sorry = the base-change universal property (KM 7.1.3(3c)); affine core is [A711-BC]
+  `fixedPointsBaseChange` (PROVEN); two routes documented (chart-glue via
+  `existsUnique_invariantsπ_lift`, or GHB3 + f.é.s.-cancellation).
+- **File now 6 code sorries** (was 8): GHB5-crux(456), GHB6/GH-DESC-GAP(487), GHB7-assembly(508),
+  gammaHAut GH1-data(628), gammaHAut_app_val pin(638), GHA3 Weil-pairing étale(715).
+- **REMAINDER (charter's "Γ_H assembly against FP4's engine")**: **GHB7** `exists_quotientProblemData`
+  (~400 LOC functor assembly — the value functor from chosen per-object quotients + couniversal
+  + geom clauses; needs `IsAffineHom(diagonal)` per X) and **GHB5-crux** (~150 LOC base-change
+  descent). Both are the mapped multi-session core; every gate they stand on ([A711-FP]/[A711-BC]/
+  GHB3/GHB4) is OPEN. GHC1 becomes unconditional the moment these close — zero further edits.
