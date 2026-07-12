@@ -280,6 +280,15 @@ the product of local sections. The source is sections on the union of the chosen
 which is global sections when they cover the whole space. Higher Cech degrees and the
 acyclic-cover comparison with sheaf cohomology remain to be constructed.
 
+The finite cover is now packaged with its acyclicity in
+`ForMathlib/AcyclicAffineOpenCover.lean`. Restriction of a quasicoherent scheme module to
+an affine open has vanishing positive `Sheaf.H`, and
+`Scheme.Hom.exists_finite_affine_openCover_acyclic` combines this with properness over an
+affine base to obtain simultaneous vanishing on every nonempty finite intersection of a
+finite cover. Thus the geometric hypotheses of the acyclic-cover theorem are available
+without noetherianity. The remaining work is the Cech comparison theorem itself and the
+subsequent finite-projective replacement.
+
 The generic two-chart degree-one calculation is now complete in
 `ForMathlib/TwoOpenHOne.lean`. The theorem
 `TopCat.Sheaf.subsingleton_H_one_of_two_open_cover` proves global `H¹` vanishing from
