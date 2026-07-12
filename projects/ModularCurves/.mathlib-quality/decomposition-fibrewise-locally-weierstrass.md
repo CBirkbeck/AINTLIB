@@ -596,6 +596,17 @@ affine pole-sheaf model now carries the base-ring action needed for finite-proje
 replacement. No finiteness or projectivity is asserted yet: the remaining step is the
 proper finite-projective replacement and its arbitrary-base comparison.
 
+Exactness is now transported at the module-valued level in
+`ForMathlib/SchemeModuleBaseCechHomology.lean`.
+`baseCechComplex_exactAt_iff` shows that exactness of the `Γ(S,⊤)`-linear complex
+can be checked on the landed additive complex, and
+`baseCechComplex_exactAt_one_iff_subsingleton_H` identifies degree-one exactness with
+genuine `Sheaf.H¹` vanishing for a quasicoherent module on an affine open cover. This
+provides the exact module-valued cohomology target for the later Grothendieck complex.
+It still does not make the raw affine Cech terms finite: Stacks 0A1G, Lemma 36.30.1 and
+Remark 36.30.2 obtain the finite projective complex from perfectness of proper
+pushforward and arbitrary base change, which remains the geometric blocker.
+
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
 `n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of
