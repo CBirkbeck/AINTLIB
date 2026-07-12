@@ -423,7 +423,37 @@ theorem _root_.AlgebraicGeometry.SchemeAction.exists_quotient_baseChange_of_free
       ∀ {Y : Scheme.{u}} (F : pullback f g ⟶ Y),
         (∀ γ : G, (σ.basePullback f hover g).hom γ ≫ F = F) →
           ∃! q : pullback f₀ g ⟶ Y, πT ≫ q = F := by
-  sorry
+  set πT : pullback f g ⟶ pullback f₀ g :=
+    pullback.map f g f₀ g π (𝟙 T) (𝟙 S) (by rw [Category.comp_id]; exact hπf.symm)
+      (by rw [Category.comp_id, Category.id_comp]) with hπTdef
+  have hsnd : πT ≫ pullback.snd f₀ g = pullback.snd f g := by
+    rw [hπTdef, pullback.lift_snd, Category.comp_id]
+  have hfst : πT ≫ pullback.fst f₀ g = pullback.fst f g ≫ π := by
+    rw [hπTdef, pullback.lift_fst]
+  have hbfst : ∀ γ : G, (σ.basePullback f hover g).hom γ ≫ pullback.fst f g
+      = pullback.fst f g ≫ σ.hom γ := fun γ => by
+    simp only [SchemeAction.basePullback, pullback.lift_fst]
+  have hbsnd : ∀ γ : G, (σ.basePullback f hover g).hom γ ≫ pullback.snd f g
+      = pullback.snd f g := fun γ => by
+    simp only [SchemeAction.basePullback, pullback.lift_snd, Category.comp_id]
+  refine ⟨πT, hsnd, hfst, ?_, ?_⟩
+  · -- invariance under the base-changed action
+    intro γ
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, hfst, ← Category.assoc, hbfst, Category.assoc, hπinv]
+    · rw [Category.assoc, hsnd, hbsnd]
+  · -- the base-change universal property (KM 7.1.3(3c) crux). Isolated sole `sorry` of
+    -- GHB5 — construction, projection clauses and invariance all proven above. Two routes:
+    -- (A) chart-local: reduce to `Z₀`/`S` affine, where the statement is
+    --   `(A ⊗_R R')ᴳ = Aᴳ ⊗_R R'` — exactly `fixedPointsBaseChange_bijective_of_free`
+    --   ([A711-BC], PROVEN) — then glue the descents over the atlas of `pullback f₀ g`
+    --   via `AffineQuotient.existsUnique_invariantsπ_lift`;
+    -- (B) abstract: `exists_quotient_of_isAffineHom` on `σ.basePullback f hover g` (structure
+    --   map `pullback.snd f g`, affine as a base change of `f`) yields a quotient `Q'`; the
+    --   universal property gives `a : Q' ⟶ pullback f₀ g` with `π' ≫ a = πT`, and `a` is an
+    --   iso by finite-étale-surjective cancellation (`πT`, `π'` both f.é.s. via [GHB4]).
+    intro Y F hF
+    sorry
 
 /-- **[GHB6] (KM 7.1.3(6), freeness-sharpened)** — KM: "If 𝒫 is finite over (Ell/R),
 and R is noetherian, then 𝒫/G is finite over (Ell/R)"; with the projection finite
