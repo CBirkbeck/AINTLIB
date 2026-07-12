@@ -1,5 +1,7 @@
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.GroupScheme.MuN
+import Mathlib.RingTheory.TotallySplit
+import Mathlib.RingTheory.Flat.Rank
 
 /-!
 # T-F1-general — the étale-local trivialisation of `E[N]` (KM 2.3.1)
@@ -49,6 +51,33 @@ lemma constSchemeSpecIso_hom_π (T : CommRingCat.{u}) (ι : Type) [Finite ι] :
     Scheme.Spec_map, Quiver.Hom.unop_op]
   rw [← Spec.map_comp, ← Spec.map_comp, ← Spec.map_id]
   congr 1
+
+/-- **T-F1 infra (rank-match)** — a finite-split `T`-algebra of constant rank `n` is
+`T`-algebra-isomorphic to `Fin n → T`. The existential rank in `IsFiniteSplit` is pinned to `n`
+by the rank hypothesis; the trivial base case `Subsingleton T` is handled directly (both sides
+subsingleton). -/
+lemma isFiniteSplit_algEquiv_fin_of_rankAtStalk {T A : Type u} [CommRing T] [CommRing A]
+    [Algebra T A] [Algebra.IsFiniteSplit T A] {n : ℕ}
+    (hn : Module.rankAtStalk (R := T) A = n) :
+    Nonempty (A ≃ₐ[T] (Fin n → T)) := by
+  obtain ⟨m, ⟨e⟩⟩ := Algebra.IsFiniteSplit.nonempty_algEquiv_fun T A
+  rcases subsingleton_or_nontrivial T with hT | hT
+  · haveI : Subsingleton (Fin m → T) := inferInstance
+    haveI : Subsingleton A := e.injective.subsingleton
+    haveI : Subsingleton (Fin n → T) := inferInstance
+    exact ⟨AlgEquiv.ofLinearEquiv default (Subsingleton.elim _ _)
+      (fun _ _ => Subsingleton.elim _ _)⟩
+  · have hmn : m = n := by
+      obtain ⟨p⟩ := (inferInstance : Nonempty (PrimeSpectrum T))
+      have h1 : Module.rankAtStalk (R := T) A p = Module.rankAtStalk (R := T) (Fin m → T) p :=
+        congrFun (Module.rankAtStalk_eq_of_equiv e.toLinearEquiv) p
+      rw [hn] at h1
+      have h2 : Module.rankAtStalk (R := T) (Fin m → T) p = m := by
+        rw [Module.rankAtStalk_pi]; simp [finsum_eq_sum_of_fintype]
+      rw [h2] at h1
+      exact h1.symm
+    subst hmn
+    exact ⟨e⟩
 
 namespace EllipticCurve
 
