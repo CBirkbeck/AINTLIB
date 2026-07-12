@@ -1,1 +1,1 @@
-FOCUS: [HG-C1c-1d-coassoc] Delta_2R DONE. Next: Delta_2L — mirror naturality (cube on left) + associator dualisation, then assembly from mulOver_assoc.
+FOCUS: [HG-C1c-1d-coassoc] R1 tripleГL_comp_assoc — R-branch (g3) DONE (green). Now L-branch (g1,g2): precompose inv squareГTop, inner tensor_hom_ext on A@A, close via assocScheme_fst_fst/fst_snd + cube legs.

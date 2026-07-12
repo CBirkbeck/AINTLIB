@@ -1210,6 +1210,55 @@ theorem assocScheme_snd :
         ≫ pullback.snd P.groupToBaseRes P.groupToBaseRes := by
   rw [assocScheme, pullback.lift_snd]
 
+/-- **R1: the associator-Künneth compat.** `tripleΓL` followed by the tensor associator
+equals `assocScheme` followed by `tripleΓ`. -/
+theorem tripleΓL_comp_assoc :
+    P.tripleΓL ≫ CommRingCat.ofHom
+        (Algebra.TensorProduct.assoc P.baseRingTop P.baseRingTop P.baseRingTop
+          P.groupRingTop P.groupRingTop P.groupRingTop).toAlgHom.toRingHom
+      = P.assocScheme.appTop ≫ P.tripleΓ := by
+  rw [← cancel_epi (inv P.cubeLΓ)]
+  rw [tripleΓL]
+  simp only [Category.assoc]
+  rw [IsIso.inv_hom_id_assoc]
+  -- reduced goal R1': `map(sqΓAlg,id) ≫ assoc = inv cubeLΓ ≫ assocScheme.appTop ≫ tripleΓ`
+  refine tensor_hom_ext ?_ ?_
+  · -- L-branch: the `Γ(square)` factor (coordinates g₁, g₂)
+    sorry
+  · -- R-branch: the `A'` factor (coordinate g₃)
+    have hg3 : CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+          (R := P.baseRingTop) (A := Γ(P.groupSquare, ⊤)) (B := P.groupRingTop)).toRingHom
+        ≫ inv P.cubeLΓ = (pullback.snd P.squareToBase P.groupToBaseRes).appTop := by
+      rw [IsIso.comp_inv_eq]
+      exact (snd_appTop_affineKunnethΓ P.squareToBase P.groupToBaseRes rfl rfl).symm
+    have hRsnd : (pullback.snd P.squareToBase P.groupToBaseRes).appTop ≫ P.assocScheme.appTop
+        = (pullback.snd P.groupToBaseRes P.groupToBaseRes).appTop
+          ≫ (pullback.snd P.groupToBaseRes P.squareToBase).appTop := by
+      rw [← Scheme.Hom.comp_appTop, assocScheme_snd, Scheme.Hom.comp_appTop]
+    rw [reassoc_of% hg3, reassoc_of% hRsnd, tripleΓ,
+      show P.cubeΓ = affineKunnethΓ P.groupToBaseRes P.squareToBase rfl rfl from rfl,
+      reassoc_of% (snd_appTop_affineKunnethΓ P.groupToBaseRes P.squareToBase rfl rfl)]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    have hsqsnd : squareΓTopAlg G P
+          ((pullback.snd P.groupToBaseRes P.groupToBaseRes).appTop.hom a)
+        = (1 : P.groupRingTop) ⊗ₜ[P.baseRingTop] a := by
+      have h := congrArg (fun m : P.groupRingTop ⟶ _ => m.hom a)
+        (snd_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl)
+      simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h
+      exact h
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom]
+    show (Algebra.TensorProduct.assoc P.baseRingTop P.baseRingTop P.baseRingTop
+          P.groupRingTop P.groupRingTop P.groupRingTop)
+        (Algebra.TensorProduct.map P.squareΓTopAlg (AlgHom.id P.baseRingTop P.groupRingTop)
+          (Algebra.TensorProduct.includeRight a))
+      = Algebra.TensorProduct.map (AlgHom.id P.baseRingTop P.groupRingTop) P.squareΓTopAlg
+          (Algebra.TensorProduct.includeRight
+            ((pullback.snd P.groupToBaseRes P.groupToBaseRes).appTop.hom a))
+    rw [Algebra.TensorProduct.includeRight_apply, Algebra.TensorProduct.map_tmul, map_one,
+      AlgHom.coe_id, id_eq, Algebra.TensorProduct.includeRight_apply,
+      Algebra.TensorProduct.map_tmul, map_one, hsqsnd, Algebra.TensorProduct.one_def,
+      Algebra.TensorProduct.assoc_tmul]
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
