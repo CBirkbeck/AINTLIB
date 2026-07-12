@@ -648,7 +648,8 @@ theorem gammaFullNaive_relRepData (N : ℕ) [NeZero N] (hinv : IsUnit (N : R))
       IsFinite d.f ∧ Etale d.f := by
   obtain ⟨eqv, hnat⟩ := YFull.exists_pointsEquiv_family R X N hinv
   refine ⟨⟨YFull.fullLevelSpace X N, YFull.fullLevelSpaceStruct X N, @eqv, @hnat⟩,
-    YFull.isFinite_fullLevelSpaceStruct X N, ?_⟩
+    YFull.isFinite_fullLevelSpaceStruct X N
+      (YFull.nIsInvertible_over_spec R X.structMap hinv), ?_⟩
   exact levelSpaceΓπ_etale X.curve N (YFull.nIsInvertible_over_spec R X.structMap hinv)
 
 /-- **[GHA5] (H = 1 data, equivariantly)** Upgrade of [GHA4] along the generic
@@ -900,7 +901,11 @@ noncomputable def coprodFullLevel {R : CommRingCat.{u}} (N : ℕ) [NeZero N] (X 
     obtain ⟨b, s, hs⟩ := spec_factors_coprod (fun _ : Bool => X.base) t
     have htg : t ≫ g = s := by rw [← hs, Category.assoc, hg b, Category.comp_id]
     have hdx : (N : ℤ) • Point.baseChangeEquiv X.curve g t x = 0 := by
-      rw [← map_zsmul (Point.baseChangeEquiv X.curve g t), hx, map_zero]
+      have h1 : Point.baseChangeEquiv X.curve g t ((N : ℤ) • x) =
+          (N : ℤ) • Point.baseChangeEquiv X.curve g t x :=
+        map_zsmul (Point.baseChangeEquiv X.curve g t).toAddMonoidHom (N : ℤ) x
+      rw [← h1, hx]
+      exact map_zero (Point.baseChangeEquiv X.curve g t).toAddMonoidHom
     have hcompatP : Point.baseChangeEquiv X.curve g t
         (Point.pull (X.curve.baseChange g) t
           (Point.asSection X.curve g (coprodPoint X g hg (fun b => (Lf b).1.1))))

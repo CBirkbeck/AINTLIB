@@ -155,12 +155,14 @@ noncomputable def fullLevelSpaceStruct : fullLevelSpace X N ⟶ X.base :=
 an affine morphism: closed immersion (affine) into `E[N] ×_S E[N]`, which is finite
 (hence affine) over `S` by `torsionπ_isFinite` (PROVEN) and base-change/composition
 stability. Provable now — no gates. -/
-theorem isAffineHom_fullLevelSpaceStruct : IsAffineHom (fullLevelSpaceStruct X N) := by
+theorem isAffineHom_fullLevelSpaceStruct (hinv : NIsInvertible X.base N) :
+    IsAffineHom (fullLevelSpaceStruct X N) := by
   show IsAffineHom (levelSpaceΓι X.curve N ≫
     pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N) ≫ X.curve.torsionπ N)
   have hι : IsClosedImmersion (levelSpaceΓι X.curve N) :=
     inferInstanceAs (IsClosedImmersion (Scheme.IdealSheafData.subschemeι _))
-  have hπ : IsFinite (X.curve.torsionπ N) := X.curve.torsionπ_isFinite N
+  have hπ : IsFinite (X.curve.torsionπ N) :=
+    X.curve.torsionπ_isFinite_of_nIsInvertible N hinv
   have hfst : IsFinite (pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N)) :=
     MorphismProperty.pullback_fst _ _ hπ
   infer_instance
@@ -170,14 +172,16 @@ theorem isAffineHom_fullLevelSpaceStruct : IsAffineHom (fullLevelSpaceStruct X N
 represented by a finite S-scheme"*; KM 5.1.1 (p. 129) *"Each is finite and flat over
 (Ell)"* (the Γ(N) case, `N` invertible). Closed immersion ≫ finite ≫ finite. Provable
 now — no gates. -/
-theorem isFinite_fullLevelSpaceStruct : IsFinite (fullLevelSpaceStruct X N) := by
+theorem isFinite_fullLevelSpaceStruct (hinv : NIsInvertible X.base N) :
+    IsFinite (fullLevelSpaceStruct X N) := by
   show IsFinite (levelSpaceΓι X.curve N ≫
     pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N) ≫ X.curve.torsionπ N)
   have hι : IsFinite (levelSpaceΓι X.curve N) := by
     have h : IsClosedImmersion (levelSpaceΓι X.curve N) :=
       inferInstanceAs (IsClosedImmersion (Scheme.IdealSheafData.subschemeι _))
     infer_instance
-  have hπ : IsFinite (X.curve.torsionπ N) := X.curve.torsionπ_isFinite N
+  have hπ : IsFinite (X.curve.torsionπ N) :=
+    X.curve.torsionπ_isFinite_of_nIsInvertible N hinv
   have hfst : IsFinite (pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N)) :=
     MorphismProperty.pullback_fst _ _ hπ
   infer_instance
@@ -631,7 +635,8 @@ theorem gammaFullNaive_affineOverEll (N : ℕ) [NeZero N] (hinv : IsUnit (N : R)
   intro X
   obtain ⟨eqv, hnat⟩ := exists_pointsEquiv_family R X N hinv
   exact ⟨fullLevelSpace X N, fullLevelSpaceStruct X N,
-    isAffineHom_fullLevelSpaceStruct X N, ⟨@eqv, @hnat⟩⟩
+    isAffineHom_fullLevelSpaceStruct X N (nIsInvertible_over_spec R X.structMap hinv),
+    ⟨@eqv, @hnat⟩⟩
 
 /-- **(KM First Main Theorem 5.1.1, the `[Γ(N)]` relative-representability clause —
 p. 129: "Each of the four moduli problems … is relatively representable over (Ell)")**
