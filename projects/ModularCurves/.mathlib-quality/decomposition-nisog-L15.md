@@ -86,3 +86,24 @@ complete and axiom-clean; the assembly interface makes `exists_nIsogSpace` a one
 extraction once the record is populated by c5β (E[N] + fibre structure) + NEW-HOPF (comul +
 dictionary) + fable-FP (relative representability). No D2-buildable leaf remains that does not
 require constructing another lane's chartered gate.
+
+## Y₀(N) ASSEMBLY FINDING (D2, 2026-07-12)
+
+The Γ₀(N) representability `exists_gammaZeroSpace` (KM 6.6.1, NIsogeny.lean:2926, sorried)
+= "the closed subscheme of `[N-Isog]` over which the universal `N`-isogeny is cyclic". The
+assembly route is: `exists_nIsogSpace` → `W_isog`; the universal `NIsogenyStructure` over
+`W_isog` → its subgroup `G_univ` → `G_univ.toRelEffCartierDiv` (T-SG1, HAVE); apply
+`exists_cyclicityLocus` (my capstone) to it → the cyclicity locus `Z ⊆ W_isog`;
+`W_Γ₀ := Z.subscheme`, finite over `S` via `Z.subschemeι` (closed imm) ∘ `w_isog`.
+
+**BLOCKER (new finding, boarding for the coordinator):** the current `exists_nIsogSpace`
+statement gives only `Nonempty` of *per-`T`* equivalences with NO naturality. The Γ₀(N)
+assembly needs the classifying point of a `T`-structure to *pull back the universal
+structure over `W_isog`* — i.e. `exists_nIsogSpace` must be **functorial/representing**, not
+just pointwise-equivalent. GammaZeroStructure ≃ cyclic-NIsogenyStructure (via `IsCyclic` =
+`toRelEffCartierDiv` is `IsGammaZeroFppf`, CyclicSubgroup.lean) then composes with `Z`'s
+universal property. **So Y₀(N) is transitively wall-blocked on a naturality-strengthened
+`exists_nIsogSpace`** — which needs L15's real `NIsogRepresentation` construction. The
+`classify` field of `NIsogRepresentation` should be upgraded to a natural-iso / representable
+form when L15 is built (noted for the construction lane). All other Y₀(N) handles
+(`toRelEffCartierDiv`, `GammaZeroStructure`/`IsCyclic`, `exists_cyclicityLocus`) are HAVE.
