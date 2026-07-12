@@ -16539,3 +16539,30 @@ HasseWeil (`mulByInt_degree` anchor). CHARTER-Y1-CLOSER-2 COMPLETE.
   seam boarded; p2 return = boundary handshake.
 - Standing: NEW-GH CHARTER-GH-2 opener re-offered if unfired; NEW-CASCADE stale park
   VOID (gate long passed; seat stood down with honor).
+
+## Amendments v10.154 (2026-07-12, coordinator): ACT-ON-DEFAULT (fleet doctrine, owner directive: no more stopping); T-F1-general adjudicated to c5β (interface-first, NEW-Y1 pinned); seven reports ratified + all seats re-fired
+
+- **DOCTRINE v10.154 — ACT-ON-DEFAULT (binding, all seats)**: reports are information,
+  not permission requests. A coordinator question is legitimate ONLY for rule-5 seams,
+  B2 events, or route forks with cross-lane impact — and even then: board the question
+  WITH your chosen default and CONTINUE ON THE DEFAULT unless overridden. Never end a
+  session with "want me to X or Y?", "standing by", or "ready for a focused pass" —
+  the charter is the answer; multi-session grinds are the target signal (beastmode
+  doctrine), banked only at green boundaries with the sentinel pointed. Openers now
+  cite this rule.
+- **ADJUDICATION: T-F1-general (étale-local trivialization E[N] ≅ const (ℤ/N)²) → c5β**
+  (CHARTER-C5B-2): their L2b fullLevelIso machinery IS the development; INTERFACE-FIRST
+  order issued (state `torsion_etaleLocal_triv` sorried + board it immediately) so
+  NEW-Y1 builds CLOPEN-β descent geometry on the pin without idling. NEW-Y1's
+  refusal to pin another lane's interface unprompted was correct; now moot.
+- **Sequencing answers**: NEW-GH → GHB4 (their own default). beastmode-A → [CMP-DEBT]
+  then [CMP-Mell] (their own default; the [CMP-a5] verify-before-work re-scope
+  RATIFIED). fable-FP → EXECUTE decomposition-kl3.md (the stop was a doctrine
+  violation; the map is the attack order; Tier-A1 spawn-and-continue on the
+  mathlib-absent criteria).
+- **Ratifications (one line each)**: c5β ecosystem re-check (90% reuse caught) +
+  glSchemeSmul layer ★ · PIC0 PAIR-block + fleet-grade isIso_of_isIso_restrict ★ ·
+  NEW-Y1 [YF-ETALE] ★ + the four-gate audit table (CLOPEN = root) · D2 ★★ cyclicity
+  capstone assembled + L15 decompose · NEW-GH GHC6 = corrected T-H6 THEOREM ★ + the
+  A711 gate-audit unblock · A's [CMP-a5] re-scope · NEW-HOPF's crux naturality ★.
+  All seven boards absorbed; seams stable (YF-ETALE↔FP4-B5 interface confirmed).
