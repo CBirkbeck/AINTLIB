@@ -1,0 +1,6 @@
+FOCUS: STREAM-G0 [HOPF ENDGAME] (rule-5). IsCoaction chartCoaction COMPLETE upstream. New file GroupScheme/StableChartData.lean:
+ - LANDED sorry-free: instModuleFiniteGroupRing (Module.Finite baseRing groupRing via G.π.finite_app) — one M5 input done.
+ - WIP sorry: chartCoaction_productMap_surjective (C2 last-mile = Γ-dual of isClosedImmersion_actPair_left; Hopf-free form productMap includeLeft chartCoaction).
+BOARDED BLOCKER (HopfAlgebra diamond): C1d StableAffineChartData assembly + IsHopfGalois chartCoaction are blocked until p2's HopfAlgebra baseRing groupRing lands WITH toAlgebra defeq to the geometric AffineChartPatch instance (a free [HopfAlgebra] var supplies its own Bialgebra-algebra → mismatch vs chartCoaction's type). Module.Finite + Hopf-free surjectivity sidestep the diamond.
+NEXT: prove the sorry (Spec.map productMap = lift; closed-immersion restrict to chart; CI→surjective). Then C3 cover, C4 glue → SIX PINS → SIGNAL ★★.
+Marathon. Pathspec commits only (shared worktree; siblings GH, KM).
