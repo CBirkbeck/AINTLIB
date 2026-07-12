@@ -137,6 +137,13 @@ axiom-clean and introduce no noetherianity or flatness hypothesis. The model-sid
 comparison is now also complete: `sectionPoleSheafPower_projModel_sectionsEquiv`
 identifies global sections with the algebraic `poleOrderFiltration`, and
 `sectionPoleSheafPower_projModel_basis` transports its explicit pole-monomial basis.
+The project-local notion of invertibility is now connected to mathlib's sheaf API:
+`Scheme.Modules.IsInvertible.isLocallyFree` builds genuine local rank-one generator
+data from the existing trivializing cover, and `IsInvertible.isQuasicoherent` applies
+mathlib's locally-free-implies-quasicoherent theorem. Consequently
+`sectionPoleSheaf_isQuasicoherent` and `sectionPoleSheafPower_isQuasicoherent` supply
+the exact quasicoherence hypotheses required by affine vanishing and coherent
+cohomology, without changing the family hypotheses.
 Finally, `EllipticCurve/PoleSheafPointedIso.lean` proves that a pointed scheme
 isomorphism transports the section ideal module, its dual pole sheaf, and every tensor
 power of the pole sheaf. This supplies the sheaf-level bridge from each explicit pointed

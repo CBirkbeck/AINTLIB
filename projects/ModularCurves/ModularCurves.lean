@@ -24,6 +24,7 @@ import ModularCurves.EllipticCurve.GroupLaw
 import ModularCurves.EllipticCurve.NegModelBaseChange
 import ModularCurves.EllipticCurve.PointsDictionary
 import ModularCurves.EllipticCurve.PoleSheaf
+import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
 import ModularCurves.EllipticCurve.PoleSheafPointedIso
 import ModularCurves.EllipticCurve.PoleSheafModel
 import ModularCurves.EllipticCurve.PoleSheafFibreSections
@@ -78,6 +79,7 @@ import ModularCurves.Picard.DualPullback.Iso
 import ModularCurves.Picard.DualPullback.TrivializationRestriction
 import ModularCurves.Picard.DualRestrict
 import ModularCurves.Picard.InvertibleSheaf
+import ModularCurves.Picard.InvertibleSheafLocallyFree
 import ModularCurves.Picard.PicComparison
 import ModularCurves.Picard.PullbackTensorObj
 import ModularCurves.Picard.UnitPullback
