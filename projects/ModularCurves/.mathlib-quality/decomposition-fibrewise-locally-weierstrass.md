@@ -321,6 +321,18 @@ constructions. The next dependency is the sheaf-level coface/differential and th
 stalkwise exactness of the augmented Cech resolution; the derived comparison is not yet
 claimed.
 
+The sheaf-level differential is now constructed in
+`ForMathlib/SheafCechSheafDifferential.lean`. For nested opens `A ≤ B`,
+`cechTermFactorRestriction` gives the canonical map from the `B` restriction-pushforward
+factor to the `A` factor and computes it on every open as
+`F(V ∩ B) → F(V ∩ A)`. The cofaces project to the tuple with one entry deleted and then
+apply this restriction, using the same `FormalCoproduct.mapPower` morphism as the native
+Cech complex; `cechDifferential` is their alternating sum. Both maps have explicit
+formulas under `cechTermSectionsAddEquiv`, with naturality, product projection, and
+finite-sum evaluation split into ordinary helpers. The next step is to package these maps
+with the augmentation as a cochain complex and prove stalkwise contraction/exactness;
+neither exactness nor the derived comparison is asserted yet.
+
 The generic two-chart degree-one calculation is now complete in
 `ForMathlib/TwoOpenHOne.lean`. The theorem
 `TopCat.Sheaf.subsingleton_H_one_of_two_open_cover` proves global `H¹` vanishing from
