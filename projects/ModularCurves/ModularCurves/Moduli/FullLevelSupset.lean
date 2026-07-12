@@ -136,36 +136,44 @@ theorem sub_killed {T : Scheme.{u}} (t : T ⟶ S) (x y : E.Point t)
   rw [← E.smul_eq_zero_iff_comp_mulByHom t N] at hx hy ⊢
   rw [smul_sub, hx, hy, sub_zero]
 
-/-- **[YF-⊇ BRIDGE — fibrewise group law, WIP frontier].** For `N` invertible, if two
-`N`-killed points `x, y` of `E` over `t` agree topologically at `u : T`, then their
-difference `x - y` vanishes at `u`: `u ∈ pointVanishSet (x - y)`.
+/-- **[YF-⊇ BRIDGE — vanishing from residue-field agreement, WIP frontier].** For `N`
+invertible, if two `N`-killed points `x, y` of `E` over `t` agree **over the residue field**
+at `u` — `fromSpecResidueField u ≫ x.1 = fromSpecResidueField u ≫ y.1` (agreement as
+morphisms `Spec κ(u) ⟶ E`, not merely topologically) — then `x - y` vanishes at `u`:
+`u ∈ pointVanishSet (x - y)`.
 
-PROOF STRATEGY (KM 3.7.1, route γ). `x.1 u = y.1 u` ⟹ (the closed immersion `torsionι` has
-injective base) the two `E[N]`-classifiers agree, `(pointToTorsion x) u = (pointToTorsion y) u`.
-Translating by `-(pointToTorsion y)` in the étale group scheme `E[N]` (a base-changed
-automorphism, `Point.pull_add`/additivity of `pointToTorsion`) rewrites this as agreement
-with the zero classifier: `(pointToTorsion (x - y)) u = (pointToTorsion 0) u`. The zero
-section of `E[N] ⟶ S` has trivial residue extension (`κ = κ(s)`), so topological agreement
-with it upgrades to morphism agreement, placing `u` in the equalizer range — which is
-exactly `pointVanishSet (x - y)` (the reverse of `range_agreementι_subset`, valid against
-the zero classifier). Depends on: `pointToTorsion` additivity, the `E[N]` translation
-automorphism, and zero-section residue triviality (a focused sub-ticket each). -/
-theorem mem_pointVanishSet_of_base_eq (hN : NIsInvertible S N) {T : Scheme.{u}} (t : T ⟶ S)
-    (x y : E.Point t) (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
-    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) (u : T) (h : x.1.base u = y.1.base u) :
+⚠ CORRECTION (this session): the earlier *topological* hypothesis `x.1 u = y.1 u` makes the
+statement **FALSE** — two Galois-conjugate torsion points (e.g. a torsion point and its image
+under a residue-field automorphism) share a topological image `x.1 u = y.1 u` yet their
+difference is a nonzero point that vanishes nowhere, so `u ∉ pointVanishSet (x-y) = ∅`.
+Genuine residue-field agreement is required. For the actual application the points are
+base-changed **sections** (of `F.π`), where the residue map is forced (= retraction-inverse),
+so topological agreement *does* upgrade to residue agreement — that upgrade
+(`sections_residue_eq_of_base_eq`, below) is the remaining section-specific crux.
+
+PROOF STRATEGY. `x|κ(u) = y|κ(u)` ⟹ `(x-y)|κ(u)` factors through the zero section
+(`restrict`/`asSection` additivity + `sub_killed`), so the two `E[N]`-classifiers of `x-y`
+and `0` agree as morphisms `Spec κ(u) ⟶ E[N]`, giving a map `Spec κ(u) ⟶` the agreement
+locus whose image is `u` — hence `u ∈ range(agreementι) = pointVanishSet (x-y)` (the reverse
+of `range_agreementι_subset`, now valid because agreement is at the morphism level). -/
+theorem mem_pointVanishSet_of_residue_eq (hN : NIsInvertible S N) {T : Scheme.{u}}
+    (t : T ⟶ S) (x y : E.Point t) (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) (u : T)
+    (h : T.fromSpecResidueField u ≫ x.1 = T.fromSpecResidueField u ≫ y.1) :
     u ∈ E.pointVanishSet N t (x - y) (E.sub_killed N t x y hx hy) := by
   sorry
 
-/-- **[YF-⊇] pointwise-distinctness from the open locus.** Contrapositive of the bridge:
-off the vanishing locus of `x - y`, the `N`-killed points `x, y` are topologically distinct
-at `u`. This is the input to `sectionsDivisor_ideal_eq_torsionIdeal`'s `hne` (via
-`asSection_base_eq_imp` for the base-changed combinations). -/
-theorem base_ne_of_notMem_pointVanishSet (hN : NIsInvertible S N) {T : Scheme.{u}}
-    (t : T ⟶ S) (x y : E.Point t) (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
-    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) (u : T)
-    (hu : u ∉ E.pointVanishSet N t (x - y) (E.sub_killed N t x y hx hy)) :
-    x.1.base u ≠ y.1.base u :=
-  fun h => hu (E.mem_pointVanishSet_of_base_eq N hN t x y hx hy u h)
+/-- **[YF-⊇ CRUX — forced residue for sections, WIP frontier].** Two sections `σ₁, σ₂` of a
+separated morphism `ρ` that agree topologically at `u` agree over the residue field:
+`fromSpecResidueField u ≫ σ₁ = fromSpecResidueField u ≫ σ₂`. The residue map of a section is
+forced (the inverse of `ρ`'s), so — unlike general morphisms — there is no Galois-conjugate
+freedom. This is the upgrade that makes `mem_pointVanishSet_of_residue_eq` applicable to the
+base-changed combination **sections**, hence discharges `[YF-⊇]` pointwise-distinctness. -/
+theorem sections_residue_eq_of_base_eq {X U : Scheme.{u}} (ρ : X ⟶ U) [IsSeparated ρ]
+    (σ₁ σ₂ : U ⟶ X) (hσ₁ : σ₁ ≫ ρ = 𝟙 U) (hσ₂ : σ₂ ≫ ρ = 𝟙 U) (u : U)
+    (h : σ₁.base u = σ₂.base u) :
+    U.fromSpecResidueField u ≫ σ₁ = U.fromSpecResidueField u ≫ σ₂ := by
+  sorry
 
 end EllipticCurve
 
