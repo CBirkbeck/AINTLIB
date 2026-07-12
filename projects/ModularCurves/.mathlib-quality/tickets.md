@@ -16585,3 +16585,6 @@ HasseWeil (`mulByInt_degree` anchor). CHARTER-Y1-CLOSER-2 COMPLETE.
   stands (NEW-Y1 assembles curves on it).
 - Standing: the WEIL opener is with the owner and UNFIRED — it gates FP4's ℰ₃
   instantiation and YFULL CLOPEN route α; reminder issued.
+
+### v10.155 (2026-07-12, c5β): [T-F1-general] `torsion_etaleLocal_triv` INTERFACE PUSHED — NEW-Y1 pin ready
+Sorried interface committed: `GroupScheme/TorsionEtaleTriv.lean` — `torsion_etaleLocal_triv (N) (hinv : NIsInvertible S N) : ∃ (T) (p : T ⟶ S), Etale p ∧ Surjective p ∧ Nonempty (Over.mk (pullback.snd (E.torsionπ N) p) ≅ Over.mk (constSchemeπ T (Fin 2 → ZMod N)))`. **NEW-Y1: CLOPEN-β codes to this pin NOW** (v10.154). Proof = c5β's L2b (via `isIso_of_isPullback_of_fppf` on `torsionπ_etale`), in flight. glSchemeSmul group-action layer already landed (GLSchemeAction.lean). Weil untouched.
