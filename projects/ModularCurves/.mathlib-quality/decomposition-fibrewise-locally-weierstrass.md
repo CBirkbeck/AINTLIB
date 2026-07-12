@@ -133,9 +133,11 @@ Both results are axiom-clean. The arbitrary-base layer is now also complete:
 isomorphism for invertible modules; `sectionPoleSheafBaseChangeIso` and
 `sectionPoleSheafPowerBaseChangeIso` apply it to `O([0])` and all `O(n[0])`; and
 `sectionPoleSheafFiberIso` specializes the construction to residue fibres. All are
-axiom-clean and introduce no noetherianity or flatness hypothesis. Still missing is the
-model-side comparison identifying the resulting fibre sheaves and their global sections
-with the algebraic `poleOrderFiltration`. The generic
+axiom-clean and introduce no noetherianity or flatness hypothesis. The model-side
+comparison is now also complete: `sectionPoleSheafPower_projModel_sectionsEquiv`
+identifies global sections with the algebraic `poleOrderFiltration`, and
+`sectionPoleSheafPower_projModel_basis` transports its explicit pole-monomial basis.
+The generic
 `RelEffCartierDiv.isOfficial` still depends on the registered
 `officialAux_exists_finite_chart` `sorry`; it is not needed for the zero section and must
 not be treated as an axiom-clean discharge.
@@ -169,8 +171,9 @@ rank H⁰(E_s, O(n[0])) = n,  n >= 1.
 ```
 
 Conclude, after shrinking the base, that `π_*O(n[0])` is locally free of rank `n` and
-commutes with base change. A sheaf-level comparison between `O(n[0])` on a projective
-model and the existing algebraic `poleOrderFiltration` remains to be added.
+commutes with base change. The model-side rank input is proved uniformly over every
+nonzero base ring as `sectionPoleSheafPower_projModel_finrank`; the remaining work in
+this step is the geometric `H¹`-vanishing comparison and its transport through Step 2.
 
 ### 4. Choose `x` and `y` -- `T-W-cmp.XY`
 
