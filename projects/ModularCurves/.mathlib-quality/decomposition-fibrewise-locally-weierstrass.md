@@ -171,11 +171,16 @@ equivalence. Its vanishing-cokernel endpoint is now arbitrary-base:
 `Module.Finite.ker_of_surjective_of_projective` identify the kernel of a surjective
 differential between finite projectives as finite projective, while
 `kerBaseChangeComparison_bijective_of_surjective` proves that this kernel commutes with
-every algebra base change. Thus the older noetherian flat-cokernel fallback is not needed
-for the pole sheaves. What is absent is the comparison from scheme/sheaf cohomology to
-that finite complex. The affine-vanishing part of draft mathlib PR #36345 is now proved
-option-free in this project, but that draft does not provide proper pushforward or
-arbitrary-base cohomology and base change.
+every algebra base change. The intervening Nakayama step is now also arbitrary-base and
+option-free: `LinearMap.exists_away_baseChange_surjective_of_residueField` spreads
+surjectivity of the fibre differential at a prime to one principal neighbourhood, and
+`LinearMap.exists_away_finiteProjective_ker_of_residueField_surjective` packages the
+finite-projective kernel and its compatibility with every further algebra base change.
+Thus the older noetherian flat-cokernel fallback is not needed for the pole sheaves. What
+is absent is the comparison from scheme/sheaf cohomology to that finite complex. The
+affine-vanishing part of draft mathlib PR #36345 is now proved option-free in this
+project, but that draft does not provide proper pushforward or arbitrary-base cohomology
+and base change.
 
 The scheme-module entry point to the existing cohomology API is now complete in
 `ForMathlib/SchemeModuleSheaf.lean`: `Scheme.Modules.toSheaf` forgets to an additive
