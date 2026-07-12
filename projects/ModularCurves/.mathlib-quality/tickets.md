@@ -18841,3 +18841,34 @@ This is the genuine hard commutative-algebra content of KM 3.7.1's ⊇ direction
   `sectionsIdealAux_ideal_eq_top_of_disjoint`, CartierDiv:976). ~100 LOC.
 - **[YF-⊆]/[YF-⊇]** over `fullLevelOpens` + assembly `isOpenImmersion_levelSpaceΓι_of_taut` → **[YF-ETALE] ★**.
 Session leaves (all clean/rooted): AgreementLocusClopen, PointVanishingClopen, FullLevelOpenLocus, SurjectiveFreeSameRank. (NEW-Y1)
+
+## v10.166 — NEW-Y1 CHARTER-YFULL: ★★ ALL DEEP CLOPEN CORES LANDED (openness + ⊇ commutative-algebra chain complete)
+
+**Both halves of the KM 3.7.1 clopen claim now have their genuine mathematical cores proven, axiom-clean,
+rooted** — the remaining work is scheme-theoretic assembly on top of these:
+
+**Openness half (v10.164):** `[YF-U]` `fullLevelOpens`/`fullLevelOpenSet_isOpen` — the full-level locus
+is OPEN (complement of the N²−1 clopen combination-vanishing loci; engines AgreementLocusClopen +
+PointVanishingClopen).
+
+**⊇ half — the same-degree-divisor-equality commutative-algebra chain (v10.165/166), COMPLETE:**
+- `injective_of_surjective_of_free_finrank_eq` (free, via OrzechProperty),
+- `injective_of_surjective_of_flat_rankAtStalk_eq` (flat, any comm ring, via localization),
+- `bijective_of_surjective_ringHom_of_flat_rankAtStalk_eq` (ring-hom form),
+- **`isIso_SpecMap_quotient_of_flat_rankAtStalk_eq`** (`SpecQuotientIso.lean`) — a closed immersion of
+  affines `Spec(R⧸I) ⟶ Spec R` with `R⧸I` of equal stalkwise rank over the base `R₀` is an **iso**
+  (`I = ⊥`). **The affine same-degree-closed-immersion-iso, ready to consume affine-locally.**
+
+**Remaining to CLOPEN — scheme-theoretic assembly (all cores present, fully de-risked):**
+- **[YF-SUBDIV-EQ]** `IsSubdivisor D' D ∧ D'.degree = D.degree ⟹ D' = D` — `RelEffCartierDiv.ext` reduced
+  affine-locally to `isIso_SpecMap_quotient_of_flat_rankAtStalk_eq` (the subscheme ideals are ideals of
+  `Γ(E, V)` on affine opens `V`; `degree = finrank = rankAtStalk` via `finrank_SpecMap_algebraMap`). ~80 LOC.
+- **[YF-COMAX]** comaximal `∏ker = ⋂ker` under disjoint supports (globalize private
+  `sectionsIdealAux_ideal_eq_top_of_disjoint`). ~100 LOC.
+- **[YF-⊆]/[YF-⊇]** over `fullLevelOpens`: ⊆ = full-level ⟹ combos distinct (reducedness); ⊇ = disjoint ⟹
+  `∏ker = ⋂ker ⊇ torsionIdeal` + [YF-SUBDIV-EQ] ⟹ `= torsionIdeal`. Then
+  `isOpenImmersion_levelSpaceΓι_of_taut fullLevelOpens ⊆ ⊇` → **[YF-ETALE] ★**.
+
+Session tally (all clean/rooted, axiom-clean): AgreementLocusClopen, PointVanishingClopen, FullLevelOpenLocus,
+SurjectiveFreeSameRank (4), SpecQuotientIso (2) + the full 5k-line divisor audit. The two hardest
+mathematical contents of KM 3.7.1 (the openness argument and the same-degree commutative algebra) are done. (NEW-Y1)
