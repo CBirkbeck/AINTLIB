@@ -409,28 +409,36 @@ theorem isIso_ev_unitObj (Y : Scheme.{u}) : IsIso (ev (unitObj Y)) := by
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
-/-- **[PAIR-4]** On an open where `M` trivializes, the restriction of the evaluation
-morphism is an isomorphism: conjugate by the trivialization and the induced trivialization
-of the dual (`Picard/Dual.lean`'s restriction layer); the conjugated map is the unit
-self-pairing, an isomorphism by the unitor. -/
-theorem isIso_restrict_ev {M : X.Modules} {W : X.Opens}
+/-- **[PAIR-4′]** On an open where `M` trivializes, the component of the presheaf
+evaluation is bijective: conjugate the pairing by the trivialization and its induced
+dual-trivialization; the conjugated pairing is the unit multiplication (the component
+content of `isIso_ev_unitObj`). Section-level — no functor conjugation. -/
+theorem bijective_evPre_app_of_triv {M : X.Modules} {W : X.Opens}
     (e : (Modules.pullback W.ι).obj M ≅ unitObj W.toScheme) :
-    IsIso ((restrictFunctor W.ι).map (ev M)) := by
+    Function.Bijective ((evPre M).app (Opposite.op W)) := by
   sorry
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
 /-- **[CMP-PAIR]** For an invertible module the evaluation pairing against the sheaf dual
-(consumed from `Picard/Dual.lean`) is an isomorphism onto the unit: on a trivializing open
-both factors are trivial and the pairing is the multiplication; the isomorphism property
-of the global evaluation morphism is Zariski-local (`isIso_of_isIso_restrict`). -/
+(consumed from `Picard/Dual.lean`) is an isomorphism onto the unit: the presheaf pairing
+is bijective on every open inside the trivializing cover
+(`bijective_evPre_app_of_triv` after `restrictTrivialization`), hence locally bijective,
+hence inverted by the sheafification. -/
 theorem nonempty_eval_iso {M : X.Modules} (hM : IsInvertible M) :
     Nonempty (tensorObj M (dualObj M) ≅ unitObj X) := by
   obtain ⟨ι, U, hU, htriv⟩ := hM
-  haveI : IsIso (ev M) := by
-    refine isIso_of_isIso_restrict (ev M) U hU (fun i => ?_)
+  have hw : PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj) (evPre M) := by
+    refine sheafificationW_of_bijective_on_cover (evPre M) U hU (fun i W hW => ?_)
     obtain ⟨e⟩ := htriv i
-    exact isIso_restrict_ev e
+    exact bijective_evPre_app_of_triv (restrictTrivialization hW e)
+  rw [PresheafOfModules.sheafificationW_iff] at hw
+  haveI : IsIso ((PresheafOfModules.sheafification
+      (𝟙 X.ringCatSheaf.obj)).map (evPre M)) := hw
+  haveI : IsIso (ev M) := by
+    show IsIso ((PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).map (evPre M) ≫
+      (sheafifyValIso (unitObj X)).hom)
+    infer_instance
   exact ⟨asIso (ev M)⟩
 
 set_option backward.defeqAttrib.useBackward true in
