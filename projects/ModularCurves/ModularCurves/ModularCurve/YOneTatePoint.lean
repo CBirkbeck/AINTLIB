@@ -24,9 +24,13 @@ both.  Every declaration is statement-byte-identical to its former site in
 `YOneAssembly.lean` (pointer comments left in place); `exists_tatePoint`'s former
 `sorry` is DISCHARGED by the relocation, not deferred.
 
-Axiom trail: `sorryAx` enters exactly through the designed **[T-A6b]**
-(`abelEnrichment_exists`) and **[T-B6′]** (`geomFibrePointAddEquiv.map_add'`) trails,
-plus the still-sorried E-track leaves of this file (each carrying its own leaf label).
+Axiom trail (v10.152, CHARTER-Y1-CLOSER-2 close): the MASTER
+`gammaOneNaive_representable` and its full input chain in this file audit at
+`{propext, Classical.choice, Quot.sound}` — the [T-A6b]/[T-B6′] designed trails were
+retired by the K-series record primitives, and the last `sorryAx` consumptions (the
+unprimed `torsionπ_etale`/`torsionπ_isFinite` in the E5 core) were swapped to the proven
+invertible-case variants when BB-FLAT closed (`mulByHom_flat_of_nIsInvertible`,
+`MulByHomSmooth.lean`).
 -/
 
 open AlgebraicGeometry CategoryTheory Limits HomogeneousIdeal HomogeneousLocalization
@@ -56,9 +60,9 @@ existence".
 Proven: the witness is `tateMarkedPoint` with its `[Y1-vi]` order property; the classifying
 ∀-clause is `MarkedChartData.tateMarkedPoint_classifies` ([Y1-ATLAS], YOneAtlasClassify.lean):
 per-chart T-E1 classification, sheaf gluing of the base and top maps over the chart cover, and
-T7 uniqueness through the induced-chart comparison ENGINE. Inherited `sorryAx` enters exactly
-through the designed trails **[T-A6b]** (`abelEnrichment_exists`) and **[T-B6′]**
-(`geomFibrePointAddEquiv.map_add'`). -/
+T7 uniqueness through the induced-chart comparison ENGINE. Audits at
+`{propext, Classical.choice, Quot.sound}` (v10.152 — the designed [T-A6b]/[T-B6′] trails
+are retired). -/
 theorem exists_tatePoint :
     ∃ P₀ : (tateUniversal R).Section,
       (tateUniversal R).NowhereGeomOrderLEThree P₀ ∧
@@ -1375,11 +1379,10 @@ theorem gammaOneNaive_representable_assembly [NeZero N] (hN : 4 ≤ N)
 
 /-- **(T-E7 MASTER closure prep — v10.117)** The held target
 `gammaOneNaive_representable` (`Moduli/Representability.lean`), statement byte-identical,
-closed by the assembly bridge against the relocated interface.  When the designed trails
-retire ([T-A6b]/[T-B6′] at T-W7a) and the E-track leaves above land, this theorem's axiom
-trail collapses to `[propext, Classical.choice, Quot.sound]` with no further wiring; the
-held upstream statement then relocates here by the v10.111 doctrine (coordinator's call),
-exactly as `exists_tatePoint` did today. -/
+closed by the assembly bridge against the relocated interface. CLOSED (v10.152): the
+designed trails are retired and the E-track leaves landed — this theorem's axiom trail
+IS `[propext, Classical.choice, Quot.sound]`; the held upstream statement can relocate
+here by the v10.111 doctrine (coordinator's call), exactly as `exists_tatePoint` did. -/
 theorem gammaOneNaive_representable_closure (N : ℕ) [NeZero N] (hN : 4 ≤ N)
     (hinv : IsUnit (N : R)) :
     (gammaOneNaiveProblem R N).Representable ∧
