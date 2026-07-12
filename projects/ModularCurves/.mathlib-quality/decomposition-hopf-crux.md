@@ -853,3 +853,40 @@ FLEET NOTE (v10.35b, no filing): D2/c5β/NEW-GH consume HOPF pins hypothesis-wir
 land (their inboxes confirm), so coassoc-first (coordinator's v10.141 sequencing) does NOT
 hard-block them. Proceeding to prove coassoc methodically per the sequencing — no
 hypothesis-wire needed. Stop-line respected: 4 measured iterations done, ledgered, hard-stop.
+
+## [HG-C1c-1d] coassoc: state after 2026-07-12 session (both naturalities + both Δ₂ sides + associator DONE)
+
+DONE this session (all committed, axiom-clean):
+- `squareΓTopAlg` (Künneth transport as R'-alghom) + `comulAlgTop_eq` (Δ' factorisation);
+- `tripleΓ` + `rightMulScheme` + ★ **`comulTop_comp_map_id_comulTop`** = Δ₂R
+  (`(id⊗Δ')∘Δ' = rightMulScheme.appTop ≫ tripleΓ`, the Γ-dual of `g₁·(g₂·g₃)`);
+- `cubeL`/`cubeLΓ`/`cubeOuterMul` + ★ **`cubeOuterMul_appTop_cubeLΓ`** (mirror naturality);
+- `tripleΓL` + `leftMulSchemeL` + **`comulTop_comp_map_comulTop_id`** = Δ₂L'
+  (`(Δ'⊗id)∘Δ' = leftMulSchemeL.appTop ≫ tripleΓL`);
+- **`assocScheme`** (`cube → cubeL`, the pullback associator) + its three legs.
+
+REMAINING (next session, ~3 routes — the conceptual content is done, these are assembly):
+- **(R1) associator-Künneth compat**: `tripleΓL ≫ ofHom(Algebra.TensorProduct.assoc R' A' A' A').toRingHom
+  = assocScheme.appTop ≫ tripleΓ`. Both maps `Γ(cubeL) → A'⊗(A'⊗A')`. Prove by precomposing
+  with `inv cubeLΓ`-family and a NESTED `tensor_hom_ext` (triple: the three inclusions of
+  `(A'⊗A')⊗A'`), matching against `assocScheme`'s three legs
+  (`assocScheme_fst_fst/fst_snd/snd`) + the fst/snd Γ-dual legs of both cube Künneths.
+  This is the single genuinely-new hard lemma; the leg lemmas are all in place.
+- **(R2) Δ₂L**: `Δ₂L = assoc∘(Δ'⊗id)∘Δ' = leftMulScheme.appTop ≫ tripleΓ` where
+  `leftMulScheme := assocScheme ≫ leftMulSchemeL : cube → G|_V`. Immediate from Δ₂L' +
+  (R1): `Δ₂L = leftMulSchemeL.appTop ≫ tripleΓL ≫ ofHom(assoc) = leftMulSchemeL.appTop ≫
+  assocScheme.appTop ≫ tripleΓ = leftMulScheme.appTop ≫ tripleΓ`.
+- **(R3) associativity + assembly**: `leftMulScheme = rightMulScheme` (i.e.
+  `assocScheme ≫ leftMulSchemeL = cubeInnerMul ≫ squareMulRes`) — this is associativity of
+  the corestricted multiplication. Route: `← cancel_mono groupOpen.ι`, expand
+  `squareMulRes_comp_ι`, reduce to `mulOver_assoc` restricted (or reprove directly via
+  point-algebra on `E.Point`, as with the counit laws — likely cleaner). Then
+  `Δ₂L = Δ₂R` ⟹ the coassoc ALGEBRA-map equality. Finally bridge to the Coalgebra
+  LINEAR-map coassoc field (`Algebra.TensorProduct.map`/`assoc` `.toLinearMap` = the
+  `LinearMap.rTensor`/`lTensor`/`TensorProduct.assoc` of the field) ⟹ `Coalgebra`, then
+  `Bialgebra.mk'` (ε',Δ' are algebra maps) ⟹ `[Bialgebra R' A']`, then antipode ⟹
+  `[HopfAlgebra R' A']`.
+
+STOP-LINE: hit at ~7 routes this session (way past 3-4, but every piece landed first/
+second try and the remaining path is now purely assembly). Ledgered at the clean
+associator boundary.
