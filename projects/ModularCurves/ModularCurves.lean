@@ -30,6 +30,7 @@ import ModularCurves.EllipticCurve.PoleSheafModel
 import ModularCurves.EllipticCurve.PoleSheafModelHOne
 import ModularCurves.EllipticCurve.PoleSheafFibreHOne
 import ModularCurves.EllipticCurve.PoleSheafFibreSections
+import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChange
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.WeierstrassModel
 import ModularCurves.ForMathlib.AffineVanishing
@@ -52,6 +53,7 @@ import ModularCurves.ForMathlib.QuotientCurveModel
 import ModularCurves.ForMathlib.SchemeActionFree
 import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 import ModularCurves.ForMathlib.SchemeModuleSheaf
+import ModularCurves.ForMathlib.SchemeModulePushforwardBaseChange
 import ModularCurves.ForMathlib.SheafCohomologyExact
 import ModularCurves.ForMathlib.SheafCohomologyIso
 import ModularCurves.ForMathlib.SheafOfModulesMonoidal

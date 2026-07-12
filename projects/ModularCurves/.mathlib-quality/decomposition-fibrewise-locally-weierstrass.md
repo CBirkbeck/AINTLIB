@@ -179,6 +179,15 @@ sequence of additive sheaves, so the remaining work can use mathlib's genuine
 `Sheaf.H`/`Ext` definitions. This bridge does not assert affine vanishing or the missing
 proper cohomology comparison.
 
+The map-level base-change entry is now complete in
+`ForMathlib/SchemeModulePushforwardBaseChange.lean`. The transformation
+`Scheme.Modules.pullbackPushforwardBaseChange` is the Beck--Chevalley mate obtained from
+pullback composition around the cartesian square and the pullback--pushforward counit.
+`EllipticCurve/PoleSheafPushforwardBaseChange.lean` composes its component with
+`sectionPoleSheafPowerBaseChangeIso`, giving the canonical comparison for
+`π_*O(n[0])` under every base change. No invertibility is asserted yet: proving this
+specific map invertible is exactly the remaining proper-cohomology input.
+
 The exact-sequence layer for genuine sheaf cohomology is now also complete in
 `ForMathlib/SheafCohomologyExact.lean`: `Sheaf.H.δ` constructs the connecting map,
 `longSequence_exact` gives a six-term window of the long exact sequence, and the
