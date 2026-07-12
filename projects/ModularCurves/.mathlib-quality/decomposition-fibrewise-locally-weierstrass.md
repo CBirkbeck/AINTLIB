@@ -431,6 +431,16 @@ This is the categorical edge calculation needed by a degree-one Cech comparison;
 does not assert that open-immersion pushforward is exact or that the sheaf-level Cech
 terms are acyclic.
 
+The injective-row acyclicity input is now complete in
+`ForMathlib/SheafCechFlasqueTerms.lean`.
+`TopCat.Sheaf.cechTerm_subsingleton_H_of_isFlasque` proves that every positive
+cohomology group of every term in a finite sheaf-level Cech resolution vanishes when
+the original sheaf is flasque. Each intersection restriction is flasque, its
+pushforward is flasque, and finite-product compatibility of genuine cohomology
+assembles the factorwise vanishing. In particular the result applies to injective
+sheaves via `TopCat.Sheaf.IsFlasque.of_injective`, which supplies the acyclic rows for
+the Cech-to-derived double complex without claiming that pushforward itself is exact.
+
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
 `n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of
