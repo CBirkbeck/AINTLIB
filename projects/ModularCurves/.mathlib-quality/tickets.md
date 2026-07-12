@@ -17043,3 +17043,22 @@ dispatchable to any free strong seat.
   coassoc pending; then `precursorSurjective` (Γ-dual of proven `isClosedImmersion_actPair_left`),
   `Module.Free`/`Finite`, `StableAffineChartData` assembly → `StableAffineChartData.isHopfGalois`
   (M5, already proven upstream) → six `SubgroupQuotient` pins → BOARD-SIGNAL.
+
+### SESSION LEDGER (NEW-HOPF, 2026-07-12 cont.4 — IsCoaction coassoc foundation)
+- **[HG-C1d] IsCoaction coassoc FOUNDATION done + integrated** (ChartCoaction.lean, commit eb3ffd313):
+  `chartAct` (restricted action on the clean product `G|_V ×_V U ⟶ U`) + `chartActToGE`/`_eq`/`_fst`/
+  `_snd` (the point-sum decomposition `act(g,x) = x + ι(g)`, the 2-factor coordinate lemmas). Green.
+- **coassoc FIELD remains `sorry`** (ChartCoaction.lean ~L387) — the last hard geometric lemma of the
+  chart Hopf-Galois path: the 3-factor triple-action associativity (analog of `assocScheme_leftMulSchemeL`
+  via the E.Point route + `translationAction_assoc`) + triple-Künneth Γ-dualization (analog of
+  `comulTop_coassoc`) + `comm`/`assoc` convention conversion. **Two dedicated agent marathons (~1.3M
+  tokens) completed the foundation but NOT the field** — friction-heavy: the `E.asOver.left ≠ E.E`
+  defeq wall triggers `rw` pattern-fails, an `erw` whnf timeout (200k heartbeats), and
+  `motive-not-type-correct`, each needing a bespoke term-mode escape; plus a `groupToBase`(morphismRestrict,
+  from `chartSpecIso`) vs `groupToBaseRes`(resLE, from the Hopf `squareMul`) cube-mismatch needing
+  `congrHom` bridging. **Scoped as a dedicated fresh-context ticket** (the agent's own recommendation);
+  path validated, plan in-file at the sorry, templates = `comulTop_coassoc`/`assocScheme_leftMulSchemeL`.
+- **Charter Hopf-Galois path status**: ⊤+opens `[HopfAlgebra]` ✓✓; `IsCoaction` counit ✓ + coassoc
+  foundation ✓ / field pending. Downstream (blocked on coassoc field): `precursorSurjective` (Γ-dual of
+  proven `isClosedImmersion_actPair_left`), `Module.Free`/`Finite`, `StableAffineChartData` →
+  `isHopfGalois` (M5, proven) → six `SubgroupQuotient` pins → BOARD-SIGNAL.
