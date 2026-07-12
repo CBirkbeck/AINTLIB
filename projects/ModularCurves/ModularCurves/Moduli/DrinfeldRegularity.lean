@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import ModularCurves.LevelStructure.Basic
 import Mathlib.RingTheory.MvPowerSeries.Basic
+import Mathlib.Algebra.MvPolynomial.Coeff
+import Mathlib.Data.Nat.Multiplicity
 
 /-!
 # KM-INTEGRAL stream skeleton: the Drinfeld upgrade of Y₁(N) (Katz–Mazur Ch. 5)
@@ -69,6 +71,73 @@ section CombinatorialCore
 
 variable {R : Type u} [CommRing R]
 
+open MvPowerSeries
+
+/-- A multi-index `e : Fin 2 →₀ ℕ` of total degree `1` is `single 0 1` or `single 1 1`. -/
+private lemma eq_single_of_degree_eq_one {e : Fin 2 →₀ ℕ} (he : e.degree = 1) :
+    e = Finsupp.single 0 1 ∨ e = Finsupp.single 1 1 := by
+  rw [Finsupp.degree_eq_sum, Fin.sum_univ_two] at he
+  rcases (by omega : e 0 = 0 ∧ e 1 = 1 ∨ e 0 = 1 ∧ e 1 = 0) with ⟨h0, h1⟩ | ⟨h0, h1⟩
+  · exact Or.inr (Finsupp.ext fun k => by fin_cases k <;> simp [Finsupp.single_apply, h0, h1])
+  · exact Or.inl (Finsupp.ext fun k => by fin_cases k <;> simp [Finsupp.single_apply, h0, h1])
+
+/-- If every degree-one coefficient of `F` is `1`, so is the coefficient at any degree-one index. -/
+private lemma coeff_eq_one_of_degree_eq_one {F : MvPowerSeries (Fin 2) R}
+    (hF : ∀ s : Fin 2, coeff (Finsupp.single s 1) F = 1) {e : Fin 2 →₀ ℕ} (he : e.degree = 1) :
+    coeff e F = 1 := by
+  rcases eq_single_of_degree_eq_one he with rfl | rfl
+  · exact hF 0
+  · exact hF 1
+
+/-- **Crux reduction.** For a power series `F ≡ X₀ + X₁ (mod deg ≥ 2)`, the total-degree-`m`
+coefficients of `F ^ m` agree with those of `(X₀ + X₁) ^ m`: in the `coeff_pow` expansion, any
+term with a factor of order `0` vanishes (`F` has no constant term), and in every surviving term
+all `m` factors have degree exactly `1`, where `F` and `X₀ + X₁` share the same coefficient `1`. -/
+private lemma coeff_pow_eq_coeff_add_pow {F : MvPowerSeries (Fin 2) R}
+    (hF0 : constantCoeff F = 0) (hF1 : ∀ s : Fin 2, coeff (Finsupp.single s 1) F = 1)
+    {m : ℕ} {d : Fin 2 →₀ ℕ} (hd : d.degree = m) :
+    coeff d (F ^ m) = coeff d ((X 0 + X 1 : MvPowerSeries (Fin 2) R) ^ m) := by
+  classical
+  have hX0 : constantCoeff (X 0 + X 1 : MvPowerSeries (Fin 2) R) = 0 := by
+    simp [map_add, MvPowerSeries.constantCoeff_X]
+  have hX1 : ∀ s : Fin 2, coeff (Finsupp.single s 1) (X 0 + X 1 : MvPowerSeries (Fin 2) R) = 1 := by
+    intro s; fin_cases s <;> simp [map_add, coeff_index_single_X]
+  rw [coeff_pow, coeff_pow]
+  refine Finset.sum_congr rfl fun l hl => ?_
+  rw [Finset.mem_finsuppAntidiag] at hl
+  obtain ⟨hlsum, -⟩ := hl
+  by_cases hz : ∃ j ∈ Finset.range m, l j = 0
+  · obtain ⟨j, hjmem, hj0⟩ := hz
+    rw [Finset.prod_eq_zero hjmem (by rw [hj0, coeff_zero_eq_constantCoeff_apply, hF0]),
+        Finset.prod_eq_zero hjmem (by rw [hj0, coeff_zero_eq_constantCoeff_apply, hX0])]
+  · push_neg at hz
+    have hdegsum : ∑ j ∈ Finset.range m, (l j).degree = m := by
+      rw [← map_sum Finsupp.degree, hlsum, hd]
+    have hge : ∀ j ∈ Finset.range m, 1 ≤ (l j).degree := fun j hj =>
+      Nat.one_le_iff_ne_zero.mpr fun h => hz j hj ((Finsupp.degree_eq_zero_iff (l j)).mp h)
+    have heach : ∀ j ∈ Finset.range m, (l j).degree = 1 := fun j hj =>
+      ((Finset.sum_eq_sum_iff_of_le (f := fun _ => (1 : ℕ)) (g := fun j => (l j).degree) hge).mp
+        (by rw [Finset.sum_const, Finset.card_range, smul_eq_mul, mul_one, hdegsum]) j hj).symm
+    exact Finset.prod_congr rfl fun j hj => by
+      rw [coeff_eq_one_of_degree_eq_one hF1 (heach j hj),
+          coeff_eq_one_of_degree_eq_one hX1 (heach j hj)]
+
+/-- The "cross" coefficient of `(X₀ + X₁) ^ m` at the index `(i, m - i)` is the binomial
+coefficient `m.choose i` (for `i ≤ m`), via the coercion to `MvPolynomial` and its `coeff_add_pow`. -/
+private lemma coeff_add_pow_cross (m i : ℕ) (hi : i ≤ m) :
+    coeff (Finsupp.single (0 : Fin 2) i + Finsupp.single 1 (m - i))
+      ((X 0 + X 1 : MvPowerSeries (Fin 2) R) ^ m) = (m.choose i : R) := by
+  have hcoe : (X 0 + X 1 : MvPowerSeries (Fin 2) R)
+      = ((MvPolynomial.X 0 + MvPolynomial.X 1 : MvPolynomial (Fin 2) R) :
+          MvPowerSeries (Fin 2) R) := by
+    simp only [MvPolynomial.coe_add, MvPolynomial.coe_X]
+  rw [hcoe, ← MvPolynomial.coe_pow, MvPolynomial.coeff_coe, MvPolynomial.coeff_add_pow]
+  have hd0 : (Finsupp.single (0 : Fin 2) i + Finsupp.single 1 (m - i)) 0 = i := by
+    simp [Finsupp.add_apply, Finsupp.single_apply]
+  have hd1 : (Finsupp.single (0 : Fin 2) i + Finsupp.single 1 (m - i)) 1 = m - i := by
+    simp [Finsupp.add_apply, Finsupp.single_apply]
+  rw [hd0, hd1, if_pos (Finset.mem_antidiagonal.mpr (by omega))]
+
 /-- **[KM-W1-1] (KM 5.3.4, first conclusion).** If a two-variable power series `G` with
 `G ≡ X₀ + X₁ (mod degree ≥ 2)` satisfies `G^{pⁿ} ∈ (X₀^{pⁿ}, X₁^{pⁿ})`, then `p = 0`
 in `R`. KM's proof (print p. 141): compare total-degree-`pⁿ` terms in
@@ -82,7 +151,60 @@ theorem CharP.p_eq_zero_of_pow_mem_span (p n : ℕ) (hp : p.Prime) (hn : 1 ≤ n
     (hlin : ∀ i : Fin 2, MvPowerSeries.coeff (Finsupp.single i 1) G = 1)
     (hsub : G ^ p ^ n ∈ Ideal.span
       {(MvPowerSeries.X (0 : Fin 2) : MvPowerSeries (Fin 2) R) ^ p ^ n, (MvPowerSeries.X (1 : Fin 2)) ^ p ^ n}) :
-    (p : R) = 0 := by sorry
+    (p : R) = 0 := by
+  classical
+  have hp1 : 1 < p := hp.one_lt
+  -- **Part A.** Every intermediate binomial coefficient `(pⁿ).choose i` vanishes in `R`.
+  have hchoose : ∀ i, 0 < i → i < p ^ n → ((p ^ n).choose i : R) = 0 := by
+    intro i hi0 him
+    have hile : i ≤ p ^ n := him.le
+    set d : Fin 2 →₀ ℕ := Finsupp.single 0 i + Finsupp.single 1 (p ^ n - i) with hd_def
+    have hd0 : d 0 = i := by rw [hd_def]; simp
+    have hd1 : d 1 = p ^ n - i := by rw [hd_def]; simp
+    have hddeg : d.degree = p ^ n := by
+      rw [hd_def, map_add, Finsupp.degree_single, Finsupp.degree_single]; omega
+    -- The cross coefficient of `Gᵖ^ⁿ` equals `(pⁿ).choose i` …
+    have hLHS : coeff d (G ^ p ^ n) = ((p ^ n).choose i : R) := by
+      rw [coeff_pow_eq_coeff_add_pow h0 hlin hddeg, hd_def, coeff_add_pow_cross (p ^ n) i hile]
+    -- … and is `0`, since `Gᵖ^ⁿ = A · X₀ᵖ^ⁿ + B · X₁ᵖ^ⁿ` has no cross terms of that degree.
+    have hRHS : coeff d (G ^ p ^ n) = 0 := by
+      obtain ⟨A, B, hAB⟩ := Ideal.mem_span_pair.mp hsub
+      have hle0 : ¬ Finsupp.single (0 : Fin 2) (p ^ n) ≤ d := by
+        rw [Finsupp.single_le_iff, hd0]; omega
+      have hle1 : ¬ Finsupp.single (1 : Fin 2) (p ^ n) ≤ d := by
+        rw [Finsupp.single_le_iff, hd1]; omega
+      rw [← hAB, map_add, X_pow_eq, X_pow_eq, coeff_mul_monomial, coeff_mul_monomial,
+          if_neg hle0, if_neg hle1, add_zero]
+    exact hLHS.symm.trans hRHS
+  -- **Part B.** `gcd ((pⁿ).choose 1) ((pⁿ).choose p^{n-1}) = gcd (pⁿ) (p · unit) = p`
+  -- (Kummer), and both generators vanish in `R`, so `p = 0` by Bézout.
+  have hklt : p ^ (n - 1) < p ^ n := Nat.pow_pred_lt_pow hp1 hn
+  have hk0 : p ^ (n - 1) ≠ 0 := pow_ne_zero _ hp.pos.ne'
+  have hA0 : ((p ^ n : ℕ) : R) = 0 := by
+    have := hchoose 1 one_pos (Nat.one_lt_pow (by omega) hp1)
+    rwa [Nat.choose_one_right] at this
+  have hB0 : (((p ^ n).choose (p ^ (n - 1)) : ℕ) : R) = 0 :=
+    hchoose (p ^ (n - 1)) (Nat.pos_of_ne_zero hk0) hklt
+  have hpB : p ∣ (p ^ n).choose (p ^ (n - 1)) := hp.dvd_choose_pow hk0 (Nat.ne_of_lt hklt)
+  have hmult : emultiplicity p ((p ^ n).choose (p ^ (n - 1))) = 1 := by
+    rw [hp.emultiplicity_choose_prime_pow hklt.le hk0, multiplicity_pow_self_of_prime hp.prime,
+        show n - (n - 1) = 1 by omega, Nat.cast_one]
+  have hnp2 : ¬ p ^ 2 ∣ (p ^ n).choose (p ^ (n - 1)) := by
+    rw [← emultiplicity_lt_iff_not_dvd, hmult]; exact_mod_cast one_lt_two
+  obtain ⟨mm, hmm⟩ := hpB
+  have hpmm : ¬ p ∣ mm := fun hd => hnp2 (by rw [hmm, pow_two]; exact mul_dvd_mul_left p hd)
+  have hpn : p ^ n = p * p ^ (n - 1) := by
+    conv_lhs => rw [← Nat.sub_add_cancel hn, pow_succ]
+    rw [mul_comm]
+  have hco : Nat.gcd (p ^ (n - 1)) mm = 1 :=
+    Nat.Coprime.pow_left (n - 1) (hp.coprime_iff_not_dvd.mpr hpmm)
+  have hgcd : Nat.gcd (p ^ n) ((p ^ n).choose (p ^ (n - 1))) = p := by
+    rw [hmm, hpn, Nat.gcd_mul_left, hco, mul_one]
+  have hbez := Nat.gcd_eq_gcd_ab (p ^ n) ((p ^ n).choose (p ^ (n - 1)))
+  rw [hgcd] at hbez
+  have hcast := congrArg (fun z : ℤ => (z : R)) hbez
+  simp only [Int.cast_natCast, Int.cast_add, Int.cast_mul] at hcast
+  rw [hcast, hA0, hB0]; ring
 
 end CombinatorialCore
 

@@ -1,1 +1,1 @@
-FOCUS: nonempty_pullback_idealModule — route: adjunction-transpose + W-membership; auditing comap/adjunction API
+FOCUS: [NAT-3-CORE-ring] — ker of B → B⊗A/(a) = span(φ a)

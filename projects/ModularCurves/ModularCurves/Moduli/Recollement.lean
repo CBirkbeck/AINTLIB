@@ -383,43 +383,41 @@ instantiated at `(a, b) = (2, 3)`, with `P.baseChange (away 2)` represented by
 `𝕸(𝒫,Legendre)/G` (over `ℤ[1/2]`) and `P.baseChange (away 3)` by `𝕸(𝒫,naive-3)/G`
 (over `ℤ[1/3]`), glued over `ℤ[1/6]`.
 
-**Proof decomposition** (KM Cor. 4.7.1; ticket `[T-E5f]`):
+**Proof decomposition** (KM Cor. 4.7.1; ticket `[T-E5f]`). Per the confirmed engine/assembly
+seam (coordinator v10.155; charter line "FP4 builds engine application, NEW-Y1 builds curve
+assembly"), the **engine** below is delivered in this file; the **assembly** ([R-glue-obj]/
+[R-glue-repr]) is NEW-Y1's `Y(N)` curve assembly, built on these primitives.
 
-* *[extract]* From `h_a`/`h_b`, obtain `Xₐ : EllObj R[1/a]` representing `P.baseChange (away a)`
-  (`Functor.reprX` + `Functor.representableBy`) and `X_b : EllObj R[1/b]` representing
-  `P.baseChange (away b)`.
+* *[extract]* ✅ From `h_a`/`h_b`, `Xₐ := Functor.reprX (P.baseChange (awayHom a))` representing
+  `P.baseChange (awayHom a)` (`Functor.representableBy`), likewise `X_b`. (In the proof body.)
 
-* *[compat]* `away a ≫ awayb' = away(ab) = away b ≫ awaya'` where
-  `awayb' : R[1/a] ⟶ R[1/ab]`, `awaya' : R[1/b] ⟶ R[1/ab]`. By
-  `ModuliProblem.baseChange_comp` (proven above), `P.baseChange (away ab)` is *both*
-  `(P.baseChange (away a)).baseChange awayb'` and `(P.baseChange (away b)).baseChange awaya'`.
-  The pullbacks of `Xₐ` and `X_b` to `R[1/ab]` (base change of `Ell`-objects along the ring
-  maps, via the pullback ⊣ restriction-of-scalars adjunction) then both represent
-  `P.baseChange (away ab)`, hence are canonically isomorphic (uniqueness of representing
-  objects). This is the gluing datum over the overlap `D(ab)`.
+* *[compat]* ✅ **Engine, delivered.** The localization tower `awayHom a ≫ awayProdHomLeft a b =
+  awayHom (a*b) = awayHom b ≫ awayProdHomRight a b` (`awayHom_comp_awayProdHomLeft/Right`) plus
+  `representableBy_baseChangeRing` (the base-change ⊣ restrict-scalars adjunction
+  `baseChangeRingHomEquiv`) give the **overlap iso** `overlapIso a b repr_a repr_b :
+  Xₐ.baseChangeRing (awayProdHomLeft a b) ≅ X_b.baseChangeRing (awayProdHomRight a b)` in
+  `Ell/R[1/ab]` — the gluing datum over `D(ab)`. The overlap inclusions are open immersions
+  (`isOpenImmersion_SpecMap_awayProdHomLeft/Right`).
 
-* *[R-glue-obj]* Glue `Xₐ.base` (over `Spec R[1/a] ≅ D(a) ⊆ Spec R`) and `X_b.base` (over
-  `D(b)`) along `D(ab)` into a scheme over `Spec R`, via `Scheme.GlueData`
-  (`AlgebraicGeometry.Scheme.GlueData`), and glue the elliptic curves `Xₐ.curve`, `X_b.curve`
-  (total spaces, `π`, zero sections, **and the group-scheme structure**) likewise, producing
-  `X_glued : EllObj R`. Ingredients: `Spec (Localization.Away a)` is `D(a)` as an affine open
-  of `Spec R` (`basicOpen_sup_basicOpen_eq_top` for `D(a) ∪ D(b) = ⊤`; the open immersion
-  `Spec R[1/a] → Spec R`).
+* *[R-glue-obj]* ⟵ **NEW-Y1 curve assembly.** Glue `Xₐ.base` (over `D(a) ⊆ Spec R`) and
+  `X_b.base` (over `D(b)`) along `D(ab)` via `overlapIso`'s base iso into a scheme over `Spec R`
+  (`Scheme.GlueData`, 2 charts; `basicOpen_sup_basicOpen_eq_top` gives `D(a) ∪ D(b) = ⊤`), and
+  glue the geometric curves likewise — the KEY INSIGHT (banked): glue the *geometric*
+  `EllipticCurveGeom` (`E` via `Scheme.GlueData`, `π`, `zero`, Zariski-local `localModel`) and
+  re-derive the group law via `EllipticCurveGeom.toEllipticCurve` (T-W7, now axiom-clean), so no
+  group-scheme gluing is needed — producing `X_glued : EllObj R`.
 
-* *[R-glue-repr]* `X_glued` represents `P`: build `P.RepresentableBy X_glued`. A `Y`-point of
-  `X_glued` is determined, Zariski-locally on `Y.base` along the pullback of the cover
-  `D(a) ∪ D(b)`, by its restrictions to the `Xₐ`/`X_b` parts, which correspond via the local
-  `RepresentableBy Xₐ`/`X_b` of `P.baseChange` to `P`-values agreeing on `D(ab)` — functor-of-
-  points descent along the Zariski cover.
+* *[R-glue-repr]* ⟵ **NEW-Y1 curve assembly.** `X_glued` represents `P` via functor-of-points
+  descent along the cover, using the local `repr_a`/`repr_b` and `overlapIso` on `D(ab)`.
 
 * *[assemble]* `⟨X_glued, ⟨repr⟩⟩`.
 
-**Outstanding engine gap.** [R-glue-obj]/[R-glue-repr] are a from-scratch Scheme-gluing
-development: `Scheme.GlueData` for the two representing bases along `D(ab)`, plus gluing the
-elliptic curve **together with its commutative group-scheme structure** — the latter has no
-off-the-shelf mathlib API (there is no group-scheme-gluing lemma) and is the substantive new
-work. The base-change of an `Ell`-object along a ring map (for the [compat] step) is likewise
-new `Ell/R` infrastructure. -/
+**Status.** Engine ([extract]/[compat]) delivered and axiom-clean:
+`baseChangeRingHomEquiv`, `representableBy_baseChangeRing`, `awayProdHomLeft/Right` (+ tower
+compat), `overlapIso`, `isOpenImmersion_SpecMap_awayProdHomLeft/Right`. The remaining
+[R-glue-obj]/[R-glue-repr] scheme-and-curve assembly is NEW-Y1's charter (`YFULL` curve
+assembly, in progress: `[YF-SUBDIV-EQ]`/`[YF-COMAX]`/`[YF-⊆⊇]` scheme plumbing) — consumed here
+as the single remaining gap, to avoid duplicating that lane's active work. -/
 theorem representable_of_baseChange_cover (P : ModuliProblem R) (a b : R)
     (hab : ∃ x y : R, x * a + y * b = 1)
     (h_a : (P.baseChange (awayHom a)).Representable)
@@ -436,8 +434,14 @@ theorem representable_of_baseChange_cover (P : ModuliProblem R) (a b : R)
     Functor.representableBy _
   have repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb :=
     Functor.representableBy _
-  -- [compat]/[R-glue-obj]/[R-glue-repr]/[assemble]: the Scheme-gluing recollement.
-  -- Glue Xa, Xb over Spec R = D(a) ∪ D(b) into `X_glued : EllObj R` and show it represents P.
+  -- [compat] ✅ engine: the gluing datum over `D(ab)` is the overlap iso in `Ell/R[1/ab]`.
+  have hcover : PrimeSpectrum.basicOpen a ⊔ PrimeSpectrum.basicOpen b = ⊤ :=
+    basicOpen_sup_basicOpen_eq_top a b hab
+  let _glue_datum : Xa.baseChangeRing (awayProdHomLeft a b) ≅ Xb.baseChangeRing (awayProdHomRight a b) :=
+    overlapIso a b repr_a repr_b
+  -- [R-glue-obj]/[R-glue-repr]/[assemble] ⟵ NEW-Y1 curve assembly (YFULL): glue `Xa`, `Xb` over
+  -- `Spec R = D(a) ∪ D(b)` into `X_glued : EllObj R` (via `_glue_datum` + the open-immersion
+  -- inclusions) and show it represents `P` by functor-of-points descent along the cover.
   sorry
 
 end ModularCurves

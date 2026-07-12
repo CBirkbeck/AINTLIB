@@ -17436,3 +17436,35 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
   producer fleet's, untouchable); the registered debt rows (2 residual PoleSheaf
   raises, cosmetic lints) are the natural first cleanup tickets. Producer work
   continues on the dev branches unchanged; y1 ⊆ main as of this merge.
+
+## Amendments v10.169 (2026-07-12, fable-PIC0): [NAT]-arc — structure complete modulo the chart chain; SESSION LEDGER (window 4)
+
+- **[NAT]-arc state** (`IdealModulePullback.lean`, builds green):
+  `nonempty_pullback_idealModule` is PROVEN-modulo `sheafificationW_idealPullHom`
+  ([NAT-3]), whose route is fully derived (v10.168 chart conjugation + adjunction
+  triangle). Landed sorry-free this window: [NAT-1] `app_mem_idealSections_comap`
+  (zero-chase via `Hom.congr_app` + rfl-grade `comp_app`) + `idealPushHom`;
+  [NAT-2] `idealPullHom` transpose + the main assembly
+  (`pullbackIsoSheafifyPresheafPullback` ≪≫ sh-map ≪≫ `sheafifyValIso`);
+  [NAT-3-CORE ring] `ker_algebraMap_tensorQuot(_span)` (via
+  `quotIdealMapEquivTensorQuot`.commutes — mathlib had the equiv ready);
+  chart link 1 `comap_ideal_eq_ker` (`Hom.ker_apply` + IsClosedImmersion
+  base-change stability instance fires).
+- **Remaining chain (2 sorries)**: [NAT-3-SCHEME] `comap_ideal_eq_span_appLE` —
+  reduce `ker (fst.app V')` to the Spec case via restricted-pullback squares;
+  EXACT TOOLS identified: `ker_ideal_of_isPullback_of_isOpenImmersion`
+  (IdealSheaf/Basic:823 — ker transport along open-immersion pullback squares!),
+  `pullbackSpecIso` + `pullbackSpecIso_hom/inv_fst` (Pullbacks.lean:719+),
+  `subschemeObjIso` (Γ(D-charts) = A ⧸ J.ideal V), then the ring core. Then
+  [NAT-3] assembly per the v10.168 conjugation plan (trivialize both sides on
+  charts via `idealGenHom`, unit-section = generator ratio, span-eq + nzd ⟹ unit;
+  nzd from the engine's `nonZeroDivisor_of_flat_of_fibrewise_nonZeroDivisor` at
+  the flat-base-change consumer).
+- LEAN-OPS: `Scheme.Hom.congr_app` (Hom-namespaced) for morphism-equality app
+  transport — the zero-chase collapses all preimage-open mismatches; congrArg on
+  h ↦ (h.app U) g is DEPENDENT-motive-ill-typed (codomain varies with h) — chase
+  zeros instead; naturality-square goal orientations: domain-map-first.
+- **LEDGER (window 4)**: NAT-1/NAT-2/ring-core/link-1 all committed+pushed; main
+  theorem structurally complete. NEXT: link 2 (the restricted-pullback Spec
+  reduction), then the conjugation assembly, then sectionToPicRel-naturality
+  against picRelFunctor.
