@@ -11,6 +11,7 @@ import ModularCurves.Moduli.QuotientProblem
 import ModularCurves.Moduli.LevelSpaces
 import ModularCurves.ModularCurve.YFullRoute
 import ModularCurves.GroupScheme.DeligneOrder
+import ModularCurves.ForMathlib.SchemeActionFree
 
 /-!
 # Γ_H relative representability (Loeffler 3.8.2 / KM 3.7.1 + 7.1) — corrected statements
@@ -345,7 +346,9 @@ is PROVEN and covers the `Y(N)` pipeline). Stated against ANY datum satisfying t
 quotient universal property (all such are canonically isomorphic). -/
 theorem _root_.AlgebraicGeometry.SchemeAction.quotientπ_finite_etale_surjective
     {G : Type*} [Group G] [Finite G]
-    {Z S Z₀ : Scheme.{u}} (σ : SchemeAction G Z) (f : Z ⟶ S) [IsAffineHom f]
+    {Z S Z₀ : Scheme.{u}}
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from Z))]
+    (σ : SchemeAction G Z) (f : Z ⟶ S) [IsAffineHom f]
     (hover : ∀ γ : G, σ.hom γ ≫ f = f)
     (hfree : ∀ {T : Scheme.{u}} (t : T ⟶ Z) (γ : G), γ ≠ 1 →
       t ≫ σ.hom γ = t → IsEmpty T)
@@ -354,7 +357,43 @@ theorem _root_.AlgebraicGeometry.SchemeAction.quotientπ_finite_etale_surjective
     (hdesc : ∀ {Y : Scheme.{u}} (F : Z ⟶ Y), (∀ γ : G, σ.hom γ ≫ F = F) →
       ∃! q : Z₀ ⟶ Y, π ≫ q = F) :
     IsFinite π ∧ Etale π ∧ Surjective π := by
-  sorry
+  classical
+  -- The `IsAffineHom`-preimage atlas (as in GHB3), giving the concrete quotient.
+  have hcov : ∀ x : Z, ∃ W : S.Opens, IsAffineOpen W ∧ f.base x ∈ W := fun x => by
+    obtain ⟨W, hW, hmem, -⟩ :=
+      exists_isAffineOpen_mem_and_subset (X := S) (TopologicalSpace.Opens.mem_top (f.base x))
+    exact ⟨W, hW, hmem⟩
+  choose US hUS_aff hUS_mem using hcov
+  have hVs : ∀ x : Z, σ.IsStableOpen (f ⁻¹ᵁ US x) := fun x g => by
+    show (σ.hom g ≫ f) ⁻¹ᵁ US x = f ⁻¹ᵁ US x; rw [hover g]
+  have hVa : ∀ x : Z, IsAffineOpen (f ⁻¹ᵁ US x) := fun x => (hUS_aff x).preimage f
+  have hVmem : ∀ x : Z, x ∈ f ⁻¹ᵁ US x := fun x => hUS_mem x
+  set V : Z → Z.Opens := fun x => f ⁻¹ᵁ US x with hVdef
+  set π₀ := σ.quotientπ V hVs hVa hVmem with hπ₀def
+  have hfree' : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ Z),
+      t ≫ σ.hom γ = t → IsEmpty T := fun γ hγ T t ht => hfree t γ hγ ht
+  haveI hFin₀ : IsFinite π₀ := σ.isFinite_quotientπ V hVs hVa hVmem hfree'
+  haveI hEt₀ : Etale π₀ := σ.etale_quotientπ V hVs hVa hVmem hfree'
+  haveI hSurj₀ : Surjective π₀ := ⟨σ.quotientπ_surjective V hVs hVa hVmem⟩
+  have hπ₀inv : ∀ g : G, σ.hom g ≫ π₀ = π₀ := σ.hom_quotientπ V hVs hVa hVmem
+  -- Unique iso between the abstract quotient `Z₀` and the concrete one.
+  obtain ⟨q, hq, -⟩ := hdesc π₀ hπ₀inv
+  obtain ⟨q', hq', -⟩ := σ.existsUnique_quotientπ_lift V hVs hVa hVmem π hπinv
+  have hqq' : q ≫ q' = 𝟙 Z₀ := by
+    obtain ⟨_, -, huniq⟩ := hdesc π hπinv
+    rw [huniq (q ≫ q') (show π ≫ (q ≫ q') = π by rw [← Category.assoc, hq, hq']),
+      huniq (𝟙 Z₀) (show π ≫ 𝟙 Z₀ = π by rw [Category.comp_id])]
+  have hq'q : q' ≫ q = 𝟙 _ := by
+    obtain ⟨_, -, huniq⟩ := σ.existsUnique_quotientπ_lift V hVs hVa hVmem π₀ hπ₀inv
+    rw [huniq (q' ≫ q) (show π₀ ≫ (q' ≫ q) = π₀ by rw [← Category.assoc, hq', hq]),
+      huniq (𝟙 _) (show π₀ ≫ 𝟙 _ = π₀ by rw [Category.comp_id])]
+  haveI : IsIso q := ⟨q', hqq', hq'q⟩
+  refine ⟨(MorphismProperty.cancel_right_of_respectsIso (P := @IsFinite) π q).mp ?_,
+    (MorphismProperty.cancel_right_of_respectsIso (P := @Etale) π q).mp ?_,
+    (MorphismProperty.cancel_right_of_respectsIso (P := @Surjective) π q).mp ?_⟩
+  · rw [hq]; exact hFin₀
+  · rw [hq]; exact hEt₀
+  · rw [hq]; exact hSurj₀
 
 /-- **[GHB5] (KM 7.1.3(3c) — gate [A711-BC]; the crux of (Q2))** — verbatim: "there is
 a natural S-morphism (𝒫_{E/S})/G → (𝒫/G)_{E/S}, which is bijective on geometric
