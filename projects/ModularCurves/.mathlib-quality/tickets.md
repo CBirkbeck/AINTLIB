@@ -16677,3 +16677,38 @@ consumable for NEW-Y1's B4 curve assembly:
   P.Representable`. (Compat over R[1/ab] is automatic from uniqueness of representing objects.)
 Order: R-comp → R-glue-obj → R-glue-repr → main. Stated consumable for NEW-Y1 (they instantiate a=2
 Legendre, b=3 naive-3).
+
+## Amendments v10.156 (2026-07-12, fable-PIC0): ★ [CMP-PAIR] CLOSED (GME 2.17 →-direction sorry-free); [CMP-←] decomposed element-wise (no sheaf-module stalks)
+
+- ★ **[CMP-PAIR] CLOSED** (`6add0934c`): `bijective_evPre_app_of_triv` green — the last
+  [PAIR-4′] leaf. Route: `LinearEquiv.ofBijective` packaging of `evalSection ψ.hom` over
+  the `ringCatSheaf.obj.obj`-spelled carriers (NOT the forget₂-clothing — synth fails
+  there); inverse hom `k = ofHom (mk.flip ψ.hom ∘ₗ hL.symm)` with a
+  `letI : CommSemiring ↑(ringCatSheaf-carrier) := inferInstanceAs (CommSemiring
+  ↑(X.sheaf.obj.obj W))` transported from the CommRingCat carrier (the monoidal
+  components are TensorProducts over THAT); `k ≫ ev = 𝟙` by `hom_ext` + simp-to-hom-level
+  (`ModuleCat.hom_comp/hom_id` FIRST — element-level exact hits the category-instance
+  wall) + `apply_symm_apply`; `ev ≫ k = 𝟙` by `tensor_ext` + `evalSection_factor` +
+  `TensorProduct.smul_tmul` balance + scalar-end roundtrip (`symm_apply_apply` +
+  `Iso.hom_inv_id_assoc` congrArg-chain); `IsIso → Bijective`. `nonempty_eval_iso` is
+  sorry-free; `IsInvertible.isUnit_toSkeleton` (GME 2.17 →) fully proved.
+- **[CMP-←] decomposition (element-wise; Stacks 0B8N-shaped, NO stalks of M — only
+  O-stalks, which schemes have):** given `IsUnit (toSkeleton M)`:
+  - **[CMP-L1]** unfold: `∃ N, Nonempty (tensorObj M N ≅ unitObj X)` via
+    `isUnit_iff_exists` + `Quotient.exact` + [CMP-T]/[CMP-U] bridging backwards.
+  - **[CMP-L2]** pure-tensor local data: `q := toSheafify ≫ ε.hom.val`; `ζ := ε.inv`-image
+    of 1; toSheafify is locally surjective ⟹ at x a lift τ on W ∋ x with q(τ) = 1|_W;
+    τ = Σ mᵢ⊗nᵢ; O_x local + nonunits-add-closed ⟹ some germ q(mᵢ⊗nᵢ) is a unit;
+    `RingedSpace.isUnit_res_of_isUnit_germ` ⟹ V ∋ x with u := q(m⊗n)|_V a unit;
+    rescale n′ := u⁻¹ • n|_V ⟹ q(m ⊗ n′) = 1 on V.
+  - **[CMP-L3]** trivialization from a unit pairing: α : unitObj V ⟶ pb M from m
+    (unitHomEquiv + over/pullback bridges à la overTrivializationOfRestrictIso);
+    β : pb M ⟶ unitObj V by pair-with-n′ (dualPresheaf-style presheaf hom); β∘α = 𝟙 by
+    section-compute q(m⊗n′)=1; α∘β = 𝟙 by ⊗-cancellation: tensorRight-(pb N) faithful
+    (generic monoidal lemma: A⊗B ≅ 𝟙 ⟹ tensorRight A ⋙ tensorRight B ≅ 𝟭 ⟹ Faithful,
+    consuming nonempty_pullback_tensorObj + pullback-unit + [CMP-T/U]-at-V) + the
+    conjugated endo of 𝟙_ = q(m⊗n′)-multiplication = id.
+  - mathlib note (ecosystem check done): `RingTheory/PicardGroup.lean`
+    (`Module.Invertible`, finite+projective instances, `free_iff_linearEquiv`) exists —
+    right shape for a STALK route, but that needs a stalk theory for sheaves of modules
+    (absent in mathlib); the element route dodges it. Cite if L2 ever localizes to rings.
