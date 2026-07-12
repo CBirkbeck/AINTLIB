@@ -690,28 +690,27 @@ algebra. It does not assert that the raw affine Cech terms are finite or project
 proper-perfect replacement of the complex is still the geometric input needed before that
 algebra can yield local freeness and base change for the pole modules.
 
-The finite-product part of termwise Cech flatness is also complete.
-`Module.Flat.pi_of_finite` proves that finite dependent products of flat modules are flat,
-and `Scheme.Modules.baseCechComplex_X_flat_of_factors` applies this through the existing
-concrete product isomorphism in every Cech degree. It remains to prove that the section
-module of the invertible pole sheaf on each affine intersection is flat over the affine
-base; no finiteness or projectivity of the raw Cech terms is inferred.
+Termwise Cech flatness is now complete. `Module.Flat.pi_of_finite` proves that finite
+dependent products of flat modules are flat, and
+`Scheme.Modules.baseCechComplex_X_flat_of_factors` applies this through the existing
+concrete product isomorphism in every Cech degree. For a trivialized affine open,
+`sectionsIsoUnitSectionsOfRestrictIso` identifies sections with its coordinate ring
+`Γ(X,U)`-linearly, while `baseModulePresheafObjIsoUnitOfRestrictIso` retains the scalar
+action from `Γ(S,⊤)`. Theorems `baseModulePresheaf_obj_flat_of_restrictIso` and
+`baseCechFactor_flat_of_trivializingCover` then transfer morphism flatness to every
+finite-intersection section factor, and `baseCechComplex_X_flat_of_trivializingCover`
+packages flatness of every Cech term. No finiteness or projectivity of the raw terms is
+inferred.
 
 The cover may now be chosen compatibly with the line-bundle trivializations:
 `Scheme.Modules.IsInvertible.exists_finite_affine_trivializingCover` refines the defining
 trivializing cover of an invertible sheaf on a compact scheme through the affine-open
 basis and extracts a finite subcover. Consequently every finite intersection in the
-separated proper curve is affine and inherits a trivialization of `O(n[0])`. What remains
-for termwise Cech flatness is the scalar-compatible identification of its section module
-with that intersection's coordinate ring, followed by smooth flatness over the base.
-
-The active termwise-flatness dependency is now split explicitly. First construct the
-`Γ(S, ⊤)`-linear comparison between sections of a sheaf trivialized on an affine open and
-the coordinate ring of that open, retaining the scalar action induced by the structural
-morphism. Then restrict a cover trivialization to each finite Cech intersection, apply
-flatness of the intersection morphism to the affine base, and combine the resulting
-factorwise flatness with `baseCechComplex_X_flat_of_factors`. This step asserts neither
-finiteness nor projectivity of the raw affine Cech terms.
+separated proper curve is affine and inherits a trivialization of `O(n[0])`. Combined
+with the preceding scalar-compatible comparison, this supplies a finite affine Cech model
+for every pole sheaf whose terms are flat over the affine base. The remaining geometric
+input is no longer termwise flatness: it is the proper-perfect replacement of this model
+and its comparison after arbitrary base change.
 
 The elementary Mayer--Vietoris seam is now complete in both directions.
 `HPrimeZeroAddEquivSections` identifies `H'⁰(U,F)` with sections naturally in `U`, while
