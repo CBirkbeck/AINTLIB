@@ -855,6 +855,50 @@ theorem exists_pairingElem_tmul_eq_one {M N : X.Modules} (ε : tensorObj M N ≅
         congrArg (c • ·) hres
     _ = 1 := (smul_eq_mul c _).trans hb
 
+open ModularCurves.SheafOfModules in
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[CMP-L3a]** Pairing against a fixed section `n` of `N`, as a morphism on the
+over-site: componentwise `s ↦ ⟨s ⊗ n|_V⟩` for the pairing of `ε`. -/
+noncomputable def pairingHom {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X)
+    {W : X.Opens} (n : N.val.obj (Opposite.op W)) :
+    M.over W ⟶ SheafOfModules.unit (X.ringCatSheaf.over W) :=
+  ⟨{ app := fun Vf => ModuleCat.ofHom
+      { toFun := fun s => pairingElem ε (Opposite.unop Vf).left
+          (s ⊗ₜ N.val.map (Opposite.unop Vf).hom.op n)
+        map_add' := fun s s' => (by
+          rw [TensorProduct.add_tmul]
+          exact pairingElem_add ε (Opposite.unop Vf).left _ _)
+        map_smul' := fun r s => (by
+          let r' : (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj
+            (Opposite.op (Opposite.unop Vf).left) := r
+          show pairingElem ε (Opposite.unop Vf).left
+              ((r' • s) ⊗ₜ N.val.map (Opposite.unop Vf).hom.op n) = _
+          rw [← TensorProduct.smul_tmul']
+          exact pairingElem_smul ε (Opposite.unop Vf).left r' _) }
+     naturality := fun {Vf Vf'} i => (by
+      refine ModuleCat.hom_ext (LinearMap.ext fun s => ?_)
+      have hw : i.unop.left ≫ (Opposite.unop Vf).hom = (Opposite.unop Vf').hom :=
+        Over.w i.unop
+      have h₁ : N.val.map ((Opposite.unop Vf').hom).op n =
+          N.val.map (i.unop.left).op (N.val.map ((Opposite.unop Vf).hom).op n) := by
+        show N.val.presheaf.map ((Opposite.unop Vf').hom).op n =
+          N.val.presheaf.map (i.unop.left).op
+            (N.val.presheaf.map ((Opposite.unop Vf).hom).op n)
+        rw [← hw, op_comp, Functor.map_comp]
+        rfl
+      show pairingElem ε (Opposite.unop Vf').left
+          ((M.val.map (i.unop.left).op s) ⊗ₜ N.val.map ((Opposite.unop Vf').hom).op n) =
+        (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).map (i.unop.left).op
+          (pairingElem ε (Opposite.unop Vf).left
+            (s ⊗ₜ N.val.map ((Opposite.unop Vf).hom).op n))
+      refine (congrArg (fun t => pairingElem ε (Opposite.unop Vf').left
+          ((M.val.map (i.unop.left).op s) ⊗ₜ t)) h₁).trans ?_
+      refine (congrArg (pairingElem ε (Opposite.unop Vf').left)
+          (PresheafOfModules.Monoidal.tensorObj_map_tmul (i.unop.left).op s
+            (N.val.map ((Opposite.unop Vf).hom).op n)).symm).trans ?_
+      exact pairingElem_map ε (i.unop.left).op _) }⟩
+
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
 /-- **[CMP-←]** A ⊗-invertible module is cover-locally trivial (Zariski-local freeness:
