@@ -1434,32 +1434,64 @@ every homological leaf above needs. -/
 
 /-- [T-REDUCEP] It suffices to prove flat-locus spreading when `S` is an `R`-free finitely-presented
 `R`-algebra (i.e. a polynomial ring): the general case follows by restricting `M` along `P ↠ S`. -/
-theorem flatLocus_spreads_reduce_to_polynomial {R S M : Type*} [CommRing R] [IsNoetherianRing R]
+theorem flatLocus_spreads_reduce_to_polynomial {R S M : Type u} [CommRing R] [IsNoetherianRing R]
     [CommRing S] [Algebra R S] [Algebra.FinitePresentation R S] [AddCommGroup M] [Module R M]
     [Module S M] [IsScalarTower R S M] [Module.FinitePresentation S M] {q : PrimeSpectrum S}
     (hq : q ∈ flatLocus R S M)
-    (H : ∀ (P : Type*) [CommRing P] [Algebra R P] [Module.Free R P] [Algebra.FinitePresentation R P]
-      (M' : Type*) [AddCommGroup M'] [Module R M'] [Module P M'] [IsScalarTower R P M']
+    (H : ∀ (P : Type u) [CommRing P] [Algebra R P] [Module.Free R P] [Algebra.FinitePresentation R P]
+      (M' : Type u) [AddCommGroup M'] [Module R M'] [Module P M'] [IsScalarTower R P M']
       [Module.FinitePresentation P M'] (q' : PrimeSpectrum P), q' ∈ flatLocus R P M' →
         ∃ g : P, g ∉ q'.asIdeal ∧
           (PrimeSpectrum.basicOpen g : Set (PrimeSpectrum P)) ⊆ flatLocus R P M') :
     ∃ g : S, g ∉ q.asIdeal ∧
       (PrimeSpectrum.basicOpen g : Set (PrimeSpectrum S)) ⊆ flatLocus R S M := by
-  -- The full proof is written and every step type-checks EXCEPT a universe-unification wart at the
-  -- two `localizedModuleComapEquiv` applications: `MvPolynomial (Fin n) R : Type (max 0 u)` will not
-  -- unify with the equiv's `P`-universe metavariable (`max 0 u` vs a fresh `u_1`).  The logic (kept
-  -- here for the resume) is: `obtain ⟨n, f, hf, hker⟩ := ‹Algebra.FinitePresentation R S›.out`;
-  -- `letI : Algebra (MvPolynomial (Fin n) R) S := f.toRingHom.toAlgebra`;
-  -- `haveI : IsScalarTower R (MvPolynomial (Fin n) R) S := .of_algebraMap_eq (f.commutes · |>.symm)`;
-  -- give `M` its `P`-module structure `Module.compHom M (algebraMap _ S)` with the two scalar towers
-  -- (`⟨fun p s m => by rw [Algebra.smul_def]; exact mul_smul _ _ _⟩` and the `R`-tower via
-  -- `algebraMap_smul`); `Module.FinitePresentation (MvPolynomial (Fin n) R) S` via
-  -- `finitePresentation_of_surjective (Algebra.linearMap _ S) hf hker`, then `.trans _ M S` for `M`;
-  -- transport `hq` to `𝔮ᴾ ∈ flatLocus R P M` by `Module.Flat.of_linearEquiv (localizedModuleComapEquiv
-  -- hf q.asIdeal)`, apply `H (MvPolynomial (Fin n) R) M _ hqP`, and pull `D(f g')` back with the
-  -- `.symm` equiv.  RESOLUTION: make the `localizedModuleComapEquiv`/`flatLocus` chain
-  -- universe-monomorphic, or replace `Fin n` with a same-universe index to avoid `max 0 u`.
-  sorry
+  classical
+  -- Presentation `P = R[ι] ↠ S` with finitely generated kernel.  `iff_quotient_mvPolynomial'`
+  -- packages the `ULift`-reindexed index `ι : Type u` (so `P : Type u`, avoiding the `max 0 u`
+  -- universe of `MvPolynomial (Fin n) R`) together with the finitely-generated kernel.
+  obtain ⟨ι, hιf, f, hf, hker⟩ :=
+    (Algebra.FinitePresentation.iff_quotient_mvPolynomial'.{u, u, u} (R := R) (A := S)).mp
+      inferInstance
+  haveI := hιf
+  letI : Algebra (MvPolynomial ι R) S := f.toRingHom.toAlgebra
+  haveI : IsScalarTower R (MvPolynomial ι R) S :=
+    IsScalarTower.of_algebraMap_eq fun r => (f.commutes r).symm
+  -- `M` as a `P`-module through `P → S`.
+  letI : Module (MvPolynomial ι R) M := Module.compHom M (algebraMap (MvPolynomial ι R) S)
+  haveI : IsScalarTower (MvPolynomial ι R) S M :=
+    ⟨fun p s m => by rw [Algebra.smul_def]; exact mul_smul _ _ _⟩
+  haveI : IsScalarTower R (MvPolynomial ι R) M :=
+    ⟨fun r p m => by
+      show algebraMap (MvPolynomial ι R) S (r • p) • m = r • (algebraMap _ S p • m)
+      rw [Algebra.smul_def (R := R), map_mul,
+        ← IsScalarTower.algebraMap_apply R (MvPolynomial ι R) S, mul_smul, algebraMap_smul]⟩
+  haveI : Module.FinitePresentation (MvPolynomial ι R) S :=
+    Module.finitePresentation_of_surjective (Algebra.linearMap (MvPolynomial ι R) S) hf hker
+  haveI : Module.FinitePresentation (MvPolynomial ι R) M :=
+    Module.FinitePresentation.trans (MvPolynomial ι R) M S
+  have hfsurj : Function.Surjective (algebraMap (MvPolynomial ι R) S) := hf
+  -- The contracted prime `𝔮ᴾ` lands in the flat locus over `P` (localisation iso).
+  have hqP : PrimeSpectrum.comap (algebraMap (MvPolynomial ι R) S) q ∈
+      flatLocus R (MvPolynomial ι R) M := by
+    rw [mem_flatLocus] at hq ⊢
+    haveI := hq
+    exact Module.Flat.of_linearEquiv (localizedModuleComapEquiv hfsurj q.asIdeal)
+  -- Apply the polynomial-case hypothesis `H` and pull the basic open back to `Spec S`.
+  obtain ⟨g', hg', hsub⟩ := H (MvPolynomial ι R) M _ hqP
+  refine ⟨f g', ?_, ?_⟩
+  · intro hmem
+    exact hg' (show g' ∈ (PrimeSpectrum.comap (algebraMap _ S) q).asIdeal from hmem)
+  · intro q'' hq''
+    rw [SetLike.mem_coe, PrimeSpectrum.mem_basicOpen] at hq''
+    have hmem : PrimeSpectrum.comap (algebraMap (MvPolynomial ι R) S) q'' ∈
+        flatLocus R (MvPolynomial ι R) M := by
+      apply hsub
+      rw [SetLike.mem_coe, PrimeSpectrum.mem_basicOpen]
+      exact hq''
+    rw [mem_flatLocus] at hmem ⊢
+    haveI : Module.Flat R (LocalizedModule
+        (q''.asIdeal.comap (algebraMap (MvPolynomial ι R) S)).primeCompl M) := hmem
+    exact Module.Flat.of_linearEquiv (localizedModuleComapEquiv hfsurj q''.asIdeal).symm
 
 /-! ## [T-FINAL] Assembly: the target `flatLocus_spreads_of_flat`
 

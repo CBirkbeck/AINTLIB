@@ -24,7 +24,12 @@ import ModularCurves.ForMathlib.FlatLocus
 
 open scoped TensorProduct
 
-variable {R P S M : Type*} [CommRing R] [CommRing P] [CommRing S]
+universe u
+
+-- Monomorphic in one universe `u`: in the application `P = MvPolynomial (Fin n) R : Type (max 0 u)`
+-- normalises to `Type u`, so keeping `R P S M` in a single universe lets it unify at the call site
+-- (independent `Type*` universes leave a `max 0 u` vs metavariable wart).
+variable {R P S M : Type u} [CommRing R] [CommRing P] [CommRing S]
   [Algebra R P] [Algebra P S] [Algebra R S] [IsScalarTower R P S]
   [AddCommGroup M] [Module S M] [Module P M] [Module R M]
   [IsScalarTower P S M] [IsScalarTower R P M] [IsScalarTower R S M]
