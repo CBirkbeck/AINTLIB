@@ -585,6 +585,17 @@ proper-cohomology dependency is to retain the module structure over the affine b
 replace the finite Cech model by a bounded complex of finite projective base modules, and
 prove its compatibility with arbitrary base change.
 
+The base-linear refinement is now complete in
+`ForMathlib/SchemeModuleBaseCech.lean`. For a scheme module `M` on `X` over `S`,
+`baseModulePresheaf` restricts the canonical module structure on sections along
+`π.appTop`, so every Cech term is a module over `Γ(S,⊤)`.
+`baseCechComplex` applies mathlib's native Cech construction in that module category,
+and `baseCechComplexForgetIso` proves that forgetting the base action recovers the
+previous additive Cech complex, including the alternating differential. Thus the finite
+affine pole-sheaf model now carries the base-ring action needed for finite-projective
+replacement. No finiteness or projectivity is asserted yet: the remaining step is the
+proper finite-projective replacement and its arbitrary-base comparison.
+
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
 `n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of
