@@ -127,15 +127,14 @@ coefficient `m.choose i` (for `i ≤ m`), via the coercion to `MvPolynomial` and
 private lemma coeff_add_pow_cross (m i : ℕ) (hi : i ≤ m) :
     coeff (Finsupp.single (0 : Fin 2) i + Finsupp.single 1 (m - i))
       ((X 0 + X 1 : MvPowerSeries (Fin 2) R) ^ m) = (m.choose i : R) := by
+  set d : Fin 2 →₀ ℕ := Finsupp.single 0 i + Finsupp.single 1 (m - i) with hd_def
   have hcoe : (X 0 + X 1 : MvPowerSeries (Fin 2) R)
       = ((MvPolynomial.X 0 + MvPolynomial.X 1 : MvPolynomial (Fin 2) R) :
           MvPowerSeries (Fin 2) R) := by
     simp only [MvPolynomial.coe_add, MvPolynomial.coe_X]
   rw [hcoe, ← MvPolynomial.coe_pow, MvPolynomial.coeff_coe, MvPolynomial.coeff_add_pow]
-  have hd0 : (Finsupp.single (0 : Fin 2) i + Finsupp.single 1 (m - i)) 0 = i := by
-    simp [Finsupp.add_apply, Finsupp.single_apply]
-  have hd1 : (Finsupp.single (0 : Fin 2) i + Finsupp.single 1 (m - i)) 1 = m - i := by
-    simp [Finsupp.add_apply, Finsupp.single_apply]
+  have hd0 : d 0 = i := by rw [hd_def]; simp
+  have hd1 : d 1 = m - i := by rw [hd_def]; simp
   rw [hd0, hd1, if_pos (Finset.mem_antidiagonal.mpr (by omega))]
 
 /-- **[KM-W1-1] (KM 5.3.4, first conclusion).** If a two-variable power series `G` with
