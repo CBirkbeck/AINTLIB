@@ -504,6 +504,28 @@ theorem projModelPoleOverlap_eq_basicOpen_sectionRoot
     _ = N ⊓ X.basicOpen s := by rw [hN]
     _ = X.basicOpen (projModelSectionRoot W) := hroot.symm
 
+/-- Restriction from the canonical section neighborhood to the pole overlap is
+injective. -/
+theorem projModelPoleOverlap_restrict_injective
+    (W : WeierstrassCurve R) :
+    Function.Injective
+      ((projModel W).presheaf.map
+        (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op).hom := by
+  let X := projModel W
+  let N := projModelSectionNeighborhood W
+  let P := projModelPoleOverlap W
+  let r := projModelSectionRoot W
+  let res : Γ(X, N) ⟶ Γ(X, P) :=
+    X.presheaf.map
+      (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op
+  letI : Algebra Γ(X, N) Γ(X, P) := res.hom.toAlgebra
+  haveI : IsLocalization.Away r Γ(X, P) :=
+    N.2.isLocalization_of_eq_basicOpen (f := r)
+      (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W))
+      (projModelPoleOverlap_eq_basicOpen_sectionRoot W)
+  exact IsLocalization.injective Γ(X, P)
+    (Submonoid.powers_le.mpr (projModelSectionRoot_mem_nonZeroDivisors W))
+
 theorem projModelPoleOverlap_le_chartOverlap (W : WeierstrassCurve R) :
     projModelPoleOverlap W ≤ projModelChartOverlap W := by
   rw [show (projModelChartOverlap W : (projModel W).Opens) =
