@@ -276,6 +276,32 @@ noncomputable def baseChangeRingHomEquiv (X : EllObj R') (τ : R' ⟶ R'') (Y : 
     · rw [baseChangeRingHomEquivFwd_baseHom, baseChangeRingHomEquivInv_baseHom, bcInvBase_fst]
     · rw [baseChangeRingHomEquivFwd_top, baseChangeRingHomEquivInv_top, bcInvTop_fst]
 
+/-! ### [T-E5f-g-transfer] representability transfers under base change -/
+
+/-- The forward map is natural: it commutes with precomposition by `(restrictScalars τ).map`. -/
+theorem baseChangeRingHomEquivFwd_comp (X : EllObj R') (τ : R' ⟶ R'') {Y' Y : EllObj R''}
+    (f : Y' ⟶ Y) (g : Y ⟶ X.baseChangeRing τ) :
+    baseChangeRingHomEquivFwd X τ Y' (f ≫ g)
+      = (EllObj.restrictScalars τ).map f ≫ baseChangeRingHomEquivFwd X τ Y g := by
+  apply EllHom.ext
+  · simp only [baseChangeRingHomEquivFwd_baseHom, EllHom.comp_baseHom,
+      EllObj.restrictScalars_map_baseHom, Category.assoc]
+  · simp only [baseChangeRingHomEquivFwd_top, EllHom.comp_top,
+      EllObj.restrictScalars_map_top, Category.assoc]
+
+/-- **[T-E5f-g-transfer]** Representability transfers under base change: if `X` represents `Q`
+over `R'`, then `X.baseChangeRing τ` represents `Q.baseChange τ` over `R''`. This is the
+gluing datum over `D(ab)` in the recollement. -/
+noncomputable def representableBy_baseChangeRing {Q : ModuliProblem R'} {X : EllObj R'}
+    (h : Q.RepresentableBy X) (τ : R' ⟶ R'') :
+    (Q.baseChange τ).RepresentableBy (X.baseChangeRing τ) where
+  homEquiv {Y} := (baseChangeRingHomEquiv X τ Y).trans h.homEquiv
+  homEquiv_comp {Y' Y} f g := by
+    show h.homEquiv (baseChangeRingHomEquivFwd X τ Y' (f ≫ g))
+      = (Q.baseChange τ).map f.op (h.homEquiv (baseChangeRingHomEquivFwd X τ Y g))
+    rw [baseChangeRingHomEquivFwd_comp, h.homEquiv_comp]
+    rfl
+
 end BaseChangeAdjunction
 
 /-! ## [T-E5f-main] the recollement theorem -/
