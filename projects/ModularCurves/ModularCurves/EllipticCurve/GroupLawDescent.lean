@@ -220,7 +220,7 @@ leg (the group inverse of the base-changed record is `Over.pullback g .map (invO
   pullback.lift_fst _ _ _
 
 /-- The first-leg component of the chart-overlap comparison morphism. -/
-private theorem bcChart_aux_inv (k : A.ι) {O' : S.Opens} (h : O' ≤ (A.U k).1) :
+@[reassoc] private theorem bcChart_aux_inv (k : A.ι) :
     haveI := A.elliptic k
     (A.e k).inv ≫ pullback.snd G.π (A.U k).1.ι =
       projModelπ (A.W k) ≫ (A.U k).2.isoSpec.inv := by
@@ -252,7 +252,7 @@ private noncomputable def bcChartHom (k : A.ι) {O' : S.Opens} (h : O' ≤ (A.U 
       (congrArg (pullback.fst (projModelπ (A.W k)) (ovlToChart A k h) ≫ ·)
         (Category.assoc (A.e k).inv (pullback.snd G.π (A.U k).1.ι) (A.U k).1.ι).symm).trans <|
       (congrArg (fun t => pullback.fst (projModelπ (A.W k)) (ovlToChart A k h) ≫
-          t ≫ (A.U k).1.ι) (bcChart_aux_inv A k h)).trans <|
+          t ≫ (A.U k).1.ι) (bcChart_aux_inv A k)).trans <|
       (congrArg (pullback.fst (projModelπ (A.W k)) (ovlToChart A k h) ≫ ·)
         (Category.assoc (projModelπ (A.W k)) (A.U k).2.isoSpec.inv (A.U k).1.ι)).trans <|
       (Category.assoc (pullback.fst (projModelπ (A.W k)) (ovlToChart A k h))
@@ -317,7 +317,7 @@ set_option backward.isDefEq.respectTransparency false in
   refine pullback.hom_ext ?_ ?_
   · rw [Category.assoc, chartRestr_fst A k h, bcChartHom_fst A k h, Category.assoc]
   · rw [Category.assoc, chartRestr_snd A k h, bcChartHom_snd_assoc A k h, Category.assoc,
-      bcChart_aux_inv A k h, ← Category.assoc,
+      bcChart_aux_inv A k, ← Category.assoc,
       pullback.condition (f := projModelπ (A.W k)) (g := ovlToChart A k h),
       Category.assoc, ovlToChart_isoSpec_inv A k h]
 
@@ -716,6 +716,220 @@ noncomputable def sqBcInv (k : A.ι) {O' : S.Opens} (h : O' ≤ (A.U k).1) :
       sqComp2 (G := G) (O' := O') ≫ bcChartInv A k h :=
   pullback.lift_snd _ _ _
 
+/-- The base-changed model multiplication acts, on the first leg, as `mulModelHom` on the
+square projections. The `CartesianMonoidalCategory (Over Scheme)` instance is definitionally
+the generic `Over.cartesianMonoidalCategory`, so `convert … <;> rfl` bridges the reducibility
+gap (using `letI` on `modelGrpObj` to keep `μ[modelOver] = mulOver` transparent) — no diamond,
+no `μ`-re-resolution. -/
+@[reassoc] theorem bcChart_mul_fst (k : A.ι) {O' : S.Opens} (h : O' ≤ (A.U k).1) :
+    haveI := A.elliptic k
+    (μ[(bcChart A k h).asOver]).left ≫ pullback.fst (projModelπ (A.W k)) (ovlToChart A k h) =
+      pullback.lift
+        (pullback.fst (pullback.snd (projModelπ (A.W k)) (ovlToChart A k h))
+            (pullback.snd (projModelπ (A.W k)) (ovlToChart A k h)) ≫
+          pullback.fst (projModelπ (A.W k)) (ovlToChart A k h))
+        (pullback.snd (pullback.snd (projModelπ (A.W k)) (ovlToChart A k h))
+            (pullback.snd (projModelπ (A.W k)) (ovlToChart A k h)) ≫
+          pullback.fst (projModelπ (A.W k)) (ovlToChart A k h))
+        (by
+          simp only [Category.assoc]
+          rw [pullback.condition (f := projModelπ (A.W k)) (g := ovlToChart A k h),
+            ← Category.assoc, pullback.condition (f := pullback.snd (projModelπ (A.W k))
+              (ovlToChart A k h)) (g := pullback.snd (projModelπ (A.W k)) (ovlToChart A k h)),
+            Category.assoc]) ≫
+        mulModelHom (A.W k) := by
+  haveI := A.elliptic k
+  letI := modelGrpObj (A.W k)
+  convert Over.grpObjMkPullbackSnd_mul_left_fst (projModelπ (A.W k)) (ovlToChart A k h) using 2 <;>
+    rfl
+
+/-- The first square component commutes with the chart / overlap restrictions. -/
+@[reassoc] theorem sqComp1_chartRestr (k : A.ι) {O' : S.Opens} (h : O' ≤ (A.U k).1) :
+    sqComp1 (G := G) (O' := O') ≫ chartRestr A k h = sqChartRestr A k h ≫ sqLift1 A k := by
+  refine pullback.hom_ext ?_ ?_
+  · rw [Category.assoc, chartRestr_fst, sqComp1_fst, Category.assoc, sqLift1_fst,
+      sqChartRestr_fst_assoc]
+  · rw [Category.assoc, chartRestr_snd, ← Category.assoc, sqComp1_snd, Category.assoc,
+      sqLift1_snd, sqChartRestr_snd]
+
+/-- The second square component commutes with the chart / overlap restrictions. -/
+@[reassoc] theorem sqComp2_chartRestr (k : A.ι) {O' : S.Opens} (h : O' ≤ (A.U k).1) :
+    sqComp2 (G := G) (O' := O') ≫ chartRestr A k h = sqChartRestr A k h ≫ sqLift2 A k := by
+  refine pullback.hom_ext ?_ ?_
+  · rw [Category.assoc, chartRestr_fst, sqComp2_fst, Category.assoc, sqLift2_fst,
+      sqChartRestr_fst_assoc]
+  · rw [Category.assoc, chartRestr_snd, ← Category.assoc, sqComp2_snd, Category.assoc,
+      sqLift2_snd, sqChartRestr_snd]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(mul cprime)** The conjugate of the base-changed model multiplication through the
+chart-overlap isomorphism, read into the record, is the overlap-restricted multiplication
+piece. -/
+theorem bcChart_conjMul_fst (k : A.ι) {O' : S.Opens} (h : O' ≤ (A.U k).1) :
+    haveI := A.elliptic k
+    (sqBcInv A k h ≫ (μ[(bcChart A k h).asOver]).left ≫ bcChartHom A k h) ≫
+        pullback.fst G.π O'.ι =
+      sqChartRestr A k h ≫ mulPiece A k := by
+  haveI := A.elliptic k
+  have hPM : sqBcInv A k h ≫ pullback.lift
+        (pullback.fst (pullback.snd (projModelπ (A.W k)) (ovlToChart A k h))
+            (pullback.snd (projModelπ (A.W k)) (ovlToChart A k h)) ≫
+          pullback.fst (projModelπ (A.W k)) (ovlToChart A k h))
+        (pullback.snd (pullback.snd (projModelπ (A.W k)) (ovlToChart A k h))
+            (pullback.snd (projModelπ (A.W k)) (ovlToChart A k h)) ≫
+          pullback.fst (projModelπ (A.W k)) (ovlToChart A k h))
+        (by
+          simp only [Category.assoc]
+          rw [pullback.condition (f := projModelπ (A.W k)) (g := ovlToChart A k h),
+            ← Category.assoc, pullback.condition (f := pullback.snd (projModelπ (A.W k))
+              (ovlToChart A k h)) (g := pullback.snd (projModelπ (A.W k)) (ovlToChart A k h)),
+            Category.assoc]) =
+      sqChartRestr A k h ≫ pullback.lift (sqLift1 A k ≫ (A.e k).hom) (sqLift2 A k ≫ (A.e k).hom)
+        ((sqLift1_hom_π A k).trans (sqLift2_hom_π A k).symm) := by
+    refine pullback.hom_ext ?_ ?_
+    · simp only [Category.assoc, pullback.lift_fst, sqBcInv_fst_assoc, bcChartInv_fst,
+        sqComp1_chartRestr_assoc]
+    · simp only [Category.assoc, pullback.lift_snd, sqBcInv_snd_assoc, bcChartInv_fst,
+        sqComp2_chartRestr_assoc]
+  rw [mulPiece]
+  simp only [Category.assoc, bcChartHom_fst, bcChart_mul_fst_assoc]
+  rw [reassoc_of% hPM]
+
+@[reassoc] theorem bcChartInv_hom_id (k : A.ι) {O' : S.Opens} (h : O' ≤ (A.U k).1) :
+    haveI := A.elliptic k
+    bcChartInv A k h ≫ bcChartHom A k h = 𝟙 (pullback G.π O'.ι) :=
+  haveI := A.elliptic k
+  (bcChartSchemeIso A k h).inv_hom_id
+
+@[simp] theorem bcChart_asOver_hom (k : A.ι) {O' : S.Opens} (h : O' ≤ (A.U k).1) :
+    haveI := A.elliptic k
+    (bcChart A k h).asOver.hom = pullback.snd (projModelπ (A.W k)) (ovlToChart A k h) :=
+  rfl
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(overlap core, multiplication)** The per-chart multiplications agree on the overlap `O'`
+of two charts: `chart_pair_isMonHom`'s multiplicativity intertwines the two base-changed model
+multiplications, which `bcChart_conjMul_fst` identifies with the multiplication pieces. -/
+private theorem chart_pair_mul_agree (i j : A.ι) {O' : S.Opens}
+    (hi : O' ≤ (A.U i).1) (hj : O' ≤ (A.U j).1) :
+    sqChartRestr A i hi ≫ mulPiece A i = sqChartRestr A j hj ≫ mulPiece A j := by
+  haveI := A.elliptic i
+  haveI := A.elliptic j
+  haveI := chart_pair_isMonHom A i j hi hj
+  have hθl : (bcChartOverIso A i hi ≪≫ (bcChartOverIso A j hj).symm).hom.left =
+      bcChartHom A i hi ≫ bcChartInv A j hj := by
+    rw [Iso.trans_hom, Iso.symm_hom, Over.comp_left, bcChartOverIso_hom_left,
+      bcChartOverIso_inv_left]
+  have hmulL := congrArg CommaMorphism.left
+    (IsMonHom.mul_hom (bcChartOverIso A i hi ≪≫ (bcChartOverIso A j hj).symm).hom)
+  simp only [Over.comp_left] at hmulL
+  have hsq : sqBcInv A i hi ≫
+      ((bcChartOverIso A i hi ≪≫ (bcChartOverIso A j hj).symm).hom ⊗ₘ
+        (bcChartOverIso A i hi ≪≫ (bcChartOverIso A j hj).symm).hom).left = sqBcInv A j hj := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc]
+      erw [Over.tensorHom_left_fst]
+      simp only [bcChart_asOver_hom]
+      rw [← Category.assoc, sqBcInv_fst, hθl, Category.assoc, bcChartInv_hom_id_assoc, sqBcInv_fst]
+    · rw [Category.assoc]
+      erw [Over.tensorHom_left_snd]
+      simp only [bcChart_asOver_hom]
+      rw [← Category.assoc, sqBcInv_snd, hθl, Category.assoc, bcChartInv_hom_id_assoc, sqBcInv_snd]
+  have hθb : (bcChartOverIso A i hi ≪≫ (bcChartOverIso A j hj).symm).hom.left ≫
+      bcChartHom A j hj = bcChartHom A i hi := by
+    rw [hθl, Category.assoc, bcChartInv_hom_id, Category.comp_id]
+  have hconj : sqBcInv A i hi ≫ (μ[(bcChart A i hi).asOver]).left ≫ bcChartHom A i hi =
+      sqBcInv A j hj ≫ (μ[(bcChart A j hj).asOver]).left ≫ bcChartHom A j hj := by
+    rw [← hθb, reassoc_of% hmulL, reassoc_of% hsq]
+  have hfin := congrArg (· ≫ pullback.fst G.π O'.ι) hconj
+  exact (bcChart_conjMul_fst A i hi).symm.trans (hfin.trans (bcChart_conjMul_fst A j hj))
+
+/-- The per-chart multiplications agree on the overlaps of the atlas square cover. -/
+theorem mulPiece_agree (i j : A.ι) :
+    pullback.fst ((atlasSquareCover A).f i) ((atlasSquareCover A).f j) ≫ mulPiece A i =
+      pullback.snd ((atlasSquareCover A).f i) ((atlasSquareCover A).f j) ≫ mulPiece A j := by
+  simp only [atlasSquareCover_f]
+  have hi : (A.U i).1 ⊓ (A.U j).1 ≤ (A.U i).1 := inf_le_left
+  have hj : (A.U i).1 ⊓ (A.U j).1 ≤ (A.U j).1 := inf_le_right
+  have hbij : (pullback.fst (pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι)
+        (pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U j).1.ι) ≫
+        pullback.snd (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι) ≫ (A.U i).1.ι =
+      (pullback.snd (pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι)
+        (pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U j).1.ι) ≫
+        pullback.snd (pullback.fst G.π G.π ≫ G.π) (A.U j).1.ι) ≫ (A.U j).1.ι := by
+    rw [Category.assoc, Category.assoc,
+      ← pullback.condition (f := pullback.fst G.π G.π ≫ G.π) (g := (A.U i).1.ι),
+      ← pullback.condition (f := pullback.fst G.π G.π ≫ G.π) (g := (A.U j).1.ι)]
+    simp only [← Category.assoc]
+    rw [pullback.condition (f := pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι)
+        (g := pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U j).1.ι)]
+  set b := (isPullback_opens_inf (A.U i).1 (A.U j).1).lift _ _ hbij with hb
+  have hbfst : b ≫ S.homOfLE hi =
+      pullback.fst (pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι)
+        (pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U j).1.ι) ≫
+        pullback.snd (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι :=
+    (isPullback_opens_inf (A.U i).1 (A.U j).1).lift_fst _ _ _
+  have hbsnd : b ≫ S.homOfLE hj =
+      pullback.snd (pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι)
+        (pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U j).1.ι) ≫
+        pullback.snd (pullback.fst G.π G.π ≫ G.π) (A.U j).1.ι :=
+    (isPullback_opens_inf (A.U i).1 (A.U j).1).lift_snd _ _ _
+  have hab : (pullback.fst (pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι)
+        (pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U j).1.ι) ≫
+        pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι) ≫ (pullback.fst G.π G.π ≫ G.π) =
+      b ≫ ((A.U i).1 ⊓ (A.U j).1).ι := by
+    rw [Category.assoc, pullback.condition (f := pullback.fst G.π G.π ≫ G.π) (g := (A.U i).1.ι),
+      ← Category.assoc, ← hbfst, Category.assoc, Scheme.homOfLE_ι]
+  set w := pullback.lift _ b hab with hw
+  have hwfst : w ≫ pullback.fst (pullback.fst G.π G.π ≫ G.π) ((A.U i).1 ⊓ (A.U j).1).ι =
+      pullback.fst (pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι)
+        (pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U j).1.ι) ≫
+        pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι :=
+    pullback.lift_fst _ _ _
+  have hwsnd : w ≫ pullback.snd (pullback.fst G.π G.π ≫ G.π) ((A.U i).1 ⊓ (A.U j).1).ι = b :=
+    pullback.lift_snd _ _ _
+  have hwi : w ≫ sqChartRestr A i hi =
+      pullback.fst (pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι)
+        (pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U j).1.ι) := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, sqChartRestr_fst, hwfst]
+    · rw [Category.assoc, sqChartRestr_snd, ← Category.assoc, hwsnd, hbfst]
+  have hwj : w ≫ sqChartRestr A j hj =
+      pullback.snd (pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι)
+        (pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U j).1.ι) := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, sqChartRestr_fst, hwfst,
+        pullback.condition (f := pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι)
+          (g := pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U j).1.ι)]
+    · rw [Category.assoc, sqChartRestr_snd, ← Category.assoc, hwsnd, hbsnd]
+  exact (congrArg (· ≫ mulPiece A i) hwi.symm).trans <|
+    (Category.assoc w (sqChartRestr A i hi) (mulPiece A i)).trans <|
+    (congrArg (w ≫ ·) (chart_pair_mul_agree A i j hi hj)).trans <|
+    (Category.assoc w (sqChartRestr A j hj) (mulPiece A j)).symm.trans <|
+    congrArg (· ≫ mulPiece A j) hwj
+
+/-- Multiplication glued from the per-chart model multiplications. -/
+noncomputable def mulHomOf : pullback G.π G.π ⟶ G.E :=
+  (atlasSquareCover A).glueMorphisms (mulPiece A) (mulPiece_agree A)
+
+@[reassoc]
+theorem mulHomOf_piece (i : A.ι) :
+    (atlasSquareCover A).f i ≫ mulHomOf A = mulPiece A i :=
+  (atlasSquareCover A).ι_glueMorphisms _ _ i
+
+/-- Each multiplication piece is a morphism over `S`. -/
+theorem mulPiece_π (i : A.ι) :
+    mulPiece A i ≫ G.π =
+      pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι ≫ (pullback.fst G.π G.π ≫ G.π) := by
+  haveI := A.elliptic i
+  rw [mulPiece]
+  simp only [Category.assoc]
+  rw [pullback.condition (f := G.π) (g := (A.U i).1.ι), bcChart_aux_inv_assoc,
+    mulModelHom_π_assoc, ← Category.assoc, pullback.lift_fst]
+  simp only [Category.assoc]
+  rw [reassoc_of% (A.compat_π i), Iso.hom_inv_id_assoc, sqLift1_snd_assoc]
+  exact (pullback.condition (f := pullback.fst G.π G.π ≫ G.π) (g := (A.U i).1.ι)).symm
+
 end Negation
 
 /-- **(T-W7.1)** Negation on a geometric elliptic curve, glued from the per-chart model
@@ -742,13 +956,17 @@ theorem EllipticCurveGeom.negHom_zero : G.zero ≫ G.negHom = G.zero := by
 of `E ×_S E` induced by a bundled atlas from the per-chart base changes of the model
 multiplication; overlap agreement = comparison theorem + variable-change equivariance. -/
 noncomputable def EllipticCurveGeom.mulHom : pullback G.π G.π ⟶ G.E :=
-  sorry
+  mulHomOf G.atlas
 
 /-- **(T-W7.2-π)** Multiplication is a morphism over `S`. -/
 @[reassoc]
 theorem EllipticCurveGeom.mulHom_π :
     G.mulHom ≫ G.π = pullback.fst G.π G.π ≫ G.π := by
-  sorry
+  show mulHomOf G.atlas ≫ G.π = pullback.fst G.π G.π ≫ G.π
+  refine (atlasSquareCover G.atlas).hom_ext _ _ (fun i => ?_)
+  exact (mulHomOf_piece_assoc G.atlas i G.π).trans
+    ((mulPiece_π G.atlas i).trans
+      (congrArg (· ≫ (pullback.fst G.π G.π ≫ G.π)) (atlasSquareCover_f G.atlas i)).symm)
 
 /-- **(T-W7.3 → T-W7.6, the packaged group object)** The group-object structure on
 `E/S` in `Over S`: multiplication and inverse glued above, unit the zero section; every
