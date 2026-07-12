@@ -690,6 +690,13 @@ algebra. It does not assert that the raw affine Cech terms are finite or project
 proper-perfect replacement of the complex is still the geometric input needed before that
 algebra can yield local freeness and base change for the pole modules.
 
+The finite-product part of termwise Cech flatness is also complete.
+`Module.Flat.pi_of_finite` proves that finite dependent products of flat modules are flat,
+and `Scheme.Modules.baseCechComplex_X_flat_of_factors` applies this through the existing
+concrete product isomorphism in every Cech degree. It remains to prove that the section
+module of the invertible pole sheaf on each affine intersection is flat over the affine
+base; no finiteness or projectivity of the raw Cech terms is inferred.
+
 The elementary Mayer--Vietoris seam is now complete in both directions.
 `HPrimeZeroAddEquivSections` identifies `H'⁰(U,F)` with sections naturally in `U`, while
 `HPrimeAddEquivHOfIsTerminal` identifies `H'ⁿ(T,F)` with genuine `Sheaf.H F n` when `T`
