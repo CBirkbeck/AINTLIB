@@ -18575,3 +18575,67 @@ T-W7a follow-through (file dev tickets if the general case is ever needed). The 
 in the closing commit — those trails retired during the K-series windows.
 
 **CHARTER-Y1-CLOSER-2 is COMPLETE.** Sentinel cleared on session end.
+
+## v10.154 — NEW-Y1 CHARTER-YFULL opening: the four-gate audit vs the POST-Y1 state (verdict + leaf plan)
+
+**Audited in code** (tracer = `getUsedConstantsAsSet`-BFS, per the v10.152 doctrine — per-module
+`#print axioms` caches can read stale; every claim below is from the tracer or a fresh audit file).
+
+**GATE 1 — ETALE: OPEN (post-Y1), plus a cheap unconditional sweep.** `torsionπ_etale'` +
+`torsionπ_isFinite_of_nIsInvertible` are at the clean triple (my N7 ladder). The YFullRoute
+presentation layer still consumes the UNPRIMED `torsionπ_isFinite`/`torsionπ_etale` — its exact
+sorried-leaf set is `{mulByHom_flat, mulByHom_locallyQuasiFinite}` (the retired general-`N` boxes)
+at three sites: `isAffineHom_fullLevelSpaceStruct`:162, `isFinite_fullLevelSpaceStruct`:179,
+`etale_fullLevelSpaceStruct`:218. **[YF-SWAP] leaf**: thread `NIsInvertible X.base N` (available at
+every consumer via `nIsInvertible_over_spec` + the stream's standing `hinv`) and swap primed —
+the whole presentation layer goes box-free. `[YF-EQV-N]` additionally carries
+`fullLevel_divisor_iff_naive_gen` (T-D8-bridge, D-stream box) + the two `gammaFull*Problem`
+def-sorries — NOT this charter's leaves; boarded for visibility.
+
+**GATE 2 — QSM: fable-FP's lane, hypothesis-wire.** `Smooth.of_precomp_etale_of_surjective`
+(ForMathlib/SmoothDescent.lean:316) is the 02KM sorry, mid-close in CHARTER-FP. My [YF-GEOM]
+consumption stays wired through the named lemma — nothing to do here but not block.
+
+**GATE 3 — GEOM: the engine input is CLEAN.**
+`RouteA.exists_ellipticCurveGeom_quotient_of_globalModel` audits at
+`{propext, Classical.choice, Quot.sound}` — FP4's B3 is real. The [YF-GEOM] leaf
+(`exists_representing_smooth_affine`:769) = the ENGINE-APPLICATION seam (FP4's B5: bootstrap
+object + T-E15a/T-E14 models + THIS FILE's [YF-ETALE] at the bootstrap + QSM). **SEAM (boarded per
+charter): I deliver [YF-ETALE]; FP4's B5 consumes it** — same engine/curve split as Y1. Not my leaf.
+
+**GATE 4 — RIGID/NOETH: P3B3-gated, park.** The linchpin `aut_trivial_of_fullLevel` carries 12
+sorried leaves — the ENTIRE `endDeg`/`endTrace` degree-theory interface (EndomorphismDegree.lean
+def-sorries) + `torsionFixed_of_fixesLevel` — i.e. CHARTER-P3B3 milestone 2 in full, not "one gate
+from done". My [YF-NOETH] de-noetherianization stays parked behind it. Cross-lane; consume-not-duplicate.
+
+**CLOPEN — THE VERDICT (the charter's one open question): route γ, NEW — trivialization-free,
+rank-free, T-D8-free.** The v10.149 route-β pin (étale-local trivialization `E[N] ≅ const (ℤ/N)²`,
+flagged UNSTAFFED) is NO LONGER NEEDED. Post-Y1, `E[N] ×_S E[N]`-world is finite étale
+unconditionally, and mathlib's `Morphisms/FlatRank.lean` provides `Scheme.Hom.finrank` +
+`isLocallyConstant_finrank` + `isIso_iff_finrank_eq` + `one_le_finrank_iff_surjective` +
+`finrank_pullback_*`. Route γ:
+- **[YF-ISOLOC]** (ForMathlib-flavored core): for a `T`-morphism `ψ : X ⟶ Y` with `X, Y` finite
+  étale over `T`: ψ is finite étale (cancellation: `Etale.of_comp` + `HasOfPostcompProperty
+  @IsFinite @IsSeparated` — both in mathlib, verified), `finrank ψ` is locally constant, and
+  `U_iso := T ∖ π_Y(support(finrank ψ ≠ 1))` is CLOPEN with `t ∈ U_iso ↔ IsIso ψ_t`
+  (π_Y finite = closed map, étale = open map; `finrank_pullback` transports fibrewise).
+- **[YF-TAUT]** the tautological pair over `T := E[N] ×_S E[N]` and its section-family
+  `φ : ∐_{(a,b) ∈ (ℤ/N)²} T ⟶ E[N]_T` (component `(a,b) ↦ [a]P + [b]Q`-classifier).
+- **[YF-CLOPEN-⊆]** `range(levelSpaceΓι) ⊆ U_iso`: the tautological `IsFullLevel` (from
+  `levelSpaceΓ_spec` at `h = 𝟙`) gives the divisor-equality; at geometric points the étale
+  (reduced) torsion forces the `N²` sections distinct AND exhaustive (surjectivity is
+  divisor-support, NO `N²`-count, NO BB-DEG); étale + geometrically-bijective ⟹ finrank ≡ 1 ⟹
+  `φ` iso over `levelSpaceΓ` ⟹ lands in `U_iso`.
+- **[YF-CLOPEN-⊇]** the mono-sandwich: over `U_iso`, `φ` iso ⟹ the `N²` sections are disjoint
+  clopens covering `E[N]_{U_iso}` ⟹ section-ideals pairwise comaximal ⟹ `sectionsDivisor`-ideal
+  `= ⋂ = ` union-ideal `= torsionIdeal` ⟹ `IsFullLevel` over `U_iso` ⟹ `levelSpaceΓ_spec.mpr`
+  produces `s : U_iso ⟶ levelSpaceΓ` with `s ≫ ι = incl` ⟹ `ι` mono + open range + section =
+  **open immersion**. (Heaviest sub-leaf: the comaximal-sections divisor computation — audit the
+  D-stream `RelEffCartierDiv`/Incidence API before building; the incidence file is 2.7k lines of
+  adjacent machinery.)
+- Route α (Weil) stays de-coupled at CHARTER-WEIL per v10.153 — γ does not wait on it.
+
+**EXECUTION ORDER**: [YF-SWAP] (cheap, unconditional wins, unblocks honest axiom-reads on the
+whole file) → `/develop --decompose` the γ-ladder vs KM 3.6.0/3.7.1 + [Loe] 3.8.2 (verbatim
+quotes, per-leaf tickets) → [YF-ISOLOC] → [YF-TAUT] → [YF-CLOPEN-⊆/⊇] → [YF-ETALE] (swap-complete,
+consumes CLOPEN) → board the FP4-B5 seam handoff. (NEW-Y1, CHARTER-YFULL session 1)
