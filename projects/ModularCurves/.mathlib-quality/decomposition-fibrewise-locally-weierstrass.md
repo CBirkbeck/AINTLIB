@@ -388,6 +388,15 @@ monicity, degree one by `cechAugmentedShortComplex_exact`, and every later degre
 assert that its terms are cohomologically acyclic or compare its global-section complex
 with genuine derived global sections. Those are the next acyclic-cover dependencies.
 
+Finite-product compatibility of genuine cohomology is now proved in
+`ForMathlib/SheafCohomologyFiniteProducts.lean`. `CategoryTheory.Sheaf.H.addEquivPi`
+uses additivity of `Sheaf.H.functorH` and the categorical finite-biproduct API, and
+`cechTerm_subsingleton_H_of_factors` transfers factorwise vanishing to a finite Cech
+term. This closes the product step but intentionally does not claim that open-immersion
+pushforward is generically exact or cohomologically transparent. Stacks 20.11.5--6
+identifies the source-faithful remaining argument as the Cech-to-derived spectral sequence
+(or its double-complex proof), degenerating under vanishing on all finite intersections.
+
 The generic two-chart degree-one calculation is now complete in
 `ForMathlib/TwoOpenHOne.lean`. The theorem
 `TopCat.Sheaf.subsingleton_H_one_of_two_open_cover` proves global `H¹` vanishing from
