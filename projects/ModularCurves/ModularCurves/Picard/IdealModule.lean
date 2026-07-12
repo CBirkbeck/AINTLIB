@@ -161,4 +161,72 @@ noncomputable def idealModule : C.Modules where
     exact Presieve.isSheaf_iso _ (idealPresheafForgetIso J).symm
       (idealSubfunctor_isSheaf J)
 
+section BasisLocal
+
+variable {X : Scheme.{u}}
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Basis variant of `sheafificationW_of_bijective_on_cover`: componentwise bijectivity
+on a basis of opens makes a presheaf map a `sheafificationW`-member. -/
+theorem sheafificationW_of_bijective_on_basis {A B : X.PresheafOfModules}
+    (g : A ⟶ B) (Bs : Set X.Opens)
+    (hBs : ∀ (x : ↥X) (U : X.Opens), x ∈ U → ∃ W ∈ Bs, x ∈ W ∧ W ≤ U)
+    (hbij : ∀ W ∈ Bs, Function.Bijective (g.app (Opposite.op W))) :
+    PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj) g := by
+  have hsieve : ∀ (V : (TopologicalSpace.Opens ↥X)ᵒᵖ) (S : Sieve V.unop),
+      (∀ W ∈ Bs, ∀ (hWV : W ≤ V.unop), S (homOfLE hWV)) →
+      S ∈ Opens.grothendieckTopology ↥X V.unop := by
+    intro V S hS
+    rw [Opens.mem_grothendieckTopology]
+    intro x hx
+    obtain ⟨W, hWB, hxW, hWV⟩ := hBs x V.unop hx
+    exact ⟨W, homOfLE hWV, hS W hWB hWV, hxW⟩
+  haveI hinj : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥X)
+      ((PresheafOfModules.toPresheaf _).map g) := by
+    constructor
+    intro V x y hxy
+    refine hsieve V _ (fun W hWB hWV => ?_)
+    refine (hbij W hWB).injective ?_
+    have hnx := PresheafOfModules.naturality_apply g (homOfLE hWV).op x
+    have hny := PresheafOfModules.naturality_apply g (homOfLE hWV).op y
+    calc g.app (Opposite.op W) (A.map (homOfLE hWV).op x)
+        = B.map (homOfLE hWV).op (g.app V x) := hnx
+      _ = B.map (homOfLE hWV).op (g.app V y) := by
+          rw [show g.app V x = g.app V y from hxy]
+      _ = g.app (Opposite.op W) (A.map (homOfLE hWV).op y) := hny.symm
+  haveI hsurj : Presheaf.IsLocallySurjective (Opens.grothendieckTopology ↥X)
+      ((PresheafOfModules.toPresheaf _).map g) := by
+    constructor
+    intro V s
+    refine hsieve (Opposite.op V) _ (fun W hWB hWV => ?_)
+    obtain ⟨t, ht⟩ := (hbij W hWB).surjective (B.map (homOfLE hWV).op s)
+    exact ⟨t, ht⟩
+  exact (PresheafOfModules.sheafificationW_iff_isLocallyBijective _ g).mpr ⟨hinj, hsurj⟩
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- A morphism of `𝒪ₓ`-modules whose presheaf components are bijective on a basis of
+opens is an isomorphism (sheafification inverts the locally bijective map; conjugate by
+the counit). -/
+theorem isIso_of_bijective_app_on_basis {A B : X.Modules} (g : A ⟶ B)
+    (Bs : Set X.Opens)
+    (hBs : ∀ (x : ↥X) (U : X.Opens), x ∈ U → ∃ W ∈ Bs, x ∈ W ∧ W ≤ U)
+    (hbij : ∀ W ∈ Bs, Function.Bijective (g.val.app (Opposite.op W))) :
+    IsIso g := by
+  have hw := sheafificationW_of_bijective_on_basis g.val Bs hBs hbij
+  rw [PresheafOfModules.sheafificationW_iff] at hw
+  have hnat := (PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)).counit.naturality g
+  have hg : g = (sheafifyValIso A).inv ≫
+      (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).map g.val ≫
+      (sheafifyValIso B).hom := by
+    rw [Iso.eq_inv_comp]
+    exact hnat.symm
+  rw [hg]
+  haveI : IsIso ((PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).map g.val) := hw
+  infer_instance
+
+end BasisLocal
+
 end AlgebraicGeometry.Scheme.Modules
