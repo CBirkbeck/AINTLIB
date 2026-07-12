@@ -1,1 +1,1 @@
-FOCUS: [HG-C1c-1d-coassoc] R1 tripleГL_comp_assoc DONE (axiom-clean). Next R3-assoc: assocScheme >> leftMulSchemeL = rightMulScheme (group assoc via mulOver_assoc), then h_coassoc + Bialgebra.ofAlgHom.
+FOCUS: [HG-C1c-1d-coassoc] instBialgebra DONE modulo R3-assoc. Sole remaining sorry: assocScheme_leftMulSchemeL (chart group assoc). Route: cancel_mono groupOpen.i then G.i => E.Point add_assoc (or Hom.commGroup mul_assoc). Then HopfAlgebra (antipode from invOver laws).

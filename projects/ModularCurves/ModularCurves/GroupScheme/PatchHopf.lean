@@ -1354,6 +1354,116 @@ theorem tripleΓL_comp_assoc :
       Algebra.TensorProduct.map_tmul, map_one, hsqsnd, Algebra.TensorProduct.one_def,
       Algebra.TensorProduct.assoc_tmul]
 
+/-! #### R3: chart-level associativity and the final coassociativity -/
+
+/-- **R3-assoc: chart-level group associativity.** The associator carries the left-associated
+triple multiplication `((g₁·g₂)·g₃)` to the right-associated one `(g₁·(g₂·g₃))`. -/
+theorem assocScheme_leftMulSchemeL :
+    P.assocScheme ≫ P.leftMulSchemeL = P.rightMulScheme := by
+  sorry
+
+/-- **Coassociativity, `CommRingCat` form**: `assoc ∘ (Δ' ⊗ id) ∘ Δ' = (id ⊗ Δ') ∘ Δ'`,
+combining `Δ₂L'` (`comulTop_comp_map_comulTop_id`), `R1` (`tripleΓL_comp_assoc`) and `R3-assoc`
+(`assocScheme_leftMulSchemeL`) on the left, `Δ₂R` (`comulTop_comp_map_id_comulTop`) on the
+right. -/
+theorem comulTop_coassoc :
+    P.comulTop ≫ CommRingCat.ofHom (Algebra.TensorProduct.map P.comulAlgTop
+          (AlgHom.id P.baseRingTop P.groupRingTop)).toRingHom
+        ≫ CommRingCat.ofHom (Algebra.TensorProduct.assoc P.baseRingTop P.baseRingTop
+          P.baseRingTop P.groupRingTop P.groupRingTop P.groupRingTop).toAlgHom.toRingHom
+      = P.comulTop ≫ CommRingCat.ofHom (Algebra.TensorProduct.map
+          (AlgHom.id P.baseRingTop P.groupRingTop) P.comulAlgTop).toRingHom := by
+  have hcomp : P.leftMulSchemeL.appTop ≫ P.assocScheme.appTop = P.rightMulScheme.appTop := by
+    rw [← Scheme.Hom.comp_appTop, assocScheme_leftMulSchemeL]
+  rw [reassoc_of% comulTop_comp_map_comulTop_id, tripleΓL_comp_assoc,
+    reassoc_of% hcomp, comulTop_comp_map_id_comulTop]
+
+/-- **Coassociativity, `AlgHom` form** — exactly the `h_coassoc` field of `Bialgebra.ofAlgHom`. -/
+theorem comulAlgTop_coassoc :
+    (Algebra.TensorProduct.assoc P.baseRingTop P.baseRingTop P.baseRingTop
+          P.groupRingTop P.groupRingTop P.groupRingTop).toAlgHom.comp
+        ((Algebra.TensorProduct.map P.comulAlgTop
+          (AlgHom.id P.baseRingTop P.groupRingTop)).comp P.comulAlgTop)
+      = (Algebra.TensorProduct.map (AlgHom.id P.baseRingTop P.groupRingTop)
+          P.comulAlgTop).comp P.comulAlgTop := by
+  refine AlgHom.ext fun x => ?_
+  exact congrArg (fun m : P.groupRingTop ⟶ _ => m.hom x) P.comulTop_coassoc
+
+/-! #### The counit laws in `lid`/`rid` form (for `Bialgebra.ofAlgHom`) -/
+
+/-- `ε'`-collapse via `lid`: `lid ∘ (ε' ⊗ id) = counitLiftAlgTop`. -/
+theorem lid_comp_map_counit :
+    (Algebra.TensorProduct.lid P.baseRingTop P.groupRingTop).toAlgHom.comp
+        (Algebra.TensorProduct.map P.counitAlgTop (AlgHom.id P.baseRingTop P.groupRingTop))
+      = P.counitLiftAlgTop := by
+  refine AlgHom.ext fun x => ?_
+  induction x using TensorProduct.induction_on with
+  | zero => simp
+  | tmul a b =>
+    rw [AlgHom.comp_apply, Algebra.TensorProduct.map_tmul, AlgHom.coe_id, id_eq]
+    show (Algebra.TensorProduct.lid P.baseRingTop P.groupRingTop)
+        (counitAlgTop G P a ⊗ₜ[P.baseRingTop] b)
+      = counitLiftAlgTop G P (a ⊗ₜ[P.baseRingTop] b)
+    rw [Algebra.TensorProduct.lid_tmul, counitLiftAlgTop, Algebra.TensorProduct.lift_tmul,
+      AlgHom.comp_apply, Algebra.ofId_apply, AlgHom.coe_id, id_eq, Algebra.smul_def]
+  | add x y hx hy => rw [map_add, map_add, hx, hy]
+
+/-- **`h_rTensor`**: `(ε' ⊗ id) ∘ Δ' = lid.symm` — the left counit law in the shape
+`Bialgebra.ofAlgHom` consumes. -/
+theorem map_counit_id_comp_comul :
+    (Algebra.TensorProduct.map P.counitAlgTop
+          (AlgHom.id P.baseRingTop P.groupRingTop)).comp P.comulAlgTop
+      = (Algebra.TensorProduct.lid P.baseRingTop P.groupRingTop).symm := by
+  have key : (Algebra.TensorProduct.lid P.baseRingTop P.groupRingTop).toAlgHom.comp
+      ((Algebra.TensorProduct.map P.counitAlgTop
+        (AlgHom.id P.baseRingTop P.groupRingTop)).comp P.comulAlgTop)
+      = AlgHom.id P.baseRingTop P.groupRingTop := by
+    rw [← AlgHom.comp_assoc, lid_comp_map_counit, counitLiftAlgTop_comp_comulAlgTop]
+  refine AlgHom.ext fun a => ?_
+  have hkey := AlgHom.congr_fun key a
+  rw [AlgHom.comp_apply, AlgHom.id_apply] at hkey
+  simpa only [AlgEquiv.coe_toAlgHom, AlgEquiv.eq_symm_apply] using hkey
+
+/-- `ε'`-collapse via `rid`: `rid ∘ (id ⊗ ε') = counitLiftAlgTop'`. -/
+theorem rid_comp_map_counit :
+    (Algebra.TensorProduct.rid P.baseRingTop P.baseRingTop P.groupRingTop).toAlgHom.comp
+        (Algebra.TensorProduct.map (AlgHom.id P.baseRingTop P.groupRingTop) P.counitAlgTop)
+      = P.counitLiftAlgTop' := by
+  refine AlgHom.ext fun x => ?_
+  induction x using TensorProduct.induction_on with
+  | zero => simp
+  | tmul a b =>
+    rw [AlgHom.comp_apply, Algebra.TensorProduct.map_tmul, AlgHom.coe_id, id_eq]
+    show (Algebra.TensorProduct.rid P.baseRingTop P.baseRingTop P.groupRingTop)
+        (a ⊗ₜ[P.baseRingTop] counitAlgTop G P b)
+      = counitLiftAlgTop' G P (a ⊗ₜ[P.baseRingTop] b)
+    rw [Algebra.TensorProduct.rid_tmul, counitLiftAlgTop', Algebra.TensorProduct.lift_tmul,
+      AlgHom.comp_apply, Algebra.ofId_apply, AlgHom.coe_id, id_eq, Algebra.smul_def,
+      _root_.mul_comm]
+  | add x y hx hy => rw [map_add, map_add, hx, hy]
+
+/-- **`h_lTensor`**: `(id ⊗ ε') ∘ Δ' = rid.symm`. -/
+theorem map_id_counit_comp_comul :
+    (Algebra.TensorProduct.map (AlgHom.id P.baseRingTop P.groupRingTop)
+          P.counitAlgTop).comp P.comulAlgTop
+      = (Algebra.TensorProduct.rid P.baseRingTop P.baseRingTop P.groupRingTop).symm := by
+  have key : (Algebra.TensorProduct.rid P.baseRingTop P.baseRingTop P.groupRingTop).toAlgHom.comp
+      ((Algebra.TensorProduct.map (AlgHom.id P.baseRingTop P.groupRingTop)
+        P.counitAlgTop).comp P.comulAlgTop)
+      = AlgHom.id P.baseRingTop P.groupRingTop := by
+    rw [← AlgHom.comp_assoc, rid_comp_map_counit, counitLiftAlgTop'_comp_comulAlgTop]
+  refine AlgHom.ext fun a => ?_
+  have hkey := AlgHom.congr_fun key a
+  rw [AlgHom.comp_apply, AlgHom.id_apply] at hkey
+  simpa only [AlgEquiv.coe_toAlgHom, AlgEquiv.eq_symm_apply] using hkey
+
+/-- **The chart Hopf-algebra bialgebra structure** `[Bialgebra R' A']`, from the ⊤-level
+comultiplication and counit, with coassociativity `comulAlgTop_coassoc` and the two counit
+laws `map_counit_id_comp_comul` / `map_id_counit_comp_comul`. -/
+noncomputable instance instBialgebra : Bialgebra P.baseRingTop P.groupRingTop :=
+  Bialgebra.ofAlgHom P.comulAlgTop P.counitAlgTop
+    P.comulAlgTop_coassoc P.map_counit_id_comp_comul P.map_id_counit_comp_comul
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
