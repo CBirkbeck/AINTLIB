@@ -33,12 +33,16 @@ The argument splits into two mathematically distinct pieces:
    reduces this to two injectivities: `u ⊗ (R/I)` injective (this is `ū_I`, the hypothesis) and
    `I ⊗ M → R ⊗ M` injective (this is exactly flatness of `M`).  No local criterion is used here.
 
-2. **`fibre_injective_of_maximal` (the local criterion of flatness — the one hard step, `sorry`).**
+2. **`fibre_injective_of_maximal` (the local criterion of flatness — the one hard step).**
    *`ū_𝔪` injective ⟹ `ū_I` injective for every f.g. ideal `I`.*  This is the genuine
-   local-criterion-of-flatness content (Stacks 00MK, Matsumura *Commutative Ring Theory* Thm 22.3):
-   the finiteness of `N` over the Noetherian local ring `R` feeds the Artin–Rees lemma
-   (`Ideal.exists_pow_inf_eq_pow_smul`) / Krull-intersection bootstrap that propagates injectivity
-   from the special fibre `I = 𝔪` to all finitely generated `I`.
+   local-criterion-of-flatness content (Stacks 00MK, Matsumura *Commutative Ring Theory* Thm 22.3).
+   The engine is the residue-field core `injective_of_lTensor_residueField_injective`: over a local
+   ring, `M` flat and `N` finite, injectivity of the residue-field fibre `k ⊗ u` forces `u` itself to
+   be injective (minimal generators from a residue-field basis, made `R`-independent by
+   `IsLocalRing.linearIndependent_of_flat`).  For a proper f.g. `I`, base-change to the local ring
+   `R ⧸ I` turns `ū_I` into `u' = (R ⧸ I) ⊗ u`, whose residue-field fibre is identified with `ū_𝔪`
+   by two `cancelBaseChange` naturality steps; the core then gives `u'` injective.  (No Artin–Rees or
+   Krull-intersection bootstrap is needed.)
 
 The main theorem `coker_of_flat_of_fibre_injective` is the composition `1 ∘ 2`.
 
@@ -47,7 +51,7 @@ The main theorem `coker_of_flat_of_fibre_injective` is the composition `1 ∘ 2`
 Stacks 00ME is stated for a local homomorphism `R → S` of Noetherian local rings with `N`, `M`
 finite `S`-modules.  Here we prove the **`R`-substrate**: `N` is finite over `R` itself and `M` is
 merely `R`-flat (not necessarily finite).  This is the form needed to bridge scalars to the
-`S`-algebra version; the finiteness that the Artin–Rees bootstrap actually consumes is that of `N`.
+`S`-algebra version; the finiteness that the residue-field core actually consumes is that of `N`.
 -/
 import Mathlib
 
@@ -91,22 +95,158 @@ theorem coker_flat_of_fibre_injective_forall (u : N →ₗ[R] M)
   · -- `I ⊗ M → R ⊗ M` is injective: this is exactly flatness of `M`.
     exact Module.Flat.iff_lTensor_injective'.mp inferInstance I
 
+omit [IsNoetherianRing R] in
+/-- **Local criterion of flatness — the residue-field core.**
+
+Over a Noetherian local ring `R` with `N` finite and `M` flat, if the residue-field fibre
+`k ⊗ u : k ⊗ N → k ⊗ M` (with `k = IsLocalRing.ResidueField R`) is injective, then `u` itself is
+injective.
+
+Proof: lift a `k`-basis `w` of `k ⊗ N` to a family `v` in `N` (minimal generators), exactly as in
+`Module.free_of_flat_of_isLocalRing`.  Injectivity of the fibre makes
+`(baseChange k u) ∘ w = k ⊗ (u ∘ v)` linearly independent over `k`, so by
+`IsLocalRing.linearIndependent_of_flat` (this is where flatness of `M` enters) the family `u ∘ v` is
+linearly independent over `R`.  As `v` generates `N` (`IsLocalRing.span_eq_top_of_tmul_eq_basis`),
+`Finsupp.linearCombination R v` is surjective, while `Finsupp.linearCombination R (u ∘ v) =
+u ∘ₗ Finsupp.linearCombination R v` is injective; together these force `u` injective. -/
+private theorem injective_of_lTensor_residueField_injective (u : N →ₗ[R] M)
+    (hbar : Function.Injective (LinearMap.lTensor (IsLocalRing.ResidueField R) u)) :
+    Function.Injective u := by
+  classical
+  -- A `k`-basis of `k ⊗ N`, lifted (via surjectivity of `n ↦ 1 ⊗ n`) to a family `v` in `N`.
+  let w := Module.Free.chooseBasis (IsLocalRing.ResidueField R)
+    (IsLocalRing.ResidueField R ⊗[R] N)
+  obtain ⟨v, hv⟩ := (TensorProduct.mk_surjective R N (IsLocalRing.ResidueField R)
+    Ideal.Quotient.mk_surjective).comp_left w
+  -- `hbar` says `k ⊗ u`, equivalently `baseChange k u`, is injective.
+  have hbar' : Function.Injective ⇑(LinearMap.baseChange (IsLocalRing.ResidueField R) u) := by
+    rw [LinearMap.baseChange_eq_ltensor]; exact hbar
+  -- Hence `k ⊗ (u ∘ v) = (baseChange k u) ∘ w` is `k`-linearly independent…
+  have hli : LinearIndependent (IsLocalRing.ResidueField R)
+      (TensorProduct.mk R (IsLocalRing.ResidueField R) M 1 ∘ (⇑u ∘ v)) := by
+    have key : (TensorProduct.mk R (IsLocalRing.ResidueField R) M 1) ∘ (⇑u ∘ v)
+        = ⇑(LinearMap.baseChange (IsLocalRing.ResidueField R) u) ∘ ⇑w := by
+      rw [← hv]; ext i; simp
+    rw [key]
+    exact w.linearIndependent.map' _ (LinearMap.ker_eq_bot.mpr hbar')
+  -- …so `u ∘ v` is `R`-linearly independent (flatness of `M`).
+  have hui : LinearIndependent R (⇑u ∘ v) := IsLocalRing.linearIndependent_of_flat _ hli
+  -- `v` generates `N`, so `Finsupp.linearCombination R v` is surjective.
+  have hspan : Submodule.span R (Set.range v) = ⊤ :=
+    IsLocalRing.span_eq_top_of_tmul_eq_basis v w (congr_fun hv)
+  have hsurj : Function.Surjective (Finsupp.linearCombination R v) :=
+    LinearMap.range_eq_top.mp (by rw [Finsupp.range_linearCombination, hspan])
+  -- `Finsupp.linearCombination R (u ∘ v) = u ∘ₗ Finsupp.linearCombination R v` is injective, and its
+  -- second factor is surjective; therefore `u` is injective.
+  have hui_inj : Function.Injective ⇑(u ∘ₗ Finsupp.linearCombination R v) := by
+    rw [← Finsupp.linearCombination_linear_comp R u]; exact hui
+  intro x y hxy
+  obtain ⟨a, rfl⟩ := hsurj x
+  obtain ⟨b, rfl⟩ := hsurj y
+  exact congrArg (Finsupp.linearCombination R v) (hui_inj hxy)
+
+/-- Injectivity transfer across a commuting square `p ∘ eN = eM ∘ q` with `eN` injective:
+if the top map `p` is injective then so is the bottom map `q`. -/
+private theorem injective_of_comm_sq {A B C D : Type*} {p : B → D} {q : A → C}
+    {eN : A → B} {eM : C → D} (heq : p ∘ eN = eM ∘ q) (heN : Function.Injective eN)
+    (hp : Function.Injective p) : Function.Injective q :=
+  (heq ▸ hp.comp heN).of_comp
+
+/-- Injectivity transfer across a commuting square `p ∘ eN = eM ∘ q` with `eN` surjective and `eM`
+injective: if the bottom map `q` is injective then so is the top map `p`. -/
+private theorem injective_of_comm_sq' {A B C D : Type*} {p : B → D} {q : A → C}
+    {eN : A → B} {eM : C → D} (heq : p ∘ eN = eM ∘ q) (heN : Function.Surjective eN)
+    (heM : Function.Injective eM) (hq : Function.Injective q) : Function.Injective p := by
+  have h1 : Function.Injective (p ∘ eN) := by rw [heq]; exact heM.comp hq
+  intro a b hab
+  obtain ⟨x, rfl⟩ := heN a
+  obtain ⟨y, rfl⟩ := heN b
+  exact congrArg eN (h1 hab)
+
+open TensorProduct.AlgebraTensorModule in
 /-- **The local criterion of flatness (Stacks 00MK / Matsumura Thm 22.3) — THE hard step.**
 
 Over a Noetherian local ring `R`, with `N` finite and `M` flat, injectivity of the special-fibre
 reduction `ū_𝔪 : N/𝔪N → M/𝔪M` propagates to injectivity of `ū_I : N/IN → M/IM` for **every**
 finitely generated ideal `I`.
 
-MISSING FACT (the single sorry): this is the local-criterion-of-flatness bootstrap.  With `N` finite
-over the Noetherian local ring `R`, the Artin–Rees lemma (`Ideal.exists_pow_inf_eq_pow_smul`) and the
-Krull-intersection theorem (`Ideal.iInf_pow_smul_eq_bot_of_isLocalRing`) control the `𝔪`-adic
-filtration on `N` and on `K = ker u`, upgrading the special-fibre injectivity `ū_𝔪` to `ū_I` for all
-`I`.  See Matsumura, *Commutative Ring Theory*, Theorem 22.3, and Stacks tag 00MK.  The flatness of
-`M` is used to identify `IM` with `I ⊗ M` throughout the induction. -/
+Proof.  For `I = ⊤` the source `(R ⧸ ⊤) ⊗ N` is a subsingleton, so `ū_⊤` is injective.  For `I ≠ ⊤`
+the ring `R' = R ⧸ I` is again Noetherian local (`I ≤ 𝔪`), the base changes `R' ⊗ N` and `R' ⊗ M`
+are respectively finite and flat over `R'`, and `ū_I` is (the underlying map of) the `R'`-linear
+base change `u' = R' ⊗ u`.  So it suffices, by the residue-field core
+`injective_of_lTensor_residueField_injective` applied over `R'`, to check that the residue-field
+fibre of `u'` over `R'` — a map tensored up to `k' = ResidueField R'` — is injective.  Two
+applications of `AlgebraTensorModule.cancelBaseChange` naturality
+(`lTensor_comp_cancelBaseChange`), along the towers `R → R ⧸ 𝔪 → k'` and `R → R' → k'`, identify
+this residue-field fibre with `k' ⊗ ū_𝔪` (base change of `hbar` along the field extension
+`ResidueField R → k'`), which is injective because `hbar` is and `k'` is flat over the field
+`ResidueField R`.  See Matsumura, *Commutative Ring Theory*, Theorem 22.3, and Stacks tag 00MK. -/
 theorem fibre_injective_of_maximal (u : N →ₗ[R] M)
     (hbar : Function.Injective (LinearMap.lTensor (R ⧸ IsLocalRing.maximalIdeal R) u)) :
     ∀ ⦃I : Ideal R⦄, I.FG → Function.Injective (LinearMap.lTensor (R ⧸ I) u) := by
-  sorry
+  intro I _
+  rcases eq_or_ne I ⊤ with rfl | hI_ne
+  · -- `I = ⊤`: `R ⧸ ⊤` is the zero ring, so the whole domain `(R ⧸ ⊤) ⊗ N` is a subsingleton.
+    haveI : Subsingleton (R ⧸ (⊤ : Ideal R)) := Ideal.Quotient.subsingleton_iff.mpr rfl
+    haveI : Subsingleton ((R ⧸ (⊤ : Ideal R)) ⊗[R] N) := Module.subsingleton (R ⧸ (⊤ : Ideal R)) _
+    exact Function.injective_of_subsingleton _
+  · -- `I ≠ ⊤`: base-change to the Noetherian local ring `R' = R ⧸ I` (with `M`-base-change flat and
+    -- `N`-base-change finite) and apply the residue-field core `L` to `u' = baseChange (R ⧸ I) u`.
+    haveI : Nontrivial (R ⧸ I) := Ideal.Quotient.nontrivial_iff.mpr hI_ne
+    haveI : IsLocalRing (R ⧸ I) :=
+      IsLocalRing.of_surjective' (Ideal.Quotient.mk I) Ideal.Quotient.mk_surjective
+    haveI : IsLocalHom (Ideal.Quotient.mk I) :=
+      IsLocalHom.of_surjective _ Ideal.Quotient.mk_surjective
+    -- The residue-field fibre of `u' = baseChange (R ⧸ I) u`, over `R ⧸ I`, is injective (`= hbar`).
+    have hbar'' : Function.Injective (LinearMap.lTensor (IsLocalRing.ResidueField (R ⧸ I))
+        (LinearMap.baseChange (R ⧸ I) u)) := by
+      -- `hbar` says `ū_𝔪 = baseChange (ResidueField R) u` is injective.
+      have hbarBC : Function.Injective ⇑(LinearMap.baseChange (IsLocalRing.ResidueField R) u) := by
+        rw [LinearMap.baseChange_eq_ltensor]; exact hbar
+      -- Tensoring up to the field extension `ResidueField R → k'` keeps it injective (`k'` flat).
+      have hBfield : Function.Injective ⇑(LinearMap.lTensor (IsLocalRing.ResidueField (R ⧸ I))
+          (LinearMap.baseChange (IsLocalRing.ResidueField R) u)) :=
+        Module.Flat.lTensor_preserves_injective_linearMap _ hbarBC
+      -- Naturality of `cancelBaseChange` along `R → ResidueField R → k'`: identify `k' ⊗ ū_𝔪` with
+      -- the `R`-base change `k' ⊗ u`, giving injectivity of the latter.
+      have eqB := lTensor_comp_cancelBaseChange R (IsLocalRing.ResidueField R)
+        (IsLocalRing.ResidueField (R ⧸ I)) (M := IsLocalRing.ResidueField (R ⧸ I))
+        (N := N) (Q := M) u
+      have eqBf : ⇑(LinearMap.lTensor (IsLocalRing.ResidueField (R ⧸ I)) u)
+            ∘ ⇑(cancelBaseChange R (IsLocalRing.ResidueField R) (IsLocalRing.ResidueField (R ⧸ I))
+                  (IsLocalRing.ResidueField (R ⧸ I)) N)
+          = ⇑(cancelBaseChange R (IsLocalRing.ResidueField R) (IsLocalRing.ResidueField (R ⧸ I))
+                  (IsLocalRing.ResidueField (R ⧸ I)) M)
+            ∘ ⇑(LinearMap.lTensor (IsLocalRing.ResidueField (R ⧸ I))
+                  (lTensor (IsLocalRing.ResidueField R) (IsLocalRing.ResidueField R) u)) := by
+        simpa only [LinearMap.coe_comp, coe_lTensor, LinearEquiv.coe_coe]
+          using congrArg DFunLike.coe eqB
+      have hStepB : Function.Injective ⇑(LinearMap.lTensor (IsLocalRing.ResidueField (R ⧸ I)) u) :=
+        injective_of_comm_sq' eqBf
+          (cancelBaseChange R (IsLocalRing.ResidueField R) (IsLocalRing.ResidueField (R ⧸ I))
+            (IsLocalRing.ResidueField (R ⧸ I)) N).surjective
+          (cancelBaseChange R (IsLocalRing.ResidueField R) (IsLocalRing.ResidueField (R ⧸ I))
+            (IsLocalRing.ResidueField (R ⧸ I)) M).injective hBfield
+      -- Naturality of `cancelBaseChange` along `R → R ⧸ I → k'`: identify `k' ⊗ u` with the
+      -- residue-field fibre of `u' = R' ⊗ u`, transporting injectivity to `hbar''`.
+      have eqA := lTensor_comp_cancelBaseChange R (R ⧸ I)
+        (IsLocalRing.ResidueField (R ⧸ I)) (M := IsLocalRing.ResidueField (R ⧸ I))
+        (N := N) (Q := M) u
+      have eqAf : ⇑(LinearMap.lTensor (IsLocalRing.ResidueField (R ⧸ I)) u)
+            ∘ ⇑(cancelBaseChange R (R ⧸ I) (IsLocalRing.ResidueField (R ⧸ I))
+                  (IsLocalRing.ResidueField (R ⧸ I)) N)
+          = ⇑(cancelBaseChange R (R ⧸ I) (IsLocalRing.ResidueField (R ⧸ I))
+                  (IsLocalRing.ResidueField (R ⧸ I)) M)
+            ∘ ⇑(LinearMap.lTensor (IsLocalRing.ResidueField (R ⧸ I))
+                  (lTensor (R ⧸ I) (R ⧸ I) u)) := by
+        simpa only [LinearMap.coe_comp, coe_lTensor, LinearEquiv.coe_coe]
+          using congrArg DFunLike.coe eqA
+      exact injective_of_comm_sq eqAf
+        (cancelBaseChange R (R ⧸ I) (IsLocalRing.ResidueField (R ⧸ I))
+          (IsLocalRing.ResidueField (R ⧸ I)) N).injective hStepB
+    have hinj : Function.Injective ⇑(LinearMap.baseChange (R ⧸ I) u) :=
+      injective_of_lTensor_residueField_injective _ hbar''
+    rwa [LinearMap.baseChange_eq_ltensor] at hinj
 
 /-- **Stacks 00ME (Lemma 10.99.1), flatness half — standalone.**
 
