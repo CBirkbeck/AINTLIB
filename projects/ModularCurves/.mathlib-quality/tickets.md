@@ -17029,3 +17029,17 @@ dispatchable to any free strong seat.
 - **Next**: `IsCoaction chartCoaction` (StableCharts.lean; 2 axioms dualizing `translationAction_unit`/
   `_assoc` — same E.Point technique), `Module.Free`/`Module.Finite`, C1d/C3/C4, six SubgroupQuotient
   pins → BOARD-SIGNAL.
+
+### SESSION LEDGER (NEW-HOPF, 2026-07-12 cont.3 — IsCoaction counit)
+- **[HG-C1d] `IsCoaction chartCoaction` counit field DONE** (new file `GroupScheme/ChartCoaction.lean`,
+  imports PatchHopf + ForMathlib.Coaction; StableCharts can't import PatchHopf, hence a new file).
+  Green + axiom-clean. Built by delegated agent, cherry-picked in (commits d9f136693/056bcd813 → abdfda17e).
+  Γ-dual of `translationAction_unit` via a clean monoidal-lift (no E.Point needed); reusable
+  `chartSpecIso` inclusion-leg duals + `ΓSpecIso_inv_naturality` dualization established.
+- **coassoc field**: documented `sorry` (ChartCoaction.lean ~L342) — the exact analog of ⊤-level
+  `comulTop_coassoc` + `assocScheme_leftMulSchemeL` (triple cube/action + E.Point `add_assoc`);
+  agent RESUMED to complete it with those as templates.
+- **State of the charter Hopf-Galois path**: ⊤+opens `[HopfAlgebra]` ✓, `IsCoaction` counit ✓ /
+  coassoc pending; then `precursorSurjective` (Γ-dual of proven `isClosedImmersion_actPair_left`),
+  `Module.Free`/`Finite`, `StableAffineChartData` assembly → `StableAffineChartData.isHopfGalois`
+  (M5, already proven upstream) → six `SubgroupQuotient` pins → BOARD-SIGNAL.
