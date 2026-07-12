@@ -242,6 +242,16 @@ split into ordinary helpers, so the result uses no options. The remaining Step 2
 is therefore specifically proper cohomology and arbitrary-base change, not affine
 acyclicity.
 
+The generic two-chart degree-one calculation is now complete in
+`ForMathlib/TwoOpenHOne.lean`. The theorem
+`TopCat.Sheaf.subsingleton_H_one_of_two_open_cover` proves global `H¹` vanishing from
+vanishing on two covering opens and surjectivity of the section-difference map on their
+overlap. It uses an injective presentation, local lifts, exactness to correct their
+overlap discrepancy, and ordinary sheaf gluing, avoiding the still-missing comparison
+between `H'` and `Sheaf.H`. The result is option-free and axiom-clean. Its next use is the
+explicit Laurent-overlap calculation for the section pole sheaves on the two affine
+Weierstrass charts; it does not supply proper cohomology or arbitrary-base change.
+
 No theorem in this stream may replace this leaf by a `CohomologyPackage` hypothesis,
 an axiom, or an unboarded `sorry`.
 

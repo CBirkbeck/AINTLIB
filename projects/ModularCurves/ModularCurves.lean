@@ -56,6 +56,7 @@ import ModularCurves.ForMathlib.SmoothDescent
 import ModularCurves.ForMathlib.SpecBasicOpenAway
 import ModularCurves.ForMathlib.SpecEqualizer
 import ModularCurves.ForMathlib.TopCatSheafRestrict
+import ModularCurves.ForMathlib.TwoOpenHOne
 import ModularCurves.ForMathlib.WeierstrassInvariant
 import ModularCurves.ForMathlib.WeierstrassProjectivePrime
 import ModularCurves.GroupScheme.MuN
