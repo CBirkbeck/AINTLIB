@@ -1,16 +1,18 @@
-FOCUS/REPORT (2026-07-12, v10.162 marathon — WALL-LEDGER bank):
+FOCUS/REPORT (2026-07-12, v10.162 — two continuations, strong bank):
 
-DELIVERED THIS RUN (all committed+pushed):
-- [T-SG3-LFP] ARC COMPLETE, 100% sorry-free — comap_ideal_fg PROVEN (the planned tensor-identification COLLAPSED: releff_ideal_fg ⟹ Dι-ideal fg on a cover ⟹ lfp_subschemeι_of_fg_cover ⟹ Dι lfp ⟹ pullback.fst lfp by base-change ⟹ ker_fG over the source; no tensor computation). generatorSpaceι_locallyOfFinitePresentation now AXIOM-CLEAN. Capstone exists_cyclicityLocus sorryAx = EXACTLY the two boarded gates (HOMOG-FRAME 6.1.1-hard + NISOG-L13 6.4.2-empty). Wiring-debt: ZERO.
-- [L15-a/b] NIsogSpace.lean OPENED, axiom-clean core: IsBiIdeal (KM 6.5.1 cut condition) + IsBiIdeal.toIdeal/counit_eq_zero accessors + NIsogRepresentation pins-record + exists_nIsogSpace_of_representation assembly + NIsogenyStructure.baseChange (datum functoriality).
+DELIVERED (all committed+pushed):
+- [T-SG3-LFP] ARC COMPLETE, 100% sorry-free (comap_ideal_fg — tensor-brick collapsed via releff_ideal_fg⟹cover-lfp⟹fst-lfp⟹ker_fG). Capstone exists_cyclicityLocus sorryAx = EXACTLY the 2 boarded gates (HOMOG-FRAME + NISOG-L13). generatorSpaceι lfp pin AXIOM-CLEAN.
+- [L15-a/b] NIsogSpace.lean: IsBiIdeal + toIdeal/counit accessors + NIsogRepresentation pins-record + exists_nIsogSpace_of_representation assembly + NIsogenyStructure.baseChange (datum functoriality). Axiom-clean core.
+- [Y₀ cyclicity-transfer CRUX] — the assembly's hardest compatibility, PROVEN:
+  * toRelEffCartierDiv_baseChange_ideal (subgroup-divisor commutes w/ base change; both = G.ι.ker.comap fst).
+  * isGammaZeroFppf_congr (cyclicity ideal-determined via ext) — FULLY AXIOM-CLEAN.
+  * isCyclic_baseChange_iff (base-changed subgroup cyclic ⟺ IsGammaZeroFppf of base-changed divisor — exact exists_cyclicityLocus shape).
 
-WALL-LEDGER — remaining D2 targets blocked on OTHER lanes' charters (precise gate-map in decomposition-nisog-L15.md):
-- L15-c/d/e/f: c5β E[N]-package (concrete locally-free 𝓕 + fibre structure) + NEW-HOPF comul/counit (Δ,ε) + fable-FP universal Grassmannian family + boarded descent. My LFP/T-D15 toolbox cuts the bi-ideal locus the moment 𝓕's Δ,ε + the universal family land.
-- Y₀(N) (exists_gammaZeroSpace, KM 6.6.1): ROUTE MAPPED (cyclicity-locus cut on [N-Isog] via toRelEffCartierDiv + exists_cyclicityLocus). BLOCKER = exists_nIsogSpace needs NATURALITY/representability (not per-T Nonempty) for the universal-datum pullback ⟹ needs L15's real NIsogRepresentation. All other handles HAVE (toRelEffCartierDiv, IsCyclic, capstone).
-- L6 (E/C): armed on NEW-HOPF BOARD-SIGNAL (NOT fired — SubgroupQuotient.lean still 6 sorries).
+Y₀(N) ASSEMBLY STATE (exists_gammaZeroSpace, KM 6.6.1): route = cut cyclicity locus Z (via exists_cyclicityLocus on univ divisor) on [N-Isog]; W_Γ₀ = Z.subscheme, w_Γ₀ = Z.subschemeι≫w. Cyclicity-transfer step DONE. REMAINING (not a wall — a coherence build best co-designed w/ L15's real classify): (i) functorial NIsogRepresentation (natural classify); (ii) moduli-up-to-iso curve-composition coherence (E.baseChange(h≫w) vs (E.baseChange w).baseChange h — the L5 bridge for the moduli functor). Then GammaZero_T ≃ cyclic-NIsog_T ≃ {h through Z} closes.
 
-RESUME TRIGGERS (act immediately when any fires):
-1. NEW-HOPF BOARD-SIGNAL ⟹ consume L6 (E/C for finite flat C; DS-NISOG-1/2 + pins).
-2. c5β E[N]-package + HOPF Δ,ε land ⟹ populate NIsogRepresentation ⟹ L15-c/d/e/f + exists_nIsogSpace.
-3. exists_nIsogSpace functorial ⟹ Y₀(N) assembly (upgrade NIsogRepresentation.classify to representable, then exists_gammaZeroSpace).
-No D2-buildable leaf remains that doesn't require constructing another lane's chartered gate.
+WALLED (other lanes' charters): L15-c/d/e/f (c5β E[N] + HOPF comul + fable-FP universal family/descent); L6 (HOPF board-signal, NOT fired — SubgroupQuotient 6 sorries).
+
+RESUME TRIGGERS:
+1. HOPF BOARD-SIGNAL ⟹ L6 (E/C).
+2. c5β E[N] + HOPF Δ,ε ⟹ populate NIsogRepresentation ⟹ L15 + exists_nIsogSpace.
+3. exists_nIsogSpace functorial ⟹ Y₀(N) assembly (cyclicity-transfer crux already HAVE; add curve-composition coherence + wire).
