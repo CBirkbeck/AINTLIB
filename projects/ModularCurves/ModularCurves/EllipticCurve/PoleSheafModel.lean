@@ -1961,4 +1961,50 @@ theorem projModelSectionPoleCoefficientZ_injective
     (by rw [projModelZChart_sup_sectionNeighborhood_eq_top W])
     m₁ m₂ hresZ hresN
 
+/-- The `Z`-chart coefficient as a linear map from global sections of
+`O(n[0])` to the pole-order filtration. -/
+noncomputable def sectionPoleSheafPower_projModel_toPoleOrderFiltration
+    (W : WeierstrassCurve R) (n : ℕ) :
+    letI : Module R (projModelPoleSections W n) :=
+      Module.compHom _ (projModelBaseScalarHom W)
+    projModelPoleSections W n →ₗ[R] poleOrderFiltration W n := by
+  letI : Module R (projModelPoleSections W n) :=
+    Module.compHom _ (projModelBaseScalarHom W)
+  refine
+    { toFun := fun m =>
+        ⟨projModelSectionPoleCoefficientZ W n m,
+          projModelSectionPoleCoefficientZ_mem_poleOrderFiltration W n m⟩
+      map_add' := ?_
+      map_smul' := ?_ }
+  · intro m₁ m₂
+    apply Subtype.ext
+    exact projModelSectionPoleCoefficientZ_add W n m₁ m₂
+  · intro r m
+    apply Subtype.ext
+    change projModelSectionPoleCoefficientZ W n
+        (projModelBaseScalarHom W r • m) =
+      r • projModelSectionPoleCoefficientZ W n m
+    exact projModelSectionPoleCoefficientZ_smul W n r m
+
+/-- Global sections of `O(n[0])` on a projective Weierstrass model are exactly
+the affine functions of pole order at most `n`. -/
+noncomputable def sectionPoleSheafPower_projModel_sectionsEquiv
+    (W : WeierstrassCurve R) (n : ℕ) :
+    letI : Module R (projModelPoleSections W n) :=
+      Module.compHom _ (projModelBaseScalarHom W)
+    projModelPoleSections W n ≃ₗ[R] poleOrderFiltration W n := by
+  letI : Module R (projModelPoleSections W n) :=
+    Module.compHom _ (projModelBaseScalarHom W)
+  apply LinearEquiv.ofBijective
+    (sectionPoleSheafPower_projModel_toPoleOrderFiltration W n)
+  constructor
+  · intro m₁ m₂ h
+    apply projModelSectionPoleCoefficientZ_injective W n
+    exact congrArg Subtype.val h
+  · intro f
+    obtain ⟨m, hm⟩ := exists_projModelSectionPoleCoefficientZ_eq_of_mem
+      W n f.1 f.2
+    refine ⟨m, ?_⟩
+    exact Subtype.ext hm
+
 end ModularCurves
