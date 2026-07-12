@@ -617,6 +617,15 @@ This comparison still makes no finiteness or projectivity assertion about the ra
 terms; the bounded finite-projective replacement and arbitrary-base comparison remain
 exactly the Stacks 0A1G input.
 
+The base-linear comparison is now specialized to the geometric sheaves in
+`EllipticCurve/PoleSheafBaseCechHOne.lean`.
+`sectionPoleSheafPower_baseCechHomologyOneIso` identifies the additive group underlying
+degree-one `Γ(S,⊤)`-linear Cech homology of `O(n[0])` with genuine `Sheaf.H¹`, and
+`exists_sectionPoleSheafPower_finiteAffineBaseCechComparison` supplies a finite affine
+cover carrying this comparison whenever the base is affine. This packages the exact
+pole-sheaf module to which the future proper-perfect-complex and arbitrary-base-change
+theorem must apply. It does not infer family-level vanishing from fibrewise vanishing.
+
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
 `n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of
