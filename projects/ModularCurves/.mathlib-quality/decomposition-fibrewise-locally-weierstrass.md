@@ -171,6 +171,14 @@ finite complex. Mathlib PR #36345 currently proves only affine vanishing and rem
 draft; it does not provide proper pushforward or arbitrary-base cohomology and base
 change.
 
+The scheme-module entry point to the existing cohomology API is now complete in
+`ForMathlib/SchemeModuleSheaf.lean`: `Scheme.Modules.toSheaf` forgets to an additive
+sheaf and is additive, faithful, finite-limit-preserving, and colimit-preserving.
+Consequently a short exact sequence of scheme modules maps directly to a short exact
+sequence of additive sheaves, so the remaining work can use mathlib's genuine
+`Sheaf.H`/`Ext` definitions. This bridge does not assert affine vanishing or the missing
+proper cohomology comparison.
+
 No theorem in this stream may replace this leaf by a `CohomologyPackage` hypothesis,
 an axiom, or an unboarded `sorry`.
 
