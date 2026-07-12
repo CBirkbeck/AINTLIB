@@ -343,6 +343,16 @@ with `cechTerm` and `cechDifferential`; consequently `cechDifferential_comp` obt
 augmentation and prove stalkwise contraction/exactness before claiming a resolution or
 derived comparison.
 
+The canonical augmentation is now constructed in
+`ForMathlib/SheafCechSheafAugmentation.lean`. `TopCat.Sheaf.cechAugmentation` is the
+product of the restriction units from `F` to the degree-zero intersection factors, and
+`cechAugmentation_apply` identifies every component with the ordinary restriction from
+`V` to `V ∩ U_i`. The two degree-zero cofaces agree after this map, so
+`cechAugmentation_comp` proves that the first differential has zero composite and
+`cechAugmentedShortComplex` packages the first three objects. No cover hypothesis is
+needed for this formal construction; exactness under the actual cover condition remains
+the next stalkwise step.
+
 The generic two-chart degree-one calculation is now complete in
 `ForMathlib/TwoOpenHOne.lean`. The theorem
 `TopCat.Sheaf.subsingleton_H_one_of_two_open_cover` proves global `H¹` vanishing from
