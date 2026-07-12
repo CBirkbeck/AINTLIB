@@ -18690,3 +18690,50 @@ Route α (Weil) stays de-coupled at CHARTER-WEIL.
 **NEXT SESSION FIRST ACT**: `/develop --decompose` [YF-CLASSIFIER] vs KM 3.7.1 / [Loe] 3.8.2 (verbatim
 quotes, the divisor↔iso dictionary as its own registered sub-ticket), then [YF-TAUT] (plumbing, ready
 now), then assemble. (NEW-Y1, CHARTER-YFULL session 1)
+
+## v10.156 — NEW-Y1 CHARTER-YFULL: route-γ SCAFFOLD COMPLETE; [YF-CLASSIFIER] design finding + decomposition
+
+**Route-γ scaffold — 4 leaves, all proof-sorry-free and rooted** (`isOpenImmersion_levelSpaceΓι`
+reduced from "open question" to one divisor leaf):
+- **[YF-ISOLOC]** `ForMathlib/FiniteLocallyFreeIsoLocus.lean` — `isClopen_finrank_eq`, `finrankLocus`,
+  `isIso_pullbackSnd_finrankLocus_one` (finite locally free ⟹ rank-`n` locus clopen; iso over rank-1).
+- **[YF-OI-CRIT]** `ForMathlib/OpenImmersionOfSection.lean` — `isOpenImmersion_of_range_subset_of_section`
+  (mono + image ⊆ open U + section over U ⟹ open immersion).
+- **[YF-TAUT]** `Moduli/FullLevelTautSection.lean` — `exists_tautSection_of_isFullLevel` (over U where the
+  taut pair is full-level, the classifying section = U.ι; via `pullback.hom_ext` + `torsionι`-mono +
+  `levelSpaceΓ_spec.mpr`).
+- **[YF-CLOPEN assembly]** (same file) — `isOpenImmersion_levelSpaceΓι_of_taut`: **the clopen leaf REDUCED**
+  to `(U, range levelSpaceΓι ⊆ U, IsFullLevel-over-U)`. Consumes [YF-TAUT]+[YF-OI-CRIT]. Closed
+  immersion ⟹ open immersion, one `exact`.
+(All inherit only the Tier-B def-trail boxes `mulByHom_flat`/`mulByHom_locallyQuasiFinite` via
+`levelSpaceΓ_spec`; clear with the Tier-B shared-def swap. No new sorry anywhere.)
+
+**[YF-CLASSIFIER] — the SOLE residual, with a design finding (saves the next session a dead end):**
+The `finrank`-of-classifier shortcut **does not close directly**: the N²-section classifier
+`φ : ∐_{(a,b)∈(ℤ/N)²} T ⟶ E[N]_T` is finite over `E[N]_T` but **not obviously flat over it**, so
+`isIso_iff_finrank_eq` (which needs `[Flat φ]`) is not directly applicable. **Use the divisor-degree
+route (KM 3.7.1) instead** — the D-stream already has the pieces:
+- `RelEffCartierDiv.degree` + `sectionsDivisor_degree π P = n` (CartierDivisor.lean:100/1621): the
+  section divisor `Σ_{(a,b)} [aP+bQ]` has degree `N²`; `torsionIdeal`/`E[N]` has degree `N²`.
+- `fullLevelLocusAux_sectionsDivisor_ideal`: `sectionsDivisor.ideal = ∏ ker(section_i)`.
+- étale-section ⟹ open immersion (N invertible ⟹ `E[N]_T → T` finite étale; the killedLocus proof in
+  `YOneTatePoint.lean:368` uses exactly `a section of an étale separated morphism is an open immersion`).
+- **Decomposition** (next session, `/develop --decompose` vs KM 3.7.1 p.104 / [Loe] 3.8.2 verbatim):
+  (γ-a) `E[N]_T → T` finite étale rank `N²` (from `torsionπ_etale'` base-changed); each of the `N²`
+  section-classifiers `[a]P+[b]Q : T → E[N]_T` is an open (cl)immersion (étale separated section).
+  (γ-b) the "pairwise-disjoint + exhaustive" locus `U ⊆ T` (= where the `N²` clopen section-images
+  partition `E[N]_T`) is **clopen** (disjointness of clopen images is open+closed; degree-`N²`=degree-`N²`
+  forces exhaustion where disjoint) — this is the U feeding the assembly.
+  (γ-c) `U = {IsFullLevel}`: on `U`, `Σ[section_i] = E[N]` as degree-`N²` divisors ⟺
+  `sectionsDivisor.ideal = torsionIdeal` (`fullLevelLocusAux_sectionsDivisor_ideal` + a same-degree
+  divisor-equality lemma — **audit CartierDivisor.lean for `degree`-equality⟹ideal-equality; likely a
+  new D-stream lemma**). Gives both `range levelSpaceΓι ⊆ U` (via `levelSpaceΓ_spec.mp` at `𝟙`) and
+  `IsFullLevel-over-U` (the assembly's two inputs).
+  Alternatively (γ'): discharge the existing D-stream sorry `fullLevel_divisor_iff_naive_gen`
+  (Basic.lean, the divisor⟺fibrewise-generation bridge) and combine with a naive-full-level clopen
+  argument — heavier, but reuses `isFullLevel_iff_naive`.
+
+**NEXT-SESSION FIRST ACT**: `/develop --decompose` [YF-CLASSIFIER] via the divisor-degree route (γ-a/b/c
+above), audit CartierDivisor.lean for the same-degree-divisor-equality lemma (build if absent), then
+assemble `isOpenImmersion_levelSpaceΓι` = `isOpenImmersion_levelSpaceΓι_of_taut` at the constructed U.
+Then [YF-ETALE] (swap-complete) consumes it; seam to FP4-B5. (NEW-Y1, CHARTER-YFULL session 1 cont.)
