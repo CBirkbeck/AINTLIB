@@ -362,6 +362,26 @@ noncomputable def projModelZeroIdealTrivializationZ (W : WeierstrassCurve R) :
   exact localIdealGeneratorIso (projModelZero W) (projModelZChart W)
     1 hr hspan (by exact one_mem (nonZeroDivisors _))
 
+/-- The standard affine overlap of the `Y`- and `Z`-charts. -/
+noncomputable abbrev projModelChartOverlap (W : WeierstrassCurve R) :
+    (projModel W).affineOpens :=
+  ⟨Proj.basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)),
+    Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+        (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (SetLike.mul_mem_graded (mk_X_mem_quotientGrading_one W 1)
+        (mk_X_mem_quotientGrading_one W 2)) (by omega)⟩
+
+theorem projModelChartOverlap_le_YChart (W : WeierstrassCurve R) :
+    projModelChartOverlap W ≤ projModelYChart W :=
+  Proj.basicOpen_mono _ _ _ ⟨_, rfl⟩
+
+theorem projModelChartOverlap_le_ZChart (W : WeierstrassCurve R) :
+    projModelChartOverlap W ≤ projModelZChart W :=
+  Proj.basicOpen_mono _ _ _ ⟨_, mul_comm _ _⟩
+
 /-- The overlap of the canonical section neighborhood with the affine `Z`-chart. -/
 noncomputable def projModelPoleOverlap (W : WeierstrassCurve R) :
     (projModel W).Opens :=
@@ -376,6 +396,96 @@ theorem projModelPoleOverlap_le_sectionNeighborhood (W : WeierstrassCurve R) :
 theorem projModelPoleOverlap_le_ZChart (W : WeierstrassCurve R) :
     projModelPoleOverlap W ≤ (projModelZChart W : (projModel W).Opens) :=
   inf_le_right
+
+theorem projModelPoleOverlap_le_chartOverlap (W : WeierstrassCurve R) :
+    projModelPoleOverlap W ≤ projModelChartOverlap W := by
+  rw [show (projModelChartOverlap W : (projModel W).Opens) =
+      (projModelYChart W : (projModel W).Opens) ⊓
+        (projModelZChart W : (projModel W).Opens) by
+    exact Proj.basicOpen_mul _ _ _]
+  refine le_inf ?_ (projModelPoleOverlap_le_ZChart W)
+  exact (projModelPoleOverlap_le_sectionNeighborhood W).trans
+    ((projModel W).affineBasicOpen_le (projModelSectionUnitSection W))
+
+/-- The section unit restricted to the standard chart overlap. -/
+noncomputable def projModelSectionUnitOverlap (W : WeierstrassCurve R) :
+    Γ(projModel W, projModelChartOverlap W) :=
+  (projModel W).presheaf.map
+    (homOfLE (projModelChartOverlap_le_YChart W)).op
+    (projModelSectionUnitSection W)
+
+/-- The overlap used for gluing pole-sheaf sections is the basic open of the
+section unit inside the standard chart overlap. -/
+theorem projModelPoleOverlap_eq_basicOpen_sectionUnitOverlap
+    (W : WeierstrassCurve R) :
+    projModelPoleOverlap W =
+      (projModel W).basicOpen (projModelSectionUnitOverlap W) := by
+  unfold projModelSectionUnitOverlap
+  rw [Scheme.basicOpen_res]
+  unfold projModelPoleOverlap
+  change (projModelSectionNeighborhood W : (projModel W).Opens) ⊓
+      (projModelZChart W : (projModel W).Opens) =
+    (projModelChartOverlap W : (projModel W).Opens) ⊓
+      (projModelSectionNeighborhood W : (projModel W).Opens)
+  rw [show (projModelChartOverlap W : (projModel W).Opens) =
+      (projModelYChart W : (projModel W).Opens) ⊓
+        (projModelZChart W : (projModel W).Opens) by
+    exact Proj.basicOpen_mul _ _ _]
+  have hN : (projModelSectionNeighborhood W : (projModel W).Opens) ≤
+      (projModelYChart W : (projModel W).Opens) :=
+    (projModel W).affineBasicOpen_le (projModelSectionUnitSection W)
+  calc
+    (projModelSectionNeighborhood W : (projModel W).Opens) ⊓
+        (projModelZChart W : (projModel W).Opens) =
+      ((projModelYChart W : (projModel W).Opens) ⊓
+        (projModelSectionNeighborhood W : (projModel W).Opens)) ⊓
+          (projModelZChart W : (projModel W).Opens) := by
+      rw [inf_eq_right.mpr hN]
+    _ = ((projModelYChart W : (projModel W).Opens) ⊓
+        (projModelZChart W : (projModel W).Opens)) ⊓
+          (projModelSectionNeighborhood W : (projModel W).Opens) := by
+      ac_rfl
+
+/-- Under the standard overlap coordinates, the restricted section unit is the
+image of `sectionUnitElem`. -/
+theorem overlapSectionsEquiv_sectionUnitOverlap (W : WeierstrassCurve R) :
+    overlapSectionsEquiv W (projModelSectionUnitOverlap W) =
+      algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)) (sectionUnitElem W) := by
+  let h := Proj.basicOpen_mono (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⟨_, rfl⟩
+  have hmap : (projModel W).presheaf.map
+      (homOfLE (projModelChartOverlap_le_YChart W)).op =
+    (projModel W).presheaf.map (homOfLE h).op :=
+    (projModel W).presheaf.congr_map (Subsingleton.elim _ _)
+  unfold projModelSectionUnitOverlap
+  rw [hmap]
+  simpa only [projModelSectionUnitSection, RingEquiv.apply_symm_apply] using
+    overlapSectionsEquiv_res_chartY W (projModelSectionUnitSection W)
+
+/-- Transport sections from the gluing overlap to the corresponding basic open
+of the standard chart overlap. -/
+noncomputable def projModelPoleOverlapBasicOpenRingEquiv
+    (W : WeierstrassCurve R) :
+    Γ(projModel W, projModelPoleOverlap W) ≃+*
+      Γ(projModel W,
+        (projModel W).basicOpen (projModelSectionUnitOverlap W)) :=
+  ((projModel W).presheaf.mapIso
+    (eqToIso (projModelPoleOverlap_eq_basicOpen_sectionUnitOverlap W)).op).symm
+      |>.commRingCatIsoToRingEquiv
+
+theorem projModelPoleOverlapBasicOpenRingEquiv_res
+    (W : WeierstrassCurve R)
+    (a : Γ(projModel W, projModelChartOverlap W)) :
+    projModelPoleOverlapBasicOpenRingEquiv W
+        ((projModel W).presheaf.map
+          (homOfLE (projModelPoleOverlap_le_chartOverlap W)).op a) =
+      (projModel W).presheaf.map
+        (homOfLE ((projModel W).basicOpen_le
+          (projModelSectionUnitOverlap W))).op a := by
+  rfl
 
 /-- The section parameter `s`, restricted to the overlap with the `Z`-chart. -/
 noncomputable def projModelSectionRootOverlap (W : WeierstrassCurve R) :
