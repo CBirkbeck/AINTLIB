@@ -16656,3 +16656,24 @@ the motive-not-type-correct wall (rewrites the type too) — use **`show`** to r
 goal with the def unfolded only in term positions (defeq, no motive), then the pullback
 lemmas fire; close residual `squareToBase = fst ≫ gtb` with explicit `rfl` (definitional,
 not syntactic, so `rw`'s auto-rfl misses it).
+
+## [T-E5f] recollement decomposition (fable-P4, 2026-07-12, /develop --decompose; KM Cor 4.7.1 p.116-117)
+KM Cor 4.7.1 verbatim: "𝕸(𝒫)⊗ℤ[1/2] = 𝕸(𝒫,Legendre)/G, 𝕸(𝒫)⊗ℤ[1/3] = 𝕸(𝒫,naive-3)/G" — glue the two
+representing objects over ℤ[1/6] since Spec ℤ = D(2) ∪ D(3). Abstract form on ProblemBaseChange,
+consumable for NEW-Y1's B4 curve assembly:
+* **[R-comp]** base-change composition: `EllObj.restrictScalars_comp` (`restrictScalars (ρ ≫ σ) =
+  restrictScalars σ ⋙ restrictScalars ρ`, Functor.ext + Spec.map_comp; map-case eqToHom collapses
+  since base/curve unchanged) → `ModuliProblem.baseChange_comp` (`P.baseChange (ρ≫σ) =
+  (P.baseChange ρ).baseChange σ`). Mine, clean.
+* **[R-glue-obj]** glue two `EllObj`s over a Zariski cover `Spec R = D(a) ∪ D(b)` agreeing over
+  D(ab) into an `EllObj R`: base scheme via `Scheme.GlueData` (the two representing bases live over
+  D(a)/D(b) ⊆ Spec R, glued along D(ab) by the uniqueness-of-representing-object iso); curve glued
+  likewise; structMap to Spec R. The hard scheme-gluing piece.
+* **[R-glue-repr]** the glued object represents P: functor-of-points checked on the cover D(a)/D(b)
+  (a T-point of Spec R lands in D(a) or D(b); use the local representing bijection; agreement on
+  D(ab) from R-comp + uniqueness).
+* **[T-E5f-main]** `representable_of_baseChange_cover`: `(a b : R) (hab : ∃ x y, x*a + y*b = 1)
+  (h_a : (P.baseChange (loc a)).Representable) (h_b : (P.baseChange (loc b)).Representable) ⟹
+  P.Representable`. (Compat over R[1/ab] is automatic from uniqueness of representing objects.)
+Order: R-comp → R-glue-obj → R-glue-repr → main. Stated consumable for NEW-Y1 (they instantiate a=2
+Legendre, b=3 naive-3).
