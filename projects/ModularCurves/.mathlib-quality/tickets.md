@@ -18914,3 +18914,9 @@ a coherent fresh unit needing D2's `sectionsDivisor`/`RelEffCartierDiv` machiner
 
 The two hardest mathematical contents of KM 3.7.1 (the openness argument and the same-degree commutative
 algebra) plus the comaximality are DONE; the remaining is D-stream integration. (NEW-Y1)
+
+## v10.168 — NEW-Y1 CHARTER-YFULL: this window CLAIMS [YF-SUBDIV-EQ] (synced to v10.167)
+Sequential /loop window, synced to v10.167 (all clopen cores + [YF-COMAX] landed). Taking the D-stream
+assembly foundation: [YF-SUBDIV-EQ] `RelEffCartierDiv.eq_of_isSubdivisor_of_degree_eq` — divisor-level
+same-degree-subdivisor equality via affine-local descent of `isIso_SpecMap_of_surjective_of_flat_rankAtStalk_eq`.
+(A concurrent window seeing this: coordinate — I hold [YF-SUBDIV-EQ].) (NEW-Y1)
