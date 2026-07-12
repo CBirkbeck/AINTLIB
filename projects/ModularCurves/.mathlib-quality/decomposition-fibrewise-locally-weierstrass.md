@@ -420,6 +420,17 @@ derived global sections when the finite intersections are acyclic, via the
 Cech-to-derived spectral sequence/double-complex argument of Stacks 20.11.5--6; no
 generic exactness of open-immersion pushforward is assumed.
 
+The degree-one cokernel consequence of the long exact sequence is now isolated in
+`ForMathlib/SheafCohomologyCokernel.lean`. For a short exact sequence whose middle
+sheaf has vanishing `H^1`, `CategoryTheory.Sheaf.H.cokernelMapZeroIsoOne` identifies
+the cokernel of the degree-zero map with `H^1` of the kernel, and
+`cokernelMapZeroIsoOne_hom_fac` identifies the induced map with the connecting
+homomorphism. The proof packages the relevant three terms as an exact short complex
+of abelian groups and uses the existing exact-and-epi characterization of a cokernel.
+This is the categorical edge calculation needed by a degree-one Cech comparison; it
+does not assert that open-immersion pushforward is exact or that the sheaf-level Cech
+terms are acyclic.
+
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
 `n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of
