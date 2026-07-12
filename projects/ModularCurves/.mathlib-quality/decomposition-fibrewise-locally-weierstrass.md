@@ -494,6 +494,17 @@ and `ιTotal_d_upNat` computes the differential as the resolution differential
 plus `(-1)^q` times the Cech differential. These generic lemmas are the concrete
 input for the degree-one edge-map homology chase.
 
+The horizontal augmentation is now mapped into that total complex in
+`ForMathlib/TotalComplexUpNatHorizontalEdge.lean`.
+`HomologicalComplex₂.totalUpNatHorizontalEdge` takes component maps from a
+cochain complex into Cech degree zero, their compatibility with the resolution
+differential, and their zero composite with the first Cech differential. Its
+component in degree `q` is the augmentation followed by the `(q, 0)` summand
+inclusion. The chain-map proof uses `ιTotal_d_upNat`: the resolution term is
+the cochain-map law and the signed Cech term vanishes by the augmentation law.
+This constructs the edge map without claiming that it is a quasi-isomorphism;
+the explicit degree-one homology chase remains next.
+
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
 `n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of
