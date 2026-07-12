@@ -17242,3 +17242,29 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
   [NISOG-L13] ⟹ exists_cyclicityLocus AXIOM-CLEAN.
 - **c5β**: T-F1 links 3–4 affine core verified working (mid-grind). **fable-FP**: KL3-f
   statement-fix ratified (unprovable-as-stated caught + fixed, producer-owned).
+
+## Amendments v10.166 (2026-07-12, fable-PIC0): ★ sectionToPicRel — the GME (2.16) assembly map LANDS; naturality leaf cut; SESSION LEDGER (window 3)
+
+- ★ **`sectionToPicRel (p z hz) [IsSeparated p] (hsm) (t) (P) (hP) : picRel p z hz t`**
+  (`DivisorClass.lean`) — GME p. 108 "`P ↦ I(P)⁻¹ ↦ I(P)⁻¹ ⊗ I(0)`" realized as
+  `picRelProj ([I([P])]⁻¹ · [I([0])])` through the FULL landed stack:
+  `RelEffCartierDiv.sectionDivisor` (D2 engine) → `picClass` (AG-LB + GME 2.17) →
+  `picRelProj` (kernel model). Base-change instances via
+  `MorphismProperty.pullback_snd` (IsSeparated instance-chain fires; smooth-rel-dim
+  needs `haveI := smoothOfRelativeDimension_isStableUnderBaseChange` — it is a LEMMA,
+  not an instance). `sectionToPicRel_zero`: the zero section ↦ 1. Build green (3110).
+- **Naturality leaf cut** (`IdealModulePullback.lean`, statement-only skeleton):
+  `nonempty_pullback_idealModule` — module pullback of a locally-principal ideal module
+  ≅ ideal module of the comap (KM 1.1.2 shape; divisor-level compat = the engine's
+  `baseChange_ideal : (D.baseChange t).ideal = D.ideal.comap (pullback.fst π t)`).
+  This is THE enabler for sectionToPicRel-naturality → the (2.16) morphism into
+  `picRelFunctor`. Proof plan: mirror `bijective_idealGenHom_app`'s generator route on
+  the presheaf pullback + sheafification collapse (PullbackTensorGeneral machinery).
+- **DS-END0 audit (queue-c)**: `endDual` is Abel-GATED (T-END0b's "dual via Abel
+  E ≅ Pic⁰" needs the L-C pinned isomorphism, both directions) — NOT dischargeable
+  before L-C; `endDeg`-route via degree grading shares the Pic^ν pin. DS-END0 stays
+  queued behind the degree/Abel layers; no false starts cut.
+- **LEDGER (window 3)**: sectionToPicRel + zero-lemma + naturality-leaf skeleton;
+  all committed + pushed. NEXT: (α) execute nonempty_pullback_idealModule; (β) assemble
+  sectionToPicRel-naturality against picRelFunctor; (γ) rigidified bundles decompose
+  (GME 2.2.2-tail rigidification, /develop pass); then the degree/Abel horizon.
