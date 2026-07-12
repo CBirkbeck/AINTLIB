@@ -901,17 +901,88 @@ theorem antipodeLiftAlgTop_eq :
       AlgHom.coe_id, id_eq]
     rfl
 
+/-- Base-congruence for points: transport across equal base morphisms preserves the
+underlying scheme morphism. -/
+theorem point_base_congr {T : Scheme.{u}} {g g' : T ⟶ S} (h : g = g')
+    (pt : E.Point g) : (h ▸ pt : E.Point g').1 = pt.1 := by subst h; rfl
+
+/-- Base transport is additive. -/
+theorem point_base_congr_add {T : Scheme.{u}} {g g' : T ⟶ S} (h : g = g')
+    (pt q : E.Point g) : (h ▸ (pt + q) : E.Point g') = (h ▸ pt) + (h ▸ q) := by
+  subst h; rfl
+
+/-- A transported restriction is pinned down by its underlying scheme morphism. -/
+theorem point_restrictT_eq {T T' : Scheme.{u}} {g : T ⟶ S} {k : T' ⟶ T} {g' : T' ⟶ S}
+    (h : k ≫ g = g') (pt : E.Point g) (q : E.Point g') (hpq : k ≫ pt.1 = q.1) :
+    (h ▸ EllipticCurve.Point.restrict E k pt : E.Point g') = q :=
+  Subtype.ext ((point_base_congr h (EllipticCurve.Point.restrict E k pt)).trans hpq)
+
+/-- Transported restriction of a sum splits as the sum of the identified points. -/
+theorem point_restrictT_add_eq {T T' : Scheme.{u}} {g : T ⟶ S} {k : T' ⟶ T} {g' : T' ⟶ S}
+    (h : k ≫ g = g') (a b : E.Point g) (pt q : E.Point g')
+    (hp : k ≫ a.1 = pt.1) (hq : k ≫ b.1 = q.1) :
+    (h ▸ EllipticCurve.Point.restrict E k (a + b) : E.Point g') = pt + q := by
+  rw [EllipticCurve.Point.restrict_add, point_base_congr_add,
+    point_restrictT_eq h a pt hp, point_restrictT_eq h b q hq]
+
 /-- **The left inverse law, chart form** `⟨S, 𝟙⟩ ≫ μ = e ∘ !`: the antipode pairing
 followed by multiplication is the constant unit map `g ↦ g⁻¹·g = e`, i.e. the base
 projection followed by the unit section. Dualises `invOver_mulOver_left`; proven by the
-same `ι`-cancellation as `assocScheme_leftMulSchemeL`. -/
+same `ι`-cancellation as `assocScheme_leftMulSchemeL`, the identity being `neg_add_cancel`
+in `E.Point (groupOpen.ι ≫ G.π)`. -/
 theorem antipodePair_comp_squareMulRes :
     P.antipodePair ≫ P.squareMulRes = P.groupToBaseRes ≫ P.unitSection := by
-  rw [← cancel_mono P.groupOpen.ι, Category.assoc, P.squareMulRes_comp_ι, Category.assoc,
-    P.unitSection_comp_ι, squareMul, ← cancel_mono G.ι]
-  simp only [Category.assoc]
-  rw [G.mulHom_ι, G.unitHom_ι]
-  sorry
+  rw [← cancel_mono (P.groupOpen.ι ≫ G.ι)]
+  have hb : P.groupOpen.ι ≫ G.π = P.groupToBaseRes ≫ P.V.ι :=
+    (Scheme.Hom.resLE_comp_ι _ _).symm
+  have hgsts : P.groupSquareToSquare ≫ (Over.mk G.π ⊗ Over.mk G.π).hom
+      = pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupToBaseRes ≫ P.V.ι := by
+    rw [← G.mulHom_π, ← Category.assoc]; exact P.squareMul_π
+  have hfstι : P.groupSquareToSquare ≫ (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι
+      = pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.ι ≫ G.ι := by
+    rw [← Category.assoc, P.groupSquareToSquare_fst]; exact Category.assoc _ _ _
+  have hsndι : P.groupSquareToSquare ≫ (snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι
+      = pullback.snd P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.ι ≫ G.ι := by
+    rw [← Category.assoc, P.groupSquareToSquare_snd]; exact Category.assoc _ _ _
+  have hbaseP : (P.antipodePair ≫ P.groupSquareToSquare) ≫ (Over.mk G.π ⊗ Over.mk G.π).hom
+      = P.groupOpen.ι ≫ G.π := by
+    simp only [Category.assoc, hgsts, P.antipodePair_fst_assoc,
+      P.invRes_comp_groupToBaseRes_assoc]
+    rw [← hb]
+  have Esplit : (hbaseP ▸ EllipticCurve.Point.restrict E
+        (P.antipodePair ≫ P.groupSquareToSquare) (G.sqFstPoint + G.sqSndPoint)
+        : E.Point (P.groupOpen.ι ≫ G.π))
+      = EllipticCurve.Point.restrict E P.groupOpen.ι (-G.universalPoint)
+        + EllipticCurve.Point.restrict E P.groupOpen.ι G.universalPoint :=
+    point_restrictT_add_eq hbaseP G.sqFstPoint G.sqSndPoint
+      (EllipticCurve.Point.restrict E P.groupOpen.ι (-G.universalPoint))
+      (EllipticCurve.Point.restrict E P.groupOpen.ι G.universalPoint)
+      (by
+        show (P.antipodePair ≫ P.groupSquareToSquare)
+            ≫ (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι
+          = P.groupOpen.ι ≫ (-G.universalPoint : E.Point G.π).1
+        rw [← G.invHom_ι]
+        simp only [Category.assoc, hfstι, P.antipodePair_fst_assoc, P.invRes_comp_ι_assoc])
+      (by
+        show (P.antipodePair ≫ P.groupSquareToSquare)
+            ≫ (snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι
+          = P.groupOpen.ι ≫ G.universalPoint.1
+        simp only [Category.assoc, hsndι, P.antipodePair_snd_assoc]
+        rfl)
+  have hsum : EllipticCurve.Point.restrict E P.groupOpen.ι (-G.universalPoint)
+        + EllipticCurve.Point.restrict E P.groupOpen.ι G.universalPoint = 0 := by
+    rw [← EllipticCurve.Point.restrict_add, neg_add_cancel, EllipticCurve.Point.restrict_zero]
+  have hLHS : (P.antipodePair ≫ P.squareMulRes) ≫ P.groupOpen.ι ≫ G.ι
+      = (EllipticCurve.Point.restrict E P.groupOpen.ι (-G.universalPoint)
+        + EllipticCurve.Point.restrict E P.groupOpen.ι G.universalPoint).1 := by
+    rw [← Esplit, point_base_congr]
+    simp only [EllipticCurve.Point.restrict, Category.assoc, P.squareMulRes_comp_ι_assoc,
+      squareMul, G.mulHom_ι]
+  have hRHS : (P.groupToBaseRes ≫ P.unitSection) ≫ P.groupOpen.ι ≫ G.ι
+      = (0 : E.Point (P.groupOpen.ι ≫ G.π)).1 := by
+    rw [E.point_zero_val, hb]
+    simp only [Category.assoc, P.unitSection_comp_ι_assoc, G.unitHom_ι]
+  rw [hLHS, hRHS, hsum]
 
 /-- **The antipode-multiplication law, `⊤`-level `CommRingCat` form.** -/
 theorem comulTop_comp_antipodeLiftTop :
@@ -998,7 +1069,56 @@ theorem antipodeLiftAlgTopR_eq :
 Dualises `invOver_mulOver_right`. -/
 theorem antipodePairR_comp_squareMulRes :
     P.antipodePairR ≫ P.squareMulRes = P.groupToBaseRes ≫ P.unitSection := by
-  sorry
+  rw [← cancel_mono (P.groupOpen.ι ≫ G.ι)]
+  have hb : P.groupOpen.ι ≫ G.π = P.groupToBaseRes ≫ P.V.ι :=
+    (Scheme.Hom.resLE_comp_ι _ _).symm
+  have hgsts : P.groupSquareToSquare ≫ (Over.mk G.π ⊗ Over.mk G.π).hom
+      = pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupToBaseRes ≫ P.V.ι := by
+    rw [← G.mulHom_π, ← Category.assoc]; exact P.squareMul_π
+  have hfstι : P.groupSquareToSquare ≫ (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι
+      = pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.ι ≫ G.ι := by
+    rw [← Category.assoc, P.groupSquareToSquare_fst]; exact Category.assoc _ _ _
+  have hsndι : P.groupSquareToSquare ≫ (snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι
+      = pullback.snd P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.ι ≫ G.ι := by
+    rw [← Category.assoc, P.groupSquareToSquare_snd]; exact Category.assoc _ _ _
+  have hbaseP : (P.antipodePairR ≫ P.groupSquareToSquare) ≫ (Over.mk G.π ⊗ Over.mk G.π).hom
+      = P.groupOpen.ι ≫ G.π := by
+    simp only [Category.assoc, hgsts, P.antipodePairR_fst_assoc]
+    rw [← hb]
+  have Esplit : (hbaseP ▸ EllipticCurve.Point.restrict E
+        (P.antipodePairR ≫ P.groupSquareToSquare) (G.sqFstPoint + G.sqSndPoint)
+        : E.Point (P.groupOpen.ι ≫ G.π))
+      = EllipticCurve.Point.restrict E P.groupOpen.ι G.universalPoint
+        + EllipticCurve.Point.restrict E P.groupOpen.ι (-G.universalPoint) :=
+    point_restrictT_add_eq hbaseP G.sqFstPoint G.sqSndPoint
+      (EllipticCurve.Point.restrict E P.groupOpen.ι G.universalPoint)
+      (EllipticCurve.Point.restrict E P.groupOpen.ι (-G.universalPoint))
+      (by
+        show (P.antipodePairR ≫ P.groupSquareToSquare)
+            ≫ (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι
+          = P.groupOpen.ι ≫ G.universalPoint.1
+        simp only [Category.assoc, hfstι, P.antipodePairR_fst_assoc]
+        rfl)
+      (by
+        show (P.antipodePairR ≫ P.groupSquareToSquare)
+            ≫ (snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι
+          = P.groupOpen.ι ≫ (-G.universalPoint : E.Point G.π).1
+        rw [← G.invHom_ι]
+        simp only [Category.assoc, hsndι, P.antipodePairR_snd_assoc, P.invRes_comp_ι_assoc])
+  have hsum : EllipticCurve.Point.restrict E P.groupOpen.ι G.universalPoint
+        + EllipticCurve.Point.restrict E P.groupOpen.ι (-G.universalPoint) = 0 := by
+    rw [← EllipticCurve.Point.restrict_add, add_neg_cancel, EllipticCurve.Point.restrict_zero]
+  have hLHS : (P.antipodePairR ≫ P.squareMulRes) ≫ P.groupOpen.ι ≫ G.ι
+      = (EllipticCurve.Point.restrict E P.groupOpen.ι G.universalPoint
+        + EllipticCurve.Point.restrict E P.groupOpen.ι (-G.universalPoint)).1 := by
+    rw [← Esplit, point_base_congr]
+    simp only [EllipticCurve.Point.restrict, Category.assoc, P.squareMulRes_comp_ι_assoc,
+      squareMul, G.mulHom_ι]
+  have hRHS : (P.groupToBaseRes ≫ P.unitSection) ≫ P.groupOpen.ι ≫ G.ι
+      = (0 : E.Point (P.groupOpen.ι ≫ G.π)).1 := by
+    rw [E.point_zero_val, hb]
+    simp only [Category.assoc, P.unitSection_comp_ι_assoc, G.unitHom_ι]
+  rw [hLHS, hRHS, hsum]
 
 theorem comulTop_comp_antipodeLiftTopR :
     P.comulTop ≫ P.antipodeLiftTopR = P.counitTop ≫ P.groupToBaseRes.appTop := by
@@ -1570,30 +1690,6 @@ theorem tripleΓL_comp_assoc :
       Algebra.TensorProduct.assoc_tmul]
 
 /-! #### R3: chart-level associativity and the final coassociativity -/
-
-/-- Base-congruence for points: transport across equal base morphisms preserves the
-underlying scheme morphism. (General-base analogue of the `Spec R` `Point.base_congr`.) -/
-theorem point_base_congr {T : Scheme.{u}} {g g' : T ⟶ S} (h : g = g')
-    (pt : E.Point g) : (h ▸ pt : E.Point g').1 = pt.1 := by subst h; rfl
-
-/-- Base transport is additive. -/
-theorem point_base_congr_add {T : Scheme.{u}} {g g' : T ⟶ S} (h : g = g')
-    (pt q : E.Point g) : (h ▸ (pt + q) : E.Point g') = (h ▸ pt) + (h ▸ q) := by
-  subst h; rfl
-
-/-- A transported restriction is pinned down by its underlying scheme morphism. -/
-theorem point_restrictT_eq {T T' : Scheme.{u}} {g : T ⟶ S} {k : T' ⟶ T} {g' : T' ⟶ S}
-    (h : k ≫ g = g') (pt : E.Point g) (q : E.Point g') (hpq : k ≫ pt.1 = q.1) :
-    (h ▸ EllipticCurve.Point.restrict E k pt : E.Point g') = q :=
-  Subtype.ext ((point_base_congr h (EllipticCurve.Point.restrict E k pt)).trans hpq)
-
-/-- Transported restriction of a sum splits as the sum of the identified points. -/
-theorem point_restrictT_add_eq {T T' : Scheme.{u}} {g : T ⟶ S} {k : T' ⟶ T} {g' : T' ⟶ S}
-    (h : k ≫ g = g') (a b : E.Point g) (pt q : E.Point g')
-    (hp : k ≫ a.1 = pt.1) (hq : k ≫ b.1 = q.1) :
-    (h ▸ EllipticCurve.Point.restrict E k (a + b) : E.Point g') = pt + q := by
-  rw [EllipticCurve.Point.restrict_add, point_base_congr_add,
-    point_restrictT_eq h a pt hp, point_restrictT_eq h b q hq]
 
 /-- The common base of the three coordinate points of the cube: the projection to `S`. -/
 noncomputable abbrev cubeBase : P.cube ⟶ S :=
