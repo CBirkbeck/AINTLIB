@@ -281,6 +281,123 @@ noncomputable def idealGenHom (V : C.Opens) (f : Γ(C, V))
               (V.ι.appIso W.unop).inv g)
       rw [map_mul, h1, h2] }⟩
 
+/-- In a localization away from `a`, multiplication by the image of a nonzerodivisor
+is injective at zero. -/
+private theorem away_mul_algebraMap_eq_zero {R S : Type u} [CommRing R] [CommRing S]
+    [Algebra R S] (a : R) [IsLocalization.Away a S] {f : R}
+    (hf : f ∈ nonZeroDivisors R) {z : S} (hz : z * algebraMap R S f = 0) : z = 0 := by
+  obtain ⟨⟨y, s⟩, hys⟩ := IsLocalization.surj (Submonoid.powers a) z
+  have h1 : algebraMap R S (y * f) = 0 := by
+    calc algebraMap R S (y * f)
+        = (z * algebraMap R S s) * algebraMap R S f := by rw [map_mul, hys]
+      _ = (z * algebraMap R S f) * algebraMap R S s := by ring
+      _ = 0 := by rw [hz, zero_mul]
+  obtain ⟨c, hc⟩ := (IsLocalization.map_eq_zero_iff (Submonoid.powers a) S (y * f)).mp h1
+  have h2 : (c : R) * y = 0 :=
+    (mem_nonZeroDivisors_iff.mp hf).2 _ (by rw [mul_assoc]; exact hc)
+  have h3 : algebraMap R S (c : R) * algebraMap R S y = 0 := by
+    rw [← map_mul, h2, map_zero]
+  have hyz : algebraMap R S y = 0 :=
+    ((IsLocalization.map_units S c).mul_right_eq_zero).mp h3
+  rw [hyz] at hys
+  exact ((IsLocalization.map_units S s).mul_left_eq_zero).mp hys
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- On the preimage in `V` of a basic open of the affine `V`, multiplication by a
+generating nonzerodivisor `f` of the ideal is bijective onto the ideal sections. -/
+theorem bijective_idealGenHom_app (V : C.affineOpens) (f : Γ(C, V.1))
+    (hspan : J.ideal V = Ideal.span {f})
+    (hnzd : f ∈ nonZeroDivisors Γ(C, V.1))
+    (hfmem : f ∈ idealSections J (Opposite.op V.1))
+    (b : Γ(C, V.1)) (hb : C.basicOpen b ≤ V.1) :
+    Function.Bijective ((idealGenHom J V.1 f hfmem).val.app
+      (Opposite.op (V.1.ι ⁻¹ᵁ C.basicOpen b))) := by
+  have hWeq : V.1.ι ''ᵁ (V.1.ι ⁻¹ᵁ C.basicOpen b) = C.basicOpen b := by
+    rw [Scheme.Hom.image_preimage_eq_opensRange_inf, Scheme.Opens.opensRange_ι,
+      inf_eq_right.mpr hb]
+  -- the span identification at the literal basic open, transported to the image
+  have hbase : idealSections J (Opposite.op (C.basicOpen b)) =
+      Ideal.span {C.presheaf.map (homOfLE hb).op f} := by
+    have h1 : idealSections J (Opposite.op (C.basicOpen b)) =
+        J.ideal (C.affineBasicOpen b) := J.ker_subschemeι_app (C.affineBasicOpen b)
+    have h2 := J.map_ideal_basicOpen V b
+    rw [hspan, Ideal.map_span, Set.image_singleton] at h2
+    rw [h1, ← h2]
+  -- the transport isomorphism onto the literal basic open
+  have hφbij : Function.Bijective (C.presheaf.map ((eqToHom hWeq.symm).op :
+      Opposite.op (V.1.ι ''ᵁ (V.1.ι ⁻¹ᵁ C.basicOpen b)) ⟶ Opposite.op (C.basicOpen b))) :=
+    (ConcreteCategory.isIso_iff_bijective _).mp inferInstance
+  -- the localization structure at the image
+  letI halg : Algebra Γ(C, V.1) Γ(C, V.1.ι ''ᵁ (V.1.ι ⁻¹ᵁ C.basicOpen b)) :=
+    (C.presheaf.map (homOfLE
+      (V.1.ι_image_le (V.1.ι ⁻¹ᵁ C.basicOpen b))).op).hom.toAlgebra
+  haveI hloc : IsLocalization.Away b
+      Γ(C, V.1.ι ''ᵁ (V.1.ι ⁻¹ᵁ C.basicOpen b)) :=
+    V.2.isLocalization_of_eq_basicOpen b
+      (homOfLE (V.1.ι_image_le (V.1.ι ⁻¹ᵁ C.basicOpen b))) hWeq
+  constructor
+  · -- injective: cancel the nonzerodivisor generator after the appIso equivalence
+    intro g g' hgg
+    have hval := congrArg Subtype.val hgg
+    have hsub : ((V.1.ι.appIso (V.1.ι ⁻¹ᵁ C.basicOpen b)).inv g -
+        (V.1.ι.appIso (V.1.ι ⁻¹ᵁ C.basicOpen b)).inv g') *
+        C.presheaf.map (homOfLE
+          (V.1.ι_image_le (V.1.ι ⁻¹ᵁ C.basicOpen b))).op f = 0 := by
+      have hval' : C.presheaf.map (homOfLE
+            (V.1.ι_image_le (V.1.ι ⁻¹ᵁ C.basicOpen b))).op f *
+          (V.1.ι.appIso (V.1.ι ⁻¹ᵁ C.basicOpen b)).inv g =
+          C.presheaf.map (homOfLE
+            (V.1.ι_image_le (V.1.ι ⁻¹ᵁ C.basicOpen b))).op f *
+          (V.1.ι.appIso (V.1.ι ⁻¹ᵁ C.basicOpen b)).inv g' := hval
+      rw [sub_mul, mul_comm, mul_comm ((V.1.ι.appIso
+        (V.1.ι ⁻¹ᵁ C.basicOpen b)).inv g') _, hval', sub_self]
+    have hz := away_mul_algebraMap_eq_zero (S := Γ(C, V.1.ι ''ᵁ
+        (V.1.ι ⁻¹ᵁ C.basicOpen b))) b hnzd hsub
+    have hinv : (V.1.ι.appIso (V.1.ι ⁻¹ᵁ C.basicOpen b)).inv g =
+        (V.1.ι.appIso (V.1.ι ⁻¹ᵁ C.basicOpen b)).inv g' := by
+      have := sub_eq_zero.mp hz
+      exact this
+    have hbijinv : Function.Bijective
+        ((V.1.ι.appIso (V.1.ι ⁻¹ᵁ C.basicOpen b)).inv) :=
+      (ConcreteCategory.isIso_iff_bijective _).mp inferInstance
+    exact hbijinv.injective hinv
+  · -- surjective: divide by the generator via the span membership
+    intro z
+    have hzmem : C.presheaf.map ((eqToHom hWeq.symm).op) (z : idealSections J
+          (Opposite.op (V.1.ι ''ᵁ (V.1.ι ⁻¹ᵁ C.basicOpen b)))).1 ∈
+        idealSections J (Opposite.op (C.basicOpen b)) :=
+      idealSections_map J ((eqToHom hWeq.symm).op) (z : idealSections J
+        (Opposite.op (V.1.ι ''ᵁ (V.1.ι ⁻¹ᵁ C.basicOpen b)))).2
+    rw [hbase] at hzmem
+    obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp hzmem
+    obtain ⟨c₀, hc₀⟩ := hφbij.surjective c
+    refine ⟨(V.1.ι.appIso (V.1.ι ⁻¹ᵁ C.basicOpen b)).hom c₀, ?_⟩
+    refine Subtype.ext ?_
+    -- reduce to an equation after the injective transport
+    refine hφbij.injective ?_
+    have hcoh : C.presheaf.map ((eqToHom hWeq.symm).op)
+        (C.presheaf.map (homOfLE
+          (V.1.ι_image_le (V.1.ι ⁻¹ᵁ C.basicOpen b))).op f) =
+        C.presheaf.map (homOfLE hb).op f := by
+      refine Eq.trans ?_ (congrArg (fun (t : _ ⟶ _) => C.presheaf.map t f)
+        (Subsingleton.elim ((homOfLE
+          (V.1.ι_image_le (V.1.ι ⁻¹ᵁ C.basicOpen b))).op ≫ (eqToHom hWeq.symm).op)
+          (homOfLE hb).op))
+      exact (congrArg (fun (t : _ ⟶ _) => (ConcreteCategory.hom t) f)
+        (C.presheaf.map_comp (homOfLE
+          (V.1.ι_image_le (V.1.ι ⁻¹ᵁ C.basicOpen b))).op (eqToHom hWeq.symm).op)).symm
+    have hih : (V.1.ι.appIso (V.1.ι ⁻¹ᵁ C.basicOpen b)).inv
+        ((V.1.ι.appIso (V.1.ι ⁻¹ᵁ C.basicOpen b)).hom c₀) = c₀ := by
+      have := (V.1.ι.appIso (V.1.ι ⁻¹ᵁ C.basicOpen b)).hom_inv_id
+      exact congrArg (fun (t : _ ⟶ _) => (ConcreteCategory.hom t) c₀) this
+    show C.presheaf.map ((eqToHom hWeq.symm).op)
+        (C.presheaf.map (homOfLE (V.1.ι_image_le (V.1.ι ⁻¹ᵁ C.basicOpen b))).op f *
+          (V.1.ι.appIso (V.1.ι ⁻¹ᵁ C.basicOpen b)).inv
+            ((V.1.ι.appIso (V.1.ι ⁻¹ᵁ C.basicOpen b)).hom c₀)) = _
+    rw [map_mul, hcoh, hih, hc₀, mul_comm]
+    exact hc
+
 end GenTriv
 
 end AlgebraicGeometry.Scheme.Modules
