@@ -50,7 +50,8 @@ of the divisor commutes with base change"; the `[Γ₁(N)]`-problem's functorial
 KM 3.2). Elliptic-curve form over a morphism of base schemes. -/
 theorem isGammaOne_pullAlong (N : ℕ) [NeZero N] (f : T ⟶ S) (P : E.Section)
     (h : E.IsGammaOne N P) :
-    (E.baseChange f).IsGammaOne N (EllipticCurve.Point.asSection E f (EllipticCurve.Point.pull E f P)) := by sorry
+    (E.baseChange f).IsGammaOne N (EllipticCurve.Point.asSection E f (EllipticCurve.Point.pull E f P)) :=
+  EllipticCurve.Section.HasExactOrder.baseChange E h f
 
 end Transport
 
