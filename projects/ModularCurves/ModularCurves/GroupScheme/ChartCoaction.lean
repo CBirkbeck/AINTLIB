@@ -831,6 +831,558 @@ theorem kunnethSpecIso_hom_specMap_coactionRing :
   rw [specMap_coactionRing, chartCoactionSpec_eq, ← Category.assoc, ← Category.assoc,
     Iso.hom_inv_id, Category.id_comp]
 
+/-- The group-square affine identification `G|_V ×_V G|_V ≅ Spec (A ⊗ A)`. -/
+noncomputable abbrev squareSpecIso :
+    P.groupSquare ≅ Spec (.of (P.groupRing ⊗[P.baseRing] P.groupRing)) :=
+  patchKunneth G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen
+    (e₁ := le_rfl) (e₂ := le_rfl) rfl rfl
+
+/-- **The right-associated triple identification** `chartCube ≅ Spec (A ⊗ (A ⊗ B))`. -/
+noncomputable def cubeSpecIso :
+    P.chartCube ≅ Spec (.of (P.groupRing ⊗[P.baseRing]
+        (P.groupRing ⊗[P.baseRing] P.chartRing))) := by
+  haveI := P.isIso_toSpecΓ_V
+  haveI := P.isIso_toSpecΓ_groupOpen
+  refine asIso (pullback.map P.groupToBaseRes P.chartD2ToBase
+      (Spec.map (CommRingCat.ofHom (algebraMap P.baseRing P.groupRing)))
+      (Spec.map (CommRingCat.ofHom (algebraMap P.baseRing
+        (P.groupRing ⊗[P.baseRing] P.chartRing))))
+      P.groupOpen.toSpecΓ (P.chartD2congr.inv ≫ P.kunnethSpecIso.hom) P.V.toSpecΓ ?_ ?_)
+    ≪≫ pullbackSpecIso P.baseRing P.groupRing (P.groupRing ⊗[P.baseRing] P.chartRing)
+  · exact (Scheme.Opens.toSpecΓ_SpecMap_appLE G.π P.V P.groupOpen le_rfl).symm
+  · conv_rhs => rw [Category.assoc, kunnethSpecIso_hom_base]
+    rw [P.chartD2congr_inv_snd_assoc]
+    show (pullback.fst P.groupToBaseRes P.chartToBase ≫ P.groupToBaseRes) ≫ P.V.toSpecΓ
+        = pullback.snd P.groupToBaseRes P.chartToBase ≫ P.chartToBase ≫ P.V.toSpecΓ
+    rw [Category.assoc, pullback.condition_assoc]
+
+/-- **The left-associated triple identification** `chartCubeL ≅ Spec ((A ⊗ A) ⊗ B)`. -/
+noncomputable def cubeLSpecIso :
+    P.chartCubeL ≅ Spec (.of ((P.groupRing ⊗[P.baseRing] P.groupRing)
+        ⊗[P.baseRing] P.chartRing)) := by
+  haveI := P.isIso_toSpecΓ_V
+  haveI := P.isIso_toSpecΓ_U
+  refine asIso (pullback.map P.squareToBase P.chartToBase
+      (Spec.map (CommRingCat.ofHom (algebraMap P.baseRing
+        (P.groupRing ⊗[P.baseRing] P.groupRing))))
+      (Spec.map (CommRingCat.ofHom (algebraMap P.baseRing P.chartRing)))
+      P.squareSpecIso.hom P.U.toSpecΓ P.V.toSpecΓ ?_ ?_)
+    ≪≫ pullbackSpecIso P.baseRing (P.groupRing ⊗[P.baseRing] P.groupRing) P.chartRing
+  · rw [squareToBase, Category.assoc]
+    exact (patchKunneth_hom_base G.π G.π P.hV P.isAffineOpen_groupOpen
+      P.isAffineOpen_groupOpen (e₁ := le_rfl) (e₂ := le_rfl) rfl rfl).symm
+  · exact (Scheme.Opens.toSpecΓ_SpecMap_appLE E.π P.V P.U P.hover).symm
+
+/-- The right-triple identification carries the outer left inclusion `A ↪ A ⊗ (A ⊗ B)` to the
+first cube projection. -/
+theorem cubeSpecIso_hom_includeLeft :
+    P.cubeSpecIso.hom ≫ Spec.map (CommRingCat.ofHom
+        (Algebra.TensorProduct.includeLeftRingHom (R := P.baseRing) (A := P.groupRing)
+          (B := P.groupRing ⊗[P.baseRing] P.chartRing)))
+      = pullback.fst P.groupToBaseRes P.chartD2ToBase ≫ P.groupOpen.toSpecΓ := by
+  rw [cubeSpecIso, Iso.trans_hom, asIso_hom, Category.assoc, pullbackSpecIso_hom_fst]
+  exact pullback.lift_fst _ _ _
+
+/-- The right-triple identification carries the outer right inclusion `(A ⊗ B) ↪ A ⊗ (A ⊗ B)`
+to the second cube projection, followed by the pair identification. -/
+theorem cubeSpecIso_hom_includeRight :
+    P.cubeSpecIso.hom ≫ Spec.map (CommRingCat.ofHom
+        (Algebra.TensorProduct.includeRight (R := P.baseRing) (A := P.groupRing)
+          (B := P.groupRing ⊗[P.baseRing] P.chartRing)).toRingHom)
+      = pullback.snd P.groupToBaseRes P.chartD2ToBase
+        ≫ P.chartD2congr.inv ≫ P.kunnethSpecIso.hom := by
+  rw [cubeSpecIso, Iso.trans_hom, asIso_hom, Category.assoc]
+  rw [show Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := P.baseRing) (A := P.groupRing)
+        (B := P.groupRing ⊗[P.baseRing] P.chartRing)).toRingHom)
+      = Spec.map (CommRingCat.ofHom (RingHomClass.toRingHom
+        (Algebra.TensorProduct.includeRight (R := P.baseRing) (A := P.groupRing)
+          (B := P.groupRing ⊗[P.baseRing] P.chartRing)))) from rfl,
+    pullbackSpecIso_hom_snd]
+  exact pullback.lift_snd _ _ _
+
+/-- The left-triple identification carries the outer left inclusion `(A ⊗ A) ↪ (A ⊗ A) ⊗ B`
+to the first cube projection, followed by the square identification. -/
+@[reassoc]
+theorem cubeLSpecIso_hom_includeLeft :
+    P.cubeLSpecIso.hom ≫ Spec.map (CommRingCat.ofHom
+        (Algebra.TensorProduct.includeLeftRingHom (R := P.baseRing)
+          (A := P.groupRing ⊗[P.baseRing] P.groupRing) (B := P.chartRing)))
+      = pullback.fst P.squareToBase P.chartToBase ≫ P.squareSpecIso.hom := by
+  rw [cubeLSpecIso, Iso.trans_hom, asIso_hom, Category.assoc, pullbackSpecIso_hom_fst]
+  exact pullback.lift_fst _ _ _
+
+/-- The left-triple identification carries the outer right inclusion `B ↪ (A ⊗ A) ⊗ B` to the
+chart projection. -/
+theorem cubeLSpecIso_hom_includeRight :
+    P.cubeLSpecIso.hom ≫ Spec.map (CommRingCat.ofHom
+        (Algebra.TensorProduct.includeRight (R := P.baseRing)
+          (A := P.groupRing ⊗[P.baseRing] P.groupRing) (B := P.chartRing)).toRingHom)
+      = pullback.snd P.squareToBase P.chartToBase ≫ P.U.toSpecΓ := by
+  rw [cubeLSpecIso, Iso.trans_hom, asIso_hom, Category.assoc]
+  rw [show Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := P.baseRing) (A := P.groupRing ⊗[P.baseRing] P.groupRing)
+        (B := P.chartRing)).toRingHom)
+      = Spec.map (CommRingCat.ofHom (RingHomClass.toRingHom
+        (Algebra.TensorProduct.includeRight (R := P.baseRing)
+          (A := P.groupRing ⊗[P.baseRing] P.groupRing) (B := P.chartRing)))) from rfl,
+    pullbackSpecIso_hom_snd]
+  exact pullback.lift_snd _ _ _
+
+/-- **The group-multiplication dual**: the square identification conjugates `Spec (Δ)` (the
+comultiplication) into the corestricted multiplication `squareMulRes`. -/
+theorem squareSpecIso_hom_comul :
+    P.squareSpecIso.hom ≫ Spec.map P.groupPatchComul
+      = P.squareMulRes ≫ P.groupOpen.toSpecΓ := by
+  rw [groupPatchComul_eq, Spec.map_comp, patchKunnethΓ, Spec.map_comp, SpecMap_ΓSpecIso_hom,
+    Scheme.Opens.toSpecΓ, squareMul_appLE_eq, Spec.map_comp]
+  simp only [Category.assoc]
+  rw [← Scheme.toSpecΓ_naturality_assoc, Iso.hom_inv_id_assoc,
+    ← Scheme.toSpecΓ_naturality_assoc]
+
+/-- Tensor identity: `A ↪ A ⊗ B` post-composed with `id ⊗ ρ_L` is `A ↪ A ⊗ (A ⊗ B)`. -/
+theorem ofHom_includeLeft_map_id_coaction :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom (R := P.baseRing)
+        (A := P.groupRing) (B := P.chartRing))
+      ≫ CommRingCat.ofHom (Algebra.TensorProduct.map (AlgHom.id P.baseRing P.groupRing)
+          P.coactionAlgLeft).toRingHom
+      = CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom (R := P.baseRing)
+        (A := P.groupRing) (B := P.groupRing ⊗[P.baseRing] P.chartRing)) := by
+  rw [← CommRingCat.ofHom_comp]
+  refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+  show (Algebra.TensorProduct.map (AlgHom.id P.baseRing P.groupRing) P.coactionAlgLeft)
+      (a ⊗ₜ[P.baseRing] (1 : P.chartRing))
+      = a ⊗ₜ[P.baseRing] (1 : P.groupRing ⊗[P.baseRing] P.chartRing)
+  rw [Algebra.TensorProduct.map_tmul, AlgHom.id_apply, map_one]
+
+/-- Tensor identity: `B ↪ A ⊗ B` post-composed with `id ⊗ ρ_L` is `ρ_L` then `A ⊗ B ↪ A ⊗ (A ⊗ B)`. -/
+theorem ofHom_includeRight_map_id_coaction :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := P.baseRing)
+        (A := P.groupRing) (B := P.chartRing)).toRingHom
+      ≫ CommRingCat.ofHom (Algebra.TensorProduct.map (AlgHom.id P.baseRing P.groupRing)
+          P.coactionAlgLeft).toRingHom
+      = P.coactionRing ≫ CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := P.baseRing) (A := P.groupRing)
+        (B := P.groupRing ⊗[P.baseRing] P.chartRing)).toRingHom := by
+  rw [← CommRingCat.ofHom_comp]
+  refine CommRingCat.hom_ext (RingHom.ext fun b => ?_)
+  show (Algebra.TensorProduct.map (AlgHom.id P.baseRing P.groupRing) P.coactionAlgLeft)
+      ((1 : P.groupRing) ⊗ₜ[P.baseRing] b)
+      = (1 : P.groupRing) ⊗ₜ[P.baseRing] P.coactionAlgLeft b
+  rw [Algebra.TensorProduct.map_tmul, AlgHom.id_apply]
+
+/-- **(ML)** `Spec` of `(id ⊗ ρ_L) ∘ ·` conjugates through the triples into the inner action. -/
+theorem cubeSpecIso_hom_mapIdCoaction :
+    P.cubeSpecIso.hom ≫ Spec.map (CommRingCat.ofHom
+        (Algebra.TensorProduct.map (AlgHom.id P.baseRing P.groupRing)
+          P.coactionAlgLeft).toRingHom)
+      = P.chartInnerAct ≫ P.chartD2congr.inv ≫ P.kunnethSpecIso.hom := by
+  refine spec_tensor_hom_ext ?_ ?_
+  · simp only [Category.assoc]
+    rw [← Spec.map_comp, ofHom_includeLeft_map_id_coaction, cubeSpecIso_hom_includeLeft,
+      kunnethSpecIso_hom_includeLeft, P.chartD2congr_inv_fst_assoc, P.chartInnerAct_fst_assoc]
+  · simp only [Category.assoc]
+    rw [← Spec.map_comp, ofHom_includeRight_map_id_coaction, Spec.map_comp, ← Category.assoc,
+      cubeSpecIso_hom_includeRight, kunnethSpecIso_hom_includeRight,
+      P.chartD2congr_inv_snd_assoc, P.chartInnerAct_snd_assoc]
+    simp only [Category.assoc]
+    rw [kunnethSpecIso_hom_specMap_coactionRing, chartActRes]
+    simp only [Category.assoc]
+
+/-- Tensor identity: `A ↪ A ⊗ B` post-composed with `Δ ⊗ id` is `Δ` then `A⊗A ↪ (A⊗A) ⊗ B`. -/
+theorem ofHom_includeLeft_map_comul_id :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom (R := P.baseRing)
+        (A := P.groupRing) (B := P.chartRing))
+      ≫ CommRingCat.ofHom (Algebra.TensorProduct.map (comulAlg G P)
+          (AlgHom.id P.baseRing P.chartRing)).toRingHom
+      = P.groupPatchComul ≫ CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := P.baseRing) (A := P.groupRing ⊗[P.baseRing] P.groupRing) (B := P.chartRing)) := by
+  rw [← CommRingCat.ofHom_comp]
+  refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+  show (Algebra.TensorProduct.map (comulAlg G P) (AlgHom.id P.baseRing P.chartRing))
+      (a ⊗ₜ[P.baseRing] (1 : P.chartRing))
+      = (comulAlg G P a) ⊗ₜ[P.baseRing] (1 : P.chartRing)
+  rw [Algebra.TensorProduct.map_tmul, map_one]
+
+/-- Tensor identity: `B ↪ A ⊗ B` post-composed with `Δ ⊗ id` is `B ↪ (A⊗A) ⊗ B`. -/
+theorem ofHom_includeRight_map_comul_id :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := P.baseRing)
+        (A := P.groupRing) (B := P.chartRing)).toRingHom
+      ≫ CommRingCat.ofHom (Algebra.TensorProduct.map (comulAlg G P)
+          (AlgHom.id P.baseRing P.chartRing)).toRingHom
+      = CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := P.baseRing)
+        (A := P.groupRing ⊗[P.baseRing] P.groupRing) (B := P.chartRing)).toRingHom := by
+  rw [← CommRingCat.ofHom_comp]
+  refine CommRingCat.hom_ext (RingHom.ext fun b => ?_)
+  show (Algebra.TensorProduct.map (comulAlg G P) (AlgHom.id P.baseRing P.chartRing))
+      ((1 : P.groupRing) ⊗ₜ[P.baseRing] b)
+      = (1 : P.groupRing ⊗[P.baseRing] P.groupRing) ⊗ₜ[P.baseRing] b
+  rw [Algebra.TensorProduct.map_tmul, map_one, AlgHom.id_apply]
+
+/-- **(MO)** `Spec` of `(Δ ⊗ id) ∘ ·` conjugates through the triples into the outer
+multiplication. -/
+@[reassoc]
+theorem cubeLSpecIso_hom_mapComulId :
+    P.cubeLSpecIso.hom ≫ Spec.map (CommRingCat.ofHom
+        (Algebra.TensorProduct.map (comulAlg G P) (AlgHom.id P.baseRing P.chartRing)).toRingHom)
+      = P.chartOuterMul ≫ P.chartD2congr.inv ≫ P.kunnethSpecIso.hom := by
+  refine spec_tensor_hom_ext ?_ ?_
+  · simp only [Category.assoc]
+    rw [← Spec.map_comp, ofHom_includeLeft_map_comul_id, Spec.map_comp, ← Category.assoc,
+      cubeLSpecIso_hom_includeLeft, kunnethSpecIso_hom_includeLeft,
+      P.chartD2congr_inv_fst_assoc, P.chartOuterMul_fst_assoc]
+    simp only [Category.assoc]
+    rw [squareSpecIso_hom_comul]
+  · simp only [Category.assoc]
+    rw [← Spec.map_comp, ofHom_includeRight_map_comul_id, cubeLSpecIso_hom_includeRight,
+      kunnethSpecIso_hom_includeRight, P.chartD2congr_inv_snd_assoc, P.chartOuterMul_snd_assoc]
+
+/-- The square identification carries `Spec` of the left inclusion `A ↪ A ⊗ A` to the first
+group leg. -/
+@[reassoc]
+theorem squareSpecIso_hom_includeLeft :
+    P.squareSpecIso.hom ≫ Spec.map (CommRingCat.ofHom
+        (Algebra.TensorProduct.includeLeftRingHom (R := P.baseRing) (A := P.groupRing)
+          (B := P.groupRing)))
+      = pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.toSpecΓ :=
+  patchKunneth_hom_comp_includeLeft G.π G.π P.hV P.isAffineOpen_groupOpen
+    P.isAffineOpen_groupOpen (e₁ := le_rfl) (e₂ := le_rfl) rfl rfl
+
+/-- The square identification carries `Spec` of the right inclusion `A ↪ A ⊗ A` to the second
+group leg. -/
+@[reassoc]
+theorem squareSpecIso_hom_includeRight :
+    P.squareSpecIso.hom ≫ Spec.map (CommRingCat.ofHom
+        (Algebra.TensorProduct.includeRight (R := P.baseRing) (A := P.groupRing)
+          (B := P.groupRing)).toRingHom)
+      = pullback.snd P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.toSpecΓ :=
+  patchKunneth_hom_comp_includeRight G.π G.π P.hV P.isAffineOpen_groupOpen
+    P.isAffineOpen_groupOpen (e₁ := le_rfl) (e₂ := le_rfl) rfl rfl
+
+/-- Tensor identity (g₁): `A ↪ (A⊗A) ↪ (A⊗A)⊗B` then `assoc` is `A ↪ A⊗(A⊗B)`. -/
+theorem ofHom_assoc_includeLeft_includeLeft :
+    (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom (R := P.baseRing)
+        (A := P.groupRing) (B := P.groupRing))
+      ≫ CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom (R := P.baseRing)
+        (A := P.groupRing ⊗[P.baseRing] P.groupRing) (B := P.chartRing)))
+      ≫ CommRingCat.ofHom (Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing
+          P.groupRing P.groupRing P.chartRing).toAlgHom.toRingHom
+      = CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom (R := P.baseRing)
+        (A := P.groupRing) (B := P.groupRing ⊗[P.baseRing] P.chartRing)) := by
+  simp only [← CommRingCat.ofHom_comp]
+  refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+  show (Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing
+        P.groupRing P.groupRing P.chartRing)
+      ((a ⊗ₜ[P.baseRing] (1 : P.groupRing)) ⊗ₜ[P.baseRing] (1 : P.chartRing))
+      = a ⊗ₜ[P.baseRing] (1 : P.groupRing ⊗[P.baseRing] P.chartRing)
+  rw [Algebra.TensorProduct.assoc_tmul, Algebra.TensorProduct.one_def]
+
+/-- Tensor identity (g₂): `A ↪ (A⊗A)` (right) `↪ (A⊗A)⊗B` then `assoc` is `A ↪ A⊗B ↪ A⊗(A⊗B)`. -/
+theorem ofHom_assoc_includeLeft_includeRight :
+    (CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := P.baseRing)
+        (A := P.groupRing) (B := P.groupRing)).toRingHom
+      ≫ CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom (R := P.baseRing)
+        (A := P.groupRing ⊗[P.baseRing] P.groupRing) (B := P.chartRing)))
+      ≫ CommRingCat.ofHom (Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing
+          P.groupRing P.groupRing P.chartRing).toAlgHom.toRingHom
+      = CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom (R := P.baseRing)
+        (A := P.groupRing) (B := P.chartRing))
+      ≫ CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := P.baseRing)
+        (A := P.groupRing) (B := P.groupRing ⊗[P.baseRing] P.chartRing)).toRingHom := by
+  simp only [← CommRingCat.ofHom_comp]
+  refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+  show (Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing
+        P.groupRing P.groupRing P.chartRing)
+      (((1 : P.groupRing) ⊗ₜ[P.baseRing] a) ⊗ₜ[P.baseRing] (1 : P.chartRing))
+      = (1 : P.groupRing) ⊗ₜ[P.baseRing] (a ⊗ₜ[P.baseRing] (1 : P.chartRing))
+  rw [Algebra.TensorProduct.assoc_tmul]
+
+/-- Tensor identity (x): `B ↪ (A⊗A)⊗B` then `assoc` is `B ↪ A⊗B ↪ A⊗(A⊗B)`. -/
+theorem ofHom_assoc_includeRight :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := P.baseRing)
+        (A := P.groupRing ⊗[P.baseRing] P.groupRing) (B := P.chartRing)).toRingHom
+      ≫ CommRingCat.ofHom (Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing
+          P.groupRing P.groupRing P.chartRing).toAlgHom.toRingHom
+      = CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := P.baseRing)
+        (A := P.groupRing) (B := P.chartRing)).toRingHom
+      ≫ CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := P.baseRing)
+        (A := P.groupRing) (B := P.groupRing ⊗[P.baseRing] P.chartRing)).toRingHom := by
+  simp only [← CommRingCat.ofHom_comp]
+  refine CommRingCat.hom_ext (RingHom.ext fun b => ?_)
+  show (Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing
+        P.groupRing P.groupRing P.chartRing)
+      ((1 : P.groupRing ⊗[P.baseRing] P.groupRing) ⊗ₜ[P.baseRing] b)
+      = (1 : P.groupRing) ⊗ₜ[P.baseRing] ((1 : P.groupRing) ⊗ₜ[P.baseRing] b)
+  rw [Algebra.TensorProduct.one_def, Algebra.TensorProduct.assoc_tmul]
+
+/-- **(MA)** `Spec` of the tensor associator conjugates through the triples into the geometric
+associator `chartAssoc`. -/
+@[reassoc]
+theorem cubeSpecIso_hom_assoc :
+    P.cubeSpecIso.hom ≫ Spec.map (CommRingCat.ofHom
+        (Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing
+          P.groupRing P.groupRing P.chartRing).toAlgHom.toRingHom)
+      = P.chartAssoc ≫ P.cubeLSpecIso.hom := by
+  refine spec_tensor_hom_ext ?_ ?_
+  · refine spec_tensor_hom_ext ?_ ?_
+    · simp only [Category.assoc]
+      rw [P.cubeLSpecIso_hom_includeLeft_assoc, squareSpecIso_hom_includeLeft,
+        P.chartAssoc_fst_fst_assoc, ← Spec.map_comp, ← Spec.map_comp,
+        ofHom_assoc_includeLeft_includeLeft, cubeSpecIso_hom_includeLeft]
+    · simp only [Category.assoc]
+      rw [P.cubeLSpecIso_hom_includeLeft_assoc, squareSpecIso_hom_includeRight,
+        P.chartAssoc_fst_snd_assoc, ← Spec.map_comp, ← Spec.map_comp,
+        ofHom_assoc_includeLeft_includeRight, Spec.map_comp, ← Category.assoc,
+        cubeSpecIso_hom_includeRight]
+      simp only [Category.assoc]
+      rw [kunnethSpecIso_hom_includeLeft, P.chartD2congr_inv_fst_assoc]
+  · simp only [Category.assoc]
+    rw [cubeLSpecIso_hom_includeRight, P.chartAssoc_snd_assoc, ← Spec.map_comp,
+      ofHom_assoc_includeRight, Spec.map_comp, ← Category.assoc,
+      cubeSpecIso_hom_includeRight]
+    simp only [Category.assoc]
+    rw [kunnethSpecIso_hom_includeRight, P.chartD2congr_inv_snd_assoc]
+
+/-- **(C1) coassoc, `CommRingCat` form** for the group-first co-action ring map: the left
+convention `(id ⊗ ρ_L) ∘ ρ_L = assoc ∘ (Δ ⊗ id) ∘ ρ_L`. Assembled from `(ML)`, `(MA)`, `(MO)`,
+`(K)` and the geometric `chartAssoc_mProd`, descended through `Spec`. -/
+theorem coactionRing_coassoc :
+    P.coactionRing ≫ CommRingCat.ofHom (Algebra.TensorProduct.map
+        (AlgHom.id P.baseRing P.groupRing) P.coactionAlgLeft).toRingHom
+      = P.coactionRing ≫ CommRingCat.ofHom (Algebra.TensorProduct.map (comulAlg G P)
+          (AlgHom.id P.baseRing P.chartRing)).toRingHom
+        ≫ CommRingCat.ofHom (Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing
+          P.groupRing P.groupRing P.chartRing).toAlgHom.toRingHom := by
+  refine Spec.map_injective ?_
+  rw [← cancel_epi P.cubeSpecIso.hom]
+  calc P.cubeSpecIso.hom ≫ Spec.map (P.coactionRing ≫ CommRingCat.ofHom
+          (Algebra.TensorProduct.map (AlgHom.id P.baseRing P.groupRing)
+            P.coactionAlgLeft).toRingHom)
+      = P.mTwice ≫ P.U.toSpecΓ := by
+        rw [Spec.map_comp, ← Category.assoc, cubeSpecIso_hom_mapIdCoaction, Category.assoc,
+          Category.assoc, kunnethSpecIso_hom_specMap_coactionRing, mTwice, chartActRes]
+        simp only [Category.assoc]
+    _ = (P.chartAssoc ≫ P.mProd) ≫ P.U.toSpecΓ := by rw [chartAssoc_mProd]
+    _ = P.cubeSpecIso.hom ≫ Spec.map (P.coactionRing ≫ CommRingCat.ofHom
+          (Algebra.TensorProduct.map (comulAlg G P) (AlgHom.id P.baseRing P.chartRing)).toRingHom
+          ≫ CommRingCat.ofHom (Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing
+            P.groupRing P.groupRing P.chartRing).toAlgHom.toRingHom) := by
+        rw [Spec.map_comp, Spec.map_comp]
+        simp only [Category.assoc]
+        rw [cubeSpecIso_hom_assoc_assoc, cubeLSpecIso_hom_mapComulId_assoc,
+          kunnethSpecIso_hom_specMap_coactionRing, mProd, chartActRes]
+        simp only [Category.assoc]
+
+/-- **Stage 1: the left-convention coassoc** for `coactionAlgLeft`, `AlgHom` form. -/
+theorem coactionAlgLeft_coassoc :
+    (Algebra.TensorProduct.map (AlgHom.id P.baseRing P.groupRing) P.coactionAlgLeft).comp
+        P.coactionAlgLeft
+      = (Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing
+          P.groupRing P.groupRing P.chartRing).toAlgHom.comp
+        ((Algebra.TensorProduct.map (comulAlg G P) (AlgHom.id P.baseRing P.chartRing)).comp
+          P.coactionAlgLeft) := by
+  refine AlgHom.ext fun b => ?_
+  have h := congrArg (fun m : P.chartRing ⟶ CommRingCat.of (P.groupRing ⊗[P.baseRing]
+    (P.groupRing ⊗[P.baseRing] P.chartRing)) => m.hom b) P.coactionRing_coassoc
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h
+  exact h
+
+/-! ### Cocommutativity of the comultiplication (the group is abelian) -/
+
+/-- The common base of the two coordinate points of the group square. -/
+noncomputable abbrev sqMulBase : P.groupSquare ⟶ S :=
+  pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupToBaseRes ≫ P.V.ι
+
+/-- Swap the two factors of the group square `G|_V ×_V G|_V`. -/
+noncomputable def squareSwap : P.groupSquare ⟶ P.groupSquare :=
+  pullback.lift (pullback.snd P.groupToBaseRes P.groupToBaseRes)
+    (pullback.fst P.groupToBaseRes P.groupToBaseRes) pullback.condition.symm
+
+@[reassoc] theorem squareSwap_fst :
+    P.squareSwap ≫ pullback.fst P.groupToBaseRes P.groupToBaseRes
+      = pullback.snd P.groupToBaseRes P.groupToBaseRes := pullback.lift_fst _ _ _
+
+@[reassoc] theorem squareSwap_snd :
+    P.squareSwap ≫ pullback.snd P.groupToBaseRes P.groupToBaseRes
+      = pullback.fst P.groupToBaseRes P.groupToBaseRes := pullback.lift_snd _ _ _
+
+/-- First coordinate point `g₁` of the group square. -/
+noncomputable def sqMulPt₁ : E.Point P.sqMulBase :=
+  ⟨pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.ι ≫ G.ι, by
+    show (pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.ι ≫ G.ι) ≫ E.π
+        = pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupToBaseRes ≫ P.V.ι
+    rw [Category.assoc, Category.assoc, G.ι_π,
+      show P.groupOpen.ι ≫ G.π = P.groupToBaseRes ≫ P.V.ι from (Scheme.Hom.resLE_comp_ι _ _).symm]⟩
+
+/-- Second coordinate point `g₂` of the group square. -/
+noncomputable def sqMulPt₂ : E.Point P.sqMulBase :=
+  ⟨pullback.snd P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.ι ≫ G.ι, by
+    show (pullback.snd P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.ι ≫ G.ι) ≫ E.π
+        = pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupToBaseRes ≫ P.V.ι
+    rw [Category.assoc, Category.assoc, G.ι_π,
+      show P.groupOpen.ι ≫ G.π = P.groupToBaseRes ≫ P.V.ι from (Scheme.Hom.resLE_comp_ι _ _).symm,
+      ← Category.assoc, ← pullback.condition, Category.assoc]⟩
+
+@[simp] theorem sqMulPt₁_val : P.sqMulPt₁.1
+    = pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.ι ≫ G.ι := rfl
+@[simp] theorem sqMulPt₂_val : P.sqMulPt₂.1
+    = pullback.snd P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.ι ≫ G.ι := rfl
+
+/-- **Commutativity of the group multiplication** on the square: swapping the two factors before
+multiplying gives the same result (the subgroup of the elliptic curve is abelian). Proved by
+`ι`-cancellation, both sides a coordinate point sum, finishing with `add_comm`. -/
+theorem squareSwap_comp_squareMulRes : P.squareSwap ≫ P.squareMulRes = P.squareMulRes := by
+  rw [← cancel_mono (P.groupOpen.ι ≫ G.ι)]
+  have hgsts : P.groupSquareToSquare ≫ (Over.mk G.π ⊗ Over.mk G.π).hom = P.sqMulBase := by
+    rw [← G.mulHom_π, ← Category.assoc]; exact P.squareMul_π
+  have hfstι : P.groupSquareToSquare ≫ (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι
+      = pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.ι ≫ G.ι := by
+    rw [← Category.assoc, P.groupSquareToSquare_fst]; exact Category.assoc _ _ _
+  have hsndι : P.groupSquareToSquare ≫ (snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι
+      = pullback.snd P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.ι ≫ G.ι := by
+    rw [← Category.assoc, P.groupSquareToSquare_snd]; exact Category.assoc _ _ _
+  have hbaseP : (P.squareSwap ≫ P.groupSquareToSquare) ≫ (Over.mk G.π ⊗ Over.mk G.π).hom
+      = P.sqMulBase := by
+    rw [Category.assoc, hgsts]
+    show (P.squareSwap ≫ pullback.fst P.groupToBaseRes P.groupToBaseRes) ≫ P.groupToBaseRes ≫ P.V.ι
+        = pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupToBaseRes ≫ P.V.ι
+    rw [squareSwap_fst, ← Category.assoc, ← pullback.condition, Category.assoc]
+  have EId : (hgsts ▸ EllipticCurve.Point.restrict E P.groupSquareToSquare
+        (G.sqFstPoint + G.sqSndPoint) : E.Point P.sqMulBase) = P.sqMulPt₁ + P.sqMulPt₂ :=
+    point_restrictT_add_eq hgsts G.sqFstPoint G.sqSndPoint P.sqMulPt₁ P.sqMulPt₂
+      (by rw [sqMulPt₁_val]; exact hfstι) (by rw [sqMulPt₂_val]; exact hsndι)
+  have ESwap : (hbaseP ▸ EllipticCurve.Point.restrict E
+        (P.squareSwap ≫ P.groupSquareToSquare) (G.sqFstPoint + G.sqSndPoint) : E.Point P.sqMulBase)
+      = P.sqMulPt₂ + P.sqMulPt₁ :=
+    point_restrictT_add_eq hbaseP G.sqFstPoint G.sqSndPoint P.sqMulPt₂ P.sqMulPt₁
+      (by
+        show (P.squareSwap ≫ P.groupSquareToSquare)
+            ≫ (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι = P.sqMulPt₂.1
+        rw [sqMulPt₂_val, Category.assoc, hfstι, ← Category.assoc, squareSwap_fst])
+      (by
+        show (P.squareSwap ≫ P.groupSquareToSquare)
+            ≫ (snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι = P.sqMulPt₁.1
+        rw [sqMulPt₁_val, Category.assoc, hsndι, ← Category.assoc, squareSwap_snd])
+  have hRHSm : P.squareMulRes ≫ P.groupOpen.ι ≫ G.ι = (P.sqMulPt₁ + P.sqMulPt₂).1 := by
+    rw [← EId, point_base_congr]
+    simp only [EllipticCurve.Point.restrict, Category.assoc, P.squareMulRes_comp_ι_assoc,
+      squareMul, G.mulHom_ι]
+  have hLHSm : (P.squareSwap ≫ P.squareMulRes) ≫ P.groupOpen.ι ≫ G.ι
+      = (P.sqMulPt₂ + P.sqMulPt₁).1 := by
+    rw [← ESwap, point_base_congr]
+    simp only [EllipticCurve.Point.restrict, Category.assoc, P.squareMulRes_comp_ι_assoc,
+      squareMul, G.mulHom_ι]
+  rw [hLHSm, hRHSm, add_comm]
+
+/-- Tensor identity: `A ↪ A ⊗ A` (left) then `comm` is `A ↪ A ⊗ A` (right). -/
+theorem ofHom_includeLeft_comm :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom (R := P.baseRing)
+        (A := P.groupRing) (B := P.groupRing))
+      ≫ CommRingCat.ofHom (Algebra.TensorProduct.comm P.baseRing P.groupRing
+          P.groupRing).toAlgHom.toRingHom
+      = CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := P.baseRing)
+        (A := P.groupRing) (B := P.groupRing)).toRingHom := by
+  rw [← CommRingCat.ofHom_comp]
+  refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+  show (Algebra.TensorProduct.comm P.baseRing P.groupRing P.groupRing)
+      (a ⊗ₜ[P.baseRing] (1 : P.groupRing)) = (1 : P.groupRing) ⊗ₜ[P.baseRing] a
+  rw [Algebra.TensorProduct.comm_tmul]
+
+/-- Tensor identity: `A ↪ A ⊗ A` (right) then `comm` is `A ↪ A ⊗ A` (left). -/
+theorem ofHom_includeRight_comm :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeRight (R := P.baseRing)
+        (A := P.groupRing) (B := P.groupRing)).toRingHom
+      ≫ CommRingCat.ofHom (Algebra.TensorProduct.comm P.baseRing P.groupRing
+          P.groupRing).toAlgHom.toRingHom
+      = CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom (R := P.baseRing)
+        (A := P.groupRing) (B := P.groupRing)) := by
+  rw [← CommRingCat.ofHom_comp]
+  refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+  show (Algebra.TensorProduct.comm P.baseRing P.groupRing P.groupRing)
+      ((1 : P.groupRing) ⊗ₜ[P.baseRing] a) = a ⊗ₜ[P.baseRing] (1 : P.groupRing)
+  rw [Algebra.TensorProduct.comm_tmul]
+
+/-- **The comm dual**: the square identification conjugates `Spec (comm)` into the square swap. -/
+theorem squareSpecIso_hom_comm :
+    P.squareSpecIso.hom ≫ Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.comm P.baseRing
+        P.groupRing P.groupRing).toAlgHom.toRingHom)
+      = P.squareSwap ≫ P.squareSpecIso.hom := by
+  refine spec_tensor_hom_ext ?_ ?_
+  · simp only [Category.assoc]
+    rw [← Spec.map_comp, ofHom_includeLeft_comm, squareSpecIso_hom_includeRight,
+      squareSpecIso_hom_includeLeft, ← Category.assoc, squareSwap_fst]
+  · simp only [Category.assoc]
+    rw [← Spec.map_comp, ofHom_includeRight_comm, squareSpecIso_hom_includeLeft,
+      squareSpecIso_hom_includeRight, ← Category.assoc, squareSwap_snd]
+
+/-- **Cocommutativity, `CommRingCat` form**: `comm ∘ Δ = Δ`, dual to the group-multiplication
+commutativity. -/
+theorem groupPatchComul_comm :
+    P.groupPatchComul ≫ CommRingCat.ofHom (Algebra.TensorProduct.comm P.baseRing
+        P.groupRing P.groupRing).toAlgHom.toRingHom = P.groupPatchComul := by
+  refine Spec.map_injective ?_
+  rw [Spec.map_comp, ← cancel_epi P.squareSpecIso.hom, ← Category.assoc,
+    squareSpecIso_hom_comm, Category.assoc, squareSpecIso_hom_comul, ← Category.assoc,
+    squareSwap_comp_squareMulRes]
+
+/-- **Cocommutativity, `AlgHom` form**: `comm ∘ Δ = Δ`. -/
+theorem comulAlg_comm :
+    (Algebra.TensorProduct.comm P.baseRing P.groupRing P.groupRing).toAlgHom.comp (comulAlg G P)
+      = comulAlg G P := by
+  refine AlgHom.ext fun a => ?_
+  have h := congrArg (fun m : P.groupRing ⟶ CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing)
+    => m.hom a) P.groupPatchComul_comm
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h
+  exact h
+
+/-! ### Stage 2: converting the left convention to the comodule (right) convention -/
+
+/-- The reversing coherence `Θ ∘ assoc` on a pure tensor `s ⊗ b`, `s ∈ A ⊗ A`: it sends
+`s ⊗ b ↦ b ⊗ comm(s)`. -/
+theorem theta_assoc_tmul (s : P.groupRing ⊗[P.baseRing] P.groupRing) (b : P.chartRing) :
+    (Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing P.chartRing P.groupRing
+        P.groupRing)
+        ((Algebra.TensorProduct.map (Algebra.TensorProduct.comm P.baseRing P.groupRing
+            P.chartRing).toAlgHom (AlgHom.id P.baseRing P.groupRing))
+          ((Algebra.TensorProduct.comm P.baseRing P.groupRing
+              (P.groupRing ⊗[P.baseRing] P.chartRing))
+            ((Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing P.groupRing P.groupRing
+                P.chartRing) (s ⊗ₜ[P.baseRing] b))))
+      = b ⊗ₜ[P.baseRing] (Algebra.TensorProduct.comm P.baseRing P.groupRing P.groupRing) s := by
+  induction s using TensorProduct.induction_on with
+  | zero => simp
+  | add x y hx hy =>
+    simp only [TensorProduct.add_tmul, map_add, hx, hy, TensorProduct.tmul_add]
+  | tmul a a' =>
+    simp only [Algebra.TensorProduct.assoc_tmul, Algebra.TensorProduct.comm_tmul,
+      Algebra.TensorProduct.map_tmul, AlgEquiv.coe_toAlgHom, AlgHom.id_apply]
+
+/-- **The front coherence**: the pure reshuffle `Θ` composed with `assoc ∘ (Δ ⊗ id)` equals
+`(id ⊗ Δ) ∘ comm`. This is where cocommutativity (`comulAlg_comm`) enters. -/
+theorem hFront_coherence :
+    (Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing P.chartRing P.groupRing
+        P.groupRing).toAlgHom.comp
+        ((Algebra.TensorProduct.map (Algebra.TensorProduct.comm P.baseRing P.groupRing
+            P.chartRing).toAlgHom (AlgHom.id P.baseRing P.groupRing)).comp
+          ((Algebra.TensorProduct.comm P.baseRing P.groupRing
+              (P.groupRing ⊗[P.baseRing] P.chartRing)).toAlgHom.comp
+            ((Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing P.groupRing P.groupRing
+                P.chartRing).toAlgHom.comp
+              (Algebra.TensorProduct.map (comulAlg G P) (AlgHom.id P.baseRing P.chartRing)))))
+      = (Algebra.TensorProduct.map (AlgHom.id P.baseRing P.chartRing) (comulAlg G P)).comp
+          (Algebra.TensorProduct.comm P.baseRing P.groupRing P.chartRing).toAlgHom := by
+  refine AlgHom.ext fun t => ?_
+  induction t using TensorProduct.induction_on with
+  | zero => simp
+  | add x y hx hy => simp only [map_add, hx, hy]
+  | tmul a b =>
+    simp only [AlgHom.comp_apply, AlgEquiv.coe_toAlgHom, Algebra.TensorProduct.map_tmul,
+      AlgHom.id_apply, Algebra.TensorProduct.comm_tmul]
+    rw [theta_assoc_tmul]
+    have hcc := AlgHom.congr_fun P.comulAlg_comm a
+    simp only [AlgHom.comp_apply, AlgEquiv.coe_toAlgHom] at hcc
+    rw [hcc]
+
 theorem chartCoaction_isCoaction : IsCoaction P.chartCoaction where
   counit := by
     rw [show Bialgebra.counitAlgHom P.baseRing P.groupRing = counitAlg G P from
@@ -853,21 +1405,27 @@ theorem chartCoaction_isCoaction : IsCoaction P.chartCoaction where
       ← AlgHom.comp_assoc, ← AlgHom.comp_assoc, hcollapse,
       chartCounitCollapse_comp_coactionAlgLeft]
   coassoc := by
-    -- REMAINING (WIP): the Γ-dual of `translationAction_assoc`, mirroring PatchHopf's
-    -- `comulTop_coassoc`. Plan (analogous to the completed `counit` field above):
-    --  1. Build the triple identification `Spec(A ⊗ (A ⊗ B)) ≅ G|_V ×_V (G|_V ×_V U)` by
-    --     layering `pullbackSpecIso P.baseRing P.groupRing (A⊗B)` on `chartSpecIso`, with
-    --     its three inclusion-leg duals (reuse `chartSpecIso_hom_includeLeft/Right`).
-    --  2. Build the two triple-action scheme maps `m_twice = α∘(id_G ×_V α)` and
-    --     `m_prod = α∘(μ ×_V id_U)∘assoc` on the triple, where α = `chartCoactionSpec`,
-    --     μ = `squareMul` (from PatchHopf).
-    --  3. Prove `m_twice = m_prod` by `cancel_mono P.U.ι` + the E.Point route (cube points
-    --     `cubePt₁/₂/₃`, `point_restrictT_add_eq`), finishing with `add_assoc` — mirroring
-    --     `assocScheme_leftMulSchemeL`.
-    --  4. Γ-dualise (through the triple legs + `ΓSpecIso_inv_naturality`) to the AlgHom
-    --     coassoc for `coactionAlgLeft`, then convert to `chartCoaction` via `comm`/`assoc`
-    --     coherence (pure tensor algebra), and rewrite `comulAlgHom` via `comulAlgHom_eq_opens`.
-    sorry
+    -- The Γ-dual of `translationAction_assoc`: assembled from `coactionAlgLeft_coassoc`
+    -- (Stage 1, dualising `chartAssoc_mProd`) converted to the right (comodule) convention via
+    -- the braiding naturality `comm_comp_map`, the front coherence `hFront_coherence`, and
+    -- cocommutativity `comulAlg_comm`.
+    rw [show Bialgebra.comulAlgHom P.baseRing P.groupRing = comulAlg G P from
+        comulAlgHom_eq_opens G P,
+      show P.chartCoaction = (Algebra.TensorProduct.comm P.baseRing P.groupRing
+        P.chartRing).toAlgHom.comp P.coactionAlgLeft from rfl]
+    refine AlgHom.ext fun b => ?_
+    have hkey := AlgHom.congr_fun P.coactionAlgLeft_coassoc b
+    have hfront := AlgHom.congr_fun P.hFront_coherence (P.coactionAlgLeft b)
+    simp only [AlgHom.comp_apply, AlgEquiv.coe_toAlgHom] at hkey hfront ⊢
+    rw [show (Algebra.TensorProduct.map ((Algebra.TensorProduct.comm P.baseRing P.groupRing
+          P.chartRing).toAlgHom.comp P.coactionAlgLeft) (AlgHom.id P.baseRing P.groupRing))
+        = (Algebra.TensorProduct.map (Algebra.TensorProduct.comm P.baseRing P.groupRing
+            P.chartRing).toAlgHom (AlgHom.id P.baseRing P.groupRing)).comp
+          (Algebra.TensorProduct.map P.coactionAlgLeft (AlgHom.id P.baseRing P.groupRing)) from by
+        rw [← Algebra.TensorProduct.map_comp, AlgHom.id_comp]]
+    simp only [AlgHom.comp_apply]
+    rw [← Algebra.TensorProduct.comm_comp_map_apply, hkey]
+    exact hfront
 
 end AffineChartPatch
 
