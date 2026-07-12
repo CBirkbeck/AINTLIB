@@ -484,7 +484,12 @@ The remaining indexing gap in mathlib's totalization API is closed in
 the standard vertical sign `(-1)^p` for natural-number-indexed cochain
 complexes, so `HomologicalComplex₂.total (ComplexShape.up ℕ)` now applies
 directly to the first-quadrant injective Cech bicomplex. This reuses mathlib's
-total complex rather than introducing a parallel construction.
+total complex rather than introducing a parallel construction. The same file
+now supplies `ComplexShape.upNat_totalComplexShapeSymmetry`, with Koszul sign
+`(-1)^(p*q)`. Consequently mathlib's existing `totalFlipIso` identifies the
+total complexes before and after swapping the two first-quadrant directions;
+this is the transport needed to reuse the horizontal edge theorem for the
+vertical comparison.
 
 The low-degree coproduct API for that totalization is now exposed in
 `ForMathlib/TotalComplexUpNatLowDegrees.lean`. `πTotalUpNat` projects a total
