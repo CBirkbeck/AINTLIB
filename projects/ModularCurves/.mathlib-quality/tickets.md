@@ -16892,3 +16892,32 @@ localModel glues (LocallyWeierstrass.baseChange + it's Zariski-local).
 - **Next after 3 sorries**: `StableAffineChartData` consumes `[HopfAlgebra R' A']` on
   `groupRingTop` DIRECTLY (no topIso bridge). Then `IsCoaction chartCoaction`, `Module.Free`/
   `Module.Finite R' A'` (from finite/flat/lfp — own arc), C1d/C3/C4, six SubgroupQuotient pins.
+
+### SESSION LEDGER (NEW-HOPF, 2026-07-12 cont. — ★★ HopfAlgebra COMPLETE)
+- ★★ **[HG-C1c-1d] `[HopfAlgebra R' A']` SORRY-FREE + AXIOM-CLEAN** ({propext, Classical.choice,
+  Quot.sound}). The chart Hopf-algebra crux is DONE: `instBialgebra` + `instHopfAlgebra` on
+  R'=`baseRingTop`, A'=`groupRingTop`, gated on nothing.
+- **The 3 chart group-law identities (all proven this session)**:
+  - `assocScheme_leftMulSchemeL` (assoc, dualizes `mulOver_assoc`) — proven by a delegated
+    worktree sub-agent via the **E.Point route**: `cancel_mono (groupOpen.ι ≫ G.ι)`, isolate the
+    tensor-`.left`↔`G.G` defeq wall into `hgsts`/`hfstι`/`hsndι` haves closed with term-mode
+    `exact Category.assoc _ _ _`, split `restrict k (sqFst+sqSnd)` via `point_restrictT_add_eq`
+    into the 3 cube coordinate points (`cubePt₁₂₃` over `cubeBase`), finish with `add_assoc`.
+  - `antipodePair_comp_squareMulRes` / `antipodePairR_comp_squareMulRes` (g⁻¹·g=e / g·g⁻¹=e,
+    dualize `invOver_mulOver_left`/`_right`) — mirrored the agent's technique over base
+    `groupOpen.ι ≫ G.π` (no base transport), splitting into `restrict groupOpen.ι (±universalPoint)`
+    and finishing with `neg_add_cancel`/`add_neg_cancel` + `restrict_zero`; the g⁻¹ coordinate is
+    identified via `rw [← G.invHom_ι]` (term-mode, sidesteps the `.left` wall).
+- **New reusable helpers** (general-base analogues of DeligneOrder's Spec-R `Point.base_congr`,
+  axiom-clean): `point_base_congr`, `point_base_congr_add`, `point_restrictT_eq`,
+  `point_restrictT_add_eq` — FOR-MATHLIB / cross-project candidates.
+- **KEY LESSON (the `.left` wall)**: Over-monoidal `(Over.mk f ⊗ Over.mk g).left` ≃ `pullback f g`
+  and `(Over.mk f).left` ≃ (domain) are defeq but NOT unfolded at `instances` transparency, so
+  `rw`/`simp`/`erw` die ("not type-correct under instances transparency", `erw` spawns failing
+  `aesop` `w`-goals). Escapes: (1) term-mode `exact <lemma>` (checks full defeq); (2) isolate every
+  `.hom`/`.left` expansion into a `have` proved term-mode so the tensor `.left` never leaks into a
+  later rewrite; (3) the E.Point route avoids the tensor `.left` entirely.
+- **Next (charter horizon)**: `StableAffineChartData` consumes `[HopfAlgebra R' A']` on
+  `groupRingTop` directly (verified — NO topIso bridge needed). Remaining: `IsCoaction chartCoaction`
+  (dualizes `translationAction_unit`/`_assoc`, same E.Point technique), `Module.Free`/`Module.Finite
+  R' A'` (from finite/flat/lfp — own arc), C1d/C3/C4, six SubgroupQuotient pins → BOARD-SIGNAL.
