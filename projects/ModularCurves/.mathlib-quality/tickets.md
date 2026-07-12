@@ -16513,3 +16513,5 @@ green (9,994 jobs). Board detail: v10.152-CLOSER on `dev/modular-curves-y1`.
 Attribution: c5β (representability chain/seesaw), A (Over-monoidal prep), NEW-CASCADE
 (T-B6′/BB-DIFF unramified cascade), NEW-Y1 (Y1 stream + K-series + BB-QF + this close),
 HasseWeil (`mulByInt_degree` anchor). CHARTER-Y1-CLOSER-2 COMPLETE.
+
+### DONE (rule 5, OWNER-FLW-MODEL, 2026-07-11, 4b78308f5): proved `projModelZero_ker_ideal_chartY`, `projModelZero_ker_ideal_chartZ`, the canonical section-neighborhood ideal trivialization, and `sectionPoleSheafPower_projModel_sectionsEquiv` identifying `Γ(O(n[0]))` with `poleOrderFiltration`; focused builds green and axiom audit is `propext`/`Classical.choice`/`Quot.sound` only (consumes T-W7 chart algebra; no Pic⁰/group-law route or new options).
