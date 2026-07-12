@@ -84,6 +84,35 @@ theorem IsFreeAlgebraAction.of_fixedPoints_ground
   obtain ⟨a, ha⟩ := hfree g hg R' (φ.restrictScalars R)
   exact ⟨a, ha⟩
 
+variable {G R A} in
+/-- Elements of the fixed subalgebra commute with the `G`-action — the reversed order of
+mathlib's `SMulCommClass G (FixedPoints.subalgebra A B' G) B'` instance. Together they let
+`IsFreeAlgebraAction.of_fixedPoints_ground` and the `A ⊗[Aᴳ] C` base-change action fire
+without manual instance plumbing. -/
+instance : SMulCommClass ↥(FixedPoints.subalgebra R A G) G A :=
+  SMulCommClass.symm G ↥(FixedPoints.subalgebra R A G) A
+
+variable {G R A} in
+/-- The fixed subalgebra's action on a base change of `A` (through the left factor, by
+multiplication) commutes with the `G`-action — the subtype-`SMul` sibling of
+`MulSemiringAction`'s `SMulCommClass G R (A ⊗[R] R')` instance. This is the instance
+`FixedPoints.subalgebra` elaborates against when the GROUND ring of the tensor is itself
+`Aᴳ` (as in `(A ⊗[Aᴳ] C)ᴳ`, the affine base-change engine of the free quotient): there
+the `Aᴳ`-`SMul` is the subalgebra-subtype action `s • z = (s : A) • z`, not the
+module-structure action, and the generic instance does not unify. -/
+instance (C : Type u) [CommRing C] [Algebra ↥(FixedPoints.subalgebra R A G) C] :
+    SMulCommClass G ↥(FixedPoints.subalgebra R A G)
+      (A ⊗[↥(FixedPoints.subalgebra R A G)] C) where
+  smul_comm g s z := by
+    show g • ((s : A) • z) = (s : A) • (g • z)
+    induction z with
+    | zero => simp
+    | add z₁ z₂ h₁ h₂ => simp only [smul_add, h₁, h₂]
+    | tmul a r =>
+      simp only [TensorProduct.smul_tmul']
+      congr 1
+      rw [smul_eq_mul, smul_eq_mul, smul_mul', s.2 g]
+
 /-- **(T-Q2-A711, step 1 — the Chase–Harrison–Rosenberg bridge; PROVEN)** KM's freeness
 condition implies the pointwise CHR condition: at every prime `𝔭` of `A` and every `g ≠ 1`
 there is `a : A` with `g • a - a ∉ 𝔭`.
@@ -930,6 +959,82 @@ theorem fixedPointsBaseChange_bijective_of_isFreeAlgebraAction
       rw [smul_mul', y.2 g, MulSemiringAction.smul_tmul_baseChange g c (1 : R')]
     simp only [hterm, ← Finset.sum_mul, ← TensorProduct.sum_tmul, hc']
     rw [show ((1 : A) ⊗ₜ[R] (1 : R')) = 1 from (Algebra.TensorProduct.one_def).symm, one_mul]
+
+variable {G R A} in
+/-- The inclusion of the base ring into the invariants of a base change: for an algebra `C`
+over the invariants `Aᴳ`, the map `c ↦ 1 ⊗ c` lands in the `G`-fixed points of `A ⊗_{Aᴳ} C`
+(the action being through the left factor). For free actions it is a bijection
+(`bijective_includeRightFixedPoints` below) — KM 7.1.3(3c)'s affine base-change engine. -/
+noncomputable def includeRightFixedPoints (C : Type u) [CommRing C]
+    [Algebra ↥(FixedPoints.subalgebra R A G) C] :
+    C →ₐ[↥(FixedPoints.subalgebra R A G)]
+      ↥(FixedPoints.subalgebra ↥(FixedPoints.subalgebra R A G)
+        (A ⊗[↥(FixedPoints.subalgebra R A G)] C) G) :=
+  AlgHom.codRestrict Algebra.TensorProduct.includeRight
+    (FixedPoints.subalgebra ↥(FixedPoints.subalgebra R A G)
+      (A ⊗[↥(FixedPoints.subalgebra R A G)] C) G) fun c g => by
+    show g • ((1 : A) ⊗ₜ[↥(FixedPoints.subalgebra R A G)] c) =
+      (1 : A) ⊗ₜ[↥(FixedPoints.subalgebra R A G)] c
+    rw [MulSemiringAction.smul_tmul_baseChange, smul_one]
+
+variable {G R A} in
+omit [SMulCommClass R G A] [Finite G] in
+@[simp]
+theorem includeRightFixedPoints_coe (C : Type u) [CommRing C]
+    [Algebra ↥(FixedPoints.subalgebra R A G) C] (c : C) :
+    (includeRightFixedPoints (G := G) (R := R) (A := A) C c :
+      A ⊗[↥(FixedPoints.subalgebra R A G)] C) =
+      (1 : A) ⊗ₜ[↥(FixedPoints.subalgebra R A G)] c := rfl
+
+variable {G R A} in
+/-- **The affine base-change engine of the free quotient (GHB5a-i, algebra half; KM
+7.1.3(3c))**: for a free action of a finite group `G` and ANY algebra `C` over the
+invariants `Aᴳ`, base change along `Aᴳ → C` has invariants exactly `C`:
+`c ↦ 1 ⊗ c : C ≅ (A ⊗_{Aᴳ} C)ᴳ`.
+
+This is [A711-BC] `fixedPointsBaseChange_bijective_of_isFreeAlgebraAction` re-grounded at
+`Aᴳ` (`IsFreeAlgebraAction.of_fixedPoints_ground`), where `FixedPoints.subalgebra Aᴳ A G`
+is `Aᴳ` itself and `Aᴳ ⊗_{Aᴳ} C ≅ C`. Note there is NO flatness/openness hypothesis on
+`C` — this is exactly what fails for non-free actions and what powers arbitrary-base
+descent of the affine quotient (`exists_invariantsπ_lift_baseChange_of_free`). -/
+theorem bijective_includeRightFixedPoints (hfree : IsFreeAlgebraAction G R A)
+    (C : Type u) [CommRing C] [Algebra ↥(FixedPoints.subalgebra R A G) C] :
+    Function.Bijective (includeRightFixedPoints (G := G) (R := R) (A := A) C) := by
+  classical
+  -- [A711-BC] at ground `Aᴳ`, via the ground-switch of freeness
+  have hbc := fixedPointsBaseChange_bijective_of_isFreeAlgebraAction G
+    ↥(FixedPoints.subalgebra R A G) A hfree.of_fixedPoints_ground C
+  -- the ground-switch identification `Aᴳ ≃ₐ[Aᴳ] FixedPoints.subalgebra Aᴳ A G`
+  have hij : Function.Bijective (Algebra.ofId ↥(FixedPoints.subalgebra R A G)
+      ↥(FixedPoints.subalgebra ↥(FixedPoints.subalgebra R A G) A G)) := by
+    constructor
+    · intro x y hxy
+      exact Subtype.ext (congrArg Subtype.val hxy)
+    · rintro ⟨z, hz⟩
+      exact ⟨⟨z, hz⟩, Subtype.ext rfl⟩
+  -- the composite `C ≅ Aᴳ ⊗ C ≅ (Fixᴳ Aᴳ) ⊗ C → (A ⊗ C)ᴳ` is elementwise `c ↦ 1 ⊗ c`
+  have hfun : ∀ c : C, includeRightFixedPoints (G := G) (R := R) (A := A) C c =
+      fixedPointsBaseChange (G := G) (R := ↥(FixedPoints.subalgebra R A G)) (A := A)
+        (R' := C)
+        (Algebra.TensorProduct.congr (AlgEquiv.ofBijective _ hij) AlgEquiv.refl
+          ((Algebra.TensorProduct.lid ↥(FixedPoints.subalgebra R A G) C).symm c)) := by
+    intro c
+    refine Subtype.ext ?_
+    rw [Algebra.TensorProduct.lid_symm_apply]
+    simp only [Algebra.TensorProduct.congr_apply, Algebra.TensorProduct.map_tmul,
+      fixedPointsBaseChange_tmul, includeRightFixedPoints_coe, map_one,
+      OneMemClass.coe_one]
+    rfl
+  have hcomp : ⇑(includeRightFixedPoints (G := G) (R := R) (A := A) C) =
+      ⇑(fixedPointsBaseChange (G := G) (R := ↥(FixedPoints.subalgebra R A G)) (A := A)
+        (R' := C)) ∘
+      ⇑(Algebra.TensorProduct.congr (AlgEquiv.ofBijective _ hij) AlgEquiv.refl) ∘
+      ⇑(Algebra.TensorProduct.lid ↥(FixedPoints.subalgebra R A G) C).symm :=
+    funext hfun
+  rw [hcomp]
+  exact hbc.comp ((Algebra.TensorProduct.congr (AlgEquiv.ofBijective _ hij)
+    AlgEquiv.refl).bijective.comp
+      (Algebra.TensorProduct.lid ↥(FixedPoints.subalgebra R A G) C).symm.bijective)
 
 /-- **(T-Q2-A711, step 7 — the separability idempotent, in its classical form)** For a free
 action of a finite group there is `e ∈ A ⊗_{Aᴳ} A` with `mult(e) = 1` and
