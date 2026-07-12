@@ -61,6 +61,29 @@ def IsFreeAlgebraAction : Prop :=
   ∀ g : G, g ≠ 1 → ∀ (R' : Type u) [CommRing R'] [Algebra R R'] [Nontrivial R']
     (φ : A →ₐ[R] R'), ∃ a : A, φ (g • a) ≠ φ a
 
+variable {G R A} in
+/-- **Freeness descends to the invariant ground ring.** If `G` acts freely on the
+`R`-algebra `A`, then it acts freely on `A` viewed as an `Aᴳ`-algebra: every
+`Aᴳ`-algebra is an `R`-algebra (via `R → Aᴳ`) and every `Aᴳ`-algebra hom out of `A` is
+an `R`-algebra hom, so the ground-`R` freeness applies verbatim. This lets
+`fixedPointsBaseChange_bijective_of_isFreeAlgebraAction` ([A711-BC]) be invoked at
+ground `Aᴳ`, giving `(A ⊗_{Aᴳ} C)ᴳ = C` for every `Aᴳ`-algebra `C` — the affine
+base-change engine of KM 7.1.3(3c) (GHB5a-i). -/
+theorem IsFreeAlgebraAction.of_fixedPoints_ground
+    [SMulCommClass G ↥(FixedPoints.subalgebra R A G) A]
+    [SMulCommClass ↥(FixedPoints.subalgebra R A G) G A]
+    [IsScalarTower R ↥(FixedPoints.subalgebra R A G) A]
+    (hfree : IsFreeAlgebraAction G R A) :
+    IsFreeAlgebraAction G ↥(FixedPoints.subalgebra R A G) A := by
+  intro g hg R' _ _ _ φ
+  letI : Algebra R R' :=
+    ((algebraMap (↥(FixedPoints.subalgebra R A G)) R').comp
+      (algebraMap R ↥(FixedPoints.subalgebra R A G))).toAlgebra
+  haveI : IsScalarTower R ↥(FixedPoints.subalgebra R A G) R' :=
+    IsScalarTower.of_algebraMap_eq fun _ => rfl
+  obtain ⟨a, ha⟩ := hfree g hg R' (φ.restrictScalars R)
+  exact ⟨a, ha⟩
+
 /-- **(T-Q2-A711, step 1 — the Chase–Harrison–Rosenberg bridge; PROVEN)** KM's freeness
 condition implies the pointwise CHR condition: at every prime `𝔭` of `A` and every `g ≠ 1`
 there is `a : A` with `g • a - a ∉ 𝔭`.
