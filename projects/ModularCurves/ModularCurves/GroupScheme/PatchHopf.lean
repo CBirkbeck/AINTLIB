@@ -1571,11 +1571,175 @@ theorem tripleΓL_comp_assoc :
 
 /-! #### R3: chart-level associativity and the final coassociativity -/
 
+/-- Base-congruence for points: transport across equal base morphisms preserves the
+underlying scheme morphism. (General-base analogue of the `Spec R` `Point.base_congr`.) -/
+theorem point_base_congr {T : Scheme.{u}} {g g' : T ⟶ S} (h : g = g')
+    (pt : E.Point g) : (h ▸ pt : E.Point g').1 = pt.1 := by subst h; rfl
+
+/-- Base transport is additive. -/
+theorem point_base_congr_add {T : Scheme.{u}} {g g' : T ⟶ S} (h : g = g')
+    (pt q : E.Point g) : (h ▸ (pt + q) : E.Point g') = (h ▸ pt) + (h ▸ q) := by
+  subst h; rfl
+
+/-- A transported restriction is pinned down by its underlying scheme morphism. -/
+theorem point_restrictT_eq {T T' : Scheme.{u}} {g : T ⟶ S} {k : T' ⟶ T} {g' : T' ⟶ S}
+    (h : k ≫ g = g') (pt : E.Point g) (q : E.Point g') (hpq : k ≫ pt.1 = q.1) :
+    (h ▸ EllipticCurve.Point.restrict E k pt : E.Point g') = q :=
+  Subtype.ext ((point_base_congr h (EllipticCurve.Point.restrict E k pt)).trans hpq)
+
+/-- Transported restriction of a sum splits as the sum of the identified points. -/
+theorem point_restrictT_add_eq {T T' : Scheme.{u}} {g : T ⟶ S} {k : T' ⟶ T} {g' : T' ⟶ S}
+    (h : k ≫ g = g') (a b : E.Point g) (pt q : E.Point g')
+    (hp : k ≫ a.1 = pt.1) (hq : k ≫ b.1 = q.1) :
+    (h ▸ EllipticCurve.Point.restrict E k (a + b) : E.Point g') = pt + q := by
+  rw [EllipticCurve.Point.restrict_add, point_base_congr_add,
+    point_restrictT_eq h a pt hp, point_restrictT_eq h b q hq]
+
+/-- The common base of the three coordinate points of the cube: the projection to `S`. -/
+noncomputable abbrev cubeBase : P.cube ⟶ S :=
+  pullback.fst P.groupToBaseRes P.squareToBase ≫ P.groupOpen.ι ≫ G.π
+
+/-- First coordinate point `g₁` of the cube, as an `E`-point over `cubeBase`. -/
+noncomputable def cubePt₁ : E.Point (P.cubeBase) :=
+  ⟨pullback.fst P.groupToBaseRes P.squareToBase ≫ P.groupOpen.ι ≫ G.ι, by
+    simp only [cubeBase, Category.assoc, G.ι_π]⟩
+
+/-- Second coordinate point `g₂` of the cube. -/
+noncomputable def cubePt₂ : E.Point (P.cubeBase) :=
+  ⟨pullback.snd P.groupToBaseRes P.squareToBase ≫ pullback.fst P.groupToBaseRes P.groupToBaseRes
+      ≫ P.groupOpen.ι ≫ G.ι, by
+    have hb : P.groupOpen.ι ≫ G.π = P.groupToBaseRes ≫ P.V.ι :=
+      (Scheme.Hom.resLE_comp_ι _ _).symm
+    have hc₂ : pullback.snd P.groupToBaseRes P.squareToBase
+          ≫ pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupToBaseRes
+        = pullback.fst P.groupToBaseRes P.squareToBase ≫ P.groupToBaseRes :=
+      pullback.condition.symm
+    simp only [cubeBase, Category.assoc, G.ι_π, hb]
+    rw [reassoc_of% hc₂]⟩
+
+/-- Third coordinate point `g₃` of the cube. -/
+noncomputable def cubePt₃ : E.Point (P.cubeBase) :=
+  ⟨pullback.snd P.groupToBaseRes P.squareToBase ≫ pullback.snd P.groupToBaseRes P.groupToBaseRes
+      ≫ P.groupOpen.ι ≫ G.ι, by
+    have hb : P.groupOpen.ι ≫ G.π = P.groupToBaseRes ≫ P.V.ι :=
+      (Scheme.Hom.resLE_comp_ι _ _).symm
+    have hc₃ : pullback.snd P.groupToBaseRes P.squareToBase
+          ≫ pullback.snd P.groupToBaseRes P.groupToBaseRes ≫ P.groupToBaseRes
+        = pullback.fst P.groupToBaseRes P.squareToBase ≫ P.groupToBaseRes := by
+      rw [← pullback.condition (f := P.groupToBaseRes) (g := P.groupToBaseRes)]
+      exact pullback.condition.symm
+    simp only [cubeBase, Category.assoc, G.ι_π, hb]
+    rw [reassoc_of% hc₃]⟩
+
 /-- **R3-assoc: chart-level group associativity.** The associator carries the left-associated
-triple multiplication `((g₁·g₂)·g₃)` to the right-associated one `(g₁·(g₂·g₃))`. -/
+triple multiplication `((g₁·g₂)·g₃)` to the right-associated one `(g₁·(g₂·g₃))`. The proof
+cancels the two monos `groupOpen.ι` and `G.ι`, reducing to an equality of morphisms into `E`;
+both sides are the coercion of a triple sum of the cube's three coordinate points, and the
+identity is `add_assoc` in `E.Point cubeBase`. -/
 theorem assocScheme_leftMulSchemeL :
     P.assocScheme ≫ P.leftMulSchemeL = P.rightMulScheme := by
-  sorry
+  rw [← cancel_mono (P.groupOpen.ι ≫ G.ι)]
+  have hb : P.groupOpen.ι ≫ G.π = P.groupToBaseRes ≫ P.V.ι :=
+    (Scheme.Hom.resLE_comp_ι _ _).symm
+  have hU : (G.sqFstPoint + G.sqSndPoint : E.Point _).1 = G.mulHom ≫ G.ι := G.mulHom_ι.symm
+  have hgsts : P.groupSquareToSquare ≫ (Over.mk G.π ⊗ Over.mk G.π).hom
+      = pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupToBaseRes ≫ P.V.ι := by
+    rw [← G.mulHom_π, ← Category.assoc]; exact P.squareMul_π
+  have hfstι : P.groupSquareToSquare ≫ (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι
+      = pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.ι ≫ G.ι := by
+    rw [← Category.assoc, P.groupSquareToSquare_fst]; exact Category.assoc _ _ _
+  have hsndι : P.groupSquareToSquare ≫ (snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι
+      = pullback.snd P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.ι ≫ G.ι := by
+    rw [← Category.assoc, P.groupSquareToSquare_snd]; exact Category.assoc _ _ _
+  have hv : (P.cubeInnerMul ≫ P.groupSquareToSquare) ≫ (Over.mk G.π ⊗ Over.mk G.π).hom
+      = P.cubeBase := by
+    simp only [Category.assoc, hgsts, P.cubeInnerMul_fst_assoc, cubeBase, hb]
+  have hv' : (P.assocScheme ≫ P.cubeOuterMul ≫ P.groupSquareToSquare)
+        ≫ (Over.mk G.π ⊗ Over.mk G.π).hom = P.cubeBase := by
+    simp only [Category.assoc, hgsts, P.cubeOuterMul_fst_assoc,
+      P.squareMulRes_comp_groupToBaseRes_assoc, P.assocScheme_fst_fst_assoc, cubeBase, hb]
+  have hs : (pullback.snd P.groupToBaseRes P.squareToBase ≫ P.groupSquareToSquare)
+        ≫ (Over.mk G.π ⊗ Over.mk G.π).hom = P.cubeBase := by
+    have hc₂ : pullback.snd P.groupToBaseRes P.squareToBase
+          ≫ pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupToBaseRes
+        = pullback.fst P.groupToBaseRes P.squareToBase ≫ P.groupToBaseRes :=
+      pullback.condition.symm
+    simp only [Category.assoc, hgsts, cubeBase, hb]
+    rw [reassoc_of% hc₂]
+  have hu : (P.assocScheme ≫ pullback.fst P.squareToBase P.groupToBaseRes ≫ P.groupSquareToSquare)
+        ≫ (Over.mk G.π ⊗ Over.mk G.π).hom = P.cubeBase := by
+    simp only [Category.assoc, hgsts, P.assocScheme_fst_fst_assoc, cubeBase, hb]
+  have Es : (hs ▸ EllipticCurve.Point.restrict E
+        (pullback.snd P.groupToBaseRes P.squareToBase ≫ P.groupSquareToSquare)
+        (G.sqFstPoint + G.sqSndPoint) : E.Point P.cubeBase) = P.cubePt₂ + P.cubePt₃ :=
+    point_restrictT_add_eq hs G.sqFstPoint G.sqSndPoint P.cubePt₂ P.cubePt₃
+      (by
+        show (pullback.snd P.groupToBaseRes P.squareToBase ≫ P.groupSquareToSquare)
+            ≫ (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι = _
+        simp only [Category.assoc, hfstι, cubePt₂])
+      (by
+        show (pullback.snd P.groupToBaseRes P.squareToBase ≫ P.groupSquareToSquare)
+            ≫ (snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι = _
+        simp only [Category.assoc, hsndι, cubePt₃])
+  have Eu : (hu ▸ EllipticCurve.Point.restrict E
+        (P.assocScheme ≫ pullback.fst P.squareToBase P.groupToBaseRes ≫ P.groupSquareToSquare)
+        (G.sqFstPoint + G.sqSndPoint) : E.Point P.cubeBase) = P.cubePt₁ + P.cubePt₂ :=
+    point_restrictT_add_eq hu G.sqFstPoint G.sqSndPoint P.cubePt₁ P.cubePt₂
+      (by
+        show (P.assocScheme ≫ pullback.fst P.squareToBase P.groupToBaseRes ≫ P.groupSquareToSquare)
+            ≫ (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι = _
+        simp only [Category.assoc, hfstι, P.assocScheme_fst_fst_assoc, cubePt₁])
+      (by
+        show (P.assocScheme ≫ pullback.fst P.squareToBase P.groupToBaseRes ≫ P.groupSquareToSquare)
+            ≫ (snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι = _
+        simp only [Category.assoc, hsndι, P.assocScheme_fst_snd_assoc, cubePt₂])
+  have Ev : (hv ▸ EllipticCurve.Point.restrict E (P.cubeInnerMul ≫ P.groupSquareToSquare)
+        (G.sqFstPoint + G.sqSndPoint) : E.Point P.cubeBase) = P.cubePt₁ + (P.cubePt₂ + P.cubePt₃) :=
+    point_restrictT_add_eq hv G.sqFstPoint G.sqSndPoint P.cubePt₁ (P.cubePt₂ + P.cubePt₃)
+      (by
+        show (P.cubeInnerMul ≫ P.groupSquareToSquare)
+            ≫ (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι = _
+        simp only [Category.assoc, hfstι, P.cubeInnerMul_fst_assoc, cubePt₁])
+      (by
+        have hR : (P.cubePt₂ + P.cubePt₃).1
+            = (pullback.snd P.groupToBaseRes P.squareToBase ≫ P.groupSquareToSquare)
+              ≫ (G.sqFstPoint + G.sqSndPoint : E.Point _).1 := by
+          rw [← Es]; exact point_base_congr hs _
+        rw [hR]
+        show (P.cubeInnerMul ≫ P.groupSquareToSquare)
+            ≫ (snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι = _
+        simp only [Category.assoc, hsndι, P.cubeInnerMul_snd_assoc,
+          P.squareMulRes_comp_ι_assoc, squareMul, hU])
+  have Ev' : (hv' ▸ EllipticCurve.Point.restrict E
+        (P.assocScheme ≫ P.cubeOuterMul ≫ P.groupSquareToSquare)
+        (G.sqFstPoint + G.sqSndPoint) : E.Point P.cubeBase) = (P.cubePt₁ + P.cubePt₂) + P.cubePt₃ :=
+    point_restrictT_add_eq hv' G.sqFstPoint G.sqSndPoint (P.cubePt₁ + P.cubePt₂) P.cubePt₃
+      (by
+        have hL : (P.cubePt₁ + P.cubePt₂).1
+            = (P.assocScheme ≫ pullback.fst P.squareToBase P.groupToBaseRes ≫ P.groupSquareToSquare)
+              ≫ (G.sqFstPoint + G.sqSndPoint : E.Point _).1 := by
+          rw [← Eu]; exact point_base_congr hu _
+        rw [hL]
+        show (P.assocScheme ≫ P.cubeOuterMul ≫ P.groupSquareToSquare)
+            ≫ (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι = _
+        simp only [Category.assoc, hfstι, P.cubeOuterMul_fst_assoc,
+          P.squareMulRes_comp_ι_assoc, squareMul, hU])
+      (by
+        show (P.assocScheme ≫ P.cubeOuterMul ≫ P.groupSquareToSquare)
+            ≫ (snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι = _
+        simp only [Category.assoc, hsndι, P.cubeOuterMul_snd_assoc,
+          P.assocScheme_snd_assoc, cubePt₃])
+  have hLHS : (P.assocScheme ≫ P.leftMulSchemeL) ≫ P.groupOpen.ι ≫ G.ι
+      = ((P.cubePt₁ + P.cubePt₂) + P.cubePt₃).1 := by
+    rw [← Ev', point_base_congr]
+    simp only [EllipticCurve.Point.restrict, leftMulSchemeL, Category.assoc,
+      P.squareMulRes_comp_ι_assoc, squareMul, G.mulHom_ι]
+  have hRHS : P.rightMulScheme ≫ P.groupOpen.ι ≫ G.ι
+      = (P.cubePt₁ + (P.cubePt₂ + P.cubePt₃)).1 := by
+    rw [← Ev, point_base_congr]
+    simp only [EllipticCurve.Point.restrict, rightMulScheme, Category.assoc,
+      P.squareMulRes_comp_ι_assoc, squareMul, G.mulHom_ι]
+  rw [hLHS, hRHS, add_assoc]
 
 /-- **Coassociativity, `CommRingCat` form**: `assoc ∘ (Δ' ⊗ id) ∘ Δ' = (id ⊗ Δ') ∘ Δ'`,
 combining `Δ₂L'` (`comulTop_comp_map_comulTop_id`), `R1` (`tripleΓL_comp_assoc`) and `R3-assoc`
