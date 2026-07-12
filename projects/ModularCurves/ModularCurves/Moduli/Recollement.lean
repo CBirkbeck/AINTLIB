@@ -113,6 +113,30 @@ theorem ModuliProblem.baseChange_comp (P : ModuliProblem R) :
 noncomputable def awayHom (a : R) : R ⟶ CommRingCat.of (Localization.Away a) :=
   CommRingCat.ofHom (algebraMap R (Localization.Away a))
 
+/-- **[T-E5f-g-away]** The localization map `R[1/a] ⟶ R[1/(a*b)]` (inverting the extra factor
+`b`); the overlap `D(ab) ⊆ D(a)`. -/
+noncomputable def awayProdHomLeft (a b : R) :
+    CommRingCat.of (Localization.Away a) ⟶ CommRingCat.of (Localization.Away (a * b)) :=
+  CommRingCat.ofHom (IsLocalization.Away.awayToAwayRight a b)
+
+/-- **[T-E5f-g-away]** The localization map `R[1/b] ⟶ R[1/(a*b)]` (inverting the extra factor
+`a`); the overlap `D(ab) ⊆ D(b)`. -/
+noncomputable def awayProdHomRight (a b : R) :
+    CommRingCat.of (Localization.Away b) ⟶ CommRingCat.of (Localization.Away (a * b)) :=
+  CommRingCat.ofHom (IsLocalization.Away.awayToAwayLeft b a)
+
+/-- The `a`-tower commutes: `R ⟶ R[1/a] ⟶ R[1/(a*b)]` equals `R ⟶ R[1/(a*b)]`. -/
+theorem awayHom_comp_awayProdHomLeft (a b : R) :
+    awayHom a ≫ awayProdHomLeft a b = awayHom (a * b) := by
+  ext r
+  exact IsLocalization.Away.awayToAwayRight_eq a b r
+
+/-- The `b`-tower commutes: `R ⟶ R[1/b] ⟶ R[1/(a*b)]` equals `R ⟶ R[1/(a*b)]`. -/
+theorem awayHom_comp_awayProdHomRight (a b : R) :
+    awayHom b ≫ awayProdHomRight a b = awayHom (a * b) := by
+  ext r
+  exact IsLocalization.Away.awayToAwayLeft_eq b a r
+
 /-- **Base change of an `Ell`-object along a ring map** `τ : R' ⟶ R''`: pull the base scheme
 back along `Spec.map τ` and base-change the curve. This is the left-adjoint direction to
 `EllObj.restrictScalars τ`; it is used to compare the two representing objects over `R[1/ab]`
@@ -303,6 +327,28 @@ noncomputable def representableBy_baseChangeRing {Q : ModuliProblem R'} {X : Ell
     rfl
 
 end BaseChangeAdjunction
+
+/-! ## [T-E5f-g-uniq] the overlap iso over `D(ab)` -/
+
+/-- **[T-E5f-g-uniq]** The overlap iso: the two representing objects, base-changed to
+`R[1/(a*b)]`, are canonically isomorphic — both represent `P.baseChange (awayHom (a*b))` (by the
+localization tower `awayHom a ≫ awayProdHomLeft = awayHom (a*b)` and `representableBy_baseChangeRing`).
+This is the gluing datum over the overlap `D(ab) = D(a) ∩ D(b)` in the recollement. -/
+noncomputable def overlapIso {P : ModuliProblem R} (a b : R)
+    {Xa : EllObj (CommRingCat.of (Localization.Away a))}
+    {Xb : EllObj (CommRingCat.of (Localization.Away b))}
+    (repr_a : (P.baseChange (awayHom a)).RepresentableBy Xa)
+    (repr_b : (P.baseChange (awayHom b)).RepresentableBy Xb) :
+    Xa.baseChangeRing (awayProdHomLeft a b) ≅ Xb.baseChangeRing (awayProdHomRight a b) :=
+  have e_a : (P.baseChange (awayHom a)).baseChange (awayProdHomLeft a b)
+      = P.baseChange (awayHom (a * b)) := by
+    rw [← ModuliProblem.baseChange_comp, awayHom_comp_awayProdHomLeft]
+  have e_b : (P.baseChange (awayHom b)).baseChange (awayProdHomRight a b)
+      = P.baseChange (awayHom (a * b)) := by
+    rw [← ModuliProblem.baseChange_comp, awayHom_comp_awayProdHomRight]
+  ((representableBy_baseChangeRing repr_a (awayProdHomLeft a b)).ofIso
+      (eqToIso e_a)).uniqueUpToIso
+    ((representableBy_baseChangeRing repr_b (awayProdHomRight a b)).ofIso (eqToIso e_b))
 
 /-! ## [T-E5f-main] the recollement theorem -/
 
