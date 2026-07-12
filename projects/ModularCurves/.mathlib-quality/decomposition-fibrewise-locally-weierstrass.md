@@ -262,6 +262,16 @@ split into ordinary helpers, so the result uses no options. The remaining Step 2
 is therefore specifically proper cohomology and arbitrary-base change, not affine
 acyclicity.
 
+The finite-cover input for a concrete Cech model is now complete in
+`ForMathlib/FiniteAffineOpenCover.lean`. Every compact scheme has a finite affine open
+cover, and a proper scheme over an affine base has such a cover with every nonempty
+finite intersection affine: properness gives compactness and separatedness, while
+separatedness supplies affineness of finite intersections. Together with affine
+quasicoherent vanishing, this is the acyclic-cover input for a finite Cech complex. It
+does not yet construct that complex, prove its comparison with derived global sections,
+or supply the finite-projective replacement and arbitrary-base comparison of Stacks
+0A1G.
+
 The generic two-chart degree-one calculation is now complete in
 `ForMathlib/TwoOpenHOne.lean`. The theorem
 `TopCat.Sheaf.subsingleton_H_one_of_two_open_cover` proves global `H¹` vanishing from
