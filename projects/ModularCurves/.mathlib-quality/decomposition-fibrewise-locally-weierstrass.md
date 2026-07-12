@@ -211,6 +211,16 @@ with finite-colimit preservation from the left adjoint, this lets
 replaces the unproved right-adjoint instance in draft mathlib PR #36345 and uses no
 options; it still does not assert affine quasicoherent vanishing.
 
+The degree-one local-killing step is now complete in
+`ForMathlib/KempfLocalKilling.lean`. Given a basis of opens, a class in `H¹(X,F)`,
+and a point `x`, `TopCat.Sheaf.one_ex_opens_toRestrict_app_zero` produces a basis open
+containing `x` on which the class restricts to zero. The proof takes an injective
+presentation of `F`, represents the class by a global section of its cokernel, lifts that
+section locally using local surjectivity, and compares the restricted cokernel sequence
+with the restriction of the presentation. The comparison and section calculation are
+separated into an option-free private helper. The higher-degree Kempf induction and the
+application to quasicoherent sheaves on affine schemes remain to be proved.
+
 No theorem in this stream may replace this leaf by a `CohomologyPackage` hypothesis,
 an axiom, or an unboarded `sorry`.
 
