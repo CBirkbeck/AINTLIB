@@ -1835,4 +1835,76 @@ theorem exists_projModelSectionPoleCoefficientZ_eq_of_mem
   rw [hlocal]
   exact RingEquiv.apply_symm_apply (chartZSectionsRingEquiv W) f
 
+/-- A global section of `O(n[0])` is determined by its coefficient on the
+affine `Z`-chart. -/
+theorem projModelSectionPoleCoefficientZ_injective
+    (W : WeierstrassCurve R) (n : ℕ) :
+    Function.Injective (projModelSectionPoleCoefficientZ W n) := by
+  intro m₁ m₂ hZ
+  let M := sectionPoleSheafPower (projModelπ W) (projModelZero W)
+    (projModelZero_projModelπ W) n
+  have hlocalZ : localTrivializationCoefficient M (projModelZChart W)
+      (projModelSectionPoleSheafPowerTrivializationZ W n) m₁ =
+    localTrivializationCoefficient M (projModelZChart W)
+      (projModelSectionPoleSheafPowerTrivializationZ W n) m₂ := by
+    exact (chartZSectionsRingEquiv W).injective hZ
+  have hresZ := restrict_eq_of_localTrivializationCoefficient_eq M
+    (projModelZChart W) (projModelSectionPoleSheafPowerTrivializationZ W n)
+    m₁ m₂ hlocalZ
+  have hoverZ : overTrivializationCoefficient M (projModelPoleOverlap W)
+      (projModelSectionPolePowerOverlapOverTrivializationZ W n) m₁ =
+    overTrivializationCoefficient M (projModelPoleOverlap W)
+      (projModelSectionPolePowerOverlapOverTrivializationZ W n) m₂ := by
+    rw [projModelSectionPoleCoefficientZ_restrict,
+      projModelSectionPoleCoefficientZ_restrict, hZ]
+  have hoverN : overTrivializationCoefficient M (projModelPoleOverlap W)
+      (projModelSectionPolePowerOverlapOverTrivialization W n) m₁ =
+    overTrivializationCoefficient M (projModelPoleOverlap W)
+      (projModelSectionPolePowerOverlapOverTrivialization W n) m₂ := by
+    calc
+      overTrivializationCoefficient M (projModelPoleOverlap W)
+          (projModelSectionPolePowerOverlapOverTrivialization W n) m₁ =
+        overTrivializationCoefficient M (projModelPoleOverlap W)
+            (projModelSectionPolePowerOverlapOverTrivializationZ W n) m₁ *
+          projModelSectionRootOverlap W ^ n :=
+        projModelSectionPolePowerOverlap_coefficients W n m₁
+      _ = overTrivializationCoefficient M (projModelPoleOverlap W)
+            (projModelSectionPolePowerOverlapOverTrivializationZ W n) m₂ *
+          projModelSectionRootOverlap W ^ n := by rw [hoverZ]
+      _ = overTrivializationCoefficient M (projModelPoleOverlap W)
+          (projModelSectionPolePowerOverlapOverTrivialization W n) m₂ :=
+        (projModelSectionPolePowerOverlap_coefficients W n m₂).symm
+  have hcoeffNRes :
+      (projModel W).presheaf.map
+          (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op
+          (projModelSectionPoleCoefficient W n m₁) =
+        (projModel W).presheaf.map
+          (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op
+          (projModelSectionPoleCoefficient W n m₂) := by
+    calc
+      (projModel W).presheaf.map
+          (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op
+          (projModelSectionPoleCoefficient W n m₁) =
+        overTrivializationCoefficient M (projModelPoleOverlap W)
+          (projModelSectionPolePowerOverlapOverTrivialization W n) m₁ :=
+        (projModelSectionPoleCoefficient_restrict W n m₁).symm
+      _ = overTrivializationCoefficient M (projModelPoleOverlap W)
+          (projModelSectionPolePowerOverlapOverTrivialization W n) m₂ := hoverN
+      _ = (projModel W).presheaf.map
+          (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op
+          (projModelSectionPoleCoefficient W n m₂) :=
+        projModelSectionPoleCoefficient_restrict W n m₂
+  have hlocalN : projModelSectionPoleCoefficient W n m₁ =
+      projModelSectionPoleCoefficient W n m₂ :=
+    projModelPoleOverlap_restrict_injective W hcoeffNRes
+  have hresN := restrict_eq_of_localTrivializationCoefficient_eq M
+    (projModelSectionNeighborhood W)
+    (projModelSectionPoleSheafPowerTrivialization W n) m₁ m₂ hlocalN
+  exact TopCat.Sheaf.eq_of_locally_eq₂ ⟨M.presheaf, M.isSheaf⟩
+    (homOfLE (le_top : (projModelZChart W : (projModel W).Opens) ≤ ⊤))
+    (homOfLE (le_top :
+      (projModelSectionNeighborhood W : (projModel W).Opens) ≤ ⊤))
+    (by rw [projModelZChart_sup_sectionNeighborhood_eq_top W])
+    m₁ m₂ hresZ hresN
+
 end ModularCurves
