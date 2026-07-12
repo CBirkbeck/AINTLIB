@@ -1,6 +1,7 @@
 import ModularCurves.ForMathlib.KempfInduction
 import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 import ModularCurves.ForMathlib.SchemeModuleSheaf
+import Mathlib.AlgebraicGeometry.Morphisms.Affine
 
 /-!
 # Affine vanishing for quasicoherent modules
@@ -179,5 +180,76 @@ theorem toCoverSheaf_H_map_zero (n : ℕ) (c : H F.sheaf n) [Finite I]
   exact hcomp.trans (h i)
 
 end CoverSheaf
+
+private lemma affineOpens_inf [IsAffine X] (U V : X.Opens)
+    (hU : U ∈ X.affineOpens) (hV : V ∈ X.affineOpens) : U ⊓ V ∈ X.affineOpens :=
+  ((diagonal_isAffine_iff_forall_isAffineOpen_inf (𝟙 X)).mp
+    (fun _ _ _ _ ↦ inferInstance)) U V hU hV
+
+private lemma H_zero_surjective_of_quasicoherent_epi [IsAffine X]
+    {M N : X.Modules} [M.IsQuasicoherent] [N.IsQuasicoherent]
+    (f : M ⟶ N) [Epi f] : Function.Surjective (H.map f.sheafHom 0) := by
+  intro y
+  obtain ⟨x, hx⟩ := isQuasicoherent_surjective_of_epi f
+    (CategoryTheory.Sheaf.H.equiv₀ N.sheaf isTerminalTop y)
+  refine ⟨(CategoryTheory.Sheaf.H.equiv₀ M.sheaf isTerminalTop).symm x, ?_⟩
+  have hnat := CategoryTheory.Sheaf.H.equiv₀_naturality
+    (f := f.sheafHom) isTerminalTop
+      ((CategoryTheory.Sheaf.H.equiv₀ M.sheaf isTerminalTop).symm x)
+  rw [AddEquiv.apply_symm_apply] at hnat
+  apply (CategoryTheory.Sheaf.H.equiv₀ N.sheaf isTerminalTop).injective
+  exact hnat.symm.trans hx
+
+private lemma H_map_injective_of_subsingleton_cokernel
+    {S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{u} X)}
+    (hS : S.ShortExact) (n : ℕ) [Subsingleton (H S.X₃ n)] :
+    Function.Injective (H.map S.f (n + 1)) := by
+  rw [injective_iff_map_eq_zero]
+  intro c hc
+  obtain ⟨x, hx⟩ := CategoryTheory.Sheaf.H.longSequence_exact₁
+    hS n (n + 1) rfl c hc
+  rw [← hx, Subsingleton.elim x 0, map_zero]
+
+private theorem affine_H_one_subsingleton [IsAffine X] [F.IsQuasicoherent] :
+    Subsingleton (H F.sheaf 1) := by
+  refine subsingleton_of_forall_eq 0 fun c ↦ ?_
+  obtain ⟨I, U', hU', vanish⟩ := TopCat.Sheaf.kempfProp1 F.sheaf 0
+    X.isBasis_affineOpens affineOpens_inf
+    (by
+      intro r U hr₁ hr₂ hU
+      omega) c
+  obtain ⟨s, hU⟩ := hU'.exists_finite_of_compactSpace
+  let U : s → X.Opens := fun i ↦ U' i.1
+  have hAffine : ∀ i, IsAffine (U i) := fun i ↦ (vanish i.1).1
+  letI (i : s) : IsAffine (U i) := hAffine i
+  haveI : Mono (F.toCoverSheaf U) := F.toCoverSheaf_mono U hU
+  let S := ShortComplex.mk (F.toCoverSheaf U)
+    (cokernel.π (F.toCoverSheaf U)) (cokernel.condition _)
+  have hS : S.ShortExact :=
+    ShortComplex.ShortExact.mk (ShortComplex.exact_cokernel (F.toCoverSheaf U))
+  let Ssheaf := S.map (toSheaf X)
+  have hSsheaf : Ssheaf.ShortExact :=
+    ShortComplex.ShortExact.map_of_exact hS (toSheaf X)
+  letI : S.X₂.IsQuasicoherent := F.coverSheaf_isQuasicoherent U
+  letI : S.X₃.IsQuasicoherent :=
+    (isQuasicoherent X).prop_colimit (parallelPair _ 0) (by
+      intro j
+      cases j with
+      | zero =>
+          change F.IsQuasicoherent
+          infer_instance
+      | one =>
+          change S.X₂.IsQuasicoherent
+          infer_instance)
+  have hsurj : Function.Surjective (H.map Ssheaf.g 0) := by
+    change Function.Surjective (H.map S.g.sheafHom 0)
+    exact H_zero_surjective_of_quasicoherent_epi S.g
+  obtain ⟨x₃, hx₃⟩ := CategoryTheory.Sheaf.H.longSequence_exact₁
+    hSsheaf 0 1 rfl c (by
+      change H.map (F.toCoverSheaf U).sheafHom 1 c = 0
+      exact F.toCoverSheaf_H_map_zero U 1 c fun i ↦ (vanish i.1).2)
+  obtain ⟨x₂, hx₂⟩ := hsurj x₃
+  rw [← hx₃, ← hx₂]
+  exact CategoryTheory.Sheaf.H.longSequence_comp_zero₃ hSsheaf 0 1 rfl x₂
 
 end AlgebraicGeometry.Scheme.Modules
