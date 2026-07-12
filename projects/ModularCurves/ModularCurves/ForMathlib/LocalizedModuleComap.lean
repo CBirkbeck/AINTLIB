@@ -20,6 +20,7 @@ This is the `M_𝔮 ≅ M_{𝔮ᴾ}` step of the polynomial-ring reduction (`[T-
 spreading argument, isolated so it does not depend on the Buchsbaum–Eisenbud machinery.
 -/
 import Mathlib
+import ModularCurves.ForMathlib.FlatLocus
 
 open scoped TensorProduct
 
@@ -63,3 +64,19 @@ noncomputable def localizedModuleComapEquiv (hf : Function.Surjective (algebraMa
   -- restrict scalars to `R`.
   exact ((IsLocalizedModule.iso (q.comap (algebraMap P S)).primeCompl
     ((LocalizedModule.mkLinearMap q.primeCompl M).restrictScalars P)).restrictScalars R)
+
+/-- **Flat locus transports across the surjection `P ↠ S`.** `M_𝔮` is `R`-flat iff `M_{𝔮ᴾ}` is
+`R`-flat, where `𝔮ᴾ = q.comap (P → S)`.  This is the module-level half of the `[T-REDUCEP]`
+reduction (`flatLocus R S M` pulls back to `flatLocus R P M` along `Spec S ↪ Spec P`); combine with
+`mem_flatLocus` and `PrimeSpectrum.comap_asIdeal` at the call site to phrase it on `flatLocus`. -/
+theorem flat_localizedModule_comap_iff (hf : Function.Surjective (algebraMap P S))
+    (q : Ideal S) [q.IsPrime] :
+    Module.Flat R (LocalizedModule q.primeCompl M) ↔
+      Module.Flat R (LocalizedModule (q.comap (algebraMap P S)).primeCompl M) := by
+  constructor
+  · intro h
+    haveI := h
+    exact Module.Flat.of_linearEquiv (localizedModuleComapEquiv hf q)
+  · intro h
+    haveI := h
+    exact Module.Flat.of_linearEquiv (localizedModuleComapEquiv hf q).symm
