@@ -540,6 +540,20 @@ comparison. The remaining task is to construct the native Cech augmentation
 into the injective resolution and discharge these column hypotheses; no
 cover-wide higher-exactness assumption has been introduced.
 
+The native vertical comparison for the injective-resolution Cech bicomplex is now
+instantiated in `ForMathlib/SheafCechInjectiveAugmentation.lean`.
+`cechInjectiveResolutionAugmentation` applies the Cech functor to the resolution
+augmentation, is monic in every Cech degree, and gives exact augmented columns in
+resolution degree zero. For resolution degree one, the cokernel of the augmentation and
+the genuine long exact sequence in `Sheaf.H` show that exactness on an open `V` follows
+from exactly `H¹(V,F)=0`; taking products yields the corresponding Cech-column theorem.
+In Cech degree zero this specializes to vanishing only on the individual cover members,
+not on all higher intersections. The resulting `cechInjectiveResolutionVerticalEdge` is
+a quasi-isomorphism in degree one under precisely those hypotheses. This closes the
+vertical collapse needed for the double-complex comparison without asserting exactness
+of open pushforward. The next step is to instantiate the horizontal edge from genuine
+derived global sections and compose the two degree-one comparisons.
+
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
 `n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of
