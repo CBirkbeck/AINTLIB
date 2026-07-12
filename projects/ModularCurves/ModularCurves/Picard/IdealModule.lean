@@ -77,4 +77,88 @@ noncomputable def idealPresheafAb : (TopologicalSpace.Opens ↥C)ᵒᵖ ⥤ AddC
     rw [Functor.map_comp]
     rfl
 
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The ideal sections as a subfunctor of the `Type`-valued structure sheaf. -/
+noncomputable def idealSubfunctor :
+    Subfunctor (C.sheaf.val ⋙ CategoryTheory.forget CommRingCat) where
+  obj U := {g | (J.subschemeι.app U.unop).hom g = 0}
+  map {U V} i := fun g hg =>
+    RingHom.mem_ker.mp (idealSections_map J i (RingHom.mem_ker.mpr hg))
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Vanishing under the subscheme inclusion is a local condition (separatedness of the
+subscheme's structure sheaf, via germs), so the ideal subfunctor is a sheaf. -/
+theorem idealSubfunctor_isSheaf :
+    Presieve.IsSheaf (Opens.grothendieckTopology ↥C)
+      (idealSubfunctor J).toFunctor := by
+  apply ((idealSubfunctor J).isSheaf_iff
+    ((isSheaf_iff_isSheaf_of_type _ _).mp
+      ((Presheaf.isSheaf_iff_isSheaf_forget _ _ (CategoryTheory.forget CommRingCat)).mp
+        C.sheaf.cond))).2
+  intro U g hsieve
+  show (J.subschemeι.app U.unop).hom g = 0
+  rw [Opens.mem_grothendieckTopology] at hsieve
+  refine TopCat.Presheaf.section_ext J.subscheme.sheaf _ _ _ (fun y hy => ?_)
+  obtain ⟨V, f, hfV, hyV⟩ := hsieve (J.subschemeι.base y) hy
+  have h0 : (J.subschemeι.app V).hom (C.presheaf.map f.op g) = 0 := hfV
+  have h1 : J.subscheme.presheaf.map
+        ((TopologicalSpace.Opens.map J.subschemeι.base).map f).op
+        ((J.subschemeι.app U.unop).hom g) =
+      (J.subschemeι.app V).hom (C.presheaf.map f.op g) :=
+    (congrArg (fun (φ : _ ⟶ _) => (ConcreteCategory.hom φ) g)
+      (J.subschemeι.naturality f.op)).symm
+  have hyV' : y ∈ J.subschemeι ⁻¹ᵁ V := hyV
+  calc J.subscheme.presheaf.germ (J.subschemeι ⁻¹ᵁ U.unop) y hy
+        ((J.subschemeι.app U.unop).hom g)
+      = J.subscheme.presheaf.germ (J.subschemeι ⁻¹ᵁ V) y hyV'
+          (J.subscheme.presheaf.map
+            ((TopologicalSpace.Opens.map J.subschemeι.base).map f).op
+            ((J.subschemeι.app U.unop).hom g)) :=
+        (J.subscheme.presheaf.germ_res_apply
+          ((TopologicalSpace.Opens.map J.subschemeι.base).map f) y hyV' _).symm
+    _ = J.subscheme.presheaf.germ (J.subschemeι ⁻¹ᵁ V) y hyV'
+          ((J.subschemeι.app V).hom (C.presheaf.map f.op g)) :=
+        congrArg _ h1
+    _ = 0 := by rw [h0]; exact map_zero _
+    _ = J.subscheme.presheaf.germ (J.subschemeι ⁻¹ᵁ U.unop) y hy 0 :=
+        (map_zero _).symm
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+noncomputable instance (U : (TopologicalSpace.Opens ↥C)ᵒᵖ) :
+    Module ((C.ringCatSheaf.obj).obj U) ((idealPresheafAb J).obj U) :=
+  inferInstanceAs (Module Γ(C, U.unop) (idealSections J U))
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The ideal sheaf of `J` as a presheaf of `𝒪_C`-modules. -/
+noncomputable def idealPresheaf : _root_.PresheafOfModules (C.ringCatSheaf.obj) :=
+  PresheafOfModules.ofPresheaf (idealPresheafAb J) (fun {U V} i r m => by
+    refine Subtype.ext ?_
+    let r' : Γ(C, U.unop) := r
+    show C.presheaf.map i (r' * m.1) =
+      C.presheaf.map i r' * C.presheaf.map i m.1
+    exact map_mul (ConcreteCategory.hom (C.presheaf.map i)) r' m.1)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- The comparison of the ideal presheaf's sections with the ideal subfunctor. -/
+noncomputable def idealPresheafForgetIso :
+    (idealPresheaf J).presheaf ⋙ CategoryTheory.forget AddCommGrpCat ≅ (idealSubfunctor J).toFunctor :=
+  NatIso.ofComponents (fun U => Iso.refl _) (fun {U V} i => rfl)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **The ideal sheaf of `J` as a sheaf of `𝒪_C`-modules** (the object side of the
+KM 1.1.1 interface "the ideal sheaf `I(D) ⊂ O_X` is an invertible `O_X`-module"). -/
+noncomputable def idealModule : C.Modules where
+  val := idealPresheaf J
+  isSheaf := by
+    apply (Presheaf.isSheaf_iff_isSheaf_forget _ _ (CategoryTheory.forget AddCommGrpCat)).mpr
+    apply (isSheaf_iff_isSheaf_of_type _ _).mpr
+    exact Presieve.isSheaf_iso _ (idealPresheafForgetIso J).symm
+      (idealSubfunctor_isSheaf J)
+
 end AlgebraicGeometry.Scheme.Modules
