@@ -486,6 +486,14 @@ complexes, so `HomologicalComplex₂.total (ComplexShape.up ℕ)` now applies
 directly to the first-quadrant injective Cech bicomplex. This reuses mathlib's
 total complex rather than introducing a parallel construction.
 
+The low-degree coproduct API for that totalization is now exposed in
+`ForMathlib/TotalComplexUpNatLowDegrees.lean`. `πTotalUpNat` projects a total
+degree onto any bidegree, `totalUpNat_zero_decomposition` and
+`totalUpNat_one_decomposition` decompose the identity in degrees zero and one,
+and `ιTotal_d_upNat` computes the differential as the resolution differential
+plus `(-1)^q` times the Cech differential. These generic lemmas are the concrete
+input for the degree-one edge-map homology chase.
+
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
 `n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of
