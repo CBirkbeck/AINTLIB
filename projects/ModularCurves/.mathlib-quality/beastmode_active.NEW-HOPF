@@ -1,1 +1,1 @@
-FOCUS: [HG-C1c-1d-coassoc] instBialgebra DONE modulo R3-assoc. Sole remaining sorry: assocScheme_leftMulSchemeL (chart group assoc). Route: cancel_mono groupOpen.i then G.i => E.Point add_assoc (or Hom.commGroup mul_assoc). Then HopfAlgebra (antipode from invOver laws).
+FOCUS: [HG-antipode] ⊤-level antipode DEFS done (invRes, antipodeTop, antipodeAlgTop). R3-assoc delegated to worktree agent. Next: antipode LAWS (lift S id ∘ comul = ofId∘counit) dualizing invOver_mulOver_left/right via R3-assoc technique + lift-Künneth. Then HopfAlgebra.ofAlgHom.
