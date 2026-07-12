@@ -572,6 +572,19 @@ next geometric step is to instantiate it for the finite affine cover of each pol
 then pass from the resulting finite Cech complex to finite-projective local pole modules
 with arbitrary-base comparison.
 
+That affine-cover instantiation is now complete in
+`ForMathlib/AcyclicAffineCechComparison.lean` and
+`EllipticCurve/PoleSheafCechHOne.lean`.
+`Scheme.Modules.cechHomologyOneIso_of_affine_openCover` computes genuine `H¹` of a
+quasicoherent module from the native Cech complex of any affine open cover.
+`sectionPoleSheafPower_cechHomologyOneIso` specializes this to `O(n[0])`, and
+`exists_sectionPoleSheafPower_finiteAffineCechComparison` combines properness over an
+affine base with the landed finite affine cover to package such a finite model for every
+smooth proper pointed curve. This comparison is still additive-group-valued. The next
+proper-cohomology dependency is to retain the module structure over the affine base,
+replace the finite Cech model by a bounded complex of finite projective base modules, and
+prove its compatibility with arbitrary base change.
+
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
 `n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of
