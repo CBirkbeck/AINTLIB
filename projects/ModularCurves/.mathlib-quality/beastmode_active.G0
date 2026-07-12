@@ -1,7 +1,7 @@
 FOCUS: STREAM-G0 [HOPF ENDGAME] (rule-5). IsCoaction chartCoaction COMPLETE upstream. GroupScheme/StableChartData.lean state (green, 1 sorry):
  - LANDED sorry-free: surjective_hom_of_isClosedImmersion_specMap (general reusable: IsClosedImmersion (Spec.map φ) → Surjective φ.hom); instModuleFiniteGroupRing (Module.Finite baseRing groupRing).
  - chartCoaction_productMap_surjective (C2 last-mile) PROVEN modulo the one geometric sorry, via lemma1.
- - REMAINING sorry: chartPrecursorSpec_isClosedImmersion — IsClosedImmersion (Spec.map β), β=productMap includeLeft chartCoaction. Route: conjugate by pullbackSpecIso ⟹ g=lift(fst)(piso.hom≫Spec.map chartCoaction)=swap∘actPair|chart; actPair|chart CI from isClosedImmersion_actPair_left. Heavy tensor-order/chart-iso chase (reuses chartSpecIso/chartKunnethSchemeIso).
+ - REMAINING sorry: chartPrecursorSpec_isClosedImmersion. Step-1 conjugation wrapper LANDED green ⟹ sorry now = IsClosedImmersion g, g:=e1.hom≫Spec.map(ofHom β)≫e2.inv (e1,e2=pullbackSpecIso). Steps 2-3 remain: legs (g≫fst=fst, g≫snd=e1.hom≫Spec.map chartCoaction via productMap_left/right) ⟹ g=swap∘actPair|chart; CI from isClosedImmersion_actPair_left. Heavy chart-iso chase (chartSpecIso/chartCoactionSpec + comm-swap + appTop↔Spec.map). Banked in crux doc.
 BOARDED BLOCKERS (re-scope the SIGNAL — NOT closeable this session):
  (a) HopfAlgebra diamond: C1d StableAffineChartData feed waits on p2's HopfAlgebra baseRing groupRing w/ toAlgebra defeq geometric AffineChartPatch instance.
  (b) C3 stable affine cover — hardest geometry, not started.

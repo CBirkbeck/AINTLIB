@@ -101,6 +101,21 @@ theorem chartPrecursorSpec_isClosedImmersion :
         (Algebra.TensorProduct.includeLeft
           (R := P.baseRing) (A := P.chartRing) (B := P.groupRing))
         P.chartCoaction).toRingHom)) := by
+  set β := (Algebra.TensorProduct.productMap
+    (Algebra.TensorProduct.includeLeft (R := P.baseRing) (A := P.chartRing) (B := P.groupRing))
+    P.chartCoaction).toRingHom with hβ
+  set e1 := AlgebraicGeometry.pullbackSpecIso P.baseRing P.chartRing P.groupRing with he1
+  set e2 := AlgebraicGeometry.pullbackSpecIso P.baseRing P.chartRing P.chartRing with he2
+  set g := e1.hom ≫ AlgebraicGeometry.Spec.map (CommRingCat.ofHom β) ≫ e2.inv with hg
+  -- `Spec.map β` is `g` conjugated back by the two `pullbackSpecIso`s; conjugation by isos
+  -- preserves closed immersions, so it suffices to show `g` is a closed immersion.
+  have hrw : AlgebraicGeometry.Spec.map (CommRingCat.ofHom β) = e1.inv ≫ g ≫ e2.hom := by
+    rw [hg]
+    simp only [Category.assoc, Iso.inv_hom_id, Category.comp_id, Iso.inv_hom_id_assoc]
+  rw [hrw]
+  suffices hCI : IsClosedImmersion g by
+    haveI := hCI
+    infer_instance
   sorry
 
 /-- **`[HG-C2]` last mile — the Galois precursor is surjective on the chart.** The `Spec` of the

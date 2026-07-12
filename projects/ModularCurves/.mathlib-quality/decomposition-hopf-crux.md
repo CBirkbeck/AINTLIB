@@ -905,7 +905,9 @@ State after this session (file `GroupScheme/StableChartData.lean`, green, ONE so
 - SORRY: `chartPrecursorSpec_isClosedImmersion : IsClosedImmersion (Spec.map (ofHom β.toRingHom))`,
   `β := productMap includeLeft chartCoaction : B⊗[R]B →ₐ[R] B⊗[R]A` (B=chartRing, A=groupRing, R=baseRing).
 
-FINISH ROUTE for the sorry (all inputs in-tree):
+FINISH ROUTE for the sorry (all inputs in-tree). **UPDATE 2026-07-13b: Step 1 LANDED green** —
+the conjugation wrapper is proven, so the sorry is now the crisp `IsClosedImmersion g` with
+`g := e1.hom ≫ Spec.map (ofHom β) ≫ e2.inv` (a `set` in the proof). Steps 2–3 remain, all inside `IsClosedImmersion g`:
 1. **Conjugate by `pullbackSpecIso`.** `e1 := pullbackSpecIso R B A` (≅ Spec(B⊗A)),
    `e2 := pullbackSpecIso R B B` (≅ Spec(B⊗B)); the legs are `Spec.map (ofHom (algebraMap R B/A))`,
    which ARE the geometric structure maps (the algebra instances were *defined* as the `appLE`s).
