@@ -92,6 +92,26 @@ The 9 raises + their guarded decls (all whnf-heavy sheaf-of-modules `change`/`si
 3. **[CMP-Mell]** abstract-curve eso (independent; locate target first).
 4. **[CMP-DEBT]** PoleSheaf 9 raises via /buzz-decompose (cooldown/interleave).
 
+## ★ VERIFY-BEFORE-WORK re-scope of the 3 consumers (beastmode-A, 2026-07-12, /beastmode pass)
+
+Executing the queue surfaced that **none of the 3 consumers is a fresh beastmode-A characterization-wiring
+task** — the characterization (`locallyWeierstrass_projModel_iff_isElliptic` etc.) is **already landed in my
+Comparison.lean**, and each consumer is other-lane-gated or already consuming it:
+- **[CMP-a5]** — characterization side DONE; the leaf `locallyWeierstrass_quotientπ` is **fable-P4's
+  cocycle-descent** (their file), consuming my `pointedIso_exists_variableChange` + `locallyWeierstrass_projModel`
+  (both landed). No beastmode-A build; FP4 assembles.
+- **[CMP-Mell]** — the pointed targets `MellWStack:49/:57` are `mellWPseudofunctor_isStack_{zariski,etale}` =
+  **T-E8 stack DESCENT** (glue Weierstrass data along covers; gated on the T-W4/T-W6 groupoid + étale-torsor
+  T-Q5/A711). NOT a pointwise-iff application — the characterization cannot discharge an `IsStack` obligation.
+  Mis-scoped/gated; `presentationFunctor_essSurj` (the actual eso for PresentedCurve) is already PROVEN.
+- **[CMP-YFGEOM]** — `exists_representing_smooth_affine` (YFullRoute, NEW-Y1's) is gated on **FP4's engine
+  (`representable_iff` ⇐) + T-E14/T-E15a explicit models + BB-DIFF + [YF-QSM]**. The characterization's
+  contribution (model smoothness) flows *through* the engine via [CMP-a5]; no separate beastmode-A bridge.
+
+**NET:** CHARTER-A-CMP's genuine beastmode-A work is exactly **[CMP-DEBT]** (7/9 done, committed; 2 surgeries
+banked) + **[KM-W1]** (the KM-INTEGRAL combinatorial core, in progress). The "consumer wiring" was already
+satisfied by landing the characterization; the downstream consumers are other lanes' gated leaves.
+
 ## Coordination boundaries (holder's stream — I own Comparison.lean; consumers are other lanes' files)
 - EngineDescent.lean = **fable-P4**; YFullRoute.lean = **NEW-Y1**; MellW* = **PIC0/holder**. Wire via
   standalone bridge lemmas in my own `ComparisonConsumers.lean` that they import — minimise cross-lane edits;
