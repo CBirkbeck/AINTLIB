@@ -890,3 +890,60 @@ REMAINING (next session, ~3 routes — the conceptual content is done, these are
 STOP-LINE: hit at ~7 routes this session (way past 3-4, but every piece landed first/
 second try and the remaining path is now purely assembly). Ledgered at the clean
 associator boundary.
+
+## Appendix: [HG-C2] geometric heart — precise finish route (STREAM-G0, 2026-07-13)
+
+State after this session (file `GroupScheme/StableChartData.lean`, green, ONE sorry):
+- `surjective_hom_of_isClosedImmersion_specMap {R S : CommRingCat} (φ) [IsClosedImmersion (Spec.map φ)] :
+  Surjective φ.hom` — LANDED sorry-free (general, ForMathlib-worthy: `isAffine_surjective_of_isAffine`
+  gives surjective `appTop`; `ΓSpecIso_naturality` rewrites `appTop = ΓSpecIso.hom ≫ φ ≫ ΓSpecIso.inv`;
+  peel the two iso factors). Reusable everywhere a Spec-map CI ⟹ ring surjectivity is needed.
+- `instModuleFiniteGroupRing : Module.Finite baseRing groupRing` — LANDED (via `G.π.finite_app` +
+  `appLE_eq_app`). One of M5's three per-chart inputs, done.
+- `chartCoaction_productMap_surjective` — the [HG-C2] deliverable, PROVEN modulo the one sorry:
+  reduces (via the helper) to `chartPrecursorSpec_isClosedImmersion`.
+- SORRY: `chartPrecursorSpec_isClosedImmersion : IsClosedImmersion (Spec.map (ofHom β.toRingHom))`,
+  `β := productMap includeLeft chartCoaction : B⊗[R]B →ₐ[R] B⊗[R]A` (B=chartRing, A=groupRing, R=baseRing).
+
+FINISH ROUTE for the sorry (all inputs in-tree):
+1. **Conjugate by `pullbackSpecIso`.** `e1 := pullbackSpecIso R B A` (≅ Spec(B⊗A)),
+   `e2 := pullbackSpecIso R B B` (≅ Spec(B⊗B)); the legs are `Spec.map (ofHom (algebraMap R B/A))`,
+   which ARE the geometric structure maps (the algebra instances were *defined* as the `appLE`s).
+   `g := e1.hom ≫ Spec.map (ofHom β.toRingHom) ≫ e2.inv : pb(B,A) → pb(B,B)`.
+   `Spec.map β = e1.inv ≫ g ≫ e2.hom`, so CI(g) ⟹ CI(Spec.map β) (CI stable under iso ∘).
+2. **Leg equations of g** (pure algebra + `pullbackSpecIso_{inv,hom}_{fst,snd}` + `Spec.map` contravariance):
+   - `g ≫ pullback.fst = pullback.fst`: `e2.inv ≫ fst = Spec.map (ofHom includeLeftRingHom)`
+     (`pullbackSpecIso_inv_fst`); `Spec.map β ≫ that = Spec.map (ofHom (β∘includeLeft))`;
+     `β ∘ includeLeft = includeLeft_{B→B⊗A}` (`productMap_comp_includeLeft`-style, pure algebra);
+     `e1.hom ≫ Spec.map (ofHom includeLeft) = fst` (`pullbackSpecIso_hom_fst`). ⚠ match
+     `includeLeftRingHom` vs `includeLeft.toRingHom` (defeq; `ofHom`/`comp` bookkeeping — budget iterations).
+   - `g ≫ pullback.snd = e1.hom ≫ Spec.map (ofHom chartCoaction.toRingHom)`: `e2.inv ≫ snd =
+     Spec.map (ofHom includeRight)`; `β ∘ includeRight = chartCoaction` (`productMap_comp_includeRight`).
+   So `g = pullback.lift (fst) (e1.hom ≫ Spec.map chartCoaction)` = **swap ∘ ⟨act,pr⟩|chart** (the
+   chart-restricted action pair; first leg = projection, second = action).
+3. **CI(g) from the chart-restricted actPair.** Identify `e1.hom ≫ Spec.map (ofHom chartCoaction.toRingHom)`
+   with the geometric restricted action, reusing `chartSpecIso`/`chartCoactionSpec` +
+   `coactionRing_eq_appTop` (chartCoaction = comm ∘ coactionAlgLeft; watch the A⊗B vs B⊗A comm swap and
+   the `comm`'s effect on `pullbackSpecIso` — it becomes `pullback.symmetry`/braiding). Then g = braiding ∘
+   (chart-restricted actPair); the chart-restricted actPair is CI as the restriction to the affine chart
+   of `isClosedImmersion_actPair_left` (CI local on target + stable under the open-immersion base change to
+   `U ×_V U`). Braiding is iso ⟹ CI(g). ⚠ HEAVY tensor-order/chart-iso bookkeeping (crux risk #1 "two
+   tensor structures"): every seam a named lemma, explicit instance args (v10.24(d)/(e)). Budget a full
+   focused session.
+
+## Appendix: HOPF ENDGAME re-scope (STREAM-G0, 2026-07-13) — the SIGNAL is NOT one-session assembly
+
+The charter framed post-`IsCoaction` as "run the pins assembly to the SIGNAL." Ground-truth after this
+session: the SIGNAL (six `SubgroupQuotient` pins) is blocked on FOUR independent multi-session fronts:
+- **(a) HopfAlgebra diamond.** M5 (`StableAffineChartData.isHopfGalois`) needs `[HopfAlgebra R A]`, whose
+  `Bialgebra`-derived `Algebra R A` must be *defeq to the geometric `AffineChartPatch` algebra instance*
+  that `chartCoaction` is typed against. A free `[HopfAlgebra …]` variable supplies a MISMATCHING algebra
+  ⟹ `galoisPrecursor chartCoaction` won't even typecheck. So the C1d `StableAffineChartData` assembly and
+  `IsHopfGalois chartCoaction` are HARD-BLOCKED until p2's Hopf-instance layer lands the instance *over the
+  geometric algebra*. (This is p2's `BB-DELIGNE L6c`, per Wave-C scoping.)
+- **(b) [HG-C2] geometric heart** — the sorry above (a full session).
+- **(c) [HG-C3] stable affine cover** — "hardest geometry leaf," NOT started.
+- **(d) [HG-C4] glue** — GlueData, p2-stack-scale, NOT started; consumes per-chart `IsHopfGalois` (⟸ (a)).
+`Module.Finite` + the Hopf-free precursor-surjectivity (reduced to (b)) are the only endgame pieces that
+sidestep the diamond, and both are now landed/reduced. Recommend: coordinator re-plans the endgame as a
+4-front effort, and pings p2 that the HopfAlgebra instance MUST extend the geometric algebra (diamond).
