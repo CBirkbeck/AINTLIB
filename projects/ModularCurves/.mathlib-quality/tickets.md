@@ -18920,3 +18920,16 @@ Sequential /loop window, synced to v10.167 (all clopen cores + [YF-COMAX] landed
 assembly foundation: [YF-SUBDIV-EQ] `RelEffCartierDiv.eq_of_isSubdivisor_of_degree_eq` — divisor-level
 same-degree-subdivisor equality via affine-local descent of `isIso_SpecMap_of_surjective_of_flat_rankAtStalk_eq`.
 (A concurrent window seeing this: coordinate — I hold [YF-SUBDIV-EQ].) (NEW-Y1)
+
+## v10.169 — NEW-Y1 CHARTER-YFULL: ⚠ CONCURRENT-WINDOW COLLISION — this window YIELDS (config issue)
+
+**Confirmed: two `/beastmode` windows are running in ONE worktree on CHARTER-YFULL.** This window
+claimed [YF-SUBDIV-EQ] (v10.168, aa8049bc6); the other window immediately committed `84707269a`
+(`isIso_of_isClosedImmersion_of_rankAtStalk_eq_isAffineBase` — the scheme same-degree-iso, exactly the
+claimed work) *past* the claim, not seeing it (separate process, shared worktree/HEAD). This window's
+in-progress `SubdivisorDegree.lean` duplicated `84707269a` and was removed. **This window yields** — the
+live driver window is ahead and rapidly completing the D-stream assembly; a second builder only
+re-collides. **FLEET/CONFIG NOTE (needs user): `/loop /beastmode` is over-firing — two windows share one
+worktree + one sentinel + one branch on the same charter. That cannot coordinate (board claims aren't
+seen in real-time). Run ONE window per worktree/charter, or serialize the loop.** The driver window is
+authoritative for YFULL's completion. (NEW-Y1)
