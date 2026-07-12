@@ -16866,3 +16866,29 @@ localModel glues (LocallyWeierstrass.baseChange + it's Zariski-local).
   RelativePic) remains fleet-lane work. Next dispatch candidates: (α) L-B divisor-route
   ratification question to coordinator; (β) rigidified-bundles / Pic^ν once degree
   lands; (γ) DS-END0 route (a) revival per CHARTER-PIC-3.
+### SESSION LEDGER (NEW-HOPF, 2026-07-12 — HopfAlgebra assembled)
+- ★★ **[HG-C1c-1d] `[HopfAlgebra R' A']` ASSEMBLED** (`GroupScheme/PatchHopf.lean`,
+  R' = `baseRingTop` = Γ(V,⊤), A' = `groupRingTop` = Γ(G|_V,⊤)). The whole chart Hopf
+  structure now compiles, reduced to **3 uniform geometric identities** (chart group laws).
+  Closed sorry-free + axiom-clean this session:
+  - **R1 `tripleΓL_comp_assoc`** (the single genuinely-new hard coassoc lemma) — associator–
+    Künneth compat, via inv-`cubeLΓ`/`squareΓTop` + nested `tensor_hom_ext` (g₁,g₂,g₃ leaves).
+  - **`comulTop_coassoc` / `comulAlgTop_coassoc`** (coassoc, CommRingCat + AlgHom form) from
+    R1 + Δ₂R (`comulTop_comp_map_id_comulTop`) + Δ₂L' (`comulTop_comp_map_comulTop_id`) + R3-assoc.
+  - **counit laws in lid/rid form** (`map_counit_id_comp_comul`, `map_id_counit_comp_comul`)
+    via `lid_comp_map_counit`/`rid_comp_map_counit` bridging the proven lift-laws.
+  - **`instBialgebra`** via `Bialgebra.ofAlgHom` (alghom axioms — NO linear-map/Coalgebra bridge).
+  - **antipode**: `invRes`/`antipodeTop`/`antipodeAlgTop`, `antipodePair`/`antipodePairR`
+    (⟨S,1⟩/⟨1,S⟩) + Künneth-lift `_eq` + both laws (`antipodeLiftAlgTop_comp_comulAlgTop`,
+    `antipodeLiftAlgTopR_comp_comulAlgTop`) + `comulAlgHom_eq`/`counitAlgHom_eq` bridges +
+    **`instHopfAlgebra`** via `HopfAlgebra.ofAlgHom`.
+- **Remaining 3 sorries (all chart group laws, same ι-cancellation technique)**:
+  `assocScheme_leftMulSchemeL` (assoc, dualizes `mulOver_assoc`),
+  `antipodePair_comp_squareMulRes` (g⁻¹·g=e, dualizes `invOver_mulOver_left`),
+  `antipodePairR_comp_squareMulRes` (g·g⁻¹=e, dualizes `invOver_mulOver_right`).
+  Route (confirmed viable): `cancel_mono groupOpen.ι` → `squareMulRes_comp_ι` → `cancel_mono G.ι`,
+  then either E.Point (`Point.restrict_add`/`_zero` exist) or Over-bridge (`invOver_mulOver_*`,
+  `Over.fst_left = pullback.fst`). Assoc delegated to a worktree sub-agent; inverse laws mirror.
+- **Next after 3 sorries**: `StableAffineChartData` consumes `[HopfAlgebra R' A']` on
+  `groupRingTop` DIRECTLY (no topIso bridge). Then `IsCoaction chartCoaction`, `Module.Free`/
+  `Module.Finite R' A'` (from finite/flat/lfp — own arc), C1d/C3/C4, six SubgroupQuotient pins.
