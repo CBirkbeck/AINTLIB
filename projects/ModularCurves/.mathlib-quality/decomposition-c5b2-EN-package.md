@@ -182,3 +182,28 @@ The crux `torsion_etaleLocal_triv` = scheme-level globalisation of mathlib's rin
 Then L2b `fullLevelHom_isIso` = base-change φ along the cover (iso of two const N²-sheet schemes) +
 `isIso_of_isPullback_of_fppf`; then L4 seam. Execution effort: substantial (multi-build), but each
 link is a named lemma — no open mathematical gap remains.
+
+## v10.162 GRIND — T-F1 affine core (links 3-4) VERIFIED WORKING; rank+coprod+glue routes named
+
+Marathon progress: the affine-core extraction FIRES the ring lemma (verified in tmp, exact code below).
+For S = Spec R, E[N]=E.torsion N:
+```lean
+haveI hfinite : IsFinite (E.torsionπ N) := E.torsionπ_isFinite N
+haveI hetale : Etale (E.torsionπ N) := E.torsionπ_etale N hinv
+haveI : IsAffine (E.torsion N) := isAffine_of_isAffineHom (E.torsionπ N)
+set φ : R ⟶ Γ(E.torsion N, ⊤) := Spec.preimage ((E.torsion N).isoSpec.inv ≫ E.torsionπ N) with hφ
+have hspecmap : Spec.map φ = (E.torsion N).isoSpec.inv ≫ E.torsionπ N := by rw [hφ, Spec.map_preimage]
+haveI hspecE : Etale (Spec.map φ) := by rw [hspecmap]; exact (MorphismProperty.cancel_left_of_respectsIso (P := @Etale) _ _).mpr hetale
+haveI hspecF : IsFinite (Spec.map φ) := by rw [hspecmap]; exact (MorphismProperty.cancel_left_of_respectsIso (P := @IsFinite) _ _).mpr hfinite
+letI : Algebra R (Γ(E.torsion N, ⊤)) := φ.hom.toAlgebra
+haveI : Algebra.Etale R (Γ(E.torsion N, ⊤)) := (HasRingHomProperty.Spec_iff (P := @Etale)).mp hspecE
+haveI : Module.Finite R (Γ(E.torsion N, ⊤)) := (IsFinite.SpecMap_iff φ).mp hspecF
+-- hrank : Module.rankAtStalk (R := R) (Γ(E.torsion N, ⊤)) = (N^2 : ℕ)   [the rank link, route below]
+obtain ⟨T, _, _, _, _, _, hsplit⟩ := Algebra.IsFiniteSplit.exists_tensorProduct_of_etale (R := R) (S := Γ(E.torsion N, ⊤)) hrank
+```
+REMAINING links (all lemma names identified):
+- **rank (hrank)**: `Scheme.Hom.finrank_SpecMap_algebraMap R A x : finrank (Spec.map (ofHom (algebraMap R A))) x = Module.rankAtStalk A x` (FlatRank:135); `algebraMap R A = φ.hom` (RingHom.algebraMap_toAlgebra), `ofHom φ.hom = φ`, `hspecmap`, `Scheme.Hom.finrank_comp_left_of_isIso` (FlatRank:145, iso-invariance), `torsion_rank = N²`. `funext x` then the chain.
+- **coproduct (5-6)**: `IsFiniteSplit.nonempty_algEquiv_fun` (T⊗A ≅ Fin N²→T) → `Spec` → `Spec (Fin N²→T) ≅ ∐_{Fin N²} Spec T` (Spec of product = coproduct, `PrimeSpectrum.primeSpectrumProd`/mathlib) → reindex `Fin N² ≃ (Fin 2 → ZMod N)` (Fintype.equivFinOfCardEq, card N²) → `constScheme (Spec T) (Fin 2 → ZMod N)`; base change `Spec(T⊗A) = pullback (E.torsionπ N) (Spec T→S)` (Spec ⊗ = pullback).
+- **cover (7)**: Spec T → S étale (FaithfullyFlat+Etale) surjective.
+- **glue (8)**: affine OpenCover of S + `∐_i` local covers + Sigma-commute reindex (rank N² constant ⟹ global const iso).
+Extraction (the fiddly CommRingCat-carrier links) is DONE/verified. Remaining = value + coproduct + glue.
