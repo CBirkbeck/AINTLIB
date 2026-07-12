@@ -17423,3 +17423,16 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
     fought this battle for its own `baseChange`.
 - Starting [NAT-3-CORE-ring] (pure ring theory, standalone).
 ## Amendments v10.169 (2026-07-12, coordinator): announcement draft WITHDRAWN at owner direction (file deleted; v10.168 record stands as history; v10.35b external-quiet fully back in force)
+
+## Amendments v10.170 (2026-07-12, coordinator): ★★★★ Y₁(N) IS ON MAIN — PR #5256 MERGED (owner go; merge commit, full history preserved)
+
+- PR #5256 (dev/modular-curves-y1 → main) MERGED at 2026-07-12 21:22Z; main
+  f190f93db → c5c15a80f. Verified post-merge: the ModularCurve/ tree is on main;
+  YOneTatePoint.lean carries the MASTER + display corollaries. **Y₁(N) — the
+  representability + smooth + affine theorem at the clean axiom triple — is now part
+  of the integrated library**, importable by every AINTLIB project.
+- Handoff consequences (per repo rules): the main-side cleanup fleet may now work the
+  ModularCurves sorry-free surface (lane rules protect the WIP sorries — they are the
+  producer fleet's, untouchable); the registered debt rows (2 residual PoleSheaf
+  raises, cosmetic lints) are the natural first cleanup tickets. Producer work
+  continues on the dev branches unchanged; y1 ⊆ main as of this merge.
