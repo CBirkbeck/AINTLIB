@@ -18737,3 +18737,58 @@ route (KM 3.7.1) instead** — the D-stream already has the pieces:
 above), audit CartierDivisor.lean for the same-degree-divisor-equality lemma (build if absent), then
 assemble `isOpenImmersion_levelSpaceΓι` = `isOpenImmersion_levelSpaceΓι_of_taut` at the constructed U.
 Then [YF-ETALE] (swap-complete) consumes it; seam to FP4-B5. (NEW-Y1, CHARTER-YFULL session 1 cont.)
+
+## v10.163 — NEW-Y1 CHARTER-YFULL: CLOPEN closure run — openness engine landed; ⊇ decomposed (agent-audited)
+
+**Session: the full 5k-line RelEffCartierDiv/Incidence/NIsogeny audit (Explore agent) + 2 clean
+axiom-clean reusable engine leaves toward CLOPEN.** Route confirmed: **divisor-degree (KM 3.7.1)**,
+not finrank-φ (φ not flat over E[N]_T — the design finding stands).
+
+**Landed (both `{propext, Classical.choice, Quot.sound}`, rooted):**
+- **[YF-CLOPEN engine]** `ForMathlib/AgreementLocusClopen.lean` — `agreementι` + `isClopen_range_agreementι`:
+  the agreement locus of two maps `a,b : Z ⟶ X` into `f : X ⟶ S` formally-unramified+lft+separated
+  (i.e. étale) is clopen (open via `FormallyUnramified.isOpenImmersion_diagonal`, closed via
+  `IsSeparated.isClosedImmersion_diagonal`, both pulled back along `lift a b`). General, reusable.
+- **[YF-CLOPEN engine, curve form]** `EllipticCurve/PointVanishingClopen.lean` —
+  `isClopen_range_pointVanish` (+ `isSeparated_torsionπ`, `zero_comp_mulByHom`): for N invertible the
+  vanishing locus of an N-killed point R (where R agrees with 0 in the finite-étale E[N]) is clopen.
+  Consumes the engine + `torsionπ_etale'`. **The per-combination building block of the open locus U.**
+
+**Complete AUDIT INVENTORY (agent, ratified — consume by name, do NOT rebuild):**
+- `fullLevelLocusAux_sectionsDivisor_ideal` (Incidence:2484) — `sectionsDivisor.ideal = ∏ ker`.
+- `Scheme.IdealSheafData.comap_prod` (IdealSheafComapMul:265); `RelEffCartierDiv.ext` (CartierDiv:1678,
+  equal ideals ⟹ equal divisors); `baseChange_ideal` (:1664).
+- `IsSubdivisor`/`isSubdivisor_iff_le` (Incidence:959/966) — `IsSubdivisor D' D ↔ D.ideal ≤ D'.ideal`;
+  `exists_incidenceLocusEQ` (:1036) — the divisor-equality locus (representable); `exists_incidenceLocusLE` (:1008).
+- `sectionsDivisor_degree = n` (CartierDiv:1621); `sectionsIdeal_finrank` (:1574); `RelEffCartierDiv.degree`
+  = `finrank` over S (:100).
+- `isFullSetOfSectionsAlg_iff_fields` (T-D2, CartierDiv:2831, reduced base); `torsion_geometricFibre_rank_two`
+  (MulByHomUnramified:224); `torsion_rank = N²` (Torsion:193). `IsClosedImmersion.isIso_iff_ker_eq_bot`
+  (mathlib ClosedImmersion:195); `AlgebraicGeometry.isClosedImmersion_section` (PoleSheaf:1587).
+- **exists_generatorLocus** (NIsogeny:1687, PROVEN — stale "sorry upstream" docstrings there are FALSE):
+  the template for the ∏ker/comap_prod/theta divisor computation.
+
+**REMAINING (the ⊇ crux + assembly):**
+- **[YF-U]** the open locus `U := (⋃_{(c,d)∈(ℤ/N)²∖0} range(vanish σ_cd))ᶜ` as `ambient.Opens`, where
+  `σ_cd := [c]•tautPt₁ + [d]•tautPt₂ : E.Point tautBase` (kill via tautPt₁/₂_killed + linearity), each
+  vanish-locus clopen by `isClopen_range_pointVanish` ⟹ union closed ⟹ U open. ~120 LOC (the (ℤ/N)²
+  indexing + point smul/add + finite union). **Next-session first act — consumes the landed engines.**
+- **[YF-⊆]** `range(levelSpaceΓι) ⊆ U`: at full-level pts, σ_cd ≠ 0 for (c,d)≠0. Route: full-level ⟹
+  `sectionsDivisor.ideal = torsionIdeal` (reduced, E[N] étale) ⟹ the N² section-images distinct ⟹ σ_cd≠0.
+  Needs "torsionIdeal reduced for N invertible" + the distinctness argument. ~150 LOC.
+- **[YF-⊇]** `IsFullLevel over U` (the heavy leaf): over U (all nonzero combos nonvanish ⟹ N² sections
+  pairwise disjoint), `∏ ker = ⋂ ker ⊇ torsionIdeal`, same degree N² ⟹ equal. **TWO sub-lemmas to BUILD**
+  (agent confirms neither pre-built): (i) **comaximal ∏=⋂** for IdealSheafData under disjointness
+  (globalize the `private` chart-local `sectionsIdealAux_ideal_eq_top_of_disjoint`, CartierDiv:976); (ii)
+  **same-degree-subdivisor-equality** `IsSubdivisor D' D ∧ D'.degree = D.degree ⟹ D' = D` (via
+  `isIso_iff_ker_eq_bot` + "surjection of finite-free same-rank ⟹ injective", `injective_iff_surjective_of_finrank_eq_finrank`).
+  ~300 LOC. **NEXT-SESSION FIRST ACT there: /develop --decompose these two sub-lemmas.**
+- **[YF-CLOPEN]** = `isOpenImmersion_levelSpaceΓι_of_taut U hU⊆ hfull⊇` (assembly, DONE last session).
+  Then **[YF-ETALE]** (YFullRoute:209, swap-complete) consumes it → ★ LOUD (a YFULL gate falls).
+- **(e)** Y(N) representability D-track: NOTE the representability half `gammaFullNaive_representable_of_engine`
+  is gated on `gammaFullNaive_rigid` (P3B3 `aut_trivial_of_fullLevel`, 12 endDeg leaves) + FP4 engine, NOT
+  on CLOPEN; [YF-ETALE] feeds the smooth-affine GEOM conjunct. Cross-lane — hypothesis-wire.
+
+Alternatively **discharge `fullLevel_divisor_iff_naive_gen`** (Basic:125 sorry) via T-D2 +
+`torsion_geometricFibre_rank_two` — unblocks `isFullLevel_iff_naive` and may shortcut [YF-⊆]/[YF-⊇] through
+the naive-generation form. (NEW-Y1, CHARTER-YFULL session 2)
