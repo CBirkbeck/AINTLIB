@@ -16600,3 +16600,33 @@ ONE section-level leaf: **`bijective_evPre_app_of_triv`** (the trivialized pairi
 component is the unit multiplication — the component content of the CLOSED
 `isIso_ev_unitObj`, conjugated by `e`'s section-isos + the dual-trivialization). Then
 [CMP-←]. Function-level `Bijective`-casts cross the scheme-app/val-app forget₂ defeq.
+
+### v10.144 (2026-07-12, NEW-GH): CHARTER-GH-2 /beastmode — PART B core landing: GHB4 PROVEN; GHB5 crux scoped; 7 leaves total this arc
+
+*Continuing the grind (GHB4→GHB5→GHB7→GHC1). Commit f0e13a30f (GHB4). All pushed;
+single-target-green; zero heartbeat bumps. Arc total (v10.143+v10.144): basePullback,
+GHB2, GHA5, GHC5, GHC6, GHB4 + first-act audit.*
+
+- **GHB4 `quotientπ_finite_etale_surjective` PROVEN** — abstract categorical quotient π is
+  finite+étale+surjective. Route: `SchemeActionFree.lean` already proves it for the
+  CONCRETE `σ.quotientπ` (`isFinite_quotientπ` / `etale_quotientπ` /
+  `quotientπ_surjective`, resting on the now-proven A711-FP/BC); build that on the
+  IsAffineHom-preimage atlas, then the two universal properties give a unique iso
+  `q : Z₀ ≅ concrete` and `cancel_right_of_respectsIso` transfers. **Added the
+  `IsAffineHom(pullback.diagonal(terminal.from Z))` hypothesis** (needed to build the
+  concrete quotient, as GHB3) — must be threaded through GHB7/GHC1 (the level scheme is
+  separated → closed-immersion into E[N]²/S → the instance holds; establish at GHC1).
+- **GHB5 `exists_quotient_baseChange_of_free` — CRUX, scoped (next):** construct `πT :=
+  pullback.map f g f₀ g π (𝟙)(𝟙)` (snd/fst/invariance clauses mechanical); the universal
+  property is the ~150-LOC crux. Affine cores IDENTIFIED:
+  `InvariantBaseChange.fixedPointsBaseChange_bijective_of_flat` (Aᴳ ⊗ R' ≅ (A⊗R')ᴳ) +
+  `AffineQuotient.exists_invariantsπ_lift_of_isOpenImmersion` (base-change descent along an
+  open immersion). Scheme-level = glue the affine base-change quotient over the atlas +
+  the arbitrary-g base change. **[A711-BC] fully open so no gate.**
+- **THEN GHB7** `exists_quotientProblemData` (THE ASSEMBLY, ~400 LOC): functor from chosen
+  per-object quotients (GHB3 + GHB4 props + GHB5 base-change for functoriality/(Q2));
+  couniversal (descend invariant maps via GHB3's ∃!); geom clauses (torsor GHB4 + k̄
+  splitting). Needs the diagonal instance per X. **THEN GHC1 = corrected T-H4**
+  (GHA5+GH2+GHB7). GHC3 (bridge) also remains (pkg-consuming, ~120 LOC).
+- **Status:** the pkg-CONSUMING tier is 2/3 done (GHC5, GHC6); GHC3 + the pkg-CONSTRUCTING
+  GHB5→GHB7→GHC1 chain is the multi-session remainder, all gates open. p0 reclaim stands.
