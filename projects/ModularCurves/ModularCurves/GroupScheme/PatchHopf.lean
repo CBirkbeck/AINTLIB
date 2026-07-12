@@ -985,6 +985,26 @@ theorem cubeInnerMul_appTop_cubeΓ :
     rw [Algebra.TensorProduct.map_tmul, map_one]
     rfl
 
+/-- The Künneth transport `Γ(square) ≅ A' ⊗ A'` as an `R'`-algebra map. -/
+noncomputable def squareΓTopAlg :
+    Γ(P.groupSquare, ⊤) →ₐ[P.baseRingTop] (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) where
+  toRingHom := P.squareΓTop.hom
+  commutes' := fun r => by
+    have hbase : P.squareToBase.appTop ≫ P.squareΓTop
+        = CommRingCat.ofHom
+            (algebraMap P.baseRingTop (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop)) := by
+      rw [squareToBase, Scheme.Hom.comp_appTop, Category.assoc]
+      exact base_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl
+    have h2 := congrArg (fun m : P.baseRingTop ⟶ CommRingCat.of
+      (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) => m.hom r) hbase
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h2
+    exact h2
+
+/-- `Δ'` factors as `squareMulResAlg` then `squareΓTopAlg`. -/
+theorem comulAlgTop_eq :
+    P.comulAlgTop = P.squareΓTopAlg.comp P.squareMulResAlg :=
+  AlgHom.ext fun _ => rfl
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
