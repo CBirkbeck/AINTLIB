@@ -705,6 +705,14 @@ separated proper curve is affine and inherits a trivialization of `O(n[0])`. Wha
 for termwise Cech flatness is the scalar-compatible identification of its section module
 with that intersection's coordinate ring, followed by smooth flatness over the base.
 
+The active termwise-flatness dependency is now split explicitly. First construct the
+`Γ(S, ⊤)`-linear comparison between sections of a sheaf trivialized on an affine open and
+the coordinate ring of that open, retaining the scalar action induced by the structural
+morphism. Then restrict a cover trivialization to each finite Cech intersection, apply
+flatness of the intersection morphism to the affine base, and combine the resulting
+factorwise flatness with `baseCechComplex_X_flat_of_factors`. This step asserts neither
+finiteness nor projectivity of the raw affine Cech terms.
+
 The elementary Mayer--Vietoris seam is now complete in both directions.
 `HPrimeZeroAddEquivSections` identifies `H'⁰(U,F)` with sections naturally in `U`, while
 `HPrimeAddEquivHOfIsTerminal` identifies `H'ⁿ(T,F)` with genuine `Sheaf.H F n` when `T`
