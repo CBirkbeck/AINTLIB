@@ -17400,3 +17400,26 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
   `fibrewiseElliptic`; `grpObj_mul_unique` no-smuggled-data); verification = clone/build/
   #print axioms instructions; HONESTY NOTES mandatory (repo-wide WIP sorries none-on-trail;
   naive-vs-Drinfeld scope; AI authorship + the audit as the trust mechanism).
+
+## Amendments v10.168 (2026-07-12, fable-PIC0): [NAT-3] route DERIVED (chart conjugation + adjunction triangle) — mathlib pullback is opaque; ring core started
+
+- **Route-audit**: `PresheafOfModules.pullback φ := (pushforward φ).leftAdjoint` — FULLY
+  OPAQUE (abstract adjoint). No elementwise route exists. DERIVED alternative (all
+  tools present):
+  - ψ-evaluations at unit-images ARE computable: the adjunction triangle
+    `η ≫ push(ψ) = idealPushHom` + pushforward-apps-are-precomposition (rfl) give
+    **`ψ.app (f⁻¹V) (η.app V ⟨g, mem⟩) = ⟨f♯g, mem⟩`** — the only ψ-values the chart
+    conjugation needs.
+  - Chart conjugation: restrict-of-pb via `Modules.pullbackComp` + chart square;
+    both sides trivialize on charts (`idealGenHom`-isos + `pullbackUnitIso`); the
+    conjugated endo's unit section = the generator ratio c where f♯g = c·g′; iso ⟺
+    c unit ⟸ span-equality + nzd.
+  - **[NAT-3-CORE]** the irreducible input: comap-ideal on affine charts of the base
+    change = `span {f♯g}` — ring core: for φ : A →+* B, ker(B → B ⊗[A] A/(a)) = span{φ a}
+    via `Algebra.TensorProduct.quotientTensorEquiv`; scheme layer via pullback-of-Spec
+    sections (pullbackSpecIso-plumbing, its own leaf).
+  - nzd-side: consumer (flat base change of curves) gets f♯g-nzd from the ENGINE's
+    `nonZeroDivisor_of_flat_of_fibrewise_nonZeroDivisor` (:2003) — the engine already
+    fought this battle for its own `baseChange`.
+- Starting [NAT-3-CORE-ring] (pure ring theory, standalone).
+## Amendments v10.169 (2026-07-12, coordinator): announcement draft WITHDRAWN at owner direction (file deleted; v10.168 record stands as history; v10.35b external-quiet fully back in force)
