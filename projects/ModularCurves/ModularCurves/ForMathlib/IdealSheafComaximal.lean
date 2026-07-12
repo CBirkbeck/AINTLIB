@@ -59,4 +59,19 @@ theorem prod_eq_biInf_of_pairwise_sup_eq_top {ι : Type*} (s : Finset ι)
     simpa using h3
   exact (Ideal.isCoprime_iff_sup_eq).mpr hsup
 
+/-- Ideal sheaves with disjoint supports are comaximal. -/
+theorem sup_eq_top_of_disjoint_support {I J : X.IdealSheafData}
+    (h : Disjoint I.support J.support) : I ⊔ J = ⊤ := by
+  rw [← support_eq_bot_iff, support_sup]
+  exact disjoint_iff.mp h
+
+/-- **Disjoint supports ⟹ product = intersection.** A finite family of ideal sheaves with
+pairwise disjoint supports has product equal to intersection. -/
+theorem prod_eq_biInf_of_pairwise_disjoint_support {ι : Type*} (s : Finset ι)
+    (I : ι → X.IdealSheafData)
+    (h : (s : Set ι).Pairwise (fun i j => Disjoint (I i).support (I j).support)) :
+    ∏ i ∈ s, I i = ⨅ i ∈ s, I i :=
+  prod_eq_biInf_of_pairwise_sup_eq_top s I
+    (fun i hi j hj hij => sup_eq_top_of_disjoint_support (h hi hj hij))
+
 end AlgebraicGeometry.Scheme.IdealSheafData
