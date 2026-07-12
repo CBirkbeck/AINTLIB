@@ -1098,6 +1098,48 @@ theorem exists_quotientπ_lift {Y : Scheme.{u}} (F : X ⟶ Y)
       hι, hqx x']
   exact (atlasCover V hVmem).hom_ext _ _ fun x => hfac x
 
+/-- The **base-changed action** on `pullback (quotientπ) j`: `g ∈ G` acts through the
+`X`-factor (well-defined because `σ.hom g ≫ quotientπ = quotientπ`, `hom_quotientπ`).
+The global-`quotientπ` analogue of `AffineQuotient.pullbackSpecSMul`. -/
+noncomputable def pullbackQuotientπSMul {W : Scheme.{u}}
+    (j : W ⟶ σ.quotient V hVs hVa) (g : G) :
+    Limits.pullback (σ.quotientπ V hVs hVa hVmem) j ⟶
+      Limits.pullback (σ.quotientπ V hVs hVa hVmem) j :=
+  Limits.pullback.lift (Limits.pullback.fst _ _ ≫ σ.hom g) (Limits.pullback.snd _ _)
+    (by rw [Category.assoc, hom_quotientπ]; exact Limits.pullback.condition)
+
+@[reassoc (attr := simp)]
+theorem pullbackQuotientπSMul_fst {W : Scheme.{u}}
+    (j : W ⟶ σ.quotient V hVs hVa) (g : G) :
+    σ.pullbackQuotientπSMul V hVs hVa hVmem j g ≫
+        Limits.pullback.fst (σ.quotientπ V hVs hVa hVmem) j =
+      Limits.pullback.fst (σ.quotientπ V hVs hVa hVmem) j ≫ σ.hom g :=
+  Limits.pullback.lift_fst _ _ _
+
+@[reassoc (attr := simp)]
+theorem pullbackQuotientπSMul_snd {W : Scheme.{u}}
+    (j : W ⟶ σ.quotient V hVs hVa) (g : G) :
+    σ.pullbackQuotientπSMul V hVs hVa hVmem j g ≫
+        Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j =
+      Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j :=
+  Limits.pullback.lift_snd _ _ _
+
+/-- **[GHB5a] Base change commutes with the quotient** (existence of descent; KM
+7.1.3(3c), the free-action case). For any base map `j : W ⟶ X/G`, the base-changed
+projection `pullback.snd (quotientπ) j : pullback (quotientπ) j ⟶ W` descends every
+morphism `F` that is invariant under the base-changed action. Global-`quotientπ`,
+arbitrary-`j` analogue of `AffineQuotient.exists_invariantsπ_lift_of_isOpenImmersion`;
+proof mirrors `exists_quotientπ_lift`'s glue over `quotientGlueData`, with the per-chart
+descent supplied by the affine `exists_invariantsπ_lift_of_isOpenImmersion` (freeness
+enters through [A711-BC] `fixedPointsBaseChange`). Consumed by [GHB5]
+`exists_quotient_baseChange_of_free` at `j = pullback.fst f₀ g`. -/
+theorem exists_quotientπ_lift_baseChange {W Y : Scheme.{u}}
+    (j : W ⟶ σ.quotient V hVs hVa)
+    (F : Limits.pullback (σ.quotientπ V hVs hVa hVmem) j ⟶ Y)
+    (hF : ∀ g : G, σ.pullbackQuotientπSMul V hVs hVa hVmem j g ≫ F = F) :
+    ∃ q : W ⟶ Y, Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j ≫ q = F := by
+  sorry
+
 /-- The open image of the `i`-th piece of a glue data. -/
 private noncomputable def chartOpens (D : Scheme.GlueData.{u}) (i : D.J) : D.glued.Opens :=
   (D.ι i).opensRange
