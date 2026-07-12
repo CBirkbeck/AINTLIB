@@ -18959,3 +18959,39 @@ pairwise disjoint (connect `pointVanishSet` ↔ section support), so `sectionsDi
 giving `IsSubdivisor D_sec D_tor`; equal degree `N²` (`sectionsDivisor_degree`, `torsion_rank`) + `[YF-SUBDIV-EQ]`
 ⟹ `sectionsDivisor.ideal = torsionIdeal` = `IsFullLevel`. Then `[YF-⊆]` + `isOpenImmersion_levelSpaceΓι_of_taut`
 → **`[YF-ETALE]` ★**. (NEW-Y1)
+
+## v10.170 — NEW-Y1 CHARTER-YFULL: ★★ [YF-⊇] DIVISOR CHAIN PROVEN + comaximality engine + bridge frontier localized
+
+**The entire `[YF-⊇]` divisor chain is now proven** (`Moduli/FullLevelSupset.lean`), modulo ONE deep,
+fully-documented topological bridge. All reusable machinery is axiom-clean; the chain inherits only the
+pre-existing boarded Tier-B torsion boxes (`torsionπ_isFinite/flat`, `torsion_rank`).
+
+**LANDED this session (all committed on `dev/modular-curves-y1`, root green @ 4201 jobs):**
+- **`sectionsDivisor_ideal_eq_torsionIdeal`** — the `[YF-⊇]` divisor chain: `N²` pairwise-pointwise-distinct
+  `N`-killed sections ⟹ `∏ker = ⋂ker ⊇ torsionIdeal` ⟹ `IsSubdivisor` + equal degree `N²` ⟹ `= torsionIdeal`.
+- **`torsionIdeal_le_ker`** (CLEAN), **`torsionDivisor`** + **`torsionDivisor_degree`** (public reconstruction
+  of the private `fullLevelLocusAux_torsionDivisor`; degree via `torsion_rank` transported across
+  `torsionIdeal_subscheme`).
+- **Comaximality engine** `ForMathlib/SectionKerDisjoint.lean`: **`sup_ker_eq_top_of_sections_pointwise_ne`**
+  (CLEAN) — pointwise-distinct sections of a separated `ρ` have comaximal kernels (sections are closed
+  immersions via `of_comp`; retraction ⟹ disjoint images; `support_ker`+`sup_eq_top_of_disjoint_support`).
+- **Agreement equalizer** `ForMathlib/AgreementLocusClopen.lean`: **`agreementι_comp_eq`** +
+  **`range_agreementι_subset`** (CLEAN) — `range(agreementι) ⊆ {topological agreement}`. KEY: for SECTIONS
+  the residue map is forced = retraction-inverse, so there topological agreement = morphism agreement.
+- **`asSection_base_eq_imp`** (CLEAN, term-mode past the semireducible-`baseChange` kabstract friction) +
+  **`sub_killed`** (CLEAN) + **`base_ne_of_notMem_pointVanishSet`** consumer (CLEAN).
+
+**THE SINGLE FRONTIER — `mem_pointVanishSet_of_base_eq` (WIP `sorry`, proof strategy fully documented in-file).**
+Fibrewise group law: `x.1 u = y.1 u ⟹ u ∈ pointVanishSet(x−y)`. Confirmed to need group-scheme infrastructure
+ABSENT from the project — decomposes into three sub-tickets:
+  1. **`pointToTorsion` additivity** — needs the group-scheme structure on `E[N] = torsion N` and `torsionι`
+     as a group hom (neither present in `Torsion.lean`).
+  2. **`E[N]` translation automorphism** — reduce pair-agreement `(c_i,c_j)` to zero-agreement `(c_i−c_j, 0)`.
+  3. **Zero-section residue triviality** — topological agreement with the zero classifier (κ = κ(s)) upgrades
+     to morphism agreement, giving the reverse of `range_agreementι_subset` against the zero section.
+This is a genuine multi-lemma group-scheme sub-development (KM 3.7.1 fibrewise), within project scope.
+
+**REMAINING after the bridge:** wire `base_ne_of_notMem_pointVanishSet` (via `asSection_base_eq_imp`) +
+base-changed killing (`restrict`+`asSection_zsmul`, friction-heavy term-mode) into `IsFullLevel over
+fullLevelOpens` `[YF-⊇]`; then `[YF-⊆]` (`range levelSpaceΓι ⊆ fullLevelOpens`, likely a bridge-analog);
+then `isOpenImmersion_levelSpaceΓι_of_taut` → **`[YF-ETALE]` ★**. (NEW-Y1)
