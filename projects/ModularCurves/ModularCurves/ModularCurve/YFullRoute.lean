@@ -188,28 +188,6 @@ theorem isFinite_fullLevelSpaceStruct (hinv : NIsInvertible X.base N) :
 
 end Presentation
 
-section IsoLocus
-
-/-- **[YF-ISOLOC] (route γ core, trivialization-free)** For finite étale `T`-schemes `X, Y` and a
-`T`-morphism `ψ : X ⟶ Y`, the non-isomorphism locus `b(support(finrank ψ ≠ 1))` is closed (so the
-iso-locus, its complement, is open). `ψ` is finite étale by cancellation (`Etale.of_comp` + the
-post-cancellation `HasOfPostcompProperty @IsFinite @IsSeparated`); `finrank ψ` is locally constant
-(mathlib `isLocallyConstant_finrank`), so `{finrank ψ ≠ 1}` is clopen; `b` finite ⟹ closed map, so
-its image is closed. No `E[N] ≅ (ℤ/N)²`, no rank count. -/
-lemma isClosed_image_finrank_ne_one {T X Y : Scheme.{u}} (a : X ⟶ T) (b : Y ⟶ T)
-    (ψ : X ⟶ Y) (w : ψ ≫ b = a) [IsFinite a] [Etale a] [IsFinite b] [Etale b] :
-    IsClosed (b.base '' {y | ψ.finrank y ≠ 1}) := by
-  haveI : Etale (ψ ≫ b) := by rw [w]; infer_instance
-  haveI : IsFinite (ψ ≫ b) := by rw [w]; infer_instance
-  haveI : Etale ψ := Etale.of_comp ψ b
-  haveI : IsFinite ψ :=
-    MorphismProperty.of_postcomp (W := @IsFinite) (W' := @IsSeparated) ψ b inferInstance inferInstance
-  have hlc : IsLocallyConstant ψ.finrank := ψ.isLocallyConstant_finrank
-  have hcl : IsClosed {y | ψ.finrank y ≠ 1} := (hlc.isClopen_fiber 1).isOpen.isClosed_compl
-  exact b.isClosedMap _ hcl
-
-end IsoLocus
-
 /-- **([YF-CLOPEN] — the one genuinely new geometric leaf of this stream)** For `N`
 invertible on `S`, the closed full-level locus is ALSO open in `E[N] ×_S E[N]`: the
 inclusion is an open immersion. Two discharge routes, either sufficient:
