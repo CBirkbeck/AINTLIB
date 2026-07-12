@@ -17008,3 +17008,24 @@ dispatchable to any free strong seat.
 - **Status**: blocked on W0 + W3/W4 + W6 · ℤ[1/N]-étale clause = consume the landed Y1 chain.
 ### [CLEANUP-KM-1] /cleanup on Moduli/DrinfeldRegularity.lean — after W1+W2+W3 land (cadence).
 ### [CLEANUP-KM-ALL] /cleanup-all before [KM-W7] (pre-milestone) + final per cadence.
+
+### SESSION LEDGER (NEW-HOPF, 2026-07-12 cont.2 — opens-level HopfAlgebra via topIso bridge)
+- ★★ **[HG-C1c] opens-level `[Bialgebra P.baseRing P.groupRing]` + `[HopfAlgebra P.baseRing
+  P.groupRing]` DONE** (green, axiom-clean {propext,Classical.choice,Quot.sound}) — the structure
+  `StableAffineChartData`/`chartCoaction`/`IsCoaction` actually consume. Built by a delegated
+  worktree sub-agent (the topIso bridge) and cherry-picked in cleanly (commit 903a809cf, +671 lines).
+- **Bridge approach (3 tracks)**: counit = pure-algebra lid/rid packaging of the proven collapsed
+  `counitLift(')_comp_comulAlg` (no transport); antipode = dualise the level-agnostic scheme
+  identities `antipodePair(R)_comp_squareMulRes` through the *opens* Künneth `squareΓ` (no transport,
+  one new bridge `squareMul_appLE_eq`); coassoc = the genuine transport `transDouble = inv squareΓ ≫
+  squareΓTop` intertwining `groupPatchComul`↔`comulTop`, with `transTriple`/`transTripleInv`
+  (triple-tensor transports via `Algebra.TensorProduct.lift` over local base-change algebra towers,
+  split-mono ⇒ Mono) carrying `comulTop_coassoc` down to `comulAlg_coassoc`.
+- **Transport gotchas recorded** (for future): keep base-change `local instance`s inside the
+  transport `section` (else they leak into instance elaboration); don't double-declare tensor
+  `Algebra baseRing` (SMul diamond — rely on `TensorProduct.leftAlgebra`); `.toRingHom`/`.toAlgHom`
+  block `map_tmul`/`assoc_tmul` under `rw` (use `show` to AlgHom/AlgEquiv coe first); `simpa` unfolds
+  `topIso.inv` into presheaf maps (use `simp only [...]; exact h`).
+- **Next**: `IsCoaction chartCoaction` (StableCharts.lean; 2 axioms dualizing `translationAction_unit`/
+  `_assoc` — same E.Point technique), `Module.Free`/`Module.Finite`, C1d/C3/C4, six SubgroupQuotient
+  pins → BOARD-SIGNAL.
