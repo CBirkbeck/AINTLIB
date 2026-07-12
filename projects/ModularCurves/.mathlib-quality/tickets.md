@@ -17468,3 +17468,29 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
   theorem structurally complete. NEXT: link 2 (the restricted-pullback Spec
   reduction), then the conjugation assembly, then sectionToPicRel-naturality
   against picRelFunctor.
+## Amendments v10.171 (2026-07-12, coordinator): ★ THE FOUR-STREAM RESET — all producer seats closed (owner); four fresh stream charters absorb every banked remnant; codex boundary formalized
+
+**Owner directive**: the second-wave seats are being closed and re-spun as FOUR fresh
+stream workers. Every banked lane is absorbed into a stream charter with resume pointers
+(inbox/STREAM-{YN,GH,G0,KM}.md); origin = ground truth for all inherited state; all old
+seats' reclaim clauses are VOID.
+
+| Stream | Absorbs (banked state) | Deliverable |
+|---|---|---|
+| **STREAM-YN** | NEW-Y1's route-γ CLOPEN (v10.163-Y1: TAUT/⊆/⊇ + audited APIs) + the Y(N) D-track + fable-P4's T-E5f recollement mid-flight (g0/transfers/overlapIso clean) | [YF-ETALE] ★ → the Y(N) MASTER `gammaFullNaive_representable` ★★★★ |
+| **STREAM-GH** | NEW-GH's GHB5a mid-crux (of_fixedPoints_ground done) → GHB7; the Γ_H MASTER-shape on FP4's proven B3 engine + c5β's glSchemeSmul; the WEIL wave folded in (inbox/WEIL.md; hypothesis-wire until critical) | T-H4 chain end-to-end ★★ → the Γ_H MASTER |
+| **STREAM-G0** | NEW-HOPF's endgame (**IsCoaction COMPLETE** at stop — six pins ONE assembly away) + c5β's T-F1/E[N] remnant + D2's capstone gates + L15 + Y₀ route map | THE PINS SIGNAL ★★ → exists_nIsogSpace → Y₀(N) |
+| **STREAM-KM** | the v10.158 charter's near half; beastmode-A's KM-W1 subagent progress (check + consume) | W1–W3 + W0 + W6a/b/c ★ per wave |
+
+- **PARKED with honor (no stream)**: fable-PIC0's Pic⁰ [NAT]-arc (structure complete
+  modulo the chart chain; window-4 ledger v10.169-PIC0 = the resume point) — resumable
+  when a seat frees; the GME 2.16 assembly map `sectionToPicRel` + AG-LB ★★ are landed.
+- **CODEX BOUNDARY (formalized; instructions relayed via owner)**: the codex worker owns
+  the abstract fibrewise⟺LW converse + its pole-sheaf/cohomology route (Comparison.lean,
+  PoleSheaf.lean cohomology side, dual-restriction layer). The four streams CONSUME the
+  landed characterizations as pins and build NOTHING there; conversely the codex lane
+  consumes (never rebuilds) the E[N]/torsion ladders. Their origin branch is STALE at
+  c1399fd1b (Jul 10) — push + rebase + board-claim instructions sent.
+- **Cleanup fleet note**: the priority:modular-curves wave (#5282–#5316, 33 tickets) runs
+  on MAIN concurrently — producer streams work dev/y1; rebase awareness at session starts;
+  rename-heavy tickets are serialized by the main-side manager.
