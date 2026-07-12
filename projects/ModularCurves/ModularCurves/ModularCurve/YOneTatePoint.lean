@@ -1407,4 +1407,30 @@ theorem gammaOneNaive_representable (N : ℕ) [NeZero N] (hN : 4 ≤ N)
       ∀ X : EllObj R, Nonempty ((gammaOneNaiveProblem R N).RepresentableBy X) →
         (Smooth X.structMap ∧ IsAffineHom X.structMap) := gammaOneNaive_representable_assembly R N hN hinv
 
+/-- **Y₁(N), display form (names the scheme).** For `4 ≤ N` invertible in `R`, the explicit
+scheme `yOne R N` — an open subscheme of the `N`-torsion killed locus of the universal Tate
+curve, packaged as the marked object `yOneEllObj R N` — represents the naive `Γ₁(N)` moduli
+problem, and its structure morphism `yOneStructMap R N` to `Spec R` is smooth and affine.
+This is `gammaOneNaive_representable` with its existential witness named. -/
+theorem yOne_representable_smooth_affine (N : ℕ) [NeZero N] (hN : 4 ≤ N)
+    (hinv : IsUnit (N : R)) :
+    Nonempty ((gammaOneNaiveProblem R N).RepresentableBy (yOneEllObj R N)) ∧
+      Smooth (yOneStructMap R N) ∧ IsAffineHom (yOneStructMap R N) :=
+  ⟨yOne_representableBy R N hN hinv, yOneStructMap_smooth R N hN hinv,
+    yOneStructMap_isAffineHom R N hN hinv⟩
+
+/-- **Y₁(N) over `ℤ[1/N]`** (Loeffler Thm 3.4.4 in its literal arithmetic form): over
+`ℤ[1/N] = Localization.Away (N : ℤ)` the naive `Γ₁(N)` moduli problem is representable and
+every representing scheme is smooth and affine over `Spec ℤ[1/N]`. The universal statement
+`gammaOneNaive_representable` specialised at the initial base. -/
+theorem gammaOneNaive_representable_zInv (N : ℕ) [NeZero N] (hN : 4 ≤ N) :
+    (gammaOneNaiveProblem (CommRingCat.of (Localization.Away (N : ℤ))) N).Representable ∧
+      ∀ X : EllObj (CommRingCat.of (Localization.Away (N : ℤ))),
+        Nonempty ((gammaOneNaiveProblem (CommRingCat.of (Localization.Away (N : ℤ))) N).RepresentableBy X) →
+          (Smooth X.structMap ∧ IsAffineHom X.structMap) :=
+  gammaOneNaive_representable (CommRingCat.of (Localization.Away (N : ℤ))) N hN <| by
+    have h := IsLocalization.Away.algebraMap_isUnit
+      (S := Localization.Away (N : ℤ)) (N : ℤ)
+    rwa [eq_intCast, Int.cast_natCast] at h
+
 end ModularCurves
