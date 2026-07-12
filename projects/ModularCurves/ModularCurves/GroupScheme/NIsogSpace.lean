@@ -94,6 +94,17 @@ close it is populated and `exists_nIsogSpace` is axiom-clean. -/
 
 variable (E : EllipticCurve S) (N : ℕ) [NeZero N]
 
+/-- **Base change of an `N`-isogeny datum** along `g : T ⟶ S`: the base-changed subgroup
+scheme, of the same rank. This is the functoriality of the moduli problem
+`T ↦ NIsogenyStructure (E_T) N` — the coherence a *representing* (functorial)
+`NIsogRepresentation` needs so that a `T`-point pulls back the universal datum (see the
+Y₀(N) assembly finding in `decomposition-nisog-L15.md`). -/
+noncomputable def _root_.ModularCurves.EllipticCurve.NIsogenyStructure.baseChange
+    {E : EllipticCurve S} {N : ℕ} [NeZero N] (nis : NIsogenyStructure E N)
+    {T : Scheme.{u}} (g : T ⟶ S) : NIsogenyStructure (E.baseChange g) N where
+  subgroup := nis.subgroup.baseChange g
+  hasRank := nis.hasRank.baseChange g
+
 /-- **[L15] the `N`-isogeny moduli representation** (hypothesis-wired pins-record). A finite
 `S`-scheme `W` whose `T`-points classify `N`-isogeny data on `E ×_S T` — exactly the closed
 subscheme of the Grassmannian of `𝓕` cut by the bi-ideal condition (KM 6.5.1). This bundles
