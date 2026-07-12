@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
 import ModularCurves.Moduli.LevelSpaces
+import ModularCurves.ForMathlib.OpenImmersionOfSection
 
 /-!
 # The tautological full-level section (YFULL route γ, [YF-TAUT])
@@ -104,6 +105,30 @@ theorem exists_tautSection_of_isFullLevel
     show U.ι ≫ (tautPt₂ E N).1 =
       U.ι ≫ pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N
     rfl
+
+/-- **[YF-CLOPEN assembly]** The `Y(N)` clopen leaf, reduced to the classifier-produced
+data. Given an open `U` of `E[N] ×_S E[N]` that (i) contains the image of the full-level
+closed immersion `levelSpaceΓι` and (ii) over which the tautological pair is a full-level
+structure, the closed immersion `levelSpaceΓι E N` is an **open immersion**.
+
+The remaining leaf `[YF-CLASSIFIER]` supplies such a `U` (the clopen locus where the
+`N²`-section classifier `[a]P + [b]Q` is an isomorphism, from `isClopen_finrank_eq`): the
+image bound is the forward "full-level ⟹ classifier iso" direction, and the full-level
+hypothesis over `U` is the reverse. This theorem consumes `[YF-TAUT]`
+(`exists_tautSection_of_isFullLevel`) and the open-immersion criterion
+`isOpenImmersion_of_range_subset_of_section`. -/
+theorem isOpenImmersion_levelSpaceΓι_of_taut
+    (U : (pullback (E.torsionπ N) (E.torsionπ N)).Opens)
+    (hrange : Set.range (levelSpaceΓι E N).base ⊆ (U : Set _))
+    (hfull : (E.baseChange (U.ι ≫ tautBase E N)).IsFullLevel N
+      (Point.asSection E (U.ι ≫ tautBase E N) (Point.restrict E U.ι (tautPt₁ E N)))
+      (Point.asSection E (U.ι ≫ tautBase E N) (Point.restrict E U.ι (tautPt₂ E N)))) :
+    IsOpenImmersion (levelSpaceΓι E N) := by
+  haveI : IsClosedImmersion (levelSpaceΓι E N) :=
+    inferInstanceAs (IsClosedImmersion (Scheme.IdealSheafData.subschemeι _))
+  obtain ⟨s, hs⟩ := exists_tautSection_of_isFullLevel E N U hfull
+  exact AlgebraicGeometry.isOpenImmersion_of_range_subset_of_section
+    (levelSpaceΓι E N) U hrange s hs
 
 end EllipticCurve
 
