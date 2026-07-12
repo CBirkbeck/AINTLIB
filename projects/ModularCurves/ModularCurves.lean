@@ -27,6 +27,7 @@ import ModularCurves.EllipticCurve.PoleSheaf
 import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
 import ModularCurves.EllipticCurve.PoleSheafPointedIso
 import ModularCurves.EllipticCurve.PoleSheafModel
+import ModularCurves.EllipticCurve.PoleSheafModelHOne
 import ModularCurves.EllipticCurve.PoleSheafFibreSections
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.WeierstrassModel

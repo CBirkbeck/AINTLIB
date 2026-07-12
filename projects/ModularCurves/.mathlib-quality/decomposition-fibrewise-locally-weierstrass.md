@@ -252,6 +252,19 @@ between `H'` and `Sheaf.H`. The result is option-free and axiom-clean. Its next 
 explicit Laurent-overlap calculation for the section pole sheaves on the two affine
 Weierstrass charts; it does not supply proper cohomology or arbitrary-base change.
 
+That explicit model calculation is now complete in
+`EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
+`n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of
+`O(n[0])` on the chart overlap as a section-neighborhood restriction minus a
+`Z`-chart restriction. The proof uses the localization description at the section
+parameter, the identities `x*s^2 = v` and `y*s^3 = v` for a cofactor congruent to
+one modulo `s`, and denominator induction to remove every principal part. Applying
+the two-open criterion and affine quasicoherent vanishing gives
+`sectionPoleSheafPower_projModel_subsingleton_H_one`. Local quasicoherence is obtained
+from the existing chart trivializations, so this theorem needs neither model
+smoothness nor noetherianity and introduces no option. This closes the geometric
+model-side `H^1` input; arbitrary-family base change remains separate.
+
 No theorem in this stream may replace this leaf by a `CohomologyPackage` hypothesis,
 an axiom, or an unboarded `sorry`.
 
@@ -271,9 +284,12 @@ nonzero base ring as `sectionPoleSheafPower_projModel_finrank`, and
 `sectionPoleSheafPowerPointedIso` supplies the sheaf-level transport from those models
 to the residue fibres. The `H⁰` conclusion is now complete as
 `FibrewiseElliptic.sectionPoleSheafPower_fiber_finrank`: for every residue fibre and
-`n ≥ 1`, the global pole sections have dimension `n`. The remaining work in this step is
-the geometric `H¹`-vanishing comparison and its transport through Step 2 to local
-freeness and base change on the family.
+`n ≥ 1`, the global pole sections have dimension `n`. The model-side geometric
+`H¹` vanishing is now also proved by
+`sectionPoleSheafPower_projModel_subsingleton_H_one`. The remaining work in this step
+is to transport that vanishing across the pointed fibre isomorphism and then prove the
+proper cohomology-and-base-change theorem which upgrades the fibrewise dimensions to
+local freeness and base change on the family.
 
 ### 4. Choose `x` and `y` -- `T-W-cmp.XY`
 
