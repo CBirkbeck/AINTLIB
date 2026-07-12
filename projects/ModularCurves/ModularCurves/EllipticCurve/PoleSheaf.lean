@@ -2588,6 +2588,29 @@ noncomputable def overTrivializationCoefficient {X : Scheme.{u}} (M : X.Modules)
   e.hom.val.app (.op (Over.mk (𝟙 U)))
     (M.presheaf.map (homOfLE le_top).op m)
 
+/-- Expressing a scalar multiple in an over-site trivialization restricts the
+scalar and multiplies the coefficient. -/
+theorem overTrivializationCoefficient_smul {X : Scheme.{u}} (M : X.Modules)
+    (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (a : Γ(X, (⊤ : X.Opens))) (m : Γ(M, (⊤ : X.Opens))) :
+    overTrivializationCoefficient M U e (a • m) =
+      X.presheaf.map (homOfLE le_top).op a *
+        overTrivializationCoefficient M U e m := by
+  unfold overTrivializationCoefficient
+  rw [M.map_smul]
+  let T : Over U := Over.mk (𝟙 U)
+  let c : (X.ringCatSheaf.over U).obj.obj (.op T) :=
+    X.presheaf.map (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op a
+  let x : (M.over U).val.obj (.op T) :=
+    M.presheaf.map (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op m
+  have h := (e.hom.val.app (.op T)).hom.map_smul c x
+  change (show (X.ringCatSheaf.over U).obj.obj (.op T) from
+      e.hom.val.app (.op T) (c • x)) =
+    c * (show (X.ringCatSheaf.over U).obj.obj (.op T) from
+      e.hom.val.app (.op T) x) at h
+  exact h
+
 /-- Coefficients in a restricted over-site trivialization are restrictions of the
 original coefficients. -/
 theorem overTrivializationCoefficient_restrict {X : Scheme.{u}} (M : X.Modules)
@@ -2897,6 +2920,19 @@ theorem overTrivializationCoefficient_overTrivializationOfRestrictIso
       overTrivializationCoefficient_eq_local_of_overIso M U _ m
     _ = localTrivializationCoefficient M U e m := by
       rw [restrictTrivializationOfOverTrivializationOfRestrictIso]
+
+/-- Expressing a scalar multiple in an affine-open trivialization restricts
+the scalar and multiplies the coefficient. -/
+theorem localTrivializationCoefficient_smul {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (a : Γ(X, (⊤ : X.Opens))) (m : Γ(M, (⊤ : X.Opens))) :
+    localTrivializationCoefficient M U e (a • m) =
+      X.presheaf.map (homOfLE le_top).op a *
+        localTrivializationCoefficient M U e m := by
+  rw [← overTrivializationCoefficient_overTrivializationOfRestrictIso,
+    ← overTrivializationCoefficient_overTrivializationOfRestrictIso]
+  exact overTrivializationCoefficient_smul M U.1 _ a m
 
 /-- Restricting a coefficient computed in an affine-open trivialization agrees
 with computing it in the induced over-site trivialization. -/
