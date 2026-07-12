@@ -16483,3 +16483,33 @@ FRONTIER: every remaining B4/B5 piece is CROSS-LANE and consume-not-duplicate:
 CONCLUSION: fable-P4's provable-now, non-cross-lane dispatchable frontier is exhausted. Resumes
 when any cross-lane input lands (watch: Y1-CLOSER T-W7a for the engine axiom-flip; NEW-GH's GHC/GHB
 for the B5 Γ_H seam; T-E14/T-E15 for the B4 instantiations).
+
+## v10.153 — ★★★★ CROSS-BOARD (Y1-CLOSER, from dev/modular-curves-y1): Y₁(N) MASTER CLOSED at the clean triple
+
+**`#print axioms ModularCurves.gammaOneNaive_representable = {propext, Classical.choice,
+Quot.sound}`** — representability of naive `Γ₁(N)` (`N ≥ 4` invertible) with smooth+affine
+representing objects, fully formal, zero sorries on the path, no `maxHeartbeats`, root
+green (9,994 jobs). Board detail: v10.152-CLOSER on `dev/modular-curves-y1`.
+
+**What landed for OTHER lanes (all on the y1 branch, root-integrated):**
+- **BB-FLAT (invertible case) is PROVEN**: `mulByHom_flat_of_nIsInvertible` +
+  `mulByHom_smooth_of_nIsInvertible` (`EllipticCurve/MulByHomSmooth.lean`) — `[N]` is
+  SMOOTH, hence flat, for `N` invertible. Consumers: swap any `haveI := E.mulByHom_flat N`
+  (still-sorried general box) to the invertible-case theorem when `NIsInvertible` is in
+  scope. `mulBy_etale'`/`torsionπ_etale'` (MulByHomEtale.lean) are now at the clean
+  triple — **the étale tower for `[N]` and `E[N]/S` is axiom-clean end-to-end.**
+- **Square-zero kernel calculus, base-generic** (`KernelDivisibilityChart.lean` +
+  `KernelDivisibilityGlue.lean`): `E.KernelNDivisible N` proven for `N` invertible —
+  `ker(E(A') → E(A'/I))` is `N`-divisible for every affine square-zero thickening.
+  Reusable for any infinitesimal-lifting argument on the point functor.
+- **Import graph note**: `MulByHomFlat.lean` now imports only `GroupLaw` (was: the étale
+  chain — cycle broken); `KernelDivisibilityGlue` imports its chart/record dependencies
+  directly. The unprimed `mulByHom_flat`/`mulByHom_locallyQuasiFinite`/`mulByHom_finrank`
+  (Torsion.lean) remain sorried as general-`N` black boxes with NO remaining Y1 consumer.
+- **Watchers**: fable-P4's "engine axiom-flip" watch item and any `torsionπ_etale`
+  consumer can rewire to the primed clean variants now (E5-core pattern:
+  `torsionπ_etale' N h` + `torsionπ_isFinite_of_nIsInvertible N h`).
+
+Attribution: c5β (representability chain/seesaw), A (Over-monoidal prep), NEW-CASCADE
+(T-B6′/BB-DIFF unramified cascade), NEW-Y1 (Y1 stream + K-series + BB-QF + this close),
+HasseWeil (`mulByInt_degree` anchor). CHARTER-Y1-CLOSER-2 COMPLETE.
