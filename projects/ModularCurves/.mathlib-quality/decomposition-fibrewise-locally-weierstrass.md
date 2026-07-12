@@ -407,6 +407,19 @@ between `H'` and `Sheaf.H`. The result is option-free and axiom-clean. Its next 
 explicit Laurent-overlap calculation for the section pole sheaves on the two affine
 Weierstrass charts; it does not supply proper cohomology or arbitrary-base change.
 
+The global-sections seam for the sheaf-level Cech resolution is now complete in
+`ForMathlib/SheafCechGlobalSections.lean`. The component isomorphism
+`TopCat.Sheaf.cechGlobalSectionsXIso` combines the terminal-object description of
+global sections with `cechTermSectionsAddEquiv`, while
+`cechGlobalSectionsComplexIso` proves that this identification carries the sheaf-level
+alternating differential to mathlib's native Cech differential. The proof separates
+top-intersection transport, a single coface summand, and finite-sum transport. Thus the
+explicit finite Cech complex is now literally the degreewise-global-sections complex of
+the exact sheaf resolution. What remains is to prove that this complex computes genuine
+derived global sections when the finite intersections are acyclic, via the
+Cech-to-derived spectral sequence/double-complex argument of Stacks 20.11.5--6; no
+generic exactness of open-immersion pushforward is assumed.
+
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
 `n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of
