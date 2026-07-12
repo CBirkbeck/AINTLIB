@@ -681,8 +681,8 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (hN : 4 ≤ N)
     show IsUnit ((N : ℕ) : Γ(Spec (CommRingCat.of A), ⊤))
     have h3 := hinvA.map (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom
     rwa [map_natCast] at h3
-  haveI hEt : Etale (FA.torsionπ N) := FA.torsionπ_etale N hNinvA
-  haveI : IsFinite (FA.torsionπ N) := FA.torsionπ_isFinite N
+  haveI hEt : Etale (FA.torsionπ N) := FA.torsionπ_etale' N hNinvA
+  haveI : IsFinite (FA.torsionπ N) := FA.torsionπ_isFinite_of_nIsInvertible N hNinvA
   haveI : IsAffine (FA.torsion N) := isAffine_of_isAffineHom (FA.torsionπ N)
   -- the killed point over A⧸I, into the universal torsion then lifted through the
   -- base-change square

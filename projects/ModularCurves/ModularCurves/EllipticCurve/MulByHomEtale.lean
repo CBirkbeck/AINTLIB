@@ -5,6 +5,7 @@ Authors: The AINTLIB Authors
 -/
 import ModularCurves.EllipticCurve.MulByHomUnramified
 import ModularCurves.EllipticCurve.MulByHomQuasiFinite
+import ModularCurves.EllipticCurve.MulByHomSmooth
 
 /-!
 # Étaleness of `[N]` and of the torsion, rewired through the proven quasi-finiteness
@@ -64,8 +65,8 @@ theorem mulByHom_formallyUnramified'' (N : ℕ) (h : NIsInvertible S N) :
   E.formallyUnramified_mulByHom_of_torsionπ N
     (E.formallyUnramified_torsionπ_of_nIsInvertible' N h)
 
-/-- **(T-B5, proven-finiteness variant)** `[N]` étale when `N` is invertible. Remaining
-sorried input: BB-FLAT (`mulByHom_flat`). -/
+/-- **(T-B5, proven-finiteness variant)** `[N]` étale when `N` is invertible. All inputs
+proven: flatness by `mulByHom_flat_of_nIsInvertible` (BB-FLAT, route (G)). -/
 theorem mulBy_etale' (N : ℕ) (h : NIsInvertible S N) :
     Etale (E.mulByHom N) := by
   rcases eq_or_ne N 0 with rfl | hN
@@ -73,7 +74,7 @@ theorem mulBy_etale' (N : ℕ) (h : NIsInvertible S N) :
     haveI hE : IsEmpty E.E := ⟨fun x => hS.false (E.π.base x)⟩
     infer_instance
   · haveI : NeZero N := ⟨hN⟩
-    haveI := E.mulByHom_flat N
+    haveI := E.mulByHom_flat_of_nIsInvertible N h
     haveI := E.mulByHom_formallyUnramified'' N h
     haveI := E.mulByHom_locallyOfFinitePresentation N
     exact Etale.of_formallyUnramified_of_flat (E.mulByHom N)

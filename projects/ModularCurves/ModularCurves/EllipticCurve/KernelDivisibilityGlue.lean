@@ -4,6 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
 import ModularCurves.EllipticCurve.KernelDivisibilityChart
+import ModularCurves.EllipticCurve.MulByHomFlat
+import ModularCurves.EllipticCurve.ModelRecord
+import ModularCurves.EllipticCurve.RecordGroupUnique
+import ModularCurves.LevelStructure.IsoTransport
 
 /-!
 # Kernel divisibility: from the chart to arbitrary records (BB-FLAT N5)
