@@ -22,6 +22,7 @@ import ModularCurves.EllipticCurve.Basic
 import ModularCurves.EllipticCurve.Comparison
 import ModularCurves.EllipticCurve.GroupLaw
 import ModularCurves.EllipticCurve.NegModelBaseChange
+import ModularCurves.EllipticCurve.PointVanishingClopen
 import ModularCurves.EllipticCurve.PointsDictionary
 import ModularCurves.EllipticCurve.MulByHomEtale
 import ModularCurves.EllipticCurve.MulByHomQuasiFinite
