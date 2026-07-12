@@ -18887,3 +18887,30 @@ completing the remaining de-risked scheme assembly `[YF-SUBDIV-EQ]/[YF-COMAX]/[Y
 [YF-ETALE]; a second window building those would only re-collide. **Process note for the fleet:
 CHARTER-YFULL advances fast across /loop windows — a fresh window must `git log`/read-board FIRST and
 build only against the newest state; this collision was a stale-view failure, now corrected.** (NEW-Y1)
+
+## v10.167 — NEW-Y1 CHARTER-YFULL: ★★ ALL REUSABLE CLOPEN CORES LANDED (openness + ⊇ chain + comaximal)
+
+**Every reusable mathematical/algebraic building block of KM 3.7.1's clopen claim is now proven,
+axiom-clean, rooted.** This session (~14 leaves + the 5k-line audit):
+- **Openness half** `[YF-U]`: `fullLevelOpens`/`fullLevelOpenSet_isOpen` (the full-level locus is open),
+  on engines `AgreementLocusClopen` + `PointVanishingClopen`.
+- **⊇ same-degree chain**: `SurjectiveFreeSameRank.lean` (free/flat/ring-hom, via OrzechProperty +
+  localization) + `SpecQuotientIso.lean` (`isIso_SpecMap_of_surjective_of_flat_rankAtStalk_eq` — the
+  affine same-degree-closed-immersion-iso).
+- **`[YF-COMAX]`** `IdealSheafComaximal.lean`: `prod_eq_biInf_of_pairwise_disjoint_support` — ideal
+  sheaves with pairwise disjoint supports have `∏ = ⨅` (via `idealAt` monoid hom +
+  `Ideal.prod_eq_iInf_of_pairwise_isCoprime` + `support_sup = ⊓` + `support_eq_bot_iff`).
+
+**Remaining = the D-stream ASSEMBLY** (ties the landed cores to the concrete full-level construction —
+a coherent fresh unit needing D2's `sectionsDivisor`/`RelEffCartierDiv` machinery):
+- **[YF-⊇]** `IsFullLevel over fullLevelOpens`: over U the taut sections `[a]P+[b]Q` are pairwise
+  disjoint (their `pointVanishSet` differences avoid U — connect `pointVanishSet` ↔ section support);
+  then `sectionsDivisor.ideal = ∏ker` (`fullLevelLocusAux_sectionsDivisor_ideal`) `= ⋂ker`
+  (`prod_eq_biInf_of_pairwise_disjoint_support`) `= torsionIdeal` (`torsionIdeal ⊆ ⋂ker` since each
+  section N-torsion, + equal degree N² via `isIso_SpecMap_of_surjective_of_flat_rankAtStalk_eq`
+  affine-locally, `sectionsDivisor_degree` = `torsion_rank` = N²).
+- **[YF-⊆]** `range levelSpaceΓι ⊆ fullLevelOpens`: full-level ⟹ combos distinct (reducedness of E[N]).
+- Then `isOpenImmersion_levelSpaceΓι_of_taut fullLevelOpens ⊆ ⊇` → **[YF-ETALE] ★**.
+
+The two hardest mathematical contents of KM 3.7.1 (the openness argument and the same-degree commutative
+algebra) plus the comaximality are DONE; the remaining is D-stream integration. (NEW-Y1)
