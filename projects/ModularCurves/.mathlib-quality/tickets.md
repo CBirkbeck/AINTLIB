@@ -17212,3 +17212,33 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
   + geom clauses; needs `IsAffineHom(diagonal)` per X) and **GHB5-crux** (~150 LOC base-change
   descent). Both are the mapped multi-session core; every gate they stand on ([A711-FP]/[A711-BC]/
   GHB3/GHB4) is OPEN. GHC1 becomes unconditional the moment these close — zero further edits.
+
+## Amendments v10.167 (2026-07-12, coordinator): marathons HOT — ★★ NEW-GH GHC1 (corrected T-H4) + GHC3 THEOREMS (both b2_log repoint targets now proven); FP4 ONE SORRY from the clean engine; D2 blocker routed ([GR-G-NAT] → fable-FP); interim + re-fire orders
+
+- **★★ NEW-GH: GHC1 = the corrected T-H4 is a THEOREM** (+ GHC3 = Loeffler Fact 3.8.1)
+  — BOTH B2-repoint targets (b2_log #1/#2) are now proven on the KM 7.1.2 quotient
+  problem; GHB5 crux isolated, GHB7 assembly = the remainder. The Γ_H stream's headline
+  tier is 3/3. Marathon continues per their own map.
+- **fable-P4: T-W7 ★★★★ ONE SORRY AWAY** (grpObj assembled, 5/6 axioms clean, protected
+  commit; sole sorry = grpObj_mul_assoc per-chart, agent on it with a full plan). On
+  landing: the KM 4.7.0 ⇐ engine prints the clean triple — watch for the ★.
+- **PIC0 (live, 20:40)**: the divisor arc EXECUTING — [LB-1] idealModule → idealGenHom →
+  ★ isInvertible_idealModule → ★★ AG-LB CLOSED (RelEffCartierDiv.picClass, the
+  DivisorClass seam) → picRelProj. The L-B degree layer is materializing on D2's engine
+  exactly as ratified.
+- **NEW-Y1 session 2 absorbed** (y1 v10.163): the CLOPEN openness ENGINE landed —
+  ★ AgreementLocusClopen (agreement locus into an étale morphism is clopen; fleet-grade
+  reusable) + isClopen_range_pointVanish (both clean-triple); the full 5k-line divisor
+  audit done; the ⊇ crux decomposed ([YF-U]/[YF-⊆]/[YF-⊇], APIs agent-audited, 2
+  sub-lemmas named); dead duplicate removed (reuse-not-duplicate). Re-fire opener with
+  the owner (next-first-act pinned in their own inbox handoff).
+- **NEW-HOPF**: coassoc field correctly sent to FRESH-SESSION doctrine after 2 agent
+  marathons (foundation integrated + green; the field = ~300 friction-heavy lines,
+  documented sorry at ChartCoaction.lean:387 with the full plan). Re-fire opener = the
+  dedicated coassoc session; the pins queue unchanged behind it.
+- **D2**: wall-ledger ratified; the exists_nIsogSpace NATURALITY finding routed →
+  fable-FP as **[GR-G-NAT]** (load-bearing escalation of their [GR-G-ASM] residual;
+  audit-first). D2 interim marathon = their OWN capstone gates [HOMOG-FRAME] +
+  [NISOG-L13] ⟹ exists_cyclicityLocus AXIOM-CLEAN.
+- **c5β**: T-F1 links 3–4 affine core verified working (mid-grind). **fable-FP**: KL3-f
+  statement-fix ratified (unprovable-as-stated caught + fixed, producer-owned).
