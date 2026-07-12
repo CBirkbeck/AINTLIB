@@ -17062,3 +17062,32 @@ dispatchable to any free strong seat.
   foundation ✓ / field pending. Downstream (blocked on coassoc field): `precursorSurjective` (Γ-dual of
   proven `isClosedImmersion_actPair_left`), `Module.Free`/`Finite`, `StableAffineChartData` →
   `isHopfGalois` (M5, proven) → six `SubgroupQuotient` pins → BOARD-SIGNAL.
+
+## Amendments v10.162 (2026-07-12, coordinator): ★ THE MARATHON NORM (owner directive: longer sessions); seven reports ratified (GME 2.17 ★★, LFP arc ★★, GHB4, ISOLOC, both-level HopfAlgebra ★★, CMP-DEBT 7/9, T-F1 unlock); marathon queues issued to all seven seats; PIC0 degree-route DECIDED
+
+- **DOCTRINE v10.162 — THE MARATHON NORM (binding, supplements v10.154)**: a session ends
+  at CONTEXT EXHAUSTION, a genuine wall-ledger, or a charter milestone explicitly marked
+  session-terminal — never at "clean boundary after 1–3 leaves". Banking early is now a
+  named failure mode (the owner's directive: the general-level cases stalled on
+  short-session overhead). Inbox queues are sized for FULL sessions; a drained queue
+  means CONTINUE to the charter's next wave without asking. Board-signals are board
+  LINES, not session ends. The beastmode sentinel discipline is the mechanism.
+- **Ratifications**: PIC0 ★★ [PIC-P2-CMP] COMPLETE (GME 2.17 both directions; End(𝟙)
+  split-pair lemma → registry, for-mathlib) + picRelFunctor ★; D2 ★★ [T-SG3-LFP] 100%
+  (releff collapse credited) + [L15-a] IsBiIdeal; NEW-Y1 ★ [YF-ISOLOC] core (route-γ
+  trivialization-free heart); NEW-HOPF ★★ both-level [HopfAlgebra] + counit + coassoc
+  foundation; NEW-GH ★ GHB4; A ★ [CMP-DEBT] 7/9 bump-stale sweep (debt-audit pattern →
+  registry: staleness-scan before surgery); c5β T-F1 unlock (exists_tensorProduct_of_etale,
+  8-link assembly, foundation verified) + the no-hidden-sorry principle CITED.
+- **DECISIONS**: (1) PIC0 degree layer = the DIVISOR-CORRESPONDENCE arc (D2's
+  sectionsDivisor_degree substrate; Euler-char route rejected; L-C stays pinned).
+  (2) NEW-Y1's relay executed: c5β's torsion_etaleLocal_triv pin deprioritized
+  cross-lane (route-γ trivialization-free), retained in-charter for L2b. (3) A's
+  post-CMP queue extends into [KM-W1] (the new stream's READY core — first staffing).
+- **Marathon queues issued to all seven seats** (inboxes v10.162): PIC0 (L-B divisor arc
+  → rigidified → DS-END0 → Pic⁰), c5β (T-F1 links 3–8 → L2b → L4 seam → substrate),
+  NEW-Y1 (TAUT → CLOPEN-⊆/⊇ → assembly → ★ → the Y(N) D-track proper), NEW-HOPF
+  (coassoc → IsCoaction → C1d → PINS → SIGNAL → E/C, one run), D2 (L15-b→f →
+  exists_nIsogSpace → L6-on-signal → Y₀ plan), A (2 whnf surgeries → Mell → YFGEOM →
+  KM-W1), NEW-GH (GHB5 → GHB7 → GHC1 ★★ → GHC3 → the Γ_H assembly, one marathon).
+  WEIL remains the one unfired charter (owner reminder).
