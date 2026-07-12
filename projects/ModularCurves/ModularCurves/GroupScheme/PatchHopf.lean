@@ -1048,6 +1048,76 @@ theorem comulTop_comp_map_id_comulTop :
   rw [← Category.assoc P.squareΓTop, ← P.cubeInnerMul_appTop_cubeΓ]
   simp only [Category.assoc]
 
+/-! #### The `Δ₂L` (left-associated) side -/
+
+/-- The left-square cube `(G|_V ×_V G|_V) ×_V G|_V`. -/
+noncomputable abbrev cubeL : Scheme.{u} :=
+  pullback P.squareToBase P.groupToBaseRes
+
+/-- The iterated Künneth for `cubeL`: `Γ(cubeL) ≅ Γ(square) ⊗ A'`. -/
+noncomputable abbrev cubeLΓ :
+    Γ(P.cubeL, ⊤) ⟶ CommRingCat.of (Γ(P.groupSquare, ⊤) ⊗[P.baseRingTop] P.groupRingTop) :=
+  affineKunnethΓ P.squareToBase P.groupToBaseRes rfl rfl
+
+instance : IsIso P.cubeLΓ := isIso_affineKunnethΓ _ _ rfl rfl
+
+/-- The outer-multiplication `cubeL → square`: `((g₁,g₂),g₃) ↦ (g₁·g₂, g₃)`. -/
+noncomputable def cubeOuterMul : P.cubeL ⟶ P.groupSquare :=
+  pullback.map P.squareToBase P.groupToBaseRes P.groupToBaseRes P.groupToBaseRes
+    P.squareMulRes (𝟙 P.groupOpen.toScheme) (𝟙 P.V.toScheme)
+    (by rw [Category.comp_id]; exact P.squareMulRes_comp_groupToBaseRes.symm)
+    (by rw [Category.id_comp, Category.comp_id])
+
+@[reassoc]
+theorem cubeOuterMul_fst :
+    P.cubeOuterMul ≫ pullback.fst P.groupToBaseRes P.groupToBaseRes
+      = pullback.fst P.squareToBase P.groupToBaseRes ≫ P.squareMulRes := by
+  rw [cubeOuterMul, pullback.lift_fst]
+
+@[reassoc]
+theorem cubeOuterMul_snd :
+    P.cubeOuterMul ≫ pullback.snd P.groupToBaseRes P.groupToBaseRes
+      = pullback.snd P.squareToBase P.groupToBaseRes := by
+  rw [cubeOuterMul, pullback.lift_snd, Category.comp_id]
+
+/-- **Künneth naturality (outer multiplication)**. -/
+theorem cubeOuterMul_appTop_cubeLΓ :
+    P.cubeOuterMul.appTop ≫ P.cubeLΓ
+      = P.squareΓTop ≫ CommRingCat.ofHom
+          (Algebra.TensorProduct.map P.squareMulResAlg
+            (AlgHom.id P.baseRingTop P.groupRingTop)).toRingHom := by
+  rw [← cancel_epi (inv P.squareΓTop), ← Category.assoc, ← Category.assoc,
+    IsIso.inv_hom_id, Category.id_comp]
+  have hLinv : CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := P.baseRingTop) (A := P.groupRingTop) (B := P.groupRingTop))
+      ≫ inv P.squareΓTop
+      = (pullback.fst P.groupToBaseRes P.groupToBaseRes).appTop := by
+    rw [IsIso.comp_inv_eq]
+    exact (fst_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl).symm
+  have hRinv : CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := P.baseRingTop) (A := P.groupRingTop) (B := P.groupRingTop)).toRingHom
+      ≫ inv P.squareΓTop
+      = (pullback.snd P.groupToBaseRes P.groupToBaseRes).appTop := by
+    rw [IsIso.comp_inv_eq]
+    exact (snd_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl).symm
+  refine tensor_hom_ext ?_ ?_
+  · rw [← Category.assoc, ← Category.assoc, hLinv, ← Scheme.Hom.comp_appTop,
+      P.cubeOuterMul_fst, Scheme.Hom.comp_appTop, Category.assoc]
+    rw [show P.cubeLΓ = affineKunnethΓ P.squareToBase P.groupToBaseRes rfl rfl from rfl,
+      fst_appTop_affineKunnethΓ]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show _ = Algebra.TensorProduct.map _ _ (a ⊗ₜ[P.baseRingTop] 1)
+    rw [Algebra.TensorProduct.map_tmul, map_one]
+    rfl
+  · rw [← Category.assoc, ← Category.assoc, hRinv, ← Scheme.Hom.comp_appTop,
+      P.cubeOuterMul_snd]
+    rw [show P.cubeLΓ = affineKunnethΓ P.squareToBase P.groupToBaseRes rfl rfl from rfl,
+      snd_appTop_affineKunnethΓ]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show _ = Algebra.TensorProduct.map _ _ (1 ⊗ₜ[P.baseRingTop] a)
+    rw [Algebra.TensorProduct.map_tmul, map_one]
+    rfl
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
