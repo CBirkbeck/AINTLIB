@@ -76,6 +76,14 @@ The 9 raises + their guarded decls (all whnf-heavy sheaf-of-modules `change`/`si
 - **REMAINING (2/9):** `idealModuleAppIdealIso_coe` (800k) + `pullbackLocalIdealGeneratorIso_hom_comp_toUnit`
   (1200k) — genuine giant-composite whnf; profiling >120 s. Surgical multi-way extraction of the post-`simp`
   kernel-iso computation into own-budget private helpers (faith-infra pattern), one at a time.
+- **Surgery-1 attempt finding (banked for fresh-context resume):** extracting the kernel-comp tail at the
+  `change`-to-`ofEq` boundary FAILS — the tail needs `x` in the *evaluated-sheaf* type
+  `(evaluation).obj (idealModule f)`, but the helper receives it as `Γ(idealModule f, U)`; the type
+  normalization is supplied precisely by the setup's `simp only [idealModule, idealModuleRaw]`, so the
+  split can't cross that boundary cleanly (error: `x` type mismatch, `Functor.obj ?m (kernel ?m)`). The
+  correct refactor states the helper with `x` in the post-`simp` evaluated type (or splits at the
+  `simp only`/`change A` boundary instead, isolating the sheafification-unfold sink). A fresh-context
+  surgical pass, low-leverage (2 of 9). File reverted to the committed 7×-win green state.
 
 ## Leaf plan (ordered; T-W7a closer-backup interrupt outranks all)
 
