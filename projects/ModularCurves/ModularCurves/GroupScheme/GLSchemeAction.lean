@@ -29,12 +29,30 @@ namespace EllipticCurve
 
 variable {S : Scheme.{u}} (E : EllipticCurve S) {N : ℕ} [NeZero N]
 
-/-- **L2 (crux)** — a naive full level-`N` structure trivialises `E[N]` to the constant
-group scheme `(ℤ/N)²_S`, for `N` invertible on `S`. Route: the homomorphism
-`φ : (ℤ/N)²_S → E[N]`, `(a,b) ↦ a·P + b·Q`, is a fibrewise iso (`IsNaiveFullLevel`
-generation + rank `N²`), hence an iso of finite-étale `S`-schemes (`torsionπ_etale`). -/
+/-- **L2a** — the trivialisation *map* `φ : (ℤ/N)²_S → E[N]`, `v ↦ (v 0)·P + (v 1)·Q`, built on
+`constScheme S A = ∐_A S` by `Sigma.desc` of the torsion sections (`pointToTorsion` of the
+`N`-killed combination). -/
+noncomputable def fullLevelHom (L : E.FullLevelPt N) :
+    constScheme S (Fin 2 → ZMod N) ⟶ E.torsion N :=
+  Sigma.desc fun v =>
+    E.pointToTorsion (((v 0).val : ℤ) • L.1.1 + ((v 1).val : ℤ) • L.1.2)
+      ((E.smul_eq_zero_iff_comp_mulByHom _ N _).mp (by
+        rw [smul_add, smul_comm (N : ℤ) ((v 0).val : ℤ), smul_comm (N : ℤ) ((v 1).val : ℤ),
+          L.2.1.1, L.2.1.2, smul_zero, smul_zero, add_zero]))
+
+/-- **L2b** — `fullLevelHom` is an isomorphism for `N` invertible (`E[N]` finite étale of rank
+`N²`, KM 2.3.1; `φ` is a fibrewise iso by `IsNaiveFullLevel` generation, hence an iso by the
+finite-étale fibrewise-iso criterion `isIso_of_isPullback_of_fppf`). Shares the machinery of
+`torsion_etaleLocal_triv` (T-F1). -/
+theorem fullLevelHom_isIso (hinv : NIsInvertible S N) (L : E.FullLevelPt N) :
+    IsIso (E.fullLevelHom L) := sorry
+
+/-- **L2 (crux)** — a naive full level-`N` structure trivialises `E[N]` to the constant scheme
+`(ℤ/N)²_S`, for `N` invertible on `S`. -/
 noncomputable def fullLevelIso (hinv : NIsInvertible S N) (L : E.FullLevelPt N) :
-    constScheme S (Fin 2 → ZMod N) ≅ E.torsion N := sorry
+    constScheme S (Fin 2 → ZMod N) ≅ E.torsion N :=
+  haveI := E.fullLevelHom_isIso hinv L
+  asIso (E.fullLevelHom L)
 
 /-- `g ∈ GL₂(ℤ/N)` as a linear bijection of `Fin 2 → ZMod N` (matrix-vector multiplication;
 inverse via `g⁻¹`). -/
