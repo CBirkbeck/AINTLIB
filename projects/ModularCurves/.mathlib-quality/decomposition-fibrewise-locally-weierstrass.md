@@ -167,9 +167,9 @@ The module-theoretic half is already formalized and axiom-clean in
 `ForMathlib/BaseChangeKerCoker.lean`: cokernel base change, kernel base change under the
 flat-cokernel condition, finite projectivity, and the algebra-form base-change
 equivalence. What is absent is the comparison from scheme/sheaf cohomology to that
-finite complex. Mathlib PR #36345 currently proves only affine vanishing and remains a
-draft; it does not provide proper pushforward or arbitrary-base cohomology and base
-change.
+finite complex. The affine-vanishing part of draft mathlib PR #36345 is now proved
+option-free in this project, but that draft does not provide proper pushforward or
+arbitrary-base cohomology and base change.
 
 The scheme-module entry point to the existing cohomology API is now complete in
 `ForMathlib/SchemeModuleSheaf.lean`: `Scheme.Modules.toSheaf` forgets to an additive
@@ -187,8 +187,7 @@ The terminal-object bridge `longSequence_surjective_of_subsingleton_H` turns an 
 vanishing statement for the kernel sheaf into surjectivity on global sections. This is
 the exact formal mechanism needed for the pole-filtration restriction maps. The port is
 option-free and axiom-clean; it deliberately omits the option-heavy functoriality layer
-of upstream mathlib PR #36218. Affine vanishing and proper cohomology/base change remain
-the unresolved geometric inputs.
+of upstream mathlib PR #36218. Proper cohomology/base change remains unresolved.
 
 The first acyclicity dependency is now complete in
 `ForMathlib/FlasqueCohomology.lean`. Free abelian sheaves represented by opens detect
@@ -227,8 +226,21 @@ restrictions of `F` have vanishing cohomology in degrees `1` through `n`, every 
 `H^(n+1)(X,F)` restricts to zero on a cover by basis opens. The proof separates dimension
 shifting for the cokernel of an injective presentation, short exactness after open
 restriction and pushforward, and naturality of the connecting map. It reuses mathlib's
-existing `IsOpenCover` API and needs no transparency options. Applying this induction to
-quasicoherent sheaves on affine schemes still requires the affine localization input.
+existing `IsOpenCover` API and needs no transparency options.
+
+The affine localization application is now complete in
+`ForMathlib/SchemeModuleQuasicoherent.lean` and
+`ForMathlib/AffineVanishing.lean`. The first file transports the `tilde` equivalence
+from spectra to arbitrary affine schemes, proving closure of quasicoherent modules under
+colimits and finite products, quasicoherence of pushforward between affine schemes, and
+surjectivity on global sections for epimorphisms. The second constructs the finite
+product of open restriction-pushforwards, proves the cover map monic, and applies
+`TopCat.Sheaf.kempfProp1` plus the long exact sequence to prove
+`Scheme.Modules.affine_subsingleton_H`: every positive `Sheaf.H` of a quasicoherent
+module on an affine scheme is subsingleton. All transparency-sensitive calculations are
+split into ordinary helpers, so the result uses no options. The remaining Step 2 blocker
+is therefore specifically proper cohomology and arbitrary-base change, not affine
+acyclicity.
 
 No theorem in this stream may replace this leaf by a `CohomologyPackage` hypothesis,
 an axiom, or an unboarded `sorry`.

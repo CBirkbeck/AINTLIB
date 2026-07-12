@@ -30,6 +30,7 @@ import ModularCurves.EllipticCurve.PoleSheafModel
 import ModularCurves.EllipticCurve.PoleSheafFibreSections
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.WeierstrassModel
+import ModularCurves.ForMathlib.AffineVanishing
 import ModularCurves.ForMathlib.BaseChangeKerCoker
 import ModularCurves.ForMathlib.Coaction
 import ModularCurves.ForMathlib.ComoduleCoinvariants
@@ -47,6 +48,7 @@ import ModularCurves.ForMathlib.PullbackLocalAtTarget
 import ModularCurves.ForMathlib.PullbackUnitMonoidal
 import ModularCurves.ForMathlib.QuotientCurveModel
 import ModularCurves.ForMathlib.SchemeActionFree
+import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 import ModularCurves.ForMathlib.SchemeModuleSheaf
 import ModularCurves.ForMathlib.SheafCohomologyExact
 import ModularCurves.ForMathlib.SheafOfModulesMonoidal

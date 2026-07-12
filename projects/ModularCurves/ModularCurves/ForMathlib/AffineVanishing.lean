@@ -1,7 +1,7 @@
+import Mathlib.AlgebraicGeometry.Morphisms.Affine
 import ModularCurves.ForMathlib.KempfInduction
 import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 import ModularCurves.ForMathlib.SchemeModuleSheaf
-import Mathlib.AlgebraicGeometry.Morphisms.Affine
 
 /-!
 # Affine vanishing for quasicoherent modules
@@ -251,5 +251,67 @@ private theorem affine_H_one_subsingleton [IsAffine X] [F.IsQuasicoherent] :
   obtain ⟨x₂, hx₂⟩ := hsurj x₃
   rw [← hx₃, ← hx₂]
   exact CategoryTheory.Sheaf.H.longSequence_comp_zero₃ hSsheaf 0 1 rfl x₂
+
+private theorem affine_H_succ_subsingleton [IsAffine X] [F.IsQuasicoherent]
+    (n : ℕ)
+    (hi : ∀ m ≤ n, ∀ {Y : Scheme.{u}} (G : Y.Modules)
+      [IsAffine Y] [G.IsQuasicoherent], Subsingleton (H G.sheaf (m + 1))) :
+    Subsingleton (H F.sheaf (n + 1 + 1)) := by
+  refine subsingleton_of_forall_eq 0 fun c ↦ ?_
+  obtain ⟨I, U', hU', vanish⟩ := TopCat.Sheaf.kempfProp1 F.sheaf (n + 1)
+    X.isBasis_affineOpens affineOpens_inf
+    (by
+      intro r U hr₁ hr₂ hU
+      letI : IsAffine U := hU
+      have hsub := hi (r - 1) (by omega) (F.restrict (Scheme.Opens.ι U))
+      rw [Nat.sub_add_cancel hr₁] at hsub
+      exact hsub) c
+  obtain ⟨s, hU⟩ := hU'.exists_finite_of_compactSpace
+  let U : s → X.Opens := fun i ↦ U' i.1
+  have hAffine : ∀ i, IsAffine (U i) := fun i ↦ (vanish i.1).1
+  letI (i : s) : IsAffine (U i) := hAffine i
+  haveI : Mono (F.toCoverSheaf U) := F.toCoverSheaf_mono U hU
+  let S := ShortComplex.mk (F.toCoverSheaf U)
+    (cokernel.π (F.toCoverSheaf U)) (cokernel.condition _)
+  have hS : S.ShortExact :=
+    ShortComplex.ShortExact.mk (ShortComplex.exact_cokernel (F.toCoverSheaf U))
+  let Ssheaf := S.map (toSheaf X)
+  have hSsheaf : Ssheaf.ShortExact :=
+    ShortComplex.ShortExact.map_of_exact hS (toSheaf X)
+  letI : S.X₂.IsQuasicoherent := F.coverSheaf_isQuasicoherent U
+  letI : S.X₃.IsQuasicoherent :=
+    (isQuasicoherent X).prop_colimit (parallelPair _ 0) (by
+      intro j
+      cases j with
+      | zero =>
+          change F.IsQuasicoherent
+          infer_instance
+      | one =>
+          change S.X₂.IsQuasicoherent
+          infer_instance)
+  have hcoker : Subsingleton (H S.X₃.sheaf (n + 1)) := hi n (le_refl n) S.X₃
+  letI : Subsingleton (H Ssheaf.X₃ (n + 1)) := hcoker
+  have hinj : Function.Injective (H.map Ssheaf.f (n + 1 + 1)) :=
+    H_map_injective_of_subsingleton_cokernel hSsheaf (n + 1)
+  apply (injective_iff_map_eq_zero _).mp hinj
+  change H.map (F.toCoverSheaf U).sheafHom (n + 1 + 1) c = 0
+  exact F.toCoverSheaf_H_map_zero U (n + 1 + 1) c fun i ↦ (vanish i.1).2
+
+/-- Positive-degree sheaf cohomology vanishes for a quasicoherent module on an affine scheme. -/
+theorem affine_subsingleton_H [IsAffine X] [F.IsQuasicoherent] (n : ℕ) :
+    Subsingleton (H F.sheaf (n + 1)) := by
+  revert F X
+  refine Nat.case_strong_induction_on
+    (p := fun n ↦ ∀ {X : Scheme.{u}} (F : X.Modules)
+      [IsAffine X] [F.IsQuasicoherent], Subsingleton (H F.sheaf (n + 1)))
+    n ?_ ?_
+  · intro X F _ _
+    exact affine_H_one_subsingleton F
+  · intro n hi X F _ _
+    exact affine_H_succ_subsingleton F n hi
+
+instance [IsAffine X] [F.IsQuasicoherent] (n : ℕ) :
+    Subsingleton (H F.sheaf (n + 1)) :=
+  affine_subsingleton_H F n
 
 end AlgebraicGeometry.Scheme.Modules
