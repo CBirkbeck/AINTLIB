@@ -58,6 +58,7 @@ import ModularCurves.ForMathlib.FlatLocus
 import ModularCurves.ForMathlib.FittingIdeals
 import ModularCurves.ForMathlib.Grade
 import ModularCurves.ForMathlib.Acyclicity
+import ModularCurves.ForMathlib.LocalizedModuleComap
 
 open TensorProduct
 
@@ -1437,13 +1438,19 @@ theorem flatLocus_spreads_reduce_to_polynomial {R S M : Type*} [CommRing R] [IsN
     [CommRing S] [Algebra R S] [Algebra.FinitePresentation R S] [AddCommGroup M] [Module R M]
     [Module S M] [IsScalarTower R S M] [Module.FinitePresentation S M] {q : PrimeSpectrum S}
     (hq : q ∈ flatLocus R S M)
-    (H : ∀ (P : Type) [CommRing P] [Algebra R P] [Module.Free R P] [Algebra.FinitePresentation R P]
-      (M' : Type) [AddCommGroup M'] [Module R M'] [Module P M'] [IsScalarTower R P M']
+    (H : ∀ (P : Type*) [CommRing P] [Algebra R P] [Module.Free R P] [Algebra.FinitePresentation R P]
+      (M' : Type*) [AddCommGroup M'] [Module R M'] [Module P M'] [IsScalarTower R P M']
       [Module.FinitePresentation P M'] (q' : PrimeSpectrum P), q' ∈ flatLocus R P M' →
         ∃ g : P, g ∉ q'.asIdeal ∧
           (PrimeSpectrum.basicOpen g : Set (PrimeSpectrum P)) ⊆ flatLocus R P M') :
     ∃ g : S, g ∉ q.asIdeal ∧
       (PrimeSpectrum.basicOpen g : Set (PrimeSpectrum S)) ⊆ flatLocus R S M := by
+  -- Structural proof (fable-FP): take the presentation `P = R[x] ↠ S` (`.out`), give `M` the
+  -- `P`-module structure through `P → S`, transport `q ∈ flatLocus R S M` to
+  -- `𝔮ᴾ ∈ flatLocus R P M` via `flat_localizedModule_comap_iff` (`LocalizedModuleComap`, imported),
+  -- apply `H` over `P`, and pull the basic open `D(g') ⊆ flatLocus R P M` back to `D(f g') ⊆
+  -- flatLocus R S M` (again `flat_localizedModule_comap_iff`).  Universe of `H` fixed to `Type*`.
+  -- Remaining: the `P`-module-tower instances + `Module.FinitePresentation.trans` arg wiring.
   sorry
 
 /-! ## [T-FINAL] Assembly: the target `flatLocus_spreads_of_flat`
