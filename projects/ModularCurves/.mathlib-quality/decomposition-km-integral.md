@@ -140,3 +140,57 @@ regularity theorem and should be run as flagship charters (W5 possibly coordinat
 mathlib-community interest). Nothing in the near half is wasted regardless: W0 gives the
 integral moduli problem and its finiteness (new arithmetic content over every ℤ-base),
 and W1–W3 give the characteristic-p rigidity kernel that every KM Ch. 5 argument reuses.
+
+## W2 bridge — precise decomposition (KM 5.3.3 → 5.3.4; source pp. 139–141 re-read 2026-07-13, KM worker)
+
+**Session landed (KM worker, 2026-07-13):** [KM-W1-1] `CharP.p_eq_zero_of_pow_mem_span`
+(repaired banked proof under the daily bump — `coeff_add_pow_cross` FunLike-coercion; axiom-clean;
+commit ea2b28190) and [KM-W0-1] `isGammaOne_pullAlong` (= `Section.HasExactOrder.baseChange`;
+axiom-clean; commit 02502fb5b). [KM-W3-1] staged as the one-line delegation to W2 (pending W2).
+
+**What `E.IsGammaOne (p^n) 0` actually is** (unfolded via `LevelStructure/Basic.lean:70`
++ `ExactOrder.lean:104,97`): `((0 : E.Section).orderDivisor E (p^n)).IsSubgroup E`, i.e. the
+relative effective Cartier divisor `p^n·[0] = sectionsDivisor E.π (fun _ : Fin (p^n) => 0)`
+is a subgroup of `E/Spec A` in the KM 1.3.6 sense (`RelEffCartierDiv.IsSubgroup`,
+`ExactOrder.lean:91`).
+
+**KM Prop 5.3.3 (verbatim, print p. 140):** "Let R be an arbitrary ring, C/R a smooth commutative
+one-dimensional group-scheme over R (cf. 1.4.1) … Suppose that the zero section 0∈C(R) is a point
+of 'exact order p^n' in C/R, i.e., that the effective Cartier divisor p^n[0] in C/R is a
+subgroup-scheme. Then p = 0 in R, and the subgroup-scheme p^n[0] is none other than Ker(F^n)."
+Proof (verbatim): "The zero-section and the Cartier divisor p^n[0] both lie in the **formal group**
+of C/R. **Zariski locally on R, we may choose a parameter X for the formal group.** Once this is
+done, our proposition results from [5.3.4]."
+
+**KM Prop 5.3.4 (verbatim, print pp. 140–141):** "…G(X,Y) = X + Y + ⋯ a one-parameter commutative
+formal group law over R. Suppose that for some prime power p^n, the equation X^{p^n} = 0 defines a
+subgroup-scheme of G. Then p = 0 in R…" Proof (verbatim): "The hypothesis means that **for any
+R-algebra B, and any elements x,y ∈ B, we have the implication x^{p^n} = y^{p^n} = 0 in B ⟹
+(G(x,y))^{p^n} = 0 in B.** Considering the **universal situation B = R[[X,Y]]/(X^{p^n},Y^{p^n})**,
+we see that inside R[[X,Y]], we have (G(X,Y))^{p^n} ∈ (X^{p^n},Y^{p^n})…" [then the binomial
+argument = **[KM-W1-1], DONE**].
+
+**Layered sub-ticket scaffold (decl-names TBD from the substrate map; each link EXISTS/GAP):**
+- **(W2-L-fg)** the formal group law `G ∈ A⟦X,Y⟧` of `E/Spec A` at the origin: `G = X+Y+⋯`
+  (`constantCoeff G = 0`, both linear coeffs `= 1`), commutative 1-parameter. GAP-or-substrate:
+  repo `EllipticCurve` is scheme-theoretic; HasseWeil (`projects/HasseWeil`, importable) has the
+  FGL of an affine `WeierstrassCurve R`; the linchpin is a `WeierstrassCurve A`-model of `E`.
+- **(W2-L-param)** parameter `X` at `0`: completed local ring of `E` at the zero section `≅ A⟦X⟧`
+  (KM "Zariski locally … choose a parameter X"); base is affine so expect global-over-A, not a
+  Zariski cover. GAP-or-substrate: repo chart machinery (`PoleFiltration`/`PoleSheaf`/
+  `ModelVariableChange`, `coordRingToZSection`, `chart*SectionsEquiv`).
+- **(W2-L-div)** `p^n·[0]` ↔ the killed locus `X^{p^n}=0`, i.e. the ideal `(X^{p^n})` in `A⟦X⟧`:
+  `orderDivisor 0 (p^n)`'s ideal at the origin chart = `(X^{p^n})`. GAP.
+- **(W2-L-sub)** the "universal situation" step W1-1 does NOT cover: from `IsSubgroup (p^n·[0])`
+  derive `G^{p^n} ∈ (X^{p^n},Y^{p^n})` in `A⟦X,Y⟧` — via the comultiplication (group law) on the
+  completed local ring of `E×E` at `(0,0) ≅ A⟦X,Y⟧` (avoid formalizing eval-at-arbitrary-nilpotents;
+  work in the completed local ring directly). GAP.
+- **(W1-1)** `G^{p^n} ∈ (X^{p^n},Y^{p^n})` ⟹ `p = 0`. **EXISTS** — `CharP.p_eq_zero_of_pow_mem_span`.
+
+Note the "p^n[0] = Ker(F^n)" second conclusion of 5.3.3/5.3.4 (= [KM-W1-2]) comes *after* `p=0`
+(Frobenius defined); deferred with the Frobenius vocabulary per the wave table.
+
+**Open question the substrate map resolves:** are (W2-L-fg)/(W2-L-param) dischargeable on
+repo-chart + HasseWeil-FGL substrate (medium sub-tickets), or is "the formal group of a
+scheme-theoretic elliptic curve + the divisor↔FGL dictionary" a deeper charter? The decomposition's
+"W2 sits directly on the chart + Cartier substrate" is being tension-tested this session.

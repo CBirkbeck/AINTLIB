@@ -17036,6 +17036,58 @@ dispatchable to any free strong seat.
 ### [CLEANUP-KM-1] /cleanup on Moduli/DrinfeldRegularity.lean — after W1+W2+W3 land (cadence).
 ### [CLEANUP-KM-ALL] /cleanup-all before [KM-W7] (pre-milestone) + final per cadence.
 
+### SESSION LEDGER (KM, 2026-07-13 — W1 ★, W0-1 ★, W2-front, W2-core reassessed to charter)
+KM worker (rule-5), branch dev/modular-curves. Landed + pushed (dev @ a7e263c47):
+- ★ **[KM-W1] / [KM-W1-1] `CharP.p_eq_zero_of_pow_mem_span` DONE** (KM 5.3.4a, the combinatorial
+  core). Consumed beastmode-A's banked subagent proof; it was RED under the daily bump
+  (`coeff_add_pow_cross`: inline `Finsupp.single … + …` applied to a component failed FunLike-coercion,
+  type-metavariable). Repaired with the `set d : Fin 2 →₀ ℕ` pattern the main theorem already used.
+  Build clean; axiom-clean {propext,Classical.choice,Quot.sound}. Commit ea2b28190. (W1-2 = Ker(Fⁿ)
+  clause stays deferred to the Frobenius vocabulary, post-`p=0`.)
+- ★ **[KM-W0-1] `isGammaOne_pullAlong` DONE** (Drinfeld transport). One-liner: `IsGammaOne N P` is
+  defeq `P.HasExactOrder E N`, and the transport is exactly the proven `Section.HasExactOrder.baseChange`
+  (ExactOrder.lean:188, KM 1.4.4 (1)⟹(2)). Axiom-clean. Commit 02502fb5b. Unblocks [KM-W0] (ii) `gammaOneProblem`.
+- **[KM-W2 · L1] `orderDivisor_zero_ideal` DONE** (front of KM 5.3.3): `(orderDivisor 0 N).ideal
+  = (Scheme.Hom.ker (0:Section).1)^N` (constituent sections `(a+1)·0 → 0` by `smul_zero`; product of a
+  constant). Axiom-clean. Commit a7e263c47.
+- **[KM-W3-1] STAGED (uncommitted-as-done)**: delegates to W2 (`CharP.p_eq_zero_of_isGammaOne_zero p n hp
+  hn A E h`; KM 5.3.5 "Assertion II is the proposition applied to E/R"). Signature verified; transitively-sorry
+  via W2 → auto-completes when W2 lands. NOT marked done.
+
+**[KM-W2] REASSESSMENT — the "READY" was optimistic; the core is a deep charter.** A full substrate
+map (repo chart machinery + HasseWeil formal-group lib + mathlib, via a research subagent) resolved
+KM 5.3.3's bridge `(orderDivisor 0 pⁿ).IsSubgroup E → Fᵖ^ⁿ ∈ (Xᵖ^ⁿ,Yᵖ^ⁿ) → p=0` into:
+- L0 unfold + **L1 done** + L2 (chart-principal `span{fᵖ^ⁿ}`, EXISTS-glue: `exists_affineOpen_ker_principal_nonZeroDivisor`
+  CartierDivisor:777 + `Scheme.Hom.ker_apply`) — the tractable front.
+- **L3 GAP** `(f)`-adic completion `Γ(E,V)^_(f) ≃+* A⟦X⟧` — absent in repo/HasseWeil/mathlib.
+- **L4 GAP** scheme group law in the coordinate = `F ∈ A⟦X,Y⟧`, `F≡X+Y mod 2` — HasseWeil `formalGroupLaw
+  W` (FormalGroup.lean:134, general CommRing) gives the series + `formalGroupLaw_coeff_left/right_unit`
+  (⟹ h0,hlin) but is NOT tied to the scheme mult; and E over Spec A gives only PER-CHART `WeierstrassCurve
+  Γ(S,U)` (no global model). Connecting scheme `E.mulHom` to `formalGroupLaw W` is absent everywhere.
+  (mathlib has NO Weierstrass formal group and NO scheme-theoretic elliptic curve.)
+- **L5 GAP** `IsSubgroup` evaluated at `B=A⟦X,Y⟧/(Xᵖ^ⁿ,Yᵖ^ⁿ)` ⟹ ideal membership — no subgroup⇄bivariate-ideal bridge.
+- L6 = **[KM-W1-1] done** (consumes raw `MvPowerSeries` + h0/hlin/hsub).
+⟹ **W2's core = building the formal group of a scheme-theoretic elliptic curve** (relative completion
+theory + Weierstrass-model extraction + scheme-group-law = FGL identification). On-target (KM 5.3.3's own
+tool) but a deep absent-substrate development — the far-half flavor the decomposition boards as charters,
+NOT near-half glue. **Boarded as [KM-W2-core] charter** (full L3/L4/L5 gap analysis + verbatim KM 5.3.3/5.3.4
+quotes in `decomposition-km-integral.md`, "W2 bridge" section). W2/W3/W7 stay blocked on it.
+Concrete substrate for a future grind: `infChartCubic W`=R[t][s]/(cubic) (PoleFiltration:258), param
+`t`=`infChartTElem` (:848), `ker_infChartAug`=span{s,t} (:4070); HasseWeil `formalGroupLaw W`.
+
+### [KM-W2-core] The formal group of a scheme-theoretic elliptic curve (KM 5.3.3 bridge L3+L4+L5)
+- **Status**: open · **Type**: charter (deep, absent-substrate) · **Parent**: [KM-W2] · **File**: new + Moduli/DrinfeldRegularity.lean
+- **Content**: L3 relative `(f)`-adic completion `≅ A⟦X⟧`; L4 scheme group law `= F`, `F≡X+Y`; L5 subgroup
+  ⟹ `Fᵖ^ⁿ∈(Xᵖ^ⁿ,Yᵖ^ⁿ)`. Then W2 = L0·L1·L2·(L3·L4·L5)·[KM-W1-1]. **First act: focused /develop --decompose**
+  (KM 5.3.3/5.3.4 verbatim already in artifact; tension against HasseWeil `formalGroupLaw W` + repo infChart).
+- **Not off-track (not B3)**: textbook formal-group theory (Silverman IV; HasseWeil did the affine case), core
+  to the project — a hard-formalization charter, not research-frontier like [KM-W5].
+
+**NEXT (KM worker)**: W2/W3 charter-blocked; continuing the marathon on the near-half — [KM-W0] (queue-next,
+first-act /develop --decompose of KM 1.4–1.11 + 3.5–3.7, consumes D2 Ch-6 seam; W0-1 already done) vs the
+[KM-W6a/b/c] standalone ring gaps (miracle flatness also unblocks the project-wide BB-FLAT master funnel —
+NB `ForMathlib/LocalFlatnessCriterion.lean` is modified in-tree, check the flatness lane for a live sibling before claiming).
+
 ### SESSION LEDGER (NEW-HOPF, 2026-07-12 cont.2 — opens-level HopfAlgebra via topIso bridge)
 - ★★ **[HG-C1c] opens-level `[Bialgebra P.baseRing P.groupRing]` + `[HopfAlgebra P.baseRing
   P.groupRing]` DONE** (green, axiom-clean {propext,Classical.choice,Quot.sound}) — the structure
