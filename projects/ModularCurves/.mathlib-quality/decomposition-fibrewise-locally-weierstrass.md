@@ -289,6 +289,16 @@ finite cover. Thus the geometric hypotheses of the acyclic-cover theorem are ava
 without noetherianity. The remaining work is the Cech comparison theorem itself and the
 subsequent finite-projective replacement.
 
+The concrete terms of mathlib's Cech complex are now exposed option-free in
+`ForMathlib/SheafCechCochains.lean`, following the specialized construction in mathlib PR
+#35073 without copying its broader formal-coproduct layer. `cechCochainAddEquiv` identifies
+degree `n` with families of sections indexed by `(n+1)`-tuples, with component formulas
+in both directions. `IsAffineOpen.cechIntersection` and
+`Scheme.Modules.cechIntersection_subsingleton_H` prove that each corresponding product
+open is affine and acyclic for a quasicoherent module on a separated scheme. The next
+missing map is the augmented-Cech quasi-isomorphism/comparison with derived global
+sections.
+
 The generic two-chart degree-one calculation is now complete in
 `ForMathlib/TwoOpenHOne.lean`. The theorem
 `TopCat.Sheaf.subsingleton_H_one_of_two_open_cover` proves global `H¹` vanishing from

@@ -57,6 +57,7 @@ import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 import ModularCurves.ForMathlib.SchemeModuleSheaf
 import ModularCurves.ForMathlib.SchemeModulePushforwardBaseChange
 import ModularCurves.ForMathlib.SheafCechZero
+import ModularCurves.ForMathlib.SheafCechCochains
 import ModularCurves.ForMathlib.SheafCohomologyExact
 import ModularCurves.ForMathlib.SheafCohomologyIso
 import ModularCurves.ForMathlib.SheafDerivedGlobalSections
