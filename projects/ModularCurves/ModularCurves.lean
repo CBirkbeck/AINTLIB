@@ -26,6 +26,7 @@ import ModularCurves.EllipticCurve.PointsDictionary
 import ModularCurves.EllipticCurve.PoleSheaf
 import ModularCurves.EllipticCurve.PoleSheafPointedIso
 import ModularCurves.EllipticCurve.PoleSheafModel
+import ModularCurves.EllipticCurve.PoleSheafFibreSections
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.WeierstrassModel
 import ModularCurves.ForMathlib.BaseChangeKerCoker
