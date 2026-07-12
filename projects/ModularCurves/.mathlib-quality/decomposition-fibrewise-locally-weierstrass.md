@@ -272,6 +272,14 @@ does not yet construct that complex, prove its comparison with derived global se
 or supply the finite-projective replacement and arbitrary-base comparison of Stacks
 0A1G.
 
+The augmentation and degree-zero exactness of the Cech construction are now complete in
+`ForMathlib/SheafCechZero.lean`. For any sheaf valued in an abelian category,
+`cechResSubKernelFork` views the equalizer-products sheaf condition as the kernel of the
+first restriction-difference map, and `cechZeroShortComplex_exact` proves exactness at
+the product of local sections. The source is sections on the union of the chosen opens,
+which is global sections when they cover the whole space. Higher Cech degrees and the
+acyclic-cover comparison with sheaf cohomology remain to be constructed.
+
 The generic two-chart degree-one calculation is now complete in
 `ForMathlib/TwoOpenHOne.lean`. The theorem
 `TopCat.Sheaf.subsingleton_H_one_of_two_open_cover` proves global `H¹` vanishing from
