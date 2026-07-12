@@ -17168,3 +17168,21 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
   wants the point subtyped in the TARGET open.
 - Remaining marathon queue: Pic⁰-assembly map (sectionDivisor + picClass + picRelFunctor),
   degree grading (sectionsDivisor_degree consumer), rigidified bundles, DS-END0.
+
+## Amendments v10.165 (2026-07-12, fable-PIC0): picRelProj extracted — Pic⁰-assembly engine ready; SESSION LEDGER (window 2)
+
+- **`picRelProj (t) : Pic (pullback p t) →* picRel p z hz t`** — the GME-p.109 kernel
+  projection `x ↦ x · (f_T^* z_T^* x)⁻¹` as public API in RelativePic.lean (+
+  `mul_inv_map_map_mem`); the (2.16) assembly map is now one definition away:
+  `P ↦ picRelProj (picClass [P] · picClass [0]⁻¹)`. LEAN-OP: parenthesize multi-line
+  calc HEADS (application-continuation splits into a bogus first step otherwise).
+- **LEDGER (this window)**: ★★ AG-LB closed (`IdealModule.lean`: idealSections/
+  idealPresheafAb/idealPresheaf/idealModule + basis-local IsIso machinery + idealGenHom
+  + bijective_idealGenHom_app + isInvertible_idealModule, all sorry-free) · ★ D2 seam
+  live (`DivisorClass.lean`: RelEffCartierDiv.isInvertible_idealModule + picClass =
+  [I(D)]⁻¹, 3109-job build) · picRelProj. All committed + pushed.
+- **NEXT-SESSION QUEUE (v10.162 marathon continues)**: (a) the assembly map
+  `E(T) → Pic_{E/S}(T)` — needs base-change stability instances for
+  IsSeparated/SmoothOfRelativeDimension-1 on `pullback p t ⟶ T` (check the engine +
+  mathlib first), then `sectionDivisor` + `picClass` + `picRelProj`; (b) degree grading
+  (`sectionsDivisor_degree` consumer → Pic^ν); (c) rigidified bundles; (d) DS-END0.

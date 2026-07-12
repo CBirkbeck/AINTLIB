@@ -384,6 +384,453 @@ theorem chartActToGE_snd :
   rw [pullbackLeftPullbackSndIso_inv_fst_snd, ← P.chartKunnethSchemeIso_hom_snd,
     Category.assoc, Iso.inv_hom_id_assoc]
 
+/-- The group coordinate of the action product `G ×_S E`, as an `E`-point (`g ↦ ι g`). -/
+noncomputable def actGPt (G : FiniteLocallyFreeSubgroup E) :
+    E.Point ((Over.mk G.π ⊗ E.asOver).hom) :=
+  (E.pointEquivOverHom _).symm (fst (Over.mk G.π) E.asOver ≫ G.ιOver)
+
+/-- The curve coordinate of the action product `G ×_S E`, as an `E`-point (`x ↦ x`). -/
+noncomputable def actXPt (G : FiniteLocallyFreeSubgroup E) :
+    E.Point ((Over.mk G.π ⊗ E.asOver).hom) :=
+  (E.pointEquivOverHom _).symm (snd (Over.mk G.π) E.asOver)
+
+@[simp] theorem actGPt_val (G : FiniteLocallyFreeSubgroup E) :
+    (actGPt G).1 = (fst (Over.mk G.π) E.asOver).left ≫ G.ι := rfl
+@[simp] theorem actXPt_val (G : FiniteLocallyFreeSubgroup E) :
+    (actXPt G).1 = (snd (Over.mk G.π) E.asOver).left := rfl
+
+/-- **The action as an `E`-point sum** (the analog of `mulHom_ι`): the underlying map of the
+translation action `G ×_S E ⟶ E` is the coercion of the sum of the two universal points
+`g ↦ ι(g)` and `x ↦ x`. -/
+theorem translationAction_left_eq_add (G : FiniteLocallyFreeSubgroup E) :
+    G.translationAction.left = ((actGPt G + actXPt G : E.Point _)).1 := by
+  letI : CommGroup ((Over.mk G.π ⊗ E.asOver) ⟶ E.asOver) := CategoryTheory.Hom.commGroup
+  have h : (E.pointEquivOverHom ((Over.mk G.π ⊗ E.asOver).hom)) (actGPt G + actXPt G)
+      = G.translationAction := by
+    rw [E.pointEquivOverHom_add, actGPt, actXPt, Equiv.apply_symm_apply, Equiv.apply_symm_apply]
+    exact G.translationAction_eq_mul.symm
+  exact (congrArg CommaMorphism.left h).symm
+
+/-- `groupToBase` (morphismRestrict, used by `chartAct`/`chartSpecIso`) equals `groupToBaseRes`
+(resLE, used by `groupSquare`/`squareMulRes`). -/
+theorem groupToBase_eq_res : P.groupToBase = P.groupToBaseRes :=
+  (Scheme.Hom.resLE_eq_morphismRestrict G.π).symm
+
+/-- The bridge iso between the two spellings of the clean product `G|_V ×_V U`. -/
+noncomputable def chartD2congr :
+    pullback P.groupToBase P.chartToBase ≅ pullback P.groupToBaseRes P.chartToBase :=
+  pullback.congrHom P.groupToBase_eq_res rfl
+
+/-- The clean product action in the `resLE` spelling (matching `squareToBase`). -/
+noncomputable def chartActRes : pullback P.groupToBaseRes P.chartToBase ⟶ P.U.toScheme :=
+  P.chartD2congr.inv ≫ P.chartAct
+
+/-- The clean-product inclusion into `G ×_S E`, `resLE` spelling. -/
+noncomputable def chartActToGERes :
+    pullback P.groupToBaseRes P.chartToBase ⟶ (Over.mk G.π ⊗ E.asOver).left :=
+  P.chartD2congr.inv ≫ P.chartActToGE
+
+@[reassoc]
+theorem chartD2congr_inv_fst :
+    P.chartD2congr.inv ≫ pullback.fst P.groupToBase P.chartToBase
+      = pullback.fst P.groupToBaseRes P.chartToBase := by
+  rw [chartD2congr, pullback.congrHom_inv, pullback.lift_fst, Category.comp_id]
+
+@[reassoc]
+theorem chartD2congr_inv_snd :
+    P.chartD2congr.inv ≫ pullback.snd P.groupToBase P.chartToBase
+      = pullback.snd P.groupToBaseRes P.chartToBase := by
+  rw [chartD2congr, pullback.congrHom_inv, pullback.lift_snd, Category.comp_id]
+
+@[reassoc]
+theorem chartActRes_comp_ι :
+    P.chartActRes ≫ P.U.ι = P.chartActToGERes ≫ G.translationAction.left := by
+  rw [chartActRes, chartActToGERes]
+  simp only [Category.assoc]
+  exact congrArg (P.chartD2congr.inv ≫ ·) P.chartAct_comp_ι
+
+theorem chartActToGERes_fst :
+    P.chartActToGERes ≫ pullback.fst G.π E.π
+      = pullback.fst P.groupToBaseRes P.chartToBase ≫ P.groupOpen.ι := by
+  rw [chartActToGERes, Category.assoc, P.chartActToGE_fst, P.chartD2congr_inv_fst_assoc]
+
+theorem chartActToGERes_snd :
+    P.chartActToGERes ≫ G.actionProj.left
+      = pullback.snd P.groupToBaseRes P.chartToBase ≫ P.U.ι := by
+  rw [chartActToGERes, Category.assoc, P.chartActToGE_snd]
+  show P.chartD2congr.inv ≫ pullback.snd P.groupToBase P.chartToBase ≫ P.U.ι
+      = pullback.snd P.groupToBaseRes P.chartToBase ≫ P.U.ι
+  rw [P.chartD2congr_inv_snd_assoc]
+
+/-- The action preserves the base point: `(g, x) ↦ x + g` lies over the same `V`-point as `x`. -/
+theorem chartAct_comp_chartToBase :
+    P.chartAct ≫ P.chartToBase
+      = pullback.snd P.groupToBase P.chartToBase ≫ P.chartToBase := by
+  rw [chartAct]
+  simp only [Category.assoc]
+  rw [P.restrictedAction_comp_chartToBase, P.chartPullbackIso_inv_comp_prOpenToBase,
+    ← Category.assoc, ← P.chartKunnethSchemeIso_hom_snd, Iso.inv_hom_id_assoc]
+
+/-- The structure map of the clean product `G|_V ×_V U` to the base patch (`resLE` spelling). -/
+noncomputable abbrev chartD2ToBase :
+    pullback P.groupToBaseRes P.chartToBase ⟶ P.V.toScheme :=
+  pullback.fst P.groupToBaseRes P.chartToBase ≫ P.groupToBaseRes
+
+@[reassoc]
+theorem chartActRes_comp_chartToBase :
+    P.chartActRes ≫ P.chartToBase = P.chartD2ToBase := by
+  rw [chartActRes, Category.assoc, P.chartAct_comp_chartToBase, P.chartD2congr_inv_snd_assoc,
+    chartD2ToBase, ← pullback.condition]
+
+/-- The right-associated chart cube `G|_V ×_V (G|_V ×_V U)`. -/
+noncomputable abbrev chartCube : Scheme.{u} :=
+  pullback P.groupToBaseRes P.chartD2ToBase
+
+/-- The left-associated chart cube `(G|_V ×_V G|_V) ×_V U`. -/
+noncomputable abbrev chartCubeL : Scheme.{u} :=
+  pullback P.squareToBase P.chartToBase
+
+/-- Inner action `chartCube → G|_V ×_V U`: `(g₁,(g₂,x)) ↦ (g₁, x + g₂)`. -/
+noncomputable def chartInnerAct : P.chartCube ⟶ pullback P.groupToBaseRes P.chartToBase :=
+  pullback.lift (pullback.fst P.groupToBaseRes P.chartD2ToBase)
+    (pullback.snd P.groupToBaseRes P.chartD2ToBase ≫ P.chartActRes)
+    (by rw [Category.assoc, P.chartActRes_comp_chartToBase]; exact pullback.condition)
+
+@[reassoc]
+theorem chartInnerAct_fst :
+    P.chartInnerAct ≫ pullback.fst P.groupToBaseRes P.chartToBase
+      = pullback.fst P.groupToBaseRes P.chartD2ToBase := by
+  rw [chartInnerAct, pullback.lift_fst]
+
+@[reassoc]
+theorem chartInnerAct_snd :
+    P.chartInnerAct ≫ pullback.snd P.groupToBaseRes P.chartToBase
+      = pullback.snd P.groupToBaseRes P.chartD2ToBase ≫ P.chartActRes := by
+  rw [chartInnerAct, pullback.lift_snd]
+
+/-- Outer multiplication `chartCubeL → G|_V ×_V U`: `((g₁,g₂),x) ↦ (g₁·g₂, x)`. -/
+noncomputable def chartOuterMul : P.chartCubeL ⟶ pullback P.groupToBaseRes P.chartToBase :=
+  pullback.lift (pullback.fst P.squareToBase P.chartToBase ≫ P.squareMulRes)
+    (pullback.snd P.squareToBase P.chartToBase)
+    (by rw [Category.assoc, P.squareMulRes_comp_groupToBaseRes]; exact pullback.condition)
+
+@[reassoc]
+theorem chartOuterMul_fst :
+    P.chartOuterMul ≫ pullback.fst P.groupToBaseRes P.chartToBase
+      = pullback.fst P.squareToBase P.chartToBase ≫ P.squareMulRes := by
+  rw [chartOuterMul, pullback.lift_fst]
+
+@[reassoc]
+theorem chartOuterMul_snd :
+    P.chartOuterMul ≫ pullback.snd P.groupToBaseRes P.chartToBase
+      = pullback.snd P.squareToBase P.chartToBase := by
+  rw [chartOuterMul, pullback.lift_snd]
+
+/-- The associator `chartCube → chartCubeL`: `(g₁,(g₂,x)) ↦ ((g₁,g₂),x)`. -/
+noncomputable def chartAssoc : P.chartCube ⟶ P.chartCubeL := by
+  refine pullback.lift
+    (pullback.lift (pullback.fst P.groupToBaseRes P.chartD2ToBase)
+      (pullback.snd P.groupToBaseRes P.chartD2ToBase
+        ≫ pullback.fst P.groupToBaseRes P.chartToBase) ?_)
+    (pullback.snd P.groupToBaseRes P.chartD2ToBase
+      ≫ pullback.snd P.groupToBaseRes P.chartToBase) ?_
+  · show pullback.fst P.groupToBaseRes P.chartD2ToBase ≫ P.groupToBaseRes
+      = (pullback.snd P.groupToBaseRes P.chartD2ToBase
+          ≫ pullback.fst P.groupToBaseRes P.chartToBase) ≫ P.groupToBaseRes
+    rw [pullback.condition, Category.assoc]
+  · show pullback.lift (pullback.fst P.groupToBaseRes P.chartD2ToBase)
+          (pullback.snd P.groupToBaseRes P.chartD2ToBase
+            ≫ pullback.fst P.groupToBaseRes P.chartToBase) _
+        ≫ (pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupToBaseRes)
+      = (pullback.snd P.groupToBaseRes P.chartD2ToBase
+          ≫ pullback.snd P.groupToBaseRes P.chartToBase) ≫ P.chartToBase
+    rw [← Category.assoc, pullback.lift_fst, pullback.condition, Category.assoc]
+    congr 1
+    rw [← pullback.condition]
+
+@[reassoc]
+theorem chartAssoc_fst_fst :
+    P.chartAssoc ≫ pullback.fst P.squareToBase P.chartToBase
+        ≫ pullback.fst P.groupToBaseRes P.groupToBaseRes
+      = pullback.fst P.groupToBaseRes P.chartD2ToBase := by
+  rw [chartAssoc, pullback.lift_fst_assoc, pullback.lift_fst]
+
+@[reassoc]
+theorem chartAssoc_fst_snd :
+    P.chartAssoc ≫ pullback.fst P.squareToBase P.chartToBase
+        ≫ pullback.snd P.groupToBaseRes P.groupToBaseRes
+      = pullback.snd P.groupToBaseRes P.chartD2ToBase
+        ≫ pullback.fst P.groupToBaseRes P.chartToBase := by
+  rw [chartAssoc, pullback.lift_fst_assoc, pullback.lift_snd]
+
+@[reassoc]
+theorem chartAssoc_snd :
+    P.chartAssoc ≫ pullback.snd P.squareToBase P.chartToBase
+      = pullback.snd P.groupToBaseRes P.chartD2ToBase
+        ≫ pullback.snd P.groupToBaseRes P.chartToBase := by
+  rw [chartAssoc, pullback.lift_snd]
+
+/-- The base map to `S` of the clean product's two coordinate points. -/
+noncomputable abbrev d2Base : pullback P.groupToBaseRes P.chartToBase ⟶ S :=
+  pullback.fst P.groupToBaseRes P.chartToBase ≫ P.groupOpen.ι ≫ G.π
+
+/-- The group coordinate of the clean product `G|_V ×_V U`, as an `E`-point (`g ↦ ι g`). -/
+noncomputable def d2gPt : E.Point P.d2Base :=
+  ⟨pullback.fst P.groupToBaseRes P.chartToBase ≫ P.groupOpen.ι ≫ G.ι, by
+    simp only [d2Base, Category.assoc, G.ι_π]⟩
+
+/-- The curve coordinate of the clean product `G|_V ×_V U`, as an `E`-point (`x ↦ x`). -/
+noncomputable def d2xPt : E.Point P.d2Base :=
+  ⟨pullback.snd P.groupToBaseRes P.chartToBase ≫ P.U.ι, by
+    rw [Category.assoc, ← P.chartToBase_comp_ι, ← Category.assoc, ← pullback.condition,
+      Category.assoc, show P.groupToBaseRes ≫ P.V.ι = P.groupOpen.ι ≫ G.π from
+        Scheme.Hom.resLE_comp_ι _ _]⟩
+
+theorem chartActToGERes_actGPt :
+    P.chartActToGERes ≫ (actGPt G).1
+      = pullback.fst P.groupToBaseRes P.chartToBase ≫ P.groupOpen.ι ≫ G.ι := by
+  rw [actGPt_val, ← Category.assoc,
+    show P.chartActToGERes ≫ (fst (Over.mk G.π) E.asOver).left
+        = pullback.fst P.groupToBaseRes P.chartToBase ≫ P.groupOpen.ι from P.chartActToGERes_fst]
+  exact Category.assoc _ _ _
+
+/-- **The action as a coordinate point sum** on the clean product: `(g, x) ↦ x + g`, i.e. the
+sum of the group point (via `ι`) and the curve point. The analog of the group's
+`squareMulRes ≫ ι ≫ G.ι = (sqFst + sqSnd)`. -/
+theorem chartActRes_comp_ι_eq_add :
+    P.chartActRes ≫ P.U.ι = (P.d2gPt + P.d2xPt : E.Point P.d2Base).1 := by
+  have hbase : P.chartActToGERes ≫ (Over.mk G.π ⊗ E.asOver).hom = P.d2Base := by
+    rw [← G.actionProj_left_π, reassoc_of% P.chartActToGERes_snd]
+    exact P.d2xPt.2
+  have hp : P.chartActToGERes ≫ (actGPt G).1 = P.d2gPt.1 := P.chartActToGERes_actGPt
+  have hq : P.chartActToGERes ≫ (actXPt G).1 = P.d2xPt.1 := by
+    rw [actXPt_val]; exact P.chartActToGERes_snd
+  have key : (hbase ▸ EllipticCurve.Point.restrict E P.chartActToGERes (actGPt G + actXPt G) :
+      E.Point P.d2Base) = P.d2gPt + P.d2xPt :=
+    point_restrictT_add_eq hbase (actGPt G) (actXPt G) P.d2gPt P.d2xPt hp hq
+  rw [chartActRes_comp_ι, translationAction_left_eq_add]
+  show (EllipticCurve.Point.restrict E P.chartActToGERes (actGPt G + actXPt G)).1
+      = (P.d2gPt + P.d2xPt).1
+  rw [← key]
+  exact (point_base_congr hbase _).symm
+
+/-- Act twice: `(g₁,(g₂,x)) ↦ (x + g₂) + g₁`. Dual of `(id ⊗ ρ) ∘ ρ`. -/
+noncomputable def mTwice : P.chartCube ⟶ P.U.toScheme := P.chartInnerAct ≫ P.chartActRes
+
+/-- Multiply then act: `((g₁,g₂),x) ↦ x + (g₁·g₂)`. Dual of `(Δ ⊗ id) ∘ ρ`. -/
+noncomputable def mProd : P.chartCubeL ⟶ P.U.toScheme := P.chartOuterMul ≫ P.chartActRes
+
+/-- The common base of the three coordinate points of the chart cube: the projection to `S`. -/
+noncomputable abbrev chartCubeBase : P.chartCube ⟶ S :=
+  pullback.fst P.groupToBaseRes P.chartD2ToBase ≫ P.groupOpen.ι ≫ G.π
+
+/-- First coordinate point `g₁` of the chart cube. -/
+noncomputable def chartCubePt₁ : E.Point P.chartCubeBase :=
+  ⟨pullback.fst P.groupToBaseRes P.chartD2ToBase ≫ P.groupOpen.ι ≫ G.ι, by
+    simp only [chartCubeBase, Category.assoc, G.ι_π]⟩
+
+/-- Second coordinate point `g₂` of the chart cube. -/
+noncomputable def chartCubePt₂ : E.Point P.chartCubeBase :=
+  ⟨pullback.snd P.groupToBaseRes P.chartD2ToBase ≫ pullback.fst P.groupToBaseRes P.chartToBase
+      ≫ P.groupOpen.ι ≫ G.ι, by
+    have hb : P.groupOpen.ι ≫ G.π = P.groupToBaseRes ≫ P.V.ι :=
+      (Scheme.Hom.resLE_comp_ι _ _).symm
+    have hc₂ : pullback.snd P.groupToBaseRes P.chartD2ToBase
+          ≫ pullback.fst P.groupToBaseRes P.chartToBase ≫ P.groupToBaseRes
+        = pullback.fst P.groupToBaseRes P.chartD2ToBase ≫ P.groupToBaseRes :=
+      pullback.condition.symm
+    simp only [chartCubeBase, Category.assoc, G.ι_π, hb]
+    rw [reassoc_of% hc₂]⟩
+
+/-- Third coordinate point `x` of the chart cube (the curve factor). -/
+noncomputable def chartCubePt₃ : E.Point P.chartCubeBase :=
+  ⟨pullback.snd P.groupToBaseRes P.chartD2ToBase ≫ pullback.snd P.groupToBaseRes P.chartToBase
+      ≫ P.U.ι, by
+    have hb : P.groupOpen.ι ≫ G.π = P.groupToBaseRes ≫ P.V.ι :=
+      (Scheme.Hom.resLE_comp_ι _ _).symm
+    have hc₃ : pullback.snd P.groupToBaseRes P.chartD2ToBase
+          ≫ pullback.snd P.groupToBaseRes P.chartToBase ≫ P.chartToBase
+        = pullback.fst P.groupToBaseRes P.chartD2ToBase ≫ P.groupToBaseRes := by
+      rw [← pullback.condition (f := P.groupToBaseRes) (g := P.chartToBase)]
+      exact pullback.condition.symm
+    simp only [chartCubeBase, Category.assoc, hb, ← P.chartToBase_comp_ι]
+    rw [reassoc_of% hc₃]⟩
+
+@[simp] theorem d2gPt_val : P.d2gPt.1
+    = pullback.fst P.groupToBaseRes P.chartToBase ≫ P.groupOpen.ι ≫ G.ι := rfl
+@[simp] theorem d2xPt_val : P.d2xPt.1
+    = pullback.snd P.groupToBaseRes P.chartToBase ≫ P.U.ι := rfl
+@[simp] theorem chartCubePt₁_val : P.chartCubePt₁.1
+    = pullback.fst P.groupToBaseRes P.chartD2ToBase ≫ P.groupOpen.ι ≫ G.ι := rfl
+@[simp] theorem chartCubePt₂_val : P.chartCubePt₂.1
+    = pullback.snd P.groupToBaseRes P.chartD2ToBase ≫ pullback.fst P.groupToBaseRes P.chartToBase
+      ≫ P.groupOpen.ι ≫ G.ι := rfl
+@[simp] theorem chartCubePt₃_val : P.chartCubePt₃.1
+    = pullback.snd P.groupToBaseRes P.chartD2ToBase ≫ pullback.snd P.groupToBaseRes P.chartToBase
+      ≫ P.U.ι := rfl
+
+/-- **The chart-level associativity of the action** (the analog of `assocScheme_leftMulSchemeL`):
+acting by `g₁` after acting by `g₂` equals acting by the product `g₁·g₂`. Cancelling `U.ι`,
+both sides are the coercion of a triple sum of the cube's three coordinate points, and the
+identity is `add_assoc` in `E.Point chartCubeBase`. -/
+theorem chartAssoc_mProd : P.chartAssoc ≫ P.mProd = P.mTwice := by
+  rw [← cancel_mono P.U.ι]
+  have hb : P.groupOpen.ι ≫ G.π = P.groupToBaseRes ≫ P.V.ι :=
+    (Scheme.Hom.resLE_comp_ι _ _).symm
+  have hU : (G.sqFstPoint + G.sqSndPoint : E.Point _).1 = G.mulHom ≫ G.ι := G.mulHom_ι.symm
+  -- `groupSquareToSquare` carries the two square-projections to the two `G|_V` legs (into `E`).
+  have hfstι : P.groupSquareToSquare ≫ (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι
+      = pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.ι ≫ G.ι := by
+    rw [← Category.assoc, P.groupSquareToSquare_fst]; exact Category.assoc _ _ _
+  have hsndι : P.groupSquareToSquare ≫ (snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι
+      = pullback.snd P.groupToBaseRes P.groupToBaseRes ≫ P.groupOpen.ι ≫ G.ι := by
+    rw [← Category.assoc, P.groupSquareToSquare_snd]; exact Category.assoc _ _ _
+  -- the base identities of the various restricted points.
+  have hInner : P.chartInnerAct ≫ P.d2Base = P.chartCubeBase := by
+    rw [d2Base, ← Category.assoc, P.chartInnerAct_fst]
+  have hsndbase : pullback.snd P.groupToBaseRes P.chartD2ToBase ≫ P.d2Base = P.chartCubeBase := by
+    have hc₂ : pullback.snd P.groupToBaseRes P.chartD2ToBase
+          ≫ pullback.fst P.groupToBaseRes P.chartToBase ≫ P.groupToBaseRes
+        = pullback.fst P.groupToBaseRes P.chartD2ToBase ≫ P.groupToBaseRes :=
+      pullback.condition.symm
+    rw [d2Base, chartCubeBase, hb, ← reassoc_of% hc₂]
+  have hgsts : P.groupSquareToSquare ≫ (Over.mk G.π ⊗ Over.mk G.π).hom
+      = pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupToBaseRes ≫ P.V.ι := by
+    rw [← G.mulHom_π, ← Category.assoc]; exact P.squareMul_π
+  have hmulbase : (P.chartAssoc ≫ pullback.fst P.squareToBase P.chartToBase
+        ≫ P.groupSquareToSquare) ≫ (Over.mk G.π ⊗ Over.mk G.π).hom = P.chartCubeBase := by
+    simp only [Category.assoc, hgsts, P.chartAssoc_fst_fst_assoc, chartCubeBase, hb]
+  -- the inner action `act(g₂, x) = g₂ + x` splits into the coordinate points `g₂` and `x`.
+  have Einner : (hsndbase ▸ EllipticCurve.Point.restrict E
+        (pullback.snd P.groupToBaseRes P.chartD2ToBase) (P.d2gPt + P.d2xPt) :
+        E.Point P.chartCubeBase) = P.chartCubePt₂ + P.chartCubePt₃ :=
+    point_restrictT_add_eq hsndbase P.d2gPt P.d2xPt P.chartCubePt₂ P.chartCubePt₃ rfl rfl
+  -- the multiplication `g₁·g₂` splits into the coordinate points `g₁` and `g₂`.
+  have EmulL : (hmulbase ▸ EllipticCurve.Point.restrict E
+        (P.chartAssoc ≫ pullback.fst P.squareToBase P.chartToBase ≫ P.groupSquareToSquare)
+        (G.sqFstPoint + G.sqSndPoint) : E.Point P.chartCubeBase)
+      = P.chartCubePt₁ + P.chartCubePt₂ :=
+    point_restrictT_add_eq hmulbase G.sqFstPoint G.sqSndPoint P.chartCubePt₁ P.chartCubePt₂
+      (by
+        show (P.chartAssoc ≫ pullback.fst P.squareToBase P.chartToBase ≫ P.groupSquareToSquare)
+            ≫ (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι = _
+        simp only [Category.assoc, hfstι, P.chartAssoc_fst_fst_assoc, chartCubePt₁_val])
+      (by
+        show (P.chartAssoc ≫ pullback.fst P.squareToBase P.chartToBase ≫ P.groupSquareToSquare)
+            ≫ (snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι = _
+        simp only [Category.assoc, hsndι, P.chartAssoc_fst_snd_assoc, chartCubePt₂_val])
+  -- LHS full split: `((g₁ + g₂) + x)`.
+  have hLbase : (P.chartAssoc ≫ P.chartOuterMul) ≫ P.d2Base = P.chartCubeBase := by
+    simp only [d2Base, Category.assoc, P.chartOuterMul_fst_assoc,
+      P.squareMulRes_comp_groupToBaseRes_assoc, P.chartAssoc_fst_fst_assoc, chartCubeBase, hb]
+  have ELHS : (hLbase ▸ EllipticCurve.Point.restrict E (P.chartAssoc ≫ P.chartOuterMul)
+        (P.d2gPt + P.d2xPt) : E.Point P.chartCubeBase)
+      = (P.chartCubePt₁ + P.chartCubePt₂) + P.chartCubePt₃ :=
+    point_restrictT_add_eq hLbase P.d2gPt P.d2xPt (P.chartCubePt₁ + P.chartCubePt₂) P.chartCubePt₃
+      (by
+        have hL : ((P.chartCubePt₁ + P.chartCubePt₂ : E.Point P.chartCubeBase)).1
+            = (P.chartAssoc ≫ pullback.fst P.squareToBase P.chartToBase ≫ P.groupSquareToSquare)
+              ≫ (G.sqFstPoint + G.sqSndPoint : E.Point _).1 := by
+          rw [← EmulL]; exact point_base_congr hmulbase _
+        rw [hL]
+        simp only [d2gPt_val, Category.assoc, P.chartOuterMul_fst_assoc,
+          P.squareMulRes_comp_ι_assoc, squareMul, G.mulHom_ι])
+      (by
+        simp only [d2xPt_val, Category.assoc, P.chartOuterMul_snd_assoc, P.chartAssoc_snd_assoc,
+          chartCubePt₃_val])
+  -- RHS full split: `(g₁ + (g₂ + x))`.
+  have EmTwice : (hInner ▸ EllipticCurve.Point.restrict E P.chartInnerAct (P.d2gPt + P.d2xPt) :
+        E.Point P.chartCubeBase) = P.chartCubePt₁ + (P.chartCubePt₂ + P.chartCubePt₃) :=
+    point_restrictT_add_eq hInner P.d2gPt P.d2xPt P.chartCubePt₁ (P.chartCubePt₂ + P.chartCubePt₃)
+      (by simp only [d2gPt_val, P.chartInnerAct_fst_assoc, chartCubePt₁_val])
+      (by
+        have hR : ((P.chartCubePt₂ + P.chartCubePt₃ : E.Point P.chartCubeBase)).1
+            = pullback.snd P.groupToBaseRes P.chartD2ToBase
+              ≫ (P.d2gPt + P.d2xPt : E.Point _).1 := by
+          rw [← Einner]; exact point_base_congr hsndbase _
+        rw [hR]
+        simp only [d2xPt_val, P.chartInnerAct_snd_assoc, P.chartActRes_comp_ι_eq_add])
+  have hLHS : (P.chartAssoc ≫ P.mProd) ≫ P.U.ι
+      = ((P.chartCubePt₁ + P.chartCubePt₂) + P.chartCubePt₃).1 := by
+    rw [← ELHS, point_base_congr]
+    simp only [mProd, EllipticCurve.Point.restrict, Category.assoc, P.chartActRes_comp_ι_eq_add]
+  have hRHS : P.mTwice ≫ P.U.ι = (P.chartCubePt₁ + (P.chartCubePt₂ + P.chartCubePt₃)).1 := by
+    rw [← EmTwice, point_base_congr]
+    simp only [mTwice, EllipticCurve.Point.restrict, Category.assoc, P.chartActRes_comp_ι_eq_add]
+  rw [hLHS, hRHS, add_assoc]
+
+/-! ### The coassoc law, algebra side: dualising `chartAssoc_mProd` -/
+
+/-- **Ext principle for maps into `Spec (A ⊗ B)`**: two scheme maps into `Spec (A ⊗[R] B)`
+agreeing after the two `Spec`-inclusions agree. -/
+theorem spec_tensor_hom_ext {R₁ A₁ B₁ : Type u} [CommRing R₁] [CommRing A₁] [CommRing B₁]
+    [Algebra R₁ A₁] [Algebra R₁ B₁] {Z : Scheme.{u}}
+    {φ ψ : Z ⟶ (Spec (.of (A₁ ⊗[R₁] B₁)) : Scheme)}
+    (hL : φ ≫ Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := R₁) (A := A₁) (B := B₁)))
+      = ψ ≫ Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := R₁) (A := A₁) (B := B₁))))
+    (hR : φ ≫ Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := R₁) (A := A₁) (B := B₁)).toRingHom)
+      = ψ ≫ Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := R₁) (A := A₁) (B := B₁)).toRingHom)) :
+    φ = ψ := by
+  rw [← cancel_mono (pullbackSpecIso R₁ A₁ B₁).inv]
+  refine pullback.hom_ext ?_ ?_
+  · rw [Category.assoc, Category.assoc, pullbackSpecIso_inv_fst]; exact hL
+  · rw [Category.assoc, Category.assoc, pullbackSpecIso_inv_snd]; exact hR
+
+/-- `chartCoactionSpec` re-expressed via the clean-product action `chartAct`. -/
+theorem chartCoactionSpec_eq :
+    P.chartCoactionSpec = P.kunnethSpecIso.inv ≫ P.chartAct := by
+  rw [chartCoactionSpec, chartAct, chartSpecIso, Iso.trans_inv, Category.assoc]
+
+/-- **(K0)** `Spec` of the coaction ring map is the action `Spec`-morphism, followed by the
+chart's affine identification. -/
+theorem specMap_coactionRing :
+    Spec.map P.coactionRing = P.chartCoactionSpec ≫ P.U.toSpecΓ := by
+  rw [Scheme.Opens.toSpecΓ, ← Category.assoc, Scheme.toSpecΓ_naturality,
+    ← SpecMap_ΓSpecIso_hom, coactionRing_eq_appTop]
+  simp only [Spec.map_comp, Category.assoc]
+
+/-- The Künneth `Spec`-iso carries `Spec` of the left inclusion `A ↪ A ⊗ B` to the group leg. -/
+theorem kunnethSpecIso_hom_includeLeft :
+    P.kunnethSpecIso.hom ≫ Spec.map (CommRingCat.ofHom
+        (Algebra.TensorProduct.includeLeftRingHom (R := P.baseRing) (A := P.groupRing)
+          (B := P.chartRing)))
+      = pullback.fst P.groupToBase P.chartToBase ≫ P.groupOpen.toSpecΓ := by
+  have h := P.chartSpecIso_hom_includeLeft
+  rw [chartSpecIso, Iso.trans_hom, Category.assoc] at h
+  exact (cancel_epi P.chartKunnethSchemeIso.hom).mp h
+
+/-- The Künneth `Spec`-iso carries `Spec` of the right inclusion `B ↪ A ⊗ B` to the chart leg. -/
+theorem kunnethSpecIso_hom_includeRight :
+    P.kunnethSpecIso.hom ≫ Spec.map (CommRingCat.ofHom
+        (Algebra.TensorProduct.includeRight (R := P.baseRing) (A := P.groupRing)
+          (B := P.chartRing)).toRingHom)
+      = pullback.snd P.groupToBase P.chartToBase ≫ P.U.toSpecΓ := by
+  have h := P.chartSpecIso_hom_includeRight
+  rw [chartSpecIso, Iso.trans_hom, ← P.chartKunnethSchemeIso_hom_snd] at h
+  simp only [Category.assoc] at h
+  exact (cancel_epi P.chartKunnethSchemeIso.hom).mp h
+
+/-- The Künneth `Spec`-iso carries `Spec` of the base algebra map to the chart structure leg. -/
+theorem kunnethSpecIso_hom_base :
+    P.kunnethSpecIso.hom ≫ Spec.map (CommRingCat.ofHom
+        (algebraMap P.baseRing (P.groupRing ⊗[P.baseRing] P.chartRing)))
+      = pullback.snd P.groupToBase P.chartToBase ≫ P.chartToBase ≫ P.V.toSpecΓ := by
+  have h := P.chartSpecIso_hom_base
+  rw [chartSpecIso, Iso.trans_hom, ← P.chartKunnethSchemeIso_hom_snd] at h
+  simp only [Category.assoc] at h
+  exact (cancel_epi P.chartKunnethSchemeIso.hom).mp h
+
+/-- **(K)** the key action-dual: the Künneth `Spec`-iso conjugates `Spec (coactionRing)` into
+the clean-product action `chartAct`. -/
+theorem kunnethSpecIso_hom_specMap_coactionRing :
+    P.kunnethSpecIso.hom ≫ Spec.map P.coactionRing = P.chartAct ≫ P.U.toSpecΓ := by
+  rw [specMap_coactionRing, chartCoactionSpec_eq, ← Category.assoc, ← Category.assoc,
+    Iso.hom_inv_id, Category.id_comp]
+
 theorem chartCoaction_isCoaction : IsCoaction P.chartCoaction where
   counit := by
     rw [show Bialgebra.counitAlgHom P.baseRing P.groupRing = counitAlg G P from

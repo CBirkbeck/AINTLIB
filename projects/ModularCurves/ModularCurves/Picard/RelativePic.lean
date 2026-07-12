@@ -57,6 +57,34 @@ theorem baseChangeZero_snd (t : T ⟶ S) :
 noncomputable def picRel (t : T ⟶ S) : Subgroup (Pic (Limits.pullback p t)) :=
   (Pic.map (baseChangeZero p z hz t)).ker
 
+/-- Normalizing a class by its zero-section pullback lands in the relative Picard
+group. -/
+theorem mul_inv_map_map_mem (t : T ⟶ S) (x : Pic (Limits.pullback p t)) :
+    x * (Pic.map (Limits.pullback.snd p t)
+      (Pic.map (baseChangeZero p z hz t) x))⁻¹ ∈ picRel p z hz t := by
+  refine MonoidHom.mem_ker.mpr ?_
+  rw [map_mul, map_inv]
+  have hrs : Pic.map (baseChangeZero p z hz t)
+      (Pic.map (Limits.pullback.snd p t) (Pic.map (baseChangeZero p z hz t) x)) =
+      Pic.map (baseChangeZero p z hz t) x := by
+    calc (Pic.map (baseChangeZero p z hz t)
+          (Pic.map (Limits.pullback.snd p t) (Pic.map (baseChangeZero p z hz t) x)))
+        = Pic.map (baseChangeZero p z hz t ≫ Limits.pullback.snd p t)
+            (Pic.map (baseChangeZero p z hz t) x) := by rw [Pic.map_comp]; rfl
+      _ = Pic.map (baseChangeZero p z hz t) x := by
+          rw [baseChangeZero_snd, Pic.map_id]; rfl
+  rw [hrs, mul_inv_cancel]
+
+/-- The retraction projection onto the relative Picard group: normalize a class by its
+zero-section pullback, `x ↦ x * (f_T^*(z_T^* x))⁻¹` (the kernel projection of the
+GME p. 109 splitting `Pic(E) = Ker(0*) ⊕ Im(f*)`). -/
+noncomputable def picRelProj (t : T ⟶ S) :
+    Pic (Limits.pullback p t) →* picRel p z hz t :=
+  (MonoidHom.id (Pic (Limits.pullback p t)) *
+    ((Pic.map (Limits.pullback.snd p t)).comp
+      (Pic.map (baseChangeZero p z hz t)))⁻¹).codRestrict _
+    (mul_inv_map_map_mem p z hz t)
+
 /-- **Comparison with the displayed definition** (GME p. 108, the definition preceding
 (2.16): "`Pic_{E/S}(T) = Pic(E ×_S T)/f_T^* Pic(T)`"): the zero-section splitting
 identifies the quotient with the kernel model. -/
