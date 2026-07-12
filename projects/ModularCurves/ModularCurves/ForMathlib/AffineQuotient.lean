@@ -911,6 +911,29 @@ theorem exists_invariantsπ_lift_of_isOpenImmersion [Finite G] {Q' Y : Scheme.{u
   exact hfinal (pullback.snd (invariantsπ G B R) j
     (show ↥(pullback (invariantsπ G B R) j) from w))
 
+variable (G B) in
+/-- **[GHB5a-i] Free-action affine base change of the quotient** (KM 7.1.3(3c),
+condition (c); the per-chart engine of `SchemeAction.exists_quotientπ_lift_baseChange`).
+For a FREE `G`-action on `Spec B` and an ARBITRARY base map `j : Q' ⟶ Spec Bᴳ`, every
+`f : pullback (invariantsπ) j ⟶ Y` invariant under `pullbackSpecSMul` descends to `Q'`.
+
+Unlike `exists_invariantsπ_lift_of_isOpenImmersion` — which needs `j` an open immersion,
+so the base change is a (flat) localization — the free action makes `(B ⊗_{Bᴳ} C)ᴳ = C`
+hold for EVERY `Bᴳ`-algebra `C`: this is [A711-BC]
+`InvariantTorsor.fixedPointsBaseChange_bijective_of_isFreeAlgebraAction` instantiated at
+ground `Bᴳ` (with `A := B`, `FixedPoints.subalgebra Bᴳ B G = Bᴳ`, so
+`(B ⊗_{Bᴳ} C)ᴳ = Bᴳ ⊗_{Bᴳ} C = C`). Freeness is given in the scheme form (`IsEmpty` of
+fixed-point loci, matching `SchemeAction`'s convention); the proof converts it to
+`IsFreeAlgebraAction G Bᴳ B` (restriction of the ground-`R` freeness). -/
+theorem exists_invariantsπ_lift_baseChange_of_free [Finite G] {Q' Y : Scheme.{u}}
+    (hfree : ∀ {T : Scheme.{u}} (t : T ⟶ Spec (CommRingCat.of B)) (g : G), g ≠ 1 →
+      t ≫ specSMul g = t → IsEmpty T)
+    (j : Q' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G)))
+    (f : Limits.pullback (invariantsπ G B R) j ⟶ Y)
+    (hf : ∀ g : G, pullbackSpecSMul G B R j g ≫ f = f) :
+    ∃ q : Q' ⟶ Y, Limits.pullback.snd (invariantsπ G B R) j ≫ q = f := by
+  sorry
+
 end UniversalProperty
 
 end AlgebraicGeometry
