@@ -325,6 +325,17 @@ comparison can identify the actual base-change morphism rather than only the sou
 target groups; constructing that geometric complex and proving its base-change comparison
 remain open.
 
+The elementary Mayer--Vietoris seam is now complete in both directions.
+`HPrimeZeroAddEquivSections` identifies `H'⁰(U,F)` with sections naturally in `U`, while
+`HPrimeAddEquivHOfIsTerminal` identifies `H'ⁿ(T,F)` with genuine `Sheaf.H F n` when `T`
+is terminal. Consequently
+`two_open_sections_difference_surjective_of_subsingleton_H_one` turns global `H¹`
+vanishing into surjectivity of the two-open section-difference map, and
+`subsingleton_H_one_iff_two_open_sections_difference_surjective` combines this with the
+existing gluing implication under local `H¹` vanishing. This closes the generic
+two-chart criterion used by explicit pole calculations; it does not replace the still-open
+proper finite-projective complex and arbitrary-base comparison.
+
 ### 4. Choose `x` and `y` -- `T-W-cmp.XY`
 
 After a further Zariski shrink, split the inclusions in the pole filtration and choose

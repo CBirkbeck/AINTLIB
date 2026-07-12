@@ -1,14 +1,17 @@
+import Mathlib.CategoryTheory.Sites.SheafCohomology.MayerVietoris
 import Mathlib.Topology.Sheaves.Flasque
+import Mathlib.Topology.Sheaves.MayerVietoris
 
 import ModularCurves.ForMathlib.KempfLocalKilling
+import ModularCurves.ForMathlib.SheafCohomologyTerminal
 
 /-!
 # Degree-one cohomology from a two-open cover
 
 This file proves the elementwise Mayer--Vietoris criterion needed for the pole-chart
-calculation. It avoids the cohomology presheaf `H'`: a degree-one class is represented
-using an injective presentation, lifted over the two opens, adjusted on their overlap,
-and then killed by ordinary sheaf gluing.
+calculation. The forward implication represents a degree-one class using an injective
+presentation and kills it by ordinary sheaf gluing. The converse transports mathlib's
+Mayer--Vietoris exact sequence from the cohomology presheaf `H'` to concrete sections.
 -/
 
 open CategoryTheory Limits Opposite TopologicalSpace
@@ -183,5 +186,103 @@ theorem subsingleton_H_one_of_two_open_cover
   obtain ⟨t, ht⟩ := exists_global_lift_of_two_open_cover hS U V hUV hsections hU hV b
   rw [← hb, ← ht, ← CategoryTheory.Sheaf.H.equiv₀_symm_naturality,
     CategoryTheory.Sheaf.H.longSequence_comp_zero₃]
+
+private lemma exists_HPrimeZero_difference_of_subsingleton_H_one
+    (F : Sheaf AddCommGrpCat.{u} X) (U V : Opens X) (hUV : U ⊔ V = ⊤)
+    (hH : Subsingleton (H F 1)) (x : (toSiteSheaf F).H' 0 (U ⊓ V)) :
+    ∃ xU : (toSiteSheaf F).H' 0 U, ∃ xV : (toSiteSheaf F).H' 0 V,
+      ((toSiteSheaf F).cohomologyPresheaf 0).map (homOfLE inf_le_left).op xU -
+        ((toSiteSheaf F).cohomologyPresheaf 0).map (homOfLE inf_le_right).op xV = x := by
+  let S := Opens.mayerVietorisSquare U V
+  let F' := toSiteSheaf F
+  have hT : IsTerminal (U ⊔ V) := by
+    rw [hUV]
+    exact isTerminalTop
+  letI : Subsingleton (H F 1) := hH
+  have hδ : S.δ F' 0 1 rfl x = 0 := by
+    apply (HPrimeAddEquivHOfIsTerminal F (U ⊔ V) hT 1).injective
+    exact Subsingleton.elim _ _
+  have hExact : Function.Exact (S.fromBiprod F' 0) (S.δ F' 0 1 rfl) :=
+    (ShortComplex.ab_exact_iff_function_exact _).mp
+      ((S.sequence_exact F' 0 1 rfl).exact 1)
+  obtain ⟨y, hy⟩ := (hExact x).mp hδ
+  change ↑(F'.H' 0 U ⊞ F'.H' 0 V) at y
+  let p := (AddCommGrpCat.biprodIsoProd (F'.H' 0 U) (F'.H' 0 V)).hom y
+  let xU : F'.H' 0 U := p.1
+  let xV : F'.H' 0 V := p.2
+  have hyrepr :
+      (AddCommGrpCat.biprodIsoProd (F'.H' 0 U) (F'.H' 0 V)).inv ⟨xU, xV⟩ = y := by
+    dsimp only [xU, xV, p]
+    rw [Prod.eta]
+    exact (AddCommGrpCat.biprodIsoProd (F'.H' 0 U) (F'.H' 0 V)).hom_inv_id_apply y
+  have hcoh :
+      (F'.cohomologyPresheaf 0).map S.f₁₂.op xU -
+          (F'.cohomologyPresheaf 0).map S.f₁₃.op xV = x := by
+    calc
+      _ = S.fromBiprod F' 0
+          ((AddCommGrpCat.biprodIsoProd (F'.H' 0 U) (F'.H' 0 V)).inv
+            ⟨xU, xV⟩) :=
+        (S.fromBiprod_biprodIsoProd_inv_apply F' xU xV).symm
+      _ = S.fromBiprod F' 0 y := congrArg (S.fromBiprod F' 0) hyrepr
+      _ = x := hy
+  have hcoh' :
+      (F'.cohomologyPresheaf 0).map (homOfLE inf_le_left).op xU -
+          (F'.cohomologyPresheaf 0).map (homOfLE inf_le_right).op xV = x := by
+    have hf₁₂ : S.f₁₂ = homOfLE inf_le_left := Subsingleton.elim _ _
+    have hf₁₃ : S.f₁₃ = homOfLE inf_le_right := Subsingleton.elim _ _
+    rw [hf₁₂, hf₁₃] at hcoh
+    exact hcoh
+  exact ⟨xU, xV, hcoh'⟩
+
+/-- If two opens cover a space and degree-one cohomology vanishes, every section on
+their overlap is a difference of sections from the two opens. -/
+theorem two_open_sections_difference_surjective_of_subsingleton_H_one
+    (F : Sheaf AddCommGrpCat.{u} X) (U V : Opens X) (hUV : U ⊔ V = ⊤)
+    (hH : Subsingleton (H F 1)) :
+    ∀ a : F.obj.obj (op (U ⊓ V)),
+      ∃ aU : F.obj.obj (op U), ∃ aV : F.obj.obj (op V),
+        F.obj.map (homOfLE inf_le_left).op aU -
+          F.obj.map (homOfLE inf_le_right).op aV = a := by
+  intro a
+  let F' := toSiteSheaf F
+  let eW := HPrimeZeroAddEquivSections F' (U ⊓ V)
+  let x : F'.H' 0 (U ⊓ V) := eW.symm a
+  obtain ⟨xU, xV, hcoh⟩ :=
+    exists_HPrimeZero_difference_of_subsingleton_H_one F U V hUV hH x
+  refine ⟨HPrimeZeroAddEquivSections F' U xU,
+    HPrimeZeroAddEquivSections F' V xV, ?_⟩
+  change F'.obj.map (homOfLE inf_le_left).op
+        (HPrimeZeroAddEquivSections F' U xU) -
+      F'.obj.map (homOfLE inf_le_right).op
+        (HPrimeZeroAddEquivSections F' V xV) = a
+  calc
+    _ = HPrimeZeroAddEquivSections F' (U ⊓ V)
+          ((F'.cohomologyPresheaf 0).map (homOfLE inf_le_left).op xU) -
+        HPrimeZeroAddEquivSections F' (U ⊓ V)
+          ((F'.cohomologyPresheaf 0).map (homOfLE inf_le_right).op xV) := by
+      rw [HPrimeZeroAddEquivSections_naturality,
+        HPrimeZeroAddEquivSections_naturality]
+    _ = HPrimeZeroAddEquivSections F' (U ⊓ V)
+        ((F'.cohomologyPresheaf 0).map (homOfLE inf_le_left).op xU -
+          (F'.cohomologyPresheaf 0).map (homOfLE inf_le_right).op xV) :=
+      (map_sub (HPrimeZeroAddEquivSections F' (U ⊓ V)) _ _).symm
+    _ = HPrimeZeroAddEquivSections F' (U ⊓ V) x :=
+      congrArg (HPrimeZeroAddEquivSections F' (U ⊓ V)) hcoh
+    _ = a := eW.apply_symm_apply a
+
+/-- For a two-open cover on which degree-one cohomology vanishes locally, global
+degree-one vanishing is equivalent to surjectivity of the section-difference map. -/
+theorem subsingleton_H_one_iff_two_open_sections_difference_surjective
+    (F : Sheaf AddCommGrpCat.{u} X) (U V : Opens X) (hUV : U ⊔ V = ⊤)
+    (hHU : Subsingleton (H ((restrict AddCommGrpCat U.isOpenEmbedding).obj F) 1))
+    (hHV : Subsingleton (H ((restrict AddCommGrpCat V.isOpenEmbedding).obj F) 1)) :
+    Subsingleton (H F 1) ↔
+      ∀ a : F.obj.obj (op (U ⊓ V)),
+        ∃ aU : F.obj.obj (op U), ∃ aV : F.obj.obj (op V),
+          F.obj.map (homOfLE inf_le_left).op aU -
+            F.obj.map (homOfLE inf_le_right).op aV = a := by
+  constructor
+  · exact two_open_sections_difference_surjective_of_subsingleton_H_one F U V hUV
+  · exact subsingleton_H_one_of_two_open_cover F U V hUV hHU hHV
 
 end TopCat.Sheaf
