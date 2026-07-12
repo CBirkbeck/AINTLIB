@@ -38,6 +38,35 @@ noncomputable def agreementι (a b : Z ⟶ X) (hab : a ≫ f = b ≫ f) :
     pullback (pullback.lift a b hab) (pullback.diagonal f) ⟶ Z :=
   pullback.fst (pullback.lift a b hab) (pullback.diagonal f)
 
+/-- The agreement-locus inclusion equalizes `a` and `b`: `agreementι ≫ a = agreementι ≫ b`.
+(`fst ≫ lift a b = snd ≫ diagonal f`; post-compose with the two projections of `X ×ₛ X`,
+using `lift_fst`/`lift_snd` and `diagonal_fst`/`diagonal_snd`.) -/
+theorem agreementι_comp_eq (a b : Z ⟶ X) (hab : a ≫ f = b ≫ f) :
+    agreementι f a b hab ≫ a = agreementι f a b hab ≫ b := by
+  have e1 : agreementι f a b hab ≫ a
+      = pullback.snd (pullback.lift a b hab) (pullback.diagonal f) := by
+    have h1 : agreementι f a b hab ≫ (pullback.lift a b hab ≫ pullback.fst f f)
+        = pullback.snd (pullback.lift a b hab) (pullback.diagonal f) := by
+      rw [agreementι, ← Category.assoc, pullback.condition, Category.assoc,
+        pullback.diagonal_fst, Category.comp_id]
+    rwa [pullback.lift_fst] at h1
+  have e2 : agreementι f a b hab ≫ b
+      = pullback.snd (pullback.lift a b hab) (pullback.diagonal f) := by
+    have h2 : agreementι f a b hab ≫ (pullback.lift a b hab ≫ pullback.snd f f)
+        = pullback.snd (pullback.lift a b hab) (pullback.diagonal f) := by
+      rw [agreementι, ← Category.assoc, pullback.condition, Category.assoc,
+        pullback.diagonal_snd, Category.comp_id]
+    rwa [pullback.lift_snd] at h2
+  rw [e1, e2]
+
+/-- The range of the agreement-locus inclusion is contained in the topological agreement
+locus `{z | a z = b z}` (the easy inclusion; equality also needs `f` unramified). -/
+theorem range_agreementι_subset (a b : Z ⟶ X) (hab : a ≫ f = b ≫ f) :
+    Set.range (agreementι f a b hab).base ⊆ {z | a.base z = b.base z} := by
+  rintro _ ⟨w, rfl⟩
+  have := congrArg (fun m => m.base w) (agreementι_comp_eq f a b hab)
+  simpa using this
+
 /-- For `f` formally unramified and locally of finite type, the agreement-locus inclusion
 is an open immersion (pullback of the open-immersion relative diagonal). -/
 instance isOpenImmersion_agreementι [FormallyUnramified f] [LocallyOfFiniteType f]
