@@ -1957,6 +1957,677 @@ noncomputable instance instHopfAlgebra : HopfAlgebra P.baseRingTop P.groupRingTo
     (by rw [comulAlgHom_eq, counitAlgHom_eq]; exact P.antipodeLiftAlgTop_comp_comulAlgTop)
     (by rw [comulAlgHom_eq, counitAlgHom_eq]; exact P.antipodeLiftAlgTopR_comp_comulAlgTop)
 
+/-! ### The opens-level Hopf structure: transporting the `⊤`-level structure across `topIso`
+
+The `⊤`-level Bialgebra/HopfAlgebra structures live over `R' = Γ(V.toScheme, ⊤)` and
+`A' = Γ(G|_V.toScheme, ⊤)`. We assemble the opens-level `[Bialgebra R A]` and `[HopfAlgebra R A]`
+(over `R = Γ(S, V)`, `A = Γ(G.G, G|_V)`) by:
+* the **counit** laws: pure-algebra packaging of the already-proven collapsed forms
+  `counitLift_comp_comulAlg` / `counitLift'_comp_comulAlg`;
+* the **antipode** laws: dualising the (level-agnostic, already-proven) scheme identities
+  `antipodePair_comp_squareMulRes` / `antipodePairR_comp_squareMulRes` through the *opens* Künneth
+  `squareΓ`, exactly mirroring the opens counit development;
+* **coassociativity**: transporting the `⊤`-level `comulTop_coassoc` across the `topIso` ring
+  isomorphisms `A ≅ A'`, `A ⊗ A ≅ A' ⊗ A'`, `A ⊗ (A ⊗ A) ≅ A' ⊗ (A' ⊗ A')`. -/
+
+/-- **The `appLE`/`appTop` bridge for `squareMul`**: the `appLE` of the restricted multiplication
+is the `topIso`-conjugate of the corestricted multiplication's `appTop`. -/
+theorem squareMul_appLE_eq :
+    P.squareMul.appLE P.groupOpen ⊤ P.top_le_preimage_groupOpen_squareMul
+      = P.groupOpen.topIso.inv ≫ P.squareMulRes.appTop := by
+  rw [appLE_congr_hom P.squareMulRes_comp_ι.symm P.groupOpen ⊤,
+    ← Scheme.Hom.appLE_comp_appLE P.squareMulRes P.groupOpen.ι P.groupOpen ⊤ ⊤
+      P.groupOpen.ι_preimage_self.ge le_top,
+    ι_appLE_top, appLE_top_top]
+
+/-- **The `appLE`/`appTop` bridge for the antipode**: `topIso`-conjugating `invRes.appTop`
+recovers the opens-level antipode `groupPatchAntipode`. -/
+theorem groupPatchAntipode_eq :
+    P.groupOpen.topIso.inv ≫ P.invRes.appTop ≫ P.groupOpen.topIso.hom
+      = P.groupPatchAntipode := by
+  rw [show P.invRes.appTop
+      = P.groupOpen.topIso.hom ≫ P.groupPatchAntipode ≫ P.groupOpen.topIso.inv from
+    Scheme.Hom.resLE_app_top (f := G.invHom) (U := P.groupOpen) (V := P.groupOpen)
+      P.le_preimage_groupOpen_invHom]
+  simp only [← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+  rw [Category.assoc, Iso.inv_hom_id, Category.comp_id]
+
+/-! #### The opens-level counit laws in `lid`/`rid` form -/
+
+/-- `ε`-collapse via `lid`: `lid ∘ (ε ⊗ id) = counitLift`. -/
+theorem lid_comp_map_counitAlg :
+    (Algebra.TensorProduct.lid P.baseRing P.groupRing).toAlgHom.comp
+        (Algebra.TensorProduct.map P.counitAlg (AlgHom.id P.baseRing P.groupRing))
+      = P.counitLift := by
+  refine AlgHom.ext fun x => ?_
+  induction x using TensorProduct.induction_on with
+  | zero => simp
+  | tmul a b =>
+    rw [AlgHom.comp_apply, Algebra.TensorProduct.map_tmul, AlgHom.coe_id, id_eq]
+    show (Algebra.TensorProduct.lid P.baseRing P.groupRing)
+        (counitAlg G P a ⊗ₜ[P.baseRing] b)
+      = counitLift G P (a ⊗ₜ[P.baseRing] b)
+    rw [Algebra.TensorProduct.lid_tmul, counitLift, Algebra.TensorProduct.lift_tmul,
+      AlgHom.comp_apply, Algebra.ofId_apply, AlgHom.coe_id, id_eq, Algebra.smul_def]
+  | add x y hx hy => rw [map_add, map_add, hx, hy]
+
+/-- **The left counit law, opens level**: `(ε ⊗ id) ∘ Δ = lid.symm`. -/
+theorem map_counitAlg_id_comp_comulAlg :
+    (Algebra.TensorProduct.map P.counitAlg (AlgHom.id P.baseRing P.groupRing)).comp P.comulAlg
+      = (Algebra.TensorProduct.lid P.baseRing P.groupRing).symm := by
+  have key : (Algebra.TensorProduct.lid P.baseRing P.groupRing).toAlgHom.comp
+      ((Algebra.TensorProduct.map P.counitAlg
+        (AlgHom.id P.baseRing P.groupRing)).comp P.comulAlg)
+      = AlgHom.id P.baseRing P.groupRing := by
+    rw [← AlgHom.comp_assoc, lid_comp_map_counitAlg, counitLift_comp_comulAlg]
+  refine AlgHom.ext fun a => ?_
+  have hkey := AlgHom.congr_fun key a
+  rw [AlgHom.comp_apply, AlgHom.id_apply] at hkey
+  simpa only [AlgEquiv.coe_toAlgHom, AlgEquiv.eq_symm_apply] using hkey
+
+/-- `ε`-collapse via `rid`: `rid ∘ (id ⊗ ε) = counitLift'`. -/
+theorem rid_comp_map_counitAlg :
+    (Algebra.TensorProduct.rid P.baseRing P.baseRing P.groupRing).toAlgHom.comp
+        (Algebra.TensorProduct.map (AlgHom.id P.baseRing P.groupRing) P.counitAlg)
+      = P.counitLift' := by
+  refine AlgHom.ext fun x => ?_
+  induction x using TensorProduct.induction_on with
+  | zero => simp
+  | tmul a b =>
+    rw [AlgHom.comp_apply, Algebra.TensorProduct.map_tmul, AlgHom.coe_id, id_eq]
+    show (Algebra.TensorProduct.rid P.baseRing P.baseRing P.groupRing)
+        (a ⊗ₜ[P.baseRing] counitAlg G P b)
+      = counitLift' G P (a ⊗ₜ[P.baseRing] b)
+    rw [Algebra.TensorProduct.rid_tmul, counitLift', Algebra.TensorProduct.lift_tmul,
+      AlgHom.comp_apply, Algebra.ofId_apply, AlgHom.coe_id, id_eq, Algebra.smul_def,
+      _root_.mul_comm]
+  | add x y hx hy => rw [map_add, map_add, hx, hy]
+
+/-- **The right counit law, opens level**: `(id ⊗ ε) ∘ Δ = rid.symm`. -/
+theorem map_id_counitAlg_comp_comulAlg :
+    (Algebra.TensorProduct.map (AlgHom.id P.baseRing P.groupRing) P.counitAlg).comp P.comulAlg
+      = (Algebra.TensorProduct.rid P.baseRing P.baseRing P.groupRing).symm := by
+  have key : (Algebra.TensorProduct.rid P.baseRing P.baseRing P.groupRing).toAlgHom.comp
+      ((Algebra.TensorProduct.map (AlgHom.id P.baseRing P.groupRing)
+        P.counitAlg).comp P.comulAlg)
+      = AlgHom.id P.baseRing P.groupRing := by
+    rw [← AlgHom.comp_assoc, rid_comp_map_counitAlg, counitLift'_comp_comulAlg]
+  refine AlgHom.ext fun a => ?_
+  have hkey := AlgHom.congr_fun key a
+  rw [AlgHom.comp_apply, AlgHom.id_apply] at hkey
+  simpa only [AlgEquiv.coe_toAlgHom, AlgEquiv.eq_symm_apply] using hkey
+
+/-! #### The opens-level antipode laws
+
+Dualising the (already-proven, level-agnostic) scheme identities
+`antipodePair_comp_squareMulRes` / `antipodePairR_comp_squareMulRes` through the *opens* Künneth
+`squareΓ`, mirroring the opens counit development. -/
+
+/-- The `Γ`-dual of the left antipode pairing, opens level: `A ⊗ A ⟶ A`. -/
+noncomputable def antipodeLiftΓ :
+    CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing) ⟶ P.groupRing :=
+  inv P.squareΓ ≫ P.antipodePair.appTop ≫ P.groupOpen.topIso.hom
+
+theorem includeLeft_comp_antipodeLiftΓ :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := P.baseRing) (A := P.groupRing) (B := P.groupRing))
+      ≫ P.antipodeLiftΓ = P.groupPatchAntipode := by
+  have hleg := topIso_inv_fst_appTop_patchKunnethΓ (e₁ := le_rfl) (e₂ := le_rfl)
+    G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen rfl rfl
+  rw [antipodeLiftΓ, ← hleg]
+  rw [Category.assoc, Category.assoc, ← Category.assoc P.squareΓ,
+    IsIso.hom_inv_id, Category.id_comp]
+  have hcomp : (pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)).appTop ≫ P.antipodePair.appTop
+      = P.invRes.appTop := by
+    rw [← Scheme.Hom.comp_appTop, P.antipodePair_fst]
+  rw [← Category.assoc ((pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+      (G.π.resLE P.V P.groupOpen le_rfl)).appTop), hcomp]
+  exact P.groupPatchAntipode_eq
+
+theorem includeRight_comp_antipodeLiftΓ :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := P.baseRing) (A := P.groupRing) (B := P.groupRing)).toRingHom
+      ≫ P.antipodeLiftΓ = 𝟙 P.groupRing := by
+  have hleg := topIso_inv_snd_appTop_patchKunnethΓ (e₁ := le_rfl) (e₂ := le_rfl)
+    G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen rfl rfl
+  rw [antipodeLiftΓ, ← hleg]
+  rw [Category.assoc, Category.assoc, ← Category.assoc P.squareΓ,
+    IsIso.hom_inv_id, Category.id_comp]
+  have hcomp : (pullback.snd (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)).appTop ≫ P.antipodePair.appTop
+      = 𝟙 _ := by
+    rw [← Scheme.Hom.comp_appTop, P.antipodePair_snd,
+      AlgebraicGeometry.Scheme.Hom.id_appTop]
+  rw [← Category.assoc ((pullback.snd (G.π.resLE P.V P.groupOpen le_rfl)
+      (G.π.resLE P.V P.groupOpen le_rfl)).appTop), hcomp, Category.id_comp,
+    Iso.inv_hom_id]
+  rfl
+
+/-- The algebraic left antipode lift `A ⊗[R] A →ₐ[R] A`, `a ⊗ b ↦ S(a) · b`. -/
+noncomputable def antipodeLift :
+    (P.groupRing ⊗[P.baseRing] P.groupRing) →ₐ[P.baseRing] P.groupRing :=
+  Algebra.TensorProduct.lift P.antipodeAlg (AlgHom.id P.baseRing P.groupRing)
+    (fun _ _ => Commute.all _ _)
+
+theorem antipodeLift_eq :
+    CommRingCat.ofHom P.antipodeLift.toRingHom = P.antipodeLiftΓ := by
+  refine tensor_hom_ext ?_ ?_
+  · rw [P.includeLeft_comp_antipodeLiftΓ]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show antipodeLift G P (a ⊗ₜ[P.baseRing] (1 : P.groupRing)) = _
+    rw [antipodeLift, Algebra.TensorProduct.lift_tmul, map_one, _root_.mul_one]
+    rfl
+  · rw [P.includeRight_comp_antipodeLiftΓ]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show antipodeLift G P ((1 : P.groupRing) ⊗ₜ[P.baseRing] a) = _
+    rw [antipodeLift, Algebra.TensorProduct.lift_tmul, map_one, _root_.one_mul,
+      AlgHom.coe_id, id_eq]
+    rfl
+
+/-- **The left antipode law, opens `CommRingCat` form**. -/
+theorem groupPatchComul_comp_antipodeLiftΓ :
+    P.groupPatchComul ≫ P.antipodeLiftΓ
+      = P.groupPatchCounit ≫ G.π.appLE P.V P.groupOpen le_rfl := by
+  rw [groupPatchComul_eq, antipodeLiftΓ, Category.assoc,
+    ← Category.assoc P.squareΓ, IsIso.hom_inv_id, Category.id_comp,
+    P.squareMul_appLE_eq, Category.assoc, ← Category.assoc P.squareMulRes.appTop,
+    ← Scheme.Hom.comp_appTop, P.antipodePair_comp_squareMulRes, Scheme.Hom.comp_appTop,
+    P.unitSection_appTop, P.groupToBase_appTop]
+  simp only [Category.assoc, Iso.inv_hom_id, Iso.inv_hom_id_assoc, Category.id_comp,
+    Category.comp_id]
+
+/-- **The left antipode law, opens `AlgHom` form**: `(S ⊗ id) ∘ Δ = ofId ∘ ε`. -/
+theorem antipodeLift_comp_comulAlg :
+    P.antipodeLift.comp P.comulAlg
+      = (Algebra.ofId P.baseRing P.groupRing).comp P.counitAlg := by
+  have h := P.groupPatchComul_comp_antipodeLiftΓ
+  rw [← P.antipodeLift_eq] at h
+  refine AlgHom.ext fun a => ?_
+  have h2 := congrArg (fun m : P.groupRing ⟶ P.groupRing => m.hom a) h
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h2
+  exact h2
+
+/-- The `Γ`-dual of the right antipode pairing, opens level. -/
+noncomputable def antipodeLiftΓR :
+    CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing) ⟶ P.groupRing :=
+  inv P.squareΓ ≫ P.antipodePairR.appTop ≫ P.groupOpen.topIso.hom
+
+theorem includeLeft_comp_antipodeLiftΓR :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := P.baseRing) (A := P.groupRing) (B := P.groupRing))
+      ≫ P.antipodeLiftΓR = 𝟙 P.groupRing := by
+  have hleg := topIso_inv_fst_appTop_patchKunnethΓ (e₁ := le_rfl) (e₂ := le_rfl)
+    G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen rfl rfl
+  rw [antipodeLiftΓR, ← hleg]
+  rw [Category.assoc, Category.assoc, ← Category.assoc P.squareΓ,
+    IsIso.hom_inv_id, Category.id_comp]
+  have hcomp : (pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)).appTop ≫ P.antipodePairR.appTop
+      = 𝟙 _ := by
+    rw [← Scheme.Hom.comp_appTop, P.antipodePairR_fst,
+      AlgebraicGeometry.Scheme.Hom.id_appTop]
+  rw [← Category.assoc ((pullback.fst (G.π.resLE P.V P.groupOpen le_rfl)
+      (G.π.resLE P.V P.groupOpen le_rfl)).appTop), hcomp, Category.id_comp,
+    Iso.inv_hom_id]
+  rfl
+
+theorem includeRight_comp_antipodeLiftΓR :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := P.baseRing) (A := P.groupRing) (B := P.groupRing)).toRingHom
+      ≫ P.antipodeLiftΓR = P.groupPatchAntipode := by
+  have hleg := topIso_inv_snd_appTop_patchKunnethΓ (e₁ := le_rfl) (e₂ := le_rfl)
+    G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen rfl rfl
+  rw [antipodeLiftΓR, ← hleg]
+  rw [Category.assoc, Category.assoc, ← Category.assoc P.squareΓ,
+    IsIso.hom_inv_id, Category.id_comp]
+  have hcomp : (pullback.snd (G.π.resLE P.V P.groupOpen le_rfl)
+        (G.π.resLE P.V P.groupOpen le_rfl)).appTop ≫ P.antipodePairR.appTop
+      = P.invRes.appTop := by
+    rw [← Scheme.Hom.comp_appTop, P.antipodePairR_snd]
+  rw [← Category.assoc ((pullback.snd (G.π.resLE P.V P.groupOpen le_rfl)
+      (G.π.resLE P.V P.groupOpen le_rfl)).appTop), hcomp]
+  exact P.groupPatchAntipode_eq
+
+/-- The algebraic right antipode lift `A ⊗[R] A →ₐ[R] A`, `a ⊗ b ↦ a · S(b)`. -/
+noncomputable def antipodeLiftR :
+    (P.groupRing ⊗[P.baseRing] P.groupRing) →ₐ[P.baseRing] P.groupRing :=
+  Algebra.TensorProduct.lift (AlgHom.id P.baseRing P.groupRing) P.antipodeAlg
+    (fun _ _ => Commute.all _ _)
+
+theorem antipodeLiftR_eq :
+    CommRingCat.ofHom P.antipodeLiftR.toRingHom = P.antipodeLiftΓR := by
+  refine tensor_hom_ext ?_ ?_
+  · rw [P.includeLeft_comp_antipodeLiftΓR]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show antipodeLiftR G P (a ⊗ₜ[P.baseRing] (1 : P.groupRing)) = _
+    rw [antipodeLiftR, Algebra.TensorProduct.lift_tmul, map_one, _root_.mul_one,
+      AlgHom.coe_id, id_eq]
+    rfl
+  · rw [P.includeRight_comp_antipodeLiftΓR]
+    refine CommRingCat.hom_ext (RingHom.ext fun a => ?_)
+    show antipodeLiftR G P ((1 : P.groupRing) ⊗ₜ[P.baseRing] a) = _
+    rw [antipodeLiftR, Algebra.TensorProduct.lift_tmul, map_one, _root_.one_mul]
+    rfl
+
+/-- **The right antipode law, opens `CommRingCat` form**. -/
+theorem groupPatchComul_comp_antipodeLiftΓR :
+    P.groupPatchComul ≫ P.antipodeLiftΓR
+      = P.groupPatchCounit ≫ G.π.appLE P.V P.groupOpen le_rfl := by
+  rw [groupPatchComul_eq, antipodeLiftΓR, Category.assoc,
+    ← Category.assoc P.squareΓ, IsIso.hom_inv_id, Category.id_comp,
+    P.squareMul_appLE_eq, Category.assoc, ← Category.assoc P.squareMulRes.appTop,
+    ← Scheme.Hom.comp_appTop, P.antipodePairR_comp_squareMulRes, Scheme.Hom.comp_appTop,
+    P.unitSection_appTop, P.groupToBase_appTop]
+  simp only [Category.assoc, Iso.inv_hom_id, Iso.inv_hom_id_assoc, Category.id_comp,
+    Category.comp_id]
+
+/-- **The right antipode law, opens `AlgHom` form**: `(id ⊗ S) ∘ Δ = ofId ∘ ε`. -/
+theorem antipodeLiftR_comp_comulAlg :
+    P.antipodeLiftR.comp P.comulAlg
+      = (Algebra.ofId P.baseRing P.groupRing).comp P.counitAlg := by
+  have h := P.groupPatchComul_comp_antipodeLiftΓR
+  rw [← P.antipodeLiftR_eq] at h
+  refine AlgHom.ext fun a => ?_
+  have h2 := congrArg (fun m : P.groupRing ⟶ P.groupRing => m.hom a) h
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h2
+  exact h2
+
+/-! #### Coassociativity, opens level: transporting `comulTop_coassoc` across `topIso`
+
+`transDouble` (resp. `transTriple`, `transTripleL`) is the `topIso`-transport of the double
+(resp. right- or left-nested triple) tensor product; each is characterised by its action on
+the tensor inclusions. The `⊤`-level `comulTop_coassoc` transports to the opens-level
+`groupPatchComul_coassoc`, hence `comulAlg_coassoc`. -/
+
+/-- The `topIso`-transport of the double tensor `A ⊗ A → A' ⊗ A'`, as `inv squareΓ ≫ squareΓTop`. -/
+noncomputable def transDouble :
+    CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing)
+      ⟶ CommRingCat.of (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) :=
+  inv P.squareΓ ≫ P.squareΓTop
+
+instance : IsIso P.transDouble := by rw [transDouble]; infer_instance
+
+/-- **`Δ`-intertwining**: the opens comultiplication is the `⊤`-level one conjugated by `topIso`. -/
+theorem groupPatchComul_comp_transDouble :
+    P.groupPatchComul ≫ P.transDouble = P.groupOpen.topIso.inv ≫ P.comulTop := by
+  rw [transDouble, groupPatchComul_eq, Category.assoc, ← Category.assoc P.squareΓ,
+    IsIso.hom_inv_id, Category.id_comp, P.squareMul_appLE_eq, comulTop, Category.assoc]
+
+/-- `transDouble` sends the left inclusion to `ψ`-conjugated left inclusion. -/
+theorem includeLeft_comp_transDouble :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := P.baseRing) (A := P.groupRing) (B := P.groupRing))
+      ≫ P.transDouble
+      = P.groupOpen.topIso.inv ≫ CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+          (R := P.baseRingTop) (A := P.groupRingTop) (B := P.groupRingTop)) := by
+  have hleg := topIso_inv_fst_appTop_patchKunnethΓ (e₁ := le_rfl) (e₂ := le_rfl)
+    G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen rfl rfl
+  rw [transDouble, ← hleg, Category.assoc, Category.assoc, ← Category.assoc P.squareΓ,
+    IsIso.hom_inv_id, Category.id_comp,
+    fst_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl]
+  rfl
+
+/-- `transDouble` sends the right inclusion to `ψ`-conjugated right inclusion. -/
+theorem includeRight_comp_transDouble :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := P.baseRing) (A := P.groupRing) (B := P.groupRing)).toRingHom
+      ≫ P.transDouble
+      = P.groupOpen.topIso.inv ≫ CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+          (R := P.baseRingTop) (A := P.groupRingTop) (B := P.groupRingTop)).toRingHom := by
+  have hleg := topIso_inv_snd_appTop_patchKunnethΓ (e₁ := le_rfl) (e₂ := le_rfl)
+    G.π G.π P.hV P.isAffineOpen_groupOpen P.isAffineOpen_groupOpen rfl rfl
+  rw [transDouble, ← hleg, Category.assoc, Category.assoc, ← Category.assoc P.squareΓ,
+    IsIso.hom_inv_id, Category.id_comp,
+    snd_appTop_affineKunnethΓ P.groupToBaseRes P.groupToBaseRes rfl rfl]
+  rfl
+
+section CoassocTransport
+
+/-- (local) base change `R → R'` along `topIso`. -/
+noncomputable local instance : Algebra P.baseRing P.baseRingTop :=
+  RingHom.toAlgebra P.V.topIso.inv.hom
+/-- (local) base change `R' → R` along `topIso`. -/
+noncomputable local instance : Algebra P.baseRingTop P.baseRing :=
+  RingHom.toAlgebra P.V.topIso.hom.hom
+/-- (local) `A'` as an `R`-algebra, through `R → R' → A'`. -/
+noncomputable local instance : Algebra P.baseRing P.groupRingTop :=
+  RingHom.toAlgebra ((algebraMap P.baseRingTop P.groupRingTop).comp
+    (algebraMap P.baseRing P.baseRingTop))
+local instance : IsScalarTower P.baseRing P.baseRingTop P.groupRingTop :=
+  .of_algebraMap_eq' rfl
+/-- (local) `A` as an `R'`-algebra, through `R' → R → A`. -/
+noncomputable local instance : Algebra P.baseRingTop P.groupRing :=
+  RingHom.toAlgebra ((algebraMap P.baseRing P.groupRing).comp
+    (algebraMap P.baseRingTop P.baseRing))
+local instance : IsScalarTower P.baseRingTop P.baseRing P.groupRing :=
+  .of_algebraMap_eq' rfl
+
+/-- The semilinearity of `ψ = topIso.inv`: `ψ ∘ algMap_R = algMap_{R'} ∘ (R → R')`. -/
+theorem topIso_inv_algebraMap :
+    G.π.appLE P.V P.groupOpen le_rfl ≫ P.groupOpen.topIso.inv
+      = P.V.topIso.inv ≫ P.groupToBaseRes.appTop := by
+  rw [groupToBase_appTop, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+
+/-- The reverse semilinearity of `ψ⁻¹ = topIso.hom`. -/
+theorem topIso_hom_algebraMap :
+    P.groupToBaseRes.appTop ≫ P.groupOpen.topIso.hom
+      = P.V.topIso.hom ≫ G.π.appLE P.V P.groupOpen le_rfl := by
+  rw [groupToBase_appTop, Category.assoc, Category.assoc, Iso.inv_hom_id, Category.comp_id]
+
+/-- `ψ = topIso.inv` as an `R`-algebra map `A →ₐ[R] A'`. -/
+noncomputable def psiAlg : P.groupRing →ₐ[P.baseRing] P.groupRingTop where
+  toRingHom := P.groupOpen.topIso.inv.hom
+  commutes' := fun r => by
+    have h := congrArg (fun m : P.baseRing ⟶ P.groupRingTop => m.hom r) P.topIso_inv_algebraMap
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h
+    exact h
+
+/-- `ψ⁻¹ = topIso.hom` as an `R'`-algebra map `A' →ₐ[R'] A`. -/
+noncomputable def psiAlgInv : P.groupRingTop →ₐ[P.baseRingTop] P.groupRing where
+  toRingHom := P.groupOpen.topIso.hom.hom
+  commutes' := fun r => by
+    have h := congrArg (fun m : P.baseRingTop ⟶ P.groupRing => m.hom r) P.topIso_hom_algebraMap
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h
+    exact h
+
+/-- Elementwise action of `transDouble`: `a ⊗ b ↦ ψ a ⊗ ψ b`. -/
+theorem transDouble_tmul (a b : P.groupRing) :
+    P.transDouble.hom (a ⊗ₜ[P.baseRing] b)
+      = P.groupOpen.topIso.inv.hom a ⊗ₜ[P.baseRingTop] P.groupOpen.topIso.inv.hom b := by
+  have hL : P.transDouble.hom (a ⊗ₜ[P.baseRing] (1 : P.groupRing))
+      = P.groupOpen.topIso.inv.hom a ⊗ₜ[P.baseRingTop] 1 := by
+    have h := congrArg (fun m : P.groupRing ⟶ _ => m.hom a) P.includeLeft_comp_transDouble
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h
+    exact h
+  have hR : P.transDouble.hom ((1 : P.groupRing) ⊗ₜ[P.baseRing] b)
+      = 1 ⊗ₜ[P.baseRingTop] P.groupOpen.topIso.inv.hom b := by
+    have h := congrArg (fun m : P.groupRing ⟶ _ => m.hom b) P.includeRight_comp_transDouble
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h
+    exact h
+  rw [show (a ⊗ₜ[P.baseRing] b : P.groupRing ⊗[P.baseRing] P.groupRing)
+      = (a ⊗ₜ[P.baseRing] (1 : P.groupRing)) * ((1 : P.groupRing) ⊗ₜ[P.baseRing] b) from by
+    rw [Algebra.TensorProduct.tmul_mul_tmul, _root_.mul_one, _root_.one_mul],
+    map_mul, hL, hR, Algebra.TensorProduct.tmul_mul_tmul, _root_.mul_one, _root_.one_mul]
+
+/-- `inv transDouble` sends the left inclusion to the `ψ⁻¹`-conjugated left inclusion. -/
+theorem includeLeft_comp_transDoubleInv :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := P.baseRingTop) (A := P.groupRingTop) (B := P.groupRingTop))
+      ≫ inv P.transDouble
+      = P.groupOpen.topIso.hom ≫ CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+          (R := P.baseRing) (A := P.groupRing) (B := P.groupRing)) := by
+  rw [IsIso.comp_inv_eq, Category.assoc, P.includeLeft_comp_transDouble]
+  exact (P.groupOpen.topIso.hom_inv_id_assoc _).symm
+
+/-- `inv transDouble` sends the right inclusion to the `ψ⁻¹`-conjugated right inclusion. -/
+theorem includeRight_comp_transDoubleInv :
+    CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := P.baseRingTop) (A := P.groupRingTop) (B := P.groupRingTop)).toRingHom
+      ≫ inv P.transDouble
+      = P.groupOpen.topIso.hom ≫ CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+          (R := P.baseRing) (A := P.groupRing) (B := P.groupRing)).toRingHom := by
+  rw [IsIso.comp_inv_eq, Category.assoc, P.includeRight_comp_transDouble]
+  exact (P.groupOpen.topIso.hom_inv_id_assoc _).symm
+
+/-- Elementwise action of `inv transDouble`: `a ⊗ b ↦ ψ⁻¹ a ⊗ ψ⁻¹ b`. -/
+theorem transDoubleInv_tmul (a b : P.groupRingTop) :
+    (inv P.transDouble).hom (a ⊗ₜ[P.baseRingTop] b)
+      = P.groupOpen.topIso.hom.hom a ⊗ₜ[P.baseRing] P.groupOpen.topIso.hom.hom b := by
+  have hL : (inv P.transDouble).hom (a ⊗ₜ[P.baseRingTop] (1 : P.groupRingTop))
+      = P.groupOpen.topIso.hom.hom a ⊗ₜ[P.baseRing] 1 := by
+    have h := congrArg (fun m : P.groupRingTop ⟶ _ => m.hom a) P.includeLeft_comp_transDoubleInv
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h
+    exact h
+  have hR : (inv P.transDouble).hom ((1 : P.groupRingTop) ⊗ₜ[P.baseRingTop] b)
+      = 1 ⊗ₜ[P.baseRing] P.groupOpen.topIso.hom.hom b := by
+    have h := congrArg (fun m : P.groupRingTop ⟶ _ => m.hom b) P.includeRight_comp_transDoubleInv
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom] at h
+    exact h
+  rw [show (a ⊗ₜ[P.baseRingTop] b : P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop)
+      = (a ⊗ₜ[P.baseRingTop] (1 : P.groupRingTop)) * ((1 : P.groupRingTop) ⊗ₜ[P.baseRingTop] b) from by
+    rw [Algebra.TensorProduct.tmul_mul_tmul, _root_.mul_one, _root_.one_mul],
+    map_mul, hL, hR, Algebra.TensorProduct.tmul_mul_tmul, _root_.mul_one, _root_.one_mul]
+
+/-- `transDouble` as an `R`-algebra map (target restricted to `R`). -/
+noncomputable def transDoubleAlg :
+    (P.groupRing ⊗[P.baseRing] P.groupRing) →ₐ[P.baseRing]
+      (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) where
+  toRingHom := P.transDouble.hom
+  commutes' := fun r => by
+    have key : P.transDouble.hom
+          (algebraMap P.baseRing (P.groupRing ⊗[P.baseRing] P.groupRing) r)
+        = algebraMap P.baseRing (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) r := by
+      rw [Algebra.TensorProduct.algebraMap_apply, P.transDouble_tmul, map_one,
+        show P.groupOpen.topIso.inv.hom (algebraMap P.baseRing P.groupRing r)
+          = algebraMap P.baseRing P.groupRingTop r from P.psiAlg.commutes r]
+      rfl
+    exact key
+
+/-- `inv transDouble` as an `R'`-algebra map. -/
+noncomputable def transDoubleInvAlg :
+    (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) →ₐ[P.baseRingTop]
+      (P.groupRing ⊗[P.baseRing] P.groupRing) where
+  toRingHom := (inv P.transDouble).hom
+  commutes' := fun r => by
+    have key : (inv P.transDouble).hom
+          (algebraMap P.baseRingTop (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) r)
+        = algebraMap P.baseRingTop (P.groupRing ⊗[P.baseRing] P.groupRing) r := by
+      rw [Algebra.TensorProduct.algebraMap_apply, P.transDoubleInv_tmul, map_one,
+        show P.groupOpen.topIso.hom.hom (algebraMap P.baseRingTop P.groupRingTop r)
+          = algebraMap P.baseRingTop P.groupRing r from P.psiAlgInv.commutes r]
+      rfl
+    exact key
+
+/-- The `topIso`-transport of the right-nested triple tensor `A ⊗ (A ⊗ A) → A' ⊗ (A' ⊗ A')`. -/
+noncomputable def transTripleAlg :
+    (P.groupRing ⊗[P.baseRing] (P.groupRing ⊗[P.baseRing] P.groupRing)) →ₐ[P.baseRing]
+      (P.groupRingTop ⊗[P.baseRingTop] (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop)) :=
+  Algebra.TensorProduct.lift
+    (((Algebra.TensorProduct.includeLeft (R := P.baseRingTop) (S := P.baseRingTop)
+        (A := P.groupRingTop) (B := P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop)).restrictScalars
+        P.baseRing).comp P.psiAlg)
+    (((Algebra.TensorProduct.includeRight (R := P.baseRingTop) (A := P.groupRingTop)
+        (B := P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop)).restrictScalars
+        P.baseRing).comp P.transDoubleAlg)
+    (fun _ _ => Commute.all _ _)
+
+/-- The transport as a `CommRingCat` morphism. -/
+noncomputable def transTriple :
+    CommRingCat.of (P.groupRing ⊗[P.baseRing] (P.groupRing ⊗[P.baseRing] P.groupRing))
+      ⟶ CommRingCat.of (P.groupRingTop ⊗[P.baseRingTop]
+          (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop)) :=
+  CommRingCat.ofHom P.transTripleAlg.toRingHom
+
+/-- The inverse triple transport. -/
+noncomputable def transTripleInvAlg :
+    (P.groupRingTop ⊗[P.baseRingTop] (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop))
+      →ₐ[P.baseRingTop] (P.groupRing ⊗[P.baseRing] (P.groupRing ⊗[P.baseRing] P.groupRing)) :=
+  Algebra.TensorProduct.lift
+    (((Algebra.TensorProduct.includeLeft (R := P.baseRing) (S := P.baseRing)
+        (A := P.groupRing) (B := P.groupRing ⊗[P.baseRing] P.groupRing)).restrictScalars
+        P.baseRingTop).comp P.psiAlgInv)
+    (((Algebra.TensorProduct.includeRight (R := P.baseRing) (A := P.groupRing)
+        (B := P.groupRing ⊗[P.baseRing] P.groupRing)).restrictScalars
+        P.baseRingTop).comp P.transDoubleInvAlg)
+    (fun _ _ => Commute.all _ _)
+
+noncomputable def transTripleInv :
+    CommRingCat.of (P.groupRingTop ⊗[P.baseRingTop]
+        (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop))
+      ⟶ CommRingCat.of (P.groupRing ⊗[P.baseRing] (P.groupRing ⊗[P.baseRing] P.groupRing)) :=
+  CommRingCat.ofHom P.transTripleInvAlg.toRingHom
+
+/-- Elementwise action of `transTriple`: `a ⊗ x ↦ ψ a ⊗ transDouble x`. -/
+theorem transTriple_tmul (a : P.groupRing) (x : P.groupRing ⊗[P.baseRing] P.groupRing) :
+    P.transTriple.hom (a ⊗ₜ[P.baseRing] x)
+      = P.groupOpen.topIso.inv.hom a ⊗ₜ[P.baseRingTop] P.transDouble.hom x := by
+  show transTripleAlg G P (a ⊗ₜ[P.baseRing] x) = _
+  rw [transTripleAlg, Algebra.TensorProduct.lift_tmul, AlgHom.comp_apply, AlgHom.comp_apply,
+    AlgHom.restrictScalars_apply, AlgHom.restrictScalars_apply,
+    Algebra.TensorProduct.includeLeft_apply, Algebra.TensorProduct.includeRight_apply,
+    Algebra.TensorProduct.tmul_mul_tmul, _root_.mul_one, _root_.one_mul]
+  rfl
+
+/-- Elementwise action of `transTripleInv`: `a ⊗ x ↦ ψ⁻¹ a ⊗ inv transDouble x`. -/
+theorem transTripleInv_tmul (a : P.groupRingTop)
+    (x : P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop) :
+    P.transTripleInv.hom (a ⊗ₜ[P.baseRingTop] x)
+      = P.groupOpen.topIso.hom.hom a ⊗ₜ[P.baseRing] (inv P.transDouble).hom x := by
+  show transTripleInvAlg G P (a ⊗ₜ[P.baseRingTop] x) = _
+  rw [transTripleInvAlg, Algebra.TensorProduct.lift_tmul, AlgHom.comp_apply, AlgHom.comp_apply,
+    AlgHom.restrictScalars_apply, AlgHom.restrictScalars_apply,
+    Algebra.TensorProduct.includeLeft_apply, Algebra.TensorProduct.includeRight_apply,
+    Algebra.TensorProduct.tmul_mul_tmul, _root_.mul_one, _root_.one_mul]
+  rfl
+
+/-- `transTripleInv` is a retraction of `transTriple`; hence `transTriple` is a split mono. -/
+theorem transTriple_comp_transTripleInv :
+    P.transTriple ≫ P.transTripleInv
+      = 𝟙 (CommRingCat.of (P.groupRing ⊗[P.baseRing] (P.groupRing ⊗[P.baseRing] P.groupRing))) := by
+  refine CommRingCat.hom_ext (RingHom.ext fun z => ?_)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_id, RingHom.id_apply]
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | tmul a x =>
+    rw [P.transTriple_tmul, P.transTripleInv_tmul]
+    have h1 : P.groupOpen.topIso.hom.hom (P.groupOpen.topIso.inv.hom a) = a :=
+      congrArg (fun m : P.groupRing ⟶ P.groupRing => m.hom a) P.groupOpen.topIso.inv_hom_id
+    have h2 : (inv P.transDouble).hom (P.transDouble.hom x) = x :=
+      congrArg (fun m : CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing)
+          ⟶ CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing) => m.hom x)
+        (IsIso.hom_inv_id P.transDouble)
+    rw [h1, h2]
+
+instance : IsSplitMono P.transTriple :=
+  IsSplitMono.mk' ⟨P.transTripleInv, P.transTriple_comp_transTripleInv⟩
+
+/-- Elementwise comultiplication intertwining: `transDouble (Δ b) = Δ' (ψ b)`. -/
+theorem transDouble_comulAlg (b : P.groupRing) :
+    P.transDouble.hom (comulAlg G P b)
+      = comulAlgTop G P (P.groupOpen.topIso.inv.hom b) := by
+  have h := congrArg (fun m : P.groupRing ⟶ _ => m.hom b) P.groupPatchComul_comp_transDouble
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h
+  exact h
+
+/-- **Naturality of `id ⊗ Δ`** under the transports. -/
+theorem map_id_comulAlg_comp_transTriple :
+    CommRingCat.ofHom
+        (Algebra.TensorProduct.map (AlgHom.id P.baseRing P.groupRing) P.comulAlg).toRingHom
+      ≫ P.transTriple
+      = P.transDouble ≫ CommRingCat.ofHom
+        (Algebra.TensorProduct.map (AlgHom.id P.baseRingTop P.groupRingTop) P.comulAlgTop).toRingHom := by
+  refine CommRingCat.hom_ext (RingHom.ext fun z => ?_)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom,
+    AlgHom.coe_toRingHom]
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | add x y hx hy => simp only [map_add, hx, hy]
+  | tmul a b =>
+    show P.transTriple.hom (a ⊗ₜ[P.baseRing] comulAlg G P b)
+        = Algebra.TensorProduct.map (AlgHom.id P.baseRingTop P.groupRingTop) (comulAlgTop G P)
+            (P.transDouble.hom (a ⊗ₜ[P.baseRing] b))
+    rw [P.transTriple_tmul, P.transDouble_tmul, Algebra.TensorProduct.map_tmul,
+      AlgHom.id_apply, P.transDouble_comulAlg]
+
+/-- **Naturality of the associator** under the transports (general middle element). -/
+theorem transTriple_assoc_tmul (y : P.groupRing ⊗[P.baseRing] P.groupRing) (b : P.groupRing) :
+    P.transTriple.hom (Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing
+        P.groupRing P.groupRing P.groupRing (y ⊗ₜ[P.baseRing] b))
+      = Algebra.TensorProduct.assoc P.baseRingTop P.baseRingTop P.baseRingTop
+          P.groupRingTop P.groupRingTop P.groupRingTop
+          (P.transDouble.hom y ⊗ₜ[P.baseRingTop] P.groupOpen.topIso.inv.hom b) := by
+  induction y using TensorProduct.induction_on with
+  | zero => simp
+  | add p q hp hq => simp only [TensorProduct.add_tmul, map_add, hp, hq]
+  | tmul p q =>
+    simp only [Algebra.TensorProduct.assoc_tmul, P.transTriple_tmul, P.transDouble_tmul]
+
+/-- **Naturality of `(Δ ⊗ id)` followed by the associator** under the transports. -/
+theorem map_comulAlg_id_assoc_comp_transTriple :
+    CommRingCat.ofHom
+        (Algebra.TensorProduct.map (comulAlg G P) (AlgHom.id P.baseRing P.groupRing)).toRingHom
+      ≫ CommRingCat.ofHom (Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing
+          P.groupRing P.groupRing P.groupRing).toAlgHom.toRingHom ≫ P.transTriple
+      = P.transDouble ≫ CommRingCat.ofHom
+          (Algebra.TensorProduct.map (comulAlgTop G P)
+            (AlgHom.id P.baseRingTop P.groupRingTop)).toRingHom
+        ≫ CommRingCat.ofHom (Algebra.TensorProduct.assoc P.baseRingTop P.baseRingTop P.baseRingTop
+            P.groupRingTop P.groupRingTop P.groupRingTop).toAlgHom.toRingHom := by
+  refine CommRingCat.hom_ext (RingHom.ext fun z => ?_)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_ofHom, AlgHom.coe_toRingHom]
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | add x y hx hy => simp only [map_add, hx, hy]
+  | tmul a b =>
+    show P.transTriple.hom ((Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing
+          P.groupRing P.groupRing P.groupRing).toAlgHom (comulAlg G P a ⊗ₜ[P.baseRing] b))
+        = (Algebra.TensorProduct.assoc P.baseRingTop P.baseRingTop P.baseRingTop
+            P.groupRingTop P.groupRingTop P.groupRingTop).toAlgHom
+          (Algebra.TensorProduct.map (comulAlgTop G P) (AlgHom.id P.baseRingTop P.groupRingTop)
+            (P.transDouble.hom (a ⊗ₜ[P.baseRing] b)))
+    rw [AlgEquiv.coe_toAlgHom, AlgEquiv.coe_toAlgHom, P.transTriple_assoc_tmul,
+      P.transDouble_tmul, Algebra.TensorProduct.map_tmul, AlgHom.id_apply,
+      P.transDouble_comulAlg]
+
+/-- **Coassociativity, opens `CommRingCat` form** — the transport of `comulTop_coassoc`. -/
+theorem groupPatchComul_coassoc :
+    P.groupPatchComul ≫ CommRingCat.ofHom (Algebra.TensorProduct.map (comulAlg G P)
+          (AlgHom.id P.baseRing P.groupRing)).toRingHom
+        ≫ CommRingCat.ofHom (Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing
+          P.groupRing P.groupRing P.groupRing).toAlgHom.toRingHom
+      = P.groupPatchComul ≫ CommRingCat.ofHom (Algebra.TensorProduct.map
+          (AlgHom.id P.baseRing P.groupRing) (comulAlg G P)).toRingHom := by
+  rw [← cancel_mono P.transTriple]
+  simp only [Category.assoc]
+  rw [P.map_comulAlg_id_assoc_comp_transTriple, P.map_id_comulAlg_comp_transTriple,
+    ← Category.assoc P.groupPatchComul, P.groupPatchComul_comp_transDouble,
+    ← Category.assoc P.groupPatchComul, P.groupPatchComul_comp_transDouble]
+  simp only [Category.assoc]
+  rw [P.comulTop_coassoc]
+
+/-- **Coassociativity, opens `AlgHom` form** — the `h_coassoc` field of `Bialgebra.ofAlgHom`. -/
+theorem comulAlg_coassoc :
+    (Algebra.TensorProduct.assoc P.baseRing P.baseRing P.baseRing
+          P.groupRing P.groupRing P.groupRing).toAlgHom.comp
+        ((Algebra.TensorProduct.map (comulAlg G P)
+          (AlgHom.id P.baseRing P.groupRing)).comp (comulAlg G P))
+      = (Algebra.TensorProduct.map (AlgHom.id P.baseRing P.groupRing)
+          (comulAlg G P)).comp (comulAlg G P) := by
+  refine AlgHom.ext fun x => ?_
+  exact congrArg (fun m : P.groupRing ⟶ _ => m.hom x) P.groupPatchComul_coassoc
+
+end CoassocTransport
+
+/-! ### The opens-level Bialgebra and HopfAlgebra instances -/
+
+/-- **The chart Hopf-algebra bialgebra structure** `[Bialgebra R A]` over `R = Γ(S, V)`,
+`A = Γ(G.G, G|_V)`, assembled from the opens-level comultiplication `comulAlg` and counit
+`counitAlg` with the transported coassociativity `comulAlg_coassoc` and the counit laws
+`map_counitAlg_id_comp_comulAlg` / `map_id_counitAlg_comp_comulAlg`. -/
+noncomputable instance instBialgebraOpens : Bialgebra P.baseRing P.groupRing :=
+  Bialgebra.ofAlgHom (comulAlg G P) (counitAlg G P)
+    P.comulAlg_coassoc P.map_counitAlg_id_comp_comulAlg P.map_id_counitAlg_comp_comulAlg
+
+/-- The canonical `comulAlgHom` of `instBialgebraOpens` is our `comulAlg`. -/
+theorem comulAlgHom_eq_opens :
+    Bialgebra.comulAlgHom P.baseRing P.groupRing = comulAlg G P :=
+  AlgHom.ext fun _ => rfl
+
+/-- The canonical `counitAlgHom` of `instBialgebraOpens` is our `counitAlg`. -/
+theorem counitAlgHom_eq_opens :
+    Bialgebra.counitAlgHom P.baseRing P.groupRing = counitAlg G P :=
+  AlgHom.ext fun _ => rfl
+
+/-- **The chart Hopf-algebra structure** `[HopfAlgebra R A]`, upgrading `instBialgebraOpens`
+with the opens-level antipode `antipodeAlg` and the two antipode laws
+`antipodeLift_comp_comulAlg` / `antipodeLiftR_comp_comulAlg`. -/
+noncomputable instance instHopfAlgebraOpens : HopfAlgebra P.baseRing P.groupRing :=
+  HopfAlgebra.ofAlgHom (antipodeAlg G P)
+    (by rw [comulAlgHom_eq_opens, counitAlgHom_eq_opens]; exact P.antipodeLift_comp_comulAlg)
+    (by rw [comulAlgHom_eq_opens, counitAlgHom_eq_opens]; exact P.antipodeLiftR_comp_comulAlg)
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
