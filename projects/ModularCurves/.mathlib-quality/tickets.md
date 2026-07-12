@@ -17349,3 +17349,22 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
   (Z₀ ≅ σ.quotient via `hdesc`-uniqueness). Full chain now precise & ungated:
   [A711-BC]✓ → GHB5a-i → GHB5a → GHB5 → GHB7 value-functor/relRep → GHC1 unconditional.
 - **LOC**: GHB5a-i ~120, GHB5a-glue ~80, GHB5-transfer ~40.
+
+### [GHB5a-i] progress (NEW-GH, v10.166): restriction lemma PROVEN; remaining pieces mapped
+- ✓ **`IsFreeAlgebraAction.of_fixedPoints_ground`** (InvariantTorsor.lean, ec61771a7) — REAL
+  proof, no sorry: ground-R freeness ⟹ ground-Aᴳ freeness (via `AlgHom.restrictScalars`).
+  Unblocks [A711-BC] at ground Bᴳ. Takes `[SMulCommClass G Bᴳ B]`/`[SMulCommClass Bᴳ G B]`/
+  `[IsScalarTower R Bᴳ B]` as instances (GHB5a-i supplies; they hold since Bᴳ is G-fixed).
+- **Remaining for GHB5a-i's proof** (each a completable sub-lemma):
+  1. `(B ⊗_{Bᴳ} C)ᴳ ≅ C` for every Bᴳ-algebra C: `fixedPointsBaseChange_bijective_of_
+     isFreeAlgebraAction (hfree.of_fixedPoints_ground) C` gives `(FixedPoints.subalgebra Bᴳ B G)
+     ⊗_{Bᴳ} C ≅ (B ⊗_{Bᴳ} C)ᴳ`; compose with `FixedPoints.subalgebra Bᴳ B G ≅ Bᴳ` (same
+     carrier, ground-switch RingEquiv) + `Bᴳ ⊗_{Bᴳ} C ≅ C` (TensorProduct.lid-style).
+  2. affine identification `pullback (invariantsπ) (Spec ψ) ≅ Spec (B ⊗_{Bᴳ} C)` with
+     `pullback.snd ≅ invariantsπ` of the tensor G-action (mathlib `pullbackSpecIso`).
+  3. per-affine descent = `exists_invariantsπ_lift` (absolute, PROVEN) on the tensor action,
+     using (1) so `Dᴳ = C`.
+  4. glue (2)+(3) over an affine cover of Q' (Q' NOT covered via j — j is arbitrary, not an
+     open immersion — so cover Q' by its own affines; this is why `_of_isOpenImmersion`'s
+     scaffolding does not adapt).
+- Then GHB5a (glue over quotientGlueData) → GHB5 (transfer) → GHB7 → GHC1 unconditional.
