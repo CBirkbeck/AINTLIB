@@ -768,8 +768,14 @@ representable by finite étale morphisms, couniversal, and with
 theorem gammaH_relativelyRepresentable (N : ℕ) [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
     (hinv : IsUnit (N : R)) :
-    Nonempty (ModuliProblem.QuotientProblemData (gammaHAut R N H)) := by
-  sorry
+    Nonempty (ModuliProblem.QuotientProblemData (gammaHAut R N H)) :=
+  -- [GHB7] applied to the `H`-action: freeness = [GH2] (`gammaFullNaive_freeAction`),
+  -- equivariant finite-étale data at every object = [GHA5]
+  -- (`gammaFullNaive_equivariantRelRepData`). `Finite ↥H` is inferred from the finiteness
+  -- of `GL₂(ℤ/N)` (`N` invertible ⟹ `NeZero N` ⟹ `ZMod N` finite).
+  ModuliProblem.exists_quotientProblemData (gammaHAut R N H)
+    (gammaFullNaive_freeAction R N H hinv)
+    (fun X => gammaFullNaive_equivariantRelRepData R N H hinv X)
 
 /-- Relative representability transports across a functor isomorphism of moduli problems:
 the representing datum `(Z, f)` is reused and the classifying bijections are post-composed
