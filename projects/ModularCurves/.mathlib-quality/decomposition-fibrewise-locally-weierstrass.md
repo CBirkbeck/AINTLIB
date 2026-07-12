@@ -333,6 +333,16 @@ finite-sum evaluation split into ordinary helpers. The next step is to package t
 with the augmentation as a cochain complex and prove stalkwise contraction/exactness;
 neither exactness nor the derived comparison is asserted yet.
 
+The unaugmented sheaf-level complex is now packaged in
+`ForMathlib/SheafCechSheafComplex.lean`. `TopCat.Sheaf.cechFactorPresheaf` sends an open
+to the pushforward of the restriction of `F`, with transition maps given by
+`cechTermFactorRestriction`, and `TopCat.Sheaf.cechComplex` applies mathlib's native
+`cechComplexFunctor` to this presheaf. Its degree objects and differentials are identified
+with `cechTerm` and `cechDifferential`; consequently `cechDifferential_comp` obtains
+`d² = 0` from the native cosimplicial construction. The remaining step is to add the
+augmentation and prove stalkwise contraction/exactness before claiming a resolution or
+derived comparison.
+
 The generic two-chart degree-one calculation is now complete in
 `ForMathlib/TwoOpenHOne.lean`. The theorem
 `TopCat.Sheaf.subsingleton_H_one_of_two_open_cover` proves global `H¹` vanishing from
