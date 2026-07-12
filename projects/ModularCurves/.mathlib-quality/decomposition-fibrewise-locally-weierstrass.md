@@ -353,6 +353,16 @@ product of the restriction units from `F` to the degree-zero intersection factor
 needed for this formal construction; exactness under the actual cover condition remains
 the next stalkwise step.
 
+Degree-zero exactness is now proved in
+`ForMathlib/SheafCechSheafZeroExact.lean`. On an open `V` contained in one cover
+member, `exists_preimage_cechAugmentation_of_le` uses the distinguished component and
+the two faces of each pair `(i₀,i)` to contract every degree-zero cycle. For a cover with
+`⨆ i, U i = ⊤`, `cechAugmentedShortComplex_exact` applies this construction to stalk
+representatives: shrink until the differential vanishes, intersect with a cover member,
+lift there, and pass back to the germ. Thus the augmentation is now exact at degree zero
+without noetherianity. Positive-degree stalkwise contraction and the resulting resolution
+and derived comparison remain open.
+
 The generic two-chart degree-one calculation is now complete in
 `ForMathlib/TwoOpenHOne.lean`. The theorem
 `TopCat.Sheaf.subsingleton_H_one_of_two_open_cover` proves global `H¹` vanishing from
