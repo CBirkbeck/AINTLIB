@@ -1,1 +1,1 @@
-FOCUS: [CMP-DEBT] (v10.154) — PoleSheaf 9 heartbeat raises via /buzz-decompose, one at a time. Starting raise 1/9 (idealModuleAppIdealIso_coe:265).
+FOCUS: [CMP-DEBT] (v10.154) BREAKTHROUGH — staleness scan found 7 of 9 raises STALE (bump-obsolete, removable). Only 2 genuine whnf-monsters: idealModuleAppIdealIso_coe (800k) + pullbackLocalIdealGeneratorIso_hom_comp_toUnit (1200k). Confirm-build running (2 kept, 7 removed); then commit 7x win + surgically decompose the 2 genuine ones.

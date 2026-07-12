@@ -54,6 +54,29 @@ For a globally-presented Weierstrass model `projModel W`:
 - Independent of the three consumers; interleave as cooldown. Order: the four 1200k raises first (heaviest
   debt), then the 800k. Each: extract the heartbeat-heavy sub-term to its own lemma (its own budget).
 
+### [CMP-DEBT] execution log (beastmode-A)
+The 9 raises + their guarded decls (all whnf-heavy sheaf-of-modules `change`/`simp only` chains):
+`idealModuleAppIdealIso_coe` (:265, 800k), `…_coe_map_localIdealElement` (:489, 800k),
+`localIdealGeneratorHom_chartBasicOpen_formula` (:660, 800k) / `…_bijective` (:695, 800k),
+`localIdealGeneratorHom_comp_restrictIdealModuleToUnit` (:848, 800k), `pullbackUnitIso_comp` (:1228, 1200k),
+`pullbackLocalIdealGeneratorIso_hom_comp_toUnit` (:1397, 1200k), `idealModuleBaseChangeHom_isIso_on_affine`
+(:1493, 1200k), `idealModuleBaseChangeHom_isIso` (:1637, 1200k).
+- **Raise 1/9 `idealModuleAppIdealIso_coe`:** ⚠ NOT stale (removing the raise → `whnf` timeout at 200k),
+  and profiling exceeds 120 s — genuine giant-composite whnf (unfolding `idealModuleAppIdealIso`/
+  `idealModule`/`idealModuleRaw`). Needs the faith-infra opacity split under the no-statement-change
+  constraint: extract the post-`simp only` kernel-iso computation (`change`+`rw` chain →
+  `PreservesKernel.iso_hom`/`kernelComparison_comp_ι`/`rfl`) into a private helper with its own budget,
+  possibly a 4-way split (800k/200k = 4×).
+- **★ STALENESS SCAN RESULT (all 9 tested in one `lake build`): 7 of 9 raises are BUMP-STALE.** Removing
+  all 9 → only **2** genuine `whnf` timeouts (200k): `idealModuleAppIdealIso_coe` (was 800k) and
+  `pullbackLocalIdealGeneratorIso_hom_comp_toUnit` (was 1200k); the other errors were "unknown constant"
+  cascades downstream of those two. Confirmed: build **GREEN (3099 jobs, 0 heartbeat errors)** with the 7
+  stale raises removed and only the 2 genuine ones kept. **7/9 of the heartbeat debt eliminated, no
+  statement changes** (removing a `maxHeartbeats` budget annotation cannot affect axioms). Banked.
+- **REMAINING (2/9):** `idealModuleAppIdealIso_coe` (800k) + `pullbackLocalIdealGeneratorIso_hom_comp_toUnit`
+  (1200k) — genuine giant-composite whnf; profiling >120 s. Surgical multi-way extraction of the post-`simp`
+  kernel-iso computation into own-budget private helpers (faith-infra pattern), one at a time.
+
 ## Leaf plan (ordered; T-W7a closer-backup interrupt outranks all)
 
 1. **[CMP-a5]** `locallyWeierstrass_quotientπ` bridge (new `ComparisonConsumers.lean` + FP4 seam) — foundational.
