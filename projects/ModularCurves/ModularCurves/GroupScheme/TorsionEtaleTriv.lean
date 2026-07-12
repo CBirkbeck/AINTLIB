@@ -25,6 +25,31 @@ universe u
 
 namespace ModularCurves
 
+/-- **T-F1 infra (universe-bridged)** — the constant scheme on `Spec T` indexed by a finite
+`Type 0` `ι` is `Spec` of the product ring `ι → T`. (Mathlib's `sigmaSpec` iso is pinned to a
+`Type u` index; `constScheme`'s index is `Type 0`, so we bridge through `ULift.{u} ι`.) -/
+noncomputable def constSchemeSpecIso (T : CommRingCat.{u}) (ι : Type) [Finite ι] :
+    constScheme (Spec T) ι ≅ Spec (CommRingCat.of (ι → (T : Type u))) :=
+  (Sigma.whiskerEquiv (Equiv.ulift.{u,0}) (fun _ => Iso.refl (Spec T))).symm ≪≫
+    asIso (sigmaSpec (fun _ : ULift.{u} ι => T)) ≪≫
+    Scheme.Spec.mapIso ((RingEquiv.piCongrLeft' (fun _ : ULift.{u} ι => (T : Type u))
+      (Equiv.ulift.{u,0})).toCommRingCatIso).symm.op
+
+/-- `constSchemeSpecIso` is a morphism over the base: it intertwines the constant-scheme
+projection `constSchemeπ` with the diagonal ring map `T → (ι → T)`. -/
+@[reassoc]
+lemma constSchemeSpecIso_hom_π (T : CommRingCat.{u}) (ι : Type) [Finite ι] :
+    (constSchemeSpecIso T ι).hom ≫ Spec.map (CommRingCat.ofHom (Pi.constRingHom ι T))
+      = constSchemeπ (Spec T) ι := by
+  refine Sigma.hom_ext _ _ fun a => ?_
+  simp only [constSchemeSpecIso, Iso.trans_hom, Iso.symm_hom, Sigma.whiskerEquiv_inv,
+    Functor.mapIso_hom, Iso.op_hom, asIso_hom, Category.assoc, constSchemeπ]
+  rw [Sigma.ι_comp_map'_assoc, ι_sigmaSpec_assoc]
+  simp only [Sigma.ι_desc, Category.id_comp, eqToHom_refl, Iso.refl_hom,
+    Scheme.Spec_map, Quiver.Hom.unop_op]
+  rw [← Spec.map_comp, ← Spec.map_comp, ← Spec.map_id]
+  congr 1
+
 namespace EllipticCurve
 
 variable {S : Scheme.{u}} (E : EllipticCurve S)
