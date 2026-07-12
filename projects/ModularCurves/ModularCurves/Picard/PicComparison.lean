@@ -3,6 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import Mathlib.LinearAlgebra.TensorProduct.Finiteness
 import ModularCurves.Picard.Dual
 import ModularCurves.Picard.PullbackTensorObj
 
@@ -597,7 +598,7 @@ noncomputable def pairingElem {M N : X.Modules} (ε : tensorObj M N ≅ unitObj 
     (V : X.Opens)
     (t : ((M.val ⊗ N.val : _root_.PresheafOfModules
       (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (Opposite.op V))) :
-    X.ringCatSheaf.obj.obj (Opposite.op V) :=
+    (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V) :=
   ε.hom.val.app (Opposite.op V)
     ((PresheafOfModules.toSheafify (𝟙 X.ringCatSheaf.obj)
       (CategoryTheory.toSheafify (Opens.grothendieckTopology ↥X)
@@ -623,7 +624,7 @@ theorem pairingElem_map {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X)
       (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).obj (Opposite.op V))) :
     pairingElem ε W ((M.val ⊗ N.val : _root_.PresheafOfModules
       (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).map i t) =
-      X.ringCatSheaf.obj.map i (pairingElem ε V t) := by
+      (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).map i (pairingElem ε V t) := by
   simp only [pairingElem]
   exact (congrArg (ε.hom.val.app (Opposite.op W))
     (PresheafOfModules.naturality_apply (PresheafOfModules.toSheafify (𝟙 X.ringCatSheaf.obj)
@@ -631,6 +632,127 @@ theorem pairingElem_map {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X)
         (M.val ⊗ N.val : _root_.PresheafOfModules
           (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).presheaf)) i t)).trans
     (PresheafOfModules.naturality_apply ε.hom.val i _)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[CMP-L2]** Around every point, an isomorphism `ε : M ⊗ N ≅ 𝒪ₓ` yields a section
+pair whose pairing is exactly `1`: locally lift the `ε`-preimage of the unit section
+through the sheafification, decompose the lift as a finite sum of pure tensors, use
+locality of the stalk to find a summand with invertible pairing, then rescale. -/
+theorem exists_pairingElem_tmul_eq_one {M N : X.Modules} (ε : tensorObj M N ≅ unitObj X)
+    (x : X) :
+    ∃ (V : X.Opens) (_ : x ∈ V) (m : M.val.obj (Opposite.op V))
+      (n : N.val.obj (Opposite.op V)), pairingElem ε V (m ⊗ₜ n) = 1 := by
+  classical
+  -- the ε-preimage of the unit section
+  set ζ := ε.inv.val.app (Opposite.op ⊤)
+    (show (unitObj X).val.obj (Opposite.op ⊤) from
+      (1 : X.ringCatSheaf.obj.obj (Opposite.op ⊤))) with hζ
+  -- locally lift ζ through the sheafification unit
+  have hmem : Presheaf.imageSieve (CategoryTheory.toSheafify (Opens.grothendieckTopology ↥X)
+      (M.val ⊗ N.val : _root_.PresheafOfModules
+        (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).presheaf) ζ ∈
+      Opens.grothendieckTopology ↥X ⊤ :=
+    Presheaf.imageSieve_mem (Opens.grothendieckTopology ↥X)
+      (CategoryTheory.toSheafify (Opens.grothendieckTopology ↥X)
+        (M.val ⊗ N.val : _root_.PresheafOfModules
+          (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).presheaf) (U := Opposite.op ⊤) ζ
+  rw [Opens.mem_grothendieckTopology] at hmem
+  obtain ⟨V₀, iV₀, hlift, hxV₀⟩ := hmem x trivial
+  obtain ⟨τ, hτ⟩ := hlift
+  -- ε sends ζ back to the unit section
+  have hcomp : ε.inv.val ≫ ε.hom.val = 𝟙 _ :=
+    congrArg SheafOfModules.Hom.val ε.inv_hom_id
+  have hεone : ε.hom.val.app (Opposite.op ⊤) ζ =
+      (show (unitObj X).val.obj (Opposite.op ⊤) from
+        (1 : X.ringCatSheaf.obj.obj (Opposite.op ⊤))) := by
+    rw [hζ]
+    show (ConcreteCategory.hom ((ε.inv.val ≫ ε.hom.val).app (Opposite.op ⊤)))
+      (show (unitObj X).val.obj (Opposite.op ⊤) from
+        (1 : X.ringCatSheaf.obj.obj (Opposite.op ⊤))) = _
+    rw [hcomp]
+    rfl
+  -- the pairing of the lifted section is exactly 1
+  have h1 : pairingElem ε V₀ τ = 1 := by
+    show ε.hom.val.app (Opposite.op V₀) ((PresheafOfModules.toSheafify (𝟙 X.ringCatSheaf.obj)
+      (CategoryTheory.toSheafify (Opens.grothendieckTopology ↥X)
+        (M.val ⊗ N.val : _root_.PresheafOfModules
+          (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).presheaf)).app (Opposite.op V₀) τ) = _
+    have h2 : (PresheafOfModules.toSheafify (𝟙 X.ringCatSheaf.obj)
+        (CategoryTheory.toSheafify (Opens.grothendieckTopology ↥X)
+          (M.val ⊗ N.val : _root_.PresheafOfModules
+            (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).presheaf)).app (Opposite.op V₀) τ =
+        (tensorObj M N).val.map iV₀.op ζ := hτ
+    refine (congrArg (ε.hom.val.app (Opposite.op V₀)) h2).trans
+      ((PresheafOfModules.naturality_apply ε.hom.val iV₀.op ζ).trans
+        ((congrArg (X.ringCatSheaf.obj.map iV₀.op) hεone).trans ?_))
+    show (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).map iV₀.op
+      (show (unitObj X).val.obj (Opposite.op ⊤) from
+        (1 : X.ringCatSheaf.obj.obj (Opposite.op ⊤))) = 1
+    exact map_one (ConcreteCategory.hom
+      ((X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).map iV₀.op))
+  -- decompose the lift as a finite sum of pure tensors
+  obtain ⟨S, hS⟩ := TensorProduct.exists_finset τ
+  have h1' : (1 : (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V₀)) =
+      ∑ p ∈ S, pairingElem ε V₀ (p.1 ⊗ₜ p.2) :=
+    (h1.symm.trans (congrArg (pairingElem ε V₀) hS)).trans (pairingElem_sum ε V₀ S _)
+  -- some summand has a pairing with invertible germ at x
+  have hpigeon : ∃ p ∈ S,
+      IsUnit (X.presheaf.germ V₀ x hxV₀ (pairingElem ε V₀ (p.1 ⊗ₜ p.2))) := by
+    by_contra hall
+    push Not at hall
+    have hnon : X.presheaf.germ V₀ x hxV₀
+        (∑ p ∈ S, pairingElem ε V₀ (p.1 ⊗ₜ p.2)) ∈ nonunits (X.presheaf.stalk x) := by
+      rw [map_sum]
+      refine Finset.sum_induction _ (· ∈ nonunits _)
+        (fun a b ha hb => IsLocalRing.nonunits_add ha hb)
+        (zero_mem_nonunits.mpr zero_ne_one) (fun p hp => mem_nonunits_iff.mpr (hall p hp))
+    rw [← h1', map_one] at hnon
+    exact (mem_nonunits_iff.mp hnon) isUnit_one
+  obtain ⟨p, hpS, hpu⟩ := hpigeon
+  -- the unit germ restricts to a unit on a smaller open
+  obtain ⟨V, iV, hxV, hu⟩ :=
+    X.toLocallyRingedSpace.toRingedSpace.isUnit_res_of_isUnit_germ V₀
+      (pairingElem ε V₀ (p.1 ⊗ₜ p.2)) x hxV₀ hpu
+  obtain ⟨b, hb⟩ := hu.exists_left_inv
+  let c : (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V) := b
+  let m₁ : M.val.obj (Opposite.op V) := M.val.map iV.op p.1
+  let n₁ : N.val.obj (Opposite.op V) := N.val.map iV.op p.2
+  refine ⟨V, hxV, m₁, c • n₁, ?_⟩
+  -- rescaling computation
+  have hbal : m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)]
+        (c • n₁) =
+      c • (m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁) :=
+    TensorProduct.tmul_smul _ _ _
+  have hres : pairingElem ε V
+        (m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁) =
+      (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).map iV.op
+        (pairingElem ε V₀ (p.1 ⊗ₜ p.2)) :=
+    (congrArg (pairingElem ε V)
+      (PresheafOfModules.Monoidal.tensorObj_map_tmul iV.op p.1 p.2).symm).trans
+      (pairingElem_map ε iV.op (p.1 ⊗ₜ p.2))
+  have hsm : pairingElem ε V
+        (c • (m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁)) =
+      c • pairingElem ε V
+        (m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁) := by
+    refine (congrArg (ε.hom.val.app (Opposite.op V)) (_root_.map_smul
+      (ConcreteCategory.hom ((PresheafOfModules.toSheafify (𝟙 X.ringCatSheaf.obj)
+        (CategoryTheory.toSheafify (Opens.grothendieckTopology ↥X)
+          (M.val ⊗ N.val : _root_.PresheafOfModules
+            (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)).presheaf)).app (Opposite.op V)))
+      c _)).trans ?_
+    exact _root_.map_smul (ConcreteCategory.hom (ε.hom.val.app (Opposite.op V))) c _
+  calc pairingElem ε V
+        (m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] (c • n₁))
+      = pairingElem ε V (c •
+          (m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁)) :=
+        congrArg (pairingElem ε V) hbal
+    _ = c • pairingElem ε V
+          (m₁ ⊗ₜ[(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj (Opposite.op V)] n₁) := hsm
+    _ = c • (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).map iV.op
+          (pairingElem ε V₀ (p.1 ⊗ₜ p.2)) :=
+        congrArg (c • ·) hres
+    _ = 1 := (smul_eq_mul c _).trans hb
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in

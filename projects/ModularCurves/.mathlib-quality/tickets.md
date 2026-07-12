@@ -16728,3 +16728,33 @@ localModel glues (LocallyWeierstrass.baseChange + it's Zariski-local).
   uniqueness (Functor.RepresentableBy unique).
 * base-change⊣restrictScalars adjunction / representability-preserved-under-base-change — the
   gluing-datum-over-D(ab) primitive.
+
+## Amendments v10.157 (2026-07-12, fable-PIC0): [CMP-L1]+[CMP-L2] CLOSED; L3 split-pair cancellation route derived (formal, no exchange-identity)
+
+- ★ **[CMP-L1] closed** (`fromSkeleton`-lift + `toSkeleton_eq_toSkeleton_iff` + T/U bridges).
+- ★ **[CMP-L2] closed**: `pairingElem` (toSheafify ≫ ε.hom.val, elementwise) +
+  `pairingElem_sum`/`pairingElem_map`; main theorem `exists_pairingElem_tmul_eq_one` via
+  imageSieve-lift at ⊤ (pin `(U := op ⊤)` — unop-meta sticks), `TensorProduct.exists_finset`
+  (new import Mathlib.LinearAlgebra.TensorProduct.Finiteness), stalk pigeonhole
+  (`Finset.sum_induction` + `IsLocalRing.nonunits_add`), `RingedSpace.isUnit_res_of_isUnit_germ`,
+  rescale by `IsUnit.exists_left_inv`-element. LEAN-OPS: (i) pairing VALUES live at the
+  `(X.sheaf.obj ⋙ forget₂ CommRingCat RingCat).obj`-spelling — mathlib Presheaf/Monoidal.lean
+  registers `CommRing ((R ⋙ forget₂ _ RingCat).obj X)` THERE (not at `ringCatSheaf.obj.obj`) —
+  all •/*/1 synth at that key; (ii) `↑u⁻¹`-coercion cannot cross clothings — destructure
+  `exists_left_inv` and `let`-recast the bare element (defeq-transparent); (iii) map-elements
+  are `restrictScalars`-clothed — `let`-recast to strip; (iv) `⊗ₜ` under binders: pin base
+  `⊗ₜ[(X.sheaf.obj ⋙ forget₂ ...).obj (op V)]`; (v) `_root_.map_smul` (namespace clash).
+- **[CMP-L3] route (derived this session, replaces the conjugation-chase):** from (W, m, n,
+  pairingElem = 1): α := unitHomEquiv.symm (overSection m) : unit (R.over W) ⟶ M.over W;
+  β : M.over W ⟶ unit (R.over W) componentwise s ↦ pairingElem(s ⊗ n|) (naturality =
+  pairingElem_map + tensorObj_map_tmul); α ≫ β = 𝟙 by unit-sections-compute (= pairing = 1).
+  **β ≫ α = 𝟙 via a GENERIC monoidal lemma [CMP-L3c]**: in a monoidal category, a split pair
+  (a : 𝟙 ⟶ A, b : A ⟶ 𝟙, a ≫ b = 𝟙) with A ⊗-invertible (e : A ⊗ B ≅ 𝟙) has b ≫ a = 𝟙.
+  Proof (formal, NO elementwise chase): v := e.inv ≫ (b ▷ B) : 𝟙 ⟶ 𝟙⊗B-corrected,
+  w := (a ▷ B) ≫ e.hom; w-after-v: w ≫ v computes to (a≫b) ▷ B = 𝟙; q := v ≫ w idempotent;
+  End(𝟙)-scalar-action s ▷̂ X := λ⁻¹ ≫ (s ▷ X) ≫ λ: naturality gives (q ▷̂ B') ≫ w = w,
+  v ≫ (q ▷̂ B') = v ⟹ q ▷̂ B' = w-v-sandwich = 𝟙; action is faithful on invertible objects
+  (conjugate by e) ⟹ q = 𝟙; target e-conjugate of (b≫a) ▷ B equals q. Then transport
+  over-iso → restrict-iso (overTrivializationOfRestrictIso-equivalences reversed) →
+  pullback-iso (restrictFunctorIsoPullback) and assemble IsInvertible from L2's pointwise data
+  (cover = the V's over all x).
