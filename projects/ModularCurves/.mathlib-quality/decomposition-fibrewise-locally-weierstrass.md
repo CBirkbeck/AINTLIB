@@ -200,6 +200,17 @@ by upstream mathlib PR #35790. This result is one input to the local-killing/Kem
 argument for affine vanishing; it does not by itself prove that a quasicoherent sheaf on
 an affine scheme is acyclic.
 
+The open-restriction dependency for that argument is now complete in
+`ForMathlib/TopCatSheafRestrict.lean`. It supplies restriction along an open embedding,
+the restriction--pushforward adjunction and its unit formulas, additive restriction and
+pushforward functors, and stability of flasqueness under restriction. Restriction of
+additive sheaves preserves finite limits by identifying its underlying presheaf functor
+with precomposition and reflecting finite diagrams through the sheaf inclusion. Together
+with finite-colimit preservation from the left adjoint, this lets
+`ShortComplex.ShortExact.map_of_exact` restrict short exact sequences directly. This
+replaces the unproved right-adjoint instance in draft mathlib PR #36345 and uses no
+options; it still does not assert affine quasicoherent vanishing.
+
 No theorem in this stream may replace this leaf by a `CohomologyPackage` hypothesis,
 an axiom, or an unboarded `sorry`.
 
