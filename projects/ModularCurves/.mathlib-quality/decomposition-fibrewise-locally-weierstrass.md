@@ -505,6 +505,20 @@ the cochain-map law and the signed Cech term vanishes by the augmentation law.
 This constructs the edge map without claiming that it is a quasi-isomorphism;
 the explicit degree-one homology chase remains next.
 
+The degree-one horizontal comparison is now proved in
+`ForMathlib/TotalComplexUpNatHorizontalEdgeHOne.lean`.
+`HomologicalComplex₂.totalUpNatHorizontalEdge_quasiIsoAt_one` shows that the
+edge map is a quasi-isomorphism in degree one from exactly three low-row
+exactness inputs: the augmented rows in resolution degrees zero and one are
+exact at Cech degree zero, and the resolution-degree-zero row is exact at Cech
+degree one. Monicity of the augmentations in resolution degrees one and two is
+the only further input. The proof decomposes total cycles and boundaries into
+their `(0,1)` and `(1,0)` components, kills and lifts them by those exactness
+hypotheses, and uses the two monomorphisms to reflect the remaining cycle and
+boundary equations. This closes the horizontal collapse without a spectral
+sequence surrogate. The vertical comparison using acyclicity on every finite
+intersection remains.
+
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
 `n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of
