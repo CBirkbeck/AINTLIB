@@ -607,6 +607,16 @@ It still does not make the raw affine Cech terms finite: Stacks 0A1G, Lemma 36.3
 Remark 36.30.2 obtain the finite projective complex from perfectness of proper
 pushforward and arbitrary base change, which remains the geometric blocker.
 
+The corresponding cohomology object is now explicit as well.
+`baseCechComplexHomologyForgetIso` identifies the additive group underlying homology of
+the base-linear Cech complex with homology of the native additive Cech complex in every
+degree. On an affine open cover, `baseCechHomologyOneIso_of_affine_openCover` then
+identifies degree one with genuine `Sheaf.H¹`. Thus the later proper-pushforward theorem
+has a concrete `Γ(S,⊤)`-module-valued target, rather than only an exactness predicate.
+This comparison still makes no finiteness or projectivity assertion about the raw Cech
+terms; the bounded finite-projective replacement and arbitrary-base comparison remain
+exactly the Stacks 0A1G input.
+
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
 `n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of
