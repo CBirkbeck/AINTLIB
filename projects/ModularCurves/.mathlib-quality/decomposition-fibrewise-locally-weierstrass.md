@@ -479,6 +479,13 @@ only the horizontal input to the Stacks 20.11.5--6 double-complex argument. The
 degree-one total-complex comparison and the vertical collapse from acyclicity on
 finite intersections remain open; no exactness of open pushforward is used.
 
+The remaining indexing gap in mathlib's totalization API is closed in
+`ForMathlib/TotalComplexUpNat.lean`. `ComplexShape.upNat_tensorSigns` supplies
+the standard vertical sign `(-1)^p` for natural-number-indexed cochain
+complexes, so `HomologicalComplex₂.total (ComplexShape.up ℕ)` now applies
+directly to the first-quadrant injective Cech bicomplex. This reuses mathlib's
+total complex rather than introducing a parallel construction.
+
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
 `n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of
