@@ -1065,6 +1065,29 @@ theorem SpreadData.exists_flat_stage (D : SpreadData 𝒮 u B)
     [Module.Flat A B] :
     ∃ (i : ι) (h : D.i₀ ≤ i), ∀ ⦃j : ι⦄ (hj : i ≤ j),
       Module.Flat (𝒮 j) (D.spreadStage (t := t) (h.trans hj)) := by
+  classical
+  -- `B` is finitely presented over `A` (the spread-data presentation).
+  obtain ⟨eB⟩ := D.equiv
+  haveI : Algebra.FinitePresentation A
+      (MvPolynomial (Fin D.m) A ⧸
+        Ideal.span (Set.range fun j => MvPolynomial.map ((u D.i₀).toRingHom) (D.g j))) :=
+    Algebra.FinitePresentation.quotient (Submodule.fg_span (Set.finite_range _))
+  haveI hFPB : Algebra.FinitePresentation A B := Algebra.FinitePresentation.equiv eB
+  -- **Reduction to a single stage.** It suffices to produce ONE stage `i` at which the model
+  -- `spreadStage i` is `𝒮 i`-flat: flatness then propagates to every later `j` because
+  -- `spreadStage j ≅ 𝒮 j ⊗[𝒮 i] spreadStage i` (`spreadStage_baseChange`) and base change
+  -- preserves flatness (`Module.Flat.baseChange`).
+  suffices hone : ∃ (i : ι) (h : D.i₀ ≤ i), Module.Flat (𝒮 i) (D.spreadStage (t := t) h) by
+    obtain ⟨i, hi, hflat⟩ := hone
+    refine ⟨i, hi, fun j hj => ?_⟩
+    letI : Algebra (𝒮 i) (𝒮 j) := (t hj).toRingHom.toAlgebra
+    haveI : Module.Flat (𝒮 i) (D.spreadStage (t := t) hi) := hflat
+    haveI : Module.Flat (𝒮 j) (𝒮 j ⊗[𝒮 i] D.spreadStage (t := t) hi) :=
+      Module.Flat.baseChange (𝒮 i) (𝒮 j) (D.spreadStage (t := t) hi)
+    obtain ⟨e⟩ := D.spreadStage_baseChange hj hi H
+    exact Module.Flat.of_linearEquiv e.symm.toLinearEquiv
+  -- The single-stage flatness is the genuine Stacks 02JO / 07RF content (noetherian descent of
+  -- the flat colimit algebra `B` + stage placement of the descended flat model).
   sorry
 
 /-! ## [KL-4] Faithful flatness at a large stage (the 01UA leg) -/
