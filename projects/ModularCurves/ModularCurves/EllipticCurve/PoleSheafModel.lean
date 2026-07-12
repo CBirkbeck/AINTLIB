@@ -465,6 +465,43 @@ theorem overlapSectionsEquiv_sectionUnitOverlap (W : WeierstrassCurve R) :
   simpa only [projModelSectionUnitSection, RingEquiv.apply_symm_apply] using
     overlapSectionsEquiv_res_chartY W (projModelSectionUnitSection W)
 
+theorem overlapSectionsEquiv_res_projModelYChart
+    (W : WeierstrassCurve R) (b : Γ(projModel W, projModelYChart W)) :
+    overlapSectionsEquiv W
+        ((projModel W).presheaf.map
+          (homOfLE (projModelChartOverlap_le_YChart W)).op b) =
+      algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W))
+        (chartYSectionsRingEquiv W b) := by
+  let h := Proj.basicOpen_mono (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⟨_, rfl⟩
+  have hmap : (projModel W).presheaf.map
+      (homOfLE (projModelChartOverlap_le_YChart W)).op =
+    (projModel W).presheaf.map (homOfLE h).op :=
+    (projModel W).presheaf.congr_map (Subsingleton.elim _ _)
+  rw [hmap]
+  exact overlapSectionsEquiv_res_chartY W b
+
+theorem overlapSectionsEquiv_res_projModelZChart
+    (W : WeierstrassCurve R) (b : Γ(projModel W, projModelZChart W)) :
+    overlapSectionsEquiv W
+        ((projModel W).presheaf.map
+          (homOfLE (projModelChartOverlap_le_ZChart W)).op b) =
+      overlapMap W (chartZSectionsRingEquiv W b) := by
+  let h := Proj.basicOpen_mono (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      ⟨_, mul_comm _ _⟩
+  have hmap : (projModel W).presheaf.map
+      (homOfLE (projModelChartOverlap_le_ZChart W)).op =
+    (projModel W).presheaf.map (homOfLE h).op :=
+    (projModel W).presheaf.congr_map (Subsingleton.elim _ _)
+  rw [hmap]
+  exact overlapSectionsEquiv_res_chartZ W b
+
 /-- The root coordinate restricted to the standard chart overlap. -/
 noncomputable def projModelSectionRootChartOverlap
     (W : WeierstrassCurve R) :
@@ -505,6 +542,17 @@ private theorem presheaf_restrict_restrict {X : Scheme.{u}}
       X.presheaf.map (homOfLE hTU).op s := by
   rw [← X.presheaf.map_comp_apply]
   congr 2
+
+private theorem presheaf_restrict_via {X : Scheme.{u}}
+    {U V W T : X.Opens}
+    (hTV : T ≤ V) (hVU : V ≤ U) (hTW : T ≤ W) (hWU : W ≤ U)
+    (s : Γ(X, U)) :
+    X.presheaf.map (homOfLE hTV).op
+        (X.presheaf.map (homOfLE hVU).op s) =
+      X.presheaf.map (homOfLE hTW).op
+        (X.presheaf.map (homOfLE hWU).op s) := by
+  rw [presheaf_restrict_restrict hTV hVU (hTV.trans hVU)]
+  rw [presheaf_restrict_restrict hTW hWU (hTW.trans hWU)]
 
 /-- Transport sections from the gluing overlap to the corresponding basic open
 of the standard chart overlap. -/
@@ -1156,5 +1204,256 @@ theorem projModelSectionPoleCoefficientZ_restrict (W : WeierstrassCurve R) (n : 
   rw [RingEquiv.symm_apply_apply]
   rw [← projModelSectionPoleSheafPowerTrivializationZ_restrict]
   exact localTrivializationCoefficient_restrict _ _ _ _ _
+
+private theorem projModelSectionPoleCoefficient_overlap_exists_denominator
+    (W : WeierstrassCurve R) (n : ℕ)
+    (m : Γ(sectionPoleSheafPower (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W) n, (⊤ : (projModel W).Opens))) :
+    ∃ (b : Γ(projModel W, projModelYChart W)) (k : ℕ),
+      (projModel W).presheaf.map
+          (homOfLE (projModelPoleOverlap_le_chartOverlap W)).op
+          ((projModel W).presheaf.map
+              (homOfLE (projModelChartOverlap_le_ZChart W)).op
+              ((chartZSectionsRingEquiv W).symm
+                (projModelSectionPoleCoefficientZ W n m)) *
+            projModelSectionRootChartOverlap W ^ n *
+            projModelSectionUnitOverlap W ^ k) =
+        (projModel W).presheaf.map
+          (homOfLE (projModelPoleOverlap_le_chartOverlap W)).op
+          ((projModel W).presheaf.map
+            (homOfLE (projModelChartOverlap_le_YChart W)).op b) := by
+  let u := projModelSectionUnitSection W
+  let bN := projModelSectionPoleCoefficient W n m
+  let resUN : Γ(projModel W, projModelYChart W) ⟶
+      Γ(projModel W, projModelSectionNeighborhood W) :=
+    (projModel W).presheaf.map
+      (homOfLE ((projModel W).affineBasicOpen_le
+        (projModelSectionUnitSection W))).op
+  letI : Algebra Γ(projModel W, projModelYChart W)
+      Γ(projModel W, projModelSectionNeighborhood W) := resUN.hom.toAlgebra
+  haveI : IsLocalization.Away u
+      Γ(projModel W, projModelSectionNeighborhood W) :=
+    (projModelYChart W).2.isLocalization_basicOpen u
+  obtain ⟨⟨b, d⟩, hd⟩ := IsLocalization.surj (Submonoid.powers u) bN
+  obtain ⟨k, hk⟩ := d.2
+  refine ⟨b, k, ?_⟩
+  have hd' : bN * resUN (u ^ k) = resUN b := by
+    change bN * algebraMap Γ(projModel W, projModelYChart W)
+      Γ(projModel W, projModelSectionNeighborhood W) (u ^ k) =
+      algebraMap Γ(projModel W, projModelYChart W)
+        Γ(projModel W, projModelSectionNeighborhood W) b
+    calc
+      bN * algebraMap Γ(projModel W, projModelYChart W)
+          Γ(projModel W, projModelSectionNeighborhood W) (u ^ k) =
+        bN * algebraMap Γ(projModel W, projModelYChart W)
+          Γ(projModel W, projModelSectionNeighborhood W) d := by
+        exact congrArg (bN * ·) (congrArg _ hk)
+      _ = algebraMap Γ(projModel W, projModelYChart W)
+          Γ(projModel W, projModelSectionNeighborhood W) b := hd
+  have htrans := projModelSectionPolePowerOverlap_coefficients W n m
+  rw [projModelSectionPoleCoefficient_restrict,
+    projModelSectionPoleCoefficientZ_restrict] at htrans
+  rw [projModelSectionRootOverlap_eq_res_chartOverlap] at htrans
+  have hdP := congrArg (fun q =>
+    (projModel W).presheaf.map
+      (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op q) hd'
+  rw [map_mul] at hdP
+  rw [htrans] at hdP
+  have hZ := (presheaf_restrict_restrict
+    (projModelPoleOverlap_le_chartOverlap W)
+    (projModelChartOverlap_le_ZChart W)
+    (projModelPoleOverlap_le_ZChart W)
+    ((chartZSectionsRingEquiv W).symm
+      (projModelSectionPoleCoefficientZ W n m))).symm
+  have hUk := presheaf_restrict_via
+    (projModelPoleOverlap_le_sectionNeighborhood W)
+    ((projModel W).affineBasicOpen_le (projModelSectionUnitSection W))
+    (projModelPoleOverlap_le_chartOverlap W)
+    (projModelChartOverlap_le_YChart W)
+    (u ^ k)
+  have hb := presheaf_restrict_via
+    (projModelPoleOverlap_le_sectionNeighborhood W)
+    ((projModel W).affineBasicOpen_le (projModelSectionUnitSection W))
+    (projModelPoleOverlap_le_chartOverlap W)
+    (projModelChartOverlap_le_YChart W) b
+  have hresUN_u : resUN (u ^ k) =
+      (projModel W).presheaf.map
+        (homOfLE ((projModel W).affineBasicOpen_le
+          (projModelSectionUnitSection W))).op (u ^ k) := rfl
+  have hresUN_b : resUN b =
+      (projModel W).presheaf.map
+        (homOfLE ((projModel W).affineBasicOpen_le
+          (projModelSectionUnitSection W))).op b := rfl
+  rw [hresUN_u, hresUN_b] at hdP
+  have hdP' :
+      (projModel W).presheaf.map
+          (homOfLE (projModelPoleOverlap_le_chartOverlap W)).op
+          ((projModel W).presheaf.map
+            (homOfLE (projModelChartOverlap_le_ZChart W)).op
+            ((chartZSectionsRingEquiv W).symm
+              (projModelSectionPoleCoefficientZ W n m))) *
+        ((projModel W).presheaf.map
+          (homOfLE (projModelPoleOverlap_le_chartOverlap W)).op
+          (projModelSectionRootChartOverlap W)) ^ n *
+        (projModel W).presheaf.map
+          (homOfLE (projModelPoleOverlap_le_chartOverlap W)).op
+          ((projModel W).presheaf.map
+            (homOfLE (projModelChartOverlap_le_YChart W)).op (u ^ k)) =
+      (projModel W).presheaf.map
+        (homOfLE (projModelPoleOverlap_le_chartOverlap W)).op
+        ((projModel W).presheaf.map
+          (homOfLE (projModelChartOverlap_le_YChart W)).op b) := by
+    calc
+      _ = (projModel W).presheaf.map
+            (homOfLE (projModelPoleOverlap_le_ZChart W)).op
+            ((chartZSectionsRingEquiv W).symm
+              (projModelSectionPoleCoefficientZ W n m)) *
+          ((projModel W).presheaf.map
+            (homOfLE (projModelPoleOverlap_le_chartOverlap W)).op
+            (projModelSectionRootChartOverlap W)) ^ n *
+          (projModel W).presheaf.map
+            (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op
+            ((projModel W).presheaf.map
+              (homOfLE ((projModel W).affineBasicOpen_le
+                (projModelSectionUnitSection W))).op (u ^ k)) := by
+        exact congrArg₂ (· * ·)
+          (congrArg (· *
+            ((projModel W).presheaf.map
+              (homOfLE (projModelPoleOverlap_le_chartOverlap W)).op
+              (projModelSectionRootChartOverlap W)) ^ n) hZ.symm)
+          hUk.symm
+      _ = (projModel W).presheaf.map
+          (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op
+          ((projModel W).presheaf.map
+            (homOfLE ((projModel W).affineBasicOpen_le
+              (projModelSectionUnitSection W))).op b) := hdP
+      _ = _ := hb
+  simpa only [map_mul, map_pow, projModelSectionUnitOverlap] using hdP'
+
+private theorem projModelSectionPoleCoefficient_overlap_exists_clearing
+    (W : WeierstrassCurve R) (n : ℕ)
+    (m : Γ(sectionPoleSheafPower (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W) n, (⊤ : (projModel W).Opens))) :
+    ∃ (b : AdjoinRoot (infChartCubic W)) (j k : ℕ),
+      (algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W))) (sectionUnitElem W) ^ j *
+        ((overlapMap W) (projModelSectionPoleCoefficientZ W n m) *
+          (algebraMap (AdjoinRoot (infChartCubic W))
+            (Localization.Away (infChartTElem W)))
+              (AdjoinRoot.root (infChartCubic W)) ^ n *
+          (algebraMap (AdjoinRoot (infChartCubic W))
+            (Localization.Away (infChartTElem W))) (sectionUnitElem W) ^ k) =
+      (algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W))) (sectionUnitElem W) ^ j *
+        (algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W))) b := by
+  obtain ⟨b, k, hden⟩ :=
+    projModelSectionPoleCoefficient_overlap_exists_denominator W n m
+  let O := projModelChartOverlap W
+  let uO := projModelSectionUnitOverlap W
+  let B := (projModel W).basicOpen uO
+  let resOB : Γ(projModel W, O) ⟶ Γ(projModel W, B) :=
+    (projModel W).presheaf.map
+      (homOfLE ((projModel W).basicOpen_le uO)).op
+  letI : Algebra Γ(projModel W, O) Γ(projModel W, B) :=
+    resOB.hom.toAlgebra
+  haveI : IsLocalization.Away uO Γ(projModel W, B) :=
+    O.2.isLocalization_basicOpen uO
+  have hB := congrArg (projModelPoleOverlapBasicOpenRingEquiv W) hden
+  rw [projModelPoleOverlapBasicOpenRingEquiv_res,
+    projModelPoleOverlapBasicOpenRingEquiv_res] at hB
+  have hB' : algebraMap Γ(projModel W, O) Γ(projModel W, B)
+      ((projModel W).presheaf.map
+          (homOfLE (projModelChartOverlap_le_ZChart W)).op
+          ((chartZSectionsRingEquiv W).symm
+            (projModelSectionPoleCoefficientZ W n m)) *
+        projModelSectionRootChartOverlap W ^ n * uO ^ k) =
+      algebraMap Γ(projModel W, O) Γ(projModel W, B)
+        ((projModel W).presheaf.map
+          (homOfLE (projModelChartOverlap_le_YChart W)).op b) := by
+    exact hB
+  obtain ⟨d, hd⟩ :=
+    (IsLocalization.eq_iff_exists
+      (S := Γ(projModel W, B)) (Submonoid.powers uO)).mp hB'
+  obtain ⟨j, hj⟩ := d.2
+  have hd' : uO ^ j *
+      ((projModel W).presheaf.map
+          (homOfLE (projModelChartOverlap_le_ZChart W)).op
+          ((chartZSectionsRingEquiv W).symm
+            (projModelSectionPoleCoefficientZ W n m)) *
+        projModelSectionRootChartOverlap W ^ n * uO ^ k) =
+      uO ^ j * ((projModel W).presheaf.map
+        (homOfLE (projModelChartOverlap_le_YChart W)).op b) := by
+    calc
+      _ = d *
+          ((projModel W).presheaf.map
+              (homOfLE (projModelChartOverlap_le_ZChart W)).op
+              ((chartZSectionsRingEquiv W).symm
+                (projModelSectionPoleCoefficientZ W n m)) *
+            projModelSectionRootChartOverlap W ^ n * uO ^ k) := by
+        exact congrArg (· * _) hj
+      _ = d * ((projModel W).presheaf.map
+          (homOfLE (projModelChartOverlap_le_YChart W)).op b) := hd
+      _ = _ := by exact congrArg (· * _) hj.symm
+  have hL := congrArg (overlapSectionsEquiv W) hd'
+  dsimp only [uO] at hL
+  simp only [map_mul, map_pow, overlapSectionsEquiv_res_projModelZChart,
+    RingEquiv.apply_symm_apply, overlapSectionsEquiv_sectionRootChartOverlap,
+    overlapSectionsEquiv_sectionUnitOverlap,
+    overlapSectionsEquiv_res_projModelYChart] at hL
+  exact ⟨chartYSectionsRingEquiv W b, j, k, hL⟩
+
+/-- The affine coordinate of a global section of `O(n[0])` has pole order at
+most `n`. -/
+theorem projModelSectionPoleCoefficientZ_mem_poleOrderFiltration
+    (W : WeierstrassCurve R) (n : ℕ)
+    (m : Γ(sectionPoleSheafPower (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W) n, (⊤ : (projModel W).Opens))) :
+    projModelSectionPoleCoefficientZ W n m ∈ poleOrderFiltration W n := by
+  rw [mem_poleOrderFiltration_iff]
+  obtain ⟨b, j, k, hL⟩ :=
+    projModelSectionPoleCoefficient_overlap_exists_clearing W n m
+  apply mem_range_algebraMap_of_forall_maximal
+  intro P hP ht
+  letI : P.IsMaximal := hP
+  have hsP : AdjoinRoot.root (infChartCubic W) ∈ P :=
+    root_mem_of_tel_mem W P ht
+  have huSub : sectionUnitElem W - 1 ∈ P := by
+    apply (Ideal.span_le.mpr ?_) (sectionUnitElem_sub_one_mem W)
+    rintro a (rfl | rfl)
+    · exact hsP
+    · exact ht
+  have huP : sectionUnitElem W ∉ P := by
+    intro hu
+    have h1 : (1 : AdjoinRoot (infChartCubic W)) ∈ P := by
+      simpa only [sub_sub_cancel] using P.sub_mem hu huSub
+    exact hP.ne_top ((Ideal.eq_top_iff_one P).mpr h1)
+  refine ⟨sectionUnitElem W ^ (j + k), ?_, ?_⟩
+  · intro huPow
+    exact huP (hP.isPrime.mem_of_pow_mem (j + k) huPow)
+  · refine ⟨sectionUnitElem W ^ j * b, ?_⟩
+    simp only [map_mul, map_pow]
+    calc
+      (algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W))) (sectionUnitElem W) ^ j *
+          (algebraMap (AdjoinRoot (infChartCubic W))
+            (Localization.Away (infChartTElem W))) b =
+        (algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W))) (sectionUnitElem W) ^ j *
+          ((overlapMap W) (projModelSectionPoleCoefficientZ W n m) *
+            (algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W)))
+                (AdjoinRoot.root (infChartCubic W)) ^ n *
+            (algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W))) (sectionUnitElem W) ^ k) :=
+        hL.symm
+      _ = (algebraMap (AdjoinRoot (infChartCubic W))
+          (Localization.Away (infChartTElem W))) (sectionUnitElem W) ^ (j + k) *
+          ((overlapMap W) (projModelSectionPoleCoefficientZ W n m) *
+            (algebraMap (AdjoinRoot (infChartCubic W))
+              (Localization.Away (infChartTElem W)))
+                (AdjoinRoot.root (infChartCubic W)) ^ n) := by
+        rw [pow_add]
+        ring
 
 end ModularCurves
