@@ -379,9 +379,14 @@ Positive-degree sheaf exactness is now proved in
 by `cechDifferential (n+1)` when the opens cover `⊤`. The proof represents a stalk cycle
 on a neighborhood, shrinks until its differential vanishes, intersects with a cover
 member containing the point, applies the local contraction, and returns the lifted germ.
-Together with `cechAugmentedShortComplex_exact`, the sheaf-level Cech construction is now
-an exact augmented resolution. The next dependency is to package that resolution for the
-acyclic-cover comparison with genuine derived global sections.
+The resulting resolution is now packaged in
+`ForMathlib/SheafCechSheafResolution.lean`. `cechAugmentation_mono` proves the
+augmentation monic by sectionwise cover separation, `cechAugmentedComplex` uses mathlib's
+native `CochainComplex.augment`, and `cechAugmentedComplex_acyclic` handles degree zero by
+monicity, degree one by `cechAugmentedShortComplex_exact`, and every later degree by
+`cechShortComplex_exact`. This is an exact augmented sheaf resolution; it does not yet
+assert that its terms are cohomologically acyclic or compare its global-section complex
+with genuine derived global sections. Those are the next acyclic-cover dependencies.
 
 The generic two-chart degree-one calculation is now complete in
 `ForMathlib/TwoOpenHOne.lean`. The theorem
