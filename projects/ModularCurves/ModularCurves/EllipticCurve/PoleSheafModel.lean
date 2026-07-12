@@ -1303,6 +1303,60 @@ noncomputable def projModelSectionPoleCoefficientZ (W : WeierstrassCurve R) (n :
       (projModelZChart W)
       (projModelSectionPoleSheafPowerTrivializationZ W n) m)
 
+/-- The canonical action of the base ring on global functions of the projective
+model. -/
+noncomputable def projModelBaseScalarHom (W : WeierstrassCurve R) :
+    R →+* Γ(projModel W, (⊤ : (projModel W).Opens)) :=
+  ((projModelπ W).appTop).hom.comp
+    ((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom
+
+/-- A base scalar restricts on the affine `Z`-chart to the corresponding
+constant function. -/
+theorem chartZSectionsRingEquiv_res_baseScalar
+    (W : WeierstrassCurve R) (r : R) :
+    chartZSectionsRingEquiv W
+        ((projModel W).presheaf.map (homOfLE le_top).op
+          (projModelBaseScalarHom W r)) =
+      algebraMap R W.toAffine.CoordinateRing r := by
+  have h := structure_section_square_apply W
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+    (mk_X_mem_quotientGrading_one W 2) one_pos r
+  have h' := congrArg (chartZRingEquiv W) h
+  rw [chartZRingEquiv_fromZero] at h'
+  unfold chartZSectionsRingEquiv projModelBaseScalarHom
+  rw [RingEquiv.trans_apply, RingHom.comp_apply]
+  convert h' using 1
+  congr 2
+
+/-- The affine pole coefficient is compatible with base scalar multiplication. -/
+theorem projModelSectionPoleCoefficientZ_smul
+    (W : WeierstrassCurve R) (n : ℕ) (r : R)
+    (m : Γ(sectionPoleSheafPower (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W) n, (⊤ : (projModel W).Opens))) :
+    projModelSectionPoleCoefficientZ W n
+        (projModelBaseScalarHom W r • m) =
+      r • projModelSectionPoleCoefficientZ W n m := by
+  unfold projModelSectionPoleCoefficientZ
+  rw [localTrivializationCoefficient_smul, map_mul,
+    chartZSectionsRingEquiv_res_baseScalar]
+  rw [Algebra.smul_def]
+
+/-- The affine pole coefficient is additive. -/
+theorem projModelSectionPoleCoefficientZ_add
+    (W : WeierstrassCurve R) (n : ℕ)
+    (m₁ m₂ : Γ(sectionPoleSheafPower (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W) n, (⊤ : (projModel W).Opens))) :
+    projModelSectionPoleCoefficientZ W n (m₁ + m₂) =
+      projModelSectionPoleCoefficientZ W n m₁ +
+        projModelSectionPoleCoefficientZ W n m₂ := by
+  unfold projModelSectionPoleCoefficientZ
+  rw [localTrivializationCoefficient_add, map_add]
+
+/-- Global sections of `O(n[0])` on the projective Weierstrass model. -/
+noncomputable abbrev projModelPoleSections (W : WeierstrassCurve R) (n : ℕ) :=
+  Γ(sectionPoleSheafPower (projModelπ W) (projModelZero W)
+    (projModelZero_projModelπ W) n, (⊤ : (projModel W).Opens))
+
 /-- The section-neighborhood coefficient restricts to its canonical overlap
 coefficient. -/
 theorem projModelSectionPoleCoefficient_restrict (W : WeierstrassCurve R) (n : ℕ)
