@@ -1,5 +1,7 @@
 import ModularCurves.ForMathlib.SheafCechInjectiveBicomplex
+import ModularCurves.ForMathlib.SheafCohomologyExact
 import ModularCurves.ForMathlib.SheafDerivedGlobalSections
+import ModularCurves.ForMathlib.TopCatSheafRestrict
 import ModularCurves.ForMathlib.TotalComplexUpNatVerticalEdge
 
 /-!
@@ -199,6 +201,331 @@ theorem cechInjectiveResolutionAugmentation_exact
           (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (i k))) (x i) := by
         rw [hx'i]
     _ = _ := hx i
+
+private theorem injectiveResolution_d_app_comp_d
+    (F : Sheaf AddCommGrpCat.{u} X) (V : Opens X) :
+    ((injectiveResolution (toSiteSheaf F)).cocomplex.d 0 1).hom.app
+        (Opposite.op V) ≫
+      ((injectiveResolution (toSiteSheaf F)).cocomplex.d 1 2).hom.app
+        (Opposite.op V) = 0 := by
+  let I := injectiveResolution (toSiteSheaf F)
+  have h : (I.cocomplex.d 0 1).hom ≫ (I.cocomplex.d 1 2).hom = 0 :=
+    congrArg (fun f ↦ f.hom) (I.complex_d_comp 0)
+  change ((I.cocomplex.d 0 1).hom ≫ (I.cocomplex.d 1 2).hom).app _ = 0
+  exact (congr_app h _).trans rfl
+
+private theorem injectiveResolution_cokernel_app_surjective_of_subsingleton_H
+    (F : Sheaf AddCommGrpCat.{u} X) (V : Opens X)
+    [Subsingleton (CategoryTheory.Sheaf.H
+      ((restrict AddCommGrpCat V.isOpenEmbedding).obj F) 1)] :
+    Function.Surjective
+      ((cokernel.π
+        ((injectiveResolution (toSiteSheaf F)).ι.f 0)).hom.app
+          (Opposite.op V)) := by
+  let I := injectiveResolution (toSiteSheaf F)
+  change Function.Surjective
+    ((cokernel.π (I.ι.f 0)).hom.app (Opposite.op V))
+  let S := ShortComplex.mk (I.ι.f 0) (cokernel.π (I.ι.f 0))
+    (cokernel.condition (I.ι.f 0))
+  have hS : S.ShortExact :=
+    ShortComplex.ShortExact.mk (ShortComplex.exact_cokernel (I.ι.f 0))
+  let R := restrict AddCommGrpCat.{u} V.isOpenEmbedding
+  haveI : R.Additive :=
+    restrict_additive V.isOpenEmbedding
+  have hR : R.PreservesZeroMorphisms :=
+    { map_zero := fun _ _ ↦
+        R.mapAddHom.map_zero }
+  have hRlim : PreservesFiniteLimits R := by
+    dsimp [R]
+    exact restrict_preservesFiniteLimits V.isOpenEmbedding
+  have hRcolim : PreservesFiniteColimits R := by
+    dsimp [R]
+    infer_instance
+  change Function.Surjective (S.g.hom.app (Opposite.op V))
+  let SV := @ShortComplex.map _ _ _ _ _ _ S R hR
+  have hSV : SV.ShortExact := by
+    exact @ShortComplex.ShortExact.map_of_exact _ _ _ _ _ _ S hS R hR
+      hRlim hRcolim
+  have hH0 : Subsingleton (CategoryTheory.Sheaf.H (R.obj F) 1) := by
+    dsimp [R]
+    infer_instance
+  have hH : Subsingleton (SV.X₁.H 1) := by
+    simpa only [SV, ShortComplex.map_X₁, S,
+      CochainComplex.single₀_obj_zero] using hH0
+  have htop := CategoryTheory.Sheaf.H.longSequence_surjective_of_subsingleton_H
+    hSV isTerminalTop
+  change Function.Surjective
+    (S.g.hom.app (Opposite.op (V.isOpenEmbedding.functor.obj ⊤))) at htop
+  rw [Opens.isOpenEmbedding_obj_top V] at htop
+  exact htop
+
+private noncomputable def injectiveResolutionAugmentationHom
+    (F : Sheaf AddCommGrpCat.{u} X) :
+    toSiteSheaf F ⟶
+      (injectiveResolution (toSiteSheaf F)).cocomplex.X 0 :=
+  (injectiveResolution (toSiteSheaf F)).ι.f 0
+
+private theorem injectiveResolutionAugmentationHom_comp_d
+    (F : Sheaf AddCommGrpCat.{u} X) :
+    injectiveResolutionAugmentationHom F ≫
+      (injectiveResolution (toSiteSheaf F)).cocomplex.d 0 1 = 0 := by
+  exact (injectiveResolution (toSiteSheaf F)).ι_f_zero_comp_complex_d
+
+private noncomputable def injectiveResolutionAugmentationShortComplex
+    (F : Sheaf AddCommGrpCat.{u} X) :
+    ShortComplex
+      (CategoryTheory.Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+  ShortComplex.mk
+    (injectiveResolutionAugmentationHom F)
+    ((injectiveResolution (toSiteSheaf F)).cocomplex.d 0 1)
+    (injectiveResolutionAugmentationHom_comp_d F)
+
+private theorem injectiveResolutionAugmentationShortComplex_exact
+    (F : Sheaf AddCommGrpCat.{u} X) :
+    (injectiveResolutionAugmentationShortComplex F).Exact := by
+  let I := injectiveResolution (toSiteSheaf F)
+  apply ShortComplex.exact_of_f_is_kernel
+  refine IsLimit.ofIsoLimit I.isLimitKernelFork ?_
+  apply Fork.ext (Iso.refl _)
+
+private noncomputable def injectiveResolutionCokernelToOne
+    (F : Sheaf AddCommGrpCat.{u} X) :
+    cokernel (injectiveResolutionAugmentationShortComplex F).f ⟶
+      (injectiveResolutionAugmentationShortComplex F).X₃ :=
+  cokernel.desc
+    (injectiveResolutionAugmentationShortComplex F).f
+    (injectiveResolutionAugmentationShortComplex F).g
+    (injectiveResolutionAugmentationShortComplex F).zero
+
+@[reassoc]
+private theorem injectiveResolution_cokernel_π_comp_toOne
+    (F : Sheaf AddCommGrpCat.{u} X) :
+    cokernel.π (injectiveResolutionAugmentationShortComplex F).f ≫
+      injectiveResolutionCokernelToOne F =
+        (injectiveResolutionAugmentationShortComplex F).g := by
+  exact cokernel.π_desc
+    (injectiveResolutionAugmentationShortComplex F).f
+    (injectiveResolutionAugmentationShortComplex F).g
+    (injectiveResolutionAugmentationShortComplex F).zero
+
+private noncomputable instance injectiveResolutionCokernelToOne_mono
+    (F : Sheaf AddCommGrpCat.{u} X) :
+    Mono (injectiveResolutionCokernelToOne F) := by
+  exact ShortComplex.Exact.mono_cokernelDesc
+    (injectiveResolutionAugmentationShortComplex_exact F)
+
+private theorem injectiveResolutionCokernelToOne_comp_d
+    (F : Sheaf AddCommGrpCat.{u} X) :
+    injectiveResolutionCokernelToOne F ≫
+      (injectiveResolution (toSiteSheaf F)).cocomplex.d 1 2 = 0 := by
+  apply (cancel_epi
+    (cokernel.π (injectiveResolutionAugmentationShortComplex F).f)).1
+  rw [← Category.assoc, injectiveResolution_cokernel_π_comp_toOne, comp_zero]
+  exact (injectiveResolution (toSiteSheaf F)).complex_d_comp 0
+
+private noncomputable def injectiveResolutionCokernelTail
+    (F : Sheaf AddCommGrpCat.{u} X) :
+    ShortComplex
+      (CategoryTheory.Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u}) :=
+  ShortComplex.mk
+    (injectiveResolutionCokernelToOne F)
+    ((injectiveResolution (toSiteSheaf F)).cocomplex.d 1 2)
+    (injectiveResolutionCokernelToOne_comp_d F)
+
+private theorem injectiveResolutionCokernelTail_exact
+    (F : Sheaf AddCommGrpCat.{u} X) :
+    (injectiveResolutionCokernelTail F).Exact := by
+  let I := injectiveResolution (toSiteSheaf F)
+  let S := ShortComplex.mk (I.cocomplex.d 0 1) (I.cocomplex.d 1 2)
+    (I.complex_d_comp 0)
+  let e : S ⟶ injectiveResolutionCokernelTail F :=
+    { τ₁ := cokernel.π (injectiveResolutionAugmentationShortComplex F).f
+      τ₂ := 𝟙 _
+      τ₃ := 𝟙 _
+      comm₁₂ := by
+        simpa [S, I, injectiveResolutionCokernelTail,
+          injectiveResolutionAugmentationShortComplex] using
+          (injectiveResolution_cokernel_π_comp_toOne F)
+      comm₂₃ := by
+        change (𝟙 _) ≫ I.cocomplex.d 1 2 =
+          I.cocomplex.d 1 2 ≫ 𝟙 _
+        simp }
+  letI : Epi e.τ₁ := by
+    dsimp [e]
+    exact epi_of_isColimit_cofork (colimit.isColimit _)
+  letI : IsIso e.τ₂ := by
+    dsimp [e]
+    exact CategoryTheory.IsIso.id _
+  letI : IsIso e.τ₃ := by
+    dsimp [e]
+    exact CategoryTheory.IsIso.id _
+  letI : Mono e.τ₃ := by
+    infer_instance
+  exact (ShortComplex.exact_iff_of_epi_of_isIso_of_mono e).mp (I.exact_succ 0)
+
+private theorem injectiveResolutionCokernelToOne_app_comp_d
+    (F : Sheaf AddCommGrpCat.{u} X) (V : Opens X) :
+    (injectiveResolutionCokernelToOne F).hom.app (Opposite.op V) ≫
+      ((injectiveResolution (toSiteSheaf F)).cocomplex.d 1 2).hom.app
+        (Opposite.op V) = 0 := by
+  have h := congrArg (fun f ↦ f.hom)
+    (injectiveResolutionCokernelToOne_comp_d F)
+  change ((injectiveResolutionCokernelToOne F).hom ≫
+    ((injectiveResolution (toSiteSheaf F)).cocomplex.d 1 2).hom).app _ = 0
+  exact (congr_app h _).trans rfl
+
+private theorem injectiveResolutionCokernelTail_app_exact
+    (F : Sheaf AddCommGrpCat.{u} X) (V : Opens X) :
+    (ShortComplex.mk
+      ((injectiveResolutionCokernelToOne F).hom.app (Opposite.op V))
+      (((injectiveResolution (toSiteSheaf F)).cocomplex.d 1 2).hom.app
+        (Opposite.op V))
+      (injectiveResolutionCokernelToOne_app_comp_d F V)).Exact := by
+  letI : Mono (injectiveResolutionCokernelTail F).f := by
+    change Mono (injectiveResolutionCokernelToOne F)
+    exact injectiveResolutionCokernelToOne_mono F
+  apply ShortComplex.exact_of_f_is_kernel
+  refine IsLimit.ofIsoLimit
+    (KernelFork.mapIsLimit _
+      (injectiveResolutionCokernelTail_exact F).fIsKernel (sectionsAt V)) ?_
+  apply Fork.ext (Iso.refl _)
+
+private theorem injectiveResolution_app_exactAt_one_of_subsingleton_H
+    (F : Sheaf AddCommGrpCat.{u} X) (V : Opens X)
+    [Subsingleton (CategoryTheory.Sheaf.H
+      ((restrict AddCommGrpCat V.isOpenEmbedding).obj F) 1)] :
+    (ShortComplex.mk
+      (((injectiveResolution (toSiteSheaf F)).cocomplex.d 0 1).hom.app
+        (Opposite.op V))
+      (((injectiveResolution (toSiteSheaf F)).cocomplex.d 1 2).hom.app
+        (Opposite.op V))
+      (injectiveResolution_d_app_comp_d F V)).Exact := by
+  rw [ShortComplex.ab_exact_iff]
+  intro y hy
+  obtain ⟨q, hq⟩ := (ShortComplex.mk
+    ((injectiveResolutionCokernelToOne F).hom.app (Opposite.op V))
+    (((injectiveResolution (toSiteSheaf F)).cocomplex.d 1 2).hom.app
+      (Opposite.op V))
+    (injectiveResolutionCokernelToOne_app_comp_d F V)).ab_exact_iff.mp
+      (injectiveResolutionCokernelTail_app_exact F V) y hy
+  have hq' :
+      (injectiveResolutionCokernelToOne F).hom.app (Opposite.op V) q = y := hq
+  obtain ⟨x, hx⟩ :=
+    injectiveResolution_cokernel_app_surjective_of_subsingleton_H F V q
+  refine ⟨x, ?_⟩
+  have hπφ := congrArg (fun f ↦ f.hom)
+    (injectiveResolution_cokernel_π_comp_toOne F)
+  have hπφV := ConcreteCategory.congr_hom
+    (congr_app hπφ (Opposite.op V)) x
+  rw [← hq', ← hx]
+  exact hπφV.symm
+
+/-- If `H¹` vanishes on every intersection indexing a Cech degree, then the
+injective-resolution column is exact in resolution degree one at that Cech
+degree. -/
+theorem cechInjectiveResolutionBicomplex_column_exactAt_one
+    (F : Sheaf AddCommGrpCat.{u} X) (p : ℕ)
+    (hH : ∀ i : Fin (p + 1) → ι,
+      Subsingleton (CategoryTheory.Sheaf.H
+        ((restrict AddCommGrpCat
+          (∏ᶜ fun k : Fin (p + 1) ↦ U (i k)).isOpenEmbedding).obj F) 1)) :
+    (ShortComplex.mk
+      (((cechInjectiveResolutionBicomplex U F).d 0 1).f p)
+      (((cechInjectiveResolutionBicomplex U F).d 1 2).f p)
+      ((cechInjectiveResolutionBicomplex U F).d_f_comp_d_f 0 1 2 p)).Exact := by
+  let I := injectiveResolution (toSiteSheaf F)
+  rw [ShortComplex.ab_exact_iff]
+  intro y hy
+  have hy' :
+      Limits.Pi.map (fun i : Fin (p + 1) → ι ↦
+        (I.cocomplex.d 1 2).hom.app
+          (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (i k)))) y = 0 := hy
+  have preimage (i : Fin (p + 1) → ι) :
+      ∃ x : (I.cocomplex.X 0).obj.obj
+          (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (i k))),
+        (I.cocomplex.d 0 1).hom.app
+            (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (i k))) x =
+          Limits.Pi.π (fun j : Fin (p + 1) → ι ↦
+            (I.cocomplex.X 1).obj.obj
+              (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (j k)))) i y := by
+    let V := ∏ᶜ fun k : Fin (p + 1) ↦ U (i k)
+    have hyi :
+        (I.cocomplex.d 1 2).hom.app (Opposite.op V)
+          (Limits.Pi.π (fun j : Fin (p + 1) → ι ↦
+            (I.cocomplex.X 1).obj.obj
+              (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (j k)))) i y) = 0 := by
+      have hmap := ConcreteCategory.congr_hom
+        (Limits.Pi.map_π (fun j : Fin (p + 1) → ι ↦
+          (I.cocomplex.d 1 2).hom.app
+            (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (j k)))) i) y
+      calc
+        _ = Limits.Pi.π (fun j : Fin (p + 1) → ι ↦
+              (I.cocomplex.X 2).obj.obj
+                (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (j k)))) i
+              (Limits.Pi.map (fun j : Fin (p + 1) → ι ↦
+                (I.cocomplex.d 1 2).hom.app
+                  (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (j k)))) y) :=
+          hmap.symm
+        _ = 0 := by rw [hy', map_zero]
+    letI : Subsingleton (CategoryTheory.Sheaf.H
+        ((restrict AddCommGrpCat V.isOpenEmbedding).obj F) 1) := hH i
+    exact ((ShortComplex.mk
+      ((I.cocomplex.d 0 1).hom.app (Opposite.op V))
+      ((I.cocomplex.d 1 2).hom.app (Opposite.op V))
+      (injectiveResolution_d_app_comp_d F V)).ab_exact_iff.mp
+        (injectiveResolution_app_exactAt_one_of_subsingleton_H F V)) _ hyi
+  choose x hx using preimage
+  let x' := (cechCochainAddEquiv (I.cocomplex.X 0).obj U p).symm x
+  refine ⟨x', ?_⟩
+  change Limits.Pi.map (fun i : Fin (p + 1) → ι ↦
+      (I.cocomplex.d 0 1).hom.app
+        (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (i k)))) x' = y
+  apply (cechCochainAddEquiv (I.cocomplex.X 1).obj U p).injective
+  funext i
+  rw [cechCochainAddEquiv_apply, cechCochainAddEquiv_apply]
+  have hmap := ConcreteCategory.congr_hom
+    (Limits.Pi.map_π (fun j : Fin (p + 1) → ι ↦
+      (I.cocomplex.d 0 1).hom.app
+        (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (j k)))) i) x'
+  have hx'i :
+      Limits.Pi.π (fun j : Fin (p + 1) → ι ↦
+        (I.cocomplex.X 0).obj.obj
+          (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (j k)))) i x' = x i := by
+    change cechCochainAddEquiv (I.cocomplex.X 0).obj U p x' i = x i
+    simp [x']
+  calc
+    _ = (I.cocomplex.d 0 1).hom.app
+          (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (i k)))
+          (Limits.Pi.π (fun j : Fin (p + 1) → ι ↦
+            (I.cocomplex.X 0).obj.obj
+              (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (j k)))) i x') := by
+        simpa only [ConcreteCategory.comp_apply] using hmap
+    _ = (I.cocomplex.d 0 1).hom.app
+          (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (i k))) (x i) := by
+        rw [hx'i]
+    _ = _ := hx i
+
+private theorem cechSingletonIntersection_eq (i : Fin 1 → ι) :
+    (∏ᶜ fun k : Fin 1 ↦ U (i k)) = U (i 0) := by
+  apply le_antisymm
+  · exact leOfHom (Limits.Pi.π (fun k : Fin 1 ↦ U (i k)) 0)
+  · exact leOfHom (Limits.Pi.lift fun k : Fin 1 ↦ homOfLE (by
+      rw [Subsingleton.elim k 0]))
+
+/-- Vanishing of `H¹` on each member of the cover gives the resolution-degree-one
+exactness required in Cech degree zero. -/
+theorem cechInjectiveResolutionBicomplex_column_zero_exactAt_one
+    (F : Sheaf AddCommGrpCat.{u} X)
+    (hH : ∀ i : ι, Subsingleton (CategoryTheory.Sheaf.H
+      ((restrict AddCommGrpCat (U i).isOpenEmbedding).obj F) 1)) :
+    (ShortComplex.mk
+      (((cechInjectiveResolutionBicomplex U F).d 0 1).f 0)
+      (((cechInjectiveResolutionBicomplex U F).d 1 2).f 0)
+      ((cechInjectiveResolutionBicomplex U F).d_f_comp_d_f 0 1 2 0)).Exact := by
+  apply cechInjectiveResolutionBicomplex_column_exactAt_one U F 0
+  intro i
+  rw [cechSingletonIntersection_eq U i]
+  exact hH (i 0)
 
 end
 
