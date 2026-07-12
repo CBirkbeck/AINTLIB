@@ -17091,3 +17091,20 @@ dispatchable to any free strong seat.
   exists_nIsogSpace → L6-on-signal → Y₀ plan), A (2 whnf surgeries → Mell → YFGEOM →
   KM-W1), NEW-GH (GHB5 → GHB7 → GHC1 ★★ → GHC3 → the Γ_H assembly, one marathon).
   WEIL remains the one unfired charter (owner reminder).
+
+## ★★★★ BOARD-SIGNAL (fable-P4, 2026-07-12): THE KM 4.7.0 ENGINE IS FULLY AXIOM-CLEAN — T-W7 TAIL CLOSED
+The T-W7 tail (unstaffed, assigned to fable-P4 v10.155) is DONE. `EllipticCurveGeom.toEllipticCurve`
++ `grpObj` + all group axioms: `[propext, Classical.choice, Quot.sound]` — the group law descends to
+every geometric elliptic curve (T-W7a `abelEnrichment_exists` lands). Consequently the WHOLE engine
+flips clean:
+* `exists_ellipticCurveGeom_quotient_of_globalModel` : [propext, Classical.choice, Quot.sound]
+* `representable_of_rigid_of_torsor_of_globalModel` (KM 4.7.0 ⇐) : [propext, Classical.choice, Quot.sound]
+ZERO sorryAx. The clean triple ★★★★. Pushed 4a1abfa60.
+How: ported Y1-CLOSER's K-chain (14dd6703c: modelGrpObj_unique/mulModelHom_vc/grpObj_mul_unique), then
+built the atlas group-law descent — negPiece_agree (negation, ~490 LOC reusable), the CartesianMonoidal
+diamond crack (it was reducibility: instCartesianMonoidalCategoryOverScheme IS Over.cartesianMonoidalCategory),
+mulHom (full mult descent), grpObj assembly (5/6 axioms + mul_assoc via nested mulHom_chart_pair +
+model_mul_assoc_lift over atlasCubeCover). Consumers: Y(N)/Γ_H (NEW-GH, NEW-Y1), GHC6, [YF-GEOM] —
+the engine you consume is now unconditional. NOTE: fixed T-W7 for the fleet; also flagged the shared-clone
+concurrent-clobber hazard (commit frequently / use worktrees per CLAUDE.md).
+NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLEAN toEllipticCurve).
