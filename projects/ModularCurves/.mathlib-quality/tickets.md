@@ -17329,3 +17329,23 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
   factors through the absolute quotient's base change — resolve the `f₀`/over-S threading first.
 - **LOC**: ~150 (the codebase's most intricate gluing; the largest remaining GH leaf).
 - **Unblocks**: GHB5 → GHB7 value-functor/relRep → GHC1 goes fully unconditional.
+
+### [GHB5a-i] free-action affine base-change descent — GHB5a's per-chart engine (NEW-GH refinement, v10.166)
+- **Status**: open  **Parent**: GHB5a  **File**: `ModularCurves/ForMathlib/AffineQuotient.lean`
+- **Statement**: analogue of `exists_invariantsπ_lift_of_isOpenImmersion` (line 628) with
+  `[IsOpenImmersion j]` DROPPED and a freeness hypothesis ADDED: for `Spec B` with a free
+  `G`-action and ARBITRARY `j : Q' ⟶ Spec Bᴳ`, every `pullbackSpecSMul`-invariant
+  `f : pullback (invariantsπ) j ⟶ Y` descends to `Q'`.
+- **Core (the alignment insight)**: the chart-local fact is `(B ⊗_{Bᴳ} C)ᴳ = C`. This is
+  **[A711-BC] `fixedPointsBaseChange_bijective_of_isFreeAlgebraAction` instantiated at ground
+  `R := Bᴳ`** (not the ℤ the scheme layer uses): with `A := B`, `R := Bᴳ`,
+  `FixedPoints.subalgebra Bᴳ B G = Bᴳ`, it gives `(B ⊗_{Bᴳ} R')ᴳ = Bᴳ ⊗_{Bᴳ} R' = R'` for
+  every `Bᴳ`-algebra `R'`. The R-parameter re-grounding (ℤ → Bᴳ) is the main plumbing;
+  `IsFreeAlgebraAction G Bᴳ B` follows from the scheme-level `hfree`.
+  The flatness route (`_of_isOpenImmersion`) is the special case where `j` localization makes
+  `C` flat; freeness replaces flatness for arbitrary `C`.
+- **Then GHB5a** = glue `[GHB5a-i]` over `quotientGlueData` mirroring `exists_quotientπ_lift`
+  (SchemeQuotient.lean:1021), and **GHB5** = instantiate GHB5a at `j = pullback.fst f₀ g`
+  (Z₀ ≅ σ.quotient via `hdesc`-uniqueness). Full chain now precise & ungated:
+  [A711-BC]✓ → GHB5a-i → GHB5a → GHB5 → GHB7 value-functor/relRep → GHC1 unconditional.
+- **LOC**: GHB5a-i ~120, GHB5a-glue ~80, GHB5-transfer ~40.
