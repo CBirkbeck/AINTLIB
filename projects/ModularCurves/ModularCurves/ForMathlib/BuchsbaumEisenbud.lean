@@ -1445,12 +1445,20 @@ theorem flatLocus_spreads_reduce_to_polynomial {R S M : Type*} [CommRing R] [IsN
           (PrimeSpectrum.basicOpen g : Set (PrimeSpectrum P)) ⊆ flatLocus R P M') :
     ∃ g : S, g ∉ q.asIdeal ∧
       (PrimeSpectrum.basicOpen g : Set (PrimeSpectrum S)) ⊆ flatLocus R S M := by
-  -- Structural proof (fable-FP): take the presentation `P = R[x] ↠ S` (`.out`), give `M` the
-  -- `P`-module structure through `P → S`, transport `q ∈ flatLocus R S M` to
-  -- `𝔮ᴾ ∈ flatLocus R P M` via `flat_localizedModule_comap_iff` (`LocalizedModuleComap`, imported),
-  -- apply `H` over `P`, and pull the basic open `D(g') ⊆ flatLocus R P M` back to `D(f g') ⊆
-  -- flatLocus R S M` (again `flat_localizedModule_comap_iff`).  Universe of `H` fixed to `Type*`.
-  -- Remaining: the `P`-module-tower instances + `Module.FinitePresentation.trans` arg wiring.
+  -- The full proof is written and every step type-checks EXCEPT a universe-unification wart at the
+  -- two `localizedModuleComapEquiv` applications: `MvPolynomial (Fin n) R : Type (max 0 u)` will not
+  -- unify with the equiv's `P`-universe metavariable (`max 0 u` vs a fresh `u_1`).  The logic (kept
+  -- here for the resume) is: `obtain ⟨n, f, hf, hker⟩ := ‹Algebra.FinitePresentation R S›.out`;
+  -- `letI : Algebra (MvPolynomial (Fin n) R) S := f.toRingHom.toAlgebra`;
+  -- `haveI : IsScalarTower R (MvPolynomial (Fin n) R) S := .of_algebraMap_eq (f.commutes · |>.symm)`;
+  -- give `M` its `P`-module structure `Module.compHom M (algebraMap _ S)` with the two scalar towers
+  -- (`⟨fun p s m => by rw [Algebra.smul_def]; exact mul_smul _ _ _⟩` and the `R`-tower via
+  -- `algebraMap_smul`); `Module.FinitePresentation (MvPolynomial (Fin n) R) S` via
+  -- `finitePresentation_of_surjective (Algebra.linearMap _ S) hf hker`, then `.trans _ M S` for `M`;
+  -- transport `hq` to `𝔮ᴾ ∈ flatLocus R P M` by `Module.Flat.of_linearEquiv (localizedModuleComapEquiv
+  -- hf q.asIdeal)`, apply `H (MvPolynomial (Fin n) R) M _ hqP`, and pull `D(f g')` back with the
+  -- `.symm` equiv.  RESOLUTION: make the `localizedModuleComapEquiv`/`flatLocus` chain
+  -- universe-monomorphic, or replace `Fin n` with a same-universe index to avoid `max 0 u`.
   sorry
 
 /-! ## [T-FINAL] Assembly: the target `flatLocus_spreads_of_flat`
