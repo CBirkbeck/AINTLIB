@@ -1304,9 +1304,118 @@ private theorem EllipticCurveGeom.grpObj_mul_assoc :
     pullback.lift (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.fst G.π G.π)
       (pullback.lift (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.snd G.π G.π)
         (pullback.snd (pullback.fst G.π G.π ≫ G.π) G.π) _ ≫ mulHomOf G.atlas) _ ≫ mulHomOf G.atlas
-  refine (atlasCubeCover G.atlas).hom_ext _ _ (fun i => ?_)
+  refine (atlasCubeCover G.atlas).hom_ext _ _ (fun (i : G.atlas.ι) => ?_)
   haveI := G.atlas.elliptic i
-  sorry
+  rw [atlasCubeCover_f]
+  -- The three cube legs, composed with the cube-chart embedding `c`, land over chart `i`.
+  have hcA : (pullback.fst (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫
+        pullback.fst G.π G.π ≫ G.π) (G.atlas.U i).1.ι ≫
+        (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.fst G.π G.π)) ≫ G.π =
+      pullback.snd (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.fst G.π G.π ≫ G.π)
+        (G.atlas.U i).1.ι ≫ (G.atlas.U i).1.ι := by
+    rw [Category.assoc, Category.assoc]
+    exact pullback.condition
+  have hcB : (pullback.fst (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫
+        pullback.fst G.π G.π ≫ G.π) (G.atlas.U i).1.ι ≫
+        (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.snd G.π G.π)) ≫ G.π =
+      pullback.snd (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.fst G.π G.π ≫ G.π)
+        (G.atlas.U i).1.ι ≫ (G.atlas.U i).1.ι := by
+    rw [Category.assoc, Category.assoc, ← pullback.condition (f := G.π) (g := G.π)]
+    exact pullback.condition
+  have hcC : (pullback.fst (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫
+        pullback.fst G.π G.π ≫ G.π) (G.atlas.U i).1.ι ≫
+        pullback.snd (pullback.fst G.π G.π ≫ G.π) G.π) ≫ G.π =
+      pullback.snd (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.fst G.π G.π ≫ G.π)
+        (G.atlas.U i).1.ι ≫ (G.atlas.U i).1.ι := by
+    rw [Category.assoc, ← pullback.condition (f := pullback.fst G.π G.π ≫ G.π) (g := G.π)]
+    exact pullback.condition
+  -- The three model points obtained by transporting the embedded legs through the chart iso.
+  set uA := pullback.lift (pullback.fst (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫
+      pullback.fst G.π G.π ≫ G.π) (G.atlas.U i).1.ι ≫
+      (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.fst G.π G.π))
+      (pullback.snd (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.fst G.π G.π ≫ G.π)
+        (G.atlas.U i).1.ι) hcA ≫ (G.atlas.e i).hom with huA
+  set uB := pullback.lift (pullback.fst (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫
+      pullback.fst G.π G.π ≫ G.π) (G.atlas.U i).1.ι ≫
+      (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.snd G.π G.π))
+      (pullback.snd (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.fst G.π G.π ≫ G.π)
+        (G.atlas.U i).1.ι) hcB ≫ (G.atlas.e i).hom with huB
+  set uC := pullback.lift (pullback.fst (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫
+      pullback.fst G.π G.π ≫ G.π) (G.atlas.U i).1.ι ≫
+      pullback.snd (pullback.fst G.π G.π ≫ G.π) G.π)
+      (pullback.snd (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.fst G.π G.π ≫ G.π)
+        (G.atlas.U i).1.ι) hcC ≫ (G.atlas.e i).hom with huC
+  -- Per-leg identity: embedded leg = model point transported back into `E`.
+  have hpA : pullback.fst (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫
+        pullback.fst G.π G.π ≫ G.π) (G.atlas.U i).1.ι ≫
+        (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.fst G.π G.π) =
+      uA ≫ (G.atlas.e i).inv ≫ pullback.fst G.π (G.atlas.U i).1.ι := by
+    rw [huA, Category.assoc, Iso.hom_inv_id_assoc, pullback.lift_fst]
+  have hpB : pullback.fst (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫
+        pullback.fst G.π G.π ≫ G.π) (G.atlas.U i).1.ι ≫
+        (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.snd G.π G.π) =
+      uB ≫ (G.atlas.e i).inv ≫ pullback.fst G.π (G.atlas.U i).1.ι := by
+    rw [huB, Category.assoc, Iso.hom_inv_id_assoc, pullback.lift_fst]
+  have hpC : pullback.fst (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫
+        pullback.fst G.π G.π ≫ G.π) (G.atlas.U i).1.ι ≫
+        pullback.snd (pullback.fst G.π G.π ≫ G.π) G.π =
+      uC ≫ (G.atlas.e i).inv ≫ pullback.fst G.π (G.atlas.U i).1.ι := by
+    rw [huC, Category.assoc, Iso.hom_inv_id_assoc, pullback.lift_fst]
+  -- π-compatibility of the three model points (all equal `cs ≫ isoSpec.hom`).
+  have hπA : uA ≫ projModelπ (G.atlas.W i) =
+      pullback.snd (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.fst G.π G.π ≫ G.π)
+        (G.atlas.U i).1.ι ≫ (G.atlas.U i).2.isoSpec.hom := by
+    rw [huA, Category.assoc, G.atlas.compat_π i]
+    exact (Category.assoc _ _ _).symm.trans
+      (congrArg (· ≫ (G.atlas.U i).2.isoSpec.hom) (pullback.lift_snd _ _ _))
+  have hπB : uB ≫ projModelπ (G.atlas.W i) =
+      pullback.snd (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.fst G.π G.π ≫ G.π)
+        (G.atlas.U i).1.ι ≫ (G.atlas.U i).2.isoSpec.hom := by
+    rw [huB, Category.assoc, G.atlas.compat_π i]
+    exact (Category.assoc _ _ _).symm.trans
+      (congrArg (· ≫ (G.atlas.U i).2.isoSpec.hom) (pullback.lift_snd _ _ _))
+  have hπC : uC ≫ projModelπ (G.atlas.W i) =
+      pullback.snd (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.fst G.π G.π ≫ G.π)
+        (G.atlas.U i).1.ι ≫ (G.atlas.U i).2.isoSpec.hom := by
+    rw [huC, Category.assoc, G.atlas.compat_π i]
+    exact (Category.assoc _ _ _).symm.trans
+      (congrArg (· ≫ (G.atlas.U i).2.isoSpec.hom) (pullback.lift_snd _ _ _))
+  have hAB := hπA.trans hπB.symm
+  have hBC := hπB.trans hπC.symm
+  clear_value uA uB uC
+  have hC : (pullback.lift uA uB hAB ≫ mulModelHom (G.atlas.W i)) ≫ projModelπ (G.atlas.W i) =
+      uC ≫ projModelπ (G.atlas.W i) := by
+    rw [Category.assoc, mulModelHom_π]
+    exact (Category.assoc _ _ _).symm.trans
+      ((congrArg (· ≫ projModelπ (G.atlas.W i)) (pullback.lift_fst _ _ _)).trans (hAB.trans hBC))
+  have hC' : uA ≫ projModelπ (G.atlas.W i) =
+      (pullback.lift uB uC hBC ≫ mulModelHom (G.atlas.W i)) ≫ projModelπ (G.atlas.W i) := by
+    rw [Category.assoc, mulModelHom_π]
+    exact hAB.trans
+      ((congrArg (· ≫ projModelπ (G.atlas.W i)) (pullback.lift_fst _ _ _)).symm.trans
+        (Category.assoc _ _ _))
+  -- Distribute the cube-chart embedding through a `pullback.lift ≫ mulHomOf`.
+  have dist : ∀ {V : Scheme.{u}} (f : V ⟶ pullback (pullback.fst G.π G.π ≫ G.π) G.π)
+      (P Q : pullback (pullback.fst G.π G.π ≫ G.π) G.π ⟶ G.E) (hPQ : P ≫ G.π = Q ≫ G.π),
+      f ≫ pullback.lift P Q hPQ ≫ mulHomOf G.atlas =
+        pullback.lift (f ≫ P) (f ≫ Q)
+          (by rw [Category.assoc, hPQ, Category.assoc]) ≫ mulHomOf G.atlas := by
+    intro V f P Q hPQ
+    rw [← Category.assoc]
+    exact congrArg (· ≫ mulHomOf G.atlas)
+      (pullback.hom_ext (by simp only [Category.assoc, pullback.lift_fst])
+        (by simp only [Category.assoc, pullback.lift_snd]))
+  -- Distribute the cube embedding through both nested lifts (`simp` copes with the dependent
+  -- `pullback.lift` proofs where `rw` cannot), substitute the per-leg identities, then bridge
+  -- both inner and outer chart-pairs to `mulModelHom` via `mulHom_chart_pair`.
+  simp only [dist, hpA, hpB, hpC, mulHom_chart_pair G.atlas i uA uB hAB,
+    mulHom_chart_pair G.atlas i uB uC hBC,
+    ← Category.assoc (pullback.lift uA uB hAB) (mulModelHom (G.atlas.W i)),
+    ← Category.assoc (pullback.lift uB uC hBC) (mulModelHom (G.atlas.W i)),
+    mulHom_chart_pair G.atlas i (pullback.lift uA uB hAB ≫ mulModelHom (G.atlas.W i)) uC hC,
+    mulHom_chart_pair G.atlas i uA (pullback.lift uB uC hBC ≫ mulModelHom (G.atlas.W i)) hC']
+  -- The goal is now the model associativity law, transported back into `E` via `(A.e i).inv`.
+  rw [reassoc_of% (model_mul_assoc_lift (G.atlas.W i) uA uB uC hAB hBC)]
 
 set_option backward.isDefEq.respectTransparency false in
 private theorem EllipticCurveGeom.grpObj_left_inv :
