@@ -137,6 +137,27 @@ theorem awayHom_comp_awayProdHomRight (a b : R) :
   ext r
   exact IsLocalization.Away.awayToAwayLeft_eq b a r
 
+/-- `Spec.map (awayHom a)` is an open immersion (`D(a) ↪ Spec R`). -/
+instance isOpenImmersion_SpecMap_awayHom (a : R) : IsOpenImmersion (Spec.map (awayHom a)) :=
+  Scheme.isOpenImmersion_SpecMap_localizationAway a
+
+/-- **The overlap inclusion `D(ab) ↪ D(a)` is an open immersion.** Proved by cancelling the open
+immersion `D(a) ↪ Spec R` from the open immersion `D(ab) ↪ Spec R` (the tower factors). -/
+instance isOpenImmersion_SpecMap_awayProdHomLeft (a b : R) :
+    IsOpenImmersion (Spec.map (awayProdHomLeft a b)) := by
+  haveI : IsOpenImmersion (Spec.map (awayProdHomLeft a b) ≫ Spec.map (awayHom a)) := by
+    rw [← Spec.map_comp, awayHom_comp_awayProdHomLeft]
+    infer_instance
+  exact IsOpenImmersion.of_comp _ (Spec.map (awayHom a))
+
+/-- **The overlap inclusion `D(ab) ↪ D(b)` is an open immersion.** -/
+instance isOpenImmersion_SpecMap_awayProdHomRight (a b : R) :
+    IsOpenImmersion (Spec.map (awayProdHomRight a b)) := by
+  haveI : IsOpenImmersion (Spec.map (awayProdHomRight a b) ≫ Spec.map (awayHom b)) := by
+    rw [← Spec.map_comp, awayHom_comp_awayProdHomRight]
+    infer_instance
+  exact IsOpenImmersion.of_comp _ (Spec.map (awayHom b))
+
 /-- **Base change of an `Ell`-object along a ring map** `τ : R' ⟶ R''`: pull the base scheme
 back along `Spec.map τ` and base-change the curve. This is the left-adjoint direction to
 `EllObj.restrictScalars τ`; it is used to compare the two representing objects over `R[1/ab]`
