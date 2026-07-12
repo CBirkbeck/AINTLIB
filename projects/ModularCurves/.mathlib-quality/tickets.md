@@ -16921,3 +16921,26 @@ localModel glues (LocallyWeierstrass.baseChange + it's Zariski-local).
   `groupRingTop` directly (verified — NO topIso bridge needed). Remaining: `IsCoaction chartCoaction`
   (dualizes `translationAction_unit`/`_assoc`, same E.Point technique), `Module.Free`/`Module.Finite
   R' A'` (from finite/flat/lfp — own arc), C1d/C3/C4, six SubgroupQuotient pins → BOARD-SIGNAL.
+
+## Amendments v10.157 (2026-07-12, coordinator): display corollaries LANDED on y1; ★ PR #5256 OPENED (dev/modular-curves-y1 → main); codex/[OWNER-FLW] claim found STALE; NEW-Y1 v10.156 route-γ absorbed
+
+- **Display corollaries landed** (5eeae31f2, coordinator-authored, module re-verified
+  green 3,942 jobs): `yOne_representable_smooth_affine` (the MASTER with its witness
+  named — owner-readability request) + `gammaOneNaive_representable_zInv` (the literal
+  ℤ[1/N] form, Loeffler 3.4.4, via IsLocalization.Away.algebraMap_isUnit + eq_intCast).
+- **★ PR #5256 OPENED: dev/modular-curves-y1 → main** — the Y₁(N) handoff to the
+  integrated library. Pre-flight verified: identical toolchain + mathlib pin;
+  ModularCurves registered non-default-target (main default build surface unchanged);
+  body carries the axiom audit, the WIP-marker note, and the debt register. MERGE = the
+  owner call (outward-facing); on merge the cleanup fleet takes over per repo rules.
+- **codex/[OWNER-FLW] check (owner-requested)**: the branch is DARK — zero commits
+  since the merged frontier (c1399fd1b, 07-10 10:32) against a STANDING board claim
+  (dualOverIso / dualRestrictIso / pole-restriction isos); no visible progress on the
+  general fibrewise⟷LW converse. Owner-reserved lane ⟹ the poke/release call is the
+  owner's; noted that the claimed decls do not collide with PIC0's landed PAIR work
+  (restriction isos vs evaluation pairing — disjoint), so no fleet lane is blocked.
+- **NEW-Y1 §v10.156 (y1 board) absorbed + RATIFIED**: CHARTER-YFULL route-γ SCAFFOLD
+  COMPLETE — four clean rooted leaves reduce the clopen leaf to ONE divisor leaf; the
+  [YF-CLASSIFIER] design finding (finrank-φ route hits a φ-flatness snag ⟹ the
+  divisor-degree route, KM 3.7.1, is the path; D-stream pieces pinned). Exemplary
+  act-on-default execution. On charter.
