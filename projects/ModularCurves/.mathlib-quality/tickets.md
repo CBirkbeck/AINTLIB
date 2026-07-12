@@ -16513,3 +16513,29 @@ green (9,994 jobs). Board detail: v10.152-CLOSER on `dev/modular-curves-y1`.
 Attribution: c5β (representability chain/seesaw), A (Over-monoidal prep), NEW-CASCADE
 (T-B6′/BB-DIFF unramified cascade), NEW-Y1 (Y1 stream + K-series + BB-QF + this close),
 HasseWeil (`mulByInt_degree` anchor). CHARTER-Y1-CLOSER-2 COMPLETE.
+
+## Amendments v10.153 (2026-07-12, coordinator): ★★★★ Y₁(N) COMPLETE — RATIFIED AT SOURCE; ALL-HANDS on the general curves (gate-map refresh; CHARTER-WEIL on the p2-seat takeover)
+
+- **★★★★ Y₁(N) IS DONE — verified at source** (y1 through ddd7e90a5): N5
+  kernelNDivisible_of_nIsInvertible → N6 formallySmooth_mulByHom_appLE +
+  mulByHom_flat/smooth_of_nIsInvertible → N7 swaps ⟹ #print axioms
+  gammaOneNaive_representable = {propext, Classical.choice, Quot.sound};
+  exists_tatePoint likewise; full attribution boarded (v10.152-CLOSER: c5β, A,
+  NEW-CASCADE, NEW-Y1, HasseWeil). CHARTER-Y1-CLOSER-2 COMPLETE — the first modular
+  curve is unconditional. The v10.140-CLOSER finding ([T-A6b]/[T-A6c] never
+  MASTER-gating) ratified retroactively — audit-first, fourth confirmation.
+- **ALL-HANDS AFFIRMED (owner: more curves ASAP)**: the v10.141 nine-charter structure
+  IS the plan; seven seats verified live on it (c5β glSchemeSmul landed; D2 ★★
+  cyclicity capstone; FP decompose done; PIC0 4b closed; HOPF mid-coassoc; A leaf-plan
+  boarded; FP4 post-B3). GATE REFRESH inboxed: YFULL ETALE gate OPEN
+  (torsionπ_etale-prime unconditional for N invertible); E[N]
+  finiteness/flatness inputs REAL (swap hypothesis-wiring at will); T-E4 family clean
+  for GH consumers.
+- **NEW-Y1 account (the freed closer): CHARTER-YFULL is primary** — Y(N) is the ranked
+  next curve; CLOPEN etale-route audited first, route α de-coupled (WEIL).
+- **CHARTER-WEIL issued (inbox/WEIL.md; p2 seat takeover — rule-5, >48h dark)**:
+  [T-C1-KM28] the Weil pairing — gates GHA3/DS4 etale conjuncts + YFULL CLOPEN route α;
+  fresh account; /develop --decompose first with adversarial route audit; PIC0-duality
+  seam boarded; p2 return = boundary handshake.
+- Standing: NEW-GH CHARTER-GH-2 opener re-offered if unfired; NEW-CASCADE stale park
+  VOID (gate long passed; seat stood down with honor).
