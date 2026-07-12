@@ -312,8 +312,13 @@ to local freeness and base change on the family. The definition-level derived-fu
 is now closed by `CategoryTheory.Abelian.Ext.addEquivRightDerived` and
 `TopCat.Sheaf.H.addEquivRightDerivedGlobalSections`: genuine Ext-defined `Sheaf.H` is
 identified with `RⁿΓ` through injective resolutions. This makes a future finite-projective
-complex for proper pushforward directly applicable to the existing fibrewise vanishing;
-constructing that geometric complex and proving its base-change comparison remain open.
+complex for proper pushforward directly applicable to the existing fibrewise vanishing.
+The comparison is now also natural: `Abelian.Ext.addEquivRightDerived_naturality` and
+`TopCat.Sheaf.H.addEquivRightDerivedGlobalSections_naturality` intertwine Ext
+postcomposition with the canonical maps on `RⁿΓ`. Thus a future geometric complex
+comparison can identify the actual base-change morphism rather than only the source and
+target groups; constructing that geometric complex and proving its base-change comparison
+remain open.
 
 ### 4. Choose `x` and `y` -- `T-W-cmp.XY`
 
