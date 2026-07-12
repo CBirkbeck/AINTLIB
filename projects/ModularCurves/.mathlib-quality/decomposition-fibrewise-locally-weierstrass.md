@@ -363,6 +363,16 @@ lift there, and pass back to the germ. Thus the augmentation is now exact at deg
 without noetherianity. Positive-degree stalkwise contraction and the resulting resolution
 and derived comparison remain open.
 
+The local positive-degree contraction is now proved in
+`ForMathlib/SheafCechSheafLocalContraction.lean`.
+`TopCat.Sheaf.exists_preimage_cechDifferential_of_le` prepends a distinguished index
+`i₀` to every tuple over `V ≤ U i₀`. Evaluating the cycle equation on that larger tuple
+identifies its zeroth face with the original component and its remaining faces with the
+preceding differential, with opposite signs. Tuple deletion, intersection transport,
+face compatibility, and finite-sum cancellation are separate private helpers and require
+no options. It remains to apply this local theorem to stalk representatives under
+`⨆ i, U i = ⊤`, then package exactness in every positive degree.
+
 The generic two-chart degree-one calculation is now complete in
 `ForMathlib/TwoOpenHOne.lean`. The theorem
 `TopCat.Sheaf.subsingleton_H_one_of_two_open_cover` proves global `H¹` vanishing from
