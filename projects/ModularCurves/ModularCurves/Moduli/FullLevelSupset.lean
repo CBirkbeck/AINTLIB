@@ -9,6 +9,7 @@ import ModularCurves.LevelStructure.Incidence
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.ForMathlib.IdealSheafComaximal
 import ModularCurves.ForMathlib.SectionKerDisjoint
+import ModularCurves.Moduli.FullLevelOpenLocus
 
 /-!
 # The torsion ideal is contained in the kernel of a killed section (YFULL route γ, [YF-⊇])
@@ -126,6 +127,45 @@ theorem asSection_base_eq_imp {T : Scheme.{u}} (g : T ⟶ S) (P Q : E.Point g) (
       = (Limits.pullback.fst E.π g).base ((Point.asSection E g Q).1.base u) :=
     (congrArg (fun m : T ⟶ E.E => m.base u) (Point.asSection_val_fst E g Q)).symm
   eP.trans ((congrArg (Limits.pullback.fst E.π g).base h).trans eQ.symm)
+
+omit [NeZero N] in
+/-- The difference of two `N`-killed points is `N`-killed (`N•(x-y) = N•x - N•y = 0`). -/
+theorem sub_killed {T : Scheme.{u}} (t : T ⟶ S) (x y : E.Point t)
+    (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero) (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) :
+    (x - y).1 ≫ E.mulByHom N = t ≫ E.zero := by
+  rw [← E.smul_eq_zero_iff_comp_mulByHom t N] at hx hy ⊢
+  rw [smul_sub, hx, hy, sub_zero]
+
+/-- **[YF-⊇ BRIDGE — fibrewise group law, WIP frontier].** For `N` invertible, if two
+`N`-killed points `x, y` of `E` over `t` agree topologically at `u : T`, then their
+difference `x - y` vanishes at `u`: `u ∈ pointVanishSet (x - y)`.
+
+PROOF STRATEGY (KM 3.7.1, route γ). `x.1 u = y.1 u` ⟹ (the closed immersion `torsionι` has
+injective base) the two `E[N]`-classifiers agree, `(pointToTorsion x) u = (pointToTorsion y) u`.
+Translating by `-(pointToTorsion y)` in the étale group scheme `E[N]` (a base-changed
+automorphism, `Point.pull_add`/additivity of `pointToTorsion`) rewrites this as agreement
+with the zero classifier: `(pointToTorsion (x - y)) u = (pointToTorsion 0) u`. The zero
+section of `E[N] ⟶ S` has trivial residue extension (`κ = κ(s)`), so topological agreement
+with it upgrades to morphism agreement, placing `u` in the equalizer range — which is
+exactly `pointVanishSet (x - y)` (the reverse of `range_agreementι_subset`, valid against
+the zero classifier). Depends on: `pointToTorsion` additivity, the `E[N]` translation
+automorphism, and zero-section residue triviality (a focused sub-ticket each). -/
+theorem mem_pointVanishSet_of_base_eq (hN : NIsInvertible S N) {T : Scheme.{u}} (t : T ⟶ S)
+    (x y : E.Point t) (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) (u : T) (h : x.1.base u = y.1.base u) :
+    u ∈ E.pointVanishSet N t (x - y) (E.sub_killed N t x y hx hy) := by
+  sorry
+
+/-- **[YF-⊇] pointwise-distinctness from the open locus.** Contrapositive of the bridge:
+off the vanishing locus of `x - y`, the `N`-killed points `x, y` are topologically distinct
+at `u`. This is the input to `sectionsDivisor_ideal_eq_torsionIdeal`'s `hne` (via
+`asSection_base_eq_imp` for the base-changed combinations). -/
+theorem base_ne_of_notMem_pointVanishSet (hN : NIsInvertible S N) {T : Scheme.{u}}
+    (t : T ⟶ S) (x y : E.Point t) (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) (u : T)
+    (hu : u ∉ E.pointVanishSet N t (x - y) (E.sub_killed N t x y hx hy)) :
+    x.1.base u ≠ y.1.base u :=
+  fun h => hu (E.mem_pointVanishSet_of_base_eq N hN t x y hx hy u h)
 
 end EllipticCurve
 
