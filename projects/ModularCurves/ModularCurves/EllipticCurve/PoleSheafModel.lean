@@ -892,6 +892,32 @@ noncomputable def projModelSectionPoleSheafPowerTrivializationZ
     (projModelZero_projModelπ W) (projModelZChart W)
     (projModelSectionPoleSheafTrivializationZ W) n
 
+/-- Restricting the section-neighborhood trivialization of `O(n[0])` to the
+overlap recovers its canonical overlap trivialization. -/
+theorem projModelSectionPoleSheafPowerTrivialization_restrict
+    (W : WeierstrassCurve R) (n : ℕ) :
+    Scheme.Modules.restrictOpenTrivialization
+        (projModelPoleOverlap_le_sectionNeighborhood W)
+        (projModelSectionPoleSheafPowerTrivialization W n) =
+      projModelSectionPolePowerOverlapTrivialization W n := by
+  unfold projModelSectionPoleSheafPowerTrivialization
+  rw [sectionPoleSheafPowerTrivialization_restrictOpen]
+  rw [projModelSectionPoleSheafTrivialization_restrict]
+  rfl
+
+/-- Restricting the `Z`-chart trivialization of `O(n[0])` to the overlap
+recovers its canonical `Z`-chart overlap trivialization. -/
+theorem projModelSectionPoleSheafPowerTrivializationZ_restrict
+    (W : WeierstrassCurve R) (n : ℕ) :
+    Scheme.Modules.restrictOpenTrivialization
+        (projModelPoleOverlap_le_ZChart W)
+        (projModelSectionPoleSheafPowerTrivializationZ W n) =
+      projModelSectionPolePowerOverlapTrivializationZ W n := by
+  unfold projModelSectionPoleSheafPowerTrivializationZ
+  rw [sectionPoleSheafPowerTrivialization_restrictOpen]
+  rw [projModelSectionPoleSheafTrivializationZ_restrict]
+  rfl
+
 /-- The coefficient near the zero section of a global section of `O(n[0])`. -/
 noncomputable def projModelSectionPoleCoefficient (W : WeierstrassCurve R) (n : ℕ)
     (m : Γ(sectionPoleSheafPower (projModelπ W) (projModelZero W)
