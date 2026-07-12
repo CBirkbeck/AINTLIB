@@ -610,30 +610,33 @@ variable {X : TopCat.{u}}
 
 private abbrev J (X : TopCat.{u}) := Opens.grothendieckTopology X
 
-private abbrev globalSections (X : TopCat.{u}) :
-    CategoryTheory.Sheaf (J X) AddCommGrpCat.{u} ⥤ AddCommGrpCat.{u} :=
-  CategoryTheory.Sheaf.Γ (J X) AddCommGrpCat.{u}
+/-- The global-sections functor for additive sheaves on a topological space. -/
+abbrev globalSectionsFunctor (X : TopCat.{u}) :
+    CategoryTheory.Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u} ⥤
+      AddCommGrpCat.{u} :=
+  CategoryTheory.Sheaf.Γ
+    (Opens.grothendieckTopology X) AddCommGrpCat.{u}
 
 private abbrev constantZ (X : TopCat.{u}) :
     CategoryTheory.Sheaf (J X) AddCommGrpCat.{u} :=
   (CategoryTheory.constantSheaf (J X) AddCommGrpCat.{u}).obj
     (AddCommGrpCat.of (ULift.{u} ℤ))
 
-noncomputable local instance : (globalSections X).Additive :=
+noncomputable local instance : (globalSectionsFunctor X).Additive :=
   (CategoryTheory.constantSheafΓAdj (J X) AddCommGrpCat.{u}).right_adjoint_additive
 
 private def homToGlobalSectionsEquiv
     (F : CategoryTheory.Sheaf (J X) AddCommGrpCat.{u}) :
-    (constantZ X ⟶ F) ≃+ ↑((globalSections X).obj F) :=
+    (constantZ X ⟶ F) ≃+ ↑((globalSectionsFunctor X).obj F) :=
   ((CategoryTheory.constantSheafΓAdj (J X) AddCommGrpCat.{u}).homAddEquiv
       (AddCommGrpCat.of (ULift.{u} ℤ)) F).trans
-    (AddCommGrpCat.uliftZMultiplesAddEquiv ((globalSections X).obj F))
+    (AddCommGrpCat.uliftZMultiplesAddEquiv ((globalSectionsFunctor X).obj F))
 
 private lemma homToGlobalSectionsEquiv_naturality
     {F G : CategoryTheory.Sheaf (J X) AddCommGrpCat.{u}}
     (f : constantZ X ⟶ F) (g : F ⟶ G) :
     homToGlobalSectionsEquiv G (f ≫ g) =
-      (globalSections X).map g (homToGlobalSectionsEquiv F f) := by
+      (globalSectionsFunctor X).map g (homToGlobalSectionsEquiv F f) := by
   change AddCommGrpCat.uliftZMultiplesAddEquiv _
       ((CategoryTheory.constantSheafΓAdj (J X) AddCommGrpCat.{u}).homEquiv _ _ (f ≫ g)) = _
   rw [(CategoryTheory.constantSheafΓAdj
@@ -643,9 +646,9 @@ private lemma homToGlobalSectionsEquiv_naturality
 /-- Sheaf cohomology agrees with the right-derived functors of global sections. -/
 noncomputable def H.addEquivRightDerivedGlobalSections
     (F : Sheaf AddCommGrpCat.{u} X) (n : ℕ) :
-    H F n ≃+ ↑(((globalSections X).rightDerived n).obj (toSiteSheaf F)) := by
+    H F n ≃+ ↑(((globalSectionsFunctor X).rightDerived n).obj (toSiteSheaf F)) := by
   exact CategoryTheory.Abelian.Ext.addEquivRightDerived
-    (globalSections X) (constantZ X) (toSiteSheaf F)
+    (globalSectionsFunctor X) (constantZ X) (toSiteSheaf F)
     homToGlobalSectionsEquiv
     (fun f g ↦ homToGlobalSectionsEquiv_naturality f g) n
 
@@ -654,10 +657,10 @@ morphisms of sheaves. -/
 theorem H.addEquivRightDerivedGlobalSections_naturality
     {F G : Sheaf AddCommGrpCat.{u} X} (f : F ⟶ G) (n : ℕ) (x : H F n) :
     H.addEquivRightDerivedGlobalSections G n (H.map f n x) =
-      (((globalSections X).rightDerived n).map f).hom
+      (((globalSectionsFunctor X).rightDerived n).map f).hom
         (H.addEquivRightDerivedGlobalSections F n x) := by
   exact CategoryTheory.Abelian.Ext.addEquivRightDerived_naturality
-    (globalSections X) (constantZ X) homToGlobalSectionsEquiv
+    (globalSectionsFunctor X) (constantZ X) homToGlobalSectionsEquiv
       (fun a b ↦ homToGlobalSectionsEquiv_naturality a b) f n x
 
 end

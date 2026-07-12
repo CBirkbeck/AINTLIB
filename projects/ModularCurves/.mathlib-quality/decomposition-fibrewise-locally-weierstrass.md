@@ -412,13 +412,13 @@ The global-sections seam for the sheaf-level Cech resolution is now complete in
 `TopCat.Sheaf.cechGlobalSectionsXIso` combines the terminal-object description of
 global sections with `cechTermSectionsAddEquiv`, while
 `cechGlobalSectionsComplexIso` proves that this identification carries the sheaf-level
-alternating differential to mathlib's native Cech differential. The proof separates
-top-intersection transport, a single coface summand, and finite-sum transport. Thus the
-explicit finite Cech complex is now literally the degreewise-global-sections complex of
-the exact sheaf resolution. What remains is to prove that this complex computes genuine
-derived global sections when the finite intersections are acyclic, via the
-Cech-to-derived spectral sequence/double-complex argument of Stacks 20.11.5--6; no
-generic exactness of open-immersion pushforward is assumed.
+alternating differential to mathlib's native Cech differential.
+`cechGlobalSectionsAugmentation` now also identifies the mapped sheaf augmentation with
+the native degree-zero Cech augmentation, proves its component formula and naturality,
+and shows that its composite with the first differential is zero. The proof separates
+top-intersection transport, a single coface summand, finite-sum transport, and
+augmentation naturality. Thus the explicit finite Cech complex is literally the
+degreewise-global-sections complex of the exact sheaf resolution, with its augmentation.
 
 The degree-one cokernel consequence of the long exact sequence is now isolated in
 `ForMathlib/SheafCohomologyCokernel.lean`. For a short exact sequence whose middle
@@ -553,6 +553,24 @@ a quasi-isomorphism in degree one under precisely those hypotheses. This closes 
 vertical collapse needed for the double-complex comparison without asserting exactness
 of open pushforward. The next step is to instantiate the horizontal edge from genuine
 derived global sections and compose the two degree-one comparisons.
+
+The degree-one double-complex comparison is now complete in
+`ForMathlib/SheafCechInjectiveComparison.lean`. The public
+`globalSectionsFunctor` removes the earlier private-definition mismatch between the
+native Cech and right-derived-functor APIs.
+`cechInjectiveResolutionHorizontalEdge` maps global sections of the chosen injective
+resolution into the total injective Cech bicomplex, and is a quasi-isomorphism in degree
+one whenever the opens genuinely cover the space. Composing its inverse on homology with
+`cechInjectiveResolutionVerticalEdge`, the chosen injective-resolution comparison, and
+`H.addEquivRightDerivedGlobalSections` gives
+`cechHomologyOneIso_of_subsingleton_H`. It identifies native Cech degree-one homology
+with genuine `Sheaf.H F 1` under exactly the cover equation and `H¹`-vanishing on each
+individual cover member. No vanishing on higher intersections is needed in total degree
+one. This closes the source-faithful Stacks 20.11.5--6 comparison required here without
+noetherianity, a parallel cohomology theory, or an open-pushforward exactness claim. The
+next geometric step is to instantiate it for the finite affine cover of each pole sheaf,
+then pass from the resulting finite Cech complex to finite-projective local pole modules
+with arbitrary-base comparison.
 
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
