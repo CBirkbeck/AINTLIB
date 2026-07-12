@@ -26,6 +26,46 @@ open CategoryTheory AlgebraicGeometry AlgebraicGeometry.Scheme
 
 namespace AlgebraicGeometry.Scheme.Modules
 
+section RingCore
+
+open scoped TensorProduct
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[NAT-3-CORE, ring level]** The kernel of the base-change map into the tensor
+quotient is the extended ideal: `ker (B → B ⊗[A] (A ⧸ I)) = I·B`. -/
+theorem ker_algebraMap_tensorQuot {A B : Type u} [CommRing A] [CommRing B] [Algebra A B]
+    (I : Ideal A) :
+    RingHom.ker (algebraMap B (B ⊗[A] (A ⧸ I))) = I.map (algebraMap A B) := by
+  ext b
+  rw [RingHom.mem_ker]
+  constructor
+  · intro hb
+    have hcomm := (Algebra.TensorProduct.quotIdealMapEquivTensorQuot B I).commutes b
+    have h0 : (Algebra.TensorProduct.quotIdealMapEquivTensorQuot B I)
+        (algebraMap B (B ⧸ I.map (algebraMap A B)) b) = 0 := by
+      rw [hcomm, hb]
+    have h1 : algebraMap B (B ⧸ I.map (algebraMap A B)) b = 0 := by
+      have := congrArg (Algebra.TensorProduct.quotIdealMapEquivTensorQuot B I).symm h0
+      rwa [AlgEquiv.symm_apply_apply, map_zero] at this
+    exact (Ideal.Quotient.eq_zero_iff_mem).mp h1
+  · intro hb
+    have h1 : algebraMap B (B ⧸ I.map (algebraMap A B)) b = 0 :=
+      (Ideal.Quotient.eq_zero_iff_mem).mpr hb
+    have hcomm := (Algebra.TensorProduct.quotIdealMapEquivTensorQuot B I).commutes b
+    rw [← hcomm, h1, map_zero]
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- **[NAT-3-CORE, principal case]** `ker (B → B ⊗[A] (A ⧸ (a))) = (φ a)`. -/
+theorem ker_algebraMap_tensorQuot_span {A B : Type u} [CommRing A] [CommRing B]
+    [Algebra A B] (a : A) :
+    RingHom.ker (algebraMap B (B ⊗[A] (A ⧸ Ideal.span {a}))) =
+      Ideal.span {algebraMap A B a} := by
+  rw [ker_algebraMap_tensorQuot, Ideal.map_span, Set.image_singleton]
+
+end RingCore
+
 variable {X' X : Scheme.{u}} (f : X' ⟶ X) (J : X.IdealSheafData)
 
 set_option backward.defeqAttrib.useBackward true in
