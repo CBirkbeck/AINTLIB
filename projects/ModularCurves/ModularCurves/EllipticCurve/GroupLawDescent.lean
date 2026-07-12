@@ -32,6 +32,72 @@ universe u
 
 namespace ModularCurves
 
+/-- The structure morphism of the monoidal unit of `Over T` is the identity. -/
+private theorem overUnit_hom (T : Scheme.{u}) : (𝟙_ (Over T)).hom = 𝟙 T := rfl
+
+/-- **(model unit law, lift form)** At the model, `mul (zero ∘ π, id) = id`: the scheme-level
+lift form of the left unit law `oneOver_mulOver`, obtained at the `Over` level by identifying
+`⟨zero ∘ π, id⟩` with `(λ_).inv ≫ (η ▷ X)` and cancelling the left unitor. -/
+private theorem model_one_mul_lift {R : Type u} [CommRing R] (W : WeierstrassCurve R)
+    [W.IsElliptic] :
+    pullback.lift (projModelπ W ≫ projModelZero W) (𝟙 (projModel W))
+        (by rw [Category.assoc, projModelZero_projModelπ, Category.comp_id, Category.id_comp]) ≫
+      mulModelHom W = 𝟙 (projModel W) := by
+  have key : CartesianMonoidalCategory.lift
+        (CartesianMonoidalCategory.toUnit (modelOver W) ≫ oneOver W) (𝟙 (modelOver W)) ≫
+      mulOver W = 𝟙 (modelOver W) := by
+    have hlu : CartesianMonoidalCategory.lift
+          (CartesianMonoidalCategory.toUnit (modelOver W) ≫ oneOver W) (𝟙 (modelOver W)) =
+        (λ_ (modelOver W)).inv ≫ (oneOver W ▷ modelOver W) := by
+      apply CartesianMonoidalCategory.hom_ext
+      · simp
+      · simp
+    rw [hlu, Category.assoc, oneOver_mulOver W, Iso.inv_hom_id]
+  have h := congrArg CommaMorphism.left key
+  simp only [Over.comp_left, Over.lift_left, Over.toUnit_left, oneOver_left, Over.id_left,
+    overUnit_hom, mulOver_left] at h
+  exact h
+
+/-- **(model unit law, lift form, right)** At the model, `mul (id, zero ∘ π) = id`: the
+scheme-level lift form of the right unit law `mulOver_oneOver`. -/
+private theorem model_mul_one_lift {R : Type u} [CommRing R] (W : WeierstrassCurve R)
+    [W.IsElliptic] :
+    pullback.lift (𝟙 (projModel W)) (projModelπ W ≫ projModelZero W)
+        (by rw [Category.id_comp, Category.assoc, projModelZero_projModelπ, Category.comp_id]) ≫
+      mulModelHom W = 𝟙 (projModel W) := by
+  have key : CartesianMonoidalCategory.lift (𝟙 (modelOver W))
+        (CartesianMonoidalCategory.toUnit (modelOver W) ≫ oneOver W) ≫
+      mulOver W = 𝟙 (modelOver W) := by
+    have hru : CartesianMonoidalCategory.lift (𝟙 (modelOver W))
+          (CartesianMonoidalCategory.toUnit (modelOver W) ≫ oneOver W) =
+        (ρ_ (modelOver W)).inv ≫ (modelOver W ◁ oneOver W) := by
+      apply CartesianMonoidalCategory.hom_ext
+      · simp
+      · simp
+    rw [hru, Category.assoc, mulOver_oneOver W, Iso.inv_hom_id]
+  have h := congrArg CommaMorphism.left key
+  simp only [Over.comp_left, Over.lift_left, Over.toUnit_left, oneOver_left, Over.id_left,
+    overUnit_hom, mulOver_left] at h
+  exact h
+
+/-- **(model associativity, lift form)** `mul (mul (a, b), c) = mul (a, mul (b, c))` at the
+model, from `MonObj.lift_lift_assoc` at the T-G4 model group object. -/
+private theorem model_mul_assoc_lift {R : Type u} [CommRing R] (W : WeierstrassCurve R)
+    [W.IsElliptic] {Z : Scheme.{u}} (a b c : Z ⟶ projModel W)
+    (hab : a ≫ projModelπ W = b ≫ projModelπ W) (hbc : b ≫ projModelπ W = c ≫ projModelπ W) :
+    pullback.lift (pullback.lift a b hab ≫ mulModelHom W) c
+        (by rw [Category.assoc, mulModelHom_π, ← Category.assoc, pullback.lift_fst]
+            exact hab.trans hbc) ≫ mulModelHom W =
+      pullback.lift a (pullback.lift b c hbc ≫ mulModelHom W)
+        (by rw [Category.assoc, mulModelHom_π, ← Category.assoc, pullback.lift_fst]
+            exact hab) ≫ mulModelHom W := by
+  letI := modelGrpObj W
+  have h := congrArg CommaMorphism.left (MonObj.lift_lift_assoc (B := modelOver W)
+    (A := Over.mk (a ≫ projModelπ W))
+    (Over.homMk a rfl) (Over.homMk b hab.symm) (Over.homMk c (hab.trans hbc).symm))
+  simp only [Over.comp_left, Over.lift_left, Over.homMk_left] at h
+  exact h
+
 variable {S : Scheme.{u}} (G : EllipticCurveGeom S)
 
 /-! ## Base change of the geometric record -/
@@ -113,6 +179,30 @@ noncomputable def atlasSquareCover : (pullback G.π G.π).OpenCover :=
 
 @[simp] theorem atlasSquareCover_f (i : A.ι) :
     (atlasSquareCover A).f i = pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι := rfl
+
+/-- The open cover of the cube `(E ×_S E) ×_S E` (the underlying scheme of `(X ⊗ X) ⊗ X`) by
+the atlas charts — the base change of the cube along the chart inclusion. Used for the
+associativity axiom. -/
+noncomputable def atlasCubeCover :
+    (pullback (pullback.fst G.π G.π ≫ G.π) G.π).OpenCover :=
+  Scheme.Cover.mkOfCovers A.ι
+    (fun i => pullback (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫
+      (pullback.fst G.π G.π ≫ G.π)) (A.U i).1.ι)
+    (fun i => pullback.fst (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫
+      (pullback.fst G.π G.π ≫ G.π)) (A.U i).1.ι)
+    (fun x => by
+      obtain ⟨i, hi⟩ := A.covers ((pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫
+        (pullback.fst G.π G.π ≫ G.π)).base x)
+      have hx : x ∈ Set.range (pullback.fst (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫
+          (pullback.fst G.π G.π ≫ G.π)) (A.U i).1.ι).base := by
+        rw [Scheme.Pullback.range_fst, Set.mem_preimage, Scheme.Opens.range_ι, SetLike.mem_coe]
+        exact hi
+      obtain ⟨y, hy⟩ := hx
+      exact ⟨i, y, hy⟩)
+
+@[simp] theorem atlasCubeCover_f (i : A.ι) :
+    (atlasCubeCover A).f i = pullback.fst (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫
+      (pullback.fst G.π G.π ≫ G.π)) (A.U i).1.ι := rfl
 
 end AtlasCover
 
@@ -930,6 +1020,65 @@ theorem mulPiece_π (i : A.ι) :
   rw [reassoc_of% (A.compat_π i), Iso.hom_inv_id_assoc, sqLift1_snd_assoc]
   exact (pullback.condition (f := pullback.fst G.π G.π ≫ G.π) (g := (A.U i).1.ι)).symm
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **(chart-local multiplication)** `mulHomOf` applied to a pair of chart-`i` points — presented
+as model points `um`, `vm` transported into `E` via `(A.e i).inv` — is the model multiplication
+`mulModelHom (A.W i)` of `um`, `vm`, transported back into `E`. This single bridge turns every
+glued group axiom into the corresponding model group law over `A.W i`. -/
+private theorem mulHom_chart_pair (i : A.ι) :
+    haveI := A.elliptic i
+    ∀ {Z : Scheme.{u}} (um vm : Z ⟶ projModel (A.W i))
+      (hum : um ≫ projModelπ (A.W i) = vm ≫ projModelπ (A.W i)),
+      pullback.lift (um ≫ (A.e i).inv ≫ pullback.fst G.π (A.U i).1.ι)
+          (vm ≫ (A.e i).inv ≫ pullback.fst G.π (A.U i).1.ι)
+          (by
+            simp only [Category.assoc]
+            rw [pullback.condition (f := G.π) (g := (A.U i).1.ι), bcChart_aux_inv_assoc,
+              reassoc_of% hum]) ≫ mulHomOf A =
+        pullback.lift um vm hum ≫ mulModelHom (A.W i) ≫ (A.e i).inv ≫
+          pullback.fst G.π (A.U i).1.ι := by
+  haveI := A.elliptic i
+  intro Z um vm hum
+  have hc : (um ≫ (A.e i).inv ≫ pullback.fst G.π (A.U i).1.ι) ≫ G.π =
+      (vm ≫ (A.e i).inv ≫ pullback.fst G.π (A.U i).1.ι) ≫ G.π := by
+    simp only [Category.assoc]
+    rw [pullback.condition (f := G.π) (g := (A.U i).1.ι), bcChart_aux_inv_assoc,
+      reassoc_of% hum]
+  have hst : pullback.lift (um ≫ (A.e i).inv ≫ pullback.fst G.π (A.U i).1.ι)
+        (vm ≫ (A.e i).inv ≫ pullback.fst G.π (A.U i).1.ι) hc ≫ (pullback.fst G.π G.π ≫ G.π) =
+      (um ≫ projModelπ (A.W i) ≫ (A.U i).2.isoSpec.inv) ≫ (A.U i).1.ι := by
+    rw [← Category.assoc, pullback.lift_fst]
+    simp only [Category.assoc]
+    rw [pullback.condition (f := G.π) (g := (A.U i).1.ι), bcChart_aux_inv_assoc]
+  set SQ := pullback.lift (pullback.lift (um ≫ (A.e i).inv ≫ pullback.fst G.π (A.U i).1.ι)
+      (vm ≫ (A.e i).inv ≫ pullback.fst G.π (A.U i).1.ι) hc)
+      (um ≫ projModelπ (A.W i) ≫ (A.U i).2.isoSpec.inv) hst with hSQ
+  have hSQfst : SQ ≫ pullback.fst (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι =
+      pullback.lift (um ≫ (A.e i).inv ≫ pullback.fst G.π (A.U i).1.ι)
+        (vm ≫ (A.e i).inv ≫ pullback.fst G.π (A.U i).1.ι) hc := pullback.lift_fst _ _ _
+  have hSQsnd : SQ ≫ pullback.snd (pullback.fst G.π G.π ≫ G.π) (A.U i).1.ι =
+      um ≫ projModelπ (A.W i) ≫ (A.U i).2.isoSpec.inv := pullback.lift_snd _ _ _
+  have hSQ1 : SQ ≫ sqLift1 A i = um ≫ (A.e i).inv := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, sqLift1_fst, ← Category.assoc, hSQfst, pullback.lift_fst,
+        Category.assoc]
+    · rw [Category.assoc, sqLift1_snd, hSQsnd, Category.assoc, bcChart_aux_inv]
+  have hSQ2 : SQ ≫ sqLift2 A i = vm ≫ (A.e i).inv := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, sqLift2_fst, ← Category.assoc, hSQfst, pullback.lift_snd,
+        Category.assoc]
+    · rw [Category.assoc, sqLift2_snd, hSQsnd, Category.assoc, bcChart_aux_inv, reassoc_of% hum]
+  have hMS : SQ ≫ pullback.lift (sqLift1 A i ≫ (A.e i).hom) (sqLift2 A i ≫ (A.e i).hom)
+        ((sqLift1_hom_π A i).trans (sqLift2_hom_π A i).symm) = pullback.lift um vm hum := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, pullback.lift_fst, ← Category.assoc, hSQ1, Category.assoc,
+        Iso.inv_hom_id, Category.comp_id, pullback.lift_fst]
+    · rw [Category.assoc, pullback.lift_snd, ← Category.assoc, hSQ2, Category.assoc,
+        Iso.inv_hom_id, Category.comp_id, pullback.lift_snd]
+  trans (SQ ≫ mulPiece A i)
+  · rw [← mulHomOf_piece A i, atlasSquareCover_f, reassoc_of% hSQfst]
+  · rw [mulPiece, reassoc_of% hMS]
+
 end Negation
 
 /-- **(T-W7.1)** Negation on a geometric elliptic curve, glued from the per-chart model
@@ -968,24 +1117,365 @@ theorem EllipticCurveGeom.mulHom_π :
     ((mulPiece_π G.atlas i).trans
       (congrArg (· ≫ (pullback.fst G.π G.π ≫ G.π)) (atlasSquareCover_f G.atlas i)).symm)
 
+/-- The unit of the glued group object: the zero section, as an `Over S`-morphism from the
+monoidal unit. -/
+private noncomputable def EllipticCurveGeom.oneHomG : 𝟙_ (Over S) ⟶ Over.mk G.π :=
+  Over.homMk ((𝟙_ (Over S)).hom ≫ G.zero) <| by
+    show ((𝟙_ (Over S)).hom ≫ G.zero) ≫ G.π = (𝟙_ (Over S)).hom
+    rw [Category.assoc, G.zero_π, Category.comp_id]
+
+/-- The multiplication of the glued group object, as an `Over S`-morphism. -/
+private noncomputable def EllipticCurveGeom.mulHomG :
+    Over.mk G.π ⊗ Over.mk G.π ⟶ Over.mk G.π :=
+  Over.homMk G.mulHom G.mulHom_π
+
+/-- The inverse of the glued group object, as an `Over S`-morphism. -/
+private noncomputable def EllipticCurveGeom.invHomG : Over.mk G.π ⟶ Over.mk G.π :=
+  Over.homMk G.negHom G.negHom_π
+
+@[simp] private theorem EllipticCurveGeom.oneHomG_left :
+    (G.oneHomG).left = (𝟙_ (Over S)).hom ≫ G.zero := rfl
+
+@[simp] private theorem EllipticCurveGeom.mulHomG_left : (G.mulHomG).left = G.mulHom := rfl
+
+@[simp] private theorem EllipticCurveGeom.invHomG_left : (G.invHomG).left = G.negHom := rfl
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem EllipticCurveGeom.grpObj_one_mul :
+    G.oneHomG ▷ Over.mk G.π ≫ G.mulHomG = (λ_ (Over.mk G.π)).hom := by
+  have key : CartesianMonoidalCategory.lift
+        (CartesianMonoidalCategory.toUnit (Over.mk G.π) ≫ G.oneHomG) (𝟙 (Over.mk G.π)) ≫
+      G.mulHomG = 𝟙 (Over.mk G.π) := by
+    apply Over.OverMorphism.ext
+    simp only [Over.comp_left, Over.lift_left, Over.toUnit_left, oneHomG_left, mulHomG_left,
+      Over.id_left, overUnit_hom]
+    show pullback.lift (G.π ≫ G.zero) (𝟙 G.E)
+        (by rw [Category.assoc, G.zero_π, Category.comp_id, Category.id_comp]) ≫
+      mulHomOf G.atlas = 𝟙 G.E
+    refine (atlasTotalCover G.atlas).hom_ext _ _ (fun i => ?_)
+    haveI := G.atlas.elliptic i
+    have hz : projModelZero (G.atlas.W i) ≫ (G.atlas.e i).inv =
+        (G.atlas.U i).2.isoSpec.inv ≫ zLift G.atlas i := by
+      rw [← cancel_mono (G.atlas.e i).hom, Category.assoc, Iso.inv_hom_id, Category.comp_id,
+        Category.assoc, zLift_totalIso, Iso.inv_hom_id_assoc]
+    have hum : ((G.atlas.e i).hom ≫ projModelπ (G.atlas.W i) ≫ projModelZero (G.atlas.W i)) ≫
+          projModelπ (G.atlas.W i) = (G.atlas.e i).hom ≫ projModelπ (G.atlas.W i) := by
+      rw [Category.assoc, Category.assoc, projModelZero_projModelπ, Category.comp_id]
+    have key := mulHom_chart_pair G.atlas i
+      ((G.atlas.e i).hom ≫ projModelπ (G.atlas.W i) ≫ projModelZero (G.atlas.W i))
+      (G.atlas.e i).hom hum
+    have hlift_e : pullback.lift ((G.atlas.e i).hom ≫ projModelπ (G.atlas.W i) ≫
+          projModelZero (G.atlas.W i)) (G.atlas.e i).hom hum =
+        (G.atlas.e i).hom ≫ pullback.lift (projModelπ (G.atlas.W i) ≫ projModelZero (G.atlas.W i))
+          (𝟙 (projModel (G.atlas.W i)))
+          (by rw [Category.assoc, projModelZero_projModelπ, Category.comp_id,
+            Category.id_comp]) := by
+      refine pullback.hom_ext ?_ ?_
+      · rw [pullback.lift_fst, Category.assoc, pullback.lift_fst]
+      · rw [pullback.lift_snd, Category.assoc, pullback.lift_snd, Category.comp_id]
+    have hL : pullback.fst G.π (G.atlas.U i).1.ι ≫ pullback.lift (G.π ≫ G.zero) (𝟙 G.E)
+          (by rw [Category.assoc, G.zero_π, Category.comp_id, Category.id_comp]) =
+        pullback.lift (((G.atlas.e i).hom ≫ projModelπ (G.atlas.W i) ≫
+            projModelZero (G.atlas.W i)) ≫ (G.atlas.e i).inv ≫ pullback.fst G.π (G.atlas.U i).1.ι)
+          ((G.atlas.e i).hom ≫ (G.atlas.e i).inv ≫ pullback.fst G.π (G.atlas.U i).1.ι)
+          (by simp only [Category.assoc]
+              rw [pullback.condition (f := G.π) (g := (G.atlas.U i).1.ι), bcChart_aux_inv_assoc,
+                reassoc_of% hum]) := by
+      refine pullback.hom_ext ?_ ?_
+      · rw [Category.assoc, pullback.lift_fst, pullback.lift_fst]
+        simp only [Category.assoc]
+        rw [reassoc_of% (G.atlas.compat_π i), reassoc_of% hz, Iso.hom_inv_id_assoc, zLift_fst,
+          reassoc_of% (pullback.condition (f := G.π) (g := (G.atlas.U i).1.ι))]
+      · rw [Category.assoc, pullback.lift_snd, pullback.lift_snd, Category.comp_id,
+          Iso.hom_inv_id_assoc]
+    rw [atlasTotalCover_f, ← Category.assoc, hL, key, hlift_e, Category.assoc,
+      reassoc_of% (model_one_mul_lift (G.atlas.W i)), Iso.hom_inv_id_assoc, Category.comp_id]
+  have hlu : CartesianMonoidalCategory.lift
+        (CartesianMonoidalCategory.toUnit (Over.mk G.π) ≫ G.oneHomG) (𝟙 (Over.mk G.π)) =
+      (λ_ (Over.mk G.π)).inv ≫ (G.oneHomG ▷ Over.mk G.π) := by
+    apply CartesianMonoidalCategory.hom_ext
+    · simp
+    · simp
+  have hk : (λ_ (Over.mk G.π)).inv ≫ G.oneHomG ▷ Over.mk G.π ≫ G.mulHomG = 𝟙 (Over.mk G.π) := by
+    rw [← Category.assoc, ← hlu]; exact key
+  calc G.oneHomG ▷ Over.mk G.π ≫ G.mulHomG
+      = (λ_ (Over.mk G.π)).hom ≫ (λ_ (Over.mk G.π)).inv ≫ G.oneHomG ▷ Over.mk G.π ≫ G.mulHomG := by
+        rw [Iso.hom_inv_id_assoc]
+    _ = (λ_ (Over.mk G.π)).hom := by rw [hk, Category.comp_id]
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem EllipticCurveGeom.grpObj_mul_one :
+    Over.mk G.π ◁ G.oneHomG ≫ G.mulHomG = (ρ_ (Over.mk G.π)).hom := by
+  have key : CartesianMonoidalCategory.lift (𝟙 (Over.mk G.π))
+        (CartesianMonoidalCategory.toUnit (Over.mk G.π) ≫ G.oneHomG) ≫
+      G.mulHomG = 𝟙 (Over.mk G.π) := by
+    apply Over.OverMorphism.ext
+    simp only [Over.comp_left, Over.lift_left, Over.toUnit_left, oneHomG_left, mulHomG_left,
+      Over.id_left, overUnit_hom]
+    show pullback.lift (𝟙 G.E) (G.π ≫ G.zero)
+        (by rw [Category.id_comp, Category.assoc, G.zero_π, Category.comp_id]) ≫
+      mulHomOf G.atlas = 𝟙 G.E
+    refine (atlasTotalCover G.atlas).hom_ext _ _ (fun i => ?_)
+    haveI := G.atlas.elliptic i
+    have hz : projModelZero (G.atlas.W i) ≫ (G.atlas.e i).inv =
+        (G.atlas.U i).2.isoSpec.inv ≫ zLift G.atlas i := by
+      rw [← cancel_mono (G.atlas.e i).hom, Category.assoc, Iso.inv_hom_id, Category.comp_id,
+        Category.assoc, zLift_totalIso, Iso.inv_hom_id_assoc]
+    have hum : (G.atlas.e i).hom ≫ projModelπ (G.atlas.W i) =
+        ((G.atlas.e i).hom ≫ projModelπ (G.atlas.W i) ≫ projModelZero (G.atlas.W i)) ≫
+          projModelπ (G.atlas.W i) := by
+      rw [Category.assoc, Category.assoc, projModelZero_projModelπ, Category.comp_id]
+    have key := mulHom_chart_pair G.atlas i (G.atlas.e i).hom
+      ((G.atlas.e i).hom ≫ projModelπ (G.atlas.W i) ≫ projModelZero (G.atlas.W i)) hum
+    have hlift_e : pullback.lift (G.atlas.e i).hom ((G.atlas.e i).hom ≫ projModelπ (G.atlas.W i) ≫
+          projModelZero (G.atlas.W i)) hum =
+        (G.atlas.e i).hom ≫ pullback.lift (𝟙 (projModel (G.atlas.W i)))
+          (projModelπ (G.atlas.W i) ≫ projModelZero (G.atlas.W i))
+          (by rw [Category.id_comp, Category.assoc, projModelZero_projModelπ,
+            Category.comp_id]) := by
+      refine pullback.hom_ext ?_ ?_
+      · rw [pullback.lift_fst, Category.assoc, pullback.lift_fst, Category.comp_id]
+      · rw [pullback.lift_snd, Category.assoc, pullback.lift_snd]
+    have hL : pullback.fst G.π (G.atlas.U i).1.ι ≫ pullback.lift (𝟙 G.E) (G.π ≫ G.zero)
+          (by rw [Category.id_comp, Category.assoc, G.zero_π, Category.comp_id]) =
+        pullback.lift ((G.atlas.e i).hom ≫ (G.atlas.e i).inv ≫ pullback.fst G.π (G.atlas.U i).1.ι)
+          (((G.atlas.e i).hom ≫ projModelπ (G.atlas.W i) ≫ projModelZero (G.atlas.W i)) ≫
+            (G.atlas.e i).inv ≫ pullback.fst G.π (G.atlas.U i).1.ι)
+          (by simp only [Category.assoc]
+              rw [pullback.condition (f := G.π) (g := (G.atlas.U i).1.ι), bcChart_aux_inv_assoc,
+                reassoc_of% hum]) := by
+      refine pullback.hom_ext ?_ ?_
+      · rw [Category.assoc, pullback.lift_fst, pullback.lift_fst, Category.comp_id,
+          Iso.hom_inv_id_assoc]
+      · rw [Category.assoc, pullback.lift_snd, pullback.lift_snd]
+        simp only [Category.assoc]
+        rw [reassoc_of% (G.atlas.compat_π i), reassoc_of% hz, Iso.hom_inv_id_assoc, zLift_fst,
+          reassoc_of% (pullback.condition (f := G.π) (g := (G.atlas.U i).1.ι))]
+    rw [atlasTotalCover_f, ← Category.assoc, hL, key, hlift_e, Category.assoc,
+      reassoc_of% (model_mul_one_lift (G.atlas.W i)), Iso.hom_inv_id_assoc, Category.comp_id]
+  have hru : CartesianMonoidalCategory.lift (𝟙 (Over.mk G.π))
+        (CartesianMonoidalCategory.toUnit (Over.mk G.π) ≫ G.oneHomG) =
+      (ρ_ (Over.mk G.π)).inv ≫ (Over.mk G.π ◁ G.oneHomG) := by
+    apply CartesianMonoidalCategory.hom_ext
+    · simp
+    · simp
+  have hk : (ρ_ (Over.mk G.π)).inv ≫ Over.mk G.π ◁ G.oneHomG ≫ G.mulHomG = 𝟙 (Over.mk G.π) := by
+    rw [← Category.assoc, ← hru]; exact key
+  calc Over.mk G.π ◁ G.oneHomG ≫ G.mulHomG
+      = (ρ_ (Over.mk G.π)).hom ≫ (ρ_ (Over.mk G.π)).inv ≫ Over.mk G.π ◁ G.oneHomG ≫ G.mulHomG := by
+        rw [Iso.hom_inv_id_assoc]
+    _ = (ρ_ (Over.mk G.π)).hom := by rw [hk, Category.comp_id]
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem EllipticCurveGeom.grpObj_mul_assoc :
+    (G.mulHomG ▷ Over.mk G.π) ≫ G.mulHomG =
+      (α_ (Over.mk G.π) (Over.mk G.π) (Over.mk G.π)).hom ≫
+        (Over.mk G.π ◁ G.mulHomG) ≫ G.mulHomG := by
+  have hLHS' : G.mulHomG ▷ Over.mk G.π =
+      CartesianMonoidalCategory.lift (CartesianMonoidalCategory.lift
+        (CartesianMonoidalCategory.fst _ _ ≫ CartesianMonoidalCategory.fst _ _)
+        (CartesianMonoidalCategory.fst _ _ ≫ CartesianMonoidalCategory.snd _ _) ≫ G.mulHomG)
+        (CartesianMonoidalCategory.snd _ _) := by
+    apply CartesianMonoidalCategory.hom_ext <;> simp
+  have hα : (α_ (Over.mk G.π) (Over.mk G.π) (Over.mk G.π)).hom =
+      CartesianMonoidalCategory.lift
+        (CartesianMonoidalCategory.fst _ _ ≫ CartesianMonoidalCategory.fst _ _)
+        (CartesianMonoidalCategory.lift
+          (CartesianMonoidalCategory.fst _ _ ≫ CartesianMonoidalCategory.snd _ _)
+          (CartesianMonoidalCategory.snd _ _)) := by
+    apply CartesianMonoidalCategory.hom_ext
+    · simp
+    · apply CartesianMonoidalCategory.hom_ext <;> simp
+  have hRHS' : (α_ (Over.mk G.π) (Over.mk G.π) (Over.mk G.π)).hom ≫ Over.mk G.π ◁ G.mulHomG =
+      CartesianMonoidalCategory.lift
+        (CartesianMonoidalCategory.fst _ _ ≫ CartesianMonoidalCategory.fst _ _)
+        (CartesianMonoidalCategory.lift
+          (CartesianMonoidalCategory.fst _ _ ≫ CartesianMonoidalCategory.snd _ _)
+          (CartesianMonoidalCategory.snd _ _) ≫ G.mulHomG) := by
+    rw [hα, CartesianMonoidalCategory.lift_whiskerLeft]
+  rw [hLHS', ← Category.assoc, hRHS']
+  apply Over.OverMorphism.ext
+  simp only [Over.comp_left, Over.lift_left, mulHomG_left, Over.fst_left, Over.snd_left,
+    Over.tensorObj_hom]
+  show pullback.lift (pullback.lift
+        (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.fst G.π G.π)
+        (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.snd G.π G.π) _ ≫ mulHomOf G.atlas)
+      (pullback.snd (pullback.fst G.π G.π ≫ G.π) G.π) _ ≫ mulHomOf G.atlas =
+    pullback.lift (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.fst G.π G.π)
+      (pullback.lift (pullback.fst (pullback.fst G.π G.π ≫ G.π) G.π ≫ pullback.snd G.π G.π)
+        (pullback.snd (pullback.fst G.π G.π ≫ G.π) G.π) _ ≫ mulHomOf G.atlas) _ ≫ mulHomOf G.atlas
+  refine (atlasCubeCover G.atlas).hom_ext _ _ (fun i => ?_)
+  haveI := G.atlas.elliptic i
+  sorry
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem EllipticCurveGeom.grpObj_left_inv :
+    CartesianMonoidalCategory.lift G.invHomG (𝟙 (Over.mk G.π)) ≫ G.mulHomG =
+      CartesianMonoidalCategory.toUnit (Over.mk G.π) ≫ G.oneHomG := by
+  apply Over.OverMorphism.ext
+  simp only [Over.comp_left, Over.lift_left, Over.toUnit_left, oneHomG_left, mulHomG_left,
+    invHomG_left, Over.id_left]
+  show pullback.lift G.negHom (𝟙 G.E) _ ≫ mulHomOf G.atlas = G.π ≫ (𝟙_ (Over S)).hom ≫ G.zero
+  refine (atlasTotalCover G.atlas).hom_ext _ _ (fun i => ?_)
+  haveI := G.atlas.elliptic i
+  have hum : ((G.atlas.e i).hom ≫ negModelHom (G.atlas.W i)) ≫ projModelπ (G.atlas.W i) =
+      (G.atlas.e i).hom ≫ projModelπ (G.atlas.W i) := by rw [Category.assoc, negModelHom_π]
+  have key := mulHom_chart_pair G.atlas i ((G.atlas.e i).hom ≫ negModelHom (G.atlas.W i))
+    (G.atlas.e i).hom hum
+  have hmodel : pullback.lift (negModelHom (G.atlas.W i)) (𝟙 (projModel (G.atlas.W i)))
+        (by rw [negModelHom_π, Category.id_comp]) ≫ mulModelHom (G.atlas.W i) =
+      projModelπ (G.atlas.W i) ≫ projModelZero (G.atlas.W i) := by
+    have h := congrArg CommaMorphism.left (invOver_mulOver (G.atlas.W i))
+    simp only [Over.comp_left, Over.lift_left, Over.toUnit_left, mulOver_left, oneOver_left,
+      invOver_left, Over.id_left, overUnit_hom] at h
+    rw [← Category.id_comp (projModelZero (G.atlas.W i))]
+    exact h
+  have hz : projModelZero (G.atlas.W i) ≫ (G.atlas.e i).inv =
+      (G.atlas.U i).2.isoSpec.inv ≫ zLift G.atlas i := by
+    rw [← cancel_mono (G.atlas.e i).hom, Category.assoc, Iso.inv_hom_id, Category.comp_id,
+      Category.assoc, zLift_totalIso, Iso.inv_hom_id_assoc]
+  have hlift_e : pullback.lift ((G.atlas.e i).hom ≫ negModelHom (G.atlas.W i)) (G.atlas.e i).hom
+        hum = (G.atlas.e i).hom ≫ pullback.lift (negModelHom (G.atlas.W i))
+        (𝟙 (projModel (G.atlas.W i))) (by rw [negModelHom_π, Category.id_comp]) := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [pullback.lift_fst, Category.assoc, pullback.lift_fst]
+    · rw [pullback.lift_snd, Category.assoc, pullback.lift_snd, Category.comp_id]
+  have hL : pullback.fst G.π (G.atlas.U i).1.ι ≫ pullback.lift G.negHom (𝟙 G.E)
+        (by rw [G.negHom_π, Category.id_comp]) =
+      pullback.lift (((G.atlas.e i).hom ≫ negModelHom (G.atlas.W i)) ≫ (G.atlas.e i).inv ≫
+          pullback.fst G.π (G.atlas.U i).1.ι)
+        ((G.atlas.e i).hom ≫ (G.atlas.e i).inv ≫ pullback.fst G.π (G.atlas.U i).1.ι)
+        (by simp only [Category.assoc]
+            rw [pullback.condition (f := G.π) (g := (G.atlas.U i).1.ι), bcChart_aux_inv_assoc,
+              reassoc_of% hum]) := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, pullback.lift_fst, pullback.lift_fst]
+      exact negHomOf_piece' G.atlas i
+    · rw [Category.assoc, pullback.lift_snd, pullback.lift_snd, Category.comp_id, ← Category.assoc,
+        Iso.hom_inv_id, Category.id_comp]
+  rw [atlasTotalCover_f, ← Category.assoc (pullback.fst G.π (G.atlas.U i).1.ι), hL, key, hlift_e,
+    Category.assoc, reassoc_of% hmodel, reassoc_of% (G.atlas.compat_π i), reassoc_of% hz,
+    Iso.hom_inv_id_assoc, zLift_fst, overUnit_hom, Category.id_comp,
+    reassoc_of% (pullback.condition (f := G.π) (g := (G.atlas.U i).1.ι))]
+
+set_option backward.isDefEq.respectTransparency false in
+private theorem EllipticCurveGeom.grpObj_right_inv :
+    CartesianMonoidalCategory.lift (𝟙 (Over.mk G.π)) G.invHomG ≫ G.mulHomG =
+      CartesianMonoidalCategory.toUnit (Over.mk G.π) ≫ G.oneHomG := by
+  apply Over.OverMorphism.ext
+  simp only [Over.comp_left, Over.lift_left, Over.toUnit_left, oneHomG_left, mulHomG_left,
+    invHomG_left, Over.id_left]
+  show pullback.lift (𝟙 G.E) G.negHom _ ≫ mulHomOf G.atlas = G.π ≫ (𝟙_ (Over S)).hom ≫ G.zero
+  refine (atlasTotalCover G.atlas).hom_ext _ _ (fun i => ?_)
+  haveI := G.atlas.elliptic i
+  have hum : (G.atlas.e i).hom ≫ projModelπ (G.atlas.W i) =
+      ((G.atlas.e i).hom ≫ negModelHom (G.atlas.W i)) ≫ projModelπ (G.atlas.W i) := by
+    rw [Category.assoc, negModelHom_π]
+  have key := mulHom_chart_pair G.atlas i (G.atlas.e i).hom
+    ((G.atlas.e i).hom ≫ negModelHom (G.atlas.W i)) hum
+  have hmodel : pullback.lift (𝟙 (projModel (G.atlas.W i))) (negModelHom (G.atlas.W i))
+        (by rw [Category.id_comp, negModelHom_π]) ≫ mulModelHom (G.atlas.W i) =
+      projModelπ (G.atlas.W i) ≫ projModelZero (G.atlas.W i) := by
+    letI := modelGrpObj (G.atlas.W i)
+    have h := congrArg CommaMorphism.left (GrpObj.right_inv (modelOver (G.atlas.W i)))
+    simp only [Over.comp_left, Over.lift_left, Over.toUnit_left, mulOver_left, oneOver_left,
+      invOver_left, Over.id_left, overUnit_hom] at h
+    rw [← Category.id_comp (projModelZero (G.atlas.W i))]
+    exact h
+  have hz : projModelZero (G.atlas.W i) ≫ (G.atlas.e i).inv =
+      (G.atlas.U i).2.isoSpec.inv ≫ zLift G.atlas i := by
+    rw [← cancel_mono (G.atlas.e i).hom, Category.assoc, Iso.inv_hom_id, Category.comp_id,
+      Category.assoc, zLift_totalIso, Iso.inv_hom_id_assoc]
+  have hlift_e : pullback.lift (G.atlas.e i).hom ((G.atlas.e i).hom ≫ negModelHom (G.atlas.W i))
+        hum = (G.atlas.e i).hom ≫ pullback.lift (𝟙 (projModel (G.atlas.W i)))
+        (negModelHom (G.atlas.W i)) (by rw [Category.id_comp, negModelHom_π]) := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [pullback.lift_fst, Category.assoc, pullback.lift_fst, Category.comp_id]
+    · rw [pullback.lift_snd, Category.assoc, pullback.lift_snd]
+  have hL : pullback.fst G.π (G.atlas.U i).1.ι ≫ pullback.lift (𝟙 G.E) G.negHom
+        (by rw [Category.id_comp, G.negHom_π]) =
+      pullback.lift ((G.atlas.e i).hom ≫ (G.atlas.e i).inv ≫
+          pullback.fst G.π (G.atlas.U i).1.ι)
+        (((G.atlas.e i).hom ≫ negModelHom (G.atlas.W i)) ≫ (G.atlas.e i).inv ≫
+          pullback.fst G.π (G.atlas.U i).1.ι)
+        (by simp only [Category.assoc]
+            rw [pullback.condition (f := G.π) (g := (G.atlas.U i).1.ι), bcChart_aux_inv_assoc,
+              reassoc_of% hum]) := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, pullback.lift_fst, pullback.lift_fst, Category.comp_id, ← Category.assoc,
+        Iso.hom_inv_id, Category.id_comp]
+    · rw [Category.assoc, pullback.lift_snd, pullback.lift_snd]
+      exact negHomOf_piece' G.atlas i
+  rw [atlasTotalCover_f, ← Category.assoc (pullback.fst G.π (G.atlas.U i).1.ι), hL, key, hlift_e,
+    Category.assoc, reassoc_of% hmodel, reassoc_of% (G.atlas.compat_π i), reassoc_of% hz,
+    Iso.hom_inv_id_assoc, zLift_fst, overUnit_hom, Category.id_comp,
+    reassoc_of% (pullback.condition (f := G.π) (g := (G.atlas.U i).1.ι))]
+
 /-- **(T-W7.3 → T-W7.6, the packaged group object)** The group-object structure on
 `E/S` in `Over S`: multiplication and inverse glued above, unit the zero section; every
 axiom holds because it holds per chart (base change of the model identity of
 `GroupLawConstruction`) and morphism equality is chart-local (`Cover.hom_ext`). -/
-noncomputable def EllipticCurveGeom.grpObj : GrpObj (Over.mk G.π) :=
-  sorry
+@[reducible] noncomputable def EllipticCurveGeom.grpObj : GrpObj (Over.mk G.π) where
+  one := G.oneHomG
+  mul := G.mulHomG
+  inv := G.invHomG
+  one_mul := G.grpObj_one_mul
+  mul_one := G.grpObj_mul_one
+  mul_assoc := G.grpObj_mul_assoc
+  left_inv := G.grpObj_left_inv
+  right_inv := G.grpObj_right_inv
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(T-W7.6-comm)** The glued structure is commutative (per chart: `mulOver_comm`). -/
 theorem EllipticCurveGeom.grpObj_isCommMonObj :
     letI := G.grpObj
     IsCommMonObj (Over.mk G.π) := by
-  sorry
+  letI := G.grpObj
+  refine ⟨?_⟩
+  apply Over.OverMorphism.ext
+  simp only [Over.comp_left, Over.braiding_hom_left]
+  show (pullbackSymmetry G.π G.π).hom ≫ mulHomOf G.atlas = mulHomOf G.atlas
+  refine (atlasSquareCover G.atlas).hom_ext _ _ (fun i => ?_)
+  haveI := G.atlas.elliptic i
+  have hum : (sqLift2 G.atlas i ≫ (G.atlas.e i).hom) ≫ projModelπ (G.atlas.W i) =
+      (sqLift1 G.atlas i ≫ (G.atlas.e i).hom) ≫ projModelπ (G.atlas.W i) := by
+    rw [sqLift2_hom_π, sqLift1_hom_π]
+  have key := mulHom_chart_pair G.atlas i (sqLift2 G.atlas i ≫ (G.atlas.e i).hom)
+    (sqLift1 G.atlas i ≫ (G.atlas.e i).hom) hum
+  have hswap : pullback.fst (pullback.fst G.π G.π ≫ G.π) (G.atlas.U i).1.ι ≫
+        (pullbackSymmetry G.π G.π).hom =
+      pullback.lift ((sqLift2 G.atlas i ≫ (G.atlas.e i).hom) ≫ (G.atlas.e i).inv ≫
+          pullback.fst G.π (G.atlas.U i).1.ι)
+        ((sqLift1 G.atlas i ≫ (G.atlas.e i).hom) ≫ (G.atlas.e i).inv ≫
+          pullback.fst G.π (G.atlas.U i).1.ι)
+        (by simp only [Category.assoc]
+            rw [pullback.condition (f := G.π) (g := (G.atlas.U i).1.ι), bcChart_aux_inv_assoc,
+              reassoc_of% hum]) := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, pullbackSymmetry_hom_comp_fst, pullback.lift_fst, Category.assoc,
+        Iso.hom_inv_id_assoc, sqLift2_fst]
+    · rw [Category.assoc, pullbackSymmetry_hom_comp_snd, pullback.lift_snd, Category.assoc,
+        Iso.hom_inv_id_assoc, sqLift1_fst]
+  have hcomm : pullback.lift (sqLift2 G.atlas i ≫ (G.atlas.e i).hom)
+        (sqLift1 G.atlas i ≫ (G.atlas.e i).hom) hum ≫ mulModelHom (G.atlas.W i) =
+      pullback.lift (sqLift1 G.atlas i ≫ (G.atlas.e i).hom)
+        (sqLift2 G.atlas i ≫ (G.atlas.e i).hom)
+        ((sqLift1_hom_π G.atlas i).trans (sqLift2_hom_π G.atlas i).symm) ≫
+        mulModelHom (G.atlas.W i) := by
+    conv_rhs => rw [← mulModelHom_comm (G.atlas.W i)]
+    rw [← Category.assoc]
+    congr 1
+    refine pullback.hom_ext ?_ ?_
+    · rw [pullback.lift_fst, Category.assoc, pullbackSymmetry_hom_comp_fst, pullback.lift_snd]
+    · rw [pullback.lift_snd, Category.assoc, pullbackSymmetry_hom_comp_snd, pullback.lift_fst]
+  rw [atlasSquareCover_f, ← Category.assoc, hswap, key, reassoc_of% hcomm]
+  conv_rhs => rw [← atlasSquareCover_f, mulHomOf_piece, mulPiece]
 
 /-- **(T-W7.6-one)** The unit of the glued structure is the zero section. -/
 theorem EllipticCurveGeom.grpObj_one_eq_zero :
     letI := G.grpObj
-    (η[Over.mk G.π] : _ ⟶ Over.mk G.π).left = (𝟙_ (Over S)).hom ≫ G.zero := by
-  sorry
+    (η[Over.mk G.π] : _ ⟶ Over.mk G.π).left = (𝟙_ (Over S)).hom ≫ G.zero :=
+  rfl
 
 /-- **(T-W7.6 = MILESTONE T-W7a, assembly)** Every geometric elliptic curve enriches to the
 working record: package `grpObj`, commutativity, and the unit normalisation. Discharges
