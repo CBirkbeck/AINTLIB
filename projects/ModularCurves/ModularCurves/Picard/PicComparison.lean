@@ -205,6 +205,29 @@ theorem evalSection_factor (M : _root_.SheafOfModules R) (U : C)
     _ = dualUnitSectionsEquiv R U (ψ.inv ≫ φ) * evalSection R M U ψ.hom m := rfl
 
 
+/-- Evaluation against (the hom of) a trivialization is bijective: it is the composite of
+the section equivalences with the bijective sections-map of an isomorphism. -/
+theorem bijective_evalSection_iso (M : _root_.SheafOfModules R) (U : C)
+    (ψ : M.over U ≅ _root_.SheafOfModules.unit (R.over U)) :
+    Function.Bijective (fun m => evalSection R M U ψ.hom m) := by
+  have hcomp : (fun m => evalSection R M U ψ.hom m) =
+      (overUnitSectionEquiv R U).symm ∘
+        (fun s => _root_.SheafOfModules.sectionsMap ψ.hom s) ∘
+        (overSectionEquiv R M U) := rfl
+  rw [hcomp]
+  refine Function.Bijective.comp (Equiv.bijective _)
+    (Function.Bijective.comp ?_ (Equiv.bijective _))
+  refine Function.bijective_iff_has_inverse.mpr
+    ⟨fun s => _root_.SheafOfModules.sectionsMap ψ.inv s, fun s => ?_, fun s => ?_⟩
+  · show _root_.SheafOfModules.sectionsMap ψ.inv
+      (_root_.SheafOfModules.sectionsMap ψ.hom s) = s
+    rw [← _root_.SheafOfModules.sectionsMap_comp, Iso.hom_inv_id,
+      _root_.SheafOfModules.sectionsMap_id]
+  · show _root_.SheafOfModules.sectionsMap ψ.hom
+      (_root_.SheafOfModules.sectionsMap ψ.inv s) = s
+    rw [← _root_.SheafOfModules.sectionsMap_comp, Iso.inv_hom_id,
+      _root_.SheafOfModules.sectionsMap_id]
+
 end ModularCurves.SheafOfModules
 
 namespace AlgebraicGeometry.Scheme.Modules
