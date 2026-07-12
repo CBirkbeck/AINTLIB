@@ -48,8 +48,8 @@ noncomputable def baseChangeZero (t : T ⟶ S) : T ⟶ Limits.pullback p t :=
 
 /-- The base-changed section is a section of the base-changed structure map. -/
 theorem baseChangeZero_snd (t : T ⟶ S) :
-    baseChangeZero p z hz t ≫ Limits.pullback.snd p t = 𝟙 T := by
-  sorry
+    baseChangeZero p z hz t ≫ Limits.pullback.snd p t = 𝟙 T :=
+  Limits.pullback.lift_snd _ _ _
 
 /-- **The relative Picard group in its kernel model** (GME p. 109: "Thus
 `Pic(E) = Ker(0*) ⊕ Im(f*)` and therefore `Pic_{E/S}` is actually a subfunctor of
@@ -75,26 +75,38 @@ noncomputable def baseChangeMap {t : T ⟶ S} {t' : T' ⟶ S} (g : T' ⟶ T) (hg
 theorem baseChangeZero_baseChangeMap {t : T ⟶ S} {t' : T' ⟶ S} (g : T' ⟶ T)
     (hg : g ≫ t = t') :
     baseChangeZero p z hz t' ≫ baseChangeMap p g hg = g ≫ baseChangeZero p z hz t := by
-  sorry
+  ext <;> simp [baseChangeZero, baseChangeMap, Limits.pullback.map, ← hg,
+    Limits.pullback.lift_fst, Limits.pullback.lift_snd, Limits.pullback.lift_fst_assoc, Limits.pullback.lift_snd_assoc]
 
 /-- Pullback along `g_E` preserves the kernel model (GME p. 108: "This induces
 `Pic^ν(g)(L) = g_E^*(L)`"). -/
 theorem pic_map_baseChangeMap_mem {t : T ⟶ S} {t' : T' ⟶ S} (g : T' ⟶ T)
     (hg : g ≫ t = t') {L : Pic (Limits.pullback p t)} (hL : L ∈ picRel p z hz t) :
     Pic.map (baseChangeMap p g hg) L ∈ picRel p z hz t' := by
-  sorry
+  refine MonoidHom.mem_ker.mpr ?_
+  calc Pic.map (baseChangeZero p z hz t') (Pic.map (baseChangeMap p g hg) L)
+      = Pic.map (baseChangeZero p z hz t' ≫ baseChangeMap p g hg) L := by
+        rw [Pic.map_comp]; rfl
+    _ = Pic.map (g ≫ baseChangeZero p z hz t) L := by
+        rw [baseChangeZero_baseChangeMap]
+    _ = Pic.map g (Pic.map (baseChangeZero p z hz t) L) := by
+        rw [Pic.map_comp]; rfl
+    _ = Pic.map g 1 := by rw [MonoidHom.mem_ker.mp hL]
+    _ = 1 := map_one _
 
 /-- Base change of maps is functorial. -/
 theorem baseChangeMap_id (t : T ⟶ S) :
     baseChangeMap p (𝟙 T) (Category.id_comp t) = 𝟙 (Limits.pullback p t) := by
-  sorry
+  ext <;> simp [baseChangeMap, Limits.pullback.map,
+    Limits.pullback.lift_fst, Limits.pullback.lift_snd, Limits.pullback.lift_fst_assoc, Limits.pullback.lift_snd_assoc]
 
 /-- Base change of maps is functorial. -/
 theorem baseChangeMap_comp {t : T ⟶ S} {t' : T' ⟶ S} {t'' : T'' ⟶ S}
     (g : T' ⟶ T) (hg : g ≫ t = t') (g' : T'' ⟶ T') (hg' : g' ≫ t' = t'') :
     baseChangeMap p (g' ≫ g) (by rw [Category.assoc, hg, hg']) =
       baseChangeMap p g' hg' ≫ baseChangeMap p g hg := by
-  sorry
+  ext <;> simp [baseChangeMap, Limits.pullback.map,
+    Limits.pullback.lift_fst, Limits.pullback.lift_snd, Limits.pullback.lift_fst_assoc, Limits.pullback.lift_snd_assoc]
 
 /-- **`Pic_{E/S}` as a contravariant group functor on `S`-schemes** (GME p. 108: "we
 consider the following contravariant functors `Pic_{E/S}, Pic^ν : SCH_{/S} → SETS`";
