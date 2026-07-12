@@ -1,1 +1,1 @@
-FOCUS: [HG-C1c-1d-coassoc] R1 tripleГL_comp_assoc — R-branch (g3) DONE (green). Now L-branch (g1,g2): precompose inv squareГTop, inner tensor_hom_ext on A@A, close via assocScheme_fst_fst/fst_snd + cube legs.
+FOCUS: [HG-C1c-1d-coassoc] R1 tripleГL_comp_assoc DONE (axiom-clean). Next R3-assoc: assocScheme >> leftMulSchemeL = rightMulScheme (group assoc via mulOver_assoc), then h_coassoc + Bialgebra.ofAlgHom.
