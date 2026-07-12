@@ -17388,3 +17388,15 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
     sectionToPicRel-naturality consumer, f = pullback.fst π t and J = section-divisor
     ideals; the engine supplies both-sides Cartier data (isOfficial + baseChange).
 - Executing [NAT-1] now.
+## Amendments v10.168 (2026-07-12, coordinator): Y₁(N) Zulip announcement DRAFTED (owner lifts v10.35b for this artifact); the definitional-trust-surface method
+
+- Owner directive: present Y₁(N) publicly (Zulip). v10.35b external-quiet is LIFTED by the
+  owner for THIS artifact only (the announcement; the standing policy otherwise unchanged).
+- Draft at `docs/announce-y1-zulip.md` (paste-ready, Zulip markdown + spoiler blocks).
+  METHOD (boarded for reuse at the next curve): present ONE headline statement + display
+  corollaries; unfold ONLY the definitional trail of that statement; anchor every bespoke
+  definition to mathlib vocabulary + a PROVEN sanity theorem (the trust anchors:
+  `geomFibrePointAddEquiv` ≃+ to mathlib's Point group; `isGammaOne_iff_naive` naive⟺KM;
+  `fibrewiseElliptic`; `grpObj_mul_unique` no-smuggled-data); verification = clone/build/
+  #print axioms instructions; HONESTY NOTES mandatory (repo-wide WIP sorries none-on-trail;
+  naive-vs-Drinfeld scope; AI authorship + the audit as the trust mechanism).
