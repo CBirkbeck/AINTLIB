@@ -18505,3 +18505,73 @@ modulo CLOPEN — the D-track assembly move, first leaf.
 **SEAM with FP4's B5**: FP4 builds the engine application (route A); I deliver **[YF-ETALE] (+ CLOPEN)**,
 the curve's étale structure that FP4's `exists_representing_smooth_affine` consumes for "𝕸(𝒫,δ) étale
 over 𝕸(δ) at the bootstrap object" (KM 4.7.1). Interface = [YF-ETALE]; board at each session start.
+
+## v10.152-CLOSER — ★★★★ MASTER CLOSED: `gammaOneNaive_representable` at `{propext, Classical.choice, Quot.sound}` (Y1-CLOSER, CHARTER-Y1-CLOSER-2 COMPLETE)
+
+**THE BAR IS MET.** `#print axioms ModularCurves.gammaOneNaive_representable =
+{propext, Classical.choice, Quot.sound}` — zero `sorryAx`, zero sorries on the path, zero
+`maxHeartbeats` on the trail files, root green (9,994 jobs), both branches pushed. The
+naive `Γ₁(N)` moduli problem (`N ≥ 4`, `N` invertible in `R`) is REPRESENTABLE, with every
+representing object smooth and affine over `Spec R` — Loeffler Thm 3.4.4 + Def 3.3.6,
+fully formal.
+
+**The closing ladder (this window):**
+- **N5 (glue)** — `kernelNDivisible_of_nIsInvertible` (`KernelDivisibilityGlue.lean`,
+  sorry-free): arbitrary square-zero tests glued from the chart-local calculus.
+  Localization cover by `D(aa p)` landing in atlas charts (`Cover.mkOfCovers`), piece
+  transport along `Point.baseChangeEquiv ∘ pointAddEquiv` (K3 `hμ`), per-piece CHART-DIV
+  solutions, overlap agreement by `kernel_val_unique_of_chartFactor` at the
+  **`OverlapRing` registered-def** (`Away a ⊗[A'] Away b` — kills the instance-path
+  clash), `Scheme.Cover.glueMorphisms`, kernel-membership leg via
+  `includeRight` killing the pushed ideal (`Ideal.Quotient.lift` factor through the
+  reduced piece), scalar leg by `hom_ext` + the value forms.
+- **N6 (LIFT)** — `MulByHomSmooth.lean` (sorry-free): `formallySmooth_mulByHom_appLE`
+  (the (LIFT) core: chart triangle `Γ(W) → Γ(U) → Γ(V)` via `appLE_comp_appLE` +
+  rintro-rfl transport along `mulByHom_π`; `E/S`-smoothness lifts the test through
+  `Algebra.FormallySmooth.comp_surjective`; the defect is a square-zero kernel element;
+  **`KernelNDivisible` divides it**; square-zero thickenings are homeomorphisms
+  (`range_comap_of_surjective` + nilpotency) so the corrected point re-lands in the
+  chart; `Spec.map_injective`/`IsOpenImmersion.lift` re-algebraize) →
+  `mulByHom_smooth_of_nIsInvertible` (assembly per mathlib's `smoothLocus_eq_top_iff`
+  pattern: `IsZariskiLocalAtSource.iff_exists_resLE` + `arrowResLEAppIso` +
+  `finitePresentation_appLE`) → **`mulByHom_flat_of_nIsInvertible`** (mathlib
+  `[Smooth f] : Flat f`). **BB-FLAT DISCHARGED** (invertible case — the case on every
+  consumer trail).
+- **N7 (swap + sweep)** — `mulBy_etale'` consumes the proven flat input
+  (`MulByHomEtale.lean`; import cycle broken by minimizing `MulByHomFlat.lean` to
+  `GroupLaw`); the E5-core (`exists_tateAlgLift_core`, YOneTatePoint) swapped off the
+  unprimed `torsionπ_etale`/`torsionπ_isFinite` to the proven
+  `torsionπ_etale'`/`torsionπ_isFinite_of_nIsInvertible` — the LAST `sorryAx`
+  consumptions on the MASTER trail. `mulBy_etale'`, `torsionπ_etale'`,
+  `exists_tatePoint`, `yOne_representableBy`, `yOneStructMap_smooth/isAffineHom`,
+  `yOne_isAffine`, `killedLocus_preimage_isOpen` — ALL now at the clean triple.
+  (Audit note: per-module `#print axioms` caches can read stale across incremental
+  builds — the `getUsedConstantsAsSet`-BFS tracer in `tmp/sorry_trace*.lean` is the
+  ground truth; post-rebuild both agree.)
+
+**Attribution — everyone on this trail (per charter):**
+- **c5β** — the representability chain and the seesaw engine the MASTER assembles
+  through (`yOne_representableBy`'s spine, T-E4 family).
+- **A** — the Over-monoidal prep (`OverPullbackMul` and friends) under the point-group
+  transports used everywhere here.
+- **NEW-CASCADE** — T-B6′/BB-DIFF: the unramifiedness cascade
+  (`mulByHom_formallyUnramified''`, `formallyUnramified_torsionπ_of_nIsInvertible'`)
+  that the étale characterization consumes.
+- **NEW-Y1** — the Y1 stream end-to-end: atlas, killed locus, clopen split, Tate point,
+  E-track (E1–E6), the K-series record/group primitives (K2 `modelGrpObj_unique`, K3
+  `RecordGroupUnique`, K4 swap), BB-QF (`mulByHom_locallyQuasiFinite_of_nIsInvertible`),
+  and this window's kernel calculus + N5–N7 close (Y1-CLOSER).
+- **HasseWeil** — the `mulByInt_degree` anchor: the fibrewise degree bridge
+  (`torsion_genN_addEquiv`) behind the quasi-finiteness that feeds finiteness, étaleness,
+  and the E5 lift alike.
+- Sources: Loeffler §3.3–3.4 (Def 3.3.6, Prop 3.3.4/3.4.3, Thm 3.4.4, Cor 3.3.5);
+  KM 2.3.1/5.x for the ambient doctrine.
+
+**Residual (NOT on the MASTER trail):** the full-generality `mulByHom_flat` /
+`mulByHom_locallyQuasiFinite` / `mulByHom_finrank` (Torsion.lean) stay sorried as the
+general-`N`-over-arbitrary-base black boxes — no Y1 consumer remains; retirement is the
+T-W7a follow-through (file dev tickets if the general case is ever needed). The stale
+`sorryAx`-attribution headers in `YOneTatePoint.lean` (T-A6b/T-B6′ wording) are updated
+in the closing commit — those trails retired during the K-series windows.
+
+**CHARTER-Y1-CLOSER-2 is COMPLETE.** Sentinel cleared on session end.
