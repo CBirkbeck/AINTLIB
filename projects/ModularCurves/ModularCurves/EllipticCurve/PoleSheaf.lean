@@ -2461,6 +2461,67 @@ theorem localTrivializationCoefficient_zero {X : Scheme.{u}} (M : X.Modules)
   unfold localTrivializationCoefficient
   rw [localTrivializationTopSection_zero, affineOpenAmbientSection_zero]
 
+/-- A ring section, viewed as a module section through an over-site
+trivialization. -/
+noncomputable def overTrivializationSection {X : Scheme.{u}} (M : X.Modules)
+    (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (r : Γ(X, U)) : Γ(M, U) :=
+  e.inv.val.app (.op (Over.mk (𝟙 U))) r
+
+/-- The coefficient of the module section constructed through a trivialization
+is the original ring section. -/
+theorem overTrivializationSection_coefficient {X : Scheme.{u}} (M : X.Modules)
+    (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (r : Γ(X, U)) :
+    e.hom.val.app (.op (Over.mk (𝟙 U)))
+        (overTrivializationSection M U e r) = r := by
+  have hcomp := congrArg (fun q => q.val.app (.op (Over.mk (𝟙 U))))
+    e.inv_hom_id
+  exact ConcreteCategory.congr_hom hcomp r
+
+@[simp]
+theorem overTrivializationSection_add {X : Scheme.{u}} (M : X.Modules)
+    (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (r s : Γ(X, U)) :
+    overTrivializationSection M U e (r + s) =
+      overTrivializationSection M U e r + overTrivializationSection M U e s := by
+  exact (e.inv.val.app (.op (Over.mk (𝟙 U)))).hom.map_add r s
+
+@[simp]
+theorem overTrivializationSection_zero {X : Scheme.{u}} (M : X.Modules)
+    (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)) :
+    overTrivializationSection M U e 0 = 0 := by
+  exact (e.inv.val.app (.op (Over.mk (𝟙 U)))).hom.map_zero
+
+/-- Constructing a section through a trivialization commutes with restriction
+to a smaller open and the induced trivialization. -/
+theorem overTrivializationSection_restrict {X : Scheme.{u}} (M : X.Modules)
+    {U V : X.Opens} (hVU : V ≤ U)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (r : Γ(X, U)) :
+    M.presheaf.map (homOfLE hVU).op (overTrivializationSection M U e r) =
+      overTrivializationSection M V
+        (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M U e
+          (Over.mk (homOfLE hVU)))
+        (X.presheaf.map (homOfLE hVU).op r) := by
+  unfold overTrivializationSection
+  let VU : Over U := Over.mk (homOfLE hVU)
+  let k : VU ⟶ Over.mk (𝟙 U) := Over.mkIdTerminal.from VU
+  have hnat := PresheafOfModules.naturality_apply e.inv.val k.op r
+  change M.presheaf.map (homOfLE hVU).op
+      (e.inv.val.app (.op (Over.mk (𝟙 U))) r) =
+    e.inv.val.app (.op ((Over.map VU.hom).obj (Over.mk (𝟙 V))))
+      (X.presheaf.map (homOfLE hVU).op r)
+  change M.presheaf.map (Over.mkIdTerminal.from VU).left.op
+      (e.inv.val.app (.op (Over.mk (𝟙 U))) r) =
+    e.inv.val.app (.op VU)
+      (X.presheaf.map (Over.mkIdTerminal.from VU).left.op r)
+  exact hnat.symm
+
 /-- The coefficient of a global section in a trivialization on the over-site of an
 open subset. -/
 noncomputable def overTrivializationCoefficient {X : Scheme.{u}} (M : X.Modules)
