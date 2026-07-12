@@ -820,6 +820,17 @@ theorem affineOpenTopSection_ambientSection {Y : Scheme.{u}}
   change (U.1.ι.appIso ⊤).hom ((U.1.ι.appIso ⊤).inv r) = r
   exact Iso.inv_hom_id_apply _ r
 
+@[simp]
+theorem affineOpenAmbientSection_topSection {Y : Scheme.{u}}
+    (U : Y.affineOpens) (r : Γ(Y, U.1)) :
+    affineOpenAmbientSection U (affineOpenTopSection U r) = r := by
+  rw [affineOpenAmbientSection, affineOpenTopSection]
+  rw [Iso.hom_inv_id_apply]
+  change (Y.presheaf.map (eqToHom U.1.ι_image_top).op ≫
+    Y.presheaf.map (homOfLE U.1.ι_image_top.ge).op) r = r
+  rw [← Y.presheaf.map_comp]
+  simp
+
 /-- The ambient affine section obtained by pulling a chart section through a
 restricted morphism. -/
 noncomputable def affinePullbackSection {X Y : Scheme.{u}} (f : X ⟶ Y)
@@ -2672,6 +2683,118 @@ theorem restrictTrivializationOfOverTrivializationOfRestrictIso
       (Category.assoc _ _ _).symm
     _ = e.hom ≫ 𝟙 _ := congrArg (fun k ↦ e.hom ≫ k) C.inv_hom_id
     _ = e.hom := Category.comp_id _
+
+private theorem restrictTrivializationOfOverIso_hom_top_apply
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (x : ((M.restrict U.ι).val.obj (.op (⊤ : U.toScheme.Opens)))) :
+    (restrictTrivializationOfOverIso M U e).hom.val.app (.op ⊤) x =
+      e.hom.val.app
+        (.op (U.overEquivalence.symm.functor.obj (⊤ : U.toScheme.Opens)))
+        (((Scheme.Modules.overFunctorEquiv U).inv.app M).val.app (.op ⊤) x) := by
+  unfold restrictTrivializationOfOverIso
+  simp only [Iso.trans_hom, Functor.mapIso_hom]
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply]
+
+private theorem affineOpenTopSection_eq_overMap_terminal
+    {X : Scheme.{u}} (U : X.affineOpens) (r : Γ(X, U.1)) :
+    let V := U.1.overEquivalence.symm.functor.obj
+      (⊤ : U.1.toScheme.Opens)
+    let k : V ⟶ Over.mk (𝟙 U.1) := Over.mkIdTerminal.from V
+    affineOpenTopSection U r =
+      (X.ringCatSheaf.over U.1).obj.map k.op r := by
+  dsimp only
+  unfold affineOpenTopSection
+  rw [U.1.ι_appIso]
+  change X.presheaf.map (eqToHom U.1.ι_image_top).op r =
+    X.presheaf.map
+      (Over.mkIdTerminal.from
+        (U.1.overEquivalence.symm.functor.obj
+          (⊤ : U.1.toScheme.Opens))).left.op r
+  congr 2
+  exact congrArg X.presheaf.map (Subsingleton.elim _ _)
+
+private theorem localTrivializationRestriction_eq_overMap_terminal
+    {X : Scheme.{u}} (M : X.Modules) (U : X.affineOpens)
+    (m : Γ(M, (⊤ : X.Opens))) :
+    let V := U.1.overEquivalence.symm.functor.obj
+      (⊤ : U.1.toScheme.Opens)
+    let k : V ⟶ Over.mk (𝟙 U.1) := Over.mkIdTerminal.from V
+    ((Scheme.Modules.overFunctorEquiv U.1).inv.app M).val.app (.op ⊤)
+        (localTrivializationRestriction M U m) =
+      (M.over U.1).val.map k.op
+        (M.presheaf.map (homOfLE le_top).op m) := by
+  dsimp only
+  rw [Scheme.Modules.overFunctorEquiv_inv_app_apply]
+  unfold localTrivializationRestriction
+  change M.presheaf.map (eqToHom U.1.ι_image_top).op
+      (M.presheaf.map (homOfLE le_top).op m) =
+    M.presheaf.map
+      (Over.mkIdTerminal.from
+        (U.1.overEquivalence.symm.functor.obj
+          (⊤ : U.1.toScheme.Opens))).left.op
+      (M.presheaf.map (homOfLE le_top).op m)
+  congr 2
+  exact congrArg M.presheaf.map (Subsingleton.elim _ _)
+
+private theorem overTrivializationCoefficient_eq_local_of_overIso
+    {X : Scheme.{u}} (M : X.Modules) (U : X.affineOpens)
+    (e : M.over U.1 ≅ SheafOfModules.unit (X.ringCatSheaf.over U.1))
+    (m : Γ(M, (⊤ : X.Opens))) :
+    overTrivializationCoefficient M U.1 e m =
+      localTrivializationCoefficient M U
+        (restrictTrivializationOfOverIso M U.1 e) m := by
+  rw [← affineOpenAmbientSection_topSection U
+    (overTrivializationCoefficient M U.1 e m)]
+  unfold localTrivializationCoefficient
+  congr 1
+  unfold localTrivializationTopSection overTrivializationCoefficient
+  rw [restrictTrivializationOfOverIso_hom_top_apply]
+  rw [localTrivializationRestriction_eq_overMap_terminal]
+  rw [affineOpenTopSection_eq_overMap_terminal]
+  let V := U.1.overEquivalence.symm.functor.obj
+    (⊤ : U.1.toScheme.Opens)
+  let k : V ⟶ Over.mk (𝟙 U.1) := Over.mkIdTerminal.from V
+  let mU := M.presheaf.map
+    (homOfLE (le_top : U.1 ≤ (⊤ : X.Opens))).op m
+  have hnat := PresheafOfModules.naturality_apply e.hom.val k.op mU
+  exact hnat.symm
+
+/-- The over-site coefficient associated to an affine-open trivialization is the
+same as the coefficient obtained directly on the open subscheme. -/
+theorem overTrivializationCoefficient_overTrivializationOfRestrictIso
+    {X : Scheme.{u}} (M : X.Modules) (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (m : Γ(M, (⊤ : X.Opens))) :
+    overTrivializationCoefficient M U.1
+        (Scheme.Modules.overTrivializationOfRestrictIso M U.1 e) m =
+      localTrivializationCoefficient M U e m := by
+  calc
+    overTrivializationCoefficient M U.1
+        (Scheme.Modules.overTrivializationOfRestrictIso M U.1 e) m =
+      localTrivializationCoefficient M U
+        (restrictTrivializationOfOverIso M U.1
+          (Scheme.Modules.overTrivializationOfRestrictIso M U.1 e)) m :=
+      overTrivializationCoefficient_eq_local_of_overIso M U _ m
+    _ = localTrivializationCoefficient M U e m := by
+      rw [restrictTrivializationOfOverTrivializationOfRestrictIso]
+
+/-- Restricting a coefficient computed in an affine-open trivialization agrees
+with computing it in the induced over-site trivialization. -/
+theorem localTrivializationCoefficient_restrict
+    {X : Scheme.{u}} (M : X.Modules) (U : X.affineOpens)
+    {V : X.Opens} (hVU : V ≤ U.1)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (m : Γ(M, (⊤ : X.Opens))) :
+    overTrivializationCoefficient M V
+        (Scheme.Modules.overTrivializationOfRestrictIso M V
+          (Scheme.Modules.restrictOpenTrivialization hVU e)) m =
+      X.presheaf.map (homOfLE hVU).op
+        (localTrivializationCoefficient M U e m) := by
+  rw [Scheme.Modules.overTrivializationOfRestrictOpenTrivialization]
+  rw [overTrivializationCoefficient_restrict]
+  rw [overTrivializationCoefficient_overTrivializationOfRestrictIso]
 
 /-- An equation expressing an ideal generator in an over-site trivialization
 restricts to the corresponding equation for the restricted generator. -/
