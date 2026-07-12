@@ -2588,6 +2588,34 @@ noncomputable def overTrivializationCoefficient {X : Scheme.{u}} (M : X.Modules)
   e.hom.val.app (.op (Over.mk (𝟙 U)))
     (M.presheaf.map (homOfLE le_top).op m)
 
+/-- Equality of coefficients in an over-site trivialization detects equality
+of the corresponding restricted module sections. -/
+theorem restrict_eq_of_overTrivializationCoefficient_eq
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (m n : Γ(M, (⊤ : X.Opens)))
+    (h : overTrivializationCoefficient M U e m =
+      overTrivializationCoefficient M U e n) :
+    M.presheaf.map (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op m =
+      M.presheaf.map (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op n := by
+  let T : Over U := Over.mk (𝟙 U)
+  let mU := M.presheaf.map
+    (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op m
+  let nU := M.presheaf.map
+    (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op n
+  change e.hom.val.app (.op T) mU = e.hom.val.app (.op T) nU at h
+  have h' := congrArg (fun x => e.inv.val.app (.op T) x) h
+  have hcancel (x : (M.over U).val.obj (.op T)) :
+      e.inv.val.app (.op T) (e.hom.val.app (.op T) x) = x := by
+    have hcomp := congrArg (fun q => q.val.app (.op T)) e.hom_inv_id
+    have hx := ConcreteCategory.congr_hom hcomp x
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply] at hx
+    exact hx
+  change (show (M.over U).val.obj (.op T) from mU) =
+    (show (M.over U).val.obj (.op T) from nU)
+  simpa only [hcancel] using h'
+
 /-- Expressing a scalar multiple in an over-site trivialization restricts the
 scalar and multiplies the coefficient. -/
 theorem overTrivializationCoefficient_smul {X : Scheme.{u}} (M : X.Modules)
@@ -2920,6 +2948,21 @@ theorem overTrivializationCoefficient_overTrivializationOfRestrictIso
       overTrivializationCoefficient_eq_local_of_overIso M U _ m
     _ = localTrivializationCoefficient M U e m := by
       rw [restrictTrivializationOfOverTrivializationOfRestrictIso]
+
+/-- Equality of coefficients in an affine-open trivialization detects equality
+of the corresponding restricted module sections. -/
+theorem restrict_eq_of_localTrivializationCoefficient_eq
+    {X : Scheme.{u}} (M : X.Modules) (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (m n : Γ(M, (⊤ : X.Opens)))
+    (h : localTrivializationCoefficient M U e m =
+      localTrivializationCoefficient M U e n) :
+    M.presheaf.map (homOfLE (le_top : U.1 ≤ (⊤ : X.Opens))).op m =
+      M.presheaf.map (homOfLE (le_top : U.1 ≤ (⊤ : X.Opens))).op n := by
+  apply restrict_eq_of_overTrivializationCoefficient_eq M U.1
+    (Scheme.Modules.overTrivializationOfRestrictIso M U.1 e)
+  rwa [overTrivializationCoefficient_overTrivializationOfRestrictIso,
+    overTrivializationCoefficient_overTrivializationOfRestrictIso]
 
 /-- Expressing a scalar multiple in an affine-open trivialization restricts
 the scalar and multiplies the coefficient. -/
