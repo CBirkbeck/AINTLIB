@@ -712,6 +712,14 @@ for every pole sheaf whose terms are flat over the affine base. The remaining ge
 input is no longer termwise flatness: it is the proper-perfect replacement of this model
 and its comparison after arbitrary base change.
 
+The active packaging step combines these two results without strengthening them:
+`Scheme.Modules.IsInvertible.exists_finiteAffineBaseCech_flat` will retain the finite
+affine trivializations and termwise flatness in one witness, and
+`exists_sectionPoleSheafPower_finiteAffineBaseCech_flat` will instantiate it for
+`O(n[0])` using smoothness, properness, and pole-sheaf invertibility. This packages the
+input to the future perfect-complex construction; it does not infer finite generation or
+projectivity of the raw Cech terms.
+
 The elementary Mayer--Vietoris seam is now complete in both directions.
 `HPrimeZeroAddEquivSections` identifies `H'⁰(U,F)` with sections naturally in `U`, while
 `HPrimeAddEquivHOfIsTerminal` identifies `H'ⁿ(T,F)` with genuine `Sheaf.H F n` when `T`
