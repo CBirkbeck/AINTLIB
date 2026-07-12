@@ -229,4 +229,58 @@ theorem isIso_of_bijective_app_on_basis {A B : X.Modules} (g : A ⟶ B)
 
 end BasisLocal
 
+section GenTriv
+
+variable {C : Scheme.{u}} (J : C.IdealSheafData)
+
+set_option backward.defeqAttrib.useBackward true in
+set_option backward.isDefEq.respectTransparency false in
+/-- Multiplication by a section `f` of the ideal over `V`: a morphism from the structure
+sheaf of `V` to the restriction of the ideal module. -/
+noncomputable def idealGenHom (V : C.Opens) (f : Γ(C, V))
+    (hf : f ∈ idealSections J (Opposite.op V)) :
+    unitObj ↑V ⟶ (restrictFunctor V.ι).obj (idealModule J) :=
+  ⟨{ app := fun W => ModuleCat.ofHom
+      (Y := ((restrictFunctor V.ι).obj (idealModule J)).val.obj W)
+      { toFun := fun g =>
+          ⟨C.presheaf.map (homOfLE (V.ι_image_le W.unop)).op f *
+              (V.ι.appIso W.unop).inv g,
+            Ideal.mul_mem_right _ _
+              (idealSections_map J (homOfLE (V.ι_image_le W.unop)).op hf)⟩
+        map_add' := fun g g' => Subtype.ext (by
+          show _ * (ConcreteCategory.hom (V.ι.appIso W.unop).inv) (g + g') = _
+          rw [map_add, mul_add]
+          rfl)
+        map_smul' := fun r g => Subtype.ext (by
+          show C.presheaf.map (homOfLE (V.ι_image_le W.unop)).op f *
+              (ConcreteCategory.hom (V.ι.appIso W.unop).inv) (r * g) =
+            (ConcreteCategory.hom (V.ι.appIso W.unop).inv) r *
+              (C.presheaf.map (homOfLE (V.ι_image_le W.unop)).op f *
+                (ConcreteCategory.hom (V.ι.appIso W.unop).inv) g)
+          rw [map_mul]
+          ring) }
+     naturality := fun {W W'} i => by
+      refine ModuleCat.hom_ext (LinearMap.ext fun g => ?_)
+      refine Subtype.ext ?_
+      have harr : (homOfLE (V.ι_image_le W.unop)).op ≫ V.ι.opensFunctor.op.map i =
+          (homOfLE (V.ι_image_le W'.unop)).op := Subsingleton.elim _ _
+      have h1 : C.presheaf.map (V.ι.opensFunctor.op.map i)
+          (C.presheaf.map (homOfLE (V.ι_image_le W.unop)).op f) =
+          C.presheaf.map (homOfLE (V.ι_image_le W'.unop)).op f := by
+        rw [← harr, Functor.map_comp]
+        rfl
+      have h2 : C.presheaf.map (V.ι.opensFunctor.op.map i)
+          ((V.ι.appIso W.unop).inv g) =
+          (V.ι.appIso W'.unop).inv ((↑V : Scheme.{u}).presheaf.map i g) :=
+        (congrArg (fun (φ : _ ⟶ _) => (ConcreteCategory.hom φ) g)
+          (V.ι.appIso_inv_naturality i)).symm
+      show C.presheaf.map (homOfLE (V.ι_image_le W'.unop)).op f *
+            (V.ι.appIso W'.unop).inv ((↑V : Scheme.{u}).presheaf.map i g) =
+          C.presheaf.map (V.ι.opensFunctor.op.map i)
+            (C.presheaf.map (homOfLE (V.ι_image_le W.unop)).op f *
+              (V.ι.appIso W.unop).inv g)
+      rw [map_mul, h1, h2] }⟩
+
+end GenTriv
+
 end AlgebraicGeometry.Scheme.Modules
