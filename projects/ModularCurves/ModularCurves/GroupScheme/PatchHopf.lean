@@ -1005,6 +1005,49 @@ theorem comulAlgTop_eq :
     P.comulAlgTop = P.squareΓTopAlg.comp P.squareMulResAlg :=
   AlgHom.ext fun _ => rfl
 
+/-- The fixed triple identification `Γ(cube) ⟶ A' ⊗ (A' ⊗ A')`. -/
+noncomputable def tripleΓ :
+    Γ(P.cube, ⊤)
+      ⟶ CommRingCat.of (P.groupRingTop ⊗[P.baseRingTop]
+          (P.groupRingTop ⊗[P.baseRingTop] P.groupRingTop)) :=
+  P.cubeΓ ≫ CommRingCat.ofHom (Algebra.TensorProduct.map
+    (AlgHom.id P.baseRingTop P.groupRingTop) P.squareΓTopAlg).toRingHom
+
+/-- The right-associated triple multiplication `cube → G|_V`,
+`(g₁,(g₂,g₃)) ↦ g₁·(g₂·g₃)`. -/
+noncomputable def rightMulScheme : P.cube ⟶ P.groupOpen.toScheme :=
+  P.cubeInnerMul ≫ P.squareMulRes
+
+/-- **`Δ₂R = (id ⊗ Δ') ∘ Δ'` is the `Γ`-dual of the right-associated triple
+multiplication.** -/
+theorem comulTop_comp_map_id_comulTop :
+    P.comulTop ≫ CommRingCat.ofHom
+        (Algebra.TensorProduct.map (AlgHom.id P.baseRingTop P.groupRingTop)
+          P.comulAlgTop).toRingHom
+      = P.rightMulScheme.appTop ≫ P.tripleΓ := by
+  -- combine the two id⊗(-) using functoriality + comulAlgTop_eq
+  have hmap : CommRingCat.ofHom
+        (Algebra.TensorProduct.map (AlgHom.id P.baseRingTop P.groupRingTop)
+          P.comulAlgTop).toRingHom
+      = CommRingCat.ofHom (Algebra.TensorProduct.map
+          (AlgHom.id P.baseRingTop P.groupRingTop) P.squareMulResAlg).toRingHom
+        ≫ CommRingCat.ofHom (Algebra.TensorProduct.map
+          (AlgHom.id P.baseRingTop P.groupRingTop) P.squareΓTopAlg).toRingHom := by
+    have halg : Algebra.TensorProduct.map (AlgHom.id P.baseRingTop P.groupRingTop)
+          P.comulAlgTop
+        = (Algebra.TensorProduct.map (AlgHom.id P.baseRingTop P.groupRingTop)
+            P.squareΓTopAlg).comp
+          (Algebra.TensorProduct.map (AlgHom.id P.baseRingTop P.groupRingTop)
+            P.squareMulResAlg) := by
+      rw [← Algebra.TensorProduct.map_comp, AlgHom.id_comp, comulAlgTop_eq]
+    rw [halg]
+    refine CommRingCat.hom_ext (RingHom.ext fun x => ?_)
+    rfl
+  rw [comulTop, tripleΓ, rightMulScheme, Scheme.Hom.comp_appTop, hmap]
+  simp only [Category.assoc]
+  rw [← Category.assoc P.squareΓTop, ← P.cubeInnerMul_appTop_cubeΓ]
+  simp only [Category.assoc]
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
