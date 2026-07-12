@@ -141,7 +141,9 @@ Finally, `EllipticCurve/PoleSheafPointedIso.lean` proves that a pointed scheme
 isomorphism transports the section ideal module, its dual pole sheaf, and every tensor
 power of the pole sheaf. This supplies the sheaf-level bridge from each explicit pointed
 model in `FibrewiseElliptic` to the corresponding residue fibre, without using `Pic⁰` or
-the group law.
+the group law. `EllipticCurve/PoleSheafFibreSections.lean` evaluates this transport on
+global sections over the common residue-field base and proves the resulting linear
+equivalence.
 The generic
 `RelEffCartierDiv.isOfficial` still depends on the registered
 `officialAux_exists_finite_chart` `sorry`; it is not needed for the zero section and must
@@ -179,8 +181,11 @@ Conclude, after shrinking the base, that `π_*O(n[0])` is locally free of rank `
 commutes with base change. The model-side rank input is proved uniformly over every
 nonzero base ring as `sectionPoleSheafPower_projModel_finrank`, and
 `sectionPoleSheafPowerPointedIso` supplies the sheaf-level transport from those models
-to the residue fibres. The remaining work in this step is the geometric `H¹`-vanishing
-comparison, its effect on global sections, and its transport through Step 2.
+to the residue fibres. The `H⁰` conclusion is now complete as
+`FibrewiseElliptic.sectionPoleSheafPower_fiber_finrank`: for every residue fibre and
+`n ≥ 1`, the global pole sections have dimension `n`. The remaining work in this step is
+the geometric `H¹`-vanishing comparison and its transport through Step 2 to local
+freeness and base change on the family.
 
 ### 4. Choose `x` and `y` -- `T-W-cmp.XY`
 
