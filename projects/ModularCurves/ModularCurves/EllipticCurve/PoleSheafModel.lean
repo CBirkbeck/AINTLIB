@@ -1456,4 +1456,254 @@ theorem projModelSectionPoleCoefficientZ_mem_poleOrderFiltration
         rw [pow_add]
         ring
 
+/-- The section-neighborhood over-site trivialization of `O(n[0])`. -/
+noncomputable def projModelSectionPoleSheafPowerOverTrivialization
+    (W : WeierstrassCurve R) (n : ℕ) :
+    (sectionPoleSheafPower (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W) n).over
+        (projModelSectionNeighborhood W) ≅
+      SheafOfModules.unit
+        ((projModel W).ringCatSheaf.over (projModelSectionNeighborhood W)) :=
+  Scheme.Modules.overTrivializationOfRestrictIso _ _
+    (projModelSectionPoleSheafPowerTrivialization W n)
+
+/-- The `Z`-chart over-site trivialization of `O(n[0])`. -/
+noncomputable def projModelSectionPoleSheafPowerOverTrivializationZ
+    (W : WeierstrassCurve R) (n : ℕ) :
+    (sectionPoleSheafPower (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W) n).over (projModelZChart W) ≅
+      SheafOfModules.unit
+        ((projModel W).ringCatSheaf.over (projModelZChart W)) :=
+  Scheme.Modules.overTrivializationOfRestrictIso _ _
+    (projModelSectionPoleSheafPowerTrivializationZ W n)
+
+/-- Restricting the section-neighborhood over-site trivialization to the pole
+overlap gives its canonical overlap trivialization. -/
+theorem projModelSectionPoleSheafPowerOverTrivialization_restrict
+    (W : WeierstrassCurve R) (n : ℕ) :
+    SheafOfModules.restrictOverTrivialization (projModel W).ringCatSheaf
+        (sectionPoleSheafPower (projModelπ W) (projModelZero W)
+          (projModelZero_projModelπ W) n)
+        (projModelSectionNeighborhood W)
+        (projModelSectionPoleSheafPowerOverTrivialization W n)
+        (Over.mk (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W))) =
+      projModelSectionPolePowerOverlapOverTrivialization W n := by
+  unfold projModelSectionPoleSheafPowerOverTrivialization
+  unfold projModelSectionPolePowerOverlapOverTrivialization
+  rw [← projModelSectionPoleSheafPowerTrivialization_restrict]
+  exact (Scheme.Modules.overTrivializationOfRestrictOpenTrivialization
+    (projModelPoleOverlap_le_sectionNeighborhood W)
+    (projModelSectionPoleSheafPowerTrivialization W n)).symm
+
+/-- Restricting the `Z`-chart over-site trivialization to the pole overlap gives
+its canonical overlap trivialization. -/
+theorem projModelSectionPoleSheafPowerOverTrivializationZ_restrict
+    (W : WeierstrassCurve R) (n : ℕ) :
+    SheafOfModules.restrictOverTrivialization (projModel W).ringCatSheaf
+        (sectionPoleSheafPower (projModelπ W) (projModelZero W)
+          (projModelZero_projModelπ W) n)
+        (projModelZChart W)
+        (projModelSectionPoleSheafPowerOverTrivializationZ W n)
+        (Over.mk (homOfLE (projModelPoleOverlap_le_ZChart W))) =
+      projModelSectionPolePowerOverlapOverTrivializationZ W n := by
+  unfold projModelSectionPoleSheafPowerOverTrivializationZ
+  unfold projModelSectionPolePowerOverlapOverTrivializationZ
+  rw [← projModelSectionPoleSheafPowerTrivializationZ_restrict]
+  exact (Scheme.Modules.overTrivializationOfRestrictOpenTrivialization
+    (projModelPoleOverlap_le_ZChart W)
+    (projModelSectionPoleSheafPowerTrivializationZ W n)).symm
+
+/-- An infinity-chart extension of `f s^n` gives compatible ring coefficients
+on the section neighborhood and the `Z`-chart. -/
+theorem projModelPoleCoefficients_compatible
+    (W : WeierstrassCurve R) (n : ℕ)
+    (f : W.toAffine.CoordinateRing) (b : AdjoinRoot (infChartCubic W))
+    (hb : algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)) b =
+      overlapMap W f * algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W))
+          (AdjoinRoot.root (infChartCubic W)) ^ n) :
+    (projModel W).presheaf.map
+        (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op
+        ((projModel W).presheaf.map
+          (homOfLE ((projModel W).affineBasicOpen_le
+            (projModelSectionUnitSection W))).op
+          ((chartYSectionsRingEquiv W).symm b)) =
+      (projModel W).presheaf.map
+          (homOfLE (projModelPoleOverlap_le_ZChart W)).op
+          ((chartZSectionsRingEquiv W).symm f) *
+        projModelSectionRootOverlap W ^ n := by
+  have hO :
+      (projModel W).presheaf.map
+          (homOfLE (projModelChartOverlap_le_YChart W)).op
+          ((chartYSectionsRingEquiv W).symm b) =
+        (projModel W).presheaf.map
+            (homOfLE (projModelChartOverlap_le_ZChart W)).op
+            ((chartZSectionsRingEquiv W).symm f) *
+          projModelSectionRootChartOverlap W ^ n := by
+    apply (overlapSectionsEquiv W).injective
+    simpa only [map_mul, map_pow,
+      overlapSectionsEquiv_res_projModelYChart,
+      overlapSectionsEquiv_res_projModelZChart,
+      RingEquiv.apply_symm_apply,
+      overlapSectionsEquiv_sectionRootChartOverlap] using hb
+  have hP := congrArg (fun q =>
+    (projModel W).presheaf.map
+      (homOfLE (projModelPoleOverlap_le_chartOverlap W)).op q) hO
+  rw [map_mul, map_pow] at hP
+  rw [projModelSectionRootOverlap_eq_res_chartOverlap]
+  calc
+    _ = (projModel W).presheaf.map
+        (homOfLE (projModelPoleOverlap_le_chartOverlap W)).op
+        ((projModel W).presheaf.map
+          (homOfLE (projModelChartOverlap_le_YChart W)).op
+          ((chartYSectionsRingEquiv W).symm b)) := by
+      exact presheaf_restrict_via
+        (projModelPoleOverlap_le_sectionNeighborhood W)
+        ((projModel W).affineBasicOpen_le
+          (projModelSectionUnitSection W))
+        (projModelPoleOverlap_le_chartOverlap W)
+        (projModelChartOverlap_le_YChart W) _
+    _ = (projModel W).presheaf.map
+          (homOfLE (projModelPoleOverlap_le_chartOverlap W)).op
+          ((projModel W).presheaf.map
+            (homOfLE (projModelChartOverlap_le_ZChart W)).op
+            ((chartZSectionsRingEquiv W).symm f)) *
+        ((projModel W).presheaf.map
+          (homOfLE (projModelPoleOverlap_le_chartOverlap W)).op
+          (projModelSectionRootChartOverlap W)) ^ n := hP
+    _ = _ := by
+      exact congrArg₂ (· * ·)
+        (presheaf_restrict_via
+          (projModelPoleOverlap_le_chartOverlap W)
+          (projModelChartOverlap_le_ZChart W)
+          (projModelPoleOverlap_le_ZChart W) le_rfl _).symm rfl
+
+/-- The local `O(n[0])` sections associated to compatible pole coefficients
+agree on the overlap. -/
+theorem projModelPoleLocalSections_compatible
+    (W : WeierstrassCurve R) (n : ℕ)
+    (f : W.toAffine.CoordinateRing) (b : AdjoinRoot (infChartCubic W))
+    (hb : algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W)) b =
+      overlapMap W f * algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W))
+          (AdjoinRoot.root (infChartCubic W)) ^ n) :
+    let M := sectionPoleSheafPower (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W) n
+    let bN := (projModel W).presheaf.map
+      (homOfLE ((projModel W).affineBasicOpen_le
+        (projModelSectionUnitSection W))).op
+      ((chartYSectionsRingEquiv W).symm b)
+    let fZ := (chartZSectionsRingEquiv W).symm f
+    M.presheaf.map
+        (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op
+        (overTrivializationSection M (projModelSectionNeighborhood W)
+          (projModelSectionPoleSheafPowerOverTrivialization W n) bN) =
+      M.presheaf.map (homOfLE (projModelPoleOverlap_le_ZChart W)).op
+        (overTrivializationSection M (projModelZChart W)
+          (projModelSectionPoleSheafPowerOverTrivializationZ W n) fZ) := by
+  dsimp only
+  rw [overTrivializationSection_restrict,
+    overTrivializationSection_restrict]
+  rw [projModelSectionPoleSheafPowerOverTrivialization_restrict,
+    projModelSectionPoleSheafPowerOverTrivializationZ_restrict]
+  apply overTrivializationSection_eq_of_transition
+    (sectionPoleSheafPower (projModelπ W) (projModelZero W)
+      (projModelZero_projModelπ W) n)
+    (projModelPoleOverlap W)
+    (projModelSectionPolePowerOverlapOverTrivialization W n)
+    (projModelSectionPolePowerOverlapOverTrivializationZ W n)
+    (projModelSectionRootOverlap W ^ n)
+  · exact projModelSectionPolePowerOverlapOver_transition W n
+  · exact projModelPoleCoefficients_compatible W n f b hb
+
+/-- Every affine function of pole order at most `n` is the `Z`-coefficient of
+a global section of `O(n[0])`. -/
+theorem exists_projModelSectionPoleCoefficientZ_eq_of_mem
+    (W : WeierstrassCurve R) (n : ℕ)
+    (f : W.toAffine.CoordinateRing) (hf : f ∈ poleOrderFiltration W n) :
+    ∃ m : Γ(sectionPoleSheafPower (projModelπ W) (projModelZero W)
+        (projModelZero_projModelπ W) n, (⊤ : (projModel W).Opens)),
+      projModelSectionPoleCoefficientZ W n m = f := by
+  obtain ⟨b, hb⟩ := (mem_poleOrderFiltration_iff W f n).mp hf
+  let M := sectionPoleSheafPower (projModelπ W) (projModelZero W)
+    (projModelZero_projModelπ W) n
+  let N : (projModel W).Opens := projModelSectionNeighborhood W
+  let Z : (projModel W).Opens := projModelZChart W
+  let eN := projModelSectionPoleSheafPowerOverTrivialization W n
+  let eZ := projModelSectionPoleSheafPowerOverTrivializationZ W n
+  let bN : Γ(projModel W, N) := (projModel W).presheaf.map
+    (homOfLE ((projModel W).affineBasicOpen_le
+      (projModelSectionUnitSection W))).op
+    ((chartYSectionsRingEquiv W).symm b)
+  let fZ : Γ(projModel W, Z) := (chartZSectionsRingEquiv W).symm f
+  let mN : Γ(M, N) := overTrivializationSection M N eN bN
+  let mZ : Γ(M, Z) := overTrivializationSection M Z eZ fZ
+  have hNZ : M.presheaf.map
+      (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op mN =
+    M.presheaf.map (homOfLE (projModelPoleOverlap_le_ZChart W)).op mZ := by
+    exact projModelPoleLocalSections_compatible W n f b hb
+  let U : Bool → (projModel W).Opens
+    | false => Z
+    | true => N
+  let sf : ∀ i, Γ(M, U i)
+    | false => mZ
+    | true => mN
+  have hcpt : TopCat.Presheaf.IsCompatible M.presheaf U sf := by
+    intro i j
+    cases i <;> cases j
+    · rfl
+    · dsimp only [U, sf]
+      let hcomm : Z ⊓ N ≤ N ⊓ Z := by rw [inf_comm]
+      have hZN := congrArg (fun q =>
+        M.presheaf.map (homOfLE hcomm).op q) hNZ.symm
+      have hleft : M.presheaf.map (homOfLE hcomm).op
+          (M.presheaf.map
+            (homOfLE (projModelPoleOverlap_le_ZChart W)).op mZ) =
+        M.presheaf.map (TopologicalSpace.Opens.infLELeft Z N).op mZ := by
+        change (M.presheaf.map
+            (homOfLE (projModelPoleOverlap_le_ZChart W)).op ≫
+          M.presheaf.map (homOfLE hcomm).op) mZ = _
+        rw [← M.presheaf.map_comp]
+        congr 2
+      have hright : M.presheaf.map (homOfLE hcomm).op
+          (M.presheaf.map
+            (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op mN) =
+        M.presheaf.map (TopologicalSpace.Opens.infLERight Z N).op mN := by
+        change (M.presheaf.map
+            (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op ≫
+          M.presheaf.map (homOfLE hcomm).op) mN = _
+        rw [← M.presheaf.map_comp]
+        congr 2
+      exact hleft.symm.trans (hZN.trans hright)
+    · dsimp only [U, sf]
+      exact hNZ
+    · rfl
+  have hcover : (⊤ : (projModel W).Opens) ≤ iSup U := by
+    calc
+      (⊤ : (projModel W).Opens) = Z ⊔ N := by
+        exact (projModelZChart_sup_sectionNeighborhood_eq_top W).symm
+      _ ≤ iSup U := by
+        apply sup_le
+        · simpa only [U] using le_iSup U false
+        · simpa only [U] using le_iSup U true
+  obtain ⟨m, hm, -⟩ := TopCat.Sheaf.existsUnique_gluing'
+    ⟨M.presheaf, M.isSheaf⟩ U ⊤ (fun _ => homOfLE le_top) hcover sf hcpt
+  refine ⟨m, ?_⟩
+  have hmZ := hm false
+  dsimp only [U, sf] at hmZ
+  have hcoord := congrArg (fun q =>
+    eZ.hom.val.app (.op (Over.mk (𝟙 Z))) q) hmZ
+  change overTrivializationCoefficient M Z eZ m =
+    eZ.hom.val.app (.op (Over.mk (𝟙 Z))) mZ at hcoord
+  rw [overTrivializationSection_coefficient] at hcoord
+  have hlocal : localTrivializationCoefficient M (projModelZChart W)
+      (projModelSectionPoleSheafPowerTrivializationZ W n) m = fZ := by
+    rw [← overTrivializationCoefficient_overTrivializationOfRestrictIso]
+    exact hcoord
+  unfold projModelSectionPoleCoefficientZ
+  rw [hlocal]
+  exact RingEquiv.apply_symm_apply (chartZSectionsRingEquiv W) f
+
 end ModularCurves
