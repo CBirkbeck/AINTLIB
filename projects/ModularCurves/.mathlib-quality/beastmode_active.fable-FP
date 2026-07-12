@@ -1,1 +1,1 @@
-FOCUS: [KL-3] BE tree frontier = 6 sorries (local_criterion_twoTerm 118, localBE_homology_disjunction 846/858 T-BE-TAIL, fibreExact_spreads 1146, coker_flat 1165, reduce_to_polynomial 1187, viaBE 1206). Attacking bottom-up. Deep BE acyclicity DONE.
+FOCUS: [KL-3] GRIND (coordinator override). Attack: 858 gap-truncation + 846 00MW-split (clean buchsbaumEisenbud_acyclic) → local-criterion Tier-A1 spawn → local_criterion_twoTerm → coker_flat → fibreExact_spreads → reduce_to_polynomial(ULift) → viaBE → wire.

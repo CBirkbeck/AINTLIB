@@ -107,3 +107,37 @@ Basic.lean:45) = `(N•P=0 ∧ N•Q=0)` ∧ fibrewise-generation (every geom-fi
 
 NEXT: `/develop --continue` to ticket L1–L4, then `/beastmode`. L3's finite-étale scheme-morphism
 construction is the sizing driver (the rest is transport from landed `glSmul`/substrate).
+
+## L3 construction — final sizing note (adjacent infra found)
+
+Groupoid.lean has the **rigidity/uniqueness** apparatus already: `aut_hom_eq_id_of_fullLevel`
+(N≥3, N inv: an aut fixing a naive full level is `𝟙`), `torsionFixed_of_fixesLevel` (a curve
+aut fixing (P,Q) fixes `E.torsionι N`), `aut_endo_eq_one`, `endDeg`. These give L3's
+well-definedness/uniqueness for free. The green-field piece is the **existence** of
+`glSchemeSmul`'s automorphism — realizing the linear section-action as an actual Scheme
+morphism `E.torsion N ⟶ E.torsion N` — via the finite-étale universal property (a
+section-level map on a finite-étale S-scheme extends to a scheme morphism). Route to check at
+build: (a) does `torsionFixed_of_fixesLevel`'s converse/construction give the map directly, or
+(b) build it from the étale trivialization `(ℤ/N)²_S ≅ E[N]` (L2) + the linear map on `(ℤ/N)²`.
+Prefer (b): compose L2's iso, the constant GL₂ scheme automorphism of `(ℤ/N)²_S`, and L2⁻¹.
+That makes L3 = `L2.symm ≪≫ (glConst g) ≪≫ L2` — turning L3 into pure transport once L2 lands.
+So **L2 (the étale scheme-iso) is the true crux; L3 is then a 3-line composition.**
+
+## EXECUTION STATUS (2026-07-11, c5β) — group-action layer LANDED, L2 crux staged
+
+Committed `GroupScheme/GLSchemeAction.lean` (compiling; one sorry = L2):
+- **BANKED (proven)**: `glEquiv`(+`_one`/`_mul`), `constGL`(+`_one`/`_mul`, self-contained via
+  `Sigma.desc` — no p2 coupling), `glSchemeSmul`, and the group-action laws
+  `glSchemeSmul_one`/`glSchemeSmul_mul` (L2-independent — proven from `constGL` laws + iso
+  cancellation; they inherit sorryAx only through `fullLevelIso`, resolving when L2 lands).
+- **REMAINING (the crux, one sorry)**: `fullLevelIso : (ℤ/N)²_S ≅ E.torsion N`. Sub-decomposition
+  (a focused sub-development — the finite-étale trivialisation, KM 2.3.1 N-invertible):
+  - **L2a** `fullLevelHom := Sigma.desc (fun v => pointToTorsion (v 0 • P + v 1 • Q, killed-by-N))`
+    — the map φ; constructible now (`pointToTorsion` Torsion.lean:67 + section arithmetic), fiddly.
+  - **L2b (sub-crux)** `IsIso fullLevelHom` — the fibrewise-iso⟹iso criterion, ABSENT from
+    mathlib/project. Route: `isIso_of_isPullback_of_fppf` (ForMathlib/PullbackLocalAtTarget.lean:120)
+    on an fppf cover trivialising `E[N]` to `(ℤ/N)²` (the KM 2.3.1 étale-local structure). This is
+    the real green-field sub-lemma; the WeilPairing lane built the analogous trivialisation for the
+    pairing (p2) — consume the *criterion* if it factors out, else build via `torsionπ_etale`.
+  - **L2** `fullLevelIso := asIso fullLevelHom` given L2b.
+- **L4** seam (`glSchemeSmul` ↔ `hOrbitSetoid`, NEW-GH's consumption) — state once L2 lands + NEW-GH pins the form.

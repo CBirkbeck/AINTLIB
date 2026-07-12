@@ -1,1 +1,1 @@
-FOCUS: [HG-C1c-1d-coassoc] naturality tool DONE. Next: Delta_2R via cubeInnerMul_appTop_cubeGamma (Gamma-dual of rightAssocMul), then Delta_2L (mirror + associator), then assembly from mulOver_assoc => Bialgebra coassoc. Path ledgered in decomposition doc.
+FOCUS: [HG-C1c-1d-coassoc] Delta_2R DONE. Next: Delta_2L — mirror naturality (cube on left) + associator dualisation, then assembly from mulOver_assoc.
