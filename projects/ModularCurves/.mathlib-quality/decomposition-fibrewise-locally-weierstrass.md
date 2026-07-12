@@ -441,6 +441,17 @@ assembles the factorwise vanishing. In particular the result applies to injectiv
 sheaves via `TopCat.Sheaf.IsFlasque.of_injective`, which supplies the acyclic rows for
 the Cech-to-derived double complex without claiming that pushforward itself is exact.
 
+Degree-one exactness of the native Cech complex for flasque sheaves is now proved in
+`ForMathlib/SheafCechFlasqueHOne.lean`.
+`TopCat.Sheaf.cechComplex_exactAt_one_of_isFlasque` factors the first sheaf-level
+Cech differential through its cycle sheaf. Exactness of the augmented sheaf resolution
+makes the resulting sequence short exact, and flasqueness of its kernel lifts every
+global cycle through the preceding term. The terminal-object global-sections comparison
+and `cechGlobalSectionsComplexIso` then transport this lifting statement to mathlib's
+native Cech complex. This supplies the degree-one horizontal exactness needed on
+injective rows; the full Cech-to-derived double-complex comparison remains open, and no
+generic exactness of open-immersion pushforward is asserted.
+
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
 `n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of
