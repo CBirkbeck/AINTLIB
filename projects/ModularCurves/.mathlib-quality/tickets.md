@@ -16729,6 +16729,33 @@ localModel glues (LocallyWeierstrass.baseChange + it's Zariski-local).
 * base-change⊣restrictScalars adjunction / representability-preserved-under-base-change — the
   gluing-datum-over-D(ab) primitive.
 
+### [T-E5f-glue] sub-ticket decomposition (fable-P4, 2026-07-12, beastmode /develop --decompose)
+Order: g0 (keystone) → g-transfer → g-uniq → g-away → g-glue-base → g-glue-curve → g-repr → main.
+- **[T-E5f-g0]** `EllObj.baseChangeRingHomEquiv` (Recollement.lean): for `X : EllObj R'`,
+  `τ : R' ⟶ R''`, `Y : EllObj R''`, the bijection `(Y ⟶ X.baseChangeRing τ) ≃
+  ((restrictScalars τ).obj Y ⟶ X)`. Statement: `Equiv`. Sketch: fwd `f ↦ ⟨f.baseHom ≫
+  pullback.fst, f.top ≫ pullback.fst, paste_horiz f.isPullback (of_hasPullback), zero_w via
+  lift_fst⟩` (base_w = baseChangeRing_fst_compat, already in tmp/adj.lean); bwd `g ↦
+  ⟨pullback.lift g.baseHom Y.structMap g.base_w, pullback.lift g.top (Y.curve.π ≫ baseHom) _,
+  of_right, zero_w via hom_ext⟩`; left/right_inv by EllHom.ext + pullback.hom_ext/lift_fst/snd.
+  Mathlib: `IsPullback.paste_horiz`, `IsPullback.of_hasPullback`, `IsPullback.of_right`,
+  `pullback.lift_fst/snd`, `pullback.hom_ext`. Parent [T-E5f-glue].
+- **[T-E5f-g0nat]** naturality of g0 (`homEquiv (k ≫ f) = ...`) — as needed by RepresentableBy.
+- **[T-E5f-g-transfer]** `Functor.RepresentableBy.baseChangeRing`: `Q.RepresentableBy X →
+  (Q.baseChange τ).RepresentableBy (X.baseChangeRing τ)`. homEquiv = g0.trans (h.homEquiv on
+  restrictScalars); naturality from g0nat + h.naturality. Parent [T-E5f-glue].
+- **[T-E5f-g-away]** localization tower: maps `R[1/a] ⟶ R[1/ab]`, `R[1/b] ⟶ R[1/ab]` with
+  `awayHom a ≫ (—) = awayHom (a*b)` (via IsLocalization.Away.map / Localization.awayMap).
+- **[T-E5f-g-uniq]** transition iso `Xa.baseChangeRing awayb' ≅ Xb.baseChangeRing awaya'` as
+  `EllObj R[1/ab]` via `RepresentableBy.uniqueUpToIso` (both represent P.baseChange (away ab)
+  by g-transfer + baseChange_comp + g-away). → the GlueData `t`.
+- **[T-E5f-g-glue-base]** `Scheme.GlueData` (2 charts Xa.base/Xb.base over D(a)/D(b), glued
+  along D(ab) by g-uniq's base iso); the glued base + structMap to Spec R (glueMorphisms).
+- **[T-E5f-g-glue-curve]** glue Xa.curve.E/Xb.curve.E likewise → EllipticCurveGeom (π/zero/
+  localModel Zariski-local) → toEllipticCurve → `X_glued : EllObj R`.
+- **[T-E5f-g-repr]** `P.RepresentableBy X_glued` via functor-of-points descent along the cover.
+- **[T-E5f-main]** assemble ⟨X_glued, ⟨repr⟩⟩ (fills the sorry at Recollement.lean:206).
+
 ## Amendments v10.157 (2026-07-12, fable-PIC0): [CMP-L1]+[CMP-L2] CLOSED; L3 split-pair cancellation route derived (formal, no exchange-identity)
 
 - ★ **[CMP-L1] closed** (`fromSkeleton`-lift + `toSkeleton_eq_toSkeleton_iff` + T/U bridges).
@@ -17268,3 +17295,37 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
   all committed + pushed. NEXT: (α) execute nonempty_pullback_idealModule; (β) assemble
   sectionToPicRel-naturality against picRelFunctor; (γ) rigidified bundles decompose
   (GME 2.2.2-tail rigidification, /develop pass); then the degree/Abel horizon.
+## Sub-ticket (NEW-GH, v10.166): [GHB5a] concrete base-change of quotientπ — the GHB5-crux engine
+
+### [GHB5a] `SchemeAction.exists_quotientπ_lift_baseChange` (concrete base-change descent)
+- **Status**: open
+- **Parent**: GHB5 (`exists_quotient_baseChange_of_free`, GammaHRepresentability.lean:456 crux)
+- **File**: `ModularCurves/ForMathlib/SchemeQuotient.lean` (next to `exists_quotientπ_lift`)
+- **Depends on**: [A711-BC] (PROVEN), `exists_invariantsπ_lift_of_isOpenImmersion` (AffineQuotient, PROVEN),
+  the `quotientGlueData`/`localQuotientMap`/`vPullbackCone` architecture (SchemeQuotient, PROVEN).
+- **Type**: theorem
+- **Statement** (single-conclusion, existence half): for `σ : SchemeAction G X`, a stable
+  affine atlas `V/hVs/hVa/hVmem`, and a base map `g : T ⟶ (σ.quotient V …)` (or the over-S
+  base change), the base-changed projection `pullback (σ.quotientπ …) g` descends every
+  action-invariant `F` to `pullback (…) g` — i.e. the concrete quotient commutes with base
+  change. Uniqueness half is a companion (`…_baseChange_hom_ext`) via the same glue.
+- **Proof sketch (MIRROR `exists_quotientπ_lift`, SchemeQuotient.lean:1021)**:
+  1. Per-chart engine: on each affine stable chart `V x`, `localQuotientπ_eq = isoSpec ≫ invariantsπ`;
+     apply `AffineQuotient.exists_invariantsπ_lift_of_isOpenImmersion` (the `j`-relative descent,
+     `pullbackSpecSMul` = the relative action) to get a per-chart base-changed lift `qx`.
+  2. Overlap compatibility: mirror `hcompat`/`hover` via `invariantsπ_hom_ext` on the overlap
+     quotient `Spec Γ(X, Vi⊓Vj)ᴳ`, base-changed along `g`.
+  3. Glue: `glueMorphisms` over the base-changed `quotientGlueData`; `hom_ext` on the atlas cover.
+  - The **freeness** enters only through [A711-BC] `fixedPointsBaseChange_bijective_of_flat`
+    (= `(A⊗R')ᴳ ≅ Aᴳ⊗R'`) inside the affine engine — WITHOUT it base change does not commute
+    (KM 7.1.3(3c) lists free as the sufficient condition).
+- **GHB5 (abstract) transfer**: GHB5 takes `π/f₀/hdesc` abstractly; discharge by instantiating
+  GHB5 at the concrete `σ.quotientπ` (GHB7 does exactly this per-object) and transferring the
+  universal property through the `hdesc`-uniqueness iso `Z₀ ≅ σ.quotient`. Alternatively restate
+  GHB5 to consume the concrete quotient (its consumer GHB7 builds it via GHB3/GHB4). Decide at
+  execution — the concrete lemma is the load-bearing content either way.
+- **Generality**: match the use site (GHB7 per-object). Over-S refinement: the concrete quotient
+  is absolute (X/G); GHB5 is over a base S with `f : Z ⟶ S`. The over-S base change `pullback f g`
+  factors through the absolute quotient's base change — resolve the `f₀`/over-S threading first.
+- **LOC**: ~150 (the codebase's most intricate gluing; the largest remaining GH leaf).
+- **Unblocks**: GHB5 → GHB7 value-functor/relRep → GHC1 goes fully unconditional.
