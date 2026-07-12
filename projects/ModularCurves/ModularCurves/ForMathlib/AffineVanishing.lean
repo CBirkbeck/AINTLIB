@@ -1,0 +1,183 @@
+import ModularCurves.ForMathlib.KempfInduction
+import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
+import ModularCurves.ForMathlib.SchemeModuleSheaf
+
+/-!
+# Affine vanishing for quasicoherent modules
+
+This file proves that positive-degree sheaf cohomology vanishes for a quasicoherent module on an
+affine scheme. The proof is Kempf's induction: kill a class on a finite affine-open cover, embed
+the module into the product of the restriction-pushforwards, and dimension-shift through its
+cokernel.
+-/
+
+open CategoryTheory Limits Opposite TopologicalSpace
+
+universe u
+
+namespace AlgebraicGeometry.Scheme.Modules
+
+open TopCat TopCat.Sheaf
+
+variable {X : Scheme.{u}} (F : X.Modules)
+
+private noncomputable def topCatFunctorH (X : TopCat.{u}) (n : ℕ) :
+    TopCat.Sheaf AddCommGrpCat.{u} X ⥤ AddCommGrpCat.{u} where
+  obj G := AddCommGrpCat.of (H G n)
+  map f := AddCommGrpCat.ofHom (H.map f n)
+  map_id G := by
+    ext c
+    exact CategoryTheory.Sheaf.H.map_id_apply c
+  map_comp f g := by
+    ext c
+    exact CategoryTheory.Sheaf.H.map_comp_apply f g c
+
+private instance (X : TopCat.{u}) (n : ℕ) : (topCatFunctorH X n).Additive where
+  map_add := by
+    intro G K f g
+    ext c
+    exact CategoryTheory.Sheaf.H.map_add_apply f g c
+
+private lemma topCatFunctorH_map_comp_eq {G K L : TopCat.Sheaf AddCommGrpCat.{u} X}
+    {f : G ⟶ K} {g : K ⟶ L} {h : G ⟶ L} (e : f ≫ g = h)
+    (n : ℕ) (c : H G n) :
+    (topCatFunctorH X n).map g ((topCatFunctorH X n).map f c) =
+      (topCatFunctorH X n).map h c := by
+  subst h
+  exact (CategoryTheory.Sheaf.H.map_comp_apply f g c).symm
+
+section RestrictionAdjunction
+
+variable {U : Scheme.{u}} (f : U ⟶ X) [hf : IsOpenImmersion f]
+
+/-- Forgetting module structure identifies the module restriction unit with the additive-sheaf
+restriction unit. -/
+lemma restrictAdjunction_sheafHom : ((restrictAdjunction f).unit.app F).sheafHom =
+    (TopCat.Sheaf.restrictPushforwardAdjunction _ hf.base_open).unit.app F.sheaf := by
+  rfl
+
+lemma restrictAdjunction_toRestrict (U : X.Opens) :
+    ((restrictAdjunction U.ι).unit.app F).sheafHom =
+      (TopCat.Sheaf.toRestrict _ U).app F.sheaf := by
+  apply restrictAdjunction_sheafHom
+
+end RestrictionAdjunction
+
+section CoverSheaf
+
+variable {I : Type u} (U : I → X.Opens)
+
+/-- The map from a module to the product of the pushforwards of its restrictions to an open
+family. -/
+noncomputable def toCoverSheaf :
+    F ⟶ ∏ᶜ fun i ↦ (restrictFunctor (U i).ι ⋙ pushforward (U i).ι).obj F :=
+  Pi.lift fun i ↦ (restrictAdjunction (U i).ι).unit.app F
+
+theorem coverSheaf_isQuasicoherent [IsAffine X] [F.IsQuasicoherent] [Finite I]
+    [∀ i, IsAffine (U i)] :
+    (∏ᶜ fun i ↦ (restrictFunctor (U i).ι ⋙ pushforward (U i).ι).obj F).IsQuasicoherent := by
+  refine (isQuasicoherent X).prop_limit (Discrete.functor _) fun _ ↦ ?_
+  simp only [Functor.comp_obj, Discrete.functor_obj_eq_as, isQuasicoherent_def]
+  infer_instance
+
+@[simp]
+lemma toCoverSheaf_comp_pi (i : I) :
+    F.toCoverSheaf U ≫
+      Pi.π (fun i ↦ (restrictFunctor (U i).ι ⋙ pushforward (U i).ι).obj F) i =
+        (restrictAdjunction (U i).ι).unit.app F := by
+  simp [toCoverSheaf, Pi.lift_π]
+
+private lemma toCoverSheaf_sheafHom_comp_pi (i : I) :
+    (F.toCoverSheaf U).sheafHom ≫
+      (Pi.π (fun i ↦
+        (restrictFunctor (U i).ι ⋙ pushforward (U i).ι).obj F) i).sheafHom =
+      ((restrictAdjunction (U i).ι).unit.app F).sheafHom := by
+  change (toSheaf X).map (F.toCoverSheaf U) ≫
+      (toSheaf X).map
+        (Pi.π (fun i ↦
+          (restrictFunctor (U i).ι ⋙ pushforward (U i).ι).obj F) i) =
+    (toSheaf X).map ((restrictAdjunction (U i).ι).unit.app F)
+  rw [← Functor.map_comp, toCoverSheaf_comp_pi]
+  rfl
+
+private lemma toCoverSheaf_sheafHom_comp_pi_toRestrict (i : I) :
+    (F.toCoverSheaf U).sheafHom ≫
+      (Pi.π (fun i ↦
+        (restrictFunctor (U i).ι ⋙ pushforward (U i).ι).obj F) i).sheafHom =
+      (toRestrict _ (U i)).app F.sheaf :=
+  (toCoverSheaf_sheafHom_comp_pi F U i).trans
+    (restrictAdjunction_toRestrict F (U i))
+
+private lemma toCoverSheaf_comp_pi_apply {V : X.Opens}
+    (s : F.sheaf.obj.obj (op V)) (i : I) :
+    (Pi.π (fun i ↦ (restrictFunctor (U i).ι ⋙ pushforward (U i).ι).obj F) i).sheafHom.hom.app
+        (op V) ((F.toCoverSheaf U).sheafHom.hom.app (op V) s) =
+      ((restrictAdjunction (U i).ι).unit.app F).sheafHom.hom.app (op V) s := by
+  exact TopCat.Sheaf.comp_app_apply (toCoverSheaf_sheafHom_comp_pi F U i) (op V) s
+
+private lemma toCoverSheaf_sheafHom_injective (hU : IsOpenCover U)
+    (W : (Opens X)ᵒᵖ) : Function.Injective ((F.toCoverSheaf U).sheafHom.hom.app W) := by
+  rw [injective_iff_map_eq_zero]
+  intro s hs
+  refine TopCat.Presheaf.IsSheaf.section_ext F.sheaf.property fun x hx ↦ ?_
+  obtain ⟨i, hi⟩ := hU.exists_mem x
+  refine ⟨(unop W) ⊓ U i, inf_le_left, ⟨by simpa using ⟨hx, hi⟩, ?_⟩⟩
+  rw [map_zero]
+  have hzero :
+      ((restrictAdjunction (U i).ι).unit.app F).sheafHom.hom.app W s = 0 := by
+    have h := congr(
+      (Pi.π (fun i ↦ (restrictFunctor (U i).ι ⋙ pushforward (U i).ι).obj F) i).sheafHom.hom.app
+        W $(hs))
+    rw [map_zero] at h
+    exact (toCoverSheaf_comp_pi_apply F U s i).symm.trans h
+  rw [restrictAdjunction_sheafHom] at hzero
+  simp only [Functor.id_obj,
+    Adjunction.sheafPushforwardContinuous_unit_app_hom_app] at hzero
+  have hle : (unop W) ⊓ U i ≤
+      (U i).isOpenEmbedding.functor.obj ((Opens.map (U i).inclusion').obj (unop W)) := by
+    aesop
+  let q := (U i).isOpenEmbedding.isOpenMap.adjunction.counit.app (unop W)
+  change F.sheaf.obj.map q.op s = 0 at hzero
+  have harrow : q.op ≫ (homOfLE hle).op = (homOfLE inf_le_left).op :=
+    Subsingleton.elim _ _
+  calc
+    F.sheaf.obj.map (homOfLE inf_le_left).op s =
+        F.sheaf.obj.map (q.op ≫ (homOfLE hle).op) s := by
+      rw [harrow]
+      rfl
+    _ = F.sheaf.obj.map (homOfLE hle).op (F.sheaf.obj.map q.op s) := by
+      rw [Functor.map_comp]
+      rfl
+    _ = F.sheaf.obj.map (homOfLE hle).op 0 := by
+      rw [hzero]
+      rfl
+    _ = 0 := by
+      rw [map_zero]
+
+/-- If the opens cover, the map to the product of restriction-pushforwards is monic. -/
+theorem toCoverSheaf_mono (hU : IsOpenCover U) : Mono (F.toCoverSheaf U) := by
+  have hs : Mono (F.toCoverSheaf U).sheafHom := by
+    refine CategoryTheory.Sheaf.mono_of_injective _ ?_
+    exact F.toCoverSheaf_sheafHom_injective U hU
+  exact Functor.mono_of_mono_map (SheafOfModules.toSheaf X.ringCatSheaf) hs
+
+/-- If a cohomology class restricts to zero on every member of a finite family, its image under
+the map to the product of restriction-pushforwards is zero. -/
+theorem toCoverSheaf_H_map_zero (n : ℕ) (c : H F.sheaf n) [Finite I]
+    (h : ∀ i, H.map ((toRestrict _ (U i)).app F.sheaf) n c = 0) :
+    H.map (F.toCoverSheaf U).sheafHom n c = 0 := by
+  haveI : (toSheaf X ⋙ topCatFunctorH X n).Additive := inferInstance
+  change (toSheaf X ⋙ topCatFunctorH X n).map (F.toCoverSheaf U) c = 0
+  apply Limits.Concrete.Pi.map_ext
+  intro i
+  rw [map_zero]
+  change (topCatFunctorH X n).map (Pi.π (fun i ↦
+      (restrictFunctor (U i).ι ⋙ pushforward (U i).ι).obj F) i).sheafHom
+      ((topCatFunctorH X n).map (F.toCoverSheaf U).sheafHom c) = 0
+  have hcomp := topCatFunctorH_map_comp_eq
+    (toCoverSheaf_sheafHom_comp_pi_toRestrict F U i) n c
+  exact hcomp.trans (h i)
+
+end CoverSheaf
+
+end AlgebraicGeometry.Scheme.Modules
