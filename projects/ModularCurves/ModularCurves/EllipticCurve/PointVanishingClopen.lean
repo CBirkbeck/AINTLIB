@@ -46,14 +46,20 @@ theorem zero_comp_mulByHom {T : Scheme.{u}} (t : T ⟶ S) :
     ((0 : E.Point t) : T ⟶ E.E) ≫ E.mulByHom N = t ≫ E.zero :=
   (E.smul_eq_zero_iff_comp_mulByHom t N 0).mp (smul_zero _)
 
-/-- **[YF-CLOPEN engine, curve form]** For `N` invertible, the locus in `T` where a
-`N`-killed point `R` of `E` over `t` agrees with the zero section is clopen. -/
-theorem isClopen_range_pointVanish (hN : NIsInvertible S N) {T : Scheme.{u}} (t : T ⟶ S)
+/-- The vanishing locus in `T` of an `N`-killed point `R` of `E` over `t`: the range of
+the agreement-locus inclusion of the `E[N]`-classifiers of `R` and of the zero point. -/
+noncomputable def pointVanishSet {T : Scheme.{u}} (t : T ⟶ S) (R : E.Point t)
+    (hR : R.1 ≫ E.mulByHom N = t ≫ E.zero) : Set T :=
+  Set.range (AlgebraicGeometry.agreementι (E.torsionπ N)
+    (E.pointToTorsion R hR)
+    (E.pointToTorsion (0 : E.Point t) (E.zero_comp_mulByHom N t))
+    (by rw [E.pointToTorsion_torsionπ, E.pointToTorsion_torsionπ])).base
+
+/-- **[YF-CLOPEN engine, curve form]** For `N` invertible, the vanishing locus of an
+`N`-killed point `R` of `E` over `t` is clopen. -/
+theorem isClopen_pointVanishSet (hN : NIsInvertible S N) {T : Scheme.{u}} (t : T ⟶ S)
     (R : E.Point t) (hR : R.1 ≫ E.mulByHom N = t ≫ E.zero) :
-    IsClopen (Set.range (AlgebraicGeometry.agreementι (E.torsionπ N)
-      (E.pointToTorsion R hR)
-      (E.pointToTorsion (0 : E.Point t) (E.zero_comp_mulByHom N t))
-      (by rw [E.pointToTorsion_torsionπ, E.pointToTorsion_torsionπ])).base) := by
+    IsClopen (E.pointVanishSet N t R hR) := by
   haveI : Etale (E.torsionπ N) := E.torsionπ_etale' N hN
   exact AlgebraicGeometry.isClopen_range_agreementι _ _ _ _
 

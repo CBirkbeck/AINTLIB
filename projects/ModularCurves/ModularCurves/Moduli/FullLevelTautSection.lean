@@ -50,7 +50,7 @@ noncomputable def tautPt₂ : E.Point (tautBase E N) :=
   ⟨pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N, by
     simp only [tautBase]; rw [Category.assoc, E.torsionι_π]; exact pullback.condition.symm⟩
 
-private theorem tautPt₁_killed :
+theorem tautPt₁_killed :
     (tautPt₁ E N).1 ≫ E.mulByHom N = tautBase E N ≫ E.zero := by
   show (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N) ≫ E.mulByHom N = _
   rw [Category.assoc,
@@ -58,7 +58,7 @@ private theorem tautPt₁_killed :
     ← Category.assoc]
   rfl
 
-private theorem tautPt₂_killed :
+theorem tautPt₂_killed :
     (tautPt₂ E N).1 ≫ E.mulByHom N = tautBase E N ≫ E.zero := by
   show (pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N) ≫ E.mulByHom N = _
   rw [Category.assoc,
