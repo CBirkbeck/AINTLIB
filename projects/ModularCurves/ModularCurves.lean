@@ -56,6 +56,7 @@ import ModularCurves.ForMathlib.SchemeModuleSheaf
 import ModularCurves.ForMathlib.SchemeModulePushforwardBaseChange
 import ModularCurves.ForMathlib.SheafCohomologyExact
 import ModularCurves.ForMathlib.SheafCohomologyIso
+import ModularCurves.ForMathlib.SheafDerivedGlobalSections
 import ModularCurves.ForMathlib.SheafOfModulesMonoidal
 import ModularCurves.ForMathlib.SmoothDescent
 import ModularCurves.ForMathlib.SpecBasicOpenAway

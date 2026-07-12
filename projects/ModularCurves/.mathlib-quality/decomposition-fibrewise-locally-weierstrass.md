@@ -308,7 +308,12 @@ homeomorphism, while the scheme-level application identifies pullback of the pol
 with pushforward of its additive sheaf along the inverse homeomorphism. Thus every
 residue fibre has `H¹(O(n[0])) = 0` for `n ≥ 1`. The remaining work in this step is
 the proper cohomology-and-base-change theorem which upgrades these fibrewise dimensions
-to local freeness and base change on the family.
+to local freeness and base change on the family. The definition-level derived-functor seam
+is now closed by `CategoryTheory.Abelian.Ext.addEquivRightDerived` and
+`TopCat.Sheaf.H.addEquivRightDerivedGlobalSections`: genuine Ext-defined `Sheaf.H` is
+identified with `RⁿΓ` through injective resolutions. This makes a future finite-projective
+complex for proper pushforward directly applicable to the existing fibrewise vanishing;
+constructing that geometric complex and proving its base-change comparison remain open.
 
 ### 4. Choose `x` and `y` -- `T-W-cmp.XY`
 
