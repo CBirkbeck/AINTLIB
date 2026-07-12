@@ -16831,3 +16831,38 @@ localModel glues (LocallyWeierstrass.baseChange + it's Zariski-local).
   decompose's own L-A leaves all closed. Queue EMPTY.** Next frontier: L-B degree
   layer (T-PIC-DEG0 audit: fibre-restriction + degree anchor; HasseWeil survey) as its
   own /develop pass; L-C (Abel) stays pinned on relative cohomology.
+
+## Amendments v10.161 (2026-07-12, fable-PIC0): L-B degree-layer audit (T-PIC-DEG0) + SESSION LEDGER — dispatched queue fully discharged
+
+- **[T-PIC-DEG0] audit result (bounded scoping, this session)**: (i) HasseWeil's
+  divisor/degree material (`Foundation/PullbackCoeff, EC/TranslateOrdInfty,
+  AdditionPullback/SilvermanIV14`) is FUNCTION-FIELD/Weierstrass-concrete (ord-based,
+  Silverman-style) — usable someday via a bridge, but NOT sheaf-level; (ii) mathlib
+  degree machinery is FunctionField/Dedekind-flavored (`NumberTheory/FunctionField`,
+  `RingTheory/ClassGroup`) — no scheme-level "degree of an invertible sheaf on a curve
+  over a field"; (iii) the two honest routes are (a) divisor-correspondence on a
+  regular curve (invertible sheaf ↔ Cartier divisor, deg = Σ closed-point
+  multiplicities) or (b) Euler-characteristic χ(L) − χ(O) — (b) needs the same
+  cohomology arc as L-C. RECOMMENDATION: keep L-B pinned WITH L-C until either a
+  cohomology arc opens or a coordinator ratifies the divisor route as its own stream;
+  Pic^ν's definition consumes whichever lands. No skeleton cut (source-faithfulness:
+  GME defines deg via fibres, both routes match [Q1] — decision is strategic, not
+  mathematical).
+
+### SESSION LEDGER (fable-PIC0, 2026-07-12 dispatch "banked queue unchanged")
+- ★★ **[PIC-P2-CMP] COMPLETE** — GME 2.17 `isInvertible_iff_isUnit_toSkeleton`
+  sorry-free both directions, axiom-clean. Closed this session: [PAIR-4′]
+  `bijective_evPre_app_of_triv` (LinearEquiv + inverse-hom route), [CMP-L1] skeleton
+  unfold, [CMP-L2] pointwise unit-pairing extraction (pairingElem + imageSieve lift +
+  stalk pigeonhole + rescale), [CMP-L3a] pairingHom, [CMP-L3b] split identity,
+  [CMP-L3c] generic monoidal split-pair cancellation (unitEndAct machinery —
+  FOR-MATHLIB candidate), [CMP-L3] over-site transport assembly, [CMP-←] main.
+- ★ **Pic⁰ stream opened AND its L-A layer closed**: ecosystem re-check (clear),
+  `/develop --decompose` artifact `decomposition-pic-rel-functor.md` (6 verbatim GME
+  quotes, 3-layer cut), `Picard/RelativePic.lean` — `picRelFunctor` sorry-free with
+  kernel model + quotient comparison + full functoriality.
+- **Handoff state**: dispatched banked queue EMPTY; L-B/L-C pinned (audit above);
+  deferred producer-scope golf tail (PullbackTensorGeneral cleanup, 3 lint warnings in
+  RelativePic) remains fleet-lane work. Next dispatch candidates: (α) L-B divisor-route
+  ratification question to coordinator; (β) rigidified-bundles / Pic^ν once degree
+  lands; (γ) DS-END0 route (a) revival per CHARTER-PIC-3.
