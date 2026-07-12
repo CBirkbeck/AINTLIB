@@ -18933,3 +18933,29 @@ re-collides. **FLEET/CONFIG NOTE (needs user): `/loop /beastmode` is over-firing
 worktree + one sentinel + one branch on the same charter. That cannot coordinate (board claims aren't
 seen in real-time). Run ONE window per worktree/charter, or serialize the loop.** The driver window is
 authoritative for YFULL's completion. (NEW-Y1)
+
+## v10.168 — NEW-Y1 CHARTER-YFULL: ★★★ THE COMPLETE CLOPEN TOOLKIT LANDED (openness + full ⊇ machinery)
+
+**Every tool needed for the KM 3.7.1 clopen leaf is now proven, axiom-clean, rooted** (~20 leaves this
+session). The remaining work is purely wiring these to the concrete full-level construction.
+
+**Openness** `[YF-U]` (v10.164): `fullLevelOpens` / `fullLevelOpenSet_isOpen` (engines AgreementLocusClopen +
+PointVanishingClopen).
+
+**⊇ machinery — COMPLETE:**
+- **Commutative-algebra core** `SurjectiveFreeSameRank.lean` (free/flat/ring-hom same-rank ⟹ injective,
+  via OrzechProperty + localization) + `SpecQuotientIso.lean` (affine same-degree Spec-iso).
+- **Comaximality** `[YF-COMAX]` `IdealSheafComaximal.lean`: `prod_eq_biInf_of_pairwise_disjoint_support`.
+- **Scheme wrapper chain** `ClosedImmersionFinrankIso.lean`: `finrank_morphismRestrict`,
+  `finrank_comp_right_of_isIso`, `finrank_eq_rankAtStalk_isAffineBase`, the affine-base wrapper (rankAtStalk
+  + finrank forms), and **`isIso_of_isClosedImmersion_of_finrank_eq`** (GENERAL base — closed immersion of
+  finite-loc-free equal-rank schemes over any `S` is an iso, via reduction to affine pieces).
+- **`[YF-SUBDIV-EQ]`** `SubdivisorEq.lean`: `RelEffCartierDiv.eq_of_isSubdivisor_of_degree_eq` — a subdivisor
+  of equal degree is the whole divisor (the general wrapper on the subscheme inclusion + equal kernels).
+
+**Remaining = the [YF-⊇]/[YF-⊆] wiring** (all tools present): over `fullLevelOpens` the taut sections are
+pairwise disjoint (connect `pointVanishSet` ↔ section support), so `sectionsDivisor.ideal = ∏ker`
+(`fullLevelLocusAux_sectionsDivisor_ideal`) `= ⋂ker` (`[YF-COMAX]`) `⊇ torsionIdeal` (each section N-torsion),
+giving `IsSubdivisor D_sec D_tor`; equal degree `N²` (`sectionsDivisor_degree`, `torsion_rank`) + `[YF-SUBDIV-EQ]`
+⟹ `sectionsDivisor.ideal = torsionIdeal` = `IsFullLevel`. Then `[YF-⊆]` + `isOpenImmersion_levelSpaceΓι_of_taut`
+→ **`[YF-ETALE]` ★**. (NEW-Y1)
