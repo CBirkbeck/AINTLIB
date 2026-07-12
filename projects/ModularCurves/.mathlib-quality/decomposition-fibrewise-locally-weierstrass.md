@@ -461,8 +461,11 @@ kernel; the resulting cycle isomorphism identifies the boundary maps, and the co
 presentation from the long exact sequence identifies the two homology objects.
 Consequently `subsingleton_H_one_iff_cechComplex_exactAt_one` characterizes genuine
 `H¹`-vanishing by exactness of the native Cech complex in degree one. This is the
-source-faithful degree-one edge of Stacks 20.11.5--6 and introduces neither a spectral
-sequence surrogate nor an open-pushforward exactness assertion.
+degree-one comparison for an acyclic sheaf-level Cech resolution and introduces neither
+a spectral-sequence surrogate nor an open-pushforward exactness assertion. It is not yet
+the affine-cover comparison of Stacks 20.11.5--6: acyclicity on the finite intersections
+does not by itself make the pushforward terms `j_*j^*F` acyclic. The genuine
+injective-resolution/Cech double-complex argument remains necessary for that step.
 
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
