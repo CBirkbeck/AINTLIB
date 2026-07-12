@@ -8,6 +8,7 @@ import ModularCurves.LevelStructure.Basic
 import ModularCurves.LevelStructure.Incidence
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.ForMathlib.IdealSheafComaximal
+import ModularCurves.ForMathlib.SectionKerDisjoint
 
 /-!
 # The torsion ideal is contained in the kernel of a killed section (YFULL route γ, [YF-⊇])
@@ -78,21 +79,26 @@ theorem torsionDivisor_degree (s : S) : (E.torsionDivisor N).degree s = N ^ 2 :=
     Scheme.Hom.finrank_comp_left_of_isIso e.hom (E.torsionπ N)]
   exact E.torsion_rank N s
 
-/-- **[YF-⊇] divisor chain.** If `N²` sections of `E/S`, each killed by `N`, have pairwise
-disjoint kernel supports, then their section divisor `Σᵢ [σᵢ]` equals `E[N]`. The section
-divisor's ideal is `∏ᵢ ker σᵢ = ⋂ᵢ ker σᵢ` (comaximal, from disjoint supports); each
-`ker σᵢ ⊇ torsionIdeal` (`torsionIdeal_le_ker`), so `torsionIdeal ≤ Σ`-ideal, making it a
-subdivisor of `E[N]`; and both have degree `N²` (`sectionsDivisor_degree`,
-`torsionDivisor_degree`), so `[YF-SUBDIV-EQ]` forces equality. -/
+/-- **[YF-⊇] divisor chain.** If `N²` sections of `E/S`, each killed by `N`, are pairwise
+pointwise-distinct (their base maps never coincide), then their section divisor `Σᵢ [σᵢ]`
+equals `E[N]`. Pointwise-distinct sections of the separated `E ⟶ S` have comaximal kernels
+(`sup_ker_eq_top_of_sections_pointwise_ne`), so the section divisor's ideal
+`∏ᵢ ker σᵢ = ⋂ᵢ ker σᵢ`; each `ker σᵢ ⊇ torsionIdeal` (`torsionIdeal_le_ker`), so
+`torsionIdeal ≤ Σ`-ideal, making it a subdivisor of `E[N]`; and both have degree `N²`
+(`sectionsDivisor_degree`, `torsionDivisor_degree`), so `[YF-SUBDIV-EQ]` forces equality. -/
 theorem sectionsDivisor_ideal_eq_torsionIdeal
     (P : Fin (N ^ 2) → E.Point (𝟙 S))
     (hkill : ∀ i, (P i).1 ≫ E.mulByHom N = 𝟙 S ≫ E.zero)
-    (hdisj : (↑(Finset.univ : Finset (Fin (N ^ 2))) : Set (Fin (N ^ 2))).Pairwise
-      (fun i j => Disjoint (Scheme.Hom.ker (P i).1).support (Scheme.Hom.ker (P j).1).support)) :
+    (hne : (↑(Finset.univ : Finset (Fin (N ^ 2))) : Set (Fin (N ^ 2))).Pairwise
+      (fun i j => ∀ u, (P i).1.base u ≠ (P j).1.base u)) :
     (RelEffCartierDiv.sectionsDivisor E.π P).ideal = E.torsionIdeal N := by
+  haveI : IsSeparated E.π := E.proper.toIsSeparated
   have hle : E.torsionIdeal N ≤ (RelEffCartierDiv.sectionsDivisor E.π P).ideal := by
     rw [fullLevelLocusAux_sectionsDivisor_ideal,
-      Scheme.IdealSheafData.prod_eq_biInf_of_pairwise_disjoint_support Finset.univ _ hdisj]
+      Scheme.IdealSheafData.prod_eq_biInf_of_pairwise_sup_eq_top Finset.univ _
+        (fun i _ j _ hij => Scheme.IdealSheafData.sup_ker_eq_top_of_sections_pointwise_ne
+          E.π (P i).1 (P j).1 (P i).2 (P j).2 (hne (Finset.mem_coe.mpr (Finset.mem_univ i))
+            (Finset.mem_coe.mpr (Finset.mem_univ j)) hij))]
     exact le_iInf fun i => le_iInf fun _ => E.torsionIdeal_le_ker N (P i) (hkill i)
   have hsub : RelEffCartierDiv.IsSubdivisor (RelEffCartierDiv.sectionsDivisor E.π P)
       (E.torsionDivisor N) :=

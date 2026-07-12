@@ -44,6 +44,7 @@ import ModularCurves.ForMathlib.IdealSheafComaximal
 import ModularCurves.ForMathlib.MonicQuotientDescent
 import ModularCurves.ForMathlib.OpenImmersionOfSection
 import ModularCurves.ForMathlib.OpensMapFinal
+import ModularCurves.ForMathlib.SectionKerDisjoint
 import ModularCurves.ForMathlib.ProjIntegral
 import ModularCurves.ForMathlib.SpecQuotientIso
 import ModularCurves.ForMathlib.SurjectiveFreeSameRank
