@@ -833,7 +833,57 @@ theorem gammaHNaive_toQuotient (N : ℕ) [NeZero N]
         (E : EllipticCurve (Spec (CommRingCat.of k))),
         Function.Bijective
           (θ.app (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))) := by
-  sorry
+  -- Well-definedness of `Quotient.lift pkg.proj.app`: the projection is constant on
+  -- `H`-orbits (`proj_invariant` at `⟨g,hg⟩⁻¹` + the `gammaHAut_app_val` pin absorb the
+  -- `γ⁻¹` twist — `H` a group makes `g ↦ g⁻¹` a bijection of `H`).
+  have wd : ∀ (X : EllObj R) (a b : X.curve.FullLevelPt N),
+      (X.curve.hOrbitSetoid H) a b →
+      pkg.proj.app (Opposite.op X) a = pkg.proj.app (Opposite.op X) b := by
+    rintro X a b ⟨g, hg, rfl⟩
+    have h := ConcreteCategory.congr_hom
+      (NatTrans.congr_app (pkg.proj_invariant ((⟨g, hg⟩ : ↥H)⁻¹)) (Opposite.op X)) a
+    simp only [NatTrans.comp_app, ConcreteCategory.comp_apply, gammaHAut_app_val, inv_inv] at h
+    exact h.symm
+  -- The comparison natural transformation `θ.app X = Quotient.lift pkg.proj.app`.
+  refine ⟨{ app := fun X => ↾Quotient.lift (fun L => pkg.proj.app X L) (wd X.unop)
+            naturality := ?_ }, ?_, ?_⟩
+  · -- naturality: check on `Quotient.mk L`. The orbit-map step `e1` closes by proof
+    -- irrelevance on the `FullLevelPt` subtype (the `.val`s are the *same* `pullSection`
+    -- term), so `pullSection` is never unfolded; the `θ`/`proj` step is the cheap
+    -- `Quotient.lift_mk` reduction — together reducing to `pkg.proj`'s naturality.
+    intro X Y f
+    ext q
+    induction q using Quotient.ind with
+    | _ L =>
+      have e1 : (gammaHNaiveProblem R N H).map f
+            (Quotient.mk ((Opposite.unop X).curve.hOrbitSetoid H) L)
+          = Quotient.mk ((Opposite.unop Y).curve.hOrbitSetoid H)
+            ((gammaFullNaiveProblem R N).map f L) := rfl
+      simp only [TypeCat.Fun.toFun_apply, types_comp_apply,
+        TypeCat.hom_ofHom, TypeCat.Fun.mk_apply, e1, Quotient.lift_mk]
+      have hn := ConcreteCategory.congr_hom (pkg.proj.naturality f) L
+      simpa only [types_comp_apply] using hn
+  · -- clause 1: `θ ∘ mk = pkg.proj` by `Quotient.lift_mk`.
+    intro X L; rfl
+  · -- geometric bijectivity from `geom_surjective` + `geom_orbits`.
+    intro k _ _ sm E
+    set W : EllObj R := ⟨Spec (CommRingCat.of k), sm, E⟩ with hW
+    constructor
+    · -- injective: equal projections ⟹ same `H`-orbit (`geom_orbits` + the pin).
+      intro q₁ q₂ hq
+      induction q₁ using Quotient.ind with
+      | _ L₁ =>
+      induction q₂ using Quotient.ind with
+      | _ L₂ =>
+        have hproj : pkg.proj.app (Opposite.op W) L₁ = pkg.proj.app (Opposite.op W) L₂ := hq
+        obtain ⟨γ, hγ⟩ := (pkg.geom_orbits k sm E L₁ L₂).mp hproj
+        rw [gammaHAut_app_val] at hγ
+        exact Quotient.sound ⟨((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)),
+          (γ⁻¹ : ↥H).2, hγ⟩
+    · -- surjective: `geom_surjective` + `mk` is surjective.
+      intro y
+      obtain ⟨L, hL⟩ := pkg.geom_surjective k sm E y
+      exact ⟨Quotient.mk _ L, hL⟩
 
 /-- Restriction of a point is `ℤ`-linear, derived from additivity (`restrict_add`)
 via `map_zsmul`. Companion to `Point.restrict_add`/`restrict_zero`
