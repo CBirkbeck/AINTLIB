@@ -465,6 +465,47 @@ theorem overlapSectionsEquiv_sectionUnitOverlap (W : WeierstrassCurve R) :
   simpa only [projModelSectionUnitSection, RingEquiv.apply_symm_apply] using
     overlapSectionsEquiv_res_chartY W (projModelSectionUnitSection W)
 
+/-- The root coordinate restricted to the standard chart overlap. -/
+noncomputable def projModelSectionRootChartOverlap
+    (W : WeierstrassCurve R) :
+    Γ(projModel W, projModelChartOverlap W) :=
+  (projModel W).presheaf.map
+    (homOfLE (projModelChartOverlap_le_YChart W)).op
+    ((chartYSectionsRingEquiv W).symm
+      (AdjoinRoot.root (infChartCubic W)))
+
+/-- Under the standard overlap coordinates, the restricted root is the image
+of the infinity-chart root. -/
+theorem overlapSectionsEquiv_sectionRootChartOverlap
+    (W : WeierstrassCurve R) :
+    overlapSectionsEquiv W (projModelSectionRootChartOverlap W) =
+      algebraMap (AdjoinRoot (infChartCubic W))
+        (Localization.Away (infChartTElem W))
+        (AdjoinRoot.root (infChartCubic W)) := by
+  let h := Proj.basicOpen_mono (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⟨_, rfl⟩
+  have hmap : (projModel W).presheaf.map
+      (homOfLE (projModelChartOverlap_le_YChart W)).op =
+    (projModel W).presheaf.map (homOfLE h).op :=
+    (projModel W).presheaf.congr_map (Subsingleton.elim _ _)
+  unfold projModelSectionRootChartOverlap
+  rw [hmap]
+  simpa only [RingEquiv.apply_symm_apply] using
+    overlapSectionsEquiv_res_chartY W
+      ((chartYSectionsRingEquiv W).symm
+        (AdjoinRoot.root (infChartCubic W)))
+
+private theorem presheaf_restrict_restrict {X : Scheme.{u}}
+    {U V T : X.Opens} (hTV : T ≤ V) (hVU : V ≤ U) (hTU : T ≤ U)
+    (s : Γ(X, U)) :
+    X.presheaf.map (homOfLE hTV).op
+        (X.presheaf.map (homOfLE hVU).op s) =
+      X.presheaf.map (homOfLE hTU).op s := by
+  rw [← X.presheaf.map_comp_apply]
+  congr 2
+
 /-- Transport sections from the gluing overlap to the corresponding basic open
 of the standard chart overlap. -/
 noncomputable def projModelPoleOverlapBasicOpenRingEquiv
@@ -493,6 +534,40 @@ noncomputable def projModelSectionRootOverlap (W : WeierstrassCurve R) :
   (projModel W).presheaf.map
     (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op
     (projModelSectionRoot W)
+
+/-- The root used in the pole transition is the restriction of the root on the
+standard chart overlap. -/
+theorem projModelSectionRootOverlap_eq_res_chartOverlap
+    (W : WeierstrassCurve R) :
+    projModelSectionRootOverlap W =
+      (projModel W).presheaf.map
+        (homOfLE (projModelPoleOverlap_le_chartOverlap W)).op
+        (projModelSectionRootChartOverlap W) := by
+  unfold projModelSectionRootOverlap projModelSectionRoot
+    projModelSectionRootChartOverlap
+  calc
+    (projModel W).presheaf.map
+        (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op
+        ((projModel W).presheaf.map
+          (homOfLE ((projModel W).affineBasicOpen_le
+            (projModelSectionUnitSection W))).op
+          ((chartYSectionsRingEquiv W).symm
+            (AdjoinRoot.root (infChartCubic W)))) =
+      (projModel W).presheaf.map
+        (homOfLE ((projModelPoleOverlap_le_sectionNeighborhood W).trans
+          ((projModel W).affineBasicOpen_le
+            (projModelSectionUnitSection W)))).op
+        ((chartYSectionsRingEquiv W).symm
+          (AdjoinRoot.root (infChartCubic W))) :=
+      presheaf_restrict_restrict _ _ _ _
+    _ = (projModel W).presheaf.map
+        (homOfLE (projModelPoleOverlap_le_chartOverlap W)).op
+        ((projModel W).presheaf.map
+          (homOfLE (projModelChartOverlap_le_YChart W)).op
+          ((chartYSectionsRingEquiv W).symm
+            (AdjoinRoot.root (infChartCubic W)))) := by
+      symm
+      exact presheaf_restrict_restrict _ _ _ _
 
 /-- The section-neighborhood ideal trivialization, expressed on its over-site. -/
 noncomputable def projModelZeroIdealOverTrivialization (W : WeierstrassCurve R) :
