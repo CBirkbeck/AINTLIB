@@ -1,4 +1,5 @@
 import Mathlib.Algebra.Category.Grp.Abelian
+import Mathlib.Algebra.Category.Grp.Biproducts
 import Mathlib.Algebra.Category.Grp.Limits
 import Mathlib.CategoryTheory.Sites.SheafCohomology.Cech
 import ModularCurves.ForMathlib.AcyclicAffineOpenCover
@@ -15,37 +16,33 @@ open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
 
 universe v u
 
-namespace TopologicalSpace
+namespace AddCommGrpCat
 
-private def addCommGrpFan {ι : Type u} (X : ι → AddCommGrpCat.{u}) : Fan X :=
-  Fan.mk (P := .of (∀ i, X i)) (fun i ↦ AddCommGrpCat.ofHom (Pi.evalAddMonoidHom _ i))
-
-private def addCommGrpIsLimitFan {ι : Type u} (X : ι → AddCommGrpCat.{u}) :
-    IsLimit (addCommGrpFan X) :=
-  Fan.IsLimit.mk _
-    (fun s ↦ AddCommGrpCat.ofHom
-      { toFun x i := s.proj i x
-        map_zero' := by aesop
-        map_add' := by aesop })
-    (fun _ _ ↦ rfl)
-    (fun s m hm ↦ by
-      ext x
-      funext i
-      exact ConcreteCategory.congr_hom (hm i) _)
-
-private noncomputable def addCommGrpPiIso {ι : Type u} (X : ι → AddCommGrpCat.{u}) :
+/-- The categorical product of additive commutative groups is isomorphic to the
+corresponding dependent function group. -/
+noncomputable def productIsoPi {ι : Type u} (X : ι → AddCommGrpCat.{u}) :
     ∏ᶜ X ≅ .of (∀ i, X i) :=
-  IsLimit.conePointUniqueUpToIso (limit.isLimit _) (addCommGrpIsLimitFan X)
+  IsLimit.conePointUniqueUpToIso (limit.isLimit _) (HasLimit.productLimitCone X).isLimit
 
-private theorem addCommGrpPiIso_hom_apply {ι : Type u} (X : ι → AddCommGrpCat.{u})
-    (x : (∏ᶜ X :)) (i : ι) : (addCommGrpPiIso X).hom x i = Pi.π X i x :=
+/-- The forward product isomorphism is componentwise projection. -/
+@[simp]
+theorem productIsoPi_hom_apply {ι : Type u} (X : ι → AddCommGrpCat.{u})
+    (x : (∏ᶜ X :)) (i : ι) : (productIsoPi X).hom x i = Pi.π X i x :=
   ConcreteCategory.congr_hom
-    (IsLimit.conePointUniqueUpToIso_hom_comp (limit.isLimit _) (addCommGrpIsLimitFan X) ⟨i⟩) x
+    (IsLimit.conePointUniqueUpToIso_hom_comp (limit.isLimit _)
+      (HasLimit.productLimitCone X).isLimit ⟨i⟩) x
 
-private theorem addCommGrpPiIso_inv_apply {ι : Type u} (X : ι → AddCommGrpCat.{u})
-    (x : ∀ i, X i) (i : ι) : Pi.π X i ((addCommGrpPiIso X).inv x) = x i :=
+/-- Every component of the inverse product isomorphism is evaluation. -/
+@[simp]
+theorem productIsoPi_inv_apply {ι : Type u} (X : ι → AddCommGrpCat.{u})
+    (x : ∀ i, X i) (i : ι) : Pi.π X i ((productIsoPi X).inv x) = x i :=
   ConcreteCategory.congr_hom
-    (IsLimit.conePointUniqueUpToIso_inv_comp (limit.isLimit _) (addCommGrpIsLimitFan X) ⟨i⟩) x
+    (IsLimit.conePointUniqueUpToIso_inv_comp (limit.isLimit _)
+      (HasLimit.productLimitCone X).isLimit ⟨i⟩) x
+
+end AddCommGrpCat
+
+namespace TopologicalSpace
 
 variable {T : Type u} [TopologicalSpace T]
 variable (F : (Opens T)ᵒᵖ ⥤ AddCommGrpCat.{u}) {ι : Type u}
@@ -57,7 +54,7 @@ noncomputable def cechCochainAddEquiv :
     ((cechComplexFunctor U).obj F).X n ≃+
       ∀ i : Fin (n + 1) → ι,
         F.obj (op (∏ᶜ fun k : Fin (n + 1) => U (i k))) :=
-  (addCommGrpPiIso fun i : Fin (n + 1) → ι =>
+  (AddCommGrpCat.productIsoPi fun i : Fin (n + 1) → ι =>
     F.obj (op (∏ᶜ fun k : Fin (n + 1) => U (i k)))).addCommGroupIsoToAddEquiv
 
 @[simp]
@@ -66,7 +63,7 @@ theorem cechCochainAddEquiv_apply
     cechCochainAddEquiv F U n x i =
       Pi.π (fun i : Fin (n + 1) → ι =>
         F.obj (op (∏ᶜ fun k : Fin (n + 1) => U (i k)))) i x :=
-  addCommGrpPiIso_hom_apply _ _ _
+  AddCommGrpCat.productIsoPi_hom_apply _ _ _
 
 @[simp]
 theorem cechCochainAddEquiv_symm_apply_component
@@ -76,7 +73,7 @@ theorem cechCochainAddEquiv_symm_apply_component
     Pi.π (fun i : Fin (n + 1) → ι =>
       F.obj (op (∏ᶜ fun k : Fin (n + 1) => U (i k)))) i
         ((cechCochainAddEquiv F U n).symm x) = x i :=
-  addCommGrpPiIso_inv_apply _ _ _
+  AddCommGrpCat.productIsoPi_inv_apply _ _ _
 
 private noncomputable def Opens.piObjIsoIInf {κ : Type v} (V : κ → Opens T) :
     ∏ᶜ V ≅ ⨅ k, V k :=

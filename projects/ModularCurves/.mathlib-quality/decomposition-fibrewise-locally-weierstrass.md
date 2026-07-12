@@ -308,6 +308,19 @@ product calculation and finite-sum evaluation are separate private helpers and u
 options. This supplies the component formula needed to construct a contracting homotopy
 for flasque Cech cochains; the augmented-Cech quasi-isomorphism itself remains open.
 
+The terms of the sheaf-level Cech resolution are now constructed in
+`ForMathlib/SheafCechSheafTerms.lean`. `TopCat.Sheaf.cechTerm` is the product, over
+`(n+1)`-tuples of cover indices, of restriction to the tuple intersection followed by
+pushforward to the ambient space. `cechTermSectionsAddEquiv` identifies its sections on
+every open `V` with the corresponding family of sections on `V` intersected with each
+tuple intersection, and its component theorem identifies the map with the canonical
+product projection followed by the restriction-pushforward section equality. The
+concrete product isomorphism used here and by `SheafCechCochains.lean` now reuses
+mathlib's `AddCommGrpCat.HasLimit.productLimitCone` instead of two local limit
+constructions. The next dependency is the sheaf-level coface/differential and then
+stalkwise exactness of the augmented Cech resolution; the derived comparison is not yet
+claimed.
+
 The generic two-chart degree-one calculation is now complete in
 `ForMathlib/TwoOpenHOne.lean`. The theorem
 `TopCat.Sheaf.subsingleton_H_one_of_two_open_cover` proves global `H¹` vanishing from
