@@ -339,6 +339,51 @@ theorem chartCounitCollapse_comp_coactionAlgLeft :
     RingHom.id_apply, CommRingCat.hom_ofHom] at h
   exact h
 
+/-! ### The coassoc law, geometric core -/
+
+/-- The restricted action on the clean product `G|_V ×_V U ⟶ U` (`(g, x) ↦ x + g`). -/
+noncomputable def chartAct : pullback P.groupToBase P.chartToBase ⟶ P.U.toScheme :=
+  P.chartKunnethSchemeIso.inv ≫ (G.chartPullbackIso P.U).inv ≫ G.restrictedAction P.hstable
+
+/-- The clean product mapped into `G ×_S E` — the point `(g, x)`. -/
+noncomputable def chartActToGE :
+    pullback P.groupToBase P.chartToBase ⟶ (Over.mk G.π ⊗ E.asOver).left :=
+  P.chartKunnethSchemeIso.inv ≫ (G.chartPullbackIso P.U).inv ≫ (G.actionProj.left ⁻¹ᵁ P.U).ι
+
+@[reassoc]
+theorem chartAct_comp_ι : P.chartAct ≫ P.U.ι = P.chartActToGE ≫ G.translationAction.left := by
+  rw [chartAct, chartActToGE, Category.assoc, Category.assoc, Category.assoc, Category.assoc]
+  exact congrArg (P.chartKunnethSchemeIso.inv ≫ (G.chartPullbackIso P.U).inv ≫ ·)
+    P.restrictedAction_comp_ι
+
+/-- The clean product inclusion into `G ×_S E`, in pullback-pasting form. -/
+theorem chartActToGE_eq :
+    P.chartActToGE = P.chartKunnethSchemeIso.inv
+      ≫ (pullbackLeftPullbackSndIso G.π E.π P.U.ι).inv
+      ≫ pullback.fst G.actionProj.left P.U.ι := by
+  rw [chartActToGE, chartPullbackIso, Iso.trans_inv, Category.assoc]
+  congr 2
+  exact pullbackRestrictIsoRestrict_hom_ι _ _
+
+/-- The group coordinate of the action point: `(g,x) ↦ g`. -/
+theorem chartActToGE_fst :
+    P.chartActToGE ≫ pullback.fst G.π E.π
+      = pullback.fst P.groupToBase P.chartToBase ≫ P.groupOpen.ι := by
+  rw [chartActToGE_eq, Category.assoc, Category.assoc]
+  erw [pullbackLeftPullbackSndIso_inv_fst]
+  rw [← P.chartKunnethSchemeIso_hom_fst_ι, Iso.inv_hom_id_assoc]
+
+/-- The chart coordinate of the action point: `(g,x) ↦ x`. -/
+theorem chartActToGE_snd :
+    P.chartActToGE ≫ G.actionProj.left
+      = pullback.snd P.groupToBase P.chartToBase ≫ P.U.ι := by
+  rw [chartActToGE_eq]
+  show P.chartKunnethSchemeIso.inv ≫ (pullbackLeftPullbackSndIso G.π E.π P.U.ι).inv
+        ≫ pullback.fst (pullback.snd G.π E.π) P.U.ι ≫ pullback.snd G.π E.π
+      = pullback.snd P.groupToBase P.chartToBase ≫ P.U.ι
+  rw [pullbackLeftPullbackSndIso_inv_fst_snd, ← P.chartKunnethSchemeIso_hom_snd,
+    Category.assoc, Iso.inv_hom_id_assoc]
+
 theorem chartCoaction_isCoaction : IsCoaction P.chartCoaction where
   counit := by
     rw [show Bialgebra.counitAlgHom P.baseRing P.groupRing = counitAlg G P from
