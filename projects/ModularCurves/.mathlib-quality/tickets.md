@@ -18639,3 +18639,54 @@ unconditionally, and mathlib's `Morphisms/FlatRank.lean` provides `Scheme.Hom.fi
 whole file) → `/develop --decompose` the γ-ladder vs KM 3.6.0/3.7.1 + [Loe] 3.8.2 (verbatim
 quotes, per-leaf tickets) → [YF-ISOLOC] → [YF-TAUT] → [YF-CLOPEN-⊆/⊇] → [YF-ETALE] (swap-complete,
 consumes CLOPEN) → board the FP4-B5 seam handoff. (NEW-Y1, CHARTER-YFULL session 1)
+
+## v10.155 — NEW-Y1 CHARTER-YFULL session 1: route-γ foundations landed; CLOPEN decomposition boarded
+
+**Landed this session (all sorry-free, `{propext, Classical.choice, Quot.sound}`, rooted):**
+- **[YF-SWAP]** (Tier-A): `YFullRoute.isAffineHom/isFinite_fullLevelSpaceStruct` gained `hinv :
+  NIsInvertible X.base N` and swap to `torsionπ_isFinite_of_nIsInvertible`; `etale_fullLevelSpaceStruct`
+  consumes `torsionπ_etale'`; both consumers threaded (`gammaFullNaive_affineOverEll`,
+  GH `gammaFullNaive_relRepData`). GH:904 `AddMonoidHomClass` synth-timeout hardened via
+  `toAddMonoidHom` defeq-absorb. (Tier-B: the `exists_fullLevelLocus`/`levelSpaceΓ` DEF-trail still
+  carries `mulByHom_flat`/`mulByHom_locallyQuasiFinite` — a shared-def swap in `Incidence.lean:2305`
+  `fullLevelLocusAux_torsionDivisor` needs `hinv` plumbed through `levelSpaceΓ`'s signature; boarded
+  as a coordinator cross-lane item since it touches the GH-shared def.)
+- **[YF-ISOLOC]** (`ForMathlib/FiniteLocallyFreeIsoLocus.lean`): for `ψ` finite flat lfp,
+  `isClopen_finrank_eq n` (rank-`n` locus clopen), `finrankLocus ψ n` (as `S.Opens`),
+  `isIso_pullbackSnd_finrankLocus_one` (over the rank-1 locus `ψ` base-changes to an iso). Pure
+  mathlib `FlatRank` (`isLocallyConstant_finrank` + `isIso_iff_finrank_eq`). **Trivialization-free,
+  rank-count-free** — the route-γ core. `Etale ⟹ Flat`+`lfp` instances ⟹ applies to finite étale
+  with only `[IsFinite][Etale]`.
+- **[YF-OI-CRIT]** (`ForMathlib/OpenImmersionOfSection.lean`):
+  `isOpenImmersion_of_range_subset_of_section` — a `Mono ι` with `range ι.base ⊆ U` (open) + a
+  section `s : U ⟶ Z`, `s ≫ ι = U.ι`, is an open immersion (iso onto `U`, via `IsOpenImmersion.lift`
+  + mutual-inverse). The shape that upgrades `levelSpaceΓι`'s closed immersion to open.
+
+**The CLOPEN assembly (remaining, for the dedicated `/develop --decompose` session):**
+`isOpenImmersion_levelSpaceΓι` (YFullRoute:202) closes as `isOpenImmersion_of_range_subset_of_section`
+applied to `ι := levelSpaceΓι E N` (closed immersion ⟹ Mono), `U := ` the clopen full-level locus, given:
+1. **[YF-CLASSIFIER]** (the heavy leaf — charter-flagged): the `N²`-section classifier
+   `φ : (∐_{(a,b)∈(ℤ/N)²} T) ⟶ E[N]_T` over `T := pullback (torsionπ N) (torsionπ N)`, finite locally
+   free, with `finrank φ = 1 ⟺ IsFullLevel` fibrewise. Bridge to build:
+   `sectionsDivisor(fun (a,b) => [a]P+[b]Q).ideal = torsionIdeal ⟺ φ iso` — the divisor computation.
+   D-stream API in hand: `fullLevelLocusAux_u₁/u₂` (taut pair, `private` — reconstruct inline as
+   `⟨fst ≫ torsionι, _⟩`), `fullLevelLocusAux_sectionsDivisor_ideal` (`.ideal = ∏ ker(section)`),
+   `torsionIdeal`, `fullLevel_divisor_iff_naive_gen` (T-D8-bridge, itself a D-stream sorry — the
+   fibrewise-generation ⟺ divisor equality). U := `finrankLocus φ 1` (clopen by [YF-ISOLOC]).
+2. **[YF-TAUT]** (self-contained plumbing, ~60 LOC, next-session first act): over `U` where the taut
+   pair is full-level, the classifying section reconstructs the inclusion —
+   `pullback.lift (pointToTorsion (pull_U u₁) ..) (pointToTorsion (pull_U u₂) ..) .. = U.ι`, via
+   `pointToTorsion_torsionι` + `torsionι` mono (`pointToTorsion (pull u₁) = U.ι ≫ pullback.fst`) +
+   `pullback.hom_ext`. Feeds the section `s` of [YF-OI-CRIT] through `levelSpaceΓ_spec.mpr`.
+3. **[YF-RANGE]**: `range levelSpaceΓι.base ⊆ U` — the tautological structure is full-level, so at its
+   points `φ` is iso, i.e. `finrank φ = 1`. From `levelSpaceΓ_spec.mp` (the taut section IS full-level)
+   + [YF-CLASSIFIER]'s forward direction.
+
+**Then [YF-ETALE]** (YFullRoute:209, swap-complete) consumes CLOPEN: `levelSpaceΓι` open immersion ⟹
+`levelSpaceΓι` étale ⟹ `etale_fullLevelSpaceStruct` (composition, already primed). **Seam with FP4-B5**
+(GEOM engine application) boarded — I deliver [YF-ETALE]; FP4's B5 consumes it at the bootstrap object.
+Route α (Weil) stays de-coupled at CHARTER-WEIL.
+
+**NEXT SESSION FIRST ACT**: `/develop --decompose` [YF-CLASSIFIER] vs KM 3.7.1 / [Loe] 3.8.2 (verbatim
+quotes, the divisor↔iso dictionary as its own registered sub-ticket), then [YF-TAUT] (plumbing, ready
+now), then assemble. (NEW-Y1, CHARTER-YFULL session 1)
