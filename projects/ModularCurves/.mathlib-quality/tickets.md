@@ -17133,3 +17133,38 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
     (first consumer!) + section-divisor degree statements; feeds the Pic⁰-assembly map
     `E(T) → Pic_{E/S}(T)` (ν-grading = the remaining degree-functor tail).
 - EXECUTE same-session per v10.162 marathon norm.
+
+## Amendments v10.164 (2026-07-12, fable-PIC0): ★★ AG-LB CLOSED (idealModule + isInvertible_idealModule) — D2 SEAM LIVE (`RelEffCartierDiv.picClass`); GME 2.17 gets its first consumer
+
+- ★★ **AG-LB (plan.md:168) IS CLOSED** — the API gap that blocked the divisor engine's
+  T-D1/T-D19 official-Cartier interface since the D-stream began:
+  - **[LB-1]** `Picard/IdealModule.lean`: `idealSections` (kernel of `subschemeι.app`
+    at EVERY open; = `J.ideal` at affines by `ker_subschemeι_app`) → `idealPresheafAb`
+    → `idealPresheaf` (ofPresheaf) → **`idealModule J : C.Modules`** (sheaf property via
+    `Subfunctor.isSheaf_iff` + germ-separatedness of the subscheme sheaf —
+    Dual.lean's dualSubfunctor pattern mirrored).
+  - **[LB-2]** **`isInvertible_idealModule`**: affine-locally span{f}-with-f-nzd ⟹
+    invertible. Machinery: `sheafificationW_of_bijective_on_basis` +
+    `isIso_of_bijective_app_on_basis` (basis-variants of the PAIR-3 template);
+    `idealGenHom` (multiplication by an ideal section, over the restrictFunctor
+    pushforward — `ofHom (Y := ...)`-hint for the twisted module instance);
+    `bijective_idealGenHom_app` at preimages of basic opens — localization AT THE IMAGE
+    via `IsAffineOpen.isLocalization_of_eq_basicOpen` (NO instance transport!),
+    injectivity by a hand-rolled away-localization nonzerodivisor lemma, surjectivity
+    by span membership through the eqToHom ring iso.
+  - **[LB-3-seam]** `Picard/DivisorClass.lean` (imports the ENGINE + the Picard stream):
+    `RelEffCartierDiv.isInvertible_idealModule` (via the engine's `isOfficial`) and
+    **`RelEffCartierDiv.picClass (hsm) (D) : Pic C := [I(D)]⁻¹`** (GME p. 107/109) —
+    the FIRST CONSUMER of [PIC-P2-CMP]'s `IsInvertible.isUnit_toSkeleton`. Builds green
+    (3109 jobs).
+- **D2 NOTICE (seam boarded per v10.162)**: T-D1/T-D19's missing interface exists —
+  `idealModule` + `isInvertible_idealModule` + `IsOfficialCartier.locallyPrincipal` is
+  exactly the consumption shape; the official-Cartier definition can now be stated
+  module-theoretically whenever D2 wants it.
+- LEAN-OPS: motive-fail on rw-at-hyp when the rewritten open occurs in a homOfLE
+  PROOF-argument (transport the ELEMENT through one eqToHom ring iso instead);
+  `x.2` IS the ι-image-membership for V-scheme points (no opensRange rewrite);
+  `Scheme.Hom.preimage_image_eq` for the basis-property; `exists_basicOpen_le`
+  wants the point subtyped in the TARGET open.
+- Remaining marathon queue: Pic⁰-assembly map (sectionDivisor + picClass + picRelFunctor),
+  degree grading (sectionsDivisor_degree consumer), rigidified bundles, DS-END0.
