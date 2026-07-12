@@ -467,6 +467,18 @@ the affine-cover comparison of Stacks 20.11.5--6: acyclicity on the finite inter
 does not by itself make the pushforward terms `j_*j^*F` acyclic. The genuine
 injective-resolution/Cech double-complex argument remains necessary for that step.
 
+The native injective-resolution Cech bicomplex is now constructed in
+`ForMathlib/SheafCechInjectiveBicomplex.lean`.
+`TopCat.Sheaf.cechInjectiveResolutionBicomplex` applies mathlib's native Cech
+functor degreewise to the chosen injective resolution, with explicit formulas for
+its objects and resolution-direction differentials. The augmented degree-zero row
+is exact by the sheaf condition, and
+`cechInjectiveResolutionBicomplex_row_exactAt_one` proves every row exact at Cech
+degree one because each resolution term is injective and hence flasque. This is
+only the horizontal input to the Stacks 20.11.5--6 double-complex argument. The
+degree-one total-complex comparison and the vertical collapse from acyclicity on
+finite intersections remain open; no exactness of open pushforward is used.
+
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
 `n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of
