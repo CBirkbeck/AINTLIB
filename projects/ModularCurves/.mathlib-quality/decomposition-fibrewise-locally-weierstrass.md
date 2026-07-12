@@ -373,6 +373,16 @@ face compatibility, and finite-sum cancellation are separate private helpers and
 no options. It remains to apply this local theorem to stalk representatives under
 `⨆ i, U i = ⊤`, then package exactness in every positive degree.
 
+Positive-degree sheaf exactness is now proved in
+`ForMathlib/SheafCechSheafPositiveExact.lean`. For every `n`,
+`TopCat.Sheaf.cechShortComplex_exact` proves exactness of `cechDifferential n` followed
+by `cechDifferential (n+1)` when the opens cover `⊤`. The proof represents a stalk cycle
+on a neighborhood, shrinks until its differential vanishes, intersects with a cover
+member containing the point, applies the local contraction, and returns the lifted germ.
+Together with `cechAugmentedShortComplex_exact`, the sheaf-level Cech construction is now
+an exact augmented resolution. The next dependency is to package that resolution for the
+acyclic-cover comparison with genuine derived global sections.
+
 The generic two-chart degree-one calculation is now complete in
 `ForMathlib/TwoOpenHOne.lean`. The theorem
 `TopCat.Sheaf.subsingleton_H_one_of_two_open_cover` proves global `H¹` vanishing from
