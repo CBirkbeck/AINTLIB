@@ -16944,3 +16944,67 @@ localModel glues (LocallyWeierstrass.baseChange + it's Zariski-local).
   [YF-CLASSIFIER] design finding (finrank-φ route hits a φ-flatness snag ⟹ the
   divisor-degree route, KM 3.7.1, is the path; D-stream pieces pinned). Exemplary
   act-on-default execution. On charter.
+
+## Amendments v10.158 (2026-07-12, coordinator): ★ KM-INTEGRAL STREAM CHARTERED — the Drinfeld upgrade planned via /develop (owner directive: "not out of scope"); skeleton green, decomposition boarded, 8 wave-tickets
+
+**Owner directive**: the KM integral theory (Y₁(N)/ℤ regular-flat, Drinfeld structures at all
+primes) enters scope. Coordinator /develop pass executed: KM Ch. 5 (print pp. 129–141) READ AT
+SOURCE; the decomposition transcribes KM's own proof tree (artifact:
+`decomposition-km-integral.md`, verbatim quotes per read node); skeleton
+`Moduli/DrinfeldRegularity.lean` GREEN (4 sorried leaves, 3,088 jobs, root-registered).
+Priority: below the second wave (Y(N)/Γ_H/Γ₀ ASAP stands); the near-term waves are
+dispatchable to any free strong seat.
+
+### [KM-W0] Integral relative representability of [Γ₁(N)] (KM 1.4–1.11, 3.5–3.7)
+- **Status**: open · **Type**: wave-charter · **File**: Moduli/DrinfeldRegularity.lean + new
+- **Deliverables**: (i) [KM-W0-1] `isGammaOne_pullAlong` (skeleton :49; KM 1.4 divisor
+  base-change on the CartierDivisor.lean substrate); (ii) `gammaOneProblem R N : ModuliProblem R`
+  (the Drinfeld problem object — DEFINE ONLY AFTER (i), v10.8 no-sorried-data); (iii) KM 3.6/3.7.1
+  rel-rep + finiteness over every base ring (no invertibility); (iv) KM 3.5.1 prime-power
+  factorization. **FIRST ACT: focused /develop --decompose of KM 1.4–1.11 + 3.5–3.7 (verbatim
+  quotes; pdf = print + 11).** SEAM: D2's Ch-6 machinery (generatorSpace/cyclicity/sectionsDivisor)
+  = consume, never duplicate; board the seam at session start.
+### [KM-W1] The combinatorial core (KM 5.3.4a) — READY
+- **Status**: open · **Type**: lemma · **Statement**: skeleton :79 (`CharP.p_eq_zero_of_pow_mem_span`)
+- **Sketch (KM p. 141, quoted in artifact)**: write G^{pⁿ} = X₀^{pⁿ}·A + X₁^{pⁿ}·B from
+  `hsub` (Ideal.span membership gives the two cofactors); compare total-degree-pⁿ homogeneous
+  components using h0/hlin (lowest part of G^{pⁿ} is (X₀+X₁)^{pⁿ} via `add_pow`); coefficients
+  of X₀^{pⁿ}, X₁^{pⁿ} force A(0,0) = B(0,0) = 1; conclude (pⁿ choose i) = 0 in R for
+  0 < i < pⁿ; i = 1 ⟹ (pⁿ : R) = 0; i = p^{n−1} + `Nat.Prime` divisibility of binomials
+  (verify: `Nat.Prime.dvd_choose` family / Kummer-adjacent lemmas; fallback: direct
+  ν_p((pⁿ choose p^{n−1})) = 1 argument) ⟹ (p : R) = 0.
+- **Mathlib**: MvPowerSeries.coeff/constantCoeff (verified), homogeneous-component API,
+  `add_pow`, binomial-valuation lemmas (verify at pickup). Generality: deliberately WEAKER
+  hypotheses than a full FGL (only h0 + hlin) — strictly more general than KM's statement.
+### [KM-W2] Zero-section proposition (KM 5.3.3, elliptic) — READY + one vocabulary leaf
+- **Status**: open · **Type**: theorem · **Statement**: skeleton :109
+- **Sketch**: Zariski-locally choose a formal/chart parameter at the zero section (Weierstrass
+  chart machinery; the Drinfeld divisor pⁿ[0] via the sectionsDivisor/killed-locus layer);
+  translate "pⁿ[0] is a subgroup" into the [KM-W1] membership at the local parameter; glue
+  (p = 0 is Zariski-local). Includes stating [KM-W1-2]/[KM-W2-2] (the Ker(Fⁿ) clauses) once a
+  Frobenius-kernel spelling is fixed (leaf: repo/mathlib Frobenius audit first).
+### [KM-W3] Rigid II, first half (KM 5.3.2.2 via 5.3.5) — READY
+- **Status**: open · **Type**: theorem · **Statement**: skeleton :132 · **Sketch**: instantiate
+  [KM-W2-1] (KM: "Assertion II is just the proposition itself, applied to E/R").
+### [KM-W4] API-GAP charter: formal deformation theory (KM 2.9 + 5.3.2 Case II)
+- **Status**: open (gated on nothing; own vocabulary-first act) · **Type**: charter
+- Universal formal deformation E/W(k)[[T]] of an elliptic curve (Witt ✓ mathlib); the
+  deformation-with-level pro-representation bookkeeping (artin local W(k)-algebras); the
+  T-invariant; Rigid II second half ("vanishing of the T-invariant means E/R constant",
+  KM p. 139); the two-generator criterion assembly (5.3.2 Case II: f = X(P), g = T).
+### [KM-W5] API-GAP charter (FLAGSHIP, research-scale): p-divisible groups + Serre–Tate
+- **Status**: open · **Type**: charter · p-divisible groups from scratch; the k̄ dichotomy
+  (μ_{p∞}×ℚ_p/ℤ_p vs height-2 formal, KM p. 134); the Serre–Tate theorem. NOTHING in mathlib.
+  Recommend flagship treatment + ecosystem watch (mathlib community interest likely).
+### [KM-W6] The axiomatic engine (KM 5.2.1 + 5.2.2)
+- **Status**: blocked on [KM-W5] for the homogeneity core; three STANDALONE ring-theory gaps
+  dispatchable now as sub-tickets: [KM-W6a] strict henselization (mathlib has only
+  HenselianLocalRing), [KM-W6b] completion/henselization-regularity transfer (EGA IV
+  18.8.8/18.8.13), [KM-W6c] miracle flatness for finite morphisms of regular schemes of equal
+  dimension [A-K V 3.6] (absent — fleet-confirmed at the Y1 N6 campaign; ALSO serves BB-FLAT
+  full generality). Plus 4.12.1 rank-constancy + the δ₁ auxiliary-level diagrams (consumes the
+  YFULL naive machinery — seam with CHARTER-YFULL).
+### [KM-W7] Assembly: First Main Theorem 5.1.1, [Γ₁(N)] clause
+- **Status**: blocked on W0 + W3/W4 + W6 · ℤ[1/N]-étale clause = consume the landed Y1 chain.
+### [CLEANUP-KM-1] /cleanup on Moduli/DrinfeldRegularity.lean — after W1+W2+W3 land (cadence).
+### [CLEANUP-KM-ALL] /cleanup-all before [KM-W7] (pre-milestone) + final per cadence.

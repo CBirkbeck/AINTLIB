@@ -69,6 +69,7 @@ import ModularCurves.Moduli.Groupoid
 import ModularCurves.Moduli.LevelSpaces
 import ModularCurves.Moduli.MellWeierstrass
 import ModularCurves.Moduli.MellWStack
+import ModularCurves.Moduli.DrinfeldRegularity
 import ModularCurves.Moduli.Representability
 import ModularCurves.ForMathlib.QuotientTorsor
 import ModularCurves.Moduli.QuotientRepresentability
