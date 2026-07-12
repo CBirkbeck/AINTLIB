@@ -1,1 +1,1 @@
-FOCUS: [YF-SWAP] Tier-A — YFullRoute :162/:179/:218 primed swaps with hinv-threading (my file only; Tier-B shared-def churn deferred to coordinator note); then gammaFullNaiveProblem def-sorry; then γ1 [YF-ISOLOC]
+FOCUS: [YF-ISOLOC] landed clean; now [YF-OI-CRIT] — clopen image + section ⟹ open immersion criterion (the CLOPEN assembly shape): closed immersion ι whose image = clopen set + a section over that clopen ⟹ ι open immersion; audit mathlib IsClopen→open subscheme + isPullback/section API
