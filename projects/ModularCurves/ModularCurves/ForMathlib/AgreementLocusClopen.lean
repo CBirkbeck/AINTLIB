@@ -67,6 +67,22 @@ theorem range_agreementι_subset (a b : Z ⟶ X) (hab : a ≫ f = b ≫ f) :
   have := congrArg (fun m => m.base w) (agreementι_comp_eq f a b hab)
   simpa using this
 
+/-- Converse companion of `range_agreementι_subset` (needs no unramified hypothesis, it is the
+universal property of the equalizer-pullback): a map `w : W ⟶ Z` that equalizes `a` and `b`
+(`w ≫ a = w ≫ b`) factors through the agreement-locus inclusion, so every point in the image of
+`w.base` lies in the range of `agreementι`. -/
+theorem base_mem_range_agreementι {W : Scheme.{u}} (a b : Z ⟶ X) (hab : a ≫ f = b ≫ f)
+    (w : W ⟶ Z) (hw : w ≫ a = w ≫ b) (p : W) :
+    w.base p ∈ Set.range (agreementι f a b hab).base := by
+  have hcond : w ≫ pullback.lift a b hab = (w ≫ a) ≫ pullback.diagonal f := by
+    apply pullback.hom_ext <;>
+      simp only [Category.assoc, pullback.lift_fst, pullback.lift_snd, pullback.diagonal_fst,
+        pullback.diagonal_snd, Category.comp_id, hw]
+  refine ⟨(pullback.lift w (w ≫ a) hcond).base p, ?_⟩
+  have hfac : pullback.lift w (w ≫ a) hcond ≫ agreementι f a b hab = w := by
+    rw [agreementι]; exact pullback.lift_fst _ _ _
+  exact congrArg (fun m => m.base p) hfac
+
 /-- For `f` formally unramified and locally of finite type, the agreement-locus inclusion
 is an open immersion (pullback of the open-immersion relative diagonal). -/
 instance isOpenImmersion_agreementι [FormallyUnramified f] [LocallyOfFiniteType f]

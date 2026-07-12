@@ -161,7 +161,35 @@ theorem mem_pointVanishSet_of_residue_eq (hN : NIsInvertible S N) {T : Scheme.{u
     (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) (u : T)
     (h : T.fromSpecResidueField u ≫ x.1 = T.fromSpecResidueField u ≫ y.1) :
     u ∈ E.pointVanishSet N t (x - y) (E.sub_killed N t x y hx hy) := by
-  sorry
+  -- `x - y` agrees with the zero point over `κ(u)`, as morphisms into `E.E`.
+  have hres : Point.restrict E (T.fromSpecResidueField u) x
+      = Point.restrict E (T.fromSpecResidueField u) y := Subtype.ext h
+  have hsub0 : Point.restrict E (T.fromSpecResidueField u) (x - y) = 0 := by
+    rw [E.restrict_sub, hres, sub_self]
+  have key : T.fromSpecResidueField u ≫ (x - y).1
+      = T.fromSpecResidueField u ≫ (0 : E.Point t).1 := by
+    have h1 := congrArg Subtype.val hsub0
+    rw [E.point_zero_val] at h1
+    rw [E.point_zero_val, ← Category.assoc]
+    exact h1
+  -- Hence the two `E[N]`-classifiers of `x - y` and `0` agree over `κ(u)` (`torsionι` is mono).
+  haveI := E.torsionι_isClosedImmersion N
+  haveI : Mono (E.torsionι N) := inferInstance
+  have hclass : T.fromSpecResidueField u
+        ≫ E.pointToTorsion (x - y) (E.sub_killed N t x y hx hy)
+      = T.fromSpecResidueField u
+        ≫ E.pointToTorsion (0 : E.Point t) (E.zeroPoint_comp_mulByHom N t) := by
+    rw [← cancel_mono (E.torsionι N), Category.assoc, Category.assoc,
+      E.pointToTorsion_torsionι, E.pointToTorsion_torsionι]
+    exact key
+  -- `fromSpecResidueField u` factors through the agreement locus, so `u` is in its range.
+  obtain ⟨p⟩ : Nonempty (↑(Spec (T.residueField u))) := inferInstance
+  have hmem := AlgebraicGeometry.base_mem_range_agreementι (E.torsionπ N)
+    (E.pointToTorsion (x - y) (E.sub_killed N t x y hx hy))
+    (E.pointToTorsion (0 : E.Point t) (E.zeroPoint_comp_mulByHom N t))
+    (by rw [E.pointToTorsion_torsionπ, E.pointToTorsion_torsionπ])
+    (T.fromSpecResidueField u) hclass p
+  rwa [Scheme.fromSpecResidueField_apply] at hmem
 
 /-- **[YF-⊇ CRUX — forced residue for sections, WIP frontier].** Two sections `σ₁, σ₂` of a
 separated morphism `ρ` that agree topologically at `u` agree over the residue field:
@@ -173,7 +201,42 @@ theorem sections_residue_eq_of_base_eq {X U : Scheme.{u}} (ρ : X ⟶ U) [IsSepa
     (σ₁ σ₂ : U ⟶ X) (hσ₁ : σ₁ ≫ ρ = 𝟙 U) (hσ₂ : σ₂ ≫ ρ = 𝟙 U) (u : U)
     (h : σ₁.base u = σ₂.base u) :
     U.fromSpecResidueField u ≫ σ₁ = U.fromSpecResidueField u ≫ σ₂ := by
-  sorry
+  -- The residue-field maps of the two sections agree (modulo the base-point identification `h`).
+  have key : σ₁.residueFieldMap u
+      = (X.residueFieldCongr h).hom ≫ σ₂.residueFieldMap u := by
+    have hu1 : ρ.base (σ₁.base u) = u := by
+      simpa using congrArg (fun m : U ⟶ U => m.base u) hσ₁
+    have hu2 : ρ.base (σ₂.base u) = u := by
+      simpa using congrArg (fun m : U ⟶ U => m.base u) hσ₂
+    -- Each section's residue map retracts `ρ`'s (`σᵢ ≫ ρ = 𝟙` on residue fields).
+    have R1 : ρ.residueFieldMap (σ₁.base u) ≫ σ₁.residueFieldMap u
+        = (U.residueFieldCongr hu1).hom := by
+      rw [← Scheme.residueFieldMap_comp, Scheme.Hom.residueFieldMap_congr hσ₁ u,
+        Scheme.residueFieldMap_id]
+      exact Category.comp_id _
+    have R2 : ρ.residueFieldMap (σ₂.base u) ≫ σ₂.residueFieldMap u
+        = (U.residueFieldCongr hu2).hom := by
+      rw [← Scheme.residueFieldMap_comp, Scheme.Hom.residueFieldMap_congr hσ₂ u,
+        Scheme.residueFieldMap_id]
+      exact Category.comp_id _
+    -- A retraction of a field extension is an isomorphism (mono field-hom + split epi).
+    haveI : IsSplitEpi (σ₁.residueFieldMap u) :=
+      ⟨⟨(U.residueFieldCongr hu1).inv ≫ ρ.residueFieldMap (σ₁.base u),
+        by rw [Category.assoc, R1, Iso.inv_hom_id]⟩⟩
+    haveI : Mono (σ₁.residueFieldMap u) :=
+      ConcreteCategory.mono_of_injective _ (σ₁.residueFieldMap u).hom.injective
+    haveI : IsIso (σ₁.residueFieldMap u) := isIso_of_mono_of_isSplitEpi _
+    haveI : IsIso (ρ.residueFieldMap (σ₁.base u) ≫ σ₁.residueFieldMap u) := by
+      rw [R1]; infer_instance
+    haveI : IsIso (ρ.residueFieldMap (σ₁.base u)) :=
+      IsIso.of_isIso_comp_right _ (σ₁.residueFieldMap u)
+    -- Cancel the (now iso) `ρ.residueFieldMap` and reduce both sides to residue-field congruences.
+    rw [← cancel_epi (ρ.residueFieldMap (σ₁.base u)), R1,
+      Scheme.Hom.residueFieldMap_congr'_assoc h, R2, Scheme.residueFieldCongr_trans_hom]
+  -- Transport through the naturality of `fromSpecResidueField`.
+  rw [← Scheme.Hom.SpecMap_residueFieldMap_fromSpecResidueField σ₁ u,
+    ← Scheme.Hom.SpecMap_residueFieldMap_fromSpecResidueField σ₂ u, key, Spec.map_comp,
+    Category.assoc, Scheme.residueFieldCongr_fromSpecResidueField h]
 
 end EllipticCurve
 
