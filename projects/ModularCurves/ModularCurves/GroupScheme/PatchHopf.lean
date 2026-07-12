@@ -1160,6 +1160,56 @@ theorem comulTop_comp_map_comulTop_id :
   rw [← Category.assoc P.squareΓTop, ← P.cubeOuterMul_appTop_cubeLΓ]
   simp only [Category.assoc]
 
+/-! #### The associator and the final coassociativity -/
+
+/-- The associator `cube → cubeL`, `(g₁,(g₂,g₃)) ↦ ((g₁,g₂),g₃)`. -/
+noncomputable def assocScheme : P.cube ⟶ P.cubeL := by
+  refine pullback.lift
+    (pullback.lift (pullback.fst P.groupToBaseRes P.squareToBase)
+      (pullback.snd P.groupToBaseRes P.squareToBase
+        ≫ pullback.fst P.groupToBaseRes P.groupToBaseRes) ?_)
+    (pullback.snd P.groupToBaseRes P.squareToBase
+      ≫ pullback.snd P.groupToBaseRes P.groupToBaseRes) ?_
+  · -- inner: g₁ ≫ gtb = (g₂-proj) ≫ gtb
+    show pullback.fst P.groupToBaseRes P.squareToBase ≫ P.groupToBaseRes
+      = (pullback.snd P.groupToBaseRes P.squareToBase
+          ≫ pullback.fst P.groupToBaseRes P.groupToBaseRes) ≫ P.groupToBaseRes
+    rw [pullback.condition, Category.assoc]
+    rfl
+  · -- outer: (inner lift) ≫ squareToBase = (g₃-proj) ≫ gtb
+    show pullback.lift (pullback.fst P.groupToBaseRes P.squareToBase)
+          (pullback.snd P.groupToBaseRes P.squareToBase
+            ≫ pullback.fst P.groupToBaseRes P.groupToBaseRes) _
+        ≫ (pullback.fst P.groupToBaseRes P.groupToBaseRes ≫ P.groupToBaseRes)
+      = (pullback.snd P.groupToBaseRes P.squareToBase
+          ≫ pullback.snd P.groupToBaseRes P.groupToBaseRes) ≫ P.groupToBaseRes
+    rw [← Category.assoc, pullback.lift_fst, pullback.condition, Category.assoc]
+    congr 1
+    rw [← pullback.condition]
+    rfl
+
+@[reassoc]
+theorem assocScheme_fst_fst :
+    P.assocScheme ≫ pullback.fst P.squareToBase P.groupToBaseRes
+        ≫ pullback.fst P.groupToBaseRes P.groupToBaseRes
+      = pullback.fst P.groupToBaseRes P.squareToBase := by
+  rw [assocScheme, pullback.lift_fst_assoc, pullback.lift_fst]
+
+@[reassoc]
+theorem assocScheme_fst_snd :
+    P.assocScheme ≫ pullback.fst P.squareToBase P.groupToBaseRes
+        ≫ pullback.snd P.groupToBaseRes P.groupToBaseRes
+      = pullback.snd P.groupToBaseRes P.squareToBase
+        ≫ pullback.fst P.groupToBaseRes P.groupToBaseRes := by
+  rw [assocScheme, pullback.lift_fst_assoc, pullback.lift_snd]
+
+@[reassoc]
+theorem assocScheme_snd :
+    P.assocScheme ≫ pullback.snd P.squareToBase P.groupToBaseRes
+      = pullback.snd P.groupToBaseRes P.squareToBase
+        ≫ pullback.snd P.groupToBaseRes P.groupToBaseRes := by
+  rw [assocScheme, pullback.lift_snd]
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
