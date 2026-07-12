@@ -1124,16 +1124,24 @@ theorem pullbackQuotientπSMul_snd {W : Scheme.{u}}
       Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j :=
   Limits.pullback.lift_snd _ _ _
 
-/-- **[GHB5a] Base change commutes with the quotient** (existence of descent; KM
-7.1.3(3c), the free-action case). For any base map `j : W ⟶ X/G`, the base-changed
-projection `pullback.snd (quotientπ) j : pullback (quotientπ) j ⟶ W` descends every
-morphism `F` that is invariant under the base-changed action. Global-`quotientπ`,
-arbitrary-`j` analogue of `AffineQuotient.exists_invariantsπ_lift_of_isOpenImmersion`;
-proof mirrors `exists_quotientπ_lift`'s glue over `quotientGlueData`, with the per-chart
-descent supplied by the affine `exists_invariantsπ_lift_of_isOpenImmersion` (freeness
-enters through [A711-BC] `fixedPointsBaseChange`). Consumed by [GHB5]
+/-- **[GHB5a] Base change commutes with the quotient for a FREE action** (existence of
+descent; KM 7.1.3(3c), the free case — condition (c)). For any base map `j : W ⟶ X/G`,
+the base-changed projection `pullback.snd (quotientπ) j : pullback (quotientπ) j ⟶ W`
+descends every morphism `F` invariant under the base-changed action.
+
+The freeness hypothesis `hfree` is **essential** for arbitrary (non-flat) `j`: the
+chart-local content is `(A ⊗_{R} C)ᴳ = Aᴳ ⊗_{R} C`, which holds *for every* base ring
+`C` exactly when the action is free (KM A7.1.2 / [A711-BC]
+`fixedPointsBaseChange_bijective_of_isFreeAlgebraAction`); the flatness route
+(`exists_invariantsπ_lift_of_isOpenImmersion`, valid for open-immersion = localization
+`j`) does not cover `j = pullback.fst f₀ g`, which is a base change of the arbitrary
+`g : T ⟶ S` and hence not flat. Proof mirrors `exists_quotientπ_lift`'s glue over
+`quotientGlueData`, with the per-chart descent supplied by the free-action affine
+base-change engine (from [A711-BC]). Consumed by [GHB5]
 `exists_quotient_baseChange_of_free` at `j = pullback.fst f₀ g`. -/
 theorem exists_quotientπ_lift_baseChange {W Y : Scheme.{u}}
+    (hfree : ∀ {T : Scheme.{u}} (t : T ⟶ X) (g : G), g ≠ 1 →
+      t ≫ σ.hom g = t → IsEmpty T)
     (j : W ⟶ σ.quotient V hVs hVa)
     (F : Limits.pullback (σ.quotientπ V hVs hVa hVmem) j ⟶ Y)
     (hF : ∀ g : G, σ.pullbackQuotientπSMul V hVs hVa hVmem j g ≫ F = F) :
