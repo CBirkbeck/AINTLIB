@@ -17331,7 +17331,8 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
 - **Unblocks**: GHB5 → GHB7 value-functor/relRep → GHC1 goes fully unconditional.
 
 ### [GHB5a-i] free-action affine base-change descent — GHB5a's per-chart engine (NEW-GH refinement, v10.166)
-- **Status**: open  **Parent**: GHB5a  **File**: `ModularCurves/ForMathlib/AffineQuotient.lean`
+- **Status**: in_progress  **Parent**: GHB5a  **File**: `ModularCurves/ForMathlib/AffineQuotient.lean`
+- **Claimed**: STREAM-GH, 2026-07-13T08:52Z (inherits NEW-GH's banked state per STREAM-GH charter v10.171; resume at "(B⊗_{Bᴳ}C)ᴳ≅C corollary via [A711-BC]@Bᴳ")
 - **Statement**: analogue of `exists_invariantsπ_lift_of_isOpenImmersion` (line 628) with
   `[IsOpenImmersion j]` DROPPED and a freeness hypothesis ADDED: for `Spec B` with a free
   `G`-action and ARBITRARY `j : Q' ⟶ Spec Bᴳ`, every `pullbackSpecSMul`-invariant
