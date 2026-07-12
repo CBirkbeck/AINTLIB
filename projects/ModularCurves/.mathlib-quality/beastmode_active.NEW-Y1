@@ -1,1 +1,1 @@
-FOCUS: route-γ foundations landed ([YF-ISOLOC],[YF-OI-CRIT],[YF-TAUT] all clean/rooted); remaining = [YF-CLASSIFIER] (divisor↔iso, heavy, needs /develop --decompose) + [YF-RANGE] + final assembly of isOpenImmersion_levelSpaceΓι
+FOCUS: [YF-U] DONE (fullLevelOpens — full-level locus OPEN, axiom-clean). Remaining CLOPEN: [YF-⊆] range levelSpaceΓι⊆fullLevelOpens (full-level⟹combos-nonzero) + [YF-⊇] IsFullLevel over fullLevelOpens (2 sub-lemmas: comaximal ∏=⋂ + same-degree-subdivisor-equality) → assembly → [YF-ETALE] ★

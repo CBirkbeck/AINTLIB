@@ -18792,3 +18792,24 @@ not finrank-φ (φ not flat over E[N]_T — the design finding stands).
 Alternatively **discharge `fullLevel_divisor_iff_naive_gen`** (Basic:125 sorry) via T-D2 +
 `torsion_geometricFibre_rank_two` — unblocks `isFullLevel_iff_naive` and may shortcut [YF-⊆]/[YF-⊇] through
 the naive-generation form. (NEW-Y1, CHARTER-YFULL session 2)
+
+## v10.164 — NEW-Y1 CHARTER-YFULL: ★ [YF-U] THE FULL-LEVEL LOCUS IS OPEN (half the clopen claim)
+
+**`fullLevelOpenSet_isOpen` / `fullLevelOpens : ambient.Opens`** (`Moduli/FullLevelOpenLocus.lean`,
+axiom-clean `{propext, Classical.choice, Quot.sound}`, rooted): the full-level locus is the complement
+of the union of the `N²−1` clopen vanishing loci of the nonzero combination points
+`combPoint c d = [c]·tautPt₁ + [d]·tautPt₂` (each killed via `tautPt₁/₂_smul_eq_zero`), hence open. Built
+on this session's engines `AgreementLocusClopen` + `isClopen_pointVanishSet` (`pointVanishSet` exposed;
+taut killing lemmas made public). **The openness half of the KM 3.7.1 clopen claim is now PROVEN.**
+
+**Remaining to CLOPEN** (both consume the divisor machinery; `U := fullLevelOpens E N hN`):
+- **[YF-⊆]** `Set.range (levelSpaceΓι E N).base ⊆ fullLevelOpens` — at full-level points every nonzero
+  combination is nonvanishing (full-level ⟹ combos distinct). Route: reducedness of `E[N]` (N inv) +
+  the distinctness argument.
+- **[YF-⊇]** `IsFullLevel over fullLevelOpens` — the heavy divisor leaf, the 2 sub-lemmas to BUILD:
+  (i) comaximal `∏ker = ⋂ker` under disjointness (globalize private `sectionsIdealAux_ideal_eq_top_of_disjoint`),
+  (ii) same-degree-subdivisor-equality (`isIso_iff_ker_eq_bot` + "surjection of finite-free same-rank ⟹
+  injective"; NOTE `isIso_of_isClosedImmersion_of_surjective` needs REDUCED target — fails over general S,
+  so the module-rank argument is required). `/develop --decompose` these.
+Then `isOpenImmersion_levelSpaceΓι_of_taut fullLevelOpens hrange hfull` fires → [YF-ETALE] ★.
+Session engines (all clean, rooted): AgreementLocusClopen, PointVanishingClopen, FullLevelOpenLocus. (NEW-Y1)
