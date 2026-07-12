@@ -49,6 +49,26 @@ noncomputable def overSection (M : _root_.SheafOfModules R) (U : C)
         M.val.map W.unop.hom.op m
       rw [← PresheafOfModules.map_comp_apply, ← op_comp, Over.w])
 
+/-- Sections of the over-site restriction are exactly sections over `U`, by evaluation at
+the terminal object (mirror of `overUnitSectionEquiv` at a general module). -/
+noncomputable def overSectionEquiv (M : _root_.SheafOfModules R) (U : C) :
+    M.val.obj (op U) ≃ (M.over U).sections where
+  toFun := overSection R M U
+  invFun s := s.val (op (Over.mk (𝟙 U)))
+  left_inv m := by
+    change M.val.map (𝟙 U).op m = m
+    rw [op_id, M.val.map_id]
+    rfl
+  right_inv s := by
+    apply PresheafOfModules.sections_ext
+    intro V
+    change M.val.map V.unop.hom.op (s.val (op (Over.mk (𝟙 U)))) = s.val V
+    have h := s.property (Over.mkIdTerminal.from V.unop).op
+    change M.val.map (Over.mkIdTerminal.from V.unop).left.op
+      (s.val (op (Over.mk (𝟙 U)))) = s.val V at h
+    rw [Over.mkIdTerminal_from_left] at h
+    exact h
+
 @[simp]
 theorem overSection_apply (M : _root_.SheafOfModules R) (U : C)
     (m : M.val.obj (op U)) (V : (Over U)ᵒᵖ) :
@@ -162,6 +182,28 @@ theorem evalSection_naturality (M : _root_.SheafOfModules R) {U V : Cᵒᵖ} (i 
     ((Over.homMk i.unop (by show i.unop ≫ 𝟙 (Opposite.unop U) = 𝟙 (Opposite.unop V) ≫ i.unop; simp) :
       (Over.map i.unop).obj (Over.mk (𝟙 (Opposite.unop V))) ⟶
         Over.mk (𝟙 (Opposite.unop U))).op) m
+
+/-- **Factorization of the evaluation through a trivialization**: for an isomorphism
+`ψ : M|ᵤ ≅ 𝒪|ᵤ` on the over-site, every functional is a scalar multiple of `ψ.hom`, and
+the evaluation factors accordingly. -/
+theorem evalSection_factor (M : _root_.SheafOfModules R) (U : C)
+    [∀ V, IsMulCommutative (R.obj.obj V)]
+    (ψ : M.over U ≅ _root_.SheafOfModules.unit (R.over U))
+    (φ : M.over U ⟶ _root_.SheafOfModules.unit (R.over U)) (m : M.val.obj (op U)) :
+    evalSection R M U φ m =
+      dualUnitSectionsEquiv R U (ψ.inv ≫ φ) * evalSection R M U ψ.hom m := by
+  have hφ : φ = ψ.hom ≫ (ψ.inv ≫ φ) := by rw [Iso.hom_inv_id_assoc]
+  have hε : (ψ.inv ≫ φ) = overUnitScalarEnd R U (dualUnitSectionsEquiv R U (ψ.inv ≫ φ)) :=
+    ((dualUnitSectionsEquiv R U).symm_apply_apply (ψ.inv ≫ φ)).symm
+  calc evalSection R M U φ m
+      = evalSection R M U (ψ.hom ≫ overUnitScalarEnd R U
+          (dualUnitSectionsEquiv R U (ψ.inv ≫ φ))) m := by rw [← hε, ← hφ]
+    _ = evalSection R M U (letI := dualSectionsModule R M U
+          dualUnitSectionsEquiv R U (ψ.inv ≫ φ) • ψ.hom) m := rfl
+    _ = dualUnitSectionsEquiv R U (ψ.inv ≫ φ) • evalSection R M U ψ.hom m :=
+        evalSection_smul_left R M U ψ.hom _ m
+    _ = dualUnitSectionsEquiv R U (ψ.inv ≫ φ) * evalSection R M U ψ.hom m := rfl
+
 
 end ModularCurves.SheafOfModules
 
