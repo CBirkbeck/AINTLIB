@@ -299,6 +299,15 @@ open is affine and acyclic for a quasicoherent module on a separated scheme. The
 missing map is the augmented-Cech quasi-isomorphism/comparison with derived global
 sections.
 
+The Cech differential is now concrete in
+`ForMathlib/SheafCechDifferential.lean`. Under `cechCochainAddEquiv`,
+`cechCoface_apply` identifies the `k`th coface with restriction from the tuple obtained
+by deleting its `k`th entry to the full intersection, and `cechDifferential_apply`
+identifies the differential with the signed sum of those restrictions. The categorical
+product calculation and finite-sum evaluation are separate private helpers and use no
+options. This supplies the component formula needed to construct a contracting homotopy
+for flasque Cech cochains; the augmented-Cech quasi-isomorphism itself remains open.
+
 The generic two-chart degree-one calculation is now complete in
 `ForMathlib/TwoOpenHOne.lean`. The theorem
 `TopCat.Sheaf.subsingleton_H_one_of_two_open_cover` proves global `H¹` vanishing from
