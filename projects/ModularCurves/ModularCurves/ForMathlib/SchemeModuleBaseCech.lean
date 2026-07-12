@@ -70,15 +70,18 @@ private theorem discreteModuleForgetIso_comp_hom_app
       (moduleForget R).map (Pi.π P i) := by
   rfl
 
-private noncomputable def modulePiForgetIso
+/-- Forgetting the module structure commutes with products. -/
+noncomputable def modulePiForgetIso
     (R : Type u) [Ring R] {I : Type u} (P : I → ModuleCat.{u} R) :
     (moduleForget R).obj (∏ᶜ P) ≅
       ∏ᶜ fun i => (moduleForget R).obj (P i) :=
   preservesLimitIso (moduleForget R) (Discrete.functor P) ≪≫
     HasLimit.isoOfNatIso (discreteModuleForgetIso R P)
 
+/-- The comparison from a forgotten module product to the additive product
+commutes with every product projection. -/
 @[reassoc]
-private theorem modulePiForgetIso_hom_π
+theorem modulePiForgetIso_hom_π
     (R : Type u) [Ring R] {I : Type u}
     (P : I → ModuleCat.{u} R) (i : I) :
     (modulePiForgetIso R P).hom ≫
@@ -127,7 +130,9 @@ private noncomputable def evalOpForgetIsoApp
       (moduleForget R).obj (P.obj (op (V.unop.obj i)))
   exact modulePiForgetIso R fun i => P.obj (op (V.unop.obj i))
 
-private noncomputable def evalOpForgetIso
+/-- Evaluation of a module-valued presheaf on a formal coproduct commutes with
+forgetting to additive groups. -/
+noncomputable def evalOpForgetIso
     {C : Type u} [Category.{u} C] (R : Type u) [Ring R]
     (P : Cᵒᵖ ⥤ ModuleCat.{u} R) :
     (FormalCoproduct.evalOp C (ModuleCat.{u} R)).obj P ⋙
@@ -140,6 +145,21 @@ private noncomputable def evalOpForgetIso
           (fun i : V.unop.I => P.obj (op (V.unop.obj i)))
           (fun i : W.unop.I => P.obj (op (W.unop.obj i)))
           f.unop.f (fun i => P.map (f.unop.φ i).op))
+
+/-- The evaluation comparison from a forgotten module product to the additive
+product commutes with every projection. -/
+@[reassoc]
+theorem evalOpForgetIso_hom_π
+    {C : Type u} [Category.{u} C] (R : Type u) [Ring R]
+    (P : Cᵒᵖ ⥤ ModuleCat.{u} R)
+    (V : (FormalCoproduct C)ᵒᵖ) (i : V.unop.I) :
+    (evalOpForgetIso R P).hom.app V ≫
+        Pi.π (fun j => (moduleForget R).obj
+          (P.obj (op (V.unop.obj j)))) i =
+      (moduleForget R).map
+        (Pi.π (fun j => P.obj (op (V.unop.obj j))) i) :=
+  modulePiForgetIso_hom_π R
+    (fun j => P.obj (op (V.unop.obj j))) i
 
 /-- The Cech complex of a scheme module, retaining its module structure over
 the global functions on the base. -/

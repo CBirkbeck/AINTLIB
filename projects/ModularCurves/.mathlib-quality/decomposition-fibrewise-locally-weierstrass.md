@@ -679,6 +679,17 @@ comparison can identify the actual base-change morphism rather than only the sou
 target groups; constructing that geometric complex and proving its base-change comparison
 remain open.
 
+The degree-zero base-linear Cech interface is now explicit.
+`Scheme.Modules.baseSections` retains the `Γ(S,⊤)`-module structure on global sections,
+`baseCechAugmentation` is the restriction map into degree zero of the landed base-linear
+Cech complex, and `baseSectionsIsoKernelBaseCechDifferential` identifies global sections
+with the linear kernel of its first differential for every genuine cover. Its component
+formula proves that the abstract kernel inclusion is exactly restriction of sections.
+This is the interface needed by the landed finite-projective kernel and arbitrary-base-change
+algebra. It does not assert that the raw affine Cech terms are finite or projective: a
+proper-perfect replacement of the complex is still the geometric input needed before that
+algebra can yield local freeness and base change for the pole modules.
+
 The elementary Mayer--Vietoris seam is now complete in both directions.
 `HPrimeZeroAddEquivSections` identifies `H'⁰(U,F)` with sections naturally in `U`, while
 `HPrimeAddEquivHOfIsTerminal` identifies `H'ⁿ(T,F)` with genuine `Sheaf.H F n` when `T`
