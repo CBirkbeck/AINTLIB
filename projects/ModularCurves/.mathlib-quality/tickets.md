@@ -17987,3 +17987,58 @@ stability, mirror EngineDescent:84) + **C3a** (translation automorphism `t_x`, r
 (freeness supplying M6's `Module.Free`; **adjacent to LANE-B c4** `E[N]` rank-N² — same
 E[N]-freeness headspace, do them together) → **C3e/f** (coverage + assembly). Then C4 glue →
 **SIGNAL ★★**. Marathon v10.162.
+
+## Amendments v10.177 (2026-07-13, coordinator): ★★ STREAM-GH GHB7 assembly RATIFIED — the quotient moduli problem P/H exists as a functor with projection + rel-representability + couniversal EXISTENCE (KM 7.1.2 + 7.1.3(1),(3c)); GHB7-0 design fork ADJUDICATED (β ships; α rejected — mathlib lacks relative-Spec-of-invariants); one sorry-gate (GHB6) tracked
+
+**Verified at source** (capstones located, committed-clean, axiom-checked in clean-room at the tip 2d44759cb):
+- `QuotPkg.quotProb` (GammaHRepresentability:1094) — **KM 7.1.2's P/G as a `ModuliProblem R`** ★★:
+  sections of chosen per-object quotients, functorial via the transport cocycle
+  (`mapT_id`/`mapT_comp` on `compare_pullback_comp`).
+- `QuotPkg.projQ` + `projQ_invariant` — the projection `Q ⟶ P/G`, full naturality + G-coequalization.
+- `QuotPkg.relRep_quotProb` (:1663) — **KM 7.1.3(3c)**: P/G relatively representable by the chosen
+  quotients, finite étale. Sole sorry-edge: `f₀_finite_etale` (:768) through the sorried **[GHB6]**,
+  discharged when **[GHB6-RING]** lands.
+- `QuotPkg.crossμ` (:1955) + `projQ_crossμ` (:2134) — **KM 7.1.3(1) couniversal EXISTENCE half**
+  (verbatim): the induced `P/G ⟶ P′` for any invariant map to a rel-representable `P′`, with
+  `projQ ≫ crossμ = ν′`; built on the cross-problem transport chain (`exists_crossTransport →
+  exists_crossDescent → crossRelKey → crossTransport_natural → crossDescent_mapT_square`).
+- Supporting infra in `QuotientProblem.lean` (`toPullbackAlong` cocycle, `compare_pullback_id/comp`,
+  `eqv_comp_compare_pullback_of_eqv`, `pullbackAlongπ_congr`).
+- **AXIOM AUDIT (clean-room `#print axioms` at tip 2d44759cb, GammaHRepresentability build exit 0):**
+  `quotProb`, `crossμ`, `projQ_crossμ` = **fully clean `{propext, Classical.choice, Quot.sound}`**
+  (the functor + both couniversal-existence morphisms carry NO sorryAx); `relRep_quotProb` =
+  `{propext, sorryAx, Classical.choice, Quot.sound}` — the lone `sorryAx` is the tracked
+  `f₀_finite_etale`/[GHB6] edge, **exactly as reported.** The integrity claim is verified to the letter.
+- **Honest scoping confirmed**: the other GammaHRepresentability sorries (:709/:2278/:2398/:2408/:2485)
+  are the ACKNOWLEDGED remainder GH itself lists — couniversal UNIQUENESS, the two k̄-geometric
+  clauses, and the final assembly — NOT part of the ratified DONE set. QuotientProblem:968 = the
+  separate T-Q6d.γ torsor-argument WIP (KM pp.114–116), unrelated to GHB7. The report's integrity
+  claim ("axiom-clean except the single GHB6 gate") is scoped to the DONE capstones and holds.
+
+**GHB7-0 DESIGN FINDING — ADJUDICATED (was "needs coordinator eyes"; now RESOLVED).** The affine-
+diagonal instance regresses onto arbitrary `EllObj` bases (matches Loeffler 3.6.1's own
+quasiprojective+finite caveat). GH shipped **resolution β** (thread
+`hbase : ∀ X, IsAffineHom (pullback.diagonal (terminal.from X.base))` through
+EquivariantRelRepData/GHB7/GHC1, rule-5-logged at board 16622). **RULING: β STANDS as the shipping
+resolution.** Evidence against the alternatives:
+- **α (relative-Spec quotient) REJECTED for now** — I checked mathlib thoroughly: **no relative-Spec,
+  no Spec-of-quasi-coherent-invariant-algebra, no GIT/geometric-quotient API exists.** α's "recommended
+  IF mathlib has the API" precondition FAILS; pursuing it = building research-scale absent
+  infrastructure (the source-faithfulness red-flag). α remains a *possible future generalise-lane*
+  improvement IF relative-Spec-of-invariants is ever built — it does NOT block GHB7/GHC1 and must not
+  derail the couniv-uniqueness marathon.
+- **γ (constrain EllObj) REJECTED** — foundational base-category change, unnecessary since β works.
+- **β is honest and non-blocking**: the added hypothesis is a rule-5 strengthening (not a wrong
+  statement — NOT a b2), and every Y_H/Y(N)-pipeline consumer discharges it at the concrete
+  application (Z = `YFull.fullLevelSpace X N` is finite over `X.base`). Ship on β.
+
+**REMAINING to GHC1 live** (GH's banked plan, ratified): couniversal UNIQUENESS
+(`relKey_of_classifies` at source `quotProb` + tμ″-descent uniqueness) → the two k̄-geometric clauses
+→ final assembly `exists_quotientProblemData` → **GHC1 goes live** (the corrected T-H4 as a theorem,
+already proven upstream as a shape). Plus [GHB6-RING] to clear the `f₀_finite_etale` sorry-edge.
+Continue the marathon from [couniv-v-a].
+
+**MAIN-PR**: this ★★ is on the branch and already inside the pending **PR-A #5680** (which tracks
+dev/modular-curves HEAD). Clean-room green was verified at 61696bb83; the branch has since advanced
+(GH's GHB7 chain + this) — **PR-A gets a fresh clean-room re-verify at the current tip when the owner
+gives merge-go** (the GHB6 sorry is a fine WIP marker on main per CLAUDE.md).
