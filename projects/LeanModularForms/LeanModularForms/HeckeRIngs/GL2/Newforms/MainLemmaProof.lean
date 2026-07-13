@@ -844,7 +844,7 @@ private theorem support_eq_empty_mixed
   · refine support_eq_empty_of_pairwise_distinct_rec (w := w r) s G hmul hzero
       (fun i hi p hp t => ?_) hdist c hc hrel
     rw [← hsingle i hi]; exact hrec i hi p hp t
-  push_neg at hsingle
+  push Not at hsingle
   obtain ⟨i₁, hi₁s, hi₁w⟩ := hsingle
   exfalso
   set L : Set ℕ := ⋃ i ∈ (s : Set ι), ⋃ j ∈ (s : Set ι),
@@ -1301,7 +1301,7 @@ private lemma charPiece_coeff_sum_eq_zero
         (by -- distinctness: distinct occurring values differ at a coprime index
           rintro ⟨s, hs⟩ ⟨s', hs'⟩ hne
           by_contra hcon
-          push_neg at hcon
+          push Not at hcon
           refine hne (Subtype.ext ?_)
           obtain ⟨k0, _, hk0⟩ := Finset.mem_image.mp (Finset.mem_of_mem_filter _ hs)
           obtain ⟨k0', _, hk0'⟩ := Finset.mem_image.mp (Finset.mem_of_mem_filter _ hs')
@@ -1353,7 +1353,7 @@ private lemma charPiece_coeff_sum_eq_zero
     obtain ⟨k0₀, hk0₀_mem, hk0₀_ne⟩ : ∃ k0 ∈ Finset.univ.filter
         (fun k0 ↦ tag k0 = χ₀ ∧ EV k0 = s), A1 k0 ≠ 0 := by
       by_contra h
-      push_neg at h
+      push Not at h
       exact hDs (Finset.sum_eq_zero h)
     simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hk0₀_mem
     obtain ⟨hk0₀_tag, hk0₀_ev⟩ := hk0₀_mem

@@ -295,7 +295,7 @@ theorem antiKummerSigmaTildeInvolutive_central
     (antiKummerSigmaTildeInvolutive (p := p) K α₀ hα₀ h_anti h_irr h_irr_g).trans g_aut =
       g_aut.trans
         (antiKummerSigmaTildeInvolutive (p := p) K α₀ hα₀ h_anti h_irr h_irr_g) := by
-  apply AlgEquiv.coe_algHom_injective
+  apply AlgEquiv.coe_toAlgHom_injective
   apply AlgHom.ext_of_adjoin_eq_top
     (antiKummerLiftRoot_adjoin_eq_top (p := p) K α₀ hα₀ h_anti h_irr h_irr_g)
   rintro x ⟨rfl⟩

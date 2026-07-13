@@ -28,7 +28,7 @@ lemma associated_zeta_sub_one_pow_prime :
     ← Finset.prod_const]
   apply Associated.prod
   intro η hη
-  refine hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+  refine hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
     hpri.out (one_mem_nthRootsFinset hpri.out.pos) ?_ ?_
   · exact ((isPrimitiveRoot_of_mem_primitiveRoots hη).mem_nthRootsFinset hpri.out.pos)
   · exact ((isPrimitiveRoot_of_mem_primitiveRoots hη).ne_one hpri.out.one_lt).symm

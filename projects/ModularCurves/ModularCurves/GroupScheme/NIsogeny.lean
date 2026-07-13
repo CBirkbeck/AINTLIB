@@ -801,7 +801,7 @@ private theorem locallyFreeRankLocusAux_exists_ideal {R : Type u} [CommRing R]
     -- Step 3b: the rank at any prime is computed on a patch containing it
     have hexists : ∃ t : T, algebraMap R A (gfun (pf t)) ∉ q.asIdeal := by
       by_contra h
-      push_neg at h
+      push Not at h
       have hle : Ideal.span (Set.range fun t : T => algebraMap R A (gfun (pf t)))
           ≤ q.asIdeal := Ideal.span_le.mpr (by rintro _ ⟨t, rfl⟩; exact h t)
       rw [hTA] at hle

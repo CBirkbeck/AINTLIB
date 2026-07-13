@@ -87,8 +87,8 @@ def coordCLM : ℝ × ℝ →L[ℝ] ℂ :=
     (Complex.I • Complex.ofRealCLM).comp (ContinuousLinearMap.snd ℝ ℝ ℝ)
 
 @[simp] theorem coordCLM_apply (p : ℝ × ℝ) : coordCLM p = (p.1 : ℂ) + (p.2 : ℂ) * Complex.I := by
-  simp only [coordCLM, ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply,
-    ContinuousLinearMap.coe_fst', ContinuousLinearMap.coe_snd', ContinuousLinearMap.smul_apply,
+  simp only [coordCLM, add_apply, ContinuousLinearMap.comp_apply,
+    ContinuousLinearMap.coe_fst', ContinuousLinearMap.coe_snd', smul_apply,
     Complex.ofRealCLM_apply, smul_eq_mul]
   ring
 
@@ -149,9 +149,9 @@ theorem holAntihol_eq_divergence {H a : ℂ → ℂ} {h b z : ℂ}
   refine ⟨(-Complex.I) • _, -_, hprod.const_mul (-Complex.I), hprod.neg, ?_⟩
   -- Evaluate the two derivatives at the basis vectors `(1,0)` and `(0,1)` and combine.
   subst hp
-  simp only [ContinuousLinearMap.smul_apply, ContinuousLinearMap.neg_apply,
-    ContinuousLinearMap.add_apply, ContinuousLinearMap.comp_apply,
-    ContinuousLinearMap.one_apply,
+  simp only [smul_apply, neg_apply,
+    add_apply, ContinuousLinearMap.comp_apply,
+    one_apply_eq_self,
     show (⇑(Complex.conjCLE : ℂ →L[ℝ] ℂ)) = ⇑(starRingEnd ℂ) from rfl,
     coordCLM_apply, smul_eq_mul, Complex.ofReal_one, Complex.ofReal_zero, one_mul, zero_mul,
     mul_one, add_zero, zero_add, map_mul, Complex.conj_I]
@@ -1692,7 +1692,7 @@ theorem arc_reparam_segments (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → 
   -- **Part B**: the arc `dx`-term, via `x = cos θ` (`θ: π/3 → 2π/3`, `dx = −sin θ dθ`).
   have hPartB : (∫ x in Set.Ioo (-(1 / 2 : ℝ)) (1 / 2), PhiField Fp a (x, fdArc x)) =
       ∫ θ in (Real.pi / 3)..(2 * Real.pi / 3), Φc θ * (Real.sin θ : ℂ) := by
-    have hsub := intervalIntegral.integral_comp_smul_deriv'
+    have hsub := intervalIntegral.integral_deriv_smul_comp'
       (a := Real.pi / 3) (b := 2 * Real.pi / 3) (f := Real.cos) (f' := fun θ => -Real.sin θ)
       (g := fun x => PhiField Fp a (x, fdArc x))
       (fun θ _ => Real.hasDerivAt_cos θ) (by fun_prop) (hPhiArc_cont.mono hcos_image)
@@ -1794,7 +1794,7 @@ theorem arc_reparam_segments (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → 
       ← intervalIntegral.integral_add_adjacent_intervals hii_lo hii_hi,
       intervalIntegral.integral_congr hIAf_zero, intervalIntegral.integral_zero, add_zero]
     -- substitute `y = sin θ` (`θ: π/3 → π/2`): `∫ √3/2..1 IAf = ∫ π/3..π/2, cos θ • IAf(sin θ)`.
-    have hsub := intervalIntegral.integral_comp_smul_deriv'
+    have hsub := intervalIntegral.integral_deriv_smul_comp'
       (a := Real.pi / 3) (b := Real.pi / 2) (f := Real.sin) (f' := Real.cos) (g := IAf)
       (fun θ _ => Real.hasDerivAt_sin θ) (by fun_prop) (hIAf_cont.mono hsin_image)
     rw [hsqrt3, hsin12] at hsub

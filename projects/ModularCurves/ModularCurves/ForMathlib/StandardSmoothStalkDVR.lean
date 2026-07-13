@@ -85,7 +85,7 @@ private theorem stalkDVRAux_exists_coord_notMem {K B : Type u} [CommRing K] [Com
     (q : Ideal B) [q.IsPrime] :
     ∃ g : B, b.repr (KaehlerDifferential.D K B g) default ∉ q := by
   by_contra hall
-  push_neg at hall
+  push Not at hall
   have hmem : (b default : Ω[B⁄K])
       ∈ Submodule.span B (Set.range (KaehlerDifferential.D K B)) := by
     rw [KaehlerDifferential.span_range_derivation]; trivial

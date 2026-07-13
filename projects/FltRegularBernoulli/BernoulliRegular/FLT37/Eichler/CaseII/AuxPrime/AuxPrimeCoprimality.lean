@@ -22,7 +22,7 @@ Slot the triple so that `Y` is the `149`-divisible slot, `Z` the `37`-divisible 
 
 1. **Coprime ideal factorisation** (`lemma96_exists_ideal`): the factors `Y − ηZ` are pairwise
    coprime — a common maximal `𝔮` of two factors contains `(η₂ − η₁)Z`; the root difference is
-   associated to `ζ − 1` (`ntRootsFinset_pairwise_associated_sub_one_sub_of_prime`), and
+   associated to `ζ − 1` (`nthRootsFinset_pairwise_associated_sub_one_sub_of_prime`), and
    `(ζ−1)³⁶ ~ 37 ∣ Z`, so in either case `Z ∈ 𝔮`, hence `Y ∈ 𝔮`, hence `1 ∈ 𝔮` by Bézout
    (`IsCoprime Y Z`).  `Finset.exists_eq_pow_of_mul_eq_pow_of_coprime` then gives
    `(Y − ζ^{±1}Z) = A_{±1}³⁷`.
@@ -201,7 +201,7 @@ theorem lemma96_spans_coprime {Y Z : ℤ} (hYZ : IsCoprime Y Z) (h37Z : (37 : �
     · -- `η₂ − η₁ ∈ 𝔮 ⟹ ζ₀ − 1 ∈ 𝔮 ⟹ 37 ∈ 𝔮 ⟹ Z ∈ 𝔮`
       have hassoc : Associated (ζ₀ - 1) (η₂ - η₁) :=
         (IsCyclotomicExtension.zeta_spec 37 ℚ
-          K37).toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+          K37).toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
           (by norm_num) hη₂ hη₁ (Ne.symm hne)
       have hζmem : (ζ₀ - 1) ∈ 𝔮 := by
         obtain ⟨t, ht⟩ := hassoc.symm.dvd

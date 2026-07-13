@@ -141,7 +141,7 @@ theorem caseII_washington_real_root_of_pow_real
 /-! ## 2. The `(1+ζ)`-unit
 
 `1 + ζ = (ζ² − 1)/(ζ − 1)` is a (cyclotomic) unit of `𝓞 K`: both `ζ − 1` and `ζ² − 1` are
-`𝔭`-uniformisers (`ntRootsFinset_pairwise_associated_sub_one_sub_of_prime`). -/
+`𝔭`-uniformisers (`nthRootsFinset_pairwise_associated_sub_one_sub_of_prime`). -/
 
 omit [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
   [NumberField.IsCMField (CyclotomicField 37 ℚ)] in
@@ -160,7 +160,7 @@ theorem caseII_washington_one_add_zeta_unit
   have hne : hζ.toInteger ^ 2 ≠ (1 : 𝓞 (CyclotomicField 37 ℚ)) :=
     hζ.toInteger_isPrimitiveRoot.pow_ne_one_of_pos_of_lt (by omega) (by decide : 2 < 37)
   have hassoc : Associated (hζ.toInteger - 1 : 𝓞 (CyclotomicField 37 ℚ)) (hζ.toInteger ^ 2 - 1) :=
-    hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       (by decide : Nat.Prime 37) hmem_sq hmem_one hne
   obtain ⟨εp, hεp⟩ := hassoc
   refine ⟨εp, ?_⟩

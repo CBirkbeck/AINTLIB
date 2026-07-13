@@ -345,7 +345,7 @@ theorem caseII_zeta_sub_one_not_dvd_factorGenerator
         fun h ↦ hη (Subtype.ext h)
       rwa [caseII_etaZero_eq_one D hp] at h1
     have hpair :=
-      D.hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+      D.hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
         (by decide : Nat.Prime 37) hmem_eta hmem_one hne
     have hassoc : Associated (D.hζ.toInteger - 1 : 𝓞 (CyclotomicField 37 ℚ))
         (1 - (η : 𝓞 (CyclotomicField 37 ℚ))) := by

@@ -294,7 +294,7 @@ omit [DecidableEq K] [W.toAffine.IsElliptic]
     coeffFrobEquiv (K := K) (geomFrobSmoothPointInv W P).x = P.x := by
   show (coeffFrobEquiv (K := K))
     ((FiniteField.frobeniusAlgEquivOfAlgebraic K (AlgebraicClosure K)).symm P.x) = P.x
-  rw [AlgEquiv.coe_ringEquiv', AlgEquiv.apply_symm_apply]
+  rw [AlgEquiv.coe_ringEquiv, AlgEquiv.apply_symm_apply]
 
 omit [DecidableEq K] [W.toAffine.IsElliptic]
   [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic] in
@@ -304,7 +304,7 @@ omit [DecidableEq K] [W.toAffine.IsElliptic]
     coeffFrobEquiv (K := K) (geomFrobSmoothPointInv W P).y = P.y := by
   show (coeffFrobEquiv (K := K))
     ((FiniteField.frobeniusAlgEquivOfAlgebraic K (AlgebraicClosure K)).symm P.y) = P.y
-  rw [AlgEquiv.coe_ringEquiv', AlgEquiv.apply_symm_apply]
+  rw [AlgEquiv.coe_ringEquiv, AlgEquiv.apply_symm_apply]
 
 omit [W.toAffine.IsElliptic] [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic] in
 /-- **`π̄` recovers `P` from its inverse-Frobenius point** (at the affine-point level):

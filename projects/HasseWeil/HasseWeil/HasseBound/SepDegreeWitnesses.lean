@@ -2207,7 +2207,7 @@ For the height-one prime `v := Sinf_kernelPrime_heightOne …` (whose `asIdeal` 
 
 **No bare `sorry`**: this is now *derived* from the value-identity leaf
 `Sinf_intValuation_eq_exp_neg_ordAtPoint_at_kernel`. The derivation is purely formal:
-* `a = 0` ⟹ `v.intValuation 0 = 0 ≤ exp(-m)` (`Valuation.map_zero`, `WithZero.zero_le`);
+* `a = 0` ⟹ `v.intValuation 0 = 0 ≤ exp(-m)` (`Valuation.map_zero`, `zero_le`);
 * `a ≠ 0` ⟹ `algebraMap a ≠ 0` (`IsFractionRing.injective`), so `ord_T(algebraMap a)`
   is a genuine integer `d` (not `⊤`); the leaf gives `v.intValuation a = exp(-d)`, and
   `(m : WithTop ℤ) ≤ (d : WithTop ℤ)` forces `m ≤ d`, hence `exp(-d) ≤ exp(-m)` by
@@ -2247,7 +2247,7 @@ theorem Sinf_intValuation_le_exp_neg_at_kernel
   -- `a = 0`: `intValuation 0 = 0 ≤ exp(-m)`.
   rcases eq_or_ne a 0 with rfl | ha0
   · rw [(Sinf_kernelPrime_heightOne W hq data T).intValuation.map_zero]
-    exact WithZero.zero_le _
+    exact zero_le
   -- `a ≠ 0`: image is nonzero, so `ord_T(image a) = (d : WithTop ℤ)` for a genuine `d`.
   have h_img_ne : algebraMap data.carrier L a ≠ 0 := by
     simpa using (IsFractionRing.injective data.carrier L).ne ha0

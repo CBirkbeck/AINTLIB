@@ -1111,7 +1111,7 @@ theorem antiKummerSigmaTildeInvolutive_sq_eq_refl
         (antiKummerSigmaTildeInvolutive (p := p) K α₀ hα₀ h_anti h_irr h_irr_g) =
       AlgEquiv.refl := by
   set pb := antiKummerLiftPowerBasis (p := p) K α₀ hα₀ h_anti h_irr h_irr_g
-  refine AlgEquiv.coe_algHom_injective ?_
+  refine AlgEquiv.coe_toAlgHom_injective ?_
   refine pb.algHom_ext ?_
   have h_gen : pb.gen = antiKummerLiftRoot (p := p) K α₀ hα₀ :=
     PowerBasis.ofAdjoinEqTop_gen _ _
@@ -1258,7 +1258,7 @@ theorem antiKummerSigmaTildeInvolutive_restricts_K
   show f₁ α₀ = f₂ α₀
   simp only [f₁, f₂, AlgHom.coe_comp, Function.comp_apply,
     IsScalarTower.coe_toAlgHom',
-    AlgEquiv.coe_algHom]
+    AlgEquiv.coe_toAlgHom]
   rw [antiKummerSigmaTildeInvolutive_apply_algebraMap_alpha
     (p := p) K α₀ hα₀ h_anti h_irr h_irr_g, h_anti]
 

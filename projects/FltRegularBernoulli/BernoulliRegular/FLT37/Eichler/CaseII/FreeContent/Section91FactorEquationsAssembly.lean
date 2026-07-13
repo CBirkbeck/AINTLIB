@@ -255,7 +255,7 @@ def CaseIISection91AnchorExtractionData37 : Prop :=
 /-- **`Associated (D.hζ.toInteger − 1) ((zeta_spec).toInteger − 1)`** for a real Case-II datum `D`.
 
 Both `D.hζ.toInteger` and `(zeta_spec 37 ℚ K).toInteger` are primitive `37`-th roots of unity, so
-their `−1` translates are associated (`ntRootsFinset_pairwise_associated_sub_one_sub_of_prime`).
+their `−1` translates are associated (`nthRootsFinset_pairwise_associated_sub_one_sub_of_prime`).
 Used to
 bridge the `D.hζ`-based anchor-support `(z') = 𝔞₀ᵏ` (`𝔭`-coprime) to the `zeta_spec`-based
 `¬ (zeta_spec − 1) ∣ z'` the capstone consumes. -/
@@ -275,7 +275,7 @@ theorem caseII_section91_zeta_sub_one_associated_zeta_spec
   have hne : D.hζ.toInteger ≠ (1 : 𝓞 (CyclotomicField 37 ℚ)) :=
     D.hζ.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37)
   have hpair := (zeta_spec 37 ℚ (CyclotomicField 37 ℚ)).toInteger_isPrimitiveRoot
-    |>.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    |>.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       (by decide : Nat.Prime 37) hmem_dζ hmem_one hne
   -- `hpair : Associated (zeta_spec − 1) (D.hζ.toInteger − 1)`; `.symm` is the goal.
   simpa using hpair.symm

@@ -160,7 +160,7 @@ theorem caseIIFirstLayer_false
   have hprim2 : ((D.hζ.toInteger - 1 : 𝓞 K)) ^ 2 ∣ ((αU : 𝓞 K) - 1) :=
     dvd_trans (pow_dvd_pow _ (by norm_num)) hprim
   -- bridge `(D.hζ - 1)² ∣ (αU-1)` to `((zeta_spec) - 1)² ∣ (αU-1)` via associatedness of the two
-  -- primitive-root uniformizers (`ntRootsFinset_pairwise_associated_sub_one_sub_of_prime`).
+  -- primitive-root uniformizers (`nthRootsFinset_pairwise_associated_sub_one_sub_of_prime`).
   have hprim2' : ((zeta_spec 37 ℚ K).toInteger - 1 : 𝓞 K) ^ 2 ∣ ((αU : 𝓞 K) - 1) := by
     have hassoc : Associated ((zeta_spec 37 ℚ K).toInteger - 1 : 𝓞 K)
         (D.hζ.toInteger - 1 : 𝓞 K) := by
@@ -172,7 +172,7 @@ theorem caseIIFirstLayer_false
         intro h
         exact D.hζ.toInteger_isPrimitiveRoot.ne_one (by decide : 1 < 37) h
       have hpair := (zeta_spec 37 ℚ K).toInteger_isPrimitiveRoot
-        |>.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+        |>.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
           (by decide : Nat.Prime 37) hmem_dζ hmem_one hne
       simpa using hpair
     have hassoc2 : Associated (((zeta_spec 37 ℚ K).toInteger - 1 : 𝓞 K) ^ 2)

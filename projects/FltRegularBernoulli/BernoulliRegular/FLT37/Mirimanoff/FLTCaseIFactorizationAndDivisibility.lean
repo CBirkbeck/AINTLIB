@@ -217,7 +217,7 @@ theorem nthRootsFinset_pairwise_associated_sub (p : ℕ) [hp : Fact p.Prime]
     (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K] :
     Set.Pairwise (Polynomial.nthRootsFinset p (1 : K))
       (fun η₁ η₂ => Associated (IsCyclotomicExtension.zeta p ℚ K - 1) (η₁ - η₂)) :=
-  (IsCyclotomicExtension.zeta_spec p ℚ K).ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+  (IsCyclotomicExtension.zeta_spec p ℚ K).nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
     hp.1
 
 /-- 𝓞 K-level: distinct integer-form p-th roots of unity differ by an
@@ -227,7 +227,7 @@ theorem nthRootsFinset_pairwise_associated_sub_intForm (p : ℕ) [hp : Fact p.Pr
     Set.Pairwise (Polynomial.nthRootsFinset p (1 : 𝓞 K))
       (fun η₁ η₂ => Associated
         ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger - 1) (η₁ - η₂)) :=
-  IsPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+  IsPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
     (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger_isPrimitiveRoot hp.1
 
 /-- For two FLT factors `(a + η₁ b)` and `(a + η₂ b)` with η₁ ≠ η₂ p-th

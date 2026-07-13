@@ -4139,7 +4139,7 @@ theorem translateAlgEquivOfPoint_add_nonTor_2tor_main
   rw [translateAlgEquivOfPoint_some_nonTor W xk₃ yk₃ h_ns₃ h_not_2_tor₃]
   rw [translateAlgEquivOfPoint_some_nonTor W xk₁ yk₁ h_ns₁ h_not_2_tor₁]
   rw [translateAlgEquivOfPoint_some_2tor W xk₂ yk₂ h_ns₂ h_2_tor₂]
-  apply AlgEquiv.coe_algHom_injective
+  apply AlgEquiv.coe_toAlgHom_injective
   apply algHom_ext_x_y_gen W
   · change translateAlgHom_of_nonTorsion W xk₃ yk₃ h_ns₃ h_not_2_tor₃ (x_gen W) =
       translateAlgHom_of_2tor W xk₂ yk₂ h_ns₂ h_2_tor₂
@@ -4172,7 +4172,7 @@ theorem translateAlgEquivOfPoint_add_2tor_nonTor_main
   rw [translateAlgEquivOfPoint_some_nonTor W xk₃ yk₃ h_ns₃ h_not_2_tor₃]
   rw [translateAlgEquivOfPoint_some_2tor W xk₁ yk₁ h_ns₁ h_2_tor₁]
   rw [translateAlgEquivOfPoint_some_nonTor W xk₂ yk₂ h_ns₂ h_not_2_tor₂]
-  apply AlgEquiv.coe_algHom_injective
+  apply AlgEquiv.coe_toAlgHom_injective
   apply algHom_ext_x_y_gen W
   · change translateAlgHom_of_nonTorsion W xk₃ yk₃ h_ns₃ h_not_2_tor₃ (x_gen W) =
       translateAlgHom_of_nonTorsion W xk₂ yk₂ h_ns₂ h_not_2_tor₂
@@ -4205,7 +4205,7 @@ theorem translateAlgEquivOfPoint_add_2tor_main
   rw [translateAlgEquivOfPoint_some_2tor W xk₃ yk₃ h_ns₃ h_2_tor₃]
   rw [translateAlgEquivOfPoint_some_2tor W xk₁ yk₁ h_ns₁ h_2_tor₁]
   rw [translateAlgEquivOfPoint_some_2tor W xk₂ yk₂ h_ns₂ h_2_tor₂]
-  apply AlgEquiv.coe_algHom_injective
+  apply AlgEquiv.coe_toAlgHom_injective
   apply algHom_ext_x_y_gen W
   · change translateAlgHom_of_2tor W xk₃ yk₃ h_ns₃ h_2_tor₃ (x_gen W) =
       translateAlgHom_of_2tor W xk₂ yk₂ h_ns₂ h_2_tor₂
@@ -4240,7 +4240,7 @@ theorem translateAlgEquivOfPoint_add_nonTor_main_2torSum
   rw [translateAlgEquivOfPoint_some_2tor W xk₃ yk₃ h_ns₃ h_2_tor₃]
   rw [translateAlgEquivOfPoint_some_nonTor W xk₁ yk₁ h_ns₁ h_not_2_tor₁]
   rw [translateAlgEquivOfPoint_some_nonTor W xk₂ yk₂ h_ns₂ h_not_2_tor₂]
-  apply AlgEquiv.coe_algHom_injective
+  apply AlgEquiv.coe_toAlgHom_injective
   apply algHom_ext_x_y_gen W
   · change translateAlgHom_of_2tor W xk₃ yk₃ h_ns₃ h_2_tor₃ (x_gen W) =
       translateAlgHom_of_nonTorsion W xk₂ yk₂ h_ns₂ h_not_2_tor₂
@@ -4275,7 +4275,7 @@ theorem translateAlgEquivOfPoint_add_nonTor_main
   rw [translateAlgEquivOfPoint_some_nonTor W xk₃ yk₃ h_ns₃ h_not_2_tor₃]
   rw [translateAlgEquivOfPoint_some_nonTor W xk₁ yk₁ h_ns₁ h_not_2_tor₁]
   rw [translateAlgEquivOfPoint_some_nonTor W xk₂ yk₂ h_ns₂ h_not_2_tor₂]
-  apply AlgEquiv.coe_algHom_injective
+  apply AlgEquiv.coe_toAlgHom_injective
   apply algHom_ext_x_y_gen W
   · change translateAlgHom_of_nonTorsion W xk₃ yk₃ h_ns₃ h_not_2_tor₃ (x_gen W) =
       translateAlgHom_of_nonTorsion W xk₂ yk₂ h_ns₂ h_not_2_tor₂

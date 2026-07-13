@@ -315,13 +315,13 @@ theorem exists_solution_of_discharge
       mul_ne_zero (ne_zero_of_mem_nthRootsFinset one_ne_zero (η₀ : _).prop)
       (hζ.toInteger_isPrimitiveRoot.ne_zero hpri.out.ne_zero)⟩
   obtain ⟨u₁, hu₁⟩ :=
-    hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       hpri.out η₂.prop (η₀ : _).prop (Subtype.coe_injective.ne_iff.mpr hη₂)
   obtain ⟨u₂, hu₂⟩ :=
-    hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       hpri.out (η₀ : _).prop η₁.prop (Subtype.coe_injective.ne_iff.mpr hη₁.symm)
   obtain ⟨u₃, hu₃⟩ :=
-    hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       hpri.out η₂.prop (η₁ : _).prop (Subtype.coe_injective.ne_iff.mpr hη)
   have := formula_of_discharge hp hζ e hy hz h_discharge η₁ η₂ hη₁ hη₂
   rw [← hu₁, ← hu₂, ← hu₃,
