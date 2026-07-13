@@ -40,3 +40,12 @@ Final `.Representable` consumes `representable_iff`'s `⇐` direction (sorried, 
 
 ## Full leaf table
 See the scout report locators L1–L25 (this file's git history / STREAM-KM board). Key project files: `Moduli/EllCategory.lean` (Scholie 4.7.0), `LevelStructure/CartierDivisor.lean` (affine full-set, KM 1.8.2/1.9.1/1.10.1), `LevelStructure/Basic.lean` (Drinfeld defs + T-D4 note), `EllipticCurve/Torsion.lean`+`TorsionFibre.lean` (`E.torsion N`, `torsionπ_isFinite`, rank-N² sorry), `GroupScheme/NIsogeny.lean` (`D^×` scheme-of-generators precedent, KM 1.10.13), `ModularCurve/YFullRoute.lean` (finished naive Γ(N) route to imitate).
+
+## POST-DECOMPOSE EXECUTION FINDING (2026-07-13, traced through code) — the naive bridge is canonicity-blocked
+The invertible-N shortcut (§ above) is a **dead-end for closing 1032/1045**, on BOTH ends:
+- **Naive maps** (`Representability:214`/`229`) are **structurally blocked** on **T-W7.8** (owner-parked arbitrary-base canonicity), NOT hard. Killing clause `(N:ℤ)•pullSection f Q = 0` needs `mulByHom N ≫ f.top = f.top ≫ mulByHom N` (`f.top` a group-scheme hom = T-E4a); sorried at `Representability:204`; the records de-sorry only exists downstream (`_of_finitePresentation`, `GammaHRep:1442`) — unreachable from the upstream naive maps.
+- **Naive rep** (`:250`/`:264`) is the separate (c)-scale KM 3.7.1 crux.
+
+**Route-defining reason:** Drinfeld `HasExactOrder` transports **canonicity-free** (divisor/ideal condition via base-change of ideals — why `hasExactOrder_pullSection` + L4 close), naive exact-order via the point-group ℤ-action (canonicity-fragile). **⟹ The DIRECT Drinfeld route (c1/c2/c4 → 3.6.0 → 4.7.0) is THE route; the naive bridge is not** — unless the owner un-parks T-W7.8, which would open it as a *second* route.
+
+**Free building blocks verified** (cartesian-only, arbitrary-base): `pullSection_zero`; the zero-transport `pull t (pullSection f Q) = 0 ↔ pull (t≫baseHom) Q = 0`. These discharge the naive **≠0-clauses**; only the **killing clause** is T-W7.8-gated.
