@@ -504,8 +504,8 @@ theorem descentComparison_invariant (W₀ : WeierstrassCurve R) (W₁ : Weierstr
         ≫ projModelBaseChange (MulSemiringAction.toRingHom G R g) (E⁻¹ • W₀) := by
     rw [Iso.comp_inv_eq]
     simp only [Category.assoc]
-    rw [projModelVCIso_map_hom]
-    simp only [eqToHom_trans_assoc, eqToHom_refl, Category.id_comp, Iso.inv_hom_id_assoc]
+    rw [projModelVCIso_map_hom, eqToHom_trans_assoc, eqToHom_refl, Category.id_comp,
+      Iso.inv_hom_id_assoc]
   -- Step C: the two base changes compose to a transported single one (`τ_g ∘ alg = alg`)
   have hC2 : projModelBaseChange (MulSemiringAction.toRingHom G R g) (W₁.map (algebraMap R₀ R))
         ≫ projModelBaseChange (algebraMap R₀ R) W₁

@@ -309,7 +309,7 @@ theorem rootsOfUnityMapQuot_bijective_of_card_roots
   letI : NeZero (Fintype.card k - 1) := ⟨hn_ne⟩
   letI : DecidableEq k := Classical.decEq k
   letI : Fintype (rootsOfUnity (Fintype.card k - 1) (𝓞 R')) :=
-    inferInstance
+    Fintype.ofFinite _
   letI : Fintype (𝓞 R' ⧸ S.Q)ˣ :=
     Fintype.ofEquiv kˣ
       ((S.residueUnitEquiv : (𝓞 R' ⧸ S.Q)ˣ ≃* kˣ).symm.toEquiv)
@@ -340,12 +340,11 @@ theorem rootsOfUnityMapQuot_bijective_of_isPrimitiveRoot
     omega
   letI : NeZero (Fintype.card k - 1) := ⟨hn_ne⟩
   letI : Fintype (rootsOfUnity (Fintype.card k - 1) (𝓞 R')) :=
-    inferInstance
+    Fintype.ofFinite _
   have hroots :
       Nat.card (rootsOfUnity (Fintype.card k - 1) (𝓞 R')) =
-        Fintype.card k - 1 := by
-    rw [Nat.card_eq_fintype_card]
-    exact hζ.card_rootsOfUnity
+        Fintype.card k - 1 :=
+    hζ.card_rootsOfUnity
   exact S.rootsOfUnityMapQuot_bijective_of_card_roots
     S.absNorm_Q_ne_one S.absNorm_Q_coprime_card_sub_one hroots
 

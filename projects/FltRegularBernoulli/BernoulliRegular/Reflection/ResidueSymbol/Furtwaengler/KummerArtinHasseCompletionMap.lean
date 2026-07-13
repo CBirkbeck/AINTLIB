@@ -256,35 +256,39 @@ lambda-adic completion of `K`. -/
 def rationalToLambdaCompletionRingHom :
     (lambdaRationalHeightOneSpectrum p).adicCompletion ℚ →+*
       LambdaValuedCompletion p K :=
-  UniformSpace.Completion.mapRingHom
-    (rationalToLambdaWithValRingHom (p := p) (K := K))
-    (continuous_rationalToLambdaWithValRingHom (p := p) (K := K))
+  (IsDedekindDomain.HeightOneSpectrum.adicCompletion.equiv K
+      (lambdaHeightOneSpectrum p K)).symm.toRingHom.comp
+    ((UniformSpace.Completion.mapRingHom
+        (f := rationalToLambdaWithValRingHom (p := p) (K := K))
+        (continuous_rationalToLambdaWithValRingHom (p := p) (K := K))).comp
+      (IsDedekindDomain.HeightOneSpectrum.adicCompletion.equiv ℚ
+        (lambdaRationalHeightOneSpectrum p)).toRingHom)
 
 @[simp]
 theorem rationalToLambdaCompletionRingHom_coe
     (x : WithVal ((lambdaRationalHeightOneSpectrum p).valuation ℚ)) :
     rationalToLambdaCompletionRingHom (p := p) (K := K) x =
       (rationalToLambdaWithValRingHom (p := p) (K := K) x :
-        LambdaValuedCompletion p K) :=
-  UniformSpace.Completion.mapRingHom_coe
-    (continuous_rationalToLambdaWithValRingHom (p := p) (K := K)) x
+        LambdaValuedCompletion p K) := by
+  simp only [rationalToLambdaCompletionRingHom, RingHom.comp_apply,
+    RingEquiv.toRingHom_eq_coe, RingHom.coe_coe]
+  rw [show IsDedekindDomain.HeightOneSpectrum.adicCompletion.equiv ℚ
+        (lambdaRationalHeightOneSpectrum p)
+        (x : (lambdaRationalHeightOneSpectrum p).adicCompletion ℚ) = (x : _) from rfl,
+    UniformSpace.Completion.mapRingHom_coe
+      (continuous_rationalToLambdaWithValRingHom (p := p) (K := K)) x]
+  rfl
 
 @[simp]
 theorem rationalToLambdaCompletionRingHom_algebraMap (q : ℚ) :
     rationalToLambdaCompletionRingHom (p := p) (K := K)
         (algebraMap ℚ ((lambdaRationalHeightOneSpectrum p).adicCompletion ℚ) q) =
       algebraMap K (LambdaValuedCompletion p K) (algebraMap ℚ K q) := by
-  let vQ := (lambdaRationalHeightOneSpectrum p).valuation ℚ
-  let vK := (lambdaHeightOneSpectrum p K).valuation K
-  change rationalToLambdaCompletionRingHom (p := p) (K := K)
-        ((UniformSpace.Completion.coeRingHom :
-            WithVal vQ →+* (lambdaRationalHeightOneSpectrum p).adicCompletion ℚ)
-          ((WithVal.equiv vQ).symm q)) =
-      (UniformSpace.Completion.coeRingHom :
-          WithVal vK →+* LambdaValuedCompletion p K)
-        ((WithVal.equiv vK).symm (algebraMap ℚ K q))
-  simp [rationalToLambdaCompletionRingHom, rationalToLambdaWithValRingHom,
-    rationalToLambdaComapWithValRingHom, vQ, vK]
+  rw [IsDedekindDomain.HeightOneSpectrum.algebraMap_adicCompletion, Function.comp_apply,
+    IsDedekindDomain.HeightOneSpectrum.algebraMap_adicCompletion, Function.comp_apply,
+    rationalToLambdaCompletionRingHom_coe]
+  simp only [rationalToLambdaWithValRingHom, RingHom.comp_apply, map_ratCast]
+  rfl
 
 /-- The canonical continuous `ℚ`-algebra equivalence from mathlib's `ℚ_[p]`
 to the rational completion used in the λ-extension map. -/
@@ -359,8 +363,19 @@ theorem continuous_algebraMap_rationalCompletionToLambdaAlgebra :
     Continuous (algebraMap ((lambdaRationalHeightOneSpectrum p).adicCompletion ℚ)
       (LambdaValuedCompletion p K)) := by
   change Continuous (rationalToLambdaCompletionRingHom (p := p) (K := K))
-  rw [rationalToLambdaCompletionRingHom, UniformSpace.Completion.coe_mapRingHom]
-  exact UniformSpace.Completion.continuous_map
+  show Continuous fun x => (IsDedekindDomain.HeightOneSpectrum.adicCompletion.equiv K
+      (lambdaHeightOneSpectrum p K)).symm
+      (UniformSpace.Completion.mapRingHom
+        (f := rationalToLambdaWithValRingHom (p := p) (K := K))
+        (continuous_rationalToLambdaWithValRingHom (p := p) (K := K))
+        (IsDedekindDomain.HeightOneSpectrum.adicCompletion.equiv ℚ
+          (lambdaRationalHeightOneSpectrum p) x))
+  refine (IsDedekindDomain.HeightOneSpectrum.adicCompletion.continuous_ofCompletion
+    (K := K) (v := lambdaHeightOneSpectrum p K)).comp ?_
+  rw [UniformSpace.Completion.coe_mapRingHom]
+  exact UniformSpace.Completion.continuous_map.comp
+    (IsDedekindDomain.HeightOneSpectrum.adicCompletion.continuous_toCompletion
+      (K := ℚ) (v := lambdaRationalHeightOneSpectrum p))
 
 theorem continuousSMul_rationalCompletionToLambdaAlgebra :
     letI : Algebra ((lambdaRationalHeightOneSpectrum p).adicCompletion ℚ)
@@ -422,8 +437,9 @@ theorem continuous_padicToLambdaCompletionRingHom :
   change Continuous fun x =>
     rationalToLambdaCompletionRingHom (p := p) (K := K)
       (lambdaPadicToRationalCompletionAlgEquiv (p := p) x)
-  exact (UniformSpace.Completion.continuous_map.comp
-    (lambdaPadicToRationalCompletionAlgEquiv (p := p)).continuous)
+  have hcont : Continuous (rationalToLambdaCompletionRingHom (p := p) (K := K)) :=
+    continuous_algebraMap_rationalCompletionToLambdaAlgebra (p := p) (K := K)
+  exact hcont.comp (lambdaPadicToRationalCompletionAlgEquiv (p := p)).continuous
 
 /-- The rational-integer completion algebra on the lambda completion, routed
 through `ℚ_[p]`. -/

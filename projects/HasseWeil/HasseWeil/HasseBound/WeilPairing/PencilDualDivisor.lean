@@ -148,7 +148,6 @@ variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
 variable (p r : ℕ) [Fact p.Prime] [CharP K p] [Fact (Fintype.card K = p ^ r)]
 variable (L : Type*) [Field L] [DecidableEq L] [Algebra K L] [IsAlgClosed L] [ExpChar L p]
   [(W.baseChange L).toAffine.IsElliptic]
-  [IsIntegrallyClosed (⟨(W.baseChange L).toAffine⟩ : SmoothPlaneCurve L).CoordinateRing]
 
 /-- **The base-changed `rπ − s` geometric data** (Silverman III.6.1/III.6.2/III.8.2 content),
 CoordHom-free.  Bundles, for the base-changed separable isogeny `φ_L = (rπ − s)_{K̄}` whose point map

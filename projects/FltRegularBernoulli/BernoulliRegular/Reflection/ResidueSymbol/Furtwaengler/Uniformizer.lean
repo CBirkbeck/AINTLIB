@@ -24,7 +24,7 @@ Strategy:
    `IsCyclotomicExtension {ℓ · p} ℚ R'` via `IsPrimitiveRoot.pow_mul_pow_lcm`
    + `IsPrimitiveRoot.adjoin_pair_eq` + `isCyclotomicExtension_singleton_iff_eq_adjoin`.
 2. Apply `IsCyclotomicExtension.Rat.ramificationIdx_eq` to get
-   `ramificationIdx of ℓ in 𝓞 R' = ℓ - 1`.
+   `ramificationIdx' of ℓ in 𝓞 R' = ℓ - 1`.
 3. The cyclotomic identity `ℓ = u · π^(ℓ-1)` (for some unit `u`)
    combined with the ramification index gives `v_Q(π) = 1`, hence
    `π ∉ Q^2`.
@@ -429,14 +429,14 @@ Strategy:
    `liesOver_span_ell_of_ell_mem`).
 3. Apply `IsCyclotomicExtension.Rat.ramificationIdx_eq` with
    `n = ℓ · p`, prime `ℓ`, `k = 0`, `m = p` to get
-   `ramificationIdx of ℓ in 𝓞 R' = ℓ - 1`.
+   `ramificationIdx' of ℓ in 𝓞 R' = ℓ - 1`.
 4. Use the cyclotomic identity: from `Polynomial.eval_one_cyclotomic_prime`
    plus `Polynomial.cyclotomic_eq_prod_X_sub_primitiveRoots`,
    `(↑ℓ : 𝓞 R') = ∏_{i=1}^{ℓ-1} (1 - ζ^i) = u · (ζ - 1)^{ℓ-1}` for some
    unit `u` (using
    `IsPrimitiveRoot.associated_sub_one_pow_sub_one_of_coprime`).
 5. Combine: if `(ζ - 1) ∈ Q^2`, then `(↑ℓ) = u · (ζ - 1)^{ℓ-1} ∈ Q^{2(ℓ-1)} ⊆ Q^ℓ`,
-   contradicting `ramificationIdx = ℓ - 1` (which gives `(↑ℓ) ∉ Q^ℓ`). -/
+   contradicting `ramificationIdx' = ℓ - 1` (which gives `(↑ℓ) ∉ Q^ℓ`). -/
 theorem pi_not_mem_Q_sq_of_ramification
     {ℓ p : ℕ} [hℓ_fact : Fact ℓ.Prime] [hp_fact : Fact p.Prime] (hpℓ : p ≠ ℓ)
     {R' : Type w} [Field R'] [NumberField R']
@@ -468,8 +468,8 @@ theorem pi_not_mem_Q_sq_of_ramification
   have hℓ_ne : (Ideal.span ({(ℓ : ℤ)} : Set ℤ) : Ideal ℤ) ≠ ⊥ := by
     simp [(Fact.out : Nat.Prime ℓ).ne_zero]
   have h_ram :
-      Ideal.ramificationIdx (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) Q = ℓ ^ 0 * (ℓ - 1) := by
-    rw [Ideal.ramificationIdx_eq_ramificationIdx' (Ideal.span {(ℓ : ℤ)}) Q hℓ_ne]
+      Ideal.ramificationIdx' (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) Q = ℓ ^ 0 * (ℓ - 1) := by
+    rw [Ideal.ramificationIdx'_eq_ramificationIdx (Ideal.span {(ℓ : ℤ)}) Q hℓ_ne]
     exact IsCyclotomicExtension.Rat.ramificationIdx_eq (n := ℓ * p) (p := ℓ)
       (k := 0) (m := p) (K := R') (P := Q) h_n h_ne_dvd
   simp only [pow_zero, one_mul] at h_ram
@@ -478,7 +478,7 @@ theorem pi_not_mem_Q_sq_of_ramification
   -- hu : (zeta_ell_int - 1)^(ℓ-1) * ↑u = ↑ℓ
   -- Step 5: contradiction. Suppose (ζ - 1) ∈ Q^2. Then (ζ - 1)^(ℓ-1) ∈ Q^(2(ℓ-1)).
   -- Hence (↑ℓ) = (ζ - 1)^(ℓ-1) · u ∈ Q^(2(ℓ-1)) ⊆ Q^ℓ.
-  -- But ramificationIdx = ℓ - 1 means (↑ℓ) ∉ Q^ℓ. Contradiction.
+  -- But ramificationIdx' = ℓ - 1 means (↑ℓ) ∉ Q^ℓ. Contradiction.
   classical
   intro h_in_Q_sq
   have h_pi_pow : (zeta_ell_int - 1) ^ (ℓ - 1) ∈ (Q ^ 2) ^ (ℓ - 1) :=
@@ -492,7 +492,7 @@ theorem pi_not_mem_Q_sq_of_ramification
   have h_ell_in_Q_ell : (ℓ : 𝓞 R') ∈ Q ^ ℓ :=
     Ideal.pow_le_pow_right h_le h_ell_in
   -- Now use ramification = ℓ - 1 + count_normalizedFactors to derive a contradiction.
-  -- ramificationIdx (span {↑ℓ}) Q = count Q (factors (span {(↑ℓ : 𝓞 R')})) = ℓ - 1.
+  -- ramificationIdx' (span {↑ℓ}) Q = count Q (factors (span {(↑ℓ : 𝓞 R')})) = ℓ - 1.
   -- But (↑ℓ) ∈ Q^ℓ means span {↑ℓ} ⊆ Q^ℓ, so by Ideal.count_le_of_ideal_ge
   -- count Q (factors Q^ℓ) ≤ count Q (factors (span {↑ℓ})), i.e., ℓ ≤ ℓ - 1. Contradiction.
   have h_map_ne_bot :
@@ -502,10 +502,10 @@ theorem pi_not_mem_Q_sq_of_ramification
     rw [Ne, Ideal.span_singleton_eq_bot]
     exact_mod_cast (Fact.out : Nat.Prime ℓ).ne_zero
   have h_ram_count :
-      Ideal.ramificationIdx (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) Q =
+      Ideal.ramificationIdx' (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) Q =
         Multiset.count Q (UniqueFactorizationMonoid.normalizedFactors
           (Ideal.map (algebraMap ℤ (𝓞 R')) (Ideal.span ({(ℓ : ℤ)} : Set ℤ)))) :=
-    Ideal.IsDedekindDomain.ramificationIdx_eq_normalizedFactors_count
+    Ideal.IsDedekindDomain.ramificationIdx'_eq_normalizedFactors_count
       h_map_ne_bot (by infer_instance) hQ_ne
   rw [h_ram] at h_ram_count
   have h_map_eq :

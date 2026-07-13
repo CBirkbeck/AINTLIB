@@ -116,7 +116,7 @@ variable {Pchar : Ideal (𝓞 (characterSubfield (L := L) (p := p)))}
   [Pchar.IsPrime] [Pchar.LiesOver (Ideal.span ({(p : ℤ)} : Set ℤ))]
 
 lemma characterSubfieldPrime_inertiaDeg_eq_one :
-    Ideal.inertiaDeg 𝔭 Pchar = 1 := by
+    Ideal.inertiaDeg' 𝔭 Pchar = 1 := by
   have hm : ¬ p ∣ p - 1 :=
     (hp.out.coprime_iff_not_dvd).mp (prime_coprime_pred (p := p))
   have hp_cast : (p : ZMod (p - 1)) = 1 := by

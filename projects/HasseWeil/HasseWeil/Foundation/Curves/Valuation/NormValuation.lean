@@ -30,7 +30,7 @@ language. Under `[IsAlgClosed F]` the general Dedekind argument runs:
 
 1. Every maximal ideal of `F[C]` lying over `(X − a)` has residue field `F`
    (finite F-algebra field ⇒ `F` by `IsAlgClosed`).
-2. So `inertiaDeg (X − a) M = finrank F (F[C]⧸M) = 1`.
+2. So `inertiaDeg' (X − a) M = finrank F (F[C]⧸M) = 1`.
 3. Combined with the principal-power form of `Ideal.relNorm`:
    `relNorm (maximalIdealAt P) = (X − P.x)^1 = (X − P.x)`.
 4. Multiplicativity of `relNorm` + UFD factorization of `(u)` in Dedekind `F[C]`
@@ -197,10 +197,10 @@ theorem inertiaDeg_maximalIdealAt (P : C.SmoothPoint) :
     letI : (C.maximalIdealAt P).LiesOver
         (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)}) :=
       C.maximalIdealAt_liesOver P
-    Ideal.inertiaDeg (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)})
+    Ideal.inertiaDeg' (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)})
       (C.maximalIdealAt P) = 1 := by
   haveI := C.maximalIdealAt_liesOver P
-  rw [Ideal.inertiaDeg_algebraMap]
+  rw [Ideal.inertiaDeg'_algebraMap]
   haveI h_max :
       (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)}).IsMaximal :=
     Ideal.Quotient.maximal_of_isField _
@@ -289,64 +289,6 @@ theorem exists_coordinates_of_isMaximal [IsAlgClosed F]
     (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y))
   exact ⟨a, b, ha, hb⟩
 
-/-- The coordinates `(a, b)` extracted from a maximal ideal of `F[C]`
-satisfy the Weierstrass equation.
-
-Proof: `mk W.polynomial = 0` in F[C] (AdjoinRoot.mk_self). Expanding
-`W.polynomial = Y² + C(C·a₁·X + C·a₃)·Y - C(X³ + C·a₂·X² + C·a₄·X + C·a₆)`
-via ring-hom properties of `mk` and projecting via `Quotient.mk M` gives
-the Weierstrass equation evaluated at `(algebraMap a, algebraMap b)` in
-`F[C]⧸M`. Pulling out `algebraMap F` and using injectivity yields the
-equation in `F`. -/
-theorem equation_of_coordinates [IsAlgClosed F]
-    {M : Ideal C.CoordinateRing} (hM : M.IsMaximal)
-    {a b : F}
-    (ha : letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
-          algebraMap F (C.CoordinateRing ⧸ M) a = Ideal.Quotient.mk M
-            (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
-              (Polynomial.C Polynomial.X)))
-    (hb : letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
-          algebraMap F (C.CoordinateRing ⧸ M) b = Ideal.Quotient.mk M
-            (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y)) :
-    C.toAffine.Equation a b := by
-  letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
-  have h_mk_zero :
-      (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
-        C.toAffine.polynomial : C.CoordinateRing) = 0 :=
-    AdjoinRoot.mk_self
-  have h_quot_zero : Ideal.Quotient.mk M
-      (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
-        C.toAffine.polynomial) = 0 := by
-    rw [h_mk_zero, map_zero]
-  rw [WeierstrassCurve.Affine.equation_iff']
-  have h_inj : Function.Injective (algebraMap F (C.CoordinateRing ⧸ M)) :=
-    RingHom.injective _
-  apply h_inj
-  rw [map_zero]
-  have h_expand :
-      algebraMap F (C.CoordinateRing ⧸ M)
-          (b ^ 2 + C.toAffine.a₁ * a * b + C.toAffine.a₃ * b -
-            (a ^ 3 + C.toAffine.a₂ * a ^ 2 + C.toAffine.a₄ * a + C.toAffine.a₆)) =
-        Ideal.Quotient.mk M
-          (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
-            C.toAffine.polynomial) := by
-    simp only [map_sub, map_add, map_pow, map_mul]
-    rw [ha, hb]
-    have h_const : ∀ (c : F),
-        algebraMap F (C.CoordinateRing ⧸ M) c =
-        Ideal.Quotient.mk M
-          (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
-            (Polynomial.C (Polynomial.C c))) := fun c ↦ rfl
-    rw [h_const, h_const, h_const, h_const, h_const]
-    simp only [← map_mul, ← map_add, ← map_sub, ← map_pow]
-    congr 1
-    congr 1
-    unfold WeierstrassCurve.Affine.polynomial
-    simp only [Polynomial.C_add, Polynomial.C_mul]
-    ring1
-  rw [h_expand]
-  exact h_quot_zero
-
 /-- **De-`IsAlgClosed` coordinate extraction**: the `[IsAlgClosed F]`-free
 generalisation of `exists_coordinates_of_isMaximal`, replacing the
 algebraic-closure hypothesis by *surjectivity* of `algebraMap F (F[C]⧸M)`. For a
@@ -368,6 +310,22 @@ theorem exists_coordinates_of_isMaximal_of_surjective
   obtain ⟨b, hb⟩ := h_surj (Ideal.Quotient.mk M
     (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y))
   exact ⟨a, b, ha, hb⟩
+
+/-- The polynomial identity underlying `equation_of_coordinates_of_field`, isolated as
+its own declaration so its `ring1` closing step elaborates cheaply.  In `F[X][Y]` the
+`X`-class polynomial `C X` and the `Y`-class `Y` recombine into `W.polynomial`. -/
+private lemma mk_polynomial_expand_aux (W : WeierstrassCurve.Affine F) :
+    (Y : F[X][Y]) ^ 2 +
+        Polynomial.C (Polynomial.C W.a₁) * Polynomial.C Polynomial.X * Y +
+        Polynomial.C (Polynomial.C W.a₃) * Y -
+        (Polynomial.C Polynomial.X ^ 3 +
+          Polynomial.C (Polynomial.C W.a₂) * Polynomial.C Polynomial.X ^ 2 +
+          Polynomial.C (Polynomial.C W.a₄) * Polynomial.C Polynomial.X +
+          Polynomial.C (Polynomial.C W.a₆)) =
+      W.polynomial := by
+  unfold WeierstrassCurve.Affine.polynomial
+  simp only [Polynomial.C_add, Polynomial.C_mul, Polynomial.C_pow]
+  ring1
 
 /-- **De-`IsAlgClosed` Weierstrass equation**: the `[IsAlgClosed F]`-free
 generalisation of `equation_of_coordinates`. The extracted coordinates `(a, b)`
@@ -397,6 +355,26 @@ theorem equation_of_coordinates_of_field
     RingHom.injective _
   apply h_inj
   rw [map_zero]
+  have h_const : ∀ (c : F),
+      algebraMap F (C.CoordinateRing ⧸ M) c =
+      Ideal.Quotient.mk M
+        (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+          (Polynomial.C (Polynomial.C c))) := fun c ↦ rfl
+  -- Rewrite `mk polynomial` on the RHS as `mk` of the expanded Weierstrass value (via the
+  -- polynomial identity `mk_polynomial_expand_aux`), then distribute the two ring homs
+  -- *forward* through the expansion and fold the `X`/`Y`-classes back via `ha`/`hb`.  Working
+  -- forward avoids the heartbeat-heavy `congr`/`whnf` descent through the coordinate-ring
+  -- quotient that the naive proof performed.
+  have hmk : WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+      ((Y : F[X][Y]) ^ 2 +
+        Polynomial.C (Polynomial.C C.toAffine.a₁) * Polynomial.C Polynomial.X * Y +
+        Polynomial.C (Polynomial.C C.toAffine.a₃) * Y -
+        (Polynomial.C Polynomial.X ^ 3 +
+          Polynomial.C (Polynomial.C C.toAffine.a₂) * Polynomial.C Polynomial.X ^ 2 +
+          Polynomial.C (Polynomial.C C.toAffine.a₄) * Polynomial.C Polynomial.X +
+          Polynomial.C (Polynomial.C C.toAffine.a₆))) =
+      WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine C.toAffine.polynomial :=
+    congrArg _ (mk_polynomial_expand_aux C.toAffine)
   have h_expand :
       algebraMap F (C.CoordinateRing ⧸ M)
           (b ^ 2 + C.toAffine.a₁ * a * b + C.toAffine.a₃ * b -
@@ -404,22 +382,26 @@ theorem equation_of_coordinates_of_field
         Ideal.Quotient.mk M
           (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
             C.toAffine.polynomial) := by
-    simp only [map_sub, map_add, map_pow, map_mul]
-    rw [ha, hb]
-    have h_const : ∀ (c : F),
-        algebraMap F (C.CoordinateRing ⧸ M) c =
-        Ideal.Quotient.mk M
-          (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
-            (Polynomial.C (Polynomial.C c))) := fun c ↦ rfl
-    rw [h_const, h_const, h_const, h_const, h_const]
-    simp only [← map_mul, ← map_add, ← map_sub, ← map_pow]
-    congr 1
-    congr 1
-    unfold WeierstrassCurve.Affine.polynomial
-    simp only [Polynomial.C_add, Polynomial.C_mul]
-    ring1
+    rw [← hmk]
+    simp only [map_add, map_sub, map_mul, map_pow, ← ha, ← hb, ← h_const]
   rw [h_expand]
   exact h_quot_zero
+
+/-- The coordinates `(a, b)` extracted from a maximal ideal of `F[C]`
+satisfy the Weierstrass equation.  Special case of `equation_of_coordinates_of_field`
+for `[IsAlgClosed F]`. -/
+theorem equation_of_coordinates [IsAlgClosed F]
+    {M : Ideal C.CoordinateRing} (hM : M.IsMaximal)
+    {a b : F}
+    (ha : letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
+          algebraMap F (C.CoordinateRing ⧸ M) a = Ideal.Quotient.mk M
+            (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
+              (Polynomial.C Polynomial.X)))
+    (hb : letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
+          algebraMap F (C.CoordinateRing ⧸ M) b = Ideal.Quotient.mk M
+            (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y)) :
+    C.toAffine.Equation a b :=
+  C.equation_of_coordinates_of_field hM ha hb
 
 /-- **De-`IsAlgClosed` SmoothPoint extraction**: given a maximal ideal `M` of
 `F[C]` whose residue map `algebraMap F (F[C]⧸M)` is *surjective* (the
@@ -574,8 +556,8 @@ theorem sum_ramificationIdx_over_fiber [IsAlgClosed F] [C.toAffine.IsElliptic]
       ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField
         (Field.toIsField F))
     ∑ M ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
-      Ideal.ramificationIdx p M *
-      Ideal.inertiaDeg p M =
+      Ideal.ramificationIdx' p M *
+      Ideal.inertiaDeg' p M =
       Module.finrank (FractionRing (Polynomial F)) C.FunctionField := by
   set p : Ideal (Polynomial F) :=
     Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} with hp_def
@@ -644,7 +626,7 @@ private theorem inertiaDeg_eq_one_of_isPrime_of_liesOver_span_X_sub_C
     [IsAlgClosed F] [C.toAffine.IsElliptic] [IsIntegrallyClosed C.CoordinateRing]
     {a : F} {M : Ideal C.CoordinateRing} (hMprime : M.IsPrime)
     (hMlies : M.LiesOver (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)})) :
-    Ideal.inertiaDeg (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) M = 1 := by
+    Ideal.inertiaDeg' (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) M = 1 := by
   haveI hMmax : M.IsMaximal :=
     C.isMaximal_of_isPrime_of_liesOver_span_X_sub_C hMprime hMlies
   obtain ⟨P, hP⟩ := C.exists_smoothPoint_of_isMaximal hMmax
@@ -668,7 +650,7 @@ theorem sum_ramificationIdx_eq_finrank [IsAlgClosed F] [C.toAffine.IsElliptic]
       ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField
         (Field.toIsField F))
     ∑ M ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
-      Ideal.ramificationIdx p M =
+      Ideal.ramificationIdx' p M =
       Module.finrank (FractionRing (Polynomial F)) C.FunctionField := by
   set p : Ideal (Polynomial F) :=
     Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} with hp_def
@@ -782,7 +764,7 @@ theorem map_algebraMap_X_sub_C_eq_prod_primesOver_pow [IsAlgClosed F]
         (Field.toIsField F))
     p.map (algebraMap (Polynomial F) C.CoordinateRing) =
       ∏ P ∈ p.primesOver C.CoordinateRing,
-        P ^ p.ramificationIdx P := by
+        P ^ p.ramificationIdx' P := by
   intro p
   haveI h_max : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
     ((Polynomial.quotientSpanXSubCAlgEquiv a).toRingEquiv.isField
@@ -793,12 +775,18 @@ theorem map_algebraMap_X_sub_C_eq_prod_primesOver_pow [IsAlgClosed F]
       Ideal.subset_span rfl
     rw [h, Ideal.zero_eq_bot, Ideal.mem_bot] at hx_mem
     exact Polynomial.X_sub_C_ne_zero a hx_mem
-  exact Ideal.map_algebraMap_eq_finsetProd_pow hp_ne
+  have hp_bot : p ≠ (⊥ : Ideal (Polynomial F)) := by
+    rwa [← Ideal.zero_eq_bot]
+  rw [Ideal.map_algebraMap_eq_finsetProd_pow (R := C.CoordinateRing) hp_ne]
+  refine Finset.prod_congr rfl fun P hP => ?_
+  have hP' : P ∈ p.primesOver C.CoordinateRing := Set.mem_toFinset.mp hP
+  obtain ⟨hP_prime, hP_over⟩ := hP'
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx p P hp_bot]
 
 /-- **Helper B fibre product equation**: applying `relNorm` to both sides of
     the Dedekind factorization gives
 
-      `(X - a)^2 = ∏ P ∈ p.primesOver, (relNorm P)^{ramificationIdx P}`
+      `(X - a)^2 = ∏ P ∈ p.primesOver, (relNorm P)^{ramificationIdx' P}`
 
     Combines `relNorm_algebraMap_X_sub_C_eq_pow_two` (LHS) with `map_prod`
     on the relNorm `→*₀` (RHS). -/
@@ -812,7 +800,7 @@ theorem prod_relNorm_pow_primesOver_eq_X_sub_C_pow_two [IsAlgClosed F]
         (Field.toIsField F))
     ∏ P ∈ p.primesOver C.CoordinateRing,
         (Ideal.relNorm (Polynomial F) P) ^
-          p.ramificationIdx P =
+          p.ramificationIdx' P =
       p ^ 2 := by
   intro p
   haveI h_max : p.IsMaximal := Ideal.Quotient.maximal_of_isField _
@@ -954,7 +942,7 @@ theorem maximalIdealAt_mem_primesOver [IsAlgClosed F]
 theorem ramificationIdx_maximalIdealAt_ne_zero [IsAlgClosed F]
     [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
     (P : C.SmoothPoint) :
-    (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)}).ramificationIdx
+    (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)}).ramificationIdx'
         (C.maximalIdealAt P) ≠ 0 := by
   haveI := C.maximalIdealAt_liesOver P
   refine Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver
@@ -986,7 +974,7 @@ private theorem sum_ramificationIdx_primesOver_eq_two [IsAlgClosed F]
     [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic] (a : F) :
     ∑ Q ∈ IsDedekindDomain.primesOverFinset
         (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) C.CoordinateRing,
-      (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}).ramificationIdx Q =
+      (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}).ramificationIdx' Q =
       2 := by
   have h_sum_e := C.sum_ramificationIdx_eq_finrank a
   simp only [C.finrank_functionField_over_fracPolynomialX] at h_sum_e
@@ -1008,7 +996,7 @@ private theorem sum_mul_ramificationIdx_primesOver_eq_two [IsAlgClosed F]
         (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) ^ (f Q)) :
     ∑ Q ∈ IsDedekindDomain.primesOverFinset
         (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}) C.CoordinateRing,
-      f Q * (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}).ramificationIdx Q =
+      f Q * (Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)}).ramificationIdx' Q =
       2 := by
   set p : Ideal (Polynomial F) :=
     Ideal.span {(Polynomial.X - Polynomial.C a : Polynomial F)} with hp_def
@@ -1023,7 +1011,7 @@ private theorem sum_mul_ramificationIdx_primesOver_eq_two [IsAlgClosed F]
   have h_fibre := C.prod_relNorm_pow_primesOver_eq_X_sub_C_pow_two a
   simp only at h_fibre
   have h_fibre_subst : ∏ Q ∈ (p.primesOver C.CoordinateRing : Set _).toFinset,
-      p ^ (f Q * p.ramificationIdx Q) = p ^ 2 := by
+      p ^ (f Q * p.ramificationIdx' Q) = p ^ 2 := by
     rw [← h_fibre]
     refine Finset.prod_congr rfl fun Q hQ_fs ↦ ?_
     rw [hf Q (h_idx ▸ hQ_fs), pow_mul]
@@ -1060,7 +1048,7 @@ private theorem primesOverExp_eq_one_of_mem_primesOver [IsAlgClosed F]
   -- `Σ e_R = 2` and `Σ s_R · e_R = 2`, both over `primesOverFinset`
   have h_sum_e := C.sum_ramificationIdx_primesOver_eq_two a
   have h_sum_se : ∑ R ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
-      s_fn R * p.ramificationIdx R = 2 := by
+      s_fn R * p.ramificationIdx' R = 2 := by
     refine C.sum_mul_ramificationIdx_primesOver_eq_two a fun R hR_fs ↦ ?_
     have hR : R ∈ p.primesOver C.CoordinateRing :=
       (IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne).mp hR_fs
@@ -1068,15 +1056,15 @@ private theorem primesOverExp_eq_one_of_mem_primesOver [IsAlgClosed F]
     exact C.relNorm_eq_pow_primesOverExp a R hR
   -- termwise `e_R ≤ s_R · e_R`, so all terms coincide
   have h_pointwise : ∀ R ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
-      p.ramificationIdx R ≤ s_fn R * p.ramificationIdx R := by
+      p.ramificationIdx' R ≤ s_fn R * p.ramificationIdx' R := by
     intro R hR_fs
     have hR : R ∈ p.primesOver C.CoordinateRing :=
       (IsDedekindDomain.mem_primesOverFinset_iff (B := C.CoordinateRing) hp_ne).mp hR_fs
     have : 1 ≤ s_fn R := by rw [h_s_fn_eq R hR]; exact C.one_le_primesOverExp a R hR
     nlinarith
   have h_sum_eq : ∑ R ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
-      p.ramificationIdx R = ∑ R ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
-        s_fn R * p.ramificationIdx R := by rw [h_sum_e, h_sum_se]
+      p.ramificationIdx' R = ∑ R ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing,
+        s_fn R * p.ramificationIdx' R := by rw [h_sum_e, h_sum_se]
   have h_each := (Finset.sum_eq_sum_iff_of_le h_pointwise).mp h_sum_eq
   -- evaluate at `Q`: `e_Q = s_Q · e_Q` with `e_Q ≠ 0`
   have hQ_fs : Q ∈ IsDedekindDomain.primesOverFinset p C.CoordinateRing :=
@@ -1085,7 +1073,7 @@ private theorem primesOverExp_eq_one_of_mem_primesOver [IsAlgClosed F]
   rw [h_s_fn_eq Q hQ] at h_Q
   haveI : Q.IsPrime := hQ.1
   haveI : Q.LiesOver p := hQ.2
-  have h_e_ne_zero : p.ramificationIdx Q ≠ 0 :=
+  have h_e_ne_zero : p.ramificationIdx' Q ≠ 0 :=
     Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver Q hp_ne
   -- `e_Q = s_Q · e_Q` with `0 < e_Q` cancels to `s_Q = 1`
   refine Nat.eq_of_mul_eq_mul_right (Nat.pos_of_ne_zero h_e_ne_zero) ?_

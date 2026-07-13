@@ -263,12 +263,12 @@ theorem under_eq_span_of_natCast_mem
 
 /-- **Stage 4 / `card_k`**: For a maximal `P ⊂ 𝓞 K` containing the
 rational prime `ℓ`, the residue-field cardinality is a power of `ℓ`,
-with exponent the inertia degree `(span {(ℓ : ℤ)}).inertiaDeg P`. -/
+with exponent the inertia degree `(span {(ℓ : ℤ)}).inertiaDeg' P`. -/
 theorem cardResidueField_eq_pow_ell_inertiaDeg
     (P : Ideal (𝓞 K₀)) [hP_max : P.IsMaximal]
     (hℓ_in_P : (ℓ₀ : 𝓞 K₀) ∈ P) :
     Fintype.card (𝓞 K₀ ⧸ P) =
-      ℓ₀ ^ ((Ideal.span ({(ℓ₀ : ℤ)} : Set ℤ)).inertiaDeg P) := by
+      ℓ₀ ^ ((Ideal.span ({(ℓ₀ : ℤ)} : Set ℤ)).inertiaDeg' P) := by
   -- Step 1: (ℓ : ℤ) ∈ comap algebraMap P.
   have hℓ_in_comap : (ℓ₀ : ℤ) ∈ Ideal.comap (algebraMap ℤ (𝓞 K₀)) P := by
     rw [Ideal.mem_comap]
@@ -297,9 +297,9 @@ theorem cardResidueField_eq_pow_ell_inertiaDeg
     h_span_max.eq_of_le h_under_ne_top h_span_le
   -- Step 6: P lies over span {(ℓ : ℤ)}.
   have hP_lies : P.LiesOver (Ideal.span ({(ℓ₀ : ℤ)} : Set ℤ)) := ⟨h_eq⟩
-  -- Step 7: absNorm = ℓ ^ inertiaDeg.
+  -- Step 7: absNorm = ℓ ^ inertiaDeg'.
   have h_absNorm :
-      Ideal.absNorm P = ℓ₀ ^ ((Ideal.span ({(ℓ₀ : ℤ)} : Set ℤ)).inertiaDeg P) :=
+      Ideal.absNorm P = ℓ₀ ^ ((Ideal.span ({(ℓ₀ : ℤ)} : Set ℤ)).inertiaDeg' P) :=
     Ideal.absNorm_eq_pow_inertiaDeg' P (Fact.out : ℓ₀.Prime)
   -- Step 8: absNorm = card.
   have h_card : Ideal.absNorm P = Fintype.card (𝓞 K₀ ⧸ P) := by
@@ -553,7 +553,7 @@ theorem canonicalQuotientMap_surjective_of_inertiaDeg_eq_one
     {R' : Type w} [Field R'] [NumberField R'] [Algebra K₀ R']
     (P : Ideal (𝓞 K₀)) [P.IsMaximal] (Q : Ideal (𝓞 R')) [Q.IsPrime]
     (h_lies : Q.under (𝓞 K₀) = P)
-    (h_inertia : P.inertiaDeg Q = 1) :
+    (h_inertia : P.inertiaDeg' Q = 1) :
     Function.Surjective (canonicalQuotientMap P Q h_lies) := by
   letI : Q.LiesOver P := ⟨h_lies.symm⟩
   letI : Algebra (𝓞 K₀ ⧸ P) (𝓞 R' ⧸ Q) :=

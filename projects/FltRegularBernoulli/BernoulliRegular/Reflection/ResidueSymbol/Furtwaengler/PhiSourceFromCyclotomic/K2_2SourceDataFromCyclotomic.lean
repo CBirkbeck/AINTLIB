@@ -82,7 +82,7 @@ theorem ramificationIdx_span_natCast_eq_one_of_ne
     {P : Ideal (𝓞 K)} [P.IsPrime]
     [P.LiesOver (Ideal.span ({(ℓ : ℤ)} : Set ℤ))]
     (hℓ_ne_p : ℓ ≠ p) :
-    (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).ramificationIdx P = 1 := by
+    (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).ramificationIdx' P = 1 := by
   haveI : IsGalois ℚ K :=
     IsCyclotomicExtension.isGalois ({p} : Set ℕ) (K := ℚ) (L := K)
   have _ : IsGaloisGroup Gal(K/ℚ) ℤ (𝓞 K) :=
@@ -102,7 +102,7 @@ theorem inertiaDeg_span_natCast_eq_orderOf_of_ne
     {P : Ideal (𝓞 K)} [P.IsPrime]
     [P.LiesOver (Ideal.span ({(ℓ : ℤ)} : Set ℤ))]
     (hℓ_ne_p : ℓ ≠ p) :
-    (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg P =
+    (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg' P =
       orderOf (ℓ : ZMod p) := by
   haveI : IsGalois ℚ K :=
     IsCyclotomicExtension.isGalois ({p} : Set ℕ) (K := ℚ) (L := K)

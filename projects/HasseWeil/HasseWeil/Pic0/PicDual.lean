@@ -294,7 +294,7 @@ class (relNorm (maximalIdealAt P)) = class (comap α* (maximalIdealAt P))     (r
 
 which holds because a rational point has residue degree `f = 1`, so `relNorm 𝔪_P = 𝔪_P ∩ R =
 comap α* 𝔪_P` (for `f = 1`, `relNorm 𝔭 = (comap 𝔭)^f = comap 𝔭`).  Mathlib has no
-`relNorm = (comap)^{inertiaDeg}` lemma (and the project's `inertiaDeg = 1`-at-smooth-points
+`relNorm = (comap)^{inertiaDeg'}` lemma (and the project's `inertiaDeg' = 1`-at-smooth-points
 computation is `Module.Free`-diamond-blocked, see `Curves/GenericFiber.lean` Piece 9), so this last
 step stays a per-isogeny obligation; the lemma below is the bridge that *reduces to it*. -/
 
@@ -338,8 +338,8 @@ theorem classNorm_toClassEquiv'_some (ch : α.CoordHom) (hinj : Function.Injecti
 /-! #### Discharging `hnat`: the residue-degree-`1` (`comap = relNorm`) step at rational points
 
 Combining the shipped `classNorm_toClassEquiv'_some` (the `relNorm0` form of the `Naturality` RHS)
-with the residue-degree bridge of `ClassGroupNorm` (`relNorm 𝔪 = comap 𝔪` at `inertiaDeg = 1`, the
-`inertiaDeg = 1` itself supplied **diamond-free** by `Ideal`.`inertiaDeg_under_eq_one_of_algHom_…`),
+with the residue-degree bridge of `ClassGroupNorm` (`relNorm 𝔪 = comap 𝔪` at `inertiaDeg' = 1`, the
+`inertiaDeg' = 1` itself supplied **diamond-free** by `Ideal`.`inertiaDeg_under_eq_one_of_algHom_…`),
 we reduce the entire `hnat`/`Naturality` obligation to the **point-map ↔ `comap` agreement** — that
 the actual point map `α.toAddMonoidHom` sends `(x, y)` to a point whose `κ`-class is the contraction
 `comap α* 𝔪_{(x,y)}` (Silverman III.3.4, the `comap` form shipped as `toClass_toPointMap`).
@@ -387,11 +387,11 @@ the class of the **contraction** `comap α* (XYIdeal E x (C y))` — Silverman's
 `[PerfectField (FractionRing R)]` (its proof reduces to the Galois case, which fails for a function
 field over a finite base), but that hypothesis is *not* needed at `f = 1`: the shipped
 `ClassGroup.mk0_relNorm0_eq_mk0_comap_of_inertiaDeg_one` (`ClassGroupNorm.lean`) discharges
-`relNorm 𝔪 = comap 𝔪` from `inertiaDeg = 1` alone via the module-length / DVR-base route, with **no**
+`relNorm 𝔪 = comap 𝔪` from `inertiaDeg' = 1` alone via the module-length / DVR-base route, with **no**
 `PerfectField`.  This removes the previous `[PerfectField E.FunctionField]` hypothesis.
 
 Proof: `XYIdeal` is maximal (`quotientXYIdealEquiv`) with residue field `F` (so `finrank F (R/𝔪) =
-1`), hence `inertiaDeg (𝔪.under R) 𝔪 = 1`
+1`), hence `inertiaDeg' (𝔪.under R) 𝔪 = 1`
 (`Ideal.inertiaDeg_under_eq_one_of_algHom_of_residueField_finrank_one`, diamond-free); then
 `ClassGroup.mk0_relNorm0_eq_mk0_comap_of_inertiaDeg_one` (`relNorm 𝔪 = comap 𝔪` under `f = 1`,
 unconditional) finishes. -/
@@ -421,7 +421,7 @@ theorem mk0_relNorm0_XYIdeal_eq_mk0_comap
     Ideal.Quotient.maximal_of_isField _
       ((WeierstrassCurve.Affine.CoordinateRing.quotientXYIdealEquiv h.1).toRingEquiv.isField
         (Field.toIsField F))
-  have hf : Ideal.inertiaDeg
+  have hf : Ideal.inertiaDeg'
       ((WeierstrassCurve.Affine.CoordinateRing.XYIdeal E x (Polynomial.C y)).under
         E.CoordinateRing)
       (WeierstrassCurve.Affine.CoordinateRing.XYIdeal E x (Polynomial.C y)) = 1 :=
@@ -540,7 +540,7 @@ the geometric `toPointMap`) — the full naturality `α.Naturality ch hinj hfin`
 This is the **unconditional** wiring requested for the Route-C `hnat` discharge: it threads the
 divisor-pushforward RHS (`classNorm_toClassEquiv'_some`) through the residue-degree-`1`
 identity `relNorm 𝔪 = comap 𝔪`, now **`PerfectField`-free** (`mk0_relNorm0_XYIdeal_eq_mk0_comap` →
-`ClassGroup.mk0_relNorm0_eq_mk0_comap_of_inertiaDeg_one`, `inertiaDeg = 1` from
+`ClassGroup.mk0_relNorm0_eq_mk0_comap_of_inertiaDeg_one`, `inertiaDeg' = 1` from
 `Ideal.inertiaDeg_under_eq_one_of_algHom_of_residueField_finrank_one`).  The `relNorm`-vs-`comap`
 residue bookkeeping is *fully discharged*; the only carried datum is `hpoint`, the point-map ↔
 `comap` agreement (Silverman III.3.4 for the actual point map), which is the genuine per-isogeny /

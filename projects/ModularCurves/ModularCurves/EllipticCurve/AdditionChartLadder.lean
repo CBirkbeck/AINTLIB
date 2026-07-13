@@ -95,14 +95,9 @@ private lemma innerEquiv_mk_gL :
       (MvPolynomial.map (algebraMap R (MvPolynomial {k : Fin 3 // k ≠ j} R))) := by
     refine ringHom_ext (fun r => ?_) (fun k => ?_)
     · show (sumAlgEquiv R _ _) ((rename Sum.inl) (C r)) = _
-      simp only [rename_C, map_C]
-      show sumToIter R _ _ (C r) = _
-      rw [sumToIter_C]
-      rfl
+      simp only [rename_C, map_C, sumAlgEquiv_C_inl, MvPolynomial.algebraMap_eq]
     · show (sumAlgEquiv R _ _) ((rename Sum.inl) (X k)) = _
-      simp only [rename_X, map_X]
-      show sumToIter R _ _ (X (Sum.inl k)) = _
-      rw [sumToIter_Xl]
+      simp only [rename_X, map_X, sumAlgEquiv_X_inl]
   have hgl : (sumAlgEquiv R {k : Fin 3 // k ≠ i} {k : Fin 3 // k ≠ j}) (gL W i j) =
       MvPolynomial.map (algebraMap R (MvPolynomial {k : Fin 3 // k ≠ j} R))
         (dehomogenizeAux R i W.toProjective.polynomial) :=

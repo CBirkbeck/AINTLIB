@@ -176,7 +176,8 @@ private lemma isEllSequence_ψ_ff (m n r : ℤ) :
       - ψ_ff W (n + r) * ψ_ff W (n - r) * ψ_ff W m ^ 2 := by
   have h : W.ψ (m + n) * W.ψ (m - n) * W.ψ r ^ 2 =
       W.ψ (m + r) * W.ψ (m - r) * W.ψ n ^ 2
-      - W.ψ (n + r) * W.ψ (n - r) * W.ψ m ^ 2 := W.isEllSequence_ψ m n r
+      - W.ψ (n + r) * W.ψ (n - r) * W.ψ m ^ 2 :=
+    (EllSequence.isEllSequence_iff_rel₃ W.ψ).mp W.isEllSequence_ψ m n r
   have hf := congrArg ((algebraMap R KE).comp (Affine.CoordinateRing.mk W.toAffine)) h
   simp only [RingHom.comp_apply, map_mul, map_pow, map_sub] at hf
   exact hf
@@ -328,7 +329,12 @@ theorem slopeOne_eq :
     mulByInt_y_one_sub_negY]
 
 /-- **addX doubling identity**: at the generic point of `W_KE`,
-    `addX(mulByInt_x W 1, mulByInt_x W 1, slopeOne W) = mulByInt_x W 2`. -/
+    `addX(mulByInt_x W 1, mulByInt_x W 1, slopeOne W) = mulByInt_x W 2`.
+
+The doubling closure at the generic point.  `slopeOne_eq` rewrites the tangent `slope`
+to its `slope_of_Y_ne` quotient form *before* it can hit the `if x₁ = x₂` decidable guard,
+so the concrete `mulByInt_x W 1 : K(E)` term is never `whnf`-reduced through `DecidableEq K(E)`;
+the remainder is a `field_simp` + `linear_combination` closed under the default budget. -/
 theorem addX_mulByInt_one_mulByInt_one :
     (W_KE W).toAffine.addX (mulByInt_x W 1) (mulByInt_x W 1) (slopeOne W) =
       mulByInt_x W 2 := by
@@ -344,6 +350,18 @@ theorem addX_mulByInt_one_mulByInt_one :
   linear_combination (-(W_KE W).a₁ ^ 2 - 4 * (W_KE W).a₂
     - 12 * mulByInt_x W 1) * heq
 
+/-- **Coordinate-wise equality of affine points** (opaque form): two `.some` points
+    with equal `x`- and `y`-coordinates are equal.  Stated over *opaque* coordinates
+    `x₁ x₂ y₁ y₂ : KE` with the two coordinate equalities as hypotheses, so that
+    `subst` + proof-irrelevance closes the goal without ever `whnf`-reducing the
+    `Nonsingular` predicate (which carries `negY` over the heavy `mulByInt` terms). -/
+private lemma some_eq_some_of_coords {x₁ x₂ y₁ y₂ : KE}
+    (h₁ : (W_KE W).toAffine.Nonsingular x₁ y₁)
+    (h₂ : (W_KE W).toAffine.Nonsingular x₂ y₂)
+    (hx : x₁ = x₂) (hy : y₁ = y₂) :
+    Affine.Point.some x₁ y₁ h₁ = Affine.Point.some x₂ y₂ h₂ := by
+  subst hx; subst hy; rfl
+
 /-- **Negation-reduction witness**: if `n • genericPoint W` is `.some` at the
     `[n]`-coordinates, then `(-n) • genericPoint W` is `.some` at the `[-n]`-coordinates. -/
 theorem zsmul_genericPoint_neg_of_pos (n : ℤ) (hn : n ≠ 0)
@@ -356,9 +374,7 @@ theorem zsmul_genericPoint_neg_of_pos (n : ℤ) (hn : n ≠ 0)
           rw [mulByInt_x_neg, mulByInt_y_neg W n hn]
           exact (WeierstrassCurve.Affine.nonsingular_neg ..).mpr h_ns_pos) := by
   rw [neg_zsmul, h_pos, Affine.Point.neg_some]
-  congr 1
-  · exact (mulByInt_x_neg W n).symm
-  · exact (mulByInt_y_neg W n hn).symm
+  exact some_eq_some_of_coords W _ _ (mulByInt_x_neg W n).symm (mulByInt_y_neg W n hn).symm
 
 /-- **Inductive step (witness form)**: given the `n`-case and the `(n+1)`-th
     `addX`/`addY` identities, derive the `(n+1)`-case (requires `[n]x ≠ [1]x`). -/

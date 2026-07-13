@@ -372,8 +372,9 @@ private lemma span_range_castSymPow_eq_top (m : ℕ) :
         = Submodule.span ℂ ((fun d => (MvPolynomial.monomial d 1 : MvPolynomial (Fin 2) ℂ)) ''
           {d | Finsupp.degree d = m}) := by
       rw [show SymPow ℂ m = MvPolynomial.homogeneousSubmodule (Fin 2) ℂ m from rfl,
-        MvPolynomial.homogeneousSubmodule_eq_finsupp_supported, Finsupp.supported_eq_span_single]
-      rfl
+        MvPolynomial.homogeneousSubmodule_eq_finsupp_supported,
+        AddMonoidAlgebra.supported_eq_span_single]
+      simp only [MvPolynomial.single_eq_monomial]
     conv_lhs => rw [heq]
     refine Submodule.span_le.mpr ?_
     rintro _ ⟨d, (hd : Finsupp.degree d = m), rfl⟩

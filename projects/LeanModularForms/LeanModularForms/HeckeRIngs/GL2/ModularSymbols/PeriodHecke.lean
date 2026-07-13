@@ -247,8 +247,9 @@ theorem rawPairing_fullModSymRep_sl (f₁ f₂ : CuspForm ((Gamma1 N).map (mapGL
     -- The RHS `rawPairing f₁ (fullModSymRep g (D ⊗ P))` is *definitionally* the `rawBilin` of the
     -- `g`-moved divisor and `symRep`-acted polynomial (`fullModSymRep_apply` and `rawPairing_tmul`
     -- are `rfl`); `show` bridges the `Module ℤ` instance diamond on the tensor type.
-    show rawBilin f₂ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) P =
-      rawBilin f₁ ((div0Rep ℤ g D : Div0 ℤ) : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ)
+    show rawBilin f₂ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff P =
+      rawBilin f₁ ((div0Rep ℤ g D : Div0 ℤ) :
+          MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff
         (symRep ℤ (k - 2).toNat g P)
     -- Expand `rawBilin` as a `Finsupp.sum`.
     have hrb : ∀ (D' : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) (P' : SymPow ℤ (k - 2).toNat),
@@ -267,9 +268,9 @@ theorem rawPairing_fullModSymRep_sl (f₁ f₂ : CuspForm ((Gamma1 N).map (mapGL
         zsmul_eq_mul]
     rw [hrb, hrb₂, castSymPow_symRep]
     -- Reindex the `g`-image divisor sum injectively.
-    have hdiv : ((div0Rep ℤ g D) : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) =
+    have hdiv : ((div0Rep ℤ g D) : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff =
         Finsupp.mapDomain ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℚ) g) • ·)
-          (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) := by
+          (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff := by
       rw [div0Rep_apply]
     have hinj : Function.Injective
         (fun c : Projectivization ℚ (Fin 2 → ℚ) =>
@@ -279,13 +280,13 @@ theorem rawPairing_fullModSymRep_sl (f₁ f₂ : CuspForm ((Gamma1 N).map (mapGL
     -- Combine into a single degree-0 sum of the (constant) cusp-value difference.
     rw [← sub_eq_zero, Finsupp.sum, Finsupp.sum, ← Finset.sum_sub_distrib]
     -- Each summand: `n · cuspValue f₂ (cast P) c − n · cuspValue f₁ (symRep g (cast P)) (g•c) = n · (−T)`.
-    have hsummand : ∀ c ∈ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support,
-        ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ) *
+    have hsummand : ∀ c ∈ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support,
+        ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ) *
             cuspValue f₂ (castSymPow (k - 2).toNat P) c -
-          ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ) *
+          ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ) *
             cuspValue f₁ (symRep ℂ (k - 2).toNat g (castSymPow (k - 2).toNat P))
               ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℚ) g) • c) =
-          ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ) * (-T) := by
+          ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ) * (-T) := by
       intro c _
       have hmapeq : (Matrix.SpecialLinearGroup.map (Int.castRingHom ℚ) g) • c =
           (Matrix.SpecialLinearGroup.mapGL ℚ g) • c := by
@@ -293,8 +294,8 @@ theorem rawPairing_fullModSymRep_sl (f₁ f₂ : CuspForm ((Gamma1 N).map (mapGL
       rw [hmapeq, hT c]; ring
     rw [Finset.sum_congr rfl hsummand, ← Finset.sum_mul]
     -- The total weight `Σ_c D(c) = 0`.
-    have hsum0 : (∑ c ∈ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support,
-        ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ)) = 0 := by
+    have hsum0 : (∑ c ∈ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support,
+        ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ)) = 0 := by
       rw [← Int.cast_sum]
       have := Div0.sum_coeff_eq_zero D
       rw [Finsupp.sum] at this
@@ -990,12 +991,13 @@ noncomputable def rawBilinGen (f0 : F) {m : ℕ} :
 
 /-- The generic raw period pairing on `Div⁰ ⊗ Sym^m` for an arbitrary arithmetic cusp form. -/
 noncomputable def rawPairingGen (f0 : F) {m : ℕ} : (Div0 ℤ ⊗[ℤ] SymPow ℤ m) →ₗ[ℤ] ℂ :=
-  TensorProduct.lift ((rawBilinGen f0).comp (Div0 ℤ).subtype)
+  TensorProduct.lift ((rawBilinGen f0).comp
+    ((MonoidAlgebra.coeffLinearEquiv ℤ).toLinearMap ∘ₗ (Div0 ℤ).subtype))
 
 /-- The generic `rawPairingGen` against a single tensor is the `rawBilinGen` of the divisor and
 polynomial. -/
 theorem rawPairingGen_tmul (f0 : F) {m : ℕ} (D : Div0 ℤ) (P : SymPow ℤ m) :
-    rawPairingGen f0 (D ⊗ₜ P) = rawBilinGen f0 (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) P :=
+    rawPairingGen f0 (D ⊗ₜ P) = rawBilinGen f0 (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff P :=
   rfl
 
 /-! ### The generic cusp-value formula `cuspValueGen = top − bottom`
@@ -1464,8 +1466,9 @@ theorem rawPairingGen_actMat (hk : 2 ≤ k) (f : CuspForm ((Gamma1 N).map (mapGL
     -- The RHS `rawPairing f (actMat M (D ⊗ P))` expands as the `rawBilin` of the `M`-moved divisor
     -- and the `symAct`-acted polynomial.
     show rawBilinGen (CuspForm.translate f (glMap (heilbronnGL M hM.ne')))
-        (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) P =
-      rawBilin f ((divAct M hM.ne' D : Div0 ℤ) : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ)
+        (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff P =
+      rawBilin f ((divAct M hM.ne' D : Div0 ℤ) :
+          MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff
         (symAct M (k - 2).toNat P)
     -- Expand both `rawBilin`/`rawBilinGen` as `Finsupp.sum` against cusp values.
     have hrb : ∀ (D' : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) (P' : SymPow ℤ (k - 2).toNat),
@@ -1486,9 +1489,9 @@ theorem rawPairingGen_actMat (hk : 2 ≤ k) (f : CuspForm ((Gamma1 N).map (mapGL
         zsmul_eq_mul]
     rw [hrb, hrbG, castSymPow_symActC]
     -- Reindex the `M`-image divisor sum injectively.
-    have hdiv : ((divAct M hM.ne' D) : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) =
+    have hdiv : ((divAct M hM.ne' D) : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff =
         Finsupp.mapDomain ((heilbronnGL M hM.ne') • ·)
-          (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) := by
+          (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff := by
       rw [divAct_coe]
     have hinj : Function.Injective
         (fun c : Projectivization ℚ (Fin 2 → ℚ) => (heilbronnGL M hM.ne') • c) :=
@@ -1496,19 +1499,19 @@ theorem rawPairingGen_actMat (hk : 2 ≤ k) (f : CuspForm ((Gamma1 N).map (mapGL
     rw [hdiv, Finsupp.sum_mapDomain_index_inj hinj]
     -- Combine into a single degree-0 sum of the (constant) cusp-value difference.
     rw [← sub_eq_zero, Finsupp.sum, Finsupp.sum, ← Finset.sum_sub_distrib]
-    have hsummand : ∀ c ∈ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support,
-        ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ) *
+    have hsummand : ∀ c ∈ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support,
+        ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ) *
             cuspValueGen (CuspForm.translate f (glMap (heilbronnGL M hM.ne')))
               (castSymPow (k - 2).toNat P) c -
-          ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ) *
+          ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ) *
             cuspValue f (symActC M (k - 2).toNat (castSymPow (k - 2).toNat P))
               ((heilbronnGL M hM.ne') • c) =
-          ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ) * (-T) := by
+          ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ) * (-T) := by
       intro c _
       rw [hT c]; ring
     rw [Finset.sum_congr rfl hsummand, ← Finset.sum_mul]
-    have hsum0 : (∑ c ∈ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support,
-        ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ)) = 0 := by
+    have hsum0 : (∑ c ∈ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support,
+        ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ)) = 0 := by
       rw [← Int.cast_sum]
       have := Div0.sum_coeff_eq_zero D
       rw [Finsupp.sum] at this
@@ -1614,8 +1617,8 @@ theorem rawPairing_eq_sum_of_coe {ι : Type*} (s : Finset ι)
     rw [rawPairing_tmul]
     -- Expand each `rawBilin`/`rawPairingGen` as a `Finsupp.sum` of cusp values, using the cusp-value
     -- coset decomposition `cuspValue_eq_sum_of_coe`.
-    have hrb : rawBilin g (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) P =
-        (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).sum
+    have hrb : rawBilin g (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff P =
+        (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.sum
           (fun c n => (n : ℂ) *
             ∑ i ∈ s, if h : (Mfun i).det ≠ 0 then
               cuspValueGen (CuspForm.translate f (glMap (heilbronnGL (Mfun i) h)))
@@ -1627,7 +1630,7 @@ theorem rawPairing_eq_sum_of_coe {ι : Type*} (s : Finset ι)
       rw [cuspValue_eq_sum_of_coe s f g Mfun hdet _ hcoe c]
     have hrbG : ∀ (i : ι), i ∈ s → ∀ (h : (Mfun i).det ≠ 0),
         rawPairingGen (CuspForm.translate f (glMap (heilbronnGL (Mfun i) h))) (D ⊗ₜ P) =
-          (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).sum
+          (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.sum
             (fun c n => (n : ℂ) *
               cuspValueGen (CuspForm.translate f (glMap (heilbronnGL (Mfun i) h)))
                 (castSymPow (k - 2).toNat P) c) := by

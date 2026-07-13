@@ -134,10 +134,17 @@ theorem symRep_apply (R : Type u) [CommRing R] (m : ℕ) (g : SL(2, ℤ)) (P : S
 
 /-! ## `div0Rep` — divisors on `ℙ¹(ℚ)` -/
 
-/-- Degree-0 divisors on `ℙ¹(ℚ)`: the kernel of the augmentation `(ℙ¹ℚ →₀ R) → R`. -/
+/-- Degree-0 divisors on `ℙ¹(ℚ)`: the kernel of the augmentation `R[ℙ¹ℚ] → R`.
+
+The permutation representation `Representation.ofMulAction` lives on the `MonoidAlgebra`
+`R[ℙ¹ℚ]`, so the augmentation submodule is expressed on that carrier via
+`MonoidAlgebra.coeffLinearEquiv`; it is the same augmentation kernel as
+`ker (Finsupp.linearCombination R (fun _ => 1))` on `ℙ¹ℚ →₀ R`, transported through the
+coefficient equivalence (cf. `Representation.ker_leftRegular_norm_eq`). -/
 noncomputable abbrev Div0 (R : Type u) [CommRing R] :
-    Submodule R (Projectivization ℚ (Fin 2 → ℚ) →₀ R) :=
-  LinearMap.ker (Finsupp.linearCombination R (fun _ => (1 : R)))
+    Submodule R (MonoidAlgebra R (Projectivization ℚ (Fin 2 → ℚ))) :=
+  LinearMap.ker (Finsupp.linearCombination R (fun _ => (1 : R)) ∘ₗ
+    (MonoidAlgebra.coeffLinearEquiv R).toLinearMap)
 
 noncomputable def div0Rep (R : Type u) [CommRing R] :
     Representation R SL(2, ℤ) (Div0 R) :=
@@ -146,18 +153,20 @@ noncomputable def div0Rep (R : Type u) [CommRing R] :
       (Matrix.SpecialLinearGroup.map (Int.castRingHom ℚ))) (Div0 R) <| by
   intro g x hx
   simp only [LinearMap.mem_ker, MonoidHom.comp_apply, Submodule.mem_comap,
-    Representation.ofMulAction_def, Finsupp.lmapDomain_apply,
+    LinearMap.comp_apply, Representation.ofMulAction_def, LinearEquiv.coe_coe,
+    LinearEquiv.apply_symm_apply, Finsupp.lmapDomain_apply,
     Finsupp.linearCombination_mapDomain] at hx ⊢
   exact hx
 
 /-- The action of `div0Rep`, as the permutation of cusps `(x) ↦ (g · x)` on the underlying
-divisor: `(div0Rep R g D).val = Finsupp.mapDomain (g · ·) D.val`, where `g` acts on `ℙ¹(ℚ)`
-through `SL(2, ℤ) → SL(2, ℚ)`. -/
+divisor: on coefficients, `(div0Rep R g D).coeff = Finsupp.mapDomain (g · ·) D.coeff`, where `g`
+acts on `ℙ¹(ℚ)` through `SL(2, ℤ) → SL(2, ℚ)`.  (The permutation representation now lives on the
+`MonoidAlgebra` carrier `R[ℙ¹ℚ]`, so the identity is stated on the `MonoidAlgebra.coeff` field.) -/
 @[simp]
 theorem div0Rep_apply (R : Type u) [CommRing R] (g : SL(2, ℤ)) (D : Div0 R) :
-    ((div0Rep R g D : Div0 R) : Projectivization ℚ (Fin 2 → ℚ) →₀ R)
+    ((div0Rep R g D : Div0 R) : MonoidAlgebra R (Projectivization ℚ (Fin 2 → ℚ))).coeff
       = Finsupp.mapDomain ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℚ) g) • ·)
-          (D : Projectivization ℚ (Fin 2 → ℚ) →₀ R) :=
+          (D : MonoidAlgebra R (Projectivization ℚ (Fin 2 → ℚ))).coeff :=
   rfl
 
 end HeckeRing.GL2.ModularSymbols

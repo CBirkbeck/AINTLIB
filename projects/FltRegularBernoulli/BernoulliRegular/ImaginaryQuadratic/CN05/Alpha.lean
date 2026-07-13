@@ -605,7 +605,7 @@ theorem inertiaDeg_at_q_inert (hp3 : p % 4 = 3) (q : ℕ)
     (h_not_sq : ∀ s : ZMod q, s ^ 2 ≠ -(p : ZMod q))
     (P : Ideal (𝓞 (Kminus p)))
     (hP : P ∈ Ideal.primesOver (Ideal.span {(q : ℤ)}) (𝓞 (Kminus p))) :
-    (Ideal.span {(q : ℤ)}).inertiaDeg P = 2 := by
+    (Ideal.span {(q : ℤ)}).inertiaDeg' P = 2 := by
   classical
   have h_exp : ¬ (q : ℕ) ∣ RingOfIntegers.exponent (alphaInOK p hp3) :=
     not_dvd_exponent_alphaInOK p hp3 q
@@ -629,7 +629,8 @@ theorem inertiaDeg_at_q_inert (hp3 : p % 4 = 3) (q : ℕ)
     exact congrArg (fun (x : ↥(Ideal.primesOver (Ideal.span {(q : ℤ)}) (𝓞 (Kminus p)))) ↦
       (x : Ideal (𝓞 (Kminus p)))) hP_set
   rw [hP_eq]
-  rw [NumberField.Ideal.inertiaDeg_primesOverSpanEquivMonicFactorsMod_symm_apply'
+  rw [Ideal.inertiaDeg'_eq_inertiaDeg (R := ℤ),
+    NumberField.Ideal.inertiaDeg_primesOverSpanEquivMonicFactorsMod_symm_apply'
       h_exp hQ_mem]
   -- Qfactor has natDegree 2.
   change (Polynomial.X ^ 2 - Polynomial.X +
@@ -672,10 +673,10 @@ theorem absNorm_primeOver_at_q_inert (hp3 : p % 4 = 3) (q : ℕ)
     Ideal.absNorm P = q ^ 2 := by
   haveI : P.IsPrime := hP.1
   haveI : P.LiesOver (Ideal.span {(q : ℤ)}) := hP.2
-  have h_ine : (Ideal.span {(q : ℤ)}).inertiaDeg P = 2 :=
+  have h_ine : (Ideal.span {(q : ℤ)}).inertiaDeg' P = 2 :=
     inertiaDeg_at_q_inert p hp3 q hq_odd hqp h_not_sq P hP
   calc Ideal.absNorm P
-      = q ^ ((Ideal.span {(q : ℤ)}).inertiaDeg P) :=
+      = q ^ ((Ideal.span {(q : ℤ)}).inertiaDeg' P) :=
         Ideal.absNorm_eq_pow_inertiaDeg' P (Fact.out : q.Prime)
     _ = q ^ 2 := by rw [h_ine]
 

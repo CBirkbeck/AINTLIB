@@ -110,7 +110,7 @@ lemma buildIdealFromMult_absNorm_isPow {q : ℕ} (hq : q.Prime)
     exact_mod_cast hq.ne_zero
   unfold buildIdealFromMult
   let d : ↥(tQ L q) → ℕ := fun Q =>
-    Ideal.inertiaDeg (Ideal.span ({(q : ℤ)} : Set ℤ)) Q.1
+    Ideal.inertiaDeg' (Ideal.span ({(q : ℤ)} : Set ℤ)) Q.1
   have h_each : ∀ Q : ↥(tQ L q), Ideal.absNorm Q.1 = q ^ d Q := fun Q => by
     have hQ_in : Q.1 ∈ Ideal.primesOver (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 L) :=
       (_root_.IsDedekindDomain.mem_primesOverFinset_iff hq_ne (𝓞 L)).mp Q.2

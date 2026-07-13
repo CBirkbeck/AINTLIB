@@ -52,8 +52,8 @@ variable [Module.Free ℤ R] [Module.Free ℤ S]
 /--
 Under `SplitsCompletely`, every prime `Q` of `S` lying above `p` has the
 same absolute norm as `p`. Indeed, by `absNorm_eq_pow_inertiaDeg_of_liesOver`,
-`absNorm Q = absNorm p ^ inertiaDeg p Q`, and the splits-completely
-hypothesis forces `inertiaDeg p Q = 1`.
+`absNorm Q = absNorm p ^ inertiaDeg' p Q`, and the splits-completely
+hypothesis forces `inertiaDeg' p Q = 1`.
 -/
 theorem SplitsCompletely.absNorm_eq_of_mem
     {p : Ideal R} [hp_max : p.IsMaximal] (hp0 : p ≠ ⊥) (h : SplitsCompletely S p)

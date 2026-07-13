@@ -374,7 +374,7 @@ noncomputable def feqPairN
     [Γ₁.IsArithmetic] [CuspFormClass F₁ Γ₁ k] [Γ₂.IsArithmetic] [CuspFormClass F₂ Γ₂ k]
     (f : F₁) (g : F₂) (hw₁ : Γ₁.strictWidthInfty = 1) (hw₂ : Γ₂.strictWidthInfty = 1) (hk : 0 < k)
     (hg : (g : ℍ → ℂ) = (Real.sqrt N : ℂ) ^ (2 - k) • ((f : ℍ → ℂ) ∣[k] frickeR N)) :
-    StrongFEPair ℂ where
+    WeakFEPair ℂ where
   f := fun t : ℝ ↦ (f : ℍ → ℂ).resToImagAxis (t / Real.sqrt N)
   g := fun t : ℝ ↦ (g : ℍ → ℂ).resToImagAxis (t / Real.sqrt N)
   k := (k : ℝ)
@@ -388,6 +388,14 @@ noncomputable def feqPairN
   h_feq := fun x hx ↦ resToImagAxisScaled_feq (f : ℍ → ℂ) (g : ℍ → ℂ) hg (mem_Ioi.mp hx)
   hf_top := fun r ↦ by simpa using isBigO_resToImagAxisScaled_rpow f hw₁ r
   hg_top := fun r ↦ by simpa using isBigO_resToImagAxisScaled_rpow g hw₂ r
+
+/-- The level-`N` `feqPairN` is a strong FE-pair: its constant terms vanish. -/
+theorem isStrongFEPairN
+    {Γ₁ Γ₂ : Subgroup (GL (Fin 2) ℝ)} {F₁ F₂ : Type*} [FunLike F₁ ℍ ℂ] [FunLike F₂ ℍ ℂ]
+    [Γ₁.IsArithmetic] [CuspFormClass F₁ Γ₁ k] [Γ₂.IsArithmetic] [CuspFormClass F₂ Γ₂ k]
+    (f : F₁) (g : F₂) (hw₁ : Γ₁.strictWidthInfty = 1) (hw₂ : Γ₂.strictWidthInfty = 1) (hk : 0 < k)
+    (hg : (g : ℍ → ℂ) = (Real.sqrt N : ℂ) ^ (2 - k) • ((f : ℍ → ℂ) ∣[k] frickeR N)) :
+    IsStrongFEPair (feqPairN f g hw₁ hw₂ hk hg) where
   hf₀ := rfl
   hg₀ := rfl
 
@@ -423,14 +431,19 @@ theorem lcompletedN_functional_equation
     (f : F₁) (g : F₂) (hw₁ : Γ₁.strictWidthInfty = 1) (hw₂ : Γ₂.strictWidthInfty = 1) (hk : 0 < k)
     (hg : (g : ℍ → ℂ) = (Real.sqrt N : ℂ) ^ (2 - k) • ((f : ℍ → ℂ) ∣[k] frickeR N)) (s : ℂ) :
     lcompletedΛN N f ((k : ℂ) - s) = Complex.I ^ k * lcompletedΛN N g s := by
-  have hfe := (feqPairN f g hw₁ hw₂ hk hg).functional_equation s
+  have hP := isStrongFEPairN f g hw₁ hw₂ hk hg
+  set P := feqPairN f g hw₁ hw₂ hk hg with hP_def
+  have hfe := P.functional_equation s
   -- `P.Λ (k - s) = ε • P.symm.Λ s`; here `ε = I^k`, `P.Λ = lcompletedΛN N f`,
   -- `P.symm.Λ = lcompletedΛN N g`.
   rw [smul_eq_mul] at hfe
-  have hkcast : (((k : ℝ) : ℂ) - s) = ((k : ℂ) - s) := by push_cast; ring
-  rw [← hkcast]
-  simpa only [lcompletedΛN_apply, StrongFEPair.Λ, StrongFEPair.symm, WeakFEPair.symm,
-    feqPairN] using hfe
+  have hΛf : ∀ t, lcompletedΛN N f t = P.Λ t := fun t ↦ (hP.hasMellin t).2
+  have hΛg : ∀ t, lcompletedΛN N g t = P.symm.Λ t := fun t ↦ (hP.symm.hasMellin t).2
+  have hPk : (P.k : ℂ) = (k : ℂ) := by
+    have hk_eq : P.k = (k : ℝ) := by rw [hP_def]; rfl
+    rw [hk_eq]; push_cast; ring
+  rw [hΛf ((k : ℂ) - s), show ((k : ℂ) - s) = (↑P.k - s) from by rw [hPk], hfe, ← hΛg s]
+  rfl
 
 open ModularForm in
 /-- **The level-`N` completed L-function is entire.**  For a width-`1` arithmetic weight-`k`
@@ -441,8 +454,12 @@ theorem differentiable_lcompletedΛN
     [Γ₁.IsArithmetic] [CuspFormClass F₁ Γ₁ k] [Γ₂.IsArithmetic] [CuspFormClass F₂ Γ₂ k]
     (f : F₁) (g : F₂) (hw₁ : Γ₁.strictWidthInfty = 1) (hw₂ : Γ₂.strictWidthInfty = 1) (hk : 0 < k)
     (hg : (g : ℍ → ℂ) = (Real.sqrt N : ℂ) ^ (2 - k) • ((f : ℍ → ℂ) ∣[k] frickeR N)) :
-    Differentiable ℂ (lcompletedΛN N f) :=
-  (feqPairN f g hw₁ hw₂ hk hg).differentiable_Λ
+    Differentiable ℂ (lcompletedΛN N f) := by
+  have hP := isStrongFEPairN f g hw₁ hw₂ hk hg
+  have hΛ : lcompletedΛN N f = (feqPairN f g hw₁ hw₂ hk hg).Λ :=
+    funext fun s ↦ (hP.hasMellin s).2
+  rw [hΛ]
+  exact hP.differentiable_Λ
 
 /-! ### Analytic continuation of `L(·, f)` at level `N` -/
 

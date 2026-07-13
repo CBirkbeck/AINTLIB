@@ -586,7 +586,7 @@ noncomputable def psiFst (k k' : Fin 3) :
     Localization.Away (lawTwoTriple W i j k) →ₐ[R]
       Localization.Away (transAlgHom W i j i' j' (lawTwoTriple W i j k) *
         transHom W i j i' j' (lawTwoTriple W i' j' k')) :=
-  IsLocalization.Away.liftAlgHom (IsScalarTower.toAlgHom R (biChartRing W i j) _)
+  IsLocalization.Away.liftAlgHom (f := IsScalarTower.toAlgHom R (biChartRing W i j) _)
     (lawTwoTriple W i j k) (isUnit_algebraMap_biChartRing_lawTwoTriple W i j i' j' k k')
 
 @[simp]
@@ -677,15 +677,17 @@ noncomputable def psiSnd (k k' : Fin 3) :
       Localization.Away (transAlgHom W i j i' j' (lawTwoTriple W i j k) *
         transHom W i j i' j' (lawTwoTriple W i' j' k')) :=
   IsLocalization.Away.liftAlgHom
-    ((IsScalarTower.toAlgHom R (transRing W i j i' j') _).comp (transHom W i j i' j'))
+    (f := (IsScalarTower.toAlgHom R (transRing W i j i' j') _).comp (transHom W i j i' j'))
     (lawTwoTriple W i' j' k') (isUnit_algebraMap_transRing_transHom_lawTwoTriple W i j i' j' k k')
 
 @[simp]
 lemma psiSnd_algebraMap (k k' : Fin 3) (x : biChartRing W i' j') :
     psiSnd W i j i' j' k k' (algebraMap (biChartRing W i' j') _ x) =
-      algebraMap (transRing W i j i' j') _ (transHom W i j i' j' x) :=
-  IsLocalization.Away.liftAlgHom_algebraMap _ (lawTwoTriple W i' j' k')
-    (isUnit_algebraMap_transRing_transHom_lawTwoTriple W i j i' j' k k') x
+      algebraMap (transRing W i j i' j') _ (transHom W i j i' j' x) := by
+  rw [psiSnd, IsLocalization.Away.liftAlgHom_apply,
+    IsLocalization.Away.lift_eq (lawTwoTriple W i' j' k')
+      (isUnit_algebraMap_transRing_transHom_lawTwoTriple W i j i' j' k k') x]
+  rfl
 
 /-- **([C4-HF-ASSEMBLY] L3, ψ_i'j' tower factorization)** ψ_i'j' restricted to `biChartRing(i'j')` is
 `(algebraMap transRing S).comp transHom` — direct from `liftAlgHom_algebraMap` (the base map already IS
@@ -1109,7 +1111,7 @@ noncomputable def psiFstZ (k k' : Fin 3) :
     Localization.Away (lawOneTriple W i j k) →ₐ[R]
       Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
         transHom W i j i' j' (lawOneTriple W i' j' k')) :=
-  IsLocalization.Away.liftAlgHom (IsScalarTower.toAlgHom R (biChartRing W i j) _)
+  IsLocalization.Away.liftAlgHom (f := IsScalarTower.toAlgHom R (biChartRing W i j) _)
     (lawOneTriple W i j k) (isUnit_algebraMap_biChartRing_lawOneTriple W i j i' j' k k')
 
 @[simp]
@@ -1200,15 +1202,17 @@ noncomputable def psiSndZ (k k' : Fin 3) :
       Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
         transHom W i j i' j' (lawOneTriple W i' j' k')) :=
   IsLocalization.Away.liftAlgHom
-    ((IsScalarTower.toAlgHom R (transRing W i j i' j') _).comp (transHom W i j i' j'))
+    (f := (IsScalarTower.toAlgHom R (transRing W i j i' j') _).comp (transHom W i j i' j'))
     (lawOneTriple W i' j' k') (isUnit_algebraMap_transRing_transHom_lawOneTriple W i j i' j' k k')
 
 @[simp]
 lemma psiSndZ_algebraMap (k k' : Fin 3) (x : biChartRing W i' j') :
     psiSndZ W i j i' j' k k' (algebraMap (biChartRing W i' j') _ x) =
-      algebraMap (transRing W i j i' j') _ (transHom W i j i' j' x) :=
-  IsLocalization.Away.liftAlgHom_algebraMap _ (lawOneTriple W i' j' k')
-    (isUnit_algebraMap_transRing_transHom_lawOneTriple W i j i' j' k k') x
+      algebraMap (transRing W i j i' j') _ (transHom W i j i' j' x) := by
+  rw [psiSndZ, IsLocalization.Away.liftAlgHom_apply,
+    IsLocalization.Away.lift_eq (lawOneTriple W i' j' k')
+      (isUnit_algebraMap_transRing_transHom_lawOneTriple W i j i' j' k k') x]
+  rfl
 
 /-- **([C4-HF-ASSEMBLY] L3, ψ_i'j' tower factorization)** ψ_i'j' restricted to `biChartRing(i'j')` is
 `(algebraMap transRing S).comp transHom` — direct from `liftAlgHom_algebraMap` (the base map already IS
@@ -1773,7 +1777,7 @@ noncomputable def psiFstCross (k k' : Fin 3) :
     Localization.Away (lawOneTriple W i j k) →ₐ[R]
       Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
         transHom W i j i' j' (lawTwoTriple W i' j' k')) :=
-  IsLocalization.Away.liftAlgHom (IsScalarTower.toAlgHom R (biChartRing W i j) _)
+  IsLocalization.Away.liftAlgHom (f := IsScalarTower.toAlgHom R (biChartRing W i j) _)
     (lawOneTriple W i j k) (isUnit_algebraMap_biChartRing_lawOneTriple_cross W i j i' j' k k')
 
 @[simp]
@@ -1808,15 +1812,17 @@ noncomputable def psiSndCross (k k' : Fin 3) :
       Localization.Away (transAlgHom W i j i' j' (lawOneTriple W i j k) *
         transHom W i j i' j' (lawTwoTriple W i' j' k')) :=
   IsLocalization.Away.liftAlgHom
-    ((IsScalarTower.toAlgHom R (transRing W i j i' j') _).comp (transHom W i j i' j'))
+    (f := (IsScalarTower.toAlgHom R (transRing W i j i' j') _).comp (transHom W i j i' j'))
     (lawTwoTriple W i' j' k') (isUnit_algebraMap_transRing_transHom_lawTwoTriple_cross W i j i' j' k k')
 
 @[simp]
 lemma psiSndCross_algebraMap (k k' : Fin 3) (x : biChartRing W i' j') :
     psiSndCross W i j i' j' k k' (algebraMap (biChartRing W i' j') _ x) =
-      algebraMap (transRing W i j i' j') _ (transHom W i j i' j' x) :=
-  IsLocalization.Away.liftAlgHom_algebraMap _ (lawTwoTriple W i' j' k')
-    (isUnit_algebraMap_transRing_transHom_lawTwoTriple_cross W i j i' j' k k') x
+      algebraMap (transRing W i j i' j') _ (transHom W i j i' j' x) := by
+  rw [psiSndCross, IsLocalization.Away.liftAlgHom_apply,
+    IsLocalization.Away.lift_eq (lawTwoTriple W i' j' k')
+      (isUnit_algebraMap_transRing_transHom_lawTwoTriple_cross W i j i' j' k k') x]
+  rfl
 
 lemma psiSndCross_toRingHom_comp' (k k' : Fin 3) :
     (psiSndCross W i j i' j' k k').toRingHom.comp

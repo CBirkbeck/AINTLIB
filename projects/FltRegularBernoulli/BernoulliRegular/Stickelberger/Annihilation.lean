@@ -43,7 +43,7 @@ basis convention as `characterSideStickelbergerIdealAction`. -/
 noncomputable def characterSideStickelbergerClassAction
     (E : MonoidAlgebra ℤ (ZMod (p - 1))ˣ) : ClassGroup (𝓞 L) :=
   ∏ b : (ZMod (p - 1))ˣ,
-    ClassGroup.mk0 (characterSidePrimeClassIdeal (p := p) (L := L) b) ^ (E b⁻¹).toNat
+    ClassGroup.mk0 (characterSidePrimeClassIdeal (p := p) (L := L) b) ^ (E.coeff b⁻¹).toNat
 
 /-- The class-group product induced by `E` is the class of the corresponding
 ideal product. -/
@@ -55,7 +55,7 @@ lemma classGroup_mk0_characterSideStickelbergerIdealAction_eq_classAction
           mem_nonZeroDivisors_iff_ne_zero.mpr hE⟩ : (Ideal (𝓞 L))⁰) =
       characterSideStickelbergerClassAction (p := p) (L := L) E := by
   let F : (ZMod (p - 1))ˣ → (Ideal (𝓞 L))⁰ := fun b =>
-    (characterSidePrimeClassIdeal (p := p) (L := L) b) ^ (E b⁻¹).toNat
+    (characterSidePrimeClassIdeal (p := p) (L := L) b) ^ (E.coeff b⁻¹).toNat
   have hprod :
       (∏ b : (ZMod (p - 1))ˣ, F b : (Ideal (𝓞 L))⁰).1 =
         characterSideStickelbergerIdealAction (p := p) (L := L) E := by

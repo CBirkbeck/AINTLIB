@@ -81,12 +81,12 @@ theorem coprime_absNorm_p_of_not_mem
     Nat.absNorm_under_prime q
   have h_under_ne_p : Ideal.absNorm (q.under ℤ) ≠ p :=
     absNorm_under_ne_of_not_mem hp_not_in_q
-  -- absNorm q is a power of absNorm (q.under ℤ) (via inertiaDeg).
+  -- absNorm q is a power of absNorm (q.under ℤ) (via inertiaDeg').
   have h_under_dvd : Ideal.absNorm (q.under ℤ) ∣ Ideal.absNorm q :=
     Int.absNorm_under_dvd_absNorm q
   have h_norm_pow : Ideal.absNorm q =
       Ideal.absNorm (q.under ℤ) ^
-        ((Ideal.span ({(Ideal.absNorm (q.under ℤ) : ℤ)} : Set ℤ)).inertiaDeg q) := by
+        ((Ideal.span ({(Ideal.absNorm (q.under ℤ) : ℤ)} : Set ℤ)).inertiaDeg' q) := by
     have := Ideal.absNorm_eq_pow_inertiaDeg
       (R := 𝓞 K) (P := q) (p := (Ideal.absNorm (q.under ℤ) : ℤ))
       (Nat.prime_iff_prime_int.mp h_under_prime)

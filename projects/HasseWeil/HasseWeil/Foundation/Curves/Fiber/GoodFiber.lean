@@ -59,15 +59,17 @@ theorem exists_finite_ramified_locus_coordHom [IsAlgClosed F]
           (letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra;
             P.under C₂.CoordinateRing = q) →
           letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
-          Ideal.ramificationIdx q P = 1 := by
+          Ideal.ramificationIdx' q P = 1 := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
   haveI hfin' : @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
     cd.module_finite
   letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
   -- the `A → B → L` tower is the OreLocalization-derived one (as in `PushforwardDivisor`)
-  haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField :=
-    inferInstance
+  haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField := by
+    refine IsScalarTower.of_algebraMap_eq fun x ↦ ?_
+    rw [RingHom.algebraMap_toAlgebra]
+    rfl
   -- the `A → K → L` tower, from `cd.compat` (the `tower1` dance of `PushforwardDivisor`)
   haveI tower1 : IsScalarTower C₂.CoordinateRing C₂.FunctionField C₁.FunctionField := by
     refine IsScalarTower.of_algebraMap_smul fun r x ↦ ?_
@@ -101,7 +103,7 @@ theorem inertiaDeg_eq_one_of_mem_primesOver [IsAlgClosed F]
     (φ : CurveMap C₁ C₂) (cd : φ.CoordHom) (Q : C₂.SmoothPoint) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
     ∀ P' ∈ (C₂.maximalIdealAt Q).primesOver C₁.CoordinateRing,
-      Ideal.inertiaDeg (C₂.maximalIdealAt Q) P' = 1 := by
+      Ideal.inertiaDeg' (C₂.maximalIdealAt Q) P' = 1 := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
   haveI htf : @Module.IsTorsionFree C₂.CoordinateRing C₁.CoordinateRing _ _ modCR :=
@@ -121,7 +123,7 @@ theorem inertiaDeg_eq_one_of_mem_primesOver [IsAlgClosed F]
   rw [hP''] at h1
   have hpeq : C₂.maximalIdealAt (toPointMap cd P'') = C₂.maximalIdealAt Q :=
     h1.trans hP'lies.over.symm
-  have hid : Ideal.inertiaDeg (C₂.maximalIdealAt (toPointMap cd P''))
+  have hid : Ideal.inertiaDeg' (C₂.maximalIdealAt (toPointMap cd P''))
       (C₁.maximalIdealAt P'') = 1 := inertiaDeg_maximalIdealAt_toPointMap φ cd P''
   rwa [hpeq, hP''] at hid
 

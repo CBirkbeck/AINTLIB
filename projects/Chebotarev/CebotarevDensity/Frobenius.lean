@@ -64,7 +64,7 @@ def UnramifiedIn [IsGalois K L] (𝔭 : Ideal (𝓞 K)) : Prop :=
 
 /-- A prime of `𝓞 L` with ramification index `1` over its image in `𝓞 K` is nonzero. -/
 theorem ne_bot_of_ramificationIdx_eq_one
-    {𝔓 : Ideal (𝓞 L)} (hunr : Ideal.ramificationIdx (𝔓.under (𝓞 K)) 𝔓 = 1) : 𝔓 ≠ ⊥ := by
+    {𝔓 : Ideal (𝓞 L)} (hunr : Ideal.ramificationIdx' (𝔓.under (𝓞 K)) 𝔓 = 1) : 𝔓 ≠ ⊥ := by
   rintro rfl
   simp at hunr
 
@@ -89,11 +89,13 @@ variable [NumberField K] [NumberField L]
 the ramification index `e(𝔓 ∣ 𝔭)` equals `1`. -/
 theorem UnramifiedIn.ramificationIdx_eq_one [IsGalois K L]
     {𝔭 : Ideal (𝓞 K)} (hunr : UnramifiedIn K L 𝔭) (𝔓 : Ideal (𝓞 L)) [𝔓.IsPrime]
-    (hP : 𝔓.LiesOver 𝔭) : Ideal.ramificationIdx (𝔓.under (𝓞 K)) 𝔓 = 1 := by
+    (hP : 𝔓.LiesOver 𝔭) : Ideal.ramificationIdx' (𝔓.under (𝓞 K)) 𝔓 = 1 := by
   have := hP
   have h𝔓 : 𝔓 ≠ ⊥ := Ideal.ne_bot_of_liesOver_of_ne_bot hunr.1 𝔓
-  exact (Algebra.isUnramifiedAt_iff_of_isDedekindDomain h𝔓).mp
-    (hunr.2 𝔓 (‹𝔓.IsPrime›.isMaximal h𝔓) hP)
+  have hpbot : 𝔓.under (𝓞 K) ≠ ⊥ := Ideal.IsIntegral.comap_ne_bot (𝓞 K) h𝔓
+  have : Algebra.IsUnramifiedAt (𝓞 K) 𝔓 := hunr.2 𝔓 (‹𝔓.IsPrime›.isMaximal h𝔓) hP
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx (𝔓.under (𝓞 K)) 𝔓 hpbot]
+  exact Ideal.ramificationIdx_eq_one_of_isUnramifiedAt
 
 /-- For a prime `𝔓` of `𝓞 L` lying over an unramified prime `𝔭` of `𝓞 K`, the residue ring
 `𝓞 L ⧸ 𝔓` is finite. -/
@@ -106,7 +108,7 @@ theorem UnramifiedIn.finite_quotient [IsGalois K L]
 /-- For an unramified prime `𝔓` (ramification index `e(𝔓 ∣ 𝔭) = 1`), the inertia group of
 `Gal(L/K)` at `𝔓` is trivial. -/
 theorem inertiaGroup_trivial_of_unramified [IsGalois K L]
-    (𝔓 : Ideal (𝓞 L)) [𝔓.IsPrime] (hunr : Ideal.ramificationIdx (𝔓.under (𝓞 K)) 𝔓 = 1) :
+    (𝔓 : Ideal (𝓞 L)) [𝔓.IsPrime] (hunr : Ideal.ramificationIdx' (𝔓.under (𝓞 K)) 𝔓 = 1) :
     Ideal.inertia Gal(L/K) 𝔓 = ⊥ := by
   have hPbot : 𝔓 ≠ ⊥ := ne_bot_of_ramificationIdx_eq_one K L hunr
   have hpbot : 𝔓.under (𝓞 K) ≠ ⊥ := Ideal.IsIntegral.comap_ne_bot (𝓞 K) hPbot
@@ -120,7 +122,7 @@ theorem inertiaGroup_trivial_of_unramified [IsGalois K L]
     exact IsGalois.to_isSeparable
   haveI : Finite (𝓞 K ⧸ 𝔓.under (𝓞 K)) := Ideal.finiteQuotientOfFreeOfNeBot _ hpbot
   have hcard : Nat.card (Ideal.inertia Gal(L/K) 𝔓) =
-      Ideal.ramificationIdx (𝔓.under (𝓞 K)) 𝔓 := by
+      Ideal.ramificationIdx' (𝔓.under (𝓞 K)) 𝔓 := by
     rw [Ideal.card_inertia_eq_ramificationIdxIn (G := Gal(L/K)) (𝔓.under (𝓞 K)) 𝔓,
       Ideal.ramificationIdxIn_eq_ramificationIdx (𝔓.under (𝓞 K)) 𝔓 Gal(L/K),
       ← Ideal.ramificationIdx_eq_ramificationIdx' (𝔓.under (𝓞 K)) 𝔓 hpbot]
@@ -214,7 +216,7 @@ prime `𝔓` of `𝓞 L`, the decomposition group `D_𝔓` is cyclic of order th
 theorem orderOf_eq_finrank_of_isArithFrobAt
     (K L : Type*) [Field K] [NumberField K] [Field L] [NumberField L] [Algebra K L] [IsGalois K L]
     (σ : Gal(L/K)) (𝔓 : Ideal (𝓞 L)) [𝔓.IsPrime]
-    (h : Ideal.ramificationIdx (𝔓.under (𝓞 K)) 𝔓 = 1) (hσ : IsArithFrobAt (𝓞 K) σ 𝔓) :
+    (h : Ideal.ramificationIdx' (𝔓.under (𝓞 K)) 𝔓 = 1) (hσ : IsArithFrobAt (𝓞 K) σ 𝔓) :
     orderOf σ = Module.finrank (𝓞 K ⧸ 𝔓.under (𝓞 K)) (𝓞 L ⧸ 𝔓) := by
   have hPbot : 𝔓 ≠ ⊥ := ne_bot_of_ramificationIdx_eq_one K L h
   have hpbot : 𝔓.under (𝓞 K) ≠ ⊥ := Ideal.IsIntegral.comap_ne_bot (𝓞 K) hPbot
@@ -223,7 +225,8 @@ theorem orderOf_eq_finrank_of_isArithFrobAt
     (inferInstance : (𝔓.under (𝓞 K)).IsPrime).isMaximal hpbot
   have : Finite (𝓞 L ⧸ 𝔓) := Ideal.finiteQuotientOfFreeOfNeBot 𝔓 hPbot
   have : Algebra.IsUnramifiedAt (𝓞 K) 𝔓 :=
-    (Algebra.isUnramifiedAt_iff_of_isDedekindDomain hPbot).mpr h
+    Ideal.ramificationIdx_eq_one_iff.mp
+      ((Ideal.ramificationIdx'_eq_ramificationIdx (𝔓.under (𝓞 K)) 𝔓 hpbot).symm.trans h)
   rw [eq_arithFrobAt_of_isArithFrobAt K L 𝔓 σ hσ]
   let : Field (𝓞 K ⧸ 𝔓.under (𝓞 K)) := Ideal.Quotient.field _
   let : Field (𝓞 L ⧸ 𝔓) := Ideal.Quotient.field _
@@ -265,7 +268,7 @@ theorem card_primesAbove_mul_finrank_eq
     Nat.card {𝔓 : Ideal (𝓞 L) // 𝔓.IsPrime ∧ 𝔓.LiesOver 𝔭 ∧ 𝔓 ≠ ⊥}
         * Module.finrank (𝓞 K ⧸ 𝔓₀.under (𝓞 K)) (𝓞 L ⧸ 𝔓₀) = Nat.card Gal(L/K) := by
   have hpbot : 𝔭 ≠ ⊥ := UnramifiedIn.ne_bot K L hunr
-  have he : Ideal.ramificationIdx (𝔓₀.under (𝓞 K)) 𝔓₀ = 1 :=
+  have he : Ideal.ramificationIdx' (𝔓₀.under (𝓞 K)) 𝔓₀ = 1 :=
     UnramifiedIn.ramificationIdx_eq_one K L hunr 𝔓₀ hlo
   have hP0bot : 𝔓₀ ≠ ⊥ := ne_bot_of_ramificationIdx_eq_one K L he
   have hunder : 𝔓₀.under (𝓞 K) = 𝔭 := hlo.over.symm

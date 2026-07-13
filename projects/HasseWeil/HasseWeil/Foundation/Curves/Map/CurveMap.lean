@@ -402,13 +402,16 @@ theorem sum_ramificationIdx_mul_inertiaDeg_eq_degree
     {p : Ideal C₂.CoordinateRing} (hpMax : p.IsMaximal) (hp0 : p ≠ ⊥) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
     ∑ P ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
-        Ideal.ramificationIdx p P *
-        Ideal.inertiaDeg p P = φ.degree := by
+        Ideal.ramificationIdx' p P *
+        Ideal.inertiaDeg' p P = φ.degree := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing :=
     coordHom.toAlgebra
   letI : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
   haveI : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing
-      C₁.FunctionField := inferInstance
+      C₁.FunctionField := by
+    refine IsScalarTower.of_algebraMap_eq fun x ↦ ?_
+    rw [RingHom.algebraMap_toAlgebra]
+    rfl
   haveI : IsScalarTower C₂.CoordinateRing C₂.FunctionField
       C₁.FunctionField := by
     refine IsScalarTower.of_algebraMap_smul fun r x ↦ ?_

@@ -672,21 +672,24 @@ We build a ring isomorphism `TateAlgebra A ≃+* MvPolynomial (Fin 1) A`. -/
 This is `toFinsupp` with the correct type annotation for `MvPolynomial`. -/
 noncomputable def toMvPolynomial [DiscreteTopology A]
     (f : ↥(TateAlgebra A)) : MvPolynomial (Fin 1) A :=
-  toFinsupp f
+  .ofCoeff (toFinsupp f)
 
 /-- Convert an `MvPolynomial (Fin 1) A` to `TateAlgebra A` (discrete case).
 This is `ofFinsupp` with the correct type annotation for `MvPolynomial`. -/
 noncomputable def fromMvPolynomial [DiscreteTopology A]
     (p : MvPolynomial (Fin 1) A) : ↥(TateAlgebra A) :=
-  ofFinsupp p
+  ofFinsupp (AddMonoidAlgebra.coeff p)
 
 theorem fromMvPolynomial_toMvPolynomial [DiscreteTopology A] (f : ↥(TateAlgebra A)) :
-    fromMvPolynomial (toMvPolynomial f) = f :=
-  (linearEquivFinsupp (A := A)).left_inv f
+    fromMvPolynomial (toMvPolynomial f) = f := by
+  rw [fromMvPolynomial, toMvPolynomial, AddMonoidAlgebra.coeff_ofCoeff]
+  exact (linearEquivFinsupp (A := A)).left_inv f
 
 theorem toMvPolynomial_fromMvPolynomial [DiscreteTopology A] (p : MvPolynomial (Fin 1) A) :
-    toMvPolynomial (fromMvPolynomial p) = p :=
-  (linearEquivFinsupp (A := A)).right_inv p
+    toMvPolynomial (fromMvPolynomial p) = p := by
+  rw [toMvPolynomial, fromMvPolynomial,
+    show toFinsupp (ofFinsupp (AddMonoidAlgebra.coeff p)) = AddMonoidAlgebra.coeff p from
+      (linearEquivFinsupp (A := A)).right_inv (AddMonoidAlgebra.coeff p)]
 
 /-- `fromMvPolynomial` preserves multiplication: it is the restriction of the
 coercion `MvPolynomial → MvPowerSeries`, which is a ring homomorphism. -/
@@ -712,8 +715,11 @@ theorem toMvPolynomial_mul [DiscreteTopology A] (f g : ↥(TateAlgebra A)) :
       fromMvPolynomial_toMvPolynomial, fromMvPolynomial_toMvPolynomial]
 
 theorem toMvPolynomial_add [DiscreteTopology A] (f g : ↥(TateAlgebra A)) :
-    toMvPolynomial (f + g) = toMvPolynomial f + toMvPolynomial g :=
-  (linearEquivFinsupp (A := A)).map_add' f g
+    toMvPolynomial (f + g) = toMvPolynomial f + toMvPolynomial g := by
+  rw [toMvPolynomial, toMvPolynomial, toMvPolynomial,
+    show toFinsupp (f + g) = toFinsupp f + toFinsupp g from
+      (linearEquivFinsupp (A := A)).map_add' f g]
+  rfl
 
 /-- The ring equivalence `TateAlgebra A ≃+* MvPolynomial (Fin 1) A` (discrete case).
 Under `[DiscreteTopology A]`, the restricted power series ring coincides with the
@@ -752,8 +758,9 @@ theorem ringEquivMvPolynomial_X [DiscreteTopology A] :
       MvPolynomial.coeff s (MvPolynomial.X (0 : Fin 1)) by
     ext s; exact h s
   intro s
-  change @DFunLike.coe _ _ _ Finsupp.instFunLike (toMvPolynomial (X : ↥(TateAlgebra A))) s = _
-  simp only [toMvPolynomial, toFinsupp, Finsupp.onFinset_apply]
+  show MvPolynomial.coeff s (toMvPolynomial (X : ↥(TateAlgebra A))) = _
+  rw [toMvPolynomial, MvPolynomial.coeff, AddMonoidAlgebra.coeff_ofCoeff]
+  simp only [toFinsupp, Finsupp.onFinset_apply]
   change MvPowerSeries.coeff s (MvPowerSeries.X (0 : Fin 1)) = _
   rw [MvPowerSeries.coeff_X]
   rw [MvPolynomial.coeff_X]

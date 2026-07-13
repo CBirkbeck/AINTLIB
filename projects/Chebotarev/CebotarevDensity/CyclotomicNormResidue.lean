@@ -322,7 +322,7 @@ private theorem absNorm_eq_of_liesOver_fixedField
   intro 𝔮 h𝔮p h𝔮lo
   haveI := h𝔮p
   haveI := h𝔮lo
-  have hinert : (𝔮.under (𝓞 K)).inertiaDeg 𝔮 = 1 := by
+  have hinert : (𝔮.under (𝓞 K)).inertiaDeg' 𝔮 = 1 := by
     rw [Ideal.inertiaDeg_algebraMap]
     exact hresdeg 𝔮 h𝔮p h𝔮lo
   have hunder : 𝔮.under (𝓞 K) = 𝔭 := h𝔮lo.over.symm

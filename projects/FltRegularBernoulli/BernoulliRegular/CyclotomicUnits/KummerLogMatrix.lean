@@ -572,7 +572,7 @@ theorem valuedIntegerComplexConj_algebraMap_ringOfIntegers
         (algebraMap (𝓞 K) (ValuedIntegerRing p K) x) =
       algebraMap (𝓞 K) (ValuedIntegerRing p K)
         (cyclotomicRingOfIntegersEquiv (p := p) K (-1) x) := by
-  ext
+  apply Subtype.ext
   change valuedCompletionCyclotomicEquiv (p := p) K (-1)
       (algebraMap (𝓞 K) (ValuedCompletion p K) x) =
     algebraMap (𝓞 K) (ValuedCompletion p K)

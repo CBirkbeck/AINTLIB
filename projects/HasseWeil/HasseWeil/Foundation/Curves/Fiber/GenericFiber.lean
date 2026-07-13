@@ -61,8 +61,8 @@ theorem primesOverFinset_card_eq_degree_of_unramified
     (h_ef_one :
       letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
       ∀ P ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
-        Ideal.ramificationIdx p P *
-        Ideal.inertiaDeg p P = 1) :
+        Ideal.ramificationIdx' p P *
+        Ideal.inertiaDeg' p P = 1) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
     (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing).card = φ.degree := by
   letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
@@ -88,8 +88,8 @@ theorem primesOverFinset_card_eq_sepDegree_of_separable_and_unramified
     (h_ef_one :
       letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
       ∀ P ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
-        Ideal.ramificationIdx p P *
-        Ideal.inertiaDeg p P = 1) :
+        Ideal.ramificationIdx' p P *
+        Ideal.inertiaDeg' p P = 1) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
     (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing).card = φ.separableDegree := by
   -- separable + finite-dim ⇒ sepDegree = degree.
@@ -173,8 +173,14 @@ theorem _root_.IsDedekindDomain.ramificationIdx_eq_one_of_isUnramifiedAt_of_ne_b
     {B : Type*} [CommRing B] [IsDomain B] [IsNoetherianRing B]
     [Algebra A B] [Algebra.EssFiniteType A B]
     {P : Ideal B} [P.IsPrime] [Algebra.IsUnramifiedAt A P] (hP : P ≠ ⊥) :
-    Ideal.ramificationIdx (P.under A) P = 1 :=
-  Ideal.ramificationIdx_eq_one_of_isUnramifiedAt hP
+    Ideal.ramificationIdx' (P.under A) P = 1 := by
+  haveI : P.LiesOver (P.under A) := ⟨rfl⟩
+  letI := Localization.AtPrime.algebraOfLiesOver (P.under A) P
+  have hmap : (P.under A).map (algebraMap A (Localization.AtPrime P)) =
+      IsLocalRing.maximalIdeal _ :=
+    ((Algebra.isUnramifiedAt_iff_map_eq A (P.under A) P).mp ‹_›).2
+  exact Ideal.ramificationIdx'_eq_one_of_map_localization Ideal.map_comap_le hP
+    (Ideal.primeCompl_le_nonZeroDivisors P) hmap
 
 /-! ### Piece 4 — existence of an unramified prime
 
@@ -235,7 +241,7 @@ field degrees are automatically `1`), this gives `(primesOverFinset).card
 /-- **T-II-2-009 Piece 5 (composed at A → B level)**: assembles Pieces
 1–4 into a single witness. For `A → B` Dedekind + finite separable +
 `B` infinite in primes, there exists a `P ∈ HeightOneSpectrum B`,
-nonzero, with `ramificationIdx (P.under A → P) = 1`.
+nonzero, with `ramificationIdx' (P.under A → P) = 1`.
 
 The inertia degree `f_P = 1` is NOT concluded here — it depends on the
 residue-field extension being trivial, which is automatic over
@@ -252,7 +258,7 @@ theorem _root_.IsDedekindDomain.exists_unramifiedPrime_ramificationIdx_eq_one
       (FractionRing.liftAlgebra A (FractionRing B)))
     (hinf : Set.Infinite {_P : IsDedekindDomain.HeightOneSpectrum B | True}) :
     ∃ P : IsDedekindDomain.HeightOneSpectrum B,
-      Ideal.ramificationIdx (P.asIdeal.under A) P.asIdeal = 1 := by
+      Ideal.ramificationIdx' (P.asIdeal.under A) P.asIdeal = 1 := by
   obtain ⟨P, hunram⟩ := IsDedekindDomain.exists_unramified_prime hsep hinf
   haveI : P.asIdeal.IsPrime := P.isPrime
   haveI := hunram
@@ -350,10 +356,10 @@ variable {F : Type*} [Field F] {C₁ C₂ : SmoothPlaneCurve F}
 /-! ### Piece 7 — residue fields at smooth points are `F`
 
 The residue-field-degree-one content (f_P = 1) of T-II-2-009 Piece 7.
-Rather than prove `inertiaDeg = 1` directly — which hits a diamond
+Rather than prove `inertiaDeg' = 1` directly — which hits a diamond
 between `Module.Free` from `Ideal.Quotient` vs `DivisionRing` paths —
 we package the residue-field F-rank: `finrank F (C.CoordinateRing /
-maximalIdealAt P) = 1`. Any consumer wanting `inertiaDeg = 1` over an
+maximalIdealAt P) = 1`. Any consumer wanting `inertiaDeg' = 1` over an
 F-rational SmoothPoint combines this (for source + target) with the
 tower `finrank_mul_finrank`; worker-K has the direct
 `inertiaDeg_maximalIdealAt` for the specific `F[X] → F[C]` case. -/
@@ -402,8 +408,8 @@ theorem exists_heightOneSpectrum_fiber_card_eq_sepDegree
     (h_ef_one_Q :
       letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
       ∀ P ∈ IsDedekindDomain.primesOverFinset Q.asIdeal C₁.CoordinateRing,
-        Ideal.ramificationIdx Q.asIdeal P *
-        Ideal.inertiaDeg Q.asIdeal P = 1) :
+        Ideal.ramificationIdx' Q.asIdeal P *
+        Ideal.inertiaDeg' Q.asIdeal P = 1) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
     (IsDedekindDomain.primesOverFinset Q.asIdeal C₁.CoordinateRing).card = φ.separableDegree := by
   haveI : Q.asIdeal.IsPrime := Q.isPrime
@@ -412,7 +418,7 @@ theorem exists_heightOneSpectrum_fiber_card_eq_sepDegree
   exact φ.primesOverFinset_card_eq_sepDegree_of_separable_and_unramified
     coordHom hsep hQmax Q.ne_bot h_ef_one_Q
 
-/-! ### Piece 9 — `inertiaDeg = 1` at smooth points: diamond-blocked
+/-! ### Piece 9 — `inertiaDeg' = 1` at smooth points: diamond-blocked
 
 **Status**: blocked by the `Module.Free (C₂.CR/Q) (C₁.CR/P)` typeclass
 diamond. The attempted workaround — using `F` as outer ring in
@@ -429,7 +435,7 @@ intermediate extension. Specifically:
 
 The narrower witness form (`exists_heightOneSpectrum_fiber_card_eq_sepDegree`,
 Piece 8 above) takes the `e_P · f_P = 1` hypothesis as input and is the
-shippable deliverable. Closing `inertiaDeg = 1` without the diamond
+shippable deliverable. Closing `inertiaDeg' = 1` without the diamond
 requires either:
 
 1. A mathlib-level change to make `Ideal.Quotient.semiring` and
@@ -437,12 +443,12 @@ requires either:
 2. A residue-field algebra isomorphism `C.CR/(maximalIdealAt P) ≃ₐ[F] F`
    (under `[IsAlgClosed F]`), expressed without passing through
    `Module.Free` synthesis on the intermediate quotient, OR
-3. A direct computation of `Ideal.inertiaDeg` from the algebra-map
+3. A direct computation of `Ideal.inertiaDeg'` from the algebra-map
    surjectivity at smooth points on an algebraically closed base.
 
 The second route is the most promising — a dedicated file
 `HasseWeil/Curves/ResidueFieldAtSmoothPoint.lean` building an explicit
-`AlgEquiv` at each smooth point and then transporting `inertiaDeg`
+`AlgEquiv` at each smooth point and then transporting `inertiaDeg'`
 through it would sidestep `finrank_mul_finrank` entirely. Estimated
 ~100 LOC. Deferred. -/
 
@@ -475,7 +481,7 @@ The formalisation gap:
   nonzero at `p`" and "unramified at `p` with trivial residue
   extensions". For Dedekind extensions this is
   `Algebra.IsUnramifiedAt ↔ ¬ p ∣ differentIdeal`, and over alg-closed
-  base the residue fields all equal `F`, making `inertiaDeg = 1`
+  base the residue fields all equal `F`, making `inertiaDeg' = 1`
   automatic.
 
 This last step is ~200 lines of algebraic-geometric infrastructure

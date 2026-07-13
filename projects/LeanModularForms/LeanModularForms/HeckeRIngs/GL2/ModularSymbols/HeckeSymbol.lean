@@ -54,17 +54,20 @@ theorem heilbronnGL_mul (M M' : Matrix (Fin 2) (Fin 2) ℤ) (hM : M.det ≠ 0) (
 determinant) acts on cusps `ℙ¹(ℚ)` via the `GL(2, ℚ)`-action, and this permutation preserves the
 augmentation, hence `Div0 ℤ`. -/
 noncomputable def divAct (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : M.det ≠ 0) : Div0 ℤ →ₗ[ℤ] Div0 ℤ :=
-  LinearMap.restrict (Finsupp.lmapDomain ℤ ℤ ((heilbronnGL M hM) • ·)) <| by
+  LinearMap.restrict
+    (MonoidAlgebra.mapDomainLinearMap ℤ ℤ ((heilbronnGL M hM) • ·)) <| by
     intro x hx
-    simp only [LinearMap.mem_ker, Finsupp.lmapDomain_apply,
+    simp only [LinearMap.mem_ker, LinearMap.comp_apply, LinearEquiv.coe_coe,
+      MonoidAlgebra.coeffLinearEquiv_apply, MonoidAlgebra.coeff_mapDomainLinearMap,
       Finsupp.linearCombination_mapDomain] at hx ⊢
     rw [show ((fun _ => (1 : ℤ)) ∘ ((heilbronnGL M hM) • ·)) = (fun _ => (1 : ℤ)) from rfl]
     exact hx
 
 @[simp]
 theorem divAct_coe (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : M.det ≠ 0) (D : Div0 ℤ) :
-    ((divAct M hM D : Div0 ℤ) : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ)
-      = Finsupp.mapDomain ((heilbronnGL M hM) • ·) (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) :=
+    ((divAct M hM D : Div0 ℤ) : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff
+      = Finsupp.mapDomain ((heilbronnGL M hM) • ·)
+          (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff :=
   rfl
 
 /-- The Heilbronn action on `SymPow ℤ m`: the integer matrix `M` acts by the linear substitution
@@ -102,7 +105,7 @@ theorem det_mul_ne_zero {M M' : Matrix (Fin 2) (Fin 2) ℤ} (hM : M.det ≠ 0) (
 /-- `divAct` composes covariantly: `divAct (M * M') = divAct M ∘ divAct M'`. -/
 theorem divAct_mul (M M' : Matrix (Fin 2) (Fin 2) ℤ) (hM : M.det ≠ 0) (hM' : M'.det ≠ 0) :
     divAct (M * M') (det_mul_ne_zero hM hM') = (divAct M hM).comp (divAct M' hM') := by
-  refine LinearMap.ext fun D => Subtype.ext ?_
+  refine LinearMap.ext fun D => Subtype.ext (MonoidAlgebra.coeff_injective ?_)
   rw [LinearMap.comp_apply, divAct_coe, divAct_coe, divAct_coe, ← Finsupp.mapDomain_comp]
   congr 1
   funext y
@@ -148,7 +151,7 @@ theorem heilbronnGL_smul_eq_sl_smul (g : SL(2, ℤ)) (y : Projectivization ℚ (
 /-- On `SL(2, ℤ)`, the divisor Heilbronn action agrees with `div0Rep`. -/
 theorem divAct_eq_div0Rep (g : SL(2, ℤ)) :
     divAct (g : Matrix (Fin 2) (Fin 2) ℤ) (sl_det_ne_zero g) = div0Rep ℤ g := by
-  refine LinearMap.ext fun D => Subtype.ext ?_
+  refine LinearMap.ext fun D => Subtype.ext (MonoidAlgebra.coeff_injective ?_)
   rw [divAct_coe, div0Rep_apply]
   rfl
 

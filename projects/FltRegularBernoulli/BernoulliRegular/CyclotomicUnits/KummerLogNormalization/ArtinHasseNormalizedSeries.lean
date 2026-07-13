@@ -173,10 +173,10 @@ theorem integralArtinHasseNormalizedExpMinusOneSeries_map_valuedIntegerCyclotomi
           ValuedIntegerRing p K →+* ValuedIntegerRing p K)
         (integralArtinHasseNormalizedExpMinusOneSeries p K) =
       integralArtinHasseNormalizedExpMinusOneSeries p K := by
-  ext n
+  refine PowerSeries.ext fun n => ?_
   rw [PowerSeries.coeff_map, integralArtinHasseNormalizedExpMinusOneSeries_coeff,
     integralExpMinusOneSeries, Furtwaengler.DieudonneDwork.IsRIntegralPS.coeff_mapTo]
-  exact congrArg Subtype.val
+  exact
     (Conjugation.valuedIntegerCyclotomicEquiv_rIntegralRatToValuedInteger
     (p := p) (K := K) a
     ⟨(PowerSeries.coeff (R := ℚ) (n + 1))

@@ -207,12 +207,11 @@ lemma maximalRealSubfield_torsionOrder_eq_two :
     Units.torsionOrder (NumberField.maximalRealSubfield K) = 2 := by
   let L := NumberField.maximalRealSubfield K
   classical
+  rw [Units.torsionOrder, Nat.card_eq_two_iff]
   refine
-    Finset.card_eq_two.2
-      ⟨1, ⟨-1, neg_one_mem_torsion⟩, by simp [← Subtype.coe_ne_coe],
-        Finset.ext fun x ↦
-          ⟨fun _ ↦ ?_, fun _ ↦ Finset.mem_univ _⟩⟩
-  rw [Finset.mem_insert, Finset.mem_singleton, ← Subtype.val_inj, ← Subtype.val_inj]
+    ⟨1, ⟨-1, neg_one_mem_torsion⟩, by simp [← Subtype.coe_ne_coe],
+      Set.eq_univ_iff_forall.2 fun x ↦ ?_⟩
+  rw [Set.mem_insert_iff, Set.mem_singleton_iff, ← Subtype.val_inj, ← Subtype.val_inj]
   exact maximalRealSubfield_torsion_eq_one_or_neg_one (K := K) x
 
 set_option linter.unusedSectionVars false in

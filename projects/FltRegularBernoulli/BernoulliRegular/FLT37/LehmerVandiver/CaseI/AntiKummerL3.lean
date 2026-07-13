@@ -424,7 +424,7 @@ theorem antiKummerRealSubfield_isUnramified_of_ram_bound
         (h_irr := h_irr)
         (antiKummerSigmaTildePkg (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne)))),
         𝔭.IsPrime → 𝔓.IsPrime → 𝔭 ≠ ⊥ → 𝔓.LiesOver 𝔭 →
-        Ideal.ramificationIdx 𝔭 𝔓 = 1) :
+        Ideal.ramificationIdx' 𝔭 𝔓 = 1) :
     Algebra.Unramified (𝓞 (NumberField.maximalRealSubfield K))
       (𝓞 (antiKummerRealSubfield (p := p) (K := K) (α₀ := α₀) (hα₀ := hα₀) (h_irr := h_irr)
         (antiKummerSigmaTildePkg (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne))) := by
@@ -442,7 +442,8 @@ theorem antiKummerRealSubfield_isUnramified_of_ram_bound
     have h𝔭_bot : 𝔭 ≠ ⊥ := by
       rw [h𝔭_def]
       exact mt Ideal.eq_bot_of_comap_eq_bot h𝔓_bot
-    refine (Algebra.isUnramifiedAt_iff_of_isDedekindDomain h𝔓_bot).mpr ?_
+    refine Algebra.isUnramifiedAt_iff_of_isDedekindDomain.mpr ?_
+    rw [← Ideal.ramificationIdx'_eq_ramificationIdx (p := 𝔭) (q := 𝔓) h𝔭_bot]
     exact h_ram_bound 𝔭 𝔓 h𝔭_prime h𝔓_prime h𝔭_bot h𝔓_over
 
 /-- **AK-4 discharge under per-FLT-data AK inputs**: a function producing

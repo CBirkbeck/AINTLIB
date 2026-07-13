@@ -232,7 +232,7 @@ sides are finite products that evaluate to `(1 - Y ^ f)⁻ᵍ` where `Y = N𝔭^
 is the residue degree and `g = |G| / f` is the number of primes above `𝔭`:
 
 * the left side has `g` factors (`card_primesAbove_mul_orderOf_eq`), each equal to `(1 - Y^f)⁻¹`
-  because `N𝔓 = N𝔭^f` (`absNorm_eq_pow_inertiaDeg_of_liesOver`, `inertiaDeg = f`);
+  because `N𝔓 = N𝔭^f` (`absNorm_eq_pow_inertiaDeg_of_liesOver`, `inertiaDeg' = f`);
 * the right side is `∏_{χ : G →* ℂˣ} (1 - χ(σ) Y)⁻¹`, and the evaluation map `χ ↦ χ(σ)`
   surjects `Ĝ` onto the `f`-th roots of unity with uniform fibres of size `g`, so
   `∏_χ (1 - χ(σ) Y) = (∏_{ζ ∈ μ_f} (1 - ζ Y))^g = (1 - Y^f)^g`.
@@ -394,7 +394,7 @@ theorem dedekindZeta_local_factor_eq_product_artin_local
     intro 𝔓
     haveI := 𝔓.2.1
     haveI hlo : 𝔓.1.LiesOver 𝔭 := 𝔓.2.2.1
-    have hdeg : (𝔓.1.under (𝓞 K)).inertiaDeg 𝔓.1 = f := by
+    have hdeg : (𝔓.1.under (𝓞 K)).inertiaDeg' 𝔓.1 = f := by
       rw [Ideal.inertiaDeg_algebraMap, hf]
       exact finrank_residue_eq_orderOf K L σ (frobeniusClass K L 𝔭) (Quotient.out_eq _)
         𝔭 _hunr rfl 𝔓.1 hlo
@@ -573,7 +573,7 @@ theorem charFibre_mem_range {G : Type*} [CommGroup G] [Finite G] (χ : G →* �
       exact Subtype.ext (by simpa [Subgroup.coe_pow] using hpow g)
   have heq : MonoidHom.range χ = rootsOfUnity (orderOf χ) ℂ :=
     Subgroup.eq_of_le_of_card_ge hsub (by
-      rw [Nat.card_eq_fintype_card, Complex.card_rootsOfUnity, hoe,
+      rw [Complex.card_rootsOfUnity, hoe,
         IsCyclic.exponent_eq_card (α := MonoidHom.range χ)])
   exact χ.mem_range.mp (heq ▸ (mem_rootsOfUnity (orderOf χ) ζ).mpr hζ)
 

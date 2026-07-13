@@ -323,7 +323,7 @@ lemma isUnramifiedAt_of_primary_witness (hp : p ≠ 2) (α : K) (hα : α ≠ 0)
     haveI hImax : (Ideal.span {(hζ.toInteger - 1 : 𝓞 K)}).IsMaximal :=
       isMaximal_span_zeta_sub_one hζ
     have hloc : ∀ Q ∈ (Ideal.span {(hζ.toInteger - 1 : 𝓞 K)}).primesOver (𝓞 L),
-        Ideal.ramificationIdx (Ideal.span {(hζ.toInteger - 1 : 𝓞 K)}) Q = 1 :=
+        Ideal.ramificationIdx' (Ideal.span {(hζ.toInteger - 1 : 𝓞 K)}) Q = 1 :=
       NonUnitKummer.isUnramifiedAt_local hp hζ a ha_cong hu L ha_ne
         (Ideal.span {(hζ.toInteger - 1 : 𝓞 K)}) (span_zeta_sub_one_ne_bot hζ) haI
     -- Transport to `Algebra.IsUnramifiedAt (𝓞 K) P` via the per-prime bridge.
@@ -340,10 +340,10 @@ lemma isUnramifiedAt_of_primary_witness (hp : p ≠ 2) (α : K) (hα : α ≠ 0)
         ((Polynomial.IsSplittingField.splits_iff L (Polynomial.X ^ p - Polynomial.C α)).mp
           hsplits).symm
     -- `e(P) = 1` from `e(P) ≤ finrank = 1` and `e(P) ≠ 0`.
-    have hle : Ideal.ramificationIdx (P.under (𝓞 K)) P ≤ Module.finrank K L :=
+    have hle : Ideal.ramificationIdx' (P.under (𝓞 K)) P ≤ Module.finrank K L :=
       Ideal.ramificationIdx_le_finrank (R := 𝓞 K) (S := 𝓞 L) (K := K) (L := L)
         (p := P.under (𝓞 K)) P
-    have hne : Ideal.ramificationIdx (P.under (𝓞 K)) P ≠ 0 :=
+    have hne : Ideal.ramificationIdx' (P.under (𝓞 K)) P ≠ 0 :=
       Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver P hUnderBot
     refine (Algebra.isUnramifiedAt_iff_of_isDedekindDomain hP_bot).mpr ?_
     rw [hfinrank1] at hle

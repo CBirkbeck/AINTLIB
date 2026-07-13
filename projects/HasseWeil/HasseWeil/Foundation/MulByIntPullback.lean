@@ -400,6 +400,25 @@ private lemma norm_smul_basis_ne_zero (p q : Polynomial F) (hq : q ≠ 0) :
   exact absurd (h_deg ▸ le_max_right _ _ : 2 • q.degree + 3 ≤ ⊥)
     (not_le.mpr (WithBot.bot_lt_iff_ne_bot.mpr this))
 
+omit [W.toAffine.IsElliptic] in
+/-- The image in `R = F[C]` of the `F[X]`-norm of the basis element `r' = p•1 + q•Y`
+factors as `r' * conj_r`, where `conj_r` is the `F[X]`-conjugate class.  Extracted as its
+own lemma so it elaborates in a light context (the `coe_norm_smul_basis` rewrite and the
+ring-hom bookkeeping are heartbeat-heavy inside the main injectivity proof). -/
+private lemma algebraMap_norm_smul_basis_eq (p q : Polynomial F) :
+    algebraMap (Polynomial F) R (Algebra.norm (Polynomial F)
+        (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X)) =
+      (p • (1 : R) + q • Affine.CoordinateRing.mk W.toAffine Polynomial.X) *
+        Affine.CoordinateRing.mk W.toAffine
+          (Polynomial.C p + Polynomial.C q *
+            (-Polynomial.X - Polynomial.C
+              (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃))) := by
+  change AdjoinRoot.of _ _ = _
+  rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
+  congr 1
+  rw [map_add, map_mul]
+  simp [Algebra.smul_def]
+
 theorem mulByInt_coordHom_injective (n : ℤ) (hn : n ≠ 0) :
     Function.Injective (mulByInt_coordHom W n hn) := by
   rw [injective_iff_map_eq_zero]
@@ -443,12 +462,7 @@ theorem mulByInt_coordHom_injective (n : ℤ) (hn : n ≠ 0) :
           (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃))) with hconj_def
     have h_factor : algebraMap (Polynomial F) R (Algebra.norm (Polynomial F) r') =
         r' * conj_r := by
-      rw [hr'_def, hconj_def]
-      change AdjoinRoot.of _ _ = _
-      rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
-      congr 1
-      rw [map_add, map_mul]
-      simp [Algebra.smul_def]
+      rw [hr'_def, hconj_def]; exact algebraMap_norm_smul_basis_eq W p q
     have hr'_zero : mulByInt_coordHom W n hn r' = 0 := by
       rw [show r' = r from hpq]; exact h_image.trans hr
     have h_norm_zero : mulByInt_xHom W n (Algebra.norm (Polynomial F) r') = 0 := by

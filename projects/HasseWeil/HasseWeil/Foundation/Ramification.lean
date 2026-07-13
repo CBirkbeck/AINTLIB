@@ -23,13 +23,13 @@ import HasseWeil.Foundation.Valuation
 /-!
 # Ramification Theory for Elliptic Curve Isogenies
 
-We connect mathlib's `Ideal.ramificationIdx` and `Ideal.inertiaDeg` to the
+We connect mathlib's `Ideal.ramificationIdx'` and `Ideal.inertiaDeg'` to the
 theory of elliptic curve isogenies, specializing the general framework from
 `Mathlib.NumberTheory.RamificationInertia` to coordinate ring extensions.
 
 For an isogeny `φ : E₁ → E₂`, the pullback `φ* : K(E₂) →ₐ[F] K(E₁)` restricts to
 a ring homomorphism on coordinate rings. The ramification index `e_P(φ)` at a
-prime `P` of `R₁ = K[E₁]` is `Ideal.ramificationIdx (φ*.restrict) p P` where
+prime `P` of `R₁ = K[E₁]` is `Ideal.ramificationIdx' (φ*.restrict) p P` where
 `p = φ*⁻¹(P)` is the prime of `R₂ = K[E₂]` below `P`.
 
 ## Main results
@@ -1443,7 +1443,7 @@ instance isIntegrallyClosed_coordinateRing (E : Affine F) [E.IsElliptic] :
   inferInstance
 
 -- Downstream ramification theory builds on the Dedekind-domain structure above via mathlib's
--- `Ideal.ramificationIdx`, `Ideal.inertiaDeg`, and `Ideal.sum_ramification_inertia`, applied to
+-- `Ideal.ramificationIdx'`, `Ideal.inertiaDeg'`, and `Ideal.sum_ramification_inertia`, applied to
 -- the coordinate-ring extension `R₂ → R₁` induced by the pullback of an isogeny.
 
 end HasseWeil

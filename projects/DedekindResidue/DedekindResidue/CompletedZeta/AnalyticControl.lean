@@ -62,7 +62,7 @@ theorem integrable_heckeΛ₀_norm (a : ℝ) :
     IntegrableOn (fun x : ℝ => x ^ (a - 1) * ‖(heckeFEPair K).f_modif x‖)
       (Set.Ioi 0) := by
   have hconv : MellinConvergent ((heckeFEPair K).f_modif) (a : ℂ) :=
-    ((heckeFEPair K).toStrongFEPair.hasMellin (a : ℂ)).1
+    ((heckeFEPair K).isStrongFEPair_toStrongFEPair.hasMellin (a : ℂ)).1
   have hnn : IntegrableOn
       (fun x : ℝ => ‖((x:ℂ) ^ ((a:ℂ) - 1) • (heckeFEPair K).f_modif x)‖)
       (Set.Ioi 0) := hconv.norm

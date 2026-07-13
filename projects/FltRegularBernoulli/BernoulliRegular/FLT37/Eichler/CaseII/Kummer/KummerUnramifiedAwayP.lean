@@ -443,10 +443,10 @@ theorem caseIIKummerUnramifiedAway37_proven : CaseIIKummerUnramifiedAway37 := by
       Pₚ hPₚ_bot hpunder_bot hn' u hgen hθ'_pow
   haveI : IsNoetherianRing Sₚ := IsLocalization.isNoetherianRing
     (Algebra.algebraMapSubmonoid (𝓞 L) q.primeCompl) Sₚ inferInstance
-  have hePₚ : Ideal.ramificationIdx (IsLocalRing.maximalIdeal A) Pₚ = 1 := by
+  have hePₚ : Ideal.ramificationIdx' (IsLocalRing.maximalIdeal A) Pₚ = 1 := by
     have h := Ideal.ramificationIdx_eq_one_of_isUnramifiedAt (R := A) (S := Sₚ) hPₚ_bot
     rwa [hPₚ_under] at h
-  have heq : Ideal.ramificationIdx q P = 1 := by
+  have heq : Ideal.ramificationIdx' q P = 1 := by
     rw [← IsLocalization.AtPrime.ramificationIdx_map_eq_ramificationIdx q A Sₚ P hq_bot]
     exact hePₚ
   refine (Algebra.isUnramifiedAt_iff_of_isDedekindDomain (R := 𝓞 (CyclotomicField 37 ℚ))

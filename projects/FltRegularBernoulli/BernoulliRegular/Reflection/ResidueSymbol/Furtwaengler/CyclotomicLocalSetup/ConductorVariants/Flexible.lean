@@ -69,7 +69,7 @@ theorem mem_descentPrime_iff (x : 𝓞 K) :
 
 /-- The ramification index of `Q ⊂ 𝓞 R'` over `descentPrime ⊂ 𝓞 K`. -/
 noncomputable def descentRamificationIdx : ℕ :=
-  Ideal.ramificationIdx S.descentPrime S.Q
+  Ideal.ramificationIdx' S.descentPrime S.Q
 
 omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- Image of `descentPrime` in `𝓞 R'` is contained in `S.Q^e`. -/

@@ -110,12 +110,12 @@ theorem idealNormMultiplicity_at_q_inert_odd (hp3 : p % 4 = 3) (q : ℕ)
   have : Even k := ⟨m, by omega⟩
   exact (Nat.not_even_iff_odd.mpr hk_odd) this
 
-/-- In the split case at `q ≠ p, 2`, both primes above q have inertiaDeg = 1. -/
+/-- In the split case at `q ≠ p, 2`, both primes above q have inertiaDeg' = 1. -/
 theorem inertiaDeg_at_q_split (hp3 : p % 4 = 3) (q : ℕ)
     [Fact q.Prime] (hq_odd : q ≠ 2) (hqp : q ≠ p) {r : ZMod q} (hr : r ^ 2 = -(p : ZMod q))
     (P : Ideal (𝓞 (Kminus p)))
     (hP : P ∈ Ideal.primesOver (Ideal.span {(q : ℤ)}) (𝓞 (Kminus p))) :
-    (Ideal.span {(q : ℤ)}).inertiaDeg P = 1 := by
+    (Ideal.span {(q : ℤ)}).inertiaDeg' P = 1 := by
   classical
   have h_exp : ¬ (q : ℕ) ∣ RingOfIntegers.exponent (alphaInOK p hp3) :=
     not_dvd_exponent_alphaInOK p hp3 q
@@ -132,7 +132,8 @@ theorem inertiaDeg_at_q_split (hp3 : p % 4 = 3) (q : ℕ)
     change (P_sub : Ideal (𝓞 (Kminus p))) = _
     rw [this]
   rw [hP_from]
-  rw [NumberField.Ideal.inertiaDeg_primesOverSpanEquivMonicFactorsMod_symm_apply'
+  rw [Ideal.inertiaDeg'_eq_inertiaDeg,
+    NumberField.Ideal.inertiaDeg_primesOverSpanEquivMonicFactorsMod_symm_apply'
       h_exp hQ_mem]
   -- Qfactor is one of the two linear factors {X - Cu, X - Cv}, so natDegree = 1.
   rw [monicFactorsMod_alpha_at_q_split p hp3 q hq_odd hqp hr] at hQ_mem
@@ -155,10 +156,10 @@ theorem absNorm_primeOver_at_q_split (hp3 : p % 4 = 3) (q : ℕ)
     Ideal.absNorm P = q := by
   haveI : P.IsPrime := hP.1
   haveI : P.LiesOver (Ideal.span {(q : ℤ)}) := hP.2
-  have h_ine : (Ideal.span {(q : ℤ)}).inertiaDeg P = 1 :=
+  have h_ine : (Ideal.span {(q : ℤ)}).inertiaDeg' P = 1 :=
     inertiaDeg_at_q_split p hp3 q hq_odd hqp hr P hP
   calc Ideal.absNorm P
-      = q ^ ((Ideal.span {(q : ℤ)}).inertiaDeg P) :=
+      = q ^ ((Ideal.span {(q : ℤ)}).inertiaDeg' P) :=
         Ideal.absNorm_eq_pow_inertiaDeg' P (Fact.out : q.Prime)
     _ = q ^ (1 : ℕ) := by rw [h_ine]
     _ = q := pow_one q
@@ -523,7 +524,7 @@ theorem ncard_primesOver_at_p (hp3 : p % 4 = 3) :
 /-- For `p ≡ 3 (mod 4)` prime, the unique prime above `p` has inertia degree 1. -/
 theorem inertiaDeg_at_p (hp3 : p % 4 = 3) (P : Ideal (𝓞 (Kminus p)))
     (hP : P ∈ Ideal.primesOver (Ideal.span {(p : ℤ)}) (𝓞 (Kminus p))) :
-    (Ideal.span {(p : ℤ)}).inertiaDeg P = 1 := by
+    (Ideal.span {(p : ℤ)}).inertiaDeg' P = 1 := by
   classical
   have h_exp : ¬ (p : ℕ) ∣ RingOfIntegers.exponent (alphaInOK p hp3) :=
     not_dvd_exponent_alphaInOK p hp3 p
@@ -547,10 +548,11 @@ theorem inertiaDeg_at_p (hp3 : p % 4 = 3) (P : Ideal (𝓞 (Kminus p)))
     exact congrArg (fun (x : ↥(Ideal.primesOver (Ideal.span {(p : ℤ)}) (𝓞 (Kminus p)))) ↦
       (x : Ideal (𝓞 (Kminus p)))) hP_set
   rw [hP_eq]
-  -- Apply the inertiaDeg formula from Kummer-Dedekind.
+  -- Apply the inertiaDeg' formula from Kummer-Dedekind.
   -- Qfactor = Polynomial.map (Int.castRingHom (ZMod p)) (X - C 2⁻¹ lifted to ℤ[X])
   -- For cleanliness, we use the ZMod version of the lemma.
-  rw [NumberField.Ideal.inertiaDeg_primesOverSpanEquivMonicFactorsMod_symm_apply'
+  rw [Ideal.inertiaDeg'_eq_inertiaDeg,
+    NumberField.Ideal.inertiaDeg_primesOverSpanEquivMonicFactorsMod_symm_apply'
       h_exp hQ_mem]
   -- Goal: natDegree (X - C (2⁻¹)) = 1
   exact Polynomial.natDegree_X_sub_C _
@@ -561,9 +563,9 @@ theorem absNorm_primeOver_at_p (hp3 : p % 4 = 3) (P : Ideal (𝓞 (Kminus p)))
     Ideal.absNorm P = p := by
   haveI : P.IsPrime := hP.1
   haveI : P.LiesOver (Ideal.span {(p : ℤ)}) := hP.2
-  have h_ine : (Ideal.span {(p : ℤ)}).inertiaDeg P = 1 := inertiaDeg_at_p p hp3 P hP
+  have h_ine : (Ideal.span {(p : ℤ)}).inertiaDeg' P = 1 := inertiaDeg_at_p p hp3 P hP
   calc Ideal.absNorm P
-      = p ^ ((Ideal.span {(p : ℤ)}).inertiaDeg P) := Ideal.absNorm_eq_pow_inertiaDeg' P hp.out
+      = p ^ ((Ideal.span {(p : ℤ)}).inertiaDeg' P) := Ideal.absNorm_eq_pow_inertiaDeg' P hp.out
     _ = p ^ (1 : ℕ) := by rw [h_ine]
     _ = p := pow_one p
 

@@ -381,7 +381,7 @@ lemma isUnramifiedAt_local (L : Type*) [Field L] [NumberField L] [Algebra K L]
     [Polynomial.IsSplittingField K L (X ^ p - C (algebraMap (𝓞 K) K a))]
     (ha : a ≠ 0)
     (I : Ideal (𝓞 K)) [I.IsMaximal] (hIbot : I ≠ ⊥) (haI : a ∉ I) :
-    ∀ P ∈ I.primesOver (𝓞 L), Ideal.ramificationIdx I P = 1 := by
+    ∀ P ∈ I.primesOver (𝓞 L), Ideal.ramificationIdx' I P = 1 := by
   have : Fact (Nat.Prime p) := hpri
   have : Algebra.IsSeparable K L := Algebra.IsAlgebraic.isSeparable_of_perfectField
   have hirr : Irreducible (X ^ p - C (algebraMap (𝓞 K) K a)) := by
@@ -409,7 +409,7 @@ lemma isUnramifiedAt_local (L : Type*) [Field L] [NumberField L] [Algebra K L]
       (IsIntegral.tower_top x.prop) hx_top ?_
     rw [minpoly_polyRoot' hp hζ a hcong hu, hIunder]
     exact separable_poly_local hp hζ a hcong ha α hβ_pow I haI
-  have he : Ideal.ramificationIdx (P.under (𝓞 K)) P = 1 :=
+  have he : Ideal.ramificationIdx' (P.under (𝓞 K)) P = 1 :=
     (Algebra.isUnramifiedAt_iff_of_isDedekindDomain hP_bot).mp hunram
   rwa [hIunder] at he
 

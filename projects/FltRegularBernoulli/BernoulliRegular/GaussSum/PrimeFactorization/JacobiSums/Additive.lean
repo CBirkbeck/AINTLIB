@@ -61,11 +61,11 @@ lemma gaussSumLiftAdditiveRoot_sub_one_mem_primeAboveP
     intro hp_unit
     exact (show P ≠ ⊤ from (inferInstance : P.IsPrime).ne_top)
       (Ideal.eq_top_of_isUnit_mem P hp_mem hp_unit)
-  letI : NeZero (Ideal.ramificationIdx 𝔭 P) :=
+  letI : NeZero (Ideal.ramificationIdx' 𝔭 P) :=
     ⟨Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver
       (R := ℤ) (S := 𝓞 L) (p := 𝔭) P hp0⟩
   letI : Algebra (ℤ ⧸ 𝔭) (𝓞 L ⧸ P) :=
-    Ideal.Quotient.algebraQuotientOfRamificationIdxNeZero 𝔭 P
+    Ideal.Quotient.algebraQuotientOfLEComap (le_of_eq (P.over_def 𝔭))
   letI : CharP (ℤ ⧸ 𝔭) p :=
     charP_of_injective_ringHom
       (f := (Int.quotientSpanNatEquivZMod p).symm.toRingHom)
@@ -211,7 +211,7 @@ lemma normalizedBoundaryPrime_under_additiveSubfield :
     (normalizedBoundaryPrime_mem_characterSidePrimeOrbit (p := p) (L := L))
 
 lemma normalizedBoundaryPrime_ramificationIdx_over_additiveSubfield :
-    Ideal.ramificationIdx
+    Ideal.ramificationIdx'
         (additiveZetaPrime (L := L) (p := p))
         (normalizedBoundaryPrime (p := p) (L := L)) = 1 := by
   let Padd := additiveZetaPrime (L := L) (p := p)

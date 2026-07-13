@@ -901,7 +901,9 @@ theorem tsum_idealSet_norm_rpow (J : (Ideal (𝓞 K))⁰) (σ : ℝ) :
       (∑' _ζ : torsion K, ENNReal.ofReal ((((n : ℝ)) ^ 2) ^ (-σ)))
         = (torsionOrder K) * ENNReal.ofReal ((((n : ℝ)) ^ 2) ^ (-σ)) := by
     intro I
-    rw [tsum_fintype, Finset.sum_const, nsmul_eq_mul]
+    letI := Fintype.ofFinite (torsion K)
+    rw [tsum_fintype, Finset.sum_const, nsmul_eq_mul, Units.torsionOrder,
+      Nat.card_eq_fintype_card]
     norm_cast
   rw [tsum_congr hinner, ENNReal.tsum_mul_left]
   congr 1
@@ -1458,7 +1460,11 @@ theorem lintegral_mellin_heckeG_dev (J : (Ideal (𝓞 K))⁰) {σ : ℝ} (hσ : 
               (embeddingCoords K (conePreimage K J a))) :=
     fun t _ => (ENNReal.tsum_mul_left).symm
   rw [setLIntegral_congr_fun measurableSet_Ioi hpull]
-  rw [lintegral_tsum (fun a => hmeas_rpow.mul (hmeasH _))]
+  rw [lintegral_tsum (f := fun (a : idealSet K J) (t : ℝ) =>
+      ENNReal.ofReal (t ^ (σ - 1))
+        * ∫⁻ u : logSpace K, ENNReal.ofReal (gaussTerm K t u
+            (embeddingCoords K (conePreimage K J a))))
+    (fun a => hmeas_rpow.mul (hmeasH _))]
   -- step 3: evaluate each cone-point term
   have hpera : ∀ a : idealSet K J,
       (∫⁻ t in Set.Ioi (0:ℝ), ENNReal.ofReal (t ^ (σ - 1))
@@ -1647,18 +1653,26 @@ theorem lintegral_mellin_heckeF_dev {σ : ℝ} (hσ : 0 < σ) :
     rw [hFsum, ENNReal.ofReal_sum_of_nonneg (fun C _ => heckeGClass_dev_nonneg K C ht),
       Finset.mul_sum]
   rw [setLIntegral_congr_fun measurableSet_Ioi hstep]
-  rw [lintegral_finsetSum' _ (fun C _ => ?_)]
+  rw [lintegral_finsetSum' (f := fun (C : ClassGroup (𝓞 K)) (t : ℝ) =>
+      ENNReal.ofReal (t ^ (σ - 1))
+        * ENNReal.ofReal (heckeGClass K C t
+            - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K)) _ (fun C _ => ?_)]
   swap
   · -- measurability per class
-    refine AEMeasurable.mul ?_ ?_
-    · have hcont : ContinuousOn (fun t : ℝ => t ^ (σ - 1)) (Set.Ioi (0:ℝ)) :=
+    have h1 : AEMeasurable (fun t : ℝ => ENNReal.ofReal (t ^ (σ - 1)))
+        (volume.restrict (Set.Ioi (0:ℝ))) := by
+      have hcont : ContinuousOn (fun t : ℝ => t ^ (σ - 1)) (Set.Ioi (0:ℝ)) :=
         fun x hx => (Real.continuousAt_rpow_const x _
           (Or.inl (ne_of_gt hx))).continuousWithinAt
       exact (ENNReal.continuous_ofReal.comp_continuousOn hcont).aemeasurable
         measurableSet_Ioi
-    · refine (ENNReal.continuous_ofReal.comp_continuousOn ?_).aemeasurable
+    have h2 : AEMeasurable (fun t : ℝ => ENNReal.ofReal (heckeGClass K C t
+          - (torsionOrder K : ℝ)⁻¹ * unitBoxVol K))
+        (volume.restrict (Set.Ioi (0:ℝ))) := by
+      refine (ENNReal.continuous_ofReal.comp_continuousOn ?_).aemeasurable
         measurableSet_Ioi
       exact (continuousOn_heckeGClass K C).sub continuousOn_const
+    exact h1.mul h2
   -- per class: e-iii + the fiber predicate through choose_spec
   have hperC : ∀ C : ClassGroup (𝓞 K),
       (∫⁻ t in Set.Ioi (0:ℝ), ENNReal.ofReal (t ^ (σ - 1))

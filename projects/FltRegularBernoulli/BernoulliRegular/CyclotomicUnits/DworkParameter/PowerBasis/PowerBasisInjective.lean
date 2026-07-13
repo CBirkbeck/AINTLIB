@@ -156,7 +156,8 @@ theorem exists_natCast_prime_smul_eq_of_mem_primeIdeal_smul_top
     simpa [mul_comm] using hb
   choose b hb using hdiv
   refine ⟨b, ?_⟩
-  ext i
+  funext i
+  apply Subtype.ext
   simpa [Pi.smul_apply, smul_eq_mul] using congrArg Subtype.val (hb i)
 
 theorem dworkParameterPowerLinearMap_eq_zero_of_natCast_prime_smul_eq

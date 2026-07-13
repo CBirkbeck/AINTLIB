@@ -76,8 +76,17 @@ def Rel₃ (m n r : ℤ) : Prop :=
   W (m + n) * W (m - n) * W r ^ 2 =
     W (m + r) * W (m - r) * W n ^ 2 - W (n + r) * W (n - r) * W m ^ 2
 
+/-- The mathlib elliptic relator at `s = 0` is equivalent to `Rel₃`. -/
+lemma rel_zero_iff_rel₃ (m n r : ℤ) :
+    IsEllipticNet.rel W m n r 0 = 0 ↔ Rel₃ W m n r := by
+  rw [IsEllipticNet.rel, Rel₃]; simp only [add_zero]
+  constructor <;> intro h <;> linear_combination h
+
 /-- `IsEllSequence` is equivalent to the universal `Rel₃` property. -/
-lemma isEllSequence_iff_rel₃ : IsEllSequence W ↔ ∀ m n r : ℤ, Rel₃ W m n r := Iff.rfl
+lemma isEllSequence_iff_rel₃ : IsEllSequence W ↔ ∀ m n r : ℤ, Rel₃ W m n r := by
+  simp only [IsEllSequence, IsEllipticSequence]
+  exact forall_congr' fun m => forall_congr' fun n => forall_congr' fun r =>
+    rel_zero_iff_rel₃ W m n r
 
 /-- The numerator of an invariant of an elliptic sequence, such that for each `s`,
 `invarNum s n / invarDenom s n` is a constant independent of `n`. -/
@@ -504,8 +513,8 @@ theorem rel₄_of_oddRec_evenRec {a b c d : ℤ} (same : HaveSameParity₄ a b c
 /-- An ℕ-indexed sequence satisfying the even-odd recurrence, after extension to all integers
 by symmetry (to make an odd function), is an elliptic sequence, provided its first two terms
 are not zero divisors. -/
-theorem _root_.IsEllSequence.of_oddRec_evenRec : IsEllSequence W := fun m n r ↦ by
-  change Rel₃ W m n r
+theorem _root_.IsEllSequence.of_oddRec_evenRec : IsEllSequence W :=
+    (isEllSequence_iff_rel₃ W).mpr fun m n r ↦ by
   rw [rel₃_iff₄, rel₄_of_oddRec_evenRec neg zero one two oddRec evenRec]
   refine ⟨?_, ?_, ?_⟩ <;> simp only [negOnePow_two_mul, negOnePow_zero]
 
@@ -520,21 +529,23 @@ namespace IsEllSequence
 variable {R : Type*} [CommRing R] {W : ℤ → R} (ell : IsEllSequence W)
 include ell
 
-lemma oddRec (m : ℤ) : OddRec W m := (rel₃_iff_oddRec W m).mp (ell _ _ _)
-lemma evenRec (m : ℤ) : EvenRec W m := (rel₃_iff_evenRec W m).mp (ell _ _ _)
+lemma oddRec (m : ℤ) : OddRec W m :=
+  (rel₃_iff_oddRec W m).mp ((isEllSequence_iff_rel₃ W).mp ell _ _ _)
+lemma evenRec (m : ℤ) : EvenRec W m :=
+  (rel₃_iff_evenRec W m).mp ((isEllSequence_iff_rel₃ W).mp ell _ _ _)
 
 /-- The zeroth term of an elliptic sequence is zero,
 provided some even term is not a zero divisor. -/
 lemma zero (m : ℤ) (mem : W (2 * m) ∈ R⁰) : W 0 = 0 := by
-  have h := ell m m (2 * m)
-  rw [show m + m = 2 * m by ring, sub_self] at h
+  have h := (isEllSequence_iff_rel₃ W).mp ell m m (2 * m)
+  rw [Rel₃, show m + m = 2 * m by ring, sub_self] at h
   -- the RHS of `h` is `X - X = 0`, leaving `W 0 * W (2 * m) ^ 3 = 0`
   have h'' : W 0 * W (2 * m) ^ 3 = 0 := by linear_combination h
   exact (pow_mem mem 3).2 _ h''
 
 lemma sub_add_neg_sub_mul_eq_zero (m n r : ℤ) :
     (W (m - n) + W (-(m - n))) * W (m + n) * W r ^ 2 = 0 := by
-  have := congr($(ell m n r) + $(ell n m r))
+  have := congr($((isEllSequence_iff_rel₃ W).mp ell m n r) + $((isEllSequence_iff_rel₃ W).mp ell n m r))
   rw [add_comm n, ← right_distrib, ← left_distrib, mul_comm (W _)] at this
   rw [show (-(m - n) : ℤ) = n - m by ring]
   convert this using 1; ring
@@ -656,9 +667,9 @@ variable {R : Type*} [CommRing R] (b c d : R)
 open Param MvPolynomial
 
 private lemma IsEllSequence.map' {S : Type*} [CommRing S] {W : ℤ → R} (h : IsEllSequence W)
-    (f : R →+* S) : IsEllSequence (f ∘ W) := by
-  intro m n r
-  simpa [Function.comp] using congr_arg f (h m n r)
+    (f : R →+* S) : IsEllSequence (f ∘ W) :=
+    (isEllSequence_iff_rel₃ (f ∘ W)).mpr fun m n r ↦ by
+  simpa [Rel₃, Function.comp] using congr_arg f ((isEllSequence_iff_rel₃ W).mp h m n r)
 
 /-- A normalised EDS is an elliptic sequence. -/
 protected theorem IsEllSequence.normEDS : IsEllSequence (normEDS b c d) := by
@@ -736,6 +747,7 @@ private lemma normEDS_mul_complEDS_of_mem (hb : b ∈ R⁰) {m : ℤ}
     (hm : normEDS b c d m ∈ R⁰) (n : ℤ) :
     normEDS b c d m * complEDS b c d m n = normEDS b c d (n * m) := by
   have ellW := IsEllSequence.normEDS b c d
+  have relW := (isEllSequence_iff_rel₃ _).mp ellW
   have hmem1 : normEDS b c d 1 ∈ R⁰ := by rw [normEDS_one]; exact one_mem _
   have hmem2 : normEDS b c d 2 ∈ R⁰ := by rw [normEDS_two]; exact hb
   induction n using Int.negInduction with
@@ -761,7 +773,7 @@ private lemma normEDS_mul_complEDS_of_mem (hb : b ∈ R⁰) {m : ℤ}
         _ = normEDS b c d (↑(2 * (k + 1)) * m) := by push_cast; ring_nf
     · rw [show 2 * k + 1 + 1 + 1 = 2 * (k + 1) + 1 by lia, complEDS'_odd]
       rw [← mul_cancel_right_mem_nonZeroDivisors (mul_mem hm (pow_mem hmem1 2))]
-      have h := (ellW ((↑k + 2) * m) ((↑k + 1) * m) 1).symm
+      have h := (relW ((↑k + 2) * m) ((↑k + 1) * m) 1).symm
       have ih1 : normEDS b c d m * complEDS' b c d m (k + 1) =
           normEDS b c d ((↑k + 1) * m) := by
         have := ih (k + 1) (by lia); rwa [complEDS_ofNat, Nat.cast_succ] at this

@@ -454,7 +454,7 @@ theorem isogOneSub_negFrobenius_pointCount_le_degree (hq : 2 ≤ Fintype.card K)
   have h_total :
       ∑ P ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
         (-(data.ordAt P)).toNat *
-          Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) P =
+          Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) P =
         2 * (isogOneSub_negFrobenius W hq).degree := by
     rw [← Conditional.finrank_gamma_pullback_x_eq_weightedPoleDegree W hq hmf data,
         ← Conditional.finrank_adjoin_eq_finrank_LinfAt W hq, l6_B3_tower W hq]
@@ -476,14 +476,14 @@ theorem isogOneSub_negFrobenius_pointCount_le_degree (hq : 2 ≤ Fintype.card K)
   -- IMAGE weighted sum = 2 · pointCount (each kernel-prime contributes `e·f = 2·1 = 2`).
   have h_image_sum :
       ∑ Q ∈ image, (-(data.ordAt Q)).toNat *
-          Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q =
+          Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) Q =
         2 * pointCount W.toAffine := by
     rw [himage_def,
       Finset.sum_image (fun T₁ _ T₂ _ h_eq ↦
         Sinf_kernelToPrime_v2_injective W hq data h_eq)]
     have h_each : ∀ T : (isogOneSub_negFrobenius W hq).kernel,
         (-(data.ordAt (bridge_Bi_kernelToPrime_v2 W hq data T))).toNat *
-          Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K))
+          Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K))
             (bridge_Bi_kernelToPrime_v2 W hq data T) = 2 := by
       intro T
       rw [bridge_Biii_ord_eq_neg_two_v2 W hq data T,
@@ -496,10 +496,10 @@ theorem isogOneSub_negFrobenius_pointCount_le_degree (hq : 2 ≤ Fintype.card K)
   -- MONOTONICITY over `image ⊆ primesOverFinset` (all terms ≥ 0): `Σ_image ≤ Σ_total`.
   have h_mono :
       ∑ Q ∈ image, (-(data.ordAt Q)).toNat *
-          Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q ≤
+          Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) Q ≤
         ∑ P ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
           (-(data.ordAt P)).toNat *
-            Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) P :=
+            Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) P :=
     Finset.sum_le_sum_of_subset_of_nonneg h_image_sub (fun _ _ _ ↦ Nat.zero_le _)
   -- Combine: `2·pointCount ≤ 2·deg`, cancel the `2`.
   rw [h_image_sum, h_total] at h_mono
@@ -1245,7 +1245,7 @@ theorem Sinf_finrank_witness_via_B3_tower (hq : 2 ≤ Fintype.card K)
     letI := data.algPoly
     ∑ P ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
       (-(data.ordAt P)).toNat *
-        Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) P =
+        Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) P =
       2 * pointCount W.toAffine := by
   letI := data.commRing
   letI := data.isDedekindDomain
@@ -1276,7 +1276,7 @@ theorem Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_via_tower (hq : 2 ≤ Fint
     letI := data.isDedekindDomain
     letI := data.algPoly
     ∑ P ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
-      (Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) P) =
+      (Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) P) =
         pointCount W.toAffine :=
   Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_of_finrank_witness W hq data
     (Sinf_finrank_witness_via_B3_tower W hq data)

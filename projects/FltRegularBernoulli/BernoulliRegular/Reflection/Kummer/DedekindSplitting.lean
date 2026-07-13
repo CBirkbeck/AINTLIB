@@ -35,7 +35,7 @@ section PolynomialFactorCount
 variable {F : Type*} [Field F] [DecidableEq F]
 
 noncomputable local instance fieldNormalizationMonoid : NormalizationMonoid F :=
-  (CommGroupWithZero.instNormalizedGCDMonoid F).toNormalizationMonoid
+  (inferInstance : NormalizedGCDMonoid F).toNormalizationMonoid
 
 /-- For a split polynomial over a field, distinct normalized
 irreducible factors are exactly the monic linear factors attached to its
@@ -244,7 +244,7 @@ noncomputable local instance quotientDecidableEq {I : Ideal R} : DecidableEq (R 
 @[reducible] noncomputable local instance quotientNormalizationMonoid {I : Ideal R} [I.IsMaximal] :
     NormalizationMonoid (R ⧸ I) := by
   letI : Field (R ⧸ I) := Ideal.Quotient.field I
-  exact (CommGroupWithZero.instNormalizedGCDMonoid (R ⧸ I)).toNormalizationMonoid
+  exact (inferInstance : NormalizedGCDMonoid (R ⧸ I)).toNormalizationMonoid
 
 noncomputable local instance quotientPolynomialDecidableEq {I : Ideal R} :
     DecidableEq (R ⧸ I)[X] :=

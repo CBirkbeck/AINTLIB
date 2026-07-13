@@ -744,8 +744,8 @@ factors with `zetaPrime` to multiplicity `p - 1`. We use the project's
 `Ideal.le_pow_ramificationIdx`. -/
 theorem zetaSubOne_pow_p_sub_one_dvd_p :
     (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ^ (p - 1) ∣ ((p : ℕ) : 𝓞 K) := by
-  -- ramificationIdx (rationalPrimeIdeal p) (zetaPrime p K) = p - 1.
-  have hram : (rationalPrimeIdeal p).ramificationIdx (zetaPrime p K) = p - 1 :=
+  -- ramificationIdx' (rationalPrimeIdeal p) (zetaPrime p K) = p - 1.
+  have hram : (rationalPrimeIdeal p).ramificationIdx' (zetaPrime p K) = p - 1 :=
     primesOver_ramificationIdx_eq_prime_sub_one_at_p (p := p) (K := K) (zetaPrime p K)
       (zetaPrime_mem_primesOver_at_p (p := p) (K := K))
   -- map (algebraMap ℤ (𝓞 K)) (rationalPrimeIdeal p) ≤ (zetaPrime p K) ^ (p - 1).

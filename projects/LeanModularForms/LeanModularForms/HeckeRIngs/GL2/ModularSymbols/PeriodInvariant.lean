@@ -202,7 +202,7 @@ def cuspDiff (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) {m : ℕ} (γ : Congr
 theorem rawPairing_modSymRep_sub (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) {m : ℕ}
     (γ : CongruenceSubgroup.Gamma1 N) (D : Div0 ℤ) (P : SymPow ℤ m) :
     rawPairing f (modSymRep N m γ (D ⊗ₜ P)) - rawPairing f (D ⊗ₜ P) =
-      (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).sum
+      (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.sum
         (fun c n => (n : ℂ) * cuspDiff f γ (castSymPow m P) c) := by
   have h1 : modSymRep N m γ (D ⊗ₜ[ℤ] P) =
       (div0Rep ℤ (γ : SL(2, ℤ)) D) ⊗ₜ[ℤ] (symRep ℤ m (γ : SL(2, ℤ)) P) := rfl
@@ -217,8 +217,10 @@ theorem rawPairing_modSymRep_sub (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) {
   rw [hrb, hrb, castSymPow_symRep]
   -- The divisor of `div0Rep γ D` is `mapDomain (γ • ·) D`, reindex the sum injectively.
   set g := Matrix.SpecialLinearGroup.map (Int.castRingHom ℚ) (γ : SL(2, ℤ)) with hg
-  have hdiv : ((div0Rep ℤ (γ : SL(2, ℤ)) D) : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) =
-      Finsupp.mapDomain (g • ·) (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) := by
+  have hdiv : ((div0Rep ℤ (γ : SL(2, ℤ)) D) :
+        MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff =
+      Finsupp.mapDomain (g • ·)
+        (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff := by
     rw [div0Rep_apply]
   have hinj : Function.Injective (fun c : Projectivization ℚ (Fin 2 → ℚ) => g • c) :=
     MulAction.injective g
@@ -230,9 +232,10 @@ theorem rawPairing_modSymRep_sub (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) {
 
 /-- A degree-`0` divisor `D` has vanishing total weight `Σ_c D(c) = 0`. -/
 theorem Div0.sum_coeff_eq_zero (D : Div0 ℤ) :
-    (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).sum (fun _ n => n) = 0 := by
+    (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.sum (fun _ n => n) = 0 := by
   have hD := D.2
-  rw [LinearMap.mem_ker, Finsupp.linearCombination_apply, Finsupp.sum] at hD
+  rw [LinearMap.mem_ker, LinearMap.comp_apply, LinearEquiv.coe_coe,
+    MonoidAlgebra.coeffLinearEquiv_apply, Finsupp.linearCombination_apply, Finsupp.sum] at hD
   simp only [smul_eq_mul, mul_one] at hD
   rwa [Finsupp.sum]
 
@@ -244,24 +247,24 @@ theorem sum_cuspDiff_eq_zero_of_const (f : CuspForm ((Gamma1 N).map (mapGL ℝ))
     (γ : CongruenceSubgroup.Gamma1 N) (Q : SymPow ℂ m) (D : Div0 ℤ)
     (hconst : ∀ c₁ c₂ : Projectivization ℚ (Fin 2 → ℚ),
       cuspDiff f γ Q c₁ = cuspDiff f γ Q c₂) :
-    (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).sum (fun c n => (n : ℂ) * cuspDiff f γ Q c) = 0 := by
-  by_cases hsupp : (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support = ∅
+    (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.sum (fun c n => (n : ℂ) * cuspDiff f γ Q c) = 0 := by
+  by_cases hsupp : (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support = ∅
   · simp [Finsupp.sum, hsupp]
   · obtain ⟨c₀, hc₀⟩ := Finset.nonempty_of_ne_empty hsupp
-    have hconst' : ∀ c ∈ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support,
-        (fun c n => (n : ℂ) * cuspDiff f γ Q c) c ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c) =
+    have hconst' : ∀ c ∈ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support,
+        (fun c n => (n : ℂ) * cuspDiff f γ Q c) c ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c) =
         (fun c n => (n : ℂ) * cuspDiff f γ Q c₀) c
-          ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c) := by
+          ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c) := by
       intro c _; simp only []; rw [hconst c c₀]
     rw [Finsupp.sum, Finset.sum_congr rfl hconst']
-    have : ∑ c ∈ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support,
-        ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ) * cuspDiff f γ Q c₀ =
-        (∑ c ∈ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support,
-          ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ)) * cuspDiff f γ Q c₀ := by
+    have : ∑ c ∈ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support,
+        ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ) * cuspDiff f γ Q c₀ =
+        (∑ c ∈ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support,
+          ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ)) * cuspDiff f γ Q c₀ := by
       rw [Finset.sum_mul]
     rw [this]
-    have hsum0 : (∑ c ∈ (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ).support,
-        ((D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) c : ℂ)) = 0 := by
+    have hsum0 : (∑ c ∈ (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff.support,
+        ((D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff c : ℂ)) = 0 := by
       rw [← Int.cast_sum]
       have := Div0.sum_coeff_eq_zero D
       rw [Finsupp.sum] at this

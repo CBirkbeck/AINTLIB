@@ -2341,12 +2341,12 @@ the algebraic level, which milestone #2's Bridge B needs.
 Mathematical content: the Sinf primes lying over `xIdeal := (X)` are
 exactly the closed points where `f⁻¹` vanishes (= poles of `f`); a prime
 NOT over X corresponds to a closed point where `f` is regular, so its
-order `data.ordAt P = -ramificationIdx _ xIdeal P` equals `-0 = 0 ≥ 0`.
+order `data.ordAt P = -ramificationIdx' _ xIdeal P` equals `-0 = 0 ≥ 0`.
 
 Proof: `xIdeal` is maximal (`xIdeal_isMaximal`); if `map xIdeal ≤ P` then
 by maximality `xIdeal = P.comap`, hence `P.LiesOver xIdeal` —
 contradicting the hypothesis. So `¬ map xIdeal ≤ P`, hence
-`ramificationIdx = 0` (`Ideal.ramificationIdx_of_not_le`), hence
+`ramificationIdx' = 0` (`Ideal.ramificationIdx_of_not_le`), hence
 `data.ordAt P = -0 = 0 ≥ 0`. -/
 theorem pole_gamma_pullback_x_imp_kernel_closed_point
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] (hq : 2 ≤ Fintype.card K)
@@ -2368,7 +2368,7 @@ theorem pole_gamma_pullback_x_imp_kernel_closed_point
     0 ≤ data.ordAt P := by
   letI := data.commRing
   letI := data.algPoly
-  have h_rampidx_zero : Ideal.ramificationIdx
+  have h_rampidx_zero : Ideal.ramificationIdx'
       (Curves.RamificationAtInfinity.xIdeal (k := K)) P = 0 := by
     apply Ideal.ramificationIdx_of_not_le
     intro h_map_le
@@ -2515,7 +2515,7 @@ theorem bridgeA_intermediateField_adjoin_eq_fractionRing_finrank
     _ = y.val := rfl
 
 /-- **Weighted pole degree of `f = γ.pullback x_gen` in the `LinfAt f` framing**:
-`[K(E) : K(f⁻¹)] = ∑_P (−ord_P f).toNat · inertiaDeg xIdeal P` over
+`[K(E) : K(f⁻¹)] = ∑_P (−ord_P f).toNat · inertiaDeg' xIdeal P` over
 `primesOverFinset xIdeal data.carrier`. Specialises
 `finrank_eq_weighted_poleDegree_of_nonconstant`. The conclusion uses the
 `@`-explicit `algebraFractionRing`-derived module instance (which sends `X ↦ f⁻¹`),
@@ -2543,7 +2543,7 @@ theorem finrank_gamma_pullback_x_eq_weightedPoleDegree
       ∑ P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
         (-(data.ordAt P)).toNat *
-          Ideal.inertiaDeg
+          Ideal.inertiaDeg'
             (Curves.RamificationAtInfinity.xIdeal (k := K)) P := by
   exact @Curves.RamificationAtInfinity.finrank_eq_weighted_poleDegree_of_nonconstant
     K _ _ _ _ ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) hf hMF data
@@ -2967,7 +2967,7 @@ theorem K_E_separable_over_LinfAt_gamma_pullback_x_gen
 /-- **Weighted pole degree of `γ.pullback x_gen` is `2 · pointCount`** (Tier-2.5
 milestone #2): given uniform pole order `-2`, inertia degree `1`, and support
 cardinality `pointCount` over `primesOverFinset xIdeal`, the weighted sum
-`∑ (-ord_P).toNat · inertiaDeg` equals `2 · pointCount`. -/
+`∑ (-ord_P).toNat · inertiaDeg'` equals `2 · pointCount`. -/
 theorem weightedPoleDegree_gamma_pullback_x_eq_two_mul_pointCount
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
     (hq : 2 ≤ Fintype.card K) (data : Curves.RamificationAtInfinity.Sinf (k := K)
@@ -2985,7 +2985,7 @@ theorem weightedPoleDegree_gamma_pullback_x_eq_two_mul_pointCount
       letI := data.algPoly
       ∀ P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
-        Ideal.inertiaDeg
+        Ideal.inertiaDeg'
           (Curves.RamificationAtInfinity.xIdeal (k := K)) P = 1)
     (h_card :
       letI := data.commRing
@@ -3000,7 +3000,7 @@ theorem weightedPoleDegree_gamma_pullback_x_eq_two_mul_pointCount
     ∑ P ∈ IsDedekindDomain.primesOverFinset
       (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
       (-(data.ordAt P)).toNat *
-        Ideal.inertiaDeg
+        Ideal.inertiaDeg'
           (Curves.RamificationAtInfinity.xIdeal (k := K)) P =
     2 * pointCount W.toAffine := by
   letI := data.commRing
@@ -3010,7 +3010,7 @@ theorem weightedPoleDegree_gamma_pullback_x_eq_two_mul_pointCount
       ∑ P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
         (-(data.ordAt P)).toNat *
-          Ideal.inertiaDeg
+          Ideal.inertiaDeg'
             (Curves.RamificationAtInfinity.xIdeal (k := K)) P =
       ∑ _P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
@@ -3023,7 +3023,7 @@ theorem weightedPoleDegree_gamma_pullback_x_eq_two_mul_pointCount
   ring
 
 /-- **Bridge B**: the abstract `primesOverFinset xIdeal` weighted sum
-`∑ (-data.ordAt P).toNat · inertiaDeg xIdeal P` equals the project's
+`∑ (-data.ordAt P).toNat · inertiaDeg' xIdeal P` equals the project's
 `projectiveDivisorOf`-support weighted sum, for `f = γ.pullback x_gen`. Both encode
 the pole degree `2 · pointCount` of `f`, under their respective witness chains. -/
 theorem bridgeB_weightedPoleDegree_eq_projectiveDivisorOf_sum
@@ -3043,7 +3043,7 @@ theorem bridgeB_weightedPoleDegree_eq_projectiveDivisorOf_sum
       letI := data.algPoly
       ∀ P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
-        Ideal.inertiaDeg
+        Ideal.inertiaDeg'
           (Curves.RamificationAtInfinity.xIdeal (k := K)) P = 1)
     (h_card :
       letI := data.commRing
@@ -3069,7 +3069,7 @@ theorem bridgeB_weightedPoleDegree_eq_projectiveDivisorOf_sum
     (∑ P ∈ IsDedekindDomain.primesOverFinset
       (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
       (-(data.ordAt P)).toNat *
-        Ideal.inertiaDeg
+        Ideal.inertiaDeg'
           (Curves.RamificationAtInfinity.xIdeal (k := K)) P) =
     ((Curves.SmoothPlaneCurve.projectiveDivisorOf (W_smooth W)
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W)))).support.sum
@@ -3108,7 +3108,7 @@ theorem finrank_gamma_pullback_x_eq_projectiveDivisorOf_sum
       letI := data.algPoly
       ∀ P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
-        Ideal.inertiaDeg
+        Ideal.inertiaDeg'
           (Curves.RamificationAtInfinity.xIdeal (k := K)) P = 1)
     (h_card :
       letI := data.commRing

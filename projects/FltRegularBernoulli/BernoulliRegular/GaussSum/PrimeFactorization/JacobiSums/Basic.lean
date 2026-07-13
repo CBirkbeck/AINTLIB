@@ -209,7 +209,7 @@ lemma jacobiSumLift_ne_zero
   simp [hzero]
 
 lemma distinguishedPrimeAboveP_ramificationIdx_over_characterSubfield :
-    Ideal.ramificationIdx
+    Ideal.ramificationIdx'
         (distinguishedPrimeAboveP_under_characterSubfield (p := p) (L := L))
         (distinguishedPrimeAboveP p L) = p - 1 := by
   let Pchar := distinguishedPrimeAboveP_under_characterSubfield (p := p) (L := L)

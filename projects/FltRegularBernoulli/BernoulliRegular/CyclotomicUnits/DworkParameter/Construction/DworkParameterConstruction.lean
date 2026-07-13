@@ -148,7 +148,7 @@ theorem valuedCyclotomicZetaInteger_eq_one_add_lambda :
 @[simp]
 theorem valuedCyclotomicZetaInteger_pow_eq_one :
     valuedCyclotomicZetaInteger p K ^ p = 1 := by
-  ext
+  apply Subtype.ext
   change valuedCyclotomicZeta p K ^ p = 1
   rw [valuedCyclotomicZeta_pow_eq_one]
 

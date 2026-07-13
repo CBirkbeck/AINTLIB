@@ -841,7 +841,7 @@ lemma ncard_primesOver_at_p_eq_one :
 
 lemma primesOver_inertiaDeg_eq_one_at_p (P : Ideal (𝓞 K))
     (hP : P ∈ Ideal.primesOver (rationalPrimeIdeal p) (𝓞 K)) :
-    (rationalPrimeIdeal p).inertiaDeg P = 1 := by
+    (rationalPrimeIdeal p).inertiaDeg' P = 1 := by
   haveI : P.IsPrime := hP.1
   haveI : P.LiesOver (Ideal.span {(p : ℤ)}) := by
     simpa [rationalPrimeIdeal] using hP.2
@@ -854,7 +854,7 @@ lemma primesOver_inertiaDeg_eq_one_at_p (P : Ideal (𝓞 K))
 
 lemma primesOver_ramificationIdx_eq_prime_sub_one_at_p (P : Ideal (𝓞 K))
     (hP : P ∈ Ideal.primesOver (rationalPrimeIdeal p) (𝓞 K)) :
-    (rationalPrimeIdeal p).ramificationIdx P = p - 1 := by
+    (rationalPrimeIdeal p).ramificationIdx' P = p - 1 := by
   haveI : P.IsPrime := hP.1
   haveI : P.LiesOver (Ideal.span {(p : ℤ)}) := by
     simpa [rationalPrimeIdeal] using hP.2
@@ -866,9 +866,9 @@ lemma primesOver_ramificationIdx_eq_prime_sub_one_at_p (P : Ideal (𝓞 K))
 
 lemma primesOver_at_p_package :
     (∀ P ∈ Ideal.primesOver (rationalPrimeIdeal p) (𝓞 K),
-      (rationalPrimeIdeal p).inertiaDeg P = 1) ∧
+      (rationalPrimeIdeal p).inertiaDeg' P = 1) ∧
     (∀ P ∈ Ideal.primesOver (rationalPrimeIdeal p) (𝓞 K),
-      (rationalPrimeIdeal p).ramificationIdx P = p - 1) ∧
+      (rationalPrimeIdeal p).ramificationIdx' P = p - 1) ∧
     (Ideal.primesOver (rationalPrimeIdeal p) (𝓞 K)).ncard = 1 :=
   ⟨primesOver_inertiaDeg_eq_one_at_p (p := p) (K := K),
    primesOver_ramificationIdx_eq_prime_sub_one_at_p (p := p) (K := K),
@@ -877,7 +877,7 @@ lemma primesOver_at_p_package :
 lemma primesOver_inertiaDeg_eq_localResidueDegree {ℓ : ℕ} [Fact ℓ.Prime]
     (hℓp : ℓ ≠ p) (P : Ideal (𝓞 K))
     (hP : P ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 K)) :
-    (rationalPrimeIdeal ℓ).inertiaDeg P = localResidueDegree (p := p) ℓ hℓp := by
+    (rationalPrimeIdeal ℓ).inertiaDeg' P = localResidueDegree (p := p) ℓ hℓp := by
   haveI : P.IsPrime := hP.1
   haveI : P.LiesOver (Ideal.span {(ℓ : ℤ)}) := hP.2
   have hcop : ¬ ℓ ∣ p := fun h => hℓp ((Nat.prime_dvd_prime_iff_eq
@@ -894,7 +894,7 @@ lemma primesOver_inertiaDeg_eq_localResidueDegree {ℓ : ℕ} [Fact ℓ.Prime]
 lemma primesOver_ramificationIdx_eq_one {ℓ : ℕ} [Fact ℓ.Prime]
     (hℓp : ℓ ≠ p) (P : Ideal (𝓞 K))
     (hP : P ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 K)) :
-    (rationalPrimeIdeal ℓ).ramificationIdx P = 1 := by
+    (rationalPrimeIdeal ℓ).ramificationIdx' P = 1 := by
   haveI : P.IsPrime := hP.1
   haveI : P.LiesOver (Ideal.span {(ℓ : ℤ)}) := hP.2
   have hcop : ¬ ℓ ∣ p := fun h => hℓp ((Nat.prime_dvd_prime_iff_eq
@@ -915,9 +915,9 @@ lemma ncard_primesOver_eq_localPrimeCount {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : 
 
 lemma primesOver_prime_ne_p_package {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : ℓ ≠ p) :
     (∀ P ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 K),
-      (rationalPrimeIdeal ℓ).inertiaDeg P = localResidueDegree (p := p) ℓ hℓp) ∧
+      (rationalPrimeIdeal ℓ).inertiaDeg' P = localResidueDegree (p := p) ℓ hℓp) ∧
     (∀ P ∈ Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 K),
-      (rationalPrimeIdeal ℓ).ramificationIdx P = 1) ∧
+      (rationalPrimeIdeal ℓ).ramificationIdx' P = 1) ∧
     (Ideal.primesOver (rationalPrimeIdeal ℓ) (𝓞 K)).ncard =
       localPrimeCount (p := p) ℓ hℓp :=
   ⟨primesOver_inertiaDeg_eq_localResidueDegree p K hℓp,

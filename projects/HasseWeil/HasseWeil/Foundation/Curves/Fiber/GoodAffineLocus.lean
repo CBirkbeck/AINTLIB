@@ -176,12 +176,12 @@ good affine open of `C₂` with coordinate ring `Af` and a finite separable exte
 `φ : C₁ → C₂`), all but finitely many primes of `Af` are unramified in the integral
 closure `B` of `Af` in `C₁.FunctionField`: there is a finite set `S` of ideals of `Af`
 such that every prime `P` of `B` lying over a prime `q ∉ S` has
-`Ideal.ramificationIdx q P = 1`. -/
+`Ideal.ramificationIdx' q P = 1`. -/
 theorem exists_finite_ramification_locus (hf : f ≠ 0) :
     ∃ S : Set (Ideal Af), S.Finite ∧
       ∀ q : Ideal Af, q ∉ S →
         ∀ P : Ideal (integralClosure Af C₁.FunctionField), P.IsPrime → P.under Af = q →
-          Ideal.ramificationIdx q P
+          Ideal.ramificationIdx' q P
             = 1 := by
   haveI := isDedekindDomain_away C₂ f Af hf
   haveI := isFractionRing_away C₂ f Af

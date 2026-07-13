@@ -621,11 +621,13 @@ theorem rawBilin_single {m : ℕ} (c : Projectivization ℚ (Fin 2 → ℚ)) (n 
 `(D, P) ↦ Σ_c D(c) · cuspValue f (P : Sym ℂ) c`.  This is the pre-descent period functional that
 descends to the modular-symbol module `𝕄`. -/
 def rawPairing {m : ℕ} : (Div0 ℤ ⊗[ℤ] SymPow ℤ m) →ₗ[ℤ] ℂ :=
-  TensorProduct.lift ((rawBilin f).comp (Div0 ℤ).subtype)
+  TensorProduct.lift ((rawBilin f).comp
+    ((MonoidAlgebra.coeffLinearEquiv ℤ).toLinearMap ∘ₗ (Div0 ℤ).subtype))
 
 @[simp]
 theorem rawPairing_tmul {m : ℕ} (D : Div0 ℤ) (P : SymPow ℤ m) :
-    rawPairing f (D ⊗ₜ P) = rawBilin f (D : Projectivization ℚ (Fin 2 → ℚ) →₀ ℤ) P :=
+    rawPairing f (D ⊗ₜ P)
+      = rawBilin f (D : MonoidAlgebra ℤ (Projectivization ℚ (Fin 2 → ℚ))).coeff P :=
   rfl
 
 /-! ## The Möbius covariance of `evalSym1` under `symRep` (the change-of-variables crux)

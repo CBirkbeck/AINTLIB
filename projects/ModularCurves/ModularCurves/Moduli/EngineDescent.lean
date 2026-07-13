@@ -980,6 +980,24 @@ private theorem projModelVCIso_map₂' {S₀ S₁ : Type u} [CommRing S₀] [Com
   rw [projModelVCIso_map₂ ρ C V, ← Category.assoc, eqToHom_trans, eqToHom_refl,
     Category.id_comp]
 
+/-- Abstract collapse of the five-fold `eqToHom` chain arising in `actLoc_baseChange`,
+stated over opaque `Scheme` objects so that the concrete `projModel` expressions never
+have to be unfolded during unification. -/
+private theorem eqToHom_chain₅_collapse {X₀ X₁ X₂ X₃ X₄ : Scheme.{u}}
+    (h₁ : X₀ = X₁) (h₂ : X₁ = X₂) (h₃ : X₂ = X₃) (h₄ : X₃ = X₄) (h₅ : X₄ = X₀)
+    {Z : Scheme.{u}} (f : X₀ ⟶ Z) :
+    eqToHom h₁ ≫ eqToHom h₂ ≫ eqToHom h₃ ≫ eqToHom h₄ ≫ eqToHom h₅ ≫ f = f := by
+  subst h₁ h₂ h₃ h₄
+  simp only [eqToHom_refl, Category.id_comp, Category.comp_id]
+
+/-- Abstract collapse of a two-fold leading `eqToHom` chain, stated over opaque `Scheme`
+objects so that the concrete `projModel` expressions never have to be unfolded. -/
+private theorem eqToHom_chain₂_collapse {X₀ X₁ : Scheme.{u}}
+    (h₁ : X₀ = X₁) (h₂ : X₁ = X₀) {Z : Scheme.{u}} (f : X₀ ⟶ Z) :
+    f = eqToHom h₁ ≫ eqToHom h₂ ≫ f := by
+  subst h₁
+  simp only [eqToHom_refl, Category.id_comp, Category.comp_id]
+
 /-- **The key base-change compatibility of the localized action datum.** If `act` is the
 `Ψ`-composite of the cocycle value `CA` over `A` and `CR = CA.map ρ` is its localization,
 then the localized `Ψ`-composite commutes with `projModelBaseChange ρ` into `act`. -/
@@ -1013,7 +1031,7 @@ private theorem actLoc_baseChange {A R : Type u} [CommRing A] [CommRing R] (ρ :
   rw [reassoc_of% projModelVCIso_natEq₂ (rfl : CA.map ρ = CA.map ρ) hVeq,
     reassoc_of% projModelVCIso_map₂' ρ CA (W₀.map τA), hΨA,
     reassoc_of% projModelBaseChange_natEq₂ ρ hCA]
-  simp only [eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
+  exact eqToHom_chain₅_collapse _ _ _ _ _ (projModelBaseChange ρ W₀ ≫ act)
 
 open scoped Pointwise in
 /-- **The localized action datum on the model of `W₀A ⊗ A_a`.** Packaged for the per-point
@@ -1112,7 +1130,12 @@ private theorem exists_actLoc {A : Type u} [CommRing A] [MulSemiringAction G A]
               (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g'))).hom
         ≫ projModelBaseChange (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g')
             (W₀A.map (algebraMap A (Localization.Away ((a : A)))))) (fun g' => ?_) g
-    simp only [eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
+    exact eqToHom_chain₂_collapse _ _
+      ((projModelVCIso ((Cvc g').map (algebraMap A (Localization.Away ((a : A)))))
+          ((W₀A.map (algebraMap A (Localization.Away ((a : A))))).map
+            (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g'))).hom
+        ≫ projModelBaseChange (MulSemiringAction.toRingHom G (Localization.Away ((a : A))) g')
+            (W₀A.map (algebraMap A (Localization.Away ((a : A))))))
   · -- (ii) covers the action through the base change
     exact actLoc_baseChange (algebraMap A (Localization.Away ((a : A))))
       (MulSemiringAction.toRingHom G A g)

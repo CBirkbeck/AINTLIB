@@ -708,7 +708,7 @@ theorem residueGaussSum_pow_p_support_in_cyclotomicConjugates
       exact_mod_cast hγ'
     have h_norm_pow : Ideal.absNorm q_K =
         Ideal.absNorm (q_K.under ℤ) ^
-          ((Ideal.span ({(Ideal.absNorm (q_K.under ℤ) : ℤ)} : Set ℤ)).inertiaDeg q_K) := by
+          ((Ideal.span ({(Ideal.absNorm (q_K.under ℤ) : ℤ)} : Set ℤ)).inertiaDeg' q_K) := by
       have := Ideal.absNorm_eq_pow_inertiaDeg
         (R := 𝓞 K) (P := q_K) (p := (Ideal.absNorm (q_K.under ℤ) : ℤ))
         (Nat.prime_iff_prime_int.mp hp_prime)

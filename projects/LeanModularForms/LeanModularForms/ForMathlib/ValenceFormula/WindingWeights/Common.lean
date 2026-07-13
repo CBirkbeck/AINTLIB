@@ -315,7 +315,7 @@ lemma delta_pi_div_twelve_lt_eps {δ ε : ℝ} (hδ_pos : 0 < δ) (hδ_le_one : 
   set x := δ * Real.pi / 12 with hx_def
   have hx_pos : 0 < x := by positivity
   have hx_le_one : x ≤ 1 := by nlinarith [Real.pi_le_four]
-  nlinarith [Real.sin_gt_sub_cube hx_pos hx_le_one, sq_nonneg x, sq_nonneg (1 - x)]
+  nlinarith [Real.sin_gt_sub_cube hx_pos, sq_nonneg x, sq_nonneg (1 - x)]
 
 /-- `12/π · arcsin(ε/2) < 1` for ε in the threshold range. -/
 lemma twelve_div_pi_arcsin_half_lt_one {ε : ℝ} (hε_half_neg : -1 ≤ ε / 2)

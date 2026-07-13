@@ -153,7 +153,7 @@ from a maximal `P ⊂ 𝓞 K` containing `ℓ` (but not `p`), a chosen prime
 witness.
 
 Assembled witnesses:
-* `card_k = ℓ^(inertiaDeg P)` from `cardResidueField_eq_pow_ell_inertiaDeg`,
+* `card_k = ℓ^(inertiaDeg' P)` from `cardResidueField_eq_pow_ell_inertiaDeg`,
 * `zeta_k = canonicalResidueZetaP P` (with primitivity from
   `canonicalResidueZetaP_isPrimitiveRoot`),
 * `hdiv : p ∣ #(𝓞 K ⧸ P) − 1` from `p_dvd_card_residueField_sub_one`,
@@ -189,7 +189,7 @@ noncomputable def mkConcreteSetup_ofSplitPrime
   haveI : P.IsPrime := hP_max.isPrime
   have card_k :
       Fintype.card (𝓞 K ⧸ P) =
-        ℓ ^ ((Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg P) :=
+        ℓ ^ ((Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg' P) :=
     cardResidueField_eq_pow_ell_inertiaDeg P hℓ_in_P
   have hdiv : p ∣ Fintype.card (𝓞 K ⧸ P) - 1 :=
     p_dvd_card_residueField_sub_one P hP_ne_bot hp_notin_P

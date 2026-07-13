@@ -10,7 +10,7 @@ public import Mathlib.RingTheory.UniqueFactorizationDomain.NormalizedFactors
 # Local-factor identity under uniform residue degree
 
 For a general number field `L` and a rational prime `q`, suppose every
-prime `Q` of `𝓞 L` above `q` has the same `inertiaDeg q Q = d`. Then the
+prime `Q` of `𝓞 L` above `q` has the same `inertiaDeg' q Q = d`. Then the
 rational-prime local factor of `ζ_L(s)` at `q` equals the inverse of the
 finite product of local Euler factors.
 
@@ -48,7 +48,7 @@ has the same inertia degree `d` (over `ℤ`).
 -/
 def UniformResidueDegree (q d : ℕ) : Prop :=
   ∀ Q ∈ IsDedekindDomain.primesOverFinset (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 L),
-    inertiaDeg (Ideal.span ({(q : ℤ)} : Set ℤ)) Q = d
+    inertiaDeg' (Ideal.span ({(q : ℤ)} : Set ℤ)) Q = d
 
 /--
 Under the uniform-residue-degree assumption, every prime `Q ∈ T` above the

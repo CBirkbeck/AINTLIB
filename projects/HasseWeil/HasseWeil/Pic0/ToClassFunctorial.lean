@@ -164,8 +164,7 @@ theorem toClass_toPointMap {φ : CurveMap C₁ C₂} (coordHom : φ.CoordHom)
   -- `maximalIdealAt (φ P) = comap α* (maximalIdealAt P)` is the scheme-theoretic shadow.
   have hmax := maximalIdealAt_toPointMap coordHom P
   -- Rewrite the underlying ideal of the `mk0` argument.
-  congr 1
-  exact congrArg ClassGroup.mk0 (Subtype.ext hmax)
+  exact congrArg (Additive.ofMul <| ClassGroup.mk0 ·) (Subtype.ext hmax)
 
 /-- **Identity-isogeny base case (unconditional).** For the identity curve map with the
 identity coordinate-ring witness, `toClass` of `φ(P)` is just `toClass P`: the point map is

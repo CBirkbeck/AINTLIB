@@ -89,13 +89,13 @@ theorem mem_descentPrime_iff (x : 𝓞 K) :
 /-! ### Ramification index of `descentPrime` in `S.Q`
 
 For the cyclotomic extension `K → R' = K(ζ_ℓ)`, the prime `Q ⊂ 𝓞 R'`
-above `descentPrime` has ramification index given by `Ideal.ramificationIdx`.
+above `descentPrime` has ramification index given by `Ideal.ramificationIdx'`.
 This packages the abstract ramification index for downstream descent
 arguments. -/
 
 /-- The ramification index of `Q ⊂ 𝓞 R'` over `descentPrime ⊂ 𝓞 K`. -/
 noncomputable def descentRamificationIdx : ℕ :=
-  Ideal.ramificationIdx S.descentPrime S.Q
+  Ideal.ramificationIdx' S.descentPrime S.Q
 
 omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- Image of `descentPrime` in `𝓞 R'` is contained in `S.Q^e` (ramification

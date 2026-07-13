@@ -42,7 +42,7 @@ instance isSeparated_torsionπ : IsSeparated (E.torsionπ N) := by
   infer_instance
 
 /-- The zero point of `E` over `t` is killed by `N`. -/
-theorem zero_comp_mulByHom {T : Scheme.{u}} (t : T ⟶ S) :
+theorem zero_point_comp_mulByHom {T : Scheme.{u}} (t : T ⟶ S) :
     ((0 : E.Point t) : T ⟶ E.E) ≫ E.mulByHom N = t ≫ E.zero :=
   (E.smul_eq_zero_iff_comp_mulByHom t N 0).mp (smul_zero _)
 
@@ -52,7 +52,7 @@ noncomputable def pointVanishSet {T : Scheme.{u}} (t : T ⟶ S) (R : E.Point t)
     (hR : R.1 ≫ E.mulByHom N = t ≫ E.zero) : Set T :=
   Set.range (AlgebraicGeometry.agreementι (E.torsionπ N)
     (E.pointToTorsion R hR)
-    (E.pointToTorsion (0 : E.Point t) (E.zero_comp_mulByHom N t))
+    (E.pointToTorsion (0 : E.Point t) (E.zero_point_comp_mulByHom N t))
     (by rw [E.pointToTorsion_torsionπ, E.pointToTorsion_torsionπ])).base
 
 /-- **[YF-CLOPEN engine, curve form]** For `N` invertible, the vanishing locus of an

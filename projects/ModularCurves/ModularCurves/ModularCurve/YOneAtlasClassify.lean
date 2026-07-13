@@ -5151,6 +5151,80 @@ theorem tateCurveLocOver_isTateNormal (R : CommRingCat.{u}) :
 
 variable (R : CommRingCat.{u}) [Algebra ↑R A] [Algebra (tateRingOver R) A]
 
+/-- Auxiliary for `projTateMap_map_tate`: at the `(0,0)`-marking the T-E1 normalisation of
+the base-changed universal Tate curve is the identity variable change. Isolated so the
+concrete Tate coefficients unfold in a dedicated elaboration unit. -/
+private lemma projTateMap_map_tate_hC1
+    [((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)).IsElliptic]
+    (g : SpecPoints (projModel ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)))
+      (projModelπ ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))) A)
+    (hZ : InZChart ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)) g)
+    (hx : zChartEval _ g hZ
+      (coordX ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))) = 0)
+    (hy : zChartEval _ g hZ
+      (coordY ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))) = 0)
+    (hord : NowhereOrderLEThree ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))
+      (zChartEval _ g hZ (coordX ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))))
+      (zChartEval _ g hZ
+        (coordY ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))))) :
+    tateNormalVariableChange
+      ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))
+      (zChartEval _ g hZ (coordX ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))))
+      (zChartEval _ g hZ (coordY ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))))
+      (zChartEval_equation_self _ g hZ) hord = 1 := by
+  have htn : ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)).IsTateNormal :=
+    (tateCurveLocOver_isTateNormal R).map (algebraMap (tateRingOver R) A)
+  refine (tateNormalVariableChange_unique _ _ _
+    (zChartEval_equation_self _ g hZ) hord 1 ⟨?_, ?_, ?_⟩).symm
+  · rw [one_smul]
+    exact htn
+  · exact hx.symm
+  · exact hy.symm
+
+/-- Auxiliary for `projTateMap_map_tate`: the pointed atlas algebra map at the `(0,0)`-marking
+of the base-changed universal Tate curve is the base-change algebra map itself. Isolated so the
+concrete Tate coefficients unfold in a dedicated elaboration unit. -/
+private lemma projTateMap_map_tate_hL
+    [((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)).IsElliptic]
+    (htower : (algebraMap (tateRingOver R) A).comp (algebraMap ↑R (tateRingOver R)) =
+      algebraMap ↑R A)
+    (g : SpecPoints (projModel ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)))
+      (projModelπ ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))) A)
+    (hZ : InZChart ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)) g)
+    (hord : NowhereOrderLEThree ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))
+      (zChartEval _ g hZ (coordX ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))))
+      (zChartEval _ g hZ
+        (coordY ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)))))
+    (hC1 : tateNormalVariableChange
+      ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))
+      (zChartEval _ g hZ (coordX ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))))
+      (zChartEval _ g hZ (coordY ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))))
+      (zChartEval_equation_self _ g hZ) hord = 1) :
+    ((tateRingOverAlgLiftOfPoint R
+      ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)) _ _
+      (zChartEval_equation_self _ g hZ) hord : tateRingOver R →ₐ[R] A) :
+        tateRingOver R →+* A) = algebraMap (tateRingOver R) A := by
+  have hAlg : ∀ r : ↑R, algebraMap (tateRingOver R) A
+      (algebraMap ↑R (tateRingOver R) r) = algebraMap ↑R A r := fun r => by
+    rw [← htower]; rfl
+  have hext := tateRingOver_algHom_ext R
+    (tateRingOverAlgLiftOfPoint R
+      ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)) _ _
+      (zChartEval_equation_self _ g hZ) hord)
+    ({ toRingHom := algebraMap (tateRingOver R) A, commutes' := hAlg } :
+      tateRingOver R →ₐ[R] A) ?_ ?_
+  · exact congrArg (fun φ : tateRingOver R →ₐ[R] A => (φ : tateRingOver R →+* A)) hext
+  · rw [tateRingOverAlgLiftOfPoint_X_zero, hC1, one_smul]
+    show ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)).a₁ =
+      algebraMap (tateRingOver R) A
+        (algebraMap (MvPolynomial (Fin 2) ↑R) (tateRingOver R) (MvPolynomial.X 0))
+    rw [WeierstrassCurve.map_a₁, tateCurveLocOver_a₁]
+  · rw [tateRingOverAlgLiftOfPoint_X_one, hC1, one_smul]
+    show ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)).a₂ =
+      algebraMap (tateRingOver R) A
+        (algebraMap (MvPolynomial (Fin 2) ↑R) (tateRingOver R) (MvPolynomial.X 1))
+    rw [WeierstrassCurve.map_a₂, tateCurveLocOver_a₂]
+
 /-- **Self-classification**: the classifying top map of the base-changed universal Tate
 curve at a `(0,0)`-marked point is the base-change morphism. -/
 theorem projTateMap_map_tate
@@ -5170,45 +5244,10 @@ theorem projTateMap_map_tate
         (coordY ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))))) :
     projTateMap R ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)) g hZ hord =
       projModelBaseChange (algebraMap (tateRingOver R) A) (tateCurveLocOver R) := by
-  have htn : ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)).IsTateNormal :=
-    (tateCurveLocOver_isTateNormal R).map (algebraMap (tateRingOver R) A)
   -- the T-E1 normalisation at the (0,0)-marking is the identity variable change
-  have hC1 : tateNormalVariableChange
-      ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))
-      (zChartEval _ g hZ (coordX ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))))
-      (zChartEval _ g hZ (coordY ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))))
-      (zChartEval_equation_self _ g hZ) hord = 1 := by
-    refine (tateNormalVariableChange_unique _ _ _
-      (zChartEval_equation_self _ g hZ) hord 1 ⟨?_, ?_, ?_⟩).symm
-    · rw [one_smul]
-      exact htn
-    · exact hx.symm
-    · exact hy.symm
+  have hC1 := projTateMap_map_tate_hC1 R g hZ hx hy hord
   -- the pointed atlas algebra map is the algebra map itself
-  have hL : ((tateRingOverAlgLiftOfPoint R
-      ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)) _ _
-      (zChartEval_equation_self _ g hZ) hord : tateRingOver R →ₐ[R] A) :
-        tateRingOver R →+* A) = algebraMap (tateRingOver R) A := by
-    have hAlg : ∀ r : ↑R, algebraMap (tateRingOver R) A
-        (algebraMap ↑R (tateRingOver R) r) = algebraMap ↑R A r := fun r => by
-      rw [← htower]; rfl
-    have hext := tateRingOver_algHom_ext R
-      (tateRingOverAlgLiftOfPoint R
-        ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)) _ _
-        (zChartEval_equation_self _ g hZ) hord)
-      ({ toRingHom := algebraMap (tateRingOver R) A, commutes' := hAlg } :
-        tateRingOver R →ₐ[R] A) ?_ ?_
-    · exact congrArg (fun φ : tateRingOver R →ₐ[R] A => (φ : tateRingOver R →+* A)) hext
-    · rw [tateRingOverAlgLiftOfPoint_X_zero, hC1, one_smul]
-      show ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)).a₁ =
-        algebraMap (tateRingOver R) A
-          (algebraMap (MvPolynomial (Fin 2) ↑R) (tateRingOver R) (MvPolynomial.X 0))
-      rw [WeierstrassCurve.map_a₁, tateCurveLocOver_a₁]
-    · rw [tateRingOverAlgLiftOfPoint_X_one, hC1, one_smul]
-      show ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)).a₂ =
-        algebraMap (tateRingOver R) A
-          (algebraMap (MvPolynomial (Fin 2) ↑R) (tateRingOver R) (MvPolynomial.X 1))
-      rw [WeierstrassCurve.map_a₂, tateCurveLocOver_a₂]
+  have hL := projTateMap_map_tate_hL R htower g hZ hord hC1
   rw [projTateMap_unfold R ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A))
     g hZ hord]
   have hinv1 := projModelVCIso_inv_congr hC1
@@ -5222,7 +5261,8 @@ theorem projTateMap_map_tate
       Iso.hom_inv_id, projModelVCIso_one, eqToHom_trans, eqToHom_refl]
   have hbcL := projModelBaseChange_ringHom_congr hL (tateCurveLocOver R)
   rw [hinv1, hinv2, hbcL]
-  simp only [Category.assoc, eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
+  rw [Category.assoc, eqToHom_trans_assoc, eqToHom_trans_assoc, eqToHom_trans_assoc,
+    eqToHom_refl, Category.id_comp]
 
 end SelfClassification
 

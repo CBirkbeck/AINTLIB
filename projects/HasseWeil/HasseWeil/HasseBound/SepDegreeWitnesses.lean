@@ -2328,7 +2328,7 @@ equals `2`. This is the precise residual content of `bridge_Biii_ord_eq_neg_two_
 via `Ideal.ramificationIdx_spec` with `n = 2`: writing `xc := algebraMap
 (Polynomial K) carrier X` (image `f⁻¹` in `LinfAt f`, so `xIdeal.map = span {xc}`),
 
-  `ramificationIdx (algebraMap) (X) P_T = 2`
+  `ramificationIdx' (algebraMap) (X) P_T = 2`
     ⟸ `xc ∈ P_T ^ 2`            (the reverse valuation direction, the one residual)
     ∧ `¬ (xc ∈ P_T ^ 3)`        (forward direction, SHIPPED: `Sinf_kernelPrime_pow_le_ord`)
 
@@ -2356,7 +2356,7 @@ theorem Sinf_ramificationIdx_eq_two_at_kernel
     (T : (isogOneSub_negFrobenius W hq).kernel) :
     letI := data.commRing
     letI := data.algPoly
-    Ideal.ramificationIdx
+    Ideal.ramificationIdx'
         (Curves.RamificationAtInfinity.xIdeal (k := K))
         (bridge_Bi_kernelToPrime_v2 W hq data T) = 2 := by
   letI := data.commRing
@@ -2384,7 +2384,7 @@ theorem Sinf_ramificationIdx_eq_two_at_kernel
   have h_map : (Curves.RamificationAtInfinity.xIdeal (k := K)).map
       (algebraMap (Polynomial K) data.carrier) = Ideal.span {xc} := by
     rw [Curves.RamificationAtInfinity.xIdeal, Ideal.map_span, Set.image_singleton]
-  -- Step 3: `ramificationIdx = 2` via `ramificationIdx_spec` with `n = 2`:
+  -- Step 3: `ramificationIdx' = 2` via `ramificationIdx_spec` with `n = 2`:
   --   `xIdeal.map ≤ P_T ^ 2`  and  `¬ xIdeal.map ≤ P_T ^ 3`.
   refine Ideal.ramificationIdx_spec ?_ ?_
   · -- `xIdeal.map ≤ P_T ^ 2`, i.e. `xc ∈ P_T ^ 2`.  RESIDUAL direction:
@@ -2413,8 +2413,8 @@ the same binders as `bridge_Bi_liesOver_v2` (plus `letI := data.algPoly`) and th
 order-based kernel-prime `bridge_Bi_kernelToPrime_v2`.
 
 Per the `Sinf.ordAt` definition (`RamificationAtInfinity.lean`),
-`data.ordAt P = -(ramificationIdx (algebraMap (Polynomial K) data.carrier) (X) P : ℤ)`,
-so the `= -2` goal reduces to the `ℕ`-level `ramificationIdx … = 2`, discharged by
+`data.ordAt P = -(ramificationIdx' (algebraMap (Polynomial K) data.carrier) (X) P : ℤ)`,
+so the `= -2` goal reduces to the `ℕ`-level `ramificationIdx' … = 2`, discharged by
 `Sinf_ramificationIdx_eq_two_at_kernel` (the isolated residual: carrier-valuation
 ↔ curve-`ordAtPoint` identification, `= ord_T(f⁻¹) = 2`).
 
@@ -2433,9 +2433,9 @@ theorem bridge_Biii_ord_eq_neg_two_v2
     data.ordAt (bridge_Bi_kernelToPrime_v2 W hq data T) = (-2 : ℤ) := by
   letI := data.commRing
   letI := data.algPoly
-  -- `Sinf.ordAt P = -(ramificationIdx … P : ℤ)` by definition; reduce to the
+  -- `Sinf.ordAt P = -(ramificationIdx' … P : ℤ)` by definition; reduce to the
   -- `ℕ`-level ramification-index computation.
-  change -(Ideal.ramificationIdx
+  change -(Ideal.ramificationIdx'
       (Curves.RamificationAtInfinity.xIdeal (k := K))
       (bridge_Bi_kernelToPrime_v2 W hq data T) : ℤ) = (-2 : ℤ)
   rw [Sinf_ramificationIdx_eq_two_at_kernel W hq data T]
@@ -3081,7 +3081,7 @@ a bare carrier prime `P` of `data.carrier` lying over `xIdeal := (X)` IS the pla
    pointCount`.
 3. The sum hypothesis combined with `Ideal.inertiaDeg_pos ≥ 1` (`xIdeal` maximal,
    `Module.Finite (K[X]) carrier` via `data.moduleFinite`, each `P` in the finset `LiesOver`):
-   `pointCount = Σ inertiaDeg ≥ #primesOverFinset`. Together with `#image ≤ #primesOverFinset`:
+   `pointCount = Σ inertiaDeg' ≥ #primesOverFinset`. Together with `#image ≤ #primesOverFinset`:
    equal cardinalities, so `image = primesOverFinset` (`Finset.eq_of_subset_of_card_le`).
 4. `P ∈ image` ⟹ `∃ T, P = P_T`. Done. -/
 theorem Sinf_primeOver_eq_kernelPrime_place_of_sum_inertia_eq_pointCount
@@ -3092,7 +3092,7 @@ theorem Sinf_primeOver_eq_kernelPrime_place_of_sum_inertia_eq_pointCount
     (h_sum : letI := data.commRing; letI := data.isDomain; letI := data.isDedekindDomain;
       letI := data.algPoly;
       ∑ P ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
-        (Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) P) =
+        (Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) P) =
           pointCount W.toAffine)
     (P : letI := data.commRing; Ideal data.carrier)
     (hP_prime : letI := data.commRing; P.IsPrime)
@@ -3145,23 +3145,23 @@ theorem Sinf_primeOver_eq_kernelPrime_place_of_sum_inertia_eq_pointCount
       (IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier).card ≤
         pointCount W.toAffine := by
     rw [← h_sum]
-    -- Σ_{P ∈ S} inertiaDeg P ≥ Σ_{P ∈ S} 1 = S.card, since each inertiaDeg ≥ 1.
+    -- Σ_{P ∈ S} inertiaDeg' P ≥ Σ_{P ∈ S} 1 = S.card, since each inertiaDeg' ≥ 1.
     have h_one_le : ∀ Q ∈
         IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
-        1 ≤ Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q := by
+        1 ≤ Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) Q := by
       intro Q hQ
       rw [IsDedekindDomain.mem_primesOverFinset_iff Curves.RamificationAtInfinity.xIdeal_ne_bot] at hQ
       obtain ⟨hQ_prime, hQ_liesOver⟩ := hQ
       haveI := hQ_prime
       haveI := hQ_liesOver
-      exact Ideal.inertiaDeg_pos (Curves.RamificationAtInfinity.xIdeal (k := K)) Q
+      exact Ideal.inertiaDeg'_pos (Curves.RamificationAtInfinity.xIdeal (k := K)) Q
     calc (IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier).card
         = ∑ _Q ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K))
             data.carrier, (1 : ℕ) := by
           rw [Finset.sum_const, smul_eq_mul, mul_one]
       _ ≤ ∑ Q ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K))
             data.carrier,
-              Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q :=
+              Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) Q :=
           Finset.sum_le_sum h_one_le
   -- Step 4: image = primesOverFinset (same finite cardinality, subset).
   have h_image_eq :
@@ -3315,14 +3315,14 @@ theorem Sinf_sum_inertiaDeg_eq_pointCount_of_K3_K2K5_witnesses
       letI := data.isDedekindDomain
       letI := data.algPoly
       ∑ P ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
-        (Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) P) =
+        (Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) P) =
           Nat.card geomPoles) :
     letI := data.commRing
     letI := data.isDomain
     letI := data.isDedekindDomain
     letI := data.algPoly
     ∑ P ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
-      (Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) P) =
+      (Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) P) =
         pointCount W.toAffine := by
   -- K3 + K4 dispatcher: Nat.card geomPoles = Fintype.card W.toAffine.Point = pointCount.
   have h_geom : Nat.card geomPoles = Fintype.card W.toAffine.Point :=
@@ -3339,7 +3339,7 @@ The downstream `_v2` analogue of the former upstream `bridge_Biv_inertia_eq_one`
 
 Per `Sinf.inertiaDeg_eq_finrank_kappa` (`RamificationAtInfinity.lean`), with the
 `LiesOver` instance from `bridge_Bi_liesOver_v2`,
-`inertiaDeg (X) P_T = Module.finrank (Polynomial K ⧸ (X)) (data.kappa P_T)`, so the
+`inertiaDeg' (X) P_T = Module.finrank (Polynomial K ⧸ (X)) (data.kappa P_T)`, so the
 `= 1` goal reduces to that residue-ring–level finrank being `1`, which is the
 residue-field-at-an-`F_q`-rational-point content isolated below as
 `Sinf_finrank_kappa_kernelPrime_eq_one`. -/
@@ -3446,16 +3446,16 @@ theorem Sinf_finrank_kappa_kernelPrime_eq_one
   letI := data.isDomain
   letI := data.moduleFinite
   set P_T : Ideal data.carrier := bridge_Bi_kernelToPrime_v2 W hq data T with hP_T
-  -- `inertiaDeg (X) P_T = finrank (K[X]⧸(X)) (kappa P_T)`; we prove the finrank `= 1`
+  -- `inertiaDeg' (X) P_T = finrank (K[X]⧸(X)) (kappa P_T)`; we prove the finrank `= 1`
   -- by `le_antisymm`. `kappa P_T` is *definitionally* `data.carrier ⧸ P_T`, and the
-  -- module structure used by `inertiaDeg` is `Quotient.algebraQuotientOfLEComap`,
+  -- module structure used by `inertiaDeg'` is `Quotient.algebraQuotientOfLEComap`,
   -- which is exactly the algebra `(K[X]⧸(X)) → (carrier⧸P_T)` we work with below.
   haveI : P_T.IsPrime := bridge_Bi_isPrime_v2 W hq data T
   -- The base ideal `(X)` is maximal and the carrier is module-finite over `K[X]`, so
   -- the residue ring `carrier ⧸ P_T` is a nontrivial finite `K[X]⧸(X)`-module.
   haveI hmax : (Curves.RamificationAtInfinity.xIdeal (k := K)).IsMaximal :=
     Curves.RamificationAtInfinity.xIdeal_isMaximal
-  -- Install the algebra instance `inertiaDeg` uses, so `finrank … (kappa P_T)` and
+  -- Install the algebra instance `inertiaDeg'` uses, so `finrank … (kappa P_T)` and
   -- `finrank … (carrier ⧸ P_T)` refer to the same module structure.
   letI : Algebra (Polynomial K ⧸ Curves.RamificationAtInfinity.xIdeal (k := K))
       (data.carrier ⧸ P_T) :=
@@ -3465,8 +3465,8 @@ theorem Sinf_finrank_kappa_kernelPrime_eq_one
   -- module-finite, transported through `inertiaDeg_algebraMap`.
   have h_ge : 1 ≤ Module.finrank (Polynomial K ⧸ Curves.RamificationAtInfinity.xIdeal (k := K))
       (data.kappa P_T) := by
-    have hpos := Ideal.inertiaDeg_pos (Curves.RamificationAtInfinity.xIdeal (k := K)) P_T
-    rwa [Ideal.inertiaDeg_algebraMap] at hpos
+    have hpos := Ideal.inertiaDeg'_pos (Curves.RamificationAtInfinity.xIdeal (k := K)) P_T
+    rwa [Ideal.inertiaDeg'_algebraMap] at hpos
   -- UPPER BOUND `finrank ≤ 1`: the residue ring is generated over `K[X]⧸(X)` by `1`,
   -- because the structure algebra map `(K[X]⧸(X)) → (carrier⧸P_T)` is SURJECTIVE —
   -- the residue-field-at-an-`F_q`-rational-point content, isolated as
@@ -3488,7 +3488,7 @@ same binders as `bridge_Biii_ord_eq_neg_two_v2` and the order-based kernel-prime
 `bridge_Bi_kernelToPrime_v2`.
 
 Via `Sinf.inertiaDeg_eq_finrank_kappa` (with the `LiesOver` instance supplied by
-`bridge_Bi_liesOver_v2`), `inertiaDeg (X) P_T = Module.finrank (Polynomial K ⧸ (X))
+`bridge_Bi_liesOver_v2`), `inertiaDeg' (X) P_T = Module.finrank (Polynomial K ⧸ (X))
 (data.kappa P_T)`, discharged by the isolated residue residual
 `Sinf_finrank_kappa_kernelPrime_eq_one`.
 
@@ -3504,13 +3504,13 @@ theorem bridge_Biv_inertia_eq_one_v2
     (T : (isogOneSub_negFrobenius W hq).kernel) :
     letI := data.commRing
     letI := data.algPoly
-    Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K))
+    Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K))
         (bridge_Bi_kernelToPrime_v2 W hq data T) = 1 := by
   letI := data.commRing
   letI := data.algPoly
   -- Supply the `LiesOver` instance so `inertiaDeg_eq_finrank_kappa` applies.
   haveI := bridge_Bi_liesOver_v2 W hq data T
-  -- `inertiaDeg (X) P_T = finrank (Polynomial K ⧸ (X)) (kappa P_T)`.
+  -- `inertiaDeg' (X) P_T = finrank (Polynomial K ⧸ (X)) (kappa P_T)`.
   rw [data.inertiaDeg_eq_finrank_kappa (bridge_Bi_kernelToPrime_v2 W hq data T)]
   -- Discharge via the isolated residue residual.
   exact Sinf_finrank_kappa_kernelPrime_eq_one W hq data T
@@ -3521,7 +3521,7 @@ Cleanest alternative witness-form for the sum-of-inertia identity `Σ f_P = #E(F
 SURJECTIVITY of the kernel-to-prime map (every prime over `(X)` is some `P_T`) directly
 implies the sum identity. The kernel-to-prime image then EQUALS `primesOverFinset` (the
 backward inclusion `bridge_Bii_kernelToPrime_mem_primesOverFinset_v2` is shipped axiom-clean),
-each `P_T` has `inertiaDeg = 1` (shipped `bridge_Biv_inertia_eq_one_v2`), and the kernel has
+each `P_T` has `inertiaDeg' = 1` (shipped `bridge_Biv_inertia_eq_one_v2`), and the kernel has
 `pointCount` elements (shipped `kernel_eq_top_of_hom_eq_id_sub_frobenius`). This factors out
 the deep structural content (the surjectivity claim — every prime over `(X)` is a kernel-
 prime) into one named witness hypothesis.
@@ -3554,7 +3554,7 @@ theorem Sinf_sum_inertiaDeg_eq_pointCount_of_surjectivity_witness
     letI := data.isDedekindDomain
     letI := data.algPoly
     ∑ P ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
-      (Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) P) =
+      (Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) P) =
         pointCount W.toAffine := by
   letI := data.commRing
   letI := data.isDomain
@@ -3593,7 +3593,7 @@ theorem Sinf_sum_inertiaDeg_eq_pointCount_of_surjectivity_witness
       Sinf_kernelToPrime_v2_injective W hq data h_eq)]
   -- Step 3: each kernel-prime has inertia 1, sum becomes Σ 1 = #univ = #kernel = pointCount.
   have h_inertia_one : ∀ T : (isogOneSub_negFrobenius W hq).kernel,
-      Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K))
+      Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K))
           (bridge_Bi_kernelToPrime_v2 W hq data T) = 1 :=
     fun T ↦ bridge_Biv_inertia_eq_one_v2 W hq data T
   simp only [h_inertia_one]
@@ -3650,14 +3650,14 @@ theorem Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_of_finrank_witness
       letI := data.algPoly
       ∑ P ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
         (-(data.ordAt P)).toNat *
-          Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) P =
+          Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) P =
         2 * pointCount W.toAffine) :
     letI := data.commRing
     letI := data.isDomain
     letI := data.isDedekindDomain
     letI := data.algPoly
     ∑ P ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
-      (Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) P) =
+      (Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) P) =
         pointCount W.toAffine := by
   letI := data.commRing
   letI := data.isDomain
@@ -3687,7 +3687,7 @@ theorem Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_of_finrank_witness
   -- Step 2: each kernel-prime contributes e_P · f_P = 2 · 1 = 2 to the weighted sum.
   have h_image_sum :
       ∑ Q ∈ image, (-(data.ordAt Q)).toNat *
-          Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q =
+          Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) Q =
         2 * pointCount W.toAffine := by
     rw [himage_def,
       Finset.sum_image (fun T₁ _ T₂ _ h_eq ↦
@@ -3695,7 +3695,7 @@ theorem Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_of_finrank_witness
     -- Each kernel-prime P_T has e = 2 and f = 1, so weighted sum = 2 · pointCount.
     have h_each : ∀ T : (isogOneSub_negFrobenius W hq).kernel,
         (-(data.ordAt (bridge_Bi_kernelToPrime_v2 W hq data T))).toNat *
-          Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K))
+          Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K))
             (bridge_Bi_kernelToPrime_v2 W hq data T) = 2 := by
       intro T
       -- e_{P_T} = 2: ord = -2 ⟹ (-ord).toNat = 2.
@@ -3713,28 +3713,28 @@ theorem Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_of_finrank_witness
   have h_pos_each : ∀ Q ∈
       IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
       1 ≤ (-(data.ordAt Q)).toNat *
-        Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q := by
+        Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) Q := by
     intro Q hQ
     rw [IsDedekindDomain.mem_primesOverFinset_iff Curves.RamificationAtInfinity.xIdeal_ne_bot] at hQ
     obtain ⟨hQ_prime, hQ_liesOver⟩ := hQ
     haveI := hQ_prime
     haveI := hQ_liesOver
-    -- inertiaDeg ≥ 1
-    have h_f_pos := Ideal.inertiaDeg_pos
+    -- inertiaDeg' ≥ 1
+    have h_f_pos := Ideal.inertiaDeg'_pos
       (Curves.RamificationAtInfinity.xIdeal (k := K)) Q
-    -- For Q ∈ primesOverFinset, ramificationIdx ≥ 1 via the LiesOver fact
+    -- For Q ∈ primesOverFinset, ramificationIdx' ≥ 1 via the LiesOver fact
     -- (`Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver`).
     have h_e_pos : 1 ≤ (-(data.ordAt Q)).toNat := by
       rw [data.toNat_neg_ordAt_eq_ramificationIdx Q]
       letI := data.isTorsionFree
-      have h_ne_zero : Ideal.ramificationIdx
+      have h_ne_zero : Ideal.ramificationIdx'
           (Curves.RamificationAtInfinity.xIdeal (k := K)) Q ≠ 0 :=
         Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver Q
           Curves.RamificationAtInfinity.xIdeal_ne_bot
       omega
     calc (1 : ℕ) = 1 * 1 := by ring
       _ ≤ (-(data.ordAt Q)).toNat *
-            Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q :=
+            Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) Q :=
           Nat.mul_le_mul h_e_pos h_f_pos
   -- The sum over the complement is 0 + each term ≥ 1 ⟹ complement empty.
   have h_image_eq :
@@ -3745,23 +3745,23 @@ theorem Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_of_finrank_witness
         (s₂ := IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier)
         h_image_sub
         (f := fun Q ↦ (-(data.ordAt Q)).toNat *
-          Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q)
+          Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) Q)
     -- h_sum_split: Σ_{compl} + Σ_{image} = Σ_{total}. Substitute h_finrank_witness + h_image_sum:
     -- Σ_{compl} + 2·pointCount = 2·pointCount, so Σ_{compl} = 0.
     have h_compl_sum_zero :
         ∑ Q ∈ (IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K))
             data.carrier) \ image,
           (-(data.ordAt Q)).toNat *
-            Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q = 0 := by
+            Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) Q = 0 := by
       have : ∑ Q ∈ (IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K))
               data.carrier) \ image,
             (-(data.ordAt Q)).toNat *
-              Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q +
+              Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) Q +
           ∑ Q ∈ image, (-(data.ordAt Q)).toNat *
-            Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q =
+            Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) Q =
           ∑ Q ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K))
             data.carrier, (-(data.ordAt Q)).toNat *
-              Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q := h_sum_split
+              Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) Q := h_sum_split
       omega
     -- complement is empty: each term ≥ 1 but sum = 0 ⟹ no terms.
     have h_compl_empty :
@@ -3774,15 +3774,15 @@ theorem Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_of_finrank_witness
         obtain ⟨Q, hQ⟩ := h_ne
         have hQ_total := (Finset.mem_sdiff.mp hQ).1
         have h_pos : 1 ≤ (-(data.ordAt Q)).toNat *
-            Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q :=
+            Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) Q :=
           h_pos_each Q hQ_total
         have h_ge_one : (1 : ℕ) ≤ ∑ Q' ∈ (IsDedekindDomain.primesOverFinset
               (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier) \ image,
             (-(data.ordAt Q')).toNat *
-              Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q' :=
+              Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) Q' :=
           le_trans h_pos (Finset.single_le_sum (f := fun Q' ↦
             (-(data.ordAt Q')).toNat *
-              Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K)) Q')
+              Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) Q')
             (fun R _ ↦ Nat.zero_le _) hQ)
         omega
     -- image = primesOverFinset (image ⊆ total + complement is empty).
@@ -3797,9 +3797,9 @@ theorem Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_of_finrank_witness
   rw [← h_image_eq, himage_def,
     Finset.sum_image (fun T₁ _ T₂ _ h_eq ↦
       Sinf_kernelToPrime_v2_injective W hq data h_eq)]
-  -- Each kernel-prime has inertiaDeg = 1.
+  -- Each kernel-prime has inertiaDeg' = 1.
   have h_inertia_one : ∀ T : (isogOneSub_negFrobenius W hq).kernel,
-      Ideal.inertiaDeg (Curves.RamificationAtInfinity.xIdeal (k := K))
+      Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K))
           (bridge_Bi_kernelToPrime_v2 W hq data T) = 1 :=
     fun T ↦ bridge_Biv_inertia_eq_one_v2 W hq data T
   simp only [h_inertia_one]

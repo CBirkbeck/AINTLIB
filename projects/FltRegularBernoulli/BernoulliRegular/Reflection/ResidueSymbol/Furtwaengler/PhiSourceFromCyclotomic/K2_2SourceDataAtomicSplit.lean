@@ -361,7 +361,7 @@ theorem f_eq_inertiaDeg_of_canonicalTraceForm
     letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
     letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) :=
       CyclotomicLocalSetup.algebra_zmod_residueField (ℓ₀ := ℓ) (K₀ := K) P hℓ_in_P
-    S.f = (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg P := by
+    S.f = (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg' P := by
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) :=
     CyclotomicLocalSetup.algebra_zmod_residueField (ℓ₀ := ℓ) (K₀ := K) P hℓ_in_P
@@ -384,7 +384,7 @@ theorem f_eq_inertiaDeg_of_canonicalTraceForm
             Q hQ_in iso h_compat := by
         simp
   change S.toConcreteStickelbergerSetup.f =
-    (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg P
+    (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg' P
   rw [h_concrete]
   unfold CyclotomicLocalSetup.mkConcreteSetup_ofSplitPrime_canonical_compat
     CyclotomicLocalSetup.mkConcreteSetup_ofSplitPrime_canonical
@@ -432,7 +432,7 @@ theorem f_eq_one_of_canonicalTraceForm_atSpan
   letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) :=
     CyclotomicLocalSetup.algebra_zmod_residueField (ℓ₀ := ℓ) (K₀ := K) P hℓ_in_P
   have hf_S :
-      S.f = (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg P :=
+      S.f = (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg' P :=
     f_eq_inertiaDeg_of_canonicalTraceForm
       (K := K) (R' := R') hℓ_in_P hp_notin_P hP_ne_bot hℓ_ne_p
       hQ_in h_compat h_trace
@@ -447,7 +447,7 @@ theorem f_eq_one_of_canonicalTraceForm_atSpan
   haveI hq_max : (Ideal.span ({(ℓ : ℤ)} : Set ℤ) : Ideal ℤ).IsMaximal :=
     Int.ideal_span_isMaximal_of_prime ℓ
   have hf_P :
-      (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg P = 1 := by
+      (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg' P = 1 := by
     rw [Ideal.inertiaDeg_eq_inertiaDeg',
         ← Ideal.inertiaDegIn_eq_inertiaDeg
           (p := Ideal.span ({(ℓ : ℤ)} : Set ℤ)) (P := P) (G := Gal(K/ℚ))]

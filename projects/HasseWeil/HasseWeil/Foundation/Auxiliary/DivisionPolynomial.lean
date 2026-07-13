@@ -260,7 +260,8 @@ lemma smulX_sub_smulX (hm : m ≠ 0) (hn : n ≠ 0) :
   rw [smulX_eq hm, smulX_eq hn,
     show ∀ (c a b : Universal.Field), c - a - (c - b) = b - a from fun c a b ↦ by ring,
     div_sub_div]
-  · rw [mul_pow]; congr; convert (isEllSequence_ψᵤ n m 1).symm using 1
+  · rw [mul_pow]; congr
+    convert ((EllSequence.isEllSequence_iff_rel₃ ψᵤ).mp isEllSequence_ψᵤ n m 1).symm using 1
     · ring
     · simp [ψᵤ]
   all_goals exact pow_ne_zero _ (ψᵤ_ne_zero <| by assumption)
@@ -435,8 +436,8 @@ theorem zsmul_point_eq_smulX_smulY : n ≠ 0 →
       rw [← mul_cancel_left_mem_nonZeroDivisors (mem_nonZeroDivisors_of_ne_zero Field.two_ne_zero),
         ← add_right_cancel_iff (a := _U.a₁ * smulX (n2 + 1 : ℕ) + _U.a₃)]
       convert smulY_add_sub_negY (n := n2) one_ne_zero (by omega) (by omega) (by omega) using 1
-      · simp_rw [Affine.negY, Nat.cast_add]; norm_cast
-        simp only [two_mul]; abel
+      · simp only [Nat.cast_add, Nat.cast_one, Affine.negY]
+        ring
       convert _U.addY_sub_negY_addY (smulY n2) (smulY 1) ne using 1
       · rw [Affine.negY, ← X_eq]; ring
       · rw [← X_eq]; rfl
@@ -553,7 +554,8 @@ lemma dblXYZ_smulRing : dblXYZ curveRing (smulRing n) = smulRing (2 * n) :=
 
 private lemma addZ_smulPoly :
     addZ (smulPoly m) (smulPoly n) = curve.ψ (n + m) * curve.ψ (n - m) := by
-  simp_rw [addZ, smulPoly, φ]; convert (curve.isEllSequence_ψ n m 1).symm using 1
+  simp_rw [addZ, smulPoly, φ]
+  convert ((EllSequence.isEllSequence_iff_rel₃ curve.ψ).mp curve.isEllSequence_ψ n m 1).symm using 1
   · simp only [fin3_def_ext]; ring
   · rw [ψ_one]; ring
 
@@ -680,11 +682,14 @@ theorem zsmul_eq_smulEval {x y : F} (h : Affine.Nonsingular W x y) (n : ℤ) :
         push_cast
         simp only [add_sub_cancel_left, one_smul]
         exact Point.fromAffine_some_ne_zero h
-      rw [Point.add_point, ih (n + 1) (by omega), ih (n + 1 + 1) (by omega), addMap_eq,
-        add_of_not_equiv (by
-          intro hequiv
-          exact hne (Point.ext_iff.mpr ((ih (n + 1) (by omega)) ▸ (ih (n + 1 + 1) (by omega)) ▸
-            Quotient.eq.mpr hequiv)))]
+      have h1 := ih (n + 1) (by omega)
+      have h2 := ih (n + 1 + 1) (by omega)
+      have hnequiv : ¬ smulEval W x y (↑(n + 1) : ℤ) ≈ smulEval W x y (↑(n + 1 + 1) : ℤ) := by
+        intro hequiv
+        refine hne (Point.ext ?_)
+        rw [h1, h2, Quotient.eq]
+        exact hequiv
+      rw [Point.add_point, h1, h2, addMap_eq, add_of_not_equiv hnequiv]
       have : (↑(n + 1 + 1) : ℤ) = ↑(n + 1) + 1 := by push_cast; omega
       rw [this, addXYZ_smulEval₁ h.1]
       congrm(⟦W.smulEval x y ↑(?_)⟧); omega

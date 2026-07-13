@@ -228,13 +228,13 @@ theorem Sinf_inertia_one_at_kernel
       ∀ (φ : (isogOneSub_negFrobenius W hq).kernel → Ideal data.carrier),
         (∀ T, (φ T).IsPrime ∧ (φ T).LiesOver (xIdeal (k := K))) →
         ∀ T : (isogOneSub_negFrobenius W hq).kernel,
-          Ideal.inertiaDeg (xIdeal (k := K)) (φ T) = 1) :
+          Ideal.inertiaDeg' (xIdeal (k := K)) (φ T) = 1) :
     letI := data.commRing
     letI := data.algPoly
     ∀ (φ : (isogOneSub_negFrobenius W hq).kernel → Ideal data.carrier),
       (∀ T, (φ T).IsPrime ∧ (φ T).LiesOver (xIdeal (k := K))) →
       ∀ T : (isogOneSub_negFrobenius W hq).kernel,
-        Ideal.inertiaDeg (xIdeal (k := K)) (φ T) = 1 :=
+        Ideal.inertiaDeg' (xIdeal (k := K)) (φ T) = 1 :=
   h_inertia_witness
 
 end Group1

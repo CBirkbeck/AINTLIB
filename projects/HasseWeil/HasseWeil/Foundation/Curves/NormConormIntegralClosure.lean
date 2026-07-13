@@ -1622,7 +1622,7 @@ theorem minpolyCoeffsRegular_coordYFun (hreg : OrdAtInftyReg (C₁ := C₁) (C�
 theorem inertiaDeg_eq_one (P : Ideal (B (C₁ := C₁) (C₂ := C₂)))
     (Q : C₂.SmoothPoint) (hPp : P.IsPrime)
     (hPq : P.under C₂.CoordinateRing = C₂.maximalIdealAt Q) :
-    Ideal.inertiaDeg (C₂.maximalIdealAt Q) P = 1 := by
+    Ideal.inertiaDeg' (C₂.maximalIdealAt Q) P = 1 := by
   have hfQ : (1 : C₂.CoordinateRing) ∉ C₂.maximalIdealAt Q := one_notMem_maximalIdealAt Q
   have hPq' : P.under C₂.CoordinateRing = awayIdealAt (C₂ := C₂) C₂.CoordinateRing Q := by
     rw [hPq, awayIdealAt_eq_maximalIdealAt]
@@ -1630,41 +1630,59 @@ theorem inertiaDeg_eq_one (P : Ideal (B (C₁ := C₁) (C₂ := C₂)))
     one_ne_zero hfQ hPp hPq'
   rwa [awayIdealAt_eq_maximalIdealAt] at this
 
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 800000 in
+/-- **Finrank coherence for `B` (opaque-base helper)**: the transport identifying
+`[Frac(C₂.CoordinateRing) : Frac(B)]` with `[K(C₁) : K(C₂)]`, stated with the
+`FractionRing C₂.CoordinateRing`-algebra structure on `FractionRing ↥B` supplied as an
+*explicit* instance argument `instBFrac` (together with its scalar tower `instBTow`).
+
+The point is that `FractionRing.liftAlgebra` is **not** a local instance here, so synthesising
+the `↥B`-side `FractionRing.algEquiv ↥B C₁.FunctionField` (which needs only the canonical
+`Subalgebra`-algebra + `instFractionRingB` structures) never triggers the looping
+`Algebra _ (FractionRing _)` discrimination-tree collision (`↥B =?= FractionRing ?R`) that the
+ambient `liftAlgebra` local instance would otherwise cause.  The public
+`finrank_fractionRing_B_eq` applies this with `instBFrac := liftAlgebra`. -/
+private theorem finrank_fractionRing_B_eq_of_liftAlgebra
+    [instBFrac : Algebra (FractionRing C₂.CoordinateRing) (FractionRing (B (C₁ := C₁) (C₂ := C₂)))]
+    [instBTow : IsScalarTower C₂.CoordinateRing (FractionRing C₂.CoordinateRing)
+      (FractionRing (B (C₁ := C₁) (C₂ := C₂)))] :
+    Module.finrank (FractionRing C₂.CoordinateRing) (FractionRing (B (C₁ := C₁) (C₂ := C₂))) =
+      Module.finrank C₂.FunctionField C₁.FunctionField := by
+  -- `C₂.FunctionField` is defeq `FractionRing C₂.CoordinateRing`, so keep the base ring fixed
+  -- (identity `i`) and transport only the top field via `algEquiv ↥B C₁.FunctionField`; the
+  -- latter's instances are the canonical subalgebra / `instFractionRingB` ones (no `liftAlgebra`
+  -- in scope to collide with).
+  refine Algebra.finrank_eq_of_equiv_equiv (R₀ := FractionRing C₂.CoordinateRing)
+    (S₀ := FractionRing (B (C₁ := C₁) (C₂ := C₂))) (R₁ := FractionRing C₂.CoordinateRing)
+    (S₁ := C₁.FunctionField) (RingEquiv.refl _)
+    (FractionRing.algEquiv (B (C₁ := C₁) (C₂ := C₂)) C₁.FunctionField).toRingEquiv ?_
+  apply IsLocalization.ringHom_ext (nonZeroDivisors C₂.CoordinateRing)
+  refine RingHom.ext fun a => ?_
+  simp only [RingHom.comp_apply, RingEquiv.toRingHom_eq_coe, RingEquiv.coe_toRingHom,
+    RingEquiv.refl_apply, AlgEquiv.toRingEquiv_eq_coe, AlgEquiv.coe_ringEquiv]
+  rw [← IsScalarTower.algebraMap_apply C₂.CoordinateRing (FractionRing C₂.CoordinateRing)
+      (FractionRing (B (C₁ := C₁) (C₂ := C₂))),
+    IsScalarTower.algebraMap_apply C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂))
+      (FractionRing (B (C₁ := C₁) (C₂ := C₂))), AlgEquiv.commutes,
+    ← IsScalarTower.algebraMap_apply C₂.CoordinateRing (FractionRing C₂.CoordinateRing)
+      C₁.FunctionField,
+    IsScalarTower.algebraMap_apply C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂)) C₁.FunctionField]
+
 attribute [local instance] FractionRing.liftAlgebra FractionRing.isScalarTower_liftAlgebra in
 /-- **Finrank coherence for `B`**: the relative-norm finrank `[Frac(C₂.CoordinateRing) : Frac(B)]`
 (computed by `Ideal.relNorm_algebraMap` with the canonical `FractionRing.liftAlgebra` structure)
 agrees with the geometric extension degree `[K(C₁) : K(C₂)]`.  Because `C₂.FunctionField` *is*
 `FractionRing C₂.CoordinateRing` (defeq abbrev) and `C₁.FunctionField` is the fraction field of `B`
-(`instFractionRingB`), the two `finrank`s are identified by the canonical `FractionRing.algEquiv`s,
-via `Algebra.finrank_eq_of_equiv_equiv`.  This is the integral-closure analogue of the affine
-template's `hcoh` (`PushforwardDivisor.relNorm_maximalIdealAt_eq`), but more direct: `B`'s fraction
-field is literally `C₁.FunctionField`, so no `liftAlgebra`-vs-pullback identification is needed.
+(`instFractionRingB`), the two `finrank`s are identified by the canonical `FractionRing.algEquiv`s.
 
-Stated with the `FractionRing.liftAlgebra` local instance active, so its LHS matches the finrank
-term produced by `Ideal.relNorm_algebraMap` verbatim. -/
+The transport itself lives in `finrank_fractionRing_B_eq_of_liftAlgebra`, where `liftAlgebra` is
+*not* a local instance — that is what keeps synthesising `algEquiv ↥B C₁.FunctionField` from
+`whnf`-looping on the `Algebra _ (FractionRing _)` discrimination-tree collision
+(`↥B =?= FractionRing ?R`).  Here we merely feed that helper the `liftAlgebra` structure the public
+statement requires. -/
 theorem finrank_fractionRing_B_eq :
     Module.finrank (FractionRing C₂.CoordinateRing) (FractionRing (B (C₁ := C₁) (C₂ := C₂))) =
-      Module.finrank C₂.FunctionField C₁.FunctionField := by
-  refine Algebra.finrank_eq_of_equiv_equiv
-    (FractionRing.algEquiv C₂.CoordinateRing C₂.FunctionField).toRingEquiv
-    (FractionRing.algEquiv (B (C₁ := C₁) (C₂ := C₂)) C₁.FunctionField).toRingEquiv ?_
-  apply IsLocalization.ringHom_ext (nonZeroDivisors C₂.CoordinateRing)
-  refine RingHom.ext fun a => ?_
-  show (algebraMap C₂.FunctionField C₁.FunctionField)
-      ((FractionRing.algEquiv C₂.CoordinateRing C₂.FunctionField)
-        ((algebraMap C₂.CoordinateRing (FractionRing C₂.CoordinateRing)) a)) =
-    (FractionRing.algEquiv (B (C₁ := C₁) (C₂ := C₂)) C₁.FunctionField)
-      ((algebraMap (FractionRing C₂.CoordinateRing) (FractionRing (B (C₁ := C₁) (C₂ := C₂))))
-        ((algebraMap C₂.CoordinateRing (FractionRing C₂.CoordinateRing)) a))
-  rw [AlgEquiv.commutes,
-    ← IsScalarTower.algebraMap_apply C₂.CoordinateRing (FractionRing C₂.CoordinateRing)
-      (FractionRing (B (C₁ := C₁) (C₂ := C₂))),
-    IsScalarTower.algebraMap_apply C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂))
-      (FractionRing (B (C₁ := C₁) (C₂ := C₂))), AlgEquiv.commutes,
-    ← IsScalarTower.algebraMap_apply C₂.CoordinateRing C₂.FunctionField C₁.FunctionField,
-    IsScalarTower.algebraMap_apply C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂)) C₁.FunctionField]
+      Module.finrank C₂.FunctionField C₁.FunctionField :=
+  finrank_fractionRing_B_eq_of_liftAlgebra
 
 /-- **The relative-norm exponent of a prime over `m_Q` is positive**: if a prime `P'` of `B`
 lies over the maximal ideal `m_Q` of `C₂.CoordinateRing` and `relNorm(P') = m_Q ^ t`, then
@@ -1720,12 +1738,12 @@ private theorem exists_relNormExp_fn (Q : C₂.SmoothPoint) :
     exact (exists_relNormExp_pos_of_mem_primesOver Q P' hP').choose_spec.2
 
 /-- **Inertia degree `1` for every prime over `m_Q`**: every prime `P'` of `B` in
-`(m_Q).primesOver B` has `inertiaDeg(m_Q, P') = 1`.  Such a `P'` lies over `m_Q`, so
+`(m_Q).primesOver B` has `inertiaDeg'(m_Q, P') = 1`.  Such a `P'` lies over `m_Q`, so
 `P'.under = m_Q`, and the per-prime `inertiaDeg_eq_one` (residue fields all `F`) applies. -/
 private theorem inertiaDeg_eq_one_of_mem_primesOver (Q : C₂.SmoothPoint)
     (P' : Ideal (B (C₁ := C₁) (C₂ := C₂)))
     (hP' : P' ∈ (C₂.maximalIdealAt Q).primesOver (B (C₁ := C₁) (C₂ := C₂))) :
-    Ideal.inertiaDeg (C₂.maximalIdealAt Q) P' = 1 := by
+    Ideal.inertiaDeg' (C₂.maximalIdealAt Q) P' = 1 := by
   obtain ⟨hP'prime, hP'lies⟩ := hP'
   have hunder : P'.under C₂.CoordinateRing = C₂.maximalIdealAt Q := hP'lies.over.symm
   exact inertiaDeg_eq_one P' Q hP'prime hunder
@@ -1737,7 +1755,7 @@ affine template's `one_le_ramificationIdx_of_liesOver_maximalIdealAt`. -/
 private theorem one_le_ramificationIdx_of_mem_primesOver (Q : C₂.SmoothPoint)
     (P' : Ideal (B (C₁ := C₁) (C₂ := C₂)))
     (hP' : P' ∈ (C₂.maximalIdealAt Q).primesOver (B (C₁ := C₁) (C₂ := C₂))) :
-    1 ≤ (C₂.maximalIdealAt Q).ramificationIdx P' := by
+    1 ≤ (C₂.maximalIdealAt Q).ramificationIdx' P' := by
   obtain ⟨hP'prime, hP'lies⟩ := hP'
   haveI : P'.IsPrime := hP'prime
   haveI : P'.LiesOver (C₂.maximalIdealAt Q) := hP'lies
@@ -1768,7 +1786,7 @@ private theorem primesOverFinset_eq_toFinset (Q : C₂.SmoothPoint) :
 template's `sum_ramificationIdx_eq_degree`. -/
 private theorem sum_ramificationIdx_eq_finrank (Q : C₂.SmoothPoint) :
     ∑ P' ∈ IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) (B (C₁ := C₁) (C₂ := C₂)),
-      (C₂.maximalIdealAt Q).ramificationIdx P' =
+      (C₂.maximalIdealAt Q).ramificationIdx' P' =
       Module.finrank C₂.FunctionField C₁.FunctionField := by
   haveI hQmax : (C₂.maximalIdealAt Q).IsMaximal := C₂.maximalIdealAt_isMaximal Q
   set p : Ideal C₂.CoordinateRing := C₂.maximalIdealAt Q with hp_def
@@ -1797,15 +1815,27 @@ private theorem finrank_eq_sum_relNormExp_mul_ramificationIdx (Q : C₂.SmoothPo
       Ideal.relNorm C₂.CoordinateRing P' = C₂.maximalIdealAt Q ^ sfn P') :
     Module.finrank C₂.FunctionField C₁.FunctionField =
       ∑ P' ∈ IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) (B (C₁ := C₁) (C₂ := C₂)),
-        sfn P' * (C₂.maximalIdealAt Q).ramificationIdx P' := by
+        sfn P' * (C₂.maximalIdealAt Q).ramificationIdx' P' := by
   haveI hQmax : (C₂.maximalIdealAt Q).IsMaximal := C₂.maximalIdealAt_isMaximal Q
   set p : Ideal C₂.CoordinateRing := C₂.maximalIdealAt Q with hp_def
   have hp0 : p ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
   have hpNotUnit : ¬ IsUnit p := by rw [Ideal.isUnit_iff]; exact hQmax.ne_top
-  set ee : Ideal (B (C₁ := C₁) (C₂ := C₂)) → ℕ := fun P' => p.ramificationIdx P' with hee_def
+  set ee : Ideal (B (C₁ := C₁) (C₂ := C₂)) → ℕ := fun P' => p.ramificationIdx' P' with hee_def
   rw [primesOverFinset_eq_toFinset Q]
   have hfact := Ideal.map_algebraMap_eq_finsetProd_pow (R := B (C₁ := C₁) (C₂ := C₂))
     (S := C₂.CoordinateRing) (p := p) hp0
+  have hpS : p.map (algebraMap C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂))) ≠ ⊥ :=
+    (Ideal.map_eq_bot_iff_of_injective
+      (FaithfulSMul.algebraMap_injective C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂)))).not.mpr hp0
+  rw [show (∏ P ∈ p.primesOver (B (C₁ := C₁) (C₂ := C₂)),
+        P ^ P.ramificationIdx C₂.CoordinateRing) =
+      ∏ P ∈ p.primesOver (B (C₁ := C₁) (C₂ := C₂)), P ^ ee P from
+    Finset.prod_congr rfl fun P' hP' => by
+      have hmem : P' ∈ p.primesOver (B (C₁ := C₁) (C₂ := C₂)) := Set.mem_toFinset.mp hP'
+      have hP'p : P'.IsPrime := hmem.1
+      have hP'over : P'.LiesOver p := hmem.2
+      simp only [hee_def]
+      rw [Ideal.ramificationIdx'_eq_ramificationIdx' p P' hpS]] at hfact
   have hrel := congr_arg (Ideal.relNorm C₂.CoordinateRing) hfact
   rw [Ideal.relNorm_algebraMap (B (C₁ := C₁) (C₂ := C₂)) p, map_prod,
     finrank_fractionRing_B_eq] at hrel
@@ -1869,7 +1899,7 @@ theorem relNorm_eq_of_under (P : Ideal (B (C₁ := C₁) (C₂ := C₂)))
   have hge1 : 1 ≤ s := one_le_relNormExp_of_liesOver Q P s hs
   -- A uniform exponent function `sfn` on the fibre over `p`: `relNorm(P') = p ^ sfn(P')`, `sfn ≥ 1`.
   obtain ⟨sfn, hsfn_ge, hsfn_relNorm⟩ := exists_relNormExp_fn (C₁ := C₁) Q
-  set ee : Ideal (B (C₁ := C₁) (C₂ := C₂)) → ℕ := fun P' => p.ramificationIdx P' with hee_def
+  set ee : Ideal (B (C₁ := C₁) (C₂ := C₂)) → ℕ := fun P' => p.ramificationIdx' P' with hee_def
   -- Membership in the explicit fibre finset gives `IsPrime ∧ LiesOver`.
   have hmem_iff : ∀ P', P' ∈ IsDedekindDomain.primesOverFinset p (B (C₁ := C₁) (C₂ := C₂)) ↔
       P' ∈ p.primesOver (B (C₁ := C₁) (C₂ := C₂)) :=

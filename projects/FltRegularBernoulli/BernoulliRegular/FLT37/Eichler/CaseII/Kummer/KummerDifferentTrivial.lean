@@ -11,7 +11,7 @@ power generates an unramified Kummer extension `L = K(α^{1/37})` over `K = ℚ(
 ## Reduction to the different ideal
 
 `IsUnramified (𝓞 K) (𝓞 L)` (flt-regular's class: every prime over every nonzero prime `q` has
-`ramificationIdx = 1`) is equivalent, prime-by-prime, to "no prime `P` of `𝓞 L` divides the
+`ramificationIdx' = 1`) is equivalent, prime-by-prime, to "no prime `P` of `𝓞 L` divides the
 different ideal `differentIdeal (𝓞 K) (𝓞 L)`" via the mathlib bridges
 `Algebra.isUnramifiedAt_iff_of_isDedekindDomain` (`e(P) = 1 ↔ Algebra.IsUnramifiedAt`) and
 `not_dvd_differentIdeal_iff` (`Algebra.IsUnramifiedAt ↔ ¬ P ∣ 𝔡`).  Hence the whole goal reduces to
@@ -129,7 +129,7 @@ into the per-prime predicate the different-ideal halves use. -/
 theorem algebra_isUnramifiedAt_of_isUnramifiedAt
     (P : Ideal (𝓞 L)) [P.IsPrime] (hP_bot : P ≠ ⊥)
     (h : ∀ Q ∈ (P.under (𝓞 K)).primesOver (𝓞 L),
-        Ideal.ramificationIdx (P.under (𝓞 K)) Q = 1) :
+        Ideal.ramificationIdx' (P.under (𝓞 K)) Q = 1) :
     Algebra.IsUnramifiedAt (𝓞 K) P := by
   haveI : P.LiesOver (P.under (𝓞 K)) := ⟨rfl⟩
   exact (Algebra.isUnramifiedAt_iff_of_isDedekindDomain hP_bot).mpr

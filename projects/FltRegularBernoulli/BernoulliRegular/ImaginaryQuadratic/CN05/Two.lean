@@ -211,11 +211,11 @@ theorem ncard_primesOver_at_two_inert (hp3 : p % 4 = 3) (hp3_8 : p % 8 = 3) :
   rw [← Nat.card_coe_set_eq, Nat.card_congr h_equiv, Nat.card_eq_finsetCard,
     monicFactorsMod_alpha_at_two_inert_card p hp3 hp3_8]
 
-/-- Each prime above 2 in the split case has inertiaDeg = 1. -/
+/-- Each prime above 2 in the split case has inertiaDeg' = 1. -/
 theorem inertiaDeg_at_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 7)
     (P : Ideal (𝓞 (Kminus p)))
     (hP : P ∈ Ideal.primesOver (Ideal.span {((2 : ℕ) : ℤ)}) (𝓞 (Kminus p))) :
-    (Ideal.span {((2 : ℕ) : ℤ)}).inertiaDeg P = 1 := by
+    (Ideal.span {((2 : ℕ) : ℤ)}).inertiaDeg' P = 1 := by
   classical
   haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   have h_exp : ¬ (2 : ℕ) ∣ RingOfIntegers.exponent (alphaInOK p hp3) :=
@@ -232,7 +232,8 @@ theorem inertiaDeg_at_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 7)
     change (P_sub : Ideal (𝓞 (Kminus p))) = _
     rw [this]
   rw [hP_from]
-  rw [NumberField.Ideal.inertiaDeg_primesOverSpanEquivMonicFactorsMod_symm_apply'
+  rw [Ideal.inertiaDeg'_eq_inertiaDeg,
+    NumberField.Ideal.inertiaDeg_primesOverSpanEquivMonicFactorsMod_symm_apply'
       h_exp hQ_mem]
   -- Qfactor is X or X + 1, both natDegree 1.
   rw [monicFactorsMod_alpha_at_two_split p hp3 hp7] at hQ_mem
@@ -253,19 +254,19 @@ theorem absNorm_primeOver_at_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 7)
   haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   haveI : P.IsPrime := hP.1
   haveI : P.LiesOver (Ideal.span {(2 : ℤ)}) := hP.2
-  have h_ine : (Ideal.span {((2 : ℕ) : ℤ)}).inertiaDeg P = 1 :=
+  have h_ine : (Ideal.span {((2 : ℕ) : ℤ)}).inertiaDeg' P = 1 :=
     inertiaDeg_at_two_split p hp3 hp7 P hP
   calc Ideal.absNorm P
-      = 2 ^ ((Ideal.span {((2 : ℕ) : ℤ)}).inertiaDeg P) :=
+      = 2 ^ ((Ideal.span {((2 : ℕ) : ℤ)}).inertiaDeg' P) :=
         Ideal.absNorm_eq_pow_inertiaDeg' P Nat.prime_two
     _ = 2 ^ (1 : ℕ) := by rw [h_ine]
     _ = 2 := pow_one 2
 
-/-- The unique prime above 2 in the inert case has inertiaDeg = 2. -/
+/-- The unique prime above 2 in the inert case has inertiaDeg' = 2. -/
 theorem inertiaDeg_at_two_inert (hp3 : p % 4 = 3) (hp3_8 : p % 8 = 3)
     (P : Ideal (𝓞 (Kminus p)))
     (hP : P ∈ Ideal.primesOver (Ideal.span {((2 : ℕ) : ℤ)}) (𝓞 (Kminus p))) :
-    (Ideal.span {((2 : ℕ) : ℤ)}).inertiaDeg P = 2 := by
+    (Ideal.span {((2 : ℕ) : ℤ)}).inertiaDeg' P = 2 := by
   classical
   haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   have h_exp : ¬ (2 : ℕ) ∣ RingOfIntegers.exponent (alphaInOK p hp3) :=
@@ -290,7 +291,8 @@ theorem inertiaDeg_at_two_inert (hp3 : p % 4 = 3) (hp3_8 : p % 8 = 3)
     exact congrArg (fun (x : ↥(Ideal.primesOver (Ideal.span {((2 : ℕ) : ℤ)}) (𝓞 (Kminus p)))) ↦
       (x : Ideal (𝓞 (Kminus p)))) hP_set
   rw [hP_eq]
-  rw [NumberField.Ideal.inertiaDeg_primesOverSpanEquivMonicFactorsMod_symm_apply'
+  rw [Ideal.inertiaDeg'_eq_inertiaDeg,
+    NumberField.Ideal.inertiaDeg_primesOverSpanEquivMonicFactorsMod_symm_apply'
       h_exp hQ_mem]
   change (Polynomial.X ^ 2 + Polynomial.X + Polynomial.C (1 : ZMod 2) :
       Polynomial (ZMod 2)).natDegree = 2
@@ -314,10 +316,10 @@ theorem absNorm_primeOver_at_two_inert (hp3 : p % 4 = 3) (hp3_8 : p % 8 = 3)
   haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   haveI : P.IsPrime := hP.1
   haveI : P.LiesOver (Ideal.span {(2 : ℤ)}) := hP.2
-  have h_ine : (Ideal.span {((2 : ℕ) : ℤ)}).inertiaDeg P = 2 :=
+  have h_ine : (Ideal.span {((2 : ℕ) : ℤ)}).inertiaDeg' P = 2 :=
     inertiaDeg_at_two_inert p hp3 hp3_8 P hP
   calc Ideal.absNorm P
-      = 2 ^ ((Ideal.span {((2 : ℕ) : ℤ)}).inertiaDeg P) :=
+      = 2 ^ ((Ideal.span {((2 : ℕ) : ℤ)}).inertiaDeg' P) :=
         Ideal.absNorm_eq_pow_inertiaDeg' P Nat.prime_two
     _ = 2 ^ (2 : ℕ) := by rw [h_ine]
     _ = 4 := by norm_num

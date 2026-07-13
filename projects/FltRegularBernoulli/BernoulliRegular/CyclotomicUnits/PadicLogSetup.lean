@@ -928,7 +928,7 @@ theorem valuedCyclotomicLambda_valuation :
   rw [show algebraMap K (ValuedCompletion p K)
       (globalCyclotomicLambdaFieldUnit p K : K) =
         ((globalCyclotomicLambdaFieldUnit p K : K) : ValuedCompletion p K) from rfl]
-  rw [Valued.valuedCompletion_apply]
+  rw [IsDedekindDomain.HeightOneSpectrum.valuedAdicCompletion_eq_valuation']
   exact globalCyclotomicLambdaFieldUnit_valuation (p := p) (K := K)
 
 /-- The element `zeta_p - 1` is topologically nilpotent in the valuation

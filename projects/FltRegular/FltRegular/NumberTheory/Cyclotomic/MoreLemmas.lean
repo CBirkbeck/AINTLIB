@@ -86,14 +86,6 @@ lemma zeta_sub_one_dvd_Int_iff {n : ℤ} : (hζ.toInteger : 𝓞 K) - 1 ∣ n �
     exact hpri.1
   rw [← hζ.norm_toInteger_sub_one_of_prime_ne_two' hp, Ideal.norm_dvd_iff hprime]
 
-lemma IsPrimitiveRoot.sub_one_dvd_sub {A : Type*} [CommRing A] [IsDomain A]
-    {p : ℕ} (hp : p.Prime) {ζ : A} (hζ : IsPrimitiveRoot ζ p) {η₁ : A}
-    (hη₁ : η₁ ∈ nthRootsFinset p 1) {η₂ : A} (hη₂ : η₂ ∈ nthRootsFinset p 1) :
-    ζ - 1 ∣ η₁ - η₂ := by
-  by_cases h : η₁ = η₂
-  · rw [h, sub_self]; exact dvd_zero _
-  · exact (hζ.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime hp hη₁ hη₂ h).dvd
-
 lemma quotient_zero_sub_one_comp_aut (σ : 𝓞 K →+* 𝓞 K) :
     (Ideal.Quotient.mk (Ideal.span {(hζ.toInteger : 𝓞 K) - 1})).comp σ = Ideal.Quotient.mk _ := by
   have : Fact (Nat.Prime p) := hpri

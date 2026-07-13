@@ -490,7 +490,7 @@ theorem inertiaDeg_eq_one_of_under_eq [IsAlgClosed F] [IsIntegrallyClosed C₂.C
     [Algebra.IsSeparable C₂.FunctionField C₁.FunctionField]
     (hf : f ≠ 0) (hfQ : f ∉ C₂.maximalIdealAt Q)
     (hPp : P.IsPrime) (hPq : P.under Af = awayIdealAt Af Q) :
-    Ideal.inertiaDeg (awayIdealAt Af Q) P = 1 := by
+    Ideal.inertiaDeg' (awayIdealAt Af Q) P = 1 := by
   classical
   haveI := hPp
   haveI hPover : P.LiesOver (awayIdealAt Af Q) := ⟨hPq.symm⟩
@@ -892,7 +892,7 @@ private theorem card_primesOver_eq_finrank [IsAlgClosed F]
     (Sram : Set (Ideal Af))
     (hSram : ∀ q : Ideal Af, q ∉ Sram →
       ∀ P : Ideal (integralClosure Af C₁.FunctionField), P.IsPrime → P.under Af = q →
-        Ideal.ramificationIdx q P = 1)
+        Ideal.ramificationIdx' q P = 1)
     (hQS : awayIdealAt Af Q ∉ Sram) :
     (IsDedekindDomain.primesOverFinset (awayIdealAt Af Q)
         (integralClosure Af C₁.FunctionField)).card =

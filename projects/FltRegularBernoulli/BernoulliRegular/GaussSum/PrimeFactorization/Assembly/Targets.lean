@@ -32,15 +32,15 @@ noncomputable def characterSideCoefficientGroupRing
 `b`. -/
 @[simp] lemma characterSideCoefficientGroupRing_apply_inv
     (v : (ZMod (p - 1))ˣ → ℕ) (b : (ZMod (p - 1))ˣ) :
-    characterSideCoefficientGroupRing (p := p) v b⁻¹ = (v b : ℤ) := by
-  rw [characterSideCoefficientGroupRing]
+    (characterSideCoefficientGroupRing (p := p) v).coeff b⁻¹ = (v b : ℤ) := by
+  rw [characterSideCoefficientGroupRing, MonoidAlgebra.coeff_sum]
   calc
-    (∑ c : (ZMod (p - 1))ˣ, MonoidAlgebra.single c⁻¹ (v c : ℤ)) b⁻¹ =
-        ∑ c : (ZMod (p - 1))ˣ, MonoidAlgebra.single c⁻¹ (v c : ℤ) b⁻¹ :=
+    (∑ c : (ZMod (p - 1))ˣ, (MonoidAlgebra.single c⁻¹ (v c : ℤ)).coeff) b⁻¹ =
+        ∑ c : (ZMod (p - 1))ˣ, (MonoidAlgebra.single c⁻¹ (v c : ℤ)).coeff b⁻¹ :=
           (Finsupp.finsetSum_apply
             (S := (Finset.univ : Finset (ZMod (p - 1))ˣ))
             (f := fun c : (ZMod (p - 1))ˣ =>
-              MonoidAlgebra.single c⁻¹ (v c : ℤ))
+              (MonoidAlgebra.single c⁻¹ (v c : ℤ)).coeff)
             (a := b⁻¹))
     _ = (v b : ℤ) := by
         rw [Fintype.sum_eq_single b]
@@ -59,7 +59,7 @@ of prime powers. Coefficients are read in the inverse-basis convention. -/
 noncomputable def characterSideIdealFactorizationFromGroupRing
     (E : MonoidAlgebra ℤ (ZMod (p - 1))ˣ) : Ideal (𝓞 L) :=
   ∏ b : (ZMod (p - 1))ˣ,
-    characterSidePrimeMap (p := p) (L := L) b ^ (E b⁻¹).toNat
+    characterSidePrimeMap (p := p) (L := L) b ^ (E.coeff b⁻¹).toNat
 
 @[simp] lemma characterSideIdealFactorizationFromGroupRing_coefficientGroupRing
     (v : (ZMod (p - 1))ˣ → ℕ) :
@@ -282,7 +282,7 @@ noncomputable def stickelbergerCharacterCoefficientGroupRingTarget
 /-- Coefficients of the character-side group-ring target. -/
 @[simp] lemma stickelbergerCharacterCoefficientGroupRingTarget_apply_inv
     (χ : DirichletCharacter ℂ p) (b : (ZMod (p - 1))ˣ) :
-    stickelbergerCharacterCoefficientGroupRingTarget (p := p) (L := L) χ b⁻¹ =
+    (stickelbergerCharacterCoefficientGroupRingTarget (p := p) (L := L) χ).coeff b⁻¹ =
       (stickelbergerCharacterCoefficientTarget (p := p) (L := L) χ b : ℤ) := by
   simp [stickelbergerCharacterCoefficientGroupRingTarget]
 
@@ -299,7 +299,7 @@ noncomputable def stickelbergerCharacterAdditiveGroupRingTarget
 /-- Coefficients of the arbitrary-character additive group-ring target. -/
 @[simp] lemma stickelbergerCharacterAdditiveGroupRingTarget_apply_inv
     (χ : DirichletCharacter ℂ p) (a : (ZMod p)ˣ) :
-    stickelbergerCharacterAdditiveGroupRingTarget (p := p) (L := L) χ a⁻¹ =
+    (stickelbergerCharacterAdditiveGroupRingTarget (p := p) (L := L) χ).coeff a⁻¹ =
       (stickelbergerGeneratorPowerNormalizedParameter (p := p) (L := L)
         (stickelbergerCharacterExponent (p := p) χ : ZMod (p - 1)) : ℤ) := by
   simp [stickelbergerCharacterAdditiveGroupRingTarget]

@@ -454,14 +454,15 @@ private theorem vcMiddleIso_snd (hC : C' • W = W') :
   simp only [vcMiddleIso, asIso_hom, vcMiddleMap]
   rw [pullback.lift_snd, Category.comp_id]
 
+private theorem zerolift_comm (V : ellipticW ↑Γ(S, ⊤)) :
+    (S.toSpecΓ ≫ projModelZero V.1) ≫ projModelπ V.1 = 𝟙 S ≫ S.toSpecΓ := by
+  rw [Category.assoc, projModelZero_projModelπ]
+  exact (Category.comp_id _).trans (Category.id_comp _).symm
+
 private theorem vcMiddleIso_zerolift (hC : C' • W = W') :
-    pullback.lift (S.toSpecΓ ≫ projModelZero W.1) (𝟙 S)
-        (by rw [Category.assoc, projModelZero_projModelπ]
-            exact (Category.comp_id _).trans (Category.id_comp _).symm) ≫
+    pullback.lift (S.toSpecΓ ≫ projModelZero W.1) (𝟙 S) (zerolift_comm W) ≫
       (vcMiddleIso C' hC).hom =
-    pullback.lift (S.toSpecΓ ≫ projModelZero W'.1) (𝟙 S)
-        (by rw [Category.assoc, projModelZero_projModelπ]
-            exact (Category.comp_id _).trans (Category.id_comp _).symm) := by
+    pullback.lift (S.toSpecΓ ≫ projModelZero W'.1) (𝟙 S) (zerolift_comm W') := by
   apply pullback.hom_ext
   · simp only [vcMiddleIso, asIso_hom, vcMiddleMap]
     rw [Category.assoc, pullback.lift_fst, ← Category.assoc, pullback.lift_fst,
@@ -495,17 +496,8 @@ from the PUBLIC cocycle `projModelVCIso_mul` alone (instantiate at `1, 1`, right
 the iso), per the v10.59 dispatch; no private transport machinery consumed. -/
 private theorem projModelVCIso_one_hom (V : WeierstrassCurve ↑Γ(S, ⊤)) :
     (projModelVCIso (1 : VariableChange ↑Γ(S, ⊤)) V).hom =
-      eqToHom (congrArg projModel (one_smul (VariableChange ↑Γ(S, ⊤)) V)) := by
-  have hmul := projModelVCIso_mul (1 : VariableChange ↑Γ(S, ⊤)) 1 V
-  have h1 := (vcIso_congrC (one_mul (1 : VariableChange ↑Γ(S, ⊤))) V).symm.trans hmul
-  have h2 := congrArg (· ≫ (projModelVCIso (1 : VariableChange ↑Γ(S, ⊤)) V).inv) h1
-  simp only [Category.assoc, Iso.hom_inv_id, Category.comp_id] at h2
-  have h3 := congrArg
-    (eqToHom (congrArg projModel (mul_smul (1 : VariableChange ↑Γ(S, ⊤)) 1 V).symm) ≫ ·) h2
-  simp only [eqToHom_trans, eqToHom_trans_assoc, eqToHom_refl, Category.id_comp] at h3
-  rw [vcIso_congrW (1 : VariableChange ↑Γ(S, ⊤))
-    (one_smul (VariableChange ↑Γ(S, ⊤)) V).symm, ← h3]
-  simp [eqToHom_trans]
+      eqToHom (congrArg projModel (one_smul (VariableChange ↑Γ(S, ⊤)) V)) :=
+  projModelVCIso_one V
 
 private theorem vcModelHom_mul {W W' W'' : ellipticW ↑Γ(S, ⊤)}
     (Cf Cg : VariableChange ↑Γ(S, ⊤)) (hf : Cf • W = W') (hg : Cg • W' = W'')
@@ -515,12 +507,12 @@ private theorem vcModelHom_mul {W W' W'' : ellipticW ↑Γ(S, ⊤)}
       (projModelVCIso Cf W.1).inv ≫ (projModelVCIso Cg (Cf • W.1)).inv ≫
         eqToHom (congrArg (projModel ·) (mul_smul Cg Cf W.1).symm) := by
     apply Iso.inv_ext
-    rw [projModelVCIso_mul]
-    simp [eqToHom_trans]
+    rw [projModelVCIso_mul, Category.assoc, Category.assoc, Iso.hom_inv_id_assoc,
+      Iso.hom_inv_id_assoc, eqToHom_trans, eqToHom_refl]
   rw [vcModelHom, vcModelHom, vcModelHom, hinv]
   simp only [Category.assoc]
-  rw [eqToHom_trans, vcIso_inv_transport (congrArg Subtype.val hf) Cg]
-  simp [eqToHom_trans]
+  rw [eqToHom_trans, vcIso_inv_transport (congrArg Subtype.val hf) Cg, eqToHom_trans]
+  rfl
 
 private theorem vcMiddleMap_mul {W W' W'' : ellipticW ↑Γ(S, ⊤)}
     (Cf Cg : VariableChange ↑Γ(S, ⊤)) (hf : Cf • W = W') (hg : Cg • W' = W'')
@@ -536,12 +528,9 @@ private theorem vcModelHom_one {W : ellipticW ↑Γ(S, ⊤)}
     vcModelHom 1 hC = 𝟙 (projModel W.1) := by
   rw [vcModelHom]
   have hinv : (projModelVCIso (1 : VariableChange ↑Γ(S, ⊤)) W.1).inv =
-      eqToHom (congrArg projModel (one_smul (VariableChange ↑Γ(S, ⊤)) W.1)).symm := by
-    apply Iso.inv_ext
-    rw [projModelVCIso_one_hom]
-    simp [eqToHom_trans]
-  rw [hinv]
-  simp [eqToHom_trans]
+      eqToHom (congrArg projModel (one_smul (VariableChange ↑Γ(S, ⊤)) W.1)).symm :=
+    Iso.inv_ext (by rw [projModelVCIso_one_hom, eqToHom_trans, eqToHom_refl])
+  rw [hinv, eqToHom_trans, eqToHom_refl]
 
 private theorem vcMiddleMap_one {W : ellipticW ↑Γ(S, ⊤)}
     (hC : (1 : VariableChange ↑Γ(S, ⊤)) • W = W) :

@@ -41,7 +41,7 @@ nonnegative exponent convention already used by the `T027` factorisation API. -/
 noncomputable def characterSideStickelbergerIdealAction
     (E : MonoidAlgebra ℤ (ZMod (p - 1))ˣ) : Ideal (𝓞 L) :=
   ∏ b : (ZMod (p - 1))ˣ,
-    (sigmaOfCharacterUnit (p := p) L b • distinguishedPrimeAboveP p L) ^ (E b⁻¹).toNat
+    (sigmaOfCharacterUnit (p := p) L b • distinguishedPrimeAboveP p L) ^ (E.coeff b⁻¹).toNat
 
 /-- The ideal-action definition is definitionally the group-ring-to-ideal
 factorisation package from `T027`, after unfolding the character-side orbit

@@ -285,7 +285,7 @@ theorem l6_v_1_1_sepDegree_eq_pointCount_of_primitive_witnesses
       letI := data.algPoly
       ∀ P ∈ IsDedekindDomain.primesOverFinset
         (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
-        Ideal.inertiaDeg
+        Ideal.inertiaDeg'
           (Curves.RamificationAtInfinity.xIdeal (k := K)) P = 1)
     (h_card :
       letI := data.commRing

@@ -254,6 +254,31 @@ theorem ofEquationCoordRingHom_smul_basis_eq (a b : Polynomial F) :
     · exact AdjoinRoot.lift_of _
     · exact AdjoinRoot.lift_root _
 
+/-- **Norm factorization of a rank-2 element** (curve-generic): for any Weierstrass
+curve `W` over `F`, the image under `algebraMap` of the `Polynomial F`-norm of
+`a • 1 + b • Y` factors as `(a • 1 + b • Y) * conj`, where `conj` is the
+`Galois`-conjugate rank-2 element. Stated over a *generic* `W` so that the
+`coe_norm_smul_basis` rewrite never has to `whnf`-unfold a concrete `iterateFrobeniusTwist`
+coordinate ring; the caller instantiates `W := V`. Mirror of
+`coordRing_norm_smul_basis_factor` from `Curves/Map/Maps.lean`. -/
+private lemma ofEquation_coordRing_norm_smul_basis_factor
+    (W : Affine F) (a b : Polynomial F) :
+    algebraMap (Polynomial F) W.CoordinateRing
+        (Algebra.norm (Polynomial F)
+          (a • (1 : W.CoordinateRing) +
+            b • Affine.CoordinateRing.mk W Polynomial.X)) =
+      (a • (1 : W.CoordinateRing) +
+          b • Affine.CoordinateRing.mk W Polynomial.X) *
+        Affine.CoordinateRing.mk W
+          (Polynomial.C a + Polynomial.C b *
+            (-Polynomial.X - Polynomial.C
+              (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃))) := by
+  change AdjoinRoot.of _ _ = _
+  rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
+  congr 1
+  rw [map_add, map_mul]
+  simp [Algebra.smul_def]
+
 omit [WeierstrassCurve.IsElliptic E.toAffine] [WeierstrassCurve.IsElliptic V.toAffine] in
 include h_eqn h_trans in
 /-- A vanishing rank-2 image forces the `Y`-coefficient to vanish (norm-degree
@@ -277,11 +302,7 @@ private theorem ofEquationCoordRingHom_smul_basis_b_eq_zero (a b : Polynomial F)
   have h_factor : algebraMap (Polynomial F) _
       (Algebra.norm (Polynomial F) r') = r' * conj_r := by
     rw [hr'_def, hconj_def]
-    change AdjoinRoot.of _ _ = _
-    rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
-    congr 1
-    rw [map_add, map_mul]
-    simp [Algebra.smul_def]
+    exact ofEquation_coordRing_norm_smul_basis_factor V.toAffine a b
   have hr'_zero : ofEquationCoordRingHom E V u v h_eqn r' = 0 :=
     (ofEquationCoordRingHom_smul_basis_eq E V u v h_eqn a b).trans h0
   have h_norm_zero : ofEquationBaseHom E u

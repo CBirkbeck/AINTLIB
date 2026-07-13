@@ -437,7 +437,6 @@ lemma ncard_primesOver_characterSubfieldPrime_eq_one
       (P := Pchar)
       (G := Gal(characterSubfield (L := L) (p := p) / ℚ))
       (GAC := Gal(L / ℚ))
-      (GBC := ↥GBC)
   have hL :
       (Ideal.primesOver 𝔭 (𝓞 L)).ncard = Nat.totient (p - 1) := by
     rw [← coe_primesAboveP (p := p) (L := L), Set.ncard_coe_finset]

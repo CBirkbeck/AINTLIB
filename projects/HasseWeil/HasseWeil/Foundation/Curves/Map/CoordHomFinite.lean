@@ -510,8 +510,8 @@ theorem sum_ramificationIdx_mul_inertiaDeg_eq_degree'
     {p : Ideal C₂.CoordinateRing} (hpMax : p.IsMaximal) (hp0 : p ≠ ⊥) :
     letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := coordHom.toAlgebra
     ∑ P ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing,
-        Ideal.ramificationIdx p P *
-        Ideal.inertiaDeg p P = φ.degree :=
+        Ideal.ramificationIdx' p P *
+        Ideal.inertiaDeg' p P = φ.degree :=
   φ.sum_ramificationIdx_mul_inertiaDeg_eq_degree coordHom
     coordHom.module_finite hpMax hp0
 

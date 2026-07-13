@@ -270,6 +270,28 @@ private lemma norm_smul_basis_ne_zero_of_coeff_ne_zero (W : WeierstrassCurve k)
   exact absurd (h_deg ▸ le_max_right _ _ : 2 • b.degree + 3 ≤ ⊥)
     (not_le.mpr (WithBot.bot_lt_iff_ne_bot.mpr h2bot))
 
+/-- **Norm factorization of a rank-2 element** (curve-generic): for any Weierstrass curve `W'`
+over `k`, the image under `algebraMap` of the `Polynomial k`-norm of `a • 1 + b • Y` factors as
+`(a • 1 + b • Y) * conj`, where `conj` is the `Galois`-conjugate rank-2 element.  Stated over a
+*generic* `W'` so that the `coe_norm_smul_basis` rewrite never has to `whnf`-unfold a concrete
+`frobeniusTwist` coordinate ring; the caller instantiates `W' := E.frobeniusTwist p`. -/
+private lemma coordRing_norm_smul_basis_factor (W : WeierstrassCurve k) (a b : Polynomial k) :
+    algebraMap (Polynomial k) W.toAffine.CoordinateRing
+        (Algebra.norm (Polynomial k)
+          (a • (1 : W.toAffine.CoordinateRing) +
+            b • Affine.CoordinateRing.mk W.toAffine Polynomial.X)) =
+      (a • (1 : W.toAffine.CoordinateRing) +
+          b • Affine.CoordinateRing.mk W.toAffine Polynomial.X) *
+        Affine.CoordinateRing.mk W.toAffine
+          (Polynomial.C a + Polynomial.C b *
+            (-Polynomial.X - Polynomial.C
+              (Polynomial.C W.a₁ * Polynomial.X + Polynomial.C W.a₃))) := by
+  change AdjoinRoot.of _ _ = _
+  rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
+  congr 1
+  rw [map_add, map_mul]
+  simp [Algebra.smul_def]
+
 /-- **The `Polynomial k`-norm of a rank-2 element killed by the relative Frobenius
 coord ring hom vanishes**: if `baseHom a + baseHom b * y_gen^p = 0`, then the norm
 of `a • 1 + b • Y` in `(E.frobeniusTwist p).CoordinateRing` is zero. The norm
@@ -295,13 +317,8 @@ private theorem frobeniusRelativeCoordRingHom_norm_smul_basis_eq_zero (a b : Pol
         (Polynomial.C (E.frobeniusTwist p).a₁ * Polynomial.X +
           Polynomial.C (E.frobeniusTwist p).a₃))) with hconj_def
   have h_factor : algebraMap (Polynomial k) _
-      (Algebra.norm (Polynomial k) r') = r' * conj_r := by
-    rw [hr'_def, hconj_def]
-    change AdjoinRoot.of _ _ = _
-    rw [Affine.CoordinateRing.coe_norm_smul_basis, map_mul]
-    congr 1
-    rw [map_add, map_mul]
-    simp [Algebra.smul_def]
+      (Algebra.norm (Polynomial k) r') = r' * conj_r :=
+    coordRing_norm_smul_basis_factor (E.frobeniusTwist p) a b
   have hr'_zero : frobeniusRelativeCoordRingHom p E r' = 0 :=
     (frobeniusRelativeCoordRingHom_smul_basis_eq p E a b).trans h0
   have h_norm_zero : frobeniusRelativeBaseHom p E

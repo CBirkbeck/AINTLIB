@@ -42,7 +42,7 @@ prime), whose role mathlib's `Algebra.IsUnramifiedAt` (base ring, *upstairs* pri
 directly fill. -/
 def IsUnramifiedAt (S : Type*) [CommRing S] {R : Type*} [CommRing R] [Algebra R S]
     (p : Ideal R) : Prop :=
-  ∀ P, P ∈ primesOver p S → Ideal.ramificationIdx p P = 1
+  ∀ P, P ∈ primesOver p S → Ideal.ramificationIdx' p P = 1
 
 /-- **Per-prime version of `prod_primesOverFinset_of_isUnramified`.** If `S/R` is unramified at
 the single prime `p` (every prime over `p` has ramification index `1`), then the product of the
