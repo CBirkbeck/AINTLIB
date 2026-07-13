@@ -2418,6 +2418,30 @@ adjudicates.
   axiom proofs · **Type**: def (done) + 2 theorems (open) · **Depends on**:
   ~~T-E-OMEGA~~ (DISCHARGED ★★), T-E13 ·
   **Sources**: KM 4.6.2 + 2.2.9 (verbatim in the quotes file); GME Ex. 2.2.1 (p. 117).
+- **T-E14 continuation decomposition (2026-07-14, OMEGA — post-B9)**: remaining leaves.
+  **[T-E14-ACT]** the `GL₂(ℤ/2) × {±1}`-action on `legendreBootstrapProblem`:
+  `{±1}` acts on the ω-factor by the unit action `(±1 : Γ(S,⊤)ˣ) • ω` (already a
+  group action via the T-OM-B6 `SMul`; note the action is by POST-scaling the datum,
+  no `negEllHom` needed — `omegaBasisMap_negEll` is instead what identifies the
+  GEOMETRIC inversion with `(−1)•`, which is what axiom-2's freeness argument uses);
+  `GL₂(ℤ/2)` acts on the level factor by `EllipticCurve.glSmul` (GammaH.lean).
+  Deliverable: a `MulAction (GL (Fin 2) (ZMod 2) × ({1, -1} : Subgroup _))`-shaped
+  action packaging compatible with `(Ell/R)`-maps (the `InvariantTorsor`-input shape
+  of T-Q2/QuotientProblem.lean — match its exact interface when instantiating).
+  **[T-E14a]** (axiom 1, `M'₂` representability): over `ℤ[1/2]` normalise
+  `y² = x(x−1)(x−λ)` with `P = (0,0)`, `Q = (1,0)`, `ω = dx/y`: existence+uniqueness
+  of the λ-model given `((P,Q), ω)` — the GME Ex 2.2.1 computation; engines:
+  `ModelVariableChange` + `WeierstrassModel` normalisation + `TateNormalForm`-style
+  explicit algebra; representing object `Spec ℤ[1/2][λ][(λ(λ−1))⁻¹]`-base-changed.
+  Est. T-E15a-sized (multi-hundred lines; own `/develop --decompose` on claim).
+  **[T-E14b]** (axiom 2, finite-étale `G`-torsor): fibrewise the λ-model is pinned by
+  `((P,Q), ω)` exactly up to `GL₂(ℤ/2) × {±1}` (KM 2.2.9): the level-factor freeness
+  is `E[2]`-étale (T-B5 stream) + `glSmul`-simple-transitivity; the `{±1}`-freeness on
+  the ω-factor is `OmegaBasis.existsUnique_unit_smul` + the inversion-fixes-`(P,Q)`
+  observation (2-torsion) + `omegaBasisMap_negEll` (the inversion moves `ω` to `−ω`,
+  so the stabiliser of the full datum is trivial — the rigidity that makes δ a torsor
+  rather than a gerbe). Depends: T-E14a for the relative-representation scheme.
+
 - **Body**: over `ℤ[1/2]` normalise `y² = x³ + a₂x² + a₄x + a₆`, `i(x, y) = (x, −y)` gives
   `[−1]`; `E[2] − {0} ≅ Spec(A[X]/(F))` free of rank 3; `E[2]` is étale (distinct roots by
   smoothness); the problem `P'₂` (pairs `P, Q ∈ E[2] − 0` with `x(P) = 0`, `x(Q) = 1`, plus
