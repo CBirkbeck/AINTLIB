@@ -2309,19 +2309,30 @@ adjudicates.
   `sectionsPullback` + `isBasis_sectionsPullback` — **open** · File A · deps: A1–A6.
 - **[T-OM-B1]** `LocalPresentation` + `WeierstrassAtlasData.presentation` — **done**
   (landed concrete with the skeleton).
-- **[T-OM-B2]** `transVC` (via 1b) + uniqueness + group laws + `transUnit` — **open** ·
-  File B · deps: B1. Existence `pointedIso_exists_variableChange`; uniqueness
-  `projModelVCIso_injective`; laws via `projModelVCIso_{one,mul}` + uniqueness.
-- **[T-OM-B3]** `transport` (cartesian pointed square; `restrict` = 𝟙-case) — **open** ·
-  File B · deps: B1. `isPullback_projModelBaseChange` + pullback pasting + `isoSpec`.
-- **[T-OM-B4]** `transVC_transport`/`transUnit_transport`/`transUnit_restrict` —
-  **open** · File B · deps: B2, B3. Via `projModelVCIso_map` + `map_variableChange` +
-  uniqueness.
-- **[T-OM-B5]** `omegaCocycle` + `omegaCocycle_res` — **open** · File B · deps: A6, B2,
-  B4. Glue transition units over pairwise intersections; laws affine-locally + separation.
+- **[T-OM-B2]** `transVC` (via 1b) + uniqueness + group laws + `transUnit` — **done**
+  (2026-07-13, OMEGA: existence via the proven 1b `choose`; `transVC_unique` via
+  `projModelVCIso_injective`; `_self`/`_trans` via `projModelVCIso_{one,mul}` +
+  uniqueness + eqToHom-transport; unit laws by `congrArg .u`).
+- **[T-OM-B3]** `transport` (cartesian pointed square; `restrict` = 𝟙-case) — **done**
+  (2026-07-13, OMEGA: `resLE_isoSpec_naturality` + `transportTheta`/`transport_isPullback`
+  paste-cancellation + `transportE` via double `isoPullback` vs
+  `isPullback_projModelBaseChange`; `compat_zero` via `hom_ext` with `hz` in the fst-leg).
+- **[T-OM-B4]** `transVC_transport`/`transUnit_transport`/`transUnit_restrict` — **done**
+  (2026-07-13, OMEGA: uniqueness + `projModelVCIso_map` + `map_variableChange`; PLUS the
+  restriction-coherence pack `transportE/transVC/transUnit_restrict_restrict`
+  (double = composite restriction) via `projModelBaseChangeOf(_comp)` hom_ext).
+- **[T-OM-B5]** `omegaCocycle` + `omegaCocycle_res` — **done** (2026-07-13, OMEGA:
+  `omegaGlue` via `exists_unit_glue` with restriction-compat from the coherence pack;
+  laws via `unit_ext_of_affine_res` + `transUnit_self/_trans`).
 - **[T-OM-B6 ★]** `omegaModules` + `_isInvertible` + `OmegaBasis` + unit-`SMul` +
-  `existsUnique_unit_smul` — **open** (assembly) · File B · deps: A3–A5, B5. **= ω2
-  milestone; REPORT.**
+  `existsUnique_unit_smul` — **★ DONE (2026-07-13, OMEGA) — THE ω2 MILESTONE.**
+  `EllipticCurve/InvariantDifferential.lean` is **SORRY-FREE**; axioms on
+  `omegaModules_isInvertible` / `OmegaBasis.existsUnique_unit_smul` /
+  `negModelHom_eq_negVC` = standard 3 (verified). **ω_{E/S} EXISTS as an invertible
+  `S.Modules` object** (`Picard/InvertibleSheaf.IsInvertible`, shared-base predicate —
+  v10.180-steer-conformant, no rebuild) **with the ω3 `𝔾ₘ`-torsor of bases** (KM 4.6.2's
+  "S-basis of ω_{E/S}" = `OmegaBasis`, unique-unit-transitive). T-E12/T-E13 statability
+  ingredients ready; T-E14 needs B7 (ω4 functoriality) — next.
 - **[T-OM-B7 ★★]** `omegaCompat` + `omegaBasisMap` + `_id`/`_comp`/`_smul` — **open** ·
   File C · deps: A7, B2–B6. **= ω4 + the T-E14/T-E12/T-E13 statability unblock; flips
   the shared engine; REPORT.**

@@ -710,6 +710,24 @@ end LocalPresentation
 /-! ### T-OM-B5: the ω-cocycle of the atlas -/
 
 open Scheme in
+/-- The glued transition unit of a pair of atlas charts, with its affine-local
+characterization. -/
+private noncomputable def omegaGlue (G : EllipticCurveGeom S) (i j : G.atlas.ι) :
+    { g : Γ(S, (G.atlas.U i).1 ⊓ (G.atlas.U j).1)ˣ //
+      ∀ (V : S.affineOpens) (hV : V.1 ≤ (G.atlas.U i).1 ⊓ (G.atlas.U j).1),
+        resUnit hV g =
+          ((G.atlas.presentation i).restrict (hV.trans inf_le_left)).transUnit
+            ((G.atlas.presentation j).restrict (hV.trans inf_le_right)) } := by
+  have hglue := Scheme.exists_unit_glue S ((G.atlas.U i).1 ⊓ (G.atlas.U j).1)
+    (fun V hV =>
+      ((G.atlas.presentation i).restrict (hV.trans inf_le_left)).transUnit
+        ((G.atlas.presentation j).restrict (hV.trans inf_le_right)))
+    (fun V V' hV h => by
+      rw [← LocalPresentation.transUnit_restrict,
+        LocalPresentation.transUnit_restrict_restrict])
+  exact ⟨hglue.choose, hglue.choose_spec.1⟩
+
+open Scheme in
 /-- **(T-OM-B5)** The transition cocycle of the invariant differential: on each pair of
 atlas charts, the transition units of the affine-locally restricted chart comparisons,
 glued over the pairwise intersection (`Scheme.exists_unit_glue`); the cocycle laws hold
@@ -718,9 +736,13 @@ noncomputable def omegaCocycle (G : EllipticCurveGeom S) : UnitCocycle S where
   ι := G.atlas.ι
   U i := (G.atlas.U i).1
   covers := G.atlas.covers
-  u i j := by sorry
-  u_self := by sorry
-  u_cocycle := by sorry
+  u i j := (omegaGlue G i j).1
+  u_self i := Scheme.unit_ext_of_affine_res S (fun V hV => by
+    rw [(omegaGlue G i i).2 V hV, LocalPresentation.transUnit_self, map_one])
+  u_cocycle i j k := Scheme.unit_ext_of_affine_res S (fun V hV => by
+    rw [map_mul, Scheme.resUnit_resUnit, Scheme.resUnit_resUnit, Scheme.resUnit_resUnit,
+      (omegaGlue G i j).2 V _, (omegaGlue G j k).2 V _, (omegaGlue G i k).2 V _,
+      LocalPresentation.transUnit_trans])
 
 open Scheme in
 /-- **(T-OM-B5)** The defining property of the glued cocycle: on every affine open
@@ -730,8 +752,8 @@ theorem omegaCocycle_res (G : EllipticCurveGeom S) (i j : G.atlas.ι)
     (V : S.affineOpens) (hV : V.1 ≤ (G.atlas.U i).1 ⊓ (G.atlas.U j).1) :
     resUnit hV ((omegaCocycle G).u i j) =
       ((G.atlas.presentation i).restrict (hV.trans inf_le_left)).transUnit
-        ((G.atlas.presentation j).restrict (hV.trans inf_le_right)) := by
-  sorry
+        ((G.atlas.presentation j).restrict (hV.trans inf_le_right)) :=
+  (omegaGlue G i j).2 V hV
 
 /-! ### T-OM-B6 ★: the invariant differential -/
 
