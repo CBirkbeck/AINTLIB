@@ -37,11 +37,11 @@ the finiteness input supplied by `torsionπ_isFinite_of_nIsInvertible`. Proof bo
 theorem formallyUnramified_torsionπ_of_nIsInvertible' (N : ℕ) (h : NIsInvertible S N) :
     FormallyUnramified (E.torsionπ N) := by
   rcases eq_or_ne N 0 with rfl | hN0
-  · haveI hS : IsEmpty S := ModularCurves.isEmpty_of_nIsInvertible_zero h
-    haveI hT : IsEmpty (E.torsion 0) := ⟨fun x => hS.false ((E.torsionπ 0).base x)⟩
+  · have hS : IsEmpty S := ModularCurves.isEmpty_of_nIsInvertible_zero h
+    have hT : IsEmpty (E.torsion 0) := ⟨fun x ↦ hS.false ((E.torsionπ 0).base x)⟩
     infer_instance
-  · haveI : NeZero N := ⟨hN0⟩
-    haveI := E.torsionπ_isFinite_of_nIsInvertible N h
+  · have : NeZero N := ⟨hN0⟩
+    have := E.torsionπ_isFinite_of_nIsInvertible N h
     apply FormallyUnramified.of_finite_fiberToSpecResidueField
     intro y
     have hbc : FormallyUnramified ((E.baseChange (S.fromSpecResidueField y)).torsionπ N) :=
@@ -70,13 +70,13 @@ proven: flatness by `mulByHom_flat_of_nIsInvertible` (BB-FLAT, route (G)). -/
 theorem mulBy_etale' (N : ℕ) (h : NIsInvertible S N) :
     Etale (E.mulByHom N) := by
   rcases eq_or_ne N 0 with rfl | hN
-  · haveI hS : IsEmpty S := ModularCurves.isEmpty_of_nIsInvertible_zero h
-    haveI hE : IsEmpty E.E := ⟨fun x => hS.false (E.π.base x)⟩
+  · have hS : IsEmpty S := ModularCurves.isEmpty_of_nIsInvertible_zero h
+    have hE : IsEmpty E.E := ⟨fun x ↦ hS.false (E.π.base x)⟩
     infer_instance
-  · haveI : NeZero N := ⟨hN⟩
-    haveI := E.mulByHom_flat_of_nIsInvertible N h
-    haveI := E.mulByHom_formallyUnramified'' N h
-    haveI := E.mulByHom_locallyOfFinitePresentation N
+  · have : NeZero N := ⟨hN⟩
+    have := E.mulByHom_flat_of_nIsInvertible N h
+    have := E.mulByHom_formallyUnramified'' N h
+    have := E.mulByHom_locallyOfFinitePresentation N
     exact Etale.of_formallyUnramified_of_flat (E.mulByHom N)
 
 /-- **(T-B5′, proven-finiteness variant)** `E[N] ⟶ S` étale when `N` is invertible. -/
