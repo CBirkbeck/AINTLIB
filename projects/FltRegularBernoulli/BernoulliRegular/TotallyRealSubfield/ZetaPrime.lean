@@ -1,6 +1,7 @@
 module
 
 public import BernoulliRegular.TotallyRealSubfield.Basic
+import FltRegular.NumberTheory.Cyclotomic.MoreLemmas
 
 /-!
 # `ζ_p - 1` prime arithmetic
@@ -98,52 +99,14 @@ lemma complexConj_apply_zeta [IsCMField K] :
 /-- Complex conjugation `c` acts as the identity on the residue field
 `𝓞 K / 𝔓`. Equivalently, `c(x) ≡ x (mod 𝔓)` for every `x : 𝓞 K`.
 
-Proved by induction on `Algebra.adjoin ℤ {hζ.toInteger} = ⊤`: the base
-case uses that both `hζ.toInteger` and `c(hζ.toInteger) = hζ.toInteger^{p-1}`
-are `p`-th roots of unity, hence both `≡ 1 (mod 𝔓)`. -/
+Every automorphism of `𝓞 K` is trivial on `𝓞 K / (ζ - 1)`, so this is just
+that fact applied to `c`. -/
 theorem complexConj_sub_mem_zetaPrime [IsCMField K] (x : 𝓞 K) :
     (ringOfIntegersComplexConj K x : 𝓞 K) - x ∈ zetaPrime p K := by
-  have hζ := IsCyclotomicExtension.zeta_spec p ℚ K
-  have htop : Algebra.adjoin ℤ {hζ.toInteger} = ⊤ :=
-    IsCyclotomicExtension.Rat.adjoin_singleton_eq_top hζ
-  have hx : x ∈ Algebra.adjoin ℤ ({hζ.toInteger} : Set (𝓞 K)) := htop ▸ trivial
-  induction hx using Algebra.adjoin_induction with
-  | mem y hy =>
-    simp only [Set.mem_singleton_iff] at hy
-    subst hy
-    have h1 : (hζ.toInteger : 𝓞 K) - 1 ∈ zetaPrime p K := by
-      simpa using zeta_pow_sub_one_mem_zetaPrime p K 1
-    have h2 : (ringOfIntegersComplexConj K hζ.toInteger : 𝓞 K) - 1 ∈ zetaPrime p K := by
-      rw [complexConj_apply_zeta]
-      exact zeta_pow_sub_one_mem_zetaPrime p K (p - 1)
-    have : (ringOfIntegersComplexConj K hζ.toInteger : 𝓞 K) - hζ.toInteger =
-        ((ringOfIntegersComplexConj K hζ.toInteger : 𝓞 K) - 1) -
-          (hζ.toInteger - 1) := by ring
-    rw [this]
-    exact Ideal.sub_mem _ h2 h1
-  | algebraMap r =>
-    have : ringOfIntegersComplexConj K ((algebraMap ℤ (𝓞 K)) r) =
-        (algebraMap ℤ (𝓞 K)) r := by
-      rw [IsScalarTower.algebraMap_apply ℤ (𝓞 (K⁺)) (𝓞 K), AlgEquiv.commutes]
-    rw [this, sub_self]
-    exact Ideal.zero_mem _
-  | add x y _ _ hpx hpy =>
-    have : (ringOfIntegersComplexConj K (x + y) : 𝓞 K) - (x + y) =
-        ((ringOfIntegersComplexConj K x : 𝓞 K) - x) +
-          ((ringOfIntegersComplexConj K y : 𝓞 K) - y) := by
-      push_cast [map_add]; ring
-    rw [this]
-    exact Ideal.add_mem _ hpx hpy
-  | mul x y _ _ hpx hpy =>
-    have : (ringOfIntegersComplexConj K (x * y) : 𝓞 K) - (x * y) =
-        ((ringOfIntegersComplexConj K x : 𝓞 K) - x) *
-            (ringOfIntegersComplexConj K y : 𝓞 K) +
-          x * ((ringOfIntegersComplexConj K y : 𝓞 K) - y) := by
-      push_cast [map_mul]; ring
-    rw [this]
-    exact Ideal.add_mem _
-      (Ideal.mul_mem_right _ _ hpx)
-      (Ideal.mul_mem_left _ _ hpy)
+  have hq := quotient_zero_sub_one_comp_aut (IsCyclotomicExtension.zeta_spec p ℚ K)
+    ((ringOfIntegersComplexConj K).toRingEquiv.toRingHom)
+  rw [zetaPrime, ← Ideal.Quotient.eq_zero_iff_mem, map_sub, sub_eq_zero]
+  exact DFunLike.congr_fun hq x
 
 /-- Key algebraic identity: `π · c(π) = -ζ^{p-1} · π²` in `𝓞 K`, where
 `π = ζ - 1`. Consequence: `π · c(π)` is associate to `π²`. -/

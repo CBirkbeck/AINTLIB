@@ -172,10 +172,9 @@ theorem ringOfIntegersComplexConj_sub_mem_one_sub_zeta [IsCMField K]
     {hζ : IsPrimitiveRoot (IsCyclotomicExtension.zeta p ℚ K) p}
     (x : 𝓞 K) :
     ringOfIntegersComplexConj K x - x ∈
-      Ideal.span ({(hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) := by
-  rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub]
-  exact sub_eq_zero.mpr
-    (ringOfIntegersComplexConj_eq_mod_one_sub_zeta (p := p) (K := K) (hζ := hζ) x)
+      Ideal.span ({(hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) :=
+  -- `zetaPrime p K` IS this span, and `hζ` is defeq to `zeta_spec p ℚ K` (proof irrelevance).
+  complexConj_sub_mem_zetaPrime p K x
 
 include hp_odd in
 /-- The ramification index of `zetaPrime` over `zetaPrimePlus` is `2`. -/
