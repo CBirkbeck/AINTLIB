@@ -790,6 +790,23 @@ private theorem triple_le {A B C : X.Opens} :
       (inf_le_right.trans inf_le_right))
     (le_inf (inf_le_left.trans inf_le_right) (inf_le_left.trans inf_le_left))
 
+/-- Affine diagonal (over `ℤ`) transfers along an affine morphism: if `S` has affine
+diagonal and `f : Z ⟶ S` is affine, so does `Z`. This lets the quotient machinery's
+`[IsAffineHom (pullback.diagonal (terminal.from Z))]` hypothesis be sourced from the
+BASE of an affine (e.g. finite étale) structure morphism — the [GHB7-0] plumbing. -/
+theorem _root_.AlgebraicGeometry.isAffineHom_diagonal_terminalFrom_of_isAffineHom
+    {Z S : Scheme.{u}} (f : Z ⟶ S) [IsAffineHom f]
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from S))] :
+    IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from Z)) := by
+  rw [← Limits.terminal.comp_from f]
+  have h₁ : MorphismProperty.diagonal @IsAffineHom f := by
+    rw [MorphismProperty.diagonal_iff]
+    haveI : IsSeparated f := .of_isAffineHom f
+    infer_instance
+  have h₂ : MorphismProperty.diagonal @IsAffineHom (Limits.terminal.from S) := ‹_›
+  exact MorphismProperty.IsStableUnderComposition.comp_mem
+    (P := MorphismProperty.diagonal @IsAffineHom) f (Limits.terminal.from S) h₁ h₂
+
 section Glue
 
 variable [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))]
@@ -1306,6 +1323,7 @@ instance isAffineHom_quotientπ : IsAffineHom (σ.quotientπ V hVs hVa hVmem) :=
     exact hVa e
 
 include hVa in
+omit [Finite G] [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))] in
 /-- Geometric freeness on `X` restricts, through the affine identification of a stable
 affine chart, to freeness of the section-ring action on `Spec Γ(X, V x)`: a `g`-fixed
 `T`-point of `Spec Γ(X, V x)` is a `g`-fixed `T`-point of `X`. -/
