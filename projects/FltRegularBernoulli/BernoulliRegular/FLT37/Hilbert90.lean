@@ -2,8 +2,8 @@ module
 
 public import BernoulliRegular.FLT37.PrimaryDescent
 public import BernoulliRegular.HMinus.KplusPrimeArithmetic
-public import Mathlib.RepresentationTheory.Homological.GroupCohomology.Hilbert90
 public import FltRegular.CaseII.AuxLemmas
+public import Mathlib.RepresentationTheory.Homological.GroupCohomology.Hilbert90
 
 /-!
 # Hilbert 90 setup for `K/K⁺` (ticket FLT37b2b2-b)
