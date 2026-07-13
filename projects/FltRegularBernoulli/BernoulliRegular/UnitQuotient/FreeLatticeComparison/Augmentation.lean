@@ -21,8 +21,6 @@ namespace BernoulliRegular
 
 open Finset
 
-set_option linter.unusedSectionVars false
-
 attribute [local instance] Fintype.ofFinite
 attribute [local instance] NumberField.Units.instZLattice_unitLattice
 
@@ -91,7 +89,7 @@ noncomputable def cyclotomicFullLogAugmentationEquivDeleted :
       NumberField.Units.dirichletUnitTheorem.logSpace K := by
   classical
   refine
-    { toFun := fun f w => f.1 w.1
+    { toFun := fun f w ↦ f.1 w.1
       map_add' := by
         intro f g
         ext w
@@ -100,8 +98,8 @@ noncomputable def cyclotomicFullLogAugmentationEquivDeleted :
         intro c f
         ext w
         rfl
-      invFun := fun g =>
-        ⟨fun w =>
+      invFun := fun g ↦
+        ⟨fun w ↦
           if h : w = NumberField.Units.dirichletUnitTheorem.w₀ then
             -∑ v : {v : InfinitePlace K //
                 v ≠ NumberField.Units.dirichletUnitTheorem.w₀}, g v
@@ -246,14 +244,14 @@ theorem cyclotomicFullLogEmbeddingFreePart_span_eq_augmentation :
       cyclotomicFullLogAugmentationSubmodule K := by
   let S := cyclotomicFullLogAugmentationSubmodule K
   have htop := cyclotomicFullLogEmbeddingFreePartAugmentation_span_eq_top (K := K)
-  have hmap := congrArg (fun T : Submodule ℝ S => T.map S.subtype) htop
+  have hmap := congrArg (fun T : Submodule ℝ S ↦ T.map S.subtype) htop
   change Submodule.map S.subtype
       (Submodule.span ℝ
         (Set.range (cyclotomicFullLogEmbeddingFreePartAugmentation K))) =
     Submodule.map S.subtype (⊤ : Submodule ℝ S) at hmap
   rw [Submodule.map_span, Submodule.map_top, Submodule.range_subtype] at hmap
   have hset :
-      ((fun a : S => (a : CyclotomicFullLogSpace K)) ''
+      ((fun a : S ↦ (a : CyclotomicFullLogSpace K)) ''
           Set.range (cyclotomicFullLogEmbeddingFreePartAugmentation K)) =
         Set.range (cyclotomicFullLogEmbeddingFreePart K) := by
     ext y
@@ -263,7 +261,7 @@ theorem cyclotomicFullLogEmbeddingFreePart_span_eq_augmentation :
     · rintro ⟨z, rfl⟩
       exact ⟨cyclotomicFullLogEmbeddingFreePartAugmentation K z, ⟨z, rfl⟩, rfl⟩
   change Submodule.span ℝ
-      ((fun a : S => (a : CyclotomicFullLogSpace K)) ''
+      ((fun a : S ↦ (a : CyclotomicFullLogSpace K)) ''
         Set.range (cyclotomicFullLogEmbeddingFreePartAugmentation K)) =
     S at hmap
   rw [hset] at hmap
