@@ -73,6 +73,20 @@ theorem sectionsDivisor_comap_support [IsSeparated π]
 
 end RelEffCartierDiv
 
+/-- Over a single-point domain, the union of the ranges of a family of maps equals the range of
+their evaluation at the point. (Each section over a geometric point `Spec k`, `k` a field, has a
+single-point source, so its base range is one point — turning the support-covering into a
+`Set.range` fit for the pigeonhole.) -/
+theorem iUnion_range_eq_range_eval {ι X Y : Type*} [Unique X] (f : ι → X → Y) :
+    ⋃ i, Set.range (f i) = Set.range (fun i => f i default) := by
+  ext y
+  simp only [Set.mem_iUnion, Set.mem_range]
+  constructor
+  · rintro ⟨i, x, rfl⟩
+    exact ⟨i, by rw [Unique.eq_default x]⟩
+  · rintro ⟨i, rfl⟩
+    exact ⟨i, default, rfl⟩
+
 /-- **Pigeonhole for a covering by a finite family.** If a finite family `f : ι → X` has range
 exactly `T` and `#T = #ι`, then `f` is injective — no two members can coincide, else the range
 would be too small. The counting core of the `[YF-⊆]` distinctness argument. -/
