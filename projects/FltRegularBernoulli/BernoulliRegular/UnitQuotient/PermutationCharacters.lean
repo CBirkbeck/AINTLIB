@@ -8,8 +8,6 @@ public import Mathlib.LinearAlgebra.Finsupp.Pi
 /-!
 # Unit quotients: the even permutation representation
 
-This file proves `REF-07c3`.
-
 The finite representation-theory statement needed for the free unit part is:
 the permutation representation of
 
@@ -32,8 +30,6 @@ namespace BernoulliRegular
 
 open Finset MonoidAlgebra
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 attribute [local instance] Fintype.ofFinite
 
@@ -83,7 +79,7 @@ the function value. -/
 def evenFunctionDescend {R : Type*} (f : CyclotomicUnitDelta p → R)
     (hf_even : ∀ a : CyclotomicUnitDelta p, f (-a) = f a) :
     CyclotomicEvenDelta p → R :=
-  fun q => q.liftOn f (fun a b hab => by
+  fun q ↦ q.liftOn f (fun a b hab ↦ by
     have hab' : a⁻¹ * b ∈ CyclotomicEvenDeltaSubgroup p :=
       QuotientGroup.leftRel_apply.mp hab
     rw [CyclotomicEvenDeltaSubgroup, Subgroup.mem_zpowers_iff] at hab'
@@ -232,7 +228,7 @@ rather than `(χ a)⁻¹`. -/
 def evenDeltaRegularCharacterFunction {R : Type*} [CommMonoidWithZero R]
     (χ : MulChar (CyclotomicEvenDelta p) R) :
     CyclotomicEvenDelta p → R :=
-  fun x => χ x⁻¹
+  fun x ↦ χ x⁻¹
 
 @[simp]
 theorem evenDeltaRegularCharacterFunction_apply {R : Type*} [CommMonoidWithZero R]
@@ -322,7 +318,7 @@ character idempotents of `Delta`. -/
 theorem delta_plusIdempotent_eq_sum_even :
     plusIdempotent (R := R) (-1 : CyclotomicUnitDelta p) =
       ∑ χ ∈ (Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
-          (fun χ => IsEvenDeltaCharacter (p := p) χ),
+          (fun χ ↦ IsEvenDeltaCharacter (p := p) χ),
         charIdempotent χ := by
   classical
   have hc : (-1 : CyclotomicUnitDelta p) * (-1 : CyclotomicUnitDelta p) = 1 := by
@@ -339,42 +335,42 @@ theorem delta_plusIdempotent_sub_trivial_eq_sum_nontrivial_even :
     plusIdempotent (R := R) (-1 : CyclotomicUnitDelta p) -
         charIdempotent (1 : MulChar (CyclotomicUnitDelta p) R) =
       ∑ χ ∈ (Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
-          (fun χ => IsEvenDeltaCharacter (p := p) χ ∧
+          (fun χ ↦ IsEvenDeltaCharacter (p := p) χ ∧
             χ ≠ (1 : MulChar (CyclotomicUnitDelta p) R)),
         charIdempotent χ := by
   classical
   rw [delta_plusIdempotent_eq_sum_even (p := p) (R := R)]
   have hsplit :
       (∑ χ ∈ (Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
-          (fun χ => IsEvenDeltaCharacter (p := p) χ),
+          (fun χ ↦ IsEvenDeltaCharacter (p := p) χ),
         charIdempotent χ) =
         charIdempotent (1 : MulChar (CyclotomicUnitDelta p) R) +
           ∑ χ ∈ (Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
-              (fun χ => IsEvenDeltaCharacter (p := p) χ ∧
+              (fun χ ↦ IsEvenDeltaCharacter (p := p) χ ∧
                 χ ≠ (1 : MulChar (CyclotomicUnitDelta p) R)),
             charIdempotent χ := by
     calc
       (∑ χ ∈ (Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
-          (fun χ => IsEvenDeltaCharacter (p := p) χ),
+          (fun χ ↦ IsEvenDeltaCharacter (p := p) χ),
         charIdempotent χ)
           = (∑ χ ∈ ((Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
-              (fun χ => IsEvenDeltaCharacter (p := p) χ)).filter
-                (fun χ => χ = (1 : MulChar (CyclotomicUnitDelta p) R)),
+              (fun χ ↦ IsEvenDeltaCharacter (p := p) χ)).filter
+                (fun χ ↦ χ = (1 : MulChar (CyclotomicUnitDelta p) R)),
               charIdempotent χ) +
             ∑ χ ∈ ((Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
-              (fun χ => IsEvenDeltaCharacter (p := p) χ)).filter
-                (fun χ => ¬ χ = (1 : MulChar (CyclotomicUnitDelta p) R)),
+              (fun χ ↦ IsEvenDeltaCharacter (p := p) χ)).filter
+                (fun χ ↦ ¬ χ = (1 : MulChar (CyclotomicUnitDelta p) R)),
               charIdempotent χ := by
               rw [Finset.sum_filter_add_sum_filter_not]
       _ = charIdempotent (1 : MulChar (CyclotomicUnitDelta p) R) +
           ∑ χ ∈ (Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
-              (fun χ => IsEvenDeltaCharacter (p := p) χ ∧
+              (fun χ ↦ IsEvenDeltaCharacter (p := p) χ ∧
                 χ ≠ (1 : MulChar (CyclotomicUnitDelta p) R)),
             charIdempotent χ := by
             have h_one_filter :
                 ((Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
-                  (fun χ => IsEvenDeltaCharacter (p := p) χ)).filter
-                    (fun χ => χ = (1 : MulChar (CyclotomicUnitDelta p) R)) =
+                  (fun χ ↦ IsEvenDeltaCharacter (p := p) χ)).filter
+                    (fun χ ↦ χ = (1 : MulChar (CyclotomicUnitDelta p) R)) =
                   {1} := by
               ext χ
               by_cases hχ : χ = (1 : MulChar (CyclotomicUnitDelta p) R)
@@ -383,10 +379,10 @@ theorem delta_plusIdempotent_sub_trivial_eq_sum_nontrivial_even :
               · simp [hχ]
             have h_ne_filter :
                 ((Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
-                  (fun χ => IsEvenDeltaCharacter (p := p) χ)).filter
-                    (fun χ => ¬ χ = (1 : MulChar (CyclotomicUnitDelta p) R)) =
+                  (fun χ ↦ IsEvenDeltaCharacter (p := p) χ)).filter
+                    (fun χ ↦ ¬ χ = (1 : MulChar (CyclotomicUnitDelta p) R)) =
                   (Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
-                    (fun χ => IsEvenDeltaCharacter (p := p) χ ∧
+                    (fun χ ↦ IsEvenDeltaCharacter (p := p) χ ∧
                       χ ≠ (1 : MulChar (CyclotomicUnitDelta p) R)) := by
               ext χ
               simp [ne_eq]
