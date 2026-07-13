@@ -116,6 +116,22 @@ theorem chartPrecursorSpec_isClosedImmersion :
   suffices hCI : IsClosedImmersion g by
     haveI := hCI
     infer_instance
+  -- Leg computations (Step 2): β ∘ includeLeft = includeLeft (into B⊗A), β ∘ includeRight = chartCoaction.
+  have key_incL :
+      β.comp (Algebra.TensorProduct.includeLeftRingHom :
+          P.chartRing →+* P.chartRing ⊗[P.baseRing] P.chartRing)
+        = (Algebra.TensorProduct.includeLeftRingHom :
+          P.chartRing →+* P.chartRing ⊗[P.baseRing] P.groupRing) := by
+    ext b
+    simp [hβ, Algebra.TensorProduct.productMap_apply_tmul]
+  have key_incR :
+      β.comp (Algebra.TensorProduct.includeRight :
+          P.chartRing →ₐ[P.baseRing] P.chartRing ⊗[P.baseRing] P.chartRing).toRingHom
+        = P.chartCoaction.toRingHom := by
+    ext b
+    simp only [hβ, RingHom.coe_comp, Function.comp_apply, RingHom.coe_coe,
+      AlgHom.toRingHom_eq_coe, Algebra.TensorProduct.includeRight_apply,
+      Algebra.TensorProduct.productMap_apply_tmul, map_one, one_mul]
   sorry
 
 /-- **`[HG-C2]` last mile — the Galois precursor is surjective on the chart.** The `Spec` of the
