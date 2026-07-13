@@ -2366,22 +2366,24 @@ adjudicates.
   Full "inversion-EllHom acts by −1 on `OmegaBasis`" deliberately DEFERRED to T-E14's
   decomposition (needs `invOver` chart lemmas; recorded as T-E14 dep) — now cut as
   **[T-OM-B9]** below.
-- **[T-OM-B9]** the inversion `EllObj`-automorphism acts by `−1` on ω-bases (ω5-tail =
-  T-E14's `{±1}`-half) — **in_progress (2026-07-13, OMEGA)** · NEW File D =
-  `Moduli/OmegaInversion.lean` (imports GroupLawDescent + OmegaFunctor; no shared-file
-  edits). Leaves: **B9-0** `negHom_negHom : G.negHom ≫ G.negHom = 𝟙 G.E` (hom_ext over
-  `atlasTotalCover`; per-piece `negPiece ≫ negHomOf = pullback.fst` from
-  `negModelHom_negModelHom` base-changed through the `bcChart` compat pack) ⟹
-  `IsIso negHom`; **B9-1** `negEllIso X : X ≅ X` in `EllObj R` (baseHom = 𝟙, top =
-  negHom, isPullback via `IsPullback.of_horiz_isIso`, zero_w = `negHom_zero`);
-  **B9-2** the neg-transport comparison: `transVC (P.restrict) (P.transport 𝟙 negHom …)
-  = (negVC _).map …`-form via `negModelHom_eq_negVC` + `projModelVCIso_injective`
-  (uniqueness), so `(omegaCompat (negEllIso X).hom).w i' j = resUnit _ (−1 · u i' j)`
-  (glue-spec + `transUnit_trans`, mirroring `omegaCompat_id_w` with the `−1`-twist);
-  **B9-3** `omegaBasisMap_negEll : omegaBasisMap (negEllIso X).hom b = (−1 : Γ(⊤)ˣ) • b`
-  (the `_id`-proof pattern with the constant `−1` factored out). Payoff: KM 4.6.2's
-  `{±1}` acts on `omegaProblem`/`legendreBootstrapProblem` through inversion — the
-  action half of T-E14's engine axiom 2.
+- **[T-OM-B9 ★]** the inversion `EllObj`-automorphism acts by `−1` on ω-bases (ω5-tail
+  = T-E14's `{±1}`-half) — **★ DONE (2026-07-14, OMEGA), sorry-free + axiom-clean**
+  (`omegaBasisMap_negEll` verified, standard 3). File-plan note: no new file was
+  needed — geometric half in `EllipticCurve/InvariantDifferential.lean` (which now
+  imports `GroupLawDescent`), `EllObj`-half in `Moduli/OmegaFunctor.lean`. Delivered:
+  `negHomOf_negHomOf`/`negHom_negHom` (glued inversion is an involution; per-piece
+  `negPiece ≫ negHomOf = fst` from `negModelHom_negModelHom` + `negHomOf_piece'`),
+  `IsIso G.negHom` + `isPullback_negHom` + `negHom_zero_w`, `negVC_map`,
+  `transportTheta_neg` (θ of the neg-square = θ-id ≫ chart-conjugated model negation),
+  **`transVC_transport_neg`** (neg-transport vs restriction compare by exactly `negVC`;
+  `transVC_unique` + `negModelHom_eq_negVC` + the pre-existing T-W7.0b-BC
+  `negModelHom_baseChange` — reused, not re-proven), `transUnit_transport_neg = −1`,
+  `negEllHom`/`negEllIso`, `omegaCompat_neg_w` (mixed comparison = `−1 ·` cocycle),
+  **`omegaBasisMap_negEll : omegaBasisMap (negEllHom X) b = (−1) • b`** and
+  `omegaProblem_map_negEll`. Payoff: KM 4.6.2's `{±1}` acts on
+  `omegaProblem`/`legendreBootstrapProblem` through inversion — the `{±1}`-factor of
+  T-E14's engine-axiom-2 torsor is in place (the `GL₂(ℤ/2)`-factor is `glSmul`,
+  already on `Moduli/GammaH.lean`).
 
 ### [T-E12] `M₁ = Spec ℤ[1/6, g₂, g₃, Δ⁻¹]` represents `(E, ω)` (GME Thm 2.2.3)
 - **Status**: open — **UNBLOCKED + STATED (2026-07-13, OMEGA)**: the problem def is
