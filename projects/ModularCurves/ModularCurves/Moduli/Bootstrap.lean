@@ -291,4 +291,79 @@ noncomputable def gammaFullNaiveGlAction (N : ℕ) [NeZero N] :
     rw [mul_inv_rev]
     exact X.unop.curve.glSmul_mul δ⁻¹ γ⁻¹ L
 
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 6400000 in
+/-- **(T-E14-ACT)** Lift an automorphism of the level problem to the Legendre product
+(identity on the `ω`-datum). -/
+noncomputable def legendreBootstrapLevelAut (α : Aut (gammaFullNaiveProblem R 2)) :
+    Aut (legendreBootstrapProblem R) where
+  hom :=
+    { app := fun X => ↾fun x : (gammaFullNaiveProblem R 2).obj X ×
+          OmegaBasis X.unop.curve.toEllipticCurveGeom =>
+        (α.hom.app X x.1, x.2)
+      naturality := fun X Y φ => by
+        ext x
+        refine Prod.ext ?_ rfl
+        exact CategoryTheory.congr_fun (α.hom.naturality φ) x.1 }
+  inv :=
+    { app := fun X => ↾fun x : (gammaFullNaiveProblem R 2).obj X ×
+          OmegaBasis X.unop.curve.toEllipticCurveGeom =>
+        (α.inv.app X x.1, x.2)
+      naturality := fun X Y φ => by
+        ext x
+        refine Prod.ext ?_ rfl
+        exact CategoryTheory.congr_fun (α.inv.naturality φ) x.1 }
+  hom_inv_id := by
+    ext X x
+    refine Prod.ext ?_ rfl
+    exact CategoryTheory.congr_fun (NatTrans.congr_app α.hom_inv_id X) x.1
+  inv_hom_id := by
+    ext X x
+    refine Prod.ext ?_ rfl
+    exact CategoryTheory.congr_fun (NatTrans.congr_app α.inv_hom_id X) x.1
+
+/-- **(T-E14-ACT)** The level-factor action on the Legendre problem. -/
+noncomputable def legendreBootstrapGlAction :
+    Matrix.GeneralLinearGroup (Fin 2) (ZMod 2) →* Aut (legendreBootstrapProblem R) where
+  toFun γ := legendreBootstrapLevelAut R (gammaFullNaiveGlAction R 2 γ)
+  map_one' := by
+    rw [map_one]
+    refine Iso.ext ?_
+    ext X x
+    exact Prod.ext rfl rfl
+  map_mul' γ δ := by
+    rw [map_mul]
+    refine Iso.ext ?_
+    ext X x
+    exact Prod.ext rfl rfl
+
+/-- The two factor-actions commute (they act on different components). -/
+private theorem legendreBootstrap_actions_comm
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod 2)) (u : ℤˣ) :
+    legendreBootstrapSignAction R u * legendreBootstrapGlAction R γ =
+      legendreBootstrapGlAction R γ * legendreBootstrapSignAction R u := by
+  rcases Int.units_eq_one_or u with rfl | rfl
+  · rw [map_one, one_mul, mul_one]
+  · refine Iso.ext ?_
+    ext X x
+    exact Prod.ext rfl rfl
+
+/-- **(T-E14-ACT ★)** KM 4.6.2's engine group `G = GL₂(ℤ/2) × {±1}` acting on the
+Legendre bootstrap problem, in the `G →* Aut Q` interface of
+`representable_of_rigid_of_torsor`: `GL₂` through the level datum, `{±1}` through the
+`ω`-datum (the factors commute — they act on different components). -/
+noncomputable def legendreBootstrapGAction :
+    Matrix.GeneralLinearGroup (Fin 2) (ZMod 2) × ℤˣ →*
+      Aut (legendreBootstrapProblem R) where
+  toFun p := legendreBootstrapGlAction R p.1 * legendreBootstrapSignAction R p.2
+  map_one' := by
+    show legendreBootstrapGlAction R 1 * legendreBootstrapSignAction R 1 = 1
+    rw [map_one, map_one, one_mul]
+  map_mul' p q := by
+    show legendreBootstrapGlAction R (p.1 * q.1) *
+        legendreBootstrapSignAction R (p.2 * q.2) = _
+    rw [map_mul, map_mul, mul_assoc,
+      ← mul_assoc (legendreBootstrapGlAction R q.1),
+      ← legendreBootstrap_actions_comm R q.1 p.2, mul_assoc, ← mul_assoc]
+
 end ModularCurves
