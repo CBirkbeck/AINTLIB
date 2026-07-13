@@ -304,20 +304,13 @@ noncomputable def gammaFullNaiveProblem (N : ℕ) [NeZero N] : ModuliProblem R w
 closed by `gammaOneNaive_representable_assembly` (zero code-consumers of the name at
 relocation time — the cap theorem). -/
 
-/-- **(T-E9 = Loeffler Prop 3.8.2–3.8.3; KM 3.1/4.7/5.1)** For `N ≥ 3` and `N` invertible
-in `R`, the naive full-level problem `[Γ(N)]` is rigid and representable; the representing
-scheme `Y(N)` is smooth and affine over `Spec R`.
-(Rigidity: Loeffler Prop 3.8.3 covers `Ell/R[1/6]` only; for residue characteristics
-2 and 3 the source of record is the GME 2.6.4 Aut-computation ("`ε ∈ Aut(E,φ)`,
-`n ≥ 3` invertible ⟹ `ε = 1`", chain B9 in decomposition-gme2 — valid in all
-characteristics with `N` invertible); KM locator pending. Smooth+affine conjunct
-restored 2026-07-06 — it was in this docstring but missing from the statement.) -/
-theorem gammaFullNaive_representable (N : ℕ) [NeZero N] (hN : 3 ≤ N)
-    (hinv : IsUnit (N : R)) :
-    ((gammaFullNaiveProblem R N).Rigid ∧ (gammaFullNaiveProblem R N).Representable) ∧
-      ∀ X : EllObj R, Nonempty ((gammaFullNaiveProblem R N).RepresentableBy X) →
-        (Smooth X.structMap ∧ IsAffineHom X.structMap) := by
-  sorry
+/- **RELOCATED (STREAM-YN, v10.111/v10.117 relocation doctrine)**: the T-E9 master
+`gammaFullNaive_representable` now lives BYTE-IDENTICAL, sorry-free-modulo-route-gates, in
+`ModularCurve/YFullTE9.lean` (downstream of `YFullRoute.lean`, which supplies the assembly),
+closed by `exact YFull.gammaFullNaive_representable_assembly R N hN hinv`. Zero code-consumers
+of the name at relocation time (the cap theorem). The held `by sorry` here is retired — its
+obligation is discharged into the route's two boarded gates (rigidity linchpin / GEOM engine),
+not deferred. -/
 
 end LevelModuli
 

@@ -66,6 +66,7 @@ import ModularCurves.LevelStructure.CartierDivisor
 import ModularCurves.LevelStructure.ExactOrder
 import ModularCurves.LevelStructure.Incidence
 import ModularCurves.ModularCurve.YFullRoute
+import ModularCurves.ModularCurve.YFullTE9
 import ModularCurves.ModularCurve.YOneAssembly
 import ModularCurves.ModularCurve.YOneAtlasClassify
 import ModularCurves.ModularCurve.YOneTatePoint
