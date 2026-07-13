@@ -266,6 +266,38 @@ theorem coequalizes_of_isInvariant {Y : Scheme.{u}} {f : E.E ⟶ Y} (hf : G.IsIn
       (congrArg (fun m => P.chartSpecIso.inv ≫ (G.chartPullbackIso P.U).inv ≫ m) hgeo).trans <|
         hB.symm.trans (Category.assoc _ _ _)
 
+/-! ### `[HG-C4c]` transition data: two nested patches -/
+
+section Transition
+
+variable (Q : G.AffineChartPatch) (hUQ : Q.U ≤ P.U) (hVQ : Q.V ≤ P.V)
+
+/-- Base-ring restriction between nested patches. -/
+noncomputable def resBase : P.baseRing ⟶ Q.baseRing :=
+  S.presheaf.map (homOfLE hVQ).op
+
+/-- Chart-ring restriction between nested patches. -/
+noncomputable def resChart : P.chartRing ⟶ Q.chartRing :=
+  E.E.presheaf.map (homOfLE hUQ).op
+
+/-- Group-ring restriction between nested patches. -/
+noncomputable def resGroup : P.groupRing ⟶ Q.groupRing :=
+  G.G.presheaf.map (homOfLE (Scheme.Hom.preimage_mono G.π hVQ)).op
+
+/-- The chart-restriction `appLE` exchange square on the `E`-side. -/
+theorem resChart_appLE :
+    (E.π.appLE P.V P.U P.hover) ≫ P.resChart Q hUQ
+      = P.resBase Q hVQ ≫ (E.π.appLE Q.V Q.U Q.hover) := by
+  rw [resChart, resBase, Scheme.Hom.appLE_map, Scheme.Hom.map_appLE]
+
+/-- The group-restriction `appLE` exchange square on the `G`-side. -/
+theorem resGroup_appLE :
+    (G.π.appLE P.V P.groupOpen le_rfl) ≫ P.resGroup Q hVQ
+      = P.resBase Q hVQ ≫ (G.π.appLE Q.V Q.groupOpen le_rfl) := by
+  rw [resGroup, resBase, Scheme.Hom.appLE_map, Scheme.Hom.map_appLE]
+
+end Transition
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
