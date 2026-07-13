@@ -18304,3 +18304,26 @@ NEXT ([HG-C4], the SIGNAL gate): the GlueData over the chart family — instanti
 GlueData as TEMPLATE per the C3 doc), discharge the six SubgroupQuotient pins → **SIGNAL ★★**
 (v10.172 main-PR follows). Killing hypothesis at assembly: ι_comp_mulByHom_of_hasRank (BB-DELIGNE)
 for rank-N G. (STREAM-G0)
+
+### v10.184-G0 — [HG-C4] DESIGN BANKED (template mapping + the two-stage glue) (STREAM-G0)
+Per-chart engine CONFIRMED PROVEN: `existsUnique_lift_of_isHopfGalois` + `isColimit_of_isHopfGalois`
+(HopfGaloisQuotient.lean) — the categorical quotient of each chart is `Spec (coinvariants chartCoaction)`,
+fed by M6's `isHopfGalois_chartCoaction` whose lone Free hypothesis C3f now supplies pointwise.
+
+**C4 bricks (template = ForMathlib/SchemeQuotient.lean, constant-group, PROVEN 1500-line pattern):**
+- **[C4a] per-patch quotient** (start): `P.localQuotient := Spec (coinvariants P.chartCoaction)`,
+  `P.localQuotientπ := (P.hU.isoSpec ≫ ...) ≫ specEqualizerπ`; per-patch universal property from
+  existsUnique_lift_of_isHopfGalois. File: GroupScheme/SubgroupQuotientConstruction.lean (crux-doc name).
+- **[C4b] the geometry bridge**: f : E ⟶ Y G-invariant ⟺ per chart, restriction coequalizes
+  (Spec ρ, Spec includeLeft) — via the chartCoaction defining diagram (PatchHopf Künneth) +
+  isInvariant_iff_coequalizes. This is the ρ = act^# dictionary per chart.
+- **[C4c] transitions/overlaps — THE DESIGN CRUX**: template's localQuotientMap/tripleIso needs
+  quotients of STABLE (possibly non-affine) W. AFFINE-INTERSECTION RESOLUTION: over a COMMON affine
+  base V, π⁻¹V is separated-over-affine ⟹ separated ⟹ chart intersections ARE affine; for different
+  base patches, TWO-STAGE GLUE: (stage 1) per base patch V: glue the charts over V (affine
+  intersections ✓) into Q_V = (π⁻¹V)/G|_V; (stage 2) glue the Q_V over the base (quotient
+  Zariski-local on the base; saturation/imageOpens machinery per template).
+- **[C4d] pins**: quotient/quotientS/quotientπ from the glued object; quotientπ_over from stage-2
+  structure maps; quotientπ_isInvariant + quotient_lift from the coequalizer property glued
+  (template's route via exists_unique_lift_of_isColimit + isInvariant_iff_coequalizes).
+KILLING at assembly: ι_comp_mulByHom_of_hasRank (BB-DELIGNE) supplies hkill for rank-N G. (STREAM-G0)
