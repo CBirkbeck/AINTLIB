@@ -19075,3 +19075,42 @@ residue crux); (2) [YF-CLOPEN] wired → [YF-ETALE] reduced to [YF-⊆]; (3) lan
 - lane-C recollement (T-E5f) = CHARTER-FP4's own milestone.
 The Y(N) MASTER auto-completes to the clean axiom triple the moment P3B3 (rigidity + T-D8) and FP4
 (T-E5 engine + GEOM) land — the wiring already consumes them. (STREAM-YN)
+
+## v10.179 — STREAM-YN: T-D8-bridge FIBRE SIDE COMPLETE + scheme-side RE-SCOPED (not multi-week)
+Delivered on dev/modular-curves-y1 (committed + pushed):
+- **step D** `FibreFullLevel.lean` (axiom-clean): `comboFamily_injective_iff_closure_top` +
+  `range_comboFamily_eq_closure` — over a finite group of order N² the N² combos [a]P+[b]Q are
+  distinct iff P,Q generate.
+- **fibre side** `FullLevelFibre.lean` (own-proofs sorry-free; inherits only T-B6 black-box sorryAx):
+  `naiveClosure_iff_torsion_filled` → `closure_pair_eq_iff_closure_top` (general subgroup bridge,
+  AXIOM-CLEAN) → `naiveClosure_iff_subgroup_closure_top` → `finite_fibreTorsion`/`natCard_fibreTorsion`
+  (T-B6: #E[N]_t=N²) → **`naive_iff_comboFamily_injective`**: naive fibre generation ⟺ the N² combos
+  are distinct in the fibre. This is the entire FIBRE half of KM 1.4.4, closed.
+
+**RE-SCOPING (corrects the "multi-week from-scratch crux" concern):** the T-D8-bridge scheme side is
+NOT a research blocker. Its ⟸ half `sectionsDivisor_ideal_eq_torsionIdeal` (FullLevelSupset:90) is
+PROVEN; the RelEffCartierDiv order API EXISTS (`IsSubdivisor`, `eq_of_isSubdivisor_of_degree_eq`,
+`torsionDivisor`, Incidence:959+); the divisor base-change-to-fibre machinery EXISTS (Incidence
+`fullLevelLocusAux_P1/P2`, :2610+ — comaps the section divisor + torsion ideal to fibres). The ONLY
+genuinely-new content remaining for the whole T-D8-bridge + [YF-⊆] is ONE lemma:
+  **[T-D8-⟹ / KM 3.7.1 reduced-fibre distinctness]** over a geom point (field k, N invertible so E[N]_k
+  is N² reduced étale points), `sectionsDivisor(combos).ideal = torsionIdeal` ⟹ the N² combos are
+  pairwise distinct. (Content: divisor-eq forces O/(∏ker) ≅ O/torsionIdeal = reduced, so the section
+  divisor is multiplicity-free ⟹ distinct.) Then: ⟹ combines with `naive_iff_comboFamily_injective`
+  to close `fullLevel_divisor_iff_naive_gen`, which unlocks [YF-⊆] `range_levelSpaceΓι_subset`
+  (full-level pt → no nonzero combo vanishes → ∈ fullLevelOpens) → [YF-ETALE]★. (STREAM-YN)
+
+### v10.179a — [YF-⊆]/T-D8-⟹ route REFINED to elementary support-counting (no local algebra)
+Correction to the "reduced-fibre multiplicity" framing above: the ⟹ direction is ELEMENTARY.
+The support tool already exists — `CartierDivisor.lean:1052`:
+  `((∏ i, Scheme.Hom.ker (P i).1).support : Set C) = ⋃ i, Set.range (P i).1.base`
+(+ `Scheme.IdealSheafData.support_mul`). So:
+  divisor eq `∏ker(σ_i) = torsionIdeal`  ⟹ (take `.support`, both sides)  ⟹
+  `⋃ᵢ range(σ_i.base) = E[N]` (as sets on the curve)  ⟹ (base-change to a geom fibre, where
+  `#E[N]_k = N²` by T-B6/`torsion_rank`)  ⟹  the N² section-values COVER the N² fibre points  ⟹
+  (pigeonhole: N² sections onto an N²-set, surjective ⟹ injective)  ⟹  the σ_i are fibrewise
+  DISTINCT  ⟹ (my `naive_iff_comboFamily_injective`, reversed) fibrewise generation, and for [YF-⊆]
+  directly: nonzero combos are nonzero ⟹ w ∉ pointVanishSet ⟹ w ∈ fullLevelOpens.
+Remaining plumbing (tractable, ~100-200 lines): base-change the support/divisor eq to the geometric
+fibre + the E[N]_k set-count = N² + the pigeonhole. NO local-ring/multiplicity theory needed. This is
+the last gate for `fullLevel_divisor_iff_naive_gen` (both directions) and [YF-⊆]. (STREAM-YN)
