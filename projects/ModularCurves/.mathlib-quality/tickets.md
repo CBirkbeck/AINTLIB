@@ -2419,7 +2419,16 @@ adjudicates.
   ~~T-E-OMEGA~~ (DISCHARGED ★★), T-E13 ·
   **Sources**: KM 4.6.2 + 2.2.9 (verbatim in the quotes file); GME Ex. 2.2.1 (p. 117).
 - **T-E14 continuation decomposition (2026-07-14, OMEGA — post-B9)**: remaining leaves.
-  **[T-E14-ACT]** the `GL₂(ℤ/2) × {±1}`-action on `legendreBootstrapProblem`:
+  **[T-E14-ACT ★ DONE (2026-07-14, OMEGA)]** — delivered in the engine's `G →* Aut Q`
+  interface: `omegaProblemNegAut`/`omegaProblemSignAction` (ℤˣ on the ω-problem),
+  `legendreBootstrapNegAut`/`legendreBootstrapSignAction`, `gammaFullNaiveGlAut`/
+  `gammaFullNaiveGlAction` (GL₂(ℤ/N), γ ↦ γ⁻¹-aut compensating the `glSmul_mul`
+  anti-law; naturality = `pullSection` ℤ-linearity), `legendreBootstrapLevelAut`,
+  and the assembled **`legendreBootstrapGAction : GL₂(ℤ/2) × ℤˣ →*
+  Aut (legendreBootstrapProblem R)`** (`Moduli/Bootstrap.lean`; sorryAx lineage only
+  via `gammaFullNaiveProblem`-map/`pullSection_add`, T-E7/T-W7.8 — the ω-side pieces
+  are axiom-clean). ORIGINAL SPEC (kept for reference): the `GL₂(ℤ/2) × {±1}`-action
+  on `legendreBootstrapProblem`:
   `{±1}` acts on the ω-factor by the unit action `(±1 : Γ(S,⊤)ˣ) • ω` (already a
   group action via the T-OM-B6 `SMul`; note the action is by POST-scaling the datum,
   no `negEllHom` needed — `omegaBasisMap_negEll` is instead what identifies the
