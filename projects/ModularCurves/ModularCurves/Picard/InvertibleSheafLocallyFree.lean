@@ -1,5 +1,4 @@
 import Mathlib.Algebra.Category.ModuleCat.Sheaf.LocallyFree
-
 import ModularCurves.Picard.InvertibleSheaf
 
 /-!
@@ -130,9 +129,8 @@ private instance invertibleQuasicoherentData_isFinitePresentation {M : X.Modules
 
 /-- An invertible scheme module is locally free in mathlib's sheaf-theoretic sense. -/
 theorem IsInvertible.isLocallyFree {M : X.Modules} (hM : IsInvertible M) :
-    M.IsLocallyFree := by
-  constructor
-  exact ⟨invertibleLocalGeneratorsData hM, inferInstance⟩
+    M.IsLocallyFree :=
+  (invertibleLocalGeneratorsData hM).isLocallyFree
 
 /-- An invertible scheme module is quasicoherent. -/
 theorem IsInvertible.isQuasicoherent {M : X.Modules} (hM : IsInvertible M) :
@@ -142,9 +140,8 @@ theorem IsInvertible.isQuasicoherent {M : X.Modules} (hM : IsInvertible M) :
 
 /-- An invertible scheme module is finitely presented in mathlib's sheaf-theoretic sense. -/
 theorem IsInvertible.isFinitePresentation {M : X.Modules} (hM : IsInvertible M) :
-    M.IsFinitePresentation := by
-  exact
-    { exists_quasicoherentData :=
-        ⟨(invertibleLocalGeneratorsData hM).quasiCoherentData, inferInstance⟩ }
+    M.IsFinitePresentation :=
+  { exists_quasicoherentData :=
+      ⟨(invertibleLocalGeneratorsData hM).quasiCoherentData, inferInstance⟩ }
 
 end AlgebraicGeometry.Scheme.Modules
