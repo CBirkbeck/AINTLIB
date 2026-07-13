@@ -4,7 +4,7 @@ public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.Setup
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DigitSum
 
 /-!
-# Stickelberger congruence assembly (Layer 2, REF-18c2c4)
+# Stickelberger congruence assembly (Layer 2)
 
 This file contains the ideal-theoretic assembly step for the digit-sum
 Stickelberger congruence.  Once the Gauss sum is known congruent modulo
@@ -52,14 +52,11 @@ variable (S : StickelbergerSetup p k R')
 /-- Non-triviality of the powers `χ_q^a` in the Stickelberger range
 `1 ≤ a ≤ p - 1`. -/
 theorem residueChar_pow_ne_one {a : ℕ} (ha₁ : 1 ≤ a) (ha₂ : a ≤ p - 1) :
-    S.residueChar ^ a ≠ 1 := by
-  intro h
-  have h_order : orderOf S.residueChar = p := S.orderOf_residueChar
-  have h_dvd : orderOf S.residueChar ∣ a := orderOf_dvd_of_pow_eq_one h
-  rw [h_order] at h_dvd
+    S.residueChar ^ a ≠ 1 := fun h ↦ by
+  -- `orderOf χ_q = p` divides `a`, but `1 ≤ a ≤ p - 1 < p`.
+  have h_dvd : p ∣ a := S.orderOf_residueChar ▸ orderOf_dvd_of_pow_eq_one h
   have hp_pos : 0 < p := (Fact.out : Nat.Prime p).pos
-  have ha_lt : a < p := lt_of_le_of_lt ha₂ (Nat.sub_lt hp_pos Nat.one_pos)
-  have ha_ge_p : p ≤ a := Nat.le_of_dvd (Nat.lt_of_lt_of_le Nat.one_pos ha₁) h_dvd
+  have : p ≤ a := Nat.le_of_dvd (by omega) h_dvd
   omega
 
 /-- Phase-B containment for every non-trivial power of the residue character.
@@ -81,7 +78,7 @@ theorem gaussSum_residueChar_pow_mem_ideal_of_q_mem
     {Q : Ideal R'} [Q.IsPrime] (hQ : (ℓ : R') ∈ Q)
     {a : ℕ} (ha₁ : 1 ≤ a) (ha₂ : a ≤ p - 1) :
     _root_.gaussSum (S.residueChar ^ a) S.psi_q ∈ Q :=
-  S.gaussSum_residueChar_pow_mem_ideal ha₁ ha₂ fun x => by
+  S.gaussSum_residueChar_pow_mem_ideal ha₁ ha₂ fun x ↦ by
     rw [hf x]
     exact zeta_pow_sub_one_mem_of_natCast_mem hζ hQ (f x)
 
@@ -113,8 +110,8 @@ Let `s = digitSum ℓ (a * ((#k - 1) / p))`.  If a proposed leading term
 `lead` has exact `Q`-adic order `s` and the Gauss sum is congruent to it
 modulo `Q^(s+1)`, then the Gauss sum has the target exact order.
 
-The remaining mathematical content of REF-18c2c4 is to construct `lead`
-as the usual unit times `(ζ_ℓ - 1)^s` and prove the congruence. -/
+The remaining mathematical content is to construct `lead` as the usual unit
+times `(ζ_ℓ - 1)^s` and prove the congruence. -/
 theorem stickelberger_qadic_ord_at_prime_of_leading_congruence
     (S : StickelbergerSetup p k R') {ℓ : ℕ} (a : ℕ) {Q : Ideal R'} {lead : R'}
     (h_lead_mem :
