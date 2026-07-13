@@ -19,6 +19,28 @@ universe u
 
 namespace ModularCurves
 
+section PullbackCongrHom
+
+variable {C : Type*} [Category C]
+
+/-- The forward comparison map `pullback.congrHom rfl h` induced by an equality of the second
+leg, composed with the first projection, is the original first projection. -/
+private theorem congrHom_hom_comp_fst {X Y Z : C} (f : X ⟶ Z) {g₁ g₂ : Y ⟶ Z} (h : g₁ = g₂)
+    [HasPullback f g₁] [HasPullback f g₂] :
+    (pullback.congrHom rfl h).hom ≫ pullback.fst f g₂ = pullback.fst f g₁ := by
+  rw [pullback.congrHom_hom]
+  exact (pullback.lift_fst _ _ _).trans (Category.comp_id _)
+
+/-- The forward comparison map `pullback.congrHom rfl h` induced by an equality of the second
+leg, composed with the second projection, is the original second projection. -/
+private theorem congrHom_hom_comp_snd {X Y Z : C} (f : X ⟶ Z) {g₁ g₂ : Y ⟶ Z} (h : g₁ = g₂)
+    [HasPullback f g₁] [HasPullback f g₂] :
+    (pullback.congrHom rfl h).hom ≫ pullback.snd f g₂ = pullback.snd f g₁ := by
+  rw [pullback.congrHom_hom]
+  exact (pullback.lift_snd _ _ _).trans (Category.comp_id _)
+
+end PullbackCongrHom
+
 section RelativeTateRing
 
 variable (R : CommRingCat.{u}) {A : Type u} [CommRing A] [Algebra R A]
@@ -1046,6 +1068,41 @@ lemma three_zsmul_some_eq_zero_of_Ψ₃_eq_zero {W : WeierstrassCurve F} {x y : 
 
 variable {A : Type u} [CommRing A]
 
+/-- Base change preserves the affine Weierstrass equation: the images of a solution `(x, y)`
+of `W`'s equation over `A` solve the equation of the base-changed curve over any `A`-algebra. -/
+private theorem toAffine_equation_baseChange (W : WeierstrassCurve A) (x y : A)
+    (k : Type u) [CommRing k] [Algebra A k] (hxy : W.toAffine.Equation x y) :
+    (W.baseChange k).toAffine.Equation (algebraMap A k x) (algebraMap A k y) := by
+  rw [WeierstrassCurve.Affine.equation_iff] at hxy
+  have hxy' := congrArg (algebraMap A k) hxy
+  simp only [map_add, map_mul, map_pow] at hxy'
+  rw [WeierstrassCurve.Affine.equation_iff]
+  simp only [WeierstrassCurve.baseChange, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
+    WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆,
+    WeierstrassCurve.toAffine]
+  linear_combination hxy'
+
+/-- Base change commutes with evaluating the second division polynomial `ψ₂` at an affine
+point: the value over the base change is the image of the value over `A`. -/
+private theorem ψ₂_evalEval_baseChange (W : WeierstrassCurve A) (x y : A)
+    (k : Type u) [CommRing k] [Algebra A k] :
+    (W.baseChange k).ψ₂.evalEval (algebraMap A k x) (algebraMap A k y) =
+      algebraMap A k ((W.Ψ 2).evalEval x y) := by
+  rw [WeierstrassCurve.Ψ_two, WeierstrassCurve.ψ₂, WeierstrassCurve.ψ₂,
+    WeierstrassCurve.Affine.evalEval_polynomialY,
+    WeierstrassCurve.Affine.evalEval_polynomialY]
+  simp only [WeierstrassCurve.baseChange, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₃,
+    WeierstrassCurve.toAffine, map_add, map_mul, map_ofNat]
+
+/-- Base change commutes with evaluating the third division polynomial `Ψ₃` at an affine
+point: the value over the base change is the image of the value over `A`. -/
+private theorem Ψ₃_eval_baseChange (W : WeierstrassCurve A) (x y : A)
+    (k : Type u) [CommRing k] [Algebra A k] :
+    (W.baseChange k).Ψ₃.eval (algebraMap A k x) =
+      algebraMap A k ((W.Ψ 3).evalEval x y) := by
+  rw [WeierstrassCurve.Ψ_three, Polynomial.evalEval_C, WeierstrassCurve.baseChange,
+    WeierstrassCurve.map_Ψ₃, Polynomial.eval_map, Polynomial.eval₂_at_apply]
+
 /-- **(B2-ii, the order ⟹ unit criterion)** If no multiple `a • P` (`0 < a ≤ 3`) of the affine
 point `(x, y)` of the elliptic `W/A` vanishes at any geometric point of `Spec A`, then the
 `ψ₂ψ₃`-value at `(x, y)` is a unit — i.e. `NowhereOrderLEThree W x y`, the input of T-E1.
@@ -1076,29 +1133,15 @@ theorem nowhereOrderLEThree_of_forall_geom (W : WeierstrassCurve A) [W.IsEllipti
   -- fibre instances and the fibre point
   haveI : (W.baseChange k).IsElliptic :=
     inferInstanceAs ((W.map (algebraMap A k)).IsElliptic)
-  have hEk : (W.baseChange k).toAffine.Equation (algebraMap A k x) (algebraMap A k y) := by
-    rw [WeierstrassCurve.Affine.equation_iff] at hxy
-    have hxy' := congrArg (algebraMap A k) hxy
-    simp only [map_add, map_mul, map_pow] at hxy'
-    rw [WeierstrassCurve.Affine.equation_iff]
-    simp only [WeierstrassCurve.baseChange, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
-      WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆,
-      WeierstrassCurve.toAffine]
-    linear_combination hxy'
+  have hEk : (W.baseChange k).toAffine.Equation (algebraMap A k x) (algebraMap A k y) :=
+    toAffine_equation_baseChange W x y k hxy
   have hns : (W.baseChange k).toAffine.Nonsingular (algebraMap A k x) (algebraMap A k y) :=
     (WeierstrassCurve.Affine.equation_iff_nonsingular).mp hEk
   -- the two division-polynomial values over `k`
   have hψ₂k : (W.baseChange k).ψ₂.evalEval (algebraMap A k x) (algebraMap A k y) =
-      algebraMap A k ((W.Ψ 2).evalEval x y) := by
-    rw [WeierstrassCurve.Ψ_two, WeierstrassCurve.ψ₂, WeierstrassCurve.ψ₂,
-      WeierstrassCurve.Affine.evalEval_polynomialY,
-      WeierstrassCurve.Affine.evalEval_polynomialY]
-    simp only [WeierstrassCurve.baseChange, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₃,
-      WeierstrassCurve.toAffine, map_add, map_mul, map_ofNat]
+      algebraMap A k ((W.Ψ 2).evalEval x y) := ψ₂_evalEval_baseChange W x y k
   have hΨ₃k : (W.baseChange k).Ψ₃.eval (algebraMap A k x) =
-      algebraMap A k ((W.Ψ 3).evalEval x y) := by
-    rw [WeierstrassCurve.Ψ_three, Polynomial.evalEval_C, WeierstrassCurve.baseChange,
-      WeierstrassCurve.map_Ψ₃, Polynomial.eval_map, Polynomial.eval₂_at_apply]
+      algebraMap A k ((W.Ψ 3).evalEval x y) := Ψ₃_eval_baseChange W x y k
   -- the vanishing product splits
   have hprod : (W.baseChange k).ψ₂.evalEval (algebraMap A k x) (algebraMap A k y) *
       (W.baseChange k).Ψ₃.eval (algebraMap A k x) = 0 := by
@@ -3612,16 +3655,8 @@ theorem fibreModelIso_zero :
       (Y.curve.baseChange (D₁.geomPt (D₁.specPt k))).zero := by
     rw [Iso.comp_inv_eq]
     exact (D₁.fibre_zero_comp k).symm
-  have e1 : (pullback.congrHom rfl hgeom).hom ≫
-      pullback.fst Y.curve.π (D₂.geomPt (D₂.specPt k)) =
-      pullback.fst Y.curve.π (D₁.geomPt (D₁.specPt k)) := by
-    rw [pullback.congrHom_hom]
-    exact (pullback.lift_fst _ _ _).trans (Category.comp_id _)
-  have e2 : (pullback.congrHom rfl hgeom).hom ≫
-      pullback.snd Y.curve.π (D₂.geomPt (D₂.specPt k)) =
-      pullback.snd Y.curve.π (D₁.geomPt (D₁.specPt k)) := by
-    rw [pullback.congrHom_hom]
-    exact (pullback.lift_snd _ _ _).trans (Category.comp_id _)
+  have e1 := congrHom_hom_comp_fst Y.curve.π hgeom
+  have e2 := congrHom_hom_comp_snd Y.curve.π hgeom
   have hz12 : (Y.curve.baseChange (D₁.geomPt (D₁.specPt k))).zero ≫
       (pullback.congrHom rfl hgeom).hom =
       (Y.curve.baseChange (D₂.geomPt (D₂.specPt k))).zero := by
@@ -3676,16 +3711,8 @@ theorem fibreModelIso_zero :
 /-- The fibre-model comparison carries the first fibre point to the second. -/
 theorem fibrePt_fibreModelIso (P : Y.curve.Section) :
     (D₁.fibrePt k P).1 ≫ (fibreModelIso D₁ D₂ k hgeom).hom = (D₂.fibrePt k P).1 := by
-  have e1 : (pullback.congrHom rfl hgeom).hom ≫
-      pullback.fst Y.curve.π (D₂.geomPt (D₂.specPt k)) =
-      pullback.fst Y.curve.π (D₁.geomPt (D₁.specPt k)) := by
-    rw [pullback.congrHom_hom]
-    exact (pullback.lift_fst _ _ _).trans (Category.comp_id _)
-  have e2 : (pullback.congrHom rfl hgeom).hom ≫
-      pullback.snd Y.curve.π (D₂.geomPt (D₂.specPt k)) =
-      pullback.snd Y.curve.π (D₁.geomPt (D₁.specPt k)) := by
-    rw [pullback.congrHom_hom]
-    exact (pullback.lift_snd _ _ _).trans (Category.comp_id _)
+  have e1 := congrHom_hom_comp_fst Y.curve.π hgeom
+  have e2 := congrHom_hom_comp_snd Y.curve.π hgeom
   have hfs : (D₁.fibreSection k P).1 ≫ (pullback.congrHom rfl hgeom).hom =
       (D₂.fibreSection k P).1 := by
     rw [D₁.fibreSection_coe k P, D₂.fibreSection_coe k P]
@@ -4462,16 +4489,8 @@ theorem test_topMap_agree (D₁ D₂ : MarkedChartData R Y)
               (D₁.specPt k ≫ D₁.U.2.isoSpec.inv) := (Category.assoc _ _ _).symm
         _ = w ≫ c₁ ≫ D₁.U.2.isoSpec.inv := by rw [hρsnd, hsp₁]
         _ = v₁ ≫ pullback.snd Y.curve.π D₁.U.1.ι := hv₁.symm
-  have hch₁ : (pullback.congrHom rfl hgeom).hom ≫
-      pullback.fst Y.curve.π (D₂.geomPt (D₂.specPt k)) =
-      pullback.fst Y.curve.π (D₁.geomPt (D₁.specPt k)) := by
-    rw [pullback.congrHom_hom]
-    exact (pullback.lift_fst _ _ _).trans (Category.comp_id _)
-  have hch₂ : (pullback.congrHom rfl hgeom).hom ≫
-      pullback.snd Y.curve.π (D₂.geomPt (D₂.specPt k)) =
-      pullback.snd Y.curve.π (D₁.geomPt (D₁.specPt k)) := by
-    rw [pullback.congrHom_hom]
-    exact (pullback.lift_snd _ _ _).trans (Category.comp_id _)
+  have hch₁ := congrHom_hom_comp_fst Y.curve.π hgeom
+  have hch₂ := congrHom_hom_comp_snd Y.curve.π hgeom
   have hmf₂ : D₂.fibreMap k ≫ pullback.fst Y.curve.π D₂.U.1.ι =
       pullback.fst Y.curve.π (D₂.geomPt (D₂.specPt k)) ≫ 𝟙 Y.curve.E :=
     pullback.lift_fst _ _ _
