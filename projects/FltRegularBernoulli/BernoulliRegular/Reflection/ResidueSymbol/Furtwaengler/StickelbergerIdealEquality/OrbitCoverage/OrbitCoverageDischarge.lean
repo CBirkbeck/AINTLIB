@@ -8,8 +8,8 @@ public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.Stickelberg
 /-!
 # `StickelbergerIdealEquality` from a `FullTeichDworkSetup`
 
-This file provides the substantive valuation-descent content of c.1
-(`REF-18c2d-main-c.1`) by showing how to assemble a
+This file provides the substantive valuation-descent content by showing
+how to assemble a
 `StickelbergerIdealEquality (S.Q.under (𝓞 K))` from a
 `FullTeichDworkSetup S` together with a coverage hypothesis on the
 Galois orbit of the descent prime.
@@ -115,8 +115,8 @@ theorem frobeniusCosetWeightSum_eq_residueOrbitSum
   classical
   let u : CyclotomicUnitDelta p := ZMod.unitOfCoprime ℓ hℓp
   let H : Subgroup (CyclotomicUnitDelta p) := Subgroup.zpowers u
-  let pred : CyclotomicUnitDelta p → Prop := fun b => a * b⁻¹ ∈ H
-  let f : CyclotomicUnitDelta p → ℕ := fun b => (b : ZMod p).val
+  let pred : CyclotomicUnitDelta p → Prop := fun b ↦ a * b⁻¹ ∈ H
+  let f : CyclotomicUnitDelta p → ℕ := fun b ↦ (b : ZMod p).val
   have hcond :
       (∑ b : CyclotomicUnitDelta p, if pred b then f b else 0) =
         ∑ x : {b : CyclotomicUnitDelta p // pred b}, f x := by
@@ -125,7 +125,7 @@ theorem frobeniusCosetWeightSum_eq_residueOrbitSum
       (s := (Finset.univ : Finset (CyclotomicUnitDelta p))) (f := f)]
     simp
   let eH : H ≃ {b : CyclotomicUnitDelta p // pred b} :=
-    { toFun := fun h =>
+    { toFun := fun h ↦
         ⟨a * (h : CyclotomicUnitDelta p), by
           dsimp [pred, H]
           have h_eq : a * (a * (h : CyclotomicUnitDelta p))⁻¹ =
@@ -133,7 +133,7 @@ theorem frobeniusCosetWeightSum_eq_residueOrbitSum
             simp [mul_comm]
           rw [h_eq]
           exact (Subgroup.zpowers u).inv_mem h.2⟩
-      invFun := fun b =>
+      invFun := fun b ↦
         ⟨a⁻¹ * (b : CyclotomicUnitDelta p), by
           dsimp [pred, H] at b
           have h_eq : a⁻¹ * (b : CyclotomicUnitDelta p) =
@@ -154,8 +154,8 @@ theorem frobeniusCosetWeightSum_eq_residueOrbitSum
         ∑ h : H, f (a * (h : CyclotomicUnitDelta p)) := by
     symm
     refine Fintype.sum_equiv eH
-      (fun h : H => f (a * (h : CyclotomicUnitDelta p)))
-      (fun x : {b : CyclotomicUnitDelta p // pred b} => f x) ?_
+      (fun h : H ↦ f (a * (h : CyclotomicUnitDelta p)))
+      (fun x : {b : CyclotomicUnitDelta p // pred b} ↦ f x) ?_
     intro h
     rfl
   have hH :
@@ -163,8 +163,8 @@ theorem frobeniusCosetWeightSum_eq_residueOrbitSum
         ∑ i : Fin (orderOf u), f (a * u ^ (i : ℕ)) := by
     symm
     refine Fintype.sum_equiv (finEquivZPowers (isOfFinOrder_of_finite u))
-      (fun i : Fin (orderOf u) => f (a * u ^ (i : ℕ)))
-      (fun h : H => f (a * (h : CyclotomicUnitDelta p))) ?_
+      (fun i : Fin (orderOf u) ↦ f (a * u ^ (i : ℕ)))
+      (fun h : H ↦ f (a * (h : CyclotomicUnitDelta p))) ?_
     intro i
     simp [finEquivZPowers_apply]
   calc
@@ -178,7 +178,7 @@ theorem frobeniusCosetWeightSum_eq_residueOrbitSum
     _ = ∑ h : H, f (a * (h : CyclotomicUnitDelta p)) := hsub
     _ = ∑ i : Fin (orderOf u), f (a * u ^ (i : ℕ)) := hH
     _ = ∑ i ∈ Finset.range (orderOf u), f (a * u ^ i) := by
-      simpa using (Fin.sum_univ_eq_sum_range (fun i => f (a * u ^ i)) (orderOf u))
+      simpa using (Fin.sum_univ_eq_sum_range (fun i ↦ f (a * u ^ i)) (orderOf u))
     _ = ∑ i ∈ Finset.range
           (orderOf (ZMod.unitOfCoprime ℓ hℓp : CyclotomicUnitDelta p)),
         residueOrbit ℓ p (a : ZMod p).val i := by
@@ -194,11 +194,9 @@ variable {k : Type u} [Field k] [Fintype k] [Algebra (ZMod ℓ) k]
 variable {K : Type v} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 variable {R' : Type w} [Field R'] [NumberField R'] [Algebra K R'] [IsScalarTower ℚ K R']
   [IsCyclotomicExtension {p, ℓ} ℚ R']
-variable [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
 
 variable (S : FullTeichDworkSetup ℓ p k K R')
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Helper:** `normalizedFactors` of `stickelbergerIdeal q_K` equals
 the sum `∑_a a.val • {σ_{a⁻¹} q_K}`. -/
 theorem normalizedFactors_stickelbergerIdeal_descentPrime_eq :
@@ -214,8 +212,6 @@ theorem normalizedFactors_stickelbergerIdeal_descentPrime_eq :
   unfold stickelbergerIdeal
   exact S.normalizedFactors_stickelbergerIdeal_finset_eq Finset.univ
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Discharge of `StickelbergerIdealConjugateMultiplicity` under faithfulness.**
 
 Given that the Galois orbit indexing is one-to-one (distinct units give
@@ -239,7 +235,7 @@ theorem stickelbergerIdealConjugateMultiplicity_of_orbitFaithful
     have h_ne : cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹
           S.toConcreteStickelbergerSetup.descentPrime ≠
         cyclotomicGaloisConjugate (p := p) (K := K) b⁻¹
-          S.toConcreteStickelbergerSetup.descentPrime := fun h =>
+          S.toConcreteStickelbergerSetup.descentPrime := fun h ↦
       hba <| (h_faithful h).symm
     rw [if_neg h_ne, Nat.mul_zero]
   · -- a ∈ Finset.univ
@@ -267,7 +263,6 @@ Both produce `StickelbergerOrbitFaithful` for the bundle's
 `stickelbergerIdealConjugateMultiplicity_of_orbitFaithful` and the
 end-to-end `stickelbergerIdealEquality_of_atomic_with_orbitFaithful`. -/
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Helper:** the orbit-indexing map `a ↦ σ_a q_K` is injective when
 the orbit attains the maximum cardinality `p − 1 = #(ZMod p)ˣ`.
 
@@ -279,16 +274,16 @@ theorem cyclotomicGaloisConjugate_descentPrime_injective_of_card_eq
     (h_card :
       (cyclotomicConjugates (p := p) (K := K)
         S.toConcreteStickelbergerSetup.descentPrime).card = p - 1) :
-    Function.Injective (fun a : CyclotomicUnitDelta p =>
+    Function.Injective (fun a : CyclotomicUnitDelta p ↦
       cyclotomicGaloisConjugate (p := p) (K := K) a
         S.toConcreteStickelbergerSetup.descentPrime) := by
   classical
   -- Unfold cyclotomicConjugates: Finset.univ.image (a ↦ σ_a q) has cardinality p - 1.
   have h_image_card :
-      (Finset.univ.image (fun a : CyclotomicUnitDelta p =>
+      (Finset.univ.image (fun a : CyclotomicUnitDelta p ↦
         cyclotomicGaloisConjugate (p := p) (K := K) a
           S.toConcreteStickelbergerSetup.descentPrime)).card = p - 1 := by
-    rw [show (Finset.univ.image (fun a : CyclotomicUnitDelta p =>
+    rw [show (Finset.univ.image (fun a : CyclotomicUnitDelta p ↦
         cyclotomicGaloisConjugate (p := p) (K := K) a
           S.toConcreteStickelbergerSetup.descentPrime)) =
       cyclotomicConjugates (p := p) (K := K)
@@ -301,7 +296,7 @@ theorem cyclotomicGaloisConjugate_descentPrime_injective_of_card_eq
     exact ZMod.card_units p
   -- card image = card Finset.univ.
   have h_card_eq :
-      (Finset.univ.image (fun a : CyclotomicUnitDelta p =>
+      (Finset.univ.image (fun a : CyclotomicUnitDelta p ↦
         cyclotomicGaloisConjugate (p := p) (K := K) a
           S.toConcreteStickelbergerSetup.descentPrime)).card =
         (Finset.univ : Finset (CyclotomicUnitDelta p)).card := by
@@ -309,7 +304,7 @@ theorem cyclotomicGaloisConjugate_descentPrime_injective_of_card_eq
   -- Apply Finset.card_image_iff to get InjOn on Finset.univ.
   have h_injOn :
       Set.InjOn
-        (fun a : CyclotomicUnitDelta p =>
+        (fun a : CyclotomicUnitDelta p ↦
           cyclotomicGaloisConjugate (p := p) (K := K) a
             S.toConcreteStickelbergerSetup.descentPrime)
         (Finset.univ : Finset (CyclotomicUnitDelta p)) :=
@@ -318,7 +313,6 @@ theorem cyclotomicGaloisConjugate_descentPrime_injective_of_card_eq
   intro a b hab
   exact h_injOn (Finset.mem_univ a) (Finset.mem_univ b) hab
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Discharge of `StickelbergerOrbitFaithful` from orbit cardinality.**
 
 Under the hypothesis `card cyclotomicConjugates q_K = p − 1` (the
@@ -344,7 +338,6 @@ theorem stickelbergerOrbitFaithful_of_card_eq
   intro a b hab
   exact h_inv (h_inj hab)
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Discharge of `StickelbergerOrbitFaithful` from totally-split ramification.**
 
 Given that the descent prime `q_K` is **totally split** above the
@@ -359,7 +352,7 @@ theorem stickelbergerOrbitFaithful_of_split
     (he : (S.toConcreteStickelbergerSetup.descentPrime.under ℤ).ramificationIdxIn (𝓞 K) = 1)
     (hf : (S.toConcreteStickelbergerSetup.descentPrime.under ℤ).inertiaDegIn (𝓞 K) = 1) :
     S.StickelbergerOrbitFaithful := by
-  haveI := S.toConcreteStickelbergerSetup.descentPrime_isPrime
+  have := S.toConcreteStickelbergerSetup.descentPrime_isPrime
   have h_card :
       (cyclotomicConjugates (p := p) (K := K)
         S.toConcreteStickelbergerSetup.descentPrime).card = p - 1 :=
@@ -369,7 +362,6 @@ theorem stickelbergerOrbitFaithful_of_split
       S.toConcreteStickelbergerSetup.descentPrime_ne_bot he hf
   exact S.stickelbergerOrbitFaithful_of_card_eq h_card
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Trivial constructor for `StickelbergerOrbitCoverage` from a span
 equality witness.** Given a generator γ ∈ 𝓞 K with the principal-ideal
 equality already established, the coverage predicate holds. This is
@@ -382,16 +374,13 @@ theorem stickelbergerOrbitCoverage_of_span_eq
     S.StickelbergerOrbitCoverage :=
   ⟨γ, hγ_ne, h_eq⟩
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- The Stickelberger ideal at descentPrime is non-bot. -/
 theorem stickelbergerIdeal_descentPrime_ne_bot :
     stickelbergerIdeal (p := p) (K := K)
         S.toConcreteStickelbergerSetup.descentPrime ≠ ⊥ :=
-  haveI := S.toConcreteStickelbergerSetup.descentPrime_isPrime
+  have := S.toConcreteStickelbergerSetup.descentPrime_isPrime
   stickelbergerIdeal_ne_bot S.toConcreteStickelbergerSetup.descentPrime_ne_bot
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Bound on emultiplicity by exponent.**
 
 If `b = σ_{a^{-1}} q_K` (a Galois conjugate of `q_K`), then
@@ -406,7 +395,7 @@ theorem emultiplicity_stickelbergerIdeal_ge_aval
           S.toConcreteStickelbergerSetup.descentPrime)
         (stickelbergerIdeal (p := p) (K := K)
           S.toConcreteStickelbergerSetup.descentPrime) := by
-  haveI := S.toConcreteStickelbergerSetup.descentPrime_isPrime
+  have := S.toConcreteStickelbergerSetup.descentPrime_isPrime
   -- The factor (σ_{a^{-1}} q_K)^a.val divides stickelbergerIdeal.
   have hle :=
     stickelbergerIdeal_le_factor (p := p) (K := K)
@@ -425,7 +414,6 @@ theorem emultiplicity_stickelbergerIdeal_ge_aval
 Under `StickelbergerExactConjugateExponents` and `StickelbergerSupportInOrbit`,
 the principal ideal `(γ)` divides `stickelbergerIdeal q_K`. -/
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Forward direction:** `h_exp ∧ h_sup` implies `(γ) ∣ stickelbergerIdeal q_K`.
 
 The proof uses Dedekind-domain factorization-uniqueness:
@@ -440,7 +428,7 @@ theorem span_dvd_stickelbergerIdeal_of_atomic
       stickelbergerIdeal (p := p) (K := K)
         S.toConcreteStickelbergerSetup.descentPrime := by
   classical
-  haveI := S.toConcreteStickelbergerSetup.descentPrime_isPrime
+  have := S.toConcreteStickelbergerSetup.descentPrime_isPrime
   have hspan_ne : Ideal.span ({γ} : Set (𝓞 K)) ≠ ⊥ := by
     rwa [Ne, Ideal.span_singleton_eq_bot]
   have hstick_ne : stickelbergerIdeal (p := p) (K := K)
@@ -499,7 +487,6 @@ theorem span_dvd_stickelbergerIdeal_of_atomic
 Under `StickelbergerExactConjugateExponents` and the structural
 `StickelbergerIdealConjugateMultiplicity`, the reverse divisibility holds. -/
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Reverse direction:** `h_exp ∧ h_stickMul` implies
 `stickelbergerIdeal q_K ∣ (γ)`. Counts on `stickelbergerIdeal` come from
 `h_stickMul`, counts on `(γ)` come from `h_exp`; for primes outside the
@@ -513,7 +500,7 @@ theorem stickelbergerIdeal_dvd_span_of_exact_atomic
         S.toConcreteStickelbergerSetup.descentPrime ∣
       Ideal.span ({γ} : Set (𝓞 K)) := by
   classical
-  haveI := S.toConcreteStickelbergerSetup.descentPrime_isPrime
+  have := S.toConcreteStickelbergerSetup.descentPrime_isPrime
   have hspan_ne : Ideal.span ({γ} : Set (𝓞 K)) ≠ ⊥ := by
     rwa [Ne, Ideal.span_singleton_eq_bot]
   have hstick_ne : stickelbergerIdeal (p := p) (K := K)
@@ -566,7 +553,6 @@ theorem stickelbergerIdeal_dvd_span_of_exact_atomic
 Combining both directions yields the orbit coverage from the three
 atomic predicates. -/
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Direct span equality from atomic predicates.** Combining both
 divisibility directions (forward via `span_dvd_stickelbergerIdeal_of_atomic`,
 reverse via `stickelbergerIdeal_dvd_span_of_exact_atomic`), the principal
@@ -588,7 +574,6 @@ theorem span_eq_stickelbergerIdeal_of_atomic
   have h_dvd2 := S.stickelbergerIdeal_dvd_span_of_exact_atomic hγ_ne h_exp h_stickMul
   exact associated_iff_eq.mp (associated_of_dvd_dvd h_dvd1 h_dvd2)
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Atomic discharge of `StickelbergerOrbitCoverage`.** Combining both
 divisibility directions (forward via `span_dvd_stickelbergerIdeal_of_atomic`,
 reverse via `stickelbergerIdeal_dvd_span_of_exact_atomic`), the principal
@@ -607,15 +592,13 @@ theorem stickelbergerOrbitCoverage_of_atomic_with_stickMul
     S.StickelbergerOrbitCoverage :=
   ⟨γ, hγ_ne, S.span_eq_stickelbergerIdeal_of_atomic hγ_ne h_exp h_sup h_stickMul⟩
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **End-to-end discharge of `StickelbergerIdealEquality` from atomic
 predicates.** This is the consumer-facing form combining
 `stickelbergerOrbitCoverage_of_atomic_with_stickMul` with
 `stickelbergerIdealEquality_of_orbitCoverage`.
 
 Given a witness γ ∈ 𝓞 K satisfying the atomic predicates, we obtain
-`StickelbergerIdealEquality (S.Q.under (𝓞 K))` — the substantive
-content of c.1, REF-18c2d-main-c.1. -/
+`StickelbergerIdealEquality (S.Q.under (𝓞 K))`. -/
 theorem stickelbergerIdealEquality_of_atomic_with_stickMul
     {γ : 𝓞 K} (hγ_ne : γ ≠ 0)
     (h_exp : S.StickelbergerExactConjugateExponents γ)
@@ -626,7 +609,6 @@ theorem stickelbergerIdealEquality_of_atomic_with_stickMul
   S.stickelbergerIdealEquality_of_orbitCoverage
     (S.stickelbergerOrbitCoverage_of_atomic_with_stickMul hγ_ne h_exp h_sup h_stickMul)
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **End-to-end discharge of `StickelbergerIdealEquality` from atomic
 predicates with orbit faithfulness.** This is the consumer-facing form
 combining `stickelbergerIdealEquality_of_atomic_with_stickMul` with the
@@ -646,8 +628,6 @@ theorem stickelbergerIdealEquality_of_atomic_with_orbitFaithful
   S.stickelbergerIdealEquality_of_atomic_with_stickMul hγ_ne h_exp h_sup
     (S.stickelbergerIdealConjugateMultiplicity_of_orbitFaithful h_faithful)
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **End-to-end discharge of `StickelbergerIdealEquality` under
 totally-split ramification.** Combines `stickelbergerOrbitFaithful_of_split`
 with `stickelbergerIdealEquality_of_atomic_with_orbitFaithful`: under
@@ -691,7 +671,6 @@ sharp orbit-counting / faithfulness data.
 Combined, these two predicates are equivalent to the original
 `StickelbergerExactConjugateExponents`. -/
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- Equivalent reformulation of `StickelbergerExactConjugateExponents γ`
 in terms of `pow_dvd` membership: for each `a ∈ (ZMod p)ˣ`, both
 `(σ_{a⁻¹} q_K)^a.val ∣ (γ)` and `(σ_{a⁻¹} q_K)^(a.val+1) ∤ (γ)`. -/
@@ -707,7 +686,7 @@ theorem stickelbergerExactConjugateExponents_iff (γ : 𝓞 K) :
             ((a : ZMod p).val + 1) ∣
           Ideal.span ({γ} : Set (𝓞 K)) := by
   unfold StickelbergerExactConjugateExponents
-  refine forall_congr' fun a => ?_
+  refine forall_congr' fun a ↦ ?_
   exact emultiplicity_eq_coe
 
 /-- **Atomic predicate: per-conjugate lower bound exponent.**
@@ -734,7 +713,6 @@ def StickelbergerUpperBoundConjugateExponents (γ : 𝓞 K) : Prop :=
         ((a : ZMod p).val + 1) ∣
       Ideal.span ({γ} : Set (𝓞 K))
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Atomic decomposition of `StickelbergerExactConjugateExponents`.**
 The exact-exponent predicate is the conjunction of the lower and upper
 bound atomic predicates. -/
@@ -747,12 +725,10 @@ theorem stickelbergerExactConjugateExponents_iff_lower_and_upper (γ : 𝓞 K) :
     StickelbergerUpperBoundConjugateExponents
   constructor
   · intro h
-    exact ⟨fun a => (h a).1, fun a => (h a).2⟩
+    exact ⟨fun a ↦ (h a).1, fun a ↦ (h a).2⟩
   · rintro ⟨h_lb, h_ub⟩ a
     exact ⟨h_lb a, h_ub a⟩
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Constructor for `StickelbergerExactConjugateExponents` from
 atomic lower+upper bounds.** -/
 theorem stickelbergerExactConjugateExponents_of_lower_and_upper
@@ -769,7 +745,6 @@ The lower bound `(σ_{a⁻¹} q_K)^a.val ∣ (γ)` is equivalent to
 (by `stickelbergerIdeal_le_factor`), it suffices to show
 `(γ) ⊆ stickelbergerIdeal q_K`, i.e., `stickelbergerIdeal q_K ∣ (γ)`. -/
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Lower bound discharge from divisibility by Stickelberger ideal.**
 If `stickelbergerIdeal q_K ∣ (γ)`, then for each `a ∈ (ZMod p)ˣ`, the
 conjugate factor `(σ_{a⁻¹} q_K)^a.val` divides `(γ)`. -/
@@ -787,8 +762,6 @@ theorem stickelbergerLowerBoundConjugateExponents_of_dvd
       S.toConcreteStickelbergerSetup.descentPrime a
   exact dvd_trans (Ideal.dvd_iff_le.mpr hle) h_dvd
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Lower bound discharge from span equality.** If
 `(γ) = stickelbergerIdeal q_K`, then the lower bound holds. -/
 theorem stickelbergerLowerBoundConjugateExponents_of_span_eq
@@ -809,7 +782,6 @@ bound follows from the structural multiplicity computation: the count of
 `a.val`, so the multiplicity is exactly `a.val`, hence the `(a.val+1)`-th
 power does not divide. -/
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Upper bound discharge from span equality + orbit faithfulness.**
 If `(γ) = stickelbergerIdeal q_K` and the cyclotomic Galois orbit acts
 faithfully on `q_K`, then the upper bound holds. -/
@@ -821,14 +793,14 @@ theorem stickelbergerUpperBoundConjugateExponents_of_span_eq_of_faithful
     (h_faithful : S.StickelbergerOrbitFaithful) :
     S.StickelbergerUpperBoundConjugateExponents γ := by
   classical
-  haveI := S.toConcreteStickelbergerSetup.descentPrime_isPrime
+  have := S.toConcreteStickelbergerSetup.descentPrime_isPrime
   intro a
   -- Reduce to emultiplicity via pow_dvd_iff_le_emultiplicity, then
   -- compute emultiplicity = a.val using the count formula.
   have hb_ne : cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹
       S.toConcreteStickelbergerSetup.descentPrime ≠ ⊥ :=
     S.cyclotomicGaloisConjugate_descentPrime_ne_bot a
-  haveI : (cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹
+  have : (cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹
       S.toConcreteStickelbergerSetup.descentPrime).IsPrime :=
     cyclotomicGaloisConjugate_isPrime a⁻¹ _
   have hb_prime : Prime (cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹
@@ -871,7 +843,6 @@ theorem stickelbergerUpperBoundConjugateExponents_of_span_eq_of_faithful
 Combining lower bound + upper bound + orbit faithfulness yields a
 substantive end-to-end discharge of `StickelbergerExactConjugateExponents`. -/
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Substantive discharge: `StickelbergerExactConjugateExponents γ` from
 span equality + orbit faithfulness.**
 
@@ -894,8 +865,6 @@ theorem stickelbergerExactConjugateExponents_of_span_eq_of_faithful
     (S.stickelbergerUpperBoundConjugateExponents_of_span_eq_of_faithful
       h_eq h_faithful)
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Substantive discharge: `StickelbergerExactConjugateExponents γ` from
 span equality + totally-split ramification.**
 
@@ -921,7 +890,6 @@ get that `StickelbergerOrbitCoverage S` together with orbit faithfulness
 produces a γ satisfying all atomic predicates. This closes the
 "existence-from-coverage" direction. -/
 
-omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- **Round-trip:** orbit coverage + orbit faithfulness produce a
 witness γ satisfying `StickelbergerExactConjugateExponents`. -/
 theorem exists_stickelbergerExactConjugateExponents_of_coverage_of_faithful
