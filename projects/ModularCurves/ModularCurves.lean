@@ -44,6 +44,7 @@ import ModularCurves.ForMathlib.HomogeneousEval
 import ModularCurves.ForMathlib.HopfGalois
 import ModularCurves.ForMathlib.HopfGaloisQuotient
 import ModularCurves.ForMathlib.IdealSheafComaximal
+import ModularCurves.ForMathlib.KempfLocalKilling
 import ModularCurves.ForMathlib.MonicQuotientDescent
 import ModularCurves.ForMathlib.OpenImmersionOfSection
 import ModularCurves.ForMathlib.OpensMapFinal
