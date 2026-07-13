@@ -1212,6 +1212,35 @@ theorem imageOpensPullbackIso_hom_snd {W₁ W₂ : E.E.Opens} (hW₁ : G.IsStabl
   rw [← cancel_mono (P.imageOpens hW₂ h2).ι, Category.assoc, ← pullback.condition,
     P.imageOpensPullbackIso_hom_comp hW₁ hW₂ h1 h2, Scheme.homOfLE_ι]
 
+/-! ### Step S5 — the quotient glue data transition maps -/
+
+/-- **The quotient glue-data transition map** on the overlap `P.U ⊓ P'.U`: the window seen in
+`P`'s local quotient, mapped to the same window seen in `P'`'s, by descending the cross-chart
+window comparison (`windowCrossIso`) through `P`'s restricted projection. The descent is
+legitimate by the master condition `cross_desc_condition`. -/
+noncomputable def glueTransition (P' : G.AffineChartPatch)
+    [Module.Free P'.baseRing P'.groupRing] :
+    (P.imageOpens (P.hstable.inf G P'.hstable) inf_le_left).toScheme ⟶
+      (P'.imageOpens (P.hstable.inf G P'.hstable) inf_le_right).toScheme :=
+  P.descRestrictedπ (P.hstable.inf G P'.hstable) inf_le_left
+    ((P.windowCrossIso P' inf_le_left inf_le_right).hom ≫
+      P'.restrictedπ (P.hstable.inf G P'.hstable) inf_le_right)
+    (fun a b hab => P.cross_desc_condition P' (P.hstable.inf G P'.hstable)
+      inf_le_left inf_le_right a b hab)
+
+/-- Defining property of `glueTransition`: it descends the cross-window comparison. -/
+@[reassoc]
+theorem restrictedπ_glueTransition (P' : G.AffineChartPatch)
+    [Module.Free P'.baseRing P'.groupRing] :
+    P.restrictedπ (P.hstable.inf G P'.hstable) inf_le_left ≫ P.glueTransition P'
+      = (P.windowCrossIso P' inf_le_left inf_le_right).hom
+        ≫ P'.restrictedπ (P.hstable.inf G P'.hstable) inf_le_right :=
+  P.restrictedπ_descRestrictedπ (P.hstable.inf G P'.hstable) inf_le_left
+    ((P.windowCrossIso P' inf_le_left inf_le_right).hom
+      ≫ P'.restrictedπ (P.hstable.inf G P'.hstable) inf_le_right)
+    (fun a b hab => P.cross_desc_condition P' (P.hstable.inf G P'.hstable)
+      inf_le_left inf_le_right a b hab)
+
 end Descent
 
 end AffineChartPatch
