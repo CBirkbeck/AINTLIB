@@ -2333,9 +2333,19 @@ adjudicates.
   v10.180-steer-conformant, no rebuild) **with the ω3 `𝔾ₘ`-torsor of bases** (KM 4.6.2's
   "S-basis of ω_{E/S}" = `OmegaBasis`, unique-unit-transitive). T-E12/T-E13 statability
   ingredients ready; T-E14 needs B7 (ω4 functoriality) — next.
-- **[T-OM-B7 ★★]** `omegaCompat` + `omegaBasisMap` + `_id`/`_comp`/`_smul` — **open** ·
-  File C · deps: A7, B2–B6. **= ω4 + the T-E14/T-E12/T-E13 statability unblock; flips
-  the shared engine; REPORT.**
+- **[T-OM-B7 ★★]** `omegaCompat` + `omegaBasisMap` + `_id`/`_comp`/`_smul` —
+  **CORE DONE (2026-07-13, OMEGA; `_comp` in flight)**: `pulledCocycle_res` (pullback of
+  the ω-cocycle = transition units of transported charts, pointwise affine refinement),
+  `omegaCompat` (mixed comparison as `UnitCocycle.Compat`, laws by affine separation),
+  **`omegaBasisMap` SORRY-FREE + axiom-clean** (= ω4: bases transport along every
+  `(Ell/R)`-morphism), `_smul` (the KM 4.6.2 `{±1}`-transport with `negVC_u`), `_id`
+  (via `omegaCompat_id_w`: the 𝟙-comparison IS the cocycle). Supporting: ALL FIVE
+  transport/restriction coherences proven in File B (restrict∘restrict,
+  restrict∘transport, transport∘restrict, transport∘transport, + `transVC_congr`).
+  REMAINING: `omegaBasisMap_comp` (plan in sentinel: `omegaCompat_comp_w` via
+  `unit_ext_of_res_cover` mirroring `pulledCocycle_res`, then per-piece double-cover).
+  T-E12/T-E13 statable NOW (need only ω2+ω3+ω4-map); T-E14's functor-bundle wants
+  `_comp`.
 - **[T-OM-B8]** `negVC` + `negVC_smul` + `negModelHom_eq_negVC` — **open** · File B ·
   standalone (ModelVariableChange/GroupLawConstruction level). ω5's `{±1}`
   identification; full "inversion-EllHom acts by −1 on `OmegaBasis`" deliberately
