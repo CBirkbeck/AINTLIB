@@ -19030,3 +19030,16 @@ Lane-A [YF-⊇]/[YF-CLOPEN] frontier COMPLETE (v10.174). Next STREAM-YN pickup =
   then map-field = `(iff).mpr (asSection_pull ...)`. ~100 LOC, provable-now (T-E4-family machinery is landed).
 - Then: representability half (yFull analogue of `yOne_representableBy`) → structure clauses → MASTER T-E9.
 [YF-ETALE]★ flips when CHARTER-P3B3's T-D8-bridge (`fullLevel_divisor_iff_naive_gen`) lands (hrange consumes it). (STREAM-YN)
+
+## v10.176 — STREAM-YN: lane-B scope CORRECTION (map-field needs transportPoint, not a plain Γ₁ mirror)
+AUDIT FINDING (investigated the machinery): the `gammaFullNaiveProblem.map` field sorry (NaiveProblems:211)
+is NOT a plain mirror of the proven Γ₁ `isNaiveGammaOne_pullSection_iff`. The Γ₁ fibrewise clause is
+EXACT-ORDER (all about `pull P`'s own multiples), discharged via `pull_transportSection_eq_zero_iff`
+(KERNELS only). The IsNaiveFullLevel fibrewise clause is `∀ x, N•x=0 → x ∈ closure{pull P, pull Q}` over
+ARBITRARY fibre points x — so it needs a **fibre-point AddEquiv `transportPoint t : X.curve.Point t ≃+
+(Y.curve.baseChange f.baseHom).Point t`** (mirror `transportSection` at t; additivity via the SAME
+`h64` mon-hom `transportSection_add_of_isMonHom`/`isMonHom_of_pointedIso_records`), then closure-transport
+via `baseChangeEquiv` (AddEquiv, available) + `AddSubgroup`-image. Est. ~150 LOC fresh infra + wiring.
+PICKUP: build `transportPoint` (+ additivity, + `dict_transportPoint_pull`) → `isNaiveFullLevel_pullSection_iff`
+(X↔baseChange, forward uses transportPoint; the asSection_pull← Y half uses baseChangeEquiv, tractable) →
+map-field = `(iff).mpr (asSection_pull)`. (STREAM-YN)
