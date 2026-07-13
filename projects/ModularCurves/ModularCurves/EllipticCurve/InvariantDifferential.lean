@@ -621,7 +621,7 @@ private lemma transportE_restrict_restrict {VP : S.affineOpens}
         projModelBaseChangeOf (sectionsMapLE (𝟙 S)
           (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p))
           P.W (P.restrict (h.trans p)).W (hWcomp.trans hWW.symm) from by
-          rw [projModelBaseChangeOf, projModelBaseChangeOf, ← Category.assoc, eqToHom_trans]]
+          rw [projModelBaseChangeOf, projModelBaseChangeOf, eqToHom_trans_assoc]]
       rw [show projModelBaseChangeOf (sectionsMapLE (𝟙 S)
           (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p))
           P.W (P.restrict (h.trans p)).W (hWcomp.trans hWW.symm) =
@@ -845,7 +845,7 @@ private lemma transportE_restrict_transport {S' : Scheme.{u}} {G' : EllipticCurv
             P.W ((P.transport f t hsq hz hV').restrict h).W hWcomp =
         projModelBaseChangeOf (sectionsMapLE f (h.trans hV'))
           P.W (P.transport f t hsq hz (h.trans hV')).W (hWcomp.trans hWW.symm) from by
-          rw [projModelBaseChangeOf, projModelBaseChangeOf, ← Category.assoc, eqToHom_trans]]
+          rw [projModelBaseChangeOf, projModelBaseChangeOf, eqToHom_trans_assoc]]
       rw [show projModelBaseChangeOf (sectionsMapLE f (h.trans hV'))
           P.W (P.transport f t hsq hz (h.trans hV')).W (hWcomp.trans hWW.symm) =
         projModelBaseChange (sectionsMapLE f (h.trans hV')) P.W from by
@@ -984,7 +984,7 @@ private lemma transportE_transport_restrict {S' : Scheme.{u}} {G' : EllipticCurv
           P.W (P.transport f t hsq hz
             (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE w)).le)).W
           (hWcomp.trans hWW.symm) from by
-          rw [projModelBaseChangeOf, projModelBaseChangeOf, ← Category.assoc, eqToHom_trans]]
+          rw [projModelBaseChangeOf, projModelBaseChangeOf, eqToHom_trans_assoc]]
       rw [show projModelBaseChangeOf
           (sectionsMapLE f (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE w)).le))
           P.W (P.transport f t hsq hz
@@ -1016,6 +1016,253 @@ private lemma transportE_transport_restrict {S' : Scheme.{u}} {G' : EllipticCurv
         transportE f t hsq P (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE w)).le) from rfl]
     exact (transportE_π f t hsq (P.restrict w) hV'').trans
       (transportE_π f t hsq P (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE w)).le)).symm
+
+/-- **(T-OM-B7 coherence, packaged)** Restricting a transported pair agrees with the
+composite transports. -/
+theorem transUnit_transport_pair_restrict {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
+    (f : S' ⟶ S) (t : G'.E ⟶ G.E)
+    (hsq : IsPullback t G'.π G.π f) (hz : G'.zero ≫ t = f ≫ G.zero)
+    {VA VB : S.affineOpens} (A : LocalPresentation G VA) (B : LocalPresentation G VB)
+    {V' V'' : S'.affineOpens} (hA : V'.1 ≤ f ⁻¹ᵁ VA.1) (hB : V'.1 ≤ f ⁻¹ᵁ VB.1)
+    (h : V''.1 ≤ V'.1) :
+    ((A.transport f t hsq hz hA).restrict h).transUnit
+      ((B.transport f t hsq hz hB).restrict h) =
+    (A.transport f t hsq hz (h.trans hA)).transUnit
+      (B.transport f t hsq hz (h.trans hB)) := by
+  refine transUnit_congr _ _ _ _ ?_ ?_ ?_ ?_
+  · show A.W.map _ = (A.W.map _).map _
+    rw [WeierstrassCurve.map_map]
+    congr 1
+    rw [sectionsMapLE_id, sectionsMapLE_comp_resLE f hA h]
+  · show B.W.map _ = (B.W.map _).map _
+    rw [WeierstrassCurve.map_map]
+    congr 1
+    rw [sectionsMapLE_id, sectionsMapLE_comp_resLE f hB h]
+  · exact transportE_restrict_transport f t hsq hz A hA h
+  · exact transportE_restrict_transport f t hsq hz B hB h
+
+/-- **(T-OM-B7 coherence, packaged)** Transporting a restricted pair agrees with the
+composite transports. -/
+theorem transUnit_restrict_pair_transport {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
+    (f : S' ⟶ S) (t : G'.E ⟶ G.E)
+    (hsq : IsPullback t G'.π G.π f) (hz : G'.zero ≫ t = f ≫ G.zero)
+    {VA VB : S.affineOpens} (A : LocalPresentation G VA) (B : LocalPresentation G VB)
+    {W₀ : S.affineOpens} {V'' : S'.affineOpens}
+    (wA : W₀.1 ≤ VA.1) (wB : W₀.1 ≤ VB.1) (hV'' : V''.1 ≤ f ⁻¹ᵁ W₀.1) :
+    ((A.restrict wA).transport f t hsq hz hV'').transUnit
+      ((B.restrict wB).transport f t hsq hz hV'') =
+    (A.transport f t hsq hz
+        (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE wA)).le)).transUnit
+      (B.transport f t hsq hz
+        (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE wB)).le)) := by
+  refine transUnit_congr _ _ _ _ ?_ ?_ ?_ ?_
+  · show A.W.map _ = (A.W.map _).map _
+    rw [WeierstrassCurve.map_map]
+    congr 1
+    rw [sectionsMapLE_id, resLE_comp_sectionsMapLE f wA hV'']
+  · show B.W.map _ = (B.W.map _).map _
+    rw [WeierstrassCurve.map_map]
+    congr 1
+    rw [sectionsMapLE_id, resLE_comp_sectionsMapLE f wB hV'']
+  · exact transportE_transport_restrict f t hsq hz A wA hV''
+  · exact transportE_transport_restrict f t hsq hz B wB hV''
+
+/-- Sections comparisons compose along composable morphisms. -/
+theorem sectionsMapLE_comp {S'' S' : Scheme.{u}} (f : S'' ⟶ S') (g : S' ⟶ S)
+    {V : S.Opens} {V' : S'.Opens} {V'' : S''.Opens}
+    (hV' : V' ≤ g ⁻¹ᵁ V) (hV'' : V'' ≤ f ⁻¹ᵁ V') :
+    (sectionsMapLE f hV'').comp (sectionsMapLE g hV') =
+      sectionsMapLE (f ≫ g)
+        (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le) := by
+  refine RingHom.ext fun r => ?_
+  show (g.appLE V V' hV' ≫ f.appLE V' V'' hV'').hom r = _
+  rw [Scheme.Hom.appLE_comp_appLE]
+  rfl
+
+/-- The induced comparisons compose along composable squares. -/
+private lemma transportTheta_transportTheta {S'' S' : Scheme.{u}}
+    {G'' : EllipticCurveGeom S''} {G' : EllipticCurveGeom S'}
+    (f : S'' ⟶ S') (g : S' ⟶ S) (t : G''.E ⟶ G'.E) (s : G'.E ⟶ G.E)
+    (hsq_f : IsPullback t G''.π G'.π f) (hsq_g : IsPullback s G'.π G.π g)
+    {V : S.affineOpens} {V' : S'.affineOpens} {V'' : S''.affineOpens}
+    (hV' : V'.1 ≤ g ⁻¹ᵁ V.1) (hV'' : V''.1 ≤ f ⁻¹ᵁ V'.1) :
+    transportTheta f t hsq_f hV'' ≫ transportTheta g s hsq_g hV' =
+      transportTheta (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g)
+        (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le) := by
+  unfold transportTheta
+  refine pullback.hom_ext ?_ ?_
+  · rw [Category.assoc, pullback.lift_fst, ← Category.assoc, pullback.lift_fst,
+      pullback.lift_fst, Category.assoc]
+  · rw [Category.assoc, pullback.lift_snd, ← Category.assoc, pullback.lift_snd,
+      pullback.lift_snd, Category.assoc, Scheme.Hom.resLE_comp_resLE]
+
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-OM-B7 coherence)** Transporting a transported chart agrees with transporting
+along the composite square. -/
+private lemma transportE_transport_transport {S'' S' : Scheme.{u}}
+    {G'' : EllipticCurveGeom S''} {G' : EllipticCurveGeom S'}
+    (f : S'' ⟶ S') (g : S' ⟶ S) (t : G''.E ⟶ G'.E) (s : G'.E ⟶ G.E)
+    (hsq_f : IsPullback t G''.π G'.π f) (hsq_g : IsPullback s G'.π G.π g)
+    (hz_f : G''.zero ≫ t = f ≫ G'.zero) (hz_g : G'.zero ≫ s = g ≫ G.zero)
+    {V : S.affineOpens} (P : LocalPresentation G V)
+    {V' : S'.affineOpens} {V'' : S''.affineOpens}
+    (hV' : V'.1 ≤ g ⁻¹ᵁ V.1) (hV'' : V''.1 ≤ f ⁻¹ᵁ V'.1) :
+    ((P.transport g s hsq_g hz_g hV').transport f t hsq_f hz_f hV'').e.hom =
+      (P.transport (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g)
+        (by rw [← Category.assoc, hz_f, Category.assoc, hz_g, ← Category.assoc] :
+          G''.zero ≫ t ≫ s = (f ≫ g) ≫ G.zero)
+        (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le)).e.hom ≫
+        eqToHom (show projModel (P.transport (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g) _
+            (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le)).W =
+            projModel ((P.transport g s hsq_g hz_g hV').transport f t hsq_f hz_f hV'').W by
+          show projModel (P.W.map _) = projModel ((P.W.map _).map _)
+          rw [WeierstrassCurve.map_map]
+          congr 2
+          rw [sectionsMapLE_comp f g hV' hV'']) := by
+  have hzc : G''.zero ≫ t ≫ s = (f ≫ g) ≫ G.zero := by
+    rw [← Category.assoc, hz_f, Category.assoc, hz_g, ← Category.assoc]
+  have hWW : (P.transport (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g) hzc
+      (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le)).W =
+      ((P.transport g s hsq_g hz_g hV').transport f t hsq_f hz_f hV'').W := by
+    show P.W.map _ = (P.W.map _).map _
+    rw [WeierstrassCurve.map_map]
+    congr 1
+    rw [sectionsMapLE_comp f g hV' hV'']
+  have hWcomp : P.W.map (sectionsMapLE (f ≫ g)
+      (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le)) =
+      ((P.transport g s hsq_g hz_g hV').transport f t hsq_f hz_f hV'').W := hWW
+  have hfeq : sectionsMapLE (f ≫ g)
+      (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le) =
+      (sectionsMapLE f hV'').comp (sectionsMapLE g hV') := by
+    rw [sectionsMapLE_comp f g hV' hV'']
+  refine (isPullback_projModelBaseChangeOf (sectionsMapLE (f ≫ g)
+      (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le))
+    P.W ((P.transport g s hsq_g hz_g hV').transport f t hsq_f hz_f hV'').W
+    hWcomp).hom_ext ?_ ?_
+  · have hLHS : ((P.transport g s hsq_g hz_g hV').transport f t hsq_f hz_f hV'').e.hom ≫
+        projModelBaseChangeOf (sectionsMapLE (f ≫ g)
+          (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le))
+          P.W ((P.transport g s hsq_g hz_g hV').transport f t hsq_f hz_f hV'').W hWcomp =
+        (transportTheta f t hsq_f hV'' ≫ transportTheta g s hsq_g hV') ≫ P.e.hom := by
+      rw [projModelBaseChangeOf_congr_f hfeq P.W
+        ((P.transport g s hsq_g hz_g hV').transport f t hsq_f hz_f hV'').W hWcomp
+        (by rw [← hfeq]; exact hWcomp)]
+      rw [projModelBaseChangeOf_comp (sectionsMapLE f hV'') (sectionsMapLE g hV')
+        P.W (P.transport g s hsq_g hz_g hV').W rfl
+        ((P.transport g s hsq_g hz_g hV').transport f t hsq_f hz_f hV'').W rfl]
+      rw [show projModelBaseChangeOf (sectionsMapLE f hV'')
+          (P.transport g s hsq_g hz_g hV').W
+          ((P.transport g s hsq_g hz_g hV').transport f t hsq_f hz_f hV'').W rfl =
+        projModelBaseChange (sectionsMapLE f hV'')
+          (P.transport g s hsq_g hz_g hV').W from by
+          rw [projModelBaseChangeOf]; simp]
+      rw [show projModelBaseChangeOf (sectionsMapLE g hV') P.W
+          (P.transport g s hsq_g hz_g hV').W rfl =
+        projModelBaseChange (sectionsMapLE g hV') P.W from by
+          rw [projModelBaseChangeOf]; simp]
+      rw [show ((P.transport g s hsq_g hz_g hV').transport f t hsq_f hz_f hV'').e =
+        transportE f t hsq_f (P.transport g s hsq_g hz_g hV') hV'' from rfl]
+      rw [← Category.assoc,
+        transportE_baseChange f t hsq_f (P.transport g s hsq_g hz_g hV') hV'']
+      rw [show (P.transport g s hsq_g hz_g hV').e = transportE g s hsq_g P hV' from rfl]
+      rw [Category.assoc, Category.assoc, transportE_baseChange g s hsq_g P hV']
+    have hRHS : ((P.transport (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g)
+        hzc
+        (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le)).e.hom ≫
+        eqToHom (by rw [hWW])) ≫
+        projModelBaseChangeOf (sectionsMapLE (f ≫ g)
+          (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le))
+          P.W ((P.transport g s hsq_g hz_g hV').transport f t hsq_f hz_f hV'').W hWcomp =
+        (transportTheta f t hsq_f hV'' ≫ transportTheta g s hsq_g hV') ≫ P.e.hom := by
+      rw [Category.assoc]
+      rw [show eqToHom (by rw [hWW]) ≫
+          projModelBaseChangeOf (sectionsMapLE (f ≫ g)
+            (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le))
+            P.W ((P.transport g s hsq_g hz_g hV').transport f t hsq_f hz_f hV'').W
+            hWcomp =
+        projModelBaseChangeOf (sectionsMapLE (f ≫ g)
+          (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le))
+          P.W (P.transport (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g)
+            hzc
+            (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le)).W
+          (hWcomp.trans hWW.symm) from by
+          rw [projModelBaseChangeOf, projModelBaseChangeOf, ← Category.assoc,
+            eqToHom_trans]]
+      rw [show projModelBaseChangeOf (sectionsMapLE (f ≫ g)
+          (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le))
+          P.W (P.transport (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g)
+            hzc
+            (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le)).W
+          (hWcomp.trans hWW.symm) =
+        projModelBaseChange (sectionsMapLE (f ≫ g)
+          (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le))
+          P.W from by
+          rw [projModelBaseChangeOf]; simp]
+      rw [show (P.transport (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g)
+          hzc
+          (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le)).e =
+        transportE (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g) P
+          (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le)
+        from rfl]
+      rw [transportE_baseChange (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g) P
+          (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le),
+        ← transportTheta_transportTheta f g t s hsq_f hsq_g hV' hV'']
+    exact hLHS.trans hRHS.symm
+  · rw [Category.assoc,
+      show eqToHom (by rw [hWW] :
+          projModel (P.transport (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g)
+            hzc
+            (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le)).W =
+            projModel ((P.transport g s hsq_g hz_g hV').transport f t hsq_f
+              hz_f hV'').W) ≫
+        projModelπ ((P.transport g s hsq_g hz_g hV').transport f t hsq_f hz_f hV'').W =
+      projModelπ (P.transport (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g)
+        hzc
+        (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le)).W
+      from projModelπ_congr hWW]
+    rw [show ((P.transport g s hsq_g hz_g hV').transport f t hsq_f hz_f hV'').e =
+        transportE f t hsq_f (P.transport g s hsq_g hz_g hV') hV'' from rfl,
+      show (P.transport (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g)
+          hzc
+          (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le)).e =
+        transportE (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g) P
+          (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le)
+        from rfl]
+    exact (transportE_π f t hsq_f (P.transport g s hsq_g hz_g hV') hV'').trans
+      (transportE_π (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g) P
+        (hV''.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hV')).le)).symm
+
+/-- **(T-OM-B7 coherence, packaged)** Transporting a transported pair agrees with the
+composite transports. -/
+theorem transUnit_transport_pair_transport {S'' S' : Scheme.{u}}
+    {G'' : EllipticCurveGeom S''} {G' : EllipticCurveGeom S'}
+    (f : S'' ⟶ S') (g : S' ⟶ S) (t : G''.E ⟶ G'.E) (s : G'.E ⟶ G.E)
+    (hsq_f : IsPullback t G''.π G'.π f) (hsq_g : IsPullback s G'.π G.π g)
+    (hz_f : G''.zero ≫ t = f ≫ G'.zero) (hz_g : G'.zero ≫ s = g ≫ G.zero)
+    {VA VB : S.affineOpens} (A : LocalPresentation G VA) (B : LocalPresentation G VB)
+    {V'A : S'.affineOpens} {V'B : S'.affineOpens} {V'' : S''.affineOpens}
+    (hA : V'A.1 ≤ g ⁻¹ᵁ VA.1) (hB : V'B.1 ≤ g ⁻¹ᵁ VB.1)
+    (hA' : V''.1 ≤ f ⁻¹ᵁ V'A.1) (hB' : V''.1 ≤ f ⁻¹ᵁ V'B.1) :
+    ((A.transport g s hsq_g hz_g hA).transport f t hsq_f hz_f hA').transUnit
+      ((B.transport g s hsq_g hz_g hB).transport f t hsq_f hz_f hB') =
+    (A.transport (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g)
+        (by rw [← Category.assoc, hz_f, Category.assoc, hz_g, ← Category.assoc])
+        (hA'.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hA)).le)).transUnit
+      (B.transport (f ≫ g) (t ≫ s) (hsq_f.paste_horiz hsq_g)
+        (by rw [← Category.assoc, hz_f, Category.assoc, hz_g, ← Category.assoc])
+        (hB'.trans ((TopologicalSpace.Opens.map f.base).map (homOfLE hB)).le)) := by
+  refine transUnit_congr _ _ _ _ ?_ ?_ ?_ ?_
+  · show A.W.map _ = (A.W.map _).map _
+    rw [WeierstrassCurve.map_map]
+    congr 1
+    rw [sectionsMapLE_comp f g hA hA']
+  · show B.W.map _ = (B.W.map _).map _
+    rw [WeierstrassCurve.map_map]
+    congr 1
+    rw [sectionsMapLE_comp f g hB hB']
+  · exact transportE_transport_transport f g t s hsq_f hsq_g hz_f hz_g A hA hA'
+  · exact transportE_transport_transport f g t s hsq_f hsq_g hz_f hz_g B hB hB'
 
 /-- **(T-OM-B7 coherence, packaged)** Restriction of a transported presentation is the
 transported presentation, up to the canonical comparison — the `transUnit`-level form
