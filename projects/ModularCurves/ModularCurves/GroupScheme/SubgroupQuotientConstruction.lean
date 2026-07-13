@@ -198,6 +198,82 @@ theorem spec_includeRight_isoSpec_inv :
   congr 1
   exact (IsIso.inv_eq_of_hom_inv_id P.hU.isoSpec.hom_inv_id).symm
 
+/-- **The group leg of the geometry bridge** (the `fst`-mirror of
+`spec_includeRight_isoSpec_inv`): the `Spec` of the group-side inclusion
+`includeLeftRingHom : A → A ⊗ B`, composed to `G` through the group-patch chart, is the first
+projection in the Künneth identifications. Same five links with the `fst` leaf lemmas
+(`pullbackSpecIso_inv_fst`, `pullbackLeftPullbackSndIso_hom_fst`,
+`pullbackRestrictIsoRestrict_inv_fst`). -/
+theorem spec_includeLeft_group_isoSpec_inv :
+    Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom :
+        P.groupRing →+* P.groupRing ⊗[P.baseRing] P.chartRing)) ≫
+      P.isAffineOpen_groupOpen.isoSpec.inv ≫ P.groupOpen.ι
+      = P.chartSpecIso.inv ≫ pullback.fst G.π (P.U.ι ≫ E.π) := by
+  haveI : IsAffine P.U.toScheme := P.hU
+  haveI : IsAffine P.groupOpen.toScheme := P.isAffineOpen_groupOpen
+  haveI := P.isIso_toSpecΓ_V
+  haveI := P.isIso_toSpecΓ_U
+  haveI := P.isIso_toSpecΓ_groupOpen
+  -- link 1: `pullbackSpecIso.inv ≫ fst = Spec.map includeLeftRingHom`
+  have h1 : (pullbackSpecIso P.baseRing P.groupRing P.chartRing).inv ≫ pullback.fst _ _
+      = Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom :
+          P.groupRing →+* P.groupRing ⊗[P.baseRing] P.chartRing)) :=
+    pullbackSpecIso_inv_fst _ _ _
+  have h1' : (pullbackSpecIso P.baseRing P.groupRing P.chartRing).inv ≫
+      pullback.fst (Spec.map (G.π.appLE P.V P.groupOpen le_rfl))
+        (Spec.map (E.π.appLE P.V P.U P.hover))
+      = Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom :
+          P.groupRing →+* P.groupRing ⊗[P.baseRing] P.chartRing)) := h1
+  -- link 2: the `kunnethToSpec` comparison square, `fst` side
+  have h2 : P.kunnethToSpec.hom ≫
+      pullback.fst (Spec.map (G.π.appLE P.V P.groupOpen le_rfl))
+        (Spec.map (E.π.appLE P.V P.U P.hover))
+      = pullback.fst P.groupToBase P.chartToBase ≫ P.groupOpen.toSpecΓ := by
+    rw [kunnethToSpec]
+    exact pullback.lift_fst _ _ _
+  have h2' : P.kunnethToSpec.inv ≫ pullback.fst P.groupToBase P.chartToBase
+      = pullback.fst (Spec.map (G.π.appLE P.V P.groupOpen le_rfl))
+          (Spec.map (E.π.appLE P.V P.U P.hover)) ≫ inv P.groupOpen.toSpecΓ :=
+    (IsIso.eq_comp_inv _).mpr (by
+      rw [Category.assoc, ← h2, Iso.inv_hom_id_assoc])
+  -- link 3: `pullbackToPatchLevel`'s group leg is the restrict iso
+  have h3 : P.pullbackToPatchLevel.hom ≫ pullback.fst P.groupToBase P.chartToBase
+      = pullback.fst (pullback.snd G.π P.V.ι) P.chartToBase ≫
+        (pullbackRestrictIsoRestrict G.π P.V).hom := by
+    simp only [pullbackToPatchLevel, asIso_hom, pullback.lift_fst]
+  have h3' : P.pullbackToPatchLevel.inv ≫ pullback.fst (pullback.snd G.π P.V.ι) P.chartToBase
+      = pullback.fst P.groupToBase P.chartToBase ≫
+        (pullbackRestrictIsoRestrict G.π P.V).inv :=
+    (Iso.eq_comp_inv (pullbackRestrictIsoRestrict G.π P.V)).mpr (by
+      rw [Category.assoc, ← h3, Iso.inv_hom_id_assoc])
+  -- link 4: `pullbackToVLevel.inv ≫ fst = fst ≫ fst` (congrHom identity legs; pasting iso)
+  have h4 : P.pullbackToVLevel.inv ≫ pullback.fst G.π (P.U.ι ≫ E.π)
+      = pullback.fst (pullback.snd G.π P.V.ι) P.chartToBase ≫ pullback.fst G.π P.V.ι := by
+    rw [pullbackToVLevel, Iso.trans_inv, Iso.symm_inv, Iso.symm_inv, Category.assoc]
+    have hc : (pullback.congrHom rfl P.chartToBase_comp_ι).hom ≫
+        pullback.fst G.π (P.U.ι ≫ E.π) = pullback.fst G.π (P.chartToBase ≫ P.V.ι) := by
+      simp only [pullback.congrHom, asIso_hom, pullback.lift_fst, Category.comp_id]
+    rw [hc]
+    exact pullbackLeftPullbackSndIso_hom_fst G.π P.V.ι P.chartToBase
+  -- link 5: the restrict iso feeds the group-patch inclusion
+  have h5 : (pullbackRestrictIsoRestrict G.π P.V).inv ≫ pullback.fst G.π P.V.ι
+      = P.groupOpen.ι :=
+    pullbackRestrictIsoRestrict_inv_fst G.π P.V
+  -- assembly
+  rw [chartSpecIso, Iso.trans_inv, Category.assoc, kunnethSpecIso, Iso.trans_inv,
+    chartKunnethSchemeIso, Iso.trans_inv, Category.assoc, Category.assoc]
+  rw [h4, ← Category.assoc (P.pullbackToPatchLevel.inv), h3', Category.assoc, h5,
+    ← Category.assoc (P.kunnethToSpec.inv), h2']
+  have hInv : P.isAffineOpen_groupOpen.isoSpec.inv = inv P.groupOpen.toSpecΓ :=
+    (IsIso.inv_eq_of_hom_inv_id P.isAffineOpen_groupOpen.isoSpec.hom_inv_id).symm
+  exact (congrArg (fun m => Spec.map (CommRingCat.ofHom
+        (Algebra.TensorProduct.includeLeftRingHom :
+          P.groupRing →+* P.groupRing ⊗[P.baseRing] P.chartRing)) ≫ m ≫ P.groupOpen.ι)
+      hInv).trans <|
+    (Category.assoc _ _ _).symm.trans <|
+      (congrArg (fun m => (m ≫ inv P.groupOpen.toSpecΓ) ≫ P.groupOpen.ι) h1'.symm).trans <|
+        congrArg (· ≫ P.groupOpen.ι) (Category.assoc _ _ _)
+
 /-- **`[HG-C4b]` — invariant morphisms coequalize the chart pair.** For a `G`-invariant
 `f : E ⟶ Y`, the chart restriction `U.ι ≫ f` satisfies the algebraic coequalization
 hypothesis of the per-patch universal property: restrict `IsInvariant.coequalizes` to the
