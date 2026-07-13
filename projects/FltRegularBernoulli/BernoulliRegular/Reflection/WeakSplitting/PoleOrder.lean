@@ -6,20 +6,20 @@ public import BernoulliRegular.Reflection.WeakSplitting.PartialZeta
 /-!
 # Pole-order assembly: forcing [L:K] = 1
 
-From the global Kummer comparison identity (REF-21c2c)
+From the global Kummer comparison identity
 $$
 \zeta_L(s) \cdot \prod_{Q \in F_L}(1 - N(Q)^{-s})
   = \Bigl(\zeta_K(s) \cdot \prod_{P \in S}(1 - N(P)^{-s})\Bigr)^{[L:K]}
 $$
 together with the simple-pole behaviour at `s = 1` of each side
-(REF-21a), comparing pole orders forces `[L:K] = 1`.
+comparing pole orders forces `[L:K] = 1`.
 
 The argument: the LHS has a simple pole at `s = 1` (from `ζ_L`), but the
 RHS, being the `[L:K]`-th power of a function with a simple pole, has a
 pole of order `[L:K]`. For these to be equal, `[L:K] = 1`.
 
-This file is REF-21d. It uses the global identity from REF-21c2c, plus
-REF-21a's pole-preservation results.
+This file uses the global identity together with the pole-preservation
+results.
 
 ## Main results
 
@@ -49,23 +49,23 @@ from `PartialZeta.lean`, but for a `Finset (Ideal (𝓞 L))` instead of a
 -/
 theorem tendsto_sub_one_mul_unfolded_partial (F : Finset (Ideal (𝓞 L)))
     (hF : ∀ Q ∈ F, Q.IsPrime ∧ Q ≠ ⊥) :
-    Tendsto (fun s : ℝ => (s - 1) *
+    Tendsto (fun s : ℝ ↦ (s - 1) *
         (dedekindZeta L s * ∏ Q ∈ F, ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-(s : ℂ)))))
       (𝓝[>] 1)
       (𝓝 ((dedekindZeta_residue L : ℂ) *
         ∏ Q ∈ F, ((1 : ℂ) - (Ideal.absNorm Q : ℂ)⁻¹))) := by
-  have h₂ : Tendsto (fun s : ℝ =>
+  have h₂ : Tendsto (fun s : ℝ ↦
       ∏ Q ∈ F, ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-(s : ℂ))))
       (𝓝[>] 1)
       (𝓝 (∏ Q ∈ F, ((1 : ℂ) - (Ideal.absNorm Q : ℂ)⁻¹))) := by
     refine Tendsto.mono_left ?_ nhdsWithin_le_nhds
-    refine tendsto_finsetProd F fun Q hQ => ?_
+    refine tendsto_finsetProd F fun Q hQ ↦ ?_
     have hQ_ne : Q ≠ ⊥ := (hF Q hQ).2
     have hN_ne : (Ideal.absNorm Q : ℂ) ≠ 0 := by
-      haveI : NeZero Q := ⟨hQ_ne⟩
+      have : NeZero Q := ⟨hQ_ne⟩
       exact_mod_cast (Ideal.absNorm_ne_zero_iff_mem_nonZeroDivisors).mpr
         (mem_nonZeroDivisors_of_ne_zero hQ_ne)
-    have h_sub : Continuous (fun s : ℝ =>
+    have h_sub : Continuous (fun s : ℝ ↦
         (1 : ℂ) - ((Ideal.absNorm Q : ℂ)) ^ (-((s : ℂ)))) :=
       continuous_const.sub (Complex.continuous_ofReal.neg.const_cpow (.inl hN_ne))
     convert h_sub.tendsto 1 using 2
@@ -77,7 +77,7 @@ theorem tendsto_sub_one_mul_unfolded_partial (F : Finset (Ideal (𝓞 L)))
 variable (K : Type*) [Field K] [NumberField K] [Algebra K L]
 
 /--
-**REF-21d: The pole-order argument forcing `[L:K] = 1`.**
+**The pole-order argument forcing `[L:K] = 1`.**
 
 If we have the global Kummer comparison identity
 $$
@@ -110,14 +110,14 @@ theorem finrank_eq_one_of_global_identity
   have hn_ne : n ≠ 0 := by omega
   have hn_sub_pos : 0 < n - 1 := by omega
   have hL_to_zero :
-      Tendsto (fun s : ℝ => ((s : ℂ) - 1) ^ n *
+      Tendsto (fun s : ℝ ↦ ((s : ℂ) - 1) ^ n *
           (dedekindZeta L (s : ℂ) * ∏ Q ∈ F_L,
             ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-(s : ℂ)))))
         (𝓝[>] 1) (𝓝 0) := by
-    have h_factor : (fun s : ℝ => ((s : ℂ) - 1) ^ n *
+    have h_factor : (fun s : ℝ ↦ ((s : ℂ) - 1) ^ n *
           (dedekindZeta L (s : ℂ) * ∏ Q ∈ F_L,
             ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-(s : ℂ))))) =
-        (fun s : ℝ => ((s : ℂ) - 1) ^ (n - 1) *
+        (fun s : ℝ ↦ ((s : ℂ) - 1) ^ (n - 1) *
           (((s : ℂ) - 1) * (dedekindZeta L (s : ℂ) * ∏ Q ∈ F_L,
             ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-(s : ℂ)))))) := by
       ext s
@@ -125,32 +125,32 @@ theorem finrank_eq_one_of_global_identity
         congr 1; omega, pow_succ]
       ring
     rw [h_factor]
-    have h_first : Tendsto (fun s : ℝ => ((s : ℂ) - 1) ^ (n - 1)) (𝓝[>] 1) (𝓝 0) := by
-      have h_real : Tendsto (fun s : ℝ => ((s : ℂ) - 1)) (𝓝[>] 1) (𝓝 0) := by
+    have h_first : Tendsto (fun s : ℝ ↦ ((s : ℂ) - 1) ^ (n - 1)) (𝓝[>] 1) (𝓝 0) := by
+      have h_real : Tendsto (fun s : ℝ ↦ ((s : ℂ) - 1)) (𝓝[>] 1) (𝓝 0) := by
         simpa using ((Complex.continuous_ofReal.tendsto 1).mono_left
           nhdsWithin_le_nhds).sub_const (1 : ℂ)
       simpa [zero_pow hn_sub_pos.ne'] using h_real.pow (n - 1)
     simpa using h_first.mul (tendsto_sub_one_mul_unfolded_partial L F_L hF_L)
   have hK_to_pow :
-      Tendsto (fun s : ℝ => ((s : ℂ) - 1) ^ n *
+      Tendsto (fun s : ℝ ↦ ((s : ℂ) - 1) ^ n *
           (dedekindZeta K (s : ℂ) * ∏ P ∈ S,
             ((1 : ℂ) - (Ideal.absNorm P : ℂ) ^ (-(s : ℂ)))) ^ n)
         (𝓝[>] 1)
         (𝓝 (((dedekindZeta_residue K : ℂ) *
           ∏ P ∈ S, ((1 : ℂ) - (Ideal.absNorm P : ℂ)⁻¹)) ^ n)) := by
-    have h_eq : (fun s : ℝ => ((s : ℂ) - 1) ^ n *
+    have h_eq : (fun s : ℝ ↦ ((s : ℂ) - 1) ^ n *
           (dedekindZeta K (s : ℂ) * ∏ P ∈ S,
             ((1 : ℂ) - (Ideal.absNorm P : ℂ) ^ (-(s : ℂ)))) ^ n) =
-        (fun s : ℝ => (((s : ℂ) - 1) *
+        (fun s : ℝ ↦ (((s : ℂ) - 1) *
           (dedekindZeta K (s : ℂ) * ∏ P ∈ S,
             ((1 : ℂ) - (Ideal.absNorm P : ℂ) ^ (-(s : ℂ))))) ^ n) := by
       ext s; rw [← mul_pow]
     rw [h_eq]
     exact (tendsto_sub_one_mul_unfolded_partial K S hS).pow n
-  have h_funeq : (fun s : ℝ => ((s : ℂ) - 1) ^ n *
+  have h_funeq : (fun s : ℝ ↦ ((s : ℂ) - 1) ^ n *
         (dedekindZeta L (s : ℂ) * ∏ Q ∈ F_L,
           ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-(s : ℂ))))) =ᶠ[𝓝[>] 1]
-      (fun s : ℝ => ((s : ℂ) - 1) ^ n *
+      (fun s : ℝ ↦ ((s : ℂ) - 1) ^ n *
         (dedekindZeta K (s : ℂ) * ∏ P ∈ S,
           ((1 : ℂ) - (Ideal.absNorm P : ℂ) ^ (-(s : ℂ)))) ^ n) := by
     refine eventually_nhdsWithin_of_forall ?_
@@ -171,7 +171,7 @@ theorem finrank_eq_one_of_global_identity
       ∏ P ∈ S, ((1 : ℂ) - (Ideal.absNorm P : ℂ)⁻¹)) ≠ 0 := by
     refine mul_ne_zero ?_ ?_
     · exact_mod_cast (dedekindZeta_residue_pos K).ne'
-    · refine Finset.prod_ne_zero_iff.mpr fun P hP => ?_
+    · refine Finset.prod_ne_zero_iff.mpr fun P hP ↦ ?_
       intro h_zero
       have hN_eq_one : (Ideal.absNorm P : ℂ)⁻¹ = 1 := by linear_combination -h_zero
       have hN_eq_one' : (Ideal.absNorm P : ℂ) = 1 := by
