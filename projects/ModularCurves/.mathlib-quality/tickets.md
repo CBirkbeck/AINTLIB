@@ -19310,3 +19310,20 @@ nonzero combo≠0]; (B) the ambient connection — w=levelSpaceΓι.base(y), the
 pt via levelSpaceΓι, the levelSpaceΓ-taut-combo at y = ambient combPoint at w; w∈pointVanishSet(combPoint c d)
 ⟹ combPoint=0 at w's geom pt [agreementι_comp_eq]; contradiction with (A). Deep residue/restriction/geom-pt
 wiring ~80-120 lines. Plus the ⟸ direction (full-set/T-D2 route, missing infra) for the FULL iff. (STREAM-YN)
+
+### v10.185 — [YF-⊆] piece B SUBTLETY RESOLVED + tool-mapped
+The residue-field subtlety of piece B is cracked: since `levelSpaceΓι` is a CLOSED IMMERSION,
+`κ(w) = κ(y)` (the residue field at the image point equals that at the preimage — the residue-field
+map is an iso), so the geometric point at `w` FACTORS through `levelSpaceΓ`. This lets `taut_generates`
+(generation at levelSpaceΓ geom pts) and `w ∈ pointVanishSet` (vanishing) be evaluated at the SAME
+geometric point for the contradiction. Tools:
+- `Hom.SpecMap_residueFieldMap_fromSpecResidueField` (mathlib ResidueField:261): `Spec.map(f.
+  residueFieldMap y) ≫ Y.fromSpecResidueField (f y) = X.fromSpecResidueField y ≫ f` — the factoring.
+- `IsClosedImmersion.lift` + `Hom.range_subset_ker_support` — alternative via `ker ≤ ker`.
+- residueFieldMap iso for closed immersion (κ(w)=κ(y)).
+
+Piece B assembly (~60-100 lines, fiddly but tool-mapped): (i) factor the geom pt at w through
+levelSpaceΓ; (ii) taut_generates ⟹ closure=⊤ (naiveClosure_iff_torsion_filled) ⟹ combPoint(c,d)≠0
+(comboFamily_ne_zero_of_closure_top, BUILT); (iii) w∈pointVanishSet ⟹ combPoint=0 at that geom pt
+(reverse of mem_pointVanishSet_of_residue_eq / agreementι_comp_eq); (iv) contradiction. Then [YF-⊆]
+closes → [YF-ETALE]★. **22 lemmas + subtlety resolved this session.** (STREAM-YN)
