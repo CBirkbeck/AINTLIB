@@ -121,7 +121,7 @@ theorem phiPrimeGenDescent_conj_mul_self_eq_ell_pow_of_algebraMap_conj_eq_inv_ga
         (phiPrimeGenDescent S ha₁ ha₂ h_ne_zero) *
         phiPrimeGenDescent S ha₁ ha₂ h_ne_zero =
       (ℓ : 𝓞 K) ^ (S.toConcreteStickelbergerSetup.f * p) := by
-  haveI : FaithfulSMul (𝓞 K) (𝓞 R') :=
+  have : FaithfulSMul (𝓞 K) (𝓞 R') :=
     S.toConcreteStickelbergerSetup.faithfulSMul_OK_OR'_of_cyclotomic
   apply FaithfulSMul.algebraMap_injective (𝓞 K) (𝓞 R')
   calc
