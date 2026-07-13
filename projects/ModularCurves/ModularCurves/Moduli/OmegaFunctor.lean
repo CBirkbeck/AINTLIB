@@ -207,4 +207,77 @@ theorem omegaBasisMap_smul {X X' : EllObj R} (φ : X' ⟶ X) (g : Γ(X.base, ⊤
   rw [Scheme.resLE_appLE]
   rfl
 
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- The mixed comparison at the identity is the transition cocycle itself. -/
+private theorem omegaCompat_id_w (X : EllObj R)
+    (i' i : X.curve.toEllipticCurveGeom.atlas.ι) :
+    (omegaCompat (𝟙 X)).w i' i =
+      Scheme.resUnit (le_inf inf_le_left inf_le_right)
+        ((omegaCocycle X.curve.toEllipticCurveGeom).u i' i) := by
+  refine Scheme.unit_ext_of_affine_res X.base (fun V hV => ?_)
+  rw [show (omegaCompat (𝟙 X)).w i' i = (omegaCompatGlue (𝟙 X) i' i).1 from rfl,
+    (omegaCompatGlue (𝟙 X) i' i).2 V hV]
+  refine Units.ext ?_
+  have hval := congrArg Units.val (omegaCocycle_res X.curve.toEllipticCurveGeom i' i V
+    (hV.trans (le_inf inf_le_left inf_le_right)))
+  simp only [Scheme.resUnit_val, Scheme.resLE_resLE] at hval ⊢
+  erw [Scheme.resLE_resLE]
+  exact hval.symm
+
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-OM-B7)** The identity morphism induces the identity on `ω`-bases: the mixed
+comparison at `𝟙 X` is the transition cocycle itself, so the glued transport is
+compatibility. -/
+theorem omegaBasisMap_id (X : EllObj R) (b : OmegaBasis X.curve.toEllipticCurveGeom) :
+    omegaBasisMap (𝟙 X) b = b := by
+  refine Subtype.ext (Subtype.ext (funext fun i' => ?_))
+  -- separation over the chart cover of `⊤ ⊓ U i'`
+  refine TopCat.Sheaf.eq_of_locally_eq' X.base.sheaf
+    (fun j : X.curve.toEllipticCurveGeom.atlas.ι =>
+      (⊤ : X.base.Opens) ⊓ (omegaCocycle X.curve.toEllipticCurveGeom).U i' ⊓
+        ((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle
+          (𝟙 X : X ⟶ X).baseHom).U j)
+    ((⊤ : X.base.Opens) ⊓ (omegaCocycle X.curve.toEllipticCurveGeom).U i')
+    (fun j => homOfLE inf_le_left) (by
+      intro x hx
+      obtain ⟨j, hxj⟩ := X.curve.toEllipticCurveGeom.atlas.covers x
+      exact Opens.mem_iSup.mpr ⟨j, hx, hxj⟩) _ _ (fun j => ?_)
+  -- the transported component's local description
+  show Scheme.resLE inf_le_left
+      (((omegaCompat (𝟙 X)).transportFun _).1 i') = Scheme.resLE inf_le_left (b.1.1 i')
+  rw [(omegaCompat (𝟙 X)).transportFun_res _ i' j]
+  -- rewrite the comparison as the cocycle and the pulled component as a restriction
+  rw [show ((omegaCompat (𝟙 X)).w i' j) =
+    Scheme.resUnit (le_inf inf_le_left inf_le_right)
+      ((omegaCocycle X.curve.toEllipticCurveGeom).u i' j) from omegaCompat_id_w X i' j]
+  -- both sides are now restriction-chains of `u i' j · b j` vs `b i'`; conclude by
+  -- the compatibility of `b`
+  have hb := congrArg (⇑(Scheme.resLE (X := X.base)
+    (show (⊤ : X.base.Opens) ⊓ (omegaCocycle X.curve.toEllipticCurveGeom).U i' ⊓
+        ((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle
+          (𝟙 X : X ⟶ X).baseHom).U j ≤
+      (⊤ : X.base.Opens) ⊓ (omegaCocycle X.curve.toEllipticCurveGeom).U i' ⊓
+        (omegaCocycle X.curve.toEllipticCurveGeom).U j from le_rfl))) (b.1.2 i' j)
+  simp only [Scheme.resUnit_val, Scheme.resLE_resLE, map_mul] at hb ⊢
+  rw [hb]
+  congr 1
+  · erw [Scheme.resLE_resLE]
+  -- the pulled `j`-component is the restriction of `b j`
+  rw [show ((((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle
+      (𝟙 X : X ⟶ X).baseHom).sectionsMap
+      (show (⊤ : X.base.Opens) ≤ (𝟙 X : X ⟶ X).baseHom ⁻¹ᵁ
+        (⊤ : X.base.Opens) from fun x _ => trivial)
+      ((omegaCocycle X.curve.toEllipticCurveGeom).sectionsPullback
+        (𝟙 X : X ⟶ X).baseHom b.1)).1 j) =
+    Scheme.resLE (inf_le_inf_right _ (show (⊤ : X.base.Opens) ≤ ⊤ from le_rfl))
+      (sectionsMapLE (𝟙 X.base)
+        (show ((⊤ : X.base.Opens) ⊓ (omegaCocycle X.curve.toEllipticCurveGeom).U j : X.base.Opens) ≤
+          (𝟙 X.base : X.base ⟶ X.base) ⁻¹ᵁ ((⊤ : X.base.Opens) ⊓
+            (omegaCocycle X.curve.toEllipticCurveGeom).U j) from fun _ hy => hy)
+        (b.1.1 j)) from rfl,
+    sectionsMapLE_id]
+  exact (Scheme.resLE_resLE _ _ _).trans (Scheme.resLE_resLE _ _ _)
+
 end ModularCurves

@@ -930,7 +930,7 @@ noncomputable def transportFun (b' : c'.sections V) : c.sections V :=
     simp only [map_mul, resUnit_val, resLE_resLE] at hsi hsi' ⊢
     rw [hsi, hsi', ← mul_assoc, κ.left_val i i' j (by order)]⟩
 
-@[simp] private theorem transportFun_res (b' : c'.sections V) (i : c.ι) (j : c'.ι) :
+@[simp] theorem transportFun_res (b' : c'.sections V) (i : c.ι) (j : c'.ι) :
     resLE (show V ⊓ c.U i ⊓ c'.U j ≤ V ⊓ c.U i by order) ((κ.transportFun b').1 i) =
       resLE (show V ⊓ c.U i ⊓ c'.U j ≤ c.U i ⊓ c'.U j by order) (κ.w i j).val *
       resLE (show V ⊓ c.U i ⊓ c'.U j ≤ V ⊓ c'.U j by order) (b'.1 j) :=
