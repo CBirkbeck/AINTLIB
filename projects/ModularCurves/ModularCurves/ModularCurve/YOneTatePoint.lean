@@ -167,6 +167,112 @@ theorem factors_yOne_iff_exists_range {T : Scheme.{u}} (t : T ⟶ tateBase R) :
       ((yOneOpens R N).ι ≫ (tateUniversal R).killedLocusπ (tatePoint R) N) = t
     rw [← Category.assoc, IsOpenImmersion.lift_fac]; exact hg
 
+/-- **(Y1-D1 forward)** If `t : T ⟶ 𝒴` factors through the closed `Y_N` by a map whose image
+lands in the open `yOneSet`, then the pulled-back marked point is a naive `Γ₁(N)` structure:
+the global kill comes from `killedLocus_spec`; fibrewise, any proper multiple `d • P = 0` with
+`d ∣ N` would put the fibre in a removed `Y_d`, contradicting the range condition (or is ruled
+out by `tatePoint_nowhereGeomOrderLEThree` when `d ≤ 3`). -/
+private theorem factors_yOne_iff_forward [NeZero N] {T : Scheme.{u}} (t : T ⟶ tateBase R)
+    (h : ∃ g : T ⟶ (tateUniversal R).killedLocus (tatePoint R) N,
+        g ≫ (tateUniversal R).killedLocusπ (tatePoint R) N = t ∧
+          Set.range g.base ⊆ yOneSet R N) :
+    ((tateUniversal R).baseChange t).IsNaiveGammaOne N
+      (EllipticCurve.Point.asSection (tateUniversal R) t
+        (EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R))) := by
+  obtain ⟨g, hg, hrange⟩ := h
+  have hkill : (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R) = 0 :=
+    ((tateUniversal R).killedLocus_spec (tatePoint R) N t).mp ⟨g, hg⟩
+  have hc1 : (N : ℤ) • EllipticCurve.Point.asSection (tateUniversal R) t
+      (EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R)) = 0 :=
+    ((tateUniversal R).zsmul_asSection_pull_eq_zero_iff (tatePoint R) t (N : ℤ)).mpr hkill
+  refine ⟨hc1, fun k _ _ τ ↦ ⟨?_, ?_⟩⟩
+  · -- clause 2a: the fibrewise `N`-kill is the section `N`-kill pulled along `τ`
+    rw [← EllipticCurve.Point.pull_zsmul, hc1, EllipticCurve.Point.pull_zero]
+  · -- clause 2b: no proper multiple `a < N` kills the fibre
+    intro a ha0 haN hbad
+    rw [(tateUniversal R).zsmul_pull_baseChange_asSection_iff (tatePoint R) t τ] at hbad
+    have hkillτ : (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) (τ ≫ t) (tatePoint R)
+        = 0 := by
+      rw [(tateUniversal R).smul_eq_zero_iff_comp_mulByHom (τ ≫ t) N]
+      have hk := ((tateUniversal R).smul_eq_zero_iff_comp_mulByHom t N
+        (EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R))).mp hkill
+      have h1 : (EllipticCurve.Point.pull (tateUniversal R) (τ ≫ t) (tatePoint R)).1
+          = τ ≫ (EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R)).1 := by
+        show (τ ≫ t) ≫ (tatePoint R).1 = τ ≫ t ≫ (tatePoint R).1
+        rw [Category.assoc]
+      rw [h1, Category.assoc, hk, Category.assoc]
+    obtain ⟨d, hdmem, hd0, hdkill⟩ :=
+      exists_properDivisor_smul_eq_zero hkillτ ha0 haN hbad
+    rw [Nat.mem_properDivisors] at hdmem
+    by_cases hd3 : d ≤ 3
+    · exact tatePoint_nowhereGeomOrderLEThree R k (τ ≫ t) d hd0 hd3 hdkill
+    · push Not at hd3
+      set cp := IsLocalRing.closedPoint k with hcp
+      have hxres : (d : ℤ) • EllipticCurve.Point.pull (tateUniversal R)
+          ((tateBase R).fromSpecResidueField ((τ ≫ t).base cp)) (tatePoint R) = 0 :=
+        ((tateUniversal R).pull_smul_eq_zero_iff_residue (tatePoint R) (d : ℤ) (τ ≫ t)
+          ((τ ≫ t).base cp) ⟨cp, rfl⟩).mp hdkill
+      have hxmem : (τ ≫ t).base cp ∈
+          Set.range ((tateUniversal R).killedLocusπ (tatePoint R) d).base :=
+        ((tateUniversal R).mem_killedLocus_range_iff (tatePoint R) d ((τ ≫ t).base cp)).mpr hxres
+      have hy : g.base (τ.base cp) ∈ yOneSet R N := hrange ⟨τ.base cp, rfl⟩
+      rw [yOneSet, Set.mem_compl_iff, Set.mem_iUnion₂] at hy
+      push Not at hy
+      refine hy d (by rw [Finset.mem_filter, Nat.mem_properDivisors]
+                      exact ⟨⟨hdmem.1, hdmem.2⟩, hd3⟩) ?_
+      have hgt : ((tateUniversal R).killedLocusπ (tatePoint R) N).base (g.base (τ.base cp))
+          = (τ ≫ t).base cp := by
+        rw [← Scheme.Hom.comp_apply, hg, Scheme.Hom.comp_apply]
+      rw [Set.mem_preimage, hgt]
+      exact hxmem
+
+/-- **(Y1-D1 backward)** If the pulled-back marked point is a naive `Γ₁(N)` structure, then
+`t` factors through `Y_N` with image in `yOneSet`: the global kill gives the factoring `g`
+(`killedLocus_spec`); and if any fibre landed in a removed `Y_d`, the geometric point (over an
+algebraic closure of the residue field) would kill a proper multiple `d • P`, contradicting the
+exact-order clause `hfib`. -/
+private theorem factors_yOne_iff_backward [NeZero N] {T : Scheme.{u}} (t : T ⟶ tateBase R)
+    (h : ((tateUniversal R).baseChange t).IsNaiveGammaOne N
+      (EllipticCurve.Point.asSection (tateUniversal R) t
+        (EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R)))) :
+    ∃ g : T ⟶ (tateUniversal R).killedLocus (tatePoint R) N,
+      g ≫ (tateUniversal R).killedLocusπ (tatePoint R) N = t ∧
+        Set.range g.base ⊆ yOneSet R N := by
+  obtain ⟨hc1, hfib⟩ := h
+  have hkill : (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R) = 0 :=
+    ((tateUniversal R).zsmul_asSection_pull_eq_zero_iff (tatePoint R) t (N : ℤ)).mp hc1
+  obtain ⟨g, hg⟩ := ((tateUniversal R).killedLocus_spec (tatePoint R) N t).mpr hkill
+  refine ⟨g, hg, ?_⟩
+  rintro _ ⟨x, rfl⟩
+  rw [yOneSet, Set.mem_compl_iff, Set.mem_iUnion₂]
+  rintro ⟨d, hd_filter, hmem⟩
+  rw [Set.mem_preimage] at hmem
+  rw [Finset.mem_filter, Nat.mem_properDivisors] at hd_filter
+  obtain ⟨⟨hdN, hdlt⟩, hd4⟩ := hd_filter
+  have hgtx : ((tateUniversal R).killedLocusπ (tatePoint R) N).base (g.base x) = t.base x := by
+    rw [← Scheme.Hom.comp_apply, hg]
+  rw [hgtx] at hmem
+  have hres : (d : ℤ) • EllipticCurve.Point.pull (tateUniversal R)
+      ((tateBase R).fromSpecResidueField (t.base x)) (tatePoint R) = 0 :=
+    ((tateUniversal R).mem_killedLocus_range_iff (tatePoint R) d (t.base x)).mp hmem
+  set k := AlgebraicClosure (T.residueField x) with hk
+  have : Subsingleton (Spec (CommRingCat.of k)) :=
+    inferInstanceAs (Subsingleton (PrimeSpectrum k))
+  set τ : Spec (CommRingCat.of k) ⟶ T :=
+    Spec.map (CommRingCat.ofHom (algebraMap (T.residueField x) k)) ≫ T.fromSpecResidueField x
+    with hτ
+  have himg : (τ ≫ t).base (IsLocalRing.closedPoint k) = t.base x := by
+    rw [Scheme.Hom.comp_apply]
+    congr 1
+    rw [hτ, Scheme.Hom.comp_apply, Scheme.fromSpecResidueField_apply]
+  have hτkill : (d : ℤ) • EllipticCurve.Point.pull (tateUniversal R) (τ ≫ t) (tatePoint R) = 0 := by
+    rw [(tateUniversal R).pull_smul_eq_zero_iff_residue (tatePoint R) (d : ℤ) (τ ≫ t)
+      ((τ ≫ t).base (IsLocalRing.closedPoint k)) ⟨IsLocalRing.closedPoint k, rfl⟩, himg]
+    exact hres
+  have hne := (hfib k τ).2 d (by omega) hdlt
+  exact hne (((tateUniversal R).zsmul_pull_baseChange_asSection_iff (tatePoint R) t τ (d : ℤ)).mpr
+    hτkill)
+
 /-- **(Y1-D1, the locus ↔ functor comparison — the "by construction" core)** A morphism
 `t : T ⟶ 𝒴` factors through `Y₁(N)` iff the pulled-back marked point is a naive `Γ₁(N)`
 structure on the pulled-back Tate curve. Factoring through the closed `Y_N` is the global
@@ -185,87 +291,7 @@ theorem factors_yOne_iff [NeZero N] (_hN : 4 ≤ N) (_hinv : IsUnit (N : R))
         (EllipticCurve.Point.asSection (tateUniversal R) t
           (EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R))) := by
   rw [factors_yOne_iff_exists_range]
-  constructor
-  · rintro ⟨g, hg, hrange⟩
-    have hkill : (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R) = 0 :=
-      ((tateUniversal R).killedLocus_spec (tatePoint R) N t).mp ⟨g, hg⟩
-    have hc1 : (N : ℤ) • EllipticCurve.Point.asSection (tateUniversal R) t
-        (EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R)) = 0 :=
-      ((tateUniversal R).zsmul_asSection_pull_eq_zero_iff (tatePoint R) t (N : ℤ)).mpr hkill
-    refine ⟨hc1, fun k _ _ τ ↦ ⟨?_, ?_⟩⟩
-    · -- clause 2a: the fibrewise `N`-kill is the section `N`-kill pulled along `τ`
-      rw [← EllipticCurve.Point.pull_zsmul, hc1, EllipticCurve.Point.pull_zero]
-    · -- clause 2b: no proper multiple `a < N` kills the fibre
-      intro a ha0 haN hbad
-      rw [(tateUniversal R).zsmul_pull_baseChange_asSection_iff (tatePoint R) t τ] at hbad
-      have hkillτ : (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) (τ ≫ t) (tatePoint R)
-          = 0 := by
-        rw [(tateUniversal R).smul_eq_zero_iff_comp_mulByHom (τ ≫ t) N]
-        have hk := ((tateUniversal R).smul_eq_zero_iff_comp_mulByHom t N
-          (EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R))).mp hkill
-        have h1 : (EllipticCurve.Point.pull (tateUniversal R) (τ ≫ t) (tatePoint R)).1
-            = τ ≫ (EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R)).1 := by
-          show (τ ≫ t) ≫ (tatePoint R).1 = τ ≫ t ≫ (tatePoint R).1
-          rw [Category.assoc]
-        rw [h1, Category.assoc, hk, Category.assoc]
-      obtain ⟨d, hdmem, hd0, hdkill⟩ :=
-        exists_properDivisor_smul_eq_zero hkillτ ha0 haN hbad
-      rw [Nat.mem_properDivisors] at hdmem
-      by_cases hd3 : d ≤ 3
-      · exact tatePoint_nowhereGeomOrderLEThree R k (τ ≫ t) d hd0 hd3 hdkill
-      · push Not at hd3
-        set cp := IsLocalRing.closedPoint k with hcp
-        have hxres : (d : ℤ) • EllipticCurve.Point.pull (tateUniversal R)
-            ((tateBase R).fromSpecResidueField ((τ ≫ t).base cp)) (tatePoint R) = 0 :=
-          ((tateUniversal R).pull_smul_eq_zero_iff_residue (tatePoint R) (d : ℤ) (τ ≫ t)
-            ((τ ≫ t).base cp) ⟨cp, rfl⟩).mp hdkill
-        have hxmem : (τ ≫ t).base cp ∈
-            Set.range ((tateUniversal R).killedLocusπ (tatePoint R) d).base :=
-          ((tateUniversal R).mem_killedLocus_range_iff (tatePoint R) d ((τ ≫ t).base cp)).mpr hxres
-        have hy : g.base (τ.base cp) ∈ yOneSet R N := hrange ⟨τ.base cp, rfl⟩
-        rw [yOneSet, Set.mem_compl_iff, Set.mem_iUnion₂] at hy
-        push Not at hy
-        refine hy d (by rw [Finset.mem_filter, Nat.mem_properDivisors]
-                        exact ⟨⟨hdmem.1, hdmem.2⟩, hd3⟩) ?_
-        have hgt : ((tateUniversal R).killedLocusπ (tatePoint R) N).base (g.base (τ.base cp))
-            = (τ ≫ t).base cp := by
-          rw [← Scheme.Hom.comp_apply, hg, Scheme.Hom.comp_apply]
-        rw [Set.mem_preimage, hgt]
-        exact hxmem
-  · rintro ⟨hc1, hfib⟩
-    have hkill : (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R) = 0 :=
-      ((tateUniversal R).zsmul_asSection_pull_eq_zero_iff (tatePoint R) t (N : ℤ)).mp hc1
-    obtain ⟨g, hg⟩ := ((tateUniversal R).killedLocus_spec (tatePoint R) N t).mpr hkill
-    refine ⟨g, hg, ?_⟩
-    rintro _ ⟨x, rfl⟩
-    rw [yOneSet, Set.mem_compl_iff, Set.mem_iUnion₂]
-    rintro ⟨d, hd_filter, hmem⟩
-    rw [Set.mem_preimage] at hmem
-    rw [Finset.mem_filter, Nat.mem_properDivisors] at hd_filter
-    obtain ⟨⟨hdN, hdlt⟩, hd4⟩ := hd_filter
-    have hgtx : ((tateUniversal R).killedLocusπ (tatePoint R) N).base (g.base x) = t.base x := by
-      rw [← Scheme.Hom.comp_apply, hg]
-    rw [hgtx] at hmem
-    have hres : (d : ℤ) • EllipticCurve.Point.pull (tateUniversal R)
-        ((tateBase R).fromSpecResidueField (t.base x)) (tatePoint R) = 0 :=
-      ((tateUniversal R).mem_killedLocus_range_iff (tatePoint R) d (t.base x)).mp hmem
-    set k := AlgebraicClosure (T.residueField x) with hk
-    have : Subsingleton (Spec (CommRingCat.of k)) :=
-      inferInstanceAs (Subsingleton (PrimeSpectrum k))
-    set τ : Spec (CommRingCat.of k) ⟶ T :=
-      Spec.map (CommRingCat.ofHom (algebraMap (T.residueField x) k)) ≫ T.fromSpecResidueField x
-      with hτ
-    have himg : (τ ≫ t).base (IsLocalRing.closedPoint k) = t.base x := by
-      rw [Scheme.Hom.comp_apply]
-      congr 1
-      rw [hτ, Scheme.Hom.comp_apply, Scheme.fromSpecResidueField_apply]
-    have hτkill : (d : ℤ) • EllipticCurve.Point.pull (tateUniversal R) (τ ≫ t) (tatePoint R) = 0 := by
-      rw [(tateUniversal R).pull_smul_eq_zero_iff_residue (tatePoint R) (d : ℤ) (τ ≫ t)
-        ((τ ≫ t).base (IsLocalRing.closedPoint k)) ⟨IsLocalRing.closedPoint k, rfl⟩, himg]
-      exact hres
-    have hne := (hfib k τ).2 d (by omega) hdlt
-    exact hne (((tateUniversal R).zsmul_pull_baseChange_asSection_iff (tatePoint R) t τ (d : ℤ)).mpr
-      hτkill)
+  exact ⟨factors_yOne_iff_forward R N t, factors_yOne_iff_backward R N t⟩
 
 /-- **(Y1-D3 — Loeffler Def 3.3.6, representability half of T-E7)** `(Y₁(N), universal curve,
 (0,0))` represents the naive `Γ₁(N)` moduli problem: for every `Y : Ell/R`,
@@ -342,6 +368,25 @@ is what makes `Y₁(N)` affine for general `N` — Loeffler's `Spec` display is 
 `N = 5` (Def 3.3.6), so affineness is derived, not quoted (KM affine-over-`(Ell)` locator to be
 attached when the KM text lands; the board's QUOTE-PARTIAL note). -/
 
+/-- A section of an étale (hence unramified) morphism is an open immersion: its diagonal is an
+open immersion, so the section — a base change of that diagonal along itself — is one too. -/
+private theorem isOpenImmersion_of_section {X Y : Scheme.{u}} (f : X ⟶ Y)
+    [Etale f] (s : Y ⟶ X) (hs : s ≫ f = 𝟙 Y) :
+    IsOpenImmersion s := by
+  have hdiag : IsOpenImmersion (Limits.pullback.diagonal f) :=
+    AlgebraicGeometry.FormallyUnramified.isOpenImmersion_diagonal _
+  have hsq := Limits.pullback_lift_diagonal_isPullback s f
+  have hliftP : IsOpenImmersion
+      (Limits.pullback.lift (𝟙 Y) s (by simp) :
+        Y ⟶ Limits.pullback (s ≫ f) f) :=
+    MorphismProperty.of_isPullback (P := @IsOpenImmersion) hsq inferInstance
+  have : IsIso (s ≫ f) := by rw [hs]; infer_instance
+  have hdec : s = (Limits.pullback.lift (𝟙 Y) s (by simp) :
+      Y ⟶ Limits.pullback (s ≫ f) f) ≫ Limits.pullback.snd _ _ :=
+    (Limits.pullback.lift_snd _ _ _).symm
+  rw [hdec]
+  infer_instance
+
 /-- **(Y1-E1, the clopen split — gate [BB-DIFF])** Over a base where `N` is invertible, each
 sub-killed-locus `{d • P = 0}` with `d ∣ N` is **open** inside the killed locus `{N • P = 0}`
 (as well as closed): on `Y_N` the point `P` classifies into the finite étale `E[N]`
@@ -365,21 +410,8 @@ theorem killedLocus_preimage_isOpen {S : Scheme.{u}} (E : EllipticCurve S) (P : 
     rw [← E.smul_eq_zero_iff_comp_mulByHom, smul_zero]
   set zT := E.pointToTorsion _ hz0 with hzT
   have hEt : Etale (E.torsionπ N) := E.torsionπ_etale' N hN
-  have : IsOpenImmersion (Limits.pullback.diagonal (E.torsionπ N)) :=
-    AlgebraicGeometry.FormallyUnramified.isOpenImmersion_diagonal _
-  have hsq := Limits.pullback_lift_diagonal_isPullback zT (E.torsionπ N)
   have hzTsec : zT ≫ E.torsionπ N = 𝟙 S := E.pointToTorsion_torsionπ _ _
-  have hliftP : IsOpenImmersion
-      (Limits.pullback.lift (𝟙 S) zT (by simp) :
-        S ⟶ Limits.pullback (zT ≫ E.torsionπ N) (E.torsionπ N)) :=
-    MorphismProperty.of_isPullback (P := @IsOpenImmersion) hsq inferInstance
-  have : IsIso (zT ≫ E.torsionπ N) := by rw [hzTsec]; infer_instance
-  have hzTopen : IsOpenImmersion zT := by
-    have hdec : zT = (Limits.pullback.lift (𝟙 S) zT (by simp) :
-        S ⟶ Limits.pullback (zT ≫ E.torsionπ N) (E.torsionπ N)) ≫
-        Limits.pullback.snd _ _ := (Limits.pullback.lift_snd _ _ _).symm
-    rw [hdec]
-    infer_instance
+  have hzTopen : IsOpenImmersion zT := isOpenImmersion_of_section (E.torsionπ N) zT hzTsec
   -- the two `ι`-composites
   have hι : gd ≫ E.torsionι N =
       ((d : ℤ) • EllipticCurve.Point.pull E (E.killedLocusπ P N) P :
@@ -447,6 +479,33 @@ theorem killedLocus_preimage_isOpen {S : Scheme.{u}} (E : EllipticCurve S) (P : 
   rw [hset]
   exact (IsOpenImmersion.isOpen_range zT).preimage gd.continuous
 
+/-- A clopen subscheme of an affine scheme is affine: transport the clopen across the affine
+identification `X.toSpecΓ` to a clopen of `Spec Γ`, which is the basic open of an idempotent
+(`PrimeSpectrum.exists_idempotent_basicOpen_eq_of_isClopen`), hence an affine open. -/
+private theorem isAffineOpen_of_isClopen {X : Scheme.{u}} [IsAffine X] (U : X.Opens)
+    (hU : IsClopen (U : Set X)) : IsAffineOpen U := by
+  classical
+  have : IsIso X.toSpecΓ := IsAffine.affine
+  set s' := (CategoryTheory.inv X.toSpecΓ).base ⁻¹' (U : Set X) with hs'
+  have hs'clopen : IsClopen s' :=
+    hU.preimage (CategoryTheory.inv X.toSpecΓ).continuous
+  obtain ⟨e, he, hse⟩ := PrimeSpectrum.exists_idempotent_basicOpen_eq_of_isClopen hs'clopen
+  have hy1 : (U : Set X) = X.toSpecΓ.base ⁻¹' s' := by
+    rw [hs', ← Set.preimage_comp]
+    have h1 : X.toSpecΓ ≫ CategoryTheory.inv X.toSpecΓ = 𝟙 X := IsIso.hom_inv_id _
+    have h2 : (CategoryTheory.inv X.toSpecΓ).base ∘ X.toSpecΓ.base = id := by
+      funext x
+      show (X.toSpecΓ ≫ CategoryTheory.inv X.toSpecΓ).base x = x
+      rw [h1]
+      rfl
+    rw [h2, Set.preimage_id]
+  have hy2 : (U : Set X) = SetLike.coe (X.basicOpen e) := by
+    rw [hy1, hse]
+    exact X.toΓSpec_preimage_basicOpen_eq e
+  have hopens : U = X.basicOpen e := TopologicalSpace.Opens.ext hy2
+  rw [hopens]
+  exact (isAffineOpen_top X).basicOpen e
+
 /-- **(Y1-E2 — affineness, gate [BB-DIFF] via Y1-E1)** `Y₁(N)` is affine: by Y1-E1 the removed
 locus is clopen in `Y_N`, so `Y₁(N)` is a *clopen* subscheme of the closed subscheme
 `Y_N ⊆ 𝒴 = Spec R[A,B][∆⁻¹]`; a clopen subset of an affine scheme is the basic open of an
@@ -478,28 +537,7 @@ theorem yOne_isAffine [NeZero N] (_hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
       exact killedLocus_preimage_isOpen (N := N) (tateUniversal R) (tatePoint R) hNinv hdN
     · exact yOneSet_isOpen R N
   -- transport to the spectrum: a clopen of an affine scheme is an idempotent basic open
-  set X := (tateUniversal R).killedLocus (tatePoint R) N with hXdef
-  have : IsIso X.toSpecΓ := hXaff.affine
-  set s' := (CategoryTheory.inv X.toSpecΓ).base ⁻¹' (yOneSet R N) with hs'
-  have hs'clopen : IsClopen s' :=
-    hclopen.preimage (CategoryTheory.inv X.toSpecΓ).continuous
-  obtain ⟨e, he, hse⟩ := PrimeSpectrum.exists_idempotent_basicOpen_eq_of_isClopen hs'clopen
-  have hy1 : yOneSet R N = X.toSpecΓ.base ⁻¹' s' := by
-    rw [hs', ← Set.preimage_comp]
-    have h1 : X.toSpecΓ ≫ CategoryTheory.inv X.toSpecΓ = 𝟙 X := IsIso.hom_inv_id _
-    have h2 : (CategoryTheory.inv X.toSpecΓ).base ∘ X.toSpecΓ.base = id := by
-      funext x
-      show (X.toSpecΓ ≫ CategoryTheory.inv X.toSpecΓ).base x = x
-      rw [h1]
-      rfl
-    rw [h2, Set.preimage_id]
-  have hy2 : yOneSet R N = SetLike.coe (X.basicOpen e) := by
-    rw [hy1, hse]
-    exact X.toΓSpec_preimage_basicOpen_eq e
-  have hopens : yOneOpens R N = X.basicOpen e := TopologicalSpace.Opens.ext hy2
-  have haff : IsAffineOpen (X.basicOpen e) := (isAffineOpen_top X).basicOpen e
-  rw [← hopens] at haff
-  exact haff
+  exact isAffineOpen_of_isClopen (yOneOpens R N) hclopen
 
 /-- **(Y1-E3)** The structure morphism of `Y₁(N)` is an affine morphism — source affine
 (Y1-E2) and target `Spec R` affine (`HasAffineProperty @IsAffineHom`). -/
@@ -542,6 +580,20 @@ theorem yOneStructMap_locallyOfFinitePresentation [NeZero N] (_hN : 4 ≤ N)
   exact MorphismProperty.comp_mem _ _ _
     (MorphismProperty.comp_mem _ _ _ hι hkl) hstr
 
+/-- **The Γ–Spec structure triangle.** Any morphism `f : X ⟶ Spec B` factors as the canonical
+`X.toSpecΓ` followed by `Spec` of the ring map `(ΓSpecIso B).inv ≫ f.appTop` — the affine
+identification of `f` on global sections. -/
+private theorem toSpecΓ_appTop_triangle {X : Scheme.{u}} {B : CommRingCat.{u}} (f : X ⟶ Spec B) :
+    f = X.toSpecΓ ≫ Spec.map ((Scheme.ΓSpecIso B).inv ≫ f.appTop) := by
+  have h1 := Scheme.toSpecΓ_naturality f
+  rw [show (Spec B).toSpecΓ = Spec.map (Scheme.ΓSpecIso B).hom from
+    Scheme.isoSpec_Spec_hom B] at h1
+  have h2 := congrArg (fun m ↦ m ≫ Spec.map (Scheme.ΓSpecIso B).inv) h1
+  simp only [Category.assoc, ← Spec.map_comp] at h2
+  rw [show Spec.map ((Scheme.ΓSpecIso B).inv ≫ (Scheme.ΓSpecIso B).hom) = 𝟙 _ by
+    rw [Iso.inv_hom_id, Spec.map_id], Category.comp_id] at h2
+  exact h2
+
 /-- **(E5/E6 shared plumbing)** Sections of a smooth morphism from an affine scheme to an
 affine base lift along nilpotent thickenings of the base: the Γ–Spec transport of
 `Algebra.FormallySmooth.lift`. -/
@@ -555,15 +607,8 @@ theorem exists_section_lift_of_smooth {X : Scheme.{u}} {B : CommRingCat.{u}}
   letI : Algebra ↑B ↑Γ(X, ⊤) := ((Scheme.ΓSpecIso B).inv ≫ f.appTop).hom.toAlgebra
   letI : Algebra ↑B ↑(B ⧸ I) := (Ideal.Quotient.mk I).toAlgebra
   -- the factoring triangle of `f` through the affine identification
-  have hftri : f = X.toSpecΓ ≫ Spec.map ((Scheme.ΓSpecIso B).inv ≫ f.appTop) := by
-    have h1 := Scheme.toSpecΓ_naturality f
-    rw [show (Spec B).toSpecΓ = Spec.map (Scheme.ΓSpecIso B).hom from
-      Scheme.isoSpec_Spec_hom B] at h1
-    have h2 := congrArg (fun m ↦ m ≫ Spec.map (Scheme.ΓSpecIso B).inv) h1
-    simp only [Category.assoc, ← Spec.map_comp] at h2
-    rw [show Spec.map ((Scheme.ΓSpecIso B).inv ≫ (Scheme.ΓSpecIso B).hom) = 𝟙 _ by
-      rw [Iso.inv_hom_id, Spec.map_id], Category.comp_id] at h2
-    exact h2
+  have hftri : f = X.toSpecΓ ≫ Spec.map ((Scheme.ΓSpecIso B).inv ≫ f.appTop) :=
+    toSpecΓ_appTop_triangle f
   -- the Γ-side of `s₀`, as a `B`-algebra map
   set q₀r := Spec.preimage (s₀ ≫ X.toSpecΓ) with hq₀r
   have hq₀spec : Spec.map q₀r = s₀ ≫ X.toSpecΓ := Spec.map_preimage _
@@ -644,6 +689,64 @@ private theorem bcEquiv_zero {S : Scheme.{u}} (E : EllipticCurve S) {T T' : Sche
     (σ : T ⟶ S) (t : T' ⟶ T) :
     EllipticCurve.Point.baseChangeEquiv E σ t 0 = 0 :=
   map_zero (EllipticCurve.Point.baseChangeEquiv E σ t).toAddMonoidHom
+
+/-- Torsion transports across `Point.baseChangeEquiv`: a point of the base change is `n`-killed
+iff its image under the (injective) `baseChangeEquiv` is. -/
+private theorem bcEquiv_zsmul_eq_zero_iff {S : Scheme.{u}} (E : EllipticCurve S)
+    {T T' : Scheme.{u}} (σ : T ⟶ S) (t : T' ⟶ T) (n : ℤ) (P : (E.baseChange σ).Point t) :
+    n • P = 0 ↔ n • EllipticCurve.Point.baseChangeEquiv E σ t P = 0 := by
+  constructor
+  · intro h0
+    rw [← bcEquiv_zsmul, h0, bcEquiv_zero]
+  · intro h0
+    refine (EllipticCurve.Point.baseChangeEquiv E σ t).injective ?_
+    rw [bcEquiv_zsmul, bcEquiv_zero]
+    exact h0
+
+/-- A geometric point `τ : Spec k ⟶ Spec A` (with `k` a field, hence reduced) of an affine
+scheme factors through the closed thickening `Spec (A ⧸ I)` when `I` is nilpotent: the induced
+ring map `A → k` kills `I` (nilpotents map to `0` in a field), so it descends through `A ⧸ I`.
+The shared "every geometric point factors through the quotient" step of the E5 lift. -/
+private theorem exists_specMap_factor_of_nilpotent {A k : Type u} [CommRing A] [Field k]
+    (I : Ideal A) (hI : IsNilpotent I)
+    (τ : Spec (CommRingCat.of k) ⟶ Spec (CommRingCat.of A)) :
+    ∃ τ₀ : Spec (CommRingCat.of k) ⟶ Spec (CommRingCat.of (A ⧸ I)),
+      τ = τ₀ ≫ Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) := by
+  set u := Spec.preimage τ with hu
+  have hIu : ∀ x ∈ I, u.hom x = 0 := by
+    intro x hx
+    obtain ⟨n, hn⟩ := hI
+    have hxn : x ^ n = 0 := by
+      have h1 : x ^ n ∈ I ^ n := Ideal.pow_mem_pow hx n
+      rw [hn] at h1
+      simpa using h1
+    have h2 : (u.hom x) ^ n = 0 := by
+      rw [← map_pow, hxn, map_zero]
+    exact IsNilpotent.eq_zero (⟨n, h2⟩ : IsNilpotent (u.hom x))
+  refine ⟨Spec.map (CommRingCat.ofHom (Ideal.Quotient.lift I u.hom hIu)), ?_⟩
+  rw [← Spec.map_comp]
+  rw [show CommRingCat.ofHom (Ideal.Quotient.mk I) ≫
+      CommRingCat.ofHom (Ideal.Quotient.lift I u.hom hIu) = u from
+    CommRingCat.hom_ext (RingHom.ext fun x ↦ Ideal.Quotient.lift_mk I u.hom hIu)]
+  exact (Spec.map_preimage τ).symm
+
+/-- The tautological Tate-marked section over any base `s : T ⟶ 𝒴`, namely
+`asSection s (pull s P₀)`, is nowhere of geometric order `≤ 3` — inherited fibrewise from
+`tatePoint_nowhereGeomOrderLEThree` through the base-change dictionary `pullAsSection_dict`. -/
+private theorem nowhereGeomOrderLEThree_asSection_pull_tatePoint {T : Scheme.{u}}
+    (s : T ⟶ tateBase R) :
+    EllipticCurve.NowhereGeomOrderLEThree ((tateUniversal R).baseChange s)
+      (EllipticCurve.Point.asSection (tateUniversal R) s
+        (EllipticCurve.Point.pull (tateUniversal R) s (tatePoint R))) := by
+  intro k _ _ τ a ha0 ha3 h0
+  refine tatePoint_nowhereGeomOrderLEThree R k (τ ≫ s) a ha0 ha3 ?_
+  have h1 : (a : ℤ) • (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) s τ)
+      (EllipticCurve.Point.pull ((tateUniversal R).baseChange s) τ
+        (EllipticCurve.Point.asSection (tateUniversal R) s
+          (EllipticCurve.Point.pull (tateUniversal R) s (tatePoint R)))) = 0 := by
+    rw [← bcEquiv_zsmul, h0, bcEquiv_zero]
+  rw [pullAsSection_dict R s τ] at h1
+  exact h1
 
 /-- **(Y1-E5 pure core)** The étale torsion-point lift against a nilpotent ideal, packaged
 through the marked-atlas classification: an atlas algebra map to `A⧸I` whose marked point is
@@ -780,25 +883,7 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (_hN : 4 ≤ N)
   -- the order condition transports along the thickening (fibres are unchanged)
   have hordPA : ((tateUniversal R).baseChange t).NowhereGeomOrderLEThree PA := by
     intro k _ _ τ a ha0 ha3 h0
-    set u := Spec.preimage τ with hu
-    have hIu : ∀ x ∈ I, u.hom x = 0 := by
-      intro x hx
-      obtain ⟨n, hn⟩ := hI
-      have hxn : x ^ n = 0 := by
-        have h1 : x ^ n ∈ I ^ n := Ideal.pow_mem_pow hx n
-        rw [hn] at h1
-        simpa using h1
-      have h2 : (u.hom x) ^ n = 0 := by
-        rw [← map_pow, hxn, map_zero]
-      exact IsNilpotent.eq_zero (⟨n, h2⟩ : IsNilpotent (u.hom x))
-    set ū := Ideal.Quotient.lift I u.hom hIu with hū
-    set τ₀ : Spec (CommRingCat.of k) ⟶ Spec (CommRingCat.of (↑A ⧸ I)) :=
-      Spec.map (CommRingCat.ofHom ū) with hτ₀
-    have hτfac : τ = τ₀ ≫ Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) := by
-      rw [hτ₀, ← Spec.map_comp]
-      rw [show CommRingCat.ofHom (Ideal.Quotient.mk I) ≫ CommRingCat.ofHom ū = u from
-        CommRingCat.hom_ext (RingHom.ext fun x ↦ Ideal.Quotient.lift_mk I u.hom hIu)]
-      exact (Spec.map_preimage τ).symm
+    obtain ⟨τ₀, hτfac⟩ := exists_specMap_factor_of_nilpotent I hI τ
     have h1 : (a : ℤ) • (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t τ)
         (EllipticCurve.Point.pull ((tateUniversal R).baseChange t) τ PA) = 0 := by
       rw [← bcEquiv_zsmul, h0, bcEquiv_zero]
@@ -900,17 +985,8 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (_hN : 4 ≤ N)
     have hord₀sec : EllipticCurve.NowhereGeomOrderLEThree
         ((tateUniversal R).baseChange
           (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ t)) P₀sec := by
-      intro k _ _ τ a ha0 ha3 h0
-      refine tatePoint_nowhereGeomOrderLEThree R k
-        (τ ≫ (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ t)) a ha0 ha3 ?_
-      have h1 : (a : ℤ) • (EllipticCurve.Point.baseChangeEquiv (tateUniversal R)
-          (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ t) τ)
-          (EllipticCurve.Point.pull ((tateUniversal R).baseChange
-            (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ t)) τ P₀sec)
-          = 0 := by
-        rw [← bcEquiv_zsmul, h0, bcEquiv_zero]
-      rw [hP₀sec, pullAsSection_dict R _ τ] at h1
-      exact h1
+      rw [hP₀sec]
+      exact nowhereGeomOrderLEThree_asSection_pull_tatePoint R _
     have hrestPT : EllipticCurve.Point.restrict (tateUniversal R)
         (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I))) PT =
         EllipticCurve.Point.pull (tateUniversal R)
@@ -1200,25 +1276,7 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
       refine ⟨hkill', ?_⟩
       -- fibrewise clauses: geometric points of `Spec A` factor through the quotient
       intro k _ _ τ
-      set u := Spec.preimage τ with hu
-      have hIu : ∀ x ∈ I, u.hom x = 0 := by
-        intro x hx
-        obtain ⟨n, hn⟩ := hI
-        have hxn : x ^ n = 0 := by
-          have h1 : x ^ n ∈ I ^ n := Ideal.pow_mem_pow hx n
-          rw [hn] at h1
-          simpa using h1
-        have h2 : (u.hom x) ^ n = 0 := by
-          rw [← map_pow, hxn, map_zero]
-        exact IsNilpotent.eq_zero (⟨n, h2⟩ : IsNilpotent (u.hom x))
-      set ū := Ideal.Quotient.lift I u.hom hIu with hū
-      set τ₀ : Spec (CommRingCat.of k) ⟶ Spec (CommRingCat.of (A ⧸ I)) :=
-        Spec.map (CommRingCat.ofHom ū) with hτ₀
-      have hτfac : τ = τ₀ ≫ Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) := by
-        rw [hτ₀, ← Spec.map_comp]
-        rw [show CommRingCat.ofHom (Ideal.Quotient.mk I) ≫ CommRingCat.ofHom ū = u from
-          CommRingCat.hom_ext (RingHom.ext fun x ↦ Ideal.Quotient.lift_mk I u.hom hIu)]
-        exact (Spec.map_preimage τ).symm
+      obtain ⟨τ₀, hτfac⟩ := exists_specMap_factor_of_nilpotent I hI τ
       have hcomp : τ ≫ t' = τ₀ ≫ t₀ := by
         rw [hτfac, Category.assoc, hrest']
       have hbridge : ∀ (a : ℤ),
@@ -1229,27 +1287,8 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
             (EllipticCurve.Point.asSection (tateUniversal R) t₀
               (EllipticCurve.Point.pull (tateUniversal R) t₀ (tatePoint R))) = 0 := by
         intro a
-        have e1 := EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t' τ
-        have h1 : ∀ (P : ((tateUniversal R).baseChange t').Point τ),
-            a • P = 0 ↔ a • (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t' τ) P
-              = 0 := fun P ↦ by
-          constructor
-          · intro h0
-            rw [← bcEquiv_zsmul, h0, bcEquiv_zero]
-          · intro h0
-            refine (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t' τ).injective ?_
-            rw [bcEquiv_zsmul, bcEquiv_zero]
-            exact h0
-        have h2 : ∀ (P : ((tateUniversal R).baseChange t₀).Point τ₀),
-            a • P = 0 ↔ a • (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t₀ τ₀) P
-              = 0 := fun P ↦ by
-          constructor
-          · intro h0
-            rw [← bcEquiv_zsmul, h0, bcEquiv_zero]
-          · intro h0
-            refine (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t₀ τ₀).injective ?_
-            rw [bcEquiv_zsmul, bcEquiv_zero]
-            exact h0
+        have h1 := bcEquiv_zsmul_eq_zero_iff (tateUniversal R) t' τ a
+        have h2 := bcEquiv_zsmul_eq_zero_iff (tateUniversal R) t₀ τ₀ a
         rw [h1, h2, pullAsSection_dict R t' τ, pullAsSection_dict R t₀ τ₀, hcomp]
       obtain ⟨hk₀, hord₀⟩ := hstruct₀.2 k τ₀
       exact ⟨(hbridge (N : ℤ)).mpr hk₀,
@@ -1292,15 +1331,8 @@ theorem yOneStructMap_smooth [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
   have : IsIso (yOne R N).toSpecΓ := IsAffine.affine
   -- the structure triangle of `yOneStructMap` (the hftri pattern)
   have hytri : yOneStructMap R N = (yOne R N).toSpecΓ ≫
-      Spec.map ((Scheme.ΓSpecIso R).inv ≫ (yOneStructMap R N).appTop) := by
-    have h1 := Scheme.toSpecΓ_naturality (yOneStructMap R N)
-    rw [show (Spec R).toSpecΓ = Spec.map (Scheme.ΓSpecIso R).hom from
-      Scheme.isoSpec_Spec_hom R] at h1
-    have h2 := congrArg (fun m ↦ m ≫ Spec.map (Scheme.ΓSpecIso R).inv) h1
-    simp only [Category.assoc, ← Spec.map_comp] at h2
-    rw [show Spec.map ((Scheme.ΓSpecIso R).inv ≫ (Scheme.ΓSpecIso R).hom) = 𝟙 _ by
-      rw [Iso.inv_hom_id, Spec.map_id], Category.comp_id] at h2
-    exact h2
+      Spec.map ((Scheme.ΓSpecIso R).inv ≫ (yOneStructMap R N).appTop) :=
+    toSpecΓ_appTop_triangle (yOneStructMap R N)
   have hinvy : CategoryTheory.inv (yOne R N).toSpecΓ ≫ yOneStructMap R N =
       Spec.map ((Scheme.ΓSpecIso R).inv ≫ (yOneStructMap R N).appTop) := by
     have h3 := congrArg (fun m ↦ CategoryTheory.inv (yOne R N).toSpecΓ ≫ m) hytri
