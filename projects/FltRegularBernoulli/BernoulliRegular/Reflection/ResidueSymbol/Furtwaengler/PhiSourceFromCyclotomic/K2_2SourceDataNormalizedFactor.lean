@@ -791,13 +791,12 @@ theorem K2_2SourceData_phi_facts_cyclotomic
     FLT37.IsSemiPrimary p (K := K) D.phi.gamma ∧
       NumberField.IsCMField.ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
         (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
-  refine ⟨?_, ?_⟩
-  · exact PhiPrimeElement.K2_2SourceData_phi_gamma_isSemiPrimary
-      (p := p) (K := K) D hp_three
-  · exact K2_2SourceData_phi_conj_mul_self_eq_absNorm_pow_cyclotomic
-      (ℓ := ℓ) (p := p) (K := K) (R' := R') hpℓ hp_gt_two D
+  exact ⟨PhiPrimeElement.K2_2SourceData_phi_gamma_isSemiPrimary
+      (p := p) (K := K) D hp_three,
+    K2_2SourceData_phi_conj_mul_self_eq_absNorm_pow_cyclotomic
+      (ℓ := ℓ) (p := p) (K := K) (R' := R') hpℓ hp_gt_two D⟩
 
 /-- **Cyclotomic discharged facts for a single reciprocal `K2_2SourceData`**:
 bundles reciprocal semi-primary and conjugation-norm facts into one named
@@ -818,13 +817,12 @@ theorem K2_2ReciprocalSourceData_phi_facts_cyclotomic
     FLT37.IsSemiPrimary p (K := K) D.phi.gamma ∧
       NumberField.IsCMField.ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
         (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
-  refine ⟨?_, ?_⟩
-  · exact PhiPrimeElement.K2_2ReciprocalSourceData_phi_gamma_isSemiPrimary
-      (p := p) (K := K) D hp_three
-  · exact K2_2ReciprocalSourceData_phi_conj_mul_self_eq_absNorm_pow_cyclotomic
-      (ℓ := ℓ) (p := p) (K := K) (R' := R') hpℓ hp_gt_two D
+  exact ⟨PhiPrimeElement.K2_2ReciprocalSourceData_phi_gamma_isSemiPrimary
+      (p := p) (K := K) D hp_three,
+    K2_2ReciprocalSourceData_phi_conj_mul_self_eq_absNorm_pow_cyclotomic
+      (ℓ := ℓ) (p := p) (K := K) (R' := R') hpℓ hp_gt_two D⟩
 
 end PhiPrimeElement
 
