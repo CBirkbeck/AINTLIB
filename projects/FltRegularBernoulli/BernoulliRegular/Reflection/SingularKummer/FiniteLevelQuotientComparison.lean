@@ -1,7 +1,7 @@
 module
 
-public import BernoulliRegular.Reflection.SingularKummer.FiniteLevelTorsionReduction
 public import BernoulliRegular.Reflection.SingularKummer.FiniteLevelProjectionBridge
+public import BernoulliRegular.Reflection.SingularKummer.FiniteLevelTorsionReduction
 
 /-!
 # Singular Kummer: finite-level projection and the elementary quotient
