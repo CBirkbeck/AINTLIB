@@ -165,7 +165,7 @@ private theorem relNorm_algebraMap_eq_sq
   exact finrank_fractionRing_ringOfIntegers_K_over_Kplus K
 
 omit [IsCyclotomicExtension {p} ℚ K] [IsCMField K] in
-/-- **SP-2a UNCONDITIONAL via the norm trick** (Reviewer guidance 2026-05-22).
+/-- **SP-2a UNCONDITIONAL via the norm trick.**
 
 For any odd prime `p`, the natural map
 `Cl(K⁺)/p → Cl(K)/p` is injective.
@@ -308,9 +308,7 @@ omit [IsCyclotomicExtension {p} ℚ K] [IsCMField K] in
 Top-level wrapper for the unconditional form. The Vandiver-conditional
 form `classGroupMap_modP_injective_of_not_dvd_hPlus` is now subsumed by
 this (the Vandiver case is just the special instance where the source
-is trivial).
-
-Reviewer guidance 2026-05-22 (Q5 / norm trick). -/
+is trivial). -/
 theorem classGroupMap_modP_injective [NumberField.IsCMField K]
     (hp_odd : p ≠ 2) :
     Function.Injective (classGroupMap_modP p K) :=
