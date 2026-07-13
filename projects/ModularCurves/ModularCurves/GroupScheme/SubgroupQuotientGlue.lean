@@ -94,6 +94,71 @@ noncomputable def localQuotientMapW {W W' : E.E.Opens} (hW : G.IsStableOpen W)
       map_zero' := Subtype.ext (map_zero _)
       map_add' := fun x y => Subtype.ext (map_add _ _ _) })
 
+/-- **The quotient projection of a stable open** (`[HG-C4c-2]` step 4b): the scheme of `W`
+maps to the spectrum of its invariant functions through the section inclusion. -/
+noncomputable def localQuotientOpenπ {W : E.E.Opens} (hW : G.IsStableOpen W) :
+    W.toScheme ⟶ G.localQuotientOpen hW :=
+  W.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (G.quotientRing hW).subtype)
+
+/-- The quotient projections commute with the window inclusions and transitions. -/
+theorem homOfLE_localQuotientOpenπ {W W' : E.E.Opens} (hW : G.IsStableOpen W)
+    (hW' : G.IsStableOpen W') (hle : W ≤ W') :
+    E.E.homOfLE hle ≫ G.localQuotientOpenπ hW'
+      = G.localQuotientOpenπ hW ≫ G.localQuotientMapW hW hW' hle := by
+  rw [localQuotientOpenπ, localQuotientOpenπ, localQuotientMapW]
+  -- the ring square: restriction commutes with the subring inclusions
+  have hring : CommRingCat.ofHom (G.quotientRing hW').subtype ≫
+      E.E.presheaf.map (homOfLE hle).op
+      = CommRingCat.ofHom
+          { toFun := fun b => ⟨(E.E.presheaf.map (homOfLE hle).op).hom b.1,
+              G.mem_quotientRing_of_res hW hW' hle b.2⟩
+            map_one' := Subtype.ext (map_one _)
+            map_mul' := fun x y => Subtype.ext (map_mul _ _ _)
+            map_zero' := Subtype.ext (map_zero _)
+            map_add' := fun x y => Subtype.ext (map_add _ _ _) } ≫
+        CommRingCat.ofHom (G.quotientRing hW).subtype := by
+    ext b
+    rfl
+  calc E.E.homOfLE hle ≫ W'.toSpecΓ ≫
+        Spec.map (CommRingCat.ofHom (G.quotientRing hW').subtype)
+      = (E.E.homOfLE hle ≫ W'.toSpecΓ) ≫
+        Spec.map (CommRingCat.ofHom (G.quotientRing hW').subtype) :=
+        (Category.assoc _ _ _).symm
+    _ = (W.toSpecΓ ≫ Spec.map (E.E.presheaf.map (homOfLE hle).op)) ≫
+        Spec.map (CommRingCat.ofHom (G.quotientRing hW').subtype) :=
+        congrArg (· ≫ Spec.map (CommRingCat.ofHom (G.quotientRing hW').subtype))
+          (Scheme.Opens.toSpecΓ_SpecMap_presheaf_map W W' hle).symm
+    _ = W.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (G.quotientRing hW').subtype ≫
+          E.E.presheaf.map (homOfLE hle).op) := by
+        rw [Category.assoc, ← Spec.map_comp]
+    _ = W.toSpecΓ ≫ Spec.map (CommRingCat.ofHom
+          { toFun := fun b => ⟨(E.E.presheaf.map (homOfLE hle).op).hom b.1,
+              G.mem_quotientRing_of_res hW hW' hle b.2⟩
+            map_one' := Subtype.ext (map_one _)
+            map_mul' := fun x y => Subtype.ext (map_mul _ _ _)
+            map_zero' := Subtype.ext (map_zero _)
+            map_add' := fun x y => Subtype.ext (map_add _ _ _) } ≫
+          CommRingCat.ofHom (G.quotientRing hW).subtype) := by
+        rw [hring]
+    _ = W.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (G.quotientRing hW).subtype) ≫
+          Spec.map (CommRingCat.ofHom
+          { toFun := fun b => ⟨(E.E.presheaf.map (homOfLE hle).op).hom b.1,
+              G.mem_quotientRing_of_res hW hW' hle b.2⟩
+            map_one' := Subtype.ext (map_one _)
+            map_mul' := fun x y => Subtype.ext (map_mul _ _ _)
+            map_zero' := Subtype.ext (map_zero _)
+            map_add' := fun x y => Subtype.ext (map_add _ _ _) }) := by
+        rw [Spec.map_comp]
+    _ = (W.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (G.quotientRing hW).subtype)) ≫
+          Spec.map (CommRingCat.ofHom
+          { toFun := fun b => ⟨(E.E.presheaf.map (homOfLE hle).op).hom b.1,
+              G.mem_quotientRing_of_res hW hW' hle b.2⟩
+            map_one' := Subtype.ext (map_one _)
+            map_mul' := fun x y => Subtype.ext (map_mul _ _ _)
+            map_zero' := Subtype.ext (map_zero _)
+            map_add' := fun x y => Subtype.ext (map_add _ _ _) }) :=
+        (Category.assoc _ _ _).symm
+
 /-! ### Step 3 — the per-patch comparison with the Hopf model -/
 
 namespace AffineChartPatch
