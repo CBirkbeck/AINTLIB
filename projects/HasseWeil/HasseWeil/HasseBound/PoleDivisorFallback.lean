@@ -2346,7 +2346,7 @@ order `data.ordAt P = -ramificationIdx' _ xIdeal P` equals `-0 = 0 ≥ 0`.
 Proof: `xIdeal` is maximal (`xIdeal_isMaximal`); if `map xIdeal ≤ P` then
 by maximality `xIdeal = P.comap`, hence `P.LiesOver xIdeal` —
 contradicting the hypothesis. So `¬ map xIdeal ≤ P`, hence
-`ramificationIdx' = 0` (`Ideal.ramificationIdx_of_not_le`), hence
+`ramificationIdx' = 0` (`Ideal.ramificationIdx'_of_not_le`), hence
 `data.ordAt P = -0 = 0 ≥ 0`. -/
 theorem pole_gamma_pullback_x_imp_kernel_closed_point
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] (hq : 2 ≤ Fintype.card K)
@@ -2370,7 +2370,7 @@ theorem pole_gamma_pullback_x_imp_kernel_closed_point
   letI := data.algPoly
   have h_rampidx_zero : Ideal.ramificationIdx'
       (Curves.RamificationAtInfinity.xIdeal (k := K)) P = 0 := by
-    apply Ideal.ramificationIdx_of_not_le
+    apply Ideal.ramificationIdx'_of_not_le
     intro h_map_le
     apply hP_not_over
     rw [Ideal.map_le_iff_le_comap] at h_map_le

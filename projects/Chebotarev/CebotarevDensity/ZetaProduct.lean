@@ -395,14 +395,14 @@ theorem dedekindZeta_local_factor_eq_product_artin_local
     haveI := 𝔓.2.1
     haveI hlo : 𝔓.1.LiesOver 𝔭 := 𝔓.2.2.1
     have hdeg : (𝔓.1.under (𝓞 K)).inertiaDeg' 𝔓.1 = f := by
-      rw [Ideal.inertiaDeg_algebraMap, hf]
+      rw [Ideal.inertiaDeg'_algebraMap, hf]
       exact finrank_residue_eq_orderOf K L σ (frobeniusClass K L 𝔭) (Quotient.out_eq _)
         𝔭 _hunr rfl 𝔓.1 hlo
     haveI : 𝔓.1.LiesOver (𝔓.1.under (𝓞 K)) := Ideal.over_under (A := 𝓞 K) (P := 𝔓.1)
     have hpubot : 𝔓.1.under (𝓞 K) ≠ ⊥ := hlo.over ▸ hpbot
     haveI : (𝔓.1.under (𝓞 K)).IsPrime := hlo.over ▸ ‹𝔭.IsPrime›
     have hnorm : Ideal.absNorm 𝔓.1 = Ideal.absNorm 𝔭 ^ f := by
-      rw [Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver 𝔓.1 (𝔓.1.under (𝓞 K)) inferInstance hpubot,
+      rw [Ideal.absNorm_eq_pow_inertiaDeg'_of_liesOver 𝔓.1 (𝔓.1.under (𝓞 K)) inferInstance hpubot,
         hdeg, ← hlo.over]
     rw [cpow_neg_absNorm_eq_pow f s hnorm, hY]
   rw [tprod_congr hterm, tprod_fintype, Finset.prod_const, Finset.card_univ,

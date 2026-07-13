@@ -268,7 +268,7 @@ lemma distinguishedPrimeAboveP_ramificationIdx_over_characterSubfield :
   have hPchar_ne : Pchar ≠ ⊥ :=
     Ring.ne_bot_of_isMaximal_of_not_isField inferInstance
       (RingOfIntegers.not_isField (characterSubfield (L := L) (p := p)))
-  rw [Ideal.ramificationIdx_eq_ramificationIdx' Pchar _ hPchar_ne]
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx Pchar _ hPchar_ne]
   exact (Ideal.ramificationIdxIn_eq_ramificationIdx
       (p := Pchar) (P := distinguishedPrimeAboveP p L) (G := ↥GBC)).symm.trans hmul
 
@@ -316,7 +316,7 @@ lemma jacobiSumLift_distinguishedPrimeExponent_dvd_pred
       (primeAboveP_ne_bot (p := p) (L := L) (P := distinguishedPrimeAboveP p L))
       inferInstance).irreducible
   have hemul :=
-    Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul
+    Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx'_mul
       (R := 𝓞 (characterSubfield (L := L) (p := p))) (S := 𝓞 L)
       (v := Pchar) (w := distinguishedPrimeAboveP p L)
       (I := Ideal.span ({xchar} : Set (𝓞 (characterSubfield (L := L) (p := p)))))

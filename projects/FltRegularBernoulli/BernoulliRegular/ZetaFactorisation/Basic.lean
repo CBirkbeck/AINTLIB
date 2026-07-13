@@ -849,7 +849,7 @@ lemma primesOver_inertiaDeg_eq_one_at_p (P : Ideal (𝓞 K))
     Int.ideal_span_isMaximal_of_prime p
   haveI hPmax : P.IsMaximal :=
     Ideal.IsMaximal.of_liesOver_isMaximal (p := Ideal.span {(p : ℤ)}) (P := P)
-  simp only [rationalPrimeIdeal, Ideal.inertiaDeg_eq_inertiaDeg']
+  simp only [rationalPrimeIdeal, Ideal.inertiaDeg'_eq_inertiaDeg]
   exact IsCyclotomicExtension.Rat.inertiaDeg_eq_of_prime p K P
 
 lemma primesOver_ramificationIdx_eq_prime_sub_one_at_p (P : Ideal (𝓞 K))
@@ -861,7 +861,7 @@ lemma primesOver_ramificationIdx_eq_prime_sub_one_at_p (P : Ideal (𝓞 K))
   have hp_ne : (Ideal.span {(p : ℤ)} : Ideal ℤ) ≠ ⊥ := by
     simp [hp.out.ne_zero]
   simp only [rationalPrimeIdeal]
-  rw [Ideal.ramificationIdx_eq_ramificationIdx' (Ideal.span {(p : ℤ)}) P hp_ne]
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx (Ideal.span {(p : ℤ)}) P hp_ne]
   exact IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime p K P
 
 lemma primesOver_at_p_package :
@@ -885,7 +885,7 @@ lemma primesOver_inertiaDeg_eq_localResidueDegree {ℓ : ℕ} [Fact ℓ.Prime]
   haveI hbase : (Ideal.span {(ℓ : ℤ)} : Ideal ℤ).IsMaximal := Int.ideal_span_isMaximal_of_prime ℓ
   haveI hPmax : P.IsMaximal :=
     Ideal.IsMaximal.of_liesOver_isMaximal (p := Ideal.span {(ℓ : ℤ)}) (P := P)
-  simp only [rationalPrimeIdeal, Ideal.inertiaDeg_eq_inertiaDeg',
+  simp only [rationalPrimeIdeal, Ideal.inertiaDeg'_eq_inertiaDeg,
     IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd ℓ K P hcop]
   unfold localResidueDegree unitOfPrimeNe
   rw [← orderOf_units]
@@ -902,7 +902,7 @@ lemma primesOver_ramificationIdx_eq_one {ℓ : ℕ} [Fact ℓ.Prime]
   have hℓ_ne : (Ideal.span {(ℓ : ℤ)} : Ideal ℤ) ≠ ⊥ := by
     simp [(Fact.out : ℓ.Prime).ne_zero]
   simp only [rationalPrimeIdeal]
-  rw [Ideal.ramificationIdx_eq_ramificationIdx' (Ideal.span {(ℓ : ℤ)}) P hℓ_ne]
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx (Ideal.span {(ℓ : ℤ)}) P hℓ_ne]
   exact IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd ℓ K P hcop
 
 lemma ncard_primesOver_eq_localPrimeCount {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : ℓ ≠ p) :

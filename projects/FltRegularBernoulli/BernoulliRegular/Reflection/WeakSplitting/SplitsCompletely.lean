@@ -113,8 +113,8 @@ theorem splitsCompletely_iff_card_primesOverFinset_eq_finrank
     haveI : Q.LiesOver p := ((IsDedekindDomain.mem_primesOverFinset_iff hp0 _).mp hQ).2
     refine Right.one_le_mul ?_ ?_
     · exact Nat.pos_iff_ne_zero.mpr <|
-        _root_.Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver _ hp0
-    · exact Nat.pos_iff_ne_zero.mpr <| _root_.Ideal.inertiaDeg_ne_zero _ _
+        _root_.Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver _ hp0
+    · exact Nat.pos_iff_ne_zero.mpr <| _root_.Ideal.inertiaDeg'_ne_zero _ _
   have hsum_eq : ∑ _Q ∈ IsDedekindDomain.primesOverFinset p S, 1 =
       ∑ Q ∈ IsDedekindDomain.primesOverFinset p S,
         p.ramificationIdx' Q * p.inertiaDeg' Q := by

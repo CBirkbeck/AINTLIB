@@ -509,7 +509,7 @@ theorem inertiaDeg_eq_one_of_under_eq [IsAlgClosed F] [IsIntegrallyClosed C₂.C
       obtain ⟨c, hc⟩ := hbijP.2 w
       exact ⟨residueAway Af Q c,
         (algebraMap_quotient_residueAway C₂ Af hPq c).trans hc⟩
-  rw [Ideal.inertiaDeg_algebraMap]
+  rw [Ideal.inertiaDeg'_algebraMap]
   have he := (AlgEquiv.ofBijective (Algebra.ofId (Af ⧸ awayIdealAt Af Q)
       ((integralClosure Af C₁.FunctionField) ⧸ P)) hbij').toLinearEquiv.finrank_eq
   rw [← he, Module.finrank_self]

@@ -226,7 +226,7 @@ theorem multiplicity_zetaPrime_even_of_map_eq_span [IsCMField K]
     (Ideal.prime_of_isPrime hPPlus0 inferInstance).irreducible
   have hemul : emultiplicity P (I.map f) = PPlus.ramificationIdx' P * emultiplicity PPlus I := by
     simpa [P, PPlus, f] using
-      Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul
+      Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx'_mul
         (R := 𝓞 (NumberField.maximalRealSubfield K)) (S := 𝓞 K)
         (v := PPlus) (w := P) (I := I) hI0 hPPlusIrr hPIrr hP0
   have hcount_even :

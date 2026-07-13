@@ -2325,7 +2325,7 @@ The carrier-side ramification index of the order-based kernel prime
 equals `2`. This is the precise residual content of `bridge_Biii_ord_eq_neg_two_v2`.
 
 **This theorem is now proved** (no bare `sorry`) by reducing to ideal membership
-via `Ideal.ramificationIdx_spec` with `n = 2`: writing `xc := algebraMap
+via `Ideal.ramificationIdx'_spec` with `n = 2`: writing `xc := algebraMap
 (Polynomial K) carrier X` (image `f⁻¹` in `LinfAt f`, so `xIdeal.map = span {xc}`),
 
   `ramificationIdx' (algebraMap) (X) P_T = 2`
@@ -2386,7 +2386,7 @@ theorem Sinf_ramificationIdx_eq_two_at_kernel
     rw [Curves.RamificationAtInfinity.xIdeal, Ideal.map_span, Set.image_singleton]
   -- Step 3: `ramificationIdx' = 2` via `ramificationIdx_spec` with `n = 2`:
   --   `xIdeal.map ≤ P_T ^ 2`  and  `¬ xIdeal.map ≤ P_T ^ 3`.
-  refine Ideal.ramificationIdx_spec ?_ ?_
+  refine Ideal.ramificationIdx'_spec ?_ ?_
   · -- `xIdeal.map ≤ P_T ^ 2`, i.e. `xc ∈ P_T ^ 2`.  RESIDUAL direction:
     -- `2 ≤ ord_T(image xc) = 2 ⟹ xc ∈ P_T ^ 2`.
     rw [h_map, Ideal.span_singleton_le_iff_mem]
@@ -3723,13 +3723,13 @@ theorem Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_of_finrank_witness
     have h_f_pos := Ideal.inertiaDeg'_pos
       (Curves.RamificationAtInfinity.xIdeal (k := K)) Q
     -- For Q ∈ primesOverFinset, ramificationIdx' ≥ 1 via the LiesOver fact
-    -- (`Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver`).
+    -- (`Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver`).
     have h_e_pos : 1 ≤ (-(data.ordAt Q)).toNat := by
       rw [data.toNat_neg_ordAt_eq_ramificationIdx Q]
       letI := data.isTorsionFree
       have h_ne_zero : Ideal.ramificationIdx'
           (Curves.RamificationAtInfinity.xIdeal (k := K)) Q ≠ 0 :=
-        Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver Q
+        Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver Q
           Curves.RamificationAtInfinity.xIdeal_ne_bot
       omega
     calc (1 : ℕ) = 1 * 1 := by ring

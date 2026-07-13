@@ -1761,7 +1761,7 @@ private theorem one_le_ramificationIdx_of_mem_primesOver (Q : C₂.SmoothPoint)
   haveI : P'.LiesOver (C₂.maximalIdealAt Q) := hP'lies
   have hp0 : C₂.maximalIdealAt Q ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
   rw [Nat.one_le_iff_ne_zero]
-  exact Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver P' hp0
+  exact Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver P' hp0
 
 /-- **The fibre over `m_Q` as a `primesOver`-`toFinset`**: the explicit fibre finset
 `IsDedekindDomain.primesOverFinset m_Q B` equals `((m_Q).primesOver B).toFinset`.  Both name the

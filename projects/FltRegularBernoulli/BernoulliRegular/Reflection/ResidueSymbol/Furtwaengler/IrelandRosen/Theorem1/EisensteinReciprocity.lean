@@ -327,7 +327,7 @@ noncomputable def canonicalPrimeSourceData
       q.inertiaDeg' Q = orderOf (ℓ : ZMod m) := by
     have hn : ℓ * m = ℓ ^ (0 + 1) * m := by
       simp
-    rw [Ideal.inertiaDeg_eq_inertiaDeg']
+    rw [Ideal.inertiaDeg'_eq_inertiaDeg]
     simpa [q] using
       (IsCyclotomicExtension.Rat.inertiaDeg_eq
         (n := ℓ * m) (p := ℓ) (k := 0) (m := m)
@@ -341,7 +341,7 @@ noncomputable def canonicalPrimeSourceData
       (ℓ := ℓ) (f := q.inertiaDeg' P) hℓ_prime_nat.two_le hf_pos
   have h_inertia_tower :
       q.inertiaDeg' Q = q.inertiaDeg' P * P.inertiaDeg' Q :=
-    Ideal.inertiaDeg_algebra_tower q P Q
+    Ideal.inertiaDeg'_algebra_tower q P Q
   have h_inertia_one : P.inertiaDeg' Q = 1 := by
     have hmul : q.inertiaDeg' P * P.inertiaDeg' Q = q.inertiaDeg' P * 1 := by
       rw [← h_inertia_tower, h_abs_inertia, h_order_m, mul_one]
@@ -350,27 +350,27 @@ noncomputable def canonicalPrimeSourceData
       q.ramificationIdx' Q = ℓ - 1 := by
     have hn : ℓ * m = ℓ ^ (0 + 1) * m := by
       simp
-    rw [Ideal.ramificationIdx_eq_ramificationIdx' q Q hq_ne]
+    rw [Ideal.ramificationIdx'_eq_ramificationIdx q Q hq_ne]
     simpa [q] using
       (IsCyclotomicExtension.Rat.ramificationIdx_eq
         (n := ℓ * m) (p := ℓ) (k := 0) (m := m)
         (K := R') (P := Q) hn hm_not_dvd_ell)
   have h_base_ram :
       q.ramificationIdx' P = 1 := by
-    rw [Ideal.ramificationIdx_eq_ramificationIdx' q P hq_ne]
+    rw [Ideal.ramificationIdx'_eq_ramificationIdx q P hq_ne]
     simpa [q] using
       (IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd
         (p := ℓ) (m := p) (K := K) (P := P)
         (prime_not_dvd_of_coprime hℓ_prime_nat hℓp))
   have h_ram_tower :
       q.ramificationIdx' Q = q.ramificationIdx' P * P.ramificationIdx' Q :=
-    Ideal.ramificationIdx_algebra_tower' (p := q) (P := P) (Q := Q)
+    Ideal.ramificationIdx'_algebra_tower' (p := q) (P := P) (Q := Q)
   have h_rel_ram : P.ramificationIdx' Q = ℓ - 1 := by
     rw [h_base_ram, one_mul] at h_ram_tower
     rw [← h_ram_tower, h_abs_ram]
   have h_base_inertia :
       q.inertiaDeg' P = orderOf (ℓ : ZMod p) := by
-    rw [Ideal.inertiaDeg_eq_inertiaDeg']
+    rw [Ideal.inertiaDeg'_eq_inertiaDeg]
     simpa [q] using
       (IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd
         (p := ℓ) (m := p) (K := K) (P := P)

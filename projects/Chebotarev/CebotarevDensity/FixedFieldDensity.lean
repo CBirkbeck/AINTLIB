@@ -293,13 +293,13 @@ private theorem stabilizer_intermediate_eq_top_of_frobenius
     exact IsGalois.to_isSeparable
   have hmem : σ ∈ MulAction.stabilizer Gal(L/K) 𝔓 := hfrob.mem_stabilizer
   have hinertK : (𝔓.under (𝓞 K)).inertiaDeg' 𝔓 = orderOf σ := by
-    rw [Ideal.inertiaDeg_algebraMap, orderOf_eq_finrank_of_isArithFrobAt K L σ 𝔓 hraK hfrob]
+    rw [Ideal.inertiaDeg'_algebraMap, orderOf_eq_finrank_of_isArithFrobAt K L σ 𝔓 hraK hfrob]
   have hcardstab' : Nat.card (MulAction.stabilizer Gal(L/K) 𝔓) = orderOf σ := by
     rw [Ideal.card_stabilizer_eq (𝔓.under (𝓞 K)) 𝔓,
       Ideal.ramificationIdxIn_eq_ramificationIdx (𝔓.under (𝓞 K)) 𝔓 Gal(L/K),
-      ← Ideal.ramificationIdx_eq_ramificationIdx' (𝔓.under (𝓞 K)) 𝔓 hpbot, hraK, one_mul,
+      ← Ideal.ramificationIdx'_eq_ramificationIdx (𝔓.under (𝓞 K)) 𝔓 hpbot, hraK, one_mul,
       Ideal.inertiaDegIn_eq_inertiaDeg (𝔓.under (𝓞 K)) 𝔓 Gal(L/K),
-      ← Ideal.inertiaDeg_eq_inertiaDeg' (𝔓.under (𝓞 K)) 𝔓, hinertK]
+      ← Ideal.inertiaDeg'_eq_inertiaDeg (𝔓.under (𝓞 K)) 𝔓, hinertK]
   have hstab : Subgroup.zpowers σ = MulAction.stabilizer Gal(L/K) 𝔓 :=
     Subgroup.eq_of_le_of_card_ge (by rwa [Subgroup.zpowers_le])
       (by rw [Nat.card_zpowers, hcardstab'])
@@ -352,7 +352,7 @@ private theorem inertiaDeg_under_E_eq_one_of_frobenius
   have hpEbot : 𝔓.under (𝓞 ↥E) ≠ ⊥ := Ideal.IsIntegral.comap_ne_bot (𝓞 ↥E) hPbot
   haveI : (𝔓.under (𝓞 ↥E)).IsMaximal := hPEp.isMaximal hpEbot
   have hraE : Ideal.ramificationIdx' (𝔓.under (𝓞 ↥E)) 𝔓 = 1 := by
-    have htower := Ideal.ramificationIdx_algebra_tower' (𝔓.under (𝓞 K)) (𝔓.under (𝓞 ↥E)) 𝔓
+    have htower := Ideal.ramificationIdx'_algebra_tower' (𝔓.under (𝓞 K)) (𝔓.under (𝓞 ↥E)) 𝔓
     rw [hraK] at htower
     exact Nat.eq_one_of_mul_eq_one_left htower.symm
   haveI : Algebra.IsSeparable (𝓞 ↥E ⧸ 𝔓.under (𝓞 ↥E)) (𝓞 L ⧸ 𝔓) := by
@@ -366,18 +366,18 @@ private theorem inertiaDeg_under_E_eq_one_of_frobenius
     Ideal.card_stabilizer_eq (𝔓.under (𝓞 ↥E)) 𝔓
   rw [hstabE, Subgroup.card_top,
     Ideal.ramificationIdxIn_eq_ramificationIdx (𝔓.under (𝓞 ↥E)) 𝔓 Gal(L/(↥E)),
-    ← Ideal.ramificationIdx_eq_ramificationIdx' (𝔓.under (𝓞 ↥E)) 𝔓 hpEbot, hraE, one_mul,
+    ← Ideal.ramificationIdx'_eq_ramificationIdx (𝔓.under (𝓞 ↥E)) 𝔓 hpEbot, hraE, one_mul,
     Ideal.inertiaDegIn_eq_inertiaDeg (𝔓.under (𝓞 ↥E)) 𝔓 Gal(L/(↥E)),
-    ← Ideal.inertiaDeg_eq_inertiaDeg' (𝔓.under (𝓞 ↥E)) 𝔓,
-    Ideal.inertiaDeg_algebraMap] at hcardE
+    ← Ideal.inertiaDeg'_eq_inertiaDeg (𝔓.under (𝓞 ↥E)) 𝔓,
+    Ideal.inertiaDeg'_algebraMap] at hcardE
   have hinertTower : (𝔓.under (𝓞 K)).inertiaDeg' 𝔓
       = (𝔓.under (𝓞 K)).inertiaDeg' (𝔓.under (𝓞 ↥E))
         * (𝔓.under (𝓞 ↥E)).inertiaDeg' 𝔓 :=
-    Ideal.inertiaDeg_algebra_tower (𝔓.under (𝓞 K)) (𝔓.under (𝓞 ↥E)) 𝔓
+    Ideal.inertiaDeg'_algebra_tower (𝔓.under (𝓞 K)) (𝔓.under (𝓞 ↥E)) 𝔓
   have hinertK : (𝔓.under (𝓞 K)).inertiaDeg' 𝔓 = orderOf σ := by
-    rw [Ideal.inertiaDeg_algebraMap, orderOf_eq_finrank_of_isArithFrobAt K L σ 𝔓 hraK hfrob]
+    rw [Ideal.inertiaDeg'_algebraMap, orderOf_eq_finrank_of_isArithFrobAt K L σ 𝔓 hraK hfrob]
   have hfPE : (𝔓.under (𝓞 ↥E)).inertiaDeg' 𝔓 = orderOf σ := by
-    rw [Ideal.inertiaDeg_algebraMap, ← hcardE, horderE]
+    rw [Ideal.inertiaDeg'_algebraMap, ← hcardE, horderE]
   have hpos : 0 < orderOf σ := orderOf_pos_iff.mpr (isOfFinOrder_of_finite σ)
   have hinertPK : (𝔓.under (𝓞 K)).inertiaDeg' (𝔓.under (𝓞 ↥E)) = 1 := by
     rw [hinertK, hfPE] at hinertTower
@@ -386,7 +386,7 @@ private theorem inertiaDeg_under_E_eq_one_of_frobenius
   have hnormP : Nat.card (𝓞 ↥E ⧸ 𝔓.under (𝓞 ↥E))
       = Nat.card (𝓞 K ⧸ 𝔓.under (𝓞 K)) ^ (𝔓.under (𝓞 K)).inertiaDeg' (𝔓.under (𝓞 ↥E)) := by
     simpa [Submodule.cardQuot_apply, Ideal.absNorm_apply] using
-      Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver (𝔓.under (𝓞 ↥E)) (𝔓.under (𝓞 K))
+      Ideal.absNorm_eq_pow_inertiaDeg'_of_liesOver (𝔓.under (𝓞 ↥E)) (𝔓.under (𝓞 K))
         inferInstance hpbot
   rw [hnormP, hinertPK, pow_one]
 
@@ -513,7 +513,7 @@ private theorem exists_arithFrobAt_over_fibrePrime
   have hnorm : Nat.card (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))
         ⧸ 𝔓.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ))))
       = Nat.card (𝓞 K ⧸ 𝔓.under (𝓞 K)) := by
-    have hnP := Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver
+    have hnP := Ideal.absNorm_eq_pow_inertiaDeg'_of_liesOver
       (𝔓.under (𝓞 ↥(IntermediateField.fixedField (Subgroup.zpowers σ)))) (𝔓.under (𝓞 K))
       inferInstance (UnramifiedIn.ne_bot K L hunrK)
     simp only [Submodule.cardQuot_apply, Ideal.absNorm_apply] at hnP ⊢
@@ -795,7 +795,7 @@ private theorem primeIdealZetaSum_fibre_eq_smul
     haveI := hPp
     have hpbot : P.under (𝓞 K) ≠ ⊥ := Ideal.IsIntegral.comap_ne_bot (𝓞 K) hPbot
     haveI : P.LiesOver (P.under (𝓞 K)) := Ideal.over_under (A := 𝓞 K) (P := P)
-    have hpow := Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver P (P.under (𝓞 K)) inferInstance hpbot
+    have hpow := Ideal.absNorm_eq_pow_inertiaDeg'_of_liesOver P (P.under (𝓞 K)) inferInstance hpbot
     rw [hPdeg, pow_one] at hpow
     rw [hpow]
   have hcardfib : ∀ 𝔭 : S', (orderOf σ * Nat.card (ConjClasses.mk σ).carrier) *
@@ -916,7 +916,7 @@ private theorem absNorm_rpow_neg_le_under_sq (σ : Gal(L/K))
   have hppr : (P.under (𝓞 K)).IsPrime := inferInstance
   have hpbot : P.under (𝓞 K) ≠ ⊥ := Ideal.IsIntegral.comap_ne_bot (𝓞 K) hPb
   haveI : P.LiesOver (P.under (𝓞 K)) := Ideal.over_under (A := 𝓞 K) (P := P)
-  have hpow := Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver P (P.under (𝓞 K)) hppr hpbot
+  have hpow := Ideal.absNorm_eq_pow_inertiaDeg'_of_liesOver P (P.under (𝓞 K)) hppr hpbot
   have hn2 : 2 ≤ Ideal.absNorm (P.under (𝓞 K)) := by
     have h0 : Ideal.absNorm (P.under (𝓞 K)) ≠ 0 := Ideal.absNorm_eq_zero_iff.not.mpr hpbot
     have h1 : Ideal.absNorm (P.under (𝓞 K)) ≠ 1 := Ideal.absNorm_eq_one_iff.not.mpr hppr.ne_top
@@ -950,7 +950,7 @@ private theorem card_primesOver_le_finrank (σ : Gal(L/K))
 /-- **The degree-`≥ 2` part of `T₂` is bounded by a constant.** For `1 < s`, the partial sum over
 the set `A` of primes `P` of `𝓞 E` whose underlying `K`-prime is unramified in `L` but of inertia
 degree `≥ 2` is bounded by `[E:K]·Σ_𝔭 N𝔭^{-2}`. Indeed `N P = N𝔭^{f}` with `f ≥ 2`
-(`Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver`), so `N P^{-s} ≤ N𝔭^{-2}` for `s ≥ 1` and
+(`Ideal.absNorm_eq_pow_inertiaDeg'_of_liesOver`), so `N P^{-s} ≤ N𝔭^{-2}` for `s ≥ 1` and
 `N𝔭 ≥ 2`; grouping the `E`-primes by their `K`-prime fibre (each of size `≤ [E:K]` via
 `Ideal.card_primesOverFinset_le_finrank`) gives the bound. -/
 private theorem primeIdealZetaSum_degTwo_le (σ : Gal(L/K)) {s : ℝ}

@@ -126,7 +126,7 @@ lemma characterSubfieldPrime_inertiaDeg_eq_one :
   haveI : (𝔭 : Ideal ℤ).IsMaximal := Int.ideal_span_isMaximal_of_prime p
   haveI : Pchar.IsMaximal :=
     Ideal.IsMaximal.of_liesOver_isMaximal (p := 𝔭) (P := Pchar)
-  rw [Ideal.inertiaDeg_eq_inertiaDeg',
+  rw [Ideal.inertiaDeg'_eq_inertiaDeg,
       IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd
         (p := p) (m := p - 1)
         (K := characterSubfield (L := L) (p := p)) (P := Pchar) hm]
@@ -144,7 +144,7 @@ lemma characterSubfieldPrime_quotient_finrank_eq_one :
       (𝓞 (characterSubfield (L := L) (p := p)) ⧸ Pchar) = 1 := by
   letI : (𝔭 : Ideal ℤ).IsMaximal := Int.ideal_span_isMaximal_of_prime p
   letI : Field (ℤ ⧸ 𝔭) := Ideal.Quotient.field 𝔭
-  rw [← Ideal.inertiaDeg_algebraMap (R := ℤ)
+  rw [← Ideal.inertiaDeg'_algebraMap (R := ℤ)
     (S := 𝓞 (characterSubfield (L := L) (p := p))) (p := 𝔭) (P := Pchar),
     characterSubfieldPrime_inertiaDeg_eq_one (p := p) (L := L) (Pchar := Pchar)]
 
