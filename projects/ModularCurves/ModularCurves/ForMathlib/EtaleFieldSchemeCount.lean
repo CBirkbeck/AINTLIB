@@ -29,4 +29,10 @@ theorem natCard_spec_carrier_eq_finrank (k A : Type u) [Field k] [CommRing A] [A
     Nat.card ↥(Spec (CommRingCat.of A)) = Module.finrank k A :=
   Algebra.FormallyEtale.natCard_primeSpectrum_eq_finrank k A
 
+/-- The source of a finite morphism to an affine scheme is affine (the affineness step of the
+finite-étale point count for the Y(N) torsion fibre). -/
+theorem isAffine_source_of_isFinite {k : Type u} [Field k] {Z : Scheme.{u}}
+    (f : Z ⟶ Spec (CommRingCat.of k)) [IsFinite f] : IsAffine Z :=
+  (HasAffineProperty.iff_of_isAffine (P := @IsAffineHom) (f := f)).mp inferInstance
+
 end AlgebraicGeometry
