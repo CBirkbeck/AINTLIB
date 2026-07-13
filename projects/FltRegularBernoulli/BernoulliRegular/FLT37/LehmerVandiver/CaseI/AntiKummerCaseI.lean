@@ -1,5 +1,5 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerL3
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer
+import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerL3
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Stage2Interface
 
 /-!
@@ -75,7 +75,7 @@ theorem intCast_add_zeta_mul_intCast_ne_zero
     (a : K) + ζ * (b : K) ≠ 0 := by
   intro h
   have hp_prime : p.Prime := Fact.out
-  haveI : NeZero (p : ℕ) := ⟨hp_prime.ne_zero⟩
+  have : NeZero (p : ℕ) := ⟨hp_prime.ne_zero⟩
   set f : Polynomial ℚ := C ((b : ℚ)) * X + C ((a : ℚ)) with hf_def
   have hb_rat : (b : ℚ) ≠ 0 := by exact_mod_cast hb
   have hf_ne : f ≠ 0 := by
@@ -515,7 +515,7 @@ theorem ramificationIdx_Lplus_over_Kplus_le_two_of_LK_unram
     ramificationIdx_Lplus_dvd_L_over_Kplus 𝔭 𝔓 𝔓_L
   have h_le : 𝔭.ramificationIdx' 𝔓_L ≤ 2 :=
     ramificationIdx_L_over_Kplus_le_two 𝔭 𝔭_K 𝔓_L h_LK_unram
-  haveI : 𝔓_L.LiesOver 𝔭 := Ideal.LiesOver.trans 𝔓_L 𝔓 𝔭
+  have : 𝔓_L.LiesOver 𝔭 := Ideal.LiesOver.trans 𝔓_L 𝔓 𝔭
   have h_pos : 0 < 𝔭.ramificationIdx' 𝔓_L :=
     Nat.pos_of_ne_zero <| Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver _ h𝔭_ne_bot
   exact (Nat.le_of_dvd h_pos h_dvd).trans h_le
@@ -537,7 +537,7 @@ theorem ramificationIdx_Lplus_over_Kplus_dvd_p
         (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne))))
     [h𝔓_prime : 𝔓.IsPrime] [h𝔓_over : 𝔓.LiesOver 𝔭] :
     𝔭.ramificationIdx' 𝔓 ∣ p := by
-  haveI hg : IsGalois (NumberField.maximalRealSubfield K)
+  have hg : IsGalois (NumberField.maximalRealSubfield K)
       (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerRealSubfield
         (p := p) (K := K) (α₀ := α₀) (hα₀ := hα₀) (h_irr := h_irr)
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerSigmaTildePkg
@@ -642,28 +642,28 @@ theorem antiKummerRealSubfield_isUnramified_from_K_unramified
   apply antiKummerRealSubfield_isUnramified_of_ram_bound
     (p := p) hp_odd α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne
   intro 𝔭 𝔓 hp_prime h𝔓_prime hp_bot h𝔓_over
-  haveI := hp_prime
-  haveI := h𝔓_prime
-  haveI := h𝔓_over
-  haveI hpm : 𝔭.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hp_bot hp_prime
+  have := hp_prime
+  have := h𝔓_prime
+  have := h𝔓_over
+  have hpm : 𝔭.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hp_bot hp_prime
   obtain ⟨𝔓_L, _, h𝔓_L_prime, h𝔓_L_over_𝔓⟩ :=
     Ideal.exists_ideal_over_prime_of_isIntegral (S := 𝓞 (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift
       (p := p) K α₀ hα₀)) 𝔓 (⊥ : Ideal (𝓞 (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift
       (p := p) K α₀ hα₀))) (by simp)
-  haveI : 𝔓_L.IsPrime := h𝔓_L_prime
-  haveI : 𝔓_L.LiesOver 𝔓 := ⟨h𝔓_L_over_𝔓.symm⟩
+  have : 𝔓_L.IsPrime := h𝔓_L_prime
+  have : 𝔓_L.LiesOver 𝔓 := ⟨h𝔓_L_over_𝔓.symm⟩
   set 𝔭_K : Ideal (𝓞 K) := 𝔓_L.under (𝓞 K) with h𝔭_K_def
-  haveI h𝔭_K_prime : 𝔭_K.IsPrime := Ideal.IsPrime.under (𝓞 K) 𝔓_L
-  haveI h𝔓_L_over_K : 𝔓_L.LiesOver 𝔭_K := ⟨rfl⟩
-  haveI h𝔓_L_over_𝔭 : 𝔓_L.LiesOver 𝔭 := Ideal.LiesOver.trans 𝔓_L 𝔓 𝔭
-  haveI h𝔭_K_over : 𝔭_K.LiesOver 𝔭 := Ideal.LiesOver.tower_bot (𝔓 := 𝔓_L) (P := 𝔭_K) (p := 𝔭)
+  have h𝔭_K_prime : 𝔭_K.IsPrime := Ideal.IsPrime.under (𝓞 K) 𝔓_L
+  have h𝔓_L_over_K : 𝔓_L.LiesOver 𝔭_K := ⟨rfl⟩
+  have h𝔓_L_over_𝔭 : 𝔓_L.LiesOver 𝔭 := Ideal.LiesOver.trans 𝔓_L 𝔓 𝔭
+  have h𝔭_K_over : 𝔭_K.LiesOver 𝔭 := Ideal.LiesOver.tower_bot (𝔓 := 𝔓_L) (P := 𝔭_K) (p := 𝔭)
   have h𝔭_K_ne_bot : 𝔭_K ≠ ⊥ := by
     intro h
     apply hp_bot
     have h_under : 𝔭 = 𝔭_K.under (𝓞 (NumberField.maximalRealSubfield K)) :=
       h𝔭_K_over.over
     rw [h_under, h, Ideal.under_bot]
-  haveI h_unram_at : Algebra.IsUnramifiedAt (𝓞 K) 𝔓_L :=
+  have h_unram_at : Algebra.IsUnramifiedAt (𝓞 K) 𝔓_L :=
     (Algebra.unramified_iff_forall (R := 𝓞 K)
       (A := 𝓞 (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift
         (p := p) K α₀ hα₀))).mp h_LK_unram ⟨𝔓_L, h𝔓_L_prime⟩
