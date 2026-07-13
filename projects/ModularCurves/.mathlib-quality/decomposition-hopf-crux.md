@@ -905,9 +905,16 @@ State after this session (file `GroupScheme/StableChartData.lean`, green, ONE so
 - SORRY: `chartPrecursorSpec_isClosedImmersion : IsClosedImmersion (Spec.map (ofHom β.toRingHom))`,
   `β := productMap includeLeft chartCoaction : B⊗[R]B →ₐ[R] B⊗[R]A` (B=chartRing, A=groupRing, R=baseRing).
 
-FINISH ROUTE for the sorry (all inputs in-tree). **UPDATE 2026-07-13b: Step 1 LANDED green** —
-the conjugation wrapper is proven, so the sorry is now the crisp `IsClosedImmersion g` with
-`g := e1.hom ≫ Spec.map (ofHom β) ≫ e2.inv` (a `set` in the proof). Steps 2–3 remain, all inside `IsClosedImmersion g`:
+FINISH ROUTE for the sorry (all inputs in-tree). **UPDATE 2026-07-13c: Steps 1–2 LANDED green.**
+Inside `chartPrecursorSpec_isClosedImmersion`: the conjugation wrapper (Step 1) + the two algebraic
+leg-lemmas `key_incL`/`key_incR` (Step 2 core: `β∘includeLeftRingHom = includeLeftRingHom` into B⊗A,
+`β∘includeRight = chartCoaction`) are all green. The sole remaining sorry is `IsClosedImmersion g`,
+`g := e1.hom ≫ Spec.map (ofHom β) ≫ e2.inv`. **Empirical finding: the remainder (Step 3) is a full-session
+geometric chart chase, NOT a quick finish** — it is the "unification meets a concrete scheme" minefield
+(crux risk #3): identify `g` (a map of Spec-pullbacks) with the chart-restricted `G.actPair.left` by
+transporting through `chartSpecIso`/`chartKunnethSchemeIso`/`chartCoactionSpec` (A⊗B-vs-B⊗A braiding
+throughout) and concluding via `MorphismProperty.IsStableUnderBaseChange.of_isPullback` on
+`isClosedImmersion_actPair_left`. Recommend a dedicated session. Route detail below (unchanged):
 1. **Conjugate by `pullbackSpecIso`.** `e1 := pullbackSpecIso R B A` (≅ Spec(B⊗A)),
    `e2 := pullbackSpecIso R B B` (≅ Spec(B⊗B)); the legs are `Spec.map (ofHom (algebraMap R B/A))`,
    which ARE the geometric structure maps (the algebra instances were *defined* as the `appLE`s).
@@ -949,3 +956,24 @@ session: the SIGNAL (six `SubgroupQuotient` pins) is blocked on FOUR independent
 `Module.Finite` + the Hopf-free precursor-surjectivity (reduced to (b)) are the only endgame pieces that
 sidestep the diamond, and both are now landed/reduced. Recommend: coordinator re-plans the endgame as a
 4-front effort, and pings p2 that the HopfAlgebra instance MUST extend the geometric algebra (diamond).
+
+## Appendix: CORRECTION (STREAM-G0, 2026-07-13d) — Front #1 was already landed; M6 achieved
+
+Both the "4-front SIGNAL block" (my 2026-07-13 re-scope) and v10.173's "build the HopfAlgebra
+instance via the OWN Γ-dual route" are **superseded**: `PatchHopf.instHopfAlgebraOpens :
+HopfAlgebra P.baseRing P.groupRing` (and `instBialgebraOpens`) ALREADY EXIST — built via
+`Bialgebra.ofAlgHom`/`HopfAlgebra.ofAlgHom` from the opens-level `comulAlg`/`counitAlg`/`antipodeAlg`,
+i.e. **over the geometric `AffineChartPatch` algebra instance**. So the "HopfAlgebra diamond" is a
+non-issue: it only arises if one introduces a *free* `[HopfAlgebra …]` variable (which shadows the
+ambient instance). Front #1 is DONE — nothing to build.
+
+Consequently **M6 is achieved** (`GroupScheme/StableChartData.lean`, green, 1 sorry):
+`isHopfGalois_chartCoaction : IsHopfGalois P.chartCoaction`, via the C1d assembly
+`chartData : StableAffineChartData` (ambient `instHopfAlgebraOpens` + `instModuleFiniteGroupRing`
++ `chartCoaction_isCoaction` + `chartCoaction_productMap_surjective`). Sole hypothesis
+`[Module.Free P.baseRing P.groupRing]` — freeness of `G` per chart, provided by `[HG-C3]`.
+
+**Revised remaining to SIGNAL** (all G0): (i) the C2 sorry `chartPrecursorSpec_isClosedImmersion`
+(geometric chart chase, finishable in a dedicated session, banked above); (ii) **[HG-C3]** stable
+affine cover (also supplies the `Module.Free` per-chart hypothesis) — NOT started; (iii) **[HG-C4]**
+glue (GlueData over the per-chart `isHopfGalois_chartCoaction`) → the six pins → SIGNAL ★★.

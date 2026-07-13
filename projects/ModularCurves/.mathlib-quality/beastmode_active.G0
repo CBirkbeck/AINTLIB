@@ -1,7 +1,11 @@
-FOCUS: STREAM-G0 [HOPF ENDGAME] (rule-5, v10.173 ratified). NO p2 — all 4 fronts are MINE. QUEUE (one marathon): #2 geom-heart → #1 HopfAlgebra instance → #3 C3 cover → #4 glue → SIGNAL ★★ → charter (B)/(C).
-File GroupScheme/StableChartData.lean (green, 1 sorry @ chartPrecursorSpec_isClosedImmersion):
- LANDED sorry-free: surjective_hom_of_isClosedImmersion_specMap (ForMathlib-flagged); instModuleFiniteGroupRing.
- chartCoaction_productMap_surjective PROVEN modulo the sorry. Step-1 conjugation wrapper green ⟹ sorry = IsClosedImmersion g, g=e1.hom≫Spec.map(ofHom β)≫e2.inv.
-NOW: #2 = finish IsClosedImmersion g. Steps: legs (g≫fst=fst, g≫snd=e1.hom≫Spec.map chartCoaction via pullbackSpecIso_inv_fst/snd + Spec.map_comp + productMap_left/right) ⟹ g=braiding∘actPair|chart; CI from isClosedImmersion_actPair_left. Chart chase (chartSpecIso A⊗B vs e1 B⊗A ⟹ comm/braiding).
-#1 route (crux ~line730): register Coalgebra baseRing groupRing (Γ-dual comul/counit on SubgroupGroupObject unitHom/mulHom); Bialgebra.mk' ([Algebra][Coalgebra] as ARGS ⟹ toAlgebra=geometric, diamond solved); HopfAlgebra antipode=Γ-dual invHom. NEVER free [HopfAlgebra]/fresh toAlgebra. p2 divisor-Hopf = read-only inventory. If antipode laws balloon: hypothesis-wire C1d/C4, board, return.
+FOCUS: STREAM-G0 [HOPF ENDGAME] (rule-5, v10.173). CORRECTION to world-model: Front #1 (HopfAlgebra) was ALREADY LANDED — PatchHopf.instHopfAlgebraOpens : HopfAlgebra baseRing groupRing, built via Bialgebra.ofAlgHom/HopfAlgebra.ofAlgHom over the GEOMETRIC algebra ⟹ NO diamond. Nothing to build there.
+
+MILESTONE M6 ACHIEVED (GroupScheme/StableChartData.lean, green, 1 sorry): isHopfGalois_chartCoaction : IsHopfGalois chartCoaction — the C1d assembly. Chain: chartData (StableAffineChartData) from ambient instHopfAlgebraOpens + instModuleFiniteGroupRing + chartCoaction_isCoaction + chartCoaction_productMap_surjective. Only hypothesis: [Module.Free baseRing groupRing] (freeness per chart, from C3 base-shrink; diamond-free).
+Also landed sorry-free: surjective_hom_of_isClosedImmersion_specMap (ForMathlib); instModuleFiniteGroupRing.
+
+REMAINING to SIGNAL ★★ (all mine, revised):
+ - C2 sorry: chartPrecursorSpec_isClosedImmersion = IsClosedImmersion g (g=e1.hom≫Spec.map(ofHom β)≫e2.inv). Wrapper+algebraic legs green; remainder = geometric chart chase (g=base-change of actPair.left via chartSpecIso; full session). Banked in crux doc.
+ - #3 C3 stable affine cover (also PROVIDES Module.Free per chart) — not started; first act /develop --decompose the appendix cover strategy.
+ - #4 C4 glue (GlueData) — consumes isHopfGalois_chartCoaction (M6, HAVE) → six pins.
+QUEUE now: C3 (unblocks Free + gives cover) → C4 glue → SIGNAL; C2 sorry finishable anytime (dedicated session). NEXT: C3 decompose OR C2 chart chase.
 Marathon. Pathspec commits only (siblings GH, KM, YN).

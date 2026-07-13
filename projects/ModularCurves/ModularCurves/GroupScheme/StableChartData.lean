@@ -3,7 +3,7 @@ import ModularCurves.GroupScheme.HopfGaloisCharts
 import ModularCurves.GroupScheme.ActPairImmersion
 
 /-!
-# The per-chart Hopf–Galois inputs (`[HG-C1d]`/`[HG-C2]` last mile)
+# The per-chart Hopf–Galois datum (`[HG-C1d]` assembly + `[HG-C2]` last mile)
 
 Construction support for `[CHARTER-HOPF]` Wave C (`.mathlib-quality/decomposition-hopf-crux.md`,
 appendix "Wave C — pin-map + C3 cover strategy"). On a `G`-stable affine chart patch `P`
@@ -13,23 +13,22 @@ appendix "Wave C — pin-map + C3 cover strategy"). On a `G`-stable affine chart
 * `isCoaction := P.chartCoaction_isCoaction` (`ChartCoaction`) — DONE upstream,
 * `precursorSurjective` — the `Γ`-dual of C2's `isClosedImmersion_actPair_left`.
 
-This file supplies the two non-co-action inputs that do **not** need the (not-yet-landed)
-`HopfAlgebra P.baseRing P.groupRing` instance:
+The chart group ring's **Hopf-algebra structure is already available**:
+`PatchHopf.instHopfAlgebraOpens : HopfAlgebra P.baseRing P.groupRing`, built via
+`Bialgebra.ofAlgHom`/`HopfAlgebra.ofAlgHom` from the opens-level `comulAlg`/`counitAlg`/`antipodeAlg`
+— i.e. **over the geometric `AffineChartPatch` algebra instance**, so there is no instance diamond
+(one only appears if a *free* `[HopfAlgebra …]` variable is introduced, which shadows the ambient
+instance with a fresh `Bialgebra`-derived algebra — this file never does that).
 
+This file supplies:
 * `instModuleFiniteGroupRing : Module.Finite P.baseRing P.groupRing` — from `G.π` finite.
-* `chartCoaction_productMap_surjective` — surjectivity of the Galois precursor written in the
-  **Hopf-free** form `productMap includeLeft chartCoaction`. Since
-  `galoisPrecursor R A ρ` is *by definition* `productMap includeLeft ρ` (the `HopfAlgebra`
-  hypothesis on its section is spurious for the map itself), this lemma discharges the
-  `precursorSurjective` field verbatim once the `HopfAlgebra` instance lands.
-
-**Boarded blocker (the HopfAlgebra diamond).** Feeding `P.chartCoaction` into M5 (the C1d
-`StableAffineChartData` assembly and `IsHopfGalois P.chartCoaction`) is blocked until p2's
-Hopf-instance layer provides `HopfAlgebra P.baseRing P.groupRing` **whose underlying
-`Algebra P.baseRing P.groupRing` is (defeq to) the geometric `AffineChartPatch` instance** —
-a free `[HopfAlgebra …]` variable supplies its own `Bialgebra`-derived algebra instance, which
-does not match the geometric one that `chartCoaction` is typed against. The two lemmas here are
-exactly the parts of that assembly that sidestep the diamond.
+* `chartCoaction_productMap_surjective` — surjectivity of the Galois precursor (the `Γ`-dual of
+  `isClosedImmersion_actPair_left`); reduced to the one geometric sorry
+  `chartPrecursorSpec_isClosedImmersion`.
+* `chartData` / `isHopfGalois_chartCoaction` — the **C1d assembly**: `IsHopfGalois P.chartCoaction`
+  (the M6 milestone), consumed by `isColimit_of_isHopfGalois` in the `[HG-C4]` glue. The sole
+  hypothesis is `Module.Free P.baseRing P.groupRing` (freeness of `G` per chart, from `[HG-C3]`
+  base-shrinking; diamond-free to hypothesis-wire).
 -/
 
 open AlgebraicGeometry CategoryTheory Limits
@@ -137,9 +136,9 @@ theorem chartPrecursorSpec_isClosedImmersion :
 /-- **`[HG-C2]` last mile — the Galois precursor is surjective on the chart.** The `Spec` of the
 Galois precursor is a closed immersion (`chartPrecursorSpec_isClosedImmersion`), and its target
 `Spec (B ⊗[R] B)` is affine, so the precursor — in the Hopf-free form
-`productMap includeLeft chartCoaction : B ⊗[R] B →ₐ[R] B ⊗[R] A` — is surjective. This is the
-`precursorSurjective` field of `StableAffineChartData` (`galoisPrecursor R A ρ` unfolds to this
-product map, so once `HopfAlgebra P.baseRing P.groupRing` lands this discharges that field). -/
+`productMap includeLeft chartCoaction : B ⊗[R] B →ₐ[R] B ⊗[R] A` — is surjective. Since
+`galoisPrecursor R A ρ` unfolds to this product map, this directly discharges the
+`precursorSurjective` field of `StableAffineChartData` (see `chartData`). -/
 theorem chartCoaction_productMap_surjective :
     Function.Surjective (Algebra.TensorProduct.productMap
       (Algebra.TensorProduct.includeLeft (R := P.baseRing) (A := P.chartRing) (B := P.groupRing))
@@ -149,6 +148,28 @@ theorem chartCoaction_productMap_surjective :
     (CommRingCat.ofHom (Algebra.TensorProduct.productMap
       (Algebra.TensorProduct.includeLeft (R := P.baseRing) (A := P.chartRing) (B := P.groupRing))
       P.chartCoaction).toRingHom)
+
+variable [Module.Free P.baseRing P.groupRing]
+
+/-- **`[HG-C1d]`: the per-chart Hopf–Galois datum.** With the chart group-ring's Hopf-algebra
+structure (`PatchHopf.instHopfAlgebraOpens`, built via `Bialgebra.ofAlgHom`/`HopfAlgebra.ofAlgHom`
+over the **geometric** algebra — so no instance diamond) and its finiteness
+(`instModuleFiniteGroupRing`), the proven co-action `chartCoaction`, its `IsCoaction` proof
+(`chartCoaction_isCoaction`), and the precursor surjectivity (`chartCoaction_productMap_surjective`)
+assemble into a `StableAffineChartData`. The lone hypothesis `Module.Free P.baseRing P.groupRing` is
+the freeness of `G` per chart, provided by shrinking the base patch in `[HG-C3]` (it bundles no
+competing algebra instance, so hypothesis-wiring it is diamond-free). -/
+noncomputable def chartData : StableAffineChartData P.baseRing P.groupRing P.chartRing where
+  coaction := P.chartCoaction
+  isCoaction := P.chartCoaction_isCoaction
+  precursorSurjective := P.chartCoaction_productMap_surjective
+
+/-- **The chart co-action is Hopf–Galois** (`[HG-C1d]` → M5): the abstract Hopf–Galois theorem
+(`StableAffineChartData.isHopfGalois`) applied to the chart datum. This is the per-chart property
+consumed by `isColimit_of_isHopfGalois` in the `[HG-C4]` glue that discharges the six
+`SubgroupQuotient` pins. -/
+theorem isHopfGalois_chartCoaction : IsHopfGalois P.chartCoaction :=
+  P.chartData.isHopfGalois
 
 end AffineChartPatch
 
