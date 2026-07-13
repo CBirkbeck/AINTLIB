@@ -19,9 +19,12 @@ open scoped NumberField
 
 namespace BernoulliRegular
 
-open Finset
-
+-- Hides 2 warnings: two theorems below do not use all of the section instances. Removing it
+-- needs `omit`, which drops those binders and so changes the statements — generalisation
+-- work (see the linter-suppression census), not cleanup.
 set_option linter.unusedSectionVars false
+
+open Finset
 
 attribute [local instance] Fintype.ofFinite
 attribute [local instance] NumberField.Units.instZLattice_unitLattice
@@ -130,7 +133,7 @@ theorem cyclotomicUnitFreePart_rank_add_one_eq_evenDelta_card_zmod
     (hp_gt_two : 2 < p) :
     (NumberField.Units.rank K : ZMod p) + 1 =
       (Fintype.card (CyclotomicEvenDelta p) : ZMod p) := by
-  have h := congrArg (fun n : ℕ => (n : ZMod p))
+  have h := congrArg (fun n : ℕ ↦ (n : ZMod p))
     (cyclotomicUnitFreePart_rank_add_one_eq_evenDelta_card
       (p := p) (K := K) hp_gt_two)
   simpa [Nat.cast_add, Nat.cast_one] using h
@@ -142,7 +145,7 @@ theorem cyclotomicUnitFreePartModP_finrank_eq_evenDeltaNontrivialCharacter_card
     (hp_gt_two : 2 < p) :
     Module.finrank (ZMod p) (CyclotomicUnitFreePartModP (p := p) K) =
       ((Finset.univ : Finset (MulChar (CyclotomicEvenDelta p) (ZMod p))).filter
-        (fun χ => χ ≠ 1)).card := by
+        (fun χ ↦ χ ≠ 1)).card := by
   rw [cyclotomicUnitFreePartModP_finrank_eq (p := p) (K := K) hp_gt_two,
     evenDeltaNontrivialCharacter_card_eq (p := p) hp_gt_two]
 
@@ -366,7 +369,7 @@ theorem cyclotomicUnitFreePartModPEvenCharacterProjector_trace_of_ne_one
         (cyclotomicUnitFreePartModPEvenCharacterProjector
           (p := p) K hp_gt_two χ) = 1 := by
   classical
-  letI : Invertible (Fintype.card (CyclotomicEvenDelta p) : ZMod p) :=
+  let : Invertible (Fintype.card (CyclotomicEvenDelta p) : ZMod p) :=
     cyclotomicEvenDeltaCardInvertibleZMod (p := p) hp_gt_two
   let ρ := cyclotomicUnitFreePartModPEvenRepresentation (p := p) K hp_gt_two
   suffices
@@ -390,7 +393,7 @@ theorem cyclotomicUnitFreePartModPEvenCharacterProjector_trace_of_ne_one
       (p := p) (K := K) hp_gt_two x⁻¹]
     by_cases hx : x = 1
     · simp [hx]
-    · have hxinv : x⁻¹ ≠ 1 := fun h =>
+    · have hxinv : x⁻¹ ≠ 1 := fun h ↦
         hx (inv_eq_one.mp h)
       rw [if_neg hxinv, if_neg hx]
   simp_rw [htrace]
