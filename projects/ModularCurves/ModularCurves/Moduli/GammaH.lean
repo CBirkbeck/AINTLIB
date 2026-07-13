@@ -992,7 +992,7 @@ noncomputable def gammaFullDrinfeldProblem (N : ℕ) [NeZero N] : ModuliProblem 
   obj X := { PQ : X.unop.curve.Section × X.unop.curve.Section //
     X.unop.curve.IsFullLevel N PQ.1 PQ.2 }
   map f := ↾fun PQ => ⟨⟨EllHom.pullSection R f.unop PQ.1.1,
-    EllHom.pullSection R f.unop PQ.1.2⟩, by sorry⟩
+    EllHom.pullSection R f.unop PQ.1.2⟩, EllHom.isFullLevel_pullSection R f.unop PQ.2⟩
   map_id X := by
     ext PQ
     · exact congrArg Subtype.val (EllHom.pullSection_id R PQ.1.1)
