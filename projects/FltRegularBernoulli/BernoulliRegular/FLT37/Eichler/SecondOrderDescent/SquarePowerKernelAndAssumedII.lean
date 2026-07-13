@@ -109,7 +109,7 @@ theorem caseII_pow37_sub_intCast_pow37_mem_37sq
     {x : 𝓞 K} {c : ℤ} (h : (37 : 𝓞 K) ∣ (x - (c : 𝓞 K))) :
     ((37 : 𝓞 K) ^ 2) ∣ (x ^ 37 - ((c ^ 37 : ℤ) : 𝓞 K)) := by
   have := caseII_pow37_sub_pow37_mem_37sq (K := K) (x := x) (y := (c : 𝓞 K)) h
-  rwa [show (((c : 𝓞 K)) ^ 37) = ((c ^ 37 : ℤ) : 𝓞 K) from by push_cast; ring] at this
+  rwa [show (((c : 𝓞 K)) ^ 37) = ((c ^ 37 : ℤ) : 𝓞 K) by push_cast; ring] at this
 
 /-! ## 2. The Corollary-8.23 second-order non-degeneracy `M ≤ 1`, genuinely proven
 
@@ -314,7 +314,7 @@ theorem caseIIOmega32_assumptionII_of_cor823
     (h_modSq : Cor823DescentUnitModSqCongruence37)
     (h_cor823 : Cor823PthPowerOfRationalModSq37) :
     WashingtonCaseIIExactQuotientUnitPower37Source := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   intro hV hSO m D x' y' z' ε₁ ε₂ ε₃ hx hy hz heq
   -- Theorem-9.4 producer-`μ` congruence: a real twist `ν` with `(ε₁/ε₂)·(map ν)^{37} ≡ c mod 37²`.
   obtain ⟨ν, c, hc⟩ := h_modSq hV hSO D hx hy hz heq
@@ -404,7 +404,7 @@ theorem caseIICor823_descentUnitModSqCongruence37_of_pthPower
   -- The corrected unit equals `w^{37}`; apply the `37²`-power kernel to `w ≡ c (mod 37)`.
   rw [hfac]
   rw [show (((w ^ 37 : (𝓞 (CyclotomicField 37 ℚ))ˣ)) : 𝓞 (CyclotomicField 37 ℚ)) =
-      (w : 𝓞 (CyclotomicField 37 ℚ)) ^ 37 from by rw [Units.val_pow_eq_pow_val]]
+      (w : 𝓞 (CyclotomicField 37 ℚ)) ^ 37 by rw [Units.val_pow_eq_pow_val]]
   exact caseII_pow37_sub_intCast_pow37_mem_37sq hwc
 
 open FLT37.LehmerVandiver.CaseII in
