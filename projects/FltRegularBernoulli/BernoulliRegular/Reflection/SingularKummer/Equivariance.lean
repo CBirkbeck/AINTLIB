@@ -24,8 +24,6 @@ namespace BernoulliRegular
 namespace Reflection
 namespace SingularKummer
 
-set_option linter.unusedSectionVars false
-
 variable (R K : Type*) [CommRing R] [IsDomain R]
 variable [Field K] [Algebra R K] [IsFractionRing R K]
 
@@ -50,6 +48,7 @@ namespace PrincipalIdealPreservingEquiv
 variable {R K}
 variable (A : PrincipalIdealPreservingEquiv R K)
 
+omit [IsDomain R] in
 /-- Principal fractional ideals are preserved as a subgroup. -/
 theorem map_principalSubgroup :
     (toPrincipalIdeal R K).range.map A.idealEquiv =
@@ -150,16 +149,19 @@ def singularPairEquiv (p : ℕ) : SingularPair R K p ≃* SingularPair R K p whe
     apply Subtype.ext
     apply Prod.ext <;> simp [ideal, generator]
 
+omit [IsDomain R] in
 @[simp]
 theorem singularPairEquiv_ideal (p : ℕ) (s : SingularPair R K p) :
     ideal (A.singularPairEquiv p s) = A.idealEquiv (ideal s) :=
   rfl
 
+omit [IsDomain R] in
 @[simp]
 theorem singularPairEquiv_generator (p : ℕ) (s : SingularPair R K p) :
     generator (A.singularPairEquiv p s) = A.unitEquiv (generator s) :=
   rfl
 
+omit [IsDomain R] in
 @[simp]
 theorem singularPairEquiv_principalPair (p : ℕ) (gamma : Kˣ) :
     A.singularPairEquiv p (principalPair (R := R) (K := K) p gamma) =
@@ -172,6 +174,7 @@ theorem singularPairEquiv_principalPair (p : ℕ) (gamma : Kˣ) :
   · change A.unitEquiv (gamma ^ p) = A.unitEquiv gamma ^ p
     simp
 
+omit [IsDomain R] in
 /-- Principal pairs are preserved as a subgroup. -/
 theorem map_principalPairSubgroup (p : ℕ) :
     (principalPairSubgroup (R := R) (K := K) p).map (A.singularPairEquiv p) =
@@ -195,6 +198,7 @@ def singularGroupEquiv (p : ℕ) :
     (A.singularPairEquiv p)
     (A.map_principalPairSubgroup p)
 
+omit [IsDomain R] in
 @[simp]
 theorem singularGroupEquiv_mk (p : ℕ) (s : SingularPair R K p) :
     A.singularGroupEquiv p
@@ -224,12 +228,14 @@ def fractionalUnitEquiv :
     apply Subtype.ext
     simp
 
+omit [IsDomain R] in
 @[simp]
 theorem fractionalUnitEquiv_apply_coe
     (u : fractionalUnitSubgroup (R := R) (K := K)) :
     (A.fractionalUnitEquiv u : Kˣ) = A.unitEquiv u.1 :=
   rfl
 
+omit [IsDomain R] in
 @[simp]
 theorem singularPairEquiv_unitPair (p : ℕ)
     (u : fractionalUnitSubgroup (R := R) (K := K)) :
@@ -241,6 +247,7 @@ theorem singularPairEquiv_unitPair (p : ℕ)
     simp
   · rfl
 
+omit [IsDomain R] in
 /-- The unit map into the singular quotient is equivariant. -/
 theorem unitToSingularGroup_equivariant (p : ℕ)
     (u : fractionalUnitSubgroup (R := R) (K := K)) :
