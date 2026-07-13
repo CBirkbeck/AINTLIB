@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.Representability
+import ModularCurves.Moduli.OmegaFunctor
 
 /-!
 # The KM 4.7 bootstrap objects (T-E12–T-E15)
@@ -31,19 +32,17 @@ holds the two **bootstrap objects** it consumes, i.e. the `δ`'s and their axiom
   `Spec ℤ[1/3][β, γ][((a₁³ − 27a₃)a₃)⁻¹]/(β³ − (β+γ)³)` with `a₁ = 3γ − 1`,
   `a₃ = −3γ² − β − 3βγ`, `P = (0,0)`, `Q = (γ, β+γ)`.
 * **T-E12 (`M₁ = Spec ℤ[1/6, g₂, g₃, Δ⁻¹]`)**, **T-E13 (`Aut_S(E, ω) = {1}`)** and
-  **T-E14 (Legendre, `M'₂ = Spec ℤ[1/2, λ, (λ(λ−1))⁻¹]`)** — **NOT statable yet.** All three
-  quantify over an `S`-basis `ω` of the invariant differentials `ω_{E/S}` (KM 4.6.2
-  verbatim: *"pairs `(φ₂, ω)` consisting of an `S`-group-scheme isomorphism
-  `φ₂ : (ℤ/2ℤ)² ≅ E[2]` together with an `S`-basis `ω` of `ω_{E/S}`…"*), and **`ω_{E/S}`
-  exists neither in mathlib (no relative differentials for schemes: no `Ω¹`, no cotangent
-  complex in `Mathlib/AlgebraicGeometry`) nor in this repo** (verified 2026-07-08). Rather
-  than register a def-level data-sorry, the datum is cut as its own gap ticket
-  **[T-E-OMEGA]** with a plan that terminates in a proof (board); the intended signatures
-  are recorded there. No decl is emitted here for them.
+  **T-E14 (Legendre, `M'₂ = Spec ℤ[1/2, λ, (λ(λ−1))⁻¹]`)** — **STATABLE as of 2026-07-13**
+  (STREAM-OMEGA, ★★): [T-E-OMEGA] delivered `ω_{E/S}` as the chart-presented invertible
+  sheaf `omegaModules` with its `𝔾ₘ`-torsor of bases `OmegaBasis`
+  (`EllipticCurve/InvariantDifferential.lean`) and the `(Ell/R)`-functorial transport
+  `omegaBasisMap` (`Moduli/OmegaFunctor.lean`), packaged as the moduli problem
+  **`omegaProblem : ModuliProblem R`** — exactly KM 4.6.2's *"an `S`-basis `ω` of
+  `ω_{E/S}`"* datum. Their statements are the `sorry`d theorems below; the Legendre
+  problem is the product `Γ(2)`-naive × ω (`legendreBootstrapProblem`).
 
-Consequently the `ℤ[1/2]`-half of the bootstrap is **blocked on [T-E-OMEGA]**, while the
-`ℤ[1/3]`-half (this file) is unblocked. See the board for the level-4 alternative that
-would dodge `ω` entirely (`δ = ` naive level 4, `G = GL₂(ℤ/4)`, `2` invertible).
+The `ℤ[1/2]`-half of the bootstrap is hence UNBLOCKED alongside the `ℤ[1/3]`-half. (The
+level-4 alternative recorded on the board is now moot but retained there for history.)
 -/
 
 open AlgebraicGeometry CategoryTheory Limits
@@ -92,6 +91,75 @@ theorem naiveLevelThree_relativelyRepresentable_finiteEtale (hR : IsUnit (3 : R)
       ∀ {T : Scheme.{u}} (g : T ⟶ X.base), Nonempty
         ({ h : T ⟶ Z // h ≫ f = g } ≃
           (gammaFullNaiveProblem R 3).obj (Opposite.op (X.pullbackAlong g))) := by
+  sorry
+
+/-! ### T-E12 / T-E13 — the `(E, ω)` problem over `ℤ[1/6]` (GME Thm 2.2.3 / Cor 2.2.4) -/
+
+/-- **(T-E12, GME Thm 2.2.3; KM 2.2)** Over a base in which `6` is invertible, the
+ω-moduli problem `[(E, ω)]` is representable by an object with **affine** base —
+explicitly `M₁ = Spec ℤ[1/6][g₂, g₃][Δ⁻¹]`, universal curve `y² = 4x³ − g₂x − g₃`
+with `ω = dx/y`. Route: A7 uniqueness of the `(g₂, g₃)`-normalised Weierstrass model
+given `ω` (`WeierstrassModel.lean`'s normalisation machinery + `omegaCocycle_res` to
+compare `ω`-data chartwise). -/
+theorem omegaProblem_representable_by_affine (hR : IsUnit (6 : R)) :
+    ∃ X : EllObj R, IsAffine X.base ∧
+      Nonempty ((omegaProblem R).RepresentableBy X) := by
+  sorry
+
+/-- **(T-E13, GME Cor 2.2.4)** `Aut_S(E, ω) = {1}`: the ω-problem is **rigid** over
+`ℤ[1/6]` — no nontrivial automorphism of `E/S` over the identity of `S` fixes an
+`S`-basis of `ω_{E/S}`. One-liner from T-E12's representability; do NOT re-derive
+rigidity from scratch — `EllipticCurve/Rigidity.lean`'s canonicity chain (in particular
+`isMonHom_of_one_comp_eq'`) is the intended engine for "an automorphism fixing the zero
+section". -/
+theorem omegaProblem_rigid (hR : IsUnit (6 : R)) : (omegaProblem R).Rigid := by
+  sorry
+
+/-! ### T-E14 — the Legendre bootstrap object `M'₂` over `ℤ[1/2]` (KM 4.6.2 / GME Ex. 2.2.1) -/
+
+/-- **(T-E14, the `δ` of KM 4.6.2)** The simultaneous **`Γ(2)`-naive × ω** problem:
+`E/S ↦ {((P, Q), ω)}` with `(P, Q)` a naive full level-2 structure and `ω` an `S`-basis
+of `ω_{E/S}`. KM 4.6.2 verbatim: *"pairs `(φ₂, ω)` consisting of an `S`-group-scheme
+isomorphism `φ₂ : (ℤ/2ℤ)² ≅ E[2]` together with an `S`-basis `ω` of `ω_{E/S}`"*; the
+engine group is `G = GL₂(ℤ/2) × {±1}`, acting through `EllipticCurve.glSmul` on the
+level datum and `negVC_u : u = −1` (ω5) on the `ω`-datum. -/
+noncomputable def legendreBootstrapProblem : ModuliProblem R where
+  obj X := (gammaFullNaiveProblem R 2).obj X × (omegaProblem R).obj X
+  map φ := ↾fun x => ⟨(gammaFullNaiveProblem R 2).map φ x.1, (omegaProblem R).map φ x.2⟩
+  map_id X := by
+    ext x
+    · exact FunctorToTypes.map_id_apply (gammaFullNaiveProblem R 2) x.1
+    · exact FunctorToTypes.map_id_apply (omegaProblem R) x.2
+  map_comp φ ψ := by
+    ext x
+    · exact FunctorToTypes.map_comp_apply (gammaFullNaiveProblem R 2) φ ψ x.1
+    · exact FunctorToTypes.map_comp_apply (omegaProblem R) φ ψ x.2
+
+/-- **(T-E14a, KM engine axiom 1 for `δ = ` Legendre)** Over a base in which `2` is
+invertible, the Legendre problem is representable by an object with **affine** base —
+explicitly `M'₂ = Spec ℤ[1/2][λ][(λ(λ−1))⁻¹]`, universal curve `y² = x(x−1)(x−λ)` with
+`P = (0, 0)`, `Q = (1, 0)`, `ω = dx/y` (KM 4.6.2; GME Ex. 2.2.1 p. 117). Route:
+normalise `y² = x³ + a₂x² + a₄x + a₆` (2 invertible), `E[2] − {0}` free of rank 3,
+place the roots at `0, 1, λ`. -/
+theorem legendreBootstrap_representable_by_affine (hR : IsUnit (2 : R)) :
+    ∃ X : EllObj R, IsAffine X.base ∧
+      Nonempty ((legendreBootstrapProblem R).RepresentableBy X) := by
+  sorry
+
+/-- **(T-E14b, KM engine axiom 2 for `δ = ` Legendre)** For every `E/S` over a base in
+which `2` is invertible, the `S`-scheme relatively representing the Legendre problem is
+**finite étale over `S`** — the underlying scheme of the `GL₂(ℤ/2) × {±1}`-torsor of
+KM 4.6.2's axiom 2. Stated in the torsor-free shape matching
+`naiveLevelThree_relativelyRepresentable_finiteEtale`; the simply-transitive action is
+supplied separately (T-Q2's `InvariantTorsor` datum). Route: `E[2]` finite étale when
+`2` is invertible (T-B5) for the level factor; the `ω`-factor is the `𝔾ₘ`-torsor
+`OmegaBasis` restricted to a `{±1}`-torsor by the normalisation — KM 2.2.9. -/
+theorem legendreBootstrap_relativelyRepresentable_finiteEtale (hR : IsUnit (2 : R))
+    (X : EllObj R) :
+    ∃ (Z : Scheme.{u}) (f : Z ⟶ X.base), IsFinite f ∧ Etale f ∧
+      ∀ {T : Scheme.{u}} (g : T ⟶ X.base), Nonempty
+        ({ h : T ⟶ Z // h ≫ f = g } ≃
+          (legendreBootstrapProblem R).obj (Opposite.op (X.pullbackAlong g))) := by
   sorry
 
 end ModularCurves

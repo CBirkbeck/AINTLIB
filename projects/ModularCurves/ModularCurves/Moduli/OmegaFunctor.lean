@@ -667,4 +667,16 @@ theorem omegaBasisMap_comp {X X' X'' : EllObj R} (φ : X'' ⟶ X') (ψ : X' ⟶ 
               ((omegaCocycle X'.curve.toEllipticCurveGeom).sectionsPullback
                 φ.baseHom (omegaBasisMap ψ b).1)).1 j') :=
         congrArg₂ (· * ·) rfl hBR.symm
+
+/-- **(T-OM-B7 payload; KM 4.6.2, GME §2.2)** The **ω-moduli problem** `[(E, ω)]`:
+to `E/S` assign the set of `S`-bases of the invariant differential `ω_{E/S}`,
+contravariantly functorial along `Ell/R`-morphisms by `omegaBasisMap`. This is the
+`ω`-half of every rigidified problem of KM Ch. 2/4 — T-E12 (`(E, ω)` itself), T-E13
+(its rigidity), T-E14 (Legendre = `Γ(2)`-naive × ω). -/
+noncomputable def omegaProblem (R : CommRingCat.{u}) : ModuliProblem R where
+  obj X := OmegaBasis X.unop.curve.toEllipticCurveGeom
+  map φ := ↾fun b => omegaBasisMap φ.unop b
+  map_id X := by ext b; exact omegaBasisMap_id X.unop b
+  map_comp φ ψ := by ext b; exact omegaBasisMap_comp ψ.unop φ.unop b
+
 end ModularCurves
