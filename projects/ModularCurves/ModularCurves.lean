@@ -61,12 +61,14 @@ import ModularCurves.ForMathlib.SchemeActionFree
 import ModularCurves.ForMathlib.SchemeModuleSheaf
 import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 import ModularCurves.ForMathlib.SheafCohomologyExact
+import ModularCurves.ForMathlib.SheafCohomologyTerminal
 import ModularCurves.ForMathlib.SheafOfModulesMonoidal
 import ModularCurves.ForMathlib.SmoothDescent
 import ModularCurves.ForMathlib.SmoothSectionLift
 import ModularCurves.ForMathlib.SpecBasicOpenAway
 import ModularCurves.ForMathlib.SpecEqualizer
 import ModularCurves.ForMathlib.UniquePointFactorsISup
+import ModularCurves.ForMathlib.TwoOpenHOne
 import ModularCurves.ForMathlib.WeierstrassInvariant
 import ModularCurves.ForMathlib.WeierstrassProjectivePrime
 import ModularCurves.GroupScheme.MuN
