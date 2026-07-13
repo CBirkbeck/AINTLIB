@@ -29,6 +29,9 @@ open scoped NumberField Pointwise nonZeroDivisors
 
 namespace BernoulliRegular
 
+-- Hides 6 warnings: several theorems below (the `_coe` / `_ext` / `_eq_bot` accessors) do not
+-- use all of the section instances. Removing it needs `omit`, which drops those binders and so
+-- changes the statements — generalisation work, not cleanup.
 set_option linter.unusedSectionVars false
 
 section PSylow
@@ -126,7 +129,7 @@ def stickelbergerPSylowClassAction
         (p := p) (L := L) hp_odd hχ]
       exact Subgroup.one_mem _⟩
 
-/-- `T034a`: the `T032c` annihilation statement, restricted to the chosen
+/-- The annihilation statement, restricted to the chosen
 Sylow `p`-subgroup of the class group. -/
 theorem stickelbergerPSylowClassAction_eq_one
     (hp_odd : p ≠ 2) {χ : DirichletCharacter ℂ p} (hχ : χ ≠ 1) :
@@ -169,12 +172,12 @@ abbrev A1 (B : CyclotomicClassGroupBoundaryComponents (p := p) (L := L)) :
     Subgroup (CyclotomicClassGroupPSylow (p := p) (L := L)) :=
   B.componentOne
 
-/-- `T034b`: the `A₀` component is trivial. -/
+/-- The `A₀` component is trivial. -/
 theorem A0_eq_bot (B : CyclotomicClassGroupBoundaryComponents (p := p) (L := L)) :
     B.A0 = ⊥ :=
   B.componentZero_eq_bot
 
-/-- `T034b`: the `A₁` component is trivial. -/
+/-- The `A₁` component is trivial. -/
 theorem A1_eq_bot (B : CyclotomicClassGroupBoundaryComponents (p := p) (L := L)) :
     B.A1 = ⊥ :=
   B.componentOne_eq_bot
@@ -253,7 +256,7 @@ structure OddComponentBernoulliAnnihilation
           (IsOddUnitCharacter.ne_one (p := p) odd)) =
       1
 
-/-- `T034c`: an odd declared component carries the Bernoulli annihilation
+/-- An odd declared component carries the Bernoulli annihilation
 certificate obtained by combining the eigenspace calculation `T033b` with the
 class-group annihilation statement `T032c`, restricted to the `p`-Sylow subgroup
 by `T034a`. -/
