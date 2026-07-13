@@ -18375,3 +18375,21 @@ base and both evolved, these reconcile as normal 3-way merges (small diffs), not
 - **PIC0 stays parked** (correctly): codex's DualPullback/DualRestrict IS the Pic⁰ dual development;
   resuming our PIC0 arc would duplicate it. On resume, PIC0 consumes codex's, not rebuilds.
 - **Modular-forms stream** (future) also consumes the invertible-sheaf/ω layer.
+
+### v10.185-G0 — ★ [HG-C4a]+[HG-C4b] COMPLETE (the per-patch quotient layer; C4b CLEAN) (STREAM-G0)
+Commits 50dc8a997/90f20a80c/594189143/2936160e6 (pushed), GroupScheme/SubgroupQuotientConstruction.lean:
+- **[C4a]** `localQuotient := Spec (coinvariants chartCoaction)`, `localQuotientπ := isoSpec.hom ≫
+  specEqualizerπ`, `localQuotient_existsUnique_lift` (per-patch universal property from
+  existsUnique_lift_of_isHopfGalois at the M6 datum; Free hypothesis = C3f).
+- **[C4b] the geometry bridge, all three pieces, AXIOM-CLEAN (exact triple):**
+  `spec_coactionRing_isoSpec_inv` (Spec coactionRing ≫ isoSpec⁻¹ = chartCoactionSpec — affine isoSpec
+  naturality on coactionRing_eq_appTop); `spec_includeRight_isoSpec_inv` (five-link Künneth chase:
+  pullbackSpecIso_inv_snd / kunnethToSpec square / patchLevel identity leg / congrHom+LPPS_hom_snd /
+  restrictedProj = pullback.snd via morphismRestrict); `coequalizes_of_isInvariant` (G-invariant f ⟹
+  the chart restriction coequalizes the algebraic pair — the swap factor comm is definitional).
+**CONSEQUENCE: for every G-invariant f : E ⟶ Y and every C3f patch P, f|_{P.U} factors UNIQUELY
+through Spec (coinvariants). The six SubgroupQuotient pins now reduce PURELY to [C4c] gluing** (the
+localQuotients over the C3f atlas; two-stage design v10.184-G0, template SchemeQuotient.lean) **+
+[C4d] assembly.** Session walls (all beaten term-mode): calc-step kabstract instance-transparency
+(E.asOver.left.Opens vs E.E.Opens), congr-closed defeq swap identities, pullback.map-is-abbrev-of-lift.
+(STREAM-G0)
