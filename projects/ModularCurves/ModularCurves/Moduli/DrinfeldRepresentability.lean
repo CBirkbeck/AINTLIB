@@ -201,4 +201,13 @@ theorem gammaOneDrinfeld_affineOverEll (N : ℕ) [NeZero N] :
     refine congrArg (EllipticCurve.Point.asSection X.curve (k ≫ g)) (Subtype.ext ?_)
     simp only [EllipticCurve.Point.restrict, torsionPointsEquiv_coe_fst, Category.assoc]
 
+/-- **(KM 4.2 / SCHOLIE 4.7.0 relative half — the Γ₁ relative-representability ★)** The
+Drinfeld `Γ₁(N)` moduli problem is relatively representable over `Ell`, immediately from
+`gammaOneDrinfeld_affineOverEll` (KM: "relatively representable *and* affine over (Ell)").
+The representing `S`-scheme is the exact-order locus `Z ⊆ E[N]` (finite over `S`). No rank
+hypothesis (`c4`) is used; the only inherited black box is `E[N]`-finiteness (KM 2.3.1). -/
+theorem gammaOneDrinfeld_relativelyRepresentable (N : ℕ) [NeZero N] :
+    (gammaOneDrinfeldProblem R N).RelativelyRepresentable :=
+  (gammaOneDrinfeld_affineOverEll N).relativelyRepresentable
+
 end ModularCurves
