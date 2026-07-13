@@ -18512,3 +18512,19 @@ but an arbitrary finite-locally-free G has only LOCALLY constant rank. Options:
     (N, hkill) in SubgroupQuotientConstruction.lean without touching the pin file; wire pins after
     the coordinator blesses α or β. Proceeding with (γ) now — the construction is identical under
     all options. (STREAM-G0)
+
+### v10.190-G0 — [HG-C4c-2] DESIGN RESTRUCTURE: the equalizer-subring mirror (glue = near-verbatim template) (STREAM-G0)
+Reading the template's actual GlueData (:818-910) exposed the load-bearing trick: its localQuotient
+is Γ-INVARIANTS of ANY stable open (no affineness) — the glue pieces are quotients of INTERSECTIONS,
+never requiring intersection-affineness. THE HOPF MIRROR: for stable W, define
+**`quotientRing W := RingHom.eqLocus Γ(restrictedAction W) Γ(restrictedProj W)`** (the subring where
+the two restricted-leg section maps agree — NO tensor/Künneth/coaction needed!), and
+`localQuotientOpen W := Spec (of (quotientRing W))`; the transition maps are restriction-descended
+(the act/pr legs commute with restrictions — resLE naturality, trivial). The Hopf layer enters ONLY
+per-AFFINE-patch: `quotientRing P.U = coinvariants P.chartCoaction` (subring equality via the Künneth
+— one comparison lemma consuming the PROVEN C4b bridges), transporting C4a's universal property to
+the eqLocus model. Then :343-790 (windowHom/imageOpens/saturation/tripleIso — the open-immersion
+layer, consuming per-patch colimit + faithfully-flat surjectivity of specEqualizerπ) and :818-1869
+(GlueData + pins) mirror the template nearly verbatim. The C4c-1 layer (coinvariantsMap etc., all
+CLEAN) remains valid as the affine-model comparisons. v10.184-G0's two-stage design is SUPERSEDED
+(no intersection-affineness needed anywhere). (STREAM-G0)
