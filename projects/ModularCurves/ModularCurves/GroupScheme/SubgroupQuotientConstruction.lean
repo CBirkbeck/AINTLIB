@@ -198,6 +198,74 @@ theorem spec_includeRight_isoSpec_inv :
   congr 1
   exact (IsIso.inv_eq_of_hom_inv_id P.hU.isoSpec.hom_inv_id).symm
 
+/-- **`[HG-C4b]` — invariant morphisms coequalize the chart pair.** For a `G`-invariant
+`f : E ⟶ Y`, the chart restriction `U.ι ≫ f` satisfies the algebraic coequalization
+hypothesis of the per-patch universal property: restrict `IsInvariant.coequalizes` to the
+chart (the `resLE` square), then transport both legs through the geometry bridge
+(`spec_coactionRing_isoSpec_inv`, `spec_includeRight_isoSpec_inv`), peeling the common
+tensor-swap factor (`Spec.map` of `Algebra.TensorProduct.comm`, an isomorphism). -/
+theorem coequalizes_of_isInvariant {Y : Scheme.{u}} {f : E.E ⟶ Y} (hf : G.IsInvariant f) :
+    Spec.map (CommRingCat.ofHom P.chartCoaction.toRingHom) ≫ P.hU.isoSpec.inv ≫ (P.U.ι ≫ f)
+      = Spec.map (CommRingCat.ofHom
+          (Algebra.TensorProduct.includeLeft :
+            P.chartRing →ₐ[P.baseRing] P.chartRing ⊗[P.baseRing] P.groupRing).toRingHom) ≫
+        P.hU.isoSpec.inv ≫ (P.U.ι ≫ f) := by
+  -- geometric coequalization on the chart, from global invariance
+  have hco := hf.coequalizes
+  have hactι : G.restrictedAction P.hstable ≫ P.U.ι
+      = (G.actionProj.left ⁻¹ᵁ P.U).ι ≫ G.translationAction.left :=
+    Scheme.Hom.resLE_comp_ι _ _
+  have hprι : G.restrictedProj P.U ≫ P.U.ι
+      = (G.actionProj.left ⁻¹ᵁ P.U).ι ≫ G.actionProj.left :=
+    Scheme.Hom.resLE_comp_ι _ _
+  have hgeo : G.restrictedAction P.hstable ≫ (P.U.ι ≫ f)
+      = G.restrictedProj P.U ≫ (P.U.ι ≫ f) :=
+    (Category.assoc _ _ _).symm.trans <|
+      (congrArg (· ≫ f) hactι).trans <|
+        (Category.assoc _ _ _).trans <|
+          (congrArg ((G.actionProj.left ⁻¹ᵁ P.U).ι ≫ ·) hco).trans <|
+            (Category.assoc _ _ _).symm.trans <|
+              (congrArg (· ≫ f) hprι.symm).trans (Category.assoc _ _ _)
+  -- the two swap decompositions: `chartCoaction = comm ∘ coactionRing`,
+  -- `includeLeft = comm ∘ includeRight`
+  have hswap₁ : Spec.map (CommRingCat.ofHom P.chartCoaction.toRingHom)
+      = Spec.map (CommRingCat.ofHom
+          ((Algebra.TensorProduct.comm P.baseRing P.groupRing P.chartRing).toAlgHom.toRingHom)) ≫
+        Spec.map P.coactionRing := by
+    rw [← Spec.map_comp]
+    rfl
+  have hswap₂ : Spec.map (CommRingCat.ofHom
+      (Algebra.TensorProduct.includeLeft :
+        P.chartRing →ₐ[P.baseRing] P.chartRing ⊗[P.baseRing] P.groupRing).toRingHom)
+      = Spec.map (CommRingCat.ofHom
+          ((Algebra.TensorProduct.comm P.baseRing P.groupRing P.chartRing).toAlgHom.toRingHom)) ≫
+        Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+          P.chartRing →ₐ[P.baseRing] P.groupRing ⊗[P.baseRing] P.chartRing).toRingHom) := by
+    rw [← Spec.map_comp]
+    congr 1
+  rw [hswap₁, hswap₂, Category.assoc, Category.assoc]
+  congr 1
+  -- both sides through the geometry bridge, term-mode (the transparency-safe idiom):
+  -- reassociate to expose the bridged composites, apply the two legs, connect by `hgeo`
+  have hA : (Spec.map P.coactionRing ≫ P.hU.isoSpec.inv) ≫ (P.U.ι ≫ f)
+      = P.chartSpecIso.inv ≫ (G.chartPullbackIso P.U).inv ≫
+          (G.restrictedAction P.hstable ≫ (P.U.ι ≫ f)) :=
+    (congrArg (· ≫ (P.U.ι ≫ f)) P.spec_coactionRing_isoSpec_inv).trans <|
+      (Category.assoc _ _ _).trans <|
+        congrArg (P.chartSpecIso.inv ≫ ·) (Category.assoc _ _ _)
+  have hB : (Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+        P.chartRing →ₐ[P.baseRing] P.groupRing ⊗[P.baseRing] P.chartRing).toRingHom) ≫
+        P.hU.isoSpec.inv) ≫ (P.U.ι ≫ f)
+      = P.chartSpecIso.inv ≫ (G.chartPullbackIso P.U).inv ≫
+          (G.restrictedProj P.U ≫ (P.U.ι ≫ f)) :=
+    (congrArg (· ≫ (P.U.ι ≫ f)) P.spec_includeRight_isoSpec_inv).trans <|
+      (Category.assoc _ _ _).trans <|
+        congrArg (P.chartSpecIso.inv ≫ ·) (Category.assoc _ _ _)
+  exact (Category.assoc _ _ _).symm.trans <|
+    hA.trans <|
+      (congrArg (fun m => P.chartSpecIso.inv ≫ (G.chartPullbackIso P.U).inv ≫ m) hgeo).trans <|
+        hB.symm.trans (Category.assoc _ _ _)
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
