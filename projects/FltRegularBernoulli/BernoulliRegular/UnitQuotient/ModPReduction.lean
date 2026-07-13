@@ -7,7 +7,8 @@ public import Mathlib.LinearAlgebra.FreeModule.ModN
 /-!
 # Unit quotients: reduction of the free quotient modulo `p`
 
-This file proves the formal reduction step used in `REF-07c4`.
+This file proves the formal reduction step from the free quotient to its mod-`p`
+reduction.
 
 There is no natural map in the direction
 
@@ -37,6 +38,9 @@ open scoped NumberField
 
 namespace BernoulliRegular
 
+-- Hides 4 warnings: several theorems below do not use all of the section instances.
+-- Removing it needs `omit`, which drops those binders and so changes the statements —
+-- that is generalisation work (see the linter-suppression census), not cleanup.
 set_option linter.unusedSectionVars false
 
 variable (p : ℕ) [Fact p.Prime]
