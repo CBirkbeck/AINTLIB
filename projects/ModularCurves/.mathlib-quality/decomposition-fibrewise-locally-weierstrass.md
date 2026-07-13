@@ -752,6 +752,16 @@ landed monoidal layer or add finiteness hypotheses. Together with affine-patch r
 naturality, it supplies the local module comparisons needed to assemble pole-sheaf Cech
 base change degreewise and compatibly with the differential.
 
+The module comparison is now pinned to the actual pullback section on pure tensors:
+`affinePullbackΓIso_hom_one_tmul` proves that `1 ⊗ m` maps to the section supplied by
+the pullback-adjunction unit. Its proof uses the conjugate-adjunction identity defining
+`affineTildePullbackIsoExtendScalars`, naturality of the pushforward-Gamma comparison,
+and the two adjunction triangle identities; no presentation-dependent formula or extra
+hypothesis is introduced. This is the generator formula needed to compare the module
+patch isomorphisms under restriction. The value-level patch isomorphism is proved as
+`affineModuleSectionsBaseChangeIso`; its restriction naturality remains the next local
+dependency before assembling the Cech complex map.
+
 The elementary Mayer--Vietoris seam is now complete in both directions.
 `HPrimeZeroAddEquivSections` identifies `H'⁰(U,F)` with sections naturally in `U`, while
 `HPrimeAddEquivHOfIsTerminal` identifies `H'ⁿ(T,F)` with genuine `Sheaf.H F n` when `T`

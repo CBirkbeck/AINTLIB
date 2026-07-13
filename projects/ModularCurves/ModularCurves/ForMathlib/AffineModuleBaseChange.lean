@@ -677,6 +677,254 @@ noncomputable def affinePullbackΓIso
     affinePullbackΓCoreIso g M ≪≫
       (affineΓLiteralIso Y ((pullback g).obj M)).symm
 
+/-- The top-level section obtained from the pullback-adjunction unit, with
+the inverse image of the top open transported back to the top open. -/
+noncomputable def affinePullbackUnitTop
+    {X Y : Scheme.{u}} (g : Y ⟶ X) (M : X.Modules)
+    (m : Γ(M, (⊤ : X.Opens))) :
+    Γ((pullback g).obj M, (⊤ : Y.Opens)) :=
+  ((pullback g).obj M).presheaf.map
+      (eqToHom (show (⊤ : Y.Opens) = g ⁻¹ᵁ (⊤ : X.Opens) by simp)).op
+    (((pullbackPushforwardAdjunction g).unit.app M).val.app
+      (op (⊤ : X.Opens)) m)
+
+private theorem affinePullbackΓCoreIso_hom_comp_unit
+    {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y]
+    (g : Y ⟶ X) (M : X.Modules) [M.IsQuasicoherent] :
+    (ModuleCat.extendRestrictScalarsAdj g.appTop.hom).unit.app
+          ((affineΓFunctor X).obj M) ≫
+        (ModuleCat.restrictScalars g.appTop.hom).map
+          (affinePullbackΓCoreIso g M).hom =
+      (affineΓFunctor X).map
+          ((pullbackPushforwardAdjunction g).unit.app M) ≫
+        (affinePushforwardΓIso g).hom.app ((pullback g).obj M) := by
+  have h := unit_conjugateEquiv_symm
+    ((affineTildeAdjunction X).comp (pullbackPushforwardAdjunction g))
+    ((ModuleCat.extendRestrictScalarsAdj g.appTop.hom).comp
+      (affineTildeAdjunction Y))
+    (affinePushforwardΓIso g).hom ((affineΓFunctor X).obj M)
+  have hβ : (affineTildePullbackIsoExtendScalars g).inv =
+      (conjugateEquiv
+        ((affineTildeAdjunction X).comp (pullbackPushforwardAdjunction g))
+        ((ModuleCat.extendRestrictScalarsAdj g.appTop.hom).comp
+          (affineTildeAdjunction Y))).symm
+        (affinePushforwardΓIso g).hom := by
+    rfl
+  have hMate :
+      (ModuleCat.extendRestrictScalarsAdj g.appTop.hom).unit.app
+            ((affineΓFunctor X).obj M) ≫
+          (ModuleCat.restrictScalars g.appTop.hom).map
+            ((affineTildeAdjunction Y).unit.app
+                ((ModuleCat.extendScalars g.appTop.hom).obj
+                  ((affineΓFunctor X).obj M)) ≫
+              (affineΓFunctor Y).map
+                ((affineTildePullbackIsoExtendScalars g).inv.app
+                  ((affineΓFunctor X).obj M))) =
+        ((affineTildeAdjunction X).comp
+              (pullbackPushforwardAdjunction g)).unit.app
+            ((affineΓFunctor X).obj M) ≫
+          (affinePushforwardΓIso g).hom.app
+            ((affineTildeFunctor X ⋙ pullback g).obj
+                  ((affineΓFunctor X).obj M)) := by
+    rw [hβ, Functor.map_comp]
+    change
+      ((ModuleCat.extendRestrictScalarsAdj g.appTop.hom).comp
+            (affineTildeAdjunction Y)).unit.app
+          ((affineΓFunctor X).obj M) ≫
+        (affineΓFunctor Y ⋙
+          ModuleCat.restrictScalars g.appTop.hom).map
+          (((conjugateEquiv
+              ((affineTildeAdjunction X).comp
+                (pullbackPushforwardAdjunction g))
+              ((ModuleCat.extendRestrictScalarsAdj g.appTop.hom).comp
+                (affineTildeAdjunction Y))).symm
+            (affinePushforwardΓIso g).hom).app
+              ((affineΓFunctor X).obj M)) =
+        ((affineTildeAdjunction X).comp
+              (pullbackPushforwardAdjunction g)).unit.app
+            ((affineΓFunctor X).obj M) ≫
+          (affinePushforwardΓIso g).hom.app
+            ((affineTildeFunctor X ⋙ pullback g).obj
+              ((affineΓFunctor X).obj M))
+    exact h.symm
+  rw [affinePullbackΓCoreIso_hom]
+  dsimp only [affinePullbackΓNatTrans, affineUnitΓNatTrans,
+    affineTildePullbackΓNatTrans, affineCounitPullbackΓNatTrans]
+  simp only [NatTrans.comp_app]
+  let q := (pullback g).map ((affineTildeAdjunction X).counit.app M)
+  have hr := (affinePushforwardΓIso g).hom.naturality q
+  have hr' :
+      (affinePushforwardΓIso g).hom.app
+            ((affineTildeFunctor X ⋙ pullback g).obj
+              ((affineΓFunctor X).obj M)) ≫
+          (ModuleCat.restrictScalars g.appTop.hom).map
+            ((affineΓFunctor Y).map q) =
+        (pushforward g ⋙ affineΓFunctor X).map q ≫
+          (affinePushforwardΓIso g).hom.app ((pullback g).obj M) := by
+    change
+      (affinePushforwardΓIso g).hom.app
+            ((pullback g).obj
+              ((affineΓFunctor X ⋙ affineTildeFunctor X).obj M)) ≫
+          (affineΓFunctor Y ⋙
+            ModuleCat.restrictScalars g.appTop.hom).map q =
+        (pushforward g ⋙ affineΓFunctor X).map q ≫
+          (affinePushforwardΓIso g).hom.app
+            ((pullback g).obj ((𝟭 X.Modules).obj M))
+    exact hr.symm
+  have hg := (pullbackPushforwardAdjunction g).unit.naturality
+    ((affineTildeAdjunction X).counit.app M)
+  have hTri := (affineTildeAdjunction X).right_triangle_components M
+  have hg' :
+      (pullbackPushforwardAdjunction g).unit.app
+            ((affineTildeFunctor X).obj ((affineΓFunctor X).obj M)) ≫
+          (pushforward g).map q =
+          (affineTildeAdjunction X).counit.app M ≫
+          (pullbackPushforwardAdjunction g).unit.app M := by
+    dsimp only [q]
+    change
+      (pullbackPushforwardAdjunction g).unit.app
+            ((affineΓFunctor X ⋙ affineTildeFunctor X).obj M) ≫
+          (pullback g ⋙ pushforward g).map
+            ((affineTildeAdjunction X).counit.app M) =
+        (affineTildeAdjunction X).counit.app M ≫
+          (pullbackPushforwardAdjunction g).unit.app M
+    exact hg.symm
+  have hΓg :
+      (affineΓFunctor X).map
+            ((pullbackPushforwardAdjunction g).unit.app
+              ((affineTildeFunctor X).obj ((affineΓFunctor X).obj M))) ≫
+          (affineΓFunctor X).map ((pushforward g).map q) =
+        (affineΓFunctor X).map
+            ((affineTildeAdjunction X).counit.app M) ≫
+          (affineΓFunctor X).map
+            ((pullbackPushforwardAdjunction g).unit.app M) := by
+    rw [← Functor.map_comp, ← Functor.map_comp]
+    exact congrArg (affineΓFunctor X).map hg'
+  have hLast :
+      ((affineTildeAdjunction X).unit.app
+              ((affineΓFunctor X).obj M) ≫
+            (affineΓFunctor X).map
+              ((affineTildeAdjunction X).counit.app M)) ≫
+          (affineΓFunctor X).map
+            ((pullbackPushforwardAdjunction g).unit.app M) =
+        (affineΓFunctor X).map
+          ((pullbackPushforwardAdjunction g).unit.app M) := by
+    calc
+      _ = 𝟙 ((affineΓFunctor X).obj M) ≫
+          (affineΓFunctor X).map
+            ((pullbackPushforwardAdjunction g).unit.app M) :=
+        congrArg (fun k ↦ k ≫ (affineΓFunctor X).map
+          ((pullbackPushforwardAdjunction g).unit.app M)) hTri
+      _ = _ := Category.id_comp _
+  have hReduce :
+      ((affineTildeAdjunction X).comp
+            (pullbackPushforwardAdjunction g)).unit.app
+          ((affineΓFunctor X).obj M) ≫
+        (pushforward g ⋙ affineΓFunctor X).map q =
+      (affineΓFunctor X).map
+        ((pullbackPushforwardAdjunction g).unit.app M) := by
+    rw [Adjunction.comp_unit_app]
+    dsimp only [Functor.comp_map]
+    let u := (affineTildeAdjunction X).unit.app
+      ((affineΓFunctor X).obj M)
+    let a := (affineΓFunctor X).map
+      ((pullbackPushforwardAdjunction g).unit.app
+        ((affineTildeFunctor X).obj ((affineΓFunctor X).obj M)))
+    let b := (affineΓFunctor X).map ((pushforward g).map q)
+    let c := (affineΓFunctor X).map
+      ((affineTildeAdjunction X).counit.app M)
+    let d := (affineΓFunctor X).map
+      ((pullbackPushforwardAdjunction g).unit.app M)
+    have h₁ : (u ≫ a) ≫ b = u ≫ (a ≫ b) :=
+      Category.assoc _ _ _
+    have h₂ : u ≫ (a ≫ b) = u ≫ (c ≫ d) :=
+      congrArg (fun k ↦ u ≫ k) hΓg
+    have h₃ : u ≫ (c ≫ d) = (u ≫ c) ≫ d :=
+      (Category.assoc _ _ _).symm
+    have h₄ : (u ≫ c) ≫ d = d := hLast
+    exact h₁.trans (h₂.trans (h₃.trans h₄))
+  let uY := (affineTildeAdjunction Y).unit.app
+    ((ModuleCat.extendScalars g.appTop.hom).obj
+      ((affineΓFunctor X).obj M))
+  let vY := (affineΓFunctor Y).map
+    ((affineTildePullbackIsoExtendScalars g).inv.app
+      ((affineΓFunctor X).obj M))
+  let wY := (affineΓFunctor Y).map q
+  let R := ModuleCat.restrictScalars g.appTop.hom
+  have hSplit : R.map (uY ≫ vY ≫ wY) =
+      (R.map uY ≫ R.map vY) ≫ R.map wY := by
+    calc
+      R.map (uY ≫ vY ≫ wY) =
+          R.map uY ≫ R.map (vY ≫ wY) := R.map_comp _ _
+      _ = R.map uY ≫ (R.map vY ≫ R.map wY) :=
+        congrArg (fun k ↦ R.map uY ≫ k) (R.map_comp _ _)
+      _ = (R.map uY ≫ R.map vY) ≫ R.map wY :=
+        (Category.assoc _ _ _).symm
+  calc
+    _ = ((ModuleCat.extendRestrictScalarsAdj g.appTop.hom).unit.app
+            ((affineΓFunctor X).obj M) ≫
+          (ModuleCat.restrictScalars g.appTop.hom).map
+            ((affineTildeAdjunction Y).unit.app
+                ((ModuleCat.extendScalars g.appTop.hom).obj
+                  ((affineΓFunctor X).obj M)) ≫
+              (affineΓFunctor Y).map
+                ((affineTildePullbackIsoExtendScalars g).inv.app
+                  ((affineΓFunctor X).obj M)))) ≫
+        (ModuleCat.restrictScalars g.appTop.hom).map
+          ((affineΓFunctor Y).map q) := by
+      change
+        (ModuleCat.extendRestrictScalarsAdj g.appTop.hom).unit.app
+              ((affineΓFunctor X).obj M) ≫
+            R.map (uY ≫ vY ≫ wY) =
+          (ModuleCat.extendRestrictScalarsAdj g.appTop.hom).unit.app
+              ((affineΓFunctor X).obj M) ≫
+            ((R.map uY ≫ R.map vY) ≫ R.map wY)
+      exact congrArg (fun k ↦
+        (ModuleCat.extendRestrictScalarsAdj g.appTop.hom).unit.app
+          ((affineΓFunctor X).obj M) ≫ k) hSplit
+    _ = (((affineTildeAdjunction X).comp
+              (pullbackPushforwardAdjunction g)).unit.app
+            ((affineΓFunctor X).obj M) ≫
+          (affinePushforwardΓIso g).hom.app
+            ((affineTildeFunctor X ⋙ pullback g).obj
+              ((affineΓFunctor X).obj M))) ≫
+        (ModuleCat.restrictScalars g.appTop.hom).map
+          ((affineΓFunctor Y).map q) :=
+      congrArg (fun k ↦ k ≫
+        (ModuleCat.restrictScalars g.appTop.hom).map
+          ((affineΓFunctor Y).map q)) hMate
+    _ = ((affineTildeAdjunction X).comp
+            (pullbackPushforwardAdjunction g)).unit.app
+          ((affineΓFunctor X).obj M) ≫
+        ((pushforward g ⋙ affineΓFunctor X).map q ≫
+          (affinePushforwardΓIso g).hom.app ((pullback g).obj M)) := by
+      exact congrArg (fun k ↦
+        ((affineTildeAdjunction X).comp
+          (pullbackPushforwardAdjunction g)).unit.app
+            ((affineΓFunctor X).obj M) ≫ k) hr'
+    _ = (((affineTildeAdjunction X).comp
+              (pullbackPushforwardAdjunction g)).unit.app
+            ((affineΓFunctor X).obj M) ≫
+          (pushforward g ⋙ affineΓFunctor X).map q) ≫
+        (affinePushforwardΓIso g).hom.app ((pullback g).obj M) := by
+      rw [Category.assoc]
+    _ = _ := by
+      exact congrArg (fun k ↦ k ≫
+        (affinePushforwardΓIso g).hom.app ((pullback g).obj M)) hReduce
+
+/-- The affine pullback comparison sends a pure tensor with coefficient one
+to the section supplied by the pullback-adjunction unit. -/
+theorem affinePullbackΓIso_hom_one_tmul
+    {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y]
+    (g : Y ⟶ X) (M : X.Modules) [M.IsQuasicoherent]
+    (m : Γ(M, (⊤ : X.Opens))) :
+    (affinePullbackΓIso g M).hom
+        ((1 : Γ(Y, (⊤ : Y.Opens))) ⊗ₜ[Γ(X, (⊤ : X.Opens))] m) =
+      affinePullbackUnitTop g M m := by
+  have h := ConcreteCategory.congr_hom
+    (affinePullbackΓCoreIso_hom_comp_unit g M) m
+  exact h
+
 /-- The arbitrary-affine pullback comparison is natural in the quasicoherent
 module. -/
 theorem affinePullbackΓIso_naturality
