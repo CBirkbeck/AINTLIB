@@ -740,6 +740,13 @@ the original restriction map and the identity on `Γ(T,⊤)`. This supplies the
 differential-level coherence needed to assemble the base-change isomorphism of Cech
 complexes; that degreewise and differential-compatible assembly is the next step.
 
+The next local input upgrades the coordinate-ring comparison to quasicoherent modules on
+affine schemes. For `g : Y → X` with `X` and `Y` affine and quasicoherent `M`, the target
+`affinePullbackΓIso` identifies global sections of `g^*M` with extension of scalars of
+`Γ(X,M)` along `g.appTop`; its naturality in `M` will transport the restriction morphisms
+appearing in the pole-sheaf Cech differential. The construction must reduce through the
+existing `isoSpec`, `tilde`, and pullback APIs, not duplicate the landed monoidal layer.
+
 The elementary Mayer--Vietoris seam is now complete in both directions.
 `HPrimeZeroAddEquivSections` identifies `H'⁰(U,F)` with sections naturally in `U`, while
 `HPrimeAddEquivHOfIsTerminal` identifies `H'ⁿ(T,F)` with genuine `Sheaf.H F n` when `T`
