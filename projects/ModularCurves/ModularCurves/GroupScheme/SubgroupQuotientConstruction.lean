@@ -114,6 +114,40 @@ theorem spec_coactionRing_isoSpec_inv :
         rw [Scheme.isoSpec_Spec_inv, ← Spec.map_comp_assoc, Iso.inv_hom_id, Spec.map_id,
           Category.id_comp]
 
+/-- **The projection leg of the geometry bridge**: the `Spec` of `includeRight`
+(`b ↦ 1 ⊗ b`, into the group-first tensor), composed back to the chart, is the restricted
+projection in the Künneth identifications. Five-link chase: `pullbackSpecIso_inv_snd`,
+the `kunnethToSpec` comparison square, `pullbackToPatchLevel`'s identity chart leg,
+`pullbackToVLevel`'s second-projection compatibility, and
+`pullbackRestrictIsoRestrict`'s morphism-restrict identification. -/
+theorem spec_includeRight_isoSpec_inv :
+    Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+        P.chartRing →ₐ[P.baseRing] P.groupRing ⊗[P.baseRing] P.chartRing).toRingHom) ≫
+      P.hU.isoSpec.inv
+      = P.chartSpecIso.inv ≫ (G.chartPullbackIso P.U).inv ≫ G.restrictedProj P.U := by
+  haveI : IsAffine P.U.toScheme := P.hU
+  haveI := P.isIso_toSpecΓ_V
+  haveI := P.isIso_toSpecΓ_U
+  haveI := P.isIso_toSpecΓ_groupOpen
+  -- link 1: `pullbackSpecIso.inv ≫ snd = Spec.map includeRight`
+  have h1 : (pullbackSpecIso P.baseRing P.groupRing P.chartRing).inv ≫ pullback.snd _ _
+      = Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+          P.chartRing →ₐ[P.baseRing] P.groupRing ⊗[P.baseRing] P.chartRing).toRingHom) :=
+    pullbackSpecIso_inv_snd _ _ _
+  -- link 2: `kunnethToSpec.inv ≫ snd = snd ≫ (Spec-side second leg)⁻¹` — from the
+  -- comparison square `kunnethToSpec ≫ snd' = snd ≫ U.toSpecΓ`
+  have h2 : P.kunnethToSpec.hom ≫
+      pullback.snd (Spec.map (G.π.appLE P.V P.groupOpen le_rfl))
+        (Spec.map (E.π.appLE P.V P.U P.hover))
+      = pullback.snd P.groupToBase P.chartToBase ≫ P.U.toSpecΓ := by
+    rw [kunnethToSpec]
+    exact pullback.lift_snd _ _ _
+  -- link 3: `pullbackToPatchLevel` has identity chart leg
+  have h3 : P.pullbackToPatchLevel.hom ≫ pullback.snd P.groupToBase P.chartToBase
+      = pullback.snd (pullback.snd G.π P.V.ι) P.chartToBase := by
+    simp only [pullbackToPatchLevel, asIso_hom, pullback.lift_snd, Category.comp_id]
+  sorry
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
