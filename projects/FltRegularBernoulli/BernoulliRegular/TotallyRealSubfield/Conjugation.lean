@@ -97,7 +97,8 @@ theorem antisymmetric_unit_eq_neg_one_pow_mul_zeta_pow [IsCMField K]
     (u : (𝓞 K)ˣ)
     (hu : unitsComplexConj K u * u = 1) :
     ∃ n k : ℕ,
-      u = (-1 : (𝓞 K)ˣ) ^ k * (hζ.toInteger_isPrimitiveRoot.isUnit (NeZero.ne p)).unit ^ n := by
+      u = (-1 : (𝓞 K)ˣ) ^ k *
+        (hζ.toInteger_isPrimitiveRoot.isUnit (NeZero.ne p)).unit ^ n := by
   obtain ⟨m, hm⟩ :=
     antisymmetric_unit_is_root_of_unity (p := p) (hp_odd := hp_odd) (K := K) (hζ := hζ) u hu
   have hcu : (unitsComplexConj K u)⁻¹ = u := inv_eq_of_mul_eq_one_right hu
@@ -109,7 +110,7 @@ theorem antisymmetric_unit_eq_neg_one_pow_mul_zeta_pow [IsCMField K]
         (u : K) ^ 2 =
           (((((hζ.toInteger_isPrimitiveRoot.isUnit (NeZero.ne p)).unit ^ m) ^ 2 :
             (𝓞 K)ˣ) : (𝓞 K)) : K) :=
-      congrArg (fun x : (𝓞 K)ˣ => (((x : (𝓞 K)) : K))) hu_sq
+      congrArg (fun x : (𝓞 K)ˣ ↦ (((x : (𝓞 K)) : K))) hu_sq
     calc
       (u : K) ^ (2 * p) = ((u : K) ^ 2) ^ p := by rw [pow_mul]
       _ = (((((hζ.toInteger_isPrimitiveRoot.isUnit (NeZero.ne p)).unit ^ m) ^ 2 :
@@ -122,7 +123,7 @@ theorem antisymmetric_unit_eq_neg_one_pow_mul_zeta_pow [IsCMField K]
             (hζ.toInteger_isPrimitiveRoot.isUnit_unit (NeZero.ne p)).pow_eq_one, one_pow]
         have hν2p : (ν ^ 2) ^ p = 1 := by
           rw [← pow_mul, mul_comm, pow_mul, hνp, one_pow]
-        exact congrArg (fun x : (𝓞 K)ˣ => (((x : (𝓞 K)) : K))) hν2p
+        exact congrArg (fun x : (𝓞 K)ˣ ↦ (((x : (𝓞 K)) : K))) hν2p
   have hpo : Odd p := hp.1.odd_of_ne_two hp_odd
   obtain ⟨n, k, hk⟩ := roots_of_unity_in_cyclo (K := K) (hζ := hζ) hpo (u : K) hu_fin
   refine ⟨n, k, ?_⟩
@@ -159,18 +160,19 @@ theorem ringOfIntegersComplexConj_eq_mod_one_sub_zeta [IsCMField K]
     (x : 𝓞 K) :
     algebraMap (𝓞 K) (𝓞 K ⧸ Ideal.span ({(hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)))
         (ringOfIntegersComplexConj K x) =
-      algebraMap (𝓞 K) (𝓞 K ⧸ Ideal.span ({(hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K))) x := by
+      algebraMap (𝓞 K)
+        (𝓞 K ⧸ Ideal.span ({(hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K))) x := by
   have hq := quotient_zero_sub_one_comp_aut hζ
     ((ringOfIntegersComplexConj K).toRingEquiv.toRingHom)
-  exact congrArg
-    (fun f : 𝓞 K →+* (𝓞 K ⧸ Ideal.span ({(hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K))) => f x) hq
+  exact DFunLike.congr_fun hq x
 
 omit hp_odd in
 /-- Elementwise form of `x̄ ≡ x mod (ζ - 1)`. -/
 theorem ringOfIntegersComplexConj_sub_mem_one_sub_zeta [IsCMField K]
     {hζ : IsPrimitiveRoot (IsCyclotomicExtension.zeta p ℚ K) p}
     (x : 𝓞 K) :
-    ringOfIntegersComplexConj K x - x ∈ Ideal.span ({(hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) := by
+    ringOfIntegersComplexConj K x - x ∈
+      Ideal.span ({(hζ.toInteger - 1 : 𝓞 K)} : Set (𝓞 K)) := by
   rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub]
   exact sub_eq_zero.mpr
     (ringOfIntegersComplexConj_eq_mod_one_sub_zeta (p := p) (K := K) (hζ := hζ) x)
@@ -195,7 +197,8 @@ include hp_odd in
 theorem multiplicity_zetaPrime_even_of_map_eq_span [IsCMField K]
     (I : Ideal (𝓞 (NumberField.maximalRealSubfield K)))
     (a : 𝓞 K) (ha : a ≠ 0)
-    (hIa : I.map (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)) = Ideal.span {a}) :
+    (hIa : I.map (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)) =
+      Ideal.span {a}) :
     Even (multiplicity ((zeta_spec p ℚ K).toInteger - 1 : 𝓞 K) a) := by
   have hζ := IsCyclotomicExtension.zeta_spec p ℚ K
   let f : 𝓞 (NumberField.maximalRealSubfield K) →+* 𝓞 K :=
@@ -211,10 +214,7 @@ theorem multiplicity_zetaPrime_even_of_map_eq_span [IsCMField K]
     rw [hIa]
     simp [ha]
   have hP0 : P ≠ ⊥ := zetaPrime_ne_bot p K
-  have hPprime : P.IsPrime := by
-    dsimp [P]
-    exact zetaPrime_isPrime p K
-  letI : P.IsPrime := hPprime
+  have hPprime : P.IsPrime := zetaPrime_isPrime p K
   have hPPlus0 : PPlus ≠ ⊥ := by
     intro hbot
     have hmap : Ideal.map f PPlus = P ^ 2 := by
