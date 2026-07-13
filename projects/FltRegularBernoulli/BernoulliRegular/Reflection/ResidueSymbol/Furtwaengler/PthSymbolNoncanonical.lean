@@ -84,14 +84,14 @@ theorem pthSymbolAtPrime_mul {K : Type*}
     (hα : α ∉ q) (hβ : β ∉ q) :
     pthSymbolAtPrime (p := p) (α * β) q =
       pthSymbolAtPrime (p := p) α q + pthSymbolAtPrime (p := p) β q := by
-  haveI : NeZero q := ⟨hbot⟩
-  haveI hqK_prime : q.IsPrime := hmax.isPrime
-  have hαβ : α * β ∉ q := fun h => (hqK_prime.mem_or_mem h).elim hα hβ
+  have : NeZero q := ⟨hbot⟩
+  have hqK_prime : q.IsPrime := hmax.isPrime
+  have hαβ : α * β ∉ q := fun h ↦ (hqK_prime.mem_or_mem h).elim hα hβ
   simp only [pthSymbolAtPrime, dif_neg hbot, dif_pos hmax, dif_neg hαβ,
     dif_neg hα, dif_neg hβ]
   split_ifs with hdiv hroot
-  · haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-    haveI : q.IsMaximal := hmax
+  · have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+    have : q.IsMaximal := hmax
     exact Reflection.ResidueSymbol.PowerResidue.primeExponent_mul q
       hroot.choose hroot.choose_spec hdiv hα hβ hαβ
   · simp
@@ -101,7 +101,7 @@ theorem pthSymbolAtPrime_mul {K : Type*}
 noncomputable def pthSymbolAtIdeal {K : Type*} [Field K] [NumberField K]
     (α : 𝓞 K) (I : Ideal (𝓞 K)) : ZMod p :=
   ((UniqueFactorizationMonoid.normalizedFactors I).map
-    (fun P => pthSymbolAtPrime (p := p) α P)).sum
+    (fun P ↦ pthSymbolAtPrime (p := p) α P)).sum
 
 /-- The symbol vanishes at the unit ideal. -/
 @[simp] theorem pthSymbolAtIdeal_one {K : Type*} [Field K] [NumberField K]
@@ -174,7 +174,7 @@ theorem pthSymbolAtIdeal_mul {K : Type*} [Field K] [NumberField K]
       pthSymbolAtIdeal (p := p) α I + pthSymbolAtIdeal (p := p) β I := by
   unfold pthSymbolAtIdeal
   rw [← Multiset.sum_map_add]
-  refine congrArg Multiset.sum (Multiset.map_congr rfl (fun P hP => ?_))
+  refine congrArg Multiset.sum (Multiset.map_congr rfl fun P hP ↦ ?_)
   obtain ⟨_, hP_ne_bot, hP_max⟩ := isPrime_of_mem_normalizedFactors hP
   exact pthSymbolAtPrime_mul hP_ne_bot hP_max (hα P hP) (hβ P hP)
 
@@ -186,10 +186,10 @@ theorem pthSymbolAtIdeal_eq_zero_of_mem_all_factors {K : Type*} [Field K] [Numbe
   unfold pthSymbolAtIdeal
   have hmap :
       (UniqueFactorizationMonoid.normalizedFactors I).map
-          (fun P => pthSymbolAtPrime (p := p) α P) =
+          (fun P ↦ pthSymbolAtPrime (p := p) α P) =
         (UniqueFactorizationMonoid.normalizedFactors I).map
-          (fun _P => (0 : ZMod p)) := by
-    refine Multiset.map_congr rfl fun P hP => ?_
+          (fun _P ↦ (0 : ZMod p)) := by
+    refine Multiset.map_congr rfl fun P hP ↦ ?_
     obtain ⟨_, hP_ne_bot, hP_max⟩ := isPrime_of_mem_normalizedFactors hP
     exact pthSymbolAtPrime_eq_zero_of_mem hP_ne_bot hP_max (hα P hP)
   rw [hmap]
