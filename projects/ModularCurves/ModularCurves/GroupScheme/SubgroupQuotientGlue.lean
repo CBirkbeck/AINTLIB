@@ -659,6 +659,164 @@ theorem exists_orbit_of_localQuotientOpenπ_eq [Module.Free P.baseRing P.groupRi
     rw [hyy] at hbr
     exact hbr
 
+/-! ### Step S3 — the saturated image opens of the patch quotient -/
+
+section ImageOpens
+
+variable [Module.Free P.baseRing P.groupRing]
+
+instance : Flat (G.localQuotientOpenπ P.hstable) :=
+  P.flat_and_surjective_localQuotientOpenπ.1
+
+instance : AlgebraicGeometry.Surjective (G.localQuotientOpenπ P.hstable) :=
+  P.flat_and_surjective_localQuotientOpenπ.2
+
+instance : QuasiCompact (G.localQuotientOpenπ P.hstable) := by
+  haveI : IsAffine P.U.toScheme := P.hU
+  haveI : IsAffine (G.localQuotientOpen P.hstable) :=
+    inferInstanceAs (IsAffine (Spec (CommRingCat.of (G.quotientRing P.hstable))))
+  exact (HasAffineProperty.iff_of_isAffine (P := @QuasiCompact)).mpr inferInstance
+
+/-- Stability, at the level of groupoid points: if the projection of a point of the
+restricted action object lands in a stable sub-open of the chart, so does its translate. -/
+theorem restrictedAction_mem_of_restrictedProj_mem {W : E.E.Opens} (hW : G.IsStableOpen W)
+    {p : ↥((G.actionProj.left ⁻¹ᵁ P.U).toScheme)}
+    (hp : (G.restrictedProj P.U).base p ∈ P.U.ι ⁻¹ᵁ W) :
+    (G.restrictedAction P.hstable).base p ∈ P.U.ι ⁻¹ᵁ W := by
+  have hcpr : G.restrictedProj P.U ≫ P.U.ι
+      = (G.actionProj.left ⁻¹ᵁ P.U).ι ≫ G.actionProj.left := by
+    rw [restrictedProj]
+    exact Scheme.Hom.resLE_comp_ι _ _
+  have hcact : G.restrictedAction P.hstable ≫ P.U.ι
+      = (G.actionProj.left ⁻¹ᵁ P.U).ι ≫ G.translationAction.left := by
+    rw [restrictedAction]
+    exact Scheme.Hom.resLE_comp_ι _ _
+  have hpr : P.U.ι.base ((G.restrictedProj P.U).base p)
+      = G.actionProj.left.base ((G.actionProj.left ⁻¹ᵁ P.U).ι.base p) :=
+    ((Scheme.Hom.comp_apply _ _ _).symm.trans (congrArg
+      (fun m : (G.actionProj.left ⁻¹ᵁ P.U).toScheme ⟶ E.E => m.base p) hcpr)).trans
+      (Scheme.Hom.comp_apply _ _ _)
+  have hact : P.U.ι.base ((G.restrictedAction P.hstable).base p)
+      = G.translationAction.left.base ((G.actionProj.left ⁻¹ᵁ P.U).ι.base p) :=
+    ((Scheme.Hom.comp_apply _ _ _).symm.trans (congrArg
+      (fun m : (G.actionProj.left ⁻¹ᵁ P.U).toScheme ⟶ E.E => m.base p) hcact)).trans
+      (Scheme.Hom.comp_apply _ _ _)
+  have hq : (G.actionProj.left ⁻¹ᵁ P.U).ι.base p ∈ G.actionProj.left ⁻¹ᵁ W := by
+    show G.actionProj.left.base _ ∈ W
+    rw [← hpr]
+    exact hp
+  have hq' := hW hq
+  show P.U.ι.base _ ∈ W
+  rw [hact]
+  exact hq'
+
+/-- **Saturation of the window** (`S3`): the `π`-preimage of the `π`-image of a stable
+window is the window — the fibres of the patch quotient projection are the orbits
+(`exists_orbit_of_localQuotientOpenπ_eq`) and the window is stable. -/
+theorem preimage_image_window {W : E.E.Opens} (hW : G.IsStableOpen W) (hWU : W ≤ P.U) :
+    (G.localQuotientOpenπ P.hstable).base ⁻¹'
+        ((G.localQuotientOpenπ P.hstable).base '' ((P.U.ι ⁻¹ᵁ W : P.U.toScheme.Opens) :
+          Set ↥P.U.toScheme))
+      = ((P.U.ι ⁻¹ᵁ W : P.U.toScheme.Opens) : Set ↥P.U.toScheme) := by
+  apply Set.Subset.antisymm
+  · rintro x ⟨w, hwmem, hww⟩
+    obtain ⟨p, hact, hpr⟩ := P.exists_orbit_of_localQuotientOpenπ_eq hww.symm
+    have := P.restrictedAction_mem_of_restrictedProj_mem hW (p := p) (by rw [hpr]; exact hwmem)
+    rw [hact] at this
+    exact this
+  · intro w hw
+    exact ⟨w, hw, rfl⟩
+
+/-- **The saturated image open** (`S3`): the image in the patch quotient of a stable
+sub-open of the chart. Open because the quotient projection is a topological quotient map
+(flat + surjective + quasi-compact) and the window is saturated. -/
+noncomputable def imageOpens {W : E.E.Opens} (hW : G.IsStableOpen W) (hWU : W ≤ P.U) :
+    (G.localQuotientOpen P.hstable).Opens :=
+  ⟨(G.localQuotientOpenπ P.hstable).base '' ((P.U.ι ⁻¹ᵁ W : P.U.toScheme.Opens) :
+      Set ↥P.U.toScheme), by
+    rw [← (Flat.isQuotientMap_of_surjective
+      (G.localQuotientOpenπ P.hstable)).isOpen_preimage]
+    show IsOpen ((G.localQuotientOpenπ P.hstable).base ⁻¹' _)
+    rw [P.preimage_image_window hW hWU]
+    exact (P.U.ι ⁻¹ᵁ W).2⟩
+
+/-- The underlying set of the image open. -/
+theorem coe_imageOpens {W : E.E.Opens} (hW : G.IsStableOpen W) (hWU : W ≤ P.U) :
+    (P.imageOpens hW hWU : Set (G.localQuotientOpen P.hstable))
+      = (G.localQuotientOpenπ P.hstable).base '' ((P.U.ι ⁻¹ᵁ W : P.U.toScheme.Opens) :
+          Set ↥P.U.toScheme) :=
+  rfl
+
+/-- The window is the full `π`-preimage of its image open (`Opens` form of saturation). -/
+theorem preimage_imageOpens {W : E.E.Opens} (hW : G.IsStableOpen W) (hWU : W ≤ P.U) :
+    G.localQuotientOpenπ P.hstable ⁻¹ᵁ P.imageOpens hW hWU = P.U.ι ⁻¹ᵁ W :=
+  TopologicalSpace.Opens.ext (P.preimage_image_window hW hWU)
+
+/-- The range of the first projection of the window pullback is the window. -/
+theorem range_fst_imageOpens {W : E.E.Opens} (hW : G.IsStableOpen W) (hWU : W ≤ P.U) :
+    Set.range (pullback.fst (G.localQuotientOpenπ P.hstable)
+        (P.imageOpens hW hWU).ι).base
+      = ((P.U.ι ⁻¹ᵁ W : P.U.toScheme.Opens) : Set ↥P.U.toScheme) := by
+  have h := Scheme.Pullback.range_fst (G.localQuotientOpenπ P.hstable)
+    (P.imageOpens hW hWU).ι
+  rw [Scheme.Opens.range_ι] at h
+  rw [h]
+  exact P.preimage_image_window hW hWU
+
+/-- **The window is the pullback of its image open** (`S3` window comparison). -/
+noncomputable def windowIso {W : E.E.Opens} (hW : G.IsStableOpen W) (hWU : W ≤ P.U) :
+    (P.U.ι ⁻¹ᵁ W).toScheme ≅
+      pullback (G.localQuotientOpenπ P.hstable) (P.imageOpens hW hWU).ι :=
+  IsOpenImmersion.isoOfRangeEq (P.U.ι ⁻¹ᵁ W).ι (pullback.fst _ _)
+    (by rw [Scheme.Opens.range_ι, P.range_fst_imageOpens hW hWU])
+
+theorem windowIso_hom_fst {W : E.E.Opens} (hW : G.IsStableOpen W) (hWU : W ≤ P.U) :
+    (P.windowIso hW hWU).hom ≫ pullback.fst _ _ = (P.U.ι ⁻¹ᵁ W).ι :=
+  IsOpenImmersion.isoOfRangeEq_hom_fac _ _ _
+
+theorem windowIso_inv_ι {W : E.E.Opens} (hW : G.IsStableOpen W) (hWU : W ≤ P.U) :
+    (P.windowIso hW hWU).inv ≫ (P.U.ι ⁻¹ᵁ W).ι = pullback.fst _ _ :=
+  IsOpenImmersion.isoOfRangeEq_inv_fac _ _ _
+
+/-- **The restricted quotient projection** (`S3`): the window maps onto its image open —
+the corestriction of `π` through the window pullback. -/
+noncomputable def restrictedπ {W : E.E.Opens} (hW : G.IsStableOpen W) (hWU : W ≤ P.U) :
+    (P.U.ι ⁻¹ᵁ W).toScheme ⟶ (P.imageOpens hW hWU).toScheme :=
+  (P.windowIso hW hWU).hom ≫ pullback.snd _ _
+
+/-- The restricted projection recovers `π` under the two open inclusions. -/
+theorem restrictedπ_ι {W : E.E.Opens} (hW : G.IsStableOpen W) (hWU : W ≤ P.U) :
+    P.restrictedπ hW hWU ≫ (P.imageOpens hW hWU).ι
+      = (P.U.ι ⁻¹ᵁ W).ι ≫ G.localQuotientOpenπ P.hstable := by
+  rw [restrictedπ, Category.assoc, ← pullback.condition, ← Category.assoc,
+    P.windowIso_hom_fst hW hWU]
+
+instance {W : E.E.Opens} (hW : G.IsStableOpen W) (hWU : W ≤ P.U) :
+    Flat (P.restrictedπ hW hWU) := by
+  rw [restrictedπ]
+  haveI : Flat (pullback.snd (G.localQuotientOpenπ P.hstable)
+      (P.imageOpens hW hWU).ι) :=
+    MorphismProperty.pullback_snd _ _ inferInstance
+  infer_instance
+
+instance {W : E.E.Opens} (hW : G.IsStableOpen W) (hWU : W ≤ P.U) :
+    AlgebraicGeometry.Surjective (P.restrictedπ hW hWU) := by
+  rw [restrictedπ]
+  haveI : AlgebraicGeometry.Surjective (pullback.snd (G.localQuotientOpenπ P.hstable)
+      (P.imageOpens hW hWU).ι) :=
+    MorphismProperty.pullback_snd _ _ inferInstance
+  infer_instance
+
+instance {W : E.E.Opens} (hW : G.IsStableOpen W) (hWU : W ≤ P.U) :
+    QuasiCompact (P.restrictedπ hW hWU) := by
+  rw [restrictedπ]
+  haveI : QuasiCompact (pullback.snd (G.localQuotientOpenπ P.hstable)
+      (P.imageOpens hW hWU).ι) :=
+    MorphismProperty.pullback_snd _ _ inferInstance
+  infer_instance
+
+end ImageOpens
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
