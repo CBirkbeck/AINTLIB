@@ -17392,6 +17392,32 @@ SIMUL-engine, not a problem-from-schemes constructor — build prob directly):
 LEAN-OPS carried: structure-literal covers; pinned pullback.condition; term-mode assoc calcs;
 de-set folded morphisms; fun x : X binder ascriptions; mkOfCovers-projection toxicity.
 
+### [GHB6-RING] étale cancellation along a faithfully flat étale extension (GHB6's chart core)
+- **Status**: open  **Parent**: GHB7 (via [GHB7-5]=GHB6)  **File**: `ModularCurves/ForMathlib/EtaleCancellation.lean` (new)
+- **Depends on**: InvariantTorsor ([A711-FP] FinitePresentationOfFinite, exists_traceInvariants_eq_one, Etale.of_isFreeAlgebraAction — all PROVEN)
+- **Type**: theorem
+- **Statement** (single-conclusion): for `C → D → B` (tower), `B` faithfully flat étale over `D`,
+  `C → B` étale, `D` finite over `C` (or fp): `Algebra.Etale C D`. Consumer-instantiation:
+  `D := Bᴳ` (free action; ff via the trace-retraction `exists_traceInvariants_eq_one`;
+  étale via `Etale.of_isFreeAlgebraAction`).
+- **Proof sketch**: (1) UNRAMIFIED-half: `Ω[B⁄C] ≅ B ⊗[D] Ω[D⁄C]` (étale-invariance of Kähler
+  differentials along `D → B` — cotangent/JacobiZariski + `FormallyEtale D B`; locate the
+  mathlib form in RingTheory/Kaehler or prove via the first exact sequence + `Ω[B⁄D] = 0` +
+  `H¹`-vanishing from formal smoothness), then `Ω[B⁄C] = 0` (C→B unramified) +
+  `Module.FaithfullyFlat.lTensor_reflects_triviality` (mathlib, Etale/Descent.lean) ⟹
+  `Ω[D⁄C] = 0`. (2) SMOOTH-half (the mathlib gap — flat+unramified+fp⟹étale absent, and
+  `FormallySmooth.of_formallySmooth_tensorProduct_of_faithfullyFlat` is `proof_wanted`):
+  EITHER (2a) prove the finite-case characterization via `Unramified/LocalStructure.lean`
+  (`IsUnramifiedAt.exists_hasStandardEtaleSurjectionOn`: unramified ⟹ locally closed-imm in
+  standard-étale; flat + fp ⟹ the closed immersion is open ⟹ étale-at-every-prime — the
+  Stacks 02GM route), OR (2b) fpqc-descent of the formal-smoothness lifting along `D → B`
+  using the separability idempotent (`exists_separabilityIdempotent`, PROVEN) to split the
+  two-pullbacks coherence (KM A7.1.3-style). Prefer (2a).
+- **Mathlib lemmas**: FaithfullyFlat.lTensor_reflects_triviality; KaehlerDifferential exact
+  sequences; Unramified/LocalStructure API; [A711-FP] for the fp-side.
+- **Sources**: KM A7.1.2-3; Stacks 02GM (étale = flat + unramified + lfp), 00UV.
+- **Generality**: minimal for the chart use (CommRing tower; finite étale case suffices).
+
 **⚠ [GHB7-0] DESIGN FINDING (STREAM-GH 2026-07-13, needs coordinator eyes — b2-adjacent but
 NOT a b2)**: the diag-instance REGRESSES. GHB3/GHB5 need
 `[IsAffineHom (pullback.diagonal (terminal.from Z))]` because the T-Q5 Glue construction
