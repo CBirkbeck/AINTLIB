@@ -256,6 +256,18 @@ theorem torsion_geometricFibre_rank_two (N : ℕ) [NeZero N] (k : Type u) [Field
           natCard_sections_eq_finrank ((E.baseChange t).torsionπ d) x₀
       _ = d ^ 2 := (E.baseChange t).torsion_rank d x₀
 
+/-- **(T-B6, point-count form)** Over an algebraically closed field in which `N` is invertible,
+the `N`-torsion scheme of the fibre has exactly `N²` topological points. -/
+theorem natCard_torsion_fibre (N : ℕ) [NeZero N] {k : Type u} [Field k] [IsAlgClosed k]
+    (t : Spec (CommRingCat.of k) ⟶ S) (hN : (N : k) ≠ 0) :
+    Nat.card ↥((E.baseChange t).torsion N) = N ^ 2 := by
+  obtain ⟨x₀⟩ : Nonempty ↑(Spec (CommRingCat.of k)) := inferInstance
+  haveI hFin : IsFinite ((E.baseChange t).torsionπ N) := (E.baseChange t).torsionπ_isFinite N
+  haveI hEt : Etale ((E.baseChange t).torsionπ N) :=
+    (E.baseChange t).torsionπ_etale N ((nIsInvertible_spec_iff k N).mpr hN)
+  rw [ModularCurves.natCard_carrier_eq_finrank ((E.baseChange t).torsionπ N) x₀]
+  exact (E.baseChange t).torsion_rank N x₀
+
 end EllipticCurve
 
 end ModularCurves
