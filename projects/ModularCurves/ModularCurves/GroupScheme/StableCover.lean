@@ -212,6 +212,29 @@ theorem ι_comp_mulByHom_of_hasRank {N : ℕ} [NeZero N] (hG : G.HasRank N) :
 
 end MulPreimage
 
+/-! ### Stability closure micro-lemmas -/
+
+section StabilityClosure
+
+/-- π-preimages are stable: the action is a morphism over `S`. -/
+theorem isStableOpen_π_preimage (V : S.Opens) : G.IsStableOpen (E.π ⁻¹ᵁ V) := by
+  intro p hp
+  have hp' : (G.actionProj.left ≫ E.π).base p ∈ V := by
+    rw [Scheme.Hom.comp_apply]; exact hp
+  rw [G.actionProj_left_π, ← G.translationAction_left_π] at hp'
+  show E.π.base (G.translationAction.left.base p) ∈ V
+  rwa [Scheme.Hom.comp_apply] at hp'
+
+/-- Stable opens are closed under intersection. -/
+theorem IsStableOpen.inf {U U' : E.E.Opens} (hU : G.IsStableOpen U)
+    (hU' : G.IsStableOpen U') : G.IsStableOpen (U ⊓ U') := by
+  intro p hp
+  have h1 : p ∈ G.actionProj.left ⁻¹ᵁ U := hp.1
+  have h2 : p ∈ G.actionProj.left ⁻¹ᵁ U' := hp.2
+  exact ⟨hU h1, hU' h2⟩
+
+end StabilityClosure
+
 /-! ### The chart existence: every point of `E` lies in a `G`-stable affine open over an
 affine base patch
 
