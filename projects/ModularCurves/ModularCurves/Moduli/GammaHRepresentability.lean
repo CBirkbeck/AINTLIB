@@ -1176,7 +1176,143 @@ noncomputable def QuotPkg.quotProb (pkg : ∀ X : EllObj R, QuotPkg φ X)
           Category.id_comp, Category.assoc, pullback.lift_snd, Category.comp_id]
     · rw [Category.assoc, pullback.lift_snd, pullback.lift_snd, pullback.lift_snd]
 
+/-- **The quotient projection** ([GHB7-4]): the natural transformation
+`Q ⟶ quotProb`, sending a value to its identity-index classification composed with
+the chosen quotient projection. Naturality is [GHB7-4a] + the descent square. -/
+noncomputable def QuotPkg.projQ (pkg : ∀ X : EllObj R, QuotPkg φ X)
+    (hfree : FreeAction φ)
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base))) :
+    Q ⟶ QuotPkg.quotProb pkg hfree hbase where
+  app Xop := ↾fun a =>
+    ⟨(((pkg Xop.unop).d.eqv ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+        (Q.map (Xop.unop.pullbackAlongπ
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1 ≫ (pkg Xop.unop).π,
+      by
+        rw [Category.assoc, (pkg Xop.unop).hπf]
+        exact (((pkg Xop.unop).d.eqv
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+          (Q.map (Xop.unop.pullbackAlongπ
+            ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).2⟩
+  naturality {Xop X'op} kop := by
+    ext a
+    refine Subtype.ext ?_
+    obtain ⟨hsndT, hfstT, hinvT, hUPT, hqT, hqfT⟩ :=
+      QuotPkg.mapT_spec pkg hfree hbase kop.unop
+    -- the canonical classification at `X` and its lift over `X'.base`
+    have hva := ((pkg Xop.unop).d.eqv
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).apply_symm_apply
+      (Q.map (Xop.unop.pullbackAlongπ
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)
+    have wℓ : (kop.unop.baseHom ≫ (((pkg Xop.unop).d.eqv
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+        (Q.map (Xop.unop.pullbackAlongπ
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1) ≫
+        (pkg Xop.unop).d.f = 𝟙 X'op.unop.base ≫ kop.unop.baseHom := by
+      rw [Category.assoc, (((pkg Xop.unop).d.eqv
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+        (Q.map (Xop.unop.pullbackAlongπ
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).2,
+        Category.id_comp]
+      show kop.unop.baseHom ≫ 𝟙 Xop.unop.base = kop.unop.baseHom
+      rw [Category.comp_id]
+    -- key: the classification at `X'` is the lifted comparison composite ([GHB7-4a])
+    have hkey := ((pkg X'op.unop).d.eqv
+        ((𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom)).injective
+      (a₁ := ((pkg X'op.unop).d.eqv
+        ((𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom)).symm
+        (Q.map (X'op.unop.pullbackAlongπ
+          ((𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom)).op (Q.map kop a)))
+      (a₂ := ⟨(⟨pullback.lift (kop.unop.baseHom ≫ (((pkg Xop.unop).d.eqv
+            ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+            (Q.map (Xop.unop.pullbackAlongπ
+              ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1)
+            (𝟙 X'op.unop.base) wℓ, pullback.lift_snd _ _ _⟩ :
+          { h : X'op.unop.base ⟶ ((pkg Xop.unop).d.pullback kop.unop).Z //
+            h ≫ ((pkg Xop.unop).d.pullback kop.unop).f =
+              (𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom }).1 ≫
+          (((pkg Xop.unop).d.pullback kop.unop).toRelRepData.compare
+            (pkg X'op.unop).d.toRelRepData).1, by
+        rw [Category.assoc, (((pkg Xop.unop).d.pullback
+          kop.unop).toRelRepData.compare (pkg X'op.unop).d.toRelRepData).2]
+        exact pullback.lift_snd _ _ _⟩)
+      (by
+        rw [Equiv.apply_symm_apply]
+        exact (ModuliProblem.RelRepData.eqv_comp_compare_pullback_of_eqv
+          (pkg Xop.unop).d.toRelRepData (pkg X'op.unop).d.toRelRepData kop.unop a
+          _ _ hva _ (pullback.lift_fst _ _ _) (pullback.lift_snd _ _ _)
+          (pullback.lift_snd _ _ _) _).symm)
+    -- the descent square for the quotient-level lift
+    have hsq : pullback.lift (kop.unop.baseHom ≫ ((((pkg Xop.unop).d.eqv
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+          (Q.map (Xop.unop.pullbackAlongπ
+            ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1 ≫
+          (pkg Xop.unop).π)) (𝟙 X'op.unop.base) (by
+          rw [Category.assoc,
+            show ((((pkg Xop.unop).d.eqv
+              ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+              (Q.map (Xop.unop.pullbackAlongπ
+                ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1 ≫
+              (pkg Xop.unop).π) ≫ (pkg Xop.unop).f₀ = 𝟙 Xop.unop.base from by
+              rw [Category.assoc, (pkg Xop.unop).hπf]
+              exact (((pkg Xop.unop).d.eqv
+                ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+                (Q.map (Xop.unop.pullbackAlongπ
+                  ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).2,
+            Category.comp_id, Category.id_comp]) =
+        pullback.lift (kop.unop.baseHom ≫ (((pkg Xop.unop).d.eqv
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+          (Q.map (Xop.unop.pullbackAlongπ
+            ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1)
+          (𝟙 X'op.unop.base) wℓ ≫ QuotPkg.πT pkg hfree hbase kop.unop := by
+      apply pullback.hom_ext
+      · rw [pullback.lift_fst, Category.assoc, hfstT, ← Category.assoc,
+          ← Category.assoc, pullback.lift_fst]
+      · rw [pullback.lift_snd, Category.assoc, hsndT, pullback.lift_snd]
+    show (((pkg X'op.unop).d.eqv
+        ((𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom)).symm
+        (Q.map (X'op.unop.pullbackAlongπ
+          ((𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom)).op (Q.map kop a))).1 ≫
+        (pkg X'op.unop).π =
+      pullback.lift (kop.unop.baseHom ≫ ((((pkg Xop.unop).d.eqv
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+          (Q.map (Xop.unop.pullbackAlongπ
+            ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1 ≫
+          (pkg Xop.unop).π)) (𝟙 X'op.unop.base) (by
+          rw [Category.assoc,
+            show ((((pkg Xop.unop).d.eqv
+              ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+              (Q.map (Xop.unop.pullbackAlongπ
+                ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1 ≫
+              (pkg Xop.unop).π) ≫ (pkg Xop.unop).f₀ = 𝟙 Xop.unop.base from by
+              rw [Category.assoc, (pkg Xop.unop).hπf]
+              exact (((pkg Xop.unop).d.eqv
+                ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+                (Q.map (Xop.unop.pullbackAlongπ
+                  ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).2,
+            Category.comp_id, Category.id_comp]) ≫
+        QuotPkg.mapT pkg hfree hbase kop.unop
+    rw [show ((((pkg X'op.unop).d.eqv
+        ((𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom)).symm
+        (Q.map (X'op.unop.pullbackAlongπ
+          ((𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom)).op (Q.map kop a))).1) =
+      ((⟨pullback.lift (kop.unop.baseHom ≫ (((pkg Xop.unop).d.eqv
+            ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+            (Q.map (Xop.unop.pullbackAlongπ
+              ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1)
+            (𝟙 X'op.unop.base) wℓ, pullback.lift_snd _ _ _⟩ :
+          { h : X'op.unop.base ⟶ ((pkg Xop.unop).d.pullback kop.unop).Z //
+            h ≫ ((pkg Xop.unop).d.pullback kop.unop).f =
+              (𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom }).1 ≫
+          (((pkg Xop.unop).d.pullback kop.unop).toRelRepData.compare
+            (pkg X'op.unop).d.toRelRepData).1) from congrArg Subtype.val hkey,
+      hsq, Category.assoc, Category.assoc, hqT]
+    rfl
+
 end Transport
+
+
+
 
 
 
