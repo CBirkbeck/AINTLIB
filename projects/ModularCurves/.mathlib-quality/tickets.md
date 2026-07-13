@@ -17693,3 +17693,54 @@ seats' reclaim clauses are VOID.
   rename-heavy tickets are serialized by the main-side manager.
 
 ## Amendments v10.172 (2026-07-12, coordinator): MAIN-PR CADENCE formalized (owner confirmation of the system) — whole-branch dev→main PRs at every boarded ★; cleanup fleet works main continuously under its own coordinator
+
+## Amendments v10.173 (2026-07-13, coordinator): STREAM-G0 session 1 RATIFIED — [HG-C2] reduced to ONE geometric sorry; SIGNAL re-scoped as a 4-front effort; the p2-ping is VOID (seat closed) — the Hopf-diamond front re-assigned IN-STREAM onto the crux doc's own-route
+
+**Verified at source** (module re-built coordinator-side: `Build completed successfully (3183
+jobs)` with exactly the one reported sorry at `GroupScheme/StableChartData.lean:98`; file read
+in full; sentinel `.G0` consistent; commits pathspec-clean, siblings untouched):
+
+1. **`surjective_hom_of_isClosedImmersion_specMap`** — LANDED sorry-free. General `CommRingCat`
+   lemma (`IsClosedImmersion (Spec.map φ) → Surjective φ.hom` via
+   `isAffine_surjective_of_isAffine` + `ΓSpecIso` naturality). **ForMathlib-worthy** (converse
+   of `IsClosedImmersion.spec_of_surjective`) — flag for the generalise lane once on main.
+2. **`instModuleFiniteGroupRing`** — LANDED (`Module.Finite baseRing groupRing` from
+   `G.π.finite_app`). One of M5's three per-chart inputs done.
+3. **`chartCoaction_productMap_surjective`** — PROVEN modulo the sole sorry
+   `chartPrecursorSpec_isClosedImmersion` (:98). The **Hopf-free-form seam is ratified as
+   exactly right**: `galoisPrecursor R A ρ` unfolds to `productMap includeLeft ρ`, so the
+   surjectivity is provable NOW and discharges the `precursorSurjective` field verbatim the
+   moment the Hopf instance lands. Step-1 (pullbackSpecIso conjugation wrapper) landed green;
+   steps 2–3 (legs + actPair identification via `isClosedImmersion_actPair_left`) banked in
+   `decomposition-hopf-crux.md`.
+
+**RE-SCOPE RATIFIED — the honest finding IS the deliverable** (v10.24 lineage): post-IsCoaction
+is NOT one assembly session. The SIGNAL ★★ = four fronts: (1) Hopf-instance diamond,
+(2) [HG-C2] geometric heart (the :98 sorry), (3) [HG-C3] stable cover, (4) [HG-C4] glue.
+Charter v10.171(A)'s "the datum plugs in" was optimistic — M5's `[HopfAlgebra]` hypothesis
+needs the diamond-compatible instance first. Charter corrected by this section.
+
+**ADJUDICATION — "ping p2" is VOID; front (1) transfers INTO STREAM-G0:**
+- The p2 seat closed at the four-stream reset (v10.171: ALL prior producer seats stood down).
+  p2's BB-DELIGNE L6c instance will never arrive from outside; waiting on it = waiting forever.
+- The crux doc ALREADY routes this (its ~line 730): "our OWN route to `[HopfAlgebra R A]`,
+  avoiding the p2-affine-base restriction" — Γ-duals of the group-object laws on
+  `GroupScheme/SubgroupGroupObject.lean`, whose C1c substrate LANDED (`unitHom`/`invHom`/
+  `mulHom`, Over-S lifts, `over_hom_ext`). Front (1) = finish that route.
+- **BINDING diamond constraint** (mathlib verified this session): `class Bialgebra R A extends
+  Algebra R A, Coalgebra R A`; `HopfAlgebra extends HopfAlgebraStruct extends Bialgebra`. The
+  instance MUST be assembled OVER the geometric `Algebra P.baseRing P.groupRing` of the
+  `AffineChartPatch` layer — register the `Coalgebra` (Γ-dual comul/counit), then
+  **`Bialgebra.mk' P.baseRing P.groupRing …`** (it takes `[Algebra R A] [Coalgebra R A]` as
+  instance ARGUMENTS, so `toAlgebra` is the geometric instance definitionally), then the
+  `HopfAlgebra` extension with the antipode = Γ-dual of `invHom`. NEVER a free `[HopfAlgebra]`
+  variable, never a fresh `RingHom.toAlgebra`-derived algebra.
+- Fallback rule: the crux doc's hypothesis-wiring provision (~line 787) stays legitimate for
+  INTERLEAVING C1d/C4 statements only — pins stated with a `[HopfAlgebra]` hypothesis are NOT
+  the SIGNAL; the instance stays critical-path. If the antipode laws balloon multi-session,
+  board it and hypothesis-wire meanwhile; do not silently stall.
+
+**G0 ORDER CONFIRMED (no redirect)**: #2 now (banked route) → #1 (own-route instance under the
+constraint) → #3 ([HG-C3]; first act = focused `/develop --decompose` of the appendix cover
+strategy, v10.8) → #4 (glue) → **SIGNAL ★★** (⟹ v10.172 main-PR) → charter (B)/(C). Marathon
+v10.162. Dispatch in `inbox/STREAM-G0.md`.
