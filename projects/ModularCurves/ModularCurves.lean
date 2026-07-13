@@ -68,6 +68,7 @@ import ModularCurves.ForMathlib.KempfLocalKilling
 import ModularCurves.ForMathlib.MonicQuotientDescent
 import ModularCurves.ForMathlib.OpensMapFinal
 import ModularCurves.ForMathlib.ProjIntegral
+import ModularCurves.ForMathlib.ProperAffineIntersectionModel
 import ModularCurves.ForMathlib.PullbackLocalAtTarget
 import ModularCurves.ForMathlib.PullbackUnitMonoidal
 import ModularCurves.ForMathlib.QuotientCurveModel
