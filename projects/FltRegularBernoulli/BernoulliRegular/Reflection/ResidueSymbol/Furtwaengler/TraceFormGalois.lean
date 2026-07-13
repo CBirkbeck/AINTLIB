@@ -5,7 +5,7 @@ public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CyclotomicL
 
 
 /-!
-# Galois action on the trace-form additive character (REF-18c2c5-b)
+# Galois action on the trace-form additive character
 
 This file connects the cyclotomic Galois action on `R'` to the
 Stickelberger psi-shift compatibility for trace-form bundles. The key
@@ -36,6 +36,23 @@ namespace Furtwaengler
 
 universe u v w
 
+/-- An injective ring endomorphism sends a primitive `ℓ`-th root of unity `ζ` to `ζ ^ c.val`
+for some unit `c : (ZMod ℓ)ˣ`: it must send `ζ` to some power `ζ ^ i`, and `i` is coprime to
+`ℓ` because the image is again primitive. -/
+private theorem exists_zmodUnit_map_eq_pow {ℓ : ℕ} [Fact (Nat.Prime ℓ)]
+    {R' : Type w} [CommRing R'] [IsDomain R'] {ζ : R'} (hζ : IsPrimitiveRoot ζ ℓ)
+    (f : R' →+* R') (hf : Function.Injective f) :
+    ∃ c : (ZMod ℓ)ˣ, f ζ = ζ ^ (c : ZMod ℓ).val := by
+  have : NeZero ℓ := ⟨(Fact.out : ℓ.Prime).ne_zero⟩
+  have hf_pow : (f ζ) ^ ℓ = 1 := by rw [← map_pow, hζ.pow_eq_one, map_one]
+  obtain ⟨i, hi_lt, hi⟩ := hζ.eq_pow_of_pow_eq_one hf_pow
+  have hi_coprime : i.Coprime ℓ :=
+    (hζ.pow_iff_coprime (Fact.out : ℓ.Prime).pos i).mp (hi ▸ hζ.map_of_injective hf)
+  refine ⟨ZMod.unitOfCoprime i hi_coprime, ?_⟩
+  rw [← hi]
+  congr 1
+  rw [ZMod.coe_unitOfCoprime, ZMod.val_natCast, Nat.mod_eq_of_lt hi_lt]
+
 namespace TraceFormStickelbergerSetup
 
 variable {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)]
@@ -57,6 +74,19 @@ theorem kUnitOfZModUnit_val (c : (ZMod ℓ)ˣ) :
     ((kUnitOfZModUnit (k := k) c : kˣ) : k) =
       algebraMap (ZMod ℓ) k (c : ZMod ℓ) := rfl
 
+omit [Fintype k] in
+/-- Trace identity: `Tr(t · (a' · x)) = c · Tr(t · x)` (in `ZMod ℓ`), where
+`a' = (algebraMap (ZMod ℓ) k) c`. The product is associated as `t * (a' * x)`
+to match the shape arising from `mulShift` in the psi-shift theorems. -/
+private theorem trace_mul_kUnit_mul_eq (t : k) (c : (ZMod ℓ)ˣ) (x : k) :
+    Algebra.trace (ZMod ℓ) k (t * (((kUnitOfZModUnit (k := k) c : kˣ) : k) * x)) =
+      (c : ZMod ℓ) * Algebra.trace (ZMod ℓ) k (t * x) := by
+  rw [show t * (((kUnitOfZModUnit (k := k) c : kˣ) : k) * x) = (c : ZMod ℓ) • (t * x) from ?_]
+  · rw [(Algebra.trace (ZMod ℓ) k).map_smul]
+    rfl
+  · rw [kUnitOfZModUnit_val, Algebra.smul_def]
+    ring
+
 /-- Trace identity: `Tr(scale · (a' · x)) = c · Tr(scale · x)` (in ZMod ℓ),
 where `a' = (algebraMap (ZMod ℓ) k) c`. Used in the psi-shift derivation.
 The product is associated as `(traceScale * (a' * x))` to match the shape
@@ -65,18 +95,12 @@ theorem trace_traceScale_mul_kUnit_mul_eq
     (c : (ZMod ℓ)ˣ) (x : k) :
     Algebra.trace (ZMod ℓ) k
         ((S.traceScale : k) * (((kUnitOfZModUnit (k := k) c : kˣ) : k) * x)) =
-      (c : ZMod ℓ) * Algebra.trace (ZMod ℓ) k ((S.traceScale : k) * x) := by
-  rw [show
-        (S.traceScale : k) * (((kUnitOfZModUnit (k := k) c : kˣ) : k) * x) =
-          (c : ZMod ℓ) • ((S.traceScale : k) * x) from ?_]
-  · rw [(Algebra.trace (ZMod ℓ) k).map_smul]
-    rfl
-  · rw [kUnitOfZModUnit_val, Algebra.smul_def]
-    ring
+      (c : ZMod ℓ) * Algebra.trace (ZMod ℓ) k ((S.traceScale : k) * x) :=
+  trace_mul_kUnit_mul_eq (S.traceScale : k) c x
 
 /-- Order of `S.zeta_ell` in `R'` equals `ℓ`. -/
 theorem orderOf_zeta_ell : orderOf S.zeta_ell = ℓ :=
-  haveI : NeZero ℓ := ⟨(Fact.out : ℓ.Prime).ne_zero⟩
+  have : NeZero ℓ := ⟨(Fact.out : ℓ.Prime).ne_zero⟩
   S.hzeta_ell.eq_orderOf.symm
 
 /-- **Trace-form psi-shift derivation.** For `σ : R' →+* R'` whose
@@ -116,33 +140,10 @@ theorem isGalPsiShiftCompatible_traceForm
     ∃ a' : kˣ,
       (f : R' →+* R').toMonoidHom.compAddChar S.psi =
         AddChar.mulShift S.psi a' := by
-  haveI : NeZero ℓ := ⟨(Fact.out : ℓ.Prime).ne_zero⟩
-  -- Apply f to the equation S.zeta_ell^ℓ = 1: get (f S.zeta_ell)^ℓ = 1.
-  have hf_pow : ((f : R' →+* R') S.zeta_ell) ^ ℓ = 1 := by
-    rw [← map_pow]
-    rw [S.hzeta_ell.pow_eq_one]
-    exact map_one _
-  -- By eq_pow_of_pow_eq_one, f S.zeta_ell = S.zeta_ell^i for some i < ℓ.
-  obtain ⟨i, hi_lt, hi⟩ := S.hzeta_ell.eq_pow_of_pow_eq_one hf_pow
-  -- i is coprime to ℓ since f S.zeta_ell is a primitive ℓ-th root
-  -- (f is an auto, so f S.zeta_ell satisfies same primitivity).
-  have h_prim : IsPrimitiveRoot ((f : R' →+* R') S.zeta_ell) ℓ :=
-    S.hzeta_ell.map_of_injective f.injective
-  -- From hi : S.zeta_ell^i = (f : R' →+* R') S.zeta_ell, deduce coprimality.
-  have hi_coprime : i.Coprime ℓ := by
-    have h_prim' : IsPrimitiveRoot (S.zeta_ell ^ i) ℓ := hi ▸ h_prim
-    exact (S.hzeta_ell.pow_iff_coprime (Fact.out : ℓ.Prime).pos i).mp h_prim'
-  -- Build c : (ZMod ℓ)ˣ from i.
-  let c : (ZMod ℓ)ˣ := ZMod.unitOfCoprime i hi_coprime
-  refine ⟨kUnitOfZModUnit (k := k) c, ?_⟩
-  -- Apply psi_shift_of_zetaEll_action.
-  apply S.psi_shift_of_zetaEll_action (f : R' →+* R') c
-  -- Need: f S.zeta_ell = S.zeta_ell ^ (c : ZMod ℓ).val.
-  rw [← hi]
-  congr 1
-  -- (c : ZMod ℓ).val = i since i < ℓ.
-  change i = ((ZMod.unitOfCoprime i hi_coprime : (ZMod ℓ)ˣ) : ZMod ℓ).val
-  rw [ZMod.coe_unitOfCoprime, ZMod.val_natCast, Nat.mod_eq_of_lt hi_lt]
+  obtain ⟨c, hc⟩ :=
+    exists_zmodUnit_map_eq_pow S.hzeta_ell (f : R' →+* R') f.injective
+  exact ⟨kUnitOfZModUnit (k := k) c,
+    S.psi_shift_of_zetaEll_action (f : R' →+* R') c hc⟩
 
 /-- Bridge: every trace-form bundle satisfies the
 `IsGalPsiShiftCompatible` predicate of `ConcreteStickelbergerSetup`. -/
@@ -179,7 +180,7 @@ variable (S : ConductorFlexibleTraceFormStickelbergerSetup ℓ p k K R')
 /-- Order of `S.zeta_ell` in `R'` equals `ℓ`, in the conductor-flexible
 trace-form setup. -/
 theorem orderOf_zeta_ell : orderOf S.zeta_ell = ℓ :=
-  haveI : NeZero ℓ := ⟨(Fact.out : ℓ.Prime).ne_zero⟩
+  have : NeZero ℓ := ⟨(Fact.out : ℓ.Prime).ne_zero⟩
   S.hzeta_ell.eq_orderOf.symm
 
 /-- Flexible trace-form psi-shift derivation.  For `σ : R' →+* R'` whose
@@ -206,44 +207,18 @@ theorem psi_shift_of_zetaEll_action
               : k) * x))).val),
       S.orderOf_zeta_ell]
   congr 1
-  have h_trace :
-      Algebra.trace (ZMod ℓ) k
-          ((S.traceScale : k) *
-            (((TraceFormStickelbergerSetup.kUnitOfZModUnit (k := k) c : kˣ) : k) * x)) =
-        (c : ZMod ℓ) *
-          Algebra.trace (ZMod ℓ) k ((S.traceScale : k) * x) := by
-    rw [show
-        (S.traceScale : k) *
-            (((TraceFormStickelbergerSetup.kUnitOfZModUnit (k := k) c : kˣ) : k) * x) =
-          (c : ZMod ℓ) • ((S.traceScale : k) * x) from ?_]
-    · rw [(Algebra.trace (ZMod ℓ) k).map_smul]
-      rfl
-    · rw [TraceFormStickelbergerSetup.kUnitOfZModUnit_val, Algebra.smul_def]
-      ring
-  rw [h_trace, ZMod.val_mul, Nat.mod_mod]
+  rw [TraceFormStickelbergerSetup.trace_mul_kUnit_mul_eq (S.traceScale : k) c x,
+    ZMod.val_mul, Nat.mod_mod]
 
 /-- Every conductor-flexible trace-form bundle satisfies the psi-shift
 compatibility predicate needed by flexible Galois descent. -/
 theorem isGalPsiShiftCompatible :
     S.concrete.IsGalPsiShiftCompatible := by
   intro f
-  haveI : NeZero ℓ := ⟨(Fact.out : ℓ.Prime).ne_zero⟩
-  have hf_pow : ((f : R' →+* R') S.zeta_ell) ^ ℓ = 1 := by
-    rw [← map_pow, S.hzeta_ell.pow_eq_one]
-    exact map_one _
-  obtain ⟨i, hi_lt, hi⟩ := S.hzeta_ell.eq_pow_of_pow_eq_one hf_pow
-  have h_prim : IsPrimitiveRoot ((f : R' →+* R') S.zeta_ell) ℓ :=
-    S.hzeta_ell.map_of_injective f.injective
-  have hi_coprime : i.Coprime ℓ := by
-    have h_prim' : IsPrimitiveRoot (S.zeta_ell ^ i) ℓ := hi ▸ h_prim
-    exact (S.hzeta_ell.pow_iff_coprime (Fact.out : ℓ.Prime).pos i).mp h_prim'
-  let c : (ZMod ℓ)ˣ := ZMod.unitOfCoprime i hi_coprime
-  refine ⟨TraceFormStickelbergerSetup.kUnitOfZModUnit (k := k) c, ?_⟩
-  apply S.psi_shift_of_zetaEll_action (f : R' →+* R') c
-  rw [← hi]
-  congr 1
-  change i = ((ZMod.unitOfCoprime i hi_coprime : (ZMod ℓ)ˣ) : ZMod ℓ).val
-  rw [ZMod.coe_unitOfCoprime, ZMod.val_natCast, Nat.mod_eq_of_lt hi_lt]
+  obtain ⟨c, hc⟩ :=
+    exists_zmodUnit_map_eq_pow S.hzeta_ell (f : R' →+* R') f.injective
+  exact ⟨TraceFormStickelbergerSetup.kUnitOfZModUnit (k := k) c,
+    S.psi_shift_of_zetaEll_action (f : R' →+* R') c hc⟩
 
 end ConductorFlexibleTraceFormStickelbergerSetup
 
