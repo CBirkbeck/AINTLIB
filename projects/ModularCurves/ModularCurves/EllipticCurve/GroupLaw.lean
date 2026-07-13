@@ -156,7 +156,7 @@ noncomputable def baseChange {T : Scheme.{u}} (g : T ⟶ S) : EllipticCurve T wh
     (by rw [Category.assoc, E.zero_π, Category.comp_id, Category.id_comp])
   zero_π := pullback.lift_snd _ _ _
   smooth := by
-    haveI : MorphismProperty.IsStableUnderBaseChange
+    have : MorphismProperty.IsStableUnderBaseChange
         (@SmoothOfRelativeDimension 1) :=
       AlgebraicGeometry.smoothOfRelativeDimension_isStableUnderBaseChange 1
     exact MorphismProperty.pullback_snd _ _ E.smooth
@@ -179,21 +179,21 @@ noncomputable def baseChange {T : Scheme.{u}} (g : T ⟶ S) : EllipticCurve T wh
         calc (Functor.LaxMonoidal.ε (Over.pullback g)).left ≫ pullback.fst (𝟙 S) g
             = (Functor.LaxMonoidal.ε (Over.pullback g)).left ≫
               pullback.snd (𝟙 S) g ≫ g := congrArg
-                (fun q => (Functor.LaxMonoidal.ε (Over.pullback g)).left ≫ q) hc
+                (fun q ↦ (Functor.LaxMonoidal.ε (Over.pullback g)).left ≫ q) hc
           _ = ((Functor.LaxMonoidal.ε (Over.pullback g)).left ≫
               pullback.snd (𝟙 S) g) ≫ g := (Category.assoc _ _ _).symm
           _ = 𝟙 T ≫ g := congrArg (· ≫ g) hε2
           _ = g := Category.id_comp g
       refine (Category.assoc _ _ _).trans ?_
       refine Eq.trans (congrArg
-        (fun q => (Functor.LaxMonoidal.ε (Over.pullback g)).left ≫ q)
+        (fun q ↦ (Functor.LaxMonoidal.ε (Over.pullback g)).left ≫ q)
         (pullback.lift_fst _ _ _)) ?_
       refine Eq.trans (Category.assoc _ _ _).symm ?_
       refine Eq.trans (congrArg (· ≫ E.zero) hε1) ?_
       exact (pullback.lift_fst _ _ _).symm
     · refine (Category.assoc _ _ _).trans ?_
       refine Eq.trans (congrArg
-        (fun q => (Functor.LaxMonoidal.ε (Over.pullback g)).left ≫ q)
+        (fun q ↦ (Functor.LaxMonoidal.ε (Over.pullback g)).left ≫ q)
         (pullback.lift_snd _ _ _)) ?_
       exact hε2.trans (pullback.lift_snd _ _ _).symm
 
