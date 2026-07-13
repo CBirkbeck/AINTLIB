@@ -19,6 +19,78 @@ namespace AlgebraicGeometry
 
 variable {R S : Type u} [CommRing R] [CommRing S]
 
+private lemma gammaSpecIso_naturality_apply (f : R →+* S)
+    (x : Γ(Spec (CommRingCat.of R), ⊤)) :
+    (Scheme.ΓSpecIso (CommRingCat.of S)).hom
+        ((Spec.map (CommRingCat.ofHom f)).appTop x) =
+      f ((Scheme.ΓSpecIso (CommRingCat.of R)).hom x) := by
+  change ((Spec.map (CommRingCat.ofHom f)).appTop ≫
+      (Scheme.ΓSpecIso (CommRingCat.of S)).hom) x =
+    ((Scheme.ΓSpecIso (CommRingCat.of R)).hom ≫ CommRingCat.ofHom f) x
+  exact congrArg (fun g => g x)
+    (Scheme.ΓSpecIso_naturality (CommRingCat.ofHom f))
+
+private noncomputable def awayEquivOfRingEquiv
+    (e : R ≃+* S) (r : R) :
+    Localization.Away r ≃+* Localization.Away (e r) :=
+  IsLocalization.ringEquivOfRingEquiv _ _ e (Submonoid.map_powers e r)
+
+private lemma awayEquivOfRingEquiv_algebraMap
+    (e : R ≃+* S) (r x : R) :
+    awayEquivOfRingEquiv e r (algebraMap R (Localization.Away r) x) =
+      algebraMap S (Localization.Away (e r)) (e x) := by
+  exact IsLocalization.ringEquivOfRingEquiv_eq (Submonoid.map_powers e r) x
+
+private lemma awayMap_bijective_of_equiv
+    {R₁ S₁ R₂ S₂ : Type u}
+    [CommRing R₁] [CommRing S₁] [CommRing R₂] [CommRing S₂]
+    (f₁ : R₁ →+* S₁) (f₂ : R₂ →+* S₂)
+    (eR : R₁ ≃+* R₂) (eS : S₁ ≃+* S₂)
+    (hcomm : eS.toRingHom.comp f₁ = f₂.comp eR.toRingHom)
+    (r : R₁)
+    (hmap : Function.Bijective
+      (IsLocalization.Away.map (Localization.Away r)
+        (Localization.Away (f₁ r)) f₁ r)) :
+    Function.Bijective
+      (IsLocalization.Away.map (Localization.Away (eR r))
+        (Localization.Away (f₂ (eR r))) f₂ (eR r)) := by
+  have hvalue (x : R₁) : eS (f₁ x) = f₂ (eR x) := by
+    change (eS.toRingHom.comp f₁) x = (f₂.comp eR.toRingHom) x
+    rw [hcomm]
+  let eAwayR := awayEquivOfRingEquiv eR r
+  have hpowersS : Submonoid.map eS.toMonoidHom (Submonoid.powers (f₁ r)) =
+      Submonoid.powers (f₂ (eR r)) := by
+    rw [Submonoid.map_powers]
+    exact congrArg Submonoid.powers (hvalue r)
+  let eAwayS : Localization.Away (f₁ r) ≃+* Localization.Away (f₂ (eR r)) :=
+    IsLocalization.ringEquivOfRingEquiv _ _ eS hpowersS
+  let g₁ := IsLocalization.Away.map
+    (Localization.Away r) (Localization.Away (f₁ r)) f₁ r
+  let g₂ := IsLocalization.Away.map
+    (Localization.Away (eR r)) (Localization.Away (f₂ (eR r))) f₂ (eR r)
+  have hsq : eAwayS.toRingHom.comp g₁ = g₂.comp eAwayR.toRingHom := by
+    apply IsLocalization.ringHom_ext (Submonoid.powers r)
+    ext x
+    change eAwayS (g₁ (algebraMap _ (Localization.Away r) x)) =
+      g₂ (eAwayR (algebraMap _ (Localization.Away r) x))
+    rw [show g₁ (algebraMap _ (Localization.Away r) x) =
+        algebraMap _ (Localization.Away (f₁ r)) (f₁ x) by
+      simp [g₁, IsLocalization.Away.map]]
+    rw [show eAwayS (algebraMap _ (Localization.Away (f₁ r)) (f₁ x)) =
+        algebraMap _ (Localization.Away (f₂ (eR r))) (eS (f₁ x)) by
+      exact IsLocalization.ringEquivOfRingEquiv_eq hpowersS (f₁ x)]
+    rw [show eAwayR (algebraMap _ (Localization.Away r) x) =
+        algebraMap _ (Localization.Away (eR r)) (eR x) by
+      exact awayEquivOfRingEquiv_algebraMap eR r x]
+    rw [show g₂ (algebraMap _ (Localization.Away (eR r)) (eR x)) =
+        algebraMap _ (Localization.Away (f₂ (eR r))) (f₂ (eR x)) by
+      simp [g₂, IsLocalization.Away.map]]
+    rw [hvalue]
+  have hleft : Function.Bijective (eAwayS.toRingHom.comp g₁) :=
+    eAwayS.bijective.comp hmap
+  have hright : Function.Bijective (g₂.comp eAwayR.toRingHom) := hsq ▸ hleft
+  exact (Function.Bijective.of_comp_iff g₂ eAwayR.bijective).mp hright
+
 private lemma primeSpectrum_comap_injective_of_awayCover
     (f : R →+* S) {κ : Type u} [Finite κ] (r : κ → R)
     (hspan : Ideal.span (Set.range fun k => f (r k)) = ⊤)
@@ -189,5 +261,46 @@ theorem Scheme.Hom.exists_awayCover_of_isOpenImmersion
     have hleft : Function.Bijective (eX.toRingEquiv.toRingHom.comp graw) :=
       hsq.symm ▸ hright
     exact (eX.toEquiv.bijective.of_comp_iff' graw).mp hleft
+
+/-- If a ring map induces an open immersion on spectra, finitely many elements
+of the source ring cut out a principal cover of the target and induce
+isomorphisms on the corresponding principal localizations. -/
+theorem exists_awayCover_of_isOpenImmersion_SpecMap
+    (f : R →+* S)
+    [IsOpenImmersion (Spec.map (CommRingCat.ofHom f))] :
+    ∃ (κ : Type u) (_ : Finite κ) (r : κ → R),
+      Ideal.span (Set.range fun k => f (r k)) = ⊤ ∧
+        ∀ k, Function.Bijective
+          (IsLocalization.Away.map
+            (Localization.Away (r k))
+            (Localization.Away (f (r k))) f (r k)) := by
+  let g := Spec.map (CommRingCat.ofHom f)
+  obtain ⟨κ, hκ, rΓ, hspan, hmap⟩ :=
+    Scheme.Hom.exists_awayCover_of_isOpenImmersion g
+  let eR := (Scheme.ΓSpecIso (CommRingCat.of R)).commRingCatIsoToRingEquiv
+  let eS := (Scheme.ΓSpecIso (CommRingCat.of S)).commRingCatIsoToRingEquiv
+  let r : κ → R := fun k => eR (rΓ k)
+  have hcommRing : eS.toRingHom.comp g.appTop.hom = f.comp eR.toRingHom := by
+    ext x
+    exact gammaSpecIso_naturality_apply f x
+  have hcomm (x : Γ(Spec (CommRingCat.of R), ⊤)) :
+      eS (g.appTop x) = f (eR x) := gammaSpecIso_naturality_apply f x
+  have hvalue (k : κ) : eS (g.appTop (rΓ k)) = f (r k) := hcomm (rΓ k)
+  have hspan' : Ideal.span (Set.range fun k => f (r k)) = ⊤ := by
+    have hrange : eS.toRingHom '' Set.range (fun k => g.appTop (rΓ k)) =
+        Set.range (fun k => f (r k)) := by
+      ext x
+      constructor
+      · rintro ⟨_, ⟨k, rfl⟩, rfl⟩
+        exact ⟨k, (hvalue k).symm⟩
+      · rintro ⟨k, rfl⟩
+        exact ⟨g.appTop (rΓ k), ⟨k, rfl⟩, hvalue k⟩
+    have hspanMap := congrArg (Ideal.map eS.toRingHom) hspan
+    rw [Ideal.map_top, Ideal.map_span, hrange] at hspanMap
+    exact hspanMap
+  refine ⟨κ, hκ, r, hspan', ?_⟩
+  intro k
+  simpa only [r] using awayMap_bijective_of_equiv
+    g.appTop.hom f eR eS hcommRing (rΓ k) (hmap k)
 
 end AlgebraicGeometry
