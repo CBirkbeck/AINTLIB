@@ -156,39 +156,48 @@ PROOF STRATEGY. `x|κ(u) = y|κ(u)` ⟹ `(x-y)|κ(u)` factors through the zero s
 and `0` agree as morphisms `Spec κ(u) ⟶ E[N]`, giving a map `Spec κ(u) ⟶` the agreement
 locus whose image is `u` — hence `u ∈ range(agreementι) = pointVanishSet (x-y)` (the reverse
 of `range_agreementι_subset`, now valid because agreement is at the morphism level). -/
+theorem base_mem_pointVanishSet_of_comp_eq {T : Scheme.{u}}
+    (t : T ⟶ S) (x y : E.Point t) (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
+    (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) {W : Scheme.{u}} (m : W ⟶ T)
+    (hm : m ≫ x.1 = m ≫ y.1) (p : W) :
+    m.base p ∈ E.pointVanishSet N t (x - y) (E.sub_killed N t x y hx hy) := by
+  -- `x - y` agrees with the zero point after `m`, as morphisms into `E.E`.
+  have hres : Point.restrict E m x = Point.restrict E m y := Subtype.ext hm
+  have hsub0 : Point.restrict E m (x - y) = 0 := by rw [E.restrict_sub, hres, sub_self]
+  have key : m ≫ (x - y).1 = m ≫ (0 : E.Point t).1 := by
+    have h1 := congrArg Subtype.val hsub0
+    rw [E.point_zero_val] at h1
+    rw [E.point_zero_val, ← Category.assoc]
+    exact h1
+  -- Hence the two `E[N]`-classifiers of `x - y` and `0` agree after `m` (`torsionι` is mono).
+  haveI := E.torsionι_isClosedImmersion N
+  haveI : Mono (E.torsionι N) := inferInstance
+  have hclass : m ≫ E.pointToTorsion (x - y) (E.sub_killed N t x y hx hy)
+      = m ≫ E.pointToTorsion (0 : E.Point t) (E.zeroPoint_comp_mulByHom N t) := by
+    rw [← cancel_mono (E.torsionι N), Category.assoc, Category.assoc,
+      E.pointToTorsion_torsionι, E.pointToTorsion_torsionι]
+    exact key
+  -- `m` factors through the agreement locus, so `m.base p` is in its range.
+  exact AlgebraicGeometry.base_mem_range_agreementι (E.torsionπ N)
+    (E.pointToTorsion (x - y) (E.sub_killed N t x y hx hy))
+    (E.pointToTorsion (0 : E.Point t) (E.zeroPoint_comp_mulByHom N t))
+    (by rw [E.pointToTorsion_torsionπ, E.pointToTorsion_torsionπ]) m hclass p
+
+/-- **[YF-⊇ BRIDGE — vanishing from residue-field agreement].** The residue-field special
+case (`m = fromSpecResidueField u`): if two `N`-killed points `x, y` agree over the residue
+field at `u`, then `x - y` vanishes at `u`. (The topological hypothesis `x.1 u = y.1 u` would
+be FALSE — Galois-conjugate torsion points share a topological image yet their nonzero
+difference vanishes nowhere; genuine residue-field agreement is required, and for the
+application the points are base-changed **sections**, where `sections_residue_eq_of_base_eq`
+supplies that upgrade.) `hN` is unused: mere membership needs no invertibility (only the
+clopen-ness of the vanishing locus does). -/
 theorem mem_pointVanishSet_of_residue_eq (hN : NIsInvertible S N) {T : Scheme.{u}}
     (t : T ⟶ S) (x y : E.Point t) (hx : x.1 ≫ E.mulByHom N = t ≫ E.zero)
     (hy : y.1 ≫ E.mulByHom N = t ≫ E.zero) (u : T)
     (h : T.fromSpecResidueField u ≫ x.1 = T.fromSpecResidueField u ≫ y.1) :
     u ∈ E.pointVanishSet N t (x - y) (E.sub_killed N t x y hx hy) := by
-  -- `x - y` agrees with the zero point over `κ(u)`, as morphisms into `E.E`.
-  have hres : Point.restrict E (T.fromSpecResidueField u) x
-      = Point.restrict E (T.fromSpecResidueField u) y := Subtype.ext h
-  have hsub0 : Point.restrict E (T.fromSpecResidueField u) (x - y) = 0 := by
-    rw [E.restrict_sub, hres, sub_self]
-  have key : T.fromSpecResidueField u ≫ (x - y).1
-      = T.fromSpecResidueField u ≫ (0 : E.Point t).1 := by
-    have h1 := congrArg Subtype.val hsub0
-    rw [E.point_zero_val] at h1
-    rw [E.point_zero_val, ← Category.assoc]
-    exact h1
-  -- Hence the two `E[N]`-classifiers of `x - y` and `0` agree over `κ(u)` (`torsionι` is mono).
-  haveI := E.torsionι_isClosedImmersion N
-  haveI : Mono (E.torsionι N) := inferInstance
-  have hclass : T.fromSpecResidueField u
-        ≫ E.pointToTorsion (x - y) (E.sub_killed N t x y hx hy)
-      = T.fromSpecResidueField u
-        ≫ E.pointToTorsion (0 : E.Point t) (E.zeroPoint_comp_mulByHom N t) := by
-    rw [← cancel_mono (E.torsionι N), Category.assoc, Category.assoc,
-      E.pointToTorsion_torsionι, E.pointToTorsion_torsionι]
-    exact key
-  -- `fromSpecResidueField u` factors through the agreement locus, so `u` is in its range.
   obtain ⟨p⟩ : Nonempty (↑(Spec (T.residueField u))) := inferInstance
-  have hmem := AlgebraicGeometry.base_mem_range_agreementι (E.torsionπ N)
-    (E.pointToTorsion (x - y) (E.sub_killed N t x y hx hy))
-    (E.pointToTorsion (0 : E.Point t) (E.zeroPoint_comp_mulByHom N t))
-    (by rw [E.pointToTorsion_torsionπ, E.pointToTorsion_torsionπ])
-    (T.fromSpecResidueField u) hclass p
+  have hmem := E.base_mem_pointVanishSet_of_comp_eq N t x y hx hy (T.fromSpecResidueField u) h p
   rwa [Scheme.fromSpecResidueField_apply] at hmem
 
 /-- **[YF-⊇ CRUX — forced residue for sections, WIP frontier].** Two sections `σ₁, σ₂` of a
