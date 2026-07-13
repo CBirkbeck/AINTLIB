@@ -1111,6 +1111,107 @@ theorem cross_desc_condition (P' : G.AffineChartPatch)
     _ = b ≫ (P.windowCrossIso P' h1 h2).hom ≫ (P'.U.ι ⁻¹ᵁ W).ι ≫
           G.localQuotientOpenπ P'.hstable := by simp only [Category.assoc]
 
+/-! ### Step S5 preliminaries — saturation arithmetic and the pullback comparison -/
+
+omit [Module.Free P.baseRing P.groupRing] in
+/-- Morphisms between windows are determined by their ambient-curve composites. -/
+theorem window_hom_ext {P' : G.AffineChartPatch} {W W' : E.E.Opens}
+    {g h : (P.U.ι ⁻¹ᵁ W).toScheme ⟶ (P'.U.ι ⁻¹ᵁ W').toScheme}
+    (hgh : g ≫ (P'.U.ι ⁻¹ᵁ W').ι ≫ P'.U.ι = h ≫ (P'.U.ι ⁻¹ᵁ W').ι ≫ P'.U.ι) :
+    g = h := by
+  rw [← cancel_mono ((P'.U.ι ⁻¹ᵁ W').ι ≫ P'.U.ι)]
+  simpa only [Category.assoc] using hgh
+
+/-- **Saturation arithmetic**: the image of an intersection window is the intersection
+of the images — fibres are orbits, and stable windows absorb orbit moves. -/
+theorem imageOpens_inf {W₁ W₂ : E.E.Opens} (hW₁ : G.IsStableOpen W₁)
+    (hW₂ : G.IsStableOpen W₂) (h1 : W₁ ≤ P.U) (h2 : W₂ ≤ P.U) :
+    P.imageOpens hW₁ h1 ⊓ P.imageOpens hW₂ h2
+      = P.imageOpens (hW₁.inf G hW₂) (inf_le_left.trans h1) := by
+  refine TopologicalSpace.Opens.ext ?_
+  rw [TopologicalSpace.Opens.coe_inf, P.coe_imageOpens hW₁ h1, P.coe_imageOpens hW₂ h2,
+    P.coe_imageOpens (hW₁.inf G hW₂) (inf_le_left.trans h1)]
+  apply Set.Subset.antisymm
+  · rintro p ⟨⟨x, hxA, hx⟩, ⟨y, hyB, hy⟩⟩
+    obtain ⟨q, hact, hpr⟩ := P.exists_orbit_of_localQuotientOpenπ_eq
+      (show (G.localQuotientOpenπ P.hstable).base y
+        = (G.localQuotientOpenπ P.hstable).base x from by rw [hx, hy])
+    have hyA : y ∈ P.U.ι ⁻¹ᵁ W₁ := by
+      have := P.restrictedAction_mem_of_restrictedProj_mem hW₁ (p := q)
+        (by rw [hpr]; exact hxA)
+      rw [hact] at this
+      exact this
+    refine ⟨y, ?_, hy⟩
+    show P.U.ι.base y ∈ W₁ ⊓ W₂
+    exact ⟨hyA, hyB⟩
+  · rintro p ⟨z, hz, hzp⟩
+    have hz1 : P.U.ι.base z ∈ W₁ := hz.1
+    have hz2 : P.U.ι.base z ∈ W₂ := hz.2
+    exact ⟨⟨z, hz1, hzp⟩, ⟨z, hz2, hzp⟩⟩
+
+/-- Image opens are monotone in the window. -/
+theorem imageOpens_mono {W₁ W₂ : E.E.Opens} (hW₁ : G.IsStableOpen W₁)
+    (hW₂ : G.IsStableOpen W₂) (h1 : W₁ ≤ P.U) (h2 : W₂ ≤ P.U) (h12 : W₁ ≤ W₂) :
+    P.imageOpens hW₁ h1 ≤ P.imageOpens hW₂ h2 := by
+  intro p hp
+  obtain ⟨x, hx, hxp⟩ := hp
+  exact ⟨x, h12 hx, hxp⟩
+
+/-- The restricted projections are natural in the window. -/
+@[reassoc]
+theorem homOfLE_restrictedπ {W₁ W₂ : E.E.Opens} (hW₁ : G.IsStableOpen W₁)
+    (hW₂ : G.IsStableOpen W₂) (h1 : W₁ ≤ P.U) (h2 : W₂ ≤ P.U) (h12 : W₁ ≤ W₂) :
+    P.U.toScheme.homOfLE (Scheme.Hom.preimage_mono P.U.ι h12) ≫ P.restrictedπ hW₂ h2
+      = P.restrictedπ hW₁ h1 ≫
+        (G.localQuotientOpen P.hstable).homOfLE
+          (P.imageOpens_mono hW₁ hW₂ h1 h2 h12) := by
+  rw [← cancel_mono (P.imageOpens hW₂ h2).ι]
+  rw [Category.assoc, P.restrictedπ_ι hW₂ h2, Category.assoc, Scheme.homOfLE_ι,
+    P.restrictedπ_ι hW₁ h1, ← Category.assoc, Scheme.homOfLE_ι]
+
+/-- **The intersection image open is the pullback of the two image opens** — the glue
+model's triple comparison. -/
+noncomputable def imageOpensPullbackIso {W₁ W₂ : E.E.Opens} (hW₁ : G.IsStableOpen W₁)
+    (hW₂ : G.IsStableOpen W₂) (h1 : W₁ ≤ P.U) (h2 : W₂ ≤ P.U) :
+    (P.imageOpens (hW₁.inf G hW₂) (inf_le_left.trans h1)).toScheme
+      ≅ pullback (P.imageOpens hW₁ h1).ι (P.imageOpens hW₂ h2).ι :=
+  IsOpenImmersion.isoOfRangeEq
+    (P.imageOpens (hW₁.inf G hW₂) (inf_le_left.trans h1)).ι
+    (pullback.fst (P.imageOpens hW₁ h1).ι (P.imageOpens hW₂ h2).ι ≫
+      (P.imageOpens hW₁ h1).ι) (by
+      rw [IsOpenImmersion.range_pullback_to_base_of_left, Scheme.Opens.range_ι,
+        Scheme.Opens.range_ι, Scheme.Opens.range_ι, ← TopologicalSpace.Opens.coe_inf,
+        P.imageOpens_inf hW₁ hW₂ h1 h2])
+
+theorem imageOpensPullbackIso_hom_comp {W₁ W₂ : E.E.Opens} (hW₁ : G.IsStableOpen W₁)
+    (hW₂ : G.IsStableOpen W₂) (h1 : W₁ ≤ P.U) (h2 : W₂ ≤ P.U) :
+    (P.imageOpensPullbackIso hW₁ hW₂ h1 h2).hom ≫
+        pullback.fst (P.imageOpens hW₁ h1).ι (P.imageOpens hW₂ h2).ι ≫
+          (P.imageOpens hW₁ h1).ι
+      = (P.imageOpens (hW₁.inf G hW₂) (inf_le_left.trans h1)).ι :=
+  IsOpenImmersion.isoOfRangeEq_hom_fac _ _ _
+
+theorem imageOpensPullbackIso_hom_fst {W₁ W₂ : E.E.Opens} (hW₁ : G.IsStableOpen W₁)
+    (hW₂ : G.IsStableOpen W₂) (h1 : W₁ ≤ P.U) (h2 : W₂ ≤ P.U) :
+    (P.imageOpensPullbackIso hW₁ hW₂ h1 h2).hom ≫
+        pullback.fst (P.imageOpens hW₁ h1).ι (P.imageOpens hW₂ h2).ι
+      = (G.localQuotientOpen P.hstable).homOfLE
+          (P.imageOpens_mono (hW₁.inf G hW₂) hW₁ (inf_le_left.trans h1) h1
+            inf_le_left) := by
+  rw [← cancel_mono (P.imageOpens hW₁ h1).ι, Category.assoc,
+    P.imageOpensPullbackIso_hom_comp hW₁ hW₂ h1 h2, Scheme.homOfLE_ι]
+
+
+theorem imageOpensPullbackIso_hom_snd {W₁ W₂ : E.E.Opens} (hW₁ : G.IsStableOpen W₁)
+    (hW₂ : G.IsStableOpen W₂) (h1 : W₁ ≤ P.U) (h2 : W₂ ≤ P.U) :
+    (P.imageOpensPullbackIso hW₁ hW₂ h1 h2).hom ≫
+        pullback.snd (P.imageOpens hW₁ h1).ι (P.imageOpens hW₂ h2).ι
+      = (G.localQuotientOpen P.hstable).homOfLE
+          (P.imageOpens_mono (hW₁.inf G hW₂) hW₂ (inf_le_left.trans h1) h2
+            inf_le_right) := by
+  rw [← cancel_mono (P.imageOpens hW₂ h2).ι, Category.assoc, ← pullback.condition,
+    P.imageOpensPullbackIso_hom_comp hW₁ hW₂ h1 h2, Scheme.homOfLE_ι]
+
 end Descent
 
 end AffineChartPatch
