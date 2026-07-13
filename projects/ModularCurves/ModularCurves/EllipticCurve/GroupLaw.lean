@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: The AINTLIB Authors
+-/
 import ModularCurves.EllipticCurve.Basic
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Grp
 import Mathlib.CategoryTheory.Monoidal.Cartesian.Over
