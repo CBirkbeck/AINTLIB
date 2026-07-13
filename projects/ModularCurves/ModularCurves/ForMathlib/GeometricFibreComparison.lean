@@ -1,13 +1,12 @@
 import ModularCurves.EllipticCurve.PointsDictionary
 import ModularCurves.EllipticCurve.ModelRecord
-import ModularCurves.LevelStructure.ExactOrder
 
 /-!
 # [T-B6′-IFACE] — the geometric-fibre point comparison (scheme ↔ affine), as a group iso
 
-**Shared sorried pin** for the two consumers of the KM 2.3 fibre-comparison box **T-B6**:
+The **geometric-fibre point comparison** for the KM 2.3 box **T-B6**, consumed by
 * STREAM-Y1's atlas leaves **ii** (order ⟹ unit) and **vi** (`P₀` nowhere order ≤ 3), and
-* the parked **BB-DIFF** étale cascade's leaf **L-B** (`E[N]_{k̄} ≅ (ℤ/N)²`) — recorded v10.38 as
+* the **BB-DIFF** étale cascade's leaf **L-B** (`E[N]_{k̄} ≅ (ℤ/N)²`) — recorded v10.38 as
   `BB-DIFF ⟸ T-B6′`.
 
 **T-B6 board spec** (verbatim, `decomposition-km2.3-b5d.md` §L-B, KM 2.3.1 proof p. 74):
@@ -17,18 +16,20 @@ import ModularCurves.LevelStructure.ExactOrder
 and (`decomposition-2026-07-05-phase1.md`, B4): "fibre comparison `E[N] ×_S Spec k̄ ≅ (ℤ/N)²`".
 
 The **set** bijection `projModelPointsEquiv : SpecPoints (projModel W) (projModelπ W) K ≃
-(W.baseChange K).toAffine.Point` is already proven (T-W7.0f). The T-B6 content that remains is the
-single fact that it is a **group** homomorphism — the fibrewise group-law intertwining. Here the
-underlying `Equiv` is built honestly (`pointSpecPointsEquiv`, the `E.Point ↔ SpecPoints` bridge, is
-ungated geometry — axiom-clean), and **only `map_add'` carries the `sorry`** — the exact `[T-B6′]`
-pin. It discharges when stream-B lands T-B6 (post-T-W7.36); until then every consumer's use carries
-a tracked `sorryAx` (not a defect — the same class as `abelEnrichment_exists`).
+(W.baseChange K).toAffine.Point` is proven (T-W7.0f), and the `E.Point ↔ SpecPoints` bridge
+(`pointSpecPointsEquiv`) is ungated geometry. As of the v10.123-CASCADE the remaining T-B6
+content — the fibrewise group-law intertwining `map_add'` — is **proven** too (the zero pin makes
+`E`'s geometry the model record's, rigidity forces the two additions to agree on `k`-points, and
+the C6 dictionary `mulModelHom_specPoints` computes the model addition as mathlib's affine
+`Point.add`). So `geomFibrePointAddEquiv` is a genuine, **axiom-clean** group isomorphism onto
+mathlib's affine `Point` group — the `[T-B6′]` pin is **discharged** (no `sorry`; axioms
+`{propext, Classical.choice, Quot.sound}`).
 
 ## Main declarations
 
 * `EllipticCurve.pointSpecPointsEquiv` — the ungated `E.Point (geomPoint) ≃ SpecPoints` bridge.
-* `EllipticCurve.geomFibrePointAddEquiv` — **[T-B6′-IFACE]** the scheme-fibre ↔ affine group `≃+`;
-  `map_add'` sorried.
+* `EllipticCurve.geomFibrePointAddEquiv` — **[T-B6′-IFACE]** the scheme-fibre ↔ affine group `≃+`,
+  fully proven (axiom-clean).
 -/
 
 open AlgebraicGeometry CategoryTheory Limits
@@ -85,7 +86,7 @@ noncomputable def geomFibrePointAddEquiv :
     E.Point (geomPoint B k) ≃+ (W.baseChange k).toAffine.Point where
   toEquiv := (pointSpecPointsEquiv W E hE hπ k).trans (projModelPointsEquiv W k)
   map_add' P Q := by
-    haveI : IsLocallyNoetherian (Spec (CommRingCat.of k)) := inferInstance
+    have : IsLocallyNoetherian (Spec (CommRingCat.of k)) := inferInstance
     -- the geometry of `E` is the model geometry: hE/hπ/hz pin every data field
     have hgeom : E.toEllipticCurveGeom = (modelEllipticCurve W).toEllipticCurveGeom :=
       EllipticCurveGeom.ext_of_eqToHom hE hπ hz
@@ -134,7 +135,7 @@ lemma affine_origin_order_gt_three {k : Type u} [Field k] [DecidableEq k]
     rw [two_zsmul, WeierstrassCurve.Affine.Point.add_some hne]
     exact WeierstrassCurve.Affine.Point.some_ne_zero _
   · have hℓ : W.toAffine.slope 0 0 0 0 = 0 := by
-      rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl (fun h => hne ⟨rfl, h⟩)]
+      rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl (fun h ↦ hne ⟨rfl, h⟩)]
       simp [h4]
     have hx2 : W.toAffine.addX 0 0 (W.toAffine.slope 0 0 0 0) = -W.a₂ := by
       rw [hℓ, WeierstrassCurve.Affine.addX]; ring
