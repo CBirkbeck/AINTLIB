@@ -327,6 +327,13 @@ therefore no nonzero combination vanishes there, i.e. the point lies in `fullLev
 the reverse ("full-level ⟹ distinct") of the `[YF-⊇]` divisor chain. -/
 theorem range_levelSpaceΓι_subset (hN : NIsInvertible S N) :
     Set.range (levelSpaceΓι E N).base ⊆ (fullLevelOpens E N hN : Set _) := by
+  intro w hw
+  show w ∈ fullLevelOpenSet E N hN
+  rw [fullLevelOpenSet, Set.mem_compl_iff, Set.mem_iUnion₂]
+  rintro ⟨cd, hcd, hmem⟩
+  -- `hw : w ∈ range levelSpaceΓι.base`, `hmem : w ∈ pointVanishSet (combPoint cd.1 cd.2)`,
+  -- `hcd : cd ≠ 0`. The geometric point at `w` factors through both closed immersions
+  -- `levelSpaceΓι` (⟹ generation ⟹ combPoint ≠ 0) and the agreement locus (⟹ combPoint = 0).
   sorry
 
 /-- **[YF-CLOPEN].** For `N` invertible the full-level closed immersion `levelSpaceΓι` is an
