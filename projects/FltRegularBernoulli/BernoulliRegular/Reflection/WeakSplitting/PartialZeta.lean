@@ -1,8 +1,8 @@
 module
 
-public import Mathlib.NumberTheory.NumberField.DedekindZeta
-public import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
 public import Mathlib.Analysis.SpecialFunctions.Pow.Continuity
+public import Mathlib.NumberTheory.NumberField.Completion.FinitePlace
+public import Mathlib.NumberTheory.NumberField.DedekindZeta
 
 /-!
 # Partial Dedekind zeta function
@@ -86,27 +86,27 @@ continuity at `s = 1` of each removed local factor.
 -/
 theorem tendsto_sub_one_mul_dedekindZetaPartial_nhdsGT
     (F : Finset (HeightOneSpectrum (𝓞 K))) :
-    Tendsto (fun s : ℝ => (s - 1) * dedekindZetaPartial K F s) (𝓝[>] 1)
+    Tendsto (fun s : ℝ ↦ (s - 1) * dedekindZetaPartial K F s) (𝓝[>] 1)
       (𝓝 (dedekindZetaPartialResidue K F)) := by
   have h₁ := tendsto_sub_one_mul_dedekindZeta_nhdsGT K
   have h₂ : Tendsto
-      (fun s : ℝ => ∏ p ∈ F, ((1 : ℂ) - (Ideal.absNorm p.asIdeal : ℂ) ^ (-(s : ℂ))))
+      (fun s : ℝ ↦ ∏ p ∈ F, ((1 : ℂ) - (Ideal.absNorm p.asIdeal : ℂ) ^ (-(s : ℂ))))
       (𝓝[>] 1)
       (𝓝 (∏ p ∈ F, ((1 : ℂ) - (Ideal.absNorm p.asIdeal : ℂ)⁻¹))) := by
     refine Tendsto.mono_left ?_ nhdsWithin_le_nhds
-    refine tendsto_finsetProd F fun p _ => ?_
+    refine tendsto_finsetProd F fun p _ ↦ ?_
     have hp : (Ideal.absNorm p.asIdeal : ℂ) ≠ 0 := by
       have h := HeightOneSpectrum.one_lt_absNorm p
       have hne : Ideal.absNorm p.asIdeal ≠ 0 := by omega
       exact_mod_cast hne
     have h_sub : Continuous
-        (fun s : ℝ => (1 : ℂ) - ((Ideal.absNorm p.asIdeal : ℂ)) ^ (-(s : ℂ))) :=
+        (fun s : ℝ ↦ (1 : ℂ) - ((Ideal.absNorm p.asIdeal : ℂ)) ^ (-(s : ℂ))) :=
       continuous_const.sub (Complex.continuous_ofReal.neg.const_cpow (Or.inl hp))
     convert h_sub.tendsto 1 using 2
     push_cast
     rw [Complex.cpow_neg, Complex.cpow_one]
-  have heq : (fun s : ℝ => (s - 1) * dedekindZetaPartial K F s) =
-      fun s : ℝ => ((s - 1) * dedekindZeta K s) *
+  have heq : (fun s : ℝ ↦ (s - 1) * dedekindZetaPartial K F s) =
+      fun s : ℝ ↦ ((s - 1) * dedekindZeta K s) *
         ∏ p ∈ F, ((1 : ℂ) - (Ideal.absNorm p.asIdeal : ℂ) ^ (-(s : ℂ))) := by
     funext s
     simp [dedekindZetaPartial, mul_assoc]
