@@ -359,7 +359,7 @@ private lemma tripleTransition_cocycle
 
 /-- The scheme glue data associated to an augmented affine finite-intersection
 functor. -/
-noncomputable def ofAffineIntersectionFunctor
+noncomputable abbrev ofAffineIntersectionFunctor
     (F : Finset J ⥤ CommAlgCat.{u} S)
     (hopen : IsOpenAffineIntersectionFunctor F)
     (hpush : IsPushoutAffineIntersectionFunctor F) : Scheme.GlueData.{u} where

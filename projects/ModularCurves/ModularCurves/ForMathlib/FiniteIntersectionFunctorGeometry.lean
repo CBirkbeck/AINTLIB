@@ -48,7 +48,9 @@ private noncomputable def geometryPairToTripleRight (i j k : J) :
     classical
     simp [geometryPairIndex, geometryTripleIndex])
 
-private noncomputable def Scheme.Hom.finiteIntersectionRingIso
+/-- The underlying ring of a nonempty object of the affine-intersection functor is
+canonically the ring of functions on the corresponding geometric intersection. -/
+noncomputable def Scheme.Hom.finiteIntersectionRingIso
     (π : X ⟶ S) (U : J → X.Opens) (s : Finset J) (hs : s.Nonempty) :
     (forget₂ (CommAlgCat Γ(S, (⊤ : S.Opens))) CommRingCat).obj
         (π.finiteIntersectionRing U s) ≅
@@ -57,7 +59,9 @@ private noncomputable def Scheme.Hom.finiteIntersectionRingIso
   (forget₂ (CommAlgCat Γ(S, (⊤ : S.Opens))) CommRingCat).mapIso
     (eqToIso (π.affineIntersectionFunctor_obj_nonempty U s hs).symm)
 
-private theorem Scheme.Hom.finiteIntersectionRestriction_ringIso
+/-- The canonical ring isomorphisms for nonempty finite intersections intertwine
+the functor map with geometric restriction of functions. -/
+theorem Scheme.Hom.finiteIntersectionRestriction_ringIso
     (π : X ⟶ S) (U : J → X.Opens) {s t : Finset J} (f : s ⟶ t)
     (hs : s.Nonempty) (ht : t.Nonempty) :
     CommRingCat.ofHom (π.finiteIntersectionRestriction U (leOfHom f)).hom.toRingHom ≫
@@ -74,7 +78,9 @@ private theorem Scheme.Hom.finiteIntersectionRestriction_ringIso
   ext x
   exact ConcreteCategory.congr_hom hAlg x
 
-private theorem Scheme.Hom.finiteIntersectionRestriction_forget
+/-- Forgetting the algebra structure, finite-intersection restriction is the map on
+global sections induced by the corresponding inclusion of open subschemes. -/
+theorem Scheme.Hom.finiteIntersectionRestriction_forget
     (π : X ⟶ S) (U : J → X.Opens) {s t : Finset J} (f : s ⟶ t) :
     CommRingCat.ofHom (π.finiteIntersectionRestriction U (leOfHom f)).hom.toRingHom =
       (X.homOfLE (X.finiteIntersectionOpen_antitone U (leOfHom f))).appTop := by
