@@ -17392,6 +17392,31 @@ SIMUL-engine, not a problem-from-schemes constructor — build prob directly):
 LEAN-OPS carried: structure-literal covers; pinned pullback.condition; term-mode assoc calcs;
 de-set folded morphisms; fun x : X binder ascriptions; mkOfCovers-projection toxicity.
 
+**⚠ [GHB7-0] DESIGN FINDING (STREAM-GH 2026-07-13, needs coordinator eyes — b2-adjacent but
+NOT a b2)**: the diag-instance REGRESSES. GHB3/GHB5 need
+`[IsAffineHom (pullback.diagonal (terminal.from Z))]` because the T-Q5 Glue construction
+takes affine ∩ affine (quotientGlueData's `(hVa i).inf (hVa j)`). For the GHB7/GHC1
+application Z = `YFull.fullLevelSpace X N`, FINITE over `X.base` — but `EllObj` bases are
+ARBITRARY schemes, and Z-affine-diagonal-over-ℤ ⟸ f affine AND X.base-affine-diagonal —
+the regress lands on the arbitrary base and CANNOT be discharged unconditionally (matches
+Loeffler 3.6.1's own caveat: "One needs quasiprojectiveness and finiteness of G here";
+the v10.144 "closed-immersion into E[N]²/S ⟹ instance at GHC1" note hits the same regress
+one level down). RESOLUTIONS (pick one):
+  (α) **RELATIVE-SPEC QUOTIENT (recommended if mathlib has the API)**: for `f : Z ⟶ S`
+  affine with free finite action over `S`, the quotient is `Spec_S(𝒜ᴳ)` of the invariant
+  quasi-coherent algebra — NO gluing, NO diagonal condition, and (KM 7.1.3's own setting)
+  every consumer here has `f` affine (finite étale!). Check mathlib relative Spec
+  (`Scheme.Spec` over a base / `HasAffineProperty`-classification / `MorphismProperty`-
+  relative-Spec) first act of the next window; if present, restate GHB3/GHB5-analogues
+  over it and GHB7 needs NO extra hypothesis.
+  (β) thread `[IsAffineHom (pullback.diagonal (terminal.from X.base))]`-per-X (or an
+  `IsSeparated`-flavor) through EquivariantRelRepData/GHB7/GHC1 — rule-5-logged statement
+  changes; honest wrt sources; Y(N)-pipeline consumers specialize their bases anyway.
+  (γ) constrain `EllObj` itself (quasi-projective/separated bases) — foundational,
+  coordinator-owned.
+Meanwhile STREAM-GH proceeds with [GHB7-5]=GHB6 (trace-summand chart-local descent), which
+is INDEPENDENT of the fork.
+
 ## Sub-ticket (NEW-GH, v10.166): [GHB5a] concrete base-change of quotientπ — the GHB5-crux engine
 
 ### [GHB5a] `SchemeAction.exists_quotientπ_lift_baseChange` (concrete base-change descent)
