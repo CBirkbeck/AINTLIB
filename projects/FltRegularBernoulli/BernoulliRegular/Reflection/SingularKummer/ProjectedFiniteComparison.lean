@@ -83,7 +83,7 @@ theorem linearRange_nontrivial_of_torsion_nontrivial_zmod
       Nontrivial (LinearMap.range e) := by
   intro h
   obtain ⟨x, hx⟩ := exists_ne (0 : torsionBySubgroup (LinearMap.range e) p)
-  exact ⟨⟨x.1, 0, fun hzero => hx (Subtype.ext hzero)⟩⟩
+  exact ⟨⟨x.1, 0, fun hzero ↦ hx (Subtype.ext hzero)⟩⟩
 
 /-- Conversely, a nontrivial projected range in a `ZMod p`-module has
 nontrivial `p`-torsion. -/
@@ -97,7 +97,7 @@ theorem torsion_nontrivial_of_linearRange_nontrivial_zmod
     ⟨x, by
       change p • x = 0
       exact ZModModule.char_nsmul_eq_zero (n := p) x⟩
-  exact ⟨⟨xt, 0, fun hzero => hx (congrArg Subtype.val hzero)⟩⟩
+  exact ⟨⟨xt, 0, fun hzero ↦ hx (congrArg Subtype.val hzero)⟩⟩
 
 variable [Finite W]
 
