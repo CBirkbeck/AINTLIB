@@ -6,7 +6,7 @@ public import Mathlib.Algebra.Module.ZMod
 /-!
 # Unit quotients: global unit component dimensions
 
-This file assembles `REF-07d`.  The map
+The map
 
 ```text
 E / E^p -> (E / E_tors) / p
@@ -30,8 +30,6 @@ namespace BernoulliRegular
 
 open Finset MonoidAlgebra
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 variable (p : ℕ) [Fact p.Prime]
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
@@ -112,7 +110,7 @@ theorem cyclotomicUnitDelta_hasEnoughRootsOfUnity_zmod :
 instance cyclotomicUnitPowerQuotientModuleZMod :
     Module (ZMod p)
       (Additive (CyclotomicUnitPowerQuotient (p := p) (N := 1) K)) :=
-  AddCommGroup.zmodModule (n := p) fun x => by
+  AddCommGroup.zmodModule (n := p) fun x ↦ by
     apply Additive.ext
     rw [toMul_nsmul, toMul_zero]
     simpa using cyclotomicUnitPowerQuotient_pow_eq_one (p := p) (N := 1) K x.toMul
@@ -308,7 +306,7 @@ theorem cyclotomicUnitPowerQuotientToFreePartModPLinear_projector
     (ρV := cyclotomicUnitPowerQuotientDeltaRepresentation (p := p) K)
     (ρW := cyclotomicUnitFreePartModPDeltaRepresentation (p := p) K)
     (f := cyclotomicUnitPowerQuotientToFreePartModPLinear (p := p) K)
-    (fun a x => cyclotomicUnitPowerQuotientToFreePartModPLinear_equivariant
+    (fun a x ↦ cyclotomicUnitPowerQuotientToFreePartModPLinear_equivariant
       (p := p) (K := K) a x)
     χ x
 
