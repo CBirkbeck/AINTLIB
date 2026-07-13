@@ -33,15 +33,8 @@ namespace ModularCurves
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
-/-- Equality of `Proj.map`s from equal graded homomorphisms (the irrelevant-ideal hypotheses
-are propositions). Local copy of the same-named private helper in `GroupLawConstruction`. -/
-private lemma Proj_map_congr {A B σ τ : Type u} [CommRing A] [SetLike σ A]
-    [AddSubgroupClass σ A] [CommRing B] [SetLike τ B] [AddSubgroupClass τ B]
-    {𝒜 : ℕ → σ} {ℬ : ℕ → τ} [GradedRing 𝒜] [GradedRing ℬ]
-    {f g : 𝒜 →+*ᵍ ℬ} (h : f = g)
-    (hf : HomogeneousIdeal.irrelevant ℬ ≤ (HomogeneousIdeal.irrelevant 𝒜).map f)
-    (hg : HomogeneousIdeal.irrelevant ℬ ≤ (HomogeneousIdeal.irrelevant 𝒜).map g) :
-    Proj.map f hf = Proj.map g hg := by subst h; rfl
+-- `Proj_map_congr` (equality of `Proj.map`s from equal graded homs) is the shared public
+-- helper from `GroupLawConstruction` (imported above); the former local copy was deduplicated.
 
 variable {R : Type u} [CommRing R] {R' : Type u} [CommRing R']
 
