@@ -19172,3 +19172,18 @@ Once that count lands: pigeonhole ⟹ base-changed combos have distinct base-poi
 link to Point.pull) comboFamily injective ⟹ (naive_iff_comboFamily_injective) closes
 `fullLevel_divisor_iff_naive_gen` ⟹ + [YF-⊆] (combo≠0 ⟹ ∉ pointVanishSet). Relocate the bridge
 downstream of SectionsDivisorBaseChange+FullLevelFibre. (STREAM-YN)
+
+### v10.180b — count-identification DE-RISKED: mathlib `equivPiOfIsSepClosed` is the key tool
+Found `Algebra.FormallyEtale.equivPiOfIsSepClosed [EssFiniteType K A] [FormallyEtale K A]
+[IsSepClosed K] : A ≃ₐ[K] (PrimeSpectrum A → K)` (Mathlib/RingTheory/Etale/Field.lean:217).
+This splits an étale algebra over a sep-closed field into k^(#primes), giving directly
+`finrank K A = Nat.card (PrimeSpectrum A)` AND sections (`A →ₐ[K] k`) ↔ points. So the count
+`#topological points of the torsion fibre = N²` is TRACTABLE (was feared new structure theory).
+
+Precise chain for the count ticket: (1) torsion fibre `(E.baseChange t).torsion N` over `Spec k`
+is affine (finite/Spec k) → coordinate algebra `A`; (2) `A` étale over `k` (from `torsionπ_etale`
+base-changed + affine) → `FormallyEtale k A` + `EssFiniteType k A` instances; (3) `IsSepClosed k`
+(alg closed); (4) `equivPiOfIsSepClosed` → `finrank k A = Nat.card (PrimeSpectrum A)`; (5)
+`finrank k A = N²` via `torsion_rank`; (6) `PrimeSpectrum A ≃ topological points of fibre ≃
+fst⁻¹(torsionIdeal.support)`. Substantial scheme↔algebra plumbing (steps 1-2, 5-6) but every link
+is now available/tooled — no missing theory. (STREAM-YN)
