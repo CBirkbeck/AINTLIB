@@ -32,28 +32,9 @@ theorem cast_card_delta_inv
     ZMod.castHom hm (ZMod p)
         ((Fintype.card (CharacterProjection.Delta p) : ZMod m)⁻¹) =
       ((Fintype.card (CharacterProjection.Delta p) : ZMod p)⁻¹) := by
-  have hmul :
-      (Fintype.card (CharacterProjection.Delta p) : ZMod p) *
-          ZMod.castHom hm (ZMod p)
-            ((Fintype.card (CharacterProjection.Delta p) : ZMod m)⁻¹) =
-        1 := by
-    have hraw :=
-      congrArg (ZMod.castHom hm (ZMod p))
-        (ZMod.mul_inv_of_unit
-          (Fintype.card (CharacterProjection.Delta p) : ZMod m) hcard)
-    calc
-      (Fintype.card (CharacterProjection.Delta p) : ZMod p) *
-          ZMod.castHom hm (ZMod p)
-            ((Fintype.card (CharacterProjection.Delta p) : ZMod m)⁻¹)
-          = ZMod.castHom hm (ZMod p) (1 : ZMod m) := by
-            simpa [ZMod.castHom_apply, map_mul] using hraw
-      _ = 1 :=
-            map_one (ZMod.castHom hm (ZMod p))
-  exact (ZMod.inv_eq_of_mul_eq_one p
-    (Fintype.card (CharacterProjection.Delta p) : ZMod p)
-    (ZMod.castHom hm (ZMod p)
-      ((Fintype.card (CharacterProjection.Delta p) : ZMod m)⁻¹))
-    hmul).symm
+  refine (ZMod.inv_eq_of_mul_eq_one p _ _ ?_).symm
+  simpa [-ZMod.castHom_apply, map_mul, map_one] using congrArg (ZMod.castHom hm (ZMod p))
+    (ZMod.mul_inv_of_unit (Fintype.card (CharacterProjection.Delta p) : ZMod m) hcard)
 
 omit [NeZero m] in
 /-- If a finite-level character reduces to `a ↦ a^i`, then its exact
@@ -70,10 +51,8 @@ theorem coefficient_cast_eq_of_character_cast
         (FiniteLevelIdempotent.coefficient (m := m) chi d) =
       CharacterProjection.characterProjectionCoefficient (p := p) i d := by
   rw [FiniteLevelIdempotent.coefficient,
-    CharacterProjection.characterProjectionCoefficient]
-  rw [map_mul]
-  rw [cast_card_delta_inv (p := p) (m := m) hm hcard]
-  rw [hchi d⁻¹]
+    CharacterProjection.characterProjectionCoefficient, map_mul,
+    cast_card_delta_inv (p := p) (m := m) hm hcard, hchi d⁻¹]
 
 variable {A : Type*} [AddCommGroup A] [Module (ZMod m) A] [Finite A]
 
