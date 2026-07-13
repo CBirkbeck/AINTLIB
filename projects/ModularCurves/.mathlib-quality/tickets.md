@@ -19226,3 +19226,22 @@ isoSpec ⟹ `#points = finrank k Γ`; (6) `Scheme.Hom.finrank_SpecMap_eq_finrank
 + `torsion_rank` ⟹ `finrank k Γ = N²`. ⟹ `#fst⁻¹(E[N]) = N²`; then pigeonhole (BUILT) ⟹ combos
 distinct ⟹ curveIsoPullback link ⟹ comboFamily inj ⟹ naive_iff (BUILT) closes bridge ⟹ [YF-⊆].
 Intricate CommRingCat/appTop/algebraize threading — the app-specific focused work. (STREAM-YN)
+
+### v10.180e — affineness step BUILT; torsion-fibre glue concretely bounded (11 lemmas)
+`isAffine_source_of_isFinite` BUILT + committed (finite morphism to affine → affine source, via
+`HasAffineProperty @IsAffineHom`). **Session: 11 axiom-clean lemmas, all pushed, full build green.**
+
+CONCRETE BOUNDARY (from a sustained build attempt): the torsion-fibre connection
+`natCard_carrier_of_finite_etale` (Nat.card ↥Z = N² for finite-étale Z/Spec k̄) needs two fiddly
+things that make it a dedicated focused piece, NOT a quick lemma: (a) `Scheme.Hom.finrank` is a REPO
+def (CartierDivisor) — the connection must live in a file importing CartierDivisor, not standalone
+ForMathlib; (b) the k-algebra structure on `Γ(Z,⊤)` is NON-CANONICAL (depends on f, via
+`(Scheme.ΓSpecIso (.of k)).inv ≫ f.appTop`), so must be a local `letI`, and deriving
+`Algebra.FormallyEtale`/`EssFiniteType` on it from `Etale f` needs `HasRingHomProperty.iff_of_isAffine`
++ matching the algebraMap to `f.appTop` through the ΓSpecIso composite (iso-preserves-étale). Fiddly
+affine↔algebra boilerplate. Cleaner alt: transport via `Scheme.arrowIsoSpecΓOfIsAffine f` (Arrow(f) ≅
+Arrow(Spec.map f.appTop)) then apply `natCard_spec_carrier_eq_finrank` (BUILT) on the Spec.map form.
+
+BUILT + ready to consume: both count cores + affineness step + entire ⟹ scaffolding + fibre side.
+REMAINING: this fibre glue (fiddly, tooled) → #fst⁻¹(E[N])=N² → pigeonhole (BUILT) → curveIsoPullback
+link → comboFamily inj → naive_iff (BUILT) → close bridge → [YF-⊆]. (STREAM-YN)
