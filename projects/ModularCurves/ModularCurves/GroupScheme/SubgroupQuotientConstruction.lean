@@ -77,6 +77,43 @@ theorem localQuotient_existsUnique_lift {Y : Scheme.{u}} (f : P.U.toScheme ⟶ Y
         = P.hU.isoSpec.inv ≫ f
     exact (P.hU.isoSpec.inv_hom_id_assoc _).symm.trans (congrArg (P.hU.isoSpec.inv ≫ ·) hA)
 
+/-! ### `[HG-C4b]` — the geometry bridge, coaction leg -/
+
+/-- **The coaction leg of the geometry bridge**: the `Spec` of the ring-level chart
+co-action, composed back to the chart, is the scheme-level chart co-action morphism
+(`chartCoactionSpec` = Künneth ≫ restricted action). Affine `isoSpec` naturality applied
+to `coactionRing_eq_appTop`. -/
+theorem spec_coactionRing_isoSpec_inv :
+    Spec.map P.coactionRing ≫ P.hU.isoSpec.inv = P.chartCoactionSpec := by
+  haveI : IsAffine P.U.toScheme := P.hU
+  have hnat := Scheme.isoSpec_inv_naturality (X := Spec (.of
+      (P.groupRing ⊗[P.baseRing] P.chartRing))) (Y := P.U.toScheme) P.chartCoactionSpec
+  -- unfold the affine-open `isoSpec` into the scheme-level one
+  have hiso : P.hU.isoSpec.inv
+      = (Scheme.Spec.mapIso P.U.topIso.symm.op).inv ≫ P.U.toScheme.isoSpec.inv := by
+    rw [IsAffineOpen.isoSpec, Iso.trans_inv]
+    rfl
+  rw [coactionRing_eq_appTop, Spec.map_comp, Spec.map_comp, hiso]
+  simp only [Category.assoc, Functor.mapIso_inv, Iso.op_inv, Iso.symm_inv]
+  -- cancel the `topIso` conjugation
+  have htop : Spec.map P.U.topIso.inv ≫ Spec.map P.U.topIso.hom.op.unop = 𝟙 _ := by
+    rw [← Spec.map_comp]
+    show Spec.map (P.U.topIso.hom ≫ P.U.topIso.inv) = _
+    rw [Iso.hom_inv_id, Spec.map_id]
+  -- assemble: the `ΓSpecIso` factor is the inverse of `(Spec _).isoSpec.inv`
+  rw [show Spec.map P.U.topIso.hom.op.unop = Spec.map P.U.topIso.hom from rfl] at htop
+  calc Spec.map (Scheme.ΓSpecIso _).hom ≫ Spec.map P.chartCoactionSpec.appTop ≫
+        Spec.map P.U.topIso.inv ≫ Spec.map P.U.topIso.hom ≫ P.U.toScheme.isoSpec.inv
+      = Spec.map (Scheme.ΓSpecIso _).hom ≫ Spec.map P.chartCoactionSpec.appTop ≫
+        P.U.toScheme.isoSpec.inv := by
+        rw [← Category.assoc (Spec.map P.U.topIso.inv), htop, Category.id_comp]
+    _ = Spec.map (Scheme.ΓSpecIso _).hom ≫ (Spec (.of
+          (P.groupRing ⊗[P.baseRing] P.chartRing))).isoSpec.inv ≫ P.chartCoactionSpec := by
+        rw [hnat]
+    _ = P.chartCoactionSpec := by
+        rw [Scheme.isoSpec_Spec_inv, ← Spec.map_comp_assoc, Iso.inv_hom_id, Spec.map_id,
+          Category.id_comp]
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
