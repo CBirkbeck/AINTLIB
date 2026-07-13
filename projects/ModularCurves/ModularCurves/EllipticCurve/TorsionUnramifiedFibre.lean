@@ -1067,6 +1067,32 @@ private theorem pointSharp_add_tail {U : (F.E).Opens} (hU : IsAffineOpen U)
        `sharp-sum f = φL (ψ f) = pT (f⊗1) + pT (1⊗f) = sharp P₁ f + sharp P₂ f`. 
 -/
 
+/-- **(H-φ)** The square-zero reduction collapses chart evaluations: if two chart-supported
+morphisms `w, w'` into `E` land in the chart `U` and agree after restriction along `φ`, then
+`φ` identifies their chart comorphisms on every chart element. Uses the `ΓSpecIso`-naturality
+of `pointSharp` and `appLE` functoriality. -/
+private theorem phi_pointSharp_eq_of_specMap_comp_eq
+    (w w' : Spec R ⟶ F.E) (hw : ∀ x : ↑(Spec R), w.base x ∈ U)
+    (hw' : ∀ x : ↑(Spec R), w'.base x ∈ U)
+    (hval : Spec.map φ ≫ w = Spec.map φ ≫ w') (c : ↑Γ(F.E, U)) :
+    φ.hom ((pointSharp w hw).hom c) = φ.hom ((pointSharp w' hw').hom c) := by
+  have hnat : ∀ (v : Spec R ⟶ F.E) (hv : ∀ x : ↑(Spec R), v.base x ∈ U),
+      pointSharp v hv ≫ φ = (Spec.map φ ≫ v).appLE U ⊤
+          (fun x _ ↦ by simpa using hv ((Spec.map φ).base x)) ≫
+        (Scheme.ΓSpecIso S').hom := by
+    intro v hv
+    rw [pointSharp, Category.assoc, ← Scheme.ΓSpecIso_naturality, ← Category.assoc,
+      ← FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_top_top (Spec.map φ),
+      Scheme.Hom.appLE_comp_appLE]
+  have h1 := congrArg (fun (m : Γ(F.E, U) ⟶ S') ↦ m.hom c) (hnat w hw)
+  have h2 := congrArg (fun (m : Γ(F.E, U) ⟶ S') ↦ m.hom c) (hnat w' hw')
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h1 h2
+  rw [h1, h2]
+  congr 1
+  have h5 := FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_congr_hom hval U ⊤
+    (fun x _ ↦ by simpa using hw ((Spec.map φ).base x))
+  exact congrArg (fun (m : Γ(F.E, U) ⟶ Γ(Spec S', ⊤)) ↦ m.hom c) h5
+
 /-- **Additivity of the chart evaluation on kernel-of-reduction points** (the geometric
 heart): for `P₁ P₂` reducing to zero along the square-zero `φ` and `f` in the augmentation
 ideal of the chart, `(P₁+P₂)♯ f = P₁♯ f + P₂♯ f`. Through the affine Künneth box and
@@ -1102,28 +1128,6 @@ private theorem pointSharp_add {U : (F.E).Opens} (hU : IsAffineOpen U)
       rw [sq]; exact Ideal.mul_mem_mul ha hb
     rw [hφ2, Ideal.mem_bot] at h2
     exact h2
-  -- (H-φ): the reduction collapses chart evaluations
-  have hφsharp : ∀ (w w' : Spec R ⟶ F.E) (hw : ∀ x : ↑(Spec R), w.base x ∈ U)
-      (hw' : ∀ x : ↑(Spec R), w'.base x ∈ U)
-      (hval : Spec.map φ ≫ w = Spec.map φ ≫ w') (c : ↑Γ(F.E, U)),
-      φ.hom ((pointSharp w hw).hom c) = φ.hom ((pointSharp w' hw').hom c) := by
-    intro w w' hw hw' hval c
-    have hnat : ∀ (v : Spec R ⟶ F.E) (hv : ∀ x : ↑(Spec R), v.base x ∈ U),
-        pointSharp v hv ≫ φ = (Spec.map φ ≫ v).appLE U ⊤
-            (fun x _ ↦ by simpa using hv ((Spec.map φ).base x)) ≫
-          (Scheme.ΓSpecIso S').hom := by
-      intro v hv
-      rw [pointSharp, Category.assoc, ← Scheme.ΓSpecIso_naturality, ← Category.assoc,
-        ← FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_top_top (Spec.map φ),
-        Scheme.Hom.appLE_comp_appLE]
-    have h1 := congrArg (fun (m : Γ(F.E, U) ⟶ S') ↦ m.hom c) (hnat w hw)
-    have h2 := congrArg (fun (m : Γ(F.E, U) ⟶ S') ↦ m.hom c) (hnat w' hw')
-    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h1 h2
-    rw [h1, h2]
-    congr 1
-    have h5 := FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_congr_hom hval U ⊤
-      (fun x _ ↦ by simpa using hw ((Spec.map φ).base x))
-    exact congrArg (fun (m : Γ(F.E, U) ⟶ Γ(Spec S', ⊤)) ↦ m.hom c) h5
   have hclose : ∀ (P : F.Point t) (hp : ∀ x : ↑(Spec R), (P.1).base x ∈ U)
       (hres0 : Point.restrict F (Spec.map φ) P = 0) (c : ↑Γ(F.E, U)),
       (pointSharp P.1 hp).hom c - algebraMap _ ↑R (ε' c) ∈ I := by
@@ -1132,7 +1136,8 @@ private theorem pointSharp_add {U : (F.E).Opens} (hU : IsAffineOpen U)
       have h := congrArg Subtype.val hres0
       simp only [Point.restrict] at h
       rw [h, F.point_zero_val, F.point_zero_val, ← Category.assoc]
-    have h1 := hφsharp P.1 ((0 : F.Point t) : Spec R ⟶ F.E) hp hz hval c
+    have h1 := phi_pointSharp_eq_of_specMap_comp_eq P.1
+      ((0 : F.Point t) : Spec R ⟶ F.E) hp hz hval c
     have h2 := pointSharp_zero_point heU t hz c
     have h3 : algebraMap ↑Γ(Spec (CommRingCat.of k), ⊤) ↑R (ε' c) =
         (t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom).hom
