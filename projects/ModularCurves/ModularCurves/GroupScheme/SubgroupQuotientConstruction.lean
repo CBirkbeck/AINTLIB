@@ -146,7 +146,57 @@ theorem spec_includeRight_isoSpec_inv :
   have h3 : P.pullbackToPatchLevel.hom ≫ pullback.snd P.groupToBase P.chartToBase
       = pullback.snd (pullback.snd G.π P.V.ι) P.chartToBase := by
     simp only [pullbackToPatchLevel, asIso_hom, pullback.lift_snd, Category.comp_id]
-  sorry
+  -- link 4: `pullbackToVLevel.inv ≫ snd = snd` (congrHom has identity legs; pasting iso)
+  have h4 : P.pullbackToVLevel.inv ≫ pullback.snd G.π (P.U.ι ≫ E.π)
+      = pullback.snd (pullback.snd G.π P.V.ι) P.chartToBase := by
+    rw [pullbackToVLevel, Iso.trans_inv, Iso.symm_inv, Iso.symm_inv, Category.assoc]
+    have hc : (pullback.congrHom rfl P.chartToBase_comp_ι).hom ≫
+        pullback.snd G.π (P.U.ι ≫ E.π) = pullback.snd G.π (P.chartToBase ≫ P.V.ι) := by
+      simp only [pullback.congrHom, asIso_hom, pullback.lift_snd, Category.comp_id]
+    rw [hc]
+    exact pullbackLeftPullbackSndIso_hom_snd G.π P.V.ι P.chartToBase
+  -- link 5: the chart Künneth carries the second projection to the restricted projection
+  have h5 : (G.chartPullbackIso P.U).inv ≫ G.restrictedProj P.U
+      = pullback.snd G.π (P.U.ι ≫ E.π) := by
+    rw [chartPullbackIso, Iso.trans_inv, Category.assoc]
+    have hres : (G.restrictedDomainIso P.U).inv ≫ G.restrictedProj P.U
+        = pullback.snd G.actionProj.left P.U.ι := by
+      rw [restrictedDomainIso, Iso.symm_inv, restrictedProj]
+      rw [show G.actionProj.left.resLE P.U (G.actionProj.left ⁻¹ᵁ P.U) le_rfl
+          = G.actionProj.left ∣_ P.U from Scheme.Hom.resLE_eq_morphismRestrict _]
+      exact pullbackRestrictIsoRestrict_hom_morphismRestrict G.actionProj.left P.U
+    rw [hres]
+    exact pullbackLeftPullbackSndIso_inv_snd_snd G.π E.π P.U.ι
+  -- assembly: chase the second projection through the whole Künneth chain
+  have hchase : P.chartSpecIso.inv ≫ (G.chartPullbackIso P.U).inv ≫ G.restrictedProj P.U
+      = Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+          P.chartRing →ₐ[P.baseRing] P.groupRing ⊗[P.baseRing] P.chartRing).toRingHom) ≫
+        inv P.U.toSpecΓ := by
+    rw [h5, chartSpecIso, Iso.trans_inv, Category.assoc, kunnethSpecIso, Iso.trans_inv,
+      chartKunnethSchemeIso, Iso.trans_inv, Category.assoc, Category.assoc]
+    rw [h4]
+    -- `pullbackToPatchLevel.inv ≫ snd = snd` from the hom-side identity `h3`
+    have h3' : P.pullbackToPatchLevel.inv ≫
+        pullback.snd (pullback.snd G.π P.V.ι) P.chartToBase
+        = pullback.snd P.groupToBase P.chartToBase := by
+      rw [← h3, Iso.inv_hom_id_assoc]
+    rw [h3']
+    -- `kunnethToSpec.inv ≫ snd = Spec-snd ≫ (toSpecΓ)⁻¹` from the hom-side square `h2`
+    have h2' : P.kunnethToSpec.inv ≫ pullback.snd P.groupToBase P.chartToBase
+        = pullback.snd (Spec.map (G.π.appLE P.V P.groupOpen le_rfl))
+            (Spec.map (E.π.appLE P.V P.U P.hover)) ≫ inv P.U.toSpecΓ :=
+      (IsIso.eq_comp_inv _).mpr (by
+        rw [Category.assoc, ← h2, Iso.inv_hom_id_assoc])
+    -- `h1`, retyped at the `appLE` spelling of the `Spec` legs (definitional)
+    have h1' : (pullbackSpecIso P.baseRing P.groupRing P.chartRing).inv ≫
+        pullback.snd (Spec.map (G.π.appLE P.V P.groupOpen le_rfl))
+          (Spec.map (E.π.appLE P.V P.U P.hover))
+        = Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+            P.chartRing →ₐ[P.baseRing] P.groupRing ⊗[P.baseRing] P.chartRing).toRingHom) := h1
+    rw [h2', ← Category.assoc, h1']
+  rw [hchase]
+  congr 1
+  exact (IsIso.inv_eq_of_hom_inv_id P.hU.isoSpec.hom_inv_id).symm
 
 end AffineChartPatch
 
