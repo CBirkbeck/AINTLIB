@@ -296,6 +296,42 @@ theorem resGroup_appLE :
       = P.resBase Q hVQ ≫ (G.π.appLE Q.V Q.groupOpen le_rfl) := by
   rw [resGroup, resBase, Scheme.Hom.appLE_map, Scheme.Hom.map_appLE]
 
+/-- **The tensor comparison of the transition** (`T` of `mem_coinvariants_of_map`): the
+ring map `B_P ⊗[R_P] A_P ⟶ B_Q ⊗[R_Q] A_Q` induced by the three restrictions, via the
+universal property of the tensor product (commutativity supplies the `Commute`s). -/
+noncomputable def transitionTensor :
+    (P.chartRing ⊗[P.baseRing] P.groupRing) →+* (Q.chartRing ⊗[Q.baseRing] Q.groupRing) :=
+  letI : Algebra P.baseRing (Q.chartRing ⊗[Q.baseRing] Q.groupRing) :=
+    ((algebraMap Q.baseRing (Q.chartRing ⊗[Q.baseRing] Q.groupRing)).comp
+      (P.resBase Q hVQ).hom).toAlgebra
+  letI fB : P.chartRing →ₐ[P.baseRing] (Q.chartRing ⊗[Q.baseRing] Q.groupRing) :=
+    { toRingHom := (Algebra.TensorProduct.includeLeft :
+          Q.chartRing →ₐ[Q.baseRing] Q.chartRing ⊗[Q.baseRing] Q.groupRing).toRingHom.comp
+        (P.resChart Q hUQ).hom
+      commutes' := fun r => by
+        have h := congrArg (fun m => (CommRingCat.Hom.hom m) r) (P.resChart_appLE Q hUQ hVQ)
+        simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h
+        show (Algebra.TensorProduct.includeLeft :
+            Q.chartRing →ₐ[Q.baseRing] Q.chartRing ⊗[Q.baseRing] Q.groupRing)
+          ((P.resChart Q hUQ).hom ((E.π.appLE P.V P.U P.hover).hom r)) = _
+        rw [h]
+        rfl }
+  letI fA : P.groupRing →ₐ[P.baseRing] (Q.chartRing ⊗[Q.baseRing] Q.groupRing) :=
+    { toRingHom := (Algebra.TensorProduct.includeRight :
+          Q.groupRing →ₐ[Q.baseRing] Q.chartRing ⊗[Q.baseRing] Q.groupRing).toRingHom.comp
+        (P.resGroup Q hVQ).hom
+      commutes' := fun r => by
+        have h := congrArg (fun m => (CommRingCat.Hom.hom m) r) (P.resGroup_appLE Q hVQ)
+        simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h
+        show Algebra.TensorProduct.includeRight ((P.resGroup Q hVQ).hom
+          ((G.π.appLE P.V P.groupOpen le_rfl).hom r)) = _
+        rw [h]
+        exact (Algebra.TensorProduct.includeRight (R := Q.baseRing) (A := Q.chartRing)
+          (B := Q.groupRing)).commutes ((P.resBase Q hVQ).hom r) }
+  (Algebra.TensorProduct.lift (R := P.baseRing) (S := P.baseRing) (A := P.chartRing)
+    (B := P.groupRing) (C := Q.chartRing ⊗[Q.baseRing] Q.groupRing)
+    fB fA (fun _ _ => Commute.all _ _)).toRingHom
+
 end Transition
 
 end AffineChartPatch
