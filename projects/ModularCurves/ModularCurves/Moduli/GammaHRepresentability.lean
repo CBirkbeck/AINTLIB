@@ -2846,6 +2846,60 @@ theorem QuotPkg.projQ_geom_surjective (pkg : ∀ X : EllObj R, QuotPkg φ X)
       ((Category.assoc _ _ _).symm.trans
         ((congrArg (· ≫ s.1) ht).trans (Category.id_comp s.1))))
 
+open Pointwise in
+/-- **The `k̄`-point orbit lemma** ([GHB7-geom-o] chart level): over an algebraically
+closed field, two algebra homomorphisms to the base field agreeing on the invariants
+differ by the group action (`exists_smul_of_under_eq` + equal-kernel rigidity of
+points valued in the base field). -/
+theorem _root_.AlgebraicGeometry.exists_smul_algHom_eq
+    {k B : Type u} [Field k] [IsAlgClosed k] [CommRing B] [Algebra k B]
+    {G : Type u_1} [Group G] [Finite G] [MulSemiringAction G B]
+    [SMulCommClass G k B] (a₁ a₂ : B →ₐ[k] k)
+    (hagree : ∀ b : B, (∀ g : G, g • b = b) → a₁ b = a₂ b) :
+    ∃ g : G, ∀ b : B, a₂ b = a₁ (g • b) := by
+  classical
+  haveI : Algebra.IsInvariant (FixedPoints.subalgebra k B G) B G :=
+    ⟨fun b hb => ⟨⟨b, hb⟩, rfl⟩⟩
+  haveI h₁ : (RingHom.ker a₁.toRingHom).IsPrime := RingHom.ker_isPrime _
+  haveI h₂ : (RingHom.ker a₂.toRingHom).IsPrime := RingHom.ker_isPrime _
+  obtain ⟨g₀, hg₀⟩ := Algebra.IsInvariant.exists_smul_of_under_eq
+    (FixedPoints.subalgebra k B G) B G
+    (RingHom.ker a₁.toRingHom) (RingHom.ker a₂.toRingHom)
+    (by
+      ext b'
+      show algebraMap _ B b' ∈ RingHom.ker a₁.toRingHom ↔
+        algebraMap _ B b' ∈ RingHom.ker a₂.toRingHom
+      rw [RingHom.mem_ker, RingHom.mem_ker]
+      have hfix : ∀ g : G, g • (b' : B) = (b' : B) := b'.2
+      rw [show a₁.toRingHom (algebraMap _ B b') = a₁ (b' : B) from rfl,
+        show a₂.toRingHom (algebraMap _ B b') = a₂ (b' : B) from rfl,
+        hagree (b' : B) hfix])
+  refine ⟨g₀⁻¹, fun b => ?_⟩
+  -- the twisted point has the same kernel as `a₂`, hence equals it
+  have hker : ∀ x : B, a₂ x = 0 ↔ a₁ (g₀⁻¹ • x) = 0 := by
+    intro x
+    constructor
+    · intro hx
+      have : x ∈ g₀ • RingHom.ker a₁.toRingHom := hg₀ ▸ (RingHom.mem_ker.mpr hx)
+      rw [Ideal.mem_pointwise_smul_iff_inv_smul_mem] at this
+      exact RingHom.mem_ker.mp this
+    · intro hx
+      have : x ∈ g₀ • RingHom.ker a₁.toRingHom := by
+        rw [Ideal.mem_pointwise_smul_iff_inv_smul_mem]
+        exact RingHom.mem_ker.mpr hx
+      rw [← hg₀] at this
+      exact RingHom.mem_ker.mp this
+  -- rigidity: agree via the common kernel and `k`-linearity
+  have hsmul_alg : ∀ c : k, g₀⁻¹ • (algebraMap k B c) = algebraMap k B c := by
+    intro c
+    rw [Algebra.algebraMap_eq_smul_one, smul_comm g₀⁻¹ c (1 : B), smul_one]
+  have hz : a₂ (b - algebraMap k B (a₁ (g₀⁻¹ • b))) = 0 := by
+    rw [(hker _)]
+    rw [smul_sub, hsmul_alg, map_sub, AlgHom.commutes, sub_eq_zero]
+    rfl
+  rw [map_sub, AlgHom.commutes, sub_eq_zero] at hz
+  exact hz
+
 end Transport
 
 
