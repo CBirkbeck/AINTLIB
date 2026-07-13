@@ -1,4 +1,5 @@
 import ModularCurves.ForMathlib.FinitePresentationPushout
+import ModularCurves.ForMathlib.FinitePresentationFunctorCover
 
 /-!
 # Synchronizing finite families of spread pushout squares
@@ -166,5 +167,43 @@ theorem SpreadData.exists_common_isPushout_mapAtLaterStage
     (D (corner₁ r)) (D (corner₂ r)) (D (corner₃ r)) H
     (h (corner₀ r)) (h (corner₁ r)) (h (corner₂ r)) (h (corner₃ r))
     (C r).le_stage (hC r) (f r) (g r) (inl r) (inr r) (C r).map_isPushout
+
+/-- Finitely many commutative squares in a spread functor whose colimit algebra
+squares are pushouts become pushouts simultaneously at one later functor stage. -/
+theorem SpreadData.FunctorModel.exists_common_isPushout_mapToStage
+    {J : Type u} [SmallCategory J] {F : J ⥤ CommAlgCat.{u} A}
+    {H : IsFilteredAlgColimit R 𝒮 t A uA}
+    (M : SpreadData.FunctorModel F H)
+    {ρ : Type u} [Finite ρ]
+    (corner₀ corner₁ corner₂ corner₃ : ρ → J)
+    (f : ∀ r, corner₀ r ⟶ corner₁ r)
+    (g : ∀ r, corner₀ r ⟶ corner₂ r)
+    (inl : ∀ r, corner₁ r ⟶ corner₃ r)
+    (inr : ∀ r, corner₂ r ⟶ corner₃ r)
+    (hsquare : ∀ r, f r ≫ inl r = g r ≫ inr r)
+    (Hpush : ∀ r, CategoryTheory.IsPushout
+      (CommRingCat.ofHom (F.map (f r)).hom.toRingHom)
+      (CommRingCat.ofHom (F.map (g r)).hom.toRingHom)
+      (CommRingCat.ofHom (F.map (inl r)).hom.toRingHom)
+      (CommRingCat.ofHom (F.map (inr r)).hom.toRingHom)) :
+    ∃ (j : ι) (hij : M.stage ≤ j), ∀ r,
+      CategoryTheory.IsPushout
+        (CommRingCat.ofHom ((M.mapToStage hij).map (f r)).toRingHom)
+        (CommRingCat.ofHom ((M.mapToStage hij).map (g r)).toRingHom)
+        (CommRingCat.ofHom ((M.mapToStage hij).map (inl r)).toRingHom)
+        (CommRingCat.ofHom ((M.mapToStage hij).map (inr r)).toRingHom) := by
+  have hsquareM (r) :
+      (M.map (inl r)).comp (M.map (f r)) =
+        (M.map (inr r)).comp (M.map (g r)) := by
+    rw [← M.map_comp, ← M.map_comp, hsquare r]
+  exact SpreadData.exists_common_isPushout_mapAtLaterStage
+    H (fun X => F.obj X) M.object corner₀ corner₁ corner₂ corner₃ M.le_stage
+      (fun r => M.map (f r)) (fun r => M.map (g r))
+      (fun r => M.map (inl r)) (fun r => M.map (inr r)) hsquareM
+      (fun r => (F.map (f r)).hom) (fun r => (F.map (g r)).hom)
+      (fun r => (F.map (inl r)).hom) (fun r => (F.map (inr r)).hom)
+      (fun r x => M.map_colimit (f r) x) (fun r x => M.map_colimit (g r) x)
+      (fun r x => M.map_colimit (inl r) x) (fun r x => M.map_colimit (inr r) x)
+      Hpush
 
 end Algebra
