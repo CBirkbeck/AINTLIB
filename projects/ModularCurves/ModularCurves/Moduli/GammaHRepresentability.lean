@@ -1368,7 +1368,104 @@ theorem QuotPkg.projQ_invariant (pkg : ∀ X : EllObj R, QuotPkg φ X)
         ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1 ≫ (pkg Xop.unop).π
   rw [congrArg Subtype.val hkey, Category.assoc, (pkg Xop.unop).hπinv γ⁻¹]
 
+/-- **The transport along a tautological projection is an isomorphism**
+([GHB7-5] enabler): both sides are quotients of canonically isomorphic data, so the
+comparison-descended inverse exists by double descent uniqueness. -/
+theorem QuotPkg.isIso_mapT_pullbackAlongπ (pkg : ∀ X : EllObj R, QuotPkg φ X)
+    (hfree : FreeAction φ)
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base))) {X' : EllObj R} {T : Scheme.{u}}
+    (g : T ⟶ X'.base) :
+    IsIso (QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g)) := by
+  obtain ⟨hsndT, hfstT, hinvT, hUPT, hqT, hqfT⟩ :=
+    QuotPkg.mapT_spec pkg hfree hbase (X'.pullbackAlongπ g)
+  -- the reverse comparison composed with the base-changed projection is invariant
+  have hFinv : ∀ γ : G, (pkg (X'.pullbackAlong g)).d.σZ.hom γ ≫
+      (((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
+        ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1 ≫
+      QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g)) =
+      ((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
+        ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1 ≫
+      QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g) := by
+    intro γ
+    have hce : (pkg (X'.pullbackAlong g)).d.σZ.hom γ ≫
+        (((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
+          ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1) =
+        (((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
+          ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1) ≫
+        ((pkg X').d.pullback (X'.pullbackAlongπ g)).σZ.hom γ :=
+      ModuliProblem.EquivariantRelRepData.compare_equivariant
+        (pkg (X'.pullbackAlong g)).d ((pkg X').d.pullback (X'.pullbackAlongπ g)) γ
+    have hce' : (pkg (X'.pullbackAlong g)).d.σZ.hom γ ≫
+        (((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
+          ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1) =
+        (((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
+          ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1) ≫
+        ((pkg X').d.σZ.basePullback (pkg X').d.f (pkg X').d.over_base
+          (X'.pullbackAlongπ g).baseHom).hom γ := hce
+    calc (pkg (X'.pullbackAlong g)).d.σZ.hom γ ≫
+        (((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
+          ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1 ≫
+        QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g))
+        = ((pkg (X'.pullbackAlong g)).d.σZ.hom γ ≫
+          (((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
+            ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1)) ≫
+          QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g) :=
+          (Category.assoc _ _ _).symm
+      _ = ((((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
+            ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1) ≫
+          ((pkg X').d.σZ.basePullback (pkg X').d.f (pkg X').d.over_base
+            (X'.pullbackAlongπ g).baseHom).hom γ) ≫
+          QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g) :=
+          congrArg (· ≫ QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g)) hce'
+      _ = (((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
+            ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1) ≫
+          (((pkg X').d.σZ.basePullback (pkg X').d.f (pkg X').d.over_base
+            (X'.pullbackAlongπ g).baseHom).hom γ ≫
+          QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g)) := Category.assoc _ _ _
+      _ = (((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
+            ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1) ≫
+          QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g) :=
+          congrArg ((((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
+            ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1) ≫ ·)
+            (hinvT γ)
+  obtain ⟨q', hq', -⟩ := (pkg (X'.pullbackAlong g)).hdesc
+    ((((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
+      ((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData).1) ≫
+      QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g)) hFinv
+  refine ⟨q', ?_, ?_⟩
+  · -- `mapT ≫ q' = 𝟙`: both descend `πT` along `πT`
+    obtain ⟨w, hw, hwu⟩ := hUPT (QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g))
+      hinvT
+    rw [hwu (QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g) ≫ q')
+      ((Category.assoc _ _ _).symm.trans ((congrArg (· ≫ q') hqT).trans
+        ((Category.assoc _ _ _).trans
+          ((congrArg ((((pkg X').d.pullback
+              (X'.pullbackAlongπ g)).toRelRepData.compare
+              (pkg (X'.pullbackAlong g)).d.toRelRepData).1 ≫ ·) hq').trans
+            ((Category.assoc _ _ _).symm.trans
+              ((congrArg (· ≫ QuotPkg.πT pkg hfree hbase (X'.pullbackAlongπ g))
+                (ModuliProblem.RelRepData.compare_comp_compare _ _)).trans
+                (Category.id_comp _))))))),
+      hwu (𝟙 _) (Category.comp_id _)]
+  · -- `q' ≫ mapT = 𝟙`: both descend the chosen projection along it
+    obtain ⟨w, hw, hwu⟩ := (pkg (X'.pullbackAlong g)).hdesc
+      (pkg (X'.pullbackAlong g)).π (pkg (X'.pullbackAlong g)).hπinv
+    rw [hwu (q' ≫ QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))
+      ((Category.assoc _ _ _).symm.trans ((congrArg
+          (· ≫ QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g)) hq').trans
+        ((Category.assoc _ _ _).trans
+          ((congrArg ((((pkg (X'.pullbackAlong g)).d.toRelRepData.compare
+              ((pkg X').d.pullback
+                (X'.pullbackAlongπ g)).toRelRepData).1) ≫ ·) hqT).trans
+            ((Category.assoc _ _ _).symm.trans
+              ((congrArg (· ≫ (pkg (X'.pullbackAlong g)).π)
+                (ModuliProblem.RelRepData.compare_comp_compare _ _)).trans
+                (Category.id_comp _))))))),
+      hwu (𝟙 _) (Category.comp_id _)]
+
 end Transport
+
 
 
 
