@@ -18689,3 +18689,25 @@ and the per-patch universal property transport VERBATIM to the glue model.
 NEXT: the S2 orbit lemma (π x = π y ⟺ chart-groupoid point above (x,y) — KP + exists_preimage_pullback
 + the C4b bridge legs identify the KP legs with restrictedAction/Proj), then imageOpens (flat+lfp ⟹
 open image? or template windowHom route), tripleIso, GlueData, pins. (STREAM-G0)
+
+## Amendments v10.193 (2026-07-13, coordinator): #5866 MERGED — codex tranche-1 invertible-sheaf layer is on `main`; cleanup-fleet issues live
+
+**#5866 MERGED** (owner "ok do it") — merge commit `8c53f079a` into `main`, history preserved
+(v10.170 producer-merge precedent). The codex tranche-1 invertible-sheaf layer
+(`Picard/InvertibleSheaf{LocallyFree,FiniteAffineCover,BaseCechFlat}` +
+`ForMathlib/SchemeModuleBaseCech{Basic,Flat,TrivialFlat}`, +503/−0, 6 sorry-free files) is on main.
+- **Verified before merge (doctrine v10.175-a):** merged-state `lake build` GREEN — `Build completed
+  successfully (4253 jobs)`, `BUILD_EXIT: 0`, 0 error lines, all 6 new files built (only warnings =
+  GH's pre-existing chartered sorries, not from #5866). `git merge-tree` CLEAN against current main
+  (16-behind but additive). The 16 intervening cleanup-fleet commits touched NONE of codex's Picard
+  dependency surface (`Picard/` untouched → the green build covers the new files). No freeze active.
+  GitHub's own `mergeable` never left UNKNOWN — local verification was authoritative.
+- **DE-URGE confirmed (v10.192-§B):** ω2 built on our shared `Picard/InvertibleSheaf` base, NOT
+  codex's `isLocallyFree` — so #5866 was a cleanup/PIC0 feed, never an OMEGA gate.
+- **Cleanup-fleet issues LIVE** (targets now on main → flipped to `state:todo`): **#5878**
+  (cleanup: Picard invertible-sheaf mathlib-API audit + polish), **#5879** (generalise: ForMathlib
+  `SchemeModuleBaseCech*` → mathlib upstream queue), **#5880** (decompose: `InvertibleSheafLocallyFree`
+  cofan scaffolding, 16 privates), **#5881** (generalise: `IsInvertible` ↔ mathlib invertible-object
+  API), **#5882** (cleanup: shared-Picard reconciliation + consumer cross-linking). Tracking epic
+  **#5885** (coordinator:todo) maps tranches 1/2/3 (tranche 2 = fibrewise⟺LW converse, `Comparison.lean`;
+  tranche 3 = Pic⁰ dual-pullback `DualRestrict`/`DualPullback` — reconcile-heavy, coordinator-integrated).
