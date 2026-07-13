@@ -18560,3 +18560,14 @@ gammaFullNaive_freeAction). Pins into `gammaH_representable`'s hrig. (STREAM-GH)
 - **#5866 verified clean:** 8 files, **+503/−0 (additive-only ⟹ no shared-Picard reconciliation needed for this tranche)**, ALL sorry-free: `Picard/InvertibleSheaf{LocallyFree,FiniteAffineCover,BaseCechFlat}` + `ForMathlib/SchemeModuleBaseCech{Basic,Flat,TrivialFlat}` + import reg. GitHub mergeability still COMPUTING (just opened). **Recommend MERGE** (owner/main-coordinator's call — main-side PR) — it's the OMEGA-critical infra, sorry-free, additive, rebased.
 - **OMEGA consequence (ω2 un-gated soon):** ω2 (glued invertible sheaf) consumes `IsInvertible.isLocallyFree`, which lands on main via #5866. OMEGA's gate drops from "wait for the whole codex rebase" to "**merge #5866, rebase onto main, import**". Start ω1 now (independent); ω2 follows #5866's merge.
 - Housekeeping: the older micro-branch PRs (#5842/#5836/#5828/#5823, pre-rebase old base) are likely superseded by the integration-branch tranches — codex/owner should close the redundant ones.
+
+### v10.191-G0 — ★ [HG-C4c-2 step 3] the glue model = the Hopf model on patches, CLEAN (STREAM-G0)
+`quotientRing_eq_coinvariants` (SubgroupQuotientGlue.lean, clean triple): on every AffineChartPatch
+the equalizer-subring quotient (eqLocus of the appLE legs) equals the Hopf co-invariants — via kappa
+(the Künneth section iso; IsIso through Scheme.Γ since appTop = Γ.map ∘ op is rfl) with
+actRing_kappa = coactionRing (definitional through resLE_app_top) and prRing_kappa = includeRight
+(Γ-dual of the raw snd bridge through comp_appTop + ΓSpecIso_naturality). Steps 1-3 of the
+v10.190-G0 glue are DONE: quotientRing/localQuotientOpen/localQuotientMapW for arbitrary stable
+opens + the patch comparison. REMAINING: step 4 (windowHom/imageOpens/saturation/tripleIso — the
+template :343-790 mirror, consuming the transported per-patch universal property + specEqualizerπ
+surjectivity) + step 5 (GlueData :818-910 + quotientπ/pins :969-1869, option-γ (N,hkill)). (STREAM-G0)
