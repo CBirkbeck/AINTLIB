@@ -149,6 +149,67 @@ theorem naive_iff_comboFamily_injective {N : ℕ} [NeZero N] {k : Type u} [Field
     ← comboFamily_injective_iff_closure_top N _ _ (zsmul_pull_subtype_eq_zero t hP)
       (zsmul_pull_subtype_eq_zero t hQ) (natCard_fibreTorsion t hN)]
 
+variable (E) in
+/-- **[YF-⊆ group core].** Over a geometric point where `N` is invertible, if two `N`-torsion
+points `A, B` of the fibre generate its whole `N`-torsion, then for coefficients `c, d ∈ [0, N)`
+not both zero the combination `[c]A + [d]B` is nonzero. (The `Fin N × Fin N`-indexed
+no-vanishing register that `[YF-⊆]` contradicts against a `combPoint = 0` at the geometric
+point.) Pigeonhole: the `N²` combinations are surjective onto the `N²`-element torsion, hence
+injective, so only the zero-index combination is `0`. -/
+theorem comb_ne_zero_of_generates {N : ℕ} [NeZero N] {k : Type u} [Field k] [IsAlgClosed k]
+    {γ : Spec (CommRingCat.of k) ⟶ S} (hN : (N : k) ≠ 0) {A B : E.Point γ}
+    (hA : (N : ℤ) • A = 0) (hB : (N : ℤ) • B = 0)
+    (hgen : ∀ x : E.Point γ, (N : ℤ) • x = 0 → x ∈ AddSubgroup.closure {A, B})
+    {c d : ℕ} (hc : c < N) (hd : d < N) (hne : ¬(c = 0 ∧ d = 0)) :
+    (c : ℤ) • A + (d : ℤ) • B ≠ 0 := by
+  haveI : NeZero (N ^ 2) := ⟨pow_ne_zero 2 (NeZero.ne N)⟩
+  have hAmem : A ∈ E.fibreTorsion γ N := mem_fibreTorsion.mpr hA
+  have hBmem : B ∈ E.fibreTorsion γ N := mem_fibreTorsion.mpr hB
+  -- the generated closure is the entire `N`-torsion subgroup
+  have hsub : AddSubgroup.closure {A, B} ≤ E.fibreTorsion γ N := by
+    rw [AddSubgroup.closure_le]
+    intro y hy
+    rcases (by simpa using hy : y = A ∨ y = B) with rfl | rfl
+    exacts [hAmem, hBmem]
+  have heq : AddSubgroup.closure {A, B} = E.fibreTorsion γ N :=
+    le_antisymm hsub fun x hx => hgen x (mem_fibreTorsion.mp hx)
+  have htop : AddSubgroup.closure
+      {(⟨A, hAmem⟩ : E.fibreTorsion γ N), ⟨B, hBmem⟩} = ⊤ :=
+    (closure_pair_eq_iff_closure_top (E.fibreTorsion γ N) hAmem hBmem).mp heq
+  haveI := finite_fibreTorsion (E := E) γ hN
+  have hcard : Nat.card (E.fibreTorsion γ N) = N ^ 2 := natCard_fibreTorsion γ hN
+  have hzsA : (N : ℤ) • (⟨A, hAmem⟩ : E.fibreTorsion γ N) = 0 := by
+    apply Subtype.ext; rw [AddSubgroup.coe_zsmul, ZeroMemClass.coe_zero]; exact hA
+  have hzsB : (N : ℤ) • (⟨B, hBmem⟩ : E.fibreTorsion γ N) = 0 := by
+    apply Subtype.ext; rw [AddSubgroup.coe_zsmul, ZeroMemClass.coe_zero]; exact hB
+  -- the index `i = c + d·N < N²` is nonzero
+  have hi : c + d * N < N ^ 2 := by
+    have hNN : N ≤ N * N := Nat.le_mul_of_pos_left N (Nat.pos_of_ne_zero (NeZero.ne N))
+    have h1 : d * N ≤ (N - 1) * N := Nat.mul_le_mul_right N (Nat.le_sub_one_of_lt hd)
+    have h2 : (N - 1) * N = N * N - N := Nat.sub_one_mul N N
+    rw [pow_two]; omega
+  have hidx : (⟨c + d * N, hi⟩ : Fin (N ^ 2)) ≠ 0 := by
+    intro hval
+    have hval2 : c + d * N = 0 := by
+      have h := congrArg Fin.val hval
+      simpa using h
+    have hc0 : c = 0 := by omega
+    have hdN0 : d * N = 0 := by omega
+    rcases Nat.mul_eq_zero.mp hdN0 with h | h
+    · exact hne ⟨hc0, h⟩
+    · exact absurd h (NeZero.ne N)
+  have hkey := comboFamily_ne_zero_of_closure_top N (⟨A, hAmem⟩ : E.fibreTorsion γ N)
+    ⟨B, hBmem⟩ hzsA hzsB hcard htop hidx
+  intro h0
+  apply hkey
+  apply Subtype.ext
+  rw [ZeroMemClass.coe_zero, comboFamily, AddSubgroup.coe_add, AddSubgroup.coe_zsmul,
+    AddSubgroup.coe_zsmul]
+  show (((c + d * N) % N : ℕ) : ℤ) • A + (((c + d * N) / N : ℕ) : ℤ) • B = 0
+  rw [Nat.add_mul_mod_self_right, Nat.mod_eq_of_lt hc, Nat.add_mul_div_right _ _
+    (Nat.pos_of_ne_zero (NeZero.ne N)), Nat.div_eq_of_lt hc, zero_add]
+  exact h0
+
 end EllipticCurve
 
 end ModularCurves

@@ -68,6 +68,7 @@ import ModularCurves.LevelStructure.Basic
 import ModularCurves.LevelStructure.CartierDivisor
 import ModularCurves.LevelStructure.ExactOrder
 import ModularCurves.LevelStructure.FibreFullLevel
+import ModularCurves.LevelStructure.FullLevelDivisorBridge
 import ModularCurves.LevelStructure.FullLevelFibre
 import ModularCurves.LevelStructure.Incidence
 import ModularCurves.LevelStructure.SectionsDivisorBaseChange
@@ -82,6 +83,7 @@ import ModularCurves.Moduli.Coarse
 import ModularCurves.Moduli.EllCategory
 import ModularCurves.Moduli.EngineDescent
 import ModularCurves.Moduli.GammaH
+import ModularCurves.Moduli.FullLevelClopen
 import ModularCurves.Moduli.FullLevelOpenLocus
 import ModularCurves.Moduli.FullLevelSupset
 import ModularCurves.Moduli.FullLevelTautSection

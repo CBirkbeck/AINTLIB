@@ -6,6 +6,7 @@ Authors: The AINTLIB Authors
 import ModularCurves.Moduli.FullLevelSupset
 import ModularCurves.Moduli.FullLevelTautSection
 import ModularCurves.LevelStructure.FullLevelDivisorBridge
+import ModularCurves.ForMathlib.ClosedImmersionResidueField
 import ModularCurves.EllipticCurve.ModelRecord
 
 /-!
@@ -318,6 +319,62 @@ theorem taut_generates_over_levelSpaceΓ (hN : NIsInvertible S N) (k : Type u) [
     (taut_isFullLevel_over_levelSpaceΓ E N).1.1 (taut_isFullLevel_over_levelSpaceΓ E N).1.2
     (taut_isFullLevel_over_levelSpaceΓ E N).2 k t
 
+/-- **[YF-⊆ transport].** `taut_generates_over_levelSpaceΓ` pushed through the base-change point
+equivalence (`Point.baseChangeEquiv`) and the associativity cast (`Point.castBase`): over a
+geometric point `t` of `levelSpaceΓ`, the **restricted** tautological pair
+`restrict (t ≫ levelSpaceΓι) tautPt₁/₂` generates the `N`-torsion of the ambient fibre
+`E.Point ((t ≫ levelSpaceΓι) ≫ tautBase)`. This is the form consumed by the group core
+`comb_ne_zero_of_generates`. -/
+theorem taut_generates_restrict (hN : NIsInvertible S N) (k : Type u) [Field k] [IsAlgClosed k]
+    (t : Spec (CommRingCat.of k) ⟶ levelSpaceΓ E N) :
+    ∀ x : E.Point ((t ≫ levelSpaceΓι E N) ≫ tautBase E N), (N : ℤ) • x = 0 →
+      x ∈ AddSubgroup.closure
+        {Point.restrict E (t ≫ levelSpaceΓι E N) (tautPt₁ E N),
+         Point.restrict E (t ≫ levelSpaceΓι E N) (tautPt₂ E N)} := by
+  set σ := levelSpaceΓι E N ≫ tautBase E N with hσ
+  set Ψ : (E.baseChange σ).Point t ≃+ E.Point ((t ≫ levelSpaceΓι E N) ≫ tautBase E N) :=
+    (Point.baseChangeEquiv E σ t).trans
+      (Point.castBase E (Category.assoc t (levelSpaceΓι E N) (tautBase E N)).symm) with hΨ
+  -- `Ψ` carries the base-change generators to the restricted tautological points
+  have hΨ₁ : Ψ (Point.pull (E.baseChange σ) t
+      (Point.asSection E σ (Point.restrict E (levelSpaceΓι E N) (tautPt₁ E N))))
+      = Point.restrict E (t ≫ levelSpaceΓι E N) (tautPt₁ E N) := by
+    apply Subtype.ext
+    rw [hΨ, AddEquiv.trans_apply, Point.castBase_coe, Point.baseChangeEquiv_apply_coe]
+    show (t ≫ (Point.asSection E σ (Point.restrict E (levelSpaceΓι E N) (tautPt₁ E N))).1)
+        ≫ pullback.fst E.π σ = (t ≫ levelSpaceΓι E N) ≫ (tautPt₁ E N).1
+    rw [Category.assoc, Point.asSection_val_fst]
+    exact (Category.assoc _ _ _).symm
+  have hΨ₂ : Ψ (Point.pull (E.baseChange σ) t
+      (Point.asSection E σ (Point.restrict E (levelSpaceΓι E N) (tautPt₂ E N))))
+      = Point.restrict E (t ≫ levelSpaceΓι E N) (tautPt₂ E N) := by
+    apply Subtype.ext
+    rw [hΨ, AddEquiv.trans_apply, Point.castBase_coe, Point.baseChangeEquiv_apply_coe]
+    show (t ≫ (Point.asSection E σ (Point.restrict E (levelSpaceΓι E N) (tautPt₂ E N))).1)
+        ≫ pullback.fst E.π σ = (t ≫ levelSpaceΓι E N) ≫ (tautPt₂ E N).1
+    rw [Category.assoc, Point.asSection_val_fst]
+    exact (Category.assoc _ _ _).symm
+  intro x hx
+  have hx' : (N : ℤ) • Ψ.symm x = 0 := by rw [← map_zsmul, hx, map_zero]
+  have hmem := taut_generates_over_levelSpaceΓ E N hN k t (Ψ.symm x) hx'
+  -- the base-change generators land in the preimage of the target closure
+  have hle : AddSubgroup.closure
+        {Point.pull (E.baseChange σ) t
+            (Point.asSection E σ (Point.restrict E (levelSpaceΓι E N) (tautPt₁ E N))),
+          Point.pull (E.baseChange σ) t
+            (Point.asSection E σ (Point.restrict E (levelSpaceΓι E N) (tautPt₂ E N)))}
+      ≤ (AddSubgroup.closure
+          {Point.restrict E (t ≫ levelSpaceΓι E N) (tautPt₁ E N),
+           Point.restrict E (t ≫ levelSpaceΓι E N) (tautPt₂ E N)}).comap Ψ.toAddMonoidHom := by
+    rw [AddSubgroup.closure_le]
+    intro z hz
+    rw [SetLike.mem_coe, AddSubgroup.mem_comap, AddEquiv.coe_toAddMonoidHom]
+    rcases (by simpa using hz : z = _ ∨ z = _) with rfl | rfl
+    · rw [hΨ₁]; exact AddSubgroup.subset_closure (Set.mem_insert _ _)
+    · rw [hΨ₂]; exact AddSubgroup.subset_closure (Set.mem_insert_of_mem _ rfl)
+  have hfin := hle hmem
+  rwa [AddSubgroup.mem_comap, AddEquiv.coe_toAddMonoidHom, Ψ.apply_symm_apply] at hfin
+
 /-- **[YF-⊆] — GATE (reduced-fibre distinctness, KM 3.7.1).** The image of the full-level
 closed immersion `levelSpaceΓι` lies in `fullLevelOpens`. At a full-level point the tautological
 pair generates `E[N]` fibrewise (`levelSpaceΓ_spec` over `κ(p)`), and for `N` invertible `E[N]`
@@ -331,10 +388,61 @@ theorem range_levelSpaceΓι_subset (hN : NIsInvertible S N) :
   show w ∈ fullLevelOpenSet E N hN
   rw [fullLevelOpenSet, Set.mem_compl_iff, Set.mem_iUnion₂]
   rintro ⟨cd, hcd, hmem⟩
-  -- `hw : w ∈ range levelSpaceΓι.base`, `hmem : w ∈ pointVanishSet (combPoint cd.1 cd.2)`,
-  -- `hcd : cd ≠ 0`. The geometric point at `w` factors through both closed immersions
-  -- `levelSpaceΓι` (⟹ generation ⟹ combPoint ≠ 0) and the agreement locus (⟹ combPoint = 0).
-  sorry
+  set fw := (pullback (E.torsionπ N) (E.torsionπ N)).fromSpecResidueField w with hfw
+  -- Part 1: `combPoint (cd.1) (cd.2)` agrees with `0` after `fw` (the geometric point at `w`
+  -- factors through the agreement locus, which is a closed immersion).
+  have hzero : fw ≫ (E.combPoint N (cd.1 : ℤ) (cd.2 : ℤ)).1
+      = fw ≫ ((0 : E.Point (E.tautBase N)) : _ ⟶ E.E) := by
+    rw [pointVanishSet] at hmem
+    obtain ⟨sA, hsA⟩ := AlgebraicGeometry.exists_fromSpecResidueField_factor _ w hmem
+    have h := congrArg (sA ≫ ·) (AlgebraicGeometry.agreementι_comp_eq (E.torsionπ N)
+      (E.pointToTorsion (E.combPoint N (cd.1 : ℤ) (cd.2 : ℤ)) (combPoint_killed E N _ _))
+      (E.pointToTorsion 0 (E.zeroPoint_comp_mulByHom N (E.tautBase N)))
+      (by rw [E.pointToTorsion_torsionπ, E.pointToTorsion_torsionπ]))
+    rw [← Category.assoc, ← Category.assoc, hsA] at h
+    have h2 := congrArg (· ≫ E.torsionι N) h
+    rwa [Category.assoc, Category.assoc, E.pointToTorsion_torsionι,
+      E.pointToTorsion_torsionι] at h2
+  -- Part 2: the taut pair generates at `w`, so no nonzero combination vanishes — contradiction.
+  -- Factor `fw` through the full-level closed immersion `levelSpaceΓι` (its range contains `w`).
+  haveI : IsClosedImmersion (levelSpaceΓι E N) :=
+    inferInstanceAs (IsClosedImmersion (Scheme.IdealSheafData.subschemeι _))
+  obtain ⟨s, hs⟩ := AlgebraicGeometry.exists_fromSpecResidueField_factor (levelSpaceΓι E N) w hw
+  -- pass to an algebraically closed geometric point over `w`
+  set k : Type u :=
+    AlgebraicClosure ↑((pullback (E.torsionπ N) (E.torsionπ N)).residueField w) with hk
+  set π : Spec (CommRingCat.of k) ⟶
+      Spec ((pullback (E.torsionπ N) (E.torsionπ N)).residueField w) :=
+    Spec.map (CommRingCat.ofHom (algebraMap
+      ↑((pullback (E.torsionπ N) (E.torsionπ N)).residueField w) k)) with hπ
+  set t : Spec (CommRingCat.of k) ⟶ levelSpaceΓ E N := π ≫ s with ht_def
+  have ht : t ≫ levelSpaceΓι E N = π ≫ fw := by rw [ht_def, Category.assoc, hs]
+  -- `N` is invertible in `k`
+  have hNk : (N : k) ≠ 0 := by
+    refine (nIsInvertible_spec_iff k N).mp ?_
+    have h := hN.map ((t ≫ (levelSpaceΓι E N ≫ tautBase E N)).appTop).hom
+    rwa [map_natCast] at h
+  -- the restricted tautological points at the geometric point over `w` are `N`-killed
+  have hAtor : (N : ℤ) • Point.restrict E (t ≫ levelSpaceΓι E N) (tautPt₁ E N) = 0 := by
+    rw [← E.restrict_zsmul, tautPt₁_smul_eq_zero, restrict_zero]
+  have hBtor : (N : ℤ) • Point.restrict E (t ≫ levelSpaceΓι E N) (tautPt₂ E N) = 0 := by
+    rw [← E.restrict_zsmul, tautPt₂_smul_eq_zero, restrict_zero]
+  -- `cd ≠ 0` gives nonzero coefficients
+  have hne : ¬((cd.1 : ℕ) = 0 ∧ (cd.2 : ℕ) = 0) := by
+    rintro ⟨h1, h2⟩
+    exact hcd (Prod.ext_iff.mpr ⟨Fin.val_eq_zero_iff.mp h1, Fin.val_eq_zero_iff.mp h2⟩)
+  -- the group core: the nonzero combination is nonzero — but `hzero` forces it to vanish
+  apply E.comb_ne_zero_of_generates hNk hAtor hBtor
+    (taut_generates_restrict E N hN k t) cd.1.isLt cd.2.isLt hne
+  rw [← E.restrict_zsmul, ← E.restrict_zsmul, ← E.restrict_add,
+    show (0 : E.Point ((t ≫ levelSpaceΓι E N) ≫ tautBase E N))
+        = Point.restrict E (t ≫ levelSpaceΓι E N) (0 : E.Point (tautBase E N)) from
+      (E.restrict_zero (t ≫ levelSpaceΓι E N)).symm]
+  apply Subtype.ext
+  show (t ≫ levelSpaceΓι E N) ≫ (E.combPoint N (cd.1 : ℤ) (cd.2 : ℤ)).1
+      = (t ≫ levelSpaceΓι E N) ≫ ((0 : E.Point (tautBase E N)) : _ ⟶ E.E)
+  rw [ht, Category.assoc, Category.assoc]
+  exact congrArg (π ≫ ·) hzero
 
 /-- **[YF-CLOPEN].** For `N` invertible the full-level closed immersion `levelSpaceΓι` is an
 **open immersion**: its image lies in the open `fullLevelOpens` (`[YF-⊆]`), over which the
