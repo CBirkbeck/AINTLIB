@@ -2275,6 +2275,17 @@ T-E15's ℰ₃), [a5-i] is trivial and [a5-ii] simplifies to one base-change poi
   same commit). ω never needs `Ω¹`: the object is DEFINED by its chart presentation
   (transitions = comparison-VC units, Silverman III Table 1.2), which is exactly what
   every consumer quantifies over.
+- **★★ R1 PIPELINE COMPLETE (2026-07-13, STREAM-OMEGA).** All of T-OM-A1..A7 (File A),
+  T-OM-B1..B6+B8 (File B), T-OM-B7 (File C) **DONE — all three files SORRY-FREE,
+  axiom-standard** (`omegaModules_isInvertible`, `OmegaBasis.existsUnique_unit_smul`,
+  `omegaBasisMap{,_smul,_id,_comp}`, `negModelHom_eq_negVC` all verified). Deliverables:
+  **ω2** — `omegaModules : S.Modules` invertible (shared `Picard` predicate, v10.180
+  steer conformant); **ω3** — `OmegaBasis` 𝔾ₘ-torsor (KM 4.6.2 "S-basis of ω");
+  **ω4** — `omegaBasisMap` contravariantly functorial + unit-equivariant;
+  **ω5-core** — `negVC_u : u = −1`. **T-E12 / T-E13 / T-E14 (Legendre) statements are
+  UNBLOCKED** — the shared `representable_iff` engine's ω-prerequisite is met; T-E14's
+  remaining own-work = the `{±1}`-action bundle + rigidity (its decomposition).
+  Next (G6): statement skeletons in `Moduli/Bootstrap.lean`.
 
 ### [T-OM] T-E-OMEGA R1 work tickets (STREAM-OMEGA, 2026-07-13 — details in decomposition-omega-r1.md)
 Ordered leaves; Status legend: open / in_progress / done. File A =
@@ -2334,22 +2345,26 @@ adjudicates.
   "S-basis of ω_{E/S}" = `OmegaBasis`, unique-unit-transitive). T-E12/T-E13 statability
   ingredients ready; T-E14 needs B7 (ω4 functoriality) — next.
 - **[T-OM-B7 ★★]** `omegaCompat` + `omegaBasisMap` + `_id`/`_comp`/`_smul` —
-  **CORE DONE (2026-07-13, OMEGA; `_comp` in flight)**: `pulledCocycle_res` (pullback of
-  the ω-cocycle = transition units of transported charts, pointwise affine refinement),
-  `omegaCompat` (mixed comparison as `UnitCocycle.Compat`, laws by affine separation),
-  **`omegaBasisMap` SORRY-FREE + axiom-clean** (= ω4: bases transport along every
-  `(Ell/R)`-morphism), `_smul` (the KM 4.6.2 `{±1}`-transport with `negVC_u`), `_id`
-  (via `omegaCompat_id_w`: the 𝟙-comparison IS the cocycle). Supporting: ALL FIVE
-  transport/restriction coherences proven in File B (restrict∘restrict,
-  restrict∘transport, transport∘restrict, transport∘transport, + `transVC_congr`).
-  REMAINING: `omegaBasisMap_comp` (plan in sentinel: `omegaCompat_comp_w` via
-  `unit_ext_of_res_cover` mirroring `pulledCocycle_res`, then per-piece double-cover).
-  T-E12/T-E13 statable NOW (need only ω2+ω3+ω4-map); T-E14's functor-bundle wants
-  `_comp`.
-- **[T-OM-B8]** `negVC` + `negVC_smul` + `negModelHom_eq_negVC` — **open** · File B ·
-  standalone (ModelVariableChange/GroupLawConstruction level). ω5's `{±1}`
-  identification; full "inversion-EllHom acts by −1 on `OmegaBasis`" deliberately
-  DEFERRED to T-E14's decomposition (needs `invOver` chart lemmas; record as T-E14 dep).
+  **★★ DONE (2026-07-13, OMEGA) — THE ω4 MILESTONE; T-E-OMEGA R1 PIPELINE COMPLETE.**
+  `Moduli/OmegaFunctor.lean` **SORRY-FREE**; `omegaBasisMap_comp` / `_id` / `_smul`
+  axioms = standard 3 (verified via fresh-env `#print axioms`). Content:
+  `pulledCocycle_res` (pullback of the ω-cocycle = transition units of transported
+  charts, pointwise affine refinement), `omegaCompat` (mixed comparison as
+  `UnitCocycle.Compat`, laws by affine separation), `omegaBasisMap` (= ω4: bases
+  transport along every `(Ell/R)`-morphism), `_smul` (the KM 4.6.2 `{±1}`-transport
+  with `negVC_u`), `_id` (via `omegaCompat_id_w`), and `_comp` via
+  `omegaCompat_comp_w_val` — the cocycle condition of ω-functoriality (stated over
+  arbitrary opens, proven by pointwise `W'`-refinement through `transUnit_transport`/
+  `transUnit_trans`/`transUnit_congr`) — assembled per-piece over the double chart
+  cover with `appLE_comp_appLE` for the pulled-basis factor. Supporting: ALL FIVE
+  transport/restriction coherences in File B. **CONSEQUENCE: ω-rigidified moduli
+  problems are functors on `(Ell/R)ᵒᵖ` — T-E12, T-E13, T-E14 (Legendre) all statable
+  NOW.** The shared representability engine's ω-gate is DISCHARGED.
+- **[T-OM-B8]** `negVC` + `negVC_u` + `negModelHom_eq_negVC` — **done (2026-07-13,
+  OMEGA)** · File B (sorry-free, axiom-verified). ω5's `{±1}` identification: the
+  inversion variable-change has `u = −1`, so it acts on ω-bases by `−1` chartwise.
+  Full "inversion-EllHom acts by −1 on `OmegaBasis`" deliberately DEFERRED to T-E14's
+  decomposition (needs `invOver` chart lemmas; recorded as T-E14 dep).
 
 ### [T-E12] `M₁ = Spec ℤ[1/6, g₂, g₃, Δ⁻¹]` represents `(E, ω)` (GME Thm 2.2.3)
 - **Status**: open, **blocked on [T-E-OMEGA]** · **File**: Moduli/Bootstrap.lean (no decl

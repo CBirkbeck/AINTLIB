@@ -140,6 +140,11 @@ Pins (consumers may use ONLY these): `omegaModules` + `omegaModules_isInvertible
 uniqueness (1b + `projModelVCIso_{one,mul,map,injective}`) + `Scheme.exists_unit_glue`;
 NO new axioms, target = sorry-free within the T-E-OMEGA stream (same marathon).
 
+**DS-OMEGA DISCHARGED (2026-07-13, same marathon, ★★).** Every def-sorry in the table
+above is proven; all three files are sorry-free and every pin above is axiom-verified
+(standard 3). The register block is retained as the pin list (consumer contract) only —
+no open data-sorries remain in the T-E-OMEGA stream.
+
 ## The BLACK-BOX REGISTER — **RR-ONLY** (owner directive, 2026-07-05)
 
 **Standing black box (the only one):**
