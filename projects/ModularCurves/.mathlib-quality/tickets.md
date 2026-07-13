@@ -18721,3 +18721,20 @@ open image? or template windowHom route), tripleIso, GlueData, pins. (STREAM-G0)
   API), **#5882** (cleanup: shared-Picard reconciliation + consumer cross-linking). Tracking epic
   **#5885** (coordinator:todo) maps tranches 1/2/3 (tranche 2 = fibrewise⟺LW converse, `Comparison.lean`;
   tranche 3 = Pic⁰ dual-pullback `DualRestrict`/`DualPullback` — reconcile-heavy, coordinator-integrated).
+
+### v10.194-G0 — ★ [HG-C4c-2] S2⟹+S3+S4-K1: the glue π's kernel pair IS the translation groupoid (STREAM-G0)
+SubgroupQuotientGlue.lean (all green): `exists_orbit_of_localQuotientOpenπ_eq` (S2⟹ — KP point
+transport through the tensor swap + C4b bridges) · S3 saturation layer (`imageOpens` open via
+Flat.isQuotientMap_of_surjective + orbit saturation; `windowIso` via Scheme.Pullback.range_fst;
+`restrictedπ` corestriction with Flat/Surjective/QuasiCompact by base change) · **S4 keystone
+`isKernelPair_localQuotientOpenπ`: IsKernelPair (π_glue) (restrictedAction) (restrictedProj)** —
+one `IsPullback.of_iso'` transport of isKernelPair_specEqualizerπ along chartTensorIso
+(= chartPullbackIso ≪≫ chartSpecIso ≪≫ specSwapIso), sides isoSpec, tip localQuotientOpenIso; the
+two leg squares are the composed C4b bridges (spec_coactionRing_isoSpec_inv + swap;
+chartPullbackIso_inv_restrictedProj + chartSpecIso_inv_snd + swap). CONSEQUENCE: descent of
+morphisms along `restrictedπ` (EffectiveEpi via mathlib fpqc: flat+surj+qc) with the pair-condition
+checked on the GROUPOID — the glue transitions need no intersection quotients at all (V_ij :=
+imageOpens; t via desc of the cross-chart window iso ≫ restrictedπ_j; invariance =
+restrictedAction_localQuotientOpenπ on the OTHER patch through E-level point matching).
+NEXT: EffectiveEpi instances + descRestrictedπ + windowCrossIso + desc_condition_cross → GlueData →
+quotientπ + universal property → pins (option-γ). (STREAM-G0)
