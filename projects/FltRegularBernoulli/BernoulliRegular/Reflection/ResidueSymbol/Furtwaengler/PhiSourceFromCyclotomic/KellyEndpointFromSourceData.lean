@@ -94,9 +94,9 @@ theorem reciprocalPhiCandidate_conj_mul_self_eq_absNorm_pow_cyclotomic
         (ℓ := ℓ) (p := p) (k := 𝓞 K ⧸ P) (K := K) (R' := R') S h_ne_zero =
         (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
-  haveI : NumberField.IsCMField R' :=
+  have : NumberField.IsCMField R' :=
     isCMField_of_cyclotomicExtension_pair_primes (p := p) (ℓ := ℓ) hpℓ
   let σ : 𝓞 R' →+* 𝓞 R' :=
     (NumberField.IsCMField.ringOfIntegersComplexConj R').toRingEquiv.toRingHom
@@ -194,7 +194,7 @@ theorem ofReciprocalPhiCandidateAtomicSplit_gamma_facts_cyclotomic
           h_descentPrime h_ne_zero h_exp he hf).gamma =
           (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   refine ⟨?_, ?_⟩
   · simpa using
@@ -266,7 +266,7 @@ theorem ofReciprocalPhiCandidateAtomicSplit_symbol_pos_cyclotomic_sourceCoprime
   letI : P.IsPrime := (show P.IsMaximal from inferInstance).isPrime
   letI : P'.IsPrime := hP'_prime
   letI : P'.IsMaximal := Ideal.IsPrime.isMaximal hP'_prime hP'_bot
-  let h_span :
+  have h_span :
       Ideal.span ({reciprocalPhiCandidate
           (ℓ := ℓ) (p := p) (k := 𝓞 K ⧸ P) (K := K) (R' := R') S h_ne_zero} :
             Set (𝓞 K)) =
@@ -369,7 +369,7 @@ theorem K2_2SourceData_phi_facts_at_targetData
       NumberField.IsCMField.ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
         (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p ∧
       PhiPrimeSymbolIdentity (p := p) (K := K) D.phi Q := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   obtain ⟨h_semi, h_norm⟩ :=
     K2_2SourceData_phi_facts_cyclotomic (ℓ := ℓ) (p := p) (K := K) (R' := R')
@@ -442,7 +442,7 @@ theorem K2_2ReciprocalSourceData_phi_facts_at_targetData
       NumberField.IsCMField.ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
         (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p ∧
       PhiPrimeSymbolIdentityPos (p := p) (K := K) D.phi Q := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   obtain ⟨h_semi, h_norm⟩ :=
     K2_2ReciprocalSourceData_phi_facts_cyclotomic
