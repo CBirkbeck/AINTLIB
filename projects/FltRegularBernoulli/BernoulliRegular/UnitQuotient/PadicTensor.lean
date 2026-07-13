@@ -22,12 +22,11 @@ infrastructure:
 * The natural ℤ_[p]-module structure (via the right tensor factor).
 * Δ-action lifted from `cyclotomicUnitFreePartLinearEquiv` via `LinearMap.rTensor`.
 
-Downstream tickets will build the Δ-character idempotent decomposition
-and the rank-1 eigenspace identification at `χ = ω^i`.
+The Δ-character idempotent decomposition and the rank-1 eigenspace identification
+at `χ = ω^i` are built on top of this.
 
 ## References
 
-* Reviewer guidance, 2026-05-07 (Q1 eigenspace iso direct construction).
 * Washington, *Introduction to Cyclotomic Fields* §5.1 (cyclotomic unit
   log embeddings + Dirichlet).
 -/
@@ -40,6 +39,10 @@ open NumberField TensorProduct
 
 namespace BernoulliRegular
 
+-- Hides 6 warnings: several theorems below do not use `[NumberField K]` /
+-- `[IsCyclotomicExtension {p} ℚ K]`. Removing it needs `omit`, which drops those binders and so
+-- changes the statements — that is generalisation work (see the linter-suppression census),
+-- not cleanup.
 set_option linter.unusedSectionVars false
 
 variable (p : ℕ) [Fact p.Prime]
@@ -187,7 +190,7 @@ since `Fintype.card (CyclotomicUnitDelta p) = p - 1`. The unit-status follows
 from `Nat.Coprime p (p-1)` ⟹ `‖((p-1 : ℕ) : ℤ_[p])‖ = 1`. -/
 noncomputable instance instInvertibleCardCyclotomicUnitDeltaPadic :
     Invertible ((Fintype.card (CyclotomicUnitDelta p) : ℤ_[p])) := by
-  haveI hp_prime := (Fact.out : p.Prime)
+  have hp_prime := (Fact.out : p.Prime)
   have h_card : (Fintype.card (CyclotomicUnitDelta p) : ℕ) = p - 1 := by
     change Fintype.card (ZMod p)ˣ = p - 1
     rw [ZMod.card_units]
@@ -202,7 +205,7 @@ noncomputable instance instInvertibleCardCyclotomicUnitDeltaPadic :
   have h_unit : IsUnit (((p - 1 : ℕ) : ℤ_[p])) :=
     PadicInt.isUnit_iff.mpr h_norm
   -- Cast and rewrite via h_card.
-  haveI : Invertible (((p - 1 : ℕ) : ℤ_[p])) := h_unit.invertible
+  have : Invertible (((p - 1 : ℕ) : ℤ_[p])) := h_unit.invertible
   rw [show (Fintype.card (CyclotomicUnitDelta p) : ℤ_[p]) = ((p - 1 : ℕ) : ℤ_[p]) from by
     rw [h_card]]
   infer_instance
@@ -267,7 +270,8 @@ def cyclotomicUnitFreePartModPClassLinear :
       c • cyclotomicUnitFreePartModPClass (p := p) K v
     exact (cyclotomicUnitFreePartModPClass (p := p) K).map_zsmul c v
 
-/-- The **mod-p reduction tensor** `ℤ_[p] ⊗[ℤ] FreePart K →ₗ[ℤ] ℤ_[p] ⊗[ℤ] FreePartModP K`,
+/-- The **mod-p reduction tensor**
+`ℤ_[p] ⊗[ℤ] FreePart K →ₗ[ℤ] ℤ_[p] ⊗[ℤ] FreePartModP K`,
 sending `z ⊗ v ↦ z ⊗ [v]` (mod-p class on the right factor only). -/
 noncomputable def cyclotomicUnitFreePartPadicReduceRight :
     CyclotomicUnitFreePartPadic (p := p) K →ₗ[ℤ]
@@ -312,19 +316,19 @@ noncomputable def cyclotomicUnitFreePartModPSmulFromTensor :
     TensorProduct ℤ (ZMod p) (CyclotomicUnitFreePartModP (p := p) K) →ₗ[ℤ]
       CyclotomicUnitFreePartModP (p := p) K :=
   TensorProduct.lift {
-    toFun := fun c => {
-      toFun := fun x => c • x
-      map_add' := fun x y => smul_add c x y
-      map_smul' := fun n x => by
+    toFun := fun c ↦ {
+      toFun := fun x ↦ c • x
+      map_add' := fun x y ↦ smul_add c x y
+      map_smul' := fun n x ↦ by
         change c • ((n : ℤ) • x) = (n : ℤ) • (c • x)
         rw [smul_comm]
     }
-    map_add' := fun c d => by
+    map_add' := fun c d ↦ by
       apply LinearMap.ext
       intro x
       change (c + d) • x = c • x + d • x
       exact add_smul c d x
-    map_smul' := fun n c => by
+    map_smul' := fun n c ↦ by
       apply LinearMap.ext
       intro x
       change ((n : ℤ) • c) • x = (n : ℤ) • (c • x)
@@ -521,13 +525,13 @@ theorem cyclotomicUnitFreePartPadicCharacterProjector_mem_eigenspace
     cyclotomicUnitFreePartPadicCharacterProjector (p := p) K χ x ∈
       cyclotomicUnitFreePartPadicCharacterEigenspace (p := p) K χ := by
   classical
-  haveI hp_prime := (Fact.out : p.Prime)
-  haveI : NeZero p := ⟨hp_prime.ne_zero⟩
-  haveI : HasEnoughRootsOfUnity ℤ_[p] (Monoid.exponent (CyclotomicUnitDelta p)) :=
+  have hp_prime := (Fact.out : p.Prime)
+  have : NeZero p := ⟨hp_prime.ne_zero⟩
+  have : HasEnoughRootsOfUnity ℤ_[p] (Monoid.exponent (CyclotomicUnitDelta p)) :=
     exponent_zmod_units (p := p) ▸ inferInstance
-  haveI : Invertible (2 : ℤ_[p]) := by
+  have : Invertible (2 : ℤ_[p]) := by
     have h_cop : p.Coprime 2 :=
-      (Nat.Prime.coprime_iff_not_dvd hp_prime).mpr (fun h => by
+      (Nat.Prime.coprime_iff_not_dvd hp_prime).mpr (fun h ↦ by
         have := Nat.le_of_dvd (by norm_num) h; omega)
     have h_norm : ‖((2 : ℕ) : ℤ_[p])‖ = 1 := PadicInt.norm_natCast_eq_one_iff.mpr h_cop
     have h_unit : IsUnit (((2 : ℕ) : ℤ_[p])) := PadicInt.isUnit_iff.mpr h_norm
@@ -545,7 +549,6 @@ theorem cyclotomicUnitFreePartPadicCharacterProjector_mem_eigenspace
   rw [map_smul]
   rfl
 
-set_option maxHeartbeats 800000 in -- slow elaboration
 open MonoidAlgebra in
 /-- **Reduction commutes with `Representation.asAlgebraHom (single g 1)`**:
 on basis monomial elements of the group algebra, the Padic representation
@@ -579,7 +582,6 @@ theorem cyclotomicUnitFreePartPadicReduceModP_asAlgebraHom_smul_single_compat
   rw [cyclotomicUnitFreePartPadicReduceModP_smul_compat]
   rw [cyclotomicUnitFreePartPadicReduceModP_asAlgebraHom_single_compat]
 
-set_option maxHeartbeats 1600000 in -- slow elaboration
 /-- **Reduction commutes with the sum `Σ_g χ(g) • asAlgebraHom (single g⁻¹ 1)`**:
 the linear extension of the per-summand compat to the full sum that defines
 the character idempotent. -/
@@ -595,7 +597,7 @@ theorem cyclotomicUnitFreePartPadicReduceModP_asAlgebraHom_sum_compat
           (MonoidAlgebra.single g⁻¹ (1 : ZMod p))
           (cyclotomicUnitFreePartPadicReduceModP (p := p) K x) := by
   rw [map_sum]
-  refine Finset.sum_congr rfl fun g _ => ?_
+  refine Finset.sum_congr rfl fun g _ ↦ ?_
   exact cyclotomicUnitFreePartPadicReduceModP_asAlgebraHom_smul_single_compat
     (p := p) K g⁻¹ (χ g) x
 
@@ -607,7 +609,7 @@ theorem invOf_eq_invOf_of_eq {R : Type*} [Monoid R] {a b : R}
     (h : a = b) (ia : Invertible a) (ib : Invertible b) :
     @Invertible.invOf R _ _ a ia = @Invertible.invOf R _ _ b ib := by
   subst h
-  exact congrArg (fun i => @Invertible.invOf R _ _ a i) (Subsingleton.elim ia ib)
+  exact congrArg (fun i ↦ @Invertible.invOf R _ _ a i) (Subsingleton.elim ia ib)
 
 /-- **Scalar identity for the cardinality inverse** under `PadicInt.toZMod`:
 the image of `⅟(|Δ| : ℤ_[p])` in `ZMod p` equals `⅟(|Δ| : ZMod p)`. The proof
@@ -619,9 +621,9 @@ theorem cyclotomicUnitDeltaCard_invOf_toZMod (hp_gt_two : 2 < p) :
     PadicInt.toZMod (p := p) (⅟((Fintype.card (CyclotomicUnitDelta p) : ℤ_[p]))) =
       letI := cyclotomicUnitDeltaCardInvertibleZMod (p := p) hp_gt_two
       ⅟((Fintype.card (CyclotomicUnitDelta p) : ZMod p)) := by
-  letI iZ : Invertible ((Fintype.card (CyclotomicUnitDelta p) : ZMod p)) :=
+  let iZ : Invertible ((Fintype.card (CyclotomicUnitDelta p) : ZMod p)) :=
     cyclotomicUnitDeltaCardInvertibleZMod (p := p) hp_gt_two
-  letI iM : Invertible (PadicInt.toZMod (p := p)
+  let iM : Invertible (PadicInt.toZMod (p := p)
       ((Fintype.card (CyclotomicUnitDelta p) : ℤ_[p]))) :=
     Invertible.map (PadicInt.toZMod (p := p))
       ((Fintype.card (CyclotomicUnitDelta p) : ℤ_[p]))
@@ -629,7 +631,6 @@ theorem cyclotomicUnitDeltaCard_invOf_toZMod (hp_gt_two : 2 < p) :
   refine invOf_eq_invOf_of_eq ?_ iM iZ
   exact map_natCast (PadicInt.toZMod (p := p)) _
 
-set_option maxHeartbeats 1600000 in -- large projector simp traversal
 /-- **Full projector compatibility**: the mod-p reduction map intertwines the
 Padic character idempotent at `χ` with the mod-p character idempotent at
 `χ.padicToZMod`. This is the gating step for surjectivity of the Padic
@@ -644,7 +645,7 @@ theorem cyclotomicUnitFreePartPadicReduceModP_projector_compat
         (MulChar.padicToZMod (p := p) χ)
         (cyclotomicUnitFreePartPadicReduceModP (p := p) K x) := by
   classical
-  letI : Invertible ((Fintype.card (CyclotomicUnitDelta p) : ZMod p)) :=
+  let : Invertible ((Fintype.card (CyclotomicUnitDelta p) : ZMod p)) :=
     cyclotomicUnitDeltaCardInvertibleZMod (p := p) hp_gt_two
   unfold cyclotomicUnitFreePartPadicCharacterProjector
     cyclotomicUnitFreePartModPDeltaCharacterProjector
@@ -654,7 +655,7 @@ theorem cyclotomicUnitFreePartPadicReduceModP_projector_compat
   simp only [map_sum, map_smul, LinearMap.sum_apply, LinearMap.smul_apply]
   rw [cyclotomicUnitDeltaCard_invOf_toZMod (p := p) hp_gt_two]
   congr 1
-  refine Finset.sum_congr rfl fun g _ => ?_
+  refine Finset.sum_congr rfl fun g _ ↦ ?_
   rw [MulChar.padicToZMod_apply]
   exact cyclotomicUnitFreePartPadicReduceModP_asAlgebraHom_smul_single_compat
     (p := p) K g⁻¹ (χ g) x
@@ -675,7 +676,7 @@ theorem cyclotomicUnitFreePartPadicReduceModP_eigenspace_surjective
       x ∈ cyclotomicUnitFreePartPadicCharacterEigenspace (p := p) K χ ∧
         cyclotomicUnitFreePartPadicReduceModP (p := p) K x = y := by
   classical
-  letI : Invertible ((Fintype.card (CyclotomicUnitDelta p) : ZMod p)) :=
+  let : Invertible ((Fintype.card (CyclotomicUnitDelta p) : ZMod p)) :=
     cyclotomicUnitDeltaCardInvertibleZMod (p := p) hp_gt_two
   obtain ⟨z, hz⟩ := cyclotomicUnitFreePartPadicReduceModP_surjective (p := p) K y
   refine ⟨cyclotomicUnitFreePartPadicCharacterProjector (p := p) K χ z,
@@ -739,7 +740,7 @@ theorem cyclotomicUnitFreePartPadicReduceModP_ker_eq_pSmul
     conv_lhs => rw [← bV.linearCombination_repr x]
     rw [Finsupp.linearCombination_apply, Finsupp.sum_fintype _ _ (by simp)]
     rw [map_sum]
-    refine Finset.sum_congr rfl fun i _ => ?_
+    refine Finset.sum_congr rfl fun i _ ↦ ?_
     rw [cyclotomicUnitFreePartPadicReduceModP_smul_compat, h_red_basis]
   -- Step 3: each coefficient is zero, hence each bV.repr x i ∈ (p).
   rw [h_red_x] at hx
@@ -767,7 +768,7 @@ theorem cyclotomicUnitFreePartPadicReduceModP_ker_eq_pSmul
   rw [Finset.smul_sum]
   conv_rhs => rw [← bV.linearCombination_repr x]
   rw [Finsupp.linearCombination_apply, Finsupp.sum_fintype _ _ (by simp)]
-  refine Finset.sum_congr rfl fun i _ => ?_
+  refine Finset.sum_congr rfl fun i _ ↦ ?_
   rw [smul_smul, ← hc i]
 
 /-- **Eigenspace kernel**: for `x` in the Padic χ-eigenspace with `red x = 0`,
@@ -783,13 +784,13 @@ theorem cyclotomicUnitFreePartPadicReduceModP_eigenspace_ker_eq_pSmul
     ∃ y ∈ cyclotomicUnitFreePartPadicCharacterEigenspace (p := p) K χ,
       ((p : ℕ) : ℤ_[p]) • y = x := by
   classical
-  haveI hp_prime := (Fact.out : p.Prime)
-  haveI : NeZero p := ⟨hp_prime.ne_zero⟩
-  haveI : HasEnoughRootsOfUnity ℤ_[p] (Monoid.exponent (CyclotomicUnitDelta p)) :=
+  have hp_prime := (Fact.out : p.Prime)
+  have : NeZero p := ⟨hp_prime.ne_zero⟩
+  have : HasEnoughRootsOfUnity ℤ_[p] (Monoid.exponent (CyclotomicUnitDelta p)) :=
     exponent_zmod_units (p := p) ▸ inferInstance
-  haveI : Invertible (2 : ℤ_[p]) := by
+  have : Invertible (2 : ℤ_[p]) := by
     have h_cop : p.Coprime 2 :=
-      (Nat.Prime.coprime_iff_not_dvd hp_prime).mpr (fun h => by
+      (Nat.Prime.coprime_iff_not_dvd hp_prime).mpr (fun h ↦ by
         have := Nat.le_of_dvd (by norm_num) h; omega)
     have h_norm : ‖((2 : ℕ) : ℤ_[p])‖ = 1 := PadicInt.norm_natCast_eq_one_iff.mpr h_cop
     have h_unit : IsUnit (((2 : ℕ) : ℤ_[p])) := PadicInt.isUnit_iff.mpr h_norm
@@ -835,11 +836,11 @@ def cyclotomicUnitFreePartPadicReduceModP_eigenspaceHom
     cyclotomicUnitFreePartPadicCharacterEigenspace (p := p) K χ →+
       cyclotomicUnitFreePartModPDeltaCharacterEigenspace_local (p := p) K
         (MulChar.padicToZMod (p := p) χ) where
-  toFun := fun ⟨x, hx⟩ =>
+  toFun := fun ⟨x, hx⟩ ↦
     ⟨cyclotomicUnitFreePartPadicReduceModP (p := p) K x,
       cyclotomicUnitFreePartPadicReduceModP_eigenspace_mem (p := p) K χ hx⟩
   map_zero' := Subtype.ext (map_zero _)
-  map_add' := fun x y => Subtype.ext (map_add _ x.1 y.1)
+  map_add' := fun x y ↦ Subtype.ext (map_add _ x.1 y.1)
 
 /-- **Eigenspace reduction is surjective**: the AddMonoidHom form. -/
 theorem cyclotomicUnitFreePartPadicReduceModP_eigenspaceHom_surjective
@@ -898,7 +899,7 @@ theorem cyclotomicUnitFreePartPadicCharacterEigenspace_finrank
   set bV := Module.Free.chooseBasis ℤ_[p] V_p_chi
   set red_eig := cyclotomicUnitFreePartPadicReduceModP_eigenspaceHom (p := p) K χ
   set bW_cand : Module.Free.ChooseBasisIndex ℤ_[p] V_p_chi → W_chi_modp :=
-    fun i => red_eig (bV i)
+    fun i ↦ red_eig (bV i)
   -- Helper: red_eig of `c • bV i` (in V_p_chi) equals `c.toZMod • bW_cand i` (in W_chi_modp).
   have h_red_smul : ∀ (c : ℤ_[p]) (i : Module.Free.ChooseBasisIndex ℤ_[p] V_p_chi),
       red_eig (c • bV i) = (PadicInt.toZMod (p := p) c) • bW_cand i := by
@@ -909,12 +910,12 @@ theorem cyclotomicUnitFreePartPadicCharacterEigenspace_finrank
     exact cyclotomicUnitFreePartPadicReduceModP_smul_compat (p := p) K _ _
   -- Step 1: bW_cand spans W_chi_modp.
   have h_span : Submodule.span (ZMod p) (Set.range bW_cand) = ⊤ := by
-    refine eq_top_iff.mpr (fun w _ => ?_)
+    refine eq_top_iff.mpr (fun w _ ↦ ?_)
     obtain ⟨v, hv⟩ := cyclotomicUnitFreePartPadicReduceModP_eigenspaceHom_surjective
       (p := p) K hp_gt_two χ w
     rw [← hv, ← bV.linearCombination_repr v,
       Finsupp.linearCombination_apply, Finsupp.sum_fintype _ _ (by simp), map_sum]
-    refine Submodule.sum_mem _ fun i _ => ?_
+    refine Submodule.sum_mem _ fun i _ ↦ ?_
     rw [h_red_smul]
     exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩)
   -- Step 2: bW_cand is linearly independent over ZMod p.
@@ -923,8 +924,8 @@ theorem cyclotomicUnitFreePartPadicCharacterEigenspace_finrank
     intro g h_sum i
     -- Lift g to ĝ via val cast.
     set ĝ : Module.Free.ChooseBasisIndex ℤ_[p] V_p_chi → ℤ_[p] :=
-      fun j => ((g j).val : ℤ_[p])
-    have h_cast : ∀ j, PadicInt.toZMod (p := p) (ĝ j) = g j := fun j => by
+      fun j ↦ ((g j).val : ℤ_[p])
+    have h_cast : ∀ j, PadicInt.toZMod (p := p) (ĝ j) = g j := fun j ↦ by
       change PadicInt.toZMod (p := p) (((g j).val : ℕ) : ℤ_[p]) = g j
       rw [map_natCast, ZMod.natCast_zmod_val]
     -- v := Σ ĝ j • bV j ∈ V_p^χ.
@@ -934,7 +935,7 @@ theorem cyclotomicUnitFreePartPadicCharacterEigenspace_finrank
       rw [show v = ∑ j, ĝ j • bV j from rfl, map_sum]
       have h_each : ∀ j ∈ (Finset.univ :
           Finset (Module.Free.ChooseBasisIndex ℤ_[p] V_p_chi)),
-          red_eig (ĝ j • bV j) = (g j) • bW_cand j := fun j _ => by
+          red_eig (ĝ j • bV j) = (g j) • bW_cand j := fun j _ ↦ by
         rw [h_red_smul, h_cast]
       rw [Finset.sum_congr rfl h_each, h_sum]
     -- v lies in the global kernel; lift via eigenspace kernel.
