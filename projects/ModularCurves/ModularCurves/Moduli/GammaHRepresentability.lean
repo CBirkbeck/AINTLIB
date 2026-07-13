@@ -1857,6 +1857,82 @@ theorem QuotPkg.crossTransport_natural {P' : ModuliProblem R} {X X' : EllObj R}
     (p.d.eqv ((p.d.pullback k).f ≫ k.baseHom)
       ⟨pullback.fst p.d.f k.baseHom, P1⟩)
 
+/-- **The descended transports commute with base change** ([GHB7-couniv-iii-b]): the
+chosen quotient transport followed by the descended cross-transport at `X'` equals the
+pulled descended transport followed by the `P'`-side comparison. Descent uniqueness
+along `πT` + `crossTransport_natural`. -/
+theorem QuotPkg.crossDescent_mapT_square (pkg : ∀ X : EllObj R, QuotPkg φ X)
+    (hfree : FreeAction φ)
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base)))
+    {P' : ModuliProblem R} {X X' : EllObj R}
+    (dP : ModuliProblem.RelRepData P' X) (dP' : ModuliProblem.RelRepData P' X')
+    (ν' : Q ⟶ P') (k : X' ⟶ X)
+    (νX : (pkg X).d.Z ⟶ dP.Z) (hνXf : νX ≫ dP.f = (pkg X).d.f)
+    (hclX : dP.eqv (pkg X).d.f ⟨νX, hνXf⟩ =
+      ν'.app (Opposite.op (X.pullbackAlong (pkg X).d.f))
+        ((pkg X).d.eqv (pkg X).d.f ⟨𝟙 (pkg X).d.Z, Category.id_comp (pkg X).d.f⟩))
+    (νX' : (pkg X').d.Z ⟶ dP'.Z) (hνX'f : νX' ≫ dP'.f = (pkg X').d.f)
+    (hclX' : dP'.eqv (pkg X').d.f ⟨νX', hνX'f⟩ =
+      ν'.app (Opposite.op (X'.pullbackAlong (pkg X').d.f))
+        ((pkg X').d.eqv (pkg X').d.f
+          ⟨𝟙 (pkg X').d.Z, Category.id_comp (pkg X').d.f⟩))
+    (μX : (pkg X).Z₀ ⟶ dP.Z) (hμX : (pkg X).π ≫ μX = νX)
+    (hμXf : μX ≫ dP.f = (pkg X).f₀)
+    (μX' : (pkg X').Z₀ ⟶ dP'.Z) (hμX' : (pkg X').π ≫ μX' = νX') :
+    QuotPkg.mapT pkg hfree hbase k ≫ μX' =
+      pullback.lift (pullback.fst (pkg X).f₀ k.baseHom ≫ μX)
+        (pullback.snd (pkg X).f₀ k.baseHom)
+        ((Category.assoc _ _ _).trans
+          ((congrArg (pullback.fst (pkg X).f₀ k.baseHom ≫ ·) hμXf).trans
+            pullback.condition)) ≫
+      ((dP.pullback k).compare dP').1 := by
+  obtain ⟨hsndT, hfstT, hinvT, hUPT, hqT, hqfT⟩ := QuotPkg.mapT_spec pkg hfree hbase k
+  have W0 : (pullback.fst (pkg X).f₀ k.baseHom ≫ μX) ≫ dP.f =
+      pullback.snd (pkg X).f₀ k.baseHom ≫ k.baseHom :=
+    (Category.assoc _ _ _).trans
+      ((congrArg (pullback.fst (pkg X).f₀ k.baseHom ≫ ·) hμXf).trans
+        pullback.condition)
+  -- both sides descend the same map along `πT`
+  have hinv2 : ∀ γ : G, ((pkg X).d.σZ.basePullback (pkg X).d.f (pkg X).d.over_base
+      k.baseHom).hom γ ≫ (QuotPkg.πT pkg hfree hbase k ≫
+        (QuotPkg.mapT pkg hfree hbase k ≫ μX')) =
+      QuotPkg.πT pkg hfree hbase k ≫ (QuotPkg.mapT pkg hfree hbase k ≫ μX') :=
+    fun γ => (Category.assoc _ _ _).symm.trans
+      (congrArg (· ≫ (QuotPkg.mapT pkg hfree hbase k ≫ μX')) (hinvT γ))
+  obtain ⟨w, hw, hwu⟩ := hUPT (QuotPkg.πT pkg hfree hbase k ≫
+    (QuotPkg.mapT pkg hfree hbase k ≫ μX')) hinv2
+  rw [hwu (QuotPkg.mapT pkg hfree hbase k ≫ μX') rfl,
+    hwu (pullback.lift (pullback.fst (pkg X).f₀ k.baseHom ≫ μX)
+      (pullback.snd (pkg X).f₀ k.baseHom) W0 ≫ ((dP.pullback k).compare dP').1) ?_]
+  -- the lift-side also descends it: chase through `crossTransport_natural`
+  have hsq : QuotPkg.πT pkg hfree hbase k ≫
+      pullback.lift (pullback.fst (pkg X).f₀ k.baseHom ≫ μX)
+        (pullback.snd (pkg X).f₀ k.baseHom) W0 =
+      pullback.lift (pullback.fst (pkg X).d.f k.baseHom ≫ νX)
+        (pullback.snd (pkg X).d.f k.baseHom)
+        ((Category.assoc _ _ _).trans
+          ((congrArg (pullback.fst (pkg X).d.f k.baseHom ≫ ·) hνXf).trans
+            pullback.condition)) := by
+    apply pullback.hom_ext
+    · rw [Category.assoc, pullback.lift_fst, pullback.lift_fst, ← Category.assoc,
+        hfstT, Category.assoc, hμX]
+    · rw [Category.assoc, pullback.lift_snd, pullback.lift_snd, hsndT]
+  exact (Category.assoc _ _ _).symm.trans
+    ((congrArg (· ≫ ((dP.pullback k).compare dP').1) hsq).trans
+      ((QuotPkg.crossTransport_natural (pkg X) (pkg X') dP dP' ν' k
+          νX hνXf hclX νX' hνX'f hclX'
+          (pullback.lift (pullback.fst (pkg X).d.f k.baseHom ≫ νX)
+            (pullback.snd (pkg X).d.f k.baseHom)
+            ((Category.assoc _ _ _).trans
+              ((congrArg (pullback.fst (pkg X).d.f k.baseHom ≫ ·) hνXf).trans
+                pullback.condition)))
+          (pullback.lift_fst _ _ _) (pullback.lift_snd _ _ _)).symm.trans
+        ((congrArg ((((pkg X).d.pullback k).toRelRepData.compare
+            (pkg X').d.toRelRepData).1 ≫ ·) hμX'.symm).trans
+          ((Category.assoc _ _ _).symm.trans
+            ((congrArg (· ≫ μX') hqT.symm).trans (Category.assoc _ _ _))))))
+
 end Transport
 
 
