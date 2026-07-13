@@ -151,6 +151,40 @@ theorem natCard_sections_eq_finrank {X : Scheme.{u}} (f : X ⟶ Spec (CommRingCa
     rfl
   rw [h1, h2, h3, h4]
 
+/-- **(T-B6d, point form)** A finite étale scheme over the spectrum of a separably closed field
+has exactly `finrank` many topological points — equivalently, as many points as sections. This
+is the reduced-fibre point count (KM 3.7.1) for the Y(N) `[YF-⊆]` distinctness argument. -/
+theorem natCard_carrier_eq_finrank {X : Scheme.{u}} (f : X ⟶ Spec (CommRingCat.of k))
+    [IsFinite f] [Etale f] (x₀ : ↑(Spec (CommRingCat.of k))) :
+    Nat.card ↥X = f.finrank x₀ := by
+  haveI : IsAffine X := isAffine_of_isAffineHom f
+  set ψ : CommRingCat.of k ⟶ Γ(X, ⊤) := Spec.preimage (X.isoSpec.inv ≫ f) with hψdef
+  have hψ : Spec.map ψ = X.isoSpec.inv ≫ f := Spec.map_preimage _
+  letI : Algebra k ↑Γ(X, ⊤) := ψ.hom.toAlgebra
+  have hAlg : algebraMap k ↑Γ(X, ⊤) = ψ.hom := rfl
+  haveI hE : Etale (Spec.map ψ) := by rw [hψ]; infer_instance
+  haveI hF : IsFinite (Spec.map ψ) := by
+    rw [hψ]
+    exact (MorphismProperty.cancel_left_of_respectsIso @IsFinite X.isoSpec.inv f).mpr
+      inferInstance
+  have hRE : RingHom.Etale ψ.hom := HasRingHomProperty.Spec_iff.mp hE
+  have hRF : RingHom.Finite ψ.hom := (IsFinite.SpecMap_iff ψ).mp hF
+  haveI : Algebra.Etale k ↑Γ(X, ⊤) := RingHom.etale_algebraMap.mp hRE
+  haveI : Module.Finite k ↑Γ(X, ⊤) := hRF
+  have hcard : Nat.card ↥X = Nat.card (↑Γ(X, ⊤) →ₐ[k] k) :=
+    Nat.card_congr <| (Scheme.homeoOfIso X.isoSpec).toEquiv.trans
+      (algHomEquivPrimeSpectrum k ↑Γ(X, ⊤)).symm
+  rw [hcard, natCard_algHom_eq_finrank k ↑Γ(X, ⊤)]
+  have h1 : f.finrank x₀ = (X.isoSpec.inv ≫ f).finrank x₀ :=
+    (congrFun (Scheme.Hom.finrank_comp_left_of_isIso X.isoSpec.inv f) x₀).symm
+  have h2 : (X.isoSpec.inv ≫ f).finrank x₀ = (Spec.map ψ).finrank x₀ := by rw [hψ]
+  have h3 : (Spec.map ψ).finrank x₀ = Module.rankAtStalk (R := k) ↑Γ(X, ⊤) x₀ :=
+    Scheme.Hom.finrank_SpecMap_algebraMap k ↑Γ(X, ⊤) x₀
+  have h4 : Module.rankAtStalk (R := k) ↑Γ(X, ⊤) x₀ = Module.finrank k ↑Γ(X, ⊤) := by
+    rw [Module.rankAtStalk_eq_finrank_of_free]
+    rfl
+  rw [h1, h2, h3, h4]
+
 end Schemes
 
 /-- `Spec L`-valued points of `Spec A` over `Spec k` are `k`-algebra homomorphisms
