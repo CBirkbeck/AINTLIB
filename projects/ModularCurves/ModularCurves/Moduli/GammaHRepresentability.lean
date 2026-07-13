@@ -2517,6 +2517,244 @@ theorem QuotPkg.relRepDatum_eqv_π (pkg : ∀ X : EllObj R, QuotPkg φ X)
               (congrArg Quiver.Hom.op hEll).symm)))
   exact congrArg Subtype.val hkey
 
+/-- **The tautological transport of a section is its classification**
+([GHB7-couniv-v-b]): pulling a `quotProb`-value back along the tautological
+projection is the `relRepDatum`-classification of its underlying section. -/
+theorem QuotPkg.quotProb_map_pullbackAlongπ (pkg : ∀ X : EllObj R, QuotPkg φ X)
+    (hfree : FreeAction φ)
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base))) (X : EllObj R)
+    (s : (QuotPkg.quotProb pkg hfree hbase).obj (Opposite.op X)) :
+    (QuotPkg.quotProb pkg hfree hbase).map
+      (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op s =
+    (QuotPkg.relRepDatum pkg hfree hbase X).eqv ((𝟙 X : X ⟶ X).baseHom)
+      ⟨s.1, s.2.trans rfl⟩ := by
+  refine Subtype.ext ?_
+  refine congrArg (· ≫ QuotPkg.mapT pkg hfree hbase
+    (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom))) (pullback.hom_ext ?_ ?_)
+  · exact (pullback.lift_fst _ _ _).trans
+      ((Category.id_comp s.1).trans (pullback.lift_fst _ _ _).symm)
+  · exact (pullback.lift_snd _ _ _).trans (pullback.lift_snd _ _ _).symm
+
+/-- **Uniqueness of the couniversal morphism** ([GHB7-couniv-v], KM 7.1.3(1)
+uniqueness half): any factorization of `ν'` through the projection agrees with
+`crossμ`. Scheme-level: the induced transport descends `νf` along the chosen
+quotient, so descent uniqueness pins it to `μf`; the pointwise values follow through
+`relKey_of_classifies` and the tautological roundtrip. -/
+theorem QuotPkg.crossμ_unique (pkg : ∀ X : EllObj R, QuotPkg φ X)
+    (hfree : FreeAction φ)
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base)))
+    {P' : ModuliProblem R} (dP : ∀ X : EllObj R, ModuliProblem.RelRepData P' X)
+    (ν' : Q ⟶ P')
+    (νf : ∀ X : EllObj R, (pkg X).d.Z ⟶ (dP X).Z)
+    (hνf : ∀ X : EllObj R, νf X ≫ (dP X).f = (pkg X).d.f)
+    (hcl : ∀ X : EllObj R, (dP X).eqv (pkg X).d.f ⟨νf X, hνf X⟩ =
+      ν'.app (Opposite.op (X.pullbackAlong (pkg X).d.f))
+        ((pkg X).d.eqv (pkg X).d.f ⟨𝟙 (pkg X).d.Z, Category.id_comp (pkg X).d.f⟩))
+    (hνinv : ∀ (X : EllObj R) (γ : G), (pkg X).d.σZ.hom γ ≫ νf X = νf X)
+    (μf : ∀ X : EllObj R, (pkg X).Z₀ ⟶ (dP X).Z)
+    (hμ : ∀ X : EllObj R, (pkg X).π ≫ μf X = νf X)
+    (hμf : ∀ X : EllObj R, μf X ≫ (dP X).f = (pkg X).f₀)
+    (μ'' : QuotPkg.quotProb pkg hfree hbase ⟶ P')
+    (hfact : QuotPkg.projQ pkg hfree hbase ≫ μ'' = ν') :
+    μ'' = QuotPkg.crossμ pkg hfree hbase dP ν' νf hνf hcl μf hμ hμf := by
+  ext Xop s
+  -- the induced transport at this object and its classifying property
+  have hclt : (dP Xop.unop).eqv (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+      ⟨(((dP Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (μ''.app (Opposite.op (Xop.unop.pullbackAlong
+            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+                Category.id_comp _⟩))).1,
+        (((dP Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (μ''.app (Opposite.op (Xop.unop.pullbackAlong
+            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+                Category.id_comp _⟩))).2⟩ =
+      μ''.app (Opposite.op (Xop.unop.pullbackAlong
+        (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
+        ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+          ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+            Category.id_comp _⟩) :=
+    (congrArg ((dP Xop.unop).eqv
+        (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f) (Subtype.eta _ _)).trans
+      (((dP Xop.unop).eqv
+        (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).apply_symm_apply _)
+  -- STEP 1: the transport descends `νf` along the chosen projection
+  have m₁ : ((pkg Xop.unop).π ≫ (((dP Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (μ''.app (Opposite.op (Xop.unop.pullbackAlong
+            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+                Category.id_comp _⟩))).1) ≫ (dP Xop.unop).f = (pkg Xop.unop).d.f :=
+    (Category.assoc _ _ _).trans
+      ((congrArg ((pkg Xop.unop).π ≫ ·) (((dP Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (μ''.app (Opposite.op (Xop.unop.pullbackAlong
+            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+                Category.id_comp _⟩))).2).trans (pkg Xop.unop).hπf)
+  have h1 : (pkg Xop.unop).π ≫ (((dP Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (μ''.app (Opposite.op (Xop.unop.pullbackAlong
+            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+                Category.id_comp _⟩))).1 = νf Xop.unop := by
+    have hkey := ((dP Xop.unop).eqv (pkg Xop.unop).d.f).injective
+      (a₁ := ⟨(⟨(pkg Xop.unop).π, (pkg Xop.unop).hπf⟩ :
+        { h : (pkg Xop.unop).d.Z ⟶ (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z //
+          h ≫ (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f = (pkg Xop.unop).d.f }).1 ≫ (((dP Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (μ''.app (Opposite.op (Xop.unop.pullbackAlong
+            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+                Category.id_comp _⟩))).1, m₁⟩)
+      (a₂ := ⟨νf Xop.unop, hνf Xop.unop⟩) ?_
+    · exact congrArg Subtype.val hkey
+    rw [ModuliProblem.relKey_of_classifies
+        (QuotPkg.relRepDatum pkg hfree hbase Xop.unop)
+        (dP Xop.unop) μ'' (((dP Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (μ''.app (Opposite.op (Xop.unop.pullbackAlong
+            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+                Category.id_comp _⟩))).1 (((dP Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (μ''.app (Opposite.op (Xop.unop.pullbackAlong
+            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+                Category.id_comp _⟩))).2 hclt (pkg Xop.unop).d.f
+        ⟨(pkg Xop.unop).π, (pkg Xop.unop).hπf⟩ m₁,
+      QuotPkg.relRepDatum_eqv_π pkg hfree hbase Xop.unop,
+      show μ''.app (Opposite.op (Xop.unop.pullbackAlong (pkg Xop.unop).d.f))
+          ((QuotPkg.projQ pkg hfree hbase).app
+            (Opposite.op (Xop.unop.pullbackAlong (pkg Xop.unop).d.f))
+            ((pkg Xop.unop).d.eqv (pkg Xop.unop).d.f
+              ⟨𝟙 (pkg Xop.unop).d.Z, Category.id_comp (pkg Xop.unop).d.f⟩)) =
+        ((QuotPkg.projQ pkg hfree hbase ≫ μ'').app
+          (Opposite.op (Xop.unop.pullbackAlong (pkg Xop.unop).d.f)))
+          ((pkg Xop.unop).d.eqv (pkg Xop.unop).d.f
+            ⟨𝟙 (pkg Xop.unop).d.Z, Category.id_comp (pkg Xop.unop).d.f⟩) from rfl,
+      hfact, hcl Xop.unop]
+  -- STEP 2: descent uniqueness pins the transport to `μf`
+  have h2 : (((dP Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (μ''.app (Opposite.op (Xop.unop.pullbackAlong
+            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+                Category.id_comp _⟩))).1 = μf Xop.unop := by
+    obtain ⟨w, hw, hwu⟩ := (pkg Xop.unop).hdesc (νf Xop.unop) (hνinv Xop.unop)
+    rw [hwu (((dP Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (μ''.app (Opposite.op (Xop.unop.pullbackAlong
+            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+                Category.id_comp _⟩))).1 h1, hwu (μf Xop.unop) (hμ Xop.unop)]
+  -- STEP 3: the pointwise value through the tautological roundtrip
+  have hround : μ''.app Xop s =
+      P'.map (EllObj.toPullbackAlong (𝟙 Xop.unop)).op
+        (μ''.app (Opposite.op (Xop.unop.pullbackAlong
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)))
+          ((QuotPkg.quotProb pkg hfree hbase).map
+            (Xop.unop.pullbackAlongπ
+              ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op s)) := by
+    rw [NatTrans.naturality_apply μ''
+      (Xop.unop.pullbackAlongπ ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op s]
+    exact ((FunctorToTypes.map_comp_apply P'
+        (Xop.unop.pullbackAlongπ
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op
+        (EllObj.toPullbackAlong (𝟙 Xop.unop)).op (μ''.app Xop s)).symm.trans
+      ((congrArg (fun m => P'.map m (μ''.app Xop s))
+        (show (Xop.unop.pullbackAlongπ
+            ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op ≫
+            (EllObj.toPullbackAlong (𝟙 Xop.unop)).op =
+            𝟙 (Opposite.op Xop.unop) from
+          congrArg Quiver.Hom.op
+            (EllObj.toPullbackAlong_pullbackAlongπ (𝟙 Xop.unop)))).trans
+        (FunctorToTypes.map_id_apply P' (μ''.app Xop s)))).symm
+  have m₃ : (s.1 ≫ (((dP Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (μ''.app (Opposite.op (Xop.unop.pullbackAlong
+            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+                Category.id_comp _⟩))).1) ≫ (dP Xop.unop).f =
+      (𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom :=
+    (Category.assoc _ _ _).trans
+      ((congrArg (s.1 ≫ ·) (((dP Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (μ''.app (Opposite.op (Xop.unop.pullbackAlong
+            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+                Category.id_comp _⟩))).2).trans (s.2.trans rfl))
+  refine hround.trans ?_
+  rw [QuotPkg.quotProb_map_pullbackAlongπ pkg hfree hbase Xop.unop s,
+    ← ModuliProblem.relKey_of_classifies
+      (QuotPkg.relRepDatum pkg hfree hbase Xop.unop)
+      (dP Xop.unop) μ'' (((dP Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (μ''.app (Opposite.op (Xop.unop.pullbackAlong
+            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+                Category.id_comp _⟩))).1 (((dP Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (μ''.app (Opposite.op (Xop.unop.pullbackAlong
+            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+                Category.id_comp _⟩))).2 hclt
+      ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)
+      ⟨s.1, s.2.trans rfl⟩ m₃,
+    show (⟨(⟨s.1, s.2.trans rfl⟩ :
+      { h : Xop.unop.base ⟶ (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z //
+        h ≫ (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f =
+          (𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom }).1 ≫ (((dP Xop.unop).eqv
+          (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f).symm
+          (μ''.app (Opposite.op (Xop.unop.pullbackAlong
+            (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f))
+            ((QuotPkg.relRepDatum pkg hfree hbase Xop.unop).eqv
+              (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).f
+              ⟨𝟙 (QuotPkg.relRepDatum pkg hfree hbase Xop.unop).Z,
+                Category.id_comp _⟩))).1, m₃⟩ :
+      { v : Xop.unop.base ⟶ (dP Xop.unop).Z //
+        v ≫ (dP Xop.unop).f =
+          (𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom }) =
+    ⟨s.1 ≫ μf Xop.unop, by
+      rw [Category.assoc, hμf Xop.unop]
+      exact s.2.trans rfl⟩ from
+    Subtype.ext (congrArg (s.1 ≫ ·) h2)]
+  rfl
+
 end Transport
 
 
