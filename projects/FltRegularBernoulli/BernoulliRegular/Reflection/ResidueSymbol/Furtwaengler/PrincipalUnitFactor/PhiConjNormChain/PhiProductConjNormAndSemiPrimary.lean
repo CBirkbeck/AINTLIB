@@ -34,7 +34,7 @@ theorem K2_2FlexibleSourceData_phi_gamma_isSemiPrimary
     (D : K2_2FlexibleSourceData S)
     (hp_three : 3 ≤ p) :
     FLT37.IsSemiPrimary p (K := K) D.phi.gamma := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   rw [K2_2FlexibleSourceData_phi_gamma]
   exact S.phiPrimeGenDescent_isSemiPrimary D.h_psi
     (le_refl 1) (one_le_p_sub_one_of_prime (p := p))
@@ -70,7 +70,7 @@ theorem
         S.concrete.psiInt⁻¹) :
     ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
       (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   have hraw :
       ringOfIntegersComplexConj K
           (S.phiPrimeGenDescent D.h_psi
@@ -132,7 +132,7 @@ theorem
         S.concrete.zeta_ell_int ^ (ℓ - 1)) :
     ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
       (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   have hσχ :
       (S.concrete.residueCharInt ^ 1).ringHomComp σ =
         (S.concrete.residueCharInt ^ 1)⁻¹ :=
@@ -175,7 +175,7 @@ theorem
         S.concrete.zeta_ell_int ^ (ℓ - 1)) :
     ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
       (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   have h_zeta_p_int_eq :
       S.concrete.zeta_p_int =
         algebraMap (𝓞 K) (𝓞 R') (cyclotomicZetaInteger (p := p) K) := by
@@ -212,12 +212,12 @@ theorem
         algebraMap (𝓞 K) (𝓞 R') (ringOfIntegersComplexConj K x)) :
     ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
       (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   let σ : 𝓞 R' →+* 𝓞 R' :=
     (ringOfIntegersComplexConj R').toRingEquiv.toRingHom
   have hσ_lifts_conj : ∀ x : 𝓞 K,
       σ (algebraMap (𝓞 K) (𝓞 R') x) =
-        algebraMap (𝓞 K) (𝓞 R') (ringOfIntegersComplexConj K x) := fun x =>
+        algebraMap (𝓞 K) (𝓞 R') (ringOfIntegersComplexConj K x) := fun x ↦
     h_upstairs_lifts_conj x
   have hσζell :
       σ S.concrete.zeta_ell_int =
@@ -277,7 +277,7 @@ theorem K2_2FlexibleReciprocalSourceData_phi_gamma_isSemiPrimary
     (D : K2_2FlexibleReciprocalSourceData S)
     (hp_three : 3 ≤ p) :
     FLT37.IsSemiPrimary p (K := K) D.phi.gamma := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   rw [K2_2FlexibleReciprocalSourceData_phi_gamma]
   exact S.phiPrimeGenDescent_isSemiPrimary D.h_psi
     (one_le_p_sub_one_of_prime (p := p)) (le_refl (p - 1))
@@ -313,7 +313,7 @@ theorem
         S.concrete.psiInt⁻¹) :
     ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
       (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   have hraw :
       ringOfIntegersComplexConj K
           (S.phiPrimeGenDescent D.h_psi
@@ -375,7 +375,7 @@ theorem
         S.concrete.zeta_ell_int ^ (ℓ - 1)) :
     ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
       (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   have hσχ :
       (S.concrete.residueCharInt ^ (p - 1)).ringHomComp σ =
         (S.concrete.residueCharInt ^ (p - 1))⁻¹ :=
@@ -418,7 +418,7 @@ theorem
         S.concrete.zeta_ell_int ^ (ℓ - 1)) :
     ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
       (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   have h_zeta_p_int_eq :
       S.concrete.zeta_p_int =
         algebraMap (𝓞 K) (𝓞 R') (cyclotomicZetaInteger (p := p) K) := by
@@ -455,12 +455,12 @@ theorem
         algebraMap (𝓞 K) (𝓞 R') (ringOfIntegersComplexConj K x)) :
     ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
       (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   let σ : 𝓞 R' →+* 𝓞 R' :=
     (ringOfIntegersComplexConj R').toRingEquiv.toRingHom
   have hσ_lifts_conj : ∀ x : 𝓞 K,
       σ (algebraMap (𝓞 K) (𝓞 R') x) =
-        algebraMap (𝓞 K) (𝓞 R') (ringOfIntegersComplexConj K x) := fun x =>
+        algebraMap (𝓞 K) (𝓞 R') (ringOfIntegersComplexConj K x) := fun x ↦
     h_upstairs_lifts_conj x
   have hσζell :
       σ S.concrete.zeta_ell_int =
