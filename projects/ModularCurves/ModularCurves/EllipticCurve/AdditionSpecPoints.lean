@@ -756,27 +756,28 @@ open WeierstrassCurve.Projective HomogeneousIdeal HomogeneousLocalization
 
 attribute [local instance] MvPolynomial.gradedAlgebra
 
-/-- [e5c-P] Through a law-1 piece presentation of the pair-point, `P`'s dictionary value is
-`toAffine` of the first tautological image. -/
-lemma dictionary_fst_of_pieceZ (W : WeierstrassCurve R) [W.IsElliptic] (i j k : Fin 3)
+/-- Shared law-agnostic core of `dictionary_fst_of_piece{Z,Y}`: parametrised over the away-triple
+element `t`, once the first-projection chart factorisation `hP1` is supplied, `P`'s dictionary value
+is `toAffine` of the left tautological image. -/
+private lemma dictionary_fst_of_piece_aux (W : WeierstrassCurve R) [W.IsElliptic] (i j : Fin 3)
     {K : Type u} [Field K] [DecidableEq K] [Algebra R K]
-    (P Q : SpecPoints (projModel W) (projModelπ W) K)
-    (w : P.1 ≫ projModelπ W = Q.1 ≫ projModelπ W)
-    (ψ : Localization.Away (lawOneTriple W i j k) →+* K)
-    (hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayZι W i j k) :
+    (P : SpecPoints (projModel W) (projModelπ W) K)
+    (t : biChartRing W i j) (ψ : Localization.Away t →+* K)
+    (hP1 : Spec.map (CommRingCat.ofHom (ψ.comp
+        ((algebraMap (biChartRing W i j) (Localization.Away t)).comp
+          ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+            (Algebra.TensorProduct.includeLeftRingHom
+              (A := chartAway W i) (B := chartAway W j)))))) ≫ chartι W i = P.1) :
     projModelPointsEquiv W K P =
       WeierstrassCurve.Projective.Point.toAffine (W.map (algebraMap R K)).toProjective
         ((ψ.comp (algebraMap (biChartRing W i j)
-          (Localization.Away (lawOneTriple W i j k)))) ∘ biChartPointFst W i j) := by
+          (Localization.Away t))) ∘ biChartPointFst W i j) := by
   classical
   set φP : chartAway W i →+* K := ψ.comp
-    ((algebraMap (biChartRing W i j) (Localization.Away (lawOneTriple W i j k))).comp
+    ((algebraMap (biChartRing W i j) (Localization.Away t)).comp
       ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
         (Algebra.TensorProduct.includeLeftRingHom
           (A := chartAway W i) (B := chartAway W j)))) with hφPdef
-  have hP1 : Spec.map (CommRingCat.ofHom φP) ≫ chartι W i = P.1 := by
-    rw [← pullback.lift_fst P.1 Q.1 w, hgp, Category.assoc,
-      specMap_pieceAwayZι_fst W i j k ψ]
   have hπ : (Spec.map (CommRingCat.ofHom φP) ≫ chartι W i) ≫ projModelπ W =
       Spec.map (CommRingCat.ofHom (algebraMap R K)) := by
     rw [hP1]
@@ -800,27 +801,29 @@ lemma dictionary_fst_of_pieceZ (W : WeierstrassCurve R) [W.IsElliptic] (i j k : 
       (chartCoordEquiv W i (Ideal.Quotient.mk _ (MvPolynomial.X ⟨m, hm⟩))))) = _
     rw [tensorLeftLeg_chartCoord W i j ⟨m, hm⟩]
     rfl
-/-- [e5c-Q] Through a law-1 piece presentation of the pair-point, `Q`'s dictionary value is
-`toAffine` of the second tautological image. -/
-lemma dictionary_snd_of_pieceZ (W : WeierstrassCurve R) [W.IsElliptic] (i j k : Fin 3)
+
+/-- Shared law-agnostic core of `dictionary_snd_of_piece{Z,Y}`: the mirror of
+`dictionary_fst_of_piece_aux` for the second projection / right tautological image. -/
+private lemma dictionary_snd_of_piece_aux (W : WeierstrassCurve R) [W.IsElliptic] (i j : Fin 3)
     {K : Type u} [Field K] [DecidableEq K] [Algebra R K]
-    (P Q : SpecPoints (projModel W) (projModelπ W) K)
-    (w : P.1 ≫ projModelπ W = Q.1 ≫ projModelπ W)
-    (ψ : Localization.Away (lawOneTriple W i j k) →+* K)
-    (hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayZι W i j k) :
+    (Q : SpecPoints (projModel W) (projModelπ W) K)
+    (t : biChartRing W i j) (ψ : Localization.Away t →+* K)
+    (hQ1 : Spec.map (CommRingCat.ofHom (ψ.comp
+        ((algebraMap (biChartRing W i j) (Localization.Away t)).comp
+          ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
+            (Algebra.TensorProduct.includeRight
+              (R := R) (A := chartAway W i) (B := chartAway W j)).toRingHom)))) ≫
+        chartι W j = Q.1) :
     projModelPointsEquiv W K Q =
       WeierstrassCurve.Projective.Point.toAffine (W.map (algebraMap R K)).toProjective
         ((ψ.comp (algebraMap (biChartRing W i j)
-          (Localization.Away (lawOneTriple W i j k)))) ∘ biChartPointSnd W i j) := by
+          (Localization.Away t))) ∘ biChartPointSnd W i j) := by
   classical
   set φQ : chartAway W j →+* K := ψ.comp
-    ((algebraMap (biChartRing W i j) (Localization.Away (lawOneTriple W i j k))).comp
+    ((algebraMap (biChartRing W i j) (Localization.Away t)).comp
       ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
         (Algebra.TensorProduct.includeRight
           (R := R) (A := chartAway W i) (B := chartAway W j)).toRingHom)) with hφQdef
-  have hQ1 : Spec.map (CommRingCat.ofHom φQ) ≫ chartι W j = Q.1 := by
-    rw [← pullback.lift_snd P.1 Q.1 w, hgp, Category.assoc,
-      specMap_pieceAwayZι_snd W i j k ψ]
   have hπ : (Spec.map (CommRingCat.ofHom φQ) ≫ chartι W j) ≫ projModelπ W =
       Spec.map (CommRingCat.ofHom (algebraMap R K)) := by
     rw [hQ1]
@@ -838,13 +841,42 @@ lemma dictionary_snd_of_pieceZ (W : WeierstrassCurve R) [W.IsElliptic] (i j k : 
   · show φQ (HomogeneousLocalization.Away.isLocalizationElem
         (mk_X_mem_quotientGrading_one W j) (mk_X_mem_quotientGrading_one W m)) = _
     rw [← chartCoordEquiv_mk_X W j ⟨m, hm⟩, hφQdef]
-    show ψ ((algebraMap (biChartRing W i j) (Localization.Away (lawOneTriple W i j k)))
+    show ψ ((algebraMap (biChartRing W i j) (Localization.Away t))
         (((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
           (Algebra.TensorProduct.includeRight
             (R := R) (A := chartAway W i) (B := chartAway W j)).toRingHom)
           (chartCoordEquiv W j (Ideal.Quotient.mk _ (MvPolynomial.X ⟨m, hm⟩))))) = _
     rw [tensorRightLeg_chartCoord W i j ⟨m, hm⟩]
     rfl
+
+/-- [e5c-P] Through a law-1 piece presentation of the pair-point, `P`'s dictionary value is
+`toAffine` of the first tautological image. -/
+lemma dictionary_fst_of_pieceZ (W : WeierstrassCurve R) [W.IsElliptic] (i j k : Fin 3)
+    {K : Type u} [Field K] [DecidableEq K] [Algebra R K]
+    (P Q : SpecPoints (projModel W) (projModelπ W) K)
+    (w : P.1 ≫ projModelπ W = Q.1 ≫ projModelπ W)
+    (ψ : Localization.Away (lawOneTriple W i j k) →+* K)
+    (hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayZι W i j k) :
+    projModelPointsEquiv W K P =
+      WeierstrassCurve.Projective.Point.toAffine (W.map (algebraMap R K)).toProjective
+        ((ψ.comp (algebraMap (biChartRing W i j)
+          (Localization.Away (lawOneTriple W i j k)))) ∘ biChartPointFst W i j) := by
+  refine dictionary_fst_of_piece_aux W i j P (lawOneTriple W i j k) ψ ?_
+  rw [← pullback.lift_fst P.1 Q.1 w, hgp, Category.assoc, specMap_pieceAwayZι_fst W i j k ψ]
+/-- [e5c-Q] Through a law-1 piece presentation of the pair-point, `Q`'s dictionary value is
+`toAffine` of the second tautological image. -/
+lemma dictionary_snd_of_pieceZ (W : WeierstrassCurve R) [W.IsElliptic] (i j k : Fin 3)
+    {K : Type u} [Field K] [DecidableEq K] [Algebra R K]
+    (P Q : SpecPoints (projModel W) (projModelπ W) K)
+    (w : P.1 ≫ projModelπ W = Q.1 ≫ projModelπ W)
+    (ψ : Localization.Away (lawOneTriple W i j k) →+* K)
+    (hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayZι W i j k) :
+    projModelPointsEquiv W K Q =
+      WeierstrassCurve.Projective.Point.toAffine (W.map (algebraMap R K)).toProjective
+        ((ψ.comp (algebraMap (biChartRing W i j)
+          (Localization.Away (lawOneTriple W i j k)))) ∘ biChartPointSnd W i j) := by
+  refine dictionary_snd_of_piece_aux W i j Q (lawOneTriple W i j k) ψ ?_
+  rw [← pullback.lift_snd P.1 Q.1 w, hgp, Category.assoc, specMap_pieceAwayZι_snd W i j k ψ]
 
 /-- [e5c-P,Y] Through a law-2 piece presentation of the pair-point, `P`'s dictionary value is
 `toAffine` of the first tautological image. -/
@@ -858,38 +890,8 @@ lemma dictionary_fst_of_pieceY (W : WeierstrassCurve R) [W.IsElliptic] (i j k : 
       WeierstrassCurve.Projective.Point.toAffine (W.map (algebraMap R K)).toProjective
         ((ψ.comp (algebraMap (biChartRing W i j)
           (Localization.Away (lawTwoTriple W i j k)))) ∘ biChartPointFst W i j) := by
-  classical
-  set φP : chartAway W i →+* K := ψ.comp
-    ((algebraMap (biChartRing W i j) (Localization.Away (lawTwoTriple W i j k))).comp
-      ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
-        (Algebra.TensorProduct.includeLeftRingHom
-          (A := chartAway W i) (B := chartAway W j)))) with hφPdef
-  have hP1 : Spec.map (CommRingCat.ofHom φP) ≫ chartι W i = P.1 := by
-    rw [← pullback.lift_fst P.1 Q.1 w, hgp, Category.assoc,
-      specMap_pieceAwayι_fst W i j k ψ]
-  have hπ : (Spec.map (CommRingCat.ofHom φP) ≫ chartι W i) ≫ projModelπ W =
-      Spec.map (CommRingCat.ofHom (algebraMap R K)) := by
-    rw [hP1]
-    exact P.2
-  have hφP : φP.comp (algebraMap R (chartAway W i)) = algebraMap R K :=
-    chartHom_compat_of_specPoint W i φP hπ
-  rw [dictionary_eq_toAffine W i φP hφP P hP1]
-  congr 1
-  funext m
-  by_cases hm : m = i
-  · subst hm
-    rw [chartPointTriple_self_eq_one]
-    show (1 : K) = (ψ.comp (algebraMap _ _)) (biChartPointFst W m j m)
-    rw [show biChartPointFst W m j m = 1 from dif_pos rfl, map_one]
-  · show φP (HomogeneousLocalization.Away.isLocalizationElem
-        (mk_X_mem_quotientGrading_one W i) (mk_X_mem_quotientGrading_one W m)) = _
-    rw [← chartCoordEquiv_mk_X W i ⟨m, hm⟩, hφPdef]
-    show ψ ((algebraMap _ _) (((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
-        (Algebra.TensorProduct.includeLeftRingHom
-          (A := chartAway W i) (B := chartAway W j)))
-      (chartCoordEquiv W i (Ideal.Quotient.mk _ (MvPolynomial.X ⟨m, hm⟩))))) = _
-    rw [tensorLeftLeg_chartCoord W i j ⟨m, hm⟩]
-    rfl
+  refine dictionary_fst_of_piece_aux W i j P (lawTwoTriple W i j k) ψ ?_
+  rw [← pullback.lift_fst P.1 Q.1 w, hgp, Category.assoc, specMap_pieceAwayι_fst W i j k ψ]
 /-- [e5c-Q,Y] Through a law-2 piece presentation of the pair-point, `Q`'s dictionary value is
 `toAffine` of the second tautological image. -/
 lemma dictionary_snd_of_pieceY (W : WeierstrassCurve R) [W.IsElliptic] (i j k : Fin 3)
@@ -902,39 +904,78 @@ lemma dictionary_snd_of_pieceY (W : WeierstrassCurve R) [W.IsElliptic] (i j k : 
       WeierstrassCurve.Projective.Point.toAffine (W.map (algebraMap R K)).toProjective
         ((ψ.comp (algebraMap (biChartRing W i j)
           (Localization.Away (lawTwoTriple W i j k)))) ∘ biChartPointSnd W i j) := by
+  refine dictionary_snd_of_piece_aux W i j Q (lawTwoTriple W i j k) ψ ?_
+  rw [← pullback.lift_snd P.1 Q.1 w, hgp, Category.assoc, specMap_pieceAwayι_snd W i j k ψ]
+
+/-- Shared law-agnostic core of `dictionary_sum_of_piece{Z,Y}`: parametrised over the on-curve
+triple `lawT` (with its equation proof `hlaw`), the piece morphism being the `chartAwayHomOfTriple`
+of `awayTriple`. The sum-point's dictionary value is `toAffine` of the triple image, obtained via
+`toAffine_smul` from the unit `ψ (invSelf (lawT k))`. -/
+private lemma dictionary_sum_of_piece_aux (W : WeierstrassCurve R) [W.IsElliptic] (i j k : Fin 3)
+    {K : Type u} [Field K] [DecidableEq K] [Algebra R K]
+    (s : SpecPoints (projModel W) (projModelπ W) K)
+    (lawT : Fin 3 → biChartRing W i j)
+    (hlaw : (W.map (algebraMap R (biChartRing W i j))).toProjective.Equation lawT)
+    (ψ : Localization.Away (lawT k) →+* K)
+    (hev : s.1 = Spec.map (CommRingCat.ofHom ψ) ≫
+      Spec.map (CommRingCat.ofHom (chartAwayHomOfTriple W k (awayTriple W i j k lawT)
+          (IsLocalization.Away.invSelf (lawT k)) (awayTriple_mul_invSelf W i j k lawT)
+          (equation_awayTriple W i j k lawT hlaw)).toRingHom) ≫ chartι W k) :
+    projModelPointsEquiv W K s =
+      WeierstrassCurve.Projective.Point.toAffine (W.map (algebraMap R K)).toProjective
+        ((ψ.comp (algebraMap (biChartRing W i j) (Localization.Away (lawT k)))) ∘ lawT) := by
   classical
-  set φQ : chartAway W j →+* K := ψ.comp
-    ((algebraMap (biChartRing W i j) (Localization.Away (lawTwoTriple W i j k))).comp
-      ((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
-        (Algebra.TensorProduct.includeRight
-          (R := R) (A := chartAway W i) (B := chartAway W j)).toRingHom)) with hφQdef
-  have hQ1 : Spec.map (CommRingCat.ofHom φQ) ≫ chartι W j = Q.1 := by
-    rw [← pullback.lift_snd P.1 Q.1 w, hgp, Category.assoc,
-      specMap_pieceAwayι_snd W i j k ψ]
-  have hπ : (Spec.map (CommRingCat.ofHom φQ) ≫ chartι W j) ≫ projModelπ W =
+  set pmHom := chartAwayHomOfTriple W k (awayTriple W i j k lawT)
+    (IsLocalization.Away.invSelf (lawT k)) (awayTriple_mul_invSelf W i j k lawT)
+    (equation_awayTriple W i j k lawT hlaw) with hpmHom
+  set φS : chartAway W k →+* K := ψ.comp pmHom.toRingHom with hφSdef
+  have hS1 : Spec.map (CommRingCat.ofHom φS) ≫ chartι W k = s.1 := by
+    rw [hev, ← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+  have hπ : (Spec.map (CommRingCat.ofHom φS) ≫ chartι W k) ≫ projModelπ W =
       Spec.map (CommRingCat.ofHom (algebraMap R K)) := by
-    rw [hQ1]
-    exact Q.2
-  have hφQ : φQ.comp (algebraMap R (chartAway W j)) = algebraMap R K :=
-    chartHom_compat_of_specPoint W j φQ hπ
-  rw [dictionary_eq_toAffine W j φQ hφQ Q hQ1]
-  congr 1
-  funext m
-  by_cases hm : m = j
-  · subst hm
-    rw [chartPointTriple_self_eq_one]
-    show (1 : K) = (ψ.comp (algebraMap _ _)) (biChartPointSnd W i m m)
-    rw [show biChartPointSnd W i m m = 1 from dif_pos rfl, map_one]
-  · show φQ (HomogeneousLocalization.Away.isLocalizationElem
-        (mk_X_mem_quotientGrading_one W j) (mk_X_mem_quotientGrading_one W m)) = _
-    rw [← chartCoordEquiv_mk_X W j ⟨m, hm⟩, hφQdef]
-    show ψ ((algebraMap (biChartRing W i j) (Localization.Away (lawTwoTriple W i j k)))
-        (((biChartRingAwayTensorEquiv W i j).symm.toRingHom.comp
-          (Algebra.TensorProduct.includeRight
-            (R := R) (A := chartAway W i) (B := chartAway W j)).toRingHom)
-          (chartCoordEquiv W j (Ideal.Quotient.mk _ (MvPolynomial.X ⟨m, hm⟩))))) = _
-    rw [tensorRightLeg_chartCoord W i j ⟨m, hm⟩]
-    rfl
+    rw [hS1]; exact s.2
+  have hφS : φS.comp (algebraMap R (chartAway W k)) = algebraMap R K :=
+    chartHom_compat_of_specPoint W k φS hπ
+  rw [dictionary_eq_toAffine W k φS hφS s hS1]
+  -- the triple is a unit multiple of χ∘lawT
+  have hc1 : ψ ((algebraMap (biChartRing W i j) (Localization.Away (lawT k)))
+      (lawT k)) * ψ (IsLocalization.Away.invSelf (lawT k)) = 1 := by
+    rw [← map_mul, ← map_one ψ]
+    congr 1
+    exact awayTriple_mul_invSelf W i j k lawT
+  have hcu : IsUnit (ψ (IsLocalization.Away.invSelf (lawT k))) :=
+    ⟨⟨ψ (IsLocalization.Away.invSelf (lawT k)),
+      ψ ((algebraMap (biChartRing W i j) (Localization.Away (lawT k))) (lawT k)),
+      (mul_comm _ _).trans hc1, hc1⟩, rfl⟩
+  have htriple : chartPointTriple W k φS =
+      ψ (IsLocalization.Away.invSelf (lawT k)) •
+        ((ψ.comp (algebraMap (biChartRing W i j)
+          (Localization.Away (lawT k)))) ∘ lawT) := by
+    funext m
+    by_cases hm : m = k
+    · subst hm
+      rw [chartPointTriple_self_eq_one]
+      show (1 : K) = ψ (IsLocalization.Away.invSelf (lawT m)) *
+        ψ ((algebraMap (biChartRing W i j) _) (lawT m))
+      rw [mul_comm]
+      exact hc1.symm
+    · show φS (HomogeneousLocalization.Away.isLocalizationElem
+          (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W m)) = _
+      rw [hφSdef]
+      show ψ (pmHom (HomogeneousLocalization.Away.isLocalizationElem
+          (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W m))) = _
+      rw [show (pmHom (HomogeneousLocalization.Away.isLocalizationElem
+          (mk_X_mem_quotientGrading_one W k)
+          (mk_X_mem_quotientGrading_one W (⟨m, hm⟩ : {l : Fin 3 // l ≠ k}).1))) =
+        awayTriple W i j k lawT (⟨m, hm⟩ : {l : Fin 3 // l ≠ k}).1 *
+          IsLocalization.Away.invSelf (lawT k) from
+        chartAwayHomOfTriple_isLocalizationElem W k _ _ _ _ ⟨m, hm⟩]
+      rw [map_mul]
+      show _ = ψ (IsLocalization.Away.invSelf (lawT k)) *
+        ψ ((algebraMap (biChartRing W i j) _) (lawT m))
+      rw [awayTriple, mul_comm]
+  rw [htriple]
+  exact WeierstrassCurve.Projective.Point.toAffine_smul _ hcu
 
 /-- [e5c-S, Z] The sum-point's dictionary value is `toAffine` of the law-1 triple image. -/
 lemma dictionary_sum_of_pieceZ (W : WeierstrassCurve R) [W.IsElliptic]
@@ -948,60 +989,8 @@ lemma dictionary_sum_of_pieceZ (W : WeierstrassCurve R) [W.IsElliptic]
       WeierstrassCurve.Projective.Point.toAffine (W.map (algebraMap R K)).toProjective
         ((ψ.comp (algebraMap (biChartRing W i j)
           (Localization.Away (lawOneTriple W i j k)))) ∘ lawOneTriple W i j) := by
-  classical
-  set φS : chartAway W k →+* K :=
-    ψ.comp (addOnZPieceHom W i j k hΔ).toRingHom with hφSdef
-  have hS1 : Spec.map (CommRingCat.ofHom φS) ≫ chartι W k = s.1 := by
-    rw [hev]
-    show _ = Spec.map (CommRingCat.ofHom ψ) ≫
-      Spec.map (CommRingCat.ofHom (addOnZPieceHom W i j k hΔ).toRingHom) ≫ chartι W k
-    rw [← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
-  have hπ : (Spec.map (CommRingCat.ofHom φS) ≫ chartι W k) ≫ projModelπ W =
-      Spec.map (CommRingCat.ofHom (algebraMap R K)) := by
-    rw [hS1]; exact s.2
-  have hφS : φS.comp (algebraMap R (chartAway W k)) = algebraMap R K :=
-    chartHom_compat_of_specPoint W k φS hπ
-  rw [dictionary_eq_toAffine W k φS hφS s hS1]
-  -- the triple is a unit multiple of χ∘lawOneTriple
-  have hc1 : ψ ((algebraMap (biChartRing W i j) (Localization.Away (lawOneTriple W i j k)))
-      (lawOneTriple W i j k)) * ψ (IsLocalization.Away.invSelf (lawOneTriple W i j k)) = 1 := by
-    rw [← map_mul, ← map_one ψ]
-    congr 1
-    exact awayTriple_mul_invSelf W i j k (lawOneTriple W i j)
-  have hcu : IsUnit (ψ (IsLocalization.Away.invSelf (lawOneTriple W i j k))) :=
-    ⟨⟨ψ (IsLocalization.Away.invSelf (lawOneTriple W i j k)),
-      ψ ((algebraMap (biChartRing W i j) (Localization.Away (lawOneTriple W i j k)))
-        (lawOneTriple W i j k)),
-      (mul_comm _ _).trans hc1, hc1⟩, rfl⟩
-  have htriple : chartPointTriple W k φS =
-      ψ (IsLocalization.Away.invSelf (lawOneTriple W i j k)) •
-        ((ψ.comp (algebraMap (biChartRing W i j)
-          (Localization.Away (lawOneTriple W i j k)))) ∘ lawOneTriple W i j) := by
-    funext m
-    by_cases hm : m = k
-    · subst hm
-      rw [chartPointTriple_self_eq_one]
-      show (1 : K) = ψ (IsLocalization.Away.invSelf (lawOneTriple W i j m)) *
-        ψ ((algebraMap (biChartRing W i j) _) (lawOneTriple W i j m))
-      rw [mul_comm]
-      exact hc1.symm
-    · show φS (HomogeneousLocalization.Away.isLocalizationElem
-          (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W m)) = _
-      rw [hφSdef]
-      show ψ ((addOnZPieceHom W i j k hΔ) (HomogeneousLocalization.Away.isLocalizationElem
-          (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W m))) = _
-      rw [show ((addOnZPieceHom W i j k hΔ) (HomogeneousLocalization.Away.isLocalizationElem
-          (mk_X_mem_quotientGrading_one W k)
-          (mk_X_mem_quotientGrading_one W (⟨m, hm⟩ : {l : Fin 3 // l ≠ k}).1))) =
-        awayTriple W i j k (lawOneTriple W i j) (⟨m, hm⟩ : {l : Fin 3 // l ≠ k}).1 *
-          IsLocalization.Away.invSelf (lawOneTriple W i j k) from
-        chartAwayHomOfTriple_isLocalizationElem W k _ _ _ _ ⟨m, hm⟩]
-      rw [map_mul]
-      show _ = ψ (IsLocalization.Away.invSelf (lawOneTriple W i j k)) *
-        ψ ((algebraMap (biChartRing W i j) _) (lawOneTriple W i j m))
-      rw [awayTriple, mul_comm]
-  rw [htriple]
-  exact WeierstrassCurve.Projective.Point.toAffine_smul _ hcu
+  exact dictionary_sum_of_piece_aux W i j k s (lawOneTriple W i j)
+    (equation_lawOneTriple_of_isDomain W i j hΔ) ψ hev
 
 /-- [e5c-S, Y] The sum-point's dictionary value is `toAffine` of the law-2 triple image. -/
 lemma dictionary_sum_of_pieceY (W : WeierstrassCurve R) [W.IsElliptic]
@@ -1015,60 +1004,8 @@ lemma dictionary_sum_of_pieceY (W : WeierstrassCurve R) [W.IsElliptic]
       WeierstrassCurve.Projective.Point.toAffine (W.map (algebraMap R K)).toProjective
         ((ψ.comp (algebraMap (biChartRing W i j)
           (Localization.Away (lawTwoTriple W i j k)))) ∘ lawTwoTriple W i j) := by
-  classical
-  set φS : chartAway W k →+* K :=
-    ψ.comp (addOnYPieceHom W i j k hΔ).toRingHom with hφSdef
-  have hS1 : Spec.map (CommRingCat.ofHom φS) ≫ chartι W k = s.1 := by
-    rw [hev]
-    show _ = Spec.map (CommRingCat.ofHom ψ) ≫
-      Spec.map (CommRingCat.ofHom (addOnYPieceHom W i j k hΔ).toRingHom) ≫ chartι W k
-    rw [← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
-  have hπ : (Spec.map (CommRingCat.ofHom φS) ≫ chartι W k) ≫ projModelπ W =
-      Spec.map (CommRingCat.ofHom (algebraMap R K)) := by
-    rw [hS1]; exact s.2
-  have hφS : φS.comp (algebraMap R (chartAway W k)) = algebraMap R K :=
-    chartHom_compat_of_specPoint W k φS hπ
-  rw [dictionary_eq_toAffine W k φS hφS s hS1]
-  -- the triple is a unit multiple of χ∘lawTwoTriple
-  have hc1 : ψ ((algebraMap (biChartRing W i j) (Localization.Away (lawTwoTriple W i j k)))
-      (lawTwoTriple W i j k)) * ψ (IsLocalization.Away.invSelf (lawTwoTriple W i j k)) = 1 := by
-    rw [← map_mul, ← map_one ψ]
-    congr 1
-    exact awayTriple_mul_invSelf W i j k (lawTwoTriple W i j)
-  have hcu : IsUnit (ψ (IsLocalization.Away.invSelf (lawTwoTriple W i j k))) :=
-    ⟨⟨ψ (IsLocalization.Away.invSelf (lawTwoTriple W i j k)),
-      ψ ((algebraMap (biChartRing W i j) (Localization.Away (lawTwoTriple W i j k)))
-        (lawTwoTriple W i j k)),
-      (mul_comm _ _).trans hc1, hc1⟩, rfl⟩
-  have htriple : chartPointTriple W k φS =
-      ψ (IsLocalization.Away.invSelf (lawTwoTriple W i j k)) •
-        ((ψ.comp (algebraMap (biChartRing W i j)
-          (Localization.Away (lawTwoTriple W i j k)))) ∘ lawTwoTriple W i j) := by
-    funext m
-    by_cases hm : m = k
-    · subst hm
-      rw [chartPointTriple_self_eq_one]
-      show (1 : K) = ψ (IsLocalization.Away.invSelf (lawTwoTriple W i j m)) *
-        ψ ((algebraMap (biChartRing W i j) _) (lawTwoTriple W i j m))
-      rw [mul_comm]
-      exact hc1.symm
-    · show φS (HomogeneousLocalization.Away.isLocalizationElem
-          (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W m)) = _
-      rw [hφSdef]
-      show ψ ((addOnYPieceHom W i j k hΔ) (HomogeneousLocalization.Away.isLocalizationElem
-          (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W m))) = _
-      rw [show ((addOnYPieceHom W i j k hΔ) (HomogeneousLocalization.Away.isLocalizationElem
-          (mk_X_mem_quotientGrading_one W k)
-          (mk_X_mem_quotientGrading_one W (⟨m, hm⟩ : {l : Fin 3 // l ≠ k}).1))) =
-        awayTriple W i j k (lawTwoTriple W i j) (⟨m, hm⟩ : {l : Fin 3 // l ≠ k}).1 *
-          IsLocalization.Away.invSelf (lawTwoTriple W i j k) from
-        chartAwayHomOfTriple_isLocalizationElem W k _ _ _ _ ⟨m, hm⟩]
-      rw [map_mul]
-      show _ = ψ (IsLocalization.Away.invSelf (lawTwoTriple W i j k)) *
-        ψ ((algebraMap (biChartRing W i j) _) (lawTwoTriple W i j m))
-      rw [awayTriple, mul_comm]
-  rw [htriple]
-  exact WeierstrassCurve.Projective.Point.toAffine_smul _ hcu
+  exact dictionary_sum_of_piece_aux W i j k s (lawTwoTriple W i j)
+    (equation_lawTwoTriple_of_isDomain W i j hΔ) ψ hev
 
 /-- [χ-compat, Z] The pair-ring evaluation is R-compatible (from P's π-condition through the
 committed piece π-compat). -/
@@ -1276,6 +1213,34 @@ lemma descended_lawTwo_smul_add (i j : Fin 3)
     refine ⟨c, hc0, ?_⟩
     rw [hc, hadd]
 
+/-- Shared prefix of `specPoints_arm_{Z,Y}` (the `hcurve` step): an `R`-compatible evaluation `χ`
+transports the projective model over the intermediate ring to the one over `K` (`map_map` + `hχ`). -/
+private lemma toProjective_map_comp_algebraMap {A : Type u} [CommRing A] (W : WeierstrassCurve A)
+    {B : Type u} [CommRing B] {K : Type u} [CommRing K] [Algebra A K]
+    (f : A →+* B) (χ : B →+* K) (hχ : χ.comp f = algebraMap A K) :
+    (W.map f).toProjective.map χ = (W.map (algebraMap A K)).toProjective := by
+  show ((W.map f).map χ).toProjective = _
+  rw [WeierstrassCurve.map_map, hχ]
+
+/-- Shared prefix of `specPoints_arm_{Z,Y}` (the `hunit` step): the base-changed evaluation of the
+`k`-th law-triple coordinate is a unit, inverted by the image of the localization's own inverse. -/
+private lemma isUnit_comp_lawTriple (i j k : Fin 3)
+    (lawT : Fin 3 → biChartRing universalWeierstrassLocU.{u} i j)
+    {K : Type u} [CommRing K]
+    (ψ : Localization.Away (lawT k) →+* K) :
+    IsUnit ((ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
+      (Localization.Away (lawT k)))) (lawT k)) := by
+  refine ⟨⟨(ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
+      (Localization.Away (lawT k)))) (lawT k),
+    ψ (IsLocalization.Away.invSelf (lawT k)), ?_, ?_⟩, rfl⟩ <;>
+  · first
+    | (rw [RingHom.comp_apply, ← map_mul, ← map_one ψ]
+       congr 1
+       exact awayTriple_mul_invSelf universalWeierstrassLocU.{u} i j k lawT)
+    | (rw [RingHom.comp_apply, mul_comm, ← map_mul, ← map_one ψ]
+       congr 1
+       exact awayTriple_mul_invSelf universalWeierstrassLocU.{u} i j k lawT)
+
 /-- [e5c ARM, Z] The complete per-piece assembly at the atlas: sum = P + Q. -/
 lemma specPoints_arm_Z {K : Type u} [Field K] [DecidableEq K]
     [Algebra WeierstrassAtlasRingU.{u} K]
@@ -1306,26 +1271,12 @@ lemma specPoints_arm_Z {K : Type u} [Field K] [DecidableEq K]
         (biChartRing universalWeierstrassLocU.{u} i j))).toProjective.map
       (ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
         (Localization.Away (lawOneTriple universalWeierstrassLocU.{u} i j k))))) =
-      (universalWeierstrassLocU.{u}.map (algebraMap _ K)).toProjective := by
-    show ((universalWeierstrassLocU.{u}.map _).map
-      (ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
-        (Localization.Away (lawOneTriple universalWeierstrassLocU.{u} i j k))))).toProjective = _
-    rw [WeierstrassCurve.map_map, hχ]
+      (universalWeierstrassLocU.{u}.map (algebraMap _ K)).toProjective :=
+    toProjective_map_comp_algebraMap universalWeierstrassLocU.{u} _ _ hχ
   have hunit : IsUnit ((ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
       (Localization.Away (lawOneTriple universalWeierstrassLocU.{u} i j k))))
-      (lawOneTriple universalWeierstrassLocU.{u} i j k)) := by
-    refine ⟨⟨(ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
-        (Localization.Away (lawOneTriple universalWeierstrassLocU.{u} i j k))))
-        (lawOneTriple universalWeierstrassLocU.{u} i j k),
-      ψ (IsLocalization.Away.invSelf (lawOneTriple universalWeierstrassLocU.{u} i j k)),
-      ?_, ?_⟩, rfl⟩ <;>
-    · first
-      | (rw [RingHom.comp_apply, ← map_mul, ← map_one ψ]
-         congr 1
-         exact awayTriple_mul_invSelf universalWeierstrassLocU.{u} i j k _)
-      | (rw [RingHom.comp_apply, mul_comm, ← map_mul, ← map_one ψ]
-         congr 1
-         exact awayTriple_mul_invSelf universalWeierstrassLocU.{u} i j k _)
+      (lawOneTriple universalWeierstrassLocU.{u} i j k)) :=
+    isUnit_comp_lawTriple i j k (lawOneTriple universalWeierstrassLocU.{u} i j) ψ
   have he5a := descended_lawOne_eq_add i j k
     (ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
       (Localization.Away (lawOneTriple universalWeierstrassLocU.{u} i j k)))) hunit
@@ -1369,26 +1320,12 @@ lemma specPoints_arm_Y {K : Type u} [Field K] [DecidableEq K]
         (biChartRing universalWeierstrassLocU.{u} i j))).toProjective.map
       (ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
         (Localization.Away (lawTwoTriple universalWeierstrassLocU.{u} i j k))))) =
-      (universalWeierstrassLocU.{u}.map (algebraMap _ K)).toProjective := by
-    show ((universalWeierstrassLocU.{u}.map _).map
-      (ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
-        (Localization.Away (lawTwoTriple universalWeierstrassLocU.{u} i j k))))).toProjective = _
-    rw [WeierstrassCurve.map_map, hχ]
+      (universalWeierstrassLocU.{u}.map (algebraMap _ K)).toProjective :=
+    toProjective_map_comp_algebraMap universalWeierstrassLocU.{u} _ _ hχ
   have hunit : IsUnit ((ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
       (Localization.Away (lawTwoTriple universalWeierstrassLocU.{u} i j k))))
-      (lawTwoTriple universalWeierstrassLocU.{u} i j k)) := by
-    refine ⟨⟨(ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
-        (Localization.Away (lawTwoTriple universalWeierstrassLocU.{u} i j k))))
-        (lawTwoTriple universalWeierstrassLocU.{u} i j k),
-      ψ (IsLocalization.Away.invSelf (lawTwoTriple universalWeierstrassLocU.{u} i j k)),
-      ?_, ?_⟩, rfl⟩ <;>
-    · first
-      | (rw [RingHom.comp_apply, ← map_mul, ← map_one ψ]
-         congr 1
-         exact awayTriple_mul_invSelf universalWeierstrassLocU.{u} i j k _)
-      | (rw [RingHom.comp_apply, mul_comm, ← map_mul, ← map_one ψ]
-         congr 1
-         exact awayTriple_mul_invSelf universalWeierstrassLocU.{u} i j k _)
+      (lawTwoTriple universalWeierstrassLocU.{u} i j k)) :=
+    isUnit_comp_lawTriple i j k (lawTwoTriple universalWeierstrassLocU.{u} i j) ψ
   obtain ⟨c, hc0, he5b⟩ := descended_lawTwo_smul_add i j k
     (ψ.comp (algebraMap (biChartRing universalWeierstrassLocU.{u} i j)
       (Localization.Away (lawTwoTriple universalWeierstrassLocU.{u} i j k)))) hunit
@@ -1402,6 +1339,80 @@ lemma specPoints_arm_Y {K : Type u} [Field K] [DecidableEq K]
   rw [← dictionary_fst_of_pieceY universalWeierstrassLocU.{u} i j k P Q w ψ hgp,
     ← dictionary_snd_of_pieceY universalWeierstrassLocU.{u} i j k P Q w ψ hgp]
   rfl
+
+/-- Shared assembler for the four law-1 (Z) arms of `mulModelHom_specPoints_atlas`: given the
+image-form factorisation `hh₁` of a piece and its multiplication-evaluation `hmul`, descend through
+`specPoint_addOnZOnImage_factors'` and finish via `specPoints_arm_Z`. -/
+private lemma mulModelHom_specPoints_atlas_armZ {K : Type u} [Field K] [DecidableEq K]
+    [Algebra WeierstrassAtlasRingU.{u} K]
+    (P Q : SpecPoints (projModel universalWeierstrassLocU.{u})
+      (projModelπ universalWeierstrassLocU.{u}) K)
+    (w : P.1 ≫ projModelπ universalWeierstrassLocU.{u} =
+      Q.1 ≫ projModelπ universalWeierstrassLocU.{u})
+    (i j : Fin 3) [IsDomain (biChartRing universalWeierstrassLocU.{u} i j)]
+    (h₁ : Spec (CommRingCat.of K) ⟶
+      (blOpenZImage universalWeierstrassLocU.{u} i j).toScheme)
+    (hh₁ : h₁ ≫ (blOpenZImage universalWeierstrassLocU.{u} i j).ι = pullback.lift P.1 Q.1 w)
+    (hmul : pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
+          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ =
+        h₁ ≫ addOnZOnImage universalWeierstrassLocU.{u}
+          universalWeierstrassLocU.isUnit_Δ i j) :
+    projModelPointsEquiv universalWeierstrassLocU.{u} K
+        ⟨pullback.lift P.1 Q.1 w ≫
+            WeierstrassCurve.Projective.mulModelHom universalWeierstrassLocU.{u}
+              universalWeierstrassLocU.isUnit_Δ, by
+          rw [Category.assoc, WeierstrassCurve.Projective.mulModelHom_projModelπ,
+            ← Category.assoc, pullback.lift_fst, P.2]⟩ =
+      projModelPointsEquiv universalWeierstrassLocU.{u} K P +
+        projModelPointsEquiv universalWeierstrassLocU.{u} K Q := by
+  classical
+  obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnZOnImage_factors'
+    universalWeierstrassLocU.{u} i j universalWeierstrassLocU.isUnit_Δ h₁
+  have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
+      pieceAwayZι universalWeierstrassLocU.{u} i j k := by
+    rw [himm]
+    exact hh₁.symm
+  refine specPoints_arm_Z P Q w i j k ψ hgp _ ?_
+  show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
+      universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
+  exact hmul.trans hev₂
+
+/-- Shared assembler for the four law-2 (Y) arms of `mulModelHom_specPoints_atlas`: the mirror of
+`mulModelHom_specPoints_atlas_armZ`, descending through `specPoint_addOnYOnImage_factors'` and
+finishing via `specPoints_arm_Y`. -/
+private lemma mulModelHom_specPoints_atlas_armY {K : Type u} [Field K] [DecidableEq K]
+    [Algebra WeierstrassAtlasRingU.{u} K]
+    (P Q : SpecPoints (projModel universalWeierstrassLocU.{u})
+      (projModelπ universalWeierstrassLocU.{u}) K)
+    (w : P.1 ≫ projModelπ universalWeierstrassLocU.{u} =
+      Q.1 ≫ projModelπ universalWeierstrassLocU.{u})
+    (i j : Fin 3) [IsDomain (biChartRing universalWeierstrassLocU.{u} i j)]
+    (h₁ : Spec (CommRingCat.of K) ⟶
+      (blOpenYImage universalWeierstrassLocU.{u} i j).toScheme)
+    (hh₁ : h₁ ≫ (blOpenYImage universalWeierstrassLocU.{u} i j).ι = pullback.lift P.1 Q.1 w)
+    (hmul : pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
+          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ =
+        h₁ ≫ addOnYOnImage universalWeierstrassLocU.{u}
+          universalWeierstrassLocU.isUnit_Δ i j) :
+    projModelPointsEquiv universalWeierstrassLocU.{u} K
+        ⟨pullback.lift P.1 Q.1 w ≫
+            WeierstrassCurve.Projective.mulModelHom universalWeierstrassLocU.{u}
+              universalWeierstrassLocU.isUnit_Δ, by
+          rw [Category.assoc, WeierstrassCurve.Projective.mulModelHom_projModelπ,
+            ← Category.assoc, pullback.lift_fst, P.2]⟩ =
+      projModelPointsEquiv universalWeierstrassLocU.{u} K P +
+        projModelPointsEquiv universalWeierstrassLocU.{u} K Q := by
+  classical
+  obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnYOnImage_factors'
+    universalWeierstrassLocU.{u} i j universalWeierstrassLocU.isUnit_Δ h₁
+  have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
+      pieceAwayι universalWeierstrassLocU.{u} i j k := by
+    rw [himm]
+    exact hh₁.symm
+  refine specPoints_arm_Y P Q w i j k ψ hgp _ ?_
+  show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
+      universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
+  exact hmul.trans hev₂
 
 /-- **[C6-e5c] The atlas-level specPoints spec** (the c6 core): over the ULift universal atlas the
 glued two-law multiplication computes the group law of the dictionary. Proof plan (v10.94f/g):
@@ -1430,138 +1441,82 @@ theorem mulModelHom_specPoints_atlas {K : Type u} [Field K] [DecidableEq K]
     obtain ⟨p, h₁, hfam, heval⟩ := specPoint_addOnZ_family universalWeierstrassLocU.{u}
       universalWeierstrassLocU.isUnit_Δ h₀
     fin_cases p
-    · obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnZOnImage_factors'
-        universalWeierstrassLocU.{u} 1 1 universalWeierstrassLocU.isUnit_Δ h₁
-      have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
-          pieceAwayZι universalWeierstrassLocU.{u} 1 1 k := by
-        rw [himm, ← hh₀, ← hfam]
-        exact (Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))
-      refine specPoints_arm_Z P Q w 1 1 k ψ hgp _ ?_
-      show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
-          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
-      exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
-            universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
-        ((Category.assoc _ _ _).trans
-          ((congrArg (h₀ ≫ ·)
-            (WeierstrassCurve.Projective.blOpenZ_ι_mulModelHom universalWeierstrassLocU.{u}
-              universalWeierstrassLocU.isUnit_Δ)).trans
-            (heval.trans hev₂)))
-    · obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnZOnImage_factors'
-        universalWeierstrassLocU.{u} 1 2 universalWeierstrassLocU.isUnit_Δ h₁
-      have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
-          pieceAwayZι universalWeierstrassLocU.{u} 1 2 k := by
-        rw [himm, ← hh₀, ← hfam]
-        exact (Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))
-      refine specPoints_arm_Z P Q w 1 2 k ψ hgp _ ?_
-      show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
-          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
-      exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
-            universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
-        ((Category.assoc _ _ _).trans
-          ((congrArg (h₀ ≫ ·)
-            (WeierstrassCurve.Projective.blOpenZ_ι_mulModelHom universalWeierstrassLocU.{u}
-              universalWeierstrassLocU.isUnit_Δ)).trans
-            (heval.trans hev₂)))
-    · obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnZOnImage_factors'
-        universalWeierstrassLocU.{u} 2 1 universalWeierstrassLocU.isUnit_Δ h₁
-      have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
-          pieceAwayZι universalWeierstrassLocU.{u} 2 1 k := by
-        rw [himm, ← hh₀, ← hfam]
-        exact (Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))
-      refine specPoints_arm_Z P Q w 2 1 k ψ hgp _ ?_
-      show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
-          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
-      exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
-            universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
-        ((Category.assoc _ _ _).trans
-          ((congrArg (h₀ ≫ ·)
-            (WeierstrassCurve.Projective.blOpenZ_ι_mulModelHom universalWeierstrassLocU.{u}
-              universalWeierstrassLocU.isUnit_Δ)).trans
-            (heval.trans hev₂)))
-    · obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnZOnImage_factors'
-        universalWeierstrassLocU.{u} 2 2 universalWeierstrassLocU.isUnit_Δ h₁
-      have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
-          pieceAwayZι universalWeierstrassLocU.{u} 2 2 k := by
-        rw [himm, ← hh₀, ← hfam]
-        exact (Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))
-      refine specPoints_arm_Z P Q w 2 2 k ψ hgp _ ?_
-      show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
-          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
-      exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
-            universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
-        ((Category.assoc _ _ _).trans
-          ((congrArg (h₀ ≫ ·)
-            (WeierstrassCurve.Projective.blOpenZ_ι_mulModelHom universalWeierstrassLocU.{u}
-              universalWeierstrassLocU.isUnit_Δ)).trans
-            (heval.trans hev₂)))
+    · refine mulModelHom_specPoints_atlas_armZ P Q w 1 1 h₁ ?_ ?_
+      · rw [← hh₀, ← hfam]
+        exact ((Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))).symm
+      · exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
+              universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
+          ((Category.assoc _ _ _).trans
+            ((congrArg (h₀ ≫ ·)
+              (WeierstrassCurve.Projective.blOpenZ_ι_mulModelHom universalWeierstrassLocU.{u}
+                universalWeierstrassLocU.isUnit_Δ)).trans heval))
+    · refine mulModelHom_specPoints_atlas_armZ P Q w 1 2 h₁ ?_ ?_
+      · rw [← hh₀, ← hfam]
+        exact ((Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))).symm
+      · exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
+              universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
+          ((Category.assoc _ _ _).trans
+            ((congrArg (h₀ ≫ ·)
+              (WeierstrassCurve.Projective.blOpenZ_ι_mulModelHom universalWeierstrassLocU.{u}
+                universalWeierstrassLocU.isUnit_Δ)).trans heval))
+    · refine mulModelHom_specPoints_atlas_armZ P Q w 2 1 h₁ ?_ ?_
+      · rw [← hh₀, ← hfam]
+        exact ((Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))).symm
+      · exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
+              universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
+          ((Category.assoc _ _ _).trans
+            ((congrArg (h₀ ≫ ·)
+              (WeierstrassCurve.Projective.blOpenZ_ι_mulModelHom universalWeierstrassLocU.{u}
+                universalWeierstrassLocU.isUnit_Δ)).trans heval))
+    · refine mulModelHom_specPoints_atlas_armZ P Q w 2 2 h₁ ?_ ?_
+      · rw [← hh₀, ← hfam]
+        exact ((Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))).symm
+      · exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
+              universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
+          ((Category.assoc _ _ _).trans
+            ((congrArg (h₀ ≫ ·)
+              (WeierstrassCurve.Projective.blOpenZ_ι_mulModelHom universalWeierstrassLocU.{u}
+                universalWeierstrassLocU.isUnit_Δ)).trans heval))
   · -- law-2 (Y) case
     obtain ⟨p, h₁, hfam, heval⟩ := specPoint_addOnY_family universalWeierstrassLocU.{u}
       universalWeierstrassLocU.isUnit_Δ h₀
     fin_cases p
-    · obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnYOnImage_factors'
-        universalWeierstrassLocU.{u} 1 1 universalWeierstrassLocU.isUnit_Δ h₁
-      have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
-          pieceAwayι universalWeierstrassLocU.{u} 1 1 k := by
-        rw [himm, ← hh₀, ← hfam]
-        exact (Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))
-      refine specPoints_arm_Y P Q w 1 1 k ψ hgp _ ?_
-      show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
-          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
-      exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
-            universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
-        ((Category.assoc _ _ _).trans
-          ((congrArg (h₀ ≫ ·)
-            (WeierstrassCurve.Projective.blOpenY_ι_mulModelHom universalWeierstrassLocU.{u}
-              universalWeierstrassLocU.isUnit_Δ)).trans
-            (heval.trans hev₂)))
-    · obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnYOnImage_factors'
-        universalWeierstrassLocU.{u} 1 2 universalWeierstrassLocU.isUnit_Δ h₁
-      have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
-          pieceAwayι universalWeierstrassLocU.{u} 1 2 k := by
-        rw [himm, ← hh₀, ← hfam]
-        exact (Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))
-      refine specPoints_arm_Y P Q w 1 2 k ψ hgp _ ?_
-      show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
-          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
-      exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
-            universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
-        ((Category.assoc _ _ _).trans
-          ((congrArg (h₀ ≫ ·)
-            (WeierstrassCurve.Projective.blOpenY_ι_mulModelHom universalWeierstrassLocU.{u}
-              universalWeierstrassLocU.isUnit_Δ)).trans
-            (heval.trans hev₂)))
-    · obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnYOnImage_factors'
-        universalWeierstrassLocU.{u} 2 1 universalWeierstrassLocU.isUnit_Δ h₁
-      have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
-          pieceAwayι universalWeierstrassLocU.{u} 2 1 k := by
-        rw [himm, ← hh₀, ← hfam]
-        exact (Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))
-      refine specPoints_arm_Y P Q w 2 1 k ψ hgp _ ?_
-      show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
-          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
-      exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
-            universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
-        ((Category.assoc _ _ _).trans
-          ((congrArg (h₀ ≫ ·)
-            (WeierstrassCurve.Projective.blOpenY_ι_mulModelHom universalWeierstrassLocU.{u}
-              universalWeierstrassLocU.isUnit_Δ)).trans
-            (heval.trans hev₂)))
-    · obtain ⟨k, ψ, hev₂, himm⟩ := specPoint_addOnYOnImage_factors'
-        universalWeierstrassLocU.{u} 2 2 universalWeierstrassLocU.isUnit_Δ h₁
-      have hgp : pullback.lift P.1 Q.1 w = Spec.map (CommRingCat.ofHom ψ) ≫
-          pieceAwayι universalWeierstrassLocU.{u} 2 2 k := by
-        rw [himm, ← hh₀, ← hfam]
-        exact (Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))
-      refine specPoints_arm_Y P Q w 2 2 k ψ hgp _ ?_
-      show pullback.lift P.1 Q.1 w ≫ WeierstrassCurve.Projective.mulModelHom
-          universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ = _
-      exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
-            universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
-        ((Category.assoc _ _ _).trans
-          ((congrArg (h₀ ≫ ·)
-            (WeierstrassCurve.Projective.blOpenY_ι_mulModelHom universalWeierstrassLocU.{u}
-              universalWeierstrassLocU.isUnit_Δ)).trans
-            (heval.trans hev₂)))
+    · refine mulModelHom_specPoints_atlas_armY P Q w 1 1 h₁ ?_ ?_
+      · rw [← hh₀, ← hfam]
+        exact ((Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))).symm
+      · exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
+              universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
+          ((Category.assoc _ _ _).trans
+            ((congrArg (h₀ ≫ ·)
+              (WeierstrassCurve.Projective.blOpenY_ι_mulModelHom universalWeierstrassLocU.{u}
+                universalWeierstrassLocU.isUnit_Δ)).trans heval))
+    · refine mulModelHom_specPoints_atlas_armY P Q w 1 2 h₁ ?_ ?_
+      · rw [← hh₀, ← hfam]
+        exact ((Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))).symm
+      · exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
+              universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
+          ((Category.assoc _ _ _).trans
+            ((congrArg (h₀ ≫ ·)
+              (WeierstrassCurve.Projective.blOpenY_ι_mulModelHom universalWeierstrassLocU.{u}
+                universalWeierstrassLocU.isUnit_Δ)).trans heval))
+    · refine mulModelHom_specPoints_atlas_armY P Q w 2 1 h₁ ?_ ?_
+      · rw [← hh₀, ← hfam]
+        exact ((Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))).symm
+      · exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
+              universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
+          ((Category.assoc _ _ _).trans
+            ((congrArg (h₀ ≫ ·)
+              (WeierstrassCurve.Projective.blOpenY_ι_mulModelHom universalWeierstrassLocU.{u}
+                universalWeierstrassLocU.isUnit_Δ)).trans heval))
+    · refine mulModelHom_specPoints_atlas_armY P Q w 2 2 h₁ ?_ ?_
+      · rw [← hh₀, ← hfam]
+        exact ((Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (Scheme.homOfLE_ι _ _))).symm
+      · exact (congrArg (· ≫ WeierstrassCurve.Projective.mulModelHom
+              universalWeierstrassLocU.{u} universalWeierstrassLocU.isUnit_Δ) hh₀.symm).trans
+          ((Category.assoc _ _ _).trans
+            ((congrArg (h₀ ≫ ·)
+              (WeierstrassCurve.Projective.blOpenY_ι_mulModelHom universalWeierstrassLocU.{u}
+                universalWeierstrassLocU.isUnit_Δ)).trans heval))
 
 section DictionaryNaturality
 
