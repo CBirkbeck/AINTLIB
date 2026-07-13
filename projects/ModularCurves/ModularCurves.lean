@@ -67,6 +67,7 @@ import ModularCurves.LevelStructure.ExactOrder
 import ModularCurves.LevelStructure.FibreFullLevel
 import ModularCurves.LevelStructure.FullLevelFibre
 import ModularCurves.LevelStructure.Incidence
+import ModularCurves.LevelStructure.SectionsDivisorBaseChange
 import ModularCurves.ModularCurve.YFullRoute
 import ModularCurves.ModularCurve.YFullTE9
 import ModularCurves.ModularCurve.YOneAssembly
