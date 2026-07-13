@@ -2206,9 +2206,10 @@ T-E15's ℰ₃), [a5-i] is trivial and [a5-ii] simplifies to one base-change poi
   - CHR (Trans. AMS 52 (1965) 15–33) stays an **optional** acquisition: it packages L1–L4 as
     "`A/Aᴳ` is Galois with group `G`" and would replace four leaves by one citation.
 
-### [T-E-OMEGA] the invariant differential `ω_{E/S}` — FUNDED (v10.27), **BLOCKED-ON-T-W7.1b**
-- **Status**: funded, decomposed (R1/R2 below), **blocked on T-W7.1b**; released to the board
-  — claimable the moment 1b flips DONE · **Claimed**: — · **File**: new `EllipticCurve/InvariantDifferential.lean` ·
+### [T-E-OMEGA] the invariant differential `ω_{E/S}` — FUNDED (v10.27), **UNGATED (1b PROVEN)**
+- **Status**: in_progress (claimed 2026-07-13, STREAM-OMEGA seat; 1b = `pointedIso_exists_variableChange`
+  proven sorry-free at `EllipticCurve/Comparison.lean:162` — stale BLOCKED header corrected per v10.179)
+  · **Claimed**: OMEGA (sentinel `beastmode_active.OMEGA`) · **File**: new `EllipticCurve/InvariantDifferential.lean` ·
   **Blocks**: T-E12, T-E13, T-E14 ⟹ T-E5e ⟹ T-E5f ⟹ **the `ℤ[1/2]`-half of KM 4.7** ·
   **Type**: def + 3 lemmas (a bounded sub-stream, not a leaf)
 - **The gap (verified 2026-07-08, fable-P4)**: KM's Legendre problem (4.6.2, verbatim)
@@ -18145,3 +18146,31 @@ all complete at once.** (T-E15, the ℤ[1/3] half, is already unblocked.)
 every seat's paste-ready opener (owner's request — they were scattered across turn-summaries + the
 per-stream inboxes). Four active seats now: **G0** (Hopf SIGNAL), **KM** (Γ₁ rel-rep ★), **GH**
 (GHC1), **OMEGA** (the shared-engine gate). Coordinator keeps it current each dispatch.
+
+### v10.180-G0 — [HG-C3b] LANDED + C3c BRIDGE KILLED: the [n]-preimage stable-chart engine (STREAM-G0)
+Two commits on dev/modular-curves (591df7740, 708e5c0a5), both pushed; GroupScheme/StableCover.lean.
+
+**[C3b] `isStableOpen_complOpen` (CLEAN triple):** E ∖ G is translation-stable, DIRECT from the
+preimage predicate per the v10.178 Q2 ruling. Route: over W = (G ×_S E) ×_{act,E,ι} G
+(exists_preimage_pullback), the identity Y + T = Z in E.Point w (pointEquivOverHom +
+translationAction_eq_mul, the IsInvariant.coequalizes idiom) with T, Z ∈ pointSubgroup gives
+Y = Z − T ∈ pointSubgroup (sub_mem) — the projection factors through ι. Also: mapIso registered
+in root imports (was landed 80bc663a2 but unregistered).
+
+**C3c CORRECTION (the ratified bridge is mathematically obstructed):** "express xᵢ+G as V₊(fᵢ)"
+cannot work as stated — V₊(f) for f ∈ 𝒜_m is ALWAYS ~ 3m·[O] (hyperplane class), so x+G = V₊(f)
+requires k(x+G) ~ 3m[O], i.e. torsion conditions on x AND an Abel/Pic⁰ linear-equivalence input —
+which is PIC0-parked territory. The v10.176 premise "a degree-N divisor D = vanishing of a
+homogeneous section f" (from my own C3 doc) is false in general; caught before building.
+
+**THE REPLACEMENT (cheaper, LANDED — the [n]-preimage engine):** G killed by n ⟹ [n]∘act = [n]∘pr
+(`translationAction_comp_mulByHom`, Hom-group) ⟹
+- `isStableOpen_mulByHom_preimage`: [n]⁻¹(ANY open) is G-stable — CLEAN triple;
+- `isAffineOpen_mulByHom_preimage`: [N]⁻¹(affine) affine ([N] finite⟹affine; inherits BB-QF);
+- `iSup_mulByHom_preimage_eq_top`: preimages of a cover cover — CLEAN;
+- `ι_comp_mulByHom_of_hasRank`: rank-N ⟹ killed-by-N morphism form (BB-DELIGNE, quarantined here).
+CONSEQUENCE: the C3 cover = pull the two Weierstrass basic-open charts D₊(Y), D₊(Z) back along [N]
+(V₊(Y) ∩ V₊(Z) ∩ E = ∅ since the cubic avoids [1:0:0]) — NO cosets, NO section-existence problem
+(C3e's x₀ vanishes), NO division polynomials, NO Abel. C3a/translateByIso + mapIso remain as landed
+general infra. REMAINING for C3: the per-Weierstrass-chart D₊(Y)/D₊(Z) instantiation (atlas plumbing,
+Comparison.lean idioms) → C3d freeness (+lane-B c4) → C3f assembly → C4. (STREAM-G0)
