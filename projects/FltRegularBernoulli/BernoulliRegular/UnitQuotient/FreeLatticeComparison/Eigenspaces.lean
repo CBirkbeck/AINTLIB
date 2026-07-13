@@ -19,10 +19,6 @@ open scoped NumberField
 
 namespace BernoulliRegular
 
-open Finset
-
-set_option linter.unusedSectionVars false
-
 attribute [local instance] Fintype.ofFinite
 attribute [local instance] NumberField.Units.instZLattice_unitLattice
 
@@ -110,7 +106,7 @@ theorem mem_cyclotomicUnitFreePartModPEvenCharacterEigenspace_iff_generator
           _ = χ ((cyclotomicEvenDeltaGenerator p) ^ n) •
                 (χ (cyclotomicEvenDeltaGenerator p) • x) := by
               simpa [cyclotomicUnitFreePartModPEvenGeneratorEnd] using congrArg
-                (fun y => χ ((cyclotomicEvenDeltaGenerator p) ^ n) • y) hx
+                (fun y ↦ χ ((cyclotomicEvenDeltaGenerator p) ^ n) • y) hx
           _ = (χ ((cyclotomicEvenDeltaGenerator p) ^ n) *
                 χ (cyclotomicEvenDeltaGenerator p)) • x := by rw [smul_smul]
           _ = χ ((cyclotomicEvenDeltaGenerator p) ^ (n + 1)) • x := by
@@ -137,11 +133,11 @@ theorem cyclotomicUnitFreePartModPEvenCharacterProjector_mem_eigenspace
     cyclotomicUnitFreePartModPEvenCharacterProjector (p := p) K hp_gt_two χ x ∈
       cyclotomicUnitFreePartModPEvenCharacterEigenspace (p := p) K hp_gt_two χ := by
   classical
-  letI : Invertible (Fintype.card (CyclotomicEvenDelta p) : ZMod p) :=
+  let : Invertible (Fintype.card (CyclotomicEvenDelta p) : ZMod p) :=
     cyclotomicEvenDeltaCardInvertibleZMod (p := p) hp_gt_two
-  letI : Invertible (2 : ZMod p) :=
+  let : Invertible (2 : ZMod p) :=
     twoInvertibleZModOfPrimeGtTwo (p := p) hp_gt_two
-  letI : HasEnoughRootsOfUnity (ZMod p) (Monoid.exponent (CyclotomicEvenDelta p)) :=
+  let : HasEnoughRootsOfUnity (ZMod p) (Monoid.exponent (CyclotomicEvenDelta p)) :=
     cyclotomicEvenDelta_hasEnoughRootsOfUnity_zmod (p := p)
   intro a
   change
@@ -162,9 +158,9 @@ theorem cyclotomicUnitFreePartModPEvenCharacterProjector_sum_apply
     (∑ χ : MulChar (CyclotomicEvenDelta p) (ZMod p),
         cyclotomicUnitFreePartModPEvenCharacterProjector (p := p) K hp_gt_two χ x) = x := by
   classical
-  letI : Invertible (Fintype.card (CyclotomicEvenDelta p) : ZMod p) :=
+  let : Invertible (Fintype.card (CyclotomicEvenDelta p) : ZMod p) :=
     cyclotomicEvenDeltaCardInvertibleZMod (p := p) hp_gt_two
-  letI : HasEnoughRootsOfUnity (ZMod p) (Monoid.exponent (CyclotomicEvenDelta p)) :=
+  let : HasEnoughRootsOfUnity (ZMod p) (Monoid.exponent (CyclotomicEvenDelta p)) :=
     cyclotomicEvenDelta_hasEnoughRootsOfUnity_zmod (p := p)
   let ρ := cyclotomicUnitFreePartModPEvenRepresentation (p := p) K hp_gt_two
   calc
@@ -191,7 +187,7 @@ theorem cyclotomicUnitFreePartModPEvenCharacterEigenspace_iSup_eq_top
   rw [← cyclotomicUnitFreePartModPEvenCharacterProjector_sum_apply
     (p := p) (K := K) hp_gt_two x]
   exact Submodule.sum_mem _
-    (fun χ _ => Submodule.mem_iSup_of_mem χ
+    (fun χ _ ↦ Submodule.mem_iSup_of_mem χ
       (cyclotomicUnitFreePartModPEvenCharacterProjector_mem_eigenspace
         (p := p) (K := K) hp_gt_two χ x))
 
@@ -243,7 +239,7 @@ theorem cyclotomicUnitFreePartModPDeltaCharacterEigenspace_eq_bot_of_odd
         _ = 0 := neg_add_cancel x
     have htwo_smul : (2 : ZMod p) • x = 0 := by
       simpa [two_smul (ZMod p) x] using hsum
-    have hp_not_dvd_two : ¬ p ∣ 2 := fun hdiv =>
+    have hp_not_dvd_two : ¬ p ∣ 2 := fun hdiv ↦
       not_le_of_gt hp_gt_two (Nat.le_of_dvd (by decide) hdiv)
     have htwo_ne : (2 : ZMod p) ≠ 0 := by
       change ¬ ((2 : ℕ) : ZMod p) = 0
@@ -287,7 +283,6 @@ theorem cyclotomicUnitFreePartModPEvenCharacterEigenspace_inf_eq_bot_of_ne
     rw [Submodule.mem_bot] at hx
     rw [hx]
     exact Submodule.zero_mem _
-
 
 end BernoulliRegular
 
