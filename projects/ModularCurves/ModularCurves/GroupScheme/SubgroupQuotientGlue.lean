@@ -1111,6 +1111,49 @@ theorem cross_desc_condition (P' : G.AffineChartPatch)
     _ = b ≫ (P.windowCrossIso P' h1 h2).hom ≫ (P'.U.ι ⁻¹ᵁ W).ι ≫
           G.localQuotientOpenπ P'.hstable := by simp only [Category.assoc]
 
+/-- **The generic glue transition**: cross to the other chart's window, widen along
+`hle`, project. Descends along the source restricted projection by the master
+condition. -/
+noncomputable def glueTransition (P' : G.AffineChartPatch)
+    [Module.Free P'.baseRing P'.groupRing] {W' : E.E.Opens}
+    (hW : G.IsStableOpen W) (hW' : G.IsStableOpen W')
+    (hWP : W ≤ P.U) (hWP' : W ≤ P'.U) (hle : W ≤ W') (hW'P' : W' ≤ P'.U) :
+    (P.imageOpens hW hWP).toScheme ⟶ (P'.imageOpens hW' hW'P').toScheme :=
+  P.descRestrictedπ hW hWP
+    ((P.windowCrossIso P' hWP hWP').hom ≫
+      P'.U.toScheme.homOfLE (Scheme.Hom.preimage_mono P'.U.ι hle) ≫
+      P'.restrictedπ hW' hW'P')
+    (fun a b hab => by
+      rw [← cancel_mono (P'.imageOpens hW' hW'P').ι]
+      have base := P.cross_desc_condition P' hW hWP hWP' a b hab
+      have base' := congrArg (· ≫ (P'.imageOpens hW hWP').ι) base
+      simp only [Category.assoc] at base' ⊢
+      rw [P'.restrictedπ_ι hW hWP'] at base'
+      rw [P'.restrictedπ_ι hW' hW'P', Scheme.homOfLE_ι_assoc]
+      exact base')
+
+@[reassoc]
+theorem restrictedπ_glueTransition (P' : G.AffineChartPatch)
+    [Module.Free P'.baseRing P'.groupRing] {W' : E.E.Opens}
+    (hW : G.IsStableOpen W) (hW' : G.IsStableOpen W')
+    (hWP : W ≤ P.U) (hWP' : W ≤ P'.U) (hle : W ≤ W') (hW'P' : W' ≤ P'.U) :
+    P.restrictedπ hW hWP ≫ P.glueTransition P' hW hW' hWP hWP' hle hW'P'
+      = (P.windowCrossIso P' hWP hWP').hom ≫
+        P'.U.toScheme.homOfLE (Scheme.Hom.preimage_mono P'.U.ι hle) ≫
+        P'.restrictedπ hW' hW'P' :=
+  P.restrictedπ_descRestrictedπ hW hWP
+    ((P.windowCrossIso P' hWP hWP').hom ≫
+      P'.U.toScheme.homOfLE (Scheme.Hom.preimage_mono P'.U.ι hle) ≫
+      P'.restrictedπ hW' hW'P')
+    (fun a b hab => by
+      rw [← cancel_mono (P'.imageOpens hW' hW'P').ι]
+      have base := P.cross_desc_condition P' hW hWP hWP' a b hab
+      have base' := congrArg (· ≫ (P'.imageOpens hW hWP').ι) base
+      simp only [Category.assoc] at base' ⊢
+      rw [P'.restrictedπ_ι hW hWP'] at base'
+      rw [P'.restrictedπ_ι hW' hW'P', Scheme.homOfLE_ι_assoc]
+      exact base')
+
 /-! ### Step S5 preliminaries — saturation arithmetic and the pullback comparison -/
 
 omit [Module.Free P.baseRing P.groupRing] in
@@ -1211,35 +1254,6 @@ theorem imageOpensPullbackIso_hom_snd {W₁ W₂ : E.E.Opens} (hW₁ : G.IsStabl
             inf_le_right) := by
   rw [← cancel_mono (P.imageOpens hW₂ h2).ι, Category.assoc, ← pullback.condition,
     P.imageOpensPullbackIso_hom_comp hW₁ hW₂ h1 h2, Scheme.homOfLE_ι]
-
-/-! ### Step S5 — the quotient glue data transition maps -/
-
-/-- **The quotient glue-data transition map** on the overlap `P.U ⊓ P'.U`: the window seen in
-`P`'s local quotient, mapped to the same window seen in `P'`'s, by descending the cross-chart
-window comparison (`windowCrossIso`) through `P`'s restricted projection. The descent is
-legitimate by the master condition `cross_desc_condition`. -/
-noncomputable def glueTransition (P' : G.AffineChartPatch)
-    [Module.Free P'.baseRing P'.groupRing] :
-    (P.imageOpens (P.hstable.inf G P'.hstable) inf_le_left).toScheme ⟶
-      (P'.imageOpens (P.hstable.inf G P'.hstable) inf_le_right).toScheme :=
-  P.descRestrictedπ (P.hstable.inf G P'.hstable) inf_le_left
-    ((P.windowCrossIso P' inf_le_left inf_le_right).hom ≫
-      P'.restrictedπ (P.hstable.inf G P'.hstable) inf_le_right)
-    (fun a b hab => P.cross_desc_condition P' (P.hstable.inf G P'.hstable)
-      inf_le_left inf_le_right a b hab)
-
-/-- Defining property of `glueTransition`: it descends the cross-window comparison. -/
-@[reassoc]
-theorem restrictedπ_glueTransition (P' : G.AffineChartPatch)
-    [Module.Free P'.baseRing P'.groupRing] :
-    P.restrictedπ (P.hstable.inf G P'.hstable) inf_le_left ≫ P.glueTransition P'
-      = (P.windowCrossIso P' inf_le_left inf_le_right).hom
-        ≫ P'.restrictedπ (P.hstable.inf G P'.hstable) inf_le_right :=
-  P.restrictedπ_descRestrictedπ (P.hstable.inf G P'.hstable) inf_le_left
-    ((P.windowCrossIso P' inf_le_left inf_le_right).hom
-      ≫ P'.restrictedπ (P.hstable.inf G P'.hstable) inf_le_right)
-    (fun a b hab => P.cross_desc_condition P' (P.hstable.inf G P'.hstable)
-      inf_le_left inf_le_right a b hab)
 
 end Descent
 
