@@ -253,6 +253,59 @@ theorem prRing_kappa :
             (Category.assoc _ _ _).trans P.topIso_isoSpec_appTop_ΓSpecIso,
           Category.id_comp]
 
+/-- `kappa` is an isomorphism (a composite of section isomorphisms). -/
+instance : IsIso P.kappa := by
+  haveI h1 : IsIso ((G.chartPullbackIso P.U).inv.appTop) :=
+    inferInstanceAs (IsIso (Scheme.Γ.map (G.chartPullbackIso P.U).inv.op))
+  haveI h2 : IsIso (P.chartSpecIso.inv.appTop) :=
+    inferInstanceAs (IsIso (Scheme.Γ.map P.chartSpecIso.inv.op))
+  rw [kappa]
+  infer_instance
+
+/-- **The per-patch comparison** (`[HG-C4c-2]` step 3c): on an affine chart patch the
+equalizer-subring quotient model agrees with the Hopf co-invariants. Elementwise: both
+legs of the equalizer are pinned under the (injective) Künneth comparison `kappa` by
+`actRing_kappa`/`prRing_kappa`, and the comodule-convention swap is definitional. -/
+theorem quotientRing_eq_coinvariants :
+    G.quotientRing P.hstable = (coinvariants P.chartCoaction).toSubring := by
+  ext b
+  constructor
+  · intro hb
+    show b ∈ coinvariants P.chartCoaction
+    rw [mem_coinvariants]
+    -- from `actRing b = prRing b`, apply `kappa` and the two leg identifications
+    have h1 : P.kappa.hom ((G.actRing P.hstable).hom b)
+        = P.kappa.hom ((G.prRing P.U).hom b) := congrArg P.kappa.hom hb
+    have h2 : P.coactionRing.hom b
+        = (Algebra.TensorProduct.includeRight :
+            P.chartRing →ₐ[P.baseRing] P.groupRing ⊗[P.baseRing] P.chartRing) b := by
+      have hA := congrArg (fun m => (CommRingCat.Hom.hom m) b) (P.actRing_kappa)
+      have hB := congrArg (fun m => (CommRingCat.Hom.hom m) b) (P.prRing_kappa)
+      simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hA hB
+      exact hA.symm.trans (h1.trans hB)
+    -- flip the group-first identity to the comodule convention
+    have h3 : P.chartCoaction b
+        = (Algebra.TensorProduct.comm P.baseRing P.groupRing P.chartRing)
+          (P.coactionRing.hom b) := rfl
+    rw [h3, h2]
+    rfl
+  · intro hb
+    have hb' : P.chartCoaction b = b ⊗ₜ[P.baseRing] 1 := mem_coinvariants.mp hb
+    -- flip to the group-first co-action ring
+    have hP : P.coactionRing.hom b = (1 : P.groupRing) ⊗ₜ[P.baseRing] b :=
+      (Algebra.TensorProduct.comm P.baseRing P.groupRing P.chartRing).injective hb'
+    show (G.actRing P.hstable).hom b = (G.prRing P.U).hom b
+    -- both sides agree after the (injective) `kappa`
+    have hA := congrArg (fun m => (CommRingCat.Hom.hom m) b) (P.actRing_kappa)
+    have hB := congrArg (fun m => (CommRingCat.Hom.hom m) b) (P.prRing_kappa)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hA hB
+    have hκ : P.kappa.hom ((G.actRing P.hstable).hom b)
+        = P.kappa.hom ((G.prRing P.U).hom b) := by
+      rw [hA, hB, hP]
+      rfl
+    haveI : IsIso P.kappa := inferInstance
+    exact ((ConcreteCategory.isIso_iff_bijective P.kappa).mp inferInstance).injective hκ
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
