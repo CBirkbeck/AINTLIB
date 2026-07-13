@@ -453,6 +453,90 @@ theorem isOpenImmersion_levelSpaceΓι_full (hN : NIsInvertible S N) :
   isOpenImmersion_levelSpaceΓι_of_taut E N (fullLevelOpens E N hN)
     (range_levelSpaceΓι_subset E N hN) (isFullLevel_taut_over_fullLevelOpens E N hN)
 
+/-! ### The T-D8-bridge `⟸` direction (naive generation ⟹ divisor equality) -/
+
+/-- **(T-D8-bridge ⟸, KM 3.7.1 / 1.4.4).** Fibrewise generation forces the `N²` combination
+sections `[a]P + [b]Q` to be pairwise **topologically** distinct: if two collide at `u ∈ S`,
+their difference — a combination that hits the *rational* identity section at `u` — has forced
+residue-field agreement (`sections_residue_eq_of_base_eq`, separatedness), so it *vanishes* at
+the geometric point over `u`; but generation makes the `N²` combinations injective there
+(`naive_iff_comboFamily_injective`), forcing the two indices equal. Pairwise-distinctness then
+feeds the `[YF-⊇]` divisor chain (`sectionsDivisor_ideal_eq_torsionIdeal`). No Galois ambiguity
+(the collision point is rational), so the full-set-of-sections/T-D2 globalization is not needed. -/
+theorem naive_gen_implies_divisor_eq (hN : NIsInvertible S N)
+    {P Q : E.Section} (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0)
+    (hgen : ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S),
+        ∀ x : E.Point t, (N : ℤ) • x = 0 →
+          x ∈ AddSubgroup.closure {Point.pull E t P, Point.pull E t Q}) :
+    (RelEffCartierDiv.sectionsDivisor E.π
+        (fun i : Fin (N ^ 2) =>
+          (((((i : ℕ) % N : ℕ) : ℤ) • P + ((((i : ℕ) / N : ℕ) : ℤ) • Q) :
+            E.Point (𝟙 S))))).ideal = E.torsionIdeal N := by
+  haveI : IsSeparated E.π := E.proper.toIsSeparated
+  apply sectionsDivisor_ideal_eq_torsionIdeal
+  · -- each combination section is killed by `N`
+    intro i
+    refine (E.smul_eq_zero_iff_comp_mulByHom (𝟙 S) N _).mp ?_
+    rw [smul_add, smul_comm (N : ℤ) _ P, smul_comm (N : ℤ) _ Q, hP, hQ, smul_zero,
+      smul_zero, add_zero]
+  · -- pairwise topological distinctness
+    intro i _ j _ hij u hcollide
+    -- separatedness forces residue-field agreement at `u`
+    have hres := sections_residue_eq_of_base_eq E.π
+      (((((i : ℕ) % N : ℕ) : ℤ) • P + ((((i : ℕ) / N : ℕ) : ℤ) • Q) : E.Point (𝟙 S))).1
+      (((((j : ℕ) % N : ℕ) : ℤ) • P + ((((j : ℕ) / N : ℕ) : ℤ) • Q) : E.Point (𝟙 S))).1
+      (((((i : ℕ) % N : ℕ) : ℤ) • P + ((((i : ℕ) / N : ℕ) : ℤ) • Q) : E.Point (𝟙 S))).2
+      (((((j : ℕ) % N : ℕ) : ℤ) • P + ((((j : ℕ) / N : ℕ) : ℤ) • Q) : E.Point (𝟙 S))).2
+      u hcollide
+    -- the geometric point over `u`
+    set k : Type u := AlgebraicClosure ↑(S.residueField u) with hk
+    set ū : Spec (CommRingCat.of k) ⟶ S :=
+      Spec.map (CommRingCat.ofHom (algebraMap ↑(S.residueField u) k)) ≫
+        S.fromSpecResidueField u with hū
+    have hpull_eq : Point.pull E ū
+          (((((i : ℕ) % N : ℕ) : ℤ) • P + ((((i : ℕ) / N : ℕ) : ℤ) • Q) : E.Point (𝟙 S)))
+        = Point.pull E ū
+          (((((j : ℕ) % N : ℕ) : ℤ) • P + ((((j : ℕ) / N : ℕ) : ℤ) • Q) : E.Point (𝟙 S))) := by
+      apply Subtype.ext
+      show ū ≫ _ = ū ≫ _
+      rw [hū, Category.assoc, Category.assoc, hres]
+    -- `N` invertible in `k`
+    have hNk : (N : k) ≠ 0 := by
+      refine (nIsInvertible_spec_iff k N).mp ?_
+      have h := hN.map (ū.appTop).hom
+      rwa [map_natCast] at h
+    -- generation makes the combination family injective at the geometric point
+    have hinj := (naive_iff_comboFamily_injective ū hNk hP hQ).mp (hgen k ū)
+    apply hij
+    apply hinj
+    apply Subtype.ext
+    rw [comboFamily, comboFamily, AddSubgroup.coe_add, AddSubgroup.coe_add,
+      AddSubgroup.coe_zsmul, AddSubgroup.coe_zsmul, AddSubgroup.coe_zsmul, AddSubgroup.coe_zsmul]
+    show ((((i : ℕ) % N : ℕ) : ℤ) • Point.pull E ū P
+        + ((((i : ℕ) / N : ℕ) : ℤ) • Point.pull E ū Q) : E.Point ū)
+      = ((((j : ℕ) % N : ℕ) : ℤ) • Point.pull E ū P
+        + ((((j : ℕ) / N : ℕ) : ℤ) • Point.pull E ū Q))
+    rw [← Point.pull_zsmul, ← Point.pull_zsmul, ← Point.pull_add, ← Point.pull_zsmul,
+      ← Point.pull_zsmul, ← Point.pull_add]
+    exact hpull_eq
+
+/-- **(T-D8-bridge, full iff — downstream discharge of `Basic.fullLevel_divisor_iff_naive_gen`).**
+For `N` invertible and `P, Q` killed by `N`, the Drinfeld full-level divisor equality holds iff on
+every geometric point the pulled-back `P, Q` generate the `N`-torsion. `⟹` is
+`naive_gen_of_divisor_eq` (the counting/pigeonhole register); `⟸` is `naive_gen_implies_divisor_eq`
+(the collision-vanishing register). -/
+theorem fullLevel_divisor_iff_naive_gen_downstream (hN : NIsInvertible S N)
+    (P Q : E.Section) (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0) :
+    (RelEffCartierDiv.sectionsDivisor E.π
+        (fun i : Fin (N ^ 2) =>
+          (((((i : ℕ) % N : ℕ) : ℤ) • P + ((((i : ℕ) / N : ℕ) : ℤ) • Q) :
+            E.Point (𝟙 S))))).ideal = E.torsionIdeal N ↔
+      ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S),
+        ∀ x : E.Point t, (N : ℤ) • x = 0 →
+          x ∈ AddSubgroup.closure {Point.pull E t P, Point.pull E t Q} :=
+  ⟨fun hdiv k _ _ t => E.naive_gen_of_divisor_eq N hN hP hQ hdiv k t,
+   fun hgen => E.naive_gen_implies_divisor_eq N hN hP hQ hgen⟩
+
 end EllipticCurve
 
 end ModularCurves
