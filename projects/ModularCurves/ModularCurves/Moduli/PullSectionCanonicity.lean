@@ -7,6 +7,7 @@ import ModularCurves.Moduli.PullSectionAdd
 import ModularCurves.EllipticCurve.RigiditySpreadingOut
 import ModularCurves.EllipticCurve.RecordGroupUnique
 import ModularCurves.LevelStructure.IsoTransport
+import ModularCurves.EllipticCurve.TorsionFibre
 
 /-!
 # The T-E4 transport, reduced to the single canonicity primitive (Y1-D2)
@@ -144,6 +145,33 @@ theorem sectionsDivisor_baseChange {S : Scheme.{u}} (E : EllipticCurve S) {n : �
   rw [hL, hR, Scheme.IdealSheafData.comap_prod]
   refine Finset.prod_congr rfl fun i _ => ?_
   exact (RelEffCartierDiv.ker_sectionBaseChange (P i).1 (P i).2 t).symm
+
+/-- **(KM-W0, full-level base-change torsion-ideal leg)** The `N`-torsion ideal sheaf
+`E[N] = (torsionι N).ker` commutes with base change: on `E ×_S T` it is the scheme-theoretic
+preimage of `E[N]` along the first projection `pullback.fst E.π s`. Public reconstruction of
+the private `fullLevelLocusAux_torsionIdeal_baseChange` (Incidence, unreachable here): the
+`torsionι`-square is a pullback — obtained by cancelling the base pullback square out of the
+`torsionπ`-square `torsion_baseChange_isPullback` via `IsPullback.of_bot` — and the kernel of a
+base-changed closed immersion is the comap of the kernel (`ker_fst_of_isClosedImmersion` +
+`ker_comp_of_isIso`, the same finish used by `RelEffCartierDiv.baseChange_ideal`). -/
+theorem torsionIdeal_baseChange {S : Scheme.{u}} (E : EllipticCurve S) (N : ℕ)
+    {T : Scheme.{u}} (s : T ⟶ S) :
+    (E.baseChange s).torsionIdeal N =
+      (E.torsionIdeal N).comap (Limits.pullback.fst E.π s) := by
+  haveI := E.torsionι_isClosedImmersion N
+  have hι : IsPullback (E.torsionBaseChangeHom N s) ((E.baseChange s).torsionι N)
+      (E.torsionι N) (Limits.pullback.fst E.π s) := by
+    refine IsPullback.of_bot ?_ (E.torsionBaseChangeHom_torsionι N s)
+      (IsPullback.of_hasPullback E.π s)
+    have hbc := E.torsion_baseChange_isPullback N s
+    rw [← E.torsionι_π N, ← (E.baseChange s).torsionι_π N] at hbc
+    exact hbc
+  show ((E.baseChange s).torsionι N).ker
+      = ((E.torsionι N).ker).comap (Limits.pullback.fst E.π s)
+  rw [← Scheme.IdealSheafData.ker_fst_of_isClosedImmersion (E.torsionι N)
+        (Limits.pullback.fst E.π s),
+    ← hι.flip.isoPullback_hom_fst]
+  exact Scheme.Hom.ker_comp_of_isIso _ _
 
 namespace EllHom
 
