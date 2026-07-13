@@ -777,6 +777,69 @@ theorem QuotPkg.f₀_finite_etale {Q : ModuliProblem R} {G : Type*} [Group G]
   exact AlgebraicGeometry.isFinite_etale_of_comp_of_finite_etale_surjective p.π p.f₀
     hcomp_fin hcomp_et
 
+/-- **[GHB7-3b] The base-change transport of quotient packages.** For `k : X' ⟶ X`,
+the base change `pullback pX.f₀ k.baseHom` is a quotient of the pulled action
+([GHB5]), so the comparison of the pulled datum with the chosen datum at `X'`
+([GHB7-2a/2b], equivariant by `compare_equivariant`) descends to a canonical morphism
+`q` to the chosen quotient at `X'`, characterized by `πT ≫ q = compare ≫ pX'.π` and
+lying over `X'.base`. The engine of the [GHB7] functor's `map`. -/
+theorem QuotPkg.exists_mapDescent {Q : ModuliProblem R} {G : Type*} [Group G]
+    [Finite G] {φ : G →* Aut Q} {X X' : EllObj R} (pX : QuotPkg φ X)
+    (pX' : QuotPkg φ X') (hfree : FreeAction φ)
+    (hbX : IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X.base)))
+    (k : X' ⟶ X) :
+    ∃ (πT : CategoryTheory.Limits.pullback pX.d.f k.baseHom ⟶
+        CategoryTheory.Limits.pullback pX.f₀ k.baseHom)
+      (q : CategoryTheory.Limits.pullback pX.f₀ k.baseHom ⟶ pX'.Z₀),
+      πT ≫ pullback.snd pX.f₀ k.baseHom = pullback.snd pX.d.f k.baseHom ∧
+      πT ≫ pullback.fst pX.f₀ k.baseHom = pullback.fst pX.d.f k.baseHom ≫ pX.π ∧
+      (∀ γ : G, (pX.d.σZ.basePullback pX.d.f pX.d.over_base k.baseHom).hom γ ≫ πT
+        = πT) ∧
+      (∀ {Y : Scheme.{u}} (F : CategoryTheory.Limits.pullback pX.d.f k.baseHom ⟶ Y),
+        (∀ γ : G, (pX.d.σZ.basePullback pX.d.f pX.d.over_base k.baseHom).hom γ ≫ F = F) →
+          ∃! q' : CategoryTheory.Limits.pullback pX.f₀ k.baseHom ⟶ Y, πT ≫ q' = F) ∧
+      πT ≫ q = ((pX.d.pullback k).toRelRepData.compare pX'.d.toRelRepData).1 ≫ pX'.π ∧
+      q ≫ pX'.f₀ = pullback.snd pX.f₀ k.baseHom := by
+  haveI := pX.d.finite
+  haveI : IsAffineHom pX.d.f := inferInstance
+  haveI := hbX
+  haveI := AlgebraicGeometry.isAffineHom_diagonal_terminalFrom_of_isAffineHom pX.d.f
+  -- the base-changed quotient is a quotient of the pulled action ([GHB5])
+  obtain ⟨πT, hsnd, hfst, hinv, hUP⟩ :=
+    AlgebraicGeometry.SchemeAction.exists_quotient_baseChange_of_free pX.d.σZ pX.d.f
+      pX.d.over_base (pX.d.free_on_points hfree) pX.π pX.f₀ pX.hπf pX.hπinv pX.hdesc
+      k.baseHom
+  set c := ((pX.d.pullback k).toRelRepData.compare pX'.d.toRelRepData) with hc
+  -- the comparison composed with the chosen projection is invariant
+  have hcinv : ∀ γ : G,
+      (pX.d.σZ.basePullback pX.d.f pX.d.over_base k.baseHom).hom γ ≫ (c.1 ≫ pX'.π) =
+        c.1 ≫ pX'.π := by
+    intro γ
+    have hce : (pX.d.pullback k).σZ.hom γ ≫ c.1 = c.1 ≫ pX'.d.σZ.hom γ :=
+      ModuliProblem.EquivariantRelRepData.compare_equivariant (pX.d.pullback k) pX'.d γ
+    have hce' : (pX.d.σZ.basePullback pX.d.f pX.d.over_base k.baseHom).hom γ ≫ c.1 =
+        c.1 ≫ pX'.d.σZ.hom γ := hce
+    calc (pX.d.σZ.basePullback pX.d.f pX.d.over_base k.baseHom).hom γ ≫ (c.1 ≫ pX'.π)
+        = ((pX.d.σZ.basePullback pX.d.f pX.d.over_base k.baseHom).hom γ ≫ c.1) ≫ pX'.π :=
+          (Category.assoc _ _ _).symm
+      _ = (c.1 ≫ pX'.d.σZ.hom γ) ≫ pX'.π := congrArg (· ≫ pX'.π) hce'
+      _ = c.1 ≫ (pX'.d.σZ.hom γ ≫ pX'.π) := Category.assoc _ _ _
+      _ = c.1 ≫ pX'.π := by rw [pX'.hπinv γ]
+  obtain ⟨q, hq, -⟩ := hUP (c.1 ≫ pX'.π) hcinv
+  -- `q` lies over `X'.base`: both sides descend `pullback.snd pX.d.f k.baseHom`
+  have hqf : q ≫ pX'.f₀ = pullback.snd pX.f₀ k.baseHom := by
+    obtain ⟨w, hw, hwuniq⟩ := hUP (pullback.snd pX.d.f k.baseHom) (fun γ => by
+      simp only [SchemeAction.basePullback, pullback.lift_snd, Category.comp_id])
+    have hπTqf : πT ≫ (q ≫ pX'.f₀) = pullback.snd pX.d.f k.baseHom := by
+      have h1 : πT ≫ (q ≫ pX'.f₀) = (c.1 ≫ pX'.π) ≫ pX'.f₀ :=
+        (Category.assoc _ _ _).symm.trans (congrArg (· ≫ pX'.f₀) hq)
+      have h2 : (c.1 ≫ pX'.π) ≫ pX'.f₀ = c.1 ≫ pX'.d.f :=
+        (Category.assoc _ _ _).trans (by rw [pX'.hπf])
+      exact h1.trans (h2.trans c.2)
+    rw [hwuniq (q ≫ pX'.f₀) hπTqf,
+      hwuniq (pullback.snd pX.f₀ k.baseHom) hsnd]
+  exact ⟨πT, q, hsnd, hfst, hinv, hUP, hq, hqf⟩
+
 /-- **[GHB7] (THE ASSEMBLY — KM 7.1.2 + 7.1.3(1),(2),(3); gates through
 [GHB4]/[GHB5])** For a free action on a moduli problem with finite étale equivariant
 relative data at every object, the quotient problem exists: KM 7.1.3(1) verbatim,
