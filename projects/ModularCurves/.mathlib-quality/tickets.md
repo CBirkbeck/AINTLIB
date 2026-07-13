@@ -18869,3 +18869,21 @@ E; morphism-gluing API hunt: Scheme.OpenCover.glueMorphisms or multicoequalizer 
 universal property (per-patch descRestrictedπ + cover); IsInvariant dictionary
 (coequalizes_of_isInvariant, C4b); then discharge the six SubgroupQuotient pins under the
 coordinator's α/β signature ruling (v10.189-G0). (STREAM-G0)
+
+### v10.196-G0 — ★★ [HG-C4c-2] THE GLUED QUOTIENT EXISTS WITH ITS UNIVERSAL PROPERTY (STREAM-G0)
+SubgroupQuotientGlueData.lean (sorry-free, 3213 jobs green): `gluedQuotient` := glued scheme of the
+quotient glue data · `gluedQuotientπ : E ⟶ E/G` (per-patch legs glued over the C3f cover; overlap
+compat via window lifts + glue condition + transition fac + E-level switch) ·
+**`gluedQuotient_existsUnique_lift`: every `G.IsInvariant` morphism factors UNIQUELY through
+`gluedQuotientπ`** (per-patch fpqc descent `descLocalQuotientOpenπ` via the kernel-pair condition;
+legs glued over `quotientGlueData.openCover` with the vPullbackCone comparison; uniqueness by
+cover-hom_ext + per-patch epi) · `gluedQuotientS : E/G ⟶ S` (= desc of E.π, invariant since points
+are over-morphisms) with `gluedQuotientπ_gluedQuotientS : π ≫ S-map = E.π`.
+This is the OPTION-γ CONSTRUCTION COMPLETE: (quotient, quotientS, quotientπ, over-triangle,
+universal property) all exist parametrized by (N, hkill). LEAN-OP note: J-typed vs point-typed
+kabstract walls throughout the cover plumbing — resolved by full term-mode transitivity chains
+(Eq.trans/congrArg elaborate at full transparency where rw/kabstract refuse).
+REMAINING to the pins: `gluedQuotientπ_coequalizes` (act ≫ π = pr ≫ π via the preimage cover +
+restrictedAction_localQuotientOpenπ) → pin 5's IsInvariant form (reverse dictionary
+isInvariant_of_coequalizes — check TranslationAction.lean) → discharge the six SubgroupQuotient
+pins under the α/β signature ruling (v10.189-G0; α = [G.HasRank N] pins, β = clopen glue). (STREAM-G0)

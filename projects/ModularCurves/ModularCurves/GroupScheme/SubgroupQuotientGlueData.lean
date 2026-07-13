@@ -411,6 +411,181 @@ theorem ι_gluedQuotientπ (i : ↥E.E) :
       = G.gluedQuotientLeg N hkill i :=
   (G.glueCover N hkill).ι_glueMorphisms _ _ i
 
+/-! ### The universal property of the glued quotient -/
+
+section Desc
+
+variable {Y : Scheme.{u}} (f : E.E ⟶ Y) (hf : G.IsInvariant f)
+
+include f hf
+
+/-- Chart restrictions of invariant morphisms coequalize the restricted pair. -/
+theorem restricted_coequalizes (i : ↥E.E) :
+    G.restrictedAction (G.gluePatch N hkill i).hstable ≫
+        ((G.gluePatch N hkill i).U.ι ≫ f)
+      = G.restrictedProj (G.gluePatch N hkill i).U ≫
+        ((G.gluePatch N hkill i).U.ι ≫ f) := by
+  have hactι : G.restrictedAction (G.gluePatch N hkill i).hstable ≫
+      (G.gluePatch N hkill i).U.ι
+      = (G.actionProj.left ⁻¹ᵁ (G.gluePatch N hkill i).U).ι ≫
+        G.translationAction.left := by
+    rw [restrictedAction]
+    exact Scheme.Hom.resLE_comp_ι _ _
+  have hprι : G.restrictedProj (G.gluePatch N hkill i).U ≫
+      (G.gluePatch N hkill i).U.ι
+      = (G.actionProj.left ⁻¹ᵁ (G.gluePatch N hkill i).U).ι ≫
+        G.actionProj.left := by
+    rw [restrictedProj]
+    exact Scheme.Hom.resLE_comp_ι _ _
+  calc G.restrictedAction (G.gluePatch N hkill i).hstable ≫
+        ((G.gluePatch N hkill i).U.ι ≫ f)
+      = (G.restrictedAction (G.gluePatch N hkill i).hstable ≫
+          (G.gluePatch N hkill i).U.ι) ≫ f := (Category.assoc _ _ _).symm
+    _ = ((G.actionProj.left ⁻¹ᵁ (G.gluePatch N hkill i).U).ι ≫
+          G.translationAction.left) ≫ f := congrArg (· ≫ f) hactι
+    _ = (G.actionProj.left ⁻¹ᵁ (G.gluePatch N hkill i).U).ι ≫
+          (G.translationAction.left ≫ f) := Category.assoc _ _ _
+    _ = (G.actionProj.left ⁻¹ᵁ (G.gluePatch N hkill i).U).ι ≫
+          (G.actionProj.left ≫ f) :=
+        congrArg ((G.actionProj.left ⁻¹ᵁ (G.gluePatch N hkill i).U).ι ≫ ·)
+          hf.coequalizes
+    _ = ((G.actionProj.left ⁻¹ᵁ (G.gluePatch N hkill i).U).ι ≫
+          G.actionProj.left) ≫ f := (Category.assoc _ _ _).symm
+    _ = (G.restrictedProj (G.gluePatch N hkill i).U ≫
+          (G.gluePatch N hkill i).U.ι) ≫ f := (congrArg (· ≫ f) hprι).symm
+    _ = G.restrictedProj (G.gluePatch N hkill i).U ≫
+          ((G.gluePatch N hkill i).U.ι ≫ f) := Category.assoc _ _ _
+
+/-- The per-patch descent leg of an invariant morphism. -/
+noncomputable def gluedDescLeg (i : ↥E.E) :
+    G.localQuotientOpen (G.gluePatch N hkill i).hstable ⟶ Y :=
+  (G.gluePatch N hkill i).descLocalQuotientOpenπ ((G.gluePatch N hkill i).U.ι ≫ f)
+    (G.restricted_coequalizes N hkill f hf i)
+
+/-- The descent legs agree across the glue transitions (V-level compatibility). -/
+theorem gluedDescLeg_glueT (i j : ↥E.E) :
+    ((G.gluePatch N hkill i).imageOpens (G.glueW_stable N hkill i j) inf_le_left).ι ≫
+        G.gluedDescLeg N hkill f hf i
+      = G.glueT N hkill i j ≫
+        ((G.gluePatch N hkill j).imageOpens (G.glueW_stable N hkill j i)
+          inf_le_left).ι ≫
+        G.gluedDescLeg N hkill f hf j := by
+  refine (G.gluePatch N hkill i).restrictedπ_hom_ext
+    (G.glueW_stable N hkill i j) inf_le_left ?_
+  rw [(G.gluePatch N hkill i).restrictedπ_ι_assoc (G.glueW_stable N hkill i j)
+    inf_le_left]
+  rw [gluedDescLeg, (G.gluePatch N hkill i).localQuotientOpenπ_descLocalQuotientOpenπ]
+  rw [glueT, (G.gluePatch N hkill i).restrictedπ_glueTransition_assoc
+    (G.gluePatch N hkill j) (G.glueW_stable N hkill i j) (G.glueW_stable N hkill j i)
+    inf_le_left inf_le_right (le_inf inf_le_right inf_le_left) inf_le_left]
+  rw [(G.gluePatch N hkill j).restrictedπ_ι_assoc (G.glueW_stable N hkill j i)
+    inf_le_left]
+  rw [gluedDescLeg, (G.gluePatch N hkill j).localQuotientOpenπ_descLocalQuotientOpenπ]
+  rw [Scheme.homOfLE_ι_assoc, ← Category.assoc,
+    AffineChartPatch.windowCrossIso_hom_ι_assoc]
+  rw [Category.assoc]
+
+/-- The descent legs are compatible over the quotient cover's pullbacks. -/
+theorem gluedDescLeg_pullback_compat (i j : ↥E.E) :
+    pullback.fst ((G.quotientGlueData N hkill).ι i) ((G.quotientGlueData N hkill).ι j) ≫
+        G.gluedDescLeg N hkill f hf i
+      = pullback.snd _ _ ≫ G.gluedDescLeg N hkill f hf j := by
+  have hlim := (G.quotientGlueData N hkill).vPullbackConeIsLimit i j
+  have hm1 := hlim.fac
+    (PullbackCone.mk (pullback.fst _ _) (pullback.snd _ _) pullback.condition)
+    WalkingCospan.left
+  have hm2 := hlim.fac
+    (PullbackCone.mk (pullback.fst _ _) (pullback.snd _ _) pullback.condition)
+    WalkingCospan.right
+  simp only [Scheme.GlueData.vPullbackCone, PullbackCone.mk_π_app] at hm1 hm2
+  set m := hlim.lift (PullbackCone.mk
+    (pullback.fst ((G.quotientGlueData N hkill).ι i) ((G.quotientGlueData N hkill).ι j))
+    (pullback.snd ((G.quotientGlueData N hkill).ι i) ((G.quotientGlueData N hkill).ι j))
+    pullback.condition) with hmdef
+  have hV := G.gluedDescLeg_glueT N hkill f hf i j
+  exact (congrArg (· ≫ G.gluedDescLeg N hkill f hf i) hm1.symm).trans
+    ((Category.assoc _ _ _).trans
+    ((congrArg (m ≫ ·) hV).trans
+    (((congrArg (m ≫ ·) (Category.assoc _ _ _).symm).trans
+      (Category.assoc _ _ _).symm).trans
+    (congrArg (· ≫ G.gluedDescLeg N hkill f hf j) hm2))))
+
+/-- **The descended morphism**: an invariant morphism factors through the glued
+quotient. -/
+noncomputable def gluedQuotientDesc : G.gluedQuotient N hkill ⟶ Y :=
+  (G.quotientGlueData N hkill).openCover.glueMorphisms
+    (fun i => G.gluedDescLeg N hkill f hf i)
+    (fun i j => G.gluedDescLeg_pullback_compat N hkill f hf i j)
+
+@[reassoc]
+theorem gluedQuotientι_gluedQuotientDesc (i : ↥E.E) :
+    G.gluedQuotientι N hkill i ≫ G.gluedQuotientDesc N hkill f hf
+      = G.gluedDescLeg N hkill f hf i :=
+  (G.quotientGlueData N hkill).openCover.ι_glueMorphisms _ _ i
+
+/-- **The factorization**: the descended morphism recovers `f` through the quotient
+projection. -/
+theorem gluedQuotientπ_gluedQuotientDesc :
+    G.gluedQuotientπ N hkill ≫ G.gluedQuotientDesc N hkill f hf = f := by
+  refine (G.glueCover N hkill).hom_ext _ _ fun i => ?_
+  calc (G.gluePatch N hkill i).U.ι ≫
+        G.gluedQuotientπ N hkill ≫ G.gluedQuotientDesc N hkill f hf
+      = ((G.gluePatch N hkill i).U.ι ≫ G.gluedQuotientπ N hkill) ≫
+          G.gluedQuotientDesc N hkill f hf := (Category.assoc _ _ _).symm
+    _ = G.gluedQuotientLeg N hkill i ≫ G.gluedQuotientDesc N hkill f hf :=
+        congrArg (· ≫ G.gluedQuotientDesc N hkill f hf) (G.ι_gluedQuotientπ N hkill i)
+    _ = G.localQuotientOpenπ (G.gluePatch N hkill i).hstable ≫
+          (G.gluedQuotientι N hkill i ≫ G.gluedQuotientDesc N hkill f hf) :=
+        Category.assoc _ _ _
+    _ = G.localQuotientOpenπ (G.gluePatch N hkill i).hstable ≫
+          G.gluedDescLeg N hkill f hf i :=
+        congrArg (G.localQuotientOpenπ (G.gluePatch N hkill i).hstable ≫ ·)
+          (G.gluedQuotientι_gluedQuotientDesc N hkill f hf i)
+    _ = (G.gluePatch N hkill i).U.ι ≫ f :=
+        (G.gluePatch N hkill i).localQuotientOpenπ_descLocalQuotientOpenπ _ _
+
+/-- **Uniqueness of the descent.** -/
+theorem gluedQuotientDesc_unique {h' : G.gluedQuotient N hkill ⟶ Y}
+    (hh : G.gluedQuotientπ N hkill ≫ h' = f) :
+    h' = G.gluedQuotientDesc N hkill f hf := by
+  refine (G.quotientGlueData N hkill).openCover.hom_ext _ _ fun i => ?_
+  refine (G.gluePatch N hkill i).localQuotientOpenπ_hom_ext ?_
+  calc G.localQuotientOpenπ (G.gluePatch N hkill i).hstable ≫
+        (G.gluedQuotientι N hkill i ≫ h')
+      = ((G.gluePatch N hkill i).U.ι ≫ G.gluedQuotientπ N hkill) ≫ h' :=
+        (Category.assoc _ _ _).symm.trans
+          (congrArg (· ≫ h') (G.ι_gluedQuotientπ N hkill i).symm)
+    _ = (G.gluePatch N hkill i).U.ι ≫ f := by rw [Category.assoc, hh]
+    _ = G.localQuotientOpenπ (G.gluePatch N hkill i).hstable ≫
+          G.gluedDescLeg N hkill f hf i :=
+        ((G.gluePatch N hkill i).localQuotientOpenπ_descLocalQuotientOpenπ _ _).symm
+    _ = G.localQuotientOpenπ (G.gluePatch N hkill i).hstable ≫
+          (G.gluedQuotientι N hkill i ≫ G.gluedQuotientDesc N hkill f hf) :=
+        (congrArg (G.localQuotientOpenπ (G.gluePatch N hkill i).hstable ≫ ·)
+          (G.gluedQuotientι_gluedQuotientDesc N hkill f hf i)).symm
+
+/-- **The universal property of the glued quotient** (`[HG-C4c-2]` payoff): every
+invariant morphism factors uniquely through the quotient projection. -/
+theorem gluedQuotient_existsUnique_lift :
+    ∃! h : G.gluedQuotient N hkill ⟶ Y, G.gluedQuotientπ N hkill ≫ h = f :=
+  ⟨G.gluedQuotientDesc N hkill f hf, G.gluedQuotientπ_gluedQuotientDesc N hkill f hf,
+    fun h' hh => G.gluedQuotientDesc_unique N hkill f hf hh⟩
+
+end Desc
+
+/-- The structure morphism itself is invariant (points are over-morphisms). -/
+theorem isInvariant_structure : G.IsInvariant E.π :=
+  fun _ _ x t _ => (x + t).2.trans x.2.symm
+
+/-- **The structure morphism of the glued quotient over the base.** -/
+noncomputable def gluedQuotientS : G.gluedQuotient N hkill ⟶ S :=
+  G.gluedQuotientDesc N hkill E.π (G.isInvariant_structure)
+
+/-- The glued quotient projection is a morphism over `S`. -/
+theorem gluedQuotientπ_gluedQuotientS :
+    G.gluedQuotientπ N hkill ≫ G.gluedQuotientS N hkill = E.π :=
+  G.gluedQuotientπ_gluedQuotientDesc N hkill E.π (G.isInvariant_structure)
+
 end FiniteLocallyFreeSubgroup
 
 end EllipticCurve
