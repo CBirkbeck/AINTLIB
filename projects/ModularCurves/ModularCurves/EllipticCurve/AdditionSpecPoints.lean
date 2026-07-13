@@ -100,7 +100,7 @@ variable (W : WeierstrassCurve R) [IsDomain R] [IsJacobsonRing R]
 variable (i j : Fin 3) [IsDomain (biChartRing W i j)]
 
 /-- Standalone collapse: the image inclusion through `isoImage.inv`. -/
-lemma blOpenZImage_ι_eq (_k : Fin 3) :
+lemma blOpenZImage_ι_eq :
     (blOpenZImage W i j).ι =
       (Scheme.Hom.isoImage (pieceι W i j) (⨆ k, blOpenZPieceFamily W i j k)).inv ≫
         (⨆ k, blOpenZPieceFamily W i j k).ι ≫ pieceι W i j :=
@@ -149,7 +149,7 @@ theorem specPoint_addOnZOnImage_factors' (hΔ : IsUnit W.Δ) {K : Type u} [Field
   · rw [CommRingCat.ofHom_hom, Spec.map_preimage]
     have hR : h ≫ (blOpenZImage W i j).ι =
         h₂ ≫ (blOpenZPieceFamily W i j k).ι ≫ pieceι W i j :=
-      (congrArg (h ≫ ·) (blOpenZImage_ι_eq W i j k)).trans
+      (congrArg (h ≫ ·) (blOpenZImage_ι_eq W i j)).trans
         (((Category.assoc _ _ _).symm).trans
           ((congrArg (· ≫ (⨆ k, blOpenZPieceFamily W i j k).ι ≫ pieceι W i j) hh₂.symm).trans
             ((Category.assoc _ _ _).trans
@@ -160,7 +160,7 @@ theorem specPoint_addOnZOnImage_factors' (hΔ : IsUnit W.Δ) {K : Type u} [Field
     exact (Category.assoc _ _ _).trans (congrArg (h₂ ≫ ·) (mR_isoAway_pieceAwayZι W i j k))
 
 /-- Standalone collapse: the image inclusion through `isoImage.inv`. -/
-lemma blOpenYImage_ι_eq (_k : Fin 3) :
+lemma blOpenYImage_ι_eq :
     (blOpenYImage W i j).ι =
       (Scheme.Hom.isoImage (pieceι W i j) (⨆ k, blOpenYPieceFamily W i j k)).inv ≫
         (⨆ k, blOpenYPieceFamily W i j k).ι ≫ pieceι W i j :=
@@ -209,7 +209,7 @@ theorem specPoint_addOnYOnImage_factors' (hΔ : IsUnit W.Δ) {K : Type u} [Field
   · rw [CommRingCat.ofHom_hom, Spec.map_preimage]
     have hR : h ≫ (blOpenYImage W i j).ι =
         h₂ ≫ (blOpenYPieceFamily W i j k).ι ≫ pieceι W i j :=
-      (congrArg (h ≫ ·) (blOpenYImage_ι_eq W i j k)).trans
+      (congrArg (h ≫ ·) (blOpenYImage_ι_eq W i j)).trans
         (((Category.assoc _ _ _).symm).trans
           ((congrArg (· ≫ (⨆ k, blOpenYPieceFamily W i j k).ι ≫ pieceι W i j) hh₂.symm).trans
             ((Category.assoc _ _ _).trans

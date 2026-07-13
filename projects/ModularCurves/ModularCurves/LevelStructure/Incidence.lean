@@ -935,7 +935,7 @@ private theorem incidenceAux_comap_eq_bot_iff {X Y Z : Scheme.{u}} (e : X ≅ Y)
 divisors `D, D'` with `D'` proper (= finite) over `S`, there is a closed subscheme
 `Z ⊆ S` universal for `D' ≤ D`, cut out locally by `deg D'` equations, compatible with
 arbitrary base change. -/
-theorem exists_incidenceLocusLE [IsSeparated π] (_hsm : SmoothOfRelativeDimension 1 π)
+theorem exists_incidenceLocusLE [IsSeparated π]
     (D D' : RelEffCartierDiv π) :
     ∃ Z : S.IdealSheafData, ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S),
       (∃ h : T ⟶ Z.subscheme, h ≫ Z.subschemeι = t) ↔
@@ -963,14 +963,14 @@ theorem exists_incidenceLocusLE [IsSeparated π] (_hsm : SmoothOfRelativeDimensi
 
 /-- **(T-D15 = KM 1.3.5, incidence `=`, verbatim source in hand)** As above, universal
 for `D_T = D'_T`, cut out locally by `deg D` equations. -/
-theorem exists_incidenceLocusEQ [IsSeparated π] (hsm : SmoothOfRelativeDimension 1 π)
+theorem exists_incidenceLocusEQ [IsSeparated π]
     (D D' : RelEffCartierDiv π) :
     ∃ Z : S.IdealSheafData, ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S),
       (∃ h : T ⟶ Z.subscheme, h ≫ Z.subschemeι = t) ↔
         (IsSubdivisor (D'.baseChange t) (D.baseChange t) ∧
          IsSubdivisor (D.baseChange t) (D'.baseChange t)) := by
-  obtain ⟨Z₁, hZ₁⟩ := exists_incidenceLocusLE hsm D D'
-  obtain ⟨Z₂, hZ₂⟩ := exists_incidenceLocusLE hsm D' D
+  obtain ⟨Z₁, hZ₁⟩ := exists_incidenceLocusLE D D'
+  obtain ⟨Z₂, hZ₂⟩ := exists_incidenceLocusLE D' D
   refine ⟨Z₁ ⊔ Z₂, fun T t ↦ ?_⟩
   rw [exists_factor_subschemeι_iff, sup_le_iff, ← hZ₁ t, ← hZ₂ t,
     exists_factor_subschemeι_iff, exists_factor_subschemeι_iff]
@@ -1261,7 +1261,7 @@ private noncomputable def subgroupLocusAux_sumDiv (E : EllipticCurve S)
 over `W`. -/
 private noncomputable def subgroupLocusAux_Z3W (E : EllipticCurve S)
     (D : RelEffCartierDiv E.π) : (subgroupLocusAux_W E D).IdealSheafData :=
-  (RelEffCartierDiv.exists_incidenceLocusLE (E.baseChange (subgroupLocusAux_q E D)).smooth
+  (RelEffCartierDiv.exists_incidenceLocusLE
     (D.baseChange (subgroupLocusAux_q E D)) (subgroupLocusAux_sumDiv E D)).choose
 
 private theorem subgroupLocusAux_Z3W_spec (E : EllipticCurve S)
@@ -1270,7 +1270,7 @@ private theorem subgroupLocusAux_Z3W_spec (E : EllipticCurve S)
         h ≫ (subgroupLocusAux_Z3W E D).subschemeι = w) ↔
       RelEffCartierDiv.IsSubdivisor ((subgroupLocusAux_sumDiv E D).baseChange w)
         ((D.baseChange (subgroupLocusAux_q E D)).baseChange w) :=
-  (RelEffCartierDiv.exists_incidenceLocusLE (E.baseChange (subgroupLocusAux_q E D)).smooth
+  (RelEffCartierDiv.exists_incidenceLocusLE
     (D.baseChange (subgroupLocusAux_q E D)) (subgroupLocusAux_sumDiv E D)).choose_spec w
 
 private theorem subgroupLocusAux_q_finite (E : EllipticCurve S)
@@ -1627,9 +1627,9 @@ theorem exists_subgroupLocus (E : EllipticCurve S) (D : RelEffCartierDiv E.π) :
     ∃ Z : S.IdealSheafData, ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S),
       (∃ h : T ⟶ Z.subscheme, h ≫ Z.subschemeι = t) ↔
         (D.baseChange t).IsSubgroup (E.baseChange t) := by
-  obtain ⟨Z₁, hZ₁⟩ := RelEffCartierDiv.exists_incidenceLocusLE E.smooth D
+  obtain ⟨Z₁, hZ₁⟩ := RelEffCartierDiv.exists_incidenceLocusLE D
     (RelEffCartierDiv.sectionDivisor E.π E.zero E.zero_π)
-  obtain ⟨Z₂, hZ₂⟩ := RelEffCartierDiv.exists_incidenceLocusLE E.smooth
+  obtain ⟨Z₂, hZ₂⟩ := RelEffCartierDiv.exists_incidenceLocusLE
     (subgroupLocusAux_invD E D) D
   refine ⟨Z₁ ⊔ Z₂ ⊔ subgroupLocusAux_Z3 E D, fun T t ↦ ?_⟩
   rw [exists_factor_subschemeι_iff, sup_le_iff, sup_le_iff,
@@ -2730,7 +2730,6 @@ theorem exists_fullLevelLocus (E : EllipticCurve S) (N : ℕ) [NeZero N] :
             (E.pointToTorsion Q hQ) (by simp)) ↔
         (E.baseChange t).IsFullLevel N (EllipticCurve.Point.asSection E t P) (EllipticCurve.Point.asSection E t Q) := by
   obtain ⟨Z, hZ⟩ := RelEffCartierDiv.exists_incidenceLocusEQ
-    (E.baseChange (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)).smooth
     (RelEffCartierDiv.sectionsDivisor
       (E.baseChange (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N)).π
       (fun i : Fin (N ^ 2) ↦

@@ -1692,7 +1692,6 @@ theorem exists_generatorLocus (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
         ((∃ k : T ⟶ Z.subscheme, k ≫ Z.subschemeι = h) ↔
           E.IsDivisorGenerator N D t (Point.asSection E t P)) := by
   obtain ⟨Z, hZ⟩ := RelEffCartierDiv.exists_incidenceLocusEQ
-    (E.baseChange (D.ideal.subschemeι ≫ E.π)).smooth
     (Section.orderDivisor (E.baseChange (D.ideal.subschemeι ≫ E.π))
       (Point.asSection E (D.ideal.subschemeι ≫ E.π) (E.divisorTautPoint D)) N)
     (D.baseChange (D.ideal.subschemeι ≫ E.π))
