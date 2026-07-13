@@ -18450,3 +18450,16 @@ which is itself gated on the [KL-3] flat-spreading sorry — audited and AVOIDED
   `Subsingleton Ω` (constructor/instance, no iff needed). NEXT: [GHA3] audit-first (invertible-N
   discharge?), [GH1] audit vs PullSectionAdd.lean's PROVEN locally-noetherian pullSection_add.
   (STREAM-GH)
+
+### v10.187-G0 — ★ [HG-C4c] K PROVEN: the two-patch Künneth comparison (STREAM-G0)
+`spec_transitionTensorA_chartSpecIso_inv` (SubgroupQuotientConstruction.lean, sorry-free): the Spec
+of the cross-base transition tensor intertwines the two patches' chart identifications with the
+ambient pullback window. Supporting layer all green: transitionTensorA + both tmul laws, raw
+projection forms (chartSpecIso_inv_snd + the fst leg spec_includeLeft_group_isoSpec_inv),
+isoSpec-window naturality (specMap_resGroup/resChart_isoSpec_inv via toSpecΓ_SpecMap_presheaf_map),
+pullbackWindow. Freeness RESCOPED to the C4a block (bridge layer is Hopf-free — needed since
+intersection sub-patches need not carry free group rings).
+REMAINING for coinvariantsMap: conjugate K by the two coactionSpec bridges + homOfLE_restrictedAction
++ Spec.map_injective ⟹ hsq (ring equivariance square) ⟹ mem_coinvariants_of_map fires. Then the
+template glue (windowHom/imageOpens/saturation/tripleIso/GlueData, SchemeQuotient :343-891) → the six
+pins → SIGNAL ★★. (STREAM-G0)
