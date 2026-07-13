@@ -1939,6 +1939,187 @@ theorem QuotPkg.crossDescent_mapT_square (pkg : ∀ X : EllObj R, QuotPkg φ X)
           ((Category.assoc _ _ _).symm.trans
             ((congrArg (· ≫ μX') hqT.symm).trans (Category.assoc _ _ _))))))
 
+/-- **The couniversal morphism** ([GHB7-couniv-iii-c]): the natural transformation
+`quotProb ⟶ P'` assembled from a family of descended cross-transports. All choices
+enter as clause hypotheses; naturality is `crossDescent_mapT_square` + the
+`P'`-instance of the [GHB7-4a] transport. -/
+noncomputable def QuotPkg.crossμ (pkg : ∀ X : EllObj R, QuotPkg φ X)
+    (hfree : FreeAction φ)
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base)))
+    {P' : ModuliProblem R} (dP : ∀ X : EllObj R, ModuliProblem.RelRepData P' X)
+    (ν' : Q ⟶ P')
+    (νf : ∀ X : EllObj R, (pkg X).d.Z ⟶ (dP X).Z)
+    (hνf : ∀ X : EllObj R, νf X ≫ (dP X).f = (pkg X).d.f)
+    (hcl : ∀ X : EllObj R, (dP X).eqv (pkg X).d.f ⟨νf X, hνf X⟩ =
+      ν'.app (Opposite.op (X.pullbackAlong (pkg X).d.f))
+        ((pkg X).d.eqv (pkg X).d.f ⟨𝟙 (pkg X).d.Z, Category.id_comp (pkg X).d.f⟩))
+    (μf : ∀ X : EllObj R, (pkg X).Z₀ ⟶ (dP X).Z)
+    (hμ : ∀ X : EllObj R, (pkg X).π ≫ μf X = νf X)
+    (hμf : ∀ X : EllObj R, μf X ≫ (dP X).f = (pkg X).f₀) :
+    QuotPkg.quotProb pkg hfree hbase ⟶ P' where
+  app Xop := ↾fun s =>
+    P'.map (EllObj.toPullbackAlong (𝟙 Xop.unop)).op
+      ((dP Xop.unop).eqv ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)
+        ⟨s.1 ≫ μf Xop.unop, by
+          rw [Category.assoc, hμf Xop.unop]
+          exact s.2⟩)
+  naturality {Xop X'op} kop := by
+    ext s
+    show P'.map (EllObj.toPullbackAlong (𝟙 X'op.unop)).op
+      ((dP X'op.unop).eqv ((𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom)
+        ⟨(pullback.lift (kop.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base)
+          (by rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
+          QuotPkg.mapT pkg hfree hbase kop.unop) ≫ μf X'op.unop, by
+          rw [Category.assoc, hμf X'op.unop, Category.assoc,
+            (QuotPkg.mapT_spec pkg hfree hbase kop.unop).2.2.2.2.2,
+            pullback.lift_snd]
+          rfl⟩) =
+      P'.map kop (P'.map (EllObj.toPullbackAlong (𝟙 Xop.unop)).op
+        ((dP Xop.unop).eqv ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)
+          ⟨s.1 ≫ μf Xop.unop, by
+            rw [Category.assoc, hμf Xop.unop]
+            exact s.2⟩))
+    -- scheme-level: the transported section factors through the pulled descent
+    have hW0 : (pullback.fst (pkg Xop.unop).f₀ kop.unop.baseHom ≫ μf Xop.unop) ≫
+        (dP Xop.unop).f =
+        pullback.snd (pkg Xop.unop).f₀ kop.unop.baseHom ≫ kop.unop.baseHom :=
+      (Category.assoc _ _ _).trans
+        ((congrArg (pullback.fst (pkg Xop.unop).f₀ kop.unop.baseHom ≫ ·)
+          (hμf Xop.unop)).trans pullback.condition)
+    have hsquare := QuotPkg.crossDescent_mapT_square pkg hfree hbase
+      (dP Xop.unop) (dP X'op.unop) ν' kop.unop
+      (νf Xop.unop) (hνf Xop.unop) (hcl Xop.unop)
+      (νf X'op.unop) (hνf X'op.unop) (hcl X'op.unop)
+      (μf Xop.unop) (hμ Xop.unop) (hμf Xop.unop)
+      (μf X'op.unop) (hμ X'op.unop)
+    -- align the classified section through the square (whole-subtype congrArg)
+    have M1 : (pullback.lift (kop.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base)
+        (by rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
+        pullback.lift (pullback.fst (pkg Xop.unop).f₀ kop.unop.baseHom ≫
+            μf Xop.unop)
+          (pullback.snd (pkg Xop.unop).f₀ kop.unop.baseHom) hW0) ≫
+        ((dP Xop.unop).pullback kop.unop).f =
+        (𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom :=
+      (Category.assoc _ _ _).trans
+        ((congrArg (pullback.lift (kop.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base)
+          (by rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫ ·)
+          (pullback.lift_snd _ _ _ :
+            pullback.lift (pullback.fst (pkg Xop.unop).f₀ kop.unop.baseHom ≫
+                μf Xop.unop)
+              (pullback.snd (pkg Xop.unop).f₀ kop.unop.baseHom) hW0 ≫
+              ((dP Xop.unop).pullback kop.unop).f =
+            pullback.snd (pkg Xop.unop).f₀ kop.unop.baseHom)).trans
+          (pullback.lift_snd _ _ _))
+    have M2 : ((⟨pullback.lift (kop.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base)
+          (by rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
+        pullback.lift (pullback.fst (pkg Xop.unop).f₀ kop.unop.baseHom ≫
+            μf Xop.unop)
+          (pullback.snd (pkg Xop.unop).f₀ kop.unop.baseHom) hW0, M1⟩ :
+        { h : X'op.unop.base ⟶ ((dP Xop.unop).pullback kop.unop).Z //
+          h ≫ ((dP Xop.unop).pullback kop.unop).f =
+            (𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom }).1 ≫
+        (((dP Xop.unop).pullback kop.unop).compare (dP X'op.unop)).1) ≫
+        (dP X'op.unop).f =
+        (𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom :=
+      (Category.assoc _ _ _).trans
+        ((congrArg (_ ≫ ·)
+          ((((dP Xop.unop).pullback kop.unop).compare (dP X'op.unop)).2)).trans M1)
+    rw [show ((dP X'op.unop).eqv
+        ((𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom))
+        ⟨(pullback.lift (kop.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base)
+          (by rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
+          QuotPkg.mapT pkg hfree hbase kop.unop) ≫ μf X'op.unop, by
+          rw [Category.assoc, hμf X'op.unop, Category.assoc,
+            (QuotPkg.mapT_spec pkg hfree hbase kop.unop).2.2.2.2.2,
+            pullback.lift_snd]
+          rfl⟩ =
+      ((dP X'op.unop).eqv
+        ((𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom))
+        ⟨(⟨pullback.lift (kop.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base)
+            (by rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
+          pullback.lift (pullback.fst (pkg Xop.unop).f₀ kop.unop.baseHom ≫
+              μf Xop.unop)
+            (pullback.snd (pkg Xop.unop).f₀ kop.unop.baseHom) hW0, M1⟩ :
+          { h : X'op.unop.base ⟶ ((dP Xop.unop).pullback kop.unop).Z //
+            h ≫ ((dP Xop.unop).pullback kop.unop).f =
+              (𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom }).1 ≫
+          (((dP Xop.unop).pullback kop.unop).compare (dP X'op.unop)).1, M2⟩ from
+      congrArg _ (Subtype.ext ((Category.assoc _ _ _).trans
+        ((congrArg (pullback.lift (kop.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base)
+          (by rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫ ·)
+          hsquare).trans (Category.assoc _ _ _).symm)))]
+    -- apply the P'-instance of the [GHB7-4a] transport
+    have h4a := ModuliProblem.RelRepData.eqv_comp_compare_pullback_of_eqv
+      (dP Xop.unop) (dP X'op.unop) kop.unop
+      (P'.map (EllObj.toPullbackAlong (𝟙 Xop.unop)).op
+        ((dP Xop.unop).eqv ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)
+          ⟨s.1 ≫ μf Xop.unop, by
+            rw [Category.assoc, hμf Xop.unop]; exact s.2⟩))
+      (s.1 ≫ μf Xop.unop)
+      (by rw [Category.assoc, hμf Xop.unop]; exact s.2)
+      (by
+        rw [← FunctorToTypes.map_comp_apply, ← op_comp]
+        have hππ : Xop.unop.pullbackAlongπ
+            ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom) ≫
+            EllObj.toPullbackAlong (𝟙 Xop.unop) =
+            𝟙 (Xop.unop.pullbackAlong
+              ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)) := by
+          apply (EllObj.homPullbackAlongEquiv Xop.unop
+            ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom) _).injective
+          refine Subtype.ext (Prod.ext ?_ ?_)
+          · exact (Category.assoc _ _ _).trans
+              ((congrArg (Xop.unop.pullbackAlongπ
+                ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom) ≫ ·)
+                (EllObj.toPullbackAlong_pullbackAlongπ (𝟙 Xop.unop))).trans
+                ((Category.comp_id _).trans (Category.id_comp _).symm))
+          · show 𝟙 Xop.unop.base ≫ 𝟙 Xop.unop.base = 𝟙 Xop.unop.base
+            rw [Category.comp_id]
+        rw [hππ]
+        show _ = P'.map (𝟙 (Opposite.op (Xop.unop.pullbackAlong
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)))) _
+        rw [CategoryTheory.Functor.map_id]
+        rfl)
+      (pullback.lift (kop.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base)
+          (by rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
+        pullback.lift (pullback.fst (pkg Xop.unop).f₀ kop.unop.baseHom ≫
+            μf Xop.unop)
+          (pullback.snd (pkg Xop.unop).f₀ kop.unop.baseHom) hW0)
+      ((Category.assoc _ _ _).trans
+        ((congrArg (pullback.lift (kop.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base)
+          (by rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫ ·)
+          (pullback.lift_fst _ _ _)).trans
+          ((Category.assoc _ _ _).symm.trans
+            ((congrArg (· ≫ μf Xop.unop) (pullback.lift_fst _ _ _)).trans
+              (Category.assoc _ _ _)))))
+      ((Category.assoc _ _ _).trans
+        ((congrArg (pullback.lift (kop.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base)
+          (by rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫ ·)
+          (pullback.lift_snd _ _ _)).trans (pullback.lift_snd _ _ _)))
+      M1 M2
+    exact (congrArg (fun y => P'.map (EllObj.toPullbackAlong (𝟙 X'op.unop)).op y)
+        h4a).trans
+      ((FunctorToTypes.map_comp_apply P'
+          (X'op.unop.pullbackAlongπ
+            ((𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom)).op
+          (EllObj.toPullbackAlong (𝟙 X'op.unop)).op
+          (P'.map kop (P'.map (EllObj.toPullbackAlong (𝟙 Xop.unop)).op
+            ((dP Xop.unop).eqv ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)
+              ⟨s.1 ≫ μf Xop.unop, by
+                rw [Category.assoc, hμf Xop.unop]; exact s.2⟩)))).symm.trans
+        ((congrArg (fun m => P'.map m
+            (P'.map kop (P'.map (EllObj.toPullbackAlong (𝟙 Xop.unop)).op
+              ((dP Xop.unop).eqv ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)
+                ⟨s.1 ≫ μf Xop.unop, by
+                  rw [Category.assoc, hμf Xop.unop]; exact s.2⟩))))
+          (show (X'op.unop.pullbackAlongπ
+              ((𝟙 X'op.unop : X'op.unop ⟶ X'op.unop).baseHom)).op ≫
+              (EllObj.toPullbackAlong (𝟙 X'op.unop)).op =
+              𝟙 (Opposite.op X'op.unop) from
+            congrArg Quiver.Hom.op
+              (EllObj.toPullbackAlong_pullbackAlongπ (𝟙 X'op.unop)))).trans
+          (FunctorToTypes.map_id_apply P' _)))
+
 end Transport
 
 
