@@ -32,8 +32,6 @@ namespace BernoulliRegular
 namespace Reflection
 namespace SingularKummer
 
-set_option linter.unusedSectionVars false
-
 variable (R K : Type*) [CommRing R] [IsDomain R]
 variable [Field K] [Algebra R K] [IsFractionRing R K]
 
@@ -69,26 +67,31 @@ def ideal (s : SingularPair R K p) : (FractionalIdeal R⁰ K)ˣ :=
 def generator (s : SingularPair R K p) : Kˣ :=
   s.1.2
 
+omit [IsDomain R] in
 /-- The defining relation `(generator s) = (ideal s)^p`. -/
 theorem principal_eq_ideal_pow (s : SingularPair R K p) :
     toPrincipalIdeal R K (generator s) = ideal s ^ p :=
   s.2
 
+omit [IsDomain R] in
 @[simp]
 theorem ideal_one :
     ideal (R := R) (K := K) (p := p) 1 = 1 :=
   rfl
 
+omit [IsDomain R] in
 @[simp]
 theorem generator_one :
     generator (R := R) (K := K) (p := p) 1 = 1 :=
   rfl
 
+omit [IsDomain R] in
 @[simp]
 theorem ideal_mul (s t : SingularPair R K p) :
     ideal (s * t) = ideal s * ideal t :=
   rfl
 
+omit [IsDomain R] in
 @[simp]
 theorem generator_mul (s t : SingularPair R K p) :
     generator (s * t) = generator s * generator t :=
@@ -129,7 +132,7 @@ theorem classMap_pow_eq_one (s : SingularPair R K p) :
 theorem exists_of_class_pow_eq_one {c : ClassGroup R} (hc : c ^ p = 1) :
     ∃ s : SingularPair R K p, classMap (R := R) (K := K) p s = c := by
   refine ClassGroup.induction (R := R) K
-    (P := fun c => c ^ p = 1 →
+    (P := fun c ↦ c ^ p = 1 →
       ∃ s : SingularPair R K p, classMap (R := R) (K := K) p s = c)
     ?_ c hc
   intro I hI
@@ -139,7 +142,7 @@ theorem exists_of_class_pow_eq_one {c : ClassGroup R} (hc : c ^ p = 1) :
         ClassGroup.mk (R := R) (K := K) (I ^ p) = 1 := by
       simpa [map_pow] using hI
     have hmapeq : ∀ J : (FractionalIdeal R⁰ K)ˣ,
-        Units.mapEquiv (↑(FractionalIdeal.canonicalEquiv R⁰ K K)) J = J := fun J => by
+        Units.mapEquiv (↑(FractionalIdeal.canonicalEquiv R⁰ K K)) J = J := fun J ↦ by
       apply Units.ext
       rw [Units.coe_mapEquiv, FractionalIdeal.canonicalEquiv_self,
         RingEquiv.coe_mulEquiv_refl, MulEquiv.refl_apply]
@@ -262,11 +265,13 @@ def unitPair (p : ℕ) : fractionalUnitSubgroup (R := R) (K := K) →*
     apply Subtype.ext
     ext <;> simp
 
+omit [IsDomain R] in
 @[simp]
 theorem unitPair_ideal (p : ℕ) (u : fractionalUnitSubgroup (R := R) (K := K)) :
     ideal (unitPair (R := R) (K := K) p u) = 1 :=
   rfl
 
+omit [IsDomain R] in
 @[simp]
 theorem unitPair_generator (p : ℕ) (u : fractionalUnitSubgroup (R := R) (K := K)) :
     generator (unitPair (R := R) (K := K) p u) = u.1 :=
@@ -279,6 +284,7 @@ def unitToSingularGroup (p : ℕ) :
   (QuotientGroup.mk' (principalPairSubgroup (R := R) (K := K) p)).comp
     (unitPair (R := R) (K := K) p)
 
+omit [IsDomain R] in
 @[simp]
 theorem unitToSingularGroup_apply (p : ℕ)
     (u : fractionalUnitSubgroup (R := R) (K := K)) :
@@ -295,6 +301,7 @@ theorem singularGroupClassMapToPTorsion_unitToSingularGroup
   apply Subtype.ext
   simp [unitToSingularGroup]
 
+omit [IsDomain R] in
 /-- A singular pair whose ideal part is principal is equal to a unit pair times
 the corresponding principal pair. -/
 theorem eq_unitPair_mul_principalPair_of_ideal_eq_principal
