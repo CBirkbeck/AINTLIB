@@ -18402,3 +18402,18 @@ localQuotients over the C3f atlas; two-stage design v10.184-G0, template SchemeQ
 [C4d] assembly.** Session walls (all beaten term-mode): calc-step kabstract instance-transparency
 (E.asOver.left.Opens vs E.E.Opens), congr-closed defeq swap identities, pullback.map-is-abbrev-of-lift.
 (STREAM-G0)
+
+### v10.186-G0 — [HG-C4c-1] transition-data layer: 6 of 7 ingredients landed (STREAM-G0)
+Commits 3cdcb6e4d…5b5adf03a (pushed), ComoduleCoinvariants + SubgroupQuotientConstruction:
+`mem_coinvariants_of_map` (abstract functoriality, CLEAN) · resBase/resChart/resGroup + the two
+appLE exchange squares · `transitionTensor` (cross-base tensor comparison via
+Algebra.TensorProduct.lift; elaboration note: ALWAYS ascribe bare includeLeft — its S-parameter
+sticks as a SMulCommClass metavar) · `transitionTensor_tmul_one` (hT1; def-local letI must be
+re-established in proof contexts) · `homOfLE_restrictedAction`/`homOfLE_restrictedProj` (the
+geometric window squares — pure map_resLE/resLE_map, term-mode).
+REMAINING for `coinvariantsMap` (the localQuotientMap analogue): **hsq** — the two-patch Künneth
+comparison identifying Spec(transitionTensor) with the pullback window under the two chartSpecIsos
+(one more 5-link-style chase: pullbackSpecIso naturality under (resGroup,resChart,resBase) +
+kunnethToSpec/patchLevel/VLevel functoriality), then Spec.map_injective assembles
+hsq : Q.chartCoaction ∘ resChart = transitionTensor ∘ P.chartCoaction. Then: template glue
+:343-891 (windowHom/imageOpens/saturation/tripleIso/GlueData) → quotient/quotientπ → pins. (STREAM-G0)
