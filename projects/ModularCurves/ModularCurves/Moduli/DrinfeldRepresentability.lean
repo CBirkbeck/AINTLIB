@@ -69,6 +69,26 @@ theorem asSection_zero {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}} (
   have h := EllipticCurve.Point.asSection_zsmul E g 0 0
   simpa using h
 
+/-- The point of `E/S` over `g` underlying a section of the base change `E ×_S T` — the
+inverse of `asSection`. Built term-mode: `(E.baseChange g).E` is defeq `pullback E.π g` only at
+default transparency, so `rw`/`simp` on the composite fail (cf. `Point.asSection_zsmul`). -/
+noncomputable def sectionToPoint {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (g : T ⟶ S) (Q : (E.baseChange g).Section) : E.Point g :=
+  ⟨Q.1 ≫ Limits.pullback.fst E.π g,
+    (Category.assoc _ _ _).trans <|
+      (congrArg (Q.1 ≫ ·) Limits.pullback.condition).trans <|
+        (Category.assoc _ _ _).symm.trans <|
+          (congrArg (· ≫ g) Q.2).trans (Category.id_comp g)⟩
+
+/-- `asSection` is a left inverse of `sectionToPoint`: the section of a section's underlying
+point is the section itself. -/
+theorem asSection_sectionToPoint {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (g : T ⟶ S) (Q : (E.baseChange g).Section) :
+    EllipticCurve.Point.asSection E g (sectionToPoint E g Q) = Q :=
+  Subtype.ext (Limits.pullback.hom_ext
+    (EllipticCurve.Point.asSection_val_fst E g (sectionToPoint E g Q))
+    ((EllipticCurve.Point.asSection_val_snd E g (sectionToPoint E g Q)).trans Q.2.symm))
+
 set_option maxHeartbeats 1000000 in
 /-- **(KM 1.6.2, `ℤ/N`-Str — no rank hypothesis, hence no `c4`)** The Drinfeld `Γ₁(N)`
 moduli problem is affine over `Ell`: for each `E/S` the functor of Drinfeld exact-order-`N`
@@ -87,7 +107,23 @@ theorem gammaOneDrinfeld_affineOverEll (N : ℕ) [NeZero N] :
         ⟨h.1, (pointToTorsion_torsionPointsEquiv X.curve N g
           ⟨h.1 ≫ Z.subschemeι, by rw [Category.assoc]; exact h.2⟩).symm⟩⟩)
       (fun P => ?_) ?_ ?_, ?_⟩
-  · sorry
+  · -- invFun: a Γ₁-structure `P` on `E ×_S T` gives a `T`-point of the exact-order locus
+    have hxsmul : (N : ℤ) • sectionToPoint X.curve g P.1 = 0 := by
+      apply asSection_injective X.curve g
+      rw [EllipticCurve.Point.asSection_zsmul, asSection_sectionToPoint, asSection_zero]
+      exact EllipticCurve.Section.HasExactOrder.smul_eq_zero (X.curve.baseChange g) P.2
+    have hx := (X.curve.smul_eq_zero_iff_comp_mulByHom g N _).mp hxsmul
+    have hle : Z ≤ (X.curve.pointToTorsion (sectionToPoint X.curve g P.1) hx).ker := by
+      rw [← exists_factor_subschemeι_iff]
+      refine (hZ g _ hx).mpr ?_
+      rw [asSection_sectionToPoint]; exact P.2
+    refine ⟨(X.curve.pointToTorsion (sectionToPoint X.curve g P.1) hx).toImage ≫
+        Scheme.IdealSheafData.inclusion hle, ?_⟩
+    have hcomp : ((X.curve.pointToTorsion (sectionToPoint X.curve g P.1) hx).toImage ≫
+        Scheme.IdealSheafData.inclusion hle) ≫ Z.subschemeι =
+        X.curve.pointToTorsion (sectionToPoint X.curve g P.1) hx := by
+      rw [Category.assoc, Scheme.IdealSheafData.inclusion_subschemeι, Scheme.Hom.toImage_imageι]
+    rw [← Category.assoc, hcomp, X.curve.pointToTorsion_torsionπ]
   · sorry
   · sorry
   · sorry
