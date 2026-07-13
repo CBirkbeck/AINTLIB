@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.GroupLaw
 import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
 import Mathlib.AlgebraicGeometry.Morphisms.Finite
@@ -138,6 +143,12 @@ theorem isPullback_sectionBaseChange {π : C ⟶ S} (z : S ⟶ C) (hz : z ≫ π
       Category.comp_id] at h
     exact h
 
+/-- A section of a separated morphism is a closed immersion. -/
+private lemma sectionsIdealAux_isClosedImmersion {π : C ⟶ S} [IsSeparated π] {z : S ⟶ C}
+    (hz : z ≫ π = 𝟙 S) : IsClosedImmersion z := by
+  have h1 : IsClosedImmersion (z ≫ π) := by rw [hz]; infer_instance
+  exact IsClosedImmersion.of_comp z π
+
 /-- The kernel of a base-changed section is the scheme-theoretic preimage of the
 kernel of the section. -/
 theorem ker_sectionBaseChange {π : C ⟶ S} [IsSeparated π] (z : S ⟶ C)
@@ -146,9 +157,7 @@ theorem ker_sectionBaseChange {π : C ⟶ S} [IsSeparated π] (z : S ⟶ C)
         (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]) :
       T ⟶ Limits.pullback π t).ker =
       (Scheme.Hom.ker z).comap (Limits.pullback.fst π t) := by
-  haveI : IsClosedImmersion z := by
-    have h1 : IsClosedImmersion (z ≫ π) := by rw [hz]; infer_instance
-    exact IsClosedImmersion.of_comp z π
+  haveI : IsClosedImmersion z := sectionsIdealAux_isClosedImmersion hz
   rw [← (isPullback_sectionBaseChange z hz t).isoPullback_hom_fst,
     Scheme.Hom.ker_comp_of_isIso,
     Scheme.IdealSheafData.ker_fst_of_isClosedImmersion]
@@ -159,11 +168,7 @@ Its subscheme is isomorphic to `S` itself (`IsIso z.toImage`), so all relative
 finiteness properties transport from the identity. -/
 noncomputable def sectionDivisor (π : C ⟶ S) [IsSeparated π] (z : S ⟶ C)
     (hz : z ≫ π = 𝟙 S) : RelEffCartierDiv π := by
-  haveI hzc : IsClosedImmersion z := by
-    have h1 : IsClosedImmersion (z ≫ π) := by
-      rw [hz]
-      infer_instance
-    exact IsClosedImmersion.of_comp z π
+  haveI hzc : IsClosedImmersion z := sectionsIdealAux_isClosedImmersion hz
   have hι : z.ker.subschemeι = inv z.toImage ≫ z := by
     rw [IsIso.eq_inv_comp, Scheme.Hom.toImage_imageι]
   have hπ : z.ker.subschemeι ≫ π = inv z.toImage := by
@@ -177,9 +182,7 @@ noncomputable def sectionDivisor (π : C ⟶ S) [IsSeparated π] (z : S ⟶ C)
 /-- **(T-D3, single-section degree)** The divisor of a single section has degree `1`. -/
 theorem sectionDivisor_degree (π : C ⟶ S) [IsSeparated π] (z : S ⟶ C)
     (hz : z ≫ π = 𝟙 S) (s : S) : (sectionDivisor π z hz).degree s = 1 := by
-  haveI hzc : IsClosedImmersion z := by
-    have h1 : IsClosedImmersion (z ≫ π) := by rw [hz]; infer_instance
-    exact IsClosedImmersion.of_comp z π
+  haveI hzc : IsClosedImmersion z := sectionsIdealAux_isClosedImmersion hz
   have hπ : (Scheme.Hom.ker z).subschemeι ≫ π = inv z.toImage := by
     rw [show (Scheme.Hom.ker z).subschemeι = inv z.toImage ≫ z from by
       rw [IsIso.eq_inv_comp, Scheme.Hom.toImage_imageι], Category.assoc, hz,
@@ -779,9 +782,7 @@ theorem exists_affineOpen_ker_principal_nonZeroDivisor (π : C ⟶ S) [IsSeparat
     ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ f : Γ(C, V.1),
       (Scheme.Hom.ker z).ideal V = Ideal.span {f} ∧
       f ∈ nonZeroDivisors Γ(C, V.1) := by
-  haveI hzc : IsClosedImmersion z := by
-    have h1 : IsClosedImmersion (z ≫ π) := by rw [hz]; infer_instance
-    exact IsClosedImmersion.of_comp z π
+  haveI hzc : IsClosedImmersion z := sectionsIdealAux_isClosedImmersion hz
   by_cases hc : c ∈ (Scheme.Hom.ker z).support
   case neg =>
     -- `c` is off the section: the ideal is the unit ideal on a small affine.
@@ -965,12 +966,6 @@ common basic-open refinements), charts of different groups being disjoint on the
 Over a small affine base the divisor subscheme is then the disjoint union of closed
 subschemes of affine opens, hence affine, and its coordinate ring is a product of
 quotients `A/(∏ᵢ fᵢ)`, each free by the KM 1.1.2 filtration. -/
-
-/-- A section of a separated morphism is a closed immersion. -/
-private lemma sectionsIdealAux_isClosedImmersion {π : C ⟶ S} [IsSeparated π] {z : S ⟶ C}
-    (hz : z ≫ π = 𝟙 S) : IsClosedImmersion z := by
-  have h1 : IsClosedImmersion (z ≫ π) := by rw [hz]; infer_instance
-  exact IsClosedImmersion.of_comp z π
 
 /-- An ideal sheaf is the unit ideal on any affine open disjoint from its support. -/
 private lemma sectionsIdealAux_ideal_eq_top_of_disjoint (I : C.IdealSheafData)
@@ -1506,6 +1501,22 @@ private lemma sectionsIdealAux_isPullback {X : Scheme.{u}} (q : X ⟶ S) (U : S.
   haveI h2 : IsIso ((U.1).toSpecΓ) := U.2.isoSpec_hom ▸ inferInstance
   exact IsPullback.of_horiz_isIso ⟨Scheme.Opens.toSpecΓ_naturality q U.1⟩
 
+/-- Shared Zariski-local core of `sectionsIdeal_isFinite`/`_flat`/`_lfp`: a morphism property
+`Q` that is Zariski-local at the target and stable under base change holds for
+`(∏ᵢ ker Pᵢ).subschemeι ≫ π` as soon as it holds for the affine chart maps supplied by
+`sectionsIdealAux_exists_chart`. -/
+private lemma sectionsIdealAux_zariski_local (π : C ⟶ S) {n : ℕ}
+    (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S })
+    (Q : MorphismProperty Scheme.{u}) [IsZariskiLocalAtTarget Q] [Q.IsStableUnderBaseChange]
+    (U : S → S.affineOpens) (hsU : ∀ s, s ∈ (U s).1)
+    (haff : ∀ s, IsAffineOpen (((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π) ⁻¹ᵁ (U s).1))
+    (hQ : ∀ s, Q (Spec.map (((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π).app (U s).1))) :
+    Q ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π) := by
+  refine IsZariskiLocalAtTarget.of_iSup_eq_top (fun s : S ↦ ((U s).1 : S.Opens)) ?_ ?_
+  · rw [eq_top_iff]
+    exact fun s _ ↦ TopologicalSpace.Opens.mem_iSup.mpr ⟨s, hsU s⟩
+  · intro s
+    exact MorphismProperty.of_isPullback (sectionsIdealAux_isPullback _ (U s) (haff s)) (hQ s)
 
 /-- **Register box (T-D3/T-D1, finiteness; KM 1.2.2 + 1.2.3)**: over a separated smooth
 relative curve the product of the section ideals cuts out a subscheme finite over the
@@ -1522,15 +1533,8 @@ theorem sectionsIdeal_isFinite (π : C ⟶ S) [IsSeparated π]
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) :
     IsFinite ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π) := by
   choose U hsU haff hFin hFlat hFP hrank using sectionsIdealAux_exists_chart π hsm P
-  refine IsZariskiLocalAtTarget.of_iSup_eq_top (fun s : S ↦ ((U s).1 : S.Opens)) ?_ ?_
-  · rw [eq_top_iff]
-    exact fun s _ ↦ TopologicalSpace.Opens.mem_iSup.mpr ⟨s, hsU s⟩
-  · intro s
-    haveI : IsFinite (Spec.map
-        (((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π).app (U s).1)) :=
-      (IsFinite.SpecMap_iff _).mpr (hFin s)
-    exact MorphismProperty.of_isPullback
-      (sectionsIdealAux_isPullback _ (U s) (haff s)) ‹_›
+  exact sectionsIdealAux_zariski_local π P @IsFinite U hsU haff
+    (fun s ↦ (IsFinite.SpecMap_iff _).mpr (hFin s))
 
 /-- **Register box (T-D3/T-D1, flatness; KM 1.2.2 + 1.2.3)** — see
 `sectionsIdeal_isFinite`. -/
@@ -1539,15 +1543,8 @@ theorem sectionsIdeal_flat (π : C ⟶ S) [IsSeparated π]
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) :
     Flat ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π) := by
   choose U hsU haff hFin hFlat hFP hrank using sectionsIdealAux_exists_chart π hsm P
-  refine IsZariskiLocalAtTarget.of_iSup_eq_top (fun s : S ↦ ((U s).1 : S.Opens)) ?_ ?_
-  · rw [eq_top_iff]
-    exact fun s _ ↦ TopologicalSpace.Opens.mem_iSup.mpr ⟨s, hsU s⟩
-  · intro s
-    haveI : Flat (Spec.map
-        (((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π).app (U s).1)) :=
-      Flat.SpecMap_iff.mpr (hFlat s)
-    exact MorphismProperty.of_isPullback
-      (sectionsIdealAux_isPullback _ (U s) (haff s)) ‹_›
+  exact sectionsIdealAux_zariski_local π P @Flat U hsU haff
+    (fun s ↦ Flat.SpecMap_iff.mpr (hFlat s))
 
 /-- **Register box (T-D3/T-D1, finite presentation; KM 1.2.2 + 1.2.3)** — see
 `sectionsIdeal_isFinite`. -/
@@ -1556,15 +1553,8 @@ theorem sectionsIdeal_lfp (π : C ⟶ S) [IsSeparated π]
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) :
     LocallyOfFinitePresentation ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π) := by
   choose U hsU haff hFin hFlat hFP hrank using sectionsIdealAux_exists_chart π hsm P
-  refine IsZariskiLocalAtTarget.of_iSup_eq_top (fun s : S ↦ ((U s).1 : S.Opens)) ?_ ?_
-  · rw [eq_top_iff]
-    exact fun s _ ↦ TopologicalSpace.Opens.mem_iSup.mpr ⟨s, hsU s⟩
-  · intro s
-    haveI : LocallyOfFinitePresentation (Spec.map
-        (((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π).app (U s).1)) :=
-      (LocallyOfFinitePresentation.SpecMap_iff _).mpr (hFP s)
-    exact MorphismProperty.of_isPullback
-      (sectionsIdealAux_isPullback _ (U s) (haff s)) ‹_›
+  exact sectionsIdealAux_zariski_local π P @LocallyOfFinitePresentation U hsU haff
+    (fun s ↦ (LocallyOfFinitePresentation.SpecMap_iff _).mpr (hFP s))
 
 /-- **Register box (T-D3, degree; KM 1.2.6)**: the divisor sum has rank `n` — KM 1.2.6
 (verbatim quote banked on T-D3): *"`deg(D₁ + D₂) = deg(D₁) + deg(D₂)`"*, applied `n`
@@ -1595,6 +1585,10 @@ theorem sectionsIdeal_finrank (π : C ⟶ S) [IsSeparated π]
   exact hrank _
 
 open scoped Classical in
+/-- **(DS4a)** The relative effective Cartier divisor `Σᵢ [Pᵢ]` cut out by a finite family of
+sections `Pᵢ` of `π` — the product `∏ᵢ ker (Pᵢ)` of their section ideals — when `π` is
+separated and smooth of relative dimension `1`; the trivial divisor (ideal `⊤`) otherwise.
+Under KM 1.2.1's standing hypotheses it has degree `n` (`sectionsDivisor_degree`). -/
 noncomputable def sectionsDivisor (π : C ⟶ S) {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) : RelEffCartierDiv π :=
   if h : IsSeparated π ∧ SmoothOfRelativeDimension 1 π then
@@ -1610,6 +1604,17 @@ noncomputable def sectionsDivisor (π : C ⟶ S) {n : ℕ}
       flat := inferInstance
       lfp := inferInstance }
 
+/-- The ideal of `sectionsDivisor` under the standing hypotheses (`π` separated and smooth of
+relative dimension `1`): the product of the section kernel ideals. This is the `dif_pos`
+unfolding stated once, for downstream consumers (the divisor-transport lemmas in
+`Incidence` / `IsoTransport`, and `sectionsDivisor_degree` below). -/
+theorem sectionsDivisor_ideal (π : C ⟶ S) [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
+    (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) :
+    (sectionsDivisor π P).ideal = ∏ i, Scheme.Hom.ker (P i).1 := by
+  have h : IsSeparated π ∧ SmoothOfRelativeDimension 1 π := ⟨‹_›, hsm⟩
+  rw [sectionsDivisor, dif_pos h]
+
 /-- **(T-D3a, specification of DS4a)** `Σᵢ [Pᵢ]` has degree `n`, under KM 1.2.1's
 standing hypotheses.
 
@@ -1622,17 +1627,10 @@ theorem sectionsDivisor_degree (π : C ⟶ S) [IsSeparated π]
     (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) (s : S) :
     (sectionsDivisor π P).degree s = n := by
-  have h : IsSeparated π ∧ SmoothOfRelativeDimension 1 π := ⟨‹_›, hsm⟩
   show ((sectionsDivisor π P).ideal.subschemeι ≫ π).finrank s = n
-  rw [show (sectionsDivisor π P).ideal = ∏ i, Scheme.Hom.ker (P i).1 from by
-    rw [sectionsDivisor, dif_pos h]]
+  rw [sectionsDivisor_ideal π hsm P]
   exact sectionsIdeal_finrank π hsm P s
 
-/-- Base change of a relative effective Cartier divisor along `t : T ⟶ S`: the ideal
-sheaf of the base-changed closed subscheme `D ×_S T ↪ C ×_S T` (kernel ideal of the
-pulled-back closed immersion), as a divisor in the base-changed curve (structure
-morphism `pullback.snd π t`). Finiteness/flatness/finite presentation are base-change
-stability, ticket `T-D12`; formation is functorial (KM 1.1). -/
 private lemma baseChange_prop (P : MorphismProperty Scheme.{u})
     [P.IsStableUnderBaseChange] [P.RespectsIso] (D : RelEffCartierDiv π)
     {T : Scheme.{u}} (t : T ⟶ S) (hD : P (D.ideal.subschemeι ≫ π)) :
@@ -1652,6 +1650,11 @@ private lemma baseChange_prop (P : MorphismProperty Scheme.{u})
   rw [hι, Category.assoc]
   exact (MorphismProperty.cancel_left_of_respectsIso P _ _).mpr hP
 
+/-- Base change of a relative effective Cartier divisor along `t : T ⟶ S`: the ideal
+sheaf of the base-changed closed subscheme `D ×_S T ↪ C ×_S T` (kernel ideal of the
+pulled-back closed immersion), as a divisor in the base-changed curve (structure
+morphism `pullback.snd π t`). Finiteness/flatness/finite presentation are base-change
+stability, ticket `T-D12`; formation is functorial (KM 1.1). -/
 noncomputable def baseChange (D : RelEffCartierDiv π) {T : Scheme.{u}} (t : T ⟶ S) :
     RelEffCartierDiv (pullback.snd π t) where
   ideal := (pullback.snd D.ideal.subschemeι (pullback.fst π t)).ker
@@ -2794,7 +2797,8 @@ def IsFullSetOfSectionsAlg [Module.Free R B] [Module.Finite R B] {n : ℕ}
 
 /-- In a reduced commutative ring, two elements are equal as soon as every ring
 homomorphism to a field identifies them (the difference lies in every prime, hence in
-the nilradical). -/
+the nilradical). ForMathlib-bound: fully generic, no modular-curve content (the extraction
+itself is a generalise-lane task). -/
 theorem eq_of_forall_field_hom_eq {A₀ : Type u} [CommRing A₀] [IsReduced A₀]
     {x y : A₀} (h : ∀ (K : Type u) [Field K] (χ : A₀ →+* K), χ x = χ y) : x = y := by
   have hd : x - y ∈ nilradical A₀ := by
