@@ -2250,6 +2250,273 @@ theorem ModuliProblem.relKey_of_classifies {S P' : ModuliProblem R} {X : EllObj 
   exact congrArg (fun z => ν.app (Opposite.op (X.pullbackAlong (h ≫ dS.f)))
     (dS.eqv (h ≫ dS.f) z)) (Subtype.ext (Category.comp_id h))
 
+/-- The base component of an `Ell/R` object-equality transport. -/
+theorem _root_.ModularCurves.EllObj.eqToHom_baseHom {A B : EllObj R} (h : A = B) :
+    (eqToHom h).baseHom = eqToHom (congrArg ModularCurves.EllObj.base h) := by
+  subst h
+  rfl
+
+/-- **The chosen quotient datum classifies the projection as the projected universal
+element** ([GHB7-couniv-v-a]): the compatibility between `relRepDatum`'s classifying
+bijection and `projQ`, at the index of the structure map. The scheme-level content of
+the couniversal uniqueness. -/
+theorem QuotPkg.relRepDatum_eqv_π (pkg : ∀ X : EllObj R, QuotPkg φ X)
+    (hfree : FreeAction φ)
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base))) (X : EllObj R) :
+    (QuotPkg.relRepDatum pkg hfree hbase X).eqv (pkg X).d.f
+      ⟨(pkg X).π, (pkg X).hπf⟩ =
+    (QuotPkg.projQ pkg hfree hbase).app
+      (Opposite.op (X.pullbackAlong (pkg X).d.f))
+      ((pkg X).d.eqv (pkg X).d.f ⟨𝟙 (pkg X).d.Z, Category.id_comp (pkg X).d.f⟩) := by
+  obtain ⟨hsndT, hfstT, hinvT, hUPT, hqT, hqfT⟩ :=
+    QuotPkg.mapT_spec pkg hfree hbase (X.pullbackAlongπ (pkg X).d.f)
+  refine Subtype.ext ?_
+  show pullback.lift (pkg X).π (𝟙 (X.pullbackAlong (pkg X).d.f).base)
+      (show (pkg X).π ≫ (pkg X).f₀ =
+        𝟙 (X.pullbackAlong (pkg X).d.f).base ≫
+          (X.pullbackAlongπ (pkg X).d.f).baseHom from
+        (pkg X).hπf.trans (Category.id_comp (pkg X).d.f).symm) ≫
+      QuotPkg.mapT pkg hfree hbase (X.pullbackAlongπ (pkg X).d.f) =
+    (((pkg (X.pullbackAlong (pkg X).d.f)).d.eqv
+        ((𝟙 (X.pullbackAlong (pkg X).d.f) :
+          X.pullbackAlong (pkg X).d.f ⟶ X.pullbackAlong (pkg X).d.f).baseHom)).symm
+        (Q.map ((X.pullbackAlong (pkg X).d.f).pullbackAlongπ
+          ((𝟙 (X.pullbackAlong (pkg X).d.f) :
+            X.pullbackAlong (pkg X).d.f ⟶
+              X.pullbackAlong (pkg X).d.f).baseHom)).op
+          ((pkg X).d.eqv (pkg X).d.f
+            ⟨𝟙 (pkg X).d.Z, Category.id_comp (pkg X).d.f⟩))).1 ≫
+      (pkg (X.pullbackAlong (pkg X).d.f)).π
+  -- factor the lifted projection through the base-changed quotient projection
+  have hℓπT : pullback.lift (𝟙 (pkg X).d.Z)
+      (𝟙 (X.pullbackAlong (pkg X).d.f).base)
+      (show 𝟙 (pkg X).d.Z ≫ (pkg X).d.f =
+        𝟙 (X.pullbackAlong (pkg X).d.f).base ≫
+          (X.pullbackAlongπ (pkg X).d.f).baseHom from rfl) ≫
+      QuotPkg.πT pkg hfree hbase (X.pullbackAlongπ (pkg X).d.f) =
+      pullback.lift (pkg X).π (𝟙 (X.pullbackAlong (pkg X).d.f).base)
+        (show (pkg X).π ≫ (pkg X).f₀ =
+          𝟙 (X.pullbackAlong (pkg X).d.f).base ≫
+            (X.pullbackAlongπ (pkg X).d.f).baseHom from
+          (pkg X).hπf.trans (Category.id_comp (pkg X).d.f).symm) := by
+    apply pullback.hom_ext
+    · rw [Category.assoc, hfstT, ← Category.assoc, pullback.lift_fst,
+        Category.id_comp, pullback.lift_fst]
+    · rw [Category.assoc, hsndT, pullback.lift_snd, pullback.lift_snd]
+  rw [← hℓπT, Category.assoc, hqT]
+  refine ((Category.assoc _ _ _).symm.trans ?_)
+  congr 1
+  -- key: the diagonal composed with the comparison classifies the universal element
+  have memℓ : pullback.lift (𝟙 (pkg X).d.Z)
+      (𝟙 (X.pullbackAlong (pkg X).d.f).base)
+      (show 𝟙 (pkg X).d.Z ≫ (pkg X).d.f =
+        𝟙 (X.pullbackAlong (pkg X).d.f).base ≫
+          (X.pullbackAlongπ (pkg X).d.f).baseHom from rfl) ≫
+      ((pkg X).d.pullback (X.pullbackAlongπ (pkg X).d.f)).f =
+      (𝟙 (X.pullbackAlong (pkg X).d.f) :
+        X.pullbackAlong (pkg X).d.f ⟶ X.pullbackAlong (pkg X).d.f).baseHom :=
+    pullback.lift_snd _ _ _
+  have hm : ((⟨pullback.lift (𝟙 (pkg X).d.Z)
+      (𝟙 (X.pullbackAlong (pkg X).d.f).base)
+      (show 𝟙 (pkg X).d.Z ≫ (pkg X).d.f =
+        𝟙 (X.pullbackAlong (pkg X).d.f).base ≫
+          (X.pullbackAlongπ (pkg X).d.f).baseHom from rfl), memℓ⟩ :
+      { h : (X.pullbackAlong (pkg X).d.f).base ⟶
+          ((pkg X).d.pullback (X.pullbackAlongπ (pkg X).d.f)).Z //
+        h ≫ ((pkg X).d.pullback (X.pullbackAlongπ (pkg X).d.f)).f =
+          (𝟙 (X.pullbackAlong (pkg X).d.f) :
+            X.pullbackAlong (pkg X).d.f ⟶
+              X.pullbackAlong (pkg X).d.f).baseHom }).1 ≫
+      (((pkg X).d.pullback (X.pullbackAlongπ (pkg X).d.f)).toRelRepData.compare
+        (pkg (X.pullbackAlong (pkg X).d.f)).d.toRelRepData).1) ≫
+      (pkg (X.pullbackAlong (pkg X).d.f)).d.f =
+      (𝟙 (X.pullbackAlong (pkg X).d.f) :
+        X.pullbackAlong (pkg X).d.f ⟶ X.pullbackAlong (pkg X).d.f).baseHom :=
+    (Category.assoc _ _ _).trans
+      ((congrArg (_ ≫ ·)
+        ((((pkg X).d.pullback (X.pullbackAlongπ (pkg X).d.f)).toRelRepData.compare
+          (pkg (X.pullbackAlong (pkg X).d.f)).d.toRelRepData).2)).trans memℓ)
+  have hkey : (⟨(⟨pullback.lift (𝟙 (pkg X).d.Z)
+      (𝟙 (X.pullbackAlong (pkg X).d.f).base)
+      (show 𝟙 (pkg X).d.Z ≫ (pkg X).d.f =
+        𝟙 (X.pullbackAlong (pkg X).d.f).base ≫
+          (X.pullbackAlongπ (pkg X).d.f).baseHom from rfl), memℓ⟩ :
+      { h : (X.pullbackAlong (pkg X).d.f).base ⟶
+          ((pkg X).d.pullback (X.pullbackAlongπ (pkg X).d.f)).Z //
+        h ≫ ((pkg X).d.pullback (X.pullbackAlongπ (pkg X).d.f)).f =
+          (𝟙 (X.pullbackAlong (pkg X).d.f) :
+            X.pullbackAlong (pkg X).d.f ⟶
+              X.pullbackAlong (pkg X).d.f).baseHom }).1 ≫
+      (((pkg X).d.pullback (X.pullbackAlongπ (pkg X).d.f)).toRelRepData.compare
+        (pkg (X.pullbackAlong (pkg X).d.f)).d.toRelRepData).1, hm⟩ :
+      { h : (X.pullbackAlong (pkg X).d.f).base ⟶
+          (pkg (X.pullbackAlong (pkg X).d.f)).d.Z //
+        h ≫ (pkg (X.pullbackAlong (pkg X).d.f)).d.f =
+          (𝟙 (X.pullbackAlong (pkg X).d.f) :
+            X.pullbackAlong (pkg X).d.f ⟶
+              X.pullbackAlong (pkg X).d.f).baseHom }) =
+      ((pkg (X.pullbackAlong (pkg X).d.f)).d.eqv
+        ((𝟙 (X.pullbackAlong (pkg X).d.f) :
+          X.pullbackAlong (pkg X).d.f ⟶
+            X.pullbackAlong (pkg X).d.f).baseHom)).symm
+        (Q.map ((X.pullbackAlong (pkg X).d.f).pullbackAlongπ
+          ((𝟙 (X.pullbackAlong (pkg X).d.f) :
+            X.pullbackAlong (pkg X).d.f ⟶
+              X.pullbackAlong (pkg X).d.f).baseHom)).op
+          ((pkg X).d.eqv (pkg X).d.f
+            ⟨𝟙 (pkg X).d.Z, Category.id_comp (pkg X).d.f⟩)) := by
+    apply ((pkg (X.pullbackAlong (pkg X).d.f)).d.eqv
+      ((𝟙 (X.pullbackAlong (pkg X).d.f) :
+        X.pullbackAlong (pkg X).d.f ⟶ X.pullbackAlong (pkg X).d.f).baseHom)).injective
+    rw [Equiv.apply_symm_apply]
+    have P1 : 𝟙 (pkg X).d.Z ≫ (pkg X).d.f =
+        (𝟙 (X.pullbackAlong (pkg X).d.f) :
+          X.pullbackAlong (pkg X).d.f ⟶ X.pullbackAlong (pkg X).d.f).baseHom ≫
+          (X.pullbackAlongπ (pkg X).d.f).baseHom :=
+      (Category.id_comp _).trans (Category.id_comp _).symm
+    have hval : ∀ (h' : { h : (X.pullbackAlong (pkg X).d.f).base ⟶
+          ((pkg X).d.pullback (X.pullbackAlongπ (pkg X).d.f)).Z //
+          h ≫ ((pkg X).d.pullback (X.pullbackAlongπ (pkg X).d.f)).f =
+            (𝟙 (X.pullbackAlong (pkg X).d.f) :
+              X.pullbackAlong (pkg X).d.f ⟶
+                X.pullbackAlong (pkg X).d.f).baseHom })
+        (v : (X.pullbackAlong (pkg X).d.f).base ⟶ (pkg X).d.Z)
+        (hv : h'.1 ≫ pullback.fst (pkg X).d.f
+          (X.pullbackAlongπ (pkg X).d.f).baseHom = v)
+        (p : v ≫ (pkg X).d.f =
+          (𝟙 (X.pullbackAlong (pkg X).d.f) :
+            X.pullbackAlong (pkg X).d.f ⟶ X.pullbackAlong (pkg X).d.f).baseHom ≫
+            (X.pullbackAlongπ (pkg X).d.f).baseHom),
+        ((pkg X).d.pullback (X.pullbackAlongπ (pkg X).d.f)).eqv
+          ((𝟙 (X.pullbackAlong (pkg X).d.f) :
+            X.pullbackAlong (pkg X).d.f ⟶
+              X.pullbackAlong (pkg X).d.f).baseHom) h' =
+          Q.map (EllObj.toPullbackAlong
+            ((X.pullbackAlong (pkg X).d.f).pullbackAlongπ
+              ((𝟙 (X.pullbackAlong (pkg X).d.f) :
+                X.pullbackAlong (pkg X).d.f ⟶
+                  X.pullbackAlong (pkg X).d.f).baseHom) ≫
+              X.pullbackAlongπ (pkg X).d.f)).op
+            ((pkg X).d.eqv
+              ((𝟙 (X.pullbackAlong (pkg X).d.f) :
+                X.pullbackAlong (pkg X).d.f ⟶
+                  X.pullbackAlong (pkg X).d.f).baseHom ≫
+                (X.pullbackAlongπ (pkg X).d.f).baseHom) ⟨v, p⟩) := by
+      intro h' v hv p; subst hv; rfl
+    have hg : ((pkg X).d.f :
+        (X.pullbackAlong (pkg X).d.f).base ⟶ X.base) =
+        (𝟙 (X.pullbackAlong (pkg X).d.f) :
+          X.pullbackAlong (pkg X).d.f ⟶ X.pullbackAlong (pkg X).d.f).baseHom ≫
+          (X.pullbackAlongπ (pkg X).d.f).baseHom :=
+      (Category.id_comp _).symm
+    rw [ModuliProblem.RelRepData.eqv_comp_compare
+        ((pkg X).d.pullback (X.pullbackAlongπ (pkg X).d.f)).toRelRepData
+        (pkg (X.pullbackAlong (pkg X).d.f)).d.toRelRepData
+        ((𝟙 (X.pullbackAlong (pkg X).d.f) :
+          X.pullbackAlong (pkg X).d.f ⟶ X.pullbackAlong (pkg X).d.f).baseHom)
+        ⟨pullback.lift (𝟙 (pkg X).d.Z)
+          (𝟙 (X.pullbackAlong (pkg X).d.f).base)
+          (show 𝟙 (pkg X).d.Z ≫ (pkg X).d.f =
+            𝟙 (X.pullbackAlong (pkg X).d.f).base ≫
+              (X.pullbackAlongπ (pkg X).d.f).baseHom from rfl), memℓ⟩,
+      hval ⟨pullback.lift (𝟙 (pkg X).d.Z)
+          (𝟙 (X.pullbackAlong (pkg X).d.f).base)
+          (show 𝟙 (pkg X).d.Z ≫ (pkg X).d.f =
+            𝟙 (X.pullbackAlong (pkg X).d.f).base ≫
+              (X.pullbackAlongπ (pkg X).d.f).baseHom from rfl), memℓ⟩
+        (𝟙 (pkg X).d.Z) (pullback.lift_fst _ _ _) P1,
+      ]
+    -- transport the index, collapse, and meet at the tautological projection
+    have hEll : (X.pullbackAlong (pkg X).d.f).pullbackAlongπ
+        ((𝟙 (X.pullbackAlong (pkg X).d.f) :
+          X.pullbackAlong (pkg X).d.f ⟶
+            X.pullbackAlong (pkg X).d.f).baseHom) =
+        EllObj.toPullbackAlong
+          ((X.pullbackAlong (pkg X).d.f).pullbackAlongπ
+            ((𝟙 (X.pullbackAlong (pkg X).d.f) :
+              X.pullbackAlong (pkg X).d.f ⟶
+                X.pullbackAlong (pkg X).d.f).baseHom) ≫
+            X.pullbackAlongπ (pkg X).d.f) ≫
+          eqToHom (congrArg (fun t => X.pullbackAlong t) hg.symm) := by
+      apply (EllObj.homPullbackAlongEquiv X (pkg X).d.f
+        ((X.pullbackAlong (pkg X).d.f).pullbackAlong
+          ((𝟙 (X.pullbackAlong (pkg X).d.f) :
+            X.pullbackAlong (pkg X).d.f ⟶
+              X.pullbackAlong (pkg X).d.f).baseHom))).injective
+      refine Subtype.ext (Prod.ext ?_ ?_)
+      · exact ((Category.assoc _ _ _).trans
+          ((congrArg (EllObj.toPullbackAlong
+              ((X.pullbackAlong (pkg X).d.f).pullbackAlongπ
+                ((𝟙 (X.pullbackAlong (pkg X).d.f) :
+                  X.pullbackAlong (pkg X).d.f ⟶
+                    X.pullbackAlong (pkg X).d.f).baseHom) ≫
+                X.pullbackAlongπ (pkg X).d.f) ≫ ·)
+            (EllObj.pullbackAlongπ_congr X hg.symm).symm).trans
+            (EllObj.toPullbackAlong_pullbackAlongπ
+              ((X.pullbackAlong (pkg X).d.f).pullbackAlongπ
+                ((𝟙 (X.pullbackAlong (pkg X).d.f) :
+                  X.pullbackAlong (pkg X).d.f ⟶
+                    X.pullbackAlong (pkg X).d.f).baseHom) ≫
+                X.pullbackAlongπ (pkg X).d.f)))).symm
+      · exact ((congrArg (𝟙 ((X.pullbackAlong (pkg X).d.f).pullbackAlong
+            ((𝟙 (X.pullbackAlong (pkg X).d.f) :
+              X.pullbackAlong (pkg X).d.f ⟶
+                X.pullbackAlong (pkg X).d.f).baseHom)).base ≫ ·)
+            (ModularCurves.EllObj.eqToHom_baseHom
+              (congrArg (fun t => X.pullbackAlong t) hg.symm))).trans
+          ((congrArg (𝟙 ((X.pullbackAlong (pkg X).d.f).pullbackAlong
+              ((𝟙 (X.pullbackAlong (pkg X).d.f) :
+                X.pullbackAlong (pkg X).d.f ⟶
+                  X.pullbackAlong (pkg X).d.f).baseHom)).base ≫ ·)
+            (show (eqToHom (congrArg ModularCurves.EllObj.base
+              (congrArg (fun t => X.pullbackAlong t) hg.symm)) :
+              (X.pullbackAlong ((𝟙 (X.pullbackAlong (pkg X).d.f) :
+                X.pullbackAlong (pkg X).d.f ⟶
+                  X.pullbackAlong (pkg X).d.f).baseHom ≫
+                (X.pullbackAlongπ (pkg X).d.f).baseHom)).base ⟶
+              (X.pullbackAlong (pkg X).d.f).base) = 𝟙 _ from rfl)).trans
+            (Category.comp_id _))).symm
+    exact (congrArg (fun y => Q.map (EllObj.toPullbackAlong
+        (((X.pullbackAlong (pkg X).d.f).pullbackAlongπ
+          (𝟙 (X.pullbackAlong (pkg X).d.f) :
+            X.pullbackAlong (pkg X).d.f ⟶
+              X.pullbackAlong (pkg X).d.f).baseHom) ≫
+          X.pullbackAlongπ (pkg X).d.f)).op y)
+        (ModuliProblem.RelRepData.eqv_congr (pkg X).d.toRelRepData hg
+          (𝟙 (pkg X).d.Z) (Category.id_comp (pkg X).d.f))).trans
+      ((FunctorToTypes.map_comp_apply Q
+          (eqToHom (congrArg (fun t => Opposite.op (X.pullbackAlong t)) hg))
+          (EllObj.toPullbackAlong
+        (((X.pullbackAlong (pkg X).d.f).pullbackAlongπ
+          (𝟙 (X.pullbackAlong (pkg X).d.f) :
+            X.pullbackAlong (pkg X).d.f ⟶
+              X.pullbackAlong (pkg X).d.f).baseHom) ≫
+          X.pullbackAlongπ (pkg X).d.f)).op
+          ((pkg X).d.eqv (pkg X).d.f
+        ⟨𝟙 (pkg X).d.Z, Category.id_comp (pkg X).d.f⟩)).symm.trans
+        (congrArg (fun m => Q.map m ((pkg X).d.eqv (pkg X).d.f
+        ⟨𝟙 (pkg X).d.Z, Category.id_comp (pkg X).d.f⟩))
+          (show (eqToHom (congrArg (fun t => Opposite.op (X.pullbackAlong t)) hg)) ≫ (EllObj.toPullbackAlong
+        (((X.pullbackAlong (pkg X).d.f).pullbackAlongπ
+          (𝟙 (X.pullbackAlong (pkg X).d.f) :
+            X.pullbackAlong (pkg X).d.f ⟶
+              X.pullbackAlong (pkg X).d.f).baseHom) ≫
+          X.pullbackAlongπ (pkg X).d.f)).op =
+              ((X.pullbackAlong (pkg X).d.f).pullbackAlongπ
+          (𝟙 (X.pullbackAlong (pkg X).d.f) :
+            X.pullbackAlong (pkg X).d.f ⟶
+              X.pullbackAlong (pkg X).d.f).baseHom).op from
+            (congrArg (· ≫ (EllObj.toPullbackAlong
+        (((X.pullbackAlong (pkg X).d.f).pullbackAlongπ
+          (𝟙 (X.pullbackAlong (pkg X).d.f) :
+            X.pullbackAlong (pkg X).d.f ⟶
+              X.pullbackAlong (pkg X).d.f).baseHom) ≫
+          X.pullbackAlongπ (pkg X).d.f)).op)
+              (eqToHom_op (congrArg (fun t => X.pullbackAlong t) hg.symm))).symm.trans
+              (congrArg Quiver.Hom.op hEll).symm)))
+  exact congrArg Subtype.val hkey
+
 end Transport
 
 
