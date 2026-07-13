@@ -37,6 +37,37 @@ namespace ModularCurves
 
 namespace EllipticCurve
 
+/-- **(dictionary additivity)** The points dictionary `projModelPointsEquiv` carries the model's
+group addition (`modelEllipticCurve_point_add_val` via `mulModelHom`) to mathlib's `Affine.Point`
+addition. This is `mulModelHom_specPoints` re-read through `modelEllipticCurve_point_add_val`, so
+`projModelPointsEquiv` is an additive bijection of point groups. -/
+theorem projModelPointsEquiv_add {K : Type u} [Field K] (W : WeierstrassCurve K) [W.IsElliptic]
+    {K' : Type u} [Field K'] [Algebra K K'] [DecidableEq K']
+    (P Q : (modelEllipticCurve W).Point
+      (Spec.map (CommRingCat.ofHom (algebraMap K K')))) :
+    projModelPointsEquiv W K' (P + Q)
+      = projModelPointsEquiv W K' P + projModelPointsEquiv W K' Q := by
+  rw [← mulModelHom_specPoints W K' P Q]
+  congr 1
+
+/-- **(dictionary as an additive equivalence)** The points dictionary bundled with its additivity
+(`projModelPointsEquiv_add`): the model's `K'`-point group is `≃+` to mathlib's `Affine.Point`. -/
+noncomputable def projModelPointsAddEquiv {K : Type u} [Field K] (W : WeierstrassCurve K)
+    [W.IsElliptic] (K' : Type u) [Field K'] [Algebra K K'] [DecidableEq K'] :
+    (modelEllipticCurve W).Point (Spec.map (CommRingCat.ofHom (algebraMap K K')))
+      ≃+ (W.baseChange K').toAffine.Point :=
+  { projModelPointsEquiv W K' with map_add' := projModelPointsEquiv_add W }
+
+/-- **(K4 point-`[N]`-match)** Under the points dictionary, the model's `zsmul` (multiplication
+by `n` in the point group) is mathlib's `zsmul` on `Affine.Point`. Specialised to `n = N` this is
+the point-level statement that the scheme `mulByHom N` realises mathlib's `[N]` (via
+`point_smul_eq_comp_mulBy`, which rewrites `(n • P).1 = P.1 ≫ mulByHom n`). -/
+theorem projModelPointsEquiv_zsmul {K : Type u} [Field K] (W : WeierstrassCurve K) [W.IsElliptic]
+    {K' : Type u} [Field K'] [Algebra K K'] [DecidableEq K'] (n : ℤ)
+    (P : (modelEllipticCurve W).Point (Spec.map (CommRingCat.ofHom (algebraMap K K')))) :
+    projModelPointsEquiv W K' (n • P) = n • projModelPointsEquiv W K' P :=
+  map_zsmul (projModelPointsAddEquiv W K') n P
+
 /-- **(K4 field-level target)** Over a field `K`, the scheme-theoretic fibre rank of
 multiplication-by-`N` on the projective model of an elliptic Weierstrass curve is `N²`.
 
