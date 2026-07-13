@@ -2215,6 +2215,32 @@ theorem QuotPkg.projQ_crossμ (pkg : ∀ X : EllObj R, QuotPkg φ X)
               (EllObj.toPullbackAlong_pullbackAlongπ (𝟙 Xop.unop)))).trans
           (FunctorToTypes.map_id_apply Q a))))
 
+/-- **The source-generic classification key** ([GHB7-couniv-v-prep]): `crossRelKey`
+over an arbitrary source problem — needed at source `quotProb` for the couniversal
+uniqueness. -/
+theorem ModuliProblem.relKey_of_classifies {S P' : ModuliProblem R} {X : EllObj R}
+    (dS : ModuliProblem.RelRepData S X) (dP : ModuliProblem.RelRepData P' X)
+    (ν : S ⟶ P') (t : dS.Z ⟶ dP.Z) (htf : t ≫ dP.f = dS.f)
+    (hclt : dP.eqv dS.f ⟨t, htf⟩ =
+      ν.app (Opposite.op (X.pullbackAlong dS.f))
+        (dS.eqv dS.f ⟨𝟙 dS.Z, Category.id_comp dS.f⟩))
+    {T : Scheme.{u}} (g : T ⟶ X.base)
+    (h : { h : T ⟶ dS.Z // h ≫ dS.f = g })
+    (m : (h.1 ≫ t) ≫ dP.f = g) :
+    dP.eqv g ⟨h.1 ≫ t, m⟩ =
+      ν.app (Opposite.op (X.pullbackAlong g)) (dS.eqv g h) := by
+  obtain ⟨h, hh⟩ := h
+  subst hh
+  have hnat := dP.nat dS.f h ⟨t, htf⟩
+  rw [show (⟨h ≫ t, m⟩ : { v : T ⟶ dP.Z // v ≫ dP.f = h ≫ dS.f }) =
+      ⟨h ≫ t, by rw [Category.assoc, htf]⟩ from Subtype.ext rfl,
+    hnat, hclt,
+    ← NatTrans.naturality_apply ν (X.pullbackAlongMap dS.f h).op
+      (dS.eqv dS.f ⟨𝟙 dS.Z, Category.id_comp dS.f⟩),
+    ← dS.nat dS.f h ⟨𝟙 dS.Z, Category.id_comp dS.f⟩]
+  exact congrArg (fun z => ν.app (Opposite.op (X.pullbackAlong (h ≫ dS.f)))
+    (dS.eqv (h ≫ dS.f) z)) (Subtype.ext (Category.comp_id h))
+
 end Transport
 
 
