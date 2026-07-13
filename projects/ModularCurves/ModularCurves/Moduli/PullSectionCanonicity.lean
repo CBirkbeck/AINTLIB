@@ -114,6 +114,37 @@ lemma isFullLevel_pointMap {S : Scheme.{u}} {E E' : EllipticCurve S}
     rw [hfam, EllipticCurve.sectionsDivisor_pointMap_ideal, hdiv,
       EllipticCurve.torsionIdeal_eq_comap e hη hμ]
 
+/-- **(KM-W0, full-level base-change divisor leg)** The divisor of a family of sections is
+natural in the base: base-changing `Σᵢ [Pᵢ]` along `t : T ⟶ S` gives the divisor of the
+pulled family `Σᵢ [asSection (pull Pᵢ)]` on the base-changed curve. General-family analogue
+of `Section.orderDivisor_baseChange`; each factor is `RelEffCartierDiv.ker_sectionBaseChange`
+(the RHS family is already `asSection ∘ pull`, so no additivity bridge is needed). -/
+theorem sectionsDivisor_baseChange {S : Scheme.{u}} (E : EllipticCurve S) {n : ℕ}
+    (P : Fin n → E.Point (𝟙 S)) {T : Scheme.{u}} (t : T ⟶ S) :
+    (RelEffCartierDiv.sectionsDivisor E.π P).baseChange t =
+      RelEffCartierDiv.sectionsDivisor (E.baseChange t).π
+        (fun i => EllipticCurve.Point.asSection E t (EllipticCurve.Point.pull E t (P i))) := by
+  have hpos : IsSeparated E.π ∧ SmoothOfRelativeDimension 1 E.π :=
+    ⟨inferInstance, E.smooth⟩
+  have hpos' : IsSeparated (E.baseChange t).π ∧
+      SmoothOfRelativeDimension 1 (E.baseChange t).π :=
+    ⟨inferInstance, (E.baseChange t).smooth⟩
+  apply RelEffCartierDiv.ext
+  have hL : ((RelEffCartierDiv.sectionsDivisor E.π P).baseChange t).ideal =
+      (∏ i, Scheme.Hom.ker (P i).1).comap (Limits.pullback.fst E.π t) := by
+    rw [RelEffCartierDiv.baseChange_ideal]
+    congr 1
+    rw [RelEffCartierDiv.sectionsDivisor, dif_pos hpos]
+  have hR : (RelEffCartierDiv.sectionsDivisor (E.baseChange t).π
+        (fun i => EllipticCurve.Point.asSection E t
+          (EllipticCurve.Point.pull E t (P i)))).ideal =
+      ∏ i, Scheme.Hom.ker
+        (EllipticCurve.Point.asSection E t (EllipticCurve.Point.pull E t (P i))).1 := by
+    rw [RelEffCartierDiv.sectionsDivisor, dif_pos hpos']
+  rw [hL, hR, Scheme.IdealSheafData.comap_prod]
+  refine Finset.prod_congr rfl fun i _ => ?_
+  exact (RelEffCartierDiv.ker_sectionBaseChange (P i).1 (P i).2 t).symm
+
 namespace EllHom
 
 variable (R : CommRingCat.{u}) {X Y : EllObj R} (f : X ⟶ Y)
