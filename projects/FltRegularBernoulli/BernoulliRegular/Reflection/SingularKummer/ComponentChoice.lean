@@ -40,7 +40,7 @@ theorem exists_lift_of_map_eq_of_ne_bot
     (φ : G →* H) (S : Subgroup G) (T : Subgroup H)
     (hmap : S.map φ = T) (hT : T ≠ ⊥) :
     ∃ x : S, φ x.1 ≠ 1 := by
-  haveI : Nontrivial T := (Subgroup.nontrivial_iff_ne_bot T).2 hT
+  have : Nontrivial T := (Subgroup.nontrivial_iff_ne_bot T).2 hT
   exact exists_lift_of_map_eq_of_nontrivial φ S T hmap
 
 /-- Elementwise form: the lift can be viewed in the ambient source group and
@@ -62,7 +62,7 @@ theorem source_ne_bot_of_map_eq_of_target_ne_bot
     S ≠ ⊥ := by
   obtain ⟨x, hx_ne⟩ := exists_lift_of_map_eq_of_ne_bot φ S T hmap hT
   exact (Subgroup.nontrivial_iff_ne_bot S).1
-    ⟨⟨x, 1, fun h => hx_ne (by simpa using congrArg (fun z : S => φ z.1) h)⟩⟩
+    ⟨⟨x, 1, fun h ↦ hx_ne (by simpa using congrArg (fun z : S ↦ φ z.1) h)⟩⟩
 
 open scoped nonZeroDivisors
 
