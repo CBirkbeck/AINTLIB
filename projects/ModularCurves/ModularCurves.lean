@@ -57,6 +57,7 @@ import ModularCurves.GroupScheme.StableCover
 import ModularCurves.GroupScheme.SubgroupQuotient
 import ModularCurves.GroupScheme.SubgroupQuotientConstruction
 import ModularCurves.GroupScheme.SubgroupQuotientGlue
+import ModularCurves.GroupScheme.SubgroupQuotientGlueData
 import ModularCurves.GroupScheme.TranslationAction
 import ModularCurves.LevelStructure.Basic
 import ModularCurves.LevelStructure.CartierDivisor

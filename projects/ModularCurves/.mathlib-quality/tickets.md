@@ -18826,3 +18826,20 @@ REMAINING for [RIG-1] per the v10.193 route audit: (1a) the c_M := c|E[M] kernel
 TorsionFibre/T-B6 family) + fibre-triviality ⟹ per-fibre agreement of c_M with 𝟙 ⟹ hsurj of
 the equalizer; (1c) assembly: `aut_endo_eq_one` (M ≥ 3 invertible, KM-pin-gated) closes c = 𝟙
 ⟹ e = refl; loc-noeth/T-W7.8 gate as flagged. (STREAM-GH)
+
+### v10.195-G0 — ★★ [HG-C4c-2 S5] THE QUOTIENT GLUE DATA IS GREEN (STREAM-G0)
+`quotientGlueData : Scheme.GlueData` (SubgroupQuotientGlueData.lean, all fields verified):
+J = points of E, U i = the patch quotient of the option-γ C3f patch at i, V (i,j) = the saturated
+image open of the window U_i ⊓ U_j, f = ι (open immersion for free), t = glueTransition (cross the
+window comparison, widen along le_inf, project, DESCEND through the effective-epi restrictedπ),
+t' = imageOpensPullbackIso-conjugate of the triple glueTransition (glue_triple_le shuffle).
+t_id/t_fac/cocycle all reduce along `restrictedπ_hom_ext` (epi) + the fac triangles
+(`restrictedπ_glueTransition(_assoc)`) + window naturality (`homOfLE_restrictedπ`) to window-level
+chain identities, closed by `window_hom_ext` + the ambient-curve collapse simp set
+(homOfLE_ι_assoc + windowCrossIso_hom_ι(_assoc)). NO intersection affineness, NO intersection
+quotients, NO opens-equality transport anywhere — the v10.190 promise holds.
+REMAINING to the pins: quotient := glued; quotientπ (glue U_i → Q_i → glued over the C3f cover of
+E; morphism-gluing API hunt: Scheme.OpenCover.glueMorphisms or multicoequalizer route); quotientS;
+universal property (per-patch descRestrictedπ + cover); IsInvariant dictionary
+(coequalizes_of_isInvariant, C4b); then discharge the six SubgroupQuotient pins under the
+coordinator's α/β signature ruling (v10.189-G0). (STREAM-G0)
