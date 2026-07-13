@@ -766,6 +766,18 @@ with every affine inclusion. Thus the local maps have exactly the coherence need
 the next dependency: assembling them degreewise, including the alternating
 differentials, into a base-linear Cech-complex base-change isomorphism.
 
+That assembly is now complete. `baseCechXBaseChangeIso` forms the finite product
+of the affine-intersection module comparisons in every degree, and
+`baseCechComplexBaseChangeIso` proves that these products commute with each
+alternating coface and hence with the Cech differential. Thus the raw
+base-linear Cech model of a quasicoherent module on a finite affine cover
+commutes with every affine base change, with no finite-presentation or
+noetherian hypothesis. Combined with the landed trivializing-cover theorem,
+the pole-sheaf Cech model is now both termwise flat and base-change compatible.
+Its terms are still not known to be finite or projective: the remaining
+geometric input is a bounded finite-projective replacement, not another local
+base-change comparison.
+
 The elementary Mayer--Vietoris seam is now complete in both directions.
 `HPrimeZeroAddEquivSections` identifies `H'⁰(U,F)` with sections naturally in `U`, while
 `HPrimeAddEquivHOfIsTerminal` identifies `H'ⁿ(T,F)` with genuine `Sheaf.H F n` when `T`
