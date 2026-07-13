@@ -16603,6 +16603,22 @@ component is the unit multiplication — the component content of the CLOSED
 
 ### v10.144 (2026-07-12, NEW-GH): CHARTER-GH-2 /beastmode — PART B core landing: GHB4 PROVEN; GHB5 crux scoped; 7 leaves total this arc
 
+### STREAM-GH day-2 progress (2026-07-13, GH) — GHB7-3 ★ THE FUNCTOR COMPLETE
+
+**PUSHED (all axiom-clean [propext, Classical.choice, Quot.sound] unless noted):**
+- **[GHB7-2a-eq]** `EquivariantRelRepData.pullback` (a0e1b8fff) — equivariant base change of rel-rep data; `basePullback` action; equivariant clause via ∀-quantified `key` over fresh reduced-typed section (THE instance-transparency dodge).
+- **[GHB7-2b-eq]** `compare_equivariant` (5ba80e470) — the canonical comparison intertwines the actions (eqv-injectivity + eqv_comp_compare/eqv_compare/equivariant chain).
+- **[GHB7-1]** QuotPkg layer (4fb82360e) — per-object chosen-quotient packages: `nonempty_quotPkg` (GHB3), `π_finite_etale_surjective` (GHB4), `f₀_finite_etale` (GHB6-gated, carries sorryAx until [GHB6-RING]). **+ RULE-5 statement change:** `hbase : ∀ X, IsAffineHom (pullback.diagonal (terminal.from X.base))` threaded through `exists_quotientProblemData` + `gammaH_relativelyRepresentable` (⚠GHB7-0 resolution β, as planned).
+- **[GHB7-3b]** `QuotPkg.exists_mapDescent` (4e701824f) — base-change transport: GHB5-quotient of the pulled action + compare_equivariant descent; characterized by πT≫q = compare≫π'; over X'.base.
+- **[GHB7-3-α]** map-id enablers (c069e8a19, QuotientProblem.lean) — `toPullbackAlong_pullbackAlongπ_self`, `toPullbackAlong_congr`, `compare_pullback_id` (compare of identity base change = pullback.fst).
+- **[GHB7-3-β]** map-comp enablers (0c8ab9242, QuotientProblem.lean) — `toPullbackAlong_comp` (EllHom cocycle) + `compare_pullback_comp` (iterated-base-change comparison cocycle; clause-parameterized).
+- **[GHB7-3c-i]** transport layer (022e521a4) — `QuotPkg.πT`/`mapT` choice-extraction + `mapT_spec`, `mapT_id`, `mapT_comp` (two hom_ext squares + β + descent uniqueness).
+- **★ [GHB7-3] `QuotPkg.quotProb` (7fed16eb0) — THE QUOTIENT MODULI PROBLEM IS A FUNCTOR.** obj = sections of the chosen quotient; map = pullback.lift ≫ mapT; laws from mapT_id/mapT_comp. KM 7.1.2's P/G exists as a `ModuliProblem R`.
+
+**REMAINING for GHB7:** GHB7-4 `proj : Q ⟶ quotProb` + naturality + `proj_invariant` (eqv-𝟙-classification ≫ π; naturality = the ℓ-lift chase through hq + eqv_comp_compare + d.nat); GHB7-5 `relRep` (sections-of-f₀-over-g ≃ quotProb-of-pullbackAlong, via GHB5-uniqueness + comparisonIso; Fin/Etale from `f₀_finite_etale` — GHB6-gated); GHB7-6 `couniversal` + geom clauses; GHB7-FIN assembly.
+
+**LEAN-OPS (added to the house book):** (5) subtype/MK @T-instance-args are driven by BINDER annotations — state h'/v-binders at the PROJECTION form so lemma-rws fire; quote val-of-MK verbatim when a lemma's output must be matched. (6) `rw … at h` descends into op-cat comp implicit args and hard-aborts — op-arithmetic term-mode: `(congrArg Quiver.Hom.op h).trans (op_comp.trans (congrArg (· ≫ _) (eqToHom_op _)))`. (7) Q.map-stack collapse: `hcoll := fun f g x => (FunctorToTypes.map_comp_apply Q f g x).symm` applied in exact-position trans-chains. (8) functor-to-Type fields: `map k := ↾fun s => …`; use `ext s` not funext. (9) `rw [← Category.assoc]` can grab composites inside lift-W-proof TYPES (motive-fail) — scope with `conv_rhs =>`.
+
 *Continuing the grind (GHB4→GHB5→GHB7→GHC1). Commit f0e13a30f (GHB4). All pushed;
 single-target-green; zero heartbeat bumps. Arc total (v10.143+v10.144): basePullback,
 GHB2, GHA5, GHC5, GHC6, GHB4 + first-act audit.*
