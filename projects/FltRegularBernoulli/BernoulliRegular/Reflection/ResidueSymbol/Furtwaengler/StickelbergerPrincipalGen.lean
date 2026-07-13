@@ -90,7 +90,7 @@ theorem stickelbergerPrincipalGen_mul (α β : 𝓞 K) :
       stickelbergerPrincipalGen (p := p) (K := K) β := by
   unfold stickelbergerPrincipalGen
   rw [← Finset.prod_mul_distrib]
-  refine Finset.prod_congr rfl fun a _ => ?_
+  refine Finset.prod_congr rfl fun a _ ↦ ?_
   rw [show cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ (α * β) =
       cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α *
       cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ β from
@@ -101,7 +101,7 @@ since σ is injective and the exponent `a.val ≥ 1` for `a ∈ (ZMod p)ˣ`. -/
 theorem stickelbergerPrincipalGen_ne_zero {α : 𝓞 K} (hα : α ≠ 0) :
     stickelbergerPrincipalGen (p := p) (K := K) α ≠ 0 := by
   unfold stickelbergerPrincipalGen
-  refine Finset.prod_ne_zero_iff.mpr fun a _ => ?_
+  refine Finset.prod_ne_zero_iff.mpr fun a _ ↦ ?_
   -- Need: (σ_{a^{-1}} α)^a.val ≠ 0.
   have hσα_ne : cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α ≠ 0 := by
     intro h
@@ -122,7 +122,7 @@ theorem stickelbergerPrincipalGen_mem_of_mem
   classical
   unfold stickelbergerPrincipalGen
   rw [← Finset.mul_prod_erase Finset.univ
-    (fun a : CyclotomicUnitDelta p =>
+    (fun a : CyclotomicUnitDelta p ↦
       (cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α) ^ ((a : ZMod p).val))
     (Finset.mem_univ (1 : CyclotomicUnitDelta p))]
   have hval_one : (((1 : CyclotomicUnitDelta p) : ZMod p).val) = 1 := by
@@ -149,7 +149,7 @@ theorem span_stickelbergerPrincipalGen (α : 𝓞 K) :
         ∏ a : CyclotomicUnitDelta p,
           Ideal.span ({(cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α) ^
               ((a : ZMod p).val)} : Set (𝓞 K)) from ?_]
-  · refine Finset.prod_congr rfl fun a _ => ?_
+  · refine Finset.prod_congr rfl fun a _ ↦ ?_
     rw [Ideal.span_singleton_pow]
   · -- span singleton of a finite product = product of span singletons.
     rw [← Ideal.prod_span_singleton]
@@ -170,7 +170,7 @@ theorem stickelbergerIdeal_span_singleton (α : 𝓞 K) :
         Set (𝓞 K)) := by
   rw [span_stickelbergerPrincipalGen]
   unfold stickelbergerIdeal
-  refine Finset.prod_congr rfl fun a _ => ?_
+  refine Finset.prod_congr rfl fun a _ ↦ ?_
   rw [cyclotomicGaloisConjugate_span_singleton]
 
 /-- The Stickelberger ideal of the unit ideal is the unit ideal. -/
@@ -180,9 +180,9 @@ theorem stickelbergerIdeal_span_singleton (α : 𝓞 K) :
   unfold stickelbergerIdeal
   rw [← Ideal.one_eq_top]
   refine Finset.prod_eq_one
-    (f := fun a : CyclotomicUnitDelta p =>
+    (f := fun a : CyclotomicUnitDelta p ↦
       cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ (1 : Ideal (𝓞 K)) ^
-        ((a : ZMod p).val)) fun a _ => ?_
+        ((a : ZMod p).val)) fun a _ ↦ ?_
   change cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹
     (1 : Ideal (𝓞 K)) ^ ((a : ZMod p).val) = 1
   rw [Ideal.one_eq_top, cyclotomicGaloisConjugate_top, Ideal.top_pow]
@@ -194,7 +194,7 @@ theorem stickelbergerIdeal_mul (A B : Ideal (𝓞 K)) :
         stickelbergerIdeal (p := p) (K := K) B := by
   unfold stickelbergerIdeal
   rw [← Finset.prod_mul_distrib]
-  refine Finset.prod_congr rfl fun a _ => ?_
+  refine Finset.prod_congr rfl fun a _ ↦ ?_
   rw [cyclotomicGaloisConjugate_mul_ideal, mul_pow]
 
 /-- Stickelberger ideal formation commutes with natural powers. -/
@@ -277,7 +277,7 @@ theorem exists_unit_principalGen_eq_principalGen_pow_of_span_pow
 `b^Θ = b · (β)`, then `η^Θ = η · (u · β^p)` for some unit `u`.
 
 This is the precise element-level numerator comparison supplied by a
-principal witness for `b^Θ / b`; the separate REF-18 endpoint still needs the
+principal witness for `b^Θ / b`; the reciprocity endpoint still needs the
 extracted unit to have trivial residue symbols. -/
 theorem exists_unit_principalGen_eq_eta_mul_pow_of_stickelbergerIdeal_eq_mul
     {η β : 𝓞 K} {b : Ideal (𝓞 K)}
@@ -381,12 +381,12 @@ theorem pthSymbolAtPrincipal_canonical_principalGen_eq_galois_sum
   rw [span_stickelbergerPrincipalGen]
   -- Step 2: distribute pthSymbolAtIdeal_canonical α over the finset product.
   rw [pthSymbolAtIdeal_canonical_finset_prod (p := p) Finset.univ
-    (fun a : CyclotomicUnitDelta p =>
+    (fun a : CyclotomicUnitDelta p ↦
       Ideal.span ({cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ β} : Set (𝓞 K))
         ^ ((a : ZMod p).val))
-    α (fun a _ => ?_)]
+    α (fun a _ ↦ ?_)]
   · -- Step 3: each pow factor unfolds via pthSymbolAtIdeal_canonical_pow_ideal.
-    refine Finset.sum_congr rfl (fun a _ => ?_)
+    refine Finset.sum_congr rfl (fun a _ ↦ ?_)
     rw [pthSymbolAtIdeal_canonical_pow_ideal α
       (Ideal.span ({cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ β} :
         Set (𝓞 K))) ((a : ZMod p).val)]
@@ -436,73 +436,36 @@ theorem pthSymbolAtIdeal_canonical_finset_prod_α {ι : Type*}
     rw [Finset.prod_insert hi, Finset.sum_insert hi]
     rw [pthSymbolAtIdeal_canonical_mul_α (p := p)
       (hf i (Finset.mem_insert_self i s))]
-    · rw [ih (fun j hj P hP => hf j (Finset.mem_insert_of_mem hj) P hP)]
+    · rw [ih (fun j hj P hP ↦ hf j (Finset.mem_insert_of_mem hj) P hP)]
     · -- ∀ P ∈ normalizedFactors I, ∏_{j ∈ s} f j ∉ P (P prime).
       intro P hP h_in_prod
       obtain ⟨_, hP_ne_bot, hP_max⟩ := isPrime_of_mem_normalizedFactors hP
-      haveI : P.IsPrime := hP_max.isPrime
+      have : P.IsPrime := hP_max.isPrime
       -- ∏ f ∈ P (prime) ⟹ some f j ∈ P.
       obtain ⟨j, hj_mem, hj_in⟩ :=
         Ideal.IsPrime.prod_mem_iff.mp h_in_prod
       exact (hf j (Finset.mem_insert_of_mem hj_mem) P hP) hj_in
 
-/-! ### Left-slot Galois sum for `(α^Θ / γ)_p`
+/-! ### Left-slot Galois sum for `(α^Θ / B)_p`
 
-The principal symbol with `α^Θ` in the numerator and `γ` in the denominator
-expands as a Galois-weighted sum:
+The symbol with `α^Θ` in the numerator expands as a Galois-weighted sum:
 ```
-(α^Θ / γ)_p = ∑_a a.val · (σ_{a^{-1}} α / γ)_p
+(α^Θ / B)_p = ∑_a a.val · (σ_{a^{-1}} α / B)_p
 ```
 This uses the multiplicativity and power form of the canonical symbol in
 its first (numerator) slot, applied to the explicit Finset-product
 expression for `α^Θ`. -/
 
-/-- **Galois-sum decomposition of `(α^Θ / γ)_p`** on the LEFT slot.
+/-- **Galois-sum decomposition of `(α^Θ / B)_p`** on the LEFT slot.
 
-For `α : 𝓞 K` and `γ : 𝓞 K`, with `σ_{a^{-1}} α ∉ P` for every prime
-factor `P` of `(γ)` and every Galois index `a`, the canonical residue
-symbol on `α^Θ` against the principal ideal `(γ)` decomposes as
+For `α : 𝓞 K` and an integral ideal `B`, with `σ_{a^{-1}} α ∉ P` for every
+prime factor `P` of `B` and every Galois index `a`, the canonical residue
+symbol on `α^Θ` against `B` decomposes as
 ```
-∑_{a ∈ (ZMod p)ˣ} a.val · (σ_{a^{-1}} α / (γ))_p.
+∑_{a ∈ (ZMod p)ˣ} a.val · (σ_{a^{-1}} α / B)_p.
 ```
--/
-theorem pthSymbolAtPrincipal_canonical_principalGen_left_eq_galois_sum
-    (α γ : 𝓞 K)
-    (h_coprime : ∀ (a : CyclotomicUnitDelta p)
-      (P : Ideal (𝓞 K)), P ∈ UniqueFactorizationMonoid.normalizedFactors
-        (Ideal.span ({γ} : Set (𝓞 K))) →
-      cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α ∉ P) :
-    pthSymbolAtPrincipal_canonical (p := p) (K := K)
-        (stickelbergerPrincipalGen (p := p) (K := K) α) γ =
-      ∑ a : CyclotomicUnitDelta p,
-        ((a : ZMod p).val : ZMod p) *
-          pthSymbolAtPrincipal_canonical (p := p) (K := K)
-            (cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α) γ := by
-  classical
-  unfold pthSymbolAtPrincipal_canonical stickelbergerPrincipalGen
-  -- Step 1: distribute pthSymbolAtIdeal_canonical over Finset-prod numerator.
-  rw [pthSymbolAtIdeal_canonical_finset_prod_α (p := p) Finset.univ
-    (fun a : CyclotomicUnitDelta p =>
-      (cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α) ^ ((a : ZMod p).val))
-    (I := Ideal.span ({γ} : Set (𝓞 K)))
-    (fun a _ P hP h_in_pow => ?_)]
-  · -- Step 2: each (σ_{a^{-1}} α)^a.val term unfolds via _pow_α.
-    refine Finset.sum_congr rfl fun a _ => ?_
-    rw [pthSymbolAtIdeal_canonical_pow_α (p := p)
-      (fun P hP => h_coprime a P hP) ((a : ZMod p).val)]
-  · -- side condition for finset_prod: (σ_{a^{-1}} α)^a.val ∉ P.
-    obtain ⟨_, hP_ne_bot, hP_max⟩ := isPrime_of_mem_normalizedFactors hP
-    haveI hP_prime : P.IsPrime := hP_max.isPrime
-    have h_in : cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α ∈ P :=
-      hP_prime.mem_of_pow_mem ((a : ZMod p).val) h_in_pow
-    exact (h_coprime a P hP) h_in
-
-/-- **Ideal-denominator Galois-sum decomposition of `(α^Θ / B)_p`**.
-
-This is the arbitrary-ideal analogue of
-`pthSymbolAtPrincipal_canonical_principalGen_left_eq_galois_sum`. It is the
-form needed for Eisenstein reciprocity, where the denominator is a general
-integral ideal `B` before specializing to a rational principal ideal. -/
+This is the form needed for Eisenstein reciprocity, where the denominator is
+a general integral ideal before specializing to a rational principal ideal. -/
 theorem pthSymbolAtIdeal_canonical_principalGen_left_eq_galois_sum
     (α : 𝓞 K) (B : Ideal (𝓞 K))
     (h_coprime : ∀ (a : CyclotomicUnitDelta p)
@@ -517,18 +480,37 @@ theorem pthSymbolAtIdeal_canonical_principalGen_left_eq_galois_sum
   classical
   unfold stickelbergerPrincipalGen
   rw [pthSymbolAtIdeal_canonical_finset_prod_α (p := p) Finset.univ
-    (fun a : CyclotomicUnitDelta p =>
+    (fun a : CyclotomicUnitDelta p ↦
       (cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α) ^ ((a : ZMod p).val))
     (I := B)
-    (fun a _ P hP h_in_pow => ?_)]
-  · refine Finset.sum_congr rfl fun a _ => ?_
+    (fun a _ P hP h_in_pow ↦ ?_)]
+  · refine Finset.sum_congr rfl fun a _ ↦ ?_
     rw [pthSymbolAtIdeal_canonical_pow_α (p := p)
-      (fun P hP => h_coprime a P hP) ((a : ZMod p).val)]
+      (fun P hP ↦ h_coprime a P hP) ((a : ZMod p).val)]
   · obtain ⟨_, _hP_ne_bot, hP_max⟩ := isPrime_of_mem_normalizedFactors hP
-    haveI hP_prime : P.IsPrime := hP_max.isPrime
-    have h_in : cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α ∈ P :=
-      hP_prime.mem_of_pow_mem ((a : ZMod p).val) h_in_pow
-    exact (h_coprime a P hP) h_in
+    have hP_prime : P.IsPrime := hP_max.isPrime
+    exact (h_coprime a P hP) (hP_prime.mem_of_pow_mem ((a : ZMod p).val) h_in_pow)
+
+/-- **Galois-sum decomposition of `(α^Θ / γ)_p`** on the LEFT slot, for a
+principal denominator `(γ)`.
+
+The principal symbol is by definition the ideal symbol at `Ideal.span {γ}`,
+so this is `pthSymbolAtIdeal_canonical_principalGen_left_eq_galois_sum`
+specialised to `B = (γ)`. -/
+theorem pthSymbolAtPrincipal_canonical_principalGen_left_eq_galois_sum
+    (α γ : 𝓞 K)
+    (h_coprime : ∀ (a : CyclotomicUnitDelta p)
+      (P : Ideal (𝓞 K)), P ∈ UniqueFactorizationMonoid.normalizedFactors
+        (Ideal.span ({γ} : Set (𝓞 K))) →
+      cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α ∉ P) :
+    pthSymbolAtPrincipal_canonical (p := p) (K := K)
+        (stickelbergerPrincipalGen (p := p) (K := K) α) γ =
+      ∑ a : CyclotomicUnitDelta p,
+        ((a : ZMod p).val : ZMod p) *
+          pthSymbolAtPrincipal_canonical (p := p) (K := K)
+            (cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α) γ :=
+  pthSymbolAtIdeal_canonical_principalGen_left_eq_galois_sum (p := p) (K := K) α
+    (Ideal.span ({γ} : Set (𝓞 K))) h_coprime
 
 end Furtwaengler
 
