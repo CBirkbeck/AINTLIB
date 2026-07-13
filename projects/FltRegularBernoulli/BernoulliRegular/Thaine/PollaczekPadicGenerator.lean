@@ -14,7 +14,6 @@ Padic-side analog of the K-side mod-p eigenspace generation results.
 
 * `flt37_pollaczekUnit_class_in_modp_freepart_ne_zero` (this project,
   `Thaine/PollaczekUnitPlusGaloisAction.lean`).
-* Reviewer guidance, 2026-05-07 (Q1 eigenspace iso direct construction).
 -/
 
 @[expose] public section

@@ -15,8 +15,7 @@ the **σ-anti radical** is the element
 where `ζ` is a fixed primitive `p`-th root of unity and `σ` is complex
 conjugation. By construction `σ(α₀) = α₀⁻¹`, which is the key property
 that makes the Kummer extension `K(α₀^{1/p})/K⁺` abelian (rather than
-dihedral, as it would be for a *real* radical — see Reviewer guidance
-2026-05-22 (Q1)).
+dihedral, as it would be for a *real* radical).
 
 This file is the entry-point for the AK chain replacing the
 mathematically-incorrect RK chain (which assumed σ̃-fixed-subfield is
@@ -25,7 +24,6 @@ Galois cyclic over K⁺, but for odd `p` it is non-Galois).
 ## References
 
 * [Diekmann23] §4.4 (anti-radical formulation; precise reference TBD).
-* Reviewer guidance 2026-05-22 (Q1, σ-anti mechanism).
 -/
 
 @[expose] public section

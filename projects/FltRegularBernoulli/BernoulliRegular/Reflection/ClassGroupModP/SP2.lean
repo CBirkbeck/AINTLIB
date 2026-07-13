@@ -26,7 +26,6 @@ otherwise allow `i = 0` and break `IsReflectionComponentIndex p i`'s
 ## References
 
 * [Wash97] §10.1.
-* Reviewer guidance 2026-05-22 (Q5 / SP-2 chain).
 -/
 
 @[expose] public section
