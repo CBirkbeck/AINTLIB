@@ -1077,7 +1077,107 @@ theorem QuotPkg.mapT_comp (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAc
   rw [hwu (cQ ≫ QuotPkg.mapT pkg hfree hbase k₂) hchase,
     hwu (QuotPkg.mapT pkg hfree hbase (k₂ ≫ k₁)) hqB]
 
+/-- **The quotient moduli problem** ([GHB7-3c], the functor): sections of the chosen
+per-object quotients, with base change through the chosen transports. Functoriality is
+`mapT_id`/`mapT_comp` fed with explicit reassociation lifts. -/
+noncomputable def QuotPkg.quotProb (pkg : ∀ X : EllObj R, QuotPkg φ X)
+    (hfree : FreeAction φ)
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base))) : ModuliProblem R where
+  obj Xop := { s : Xop.unop.base ⟶ (pkg Xop.unop).Z₀ //
+    s ≫ (pkg Xop.unop).f₀ = 𝟙 Xop.unop.base }
+  map {Xop X'op} kop := ↾fun s =>
+    ⟨pullback.lift (kop.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base) (by
+        rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
+      QuotPkg.mapT pkg hfree hbase kop.unop, by
+      rw [Category.assoc, (QuotPkg.mapT_spec pkg hfree hbase kop.unop).2.2.2.2.2,
+        pullback.lift_snd]⟩
+  map_id Xop := by
+    ext s
+    show pullback.lift ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom ≫ s.1)
+        (𝟙 Xop.unop.base) (by
+          rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
+      QuotPkg.mapT pkg hfree hbase (𝟙 Xop.unop) = s.1
+    rw [QuotPkg.mapT_id pkg hfree hbase Xop.unop, pullback.lift_fst]
+    show 𝟙 Xop.unop.base ≫ s.1 = s.1
+    rw [Category.id_comp]
+  map_comp {Xop X'op X''op} kop₁ kop₂ := by
+    ext s
+    -- the inner value is a section
+    have hsec : (pullback.lift (kop₁.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base) (by
+          rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
+        QuotPkg.mapT pkg hfree hbase kop₁.unop) ≫ (pkg X'op.unop).f₀ =
+        𝟙 X'op.unop.base := by
+      rw [Category.assoc, (QuotPkg.mapT_spec pkg hfree hbase kop₁.unop).2.2.2.2.2,
+        pullback.lift_snd]
+    show pullback.lift ((kop₂.unop ≫ kop₁.unop).baseHom ≫ s.1) (𝟙 X''op.unop.base) (by
+        rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
+      QuotPkg.mapT pkg hfree hbase (kop₂.unop ≫ kop₁.unop) =
+      pullback.lift (kop₂.unop.baseHom ≫
+          (pullback.lift (kop₁.unop.baseHom ≫ s.1) (𝟙 X'op.unop.base) (by
+            rw [Category.assoc, s.2, Category.comp_id, Category.id_comp]) ≫
+          QuotPkg.mapT pkg hfree hbase kop₁.unop)) (𝟙 X''op.unop.base) (by
+          rw [Category.assoc, hsec, Category.comp_id, Category.id_comp]) ≫
+      QuotPkg.mapT pkg hfree hbase kop₂.unop
+    -- the comparison bridge for the reassociation lift
+    have hc₁f : (((pkg Xop.unop).d.pullback kop₁.unop).toRelRepData.compare
+        (pkg X'op.unop).d.toRelRepData).1 ≫ (pkg X'op.unop).d.f =
+        pullback.snd (pkg Xop.unop).d.f kop₁.unop.baseHom :=
+      (((pkg Xop.unop).d.pullback kop₁.unop).toRelRepData.compare
+        (pkg X'op.unop).d.toRelRepData).2
+    rw [← QuotPkg.mapT_comp pkg hfree hbase kop₁.unop kop₂.unop
+      (pullback.lift (pullback.fst (pkg Xop.unop).d.f (kop₂.unop ≫ kop₁.unop).baseHom)
+        (pullback.snd (pkg Xop.unop).d.f (kop₂.unop ≫ kop₁.unop).baseHom ≫
+          kop₂.unop.baseHom)
+        (by rw [Category.assoc]; exact pullback.condition))
+      (pullback.lift_fst _ _ _) (pullback.lift_snd _ _ _)
+      (pullback.lift
+        ((pullback.lift (pullback.fst (pkg Xop.unop).d.f
+            (kop₂.unop ≫ kop₁.unop).baseHom)
+          (pullback.snd (pkg Xop.unop).d.f (kop₂.unop ≫ kop₁.unop).baseHom ≫
+            kop₂.unop.baseHom)
+          (by rw [Category.assoc]; exact pullback.condition)) ≫
+          (((pkg Xop.unop).d.pullback kop₁.unop).toRelRepData.compare
+            (pkg X'op.unop).d.toRelRepData).1)
+        (pullback.snd (pkg Xop.unop).d.f (kop₂.unop ≫ kop₁.unop).baseHom)
+        ((Category.assoc _ _ _).trans ((congrArg (_ ≫ ·) hc₁f).trans
+          (pullback.lift_snd _ _ _))))
+      (pullback.lift_fst _ _ _) (pullback.lift_snd _ _ _)
+      (pullback.lift (pullback.fst (pkg Xop.unop).f₀ (kop₂.unop ≫ kop₁.unop).baseHom)
+        (pullback.snd (pkg Xop.unop).f₀ (kop₂.unop ≫ kop₁.unop).baseHom ≫
+          kop₂.unop.baseHom)
+        (by rw [Category.assoc]; exact pullback.condition))
+      (pullback.lift_fst _ _ _) (pullback.lift_snd _ _ _)
+      (pullback.lift
+        ((pullback.lift (pullback.fst (pkg Xop.unop).f₀
+            (kop₂.unop ≫ kop₁.unop).baseHom)
+          (pullback.snd (pkg Xop.unop).f₀ (kop₂.unop ≫ kop₁.unop).baseHom ≫
+            kop₂.unop.baseHom)
+          (by rw [Category.assoc]; exact pullback.condition)) ≫
+          QuotPkg.mapT pkg hfree hbase kop₁.unop)
+        (pullback.snd (pkg Xop.unop).f₀ (kop₂.unop ≫ kop₁.unop).baseHom)
+        ((Category.assoc _ _ _).trans ((congrArg (_ ≫ ·)
+            (QuotPkg.mapT_spec pkg hfree hbase kop₁.unop).2.2.2.2.2).trans
+          (pullback.lift_snd _ _ _))))
+      (pullback.lift_fst _ _ _) (pullback.lift_snd _ _ _),
+      ← Category.assoc]
+    congr 1
+    apply pullback.hom_ext
+    · rw [Category.assoc, pullback.lift_fst, pullback.lift_fst, ← Category.assoc]
+      conv_rhs => rw [← Category.assoc]
+      congr 1
+      apply pullback.hom_ext
+      · rw [Category.assoc, pullback.lift_fst, pullback.lift_fst, Category.assoc,
+          pullback.lift_fst]
+        show (kop₂.unop.baseHom ≫ kop₁.unop.baseHom) ≫ s.1 =
+          kop₂.unop.baseHom ≫ kop₁.unop.baseHom ≫ s.1
+        rw [Category.assoc]
+      · rw [Category.assoc, pullback.lift_snd, ← Category.assoc, pullback.lift_snd,
+          Category.id_comp, Category.assoc, pullback.lift_snd, Category.comp_id]
+    · rw [Category.assoc, pullback.lift_snd, pullback.lift_snd, pullback.lift_snd]
+
 end Transport
+
 
 
 /-- **[GHB7] (THE ASSEMBLY — KM 7.1.2 + 7.1.3(1),(2),(3); gates through
