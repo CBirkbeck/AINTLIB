@@ -746,6 +746,13 @@ affine schemes. For `g : Y → X` with `X` and `Y` affine and quasicoherent `M`,
 `Γ(X,M)` along `g.appTop`; its naturality in `M` will transport the restriction morphisms
 appearing in the pole-sheaf Cech differential. The construction must reduce through the
 existing `isoSpec`, `tilde`, and pullback APIs, not duplicate the landed monoidal layer.
+The spectrum case is now complete: `specPullbackΓIso` compares pullback along
+`Spec.map φ` with extension of scalars along `φ`, and
+`specPullbackΓIso_naturality` proves naturality in every quasicoherent module. Its hom is
+the component of a composite of three natural transformations: the tilde-Gamma unit,
+the conjugate pullback/extension-of-scalars adjunction isomorphism, and the pulled-back
+tilde-Gamma counit. The remaining part of this input is transport through the canonical
+`isoSpec` presentations of arbitrary affine source and target schemes.
 
 The elementary Mayer--Vietoris seam is now complete in both directions.
 `HPrimeZeroAddEquivSections` identifies `H'⁰(U,F)` with sections naturally in `U`, while
