@@ -344,6 +344,25 @@ theorem transitionTensor_tmul_one (b : P.chartRing) :
   rw [Algebra.TensorProduct.lift_tmul, map_one, mul_one]
   rfl
 
+/-- **The geometric window square, action leg**: the restricted actions of nested patches
+commute with the window inclusions (`resLE` composition laws). -/
+theorem homOfLE_restrictedAction :
+    Scheme.homOfLE _ (Scheme.Hom.preimage_mono G.actionProj.left hUQ) ≫
+        G.restrictedAction P.hstable
+      = G.restrictedAction Q.hstable ≫ E.E.homOfLE hUQ :=
+  (Scheme.Hom.map_resLE G.translationAction.left P.hstable
+      (Scheme.Hom.preimage_mono G.actionProj.left hUQ)).trans
+    (Scheme.Hom.resLE_map G.translationAction.left Q.hstable hUQ).symm
+
+/-- **The geometric window square, projection leg**. -/
+theorem homOfLE_restrictedProj :
+    Scheme.homOfLE _ (Scheme.Hom.preimage_mono G.actionProj.left hUQ) ≫
+        G.restrictedProj P.U
+      = G.restrictedProj Q.U ≫ E.E.homOfLE hUQ :=
+  (Scheme.Hom.map_resLE G.actionProj.left le_rfl
+      (Scheme.Hom.preimage_mono G.actionProj.left hUQ)).trans
+    (Scheme.Hom.resLE_map G.actionProj.left le_rfl hUQ).symm
+
 end Transition
 
 end AffineChartPatch
