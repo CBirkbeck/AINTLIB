@@ -43,6 +43,26 @@ theorem baseChange_sections_base_injective {N : ℕ} [NeZero N]
     rfl
   · rw [E.natCard_fibre_torsion_locus N t hN, Nat.card_eq_fintype_card, Fintype.card_fin]
 
+/-- **(T-D8-⟹, piece (d))** Distinct base-points of the base-changed sections force the pulled
+points themselves to be distinct: if `pull (Pᵢ) = pull (Pⱼ)` then `t ≫ (Pᵢ).1 = t ≫ (Pⱼ).1`, so
+the base-changed sections coincide, so their base-points coincide, so `i = j`. -/
+theorem pull_injective_of_baseChange_base_injective {N : ℕ}
+    (P : Fin (N ^ 2) → E.Point (𝟙 S)) {k : Type u} [Field k] [IsAlgClosed k]
+    (t : Spec (CommRingCat.of k) ⟶ S)
+    (hinj : Function.Injective
+      (fun i => (RelEffCartierDiv.sectionBaseChange (P i) t).1.base default)) :
+    Function.Injective (fun i => Point.pull E t (P i)) := by
+  intro i j hij
+  apply hinj
+  have h1 : t ≫ (P i).1 = t ≫ (P j).1 := congrArg Subtype.val hij
+  have h2 : (RelEffCartierDiv.sectionBaseChange (P i) t).1
+      = (RelEffCartierDiv.sectionBaseChange (P j) t).1 := by
+    show pullback.lift (t ≫ (P i).1) (𝟙 _) _ = pullback.lift (t ≫ (P j).1) (𝟙 _) _
+    apply pullback.hom_ext <;> simp only [pullback.lift_fst, pullback.lift_snd, h1]
+  show (RelEffCartierDiv.sectionBaseChange (P i) t).1.base default
+    = (RelEffCartierDiv.sectionBaseChange (P j) t).1.base default
+  rw [h2]
+
 end EllipticCurve
 
 end ModularCurves
