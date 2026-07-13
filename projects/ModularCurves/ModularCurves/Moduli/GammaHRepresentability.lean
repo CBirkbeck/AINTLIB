@@ -297,6 +297,97 @@ noncomputable def _root_.AlgebraicGeometry.SchemeAction.basePullback
     · rw [Category.assoc, pullback.lift_snd, pullback.lift_snd, pullback.lift_snd_assoc,
         Category.comp_id, Category.comp_id]
 
+open EllObj in
+/-- **The base change of an equivariant relative representation datum** along an
+`Ell/R`-morphism ([GHB7-2a], equivariant upgrade): the underlying datum is
+`RelRepData.pullback`, the action is `SchemeAction.basePullback`, and the geometric
+clauses transport by base-change stability. Feeds the per-object choices of the [GHB7]
+assembly with functorial comparisons. -/
+noncomputable def ModuliProblem.EquivariantRelRepData.pullback {R : CommRingCat.{u}}
+    {Q : ModuliProblem R}
+    {G : Type*} [Group G] [Finite G] {φ : G →* Aut Q} {X' X : EllObj R}
+    (d : ModuliProblem.EquivariantRelRepData φ X) (ψ : X' ⟶ X) :
+    ModuliProblem.EquivariantRelRepData φ X' where
+  toRelRepData := d.toRelRepData.pullback ψ
+  σZ := d.σZ.basePullback d.f d.over_base ψ.baseHom
+  over_base γ := by
+    show (d.σZ.basePullback d.f d.over_base ψ.baseHom).hom γ ≫
+      pullback.snd d.f ψ.baseHom = pullback.snd d.f ψ.baseHom
+    simp only [SchemeAction.basePullback, pullback.lift_snd, Category.comp_id]
+  equivariant := by
+    intro T g h γ
+    have hbfst : (d.σZ.basePullback d.f d.over_base ψ.baseHom).hom γ ≫
+        pullback.fst d.f ψ.baseHom = pullback.fst d.f ψ.baseHom ≫ d.σZ.hom γ := by
+      simp only [SchemeAction.basePullback, pullback.lift_fst]
+    have hbsnd : (d.σZ.basePullback d.f d.over_base ψ.baseHom).hom γ ≫
+        pullback.snd d.f ψ.baseHom = pullback.snd d.f ψ.baseHom := by
+      simp only [SchemeAction.basePullback, pullback.lift_snd, Category.comp_id]
+    -- re-anchor the three-layer classifying bijection (`rfl`-graded)
+    have hval : ∀ (h' : { h : T ⟶ (d.toRelRepData.pullback ψ).Z //
+          h ≫ (d.toRelRepData.pullback ψ).f = g })
+        (p : (h'.1 ≫ pullback.fst d.f ψ.baseHom) ≫ d.f = g ≫ ψ.baseHom),
+        (d.toRelRepData.pullback ψ).eqv g h' =
+          Q.map (EllObj.toPullbackAlong (X'.pullbackAlongπ g ≫ ψ)).op
+            (d.eqv (g ≫ ψ.baseHom) ⟨h'.1 ≫ pullback.fst d.f ψ.baseHom, p⟩) :=
+      fun h' p => rfl
+    -- the whole identity over a fresh reduced-typed section, instantiated at `h` last
+    have key : ∀ (v : T ⟶ CategoryTheory.Limits.pullback d.f ψ.baseHom)
+        (hv2 : v ≫ pullback.snd d.f ψ.baseHom = g),
+        (d.toRelRepData.pullback ψ).eqv g
+          ⟨v ≫ (d.σZ.basePullback d.f d.over_base ψ.baseHom).hom γ,
+            show (v ≫ (d.σZ.basePullback d.f d.over_base ψ.baseHom).hom γ) ≫
+                pullback.snd d.f ψ.baseHom = g by
+              rw [Category.assoc, hbsnd, hv2]⟩ =
+        (φ γ⁻¹).hom.app (Opposite.op (X'.pullbackAlong g))
+          ((d.toRelRepData.pullback ψ).eqv g ⟨v, hv2⟩) := by
+      intro v hv2
+      have hmred : (v ≫ (d.σZ.basePullback d.f d.over_base ψ.baseHom).hom γ) ≫
+          pullback.snd d.f ψ.baseHom = g := by
+        rw [Category.assoc, hbsnd, hv2]
+      have hp1 : ((v ≫ (d.σZ.basePullback d.f d.over_base ψ.baseHom).hom γ) ≫
+          pullback.fst d.f ψ.baseHom) ≫ d.f = g ≫ ψ.baseHom := by
+        calc ((v ≫ (d.σZ.basePullback d.f d.over_base ψ.baseHom).hom γ) ≫
+                pullback.fst d.f ψ.baseHom) ≫ d.f
+            = (v ≫ (d.σZ.basePullback d.f d.over_base ψ.baseHom).hom γ) ≫
+                pullback.fst d.f ψ.baseHom ≫ d.f := Category.assoc _ _ _
+          _ = (v ≫ (d.σZ.basePullback d.f d.over_base ψ.baseHom).hom γ) ≫
+                pullback.snd d.f ψ.baseHom ≫ ψ.baseHom := by
+              rw [pullback.condition]
+          _ = ((v ≫ (d.σZ.basePullback d.f d.over_base ψ.baseHom).hom γ) ≫
+                pullback.snd d.f ψ.baseHom) ≫ ψ.baseHom := (Category.assoc _ _ _).symm
+          _ = g ≫ ψ.baseHom := congrArg (· ≫ ψ.baseHom) hmred
+      have hp2 : (v ≫ pullback.fst d.f ψ.baseHom) ≫ d.f = g ≫ ψ.baseHom := by
+        calc (v ≫ pullback.fst d.f ψ.baseHom) ≫ d.f
+            = v ≫ pullback.fst d.f ψ.baseHom ≫ d.f := Category.assoc _ _ _
+          _ = v ≫ pullback.snd d.f ψ.baseHom ≫ ψ.baseHom := by rw [pullback.condition]
+          _ = (v ≫ pullback.snd d.f ψ.baseHom) ≫ ψ.baseHom := (Category.assoc _ _ _).symm
+          _ = g ≫ ψ.baseHom := congrArg (· ≫ ψ.baseHom) hv2
+      rw [hval ⟨v ≫ (d.σZ.basePullback d.f d.over_base ψ.baseHom).hom γ, hmred⟩ hp1,
+        hval ⟨v, hv2⟩ hp2]
+      rw [show (⟨(⟨v ≫ (d.σZ.basePullback d.f d.over_base ψ.baseHom).hom γ, hmred⟩ :
+            { hh : T ⟶ (d.toRelRepData.pullback ψ).Z //
+              hh ≫ (d.toRelRepData.pullback ψ).f = g }).1 ≫
+            pullback.fst d.f ψ.baseHom, hp1⟩ :
+          { kk : T ⟶ d.Z // kk ≫ d.f = g ≫ ψ.baseHom }) =
+        ⟨(v ≫ pullback.fst d.f ψ.baseHom) ≫ d.σZ.hom γ, by
+          rw [Category.assoc, d.over_base γ]; exact hp2⟩ from
+        Subtype.ext (by
+          show (v ≫ (d.σZ.basePullback d.f d.over_base ψ.baseHom).hom γ) ≫
+              pullback.fst d.f ψ.baseHom =
+            (v ≫ pullback.fst d.f ψ.baseHom) ≫ d.σZ.hom γ
+          rw [Category.assoc, hbfst, ← Category.assoc])]
+      rw [d.equivariant (g ≫ ψ.baseHom) ⟨v ≫ pullback.fst d.f ψ.baseHom, hp2⟩ γ]
+      exact (NatTrans.naturality_apply (φ γ⁻¹).hom
+        (EllObj.toPullbackAlong (X'.pullbackAlongπ g ≫ ψ)).op _).symm
+    exact key h.1 h.2
+  finite := by
+    haveI := d.finite
+    exact MorphismProperty.pullback_snd _ _ d.finite
+  etale := by
+    haveI := d.etale
+    show Etale (pullback.snd d.f ψ.baseHom)
+    infer_instance
+
 /-- **[GHB3] (KM 7.1.3(3) existence half; Loeffler Prop 3.6.1's affine patching)** —
 "For any E/S/R, the quotient scheme 𝒫_{E/S}/G exists"; Loeffler 3.6.1 (verbatim): "for
 X = Spec(A) affine, Spec(A^G) works, and one can show that these patch nicely. (One
