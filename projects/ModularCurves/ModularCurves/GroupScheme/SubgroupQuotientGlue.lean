@@ -31,15 +31,15 @@ namespace FiniteLocallyFreeSubgroup
 variable {S : Scheme.{u}} {E : EllipticCurve S} (G : FiniteLocallyFreeSubgroup E)
 
 /-- The action-side section map of a stable open: sections of `W` pulled back along the
-restricted translation action. -/
+translation action (the `appLE` of the action into the stability window). -/
 noncomputable def actRing {W : E.E.Opens} (hW : G.IsStableOpen W) :
     Γ(E.E, W) ⟶ Γ((Over.mk G.π ⊗ E.asOver).left, G.actionProj.left ⁻¹ᵁ W) :=
-  W.topIso.inv ≫ (G.restrictedAction hW).appTop ≫ (G.actionProj.left ⁻¹ᵁ W).topIso.hom
+  G.translationAction.left.appLE W (G.actionProj.left ⁻¹ᵁ W) hW
 
 /-- The projection-side section map of a stable open. -/
 noncomputable def prRing (W : E.E.Opens) :
     Γ(E.E, W) ⟶ Γ((Over.mk G.π ⊗ E.asOver).left, G.actionProj.left ⁻¹ᵁ W) :=
-  W.topIso.inv ≫ (G.restrictedProj W).appTop ≫ (G.actionProj.left ⁻¹ᵁ W).topIso.hom
+  G.actionProj.left.appLE W (G.actionProj.left ⁻¹ᵁ W) le_rfl
 
 /-- **The quotient ring of a stable open**: the subring of sections on which the translated
 and projected pullbacks agree — the invariant functions. -/
@@ -49,6 +49,49 @@ noncomputable def quotientRing {W : E.E.Opens} (hW : G.IsStableOpen W) : Subring
 /-- **The local quotient of a stable open**: the spectrum of its invariant functions. -/
 noncomputable def localQuotientOpen {W : E.E.Opens} (hW : G.IsStableOpen W) : Scheme.{u} :=
   Spec (CommRingCat.of (G.quotientRing hW))
+
+/-- **Restriction preserves invariance** (`[HG-C4c-2]` step 2, membership): for nested
+stable opens the restriction of an invariant section is invariant — the two legs commute
+with restrictions (`appLE` exchange). -/
+theorem mem_quotientRing_of_res {W W' : E.E.Opens} (hW : G.IsStableOpen W)
+    (hW' : G.IsStableOpen W') (hle : W ≤ W') {b : Γ(E.E, W')}
+    (hb : b ∈ G.quotientRing hW') :
+    (E.E.presheaf.map (homOfLE hle).op).hom b ∈ G.quotientRing hW := by
+  have hact : (G.translationAction.left.appLE W' (G.actionProj.left ⁻¹ᵁ W') hW') ≫
+      ((Over.mk G.π ⊗ E.asOver).left.presheaf.map
+        (homOfLE (Scheme.Hom.preimage_mono G.actionProj.left hle)).op)
+      = (E.E.presheaf.map (homOfLE hle).op) ≫
+        G.translationAction.left.appLE W (G.actionProj.left ⁻¹ᵁ W) hW :=
+    (Scheme.Hom.appLE_map G.translationAction.left hW'
+        (homOfLE (Scheme.Hom.preimage_mono G.actionProj.left hle)).op).trans
+      (Scheme.Hom.map_appLE G.translationAction.left hW (homOfLE hle).op).symm
+  have hpr : (G.actionProj.left.appLE W' (G.actionProj.left ⁻¹ᵁ W') le_rfl) ≫
+      ((Over.mk G.π ⊗ E.asOver).left.presheaf.map
+        (homOfLE (Scheme.Hom.preimage_mono G.actionProj.left hle)).op)
+      = (E.E.presheaf.map (homOfLE hle).op) ≫
+        G.actionProj.left.appLE W (G.actionProj.left ⁻¹ᵁ W) le_rfl :=
+    (Scheme.Hom.appLE_map G.actionProj.left le_rfl
+        (homOfLE (Scheme.Hom.preimage_mono G.actionProj.left hle)).op).trans
+      (Scheme.Hom.map_appLE G.actionProj.left le_rfl (homOfLE hle).op).symm
+  have h1 := congrArg (fun m => (CommRingCat.Hom.hom m) b) hact
+  have h2 := congrArg (fun m => (CommRingCat.Hom.hom m) b) hpr
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h1 h2
+  show (G.actRing hW).hom _ = (G.prRing W).hom _
+  rw [actRing, prRing, ← h1, ← h2]
+  exact congrArg _ hb
+
+/-- **The transition map of local quotients** (`[HG-C4c-2]` step 2): restriction of
+invariants, on spectra. -/
+noncomputable def localQuotientMapW {W W' : E.E.Opens} (hW : G.IsStableOpen W)
+    (hW' : G.IsStableOpen W') (hle : W ≤ W') :
+    G.localQuotientOpen hW ⟶ G.localQuotientOpen hW' :=
+  Spec.map (CommRingCat.ofHom
+    { toFun := fun b => ⟨(E.E.presheaf.map (homOfLE hle).op).hom b.1,
+        G.mem_quotientRing_of_res hW hW' hle b.2⟩
+      map_one' := Subtype.ext (map_one _)
+      map_mul' := fun x y => Subtype.ext (map_mul _ _ _)
+      map_zero' := Subtype.ext (map_zero _)
+      map_add' := fun x y => Subtype.ext (map_add _ _ _) })
 
 end FiniteLocallyFreeSubgroup
 
