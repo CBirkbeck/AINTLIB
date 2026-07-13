@@ -3172,7 +3172,46 @@ theorem exists_quotientProblemData {Q : ModuliProblem R} {G : Type*} [Group G]
     (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
       (Limits.terminal.from X.base))) :
     Nonempty (QuotientProblemData φ) := by
-  sorry
+  let pkg : ∀ X : EllObj R, QuotPkg φ X := fun X =>
+    (nonempty_quotPkg φ hdata hbase X).some
+  refine ⟨⟨QuotPkg.quotProb pkg hfree hbase, QuotPkg.projQ pkg hfree hbase,
+    QuotPkg.projQ_invariant pkg hfree hbase,
+    QuotPkg.relRep_quotProb pkg hfree hbase, ?_, ?_, ?_⟩⟩
+  · -- couniversal (KM 7.1.3(1) verbatim)
+    intro P' hP' ν' hν'
+    let dP : ∀ X : EllObj R, ModuliProblem.RelRepData P' X := fun X =>
+      ((ModuliProblem.relativelyRepresentable_iff_nonempty_relRepData P').mp
+        hP' X).some
+    have hct := fun X : EllObj R =>
+      QuotPkg.exists_crossTransport (pkg X) (dP X) ν' hν'
+    let νf : ∀ X : EllObj R, (pkg X).d.Z ⟶ (dP X).Z := fun X => (hct X).choose
+    have hνf : ∀ X : EllObj R, νf X ≫ (dP X).f = (pkg X).d.f := fun X =>
+      (hct X).choose_spec.choose
+    have hcl : ∀ X : EllObj R, (dP X).eqv (pkg X).d.f ⟨νf X, hνf X⟩ =
+        ν'.app (Opposite.op (X.pullbackAlong (pkg X).d.f))
+          ((pkg X).d.eqv (pkg X).d.f
+            ⟨𝟙 (pkg X).d.Z, Category.id_comp (pkg X).d.f⟩) := fun X =>
+      (hct X).choose_spec.choose_spec.1
+    have hνinv : ∀ (X : EllObj R) (γ : G),
+        (pkg X).d.σZ.hom γ ≫ νf X = νf X := fun X =>
+      (hct X).choose_spec.choose_spec.2
+    have hcd := fun X : EllObj R =>
+      QuotPkg.exists_crossDescent (pkg X) (dP X) (νf X) (hνf X) (hνinv X)
+    let μf : ∀ X : EllObj R, (pkg X).Z₀ ⟶ (dP X).Z := fun X => (hcd X).choose
+    have hμ : ∀ X : EllObj R, (pkg X).π ≫ μf X = νf X := fun X =>
+      (hcd X).choose_spec.1
+    have hμf : ∀ X : EllObj R, μf X ≫ (dP X).f = (pkg X).f₀ := fun X =>
+      (hcd X).choose_spec.2.1
+    exact ⟨QuotPkg.crossμ pkg hfree hbase dP ν' νf hνf hcl μf hμ hμf,
+      QuotPkg.projQ_crossμ pkg hfree hbase dP ν' νf hνf hcl μf hμ hμf,
+      fun μ'' hμ'' => QuotPkg.crossμ_unique pkg hfree hbase dP ν' νf hνf hcl
+        hνinv μf hμ hμf μ'' hμ''⟩
+  · -- geometric surjectivity (KM 7.1.3(3), surjectivity half)
+    intro k _ _ sm E
+    exact QuotPkg.projQ_geom_surjective pkg hfree hbase k sm E
+  · -- fibres are orbits (KM 7.1.3(3), injectivity half)
+    intro k _ _ sm E a b
+    exact QuotPkg.projQ_geom_orbits pkg hfree hbase k rfl a b
 
 end ModuliProblem
 
