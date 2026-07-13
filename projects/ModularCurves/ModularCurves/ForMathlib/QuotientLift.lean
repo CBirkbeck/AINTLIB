@@ -13,8 +13,9 @@ The restricted universal property of `SchemeAction.quotient`: a `G`-invariant mo
 `pullback quotientπ j` (the `G`-stable open of `X` over an open immersion `j : Q' ⟶ X/G`)
 descends uniquely to `Q'`.
 
-* `epi_pullback_snd_quotientπ` — the restricted quotient cover is an epimorphism (fppf: flat from
-  `etale_quotientπ`, surjective by base change; `Flat.epi_of_flat_of_surjective`). Uniqueness.
+* `epi_pullback_snd_quotientπ` (the general arbitrary-base form in `SchemeQuotient`, imported and
+  consumed below) — the restricted quotient cover is an epimorphism (fppf: flat + surjective ⟹
+  epic). Uniqueness of the descent rests on it.
 * `exists_quotientπ_lift_of_isOpenImmersion` — existence: glue the affine keystone
   `exists_invariantsπ_lift_of_isOpenImmersion` over the quotient-chart cover; overlap agreement by
   the epi property; `Scheme.Cover.glueMorphisms`.
@@ -27,24 +28,10 @@ universe u
 namespace AlgebraicGeometry.SchemeAction
 variable {G : Type u} [Group G] {X : Scheme.{u}} (σ : SchemeAction G X)
 
--- W2 target: see QLIFT_SPEC.md — (1) epi_pullback_snd_quotientπ, (2) exists_quotientπ_lift_of_isOpenImmersion
-
-/-- **(W2, uniqueness half)** For a free action, the pullback of the quotient projection
-`X ⟶ X/G` along an open immersion `j : Q' ⟶ X/G` is an epimorphism: the restricted quotient
-cover is still an fppf cover (surjective + flat), and flat surjections of schemes are epic. -/
-theorem epi_pullback_snd_quotientπ [Finite G]
-    [IsAffineHom (pullback.diagonal (terminal.from X))]
-    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
-    (hVmem : ∀ x, x ∈ V x)
-    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
-    {Q' : Scheme.{u}} (j : Q' ⟶ σ.quotient V hVs hVa) [IsOpenImmersion j] :
-    Epi (pullback.snd (σ.quotientπ V hVs hVa hVmem) j) := by
-  haveI hsurj : Surjective (σ.quotientπ V hVs hVa hVmem) :=
-    ⟨σ.quotientπ_surjective V hVs hVa hVmem⟩
-  haveI : Etale (σ.quotientπ V hVs hVa hVmem) := σ.etale_quotientπ V hVs hVa hVmem hfree
-  haveI : Surjective (pullback.snd (σ.quotientπ V hVs hVa hVmem) j) :=
-    MorphismProperty.pullback_snd _ _ hsurj
-  exact Flat.epi_of_flat_of_surjective _
+-- W2 target: see QLIFT_SPEC.md — (2) exists_quotientπ_lift_of_isOpenImmersion.
+-- (1) `epi_pullback_snd_quotientπ` is the general arbitrary-base form in `SchemeQuotient`
+-- (imported, consumed at the overlap-agreement step below); the earlier open-immersion-only
+-- copy here was a redundant duplicate of it and has been removed.
 
 /-- Two morphisms out of an "overlap" `T` of two chart pieces agree as soon as they are induced
 by the same morphism `f` on the total space of a family of pullback squares over a common
@@ -190,7 +177,7 @@ theorem exists_quotientπ_lift_of_isOpenImmersion [Finite G]
     [IsAffineHom (pullback.diagonal (terminal.from X))]
     (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
     (hVmem : ∀ x, x ∈ V x)
-    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T)
+    (hfree : ∀ {T : Scheme.{u}} (t : T ⟶ X) (g : G), g ≠ 1 → t ≫ σ.hom g = t → IsEmpty T)
     {Q' Y : Scheme.{u}} (j : Q' ⟶ σ.quotient V hVs hVa) [IsOpenImmersion j]
     (f : pullback (σ.quotientπ V hVs hVa hVmem) j ⟶ Y)
     (hf : ∀ g : G, pullback.map (σ.quotientπ V hVs hVa hVmem) j
