@@ -17347,6 +17347,27 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
   all committed + pushed. NEXT: (α) execute nonempty_pullback_idealModule; (β) assemble
   sectionToPicRel-naturality against picRelFunctor; (γ) rigidified bundles decompose
   (GME 2.2.2-tail rigidification, /develop pass); then the degree/Abel horizon.
+## STREAM-GH (2026-07-13): ★ GHB5 CLOSED — the KM 7.1.3(3c) base-change crux is a THEOREM (GHB5a-i → GHB5a → GHB5 all landed today, all axiom-clean)
+
+- **★ [GHB5] `exists_quotient_baseChange_of_free` PROVEN** (GammaHRepresentability.lean) —
+  `[propext, Classical.choice, Quot.sound]`, ZERO sorryAx. The b2-repoint target's last
+  quotient-side infrastructure gate: base change commutes with the free quotient, with the
+  full universal property (∃!) over ANY base `g : T ⟶ S`. File code-sorries 6 → 5
+  (remaining: GHB6/GH-DESC-GAP, GHB7-assembly, gammaHAut GH1-data ×2, GHA3 Weil-étale).
+- **Statement change (logged per rule 5)**: added
+  `[IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from Z))]` to GHB5 — the proof
+  constructs the concrete quotient (SchemeQuotient's Glue section requires the affine
+  diagonal), and the sibling GHB4 theorem `quotientπ_finite_etale_surjective` already
+  carries the same instance. Consumer GHB7 works with the level scheme (separated ⟹
+  affine diagonal; the v10.144 note already planned discharging this instance at GHC1).
+- Proof shape: `hdesc`-uniqueness iso `q : Z₀ ≅ σ.quotient` (mirrors GHB4's block) →
+  comparison iso `E : pullback (quotientπ) jc ≅ pullback f g` at `jc := fst₀ ≫ q`
+  (two pullback.lifts + hom_ext; key identity `E ≫ πT = pullback.snd (quotientπ) jc`) →
+  action intertwining → existence via [GHB5a] `exists_quotientπ_lift_baseChange` →
+  uniqueness via `epi_pullback_snd_quotientπ` (de-privatized for cross-file use).
+- **CHAIN STATUS: GHB5a-i ✓ → GHB5a ✓ → GHB5 ✓. NEXT: GHB7 `exists_quotientProblemData`
+  (THE ASSEMBLY, ~400 LOC, GammaHRepresentability:~508) → GHC1 goes fully unconditional ★★.**
+
 ## Sub-ticket (NEW-GH, v10.166): [GHB5a] concrete base-change of quotientπ — the GHB5-crux engine
 
 ### [GHB5a] `SchemeAction.exists_quotientπ_lift_baseChange` (concrete base-change descent)

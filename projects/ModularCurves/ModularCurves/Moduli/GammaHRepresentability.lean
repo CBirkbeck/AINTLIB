@@ -402,12 +402,14 @@ freely on 𝒫." Formulated as: the base change `pullback f₀ g` of a quotient 
 the quotient universal property for the base-changed action — so "quotient commutes
 with base change" for free actions. Chart-local algebra core:
 `fixedPointsBaseChange_bijective_of_isFreeAlgebraAction`
-(`ForMathlib/InvariantTorsor.lean`, KM A7.1.2 "∗(A, G, R, R′) for every R′" — SORRIED,
+(`ForMathlib/InvariantTorsor.lean`, KM A7.1.2 "∗(A, G, R, R′) for every R′" — PROVEN,
 [A711-BC]); without freeness the statement is FALSE (KM lists (c) as a sufficient
 condition; non-free quotients do not commute with base change). -/
 theorem _root_.AlgebraicGeometry.SchemeAction.exists_quotient_baseChange_of_free
     {G : Type*} [Group G]
-    [Finite G] {Z S Z₀ : Scheme.{u}} (σ : SchemeAction G Z) (f : Z ⟶ S)
+    [Finite G] {Z S Z₀ : Scheme.{u}}
+    [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from Z))]
+    (σ : SchemeAction G Z) (f : Z ⟶ S)
     [IsAffineHom f] (hover : ∀ γ : G, σ.hom γ ≫ f = f)
     (hfree : ∀ {T : Scheme.{u}} (t : T ⟶ Z) (γ : G), γ ≠ 1 →
       t ≫ σ.hom γ = t → IsEmpty T)
@@ -442,18 +444,106 @@ theorem _root_.AlgebraicGeometry.SchemeAction.exists_quotient_baseChange_of_free
     refine pullback.hom_ext ?_ ?_
     · rw [Category.assoc, hfst, ← Category.assoc, hbfst, Category.assoc, hπinv]
     · rw [Category.assoc, hsnd, hbsnd]
-  · -- the base-change universal property (KM 7.1.3(3c) crux). Isolated sole `sorry` of
-    -- GHB5 — construction, projection clauses and invariance all proven above. Two routes:
-    -- (A) chart-local: reduce to `Z₀`/`S` affine, where the statement is
-    --   `(A ⊗_R R')ᴳ = Aᴳ ⊗_R R'` — exactly `fixedPointsBaseChange_bijective_of_free`
-    --   ([A711-BC], PROVEN) — then glue the descents over the atlas of `pullback f₀ g`
-    --   via `AffineQuotient.existsUnique_invariantsπ_lift`;
-    -- (B) abstract: `exists_quotient_of_isAffineHom` on `σ.basePullback f hover g` (structure
-    --   map `pullback.snd f g`, affine as a base change of `f`) yields a quotient `Q'`; the
-    --   universal property gives `a : Q' ⟶ pullback f₀ g` with `π' ≫ a = πT`, and `a` is an
-    --   iso by finite-étale-surjective cancellation (`πT`, `π'` both f.é.s. via [GHB4]).
+  · -- the base-change universal property (KM 7.1.3(3c) crux): identify the abstract
+    -- quotient with the concrete one (`hdesc`-uniqueness iso `q`), identify
+    -- `pullback f g` with the base change of the concrete `quotientπ` along
+    -- `jc := pullback.fst f₀ g ≫ q` (the comparison iso `E`, with `E ≫ πT` = the
+    -- base-changed projection), and descend through [GHB5a]
+    -- `exists_quotientπ_lift_baseChange`; uniqueness because the base-changed
+    -- projection is an epimorphism (`epi_pullback_snd_quotientπ`, free actions).
     intro Y F hF
-    sorry
+    classical
+    -- the stable affine atlas and the concrete quotient (as in `quotientπ_finite_etale_surjective`)
+    have hcov : ∀ x : Z, ∃ W : S.Opens, IsAffineOpen W ∧ f.base x ∈ W := fun x => by
+      obtain ⟨W, hW, hmem, -⟩ :=
+        exists_isAffineOpen_mem_and_subset (X := S) (TopologicalSpace.Opens.mem_top (f.base x))
+      exact ⟨W, hW, hmem⟩
+    choose US hUS_aff hUS_mem using hcov
+    have hVs : ∀ x : Z, σ.IsStableOpen (f ⁻¹ᵁ US x) := fun x γ => by
+      show (σ.hom γ ≫ f) ⁻¹ᵁ US x = f ⁻¹ᵁ US x; rw [hover γ]
+    have hVa : ∀ x : Z, IsAffineOpen (f ⁻¹ᵁ US x) := fun x => (hUS_aff x).preimage f
+    have hVmem : ∀ x : Z, x ∈ f ⁻¹ᵁ US x := fun x => hUS_mem x
+    set V : Z → Z.Opens := fun x => f ⁻¹ᵁ US x with hVdef
+    have hfree' : ∀ {T' : Scheme.{u}} (t : T' ⟶ Z) (γ : G), γ ≠ 1 →
+        t ≫ σ.hom γ = t → IsEmpty T' := fun t γ hγ ht => hfree t γ hγ ht
+    have hπinv₀ : ∀ γ : G, σ.hom γ ≫ (σ.quotientπ V hVs hVa hVmem) = (σ.quotientπ V hVs hVa hVmem) := σ.hom_quotientπ V hVs hVa hVmem
+    -- the unique iso between the abstract and the concrete quotient
+    obtain ⟨q, hq, -⟩ := hdesc (σ.quotientπ V hVs hVa hVmem) hπinv₀
+    obtain ⟨q', hq', -⟩ := σ.existsUnique_quotientπ_lift V hVs hVa hVmem π hπinv
+    have hqq' : q ≫ q' = 𝟙 Z₀ := by
+      obtain ⟨_, -, huniq⟩ := hdesc π hπinv
+      rw [huniq (q ≫ q') (show π ≫ (q ≫ q') = π by rw [← Category.assoc, hq, hq']),
+        huniq (𝟙 Z₀) (show π ≫ 𝟙 Z₀ = π by rw [Category.comp_id])]
+    have hq'q : q' ≫ q = 𝟙 _ := by
+      obtain ⟨_, -, huniq⟩ := σ.existsUnique_quotientπ_lift V hVs hVa hVmem (σ.quotientπ V hVs hVa hVmem) hπinv₀
+      rw [huniq (q' ≫ q) (show (σ.quotientπ V hVs hVa hVmem) ≫ (q' ≫ q) = (σ.quotientπ V hVs hVa hVmem) by rw [← Category.assoc, hq', hq]),
+        huniq (𝟙 _) (show (σ.quotientπ V hVs hVa hVmem) ≫ 𝟙 _ = (σ.quotientπ V hVs hVa hVmem) by rw [Category.comp_id])]
+    haveI : IsIso q := ⟨q', hqq', hq'q⟩
+    -- the base map into the concrete quotient, and the comparison iso of base changes
+    set jc : pullback f₀ g ⟶ σ.quotient V hVs hVa := pullback.fst f₀ g ≫ q with hjc
+    have hkey : pullback.fst (σ.quotientπ V hVs hVa hVmem) jc ≫ π = pullback.snd (σ.quotientπ V hVs hVa hVmem) jc ≫ pullback.fst f₀ g := by
+      have h1 : (pullback.fst (σ.quotientπ V hVs hVa hVmem) jc ≫ π) ≫ q =
+          (pullback.snd (σ.quotientπ V hVs hVa hVmem) jc ≫ pullback.fst f₀ g) ≫ q := by
+        rw [Category.assoc, hq, pullback.condition (f := (σ.quotientπ V hVs hVa hVmem)) (g := jc), hjc,
+          Category.assoc]
+      exact (cancel_mono q).mp h1
+    have hsq : pullback.fst (σ.quotientπ V hVs hVa hVmem) jc ≫ f = (pullback.snd (σ.quotientπ V hVs hVa hVmem) jc ≫ pullback.snd f₀ g) ≫ g := by
+      rw [← hπf, ← Category.assoc, hkey, Category.assoc, Category.assoc,
+        pullback.condition (f := f₀) (g := g), ← Category.assoc]
+    set E : pullback (σ.quotientπ V hVs hVa hVmem) jc ⟶ pullback f g :=
+      pullback.lift (pullback.fst (σ.quotientπ V hVs hVa hVmem) jc) (pullback.snd (σ.quotientπ V hVs hVa hVmem) jc ≫ pullback.snd f₀ g) hsq
+      with hE
+    have hEfst : E ≫ pullback.fst f g = pullback.fst (σ.quotientπ V hVs hVa hVmem) jc := by
+      rw [hE]; exact pullback.lift_fst _ _ _
+    have hEsnd : E ≫ pullback.snd f g = pullback.snd (σ.quotientπ V hVs hVa hVmem) jc ≫ pullback.snd f₀ g := by
+      rw [hE]; exact pullback.lift_snd _ _ _
+    -- `E ≫ πT` is the concrete base-changed projection
+    have hEπT : E ≫ πT = pullback.snd (σ.quotientπ V hVs hVa hVmem) jc := by
+      refine pullback.hom_ext ?_ ?_
+      · rw [Category.assoc, hfst, ← Category.assoc, hEfst, hkey]
+      · rw [Category.assoc, hsnd, hEsnd]
+    -- `E` is an isomorphism, with inverse assembled from `πT`
+    have hsq' : pullback.fst f g ≫ (σ.quotientπ V hVs hVa hVmem) = πT ≫ jc := by
+      rw [← hq, hjc, ← Category.assoc, ← hfst, Category.assoc]
+    set E' : pullback f g ⟶ pullback (σ.quotientπ V hVs hVa hVmem) jc :=
+      pullback.lift (pullback.fst f g) πT hsq' with hE'
+    have hE'fst : E' ≫ pullback.fst (σ.quotientπ V hVs hVa hVmem) jc = pullback.fst f g := by
+      rw [hE']; exact pullback.lift_fst _ _ _
+    have hE'snd : E' ≫ pullback.snd (σ.quotientπ V hVs hVa hVmem) jc = πT := by
+      rw [hE']; exact pullback.lift_snd _ _ _
+    haveI : IsIso E := by
+      refine ⟨E', ?_, ?_⟩
+      · refine pullback.hom_ext ?_ ?_
+        · rw [Category.assoc, hE'fst, Category.id_comp, hEfst]
+        · rw [Category.assoc, hE'snd, Category.id_comp, hEπT]
+      · refine pullback.hom_ext ?_ ?_
+        · rw [Category.assoc, hEfst, Category.id_comp, hE'fst]
+        · rw [Category.assoc, hEsnd, Category.id_comp, ← Category.assoc, hE'snd, hsnd]
+    -- the comparison intertwines the actions
+    have hEact : ∀ γ : G, E ≫ (σ.basePullback f hover g).hom γ =
+        σ.pullbackQuotientπSMul V hVs hVa hVmem jc γ ≫ E := by
+      intro γ
+      refine pullback.hom_ext ?_ ?_
+      · rw [Category.assoc, hbfst, ← Category.assoc, hEfst, Category.assoc, hEfst,
+          SchemeAction.pullbackQuotientπSMul_fst]
+      · rw [Category.assoc, hbsnd, hEsnd, Category.assoc, hEsnd, ← Category.assoc,
+          SchemeAction.pullbackQuotientπSMul_snd]
+    -- existence of the descent, through the concrete engine [GHB5a]
+    have hFE : ∀ γ : G, σ.pullbackQuotientπSMul V hVs hVa hVmem jc γ ≫ (E ≫ F) = E ≫ F := by
+      intro γ
+      rw [← Category.assoc, ← hEact γ, Category.assoc, hF γ]
+    obtain ⟨q₀, hq₀⟩ := σ.exists_quotientπ_lift_baseChange V hVs hVa hVmem hfree' jc
+      (E ≫ F) hFE
+    haveI : Epi (pullback.snd (σ.quotientπ V hVs hVa hVmem) jc) :=
+      σ.epi_pullback_snd_quotientπ V hVs hVa hVmem hfree' jc
+    refine ⟨q₀, ?_, ?_⟩
+    · show πT ≫ q₀ = F
+      rw [← cancel_epi E, ← Category.assoc, hEπT]
+      exact hq₀
+    · intro q₁ hq₁
+      have hq₁' : πT ≫ q₁ = F := hq₁
+      rw [← cancel_epi (pullback.snd (σ.quotientπ V hVs hVa hVmem) jc), hq₀, ← hEπT,
+        Category.assoc, hq₁']
 
 /-- **[GHB6] (KM 7.1.3(6), freeness-sharpened)** — KM: "If 𝒫 is finite over (Ell/R),
 and R is noetherian, then 𝒫/G is finite over (Ell/R)"; with the projection finite

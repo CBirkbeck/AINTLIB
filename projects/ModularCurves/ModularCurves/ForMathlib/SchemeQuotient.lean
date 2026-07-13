@@ -1364,7 +1364,7 @@ private theorem flat_quotientπ
 include hVmem in
 /-- For a FREE action, the base change of the quotient projection along ANY morphism is
 an epimorphism — uniqueness of descent over an arbitrary base. -/
-private theorem epi_pullback_snd_quotientπ
+theorem epi_pullback_snd_quotientπ
     (hfree : ∀ {T : Scheme.{u}} (t : T ⟶ X) (g : G), g ≠ 1 → t ≫ σ.hom g = t → IsEmpty T)
     {W : Scheme.{u}} (j : W ⟶ σ.quotient V hVs hVa) :
     Epi (Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j) := by
