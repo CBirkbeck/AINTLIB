@@ -262,15 +262,48 @@ theorem isFullLevel_taut_over_fullLevelOpens (hN : NIsInvertible S N) :
 
 /-! ### `[YF-⊆]` and the clopen leaf -/
 
+/-- The tautological pair is a full-level structure over `levelSpaceΓ` itself — the level space
+classifies full-level, so its own inclusion witnesses it (`levelSpaceΓ_spec` with `h = 𝟙`). -/
+theorem taut_isFullLevel_over_levelSpaceΓ :
+    (E.baseChange (levelSpaceΓι E N ≫ tautBase E N)).IsFullLevel N
+      (Point.asSection E (levelSpaceΓι E N ≫ tautBase E N)
+        (Point.restrict E (levelSpaceΓι E N) (tautPt₁ E N)))
+      (Point.asSection E (levelSpaceΓι E N ≫ tautBase E N)
+        (Point.restrict E (levelSpaceΓι E N) (tautPt₂ E N))) := by
+  have hP : (Point.restrict E (levelSpaceΓι E N) (tautPt₁ E N)).1 ≫ E.mulByHom N =
+      (levelSpaceΓι E N ≫ tautBase E N) ≫ E.zero := by
+    show (levelSpaceΓι E N ≫ (tautPt₁ E N).1) ≫ E.mulByHom N = _
+    rw [Category.assoc, tautPt₁_killed, ← Category.assoc]
+  have hQ : (Point.restrict E (levelSpaceΓι E N) (tautPt₂ E N)).1 ≫ E.mulByHom N =
+      (levelSpaceΓι E N ≫ tautBase E N) ≫ E.zero := by
+    show (levelSpaceΓι E N ≫ (tautPt₂ E N).1) ≫ E.mulByHom N = _
+    rw [Category.assoc, tautPt₂_killed, ← Category.assoc]
+  refine (levelSpaceΓ_spec E N (levelSpaceΓι E N ≫ tautBase E N)
+    (Point.restrict E (levelSpaceΓι E N) (tautPt₁ E N))
+    (Point.restrict E (levelSpaceΓι E N) (tautPt₂ E N)) hP hQ).mp ⟨𝟙 _, ?_⟩
+  rw [Category.id_comp]
+  haveI := E.torsionι_isClosedImmersion N
+  refine pullback.hom_ext ?_ ?_
+  · rw [pullback.lift_fst]
+    apply (cancel_mono (E.torsionι N)).mp
+    rw [E.pointToTorsion_torsionι, Category.assoc]
+    show levelSpaceΓι E N ≫ (tautPt₁ E N).1 =
+      levelSpaceΓι E N ≫ pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N
+    rfl
+  · rw [pullback.lift_snd]
+    apply (cancel_mono (E.torsionι N)).mp
+    rw [E.pointToTorsion_torsionι, Category.assoc]
+    show levelSpaceΓι E N ≫ (tautPt₂ E N).1 =
+      levelSpaceΓι E N ≫ pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N
+    rfl
+
 /-- **[YF-⊆] — GATE (reduced-fibre distinctness, KM 3.7.1).** The image of the full-level
 closed immersion `levelSpaceΓι` lies in `fullLevelOpens`. At a full-level point the tautological
 pair generates `E[N]` fibrewise (`levelSpaceΓ_spec` over `κ(p)`), and for `N` invertible `E[N]`
 is finite étale hence has reduced geometric fibres of rank `N²`, so the `N²` combinations
-`[c]P + [d]Q` are fibrewise **distinct** (`isFullSetOfSectionsAlg_iff_fields` over the reduced
-residue field / the `fullLevel_divisor_iff_naive_gen` = T-D8-bridge register); therefore no
-nonzero combination vanishes there, i.e. the point lies in `fullLevelOpens`. This is the reverse
-("full-level ⟹ distinct") of the `[YF-⊇]` divisor chain and consumes the same reduced-fibre
-content as the boarded T-D8-bridge box. -/
+`[c]P + [d]Q` are fibrewise **distinct** (the `naive_gen_of_divisor_eq` = T-D8-bridge ⟹ register);
+therefore no nonzero combination vanishes there, i.e. the point lies in `fullLevelOpens`. This is
+the reverse ("full-level ⟹ distinct") of the `[YF-⊇]` divisor chain. -/
 theorem range_levelSpaceΓι_subset (hN : NIsInvertible S N) :
     Set.range (levelSpaceΓι E N).base ⊆ (fullLevelOpens E N hN : Set _) := by
   sorry
