@@ -268,6 +268,35 @@ private theorem kerPrincipalAux_exists_repr_one {R A : Type u} [CommRing R] [Com
     exact hx₀
 
 open scoped Pointwise in
+/-- The **canonical conormal derivation** attached to an `R`-algebra retraction
+`σ : A →ₐ[R] R`: the `R`-derivation `A → A ⧸ (ker σ)²` given by `a ↦ [a − σ(a)]`. It is a
+derivation because its Leibniz defect `(a − σa)(c − σc)` lies in `(ker σ)²`. -/
+private def kerPrincipalAux_conormalDerivation {R A : Type u} [CommRing R] [CommRing A]
+    [Algebra R A] (σ : A →ₐ[R] R) :
+    Derivation R A (A ⧸ (RingHom.ker σ • RingHom.ker σ)) where
+  toLinearMap :=
+    ((RingHom.ker σ • RingHom.ker σ).mkQ.restrictScalars R) ∘ₗ
+      (LinearMap.id - (Algebra.linearMap R A ∘ₗ σ.toLinearMap))
+  map_one_eq_zero' := by
+    show Submodule.Quotient.mk ((1 : A) - algebraMap R A (σ 1)) = 0
+    simp
+  leibniz' := by
+    intro a c
+    have hmemI : ∀ a : A, a - algebraMap R A (σ a) ∈ RingHom.ker σ := fun a => by
+      simp [RingHom.mem_ker, map_sub]
+    show Submodule.Quotient.mk (a * c - algebraMap R A (σ (a * c)))
+      = a • Submodule.Quotient.mk (c - algebraMap R A (σ c))
+        + c • Submodule.Quotient.mk (a - algebraMap R A (σ a))
+    rw [← Submodule.Quotient.mk_smul, ← Submodule.Quotient.mk_smul,
+      ← Submodule.Quotient.mk_add, Submodule.Quotient.eq]
+    have h1 : a * c - algebraMap R A (σ (a * c)) -
+        (a • (c - algebraMap R A (σ c)) + c • (a - algebraMap R A (σ a)))
+        = -((a - algebraMap R A (σ a)) * (c - algebraMap R A (σ c))) := by
+      simp only [smul_eq_mul, map_mul]
+      ring
+    rw [h1]
+    exact neg_mem (Submodule.smul_mem_smul (hmemI a) (hmemI c))
+
 /-- Conormal step for T-D22: if `Ω[A⁄R]` has a singleton basis and `σ` is an `R`-algebra
 retraction of `A`, then `I := ker σ` satisfies `I ≤ (f) ⊔ I • I` for an explicit `f ∈ I`.
 The generator is found via the (inverse of the) conormal isomorphism
@@ -306,26 +335,7 @@ private theorem kerPrincipalAux_le_span_sup {R A : Type u} [CommRing R] [CommRin
   refine ⟨f, hfI, ?_⟩
   -- Step (ii): the canonical derivation into `A ⧸ I•I`
   set J : Ideal A := I • I with hJdef
-  set L : A →ₗ[R] A ⧸ J :=
-    (J.mkQ.restrictScalars R) ∘ₗ
-      (LinearMap.id - (Algebra.linearMap R A ∘ₗ σ.toLinearMap)) with hLdef
-  have hL : ∀ a : A, L a = Submodule.Quotient.mk (a - algebraMap R A (σ a)) := fun a => rfl
-  set 𝔇 : Derivation R A (A ⧸ J) :=
-    { toLinearMap := L
-      map_one_eq_zero' := by
-        rw [hL]
-        simp
-      leibniz' := by
-        intro a c
-        rw [hL, hL, hL, ← Submodule.Quotient.mk_smul, ← Submodule.Quotient.mk_smul,
-          ← Submodule.Quotient.mk_add, Submodule.Quotient.eq]
-        have h1 : a * c - algebraMap R A (σ (a * c)) -
-            (a • (c - algebraMap R A (σ c)) + c • (a - algebraMap R A (σ a)))
-            = -((a - algebraMap R A (σ a)) * (c - algebraMap R A (σ c))) := by
-          simp only [smul_eq_mul, map_mul]
-          ring
-        rw [h1]
-        exact neg_mem (hJdef ▸ Submodule.smul_mem_smul (hmemI a) (hmemI c)) } with h𝔇def
+  set 𝔇 : Derivation R A (A ⧸ J) := kerPrincipalAux_conormalDerivation σ with h𝔇def
   have h𝔇 : ∀ a : A, 𝔇 a = Submodule.Quotient.mk (a - algebraMap R A (σ a)) := fun a => rfl
   -- the image of the lift lies in the image of `I`
   obtain ⟨i₀, hi₀I, hi₀⟩ : ∃ i₀ ∈ I,
@@ -406,6 +416,188 @@ private theorem kerPrincipalAux_exists_gen {R A : Type u} [CommRing R] [CommRing
     simpa [smul_eq_mul] using hrsm (Submodule.smul_mem_pointwise_smul x r _ hx)⟩
 
 open TensorProduct in
+/-- **Vanishing in the smoothness localization** (heart of `kerPrincipalAux_nzd`). With `A`
+standard-smooth of relative dimension one over `R`, let `g` be the coordinate of `d f` in the
+rank-one free module `Ω[A⁄R]`. On the localization `A' := A[1/g]`, `d f` *generates* `Ω[A'⁄R]`,
+so `A'` is formally smooth — hence smooth, flat, and `X`-torsion-free — over `P := R[X]`
+(`X ↦ f`). Consequently any `x` with `x·f = 0` in `A` maps to `0` in `A'`. -/
+private theorem kerPrincipalAux_kill {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+    [Algebra.IsStandardSmoothOfRelativeDimension 1 R A] [Module.Free A (Ω[A⁄R])]
+    [Unique (Module.Free.ChooseBasisIndex A (Ω[A⁄R]))] (f : A) :
+    ∀ x : A, x * f = 0 →
+      algebraMap A (Localization.Away
+          ((Module.Free.chooseBasis A (Ω[A⁄R])).repr (KaehlerDifferential.D R A f) default))
+        x = 0 := by
+  set b := Module.Free.chooseBasis A (Ω[A⁄R]) with hbdef
+  set g : A := b.repr (KaehlerDifferential.D R A f) default with hgdef
+  set A' := Localization.Away g with hA'def
+  rcases subsingleton_or_nontrivial A' with hA' | hA'
+  · exact fun x _ => Subsingleton.elim _ _
+  haveI hstdA' : Algebra.IsStandardSmoothOfRelativeDimension 1 R A' := by
+    haveI h0 : Algebra.IsStandardSmoothOfRelativeDimension 0 A A' := by
+      rw [← RingHom.isStandardSmoothOfRelativeDimension_algebraMap]
+      exact RingHom.isStandardSmoothOfRelativeDimension_holdsForLocalizationAway A' g
+    have h1 := Algebra.IsStandardSmoothOfRelativeDimension.trans
+      (n := 1) (m := 0) R A A'
+    simpa using h1
+  haveI : Algebra.IsStandardSmooth R A' :=
+    Algebra.IsStandardSmoothOfRelativeDimension.isStandardSmooth 1
+  haveI := kerPrincipalAux_unique_index R A'
+  set f' : A' := algebraMap A A' f with hf'def
+  have hgu : IsUnit (algebraMap A A' g) :=
+    IsLocalization.map_units A' (⟨g, Submonoid.mem_powers g⟩ : Submonoid.powers g)
+  -- `d f'` generates `Ω[A'⁄R]`
+  have hgen : ∀ m : Ω[A'⁄R], ∃ a : A', m = a • KaehlerDifferential.D R A' f' := by
+    have hDf' : KaehlerDifferential.D R A' f'
+        = algebraMap A A' g • KaehlerDifferential.map R R A A' (b default) := by
+      rw [hf'def, ← KaehlerDifferential.map_D R R A A' f]
+      conv_lhs => rw [kerPrincipalAux_basis_expand b (KaehlerDifferential.D R A f)]
+      rw [map_smul, algebraMap_smul]
+    obtain ⟨u, hu⟩ := hgu
+    have hb0 : KaehlerDifferential.map R R A A' (b default)
+        = (↑u⁻¹ : A') • KaehlerDifferential.D R A' f' := by
+      rw [hDf', ← hu, smul_smul, Units.inv_mul, one_smul]
+    intro m
+    have hm : m ∈ Submodule.span A'
+        (Set.range (KaehlerDifferential.map R R A A' ∘ KaehlerDifferential.D R A)) := by
+      rw [KaehlerDifferential.span_range_map_derivation_of_isLocalization
+        (R := R) (S := A) (T := A') (Submonoid.powers g)]
+      trivial
+    induction hm using Submodule.span_induction with
+    | mem m hm =>
+      obtain ⟨x, rfl⟩ := hm
+      refine ⟨algebraMap A A' (b.repr (KaehlerDifferential.D R A x) default) * ↑u⁻¹, ?_⟩
+      show KaehlerDifferential.map R R A A' (KaehlerDifferential.D R A x) = _
+      conv_lhs => rw [kerPrincipalAux_basis_expand b (KaehlerDifferential.D R A x)]
+      rw [map_smul,
+        show (b.repr (KaehlerDifferential.D R A x) default)
+            • KaehlerDifferential.map R R A A' (b default)
+          = algebraMap A A' (b.repr (KaehlerDifferential.D R A x) default)
+            • KaehlerDifferential.map R R A A' (b default) from
+          (algebraMap_smul A' _ _).symm,
+        hb0, smul_smul]
+    | zero => exact ⟨0, by simp⟩
+    | add m₁ m₂ _ _ ih₁ ih₂ =>
+      obtain ⟨a₁, rfl⟩ := ih₁
+      obtain ⟨a₂, rfl⟩ := ih₂
+      exact ⟨a₁ + a₂, by rw [add_smul]⟩
+    | smul a m _ ih =>
+      obtain ⟨a₀, rfl⟩ := ih
+      exact ⟨a * a₀, by rw [smul_smul]⟩
+  -- `a • d f' = 0` forces `a = 0`
+  have hreg : ∀ a : A', a • KaehlerDifferential.D R A' f' = 0 → a = 0 := by
+    intro a ha
+    set b' := Module.Free.chooseBasis A' (Ω[A'⁄R]) with hb'def
+    obtain ⟨e, he⟩ := hgen (b' default)
+    set c : A' := b'.repr (KaehlerDifferential.D R A' f') default with hcdef
+    have h2 : e * c = 1 := by
+      have h3 := congrArg (fun m => b'.repr m default) he
+      simp only [map_smul, Finsupp.smul_apply, smul_eq_mul,
+        Module.Basis.repr_self, Finsupp.single_eq_same] at h3
+      exact h3.symm
+    have h4 : a * c = 0 := by
+      have h5 := congrArg (fun m => b'.repr m default) ha
+      simp only [map_smul, Finsupp.smul_apply, smul_eq_mul, map_zero,
+        Finsupp.zero_apply] at h5
+      exact h5
+    calc a = a * (c * e) := by rw [mul_comm c e, h2, mul_one]
+    _ = a * c * e := by ring
+    _ = 0 := by rw [h4, zero_mul]
+  -- the polynomial algebra `P = R[X]`, mapping `X ↦ f'`
+  letI : Algebra (Polynomial R) A' := (Polynomial.aeval f').toRingHom.toAlgebra
+  haveI : IsScalarTower R (Polynomial R) A' :=
+    IsScalarTower.of_algebraMap_eq' (by
+      ext r
+      exact (Polynomial.aeval_C f' r).symm)
+  have halgX : algebraMap (Polynomial R) A' Polynomial.X = f' := Polynomial.aeval_X f'
+  -- `Ω[A'⁄P] = 0`
+  have hΩP : Subsingleton (Ω[A'⁄Polynomial R]) := by
+    have hzero : ∀ x : A', KaehlerDifferential.D (Polynomial R) A' x = 0 := by
+      intro x
+      obtain ⟨a, ha⟩ := hgen (KaehlerDifferential.D R A' x)
+      have h1 := congrArg (KaehlerDifferential.map R (Polynomial R) A' A') ha
+      rw [KaehlerDifferential.map_D, map_smul, KaehlerDifferential.map_D] at h1
+      rw [show algebraMap A' A' x = x from by simp] at h1
+      rw [show algebraMap A' A' f' = f' from by simp] at h1
+      rw [← halgX, Derivation.map_algebraMap, smul_zero] at h1
+      exact h1
+    refine subsingleton_of_forall_eq 0 fun m => ?_
+    have hm : m ∈ Submodule.span A'
+        (Set.range (KaehlerDifferential.D (Polynomial R) A')) := by
+      rw [KaehlerDifferential.span_range_derivation]; trivial
+    induction hm using Submodule.span_induction with
+    | mem m hm => obtain ⟨x, rfl⟩ := hm; exact hzero x
+    | zero => rfl
+    | add m₁ m₂ _ _ ih₁ ih₂ => rw [ih₁, ih₂, add_zero]
+    | smul a m _ ih => rw [ih, smul_zero]
+  -- injectivity of `mapBaseChange R P A'` (it sends the generator `1 ⊗ dX` to `d f'`)
+  have hrep : ∀ t : A' ⊗[Polynomial R] (Ω[Polynomial R⁄R]), ∃ a : A', t = a •
+      ((1 : A') ⊗ₜ[Polynomial R]
+        KaehlerDifferential.D R (Polynomial R) Polynomial.X) := by
+    intro t
+    induction t with
+    | zero => exact ⟨0, by simp⟩
+    | tmul p ω =>
+      obtain ⟨q, rfl⟩ : ∃ q : Polynomial R,
+          ω = q • KaehlerDifferential.D R (Polynomial R) Polynomial.X := by
+        refine ⟨KaehlerDifferential.polynomialEquiv R ω, ?_⟩
+        conv_lhs =>
+          rw [← (KaehlerDifferential.polynomialEquiv R).symm_apply_apply ω]
+        rfl
+      refine ⟨algebraMap (Polynomial R) A' q * p, ?_⟩
+      have e1 : p ⊗ₜ[Polynomial R] (q • KaehlerDifferential.D R (Polynomial R) Polynomial.X)
+          = (algebraMap (Polynomial R) A' q * p) ⊗ₜ[Polynomial R]
+            KaehlerDifferential.D R (Polynomial R) Polynomial.X := by
+        rw [TensorProduct.tmul_smul, ← algebraMap_smul A' q, TensorProduct.smul_tmul',
+          smul_eq_mul]
+      rw [e1, TensorProduct.smul_tmul', smul_eq_mul, mul_one]
+    | add t₁ t₂ ih₁ ih₂ =>
+      obtain ⟨a₁, rfl⟩ := ih₁
+      obtain ⟨a₂, rfl⟩ := ih₂
+      exact ⟨a₁ + a₂, by rw [add_smul]⟩
+  have hker : ∀ t : A' ⊗[Polynomial R] (Ω[Polynomial R⁄R]),
+      KaehlerDifferential.mapBaseChange R (Polynomial R) A' t = 0 → t = 0 := by
+    intro t ht
+    obtain ⟨a, rfl⟩ := hrep t
+    rw [map_smul] at ht
+    have h2 : KaehlerDifferential.mapBaseChange R (Polynomial R) A'
+        ((1 : A') ⊗ₜ[Polynomial R]
+          KaehlerDifferential.D R (Polynomial R) Polynomial.X)
+        = KaehlerDifferential.D R A' f' := by
+      rw [KaehlerDifferential.mapBaseChange_tmul, KaehlerDifferential.map_D, halgX,
+        one_smul]
+    rw [h2] at ht
+    rw [hreg a ht, zero_smul]
+  -- formal smoothness of `A'` over `P` via the Jacobi–Zariski sequence
+  haveI hFS : Algebra.FormallySmooth (Polynomial R) A' := by
+    rw [Algebra.formallySmooth_iff]
+    refine ⟨?_, ?_⟩
+    · haveI := hΩP
+      haveI : Module.Free A' (Ω[A'⁄Polynomial R]) := Module.Free.of_subsingleton A' _
+      infer_instance
+    · refine subsingleton_of_forall_eq 0 fun x => ?_
+      have hδ : Algebra.H1Cotangent.δ R (Polynomial R) A' x = 0 :=
+        hker _ ((Algebra.H1Cotangent.exact_δ_mapBaseChange
+          R (Polynomial R) A').apply_apply_eq_zero x)
+      obtain ⟨y, hy⟩ :=
+        (Algebra.H1Cotangent.exact_map_δ R (Polynomial R) A' x).mp hδ
+      rw [← hy, Subsingleton.elim y 0, map_zero]
+  -- `A'` is `P`-smooth, hence `P`-flat, hence `X`-torsion-free
+  haveI hFP : Algebra.FinitePresentation (Polynomial R) A' :=
+    Algebra.FinitePresentation.of_restrict_scalars_finitePresentation
+      (R := R) (A := Polynomial R) (B := A')
+  haveI hSm : Algebra.Smooth (Polynomial R) A' := ⟨hFS, hFP⟩
+  haveI hFl : Module.Flat (Polynomial R) A' := Algebra.Smooth.flat _ _
+  have hX : IsSMulRegular A' (Polynomial.X : Polynomial R) :=
+    Module.Flat.isSMulRegular_of_nonZeroDivisors
+      Polynomial.monic_X.mem_nonZeroDivisors
+  intro x hx
+  have hx' : (Polynomial.X : Polynomial R) • algebraMap A A' x
+      = (Polynomial.X : Polynomial R) • (0 : A') := by
+    rw [smul_zero, Algebra.smul_def, halgX, hf'def, ← map_mul, mul_comm f x, hx, map_zero]
+  exact hX hx'
+
+open TensorProduct in
 /-- **T-D22 nonzerodivisor leg.** A generator of the kernel of a retraction of a
 standard-smooth algebra of relative dimension `1` is a nonzerodivisor
 (EGA IV 17.12.1 / KM 1.2.2).
@@ -451,172 +643,7 @@ private theorem kerPrincipalAux_nzd {R A : Type u} [CommRing R] [CommRing A]
   -- the localization inverting `g`
   set A' := Localization.Away g with hA'def
   -- the key vanishing: any `x` with `x * f = 0` dies in `A'`
-  have hkill : ∀ x : A, x * f = 0 → algebraMap A A' x = 0 := by
-    rcases subsingleton_or_nontrivial A' with hA' | hA'
-    · exact fun x _ => Subsingleton.elim _ _
-    haveI hstdA' : Algebra.IsStandardSmoothOfRelativeDimension 1 R A' := by
-      haveI h0 : Algebra.IsStandardSmoothOfRelativeDimension 0 A A' := by
-        rw [← RingHom.isStandardSmoothOfRelativeDimension_algebraMap]
-        exact RingHom.isStandardSmoothOfRelativeDimension_holdsForLocalizationAway A' g
-      have h1 := Algebra.IsStandardSmoothOfRelativeDimension.trans
-        (n := 1) (m := 0) R A A'
-      simpa using h1
-    haveI : Algebra.IsStandardSmooth R A' :=
-      Algebra.IsStandardSmoothOfRelativeDimension.isStandardSmooth 1
-    haveI := kerPrincipalAux_unique_index R A'
-    set f' : A' := algebraMap A A' f with hf'def
-    have hgu : IsUnit (algebraMap A A' g) :=
-      IsLocalization.map_units A' (⟨g, Submonoid.mem_powers g⟩ : Submonoid.powers g)
-    -- `d f'` generates `Ω[A'⁄R]`
-    have hgen : ∀ m : Ω[A'⁄R], ∃ a : A', m = a • KaehlerDifferential.D R A' f' := by
-      have hDf' : KaehlerDifferential.D R A' f'
-          = algebraMap A A' g • KaehlerDifferential.map R R A A' (b default) := by
-        rw [hf'def, ← KaehlerDifferential.map_D R R A A' f]
-        conv_lhs => rw [kerPrincipalAux_basis_expand b (KaehlerDifferential.D R A f)]
-        rw [map_smul, algebraMap_smul]
-      obtain ⟨u, hu⟩ := hgu
-      have hb0 : KaehlerDifferential.map R R A A' (b default)
-          = (↑u⁻¹ : A') • KaehlerDifferential.D R A' f' := by
-        rw [hDf', ← hu, smul_smul, Units.inv_mul, one_smul]
-      intro m
-      have hm : m ∈ Submodule.span A'
-          (Set.range (KaehlerDifferential.map R R A A' ∘ KaehlerDifferential.D R A)) := by
-        rw [KaehlerDifferential.span_range_map_derivation_of_isLocalization
-          (R := R) (S := A) (T := A') (Submonoid.powers g)]
-        trivial
-      induction hm using Submodule.span_induction with
-      | mem m hm =>
-        obtain ⟨x, rfl⟩ := hm
-        refine ⟨algebraMap A A' (b.repr (KaehlerDifferential.D R A x) default) * ↑u⁻¹, ?_⟩
-        show KaehlerDifferential.map R R A A' (KaehlerDifferential.D R A x) = _
-        conv_lhs => rw [kerPrincipalAux_basis_expand b (KaehlerDifferential.D R A x)]
-        rw [map_smul,
-          show (b.repr (KaehlerDifferential.D R A x) default)
-              • KaehlerDifferential.map R R A A' (b default)
-            = algebraMap A A' (b.repr (KaehlerDifferential.D R A x) default)
-              • KaehlerDifferential.map R R A A' (b default) from
-            (algebraMap_smul A' _ _).symm,
-          hb0, smul_smul]
-      | zero => exact ⟨0, by simp⟩
-      | add m₁ m₂ _ _ ih₁ ih₂ =>
-        obtain ⟨a₁, rfl⟩ := ih₁
-        obtain ⟨a₂, rfl⟩ := ih₂
-        exact ⟨a₁ + a₂, by rw [add_smul]⟩
-      | smul a m _ ih =>
-        obtain ⟨a₀, rfl⟩ := ih
-        exact ⟨a * a₀, by rw [smul_smul]⟩
-    -- `a • d f' = 0` forces `a = 0`
-    have hreg : ∀ a : A', a • KaehlerDifferential.D R A' f' = 0 → a = 0 := by
-      intro a ha
-      set b' := Module.Free.chooseBasis A' (Ω[A'⁄R]) with hb'def
-      obtain ⟨e, he⟩ := hgen (b' default)
-      set c : A' := b'.repr (KaehlerDifferential.D R A' f') default with hcdef
-      have h2 : e * c = 1 := by
-        have h3 := congrArg (fun m => b'.repr m default) he
-        simp only [map_smul, Finsupp.smul_apply, smul_eq_mul,
-          Module.Basis.repr_self, Finsupp.single_eq_same] at h3
-        exact h3.symm
-      have h4 : a * c = 0 := by
-        have h5 := congrArg (fun m => b'.repr m default) ha
-        simp only [map_smul, Finsupp.smul_apply, smul_eq_mul, map_zero,
-          Finsupp.zero_apply] at h5
-        exact h5
-      calc a = a * (c * e) := by rw [mul_comm c e, h2, mul_one]
-      _ = a * c * e := by ring
-      _ = 0 := by rw [h4, zero_mul]
-    -- the polynomial algebra `P = R[X]`, mapping `X ↦ f'`
-    letI : Algebra (Polynomial R) A' := (Polynomial.aeval f').toRingHom.toAlgebra
-    haveI : IsScalarTower R (Polynomial R) A' :=
-      IsScalarTower.of_algebraMap_eq' (by
-        ext r
-        exact (Polynomial.aeval_C f' r).symm)
-    have halgX : algebraMap (Polynomial R) A' Polynomial.X = f' := Polynomial.aeval_X f'
-    -- `Ω[A'⁄P] = 0`
-    have hΩP : Subsingleton (Ω[A'⁄Polynomial R]) := by
-      have hzero : ∀ x : A', KaehlerDifferential.D (Polynomial R) A' x = 0 := by
-        intro x
-        obtain ⟨a, ha⟩ := hgen (KaehlerDifferential.D R A' x)
-        have h1 := congrArg (KaehlerDifferential.map R (Polynomial R) A' A') ha
-        rw [KaehlerDifferential.map_D, map_smul, KaehlerDifferential.map_D] at h1
-        rw [show algebraMap A' A' x = x from by simp] at h1
-        rw [show algebraMap A' A' f' = f' from by simp] at h1
-        rw [← halgX, Derivation.map_algebraMap, smul_zero] at h1
-        exact h1
-      refine subsingleton_of_forall_eq 0 fun m => ?_
-      have hm : m ∈ Submodule.span A'
-          (Set.range (KaehlerDifferential.D (Polynomial R) A')) := by
-        rw [KaehlerDifferential.span_range_derivation]; trivial
-      induction hm using Submodule.span_induction with
-      | mem m hm => obtain ⟨x, rfl⟩ := hm; exact hzero x
-      | zero => rfl
-      | add m₁ m₂ _ _ ih₁ ih₂ => rw [ih₁, ih₂, add_zero]
-      | smul a m _ ih => rw [ih, smul_zero]
-    -- injectivity of `mapBaseChange R P A'` (it sends the generator `1 ⊗ dX` to `d f'`)
-    have hrep : ∀ t : A' ⊗[Polynomial R] (Ω[Polynomial R⁄R]), ∃ a : A', t = a •
-        ((1 : A') ⊗ₜ[Polynomial R]
-          KaehlerDifferential.D R (Polynomial R) Polynomial.X) := by
-      intro t
-      induction t with
-      | zero => exact ⟨0, by simp⟩
-      | tmul p ω =>
-        obtain ⟨q, rfl⟩ : ∃ q : Polynomial R,
-            ω = q • KaehlerDifferential.D R (Polynomial R) Polynomial.X := by
-          refine ⟨KaehlerDifferential.polynomialEquiv R ω, ?_⟩
-          conv_lhs =>
-            rw [← (KaehlerDifferential.polynomialEquiv R).symm_apply_apply ω]
-          rfl
-        refine ⟨algebraMap (Polynomial R) A' q * p, ?_⟩
-        have e1 : p ⊗ₜ[Polynomial R] (q • KaehlerDifferential.D R (Polynomial R) Polynomial.X)
-            = (algebraMap (Polynomial R) A' q * p) ⊗ₜ[Polynomial R]
-              KaehlerDifferential.D R (Polynomial R) Polynomial.X := by
-          rw [TensorProduct.tmul_smul, ← algebraMap_smul A' q, TensorProduct.smul_tmul',
-            smul_eq_mul]
-        rw [e1, TensorProduct.smul_tmul', smul_eq_mul, mul_one]
-      | add t₁ t₂ ih₁ ih₂ =>
-        obtain ⟨a₁, rfl⟩ := ih₁
-        obtain ⟨a₂, rfl⟩ := ih₂
-        exact ⟨a₁ + a₂, by rw [add_smul]⟩
-    have hker : ∀ t : A' ⊗[Polynomial R] (Ω[Polynomial R⁄R]),
-        KaehlerDifferential.mapBaseChange R (Polynomial R) A' t = 0 → t = 0 := by
-      intro t ht
-      obtain ⟨a, rfl⟩ := hrep t
-      rw [map_smul] at ht
-      have h2 : KaehlerDifferential.mapBaseChange R (Polynomial R) A'
-          ((1 : A') ⊗ₜ[Polynomial R]
-            KaehlerDifferential.D R (Polynomial R) Polynomial.X)
-          = KaehlerDifferential.D R A' f' := by
-        rw [KaehlerDifferential.mapBaseChange_tmul, KaehlerDifferential.map_D, halgX,
-          one_smul]
-      rw [h2] at ht
-      rw [hreg a ht, zero_smul]
-    -- formal smoothness of `A'` over `P` via the Jacobi–Zariski sequence
-    haveI hFS : Algebra.FormallySmooth (Polynomial R) A' := by
-      rw [Algebra.formallySmooth_iff]
-      refine ⟨?_, ?_⟩
-      · haveI := hΩP
-        haveI : Module.Free A' (Ω[A'⁄Polynomial R]) := Module.Free.of_subsingleton A' _
-        infer_instance
-      · refine subsingleton_of_forall_eq 0 fun x => ?_
-        have hδ : Algebra.H1Cotangent.δ R (Polynomial R) A' x = 0 :=
-          hker _ ((Algebra.H1Cotangent.exact_δ_mapBaseChange
-            R (Polynomial R) A').apply_apply_eq_zero x)
-        obtain ⟨y, hy⟩ :=
-          (Algebra.H1Cotangent.exact_map_δ R (Polynomial R) A' x).mp hδ
-        rw [← hy, Subsingleton.elim y 0, map_zero]
-    -- `A'` is `P`-smooth, hence `P`-flat, hence `X`-torsion-free
-    haveI hFP : Algebra.FinitePresentation (Polynomial R) A' :=
-      Algebra.FinitePresentation.of_restrict_scalars_finitePresentation
-        (R := R) (A := Polynomial R) (B := A')
-    haveI hSm : Algebra.Smooth (Polynomial R) A' := ⟨hFS, hFP⟩
-    haveI hFl : Module.Flat (Polynomial R) A' := Algebra.Smooth.flat _ _
-    have hX : IsSMulRegular A' (Polynomial.X : Polynomial R) :=
-      Module.Flat.isSMulRegular_of_nonZeroDivisors
-        Polynomial.monic_X.mem_nonZeroDivisors
-    intro x hx
-    have hx' : (Polynomial.X : Polynomial R) • algebraMap A A' x
-        = (Polynomial.X : Polynomial R) • (0 : A') := by
-      rw [smul_zero, Algebra.smul_def, halgX, hf'def, ← map_mul, mul_comm f x, hx, map_zero]
-    exact hX hx'
+  have hkill : ∀ x : A, x * f = 0 → algebraMap A A' x = 0 := kerPrincipalAux_kill f
   -- endgame: from `gⁿ x = 0` and `g ≡ φ(σ g) mod (f)`, conclude `x = 0`
   intro x hx
   have h1 : algebraMap A A' x = 0 := hkill x hx
@@ -774,6 +801,31 @@ private lemma kerPrincipalAux_stdSmooth_res {U : S.Opens} {V : C.Opens}
   have h4 := RingHom.IsStandardSmoothOfRelativeDimension.comp h2 hstd
   simpa using h4
 
+/-- Off the section: at a point `c` outside the support of `ker z`, some affine neighbourhood
+carries the *unit* ideal `(1)`, so the kernel is principal there on the nonzerodivisor `1`.
+(The support avoids a basic affine `W ∋ c`, so the zero locus of `ker z` meets `W` emptily,
+forcing `ker z|_W = ⊤`.) -/
+theorem exists_affineOpen_ker_unit_of_notMem_support (z : S ⟶ C) (c : C)
+    (hc : c ∉ (Scheme.Hom.ker z).support) :
+    ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ f : Γ(C, V.1),
+      (Scheme.Hom.ker z).ideal V = Ideal.span {f} ∧
+      f ∈ nonZeroDivisors Γ(C, V.1) := by
+  obtain ⟨_, ⟨W, hW, rfl⟩, hcW, hWs⟩ :=
+    C.isBasis_affineOpens.exists_subset_of_mem_open (show c ∈ (_ᶜ : Set C) from hc)
+      (Scheme.Hom.ker z).support.2.isOpen_compl
+  refine ⟨⟨W, hW⟩, hcW, 1, ?_, one_mem _⟩
+  have htop : (Scheme.Hom.ker z).ideal ⟨W, hW⟩ = ⊤ := by
+    have h1 : C.zeroLocus (U := W) ((Scheme.Hom.ker z).ideal ⟨W, hW⟩ : Set _) ∩ W = ∅ := by
+      rw [Set.eq_empty_iff_forall_notMem]
+      rintro x ⟨h2, h3⟩
+      exact hWs h3
+        ((Scheme.Hom.ker z).zeroLocus_inter_subset_supportSet ⟨W, hW⟩ ⟨h2, h3⟩)
+    have h4 := hW.fromSpec_image_zeroLocus
+      ((Scheme.Hom.ker z).ideal ⟨W, hW⟩ : Set Γ(C, W))
+    rw [h1, Set.image_eq_empty] at h4
+    exact PrimeSpectrum.zeroLocus_empty_iff_eq_top.mp h4
+  rw [htop, Ideal.span_singleton_one]
+
 /-- **(T-D22 = HB-REGIMM, KM 1.2.2 / GME §2.1.4)** The kernel ideal of a section of a
 smooth relative curve is, affine-locally on the total space, principal on a
 nonzerodivisor. -/
@@ -786,21 +838,7 @@ theorem exists_affineOpen_ker_principal_nonZeroDivisor (π : C ⟶ S) [IsSeparat
   by_cases hc : c ∈ (Scheme.Hom.ker z).support
   case neg =>
     -- `c` is off the section: the ideal is the unit ideal on a small affine.
-    obtain ⟨_, ⟨W, hW, rfl⟩, hcW, hWs⟩ :=
-      C.isBasis_affineOpens.exists_subset_of_mem_open (show c ∈ (_ᶜ : Set C) from hc)
-        (Scheme.Hom.ker z).support.2.isOpen_compl
-    refine ⟨⟨W, hW⟩, hcW, 1, ?_, one_mem _⟩
-    have htop : (Scheme.Hom.ker z).ideal ⟨W, hW⟩ = ⊤ := by
-      have h1 : C.zeroLocus (U := W) ((Scheme.Hom.ker z).ideal ⟨W, hW⟩ : Set _) ∩ W = ∅ := by
-        rw [Set.eq_empty_iff_forall_notMem]
-        rintro x ⟨h2, h3⟩
-        exact hWs h3
-          ((Scheme.Hom.ker z).zeroLocus_inter_subset_supportSet ⟨W, hW⟩ ⟨h2, h3⟩)
-      have h4 := hW.fromSpec_image_zeroLocus
-        ((Scheme.Hom.ker z).ideal ⟨W, hW⟩ : Set Γ(C, W))
-      rw [h1, Set.image_eq_empty] at h4
-      exact PrimeSpectrum.zeroLocus_empty_iff_eq_top.mp h4
-    rw [htop, Ideal.span_singleton_one]
+    exact exists_affineOpen_ker_unit_of_notMem_support z c hc
   case pos =>
     -- `c` is on the section: `c = z s₀`.
     obtain ⟨s₀, hs₀⟩ : c ∈ Set.range ⇑z := by
@@ -1064,6 +1102,64 @@ private lemma sectionsIdealAux_support_prod (π : C ⟶ S) [IsSeparated π] {n :
       Finset.set_biUnion_insert j s (fun i ↦ Set.range (P i).1.base)]
 
 
+/-- **One split extension of the KM 1.1.2 filtration.** If `f₀` is a nonzerodivisor of an
+`R`-algebra `A` generating the kernel of an `R`-algebra retraction `σ₀ : A →ₐ[R] R`, then for
+any `t : A` the short exact sequence
+`0 → A ⧸ (t) →(·f₀) A ⧸ (f₀·t) →(σ₀) R → 0`
+splits (its cokernel `R` is free, hence projective), giving `A ⧸ (f₀·t) ≃ₗ[R] (A ⧸ (t)) × R`. -/
+private theorem sectionsIdealAux_quotient_prod {R A : Type u} [CommRing R] [CommRing A]
+    [Algebra R A] (f₀ : A) (hf₀ : f₀ ∈ nonZeroDivisors A) (σ₀ : A →ₐ[R] R)
+    (hσ₀ : RingHom.ker σ₀ = Ideal.span {f₀}) (t : A) :
+    Nonempty ((A ⧸ Ideal.span {f₀ * t}) ≃ₗ[R] (A ⧸ Ideal.span {t}) × R) := by
+  set J : Ideal A := Ideal.span {f₀ * t} with hJ
+  set J₂ : Ideal A := Ideal.span {t} with hJ₂
+  have hmap : J₂ ≤ Submodule.comap (LinearMap.mulLeft A f₀) J := by
+    intro x hx
+    obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp hx
+    exact Ideal.mem_span_singleton'.mpr ⟨c, by simp [LinearMap.mulLeft_apply]; ring⟩
+  set μ : (A ⧸ J₂) →ₗ[R] (A ⧸ J) :=
+    (Submodule.mapQ J₂ J (LinearMap.mulLeft A f₀) hmap).restrictScalars R with hμ
+  have hμ_mk : ∀ x : A, μ (Ideal.Quotient.mk J₂ x) = Ideal.Quotient.mk J (f₀ * x) :=
+    fun x ↦ rfl
+  have hJle : ∀ a ∈ J, σ₀ a = 0 := by
+    intro a ha
+    obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp ha
+    have hf0 : σ₀ f₀ = 0 := by
+      have : f₀ ∈ RingHom.ker σ₀ := hσ₀ ▸ Ideal.subset_span rfl
+      rwa [RingHom.mem_ker] at this
+    simp [map_mul, hf0]
+  set ν : (A ⧸ J) →ₗ[R] R := (Ideal.Quotient.liftₐ J σ₀ hJle).toLinearMap with hν
+  have hν_mk : ∀ x : A, ν (Ideal.Quotient.mk J x) = σ₀ x := fun x ↦ rfl
+  have hinj : Function.Injective μ := by
+    rw [injective_iff_map_eq_zero]
+    intro x hx
+    obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective x
+    rw [hμ_mk, Ideal.Quotient.eq_zero_iff_mem] at hx
+    obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp hx
+    rw [Ideal.Quotient.eq_zero_iff_mem]
+    refine Ideal.mem_span_singleton'.mpr ⟨c, ?_⟩
+    have h0 : (x - c * t) * f₀ = 0 := by linear_combination -hc
+    exact (sub_eq_zero.mp ((mem_nonZeroDivisors_iff.mp hf₀).2 _ h0)).symm
+  have hsurj : Function.Surjective ν := fun r ↦
+    ⟨Ideal.Quotient.mk J (algebraMap R A r), by rw [hν_mk]; exact σ₀.commutes r⟩
+  have hexact : Function.Exact μ ν := by
+    rw [LinearMap.exact_iff]
+    ext x
+    obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective x
+    constructor
+    · intro hx
+      rw [LinearMap.mem_ker, hν_mk, ← RingHom.mem_ker, hσ₀] at hx
+      obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp hx
+      exact ⟨Ideal.Quotient.mk J₂ c, by rw [hμ_mk, mul_comm]⟩
+    · rintro ⟨y, hy⟩
+      obtain ⟨y, rfl⟩ := Ideal.Quotient.mk_surjective y
+      rw [LinearMap.mem_ker, ← hy, hμ_mk, hν_mk]
+      have hf0 : σ₀ f₀ = 0 := by
+        have : f₀ ∈ RingHom.ker σ₀ := hσ₀ ▸ Ideal.subset_span rfl
+        rwa [RingHom.mem_ker] at this
+      simp [map_mul, hf0]
+  exact hexact.nonempty_linearEquiv_prod_of_projective hinj hsurj
+
 open Function in
 /-- **KM 1.1.2 filtration, packaged**: if `f 0, …, f (m-1)` are nonzerodivisors of an
 `R`-algebra `A`, each generating the kernel of an `R`-algebra retraction `σ i : A →ₐ[R] R`,
@@ -1089,57 +1185,11 @@ private theorem sectionsIdealAux_free_quotient {R A : Type u} [CommRing R] [Comm
   | m + 1, f, hf, σ, hσ => by
     obtain ⟨e₂⟩ := sectionsIdealAux_free_quotient m (fun i ↦ f i.succ) (fun i ↦ hf i.succ)
       (fun i ↦ σ i.succ) (fun i ↦ hσ i.succ)
-    set t : A := ∏ i : Fin m, f i.succ with ht
-    set J : Ideal A := Ideal.span {f 0 * t} with hJ
-    set J₂ : Ideal A := Ideal.span {t} with hJ₂
-    have hmap : J₂ ≤ Submodule.comap (LinearMap.mulLeft A (f 0)) J := by
-      intro x hx
-      obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp hx
-      exact Ideal.mem_span_singleton'.mpr ⟨c, by simp [LinearMap.mulLeft_apply]; ring⟩
-    set μ : (A ⧸ J₂) →ₗ[R] (A ⧸ J) :=
-      (Submodule.mapQ J₂ J (LinearMap.mulLeft A (f 0)) hmap).restrictScalars R with hμ
-    have hμ_mk : ∀ x : A, μ (Ideal.Quotient.mk J₂ x) = Ideal.Quotient.mk J (f 0 * x) :=
-      fun x ↦ rfl
-    have hJle : ∀ a ∈ J, σ 0 a = 0 := by
-      intro a ha
-      obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp ha
-      have hf0 : σ 0 (f 0) = 0 := by
-        have : f 0 ∈ RingHom.ker (σ 0) := (hσ 0) ▸ Ideal.subset_span rfl
-        rwa [RingHom.mem_ker] at this
-      simp [map_mul, hf0]
-    set ν : (A ⧸ J) →ₗ[R] R := (Ideal.Quotient.liftₐ J (σ 0) hJle).toLinearMap with hν
-    have hν_mk : ∀ x : A, ν (Ideal.Quotient.mk J x) = σ 0 x := fun x ↦ rfl
-    have hinj : Function.Injective μ := by
-      rw [injective_iff_map_eq_zero]
-      intro x hx
-      obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective x
-      rw [hμ_mk, Ideal.Quotient.eq_zero_iff_mem] at hx
-      obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp hx
-      rw [Ideal.Quotient.eq_zero_iff_mem]
-      refine Ideal.mem_span_singleton'.mpr ⟨c, ?_⟩
-      have h0 : (x - c * t) * f 0 = 0 := by linear_combination -hc
-      exact (sub_eq_zero.mp ((mem_nonZeroDivisors_iff.mp (hf 0)).2 _ h0)).symm
-    have hsurj : Function.Surjective ν := fun r ↦
-      ⟨Ideal.Quotient.mk J (algebraMap R A r), by rw [hν_mk]; exact (σ 0).commutes r⟩
-    have hexact : Function.Exact μ ν := by
-      rw [LinearMap.exact_iff]
-      ext x
-      obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective x
-      constructor
-      · intro hx
-        rw [LinearMap.mem_ker, hν_mk, ← RingHom.mem_ker, hσ 0] at hx
-        obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp hx
-        exact ⟨Ideal.Quotient.mk J₂ c, by rw [hμ_mk, mul_comm]⟩
-      · rintro ⟨y, hy⟩
-        obtain ⟨y, rfl⟩ := Ideal.Quotient.mk_surjective y
-        rw [LinearMap.mem_ker, ← hy, hμ_mk, hν_mk]
-        have hf0 : σ 0 (f 0) = 0 := by
-          have : f 0 ∈ RingHom.ker (σ 0) := (hσ 0) ▸ Ideal.subset_span rfl
-          rwa [RingHom.mem_ker] at this
-        simp [map_mul, hf0]
-    obtain ⟨e₁⟩ := hexact.nonempty_linearEquiv_prod_of_projective hinj hsurj
-    have hquot : (A ⧸ Ideal.span {∏ i : Fin (m + 1), f i}) ≃ₗ[R] (A ⧸ J) :=
-      (Submodule.quotEquivOfEq _ _ (by rw [hJ, Fin.prod_univ_succ])).restrictScalars R
+    obtain ⟨e₁⟩ := sectionsIdealAux_quotient_prod (f 0) (hf 0) (σ 0) (hσ 0)
+      (∏ i : Fin m, f i.succ)
+    have hquot : (A ⧸ Ideal.span {∏ i : Fin (m + 1), f i}) ≃ₗ[R]
+        (A ⧸ Ideal.span {f 0 * ∏ i : Fin m, f i.succ}) :=
+      (Submodule.quotEquivOfEq _ _ (by rw [Fin.prod_univ_succ])).restrictScalars R
     have easm : ((Fin m → R) × R) ≃ₗ[R] (Fin (m + 1) → R) :=
       ((LinearEquiv.refl R (Fin m → R)).prodCongr
           (LinearEquiv.funUnique (Fin 1) R R).symm).trans
@@ -1254,6 +1304,23 @@ private theorem sectionsIdealAux_piece_free (π : C ⟶ S) [IsSeparated π] {n :
     (fun k ↦ hfWnzd (e.symm k)) (fun k ↦ σW (e.symm k)) (fun k ↦ hkerW (e.symm k))
   exact ⟨((Submodule.quotEquivOfEq _ _ hKid).restrictScalars Γ(S, U.1)).trans e₀⟩
 
+
+/-- A ring map `R → B` whose target is `R`-linearly isomorphic to the free module `Rⁿ` is
+finite, flat, of finite presentation, and of constant fibre rank `n`. (Package of the four
+module-freeness ⟹ ring-map-property translations used to read off the chart conclusions.) -/
+private theorem ringHom_finite_flat_fp_finrank_of_linearEquiv_pi {R B : Type u}
+    [CommRing R] [CommRing B] [Algebra R B] {n : ℕ} (efree : B ≃ₗ[R] (Fin n → R)) :
+    (algebraMap R B).Finite ∧ (algebraMap R B).Flat ∧
+      (algebraMap R B).FinitePresentation ∧ ∀ p, (algebraMap R B).finrank p = n := by
+  refine ⟨RingHom.finite_algebraMap.mpr (Module.Finite.equiv efree.symm),
+    RingHom.flat_algebraMap_iff.mpr (Module.Flat.of_linearEquiv efree), ?_, ?_⟩
+  · haveI := Module.FinitePresentation.of_equiv efree.symm
+    exact RingHom.finitePresentation_algebraMap.mpr inferInstance
+  · intro p
+    haveI := p.nontrivial
+    rw [RingHom.finrank_algebraMap, Module.rankAtStalk_eq_of_equiv efree,
+      Module.rankAtStalk_eq_finrank_of_free]
+    simp
 
 /-- **Master chart** (the local model of KM 1.2.2/1.2.3 for `Σᵢ [Pᵢ]`): every point of the
 base has an affine neighbourhood `U` over which the subscheme cut out by `∏ᵢ ker (Pᵢ)` is
@@ -1477,19 +1544,14 @@ private theorem sectionsIdealAux_exists_chart (π : C ⟶ S) [IsSeparated π]
             (Fintype.equivFinOfCardEq hcard))))⟩
   -- STEP 9: conclusions
   obtain ⟨efree⟩ := efinal
+  obtain ⟨hfin, hflat, hfp, hfrank⟩ :=
+    ringHom_finite_flat_fp_finrank_of_linearEquiv_pi
+      (R := Γ(S, U.1)) (B := Γ(K.subscheme, q ⁻¹ᵁ U.1)) efree
   refine ⟨U, hsu₀, haff, ?_, ?_, ?_, ?_⟩
-  · rw [← RingHom.algebraMap_toAlgebra (q.app U.1).hom]
-    exact RingHom.finite_algebraMap.mpr (Module.Finite.equiv efree.symm)
-  · rw [← RingHom.algebraMap_toAlgebra (q.app U.1).hom]
-    exact RingHom.flat_algebraMap_iff.mpr (Module.Flat.of_linearEquiv efree)
-  · rw [← RingHom.algebraMap_toAlgebra (q.app U.1).hom]
-    haveI := Module.FinitePresentation.of_equiv efree.symm
-    exact RingHom.finitePresentation_algebraMap.mpr inferInstance
-  · intro p
-    haveI := p.nontrivial
-    rw [← RingHom.algebraMap_toAlgebra (q.app U.1).hom, RingHom.finrank_algebraMap,
-      Module.rankAtStalk_eq_of_equiv efree, Module.rankAtStalk_eq_finrank_of_free]
-    simp
+  · rw [← RingHom.algebraMap_toAlgebra (q.app U.1).hom]; exact hfin
+  · rw [← RingHom.algebraMap_toAlgebra (q.app U.1).hom]; exact hflat
+  · rw [← RingHom.algebraMap_toAlgebra (q.app U.1).hom]; exact hfp
+  · rw [← RingHom.algebraMap_toAlgebra (q.app U.1).hom]; exact hfrank
 
 
 /-- The isomorphism square: a restriction of `q` over an affine open with affine preimage
@@ -2090,6 +2152,44 @@ private theorem officialAux_flat_ideal_inf_le {R A : Type u} [CommRing R] [CommR
   rw [← hz, ← hw]
   exact hmem w
 
+/-- **Nakayama generator descent.** If, in a local ring `O` receiving an `A`-algebra
+structure, the extended ideal `I·O` is principal (equal to `span {u}` for some `u : O`), then
+it is already generated by the image of an element of `I`. (Pick `f ∈ I` whose image escapes
+`𝔪·(I·O)`; then `image f = c·u` with `c` a unit, so `span {image f} = span {u} = I·O`.) -/
+private theorem officialAux_exists_mem_of_map_eq_span_localRing {A O : Type u} [CommRing A]
+    [CommRing O] [Algebra A O] [IsLocalRing O] (I : Ideal A) {u : O}
+    (hmapeq : I.map (algebraMap A O) = Ideal.span {u}) :
+    ∃ f ∈ I, I.map (algebraMap A O) = Ideal.span {algebraMap A O f} := by
+  rcases eq_or_ne (I.map (algebraMap A O)) ⊥ with hbot | hbot
+  · exact ⟨0, I.zero_mem, by rw [hbot, map_zero, Ideal.span_singleton_zero]⟩
+  · have hJfg : (I.map (algebraMap A O)).FG := by
+      rw [hmapeq]; exact Submodule.fg_span_singleton u
+    have hex : ∃ f ∈ I,
+        (algebraMap A O) f ∉ (IsLocalRing.maximalIdeal O) • (I.map (algebraMap A O)) := by
+      by_contra hcon
+      apply hbot
+      have hJle : I.map (algebraMap A O)
+          ≤ (IsLocalRing.maximalIdeal O) • (I.map (algebraMap A O)) := by
+        rw [Ideal.map_le_iff_le_comap]
+        intro i hi
+        rw [Ideal.mem_comap]
+        by_contra hni
+        exact hcon ⟨i, hi, hni⟩
+      exact Submodule.eq_bot_of_le_smul_of_le_jacobson_bot _ _ hJfg hJle
+        (IsLocalRing.maximalIdeal_le_jacobson ⊥)
+    obtain ⟨f, hf, hfnotmem⟩ := hex
+    have hfJ : (algebraMap A O) f ∈ I.map (algebraMap A O) := Ideal.mem_map_of_mem _ hf
+    obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp (hmapeq ▸ hfJ)
+    have huJ : u ∈ I.map (algebraMap A O) := by
+      rw [hmapeq]; exact Ideal.mem_span_singleton_self u
+    have hcm : c ∉ IsLocalRing.maximalIdeal O := by
+      intro hcmem
+      apply hfnotmem
+      rw [← hc, ← smul_eq_mul]
+      exact Submodule.smul_mem_smul hcmem huJ
+    have hcu : IsUnit c := IsLocalRing.notMem_maximalIdeal.mp hcm
+    exact ⟨f, hf, by rw [hmapeq, ← hc, Ideal.span_singleton_mul_left_unit hcu u]⟩
+
 open TensorProduct in
 /-- Fibre principality (wave-2 transport): in the local ring `O = A_q / p·A_q` (the DVR
 local ring of the smooth-curve fibre over the residue point), the ideal `I` becomes
@@ -2222,35 +2322,40 @@ private theorem officialAux_exists_mem_fibre_principal (R A : Type u) [CommRing 
   have hmapeq : I.map (algebraMap A O) = Ideal.span {Ψhat g} := by
     rw [← step1, hIκrh, Ideal.map_map, hcomp2]
   -- === generator descent (Nakayama) to a generator with `f ∈ I` ===
-  rcases eq_or_ne (I.map (algebraMap A O)) ⊥ with hbot | hbot
-  · exact ⟨0, I.zero_mem, by rw [hbot, map_zero, Ideal.span_singleton_zero]⟩
-  · have hJfg : (I.map (algebraMap A O)).FG := by
-      rw [hmapeq]; exact Submodule.fg_span_singleton (Ψhat g)
-    have hex : ∃ f ∈ I,
-        (algebraMap A O) f ∉ (IsLocalRing.maximalIdeal O) • (I.map (algebraMap A O)) := by
-      by_contra hcon
-      apply hbot
-      have hJle : I.map (algebraMap A O)
-          ≤ (IsLocalRing.maximalIdeal O) • (I.map (algebraMap A O)) := by
-        rw [Ideal.map_le_iff_le_comap]
-        intro i hi
-        rw [Ideal.mem_comap]
-        by_contra hni
-        exact hcon ⟨i, hi, hni⟩
-      exact Submodule.eq_bot_of_le_smul_of_le_jacobson_bot _ _ hJfg hJle
-        (IsLocalRing.maximalIdeal_le_jacobson ⊥)
-    obtain ⟨f, hf, hfnotmem⟩ := hex
-    have hfJ : (algebraMap A O) f ∈ I.map (algebraMap A O) := Ideal.mem_map_of_mem _ hf
-    obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp (hmapeq ▸ hfJ)
-    have huJ : (Ψhat g) ∈ I.map (algebraMap A O) := by
-      rw [hmapeq]; exact Ideal.mem_span_singleton_self (Ψhat g)
-    have hcm : c ∉ IsLocalRing.maximalIdeal O := by
-      intro hcmem
-      apply hfnotmem
-      rw [← hc, ← smul_eq_mul]
-      exact Submodule.smul_mem_smul hcmem huJ
-    have hcu : IsUnit c := IsLocalRing.notMem_maximalIdeal.mp hcm
-    exact ⟨f, hf, by rw [hmapeq, ← hc, Ideal.span_singleton_mul_left_unit hcu (Ψhat g)]⟩
+  exact officialAux_exists_mem_of_map_eq_span_localRing I hmapeq
+
+/-- **Nakayama, from a fibre generator.** In a local ring `S`, a finitely generated ideal
+`JS` that becomes principal modulo `pS ≤ 𝔪` — generated there by the image of some `fS ∈ JS`
+— and whose intersection with `pS` sits inside `pS·JS`, is already principal on `fS`.
+(The fibre relation lifts `x ∈ JS` to `x = s·fS + (x − s·fS)` with `x − s·fS ∈ JS ⊓ pS ⊆ 𝔪·JS`,
+so `JS ≤ (fS) ⊔ 𝔪·JS`; conclude by `le_of_le_smul_of_le_jacobson_bot`.) -/
+private theorem le_span_of_fibre_span_of_inter_le {S : Type u} [CommRing S] [IsLocalRing S]
+    {JS pS : Ideal S} (hJSfg : JS.FG) (hpS𝔪 : pS ≤ IsLocalRing.maximalIdeal S)
+    (hinter : JS ⊓ pS ≤ pS • JS) {fS : S} (hfSJS : fS ∈ JS)
+    (hfib : Ideal.map (Ideal.Quotient.mk pS) JS
+        = Ideal.span {Ideal.Quotient.mk pS fS}) :
+    JS ≤ Ideal.span {fS} := by
+  have hNN : JS ≤ Ideal.span {fS} ⊔ IsLocalRing.maximalIdeal S • JS := by
+    intro x hx
+    have hxmk : Ideal.Quotient.mk pS x
+        ∈ Ideal.span {Ideal.Quotient.mk pS fS} := by
+      rw [← hfib]; exact Ideal.mem_map_of_mem _ hx
+    rw [Ideal.mem_span_singleton'] at hxmk
+    obtain ⟨c, hc⟩ := hxmk
+    obtain ⟨s, rfl⟩ := Ideal.Quotient.mk_surjective c
+    have hcpS : x - s * fS ∈ pS := by
+      rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, map_mul, hc, sub_self]
+    have hxsub : x - s * fS ∈ JS := JS.sub_mem hx (JS.mul_mem_left s hfSJS)
+    have hmem : x - s * fS ∈ JS ⊓ pS := ⟨hxsub, hcpS⟩
+    have h𝔪 : x - s * fS ∈ IsLocalRing.maximalIdeal S • JS :=
+      (le_trans hinter (Submodule.smul_mono hpS𝔪 le_rfl)) hmem
+    have : x = s * fS + (x - s * fS) := by ring
+    rw [this]
+    exact Submodule.add_mem _
+      (Submodule.mem_sup_left (Ideal.mem_span_singleton'.mpr ⟨s, rfl⟩))
+      (Submodule.mem_sup_right h𝔪)
+  exact Submodule.le_of_le_smul_of_le_jacobson_bot hJSfg
+    (IsLocalRing.maximalIdeal_le_jacobson ⊥) hNN
 
 /-- **Fibre-stalk principality (T-FLAT1 crux).** For `A` standard-smooth of relative
 dimension one over `R`, an ideal `I` with `A ⧸ I` flat and finite over `R`, and a prime
@@ -2294,31 +2399,44 @@ private theorem officialAux_stalk_span (R A : Type u) [CommRing R] [CommRing A] 
         _ = pS * JS := by rw [Ideal.map_mul]
     exact h2
   refine ⟨f, hfI, le_antisymm ?_ ?_⟩
-  · set fS : S := algebraMap A S f with hfS
-    have hfSJS : fS ∈ JS := Ideal.mem_map_of_mem _ hfI
-    have hNN : JS ≤ Ideal.span {fS} ⊔ IsLocalRing.maximalIdeal S • JS := by
-      intro x hx
-      have hxmk : Ideal.Quotient.mk pS x
-          ∈ Ideal.span {Ideal.Quotient.mk pS fS} := by
-        rw [← hfib]; exact Ideal.mem_map_of_mem _ hx
-      rw [Ideal.mem_span_singleton'] at hxmk
-      obtain ⟨c, hc⟩ := hxmk
-      obtain ⟨s, rfl⟩ := Ideal.Quotient.mk_surjective c
-      have hcpS : x - s * fS ∈ pS := by
-        rw [← Ideal.Quotient.eq_zero_iff_mem, map_sub, map_mul, hc, sub_self]
-      have hxsub : x - s * fS ∈ JS := JS.sub_mem hx (JS.mul_mem_left s hfSJS)
-      have hmem : x - s * fS ∈ JS ⊓ pS := ⟨hxsub, hcpS⟩
-      have h𝔪 : x - s * fS ∈ IsLocalRing.maximalIdeal S • JS :=
-        (le_trans hinter (Submodule.smul_mono hpS𝔪 le_rfl)) hmem
-      have : x = s * fS + (x - s * fS) := by ring
-      rw [this]
-      exact Submodule.add_mem _
-        (Submodule.mem_sup_left (Ideal.mem_span_singleton'.mpr ⟨s, rfl⟩))
-        (Submodule.mem_sup_right h𝔪)
-    exact Submodule.le_of_le_smul_of_le_jacobson_bot hJSfg
-      (IsLocalRing.maximalIdeal_le_jacobson ⊥) hNN
+  · exact le_span_of_fibre_span_of_inter_le hJSfg hpS𝔪 hinter
+      (Ideal.mem_map_of_mem _ hfI) hfib
   · rw [Ideal.span_le, Set.singleton_subset_iff]
     exact Ideal.mem_map_of_mem _ hfI
+
+/-- Denominator clearing for one element: if `I·A_q = (f)·A_q` in the stalk at a prime `q`,
+then any `g ∈ I` satisfies `d·g = b·f` in `A` for some `d ∉ q` and `b`. (Write the stalk
+relation `g = c·f`, clear the denominator of `c`, then clear the localization witness.) -/
+private theorem exists_denom_mul_eq_mul_of_mem_of_map_atPrime_span {A : Type u} [CommRing A]
+    (I : Ideal A) (f : A) (q : Ideal A) [q.IsPrime]
+    (hq : I.map (algebraMap A (Localization.AtPrime q))
+        = Ideal.span {algebraMap A (Localization.AtPrime q) f})
+    {g : A} (hgI : g ∈ I) :
+    ∃ d : A, d ∉ q ∧ ∃ b : A, d * g = b * f := by
+  classical
+  have hmem : algebraMap A (Localization.AtPrime q) g
+      ∈ Ideal.span {algebraMap A (Localization.AtPrime q) f} := by
+    rw [← hq]; exact Ideal.mem_map_of_mem _ hgI
+  rw [Ideal.mem_span_singleton'] at hmem
+  obtain ⟨c, hc⟩ := hmem
+  obtain ⟨⟨ag, sg⟩, hceq⟩ := IsLocalization.mk'_surjective q.primeCompl c
+  simp only at hceq
+  have heq : algebraMap A (Localization.AtPrime q) (sg * g)
+      = algebraMap A (Localization.AtPrime q) (ag * f) := by
+    have h1 : algebraMap A (Localization.AtPrime q) (sg : A)
+        * (c * algebraMap A (Localization.AtPrime q) f)
+        = algebraMap A (Localization.AtPrime q) (sg : A)
+          * algebraMap A (Localization.AtPrime q) g := by rw [hc]
+    rw [← hceq, ← mul_assoc,
+      mul_comm (algebraMap A (Localization.AtPrime q) (sg : A)) (IsLocalization.mk' _ ag sg),
+      IsLocalization.mk'_spec] at h1
+    rw [map_mul, map_mul]
+    exact h1.symm
+  rw [IsLocalization.eq_iff_exists q.primeCompl] at heq
+  obtain ⟨t, ht⟩ := heq
+  refine ⟨t * sg, q.primeCompl.mul_mem t.2 sg.2, t * ag, ?_⟩
+  have : (t : A) * (sg * g) = (t : A) * (ag * f) := ht
+  linear_combination this
 
 /-- Spreading principality from the stalk `A_q` to a basic open `A[1/r]` with `r ∉ q`:
 elementary denominator clearing using that `I` is finitely generated. -/
@@ -2330,32 +2448,8 @@ private theorem officialAux_spread (A : Type u) [CommRing A] (I : Ideal A) (hfg 
         = Ideal.span {algebraMap A (Localization.Away r) f} := by
   classical
   obtain ⟨s, hs⟩ := hfg
-  have key : ∀ g ∈ s, ∃ dg : A, dg ∉ q ∧ ∃ bg : A, dg * g = bg * f := by
-    intro g hg
-    have hgI : g ∈ I := hs ▸ Ideal.subset_span hg
-    have hmem : algebraMap A (Localization.AtPrime q) g
-        ∈ Ideal.span {algebraMap A (Localization.AtPrime q) f} := by
-      rw [← hq]; exact Ideal.mem_map_of_mem _ hgI
-    rw [Ideal.mem_span_singleton'] at hmem
-    obtain ⟨c, hc⟩ := hmem
-    obtain ⟨⟨ag, sg⟩, hceq⟩ := IsLocalization.mk'_surjective q.primeCompl c
-    simp only at hceq
-    have heq : algebraMap A (Localization.AtPrime q) (sg * g)
-        = algebraMap A (Localization.AtPrime q) (ag * f) := by
-      have h1 : algebraMap A (Localization.AtPrime q) (sg : A)
-          * (c * algebraMap A (Localization.AtPrime q) f)
-          = algebraMap A (Localization.AtPrime q) (sg : A)
-            * algebraMap A (Localization.AtPrime q) g := by rw [hc]
-      rw [← hceq, ← mul_assoc,
-        mul_comm (algebraMap A (Localization.AtPrime q) (sg : A)) (IsLocalization.mk' _ ag sg),
-        IsLocalization.mk'_spec] at h1
-      rw [map_mul, map_mul]
-      exact h1.symm
-    rw [IsLocalization.eq_iff_exists q.primeCompl] at heq
-    obtain ⟨t, ht⟩ := heq
-    refine ⟨t * sg, q.primeCompl.mul_mem t.2 sg.2, t * ag, ?_⟩
-    have : (t : A) * (sg * g) = (t : A) * (ag * f) := ht
-    linear_combination this
+  have key : ∀ g ∈ s, ∃ dg : A, dg ∉ q ∧ ∃ bg : A, dg * g = bg * f := fun g hg =>
+    exists_denom_mul_eq_mul_of_mem_of_map_atPrime_span I f q hq (hs ▸ Ideal.subset_span hg)
   choose dfun hdq bfun hrel using key
   refine ⟨∏ g ∈ s.attach, dfun g.1 g.2, ?_, ?_⟩
   · exact q.primeCompl.prod_mem (fun g _ => hdq g.1 g.2)
@@ -2828,6 +2922,37 @@ theorem sectionBaseChange_tensor_map {A A' : Type u} [CommRing A] [CommRing A']
   | tmul a b =>
     simp [AlgHom.sectionBaseChange, Algebra.smul_def, map_mul]
 
+open TensorProduct in
+/-- Specialising the universal element back to `f`: with `bb := A ⊗ b` the induced basis of
+`A ⊗_R B`, applying `aeval (bb.repr f)` to the universal tensor `∑ⱼ Xⱼ ⊗ bⱼ` (over the
+polynomial ring `R[Xⱼ]`) and pushing along `A ⊗ id` recovers `f`. -/
+private theorem sectionBaseChange_specialize_univ {ι : Type u} [Fintype ι]
+    (b : Module.Basis ι R B) {A : Type u} [CommRing A] [Algebra R A] (f : A ⊗[R] B) :
+    (Algebra.TensorProduct.map
+        (MvPolynomial.aeval (fun j => (Algebra.TensorProduct.basis A b).repr f j) :
+          MvPolynomial ι R →ₐ[R] A)
+        (AlgHom.id R B))
+      (∑ j, (MvPolynomial.X j : MvPolynomial ι R) ⊗ₜ[R] (b j)) = f := by
+  classical
+  rw [map_sum]
+  have hterm : ∀ j : ι,
+      (Algebra.TensorProduct.map
+        (MvPolynomial.aeval (fun j => (Algebra.TensorProduct.basis A b).repr f j) :
+          MvPolynomial ι R →ₐ[R] A)
+        (AlgHom.id R B)) ((MvPolynomial.X j : MvPolynomial ι R) ⊗ₜ[R] (b j)) =
+      ((Algebra.TensorProduct.basis A b).repr f j : A) ⊗ₜ[R] (b j) := by
+    intro j
+    rw [Algebra.TensorProduct.map_tmul, AlgHom.coe_id, id_eq, MvPolynomial.aeval_X]
+  rw [Finset.sum_congr rfl fun j _ => hterm j]
+  calc ∑ j, ((Algebra.TensorProduct.basis A b).repr f j : A) ⊗ₜ[R] (b j)
+      = ∑ j, ((Algebra.TensorProduct.basis A b).repr f j : A) • ((1 : A) ⊗ₜ[R] (b j)) := by
+        refine Finset.sum_congr rfl fun j _ => ?_
+        rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]
+    _ = ∑ j, (Algebra.TensorProduct.basis A b).repr f j • (Algebra.TensorProduct.basis A b) j := by
+        refine Finset.sum_congr rfl fun j _ => ?_
+        rw [Algebra.TensorProduct.basis_apply]
+    _ = f := (Algebra.TensorProduct.basis A b).sum_repr f
+
 /-- **(T-D2 = KM 1.9.2, verbatim source in hand with proof)** Over a *reduced* base, "in
 order that `P₁,…,P_N` form a full set of sections of `Z/S`, it is necessary and sufficient
 that for every geometric point `Spec(k) → S` … `Norm(f) = ∏ f((Pᵢ)_k)`" — i.e. it suffices
@@ -2858,35 +2983,11 @@ theorem isFullSetOfSectionsAlg_iff_fields [IsReduced R] [Module.Free R B]
       rw [Finset.prod_congr rfl
         (fun i _ => sectionBaseChange_tensor_map R B χ (P i) f₀), ← map_prod] at hK
       exact hK
-    have hbbdef : ∀ (bb : Module.Basis ι A (TensorProduct R A B)),
-        bb = Algebra.TensorProduct.basis A b →
-        (Algebra.TensorProduct.map
-          (MvPolynomial.aeval (fun j => bb.repr f j) : A₀ →ₐ[R] A)
-          (AlgHom.id R B)) f₀ = f := by
-      intro bb hbb
-      rw [hf₀, map_sum]
-      have hterm : ∀ j : ι,
-          (Algebra.TensorProduct.map
-            (MvPolynomial.aeval (fun j => bb.repr f j) : A₀ →ₐ[R] A)
-            (AlgHom.id R B)) ((MvPolynomial.X j : A₀) ⊗ₜ[R] (b j)) =
-          (bb.repr f j : A) ⊗ₜ[R] (b j) := by
-        intro j
-        rw [Algebra.TensorProduct.map_tmul, AlgHom.coe_id, id_eq,
-          MvPolynomial.aeval_X]
-      rw [Finset.sum_congr rfl fun j _ => hterm j]
-      calc ∑ j, (bb.repr f j : A) ⊗ₜ[R] (b j)
-          = ∑ j, (bb.repr f j : A) • ((1 : A) ⊗ₜ[R] (b j)) := by
-            refine Finset.sum_congr rfl fun j _ => ?_
-            rw [TensorProduct.smul_tmul', smul_eq_mul, mul_one]
-        _ = ∑ j, bb.repr f j • bb j := by
-            refine Finset.sum_congr rfl fun j _ => ?_
-            rw [hbb, Algebra.TensorProduct.basis_apply]
-        _ = f := bb.sum_repr f
     set bb : Module.Basis ι A (TensorProduct R A B) :=
       Algebra.TensorProduct.basis A b with hbb
     set φ : A₀ →ₐ[R] A := MvPolynomial.aeval (fun j => bb.repr f j) with hφ
     have hf : (Algebra.TensorProduct.map φ (AlgHom.id R B)) f₀ = f :=
-      hbbdef bb hbb
+      sectionBaseChange_specialize_univ R B b f
     calc Algebra.norm A f
         = Algebra.norm A ((Algebra.TensorProduct.map φ (AlgHom.id R B)) f₀) := by
           rw [hf]
