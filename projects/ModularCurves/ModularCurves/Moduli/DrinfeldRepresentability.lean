@@ -55,6 +55,19 @@ theorem pointToTorsion_torsionPointsEquiv {S : Scheme.{u}} (E : EllipticCurve S)
           ((Submodule.mem_torsionBy_iff _ _).mp (E.torsionPointsEquiv N g j).2)) = j.1 :=
   congrArg Subtype.val ((E.torsionPointsEquiv N g).left_inv j)
 
+set_option maxHeartbeats 1000000 in
+/-- Mirror of `pointToTorsion_torsionPointsEquiv` (the `right_inv` direction): the `N`-torsion
+point recovered from `pointToTorsion Q` via `torsionPointsEquiv` is `Q` itself. This is the
+uniqueness fact used to close the `right_inv` of the Γ₁ functor-of-points equivalence. -/
+theorem coe_torsionPointsEquiv_pointToTorsion {S : Scheme.{u}} (E : EllipticCurve S) (N : ℕ)
+    [NeZero N] {T : Scheme.{u}} (g : T ⟶ S) (Q : E.Point g)
+    (hQ : (Q : T ⟶ E.E) ≫ E.mulByHom (N : ℤ) = g ≫ E.zero)
+    (hπ : E.pointToTorsion Q hQ ≫ E.torsionπ N = g) :
+    ((E.torsionPointsEquiv N g ⟨E.pointToTorsion Q hQ, hπ⟩ :
+        Submodule.torsionBy ℤ (E.Point g) (N : ℤ)) : E.Point g) = Q :=
+  congrArg Subtype.val ((E.torsionPointsEquiv N g).right_inv
+    ⟨Q, (Submodule.mem_torsionBy_iff _ _).mpr ((E.smul_eq_zero_iff_comp_mulByHom g N Q).mpr hQ)⟩)
+
 /-- `asSection` is injective: a point is recovered from its section by `≫ pullback.fst`. -/
 theorem asSection_injective {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}} (g : T ⟶ S) :
     Function.Injective (EllipticCurve.Point.asSection E g) := fun a b hab =>
@@ -88,6 +101,49 @@ theorem asSection_sectionToPoint {S : Scheme.{u}} (E : EllipticCurve S) {T : Sch
   Subtype.ext (Limits.pullback.hom_ext
     (EllipticCurve.Point.asSection_val_fst E g (sectionToPoint E g Q))
     ((EllipticCurve.Point.asSection_val_snd E g (sectionToPoint E g Q)).trans Q.2.symm))
+
+/-- `sectionToPoint` is a left inverse of `asSection`. -/
+theorem sectionToPoint_asSection {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
+    (g : T ⟶ S) (x : E.Point g) :
+    sectionToPoint E g (EllipticCurve.Point.asSection E g x) = x :=
+  Subtype.ext (EllipticCurve.Point.asSection_val_fst E g x)
+
+/-- The underlying map of the point recovered from `j` via `torsionPointsEquiv` is
+`j ≫ torsionι` (definitional; the naturality bookkeeping fact for the Γ₁ equivalence). -/
+theorem torsionPointsEquiv_coe_fst {S : Scheme.{u}} (E : EllipticCurve S) (N : ℕ)
+    {T : Scheme.{u}} (g : T ⟶ S)
+    (j : { j : T ⟶ E.torsion N // j ≫ E.torsionπ N = g }) :
+    (((E.torsionPointsEquiv N g j : Submodule.torsionBy ℤ (E.Point g) (N : ℤ)) :
+        E.Point g) : T ⟶ E.E) = j.1 ≫ E.torsionι N := rfl
+
+open EllipticCurve in
+/-- `EllHom.pullSection` along the base-change comparison morphism `pullbackAlongMap g k`
+restricts the represented point: `pullSection (pullbackAlongMap g k) (asSection g P)
+= asSection (k ≫ g) (P.restrict k)`. (Re-statement of the identically-named `private`
+lemma of `Moduli/GammaHRepresentability.lean` / `ModularCurve/YFullRoute.lean`, needed
+here for the Γ₁ functor-of-points naturality square.) -/
+theorem pullSection_asSection {R : CommRingCat.{u}} (X : EllObj R)
+    {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T) (P : X.curve.Point g) :
+    EllHom.pullSection R (X.pullbackAlongMap g k) (Point.asSection X.curve g P) =
+      Point.asSection X.curve (k ≫ g) (Point.restrict X.curve k P) := by
+  have htop : (X.pullbackAlongMap g k).top ≫ pullback.fst X.curve.π g =
+      pullback.fst X.curve.π (k ≫ g) := by
+    show Limits.pullback.map X.curve.π (k ≫ g) X.curve.π g (𝟙 _) k (𝟙 _)
+        (by simp) (by simp) ≫ Limits.pullback.fst X.curve.π g =
+      Limits.pullback.fst X.curve.π (k ≫ g)
+    rw [Limits.pullback.lift_fst, Category.comp_id]
+  refine Subtype.ext (pullback.hom_ext ?_ ?_)
+  · refine ((congrArg ((EllHom.pullSection R (X.pullbackAlongMap g k)
+        (Point.asSection X.curve g P)).1 ≫ ·) htop.symm).trans ?_).trans
+      (Point.asSection_val_fst X.curve (k ≫ g) (Point.restrict X.curve k P)).symm
+    refine (Category.assoc _ _ _).symm.trans ?_
+    refine (congrArg (· ≫ pullback.fst X.curve.π g)
+      ((X.pullbackAlongMap g k).isPullback.lift_fst _ _ _)).trans ?_
+    exact (Category.assoc _ _ _).trans
+      (congrArg (k ≫ ·) (Point.asSection_val_fst X.curve g P))
+  · exact (EllHom.pullSection R (X.pullbackAlongMap g k)
+      (Point.asSection X.curve g P)).2.trans
+      (Point.asSection_val_snd X.curve (k ≫ g) (Point.restrict X.curve k P)).symm
 
 set_option maxHeartbeats 1000000 in
 /-- **(KM 1.6.2, `ℤ/N`-Str — no rank hypothesis, hence no `c4`)** The Drinfeld `Γ₁(N)`
@@ -124,8 +180,25 @@ theorem gammaOneDrinfeld_affineOverEll (N : ℕ) [NeZero N] :
         X.curve.pointToTorsion (sectionToPoint X.curve g P.1) hx := by
       rw [Category.assoc, Scheme.IdealSheafData.inclusion_subschemeι, Scheme.Hom.toImage_imageι]
     rw [← Category.assoc, hcomp, X.curve.pointToTorsion_torsionπ]
-  · sorry
-  · sorry
-  · sorry
+  · -- left_inv: a locus point `h` sent through `toFun` then `invFun` returns to `h`
+    intro h
+    haveI : Mono Z.subschemeι := inferInstance
+    refine Subtype.ext ((cancel_mono Z.subschemeι).mp ?_)
+    rw [Category.assoc, Scheme.IdealSheafData.inclusion_subschemeι, Scheme.Hom.toImage_imageι]
+    simp only [sectionToPoint_asSection]
+    exact pointToTorsion_torsionPointsEquiv X.curve N g _
+  · -- right_inv: a Γ₁-section `P` sent through `invFun` then `toFun` returns to `P`
+    intro P
+    refine Subtype.ext (Eq.trans (congrArg (EllipticCurve.Point.asSection X.curve g) ?_)
+      (asSection_sectionToPoint X.curve g P.1))
+    simp only [Category.assoc, Scheme.IdealSheafData.inclusion_subschemeι, Scheme.Hom.toImage_imageι]
+    exact coe_torsionPointsEquiv_pointToTorsion X.curve N g (sectionToPoint X.curve g P.1) _ _
+  · -- naturality: the family of equivalences commutes with restriction along `k`
+    intro T T' g k h
+    refine Subtype.ext (Eq.trans ?_ (pullSection_asSection X g k
+      (↑(X.curve.torsionPointsEquiv N g
+          ⟨h.1 ≫ Z.subschemeι, by rw [Category.assoc]; exact h.2⟩))).symm)
+    refine congrArg (EllipticCurve.Point.asSection X.curve (k ≫ g)) (Subtype.ext ?_)
+    simp only [EllipticCurve.Point.restrict, torsionPointsEquiv_coe_fst, Category.assoc]
 
 end ModularCurves
