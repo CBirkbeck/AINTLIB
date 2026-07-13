@@ -17815,3 +17815,114 @@ sibling WIP, while the committed files were attested green by their owners.)
   GHC1/GHC3 theorems + RelRepData layers + G0's StableChartData + QuotientLift descent).
   OPENED; **merge held until clean-room green** (build running).
 - **PR-B**: dev/modular-curves-y1 → main — opens the moment YN pushes.
+
+## Amendments v10.175 (2026-07-13, coordinator): ⛑ TREE-RED CASCADE CAUGHT + REPAIRED at the merge gate (2 hidden committed-state reds: QuotientLift e6a04fe8d + EngineDescent 61696bb83) — a near-miss on merging red to main; TWO verification doctrines; G0 M6 ★ ratified (v10.173 SELF-CORRECTED); KM L4 ★★★ ratified + PHASE-8 rulings (c1/c2/c4/T-W7.8)
+
+**⛑ (1) THE HEADLINE — a red tree almost merged to main; caught at the clean-room gate, then a
+SECOND red surfaced behind the first.** Opening PR-A (v10.174) I ran a clean-room
+`lake build ModularCurves` and read `CLEANROOM RESULT: exit 0` — **a shell artifact**:
+`lake … 2>&1 | tail -6 && echo "exit $?"` captures `tail`'s exit, not `lake`'s. The real tail
+said `error: build failed` on `ModularCurves.ForMathlib.QuotientLift` — **NOT in the dirty
+list** ⟹ a genuine **committed-state red**, not sibling WIP (my v10.174-(4) "QuotientLift +
+GammaHRep were uncommitted WIP" was HALF WRONG — true for GammaHRep, false for QuotientLift).
+Common root cause across BOTH reds: **STREAM-GH's GHB5a changed the free-action convention** —
+it landed the general arbitrary-base `epi_pullback_snd_quotientπ` in `SchemeQuotient:1385` with
+`hfree : ∀ {T} (t : T ⟶ X) (g : G), g ≠ 1 → …` (T implicit, `t` before `g`), diverging from the
+older `∀ (g)…(T)(t)` order still used across `SchemeActionFree`/`QuotientTorsor`/`EngineDescent`.
+- **RED #1 `QuotientLift.lean`** (a5-W2, 7db27c862): a **redundant less-general duplicate** of
+  `epi_pullback_snd_quotientπ` (open-immersion-only) under the same qualified name + stale-order
+  `hfree` ⟹ "already declared" (:35) + type-mismatch at :226 (where the general form is what's
+  needed — the argument is a composite, not an open immersion). **Repair `e6a04fe8d`**
+  (+8/−21): removed the duplicate, realigned `exists_quotientπ_lift_of_isOpenImmersion`'s hfree.
+- **RED #2 `EngineDescent.lean`** (LATENT behind #1 — EngineDescent imports QuotientLift, so
+  lake skipped it until #1 built; doctrine v10.175-a surfaced it on the re-verify). Its
+  `discharge_hlift`/`discharge_hepi` feed old-order `hfreeE` to the now-new-order consumers
+  (:1752 my realigned `exists_quotientπ_lift`, :1778 GHB5a's `epi_pullback`). **Repair
+  `61696bb83`** (+6/−2): boundary adapters `fun t g hg h => hfreeE g hg _ t h` at the two call
+  sites. No signature touched.
+- **Both repairs statement-preserving; no sorry; no consumer signature changed.** Third full
+  clean-room re-verify (loop-until-green) **GREEN at 61696bb83: `Build completed successfully
+  (3798 jobs)`, real logged exit 0, zero errors** — the branch is now genuinely buildable.
+- **The divergence itself is DEBT, filed to cleanup**: `SchemeActionFree`/`QuotientTorsor`/
+  `EngineDescent` (old order) vs `SchemeQuotient`/`AffineQuotient`/`QuotientLift` (new order) —
+  a project-wide free-action-hypothesis-order unification (a signature change ⟹ lane:generalise,
+  coordinator-gated on main). GH issue filed post-PR-A-merge; boarded here so no producer
+  re-spells the wrong order meanwhile — **use the new `∀ {T} (t) (g)` order for any new
+  free-action hypothesis.**
+
+**DOCTRINE v10.175-a (clean-room verification — binding for the merge gate):**
+1. **Capture the REAL exit code.** Never `lake … | tail && echo $?` (`$?` = the pipe's last
+   stage). Redirect to a log: `lake build … > LOG 2>&1 ; echo "EXIT $?"` immediately after
+   lake, then grep the log for `error`. The exit-0 artifact nearly merged a red tree to main.
+2. **Verify at the ACTUAL branch tip, not a stale pin.** The branch moved 20+ commits (GH's
+   GHB7 chain, G0's M6, KM's L4) between opening PR-A (fd1a8ecee) and the gate; the pin build
+   didn't even include L4. Re-fetch, re-point the clean-room to `origin/dev/…` HEAD, rebuild.
+3. **The shared producer tree is an unreliable oracle** (perpetually WIP-dirty; a whole-lib
+   build there red-herrings on live sibling edits) — BUT "not in the dirty list" + "fails in
+   clean-room" = a real committed red. The clean-room detached worktree at the tip is the
+   only trustworthy PR gate.
+
+**DOCTRINE v10.175-b (shared-branch name-collision — recurring hazard):** two producers who
+independently prove the "same" lemma under one namespace (here `SchemeAction.epi_pullback_
+snd_quotientπ` in both SchemeQuotient and QuotientLift) DON'T conflict at commit time (different
+files, pathspec-clean) — they collide at COMPILE time once both are imported, and the more-
+general one silently wins the name while the other's call sites skew. Prevention: before adding
+a `theorem <name>` in a shared namespace, `grep -rn "theorem <name>\b"` the tree first (rule-5
+extended to declaration NAMES, not just files). Cross-links to the v10.130 staged-sweep race.
+
+**(2) STREAM-G0 M6 ★ RATIFIED + v10.173 SELF-CORRECTION.** Verified: `isHopfGalois_chartCoaction`
+(`StableChartData:171`) via `chartData : StableAffineChartData` (:162), sole hyp
+`[Module.Free P.baseRing P.groupRing]`; one sorry (the C2 heart :134). **My v10.173 adjudication
+was WRONG on its premise**: I told G0 to BUILD `HopfAlgebra baseRing groupRing` via
+`Bialgebra.mk'` — but it ALREADY EXISTED (`instBialgebraOpens` PatchHopf:2609 +
+`instHopfAlgebraOpens` via `HopfAlgebra.ofAlgHom` :1956, over the geometric algebra, diamond-free).
+G0 traced this and corrected me — **credited**. The META-point of v10.173 HELD (p2 is closed;
+the instance was IN-STREAM, from the NEW-HOPF/PatchHopf lineage, not a ghost dependency) — I
+just didn't verify the in-stream work was already COMPLETE. Lesson folded into the closed-seat
+doctrine: "in-stream" can mean "already landed" — grep the stream's own files before charter-ing
+new construction. **RULING: C3 next, confirmed** (G0's plan — the long-pole stable-affine cover;
+first act `/develop --decompose` per v10.8; it also supplies the `Module.Free` per-chart hyp M6
+takes). Close the bounded C2 sorry opportunistically for a sorry-free `StableChartData` checkpoint.
+Path to SIGNAL: C2 + C3 → C4 glue → six pins → ★★.
+
+**(3) STREAM-KM L4 ★★★ RATIFIED + PHASE-8 accepted + the canonicity finding ratified.**
+`gammaFullDrinfeldProblem` (`GammaH:991`) is a sorry-free axiom-clean `ModuliProblem` (the
+:1035 sorry is the FUTURE rel-rep target, not the functor). **Both** integral Drinfeld functors
+(Γ₁ ★ + Γ(N) ★★★) now exist over an arbitrary base. The **canonicity finding is RATIFIED and
+is itself a deliverable**: Drinfeld `HasExactOrder` transports canonicity-FREE (divisor/ideal
+base-change) ⟹ both functors close; naive exact-order is canonicity-BLOCKED on the point-group
+ℤ-action (needs T-W7.8, owner-parked). This is a code-level vindication of the whole KM-integral
+charter (the divisor formulation is the robust one). `decomposition-relrep.md` = source-faithful
+(verbatim KM 1.6.1/1.6.2/1.10.13 quotes), feasibility BOUNDED.
+
+**DISPATCH RULINGS for the next KM session (sentinel removed; owner re-fires) — the PHASE-8
+runway is NOT as blocked as reported:**
+- **c2 (Hom-scheme, KM 1.6.1)** — **YOURS, DO FIRST, reachable NOW.** `Hom_{S-gp}(A,E[N]) = ∏
+  E[Nᵢ]` on the already-built `E.torsion N`: `Hom(ℤ/N,E)=E[N]` (Γ₁, one factor), `E[N]×_S E[N]`
+  (Γ(N)). Your "speculative-ahead-of-c1" worry is answered by PINNING the ambient shape to the
+  KM 1.6.1 source spec — it is not speculation if source-pinned; it's the ambient c1 cuts inside.
+- **c1 (T-D4 linchpin, KM 1.9.1→1.10.13(1))** — **RULING: Moduli-wrapper, NOT a LevelStructure
+  edit.** New file importing `LevelStructure/CartierDivisor` (the proven affine full-set heart),
+  build the scheme-level globalisation there — EXACTLY your `torsionIdeal_baseChange` precedent
+  (public reconstruction, no LevelStructure edit, no cleanup-fleet collision). This clears the
+  "placement gate" you stopped on; reachable after c2.
+- **c4 (E[N] locally free rank N², KM 2.3.1)** — **ROUTED TO STREAM-G0** (the sorried leaf
+  `Torsion.lean:153/194` ⟸ `endDeg_mulBy = n²` `EndomorphismDegree.lean:107`; E[N] = G0's lane-B
+  territory). **KEY: c4 is Γ(N)-only.** The **Γ₁ integral rel-rep is FULLY in-stream reachable**
+  (c2+c1 → 3.6.0 → 4.7.0; Hom(ℤ/N,E)=E[N] needs no rank-N²) — so your next session has a clear
+  unblocked runway to the **Γ₁ rel-rep ★** WITHOUT waiting on G0. Γ(N) rel-rep waits on c4.
+- **T-W7.8** — **stays owner-parked** (OWNER FYI below); the direct Drinfeld route does not need
+  it. Do NOT un-park; the naive bridge is a redundant second route only.
+- **Parallel lane** [KM-W6a/b/c] ring gaps — standalone-unblocked; if idle on c-chain, decompose
+  miracle-flatness (also unblocks the project-wide BB-FLAT funnel).
+
+**OWNER FYI (T-W7.8):** un-parking T-W7.8 (arbitrary-base canonicity `mulByHom N ≫ f.top =
+f.top ≫ mulByHom N`) is an owner decision. KM's finding shows it is **NOT needed** for Drinfeld
+rel-rep (the divisor route bypasses it) — it would only open the naive bridge as a *second*,
+redundant route. Recommendation: keep parked. No action needed unless you want the second route.
+
+**(4) PR STATUS.** **PR-A #5680** (dev/modular-curves → main): was RED at open (the 2-red
+cascade above), **repaired e6a04fe8d + 61696bb83**, **clean-room full-library GREEN at 61696bb83
+(3798 jobs)** — **ready; merge on owner-go** (v10.170 precedent: coordinator opens+verifies,
+owner says merge). **PR-B** (dev/modular-curves-y1 → main): still awaits STREAM-YN's push
+(origin-y1 stale at ccbfe2576).
