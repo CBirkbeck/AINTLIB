@@ -1667,11 +1667,17 @@ each object, a `G`-invariant morphism of representing schemes over the base. -/
 theorem QuotPkg.exists_crossTransport {P' : ModuliProblem R} {X : EllObj R}
     (p : QuotPkg φ X) (d' : ModuliProblem.RelRepData P' X) (ν' : Q ⟶ P')
     (hν' : ∀ γ : G, (φ γ).hom ≫ ν' = ν') :
-    ∃ ν : p.d.Z ⟶ d'.Z, ν ≫ d'.f = p.d.f ∧ ∀ γ : G, p.d.σZ.hom γ ≫ ν = ν := by
+    ∃ (ν : p.d.Z ⟶ d'.Z) (hνf : ν ≫ d'.f = p.d.f),
+      d'.eqv p.d.f ⟨ν, hνf⟩ =
+        ν'.app (Opposite.op (X.pullbackAlong p.d.f))
+          (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩) ∧
+      ∀ γ : G, p.d.σZ.hom γ ≫ ν = ν := by
   refine ⟨((d'.eqv p.d.f).symm (ν'.app (Opposite.op (X.pullbackAlong p.d.f))
       (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩))).1,
     ((d'.eqv p.d.f).symm (ν'.app (Opposite.op (X.pullbackAlong p.d.f))
-      (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩))).2, ?_⟩
+      (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩))).2,
+    (congrArg (d'.eqv p.d.f) (Subtype.eta _ _)).trans
+      ((d'.eqv p.d.f).apply_symm_apply _), ?_⟩
   intro γ
   have hν := ((d'.eqv p.d.f).symm (ν'.app (Opposite.op (X.pullbackAlong p.d.f))
       (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩))).2
