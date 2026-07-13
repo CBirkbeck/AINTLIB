@@ -260,6 +260,30 @@ theorem isFullLevel_taut_over_fullLevelOpens (hN : NIsInvertible S N) :
     rw [e1, e2] at hi
     exact hi.symm.trans hj
 
+/-! ### `[YF-⊆]` and the clopen leaf -/
+
+/-- **[YF-⊆] — GATE (reduced-fibre distinctness, KM 3.7.1).** The image of the full-level
+closed immersion `levelSpaceΓι` lies in `fullLevelOpens`. At a full-level point the tautological
+pair generates `E[N]` fibrewise (`levelSpaceΓ_spec` over `κ(p)`), and for `N` invertible `E[N]`
+is finite étale hence has reduced geometric fibres of rank `N²`, so the `N²` combinations
+`[c]P + [d]Q` are fibrewise **distinct** (`isFullSetOfSectionsAlg_iff_fields` over the reduced
+residue field / the `fullLevel_divisor_iff_naive_gen` = T-D8-bridge register); therefore no
+nonzero combination vanishes there, i.e. the point lies in `fullLevelOpens`. This is the reverse
+("full-level ⟹ distinct") of the `[YF-⊇]` divisor chain and consumes the same reduced-fibre
+content as the boarded T-D8-bridge box. -/
+theorem range_levelSpaceΓι_subset (hN : NIsInvertible S N) :
+    Set.range (levelSpaceΓι E N).base ⊆ (fullLevelOpens E N hN : Set _) := by
+  sorry
+
+/-- **[YF-CLOPEN].** For `N` invertible the full-level closed immersion `levelSpaceΓι` is an
+**open immersion**: its image lies in the open `fullLevelOpens` (`[YF-⊆]`), over which the
+tautological pair is a full-level structure (`[YF-⊇]`, `isFullLevel_taut_over_fullLevelOpens`),
+providing a section — so `isOpenImmersion_levelSpaceΓι_of_taut` upgrades the closed immersion. -/
+theorem isOpenImmersion_levelSpaceΓι_full (hN : NIsInvertible S N) :
+    IsOpenImmersion (levelSpaceΓι E N) :=
+  isOpenImmersion_levelSpaceΓι_of_taut E N (fullLevelOpens E N hN)
+    (range_levelSpaceΓι_subset E N hN) (isFullLevel_taut_over_fullLevelOpens E N hN)
+
 end EllipticCurve
 
 end ModularCurves

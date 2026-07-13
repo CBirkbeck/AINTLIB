@@ -8,6 +8,7 @@ import ModularCurves.EllipticCurve.MulByHomEtale
 import ModularCurves.Moduli.GammaH
 import ModularCurves.Moduli.LevelSpaces
 import ModularCurves.Moduli.NaiveProblems
+import ModularCurves.Moduli.FullLevelClopen
 
 /-!
 # STREAM-YFULL: the Y(N) representability route (T-E9)
@@ -203,8 +204,8 @@ GATE: [YF-CLOPEN] — T-C1 or the CHARTER-P3B3 étale toolkit; not buildable fro
 current sorry-free layer alone. -/
 theorem isOpenImmersion_levelSpaceΓι {S : Scheme.{u}} (E : EllipticCurve S) (N : ℕ)
     [NeZero N] (hinv : NIsInvertible S N) :
-    IsOpenImmersion (levelSpaceΓι E N) := by
-  sorry
+    IsOpenImmersion (levelSpaceΓι E N) :=
+  EllipticCurve.isOpenImmersion_levelSpaceΓι_full E N hinv
 
 /-- **([YF-ETALE] = the étale half of KM 3.7.1 / [Loe] 3.8.2 for `[Γ(N)]`)** For `N`
 invertible in `R`, the Γ(N)-presentation is étale over the base: open immersion
