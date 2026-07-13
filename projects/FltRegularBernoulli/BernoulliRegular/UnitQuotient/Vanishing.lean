@@ -3,7 +3,7 @@ module
 public import BernoulliRegular.UnitQuotient.Structure
 
 /-!
-# Vanishing of odd unit-quotient components (T041)
+# Vanishing of odd unit-quotient components
 
 For the cyclotomic field `K = ℚ(ζ_p)`, the Dirichlet-unit theorem plus
 Kronecker's theorem on roots of unity force the `Δ = (ZMod p)ˣ`-character
@@ -11,14 +11,11 @@ decomposition of `E / E^p` to concentrate in the `ω`-eigenspace (the
 "Teichmüller index `j = 1`") on the odd side: every odd character other
 than the one tagging the torsion subgroup has trivial component.
 
-The current API treats the component decomposition as data (see
-`CyclotomicUnitQuotientComponentStructure` in `T040b`), so the honest
-shape of `T041` is to record the vanishing as the content of a predicate
-on a given `CyclotomicUnitModPStructure`, together with the extraction
-lemma downstream callers consume. The concrete proof from the Dirichlet
-theorem and the cyclotomic-unit module structure is the subject of a
-future refinement ticket; here we expose the exact interface
-`T042` expects.
+The component decomposition is treated as data (see
+`CyclotomicUnitQuotientComponentStructure`), so the vanishing is recorded here as a
+**predicate** on a given `CyclotomicUnitModPStructure` — a certificate to be supplied —
+together with the extraction lemmas downstream callers consume. Deriving that certificate
+from the Dirichlet unit theorem and the cyclotomic-unit module structure is not done here.
 
 ## Main definitions
 
@@ -59,7 +56,7 @@ Stickelberger layer, but avoids importing it to keep `UnitQuotient` light. -/
 def IsOddDeltaCharacter (χ : MulChar (CyclotomicUnitDelta p) ℚ) : Prop :=
   χ (-1 : (ZMod p)ˣ) = -1
 
-/-- The **T041** vanishing predicate for the mod-`p` cyclotomic unit quotient.
+/-- The vanishing predicate for the mod-`p` cyclotomic unit quotient.
 
 Records that the `Δ`-component decomposition of `E/E^p` encoded by `S`
 concentrates its odd side at a single distinguished character: every other
@@ -87,9 +84,8 @@ namespace CyclotomicUnitModPOddVanishing
 variable {p K}
 variable {S : CyclotomicUnitModPStructure (p := p) K}
 
-/-- **T041** (carrier form): for a vanishing certificate and an odd character
-other than the distinguished one, the component carrier is the trivial
-subgroup. -/
+/-- **Carrier form**: for a vanishing certificate and an odd character other than the
+distinguished one, the component carrier is the trivial subgroup. -/
 theorem component_eq_bot (V : CyclotomicUnitModPOddVanishing (p := p) K S)
     {χ : MulChar (CyclotomicUnitDelta p) ℚ}
     (hχ_odd : IsOddDeltaCharacter (p := p) χ)
@@ -97,8 +93,8 @@ theorem component_eq_bot (V : CyclotomicUnitModPOddVanishing (p := p) K S)
     (S.components.component χ).carrier = ⊥ :=
   V.vanishing χ hχ_odd hχ_ne
 
-/-- **T041** (cardinality form): the trivial component has cardinality one.
-This is the shape the reflection rank inequality (`T042b`) consumes. -/
+/-- **Cardinality form**: the trivial component has cardinality one. This is the shape
+the reflection rank inequality consumes. -/
 theorem component_natCard_eq_one
     (V : CyclotomicUnitModPOddVanishing (p := p) K S)
     {χ : MulChar (CyclotomicUnitDelta p) ℚ}
