@@ -625,6 +625,20 @@ theorem relativelyRepresentable_iff_nonempty_relRepData (Q : ModuliProblem R) :
     obtain ⟨d⟩ := hQ X
     exact ⟨d.Z, d.f, @d.eqv, @d.nat⟩
 
+/-- Reindexing a relative representation datum's classifying bijection along an
+equality of base maps: the two values agree up to the `eqToHom`-transport of the
+pulled-back object. The `subst`-based bridge for the associativity reindexings in the
+base-change functoriality ([GHB7]); at `hg := rfl` it is definitional. -/
+theorem RelRepData.eqv_congr {Q : ModuliProblem R} {X : EllObj R} (d : RelRepData Q X)
+    {T : Scheme.{u}} {g₁ g₂ : T ⟶ X.base} (hg : g₁ = g₂) (v : T ⟶ d.Z)
+    (p : v ≫ d.f = g₁) :
+    d.eqv g₂ ⟨v, p.trans hg⟩ =
+      Q.map (eqToHom (congrArg (fun t => Opposite.op (X.pullbackAlong t)) hg))
+        (d.eqv g₁ ⟨v, p⟩) := by
+  subst hg
+  rw [eqToHom_refl, CategoryTheory.Functor.map_id]
+  rfl
+
 /-- **KM 4.7, axiom 2 vocabulary** (KM p. 112: "G operates upon δ, in such a way
 that for every elliptic curve E/S […] the S-scheme `δ_{E/S}` is a finite etale
 G-torsor"): a relative representation datum for the auxiliary problem carrying a
@@ -984,6 +998,93 @@ theorem existsUnique_alpha_descent {R : CommRingCat.{u}} {P : ModuliProblem R}
     rw [← htβ]
     exact congrArg (d₀.eqv (𝟙 X₀.base)) (Subtype.ext hts)
   rw [← hval, ← Functor.map_comp_apply, ← op_comp, hιπ, op_id, Functor.map_id_apply]
+
+
+open EllObj in
+/-- **The base change of a relative representation datum along an `Ell/R`-morphism**
+(the [GHB7-2a] engine): if `(Z, f)` relatively represents `Q` at `X`, then the scheme
+base change `(Z ×_{X.base} X'.base, snd)` relatively represents `Q` at `X'`. The
+classifying bijections are the pullback universal property, `d.eqv` at the composed
+base map, and the one-shot cartesian identification
+`X'.pullbackAlong g ≅ X.pullbackAlong (g ≫ ψ.baseHom)` (`isoPullbackAlong` at
+`X'.pullbackAlongπ g ≫ ψ`); naturality is `map_eqv` at the chart-comparison morphism,
+which absorbs the associativity reindexing of base maps. -/
+noncomputable def RelRepData.pullback {R : CommRingCat.{u}} {Q : ModuliProblem R}
+    {X' X : EllObj R} (d : RelRepData Q X) (ψ : X' ⟶ X) : RelRepData Q X' where
+  Z := Limits.pullback d.f ψ.baseHom
+  f := Limits.pullback.snd d.f ψ.baseHom
+  eqv {T} g :=
+    ({ toFun := fun h => ⟨h.1 ≫ Limits.pullback.fst d.f ψ.baseHom, by
+          rw [Category.assoc, Limits.pullback.condition, ← Category.assoc, h.2]⟩
+       invFun := fun kk => ⟨Limits.pullback.lift kk.1 g kk.2, Limits.pullback.lift_snd _ _ _⟩
+       left_inv := fun h => Subtype.ext (by
+          refine Limits.pullback.hom_ext ?_ ?_
+          · rw [Limits.pullback.lift_fst]
+          · rw [Limits.pullback.lift_snd, h.2])
+       right_inv := fun kk => Subtype.ext (Limits.pullback.lift_fst _ _ _) } :
+        { h : T ⟶ Limits.pullback d.f ψ.baseHom //
+            h ≫ Limits.pullback.snd d.f ψ.baseHom = g } ≃
+          { kk : T ⟶ d.Z // kk ≫ d.f = g ≫ ψ.baseHom }).trans
+      ((d.eqv (g ≫ ψ.baseHom)).trans
+        (Q.mapIso (isoPullbackAlong (X'.pullbackAlongπ g ≫ ψ)).op).toEquiv)
+  nat {T T'} g k h := by
+    dsimp only [Equiv.trans_apply, Equiv.coe_fn_mk, Iso.toEquiv_fun,
+      Functor.mapIso_hom, Iso.op_hom]
+    rw [show (⟨(k ≫ h.1) ≫ Limits.pullback.fst d.f ψ.baseHom, by
+        simp only [Category.assoc, Limits.pullback.condition, reassoc_of% h.2]⟩ :
+        { kk : T' ⟶ d.Z // kk ≫ d.f = (k ≫ g) ≫ ψ.baseHom }) =
+      ⟨k ≫ (h.1 ≫ Limits.pullback.fst d.f ψ.baseHom), by
+        simp only [Category.assoc, Limits.pullback.condition, reassoc_of% h.2]⟩ from
+      Subtype.ext (Category.assoc _ _ _)]
+    have hcollapse : (isoPullbackAlong (X'.pullbackAlongπ (k ≫ g) ≫ ψ)).inv ≫
+        (X'.pullbackAlongπ (k ≫ g) ≫ ψ) =
+        X.pullbackAlongπ ((X'.pullbackAlongπ (k ≫ g) ≫ ψ).baseHom) := by
+      rw [Iso.inv_comp_eq]
+      exact (toPullbackAlong_pullbackAlongπ _).symm
+    have hπw : ((isoPullbackAlong (X'.pullbackAlongπ (k ≫ g) ≫ ψ)).inv ≫
+          X'.pullbackAlongMap g k ≫
+            (isoPullbackAlong (X'.pullbackAlongπ g ≫ ψ)).hom) ≫
+          X.pullbackAlongπ ((X'.pullbackAlongπ g ≫ ψ).baseHom) =
+        X.pullbackAlongπ ((X'.pullbackAlongπ (k ≫ g) ≫ ψ).baseHom) := by
+      rw [Category.assoc, Category.assoc,
+        show (isoPullbackAlong (X'.pullbackAlongπ g ≫ ψ)).hom ≫
+            X.pullbackAlongπ ((X'.pullbackAlongπ g ≫ ψ).baseHom) =
+          X'.pullbackAlongπ g ≫ ψ from toPullbackAlong_pullbackAlongπ _,
+        ← Category.assoc (X'.pullbackAlongMap g k),
+        pullbackAlongMap_pullbackAlongπ X' g k, hcollapse]
+    have hmap := map_eqv d
+      ((isoPullbackAlong (X'.pullbackAlongπ (k ≫ g) ≫ ψ)).inv ≫
+        X'.pullbackAlongMap g k ≫ (isoPullbackAlong (X'.pullbackAlongπ g ≫ ψ)).hom) k
+      (by show 𝟙 T' ≫ k ≫ 𝟙 T = k
+          rw [Category.id_comp, Category.comp_id])
+      (by show k ≫ g ≫ ψ.baseHom = (k ≫ g) ≫ ψ.baseHom
+          rw [Category.assoc])
+      hπw ⟨h.1 ≫ Limits.pullback.fst d.f ψ.baseHom, by
+        show (h.1 ≫ Limits.pullback.fst d.f ψ.baseHom) ≫ d.f = g ≫ ψ.baseHom
+        rw [Category.assoc, Limits.pullback.condition, ← Category.assoc, h.2]⟩
+    -- re-anchor `map_eqv`'s output at the reduced base maps (default-transparency retyping)
+    have hmap' : Q.map ((isoPullbackAlong (X'.pullbackAlongπ (k ≫ g) ≫ ψ)).inv ≫
+          X'.pullbackAlongMap g k ≫
+            (isoPullbackAlong (X'.pullbackAlongπ g ≫ ψ)).hom).op
+          (d.eqv (g ≫ ψ.baseHom) ⟨h.1 ≫ Limits.pullback.fst d.f ψ.baseHom, by
+            rw [Category.assoc, Limits.pullback.condition, ← Category.assoc, h.2]⟩) =
+        d.eqv ((k ≫ g) ≫ ψ.baseHom)
+          ⟨k ≫ (h.1 ≫ Limits.pullback.fst d.f ψ.baseHom), by
+            simp only [Category.assoc, Limits.pullback.condition, reassoc_of% h.2]⟩ :=
+      hmap
+    rw [← hmap']
+    show Q.map (isoPullbackAlong (X'.pullbackAlongπ (k ≫ g) ≫ ψ)).hom.op
+        (Q.map ((isoPullbackAlong (X'.pullbackAlongπ (k ≫ g) ≫ ψ)).inv ≫
+          X'.pullbackAlongMap g k ≫
+            (isoPullbackAlong (X'.pullbackAlongπ g ≫ ψ)).hom).op
+          (d.eqv (g ≫ ψ.baseHom) ⟨h.1 ≫ Limits.pullback.fst d.f ψ.baseHom, by
+            rw [Category.assoc, Limits.pullback.condition, ← Category.assoc, h.2]⟩)) =
+      Q.map (X'.pullbackAlongMap g k).op
+        (Q.map (isoPullbackAlong (X'.pullbackAlongπ g ≫ ψ)).hom.op
+          (d.eqv (g ≫ ψ.baseHom) ⟨h.1 ≫ Limits.pullback.fst d.f ψ.baseHom, by
+            rw [Category.assoc, Limits.pullback.condition, ← Category.assoc, h.2]⟩))
+    rw [← Functor.map_comp_apply, ← Functor.map_comp_apply, ← op_comp, ← op_comp,
+      Iso.hom_inv_id_assoc]
 
 end Engine
 
