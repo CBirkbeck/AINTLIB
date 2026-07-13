@@ -1,8 +1,8 @@
+import BernoulliRegular.FLT37.Hilbert90
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerCaseI
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummerFLTConsumer
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ProvedAuxiliaries
 import BernoulliRegular.FLT37.PrimaryDescent
-import BernoulliRegular.FLT37.Hilbert90
 
 /-!
 # AK-5: case-I primarity argument for `CaseIAntiKummerLKUnramified`
@@ -416,8 +416,8 @@ theorem isSplittingField_X_pow_sub_C_unit_of_unit_form
     (h_finrank : Module.finrank K L = p)
     (h_irr : Irreducible (Polynomial.X ^ p - Polynomial.C α₀)) :
     Polynomial.IsSplittingField K L (Polynomial.X ^ p - Polynomial.C u) := by
-  haveI : NeZero p := ⟨Nat.pos_iff_ne_zero.mp hp_pos⟩
-  haveI : FiniteDimensional K L := Polynomial.IsSplittingField.finiteDimensional L
+  have : NeZero p := ⟨Nat.pos_iff_ne_zero.mp hp_pos⟩
+  have : FiniteDimensional K L := Polynomial.IsSplittingField.finiteDimensional L
     (Polynomial.X ^ p - Polynomial.C α₀)
   let β : L := rootOfSplitsXPowSubC hp_pos α₀ L
   have hβ_pow : β ^ p = algebraMap K L α₀ :=
@@ -490,7 +490,7 @@ theorem antiKummerLift_isUnramified_via_AK5
       (K := K) (p := p)
       (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical K a b ζ hab)
       hα₀_ne h_irr
-  haveI : IsCyclic
+  have : IsCyclic
       (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift (p := p) K
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical K a b ζ hab)
         hα₀_ne ≃ₐ[K]
@@ -501,7 +501,7 @@ theorem antiKummerLift_isUnramified_via_AK5
       (K := K) (p := p)
       (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical K a b ζ hab)
       hα₀_ne h_irr
-  haveI : Polynomial.IsSplittingField K
+  have : Polynomial.IsSplittingField K
       (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift (p := p) K
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical K a b ζ hab)
         hα₀_ne)
@@ -509,7 +509,7 @@ theorem antiKummerLift_isUnramified_via_AK5
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical K a b ζ hab)) := by
     unfold BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift
     infer_instance
-  haveI : Polynomial.IsSplittingField K
+  have : Polynomial.IsSplittingField K
       (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift (p := p) K
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical K a b ζ hab)
         hα₀_ne)
@@ -816,7 +816,7 @@ theorem AK5a_PrincipalMinusIdeals_of_factor_class_square_eq_and_not_dvd_hPlus_cy
               (⟨I, mem_nonZeroDivisors_iff_ne_zero.mpr hI_nz⟩ :
                 nonZeroDivisors (Ideal (𝓞 (CyclotomicField p ℚ)))) ^ 2)) :
     AK5a_PrincipalMinusIdeals (p := p) (K := CyclotomicField p ℚ) := by
-  haveI : IsCyclotomicExtension {p} ℚ (CyclotomicField p ℚ) :=
+  have : IsCyclotomicExtension {p} ℚ (CyclotomicField p ℚ) :=
     CyclotomicField.isCyclotomicExtension p ℚ
   intro a b c hgcd hcaseI heq ζ hζ _hab I hI_ne hI_pow
   have h_class_one :
@@ -1126,7 +1126,7 @@ theorem norm_Kplus_eq_one_of_mul_complexConj_eq_one
 theorem exists_div_complexConj_of_mul_complexConj_eq_one
     (γ : K) (hγ : γ * NumberField.IsCMField.complexConj K γ = 1) :
     ∃ δ : Kˣ, (δ : K) / NumberField.IsCMField.complexConj K (δ : K) = γ := by
-  haveI : IsCyclic (K ≃ₐ[NumberField.maximalRealSubfield K] K) := by
+  have : IsCyclic (K ≃ₐ[NumberField.maximalRealSubfield K] K) := by
     rw [isCyclic_iff_exists_zpowers_eq_top]
     exact ⟨NumberField.IsCMField.complexConj K,
       NumberField.IsCMField.zpowers_complexConj_eq_top K⟩
@@ -1725,7 +1725,7 @@ theorem AK5a_PrincipalMinusIdeals_of_cross_mul_data_and_not_dvd_hPlus
   obtain ⟨δ, h_cross, hx_ne, hy_ne⟩ :=
     h_cross_data hgcd hcaseI heq hζ hab hI_ne hI_pow
   have hI_principal : I.IsPrincipal := by
-    haveI : Fact (p ≠ 2) := ⟨hp_odd⟩
+    have : Fact (p ≠ 2) := ⟨hp_odd⟩
     let σI : (Ideal (𝓞 K))⁰ :=
       ⟨I.map
         (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom,
@@ -1848,7 +1848,7 @@ theorem AK5a_PrincipalMinusIdeals_of_CaseIAntiKummerLKUnramified_and_not_dvd_hPl
     (h_not_dvd : ¬ (37 : ℕ) ∣ hPlus (CyclotomicField 37 ℚ))
     (h_LK : CaseIAntiKummerLKUnramified) :
     AK5a_PrincipalMinusIdeals (p := 37) (K := CyclotomicField 37 ℚ) := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   unfold AK5a_PrincipalMinusIdeals
   intro a b c hgcd hcaseI heq ζ hζ hab I hI_ne hI_pow
   exact
