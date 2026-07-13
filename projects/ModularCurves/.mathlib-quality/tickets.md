@@ -18264,3 +18264,25 @@ module trivializes on basic opens; SAME headspace as lane-B c4 E[N]-rank-N², fo
 [C3f] package the existence into the AffineChartPatch family + stable-affine pairwise intersections
 (C4's input shape) → [HG-C4] glue. The killing hypothesis threads BB-DELIGNE via
 ι_comp_mulByHom_of_hasRank at assembly time. (STREAM-G0)
+
+### v10.182-G0 — ★ [HG-C3d] COMPLETE, AXIOM-CLEAN: groupRing free on a shrunk patch (STREAM-G0)
+Commits 0c7fe3591 (transport infra) + 21570110d (the leaf), pushed. `exists_basicOpen_groupRing_free`
+(GroupScheme/GroupRingFree.lean): for s ∈ affine V there is r with s ∈ D(r) and **Γ(G, π⁻¹D(r)) FREE
+over Γ(S, D(r)) in the appLE algebra** — exactly M6/chartData's `Module.Free baseRing groupRing`
+hypothesis, at a patch shrinkable around every base point. **Clean triple** (no BB boxes — the
+subgroup's finite/flat/lfp are structure FIELDS).
+
+Infra (ForMathlib/FiniteFlatFreeAway.lean, both clean):
+- `exists_away_free_of_finite_of_flat`: finite flat f.p. algebra ⟹ free on a basic-open nbhd of
+  every prime (stacks-0564 bridge + free_of_flat_of_isLocalRing + exists_free_localizedModule_powers).
+- `Module.Free.of_isLocalizedModule_away`: freeness transports from the (Localization, LocalizedModule)
+  model to ANY concrete localization pair — the GenericFlatness semilinear idiom, abstracted.
+  MATHLIB-WORTHY pair.
+Scheme glue: HasRingHomProperty.appLE extraction for @Flat/@LocallyOfFinitePresentation;
+isLocalization_basicOpen transported across preimage_basicOpen with thin-category coherence
+(Quiver.Hom.unop_inj + Subsingleton.elim) + Algebra.algebra_ext.
+
+REMAINING for C3: [C3f] assemble `exists_affineChartPatch_free` — combine chart existence
+(v10.181-G0) + this freeness (shrink the chart's V via IsStableOpen.inf + isStableOpen_π_preimage +
+basicOpen affinity) into: every x ∈ E lies in the chart open of an AffineChartPatch with free
+groupRing. Then [HG-C4] glue → SIGNAL ★★. (STREAM-G0)
