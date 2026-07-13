@@ -54,7 +54,6 @@ equivalent to `c₁₅ = 0` via `9·c₁₅`).
 noncomputable section
 
 set_option maxRecDepth 4000
-set_option maxHeartbeats 2000000
 
 open NumberField
 
@@ -139,7 +138,7 @@ theorem cor823Omega32SecondOrderCollapse37_of_prop812
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (hProp : Prop812DescentCoeff37) :
     Cor823Omega32SecondOrderCollapse37 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   intro u c hc
   -- (1) The proven detector vanishing.
   have hdet0 : caseIICor823DescentDetectorSq u = 0 :=
