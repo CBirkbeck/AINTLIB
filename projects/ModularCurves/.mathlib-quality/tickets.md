@@ -17383,8 +17383,34 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
 - **Unblocks**: GHB5 → GHB7 value-functor/relRep → GHC1 goes fully unconditional.
 
 ### [GHB5a-i] free-action affine base-change descent — GHB5a's per-chart engine (NEW-GH refinement, v10.166)
-- **Status**: in_progress  **Parent**: GHB5a  **File**: `ModularCurves/ForMathlib/AffineQuotient.lean`
+- **Status**: done (STREAM-GH, 2026-07-13T08:52Z → 2026-07-13T12:35Z)  **Parent**: GHB5a  **File**: `ModularCurves/ForMathlib/AffineQuotient.lean`
 - **Claimed**: STREAM-GH, 2026-07-13T08:52Z (inherits NEW-GH's banked state per STREAM-GH charter v10.171; resume at "(B⊗_{Bᴳ}C)ᴳ≅C corollary via [A711-BC]@Bᴳ")
+- **Progress**:
+  - 2026-07-13: DONE — `exists_invariantsπ_lift_baseChange_of_free` PROVEN, sorry gone,
+    `[propext, Classical.choice, Quot.sound]`, downstream (SchemeQuotient/SchemeActionFree/
+    GammaHRepresentability) green. Pieces (all axiom-clean): InvariantTorsor
+    `bijective_includeRightFixedPoints` ((B⊗_{Bᴳ}C)ᴳ≅C via [A711-BC]@ground-Bᴳ +
+    `of_fixedPoints_ground`) + the subtype-SMul `SMulCommClass G ↥Bᴳ (B⊗[↥Bᴳ]C)` instance
+    (KEY UNBLOCK: `FixedPoints.subalgebra` elaborates its SMulCommClass binder against
+    `instSMulSubtypeMem`, NOT `TensorProduct.instSMul` — the generic tensor instance never
+    unifies at ground Bᴳ; ~2h of the session); AffineQuotient
+    `isFreeAlgebraAction_of_specSMul_free` (scheme-freeness → KM A7.1.1),
+    `epi_pullback_snd_invariantsπ_of_free` (finite-flat-surj ⟹ base change of π is epi ⟹
+    descent-uniqueness over ANY base — replaces the of_isOpenImmersion basic-open gymnastics),
+    `pullbackRes` + fst/snd/SMul-naturality (the comparison-morphism bookkeeping as a DEF —
+    set/pullback.map-inline forms break rw/simp on proof-args and dependent bases),
+    chart engine `exists_invariantsπ_lift_baseChange_spec` (pullbackSpecIso conjugation +
+    exists_invariantsπ_lift on the tensor action + χ := includeRightFixedPoints iso), affine
+    wrapper via isoSpec, glue over `Q'.affineCover` (epi-cancel compat via term-mode calc;
+    verification over `pullback₁` cover). LEAN-OPS for the board: (i) mixed
+    invariantsπ-vs-Spec.map-form composites poison simp/rw at reducible transparency — bind
+    the pullbackSpecIso through a TYPE-ASCRIBED `set e : <invariantsπ-form> := pullbackSpecIso …`
+    and bridge with `rw [he]; exact` at default transparency; (ii) `← Category.assoc` rewrites
+    can grab composite BASE-ARGUMENTS of pullback.snd (motive-not-type-correct / wrong-side
+    rewrites) — use term-mode `(Category.assoc _ _ _).symm` calc steps; (iii) cover indices
+    must be bound at `Q'.affineCover.I₀` (NOT ↥Q') or the `IsAffine (affineCover.X i)`
+    instance fails at TC's reducible unification; never `set 𝒰 := Q'.affineCover` (opaque I₀).
+    NEXT (chain): GHB5a glue over quotientGlueData → GHB5 transfer → GHB7 → GHC1 unconditional.
 - **Statement**: analogue of `exists_invariantsπ_lift_of_isOpenImmersion` (line 628) with
   `[IsOpenImmersion j]` DROPPED and a freeness hypothesis ADDED: for `Spec B` with a free
   `G`-action and ARBITRARY `j : Q' ⟶ Spec Bᴳ`, every `pullbackSpecSMul`-invariant

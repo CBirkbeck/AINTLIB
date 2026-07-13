@@ -7,6 +7,8 @@ ForMathlib (OURS, not vendored): upstream candidate. Ticket T-Q3.
 -/
 import ModularCurves.ForMathlib.SpecGroupAction
 import ModularCurves.ForMathlib.InvariantLocalization
+import ModularCurves.ForMathlib.InvariantTorsor
+import Mathlib.AlgebraicGeometry.Morphisms.Flat
 
 /-!
 # The affine quotient by a finite group action: universal property
@@ -37,7 +39,7 @@ localization = localization of the invariants" (`InvariantLocalization.lean`).
 
 universe u v
 
-open AlgebraicGeometry CategoryTheory CategoryTheory.Limits
+open TensorProduct AlgebraicGeometry CategoryTheory CategoryTheory.Limits
 
 namespace AlgebraicGeometry
 
@@ -912,6 +914,229 @@ theorem exists_invariantsπ_lift_of_isOpenImmersion [Finite G] {Q' Y : Scheme.{u
     (show ↥(pullback (invariantsπ G B R) j) from w))
 
 variable (G B) in
+omit [SMulCommClass G R B] in
+/-- Geometric freeness of the `G`-action on `Spec B` — no `g ≠ 1` fixes a `T`-point over a
+nonempty `T` — gives Katz–Mazur A7.1.1 freeness of the action on `B`. Bare-`Spec` version
+of `SchemeAction.isFreeAlgebraAction_of_free` (which lives downstream, on
+`SchemeQuotient`'s `SchemeAction`): a `g`-invariant `R`-algebra point `φ : B →ₐ[R] R'` is
+exactly a `g`-fixed `Spec R'`-point of `Spec B`, and a nontrivial ring has a prime. -/
+theorem isFreeAlgebraAction_of_specSMul_free
+    (hfree : ∀ {T : Scheme.{u}} (t : T ⟶ Spec (CommRingCat.of B)) (g : G), g ≠ 1 →
+      t ≫ specSMul g = t → IsEmpty T) :
+    IsFreeAlgebraAction G R B := by
+  intro g hg R' _ _ _ φ
+  by_contra hcon
+  push Not at hcon
+  have hring : CommRingCat.ofHom (MulSemiringAction.toRingHom G B g) ≫
+      CommRingCat.ofHom φ.toRingHom = CommRingCat.ofHom φ.toRingHom := by
+    ext a
+    exact hcon a
+  have hspec : Spec.map (CommRingCat.ofHom φ.toRingHom) ≫ specSMul g =
+      Spec.map (CommRingCat.ofHom φ.toRingHom) := by
+    rw [specSMul, ← Spec.map_comp, hring]
+  haveI hE : IsEmpty (Spec (CommRingCat.of R')) :=
+    hfree (Spec.map (CommRingCat.ofHom φ.toRingHom)) g hg hspec
+  obtain ⟨p⟩ : Nonempty (PrimeSpectrum R') := inferInstance
+  exact hE.false p
+
+variable (G B) in
+/-- For a **free** action the invariants morphism is finite flat surjective, so its base
+change along ANY morphism is an epimorphism of schemes — uniqueness of descent over an
+arbitrary base. (For non-free actions this fails: `invariantsπ` need not be flat.) -/
+theorem epi_pullback_snd_invariantsπ_of_free [Finite G]
+    (halg : IsFreeAlgebraAction G R B) {Q' : Scheme.{u}}
+    (j : Q' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G))) :
+    Epi (pullback.snd (invariantsπ G B R) j) := by
+  haveI : SMulCommClass R G B := SMulCommClass.symm G R B
+  haveI : Module.Finite (FixedPoints.subalgebra R B G) B :=
+    Module.Finite.of_isFreeAlgebraAction G R B halg
+  haveI : Module.Projective (FixedPoints.subalgebra R B G) B :=
+    Module.Projective.of_isFreeAlgebraAction G R B halg
+  haveI : Module.Flat (FixedPoints.subalgebra R B G) B := Module.Flat.of_projective
+  haveI : Flat (invariantsπ G B R) := by
+    rw [invariantsπ, AlgebraicGeometry.Flat.SpecMap_iff, CommRingCat.hom_ofHom,
+      RingHom.flat_algebraMap_iff]
+    infer_instance
+  haveI : Surjective (invariantsπ G B R) := ⟨invariantsπ_surjective G B R⟩
+  haveI : Surjective (pullback.snd (invariantsπ G B R) j) :=
+    MorphismProperty.pullback_snd _ _ ‹Surjective (invariantsπ G B R)›
+  exact Flat.epi_of_flat_of_surjective _
+
+variable (G B) in
+/-- The comparison morphism between base changes of `invariantsπ`: for `u : W' ⟶ W''`
+over `Spec Bᴳ` — i.e. `w = u ≫ j''` — the induced morphism
+`pullback π w ⟶ pullback π j''`. Bundled as a definition so the gluing bookkeeping
+rewrites cleanly. -/
+private noncomputable def pullbackRes {W' W'' : Scheme.{u}}
+    (j'' : W'' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G)))
+    (w : W' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G)))
+    (u : W' ⟶ W'') (hw : w = u ≫ j'') :
+    pullback (invariantsπ G B R) w ⟶ pullback (invariantsπ G B R) j'' :=
+  pullback.map _ _ _ _ (𝟙 _) u (𝟙 _) (by simp) (by rw [Category.comp_id, hw])
+
+variable (G B) in
+@[reassoc]
+private theorem pullbackRes_fst {W' W'' : Scheme.{u}}
+    (j'' : W'' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G)))
+    (w : W' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G)))
+    (u : W' ⟶ W'') (hw : w = u ≫ j'') :
+    pullbackRes G B R j'' w u hw ≫ pullback.fst (invariantsπ G B R) j'' =
+      pullback.fst (invariantsπ G B R) w :=
+  (pullback.lift_fst _ _ _).trans (Category.comp_id _)
+
+variable (G B) in
+@[reassoc]
+private theorem pullbackRes_snd {W' W'' : Scheme.{u}}
+    (j'' : W'' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G)))
+    (w : W' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G)))
+    (u : W' ⟶ W'') (hw : w = u ≫ j'') :
+    pullbackRes G B R j'' w u hw ≫ pullback.snd (invariantsπ G B R) j'' =
+      pullback.snd (invariantsπ G B R) w ≫ u :=
+  pullback.lift_snd _ _ _
+
+variable (G B) in
+/-- The comparison morphisms intertwine the relative actions: `pullbackSpecSMul` is
+natural in the base. -/
+private theorem pullbackSpecSMul_pullbackRes {W' W'' : Scheme.{u}}
+    (j'' : W'' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G)))
+    (w : W' ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G)))
+    (u : W' ⟶ W'') (hw : w = u ≫ j'') (g : G) :
+    pullbackSpecSMul G B R w g ≫ pullbackRes G B R j'' w u hw =
+      pullbackRes G B R j'' w u hw ≫ pullbackSpecSMul G B R j'' g := by
+  refine pullback.hom_ext ?_ ?_
+  · simp only [Category.assoc, pullbackRes_fst, pullbackRes_fst_assoc,
+      pullbackSpecSMul_fst]
+  · simp only [Category.assoc, pullbackRes_snd, pullbackSpecSMul_snd,
+      pullbackSpecSMul_snd_assoc]
+
+variable (G B) in
+/-- **The chart engine of free-action base change** (KM 7.1.3(3c) over an affine base):
+for the base change of `invariantsπ` along `Spec ψ` with `ψ : Bᴳ →+* C` ARBITRARY, every
+invariant morphism out of the base-changed total space descends to `Spec C`.
+
+Route: the base-changed total space is `Spec (B ⊗[Bᴳ] C)` (`pullbackSpecIso`), the
+base-changed action is the tensor action through the left factor, the base-changed
+projection is the invariants morphism of that action (`exists_invariantsπ_lift` applies),
+and its target `Spec ((B ⊗[Bᴳ] C)ᴳ)` is `Spec C` itself by
+`bijective_includeRightFixedPoints` — the point where freeness enters ([A711-BC] at
+ground `Bᴳ`). -/
+private theorem exists_invariantsπ_lift_baseChange_spec [Finite G] {Y : Scheme.{u}}
+    (halg : IsFreeAlgebraAction G R B) (C : Type u) [CommRing C]
+    (ψ : FixedPoints.subalgebra R B G →+* C)
+    (f : pullback (invariantsπ G B R) (Spec.map (CommRingCat.ofHom ψ)) ⟶ Y)
+    (hf : ∀ g : G, pullbackSpecSMul G B R (Spec.map (CommRingCat.ofHom ψ)) g ≫ f = f) :
+    ∃ q : Spec (CommRingCat.of C) ⟶ Y,
+      pullback.snd (invariantsπ G B R) (Spec.map (CommRingCat.ofHom ψ)) ≫ q = f := by
+  classical
+  haveI : SMulCommClass R G B := SMulCommClass.symm G R B
+  letI : Algebra ↥(FixedPoints.subalgebra R B G) C := ψ.toAlgebra
+  -- the affine identification of the base-changed total space, retyped at `invariantsπ`
+  set e : pullback (invariantsπ G B R) (Spec.map (CommRingCat.ofHom ψ)) ≅
+      Spec (CommRingCat.of (B ⊗[↥(FixedPoints.subalgebra R B G)] C)) :=
+    pullbackSpecIso ↥(FixedPoints.subalgebra R B G) B C with he
+  have hefst : e.inv ≫
+      pullback.fst (invariantsπ G B R) (Spec.map (CommRingCat.ofHom ψ)) =
+      Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+        (R := ↥(FixedPoints.subalgebra R B G)) (A := B) (B := C))) := by
+    rw [he]
+    exact pullbackSpecIso_inv_fst ↥(FixedPoints.subalgebra R B G) B C
+  have hesnd : e.inv ≫
+      pullback.snd (invariantsπ G B R) (Spec.map (CommRingCat.ofHom ψ)) =
+      Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+        (R := ↥(FixedPoints.subalgebra R B G)) (A := B) (B := C)).toRingHom) := by
+    rw [he]
+    exact pullbackSpecIso_inv_snd ↥(FixedPoints.subalgebra R B G) B C
+  -- the identification intertwines the tensor action with the relative action
+  have hact : ∀ g : G,
+      e.inv ≫ pullbackSpecSMul G B R (Spec.map (CommRingCat.ofHom ψ)) g =
+      specSMul g ≫ e.inv := by
+    intro g
+    have hsqL : Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom
+          (R := ↥(FixedPoints.subalgebra R B G)) (A := B) (B := C))) ≫ specSMul g =
+        specSMul g ≫ Spec.map (CommRingCat.ofHom
+          (Algebra.TensorProduct.includeLeftRingHom
+            (R := ↥(FixedPoints.subalgebra R B G)) (A := B) (B := C))) := by
+      rw [specSMul, specSMul, ← Spec.map_comp, ← Spec.map_comp,
+        ← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp]
+      congr 2
+    have hsqR : Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+          (R := ↥(FixedPoints.subalgebra R B G)) (A := B) (B := C)).toRingHom) =
+        specSMul g ≫ Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight
+          (R := ↥(FixedPoints.subalgebra R B G)) (A := B) (B := C)).toRingHom) := by
+      rw [specSMul, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+      congr 2
+      ext c
+      show (1 : B) ⊗ₜ[↥(FixedPoints.subalgebra R B G)] c =
+        g • ((1 : B) ⊗ₜ[↥(FixedPoints.subalgebra R B G)] c)
+      rw [MulSemiringAction.smul_tmul_baseChange, smul_one]
+    refine pullback.hom_ext ?_ ?_
+    · simp only [Category.assoc, pullbackSpecSMul_fst]
+      rw [← Category.assoc, hefst]
+      exact hsqL
+    · simp only [Category.assoc, pullbackSpecSMul_snd]
+      rw [hesnd]
+      exact hsqR
+  -- the descended morphism on `Spec (B ⊗ C)` is invariant for the tensor action
+  have hf' : ∀ g : G, specSMul g ≫ (e.inv ≫ f) = e.inv ≫ f := by
+    intro g
+    rw [← Category.assoc, ← hact g, Category.assoc, hf g]
+  -- descend through the invariants morphism of the tensor action
+  obtain ⟨q₀, hq₀⟩ := exists_invariantsπ_lift G
+    (B ⊗[↥(FixedPoints.subalgebra R B G)] C) ↥(FixedPoints.subalgebra R B G)
+    (e.inv ≫ f) hf'
+  -- identify the invariants of the tensor with `C` (freeness enters here)
+  set χe : C ≃+* FixedPoints.subalgebra ↥(FixedPoints.subalgebra R B G)
+      (B ⊗[↥(FixedPoints.subalgebra R B G)] C) G :=
+    RingEquiv.ofBijective _ (bijective_includeRightFixedPoints halg C) with hχe
+  refine ⟨Spec.map (CommRingCat.ofHom (χe.symm : _ →+* C)) ≫ q₀, ?_⟩
+  rw [← cancel_epi e.inv, ← Category.assoc, hesnd, ← Category.assoc, ← Spec.map_comp,
+    ← CommRingCat.ofHom_comp]
+  have hkey : CommRingCat.ofHom
+      ((Algebra.TensorProduct.includeRight
+        (R := ↥(FixedPoints.subalgebra R B G)) (A := B) (B := C)).toRingHom.comp
+          (χe.symm : _ →+* C)) =
+      CommRingCat.ofHom (algebraMap
+        (FixedPoints.subalgebra ↥(FixedPoints.subalgebra R B G)
+          (B ⊗[↥(FixedPoints.subalgebra R B G)] C) G)
+        (B ⊗[↥(FixedPoints.subalgebra R B G)] C)) := by
+    congr 1
+    ext x
+    show (1 : B) ⊗ₜ[↥(FixedPoints.subalgebra R B G)] (χe.symm x : C) = (x :
+      B ⊗[↥(FixedPoints.subalgebra R B G)] C)
+    rw [← includeRightFixedPoints_coe (G := G) (R := R) (A := B) C (χe.symm x)]
+    exact congrArg Subtype.val (χe.apply_symm_apply x)
+  rw [hkey]
+  exact hq₀
+
+variable (G B) in
+/-- The chart engine over an abstract affine base: descent of invariant morphisms along
+the base change of `invariantsπ` to ANY affine scheme over `Spec Bᴳ`. Reduction of
+`exists_invariantsπ_lift_baseChange_spec` along `W.isoSpec`. -/
+private theorem exists_invariantsπ_lift_baseChange_of_isAffine [Finite G]
+    {W Y : Scheme.{u}} [IsAffine W] (halg : IsFreeAlgebraAction G R B)
+    (w : W ⟶ Spec (CommRingCat.of (FixedPoints.subalgebra R B G)))
+    (f : pullback (invariantsπ G B R) w ⟶ Y)
+    (hf : ∀ g : G, pullbackSpecSMul G B R w g ≫ f = f) :
+    ∃ q : W ⟶ Y, pullback.snd (invariantsπ G B R) w ≫ q = f := by
+  obtain ⟨ψ, hψ⟩ := Spec.map_surjective (W.isoSpec.inv ≫ w)
+  -- the comparison iso between the two base changes
+  haveI : IsIso (pullbackRes G B R w (Spec.map ψ) W.isoSpec.inv hψ) := by
+    unfold pullbackRes
+    infer_instance
+  -- transport the invariance and descend on the `Spec` model
+  have hfρ : ∀ g : G, pullbackSpecSMul G B R (Spec.map ψ) g ≫
+      (pullbackRes G B R w (Spec.map ψ) W.isoSpec.inv hψ ≫ f) =
+      pullbackRes G B R w (Spec.map ψ) W.isoSpec.inv hψ ≫ f := by
+    intro g
+    rw [← Category.assoc, pullbackSpecSMul_pullbackRes, Category.assoc, hf g]
+  obtain ⟨q₀, hq₀⟩ := exists_invariantsπ_lift_baseChange_spec G B R halg _ ψ.hom
+    (pullbackRes G B R w (Spec.map ψ) W.isoSpec.inv hψ ≫ f) hfρ
+  refine ⟨W.isoSpec.hom ≫ q₀, ?_⟩
+  rw [← cancel_epi (pullbackRes G B R w (Spec.map ψ) W.isoSpec.inv hψ), ← Category.assoc,
+    pullbackRes_snd, Category.assoc, Iso.inv_hom_id_assoc]
+  exact hq₀
+
+variable (G B) in
 /-- **[GHB5a-i] Free-action affine base change of the quotient** (KM 7.1.3(3c),
 condition (c); the per-chart engine of `SchemeAction.exists_quotientπ_lift_baseChange`).
 For a FREE `G`-action on `Spec B` and an ARBITRARY base map `j : Q' ⟶ Spec Bᴳ`, every
@@ -932,8 +1157,143 @@ theorem exists_invariantsπ_lift_baseChange_of_free [Finite G] {Q' Y : Scheme.{u
     (f : Limits.pullback (invariantsπ G B R) j ⟶ Y)
     (hf : ∀ g : G, pullbackSpecSMul G B R j g ≫ f = f) :
     ∃ q : Q' ⟶ Y, Limits.pullback.snd (invariantsπ G B R) j ≫ q = f := by
-  sorry
-
-end UniversalProperty
-
-end AlgebraicGeometry
+  classical
+  have halg : IsFreeAlgebraAction G R B := isFreeAlgebraAction_of_specSMul_free G B R hfree
+  -- chart-wise descents of the restricted morphisms
+  have hfx : ∀ (x : Q'.affineCover.I₀) (g : G),
+      pullbackSpecSMul G B R (Q'.affineCover.f x ≫ j) g ≫
+        (pullbackRes G B R j (Q'.affineCover.f x ≫ j) (Q'.affineCover.f x) rfl ≫ f) =
+      pullbackRes G B R j (Q'.affineCover.f x ≫ j) (Q'.affineCover.f x) rfl ≫ f := by
+    intro x g
+    rw [← Category.assoc, pullbackSpecSMul_pullbackRes, Category.assoc, hf g]
+  choose qx hqx using fun x : Q'.affineCover.I₀ =>
+    exists_invariantsπ_lift_baseChange_of_isAffine G B R halg (Q'.affineCover.f x ≫ j)
+      (pullbackRes G B R j (Q'.affineCover.f x ≫ j) (Q'.affineCover.f x) rfl ≫ f) (hfx x)
+  -- gluing compatibility on overlaps, by cancelling the (epi) base-changed projection
+  have hcompat : ∀ x z : Q'.affineCover.I₀,
+      pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫ qx x =
+      pullback.snd (Q'.affineCover.f x) (Q'.affineCover.f z) ≫ qx z := by
+    intro x z
+    have hbase : pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫
+        Q'.affineCover.f x ≫ j =
+        pullback.snd (Q'.affineCover.f x) (Q'.affineCover.f z) ≫ Q'.affineCover.f z ≫ j := by
+      rw [← Category.assoc, ← Category.assoc, pullback.condition]
+    have hσρ : pullbackRes G B R (Q'.affineCover.f x ≫ j)
+          (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫ Q'.affineCover.f x ≫ j)
+          (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z)) rfl ≫
+          pullbackRes G B R j (Q'.affineCover.f x ≫ j) (Q'.affineCover.f x) rfl =
+        pullbackRes G B R (Q'.affineCover.f z ≫ j)
+          (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫ Q'.affineCover.f x ≫ j)
+          (pullback.snd (Q'.affineCover.f x) (Q'.affineCover.f z)) hbase ≫
+          pullbackRes G B R j (Q'.affineCover.f z ≫ j) (Q'.affineCover.f z) rfl := by
+      refine pullback.hom_ext ?_ ?_
+      · simp only [Category.assoc, pullbackRes_fst]
+      · simp only [Category.assoc, pullbackRes_snd, pullbackRes_snd_assoc]
+        rw [pullback.condition]
+    haveI := epi_pullback_snd_invariantsπ_of_free G B R halg
+      (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫ Q'.affineCover.f x ≫ j)
+    refine (cancel_epi (pullback.snd (invariantsπ G B R)
+      (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫
+        Q'.affineCover.f x ≫ j))).mp ?_
+    calc pullback.snd (invariantsπ G B R)
+          (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫
+            Q'.affineCover.f x ≫ j) ≫
+          pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫ qx x
+        = (pullback.snd (invariantsπ G B R)
+            (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫
+              Q'.affineCover.f x ≫ j) ≫
+            pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z)) ≫ qx x :=
+          (Category.assoc _ _ _).symm
+      _ = (pullbackRes G B R (Q'.affineCover.f x ≫ j)
+            (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫
+              Q'.affineCover.f x ≫ j)
+            (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z)) rfl ≫
+            pullback.snd (invariantsπ G B R) (Q'.affineCover.f x ≫ j)) ≫ qx x := by
+          rw [pullbackRes_snd]
+      _ = pullbackRes G B R (Q'.affineCover.f x ≫ j)
+            (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫
+              Q'.affineCover.f x ≫ j)
+            (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z)) rfl ≫
+            pullback.snd (invariantsπ G B R) (Q'.affineCover.f x ≫ j) ≫ qx x :=
+          Category.assoc _ _ _
+      _ = pullbackRes G B R (Q'.affineCover.f x ≫ j)
+            (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫
+              Q'.affineCover.f x ≫ j)
+            (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z)) rfl ≫
+            pullbackRes G B R j (Q'.affineCover.f x ≫ j) (Q'.affineCover.f x) rfl ≫ f := by
+          rw [hqx x]
+      _ = (pullbackRes G B R (Q'.affineCover.f x ≫ j)
+            (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫
+              Q'.affineCover.f x ≫ j)
+            (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z)) rfl ≫
+            pullbackRes G B R j (Q'.affineCover.f x ≫ j) (Q'.affineCover.f x) rfl) ≫ f :=
+          (Category.assoc _ _ _).symm
+      _ = (pullbackRes G B R (Q'.affineCover.f z ≫ j)
+            (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫
+              Q'.affineCover.f x ≫ j)
+            (pullback.snd (Q'.affineCover.f x) (Q'.affineCover.f z)) hbase ≫
+            pullbackRes G B R j (Q'.affineCover.f z ≫ j) (Q'.affineCover.f z) rfl) ≫ f := by
+          rw [hσρ]
+      _ = pullbackRes G B R (Q'.affineCover.f z ≫ j)
+            (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫
+              Q'.affineCover.f x ≫ j)
+            (pullback.snd (Q'.affineCover.f x) (Q'.affineCover.f z)) hbase ≫
+            pullbackRes G B R j (Q'.affineCover.f z ≫ j) (Q'.affineCover.f z) rfl ≫ f :=
+          Category.assoc _ _ _
+      _ = pullbackRes G B R (Q'.affineCover.f z ≫ j)
+            (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫
+              Q'.affineCover.f x ≫ j)
+            (pullback.snd (Q'.affineCover.f x) (Q'.affineCover.f z)) hbase ≫
+            pullback.snd (invariantsπ G B R) (Q'.affineCover.f z ≫ j) ≫ qx z := by
+          rw [← hqx z]
+      _ = (pullbackRes G B R (Q'.affineCover.f z ≫ j)
+            (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫
+              Q'.affineCover.f x ≫ j)
+            (pullback.snd (Q'.affineCover.f x) (Q'.affineCover.f z)) hbase ≫
+            pullback.snd (invariantsπ G B R) (Q'.affineCover.f z ≫ j)) ≫ qx z :=
+          (Category.assoc _ _ _).symm
+      _ = (pullback.snd (invariantsπ G B R)
+            (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫
+              Q'.affineCover.f x ≫ j) ≫
+            pullback.snd (Q'.affineCover.f x) (Q'.affineCover.f z)) ≫ qx z := by
+          rw [pullbackRes_snd]
+      _ = pullback.snd (invariantsπ G B R)
+            (pullback.fst (Q'.affineCover.f x) (Q'.affineCover.f z) ≫
+              Q'.affineCover.f x ≫ j) ≫
+            pullback.snd (Q'.affineCover.f x) (Q'.affineCover.f z) ≫ qx z :=
+          Category.assoc _ _ _
+  refine ⟨Q'.affineCover.glueMorphisms qx hcompat, ?_⟩
+  -- verify the factorization on the pullback cover of the global base change
+  refine Scheme.Cover.hom_ext
+    (Q'.affineCover.pullback₁ (pullback.snd (invariantsπ G B R) j)) _ _ fun x => ?_
+  show pullback.fst (pullback.snd (invariantsπ G B R) j) (Q'.affineCover.f x) ≫
+      pullback.snd (invariantsπ G B R) j ≫ Q'.affineCover.glueMorphisms qx hcompat =
+    pullback.fst (pullback.snd (invariantsπ G B R) j) (Q'.affineCover.f x) ≫ f
+  have hcond : pullback.fst (pullback.snd (invariantsπ G B R) j) (Q'.affineCover.f x) ≫
+      pullback.snd (invariantsπ G B R) j =
+      pullback.snd (pullback.snd (invariantsπ G B R) j) (Q'.affineCover.f x) ≫
+        Q'.affineCover.f x :=
+    pullback.condition
+  rw [← Category.assoc, hcond, Category.assoc,
+    Q'.affineCover.ι_glueMorphisms qx hcompat x]
+  -- compare through the canonical map into the chart base change
+  set θ : pullback (pullback.snd (invariantsπ G B R) j) (Q'.affineCover.f x) ⟶
+      pullback (invariantsπ G B R) (Q'.affineCover.f x ≫ j) :=
+    pullback.lift
+      (pullback.fst (pullback.snd (invariantsπ G B R) j) (Q'.affineCover.f x) ≫
+        pullback.fst (invariantsπ G B R) j)
+      (pullback.snd (pullback.snd (invariantsπ G B R) j) (Q'.affineCover.f x))
+      (by
+        rw [Category.assoc, pullback.condition (f := invariantsπ G B R) (g := j),
+          ← Category.assoc, hcond, Category.assoc])
+      with hθ
+  have hθsnd : θ ≫ pullback.snd (invariantsπ G B R) (Q'.affineCover.f x ≫ j) =
+      pullback.snd (pullback.snd (invariantsπ G B R) j) (Q'.affineCover.f x) := by
+    rw [hθ]
+    exact pullback.lift_snd _ _ _
+  have hθρ : θ ≫ pullbackRes G B R j (Q'.affineCover.f x ≫ j) (Q'.affineCover.f x) rfl =
+      pullback.fst (pullback.snd (invariantsπ G B R) j) (Q'.affineCover.f x) := by
+    refine pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, pullbackRes_fst, hθ, pullback.lift_fst]
+    · rw [Category.assoc, pullbackRes_snd, ← Category.assoc, hθsnd, hcond]
+  rw [← hθsnd, Category.assoc, hqx x, ← Category.assoc, hθρ]
