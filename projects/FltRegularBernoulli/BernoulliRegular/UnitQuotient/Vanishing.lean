@@ -44,8 +44,6 @@ noncomputable section
 
 namespace BernoulliRegular
 
-set_option linter.unusedSectionVars false
-
 variable (p : ℕ) [Fact p.Prime]
 variable (K : Type*) [Field K] [NumberField K]
 
@@ -84,6 +82,7 @@ namespace CyclotomicUnitModPOddVanishing
 variable {p K}
 variable {S : CyclotomicUnitModPStructure (p := p) K}
 
+omit [NumberField K] in
 /-- **Carrier form**: for a vanishing certificate and an odd character other than the
 distinguished one, the component carrier is the trivial subgroup. -/
 theorem component_eq_bot (V : CyclotomicUnitModPOddVanishing (p := p) K S)
@@ -93,6 +92,7 @@ theorem component_eq_bot (V : CyclotomicUnitModPOddVanishing (p := p) K S)
     (S.components.component χ).carrier = ⊥ :=
   V.vanishing χ hχ_odd hχ_ne
 
+omit [NumberField K] in
 /-- **Cardinality form**: the trivial component has cardinality one. This is the shape
 the reflection rank inequality consumes. -/
 theorem component_natCard_eq_one
