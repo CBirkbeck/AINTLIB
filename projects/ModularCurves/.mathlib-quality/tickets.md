@@ -19245,3 +19245,19 @@ Arrow(Spec.map f.appTop)) then apply `natCard_spec_carrier_eq_finrank` (BUILT) o
 BUILT + ready to consume: both count cores + affineness step + entire ⟹ scaffolding + fibre side.
 REMAINING: this fibre glue (fiddly, tooled) → #fst⁻¹(E[N])=N² → pigeonhole (BUILT) → curveIsoPullback
 link → comboFamily inj → naive_iff (BUILT) → close bridge → [YF-⊆]. (STREAM-YN)
+
+### v10.181 — ★ COUNT-IDENTIFICATION CRACKED (the sole remaining hard piece of T-D8-⟹)
+BREAKTHROUGH via the existing `ForMathlib/EtaleSectionsCount.lean` machinery:
+- **`natCard_carrier_eq_finrank`** (AXIOM-CLEAN) — a finite étale scheme over a sep-closed field has
+  `finrank`-many topological points (= #sections). Mirrors `natCard_sections_eq_finrank`, reusing its
+  entire affine↔algebra translation (isoSpec ψ, `Algebra.Etale` instance, `finrank_SpecMap_algebraMap`)
+  + `algHomEquivPrimeSpectrum` for points↔algHoms↔PrimeSpectrum. The whole fiddly affine boilerplate I
+  was bounding was ALREADY DONE here for sections — I just mirrored it for points.
+- **`natCard_torsion_fibre`** — `Nat.card ↥((E.baseChange t).torsion N) = N²` (apply the above to
+  `torsionπ` finite-étale + `torsion_rank`). Own-proof sorry-free (inherits torsion black boxes as T-B6).
+
+**13 lemmas this session.** The KEY conceptual blocker (KM 3.7.1 reduced-fibre count) is now DONE.
+REMAINING = plumbing (conceptually clear): (a) `#fst⁻¹(torsionIdeal.support) = N²` (= torsion fibre
+count via base-change/curveIsoPullback identification); (b) support-cover ⟹ `range g = T`; (c) pigeonhole
+(BUILT); (d) curveIsoPullback link base-changed comboᵢ↔Point.pull ⟹ comboFamily inj; (e) naive_iff
+(BUILT) closes bridge; (f) pointVanishSet + relocate ⟹ [YF-⊆]. (STREAM-YN)
