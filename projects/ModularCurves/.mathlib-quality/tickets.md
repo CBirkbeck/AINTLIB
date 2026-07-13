@@ -18105,3 +18105,8 @@ Continue C3b → C3c bridge → C3d (+ lane-B c4) → C3e/f → C4 → SIGNAL.
 
 **(4) STREAM-GH — duplicate relay; ALREADY RATIFIED at v10.177** (GHB7 ★★ axiom-verified: quotProb/crossμ
 clean, relRep only-GHB6-sorryAx; GHB7-0 fork adjudicated to β). No new action; GH continues from [couniv-v-a].
+
+### PR-status ledger (v10.178, coordinator) — both producer PRs open + clean-room-verified, held for owner merge-go
+- **PR-A #5680** (dev/modular-curves → main): clean-room GREEN at 61696bb83 (3798 jobs; the 2-red cascade repaired). Branch has since advanced (GH GHB7 chain, G0 C3a, KM Γ₁ scaffold) — **re-verify at the tip at merge time.**
+- **PR-B #5790** (dev/modular-curves-y1 → main): clean-room GREEN at d9f2fbbb7 (4212 jobs, real exit 0, zero errors); [YF-ETALE]★ + T-D8-bridge + T-E9 MASTER wiring.
+- **⚠ main is churning** (cleanup fleet: origin/main moved e0c5b0d40→3109d4d97 this turn). BOTH PRs will need rebase onto current main + re-verify before merge; the y1 branch's `Basic.lean`/`FullLevelClopen` overlaps files the cleanup fleet touches — integration is a main-coordinator concern. Producer-side: keep the branches buildable; absorb the statement-preserving cleanup flow-back at rebase.
