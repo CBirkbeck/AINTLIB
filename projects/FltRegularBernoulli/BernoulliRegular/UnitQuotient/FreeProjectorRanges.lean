@@ -6,7 +6,7 @@ public import Mathlib.LinearAlgebra.Projection
 /-!
 # Unit quotients: ranges of free-unit character projectors
 
-This file continues `REF-07c6c2b`.  The actual reduced free-unit quotient has
+The actual reduced free-unit quotient has
 character idempotent projectors for the factored action of `Delta / {±1}`.
 Here we prove that these projectors are precisely the projections onto the
 actual character eigenspaces.
@@ -20,8 +20,6 @@ open NumberField IsCyclotomicExtension
 open scoped NumberField
 
 namespace BernoulliRegular
-
-set_option linter.unusedSectionVars false
 
 attribute [local instance] Fintype.ofFinite
 
@@ -59,7 +57,7 @@ theorem cyclotomicUnitFreePartModPEvenCharacterProjector_commute_action
       cyclotomicUnitFreePartModPEvenCharacterProjector (p := p) K hp_gt_two χ
         (cyclotomicUnitFreePartModPEvenDeltaActionZMod (p := p) K hp_gt_two a x) := by
   classical
-  letI : Invertible (Fintype.card (CyclotomicEvenDelta p) : ZMod p) :=
+  let : Invertible (Fintype.card (CyclotomicEvenDelta p) : ZMod p) :=
     cyclotomicEvenDeltaCardInvertibleZMod (p := p) hp_gt_two
   let ρ := cyclotomicUnitFreePartModPEvenRepresentation (p := p) K hp_gt_two
   change ρ a
@@ -124,10 +122,10 @@ theorem cyclotomicUnitFreePartModPEvenCharacterProjector_apply_of_mem_eigenspace
         ∑ ψ : MulChar (CyclotomicEvenDelta p) (ZMod p),
           cyclotomicUnitFreePartModPEvenCharacterProjector (p := p) K hp_gt_two ψ x :=
           (Finset.sum_eq_single χ
-            (fun ψ _hψ hψχ =>
+            (fun ψ _hψ hψχ ↦
               cyclotomicUnitFreePartModPEvenCharacterProjector_apply_eq_zero_of_mem_ne
                 (p := p) (K := K) hp_gt_two (Ne.symm hψχ) hx)
-            (fun hχ => (hχ (Finset.mem_univ χ)).elim)).symm
+            (fun hχ ↦ (hχ (Finset.mem_univ χ)).elim)).symm
     _ = x := cyclotomicUnitFreePartModPEvenCharacterProjector_sum_apply
       (p := p) (K := K) hp_gt_two x
 
@@ -155,7 +153,7 @@ theorem cyclotomicUnitFreePartModPEvenCharacterEigenspace_finrank_of_ne_one
     Module.finrank (ZMod p)
         (cyclotomicUnitFreePartModPEvenCharacterEigenspace (p := p) K hp_gt_two χ) = 1 := by
   classical
-  letI : Invertible (Fintype.card (CyclotomicEvenDelta p) : ZMod p) :=
+  let : Invertible (Fintype.card (CyclotomicEvenDelta p) : ZMod p) :=
     cyclotomicEvenDeltaCardInvertibleZMod (p := p) hp_gt_two
   let P := cyclotomicUnitFreePartModPEvenCharacterProjector (p := p) K hp_gt_two χ
   have hPidem : IsIdempotentElem P := by
