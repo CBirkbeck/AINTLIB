@@ -75,3 +75,29 @@ C3b/C3a/C3d are each ~1 brick. Total: a full focused session (or two), matching 
 **Interaction with C2/C4:** C3 is independent of the C2 sorry (`chartPrecursorSpec_isClosedImmersion`)
 — both feed the sorry-free `isHopfGalois_chartCoaction` that C4 consumes. C4 (GlueData) can be
 prototyped against the constant-group `SchemeQuotient` template once C3's cover exists.
+
+## Appendix: C3 execution state (STREAM-G0, 2026-07-13, resume)
+
+LANDED sorry-free (reusable infra):
+- **C3a** `TranslationBySection.translateByIso x : E.asOver ≅ E.asOver` (p↦p+x).
+- **RelEffCartierDiv.mapIso** (CartierDivisorMapIso.lean) — pushforward of a rel eff Cartier divisor
+  along an S-automorphism; coset `x+D := mapIso (translateByIso x) …`.
+- **C3b-half** `StableComplement.actionShear : G×_S E ≅ G×_S E` `(t,x)↦(t,x+ιt)`, with
+  `actionShear_hom_comp_actionProj : actionShear.hom ≫ actionProj = translationAction`.
+
+REMAINING C3b (the group-closure witness — the real content of `IsStableOpen (E∖G)`):
+With `translationAction.left = actionShear.hom.left ≫ actionProj.left` and `actionShear.hom.left`
+a homeomorphism, `IsStableOpen(E∖G)` reduces to `V ≤ actionShear.hom.left⁻¹ᵁ V`
+(`V := actionProj.left⁻¹ᵁ(E∖G) = {(t,x):x∉G}`), i.e. the topological inclusion
+`translationAction.left.base⁻¹(range ι) ⊆ actionProj.left.base⁻¹(range ι)` (`x+ιt∈G ⟹ x∈G`).
+WITNESS: on `Z := pullback translationAction.left G.ι` (base = the preimage; `pullback.fst` a closed
+immersion of base-range = that preimage), build `q : Z → G.G` = `⟨pullback.snd (=x+ιt∈G),
+invHom(pullback.fst≫fst-to-G) (=−ιt)⟩ ≫ mulHom`, and prove `q ≫ G.ι = pullback.fst ≫ actionProj.left`
+via `mulHom_ι` + `invHom_ι` (ι intertwines the group laws; `x=(x+ιt)+(−ιt)`). Then range of
+`pullback.fst.base` = the preimage ⟹ `actionProj.left.base(preimage) ⊆ range ι`. ~80–100 lines;
+the base/range plumbing (`range pullback.fst` = topological preimage for a closed immersion) is the
+fiddly part. Dedicated sub-session.
+
+REMAINING C3c bridge: `x+G = V(fᵢ)` for homogeneous `fᵢ` ⟹ `E∖(x+G)=D₊(fᵢ)` affine via mathlib
+`Proj.isAffineOpen_basicOpen` (grep `sectionsDivisor`/`sectionDivisor` — `sectionDivisor` = single
+section's `ker` divisor; need degree-N divisor→homogeneous-section via the Weierstrass grading).
