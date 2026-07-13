@@ -323,19 +323,6 @@ Convenient sufficient conditions for the canonical ideal/principal symbol to
 vanish. These reduce to the prime-level vanishing lemmas
 (`pthSymbolAtPrime_canonical_eq_zero_*`). -/
 
-/-- **Vanishing characterization at the ideal level.** If the canonical
-prime-level symbol vanishes on every prime factor of `I`, then the canonical
-ideal symbol vanishes too. (The converse can fail because the symbol is a
-sum, not a product, in `ZMod p`.) -/
-theorem pthSymbolAtIdeal_canonical_eq_zero_of_forall_prime
-    {α : 𝓞 K} {I : Ideal (𝓞 K)}
-    (h : ∀ P ∈ UniqueFactorizationMonoid.normalizedFactors I,
-            pthSymbolAtPrime_canonical (p := p) (K := K) α P = 0) :
-    pthSymbolAtIdeal_canonical (p := p) (K := K) α I = 0 := by
-  unfold pthSymbolAtIdeal_canonical
-  rw [Multiset.map_congr rfl h]
-  simp
-
 /-- **Per-prime vanishing characterization at the principal level.** If the
 canonical prime symbol vanishes on every prime factor of `(β)`, then the
 canonical principal symbol `(α / β)_canonical` vanishes. Direct from
