@@ -236,6 +236,27 @@ private lemma orderDivisor_zero_ideal {S : Scheme.{u}} (E : EllipticCurve S) (N 
   rw [EllipticCurve.Section.orderDivisor, RelEffCartierDiv.sectionsDivisor, dif_pos hpos]
   simp only [smul_zero, Finset.prod_const, Finset.card_univ, Fintype.card_fin]
 
+/-- **[KM-W2 · L2]** Affine-locally at any point `c` of the total space, the zero-section
+order divisor `[0]+⋯+[N·0]` is cut out by `fᴺ` for a local nonzerodivisor parameter `f`:
+this is KM 5.3.3's "the Cartier divisor `pⁿ[0]` is `X^{pⁿ} = 0`". Combines `L1`
+(ideal `= (ker 0)^N`) with the principal-parameter existence for a section of a smooth
+relative curve (`exists_affineOpen_ker_principal_nonZeroDivisor`, KM 1.2.2). -/
+private lemma orderDivisor_zero_ideal_principal {S : Scheme.{u}} (E : EllipticCurve S) (N : ℕ)
+    (c : E.E) :
+    ∃ V : E.E.affineOpens, c ∈ V.1 ∧ ∃ f : Γ(E.E, V.1),
+      ((EllipticCurve.Section.orderDivisor E 0 N).ideal).ideal V = Ideal.span {f ^ N} ∧
+      f ∈ nonZeroDivisors Γ(E.E, V.1) := by
+  obtain ⟨V, hcV, f, hf, hfnzd⟩ :=
+    RelEffCartierDiv.exists_affineOpen_ker_principal_nonZeroDivisor E.π E.smooth
+      (0 : E.Section).1 (0 : E.Section).2 c
+  refine ⟨V, hcV, f, ?_, hfnzd⟩
+  have hpow : ((Scheme.Hom.ker (0 : E.Section).1) ^ N).ideal V
+      = ((Scheme.Hom.ker (0 : E.Section).1).ideal V) ^ N := by
+    rw [← Pi.pow_apply]
+    exact congrFun
+      (map_pow (Scheme.IdealSheafData.idealMonoidHom E.E) (Scheme.Hom.ker (0 : E.Section).1) N) V
+  rw [orderDivisor_zero_ideal, hpow, hf, Ideal.span_singleton_pow]
+
 /-- **[KM-W2-1] (KM 5.3.3, first conclusion, elliptic affine case).** If the zero
 section of an elliptic curve over `Spec A` has Drinfeld exact order `pⁿ`, then
 `p = 0` in `A`. -/
