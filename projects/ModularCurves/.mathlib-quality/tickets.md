@@ -17937,3 +17937,53 @@ cascade above), **repaired e6a04fe8d + 61696bb83**, **clean-room full-library GR
 (3798 jobs)** — **ready; merge on owner-go** (v10.170 precedent: coordinator opens+verifies,
 owner says merge). **PR-B** (dev/modular-curves-y1 → main): still awaits STREAM-YN's push
 (origin-y1 stale at ccbfe2576).
+
+## Amendments v10.176 (2026-07-13, coordinator): STREAM-G0 [HG-C3] decomposition RATIFIED — and the C3c "long pole" DE-RISKED: the affineness is mathlib (`Proj.isAffineOpen_basicOpen`), NOT a gap; only the divisor↔section bridge is new. Reuse-steered per the cardinal rule.
+
+**Verified at source** (`decomposition-hopf-c3-cover.md` read; HEAD 9a0c7a355 = the C3 board
+commit, branch since advanced to 19f428399 by STREAM-GH — G0 rebase-aware). C3 leaves C3a–f are
+source-faithful; the constant-group-orbit-machinery-doesn't-apply finding (fppf non-étale
+subgroup ⟹ divisor-complement route, not `exists_isStableOpen_isAffineOpen`) is CORRECT and
+ratified.
+
+**THE C3c CORRECTION (the load-bearing adjudication).** G0 flagged C3c ("complement of a
+fibrewise-ample divisor is affine") as "absent from mathlib / the real risk / a dedicated
+sub-session." **That conflates two statements:**
+- the GENERAL "complement of an ample divisor is affine" — indeed absent from mathlib, and
+  **irrelevant** (the Proj route sidesteps it);
+- the SPECIFIC "`D₊(f)` is affine for `f` homogeneous of positive degree" — **PRESENT**:
+  `AlgebraicGeometry.Proj.isAffineOpen_basicOpen` (`mathlib …/ProjectiveSpectrum/Basic.lean:201`),
+  and the repo ALREADY applies it on the Weierstrass model
+  (`PoleFiltration.lean:2190+` `Proj_fromSpec_awayToSection_awayι` / `projModelZero_eq_fromSpec`).
+So **C3c does not BUILD affineness — it APPLIES a mathlib lemma.** The route is RATIFIED, and its
+cost reframes from "research-scale gap" to "one bounded divisor↔section bridge + apply
+`isAffineOpen_basicOpen`."
+
+**REUSE STEER (cardinal rule — consume, do NOT rebuild):**
+- **Affineness of `E ∖ (xᵢ+G) = D₊(fᵢ)`** ⟸ mathlib `Proj.isAffineOpen_basicOpen` +
+  `Proj.opensRange_awayι` + `Proj.map_preimage_basicOpen` (`…/ProjectiveSpectrum/Functor.lean:156`,
+  for C3a's translation-preimage-of-`D₊`).
+- **The Weierstrass-`Proj` plumbing** ⟸ `EllipticCurve/Comparison.lean` (projModel presentation),
+  `PoleFiltration.lean` (`basicOpenIsoAway`/`awayToSection`/`awayι` bridges),
+  `WeierstrassModel.lean` (the `D₊(Xᵢ)` cover), `GroupLawConstruction.lean:417+`
+  (`Proj.map_preimage_basicOpen` used for an automorphism preserving `D₊` — the C3a precedent).
+- **C3b stability** ⟸ mirror `EngineDescent.lean:84` ("complement of the zero section is stable").
+- **The divisor side** ⟸ `G.toRelEffCartierDiv` (T-SG1 bridge; `NIsogSpace.lean:112`,
+  `CyclicSubgroup.lean`) — degree `N`, `isSubgroup`. **Answer to G0's direct question:** KM's
+  Cartier layer gives the DIVISOR (degree/ideal), NOT affineness/`D₊` — those are disjoint layers;
+  the bridge between them is the new brick.
+
+**THE ONE GENUINELY-NEW BRICK (C3c's real content):** the **divisor↔homogeneous-section bridge** —
+express the translated subgroup divisor `xᵢ+G` (= `G.toRelEffCartierDiv` shifted by the section
+`xᵢ`, degree `N`) as the vanishing `V(fᵢ)` of a homogeneous `fᵢ ∈ 𝒜_m`, so that
+`E ∖ (xᵢ+G) = D₊(fᵢ)`. Moderate (a divisor-to-section identification), NOT the affineness gap.
+**Scope check before building:** the repo's `sectionsDivisor` machinery (heavy in the Y1/YFULL
+clopen work) may already relate a section's divisor to its vanishing — G0: grep
+`sectionsDivisor`/`vanishingIdeal` on the Proj model FIRST and reuse if present.
+
+**ORDER CONFIRMED** (no redirect — G0 proceeds): elementary bricks first — **C3b** (complement
+stability, mirror EngineDescent:84) + **C3a** (translation automorphism `t_x`, reuse
+`Proj.map_preimage_basicOpen`) in either order — then **C3c** (the bridge, now bounded) → **C3d**
+(freeness supplying M6's `Module.Free`; **adjacent to LANE-B c4** `E[N]` rank-N² — same
+E[N]-freeness headspace, do them together) → **C3e/f** (coverage + assembly). Then C4 glue →
+**SIGNAL ★★**. Marathon v10.162.
