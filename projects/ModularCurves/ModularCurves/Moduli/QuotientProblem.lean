@@ -971,7 +971,7 @@ theorem representable_of_rigid_of_torsor (P Q : ModuliProblem R)
 
 /-- The chart-comparison morphism composed with the chart projection is the chart
 projection of the composite base map: `pullbackAlongMap g k ≫ π_g = π_{k ≫ g}`. -/
-private theorem pullbackAlongMap_pullbackAlongπ {R : CommRingCat.{u}} (X : EllObj R)
+theorem pullbackAlongMap_pullbackAlongπ {R : CommRingCat.{u}} (X : EllObj R)
     {T T' : Scheme.{u}} (g : T ⟶ X.base) (k : T' ⟶ T) :
     X.pullbackAlongMap g k ≫ X.pullbackAlongπ g = X.pullbackAlongπ (k ≫ g) := by
   refine EllHom.ext rfl ?_

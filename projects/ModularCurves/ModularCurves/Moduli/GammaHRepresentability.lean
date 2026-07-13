@@ -881,6 +881,17 @@ theorem QuotPkg.mapT_spec (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAc
     QuotPkg.mapT pkg hfree hbase k ≫ (pkg X').f₀ = pullback.snd (pkg X).f₀ k.baseHom :=
   ((pkg X).exists_mapDescent (pkg X') hfree (hbase X) k).choose_spec.choose_spec
 
+/-- Transport of `mapT` along an equality of `Ell/R`-morphisms (the source pullback
+moves with the base morphism; subst-internal, `map_eqv`-style). -/
+theorem QuotPkg.mapT_congr (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAction φ)
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base))) {X X' : EllObj R} {k₁ k₂ : X' ⟶ X}
+    (hk : k₁ = k₂) :
+    QuotPkg.mapT pkg hfree hbase k₁ =
+      eqToHom (by rw [hk]) ≫ QuotPkg.mapT pkg hfree hbase k₂ := by
+  subst hk
+  rw [eqToHom_refl, Category.id_comp]
+
 /-- **The identity transport is the first projection** ([GHB7-3c] map-id law, via
 `compare_pullback_id` and descent uniqueness). -/
 theorem QuotPkg.mapT_id (pkg : ∀ X : EllObj R, QuotPkg φ X) (hfree : FreeAction φ)
@@ -1464,7 +1475,194 @@ theorem QuotPkg.isIso_mapT_pullbackAlongπ (pkg : ∀ X : EllObj R, QuotPkg φ X
                 (Category.id_comp _))))))),
       hwu (𝟙 _) (Category.comp_id _)]
 
+/-- **The quotient problem is relatively representable by the chosen quotients**
+([GHB7-5]; KM 7.1.3(1) + the étale conjunct): `(pkg X').Z₀` with `f₀` represents
+`quotProb` relatively at `X'`, finite étale (through [GHB6]). The classifying
+bijection composes the pullback universal property with the transport isomorphism
+`isIso_mapT_pullbackAlongπ`; naturality is the transport cocycle. -/
+theorem QuotPkg.relRep_quotProb (pkg : ∀ X : EllObj R, QuotPkg φ X)
+    (hfree : FreeAction φ)
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base))) (X' : EllObj R) :
+    ∃ d' : ModuliProblem.RelRepData (QuotPkg.quotProb pkg hfree hbase) X',
+      IsFinite d'.f ∧ Etale d'.f := by
+  obtain ⟨hfin, het⟩ := (pkg X').f₀_finite_etale hfree (hbase X')
+  have hqf : ∀ {T : Scheme.{u}} (g : T ⟶ X'.base),
+      QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g) ≫
+        (pkg (X'.pullbackAlong g)).f₀ =
+      (pullback.snd (pkg X').f₀ g :
+        CategoryTheory.Limits.pullback (pkg X').f₀ g ⟶ T) :=
+    fun g => (QuotPkg.mapT_spec pkg hfree hbase (X'.pullbackAlongπ g)).2.2.2.2.2
+  have hinvf : ∀ {T : Scheme.{u}} (g : T ⟶ X'.base)
+      [IsIso (QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))],
+      inv (QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g)) ≫
+        (pullback.snd (pkg X').f₀ g :
+          CategoryTheory.Limits.pullback (pkg X').f₀ g ⟶ T) =
+      (pkg (X'.pullbackAlong g)).f₀ := by
+    intro T g _
+    exact (congrArg (inv (QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g)) ≫ ·)
+        (hqf g).symm).trans
+      ((Category.assoc _ _ _).symm.trans
+        ((congrArg (· ≫ (pkg (X'.pullbackAlong g)).f₀)
+          (IsIso.inv_hom_id _)).trans (Category.id_comp _)))
+  refine ⟨⟨(pkg X').Z₀, (pkg X').f₀, fun {T} g =>
+    haveI := QuotPkg.isIso_mapT_pullbackAlongπ pkg hfree hbase (X' := X') g; {
+    toFun := fun h => ⟨pullback.lift h.1 (𝟙 T)
+        (h.2.trans (Category.id_comp g).symm) ≫
+        QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g),
+      (Category.assoc _ _ _).trans ((congrArg (pullback.lift h.1 (𝟙 T)
+          (h.2.trans (Category.id_comp g).symm) ≫ ·) (hqf g)).trans
+        (pullback.lift_snd _ _ _))⟩
+    invFun := fun s => ⟨(s.1 ≫ inv (QuotPkg.mapT pkg hfree hbase
+        (X'.pullbackAlongπ g))) ≫ pullback.fst (pkg X').f₀ g,
+      (Category.assoc _ _ _).trans ((congrArg ((s.1 ≫ inv (QuotPkg.mapT pkg hfree
+          hbase (X'.pullbackAlongπ g))) ≫ ·) pullback.condition).trans
+        ((Category.assoc _ _ _).symm.trans
+          ((congrArg (· ≫ g)
+            ((Category.assoc _ _ _).trans
+              ((congrArg (s.1 ≫ ·) (hinvf g)).trans s.2))).trans
+            (Category.id_comp g))))⟩
+    left_inv := fun h => Subtype.ext
+      ((congrArg (· ≫ pullback.fst (pkg X').f₀ g)
+        ((Category.assoc _ _ _).trans ((congrArg (pullback.lift h.1 (𝟙 T)
+            (h.2.trans (Category.id_comp g).symm) ≫ ·)
+          (IsIso.hom_inv_id (QuotPkg.mapT pkg hfree hbase
+            (X'.pullbackAlongπ g)))).trans (Category.comp_id _)))).trans
+        (pullback.lift_fst _ _ _))
+    right_inv := fun s => Subtype.ext
+      ((congrArg (· ≫ QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))
+        (pullback.hom_ext (pullback.lift_fst _ _ _)
+          ((pullback.lift_snd _ _ _).trans
+            ((Category.assoc _ _ _).trans
+              ((congrArg (s.1 ≫ ·) (hinvf g)).trans s.2)).symm) :
+          pullback.lift ((s.1 ≫ inv (QuotPkg.mapT pkg hfree hbase
+              (X'.pullbackAlongπ g))) ≫ pullback.fst (pkg X').f₀ g) (𝟙 T)
+            ((Category.assoc _ _ _).trans ((congrArg ((s.1 ≫ inv (QuotPkg.mapT pkg
+                hfree hbase (X'.pullbackAlongπ g))) ≫ ·)
+              pullback.condition).trans
+              ((Category.assoc _ _ _).symm.trans
+                ((congrArg (· ≫ g)
+                  ((Category.assoc _ _ _).trans
+                    ((congrArg (s.1 ≫ ·) (hinvf g)).trans s.2))).trans
+                  (Category.id_comp g))))) =
+          s.1 ≫ inv (QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g)))).trans
+        ((Category.assoc _ _ _).trans ((congrArg (s.1 ≫ ·)
+          (IsIso.inv_hom_id (QuotPkg.mapT pkg hfree hbase
+            (X'.pullbackAlongπ g)))).trans (Category.comp_id _)))) }, ?_⟩,
+    hfin, het⟩
+  -- naturality in `T` (the transport cocycle along the base-change triangle)
+  intro T T' g k h
+  refine Subtype.ext ?_
+  have hsec : (pullback.lift h.1 (𝟙 T) (h.2.trans (Category.id_comp g).symm) ≫
+      QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g)) ≫
+      (pkg (X'.pullbackAlong g)).f₀ = 𝟙 T :=
+    (Category.assoc _ _ _).trans ((congrArg (pullback.lift h.1 (𝟙 T)
+        (h.2.trans (Category.id_comp g).symm) ≫ ·) (hqf g)).trans
+      (pullback.lift_snd _ _ _))
+  have hc₁f : (((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData.compare
+      (pkg (X'.pullbackAlong g)).d.toRelRepData).1 ≫ (pkg (X'.pullbackAlong g)).d.f =
+      pullback.snd (pkg X').d.f (X'.pullbackAlongπ g).baseHom :=
+    (((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData.compare
+      (pkg (X'.pullbackAlong g)).d.toRelRepData).2
+  show pullback.lift (k ≫ h.1) (𝟙 T')
+      ((show (k ≫ h.1) ≫ (pkg X').f₀ = k ≫ g from by
+        rw [Category.assoc, h.2]).trans (Category.id_comp (k ≫ g)).symm) ≫
+      QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ (k ≫ g)) =
+    pullback.lift (k ≫ (pullback.lift h.1 (𝟙 T)
+        (h.2.trans (Category.id_comp g).symm) ≫
+        QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))) (𝟙 T')
+      ((show (k ≫ (pullback.lift h.1 (𝟙 T)
+          (h.2.trans (Category.id_comp g).symm) ≫
+          QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))) ≫
+          (pkg (X'.pullbackAlong g)).f₀ = k from
+        (Category.assoc _ _ _).trans
+          ((congrArg (k ≫ ·) hsec).trans (Category.comp_id k))).trans
+        (Category.id_comp k).symm) ≫
+      QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongMap g k)
+  rw [QuotPkg.mapT_congr pkg hfree hbase
+      (ModuliProblem.pullbackAlongMap_pullbackAlongπ X' g k).symm,
+    show (eqToHom (by rw [(ModuliProblem.pullbackAlongMap_pullbackAlongπ
+          X' g k).symm]) :
+        CategoryTheory.Limits.pullback (pkg X').f₀
+          (X'.pullbackAlongπ (k ≫ g)).baseHom ⟶
+        CategoryTheory.Limits.pullback (pkg X').f₀
+          (X'.pullbackAlongMap g k ≫ X'.pullbackAlongπ g).baseHom) =
+      𝟙 _ from rfl]
+  refine (congrArg (pullback.lift (k ≫ h.1) (𝟙 T')
+      ((show (k ≫ h.1) ≫ (pkg X').f₀ = k ≫ g from by
+        rw [Category.assoc, h.2]).trans (Category.id_comp (k ≫ g)).symm) ≫ ·)
+    (Category.id_comp _)).trans ?_
+  rw [← QuotPkg.mapT_comp pkg hfree hbase (X'.pullbackAlongπ g)
+      (X'.pullbackAlongMap g k)
+      (pullback.lift (pullback.fst (pkg X').d.f (k ≫ g))
+        (pullback.snd (pkg X').d.f (k ≫ g) ≫ k)
+        (by rw [Category.assoc]; exact pullback.condition))
+      (pullback.lift_fst _ _ _) (pullback.lift_snd _ _ _)
+      (pullback.lift
+        ((pullback.lift (pullback.fst (pkg X').d.f (k ≫ g))
+          (pullback.snd (pkg X').d.f (k ≫ g) ≫ k)
+          (by rw [Category.assoc]; exact pullback.condition)) ≫
+          (((pkg X').d.pullback (X'.pullbackAlongπ g)).toRelRepData.compare
+            (pkg (X'.pullbackAlong g)).d.toRelRepData).1)
+        (pullback.snd (pkg X').d.f (k ≫ g))
+        ((Category.assoc _ _ _).trans ((congrArg (_ ≫ ·) hc₁f).trans
+          (pullback.lift_snd _ _ _))))
+      (pullback.lift_fst _ _ _) (pullback.lift_snd _ _ _)
+      (pullback.lift (pullback.fst (pkg X').f₀ (k ≫ g))
+        (pullback.snd (pkg X').f₀ (k ≫ g) ≫ k)
+        (by rw [Category.assoc]; exact pullback.condition))
+      (pullback.lift_fst _ _ _) (pullback.lift_snd _ _ _)
+      (pullback.lift
+        ((pullback.lift (pullback.fst (pkg X').f₀ (k ≫ g))
+          (pullback.snd (pkg X').f₀ (k ≫ g) ≫ k)
+          (by rw [Category.assoc]; exact pullback.condition)) ≫
+          QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))
+        (pullback.snd (pkg X').f₀ (k ≫ g))
+        ((Category.assoc _ _ _).trans ((congrArg (_ ≫ ·) (hqf g)).trans
+          (pullback.lift_snd _ _ _))))
+      (pullback.lift_fst _ _ _) (pullback.lift_snd _ _ _)]
+  refine ((Category.assoc _ _ _).symm.trans ?_)
+  congr 1
+  have hleg : ∀ (u : T' ⟶ CategoryTheory.Limits.pullback (pkg X').f₀ (k ≫ g)),
+      u ≫ pullback.fst (pkg X').f₀ (k ≫ g) = k ≫ h.1 →
+      u ≫ pullback.snd (pkg X').f₀ (k ≫ g) = 𝟙 T' →
+      u ≫ pullback.lift
+        ((pullback.lift (pullback.fst (pkg X').f₀ (k ≫ g))
+          (pullback.snd (pkg X').f₀ (k ≫ g) ≫ k)
+          (by rw [Category.assoc]; exact pullback.condition)) ≫
+          QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))
+        (pullback.snd (pkg X').f₀ (k ≫ g))
+        ((Category.assoc _ _ _).trans ((congrArg (_ ≫ ·) (hqf g)).trans
+          (pullback.lift_snd _ _ _))) =
+      pullback.lift (k ≫ (pullback.lift h.1 (𝟙 T)
+          (h.2.trans (Category.id_comp g).symm) ≫
+          QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))) (𝟙 T')
+        ((show (k ≫ (pullback.lift h.1 (𝟙 T)
+            (h.2.trans (Category.id_comp g).symm) ≫
+            QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))) ≫
+            (pkg (X'.pullbackAlong g)).f₀ = k from
+          (Category.assoc _ _ _).trans
+            ((congrArg (k ≫ ·) hsec).trans (Category.comp_id k))).trans
+          (Category.id_comp k).symm) := by
+    intro u hu1 hu2
+    apply pullback.hom_ext
+    · rw [Category.assoc, pullback.lift_fst, pullback.lift_fst, ← Category.assoc]
+      have hinner : u ≫ pullback.lift (pullback.fst (pkg X').f₀ (k ≫ g))
+          (pullback.snd (pkg X').f₀ (k ≫ g) ≫ k)
+          (by rw [Category.assoc]; exact pullback.condition) =
+          k ≫ pullback.lift h.1 (𝟙 T) (h.2.trans (Category.id_comp g).symm) := by
+        apply pullback.hom_ext
+        · rw [Category.assoc, pullback.lift_fst, hu1, Category.assoc,
+            pullback.lift_fst]
+        · rw [Category.assoc, pullback.lift_snd, ← Category.assoc, hu2,
+            Category.id_comp, Category.assoc, pullback.lift_snd, Category.comp_id]
+      exact (congrArg (· ≫ QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g))
+        hinner).trans (Category.assoc _ _ _)
+    · rw [Category.assoc, pullback.lift_snd, hu2, pullback.lift_snd]
+  exact hleg _ (pullback.lift_fst _ _ _) (pullback.lift_snd _ _ _)
+
 end Transport
+
 
 
 
