@@ -1,10 +1,10 @@
 module
 
 public import Mathlib.Analysis.Normed.Ring.InfiniteSum
-public import Mathlib.Analysis.SpecificLimits.Normed
 public import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
-public import Mathlib.Topology.Algebra.InfiniteSum.Constructions
+public import Mathlib.Analysis.SpecificLimits.Normed
 public import Mathlib.Data.Finset.Insert
+public import Mathlib.Topology.Algebra.InfiniteSum.Constructions
 
 /-!
 # Finite multidimensional geometric series
@@ -53,7 +53,7 @@ when `β` is empty, equals `1`. The function type is then a singleton.
 -/
 theorem tsum_const_one_of_isEmpty_pi {β : Type*} [IsEmpty β] :
     ∑' (_ : β → ℕ), (1 : ℂ) = 1 := by
-  haveI : Unique (β → ℕ) := Pi.uniqueOfIsEmpty _
+  have : Unique (β → ℕ) := Pi.uniqueOfIsEmpty _
   exact (hasSum_unique _).tsum_eq
 
 /--
@@ -64,8 +64,8 @@ to `↥T`.
 def insertFunEquiv {α : Type*} [DecidableEq α] {T : Finset α} {a₀ : α} (h : a₀ ∉ T) :
     (↥(insert a₀ T) → ℕ) ≃ ℕ × (↥T → ℕ) where
   toFun f := (f ⟨a₀, Finset.mem_insert_self _ _⟩,
-    fun ⟨a, ha⟩ => f ⟨a, Finset.mem_insert_of_mem ha⟩)
-  invFun p := fun ⟨a, ha⟩ =>
+    fun ⟨a, ha⟩ ↦ f ⟨a, Finset.mem_insert_of_mem ha⟩)
+  invFun p := fun ⟨a, ha⟩ ↦
     if heq : a = a₀ then p.1
     else p.2 ⟨a, (Finset.mem_insert.mp ha).resolve_left heq⟩
   left_inv f := by
@@ -78,7 +78,7 @@ def insertFunEquiv {α : Type*} [DecidableEq α] {T : Finset α} {a₀ : α} (h 
     refine Prod.ext ?_ ?_
     · simp
     · funext ⟨a, ha⟩
-      have hne : a ≠ a₀ := fun heq => h (heq ▸ ha)
+      have hne : a ≠ a₀ := fun heq ↦ h (heq ▸ ha)
       simp [hne]
 
 /--
@@ -112,43 +112,43 @@ inverse local factors equals the tsum.
 -/
 private lemma norm_summable_and_prod_eq {α : Type*} (T : Finset α)
     (z : α → ℂ) (hz : ∀ a ∈ T, ‖z a‖ < 1) :
-    Summable (fun f : ↥T → ℕ => ‖∏ a ∈ T.attach, (z a.1) ^ (f a)‖) ∧
+    Summable (fun f : ↥T → ℕ ↦ ‖∏ a ∈ T.attach, (z a.1) ^ (f a)‖) ∧
       ∏ a ∈ T, (1 - z a)⁻¹ =
         ∑' (f : ↥T → ℕ), ∏ a ∈ T.attach, (z a.1) ^ (f a) := by
   classical
   induction T using Finset.induction_on with
   | empty =>
-    haveI : IsEmpty (↥(∅ : Finset α)) :=
-      ⟨fun a => absurd a.2 (Finset.notMem_empty _)⟩
-    haveI : Unique (↥(∅ : Finset α) → ℕ) := Pi.uniqueOfIsEmpty _
+    have : IsEmpty (↥(∅ : Finset α)) :=
+      ⟨fun a ↦ absurd a.2 (Finset.notMem_empty _)⟩
+    have : Unique (↥(∅ : Finset α) → ℕ) := Pi.uniqueOfIsEmpty _
     refine ⟨?_, ?_⟩
     · simp only [Finset.attach_empty, Finset.prod_empty, norm_one]
-      exact (hasSum_unique (fun _ : ↥(∅ : Finset α) → ℕ => (1 : ℝ))).summable
+      exact (hasSum_unique (fun _ : ↥(∅ : Finset α) → ℕ ↦ (1 : ℝ))).summable
     · simp only [Finset.attach_empty, Finset.prod_empty]
       exact (tsum_const_one_of_isEmpty_pi (β := ↥(∅ : Finset α))).symm
   | @insert a₀ T' h ih =>
-    obtain ⟨ih_sum, ih_eq⟩ := ih (fun a ha => hz a (Finset.mem_insert_of_mem ha))
+    obtain ⟨ih_sum, ih_eq⟩ := ih (fun a ha ↦ hz a (Finset.mem_insert_of_mem ha))
     have hz_a₀ : ‖z a₀‖ < 1 := hz a₀ (Finset.mem_insert_self _ _)
-    have h_geom_sum : Summable (fun n : ℕ => ‖(z a₀) ^ n‖) :=
+    have h_geom_sum : Summable (fun n : ℕ ↦ ‖(z a₀) ^ n‖) :=
       summable_norm_geometric_of_norm_lt_one hz_a₀
     have h_pair_sum :
-        Summable (fun p : ℕ × (↥T' → ℕ) =>
+        Summable (fun p : ℕ × (↥T' → ℕ) ↦
           ‖(z a₀) ^ p.1 * ∏ a ∈ T'.attach, (z a.1) ^ (p.2 a)‖) :=
       Summable.mul_norm
-        (f := fun n : ℕ => (z a₀) ^ n)
-        (g := fun k : ↥T' → ℕ => ∏ a ∈ T'.attach, (z a.1) ^ (k a))
+        (f := fun n : ℕ ↦ (z a₀) ^ n)
+        (g := fun k : ↥T' → ℕ ↦ ∏ a ∈ T'.attach, (z a.1) ^ (k a))
         h_geom_sum ih_sum
     have prod_decomp_pair : ∀ p : ℕ × (↥T' → ℕ),
         ∏ a ∈ (insert a₀ T').attach, (z a.1) ^ ((insertFunEquiv h).symm p a) =
           (z a₀) ^ p.1 * ∏ a ∈ T'.attach, (z a.1) ^ (p.2 a) := by
       rintro ⟨n, g⟩
       rw [prod_insert_attach_split h
-        (fun a => (z a.1) ^ ((insertFunEquiv h).symm (n, g) a))]
+        (fun a ↦ (z a.1) ^ ((insertFunEquiv h).symm (n, g) a))]
       simp only [insertFunEquiv, Equiv.coe_fn_symm_mk, dite_true]
       congr 1
       apply Finset.prod_congr rfl
       intro a _
-      have hne : a.1 ≠ a₀ := fun heq => h (heq ▸ a.2)
+      have hne : a.1 ≠ a₀ := fun heq ↦ h (heq ▸ a.2)
       simp [hne]
     refine ⟨?_, ?_⟩
     · rw [← (insertFunEquiv h).symm.summable_iff]
@@ -160,13 +160,13 @@ private lemma norm_summable_and_prod_eq {α : Type*} (T : Finset α)
         show (1 - z a₀)⁻¹ = ∑' n : ℕ, (z a₀) ^ n from
           (tsum_geometric_of_norm_lt_one hz_a₀).symm,
         tsum_mul_tsum_of_summable_norm h_geom_sum ih_sum,
-        show (fun p : ℕ × (↥T' → ℕ) =>
+        show (fun p : ℕ × (↥T' → ℕ) ↦
             (z a₀) ^ p.1 * ∏ a ∈ T'.attach, (z a.1) ^ (p.2 a)) =
-          fun p : ℕ × (↥T' → ℕ) =>
+          fun p : ℕ × (↥T' → ℕ) ↦
             ∏ a ∈ (insert a₀ T').attach, (z a.1) ^ ((insertFunEquiv h).symm p a) by
           funext p; rw [prod_decomp_pair p]]
       exact (insertFunEquiv h).symm.tsum_eq
-        (fun f : ↥(insert a₀ T') → ℕ =>
+        (fun f : ↥(insert a₀ T') → ℕ ↦
           ∏ a ∈ (insert a₀ T').attach, (z a.1) ^ (f a))
 
 /--
@@ -177,7 +177,7 @@ function `f ↦ ‖∏ a ∈ T.attach, (z a.1) ^ (f a)‖` is summable over
 -/
 theorem norm_summable_prod_pow {α : Type*} (T : Finset α) (z : α → ℂ)
     (hz : ∀ a ∈ T, ‖z a‖ < 1) :
-    Summable (fun f : ↥T → ℕ => ‖∏ a ∈ T.attach, (z a.1) ^ (f a)‖) :=
+    Summable (fun f : ↥T → ℕ ↦ ‖∏ a ∈ T.attach, (z a.1) ^ (f a)‖) :=
   (norm_summable_and_prod_eq T z hz).1
 
 /--
