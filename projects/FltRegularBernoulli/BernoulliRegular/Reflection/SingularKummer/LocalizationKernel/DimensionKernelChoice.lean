@@ -9,7 +9,7 @@ public import BernoulliRegular.Reflection.SingularKummer.LocalizationKernel.Loca
 /-!
 # Singular Kummer: choosing a class in the localization kernel
 
-This file records the REF-13 dimension argument.  Once the localization map is
+This file records the dimension argument.  Once the localization map is
 expressed on the `i`-th singular component with codomain the completed local
 principal-unit `i`-component, the inequality
 
@@ -40,14 +40,11 @@ open SingularLinearAction.SingularPair
 variable (p : ℕ) [Fact p.Prime]
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
-set_option maxHeartbeats 800000 in
 -- `QuotientGroup.lift` unfolds the cyclotomic local-unit quotient and the
 -- completed principal-unit quotient; keep the larger budget local to this
 -- descent.
-set_option synthInstance.maxHeartbeats 80000 in
 -- The completed quotient's `ZMod p` module is synthesized through additive
 -- and quotient-group wrappers.
-set_option synthInstance.maxHeartbeats 80000 in
 -- The component codomain repeats the same completed quotient module synthesis
 -- while building the projected linear map.
 /-- The concrete completed localization map, projected to the target `i`-th
@@ -67,7 +64,7 @@ noncomputable def singularGroupCompletedLocalizationComponentMap {i : ℕ} :
     apply Subtype.ext
     simp
 
-/-- REF-13, component-level kernel choice.
+/-- Component-level kernel choice.
 
 Given the component-level localization map from the singular `i`-component to
 the local completed principal-unit `i`-component, there is a nonzero singular
@@ -100,7 +97,7 @@ theorem exists_nonzero_in_component_localization_kernel
         (Local.completedPrincipalUnitModPCharacterProjectionRange (p := p) K i) = 1 :=
     Local.completedPrincipalUnitModPCharacterProjectionRange_finrank_one
       (p := p) (K := K) hp_gt_two hi_low (by omega)
-  haveI : FiniteDimensional (ZMod p)
+  have : FiniteDimensional (ZMod p)
       (Local.completedPrincipalUnitModPCharacterProjectionRange (p := p) K i) :=
     FiniteDimensional.of_finrank_eq_succ hLocal_finrank
   have hlt :
@@ -112,7 +109,6 @@ theorem exists_nonzero_in_component_localization_kernel
     omega
   exact LinearDimensionKernel.exists_ne_zero_map_eq_zero_of_finrank_lt loc_i hlt
 
-set_option synthInstance.maxHeartbeats 80000 in
 -- The completed unit quotient's `ZMod p` instance is deeply wrapped through
 -- additive and quotient-group structures.
 /-- Restrict an equivariant localization map to the matching source and target
@@ -155,7 +151,7 @@ def completedLocalComponentMap {i : ℕ}
   map_smul' c x :=
     Subtype.ext <| map_smul loc c x.1
 
-/-- REF-21.6d2a, abstract component form.
+/-- Abstract component form.
 
 If the global-unit component injects into the singular component, the component
 class map is the actual singular-to-class map, and the local target has the
@@ -194,7 +190,7 @@ theorem componentLocalizationKernel_finrank_ge_classComponent [NeZero p] {i : �
       Ucomp →ₗ[ZMod p]
         singularGroupCharacterProjectionComponent (K := K) (p := p) i
           (cyclotomicSingularGroupAction K p) := {
-    toFun := fun u =>
+    toFun := fun u ↦
       ⟨globalUnitPowerQuotientToSingularGroupLinear K p u.1,
         hU_to_S ⟨u.1, u.2, rfl⟩⟩
     map_add' := by
@@ -233,11 +229,9 @@ theorem componentLocalizationKernel_finrank_ge_classComponent [NeZero p] {i : �
     exact Subtype.ext <|
       globalUnitPowerQuotientToSingularGroupLinear_injective K p <| congrArg Subtype.val huv
 
-set_option maxHeartbeats 1000000 in
 -- The component finite-dimensionality proof unfolds the projected singular
 -- exact sequence and the cyclotomic component maps.
-set_option synthInstance.maxHeartbeats 120000 in
-/-- REF-21.6d2a1: the concrete even-character singular component is
+/-- The concrete even-character singular component is
 finite-dimensional without an external finiteness hypothesis.
 
 The proof uses the component form of `E/E^p -> S -> A[p]`: the matching unit
@@ -256,13 +250,13 @@ theorem singularGroupCharacterProjectionComponent_finiteDimensional_of_even_powe
       Module.finrank (ZMod p) Ucomp = 1 :=
     cyclotomicUnitPowerQuotientDeltaPowerCharacterEigenspace_finrank
       (p := p) K hp_gt_two hi_even hi_low hi_high
-  haveI : FiniteDimensional (ZMod p) Ucomp :=
+  have : FiniteDimensional (ZMod p) Ucomp :=
     FiniteDimensional.of_finrank_eq_succ hU_finrank
   let unitToSingularComponent :
       Ucomp →ₗ[ZMod p]
         singularGroupCharacterProjectionComponent (K := K) (p := p) i
           (cyclotomicSingularGroupAction K p) := {
-    toFun := fun u =>
+    toFun := fun u ↦
       ⟨globalUnitPowerQuotientToSingularGroupLinear K p u.1,
         globalUnitPowerQuotientToSingularGroupLinear_mem_characterProjectionComponent
           (K := K) (p := p) (i := i) u.2⟩
@@ -340,7 +334,7 @@ theorem singularGroupCharacterProjectionComponent_finiteDimensional_of_even_powe
         exact (cyclotomicSingularGroupClassMapToPTorsion_equivariant K p d x).symm))
     hker
 
-/-- REF-21.6d2a, concrete even-character form for the completed lambda-local
+/-- Concrete even-character form for the completed lambda-local
 localization component.  This is the formal dimension estimate
 
 ```text
@@ -369,17 +363,17 @@ theorem completedLocalizationKernel_finrank_ge_classComponent_of_even_power_char
         (Local.completedPrincipalUnitModPCharacterProjectionRange (p := p) K i) = 1 :=
     Local.completedPrincipalUnitModPCharacterProjectionRange_finrank_one
       (p := p) (K := K) hp_gt_two hi_low (by omega)
-  haveI : FiniteDimensional (ZMod p) Ucomp :=
+  have : FiniteDimensional (ZMod p) Ucomp :=
     FiniteDimensional.of_finrank_eq_succ hU_finrank
-  haveI : FiniteDimensional (ZMod p)
+  have : FiniteDimensional (ZMod p)
       (Local.completedPrincipalUnitModPCharacterProjectionRange (p := p) K i) :=
     FiniteDimensional.of_finrank_eq_succ hLocal_finrank
-  haveI : FiniteDimensional (ZMod p)
+  have : FiniteDimensional (ZMod p)
       (singularGroupCharacterProjectionComponent (K := K) (p := p) i
         (cyclotomicSingularGroupAction K p)) :=
     singularGroupCharacterProjectionComponent_finiteDimensional_of_even_power_character
       (K := K) (p := p) hp_gt_two hi_even hi_low hi_high
-  haveI : FiniteDimensional (ZMod p)
+  have : FiniteDimensional (ZMod p)
       (classGroupPTorsionCharacterProjectionComponent (K := K) (p := p) i
         (cyclotomicClassGroupPTorsionAction K p)) :=
     inferInstance
@@ -394,7 +388,7 @@ theorem completedLocalizationKernel_finrank_ge_classComponent_of_even_power_char
       (K := K) (p := p) (i := i) hx
   · rw [hU_finrank, hLocal_finrank]
 
-/-- REF-13 representative form of the localization-kernel choice.
+/-- Representative form of the localization-kernel choice.
 
 The map `loc_i` is the component-level localization map into the completed
 local principal-unit component.  The theorem produces a singular pair
@@ -474,11 +468,11 @@ theorem exists_singularPair_in_component_localization_kernel
     rw [hs]
     exact hx_eigen
 
-/-- Concrete REF-13 component-kernel form using the REF-12 localization
+/-- Concrete component-kernel form using the localization
 composed with the completed local principal-unit bridge, then projected to the
 target `i`-component.
 
-The remaining stronger endpoint for REF-13 is to prove equivariance of this
+The remaining stronger endpoint is to prove equivariance of this
 concrete completed localization map; that upgrades this projected kernel
 statement to the full completed-localization kernel statement below. -/
 theorem exists_singularPair_in_concrete_completed_localization_component_kernel
@@ -516,7 +510,7 @@ theorem exists_singularPair_in_concrete_completed_localization_component_kernel
     (K := K) (p := p) hp_gt_two hi_even hi_low hi_high hA_ne_bot
     (singularGroupCompletedLocalizationComponentMap (K := K) (p := p) (i := i))
 
-/-- REF-13 representative form for an equivariant full localization map into
+/-- Representative form for an equivariant full localization map into
 the completed local principal-unit quotient. -/
 theorem exists_singularPair_in_completed_localization_kernel
     (hp_gt_two : 2 < p) {i : ℕ}
@@ -565,7 +559,7 @@ theorem exists_singularPair_in_completed_localization_kernel
   have hval := congrArg Subtype.val hs_loc
   simpa [completedLocalComponentMap] using hval
 
-/-- Concrete REF-13 full-kernel form, with an explicit supplied equivariance
+/-- Concrete full-kernel form, with an explicit supplied equivariance
 statement for localization into `U_lambda / U_lambda^p`. -/
 theorem exists_singularPair_in_concrete_completed_localization_kernel_of_cyclotomicLocalUnits
     (hp_gt_two : 2 < p) {i : ℕ}
@@ -610,7 +604,7 @@ theorem exists_singularPair_in_concrete_completed_localization_kernel_of_cycloto
     (singularGroupLocalizationToCompletedPrincipalUnitsLinear_equivariant_of_cyclotomicLocalUnits
       (p := p) (K := K) hloc)
 
-/-- Concrete REF-13 full-kernel form for the completed lambda-local
+/-- Concrete full-kernel form for the completed lambda-local
 localization. -/
 theorem exists_singularPair_in_concrete_completed_localization_kernel
     (hp_gt_two : 2 < p) {i : ℕ}
