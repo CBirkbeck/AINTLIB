@@ -447,13 +447,83 @@ theorem sectionsEquivOfLE_trivSection (k : c.ι) {V : X.Opens} (hV : V ≤ c.U k
 
 /-! ### T-OM-A4b: invertibility (the Picard-stream predicate) -/
 
-open AlgebraicGeometry.Scheme.Modules in
+/-- **(T-OM-A4b)** Restriction distributes over the scalar action of sections. -/
+theorem sectionsMap_smul {V' V : X.Opens} (h : V' ≤ V) (r : Γ(X, V)) (b : c.sections V) :
+    c.sectionsMap h (r • b) = resLE h r • c.sectionsMap h b :=
+  Subtype.ext (funext fun i => by
+    show resLE _ (resLE inf_le_left r * b.1 i) =
+      resLE inf_le_left (resLE h r) * resLE _ (b.1 i)
+    rw [map_mul]
+    simp only [resLE_resLE])
+
+/-- **(T-OM-A4b)** The chart section is natural under restriction. -/
+theorem sectionsMap_trivSection (k : c.ι) {V' V : X.Opens} (h' : V' ≤ V)
+    (hV : V ≤ c.U k) :
+    c.sectionsMap h' (c.trivSection k hV) = c.trivSection k (h'.trans hV) :=
+  Subtype.ext (funext fun i => by
+    show resLE _ ((resUnit _ (c.u i k)).val) = (resUnit _ (c.u i k)).val
+    rw [resLE_resUnit_val])
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-OM-A4b)** Multiplication into the chart section: a morphism from the structure
+sheaf of the chart to the restriction of the line bundle (the trivializing map). -/
+noncomputable def trivHom (k : c.ι) :
+    Modules.unitObj ↑(c.U k) ⟶ (Modules.restrictFunctor (c.U k).ι).obj c.lineBundle :=
+  ⟨{ app := fun W => ModuleCat.ofHom
+      (Y := ((Modules.restrictFunctor (c.U k).ι).obj c.lineBundle).val.obj W)
+      { toFun := fun g => (((c.U k).ι.appIso W.unop).inv.hom g) •
+          c.trivSection k ((c.U k).ι_image_le W.unop)
+        map_add' := fun g g' => by
+          erw [map_add, add_smul]
+        map_smul' := fun r g => by
+          erw [map_mul, mul_smul]
+          try rfl }
+     naturality := fun {W W'} i => by
+      refine ModuleCat.hom_ext (LinearMap.ext fun g => ?_)
+      have h0 := congrArg (fun (φ : _ ⟶ _) => (ConcreteCategory.hom φ) g)
+        ((c.U k).ι.appIso_inv_naturality i)
+      simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h0
+      have harr : (c.U k).ι.opensFunctor.op.map i =
+          (homOfLE ((c.U k).ι.opensFunctor.map i.unop).le).op := by
+        rw [show (c.U k).ι.opensFunctor.op.map i =
+          ((c.U k).ι.opensFunctor.map i.unop).op from rfl]
+        exact congrArg Quiver.Hom.op (Subsingleton.elim _ _)
+      rw [harr] at h0
+      show (((c.U k).ι.appIso W'.unop).inv.hom
+          ((↑(c.U k) : Scheme.{u}).presheaf.map i g)) •
+          c.trivSection k ((c.U k).ι_image_le W'.unop) =
+        c.sectionsMap ((c.U k).ι.opensFunctor.map i.unop).le
+          ((((c.U k).ι.appIso W.unop).inv.hom g) •
+            c.trivSection k ((c.U k).ι_image_le W.unop))
+      rw [c.sectionsMap_smul, c.sectionsMap_trivSection, h0] }⟩
+
+/-- **(T-OM-A4b)** The trivializing map is bijective on every open of the chart:
+it is the composition of the section iso of the open immersion with the inverse of the
+chart trivialization. -/
+theorem bijective_trivHom_app (k : c.ι)
+    (W : (TopologicalSpace.Opens ↥(c.U k))ᵒᵖ) :
+    Function.Bijective ((c.trivHom k).val.app W).hom := by
+  have hfun : ⇑((c.trivHom k).val.app W).hom =
+      (⇑(c.sectionsEquivOfLE k ((c.U k).ι_image_le W.unop)).symm) ∘
+        (⇑(((c.U k).ι.appIso W.unop).inv.hom)) :=
+    rfl
+  rw [hfun]
+  exact (c.sectionsEquivOfLE k ((c.U k).ι_image_le W.unop)).symm.bijective.comp
+    ((ConcreteCategory.isIso_iff_bijective _).mp inferInstance)
+
 /-- **(T-OM-A4b)** ★ The glued line bundle is an invertible `𝒪ₓ`-module in the sense of
 the Picard stream (`Scheme.Modules.IsInvertible`): the cover `U` trivializes it, by the
 `isIso_of_bijective_app_on_basis` route with the bijectivity supplied by
 `sectionsEquivOfLE` at every open below a chart. -/
-theorem lineBundle_isInvertible : IsInvertible c.lineBundle := by
-  sorry
+theorem lineBundle_isInvertible : Modules.IsInvertible c.lineBundle := by
+  refine ⟨c.ι, c.U, c.iSup_eq_top, fun k => ?_⟩
+  haveI : IsIso (c.trivHom k) := by
+    refine Modules.isIso_of_bijective_app_on_basis _ Set.univ
+      (fun x U hxU => ⟨U, trivial, hxU, le_rfl⟩) ?_
+    intro W _
+    exact c.bijective_trivHom_app k (Opposite.op W)
+  exact ⟨(Modules.restrictFunctorIsoPullback (c.U k).ι).symm.app c.lineBundle ≪≫
+    (asIso (c.trivHom k)).symm⟩
 
 /-! ### T-OM-A5: bases and the torsor structure -/
 
