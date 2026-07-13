@@ -705,6 +705,46 @@ private theorem transUnit_restrict_restrict {VP VQ : S.affineOpens}
       (P.restrict (h.trans p)).transUnit (Q.restrict (h.trans q)) := by
   rw [transUnit, transUnit, transVC_restrict_restrict P Q p q h]
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-OM-B7 coherence)** The comparison variable change only depends on the
+presentations through their charts up to the canonical transport: presentations with
+equal curves and `eqToHom`-related chart isomorphisms have equal comparisons. -/
+theorem transVC_congr {V'' : S.affineOpens} (P₁ P₂ Q₁ Q₂ : LocalPresentation G V'')
+    (w₁ : Q₁.W = P₁.W) (w₂ : Q₂.W = P₂.W)
+    (he₁ : P₁.e.hom = Q₁.e.hom ≫ eqToHom (by rw [w₁]))
+    (he₂ : P₂.e.hom = Q₂.e.hom ≫ eqToHom (by rw [w₂])) :
+    P₁.transVC P₂ = Q₁.transVC Q₂ := by
+  have hPinv : P₁.e.inv = eqToHom (show projModel P₁.W = projModel Q₁.W by rw [w₁]) ≫
+      Q₁.e.inv := by
+    rw [← cancel_mono P₁.e.hom, Iso.inv_hom_id, he₁, Category.assoc,
+      ← Category.assoc Q₁.e.inv, Iso.inv_hom_id, Category.id_comp, eqToHom_trans,
+      eqToHom_refl]
+  refine Q₁.transVC_unique Q₂ (P₁.transVC P₂) ?_ ?_
+  · rw [w₂, w₁]
+    exact P₁.transVC_smul P₂
+  · show (Q₁.e.symm ≪≫ Q₂.e).hom = _
+    have hQ₁inv : Q₁.e.inv =
+        eqToHom (show projModel Q₁.W = projModel P₁.W by rw [w₁]) ≫ P₁.e.inv := by
+      rw [hPinv, ← Category.assoc, eqToHom_trans, eqToHom_refl, Category.id_comp]
+    have hQ₂hom : Q₂.e.hom = P₂.e.hom ≫
+        eqToHom (show projModel P₂.W = projModel Q₂.W by rw [w₂]) := by
+      rw [he₂, Category.assoc, eqToHom_trans, eqToHom_refl, Category.comp_id]
+    rw [Iso.trans_hom, Iso.symm_hom, hQ₁inv, hQ₂hom]
+    simp only [Category.assoc]
+    rw [← Category.assoc P₁.e.inv]
+    rw [show P₁.e.inv ≫ P₂.e.hom = (P₁.pointedIso P₂).hom from rfl]
+    rw [P₁.transVC_spec P₂]
+    rw [projModelVCIso_congr w₂ (P₁.transVC P₂)]
+    simp only [Category.assoc, eqToHom_trans_assoc]
+
+/-- **(T-OM-B7 coherence, unit form)** -/
+theorem transUnit_congr {V'' : S.affineOpens} (P₁ P₂ Q₁ Q₂ : LocalPresentation G V'')
+    (w₁ : Q₁.W = P₁.W) (w₂ : Q₂.W = P₂.W)
+    (he₁ : P₁.e.hom = Q₁.e.hom ≫ eqToHom (by rw [w₁]))
+    (he₂ : P₂.e.hom = Q₂.e.hom ≫ eqToHom (by rw [w₂])) :
+    P₁.transUnit P₂ = Q₁.transUnit Q₂ := by
+  rw [transUnit, transUnit, transVC_congr P₁ P₂ Q₁ Q₂ w₁ w₂ he₁ he₂]
+
 end LocalPresentation
 
 /-! ### T-OM-B5: the ω-cocycle of the atlas -/
