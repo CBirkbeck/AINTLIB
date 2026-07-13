@@ -18571,3 +18571,108 @@ v10.190-G0 glue are DONE: quotientRing/localQuotientOpen/localQuotientMapW for a
 opens + the patch comparison. REMAINING: step 4 (windowHom/imageOpens/saturation/tripleIso — the
 template :343-790 mirror, consuming the transported per-patch universal property + specEqualizerπ
 surjectivity) + step 5 (GlueData :818-910 + quotientπ/pins :969-1869, option-γ (N,hkill)). (STREAM-G0)
+
+## Amendments v10.192 (2026-07-13, coordinator): ★★ FOUR-STREAM SWEEP — ω2 LANDS SORRY-FREE (the shared-engine gate's core deliverable) + KM Γ₁ rel-rep ★ RATIFIED & re-chartered to the ENDOMORPHISM-DEGREE KEYSTONE + the RIGID FRONT converges on GH's general bridge + GH GHB6/[RIG-3] ratified + #5866 DE-URGED
+
+Owner relayed three live-session reports (KM terminal, G0 checkpoint+question, GH ★★★★) with "give
+them new work." Verified everything at source; findings + dispatches below.
+
+**§A — ★★ ω2 (ω_{E/S}) HAS LANDED SORRY-FREE (STREAM-OMEGA, commit 5ca4b7bc0 [T-OM-B5,B6]).** The
+invariant differential `ω_{E/S}` exists as an invertible `Scheme.Modules` object,
+`EllipticCurve/InvariantDifferential.lean` **67945 bytes / 0 sorries** (verified at source). This is
+the CORE deliverable of [T-E-OMEGA] — the single gate under the shared `representable_iff` engine
+that Y(N)+Γ₁+Γ_H all consume (v10.178 convergence). OMEGA is now past the ω2 milestone and grinding
+the tail ([T-OM-B7-pre] mixed restrict/transport coherence at the tip): ω3 (basis↔unit torsor) → ω4
+(base change) → **ω5 = T-E14 the {±1}/Legendre unblock** — the ★★ that flips `representable_iff`.
+**STALE-HEADER CORRECTION (again):** `EllCategory.lean:272` still reads "T-E14, blocked on
+[T-E-OMEGA]" — but ω_{E/S} now EXISTS; the blocker is the ω5/T-E14 *tail*, which OMEGA is closing,
+not the whole of ω. `representable_iff:280` still `sorry` (correctly — it needs T-E14 done +
+recollement T-E5f); OMEGA is the live path to it. Do NOT prematurely claim the engine unblocked.
+
+**§B — #5866 DE-URGED (no longer OMEGA-critical).** v10.180/181 steered OMEGA's ω2 to CONSUME
+codex's `IsInvertible.isLocallyFree` (gated on merging #5866). **Verified at source: ω2 did NOT
+consume it** — `InvariantDifferential.lean` builds its invertibility on OUR shared
+`Picard/InvertibleSheaf.lean` (`Modules.IsInvertible (omegaModules G)` at :1107); the codex file
+`Picard/InvertibleSheafLocallyFree.lean` does not even exist on our branch. So #5866 is now a **pure
+cleanup-fleet / PIC0-reuse feed, not a gate on anything live.** Still merge it (owner "ok do it",
+clean additive +503/−0) when its build verifies green — but no urgency, and the OMEGA inbox's
+"ω2 gated on #5866" line is now VOID (corrected in STREAM-OMEGA.md).
+
+**§C — STREAM-KM: Γ₁ rel-rep ★ RATIFIED; rigid ROUTED; re-chartered to the endomorphism-degree keystone.**
+- **★ RATIFIED:** `gammaOneDrinfeld_relativelyRepresentable` (DrinfeldRepresentability.lean:209) =
+  `(gammaOneDrinfeld_affineOverEll N).relativelyRepresentable`, verified at source. The Γ₁ Drinfeld
+  relative-representability is DELIVERED (c1 `exactOrderLocus` + c2 `torsionPointsEquiv`, no c4). KM's
+  four WIP sorries closed (commit 3aef6f052 + equiv toFun/invFun). Honest ★.
+- **RIGID ROUTING RULING (answers KM request (a)):** `gammaOneDrinfeld_rigid` is **not yet a decl**
+  (only `gammaOneDrinfeldProblem`, GammaH:1007) — KM correctly did NOT wire `GammaH:1045 .Representable`
+  (would inject a rigid sorry into shared GammaH.lean). **The rigid front CONVERGES on GH's general
+  bridge:** `ModuliProblem.QuotientProblemData.rigid_of_geom_free` (GammaHMaster.lean:210, PROVEN
+  axiom-clean, [RIG-3]) is **Q-general** — its pins are [RIG-1] geometric-fibre detection + [RIG-2]
+  k̄ orbit-freeness. Γ₁-Drinfeld rigidity instantiates the SAME bridge, so **KM builds NO parallel
+  rigid route.** gammaOneDrinfeld_rigid becomes a short instantiation of GH's bridge once GH's
+  [RIG-1]/[RIG-2] land (wired by GH or KM then). The alternatives KM found — `gammaHNaive_rigid_iff`
+  (GammaH:447, Loeffler 3.8.3, sorried, H-lane) and the endomorphism-degree route — are NOT needed
+  for rigidity given the geometric bridge.
+- **THE ARITHMETIC CONVERGENCE (why KM's new charter is the keystone):** GH's [RIG-2] orbit-freeness
+  (Serre N≥3: Aut(E/k̄) acts freely on exact-order-N points) is PROVED via the endomorphism-degree
+  fact `deg(α−1) < N` for CM units α (order 3/4/6). So the **endomorphism-degree theory is the
+  arithmetic ROOT under the entire rigidity front (BOTH Γ_H and Γ₁), PLUS G0's c4 (E[N] rank-N² =
+  `endDeg_mulBy = N²`), PLUS `torsion_rank`/BB-DEG (`mulByHom_finrank = N²`, Torsion.lean:152).** It
+  is currently sorried and owned by nobody active (KM's report parks it in "G0's lane"; G0 is buried
+  in the Hopf C4c-2 endgame). Three streams share this need — the classic de-dup-onto-one-seat case.
+- **KM NEW CHARTER — the ENDOMORPHISM-DEGREE KEYSTONE** (`EllipticCurve/EndomorphismDegree.lean` +
+  `Torsion.lean` BB-DEG/BB-QF): prove `endDeg_mulBy N = N²` and `deg(α−1)` for CM automorphisms →
+  discharge `mulByHom_finrank` (BB-DEG) and `mulByHom_locallyQuasiFinite` (BB-QF). **CROSS-PROJECT
+  ANCHOR VERIFIED:** HasseWeil `mulByInt_degree` (Foundation/Basic.lean:727, PROVEN, `deg[n]=n²`) —
+  bridge it to the scheme-`finrank` via T-B6. This is KM's torsion wheelhouse (just finished
+  exactOrderLocus/torsionPointsEquiv), non-colliding (dedicated substrate seat), and unblocks rigid
+  (both levels) + c4 + torsion_rank at once. FIRST ACT: `/develop --decompose` to scope the T-B6
+  bridge + the deg(α−1) CM computation. **BB-FLAT (miracle flatness, `mulByHom_flat`:147) is a
+  SEPARATE deeper item (regularity program) — NOT bundled here.** Makes KM's own Γ₁ ★ axiom-clean.
+
+**§D — STREAM-GH: [GHB6] cleared + [RIG-3] bridge + Charter-B RATIFIED (★★★★).**
+- Verified at source: `f₀_finite_etale` (GammaHRepresentability.lean:777) discharged via new
+  `ForMathlib/EtaleCancellation.lean` (9479 b) + `SchemeActionFree.lean` (26956 b); `rigid_of_geom_free`
+  (GammaHMaster.lean:210) PROVEN axiom-clean; `gammaH_representable` interface (GammaHMaster.lean:268)
+  live; `gammaH_relativelyRepresentable` (GammaHRepresentability.lean:3484). GHC1's remaining sorryAx
+  flows only through chartered [GH1] `gammaHAut` (owner-parked behind T-W7.8) + [GHA3]
+  `levelSpaceΓπ_etale` (WEIL-scale). Ratified.
+- **CONTINUE [RIG-2] → [RIG-1] with the KM HANDSHAKE:** state the [RIG-2] orbit-freeness CORE
+  **level-agnostically** — `Aut(E/k̄)` acts freely on exact-order-N points (N≥3), CONSUMING KM's
+  endomorphism-degree `deg(α−1)` — so the ONE core lemma serves BOTH Γ_H (with the H-condition
+  wrapper) AND Γ₁-Drinfeld. Do NOT prove deg(α−1) yourself; that's KM's keystone (§C). Flag KM when
+  you fix the [RIG-2] core's signature so KM targets it.
+
+**§E — STREAM-G0: checkpoint ratified (C4c-2 step 3 clean); pullback-range question answered separately.**
+`quotientRing_eq_coinvariants` (v10.191-G0, kappa/actRing_kappa/prRing_kappa) sorry-free — the glue
+model = Hopf model on patches. Steps 4-5 remain (template :343-790 mirror + GlueData/pins, option-γ).
+G0's Q — "repo/mathlib lemma for `range (pullback.fst f g) = f.base ⁻¹' range g.base`?" — **ANSWERED:
+mathlib has it EXACTLY, hypothesis-free** — `AlgebraicGeometry.Scheme.Pullback.range_fst`
+(`PullbackCarrier.lean:323`): `Set.range (pullback.fst f g) = f ⁻¹' Set.range g` (companion
+`range_snd`; the `.base` vs `⇑`-coercion difference is definitional, closes by `exact`/`rw` or a
+`rfl` bridge). **Do NOT build it from the TopCat pullback iso**, and do NOT reach for the
+`IsOpenImmersion.range_pullback*` variants (those carry an immersion hypothesis + `Opens`-preimage
+spelling — strictly weaker). G0 is LIVE (sentinel 22:26); fold at next pull.
+
+**§F — FOUR-STREAM STATUS (2026-07-13, post-sweep):**
+| Seat | State | Now | Gate/next |
+|---|---|---|---|
+| **OMEGA** | LIVE (22:21) | ω2 ★ done; ω3/ω4/ω5 tail | ω5 = T-E14 flips `representable_iff` (★★) |
+| **GH** | LIVE (22:18) | GHB6✓ [RIG-3]✓ Charter-B | [RIG-2] Serre core (consumes KM keystone) → [RIG-1] |
+| **G0** | LIVE (22:26) | Hopf C4c-2 step 3✓ | steps 4-5 → C4 glue → SIGNAL ★★ |
+| **KM** | IDLE→re-fired | Γ₁ rel-rep ★ delivered | NEW: endomorphism-degree keystone (unblocks rigid+c4+torsion) |
+**Dependency spine:** KM endo-degree (deg(α−1), endDeg_mulBy=N²) → {GH [RIG-2] Serre → rigid_of_geom_free
+→ Γ_H & Γ₁ rigid} + {G0 c4} + {torsion_rank/BB-DEG}. OMEGA ω5→T-E14→`representable_iff` (⇐ engine).
+Both `.Representable` gates (rigid via GH/KM, engine via OMEGA) are now staffed and live.
+
+### v10.192-G0 — [HG-C4c-2] steps 1-4b GREEN: the glue infrastructure is complete (STREAM-G0)
+SubgroupQuotientGlue.lean (all pushed, full repo green 3825 jobs): quotientRing/localQuotientOpen/
+localQuotientMapW (steps 1-2) · quotientRing_eq_coinvariants ★ CLEAN (step 3: the glue model = the
+Hopf model on every free patch, via kappa with both legs pinned) · localQuotientOpenπ + the full
+transition square homOfLE_localQuotientOpenπ (step 4b, first-try) · localQuotientOpenIso (step 4a
+eqToIso — C4a/C4b universal machinery transports to the glue).
+REMAINING to the SIGNAL: the saturation layer (template :343-790 — windowHom-analogues DONE as
+localQuotientMapW; needed: π-surjectivity on patches from isRegularEpi_specEqualizerπ through
+localQuotientOpenIso, the imageOpens/saturation point-lemmas via the kernel-pair
+(isKernelPair_specEqualizerπ — fppf-orbit fibres), tripleIso, isIso_of_le_le, f_open) → GlueData
+(:818-910) → quotient/quotientS/quotientπ + six pins (:969-1869) under option-γ (N,hkill). (STREAM-G0)
