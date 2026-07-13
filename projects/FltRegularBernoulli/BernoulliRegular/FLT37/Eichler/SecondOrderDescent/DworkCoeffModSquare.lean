@@ -113,7 +113,7 @@ theorem rationalPadicIntegerToZModSq_eq_zero_iff_mem_primeIdeal_sq
     simp [e, padicIntToRationalPadicIntegerRingEquiv]
   rw [show ((rationalPadicPrimeIdeal p) ^ 2 :
       Ideal (RationalPadicIntegerRing p)) =
-        Ideal.span {(p : RationalPadicIntegerRing p) ^ 2} from by
+        Ideal.span {(p : RationalPadicIntegerRing p) ^ 2} by
       rw [rationalPadicPrimeIdeal, Ideal.span_singleton_pow]]
   rw [Ideal.mem_span_singleton, Ideal.mem_span_singleton]
   constructor
@@ -137,10 +137,6 @@ agrees mod `p²`.  This is the second-order analog of the proven
 difference as `p² · z`, transports to coordinates as `a = p² · b` by injectivity of the Dwork power
 linear map, and reads off `a i = p² · b i ∈ (rationalPadicPrimeIdeal)^2`. -/
 
-set_option maxHeartbeats 800000 in
--- The proof compares two full Dwork power-basis expansions through the completed ramification
--- identity `(p²) = (varpi)^(2(p-1))`; elaborating the basis and scalar-action coercions is slower
--- than the default budget (as in the first-order analog).
 omit [NumberField.IsCMField K] in
 theorem dworkParameterPowerBasis_coeff_sub_mem_primeIdeal_sq_of_mem_parameterIdeal_pow_two_pred
     {x y : DworkCompleteIntegerRing p K}
