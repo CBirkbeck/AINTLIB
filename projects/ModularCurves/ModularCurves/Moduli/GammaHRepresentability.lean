@@ -1724,6 +1724,22 @@ theorem QuotPkg.exists_crossTransport {P' : ModuliProblem R} {X : EllObj R}
         (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩) from rfl,
     hν' γ⁻¹]
 
+/-- **The descended cross-problem transport** ([GHB7-couniv-ii]): the `G`-invariant
+transport descends uniquely through the chosen quotient, over the base. -/
+theorem QuotPkg.exists_crossDescent {P' : ModuliProblem R} {X : EllObj R}
+    (p : QuotPkg φ X) (d' : ModuliProblem.RelRepData P' X)
+    (ν : p.d.Z ⟶ d'.Z) (hνf : ν ≫ d'.f = p.d.f)
+    (hνinv : ∀ γ : G, p.d.σZ.hom γ ≫ ν = ν) :
+    ∃ μX : p.Z₀ ⟶ d'.Z, p.π ≫ μX = ν ∧ μX ≫ d'.f = p.f₀ ∧
+      ∀ μX' : p.Z₀ ⟶ d'.Z, p.π ≫ μX' = ν → μX' = μX := by
+  obtain ⟨μX, hμ, huniq⟩ := p.hdesc ν hνinv
+  refine ⟨μX, hμ, ?_, fun μX' h' => huniq μX' h'⟩
+  -- both `μX ≫ d'.f` and `f₀` descend the invariant `p.d.f`
+  obtain ⟨w, hw, hwu⟩ := p.hdesc p.d.f p.d.over_base
+  rw [hwu (μX ≫ d'.f) ((Category.assoc _ _ _).symm.trans
+      ((congrArg (· ≫ d'.f) hμ).trans hνf)),
+    hwu p.f₀ p.hπf]
+
 end Transport
 
 
