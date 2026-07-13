@@ -313,6 +313,15 @@ private noncomputable def pointBaseChangeFun {T T' : Scheme.{u}} (σ : T ⟶ S) 
       (Category.assoc _ _ _).symm.trans <|
       congrArg (· ≫ σ) x.2⟩
 
+/-- The underlying morphism of a point sum, through `pointEquivOverHom_add` (the
+`Hom.commGroup` multiplication made explicit as `lift … ≫ μ`). -/
+private lemma point_add_coe {T : Scheme.{u}} (g : T ⟶ S) (P Q : E.Point g) :
+    (P + Q : E.Point g).1 =
+      (lift (E.pointEquivOverHom g P) (E.pointEquivOverHom g Q)).left ≫
+        (μ[E.asOver]).left :=
+  (congrArg CommaMorphism.left (E.pointEquivOverHom_add g P Q)).trans
+    (Over.comp_left _ _ _ _ _)
+
 private lemma pointBaseChangeFun_add {T T' : Scheme.{u}} (σ : T ⟶ S) (t : T' ⟶ T)
     (x y : (E.baseChange σ).Point t) :
     pointBaseChangeFun E σ t (x + y)
@@ -322,14 +331,12 @@ private lemma pointBaseChangeFun_add {T T' : Scheme.{u}} (σ : T ⟶ S) (t : T' 
       = (lift ((E.baseChange σ).pointEquivOverHom t x)
           ((E.baseChange σ).pointEquivOverHom t y)).left
         ≫ (μ[(E.baseChange σ).asOver]).left :=
-    (congrArg CommaMorphism.left ((E.baseChange σ).pointEquivOverHom_add t x y)).trans
-      (Over.comp_left _ _ _ _ _)
+    point_add_coe (E.baseChange σ) t x y
   have hR : (pointBaseChangeFun E σ t x + pointBaseChangeFun E σ t y).1
       = (lift (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t x))
           (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t y))).left
         ≫ (μ[E.asOver]).left :=
-    (congrArg CommaMorphism.left (E.pointEquivOverHom_add (t ≫ σ) _ _)).trans
-      (Over.comp_left _ _ _ _ _)
+    point_add_coe E (t ≫ σ) (pointBaseChangeFun E σ t x) (pointBaseChangeFun E σ t y)
   -- projections of the two lifted pairs
   have hbx : (lift ((E.baseChange σ).pointEquivOverHom t x)
         ((E.baseChange σ).pointEquivOverHom t y)).left

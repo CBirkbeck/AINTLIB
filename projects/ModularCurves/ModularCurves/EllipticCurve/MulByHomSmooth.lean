@@ -40,6 +40,61 @@ namespace EllipticCurve
 
 variable {S : Scheme.{u}} (E : EllipticCurve S)
 
+/-- `Spec` of a quotient by a square-zero ideal is surjective on points (square-zero
+thickenings are homeomorphisms): the augmentation-kernel elements are nilpotent, hence lie
+in every prime, so the comap of the quotient map hits every prime. Extracted from the
+re-algebraize stage of the (LIFT) core. -/
+private theorem specMap_quotientMk_base_surjective {B : Type u} [CommRing B] (I : Ideal B)
+    (hI : I ^ 2 = ⊥) :
+    Function.Surjective (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I))).base := by
+  rw [← Set.range_eq_univ]
+  show Set.range (PrimeSpectrum.comap (Ideal.Quotient.mk I)) = Set.univ
+  have h1 : Set.range (PrimeSpectrum.comap (Ideal.Quotient.mk I)) =
+      PrimeSpectrum.zeroLocus ((RingHom.ker (Ideal.Quotient.mk I) : Ideal B) : Set B) :=
+    range_comap_of_surjective _ _ Ideal.Quotient.mk_surjective
+  rw [Ideal.mk_ker] at h1
+  rw [h1, Set.eq_univ_iff_forall]
+  intro p a ha
+  have ha2 : a ^ 2 ∈ I ^ 2 := Ideal.pow_mem_pow ha 2
+  rw [hI] at ha2
+  have ha0 : a ^ 2 = 0 := by simpa using ha2
+  exact p.isPrime.mem_of_pow_mem 2 (ha0 ▸ p.asIdeal.zero_mem)
+
+/-- The chart triangle `Γ(W) ⟶ Γ(U) ⟶ Γ(V)` of `[n]` refines the structure chart map:
+`π`'s comorphism `Γ(W) ⟶ Γ(V)` factors as `Γ(W) ⟶ Γ(U)` (via `π`) then `Γ(U) ⟶ Γ(V)`
+(via `[n]`), because `[n] ≫ π = π`. Extracted from the geometrize/setup stage. -/
+private theorem pi_appLE_eq_comp_mulByHom_appLE (n : ℤ) {W : S.Opens} {U V : E.E.Opens}
+    (hVW : V ≤ E.π ⁻¹ᵁ W) (hUW : U ≤ E.π ⁻¹ᵁ W) (hVU : V ≤ (E.mulByHom n) ⁻¹ᵁ U) :
+    E.π.appLE W V hVW = E.π.appLE W U hUW ≫ (E.mulByHom n).appLE U V hVU := by
+  rw [Scheme.Hom.appLE_comp_appLE]
+  have key : ∀ (q : E.E ⟶ S) (_ : q = E.π) (e : V ≤ q ⁻¹ᵁ W),
+      E.π.appLE W V hVW = q.appLE W V e := by
+    rintro q rfl e
+    rfl
+  exact key _ (E.mulByHom_π n) _
+
+/-- **(divide-defect + correct)** Given a lifted point `Pxt` whose `[N]`-image agrees with
+the target `Py` after reduction along the square-zero quotient, the kernel-`N`-divisibility
+of the point functor (N5) produces a corrected lift `Px` with `[N]Px = Py` that reduces to
+the same point as `Pxt`. Extracted from the middle two stages of the (LIFT) core. -/
+private theorem exists_corrected_lift (N : ℕ) (h : NIsInvertible S N) (B : CommRingCat.{u})
+    (I : Ideal ↥B) (hI : I ^ 2 = ⊥) (t : Spec B ⟶ S) (Py Pxt : E.Point t)
+    (hres : Point.restrict E (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I))) Py =
+        Point.restrict E (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)))
+          ((N : ℤ) • Pxt)) :
+    ∃ Px : E.Point t, (N : ℤ) • Px = Py ∧
+      Point.restrict E (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I))) Px =
+        Point.restrict E (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I))) Pxt := by
+  have hεres : Point.restrict E (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)))
+      (Py - (N : ℤ) • Pxt) = 0 := by
+    rw [E.restrict_sub, hres, sub_self]
+  obtain ⟨δ, hδres, hδN⟩ :=
+    E.kernelNDivisible_of_nIsInvertible N h B I hI t (Py - (N : ℤ) • Pxt) hεres
+  refine ⟨Pxt + δ, ?_, ?_⟩
+  · rw [smul_add, hδN]
+    abel
+  · rw [E.restrict_add, hδres, add_zero]
+
 /-- **(N6 core, the (LIFT) argument)** For `N` invertible, the chart ring map of `[N]`
 on a compatible affine chart triple `W, U, V` is formally smooth. -/
 theorem formallySmooth_mulByHom_appLE (N : ℕ) (h : NIsInvertible S N)
@@ -53,13 +108,8 @@ theorem formallySmooth_mulByHom_appLE (N : ℕ) (h : NIsInvertible S N)
     rwa [← Scheme.Hom.comp_apply, E.mulByHom_π] at h1
   -- the chart triangle `Γ(W) ⟶ Γ(U) ⟶ Γ(V)` refines the structure chart map
   have happ : E.π.appLE W V hVW =
-      E.π.appLE W U hUW ≫ (E.mulByHom (N : ℤ)).appLE U V hVU := by
-    rw [Scheme.Hom.appLE_comp_appLE]
-    have key : ∀ (q : E.E ⟶ S) (_ : q = E.π) (e : V ≤ q ⁻¹ᵁ W),
-        E.π.appLE W V hVW = q.appLE W V e := by
-      rintro q rfl e
-      rfl
-    exact key _ (E.mulByHom_π (N : ℤ)) _
+      E.π.appLE W U hUW ≫ (E.mulByHom (N : ℤ)).appLE U V hVU :=
+    E.pi_appLE_eq_comp_mulByHom_appLE (N : ℤ) hVW hUW hVU
   have hπfs : (E.π.appLE W V hVW).hom.FormallySmooth :=
     (RingHom.smooth_def.mp (E.π.smooth_appLE hW hV hVW)).1
   letI : Algebra ↑Γ(E.E, U) ↑Γ(E.E, V) :=
@@ -124,32 +174,11 @@ theorem formallySmooth_mulByHom_appLE (N : ℕ) (h : NIsInvertible S N)
     refine (congrArg (· ≫ E.mulByHom (N : ℤ)) hxtres.symm).trans ?_
     refine (Category.assoc _ _ _).trans ?_
     exact congrArg (Spec.map φB ≫ ·) (point_smul_eq_comp_mulBy E t (N : ℤ) Pxt).symm
-  have hεres : Point.restrict E (Spec.map φB) (Py - (N : ℤ) • Pxt) = 0 := by
-    rw [E.restrict_sub, hres_eq, sub_self]
-  obtain ⟨δ, hδres, hδN⟩ := E.kernelNDivisible_of_nIsInvertible N h BC I hI t
-    (Py - (N : ℤ) • Pxt) hεres
-  -- the corrected lift
-  set Px : E.Point t := Pxt + δ with hPx
-  have hPxN : (N : ℤ) • Px = Py := by
-    rw [hPx, smul_add, hδN]
-    abel
-  have hPxres : Point.restrict E (Spec.map φB) Px =
-      Point.restrict E (Spec.map φB) Pxt := by
-    rw [hPx, E.restrict_add, hδres, add_zero]
+  -- the corrected lift, via kernel `N`-divisibility (N5)
+  obtain ⟨Px, hPxN, hPxres⟩ := E.exists_corrected_lift N h BC I hI t Py Pxt hres_eq
   -- the corrected lift lands in the chart: square-zero thickenings are homeomorphisms
-  have hφBsurj : Function.Surjective (Spec.map φB).base := by
-    rw [← Set.range_eq_univ]
-    show Set.range (PrimeSpectrum.comap (Ideal.Quotient.mk I)) = Set.univ
-    have h1 : Set.range (PrimeSpectrum.comap (Ideal.Quotient.mk I)) =
-        PrimeSpectrum.zeroLocus ((RingHom.ker (Ideal.Quotient.mk I) : Ideal B) : Set B) :=
-      range_comap_of_surjective _ _ Ideal.Quotient.mk_surjective
-    rw [Ideal.mk_ker] at h1
-    rw [h1, Set.eq_univ_iff_forall]
-    intro p a ha
-    have ha2 : a ^ 2 ∈ I ^ 2 := Ideal.pow_mem_pow ha 2
-    rw [hI] at ha2
-    have ha0 : a ^ 2 = 0 := by simpa using ha2
-    exact p.isPrime.mem_of_pow_mem 2 (ha0 ▸ p.asIdeal.zero_mem)
+  have hφBsurj : Function.Surjective (Spec.map φB).base :=
+    specMap_quotientMk_base_surjective I hI
   have hresval : Spec.map φB ≫ Px.1 = Spec.map (CommRingCat.ofHom ψq.toRingHom) ≫
       hV.fromSpec := by
     have h1 : (Point.restrict E (Spec.map φB) Px).1 =
