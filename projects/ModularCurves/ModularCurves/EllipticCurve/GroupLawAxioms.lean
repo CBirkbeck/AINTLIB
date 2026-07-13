@@ -159,6 +159,20 @@ the corresponding group law on `Affine.Point`, and close by injectivity of the d
 
 section AtlasEquations
 
+/-- **(spec-shape of a structure composite)** For a `K`-point `q` of the atlas base, equipped
+with its canonical algebra `(Spec.preimage q).hom.toAlgebra`, `q` is the `Spec` of the structure
+ring map. This is the spec-shape identity that opens every atlas field-point computation
+(the `hσ`/`hπ₁` steps of `mulModelHom_comm_atlas`, `mulOver_assoc_atlas`, `mulOver_oneOver_atlas`,
+`invOver_mulOver_atlas`). -/
+private lemma structure_eq_specMap {K : Type u} [Field K]
+    (q : Spec (CommRingCat.of K) ⟶ Spec (CommRingCat.of WeierstrassAtlasRingU.{u})) :
+    letI : Algebra WeierstrassAtlasRingU.{u} K := (Spec.preimage q).hom.toAlgebra
+    q = Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
+  letI : Algebra WeierstrassAtlasRingU.{u} K := (Spec.preimage q).hom.toAlgebra
+  have h1 : CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K) = Spec.preimage q :=
+    CommRingCat.ofHom_hom _
+  rw [h1, Spec.map_preimage]
+
 /-- **(T-G3-comm)** Commutativity of the two-law multiplication at the universe-`u` atlas:
 swapping the factors of `E ×_U E` does not change the product. -/
 theorem mulModelHom_comm_atlas :
@@ -172,13 +186,8 @@ theorem mulModelHom_comm_atlas :
   letI : Algebra WeierstrassAtlasRingU.{u} K :=
     ((Spec.preimage
       (p ≫ pullback.fst (projModelπ 𝕌) (projModelπ 𝕌) ≫ (projModelπ 𝕌))).hom).toAlgebra
-  have hσ : p ≫ pullback.fst (projModelπ 𝕌) (projModelπ 𝕌) ≫ (projModelπ 𝕌) =
-      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
-    have h1 : CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K) =
-        Spec.preimage (p ≫ pullback.fst (projModelπ 𝕌)
-          (projModelπ 𝕌) ≫ (projModelπ 𝕌)) :=
-      CommRingCat.ofHom_hom _
-    rw [h1, Spec.map_preimage]
+  have hσ := structure_eq_specMap
+    (p ≫ pullback.fst (projModelπ 𝕌) (projModelπ 𝕌) ≫ (projModelπ 𝕌))
   have hπP : (p ≫ pullback.fst (projModelπ 𝕌) (projModelπ 𝕌)) ≫ (projModelπ 𝕌) =
       Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
     rw [Category.assoc]; exact hσ
@@ -212,6 +221,41 @@ theorem mulModelHom_comm_atlas :
     · rw [pullback.lift_snd]
   exact hL.trans (keyval.trans (congrArg (· ≫ (mulModelHom 𝕌)) hR.symm))
 
+/-- **(atlas group-law associativity, point level)** For three `K`-points `a, b, c` of the
+universal model sharing a base, the two bracketings of the two-law product agree. This is the
+`Affine.Point` `add_assoc` core of `mulOver_assoc_atlas`, isolated from the fibre-cube geometry:
+it evaluates the three relevant `mulModelHom` lifts through `mulModelHom_specPoints`, applies
+`add_assoc` under the dictionary `projModelPointsEquiv`, and re-injects. -/
+private lemma mulModelHom_assoc_specPoints {K : Type u} [Field K]
+    [Algebra WeierstrassAtlasRingU.{u} K]
+    (a b c : Spec (CommRingCat.of K) ⟶ projModel 𝕌)
+    (ha : a ≫ projModelπ 𝕌 = Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)))
+    (hb : b ≫ projModelπ 𝕌 = Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)))
+    (hc : c ≫ projModelπ 𝕌 = Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)))
+    (h12 : (pullback.lift a b (ha.trans hb.symm) ≫ mulModelHom 𝕌) ≫ projModelπ 𝕌 =
+        Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)))
+    (h23 : (pullback.lift b c (hb.trans hc.symm) ≫ mulModelHom 𝕌) ≫ projModelπ 𝕌 =
+        Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K))) :
+    pullback.lift (pullback.lift a b (ha.trans hb.symm) ≫ mulModelHom 𝕌) c (h12.trans hc.symm) ≫
+        mulModelHom 𝕌 =
+      pullback.lift a (pullback.lift b c (hb.trans hc.symm) ≫ mulModelHom 𝕌) (ha.trans h23.symm) ≫
+        mulModelHom 𝕌 := by
+  classical
+  have hP₁₂ := mulModelHom_specPoints 𝕌 K ⟨a, ha⟩ ⟨b, hb⟩
+  have hP₂₃ := mulModelHom_specPoints 𝕌 K ⟨b, hb⟩ ⟨c, hc⟩
+  have hL2 := mulModelHom_specPoints 𝕌 K ⟨_, h12⟩ ⟨c, hc⟩
+  have hR2 := mulModelHom_specPoints 𝕌 K ⟨a, ha⟩ ⟨_, h23⟩
+  have e2 : projModelPointsEquiv 𝕌 K ⟨_, h12⟩ =
+      projModelPointsEquiv 𝕌 K ⟨a, ha⟩ + projModelPointsEquiv 𝕌 K ⟨b, hb⟩ :=
+    (congrArg (projModelPointsEquiv 𝕌 K) (Subtype.ext rfl)).trans hP₁₂
+  have e4 : projModelPointsEquiv 𝕌 K ⟨_, h23⟩ =
+      projModelPointsEquiv 𝕌 K ⟨b, hb⟩ + projModelPointsEquiv 𝕌 K ⟨c, hc⟩ :=
+    (congrArg (projModelPointsEquiv 𝕌 K) (Subtype.ext rfl)).trans hP₂₃
+  have ebigL := hL2.trans (congrArg (· + projModelPointsEquiv 𝕌 K ⟨c, hc⟩) e2)
+  have ebigR := hR2.trans (congrArg (projModelPointsEquiv 𝕌 K ⟨a, ha⟩ + ·) e4)
+  exact congrArg Subtype.val
+    ((projModelPointsEquiv 𝕌 K).injective (ebigL.trans ((add_assoc _ _ _).trans ebigR.symm)))
+
 /-- **(T-G3-assoc)** Associativity of the two-law multiplication at the universe-`u` atlas,
 at the `Over (Spec 𝕌)` level: evaluate on a field point of the fibre cube, reduce both
 sides to spec-shaped lifts, and apply `add_assoc` on `Affine.Point`. -/
@@ -236,17 +280,10 @@ theorem mulOver_assoc_atlas :
     ((Spec.preimage ((p ≫
       pullback.fst (pullback.fst (projModelπ 𝕌) (projModelπ 𝕌) ≫ (projModelπ 𝕌)) (projModelπ 𝕌) ≫
       pullback.fst (projModelπ 𝕌) (projModelπ 𝕌)) ≫ (projModelπ 𝕌))).hom).toAlgebra
-  have hπ₁ : ((p ≫ pullback.fst (pullback.fst (projModelπ 𝕌) (projModelπ 𝕌) ≫ (projModelπ 𝕌))
+  have hπ₁ := structure_eq_specMap
+    ((p ≫ pullback.fst (pullback.fst (projModelπ 𝕌) (projModelπ 𝕌) ≫ (projModelπ 𝕌))
         (projModelπ 𝕌) ≫
-      pullback.fst (projModelπ 𝕌) (projModelπ 𝕌)) ≫ (projModelπ 𝕌)) =
-      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
-    have h1 : CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K) =
-        Spec.preimage ((p ≫
-          pullback.fst (pullback.fst (projModelπ 𝕌) (projModelπ 𝕌) ≫ (projModelπ 𝕌))
-            (projModelπ 𝕌) ≫
-          pullback.fst (projModelπ 𝕌) (projModelπ 𝕌)) ≫ (projModelπ 𝕌)) :=
-      CommRingCat.ofHom_hom _
-    rw [h1, Spec.map_preimage]
+      pullback.fst (projModelπ 𝕌) (projModelπ 𝕌)) ≫ (projModelπ 𝕌))
   have hπ₂ : ((p ≫ pullback.fst (pullback.fst (projModelπ 𝕌) (projModelπ 𝕌) ≫ (projModelπ 𝕌))
         (projModelπ 𝕌) ≫
       pullback.snd (projModelπ 𝕌) (projModelπ 𝕌)) ≫ (projModelπ 𝕌)) =
@@ -263,8 +300,6 @@ theorem mulOver_assoc_atlas :
     exact congrArg (p ≫ ·)
       (pullback.condition (f := pullback.fst (projModelπ 𝕌) (projModelπ 𝕌) ≫ (projModelπ 𝕌))
         (g := (projModelπ 𝕌))).symm
-  have hP₁₂ := mulModelHom_specPoints 𝕌 K ⟨_, hπ₁⟩ ⟨_, hπ₂⟩
-  have hP₂₃ := mulModelHom_specPoints 𝕌 K ⟨_, hπ₂⟩ ⟨_, hπ₃⟩
   have hπ₁₂ : (pullback.lift _ _ ((hπ₁).trans (hπ₂).symm) ≫
       mulModelHom 𝕌) ≫ (projModelπ 𝕌) =
       Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
@@ -277,25 +312,7 @@ theorem mulOver_assoc_atlas :
     rw [Category.assoc, show mulModelHom 𝕌 ≫ (projModelπ 𝕌) = _ from mulModelHom_π 𝕌,
       ← Category.assoc, pullback.lift_fst]
     exact hπ₂
-  have hL2 := mulModelHom_specPoints 𝕌 K ⟨_, hπ₁₂⟩ ⟨_, hπ₃⟩
-  have hR2 := mulModelHom_specPoints 𝕌 K ⟨_, hπ₁⟩ ⟨_, hπ₂₃⟩
-  have e2 : projModelPointsEquiv 𝕌 K ⟨_, hπ₁₂⟩ =
-      projModelPointsEquiv 𝕌 K ⟨_, hπ₁⟩ +
-      projModelPointsEquiv 𝕌 K ⟨_, hπ₂⟩ :=
-    (congrArg (projModelPointsEquiv 𝕌 K) (Subtype.ext rfl)).trans hP₁₂
-  have e4 : projModelPointsEquiv 𝕌 K ⟨_, hπ₂₃⟩ =
-      projModelPointsEquiv 𝕌 K ⟨_, hπ₂⟩ +
-      projModelPointsEquiv 𝕌 K ⟨_, hπ₃⟩ :=
-    (congrArg (projModelPointsEquiv 𝕌 K) (Subtype.ext rfl)).trans hP₂₃
-  have ebigL := hL2.trans
-    (congrArg (· + projModelPointsEquiv 𝕌 K ⟨_, hπ₃⟩) e2)
-  have ebigR := hR2.trans
-    (congrArg (projModelPointsEquiv 𝕌 K ⟨_, hπ₁⟩ + ·) e4)
-  have keyval : (pullback.lift _ _ ((hπ₁₂).trans (hπ₃).symm) ≫ mulModelHom 𝕌) =
-      (pullback.lift _ _ ((hπ₁).trans (hπ₂₃).symm) ≫ mulModelHom 𝕌) :=
-    congrArg Subtype.val
-      ((projModelPointsEquiv 𝕌 K).injective
-        (ebigL.trans ((add_assoc _ _ _).trans ebigR.symm)))
+  have keyval := mulModelHom_assoc_specPoints _ _ _ hπ₁ hπ₂ hπ₃ hπ₁₂ hπ₂₃
   -- outer first projection of the cube through the (mo⊗mo)-factor is the (f,g) input lift
   have hp₁₂p :
       p ≫ pullback.fst (pullback.fst (projModelπ 𝕌)
@@ -405,16 +422,8 @@ theorem mulOver_oneOver_atlas :
     ((Spec.preimage ((p ≫ pullback.fst (projModelπ 𝕌)
       (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom) ≫
         projModelπ 𝕌)).hom).toAlgebra
-  have hσ : (p ≫ pullback.fst (projModelπ 𝕌)
-      (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom) ≫
-      projModelπ 𝕌 =
-      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
-    have h1 : CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K) =
-        Spec.preimage ((p ≫ pullback.fst (projModelπ 𝕌)
-          (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom) ≫
-            projModelπ 𝕌) :=
-      CommRingCat.ofHom_hom _
-    rw [h1, Spec.map_preimage]
+  have hσ := structure_eq_specMap ((p ≫ pullback.fst (projModelπ 𝕌)
+    (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom) ≫ projModelπ 𝕌)
   have hπZ : (Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) ≫
       projModelZero 𝕌) ≫ projModelπ 𝕌 =
       Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
@@ -481,12 +490,7 @@ theorem invOver_mulOver_atlas :
   refine hom_ext_of_forall_specPoint fun K _ p => ?_
   letI : Algebra WeierstrassAtlasRingU.{u} K :=
     ((Spec.preimage (p ≫ projModelπ 𝕌)).hom).toAlgebra
-  have hσ : p ≫ projModelπ 𝕌 =
-      Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) := by
-    have h1 : CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K) =
-        Spec.preimage (p ≫ projModelπ 𝕌) :=
-      CommRingCat.ofHom_hom _
-    rw [h1, Spec.map_preimage]
+  have hσ := structure_eq_specMap (p ≫ projModelπ 𝕌)
   have hπneg : (p ≫ negModelHom 𝕌) ≫ projModelπ 𝕌 =
       Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRingU.{u} K)) :=
     (Category.assoc _ _ _).trans
@@ -729,20 +733,26 @@ private lemma tripleMapBaseChangeOf_snd (f : WeierstrassAtlasRingU.{u} →+* R)
         projModelBaseChangeOf f 𝕌 ((𝕌).map f) rfl :=
   (limit.lift_π _ _).trans rfl
 
+/-- **(T-G4 shared BC-leg)** The multiplication morphism intertwines the base change to
+`(𝕌).map f`: pushing `mulModelHom` across `projModelBaseChangeOf` equals whiskering
+`pullbackMapBaseChangeOf` into the universal `mulModelHom`. This is the base-change leg shared,
+verbatim, by the `*_of_map` transports (`mulOver_left_baseChangeOf`, `mulOver_oneOver_of_map`,
+`invOver_mulOver_of_map`); each `hbc` step is a call to this lemma. -/
+private lemma mulModelHom_baseChangeOf (f : WeierstrassAtlasRingU.{u} →+* R)
+    [((𝕌).map f).IsElliptic] :
+    mulModelHom ((𝕌).map f) ≫ projModelBaseChangeOf f 𝕌 ((𝕌).map f) rfl =
+      pullbackMapBaseChangeOf f 𝕌 ((𝕌).map f) rfl ≫
+        WeierstrassCurve.Projective.mulModelHom 𝕌 (𝕌).isUnit_Δ := by
+  rw [mulModelHom_map_eq_BC f]
+  exact mulModelHomBC_baseChange f 𝕌 (𝕌).isUnit_Δ ((𝕌).map f) rfl
+
 /-- The multiplication intertwines the base change, in the Over spelling (`hbc` bridged). -/
 private lemma mulOver_left_baseChangeOf (f : WeierstrassAtlasRingU.{u} →+* R)
     [((𝕌).map f).IsElliptic] :
     (mulOver ((𝕌).map f)).left ≫
       projModelBaseChangeOf f 𝕌 ((𝕌).map f) rfl =
       pairMapBaseChangeOf f ≫ (mulOver 𝕌).left := by
-  have hbc : mulModelHom ((𝕌).map f) ≫
-        projModelBaseChangeOf f 𝕌 ((𝕌).map f) rfl =
-      pullbackMapBaseChangeOf f 𝕌 ((𝕌).map f) rfl ≫
-      WeierstrassCurve.Projective.mulModelHom 𝕌
-        (𝕌).isUnit_Δ := by
-    rw [mulModelHom_map_eq_BC f]
-    exact mulModelHomBC_baseChange f 𝕌
-      (𝕌).isUnit_Δ ((𝕌).map f) rfl
+  have hbc := mulModelHom_baseChangeOf f
   have hmm : (mulOver 𝕌).left =
       WeierstrassCurve.Projective.mulModelHom 𝕌
         (𝕌).isUnit_Δ := by
@@ -911,6 +921,17 @@ private lemma assoc_whiskerLeft_baseChangeOf (f : WeierstrassAtlasRingU.{u} →+
         (modelOver 𝕌)).hom.left ≫ ·) whiskerLeftMul_snd_U.symm)
       (Category.assoc _ _ _).symm
 
+/-- **(T-G4 raw assoc)** The `.left` (raw scheme-level) projection of the atlas associativity
+`mulOver_assoc_atlas`, with the three `Over.comp_left`s pushed through. The `raw` input to the
+associativity transport. -/
+private lemma mulOver_assoc_atlas_left :
+    (mulOver 𝕌 ▷ modelOver 𝕌).left ≫ (mulOver 𝕌).left =
+      (α_ (modelOver 𝕌) (modelOver 𝕌) (modelOver 𝕌)).hom.left ≫
+        (modelOver 𝕌 ◁ mulOver 𝕌).left ≫ (mulOver 𝕌).left := by
+  have h2 := congrArg (fun m => m.left) mulOver_assoc_atlas
+  rw [Over.comp_left, Over.comp_left, Over.comp_left] at h2
+  exact h2
+
 /-- **(T-W7.0g-assoc·of_map)** Associativity at the base-changed universal curve (the `h = rfl`
 case). The whisker-BC naturalities are Over-spelled double-pullback-valued equations proven by
 `pullback.hom_ext` on named projection lemmas (never constructing an inline triple
@@ -928,15 +949,7 @@ theorem mulOver_assoc_of_map (f : WeierstrassAtlasRingU.{u} →+* R)
           mulOver ((𝕌).map f) := by
   apply Over.OverMorphism.ext
   rw [Over.comp_left, Over.comp_left, Over.comp_left]
-  have raw : (mulOver 𝕌 ▷ modelOver 𝕌).left ≫
-      (mulOver 𝕌).left =
-      (α_ (modelOver 𝕌) (modelOver 𝕌)
-          (modelOver 𝕌)).hom.left ≫
-        (modelOver 𝕌 ◁ mulOver 𝕌).left ≫
-          (mulOver 𝕌).left := by
-    have h2 := congrArg (fun m => m.left) mulOver_assoc_atlas
-    rw [Over.comp_left, Over.comp_left, Over.comp_left] at h2
-    exact h2
+  have raw := mulOver_assoc_atlas_left
   have hL : (mulOver ((𝕌).map f) ▷
         modelOver ((𝕌).map f)).left ≫ pairMapBaseChangeOf f =
       tripleMapBaseChangeOf f ≫
@@ -1031,6 +1044,19 @@ theorem mulOver_assoc (W : WeierstrassCurve R) [W.IsElliptic] :
         (modelOver W ◁ mulOver W) ≫ mulOver W :=
   mulOver_assoc_of_eq (classifyRingHomU W) W (universalWeierstrassLocU_map_classifyRingHomU W)
 
+/-- **(T-G4 raw mul-one)** The `.left` projection of the atlas right-unit law
+`mulOver_oneOver_atlas`, rewritten into the raw `mulModelHom`/`pullback.fst` spelling via
+`mulModelHom_universalWeierstrassLocU`. The `raw` input to the right-unit transport. -/
+private lemma mulOver_oneOver_atlas_left :
+    (modelOver 𝕌 ◁ oneOver 𝕌).left ≫
+        WeierstrassCurve.Projective.mulModelHom 𝕌 (𝕌).isUnit_Δ =
+      pullback.fst (projModelπ 𝕌)
+        (𝟙 (Spec (CommRingCat.of WeierstrassAtlasRingU.{u}))) := by
+  have h2 := congrArg (fun m => m.left) mulOver_oneOver_atlas
+  rw [Over.comp_left, mulOver_left, Over.rightUnitor_hom_left,
+    mulModelHom_universalWeierstrassLocU] at h2
+  exact h2
+
 /-- **(T-W7.0g-mul-one·of_map)** Right unit law at the base-changed universal curve
 `universalWeierstrassLocU.map f` (the `h = rfl` case). The whisker-BC naturality `hnat` is
 discharged by `pullback.map_comp` on both sides (the Over-monoidal `HasPullback` instance and
@@ -1043,25 +1069,8 @@ theorem mulOver_oneOver_of_map (f : WeierstrassAtlasRingU.{u} →+* R)
       (ρ_ (modelOver ((𝕌).map f))).hom := by
   apply Over.OverMorphism.ext
   rw [Over.comp_left, mulOver_left, Over.rightUnitor_hom_left]
-  have raw : (modelOver 𝕌 ◁ oneOver 𝕌).left ≫
-      WeierstrassCurve.Projective.mulModelHom 𝕌
-        (𝕌).isUnit_Δ =
-      pullback.fst (projModelπ 𝕌)
-        (𝟙 (Spec (CommRingCat.of WeierstrassAtlasRingU.{u}))) := by
-    have h2 := congrArg (fun m => m.left) mulOver_oneOver_atlas
-    rw [Over.comp_left, mulOver_left, Over.rightUnitor_hom_left,
-      mulModelHom_universalWeierstrassLocU] at h2
-    exact h2
-  have hbc : mulModelHom ((𝕌).map f) ≫
-        projModelBaseChangeOf f 𝕌
-          ((𝕌).map f) rfl =
-      pullbackMapBaseChangeOf f 𝕌
-        ((𝕌).map f) rfl ≫
-      WeierstrassCurve.Projective.mulModelHom 𝕌
-        (𝕌).isUnit_Δ := by
-    rw [mulModelHom_map_eq_BC f]
-    exact mulModelHomBC_baseChange f 𝕌
-      (𝕌).isUnit_Δ ((𝕌).map f) rfl
+  have raw := mulOver_oneOver_atlas_left
+  have hbc := mulModelHom_baseChangeOf f
   have hw1 : projModelπ ((𝕌).map f) ≫ Spec.map (CommRingCat.ofHom f) =
       projModelBaseChangeOf f 𝕌
         ((𝕌).map f) rfl ≫ projModelπ 𝕌 :=
@@ -1122,6 +1131,20 @@ theorem oneOver_mulOver (W : WeierstrassCurve R) [W.IsElliptic] :
   rw [← mulOver_comm W, ← Category.assoc, BraidedCategory.braiding_naturality_left,
     Category.assoc, mulOver_oneOver, braiding_rightUnitor]
 
+/-- **(T-G4 raw inv-law)** The `.left` projection of the atlas inverse law
+`invOver_mulOver_atlas`, rewritten into the raw `mulModelHom`/`projModelZero` spelling via
+`mulModelHom_universalWeierstrassLocU`. The `raw` input to the inverse-law transport. -/
+private lemma invOver_mulOver_atlas_left :
+    (lift (invOver 𝕌) (𝟙 (modelOver 𝕌))).left ≫
+        WeierstrassCurve.Projective.mulModelHom 𝕌 (𝕌).isUnit_Δ =
+      (modelOver 𝕌).hom ≫
+        (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom ≫
+          projModelZero 𝕌 := by
+  have h2 := congrArg (fun m => m.left) invOver_mulOver_atlas
+  rw [Over.comp_left, Over.comp_left, mulOver_left, Over.toUnit_left, oneOver_left,
+    mulModelHom_universalWeierstrassLocU] at h2
+  exact h2
+
 /-- **(T-W7.0g-inv-law·of_map)** The left inverse law at the base-changed universal curve
 `universalWeierstrassLocU.map f` (the `h = rfl` case). The whisker-BC naturality `hnat` here has a
 single-object domain (`projModel`), so it reduces by `pullback.hom_ext` to
@@ -1136,27 +1159,8 @@ theorem invOver_mulOver_of_map (f : WeierstrassAtlasRingU.{u} →+* R)
         oneOver ((𝕌).map f) := by
   apply Over.OverMorphism.ext
   rw [Over.comp_left, Over.comp_left, mulOver_left, Over.toUnit_left, oneOver_left]
-  have raw : (lift (invOver 𝕌)
-        (𝟙 (modelOver 𝕌))).left ≫
-      WeierstrassCurve.Projective.mulModelHom 𝕌
-        (𝕌).isUnit_Δ =
-      (modelOver 𝕌).hom ≫
-        (𝟙_ (Over (Spec (CommRingCat.of WeierstrassAtlasRingU.{u})))).hom ≫
-          projModelZero 𝕌 := by
-    have h2 := congrArg (fun m => m.left) invOver_mulOver_atlas
-    rw [Over.comp_left, Over.comp_left, mulOver_left, Over.toUnit_left, oneOver_left,
-      mulModelHom_universalWeierstrassLocU] at h2
-    exact h2
-  have hbc : mulModelHom ((𝕌).map f) ≫
-        projModelBaseChangeOf f 𝕌
-          ((𝕌).map f) rfl =
-      pullbackMapBaseChangeOf f 𝕌
-        ((𝕌).map f) rfl ≫
-      WeierstrassCurve.Projective.mulModelHom 𝕌
-        (𝕌).isUnit_Δ := by
-    rw [mulModelHom_map_eq_BC f]
-    exact mulModelHomBC_baseChange f 𝕌
-      (𝕌).isUnit_Δ ((𝕌).map f) rfl
+  have raw := invOver_mulOver_atlas_left
+  have hbc := mulModelHom_baseChangeOf f
   have hnat : (lift (invOver ((𝕌).map f))
         (𝟙 (modelOver ((𝕌).map f)))).left ≫
       pullbackMapBaseChangeOf f 𝕌
