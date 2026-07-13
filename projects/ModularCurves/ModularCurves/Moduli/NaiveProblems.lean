@@ -1,5 +1,6 @@
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.PullSectionCanonicity
+import ModularCurves.Moduli.TransportPoint
 import ModularCurves.EllipticCurve.TorsionFibre
 
 /-!
@@ -201,6 +202,86 @@ noncomputable def gammaOneNaiveProblem (N : ℕ) [NeZero N] : ModuliProblem R wh
     ext P
     exact congrArg Subtype.val (EllHom.pullSection_comp R g.unop f.unop P.1)
 
+/-- Naive full-level structures transport to the base change along an `Ell/R`-morphism's base
+(the target-side input of `isNaiveFullLevel_pullSection`): the killing clauses transport through
+`asSection`/`pull`, and the fibrewise generation transports through the geometric-fibre
+dictionary `baseChangeEquiv` (an additive equivalence preserving subgroup closures). -/
+private lemma isNaiveFullLevel_asSection_pull (N : ℕ) [NeZero N] {X Y : EllObj R} (f : X ⟶ Y)
+    {P Q : Y.curve.Section} (hPQ : Y.curve.IsNaiveFullLevel N P Q) :
+    (Y.curve.baseChange f.baseHom).IsNaiveFullLevel N
+      (EllipticCurve.Point.asSection Y.curve f.baseHom
+        (EllipticCurve.Point.pull Y.curve f.baseHom P))
+      (EllipticCurve.Point.asSection Y.curve f.baseHom
+        (EllipticCurve.Point.pull Y.curve f.baseHom Q)) := by
+  obtain ⟨⟨hkP, hkQ⟩, hfib⟩ := hPQ
+  have hasz : EllipticCurve.Point.asSection Y.curve f.baseHom (0 : Y.curve.Point f.baseHom) = 0 := by
+    refine Subtype.ext (Limits.pullback.hom_ext ?_ ?_)
+    · have hL : (EllipticCurve.Point.asSection Y.curve f.baseHom (0 : Y.curve.Point f.baseHom)).1
+          ≫ Limits.pullback.fst Y.curve.π f.baseHom = f.baseHom ≫ Y.curve.zero :=
+        (EllipticCurve.Point.asSection_val_fst Y.curve f.baseHom 0).trans
+          (Y.curve.point_zero_val f.baseHom)
+      have hR : (0 : (Y.curve.baseChange f.baseHom).Point (𝟙 X.base)).1
+          ≫ Limits.pullback.fst Y.curve.π f.baseHom = f.baseHom ≫ Y.curve.zero := by
+        rw [(Y.curve.baseChange f.baseHom).point_zero_val (𝟙 X.base), Category.id_comp]
+        exact Limits.pullback.lift_fst _ _ _
+      exact hL.trans hR.symm
+    · have hL : (EllipticCurve.Point.asSection Y.curve f.baseHom (0 : Y.curve.Point f.baseHom)).1
+          ≫ Limits.pullback.snd Y.curve.π f.baseHom = 𝟙 X.base :=
+        EllipticCurve.Point.asSection_val_snd Y.curve f.baseHom 0
+      have hR : (0 : (Y.curve.baseChange f.baseHom).Point (𝟙 X.base)).1
+          ≫ Limits.pullback.snd Y.curve.π f.baseHom = 𝟙 X.base := by
+        rw [(Y.curve.baseChange f.baseHom).point_zero_val (𝟙 X.base), Category.id_comp]
+        exact Limits.pullback.lift_snd _ _ _
+      exact hL.trans hR.symm
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · rw [← EllipticCurve.Point.asSection_zsmul, ← EllipticCurve.Point.pull_zsmul, hkP,
+      EllipticCurve.Point.pull_zero, hasz]
+  · rw [← EllipticCurve.Point.asSection_zsmul, ← EllipticCurve.Point.pull_zsmul, hkQ,
+      EllipticCurve.Point.pull_zero, hasz]
+  · intro k _ _ t x hx
+    refine (AddEquiv.mem_closure_image (EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom t)
+      {EllipticCurve.Point.pull (Y.curve.baseChange f.baseHom) t
+          (EllipticCurve.Point.asSection Y.curve f.baseHom
+            (EllipticCurve.Point.pull Y.curve f.baseHom P)),
+       EllipticCurve.Point.pull (Y.curve.baseChange f.baseHom) t
+          (EllipticCurve.Point.asSection Y.curve f.baseHom
+            (EllipticCurve.Point.pull Y.curve f.baseHom Q))} x).mp ?_
+    rw [Set.image_pair, baseChangeEquiv_pull_asSection, baseChangeEquiv_pull_asSection]
+    exact hfib k (t ≫ f.baseHom) _ (by rw [← map_zsmul, hx, map_zero])
+
+/-- Section-pullback of a naive full-level structure is a naive full-level structure: reduce
+to the base-changed structure (`isNaiveFullLevel_asSection_pull`), then transport back along the
+cartesian-square fibre equivalence `transportPointEquiv`. -/
+private lemma isNaiveFullLevel_pullSection (N : ℕ) [NeZero N] {X Y : EllObj R} (f : X ⟶ Y)
+    {P Q : Y.curve.Section} (hPQ : Y.curve.IsNaiveFullLevel N P Q) :
+    X.curve.IsNaiveFullLevel N (EllHom.pullSection R f P) (EllHom.pullSection R f Q) := by
+  obtain ⟨⟨hkbP, hkbQ⟩, hfibb⟩ := isNaiveFullLevel_asSection_pull R N f hPQ
+  obtain ⟨⟨hkP, hkQ⟩, _⟩ := hPQ
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · rw [← EllHom.pullSection_zsmul_of_finitePresentation, hkP]
+    exact map_zero (AddMonoidHom.mk' (EllHom.pullSection R f)
+      (EllHom.pullSection_add_of_finitePresentation R f))
+  · rw [← EllHom.pullSection_zsmul_of_finitePresentation, hkQ]
+    exact map_zero (AddMonoidHom.mk' (EllHom.pullSection R f)
+      (EllHom.pullSection_add_of_finitePresentation R f))
+  · intro k _ _ t x hx
+    refine (AddEquiv.mem_closure_image (EllHom.transportPointEquiv R f t)
+      {EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f P),
+       EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f Q)} x).mp ?_
+    have himg : EllHom.transportPointEquiv R f t ''
+        {EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f P),
+         EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f Q)}
+        = {EllipticCurve.Point.pull (Y.curve.baseChange f.baseHom) t
+              (EllipticCurve.Point.asSection Y.curve f.baseHom
+                (EllipticCurve.Point.pull Y.curve f.baseHom P)),
+           EllipticCurve.Point.pull (Y.curve.baseChange f.baseHom) t
+              (EllipticCurve.Point.asSection Y.curve f.baseHom
+                (EllipticCurve.Point.pull Y.curve f.baseHom Q))} := by
+      rw [Set.image_pair]
+      simp only [EllHom.transportPointEquiv_apply, EllHom.transportPoint_pull_pullSection]
+    rw [himg]
+    exact hfibb k t (EllHom.transportPointEquiv R f t x) (by rw [← map_zsmul, hx, map_zero])
+
 /-- The naive full-level-`N` (`Γ(N)`) moduli problem over `R`:
 `E/S ↦ {(P, Q) generating E[N] in every fibre}`. Source: Loeffler Fact 3.8.1 (verbatim:
 "pairs of sections `P, Q ∈ E[S]` generating `E[N]` in every fibre"); KM 3.1 + 3.7. -/
@@ -208,7 +289,7 @@ noncomputable def gammaFullNaiveProblem (N : ℕ) [NeZero N] : ModuliProblem R w
   obj X := { PQ : X.unop.curve.Section × X.unop.curve.Section //
     X.unop.curve.IsNaiveFullLevel N PQ.1 PQ.2 }
   map f := ↾fun PQ => ⟨⟨EllHom.pullSection R f.unop PQ.1.1,
-    EllHom.pullSection R f.unop PQ.1.2⟩, by sorry⟩
+    EllHom.pullSection R f.unop PQ.1.2⟩, isNaiveFullLevel_pullSection R N f.unop PQ.2⟩
   map_id X := by
     ext PQ
     · exact congrArg Subtype.val (EllHom.pullSection_id R PQ.1.1)
