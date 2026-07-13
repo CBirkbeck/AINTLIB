@@ -10,7 +10,7 @@ public import FltRegular.NumberTheory.Cyclotomic.UnitLemmas
 
 
 /-!
-# Uniformizer fact derivation (REF-18c2c4-L2c3a-prove)
+# Uniformizer fact derivation
 
 Provides a free-standing proof that `π = ζ_ℓ - 1` is a `Q`-uniformizer
 in `R' = ℚ(ζ_p, ζ_ℓ)` for any prime `Q` of `𝓞 R'` above `ℓ`. This
@@ -50,11 +50,11 @@ theorem isCyclotomicExtension_singleton_mul_of_pair
     {R' : Type w} [CommRing R'] [Algebra ℚ R']
     [hR' : IsCyclotomicExtension {p, ℓ} ℚ R'] :
     IsCyclotomicExtension {p * ℓ} ℚ R' := by
-  haveI hp_prime : Nat.Prime p := Fact.out
-  haveI hℓ_prime : Nat.Prime ℓ := Fact.out
-  haveI : NeZero p := ⟨hp_prime.ne_zero⟩
-  haveI : NeZero ℓ := ⟨hℓ_prime.ne_zero⟩
-  haveI hpℓ_ne : NeZero (p * ℓ) := ⟨Nat.mul_ne_zero (NeZero.ne p) (NeZero.ne ℓ)⟩
+  have hp_prime : Nat.Prime p := Fact.out
+  have hℓ_prime : Nat.Prime ℓ := Fact.out
+  have : NeZero p := ⟨hp_prime.ne_zero⟩
+  have : NeZero ℓ := ⟨hℓ_prime.ne_zero⟩
+  have hpℓ_ne : NeZero (p * ℓ) := ⟨Nat.mul_ne_zero (NeZero.ne p) (NeZero.ne ℓ)⟩
   -- Get primitive p-th and ℓ-th roots from the {p, ℓ}-cyclotomic structure.
   have h_p_mem : (p : ℕ) ∈ ({p, ℓ} : Set ℕ) := Set.mem_insert _ _
   have h_ℓ_mem : (ℓ : ℕ) ∈ ({p, ℓ} : Set ℕ) :=
@@ -103,11 +103,11 @@ theorem isCMField_of_cyclotomicExtension_pair_primes
     {R' : Type w} [Field R'] [NumberField R']
     [hR' : IsCyclotomicExtension {p, ℓ} ℚ R'] :
     NumberField.IsCMField R' := by
-  haveI hp_prime : Nat.Prime p := Fact.out
-  haveI hℓ_prime : Nat.Prime ℓ := Fact.out
-  haveI : IsCyclotomicExtension {p * ℓ} ℚ R' :=
+  have hp_prime : Nat.Prime p := Fact.out
+  have hℓ_prime : Nat.Prime ℓ := Fact.out
+  have : IsCyclotomicExtension {p * ℓ} ℚ R' :=
     isCyclotomicExtension_singleton_mul_of_pair hpℓ
-  haveI : NeZero (p * ℓ) :=
+  have : NeZero (p * ℓ) :=
     ⟨Nat.mul_ne_zero hp_prime.ne_zero hℓ_prime.ne_zero⟩
   have h_pl_gt_two : 2 < p * ℓ := by
     have hp_ge_two : 2 ≤ p := hp_prime.two_le
@@ -129,8 +129,8 @@ theorem charP_residueField_of_natCast_mem
     (P : Ideal (𝓞 F)) [hP_max : P.IsMaximal]
     (hℓ_in_P : (ell : 𝓞 F) ∈ P) :
     CharP (𝓞 F ⧸ P) ell := by
-  letI : Field (𝓞 F ⧸ P) := Ideal.Quotient.field P
-  refine ⟨fun n => ?_⟩
+  let : Field (𝓞 F ⧸ P) := Ideal.Quotient.field P
+  refine ⟨fun n ↦ ?_⟩
   rw [show ((n : 𝓞 F ⧸ P)) = (Ideal.Quotient.mk P) ((n : 𝓞 F)) from
     (map_natCast _ _).symm]
   rw [Ideal.Quotient.eq_zero_iff_mem]
@@ -177,7 +177,7 @@ theorem ringOfIntegersComplexConj_primitiveRoot
     {ζ : 𝓞 F} (hζ : IsPrimitiveRoot ζ n) :
     (NumberField.IsCMField.ringOfIntegersComplexConj F ζ : 𝓞 F) =
       (ζ : 𝓞 F) ^ (n - 1) := by
-  haveI : NeZero n := ⟨hn_pos.ne'⟩
+  have : NeZero n := ⟨hn_pos.ne'⟩
   -- ζ is a unit (primitive root in a domain).
   have hζ_unit : IsUnit ζ := hζ.isUnit hn_pos.ne'
   let u : (𝓞 F)ˣ := hζ_unit.unit
@@ -217,7 +217,7 @@ theorem ringOfIntegersComplexConj_primitiveRoot
 For `K = ℚ(ζ_p)` with `p > 2`, complex conjugation on any CM upstairs field
 `R'` restricts to the cyclotomic complex conjugation on `K`, provided the
 integer algebra map `𝓞 K → 𝓞 R'` is faithful. This is the form needed by the
-source-conductor REF-18 route, where the upstairs field is cyclotomic for
+source-conductor route, where the upstairs field is cyclotomic for
 `ell * (#k - 1)` rather than literally pair-cyclotomic. -/
 theorem upstairsComplexConj_lifts_downstairs_of_isCMField
     {p : ℕ} [hp : Fact p.Prime] (hp_gt_two : 2 < p)
@@ -234,7 +234,7 @@ theorem upstairsComplexConj_lifts_downstairs_of_isCMField
         (algebraMap (𝓞 K) (𝓞 R') x) =
       algebraMap (𝓞 K) (𝓞 R')
         (NumberField.IsCMField.ringOfIntegersComplexConj K x) := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   have hp_pos : 0 < p := hp.1.pos
   -- Induction on x ∈ Algebra.adjoin ℤ {ζ_p} = ⊤.
@@ -314,9 +314,9 @@ theorem upstairsComplexConj_lifts_downstairs
         (algebraMap (𝓞 K) (𝓞 R') x) =
       algebraMap (𝓞 K) (𝓞 R')
         (NumberField.IsCMField.ringOfIntegersComplexConj K x) := by
-  haveI : NumberField.IsCMField R' :=
+  have : NumberField.IsCMField R' :=
     isCMField_of_cyclotomicExtension_pair_primes (p := p) (ℓ := ℓ) hpℓ
-  haveI : FaithfulSMul (𝓞 K) (𝓞 R') :=
+  have : FaithfulSMul (𝓞 K) (𝓞 R') :=
     FaithfulSMul.of_field_isFractionRing (𝓞 K) (𝓞 R') K R'
   exact
     upstairsComplexConj_lifts_downstairs_of_isCMField
@@ -329,7 +329,7 @@ theorem absNorm_under_eq_of_ell_mem
     [IsDedekindDomain R] [Module.Free ℤ R] [Algebra.IsIntegral ℤ R]
     {Q : Ideal R} [Q.IsPrime] (hQ_ne : Q ≠ ⊥) (hℓ : (ℓ : R) ∈ Q) :
     Ideal.absNorm (Q.under ℤ) = ℓ := by
-  haveI : NeZero Q := ⟨hQ_ne⟩
+  have : NeZero Q := ⟨hQ_ne⟩
   have h_prime := Nat.absNorm_under_prime Q
   have h_dvd : Ideal.absNorm (Q.under ℤ) ∣ ℓ := by
     have h := (Int.cast_mem_ideal_iff (R := R) (I := Q) (d := (ℓ : ℤ))).mp
@@ -372,7 +372,7 @@ theorem associated_ell_zeta_sub_one_pow
   have h_prod :
       Associated (∏ μ ∈ primitiveRoots ℓ R, (1 - μ))
         (∏ μ ∈ primitiveRoots ℓ R, (ζ - 1)) := by
-    refine Associated.prod (primitiveRoots ℓ R) (fun μ => 1 - μ) (fun _ => ζ - 1) ?_
+    refine Associated.prod (primitiveRoots ℓ R) (fun μ ↦ 1 - μ) (fun _ ↦ ζ - 1) ?_
     intro μ hμ
     have hμ_prim : IsPrimitiveRoot μ ℓ := (mem_primitiveRoots hℓ_pos).1 hμ
     obtain ⟨i, _hi_lt, hi_coprime, hζi⟩ := (hζ.isPrimitiveRoot_iff).1 hμ_prim
@@ -417,7 +417,7 @@ theorem liesOver_span_ell_of_ell_mem
     rw [h_eq]]
   exact h_inst
 
-/-- **Main derivation (REF-18c2c4-L2c3a-prove):** for any prime `Q` of
+/-- **Main derivation:** for any prime `Q` of
 `𝓞 R'` above `ℓ`, the element `ζ_ℓ - 1` is a uniformizer at `Q`, i.e.,
 `(ζ_ℓ - 1) ∉ Q^2`.
 
@@ -447,7 +447,7 @@ theorem pi_not_mem_Q_sq_of_ramification
     (hQ : (ℓ : 𝓞 R') ∈ Q) :
     zeta_ell_int - 1 ∉ Q ^ 2 := by
   -- Step 1: derive {ℓ · p}-cyclotomic structure on R'.
-  haveI : IsCyclotomicExtension {ℓ * p} ℚ R' := by
+  have : IsCyclotomicExtension {ℓ * p} ℚ R' := by
     have h_swap : ({ℓ, p} : Set ℕ) = {p, ℓ} := by
       ext x; constructor <;> rintro (rfl | rfl) <;> simp
     have : IsCyclotomicExtension {p * ℓ} ℚ R' :=
@@ -455,11 +455,11 @@ theorem pi_not_mem_Q_sq_of_ramification
     rw [show ({ℓ * p} : Set ℕ) = ({p * ℓ} : Set ℕ) by rw [Nat.mul_comm]]
     exact this
   -- Step 2: establish LiesOver.
-  haveI hQ_lies : Q.LiesOver (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) :=
+  have hQ_lies : Q.LiesOver (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) :=
     liesOver_span_ell_of_ell_mem Q hQ_ne hQ
-  haveI : NeZero (p : ℕ) := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
+  have : NeZero (p : ℕ) := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
   -- Step 3: apply ramificationIdx_eq with n = ℓ * p, prime ℓ, k = 0, m = p.
-  have h_ne_dvd : ¬ ℓ ∣ p := fun hdvd => by
+  have h_ne_dvd : ¬ ℓ ∣ p := fun hdvd ↦ by
     have : ℓ = p :=
       (Nat.prime_dvd_prime_iff_eq (Fact.out : Nat.Prime ℓ)
         (Fact.out : Nat.Prime p)).mp hdvd
