@@ -34,4 +34,14 @@ instance isIso_residueFieldMap_of_isClosedImmersion {X Y : Scheme.{u}} (f : X �
   rw [← hnat] at hs
   exact hs.of_comp
 
+/-- A geometric point at `w` factors through a closed immersion `f` whenever `w` is in its (set-)
+range: `X.fromSpecResidueField w` factors through `f`, since `κ(w) ≅ κ(y)` for the preimage `y`. -/
+theorem exists_fromSpecResidueField_factor {X Y : Scheme.{u}} (f : X ⟶ Y) [IsClosedImmersion f]
+    (w : Y) (hw : w ∈ Set.range f.base) :
+    ∃ s : Spec (Y.residueField w) ⟶ X, s ≫ f = Y.fromSpecResidueField w := by
+  obtain ⟨y, rfl⟩ := hw
+  refine ⟨inv (Spec.map (f.residueFieldMap y)) ≫ X.fromSpecResidueField y, ?_⟩
+  rw [Category.assoc, ← f.SpecMap_residueFieldMap_fromSpecResidueField y,
+    ← Category.assoc, IsIso.inv_hom_id, Category.id_comp]
+
 end AlgebraicGeometry
