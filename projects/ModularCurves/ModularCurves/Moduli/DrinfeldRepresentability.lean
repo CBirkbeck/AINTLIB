@@ -43,6 +43,18 @@ theorem exactOrderLocus_isAffineHom {S : Scheme.{u}} (E : EllipticCurve S) (N : 
   haveI : IsFinite (E.torsionπ N) := E.torsionπ_isFinite N
   exact inferInstance
 
+set_option maxHeartbeats 1000000 in
+/-- The kernel `T`-point recovered from an `N`-torsion point via `torsionPointsEquiv` is the
+original map into `E[N]` (both sides are the unique lift over the two `E[N]`-projections). This
+is the uniqueness fact that makes the exact-order locus represent the Γ₁ functor of points. -/
+theorem pointToTorsion_torsionPointsEquiv {S : Scheme.{u}} (E : EllipticCurve S) (N : ℕ)
+    [NeZero N] {T : Scheme.{u}} (g : T ⟶ S)
+    (j : { j : T ⟶ E.torsion N // j ≫ E.torsionπ N = g }) :
+    E.pointToTorsion (↑(E.torsionPointsEquiv N g j))
+        ((E.smul_eq_zero_iff_comp_mulByHom g N _).mp
+          ((Submodule.mem_torsionBy_iff _ _).mp (E.torsionPointsEquiv N g j).2)) = j.1 :=
+  congrArg Subtype.val ((E.torsionPointsEquiv N g).left_inv j)
+
 /-- **(KM 1.6.2, `ℤ/N`-Str — no rank hypothesis, hence no `c4`)** The Drinfeld `Γ₁(N)`
 moduli problem is affine over `Ell`: for each `E/S` the functor of Drinfeld exact-order-`N`
 points is represented by the exact-order locus `Z ⊆ E[N]`, finite (hence affine) over `S`.
