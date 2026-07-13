@@ -274,6 +274,30 @@ theorem spec_includeLeft_group_isoSpec_inv :
       (congrArg (fun m => (m ≫ inv P.groupOpen.toSpecΓ) ≫ P.groupOpen.ι) h1'.symm).trans <|
         congrArg (· ≫ P.groupOpen.ι) (Category.assoc _ _ _)
 
+/-- The chart Künneth carries the second projection to the restricted projection
+(standalone export of the in-proof identification). -/
+theorem chartPullbackIso_inv_restrictedProj :
+    (G.chartPullbackIso P.U).inv ≫ G.restrictedProj P.U
+      = pullback.snd G.π (P.U.ι ≫ E.π) := by
+  rw [chartPullbackIso, Iso.trans_inv, Category.assoc]
+  have hres : (G.restrictedDomainIso P.U).inv ≫ G.restrictedProj P.U
+      = pullback.snd G.actionProj.left P.U.ι := by
+    rw [restrictedDomainIso, Iso.symm_inv, restrictedProj]
+    rw [show G.actionProj.left.resLE P.U (G.actionProj.left ⁻¹ᵁ P.U) le_rfl
+        = G.actionProj.left ∣_ P.U from Scheme.Hom.resLE_eq_morphismRestrict _]
+    exact pullbackRestrictIsoRestrict_hom_morphismRestrict G.actionProj.left P.U
+  rw [hres]
+  exact pullbackLeftPullbackSndIso_inv_snd_snd G.π E.π P.U.ι
+
+/-- The raw second-projection form of the chart-side bridge leg. -/
+theorem chartSpecIso_inv_snd :
+    P.chartSpecIso.inv ≫ pullback.snd G.π (P.U.ι ≫ E.π)
+      = Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+          P.chartRing →ₐ[P.baseRing] P.groupRing ⊗[P.baseRing] P.chartRing).toRingHom) ≫
+        P.hU.isoSpec.inv :=
+  (congrArg (P.chartSpecIso.inv ≫ ·) P.chartPullbackIso_inv_restrictedProj.symm).trans
+    P.spec_includeRight_isoSpec_inv.symm
+
 /-- **`[HG-C4b]` — invariant morphisms coequalize the chart pair.** For a `G`-invariant
 `f : E ⟶ Y`, the chart restriction `U.ι ≫ f` satisfies the algebraic coequalization
 hypothesis of the per-patch universal property: restrict `IsInvariant.coequalizes` to the
