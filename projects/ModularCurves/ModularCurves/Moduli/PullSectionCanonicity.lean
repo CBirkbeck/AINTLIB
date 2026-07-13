@@ -5,6 +5,7 @@ Authors: The AINTLIB Authors
 -/
 import ModularCurves.Moduli.PullSectionAdd
 import ModularCurves.EllipticCurve.RigiditySpreadingOut
+import ModularCurves.EllipticCurve.RecordGroupUnique
 
 /-!
 # The T-E4 transport, reduced to the single canonicity primitive (Y1-D2)
@@ -144,29 +145,21 @@ lemma curveIsoPullbackOver_one :
     (congrArg ((𝟙_ (Over X.base)).hom ≫ ·) (zero_curveIsoPullback R f)).trans <|
     (Y.curve.baseChange f.baseHom).one_eq_zero.symm
 
-/-- **(T-E4a over an arbitrary base — modulo the single route (a)/(c) canonicity primitive)**
-Transport additivity, with the group-hom equation supplied by the arbitrary-base GIT Cor 6.4
-`isMonHom_of_one_comp_eq'_of_finitePresentation` (route (a), `RigiditySpreadingOut.lean`).
-Elliptic curves are smooth of relative dimension one, hence of finite presentation, so the
-finite-presentation hypotheses are automatic. -/
+/-- **(T-E4a over an arbitrary base — now unconditional)**
+Transport additivity, with the group-hom equation supplied by the arbitrary-base
+records-level canonicity primitive `isMonHom_of_pointedIso_records`
+(`RecordGroupUnique.lean`): the pointed comparison isomorphism onto the pullback is
+automatically a homomorphism of the two group structures, so no finite-presentation or
+noetherian hypothesis on the base is needed. (The name is retained for its consumers; the
+finite-presentation route (a), `isMonHom_of_one_comp_eq'_of_finitePresentation`, is no
+longer used here.) -/
 theorem transportSection_add_of_finitePresentation (s s' : X.curve.Section) :
     transportSection R f (s + s')
-      = transportSection R f s + transportSection R f s' := by
-  haveI : Smooth X.curve.π := SmoothOfRelativeDimension.smooth (n := 1) (f := X.curve.π)
-  haveI : Smooth (Y.curve.baseChange f.baseHom).π :=
-    SmoothOfRelativeDimension.smooth (n := 1) (f := (Y.curve.baseChange f.baseHom).π)
-  haveI : IsProper X.curve.asOver.hom := inferInstanceAs (IsProper X.curve.π)
-  haveI : Flat X.curve.asOver.hom := inferInstanceAs (Flat X.curve.π)
-  haveI : LocallyOfFinitePresentation X.curve.asOver.hom :=
-    inferInstanceAs (LocallyOfFinitePresentation X.curve.π)
-  haveI : IsSeparated (Y.curve.baseChange f.baseHom).asOver.hom :=
-    inferInstanceAs (IsSeparated (Y.curve.baseChange f.baseHom).π)
-  haveI : LocallyOfFinitePresentation (Y.curve.baseChange f.baseHom).asOver.hom :=
-    inferInstanceAs (LocallyOfFinitePresentation (Y.curve.baseChange f.baseHom).π)
-  exact transportSection_add_of_isMonHom R f
-    (isMonHom_of_one_comp_eq'_of_finitePresentation
-      X.curve.toEllipticCurveGeom.universallyOConnected
-      (curveIsoPullbackOver R f) (curveIsoPullbackOver_one R f)) s s'
+      = transportSection R f s + transportSection R f s' :=
+  transportSection_add_of_isMonHom R f
+    (isMonHom_of_pointedIso_records X.curve (Y.curve.baseChange f.baseHom)
+      (Over.isoMk (curveIsoPullback R f) f.isPullback.isoPullback_hom_snd)
+      (curveIsoPullbackOver_one R f)) s s'
 
 /-- **(T-E4a, `pullSection_add` over an arbitrary base)** Section-pullback is additive over an
 arbitrary base — the unrestricted statement, modulo the single route (a)/(c) canonicity
