@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
 import ModularCurves.GroupScheme.SubgroupQuotientConstruction
+import Mathlib.AlgebraicGeometry.Sites.Fpqc
 
 /-!
 # The subgroup-scheme quotient glue: the equalizer-subring model (`[HG-C4c-2]`)
@@ -933,6 +934,184 @@ theorem isKernelPair_localQuotientOpenπ :
     P.localQuotientOpenπ_iso.symm
 
 end KernelPair
+
+/-! ### Step S4 — descent along the restricted projection -/
+
+section Descent
+
+variable [Module.Free P.baseRing P.groupRing] {W : E.E.Opens}
+
+/-- Morphisms out of the window that identify all `restrictedπ`-equal pairs descend to
+the image open: `restrictedπ` is flat, surjective and quasi-compact, hence an effective
+epimorphism (fpqc descent). -/
+noncomputable def descRestrictedπ (hW : G.IsStableOpen W) (hWU : W ≤ P.U) {Z : Scheme.{u}}
+    (h : (P.U.ι ⁻¹ᵁ W).toScheme ⟶ Z)
+    (hinv : ∀ {T : Scheme.{u}} (a b : T ⟶ (P.U.ι ⁻¹ᵁ W).toScheme),
+      a ≫ P.restrictedπ hW hWU = b ≫ P.restrictedπ hW hWU → a ≫ h = b ≫ h) :
+    (P.imageOpens hW hWU).toScheme ⟶ Z :=
+  EffectiveEpi.desc (P.restrictedπ hW hWU) h fun g₁ g₂ hg => hinv g₁ g₂ hg
+
+@[reassoc]
+theorem restrictedπ_descRestrictedπ (hW : G.IsStableOpen W) (hWU : W ≤ P.U)
+    {Z : Scheme.{u}} (h : (P.U.ι ⁻¹ᵁ W).toScheme ⟶ Z)
+    (hinv : ∀ {T : Scheme.{u}} (a b : T ⟶ (P.U.ι ⁻¹ᵁ W).toScheme),
+      a ≫ P.restrictedπ hW hWU = b ≫ P.restrictedπ hW hWU → a ≫ h = b ≫ h) :
+    P.restrictedπ hW hWU ≫ P.descRestrictedπ hW hWU h hinv = h :=
+  EffectiveEpi.fac _ _ _
+
+/-- Morphisms out of the image open are determined by precomposition with the
+restricted projection. -/
+theorem restrictedπ_hom_ext (hW : G.IsStableOpen W) (hWU : W ≤ P.U) {Z : Scheme.{u}}
+    {q₁ q₂ : (P.imageOpens hW hWU).toScheme ⟶ Z}
+    (hq : P.restrictedπ hW hWU ≫ q₁ = P.restrictedπ hW hWU ≫ q₂) : q₁ = q₂ :=
+  (cancel_epi (P.restrictedπ hW hWU)).mp hq
+
+omit [Module.Free P.baseRing P.groupRing] in
+/-- The window over a stable sub-open, embedded back into the curve: the range is the
+sub-open itself. -/
+theorem range_window_ι (hWU : W ≤ P.U) :
+    Set.range ((P.U.ι ⁻¹ᵁ W).ι ≫ P.U.ι).base = (W : Set ↥E.E) := by
+  show Set.range (⇑P.U.ι.base ∘ ⇑(P.U.ι ⁻¹ᵁ W).ι.base) = (W : Set ↥E.E)
+  rw [Set.range_comp, Scheme.Opens.range_ι]
+  show ⇑P.U.ι.base '' (⇑P.U.ι.base ⁻¹' (W : Set ↥E.E)) = (W : Set ↥E.E)
+  rw [Set.image_preimage_eq_inter_range, Scheme.Opens.range_ι]
+  exact Set.inter_eq_left.mpr (SetLike.coe_subset_coe.mpr hWU)
+
+omit [Module.Free P.baseRing P.groupRing] in
+/-- **The cross-chart window comparison**: one stable open, seen inside two chart
+patches, gives canonically isomorphic windows (both are open immersions onto `W`). -/
+noncomputable def windowCrossIso (P' : G.AffineChartPatch) (h1 : W ≤ P.U) (h2 : W ≤ P'.U) :
+    (P.U.ι ⁻¹ᵁ W).toScheme ≅ (P'.U.ι ⁻¹ᵁ W).toScheme :=
+  IsOpenImmersion.isoOfRangeEq ((P.U.ι ⁻¹ᵁ W).ι ≫ P.U.ι) ((P'.U.ι ⁻¹ᵁ W).ι ≫ P'.U.ι)
+    ((P.range_window_ι h1).trans (P'.range_window_ι h2).symm)
+
+omit [Module.Free P.baseRing P.groupRing] in
+@[reassoc]
+theorem windowCrossIso_hom_ι (P' : G.AffineChartPatch) (h1 : W ≤ P.U) (h2 : W ≤ P'.U) :
+    (P.windowCrossIso P' h1 h2).hom ≫ (P'.U.ι ⁻¹ᵁ W).ι ≫ P'.U.ι
+      = (P.U.ι ⁻¹ᵁ W).ι ≫ P.U.ι := by
+  have h := IsOpenImmersion.isoOfRangeEq_hom_fac ((P.U.ι ⁻¹ᵁ W).ι ≫ P.U.ι)
+    ((P'.U.ι ⁻¹ᵁ W).ι ≫ P'.U.ι) ((P.range_window_ι h1).trans (P'.range_window_ι h2).symm)
+  rw [← Category.assoc]
+  exact h
+
+/-- **The master descent condition** — pairs identified by one patch's restricted
+projection are identified by any other patch's, across the window comparison. The pair
+lifts to the translation groupoid (`isKernelPair_localQuotientOpenπ`), the groupoid
+element transfers to the other chart through the ambient curve, and invariance
+(`restrictedAction_localQuotientOpenπ`) collapses it there. -/
+theorem cross_desc_condition (P' : G.AffineChartPatch)
+    [Module.Free P'.baseRing P'.groupRing]
+    (hW : G.IsStableOpen W) (h1 : W ≤ P.U) (h2 : W ≤ P'.U)
+    {T : Scheme.{u}} (a b : T ⟶ (P.U.ι ⁻¹ᵁ W).toScheme)
+    (hab : a ≫ P.restrictedπ hW h1 = b ≫ P.restrictedπ hW h1) :
+    a ≫ (P.windowCrossIso P' h1 h2).hom ≫ P'.restrictedπ hW h2
+      = b ≫ (P.windowCrossIso P' h1 h2).hom ≫ P'.restrictedπ hW h2 := by
+  -- (0) the pair equalizes the full patch projection
+  have h0 : (a ≫ (P.U.ι ⁻¹ᵁ W).ι) ≫ G.localQuotientOpenπ P.hstable
+      = (b ≫ (P.U.ι ⁻¹ᵁ W).ι) ≫ G.localQuotientOpenπ P.hstable := by
+    have h := congrArg (· ≫ (P.imageOpens hW h1).ι) hab
+    simp only [Category.assoc] at h
+    rw [P.restrictedπ_ι hW h1] at h
+    simpa only [Category.assoc] using h
+  -- (1) the groupoid element above the pair
+  have KP := P.isKernelPair_localQuotientOpenπ
+  set φ : T ⟶ (G.actionProj.left ⁻¹ᵁ P.U).toScheme :=
+    KP.lift (a ≫ (P.U.ι ⁻¹ᵁ W).ι) (b ≫ (P.U.ι ⁻¹ᵁ W).ι) h0 with hφdef
+  have hφa : φ ≫ G.restrictedAction P.hstable = a ≫ (P.U.ι ⁻¹ᵁ W).ι := KP.lift_fst _ _ _
+  have hφb : φ ≫ G.restrictedProj P.U = b ≫ (P.U.ι ⁻¹ᵁ W).ι := KP.lift_snd _ _ _
+  -- the two ambient-curve legs of the groupoid element
+  have hcpr : G.restrictedProj P.U ≫ P.U.ι
+      = (G.actionProj.left ⁻¹ᵁ P.U).ι ≫ G.actionProj.left := by
+    rw [restrictedProj]
+    exact Scheme.Hom.resLE_comp_ι _ _
+  have hcact : G.restrictedAction P.hstable ≫ P.U.ι
+      = (G.actionProj.left ⁻¹ᵁ P.U).ι ≫ G.translationAction.left := by
+    rw [restrictedAction]
+    exact Scheme.Hom.resLE_comp_ι _ _
+  have hcpr' : G.restrictedProj P'.U ≫ P'.U.ι
+      = (G.actionProj.left ⁻¹ᵁ P'.U).ι ≫ G.actionProj.left := by
+    rw [restrictedProj]
+    exact Scheme.Hom.resLE_comp_ι _ _
+  have hcact' : G.restrictedAction P'.hstable ≫ P'.U.ι
+      = (G.actionProj.left ⁻¹ᵁ P'.U).ι ≫ G.translationAction.left := by
+    rw [restrictedAction]
+    exact Scheme.Hom.resLE_comp_ι _ _
+  -- (2) transfer the groupoid element to the other chart
+  have hrange : Set.range (φ ≫ (G.actionProj.left ⁻¹ᵁ P.U).ι).base
+      ⊆ Set.range (G.actionProj.left ⁻¹ᵁ P'.U).ι.base := by
+    rintro _ ⟨t, rfl⟩
+    rw [Scheme.Opens.range_ι]
+    show G.actionProj.left.base ((φ ≫ (G.actionProj.left ⁻¹ᵁ P.U).ι).base t) ∈ P'.U
+    rw [Scheme.Hom.comp_apply]
+    have hpt : P.U.ι.base ((G.restrictedProj P.U).base (φ.base t))
+        = G.actionProj.left.base ((G.actionProj.left ⁻¹ᵁ P.U).ι.base (φ.base t)) :=
+      ((Scheme.Hom.comp_apply _ _ _).symm.trans (congrArg
+        (fun m : (G.actionProj.left ⁻¹ᵁ P.U).toScheme ⟶ E.E =>
+          m.base (φ.base t)) hcpr)).trans (Scheme.Hom.comp_apply _ _ _)
+    rw [← hpt]
+    have hmem : (G.restrictedProj P.U).base (φ.base t) ∈ P.U.ι ⁻¹ᵁ W := by
+      have h : (G.restrictedProj P.U).base (φ.base t)
+          = (P.U.ι ⁻¹ᵁ W).ι.base (b.base t) :=
+        ((Scheme.Hom.comp_apply _ _ _).symm.trans (congrArg
+          (fun m : T ⟶ P.U.toScheme => m.base t) hφb)).trans
+          (Scheme.Hom.comp_apply _ _ _)
+      rw [h]
+      have hb : (P.U.ι ⁻¹ᵁ W).ι.base (b.base t)
+          ∈ ((P.U.ι ⁻¹ᵁ W : P.U.toScheme.Opens) : Set ↥P.U.toScheme) :=
+        (Scheme.Opens.range_ι _) ▸ ⟨b.base t, rfl⟩
+      exact hb
+    exact h2 hmem
+  set ψ : T ⟶ (G.actionProj.left ⁻¹ᵁ P'.U).toScheme :=
+    IsOpenImmersion.lift (G.actionProj.left ⁻¹ᵁ P'.U).ι
+      (φ ≫ (G.actionProj.left ⁻¹ᵁ P.U).ι) hrange with hψdef
+  have hψ : ψ ≫ (G.actionProj.left ⁻¹ᵁ P'.U).ι
+      = φ ≫ (G.actionProj.left ⁻¹ᵁ P.U).ι :=
+    IsOpenImmersion.lift_fac _ _ _
+  -- (3) the transferred element covers the crossed pair
+  have hψa : ψ ≫ G.restrictedAction P'.hstable
+      = a ≫ (P.windowCrossIso P' h1 h2).hom ≫ (P'.U.ι ⁻¹ᵁ W).ι := by
+    rw [← cancel_mono P'.U.ι]
+    exact (Category.assoc _ _ _).trans ((congrArg (ψ ≫ ·) hcact').trans
+      (((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ G.translationAction.left) hψ)).trans
+      ((Category.assoc _ _ _).trans ((congrArg (φ ≫ ·) hcact.symm).trans
+      (((Category.assoc _ _ _).symm.trans (congrArg (· ≫ P.U.ι) hφa)).trans
+      ((Category.assoc _ _ _).trans ((congrArg (a ≫ ·)
+        (P.windowCrossIso_hom_ι P' h1 h2).symm).trans
+      ((congrArg (a ≫ ·) (Category.assoc _ _ _).symm).trans
+        (Category.assoc _ _ _).symm))))))))
+  have hψb : ψ ≫ G.restrictedProj P'.U
+      = b ≫ (P.windowCrossIso P' h1 h2).hom ≫ (P'.U.ι ⁻¹ᵁ W).ι := by
+    rw [← cancel_mono P'.U.ι]
+    exact (Category.assoc _ _ _).trans ((congrArg (ψ ≫ ·) hcpr').trans
+      (((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ G.actionProj.left) hψ)).trans
+      ((Category.assoc _ _ _).trans ((congrArg (φ ≫ ·) hcpr.symm).trans
+      (((Category.assoc _ _ _).symm.trans (congrArg (· ≫ P.U.ι) hφb)).trans
+      ((Category.assoc _ _ _).trans ((congrArg (b ≫ ·)
+        (P.windowCrossIso_hom_ι P' h1 h2).symm).trans
+      ((congrArg (b ≫ ·) (Category.assoc _ _ _).symm).trans
+        (Category.assoc _ _ _).symm))))))))
+  -- (4) conclude by invariance on the other patch
+  rw [← cancel_mono (P'.imageOpens hW h2).ι]
+  simp only [Category.assoc]
+  rw [P'.restrictedπ_ι hW h2]
+  calc a ≫ (P.windowCrossIso P' h1 h2).hom ≫ (P'.U.ι ⁻¹ᵁ W).ι ≫
+        G.localQuotientOpenπ P'.hstable
+      = (a ≫ (P.windowCrossIso P' h1 h2).hom ≫ (P'.U.ι ⁻¹ᵁ W).ι) ≫
+          G.localQuotientOpenπ P'.hstable := by simp only [Category.assoc]
+    _ = (ψ ≫ G.restrictedAction P'.hstable) ≫ G.localQuotientOpenπ P'.hstable := by
+        rw [hψa]
+    _ = (ψ ≫ G.restrictedProj P'.U) ≫ G.localQuotientOpenπ P'.hstable := by
+        rw [Category.assoc, Category.assoc,
+          restrictedAction_localQuotientOpenπ (G := G) P'.hstable]
+    _ = (b ≫ (P.windowCrossIso P' h1 h2).hom ≫ (P'.U.ι ⁻¹ᵁ W).ι) ≫
+          G.localQuotientOpenπ P'.hstable := by rw [hψb]
+    _ = b ≫ (P.windowCrossIso P' h1 h2).hom ≫ (P'.U.ι ⁻¹ᵁ W).ι ≫
+          G.localQuotientOpenπ P'.hstable := by simp only [Category.assoc]
+
+end Descent
 
 end AffineChartPatch
 
