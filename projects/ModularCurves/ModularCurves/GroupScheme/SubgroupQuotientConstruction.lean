@@ -37,7 +37,11 @@ namespace FiniteLocallyFreeSubgroup
 namespace AffineChartPatch
 
 variable {S : Scheme.{u}} {E : EllipticCurve S} {G : FiniteLocallyFreeSubgroup E}
-  (P : G.AffineChartPatch) [Module.Free P.baseRing P.groupRing]
+  (P : G.AffineChartPatch)
+
+section LocalQuotient
+
+variable [Module.Free P.baseRing P.groupRing]
 
 /-- **`[HG-C4a]` — the per-patch quotient**: the affine scheme of the co-invariants of the
 chart co-action. -/
@@ -76,6 +80,8 @@ theorem localQuotient_existsUnique_lift {Y : Scheme.{u}} (f : P.U.toScheme ⟶ Y
     show specEqualizerπ P.chartCoaction Algebra.TensorProduct.includeLeft ≫ g'
         = P.hU.isoSpec.inv ≫ f
     exact (P.hU.isoSpec.inv_hom_id_assoc _).symm.trans (congrArg (P.hU.isoSpec.inv ≫ ·) hA)
+
+end LocalQuotient
 
 /-! ### `[HG-C4b]` — the geometry bridge, coaction leg -/
 
@@ -536,6 +542,143 @@ theorem specMap_resChart_isoSpec_inv :
     (IsIso.inv_eq_of_hom_inv_id Q.hU.isoSpec.hom_inv_id).symm
   rw [hInvP, hInvQ, IsIso.comp_inv_eq, Category.assoc, IsIso.eq_inv_comp]
   exact hnat
+
+/-- The scheme-level window between the ambient chart pullbacks of nested patches. -/
+noncomputable def pullbackWindow :
+    pullback G.π (Q.U.ι ≫ E.π) ⟶ pullback G.π (P.U.ι ≫ E.π) :=
+  pullback.map G.π (Q.U.ι ≫ E.π) G.π (P.U.ι ≫ E.π) (𝟙 G.G) (E.E.homOfLE hUQ) (𝟙 S)
+    (by rw [Category.comp_id, Category.id_comp])
+    (by rw [Category.comp_id, ← Category.assoc, Scheme.homOfLE_ι])
+
+/-- **`K` — the two-patch Künneth comparison**: the `Spec` of the transition tensor
+intertwines the two chart identifications with the ambient pullback window. Proof by
+`pullback.hom_ext`, chasing each projection through the per-patch bridge legs, the
+transition-tensor laws, the `isoSpec`-window naturality, and `homOfLE_ι`. -/
+theorem spec_transitionTensorA_chartSpecIso_inv :
+    Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫ P.chartSpecIso.inv
+      = Q.chartSpecIso.inv ≫ P.pullbackWindow Q hUQ := by
+  -- ring-level leg exchanges (elementwise from the transition-tensor laws)
+  have hringF : CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom :
+        P.groupRing →+* P.groupRing ⊗[P.baseRing] P.chartRing) ≫
+        CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)
+      = P.resGroup Q hVQ ≫ CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom :
+          Q.groupRing →+* Q.groupRing ⊗[Q.baseRing] Q.chartRing) := by
+    ext a
+    exact P.transitionTensorA_tmul_one Q hUQ hVQ a
+  have hringS : CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+        P.chartRing →ₐ[P.baseRing] P.groupRing ⊗[P.baseRing] P.chartRing).toRingHom ≫
+        CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)
+      = P.resChart Q hUQ ≫ CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+          Q.chartRing →ₐ[Q.baseRing] Q.groupRing ⊗[Q.baseRing] Q.chartRing).toRingHom := by
+    ext b
+    exact P.transitionTensorA_one_tmul Q hUQ hVQ b
+  -- their `Spec` forms
+  have hSpecF : Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫
+      Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom :
+        P.groupRing →+* P.groupRing ⊗[P.baseRing] P.chartRing))
+      = Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom :
+          Q.groupRing →+* Q.groupRing ⊗[Q.baseRing] Q.chartRing)) ≫
+        Spec.map (P.resGroup Q hVQ) :=
+    (Spec.map_comp _ _).symm.trans ((congrArg Spec.map hringF).trans (Spec.map_comp _ _))
+  have hSpecS : Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫
+      Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+        P.chartRing →ₐ[P.baseRing] P.groupRing ⊗[P.baseRing] P.chartRing).toRingHom)
+      = Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+          Q.chartRing →ₐ[Q.baseRing] Q.groupRing ⊗[Q.baseRing] Q.chartRing).toRingHom) ≫
+        Spec.map (P.resChart Q hUQ) :=
+    (Spec.map_comp _ _).symm.trans ((congrArg Spec.map hringS).trans (Spec.map_comp _ _))
+  apply pullback.hom_ext
+  · -- first projections
+    have hpwf : P.pullbackWindow Q hUQ ≫ pullback.fst G.π (P.U.ι ≫ E.π)
+        = pullback.fst G.π (Q.U.ι ≫ E.π) := by
+      simp only [pullbackWindow, pullback.lift_fst, Category.comp_id]
+    calc (Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫
+          P.chartSpecIso.inv) ≫ pullback.fst G.π (P.U.ι ≫ E.π)
+        = Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫
+            (P.chartSpecIso.inv ≫ pullback.fst G.π (P.U.ι ≫ E.π)) :=
+          Category.assoc _ _ _
+      _ = Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫
+            Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom :
+              P.groupRing →+* P.groupRing ⊗[P.baseRing] P.chartRing)) ≫
+            P.isAffineOpen_groupOpen.isoSpec.inv ≫ P.groupOpen.ι :=
+          congrArg (Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫ ·)
+            (P.spec_includeLeft_group_isoSpec_inv).symm
+      _ = (Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫
+            Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom :
+              P.groupRing →+* P.groupRing ⊗[P.baseRing] P.chartRing))) ≫
+            P.isAffineOpen_groupOpen.isoSpec.inv ≫ P.groupOpen.ι :=
+          (Category.assoc _ _ _).symm
+      _ = (Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom :
+              Q.groupRing →+* Q.groupRing ⊗[Q.baseRing] Q.chartRing)) ≫
+            Spec.map (P.resGroup Q hVQ)) ≫
+            P.isAffineOpen_groupOpen.isoSpec.inv ≫ P.groupOpen.ι :=
+          congrArg (· ≫ P.isAffineOpen_groupOpen.isoSpec.inv ≫ P.groupOpen.ι) hSpecF
+      _ = Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom :
+              Q.groupRing →+* Q.groupRing ⊗[Q.baseRing] Q.chartRing)) ≫
+            (Spec.map (P.resGroup Q hVQ) ≫ P.isAffineOpen_groupOpen.isoSpec.inv) ≫
+            P.groupOpen.ι := by
+          simp only [Category.assoc]
+      _ = Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom :
+              Q.groupRing →+* Q.groupRing ⊗[Q.baseRing] Q.chartRing)) ≫
+            (Q.isAffineOpen_groupOpen.isoSpec.inv ≫
+              Scheme.homOfLE _ (Scheme.Hom.preimage_mono G.π hVQ)) ≫ P.groupOpen.ι :=
+          congrArg (fun m => Spec.map (CommRingCat.ofHom
+              (Algebra.TensorProduct.includeLeftRingHom :
+                Q.groupRing →+* Q.groupRing ⊗[Q.baseRing] Q.chartRing)) ≫ m ≫ P.groupOpen.ι)
+            (P.specMap_resGroup_isoSpec_inv Q hVQ)
+      _ = Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeLeftRingHom :
+              Q.groupRing →+* Q.groupRing ⊗[Q.baseRing] Q.chartRing)) ≫
+            Q.isAffineOpen_groupOpen.isoSpec.inv ≫ Q.groupOpen.ι := by
+          simp only [Category.assoc, Scheme.homOfLE_ι]
+      _ = Q.chartSpecIso.inv ≫ pullback.fst G.π (Q.U.ι ≫ E.π) :=
+          Q.spec_includeLeft_group_isoSpec_inv
+      _ = Q.chartSpecIso.inv ≫ P.pullbackWindow Q hUQ ≫ pullback.fst G.π (P.U.ι ≫ E.π) :=
+          congrArg (Q.chartSpecIso.inv ≫ ·) hpwf.symm
+      _ = (Q.chartSpecIso.inv ≫ P.pullbackWindow Q hUQ) ≫
+            pullback.fst G.π (P.U.ι ≫ E.π) := (Category.assoc _ _ _).symm
+  · -- second projections
+    have hpws : P.pullbackWindow Q hUQ ≫ pullback.snd G.π (P.U.ι ≫ E.π)
+        = pullback.snd G.π (Q.U.ι ≫ E.π) ≫ E.E.homOfLE hUQ := by
+      simp only [pullbackWindow, pullback.lift_snd]
+    calc (Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫
+          P.chartSpecIso.inv) ≫ pullback.snd G.π (P.U.ι ≫ E.π)
+        = Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫
+            (P.chartSpecIso.inv ≫ pullback.snd G.π (P.U.ι ≫ E.π)) :=
+          Category.assoc _ _ _
+      _ = Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫
+            Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+              P.chartRing →ₐ[P.baseRing] P.groupRing ⊗[P.baseRing] P.chartRing).toRingHom) ≫
+            P.hU.isoSpec.inv :=
+          congrArg (Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫ ·)
+            P.chartSpecIso_inv_snd
+      _ = (Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫
+            Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+              P.chartRing →ₐ[P.baseRing] P.groupRing ⊗[P.baseRing] P.chartRing).toRingHom)) ≫
+            P.hU.isoSpec.inv := (Category.assoc _ _ _).symm
+      _ = (Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+              Q.chartRing →ₐ[Q.baseRing] Q.groupRing ⊗[Q.baseRing] Q.chartRing).toRingHom) ≫
+            Spec.map (P.resChart Q hUQ)) ≫ P.hU.isoSpec.inv :=
+          congrArg (· ≫ P.hU.isoSpec.inv) hSpecS
+      _ = Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+              Q.chartRing →ₐ[Q.baseRing] Q.groupRing ⊗[Q.baseRing] Q.chartRing).toRingHom) ≫
+            (Spec.map (P.resChart Q hUQ) ≫ P.hU.isoSpec.inv) := Category.assoc _ _ _
+      _ = Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+              Q.chartRing →ₐ[Q.baseRing] Q.groupRing ⊗[Q.baseRing] Q.chartRing).toRingHom) ≫
+            (Q.hU.isoSpec.inv ≫ E.E.homOfLE hUQ) :=
+          congrArg (Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+              Q.chartRing →ₐ[Q.baseRing] Q.groupRing ⊗[Q.baseRing] Q.chartRing).toRingHom) ≫ ·)
+            (P.specMap_resChart_isoSpec_inv Q hUQ)
+      _ = (Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+              Q.chartRing →ₐ[Q.baseRing] Q.groupRing ⊗[Q.baseRing] Q.chartRing).toRingHom) ≫
+            Q.hU.isoSpec.inv) ≫ E.E.homOfLE hUQ := (Category.assoc _ _ _).symm
+      _ = (Q.chartSpecIso.inv ≫ pullback.snd G.π (Q.U.ι ≫ E.π)) ≫ E.E.homOfLE hUQ :=
+          congrArg (· ≫ E.E.homOfLE hUQ) Q.chartSpecIso_inv_snd.symm
+      _ = Q.chartSpecIso.inv ≫ pullback.snd G.π (Q.U.ι ≫ E.π) ≫ E.E.homOfLE hUQ :=
+          Category.assoc _ _ _
+      _ = Q.chartSpecIso.inv ≫ P.pullbackWindow Q hUQ ≫ pullback.snd G.π (P.U.ι ≫ E.π) :=
+          congrArg (Q.chartSpecIso.inv ≫ ·) hpws.symm
+      _ = (Q.chartSpecIso.inv ≫ P.pullbackWindow Q hUQ) ≫
+            pullback.snd G.π (P.U.ι ≫ E.π) := (Category.assoc _ _ _).symm
 
 /-- **The geometric window square, action leg**: the restricted actions of nested patches
 commute with the window inclusions (`resLE` composition laws). -/
