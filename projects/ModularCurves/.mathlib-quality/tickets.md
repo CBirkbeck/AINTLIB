@@ -19296,3 +19296,17 @@ REMAINING: (i) [YF-⊆] `range_levelSpaceΓι_subset` — wire `naive_gen_of_div
 + the pointVanishSet connection (combo≠0 ⟹ ∉ pointVanishSet). (ii) the ⟸ direction (naive-gen ⟹ divisor)
 for the FULL iff `fullLevel_divisor_iff_naive_gen` (Basic:125) — SUBTLE (topological-vs-geometric /
 Galois; needs the full-set-of-sections/T-D2 route, NOT the reverse of ⟹). (STREAM-YN)
+
+### v10.184 — [YF-⊆] pieces 1-2 BUILT (taut full-level + generation over levelSpaceΓ)
+Concrete progress on [YF-⊆] via the proven ⟹ (`naive_gen_of_divisor_eq`), both in FullLevelClopen.lean:
+- **piece 1** `taut_isFullLevel_over_levelSpaceΓ` — the taut pair is full-level over levelSpaceΓ
+  (levelSpaceΓ_spec with h=𝟙, mirroring exists_tautSection).
+- **piece 2** `taut_generates_over_levelSpaceΓ` — the taut pair generates E[N] at every geometric point
+  of levelSpaceΓ (naive_gen_of_divisor_eq applied to piece 1). Clean.
+
+**20 axiom-clean lemmas this session.** REMAINING for range_levelSpaceΓι_subset (FullLevelClopen:328 sorry):
+(A) generation ⟹ combPoint(c,d)≠0 for nonzero cd [fibre: closure=⊤ ⟹ comboFamily injective (step D) ⟹
+nonzero combo≠0]; (B) the ambient connection — w=levelSpaceΓι.base(y), the geom pt over y maps to w's geom
+pt via levelSpaceΓι, the levelSpaceΓ-taut-combo at y = ambient combPoint at w; w∈pointVanishSet(combPoint c d)
+⟹ combPoint=0 at w's geom pt [agreementι_comp_eq]; contradiction with (A). Deep residue/restriction/geom-pt
+wiring ~80-120 lines. Plus the ⟸ direction (full-set/T-D2 route, missing infra) for the FULL iff. (STREAM-YN)
