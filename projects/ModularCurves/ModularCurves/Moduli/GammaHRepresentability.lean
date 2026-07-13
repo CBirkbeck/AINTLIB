@@ -699,8 +699,14 @@ ForMathlib fppf/finite-locally-free descent development (`ForMathlib/FiniteEtale
 which is out of scope for a "NOW" leaf (v10.24: decompose-don't-grind). **Intended
 discharge for the Y(N) pipeline is the PRIMARY chart-local route above** — provable in the
 GHB4/GHB7 quotient context where `Aᴳ ⊆ A` is a projective (hence flat, direct-summand)
-`B`-submodule of the finite `B`-module `A`; it does NOT need this abstract lemma. Left
-gated pending either. -/
+`B`-submodule of the finite `B`-module `A`; it does NOT need this abstract lemma.
+
+**[2026-07-13, GH] The PRIMARY route has LANDED** (`SchemeAction.quotient_desc_finite_etale`,
+`ForMathlib/SchemeActionFree.lean`, axiom-clean via `ForMathlib/EtaleCancellation.lean`) and
+`QuotPkg.f₀_finite_etale` now routes through it — **nothing in the pipeline consumes this
+abstract statement any more**. It stays as the [GH-DESC-GAP] marker for the general fppf
+source-descent (its finite-half needs Chevalley's "affine descends along finite surjective",
+absent from mathlib); close it or upstream it when that lands. -/
 theorem _root_.AlgebraicGeometry.isFinite_etale_of_comp_of_finite_etale_surjective
     {Z Z₀ S : Scheme.{u}}
     (π : Z ⟶ Z₀) (f₀ : Z₀ ⟶ S) [IsFinite π] [Etale π] [Surjective π]
@@ -764,18 +770,22 @@ theorem QuotPkg.π_finite_etale_surjective {Q : ModuliProblem R} {G : Type*} [Gr
     p.d.over_base (p.d.free_on_points hfree) p.π p.f₀ p.hπf p.hπinv p.hdesc
 
 /-- The descended structure map of a quotient package is finite étale (KM 7.1.3(6)
-sharpened; gates through [GHB6]). -/
+sharpened; **[GHB6] discharged** by the chart-local split-cover route
+`SchemeAction.quotient_desc_finite_etale` — trace-retract étale cancellation over each
+affine chart of the base, `ForMathlib/EtaleCancellation.lean` +
+`ForMathlib/SchemeActionFree.lean`). -/
 theorem QuotPkg.f₀_finite_etale {Q : ModuliProblem R} {G : Type*} [Group G]
     [Finite G] {φ : G →* Aut Q} {X : EllObj R} (p : QuotPkg φ X)
     (hfree : FreeAction φ)
     (hbX : IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X.base))) :
     IsFinite p.f₀ ∧ Etale p.f₀ := by
-  obtain ⟨hfin, het, hsurj⟩ := p.π_finite_etale_surjective hfree hbX
-  haveI := hfin; haveI := het; haveI := hsurj
-  have hcomp_fin : IsFinite (p.π ≫ p.f₀) := by rw [p.hπf]; exact p.d.finite
-  have hcomp_et : Etale (p.π ≫ p.f₀) := by rw [p.hπf]; exact p.d.etale
-  exact AlgebraicGeometry.isFinite_etale_of_comp_of_finite_etale_surjective p.π p.f₀
-    hcomp_fin hcomp_et
+  haveI := p.d.finite
+  haveI : IsAffineHom p.d.f := inferInstance
+  haveI := hbX
+  haveI := AlgebraicGeometry.isAffineHom_diagonal_terminalFrom_of_isAffineHom p.d.f
+  exact AlgebraicGeometry.SchemeAction.quotient_desc_finite_etale p.d.σZ p.d.f
+    p.d.over_base (fun γ hγ T t ht => p.d.free_on_points hfree t γ hγ ht)
+    p.d.finite p.d.etale p.π p.f₀ p.hπf p.hπinv p.hdesc
 
 /-- **[GHB7-3b] The base-change transport of quotient packages.** For `k : X' ⟶ X`,
 the base change `pullback pX.f₀ k.baseHom` is a quotient of the pulled action
