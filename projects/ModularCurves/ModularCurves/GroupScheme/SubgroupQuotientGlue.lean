@@ -380,6 +380,39 @@ noncomputable def localQuotientOpenIso [Module.Free P.baseRing P.groupRing] :
       P.quotientRing_eq_coinvariants]
     rfl)
 
+/-- **`S1` — the patch quotient projection is flat and surjective**: the invariants
+inclusion is faithfully flat (the Hopf–Galois property, through the step-3 comparison),
+and the affine identification is an isomorphism. -/
+theorem flat_and_surjective_localQuotientOpenπ [Module.Free P.baseRing P.groupRing] :
+    Flat (G.localQuotientOpenπ P.hstable) ∧
+      AlgebraicGeometry.Surjective (G.localQuotientOpenπ P.hstable) := by
+  -- faithful flatness of the invariants inclusion, in the glue spelling
+  have h1 : Flat (Spec.map (CommRingCat.ofHom (G.quotientRing P.hstable).subtype)) ∧
+      AlgebraicGeometry.Surjective
+        (Spec.map (CommRingCat.ofHom (G.quotientRing P.hstable).subtype)) := by
+    rw [P.quotientRing_eq_coinvariants]
+    have hff : (CommRingCat.ofHom (algebraMap (coinvariants P.chartCoaction)
+        P.chartRing)).hom.FaithfullyFlat := by
+      rw [CommRingCat.hom_ofHom, RingHom.faithfullyFlat_algebraMap_iff]
+      exact P.isHopfGalois_chartCoaction.faithfullyFlat
+    exact (flat_and_surjective_SpecMap_iff _).mpr hff
+  obtain ⟨hflat, hsurj⟩ := h1
+  haveI : IsAffine P.U.toScheme := P.hU
+  haveI := P.isIso_toSpecΓ_U
+  haveI : IsOpenImmersion P.U.toSpecΓ := inferInstance
+  haveI : Flat P.U.toSpecΓ := inferInstance
+  haveI : AlgebraicGeometry.Surjective P.U.toSpecΓ := inferInstance
+  haveI := hflat
+  haveI := hsurj
+  constructor
+  · rw [FiniteLocallyFreeSubgroup.localQuotientOpenπ]
+    exact @Flat.comp _ _ _ P.U.toSpecΓ
+      (Spec.map (CommRingCat.ofHom (G.quotientRing P.hstable).subtype))
+      inferInstance hflat
+  · rw [FiniteLocallyFreeSubgroup.localQuotientOpenπ]
+    exact ⟨((Spec.map (CommRingCat.ofHom
+      (G.quotientRing P.hstable).subtype)).surjective).comp P.U.toSpecΓ.surjective⟩
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
