@@ -18676,3 +18676,16 @@ localQuotientMapW; needed: π-surjectivity on patches from isRegularEpi_specEqua
 localQuotientOpenIso, the imageOpens/saturation point-lemmas via the kernel-pair
 (isKernelPair_specEqualizerπ — fppf-orbit fibres), tripleIso, isIso_of_le_le, f_open) → GlueData
 (:818-910) → quotient/quotientS/quotientπ + six pins (:969-1869) under option-γ (N,hkill). (STREAM-G0)
+
+### v10.193-G0 — [HG-C4c-2] S1 + S2-alignment landed: the glue π is flat, surjective, and IS the Hopf π (STREAM-G0)
+Commits b6192f977…822df3ef3 (pushed): `flat_and_surjective_localQuotientOpenπ` (S1 — ff of the
+invariants inclusion through the subring equality, Spec flat+surjective, composed with the affine
+toSpecΓ iso; Flat.comp needed @-form application) · `localQuotientOpenIso` REBUILT as a hand-rolled
+Spec-iso of the honest RingEquiv (subringCongr + carrier equiv; eqToIso and asIso both abandoned —
+instance/kabstract walls; triangle ids term-mode via Spec.map_comp) · `localQuotientOpenπ_iso`
+(S2-alignment: π-glue ≫ iso = C4a's localQuotientπ — term-mode Spec.map_comp collapse; the ring
+triangle closes by congr definitionally). CONSEQUENCE: the kernel pair (isKernelPair_specEqualizerπ)
+and the per-patch universal property transport VERBATIM to the glue model.
+NEXT: the S2 orbit lemma (π x = π y ⟺ chart-groupoid point above (x,y) — KP + exists_preimage_pullback
++ the C4b bridge legs identify the KP legs with restrictedAction/Proj), then imageOpens (flat+lfp ⟹
+open image? or template windowHom route), tripleIso, GlueData, pins. (STREAM-G0)
