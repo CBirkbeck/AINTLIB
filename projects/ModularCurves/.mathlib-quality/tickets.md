@@ -18286,3 +18286,21 @@ REMAINING for C3: [C3f] assemble `exists_affineChartPatch_free` — combine char
 (v10.181-G0) + this freeness (shrink the chart's V via IsStableOpen.inf + isStableOpen_π_preimage +
 basicOpen affinity) into: every x ∈ E lies in the chart open of an AffineChartPatch with free
 groupRing. Then [HG-C4] glue → SIGNAL ★★. (STREAM-G0)
+
+### v10.183-G0 — ★★ [HG-C3] COMPLETE: the G-stable free affine chart exists around every point (STREAM-G0)
+Commit 37d6c6b10 (pushed). **`exists_affineChartPatch_free` (GroupRingFree.lean): for G killed by N,
+every x ∈ E lies in the chart open of an `AffineChartPatch` with `Module.Free baseRing groupRing`** —
+the COMPLETE geometric input of M6 (`chartData`/`isHopfGalois_chartCoaction` instantiate at a patch
+around every point of E; the lone M6 hypothesis is supplied). Axioms: sorryAx = BB-QF only
+(mulByHom_isFinite, through the chart-existence path); the C3d freeness sub-chain is CLEAN.
+
+C3 leaf ledger: C3a translateByIso ✓ (80bc663a2) · C3b complement ✓ (591df7740) · C3c bridge KILLED →
+[n]-preimage engine ✓ (708e5c0a5) · chart existence ✓ (d32bb2d59) · C3d freeness ✓ CLEAN (21570110d) ·
+C3f assembly ✓ (37d6c6b10). mapIso registered; three session walls documented (abstract-P whnf pattern,
+thin-category algebra coherence, dot-notation-vs-section-variable).
+
+NEXT ([HG-C4], the SIGNAL gate): the GlueData over the chart family — instantiate M6 per patch
+(hypothesis now discharged by C3f), glue the per-chart quotients (constant-group SchemeQuotient
+GlueData as TEMPLATE per the C3 doc), discharge the six SubgroupQuotient pins → **SIGNAL ★★**
+(v10.172 main-PR follows). Killing hypothesis at assembly: ι_comp_mulByHom_of_hasRank (BB-DELIGNE)
+for rank-N G. (STREAM-G0)
