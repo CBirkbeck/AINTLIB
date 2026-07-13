@@ -19127,3 +19127,27 @@ pigeonhole (`Fintype.bijective_iff_surjective_and_card`), and `naive_iff_comboFa
   compatibility (thread `baseChange_ideal` through `∏ ker` + section base-change), then the ⟹
   assembly (support/count/pigeonhole) closes `fullLevel_divisor_iff_naive_gen` + [YF-⊆] mechanically.
   This is the precise, dispatchable next ticket — focused, NOT multi-week, NOT externally gated. (STREAM-YN)
+
+### v10.180 — STREAM-YN: T-D8-⟹ TOPOLOGICAL CORE BUILT (3 axiom-clean lemmas)
+Real code progress on the ⟹ direction (all committed, pushed, full build green 4207 jobs):
+- **`sectionsDivisor_baseChange`** (KM 1.1) — the section divisor commutes with base change:
+  `(sectionsDivisor π P).ideal.comap (pullback.fst π t) = sectionsDivisor (pullback.snd π t)
+  (base-changed sections)`. Via `baseChange_ideal` + `ker_sectionBaseChange` + `comap_prod`.
+- **`sectionsDivisor_support`** (CartierDivisor, public wrapper) — `(sectionsDivisor π P).ideal.support
+  = ⋃ᵢ range(Pᵢ.base)`.
+- **`sectionsDivisor_comap_support`** — the fibre support-covering: `((sectionsDivisor π P).ideal.comap
+  fst).support = ⋃ᵢ range(base-changed sectionᵢ.base)`. All in `LevelStructure/SectionsDivisorBaseChange.lean`.
+
+Chain now available: from a divisor eq `(sectionsDivisor E.π combos).ideal = torsionIdeal`, taking
+`.comap(fst).support` + mathlib `IdealSheafData.support_comap` gives
+  **`⋃ᵢ range(base-changed comboᵢ.base) = fst⁻¹(torsionIdeal.support)`** over the fibre `pullback E.π t`.
+
+REMAINING for ⟹ / [YF-⊆] (pinned, decreasing size):
+  (1) **the count** — over a geom pt `t : Spec k → S` (k alg closed): `Nat.card (fst⁻¹(torsionIdeal.support))
+      = N²`. The genuine remaining difficulty: identify the topological points of the torsion fibre with
+      the sections/points counted by T-B6 (`natCard_sections_eq_finrank` + `torsion_rank`, sections↔closed
+      points over k̄). (2) **pigeonhole** (easy): `Set.range g = T ∧ #T = #ι ⟹ Injective g`. (3) the
+      curveIsoPullback link `base-changed comboᵢ ↔ Point.pull (combSec i)` → `comboFamily` injective
+      (then `naive_iff_comboFamily_injective`, FullLevelFibre, closes it). (4) [YF-⊆]: combo≠0 at pt ⟹
+      ∉ pointVanishSet. The full `fullLevel_divisor_iff_naive_gen` must be RELOCATED downstream of
+      SectionsDivisorBaseChange+FullLevelFibre (T-E9 relocation doctrine). (STREAM-YN)
