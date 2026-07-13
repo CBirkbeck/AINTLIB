@@ -43,7 +43,6 @@ variable (p : ℕ) [hp : Fact p.Prime]
 variable (K : Type*) [Field K] [NumberField K]
   [IsCyclotomicExtension {p} ℚ K] [NumberField.IsCMField K]
 
-
 /-- **PUP image in mod-p free part is non-zero (multiplicative form)**:
 the image of `[PUP]_{E/E^37}` under the canonical map to mod-p free part
 is not the identity. -/
@@ -183,7 +182,7 @@ theorem flt37_pollaczekUnit_class_in_modp_freepart_ne_zero_iff_cert
       cyclotomicUnitToFreePartModPAdd (p := 37) (CyclotomicField 37 ℚ)
         (Additive.ofMul (pollaczekUnit 37 (CyclotomicField 37 ℚ) 32))
     -- Use the existing project pattern: 2 invertible in ZMod 37 via twoInvertibleZModOfPrimeGtTwo.
-    letI : Invertible ((2 : ZMod 37)) :=
+    let : Invertible ((2 : ZMod 37)) :=
       twoInvertibleZModOfPrimeGtTwo (p := 37) (by omega)
     have h_two_smul_zmod : ((2 : ZMod 37)) • y = 0 := by
       have h_cast : (((2 : ℕ) : ZMod 37)) • y = ((2 : ℕ) : ℕ) • y :=
@@ -286,11 +285,11 @@ theorem flt37_pollaczekUnit_image_spans_omegaChar32_eigenspace
             pollaczekUnit_image_in_omegaChar32_eigenspace_FLT37⟩} :
           Set (cyclotomicUnitFreePartModPDeltaCharacterEigenspace (p := 37)
             (CyclotomicField 37 ℚ) (cyclotomicOmegaChar (p := 37) 32))) = ⊤ := by
-  letI : Fintype {w : InfinitePlace (CyclotomicField 37 ℚ) //
+  let : Fintype {w : InfinitePlace (CyclotomicField 37 ℚ) //
       w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := Fintype.ofFinite _
-  letI : DiscreteTopology (NumberField.Units.unitLattice (CyclotomicField 37 ℚ)) :=
+  let : DiscreteTopology (NumberField.Units.unitLattice (CyclotomicField 37 ℚ)) :=
     NumberField.Units.instDiscrete_unitLattice (CyclotomicField 37 ℚ)
-  letI : IsZLattice ℝ (NumberField.Units.unitLattice (CyclotomicField 37 ℚ)) := by
+  let : IsZLattice ℝ (NumberField.Units.unitLattice (CyclotomicField 37 ℚ)) := by
     refine ⟨?_⟩
     convert NumberField.Units.dirichletUnitTheorem.unitLattice_span_eq_top (CyclotomicField 37 ℚ)
   have h_finrank :
