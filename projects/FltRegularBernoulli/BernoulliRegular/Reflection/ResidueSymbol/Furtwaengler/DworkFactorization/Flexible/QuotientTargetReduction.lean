@@ -47,7 +47,7 @@ theorem quotient_mk_artinHasseThetaTruncProductAtTo_eq_prod_trunc_eval
     let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.concrete.rIntegralRatToQuotient N)
     Ideal.Quotient.mk (F.Q ^ (N + 1))
         (F.artinHasseThetaTruncProductAtTo γ N y) =
@@ -61,9 +61,9 @@ theorem quotient_mk_artinHasseThetaTruncProductAtTo_eq_prod_trunc_eval
   let S0 : ConductorFlexibleConcreteStickelbergerSetup ℓ p k K R' := F.concrete
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let hE : DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) :=
-    fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n
+    fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n
   let Eps : PowerSeries A := hE.mapTo (S0.rIntegralRatToQuotient N)
-  let u : Fin F.concrete.f → 𝓞 R' := fun i =>
+  let u : Fin F.concrete.f → 𝓞 R' := fun i ↦
     (F.teichUnitFullVal (F.traceScale * y)) ^ (ℓ ^ (i : ℕ))
   calc
     Ideal.Quotient.mk (F.Q ^ (N + 1))
@@ -99,7 +99,7 @@ theorem quotient_mk_artinHasseThetaTruncProductAtTo_approx_eq_prod_inverse_trunc
     let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.concrete.rIntegralRatToQuotient N)
     let Ips : PowerSeries A :=
       (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -119,14 +119,14 @@ theorem quotient_mk_artinHasseThetaTruncProductAtTo_approx_eq_prod_inverse_trunc
   let S0 : ConductorFlexibleConcreteStickelbergerSetup ℓ p k K R' := F.concrete
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let hE : DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) :=
-    fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n
+    fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n
   let Eps : PowerSeries A := hE.mapTo (S0.rIntegralRatToQuotient N)
   let Ips : PowerSeries A :=
     (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
       (S0.rIntegralRatToQuotient N)
   let πbar : A := Ideal.Quotient.mk (F.Q ^ (N + 1)) F.π
   let γ : 𝓞 R' := S0.artinHasseDworkParameterApproxTo N
-  let u : Fin F.concrete.f → 𝓞 R' := fun i =>
+  let u : Fin F.concrete.f → 𝓞 R' := fun i ↦
     (F.teichUnitFullVal (F.traceScale * y)) ^ (ℓ ^ (i : ℕ))
   have hγ :
       Ideal.Quotient.mk (F.Q ^ (N + 1)) γ =
@@ -189,7 +189,7 @@ def artinHasseApproxDworkOneAddPiProductIdentity (N : ℕ) (y : kˣ) : Prop :=
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.concrete.rIntegralRatToQuotient N)
   let Ips : PowerSeries A :=
     (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -212,7 +212,7 @@ theorem psiInt_sub_artinHasseThetaTruncProductAtTo_approx_mem_Q_pow_succ_iff
     let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.concrete.rIntegralRatToQuotient N)
     let Ips : PowerSeries A :=
       (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -234,7 +234,7 @@ theorem psiInt_sub_artinHasseThetaTruncProductAtTo_approx_mem_Q_pow_succ_iff
   dsimp only
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let hE : DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) :=
-    fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n
+    fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n
   let Eps : PowerSeries A := hE.mapTo (F.concrete.rIntegralRatToQuotient N)
   let Ips : PowerSeries A :=
     (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
