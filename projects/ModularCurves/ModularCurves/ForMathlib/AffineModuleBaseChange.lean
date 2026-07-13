@@ -263,4 +263,438 @@ theorem specPullbackΓIso_naturality
   rw [specPullbackΓIso_hom, specPullbackΓIso_hom]
   exact (specPullbackΓNatTrans φ).naturality f
 
+private noncomputable def affineΓFunctor (X : Scheme.{u}) :
+    X.Modules ⥤ ModuleCat.{u} Γ(X, (⊤ : X.Opens)) :=
+  toPresheafOfModules X ⋙
+    PresheafOfModules.forgetToPresheafModuleCat
+      (op (⊤ : X.Opens)) (Limits.initialOpOfTerminal Limits.isTerminalTop) ⋙
+    (evaluation X.Opensᵒᵖ (ModuleCat Γ(X, (⊤ : X.Opens)))).obj
+      (op (⊤ : X.Opens))
+
+private noncomputable def affineΓPushforwardIsoSpecApp
+    (X : Scheme.{u}) [IsAffine X] (M : X.Modules) :
+    (pushforward X.isoSpec.hom ⋙ moduleSpecΓFunctor).obj M ≅
+      (affineΓFunctor X).obj M := by
+  have htop :
+      (Opens.map X.isoSpec.hom.base).op.obj
+          (op (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens)) =
+        op (⊤ : X.Opens) := by
+    rfl
+  let F := (PresheafOfModules.forgetToPresheafModuleCat
+    (op (⊤ : X.Opens)) (Limits.initialOpOfTerminal Limits.isTerminalTop)).obj M.1
+  let e₀ : (pushforward X.isoSpec.hom ⋙ moduleSpecΓFunctor).obj M ≅
+      F.obj ((Opens.map X.isoSpec.hom.base).op.obj
+        (op (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens))) := by
+    refine ModuleCat.isoMk (Iso.refl _) ?_
+    intro r
+    change (F.obj ((Opens.map X.isoSpec.hom.base).op.obj
+      (op (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens)))).smul r =
+        ((pushforward X.isoSpec.hom ⋙ moduleSpecΓFunctor).obj M).smul r
+    change
+      (M.1.obj ((Opens.map X.isoSpec.hom.base).op.obj
+        (op (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens)))).smul
+          ((X.presheaf.map ((Limits.initialOpOfTerminal Limits.isTerminalTop).to
+            ((Opens.map X.isoSpec.hom.base).op.obj
+              (op (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens))))).hom r) =
+        (M.1.obj ((Opens.map X.isoSpec.hom.base).op.obj
+          (op (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens)))).smul
+            ((X.isoSpec.hom.app (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens)).hom
+              ((Scheme.ΓSpecIso Γ(X, (⊤ : X.Opens))).inv.hom r))
+    congr 1
+    change
+      (X.presheaf.map ((Limits.initialOpOfTerminal Limits.isTerminalTop).to
+        (op (⊤ : X.Opens)))).hom r =
+        X.isoSpec.hom.appTop.hom
+          ((Scheme.ΓSpecIso Γ(X, (⊤ : X.Opens))).inv.hom r)
+    rw [show X.isoSpec.hom.appTop =
+      (Scheme.ΓSpecIso Γ(X, (⊤ : X.Opens))).hom from
+        Scheme.toSpecΓ_appTop X]
+    simp
+  exact e₀ ≪≫ F.mapIso (eqToIso htop)
+
+private noncomputable def affineΓPushforwardIsoSpec
+    (X : Scheme.{u}) [IsAffine X] :
+    pushforward X.isoSpec.hom ⋙ moduleSpecΓFunctor ≅ affineΓFunctor X :=
+  NatIso.ofComponents (affineΓPushforwardIsoSpecApp X) (by
+    intro M N f
+    let FM := (PresheafOfModules.forgetToPresheafModuleCat
+      (op (⊤ : X.Opens)) (Limits.initialOpOfTerminal Limits.isTerminalTop)).obj M.1
+    let FN := (PresheafOfModules.forgetToPresheafModuleCat
+      (op (⊤ : X.Opens)) (Limits.initialOpOfTerminal Limits.isTerminalTop)).obj N.1
+    have htop :
+        (Opens.map X.isoSpec.hom.base).op.obj
+            (op (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens)) =
+          op (⊤ : X.Opens) := by
+      rfl
+    ext m
+    change
+      (FN.map (eqToHom htop)).hom
+          ((f.app ((X.isoSpec.hom ⁻¹ᵁ
+            (⊤ : (Spec Γ(X, (⊤ : X.Opens))).Opens)))).hom m) =
+        (f.app (⊤ : X.Opens)).hom
+          ((FM.map (eqToHom htop)).hom m)
+    exact ConcreteCategory.congr_hom (f.1.naturality (eqToHom htop)).symm m)
+
+private noncomputable def affineTildeFunctor (X : Scheme.{u}) [IsAffine X] :
+    ModuleCat.{u} Γ(X, (⊤ : X.Opens)) ⥤ X.Modules :=
+  tilde.functor Γ(X, (⊤ : X.Opens)) ⋙ pullback X.isoSpec.hom
+
+private noncomputable def affineTildeAdjunction (X : Scheme.{u}) [IsAffine X] :
+    affineTildeFunctor X ⊣ affineΓFunctor X :=
+  ((tilde.adjunction (R := Γ(X, (⊤ : X.Opens)))).comp
+    (pullbackPushforwardAdjunction X.isoSpec.hom)).ofNatIsoRight
+      (affineΓPushforwardIsoSpec X)
+
+private noncomputable def affinePushforwardΓIsoApp
+    {X Y : Scheme.{u}} (g : Y ⟶ X) (N : Y.Modules) :
+    (pushforward g ⋙ affineΓFunctor X).obj N ≅
+      (affineΓFunctor Y ⋙ ModuleCat.restrictScalars g.appTop.hom).obj N := by
+  have htop :
+      (Opens.map g.base).op.obj (op (⊤ : X.Opens)) =
+        op (⊤ : Y.Opens) := by
+    rfl
+  let F := (PresheafOfModules.forgetToPresheafModuleCat
+    (op (⊤ : Y.Opens)) (Limits.initialOpOfTerminal Limits.isTerminalTop)).obj N.1
+  let W := (Opens.map g.base).op.obj (op (⊤ : X.Opens))
+  let e₀ : (pushforward g ⋙ affineΓFunctor X).obj N ≅
+      (ModuleCat.restrictScalars g.appTop.hom).obj (F.obj W) := by
+    refine ModuleCat.isoMk (Iso.refl _) ?_
+    intro r
+    change
+      (N.1.obj W).smul
+          ((Y.presheaf.map
+            ((Limits.initialOpOfTerminal Limits.isTerminalTop).to W)).hom
+              (g.appTop.hom r)) =
+        (N.1.obj W).smul
+          ((g.app (⊤ : X.Opens)).hom
+            ((X.presheaf.map
+              ((Limits.initialOpOfTerminal Limits.isTerminalTop).to
+                (op (⊤ : X.Opens)))).hom r))
+    congr 1
+    exact (ConcreteCategory.congr_hom
+      (g.naturality ((Limits.initialOpOfTerminal Limits.isTerminalTop).to
+        (op (⊤ : X.Opens)))) r).symm
+  exact e₀ ≪≫ (ModuleCat.restrictScalars g.appTop.hom).mapIso
+    (F.mapIso (eqToIso htop))
+
+private noncomputable def affinePushforwardΓIso
+    {X Y : Scheme.{u}} (g : Y ⟶ X) :
+    pushforward g ⋙ affineΓFunctor X ≅
+      affineΓFunctor Y ⋙ ModuleCat.restrictScalars g.appTop.hom :=
+  NatIso.ofComponents (affinePushforwardΓIsoApp g) (by
+    intro M N f
+    let FM := (PresheafOfModules.forgetToPresheafModuleCat
+      (op (⊤ : Y.Opens)) (Limits.initialOpOfTerminal Limits.isTerminalTop)).obj M.1
+    let FN := (PresheafOfModules.forgetToPresheafModuleCat
+      (op (⊤ : Y.Opens)) (Limits.initialOpOfTerminal Limits.isTerminalTop)).obj N.1
+    have htop :
+        (Opens.map g.base).op.obj (op (⊤ : X.Opens)) =
+          op (⊤ : Y.Opens) := by
+      rfl
+    ext m
+    change
+      (FN.map (eqToHom htop)).hom
+          ((f.app (g ⁻¹ᵁ (⊤ : X.Opens))).hom m) =
+        (f.app (⊤ : Y.Opens)).hom
+          ((FM.map (eqToHom htop)).hom m)
+    exact ConcreteCategory.congr_hom (f.1.naturality (eqToHom htop)).symm m)
+
+private noncomputable def affineTildePullbackIsoExtendScalars
+    {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y] (g : Y ⟶ X) :
+    affineTildeFunctor X ⋙ pullback g ≅
+      ModuleCat.extendScalars g.appTop.hom ⋙ affineTildeFunctor Y := by
+  let adj₁ := (affineTildeAdjunction X).comp
+    (pullbackPushforwardAdjunction g)
+  let adj₂ := (ModuleCat.extendRestrictScalarsAdj g.appTop.hom).comp
+    (affineTildeAdjunction Y)
+  exact ((conjugateIsoEquiv adj₁ adj₂).symm
+    (affinePushforwardΓIso g)).symm
+
+private theorem isIso_affineTildeAdjunction_counit_app
+    {X : Scheme.{u}} [IsAffine X] (M : X.Modules)
+    [M.IsQuasicoherent] :
+    IsIso ((affineTildeAdjunction X).counit.app M) := by
+  letI : (pullback X.isoSpec.hom).IsEquivalence :=
+    pullback_isEquivalence_of_iso X.isoSpec
+  letI : (pushforward X.isoSpec.hom).IsEquivalence :=
+    (pullbackPushforwardAdjunction X.isoSpec.hom).isEquivalence_right_of_isEquivalence_left
+  letI : IsIso (pullbackPushforwardAdjunction X.isoSpec.hom).counit := by
+    infer_instance
+  let PM := (pushforward X.isoSpec.hom).obj M
+  letI : PM.IsQuasicoherent := by
+    dsimp only [PM]
+    infer_instance
+  letI : IsIso (tilde.adjunction (R := Γ(X, (⊤ : X.Opens))).counit.app PM) := by
+    change IsIso PM.fromTildeΓ
+    infer_instance
+  let adj := (tilde.adjunction (R := Γ(X, (⊤ : X.Opens)))).comp
+    (pullbackPushforwardAdjunction X.isoSpec.hom)
+  have hAdj : IsIso (adj.counit.app M) := by
+    let α := (pullback X.isoSpec.hom).map
+      ((tilde.adjunction (R := Γ(X, (⊤ : X.Opens)))).counit.app PM)
+    let β := (pullbackPushforwardAdjunction X.isoSpec.hom).counit.app M
+    have hα : IsIso α := by
+      dsimp only [α]
+      infer_instance
+    have hβ : IsIso β := by
+      dsimp only [β]
+      infer_instance
+    change IsIso (α ≫ β)
+    exact @IsIso.comp_isIso _ _ _ _ _ α β hα hβ
+  let α := (affineTildeFunctor X).map ((affineΓPushforwardIsoSpec X).inv.app M)
+  have hα : IsIso α := by
+    dsimp only [α]
+    infer_instance
+  change IsIso (α ≫ adj.counit.app M)
+  exact @IsIso.comp_isIso _ _ _ _ _ α (adj.counit.app M)
+    hα hAdj
+
+private theorem isIso_affineTildeAdjunction_unit_app
+    {X : Scheme.{u}} [IsAffine X]
+    (A : ModuleCat.{u} Γ(X, (⊤ : X.Opens))) :
+    IsIso ((affineTildeAdjunction X).unit.app A) := by
+  letI : (pullback X.isoSpec.hom).IsEquivalence :=
+    pullback_isEquivalence_of_iso X.isoSpec
+  letI : (pushforward X.isoSpec.hom).IsEquivalence :=
+    (pullbackPushforwardAdjunction X.isoSpec.hom).isEquivalence_right_of_isEquivalence_left
+  letI : IsIso (pullbackPushforwardAdjunction X.isoSpec.hom).unit := by
+    infer_instance
+  let adj := (tilde.adjunction (R := Γ(X, (⊤ : X.Opens)))).comp
+    (pullbackPushforwardAdjunction X.isoSpec.hom)
+  have hAdj : IsIso (adj.unit.app A) := by
+    let α := (tilde.adjunction (R := Γ(X, (⊤ : X.Opens)))).unit.app A
+    let β := moduleSpecΓFunctor.map
+      ((pullbackPushforwardAdjunction X.isoSpec.hom).unit.app
+        ((tilde.functor Γ(X, (⊤ : X.Opens))).obj A))
+    have hα : IsIso α := by
+      dsimp only [α]
+      infer_instance
+    have hβ : IsIso β := by
+      dsimp only [β]
+      infer_instance
+    change IsIso (α ≫ β)
+    exact @IsIso.comp_isIso _ _ _ _ _ α β hα hβ
+  let α := adj.unit.app A
+  let β := (affineΓPushforwardIsoSpec X).hom.app ((affineTildeFunctor X).obj A)
+  have hα : IsIso α := hAdj
+  have hβ : IsIso β := by
+    dsimp only [β]
+    infer_instance
+  change IsIso (α ≫ β)
+  exact @IsIso.comp_isIso _ _ _ _ _ α β hα hβ
+
+private noncomputable def affineΓLiteralIso (X : Scheme.{u}) (M : X.Modules) :
+    ModuleCat.of Γ(X, (⊤ : X.Opens)) Γ(M, (⊤ : X.Opens)) ≅
+      (affineΓFunctor X).obj M := by
+  refine ModuleCat.isoMk (Iso.refl _) ?_
+  intro r
+  change
+    (M.1.obj (op (⊤ : X.Opens))).smul
+        ((X.presheaf.map
+          ((Limits.initialOpOfTerminal Limits.isTerminalTop).to
+            (op (⊤ : X.Opens)))).hom r) =
+      (M.1.obj (op (⊤ : X.Opens))).smul r
+  congr 1
+  rw [show (Limits.initialOpOfTerminal Limits.isTerminalTop).to
+    (op (⊤ : X.Opens)) = 𝟙 _ from Subsingleton.elim _ _]
+  simp
+
+/-- The map on top-level sections induced by a morphism of scheme modules,
+viewed as a linear map over the top-level ring of functions. -/
+noncomputable def affineΓMap {X : Scheme.{u}} {M N : X.Modules} (f : M ⟶ N) :
+    ModuleCat.of Γ(X, (⊤ : X.Opens)) Γ(M, (⊤ : X.Opens)) ⟶
+      ModuleCat.of Γ(X, (⊤ : X.Opens)) Γ(N, (⊤ : X.Opens)) :=
+  (affineΓLiteralIso X M).hom ≫ (affineΓFunctor X).map f ≫
+    (affineΓLiteralIso X N).inv
+
+private noncomputable def affineUnitΓNatTrans
+    {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y] (g : Y ⟶ X) :
+    affineΓFunctor X ⋙ ModuleCat.extendScalars g.appTop.hom ⟶
+      ((affineΓFunctor X ⋙ ModuleCat.extendScalars g.appTop.hom) ⋙
+        affineTildeFunctor Y) ⋙ affineΓFunctor Y where
+  app M := (affineTildeAdjunction Y).unit.app
+    ((ModuleCat.extendScalars g.appTop.hom).obj ((affineΓFunctor X).obj M))
+  naturality {M N} f := by
+    change
+      (ModuleCat.extendScalars g.appTop.hom).map ((affineΓFunctor X).map f) ≫
+          (affineTildeAdjunction Y).unit.app
+            ((ModuleCat.extendScalars g.appTop.hom).obj
+              ((affineΓFunctor X).obj N)) =
+        (affineTildeAdjunction Y).unit.app
+              ((ModuleCat.extendScalars g.appTop.hom).obj
+                ((affineΓFunctor X).obj M)) ≫
+          (affineΓFunctor Y).map
+            ((affineTildeFunctor Y).map
+              ((ModuleCat.extendScalars g.appTop.hom).map
+                ((affineΓFunctor X).map f)))
+    exact (affineTildeAdjunction Y).unit.naturality
+      ((ModuleCat.extendScalars g.appTop.hom).map ((affineΓFunctor X).map f))
+
+private theorem affineTildePullbackIso_inv_Γ_naturality
+    {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y] (g : Y ⟶ X)
+    {M N : X.Modules} (f : M ⟶ N) :
+    (affineΓFunctor Y).map
+          ((affineTildeFunctor Y).map
+            ((ModuleCat.extendScalars g.appTop.hom).map
+              ((affineΓFunctor X).map f))) ≫
+        (affineΓFunctor Y).map
+          ((affineTildePullbackIsoExtendScalars g).inv.app
+            ((affineΓFunctor X).obj N)) =
+      (affineΓFunctor Y).map
+          ((affineTildePullbackIsoExtendScalars g).inv.app
+            ((affineΓFunctor X).obj M)) ≫
+        (affineΓFunctor Y).map
+          ((pullback g).map
+            ((affineTildeFunctor X).map ((affineΓFunctor X).map f))) := by
+  have h := (affineTildePullbackIsoExtendScalars g).inv.naturality
+    ((affineΓFunctor X).map f)
+  have h' := congrArg (affineΓFunctor Y).map h
+  simp only [Functor.comp_map, Functor.map_comp] at h'
+  exact h'
+
+private noncomputable def affineTildePullbackΓNatTrans
+    {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y] (g : Y ⟶ X) :
+    ((affineΓFunctor X ⋙ ModuleCat.extendScalars g.appTop.hom) ⋙
+          affineTildeFunctor Y) ⋙ affineΓFunctor Y ⟶
+      ((affineΓFunctor X ⋙ affineTildeFunctor X) ⋙ pullback g) ⋙
+        affineΓFunctor Y where
+  app M := (affineΓFunctor Y).map
+    ((affineTildePullbackIsoExtendScalars g).app
+      ((affineΓFunctor X).obj M)).inv
+  naturality {M N} f := by
+    change
+      (affineΓFunctor Y).map
+            ((affineTildeFunctor Y).map
+              ((ModuleCat.extendScalars g.appTop.hom).map
+                ((affineΓFunctor X).map f))) ≫
+          (affineΓFunctor Y).map
+            ((affineTildePullbackIsoExtendScalars g).inv.app
+              ((affineΓFunctor X).obj N)) =
+        (affineΓFunctor Y).map
+              ((affineTildePullbackIsoExtendScalars g).inv.app
+                ((affineΓFunctor X).obj M)) ≫
+          (affineΓFunctor Y).map
+            ((pullback g).map
+              ((affineTildeFunctor X).map ((affineΓFunctor X).map f)))
+    exact affineTildePullbackIso_inv_Γ_naturality g f
+
+private theorem affineCounit_pullback_Γ_naturality
+    {X Y : Scheme.{u}} [IsAffine X] (g : Y ⟶ X)
+    {M N : X.Modules} (f : M ⟶ N) :
+    (affineΓFunctor Y).map
+          ((pullback g).map
+            ((affineTildeFunctor X).map ((affineΓFunctor X).map f))) ≫
+        (affineΓFunctor Y).map
+          ((pullback g).map ((affineTildeAdjunction X).counit.app N)) =
+      (affineΓFunctor Y).map
+          ((pullback g).map ((affineTildeAdjunction X).counit.app M)) ≫
+        (affineΓFunctor Y).map ((pullback g).map f) := by
+  have h := (affineTildeAdjunction X).counit.naturality f
+  change
+    (affineTildeFunctor X).map ((affineΓFunctor X).map f) ≫
+        (affineTildeAdjunction X).counit.app N =
+      (affineTildeAdjunction X).counit.app M ≫ f at h
+  rw [← Functor.map_comp, ← Functor.map_comp]
+  rw [← Functor.map_comp, ← Functor.map_comp]
+  exact congrArg (affineΓFunctor Y).map (congrArg (pullback g).map h)
+
+private noncomputable def affineCounitPullbackΓNatTrans
+    {X Y : Scheme.{u}} [IsAffine X] (g : Y ⟶ X) :
+    ((affineΓFunctor X ⋙ affineTildeFunctor X) ⋙ pullback g) ⋙
+          affineΓFunctor Y ⟶
+      pullback g ⋙ affineΓFunctor Y where
+  app M := (affineΓFunctor Y).map
+    ((pullback g).map ((affineTildeAdjunction X).counit.app M))
+  naturality {M N} f := by
+    change
+      (affineΓFunctor Y).map
+            ((pullback g).map
+              ((affineTildeFunctor X).map ((affineΓFunctor X).map f))) ≫
+          (affineΓFunctor Y).map
+            ((pullback g).map ((affineTildeAdjunction X).counit.app N)) =
+        (affineΓFunctor Y).map
+              ((pullback g).map ((affineTildeAdjunction X).counit.app M)) ≫
+          (affineΓFunctor Y).map ((pullback g).map f)
+    exact affineCounit_pullback_Γ_naturality g f
+
+private noncomputable def affinePullbackΓNatTrans
+    {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y] (g : Y ⟶ X) :
+    affineΓFunctor X ⋙ ModuleCat.extendScalars g.appTop.hom ⟶
+      pullback g ⋙ affineΓFunctor Y :=
+  affineUnitΓNatTrans g ≫ affineTildePullbackΓNatTrans g ≫
+    affineCounitPullbackΓNatTrans g
+
+private noncomputable def affinePullbackΓCoreIso
+    {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y]
+    (g : Y ⟶ X) (M : X.Modules) [M.IsQuasicoherent] :
+    (ModuleCat.extendScalars g.appTop.hom).obj ((affineΓFunctor X).obj M) ≅
+      (affineΓFunctor Y).obj ((pullback g).obj M) := by
+  let A := (affineΓFunctor X).obj M
+  let B := (ModuleCat.extendScalars g.appTop.hom).obj A
+  have hCounit : IsIso ((affineTildeAdjunction X).counit.app M) :=
+    isIso_affineTildeAdjunction_counit_app M
+  have hUnit : IsIso ((affineTildeAdjunction Y).unit.app B) :=
+    isIso_affineTildeAdjunction_unit_app B
+  let e₀ := @asIso _ _ _ _ ((affineTildeAdjunction Y).unit.app B) hUnit
+  let e₂ := @asIso _ _ _ _ ((affineTildeAdjunction X).counit.app M) hCounit
+  exact e₀ ≪≫
+    (affineΓFunctor Y).mapIso
+      ((affineTildePullbackIsoExtendScalars g).app A).symm ≪≫
+    (affineΓFunctor Y).mapIso
+      ((pullback g).mapIso e₂)
+
+private theorem affinePullbackΓCoreIso_hom
+    {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y]
+    (g : Y ⟶ X) (M : X.Modules) [M.IsQuasicoherent] :
+    (affinePullbackΓCoreIso g M).hom = (affinePullbackΓNatTrans g).app M := by
+  dsimp [affinePullbackΓCoreIso, affinePullbackΓNatTrans,
+    affineUnitΓNatTrans, affineTildePullbackΓNatTrans,
+    affineCounitPullbackΓNatTrans]
+  rfl
+
+private theorem affinePullbackΓCoreIso_naturality
+    {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y] (g : Y ⟶ X)
+    {M N : X.Modules} [M.IsQuasicoherent] [N.IsQuasicoherent]
+    (f : M ⟶ N) :
+    (ModuleCat.extendScalars g.appTop.hom).map ((affineΓFunctor X).map f) ≫
+        (affinePullbackΓCoreIso g N).hom =
+      (affinePullbackΓCoreIso g M).hom ≫
+        (affineΓFunctor Y).map ((pullback g).map f) := by
+  rw [affinePullbackΓCoreIso_hom, affinePullbackΓCoreIso_hom]
+  exact (affinePullbackΓNatTrans g).naturality f
+
+/-- On arbitrary affine schemes, top-level sections of a pulled-back
+quasicoherent module are obtained by extension of scalars. -/
+noncomputable def affinePullbackΓIso
+    {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y]
+    (g : Y ⟶ X) (M : X.Modules) [M.IsQuasicoherent] :
+    (ModuleCat.extendScalars g.appTop.hom).obj
+        (ModuleCat.of Γ(X, (⊤ : X.Opens)) Γ(M, (⊤ : X.Opens))) ≅
+      ModuleCat.of Γ(Y, (⊤ : Y.Opens))
+        Γ((pullback g).obj M, (⊤ : Y.Opens)) := by
+  exact (ModuleCat.extendScalars g.appTop.hom).mapIso
+      (affineΓLiteralIso X M) ≪≫
+    affinePullbackΓCoreIso g M ≪≫
+      (affineΓLiteralIso Y ((pullback g).obj M)).symm
+
+/-- The arbitrary-affine pullback comparison is natural in the quasicoherent
+module. -/
+theorem affinePullbackΓIso_naturality
+    {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y] (g : Y ⟶ X)
+    {M N : X.Modules} [M.IsQuasicoherent] [N.IsQuasicoherent]
+    (f : M ⟶ N) :
+    (ModuleCat.extendScalars g.appTop.hom).map (affineΓMap f) ≫
+        (affinePullbackΓIso g N).hom =
+      (affinePullbackΓIso g M).hom ≫ affineΓMap ((pullback g).map f) := by
+  dsimp only [affinePullbackΓIso, affineΓMap]
+  simp only [Iso.trans_hom, Functor.mapIso_hom, Iso.symm_hom,
+    Functor.map_comp, Category.assoc]
+  simp
+  have h := congrArg (fun k =>
+    (ModuleCat.extendScalars g.appTop.hom).map
+          (affineΓLiteralIso X M).hom ≫
+      k ≫ (affineΓLiteralIso Y ((pullback g).obj N)).inv)
+    (affinePullbackΓCoreIso_naturality g f)
+  simpa only [Category.assoc] using h
+
 end AlgebraicGeometry.Scheme.Modules

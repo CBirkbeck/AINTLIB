@@ -740,19 +740,17 @@ the original restriction map and the identity on `Γ(T,⊤)`. This supplies the
 differential-level coherence needed to assemble the base-change isomorphism of Cech
 complexes; that degreewise and differential-compatible assembly is the next step.
 
-The next local input upgrades the coordinate-ring comparison to quasicoherent modules on
-affine schemes. For `g : Y → X` with `X` and `Y` affine and quasicoherent `M`, the target
-`affinePullbackΓIso` identifies global sections of `g^*M` with extension of scalars of
-`Γ(X,M)` along `g.appTop`; its naturality in `M` will transport the restriction morphisms
-appearing in the pole-sheaf Cech differential. The construction must reduce through the
-existing `isoSpec`, `tilde`, and pullback APIs, not duplicate the landed monoidal layer.
-The spectrum case is now complete: `specPullbackΓIso` compares pullback along
-`Spec.map φ` with extension of scalars along `φ`, and
-`specPullbackΓIso_naturality` proves naturality in every quasicoherent module. Its hom is
-the component of a composite of three natural transformations: the tilde-Gamma unit,
-the conjugate pullback/extension-of-scalars adjunction isomorphism, and the pulled-back
-tilde-Gamma counit. The remaining part of this input is transport through the canonical
-`isoSpec` presentations of arbitrary affine source and target schemes.
+The affine module-valued input is complete. For `g : Y → X` between arbitrary affine
+schemes and quasicoherent `M`, `affinePullbackΓIso` identifies global sections of `g^*M`
+with extension of scalars of `Γ(X,M)` along `g.appTop`, and
+`affinePullbackΓIso_naturality` transports every module morphism through that comparison.
+The proof constructs the affine tilde-Gamma adjunction from the canonical `isoSpec`
+presentation and factors the comparison through the adjunction unit, the conjugate
+pullback/extension-of-scalars isomorphism, and the pulled-back counit. The spectrum
+specialization remains available as `specPullbackΓIso`. This does not duplicate the
+landed monoidal layer or add finiteness hypotheses. Together with affine-patch ring
+naturality, it supplies the local module comparisons needed to assemble pole-sheaf Cech
+base change degreewise and compatibly with the differential.
 
 The elementary Mayer--Vietoris seam is now complete in both directions.
 `HPrimeZeroAddEquivSections` identifies `H'⁰(U,F)` with sections naturally in `U`, while

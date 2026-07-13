@@ -1,5 +1,6 @@
 import ModularCurves.EllipticCurve.PoleSheafPointedIso
 import ModularCurves.EllipticCurve.PoleSheafModel
+import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 
 /-!
 # Global pole sections on residue fibres
@@ -15,12 +16,6 @@ open AlgebraicGeometry CategoryTheory Limits MonoidalCategory SheafOfModules
 universe u
 
 namespace AlgebraicGeometry.Scheme.Modules
-
-private theorem pullback_isEquivalence_of_iso {X Y : Scheme.{u}} (e : X ≅ Y) :
-    (pullback e.hom).IsEquivalence :=
-  Functor.IsEquivalence.mk' (pullback e.inv)
-    ((pullbackComp e.inv e.hom ≪≫ pullbackCongr e.inv_hom_id ≪≫ pullbackId Y).symm)
-    (pullbackComp e.hom e.inv ≪≫ pullbackCongr e.hom_inv_id ≪≫ pullbackId X)
 
 private noncomputable def pushforwardIsoOfPullbackIso
     {X Y S : Scheme.{u}} {πX : X ⟶ S} {πY : Y ⟶ S}
