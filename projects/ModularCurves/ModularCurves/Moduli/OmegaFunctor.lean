@@ -180,4 +180,31 @@ noncomputable def omegaBasisMap {X X' : EllObj R} (φ : X' ⟶ X)
       (Scheme.UnitCocycle.isBasis_sectionsPullback
         (omegaCocycle X.curve.toEllipticCurveGeom) φ.baseHom b.2)⟩
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-OM-B7)** `omegaBasisMap` is equivariant for the global-unit actions through
+the section comparison of the base morphism — with `negVC_u`, KM 4.6.2's
+`{±1}`-action transports along every `Ell/R`-morphism. -/
+theorem omegaBasisMap_smul {X X' : EllObj R} (φ : X' ⟶ X) (g : Γ(X.base, ⊤)ˣ)
+    (b : OmegaBasis X.curve.toEllipticCurveGeom) :
+    omegaBasisMap φ (g • b) =
+      Units.map ((φ.baseHom.appLE ⊤ ⊤ (fun x _ => trivial)).hom).toMonoidHom g •
+        omegaBasisMap φ b := by
+  refine Subtype.ext ?_
+  have h1 : ((omegaCocycle X.curve.toEllipticCurveGeom).sectionsPullback φ.baseHom
+      (g • b).1) =
+    ((φ.baseHom.appLE ⊤ (φ.baseHom ⁻¹ᵁ (⊤ : X.base.Opens)) le_rfl).hom g.val) •
+      ((omegaCocycle X.curve.toEllipticCurveGeom).sectionsPullback φ.baseHom b.1) :=
+    Scheme.UnitCocycle.sectionsPullback_smul
+      (omegaCocycle X.curve.toEllipticCurveGeom) φ.baseHom g.val b.1
+  show ((omegaCompat φ).sectionsEquiv ⊤)
+      (((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle
+        φ.baseHom).sectionsMap _
+      ((omegaCocycle X.curve.toEllipticCurveGeom).sectionsPullback φ.baseHom
+        (g • b).1)) = _
+  rw [h1, Scheme.UnitCocycle.sectionsMap_smul, map_smul]
+  show _ • ((omegaCompat φ).sectionsEquiv ⊤) _ = _
+  congr 1
+  rw [Scheme.resLE_appLE]
+  rfl
+
 end ModularCurves

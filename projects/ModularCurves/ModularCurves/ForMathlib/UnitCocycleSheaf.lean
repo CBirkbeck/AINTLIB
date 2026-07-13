@@ -1128,6 +1128,21 @@ theorem isBasis_sectionsPullback (f : Y ⟶ X) {V : X.Opens} {b : c.sections V}
     (hb : c.IsBasis b) : (c.pullbackCocycle f).IsBasis (c.sectionsPullback f b) :=
   fun i => (hb i).map _
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-OM-A7b)** Pullback of sections is semilinear over the section comparison. -/
+theorem sectionsPullback_smul (f : Y ⟶ X) {V : X.Opens} (r : Γ(X, V)) (b : c.sections V) :
+    c.sectionsPullback f (r • b) =
+      ((f.appLE V (f ⁻¹ᵁ V) le_rfl).hom r) • c.sectionsPullback f b := by
+  refine Subtype.ext (funext fun i => ?_)
+  show (f.appLE (V ⊓ c.U i) (f ⁻¹ᵁ V ⊓ (c.pullbackCocycle f).U i)
+      (fun _ hy => ⟨hy.1, hy.2⟩)).hom (resLE inf_le_left r * b.1 i) =
+    resLE inf_le_left ((f.appLE V (f ⁻¹ᵁ V) le_rfl).hom r) *
+      (f.appLE (V ⊓ c.U i) (f ⁻¹ᵁ V ⊓ (c.pullbackCocycle f).U i)
+        (fun _ hy => ⟨hy.1, hy.2⟩)).hom (b.1 i)
+  rw [map_mul]
+  congr 1
+  rw [appLE_resLE, resLE_appLE]
+
 end UnitCocycle
 
 end AlgebraicGeometry.Scheme
