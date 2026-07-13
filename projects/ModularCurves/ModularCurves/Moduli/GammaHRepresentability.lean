@@ -1661,6 +1661,69 @@ theorem QuotPkg.relRep_quotProb (pkg : ∀ X : EllObj R, QuotPkg φ X)
     · rw [Category.assoc, pullback.lift_snd, hu2, pullback.lift_snd]
   exact hleg _ (pullback.lift_fst _ _ _) (pullback.lift_snd _ _ _)
 
+/-- **The cross-problem transport** ([GHB7-couniv-i], KM 7.1.3(1) scheme-level
+content): a `G`-invariant morphism to a relatively representable problem induces, at
+each object, a `G`-invariant morphism of representing schemes over the base. -/
+theorem QuotPkg.exists_crossTransport {P' : ModuliProblem R} {X : EllObj R}
+    (p : QuotPkg φ X) (d' : ModuliProblem.RelRepData P' X) (ν' : Q ⟶ P')
+    (hν' : ∀ γ : G, (φ γ).hom ≫ ν' = ν') :
+    ∃ ν : p.d.Z ⟶ d'.Z, ν ≫ d'.f = p.d.f ∧ ∀ γ : G, p.d.σZ.hom γ ≫ ν = ν := by
+  refine ⟨((d'.eqv p.d.f).symm (ν'.app (Opposite.op (X.pullbackAlong p.d.f))
+      (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩))).1,
+    ((d'.eqv p.d.f).symm (ν'.app (Opposite.op (X.pullbackAlong p.d.f))
+      (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩))).2, ?_⟩
+  intro γ
+  have hν := ((d'.eqv p.d.f).symm (ν'.app (Opposite.op (X.pullbackAlong p.d.f))
+      (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩))).2
+  have hgs : p.d.σZ.hom γ ≫ p.d.f = p.d.f := p.d.over_base γ
+  have hp1 : (p.d.σZ.hom γ ≫ ((d'.eqv p.d.f).symm
+      (ν'.app (Opposite.op (X.pullbackAlong p.d.f))
+        (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩))).1) ≫ d'.f =
+      p.d.σZ.hom γ ≫ p.d.f := by
+    rw [Category.assoc, hν]
+  refine congrArg Subtype.val ((d'.eqv p.d.f).injective
+    (a₁ := ⟨_, hp1.trans hgs⟩) ?_)
+  rw [Equiv.apply_symm_apply]
+  -- d'-side: index-shift + naturality peel the action off
+  rw [ModuliProblem.RelRepData.eqv_congr d' hgs
+      (p.d.σZ.hom γ ≫ ((d'.eqv p.d.f).symm
+        (ν'.app (Opposite.op (X.pullbackAlong p.d.f))
+          (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩))).1) hp1,
+    d'.nat p.d.f (p.d.σZ.hom γ) ((d'.eqv p.d.f).symm
+      (ν'.app (Opposite.op (X.pullbackAlong p.d.f))
+        (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩))),
+    Equiv.apply_symm_apply,
+    ← NatTrans.naturality_apply ν' (X.pullbackAlongMap p.d.f (p.d.σZ.hom γ)).op
+      (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩),
+    ← NatTrans.naturality_apply ν'
+      (eqToHom (congrArg (fun t => Opposite.op (X.pullbackAlong t)) hgs))
+      (Q.map (X.pullbackAlongMap p.d.f (p.d.σZ.hom γ)).op
+        (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩))]
+  -- Q-side: the transported universal element is the `γ⁻¹`-twisted one
+  have hp2 : (p.d.σZ.hom γ ≫ 𝟙 p.d.Z) ≫ p.d.f = p.d.σZ.hom γ ≫ p.d.f := by
+    rw [Category.comp_id]
+  have hQside : Q.map (eqToHom (congrArg (fun t =>
+      Opposite.op (X.pullbackAlong t)) hgs))
+      (Q.map (X.pullbackAlongMap p.d.f (p.d.σZ.hom γ)).op
+        (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩)) =
+      (φ γ⁻¹).hom.app (Opposite.op (X.pullbackAlong p.d.f))
+        (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩) := by
+    rw [← p.d.nat p.d.f (p.d.σZ.hom γ) ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩,
+      ← ModuliProblem.RelRepData.eqv_congr p.d.toRelRepData hgs
+        (p.d.σZ.hom γ ≫ 𝟙 p.d.Z) hp2,
+      show (⟨p.d.σZ.hom γ ≫ 𝟙 p.d.Z, hp2.trans hgs⟩ :
+        { h : p.d.Z ⟶ p.d.Z // h ≫ p.d.f = p.d.f }) =
+      ⟨𝟙 p.d.Z ≫ p.d.σZ.hom γ, by rw [Category.id_comp]; exact hgs⟩ from
+        Subtype.ext ((Category.comp_id _).trans (Category.id_comp _).symm)]
+    exact p.d.equivariant p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩ γ
+  rw [hQside,
+    show ν'.app (Opposite.op (X.pullbackAlong p.d.f))
+      ((φ γ⁻¹).hom.app (Opposite.op (X.pullbackAlong p.d.f))
+        (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩)) =
+      ((φ γ⁻¹).hom ≫ ν').app (Opposite.op (X.pullbackAlong p.d.f))
+        (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩) from rfl,
+    hν' γ⁻¹]
+
 end Transport
 
 
