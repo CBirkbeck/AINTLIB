@@ -18417,3 +18417,36 @@ comparison identifying Spec(transitionTensor) with the pullback window under the
 kunnethToSpec/patchLevel/VLevel functoriality), then Spec.map_injective assembles
 hsq : Q.chartCoaction ∘ resChart = transitionTensor ∘ P.chartCoaction. Then: template glue
 :343-891 (windowHom/imageOpens/saturation/tripleIso/GlueData) → quotient/quotientπ → pins. (STREAM-G0)
+
+### v10.187-GH — ★★★★ [GHB6] CLEARED: the GHB7 assembly is END-TO-END AXIOM-CLEAN (STREAM-GH)
+Commits 86e6d66be, 668e21a73, 4ced1cb0a (all pushed). The single sorryAx edge of the ★★★ assembly
+(`f₀_finite_etale`, KM 7.1.3(6)) is DISCHARGED — clean-room `#print axioms` at tip:
+**`QuotPkg.f₀_finite_etale`, `exists_quotientProblemData`, `quotProb`/`crossμ`/`projQ_crossμ`/
+`projQ_geom_orbits` = ALL {propext, Classical.choice, Quot.sound}.** Route (NOT the 02KL fp-descent,
+which is itself gated on the [KL-3] flat-spreading sorry — audited and AVOIDED):
+- **`ForMathlib/EtaleCancellation.lean` (NEW, all axiom-clean)** — `Algebra.Etale.of_comp_of_retract`:
+  in a tower `R → B → A` with `B → A` formally étale + flat + SPLIT (B-linear retraction of the unit),
+  `R → A` finite étale ⟹ `R → B` étale. The retraction (trace `a ↦ tr(c·a)`, `tr(c)=1` from
+  InvariantTorsor's `exists_traceInvariants_eq_one`) replaces flat-spreading: finite/flat via retract,
+  fp via finite-projective-module chain (`Module.FinitePresentation.of_finite_of_finitePresentation` +
+  `projective_of_finitePresentation` + retract + `Algebra.FinitePresentation.of_finitePresentation`),
+  unramified via `Ω[B⁄R] ⊗ A ≅ Ω[A⁄R] = 0` (`tensorKaehlerEquivOfFormallyEtale` + ff reflects), then
+  mathlib's NEW `Algebra.Etale.of_formallyUnramified_of_flat` (08WD) — NO smoothness argument.
+  + `RingHom.invariantsCorestrict_finite/_etale` (the `R → Aᴳ` corollaries).
+- **`ForMathlib/SchemeActionFree.lean` QuotientDesc section (NEW, all axiom-clean)** —
+  `quotient_desc_finite_etale`: descended structure map of ANY hdesc-datum quotient of a free action
+  is finite étale. Chart route: `f₀⁻¹(US x) = quotientChart x` (π₀-surjectivity + preimage lemma);
+  `f₀ ∣_ US x = isoOfEq ≫ chartIso.inv ≫ Spec.map(invariantsCorestrict appLE) ≫ isoSpec.inv`
+  (cancel epi `localQuotientπ` × mono `(US x).ι`; `toSpecΓ_SpecMap_appLE` naturality); complement of
+  the CLOSED image of f (finite ⟹ closed) covered by affines with EMPTY f₀-preimage (mathlib's
+  IsEmpty-instances close IsFinite/Etale). + `finite_appLE`/`gamma_appLE_invariant`/`quotientDescRing`.
+- GHC1 `gammaH_relativelyRepresentable` LIVE; its sorryAx now ONLY via the two chartered INPUTS:
+  **[GH1]** `gammaHAut`+spec (T-E4a/T-H3-gated data) and **[GHA3]** `levelSpaceΓπ_etale` (WEIL wave,
+  charter C). Abstract `isFinite_etale_of_comp_of_finite_etale_surjective` stays as the unused
+  [GH-DESC-GAP] marker (abstract fppf form needs Chevalley "affine descends along finite surjective",
+  absent from mathlib). LEAN-OPS: (16) `R₀ : Type u`-pinned-with-ℤ forces u:=0 — give the ground ring
+  its own universe (InvariantTorsor pattern); (17) `Finite G` inside `RingHom.`-named decls captures
+  as `RingHom.Finite` — use `_root_.Finite`; (18) mathlib `FormallyUnramified` is now DEFINED as
+  `Subsingleton Ω` (constructor/instance, no iff needed). NEXT: [GHA3] audit-first (invertible-N
+  discharge?), [GH1] audit vs PullSectionAdd.lean's PROVEN locally-noetherian pullSection_add.
+  (STREAM-GH)
