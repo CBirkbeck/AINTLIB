@@ -9,7 +9,7 @@ public import BernoulliRegular.UnitQuotient.TorsionQuotient
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.UnitSignEndpointAndKellyEquality
 
 /-!
-# Principal unit factor (REF-18 Phase 2, sub-piece U)
+# Principal unit factor (Phase 2, sub-piece U)
 
 For a nonzero principal ideal `(α)`, the actual multiplicative Φ element
 `Φ((α))` and the explicit Stickelberger principal generator
@@ -61,7 +61,7 @@ namespace Furtwaengler
 variable {p : ℕ} [Fact p.Prime]
 variable {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
-/-- Primary-version REF-18-facing U4 endpoint from prime-level Φ
+/-- Primary-version U4 endpoint from prime-level Φ
 semi-primarity and prime-level Φ conjugation norms.
 
 This is the concrete U4 product theorem after the prime Gauss-sum calculations:
@@ -554,7 +554,7 @@ sign theorem, because `IsPrimary` implies `IsSemiPrimary`. -/
 theorem PrimaryUnitFactorSignHypothesis_of_semiPrimary
     {α : 𝓞 K}
     (h_sign : SemiPrimaryUnitFactorSignHypothesis (p := p) (K := K) α) :
-    PrimaryUnitFactorSignHypothesis (p := p) (K := K) α := fun h_primary hα Φα =>
+    PrimaryUnitFactorSignHypothesis (p := p) (K := K) α := fun h_primary hα Φα ↦
   h_sign (FLT37.IsPrimary.toIsSemiPrimary (p := p) (K := K) h_primary) hα Φα
 
 /-- A primary sign theorem immediately gives the corrected symbol-trivial
