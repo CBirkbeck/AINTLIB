@@ -65,6 +65,7 @@ import ModularCurves.LevelStructure.Basic
 import ModularCurves.LevelStructure.CartierDivisor
 import ModularCurves.LevelStructure.ExactOrder
 import ModularCurves.LevelStructure.FibreFullLevel
+import ModularCurves.LevelStructure.FullLevelFibre
 import ModularCurves.LevelStructure.Incidence
 import ModularCurves.ModularCurve.YFullRoute
 import ModularCurves.ModularCurve.YFullTE9
