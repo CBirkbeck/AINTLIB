@@ -825,101 +825,6 @@ section KernelPair
 
 variable [Module.Free P.baseRing P.groupRing]
 
-/-- The tensor-swap spectrum isomorphism between the two Künneth orders. -/
-noncomputable def specSwapIso :
-    (Spec (.of (P.groupRing ⊗[P.baseRing] P.chartRing)) : Scheme.{u})
-      ≅ Spec (.of (P.chartRing ⊗[P.baseRing] P.groupRing)) where
-  hom := Spec.map (CommRingCat.ofHom
-    ((Algebra.TensorProduct.comm P.baseRing P.chartRing P.groupRing).toAlgHom.toRingHom))
-  inv := Spec.map (CommRingCat.ofHom
-    ((Algebra.TensorProduct.comm P.baseRing P.groupRing P.chartRing).toAlgHom.toRingHom))
-  hom_inv_id := (Spec.map_comp _ _).symm.trans (by
-    rw [show CommRingCat.ofHom
-        ((Algebra.TensorProduct.comm P.baseRing P.groupRing
-          P.chartRing).toAlgHom.toRingHom) ≫
-        CommRingCat.ofHom
-        ((Algebra.TensorProduct.comm P.baseRing P.chartRing
-          P.groupRing).toAlgHom.toRingHom) = 𝟙 _ from by
-      apply CommRingCat.hom_ext
-      apply RingHom.ext
-      intro x
-      show (Algebra.TensorProduct.comm P.baseRing P.chartRing P.groupRing)
-        ((Algebra.TensorProduct.comm P.baseRing P.groupRing P.chartRing) x) = x
-      rw [← Algebra.TensorProduct.comm_symm]
-      exact (Algebra.TensorProduct.comm P.baseRing P.chartRing
-        P.groupRing).apply_symm_apply x]
-    exact Spec.map_id _)
-  inv_hom_id := (Spec.map_comp _ _).symm.trans (by
-    rw [show CommRingCat.ofHom
-        ((Algebra.TensorProduct.comm P.baseRing P.chartRing
-          P.groupRing).toAlgHom.toRingHom) ≫
-        CommRingCat.ofHom
-        ((Algebra.TensorProduct.comm P.baseRing P.groupRing
-          P.chartRing).toAlgHom.toRingHom) = 𝟙 _ from by
-      apply CommRingCat.hom_ext
-      apply RingHom.ext
-      intro x
-      show (Algebra.TensorProduct.comm P.baseRing P.groupRing P.chartRing)
-        ((Algebra.TensorProduct.comm P.baseRing P.chartRing P.groupRing) x) = x
-      rw [← Algebra.TensorProduct.comm_symm]
-      exact (Algebra.TensorProduct.comm P.baseRing P.groupRing
-        P.chartRing).apply_symm_apply x]
-    exact Spec.map_id _)
-
-/-- The chart identification of the restricted-action object with the spectrum of the
-chart-first Künneth tensor. -/
-noncomputable def chartTensorIso :
-    (G.actionProj.left ⁻¹ᵁ P.U).toScheme
-      ≅ Spec (.of (P.chartRing ⊗[P.baseRing] P.groupRing)) :=
-  G.chartPullbackIso P.U ≪≫ P.chartSpecIso ≪≫ P.specSwapIso
-
-/-- The chart tensor identification carries the chart co-action to the restricted
-action (composed C4b bridge, action leg). -/
-theorem chartTensorIso_hom_specMap_chartCoaction :
-    P.chartTensorIso.hom ≫ Spec.map (CommRingCat.ofHom P.chartCoaction.toRingHom)
-      = G.restrictedAction P.hstable ≫ P.hU.isoSpec.hom := by
-  have hswap : Spec.map (CommRingCat.ofHom P.chartCoaction.toRingHom)
-      = P.specSwapIso.inv ≫ Spec.map P.coactionRing := by
-    show _ = Spec.map (CommRingCat.ofHom
-      ((Algebra.TensorProduct.comm P.baseRing P.groupRing
-        P.chartRing).toAlgHom.toRingHom)) ≫ Spec.map P.coactionRing
-    rw [← Spec.map_comp]
-    rfl
-  have hbridge : Spec.map P.coactionRing = P.chartCoactionSpec ≫ P.hU.isoSpec.hom :=
-    (Iso.comp_inv_eq P.hU.isoSpec).mp P.spec_coactionRing_isoSpec_inv
-  rw [hswap, chartTensorIso, hbridge, chartCoactionSpec]
-  simp only [Iso.trans_hom, Category.assoc, Iso.hom_inv_id_assoc]
-
-/-- The chart tensor identification carries the trivial co-action to the restricted
-projection (composed C4b bridge, projection leg). -/
-theorem chartTensorIso_hom_specMap_includeLeft :
-    P.chartTensorIso.hom ≫ Spec.map (CommRingCat.ofHom
-        (Algebra.TensorProduct.includeLeft :
-          P.chartRing →ₐ[P.baseRing] P.chartRing ⊗[P.baseRing] P.groupRing).toRingHom)
-      = G.restrictedProj P.U ≫ P.hU.isoSpec.hom := by
-  have hswap : Spec.map (CommRingCat.ofHom
-      (Algebra.TensorProduct.includeLeft :
-        P.chartRing →ₐ[P.baseRing] P.chartRing ⊗[P.baseRing] P.groupRing).toRingHom)
-      = P.specSwapIso.inv ≫ Spec.map (CommRingCat.ofHom
-          (Algebra.TensorProduct.includeRight :
-            P.chartRing →ₐ[P.baseRing]
-              P.groupRing ⊗[P.baseRing] P.chartRing).toRingHom) := by
-    show _ = Spec.map (CommRingCat.ofHom
-      ((Algebra.TensorProduct.comm P.baseRing P.groupRing
-        P.chartRing).toAlgHom.toRingHom)) ≫ Spec.map _
-    rw [← Spec.map_comp]
-    congr 1
-  have hbridge : Spec.map (CommRingCat.ofHom
-      (Algebra.TensorProduct.includeRight :
-        P.chartRing →ₐ[P.baseRing] P.groupRing ⊗[P.baseRing] P.chartRing).toRingHom)
-      = (P.chartSpecIso.inv ≫ (G.chartPullbackIso P.U).inv ≫ G.restrictedProj P.U) ≫
-        P.hU.isoSpec.hom :=
-    (Iso.comp_inv_eq P.hU.isoSpec).mp
-      ((congrArg (P.chartSpecIso.inv ≫ ·) P.chartPullbackIso_inv_restrictedProj).trans
-        P.chartSpecIso_inv_snd).symm
-  rw [hswap, chartTensorIso, hbridge]
-  simp only [Iso.trans_hom, Category.assoc, Iso.hom_inv_id_assoc]
-
 /-- **`S4` keystone — the kernel pair of the glue quotient projection on a free patch is
 the restricted translation groupoid**: transport of `isKernelPair_specEqualizerπ` along
 the chart identifications (apex: the Künneth chart; sides: `isoSpec`; tip: the subring
@@ -1154,6 +1059,43 @@ theorem restrictedπ_glueTransition (P' : G.AffineChartPatch)
       rw [P'.restrictedπ_ι hW hWP'] at base'
       rw [P'.restrictedπ_ι hW' hW'P', Scheme.homOfLE_ι_assoc]
       exact base')
+
+/-- Pairs identified by the full patch projection are identified by anything
+coequalizing the restricted translation pair (the kernel-pair transport of the
+universal property). -/
+theorem localQuotientOpenπ_desc_condition {Z : Scheme.{u}} (h : P.U.toScheme ⟶ Z)
+    (hinv : G.restrictedAction P.hstable ≫ h = G.restrictedProj P.U ≫ h)
+    {T : Scheme.{u}} (a b : T ⟶ P.U.toScheme)
+    (hab : a ≫ G.localQuotientOpenπ P.hstable = b ≫ G.localQuotientOpenπ P.hstable) :
+    a ≫ h = b ≫ h := by
+  have KP := P.isKernelPair_localQuotientOpenπ
+  calc a ≫ h = (KP.lift a b hab ≫ G.restrictedAction P.hstable) ≫ h := by
+        rw [KP.lift_fst]
+    _ = (KP.lift a b hab ≫ G.restrictedProj P.U) ≫ h := by
+        rw [Category.assoc, hinv, ← Category.assoc]
+    _ = b ≫ h := by rw [KP.lift_snd]
+
+/-- **Descent through the patch quotient projection**: chart morphisms coequalizing the
+restricted translation pair factor through the local quotient (fpqc effective epi). -/
+noncomputable def descLocalQuotientOpenπ {Z : Scheme.{u}} (h : P.U.toScheme ⟶ Z)
+    (hinv : G.restrictedAction P.hstable ≫ h = G.restrictedProj P.U ≫ h) :
+    G.localQuotientOpen P.hstable ⟶ Z :=
+  EffectiveEpi.desc (G.localQuotientOpenπ P.hstable) h
+    (fun a b hab => P.localQuotientOpenπ_desc_condition h hinv a b hab)
+
+@[reassoc]
+theorem localQuotientOpenπ_descLocalQuotientOpenπ {Z : Scheme.{u}} (h : P.U.toScheme ⟶ Z)
+    (hinv : G.restrictedAction P.hstable ≫ h = G.restrictedProj P.U ≫ h) :
+    G.localQuotientOpenπ P.hstable ≫ P.descLocalQuotientOpenπ h hinv = h :=
+  EffectiveEpi.fac _ _ _
+
+/-- Morphisms out of the patch quotient are determined by precomposition with the
+projection. -/
+theorem localQuotientOpenπ_hom_ext {Z : Scheme.{u}}
+    {q₁ q₂ : G.localQuotientOpen P.hstable ⟶ Z}
+    (hq : G.localQuotientOpenπ P.hstable ≫ q₁ = G.localQuotientOpenπ P.hstable ≫ q₂) :
+    q₁ = q₂ :=
+  (cancel_epi (G.localQuotientOpenπ P.hstable)).mp hq
 
 /-! ### Step S5 preliminaries — saturation arithmetic and the pullback comparison -/
 

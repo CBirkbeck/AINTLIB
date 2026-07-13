@@ -29,7 +29,9 @@ statement fibre-by-fibre (the fibre `E_s` over `κ(s)` is `≅ projModel W_s` by
 `E.localModel : LocallyWeierstrass`, `S = Spec κ(s)` being a one-point base).
 -/
 
-open AlgebraicGeometry CategoryTheory WeierstrassCurve
+open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve HomogeneousIdeal
+
+attribute [local instance] MvPolynomial.gradedAlgebra
 
 universe u
 
@@ -67,6 +69,25 @@ theorem projModelPointsEquiv_zsmul {K : Type u} [Field K] (W : WeierstrassCurve 
     (P : (modelEllipticCurve W).Point (Spec.map (CommRingCat.ofHom (algebraMap K K')))) :
     projModelPointsEquiv W K' (n • P) = n • projModelPointsEquiv W K' P :=
   map_zsmul (projModelPointsAddEquiv W K') n P
+
+/-- **(K4 (B): function-field identity)** The scheme function field of the integral projective
+model `projModel W` (mathlib `Scheme.functionField`) is `W.toAffine.FunctionField`: both are
+fraction fields of the isomorphic coordinate rings `Γ(projModel W, Z-chart) ≃+* W.CoordinateRing`
+(`coordRingToZSection`), via `functionField_isFractionRing_of_isAffineOpen`. -/
+noncomputable def projModelFunctionFieldEquiv {K : Type u} [Field K] (W : WeierstrassCurve K)
+    [W.IsElliptic] :
+    (projModel W).functionField ≃+* W.toAffine.FunctionField := by
+  set Z : (projModel W).Opens := Proj.basicOpen (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) with hZ
+  haveI hZaff : IsAffineOpen Z :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  haveI hNe : Nonempty Z := by sorry
+  haveI : IsFractionRing Γ(projModel W, Z) (projModel W).functionField :=
+    functionField_isFractionRing_of_isAffineOpen (projModel W) Z hZaff
+  exact (IsLocalization.ringEquivOfRingEquiv (M := (nonZeroDivisors Γ(projModel W, Z)))
+    (T := (nonZeroDivisors W.toAffine.CoordinateRing))
+    (projModel W).functionField W.toAffine.FunctionField
+    (coordRingToZSection W).symm (by sorry))
 
 /-- **(K4 field-level target)** Over a field `K`, the scheme-theoretic fibre rank of
 multiplication-by-`N` on the projective model of an elliptic Weierstrass curve is `N²`.

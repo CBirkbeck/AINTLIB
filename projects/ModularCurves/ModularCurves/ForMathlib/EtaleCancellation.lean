@@ -39,7 +39,7 @@ The invariants instantiation (`RingHom.invariantsCorestrict_finite` /
 finite étale over each affine chart of the base.
 -/
 
-universe u
+universe u v
 
 open TensorProduct
 
@@ -115,8 +115,9 @@ end Retract
 
 section Invariants
 
-variable (G : Type*) [Group G] [_root_.Finite G] (R₀ A : Type u) [CommRing R₀] [CommRing A]
-  [Algebra R₀ A] [MulSemiringAction G A] [SMulCommClass G R₀ A] [SMulCommClass R₀ G A]
+variable (G : Type*) [Group G] [_root_.Finite G] (R₀ : Type v) (A : Type u) [CommRing R₀]
+  [CommRing A] [Algebra R₀ A] [MulSemiringAction G A] [SMulCommClass G R₀ A]
+  [SMulCommClass R₀ G A]
 
 /-- The trace retraction `a ↦ tr(c·a)` of the invariants inclusion `Aᴳ ↪ A` of a free
 action, where `tr(c) = 1` (`exists_traceInvariants_eq_one`). -/
