@@ -226,14 +226,12 @@ theorem ChosenPrimaryUnitFactorSymbolTrivial_of_K2_2PrimeFactorBundleFamily_cycl
   · intro P hP
     letI : P.IsMaximal := (sourceBundle P hP).P_max
     letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) := (sourceBundle P hP).alg_inst
-    letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
     exact (K2_2SourceData_phi_facts_cyclotomic
       (ℓ := ℓ) (p := p) (K := K) (R' := R')
       hpℓ hp_gt_two hp_three (sourceBundle P hP).D).1
   · intro P hP
     letI : P.IsMaximal := (sourceBundle P hP).P_max
     letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) := (sourceBundle P hP).alg_inst
-    letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
     exact (K2_2SourceData_phi_facts_cyclotomic
       (ℓ := ℓ) (p := p) (K := K) (R' := R')
       hpℓ hp_gt_two hp_three (sourceBundle P hP).D).2
@@ -277,14 +275,12 @@ theorem ChosenPrimaryUnitFactorProductPower_of_K2_2PrimeFactorBundleFamily_cyclo
   · intro P hP
     letI : P.IsMaximal := (sourceBundle P hP).P_max
     letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) := (sourceBundle P hP).alg_inst
-    letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
     exact (K2_2SourceData_phi_facts_cyclotomic
       (ℓ := ℓ) (p := p) (K := K) (R' := R')
       hpℓ hp_gt_two hp_three (sourceBundle P hP).D).1
   · intro P hP
     letI : P.IsMaximal := (sourceBundle P hP).P_max
     letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) := (sourceBundle P hP).alg_inst
-    letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
     exact (K2_2SourceData_phi_facts_cyclotomic
       (ℓ := ℓ) (p := p) (K := K) (R' := R')
       hpℓ hp_gt_two hp_three (sourceBundle P hP).D).2
@@ -329,14 +325,12 @@ theorem ChosenPrimaryUnitFactorProductSymbolZero_of_K2_2PrimeFactorBundleFamily_
   · intro P hP
     letI : P.IsMaximal := (sourceBundle P hP).P_max
     letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) := (sourceBundle P hP).alg_inst
-    letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
     exact (K2_2SourceData_phi_facts_cyclotomic
       (ℓ := ℓ) (p := p) (K := K) (R' := R')
       hpℓ hp_gt_two hp_three (sourceBundle P hP).D).1
   · intro P hP
     letI : P.IsMaximal := (sourceBundle P hP).P_max
     letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) := (sourceBundle P hP).alg_inst
-    letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
     exact (K2_2SourceData_phi_facts_cyclotomic
       (ℓ := ℓ) (p := p) (K := K) (R' := R')
       hpℓ hp_gt_two hp_three (sourceBundle P hP).D).2
@@ -507,7 +501,6 @@ theorem kellyPrimeNegEquality_of_K2_2PrimeFactorBundleFamily_targetData
   intro P hP
   letI : P.IsMaximal := (sourceBundle P hP).P_max
   letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P) := (sourceBundle P hP).alg_inst
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   exact K2_2SourceData_phi_facts_at_targetData
     (ℓ := ℓ) (p := p) (K := K) (R' := R') hpℓ hp_gt_two hp_three
     (sourceBundle P hP).D targetData (hcop_each P hP)
@@ -856,7 +849,6 @@ theorem kellyPrimeNegEquality_of_K2_2Bundles_sourceCoprime_primeTarget
   let B₀ := sourceBundle P₀ hP₀
   letI : P₀.IsMaximal := B₀.P_max
   letI : Algebra (ZMod ℓ) (𝓞 K ⧸ P₀) := B₀.alg_inst
-  letI : Field (𝓞 K ⧸ P₀) := Ideal.Quotient.field P₀
   have hℓ_notin_P' : (ℓ : 𝓞 K) ∉ P' :=
     natCast_notMem_of_absNorm_coprime_of_natCast_mem
       (P := P₀) (P' := P') B₀.D.hP_bot hP'_ne B₀.D.hℓ_in_P
