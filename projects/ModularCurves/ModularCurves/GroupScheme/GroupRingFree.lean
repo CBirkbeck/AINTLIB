@@ -142,6 +142,37 @@ theorem exists_basicOpen_groupRing_free (V : S.affineOpens) {s : S} (hs : s ∈ 
       (IsScalarTower.toAlgHom Γ(S, V.1) Γ(G.G, G.π ⁻¹ᵁ V.1)
         Γ(G.G, G.π ⁻¹ᵁ S.basicOpen r)).toLinearMap
 
+/-- **`[HG-C3f]` — the free affine chart patch around every point.** For `G` killed by `N`,
+every point of `E` lies in the chart open of an `AffineChartPatch` whose group ring is a
+**free** module over the base ring — the complete geometric input of the per-chart
+Hopf–Galois datum (`chartData`/`isHopfGalois_chartCoaction`, M6). Assembles the chart
+existence (`exists_mem_stableAffineOpen`) with the freeness shrink
+(`exists_basicOpen_groupRing_free`): intersect the chart with the preimage of the freeness
+basic open (stable by `IsStableOpen.inf` + `isStableOpen_π_preimage`, affine as a basic
+open of the affine chart). -/
+theorem exists_affineChartPatch_free (N : ℕ) [NeZero N]
+    (hkill : G.ι ≫ E.mulByHom N = G.π ≫ E.zero) (x : E.E) :
+    ∃ P : G.AffineChartPatch, x ∈ P.U ∧ Module.Free P.baseRing P.groupRing := by
+  obtain ⟨V, Uc, hxU, hUaff, hUst, hUover⟩ := G.exists_mem_stableAffineOpen N hkill x
+  have hs : E.π.base x ∈ V.1 := hUover hxU
+  obtain ⟨r, hsr, hfree⟩ := G.exists_basicOpen_groupRing_free V hs
+  -- the shrunk chart: intersect with the preimage of the freeness basic open
+  have hstable : G.IsStableOpen (Uc ⊓ E.π ⁻¹ᵁ S.basicOpen r) :=
+    hUst.inf G (G.isStableOpen_π_preimage _)
+  have haffine : IsAffineOpen (Uc ⊓ E.π ⁻¹ᵁ S.basicOpen r) := by
+    have h1 : E.π ⁻¹ᵁ S.basicOpen r = E.E.basicOpen (E.π.app V.1 r) :=
+      Scheme.preimage_basicOpen E.π r
+    have h2 : E.E.basicOpen ((E.E.presheaf.map (homOfLE hUover).op) (E.π.app V.1 r))
+        = Uc ⊓ E.E.basicOpen (E.π.app V.1 r) :=
+      Scheme.basicOpen_res _ _ ((homOfLE hUover).op)
+    rw [h1, ← h2]
+    exact hUaff.basicOpen _
+  refine ⟨⟨S.basicOpen r, V.2.basicOpen r, Uc ⊓ E.π ⁻¹ᵁ S.basicOpen r, haffine, hstable,
+    inf_le_right⟩, ⟨hxU, ?_⟩, ?_⟩
+  · show E.π.base x ∈ S.basicOpen r
+    exact hsr
+  · exact hfree
+
 end FiniteLocallyFreeSubgroup
 
 end EllipticCurve

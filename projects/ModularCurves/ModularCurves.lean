@@ -50,6 +50,7 @@ import ModularCurves.ForMathlib.SpecEqualizer
 import ModularCurves.ForMathlib.WeierstrassInvariant
 import ModularCurves.ForMathlib.WeierstrassProjectivePrime
 import ModularCurves.GroupScheme.CartierDivisorMapIso
+import ModularCurves.GroupScheme.GroupRingFree
 import ModularCurves.GroupScheme.MuN
 import ModularCurves.GroupScheme.NIsogeny
 import ModularCurves.GroupScheme.StableCover
