@@ -17368,6 +17368,30 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
 - **CHAIN STATUS: GHB5a-i ✓ → GHB5a ✓ → GHB5 ✓. NEXT: GHB7 `exists_quotientProblemData`
   (THE ASSEMBLY, ~400 LOC, GammaHRepresentability:~508) → GHC1 goes fully unconditional ★★.**
 
+### [GHB7] decomposition (STREAM-GH scouting, 2026-07-13 — banked for the assembly run)
+Sub-leaves (contracts read: ModuliProblem=functor EllCategory:91; RelRepData QuotientProblem:603;
+EquivariantRelRepData w/ γ⁻¹-twist; QuotientProblemData 7 fields; simulRepresentableBy is the
+SIMUL-engine, not a problem-from-schemes constructor — build prob directly):
+- **[GHB7-0] diag-plumbing (FIRST ACT)**: GHB3/GHB5 need [IsAffineHom (diagonal (terminal.from Z))]
+  per object; inspect GHC1's (PROVEN) hdata call-site + GHA5's concrete data — either add a
+  diag-field to EquivariantRelRepData (rule-5 log; level scheme separated → closed-imm into
+  E[N]²/S → affine diagonal, v10.144 plan) or thread ∀X-hypothesis matching GHC1.
+- **[GHB7-1] per-X choice**: dX := (hdata X).some; GHB2 freeness-transfer; GHB3 (PROVEN) →
+  (Z₀X, πX, f₀X, hπf, hπinv, hdesc).
+- **[GHB7-2] comparison isos**: ψ : X′ ⟶ X ⟹ dX′.Z ≅ pullback dX.f ψ.baseHom (RelRepData-
+  uniqueness — locate/prove) + GHB5 at g := ψ.baseHom ⟹ Z₀X′ ≅ pullback f₀X ψ.baseHom.
+- **[GHB7-3] prob**: obj (op X) := {h : X.base ⟶ Z₀X // h ≫ f₀X = 𝟙}; map via GHB7-2;
+  map_id/map_comp = hdesc-uniqueness coherence (the LOC sink).
+- **[GHB7-4] proj/proj_invariant**: eqv@𝟙 ∘ (≫ πX); hπinv + γ⁻¹-twist.
+- **[GHB7-5] relRep = GHB6 route**: NOT the abstract source-descent — chart-local: free action
+  ⟹ Bᴳ is a C-module DIRECT SUMMAND of the finite étale B (trace idempotent,
+  exists_traceInvariants_eq_one) ⟹ f₀ finite (summand) + étale (flat summand, unramified
+  quotient, f.p. factor); globalize via the flat_quotientπ IsZariskiLocalAtTarget skeleton.
+- **[GHB7-6] geom clauses**: fin-étale over k̄ splits (surjectivity); quotientπ-fibres-are-orbits
+  globalized (orbits).
+LEAN-OPS carried: structure-literal covers; pinned pullback.condition; term-mode assoc calcs;
+de-set folded morphisms; fun x : X binder ascriptions; mkOfCovers-projection toxicity.
+
 ## Sub-ticket (NEW-GH, v10.166): [GHB5a] concrete base-change of quotientπ — the GHB5-crux engine
 
 ### [GHB5a] `SchemeAction.exists_quotientπ_lift_baseChange` (concrete base-change descent)
