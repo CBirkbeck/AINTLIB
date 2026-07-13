@@ -5,6 +5,7 @@ Authors: The AINTLIB Authors
 -/
 import ModularCurves.Moduli.FullLevelSupset
 import ModularCurves.Moduli.FullLevelTautSection
+import ModularCurves.LevelStructure.FullLevelDivisorBridge
 import ModularCurves.EllipticCurve.ModelRecord
 
 /-!
@@ -296,6 +297,26 @@ theorem taut_isFullLevel_over_levelSpaceΓ :
     show levelSpaceΓι E N ≫ (tautPt₂ E N).1 =
       levelSpaceΓι E N ≫ pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N
     rfl
+
+/-- **[YF-⊆] piece 2.** The tautological pair generates `E[N]` at every geometric point of
+`levelSpaceΓ` — apply the T-D8-bridge ⟹ (`naive_gen_of_divisor_eq`) to the full-level structure
+`taut_isFullLevel_over_levelSpaceΓ`. -/
+theorem taut_generates_over_levelSpaceΓ (hN : NIsInvertible S N) (k : Type u) [Field k]
+    [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ levelSpaceΓ E N) :
+    ∀ x : (E.baseChange (levelSpaceΓι E N ≫ tautBase E N)).Point t, (N : ℤ) • x = 0 →
+      x ∈ AddSubgroup.closure
+        {Point.pull (E.baseChange (levelSpaceΓι E N ≫ tautBase E N)) t
+            (Point.asSection E (levelSpaceΓι E N ≫ tautBase E N)
+              (Point.restrict E (levelSpaceΓι E N) (tautPt₁ E N))),
+          Point.pull (E.baseChange (levelSpaceΓι E N ≫ tautBase E N)) t
+            (Point.asSection E (levelSpaceΓι E N ≫ tautBase E N)
+              (Point.restrict E (levelSpaceΓι E N) (tautPt₂ E N)))} := by
+  have hN' : NIsInvertible (levelSpaceΓ E N) N := by
+    have h := hN.map ((levelSpaceΓι E N ≫ tautBase E N).appTop).hom
+    rwa [map_natCast] at h
+  exact (E.baseChange (levelSpaceΓι E N ≫ tautBase E N)).naive_gen_of_divisor_eq N hN'
+    (taut_isFullLevel_over_levelSpaceΓ E N).1.1 (taut_isFullLevel_over_levelSpaceΓ E N).1.2
+    (taut_isFullLevel_over_levelSpaceΓ E N).2 k t
 
 /-- **[YF-⊆] — GATE (reduced-fibre distinctness, KM 3.7.1).** The image of the full-level
 closed immersion `levelSpaceΓι` lies in `fullLevelOpens`. At a full-level point the tautological
