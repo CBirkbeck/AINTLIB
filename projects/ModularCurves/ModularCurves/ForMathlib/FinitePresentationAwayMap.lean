@@ -200,7 +200,7 @@ private theorem SpreadData.tensorProduct_awayMap_bijective
     exact hbij.comp E₁.bijective
   exact (E₂.bijective.of_comp_iff' g).mp hcomp
 
-private theorem SpreadData.awayMapAtLaterStage_bijective
+private theorem SpreadData.awayMapAtLaterStage_bijective_of_tensorProduct
     {B₁ B₂ : Type u} [CommRing B₁] [CommRing B₂]
     [Algebra A B₁] [Algebra A B₂]
     (D₁ : SpreadData 𝒮 uA B₁) (D₂ : SpreadData 𝒮 uA B₂)
@@ -244,6 +244,56 @@ private theorem SpreadData.awayMapAtLaterStage_bijective
     exact hleft
   exact (Function.Bijective.of_comp_iff g_j E₁.bijective).mp hright
 
+/-- A chosen element of a spread model transported to a later stage. -/
+noncomputable def SpreadData.elementAtLaterStage
+    {B : Type u} [CommRing B] [Algebra A B]
+    (D : SpreadData 𝒮 uA B) (H : IsFilteredAlgColimit R 𝒮 t A uA)
+    {i j : ι} (h : D.i₀ ≤ i) (hij : i ≤ j)
+    (b_i : D.spreadStage (t := t) h) :
+    D.spreadStage (t := t) (h.trans hij) :=
+  D.stageTransition H (P := ⟨i, h⟩) (Q := ⟨j, h.trans hij⟩) hij b_i
+
+/-- The canonical away map obtained by transporting a stage map and its chosen
+source element to a later spread stage. -/
+noncomputable def SpreadData.awayMapAtLaterStage
+    {B₁ B₂ : Type u} [CommRing B₁] [CommRing B₂]
+    [Algebra A B₁] [Algebra A B₂]
+    (D₁ : SpreadData 𝒮 uA B₁) (D₂ : SpreadData 𝒮 uA B₂)
+    (H : IsFilteredAlgColimit R 𝒮 t A uA)
+    {i j : ι} (h₁ : D₁.i₀ ≤ i) (h₂ : D₂.i₀ ≤ i) (hij : i ≤ j)
+    (f : D₁.spreadStage (t := t) h₁ →ₐ[𝒮 i]
+      D₂.spreadStage (t := t) h₂)
+    (b_i : D₁.spreadStage (t := t) h₁) :
+    letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+    Localization.Away (D₁.elementAtLaterStage H h₁ hij b_i) →ₐ[𝒮 j]
+      Localization.Away
+        ((D₁.mapAtLaterStage D₂ H h₁ h₂ hij f)
+          (D₁.elementAtLaterStage H h₁ hij b_i)) := by
+  letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+  exact IsLocalization.Away.mapₐ _ _
+    (D₁.mapAtLaterStage D₂ H h₁ h₂ hij f)
+    (D₁.elementAtLaterStage H h₁ hij b_i)
+
+/-- Bijectivity of a canonical away map is preserved when its spread models are
+transported to a later stage. -/
+theorem SpreadData.awayMapAtLaterStage_bijective
+    {B₁ B₂ : Type u} [CommRing B₁] [CommRing B₂]
+    [Algebra A B₁] [Algebra A B₂]
+    (D₁ : SpreadData 𝒮 uA B₁) (D₂ : SpreadData 𝒮 uA B₂)
+    (H : IsFilteredAlgColimit R 𝒮 t A uA)
+    {i j : ι} (h₁ : D₁.i₀ ≤ i) (h₂ : D₂.i₀ ≤ i) (hij : i ≤ j)
+    (f : D₁.spreadStage (t := t) h₁ →ₐ[𝒮 i]
+      D₂.spreadStage (t := t) h₂)
+    (b_i : D₁.spreadStage (t := t) h₁)
+    (hbij : Function.Bijective
+      (IsLocalization.Away.mapₐ
+        (Localization.Away b_i) (Localization.Away (f b_i)) f b_i)) :
+    letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+    Function.Bijective (D₁.awayMapAtLaterStage D₂ H h₁ h₂ hij f b_i) := by
+  letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+  apply D₁.awayMapAtLaterStage_bijective_of_tensorProduct D₂ H h₁ h₂ hij f b_i
+  exact Algebra.TensorProduct.map_bijective Function.bijective_id hbij
+
 /-- A compatible canonical away map that is bijective over the filtered
 colimit becomes the literal bijective away map after one later stage. -/
 theorem SpreadData.exists_awayMapAtLaterStage_bijective
@@ -283,6 +333,7 @@ theorem SpreadData.exists_awayMapAtLaterStage_bijective
     D₁.tensorProduct_awayMap_bijective D₂ H h₁ h₂ f F hf b_i b hb hbij
   obtain ⟨j, hij, hj⟩ := H.exists_tensorProductMap_bijective g hg
   exact ⟨j, hij,
-    D₁.awayMapAtLaterStage_bijective D₂ H h₁ h₂ hij f b_i hj⟩
+    D₁.awayMapAtLaterStage_bijective_of_tensorProduct
+      D₂ H h₁ h₂ hij f b_i hj⟩
 
 end Algebra
