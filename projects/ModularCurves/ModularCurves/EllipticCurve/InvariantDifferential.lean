@@ -898,7 +898,7 @@ set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 /-- **(T-OM-B7 coherence)** Transporting a restricted chart agrees with transporting
 along the composite. -/
-private lemma transportE_transport_restrict {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
+lemma transportE_transport_restrict {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
     (f : S' ⟶ S) (t : G'.E ⟶ G.E)
     (hsq : IsPullback t G'.π G.π f) (hz : G'.zero ≫ t = f ≫ G.zero)
     {VP : S.affineOpens} (P : LocalPresentation G VP)
@@ -1100,7 +1100,7 @@ set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 /-- **(T-OM-B7 coherence)** Transporting a transported chart agrees with transporting
 along the composite square. -/
-private lemma transportE_transport_transport {S'' S' : Scheme.{u}}
+lemma transportE_transport_transport {S'' S' : Scheme.{u}}
     {G'' : EllipticCurveGeom S''} {G' : EllipticCurveGeom S'}
     (f : S'' ⟶ S') (g : S' ⟶ S) (t : G''.E ⟶ G'.E) (s : G'.E ⟶ G.E)
     (hsq_f : IsPullback t G''.π G'.π f) (hsq_g : IsPullback s G'.π G.π g)

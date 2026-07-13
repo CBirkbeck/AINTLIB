@@ -280,4 +280,192 @@ theorem omegaBasisMap_id (X : EllObj R) (b : OmegaBasis X.curve.toEllipticCurveG
     sectionsMapLE_id]
   exact (Scheme.resLE_resLE _ _ _).trans (Scheme.resLE_resLE _ _ _)
 
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- The mixed comparison of a composite factors through the two comparisons: the
+cocycle condition of the ω-functoriality, affine-locally at the value level. -/
+private theorem omegaCompat_comp_w_val {X X' X'' : EllObj R} (φ : X'' ⟶ X') (ψ : X' ⟶ X)
+    (i'' : X''.curve.toEllipticCurveGeom.atlas.ι)
+    (j' : X'.curve.toEllipticCurveGeom.atlas.ι)
+    (j : X.curve.toEllipticCurveGeom.atlas.ι)
+    (V : X''.base.affineOpens)
+    (h1 : V.1 ≤ (omegaCocycle X''.curve.toEllipticCurveGeom).U i'')
+    (h2 : V.1 ≤ φ.baseHom ⁻¹ᵁ (omegaCocycle X'.curve.toEllipticCurveGeom).U j')
+    (h3 : V.1 ≤ φ.baseHom ⁻¹ᵁ
+      (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j)) :
+    Scheme.resLE (le_inf h1 h3) ((omegaCompat (φ ≫ ψ)).w i'' j).val =
+      Scheme.resLE (le_inf h1 h2) ((omegaCompat φ).w i'' j').val *
+      (φ.baseHom.appLE
+          ((omegaCocycle X'.curve.toEllipticCurveGeom).U j' ⊓
+            (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j)) V.1
+          (fun _ hy => ⟨h2 hy, h3 hy⟩)).hom ((omegaCompat ψ).w j' j).val := by
+  -- pointwise choice: an affine `W'` around `φ(v)` inside the mixed ψ-overlap, and an
+  -- affine `Vv` around `v` inside `V ⊓ φ⁻¹W'`
+  have hchoice : ∀ v : V.1,
+      ∃ (W' : X'.base.affineOpens) (Vv : X''.base.affineOpens),
+      W'.1 ≤ (omegaCocycle X'.curve.toEllipticCurveGeom).U j' ⊓
+        (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j) ∧
+      v.1 ∈ Vv.1 ∧ Vv.1 ≤ V.1 ∧ Vv.1 ≤ φ.baseHom ⁻¹ᵁ W'.1 := by
+    intro v
+    obtain ⟨W₀, hWaff, hfvW, hWle⟩ := exists_isAffineOpen_mem_and_subset
+      (show φ.baseHom.base v.1 ∈ (omegaCocycle X'.curve.toEllipticCurveGeom).U j' ⊓
+        (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j) from
+        ⟨h2 v.2, h3 v.2⟩)
+    obtain ⟨Vv₀, hVvaff, hvVv, hVvle⟩ := exists_isAffineOpen_mem_and_subset
+      (show v.1 ∈ V.1 ⊓ (φ.baseHom ⁻¹ᵁ W₀) from ⟨v.2, hfvW⟩)
+    exact ⟨⟨W₀, hWaff⟩, ⟨Vv₀, hVvaff⟩, hWle, hvVv,
+      le_trans hVvle inf_le_left, le_trans hVvle inf_le_right⟩
+  choose W' Vv hW' hvmem hVvV hVvW using hchoice
+  refine TopCat.Sheaf.eq_of_locally_eq' X''.base.sheaf (fun v : V.1 => (Vv v).1) V.1
+    (fun v => homOfLE (hVvV v)) (fun x hx => Opens.mem_iSup.mpr ⟨⟨x, hx⟩, hvmem ⟨x, hx⟩⟩)
+    _ _ (fun v => ?_)
+  show Scheme.resLE (hVvV v) _ = Scheme.resLE (hVvV v) _
+  rw [map_mul, Scheme.resLE_resLE, Scheme.resLE_resLE]
+  -- the glue characterizations, at the value level
+  have hL : Scheme.resLE ((hVvV v).trans (le_inf h1 h3))
+      ((omegaCompat (φ ≫ ψ)).w i'' j).val =
+    (((X''.curve.toEllipticCurveGeom.atlas.presentation i'').restrict
+        (((hVvV v).trans (le_inf h1 h3)).trans inf_le_left)).transUnit
+      ((X.curve.toEllipticCurveGeom.atlas.presentation j).transport
+        (φ ≫ ψ).baseHom (φ ≫ ψ).top (φ ≫ ψ).isPullback (φ ≫ ψ).zero_w
+        (((hVvV v).trans (le_inf h1 h3)).trans inf_le_right))).val := by
+    have h0 := congrArg Units.val ((omegaCompatGlue (φ ≫ ψ) i'' j).2 (Vv v)
+      ((hVvV v).trans (le_inf h1 h3)))
+    rw [Scheme.resUnit_val] at h0
+    exact h0
+  have hF : Scheme.resLE ((hVvV v).trans (le_inf h1 h2))
+      ((omegaCompat φ).w i'' j').val =
+    (((X''.curve.toEllipticCurveGeom.atlas.presentation i'').restrict
+        (((hVvV v).trans (le_inf h1 h2)).trans inf_le_left)).transUnit
+      ((X'.curve.toEllipticCurveGeom.atlas.presentation j').transport φ.baseHom φ.top
+        φ.isPullback φ.zero_w
+        (((hVvV v).trans (le_inf h1 h2)).trans inf_le_right))).val := by
+    have h0 := congrArg Units.val ((omegaCompatGlue φ i'' j').2 (Vv v)
+      ((hVvV v).trans (le_inf h1 h2)))
+    rw [Scheme.resUnit_val] at h0
+    exact h0
+  have hΨ : Scheme.resLE (hW' v) ((omegaCompat ψ).w j' j).val =
+    (((X'.curve.toEllipticCurveGeom.atlas.presentation j').restrict
+        ((hW' v).trans inf_le_left)).transUnit
+      ((X.curve.toEllipticCurveGeom.atlas.presentation j).transport ψ.baseHom ψ.top
+        ψ.isPullback ψ.zero_w ((hW' v).trans inf_le_right))).val := by
+    have h0 := congrArg Units.val ((omegaCompatGlue ψ j' j).2 (W' v) (hW' v))
+    rw [Scheme.resUnit_val] at h0
+    exact h0
+  -- push the ψ-comparison through `φ` (unit-level transport naturality)
+  have hT := congrArg Units.val
+    (transUnit_transport φ.baseHom φ.top φ.isPullback φ.zero_w
+      ((X'.curve.toEllipticCurveGeom.atlas.presentation j').restrict
+        ((hW' v).trans inf_le_left))
+      ((X.curve.toEllipticCurveGeom.atlas.presentation j).transport ψ.baseHom ψ.top
+        ψ.isPullback ψ.zero_w ((hW' v).trans inf_le_right)) (hVvW v))
+  -- normalize the pushed pair to composite transports
+  have hN := transUnit_congr
+    (((X'.curve.toEllipticCurveGeom.atlas.presentation j').restrict
+        ((hW' v).trans inf_le_left)).transport φ.baseHom φ.top φ.isPullback φ.zero_w
+        (hVvW v))
+    (((X.curve.toEllipticCurveGeom.atlas.presentation j).transport ψ.baseHom ψ.top
+        ψ.isPullback ψ.zero_w ((hW' v).trans inf_le_right)).transport φ.baseHom φ.top
+        φ.isPullback φ.zero_w (hVvW v))
+    ((X'.curve.toEllipticCurveGeom.atlas.presentation j').transport φ.baseHom φ.top
+        φ.isPullback φ.zero_w
+        ((hVvW v).trans ((Opens.map φ.baseHom.base).map
+          (homOfLE ((hW' v).trans inf_le_left))).le))
+    ((X.curve.toEllipticCurveGeom.atlas.presentation j).transport
+        (φ.baseHom ≫ ψ.baseHom) (φ.top ≫ ψ.top) (φ.isPullback.paste_horiz ψ.isPullback)
+        (by rw [← Category.assoc, φ.zero_w, Category.assoc, ψ.zero_w, ← Category.assoc])
+        ((hVvW v).trans ((Opens.map φ.baseHom.base).map
+          (homOfLE ((hW' v).trans inf_le_right))).le))
+    (by
+      show (X'.curve.toEllipticCurveGeom.atlas.presentation j').W.map _ =
+        ((X'.curve.toEllipticCurveGeom.atlas.presentation j').W.map _).map _
+      rw [WeierstrassCurve.map_map]
+      congr 1
+      rw [sectionsMapLE_id, resLE_comp_sectionsMapLE φ.baseHom _ (hVvW v)])
+    (by
+      show (X.curve.toEllipticCurveGeom.atlas.presentation j).W.map _ =
+        ((X.curve.toEllipticCurveGeom.atlas.presentation j).W.map _).map _
+      rw [WeierstrassCurve.map_map]
+      congr 1
+      rw [sectionsMapLE_comp φ.baseHom ψ.baseHom ((hW' v).trans inf_le_right) (hVvW v)])
+    (transportE_transport_restrict φ.baseHom φ.top φ.isPullback φ.zero_w
+      (X'.curve.toEllipticCurveGeom.atlas.presentation j')
+      ((hW' v).trans inf_le_left) (hVvW v))
+    (transportE_transport_transport φ.baseHom ψ.baseHom φ.top ψ.top
+      φ.isPullback ψ.isPullback φ.zero_w ψ.zero_w
+      (X.curve.toEllipticCurveGeom.atlas.presentation j)
+      ((hW' v).trans inf_le_right) (hVvW v))
+  -- the cocycle chain at composite transports
+  have hC := transUnit_trans
+    ((X''.curve.toEllipticCurveGeom.atlas.presentation i'').restrict
+      (((hVvV v).trans (le_inf h1 h2)).trans inf_le_left))
+    ((X'.curve.toEllipticCurveGeom.atlas.presentation j').transport φ.baseHom φ.top
+      φ.isPullback φ.zero_w
+      ((hVvW v).trans ((Opens.map φ.baseHom.base).map
+        (homOfLE ((hW' v).trans inf_le_left))).le))
+    ((X.curve.toEllipticCurveGeom.atlas.presentation j).transport
+      (φ.baseHom ≫ ψ.baseHom) (φ.top ≫ ψ.top) (φ.isPullback.paste_horiz ψ.isPullback)
+      (by rw [← Category.assoc, φ.zero_w, Category.assoc, ψ.zero_w, ← Category.assoc])
+      ((hVvW v).trans ((Opens.map φ.baseHom.base).map
+        (homOfLE ((hW' v).trans inf_le_right))).le))
+  -- assemble
+  calc Scheme.resLE ((hVvV v).trans (le_inf h1 h3))
+        ((omegaCompat (φ ≫ ψ)).w i'' j).val
+      = (((X''.curve.toEllipticCurveGeom.atlas.presentation i'').restrict
+            (((hVvV v).trans (le_inf h1 h3)).trans inf_le_left)).transUnit
+          ((X.curve.toEllipticCurveGeom.atlas.presentation j).transport
+            (φ ≫ ψ).baseHom (φ ≫ ψ).top (φ ≫ ψ).isPullback (φ ≫ ψ).zero_w
+            (((hVvV v).trans (le_inf h1 h3)).trans inf_le_right))).val := hL
+    _ = (((X''.curve.toEllipticCurveGeom.atlas.presentation i'').restrict
+            (((hVvV v).trans (le_inf h1 h2)).trans inf_le_left)).transUnit
+          ((X'.curve.toEllipticCurveGeom.atlas.presentation j').transport φ.baseHom
+            φ.top φ.isPullback φ.zero_w
+            ((hVvW v).trans ((Opens.map φ.baseHom.base).map
+              (homOfLE ((hW' v).trans inf_le_left))).le)) *
+        ((X'.curve.toEllipticCurveGeom.atlas.presentation j').transport φ.baseHom
+            φ.top φ.isPullback φ.zero_w
+            ((hVvW v).trans ((Opens.map φ.baseHom.base).map
+              (homOfLE ((hW' v).trans inf_le_left))).le)).transUnit
+          ((X.curve.toEllipticCurveGeom.atlas.presentation j).transport
+            (φ.baseHom ≫ ψ.baseHom) (φ.top ≫ ψ.top)
+            (φ.isPullback.paste_horiz ψ.isPullback)
+            (by rw [← Category.assoc, φ.zero_w, Category.assoc, ψ.zero_w,
+              ← Category.assoc])
+            ((hVvW v).trans ((Opens.map φ.baseHom.base).map
+              (homOfLE ((hW' v).trans inf_le_right))).le))).val := by
+        rw [hC]
+        rfl
+    _ = Scheme.resLE ((hVvV v).trans (le_inf h1 h2)) ((omegaCompat φ).w i'' j').val *
+        Scheme.resLE (hVvV v)
+          ((φ.baseHom.appLE
+            ((omegaCocycle X'.curve.toEllipticCurveGeom).U j' ⊓
+              (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j)) V.1
+            (fun _ hy => ⟨h2 hy, h3 hy⟩)).hom ((omegaCompat ψ).w j' j).val) := by
+        rw [Units.val_mul]
+        congr 1
+        · exact hF.symm
+        · rw [show Scheme.resLE (hVvV v)
+              ((φ.baseHom.appLE
+                ((omegaCocycle X'.curve.toEllipticCurveGeom).U j' ⊓
+                  (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j)) V.1
+                (fun _ hy => ⟨h2 hy, h3 hy⟩)).hom ((omegaCompat ψ).w j' j).val) =
+            (φ.baseHom.appLE (W' v).1 (Vv v).1 (hVvW v)).hom
+              (Scheme.resLE (hW' v) ((omegaCompat ψ).w j' j).val) from by
+              rw [Scheme.resLE_appLE, Scheme.appLE_resLE]]
+          rw [hΨ]
+          rw [show (φ.baseHom.appLE (W' v).1 (Vv v).1 (hVvW v)).hom
+              ((((X'.curve.toEllipticCurveGeom.atlas.presentation j').restrict
+                  ((hW' v).trans inf_le_left)).transUnit
+                ((X.curve.toEllipticCurveGeom.atlas.presentation j).transport ψ.baseHom
+                  ψ.top ψ.isPullback ψ.zero_w ((hW' v).trans inf_le_right))).val) =
+            (Units.map ((sectionsMapLE φ.baseHom (hVvW v)).toMonoidHom)
+              (((X'.curve.toEllipticCurveGeom.atlas.presentation j').restrict
+                  ((hW' v).trans inf_le_left)).transUnit
+                ((X.curve.toEllipticCurveGeom.atlas.presentation j).transport ψ.baseHom
+                  ψ.top ψ.isPullback ψ.zero_w ((hW' v).trans inf_le_right)))).val
+            from rfl]
+          rw [← hT]
+          exact (congrArg Units.val hN).symm
+
 end ModularCurves
