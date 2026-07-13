@@ -19114,3 +19114,16 @@ The support tool already exists — `CartierDivisor.lean:1052`:
 Remaining plumbing (tractable, ~100-200 lines): base-change the support/divisor eq to the geometric
 fibre + the E[N]_k set-count = N² + the pigeonhole. NO local-ring/multiplicity theory needed. This is
 the last gate for `fullLevel_divisor_iff_naive_gen` (both directions) and [YF-⊆]. (STREAM-YN)
+
+### v10.179b — [YF-⊆]/T-D8-⟹ the ONE new sub-lemma pinned
+Evidence-based boundary: everything around the ⟹ gate exists — `RelEffCartierDiv.baseChange_ideal`
+(CartierDivisor:1664), the support tool `(∏ker).support=⋃range` (CartierDivisor:1052), T-B6 count,
+pigeonhole (`Fintype.bijective_iff_surjective_and_card`), and `naive_iff_comboFamily_injective`
+(FullLevelFibre). The single genuinely-NEW piece needed:
+  **`sectionsDivisor_baseChange`** : `(sectionsDivisor E.π P).ideal.baseChange t
+     = (sectionsDivisor (E.baseChange t).π (asSection∘P∘...)).ideal` — sectionsDivisor commutes with
+  base-change to a fibre. A general version does NOT exist; only the private specialized comap
+  `fullLevelLocusAux_P1` (Incidence:2610, via θ) and the ideal-level `baseChange_ideal`. Build this
+  compatibility (thread `baseChange_ideal` through `∏ ker` + section base-change), then the ⟹
+  assembly (support/count/pigeonhole) closes `fullLevel_divisor_iff_naive_gen` + [YF-⊆] mechanically.
+  This is the precise, dispatchable next ticket — focused, NOT multi-week, NOT externally gated. (STREAM-YN)
