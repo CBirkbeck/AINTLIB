@@ -79,6 +79,140 @@ theorem combo_eq_asSection_restrict {T : Scheme.{u}}
   rw [combPoint, E.restrict_add, E.restrict_zsmul, E.restrict_zsmul, Point.asSection_add,
     Point.asSection_zsmul, Point.asSection_zsmul]
 
+/-- `Point.asSection` sends `0` to `0` (from additivity: `x = x + x ⟹ x = 0`). -/
+theorem Point.asSection_zero {T : Scheme.{u}} (g : T ⟶ S) :
+    Point.asSection E g (0 : E.Point g) = 0 := by
+  refine add_left_cancel (a := Point.asSection E g (0 : E.Point g)) ?_
+  rw [add_zero, ← Point.asSection_add, add_zero]
+
+/-! ### Combination-point algebra -/
+
+omit [NeZero N] in
+/-- The difference of two combination points is the combination of the differences. -/
+theorem combPoint_sub (a b c d : ℤ) :
+    combPoint E N a b - combPoint E N c d = combPoint E N (a - c) (b - d) := by
+  simp only [combPoint, sub_smul]
+  abel
+
+/-- Scalar multiplication of an `N`-killed point is `N`-periodic in the coefficient. -/
+theorem zsmul_emod_eq {T : Scheme.{u}} {g : T ⟶ S} (P : E.Point g) (hP : (N : ℤ) • P = 0)
+    (c : ℤ) : c • P = (c % (N : ℤ)) • P := by
+  obtain ⟨k, hk⟩ : ∃ k, c = c % (N : ℤ) + (N : ℤ) * k :=
+    ⟨c / (N : ℤ), (Int.emod_add_mul_ediv c (N : ℤ)).symm⟩
+  conv_lhs => rw [hk]
+  rw [add_zsmul, mul_comm (N : ℤ) k, mul_zsmul, hP, smul_zero, add_zero]
+
+/-- Combination points depend on their coefficients only modulo `N`. -/
+theorem combPoint_emod (a b : ℤ) :
+    combPoint E N a b = combPoint E N (a % (N : ℤ)) (b % (N : ℤ)) := by
+  rw [combPoint, combPoint, E.zsmul_emod_eq N (tautPt₁ E N) (tautPt₁_smul_eq_zero E N) a,
+    E.zsmul_emod_eq N (tautPt₂ E N) (tautPt₂_smul_eq_zero E N) b]
+
+/-- The first taut section (base-changed along `k`) is `N`-killed. -/
+theorem smul_N_taut₁_section {T : Scheme.{u}}
+    (k : T ⟶ pullback (E.torsionπ N) (E.torsionπ N)) :
+    (N : ℤ) • Point.asSection E (k ≫ tautBase E N) (Point.restrict E k (tautPt₁ E N)) = 0 := by
+  rw [← Point.asSection_zsmul, ← restrict_zsmul, tautPt₁_smul_eq_zero, restrict_zero,
+    Point.asSection_zero]
+
+/-- The second taut section (base-changed along `k`) is `N`-killed. -/
+theorem smul_N_taut₂_section {T : Scheme.{u}}
+    (k : T ⟶ pullback (E.torsionπ N) (E.torsionπ N)) :
+    (N : ℤ) • Point.asSection E (k ≫ tautBase E N) (Point.restrict E k (tautPt₂ E N)) = 0 := by
+  rw [← Point.asSection_zsmul, ← restrict_zsmul, tautPt₂_smul_eq_zero, restrict_zero,
+    Point.asSection_zero]
+
+/-- The vanishing locus depends only on the point (the killing hypothesis is proof-irrelevant). -/
+theorem pointVanishSet_congr {T : Scheme.{u}} (t : T ⟶ S) {R₁ R₂ : E.Point t} (h : R₁ = R₂)
+    (hR₁ : R₁.1 ≫ E.mulByHom N = t ≫ E.zero) (hR₂ : R₂.1 ≫ E.mulByHom N = t ≫ E.zero) :
+    E.pointVanishSet N t R₁ hR₁ = E.pointVanishSet N t R₂ hR₂ := by
+  subst h; rfl
+
+/-! ### `[YF-⊇]`: over `fullLevelOpens` the tautological combinations are pairwise distinct -/
+
+/-- **[YF-⊇ distinctness].** Over `fullLevelOpens` (where every nonzero combination is
+nonvanishing), two tautological combinations whose coefficient pair differs modulo `N` are
+pointwise distinct: if they agreed at `w`, the base-changed sections agree over the residue
+field (`sections_residue_eq_of_base_eq`), so the difference — a nonzero combination — would
+vanish at `U.ι w ∈ fullLevelOpens`, contradicting the defining nonvanishing. -/
+theorem combSec_ne_of_diff (hN : NIsInvertible S N) (a b c d : ℤ)
+    (hdvd : ¬((N : ℤ) ∣ (a - c) ∧ (N : ℤ) ∣ (b - d)))
+    (w : ↥(fullLevelOpens E N hN : Scheme.{u})) :
+    (a • Point.asSection E ((fullLevelOpens E N hN).ι ≫ tautBase E N)
+        (Point.restrict E (fullLevelOpens E N hN).ι (tautPt₁ E N))
+      + b • Point.asSection E ((fullLevelOpens E N hN).ι ≫ tautBase E N)
+        (Point.restrict E (fullLevelOpens E N hN).ι (tautPt₂ E N))).1.base w
+    ≠ (c • Point.asSection E ((fullLevelOpens E N hN).ι ≫ tautBase E N)
+        (Point.restrict E (fullLevelOpens E N hN).ι (tautPt₁ E N))
+      + d • Point.asSection E ((fullLevelOpens E N hN).ι ≫ tautBase E N)
+        (Point.restrict E (fullLevelOpens E N hN).ι (tautPt₂ E N))).1.base w := by
+  intro hbase
+  rw [combo_eq_asSection_restrict E N (fullLevelOpens E N hN).ι a b,
+    combo_eq_asSection_restrict E N (fullLevelOpens E N hN).ι c d] at hbase
+  set Uι := (fullLevelOpens E N hN).ι with hUι
+  set g := Uι ≫ tautBase E N with hg
+  -- the two combinations are sections of the (separated) base-changed structure map
+  haveI : IsSeparated E.π := E.proper.toIsSeparated
+  haveI : IsSeparated (E.baseChange g).π :=
+    inferInstanceAs (IsSeparated (pullback.snd E.π g))
+  have hres := sections_residue_eq_of_base_eq (E.baseChange g).π
+    (Point.asSection E g (Point.restrict E Uι (combPoint E N a b))).1
+    (Point.asSection E g (Point.restrict E Uι (combPoint E N c d))).1
+    (Point.asSection E g (Point.restrict E Uι (combPoint E N a b))).2
+    (Point.asSection E g (Point.restrict E Uι (combPoint E N c d))).2 w hbase
+  -- push the residue agreement onto the ambient combination points via the first projection
+  set fw := (fullLevelOpens E N hN : Scheme.{u}).fromSpecResidueField w with hfw
+  have side_eq : ∀ z : ℤ × ℤ, (fw ≫ Uι) ≫ (combPoint E N z.1 z.2).1
+      = (fw ≫ (Point.asSection E g (Point.restrict E Uι (combPoint E N z.1 z.2))).1)
+        ≫ pullback.fst E.π g := by
+    intro z
+    simp only [Category.assoc, Point.asSection_val_fst]
+    rfl
+  have hm : (fw ≫ Uι) ≫ (combPoint E N a b).1 = (fw ≫ Uι) ≫ (combPoint E N c d).1 := by
+    rw [side_eq (a, b), side_eq (c, d)]
+    exact congrArg (· ≫ pullback.fst E.π g) hres
+  -- the difference of the two ambient combinations vanishes at `v = Uι w`
+  obtain ⟨p⟩ : Nonempty (↑(Spec ((fullLevelOpens E N hN : Scheme.{u}).residueField w))) :=
+    inferInstance
+  have hv := E.base_mem_pointVanishSet_of_comp_eq N (tautBase E N) (combPoint E N a b)
+    (combPoint E N c d) (combPoint_killed E N a b) (combPoint_killed E N c d) (fw ≫ Uι) hm p
+  have hvp : (fw ≫ Uι).base p = Uι.base w := by
+    show Uι.base (fw.base p) = Uι.base w
+    rw [hfw, Scheme.fromSpecResidueField_apply]
+  rw [hvp, E.pointVanishSet_congr N (tautBase E N) (E.combPoint_sub N a b c d)
+    (E.sub_killed N (tautBase E N) _ _ (combPoint_killed E N a b) (combPoint_killed E N c d))
+    (combPoint_killed E N (a - c) (b - d))] at hv
+  -- `v` lies in `fullLevelOpens`, so no nonzero combination vanishes there — contradiction
+  have hN0 : 0 < (N : ℤ) := by exact_mod_cast Nat.pos_of_ne_zero (NeZero.ne N)
+  have hbdd : ∀ z : ℤ, (z % (N : ℤ)).toNat < N := fun z => by
+    rw [Int.toNat_lt (Int.emod_nonneg z (by exact_mod_cast NeZero.ne N))]
+    exact_mod_cast Int.emod_lt_of_pos z hN0
+  set cd : Fin N × Fin N :=
+    (⟨((a - c) % (N : ℤ)).toNat, hbdd _⟩, ⟨((b - d) % (N : ℤ)).toNat, hbdd _⟩) with hcd
+  have hcast1 : ((cd.1 : ℕ) : ℤ) = (a - c) % (N : ℤ) :=
+    Int.toNat_of_nonneg (Int.emod_nonneg _ (by exact_mod_cast NeZero.ne N))
+  have hcast2 : ((cd.2 : ℕ) : ℤ) = (b - d) % (N : ℤ) :=
+    Int.toNat_of_nonneg (Int.emod_nonneg _ (by exact_mod_cast NeZero.ne N))
+  have hcomb : combPoint E N (cd.1 : ℤ) (cd.2 : ℤ) = combPoint E N (a - c) (b - d) := by
+    rw [hcast1, hcast2, ← E.combPoint_emod]
+  have hcd_ne : cd ≠ 0 := by
+    intro h0
+    refine hdvd ⟨?_, ?_⟩
+    · rw [Int.dvd_iff_emod_eq_zero]
+      have : ((cd.1 : ℕ) : ℤ) = 0 := by rw [h0]; rfl
+      rwa [hcast1] at this
+    · rw [Int.dvd_iff_emod_eq_zero]
+      have : ((cd.2 : ℕ) : ℤ) = 0 := by rw [h0]; rfl
+      rwa [hcast2] at this
+  have hvU : Uι.base w ∈ fullLevelOpenSet E N hN := by
+    have hr : Uι.base w ∈ Set.range Uι.base := ⟨w, rfl⟩
+    rwa [hUι, Scheme.Opens.range_ι] at hr
+  rw [fullLevelOpenSet, Set.mem_compl_iff, Set.mem_iUnion₂] at hvU
+  exact hvU ⟨cd, hcd_ne, by
+    rw [E.pointVanishSet_congr N (tautBase E N) hcomb (combPoint_killed E N _ _)
+      (combPoint_killed E N (a - c) (b - d))]
+    exact hv⟩
+
 end EllipticCurve
 
 end ModularCurves
