@@ -814,4 +814,77 @@ theorem omegaProblem_map_negEll (X : EllObj R)
     (omegaProblem R).map (negEllHom X).op b = (-1 : Γ(X.base, ⊤)ˣ) • b :=
   omegaBasisMap_negEll X b
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-ACT)** Unit actions on ω-bases compose multiplicatively. -/
+theorem OmegaBasis.mul_smul' {S : Scheme.{u}} {G : EllipticCurveGeom S}
+    (g h : Γ(S, ⊤)ˣ) (b : OmegaBasis G) : g • h • b = (g * h) • b := by
+  refine Subtype.ext (Subtype.ext (funext fun i => ?_))
+  show Scheme.resLE inf_le_left g.val *
+      (Scheme.resLE inf_le_left h.val * b.1.1 i) =
+    Scheme.resLE inf_le_left (g.val * h.val) * b.1.1 i
+  rw [map_mul, mul_assoc]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-ACT)** The unit `1` acts trivially on ω-bases. -/
+theorem OmegaBasis.one_smul' {S : Scheme.{u}} {G : EllipticCurveGeom S}
+    (b : OmegaBasis G) : (1 : Γ(S, ⊤)ˣ) • b = b := by
+  refine Subtype.ext (Subtype.ext (funext fun i => ?_))
+  show Scheme.resLE inf_le_left (1 : Γ(S, ⊤)ˣ).val * b.1.1 i = b.1.1 i
+  rw [Units.val_one, map_one, one_mul]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-ACT, the `{±1}` of KM 4.6.2)** The sign automorphism of the ω-problem:
+scale every basis by the global unit `−1`. Natural by `omegaBasisMap_smul` (ring maps
+send `−1` to `−1`); an involution by `mul_smul'`. -/
+noncomputable def omegaProblemNegAut (R : CommRingCat.{u}) :
+    Aut (omegaProblem R) where
+  hom :=
+    { app := fun X => ↾fun b : OmegaBasis X.unop.curve.toEllipticCurveGeom =>
+        (-1 : Γ(X.unop.base, ⊤)ˣ) • b
+      naturality := fun X Y φ => by
+        ext b
+        refine Eq.trans ?_ (omegaBasisMap_smul φ.unop (-1) b).symm
+        exact congrArg (· • omegaBasisMap φ.unop b) (Units.ext (by
+          rw [Units.coe_map, Units.val_neg, Units.val_one]
+          show ((φ.unop.baseHom.appLE ⊤ ⊤ (fun x _ => trivial)).hom) (-1) = -1
+          rw [map_neg, map_one])).symm }
+  inv :=
+    { app := fun X => ↾fun b : OmegaBasis X.unop.curve.toEllipticCurveGeom =>
+        (-1 : Γ(X.unop.base, ⊤)ˣ) • b
+      naturality := fun X Y φ => by
+        ext b
+        refine Eq.trans ?_ (omegaBasisMap_smul φ.unop (-1) b).symm
+        exact congrArg (· • omegaBasisMap φ.unop b) (Units.ext (by
+          rw [Units.coe_map, Units.val_neg, Units.val_one]
+          show ((φ.unop.baseHom.appLE ⊤ ⊤ (fun x _ => trivial)).hom) (-1) = -1
+          rw [map_neg, map_one])).symm }
+  hom_inv_id := by
+    ext X b
+    exact (OmegaBasis.mul_smul' _ _ _).trans
+      (by rw [neg_one_mul, neg_neg]; exact OmegaBasis.one_smul' _)
+  inv_hom_id := by
+    ext X b
+    exact (OmegaBasis.mul_smul' _ _ _).trans
+      (by rw [neg_one_mul, neg_neg]; exact OmegaBasis.one_smul' _)
+
+/-- **(T-E14-ACT)** The `{±1}`-action on the ω-problem in the engine's `G →* Aut Q`
+interface (`representable_of_rigid_of_torsor`): `ℤˣ = {±1}` acts through the sign
+automorphism. -/
+noncomputable def omegaProblemSignAction (R : CommRingCat.{u}) :
+    ℤˣ →* Aut (omegaProblem R) where
+  toFun u := if u = 1 then 1 else omegaProblemNegAut R
+  map_one' := if_pos rfl
+  map_mul' u v := by
+    rcases Int.units_eq_one_or u with rfl | rfl <;>
+      rcases Int.units_eq_one_or v with rfl | rfl
+    · rw [one_mul, if_pos rfl, one_mul]
+    · rw [one_mul, if_pos rfl, one_mul]
+    · rw [mul_one, if_pos rfl, mul_one]
+    · rw [show (-1 : ℤˣ) * (-1) = 1 from by decide, if_pos rfl, if_neg (by decide)]
+      refine Iso.ext ?_
+      refine Eq.symm ?_
+      ext X b
+      exact (OmegaBasis.mul_smul' _ _ _).trans
+        (by rw [neg_one_mul, neg_neg]; exact OmegaBasis.one_smul' _)
+
 end ModularCurves
