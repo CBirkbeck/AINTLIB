@@ -17744,3 +17744,58 @@ needs the diamond-compatible instance first. Charter corrected by this section.
 constraint) → #3 ([HG-C3]; first act = focused `/develop --decompose` of the appendix cover
 strategy, v10.8) → #4 (glue) → **SIGNAL ★★** (⟹ v10.172 main-PR) → charter (B)/(C). Marathon
 v10.162. Dispatch in `inbox/STREAM-G0.md`.
+
+## Amendments v10.174 (2026-07-13, coordinator): ★★ STREAM-KM transport wave + ★★★★ STREAM-YN T-E9 MASTER wired — RATIFIED; v10.172 cadence FIRES (PR-A open; PR-B blocked on YN push); TWO closed-seat phantom gates corrected ⟹ CLOSED-SEAT DOCTRINE; P3B3 orphans allocated to STREAM-YN
+
+**(1) STREAM-KM ★★ RATIFIED** (inbox report + at-source: f80b462c7 / 88d78b857 / f9345ed7f /
+1d06fcf5f, plus the POST-report `ae449a085 sectionsDivisor_baseChange` and
+`fd1a8ecee torsionIdeal_baseChange` — the L4 blocker they named, already discharged
+mid-marathon): **`gammaOneDrinfeldProblem` is a sorry-free, axiom-clean `ModuliProblem`** —
+the integral (no N-invertibility) Drinfeld [Γ₁(N)] functor EXISTS as a genuine object.
+Transport substrate (`hasExactOrder_pullSection`; T-E4a `_of_finitePresentation` chain
+de-sorried via the records primitive) is reusable stream-wide. The W2-core reassessment
+("READY was optimistic" → deep charter, 426f95dcc) is RATIFIED — honest re-scopes are
+deliverables (v10.24 lineage; both reset-inherited optimistic assemblies — G0's v10.173 and
+this — corrected the same day). Queue confirmed: L4 close (`isFullLevel_baseChange` wrapper →
+eA/dictionary → GammaH:991 + rebuild) → [KM-W0] rel-rep wave (first act: focused
+`/develop --decompose` of KM 1.4–1.11 + 3.5–3.7, verbatim quotes) → [KM-W6a/b/c].
+W2-core/W4/W5 stay chartered-parked.
+
+**(2) STREAM-YN ★★★ + ★★★★ RATIFIED-AT-REPORT** (their inbox notes; y1 board v10.174–178;
+attested FULL build green, 3949 jobs, in their isolated worktree): [YF-⊇] residue frontier
+discharged axiom-clean + the entire ⊇-over-fullLevelOpens leaf (`Moduli/FullLevelClopen.lean`)
++ [YF-CLOPEN] wired + `gammaFullNaiveProblem` now a TOTAL functor (`Moduli/TransportPoint.lean`
+fibre-transport, the v10.176 scope correction) + **T-E9 MASTER `gammaFullNaive_representable`
+wired END-TO-END** (`ModularCurve/YFullTE9.lean`). ⚠ **origin/dev/modular-curves-y1 is STALE
+at ccbfe2576 — the whole session is unpushed** (verified by fresh fetch). PUSH ORDER issued;
+at-source ratification + PR-B complete after the push.
+
+**(3) TWO PHANTOM CLOSED-SEAT GATES CORRECTED — now DOCTRINE:**
+- YN's "Representable + GEOM + recollement ⟸ CHARTER-FP4 (T-E5 engine)": FP4 is CLOSED and
+  the T-E5/T-E5f recollement lane is **STREAM-YN's OWN lane (C)** (v10.171 table, verbatim).
+  Nothing there is external; un-gate.
+- YN's "[YF-⊆]/hrange + rigidity ⟸ CHARTER-P3B3 (T-D8-bridge + linchpin)": P3B3 retired
+  PRE-reset and v10.171 never re-allocated its remnants — a coordinator miss, owned here.
+  **ALLOCATED NOW → STREAM-YN**: `fullLevel_divisor_iff_naive_gen` (T-D8-bridge,
+  `LevelStructure/Basic.lean:115`, sorried :125 — its docstring already routes the proof:
+  T-D2 reduced-base full-set-of-sections criterion glued to the T-B6 fibre comparison) plus
+  the rigidity linchpin their report names (YN: identify it from the banked P3B3 board
+  sections and claim it explicitly). Rationale: sole consumer ([YF-⊆] → [YF-ETALE] ★ →
+  MASTER-clean) and squarely their comaximal-divisor method.
+- **CLOSED-SEAT DOCTRINE (binding, all streams)**: banked docs, code comments, and old board
+  sections name dead seats as gate labels ("⟸ CHARTER-X", "p2's layer", "P3B3 item 4").
+  Those are HISTORY, not live seats. Before waiting on ANY cross-charter gate: resolve the
+  name against the v10.171 stream table. Live stream → boundary handshake. Not a stream →
+  the gate is YOURS or orphaned: board the claim and proceed act-on-default. NEVER wait on a
+  ghost. (Today's instances: G0/p2 → v10.173; YN/FP4 + YN/P3B3 → here.)
+
+**(4) CADENCE EXECUTION (v10.172, first firing).** AINTLIB has NO PR CI (workflows =
+blueprint/pages only) ⟹ the merge gate is coordinator **clean-room verification**: a detached
+scratch worktree at the pinned SHA, full `lake build ModularCurves`. (The shared producer tree
+is perpetually WIP-dirty — a whole-lib build there red-herrings on live sibling edits;
+observed this session: QuotientLift + GammaHRepresentability "failures" were uncommitted
+sibling WIP, while the committed files were attested green by their owners.)
+- **PR-A**: dev/modular-curves → main @ fd1a8ecee (KM ★★ + GH's GHB5/GHB5a ★ chain +
+  GHC1/GHC3 theorems + RelRepData layers + G0's StableChartData + QuotientLift descent).
+  OPENED; **merge held until clean-room green** (build running).
+- **PR-B**: dev/modular-curves-y1 → main — opens the moment YN pushes.
