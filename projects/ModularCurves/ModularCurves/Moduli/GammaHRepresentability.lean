@@ -2755,6 +2755,97 @@ theorem QuotPkg.crossμ_unique (pkg : ∀ X : EllObj R, QuotPkg φ X)
     Subtype.ext (congrArg (s.1 ≫ ·) h2)]
   rfl
 
+/-- The tautological projection at the identity index composed with the canonical
+comparison is the identity ([GHB7-geom] enabler; the third use of this collapse). -/
+theorem _root_.ModularCurves.EllObj.pullbackAlongπ_toPullbackAlong_id
+    (X : EllObj R) :
+    X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom) ≫ EllObj.toPullbackAlong (𝟙 X) =
+      𝟙 (X.pullbackAlong ((𝟙 X : X ⟶ X).baseHom)) := by
+  apply (EllObj.homPullbackAlongEquiv X ((𝟙 X : X ⟶ X).baseHom) _).injective
+  refine Subtype.ext (Prod.ext ?_ ?_)
+  · exact (Category.assoc _ _ _).trans
+      ((congrArg (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom) ≫ ·)
+        (EllObj.toPullbackAlong_pullbackAlongπ (𝟙 X))).trans
+        ((Category.comp_id _).trans (Category.id_comp _).symm))
+  · show 𝟙 X.base ≫ 𝟙 X.base = 𝟙 X.base
+    rw [Category.comp_id]
+
+/-- **The projection is surjective on geometric points** ([GHB7-geom-s], KM 7.1.3(3)
+surjectivity half): over an algebraically closed field every section of the chosen
+quotient lifts to a value of `Q`, because the base change of the finite étale
+surjective `π` along the section has a section (`natCard_sections_eq_finrank` +
+`one_le_finrank_iff_surjective`). -/
+theorem QuotPkg.projQ_geom_surjective (pkg : ∀ X : EllObj R, QuotPkg φ X)
+    (hfree : FreeAction φ)
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base)))
+    (k : Type u) [Field k] [IsAlgClosed k]
+    (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+    (E : EllipticCurve (Spec (CommRingCat.of k))) :
+    Function.Surjective
+      ((QuotPkg.projQ pkg hfree hbase).app
+        (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))) := by
+  set X : EllObj R := ⟨Spec (CommRingCat.of k), sm, E⟩ with hXdef
+  intro s
+  obtain ⟨hfin, het, hsurj⟩ := (pkg X).π_finite_etale_surjective hfree (hbase X)
+  haveI := hfin; haveI := het; haveI := hsurj
+  haveI : IsFinite (pullback.snd (pkg X).π s.1) :=
+    MorphismProperty.pullback_snd _ _ hfin
+  haveI : Etale (pullback.snd (pkg X).π s.1) :=
+    MorphismProperty.pullback_snd _ _ het
+  -- a section of the base-changed projection exists
+  have hne : Nonempty ↑(Spec (CommRingCat.of k)) := by
+    refine ⟨⟨⊥, Ideal.bot_prime⟩⟩
+  obtain ⟨x₀⟩ := hne
+  have hcard := natCard_sections_eq_finrank (k := k)
+    (pullback.snd (pkg X).π s.1) x₀
+  have hpos : 1 ≤ (pullback.snd (pkg X).π s.1).finrank x₀ := by
+    rw [Scheme.Hom.finrank_pullback_snd]
+    exact (Scheme.Hom.one_le_finrank_iff_surjective (pkg X).π).mpr hsurj _
+  obtain ⟨⟨t, ht⟩⟩ := Nat.card_pos_iff.mp (hcard ▸ hpos) |>.1
+  -- the lifted classifying section and its value
+  have hmem : (t ≫ pullback.fst (pkg X).π s.1) ≫ (pkg X).d.f =
+      (𝟙 X : X ⟶ X).baseHom := by
+    rw [show (pkg X).d.f = (pkg X).π ≫ (pkg X).f₀ from (pkg X).hπf.symm]
+    exact (Category.assoc _ _ _).trans
+      ((congrArg (t ≫ ·) ((Category.assoc _ _ _).symm.trans
+        ((congrArg (· ≫ (pkg X).f₀) pullback.condition).trans
+          ((Category.assoc _ _ _).trans
+            (congrArg (pullback.snd (pkg X).π s.1 ≫ ·) s.2))))).trans
+        ((Category.assoc _ _ _).symm.trans
+          ((congrArg (· ≫ 𝟙 X.base) ht).trans
+            ((Category.id_comp _).trans rfl))))
+  refine ⟨Q.map (EllObj.toPullbackAlong (𝟙 X)).op
+    ((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)
+      ⟨t ≫ pullback.fst (pkg X).π s.1, hmem⟩), ?_⟩
+  refine Subtype.ext ?_
+  have hcollapse : Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op
+      (Q.map (EllObj.toPullbackAlong (𝟙 X)).op
+        ((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)
+          ⟨t ≫ pullback.fst (pkg X).π s.1, hmem⟩)) =
+      (pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)
+        ⟨t ≫ pullback.fst (pkg X).π s.1, hmem⟩ :=
+    (FunctorToTypes.map_comp_apply Q (EllObj.toPullbackAlong (𝟙 X)).op
+      (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op _).symm.trans
+      ((congrArg (fun m => Q.map m ((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)
+        ⟨t ≫ pullback.fst (pkg X).π s.1, hmem⟩))
+        (show (EllObj.toPullbackAlong (𝟙 X)).op ≫
+            (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op =
+            𝟙 (Opposite.op (X.pullbackAlong ((𝟙 X : X ⟶ X).baseHom))) from
+          congrArg Quiver.Hom.op
+            (ModularCurves.EllObj.pullbackAlongπ_toPullbackAlong_id X))).trans
+        (FunctorToTypes.map_id_apply Q _))
+  show (((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
+      (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op
+        (Q.map (EllObj.toPullbackAlong (𝟙 X)).op
+          ((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)
+            ⟨t ≫ pullback.fst (pkg X).π s.1, hmem⟩)))).1 ≫ (pkg X).π = s.1
+  rw [hcollapse, Equiv.symm_apply_apply]
+  exact (Category.assoc _ _ _).trans
+    ((congrArg (t ≫ ·) pullback.condition).trans
+      ((Category.assoc _ _ _).symm.trans
+        ((congrArg (· ≫ s.1) ht).trans (Category.id_comp s.1))))
+
 end Transport
 
 
