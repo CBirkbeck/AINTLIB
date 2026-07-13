@@ -123,6 +123,23 @@ recorded as construction-ticket obligations. Consumers use pins only, per the st
 Rule for future decompose passes: skeleton `def := sorry` decls MUST be added to this
 register in the same commit that creates them.
 
+**DS-OMEGA block (added 2026-07-13, STREAM-OMEGA, same commit as the T-E-OMEGA R1
+skeletons; decomposition: decomposition-omega-r1.md):**
+
+| DS-OMEGA defs | File | Ticket |
+|---|---|---|
+| `UnitCocycle.{sectionsMap, presheafAb, presheafOfModules, lineBundle, lineBundleSectionsEquiv, trivSection, sectionsEquivOfLE, Compat.sectionsEquiv, pullbackCocycle, sectionsPullback}` | ForMathlib/UnitCocycleSheaf.lean | T-OM-A2/A3/A4/A7 |
+| `LocalPresentation.transport` (e/compat fields) | EllipticCurve/InvariantDifferential.lean | T-OM-B3 |
+| `omegaCocycle` (u field) | EllipticCurve/InvariantDifferential.lean | T-OM-B5 |
+| `omegaCompat`, `omegaBasisMap` | Moduli/OmegaFunctor.lean | T-OM-B7 |
+
+Pins (consumers may use ONLY these): `omegaModules` + `omegaModules_isInvertible` (ω2 ★),
+`OmegaBasis` + its `Γ(S,⊤)ˣ`-`SMul` + `OmegaBasis.existsUnique_unit_smul` (ω3 torsor),
+`omegaBasisMap` + `_id`/`_comp`/`_smul` (ω4, T-E14 statability), `omegaCocycle_res`
+(chart-transition spec), `negVC_u` (ω5 `{±1}`). Discharge route: comparison-theorem
+uniqueness (1b + `projModelVCIso_{one,mul,map,injective}`) + `Scheme.exists_unit_glue`;
+NO new axioms, target = sorry-free within the T-E-OMEGA stream (same marathon).
+
 ## The BLACK-BOX REGISTER — **RR-ONLY** (owner directive, 2026-07-05)
 
 **Standing black box (the only one):**

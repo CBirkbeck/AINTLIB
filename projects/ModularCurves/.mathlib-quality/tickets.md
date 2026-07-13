@@ -2260,6 +2260,66 @@ T-E15's ℰ₃), [a5-i] is trivial and [a5-ii] simplifies to one base-change poi
   (400–700 lines, reusable everywhere — Hodge bundle, modular forms) **vs** an explicit
   `Y(4)` model (~T-E15-sized, single-use). Recommendation: **do T-E-OMEGA** — the Hodge
   bundle `ω` is needed by the modular-forms stream regardless.
+- **★ R1 DECOMPOSED + SKELETON LANDED (2026-07-13, STREAM-OMEGA — own `/develop
+  --decompose` per charter; full doc with prose proofs, verbatim quotes, Lean↔source
+  match paragraphs: `decomposition-omega-r1.md`).** Substrate corrections vs the v10.27
+  scan: mathlib NOW has `SheafOfModules.IsLocallyFree` + rich `Scheme.Modules`
+  functoriality; the PIC0 stream's `Picard/{InvertibleSheaf,IdealModule}.lean` provides
+  `Scheme.Modules.IsInvertible`, `isIso_of_bijective_app_on_basis`, and the
+  presheaf-of-modules bundling idiom — all REUSED, not rebuilt. Design: generic
+  **Čech-unit-cocycle line bundle** (`ForMathlib/UnitCocycleSheaf.lean`, T-OM-A1..A7,
+  mathlib-able) + **atlas transition cocycle from the comparison theorem**
+  (`EllipticCurve/InvariantDifferential.lean`, T-OM-B1..B6+B8) + **(Ell/R)-functoriality
+  of ω-bases** (`Moduli/OmegaFunctor.lean`, T-OM-B7 = the T-E14-statability payload).
+  All three files **build green** (sorried leaves; DS-OMEGA register block in plan.md,
+  same commit). ω never needs `Ω¹`: the object is DEFINED by its chart presentation
+  (transitions = comparison-VC units, Silverman III Table 1.2), which is exactly what
+  every consumer quantifies over.
+
+### [T-OM] T-E-OMEGA R1 work tickets (STREAM-OMEGA, 2026-07-13 — details in decomposition-omega-r1.md)
+Ordered leaves; Status legend: open / in_progress / done. File A =
+`ForMathlib/UnitCocycleSheaf.lean`, File B = `EllipticCurve/InvariantDifferential.lean`,
+File C = `Moduli/OmegaFunctor.lean`.
+
+- **[T-OM-A1]** `UnitCocycle` structure + `sections` module — **done** (landed concrete
+  with the skeleton: closure lemmas, `AddCommGroup`/`Module` instances, simp API).
+- **[T-OM-A2]** `sectionsMap`/`presheafAb`/`presheafOfModules` — **open** · File A ·
+  deps: A1. Componentwise restriction; `PresheafOfModules.ofPresheaf` (Picard idiom).
+- **[T-OM-A3]** `isSheaf_presheafAb` + `lineBundle` + `lineBundleSectionsEquiv` —
+  **open** · File A · deps: A2. Componentwise gluing of `𝒪_X` + locality of
+  `Compatible`; bundling per `Picard/IdealModule.lean`.
+- **[T-OM-A4]** `trivSection` + `sectionsEquivOfLE` (+naturality, +`_trivSection`) —
+  **open** · File A · deps: A1. Consumes `u_self`+`u_cocycle`; THE invertibility content.
+- **[T-OM-A4b]** `lineBundle_isInvertible` — **open** · File A · deps: A3, A4. Via
+  `isIso_of_bijective_app_on_basis` + `restrictFunctorIsoPullback` (Picard route).
+- **[T-OM-A5]** `IsBasis` API + torsor (`exists_unique_smul_eq`, freeness) — **open** ·
+  File A · deps: A1, A3(gluing), A4. = board's "ω3 𝔾ₘ-torsor, T-A4's trivialization".
+- **[T-OM-A6]** `Scheme.exists_unit_glue` — **open** · File A · standalone. Affine-basis
+  gluing + `RingedSpace.isUnit_of_isUnit_germ`.
+- **[T-OM-A7]** `Compat` + `sectionsEquiv` + basis transport; `pullbackCocycle` +
+  `sectionsPullback` + `isBasis_sectionsPullback` — **open** · File A · deps: A1–A6.
+- **[T-OM-B1]** `LocalPresentation` + `WeierstrassAtlasData.presentation` — **done**
+  (landed concrete with the skeleton).
+- **[T-OM-B2]** `transVC` (via 1b) + uniqueness + group laws + `transUnit` — **open** ·
+  File B · deps: B1. Existence `pointedIso_exists_variableChange`; uniqueness
+  `projModelVCIso_injective`; laws via `projModelVCIso_{one,mul}` + uniqueness.
+- **[T-OM-B3]** `transport` (cartesian pointed square; `restrict` = 𝟙-case) — **open** ·
+  File B · deps: B1. `isPullback_projModelBaseChange` + pullback pasting + `isoSpec`.
+- **[T-OM-B4]** `transVC_transport`/`transUnit_transport`/`transUnit_restrict` —
+  **open** · File B · deps: B2, B3. Via `projModelVCIso_map` + `map_variableChange` +
+  uniqueness.
+- **[T-OM-B5]** `omegaCocycle` + `omegaCocycle_res` — **open** · File B · deps: A6, B2,
+  B4. Glue transition units over pairwise intersections; laws affine-locally + separation.
+- **[T-OM-B6 ★]** `omegaModules` + `_isInvertible` + `OmegaBasis` + unit-`SMul` +
+  `existsUnique_unit_smul` — **open** (assembly) · File B · deps: A3–A5, B5. **= ω2
+  milestone; REPORT.**
+- **[T-OM-B7 ★★]** `omegaCompat` + `omegaBasisMap` + `_id`/`_comp`/`_smul` — **open** ·
+  File C · deps: A7, B2–B6. **= ω4 + the T-E14/T-E12/T-E13 statability unblock; flips
+  the shared engine; REPORT.**
+- **[T-OM-B8]** `negVC` + `negVC_smul` + `negModelHom_eq_negVC` — **open** · File B ·
+  standalone (ModelVariableChange/GroupLawConstruction level). ω5's `{±1}`
+  identification; full "inversion-EllHom acts by −1 on `OmegaBasis`" deliberately
+  DEFERRED to T-E14's decomposition (needs `invOver` chart lemmas; record as T-E14 dep).
 
 ### [T-E12] `M₁ = Spec ℤ[1/6, g₂, g₃, Δ⁻¹]` represents `(E, ω)` (GME Thm 2.2.3)
 - **Status**: open, **blocked on [T-E-OMEGA]** · **File**: Moduli/Bootstrap.lean (no decl
