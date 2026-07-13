@@ -5,8 +5,10 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.LevelStructure.CartierDivisor
 import ModularCurves.Picard.Dual
+import ModularCurves.Picard.DualPullback.Iso
 import ModularCurves.Picard.Pic
 import ModularCurves.Picard.UnitPullback
+import ModularCurves.ForMathlib.PullbackTensorGeneral
 import ModularCurves.ForMathlib.PullbackTensorMonoidal
 import Mathlib.Algebra.Category.ModuleCat.Kernels
 import Mathlib.Algebra.Category.ModuleCat.Presheaf.Sheafification
@@ -1649,6 +1651,24 @@ noncomputable def sectionPoleSheaf {C S : Scheme.{u}} (π : C ⟶ S)
     [IsSeparated π] (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) : C.Modules :=
   Scheme.Modules.dualObj (sectionIdealModule π z hz)
 
+/-- The simple-pole sheaf of a smooth separated relative curve commutes with
+arbitrary base change. -/
+noncomputable def sectionPoleSheafBaseChangeIso
+    {C S T : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (t : T ⟶ S) :
+    (Scheme.Modules.pullback (pullback.fst π t)).obj
+        (sectionPoleSheaf π z hz) ≅
+      sectionPoleSheaf (pullback.snd π t) (sectionBaseChange z hz t)
+        (sectionBaseChange_snd z hz t) := by
+  letI : IsSeparated (pullback.snd π t) :=
+    MorphismProperty.pullback_snd π t inferInstance
+  exact Scheme.Modules.dualPullbackIsoOfIsInvertible
+      (pullback.fst π t) (sectionIdealModule π z hz)
+      (sectionIdealModule_isInvertible hsm z hz) ≪≫
+    (Scheme.Modules.dualIsoObj
+      (sectionIdealModuleBaseChangeIso hsm z hz t)).symm
+
 /-- The inclusion of the zero-section ideal into the structure sheaf. -/
 noncomputable def sectionIdealToUnit {C S : Scheme.{u}} (π : C ⟶ S)
     [IsSeparated π] (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) :
@@ -1670,6 +1690,35 @@ noncomputable def sectionPoleSheafPower {C S : Scheme.{u}} (π : C ⟶ S)
     [IsSeparated π] (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) : ℕ → C.Modules
   | 0 => 𝟙_ C.Modules
   | n + 1 => sectionPoleSheafPower π z hz n ⊗ sectionPoleSheaf π z hz
+
+/-- Every nonnegative tensor power of the pole sheaf commutes with arbitrary
+base change. -/
+noncomputable def sectionPoleSheafPowerBaseChangeIso
+    {C S T : Scheme.{u}} {π : C ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (t : T ⟶ S) :
+    ∀ n : ℕ,
+      (Scheme.Modules.pullback (pullback.fst π t)).obj
+          (sectionPoleSheafPower π z hz n) ≅
+        sectionPoleSheafPower (pullback.snd π t)
+          (sectionBaseChange z hz t) (sectionBaseChange_snd z hz t) n
+  | 0 => by
+      letI : IsSeparated (pullback.snd π t) :=
+        MorphismProperty.pullback_snd π t inferInstance
+      letI : (Scheme.Modules.pullback (pullback.fst π t)).Monoidal :=
+        Scheme.Modules.pullbackMonoidal (pullback.fst π t)
+      exact (Functor.Monoidal.εIso
+        (Scheme.Modules.pullback (pullback.fst π t))).symm
+  | n + 1 => by
+      letI : IsSeparated (pullback.snd π t) :=
+        MorphismProperty.pullback_snd π t inferInstance
+      letI : (Scheme.Modules.pullback (pullback.fst π t)).Monoidal :=
+        Scheme.Modules.pullbackMonoidal (pullback.fst π t)
+      exact (Functor.Monoidal.μIso
+          (Scheme.Modules.pullback (pullback.fst π t))
+          (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz)).symm ≪≫
+        (sectionPoleSheafPowerBaseChangeIso hsm z hz t n ⊗ᵢ
+          sectionPoleSheafBaseChangeIso hsm z hz t)
 
 /-- The localized monoidal unit is the structure sheaf. -/
 private noncomputable def monoidalUnitObjIso (X : Scheme.{u}) :
