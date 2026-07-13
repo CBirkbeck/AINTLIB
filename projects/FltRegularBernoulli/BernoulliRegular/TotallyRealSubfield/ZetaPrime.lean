@@ -56,6 +56,12 @@ theorem zetaPrime_ne_bot : zetaPrime p K ≠ ⊥ := by
   rw [zetaPrime, Ne, Ideal.span_singleton_eq_bot]
   exact (zeta_spec p ℚ K).zeta_sub_one_prime'.ne_zero
 
+/-- Every `ζ^n - 1` lies in `𝔓 = (ζ - 1)`, since `ζ - 1 ∣ ζ^n - 1ⁿ`. -/
+theorem zeta_pow_sub_one_mem_zetaPrime (n : ℕ) :
+    ((zeta_spec p ℚ K).toInteger ^ n - 1 : 𝓞 K) ∈ zetaPrime p K := by
+  rw [zetaPrime, Ideal.mem_span_singleton]
+  simpa using sub_dvd_pow_sub_pow ((zeta_spec p ℚ K).toInteger) (1 : 𝓞 K) n
+
 /-- The contraction of `𝔓` to `𝓞_{K⁺}` — the prime of `𝓞_{K⁺}` below `𝔓`. -/
 noncomputable def zetaPrimePlus [IsCMField K] : Ideal (𝓞 (K⁺)) :=
   (zetaPrime p K).under (𝓞 (K⁺))
@@ -105,16 +111,11 @@ theorem complexConj_sub_mem_zetaPrime [IsCMField K] (x : 𝓞 K) :
   | mem y hy =>
     simp only [Set.mem_singleton_iff] at hy
     subst hy
-    have hpow_sub : ∀ n : ℕ, (hζ.toInteger ^ n - 1 : 𝓞 K) ∈ zetaPrime p K := by
-      intro n
-      rw [zetaPrime, Ideal.mem_span_singleton]
-      have := sub_dvd_pow_sub_pow hζ.toInteger (1 : 𝓞 K) n
-      rwa [one_pow] at this
     have h1 : (hζ.toInteger : 𝓞 K) - 1 ∈ zetaPrime p K := by
-      simpa using hpow_sub 1
+      simpa using zeta_pow_sub_one_mem_zetaPrime p K 1
     have h2 : (ringOfIntegersComplexConj K hζ.toInteger : 𝓞 K) - 1 ∈ zetaPrime p K := by
       rw [complexConj_apply_zeta]
-      exact hpow_sub (p - 1)
+      exact zeta_pow_sub_one_mem_zetaPrime p K (p - 1)
     have : (ringOfIntegersComplexConj K hζ.toInteger : 𝓞 K) - hζ.toInteger =
         ((ringOfIntegersComplexConj K hζ.toInteger : 𝓞 K) - 1) -
           (hζ.toInteger - 1) := by ring
@@ -227,9 +228,8 @@ theorem multiplicity_zetaPrime_algebraMap_even [IsCMField K]
     linear_combination zeta_toInteger_pow_pred_mul p K
   have hcα_expand : (-hζ.toInteger ^ (p - 1) * (hζ.toInteger - 1) : 𝓞 K) ^ e *
       ringOfIntegersComplexConj K u = (hζ.toInteger - 1) ^ e * u := by
-    have := hcα
-    rw [hαu, map_mul, map_pow, hc_pi] at this
-    exact this
+    rw [hαu, map_mul, map_pow, hc_pi] at hcα
+    exact hcα
   have hπ_ne : (hζ.toInteger - 1 : 𝓞 K) ≠ 0 := hπ_prime.ne_zero
   have hcu_eq : ((-hζ.toInteger ^ (p - 1)) ^ e : 𝓞 K) * ringOfIntegersComplexConj K u = u := by
     have hreord : ((hζ.toInteger - 1) ^ e : 𝓞 K) *
@@ -242,17 +242,12 @@ theorem multiplicity_zetaPrime_algebraMap_even [IsCMField K]
     exact mul_left_cancel₀ (pow_ne_zero _ hπ_ne) hreord
   have hres : (ringOfIntegersComplexConj K u : 𝓞 K) - u ∈ zetaPrime p K :=
     complexConj_sub_mem_zetaPrime p K u
-  have hpow_sub : ∀ n : ℕ, (hζ.toInteger ^ n - 1 : 𝓞 K) ∈ zetaPrime p K := by
-    intro n
-    rw [zetaPrime, Ideal.mem_span_singleton]
-    have := sub_dvd_pow_sub_pow hζ.toInteger (1 : 𝓞 K) n
-    rwa [one_pow] at this
   have hneg_pow_sub : ((-hζ.toInteger ^ (p - 1)) ^ e - (-1) ^ e : 𝓞 K) ∈ zetaPrime p K := by
     have key : ((-hζ.toInteger ^ (p - 1)) ^ e - (-1) ^ e : 𝓞 K) =
         (-1) ^ e * (hζ.toInteger ^ ((p - 1) * e) - 1) := by
       rw [neg_pow, ← pow_mul]; ring
     rw [key]
-    exact Ideal.mul_mem_left _ _ (hpow_sub _)
+    exact Ideal.mul_mem_left _ _ (zeta_pow_sub_one_mem_zetaPrime p K _)
   have hkey : ((1 - (-1) ^ e) * u : 𝓞 K) ∈ zetaPrime p K := by
     have h1 : ((-hζ.toInteger ^ (p - 1)) ^ e : 𝓞 K) * ringOfIntegersComplexConj K u -
         (-1) ^ e * u ∈ zetaPrime p K := by
