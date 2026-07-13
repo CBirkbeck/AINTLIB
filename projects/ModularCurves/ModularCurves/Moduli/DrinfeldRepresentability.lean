@@ -55,6 +55,20 @@ theorem pointToTorsion_torsionPointsEquiv {S : Scheme.{u}} (E : EllipticCurve S)
           ((Submodule.mem_torsionBy_iff _ _).mp (E.torsionPointsEquiv N g j).2)) = j.1 :=
   congrArg Subtype.val ((E.torsionPointsEquiv N g).left_inv j)
 
+/-- `asSection` is injective: a point is recovered from its section by `≫ pullback.fst`. -/
+theorem asSection_injective {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}} (g : T ⟶ S) :
+    Function.Injective (EllipticCurve.Point.asSection E g) := fun a b hab =>
+  Subtype.ext (by
+    have h := congrArg
+      (fun s : (E.baseChange g).Section => s.1 ≫ Limits.pullback.fst E.π g) hab
+    simpa only [EllipticCurve.Point.asSection_val_fst] using h)
+
+/-- `asSection` sends the zero point to the zero section. -/
+theorem asSection_zero {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}} (g : T ⟶ S) :
+    EllipticCurve.Point.asSection E g 0 = 0 := by
+  have h := EllipticCurve.Point.asSection_zsmul E g 0 0
+  simpa using h
+
 set_option maxHeartbeats 1000000 in
 /-- **(KM 1.6.2, `ℤ/N`-Str — no rank hypothesis, hence no `c4`)** The Drinfeld `Γ₁(N)`
 moduli problem is affine over `Ell`: for each `E/S` the functor of Drinfeld exact-order-`N`
