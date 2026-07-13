@@ -38,4 +38,18 @@ theorem coinvariants_coaction (ρ : B →ₐ[R] B ⊗[R] A) (b : coinvariants ρ
     ρ b = (b : B) ⊗ₜ[R] 1 :=
   mem_coinvariants.mp b.2
 
+/-- **Functoriality of co-invariants across a (possibly base-changing) equivariant square.**
+If `φB` intertwines the two co-actions through *any* comparison map `T` of the tensor sides
+that carries `b ⊗ 1` to `φB b ⊗ 1`, then `φB` maps co-invariants to co-invariants. (`T` is
+data: at the chart-restriction instantiation it is the tensor of the two section
+restrictions, and the square is the geometric equivariance of the restricted action —
+`[HG-C4c]`.) -/
+theorem mem_coinvariants_of_map {R' A' B' : Type*} [CommRing R'] [CommRing A'] [CommRing B']
+    [Algebra R' A'] [Algebra R' B'] {ρ : B →ₐ[R] B ⊗[R] A} {ρ' : B' →ₐ[R'] B' ⊗[R'] A'}
+    (φB : B →+* B') (T : B ⊗[R] A →+* B' ⊗[R'] A')
+    (hsq : ∀ b, ρ' (φB b) = T (ρ b)) (hT1 : ∀ b : B, T (b ⊗ₜ[R] 1) = φB b ⊗ₜ[R'] 1)
+    {b : B} (hb : b ∈ coinvariants ρ) : φB b ∈ coinvariants ρ' := by
+  rw [mem_coinvariants] at hb ⊢
+  rw [hsq, hb, hT1]
+
 end ModularCurves
