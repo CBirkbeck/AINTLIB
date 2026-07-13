@@ -1628,6 +1628,15 @@ theorem sectionsDivisor_degree (π : C ⟶ S) [IsSeparated π]
     rw [sectionsDivisor, dif_pos h]]
   exact sectionsIdeal_finrank π hsm P s
 
+/-- The support of the section divisor `Σᵢ [Pᵢ]` is the union of the section images. -/
+theorem sectionsDivisor_support (π : C ⟶ S) [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
+    (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) :
+    ((sectionsDivisor π P).ideal.support : Set C) = ⋃ i, Set.range (P i).1.base := by
+  rw [show (sectionsDivisor π P).ideal = ∏ i, Scheme.Hom.ker (P i).1 from by
+    rw [sectionsDivisor, dif_pos ⟨‹_›, hsm⟩]]
+  exact sectionsIdealAux_support_prod π P
+
 /-- Base change of a relative effective Cartier divisor along `t : T ⟶ S`: the ideal
 sheaf of the base-changed closed subscheme `D ×_S T ↪ C ×_S T` (kernel ideal of the
 pulled-back closed immersion), as a divisor in the base-changed curve (structure

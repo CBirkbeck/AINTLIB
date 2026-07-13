@@ -54,6 +54,23 @@ theorem sectionsDivisor_baseChange [IsSeparated π] (hsm : SmoothOfRelativeDimen
   refine Finset.prod_congr rfl fun i _ => ?_
   exact (ker_sectionBaseChange (P i).1 (P i).2 t).symm
 
+/-- **The fibre support-covering.** The support of the base-changed section divisor is the
+union of the base-changed section images — the topological core of the `[YF-⊆]` argument:
+combined with a divisor equality `(sectionsDivisor π P).ideal = J`, the union of section images
+in the fibre equals the preimage of `J.support`. -/
+theorem sectionsDivisor_comap_support [IsSeparated π]
+    (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
+    (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) {T : Scheme.{u}} (t : T ⟶ S) :
+    (((sectionsDivisor π P).ideal.comap (pullback.fst π t)).support : Set ↥(pullback π t))
+      = ⋃ i, Set.range (sectionBaseChange (P i) t).1.base := by
+  haveI : IsSeparated (pullback.snd π t) := MorphismProperty.pullback_snd _ _ ‹_›
+  haveI hsm' : SmoothOfRelativeDimension 1 (pullback.snd π t) := by
+    have : MorphismProperty.IsStableUnderBaseChange (@SmoothOfRelativeDimension 1) :=
+      AlgebraicGeometry.smoothOfRelativeDimension_isStableUnderBaseChange 1
+    exact MorphismProperty.pullback_snd π t hsm
+  rw [sectionsDivisor_baseChange hsm P t,
+    sectionsDivisor_support (pullback.snd π t) hsm' (fun i => sectionBaseChange (P i) t)]
+
 end RelEffCartierDiv
 
 end ModularCurves
