@@ -5,10 +5,10 @@ public import BernoulliRegular.Reflection.WeakSplitting.Final
 public import BernoulliRegular.Reflection.WeakSplitting.QPowerIdealEquiv
 
 /-!
-# Unconditional global identity and final API (REF-21h)
+# Unconditional global identity and final API
 
 This file re-proves `dedekindZeta_eq_tprod_localFactorRat_inv` WITHOUT the
-uniform-residue-degree hypothesis, using REF-21f3
+uniform-residue-degree hypothesis, using
 (`dedekindLocalFactorRat_inv_eq_tsum_idealNormMultiplicity`). Multipliability
 of `(dedekindLocalFactorRat L · s)⁻¹` over `Nat.Primes` is proved via the
 project's Euler-product machinery.
@@ -19,7 +19,6 @@ any rational prime, outside `S`, splits completely in `𝓞 L`) and concludes
 `Module.finrank K L = 1`. NO uniform-residue-degree hypothesis, NO
 multipliability hypotheses.
 
-This closes REF-21.
 -/
 
 @[expose] public section
@@ -35,7 +34,7 @@ open NumberField Ideal Filter Topology
 variable (L : Type*) [Field L] [NumberField L]
 
 /--
-**Unconditional version of `dedekindZeta_eq_tprod_localFactorRat_inv` (REF-21h).**
+**Unconditional version of `dedekindZeta_eq_tprod_localFactorRat_inv`.**
 For any number field `L` and `Re(s) > 1`, the Dedekind zeta function equals the
 tprod of inverse local factors. NO uniform-residue-degree hypothesis.
 -/
@@ -44,7 +43,7 @@ theorem dedekindZeta_eq_tprod_localFactorRat_inv'
     dedekindZeta L s =
       ∏' q : Nat.Primes, (dedekindLocalFactorRat L (q : ℕ) s)⁻¹ := by
   rw [dedekindZeta_eq_tprod_primePowerSeries L hs]
-  exact tprod_congr fun q =>
+  exact tprod_congr fun q ↦
     (dedekindLocalFactorRat_inv_eq_tsum_idealNormMultiplicity L q.2 hs).symm
 
 /--
@@ -52,25 +51,25 @@ theorem dedekindZeta_eq_tprod_localFactorRat_inv'
 Follows from the unconditional Euler-product machinery.
 -/
 theorem multipliable_dedekindLocalFactorRat_inv {s : ℂ} (hs : 1 < s.re) :
-    Multipliable (fun q : Nat.Primes => (dedekindLocalFactorRat L (q : ℕ) s)⁻¹) := by
+    Multipliable (fun q : Nat.Primes ↦ (dedekindLocalFactorRat L (q : ℕ) s)⁻¹) := by
   classical
-  let f : ℕ → ℂ := fun n => (idealNormMultiplicity L n : ℂ) * (n : ℂ) ^ (-s)
+  let f : ℕ → ℂ := fun n ↦ (idealNormMultiplicity L n : ℂ) * (n : ℂ) ^ (-s)
   have hf_zero : f 0 = 0 := by simp [f, idealNormMultiplicity_zero L]
   have hf_one : f 1 = 1 := by simp [f, idealNormMultiplicity_one L]
-  have hf_mul : ∀ {m n : ℕ}, m.Coprime n → f (m * n) = f m * f n := fun {m n} hcop => by
+  have hf_mul : ∀ {m n : ℕ}, m.Coprime n → f (m * n) = f m * f n := fun {m n} hcop ↦ by
     simp only [f]
     rw [idealNormMultiplicity_mul L hcop, Nat.cast_mul, Nat.cast_mul,
       Complex.natCast_mul_natCast_cpow]
     ring
-  have hf_sum : Summable fun n => ‖f n‖ :=
+  have hf_sum : Summable fun n ↦ ‖f n‖ :=
     summable_idealNormMultiplicity_mul_cpow_neg L hs
   have h_eulerProduct : HasProd
-      (fun p : Nat.Primes => ∑' k : ℕ, (idealNormMultiplicity L ((p : ℕ) ^ k) : ℂ) *
+      (fun p : Nat.Primes ↦ ∑' k : ℕ, (idealNormMultiplicity L ((p : ℕ) ^ k) : ℂ) *
         (((p : ℕ) ^ k : ℕ) : ℂ) ^ (-s))
       (∑' n : ℕ, f n) :=
     EulerProduct.eulerProduct_hasProd hf_one hf_mul hf_sum hf_zero
   have h_eulerProduct' : HasProd
-      (fun p : Nat.Primes => (dedekindLocalFactorRat L (p : ℕ) s)⁻¹)
+      (fun p : Nat.Primes ↦ (dedekindLocalFactorRat L (p : ℕ) s)⁻¹)
       (∑' n : ℕ, f n) := by
     convert h_eulerProduct using 1
     funext p
@@ -78,7 +77,7 @@ theorem multipliable_dedekindLocalFactorRat_inv {s : ℂ} (hs : 1 < s.re) :
   exact h_eulerProduct'.multipliable
 
 /--
-**Multipliability of the F-side correction product (REF-21h helper).**
+**Multipliability of the F-side correction product.**
 For a finite set `F : Finset (Ideal (𝓞 L))` of nonzero primes, the function
 `q ↦ ∏ Q ∈ F ∩ T_L(q), (1 - absNorm Q^(-s))` has finite support: only
 rational primes underneath some `Q ∈ F` contribute. Hence multipliable.
@@ -86,17 +85,17 @@ rational primes underneath some `Q ∈ F` contribute. Hence multipliable.
 theorem multipliable_F_correction
     (F : Finset (Ideal (𝓞 L)))
     (hF : ∀ Q ∈ F, Q.IsPrime ∧ Q ≠ ⊥) {s : ℂ} :
-    Multipliable (fun q : Nat.Primes =>
+    Multipliable (fun q : Nat.Primes ↦
       ∏ Q ∈ F ∩ IsDedekindDomain.primesOverFinset (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) (𝓞 L),
         ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-s))) := by
   classical
-  let mkPrime : (Q : Ideal (𝓞 L)) → Q ∈ F → Nat.Primes := fun Q hQ =>
+  let mkPrime : (Q : Ideal (𝓞 L)) → Q ∈ F → Nat.Primes := fun Q hQ ↦
     have h := hF Q hQ
     haveI : Q.IsPrime := h.1
     haveI : NeZero Q := ⟨h.2⟩
     ⟨Ideal.absNorm (Ideal.under ℤ Q), Nat.absNorm_under_prime Q⟩
   let primesUnder : Finset Nat.Primes :=
-    F.attach.image (fun Q => mkPrime Q.val Q.property)
+    F.attach.image (fun Q ↦ mkPrime Q.val Q.property)
   refine multipliable_of_ne_finset_one (s := primesUnder) ?_
   intro q hq
   apply Finset.prod_eq_one
@@ -132,17 +131,17 @@ theorem multipliable_dedekindLocalFactorRatPartial_inv
     (F : Finset (Ideal (𝓞 L)))
     (hF : ∀ Q ∈ F, Q.IsPrime ∧ Q ≠ ⊥)
     {s : ℂ} (hs : 1 < s.re) :
-    Multipliable (fun q : Nat.Primes =>
+    Multipliable (fun q : Nat.Primes ↦
       (dedekindLocalFactorRatPartial L F (q : ℕ) s)⁻¹) := by
   have h_eq : ∀ q : Nat.Primes,
       (dedekindLocalFactorRatPartial L F (q : ℕ) s)⁻¹ =
         (dedekindLocalFactorRat L (q : ℕ) s)⁻¹ *
           ∏ Q ∈ IsDedekindDomain.primesOverFinset (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) (𝓞 L) ∩ F,
-            ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-s)) := fun q =>
+            ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-s)) := fun q ↦
     (dedekindLocalFactorRat_inv_mul_factor_eq_partial_inv L F q.2
       (by linarith : (0 : ℝ) < s.re)).symm
-  rw [show (fun q : Nat.Primes => (dedekindLocalFactorRatPartial L F (q : ℕ) s)⁻¹) =
-    fun q : Nat.Primes => (dedekindLocalFactorRat L (q : ℕ) s)⁻¹ *
+  rw [show (fun q : Nat.Primes ↦ (dedekindLocalFactorRatPartial L F (q : ℕ) s)⁻¹) =
+    fun q : Nat.Primes ↦ (dedekindLocalFactorRat L (q : ℕ) s)⁻¹ *
       ∏ Q ∈ IsDedekindDomain.primesOverFinset (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) (𝓞 L) ∩ F,
         ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-s)) from funext h_eq]
   refine (multipliable_dedekindLocalFactorRat_inv L hs).mul ?_
@@ -154,7 +153,7 @@ theorem multipliable_dedekindLocalFactorRatPartial_inv
 variable (K : Type*) [Field K] [NumberField K] [Algebra K L]
 
 /--
-**Unconditional `dedekindZeta_mul_prod_eq_tprod_partial_inv` (REF-21h).**
+**Unconditional `dedekindZeta_mul_prod_eq_tprod_partial_inv`.**
 Same as the original but without uniformity hypothesis.
 -/
 theorem dedekindZeta_mul_prod_eq_tprod_partial_inv'
@@ -163,16 +162,16 @@ theorem dedekindZeta_mul_prod_eq_tprod_partial_inv'
     dedekindZeta L s * ∏ Q ∈ F, ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-s)) =
       ∏' q : Nat.Primes, (dedekindLocalFactorRatPartial L F (q : ℕ) s)⁻¹ := by
   rw [dedekindZeta_eq_tprod_localFactorRat_inv' L hs,
-    prod_F_eq_tprod_intersect L F hF (fun Q => (1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-s)),
+    prod_F_eq_tprod_intersect L F hF (fun Q ↦ (1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-s)),
     ((multipliable_dedekindLocalFactorRat_inv L hs).hasProd.mul
       (multipliable_F_correction L F hF).hasProd).tprod_eq.symm]
-  refine tprod_congr fun q => ?_
+  refine tprod_congr fun q ↦ ?_
   rw [Finset.inter_comm F (IsDedekindDomain.primesOverFinset _ (𝓞 L))]
   exact dedekindLocalFactorRat_inv_mul_factor_eq_partial_inv L F q.2
     (by linarith : (0 : ℝ) < s.re)
 
 /--
-**Unconditional `dedekindZeta_mul_prod_eq_pow_of_splits` (REF-21h).**
+**Unconditional `dedekindZeta_mul_prod_eq_pow_of_splits`.**
 Same as the original but without uniformity hypothesis.
 -/
 theorem dedekindZeta_mul_prod_eq_pow_of_splits'
@@ -182,12 +181,12 @@ theorem dedekindZeta_mul_prod_eq_pow_of_splits'
     (hsplits : ∀ q : ℕ, q.Prime →
       ∀ P ∈ (IsDedekindDomain.primesOverFinset (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 K)) \ S,
         BernoulliRegular.Ideal.SplitsCompletely (𝓞 L) P)
-    (hMult_partialK : Multipliable (fun q : Nat.Primes =>
+    (hMult_partialK : Multipliable (fun q : Nat.Primes ↦
       (dedekindLocalFactorRatPartial K S (q : ℕ) s)⁻¹))
-    (hF_L_prime : ∀ Q ∈ S.biUnion (fun P => IsDedekindDomain.primesOverFinset P (𝓞 L)),
+    (hF_L_prime : ∀ Q ∈ S.biUnion (fun P ↦ IsDedekindDomain.primesOverFinset P (𝓞 L)),
       Q.IsPrime ∧ Q ≠ ⊥)
     (hS_S_prime : ∀ P ∈ S, P.IsPrime ∧ P ≠ ⊥) :
-    dedekindZeta L s * ∏ Q ∈ S.biUnion (fun P => IsDedekindDomain.primesOverFinset P (𝓞 L)),
+    dedekindZeta L s * ∏ Q ∈ S.biUnion (fun P ↦ IsDedekindDomain.primesOverFinset P (𝓞 L)),
         ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-s)) =
       (dedekindZeta K s * ∏ P ∈ S, ((1 : ℂ) - (Ideal.absNorm P : ℂ) ^ (-s))) ^
         Module.finrank K L := by
@@ -204,7 +203,7 @@ private lemma biUnion_S_isPrime_and_ne_bot
     (S : Finset (Ideal (𝓞 K)))
     (hS_ne : ∀ P ∈ S, P ≠ ⊥)
     (hS_prime : ∀ P ∈ S, P.IsPrime) :
-    ∀ Q ∈ S.biUnion (fun P => IsDedekindDomain.primesOverFinset P (𝓞 L)),
+    ∀ Q ∈ S.biUnion (fun P ↦ IsDedekindDomain.primesOverFinset P (𝓞 L)),
       Q.IsPrime ∧ Q ≠ ⊥ := by
   intro Q hQ
   rw [Finset.mem_biUnion] at hQ
@@ -219,15 +218,15 @@ private lemma biUnion_S_isPrime_and_ne_bot
   exact ⟨hQ_in_set.1, Ideal.ne_bot_of_mem_primesOver hP_ne hQ_in_set⟩
 
 /--
-**REF-21h: the closing API.**
+**The closing API.**
 
 If almost all primes of `K` split completely in `L` — i.e., there exists
 a finite "bad" set `S : Finset (Ideal (𝓞 K))` of nonzero primes such that
 every K-prime above any rational prime, but outside `S`, splits completely
 in `𝓞 L` — then `Module.finrank K L = 1`.
 
-This composes the unconditional global identity (REF-21h) with the
-analytic backbone (REF-21d/e). NO uniform-residue-degree hypothesis,
+This composes the unconditional global identity with the analytic
+backbone. NO uniform-residue-degree hypothesis,
 NO multipliability hypotheses.
 -/
 theorem weakSplittingLemma_of_splits
@@ -239,10 +238,10 @@ theorem weakSplittingLemma_of_splits
     [Module.Finite K L] [Module.Free K L] (h_finrank_pos : 0 < Module.finrank K L) :
     Module.finrank K L = 1 := by
   have hS_S_prime : ∀ P ∈ S, P.IsPrime ∧ P ≠ ⊥ :=
-    fun P hP => ⟨hS_prime P hP, hS_ne P hP⟩
+    fun P hP ↦ ⟨hS_prime P hP, hS_ne P hP⟩
   have hF_L_prime := biUnion_S_isPrime_and_ne_bot L K S hS_ne hS_prime
   apply weakSplittingLemma L K
-    (S.biUnion (fun P => IsDedekindDomain.primesOverFinset P (𝓞 L))) S
+    (S.biUnion (fun P ↦ IsDedekindDomain.primesOverFinset P (𝓞 L))) S
   · exact hF_L_prime
   · exact hS_S_prime
   · intro s hs
