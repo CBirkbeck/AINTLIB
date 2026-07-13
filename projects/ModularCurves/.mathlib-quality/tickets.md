@@ -19151,3 +19151,24 @@ REMAINING for ⟹ / [YF-⊆] (pinned, decreasing size):
       (then `naive_iff_comboFamily_injective`, FullLevelFibre, closes it). (4) [YF-⊆]: combo≠0 at pt ⟹
       ∉ pointVanishSet. The full `fullLevel_divisor_iff_naive_gen` must be RELOCATED downstream of
       SectionsDivisorBaseChange+FullLevelFibre (T-E9 relocation doctrine). (STREAM-YN)
+
+### v10.180a — T-D8-⟹ pigeonhole BUILT; count-identification is the SOLE remaining gate
+`injective_of_range_eq_of_natCard_eq` (SectionsDivisorBaseChange) built + committed:
+`Set.range f = T ∧ #T = #ι ⟹ Injective f`. So the ENTIRE ⟹ scaffolding is now built (5 clean
+axiom-clean lemmas this session): sectionsDivisor_baseChange, sectionsDivisor_support,
+sectionsDivisor_comap_support, injective_of_range_eq_of_natCard_eq, + the whole fibre side
+(FibreFullLevel + FullLevelFibre).
+
+**The SOLE genuinely-hard remaining lemma** (KM 3.7.1 reduced-fibre content):
+  `Nat.card ↥((E.torsionIdeal N).support.preimage (pullback.fst E.π t).continuous) = N²` over a
+  geometric point `t : Spec k → S` (k alg closed, N inv). I.e. the TOPOLOGICAL point count of the
+  finite-étale torsion fibre = N². T-B6 counts SECTIONS (=N², via natCard_sections_eq_finrank +
+  torsion_rank + torsionPointsEquiv); this needs the **topological-points ↔ sections/k-points**
+  identification for a finite étale scheme over k̄ (étale-over-alg-closed-field = disjoint copies of
+  Spec k, so #points = #sections = rank). Not a mathlib citation (Etale/Finite.lean has the ring
+  side, no scheme point-count). Genuine structure theory — the focused next ticket.
+
+Once that count lands: pigeonhole ⟹ base-changed combos have distinct base-points ⟹ (curveIsoPullback
+link to Point.pull) comboFamily injective ⟹ (naive_iff_comboFamily_injective) closes
+`fullLevel_divisor_iff_naive_gen` ⟹ + [YF-⊆] (combo≠0 ⟹ ∉ pointVanishSet). Relocate the bridge
+downstream of SectionsDivisorBaseChange+FullLevelFibre. (STREAM-YN)
