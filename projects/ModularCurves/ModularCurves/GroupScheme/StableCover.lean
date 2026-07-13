@@ -122,6 +122,95 @@ theorem isStableOpen_complOpen : G.IsStableOpen G.complOpen := by
   rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply, hw₁] at hev
   exact hev
 
+/-! ### `[n]`-preimage charts: stable and affine for free
+
+For `G` killed by `n` (morphism form: `ι ≫ [n] = π_G ≫ zero`), multiplication by `n` is
+invariant under translation by `G` — `[n] ∘ act = [n] ∘ pr` — so the `[n]`-preimage of **any**
+open is `G`-stable; and `[n]` is finite, hence affine, so the `[n]`-preimage of any affine
+open is affine. Preimages of a cover form a cover. This kills the `[HG-C3c]` "divisor ↔
+homogeneous-section bridge": the two Weierstrass basic-open charts `D₊(Y), D₊(Z)` of `E`
+pull back to a two-element `G`-stable affine cover directly. -/
+
+section MulPreimage
+
+/-- **The killing identity in action form.** If `G` is killed by `n` (`ι ≫ [n]` is the zero
+section over `G`), then `[n]` coequalizes the translation action and the projection:
+`act ≫ [n] = pr ≫ [n]`. Hom-group computation: `(x + ι t)^n = x^n · (ι t)^n = x^n`. -/
+theorem translationAction_comp_mulByHom (n : ℤ)
+    (hkill : G.ι ≫ E.mulByHom n = G.π ≫ E.zero) :
+    G.translationAction.left ≫ E.mulByHom n = G.actionProj.left ≫ E.mulByHom n := by
+  letI : CommGroup ((Over.mk G.π) ⊗ E.asOver ⟶ E.asOver) := Hom.commGroup
+  letI : CommGroup (Over.mk G.π ⟶ E.asOver) := Hom.commGroup
+  -- composition with `mulBy n` is the `n`-th power in the hom-group
+  have hpow : ∀ f : (Over.mk G.π) ⊗ E.asOver ⟶ E.asOver, f ≫ E.mulBy n = f ^ n := by
+    intro f
+    show f ≫ (𝟙 E.asOver) ^ n = f ^ n
+    rw [GrpObj.comp_zpow, Category.comp_id]
+  have hpowι : G.ιOver ≫ E.mulBy n = G.ιOver ^ n := by
+    show G.ιOver ≫ (𝟙 E.asOver) ^ n = G.ιOver ^ n
+    rw [GrpObj.comp_zpow, Category.comp_id]
+  -- the killing hypothesis says `ιOver ^ n` is the unit of the hom-group
+  have hunit : G.ιOver ^ n = (1 : Over.mk G.π ⟶ E.asOver) := by
+    rw [← hpowι]
+    refine Over.OverMorphism.ext ?_
+    show G.ι ≫ E.mulByHom n = (toUnit (Over.mk G.π) ≫ η[E.asOver]).left
+    rw [hkill, Over.comp_left, E.one_eq_zero]
+    exact ((Category.assoc _ _ _).symm.trans
+      (congrArg (· ≫ E.zero) (Over.w (toUnit (Over.mk G.π))))).symm
+  -- expand the action as a product and kill the `G`-factor
+  have hover : G.translationAction ≫ E.mulBy n = G.actionProj ≫ E.mulBy n := by
+    rw [hpow, hpow, G.translationAction_eq_mul, mul_zpow, ← GrpObj.comp_zpow, hunit]
+    show (fst (Over.mk G.π) E.asOver ≫ (1 : Over.mk G.π ⟶ E.asOver))
+        * (snd (Over.mk G.π) E.asOver) ^ n = _
+    rw [MonObj.comp_one, _root_.one_mul]
+    rfl
+  have h2 : G.translationAction.left ≫ (E.mulBy n).left
+      = G.actionProj.left ≫ (E.mulBy n).left := by
+    simpa only [Over.comp_left] using congrArg CommaMorphism.left hover
+  exact h2
+
+/-- **`[HG-C3` stable charts for free`]`** For `G` killed by `n`, the `[n]`-preimage of *any*
+open of `E` is `G`-stable: the two preimage-opens in the stability predicate agree, since
+`act ≫ [n] = pr ≫ [n]`. -/
+theorem isStableOpen_mulByHom_preimage (n : ℤ)
+    (hkill : G.ι ≫ E.mulByHom n = G.π ≫ E.zero) (U : E.E.Opens) :
+    G.IsStableOpen (E.mulByHom n ⁻¹ᵁ U) := by
+  intro p hp
+  have hp' : (G.actionProj.left ≫ E.mulByHom n).base p ∈ U := by
+    rw [Scheme.Hom.comp_apply]; exact hp
+  have h2 : (G.translationAction.left ≫ E.mulByHom n).base p ∈ U := by
+    rw [G.translationAction_comp_mulByHom n hkill]; exact hp'
+  show (E.mulByHom n).base (G.translationAction.left.base p) ∈ U
+  rwa [Scheme.Hom.comp_apply] at h2
+
+/-- The `[N]`-preimage of an affine open is affine (`[N]` is finite, hence affine). -/
+theorem isAffineOpen_mulByHom_preimage (N : ℕ) [NeZero N] {U : E.E.Opens}
+    (hU : IsAffineOpen U) : IsAffineOpen (E.mulByHom N ⁻¹ᵁ U) := by
+  haveI := E.mulByHom_isFinite N
+  exact hU.preimage (E.mulByHom N)
+
+/-- Preimages of a cover cover. -/
+theorem iSup_mulByHom_preimage_eq_top {κ : Type*} (n : ℤ) (U : κ → E.E.Opens)
+    (hU : iSup U = ⊤) : (⨆ i, E.mulByHom n ⁻¹ᵁ U i) = ⊤ := by
+  apply TopologicalSpace.Opens.ext
+  apply Set.eq_univ_of_univ_subset
+  intro p _
+  have hmem : (E.mulByHom n).base p ∈ iSup U := by rw [hU]; trivial
+  obtain ⟨i, hpV⟩ := TopologicalSpace.Opens.mem_iSup.mp hmem
+  exact TopologicalSpace.Opens.mem_iSup.mpr ⟨i, hpV⟩
+
+/-- **The killing identity from the rank (KM 1.4.2, via BB-DELIGNE).** A subgroup scheme of
+constant rank `N` is killed by `N`, in the morphism form the charts consume: apply the
+point-level Deligne bound to the tautological point `ι` of `E` over `G.π`. -/
+theorem ι_comp_mulByHom_of_hasRank {N : ℕ} [NeZero N] (hG : G.HasRank N) :
+    G.ι ≫ E.mulByHom N = G.π ≫ E.zero := by
+  have hP : (⟨G.ι, G.ι_π⟩ : E.Point G.π) ∈ G.pointSubgroup G.π :=
+    ⟨𝟙 G.G, Category.id_comp _⟩
+  have h0 := hG.smul_eq_zero_of_factors G.π ⟨G.ι, G.ι_π⟩ hP
+  exact (E.smul_eq_zero_iff_comp_mulByHom G.π N ⟨G.ι, G.ι_π⟩).mp h0
+
+end MulPreimage
+
 end FiniteLocallyFreeSubgroup
 
 end EllipticCurve
