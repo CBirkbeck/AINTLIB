@@ -335,6 +335,80 @@ theorem hasExactOrder_pullSection {P : Y.curve.Section} {N : ℕ} [NeZero N]
   rw [hkey] at htrans
   exact htrans
 
+/-- **(KM-W0 transport leaf — Drinfeld full level pulls back along `Ell/R`-morphisms)**
+If `(P, Q)` is a Drinfeld `Γ(N)`-structure on `Y.curve`, so is `(pullSection f P,
+pullSection f Q)` on `X.curve`. This is the `IsFullLevel` functoriality clause (KM 3.1/3.2)
+for the Drinfeld `[Γ(N)]` moduli problem over an arbitrary base — the substrate that
+discharges `gammaFullDrinfeldProblem.map`. Direct (no `IsFullLevel` base-change intermediate):
+the killing clauses transport by `ℤ`-linearity of `pullSection`; the divisor clause combines
+the `N²`-section family into `pullSection f (aP + bQ)` (`pullSection_add`/`_zsmul`), applies the
+dictionary `pullSection f s = pointMapOfHom eA.symm.hom (asSection (pull s))`, then runs the
+base-change ⧸ iso legs (`sectionsDivisor_pointMap_ideal`, `sectionsDivisor_baseChange`,
+`RelEffCartierDiv.baseChange_ideal`, `torsionIdeal_eq_comap`, `torsionIdeal_baseChange`). The
+group-hom hypothesis on `eA.symm` is the arbitrary-base records primitive
+`isMonHom_of_pointedIso_records`. -/
+theorem isFullLevel_pullSection {P Q : Y.curve.Section} {N : ℕ} [NeZero N]
+    (h : Y.curve.IsFullLevel N P Q) :
+    X.curve.IsFullLevel N (EllHom.pullSection R f P) (EllHom.pullSection R f Q) := by
+  obtain ⟨⟨hPk, hQk⟩, hdiv⟩ := h
+  -- `pullSection` as an additive homomorphism (killing clauses + family combination)
+  let φ : Y.curve.Section →+ X.curve.Section :=
+    AddMonoidHom.mk' (EllHom.pullSection R f) (pullSection_add_of_finitePresentation R f)
+  -- the cartesian comparison iso and its records-supplied group-hom equation
+  let eA : X.curve.asOver ≅ (Y.curve.baseChange f.baseHom).asOver :=
+    Over.isoMk (curveIsoPullback R f) f.isPullback.isoPullback_hom_snd
+  have hη_symm :
+      η[(Y.curve.baseChange f.baseHom).asOver] ≫ eA.symm.hom = η[X.curve.asOver] := by
+    rw [Iso.symm_hom, Iso.comp_inv_eq]
+    exact (curveIsoPullbackOver_one R f).symm
+  have hμ_symm := isMonHom_of_pointedIso_records (Y.curve.baseChange f.baseHom) X.curve
+    eA.symm hη_symm
+  -- dictionary: `pullSection` factors as base-change-then-iso (the `hAS`/`hkey` of
+  -- `hasExactOrder_pullSection`, generalised over the section)
+  have hdict : ∀ s : Y.curve.Section,
+      EllipticCurve.pointMapOfHom eA.symm.hom
+        (EllipticCurve.Point.asSection Y.curve f.baseHom
+          (EllipticCurve.Point.pull Y.curve f.baseHom s))
+      = EllHom.pullSection R f s := by
+    intro s
+    have hAS : EllipticCurve.Point.asSection Y.curve f.baseHom
+          (EllipticCurve.Point.pull Y.curve f.baseHom s)
+        = transportSection R f (EllHom.pullSection R f s) := by
+      refine Subtype.ext ?_
+      rw [transportSection_pullSection, EllipticCurve.Point.asSection_coe]
+      rfl
+    rw [hAS]
+    show EllipticCurve.pointMapOfHom eA.symm.hom
+        (EllipticCurve.pointMapOfHom eA.hom (EllHom.pullSection R f s))
+      = EllHom.pullSection R f s
+    rw [Iso.symm_hom]
+    refine Subtype.ext ?_
+    exact (Category.assoc _ _ _).trans
+      ((congrArg (fun m => (EllHom.pullSection R f s).1 ≫ m)
+          (EllipticCurve.iso_hom_left_inv_left eA)).trans (Category.comp_id _))
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · rw [show ((N : ℤ) • EllHom.pullSection R f P) = φ ((N : ℤ) • P) from
+        (map_zsmul φ (N : ℤ) P).symm, hPk]
+    exact map_zero φ
+  · rw [show ((N : ℤ) • EllHom.pullSection R f Q) = φ ((N : ℤ) • Q) from
+        (map_zsmul φ (N : ℤ) Q).symm, hQk]
+    exact map_zero φ
+  · have hfam : (fun i : Fin (N ^ 2) =>
+          (((i : ℕ) % N : ℕ) : ℤ) • EllHom.pullSection R f P
+            + (((i : ℕ) / N : ℕ) : ℤ) • EllHom.pullSection R f Q)
+        = fun i : Fin (N ^ 2) => EllipticCurve.pointMapOfHom eA.symm.hom
+            (EllipticCurve.Point.asSection Y.curve f.baseHom
+              (EllipticCurve.Point.pull Y.curve f.baseHom
+                ((((i : ℕ) % N : ℕ) : ℤ) • P + (((i : ℕ) / N : ℕ) : ℤ) • Q))) := by
+      funext i
+      rw [← pullSection_zsmul_of_finitePresentation R f,
+        ← pullSection_zsmul_of_finitePresentation R f,
+        ← pullSection_add_of_finitePresentation R f, ← hdict]
+    show (RelEffCartierDiv.sectionsDivisor X.curve.π _).ideal = X.curve.torsionIdeal N
+    rw [hfam, EllipticCurve.sectionsDivisor_pointMap_ideal eA.symm,
+      ← sectionsDivisor_baseChange, RelEffCartierDiv.baseChange_ideal, hdiv,
+      EllipticCurve.torsionIdeal_eq_comap eA.symm hη_symm hμ_symm, torsionIdeal_baseChange]
+
 end EllHom
 
 end ModularCurves
