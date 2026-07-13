@@ -19043,3 +19043,14 @@ via `baseChangeEquiv` (AddEquiv, available) + `AddSubgroup`-image. Est. ~150 LOC
 PICKUP: build `transportPoint` (+ additivity, + `dict_transportPoint_pull`) → `isNaiveFullLevel_pullSection_iff`
 (X↔baseChange, forward uses transportPoint; the asSection_pull← Y half uses baseChangeEquiv, tractable) →
 map-field = `(iff).mpr (asSection_pull)`. (STREAM-YN)
+
+## v10.177 — STREAM-YN: ★ lane-B map-field DISCHARGED (gammaFullNaiveProblem total)
+The `gammaFullNaiveProblem.map` field sorry (NaiveProblems:211) is DISCHARGED — `gammaFullNaiveProblem`
+is now a total functor (D-track unblocked). Built the transportPoint fibre-transport infra the v10.176
+scope-correction identified: `Moduli/TransportPoint.lean` (transportPoint + transportPoint_add via
+isMonHom_of_pointedIso_records at arbitrary t + transportPointEquiv AddEquiv + transportPoint_pull_pullSection
+dict + AddEquiv.mem_closure_image), then isNaiveFullLevel_asSection_pull + isNaiveFullLevel_pullSection.
+Downstream Representability builds green. Inherits only the boarded T-E4-family primitive
+(isMonHom_of_one_comp_eq'_of_finitePresentation, route a/c). NEXT: representability half (yFull analogue of
+yOne_representableBy) → structure clauses → MASTER T-E9 (gated on T-E5 engine = CHARTER-FP4, rigidity
+linchpin = CHARTER-P3B3, GEOM). (STREAM-YN)
