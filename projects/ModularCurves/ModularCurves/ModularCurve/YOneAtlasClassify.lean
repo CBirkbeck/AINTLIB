@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: The AINTLIB Authors
+-/
 import ModularCurves.EllipticCurve.Comparison
 import ModularCurves.ModularCurve.YOneAssembly
 import ModularCurves.Moduli.QuotientProblem
@@ -5118,23 +5123,6 @@ itself.  This is the crux that pins the `top` component of an arbitrary classify
 morphism against the glued one. -/
 
 variable {A : Type u} [CommRing A]
-
-private lemma projModelVCIso_hom_congrC {C₁ C₂ : WeierstrassCurve.VariableChange A}
-    (h : C₁ = C₂) (W : WeierstrassCurve A) :
-    (projModelVCIso C₁ W).hom =
-      eqToHom (show projModel (C₁ • W) = projModel (C₂ • W) by rw [h]) ≫
-        (projModelVCIso C₂ W).hom := by
-  subst h
-  rw [eqToHom_refl, Category.id_comp]
-
-private lemma projModelVCIso_hom_congrW (C : WeierstrassCurve.VariableChange A)
-    {V V' : WeierstrassCurve A} (h : V = V') :
-    (projModelVCIso C V).hom =
-      eqToHom (show projModel (C • V) = projModel (C • V') by rw [h]) ≫
-        (projModelVCIso C V').hom ≫
-        eqToHom (show projModel V' = projModel V by rw [h]) := by
-  subst h
-  rw [eqToHom_refl, eqToHom_refl, Category.id_comp, Category.comp_id]
 
 /-- The atlas curve coefficient `a₁` is the first universal coefficient. -/
 theorem tateCurveLocOver_a₁ (R : CommRingCat.{u}) :
