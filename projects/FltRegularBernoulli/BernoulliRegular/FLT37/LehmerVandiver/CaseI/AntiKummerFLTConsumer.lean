@@ -81,7 +81,7 @@ theorem fermatLastTheoremFor_thirtyseven_via_AK_chain
     (kellner : KellnerProp27_thirtyseven_thirtytwo)
     (caseII : CaseIIBridge 37 (CyclotomicField 37 ℚ) 32) :
     FermatLastTheoremFor 37 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   have stage2 : FLT37.LehmerVandiver.CaseI.Stage2KummerRatioK 37 (CyclotomicField 37 ℚ) :=
     flt37_stage2_via_AK_chain (K := CyclotomicField 37 ℚ) (p := 37)
       (by decide : (37 : ℕ) ≠ 2) (by decide : (37 : ℕ) ≠ 3) h_VC
@@ -170,7 +170,7 @@ theorem fermatLastTheoremFor_thirtyseven_via_AK_chain_of_cor8_19_and_noSecondOrd
     (noSecondOrderIrregular : NoSecondOrderIrregularPair 37 32)
     (caseII : CaseIIBridge 37 (CyclotomicField 37 ℚ) 32) :
     FermatLastTheoremFor 37 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   have h_VC : ¬ (37 : ℕ) ∣ hPlus (CyclotomicField 37 ℚ) :=
     not_dvd_hPlus_thirtyseven_of_cor8_19 cor8_19
   have stage2 : FLT37.LehmerVandiver.CaseI.Stage2KummerRatioK 37
@@ -200,7 +200,7 @@ theorem fermatLastTheoremFor_thirtyseven_via_AK_chain_of_VC
     (kellner : KellnerProp27_thirtyseven_thirtytwo)
     (caseII : CaseIIBridge 37 (CyclotomicField 37 ℚ) 32) :
     FermatLastTheoremFor 37 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   exact fermatLastTheoremFor_thirtyseven_via_AK_chain
     (cor8_19Bridge_of_not_dvd_hPlus 37 (CyclotomicField 37 ℚ) h_VC)
     h_VC h_LK_unram_per_case kellner caseII
