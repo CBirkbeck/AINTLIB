@@ -444,6 +444,64 @@ theorem transitionTensor_tmul_one (b : P.chartRing) :
   rw [Algebra.TensorProduct.lift_tmul, map_one, mul_one]
   rfl
 
+/-- **The group-first tensor comparison of the transition** (the order used by the
+Künneth/`chartSpecIso` side): `A_P ⊗[R_P] B_P ⟶ A_Q ⊗[R_Q] B_Q` induced by the three
+restrictions. -/
+noncomputable def transitionTensorA :
+    (P.groupRing ⊗[P.baseRing] P.chartRing) →+* (Q.groupRing ⊗[Q.baseRing] Q.chartRing) :=
+  letI : Algebra P.baseRing (Q.groupRing ⊗[Q.baseRing] Q.chartRing) :=
+    ((algebraMap Q.baseRing (Q.groupRing ⊗[Q.baseRing] Q.chartRing)).comp
+      (P.resBase Q hVQ).hom).toAlgebra
+  letI fA : P.groupRing →ₐ[P.baseRing] (Q.groupRing ⊗[Q.baseRing] Q.chartRing) :=
+    { toRingHom := (Algebra.TensorProduct.includeLeft :
+          Q.groupRing →ₐ[Q.baseRing] Q.groupRing ⊗[Q.baseRing] Q.chartRing).toRingHom.comp
+        (P.resGroup Q hVQ).hom
+      commutes' := fun r => by
+        have h := congrArg (fun m => (CommRingCat.Hom.hom m) r) (P.resGroup_appLE Q hVQ)
+        simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h
+        show (Algebra.TensorProduct.includeLeft :
+            Q.groupRing →ₐ[Q.baseRing] Q.groupRing ⊗[Q.baseRing] Q.chartRing)
+          ((P.resGroup Q hVQ).hom ((G.π.appLE P.V P.groupOpen le_rfl).hom r)) = _
+        rw [h]
+        rfl }
+  letI fB : P.chartRing →ₐ[P.baseRing] (Q.groupRing ⊗[Q.baseRing] Q.chartRing) :=
+    { toRingHom := (Algebra.TensorProduct.includeRight :
+          Q.chartRing →ₐ[Q.baseRing] Q.groupRing ⊗[Q.baseRing] Q.chartRing).toRingHom.comp
+        (P.resChart Q hUQ).hom
+      commutes' := fun r => by
+        have h := congrArg (fun m => (CommRingCat.Hom.hom m) r) (P.resChart_appLE Q hUQ hVQ)
+        simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h
+        show Algebra.TensorProduct.includeRight ((P.resChart Q hUQ).hom
+          ((E.π.appLE P.V P.U P.hover).hom r)) = _
+        rw [h]
+        exact (Algebra.TensorProduct.includeRight (R := Q.baseRing) (A := Q.groupRing)
+          (B := Q.chartRing)).commutes ((P.resBase Q hVQ).hom r) }
+  (Algebra.TensorProduct.lift (R := P.baseRing) (S := P.baseRing) (A := P.groupRing)
+    (B := P.chartRing) (C := Q.groupRing ⊗[Q.baseRing] Q.chartRing)
+    fA fB (fun _ _ => Commute.all _ _)).toRingHom
+
+/-- The A-first transition on the group leg: `T_A (a ⊗ 1) = res a ⊗ 1`. -/
+theorem transitionTensorA_tmul_one (a : P.groupRing) :
+    P.transitionTensorA Q hUQ hVQ (a ⊗ₜ[P.baseRing] 1)
+      = (P.resGroup Q hVQ).hom a ⊗ₜ[Q.baseRing] 1 := by
+  letI : Algebra P.baseRing (Q.groupRing ⊗[Q.baseRing] Q.chartRing) :=
+    ((algebraMap Q.baseRing (Q.groupRing ⊗[Q.baseRing] Q.chartRing)).comp
+      (P.resBase Q hVQ).hom).toAlgebra
+  simp only [transitionTensorA, AlgHom.toRingHom_eq_coe, RingHom.coe_coe]
+  rw [Algebra.TensorProduct.lift_tmul, map_one, mul_one]
+  rfl
+
+/-- The A-first transition on the chart leg: `T_A (1 ⊗ b) = 1 ⊗ res b`. -/
+theorem transitionTensorA_one_tmul (b : P.chartRing) :
+    P.transitionTensorA Q hUQ hVQ ((1 : P.groupRing) ⊗ₜ[P.baseRing] b)
+      = (1 : Q.groupRing) ⊗ₜ[Q.baseRing] (P.resChart Q hUQ).hom b := by
+  letI : Algebra P.baseRing (Q.groupRing ⊗[Q.baseRing] Q.chartRing) :=
+    ((algebraMap Q.baseRing (Q.groupRing ⊗[Q.baseRing] Q.chartRing)).comp
+      (P.resBase Q hVQ).hom).toAlgebra
+  simp only [transitionTensorA, AlgHom.toRingHom_eq_coe, RingHom.coe_coe]
+  rw [Algebra.TensorProduct.lift_tmul, map_one, one_mul]
+  rfl
+
 /-- **The geometric window square, action leg**: the restricted actions of nested patches
 commute with the window inclusions (`resLE` composition laws). -/
 theorem homOfLE_restrictedAction :
