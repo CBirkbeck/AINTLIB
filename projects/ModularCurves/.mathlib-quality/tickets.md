@@ -18463,3 +18463,24 @@ REMAINING for coinvariantsMap: conjugate K by the two coactionSpec bridges + hom
 + Spec.map_injective ⟹ hsq (ring equivariance square) ⟹ mem_coinvariants_of_map fires. Then the
 template glue (windowHom/imageOpens/saturation/tripleIso/GlueData, SchemeQuotient :343-891) → the six
 pins → SIGNAL ★★. (STREAM-G0)
+
+### v10.188-GH — [Γ_H MASTER] interface LANDED + rigidity-discharge decomposed (STREAM-GH)
+Commit (GammaHMaster.lean NEW): `gammaH_representable` — the KM 4.7.0 [B3]/FP4 engine
+(`representable_of_rigid_of_torsor_of_globalModel`, audited FULLY AXIOM-CLEAN) applied to
+P_H := qpd.prob. Pure assembly (relRep repackaged from qpd.relRep via
+relativelyRepresentable_iff_nonempty_relRepData); statement-sorryAx only via gammaHAut [GH1].
+PIN-SET (named hypotheses, consume-by-name): qpd = GHC1 ✓ LIVE (mine) · hQrep = Y(N)
+representability (STREAM-YN (C)) · htors = full-group TorsorData on the level scheme (c5β's
+glSchemeSmul/L4 layer — their marathon queue (c)/(d); NOT duplicated here per seat boundaries)
+· hrig = P_H.Rigid · hQaff/hPaff/hmodel = KM's affine-over-Ell + Weierstrass clauses.
+**[RIG] decomposition (next leaves, GH-owned)**: [RIG-3] bridge
+`QuotientProblemData.rigid_of_geom_free` (Rigid ⟸ geometric H-orbit-freeness; fibre transport
+eT := pullback.map e.top (𝟙) over the geometric point (exists_geometricPoint T-H7d PROVEN, N:=1
+trick); X.pullbackAlong t IS the ⟨Spec k̄, sm, E⟩-literal by delta ⟹ geom_surjective/geom_orbits
+apply literally; empty-base case: iso_eq_refl_of_isEmpty). [RIG-1] the DETECTION ingredient
+(genuinely new): e ≠ refl ⟹ eT ≠ refl at SOME geometric t (Aut of an elliptic scheme has no
+infinitesimal/fibrewise-invisible autos; KM 2.7-adjacent — route via unramifiedness of the aut
+action on torsion or via [N]-faithfulness). [RIG-2] the k̄ Serre lemma (u ≠ 1 on E/k̄ acts ≠ 1
+on E[N](k̄), N ≥ 3; glSmul matrix machinery as in gammaFullNaive_freeAction). Note
+gammaFullNaive_not_rigid_of_le_two (N ≤ 2 stack story) is PROVEN — the N ≥ 3 positive direction
+is the open half. (STREAM-GH)
