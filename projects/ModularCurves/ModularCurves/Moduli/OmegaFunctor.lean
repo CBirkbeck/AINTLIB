@@ -679,4 +679,139 @@ noncomputable def omegaProblem (R : CommRingCat.{u}) : ModuliProblem R where
   map_id X := by ext b; exact omegaBasisMap_id X.unop b
   map_comp φ ψ := by ext b; exact omegaBasisMap_comp ψ.unop φ.unop b
 
+/-! ### T-OM-B9: the inversion acts by `−1` on ω-bases (KM 4.6.2's `{±1}`) -/
+
+/-- **(T-OM-B9)** The inversion `[-1]` as an `Ell/R`-endomorphism over the identity
+of the base. -/
+noncomputable def negEllHom (X : EllObj R) : X ⟶ X where
+  baseHom := 𝟙 X.base
+  base_w := Category.id_comp _
+  top := X.curve.toEllipticCurveGeom.negHom
+  isPullback := X.curve.toEllipticCurveGeom.isPullback_negHom
+  zero_w := X.curve.toEllipticCurveGeom.negHom_zero_w
+
+/-- **(T-OM-B9)** Inversion is an `Ell/R`-automorphism (an involution). -/
+noncomputable def negEllIso (X : EllObj R) : X ≅ X where
+  hom := negEllHom X
+  inv := negEllHom X
+  hom_inv_id :=
+    EllHom.ext (Category.id_comp _) X.curve.toEllipticCurveGeom.negHom_negHom
+  inv_hom_id :=
+    EllHom.ext (Category.id_comp _) X.curve.toEllipticCurveGeom.negHom_negHom
+
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-OM-B9)** The mixed comparison at the inversion is `−1` times the transition
+cocycle: chartwise, `[-1]^* ω = −ω`. -/
+private theorem omegaCompat_neg_w (X : EllObj R)
+    (i' i : X.curve.toEllipticCurveGeom.atlas.ι) :
+    (omegaCompat (negEllHom X)).w i' i =
+      Scheme.resUnit (le_inf inf_le_left inf_le_right :
+          (omegaCocycle X.curve.toEllipticCurveGeom).U i' ⊓
+            ((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle
+              (negEllHom X).baseHom).U i ≤ _)
+        ((omegaCocycle X.curve.toEllipticCurveGeom).u i' i) * (-1) := by
+  refine Scheme.unit_ext_of_affine_res X.base (fun V hV => ?_)
+  rw [show (omegaCompat (negEllHom X)).w i' i =
+      (omegaCompatGlue (negEllHom X) i' i).1 from rfl,
+    (omegaCompatGlue (negEllHom X) i' i).2 V hV]
+  -- split the mixed comparison through the plain restriction
+  rw [show ((X.curve.toEllipticCurveGeom.atlas.presentation i').restrict
+        (hV.trans inf_le_left)).transUnit
+      ((X.curve.toEllipticCurveGeom.atlas.presentation i).transport
+        (negEllHom X).baseHom (negEllHom X).top (negEllHom X).isPullback
+        (negEllHom X).zero_w (hV.trans inf_le_right)) =
+    ((X.curve.toEllipticCurveGeom.atlas.presentation i').restrict
+        (hV.trans inf_le_left)).transUnit
+      ((X.curve.toEllipticCurveGeom.atlas.presentation i).restrict
+        (hV.trans inf_le_right)) *
+    ((X.curve.toEllipticCurveGeom.atlas.presentation i).restrict
+        (hV.trans inf_le_right)).transUnit
+      ((X.curve.toEllipticCurveGeom.atlas.presentation i).transport
+        (negEllHom X).baseHom (negEllHom X).top (negEllHom X).isPullback
+        (negEllHom X).zero_w (hV.trans inf_le_right)) from
+    (transUnit_trans _ _ _).symm]
+  rw [show ((X.curve.toEllipticCurveGeom.atlas.presentation i).restrict
+        (hV.trans inf_le_right)).transUnit
+      ((X.curve.toEllipticCurveGeom.atlas.presentation i).transport
+        (negEllHom X).baseHom (negEllHom X).top (negEllHom X).isPullback
+        (negEllHom X).zero_w (hV.trans inf_le_right)) = -1 from
+    transUnit_transport_neg i (negEllHom X).isPullback (negEllHom X).zero_w
+      (hV.trans inf_le_right)]
+  rw [show ((X.curve.toEllipticCurveGeom.atlas.presentation i').restrict
+        (hV.trans inf_le_left)).transUnit
+      ((X.curve.toEllipticCurveGeom.atlas.presentation i).restrict
+        (hV.trans inf_le_right)) =
+    Scheme.resUnit (hV.trans (le_inf inf_le_left inf_le_right))
+      ((omegaCocycle X.curve.toEllipticCurveGeom).u i' i) from
+    (omegaCocycle_res X.curve.toEllipticCurveGeom i' i V
+      (hV.trans (le_inf inf_le_left inf_le_right))).symm]
+  rw [map_mul]
+  refine congrArg₂ (· * ·) ?_ ?_
+  · refine Units.ext ?_
+    simp only [Scheme.resUnit_val, Scheme.resLE_resLE]
+  · refine Units.ext ?_
+    simp only [Scheme.resUnit_val, Units.val_neg, Units.val_one, map_neg, map_one]
+
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-OM-B9 ★)** The inversion acts by `−1` on the `S`-bases of `ω_{E/S}` —
+KM 4.6.2's `{±1}`-action, `[-1]^* ω = −ω`. -/
+theorem omegaBasisMap_negEll (X : EllObj R)
+    (b : OmegaBasis X.curve.toEllipticCurveGeom) :
+    omegaBasisMap (negEllHom X) b = (-1 : Γ(X.base, ⊤)ˣ) • b := by
+  refine Subtype.ext (Subtype.ext (funext fun i' => ?_))
+  refine TopCat.Sheaf.eq_of_locally_eq' X.base.sheaf
+    (fun j : X.curve.toEllipticCurveGeom.atlas.ι =>
+      (⊤ : X.base.Opens) ⊓ (omegaCocycle X.curve.toEllipticCurveGeom).U i' ⊓
+        ((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle
+          (negEllHom X).baseHom).U j)
+    ((⊤ : X.base.Opens) ⊓ (omegaCocycle X.curve.toEllipticCurveGeom).U i')
+    (fun j => homOfLE inf_le_left) (by
+      intro x hx
+      obtain ⟨j, hxj⟩ := X.curve.toEllipticCurveGeom.atlas.covers x
+      exact Opens.mem_iSup.mpr ⟨j, hx, hxj⟩) _ _ (fun j => ?_)
+  show Scheme.resLE inf_le_left
+      (((omegaCompat (negEllHom X)).transportFun _).1 i') =
+    Scheme.resLE inf_le_left (((-1 : Γ(X.base, ⊤)ˣ) • b).1.1 i')
+  rw [(omegaCompat (negEllHom X)).transportFun_res _ i' j]
+  rw [omegaCompat_neg_w X i' j]
+  rw [show ((-1 : Γ(X.base, ⊤)ˣ) • b).1 = ((-1 : Γ(X.base, ⊤)ˣ)).val • b.1 from rfl]
+  -- compatibility of `b` restricted to the piece
+  have hb := congrArg (⇑(Scheme.resLE (X := X.base)
+    (show (⊤ : X.base.Opens) ⊓ (omegaCocycle X.curve.toEllipticCurveGeom).U i' ⊓
+        ((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle
+          (negEllHom X).baseHom).U j ≤
+      (⊤ : X.base.Opens) ⊓ (omegaCocycle X.curve.toEllipticCurveGeom).U i' ⊓
+        (omegaCocycle X.curve.toEllipticCurveGeom).U j from le_rfl))) (b.1.2 i' j)
+  simp only [Scheme.resUnit_val, Scheme.resLE_resLE, map_mul, Units.val_mul,
+    Units.val_neg, Units.val_one, map_neg, map_one, mul_neg, neg_mul, one_mul, mul_one,
+    Scheme.UnitCocycle.sections.smul_coe] at hb ⊢
+  -- the pulled `j`-component is the restriction of `b j`
+  rw [show ((((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle
+      (negEllHom X).baseHom).sectionsMap
+      (show (⊤ : X.base.Opens) ≤ (negEllHom X).baseHom ⁻¹ᵁ
+        (⊤ : X.base.Opens) from fun x _ => trivial)
+      ((omegaCocycle X.curve.toEllipticCurveGeom).sectionsPullback
+        (negEllHom X).baseHom b.1)).1 j) =
+    Scheme.resLE (inf_le_inf_right _ (show (⊤ : X.base.Opens) ≤ ⊤ from le_rfl))
+      (sectionsMapLE (𝟙 X.base)
+        (show ((⊤ : X.base.Opens) ⊓ (omegaCocycle X.curve.toEllipticCurveGeom).U j :
+            X.base.Opens) ≤
+          (𝟙 X.base : X.base ⟶ X.base) ⁻¹ᵁ ((⊤ : X.base.Opens) ⊓
+            (omegaCocycle X.curve.toEllipticCurveGeom).U j) from fun _ hy => hy)
+        (b.1.1 j)) from rfl,
+    sectionsMapLE_id]
+  rw [neg_inj]
+  erw [Scheme.resLE_resLE, Scheme.resLE_resLE]
+  exact hb.symm
+
+/-- **(T-OM-B9 ★)** KM 4.6.2's `{±1}` on the ω-problem: the inversion automorphism
+acts as the global unit `−1`. -/
+theorem omegaProblem_map_negEll (X : EllObj R)
+    (b : OmegaBasis X.curve.toEllipticCurveGeom) :
+    (omegaProblem R).map (negEllHom X).op b = (-1 : Γ(X.base, ⊤)ˣ) • b :=
+  omegaBasisMap_negEll X b
+
 end ModularCurves
