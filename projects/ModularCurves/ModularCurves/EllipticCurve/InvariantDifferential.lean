@@ -44,7 +44,9 @@ The `(Ell/R)`-functoriality (base change of bases along cartesian pointed square
 `omegaBasisMap`) is in `Moduli/OmegaFunctor.lean` (T-OM-B7).
 -/
 
-open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve
+open AlgebraicGeometry CategoryTheory Limits WeierstrassCurve HomogeneousIdeal
+
+attribute [local instance] MvPolynomial.gradedAlgebra
 
 universe u
 
@@ -98,12 +100,17 @@ noncomputable def pointedIso (P Q : LocalPresentation G V) :
 /-- **(T-OM-B2)** The induced model isomorphism respects the structure morphisms. -/
 theorem pointedIso_π (P Q : LocalPresentation G V) :
     (P.pointedIso Q).hom ≫ projModelπ Q.W = projModelπ P.W := by
-  sorry
+  show (P.e.symm ≪≫ Q.e).hom ≫ projModelπ Q.W = projModelπ P.W
+  rw [Iso.trans_hom, Iso.symm_hom, Category.assoc, Q.compat_π, ← P.compat_π,
+    Iso.inv_hom_id_assoc]
 
 /-- **(T-OM-B2)** The induced model isomorphism respects the points at infinity. -/
 theorem pointedIso_zero (P Q : LocalPresentation G V) :
     projModelZero P.W ≫ (P.pointedIso Q).hom = projModelZero Q.W := by
-  sorry
+  show projModelZero P.W ≫ (P.e.symm ≪≫ Q.e).hom = projModelZero Q.W
+  rw [Iso.trans_hom, Iso.symm_hom, ← P.compat_zero, Category.assoc, Category.assoc,
+    Iso.hom_inv_id_assoc, ← Category.assoc]
+  exact Q.compat_zero
 
 /-- **(T-OM-B2)** The comparison variable change of two presentations over the same
 affine open: the unique `C` with `C • Q.W = P.W` inducing the chart comparison — KM
@@ -114,15 +121,25 @@ noncomputable def transVC (P Q : LocalPresentation G V) : VariableChange Γ(S, V
     (P.pointedIso_zero Q)).choose
 
 /-- **(T-OM-B2)** The comparison variable change acts by `C • Q.W = P.W`. -/
-theorem transVC_smul (P Q : LocalPresentation G V) : P.transVC Q • Q.W = P.W := by
-  sorry
+theorem transVC_smul (P Q : LocalPresentation G V) : P.transVC Q • Q.W = P.W :=
+  (pointedIso_exists_variableChange P.W Q.W (P.pointedIso Q) (P.pointedIso_π Q)
+    (P.pointedIso_zero Q)).choose_spec.choose
 
 /-- **(T-OM-B2)** The defining property: the chart comparison is the model isomorphism
 of the comparison variable change. -/
 theorem transVC_spec (P Q : LocalPresentation G V) :
     (P.pointedIso Q).hom =
-      eqToHom (by rw [P.transVC_smul Q]) ≫ (projModelVCIso (P.transVC Q) Q.W).hom := by
-  sorry
+      eqToHom (by rw [P.transVC_smul Q]) ≫ (projModelVCIso (P.transVC Q) Q.W).hom :=
+  (pointedIso_exists_variableChange P.W Q.W (P.pointedIso Q) (P.pointedIso_π Q)
+    (P.pointedIso_zero Q)).choose_spec.choose_spec
+
+/-- Transport of the model isomorphism along an equality of curves. -/
+private theorem projModelVCIso_congr {R : Type u} [CommRing R]
+    {W₁ W₂ : WeierstrassCurve R} (h : W₁ = W₂) (C : VariableChange R) :
+    (projModelVCIso C W₁).hom =
+      eqToHom (by rw [h]) ≫ (projModelVCIso C W₂).hom ≫ eqToHom (by rw [h]) := by
+  cases h
+  simp
 
 /-- **(T-OM-B2)** Uniqueness: any variable change with the defining property is the
 comparison variable change (faithfulness of the model action,
@@ -131,18 +148,36 @@ theorem transVC_unique (P Q : LocalPresentation G V) (C : VariableChange Γ(S, V
     (hC : C • Q.W = P.W)
     (h : (P.pointedIso Q).hom = eqToHom (by rw [hC]) ≫ (projModelVCIso C Q.W).hom) :
     C = P.transVC Q := by
-  sorry
+  refine projModelVCIso_injective C (P.transVC Q) Q.W
+    (by rw [hC, P.transVC_smul Q]) ?_
+  have h2 := (P.transVC_spec Q).symm.trans h
+  -- h2 : eqToHom b ≫ isoT.hom = eqToHom a ≫ isoC.hom
+  have h3 := congrArg
+    (fun t => eqToHom (show projModel (C • Q.W) = projModel P.W by rw [hC]) ≫ t) h2.symm
+  simpa [eqToHom_trans_assoc] using h3
 
 /-- **(T-OM-B2)** Reflexivity: the comparison of a presentation with itself is the
 identity variable change (`projModelVCIso_one` + uniqueness). -/
-theorem transVC_self (P : LocalPresentation G V) : P.transVC P = 1 := by
-  sorry
+theorem transVC_self (P : LocalPresentation G V) : P.transVC P = 1 :=
+  (P.transVC_unique P 1 (one_smul _ _) (by
+    show (P.e.symm ≪≫ P.e).hom = _
+    rw [Iso.trans_hom, Iso.symm_hom, Iso.inv_hom_id, projModelVCIso_one, eqToHom_trans,
+      eqToHom_refl])).symm
 
 /-- **(T-OM-B2)** The cocycle law: comparisons compose according to the group law
 (`projModelVCIso_mul` + uniqueness). -/
 theorem transVC_trans (P Q R' : LocalPresentation G V) :
     P.transVC Q * Q.transVC R' = P.transVC R' := by
-  sorry
+  refine P.transVC_unique R' (P.transVC Q * Q.transVC R')
+    (by rw [mul_smul, Q.transVC_smul R', P.transVC_smul Q]) ?_
+  have hsplit : (P.pointedIso R').hom = (P.pointedIso Q).hom ≫ (Q.pointedIso R').hom := by
+    show (P.e.symm ≪≫ R'.e).hom =
+      (P.e.symm ≪≫ Q.e).hom ≫ (Q.e.symm ≪≫ R'.e).hom
+    simp [Iso.trans_hom, Iso.symm_hom]
+  rw [hsplit, P.transVC_spec Q, Q.transVC_spec R', projModelVCIso_mul]
+  rw [projModelVCIso_congr
+    (show Q.transVC R' • R'.W = Q.W from Q.transVC_smul R') (P.transVC Q)]
+  simp [eqToHom_trans_assoc, Category.assoc]
 
 /-- **(T-OM-B2)** The transition unit of two presentations: the `u`-component of the
 comparison variable change — the number by which the two classical chart bases
@@ -152,12 +187,14 @@ noncomputable def transUnit (P Q : LocalPresentation G V) : Γ(S, V.1)ˣ :=
 
 /-- **(T-OM-B2)** The transition unit is normalized on the diagonal. -/
 theorem transUnit_self (P : LocalPresentation G V) : P.transUnit P = 1 := by
-  sorry
+  rw [transUnit, P.transVC_self]
+  rfl
 
 /-- **(T-OM-B2)** The transition units satisfy the cocycle law. -/
 theorem transUnit_trans (P Q R' : LocalPresentation G V) :
     P.transUnit Q * Q.transUnit R' = P.transUnit R' := by
-  sorry
+  rw [transUnit, transUnit, transUnit, ← P.transVC_trans Q R']
+  rfl
 
 /-! ### T-OM-B3: transport along a cartesian pointed square, and restriction -/
 
@@ -291,7 +328,14 @@ units: any two bases differ by a unique global unit — the `𝔾ₘ`-trivializa
 board records as "ω3 = T-A4's torsor form". -/
 theorem OmegaBasis.existsUnique_unit_smul {G : EllipticCurveGeom S}
     (b b' : OmegaBasis G) : ∃! g : Γ(S, ⊤)ˣ, g • b = b' := by
-  sorry
+  obtain ⟨g₀, hg₀, hg₀uniq⟩ := (omegaCocycle G).exists_unique_smul_eq b.2 b'.1
+  obtain ⟨h₀, hh₀, -⟩ := (omegaCocycle G).exists_unique_smul_eq b'.2 b.1
+  have hgh : g₀ * h₀ = 1 := by
+    refine (omegaCocycle G).smul_left_injective b'.2 (g := g₀ * h₀) (g' := 1) ?_
+    rw [mul_smul, hh₀, hg₀, one_smul]
+  have hhg : h₀ * g₀ = 1 := by rw [mul_comm]; exact hgh
+  refine ⟨⟨g₀, h₀, hgh, hhg⟩, Subtype.ext hg₀, fun g₁ hg₁ => Units.ext ?_⟩
+  exact hg₀uniq g₁.val (congrArg Subtype.val hg₁)
 
 /-! ### T-OM-B8: the negation variable change -/
 
@@ -309,13 +353,66 @@ the elliptic inversion scales every basis of `ω_{E/S}` by `−1` (KM 4.6.2's `{
 
 /-- **(T-OM-B8)** The negation variable change fixes the curve. -/
 theorem negVC_smul (W : WeierstrassCurve R) : negVC W • W = W := by
-  sorry
+  ext <;>
+    simp [negVC, WeierstrassCurve.variableChange_def, Units.val_neg, Units.val_one] <;>
+    ring
+
+/-- **(T-OM-B8)** The negation and variable-change substitution vectors agree. -/
+theorem vcMvSubst_negVC (W : WeierstrassCurve R) : vcMvSubst (negVC W) = negVec W := by
+  funext i
+  fin_cases i <;>
+    simp [vcMvSubst, negVC, negVec, MvPolynomial.smul_eq_C_mul, Units.val_neg,
+      Units.val_one] <;>
+    ring
+
+private lemma mk_heq' {R' : Type u} [CommRing R'] {V V' : WeierstrassCurve R'} (e : V = V')
+    (q : MvPolynomial (Fin 3) R') :
+    HEq (Ideal.Quotient.mk (projIdeal V).toIdeal q)
+      (Ideal.Quotient.mk (projIdeal V').toIdeal q) := by
+  subst e; rfl
+
+private lemma gradedHom_heq' {R' : Type u} [CommRing R'] (W : WeierstrassCurve R')
+    {V V' : WeierstrassCurve R'} (e : V = V')
+    (g : GradedRingHom (quotientGrading (projIdeal W))
+      (quotientGrading (projIdeal V)))
+    (g' : GradedRingHom (quotientGrading (projIdeal W))
+      (quotientGrading (projIdeal V')))
+    (h : ∀ x, HEq (g x) (g' x)) : HEq g g' := by
+  subst e
+  exact heq_of_eq (GradedRingHom.ext fun x => eq_of_heq (h x))
+
+private lemma projMap_transport_heq' {R' : Type u} [CommRing R'] (W : WeierstrassCurve R')
+    {V V' : WeierstrassCurve R'} (e : V' = V)
+    (g : GradedRingHom (quotientGrading (projIdeal W))
+      (quotientGrading (projIdeal V)))
+    (hg : (quotientGrading (projIdeal V))₊ ≤ ((quotientGrading (projIdeal W))₊).map g)
+    (g' : GradedRingHom (quotientGrading (projIdeal W))
+      (quotientGrading (projIdeal V')))
+    (hg' : (quotientGrading (projIdeal V'))₊ ≤ ((quotientGrading (projIdeal W))₊).map g')
+    (hgg : HEq g g') :
+    Proj.map g hg = eqToHom (congrArg projModel e.symm) ≫ Proj.map g' hg' := by
+  subst e
+  obtain rfl := eq_of_heq hgg
+  simp
 
 /-- **(T-OM-B8)** The negation morphism of the projective model is the model
 isomorphism of the negation variable change: both are `Proj.map` of the same graded
 substitution (`negVec` vs `vcMvSubst (negVC W)`). -/
 theorem negModelHom_eq_negVC (W : WeierstrassCurve R) :
     negModelHom W = eqToHom (by rw [negVC_smul]) ≫ (projModelVCIso (negVC W) W).hom := by
-  sorry
+  have key : (projModelVCIso (negVC W) W).hom =
+      eqToHom (congrArg projModel (negVC_smul W)) ≫ negModelHom W := by
+    rw [show (projModelVCIso (negVC W) W).hom =
+      Proj.map (vcGradedHom (negVC W) W) (vcGradedHom_irrelevant_le (negVC W) W) from rfl,
+      negModelHom]
+    refine projMap_transport_heq' W (e := (negVC_smul W).symm) _ _ _ _
+      (gradedHom_heq' W (negVC_smul W) _ _ fun x => ?_)
+    obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+    rw [vcGradedHom, quotientGradingMap_mk, negGradedQuot,
+      quotientGradingMap_mk]
+    refine (mk_heq' (negVC_smul W) _).trans (heq_of_eq (congrArg _ ?_))
+    show MvPolynomial.aeval (vcMvSubst (negVC W)) a = (MvPolynomial.aeval (negVec W)) a
+    rw [vcMvSubst_negVC]
+  rw [key, ← Category.assoc, eqToHom_trans, eqToHom_refl, Category.id_comp]
 
 end ModularCurves
