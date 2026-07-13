@@ -18110,3 +18110,38 @@ clean, relRep only-GHB6-sorryAx; GHB7-0 fork adjudicated to β). No new action; 
 - **PR-A #5680** (dev/modular-curves → main): clean-room GREEN at 61696bb83 (3798 jobs; the 2-red cascade repaired). Branch has since advanced (GH GHB7 chain, G0 C3a, KM Γ₁ scaffold) — **re-verify at the tip at merge time.**
 - **PR-B #5790** (dev/modular-curves-y1 → main): clean-room GREEN at d9f2fbbb7 (4212 jobs, real exit 0, zero errors); [YF-ETALE]★ + T-D8-bridge + T-E9 MASTER wiring.
 - **⚠ main is churning** (cleanup fleet: origin/main moved e0c5b0d40→3109d4d97 this turn). BOTH PRs will need rebase onto current main + re-verify before merge; the y1 branch's `Basic.lean`/`FullLevelClopen` overlaps files the cleanup fleet touches — integration is a main-coordinator concern. Producer-side: keep the branches buildable; absorb the statement-preserving cleanup flow-back at rebase.
+
+## Amendments v10.179 (2026-07-13, coordinator): ★ [T-E-OMEGA] UN-DEMOTED + STAFFED (owner directive) — the shared-engine gate goes live; route R1 confirmed ungated (stale header corrected); consolidated WORK-ORDERS.md created (the openers now have a findable home)
+
+**Owner directive this turn:** "when did i demote it? lets get it back up and running."
+
+**When it was demoted (the record):** T-E-OMEGA was **FUNDED 2026-07-08 (v10.27, DECISION 2** —
+the level-4 detour was rejected in its favor), then set to **on-demand at v10.36** (~2026-07-08/09,
+mid Y1-first): the engine path was re-routed through "route (a)" (the A711 trace-invariants descent)
+which does not need ω, so ω "moves to LAST/on-demand … executed only when a consumer demands it"
+(CHARTER-A amendment, board ~9268). **It was never killed — it stayed FUNDED, gated behind that
+on-demand condition.** The condition has now fired: the shared `representable_iff` engine (KM 4.7.0),
+which Y(N)+Γ₁+Γ_H ALL consume (v10.178 convergence), demands ω. → **UN-DEMOTED to critical-path.**
+
+**Route R1 is UNGATED — the board header was stale.** The [T-E-OMEGA] section (~2209) reads
+"BLOCKED-ON-T-W7.1b", written 2026-07-08 when 1b was in-flight. Verified at source THIS turn:
+**T-W7.1b = `pointedIso_exists_variableChange` is PROVEN sorry-free** (`Comparison.lean:162`; file
+0 sorries), and `projModelVCIso_mul` is in `ModelVariableChange.lean`. So R1's gate is cleared; the
+only thing that kept ω parked was the on-demand demotion, now lifted. (Header correction noted; the
+section body's R1/R2 decomposition stands.)
+
+**STAFFED: STREAM-OMEGA = the freed YN seat** (YN's Y(N) charter is BEASTMODE-DONE; its remaining
+conjuncts auto-complete when ω lands — so its seat is best spent BUILDING the gate it waits on).
+Charter: `inbox/STREAM-OMEGA.md`. First act = the worker's own `/develop --decompose` of route R1
+(v10.8), target new `EllipticCurve/InvariantDifferential.lean`, ω1→ω5; the T-E14 Legendre unblock
+is the ★★ that flips `representable_iff`. Sentinel `beastmode_active.OMEGA`.
+
+**Unblock chain (why this is the highest-leverage seat):**
+`ω_{E/S}` → T-E12/T-E13/**T-E14** → T-E5e → T-E5f (recollement over ℤ[1/6]) → the ℤ[1/2]-half of
+KM 4.7 → `representable_iff` de-sorried → **Y(N) MASTER + Γ₁-Drinfeld `.Representable` + Γ_H MASTER
+all complete at once.** (T-E15, the ℤ[1/3] half, is already unblocked.)
+
+**Process fix — WORK-ORDERS.md created** (`inbox/WORK-ORDERS.md`): the single findable home for
+every seat's paste-ready opener (owner's request — they were scattered across turn-summaries + the
+per-stream inboxes). Four active seats now: **G0** (Hopf SIGNAL), **KM** (Γ₁ rel-rep ★), **GH**
+(GHC1), **OMEGA** (the shared-engine gate). Coordinator keeps it current each dispatch.
