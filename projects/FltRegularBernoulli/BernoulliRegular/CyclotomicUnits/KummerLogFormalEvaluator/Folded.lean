@@ -21,9 +21,7 @@ open PadicLogSetup PadicLogSetup.DworkParameter
 
 variable (p : ℕ) [Fact p.Prime]
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-variable [NumberField.IsCMField K]
 
-omit [NumberField.IsCMField K] in
 /-- The cyclotomic action transports the unscaled normalized Artin-Hasse
 finite coordinate to the scaled coordinate in the matching finite quotient. -/
 theorem quotient_mk_valuedIntegerCyclotomicEquiv_dworkParameterNormalizedCoordApprox
@@ -65,7 +63,6 @@ theorem quotient_mk_valuedIntegerCyclotomicEquiv_dworkParameterNormalizedCoordAp
   simpa [I, e, dworkParameterNormalizedCoordApprox,
     scaledDworkParameterNormalizedCoordApprox, map_sub] using hcoord
 
-omit [NumberField.IsCMField K] in
 /-- The unscaled normalized Artin-Hasse finite logarithm at the Dwork
 parameter approximant, at the Kummer precision. -/
 noncomputable def dworkParameterNormalizedFiniteLogApprox :
@@ -77,7 +74,6 @@ noncomputable def dworkParameterNormalizedFiniteLogApprox :
       (dworkParameterNormalizedCoordApprox_mem_lambdaIdeal
         (p := p) (K := K) (p - 2)))
 
-omit [NumberField.IsCMField K] in
 /-- The scaled normalized Artin-Hasse finite logarithm at the Dwork parameter
 approximant, at the Kummer precision. -/
 noncomputable def scaledDworkParameterNormalizedFiniteLogApprox
@@ -91,7 +87,6 @@ noncomputable def scaledDworkParameterNormalizedFiniteLogApprox
       (scaledDworkParameterNormalizedCoordApprox_mem_lambdaIdeal
         (p := p) (K := K) a (p - 2)))
 
-omit [NumberField.IsCMField K] in
 /-- The folded same-prime finite logarithm at precision `lambda^(p - 1)`.
 
 This is the finite quotient representative
@@ -105,7 +100,6 @@ noncomputable def samePrimeFoldedFiniteLogPowPred
     samePrimeFiniteLogTerm (p := p) (K := K) (p - 2) n x hx) +
   samePrimeFiniteLogTerm (p := p) (K := K) (p - 2) p x hx
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteLog_eq_samePrimeFoldedFiniteLogPowPred
     (hp_three : 3 ≤ p)
     {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
@@ -114,7 +108,6 @@ theorem samePrimeFiniteLog_eq_samePrimeFoldedFiniteLogPowPred
   samePrimeFiniteLog_eq_sum_Icc_add_p_term_pow_pred
     (p := p) (K := K) hp_three hx
 
-omit [NumberField.IsCMField K] in
 /-- Folded finite-log representative for the unscaled normalized
 Artin-Hasse factor at the Dwork parameter. -/
 noncomputable def dworkParameterNormalizedFoldedFiniteLogApprox :
@@ -125,7 +118,6 @@ noncomputable def dworkParameterNormalizedFoldedFiniteLogApprox :
     (dworkParameterNormalizedCoordApprox_mem_lambdaIdeal
       (p := p) (K := K) (p - 2))
 
-omit [NumberField.IsCMField K] in
 /-- Folded finite-log representative for the scaled normalized
 Artin-Hasse factor at `omega(a) * varpi`. -/
 noncomputable def scaledDworkParameterNormalizedFoldedFiniteLogApprox
@@ -138,7 +130,6 @@ noncomputable def scaledDworkParameterNormalizedFoldedFiniteLogApprox
     (scaledDworkParameterNormalizedCoordApprox_mem_lambdaIdeal
       (p := p) (K := K) a (p - 2))
 
-omit [NumberField.IsCMField K] in
 /-- The specialized folded representative for the normalized Kummer quotient:
 the folded unscaled normalized logarithm minus the folded scaled normalized
 logarithm. -/
@@ -150,7 +141,6 @@ noncomputable def kummerLogDworkArtinHasseSpecializedFoldedFiniteLog
       (p := p) (K := K)
       (kummerLogColumnIndex (p := p) hp_three a : ZMod p)
 
-omit [NumberField.IsCMField K] in
 /-- CU-11f2b2c3: the Dwork Artin-Hasse specialized finite logarithm is
 represented by the folded same-prime expression. -/
 theorem kummerLogDworkArtinHasseSpecializedFiniteLog_eq_folded
@@ -172,7 +162,6 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLog_eq_folded
         (kummerLogColumnIndex (p := p) hp_three a : ZMod p) (p - 2))]
   rfl
 
-omit [NumberField.IsCMField K] in
 /-- The folded representative after reducing to the `p - 1` quotient used by
 Dwork-coordinate coefficients. -/
 theorem kummerLogDworkArtinHasseSpecializedFiniteLog_factorPow_eq_folded
@@ -188,7 +177,6 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLog_factorPow_eq_folded
   rw [kummerLogDworkArtinHasseSpecializedFiniteLog_eq_folded
     (p := p) (K := K) hp_three a]
 
-omit [NumberField.IsCMField K] in
 /-- The scaled normalized Artin-Hasse finite logarithm is the cyclotomic image
 of the unscaled normalized finite logarithm at the Kummer precision. -/
 theorem samePrimeFiniteLog_scaledNormalizedCoordApprox_eq_quotientMap
@@ -242,7 +230,6 @@ theorem samePrimeFiniteLog_scaledNormalizedCoordApprox_eq_quotientMap
       (p := p) (K := K) (N := p - 2) a hx
   simpa [e, x, y] using hlog.symm.trans hmap.symm
 
-omit [NumberField.IsCMField K] in
 /-- Factoring a cyclotomic quotient map to lower lambda-adic precision commutes
 with first factoring the source quotient. -/
 theorem quotientMap_valuedIntegerCyclotomicEquiv_factorPow
@@ -272,7 +259,6 @@ theorem quotientMap_valuedIntegerCyclotomicEquiv_factorPow
 set_option maxHeartbeats 2000000 in
 -- The statement contains the p-level lambda quotient and two finite-log
 -- approximants; elaborating the quotient type needs a local heartbeat bump.
-omit [NumberField.IsCMField K] in
 /-- Coordinate form of
 `samePrimeFiniteLog_scaledNormalizedCoordApprox_eq_quotientMap`. -/
 theorem valuedLambdaQuotientDworkCoeffModP_scaledNormalizedFiniteLog_eq_smul
@@ -296,7 +282,6 @@ theorem valuedLambdaQuotientDworkCoeffModP_scaledNormalizedFiniteLog_eq_smul
   simpa [dworkParameterNormalizedFiniteLogApprox,
     scaledDworkParameterNormalizedFiniteLogApprox] using hcoord
 
-omit [NumberField.IsCMField K] in
 /-- CU-11f2b2c reduced to the unscaled normalized Artin-Hasse finite-log
 coordinate.  The scaled denominator contributes by the cyclotomic action,
 hence the factor `1 - c^i`. -/
@@ -330,7 +315,6 @@ theorem valuedLambdaQuotientDworkCoeffModP_specializedFiniteLog_eq_one_sub_pow_m
       (p := p) (K := K) δ i]
   ring
 
-omit [NumberField.IsCMField K] in
 /-- Dwork-specialized normalized quotient identity, with the denominator
 cleared.
 
@@ -385,7 +369,6 @@ theorem kummerLogDworkArtinHasseNormalizedQuotientUnit_mul_scaled_eq_normalized
     _ = c * (artinHasseExp_eval_scaledDworkParameter p K 1 - 1) := by
           simp
 
-omit [NumberField.IsCMField K] in
 /-- Finite quotient form of
 `kummerLogDworkArtinHasseNormalizedQuotientUnit_mul_scaled_eq_normalized`,
 at the Kummer mod-`p` level. -/

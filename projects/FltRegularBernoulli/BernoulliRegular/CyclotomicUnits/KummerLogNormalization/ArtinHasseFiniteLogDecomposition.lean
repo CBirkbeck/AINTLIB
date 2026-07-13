@@ -17,10 +17,8 @@ open PadicLogSetup PadicLogSetup.DworkParameter
 
 variable (p : ℕ) [Fact p.Prime]
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-variable [NumberField.IsCMField K]
 
 set_option linter.style.longLine false in
-omit [NumberField.IsCMField K] in
 theorem quotient_mk_samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_weighted_sum_eq_formal
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeQuotientMap (p := p) (K := K) N
@@ -160,7 +158,6 @@ theorem quotient_mk_samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_f
             (Finset.Icc 1 d)).symm
         rw [hmapsum]
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_pow_coeff_mem_lambdaIdeal_pow
     (N : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (n d : ℕ) :
@@ -199,7 +196,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_pow_coeff_mem_lambdaIdeal_p
         simpa [pow_add] using Ideal.mul_mem_mul hleft hright
       simpa [hsum] using hmul
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousNumerator_mem_lambdaIdeal_pow
     (N n d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousNumerator
@@ -209,7 +205,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousNumerator_mem_lamb
     (samePrimeFiniteArtinHasseNormalizedCoordPoly_pow_coeff_mem_lambdaIdeal_pow
       (p := p) (K := K) N hx n d)
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_coeff_sub_coeff_mem_lambdaIdeal_pow
     (N M d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hNM : N ≤ M) :
@@ -244,7 +239,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_coeff_sub_coeff_mem_lambdaI
         (p := p) (K := K) M hx d
     exact ((lambdaIdeal p K) ^ d).sub_mem hNmem hMmem
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_pow_coeff_sub_coeff_mem_lambdaIdeal_pow
     (N M n d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hNM : N ≤ M) :
@@ -349,7 +343,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_pow_coeff_sub_coeff_mem_lam
         exact ((lambdaIdeal p K) ^
           (if d < N + (n + 1) then N + 1 + d else d)).add_mem hterm₁ hterm₂
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_pow_coeff_eq_zero_of_lt
     (N : ℕ) (x : ValuedIntegerRing p K) {n d : ℕ} (hdn : d < n) :
     ((samePrimeFiniteArtinHasseNormalizedCoordPoly
@@ -361,7 +354,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_pow_coeff_eq_zero_of_lt
         (p := p) (K := K) N x) hdn
   simpa [← Polynomial.coe_pow, Polynomial.coeff_coe] using h
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_pow_le_of_mem_support
     (N : ℕ) (x : ValuedIntegerRing p K) {n d : ℕ}
     (hd : d ∈ ((samePrimeFiniteArtinHasseNormalizedCoordPoly
@@ -376,7 +368,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_pow_le_of_mem_support
       (p := p) (K := K) N x hdn
   exact (Polynomial.mem_support_iff.mp hd) hcoeff
 
-omit [NumberField.IsCMField K] in
 /-- Unsigned homogeneous finite-log term attached to the degree-`d`
 coefficient of the `n`-th power of the normalized Artin-Hasse coordinate. -/
 noncomputable def samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousCore
@@ -392,7 +383,6 @@ noncomputable def samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousCore
         (samePrimeFiniteArtinHasse_den_exponent_le (p := p) hn hnd)
     else 0
 
-omit [NumberField.IsCMField K] in
 /-- Signed homogeneous finite-log term attached to the degree-`d`
 coefficient of the `n`-th power of the normalized Artin-Hasse coordinate. -/
 noncomputable def samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm
@@ -402,7 +392,6 @@ noncomputable def samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm
     samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousCore
       (p := p) (K := K) N n d x hx
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm_eq_signed_eval
     (N n d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hn : n ≠ 0) (hnd : n ≤ d) :
@@ -418,7 +407,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm_eq_signed_eva
   simp [samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm,
     samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousCore, hn, hnd]
 
-omit [NumberField.IsCMField K] in
 noncomputable def samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum
     (N d : ℕ) (x : ValuedIntegerRing p K) (hx : x ∈ lambdaIdeal p K) :
     ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) :=
@@ -426,7 +414,6 @@ noncomputable def samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSu
     samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm
       (p := p) (K := K) N a.1 d x hx
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_eval_sum
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum
@@ -492,7 +479,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_eval_
     hnum0 _
 
 set_option linter.style.longLine false in
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_zero_of_factorial_weighted_sum_mem
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hclear :
@@ -542,7 +528,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_zero_
     _ = 0 := htransport
 
 set_option linter.style.longLine false in
-omit [NumberField.IsCMField K] in
 /-- Multiplying a normalized homogeneous finite-log degree slice by `d!`
 clears the same-prime denominators and gives the factorial-weighted numerator
 sum in the finite quotient. -/
@@ -653,7 +638,6 @@ theorem natCast_factorial_mul_samePrimeFiniteArtinHasseNormalizedCoordLogHomogen
               q (((d.factorial / n : ℕ) : ValuedIntegerRing p K) * z n)))
 
 set_option linter.style.longLine false in
-omit [NumberField.IsCMField K] in
 /-- Factorial-cleared normalized homogeneous degree slice, expressed through
 the formal normalized Artin-Hasse logarithm coefficient. -/
 theorem natCast_factorial_mul_samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_formal
@@ -672,7 +656,6 @@ theorem natCast_factorial_mul_samePrimeFiniteArtinHasseNormalizedCoordLogHomogen
     (p := p) (K := K) N d hx
 
 set_option linter.style.longLine false in
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_weighted_sub_precision_mem_lambdaIdeal_pow
     (N M n d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hNM : N ≤ M) (hn1 : 1 ≤ n) (hnd : n ≤ d) :
@@ -755,7 +738,6 @@ theorem samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_wei
   exact Ideal.pow_le_pow_right htarget hweighted
 
 set_option linter.style.longLine false in
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_weighted_sub_highPrecision_mem_lambdaIdeal_pow
     (N n d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hn1 : 1 ≤ n) (hnd : n ≤ d) :
@@ -771,7 +753,6 @@ theorem samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_wei
     (Nat.le_add_right N (d.factorial.factorization p * (p - 1))) hn1 hnd
 
 set_option linter.style.longLine false in
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_weighted_sum_mem_lambdaIdeal_pow_of_coeff_log_eq_zero
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hcoeff :
@@ -860,7 +841,6 @@ theorem samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_wei
   exact I.add_mem hdiff hsumM
 
 set_option linter.style.longLine false in
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_zero_of_coeff_log_eq_zero
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hcoeff :
@@ -873,7 +853,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_zero_
     (samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_weighted_sum_mem_lambdaIdeal_pow_of_coeff_log_eq_zero
       (p := p) (K := K) N d hx hcoeff)
 
-omit [NumberField.IsCMField K] in
 theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm_eq_zero_of_not_mem_support
     (N n d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hd : d ∉ ((samePrimeFiniteArtinHasseNormalizedCoordPoly

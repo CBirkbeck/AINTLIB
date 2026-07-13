@@ -65,11 +65,9 @@ open BernoulliRegular.CyclotomicUnits.PadicLogSetup
 open BernoulliRegular.CyclotomicUnits.PadicLogSetup.DworkParameter
 
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
-variable [NumberField.IsCMField K]
 
 /-! ## 1. The factorial-`37` extraction carried into the mod-`37³` coordinate (level-`107`) -/
 
-omit [NumberField.IsCMField K] in
 /-- **The factorial-`37` second-order extraction at degree `68`, mod `37³`** (proven, axiom-clean):
 
   `(68! : ZMod 37³) · coordCube(deg-68 slice at level 107) = coordCube(quotMap(x^68)·formalSum_68)`,
@@ -104,7 +102,6 @@ Reusing the proven Dwork-ring identities `dworkParameter_pow_sixtyeight_eq` (the
 `dworkParameter^68 = −37·tailUnit·dworkParameter^32`) and the proven mod-`37²` coordinate of
 `tailUnit·dworkParameter^32` (`= 1`), the `varpi^32` mod-`37³` coordinate of `x^68` is `−37`. -/
 
-omit [NumberField.IsCMField K] in
 /-- **The quotient image of `x^68` is the completed evaluation of `dworkParameter^68`** (proven,
 level-`108` precision): `mk(dworkParameterApprox 108 ^ 68) = evalₐ 108 (dworkParameter^68)`. -/
 theorem mk_dworkParameterApprox_pow_sixtyeight_modCube_eq :
@@ -114,7 +111,6 @@ theorem mk_dworkParameterApprox_pow_sixtyeight_modCube_eq :
         (dworkParameter 37 K ^ 68) := by
   rw [map_pow, map_pow, dworkParameter_evalₐ]
 
-omit [NumberField.IsCMField K] in
 /-- **The `tailUnit·dworkParameter^32` tail part vanishes mod `37³` after the `−37` fold** (proven):
 `rationalPadicIntegerToZModCube(−37·repr(artinHasseTail·dworkParameter^32) 32) = 0`, since
 `repr(artinHasseTail·dworkParameter^32) 32 ∈ (rationalPadicPrimeIdeal)^2`
@@ -141,7 +137,6 @@ theorem neg_thirtyseven_artinHasseTail_mul_dworkParameter_pow_thirtytwo_coordMod
       (rationalPadicPrimeIdeal 37) ^ 3 by ring] at hprod
   exact hprod
 
-omit [NumberField.IsCMField K] in
 /-- **The `varpi^32` mod-`37³` coordinate of `dworkParameter^68` is exactly `−37`** (proven): for the
 basis index `k` with `(k : ℕ) = 32`,
 
@@ -188,7 +183,6 @@ theorem dworkParameter_pow_sixtyeight_coordModCube_eq_neg_thirtyseven
   push_cast
   ring
 
-omit [NumberField.IsCMField K] in
 /-- **The `varpi^32` coordinate of `samePrimeQuotientMap 107 (x^68)` is `−37` mod `37³`** (proven):
 the same `−37` value as `dworkParameter_pow_sixtyeight_coordModCube_eq_neg_thirtyseven`, displayed on
 the `samePrimeQuotientMap 107` form (precision `107+1 = 108 = 3(p−1)`), reconciled by
