@@ -674,4 +674,71 @@ theorem SpreadData.exists_isPushout_mapAtLaterStage
   exact ⟨j, hij, D₀.isPushout_mapAtLaterStage_of_tensorProduct
     D₁ D₂ D₃ H h₀ h₁ h₂ h₃ hij f g inl inr hpushT⟩
 
+/-- A pushout square of transported spread-stage maps remains a pushout after
+every further transition in the filtered system. -/
+theorem SpreadData.isPushout_mapAtLaterStage_trans
+    {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+    {𝒮 : ι → Type u} [∀ i, CommRing (𝒮 i)] [∀ i, Algebra R (𝒮 i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (𝒮 i →ₐ[R] 𝒮 j)}
+    {A : Type u} [CommRing A] [Algebra R A] {uA : ∀ i, 𝒮 i →ₐ[R] A}
+    {B₀ B₁ B₂ B₃ : Type u}
+    [CommRing B₀] [CommRing B₁] [CommRing B₂] [CommRing B₃]
+    [Algebra A B₀] [Algebra A B₁] [Algebra A B₂] [Algebra A B₃]
+    (D₀ : SpreadData 𝒮 uA B₀) (D₁ : SpreadData 𝒮 uA B₁)
+    (D₂ : SpreadData 𝒮 uA B₂) (D₃ : SpreadData 𝒮 uA B₃)
+    (H : IsFilteredAlgColimit R 𝒮 t A uA)
+    {i j k : ι} (h₀ : D₀.i₀ ≤ i) (h₁ : D₁.i₀ ≤ i)
+    (h₂ : D₂.i₀ ≤ i) (h₃ : D₃.i₀ ≤ i) (hij : i ≤ j) (hjk : j ≤ k)
+    (f : D₀.spreadStage (t := t) h₀ →ₐ[𝒮 i]
+      D₁.spreadStage (t := t) h₁)
+    (g : D₀.spreadStage (t := t) h₀ →ₐ[𝒮 i]
+      D₂.spreadStage (t := t) h₂)
+    (inl : D₁.spreadStage (t := t) h₁ →ₐ[𝒮 i]
+      D₃.spreadStage (t := t) h₃)
+    (inr : D₂.spreadStage (t := t) h₂ →ₐ[𝒮 i]
+      D₃.spreadStage (t := t) h₃)
+    (hpush :
+      letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+      CategoryTheory.IsPushout
+        (CommRingCat.ofHom
+          (D₀.mapAtLaterStage D₁ H h₀ h₁ hij f).toRingHom)
+        (CommRingCat.ofHom
+          (D₀.mapAtLaterStage D₂ H h₀ h₂ hij g).toRingHom)
+        (CommRingCat.ofHom
+          (D₁.mapAtLaterStage D₃ H h₁ h₃ hij inl).toRingHom)
+        (CommRingCat.ofHom
+          (D₂.mapAtLaterStage D₃ H h₂ h₃ hij inr).toRingHom)) :
+    letI : Algebra (𝒮 i) (𝒮 k) := (t (hij.trans hjk)).toRingHom.toAlgebra
+    CategoryTheory.IsPushout
+      (CommRingCat.ofHom
+        (D₀.mapAtLaterStage D₁ H h₀ h₁ (hij.trans hjk) f).toRingHom)
+      (CommRingCat.ofHom
+        (D₀.mapAtLaterStage D₂ H h₀ h₂ (hij.trans hjk) g).toRingHom)
+      (CommRingCat.ofHom
+        (D₁.mapAtLaterStage D₃ H h₁ h₃ (hij.trans hjk) inl).toRingHom)
+      (CommRingCat.ofHom
+        (D₂.mapAtLaterStage D₃ H h₂ h₃ (hij.trans hjk) inr).toRingHom) := by
+  letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+  letI : Algebra (𝒮 j) (𝒮 k) := (t hjk).toRingHom.toAlgebra
+  letI : Algebra (𝒮 i) (𝒮 k) := (t (hij.trans hjk)).toRingHom.toAlgebra
+  let f_j := D₀.mapAtLaterStage D₁ H h₀ h₁ hij f
+  let g_j := D₀.mapAtLaterStage D₂ H h₀ h₂ hij g
+  let inl_j := D₁.mapAtLaterStage D₃ H h₁ h₃ hij inl
+  let inr_j := D₂.mapAtLaterStage D₃ H h₂ h₃ hij inr
+  have hpushT := isPushout_tensorProduct_map
+    (S := 𝒮 j) (T := 𝒮 k)
+    (C₀ := D₀.spreadStage (t := t) (h₀.trans hij))
+    (C₁ := D₁.spreadStage (t := t) (h₁.trans hij))
+    (C₂ := D₂.spreadStage (t := t) (h₂.trans hij))
+    (C₃ := D₃.spreadStage (t := t) (h₃.trans hij))
+    f_j g_j inl_j inr_j hpush
+  have hpushK := D₀.isPushout_mapAtLaterStage_of_tensorProduct D₁ D₂ D₃ H
+    (h₀.trans hij) (h₁.trans hij) (h₂.trans hij) (h₃.trans hij) hjk
+      f_j g_j inl_j inr_j hpushT
+  simpa only [f_j, g_j, inl_j, inr_j,
+    D₀.mapAtLaterStage_trans D₁ H h₀ h₁ hij hjk f,
+    D₀.mapAtLaterStage_trans D₂ H h₀ h₂ hij hjk g,
+    D₁.mapAtLaterStage_trans D₃ H h₁ h₃ hij hjk inl,
+    D₂.mapAtLaterStage_trans D₃ H h₂ h₃ hij hjk inr] using hpushK
+
 end Algebra
