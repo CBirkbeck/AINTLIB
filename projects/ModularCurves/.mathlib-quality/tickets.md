@@ -19327,3 +19327,20 @@ levelSpaceΓ; (ii) taut_generates ⟹ closure=⊤ (naiveClosure_iff_torsion_fill
 (comboFamily_ne_zero_of_closure_top, BUILT); (iii) w∈pointVanishSet ⟹ combPoint=0 at that geom pt
 (reverse of mem_pointVanishSet_of_residue_eq / agreementι_comp_eq); (iv) contradiction. Then [YF-⊆]
 closes → [YF-ETALE]★. **22 lemmas + subtlety resolved this session.** (STREAM-YN)
+
+### v10.186 — [YF-⊆] piece B ENABLERS BUILT (residueFieldMap iso + factoring)
+Two reusable axiom-clean ForMathlib lemmas built (ForMathlib/ClosedImmersionResidueField.lean):
+- **`isIso_residueFieldMap_of_isClosedImmersion`** — for a closed immersion, `residueFieldMap` is
+  an iso (κ(f x)≅κ(x)): injective (field hom) + surjective (`SurjectiveOnStalks` +
+  `residue_surjective` via the `residue_residueFieldMap` naturality).
+- **`exists_fromSpecResidueField_factor`** — a geom point at `w` factors through a closed immersion
+  given `w ∈ range` (via the iso + `SpecMap_residueFieldMap_fromSpecResidueField`).
+
+These crack piece B's core: both `levelSpaceΓι` AND `agreementι` are closed immersions, so the geom
+point at `w` factors through BOTH — giving `combPoint≠0` (through levelSpaceΓ + taut_generates) and
+`combPoint=0` (through the agreement locus + agreementι_comp_eq) at the SAME point, a contradiction.
+
+**24 axiom-clean lemmas this session.** REMAINING = the `range_levelSpaceΓι_subset` integration (~80
+lines, all tools built): fullLevelOpenSet membership + dual factoring applications + taut_generates→
+combPoint≠0 (fibre connector: naive_iff → comboFamily inj → comboFamily_ne_zero_of_closure_top, BUILT)
++ agreementι→combPoint=0 + contradiction. Then [YF-⊆] closes → [YF-ETALE]★. Plus ⟸ (missing infra). (STREAM-YN)
