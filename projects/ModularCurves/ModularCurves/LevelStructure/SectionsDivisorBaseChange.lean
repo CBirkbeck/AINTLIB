@@ -73,4 +73,22 @@ theorem sectionsDivisor_comap_support [IsSeparated π]
 
 end RelEffCartierDiv
 
+/-- **Pigeonhole for a covering by a finite family.** If a finite family `f : ι → X` has range
+exactly `T` and `#T = #ι`, then `f` is injective — no two members can coincide, else the range
+would be too small. The counting core of the `[YF-⊆]` distinctness argument. -/
+theorem injective_of_range_eq_of_natCard_eq {ι X : Type*} [Finite ι] {f : ι → X}
+    {T : Set X} (hrange : Set.range f = T) (hcard : Nat.card T = Nat.card ι) :
+    Function.Injective f := by
+  classical
+  haveI : Fintype ι := Fintype.ofFinite ι
+  haveI : Finite ↥(Set.range f) := (Set.finite_range f).to_subtype
+  haveI : Fintype ↥(Set.range f) := Fintype.ofFinite _
+  have hcard' : Fintype.card ↥(Set.range f) = Fintype.card ι := by
+    rw [← Nat.card_eq_fintype_card, ← Nat.card_eq_fintype_card, hrange, hcard]
+  have hsurj : Function.Surjective (Set.rangeFactorization f) :=
+    fun y => ⟨y.2.choose, Subtype.ext y.2.choose_spec⟩
+  have hbij : Function.Bijective (Set.rangeFactorization f) :=
+    (Fintype.bijective_iff_surjective_and_card _).mpr ⟨hsurj, hcard'.symm⟩
+  exact Subtype.val_injective.comp hbij.injective
+
 end ModularCurves
