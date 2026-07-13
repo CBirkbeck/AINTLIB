@@ -53,9 +53,7 @@ open PadicLogSetup PadicLogSetup.DworkParameter
 private instance instFact37Deg68SLA : Fact (Nat.Prime 37) := ⟨by norm_num⟩
 
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
-variable [NumberField.IsCMField K]
 
-omit [NumberField.IsCMField K] in
 /-- **The perturbed deg-`68` evaluation vanishes for `a ∈ [1,68]`** (proven, axiom-clean): for
 `δ ∈ (λ)^{108}` and `a ∈ [1,68]` (so `a.factorization 37 ≤ 1`), `samePrimeNatDivEval 71 a 0 δ = 0`.
 
@@ -88,7 +86,6 @@ theorem samePrimeNatDivEval_deg68_perturbation_eq_zero
   exact samePrimeNatDivEval_eq_zero_of_succ_le (p := 37) (K := K)
     (Nat.ne_zero_of_lt ha1) hmem' (by omega)
 
-omit [NumberField.IsCMField K] in
 /-- **The numerator lies in `(λ)^{v·36}`** (proven): for `a ∈ [1,68]`,
 `samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousNumerator N a 68 x ∈ (λ)^{a.factorization 37·
 (37-1) + 0}`.  The numerator is in `(λ)^{68}` (`…_mem_lambdaIdeal_pow`), and `a.factorization 37·36 ≤
@@ -114,7 +111,6 @@ theorem deg68_numerator_mem (N a : ℕ) (ha68 : a ≤ 68) (x : ValuedIntegerRing
     N a 68 x = w at hmem68 ⊢
   exact hle hmem68
 
-omit [NumberField.IsCMField K] in
 /-- **Abstract level-`72` evaluation agreement from a `(λ)^{108}` difference** (proven, axiom-clean):
 for abstract `z₁ z₂` and `a ∈ [1,68]` (so `a.factorization 37 ≤ 1`), if `z₁ − z₂ ∈ (λ)^{108}` then
 `samePrimeNatDivEval 71 a 0 z₁ = samePrimeNatDivEval 71 a 0 z₂`.
@@ -157,7 +153,6 @@ theorem samePrimeNatDivEval_level72_eq_of_sub_mem
   rw [Ideal.Quotient.eq]
   exact hydiff72
 
-omit [NumberField.IsCMField K] in
 /-- **`a.factorization 37 ≤ 1` for `a ≤ 68`** (proven): the only multiple of `37²` would exceed `68`. -/
 theorem factorization_le_one_of_le_sixtyeight (a : ℕ) (ha68 : a ≤ 68) : a.factorization 37 ≤ 1 := by
   rcases Nat.eq_zero_or_pos a with h0 | hpos
