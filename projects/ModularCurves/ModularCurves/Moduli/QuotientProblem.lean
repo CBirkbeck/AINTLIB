@@ -639,6 +639,52 @@ theorem RelRepData.eqv_congr {Q : ModuliProblem R} {X : EllObj R} (d : RelRepDat
   rw [eqToHom_refl, CategoryTheory.Functor.map_id]
   rfl
 
+/-- The comparison morphism between two relative representation data of the same problem
+at the same object: the section of `d₂.f` over `d₁.f` classifying `d₁`'s universal value
+([GHB7-2b]; two relative representing schemes are canonically isomorphic). -/
+noncomputable def RelRepData.compare {Q : ModuliProblem R} {X : EllObj R}
+    (d₁ d₂ : RelRepData Q X) : { s : d₁.Z ⟶ d₂.Z // s ≫ d₂.f = d₁.f } :=
+  (d₂.eqv d₁.f).symm (d₁.eqv d₁.f ⟨𝟙 d₁.Z, Category.id_comp d₁.f⟩)
+
+theorem RelRepData.eqv_compare {Q : ModuliProblem R} {X : EllObj R}
+    (d₁ d₂ : RelRepData Q X) :
+    d₂.eqv d₁.f (d₁.compare d₂) = d₁.eqv d₁.f ⟨𝟙 d₁.Z, Category.id_comp d₁.f⟩ :=
+  (d₂.eqv d₁.f).apply_symm_apply _
+
+/-- Composing a classifying section with the comparison morphism classifies the same
+value: the comparison intertwines the two presentations. -/
+theorem RelRepData.eqv_comp_compare {Q : ModuliProblem R} {X : EllObj R}
+    (d₁ d₂ : RelRepData Q X) {T : Scheme.{u}} (g : T ⟶ X.base)
+    (h : { h : T ⟶ d₁.Z // h ≫ d₁.f = g }) :
+    d₂.eqv g ⟨h.1 ≫ (d₁.compare d₂).1, by
+      rw [Category.assoc, (d₁.compare d₂).2, h.2]⟩ = d₁.eqv g h := by
+  obtain ⟨h, hh⟩ := h
+  subst hh
+  have h₂ := d₂.nat d₁.f h (d₁.compare d₂)
+  have h₁ := d₁.nat d₁.f h ⟨𝟙 d₁.Z, Category.id_comp d₁.f⟩
+  rw [h₂, RelRepData.eqv_compare, ← h₁]
+  exact (congrArg (d₁.eqv (h ≫ d₁.f)) (Subtype.ext (Category.comp_id h))).symm
+
+theorem RelRepData.compare_comp_compare {Q : ModuliProblem R} {X : EllObj R}
+    (d₁ d₂ : RelRepData Q X) :
+    (d₁.compare d₂).1 ≫ (d₂.compare d₁).1 = 𝟙 d₁.Z := by
+  have key : d₁.eqv d₁.f ⟨(d₁.compare d₂).1 ≫ (d₂.compare d₁).1, by
+      rw [Category.assoc, (d₂.compare d₁).2, (d₁.compare d₂).2]⟩ =
+      d₁.eqv d₁.f ⟨𝟙 d₁.Z, Category.id_comp d₁.f⟩ := by
+    rw [RelRepData.eqv_comp_compare d₂ d₁ d₁.f (d₁.compare d₂), RelRepData.eqv_compare]
+  exact congrArg Subtype.val ((d₁.eqv d₁.f).injective key)
+
+/-- **Canonical isomorphism of relative representing schemes** ([GHB7-2b]): any two
+relative representation data of the same problem at the same object have canonically
+isomorphic representing schemes, compatibly with the structure maps
+(`(d₁.compare d₂).2`) and the classifying bijections (`eqv_comp_compare`). -/
+noncomputable def RelRepData.comparisonIso {Q : ModuliProblem R} {X : EllObj R}
+    (d₁ d₂ : RelRepData Q X) : d₁.Z ≅ d₂.Z where
+  hom := (d₁.compare d₂).1
+  inv := (d₂.compare d₁).1
+  hom_inv_id := d₁.compare_comp_compare d₂
+  inv_hom_id := d₂.compare_comp_compare d₁
+
 /-- **KM 4.7, axiom 2 vocabulary** (KM p. 112: "G operates upon δ, in such a way
 that for every elliptic curve E/S […] the S-scheme `δ_{E/S}` is a finite etale
 G-torsor"): a relative representation datum for the auxiliary problem carrying a
