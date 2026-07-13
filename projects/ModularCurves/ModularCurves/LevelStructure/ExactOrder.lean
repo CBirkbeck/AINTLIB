@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.LevelStructure.CartierDivisor
 import ModularCurves.EllipticCurve.Torsion
 import Mathlib.AlgebraicGeometry.Morphisms.Etale
@@ -96,7 +101,7 @@ def _root_.ModularCurves.RelEffCartierDiv.IsSubgroup (D : RelEffCartierDiv E.π)
 /-- The divisor `[P] + [2P] + ⋯ + [NP]` of KM 1.4.1 (via DS4a). -/
 noncomputable def Section.orderDivisor (P : E.Section) (N : ℕ) : RelEffCartierDiv E.π :=
   RelEffCartierDiv.sectionsDivisor E.π
-    (fun a : Fin N => ((((a : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S)))
+    (fun a : Fin N ↦ ((((a : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S)))
 
 /-- **KM 1.4.1 — a point of exact order `N`** (Drinfeld): `P ∈ E(S)` has exact order `N`
 if the degree-`N` relative effective Cartier divisor `[P] + [2P] + ⋯ + [NP]` is a subgroup
@@ -115,7 +120,8 @@ theorem _root_.ModularCurves.RelEffCartierDiv.IsSubgroup.smul_eq_zero_of_factors
     (N : ℤ) • Q = 0 := by sorry
 
 /-- `IdealSheafData.ideal` as a monoid homomorphism (products of ideal sheaves are
-computed pointwise). -/
+computed pointwise). ForMathlib-bound: generic, no modular-curve content (relocation is a
+generalise-lane task). -/
 noncomputable def _root_.AlgebraicGeometry.Scheme.IdealSheafData.idealMonoidHom
     (X : Scheme.{u}) :
     X.IdealSheafData →* (∀ U : X.affineOpens, Ideal Γ(X, U.1)) where
@@ -154,7 +160,7 @@ theorem Section.orderDivisor_baseChange (P : E.Section) (N : ℕ) {T : Scheme.{u
           (E.baseChange t).Point (𝟙 T))).1 := by
     rw [Section.orderDivisor, RelEffCartierDiv.sectionsDivisor, dif_pos hpos']
   rw [hL, hR, Scheme.IdealSheafData.comap_prod]
-  refine Finset.prod_congr rfl fun a _ => ?_
+  refine Finset.prod_congr rfl fun a _ ↦ ?_
   have hsec : ((((a : ℕ) : ℤ) + 1) • Point.asSection E t (Point.pull E t P) :
       (E.baseChange t).Point (𝟙 T)) =
       Point.asSection E t (Point.pull E t ((((a : ℕ) : ℤ) + 1) • P)) :=
@@ -164,7 +170,7 @@ theorem Section.orderDivisor_baseChange (P : E.Section) (N : ℕ) {T : Scheme.{u
   have hker := RelEffCartierDiv.ker_sectionBaseChange
     (((((a : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S))).1
     (((((a : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S))).2 t
-  exact ((congrArg (fun Q : (E.baseChange t).Point (𝟙 T) =>
+  exact ((congrArg (fun Q : (E.baseChange t).Point (𝟙 T) ↦
     Scheme.Hom.ker Q.1) hsec).trans hker).symm
 
 /-- **(T-D6a-ii, L4 — KM 1.3.6 base-change stability)** Being a subgroup divisor is stable
@@ -176,7 +182,7 @@ theorem _root_.ModularCurves.RelEffCartierDiv.IsSubgroup.baseChange
     (D.baseChange t).IsSubgroup (E.baseChange t) := by
   intro T' g'
   obtain ⟨H, hH⟩ := hD (g' ≫ t)
-  refine ⟨H.comap (Point.baseChangeEquiv E t g').toAddMonoidHom, fun Q => ?_⟩
+  refine ⟨H.comap (Point.baseChangeEquiv E t g').toAddMonoidHom, fun Q ↦ ?_⟩
   rw [AddSubgroup.mem_comap, AddEquiv.coe_toAddMonoidHom, hH,
     Point.baseChangeEquiv_apply_coe, RelEffCartierDiv.baseChange_ideal]
   exact (AlgebraicGeometry.Scheme.IdealSheafData.exists_factor_comap_iff D.ideal
@@ -199,9 +205,9 @@ finite locally free commutative group scheme of rank `N` is killed by `N` (KM ci
 [Oort–Tate]). -/
 theorem Section.HasExactOrder.smul_eq_zero {P : E.Section} {N : ℕ} [NeZero N]
     (h : P.HasExactOrder E N) : (N : ℤ) • P = 0 := by
-  haveI hsep : IsSeparated E.π := inferInstance
+  have hsep : IsSeparated E.π := inferInstance
   have hpos : IsSeparated E.π ∧ SmoothOfRelativeDimension 1 E.π := ⟨hsep, E.smooth⟩
-  have hdeg : ∀ s, (P.orderDivisor E N).degree s = N := fun s =>
+  have hdeg : ∀ s, (P.orderDivisor E N).degree s = N := fun s ↦
     RelEffCartierDiv.sectionsDivisor_degree E.π E.smooth _ s
   refine RelEffCartierDiv.IsSubgroup.smul_eq_zero_of_factors E h hdeg (𝟙 S) P ?_
   have hideal : (P.orderDivisor E N).ideal =
@@ -230,7 +236,7 @@ theorem Section.HasExactOrder.smul_eq_zero {P : E.Section} {N : ℕ} [NeZero N]
           Ideal.prod_le_inf.trans (Finset.inf_le (Finset.mem_univ (0 : Fin N)))
     rw [h0] at hle0
     exact hle0
-  haveI hPc : IsClosedImmersion P.1 := by
+  have hPc : IsClosedImmersion P.1 := by
     have h1 : IsClosedImmersion (P.1 ≫ E.π) := by
       rw [P.2]
       infer_instance
@@ -302,10 +308,10 @@ theorem Section.hasExactOrder_iff_geometric {P : E.Section} {N : ℕ} [NeZero N]
         ∀ a : ℕ, 0 < a → a < N → (a : ℤ) • Point.pull E t P ≠ 0 := by
   constructor
   · intro h k _ _ t
-    refine ⟨?_, fun a ha0 haN => h.pull_nsmul_ne_zero E hN hkill k t ha0 haN⟩
+    refine ⟨?_, fun a ha0 haN ↦ h.pull_nsmul_ne_zero E hN hkill k t ha0 haN⟩
     rw [← Point.pull_zsmul, hkill, Point.pull_zero]
   · intro h
-    exact Section.hasExactOrder_of_geometric E hN hkill fun k _ _ t => (h k t).2
+    exact Section.hasExactOrder_of_geometric E hN hkill fun k _ _ t ↦ (h k t).2
 
 /-- **Register box `T-D7-bridge` (KM 1.4.4, (3)⟺(4))**: the divisor `Σ [aP]` is finite
 étale over `S` iff on every geometric point the multiples are distinct. KM (verbatim):
@@ -322,7 +328,8 @@ theorem Section.orderDivisor_etale_iff_geometric {P : E.Section} {N : ℕ} [NeZe
 
 /-- **(T-D7 = KM 1.4.4, (1) ⇔ (4))** For a point `P` killed by `N` and `N` invertible
 on `S`: `P` has exact order `N` iff the divisor `Σₐ [aP]` is finite étale over `S`.
-Derived from T-D6 and the `T-D7-bridge` box. -/
+Derived from T-D6 and the `T-D7-bridge` box. Register theorem (no code consumer): the étale
+characterisation of exact order, kept as a trust-anchor. -/
 theorem Section.hasExactOrder_iff_etale {P : E.Section} {N : ℕ} [NeZero N]
     (hN : NIsInvertible S N) (hkill : (N : ℤ) • P = 0) :
     P.HasExactOrder E N ↔
