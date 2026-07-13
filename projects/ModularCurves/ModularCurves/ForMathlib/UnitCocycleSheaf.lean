@@ -544,6 +544,11 @@ theorem isBasis_trivSection (k : c.ι) {V : X.Opens} (hV : V ≤ c.U k) :
     c.IsBasis (c.trivSection k hV) := fun i =>
   (resUnit (le_inf inf_le_right (inf_le_left.trans hV)) (c.u i k)).isUnit
 
+/-- **(T-OM-A5)** Restriction preserves bases. -/
+theorem IsBasis.sectionsMap {V' V : X.Opens} (h : V' ≤ V) {b : c.sections V}
+    (hb : c.IsBasis b) : c.IsBasis (c.sectionsMap h b) := fun i =>
+  (hb i).map (resLE (inf_le_inf_right (c.U i) h))
+
 /-- **(T-OM-A5)** Unit scaling preserves and reflects bases. -/
 theorem isBasis_smul_iff {V : X.Opens} (g : Γ(X, V)ˣ) (b : c.sections V) :
     c.IsBasis (g.val • b) ↔ c.IsBasis b := by
@@ -754,6 +759,17 @@ theorem exists_unit_glue (X : Scheme.{u}) (W : X.Opens)
     show resLE p.2 g'.val = (data p.1 p.2).val
     have := congrArg Units.val (hg' p.1 p.2)
     simpa using this
+
+/-- **(T-OM-A6)** Units of the section ring agreeing on a covering family of subopens
+are equal (separation). -/
+theorem unit_ext_of_res_cover (X : Scheme.{u}) {W : X.Opens} {g g' : Γ(X, W)ˣ}
+    {ι' : Type u} (𝒰 : ι' → X.Opens) (h𝒰 : ∀ l, 𝒰 l ≤ W) (hcover : W ≤ iSup 𝒰)
+    (h : ∀ l, resUnit (h𝒰 l) g = resUnit (h𝒰 l) g') : g = g' := by
+  refine Units.ext (TopCat.Sheaf.eq_of_locally_eq' X.sheaf 𝒰 W (fun l => homOfLE (h𝒰 l))
+    hcover g.val g'.val (fun l => ?_))
+  show resLE (h𝒰 l) g.val = resLE (h𝒰 l) g'.val
+  have := congrArg Units.val (h l)
+  simpa using this
 
 /-- **(T-OM-A6)** Units of the section ring agreeing on all affine opens below `W`
 are equal (separation over the affine basis). -/
