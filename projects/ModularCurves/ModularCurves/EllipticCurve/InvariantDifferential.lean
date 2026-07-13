@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.EllipticCurve.AdditionBaseChange
 import ModularCurves.EllipticCurve.Comparison
+import ModularCurves.EllipticCurve.GroupLawDescent
 import ModularCurves.EllipticCurve.GroupLawConstruction
 import ModularCurves.EllipticCurve.WeierstrassAtlasBundle
 import ModularCurves.ForMathlib.UnitCocycleSheaf
@@ -1458,5 +1459,167 @@ theorem negModelHom_eq_negVC (W : WeierstrassCurve R) :
     show MvPolynomial.aeval (vcMvSubst (negVC W)) a = (MvPolynomial.aeval (negVec W)) a
     rw [vcMvSubst_negVC]
   rw [key, ← Category.assoc, eqToHom_trans, eqToHom_refl, Category.id_comp]
+
+/-! ### T-OM-B9 (geometric half): the inversion transports charts by `negVC` -/
+
+/-- **(T-OM-B9)** The negation variable change commutes with coefficient base change. -/
+theorem negVC_map {R' : Type u} [CommRing R'] (σ : R →+* R') (W : WeierstrassCurve R) :
+    (negVC W).map σ = negVC (W.map σ) := by
+  ext <;> simp [negVC, WeierstrassCurve.VariableChange.map, WeierstrassCurve.map]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-OM-B9)** The glued negation is an involution (per-chart:
+`negModelHom_negModelHom` conjugated through the chart isomorphisms). -/
+theorem negHomOf_negHomOf {S : Scheme.{u}} {G : EllipticCurveGeom S}
+    (A : WeierstrassAtlasData G) : negHomOf A ≫ negHomOf A = 𝟙 G.E := by
+  refine (atlasTotalCover A).hom_ext _ _ (fun i => ?_)
+  haveI := A.elliptic (show A.ι from i)
+  rw [Category.comp_id, ← Category.assoc, negHomOf_piece]
+  show ((A.e i).hom ≫ negModelHom (A.W i) ≫ (A.e i).inv ≫
+      pullback.fst G.π (A.U i).1.ι) ≫ negHomOf A = (atlasTotalCover A).f i
+  simp only [Category.assoc, negHomOf_piece']
+  simp only [negPiece, Category.assoc]
+  rw [Iso.inv_hom_id_assoc, reassoc_of% negModelHom_negModelHom (A.W i),
+    Iso.hom_inv_id_assoc, atlasTotalCover_f]
+
+/-- **(T-OM-B9)** The negation of a geometric elliptic curve is an involution. -/
+theorem EllipticCurveGeom.negHom_negHom {S : Scheme.{u}} (G : EllipticCurveGeom S) :
+    G.negHom ≫ G.negHom = 𝟙 G.E :=
+  negHomOf_negHomOf G.atlas
+
+instance {S : Scheme.{u}} (G : EllipticCurveGeom S) : IsIso G.negHom :=
+  ⟨G.negHom, G.negHom_negHom, G.negHom_negHom⟩
+
+/-- **(T-OM-B9)** The negation square of a geometric elliptic curve is cartesian over
+the identity. -/
+theorem EllipticCurveGeom.isPullback_negHom {S : Scheme.{u}} (G : EllipticCurveGeom S) :
+    IsPullback G.negHom G.π G.π (𝟙 S) :=
+  IsPullback.of_horiz_isIso ⟨by rw [G.negHom_π, Category.comp_id]⟩
+
+/-- **(T-OM-B9)** The negation square is pointed. -/
+theorem EllipticCurveGeom.negHom_zero_w {S : Scheme.{u}} (G : EllipticCurveGeom S) :
+    G.zero ≫ G.negHom = 𝟙 S ≫ G.zero :=
+  G.negHom_zero.trans (Category.id_comp _).symm
+
+namespace LocalPresentation
+
+variable {S : Scheme.{u}} {G : EllipticCurveGeom S}
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The comparison of the restricted curves along the negation square factors as the
+identity comparison followed by the chart-conjugated model negation (the
+presentation-level `negPiece` identity). -/
+private theorem transportTheta_neg (i : G.atlas.ι)
+    (hsq : IsPullback G.negHom G.π G.π (𝟙 S))
+    {V' : S.affineOpens} (hV' : V'.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ (G.atlas.U i).1) :
+    transportTheta (𝟙 S) G.negHom hsq hV' =
+      transportTheta (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩) hV' ≫
+        (G.atlas.e i).hom ≫ negModelHom (G.atlas.W i) ≫ (G.atlas.e i).inv := by
+  haveI := G.atlas.elliptic i
+  have hconj : (G.atlas.e i).hom ≫ negModelHom (G.atlas.W i) ≫ (G.atlas.e i).inv ≫
+      pullback.snd G.π (G.atlas.U i).1.ι = pullback.snd G.π (G.atlas.U i).1.ι := by
+    have hinv : (G.atlas.e i).inv ≫ pullback.snd G.π (G.atlas.U i).1.ι =
+        projModelπ (G.atlas.W i) ≫ (G.atlas.U i).2.isoSpec.inv := by
+      rw [Iso.inv_comp_eq, ← Category.assoc, G.atlas.compat_π i, Category.assoc,
+        Iso.hom_inv_id, Category.comp_id]
+    rw [hinv, reassoc_of% negModelHom_π (G.atlas.W i), ← Category.assoc,
+      G.atlas.compat_π i, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+  refine pullback.hom_ext ?_ ?_
+  · show transportTheta (𝟙 S) G.negHom hsq hV' ≫ pullback.fst G.π (G.atlas.U i).1.ι = _
+    unfold transportTheta
+    rw [pullback.lift_fst]
+    simp only [Category.assoc]
+    rw [show (G.atlas.e i).hom ≫ negModelHom (G.atlas.W i) ≫ (G.atlas.e i).inv ≫
+        pullback.fst G.π (G.atlas.U i).1.ι = negPiece G.atlas i from rfl,
+      ← negHomOf_piece', ← Category.assoc, pullback.lift_fst]
+    simp only [Category.comp_id, Category.id_comp, Category.assoc]
+    rfl
+  · show transportTheta (𝟙 S) G.negHom hsq hV' ≫ pullback.snd G.π (G.atlas.U i).1.ι = _
+    unfold transportTheta
+    rw [pullback.lift_snd]
+    simp only [Category.assoc]
+    rw [hconj, pullback.lift_snd]
+
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-OM-B9 core)** Transporting an atlas chart along the inversion square compares
+to its plain restriction by exactly the negation variable change — KM 4.6.2's `{±1}`:
+`[-1]^* ω = −ω` chartwise (through `negModelHom_eq_negVC`). -/
+theorem transVC_transport_neg (i : G.atlas.ι)
+    (hsq : IsPullback G.negHom G.π G.π (𝟙 S)) (hz : G.zero ≫ G.negHom = 𝟙 S ≫ G.zero)
+    {V' : S.affineOpens} (hV' : V'.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ (G.atlas.U i).1) :
+    ((G.atlas.presentation i).restrict hV').transVC
+        ((G.atlas.presentation i).transport (𝟙 S) G.negHom hsq hz hV') =
+      negVC (((G.atlas.presentation i).restrict hV').W) := by
+  haveI := G.atlas.elliptic i
+  refine (transVC_unique ((G.atlas.presentation i).restrict hV')
+    ((G.atlas.presentation i).transport (𝟙 S) G.negHom hsq hz hV')
+    (negVC (((G.atlas.presentation i).restrict hV').W)) (negVC_smul _) ?_).symm
+  refine Eq.trans ?_ (negModelHom_eq_negVC _)
+  -- the pointed comparison is the model negation of the restricted chart
+  show (((G.atlas.presentation i).restrict hV').e.symm ≪≫
+      ((G.atlas.presentation i).transport (𝟙 S) G.negHom hsq hz hV').e).hom = _
+  rw [Iso.trans_hom, Iso.symm_hom, Iso.inv_comp_eq]
+  -- both `e`s are `transportE`s sharing the model-square factor
+  show (transportE (𝟙 S) G.negHom hsq (G.atlas.presentation i) hV').hom =
+    (transportE (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
+      (G.atlas.presentation i) hV').hom ≫ negModelHom _
+  unfold transportE
+  rw [Iso.trans_hom, Iso.trans_hom, Iso.symm_hom, Iso.comp_inv_eq]
+  simp only [Category.assoc]
+  refine pullback.hom_ext ?_ ?_
+  · -- the base-change leg: `negModelHom_baseChange` through the model square
+    rw [Category.assoc, Category.assoc, Category.assoc,
+      (transport_isPullback' (𝟙 S) G.negHom hsq (G.atlas.presentation i)
+        hV').isoPullback_hom_fst,
+      show (transport_isPullback_model (𝟙 S) hV'
+          (G.atlas.presentation i)).isoPullback.hom ≫
+          pullback.fst (projModelπ (G.atlas.presentation i).W)
+            (Spec.map (CommRingCat.ofHom (sectionsMapLE (𝟙 S) hV'))) =
+        projModelBaseChange (sectionsMapLE (𝟙 S) hV') (G.atlas.presentation i).W from
+        (transport_isPullback_model (𝟙 S) hV'
+          (G.atlas.presentation i)).isoPullback_hom_fst,
+      negModelHom_baseChange (sectionsMapLE (𝟙 S) hV') (G.atlas.presentation i).W,
+      reassoc_of% (transport_isPullback_model (𝟙 S) hV'
+        (G.atlas.presentation i)).isoPullback_inv_fst,
+      reassoc_of% (transport_isPullback' (𝟙 S) (𝟙 G.E)
+        (IsPullback.of_horiz_isIso ⟨by simp⟩) (G.atlas.presentation i)
+        hV').isoPullback_hom_fst,
+      transportTheta_neg i hsq hV']
+    simp only [Category.assoc]
+    show transportTheta (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩) hV' ≫
+        (G.atlas.e i).hom ≫ negModelHom (G.atlas.W i) ≫ (G.atlas.e i).inv ≫
+        (G.atlas.e i).hom =
+      transportTheta (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩) hV' ≫
+        (G.atlas.e i).hom ≫ negModelHom (G.atlas.W i)
+    rw [Iso.inv_hom_id, Category.comp_id (negModelHom (G.atlas.W i))]
+  · -- the `π` leg: negation is over the base
+    rw [Category.assoc, Category.assoc, Category.assoc,
+      (transport_isPullback' (𝟙 S) G.negHom hsq (G.atlas.presentation i)
+        hV').isoPullback_hom_snd,
+      show (transport_isPullback_model (𝟙 S) hV'
+          (G.atlas.presentation i)).isoPullback.hom ≫
+          pullback.snd (projModelπ (G.atlas.presentation i).W)
+            (Spec.map (CommRingCat.ofHom (sectionsMapLE (𝟙 S) hV'))) =
+        projModelπ ((G.atlas.presentation i).W.map (sectionsMapLE (𝟙 S) hV')) from
+        (transport_isPullback_model (𝟙 S) hV'
+          (G.atlas.presentation i)).isoPullback_hom_snd,
+      negModelHom_π ((G.atlas.presentation i).W.map (sectionsMapLE (𝟙 S) hV')),
+      (transport_isPullback_model (𝟙 S) hV'
+        (G.atlas.presentation i)).isoPullback_inv_snd,
+      (transport_isPullback' (𝟙 S) (𝟙 G.E)
+        (IsPullback.of_horiz_isIso ⟨by simp⟩) (G.atlas.presentation i)
+        hV').isoPullback_hom_snd]
+
+/-- **(T-OM-B9)** The transition unit of the inversion transport is `−1`. -/
+theorem transUnit_transport_neg (i : G.atlas.ι)
+    (hsq : IsPullback G.negHom G.π G.π (𝟙 S)) (hz : G.zero ≫ G.negHom = 𝟙 S ≫ G.zero)
+    {V' : S.affineOpens} (hV' : V'.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ (G.atlas.U i).1) :
+    ((G.atlas.presentation i).restrict hV').transUnit
+        ((G.atlas.presentation i).transport (𝟙 S) G.negHom hsq hz hV') = -1 := by
+  rw [transUnit, transVC_transport_neg]
+  rfl
+
+end LocalPresentation
 
 end ModularCurves
