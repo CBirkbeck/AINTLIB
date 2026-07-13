@@ -9,7 +9,7 @@ public import BernoulliRegular.UnitQuotient.TorsionQuotient
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.UnitFactorChainInterface
 
 /-!
-# Principal unit factor (REF-18 Phase 2, sub-piece U)
+# Principal unit factor (Phase 2, sub-piece U)
 
 For a nonzero principal ideal `(α)`, the actual multiplicative Φ element
 `Φ((α))` and the explicit Stickelberger principal generator
@@ -73,7 +73,7 @@ theorem isSemiPrimary_finset_prod
   | insert i s hi ih =>
       rw [Finset.prod_insert hi]
       exact (hf i (by simp)).mul
-        (ih fun j hj => hf j (by simp [hj]))
+        (ih fun j hj ↦ hf j (by simp [hj]))
 
 /-- A multiset product of semi-primary elements is semi-primary. -/
 theorem isSemiPrimary_multiset_prod
@@ -86,7 +86,7 @@ theorem isSemiPrimary_multiset_prod
   | cons x m ih =>
       rw [Multiset.prod_cons]
       exact (hm x (by simp)).mul
-        (ih fun y hy => hm y (by simp [hy]))
+        (ih fun y hy ↦ hm y (by simp [hy]))
 
 /-- The actual Φ-prime element constructed from a descended Gauss sum is
 semi-primary. -/
@@ -178,7 +178,7 @@ theorem PhiPrimeElement.K2_2SourceData_phi_gamma_isSemiPrimary
     (D : PhiPrimeElement.K2_2SourceData S)
     (hp_three : 3 ≤ p) :
     FLT37.IsSemiPrimary p (K := K) D.phi.gamma := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   simpa [PhiPrimeElement.K2_2SourceData.phi] using
     PhiPrimeElement.ofDescentIndexOne_gamma_isSemiPrimary
       (p := p) (K := K) S D.h_ne_zero D.h_span hp_three
@@ -196,7 +196,7 @@ theorem PhiPrimeElement.K2_2ReciprocalSourceData_phi_gamma_isSemiPrimary
     (D : PhiPrimeElement.K2_2ReciprocalSourceData S)
     (hp_three : 3 ≤ p) :
     FLT37.IsSemiPrimary p (K := K) D.phi.gamma := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   simpa [PhiPrimeElement.K2_2ReciprocalSourceData.phi] using
     PhiPrimeElement.ofDescentSubOne_gamma_isSemiPrimary
       (p := p) (K := K) S D.h_ne_zero D.h_span hp_three
@@ -225,7 +225,7 @@ theorem PhiPrimeElement.K2_2SourceData_phi_conj_mul_self_eq_absNorm_pow_of_ringH
         S.toConcreteStickelbergerSetup.psiInt⁻¹) :
     ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
       (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   have hraw :
       ringOfIntegersComplexConj K
           (phiPrimeGenDescent S (le_refl 1)
@@ -280,7 +280,7 @@ theorem PhiPrimeElement.K2_2SourceData_phi_conj_mul_self_eq_absNorm_pow_of_rootA
         S.toConcreteStickelbergerSetup.zeta_ell_int ^ (ℓ - 1)) :
     ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
       (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   have hσχ :
       (S.toConcreteStickelbergerSetup.residueCharInt ^ 1).ringHomComp σ =
         (S.toConcreteStickelbergerSetup.residueCharInt ^ 1)⁻¹ :=
@@ -319,7 +319,7 @@ theorem PhiPrimeElement.K2_2SourceData_phi_conj_mul_self_eq_absNorm_pow_of_zetaE
         S.toConcreteStickelbergerSetup.zeta_ell_int ^ (ℓ - 1)) :
     ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
       (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   have hσζp :
       σ S.toConcreteStickelbergerSetup.zeta_p_int =
         S.toConcreteStickelbergerSetup.zeta_p_int ^ (p - 1) :=
@@ -347,12 +347,12 @@ theorem PhiPrimeElement.K2_2SourceData_phi_conj_mul_self_eq_absNorm_pow_of_upsta
         algebraMap (𝓞 K) (𝓞 R') (ringOfIntegersComplexConj K x)) :
     ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
       (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   let σ : 𝓞 R' →+* 𝓞 R' :=
     (ringOfIntegersComplexConj R').toRingEquiv.toRingHom
   have hσ_lifts_conj : ∀ x : 𝓞 K,
       σ (algebraMap (𝓞 K) (𝓞 R') x) =
-        algebraMap (𝓞 K) (𝓞 R') (ringOfIntegersComplexConj K x) := fun x =>
+        algebraMap (𝓞 K) (𝓞 R') (ringOfIntegersComplexConj K x) := fun x ↦
     h_upstairs_lifts_conj x
   have hσζell :
       σ S.toConcreteStickelbergerSetup.zeta_ell_int =
@@ -387,7 +387,7 @@ theorem PhiPrimeElement.K2_2ReciprocalSourceData_phi_conj_mul_self_eq_absNorm_po
         S.toConcreteStickelbergerSetup.psiInt⁻¹) :
     ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
       (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   have hraw :
       ringOfIntegersComplexConj K
           (phiPrimeGenDescent S
@@ -440,7 +440,7 @@ theorem PhiPrimeElement.K2_2ReciprocalSourceData_phi_conj_mul_self_eq_absNorm_po
         S.toConcreteStickelbergerSetup.zeta_ell_int ^ (ℓ - 1)) :
     ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
       (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   have hσχ :
       (S.toConcreteStickelbergerSetup.residueCharInt ^ (p - 1)).ringHomComp σ =
         (S.toConcreteStickelbergerSetup.residueCharInt ^ (p - 1))⁻¹ :=
@@ -480,7 +480,7 @@ theorem
         S.toConcreteStickelbergerSetup.zeta_ell_int ^ (ℓ - 1)) :
     ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
       (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   have hσζp :
       σ S.toConcreteStickelbergerSetup.zeta_p_int =
         S.toConcreteStickelbergerSetup.zeta_p_int ^ (p - 1) :=
@@ -508,12 +508,12 @@ theorem
         algebraMap (𝓞 K) (𝓞 R') (ringOfIntegersComplexConj K x)) :
     ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
       (((Ideal.absNorm P : ℤ) : 𝓞 K)) ^ p := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   let σ : 𝓞 R' →+* 𝓞 R' :=
     (ringOfIntegersComplexConj R').toRingEquiv.toRingHom
   have hσ_lifts_conj : ∀ x : 𝓞 K,
       σ (algebraMap (𝓞 K) (𝓞 R') x) =
-        algebraMap (𝓞 K) (𝓞 R') (ringOfIntegersComplexConj K x) := fun x =>
+        algebraMap (𝓞 K) (𝓞 R') (ringOfIntegersComplexConj K x) := fun x ↦
     h_upstairs_lifts_conj x
   have hσζell :
       σ S.toConcreteStickelbergerSetup.zeta_ell_int =
