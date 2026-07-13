@@ -22,6 +22,20 @@ variable {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
   {A : Type u} [CommRing A] [Algebra R A] {uA : ∀ i, 𝒮 i →ₐ[R] A}
   {B : Type u} [CommRing B] [Algebra A B]
 
+private theorem span_range_map_eq_top
+    {S T κ : Type*} [CommRing S] [CommRing T]
+    (f : S →+* T) (b : κ → S)
+    (h : Ideal.span (Set.range b) = ⊤) :
+    Ideal.span (Set.range fun k => f (b k)) = ⊤ := by
+  have hrange : Set.range (fun k => f (b k)) = f '' Set.range b := by
+    ext x
+    constructor
+    · rintro ⟨k, rfl⟩
+      exact ⟨b k, ⟨k, rfl⟩, rfl⟩
+    · rintro ⟨_, ⟨k, rfl⟩, rfl⟩
+      exact ⟨k, rfl⟩
+  rw [hrange, ← Ideal.map_span, h, Ideal.map_top]
+
 /-- A finite family of colimit elements can be represented at a spread stage later
 than any prescribed system index. -/
 theorem SpreadData.exists_common_stageToColimit_eq_atLaterStage
@@ -268,6 +282,115 @@ theorem SpreadData.FunctorModel.exists_mapCoverAtLaterStage
   exact (M.object X).exists_mapCoverAtLaterStage
     (M.object Y) H (M.le_stage X) (M.le_stage Y) (M.map a)
       (F.map a).hom (M.map_colimit a) b hspan
+
+private structure SpreadData.FunctorModel.MapCoverStage
+    (M : SpreadData.FunctorModel F H) {X Y : J} (a : X ⟶ Y)
+    {κ : Type*} (b : κ → F.obj X) where
+  stage : ι
+  le_stage : M.stage ≤ stage
+  source : κ → (M.object X).spreadStage (t := t)
+    ((M.le_stage X).trans le_stage)
+  source_colimit : ∀ k, (M.object X).stageToColimit H
+    ⟨stage, (M.le_stage X).trans le_stage⟩ (source k) = b k
+  image_span : Ideal.span (Set.range fun k =>
+    (M.object X).mapAtLaterStage (M.object Y) H
+      (M.le_stage X) (M.le_stage Y) le_stage (M.map a) (source k)) = ⊤
+
+private theorem SpreadData.FunctorModel.exists_mapCoverStage
+    (M : SpreadData.FunctorModel F H) {X Y : J} (a : X ⟶ Y)
+    {κ : Type*} [Finite κ] (b : κ → F.obj X)
+    (hspan : Ideal.span (Set.range fun k => (F.map a).hom (b k)) = ⊤) :
+    Nonempty (M.MapCoverStage a b) := by
+  obtain ⟨j, hij, b_j, hb_j, hspan_j⟩ :=
+    M.exists_mapCoverAtLaterStage a b hspan
+  exact ⟨⟨j, hij, b_j, hb_j, hspan_j⟩⟩
+
+/-- Move a spread functor to one stage where finite source families for finitely
+many chosen arrows have unit-ideal image families simultaneously. -/
+theorem SpreadData.FunctorModel.exists_common_mapCoverAtLaterStage
+    (M : SpreadData.FunctorModel F H)
+    {ρ : Type u} [Finite ρ] (κ : ρ → Type u) [∀ r, Finite (κ r)]
+    (src dst : ρ → J) (a : ∀ r, src r ⟶ dst r)
+    (b : ∀ r, κ r → F.obj (src r))
+    (hspan : ∀ r,
+      Ideal.span (Set.range fun k => (F.map (a r)).hom (b r k)) = ⊤) :
+    ∃ (j : ι) (hij : M.stage ≤ j)
+        (b_j : ∀ r, κ r → (M.object (src r)).spreadStage (t := t)
+          ((M.le_stage (src r)).trans hij)),
+      (∀ r k, (M.object (src r)).stageToColimit H
+          ⟨j, (M.le_stage (src r)).trans hij⟩ (b_j r k) = b r k) ∧
+        ∀ r, Ideal.span (Set.range fun k =>
+          (M.mapToStage hij).map (a r) (b_j r k)) = ⊤ := by
+  classical
+  let C : ∀ r, M.MapCoverStage (a r) (b r) := fun r =>
+    Classical.choice (M.exists_mapCoverStage (a r) (b r) (hspan r))
+  letI : Fintype ρ := Fintype.ofFinite ρ
+  haveI := H.directed
+  haveI := H.nonempty
+  obtain ⟨j, hjall⟩ :=
+    (insert M.stage (Finset.univ.image fun r => (C r).stage)).exists_le
+  have hij : M.stage ≤ j := hjall M.stage (Finset.mem_insert_self _ _)
+  have hC : ∀ r, (C r).stage ≤ j := fun r => hjall (C r).stage
+    (Finset.mem_insert_of_mem
+      (Finset.mem_image_of_mem (fun r => (C r).stage) (Finset.mem_univ r)))
+  let b_j : ∀ r, κ r → (M.object (src r)).spreadStage (t := t)
+      ((M.le_stage (src r)).trans hij) := fun r k =>
+    (M.object (src r)).stageTransition H
+      (P := ⟨(C r).stage, (M.le_stage (src r)).trans (C r).le_stage⟩)
+      (Q := ⟨j, (M.le_stage (src r)).trans hij⟩) (hC r) ((C r).source k)
+  have hb_j (r) (k) : (M.object (src r)).stageToColimit H
+      ⟨j, (M.le_stage (src r)).trans hij⟩ (b_j r k) = b r k :=
+    ((M.object (src r)).stageToColimit_stageTransition H
+      ((M.le_stage (src r)).trans (C r).le_stage) (hC r) ((C r).source k)).trans
+        ((C r).source_colimit k)
+  have himage (r) : (fun k =>
+      (M.mapToStage hij).map (a r) (b_j r k)) = fun k =>
+      (M.object (dst r)).stageTransition H
+        (P := ⟨(C r).stage, (M.le_stage (dst r)).trans (C r).le_stage⟩)
+        (Q := ⟨j, (M.le_stage (dst r)).trans hij⟩) (hC r)
+          ((M.object (src r)).mapAtLaterStage (M.object (dst r)) H
+            (M.le_stage (src r)) (M.le_stage (dst r)) (C r).le_stage
+              (M.map (a r)) ((C r).source k)) := by
+    funext k
+    change (M.object (src r)).mapAtLaterStage (M.object (dst r)) H
+      (M.le_stage (src r)) (M.le_stage (dst r)) hij (M.map (a r)) (b_j r k) = _
+    calc
+      _ = (M.object (src r)).mapAtLaterStage (M.object (dst r)) H
+          ((M.le_stage (src r)).trans (C r).le_stage)
+          ((M.le_stage (dst r)).trans (C r).le_stage) (hC r)
+          ((M.object (src r)).mapAtLaterStage (M.object (dst r)) H
+            (M.le_stage (src r)) (M.le_stage (dst r)) (C r).le_stage
+              (M.map (a r))) (b_j r k) := by
+            rw [(M.object (src r)).mapAtLaterStage_trans (M.object (dst r)) H
+              (M.le_stage (src r)) (M.le_stage (dst r))
+              (C r).le_stage (hC r) (M.map (a r))]
+      _ = _ := (M.object (src r)).mapAtLaterStage_stageTransition
+        (M.object (dst r)) H
+        ((M.le_stage (src r)).trans (C r).le_stage)
+        ((M.le_stage (dst r)).trans (C r).le_stage) (hC r)
+        ((M.object (src r)).mapAtLaterStage (M.object (dst r)) H
+          (M.le_stage (src r)) (M.le_stage (dst r)) (C r).le_stage
+            (M.map (a r))) ((C r).source k)
+  refine ⟨j, hij, b_j, hb_j, fun r => ?_⟩
+  letI : Algebra (𝒮 (M.object (dst r)).i₀)
+      ((M.object (dst r)).spreadStage (t := t)
+        ((M.le_stage (dst r)).trans (C r).le_stage)) :=
+    ((algebraMap (𝒮 (C r).stage) _).comp
+      (t ((M.le_stage (dst r)).trans (C r).le_stage)).toRingHom).toAlgebra
+  letI : Algebra (𝒮 (M.object (dst r)).i₀)
+      ((M.object (dst r)).spreadStage (t := t)
+        ((M.le_stage (dst r)).trans hij)) :=
+    ((algebraMap (𝒮 j) _).comp
+      (t ((M.le_stage (dst r)).trans hij)).toRingHom).toAlgebra
+  rw [himage r]
+  exact span_range_map_eq_top
+    ((M.object (dst r)).stageTransition H
+      (P := ⟨(C r).stage, (M.le_stage (dst r)).trans (C r).le_stage⟩)
+      (Q := ⟨j, (M.le_stage (dst r)).trans hij⟩) (hC r)).toRingHom
+    (fun k => (M.object (src r)).mapAtLaterStage (M.object (dst r)) H
+      (M.le_stage (src r)) (M.le_stage (dst r)) (C r).le_stage
+        (M.map (a r)) ((C r).source k))
+    (C r).image_span
 
 /-- Move a spread functor to a stage where a finite principal cover on one chosen
 object is represented. The cover relation, finite presentation of each principal
