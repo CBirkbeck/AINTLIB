@@ -680,6 +680,65 @@ theorem spec_transitionTensorA_chartSpecIso_inv :
       _ = (Q.chartSpecIso.inv ≫ P.pullbackWindow Q hUQ) ≫
             pullback.snd G.π (P.U.ι ≫ E.π) := (Category.assoc _ _ _).symm
 
+/-- **`W'` — the ambient window under the chart Künneth**: the pullback window corresponds
+to the opens window of the restricted-action domains. Compared after the (mono) domain
+inclusion, then by `hom_ext` on the ambient `G ×_S E` via the pasting-iso projection laws. -/
+theorem pullbackWindow_chartPullbackIso_inv :
+    P.pullbackWindow Q hUQ ≫ (G.chartPullbackIso P.U).inv
+      = (G.chartPullbackIso Q.U).inv ≫
+        Scheme.homOfLE _ (Scheme.Hom.preimage_mono G.actionProj.left hUQ) := by
+  have hcpι : ∀ (R : G.AffineChartPatch),
+      (G.chartPullbackIso R.U).inv ≫ (G.actionProj.left ⁻¹ᵁ R.U).ι
+        = (pullbackLeftPullbackSndIso G.π E.π R.U.ι).inv ≫
+          pullback.fst G.actionProj.left R.U.ι := by
+    intro R
+    rw [chartPullbackIso, Iso.trans_inv, Category.assoc]
+    congr 1
+    rw [restrictedDomainIso, Iso.symm_inv]
+    exact pullbackRestrictIsoRestrict_hom_ι G.actionProj.left R.U
+  rw [← cancel_mono ((G.actionProj.left ⁻¹ᵁ P.U).ι)]
+  rw [Category.assoc, hcpι P, Category.assoc]
+  rw [show Scheme.homOfLE _ (Scheme.Hom.preimage_mono G.actionProj.left hUQ) ≫
+      (G.actionProj.left ⁻¹ᵁ P.U).ι = (G.actionProj.left ⁻¹ᵁ Q.U).ι from
+    Scheme.homOfLE_ι _ _]
+  rw [hcpι Q]
+  -- both sides now live in the ambient `G ×_S E`: compare projections
+  apply pullback.hom_ext
+  · -- to `G`
+    calc (P.pullbackWindow Q hUQ ≫ (pullbackLeftPullbackSndIso G.π E.π P.U.ι).inv ≫
+          pullback.fst G.actionProj.left P.U.ι) ≫ pullback.fst G.π E.π
+        = P.pullbackWindow Q hUQ ≫ (pullbackLeftPullbackSndIso G.π E.π P.U.ι).inv ≫
+          pullback.fst G.actionProj.left P.U.ι ≫ pullback.fst G.π E.π := by
+          simp only [Category.assoc]
+      _ = P.pullbackWindow Q hUQ ≫ pullback.fst G.π (P.U.ι ≫ E.π) :=
+          congrArg (P.pullbackWindow Q hUQ ≫ ·)
+            (pullbackLeftPullbackSndIso_inv_fst G.π E.π P.U.ι)
+      _ = pullback.fst G.π (Q.U.ι ≫ E.π) := by
+          simp only [pullbackWindow, pullback.lift_fst, Category.comp_id]
+      _ = ((pullbackLeftPullbackSndIso G.π E.π Q.U.ι).inv ≫
+            pullback.fst G.actionProj.left Q.U.ι) ≫ pullback.fst G.π E.π :=
+          ((Category.assoc _ _ _).trans
+            (pullbackLeftPullbackSndIso_inv_fst G.π E.π Q.U.ι)).symm
+  · -- to `E`
+    calc (P.pullbackWindow Q hUQ ≫ (pullbackLeftPullbackSndIso G.π E.π P.U.ι).inv ≫
+          pullback.fst G.actionProj.left P.U.ι) ≫ pullback.snd G.π E.π
+        = P.pullbackWindow Q hUQ ≫ (pullbackLeftPullbackSndIso G.π E.π P.U.ι).inv ≫
+          pullback.fst G.actionProj.left P.U.ι ≫ pullback.snd G.π E.π := by
+          simp only [Category.assoc]
+      _ = P.pullbackWindow Q hUQ ≫ pullback.snd G.π (P.U.ι ≫ E.π) ≫ P.U.ι :=
+          congrArg (P.pullbackWindow Q hUQ ≫ ·)
+            (pullbackLeftPullbackSndIso_inv_fst_snd G.π E.π P.U.ι)
+      _ = (pullback.snd G.π (Q.U.ι ≫ E.π) ≫ E.E.homOfLE hUQ) ≫ P.U.ι := by
+          rw [← Category.assoc]
+          congr 1
+          simp only [pullbackWindow, pullback.lift_snd]
+      _ = pullback.snd G.π (Q.U.ι ≫ E.π) ≫ Q.U.ι := by
+          rw [Category.assoc, Scheme.homOfLE_ι]
+      _ = ((pullbackLeftPullbackSndIso G.π E.π Q.U.ι).inv ≫
+            pullback.fst G.actionProj.left Q.U.ι) ≫ pullback.snd G.π E.π :=
+          ((Category.assoc _ _ _).trans
+            (pullbackLeftPullbackSndIso_inv_fst_snd G.π E.π Q.U.ι)).symm
+
 /-- **The geometric window square, action leg**: the restricted actions of nested patches
 commute with the window inclusions (`resLE` composition laws). -/
 theorem homOfLE_restrictedAction :
