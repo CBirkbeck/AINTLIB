@@ -262,7 +262,7 @@ theorem residue_ready_factorization_explicit_LValues :
     NumberField.dedekindZeta_residue K =
       ((Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ) *
           Finset.prod (oddCharacters (p := p)) (fun χ ↦ oddLValueRhs p χ)).re) := by
-  rw [residue_ready_factorization_even_odd (p := p) (K := K),
+  rw [dedekindZeta_residue_eq_re_evenLProduct_mul_oddLProduct (p := p) (K := K),
     evenLProduct_one_eq_prod_evenLValueRhs (p := p),
     oddLProduct_one_eq_prod_oddLValueRhs (p := p)]
 
