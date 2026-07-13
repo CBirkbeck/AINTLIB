@@ -34,11 +34,9 @@ namespace BernoulliRegular
 namespace Reflection
 namespace SingularKummer
 
-set_option linter.unusedSectionVars false
-
 namespace SingularPair
 
-variable (R K : Type*) [CommRing R] [IsDomain R] [IsDedekindDomain R]
+variable (R K : Type*) [CommRing R] [IsDedekindDomain R]
 variable [Field K] [Algebra R K] [IsFractionRing R K]
 
 /-- The global field quotient `Kˣ / Kˣ^p`. -/
@@ -64,14 +62,14 @@ theorem fieldPowerClass_pow_eq_one (p : ℕ) (x : Kˣ) :
 theorem fieldPowerQuotient_pow_eq_one (p : ℕ)
     (x : fieldPowerQuotient K p) :
     x ^ p = 1 := by
-  refine QuotientGroup.induction_on x fun y => ?_
+  refine QuotientGroup.induction_on x fun y ↦ ?_
   rw [← QuotientGroup.mk_pow]
   exact fieldPowerClass_pow_eq_one K p y
 
 /-- Additive `ZMod p`-module structure on `Kˣ / Kˣ^p`. -/
 instance fieldPowerQuotientModuleZMod (p : ℕ) :
     Module (ZMod p) (Additive (fieldPowerQuotient K p)) :=
-  AddCommGroup.zmodModule (n := p) fun x => by
+  AddCommGroup.zmodModule (n := p) fun x ↦ by
     apply Additive.ext
     rw [toMul_nsmul, toMul_zero]
     exact fieldPowerQuotient_pow_eq_one K p x.toMul
@@ -128,7 +126,7 @@ theorem localUnitPowerClassAt_pow_eq_one (p : ℕ)
 theorem localUnitPowerQuotientAt_pow_eq_one (p : ℕ)
     (x : localUnitPowerQuotientAt (R := R) (K := K) v p) :
     x ^ p = 1 := by
-  refine QuotientGroup.induction_on x fun u => ?_
+  refine QuotientGroup.induction_on x fun u ↦ ?_
   rw [← QuotientGroup.mk_pow]
   exact localUnitPowerClassAt_pow_eq_one (R := R) (K := K) v p u
 
@@ -136,7 +134,7 @@ theorem localUnitPowerQuotientAt_pow_eq_one (p : ℕ)
 instance localUnitPowerQuotientAtModuleZMod (p : ℕ) :
     Module (ZMod p)
       (Additive (localUnitPowerQuotientAt (R := R) (K := K) v p)) :=
-  AddCommGroup.zmodModule (n := p) fun x => by
+  AddCommGroup.zmodModule (n := p) fun x ↦ by
     apply Additive.ext
     rw [toMul_nsmul, toMul_zero]
     exact localUnitPowerQuotientAt_pow_eq_one (R := R) (K := K) v p x.toMul
@@ -232,7 +230,7 @@ theorem localUniformizerExponent_generator_dvd (p : ℕ) (s : SingularPair R K p
           FractionalIdeal R⁰ K) =
         (((ideal s : (FractionalIdeal R⁰ K)ˣ) ^ p : (FractionalIdeal R⁰ K)ˣ) :
           FractionalIdeal R⁰ K) :=
-    congrArg (fun I : (FractionalIdeal R⁰ K)ˣ => (I : FractionalIdeal R⁰ K))
+    congrArg (fun I : (FractionalIdeal R⁰ K)ˣ ↦ (I : FractionalIdeal R⁰ K))
       (principal_eq_ideal_pow (R := R) (K := K) s)
   rw [hprincipal]
   rw [Units.val_pow_eq_pow_val, FractionalIdeal.count_pow]
@@ -371,8 +369,9 @@ theorem fieldPowerQuotientToLocalUnitPowerQuotient_mk (p : ℕ) (x : Kˣ) :
 def generatorHom (p : ℕ) : SingularPair R K p →* Kˣ where
   toFun := generator
   map_one' := rfl
-  map_mul' := fun _ _ => rfl
+  map_mul' := fun _ _ ↦ rfl
 
+omit [IsDedekindDomain R] in
 @[simp]
 theorem generatorHom_apply (p : ℕ) (s : SingularPair R K p) :
     generatorHom (R := R) (K := K) p s = generator s :=
@@ -383,12 +382,14 @@ def singularPairToFieldPowerQuotient (p : ℕ) :
     SingularPair R K p →* fieldPowerQuotient K p :=
   (fieldPowerClass K p).comp (generatorHom (R := R) (K := K) p)
 
+omit [IsDedekindDomain R] in
 @[simp]
 theorem singularPairToFieldPowerQuotient_apply (p : ℕ) (s : SingularPair R K p) :
     singularPairToFieldPowerQuotient (R := R) (K := K) p s =
       fieldPowerClass K p (generator s) :=
   rfl
 
+omit [IsDedekindDomain R] in
 @[simp]
 theorem singularPairToFieldPowerQuotient_principalPair (p : ℕ) (gamma : Kˣ) :
     singularPairToFieldPowerQuotient (R := R) (K := K) p
@@ -407,6 +408,7 @@ def singularGroupToFieldPowerQuotient (p : ℕ) :
       obtain ⟨gamma, rfl⟩ := hs
       exact singularPairToFieldPowerQuotient_principalPair (R := R) (K := K) p gamma)
 
+omit [IsDedekindDomain R] in
 @[simp]
 theorem singularGroupToFieldPowerQuotient_mk (p : ℕ) (s : SingularPair R K p) :
     singularGroupToFieldPowerQuotient (R := R) (K := K) p
