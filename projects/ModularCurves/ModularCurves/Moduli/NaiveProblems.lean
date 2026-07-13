@@ -6,12 +6,13 @@ import ModularCurves.EllipticCurve.TorsionFibre
 # The naive level-structure moduli problems (relocated holder, Y1-CLOSER S4)
 
 Relocated byte-identical from `Moduli/Representability.lean` (pointer there; v10.117
-doctrine) so the three parked `sorry`s can consume A's `PullSectionCanonicity.lean` per its
-wiring note: `pullSection_add` := the finite-presentation transport; the functor-law
-memberships close by the killing-clause transport (`pullSection_zsmul_of_finitePresentation`)
-plus the barehanded fibrewise `Point.pull`-compatibility. Everything bottoms out at the
-single designed primitive `isMonHom_of_one_comp_eq'_of_finitePresentation` (route (a)
-`RigiditySpreadingOut` / route (c) T-W7a — in flight on other lanes).
+doctrine). `EllHom.pullSection_add` and the `gammaOneNaiveProblem.map` naive-`Γ₁(N)`
+membership are now discharged — via A's `PullSectionCanonicity.lean` finite-presentation
+transport and `isNaiveGammaOne_pullSection_iff`. Two `sorry`s remain, both full-level
+producer WIP: the `gammaFullNaiveProblem.map` membership and `gammaFullNaive_representable`
+(T-E9). Their discharge bottoms out at the single designed primitive
+`isMonHom_of_one_comp_eq'_of_finitePresentation` (route (a) `RigiditySpreadingOut` /
+route (c) T-W7a — in flight on other lanes).
 -/
 
 open AlgebraicGeometry CategoryTheory Polynomial
@@ -29,9 +30,10 @@ variable (R : CommRingCat.{u})
 group-compatibility field and the two curves' `grp` data are independent, so this
 consumes uniqueness of the group law with given unit (`abelEnrichment_unique`,
 GME Cor 2.2.5 — a pointed isomorphism onto the pullback is automatically a group
-isomorphism). Every moduli-functor `map` below (Γ₁/Γ(N)/P_H, naive and Drinfeld)
-consumes this lemma; it restores the dependency edge from the level functors to the
-canonicity chain A6.δ that the earlier "nothing depends on it" amendment dropped. -/
+isomorphism). Consumed downstream via `EllHom.pullSection_zsmul`
+(`Moduli/GammaHRepresentability.lean`, the `P_H` functor) and in
+`ModularCurve/YOneTatePoint.lean`; it restores the dependency edge from the level functors
+to the canonicity chain A6.δ that the earlier "nothing depends on it" amendment dropped. -/
 theorem EllHom.pullSection_add {X Y : EllObj R} (f : X ⟶ Y)
     (P Q : Y.curve.Section) :
     EllHom.pullSection R f (P + Q) =
@@ -64,9 +66,8 @@ private lemma pull_transportSection_eq_zero_iff {X Y : EllObj R} (f : X ⟶ Y) {
 on `X.curve` iff the pulled *point* is naive-`Γ₁(N)` on the base-changed curve
 `Y.curve ×_{Y.base} X.base`. The cartesian square of `f` identifies the two curves pointedly;
 the group-compatibility of that identification is the GME 2.2.5 canonicity chain — the same
-**[T-E4-family]** machinery as `EllHom.pullSection_add` and the membership sorry inside
-`gammaOneNaiveProblem.map` (held file), with which the discharge must be coordinated (prove
-once, consume twice). -/
+**[T-E4-family]** machinery as `EllHom.pullSection_add`. Now proven and consumed by
+`gammaOneNaiveProblem.map` (below), discharging its former naive-`Γ₁(N)` membership `sorry`. -/
 theorem isNaiveGammaOne_pullSection_iff (N : ℕ) [NeZero N] {X Y : EllObj R} (f : X ⟶ Y)
     (Q : Y.curve.Section) :
     X.curve.IsNaiveGammaOne N (EllHom.pullSection R f Q) ↔
@@ -79,7 +80,7 @@ theorem isNaiveGammaOne_pullSection_iff (N : ℕ) [NeZero N] {X Y : EllObj R} (f
     AddMonoidHom.mk' (EllHom.transportSection R f)
       (EllHom.transportSection_add_of_finitePresentation R f) with hΦ
   have hinj : Function.Injective Φ := EllHom.transportSection_injective R f
-  have hΦ0 : ∀ y, Φ y = 0 ↔ y = 0 := fun y => by rw [← map_zero Φ]; exact hinj.eq_iff
+  have hΦ0 : ∀ y, Φ y = 0 ↔ y = 0 := fun y ↦ by rw [← map_zero Φ]; exact hinj.eq_iff
   -- dictionary: the transport of the pulled section IS the base-changed pulled point-section.
   have hdict : Φ (EllHom.pullSection R f Q)
       = EllipticCurve.Point.asSection Y.curve f.baseHom (EllipticCurve.Point.pull Y.curve f.baseHom Q) := by
@@ -109,12 +110,12 @@ theorem isNaiveGammaOne_pullSection_iff (N : ℕ) [NeZero N] {X Y : EllObj R} (f
     refine ⟨killing_iff.mp hkill, ?_⟩
     intro k _ _ t
     exact ⟨(hbridge (N : ℤ) t).mp (hfib k t).1,
-      fun a ha haN => (not_congr (hbridge (a : ℤ) t)).mp ((hfib k t).2 a ha haN)⟩
+      fun a ha haN ↦ (not_congr (hbridge (a : ℤ) t)).mp ((hfib k t).2 a ha haN)⟩
   · rintro ⟨hkill, hfib⟩
     refine ⟨killing_iff.mpr hkill, ?_⟩
     intro k _ _ t
     exact ⟨(hbridge (N : ℤ) t).mpr (hfib k t).1,
-      fun a ha haN => (not_congr (hbridge (a : ℤ) t)).mpr ((hfib k t).2 a ha haN)⟩
+      fun a ha haN ↦ (not_congr (hbridge (a : ℤ) t)).mpr ((hfib k t).2 a ha haN)⟩
 
 /-- The base-changed pull of `asSection` is the pull along the composite: the
 `baseChangeEquiv`-dictionary at geometric points. -/
@@ -184,14 +185,14 @@ private lemma isNaiveGammaOne_asSection_pull (N : ℕ) [NeZero N] {X Y : EllObj 
         refine (EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom t).injective ?_
         rw [map_zsmul, baseChangeEquiv_pull_asSection, map_zero, h0]
     obtain ⟨hk, hord⟩ := hfib k (t ≫ f.baseHom)
-    exact ⟨(hbc (N : ℤ)).mpr hk, fun a ha haN h0 => hord a ha haN ((hbc (a : ℤ)).mp h0)⟩
+    exact ⟨(hbc (N : ℤ)).mpr hk, fun a ha haN h0 ↦ hord a ha haN ((hbc (a : ℤ)).mp h0)⟩
 
 /-- The naive `Γ₁(N)` moduli problem over `R`: `E/S ↦ {P ∈ E(S) : P` has naive exact
 order `N}` (fibrewise; the right notion for `N` invertible, KM 1.4.4). Functor laws are
 `T-E4`. Source: Loeffler §3.3/§3.8; KM 3.2 + 3.7. -/
 noncomputable def gammaOneNaiveProblem (N : ℕ) [NeZero N] : ModuliProblem R where
   obj X := { P : X.unop.curve.Section // X.unop.curve.IsNaiveGammaOne N P }
-  map f := ↾fun P => ⟨EllHom.pullSection R f.unop P.1,
+  map f := ↾fun P ↦ ⟨EllHom.pullSection R f.unop P.1,
     (isNaiveGammaOne_pullSection_iff R N f.unop P.1).mpr
       (isNaiveGammaOne_asSection_pull R N f.unop P.2)⟩
   map_id X := by
