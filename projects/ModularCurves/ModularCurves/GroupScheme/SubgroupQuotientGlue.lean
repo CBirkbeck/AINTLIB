@@ -786,6 +786,7 @@ noncomputable def restrictedπ {W : E.E.Opens} (hW : G.IsStableOpen W) (hWU : W 
   (P.windowIso hW hWU).hom ≫ pullback.snd _ _
 
 /-- The restricted projection recovers `π` under the two open inclusions. -/
+@[reassoc]
 theorem restrictedπ_ι {W : E.E.Opens} (hW : G.IsStableOpen W) (hWU : W ≤ P.U) :
     P.restrictedπ hW hWU ≫ (P.imageOpens hW hWU).ι
       = (P.U.ι ⁻¹ᵁ W).ι ≫ G.localQuotientOpenπ P.hstable := by

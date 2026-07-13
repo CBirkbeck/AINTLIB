@@ -204,6 +204,213 @@ noncomputable def quotientGlueData : Scheme.GlueData where
     exact Iso.inv_hom_id _
   f_open i j := inferInstance
 
+/-! ### The glued quotient and the quotient projection -/
+
+/-- The option-γ patch cover of the curve. -/
+noncomputable def glueCover : E.E.OpenCover :=
+  Scheme.Cover.mkOfCovers (↥E.E) (fun i => (G.gluePatch N hkill i).U.toScheme)
+    (fun i => (G.gluePatch N hkill i).U.ι)
+    (fun x => ⟨x, by
+      have hx : x ∈ Set.range ⇑(G.gluePatch N hkill x).U.ι := by
+        rw [Scheme.Opens.range_ι]
+        exact G.mem_gluePatch N hkill x
+      obtain ⟨y, hy⟩ := hx
+      exact ⟨y, hy⟩⟩)
+
+/-- **The glued quotient** (option-γ): the scheme glued from the patch quotients. -/
+noncomputable def gluedQuotient : Scheme.{u} := (G.quotientGlueData N hkill).glued
+
+/-- The patch-quotient inclusion into the glued quotient. -/
+noncomputable def gluedQuotientι (i : ↥E.E) :
+    G.localQuotientOpen (G.gluePatch N hkill i).hstable ⟶ G.gluedQuotient N hkill :=
+  (G.quotientGlueData N hkill).ι i
+
+/-- The per-patch leg of the quotient projection. -/
+noncomputable def gluedQuotientLeg (i : ↥E.E) :
+    (G.gluePatch N hkill i).U.toScheme ⟶ G.gluedQuotient N hkill :=
+  G.localQuotientOpenπ (G.gluePatch N hkill i).hstable ≫ G.gluedQuotientι N hkill i
+
+/-- The chart-pullback factors through the first window. -/
+noncomputable def pullbackWindowFst (i j : ↥E.E) :
+    pullback (G.gluePatch N hkill i).U.ι (G.gluePatch N hkill j).U.ι ⟶
+      ((G.gluePatch N hkill i).U.ι ⁻¹ᵁ
+        ((G.gluePatch N hkill i).U ⊓ (G.gluePatch N hkill j).U)).toScheme :=
+  IsOpenImmersion.lift
+    ((G.gluePatch N hkill i).U.ι ⁻¹ᵁ
+      ((G.gluePatch N hkill i).U ⊓ (G.gluePatch N hkill j).U)).ι
+    (pullback.fst _ _) (by
+      rintro _ ⟨p, rfl⟩
+      rw [Scheme.Opens.range_ι]
+      show (G.gluePatch N hkill i).U.ι.base ((pullback.fst (G.gluePatch N hkill i).U.ι (G.gluePatch N hkill j).U.ι).base p)
+        ∈ (G.gluePatch N hkill i).U ⊓ (G.gluePatch N hkill j).U
+      constructor
+      · rw [← Scheme.Opens.range_ι]
+        exact ⟨_, rfl⟩
+      · have hcond : (G.gluePatch N hkill i).U.ι.base ((pullback.fst (G.gluePatch N hkill i).U.ι (G.gluePatch N hkill j).U.ι).base p)
+            = (G.gluePatch N hkill j).U.ι.base ((pullback.snd (G.gluePatch N hkill i).U.ι (G.gluePatch N hkill j).U.ι).base p) :=
+          ((Scheme.Hom.comp_apply _ _ _).symm.trans (congrArg
+            (fun m : pullback (G.gluePatch N hkill i).U.ι
+                (G.gluePatch N hkill j).U.ι ⟶ E.E => m.base p)
+            pullback.condition)).trans (Scheme.Hom.comp_apply _ _ _)
+        rw [hcond, ← Scheme.Opens.range_ι]
+        exact ⟨_, rfl⟩)
+
+@[reassoc]
+theorem pullbackWindowFst_ι (i j : ↥E.E) :
+    G.pullbackWindowFst N hkill i j ≫
+        ((G.gluePatch N hkill i).U.ι ⁻¹ᵁ
+          ((G.gluePatch N hkill i).U ⊓ (G.gluePatch N hkill j).U)).ι
+      = pullback.fst _ _ :=
+  IsOpenImmersion.lift_fac _ _ _
+
+/-- The chart-pullback factors through the second window. -/
+noncomputable def pullbackWindowSnd (i j : ↥E.E) :
+    pullback (G.gluePatch N hkill i).U.ι (G.gluePatch N hkill j).U.ι ⟶
+      ((G.gluePatch N hkill j).U.ι ⁻¹ᵁ
+        ((G.gluePatch N hkill j).U ⊓ (G.gluePatch N hkill i).U)).toScheme :=
+  IsOpenImmersion.lift
+    ((G.gluePatch N hkill j).U.ι ⁻¹ᵁ
+      ((G.gluePatch N hkill j).U ⊓ (G.gluePatch N hkill i).U)).ι
+    (pullback.snd _ _) (by
+      rintro _ ⟨p, rfl⟩
+      rw [Scheme.Opens.range_ι]
+      show (G.gluePatch N hkill j).U.ι.base ((pullback.snd (G.gluePatch N hkill i).U.ι (G.gluePatch N hkill j).U.ι).base p)
+        ∈ (G.gluePatch N hkill j).U ⊓ (G.gluePatch N hkill i).U
+      constructor
+      · rw [← Scheme.Opens.range_ι]
+        exact ⟨_, rfl⟩
+      · have hcond : (G.gluePatch N hkill i).U.ι.base ((pullback.fst (G.gluePatch N hkill i).U.ι (G.gluePatch N hkill j).U.ι).base p)
+            = (G.gluePatch N hkill j).U.ι.base ((pullback.snd (G.gluePatch N hkill i).U.ι (G.gluePatch N hkill j).U.ι).base p) :=
+          ((Scheme.Hom.comp_apply _ _ _).symm.trans (congrArg
+            (fun m : pullback (G.gluePatch N hkill i).U.ι
+                (G.gluePatch N hkill j).U.ι ⟶ E.E => m.base p)
+            pullback.condition)).trans (Scheme.Hom.comp_apply _ _ _)
+        rw [← hcond, ← Scheme.Opens.range_ι]
+        exact ⟨_, rfl⟩)
+
+@[reassoc]
+theorem pullbackWindowSnd_ι (i j : ↥E.E) :
+    G.pullbackWindowSnd N hkill i j ≫
+        ((G.gluePatch N hkill j).U.ι ⁻¹ᵁ
+          ((G.gluePatch N hkill j).U ⊓ (G.gluePatch N hkill i).U)).ι
+      = pullback.snd _ _ :=
+  IsOpenImmersion.lift_fac _ _ _
+
+/-- The compatibility of the per-patch legs over chart overlaps: both factor through the
+same window point of the ambient curve, and the glue condition matches the two quotient
+images. -/
+theorem gluedQuotientLeg_compat (i j : ↥E.E) :
+    pullback.fst (G.gluePatch N hkill i).U.ι (G.gluePatch N hkill j).U.ι ≫
+        G.gluedQuotientLeg N hkill i
+      = pullback.snd _ _ ≫ G.gluedQuotientLeg N hkill j := by
+  have hkey : G.pullbackWindowFst N hkill i j ≫
+      ((G.gluePatch N hkill i).windowCrossIso (G.gluePatch N hkill j)
+        inf_le_left inf_le_right).hom ≫
+      ((G.gluePatch N hkill j).U.ι ⁻¹ᵁ
+        ((G.gluePatch N hkill i).U ⊓ (G.gluePatch N hkill j).U)).ι
+      = G.pullbackWindowSnd N hkill i j ≫
+        ((G.gluePatch N hkill j).U.ι ⁻¹ᵁ
+          ((G.gluePatch N hkill j).U ⊓ (G.gluePatch N hkill i).U)).ι := by
+    rw [← cancel_mono (G.gluePatch N hkill j).U.ι]
+    simp only [Category.assoc, AffineChartPatch.windowCrossIso_hom_ι]
+    rw [G.pullbackWindowFst_ι_assoc N hkill i j, G.pullbackWindowSnd_ι_assoc N hkill i j]
+    exact pullback.condition
+  calc pullback.fst (G.gluePatch N hkill i).U.ι (G.gluePatch N hkill j).U.ι ≫
+        G.gluedQuotientLeg N hkill i
+      = G.pullbackWindowFst N hkill i j ≫
+          ((G.gluePatch N hkill i).U.ι ⁻¹ᵁ
+            ((G.gluePatch N hkill i).U ⊓ (G.gluePatch N hkill j).U)).ι ≫
+          G.localQuotientOpenπ (G.gluePatch N hkill i).hstable ≫
+          G.gluedQuotientι N hkill i := by
+        rw [gluedQuotientLeg, ← G.pullbackWindowFst_ι_assoc N hkill i j]
+    _ = G.pullbackWindowFst N hkill i j ≫
+          (G.gluePatch N hkill i).restrictedπ (G.glueW_stable N hkill i j)
+            inf_le_left ≫
+          ((G.gluePatch N hkill i).imageOpens (G.glueW_stable N hkill i j)
+            inf_le_left).ι ≫
+          G.gluedQuotientι N hkill i := by
+        rw [← (G.gluePatch N hkill i).restrictedπ_ι_assoc
+          (G.glueW_stable N hkill i j) inf_le_left]
+    _ = G.pullbackWindowFst N hkill i j ≫
+          (G.gluePatch N hkill i).restrictedπ (G.glueW_stable N hkill i j)
+            inf_le_left ≫
+          G.glueT N hkill i j ≫
+          ((G.gluePatch N hkill j).imageOpens (G.glueW_stable N hkill j i)
+            inf_le_left).ι ≫
+          G.gluedQuotientι N hkill j := by
+        have hglue := (G.quotientGlueData N hkill).glue_condition i j
+        rw [show (G.quotientGlueData N hkill).t i j = G.glueT N hkill i j from rfl,
+          show (G.quotientGlueData N hkill).f j i
+            = ((G.gluePatch N hkill j).imageOpens (G.glueW_stable N hkill j i)
+              inf_le_left).ι from rfl,
+          show (G.quotientGlueData N hkill).f i j
+            = ((G.gluePatch N hkill i).imageOpens (G.glueW_stable N hkill i j)
+              inf_le_left).ι from rfl,
+          show (G.quotientGlueData N hkill).ι j = G.gluedQuotientι N hkill j from rfl,
+          show (G.quotientGlueData N hkill).ι i = G.gluedQuotientι N hkill i from rfl]
+          at hglue
+        exact congrArg (fun m : ((G.gluePatch N hkill i).imageOpens
+            (G.glueW_stable N hkill i j) inf_le_left).toScheme ⟶
+            G.gluedQuotient N hkill =>
+          G.pullbackWindowFst N hkill i j ≫
+            (G.gluePatch N hkill i).restrictedπ (G.glueW_stable N hkill i j)
+              inf_le_left ≫ m) hglue.symm
+    _ = G.pullbackWindowFst N hkill i j ≫
+          ((G.gluePatch N hkill i).windowCrossIso (G.gluePatch N hkill j)
+            inf_le_left inf_le_right).hom ≫
+          (G.gluePatch N hkill j).U.toScheme.homOfLE
+            (Scheme.Hom.preimage_mono (G.gluePatch N hkill j).U.ι
+              (le_inf inf_le_right inf_le_left)) ≫
+          (G.gluePatch N hkill j).restrictedπ (G.glueW_stable N hkill j i)
+            inf_le_left ≫
+          ((G.gluePatch N hkill j).imageOpens (G.glueW_stable N hkill j i)
+            inf_le_left).ι ≫
+          G.gluedQuotientι N hkill j := by
+        rw [glueT, (G.gluePatch N hkill i).restrictedπ_glueTransition_assoc
+            (G.gluePatch N hkill j) (G.glueW_stable N hkill i j)
+            (G.glueW_stable N hkill j i) inf_le_left inf_le_right
+            (le_inf inf_le_right inf_le_left) inf_le_left]
+    _ = G.pullbackWindowFst N hkill i j ≫
+          ((G.gluePatch N hkill i).windowCrossIso (G.gluePatch N hkill j)
+            inf_le_left inf_le_right).hom ≫
+          (G.gluePatch N hkill j).U.toScheme.homOfLE
+            (Scheme.Hom.preimage_mono (G.gluePatch N hkill j).U.ι
+              (le_inf inf_le_right inf_le_left)) ≫
+          ((G.gluePatch N hkill j).U.ι ⁻¹ᵁ
+            ((G.gluePatch N hkill j).U ⊓ (G.gluePatch N hkill i).U)).ι ≫
+          G.localQuotientOpenπ (G.gluePatch N hkill j).hstable ≫
+          G.gluedQuotientι N hkill j := by
+        rw [(G.gluePatch N hkill j).restrictedπ_ι_assoc
+          (G.glueW_stable N hkill j i) inf_le_left]
+    _ = G.pullbackWindowFst N hkill i j ≫
+          ((G.gluePatch N hkill i).windowCrossIso (G.gluePatch N hkill j)
+            inf_le_left inf_le_right).hom ≫
+          ((G.gluePatch N hkill j).U.ι ⁻¹ᵁ
+            ((G.gluePatch N hkill i).U ⊓ (G.gluePatch N hkill j).U)).ι ≫
+          G.localQuotientOpenπ (G.gluePatch N hkill j).hstable ≫
+          G.gluedQuotientι N hkill j := by
+        rw [Scheme.homOfLE_ι_assoc]
+    _ = G.pullbackWindowSnd N hkill i j ≫
+          ((G.gluePatch N hkill j).U.ι ⁻¹ᵁ
+            ((G.gluePatch N hkill j).U ⊓ (G.gluePatch N hkill i).U)).ι ≫
+          G.localQuotientOpenπ (G.gluePatch N hkill j).hstable ≫
+          G.gluedQuotientι N hkill j := by
+        rw [reassoc_of% hkey]
+    _ = pullback.snd (G.gluePatch N hkill i).U.ι (G.gluePatch N hkill j).U.ι ≫
+          G.gluedQuotientLeg N hkill j := by
+        rw [gluedQuotientLeg, ← G.pullbackWindowSnd_ι_assoc N hkill i j]
+
+/-- **The quotient projection**: the per-patch quotient legs glued over the C3f cover. -/
+noncomputable def gluedQuotientπ : E.E ⟶ G.gluedQuotient N hkill :=
+  (G.glueCover N hkill).glueMorphisms (G.gluedQuotientLeg N hkill)
+    (G.gluedQuotientLeg_compat N hkill)
+
+@[reassoc]
+theorem ι_gluedQuotientπ (i : ↥E.E) :
+    (G.gluePatch N hkill i).U.ι ≫ G.gluedQuotientπ N hkill
+      = G.gluedQuotientLeg N hkill i :=
+  (G.glueCover N hkill).ι_glueMorphisms _ _ i
+
 end FiniteLocallyFreeSubgroup
 
 end EllipticCurve
