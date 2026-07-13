@@ -107,6 +107,27 @@ theorem toPullbackAlong_pullbackAlongπ {Y X : EllObj R} (u : Y ⟶ X) :
   · show u.isPullback.isoPullback.hom ≫ pullback.fst X.curve.π u.baseHom = u.top
     exact u.isPullback.isoPullback_hom_fst
 
+/-- `toPullbackAlong` of the tautological projection is the identity: the canonical
+self-comparison of a chosen pullback ([GHB7-3] map-id enabler). -/
+@[simp]
+theorem toPullbackAlong_pullbackAlongπ_self (X : EllObj R) {T : Scheme.{u}}
+    (g : T ⟶ X.base) :
+    toPullbackAlong (X.pullbackAlongπ g) = 𝟙 (X.pullbackAlong g) := by
+  refine EllHom.ext rfl ?_
+  show (X.pullbackAlongπ g).isPullback.isoPullback.hom = 𝟙 _
+  apply pullback.hom_ext
+  · rw [IsPullback.isoPullback_hom_fst]
+    exact (Category.id_comp _).symm
+  · rw [IsPullback.isoPullback_hom_snd]
+    exact (Category.id_comp _).symm
+
+/-- Transport of `toPullbackAlong` along an equality of morphisms (the index of the
+target pullback moves with the base morphism, so the bridge is an `eqToHom`). -/
+theorem toPullbackAlong_congr {Y X : EllObj R} {u₁ u₂ : Y ⟶ X} (h : u₁ = u₂) :
+    toPullbackAlong u₁ = toPullbackAlong u₂ ≫ eqToHom (by rw [h]) := by
+  subst h
+  rw [eqToHom_refl, Category.comp_id]
+
 /-- The morphism `Y ⟶ X.pullbackAlong g` assembled from `u : Y ⟶ X` and a base
 factorization `h : Y.base ⟶ T` with `h ≫ g = u.baseHom` (the universal property
 of the tautological cartesian square, map-in direction). -/
@@ -1131,6 +1152,51 @@ noncomputable def RelRepData.pullback {R : CommRingCat.{u}} {Q : ModuliProblem R
             rw [Category.assoc, Limits.pullback.condition, ← Category.assoc, h.2]⟩))
     rw [← Functor.map_comp_apply, ← Functor.map_comp_apply, ← op_comp, ← op_comp,
       Iso.hom_inv_id_assoc]
+
+/-- **The comparison of the identity base change with the original datum is the first
+projection** ([GHB7-3] map-id enabler): under `RelRepData.pullback (𝟙 X)`, the
+canonical comparison morphism to `d` itself is `pullback.fst`. -/
+theorem RelRepData.compare_pullback_id {Q : ModuliProblem R} {X : EllObj R}
+    (d : RelRepData Q X) :
+    ((d.pullback (𝟙 X)).compare d).1 =
+      pullback.fst d.f (𝟙 X : X ⟶ X).baseHom := by
+  have hid : ∀ {W : Scheme.{u}} (v : W ⟶ X.base), v ≫ (𝟙 X : X ⟶ X).baseHom = v :=
+    fun v => Category.comp_id v
+  have hmem : pullback.fst d.f (𝟙 X : X ⟶ X).baseHom ≫ d.f =
+      (d.pullback (𝟙 X)).f :=
+    pullback.condition.trans (hid _)
+  have hkey : (d.pullback (𝟙 X)).compare d =
+      ⟨pullback.fst d.f (𝟙 X : X ⟶ X).baseHom, hmem⟩ := by
+    apply (d.eqv (d.pullback (𝟙 X)).f).injective
+    rw [RelRepData.eqv_compare]
+    -- unfold the pulled datum's classifying bijection (`rfl`-graded in this file),
+    -- with the classified value as its own binder (dodges the dependent-MK motive)
+    have hval : ∀ (h' : { h : (d.pullback (𝟙 X)).Z ⟶ (d.pullback (𝟙 X)).Z //
+          h ≫ (d.pullback (𝟙 X)).f = (d.pullback (𝟙 X)).f })
+        (v : (d.pullback (𝟙 X)).Z ⟶ d.Z)
+        (hv : h'.1 ≫ pullback.fst d.f (𝟙 X : X ⟶ X).baseHom = v)
+        (p : v ≫ d.f = (d.pullback (𝟙 X)).f ≫ (𝟙 X : X ⟶ X).baseHom),
+        (d.pullback (𝟙 X)).eqv (d.pullback (𝟙 X)).f h' =
+          Q.map (EllObj.toPullbackAlong
+            (X.pullbackAlongπ (d.pullback (𝟙 X)).f ≫ 𝟙 X)).op
+            (d.eqv ((d.pullback (𝟙 X)).f ≫ (𝟙 X : X ⟶ X).baseHom) ⟨v, p⟩) := by
+      intro h' v hv p
+      subst hv
+      rfl
+    -- the comparison iso along `u ≫ 𝟙` is an `eqToHom`
+    have hcompid : EllObj.toPullbackAlong
+        (X.pullbackAlongπ (d.pullback (𝟙 X)).f ≫ 𝟙 X) =
+        eqToHom (by rw [Category.comp_id]; rfl) := by
+      rw [EllObj.toPullbackAlong_congr
+          (Category.comp_id (X.pullbackAlongπ (d.pullback (𝟙 X)).f)),
+        EllObj.toPullbackAlong_pullbackAlongπ_self]
+      exact Category.id_comp _
+    rw [hval ⟨𝟙 _, Category.id_comp _⟩ (pullback.fst d.f (𝟙 X : X ⟶ X).baseHom)
+        (Category.id_comp _) (hmem.trans (hid _).symm),
+      hcompid, eqToHom_op]
+    exact (d.eqv_congr (hid (d.pullback (𝟙 X)).f)
+      (pullback.fst d.f (𝟙 X : X ⟶ X).baseHom) (hmem.trans (hid _).symm)).symm
+  exact congrArg Subtype.val hkey
 
 end Engine
 
