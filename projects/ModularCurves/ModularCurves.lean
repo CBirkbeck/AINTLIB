@@ -35,6 +35,7 @@ import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.WeierstrassModel
 import ModularCurves.ForMathlib.AffineVanishing
 import ModularCurves.ForMathlib.AffineModulePatchBaseChange
+import ModularCurves.ForMathlib.AffineModulePatchBaseChangeNaturality
 import ModularCurves.ForMathlib.AcyclicAffineOpenCover
 import ModularCurves.ForMathlib.BaseChangeKerCoker
 import ModularCurves.ForMathlib.Coaction

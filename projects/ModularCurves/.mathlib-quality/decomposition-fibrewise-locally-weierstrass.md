@@ -758,9 +758,13 @@ the pullback-adjunction unit. Its proof uses the conjugate-adjunction identity d
 `affineTildePullbackIsoExtendScalars`, naturality of the pushforward-Gamma comparison,
 and the two adjunction triangle identities; no presentation-dependent formula or extra
 hypothesis is introduced. This is the generator formula needed to compare the module
-patch isomorphisms under restriction. The value-level patch isomorphism is proved as
-`affineModuleSectionsBaseChangeIso`; its restriction naturality remains the next local
-dependency before assembling the Cech complex map.
+patch isomorphisms under restriction. The patch comparison is now complete:
+`affineModuleSectionsBaseChangeIso` gives the value-level isomorphism,
+`affineModuleSectionsBaseChangeIso_hom_one_tmul` identifies its generator with the
+pullback unit, and `affineModuleSectionsBaseChangeIso_naturality` proves compatibility
+with every affine inclusion. Thus the local maps have exactly the coherence needed for
+the next dependency: assembling them degreewise, including the alternating
+differentials, into a base-linear Cech-complex base-change isomorphism.
 
 The elementary Mayer--Vietoris seam is now complete in both directions.
 `HPrimeZeroAddEquivSections` identifies `H'⁰(U,F)` with sections naturally in `U`, while
