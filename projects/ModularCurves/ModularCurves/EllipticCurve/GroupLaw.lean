@@ -313,31 +313,28 @@ private noncomputable def pointBaseChangeFun {T T' : Scheme.{u}} (σ : T ⟶ S) 
       (Category.assoc _ _ _).symm.trans <|
       congrArg (· ≫ σ) x.2⟩
 
-/-- The underlying morphism of a point sum, through `pointEquivOverHom_add` (the
-`Hom.commGroup` multiplication made explicit as `lift … ≫ μ`). -/
-private lemma point_add_coe {T : Scheme.{u}} (g : T ⟶ S) (P Q : E.Point g) :
-    (P + Q : E.Point g).1 =
-      (lift (E.pointEquivOverHom g P) (E.pointEquivOverHom g Q)).left ≫
-        (μ[E.asOver]).left :=
-  (congrArg CommaMorphism.left (E.pointEquivOverHom_add g P Q)).trans
-    (Over.comp_left _ _ _ _ _)
-
-private lemma pointBaseChangeFun_add {T T' : Scheme.{u}} (σ : T ⟶ S) (t : T' ⟶ T)
+/-- The categorical core of `pointBaseChangeFun_add`: the lift of the two base-changed
+points and the lift of their images under `pointBaseChangeFun` induce the same map into
+`E ×ₛ E` after the pullback comparison morphism, by the universal property of the
+base-change pullback (both projections agree). -/
+private lemma pointBaseChangeFun_add_lift_left {T T' : Scheme.{u}} (σ : T ⟶ S) (t : T' ⟶ T)
     (x y : (E.baseChange σ).Point t) :
-    pointBaseChangeFun E σ t (x + y)
-      = pointBaseChangeFun E σ t x + pointBaseChangeFun E σ t y := by
-  refine Subtype.ext ?_
-  have hx : (x + y).1
-      = (lift ((E.baseChange σ).pointEquivOverHom t x)
-          ((E.baseChange σ).pointEquivOverHom t y)).left
-        ≫ (μ[(E.baseChange σ).asOver]).left :=
-    point_add_coe (E.baseChange σ) t x y
-  have hR : (pointBaseChangeFun E σ t x + pointBaseChangeFun E σ t y).1
+    (lift ((E.baseChange σ).pointEquivOverHom t x)
+        ((E.baseChange σ).pointEquivOverHom t y)).left
+        ≫ pullback.lift
+          (pullback.fst (pullback.snd E.π σ) (pullback.snd E.π σ) ≫ pullback.fst E.π σ)
+          (pullback.snd (pullback.snd E.π σ) (pullback.snd E.π σ) ≫ pullback.fst E.π σ)
+          ((Category.assoc _ _ _).trans <|
+            (congrArg (pullback.fst (pullback.snd E.π σ) (pullback.snd E.π σ) ≫ ·)
+              pullback.condition).trans <|
+            (Category.assoc _ _ _).symm.trans <|
+            (congrArg (· ≫ σ) pullback.condition).trans <|
+            (Category.assoc _ _ _).trans <|
+            (congrArg (pullback.snd (pullback.snd E.π σ) (pullback.snd E.π σ) ≫ ·)
+              pullback.condition.symm).trans <|
+            (Category.assoc _ _ _).symm)
       = (lift (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t x))
-          (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t y))).left
-        ≫ (μ[E.asOver]).left :=
-    point_add_coe E (t ≫ σ) (pointBaseChangeFun E σ t x) (pointBaseChangeFun E σ t y)
-  -- projections of the two lifted pairs
+          (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t y))).left := by
   have hbx : (lift ((E.baseChange σ).pointEquivOverHom t x)
         ((E.baseChange σ).pointEquivOverHom t y)).left
         ≫ pullback.fst (pullback.snd E.π σ) (pullback.snd E.π σ) = x.1 :=
@@ -354,24 +351,7 @@ private lemma pointBaseChangeFun_add {T T' : Scheme.{u}} (σ : T ⟶ S) (t : T' 
         (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t y))).left
         ≫ pullback.snd E.π E.π = y.1 ≫ pullback.fst E.π σ :=
     (Over.comp_left _ _ _ _ _).symm.trans (congrArg CommaMorphism.left (lift_snd _ _))
-  -- the lifted pairs agree after the comparison morphism of the intertwining lemma
-  have hlift : (lift ((E.baseChange σ).pointEquivOverHom t x)
-        ((E.baseChange σ).pointEquivOverHom t y)).left
-        ≫ pullback.lift
-          (pullback.fst (pullback.snd E.π σ) (pullback.snd E.π σ) ≫ pullback.fst E.π σ)
-          (pullback.snd (pullback.snd E.π σ) (pullback.snd E.π σ) ≫ pullback.fst E.π σ)
-          ((Category.assoc _ _ _).trans <|
-            (congrArg (pullback.fst (pullback.snd E.π σ) (pullback.snd E.π σ) ≫ ·)
-              pullback.condition).trans <|
-            (Category.assoc _ _ _).symm.trans <|
-            (congrArg (· ≫ σ) pullback.condition).trans <|
-            (Category.assoc _ _ _).trans <|
-            (congrArg (pullback.snd (pullback.snd E.π σ) (pullback.snd E.π σ) ≫ ·)
-              pullback.condition.symm).trans <|
-            (Category.assoc _ _ _).symm)
-      = (lift (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t x))
-          (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t y))).left :=
-    Over.tensorObj_ext (S := E.asOver) (T := E.asOver) _ _
+  exact Over.tensorObj_ext (S := E.asOver) (T := E.asOver) _ _
       ((Category.assoc _ _ _).trans <|
         (congrArg ((lift ((E.baseChange σ).pointEquivOverHom t x)
             ((E.baseChange σ).pointEquivOverHom t y)).left ≫ ·)
@@ -386,6 +366,24 @@ private lemma pointBaseChangeFun_add {T T' : Scheme.{u}} (σ : T ⟶ S) (t : T' 
         (Category.assoc _ _ _).symm.trans <|
         (congrArg (· ≫ pullback.fst E.π σ) hby).trans <|
         hSy.symm)
+
+private lemma pointBaseChangeFun_add {T T' : Scheme.{u}} (σ : T ⟶ S) (t : T' ⟶ T)
+    (x y : (E.baseChange σ).Point t) :
+    pointBaseChangeFun E σ t (x + y)
+      = pointBaseChangeFun E σ t x + pointBaseChangeFun E σ t y := by
+  refine Subtype.ext ?_
+  have hx : (x + y).1
+      = (lift ((E.baseChange σ).pointEquivOverHom t x)
+          ((E.baseChange σ).pointEquivOverHom t y)).left
+        ≫ (μ[(E.baseChange σ).asOver]).left :=
+    (congrArg CommaMorphism.left ((E.baseChange σ).pointEquivOverHom_add t x y)).trans
+      (Over.comp_left _ _ _ _ _)
+  have hR : (pointBaseChangeFun E σ t x + pointBaseChangeFun E σ t y).1
+      = (lift (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t x))
+          (E.pointEquivOverHom (t ≫ σ) (pointBaseChangeFun E σ t y))).left
+        ≫ (μ[E.asOver]).left :=
+    (congrArg CommaMorphism.left (E.pointEquivOverHom_add (t ≫ σ) _ _)).trans
+      (Over.comp_left _ _ _ _ _)
   show (x + y).1 ≫ pullback.fst E.π σ = _
   rw [hR]
   exact (congrArg (· ≫ pullback.fst E.π σ) hx).trans <|
@@ -394,7 +392,7 @@ private lemma pointBaseChangeFun_add {T T' : Scheme.{u}} (σ : T ⟶ S) (t : T' 
         ((E.baseChange σ).pointEquivOverHom t y)).left ≫ ·)
       (Over.grpObjMkPullbackSnd_mul_left_fst E.π σ)).trans <|
     (Category.assoc _ _ _).symm.trans <|
-    congrArg (· ≫ (μ[E.asOver]).left) hlift
+    congrArg (· ≫ (μ[E.asOver]).left) (pointBaseChangeFun_add_lift_left E σ t x y)
 
 /-- **(T-H2b)** The additive base-change point dictionary: `T'`-points of the base-changed
 curve are `T'`-points of `E` over the composite, additively. The underlying bijection is
