@@ -3,6 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import ModularCurves.EllipticCurve.AdditionBaseChange
 import ModularCurves.EllipticCurve.Comparison
 import ModularCurves.EllipticCurve.GroupLawConstruction
 import ModularCurves.EllipticCurve.WeierstrassAtlasBundle
@@ -405,6 +406,19 @@ noncomputable def restrict (P : LocalPresentation G V) {V' : S.affineOpens}
 
 /-! ### T-OM-B4: naturality of the comparison under transport -/
 
+private lemma projModelπ_congr {R : Type u} [CommRing R] {W₁ W₂ : WeierstrassCurve R}
+    (h : W₁ = W₂) :
+    eqToHom (congrArg projModel h) ≫ projModelπ W₂ = projModelπ W₁ := by
+  cases h; simp
+
+private lemma projModelBaseChange_congr {R R' : Type u} [CommRing R] [CommRing R']
+    (σ : R →+* R') {W₁ W₂ : WeierstrassCurve R} (h : W₁ = W₂) :
+    projModelBaseChange σ W₂ ≫ eqToHom (show projModel W₂ = projModel W₁ by rw [h]) =
+      eqToHom (show projModel (W₂.map σ) = projModel (W₁.map σ) by rw [h]) ≫
+        projModelBaseChange σ W₁ := by
+  cases h; simp
+
+set_option backward.isDefEq.respectTransparency false in
 /-- **(T-OM-B4)** The comparison variable change is natural under transport: the
 comparison of the transported presentations is the coefficient base change of the
 comparison (`projModelVCIso_map` + `map_variableChange` + uniqueness). -/
@@ -415,7 +429,47 @@ theorem transVC_transport {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
     {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
     (P.transport f t hsq hz hV').transVC (Q.transport f t hsq hz hV') =
       (P.transVC Q).map (sectionsMapLE f hV') := by
-  sorry
+  letI : Algebra Γ(S, V.1) Γ(S', V'.1) := (sectionsMapLE f hV').toAlgebra
+  have hsmul : (P.transVC Q).map (sectionsMapLE f hV') •
+      (Q.transport f t hsq hz hV').W = (P.transport f t hsq hz hV').W := by
+    show (P.transVC Q).map (sectionsMapLE f hV') • Q.W.map (sectionsMapLE f hV') =
+      P.W.map (sectionsMapLE f hV')
+    rw [map_variableChange, P.transVC_smul Q]
+  refine ((P.transport f t hsq hz hV').transVC_unique (Q.transport f t hsq hz hV')
+    ((P.transVC Q).map (sectionsMapLE f hV')) hsmul ?_).symm
+  -- both sides of the defining equation are maps into the base-change pullback of `Q`
+  refine (transport_isPullback_model f hV' Q).hom_ext ?_ ?_
+  · -- the `projModelBaseChange` leg
+    show ((P.transport f t hsq hz hV').pointedIso (Q.transport f t hsq hz hV')).hom ≫
+        projModelBaseChange (sectionsMapLE f hV') Q.W = _
+    rw [show ((P.transport f t hsq hz hV').pointedIso (Q.transport f t hsq hz hV')).hom =
+      (transportE f t hsq P hV').inv ≫ (transportE f t hsq Q hV').hom from rfl]
+    simp only [Category.assoc]
+    rw [transportE_baseChange f t hsq Q hV']
+    rw [show transportTheta f t hsq hV' ≫ Q.e.hom =
+      (transportTheta f t hsq hV' ≫ P.e.hom) ≫ (P.pointedIso Q).hom by
+        simp [pointedIso, Iso.trans_hom, Iso.symm_hom]]
+    rw [← transportE_baseChange f t hsq P hV', Category.assoc, ← Category.assoc,
+      Iso.inv_hom_id, Category.id_comp]
+    -- LHS is now `projModelBaseChange σ P.W ≫ (P.pointedIso Q).hom`
+    rw [P.transVC_spec Q]
+    -- RHS: unfold via `projModelVCIso_map`
+    have hmap := projModelVCIso_map (R' := Γ(S', V'.1)) (P.transVC Q) Q.W
+    rw [show algebraMap Γ(S, V.1) Γ(S', V'.1) = sectionsMapLE f hV' from rfl] at hmap
+    rw [← Category.assoc,
+      projModelBaseChange_congr (sectionsMapLE f hV')
+        (show P.transVC Q • Q.W = P.W from P.transVC_smul Q),
+      Category.assoc, hmap, ← Category.assoc, eqToHom_trans]
+    rfl
+  · -- the `projModelπ` leg
+    show ((P.transport f t hsq hz hV').pointedIso (Q.transport f t hsq hz hV')).hom ≫
+        projModelπ (Q.transport f t hsq hz hV').W =
+      (eqToHom _ ≫ (projModelVCIso ((P.transVC Q).map (sectionsMapLE f hV'))
+        (Q.transport f t hsq hz hV').W).hom) ≫
+        projModelπ (Q.transport f t hsq hz hV').W
+    rw [(P.transport f t hsq hz hV').pointedIso_π (Q.transport f t hsq hz hV')]
+    rw [Category.assoc, projModelVCIso_π, projModelπ_congr]
+    exact hsmul.symm
 
 /-- **(T-OM-B4)** The transition unit is natural under transport. -/
 theorem transUnit_transport {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
@@ -425,15 +479,231 @@ theorem transUnit_transport {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
     {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
     (P.transport f t hsq hz hV').transUnit (Q.transport f t hsq hz hV') =
       Units.map (sectionsMapLE f hV').toMonoidHom (P.transUnit Q) := by
-  sorry
+  rw [transUnit, transUnit, transVC_transport f t hsq hz P Q hV']
+  rfl
+
+/-- The sections comparison of the identity morphism is restriction. -/
+theorem sectionsMapLE_id {V' V : S.Opens} (h : V' ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ V) :
+    sectionsMapLE (𝟙 S) h = Scheme.resLE (X := S) (show V' ≤ V by simpa using h) := by
+  have harr : (𝟙 S : S ⟶ S).appLE V V' h =
+      S.presheaf.map (homOfLE (show V' ≤ V by simpa using h)).op := by
+    rw [Scheme.Hom.appLE, Scheme.Hom.id_app]
+    erw [Category.id_comp]
+    rfl
+  exact congrArg CommRingCat.Hom.hom harr
 
 /-- **(T-OM-B4)** Restriction form of the naturality: transition units restrict to
 transition units. -/
 theorem transUnit_restrict (P Q : LocalPresentation G V) {V' : S.affineOpens}
     (h : V'.1 ≤ V.1) :
     (P.restrict h).transUnit (Q.restrict h) =
-      Units.map (sectionsMapLE (𝟙 S) (by simpa using h)).toMonoidHom (P.transUnit Q) := by
-  sorry
+      Scheme.resUnit h (P.transUnit Q) := by
+  rw [restrict, restrict, transUnit_transport (𝟙 S) (𝟙 G.E)
+    (IsPullback.of_horiz_isIso ⟨by simp⟩) (by simp) P Q (by simpa using h)]
+  refine Units.ext ?_
+  show sectionsMapLE (𝟙 S) (by simpa using h) (P.transUnit Q).val = _
+  rw [sectionsMapLE_id]
+  rfl
+
+/-- The induced comparisons of restrictions compose. -/
+private lemma transportTheta_comp {V V'' : S.affineOpens} {VP : S.affineOpens}
+    (p : V.1 ≤ VP.1) (h : V''.1 ≤ V.1) :
+    transportTheta (G' := G) (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
+        (V := V) (V' := V'') (by simpa using h) ≫
+      transportTheta (G' := G) (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
+        (V := VP) (V' := V) (by simpa using p) =
+    transportTheta (G' := G) (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
+        (V := VP) (V' := V'') (by simpa using h.trans p) := by
+  unfold transportTheta
+  refine pullback.hom_ext ?_ ?_
+  · rw [Category.assoc, pullback.lift_fst, ← Category.assoc, pullback.lift_fst,
+      pullback.lift_fst, Category.assoc, Category.comp_id, Category.comp_id]
+  · rw [Category.assoc, pullback.lift_snd, ← Category.assoc, pullback.lift_snd,
+      pullback.lift_snd, Category.assoc, Scheme.Hom.resLE_comp_resLE]
+    congr 1
+
+private lemma projModelBaseChangeOf_congr_f {U R : Type u} [CommRing U] [CommRing R]
+    {f f' : U →+* R} (hf : f = f') (W₀ : WeierstrassCurve U) (W : WeierstrassCurve R)
+    (hh : W₀.map f = W) (hh' : W₀.map f' = W) :
+    projModelBaseChangeOf f W₀ W hh = projModelBaseChangeOf f' W₀ W hh' := by
+  subst hf; rfl
+
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- Double restriction agrees with the composite restriction on chart isomorphisms
+(uniqueness of pullback comparisons, through `projModelBaseChangeOf`). -/
+private lemma transportE_restrict_restrict {VP : S.affineOpens}
+    (P : LocalPresentation G VP)
+    {V V'' : S.affineOpens} (p : V.1 ≤ VP.1) (h : V''.1 ≤ V.1) :
+    ((P.restrict p).restrict h).e.hom =
+      (P.restrict (h.trans p)).e.hom ≫
+        eqToHom (show projModel (P.restrict (h.trans p)).W =
+            projModel ((P.restrict p).restrict h).W by
+          show projModel (P.W.map _) = projModel ((P.W.map _).map _)
+          rw [WeierstrassCurve.map_map]
+          congr 2
+          rw [sectionsMapLE_id, sectionsMapLE_id, sectionsMapLE_id, Scheme.resLE_comp]) := by
+  have hWW : (P.restrict (h.trans p)).W = ((P.restrict p).restrict h).W := by
+    show P.W.map _ = (P.W.map _).map _
+    rw [WeierstrassCurve.map_map]
+    congr 1
+    rw [sectionsMapLE_id, sectionsMapLE_id, sectionsMapLE_id, Scheme.resLE_comp]
+  have hWcomp : P.W.map (sectionsMapLE (𝟙 S)
+      (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p)) =
+    ((P.restrict p).restrict h).W := by
+    show _ = (P.W.map _).map _
+    rw [WeierstrassCurve.map_map]
+    congr 1
+    rw [sectionsMapLE_id, sectionsMapLE_id, sectionsMapLE_id, Scheme.resLE_comp]
+  refine (isPullback_projModelBaseChangeOf
+    (sectionsMapLE (𝟙 S) (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p))
+    P.W ((P.restrict p).restrict h).W hWcomp).hom_ext ?_ ?_
+  · -- the base-change leg: both reduce to `θ_h ≫ θ_p ≫ P.e.hom`
+    have hfeq : sectionsMapLE (𝟙 S)
+        (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p) =
+      (sectionsMapLE (𝟙 S) (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ V.1 by simpa using h)).comp
+        (sectionsMapLE (𝟙 S) (show V.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using p)) := by
+      rw [sectionsMapLE_id, sectionsMapLE_id, sectionsMapLE_id, Scheme.resLE_comp]
+    have hLHS : ((P.restrict p).restrict h).e.hom ≫
+        projModelBaseChangeOf (sectionsMapLE (𝟙 S)
+          (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p))
+          P.W ((P.restrict p).restrict h).W hWcomp =
+        (transportTheta (G' := G) (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
+            (V := V) (V' := V'') (by simpa using h) ≫
+          transportTheta (G' := G) (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
+            (V := VP) (V' := V) (by simpa using p)) ≫ P.e.hom := by
+      rw [projModelBaseChangeOf_congr_f hfeq P.W ((P.restrict p).restrict h).W hWcomp
+        (by rw [← hfeq]; exact hWcomp)]
+      rw [projModelBaseChangeOf_comp
+        (sectionsMapLE (𝟙 S) (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ V.1 by simpa using h))
+        (sectionsMapLE (𝟙 S) (show V.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using p))
+        P.W (P.restrict p).W rfl ((P.restrict p).restrict h).W rfl]
+      rw [show projModelBaseChangeOf
+          (sectionsMapLE (𝟙 S) (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ V.1 by simpa using h))
+          (P.restrict p).W ((P.restrict p).restrict h).W rfl =
+        projModelBaseChange
+          (sectionsMapLE (𝟙 S) (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ V.1 by simpa using h))
+          (P.restrict p).W from by
+          rw [projModelBaseChangeOf]; simp]
+      rw [show projModelBaseChangeOf
+          (sectionsMapLE (𝟙 S) (show V.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using p))
+          P.W (P.restrict p).W rfl =
+        projModelBaseChange
+          (sectionsMapLE (𝟙 S) (show V.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using p))
+          P.W from by
+          rw [projModelBaseChangeOf]; simp]
+      rw [show ((P.restrict p).restrict h).e = transportE (𝟙 S) (𝟙 G.E)
+          (IsPullback.of_horiz_isIso ⟨by simp⟩) (P.restrict p)
+          (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ V.1 by simpa using h) from rfl]
+      rw [← Category.assoc,
+        transportE_baseChange (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
+          (P.restrict p) (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ V.1 by simpa using h)]
+      rw [show (P.restrict p).e = transportE (𝟙 S) (𝟙 G.E)
+          (IsPullback.of_horiz_isIso ⟨by simp⟩) P
+          (show V.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using p) from rfl]
+      rw [Category.assoc, Category.assoc,
+        transportE_baseChange (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
+          P (show V.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using p)]
+    have hRHS : ((P.restrict (h.trans p)).e.hom ≫
+        eqToHom (by rw [hWW])) ≫
+        projModelBaseChangeOf (sectionsMapLE (𝟙 S)
+          (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p))
+          P.W ((P.restrict p).restrict h).W hWcomp =
+        (transportTheta (G' := G) (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
+            (V := V) (V' := V'') (by simpa using h) ≫
+          transportTheta (G' := G) (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
+            (V := VP) (V' := V) (by simpa using p)) ≫ P.e.hom := by
+      rw [Category.assoc]
+      rw [show eqToHom (by rw [hWW]) ≫
+          projModelBaseChangeOf (sectionsMapLE (𝟙 S)
+            (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p))
+            P.W ((P.restrict p).restrict h).W hWcomp =
+        projModelBaseChangeOf (sectionsMapLE (𝟙 S)
+          (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p))
+          P.W (P.restrict (h.trans p)).W (hWcomp.trans hWW.symm) from by
+          rw [projModelBaseChangeOf, projModelBaseChangeOf, ← Category.assoc, eqToHom_trans]]
+      rw [show projModelBaseChangeOf (sectionsMapLE (𝟙 S)
+          (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p))
+          P.W (P.restrict (h.trans p)).W (hWcomp.trans hWW.symm) =
+        projModelBaseChange (sectionsMapLE (𝟙 S)
+          (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p)) P.W from by
+          rw [projModelBaseChangeOf]; simp]
+      rw [show (P.restrict (h.trans p)).e = transportE (𝟙 S) (𝟙 G.E)
+          (IsPullback.of_horiz_isIso ⟨by simp⟩) P
+          (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p) from rfl]
+      rw [transportE_baseChange (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
+          P (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p),
+        ← transportTheta_comp p h]
+    exact hLHS.trans hRHS.symm
+  · -- the `π` leg: both sides are the chart projection of `V''`
+    rw [Category.assoc,
+      show eqToHom (by rw [hWW] :
+          projModel (P.restrict (h.trans p)).W =
+            projModel ((P.restrict p).restrict h).W) ≫
+        projModelπ ((P.restrict p).restrict h).W =
+      projModelπ (P.restrict (h.trans p)).W from projModelπ_congr hWW]
+    rw [show ((P.restrict p).restrict h).e = transportE (𝟙 S) (𝟙 G.E)
+        (IsPullback.of_horiz_isIso ⟨by simp⟩) (P.restrict p)
+        (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ V.1 by simpa using h) from rfl,
+      show (P.restrict (h.trans p)).e = transportE (𝟙 S) (𝟙 G.E)
+        (IsPullback.of_horiz_isIso ⟨by simp⟩) P
+        (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p) from rfl]
+    exact (transportE_π (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
+      (P.restrict p) (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ V.1 by simpa using h)).trans
+      (transportE_π (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
+        P (show V''.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ VP.1 by simpa using h.trans p)).symm
+
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-OM-B5 coherence)** Double restriction agrees with the composite restriction on
+comparison variable changes (uniqueness through the chart-isomorphism coherence). -/
+private theorem transVC_restrict_restrict {VP VQ : S.affineOpens}
+    (P : LocalPresentation G VP) (Q : LocalPresentation G VQ)
+    {V V'' : S.affineOpens} (p : V.1 ≤ VP.1) (q : V.1 ≤ VQ.1) (h : V''.1 ≤ V.1) :
+    ((P.restrict p).restrict h).transVC ((Q.restrict q).restrict h) =
+      (P.restrict (h.trans p)).transVC (Q.restrict (h.trans q)) := by
+  have hWWP : (P.restrict (h.trans p)).W = ((P.restrict p).restrict h).W := by
+    show P.W.map _ = (P.W.map _).map _
+    rw [WeierstrassCurve.map_map]
+    congr 1
+    rw [sectionsMapLE_id, sectionsMapLE_id, sectionsMapLE_id, Scheme.resLE_comp]
+  have hWWQ : (Q.restrict (h.trans q)).W = ((Q.restrict q).restrict h).W := by
+    show Q.W.map _ = (Q.W.map _).map _
+    rw [WeierstrassCurve.map_map]
+    congr 1
+    rw [sectionsMapLE_id, sectionsMapLE_id, sectionsMapLE_id, Scheme.resLE_comp]
+  have hP := transportE_restrict_restrict P p h
+  have hQ := transportE_restrict_restrict Q q h
+  -- invert the `P`-coherence
+  have hPinv : (((P.restrict p).restrict h).e).inv =
+      eqToHom (congrArg projModel hWWP).symm ≫ (P.restrict (h.trans p)).e.inv := by
+    rw [← cancel_mono (((P.restrict p).restrict h).e.hom), Iso.inv_hom_id, hP,
+      Category.assoc, ← Category.assoc ((P.restrict (h.trans p)).e.inv),
+      Iso.inv_hom_id, Category.id_comp, eqToHom_trans, eqToHom_refl]
+  refine ((((P.restrict p).restrict h).transVC_unique ((Q.restrict q).restrict h)
+    ((P.restrict (h.trans p)).transVC (Q.restrict (h.trans q))) ?_ ?_)).symm
+  · rw [← hWWQ, ← hWWP]
+    exact (P.restrict (h.trans p)).transVC_smul (Q.restrict (h.trans q))
+  · show (((P.restrict p).restrict h).e.symm ≪≫ ((Q.restrict q).restrict h).e).hom = _
+    rw [Iso.trans_hom, Iso.symm_hom, hPinv, hQ]
+    simp only [Category.assoc]
+    rw [← Category.assoc ((P.restrict (h.trans p)).e.inv)]
+    rw [show (P.restrict (h.trans p)).e.inv ≫ (Q.restrict (h.trans q)).e.hom =
+      ((P.restrict (h.trans p)).pointedIso (Q.restrict (h.trans q))).hom from rfl]
+    rw [(P.restrict (h.trans p)).transVC_spec (Q.restrict (h.trans q))]
+    rw [projModelVCIso_congr hWWQ ((P.restrict (h.trans p)).transVC (Q.restrict (h.trans q)))]
+    simp only [Category.assoc, eqToHom_trans, eqToHom_trans_assoc]
+    simp
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-OM-B5 coherence, unit form)** Restricting a transition unit twice agrees with
+the composite restriction. -/
+private theorem transUnit_restrict_restrict {VP VQ : S.affineOpens}
+    (P : LocalPresentation G VP) (Q : LocalPresentation G VQ)
+    {V V'' : S.affineOpens} (p : V.1 ≤ VP.1) (q : V.1 ≤ VQ.1) (h : V''.1 ≤ V.1) :
+    ((P.restrict p).restrict h).transUnit ((Q.restrict q).restrict h) =
+      (P.restrict (h.trans p)).transUnit (Q.restrict (h.trans q)) := by
+  rw [transUnit, transUnit, transVC_restrict_restrict P Q p q h]
 
 end LocalPresentation
 

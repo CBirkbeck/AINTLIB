@@ -83,6 +83,11 @@ theorem resUnit_resUnit {V'' V' V : X.Opens} (h' : V'' ≤ V') (h : V' ≤ V) (g
     resUnit h' (resUnit h g) = resUnit (h'.trans h) g :=
   Units.ext (by simp [resLE_resLE])
 
+/-- Restrictions compose (ring-hom level). -/
+theorem resLE_comp {V'' V' V : X.Opens} (h' : V'' ≤ V') (h : V' ≤ V) :
+    (resLE (X := X) h').comp (resLE h) = resLE (h'.trans h) :=
+  RingHom.ext fun r => resLE_resLE h' h r
+
 /-- The inverse of a restricted unit times the restricted value is one. -/
 theorem inv_resUnit_mul_resLE {V' V : X.Opens} (h : V' ≤ V) (g : Γ(X, V)ˣ) :
     ((resUnit h g)⁻¹).val * resLE h g.val = 1 :=
@@ -749,6 +754,21 @@ theorem exists_unit_glue (X : Scheme.{u}) (W : X.Opens)
     show resLE p.2 g'.val = (data p.1 p.2).val
     have := congrArg Units.val (hg' p.1 p.2)
     simpa using this
+
+/-- **(T-OM-A6)** Units of the section ring agreeing on all affine opens below `W`
+are equal (separation over the affine basis). -/
+theorem unit_ext_of_affine_res (X : Scheme.{u}) {W : X.Opens} {g g' : Γ(X, W)ˣ}
+    (h : ∀ (V : X.affineOpens) (hV : V.1 ≤ W), resUnit hV g = resUnit hV g') : g = g' := by
+  have hcover : W ≤ iSup (fun p : {V : X.affineOpens // V.1 ≤ W} => p.1.1) := by
+    intro x hxW
+    obtain ⟨V, hVaff, hxV, hVW⟩ := exists_isAffineOpen_mem_and_subset hxW
+    exact Opens.mem_iSup.mpr ⟨⟨⟨V, hVaff⟩, hVW⟩, hxV⟩
+  refine Units.ext (TopCat.Sheaf.eq_of_locally_eq' X.sheaf
+    (fun p : {V : X.affineOpens // V.1 ≤ W} => p.1.1) W (fun p => homOfLE p.2) hcover
+    g.val g'.val (fun p => ?_))
+  show resLE p.2 g.val = resLE p.2 g'.val
+  have := congrArg Units.val (h p.1 p.2)
+  simpa using this
 
 namespace UnitCocycle
 
