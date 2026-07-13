@@ -1,5 +1,6 @@
 import ModularCurves.ForMathlib.AffineOpenImmersionCover
 import ModularCurves.ForMathlib.FinitePresentationAwayMapFamily
+import ModularCurves.ForMathlib.FinitePresentationFunctorCover
 
 /-!
 # Spreading finite families of affine open immersions
@@ -14,10 +15,33 @@ universe u
 
 namespace Algebra
 
+open CategoryTheory
+
 variable {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
   {𝒮 : ι → Type u} [∀ i, CommRing (𝒮 i)] [∀ i, Algebra R (𝒮 i)]
   {t : ∀ ⦃i j : ι⦄, i ≤ j → (𝒮 i →ₐ[R] 𝒮 j)}
   {A : Type u} [CommRing A] [Algebra R A] {uA : ∀ i, 𝒮 i →ₐ[R] A}
+
+private structure SpecMapAwayCover
+    {S T : Type u} [CommRing S] [CommRing T] (f : S →+* T) where
+  index : Type u
+  finite_index : Finite index
+  source : index → S
+  image_span : Ideal.span (Set.range fun k => f (source k)) = ⊤
+  map_bijective : ∀ k, Function.Bijective
+    (IsLocalization.Away.map
+      (Localization.Away (source k))
+      (Localization.Away (f (source k))) f (source k))
+
+private theorem nonempty_specMapAwayCover
+    {S T : Type u} [CommRing S] [CommRing T] (f : S →+* T)
+    (hopen : AlgebraicGeometry.IsOpenImmersion
+      (AlgebraicGeometry.Spec.map (CommRingCat.ofHom f))) :
+    Nonempty (SpecMapAwayCover f) := by
+  letI := hopen
+  obtain ⟨κ, hκ, b, hspan, hbij⟩ :=
+    AlgebraicGeometry.exists_awayCover_of_isOpenImmersion_SpecMap f
+  exact ⟨⟨κ, hκ, b, hspan, hbij⟩⟩
 
 private theorem span_range_map_eq_top
     {S T κ : Type u} [CommRing S] [CommRing T]
@@ -140,5 +164,55 @@ theorem SpreadData.exists_common_isOpenImmersion_mapAtLaterStage
   exact (D (src r)).isOpenImmersion_mapAtLaterStage
     (D (dst r)) H (h (src r)) (h (dst r)) hij (f r) (b_i r)
       (hspan r) fun k => hlocal ⟨r, k⟩
+
+/-- Finitely many arrows in a spread functor whose colimit spectrum maps are open
+immersions become open immersions simultaneously at one later functor stage. -/
+theorem SpreadData.FunctorModel.exists_common_isOpenImmersion_mapToStage
+    {J : Type u} [SmallCategory J] {F : J ⥤ CommAlgCat.{u} A}
+    {H : IsFilteredAlgColimit R 𝒮 t A uA}
+    (M : SpreadData.FunctorModel F H)
+    {ρ : Type u} [Finite ρ] (src dst : ρ → J)
+    (a : ∀ r, src r ⟶ dst r)
+    (hopen : ∀ r, AlgebraicGeometry.IsOpenImmersion
+      (AlgebraicGeometry.Spec.map (CommRingCat.ofHom
+        (F.map (a r)).hom.toRingHom))) :
+    ∃ (j : ι) (hij : M.stage ≤ j),
+      ∀ r, AlgebraicGeometry.IsOpenImmersion
+        (AlgebraicGeometry.Spec.map (CommRingCat.ofHom
+          ((M.mapToStage hij).map (a r)).toRingHom)) := by
+  classical
+  let C : ∀ r, SpecMapAwayCover (F.map (a r)).hom.toRingHom := fun r =>
+    Classical.choice (nonempty_specMapAwayCover _ (hopen r))
+  let κ : ρ → Type u := fun r => (C r).index
+  letI : ∀ r, Finite (κ r) := fun r => (C r).finite_index
+  let b : ∀ r, κ r → F.obj (src r) := fun r => (C r).source
+  obtain ⟨i, hMi, b_i, hb_i, hspan_i⟩ :=
+    M.exists_common_mapCoverAtLaterStage κ src dst a b fun r => (C r).image_span
+  let N := M.mapToStage hMi
+  have hbij (r) (k) : Function.Bijective
+      (IsLocalization.Away.mapₐ
+        (Localization.Away (b r k))
+        (Localization.Away ((F.map (a r)).hom (b r k)))
+        (F.map (a r)).hom (b r k)) := by
+    change Function.Bijective
+      (IsLocalization.Away.map
+        (Localization.Away ((C r).source k))
+        (Localization.Away ((F.map (a r)).hom.toRingHom ((C r).source k)))
+        (F.map (a r)).hom.toRingHom ((C r).source k))
+    exact (C r).map_bijective k
+  obtain ⟨j, hij, hj⟩ :=
+    SpreadData.exists_common_isOpenImmersion_mapAtLaterStage
+      H κ (fun X => F.obj X) N.object src dst N.le_stage
+        (fun r => N.map (a r)) (fun r => (F.map (a r)).hom)
+        (fun r x => N.map_colimit (a r) x) b_i b hb_i hspan_i hbij
+  refine ⟨j, hMi.trans hij, fun r => ?_⟩
+  change AlgebraicGeometry.IsOpenImmersion
+    (AlgebraicGeometry.Spec.map (CommRingCat.ofHom
+      ((M.object (src r)).mapAtLaterStage (M.object (dst r)) H
+        (M.le_stage (src r)) (M.le_stage (dst r)) (hMi.trans hij)
+          (M.map (a r))).toRingHom))
+  rw [← (M.object (src r)).mapAtLaterStage_trans (M.object (dst r)) H
+    (M.le_stage (src r)) (M.le_stage (dst r)) hMi hij (M.map (a r))]
+  exact hj r
 
 end Algebra
