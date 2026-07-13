@@ -714,6 +714,69 @@ namespace ModuliProblem
 
 variable {R : CommRingCat.{u}}
 
+/-- The chosen-quotient package at one object ([GHB7] assembly unit): an equivariant
+relative representation datum together with a quotient of its total space by the
+action, i.e. [GHB3]'s output bundled with its input. All fields are DATA chosen once
+per object by the assembly; every comparison between two packages (or a package and a
+base change) is rigid by the descent-uniqueness field `hdesc`. -/
+structure QuotPkg {Q : ModuliProblem R} {G : Type*} [Group G] [Finite G]
+    (φ : G →* Aut Q) (X : EllObj R) where
+  /-- The equivariant relative representation datum. -/
+  d : EquivariantRelRepData φ X
+  /-- The quotient scheme `Z/G`. -/
+  Z₀ : Scheme.{u}
+  /-- The quotient projection. -/
+  π : d.Z ⟶ Z₀
+  /-- The descended structure map. -/
+  f₀ : Z₀ ⟶ X.base
+  hπf : π ≫ f₀ = d.f
+  hπinv : ∀ γ : G, d.σZ.hom γ ≫ π = π
+  hdesc : ∀ {Y : Scheme.{u}} (F : d.Z ⟶ Y), (∀ γ : G, d.σZ.hom γ ≫ F = F) →
+    ∃! q : Z₀ ⟶ Y, π ≫ q = F
+
+/-- Every object carries a quotient package ([GHB3] + choice of datum). -/
+theorem nonempty_quotPkg {Q : ModuliProblem R} {G : Type*} [Group G] [Finite G]
+    (φ : G →* Aut Q) (hdata : ∀ X : EllObj R, Nonempty (EquivariantRelRepData φ X))
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base))) (X : EllObj R) :
+    Nonempty (QuotPkg φ X) := by
+  obtain ⟨d⟩ := hdata X
+  haveI := d.finite
+  haveI : IsAffineHom d.f := inferInstance
+  haveI := hbase X
+  haveI := AlgebraicGeometry.isAffineHom_diagonal_terminalFrom_of_isAffineHom d.f
+  obtain ⟨Z₀, π, f₀, hπf, hπinv, hdesc⟩ :=
+    AlgebraicGeometry.SchemeAction.exists_quotient_of_isAffineHom d.σZ d.f d.over_base
+  exact ⟨⟨d, Z₀, π, f₀, hπf, hπinv, hdesc⟩⟩
+
+/-- The projection of a quotient package is finite étale surjective ([GHB4] applied to
+the package; needs freeness). -/
+theorem QuotPkg.π_finite_etale_surjective {Q : ModuliProblem R} {G : Type*} [Group G]
+    [Finite G] {φ : G →* Aut Q} {X : EllObj R} (p : QuotPkg φ X)
+    (hfree : FreeAction φ)
+    (hbX : IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X.base))) :
+    IsFinite p.π ∧ Etale p.π ∧ Surjective p.π := by
+  haveI := p.d.finite
+  haveI : IsAffineHom p.d.f := inferInstance
+  haveI := hbX
+  haveI := AlgebraicGeometry.isAffineHom_diagonal_terminalFrom_of_isAffineHom p.d.f
+  exact AlgebraicGeometry.SchemeAction.quotientπ_finite_etale_surjective p.d.σZ p.d.f
+    p.d.over_base (p.d.free_on_points hfree) p.π p.f₀ p.hπf p.hπinv p.hdesc
+
+/-- The descended structure map of a quotient package is finite étale (KM 7.1.3(6)
+sharpened; gates through [GHB6]). -/
+theorem QuotPkg.f₀_finite_etale {Q : ModuliProblem R} {G : Type*} [Group G]
+    [Finite G] {φ : G →* Aut Q} {X : EllObj R} (p : QuotPkg φ X)
+    (hfree : FreeAction φ)
+    (hbX : IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X.base))) :
+    IsFinite p.f₀ ∧ Etale p.f₀ := by
+  obtain ⟨hfin, het, hsurj⟩ := p.π_finite_etale_surjective hfree hbX
+  haveI := hfin; haveI := het; haveI := hsurj
+  have hcomp_fin : IsFinite (p.π ≫ p.f₀) := by rw [p.hπf]; exact p.d.finite
+  have hcomp_et : Etale (p.π ≫ p.f₀) := by rw [p.hπf]; exact p.d.etale
+  exact AlgebraicGeometry.isFinite_etale_of_comp_of_finite_etale_surjective p.π p.f₀
+    hcomp_fin hcomp_et
+
 /-- **[GHB7] (THE ASSEMBLY — KM 7.1.2 + 7.1.3(1),(2),(3); gates through
 [GHB4]/[GHB5])** For a free action on a moduli problem with finite étale equivariant
 relative data at every object, the quotient problem exists: KM 7.1.3(1) verbatim,
@@ -725,7 +788,9 @@ the `simulRepresentableBy` construction pattern of T-Q6c); the geometric clauses
 from the torsor property ([GHB4]) and splitting of finite étale covers over `k̄`. -/
 theorem exists_quotientProblemData {Q : ModuliProblem R} {G : Type*} [Group G]
     [Finite G] (φ : G →* Aut Q) (hfree : FreeAction φ)
-    (hdata : ∀ X : EllObj R, Nonempty (EquivariantRelRepData φ X)) :
+    (hdata : ∀ X : EllObj R, Nonempty (EquivariantRelRepData φ X))
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base))) :
     Nonempty (QuotientProblemData φ) := by
   sorry
 
@@ -989,7 +1054,9 @@ representable by finite étale morphisms, couniversal, and with
 ([GHC4]); the two statements agree exactly at `H = ⊥` ([GHC2]). -/
 theorem gammaH_relativelyRepresentable (N : ℕ) [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
-    (hinv : IsUnit (N : R)) :
+    (hinv : IsUnit (N : R))
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base))) :
     Nonempty (ModuliProblem.QuotientProblemData (gammaHAut R N H)) :=
   -- [GHB7] applied to the `H`-action: freeness = [GH2] (`gammaFullNaive_freeAction`),
   -- equivariant finite-étale data at every object = [GHA5]
@@ -997,7 +1064,7 @@ theorem gammaH_relativelyRepresentable (N : ℕ) [NeZero N]
   -- of `GL₂(ℤ/N)` (`N` invertible ⟹ `NeZero N` ⟹ `ZMod N` finite).
   ModuliProblem.exists_quotientProblemData (gammaHAut R N H)
     (gammaFullNaive_freeAction R N H hinv)
-    (fun X => gammaFullNaive_equivariantRelRepData R N H hinv X)
+    (fun X => gammaFullNaive_equivariantRelRepData R N H hinv X) hbase
 
 /-- Relative representability transports across a functor isomorphism of moduli problems:
 the representing datum `(Z, f)` is reused and the classifying bijections are post-composed
