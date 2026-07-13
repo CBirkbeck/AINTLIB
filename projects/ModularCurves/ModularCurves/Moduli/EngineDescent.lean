@@ -1749,7 +1749,10 @@ private theorem discharge_hlift [Finite G]
           (by rw [Category.comp_id, hEact g]) (by simp) ≫ f = f) →
       ∃ q : Q' ⟶ Y, pullback.snd (σE.quotientπ VE hVEs hVEa hVEmem) j ≫ q = f := by
   intro Q' Y j hj f hf
-  refine σE.exists_quotientπ_lift_of_isOpenImmersion VE hVEs hVEa hVEmem hfreeE j f ?_
+  -- adapt the local (old-order) free-action hypothesis to the canonical
+  -- `SchemeQuotient` order `∀ {T} (t) (g), …` that the consumer now expects.
+  refine σE.exists_quotientπ_lift_of_isOpenImmersion VE hVEs hVEa hVEmem
+    (fun t g hg h => hfreeE g hg _ t h) j f ?_
   intro g
   have hmap_eq : pullback.map (σE.quotientπ VE hVEs hVEa hVEmem) j
       (σE.quotientπ VE hVEs hVEa hVEmem) j (σE.hom g) (𝟙 Q') (𝟙 _)
@@ -1775,7 +1778,8 @@ private theorem discharge_hepi [Finite G]
     ∀ {Q' : Scheme.{u}} (j : Q' ⟶ σE.quotient VE hVEs hVEa) [IsOpenImmersion j],
       Epi (pullback.snd (σE.quotientπ VE hVEs hVEa hVEmem) j) := by
   intro Q' j hj
-  exact σE.epi_pullback_snd_quotientπ VE hVEs hVEa hVEmem hfreeE j
+  exact σE.epi_pullback_snd_quotientπ VE hVEs hVEa hVEmem
+    (fun t g hg h => hfreeE g hg _ t h) j
 
 set_option backward.isDefEq.respectTransparency false in
 theorem locallyWeierstrass_quotientπ_of_globalModel [Finite G] [IsAffine X]
