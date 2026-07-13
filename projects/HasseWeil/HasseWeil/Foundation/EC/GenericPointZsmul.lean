@@ -170,14 +170,14 @@ omit [DecidableEq F] [W.toAffine.IsElliptic] in
   simp [Affine.CoordinateRing.mk]
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
-private lemma isEllSequence_ψ_ff (m n r : ℤ) :
+private lemma isEllipticSequence_ψ_ff (m n r : ℤ) :
     ψ_ff W (m + n) * ψ_ff W (m - n) * ψ_ff W r ^ 2 =
       ψ_ff W (m + r) * ψ_ff W (m - r) * ψ_ff W n ^ 2
       - ψ_ff W (n + r) * ψ_ff W (n - r) * ψ_ff W m ^ 2 := by
   have h : W.ψ (m + n) * W.ψ (m - n) * W.ψ r ^ 2 =
       W.ψ (m + r) * W.ψ (m - r) * W.ψ n ^ 2
       - W.ψ (n + r) * W.ψ (n - r) * W.ψ m ^ 2 :=
-    (EllSequence.isEllSequence_iff_rel₃ W.ψ).mp W.isEllSequence_ψ m n r
+    (EllSequence.isEllipticSequence_iff_rel₃ W.ψ).mp W.isEllipticSequence_ψ m n r
   have hf := congrArg ((algebraMap R KE).comp (Affine.CoordinateRing.mk W.toAffine)) h
   simp only [RingHom.comp_apply, map_mul, map_pow, map_sub] at hf
   exact hf
@@ -191,7 +191,7 @@ theorem mulByInt_x_sub_mulByInt_x (m n : ℤ) (hm : m ≠ 0) (hn : n ≠ 0) :
   have hψn : ψ_ff W n ≠ 0 := ψ_ff_ne_zero W hn
   have hψm2 : ψ_ff W m ^ 2 ≠ 0 := pow_ne_zero 2 hψm
   have hψn2 : ψ_ff W n ^ 2 ≠ 0 := pow_ne_zero 2 hψn
-  have heq := isEllSequence_ψ_ff W n m 1
+  have heq := isEllipticSequence_ψ_ff W n m 1
   rw [ψ_ff_one, one_pow, mul_one] at heq
   rw [mulByInt_x_eq W m hm, mulByInt_x_eq W n hn,
     show x_gen W - ψ_ff W (m + 1) * ψ_ff W (m - 1) / ψ_ff W m ^ 2

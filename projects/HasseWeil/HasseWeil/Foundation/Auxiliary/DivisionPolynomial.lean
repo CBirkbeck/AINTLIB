@@ -62,7 +62,7 @@ def invar : R[X] := 6 * X ^ 2 + C W.b₂ * X + C W.b₄
 /-- The complement of ψ(n) in ψ(2n). -/
 def ψc : ℤ → R[X][Y] := complEDS₂ W.ψ₂ (C W.Ψ₃) (C W.preΨ₄)
 
-lemma isEllSequence_ψ : IsEllSequence W.ψ := IsEllSequence.normEDS W.ψ₂ (C W.Ψ₃) (C W.preΨ₄)
+lemma isEllipticSequence_ψ : IsEllipticSequence W.ψ := IsEllipticSequence.normEDS W.ψ₂ (C W.Ψ₃) (C W.preΨ₄)
 
 lemma C_Ψ₃_eq :
     C W.Ψ₃ = (3 * C X + CC W.a₂) * C W.Ψ₂Sq - polynomialX W ^ 2
@@ -206,8 +206,8 @@ lemma ψᵤ_eq_normEDS :
       (polyToField curve.ψ₂) (polyToField <| C curve.Ψ₃) (polyToField <| C curve.preΨ₄) := by
   ext; rw [← map_normEDS]; rfl
 
-lemma isEllSequence_ψᵤ : IsEllSequence ψᵤ := by
-  rw [ψᵤ_eq_normEDS]; exact IsEllSequence.normEDS _ _ _
+lemma isEllipticSequence_ψᵤ : IsEllipticSequence ψᵤ := by
+  rw [ψᵤ_eq_normEDS]; exact IsEllipticSequence.normEDS _ _ _
 
 lemma net_ψᵤ (p q r s) : EllSequence.net ψᵤ p q r s = 0 := by
   rw [ψᵤ_eq_normEDS]; apply net_normEDS
@@ -261,7 +261,7 @@ lemma smulX_sub_smulX (hm : m ≠ 0) (hn : n ≠ 0) :
     show ∀ (c a b : Universal.Field), c - a - (c - b) = b - a from fun c a b ↦ by ring,
     div_sub_div]
   · rw [mul_pow]; congr
-    convert ((EllSequence.isEllSequence_iff_rel₃ ψᵤ).mp isEllSequence_ψᵤ n m 1).symm using 1
+    convert ((EllSequence.isEllipticSequence_iff_rel₃ ψᵤ).mp isEllipticSequence_ψᵤ n m 1).symm using 1
     · ring
     · simp [ψᵤ]
   all_goals exact pow_ne_zero _ (ψᵤ_ne_zero <| by assumption)
@@ -555,7 +555,7 @@ lemma dblXYZ_smulRing : dblXYZ curveRing (smulRing n) = smulRing (2 * n) :=
 private lemma addZ_smulPoly :
     addZ (smulPoly m) (smulPoly n) = curve.ψ (n + m) * curve.ψ (n - m) := by
   simp_rw [addZ, smulPoly, φ]
-  convert ((EllSequence.isEllSequence_iff_rel₃ curve.ψ).mp curve.isEllSequence_ψ n m 1).symm using 1
+  convert ((EllSequence.isEllipticSequence_iff_rel₃ curve.ψ).mp curve.isEllipticSequence_ψ n m 1).symm using 1
   · simp only [fin3_def_ext]; ring
   · rw [ψ_one]; ring
 
