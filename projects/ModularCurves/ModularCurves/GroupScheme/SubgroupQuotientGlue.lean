@@ -16,6 +16,7 @@ through the per-affine-patch comparison `quotientRing P.U = coinvariants P.chart
 -/
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
+open scoped TensorProduct
 
 attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
   CategoryTheory.Over.braidedCategory
@@ -92,6 +93,52 @@ noncomputable def localQuotientMapW {W W' : E.E.Opens} (hW : G.IsStableOpen W)
       map_mul' := fun x y => Subtype.ext (map_mul _ _ _)
       map_zero' := Subtype.ext (map_zero _)
       map_add' := fun x y => Subtype.ext (map_add _ _ _) })
+
+/-! ### Step 3 — the per-patch comparison with the Hopf model -/
+
+namespace AffineChartPatch
+
+variable {G} (P : G.AffineChartPatch)
+
+/-- The chart Künneth comparison on sections: `Γ(pr⁻¹U) ≅ B ⊗ A` (group-first). -/
+noncomputable def kappa :
+    Γ((Over.mk G.π ⊗ E.asOver).left, G.actionProj.left ⁻¹ᵁ P.U) ⟶
+      CommRingCat.of (P.groupRing ⊗[P.baseRing] P.chartRing) :=
+  (G.actionProj.left ⁻¹ᵁ P.U).topIso.inv ≫ (G.chartPullbackIso P.U).inv.appTop ≫
+    P.chartSpecIso.inv.appTop ≫
+    (Scheme.ΓSpecIso (.of (P.groupRing ⊗[P.baseRing] P.chartRing))).hom
+
+/-- The action-side `appLE` in `topIso`-conjugated form (`resLE_app_top`). -/
+theorem actRing_eq_topIso :
+    G.actRing P.hstable
+      = P.U.topIso.inv ≫ (G.restrictedAction P.hstable).appTop ≫
+        (G.actionProj.left ⁻¹ᵁ P.U).topIso.hom := by
+  have h := Scheme.Hom.resLE_app_top (f := G.translationAction.left) (U := P.U)
+    (V := G.actionProj.left ⁻¹ᵁ P.U) (e := P.hstable)
+  rw [actRing, show (G.restrictedAction P.hstable).appTop
+      = (G.translationAction.left.resLE P.U (G.actionProj.left ⁻¹ᵁ P.U) P.hstable).app ⊤
+      from rfl, h]
+  have e1 : (P.U.topIso.hom ≫
+      G.translationAction.left.appLE P.U (G.actionProj.left ⁻¹ᵁ P.U) P.hstable ≫
+      (G.actionProj.left ⁻¹ᵁ P.U).topIso.inv) ≫ (G.actionProj.left ⁻¹ᵁ P.U).topIso.hom
+      = P.U.topIso.hom ≫
+        G.translationAction.left.appLE P.U (G.actionProj.left ⁻¹ᵁ P.U) P.hstable :=
+    (Category.assoc _ _ _).trans <|
+      congrArg (P.U.topIso.hom ≫ ·) <|
+        (Category.assoc _ _ _).trans <|
+          (congrArg (G.translationAction.left.appLE P.U
+              (G.actionProj.left ⁻¹ᵁ P.U) P.hstable ≫ ·)
+            (G.actionProj.left ⁻¹ᵁ P.U).topIso.inv_hom_id).trans (Category.comp_id _)
+  exact ((congrArg (P.U.topIso.inv ≫ ·) e1).trans
+    (P.U.topIso.inv_hom_id_assoc _)).symm
+
+/-- The action leg under `kappa` is the chart co-action ring. -/
+theorem actRing_kappa :
+    G.actRing P.hstable ≫ P.kappa = P.coactionRing := by
+  rw [kappa, coactionRing, coactionToPullback, actRing_eq_topIso]
+  simp only [Category.assoc, Iso.hom_inv_id_assoc]
+
+end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
 
