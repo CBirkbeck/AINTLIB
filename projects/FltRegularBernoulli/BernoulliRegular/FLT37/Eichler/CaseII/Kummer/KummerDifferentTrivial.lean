@@ -119,7 +119,7 @@ theorem isUnramified_of_differentIdeal_eq_top
   exact fun hdvd ↦ ‹P.IsPrime›.ne_top (top_le_iff.mp (Ideal.dvd_iff_le.mp hdvd))
 
 omit [Algebra K L] [FiniteDimensional K L] [IsScalarTower (𝓞 K) (𝓞 L) L]
-  [IsScalarTower (𝓞 K) K L] [FaithfulSMul (𝓞 K) (𝓞 L)] in
+  [IsScalarTower (𝓞 K) K L] in
 /-- **"`q`-unramified" ⟹ mathlib `Algebra.IsUnramifiedAt (𝓞 K) P`** for a prime `P` of `𝓞 L` over
 `q = P.under (𝓞 K)`.  The hypothesis is the unfolded meaning of the (now-removed) flt-regular
 `IsUnramifiedAt (𝓞 L) q`: every prime of `𝓞 L` over `q` has ramification index `1`.  In particular
@@ -132,8 +132,15 @@ theorem algebra_isUnramifiedAt_of_isUnramifiedAt
         Ideal.ramificationIdx' (P.under (𝓞 K)) Q = 1) :
     Algebra.IsUnramifiedAt (𝓞 K) P := by
   haveI : P.LiesOver (P.under (𝓞 K)) := ⟨rfl⟩
-  exact (Algebra.isUnramifiedAt_iff_of_isDedekindDomain hP_bot).mpr
-    (h P ⟨inferInstance, inferInstance⟩)
+  haveI : Module.IsTorsionFree (𝓞 K) (𝓞 L) :=
+    Module.isTorsionFree_iff_algebraMap_injective.mpr
+      (FaithfulSMul.algebraMap_injective (𝓞 K) (𝓞 L))
+  have hunder_bot : P.under (𝓞 K) ≠ ⊥ := by
+    rw [Ideal.under_def]
+    exact mt (Ideal.eq_bot_of_comap_eq_bot (R := 𝓞 K) (S := 𝓞 L)) hP_bot
+  exact Ideal.ramificationIdx_eq_one_iff.mp
+    ((Ideal.ramificationIdx'_eq_ramificationIdx _ P hunder_bot).symm.trans
+      (h P ⟨inferInstance, inferInstance⟩))
 
 end Bridge
 

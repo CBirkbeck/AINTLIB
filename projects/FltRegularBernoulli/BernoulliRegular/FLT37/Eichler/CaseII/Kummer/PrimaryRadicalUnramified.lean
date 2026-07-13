@@ -409,8 +409,10 @@ lemma isUnramifiedAt_local (L : Type*) [Field L] [NumberField L] [Algebra K L]
       (IsIntegral.tower_top x.prop) hx_top ?_
     rw [minpoly_polyRoot' hp hζ a hcong hu, hIunder]
     exact separable_poly_local hp hζ a hcong ha α hβ_pow I haI
-  have he : Ideal.ramificationIdx' (P.under (𝓞 K)) P = 1 :=
-    (Algebra.isUnramifiedAt_iff_of_isDedekindDomain hP_bot).mp hunram
+  have he : Ideal.ramificationIdx' (P.under (𝓞 K)) P = 1 := by
+    haveI := hunram
+    exact (Ideal.ramificationIdx'_eq_ramificationIdx _ P (by rw [hIunder]; exact hIbot)).trans
+      (Ideal.ramificationIdx_eq_one_of_isUnramifiedAt (R := 𝓞 K))
   rwa [hIunder] at he
 
 end BernoulliRegular.FLT37.Eichler.NonUnitKummer

@@ -344,10 +344,15 @@ lemma isUnramifiedAt_of_primary_witness (hp : p ≠ 2) (α : K) (hα : α ≠ 0)
       Ideal.ramificationIdx_le_finrank (R := 𝓞 K) (S := 𝓞 L) (K := K) (L := L)
         (p := P.under (𝓞 K)) P
     have hne : Ideal.ramificationIdx' (P.under (𝓞 K)) P ≠ 0 :=
-      Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver P hUnderBot
-    refine (Algebra.isUnramifiedAt_iff_of_isDedekindDomain hP_bot).mpr ?_
-    rw [hfinrank1] at hle
-    lia
+      Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver P hUnderBot
+    have he1 : Ideal.ramificationIdx' (P.under (𝓞 K)) P = 1 := by
+      rw [hfinrank1] at hle
+      lia
+    haveI : Module.IsTorsionFree (𝓞 K) (𝓞 L) :=
+      Module.isTorsionFree_iff_algebraMap_injective.mpr
+        (FaithfulSMul.algebraMap_injective (𝓞 K) (𝓞 L))
+    exact Ideal.ramificationIdx_eq_one_iff.mp
+      ((Ideal.ramificationIdx'_eq_ramificationIdx _ P hUnderBot).symm.trans he1)
 
 end Assembly
 
