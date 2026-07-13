@@ -1,6 +1,36 @@
 # Decomposition: [T-E-OMEGA] route R1 — the invariant differential `ω_{E/S}`
 
 **Author**: STREAM-OMEGA seat, 2026-07-13. **Charter**: inbox/STREAM-OMEGA.md (v10.179).
+
+## 0′. v10.180 re-steer reconciliation (2026-07-13, mid-session)
+
+Coordinator steer: *"ω2 must CONSUME the invertible-sheaf infra (codex's
+`IsInvertible.isLocallyFree` + trivialization layer, arriving via codex-merge tranche-1),
+not rebuild it; build on our `Picard/InvertibleSheaf.lean`."* Reconciliation with the
+work already landed:
+
+- **No rebuild happened.** `omegaModules_isInvertible` targets the shared
+  `Picard/InvertibleSheaf.lean` predicate `Scheme.Modules.IsInvertible` verbatim, and the
+  proof route reuses `Picard/IdealModule.lean`'s `isIso_of_bijective_app_on_basis` +
+  `restrictFunctorIsoPullback` assembly. Nothing in the OMEGA files restates
+  `IsInvertible`, `isLocallyFree`, `FiniteAffineCover`, or `BaseCechFlat` (codex's layer —
+  not yet on our line; grep-verified absent).
+- **Direction is complementary, not duplicated.** Codex's tranche is the *extraction*
+  direction (from `IsInvertible`, produce locally-free/trivialization data for arbitrary
+  invertible sheaves). `UnitCocycleSheaf` is the *construction* direction (from a Čech
+  unit cocycle, produce a module sheaf and prove it `IsInvertible`) plus the
+  cocycle-model-specific sections API (`sections V` = compatible families, definitionally)
+  that ω3/ω4/ω5 compute with — the transition-unit arithmetic (`u_self`/`u_cocycle`
+  consumption, `Compat` transport, basis pullback) has no counterpart in an abstract
+  invertible-sheaf layer. When tranche-1 lands, `IsInvertible (omegaModules G)` composes
+  with codex's `IsInvertible.isLocallyFree` with no interface work.
+- **Sequencing conformance**: ω1 (B2, the transition-cocycle engine) was completed first
+  and is independent, as steered; ω2 as landed is ALSO independent of the codex tranche
+  (it needs only the already-on-line `Picard/InvertibleSheaf.lean`), so no gate is
+  actually crossed. Flagged for the coordinator at tranche-1: if codex's trivialization
+  API and `UnitCocycle.sectionsEquivOfLE` overlap for the *specific* cocycle bundles, the
+  dedup is a cleanup-lane pass on top of the merge; `ForMathlib/UnitCocycleSheaf.lean` is
+  additionally a `/mathlibable` candidate (mathlib has no cocycle→bundle constructor).
 **Board section**: tickets.md [T-E-OMEGA] (~2209). **Route**: R1 (atlas-glued), UNGATED —
 T-W7.1b = `pointedIso_exists_variableChange` proven sorry-free (`EllipticCurve/Comparison.lean:162`).
 

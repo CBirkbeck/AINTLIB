@@ -203,21 +203,190 @@ noncomputable def _root_.ModularCurves.sectionsMapLE {S' : Scheme.{u}} (f : S' �
     {V : S.Opens} {V' : S'.Opens} (h : V' ≤ f ⁻¹ᵁ V) : Γ(S, V) →+* Γ(S', V') :=
   (f.appLE V V' h).hom
 
+section Transport
+
+variable {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
+
+/-- The scheme-level restriction of `f` intertwines the affine-chart isomorphisms with
+`Spec` of the sections comparison (naturality of `isoSpec`; mirrors
+`SchemeQuotient.resLE_isoSpec_hom`). -/
+private lemma resLE_isoSpec_naturality (f : S' ⟶ S) {V : S.affineOpens}
+    {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
+    f.resLE V.1 V'.1 hV' ≫ V.2.isoSpec.hom =
+      V'.2.isoSpec.hom ≫ Spec.map (CommRingCat.ofHom (sectionsMapLE f hV')) := by
+  haveI : IsAffine (V.1 : Scheme.{u}) := V.2
+  haveI : IsAffine (V'.1 : Scheme.{u}) := V'.2
+  have hnat := Scheme.isoSpec_hom_naturality (f.resLE V.1 V'.1 hV')
+  show f.resLE V.1 V'.1 hV' ≫
+      ((V.1 : Scheme.{u}).isoSpec ≪≫ Scheme.Spec.mapIso V.1.topIso.symm.op).hom =
+    ((V'.1 : Scheme.{u}).isoSpec ≪≫ Scheme.Spec.mapIso V'.1.topIso.symm.op).hom ≫
+      Spec.map (CommRingCat.ofHom (sectionsMapLE f hV'))
+  rw [Iso.trans_hom, ← Category.assoc, ← hnat, Iso.trans_hom, Category.assoc,
+    Category.assoc]
+  congr 1
+  show Spec.map (f.resLE V.1 V'.1 hV').appTop ≫ Spec.map V.1.topIso.inv =
+    Spec.map V'.1.topIso.inv ≫ Spec.map (CommRingCat.ofHom (sectionsMapLE f hV'))
+  rw [← Spec.map_comp, ← Spec.map_comp]
+  congr 1
+  show V.1.topIso.inv ≫ (f.resLE V.1 V'.1 hV').app ⊤ =
+    CommRingCat.ofHom (sectionsMapLE f hV') ≫ V'.1.topIso.inv
+  rw [Scheme.Hom.resLE_app_top]
+  erw [Iso.inv_hom_id_assoc]
+  show f.appLE V.1 V'.1 hV' ≫ V'.1.topIso.inv =
+    CommRingCat.ofHom ((f.appLE V.1 V'.1 hV').hom) ≫ V'.1.topIso.inv
+  rw [CommRingCat.ofHom_hom]
+
+/-- The induced comparison of the restricted curves over a cartesian pointed square. -/
+private noncomputable def transportTheta (f : S' ⟶ S) (t : G'.E ⟶ G.E)
+    (hsq : IsPullback t G'.π G.π f) {V : S.affineOpens}
+    {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
+    (pullback G'.π V'.1.ι : Scheme.{u}) ⟶ pullback G.π V.1.ι :=
+  pullback.lift (pullback.fst _ _ ≫ t) (pullback.snd _ _ ≫ f.resLE V.1 V'.1 hV') (by
+    rw [Category.assoc, hsq.w, ← Category.assoc, pullback.condition, Category.assoc,
+      Category.assoc, Scheme.Hom.resLE_comp_ι])
+
+/-- The restricted curves form a cartesian square over the restricted morphism. -/
+private lemma transport_isPullback (f : S' ⟶ S) (t : G'.E ⟶ G.E)
+    (hsq : IsPullback t G'.π G.π f) {V : S.affineOpens}
+    {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
+    IsPullback (transportTheta f t hsq hV') (pullback.snd G'.π V'.1.ι)
+      (pullback.snd G.π V.1.ι) (f.resLE V.1 V'.1 hV') := by
+  have big := (IsPullback.of_hasPullback G'.π V'.1.ι).paste_horiz hsq
+  rw [show V'.1.ι ≫ f = f.resLE V.1 V'.1 hV' ≫ V.1.ι from
+    (Scheme.Hom.resLE_comp_ι f hV').symm] at big
+  unfold transportTheta
+  refine IsPullback.of_right ?_ (pullback.lift_snd _ _ _)
+    (IsPullback.of_hasPullback G.π V.1.ι)
+  rwa [pullback.lift_fst]
+
+/-- The base-change square of the projective model along the sections comparison. -/
+private lemma transport_isPullback_model (f : S' ⟶ S) {V : S.affineOpens}
+    {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) (P : LocalPresentation G V) :
+    IsPullback
+      (projModelBaseChange (sectionsMapLE f hV') P.W)
+      (projModelπ (P.W.map (sectionsMapLE f hV')))
+      (projModelπ P.W)
+      (Spec.map (CommRingCat.ofHom (sectionsMapLE f hV'))) := by
+  letI : Algebra Γ(S, V.1) Γ(S', V'.1) := (sectionsMapLE f hV').toAlgebra
+  exact isPullback_projModelBaseChange P.W
+
+/-- The restricted-curve square transported to the model/`Spec` presentation. -/
+private lemma transport_isPullback' (f : S' ⟶ S) (t : G'.E ⟶ G.E)
+    (hsq : IsPullback t G'.π G.π f) {V : S.affineOpens} (P : LocalPresentation G V)
+    {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
+    IsPullback (transportTheta f t hsq hV' ≫ P.e.hom)
+      (pullback.snd G'.π V'.1.ι ≫ V'.2.isoSpec.hom)
+      (projModelπ P.W)
+      (Spec.map (CommRingCat.ofHom (sectionsMapLE f hV'))) := by
+  refine (transport_isPullback f t hsq hV').of_iso (Iso.refl _) P.e V'.2.isoSpec
+    V.2.isoSpec ?_ ?_ ?_ ?_
+  · rw [Iso.refl_hom, Category.id_comp]
+  · rw [Iso.refl_hom, Category.id_comp]
+  · exact P.compat_π.symm
+  · exact resLE_isoSpec_naturality f hV'
+
+/-- The transported chart isomorphism: both sides are pullbacks of the model along
+`Spec` of the sections comparison. -/
+private noncomputable def transportE (f : S' ⟶ S) (t : G'.E ⟶ G.E)
+    (hsq : IsPullback t G'.π G.π f) {V : S.affineOpens} (P : LocalPresentation G V)
+    {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
+    (pullback G'.π V'.1.ι : Scheme.{u}) ≅ projModel (P.W.map (sectionsMapLE f hV')) :=
+  (transport_isPullback' f t hsq P hV').isoPullback ≪≫
+    (transport_isPullback_model f hV' P).isoPullback.symm
+
+private lemma transportE_π (f : S' ⟶ S) (t : G'.E ⟶ G.E)
+    (hsq : IsPullback t G'.π G.π f) {V : S.affineOpens} (P : LocalPresentation G V)
+    {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
+    (transportE f t hsq P hV').hom ≫ projModelπ (P.W.map (sectionsMapLE f hV')) =
+      pullback.snd G'.π V'.1.ι ≫ V'.2.isoSpec.hom := by
+  rw [transportE, Iso.trans_hom, Iso.symm_hom, Category.assoc,
+    show (transport_isPullback_model f hV' P).isoPullback.inv ≫
+        projModelπ (P.W.map (sectionsMapLE f hV')) =
+      pullback.snd (projModelπ P.W)
+        (Spec.map (CommRingCat.ofHom (sectionsMapLE f hV'))) from
+      (transport_isPullback_model f hV' P).isoPullback_inv_snd,
+    (transport_isPullback' f t hsq P hV').isoPullback_hom_snd]
+
+private lemma transportE_baseChange (f : S' ⟶ S) (t : G'.E ⟶ G.E)
+    (hsq : IsPullback t G'.π G.π f) {V : S.affineOpens} (P : LocalPresentation G V)
+    {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
+    (transportE f t hsq P hV').hom ≫ projModelBaseChange (sectionsMapLE f hV') P.W =
+      transportTheta f t hsq hV' ≫ P.e.hom := by
+  rw [transportE, Iso.trans_hom, Iso.symm_hom, Category.assoc,
+    show (transport_isPullback_model f hV' P).isoPullback.inv ≫
+        projModelBaseChange (sectionsMapLE f hV') P.W =
+      pullback.fst (projModelπ P.W)
+        (Spec.map (CommRingCat.ofHom (sectionsMapLE f hV'))) from
+      (transport_isPullback_model f hV' P).isoPullback_inv_fst,
+    (transport_isPullback' f t hsq P hV').isoPullback_hom_fst]
+
 /-- **(T-OM-B3)** Transport of a presentation along a cartesian pointed square over
 `f : S' ⟶ S`, to an affine open inside the preimage of the chart: the chart curve is
 the coefficient base change, the chart isomorphism the induced comparison of pullbacks
 (`isPullback_projModelBaseChange` + pasting). Restriction is the case `f = 𝟙 S`. -/
-noncomputable def transport {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
-    (f : S' ⟶ S) (t : G'.E ⟶ G.E)
+noncomputable def transport (f : S' ⟶ S) (t : G'.E ⟶ G.E)
     (hsq : IsPullback t G'.π G.π f) (hz : G'.zero ≫ t = f ≫ G.zero)
     (P : LocalPresentation G V)
     {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
     LocalPresentation G' V' where
   W := P.W.map (sectionsMapLE f hV')
-  elliptic := by sorry
-  e := by sorry
-  compat_π := by sorry
-  compat_zero := by sorry
+  elliptic := by
+    letI := P.elliptic
+    exact ⟨by rw [WeierstrassCurve.map_Δ]; exact P.W.isUnit_Δ.map _⟩
+  e := transportE f t hsq P hV'
+  compat_π := transportE_π f t hsq P hV'
+  compat_zero := by
+    letI : Algebra Γ(S, V.1) Γ(S', V'.1) := (sectionsMapLE f hV').toAlgebra
+    refine (transport_isPullback_model f hV' P).hom_ext ?_ ?_
+    · -- the `projModelBaseChange` leg: reduce to `P.compat_zero` via the zero-section
+      -- naturality `hz` and `resLE`/`isoSpec` naturality
+      rw [Category.assoc, transportE_baseChange,
+        show projModelZero (P.W.map (sectionsMapLE f hV')) ≫
+            projModelBaseChange (sectionsMapLE f hV') P.W =
+          Spec.map (CommRingCat.ofHom (sectionsMapLE f hV')) ≫ projModelZero P.W from
+          projModelZero_baseChange P.W]
+      -- lift' ≫ θ = resLE ≫ liftV
+      rw [show (V'.2.isoSpec.inv ≫ pullback.lift (V'.1.ι ≫ G'.zero) (𝟙 _)
+          (by rw [Category.assoc, G'.zero_π, Category.comp_id, Category.id_comp])) ≫
+            transportTheta f t hsq hV' ≫ P.e.hom =
+          V'.2.isoSpec.inv ≫ (pullback.lift (V'.1.ι ≫ G'.zero) (𝟙 _)
+            (by rw [Category.assoc, G'.zero_π, Category.comp_id, Category.id_comp]) ≫
+              transportTheta f t hsq hV') ≫ P.e.hom by
+            simp only [Category.assoc]]
+      rw [show pullback.lift (V'.1.ι ≫ G'.zero) (𝟙 _)
+          (by rw [Category.assoc, G'.zero_π, Category.comp_id, Category.id_comp]) ≫
+            transportTheta f t hsq hV' =
+          f.resLE V.1 V'.1 hV' ≫ pullback.lift (V.1.ι ≫ G.zero) (𝟙 _)
+            (by rw [Category.assoc, G.zero_π, Category.comp_id, Category.id_comp]) from ?_]
+      · -- finish: isoSpec-naturality + `P.compat_zero`
+        rw [show V'.2.isoSpec.inv ≫ (f.resLE V.1 V'.1 hV' ≫ pullback.lift (V.1.ι ≫ G.zero)
+            (𝟙 _) (by rw [Category.assoc, G.zero_π, Category.comp_id, Category.id_comp])) ≫
+              P.e.hom =
+            (V'.2.isoSpec.inv ≫ f.resLE V.1 V'.1 hV' ≫ V.2.isoSpec.hom) ≫
+              (V.2.isoSpec.inv ≫ pullback.lift (V.1.ι ≫ G.zero) (𝟙 _)
+                (by rw [Category.assoc, G.zero_π, Category.comp_id, Category.id_comp])) ≫
+                P.e.hom by simp only [Category.assoc, Iso.hom_inv_id_assoc]]
+        rw [P.compat_zero, resLE_isoSpec_naturality f hV', Iso.inv_hom_id_assoc]
+      · -- the two lifts agree (compare both pullback legs; `hz` enters the `fst` leg)
+        unfold transportTheta
+        refine pullback.hom_ext ?_ ?_
+        · rw [Category.assoc, pullback.lift_fst, ← Category.assoc, pullback.lift_fst,
+            Category.assoc, hz, ← Category.assoc, ← Scheme.Hom.resLE_comp_ι f hV',
+            Category.assoc, Category.assoc, pullback.lift_fst]
+        · rw [Category.assoc, pullback.lift_snd, ← Category.assoc, pullback.lift_snd,
+            Category.id_comp, Category.assoc, pullback.lift_snd, Category.comp_id]
+    · -- the `π` leg: both sides are the identity on `Spec Γ(V')`
+      rw [Category.assoc, transportE_π, projModelZero_projModelπ]
+      rw [show (V'.2.isoSpec.inv ≫ pullback.lift (V'.1.ι ≫ G'.zero) (𝟙 _)
+          (by rw [Category.assoc, G'.zero_π, Category.comp_id, Category.id_comp])) ≫
+            pullback.snd G'.π V'.1.ι ≫ V'.2.isoSpec.hom =
+          V'.2.isoSpec.inv ≫ (pullback.lift (V'.1.ι ≫ G'.zero) (𝟙 _)
+            (by rw [Category.assoc, G'.zero_π, Category.comp_id, Category.id_comp]) ≫
+              pullback.snd G'.π V'.1.ι) ≫ V'.2.isoSpec.hom by simp only [Category.assoc]]
+      rw [pullback.lift_snd, Category.id_comp, Iso.inv_hom_id]
+      rfl
+
+end Transport
 
 @[simp] theorem transport_W {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
     (f : S' ⟶ S) (t : G'.E ⟶ G.E)

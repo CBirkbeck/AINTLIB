@@ -2281,6 +2281,15 @@ Ordered leaves; Status legend: open / in_progress / done. File A =
 `ForMathlib/UnitCocycleSheaf.lean`, File B = `EllipticCurve/InvariantDifferential.lean`,
 File C = `Moduli/OmegaFunctor.lean`.
 
+**v10.180 re-steer RECONCILED (see decomposition-omega-r1.md §0′)**: no invertible-sheaf
+rebuild — `omegaModules_isInvertible` targets the shared `Picard/InvertibleSheaf.IsInvertible`
+verbatim (assembly via `isIso_of_bijective_app_on_basis`, Picard idiom); codex's
+`isLocallyFree`-extraction layer (not yet on our line) is the complementary direction and
+composes at tranche-1 with zero interface work. Sequencing: ω1 (B2) completed first as
+steered; PART A (File A) is 0-sorry incl. `IsInvertible`. Tranche-1 dedup flag: codex
+trivialization API vs `sectionsEquivOfLE` on cocycle bundles — cleanup-lane, coordinator
+adjudicates.
+
 - **[T-OM-A1]** `UnitCocycle` structure + `sections` module — **done** (landed concrete
   with the skeleton: closure lemmas, `AddCommGroup`/`Module` instances, simp API).
 - **[T-OM-A2]** `sectionsMap`/`presheafAb`/`presheafOfModules` — **open** · File A ·
