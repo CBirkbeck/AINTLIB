@@ -16,8 +16,8 @@ import ModularCurves.Moduli.NaiveProblems
 /-!
 # The Y₁(N) assembly (T-E7 / STREAM-Y1): Loeffler Def 3.3.6 + Thm 3.4.4
 
-`/develop --decompose` skeleton for **T-E7** = `gammaOneNaive_representable`
-(`Moduli/Representability.lean:250`, HELD — not edited here): for `N ≥ 4` and `N` invertible in
+Term-mode assembly of **T-E7** = `gammaOneNaive_representable`
+(`Moduli/Representability.lean`): for `N ≥ 4` and `N` invertible in
 `R`, the naive `Γ₁(N)` moduli problem is representable, and any representing object has smooth
 affine structure morphism. This file mirrors **Loeffler, modcurvesnotes.pdf** —
 Definition 3.3.6 (printed p. 14, §3.3) and Theorem 3.4.4 (printed p. 15, §3.4) — leaf by leaf:
@@ -40,18 +40,20 @@ Full decomposition — prose proof, verbatim quotes, Lean ↔ source match parag
 attack blocks, gate register and LOC grounding — in
 `.mathlib-quality/decomposition-y1-assembly.md`.
 
-## Named gates consumed (cited, NOT rebuilt here)
-* **[T-A6b]** `EllipticCurve.abelEnrichment_exists` (`GroupLaw.lean:75`, sorried) — enriches the
-  projective Tate model to the working record. (Alt discharge: the T-W7 A-lane chart group law.)
+## Named inputs (cited, NOT rebuilt here)
+This assembly is `sorry`-free; the results below are cited as proven inputs:
 * **[T-W7]** `pointedIso_exists_variableChange` + `projModelVCIso_injective`
-  (`EllipticCurve/Comparison.lean`, A-lane in flight) — inside the atlas subtree (L-ATLAS).
-* **[BB-DIFF MASTER]** `mulByHom_formallyUnramified'` (`EllipticCurve/MulByHomUnramified.lean`,
-  in flight) ⟹ `torsionπ_etale` — feeds the clopen split (affineness) and the lifting (smoothness).
+  (`EllipticCurve/Comparison.lean`) — inside the atlas subtree (L-ATLAS).
+* **[BB-DIFF MASTER]** `mulByHom_formallyUnramified'` (`EllipticCurve/MulByHomUnramified.lean`)
+  ⟹ `torsionπ_etale` — feeds the clopen split (affineness) and the lifting (smoothness).
 * **[T-E4-family]** canonicity transport of level structures along `Ell/R`-morphisms
-  (`EllHom.pullSection_add` + the `gammaOneNaiveProblem.map` membership sorry, held file) —
-  the same GME 2.2.5 canonicity chain discharges `isNaiveGammaOne_pullSection_iff` below.
+  (`EllHom.pullSection_add`) — the GME 2.2.5 canonicity chain also discharges
+  `isNaiveGammaOne_pullSection_iff`.
+* **[T-A6b]** `EllipticCurve.abelEnrichment_exists` — no longer on this trail: the Tate geometry
+  is a global model, so the working record needs no descent (retained only as the alternative
+  chart group-law discharge).
 
-AINTLIB ModularCurves STREAM-Y1 (T-E7; planning-only skeleton, all leaves `sorry`).
+AINTLIB ModularCurves STREAM-Y1 (T-E7; assembled term-mode from the leaves, `sorry`-free).
 -/
 
 open AlgebraicGeometry CategoryTheory Limits HomogeneousIdeal HomogeneousLocalization
@@ -229,9 +231,9 @@ theorem projModel_locallyWeierstrass {A : Type u} [CommRing A] (W : WeierstrassC
   intro s
   letI : Algebra A ↑Γ(Spec (CommRingCat.of A), (⊤ : (Spec (CommRingCat.of A)).Opens)) :=
     (Scheme.ΓSpecIso (.of A)).inv.hom.toAlgebra
-  haveI : IsIso (⊤ : (Spec (CommRingCat.of A)).Opens).ι := by
+  have : IsIso (⊤ : (Spec (CommRingCat.of A)).Opens).ι := by
     rw [← Scheme.topIso_hom]; infer_instance
-  haveI : IsIso (Spec.map (CommRingCat.ofHom
+  have : IsIso (Spec.map (CommRingCat.ofHom
       (algebraMap A ↑Γ(Spec (CommRingCat.of A), (⊤ : (Spec (CommRingCat.of A)).Opens))))) := by
     have : CommRingCat.ofHom (algebraMap A
         ↑Γ(Spec (CommRingCat.of A), (⊤ : (Spec (CommRingCat.of A)).Opens))) =
@@ -254,7 +256,7 @@ theorem projModel_locallyWeierstrass {A : Type u} [CommRing A] (W : WeierstrassC
       (IsAffineOpen.isoSpec h).hom ≫ Spec.map (CommRingCat.ofHom
         (algebraMap A ↑Γ(Spec (CommRingCat.of A), (⊤ : (Spec (CommRingCat.of A)).Opens))))
       = (⊤ : (Spec (CommRingCat.of A)).Opens).ι :=
-    fun h => hφ_eq ▸ isAffineOpen_top_isoSpec_hom_scheme_isoSpec_inv h
+    fun h ↦ hφ_eq ▸ isAffineOpen_top_isoSpec_hom_scheme_isoSpec_inv h
   case c1 =>
     rw [← cancel_mono (Spec.map (CommRingCat.ofHom (algebraMap A
         ↑Γ(Spec (CommRingCat.of A), (⊤ : (Spec (CommRingCat.of A)).Opens)))))]
@@ -273,7 +275,7 @@ theorem projModel_locallyWeierstrass {A : Type u} [CommRing A] (W : WeierstrassC
           (⊤ : (Spec (CommRingCat.of A)).Opens).ι ≫ g
           = Spec.map (CommRingCat.ofHom (algebraMap A
             ↑Γ(Spec (CommRingCat.of A), (⊤ : (Spec (CommRingCat.of A)).Opens)))) ≫ g :=
-      fun g => by rw [← Category.assoc]; exact congrArg (· ≫ g) hcrux2
+      fun g ↦ by rw [← Category.assoc]; exact congrArg (· ≫ g) hcrux2
     simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv, Category.assoc]
     rw [pullback.lift_fst_assoc]
     simp only [Category.assoc]
@@ -321,7 +323,7 @@ noncomputable def tateP0sol :
     {v : {j : Fin 3 // j ≠ 2} → tateRingOver R //
       aeval v (dehomogenizeAux (tateRingOver R) 2 (tateCurveLocOver R).toProjective.polynomial)
         = 0} :=
-  ⟨fun _ => 0, by
+  ⟨fun _ ↦ 0, by
     have h6 : (tateCurveLocOver R).a₆ = 0 := by
       simp only [tateCurveLocOver, tateCurveOver, WeierstrassCurve.map]; simp [tateCurve]
     have h4 : (tateCurveLocOver R).a₄ = 0 := by
@@ -487,20 +489,12 @@ private lemma spec_map_ofHom_comp_awayι {A B C : Type u} [CommRing A] [CommRing
   rw [← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
 
 /-- **(Y1-vi setup)** The pulled marked point factors through the `Z`-chart via the base change
-`(algebraMap) ∘ φ_B` of `tateP0mor`'s chart hom.
-
-**GAP [Y1-vi-FACTOR]** — the *only* `sorry` in the vi assembly. The identity is a pure categorical
-computation: `pull P₀ = geomPoint ≫ tateP0mor` (`tateMarkedPoint_pull_fst`, PROVEN), and
-`tateP0mor = Spec.map (ofHom φ_B) ≫ awayι` (`tateP0mor_factor`, PROVEN); composing and folding
-`geomPoint = Spec.map (ofHom (algebraMap …))` through `CommRingCat.ofHom_comp` + `Spec.map_comp` +
-`Category.assoc` gives the claim. But the *closing* `isDefEq` on `Spec.map (ofHom φ_B.1)` — where
-`φ_B.1 = ((chartSolutionsEquiv …).symm (tateP0sol R)).1` over the localization ring `tateRingOver R`
-— `whnf`-explodes past `maxHeartbeats` (the "concrete-module whnf-explosion" pattern; the
-`chartSolutionsEquiv`/`chartHomEquiv` interface over a `Localization` base is `whnf`-heavy). Bumping
-heartbeats is forbidden; further decomposition does not help since this is already a minimal
-`Spec.map_comp` identity. Discharge route: an `irreducible` wrapper for `φ_B` (so `isDefEq` treats
-it atomically), or `Spec`-functoriality lemmas keyed to avoid unfolding the chart equiv. All other
-pieces of the transfer pin, `[Y1-vi]`, and the atlas leaf are `sorry`-free modulo this. -/
+`(algebraMap) ∘ φ_B` of `tateP0mor`'s chart hom. Assembled from `tateMarkedPoint_pull_fst`
+(`pull P₀ = geomPoint ≫ tateP0mor`) and `tateP0mor_factor`
+(`tateP0mor = Spec.map (ofHom φ_B) ≫ awayι`), folded through `spec_map_ofHom_comp_awayι` — a
+`Spec`-functoriality lemma keyed to pass the `whnf`-heavy chart hom `φ_B` opaquely, so the closing
+`Spec.map_comp` identity never unfolds the `chartSolutionsEquiv`/`chartHomEquiv` interface over the
+localization ring `tateRingOver R`. -/
 private lemma tateMarkedPoint_pull_factor (R : CommRingCat.{u}) (k : Type u) [Field k]
     [Algebra (tateRingOver R) k] :
     Spec.map (CommRingCat.ofHom ((algebraMap (tateRingOver R) k).comp ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1)) ≫
@@ -589,7 +583,7 @@ theorem tateMarkedPoint_nowhereGeomOrderLEThree :
   have ht : t = EllipticCurve.geomPoint (tateRingOver R) k := by
     show t = Spec.map (CommRingCat.ofHom (algebraMap (tateRingOver R) k))
     rw [RingHom.algebraMap_toAlgebra, CommRingCat.ofHom_hom, Spec.map_preimage]
-  haveI : ((tateCurveLocOver R).baseChange k).IsElliptic :=
+  have : ((tateCurveLocOver R).baseChange k).IsElliptic :=
     inferInstanceAs ((tateCurveLocOver R).map (algebraMap (tateRingOver R) k)).IsElliptic
   have hns := baseChange_nonsingular_zero R k
   have htransfer : EllipticCurve.geomFibrePointAddEquiv (tateCurveLocOver R) (tateUniversal R)
@@ -700,7 +694,7 @@ theorem pull_smul_eq_zero_iff_residue (a : ℤ) {k : Type u} [Field k]
     (t : Spec (CommRingCat.of k) ⟶ S) (x : S) (hx : x ∈ Set.range t.base) :
     a • Point.pull E t P = 0 ↔
       a • Point.pull E (S.fromSpecResidueField x) P = 0 := by
-  haveI : Subsingleton ↥(Spec (CommRingCat.of k)) :=
+  have : Subsingleton ↥(Spec (CommRingCat.of k)) :=
     inferInstanceAs (Subsingleton (PrimeSpectrum k))
   have key : ∀ {T : Scheme.{u}} (τ : T ⟶ S),
       (a • Point.pull E τ P = 0) ↔ ((τ ≫ P.1) ≫ E.mulByHom a = τ ≫ E.zero) := by
