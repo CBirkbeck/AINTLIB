@@ -18042,3 +18042,66 @@ Continue the marathon from [couniv-v-a].
 dev/modular-curves HEAD). Clean-room green was verified at 61696bb83; the branch has since advanced
 (GH's GHB7 chain + this) — **PR-A gets a fresh clean-room re-verify at the current tip when the owner
 gives merge-go** (the GHB6 sorry is a fine WIP marker on main per CLAUDE.md).
+
+## Amendments v10.178 (2026-07-13, coordinator): ★ THE T-E-OMEGA CONVERGENCE — all three general levels (Y(N), Γ₁-Drinfeld, Γ_H) bottom out at ONE shared representability engine `representable_iff` (KM 4.7.0), gated on the owner-DEMOTED T-E-OMEGA → un-demote recommended. Plus: YN BEASTMODE-DONE [YF-ETALE]★ ratified (PR-B opening); KM PHASE-8 REVERSED (un-block ruling vindicated); G0 C3a ratified + steers.
+
+**★ THE CONVERGENCE (the load-bearing coordination finding this turn).** Verified at source
+(`EllCategory.lean:274` `representable_iff (P) (hP : P.AffineOverEll) : P.Representable ↔
+P.RelativelyRepresentable ∧ P.Rigid`, with a `sorry` at :279): this is the **single shared
+representability engine (KM Scholie 4.7.0)** that EVERY general level consumes:
+- YN's Y(N) MASTER ⟸ `representable_iff` (`YFullRoute:704` — "GATE: its sorry is the KM engine").
+- KM's Γ₁-Drinfeld `.Representable` ⟸ `representable_iff` (`DrinfeldRepresentability:26`, KM 4.7.0).
+- GH's Γ_H MASTER ⟸ `representable_iff` + T-H4/GHC1 (`GammaH:460`).
+The `⇐` half instantiates KM's p.112 engine at `(3, GL₂(𝔽₃))` [T-E15, **unblocked**] and
+`(2, Legendre, GL₂(ℤ/2))` [T-E14, **blocked on [T-E-OMEGA]**], glued over ℤ[1/6] [T-E5f
+recollement = YN lane C]. **T-E-OMEGA = the ω_{E/S} line bundle (route R1), which the owner
+DEMOTED during the Y1-first phase** (board v10.34/36/9268: "no longer on critical path" — correct
+*then*, because Y1 used a different route). **Post-Y1 that rationale is void: T-E-OMEGA is now the
+single shared gate whose discharge unblocks representability for ALL THREE general levels at once.**
+→ **OWNER DECISION SURFACED (recommend UN-DEMOTE + staff T-E-OMEGA)** — highest-leverage unblock in
+the project; Bootstrap.lean:41 notes it has "a plan that terminates in a proof." Until then, all
+three streams correctly WIRE their MASTER/rel-rep to `representable_iff` and ACCEPT its shared sorry
+(exactly as the naive Y1 problems already do) — their per-level work is real and complete-modulo-engine.
+
+**(1) STREAM-YN — BEASTMODE-DONE, [YF-ETALE]★ RATIFIED.** Verified at source (y1 tip d9f2fbbb7):
+- `etale_fullLevelSpaceStruct` (`YFullRoute:215`) depends only on `torsionπ_etale'` (the inherited
+  T-B6/BB-DIFF black-box) + the DOWNSTREAM `isOpenImmersion_levelSpaceΓι_full` — **NOT** the sorried
+  `Basic:125` box. ★ genuine; axiom profile = the inherited KM black-box, as claimed.
+- **T-D8-bridge (the orphan I allocated v10.174) PROVEN both directions**, sorry-free downstream in
+  `FullLevelClopen` (`naive_gen_of_divisor_eq` ⟹ + `naive_gen_implies_divisor_eq` ⟸), and — nice —
+  via `sections_residue_eq_of_base_eq` (rational-identity + separatedness), NOT the T-D2 globalisation
+  the board feared. The allocation paid off.
+- Items 5/6 (recollement + MASTER triple) correctly gated on the SHARED `representable_iff`/T-E-OMEGA
+  engine — NOT a phantom gate (T-E-OMEGA is genuinely unbuilt). So **BEASTMODE-DONE is legitimate**:
+  YN's dischargeable frontier is complete; the MASTER auto-completes when the shared engine lands.
+- **PR-B** (dev/modular-curves-y1 → main): OPENING per v10.172 (YN's frontier complete + [YF-ETALE]★);
+  clean-room y1 full-build verification running; merge on owner-go.
+- **COORDINATOR TODO (boarded, tracked):** YN handed up a cross-file relocation — move
+  `fullLevel_divisor_iff_naive_gen` + `isFullLevel_iff_naive` OUT of the shared upstream `Basic.lean`
+  (where they carry a now-redundant `:125` sorry) INTO `FullLevelClopen` (where the real proofs live);
+  YN verified cycle-safe (consumers transitively import FullLevelClopen). Non-urgent (redundant sorry,
+  main-tolerated); scheduled for the y1-PR-B consolidation or the cleanup fleet post-merge — NOT done
+  mid-turn (needs y1-branch build-verification; not blocking).
+
+**(2) STREAM-KM — PHASE-8 REVERSED; the un-block ruling (v10.174/175) VINDICATED.** After my
+"runway less blocked than your PHASE-8 read" ruling, KM traced the code and found BOTH linchpins
+already exist sorry-free (verified at source): **c2** = `torsionPointsEquiv` (`TorsionFibre:281`,
+the T-B6 kernel-UP `{h // h≫torsionπ=t} ≃ torsionBy ℤ (E.Point t) N`); **c1** = `exists_exactOrderLocus`
+(`Incidence:2506`, the A-Str/exact-order locus). So Γ₁ representability is an ASSEMBLY, not new math —
+CREDIT KM's trace. Landed: 4 green commits (3aa06ca95→9e1313e64), new `Moduli/DrinfeldRepresentability.lean`
+(5 WIP sorries: equiv `invFun`/`left_inv`/`right_inv`/naturality + the `representable_iff` engine call).
+No c4 needed for Γ₁ (KM 1.6.2 has no rank hypothesis) — fully in-stream to the Γ₁ rel-rep ★ modulo the
+shared engine. Documented friction ratified (maxHeartbeats 1M + term-mode over pullback.hom_ext for the
+semireducible torsion-pullback). Continue: equiv → `gammaOneDrinfeld_rigid` → `GammaH:1045 .Representable`
+via `representable_iff` (accept the shared sorry — same as the naive problems).
+
+**(3) STREAM-G0 — C3a RATIFIED + two steers answered.** `TranslationBySection.lean` (translateByIso)
+sorry-free ✓. **Q1 (coset representation): build `RelEffCartierDiv.mapIso` GENERAL — RATIFIED** (your
+lean; reusable, KM uses translated divisors throughout; clean pushforward-along-S-automorphism API that
+downstream NISOG/Y₀ will reuse). **Q2 (E∖G stability): go DIRECT from the preimage predicate — do NOT
+build the functor-of-points `IsStableOpen` characterization ahead of need** (single consumer so far;
+YAGNI/decompose-don't-over-build — extract the characterization only if/when a second consumer appears).
+Continue C3b → C3c bridge → C3d (+ lane-B c4) → C3e/f → C4 → SIGNAL.
+
+**(4) STREAM-GH — duplicate relay; ALREADY RATIFIED at v10.177** (GHB7 ★★ axiom-verified: quotProb/crossμ
+clean, relRep only-GHB6-sorryAx; GHB7-0 fork adjudicated to β). No new action; GH continues from [couniv-v-a].
