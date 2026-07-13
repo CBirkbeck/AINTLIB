@@ -63,6 +63,31 @@ theorem pull_injective_of_baseChange_base_injective {N : ℕ}
     = (RelEffCartierDiv.sectionBaseChange (P j) t).1.base default
   rw [h2]
 
+/-- **(T-D8-⟹ direction, KM 3.7.1)** For `N` invertible, the Drinfeld full-level divisor equality
+implies the naive fibrewise generation condition. -/
+theorem naive_gen_of_divisor_eq (N : ℕ) [NeZero N] (hN : NIsInvertible S N)
+    {P Q : E.Section} (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0)
+    (hdiv : (RelEffCartierDiv.sectionsDivisor E.π
+        (fun i : Fin (N ^ 2) =>
+          (((((i : ℕ) % N : ℕ) : ℤ) • P + ((((i : ℕ) / N : ℕ) : ℤ) • Q) :
+            E.Point (𝟙 S))))).ideal = E.torsionIdeal N)
+    (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S) :
+    ∀ x : E.Point t, (N : ℤ) • x = 0 →
+      x ∈ AddSubgroup.closure {Point.pull E t P, Point.pull E t Q} := by
+  have hNk : (N : k) ≠ 0 := by
+    refine (nIsInvertible_spec_iff k N).mp ?_
+    have h := hN.map (t.appTop).hom
+    rwa [map_natCast] at h
+  rw [naive_iff_comboFamily_injective t hNk hP hQ]
+  intro i j hij
+  apply E.pull_injective_of_baseChange_base_injective _ t
+    (E.baseChange_sections_base_injective _ hdiv t hNk)
+  have h := congrArg Subtype.val hij
+  simp only [comboFamily, AddSubgroup.coe_add, AddSubgroup.coe_zsmul] at h
+  simp only [Point.pull_add, Point.pull_zsmul]
+  push_cast at h ⊢
+  exact h
+
 end EllipticCurve
 
 end ModularCurves
