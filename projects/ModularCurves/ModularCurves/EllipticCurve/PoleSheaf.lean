@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.LevelStructure.CartierDivisor
 import ModularCurves.Picard.Dual
 import ModularCurves.Picard.Pic
+import ModularCurves.Picard.UnitPullback
 import ModularCurves.ForMathlib.PullbackTensorMonoidal
 import Mathlib.Algebra.Category.ModuleCat.Kernels
 import Mathlib.Algebra.Category.ModuleCat.Presheaf.Sheafification
@@ -526,18 +527,6 @@ theorem idealModuleAppIdealIso_coe_map_localIdealElement {X Y : Scheme.{u}}
   change Y.presheaf.map i r = _
   congr
 
-set_option backward.isDefEq.respectTransparency false in
-/-- A section over the top open determines the compatible family of all its
-restrictions. -/
-noncomputable def moduleSectionsOfTop {X : Scheme.{u}} (M : X.Modules)
-    (x : Γ(M, (⊤ : X.Opens))) : M.sections :=
-  PresheafOfModules.sectionsMk
-    (fun U ↦ M.val.map (homOfLE (le_top : U.unop ≤ (⊤ : X.Opens))).op x)
-    (by
-      intro U V g
-      rw [← M.val.map_comp_apply]
-      exact M.val.congr_map_apply (Subsingleton.elim _ _) x)
-
 /-- A generator of the affine ideal gives a global section of the restriction of
 `idealModule f` to that affine open. -/
 noncomputable def localIdealGenerator {X Y : Scheme.{u}} (f : X ⟶ Y)
@@ -788,20 +777,6 @@ theorem idealModule_isInvertible_of_locallyPrincipal {X Y : Scheme.{u}}
     exact ⟨Scheme.Modules.pullbackIsoOfRestrictIso (idealModule f) (U y).1
       (localIdealGeneratorIso f (U y) (r y) hr (hspan y) (hnzd y)).symm⟩
 
-/-- Multiplication by a top-open section of the structure sheaf. -/
-noncomputable def unitEndomorphismOfTopSection {X : Scheme.{u}}
-    (r : Γ(X, (⊤ : X.Opens))) :
-    Scheme.Modules.unitObj X ⟶ Scheme.Modules.unitObj X :=
-  (Scheme.Modules.unitObj X).unitHomEquiv.symm
-    (moduleSectionsOfTop _ r)
-
-@[simp]
-theorem unitEndomorphismOfTopSection_app_apply {X : Scheme.{u}}
-    (r : Γ(X, (⊤ : X.Opens))) (W : X.Opens) (a : Γ(X, W)) :
-    (unitEndomorphismOfTopSection r).val.app (.op W) a =
-      a * X.presheaf.map (homOfLE (le_top : W ≤ (⊤ : X.Opens))).op r := by
-  rfl
-
 /-- A section on an ambient open, transported to the top open of its open subscheme. -/
 noncomputable def affineOpenTopSection {Y : Scheme.{u}} (U : Y.affineOpens)
     (r : Γ(Y, U.1)) : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) :=
@@ -920,70 +895,6 @@ theorem localIdealGeneratorHom_comp_restrictIdealModuleToUnit
           (Y.presheaf.map (eqToHom U.1.ι_image_top).op r))
         (U.1.ι.appIso_hom_naturality i)
       simpa only [CommRingCat.hom_comp, RingHom.coe_comp, Function.comp_apply] using h
-
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
-theorem unitEndomorphismOfTopSection_comp_unitToPushforward
-    {X Y : Scheme.{u}} (f : X ⟶ Y) (r : Γ(Y, (⊤ : Y.Opens))) :
-    unitEndomorphismOfTopSection r ≫
-        SheafOfModules.unitToPushforwardObjUnit f.toRingCatSheafHom =
-      SheafOfModules.unitToPushforwardObjUnit f.toRingCatSheafHom ≫
-        (Scheme.Modules.pushforward f).map
-          (unitEndomorphismOfTopSection (f.appTop.hom r)) := by
-  apply SheafOfModules.hom_ext
-  ext W
-  change (f.app W.unop).hom
-      ((unitEndomorphismOfTopSection r).val.app W
-        (show Γ(Y, W.unop) from 1)) =
-    (unitEndomorphismOfTopSection (f.appTop.hom r)).val.app
-      (.op (f ⁻¹ᵁ W.unop))
-      ((f.app W.unop).hom (show Γ(Y, W.unop) from 1))
-  rw [unitEndomorphismOfTopSection_app_apply,
-    unitEndomorphismOfTopSection_app_apply, map_one, one_mul, one_mul]
-  let i : Opposite.op (⊤ : Y.Opens) ⟶ W :=
-    (homOfLE (le_top : W.unop ≤ (⊤ : Y.Opens))).op
-  have h := congrArg (fun q => q.hom r) (f.naturality i)
-  have h' : (f.app W.unop).hom (Y.presheaf.map i r) =
-      X.presheaf.map (((Opens.map f.base).map i.unop).op) ((f.app ⊤).hom r) := by
-    simpa only [CommRingCat.hom_comp, RingHom.coe_comp, Function.comp_apply] using h
-  calc
-    (f.app W.unop).hom
-        (Y.presheaf.map (homOfLE (le_top : W.unop ≤ (⊤ : Y.Opens))).op r) =
-      (f.app W.unop).hom (Y.presheaf.map i r) := by
-        rfl
-    _ = X.presheaf.map (((Opens.map f.base).map i.unop).op)
-        ((f.app ⊤).hom r) := h'
-    _ = X.presheaf.map
-        (homOfLE (le_top : f ⁻¹ᵁ W.unop ≤ (⊤ : X.Opens))).op
-        (f.appTop.hom r) := by
-      have hmap :
-          X.presheaf.map (((Opens.map f.base).map i.unop).op) =
-            X.presheaf.map
-              (homOfLE (le_top : f ⁻¹ᵁ W.unop ≤ (⊤ : X.Opens))).op :=
-        X.presheaf.congr_map (Subsingleton.elim _ _)
-      rw [hmap]
-      congr 1
-
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
-theorem pullback_unitEndomorphismOfTopSection
-    {X Y : Scheme.{u}} (f : X ⟶ Y) (r : Γ(Y, (⊤ : Y.Opens))) :
-    (Scheme.Modules.pullbackUnitIso f).inv ≫
-        (Scheme.Modules.pullback f).map (unitEndomorphismOfTopSection r) ≫
-        (Scheme.Modules.pullbackUnitIso f).hom =
-      unitEndomorphismOfTopSection (f.appTop.hom r) := by
-  let e := Scheme.Modules.pullbackUnitIso f
-  apply (cancel_epi e.hom).1
-  change e.hom ≫ e.inv ≫
-      (Scheme.Modules.pullback f).map (unitEndomorphismOfTopSection r) ≫ e.hom =
-    e.hom ≫ unitEndomorphismOfTopSection (f.appTop.hom r)
-  rw [Iso.hom_inv_id_assoc]
-  let adj := Scheme.Modules.pullbackPushforwardAdjunction f
-  apply (adj.homEquiv _ _).injective
-  rw [Adjunction.homEquiv_naturality_left]
-  rw [Adjunction.homEquiv_naturality_right]
-  erw [SheafOfModules.pullbackPushforwardAdjunction_homEquiv_pullbackObjUnitToUnit]
-  exact unitEndomorphismOfTopSection_comp_unitToPushforward f r
 
 /-- Affine-chart formula for an arbitrary scheme-theoretic inverse image of an ideal. -/
 theorem ideal_comap_affineOpens_nested {X Y : Scheme.{u}}
