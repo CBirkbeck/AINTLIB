@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
 import ModularCurves.GroupScheme.StableCharts
+import ModularCurves.EllipticCurve.WeierstrassModel
 
 /-!
 # The `G`-stable affine cover of `E` — complement stability (`[HG-C3b]`)
@@ -24,7 +25,7 @@ affineness is `[HG-C3c]` (the Proj basic-open route).
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
 
 attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
-  CategoryTheory.Over.braidedCategory
+  CategoryTheory.Over.braidedCategory MvPolynomial.gradedAlgebra
 
 universe u
 
@@ -210,6 +211,99 @@ theorem ι_comp_mulByHom_of_hasRank {N : ℕ} [NeZero N] (hG : G.HasRank N) :
   exact (E.smul_eq_zero_iff_comp_mulByHom G.π N ⟨G.ι, G.ι_π⟩).mp h0
 
 end MulPreimage
+
+/-! ### The chart existence: every point of `E` lies in a `G`-stable affine open over an
+affine base patch
+
+Instantiation of the `[n]`-preimage engine on the Weierstrass atlas (`E.localModel`): near
+any `x ∈ E`, pick the atlas patch `V ∋ π x` with `E|_V ≅ projModel W`, take the Proj
+basic-open chart `D₊(Xᵢ)` containing the image of `[N] x` (three-chart cover), transport it
+to an affine open of `E` through the atlas iso and the open immersion `E|_V ↪ E`, and pull
+back along `[N]`. -/
+
+section ChartExistence
+
+/-- **Chart transport, abstract model form.** Given an affine base patch `V`, an iso `e` of
+`E|_V` with an *abstract* scheme `P` (kept opaque so instance search never unfolds the
+Weierstrass `Proj`), and an affine open `A ⊆ P` containing the image of a preimage `y'` of
+`[N] x`, transporting `A` back to `E` and pulling back along `[N]` yields a `G`-stable
+affine open around `x` over `V`. -/
+theorem exists_mem_stableAffineOpen_aux (N : ℕ) [NeZero N]
+    (hkill : G.ι ≫ E.mulByHom N = G.π ≫ E.zero) (x : E.E) (V : S.affineOpens)
+    {P : Scheme.{u}} (e : pullback E.π V.1.ι ≅ P) {A : P.Opens} (hAaff : IsAffineOpen A)
+    {y' : ↥(pullback E.π V.1.ι)}
+    (hy' : (pullback.fst E.π V.1.ι).base y' = (E.mulByHom N).base x)
+    (hzi : e.hom.base y' ∈ A) :
+    ∃ (V' : S.affineOpens) (Uc : E.E.Opens),
+      x ∈ Uc ∧ IsAffineOpen Uc ∧ G.IsStableOpen Uc ∧ Uc ≤ E.π ⁻¹ᵁ V'.1 := by
+  set B : (pullback E.π V.1.ι).Opens := e.inv ''ᵁ A with hB
+  have hBaff : IsAffineOpen B := hAaff.image_of_isOpenImmersion e.inv
+  have hyB : y' ∈ B := by
+    refine ⟨e.hom.base y', hzi, ?_⟩
+    have hbase := congrArg (fun m : pullback E.π V.1.ι ⟶ pullback E.π V.1.ι => m.base y')
+      e.hom_inv_id
+    simpa [Scheme.Hom.comp_apply] using hbase
+  set C : E.E.Opens := (pullback.fst E.π V.1.ι) ''ᵁ B with hC
+  have hCaff : IsAffineOpen C := hBaff.image_of_isOpenImmersion _
+  -- the transported chart lies over the base patch
+  have hCle : C ≤ E.π ⁻¹ᵁ V.1 := by
+    rintro c ⟨q, -, rfl⟩
+    have hcond := congrArg (fun m : pullback E.π V.1.ι ⟶ S => m.base q)
+      (pullback.condition (f := E.π) (g := V.1.ι))
+    have h2 : E.π.base ((pullback.fst E.π V.1.ι).base q)
+        = V.1.ι.base ((pullback.snd E.π V.1.ι).base q) := by
+      simpa [Scheme.Hom.comp_apply] using hcond
+    show E.π.base ((pullback.fst E.π V.1.ι).base q) ∈ V.1
+    rw [h2]
+    have := ((pullback.snd E.π V.1.ι).base q).2
+    simpa using this
+  refine ⟨V, E.mulByHom N ⁻¹ᵁ C, ?_, ?_, ?_, ?_⟩
+  · show (E.mulByHom N).base x ∈ C
+    exact ⟨y', hyB, hy'⟩
+  · exact isAffineOpen_mulByHom_preimage N hCaff
+  · exact G.isStableOpen_mulByHom_preimage N hkill C
+  · intro p hp
+    have hpV : E.π.base ((E.mulByHom N).base p) ∈ V.1 := hCle hp
+    show E.π.base p ∈ V.1
+    have hππp : E.π.base ((E.mulByHom N).base p) = E.π.base p := by
+      rw [← Scheme.Hom.comp_apply, E.mulByHom_π]
+    rwa [hππp] at hpV
+
+set_option maxHeartbeats 1000000 in
+/-- **[HG-C3 chart existence]** For `G` killed by `N`, every point of `E` lies in a
+`G`-stable affine open lying over an affine open of the base. This is the geometric heart
+of the `[HG-C3]` cover; the freeness refinement (shrinking the base patch until `groupRing`
+is free) is `[HG-C3d]`. -/
+theorem exists_mem_stableAffineOpen (N : ℕ) [NeZero N]
+    (hkill : G.ι ≫ E.mulByHom N = G.π ≫ E.zero) (x : E.E) :
+    ∃ (V : S.affineOpens) (Uc : E.E.Opens),
+      x ∈ Uc ∧ IsAffineOpen Uc ∧ G.IsStableOpen Uc ∧ Uc ≤ E.π ⁻¹ᵁ V.1 := by
+  classical
+  -- the base point and the atlas patch around it
+  set y : E.E := (E.mulByHom N).base x with hy
+  have hππ : E.π.base y = E.π.base x := by
+    show E.π.base ((E.mulByHom N).base x) = E.π.base x
+    rw [← Scheme.Hom.comp_apply, E.mulByHom_π]
+  obtain ⟨U, hsU, W, hell, e, heπ, hez⟩ := E.localModel (E.π.base x)
+  -- `y` lies over `U`, hence in the range of the atlas-patch inclusion
+  have hyU : y ∈ E.π ⁻¹ᵁ U.1 := by
+    show E.π.base y ∈ U.1
+    rw [hππ]; exact hsU
+  have hymem : y ∈ Set.range (pullback.fst E.π U.1.ι).base := by
+    rw [Scheme.Pullback.range_fst, Set.mem_preimage, Scheme.Opens.range_ι, SetLike.mem_coe]
+    exact hyU
+  obtain ⟨y', hy'⟩ := hymem
+  -- the Proj chart containing the image of `y'`
+  have htop := Proj.iSup_basicOpen_eq_top ((projIdeal W).quotientGrading)
+    (fun i : Fin 3 => Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X i))
+    (quotient_irrelevant_le_span_mk_X W)
+  have hz : e.hom.base y' ∈ (⊤ : (projModel W).Opens) := trivial
+  rw [← htop] at hz
+  obtain ⟨i, hzi⟩ := TopologicalSpace.Opens.mem_iSup.mp hz
+  exact G.exists_mem_stableAffineOpen_aux N hkill x U e
+    (Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W i) one_pos) hy' hzi
+
+end ChartExistence
 
 end FiniteLocallyFreeSubgroup
 
