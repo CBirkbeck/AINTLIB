@@ -586,6 +586,80 @@ theorem gluedQuotientπ_gluedQuotientS :
     G.gluedQuotientπ N hkill ≫ G.gluedQuotientS N hkill = E.π :=
   G.gluedQuotientπ_gluedQuotientDesc N hkill E.π (G.isInvariant_structure)
 
+/-- The preimage cover of the action object by the patch windows. -/
+noncomputable def glueActionCover : (Over.mk G.π ⊗ E.asOver).left.OpenCover :=
+  Scheme.Cover.mkOfCovers (↥E.E)
+    (fun i => (G.actionProj.left ⁻¹ᵁ (G.gluePatch N hkill i).U).toScheme)
+    (fun i => (G.actionProj.left ⁻¹ᵁ (G.gluePatch N hkill i).U).ι)
+    (fun q => ⟨G.actionProj.left.base q, by
+      have hq : q ∈ Set.range
+          ⇑(G.actionProj.left ⁻¹ᵁ
+            (G.gluePatch N hkill (G.actionProj.left.base q)).U).ι := by
+        rw [Scheme.Opens.range_ι]
+        exact G.mem_gluePatch N hkill (G.actionProj.left.base q)
+      obtain ⟨y, hy⟩ := hq
+      exact ⟨y, hy⟩⟩)
+
+/-- **The glued projection coequalizes the translation pair**: checked on the preimage
+cover, where it is the per-patch coequalization. -/
+theorem gluedQuotientπ_coequalizes :
+    G.translationAction.left ≫ G.gluedQuotientπ N hkill
+      = G.actionProj.left ≫ G.gluedQuotientπ N hkill := by
+  refine (G.glueActionCover N hkill).hom_ext _ _ fun i => ?_
+  have hcact : G.restrictedAction (G.gluePatch N hkill i).hstable ≫
+      (G.gluePatch N hkill i).U.ι
+      = (G.actionProj.left ⁻¹ᵁ (G.gluePatch N hkill i).U).ι ≫
+        G.translationAction.left := by
+    rw [restrictedAction]
+    exact Scheme.Hom.resLE_comp_ι _ _
+  have hcpr : G.restrictedProj (G.gluePatch N hkill i).U ≫
+      (G.gluePatch N hkill i).U.ι
+      = (G.actionProj.left ⁻¹ᵁ (G.gluePatch N hkill i).U).ι ≫
+        G.actionProj.left := by
+    rw [restrictedProj]
+    exact Scheme.Hom.resLE_comp_ι _ _
+  calc (G.actionProj.left ⁻¹ᵁ (G.gluePatch N hkill i).U).ι ≫
+        G.translationAction.left ≫ G.gluedQuotientπ N hkill
+      = ((G.actionProj.left ⁻¹ᵁ (G.gluePatch N hkill i).U).ι ≫
+          G.translationAction.left) ≫ G.gluedQuotientπ N hkill :=
+        (Category.assoc _ _ _).symm
+    _ = (G.restrictedAction (G.gluePatch N hkill i).hstable ≫
+          (G.gluePatch N hkill i).U.ι) ≫ G.gluedQuotientπ N hkill :=
+        (congrArg (· ≫ G.gluedQuotientπ N hkill) hcact).symm
+    _ = G.restrictedAction (G.gluePatch N hkill i).hstable ≫
+          ((G.gluePatch N hkill i).U.ι ≫ G.gluedQuotientπ N hkill) :=
+        Category.assoc _ _ _
+    _ = G.restrictedAction (G.gluePatch N hkill i).hstable ≫
+          G.gluedQuotientLeg N hkill i :=
+        congrArg (G.restrictedAction (G.gluePatch N hkill i).hstable ≫ ·)
+          (G.ι_gluedQuotientπ N hkill i)
+    _ = (G.restrictedAction (G.gluePatch N hkill i).hstable ≫
+          G.localQuotientOpenπ (G.gluePatch N hkill i).hstable) ≫
+          G.gluedQuotientι N hkill i := (Category.assoc _ _ _).symm
+    _ = (G.restrictedProj (G.gluePatch N hkill i).U ≫
+          G.localQuotientOpenπ (G.gluePatch N hkill i).hstable) ≫
+          G.gluedQuotientι N hkill i :=
+        congrArg (· ≫ G.gluedQuotientι N hkill i)
+          (restrictedAction_localQuotientOpenπ G (G.gluePatch N hkill i).hstable)
+    _ = G.restrictedProj (G.gluePatch N hkill i).U ≫ G.gluedQuotientLeg N hkill i :=
+        Category.assoc _ _ _
+    _ = G.restrictedProj (G.gluePatch N hkill i).U ≫
+          ((G.gluePatch N hkill i).U.ι ≫ G.gluedQuotientπ N hkill) :=
+        (congrArg (G.restrictedProj (G.gluePatch N hkill i).U ≫ ·)
+          (G.ι_gluedQuotientπ N hkill i)).symm
+    _ = (G.restrictedProj (G.gluePatch N hkill i).U ≫
+          (G.gluePatch N hkill i).U.ι) ≫ G.gluedQuotientπ N hkill :=
+        (Category.assoc _ _ _).symm
+    _ = ((G.actionProj.left ⁻¹ᵁ (G.gluePatch N hkill i).U).ι ≫
+          G.actionProj.left) ≫ G.gluedQuotientπ N hkill :=
+        congrArg (· ≫ G.gluedQuotientπ N hkill) hcpr
+    _ = (G.actionProj.left ⁻¹ᵁ (G.gluePatch N hkill i).U).ι ≫
+          G.actionProj.left ≫ G.gluedQuotientπ N hkill := Category.assoc _ _ _
+
+/-- **The glued projection is invariant** (pin-5 form, via the backward bridge). -/
+theorem isInvariant_gluedQuotientπ : G.IsInvariant (G.gluedQuotientπ N hkill) :=
+  IsInvariant.of_coequalizes (G.gluedQuotientπ_coequalizes N hkill)
+
 end FiniteLocallyFreeSubgroup
 
 end EllipticCurve

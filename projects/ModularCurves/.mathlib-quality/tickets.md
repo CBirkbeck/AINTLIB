@@ -18887,3 +18887,17 @@ REMAINING to the pins: `gluedQuotientπ_coequalizes` (act ≫ π = pr ≫ π via
 restrictedAction_localQuotientOpenπ) → pin 5's IsInvariant form (reverse dictionary
 isInvariant_of_coequalizes — check TranslationAction.lean) → discharge the six SubgroupQuotient
 pins under the α/β signature ruling (v10.189-G0; α = [G.HasRank N] pins, β = clopen glue). (STREAM-G0)
+
+### v10.197-G0 — ★★ SIGNAL STATUS: all six pin-shaped facts LIVE; the quotient rests on ONE sorry (STREAM-G0)
+`gluedQuotientπ_coequalizes` (preimage-of-patch cover + per-patch coequalization) and
+`isInvariant_gluedQuotientπ` (backward bridge `IsInvariant.of_coequalizes`) land — with v10.196's
+deliverables the construction now supplies ALL SIX pin-shaped facts: gluedQuotient/gluedQuotientS/
+gluedQuotientπ (data) + over-triangle + invariance + existsUnique-lift, parametrized (N, hkill).
+FULL REPO GREEN (3826 jobs). AXIOM AUDIT: everything traces to exactly ONE producer sorry —
+`chartPrecursorSpec_isClosedImmersion` (StableChartData.lean:134, the [HG-C2] geometric heart,
+front (2) of the v10.173 4-front SIGNAL re-scope; fronts (1) Hopf instance, (3) C3 cover,
+(4) C4 glue are ALL DONE as of this session). The :134 proof is already through hrw/key_incL/
+key_incR; remaining: identify g (= ⟨pr, act⟩ chart pair under pullbackSpecIso) with the
+chart-restriction of the PROVEN `isClosedImmersion_actPair_left` — stability makes the
+comparison square cartesian, and closed immersions are stable under base change + iso + swap
+(pullbackSymmetry). G0 attacking now. Pin-file wiring still awaits α/β (v10.189-G0). (STREAM-G0)
