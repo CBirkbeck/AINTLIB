@@ -1,14 +1,1 @@
-FOCUS: STREAM-G0 [HOPF ENDGAME] (rule-5, v10.173). CORRECTION to world-model: Front #1 (HopfAlgebra) was ALREADY LANDED — PatchHopf.instHopfAlgebraOpens : HopfAlgebra baseRing groupRing, built via Bialgebra.ofAlgHom/HopfAlgebra.ofAlgHom over the GEOMETRIC algebra ⟹ NO diamond. Nothing to build there.
-
-MILESTONE M6 ACHIEVED (GroupScheme/StableChartData.lean, green, 1 sorry): isHopfGalois_chartCoaction : IsHopfGalois chartCoaction — the C1d assembly. Chain: chartData (StableAffineChartData) from ambient instHopfAlgebraOpens + instModuleFiniteGroupRing + chartCoaction_isCoaction + chartCoaction_productMap_surjective. Only hypothesis: [Module.Free baseRing groupRing] (freeness per chart, from C3 base-shrink; diamond-free).
-Also landed sorry-free: surjective_hom_of_isClosedImmersion_specMap (ForMathlib); instModuleFiniteGroupRing.
-
-REMAINING to SIGNAL ★★ (all mine, revised):
- - C2 sorry: chartPrecursorSpec_isClosedImmersion = IsClosedImmersion g (g=e1.hom≫Spec.map(ofHom β)≫e2.inv). Wrapper+algebraic legs green; remainder = geometric chart chase (g=base-change of actPair.left via chartSpecIso; full session). Banked in crux doc.
- - #3 C3 stable affine cover (also PROVIDES Module.Free per chart) — not started; first act /develop --decompose the appendix cover strategy.
- - #4 C4 glue (GlueData) — consumes isHopfGalois_chartCoaction (M6, HAVE) → six pins.
-C3 DECOMPOSED (decomposition-hopf-c3-cover.md): leaves C3a-f. Constant-group orbit machinery (SchemeQuotient/EngineDescent) does NOT apply (fppf subgroup-scheme, not constant group). Route = divisor-complement: G=rel eff Cartier div (toRelEffCartierDiv ✓, degree=rank); translate x+G (C3a, needs translation-by-section); complement stable (C3b, elementary FIRST brick); affineness of complement (C3c CRUX GAP — no mathlib lemma; RECOMMENDED route = Proj basic-open D₊(f) via E's Proj presentation + Proj.isAffineOpen_basicOpen); freeness per chart (C3d, shrink patch); 2-chart coverage (C3e) + assembly (C3f).
-LANE-B (below SIGNAL): c4 = E[N] locally free rank N² (endDeg_mulBy=n², EndomorphismDegree:107) — for KM Γ(N). Board loud when lands.
-C3a LANDED sorry-free (GroupScheme/TranslationBySection.lean): translateByIso x : E.asOver ≅ E.asOver (translation by a section, p↦p+x; inverse translate by x⁻¹) via translateBy_comp (composition adds shifts) + Hom.commGroup algebra. Coset x+G now definable as its image. (Watch: monoidal vs group mul_one/mul_assoc — use term-mode exact.)
-QUEUE: C3b (complement stability, mirror EngineDescent:84) → C3c bridge (x+G=V(fᵢ); grep sectionsDivisor/vanishingIdeal) → Proj-affineness (Proj.isAffineOpen_basicOpen + opensRange_awayι + map_preimage_basicOpen) → C3d (freeness, WITH lane-B c4 E[N]) → C3e/f → C4 → SIGNAL. C2 sorry opportunistic. Free-action order now ∀{T}(t)(g).
-Marathon. Pathspec commits only (siblings GH, KM, YN).
+FOCUS: STREAM-G0 [HG-C4c-2] — S2 DONE (both directions). NOW S3: imageOpens — READ template ForMathlib/SchemeQuotient.lean :387-400 FIRST (windowHom-opensRange route), mirror it for the eqLocus model; then tripleIso (:343-790), GlueData (:818-910), pins (:969-1869; option-γ (N,hkill); α/β at v10.189-G0).

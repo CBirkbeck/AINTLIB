@@ -529,6 +529,136 @@ theorem localQuotientOpenπ_iso [Module.Free P.baseRing P.groupRing] :
     (congrArg (· ≫ specEqualizerπ P.chartCoaction Algebra.TensorProduct.includeLeft)
       P.hU.isoSpec_hom.symm)
 
+/-- **`S2`-⟹ — the orbit lemma**: points of a free patch identified by the quotient
+projection lie in a common translation orbit. Kernel-pair transport: the fibre product of
+`specEqualizerπ` against itself is the chart groupoid (`isKernelPair_specEqualizerπ`),
+points of pullbacks surject onto compatible pairs, the tensor-swap re-orders the apex, and
+the two C4b bridge legs identify the kernel-pair legs with the restricted action pair. -/
+theorem exists_orbit_of_localQuotientOpenπ_eq [Module.Free P.baseRing P.groupRing]
+    {x y : ↥P.U.toScheme}
+    (h : (G.localQuotientOpenπ P.hstable).base x
+      = (G.localQuotientOpenπ P.hstable).base y) :
+    ∃ p : ↥((G.actionProj.left ⁻¹ᵁ P.U).toScheme),
+      (G.restrictedAction P.hstable).base p = x ∧ (G.restrictedProj P.U).base p = y := by
+  -- (1) move to the Hopf projection through the alignment
+  have hHopf : P.localQuotientπ.base x = P.localQuotientπ.base y := by
+    have hx := congrArg (fun m : P.U.toScheme ⟶ P.localQuotient => m.base x)
+      P.localQuotientOpenπ_iso
+    have hy := congrArg (fun m : P.U.toScheme ⟶ P.localQuotient => m.base y)
+      P.localQuotientOpenπ_iso
+    simp only [Scheme.Hom.comp_apply] at hx hy
+    rw [← hx, ← hy]
+    exact congrArg P.localQuotientOpenIso.hom.base h
+  -- (2) the `Spec`-side points
+  have hEq : (specEqualizerπ P.chartCoaction Algebra.TensorProduct.includeLeft).base
+        (P.hU.isoSpec.hom.base x)
+      = (specEqualizerπ P.chartCoaction Algebra.TensorProduct.includeLeft).base
+        (P.hU.isoSpec.hom.base y) := by
+    have hx : P.localQuotientπ.base x
+        = (specEqualizerπ P.chartCoaction Algebra.TensorProduct.includeLeft).base
+          (P.hU.isoSpec.hom.base x) := by
+      rw [localQuotientπ]
+      exact Scheme.Hom.comp_apply _ _ _
+    have hy : P.localQuotientπ.base y
+        = (specEqualizerπ P.chartCoaction Algebra.TensorProduct.includeLeft).base
+          (P.hU.isoSpec.hom.base y) := by
+      rw [localQuotientπ]
+      exact Scheme.Hom.comp_apply _ _ _
+    rw [← hx, ← hy]
+    exact hHopf
+  -- point-application helper (typed, to avoid metavariable field projections)
+  have happ : ∀ {X Y : Scheme.{u}} {f g : X ⟶ Y}, f = g → ∀ t, f.base t = g.base t :=
+    fun h t => by rw [h]
+  -- (3) a kernel-pair point above the pair
+  have KP := isKernelPair_specEqualizerπ P.chartCoaction P.isHopfGalois_chartCoaction
+  obtain ⟨z, hz1, hz2⟩ := Scheme.Pullback.exists_preimage_pullback
+    (f := specEqualizerπ P.chartCoaction Algebra.TensorProduct.includeLeft)
+    (g := specEqualizerπ P.chartCoaction Algebra.TensorProduct.includeLeft)
+    (P.hU.isoSpec.hom.base x) (P.hU.isoSpec.hom.base y) hEq
+  set q := KP.isoPullback.inv.base z with hqdef
+  have hcancel : KP.isoPullback.hom.base q = z := by
+    rw [hqdef, ← Scheme.Hom.comp_apply]
+    have := happ KP.isoPullback.inv_hom_id z
+    simpa using this
+  have hq1 : (Spec.map (CommRingCat.ofHom P.chartCoaction.toRingHom)).base q
+      = P.hU.isoSpec.hom.base x := by
+    have h := happ KP.isoPullback_hom_fst q
+    simp only [Scheme.Hom.comp_apply] at h
+    rw [hcancel] at h
+    exact h.symm.trans hz1
+  have hq2 : (Spec.map (CommRingCat.ofHom
+      (Algebra.TensorProduct.includeLeft :
+        P.chartRing →ₐ[P.baseRing]
+          P.chartRing ⊗[P.baseRing] P.groupRing).toRingHom)).base q
+      = P.hU.isoSpec.hom.base y := by
+    have h := happ KP.isoPullback_hom_snd q
+    simp only [Scheme.Hom.comp_apply] at h
+    rw [hcancel] at h
+    exact h.symm.trans hz2
+  -- (4) re-order the apex through the tensor swap
+  have hswap₁ : Spec.map (CommRingCat.ofHom P.chartCoaction.toRingHom)
+      = Spec.map (CommRingCat.ofHom
+          ((Algebra.TensorProduct.comm P.baseRing P.groupRing
+            P.chartRing).toAlgHom.toRingHom)) ≫ Spec.map P.coactionRing := by
+    rw [← Spec.map_comp]
+    rfl
+  have hswap₂ : Spec.map (CommRingCat.ofHom
+      (Algebra.TensorProduct.includeLeft :
+        P.chartRing →ₐ[P.baseRing]
+          P.chartRing ⊗[P.baseRing] P.groupRing).toRingHom)
+      = Spec.map (CommRingCat.ofHom
+          ((Algebra.TensorProduct.comm P.baseRing P.groupRing
+            P.chartRing).toAlgHom.toRingHom)) ≫
+        Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+          P.chartRing →ₐ[P.baseRing] P.groupRing ⊗[P.baseRing] P.chartRing).toRingHom) := by
+    rw [← Spec.map_comp]
+    congr 1
+  set q' := (Spec.map (CommRingCat.ofHom
+    ((Algebra.TensorProduct.comm P.baseRing P.groupRing
+      P.chartRing).toAlgHom.toRingHom))).base q with hq'def
+  have hq1' : (Spec.map P.coactionRing).base q' = P.hU.isoSpec.hom.base x := by
+    have h := happ hswap₁ q
+    simp only [Scheme.Hom.comp_apply] at h
+    rw [hq'def, ← h]
+    exact hq1
+  have hq2' : (Spec.map (CommRingCat.ofHom (Algebra.TensorProduct.includeRight :
+      P.chartRing →ₐ[P.baseRing] P.groupRing ⊗[P.baseRing] P.chartRing).toRingHom)).base q'
+      = P.hU.isoSpec.hom.base y := by
+    have h := happ hswap₂ q
+    simp only [Scheme.Hom.comp_apply] at h
+    rw [hq'def, ← h]
+    exact hq2
+  -- (5) the orbit point, through the Künneth identifications
+  refine ⟨(G.chartPullbackIso P.U).inv.base (P.chartSpecIso.inv.base q'), ?_, ?_⟩
+  · -- the action leg, through the coaction bridge
+    have hbr := happ P.spec_coactionRing_isoSpec_inv q'
+    simp only [Scheme.Hom.comp_apply] at hbr
+    rw [hq1'] at hbr
+    have hxx : P.hU.isoSpec.inv.base (P.hU.isoSpec.hom.base x) = x := by
+      rw [← Scheme.Hom.comp_apply]
+      have := happ P.hU.isoSpec.hom_inv_id x
+      simpa using this
+    rw [hxx] at hbr
+    have hCCS : P.chartCoactionSpec.base q'
+        = (G.restrictedAction P.hstable).base
+          ((G.chartPullbackIso P.U).inv.base (P.chartSpecIso.inv.base q')) := by
+      rw [chartCoactionSpec]
+      simp only [Scheme.Hom.comp_apply]
+    rw [← hCCS]
+    exact hbr.symm
+  · -- the projection leg, through the raw snd bridge
+    have hbr := happ
+      ((congrArg (P.chartSpecIso.inv ≫ ·) P.chartPullbackIso_inv_restrictedProj).trans
+        P.chartSpecIso_inv_snd) q'
+    simp only [Scheme.Hom.comp_apply] at hbr
+    rw [hq2'] at hbr
+    have hyy : P.hU.isoSpec.inv.base (P.hU.isoSpec.hom.base y) = y := by
+      rw [← Scheme.Hom.comp_apply]
+      have := happ P.hU.isoSpec.hom_inv_id y
+      simpa using this
+    rw [hyy] at hbr
+    exact hbr
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
