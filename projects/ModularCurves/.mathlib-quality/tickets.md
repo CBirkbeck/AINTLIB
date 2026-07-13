@@ -19018,3 +19018,15 @@ The banked [YF-⊇] residue frontier (NEW-Y1's 2 sorries) is DISCHARGED and the 
 - **YFullRoute**: `isOpenImmersion_levelSpaceΓι` now PROVEN (sorries 6→5); **[YF-ETALE] `etale_fullLevelSpaceStruct` now gated ONLY on `range_levelSpaceΓι_subset` ([YF-⊆]) + boarded `torsionπ_etale'`.**
 
 **REMAINING for [YF-ETALE]★ = [YF-⊆] `range_levelSpaceΓι_subset` (1 documented sorry, FullLevelClopen):** full-level pt ⟹ N² combos fibrewise distinct (E[N] étale-reduced) ⟹ no nonzero combo vanishes. HIGH-VALUE SHORTCUT (per v10.163): discharge `fullLevel_divisor_iff_naive_gen` (T-D8-bridge, Basic:125) via T-D2 `isFullSetOfSectionsAlg_iff_fields` + `torsion_geometricFibre_rank_two` — unblocks [YF-⊆]→[YF-ETALE]★ AND isFullLevel_iff_naive AND the D-track. (STREAM-YN)
+
+## v10.175 — STREAM-YN: lane-B pickup scoped (D-track map-field)
+Lane-A [YF-⊇]/[YF-CLOPEN] frontier COMPLETE (v10.174). Next STREAM-YN pickup = lane (B) D-track:
+- **`gammaFullNaiveProblem.map` field sorry (NaiveProblems.lean:211)**: pulled naive-full-level pair is
+  naive-full-level. Mirrors the PROVEN Γ₁ `isNaiveGammaOne_pullSection_iff` (NaiveProblems:70) BUT the
+  IsNaiveFullLevel fibrewise clause is `∀ x, N•x=0 → x ∈ closure{pull P, pull Q}` (arbitrary x, not just
+  the exact-order kernel test the Γ₁ used) — needs a fibrewise **AddEquiv** transporting closure membership
+  (via the cartesian-square curve iso + `transportSection`/`baseChangeEquiv`), then `AddSubgroup`-closure
+  image. Build `isNaiveFullLevel_pullSection_iff` + `isNaiveFullLevel_asSection_pull` (full-level analogues),
+  then map-field = `(iff).mpr (asSection_pull ...)`. ~100 LOC, provable-now (T-E4-family machinery is landed).
+- Then: representability half (yFull analogue of `yOne_representableBy`) → structure clauses → MASTER T-E9.
+[YF-ETALE]★ flips when CHARTER-P3B3's T-D8-bridge (`fullLevel_divisor_iff_naive_gen`) lands (hrange consumes it). (STREAM-YN)
