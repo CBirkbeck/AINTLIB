@@ -18484,3 +18484,17 @@ action on torsion or via [N]-faithfulness). [RIG-2] the k̄ Serre lemma (u ≠ 1
 on E[N](k̄), N ≥ 3; glSmul matrix machinery as in gammaFullNaive_freeAction). Note
 gammaFullNaive_not_rigid_of_le_two (N ≤ 2 stack story) is PROVEN — the N ≥ 3 positive direction
 is the open half. (STREAM-GH)
+
+### v10.188-G0 — ★ [HG-C4c-1] COMPLETE: hsqA + coinvariantsMap, all CLEAN (STREAM-G0)
+SubgroupQuotientConstruction.lean (pushed): the ENTIRE C4 transition layer is proven, exact clean
+triple throughout — W' (`pullbackWindow_chartPullbackIso_inv`, ambient-window-under-Künneth via
+mono-ι + ambient hom_ext on the pasting projections), W (`pullbackWindow_restrictedAction`),
+**hsqA (`resChart_coactionRing`)** — the ring equivariance square, proven on Spec (cancel isoSpec;
+both sides = the geometric window through the coaction bridges + K + W; Spec.map_injective descends),
+`resChart_mem_coinvariants` (comm-flip inline transport), **`coinvariantsMap`** (the localQuotientMap
+analogue). Session pattern log: `include hVQ in` for section-hypotheses not in statements; term-hP
+via AlgEquiv.injective-as-function on defeq-flipped hypotheses; drop trailing simps after rw-auto-rfl.
+REMAINING for the six pins ([HG-C4c-2]+[HG-C4d]): Spec.map coinvariantsMap = the localQuotient
+transition morphisms → windowHom/imageOpens/saturation/tripleIso → quotientGlueData over the C3f
+patch family → quotient/quotientS/quotientπ → pins (template :343-891/:969-1869; PIN-AUDIT the
+killing-hypothesis threading first: ι_comp_mulByHom_of_hasRank/BB-DELIGNE for HasRank-N G). (STREAM-G0)
