@@ -332,6 +332,18 @@ noncomputable def transitionTensor :
     (B := P.groupRing) (C := Q.chartRing ⊗[Q.baseRing] Q.groupRing)
     fB fA (fun _ _ => Commute.all _ _)).toRingHom
 
+/-- The transition tensor carries `b ⊗ 1` to `(res b) ⊗ 1` — the `hT1` input of
+`mem_coinvariants_of_map`. -/
+theorem transitionTensor_tmul_one (b : P.chartRing) :
+    P.transitionTensor Q hUQ hVQ (b ⊗ₜ[P.baseRing] 1)
+      = (P.resChart Q hUQ).hom b ⊗ₜ[Q.baseRing] 1 := by
+  letI : Algebra P.baseRing (Q.chartRing ⊗[Q.baseRing] Q.groupRing) :=
+    ((algebraMap Q.baseRing (Q.chartRing ⊗[Q.baseRing] Q.groupRing)).comp
+      (P.resBase Q hVQ).hom).toAlgebra
+  simp only [transitionTensor, AlgHom.toRingHom_eq_coe, RingHom.coe_coe]
+  rw [Algebra.TensorProduct.lift_tmul, map_one, mul_one]
+  rfl
+
 end Transition
 
 end AffineChartPatch
