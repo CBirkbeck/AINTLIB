@@ -81,13 +81,16 @@ noncomputable def projModelFunctionFieldEquiv {K : Type u} [Field K] (W : Weiers
     ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) with hZ
   haveI hZaff : IsAffineOpen Z :=
     Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
-  haveI hNe : Nonempty Z := by sorry
+  haveI : Nontrivial W.toAffine.CoordinateRing := inferInstance
+  haveI hnt : Nontrivial Γ(projModel W, Z) :=
+    (coordRingToZSection W).toEquiv.symm.nontrivial
+  haveI hNe : Nonempty Z := ⟨hZaff.isoSpec.inv.base (Classical.arbitrary _)⟩
   haveI : IsFractionRing Γ(projModel W, Z) (projModel W).functionField :=
     functionField_isFractionRing_of_isAffineOpen (projModel W) Z hZaff
   exact (IsLocalization.ringEquivOfRingEquiv (M := (nonZeroDivisors Γ(projModel W, Z)))
     (T := (nonZeroDivisors W.toAffine.CoordinateRing))
     (projModel W).functionField W.toAffine.FunctionField
-    (coordRingToZSection W).symm (by sorry))
+    (coordRingToZSection W).symm (MulEquivClass.map_nonZeroDivisors (coordRingToZSection W).symm))
 
 /-- **(K4 field-level target)** Over a field `K`, the scheme-theoretic fibre rank of
 multiplication-by-`N` on the projective model of an elliptic Weierstrass curve is `N²`.
