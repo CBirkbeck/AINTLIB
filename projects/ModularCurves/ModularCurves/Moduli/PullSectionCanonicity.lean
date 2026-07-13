@@ -6,6 +6,7 @@ Authors: The AINTLIB Authors
 import ModularCurves.Moduli.PullSectionAdd
 import ModularCurves.EllipticCurve.RigiditySpreadingOut
 import ModularCurves.EllipticCurve.RecordGroupUnique
+import ModularCurves.LevelStructure.IsoTransport
 
 /-!
 # The T-E4 transport, reduced to the single canonicity primitive (Y1-D2)
@@ -183,6 +184,57 @@ theorem pullSection_zsmul_of_finitePresentation (n : ℤ) (P : Y.curve.Section) 
     EllHom.pullSection R f (n • P) = n • EllHom.pullSection R f P :=
   map_zsmul (AddMonoidHom.mk' (EllHom.pullSection R f)
     (pullSection_add_of_finitePresentation R f)) n P
+
+/-- **(KM-W0 transport leaf — Drinfeld exact order pulls back along `Ell/R`-morphisms)**
+If a section `P` of `Y.curve` has Drinfeld exact order `N`, so does its pullback
+`pullSection f P` along `f : X ⟶ Y`. Two legs: base change of the exact-order divisor
+(`Section.HasExactOrder.baseChange`) to `Y.curve.baseChange f.baseHom`, then transport
+across the cartesian comparison isomorphism `curveIsoPullback`
+(`Section.HasExactOrder.pointMap`, whose group-hom hypothesis is supplied by the
+arbitrary-base records canonicity primitive `isMonHom_of_pointedIso_records`). This is the
+`IsGammaOne` functoriality clause (KM 3.2) for the Drinfeld `[Γ₁(N)]` moduli problem over
+an arbitrary base — the substrate that discharges `gammaOneDrinfeldProblem.map`. -/
+theorem hasExactOrder_pullSection {P : Y.curve.Section} {N : ℕ} [NeZero N]
+    (h : P.HasExactOrder Y.curve N) :
+    (EllHom.pullSection R f P).HasExactOrder X.curve N := by
+  -- the cartesian comparison iso  X.curve.asOver ≅ (Y.curve.baseChange f.baseHom).asOver
+  let eA : X.curve.asOver ≅ (Y.curve.baseChange f.baseHom).asOver :=
+    Over.isoMk (curveIsoPullback R f) f.isPullback.isoPullback_hom_snd
+  -- unit-compatibility of `eA.symm`, feeding the records canonicity primitive
+  have hη_symm :
+      η[(Y.curve.baseChange f.baseHom).asOver] ≫ eA.symm.hom = η[X.curve.asOver] := by
+    rw [Iso.symm_hom, Iso.comp_inv_eq]
+    exact (curveIsoPullbackOver_one R f).symm
+  have hμ_symm := isMonHom_of_pointedIso_records (Y.curve.baseChange f.baseHom) X.curve
+    eA.symm hη_symm
+  -- base-change leg, then iso leg
+  have hbc := EllipticCurve.Section.HasExactOrder.baseChange Y.curve h f.baseHom
+  have htrans := EllipticCurve.Section.HasExactOrder.pointMap eA.symm hμ_symm hbc
+  -- dictionary: the transported base-changed section is exactly `pullSection f P`
+  have hAS : EllipticCurve.Point.asSection Y.curve f.baseHom
+        (EllipticCurve.Point.pull Y.curve f.baseHom P)
+      = transportSection R f (EllHom.pullSection R f P) := by
+    refine Subtype.ext ?_
+    rw [transportSection_pullSection, EllipticCurve.Point.asSection_coe]
+    rfl
+  have hkey : EllipticCurve.pointMapOfHom eA.symm.hom
+      (EllipticCurve.Point.asSection Y.curve f.baseHom
+        (EllipticCurve.Point.pull Y.curve f.baseHom P))
+      = EllHom.pullSection R f P := by
+    rw [hAS]
+    -- `transportSection R f Q` is defeq `pointMapOfHom eA.hom Q` (both are `Q.1 ≫ eA.hom.left`,
+    -- as `eA.hom.left ≡ (curveIsoPullback R f).hom`); staying in `eA.hom.left`/`eA.inv.left`
+    -- avoids the `pullback`-vs-`baseChange.E` typing friction.
+    show EllipticCurve.pointMapOfHom eA.symm.hom
+        (EllipticCurve.pointMapOfHom eA.hom (EllHom.pullSection R f P))
+      = EllHom.pullSection R f P
+    rw [Iso.symm_hom]
+    refine Subtype.ext ?_
+    exact (Category.assoc _ _ _).trans
+      ((congrArg (fun m => (EllHom.pullSection R f P).1 ≫ m)
+          (EllipticCurve.iso_hom_left_inv_left eA)).trans (Category.comp_id _))
+  rw [hkey] at htrans
+  exact htrans
 
 end EllHom
 
