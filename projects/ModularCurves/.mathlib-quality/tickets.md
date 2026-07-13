@@ -19207,3 +19207,22 @@ FormallyEtale`+`EssFiniteType` instances on `Γ`; `Scheme.Hom.finrank_SpecMap_eq
 (BUILT) ⟹ combos distinct ⟹ curveIsoPullback link ⟹ comboFamily injective ⟹ naive_iff_comboFamily_
 injective (BUILT) closes the bridge (relocate downstream) ⟹ [YF-⊆]. Substantial instance-heavy but
 fully-tooled focused work. (STREAM-YN)
+
+### v10.180d — BOTH count cores built (algebra + scheme level); 10 lemmas this session
+`natCard_spec_carrier_eq_finrank` BUILT + committed (ForMathlib/EtaleFieldSchemeCount.lean,
+axiom-clean): for A ess-finite-type formally-étale over sep-closed k, `Nat.card ↥(Spec A) =
+finrank k A` (↥(Spec A) defeq PrimeSpectrum A + the algebra core). So BOTH reduced-fibre point-count
+cores (KM 3.7.1) are now in hand — the genuinely reusable, hard-to-get pieces.
+
+**Session tally: 10 axiom-clean lemmas, all committed/pushed, full build green.**
+
+Sole REMAINING = the torsion-fibre connection (intricate app-specific instance plumbing; all tools
+cited): (1) `IsFinite (torsionπ)` → `IsAffineHom` → `IsAffine (torsion fibre)` (affine base); (2)
+`Scheme.isoSpec` (AffineScheme.lean:68): fibre ≅ Spec Γ(fibre,⊤); (3) k-algebra structure on Γ via
+structure morphism; (4) `Etale`+affine → `HasRingHomProperty.iff_of_isAffine` (RingHomProperties:352)
+→ `RingHom.Etale (appTop)` → `RingHom.Etale.toAlgebra`/`etale_algebraMap` (RingHom/Etale:37) →
+`Algebra.Etale`→`FormallyEtale`+`EssFiniteType` on Γ; (5) `natCard_spec_carrier_eq_finrank` +
+isoSpec ⟹ `#points = finrank k Γ`; (6) `Scheme.Hom.finrank_SpecMap_eq_finrank` (CartierDivisor:1594)
++ `torsion_rank` ⟹ `finrank k Γ = N²`. ⟹ `#fst⁻¹(E[N]) = N²`; then pigeonhole (BUILT) ⟹ combos
+distinct ⟹ curveIsoPullback link ⟹ comboFamily inj ⟹ naive_iff (BUILT) closes bridge ⟹ [YF-⊆].
+Intricate CommRingCat/appTop/algebraize threading — the app-specific focused work. (STREAM-YN)
