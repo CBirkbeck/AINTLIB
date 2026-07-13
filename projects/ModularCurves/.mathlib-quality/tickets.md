@@ -2367,14 +2367,18 @@ adjudicates.
   decomposition (needs `invOver` chart lemmas; recorded as T-E14 dep).
 
 ### [T-E12] `M₁ = Spec ℤ[1/6, g₂, g₃, Δ⁻¹]` represents `(E, ω)` (GME Thm 2.2.3)
-- **Status**: open, **blocked on [T-E-OMEGA]** · **File**: Moduli/Bootstrap.lean (no decl
-  yet — see its header) · **Type**: def + theorem · **Sources**: GME Thm 2.2.3; KM 2.2.
+- **Status**: open — **UNBLOCKED + STATED (2026-07-13, OMEGA)**: the problem def is
+  **`omegaProblem : ModuliProblem R`** (`Moduli/OmegaFunctor.lean`, PROVEN functor,
+  axiom-clean — laws = `omegaBasisMap_id`/`_comp`); the representability statement is
+  `omegaProblem_representable_by_affine` (`Moduli/Bootstrap.lean`, sorry) ·
+  **Type**: def (done) + theorem (open) · **Sources**: GME Thm 2.2.3; KM 2.2.
 - **Body** (from `decomposition-gme2.md` §E12, fully explicit): `P₁ : S ↦ [(E, ω)]` is
   represented over `ℤ[1/6]` by `M₁ = Spec ℤ[1/6, g₂, g₃, Δ⁻¹]`; proof = A7 uniqueness of
   `(g₂, g₃)` given `ω`; universal curve `y² = 4x³ − g₂x − g₃`.
 
 ### [T-E13] `Aut_S(E, ω) = {1}` — the rigidity engine (GME Cor 2.2.4)
-- **Status**: open, **blocked on [T-E-OMEGA]** · **File**: Moduli/Bootstrap.lean · **Type**:
+- **Status**: open — **UNBLOCKED + STATED (2026-07-13, OMEGA)**: `omegaProblem_rigid :
+  (omegaProblem R).Rigid` (`Moduli/Bootstrap.lean`, sorry) · **Type**:
   theorem (short) · **Depends on**: T-E12 · **Sources**: GME Cor 2.2.4.
 - **Body**: one-liner from T-E12's representability ("two distinct identifications
   `φ*(𝐄, ω) ≅ (E, ω)`"). **Do NOT re-derive rigidity from scratch** (dispatch v10.4): the
@@ -2384,8 +2388,16 @@ adjudicates.
   import it.
 
 ### [T-E14] the Legendre bootstrap object `M'₂` over `ℤ[1/2]` (GME Ex. 2.2.1 / KM 4.6.2)
-- **Status**: open, **blocked on [T-E-OMEGA]** · **File**: Moduli/Bootstrap.lean · **Type**:
-  def + 2 theorems (KM engine axioms 1 & 2) · **Depends on**: T-E-OMEGA, T-E13 ·
+- **Status**: open — **UNBLOCKED + STATED (2026-07-13, OMEGA)**: the `δ` is
+  **`legendreBootstrapProblem := Γ(2)-naive × omegaProblem`** (`Moduli/Bootstrap.lean`,
+  functor laws proven; sorryAx only inherited from `gammaFullNaiveProblem`'s
+  pre-existing map-sorry, T-E7 lineage); engine axioms 1/2 =
+  `legendreBootstrap_representable_by_affine` / `_relativelyRepresentable_finiteEtale`
+  (sorries, shape-matched to T-E15a/b). Own remaining decomposition: the
+  `GL₂(ℤ/2) × {±1}`-action bundle (level: `glSmul`; ω: `negVC_u` + "inversion acts by
+  −1 on `OmegaBasis`" — needs `invOver` chart lemmas, recorded at T-OM-B8) + the two
+  axiom proofs · **Type**: def (done) + 2 theorems (open) · **Depends on**:
+  ~~T-E-OMEGA~~ (DISCHARGED ★★), T-E13 ·
   **Sources**: KM 4.6.2 + 2.2.9 (verbatim in the quotes file); GME Ex. 2.2.1 (p. 117).
 - **Body**: over `ℤ[1/2]` normalise `y² = x³ + a₂x² + a₄x + a₆`, `i(x, y) = (x, −y)` gives
   `[−1]`; `E[2] − {0} ≅ Spec(A[X]/(F))` free of rank 3; `E[2]` is étale (distinct roots by
