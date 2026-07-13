@@ -19187,3 +19187,23 @@ base-changed + affine) → `FormallyEtale k A` + `EssFiniteType k A` instances; 
 `finrank k A = N²` via `torsion_rank`; (6) `PrimeSpectrum A ≃ topological points of fibre ≃
 fst⁻¹(torsionIdeal.support)`. Substantial scheme↔algebra plumbing (steps 1-2, 5-6) but every link
 is now available/tooled — no missing theory. (STREAM-YN)
+
+### v10.180c — count ALGEBRAIC CORE built; only scheme↔algebra glue remains
+`Algebra.FormallyEtale.natCard_primeSpectrum_eq_finrank` BUILT + committed (ForMathlib/
+EtaleFieldCount.lean, axiom-clean): for an ess-finite-type formally-étale algebra `A` over a
+sep-closed field `K`, `Nat.card (PrimeSpectrum A) = Module.finrank K A` (via mathlib
+`equivPiOfIsSepClosed`). This is the reusable algebraic heart of the KM 3.7.1 count.
+
+**Session tally: 9 axiom-clean lemmas, full build green (4208 jobs), all pushed** — entire fibre
+side (FibreFullLevel + FullLevelFibre) + entire ⟹ scaffolding (sectionsDivisor_baseChange/support/
+comap_support + injective_of_range_eq_of_natCard_eq) + the count core.
+
+REMAINING = the scheme↔algebra glue (all tools EXIST, cited): torsion fibre `(E.baseChange t).torsion N`
+is finite (`torsionπ_isFinite`) hence affine → coordinate algebra `Γ`; `Etale`+affine → `RingHom.Etale`
+(via `HasRingHomProperty @Etale RingHom.Etale`, `HasRingHomProperty.iff_exists_appLE`) → `Algebra.
+FormallyEtale`+`EssFiniteType` instances on `Γ`; `Scheme.Hom.finrank_SpecMap_eq_finrank`
+(CartierDivisor:1594) connects `.finrank`=`torsion_rank`=N² to `finrank k Γ`; `#topological points`
+=`#PrimeSpectrum Γ` → apply count core → `#points = N²`. Then pigeonhole (BUILT) on the support-cover
+(BUILT) ⟹ combos distinct ⟹ curveIsoPullback link ⟹ comboFamily injective ⟹ naive_iff_comboFamily_
+injective (BUILT) closes the bridge (relocate downstream) ⟹ [YF-⊆]. Substantial instance-heavy but
+fully-tooled focused work. (STREAM-YN)
