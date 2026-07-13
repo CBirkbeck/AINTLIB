@@ -43,6 +43,7 @@ import ModularCurves.ForMathlib.BaseChangeKerCoker
 import ModularCurves.ForMathlib.Coaction
 import ModularCurves.ForMathlib.ComoduleCoinvariants
 import ModularCurves.ForMathlib.FiniteAffineOpenCover
+import ModularCurves.ForMathlib.FinitePresentationBaseChangeEquiv
 import ModularCurves.ForMathlib.FinitePresentationEquiv
 import ModularCurves.ForMathlib.FinitePresentationFunctor
 import ModularCurves.ForMathlib.FinitePresentationFunctorCover
