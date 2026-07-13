@@ -68,4 +68,21 @@ noncomputable def pullbackPreimageΓIsoTensor
     (isoAppTop e).symm ≪≫
       asIso (affineKunnethΓ (U.ι ≫ f) t rfl rfl)
 
+/-- The inverse of the affine-patch section isomorphism is the inverse
+Kunneth map, followed by transport across the geometric patch isomorphism
+and the ambient-open comparison. -/
+theorem pullbackPreimageΓIsoTensor_inv
+    {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (U : X.Opens)
+    (hU : IsAffineOpen U) [IsAffine S] [IsAffine T] :
+    letI : IsAffine U.toScheme := hU
+    letI : Algebra Γ(S, (⊤ : S.Opens))
+        Γ(U.toScheme, (⊤ : U.toScheme.Opens)) :=
+      ((U.ι ≫ f).appTop.hom).toAlgebra
+    letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) :=
+      t.appTop.hom.toAlgebra
+    (pullbackPreimageΓIsoTensor f t U hU).inv =
+      inv (affineKunnethΓ (U.ι ≫ f) t rfl rfl) ≫
+        (pullbackPreimageIsoPullbackRestrict f t U).hom.appTop ≫
+          (pullback.fst f t ⁻¹ᵁ U).topIso.hom := rfl
+
 end AlgebraicGeometry

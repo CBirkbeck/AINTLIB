@@ -731,12 +731,14 @@ compare Cech factors after base change. The next affine-local step is naturality
 inclusions of finite intersections, needed to compare the differentials; none of these
 statements asserts perfectness or cohomology base change.
 
-The active naturality step will characterize the inverse section-ring isomorphism on the
-two tensor generators: the `U` generator is pullback along `U_T → U`, and the `T`
-generator is pullback along `U_T → T`. The tensor-product extensionality theorem then
-reduces compatibility with every inclusion `V ≤ U` to functoriality of these two
-projections. This is exactly the differential-level coherence needed before assembling a
-base-change isomorphism of Cech complexes.
+Affine-patch base change is now natural under restriction. The inverse section-ring
+isomorphism sends the `U` tensor generator to pullback along `U_T → U` and the `T`
+generator to pullback along `U_T → T`. The theorem
+`pullbackPreimageΓIsoTensor_naturality` uses these formulas and tensor-product
+extensionality to identify restriction along every inclusion `V ≤ U` with the tensor of
+the original restriction map and the identity on `Γ(T,⊤)`. This supplies the
+differential-level coherence needed to assemble the base-change isomorphism of Cech
+complexes; that degreewise and differential-compatible assembly is the next step.
 
 The elementary Mayer--Vietoris seam is now complete in both directions.
 `HPrimeZeroAddEquivSections` identifies `H'⁰(U,F)` with sections naturally in `U`, while
