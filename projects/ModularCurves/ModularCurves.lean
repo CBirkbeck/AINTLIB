@@ -85,6 +85,7 @@ import ModularCurves.Moduli.NaiveProblems
 import ModularCurves.Moduli.QuotientRepresentability
 import ModularCurves.Moduli.Stack
 import ModularCurves.Picard.InvertibleSheaf
+import ModularCurves.Picard.InvertibleSheafBaseCechFlat
 import ModularCurves.Picard.InvertibleSheafFiniteAffineCover
 import ModularCurves.Picard.InvertibleSheafLocallyFree
 import ModularCurves.Picard.PicComparison
