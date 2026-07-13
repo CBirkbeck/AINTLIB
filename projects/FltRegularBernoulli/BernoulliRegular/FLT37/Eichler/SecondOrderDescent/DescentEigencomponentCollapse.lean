@@ -6,11 +6,9 @@ import BernoulliRegular.FLT37.Eichler.Reduction.SecondOrderVandermondeRowCollaps
 `Prop812SecondOrderCoeff37`
 
 This file discharges the descent-unit second-order leading-coefficient residual
-`Prop812DescentCoeff37` (`CaseIICor823SecondOrderEndpoint.lean`) — Washington Proposition 8.12 at
+`Prop812DescentCoeff37` (`DescentUnitPadicLCoeffFLT37.lean`) — Washington Proposition 8.12 at
 the irregular index `i = 32`, on the descent unit — **down to the single-column second-order
-coefficient value** `Prop812SecondOrderCoeff37` (`CaseIICor823SecondOrderMatrix.lean`).
-
-It imports only; it does **not** modify any existing file.  No `sorry`, no `axiom`.
+coefficient value** `Prop812SecondOrderCoeff37` (`KummerLogDetectorModSq.lean`).
 
 ## The reduction (everything but the single-column coefficient value is proven here)
 
@@ -63,10 +61,8 @@ entering only via the *separately proven* `9·c₁₅` inversion — not `c₁�
 
 noncomputable section
 
-set_option maxRecDepth 4000
-
 open NumberField
-open scoped NumberField BigOperators
+open scoped NumberField
 
 namespace BernoulliRegular
 namespace CyclotomicUnits
@@ -171,7 +167,6 @@ matrix is `kummerLogDetRowFactor 15 · (V·ē)_15 = 0·… = 0` (the irregularit
 the first-order degeneracy that the `37`-th-power saturation correction inherits, and it is what
 makes the saturation correction `37 · coeff_Y` reduce to `0` mod `37`. -/
 
-set_option maxHeartbeats 1600000 in
 -- The completed-log-column sum lives in the heavy `DworkCompleteIntegerRing`; unifying the
 -- `evalₐ`-of-coerced-sum with the column sum exceeds the default heartbeat budget (as in the
 -- first-order analog `caseIIEx811Core_mulVec_eq_zero_of_evalₐ_eq_zero`).
@@ -269,10 +264,8 @@ def caseIICor823DetSqLog
     (⟨32, by norm_num⟩ : Fin (37 - 1))
     (AdicCompletion.evalₐ (lambdaIdeal 37 (CyclotomicField 37 ℚ)) (2 * (37 - 1)) X)
 
-set_option maxHeartbeats 800000 in
 -- `map_add` on the `evalₐ` `AlgHom` over the heavy `adicCompletionIntegers` types makes the
 -- `AddHomClass` instance synthesis (and the elaboration) expensive; raise both budgets.
-set_option synthInstance.maxHeartbeats 800000 in
 theorem caseIICor823DetSqLog_add
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
@@ -281,10 +274,8 @@ theorem caseIICor823DetSqLog_add
   unfold caseIICor823DetSqLog
   rw [map_add, valuedLambdaQuotientDworkCoeffModSq_add]
 
-set_option maxHeartbeats 800000 in
 -- As above, the `map_mul` / `map_natCast` on the `evalₐ` `AlgHom` need raised elaboration and
 -- instance-synthesis budgets over the heavy `adicCompletionIntegers` types.
-set_option synthInstance.maxHeartbeats 800000 in
 theorem caseIICor823DetSqLog_nsmul_thirtyseven
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
@@ -310,7 +301,6 @@ theorem caseIICor823DescentDetectorSq_eq_detSqLog
   -- The two sides differ only in the (proof-irrelevant) `Fin` membership proof of `⟨32, _⟩`.
   congr 1
 
-set_option maxHeartbeats 1600000 in
 -- The heavy `DworkCompleteIntegerRing` `completedLog` additivity / power identities exceed the
 -- default heartbeat budget.
 theorem caseIICor823DescentDetectorSq_split
@@ -339,7 +329,6 @@ theorem caseIICor823DescentDetectorSq_split
   rw [hlog, caseIICor823DetSqLog_add, caseIICor823DetSqLog_nsmul_thirtyseven]
   ring
 
-set_option maxHeartbeats 1600000 in
 -- The `ϖ ↔ λ` bridge over the heavy `adicCompletionIntegers` `evalₐ` exceeds the default budget.
 /-- `caseIICor823DetSqLog (S : Dwork)` for a *fixed-subalgebra* element `S` is the even-power Dwork
 coefficient `rationalPadicIntegerToZModSq (repr S (kummerLogEvenPowerIndex 15))` — the
@@ -361,7 +350,6 @@ theorem caseIICor823DetSqLog_coe_fixedSubalgebra_eq
   rw [show (⟨32, by norm_num⟩ : Fin (37 - 1)) =
       (kummerLogEvenPowerIndex (p := 37) (by norm_num) (15 : Fin (kummerLogRank 37))).1 from rfl]
 
-set_option maxHeartbeats 1600000 in
 -- The `castHom`/level compatibility over the heavy `adicCompletionIntegers` `evalₐ` is slow.
 /-- The mod-`37` reduction of `caseIICor823DetSqLog X` (the level-`72` `varpi^{32}` coordinate) is
 the first-order level-`36` `varpi^{32}` coordinate `valuedLambdaQuotientDworkCoeffModP ⟨32,_⟩
@@ -380,7 +368,6 @@ theorem castHom_caseIICor823DetSqLog
 
 /-! ## 3. `Cor823Omega32SecondOrderCollapse37` from the single-column coefficient value -/
 
-set_option maxHeartbeats 4000000 in
 -- The p-saturation assembly threads several heavy `adicCompletionIntegers` `evalₐ`/`completedLog`
 -- terms; the cumulative elaboration is well above the default budget (below the `whnf` wall).
 /-- **`Cor823Omega32SecondOrderCollapse37` from the single-column second-order coefficient value
