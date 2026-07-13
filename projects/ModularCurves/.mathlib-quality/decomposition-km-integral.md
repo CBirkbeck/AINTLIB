@@ -190,6 +190,66 @@ argument = **[KM-W1-1], DONE**].
 Note the "p^n[0] = Ker(F^n)" second conclusion of 5.3.3/5.3.4 (= [KM-W1-2]) comes *after* `p=0`
 (Frobenius defined); deferred with the Frobenius vocabulary per the wave table.
 
+## [KM-W2-core] — adversarial `/develop --decompose` pass (KM worker, 2026-07-13)
+
+*Ran Phase 1e adversarially (disposition: oppose the plan). The tractable front (L1 `orderDivisor_zero_ideal`,
+L2 `orderDivisor_zero_ideal_principal`) and the endpoint L6 (`CharP.p_eq_zero_of_pow_mem_span`) are DONE +
+axiom-clean and are NOT re-attacked here. This pass adversarially verifies the residual route L3·L4·L5.*
+
+### Step 1 — KM's actual proof of 5.3.3 (full, verbatim, re-read pp. 139–141)
+The **entire** proof of 5.3.3 is the three sentences quoted above: reduce to **the formal group of C/R**,
+choose a parameter X (Zariski-locally), invoke 5.3.4. KM does **not** construct the formal group here — he
+uses it as standing theory ("cf. 1.4.1"; the formal group of a smooth 1-dim group scheme is Ch.1 / standard
+Silverman IV material). 5.3.4's proof is the universal-situation reduction (→ L5) + the binomial argument
+(= L6, DONE).
+
+### Step 2 — decomposition tree (mirrors KM)
+- **L3** relative formal completion + parameter: `Ô_{E,0} ≅ A⟦X⟧` (equivalently the formal group `Ê` of `E/Spec A`).
+- **L4** the scheme group law read in `X` = a 1-param FGL `F ∈ A⟦X,Y⟧`, `F ≡ X+Y mod deg 2`.
+- **L5** `IsSubgroup(pⁿ[0])` ⟹ `F^{pⁿ} ∈ (X^{pⁿ},Y^{pⁿ})` (KM's universal `B=A⟦X,Y⟧/(X^{pⁿ},Y^{pⁿ})`).
+- **L6** = `CharP.p_eq_zero_of_pow_mem_span` (DONE). Plus a Zariski-glue (`p=0` local ⟹ global; `A → ∏ Aᵢ` injective on a cover).
+
+### Step 3/4.5 — ATTACKS ATTEMPTED on the route (the binding adversarial artifact)
+Red-flag #1 fired: L3/L4 need "substantial infrastructure absent from mathlib" (the formal group of a
+scheme-theoretic group scheme). Per the source-faithfulness rule this "almost always means the source has an
+easier route" — so the route was actively attacked:
+- **[A1] Is there an easier KM route avoiding the formal group?** Re-read 5.3.3's full proof: NO. KM's proof
+  IS "both lie in the formal group … choose a parameter X … results from 5.3.4." The formal group is
+  KM's own, unavoidable tool. → L3/L4 are **faithful to KM**, not invented scaffolding. Red-flag #1 is a
+  genuine API gap here, not the Wedhorn-style "invented route" error.
+- **[A2] Can the abstract completion (L3) be dodged via the concrete inf-chart `R[t][s]/(cubic)`?** NO. The
+  group law on the chart is an algebraic (not polynomial) map; its expansion at 0 IS a power series, i.e.
+  the completion. The divisor is `span{t^{pⁿ}}` (L2 ✓) but the *group law* forces the formal expansion. → L3 unavoidable.
+- **[A3] Can HasseWeil's `formalGroupLaw W` be used without L3?** NO. `formalGroupLaw W` is an algebraic
+  chord-process series in `R⟦X,Y⟧`, built with no scheme. Using it for W2 requires proving the SCHEME mult,
+  expanded in the completed coordinate, EQUALS it — which presupposes L3 (the completion) + a mult-matches-chord
+  proof (L4-connect). → HasseWeil shortens L4's *coefficient facts* (h0/hlin via `formalGroupLaw_coeff_left/right_unit`)
+  but does NOT remove L3 or the scheme-connection.
+- **[A4] Is L5 dischargeable once L3/L4 exist?** PLAUSIBLE-but-nontrivial: KM's "for any R-algebra B" is a
+  functor-of-points reading of `IsSubgroup`; instantiating it at the universal `B` and extracting the ideal
+  membership needs the comultiplication on the completed local ring of `E×E`. Bounded once L3/L4 land; a leaf under them.
+
+### Step 4/5/6 — feasibility verdict: DEEP API GAP (charter), faithful to source
+**L3 + L4 = the formal group of a smooth 1-dimensional group scheme over an arbitrary base** (relative formal
+completion `Ô_{E,0} ≅ A⟦X⟧` + the induced FGL, with `F ≡ X+Y`). This is **absent from repo, HasseWeil, and
+mathlib** (verified via the substrate map). HasseWeil formalises the *affine Weierstrass* FGL algebraically
+but neither the scheme-theoretic formal completion nor the scheme-mult ↔ chord-series identification. mathlib
+has NO scheme-theoretic elliptic curve and NO Weierstrass formal group. Building L3/L4 is a **multi-week
+formal-geometry sub-development** — textbook (Silverman IV, relativised), NOT research-frontier (so NOT B3;
+it's a hard-formalisation charter, unlike [KM-W5] Serre–Tate). It is a genuine **API GAP** in the /develop
+sense: it cannot be discharged from existing infrastructure and needs its own sub-decomposition (relative
+completion theory first, then the FGL, then L4-connect).
+
+**Skeleton note (Step 2.5):** the L3/L4 leaves cannot be stated as building `:= by sorry` declarations without
+first choosing the relative-completion API (mathlib `adicCompletion` vs a bespoke `PowerSeries A` iso) — that
+choice is itself the first leaf of the API-gap sub-development. So the buildable skeleton for W2-core is
+deferred into that sub-development rather than force-fit here (the front L1/L2 + endpoint L6 already build).
+
+**Recommendation:** keep [KM-W2-core] as a boarded charter (this analysis is its plan). Its own first act,
+when a worker commits to it, is a `/develop --decompose` of the *relative formal group of an elliptic curve*
+(L3 completion → L4 FGL → L4-connect → L5), tensioned against Silverman IV + HasseWeil's affine FGL as the
+coefficient substrate. W2 (and W3, W7) stay blocked on it. The near-half marathon proceeds on W0/W6 meanwhile.
+
 **Open question the substrate map resolves:** are (W2-L-fg)/(W2-L-param) dischargeable on
 repo-chart + HasseWeil-FGL substrate (medium sub-tickets), or is "the formal group of a
 scheme-theoretic elliptic curve + the divisor↔FGL dictionary" a deeper charter? The decomposition's
