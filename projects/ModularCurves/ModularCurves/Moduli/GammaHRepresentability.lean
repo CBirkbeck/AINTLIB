@@ -1740,6 +1740,123 @@ theorem QuotPkg.exists_crossDescent {P' : ModuliProblem R} {X : EllObj R}
       ((congrArg (· ≫ d'.f) hμ).trans hνf)),
     hwu p.f₀ p.hπf]
 
+/-- **The cross-problem classification key** ([GHB7-couniv], the relative
+`homEquiv_comp_transportHom`): composing a classifying section with the transport
+classifies the `ν'`-image (GHB1's `relKey`, cross-problem). -/
+theorem QuotPkg.crossRelKey {P' : ModuliProblem R} {X : EllObj R}
+    (p : QuotPkg φ X) (dP : ModuliProblem.RelRepData P' X) (ν' : Q ⟶ P')
+    (νX : p.d.Z ⟶ dP.Z) (hνXf : νX ≫ dP.f = p.d.f)
+    (hclX : dP.eqv p.d.f ⟨νX, hνXf⟩ =
+      ν'.app (Opposite.op (X.pullbackAlong p.d.f))
+        (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩))
+    {T : Scheme.{u}} (g : T ⟶ X.base)
+    (h : { h : T ⟶ p.d.Z // h ≫ p.d.f = g })
+    (m : (h.1 ≫ νX) ≫ dP.f = g) :
+    dP.eqv g ⟨h.1 ≫ νX, m⟩ =
+      ν'.app (Opposite.op (X.pullbackAlong g)) (p.d.eqv g h) := by
+  obtain ⟨h, hh⟩ := h
+  subst hh
+  have hnat := dP.nat p.d.f h ⟨νX, hνXf⟩
+  rw [show (⟨h ≫ νX, m⟩ : { v : T ⟶ dP.Z // v ≫ dP.f = h ≫ p.d.f }) =
+      ⟨h ≫ νX, by rw [Category.assoc, hνXf]⟩ from Subtype.ext rfl,
+    hnat, hclX,
+    ← NatTrans.naturality_apply ν' (X.pullbackAlongMap p.d.f h).op
+      (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩),
+    ← p.d.nat p.d.f h ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩]
+  exact congrArg (fun z => ν'.app (Opposite.op (X.pullbackAlong (h ≫ p.d.f)))
+    (p.d.eqv (h ≫ p.d.f) z)) (Subtype.ext (Category.comp_id h))
+
+/-- **Naturality of the cross-problem transports** ([GHB7-couniv-iii-a]): the
+`ν`-transports at `X` and `X'` are intertwined by the comparison morphisms of the
+pulled data on both problem sides. Clause-parameterized in the classifying properties
+(`hclX`/`hclX'`) and the reassociation lift `e`. -/
+theorem QuotPkg.crossTransport_natural {P' : ModuliProblem R} {X X' : EllObj R}
+    (p : QuotPkg φ X) (p' : QuotPkg φ X')
+    (dP : ModuliProblem.RelRepData P' X) (dP' : ModuliProblem.RelRepData P' X')
+    (ν' : Q ⟶ P') (k : X' ⟶ X)
+    (νX : p.d.Z ⟶ dP.Z) (hνXf : νX ≫ dP.f = p.d.f)
+    (hclX : dP.eqv p.d.f ⟨νX, hνXf⟩ =
+      ν'.app (Opposite.op (X.pullbackAlong p.d.f))
+        (p.d.eqv p.d.f ⟨𝟙 p.d.Z, Category.id_comp p.d.f⟩))
+    (νX' : p'.d.Z ⟶ dP'.Z) (hνX'f : νX' ≫ dP'.f = p'.d.f)
+    (hclX' : dP'.eqv p'.d.f ⟨νX', hνX'f⟩ =
+      ν'.app (Opposite.op (X'.pullbackAlong p'.d.f))
+        (p'.d.eqv p'.d.f ⟨𝟙 p'.d.Z, Category.id_comp p'.d.f⟩))
+    (e : CategoryTheory.Limits.pullback p.d.f k.baseHom ⟶
+      CategoryTheory.Limits.pullback dP.f k.baseHom)
+    (he_fst : e ≫ pullback.fst dP.f k.baseHom =
+      pullback.fst p.d.f k.baseHom ≫ νX)
+    (he_snd : e ≫ pullback.snd dP.f k.baseHom = pullback.snd p.d.f k.baseHom) :
+    ((p.d.pullback k).toRelRepData.compare p'.d.toRelRepData).1 ≫ νX' =
+      e ≫ ((dP.pullback k).compare dP').1 := by
+  have hcQ2 : ((p.d.pullback k).toRelRepData.compare p'.d.toRelRepData).1 ≫
+      p'.d.f = pullback.snd p.d.f k.baseHom :=
+    ((p.d.pullback k).toRelRepData.compare p'.d.toRelRepData).2
+  have hcP2 : ((dP.pullback k).compare dP').1 ≫ dP'.f =
+      pullback.snd dP.f k.baseHom := ((dP.pullback k).compare dP').2
+  have m₁ : (((p.d.pullback k).toRelRepData.compare p'.d.toRelRepData).1 ≫ νX') ≫
+      dP'.f = (p.d.pullback k).f :=
+    (Category.assoc _ _ _).trans
+      ((congrArg (((p.d.pullback k).toRelRepData.compare
+        p'.d.toRelRepData).1 ≫ ·) hνX'f).trans hcQ2)
+  have m₂ : (e ≫ ((dP.pullback k).compare dP').1) ≫ dP'.f =
+      (p.d.pullback k).f :=
+    (Category.assoc _ _ _).trans ((congrArg (e ≫ ·) hcP2).trans he_snd)
+  have hme : e ≫ (dP.pullback k).f = (p.d.pullback k).f := he_snd
+  have hkey := (dP'.eqv (p.d.pullback k).f).injective
+    (a₁ := ⟨((p.d.pullback k).toRelRepData.compare p'.d.toRelRepData).1 ≫ νX', m₁⟩)
+    (a₂ := ⟨(⟨e, hme⟩ : { h : (p.d.pullback k).Z ⟶ (dP.pullback k).Z //
+        h ≫ (dP.pullback k).f = (p.d.pullback k).f }).1 ≫
+      ((dP.pullback k).compare dP').1, m₂⟩) ?_
+  · exact congrArg Subtype.val hkey
+  -- LHS: cross-key at X' + the Q-side comparison unfold
+  have hmemc : ((p.d.pullback k).toRelRepData.compare p'.d.toRelRepData).1 ≫
+      p'.d.f = (p.d.pullback k).f := hcQ2
+  rw [QuotPkg.crossRelKey p' dP' ν' νX' hνX'f hclX' (p.d.pullback k).f
+      ⟨((p.d.pullback k).toRelRepData.compare p'.d.toRelRepData).1, hmemc⟩ m₁,
+    ModuliProblem.RelRepData.eqv_compare (p.d.pullback k).toRelRepData
+      p'.d.toRelRepData]
+  -- RHS: P'-side comp-compare + unfolds on both, meeting at the same iso
+  have hval : ∀ (h' : { h : (p.d.pullback k).Z ⟶ (p.d.pullback k).Z //
+        h ≫ (p.d.pullback k).f = (p.d.pullback k).f })
+      (v : (p.d.pullback k).Z ⟶ p.d.Z)
+      (hv : h'.1 ≫ pullback.fst p.d.f k.baseHom = v)
+      (pv : v ≫ p.d.f = (p.d.pullback k).f ≫ k.baseHom),
+      (p.d.pullback k).eqv (p.d.pullback k).f h' =
+        Q.map (EllObj.toPullbackAlong
+          (X'.pullbackAlongπ (p.d.pullback k).f ≫ k)).op
+          (p.d.eqv ((p.d.pullback k).f ≫ k.baseHom) ⟨v, pv⟩) := by
+    intro h' v hv pv; subst hv; rfl
+  have hvalP : ∀ (h' : { h : (p.d.pullback k).Z ⟶ (dP.pullback k).Z //
+        h ≫ (dP.pullback k).f = (p.d.pullback k).f })
+      (v : (p.d.pullback k).Z ⟶ dP.Z)
+      (hv : h'.1 ≫ pullback.fst dP.f k.baseHom = v)
+      (pv : v ≫ dP.f = (p.d.pullback k).f ≫ k.baseHom),
+      (dP.pullback k).eqv (p.d.pullback k).f h' =
+        P'.map (EllObj.toPullbackAlong
+          (X'.pullbackAlongπ (p.d.pullback k).f ≫ k)).op
+          (dP.eqv ((p.d.pullback k).f ≫ k.baseHom) ⟨v, pv⟩) := by
+    intro h' v hv pv; subst hv; rfl
+  have P1 : (pullback.fst p.d.f k.baseHom ≫ p.d.f) =
+      (p.d.pullback k).f ≫ k.baseHom := pullback.condition
+  have P2 : (pullback.fst p.d.f k.baseHom ≫ νX) ≫ dP.f =
+      (p.d.pullback k).f ≫ k.baseHom :=
+    (Category.assoc _ _ _).trans
+      ((congrArg (pullback.fst p.d.f k.baseHom ≫ ·) hνXf).trans
+        pullback.condition)
+  rw [ModuliProblem.RelRepData.eqv_comp_compare (dP.pullback k) dP'
+      (p.d.pullback k).f ⟨e, hme⟩,
+    hval ⟨𝟙 _, Category.id_comp _⟩ (pullback.fst p.d.f k.baseHom)
+      (Category.id_comp _) P1,
+    hvalP ⟨e, hme⟩ (pullback.fst p.d.f k.baseHom ≫ νX) he_fst P2,
+    QuotPkg.crossRelKey p dP ν' νX hνXf hclX
+      ((p.d.pullback k).f ≫ k.baseHom)
+      ⟨pullback.fst p.d.f k.baseHom, P1⟩ P2]
+  exact NatTrans.naturality_apply ν'
+    (EllObj.toPullbackAlong (X'.pullbackAlongπ (p.d.pullback k).f ≫ k)).op
+    (p.d.eqv ((p.d.pullback k).f ≫ k.baseHom)
+      ⟨pullback.fst p.d.f k.baseHom, P1⟩)
+
 end Transport
 
 
