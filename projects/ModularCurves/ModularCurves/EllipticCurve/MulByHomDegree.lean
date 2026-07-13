@@ -1,0 +1,56 @@
+import ModularCurves.EllipticCurve.ModelRecord
+import ModularCurves.EllipticCurve.PointsDictionary
+import ModularCurves.EllipticCurve.FinrankFractionField
+import HasseWeil.Foundation.Basic
+
+/-!
+# The degree of `[N]` on the projective model: `finrank = N²` (K4 field-level crux)
+
+This file builds the **field-level crux** of the endomorphism-degree keystone (STREAM-KM):
+over a field `K`, the scheme-theoretic fibre rank `Scheme.Hom.finrank` of multiplication-by-`N`
+on the projective Weierstrass model `projModel W` is `N²`.
+
+It is the anchor that connects the *scheme* world (`Scheme.Hom.finrank`, `modelEllipticCurve`,
+`mulByHom`) to AINTLIB's *HasseWeil* function-field world (`WeierstrassCurve.Affine.Isogeny.degree`,
+`mulByInt_degree = N²`). The bridge factors as:
+
+* `Scheme.Hom.finrank` of the model `[N]` at the generic point = the degree of the induced
+  function-field extension `[K(projModel W) : K(projModel W)]` via `[N]*`
+  (`FinrankFractionField.finrank_SpecMap_algebraMap_eq_finrank`, the algebraic core, over the
+  domain coordinate ring);
+* the model `[N]` and HasseWeil's `mulByInt W N` agree on points via the *green* dictionary
+  `PointsDictionary.projModelPointsEquiv` (+ `modelEllipticCurve_point_add_val`), hence induce
+  the same function-field pullback (points determine morphisms on reduced/separated schemes,
+  `hom_ext_of_forall_specPoint`);
+* `mulByInt_degree` (HasseWeil) gives that degree `= N²`.
+
+For an arbitrary elliptic curve `E/S`, `Torsion.mulByHom_finrank` reduces to this field-level
+statement fibre-by-fibre (the fibre `E_s` over `κ(s)` is `≅ projModel W_s` by
+`E.localModel : LocallyWeierstrass`, `S = Spec κ(s)` being a one-point base).
+-/
+
+open AlgebraicGeometry CategoryTheory WeierstrassCurve
+
+universe u
+
+namespace ModularCurves
+
+namespace EllipticCurve
+
+/-- **(K4 field-level target)** Over a field `K`, the scheme-theoretic fibre rank of
+multiplication-by-`N` on the projective model of an elliptic Weierstrass curve is `N²`.
+
+The finiteness/flatness of `[N]` (the accepted KM 2.3.1 `BB-QF`/`BB-FLAT` fibre inputs) are taken
+as hypotheses — this lemma supplies the *degree* content on top of them (the charter's scope (i)),
+anchored in HasseWeil `mulByInt_degree`. The arbitrary-`E/S` assembly (`Torsion.mulByHom_finrank`)
+discharges them from `mulByHom_flat`/`mulByHom_isFinite`. -/
+theorem modelEllipticCurve_mulByHom_finrank {K : Type u} [Field K] (W : WeierstrassCurve K)
+    [W.IsElliptic] (N : ℕ) [NeZero N]
+    [Flat ((modelEllipticCurve W).mulByHom N)] [IsFinite ((modelEllipticCurve W).mulByHom N)]
+    (x : (modelEllipticCurve W).E) :
+    ((modelEllipticCurve W).mulByHom N).finrank x = N ^ 2 := by
+  sorry
+
+end EllipticCurve
+
+end ModularCurves
