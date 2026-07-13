@@ -2120,6 +2120,101 @@ noncomputable def QuotPkg.crossμ (pkg : ∀ X : EllObj R, QuotPkg φ X)
               (EllObj.toPullbackAlong_pullbackAlongπ (𝟙 X'op.unop)))).trans
           (FunctorToTypes.map_id_apply P' _)))
 
+/-- **The couniversal factorization** ([GHB7-couniv-iv]): the couniversal morphism
+factors the invariant map through the projection (KM 7.1.3(1), existence half). -/
+theorem QuotPkg.projQ_crossμ (pkg : ∀ X : EllObj R, QuotPkg φ X)
+    (hfree : FreeAction φ)
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base)))
+    {P' : ModuliProblem R} (dP : ∀ X : EllObj R, ModuliProblem.RelRepData P' X)
+    (ν' : Q ⟶ P')
+    (νf : ∀ X : EllObj R, (pkg X).d.Z ⟶ (dP X).Z)
+    (hνf : ∀ X : EllObj R, νf X ≫ (dP X).f = (pkg X).d.f)
+    (hcl : ∀ X : EllObj R, (dP X).eqv (pkg X).d.f ⟨νf X, hνf X⟩ =
+      ν'.app (Opposite.op (X.pullbackAlong (pkg X).d.f))
+        ((pkg X).d.eqv (pkg X).d.f ⟨𝟙 (pkg X).d.Z, Category.id_comp (pkg X).d.f⟩))
+    (μf : ∀ X : EllObj R, (pkg X).Z₀ ⟶ (dP X).Z)
+    (hμ : ∀ X : EllObj R, (pkg X).π ≫ μf X = νf X)
+    (hμf : ∀ X : EllObj R, μf X ≫ (dP X).f = (pkg X).f₀) :
+    QuotPkg.projQ pkg hfree hbase ≫
+      QuotPkg.crossμ pkg hfree hbase dP ν' νf hνf hcl μf hμ hμf = ν' := by
+  ext Xop a
+  show P'.map (EllObj.toPullbackAlong (𝟙 Xop.unop)).op
+    ((dP Xop.unop).eqv ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)
+      ⟨((((pkg Xop.unop).d.eqv
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+          (Q.map (Xop.unop.pullbackAlongπ
+            ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1 ≫
+        (pkg Xop.unop).π) ≫ μf Xop.unop, by
+        rw [Category.assoc, hμf Xop.unop, Category.assoc, (pkg Xop.unop).hπf]
+        exact ((((pkg Xop.unop).d.eqv
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+          (Q.map (Xop.unop.pullbackAlongπ
+            ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).2)⟩) =
+    ν'.app Xop a
+  have hval : (((pkg Xop.unop).d.eqv
+      ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+      (Q.map (Xop.unop.pullbackAlongπ
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1 ≫
+      ((pkg Xop.unop).π ≫ μf Xop.unop) =
+      (((pkg Xop.unop).d.eqv
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+        (Q.map (Xop.unop.pullbackAlongπ
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1 ≫ νf Xop.unop :=
+    congrArg ((((pkg Xop.unop).d.eqv
+      ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+      (Q.map (Xop.unop.pullbackAlongπ
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1 ≫ ·)
+      (hμ Xop.unop)
+  have hm2 : ((((pkg Xop.unop).d.eqv
+      ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+      (Q.map (Xop.unop.pullbackAlongπ
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1 ≫ νf Xop.unop) ≫
+      (dP Xop.unop).f = (𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom := by
+    rw [Category.assoc, hνf Xop.unop]
+    exact ((((pkg Xop.unop).d.eqv
+      ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+      (Q.map (Xop.unop.pullbackAlongπ
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).2)
+  rw [show ((dP Xop.unop).eqv ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom))
+      ⟨((((pkg Xop.unop).d.eqv
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+          (Q.map (Xop.unop.pullbackAlongπ
+            ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1 ≫
+        (pkg Xop.unop).π) ≫ μf Xop.unop, _⟩ =
+    ((dP Xop.unop).eqv ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom))
+      ⟨(((pkg Xop.unop).d.eqv
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+          (Q.map (Xop.unop.pullbackAlongπ
+            ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1 ≫
+        νf Xop.unop, hm2⟩ from
+    congrArg _ (Subtype.ext ((Category.assoc _ _ _).trans hval)),
+    QuotPkg.crossRelKey (pkg Xop.unop) (dP Xop.unop) ν' (νf Xop.unop)
+      (hνf Xop.unop) (hcl Xop.unop)
+      ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)
+      (((pkg Xop.unop).d.eqv
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+        (Q.map (Xop.unop.pullbackAlongπ
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)) hm2,
+    Equiv.apply_symm_apply]
+  exact (NatTrans.naturality_apply ν'
+      (EllObj.toPullbackAlong (𝟙 Xop.unop)).op
+      (Q.map (Xop.unop.pullbackAlongπ
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).symm.trans
+    (congrArg (fun y => ν'.app Xop y)
+      (((FunctorToTypes.map_comp_apply Q
+        (Xop.unop.pullbackAlongπ
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op
+        (EllObj.toPullbackAlong (𝟙 Xop.unop)).op a).symm).trans
+        ((congrArg (fun m => Q.map m a)
+          (show (Xop.unop.pullbackAlongπ
+              ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op ≫
+              (EllObj.toPullbackAlong (𝟙 Xop.unop)).op =
+              𝟙 (Opposite.op Xop.unop) from
+            congrArg Quiver.Hom.op
+              (EllObj.toPullbackAlong_pullbackAlongπ (𝟙 Xop.unop)))).trans
+          (FunctorToTypes.map_id_apply Q a))))
+
 end Transport
 
 
