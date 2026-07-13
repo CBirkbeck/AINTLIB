@@ -1,6 +1,6 @@
+import ModularCurves.EllipticCurve.Comparison
 import ModularCurves.ModularCurve.YOneAssembly
 import ModularCurves.Moduli.QuotientProblem
-import ModularCurves.EllipticCurve.Comparison
 
 /-!
 # The Y₁ Tate-atlas classifying clause: local algebra
@@ -28,17 +28,17 @@ the corresponding Tate-normal discriminant is a unit.  Scheme-theoretically, `Sp
 the local map to the Tate atlas `tateBase R`. -/
 noncomputable def tateRingOverLift (α β : A)
     (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
-      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+      (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ)) :
     tateRingOver R →+* A :=
   IsLocalization.Away.lift (tateCurveOver R).Δ
     (g := MvPolynomial.eval₂Hom (algebraMap R A)
-      (fun i : Fin 2 => if i = 0 then α else β))
+      (fun i : Fin 2 ↦ if i = 0 then α else β))
     (by simpa [WeierstrassCurve.map_Δ] using hΔ)
 
 @[simp]
 theorem tateRingOverLift_X_zero (α β : A)
     (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
-      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+      (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ)) :
     tateRingOverLift R α β hΔ
       (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 0)) = α := by
   simp [tateRingOverLift]
@@ -46,7 +46,7 @@ theorem tateRingOverLift_X_zero (α β : A)
 @[simp]
 theorem tateRingOverLift_X_one (α β : A)
     (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
-      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+      (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ)) :
     tateRingOverLift R α β hΔ
       (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) = β := by
   simp [tateRingOverLift]
@@ -55,7 +55,7 @@ theorem tateRingOverLift_X_one (α β : A)
 used by affine maps over `Spec R`. -/
 noncomputable def tateRingOverAlgLift (α β : A)
     (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
-      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+      (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ)) :
     tateRingOver R →ₐ[R] A where
   toRingHom := tateRingOverLift R α β hΔ
   commutes' r := by
@@ -66,7 +66,7 @@ noncomputable def tateRingOverAlgLift (α β : A)
 @[simp]
 theorem tateRingOverAlgLift_X_zero (α β : A)
     (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
-      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+      (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ)) :
     tateRingOverAlgLift R α β hΔ
       (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 0)) = α := by
   simp [tateRingOverAlgLift]
@@ -74,7 +74,7 @@ theorem tateRingOverAlgLift_X_zero (α β : A)
 @[simp]
 theorem tateRingOverAlgLift_X_one (α β : A)
     (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
-      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+      (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ)) :
     tateRingOverAlgLift R α β hΔ
       (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) = β := by
   simp [tateRingOverAlgLift]
@@ -107,7 +107,7 @@ coordinates.  This packages the affine uniqueness clause needed before gluing th
 `α, β` sections. -/
 theorem tateRingOver_algHom_eq_lift (φ : tateRingOver R →ₐ[R] A) (α β : A)
     (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
-      (fun i : Fin 2 => if i = 0 then α else β))).Δ))
+      (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ))
     (h0 : φ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 0)) = α)
     (h1 : φ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) = β) :
     (φ : tateRingOver R →+* A) = tateRingOverLift R α β hΔ := by
@@ -125,7 +125,7 @@ theorem tateRingOver_algHom_eq_lift (φ : tateRingOver R →ₐ[R] A) (α β : A
 /-- The algebra-map version of `tateRingOver_algHom_eq_lift`. -/
 theorem tateRingOver_algHom_eq_algLift (φ : tateRingOver R →ₐ[R] A) (α β : A)
     (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
-      (fun i : Fin 2 => if i = 0 then α else β))).Δ))
+      (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ))
     (h0 : φ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 0)) = α)
     (h1 : φ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) = β) :
     φ = tateRingOverAlgLift R α β hΔ := by
@@ -142,7 +142,7 @@ noncomputable def tateBaseSpecMap (φ : tateRingOver R →ₐ[R] A) :
 /-- The affine scheme map to `tateBase R` classified by the coefficients `(α, β)`. -/
 noncomputable def tateBaseSpecMapOfCoeffs (α β : A)
     (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
-      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+      (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ)) :
     Spec (CommRingCat.of A) ⟶ tateBase R :=
   tateBaseSpecMap R (tateRingOverAlgLift R α β hΔ)
 
@@ -164,12 +164,12 @@ theorem tateBaseSpecMap_tateStructMap (φ : tateRingOver R →ₐ[R] A) :
   unfold tateBaseSpecMap tateStructMap
   rw [← Spec.map_comp, ← CommRingCat.ofHom_comp]
   congr 1
-  exact CommRingCat.hom_ext (RingHom.ext fun r => φ.commutes r)
+  exact CommRingCat.hom_ext (RingHom.ext fun r ↦ φ.commutes r)
 
 /-- The affine coefficient-classifying map to the Tate atlas lies over `Spec R`. -/
 theorem tateBaseSpecMapOfCoeffs_tateStructMap (α β : A)
     (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
-      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+      (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ)) :
     tateBaseSpecMapOfCoeffs R α β hΔ ≫ tateStructMap R =
       Spec.map (CommRingCat.ofHom (algebraMap R A)) :=
   tateBaseSpecMap_tateStructMap R (tateRingOverAlgLift R α β hΔ)
@@ -181,7 +181,7 @@ variable (S : Scheme.{u}) [Algebra R Γ(S, ⊤)]
 coefficients glue in Loeffler's proof. -/
 noncomputable def tateBaseMapOfGlobalCoeffs (α β : Γ(S, ⊤))
     (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(S, ⊤))
-      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+      (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ)) :
     S ⟶ tateBase R :=
   S.toSpecΓ ≫ tateBaseSpecMapOfCoeffs R α β hΔ
 
@@ -190,9 +190,9 @@ global Tate coefficients are equal.  This packages the last affine uniqueness ch
 the sheaf-gluing step for `α` and `β`. -/
 theorem tateBaseMapOfGlobalCoeffs_ext (α β α' β' : Γ(S, ⊤))
     (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(S, ⊤))
-      (fun i : Fin 2 => if i = 0 then α else β))).Δ))
+      (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ))
     (hΔ' : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(S, ⊤))
-      (fun i : Fin 2 => if i = 0 then α' else β'))).Δ))
+      (fun i : Fin 2 ↦ if i = 0 then α' else β'))).Δ))
     (hα : α = α') (hβ : β = β') :
     tateBaseMapOfGlobalCoeffs R S α β hΔ =
       tateBaseMapOfGlobalCoeffs R S α' β' hΔ' := by
@@ -206,7 +206,7 @@ theorem tateBaseMapOfGlobalCoeffs_ext (α β α' β' : Γ(S, ⊤))
 `Spec R`. -/
 theorem tateBaseMapOfGlobalCoeffs_tateStructMap (α β : Γ(S, ⊤))
     (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(S, ⊤))
-      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+      (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ)) :
     tateBaseMapOfGlobalCoeffs R S α β hΔ ≫ tateStructMap R =
       S.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (algebraMap R Γ(S, ⊤))) := by
   unfold tateBaseMapOfGlobalCoeffs
@@ -248,7 +248,7 @@ theorem tateBaseMapOfGlobalCoeffs_base_w (Y : EllObj R)
     (α β : Γ(Y.base, ⊤))
     (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom
       (algebraMap R Γ(Y.base, ⊤))
-      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+      (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ)) :
     tateBaseMapOfGlobalCoeffs R Y.base α β hΔ ≫ tateStructMap R = Y.structMap := by
   rw [tateBaseMapOfGlobalCoeffs_tateStructMap]
   exact EllObj.toSpecΓ_algebraMap_eq_structMap R Y halg
@@ -258,7 +258,7 @@ noncomputable def EllObj.tateBaseMapOfGlobalCoeffs (Y : EllObj R)
     (α β : Γ(Y.base, ⊤))
     (hΔ : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
       IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
-        (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+        (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ)) :
     Y.base ⟶ tateBase R := by
   letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
   exact ModularCurves.tateBaseMapOfGlobalCoeffs R Y.base α β hΔ
@@ -268,7 +268,7 @@ theorem EllObj.tateBaseMapOfGlobalCoeffs_base_w (Y : EllObj R)
     (α β : Γ(Y.base, ⊤))
     (hΔ : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
       IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
-        (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+        (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ)) :
     EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ ≫ tateStructMap R = Y.structMap := by
   letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
   exact ModularCurves.tateBaseMapOfGlobalCoeffs_base_w R Y
@@ -278,10 +278,10 @@ theorem EllObj.tateBaseMapOfGlobalCoeffs_ext (Y : EllObj R)
     (α β α' β' : Γ(Y.base, ⊤))
     (hΔ : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
       IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
-        (fun i : Fin 2 => if i = 0 then α else β))).Δ))
+        (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ))
     (hΔ' : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
       IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
-        (fun i : Fin 2 => if i = 0 then α' else β'))).Δ))
+        (fun i : Fin 2 ↦ if i = 0 then α' else β'))).Δ))
     (hα : α = α') (hβ : β = β') :
     EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ =
       EllObj.tateBaseMapOfGlobalCoeffs R Y α' β' hΔ' := by
@@ -391,7 +391,7 @@ noncomputable def EllObj.tateClassifyingHomOfGlobalCoeffs (Y : EllObj R)
     (α β : Γ(Y.base, ⊤))
     (hΔ : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
       IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
-        (fun i : Fin 2 => if i = 0 then α else β))).Δ))
+        (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ))
     (top : Y.curve.E ⟶ (tateUniversal R).E)
     (isPullback : IsPullback top Y.curve.π (tateUniversal R).π
       (EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ))
@@ -406,7 +406,7 @@ theorem EllObj.tateClassifyingHomOfGlobalCoeffs_baseHom (Y : EllObj R)
     (α β : Γ(Y.base, ⊤))
     (hΔ : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
       IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
-        (fun i : Fin 2 => if i = 0 then α else β))).Δ))
+        (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ))
     (top : Y.curve.E ⟶ (tateUniversal R).E)
     (isPullback : IsPullback top Y.curve.π (tateUniversal R).π
       (EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ))
@@ -421,7 +421,7 @@ theorem EllObj.tateClassifyingHomOfGlobalCoeffs_top (Y : EllObj R)
     (α β : Γ(Y.base, ⊤))
     (hΔ : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
       IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
-        (fun i : Fin 2 => if i = 0 then α else β))).Δ))
+        (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ))
     (top : Y.curve.E ⟶ (tateUniversal R).E)
     (isPullback : IsPullback top Y.curve.π (tateUniversal R).π
       (EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ))
@@ -435,10 +435,10 @@ theorem EllObj.tateClassifyingHomOfGlobalCoeffs_ext (Y : EllObj R)
     (α β α' β' : Γ(Y.base, ⊤))
     (hΔ : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
       IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
-        (fun i : Fin 2 => if i = 0 then α else β))).Δ))
+        (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ))
     (hΔ' : letI : Algebra R Γ(Y.base, ⊤) := Y.structAlgebra
       IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R Γ(Y.base, ⊤))
-        (fun i : Fin 2 => if i = 0 then α' else β'))).Δ))
+        (fun i : Fin 2 ↦ if i = 0 then α' else β'))).Δ))
     (top top' : Y.curve.E ⟶ (tateUniversal R).E)
     (isPullback : IsPullback top Y.curve.π (tateUniversal R).π
       (EllObj.tateBaseMapOfGlobalCoeffs R Y α β hΔ))
@@ -644,19 +644,19 @@ theorem EllObj.tateClassifyingHomOfPullbackMap_pullSection {Y : EllObj R}
 with coefficients `(α, β)`. -/
 theorem tateCurveLocOver_map_tateRingOverLift (α β : A)
     (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
-      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+      (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ)) :
     (tateCurveLocOver R).map (tateRingOverLift R α β hΔ) =
       (tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
-        (fun i : Fin 2 => if i = 0 then α else β)) := by
+        (fun i : Fin 2 ↦ if i = 0 then α else β)) := by
   simp [tateCurveLocOver, tateRingOverLift, WeierstrassCurve.map_map]
 
 /-- The algebra-map version of `tateCurveLocOver_map_tateRingOverLift`. -/
 theorem tateCurveLocOver_map_tateRingOverAlgLift (α β : A)
     (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
-      (fun i : Fin 2 => if i = 0 then α else β))).Δ)) :
+      (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ)) :
     (tateCurveLocOver R).map (tateRingOverAlgLift R α β hΔ) =
       (tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
-        (fun i : Fin 2 => if i = 0 then α else β)) :=
+        (fun i : Fin 2 ↦ if i = 0 then α else β)) :=
   tateCurveLocOver_map_tateRingOverLift R α β hΔ
 
 /-- A Tate-normal curve over an `R`-algebra is exactly the specialization of `tateCurveOver R`
@@ -664,7 +664,7 @@ at its coefficients `a₁` and `a₂`. -/
 theorem tateCurveOver_map_tateNormal_coeffs (W : WeierstrassCurve A)
     (hW : W.IsTateNormal) :
     (tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
-      (fun i : Fin 2 => if i = 0 then W.a₁ else W.a₂)) = W := by
+      (fun i : Fin 2 ↦ if i = 0 then W.a₁ else W.a₂)) = W := by
   ext <;> simp [tateCurveOver, tateCurve, WeierstrassCurve.map, hW.1, hW.2.1, hW.2.2]
 
 /-- The atlas-ring map attached to an elliptic Tate-normal Weierstrass curve. -/
@@ -721,7 +721,7 @@ theorem tateCurveLocOver_map_tateRingOverLiftOfTateNormal (W : WeierstrassCurve 
   rw [show (tateRingOverLiftOfTateNormal R W hW).comp
       (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R)) =
         MvPolynomial.eval₂Hom (algebraMap R A)
-          (fun i : Fin 2 => if i = 0 then W.a₁ else W.a₂) by
+          (fun i : Fin 2 ↦ if i = 0 then W.a₁ else W.a₂) by
     simp [tateRingOverLiftOfTateNormal, tateRingOverLift]]
   exact tateCurveOver_map_tateNormal_coeffs R W hW
 
@@ -1027,7 +1027,7 @@ lemma three_zsmul_some_eq_zero_of_Ψ₃_eq_zero {W : WeierstrassCurve F} {x y : 
   -- `x(2P) = x(P)` forces `2P = ±P`
   have hcases := WeierstrassCurve.Affine.Point.X_eq_iff
     (h₁ := WeierstrassCurve.Affine.nonsingular_add hns hns
-      (fun hxy => hy2 hxy.right)) (h₂ := hns) |>.mp hx2
+      (fun hxy ↦ hy2 hxy.right)) (h₂ := hns) |>.mp hx2
   have h3P : (3 : ℤ) • WeierstrassCurve.Affine.Point.some x y hns =
       (WeierstrassCurve.Affine.Point.some x y hns +
         WeierstrassCurve.Affine.Point.some x y hns) +
@@ -1168,11 +1168,11 @@ theorem inZChart_of_forall_ne_zero (W : WeierstrassCurve A)
       have himg : g.1.base p = (Proj.awayι (quotientGrading (projIdeal W))
           ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
           (mk_X_mem_quotientGrading_one W 2) one_pos).base (h'.base default) := by
-        have hc := congrArg (fun m => m.base default) hfac
+        have hc := congrArg (fun m ↦ m.base default) hfac
         simp only [ht, Scheme.Hom.comp_apply] at hc
         have hpt : ((Spec (CommRingCat.of K)).fromSpecResidueField p).base default = p :=
           Scheme.fromSpecResidueField_apply p default
-        exact (congrArg (fun q => g.1.base q) hpt).symm.trans hc.symm
+        exact (congrArg (fun q ↦ g.1.base q) hpt).symm.trans hc.symm
       rw [himg]
       have h2 : (Proj.awayι (quotientGrading (projIdeal W))
           ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
@@ -1229,7 +1229,7 @@ theorem Spec_map_zChartHom_awayι (g : SpecPoints (projModel W) (projModelπ W) 
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
         (mk_X_mem_quotientGrading_one W 2) one_pos = g.1 := by
   show _ = (⟨g, hZ⟩ : { g : SpecPoints (projModel W) (projModelπ W) K // InZChart W g }).1.1
-  exact congrArg (fun z => z.1.1) ((chartHomEquiv W 2 K).symm_apply_apply ⟨g, hZ⟩)
+  exact congrArg (fun z ↦ z.1.1) ((chartHomEquiv W 2 K).symm_apply_apply ⟨g, hZ⟩)
 
 /-- The chart-ring homomorphism is the unique one satisfying the factoring equation. -/
 theorem zChartHom_unique (g : SpecPoints (projModel W) (projModelπ W) K)
@@ -1284,7 +1284,7 @@ theorem zChartEval_equation (g : SpecPoints (projModel W) (projModelπ W) K)
     intro a
     rw [show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
         (Polynomial.C (Polynomial.C a)) =
-        algebraMap A W.toAffine.CoordinateRing a from by
+        algebraMap A W.toAffine.CoordinateRing a by
       rw [show WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine
           (Polynomial.C (Polynomial.C a)) =
           AdjoinRoot.of W.toAffine.polynomial (Polynomial.C a) from rfl,
@@ -1382,7 +1382,7 @@ theorem Spec_map_pointedIsoAwayHom_awayι {W₁ W₂ : WeierstrassCurve A}
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) =
       (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
-        (mk_X_mem_quotientGrading_one W 2) one_pos).hom := fun _ => rfl
+        (mk_X_mem_quotientGrading_one W 2) one_pos).hom := fun _ ↦ rfl
   rw [hats, hats] at h1
   -- re-ascribe `h1` so every proof argument is spelled as in the goal
   have h2 : Spec.map (CommRingCat.ofHom (pointedIsoΓ ε hez).toRingHom) ≫
@@ -1416,7 +1416,7 @@ theorem Spec_map_pointedIsoAwayHom_awayι {W₁ W₂ : WeierstrassCurve A}
     rw [Spec.map_comp, Spec.map_comp, Category.assoc]
     rfl
   rw [hexp, Category.assoc, Category.assoc]
-  have h3 := congrArg (fun m => Spec.map ((Proj.basicOpenIsoAway
+  have h3 := congrArg (fun m ↦ Spec.map ((Proj.basicOpenIsoAway
     (quotientGrading (projIdeal W₁)) ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
     (mk_X_mem_quotientGrading_one W₁ 2) one_pos).inv) ≫ m) h2
   have h4 : Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W₁))
@@ -1479,7 +1479,7 @@ theorem zChartEval_pointedIso {W₁ W₂ : WeierstrassCurve A}
       (pointedIsoΓ ε hez ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W₂))
         ((quotientGradingHom (projIdeal W₂)) (MvPolynomial.X 2))
         (mk_X_mem_quotientGrading_one W₂ 2) one_pos).commRingCatIsoToRingEquiv z)) :=
-    fun _ => rfl
+    fun _ ↦ rfl
   exact (happ _).trans hkey.symm
 
 /-- **(ENGINE core: the composite normalising change)** If the marked coordinates of two
@@ -1695,7 +1695,7 @@ theorem coordRingHom_ext (φ ψ : W.toAffine.CoordinateRing →+* K)
       ψ (AdjoinRoot.of W.toAffine.polynomial (Polynomial.C a)) := by
     intro a
     rw [show AdjoinRoot.of W.toAffine.polynomial (Polynomial.C a) =
-      algebraMap A W.toAffine.CoordinateRing a from by
+      algebraMap A W.toAffine.CoordinateRing a by
       rw [← AdjoinRoot.algebraMap_eq, ← Polynomial.algebraMap_eq,
         ← IsScalarTower.algebraMap_apply]]
     exact halg a
@@ -1727,10 +1727,10 @@ theorem specPoint_ext_of_zChartEval (g g' : SpecPoints (projModel W) (projModel�
     (hX : zChartEval W g hZ (coordX W) = zChartEval W g' hZ' (coordX W))
     (hY : zChartEval W g hZ (coordY W) = zChartEval W g' hZ' (coordY W)) : g = g' := by
   have hev : zChartEval W g hZ = zChartEval W g' hZ' := by
-    refine coordRingHom_ext W _ _ (fun r => ?_) hX hY
+    refine coordRingHom_ext W _ _ (fun r ↦ ?_) hX hY
     rw [zChartEval_algebraMap, zChartEval_algebraMap]
   have hhom : zChartHom W g hZ = zChartHom W g' hZ' := by
-    refine RingHom.ext fun z => ?_
+    refine RingHom.ext fun z ↦ ?_
     have := RingHom.congr_fun hev (chartZRingEquiv W z)
     show zChartHom W g hZ z = zChartHom W g' hZ' z
     calc zChartHom W g hZ z
@@ -1842,7 +1842,7 @@ theorem Spec_map_awayCongr_awayι {R₀ B : Type u} [CommRing R₀] [CommRing B]
     Spec.map (CommRingCat.ofHom (awayCongr (𝒜 := 𝒜) h).toRingHom) ≫
       Proj.awayι 𝒜 s hs one_pos = Proj.awayι 𝒜 t (h ▸ hs) one_pos := by
   subst h
-  rw [show (awayCongr (𝒜 := 𝒜) (rfl : s = s)).toRingHom = RingHom.id _ from by
+  rw [show (awayCongr (𝒜 := 𝒜) (rfl : s = s)).toRingHom = RingHom.id _ by
     rw [awayCongr_rfl]; rfl]
   rw [CommRingCat.ofHom_id, Spec.map_id, Category.id_comp]
 
@@ -2343,7 +2343,7 @@ theorem zChartEval_eqToHom_point {V₁ V₂ : WeierstrassCurve A} (h : V₁ = V�
 /-- `eqToHom` transport of the base-change morphism along an equality of ring maps. -/
 theorem eqToHom_projModelBaseChange {B : Type u} [CommRing B]
     {f₁ f₂ : B →+* A} (h : f₁ = f₂) (W : WeierstrassCurve B) :
-    eqToHom (congrArg (fun ψ : B →+* A => projModel (W.map ψ)) h) ≫
+    eqToHom (congrArg (fun ψ : B →+* A ↦ projModel (W.map ψ)) h) ≫
       projModelBaseChange f₂ W = projModelBaseChange f₁ W := by
   subst h
   rw [eqToHom_refl, Category.id_comp]
@@ -2437,7 +2437,7 @@ theorem projTateMap_eq_of_pointedIso :
     rfl
   -- conclude on the classifying morphisms
   have hbc := eqToHom_projModelBaseChange
-    (congrArg (fun (ψ : tateRingOver R →ₐ[R] A) => (ψ : tateRingOver R →+* A)) hφ)
+    (congrArg (fun (ψ : tateRingOver R →ₐ[R] A) ↦ (ψ : tateRingOver R →+* A)) hφ)
     (tateCurveLocOver R)
   rw [hhom]
   show ((tateNormalIso R W₁ g₁ hZ₁ hord₁).inv ≫ eqToHom (congrArg projModel hcur) ≫
@@ -2561,7 +2561,7 @@ theorem pull_eq_zero_of_pt_eq_zero (P : Y.curve.Section) {k : Type u} [Field k]
         D.e.hom := by
     simpa only [Category.assoc] using heq
   have heq3 := (cancel_mono D.e.hom).mp heq2
-  have heq4 := congrArg (fun m => m ≫ pullback.fst Y.curve.π D.U.1.ι) heq3
+  have heq4 := congrArg (fun m ↦ m ≫ pullback.fst Y.curve.π D.U.1.ι) heq3
   have hfst : D.restrictSection P ≫ pullback.fst Y.curve.π D.U.1.ι = D.U.1.ι ≫ P.1 :=
     pullback.lift_fst _ _ _
   have hfst0 : pullback.lift (D.U.1.ι ≫ Y.curve.zero) (𝟙 _)
@@ -2587,7 +2587,7 @@ theorem pt_inZChart (P : Y.curve.Section)
     rw [Algebra.algebraMap_self, CommRingCat.ofHom_id, Spec.map_id, Category.comp_id]
   rw [hid] at heq
   have heqb := congrArg
-    (fun m => Spec.map (CommRingCat.ofHom (algebraMap k (AlgebraicClosure k))) ≫ m) heq
+    (fun m ↦ Spec.map (CommRingCat.ofHom (algebraMap k (AlgebraicClosure k))) ≫ m) heq
   simp only [← Category.assoc] at heqb
   have h0 := D.pull_eq_zero_of_pt_eq_zero P
     (Spec.map (CommRingCat.ofHom (algebraMap k (AlgebraicClosure k))) ≫ t) heqb
@@ -2891,7 +2891,7 @@ theorem fibreSection_comp_bc (P : Y.curve.Section) :
       projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) D.W =
       D.specPt k ≫ (D.pt P).1 := by
   have hbc := pullbackChartIso_hom_bc D.W (D.fibreTop_isPullback k)
-  have h2 := congrArg (fun m => (D.fibreSection k P).1 ≫ m) hbc
+  have h2 := congrArg (fun m ↦ (D.fibreSection k P).1 ≫ m) hbc
   refine Eq.trans (h2 : _ = _) ?_
   show (D.fibreSection k P).1 ≫ D.fibreMap k ≫ D.e.hom = _
   have hlift : (D.fibreSection k P).1 ≫ D.fibreMap k =
@@ -3265,7 +3265,7 @@ theorem topMap_zero :
     pullback.lift (D.U.1.ι ≫ Y.curve.zero) (𝟙 _)
       (by rw [Category.assoc, Y.curve.zero_π, Category.comp_id, Category.id_comp]) ≫
       D.topMap P hP = D.baseMap P hP ≫ projModelZero (tateCurveLocOver R) := by
-  have h1 := congrArg (fun m => D.U.2.isoSpec.hom ≫ m) D.hez
+  have h1 := congrArg (fun m ↦ D.U.2.isoSpec.hom ≫ m) D.hez
   simp only [Category.assoc, Iso.hom_inv_id_assoc] at h1
   simp only [topMap, baseMap, Category.assoc]
   rw [← Category.assoc, h1, Category.assoc,
@@ -3274,7 +3274,7 @@ theorem topMap_zero :
 /-- The local square carries the section to the atlas marking. -/
 theorem topMap_marking :
     D.restrictSection P ≫ D.topMap P hP = D.baseMap P hP ≫ tateP0mor R := by
-  have h1 := congrArg (fun m => D.U.2.isoSpec.hom ≫ m) (D.pt_coe P)
+  have h1 := congrArg (fun m ↦ D.U.2.isoSpec.hom ≫ m) (D.pt_coe P)
   simp only [Iso.hom_inv_id_assoc] at h1
   simp only [topMap, baseMap, Category.assoc]
   rw [← Category.assoc, ← h1, Category.assoc,
@@ -3599,8 +3599,8 @@ theorem fibreModelIso_π :
     exact (pullbackChartIso_hom_π D₁.W (D₁.fibreTop_isPullback k)).symm
   rw [fibreModelIso]
   simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc]
-  refine Eq.trans (congrArg (fun m => (D₁.fibreChartIso k).inv ≫ m) ?_) h3
-  exact Eq.trans (congrArg (fun m => (pullback.congrHom rfl hgeom).hom ≫ m) h1) h2
+  refine Eq.trans (congrArg (fun m ↦ (D₁.fibreChartIso k).inv ≫ m) ?_) h3
+  exact Eq.trans (congrArg (fun m ↦ (pullback.congrHom rfl hgeom).hom ≫ m) h1) h2
 
 /-- The fibre-model comparison is pointed. -/
 theorem fibreModelIso_zero :
@@ -3912,7 +3912,7 @@ theorem test_baseMap_agree (D₁ D₂ : MarkedChartData R Y)
         CommRingCat.ofHom_comp _ _]
       rw [Spec.map_comp, Spec.map_comp, hof₁, hof₂, Spec.map_preimage, Spec.map_preimage,
         hbase₁, hbase₂]
-      have hw := congrArg (fun m => m ≫ Y.structMap) hcc
+      have hw := congrArg (fun m ↦ m ≫ Y.structMap) hcc
       simp only [Category.assoc] at hw ⊢
       exact hw.symm
     have hring := Spec.map_injective hspec
@@ -3934,9 +3934,9 @@ variable (Y) in
 /-- The open cover of the base by marked charts. -/
 noncomputable def chartCover : Y.base.OpenCover :=
   Scheme.Cover.mkOfCovers ↥Y.base
-    (fun s => (chartAt Y s).U.1.toScheme)
-    (fun s => (chartAt Y s).U.1.ι)
-    (fun s => ⟨s, ⟨⟨s, chartAt_mem s⟩, rfl⟩⟩)
+    (fun s ↦ (chartAt Y s).U.1.toScheme)
+    (fun s ↦ (chartAt Y s).U.1.ι)
+    (fun s ↦ ⟨s, ⟨⟨s, chartAt_mem s⟩, rfl⟩⟩)
 
 @[simp]
 theorem chartCover_f (s : ↥Y.base) : (chartCover Y).f s = (chartAt Y s).U.1.ι := rfl
@@ -3971,7 +3971,7 @@ theorem coverBaseMap_compat (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrder
         (chartAt Y j).U.2.isoSpec.hom) ≫
       (chartAt Y j).U.2.isoSpec.inv ≫ (chartAt Y j).U.1.ι := by
     simp only [Category.assoc]
-    have hw := congrArg (fun m => (Scheme.isoSpec V).inv ≫
+    have hw := congrArg (fun m ↦ (Scheme.isoSpec V).inv ≫
       (Scheme.affineCover (pullback ((chartCover Y).f i) ((chartCover Y).f j))).f z ≫ m)
       (pullback.condition (f := (chartCover Y).f i) (g := (chartCover Y).f j))
     calc (Scheme.isoSpec V).inv ≫
@@ -3982,7 +3982,7 @@ theorem coverBaseMap_compat (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrder
         = (Scheme.isoSpec V).inv ≫
           (Scheme.affineCover (pullback ((chartCover Y).f i) ((chartCover Y).f j))).f z ≫
           pullback.fst ((chartCover Y).f i) ((chartCover Y).f j) ≫ (chartAt Y i).U.1.ι :=
-        congrArg (fun m => (Scheme.isoSpec V).inv ≫
+        congrArg (fun m ↦ (Scheme.isoSpec V).inv ≫
           (Scheme.affineCover (pullback ((chartCover Y).f i) ((chartCover Y).f j))).f z ≫
           pullback.fst ((chartCover Y).f i) ((chartCover Y).f j) ≫ m)
           (Iso.hom_inv_id_assoc (chartAt Y i).U.2.isoSpec (chartAt Y i).U.1.ι)
@@ -3995,7 +3995,7 @@ theorem coverBaseMap_compat (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrder
           pullback.snd ((chartCover Y).f i) ((chartCover Y).f j) ≫
           (chartAt Y j).U.2.isoSpec.hom ≫ (chartAt Y j).U.2.isoSpec.inv ≫
           (chartAt Y j).U.1.ι :=
-        (congrArg (fun m => (Scheme.isoSpec V).inv ≫
+        (congrArg (fun m ↦ (Scheme.isoSpec V).inv ≫
           (Scheme.affineCover (pullback ((chartCover Y).f i) ((chartCover Y).f j))).f z ≫
           pullback.snd ((chartCover Y).f i) ((chartCover Y).f j) ≫ m)
           (Iso.hom_inv_id_assoc (chartAt Y j).U.2.isoSpec (chartAt Y j).U.1.ι)).symm
@@ -4066,7 +4066,7 @@ private lemma gradedHomHeq {A R' : Type u} [CommRing A] [CommRing R']
     (g' : GradedRingHom (quotientGrading (projIdeal W)) (quotientGrading (projIdeal V')))
     (h : ∀ x, HEq (g x) (g' x)) : HEq g g' := by
   subst e
-  exact heq_of_eq (GradedRingHom.ext fun x => eq_of_heq (h x))
+  exact heq_of_eq (GradedRingHom.ext fun x ↦ eq_of_heq (h x))
 
 private lemma mkHeq {R' : Type u} [CommRing R'] {V V' : WeierstrassCurve R'} (e : V = V')
     (q : MvPolynomial (Fin 3) R') :
@@ -4084,7 +4084,7 @@ theorem projModelBaseChange_comp_eqToHom {A B C : Type u} [CommRing A] [CommRing
     eqToHom _ ≫ Proj.map (baseChangeGradedHom (ψ.comp φ) W) _
   rw [← Proj.map_comp]
   refine projMapTransportHeq W (WeierstrassCurve.map_map W φ ψ).symm _ _ _ _
-    (gradedHomHeq W (WeierstrassCurve.map_map W φ ψ) _ _ fun x => ?_)
+    (gradedHomHeq W (WeierstrassCurve.map_map W φ ψ) _ _ fun x ↦ ?_)
   obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
   show HEq (baseChangeGradedHom ψ (W.map φ)
       (baseChangeGradedHom φ W (Ideal.Quotient.mk _ a)))
@@ -4225,7 +4225,7 @@ theorem projModelBaseChange_projTateMap
     ← cancel_epi (projModelVCIso ((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).hom]
   have hstar : (projModelVCIso ((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).hom ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) D.W =
       eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) ((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W) ≫ (projModelVCIso (tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) D.W).hom := by
-    refine Eq.trans ?_ (congrArg (fun m =>
+    refine Eq.trans ?_ (congrArg (fun m ↦
       eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ m) hG1.symm)
     rw [eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
   have hslide := projModelBaseChange_eqToHom (algebraMap ↑Γ(Y.base, D.U.1) k) (tateCurveLocOver_map_marked R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP))
@@ -4244,20 +4244,20 @@ theorem projModelBaseChange_projTateMap
     _ = eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) ((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W) ≫ (projModelVCIso (tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) D.W).hom ≫ (projModelVCIso (tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) D.W).inv ≫ eqToHom (congrArg projModel (tateCurveLocOver_map_marked R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP))).symm ≫ projModelBaseChange ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R) := by
         simp only [Category.assoc]
     _ = eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) ((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W) ≫ eqToHom (congrArg projModel (tateCurveLocOver_map_marked R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP))).symm ≫ projModelBaseChange ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R) :=
-        congrArg (fun m => eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) ((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W) ≫ m) (Iso.hom_inv_id_assoc _ _)
+        congrArg (fun m ↦ eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) ((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W) ≫ m) (Iso.hom_inv_id_assoc _ _)
     _ = eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ (projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) ((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W) ≫ eqToHom (congrArg projModel (tateCurveLocOver_map_marked R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP))).symm) ≫ projModelBaseChange ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R) := by
         simp only [Category.assoc]
     _ = eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ (eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [tateCurveLocOver_map_marked R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP)]) ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) ((tateCurveLocOver R).map ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))))) ≫ projModelBaseChange ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R) :=
-        congrArg (fun m => eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ m ≫ projModelBaseChange ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R)) hslide
+        congrArg (fun m ↦ eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ m ≫ projModelBaseChange ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R)) hslide
     _ = eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [tateCurveLocOver_map_marked R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP)]) ≫ (projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) ((tateCurveLocOver R).map ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))) ≫ projModelBaseChange ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R)) := by
         simp only [Category.assoc]
     _ = eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [tateCurveLocOver_map_marked R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP)]) ≫ (eqToHom (congrArg projModel (WeierstrassCurve.map_map (tateCurveLocOver R) ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (algebraMap ↑Γ(Y.base, D.U.1) k))) ≫
           projModelBaseChange ((algebraMap ↑Γ(Y.base, D.U.1) k).comp ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))) (tateCurveLocOver R)) :=
-        congrArg (fun m => eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [tateCurveLocOver_map_marked R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP)]) ≫ m) hcomp
+        congrArg (fun m ↦ eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [tateCurveLocOver_map_marked R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP)]) ≫ m) hcomp
     _ = eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [tateCurveLocOver_map_marked R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP)]) ≫ (eqToHom (congrArg projModel (WeierstrassCurve.map_map (tateCurveLocOver R) ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (algebraMap ↑Γ(Y.base, D.U.1) k))) ≫ (eqToHom (show projModel ((tateCurveLocOver R).map ((algebraMap ↑Γ(Y.base, D.U.1) k).comp ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))))) = projModel ((tateCurveLocOver R).map ((((tateRingOverAlgLiftOfPoint R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP))) (D.fibrePt_hord k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k))) by rw [hL']) ≫ projModelBaseChange ((((tateRingOverAlgLiftOfPoint R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP))) (D.fibrePt_hord k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) (tateCurveLocOver R))) :=
-        congrArg (fun m => eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [tateCurveLocOver_map_marked R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP)]) ≫ (eqToHom (congrArg projModel (WeierstrassCurve.map_map (tateCurveLocOver R) ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (algebraMap ↑Γ(Y.base, D.U.1) k))) ≫ m)) hbcL
+        congrArg (fun m ↦ eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [tateCurveLocOver_map_marked R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP)]) ≫ (eqToHom (congrArg projModel (WeierstrassCurve.map_map (tateCurveLocOver R) ((((tateRingOverAlgLiftOfPoint R D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (algebraMap ↑Γ(Y.base, D.U.1) k))) ≫ m)) hbcL
     _ = eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel ((tateCurveLocOver R).map ((((tateRingOverAlgLiftOfPoint R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP))) (D.fibrePt_hord k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k))) by rw [WeierstrassCurve.map_variableChange, ← tateCurveLocOver_map_marked R D.W (D.pt P) (D.pt_inZChart P hP) (D.pt_hord P hP), WeierstrassCurve.map_map, hL']) ≫ projModelBaseChange ((((tateRingOverAlgLiftOfPoint R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP))) (D.fibrePt_hord k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) (tateCurveLocOver R) := by
-        simp only [eqToHom_trans_assoc, eqToHom_trans]
+        simp only [eqToHom_trans_assoc]
     _ = (projModelVCIso ((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).hom ≫ (projModelVCIso (tateNormalVariableChange (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP))) (D.fibrePt_hord k P hP)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).inv ≫ eqToHom (congrArg projModel (tateCurveLocOver_map_marked R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (D.fibrePt_hord k P hP))).symm ≫ projModelBaseChange ((((tateRingOverAlgLiftOfPoint R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP))) (D.fibrePt_hord k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) (tateCurveLocOver R) := by
         rw [hinvC]
         rw [show (projModelVCIso ((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).hom ≫ ((projModelVCIso ((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).inv ≫ eqToHom (show projModel (((tateNormalVariableChange D.W (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordX D.W)) (zChartEval D.W (D.pt P) (D.pt_inZChart P hP) (coordY D.W)) (zChartEval_equation_self D.W (D.pt P) (D.pt_inZChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel ((tateNormalVariableChange (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP))) (D.fibrePt_hord k P hP)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) by rw [hC])) ≫ eqToHom (congrArg projModel (tateCurveLocOver_map_marked R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (D.fibrePt_hord k P hP))).symm ≫ projModelBaseChange ((((tateRingOverAlgLiftOfPoint R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (zChartEval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.fibrePt k P) (D.fibrePt_inZChart k P (D.pt_inZChart P hP))) (D.fibrePt_hord k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) (tateCurveLocOver R) =
@@ -4416,7 +4416,7 @@ theorem test_topMap_agree (D₁ D₂ : MarkedChartData R Y)
         CommRingCat.ofHom_comp _ _]
       rw [Spec.map_comp, Spec.map_comp, hof₁, hof₂, Spec.map_preimage, Spec.map_preimage,
         hbase₁, hbase₂]
-      have hw := congrArg (fun m => m ≫ Y.structMap) hcc
+      have hw := congrArg (fun m ↦ m ≫ Y.structMap) hcc
       simp only [Category.assoc] at hw ⊢
       exact hw.symm
     have hring := Spec.map_injective hspec
@@ -4545,9 +4545,9 @@ of the chart cover along `Y.curve.π`, re-presented with definitionally transpar
 index/piece/map fields). -/
 noncomputable def curveCover : Y.curve.E.OpenCover :=
   Scheme.Cover.copy ((chartCover Y).pullback₁ Y.curve.π) ↥Y.base
-    (fun s => pullback Y.curve.π (chartAt Y s).U.1.ι)
-    (fun s => pullback.fst Y.curve.π (chartAt Y s).U.1.ι)
-    (Equiv.refl _) (fun _ => Iso.refl _) (fun _ => (Category.id_comp _).symm)
+    (fun s ↦ pullback Y.curve.π (chartAt Y s).U.1.ι)
+    (fun s ↦ pullback.fst Y.curve.π (chartAt Y s).U.1.ι)
+    (Equiv.refl _) (fun _ ↦ Iso.refl _) (fun _ ↦ (Category.id_comp _).symm)
 
 /-- The local classifying top maps of the curve cover. -/
 noncomputable def coverTopMap (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P)
@@ -4579,13 +4579,13 @@ theorem coverTopMap_compat (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderL
       (pullback.snd (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
         (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫
         pullback.snd Y.curve.π (chartAt Y j).U.1.ι) ≫ (chartAt Y j).U.1.ι := by
-    have h1 := congrArg (fun m => pullback.fst (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+    have h1 := congrArg (fun m ↦ pullback.fst (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
         (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫ m)
       (pullback.condition (f := Y.curve.π) (g := (chartAt Y i).U.1.ι))
-    have h2 := congrArg (fun m => pullback.snd (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
+    have h2 := congrArg (fun m ↦ pullback.snd (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
         (pullback.fst Y.curve.π (chartAt Y j).U.1.ι) ≫ m)
       (pullback.condition (f := Y.curve.π) (g := (chartAt Y j).U.1.ι))
-    have h3 := congrArg (fun m => m ≫ Y.curve.π) hQ
+    have h3 := congrArg (fun m ↦ m ≫ Y.curve.π) hQ
     simp only [Category.assoc] at h1 h2 h3 ⊢
     rw [← h1, h3, h2]
   set g : pullback (pullback.fst Y.curve.π (chartAt Y i).U.1.ι)
@@ -4630,7 +4630,7 @@ theorem coverTopMap_compat (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderL
         (chartAt Y j).U.2.isoSpec.hom) ≫
         (chartAt Y j).U.2.isoSpec.inv ≫ (chartAt Y j).U.1.ι := by
     simp only [Category.assoc, Iso.hom_inv_id_assoc]
-    have hw := congrArg (fun m => (Scheme.isoSpec (𝒱.X z)).inv ≫ 𝒱.f z ≫ m)
+    have hw := congrArg (fun m ↦ (Scheme.isoSpec (𝒱.X z)).inv ≫ 𝒱.f z ≫ m)
       (pullback.condition (f := (chartAt Y i).U.1.ι) (g := (chartAt Y j).U.1.ι))
     simpa only [Category.assoc] using hw
   refine test_topMap_agree (chartAt Y i) (chartAt Y j)
@@ -4708,7 +4708,7 @@ noncomputable def gluedTopMap (P : Y.curve.Section)
     (hP : Y.curve.NowhereGeomOrderLEThree P) :
     Y.curve.E ⟶ projModel (tateCurveLocOver R) :=
   (curveCover Y).glueMorphisms (coverTopMap P hP)
-    (fun i j => coverTopMap_compat P hP i j)
+    (fun i j ↦ coverTopMap_compat P hP i j)
 
 @[reassoc (attr := simp)]
 theorem ι_gluedTopMap (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P)
@@ -4716,7 +4716,7 @@ theorem ι_gluedTopMap (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThr
     pullback.fst Y.curve.π (chartAt Y s).U.1.ι ≫ gluedTopMap P hP =
       coverTopMap P hP s :=
   Scheme.Cover.ι_glueMorphisms (curveCover Y) (coverTopMap P hP)
-    (fun i j => coverTopMap_compat P hP i j) s
+    (fun i j ↦ coverTopMap_compat P hP i j) s
 
 end MarkedChartData
 
@@ -5014,7 +5014,7 @@ theorem gluedTopMap_isPullback (P : Y.curve.Section)
       (P := MorphismProperty.isomorphisms Scheme)
       (f := χ) ((chartCover Y).pullback₁
         (pullback.snd (projModelπ (tateCurveLocOver R)) (gluedBaseMap P hP)))
-      (fun s => hpiece s)
+      (fun s ↦ hpiece s)
     exact h
   exact IsPullback.of_iso_pullback ⟨gluedTopMap_π P hP⟩ (asIso χ) hχfst hχsnd
 
@@ -5117,11 +5117,6 @@ private lemma projModelVCIso_hom_congrW (C : WeierstrassCurve.VariableChange A)
   subst h
   rw [eqToHom_refl, eqToHom_refl, Category.id_comp, Category.comp_id]
 
-/- `projModelVCIso_one` RELOCATED-BY-DEDUP (v10.118-Y1 merge): the identical statement now
-lives upstream in `EllipticCurve/ModelVariableChange.lean` (grown on dev during T-G4);
-this file's copy (proven 2026-07-10, NEW-ATLAS-3, via the `projModelVCIso_mul` cocycle at
-`C = C' = 1`) was deleted in favour of the imported one. Consumers below are unchanged. -/
-
 /-- The atlas curve coefficient `a₁` is the first universal coefficient. -/
 theorem tateCurveLocOver_a₁ (R : CommRingCat.{u}) :
     (tateCurveLocOver R).a₁ =
@@ -5151,6 +5146,7 @@ theorem tateCurveLocOver_isTateNormal (R : CommRingCat.{u}) :
 
 variable (R : CommRingCat.{u}) [Algebra ↑R A] [Algebra (tateRingOver R) A]
 
+omit [Algebra ↑R A] in
 /-- Auxiliary for `projTateMap_map_tate`: at the `(0,0)`-marking the T-E1 normalisation of
 the base-changed universal Tate curve is the identity variable change. Isolated so the
 concrete Tate coefficients unfold in a dedicated elaboration unit. -/
@@ -5205,7 +5201,7 @@ private lemma projTateMap_map_tate_hL
       (zChartEval_equation_self _ g hZ) hord : tateRingOver R →ₐ[R] A) :
         tateRingOver R →+* A) = algebraMap (tateRingOver R) A := by
   have hAlg : ∀ r : ↑R, algebraMap (tateRingOver R) A
-      (algebraMap ↑R (tateRingOver R) r) = algebraMap ↑R A r := fun r => by
+      (algebraMap ↑R (tateRingOver R) r) = algebraMap ↑R A r := fun r ↦ by
     rw [← htower]; rfl
   have hext := tateRingOver_algHom_ext R
     (tateRingOverAlgLiftOfPoint R
@@ -5213,7 +5209,7 @@ private lemma projTateMap_map_tate_hL
       (zChartEval_equation_self _ g hZ) hord)
     ({ toRingHom := algebraMap (tateRingOver R) A, commutes' := hAlg } :
       tateRingOver R →ₐ[R] A) ?_ ?_
-  · exact congrArg (fun φ : tateRingOver R →ₐ[R] A => (φ : tateRingOver R →+* A)) hext
+  · exact congrArg (fun φ : tateRingOver R →ₐ[R] A ↦ (φ : tateRingOver R →+* A)) hext
   · rw [tateRingOverAlgLiftOfPoint_X_zero, hC1, one_smul]
     show ((tateCurveLocOver R).map (algebraMap (tateRingOver R) A)).a₁ =
       algebraMap (tateRingOver R) A
@@ -5744,7 +5740,7 @@ theorem tateBaseSpecMapOfPoint_inducedPt
     · exact (D.inducedPt_coordX fb ftop hPB hzw P hP hmark).symm
     · exact (D.inducedPt_coordY fb ftop hPB hzw P hP hmark).symm
   have hAlg : ∀ r : ↑R, algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1)
-      (algebraMap ↑R (tateRingOver R) r) = algebraMap ↑R ↑Γ(Y.base, D.U.1) r := fun r => by
+      (algebraMap ↑R (tateRingOver R) r) = algebraMap ↑R ↑Γ(Y.base, D.U.1) r := fun r ↦ by
     rw [← htower]; rfl
   have h := tateBaseSpecMap_eq_tateBaseSpecMapOfPoint R
     ({ toRingHom := algebraMap (tateRingOver R) ↑Γ(Y.base, D.U.1), commutes' := hAlg } :
@@ -5907,7 +5903,7 @@ theorem components_unique (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLE
       letI := (chartAt Y s).chartAlgebra
       have h := (chartAt Y s).chart_topMap_eq fb ftop hPB hzw P
         ((chartAt Y s).chartAlgebra_compatible) hbw hP hmark
-      have h2 := congrArg (fun m => m ≫ eqToHom (tateUniversal_E_eq R).symm) h
+      have h2 := congrArg (fun m ↦ m ≫ eqToHom (tateUniversal_E_eq R).symm) h
       simp only [Category.assoc, eqToHom_trans, eqToHom_refl, Category.comp_id] at h2
       rw [← Category.assoc, ι_gluedTopMap, ← h2]
       exact rfl
@@ -5933,7 +5929,7 @@ theorem tateMarkedPoint_classifies (R : CommRingCat.{u}) (Y : EllObj R)
     rw [hm, ← Category.assoc, gluedTopMap_marking P hP, Category.assoc]
   · intro f hf
     have hmark : P.1 ≫ f.top = f.baseHom ≫ (tateMarkedPoint R).1 :=
-      (congrArg (fun Q : Y.curve.Section => Q.1 ≫ f.top) hf).symm.trans
+      (congrArg (fun Q : Y.curve.Section ↦ Q.1 ≫ f.top) hf).symm.trans
         (f.isPullback.lift_fst _ _ _)
     have h := components_unique P hP f.baseHom f.top f.isPullback f.zero_w f.base_w hmark
     exact ⟨h.1, h.2⟩
