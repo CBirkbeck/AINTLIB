@@ -502,6 +502,41 @@ theorem transitionTensorA_one_tmul (b : P.chartRing) :
   rw [Algebra.TensorProduct.lift_tmul, map_one, one_mul]
   rfl
 
+/-- `isoSpec`-window naturality on the group patches: restricting sections corresponds to
+the window inclusion of the group opens. -/
+theorem specMap_resGroup_isoSpec_inv :
+    Spec.map (P.resGroup Q hVQ) ≫ P.isAffineOpen_groupOpen.isoSpec.inv
+      = Q.isAffineOpen_groupOpen.isoSpec.inv ≫
+        Scheme.homOfLE _ (Scheme.Hom.preimage_mono G.π hVQ) := by
+  haveI : IsAffine P.groupOpen.toScheme := P.isAffineOpen_groupOpen
+  haveI : IsAffine Q.groupOpen.toScheme := Q.isAffineOpen_groupOpen
+  haveI := P.isIso_toSpecΓ_groupOpen
+  haveI := Q.isIso_toSpecΓ_groupOpen
+  have hnat := Scheme.Opens.toSpecΓ_SpecMap_presheaf_map Q.groupOpen P.groupOpen
+    (Scheme.Hom.preimage_mono G.π hVQ)
+  have hInvP : P.isAffineOpen_groupOpen.isoSpec.inv = inv P.groupOpen.toSpecΓ :=
+    (IsIso.inv_eq_of_hom_inv_id P.isAffineOpen_groupOpen.isoSpec.hom_inv_id).symm
+  have hInvQ : Q.isAffineOpen_groupOpen.isoSpec.inv = inv Q.groupOpen.toSpecΓ :=
+    (IsIso.inv_eq_of_hom_inv_id Q.isAffineOpen_groupOpen.isoSpec.hom_inv_id).symm
+  rw [hInvP, hInvQ, IsIso.comp_inv_eq, Category.assoc, IsIso.eq_inv_comp]
+  exact hnat
+
+/-- `isoSpec`-window naturality on the charts. -/
+theorem specMap_resChart_isoSpec_inv :
+    Spec.map (P.resChart Q hUQ) ≫ P.hU.isoSpec.inv
+      = Q.hU.isoSpec.inv ≫ E.E.homOfLE hUQ := by
+  haveI : IsAffine P.U.toScheme := P.hU
+  haveI : IsAffine Q.U.toScheme := Q.hU
+  haveI := P.isIso_toSpecΓ_U
+  haveI := Q.isIso_toSpecΓ_U
+  have hnat := Scheme.Opens.toSpecΓ_SpecMap_presheaf_map Q.U P.U hUQ
+  have hInvP : P.hU.isoSpec.inv = inv P.U.toSpecΓ :=
+    (IsIso.inv_eq_of_hom_inv_id P.hU.isoSpec.hom_inv_id).symm
+  have hInvQ : Q.hU.isoSpec.inv = inv Q.U.toSpecΓ :=
+    (IsIso.inv_eq_of_hom_inv_id Q.hU.isoSpec.hom_inv_id).symm
+  rw [hInvP, hInvQ, IsIso.comp_inv_eq, Category.assoc, IsIso.eq_inv_comp]
+  exact hnat
+
 /-- **The geometric window square, action leg**: the restricted actions of nested patches
 commute with the window inclusions (`resLE` composition laws). -/
 theorem homOfLE_restrictedAction :
