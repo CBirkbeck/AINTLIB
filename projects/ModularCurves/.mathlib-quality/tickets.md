@@ -18234,3 +18234,23 @@ CONSEQUENCE: the C3 cover = pull the two Weierstrass basic-open charts D₊(Y), 
 (C3e's x₀ vanishes), NO division polynomials, NO Abel. C3a/translateByIso + mapIso remain as landed
 general infra. REMAINING for C3: the per-Weierstrass-chart D₊(Y)/D₊(Z) instantiation (atlas plumbing,
 Comparison.lean idioms) → C3d freeness (+lane-B c4) → C3f assembly → C4. (STREAM-G0)
+
+### v10.181-G0 — ★ [HG-C3] GEOMETRIC HEART COMPLETE: chart existence at every point (STREAM-G0)
+Commit d32bb2d59 (pushed). `exists_mem_stableAffineOpen` (StableCover.lean): **for G killed by N,
+every x ∈ E lies in a G-stable affine open over an affine base patch** — the AffineChartPatch
+geometry, produced by the [n]-preimage engine on the Weierstrass atlas: localModel patch at π(x) →
+Proj 3-chart cover locates [N]x → transport through e.inv ''ᵁ + fst ''ᵁ → [N]-preimage
+(stable: engine; affine: [N] finite). Axioms: sorryAx = BB-QF (mulByHom_isFinite) ONLY.
+
+**New wall variant documented (extends the c5β tensor-whnf lesson):** instance searches on morphisms
+touching `projModel W` (Proj of a quotient grading) whnf-diverge even at 1M heartbeats — e.g.
+`IsOpenImmersion e.inv` for `e : E|_V ≅ projModel W`. FIX: state the transport lemma over an
+ABSTRACT scheme `P` (`exists_mem_stableAffineOpen_aux`) and instantiate `P := projModel W` at the
+call site — application is syntactic, instance search never sees the Proj term. Reusable pattern
+for anything touching the Weierstrass Proj through isos.
+
+**C3 REMAINING:** [C3d] freeness — shrink V until groupRing = Γ(G|_V) is free (finite flat+fp
+module trivializes on basic opens; SAME headspace as lane-B c4 E[N]-rank-N², fold together) →
+[C3f] package the existence into the AffineChartPatch family + stable-affine pairwise intersections
+(C4's input shape) → [HG-C4] glue. The killing hypothesis threads BB-DELIGNE via
+ι_comp_mulByHom_of_hasRank at assembly time. (STREAM-G0)
