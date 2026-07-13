@@ -184,6 +184,13 @@ noncomputable def pushforwardIsoFactored :
     pushforward.{u} φ ≅ pushforwardFactored φ :=
   NatIso.ofComponents (fun P => Iso.refl _) (fun f => by simp; rfl)
 
+/-- The comparison with the factored pushforward is the identity natural
+isomorphism after unfolding the definition of `pushforward`. -/
+lemma pushforwardIsoFactored_eq_refl :
+    pushforwardIsoFactored φ = Iso.refl (pushforward φ) := by
+  ext P
+  rfl
+
 /-- **[D-PresPB′-general], leaf B1 (lax structure on the factored pushforward).** -/
 @[implicit_reducible]
 noncomputable def pushforwardFactoredLaxMonoidal : (pushforwardFactored φ).LaxMonoidal :=
@@ -206,6 +213,18 @@ noncomputable def pullbackPushforwardFactoredAdjunction
     [(pushforward.{u} φ).IsRightAdjoint] :
     pullback.{u} φ ⊣ pushforwardFactored φ :=
   (pullbackPushforwardAdjunction.{u} φ).ofNatIsoRight (pushforwardIsoFactored φ)
+
+/-- Transporting the pullback--pushforward adjunction along the componentwise
+identity factored comparison recovers the original adjunction. -/
+lemma pullbackPushforwardFactoredAdjunction_eq
+    [(pushforward.{u} φ).IsRightAdjoint] :
+    pullbackPushforwardFactoredAdjunction φ =
+      pullbackPushforwardAdjunction φ := by
+  unfold pullbackPushforwardFactoredAdjunction
+  rw [pushforwardIsoFactored_eq_refl]
+  cases pullbackPushforwardAdjunction φ
+  ext
+  rfl
 
 /-- The unit of the transported adjunction agrees elementwise with the unit of the
 original pullback–pushforward adjunction (the comparison is componentwise the
@@ -1084,30 +1103,36 @@ variable {C' D' : Type u} [SmallCategory C'] [SmallCategory D']
   (φ₀ : (S ⋙ forget₂ CommRingCat RingCat) ⟶
     F.op ⋙ (R ⋙ forget₂ CommRingCat RingCat))
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **[D-PresPB′-general], leaf A (descent).** If the presheaf-level pullback along `φ₀` is
 monoidal, then the sheaf-level pullback is monoidal for the localized monoidal structures:
 `functorMonoidalOfComp` along the sheafification localization, with the lifting supplied by
 mathlib's `sheafificationCompPullback`. -/
-theorem nonempty_sheafPullback_monoidal
+@[implicit_reducible]
+noncomputable def sheafPullbackMonoidal
     (hmono : (PresheafOfModules.pullback.{u} φ₀).Monoidal) :
     letI := PresheafOfModules.sheafOfModulesMonoidalCategory S hS
     letI := PresheafOfModules.sheafOfModulesMonoidalCategory R hR
-    Nonempty ((SheafOfModules.pullback.{u}
+    (SheafOfModules.pullback.{u}
       (⟨φ₀⟩ : (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}) ⟶
         (F.sheafPushforwardContinuous RingCat.{u} J K).obj
-          ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩)).Monoidal) := by
+          ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩)).Monoidal := by
   letI := PresheafOfModules.sheafOfModulesMonoidalCategory S hS
   letI := PresheafOfModules.sheafOfModulesMonoidalCategory R hR
-  letI := hmono
+  letI pullbackMonoidal : (PresheafOfModules.pullback.{u} φ₀).Monoidal := hmono
   letI : (Localization.Monoidal.toMonoidalCategory
       (L := PresheafOfModules.sheafification.{u}
         (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
       (W := PresheafOfModules.sheafificationW.{u}
         (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
       (Iso.refl _)).Monoidal := inferInstance
-  haveI : Localization.Lifting
+  letI compositeMonoidal : (PresheafOfModules.pullback.{u} φ₀ ⋙
+      Localization.Monoidal.toMonoidalCategory
+        (L := PresheafOfModules.sheafification.{u}
+          (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
+        (W := PresheafOfModules.sheafificationW.{u}
+          (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
+        (Iso.refl _)).Monoidal := inferInstance
+  letI lifting : Localization.Lifting
       (Localization.Monoidal.toMonoidalCategory
         (L := PresheafOfModules.sheafification.{u}
           (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj))
@@ -1131,7 +1156,8 @@ theorem nonempty_sheafPullback_monoidal
       (⟨φ₀⟩ : (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}) ⟶
         (F.sheafPushforwardContinuous RingCat.{u} J K).obj
           ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩))⟩
-  exact ⟨(Localization.Monoidal.functorMonoidalOfComp
+  exact @Localization.Monoidal.functorMonoidalOfComp
+    _ _ _ _ _ _ _ _ _
     (Localization.Monoidal.toMonoidalCategory
       (L := PresheafOfModules.sheafification.{u}
         (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj))
@@ -1140,6 +1166,7 @@ theorem nonempty_sheafPullback_monoidal
       (Iso.refl _))
     (PresheafOfModules.sheafificationW.{u}
       (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj))
+    _ _
     (SheafOfModules.pullback.{u}
       (⟨φ₀⟩ : (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}) ⟶
         (F.sheafPushforwardContinuous RingCat.{u} J K).obj
@@ -1150,11 +1177,18 @@ theorem nonempty_sheafPullback_monoidal
           (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
         (W := PresheafOfModules.sheafificationW.{u}
           (𝟙 (⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩ : Sheaf K RingCat.{u}).obj))
-        (Iso.refl _)) :
-    (SheafOfModules.pullback.{u}
+        (Iso.refl _)) compositeMonoidal _ lifting
+
+/-- The sheaf-level pullback monoidal structure exists. -/
+theorem nonempty_sheafPullback_monoidal
+    (hmono : (PresheafOfModules.pullback.{u} φ₀).Monoidal) :
+    letI := PresheafOfModules.sheafOfModulesMonoidalCategory S hS
+    letI := PresheafOfModules.sheafOfModulesMonoidalCategory R hR
+    Nonempty ((SheafOfModules.pullback.{u}
       (⟨φ₀⟩ : (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}) ⟶
         (F.sheafPushforwardContinuous RingCat.{u} J K).obj
-          ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩)).Monoidal)⟩
+          ⟨R ⋙ forget₂ CommRingCat RingCat, hR⟩)).Monoidal) :=
+  ⟨sheafPullbackMonoidal S hS R hR φ₀ hmono⟩
 
 end SheafDescent
 
@@ -1172,18 +1206,26 @@ free-yoneda generators by two single-variable presentation passes in the abelian
 `SheafOfModules`), packaged through `functorMonoidalOfComp` with the `Lifting` instance
 `sheafificationCompPullback`. Consumer: `Skeleton.monoidHom` then gives
 `Pic(f) : Pic X →* Pic Y` — the GME (2.16) Picard functor. -/
-theorem nonempty_pullback_monoidal (f : Y ⟶ X) :
+@[implicit_reducible]
+noncomputable def pullbackMonoidal (f : Y ⟶ X) :
     letI := Modules.monoidalCategory X
     letI := Modules.monoidalCategory Y
-    Nonempty ((Modules.pullback f).Monoidal) := by
+    (Modules.pullback f).Monoidal := by
   letI := Modules.monoidalCategory X
   letI := Modules.monoidalCategory Y
-  exact (_root_.PresheafOfModules.nonempty_sheafPullback_monoidal
+  exact _root_.PresheafOfModules.sheafPullbackMonoidal
     (F := TopologicalSpace.Opens.map f.base)
     X.sheaf.obj X.ringCatSheaf.property Y.sheaf.obj Y.ringCatSheaf.property
     (_root_.PresheafOfModules.schemeRingPresheafHom f)
-    (_root_.PresheafOfModules.pullbackMonoidal f) :
-    Nonempty ((Modules.pullback f).Monoidal))
+    (_root_.PresheafOfModules.pullbackMonoidal f)
+
+/-- Pullback of sheaves of modules admits the canonical monoidal structure constructed
+through presheaf pullback and sheafification. -/
+theorem nonempty_pullback_monoidal (f : Y ⟶ X) :
+    letI := Modules.monoidalCategory X
+    letI := Modules.monoidalCategory Y
+    Nonempty ((Modules.pullback f).Monoidal) :=
+  ⟨pullbackMonoidal f⟩
 
 /-- **[PIC-P1b-MONO], leaf D-PresPB′ (general `f`), relocated from
 `PullbackTensorMonoidal` and closed** (respelled at the `CommRingCat`-derived clothing of
