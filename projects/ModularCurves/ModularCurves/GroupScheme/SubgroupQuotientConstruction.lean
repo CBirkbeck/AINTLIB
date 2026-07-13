@@ -749,6 +749,97 @@ theorem homOfLE_restrictedAction :
       (Scheme.Hom.preimage_mono G.actionProj.left hUQ)).trans
     (Scheme.Hom.resLE_map G.translationAction.left Q.hstable hUQ).symm
 
+/-- **`W` — the full geometric window comparison**: through the Künneth identifications,
+the transition carries the `P`-restricted action to the `Q`-restricted action followed by
+the chart window. -/
+theorem pullbackWindow_restrictedAction :
+    P.pullbackWindow Q hUQ ≫ (G.chartPullbackIso P.U).inv ≫ G.restrictedAction P.hstable
+      = (G.chartPullbackIso Q.U).inv ≫ G.restrictedAction Q.hstable ≫ E.E.homOfLE hUQ :=
+  (Category.assoc _ _ _).symm.trans <|
+    (congrArg (· ≫ G.restrictedAction P.hstable)
+      (P.pullbackWindow_chartPullbackIso_inv Q hUQ)).trans <|
+    (Category.assoc _ _ _).trans <|
+      congrArg ((G.chartPullbackIso Q.U).inv ≫ ·) (P.homOfLE_restrictedAction Q hUQ)
+
+/-- **`hsqA` — the ring-level equivariance square** (group-first order): restriction
+intertwines the chart co-action rings through the transition tensor. Proved on `Spec`
+(cancel the chart `isoSpec`; both sides become the geometric window comparison `W`
+through the coaction bridges and `K`), then descended by `Spec.map_injective`. -/
+theorem resChart_coactionRing :
+    P.resChart Q hUQ ≫ Q.coactionRing
+      = P.coactionRing ≫ CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ) := by
+  apply Spec.map_injective
+  rw [Spec.map_comp, Spec.map_comp, ← cancel_mono P.hU.isoSpec.inv]
+  calc (Spec.map Q.coactionRing ≫ Spec.map (P.resChart Q hUQ)) ≫ P.hU.isoSpec.inv
+      = Spec.map Q.coactionRing ≫ Spec.map (P.resChart Q hUQ) ≫ P.hU.isoSpec.inv :=
+        Category.assoc _ _ _
+    _ = Spec.map Q.coactionRing ≫ Q.hU.isoSpec.inv ≫ E.E.homOfLE hUQ :=
+        congrArg (Spec.map Q.coactionRing ≫ ·) (P.specMap_resChart_isoSpec_inv Q hUQ)
+    _ = (Spec.map Q.coactionRing ≫ Q.hU.isoSpec.inv) ≫ E.E.homOfLE hUQ :=
+        (Category.assoc _ _ _).symm
+    _ = Q.chartCoactionSpec ≫ E.E.homOfLE hUQ :=
+        congrArg (· ≫ E.E.homOfLE hUQ) Q.spec_coactionRing_isoSpec_inv
+    _ = Q.chartSpecIso.inv ≫ (G.chartPullbackIso Q.U).inv ≫
+          (G.restrictedAction Q.hstable ≫ E.E.homOfLE hUQ) := by
+        rw [chartCoactionSpec]
+        simp only [Category.assoc]
+    _ = Q.chartSpecIso.inv ≫ P.pullbackWindow Q hUQ ≫
+          (G.chartPullbackIso P.U).inv ≫ G.restrictedAction P.hstable := by
+        rw [← P.pullbackWindow_restrictedAction Q hUQ]
+    _ = (Q.chartSpecIso.inv ≫ P.pullbackWindow Q hUQ) ≫
+          (G.chartPullbackIso P.U).inv ≫ G.restrictedAction P.hstable :=
+        (Category.assoc _ _ _).symm
+    _ = (Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫
+          P.chartSpecIso.inv) ≫ (G.chartPullbackIso P.U).inv ≫ G.restrictedAction P.hstable :=
+        congrArg (· ≫ (G.chartPullbackIso P.U).inv ≫ G.restrictedAction P.hstable)
+          (P.spec_transitionTensorA_chartSpecIso_inv Q hUQ hVQ).symm
+    _ = Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫ P.chartCoactionSpec := by
+        rw [chartCoactionSpec]
+        simp only [Category.assoc]
+    _ = Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫
+          Spec.map P.coactionRing ≫ P.hU.isoSpec.inv :=
+        congrArg (Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫ ·)
+          P.spec_coactionRing_isoSpec_inv.symm
+    _ = (Spec.map (CommRingCat.ofHom (P.transitionTensorA Q hUQ hVQ)) ≫
+          Spec.map P.coactionRing) ≫ P.hU.isoSpec.inv := (Category.assoc _ _ _).symm
+
+include hVQ in
+/-- **Restriction preserves co-invariants** — the `[HG-C4c]` membership transport: flip the
+`B ⊗ A`-convention co-invariance to the group-first `coactionRing` (the swap is
+definitional and injective), apply the ring equivariance square and the transition-tensor
+law, and flip back. -/
+theorem resChart_mem_coinvariants {b : P.chartRing}
+    (hb : b ∈ coinvariants P.chartCoaction) :
+    (P.resChart Q hUQ).hom b ∈ coinvariants Q.chartCoaction := by
+  rw [mem_coinvariants] at hb ⊢
+  -- flip to the group-first co-action ring
+  have hP : P.coactionRing.hom b = (1 : P.groupRing) ⊗ₜ[P.baseRing] b :=
+    (Algebra.TensorProduct.comm P.baseRing P.groupRing P.chartRing).injective hb
+  have hQ := congrArg (fun m => (CommRingCat.Hom.hom m) b) (P.resChart_coactionRing Q hUQ hVQ)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hQ
+  rw [hP] at hQ
+  have hQ' : Q.coactionRing.hom ((P.resChart Q hUQ).hom b)
+      = (1 : Q.groupRing) ⊗ₜ[Q.baseRing] (P.resChart Q hUQ).hom b :=
+    hQ.trans (P.transitionTensorA_one_tmul Q hUQ hVQ b)
+  -- flip back to the comodule convention
+  show Q.chartCoaction ((P.resChart Q hUQ).hom b) = _
+  have hflip : Q.chartCoaction ((P.resChart Q hUQ).hom b)
+      = (Algebra.TensorProduct.comm Q.baseRing Q.groupRing Q.chartRing)
+        (Q.coactionRing.hom ((P.resChart Q hUQ).hom b)) := rfl
+  rw [hflip, hQ']
+  rfl
+
+include hVQ in
+/-- **The local-quotient transition map** (`[HG-C4c]`, the `localQuotientMap` analogue):
+restriction of chart sections between nested patches, on co-invariants. -/
+noncomputable def coinvariantsMap :
+    coinvariants P.chartCoaction →+* coinvariants Q.chartCoaction where
+  toFun b := ⟨(P.resChart Q hUQ).hom b.1, P.resChart_mem_coinvariants Q hUQ hVQ b.2⟩
+  map_one' := Subtype.ext (map_one _)
+  map_mul' x y := Subtype.ext (map_mul _ _ _)
+  map_zero' := Subtype.ext (map_zero _)
+  map_add' x y := Subtype.ext (map_add _ _ _)
+
 /-- **The geometric window square, projection leg**. -/
 theorem homOfLE_restrictedProj :
     Scheme.homOfLE _ (Scheme.Hom.preimage_mono G.actionProj.left hUQ) ≫
