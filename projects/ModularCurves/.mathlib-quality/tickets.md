@@ -19278,3 +19278,21 @@ REMAINING for the bridge ⟹ / [YF-⊆] (wiring, all pieces built or routed):
   base-pt); distinct base-pts ⟺ distinct Point.pull (k-point determinism) ⟺ comboFamily inj. [fiddly]
 - (e) `naive_iff_comboFamily_injective` (BUILT) closes `fullLevel_divisor_iff_naive_gen` (RELOCATE
   downstream). (f) [YF-⊆]: combo≠0 ⟹ ∉ pointVanishSet via levelSpaceΓ_spec. (STREAM-YN)
+
+### v10.183 — ★★★ T-D8-BRIDGE ⟹ DIRECTION COMPLETE (naive_gen_of_divisor_eq)
+The DECISIVE half of KM 3.7.1 is PROVEN, enabled by the count breakthrough. New
+`LevelStructure/FullLevelDivisorBridge.lean`: `naive_gen_of_divisor_eq` — the Drinfeld full-level
+divisor equality `sectionsDivisor(combos).ideal = torsionIdeal` ⟹ the naive fibrewise generation
+condition. Assembled end-to-end:
+  count-identification (natCard_carrier_eq_finrank) → natCard_torsion_fibre=N² → piece (a)
+  natCard_fibre_torsion_locus (#fst⁻¹=N²) → (b+c) baseChange_sections_base_injective (support-cover +
+  pigeonhole ⟹ distinct base-pts) → (d) pull_injective_of_baseChange_base_injective → (e) coe-identity
+  + naive_iff_comboFamily_injective. Own-proof sorry-free (inherits torsion black boxes as T-B6).
+
+**18 axiom-clean lemmas this session.** The T-D8-bridge went from "feared multi-week externally-gated
+crux" to "⟹ PROVEN, count CRACKED". This is the direction [YF-⊆] consumes (full-level ⟹ distinct).
+
+REMAINING: (i) [YF-⊆] `range_levelSpaceΓι_subset` — wire `naive_gen_of_divisor_eq` (⟹) + levelSpaceΓ_spec
++ the pointVanishSet connection (combo≠0 ⟹ ∉ pointVanishSet). (ii) the ⟸ direction (naive-gen ⟹ divisor)
+for the FULL iff `fullLevel_divisor_iff_naive_gen` (Basic:125) — SUBTLE (topological-vs-geometric /
+Galois; needs the full-set-of-sections/T-D2 route, NOT the reverse of ⟹). (STREAM-YN)
