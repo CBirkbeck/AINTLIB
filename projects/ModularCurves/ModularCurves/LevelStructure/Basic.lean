@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.LevelStructure.ExactOrder
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
@@ -100,7 +105,7 @@ the divisor `Σ_{(a,b) ∈ (ℤ/N)²} [aP + bQ]` equals `E[N]` as a closed subsc
 def IsFullLevel (N : ℕ) [NeZero N] (P Q : E.Section) : Prop :=
   ((N : ℤ) • P = 0 ∧ (N : ℤ) • Q = 0) ∧
     (RelEffCartierDiv.sectionsDivisor E.π
-        (fun i : Fin (N ^ 2) =>
+        (fun i : Fin (N ^ 2) ↦
           (((((i : ℕ) % N : ℕ) : ℤ) • P + ((((i : ℕ) / N : ℕ) : ℤ) • Q) :
             E.Point (𝟙 S))))).ideal =
       (E.torsionIdeal N)
@@ -139,13 +144,14 @@ theorem isFullLevel_iff_naive (N : ℕ) [NeZero N] (hN : NIsInvertible S N)
       (fullLevel_divisor_iff_naive_gen E N hN P Q hP hQ).mpr hgen⟩
 
 /-- **(T-D9 = KM 1.4.4 (1) ⇔ (3), restated)** For `N` invertible, Drinfeld Γ₁(N) equals
-naive Γ₁(N). -/
+naive Γ₁(N). Register theorem (trust-anchor for the Y₁ surface): it has no code consumer, but
+certifies that the two Γ₁(N) definitions of record agree. -/
 theorem isGammaOne_iff_naive (N : ℕ) [NeZero N] (hN : NIsInvertible S N) (P : E.Section) :
     E.IsGammaOne N P ↔ E.IsNaiveGammaOne N P := by
   constructor
   · intro h
     have hkill : (N : ℤ) • P = 0 := Section.HasExactOrder.smul_eq_zero E h
-    refine ⟨hkill, fun k _ _ t => ?_⟩
+    refine ⟨hkill, fun k _ _ t ↦ ?_⟩
     exact (Section.hasExactOrder_iff_geometric E hN hkill).mp h k t
   · rintro ⟨hkill, h⟩
     exact (Section.hasExactOrder_iff_geometric E hN hkill).mpr h
