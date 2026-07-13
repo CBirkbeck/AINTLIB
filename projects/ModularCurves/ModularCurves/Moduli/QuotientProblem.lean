@@ -198,6 +198,37 @@ noncomputable def homPullbackAlongEquiv (X : EllObj R) {T : Scheme.{u}}
     · exact homToPullbackAlong_pullbackAlongπ p.1.1 p.1.2 p.2
     · rfl
 
+/-- **The `toPullbackAlong` cocycle** ([GHB7-3] map-comp enabler): comparing into a
+chosen pullback in two steps — first along `u`, then along the projection composed
+with `k` — agrees with the one-step comparison along `u ≫ k`. -/
+theorem toPullbackAlong_comp {W X' X : EllObj R} (u : W ⟶ X') (k : X' ⟶ X) :
+    toPullbackAlong u ≫ toPullbackAlong (X'.pullbackAlongπ u.baseHom ≫ k) =
+      toPullbackAlong (u ≫ k) := by
+  apply (homPullbackAlongEquiv X ((u ≫ k).baseHom) W).injective
+  refine Subtype.ext (Prod.ext ?_ ?_)
+  · show (toPullbackAlong u ≫ toPullbackAlong (X'.pullbackAlongπ u.baseHom ≫ k)) ≫
+        X.pullbackAlongπ ((u ≫ k).baseHom) =
+      toPullbackAlong (u ≫ k) ≫ X.pullbackAlongπ ((u ≫ k).baseHom)
+    calc (toPullbackAlong u ≫ toPullbackAlong (X'.pullbackAlongπ u.baseHom ≫ k)) ≫
+          X.pullbackAlongπ ((u ≫ k).baseHom)
+        = toPullbackAlong u ≫ toPullbackAlong (X'.pullbackAlongπ u.baseHom ≫ k) ≫
+            X.pullbackAlongπ ((u ≫ k).baseHom) := Category.assoc _ _ _
+      _ = toPullbackAlong u ≫ X'.pullbackAlongπ u.baseHom ≫ k :=
+          congrArg (toPullbackAlong u ≫ ·)
+            (show toPullbackAlong (X'.pullbackAlongπ u.baseHom ≫ k) ≫
+                X.pullbackAlongπ ((u ≫ k).baseHom) =
+                X'.pullbackAlongπ u.baseHom ≫ k from
+              toPullbackAlong_pullbackAlongπ (X'.pullbackAlongπ u.baseHom ≫ k))
+      _ = (toPullbackAlong u ≫ X'.pullbackAlongπ u.baseHom) ≫ k :=
+          (Category.assoc _ _ _).symm
+      _ = u ≫ k := congrArg (· ≫ k) (toPullbackAlong_pullbackAlongπ u)
+      _ = toPullbackAlong (u ≫ k) ≫ X.pullbackAlongπ ((u ≫ k).baseHom) :=
+          (toPullbackAlong_pullbackAlongπ (u ≫ k)).symm
+  · show (toPullbackAlong u ≫ toPullbackAlong (X'.pullbackAlongπ u.baseHom ≫ k)).baseHom
+        = (toPullbackAlong (u ≫ k)).baseHom
+    show 𝟙 W.base ≫ 𝟙 W.base = 𝟙 W.base
+    rw [Category.comp_id]
+
 /-- Decomposing a morphism into the tautological square over a composite base
 map: `v : Y ⟶ X ×_{X.base} T` factors as the comparison of `v ≫ π` followed by
 the base-change functoriality map. -/
@@ -1196,6 +1227,140 @@ theorem RelRepData.compare_pullback_id {Q : ModuliProblem R} {X : EllObj R}
       hcompid, eqToHom_op]
     exact (d.eqv_congr (hid (d.pullback (𝟙 X)).f)
       (pullback.fst d.f (𝟙 X : X ⟶ X).baseHom) (hmem.trans (hid _).symm)).symm
+  exact congrArg Subtype.val hkey
+
+/-- **The comparison cocycle under iterated base change** ([GHB7-3] map-comp enabler):
+for data `d/d'/d''` at `X/X'/X''` and morphisms `k₁ : X' ⟶ X`, `k₂ : X'' ⟶ X'`, any
+reassociation morphism `e` (with projection clauses `he_*`, built from any inner
+reassociation `i` with clauses `hi_*`) composed with the step-two comparison equals
+the one-step comparison along `k₂ ≫ k₁`. Stated clause-wise so callers can feed their
+own `pullback.lift` terms without instance-transparency friction. -/
+theorem RelRepData.compare_pullback_comp {Q : ModuliProblem R} {X X' X'' : EllObj R}
+    (d : RelRepData Q X) (d' : RelRepData Q X') (d'' : RelRepData Q X'')
+    (k₁ : X' ⟶ X) (k₂ : X'' ⟶ X')
+    (i : CategoryTheory.Limits.pullback d.f (k₂ ≫ k₁).baseHom ⟶
+      CategoryTheory.Limits.pullback d.f k₁.baseHom)
+    (hi_fst : i ≫ pullback.fst d.f k₁.baseHom = pullback.fst d.f (k₂ ≫ k₁).baseHom)
+    (hi_snd : i ≫ pullback.snd d.f k₁.baseHom =
+      pullback.snd d.f (k₂ ≫ k₁).baseHom ≫ k₂.baseHom)
+    (e : CategoryTheory.Limits.pullback d.f (k₂ ≫ k₁).baseHom ⟶
+      CategoryTheory.Limits.pullback d'.f k₂.baseHom)
+    (he_fst : e ≫ pullback.fst d'.f k₂.baseHom = i ≫ ((d.pullback k₁).compare d').1)
+    (he_snd : e ≫ pullback.snd d'.f k₂.baseHom = pullback.snd d.f (k₂ ≫ k₁).baseHom) :
+    e ≫ ((d'.pullback k₂).compare d'').1 = ((d.pullback (k₂ ≫ k₁)).compare d'').1 := by
+  have hc₁ : ((d.pullback k₁).compare d').1 ≫ d'.f = pullback.snd d.f k₁.baseHom :=
+    ((d.pullback k₁).compare d').2
+  have hc₂ : ((d'.pullback k₂).compare d'').1 ≫ d''.f = pullback.snd d'.f k₂.baseHom :=
+    ((d'.pullback k₂).compare d'').2
+  -- both sides are sections of `d''.f` over the pulled structure map
+  have hmem : (e ≫ ((d'.pullback k₂).compare d'').1) ≫ d''.f =
+      pullback.snd d.f (k₂ ≫ k₁).baseHom :=
+    (Category.assoc _ _ _).trans ((congrArg (e ≫ ·) hc₂).trans he_snd)
+  have hemem : e ≫ (d'.pullback k₂).f = (d.pullback (k₂ ≫ k₁)).f := he_snd
+  have Pi : i ≫ (d.pullback k₁).f = (d.pullback (k₂ ≫ k₁)).f ≫ k₂.baseHom := hi_snd
+  have P₂ : (i ≫ ((d.pullback k₁).compare d').1) ≫ d'.f =
+      (d.pullback (k₂ ≫ k₁)).f ≫ k₂.baseHom :=
+    (Category.assoc _ _ _).trans ((congrArg (i ≫ ·) hc₁).trans hi_snd)
+  have P₁ : (pullback.fst d.f (k₂ ≫ k₁).baseHom ≫ d.f) =
+      ((d.pullback (k₂ ≫ k₁)).f ≫ k₂.baseHom) ≫ k₁.baseHom :=
+    pullback.condition.trans
+      (show pullback.snd d.f (k₂ ≫ k₁).baseHom ≫ (k₂ ≫ k₁).baseHom =
+        (pullback.snd d.f (k₂ ≫ k₁).baseHom ≫ k₂.baseHom) ≫ k₁.baseHom from
+          (Category.assoc _ _ _).symm)
+  have P₃ : pullback.fst d.f (k₂ ≫ k₁).baseHom ≫ d.f =
+      (d.pullback (k₂ ≫ k₁)).f ≫ (k₂ ≫ k₁).baseHom := pullback.condition
+  have hkey : (⟨(⟨e, hemem⟩ : { h : (d.pullback (k₂ ≫ k₁)).Z ⟶ (d'.pullback k₂).Z //
+          h ≫ (d'.pullback k₂).f = (d.pullback (k₂ ≫ k₁)).f }).1 ≫
+        ((d'.pullback k₂).compare d'').1, hmem⟩ :
+      { s : (d.pullback (k₂ ≫ k₁)).Z ⟶ d''.Z //
+        s ≫ d''.f = (d.pullback (k₂ ≫ k₁)).f }) =
+      (d.pullback (k₂ ≫ k₁)).compare d'' := by
+    apply (d''.eqv (d.pullback (k₂ ≫ k₁)).f).injective
+    rw [RelRepData.eqv_compare]
+    -- `rfl`-graded unfolds of the three pulled classifying bijections (v-binder form)
+    have hval₂ : ∀ (h' : { h : (d.pullback (k₂ ≫ k₁)).Z ⟶
+          (d'.pullback k₂).Z // h ≫ (d'.pullback k₂).f = (d.pullback (k₂ ≫ k₁)).f })
+        (v : (d.pullback (k₂ ≫ k₁)).Z ⟶ d'.Z)
+        (hv : h'.1 ≫ pullback.fst d'.f k₂.baseHom = v)
+        (p : v ≫ d'.f = (d.pullback (k₂ ≫ k₁)).f ≫ k₂.baseHom),
+        (d'.pullback k₂).eqv (d.pullback (k₂ ≫ k₁)).f h' =
+          Q.map (EllObj.toPullbackAlong
+            (X''.pullbackAlongπ (d.pullback (k₂ ≫ k₁)).f ≫ k₂)).op
+            (d'.eqv ((d.pullback (k₂ ≫ k₁)).f ≫ k₂.baseHom) ⟨v, p⟩) := by
+      intro h' v hv p; subst hv; rfl
+    have hval₁ : ∀ (h' : { h : (d.pullback (k₂ ≫ k₁)).Z ⟶
+          (d.pullback k₁).Z //
+          h ≫ (d.pullback k₁).f = (d.pullback (k₂ ≫ k₁)).f ≫ k₂.baseHom })
+        (v : (d.pullback (k₂ ≫ k₁)).Z ⟶ d.Z)
+        (hv : h'.1 ≫ pullback.fst d.f k₁.baseHom = v)
+        (p : v ≫ d.f = ((d.pullback (k₂ ≫ k₁)).f ≫ k₂.baseHom) ≫ k₁.baseHom),
+        (d.pullback k₁).eqv ((d.pullback (k₂ ≫ k₁)).f ≫ k₂.baseHom) h' =
+          Q.map (EllObj.toPullbackAlong
+            (X'.pullbackAlongπ ((d.pullback (k₂ ≫ k₁)).f ≫ k₂.baseHom) ≫ k₁)).op
+            (d.eqv (((d.pullback (k₂ ≫ k₁)).f ≫ k₂.baseHom) ≫ k₁.baseHom) ⟨v, p⟩) := by
+      intro h' v hv p; subst hv; rfl
+    have hval₃ : ∀ (h' : { h : (d.pullback (k₂ ≫ k₁)).Z ⟶
+          (d.pullback (k₂ ≫ k₁)).Z //
+          h ≫ (d.pullback (k₂ ≫ k₁)).f = (d.pullback (k₂ ≫ k₁)).f })
+        (v : (d.pullback (k₂ ≫ k₁)).Z ⟶ d.Z)
+        (hv : h'.1 ≫ pullback.fst d.f (k₂ ≫ k₁).baseHom = v)
+        (p : v ≫ d.f = (d.pullback (k₂ ≫ k₁)).f ≫ (k₂ ≫ k₁).baseHom),
+        (d.pullback (k₂ ≫ k₁)).eqv (d.pullback (k₂ ≫ k₁)).f h' =
+          Q.map (EllObj.toPullbackAlong
+            (X''.pullbackAlongπ (d.pullback (k₂ ≫ k₁)).f ≫ (k₂ ≫ k₁))).op
+            (d.eqv ((d.pullback (k₂ ≫ k₁)).f ≫ (k₂ ≫ k₁).baseHom) ⟨v, p⟩) := by
+      intro h' v hv p; subst hv; rfl
+    rw [RelRepData.eqv_comp_compare (d'.pullback k₂) d'' (d.pullback (k₂ ≫ k₁)).f
+        ⟨e, hemem⟩,
+      hval₂ ⟨e, hemem⟩
+        ((⟨i, Pi⟩ : { h : (d.pullback (k₂ ≫ k₁)).Z ⟶ (d.pullback k₁).Z //
+            h ≫ (d.pullback k₁).f = (d.pullback (k₂ ≫ k₁)).f ≫ k₂.baseHom }).1 ≫
+          ((d.pullback k₁).compare d').1) he_fst P₂,
+      RelRepData.eqv_comp_compare (d.pullback k₁) d'
+        ((d.pullback (k₂ ≫ k₁)).f ≫ k₂.baseHom) ⟨i, Pi⟩,
+      hval₁ ⟨i, Pi⟩ (pullback.fst d.f (k₂ ≫ k₁).baseHom) hi_fst P₁,
+      hval₃ ⟨𝟙 _, Category.id_comp _⟩ (pullback.fst d.f (k₂ ≫ k₁).baseHom)
+        (Category.id_comp _) P₃]
+    -- shift the flat index to the associated one
+    have hgFA : ((d.pullback (k₂ ≫ k₁)).f ≫ k₂.baseHom) ≫ k₁.baseHom =
+        (d.pullback (k₂ ≫ k₁)).f ≫ (k₂ ≫ k₁).baseHom := by
+      rw [Category.assoc]; rfl
+    rw [show (⟨pullback.fst d.f (k₂ ≫ k₁).baseHom, P₃⟩ :
+        { kk : (d.pullback (k₂ ≫ k₁)).Z ⟶ d.Z //
+          kk ≫ d.f = (d.pullback (k₂ ≫ k₁)).f ≫ (k₂ ≫ k₁).baseHom }) =
+      ⟨pullback.fst d.f (k₂ ≫ k₁).baseHom, P₁.trans hgFA⟩ from
+      Subtype.ext rfl]
+    rw [d.eqv_congr hgFA (pullback.fst d.f (k₂ ≫ k₁).baseHom) P₁]
+    -- collapse the two-functor stacks (term-mode: kabstract cannot cross the
+    -- defeq index boundary, but `exact`-position elaboration can)
+    have hcoll : ∀ {A B C : (EllObj R)ᵒᵖ} (f : A ⟶ B) (g : B ⟶ C) (x : Q.obj A),
+        Q.map g (Q.map f x) = Q.map (f ≫ g) x :=
+      fun f g x => (FunctorToTypes.map_comp_apply Q f g x).symm
+    -- the morphism-level cocycle: `toPullbackAlong_comp` + associativity `eqToHom`
+    have hEll : EllObj.toPullbackAlong
+          (X''.pullbackAlongπ (d.pullback (k₂ ≫ k₁)).f ≫ k₂) ≫
+        EllObj.toPullbackAlong
+          (X'.pullbackAlongπ ((d.pullback (k₂ ≫ k₁)).f ≫ k₂.baseHom) ≫ k₁) =
+        EllObj.toPullbackAlong
+          ((X''.pullbackAlongπ (d.pullback (k₂ ≫ k₁)).f ≫ k₂) ≫ k₁) :=
+      EllObj.toPullbackAlong_comp _ _
+    have hcomb := hEll.trans
+      (EllObj.toPullbackAlong_congr (Category.assoc
+        (X''.pullbackAlongπ (d.pullback (k₂ ≫ k₁)).f) k₂ k₁))
+    have hop : (EllObj.toPullbackAlong
+          (X'.pullbackAlongπ ((d.pullback (k₂ ≫ k₁)).f ≫ k₂.baseHom) ≫ k₁)).op ≫
+        (EllObj.toPullbackAlong
+          (X''.pullbackAlongπ (d.pullback (k₂ ≫ k₁)).f ≫ k₂)).op =
+        eqToHom (congrArg (fun t => Opposite.op (X.pullbackAlong t)) hgFA) ≫
+        (EllObj.toPullbackAlong
+          (X''.pullbackAlongπ (d.pullback (k₂ ≫ k₁)).f ≫ (k₂ ≫ k₁))).op := by
+      exact (congrArg Quiver.Hom.op hcomb).trans
+        (op_comp.trans (congrArg (· ≫ _) (eqToHom_op _)))
+    exact (hcoll _ _ _).trans
+      ((congrArg (fun m => Q.map m
+          (d.eqv (((d.pullback (k₂ ≫ k₁)).f ≫ k₂.baseHom) ≫ k₁.baseHom)
+            ⟨pullback.fst d.f (k₂ ≫ k₁).baseHom, P₁⟩)) hop).trans
+        (hcoll _ _ _).symm)
   exact congrArg Subtype.val hkey
 
 end Engine
