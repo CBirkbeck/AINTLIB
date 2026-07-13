@@ -34,15 +34,39 @@ That single change converts the infinite loop into a one-pass disposition. (Crea
 ## Triage the existing queue (do this early)
 Issue **#1892** already groups the ~21 looping TODO false-positives by reason with per-ticket specifics. For each cluster, do a quick confirm (is the decl really already-general / concrete / all-instances-used / in-mathlib?), then **bulk-close** with a one-line reason. The EDS ×13 are high-confidence closes. This collapses the queue to the real PR-able work + the in-flight review PRs and stops the lowest-first spin.
 
+## Mandatory cache-first, freeze-last discipline
+- **Before any `lake build` in a worktree, run `lake exe cache get` successfully in that exact
+  worktree. No exceptions.** If Lean starts compiling mathlib from source, cancel the build and
+  diagnose the cache instead of letting it continue.
+- Reuse the dedicated, already-warmed reviewer worktree and its `.lake/build`; do not create a cold
+  worktree for each review. If the 9-library gate would require rebuilding all of AINTLIB from
+  scratch, stop and report the missing warm build as a blocker rather than starting the rebuild.
+- Cache retrieval, worktree preparation, local integration, and the full verification gate all
+  happen **without** a freeze. A local integration branch does not touch remote `main`, so the fleet
+  can keep working while it is tested.
+- Open `freeze:active` only after the integrated candidate is green and caught up to the latest
+  `origin/main`, when the only remaining operations are the final race check and push. If `main`
+  moved or any non-incremental build becomes necessary after opening the freeze, close the freeze,
+  prepare and re-verify without it, then try the short landing window again.
+
 ## Reviewing + merging the REAL generalise PRs (your core job)
 1. Find them: `gh issue list --label state:review --label lane:generalise` (each should have an open `generalise/<n>` PR; `gh pr list --head generalise/<n>`).
-2. **Freeze** (you're touching `main`): open a `freeze:active` issue so the fleet idles.
-3. **Integrate** the mergeable PRs on a branch off latest `origin/main`: `git checkout -B integrate-generalise origin/main`; for each, `LEAN4_GUARDRAILS_BYPASS=1 git merge --no-ff --no-edit origin/generalise/<n>`.
-4. **Verify with the 9-LIB GATE — NOT `build_all.sh`:**
+2. **Prepare without freezing:** in the warmed reviewer worktree, fetch latest `origin/main`, run
+   `lake exe cache get`, and confirm the existing warm build matches the current mathlib pin. Do not
+   continue from a cold build tree.
+3. **Integrate locally without freezing** on a branch off latest `origin/main`: `git checkout -B integrate-generalise origin/main`; for each, `LEAN4_GUARDRAILS_BYPASS=1 git merge --no-ff --no-edit origin/generalise/<n>`.
+4. **Verify without freezing with the 9-LIB GATE — NOT `build_all.sh`:**
    `lake build Common FltRegular HasseWeil LeanModularForms "«Adic spaces»" BernoulliRegular PadicLFunctions LutzNagell CebotarevDensity`
    (Why not `build_all.sh`? It builds *orphan* modules too, which carry **pre-existing WIP/Verso breakage unrelated to your PRs** — it'll always be red. The 9-lib gate is the reachable code; it catches the only real risk: a broken in-gate consumer.)
 5. **green ⟹ sound.** A generalise PR is a proof *re-verified against the weaker statement*; if the gate is green, the weakening type-checks and every consumer still compiles (they satisfy the weaker premise). So **green-only merge is safe** — you don't need to hand-audit the math, just confirm the gate + sanity-read the old→new diff in the PR body.
-6. **Land it:** confirm FF (`git rev-list --count HEAD..origin/main` = 0; rebase if a worker slipped one in), `LEAN4_GUARDRAILS_BYPASS=1 git push origin integrate-generalise:main`, close the issues, delete the `generalise/<n>` branches, close the freeze. If a PR breaks the gate or is otherwise wrong, **exclude it and send it back via the round-trip below** — don't merge it.
+6. **Catch up without freezing:** fetch `origin/main`; if it moved, rebase and rerun the incremental
+   9-library gate. Repeat until the verified branch contains current `origin/main`.
+7. **Land in a short freeze:** only now open `freeze:active`, immediately fetch and confirm FF
+   (`git rev-list --count HEAD..origin/main` = 0). If it is no longer FF, close the freeze and return
+   to step 6. Otherwise `LEAN4_GUARDRAILS_BYPASS=1 git push origin integrate-generalise:main`, close
+   the issues, delete the `generalise/<n>` branches, and close the freeze immediately. If a PR
+   breaks the gate or is otherwise wrong, **exclude it and send it back via the round-trip below** —
+   don't merge it.
 
 ## Requesting changes from the worker (the round-trip)
 **Critical:** the fleet is *pull-based on state labels* — a worker scans for tickets to claim and **never reads comments on its own `state:review` tickets**. So a bare comment "this is wrong, fix X" is **invisible** to the worker. To actually send work back you MUST change the ticket's *state*:
@@ -55,6 +79,8 @@ That's it. The worker's next cron firing scans `state:changes-requested` **as it
 A generalise weakens **hypotheses** — it must **not** change what a theorem *means* or drop a hypothesis the result genuinely needs. The worker re-proves it (green); you confirm the gate and the diff. Never add a `sorry`; never bump; idle during freezes.
 
 ## Gotchas
+- **Cache first, freeze last** (above) — never build before `lake exe cache get`, never cold-build
+  the whole workspace, and never hold the fleet freeze during preparation or verification.
 - **9-lib gate vs `build_all.sh`** (above) — the single most important operational point.
 - **`«Adic spaces»` modules** carry a space — target individually with guillemets: `lake build "«Adic spaces».Foo"`.
 - **`sorry`'d targets** = producer WIP; workers skip them (so should you).
