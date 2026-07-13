@@ -4,12 +4,6 @@ public import Mathlib.NumberTheory.NumberField.CMField
 public import Mathlib.NumberTheory.NumberField.ClassNumber
 public import Mathlib.NumberTheory.Cyclotomic.Basic
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
-public import Mathlib.NumberTheory.NumberField.Cyclotomic.Embeddings
-public import Mathlib.NumberTheory.RamificationInertia.Ramification
-public import Mathlib.LinearAlgebra.Dimension.StrongRankCondition
-public import Mathlib.RingTheory.Flat.TorsionFree
-public import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
-public import Mathlib.RingTheory.Ideal.GoingUp
 public import BernoulliRegular.ClassGroupExtension
 public import FltRegular.NumberTheory.RegularPrimes
 public import FltRegular.NumberTheory.Cyclotomic.UnitLemmas
