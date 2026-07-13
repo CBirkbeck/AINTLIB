@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.Representability
+import ModularCurves.Moduli.GammaH
 import ModularCurves.Moduli.OmegaFunctor
 
 /-!
@@ -221,5 +222,73 @@ noncomputable def legendreBootstrapSignAction :
       refine Prod.ext rfl ?_
       exact (OmegaBasis.mul_smul' _ _ _).trans
         (by rw [neg_one_mul, neg_neg]; exact OmegaBasis.one_smul' _)
+
+open EllipticCurve in
+private theorem pullSection_zsmul' {X Y : EllObj R} (f : X ⟶ Y) (n : ℤ)
+    (P : Y.curve.Section) :
+    EllHom.pullSection R f (n • P) = n • EllHom.pullSection R f P :=
+  map_zsmul (AddMonoidHom.mk' (EllHom.pullSection R f)
+    (EllHom.pullSection_add R f)) n P
+
+open EllipticCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-ACT)** The `GL₂(ℤ/N)`-automorphism of the naive full-level problem
+induced by `glSmul` (T-H2). Natural because `glSmul` is an integer-linear combination
+of the sections and `EllHom.pullSection` is `ℤ`-linear. -/
+noncomputable def gammaFullNaiveGlAut (N : ℕ) [NeZero N]
+    (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    Aut (gammaFullNaiveProblem R N) where
+  hom :=
+    { app := fun X => ↾fun L : X.unop.curve.FullLevelPt N => X.unop.curve.glSmul γ L
+      naturality := fun X Y φ => by
+        ext L
+        refine Subtype.ext (Prod.ext ?_ ?_)
+        · exact ((EllHom.pullSection_add R φ.unop _ _).trans
+            (congrArg₂ (· + ·) (pullSection_zsmul' R φ.unop _ _)
+              (pullSection_zsmul' R φ.unop _ _))).symm
+        · exact ((EllHom.pullSection_add R φ.unop _ _).trans
+            (congrArg₂ (· + ·) (pullSection_zsmul' R φ.unop _ _)
+              (pullSection_zsmul' R φ.unop _ _))).symm }
+  inv :=
+    { app := fun X => ↾fun L : X.unop.curve.FullLevelPt N => X.unop.curve.glSmul γ⁻¹ L
+      naturality := fun X Y φ => by
+        ext L
+        refine Subtype.ext (Prod.ext ?_ ?_)
+        · exact ((EllHom.pullSection_add R φ.unop _ _).trans
+            (congrArg₂ (· + ·) (pullSection_zsmul' R φ.unop _ _)
+              (pullSection_zsmul' R φ.unop _ _))).symm
+        · exact ((EllHom.pullSection_add R φ.unop _ _).trans
+            (congrArg₂ (· + ·) (pullSection_zsmul' R φ.unop _ _)
+              (pullSection_zsmul' R φ.unop _ _))).symm }
+  hom_inv_id := by
+    ext X L
+    exact (X.unop.curve.glSmul_mul γ γ⁻¹ L).symm.trans
+      (by rw [mul_inv_cancel]; exact X.unop.curve.glSmul_one L)
+  inv_hom_id := by
+    ext X L
+    exact (X.unop.curve.glSmul_mul γ⁻¹ γ L).symm.trans
+      (by rw [inv_mul_cancel]; exact X.unop.curve.glSmul_one L)
+
+open EllipticCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-ACT)** The `GL₂(ℤ/N)`-action on the naive full-level problem in the
+engine's `G →* Aut Q` interface: `γ` acts through the `γ⁻¹`-automorphism (the inverse
+compensates the precomposition anti-law `glSmul_mul`). -/
+noncomputable def gammaFullNaiveGlAction (N : ℕ) [NeZero N] :
+    Matrix.GeneralLinearGroup (Fin 2) (ZMod N) →* Aut (gammaFullNaiveProblem R N) where
+  toFun γ := gammaFullNaiveGlAut R N γ⁻¹
+  map_one' := by
+    rw [inv_one]
+    refine Iso.ext ?_
+    ext X L
+    show X.unop.curve.glSmul 1 L = L
+    exact X.unop.curve.glSmul_one L
+  map_mul' γ δ := by
+    refine Iso.ext ?_
+    ext X L
+    show X.unop.curve.glSmul (γ * δ)⁻¹ L =
+      X.unop.curve.glSmul γ⁻¹ (X.unop.curve.glSmul δ⁻¹ L)
+    rw [mul_inv_rev]
+    exact X.unop.curve.glSmul_mul δ⁻¹ γ⁻¹ L
 
 end ModularCurves
