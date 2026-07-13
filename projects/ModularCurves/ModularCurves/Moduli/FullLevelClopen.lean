@@ -213,6 +213,53 @@ theorem combSec_ne_of_diff (hN : NIsInvertible S N) (a b c d : ℤ)
       (combPoint_killed E N (a - c) (b - d))]
     exact hv⟩
 
+/-- **[YF-⊇].** Over `fullLevelOpens` the tautological pair is a full-level structure: the
+`N²` combinations are `N`-killed (the taut points are) and pairwise pointwise-distinct
+(`combSec_ne_of_diff`), so their section divisor equals `E[N]`
+(`sectionsDivisor_ideal_eq_torsionIdeal`). -/
+theorem isFullLevel_taut_over_fullLevelOpens (hN : NIsInvertible S N) :
+    (E.baseChange ((fullLevelOpens E N hN).ι ≫ tautBase E N)).IsFullLevel N
+      (Point.asSection E ((fullLevelOpens E N hN).ι ≫ tautBase E N)
+        (Point.restrict E (fullLevelOpens E N hN).ι (tautPt₁ E N)))
+      (Point.asSection E ((fullLevelOpens E N hN).ι ≫ tautBase E N)
+        (Point.restrict E (fullLevelOpens E N hN).ι (tautPt₂ E N))) := by
+  refine ⟨⟨smul_N_taut₁_section E N _, smul_N_taut₂_section E N _⟩, ?_⟩
+  apply sectionsDivisor_ideal_eq_torsionIdeal
+  · -- each combination is `N`-killed
+    intro i
+    rw [← (E.baseChange _).smul_eq_zero_iff_comp_mulByHom, smul_add, smul_comm (N : ℤ) _,
+      smul_comm (N : ℤ) _, smul_N_taut₁_section E N _, smul_N_taut₂_section E N _, smul_zero,
+      smul_zero, add_zero]
+  · -- pairwise pointwise-distinct
+    intro i _ j _ hij u
+    refine combSec_ne_of_diff E N hN _ _ _ _ ?_ u
+    rintro ⟨hd1, hd2⟩
+    have hposN : 0 < N := Nat.pos_of_ne_zero (NeZero.ne N)
+    have hN0 : (0 : ℤ) < N := by exact_mod_cast hposN
+    -- a divisor of a difference of two nonnegative integers below `N` forces equality
+    have hkey : ∀ x y : ℤ, (N : ℤ) ∣ (x - y) → 0 ≤ x → x < N → 0 ≤ y → y < N → x = y := by
+      rintro x y ⟨k, hk⟩ hx0 hxN hy0 hyN
+      have hk1 : k < 1 := by nlinarith
+      have hk2 : -1 < k := by nlinarith
+      have hk0 : k = 0 := by omega
+      rw [hk0, mul_zero] at hk
+      omega
+    refine hij (Fin.ext ?_)
+    have e1 : (i : ℕ) % N = (j : ℕ) % N := by
+      have := hkey _ _ hd1 (by positivity) (by exact_mod_cast Nat.mod_lt _ hposN)
+        (by positivity) (by exact_mod_cast Nat.mod_lt _ hposN)
+      exact_mod_cast this
+    have e2 : (i : ℕ) / N = (j : ℕ) / N := by
+      have := hkey _ _ hd2 (by positivity)
+        (by exact_mod_cast Nat.div_lt_of_lt_mul (by simpa [pow_two] using i.2))
+        (by positivity)
+        (by exact_mod_cast Nat.div_lt_of_lt_mul (by simpa [pow_two] using j.2))
+      exact_mod_cast this
+    have hi := Nat.div_add_mod (i : ℕ) N
+    have hj := Nat.div_add_mod (j : ℕ) N
+    rw [e1, e2] at hi
+    exact hi.symm.trans hj
+
 end EllipticCurve
 
 end ModularCurves
