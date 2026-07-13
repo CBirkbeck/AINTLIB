@@ -310,7 +310,7 @@ lemma petN_toCuspForm_eq_zero_of_ne {f g : Newform N k} (hfg : f ≠ g) :
     -- Some good-prime eigenvalue differs, else `f = g` by Strong Multiplicity One + Task-2.
     have : ∃ n : ℕ+, Nat.Coprime n.val N ∧ f.eigenvalue n ≠ g.eigenvalue n := by
       by_contra hcon
-      push_neg at hcon
+      push Not at hcon
       refine hfg (ext_of_toCuspForm (strongMultiplicityOne f g g.χ
         (hχ ▸ f.mem_charSpace) g.mem_charSpace ∅ fun n hn _ => hcon n hn))
     obtain ⟨n, hn, hne⟩ := this

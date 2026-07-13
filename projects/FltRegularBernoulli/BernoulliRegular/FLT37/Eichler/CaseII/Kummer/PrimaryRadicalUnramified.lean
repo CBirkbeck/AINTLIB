@@ -325,7 +325,7 @@ lemma separable_poly_local {L : Type*} [Field L] [Algebra K L]
   obtain ⟨v, hv⟩ :
       Associated (hζ.toInteger - 1 : 𝓞 K)
         ((hζ.toInteger : 𝓞 K) ^ n - (hζ.toInteger : 𝓞 K) ^ m) := by
-    refine hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    refine hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       hpri.out ?_ ?_ ?_
     · rw [Finset.mem_coe, mem_nthRootsFinset (NeZero.pos p), ← pow_mul, mul_comm, pow_mul,
         hζ.toInteger_isPrimitiveRoot.pow_eq_one, one_pow]

@@ -145,7 +145,7 @@ theorem badPrimes_primeRestrict_eq {p : ℕ} (hp : p.Prime) (F G : ℕ → ℂ) 
     badPrimes (IsMultiplicative'.primeRestrict p F) (IsMultiplicative'.primeRestrict p G) =
       badPrimes F G \ {p} := by
   ext q
-  simp only [badPrimes, Set.mem_setOf_eq, Set.mem_diff, Set.mem_singleton_iff]
+  simp only [badPrimes, Set.mem_setOf_eq, Set.mem_sdiff, Set.mem_singleton_iff]
   constructor
   · rintro ⟨hq, a, ha1, hne⟩
     -- `q` separates the restrictions ⟹ `q ≠ p` (else both sides are `0`) and `q` separates `F,G`.
@@ -179,7 +179,7 @@ theorem not_equiv'_primeRestrict {p : ℕ} (hp : p.Prime) {F G : ℕ → ℂ}
     ¬ Equiv' (IsMultiplicative'.primeRestrict p F) (IsMultiplicative'.primeRestrict p G) := by
   rw [not_equiv'_iff] at h ⊢
   rw [badPrimes_primeRestrict_eq hp]
-  exact h.diff (Set.finite_singleton p)
+  exact h.sdiff (Set.finite_singleton p)
 
 /-- The prime-restriction `F^{(p)}` satisfies the **same** prime-power recurrence as `F`, except the
 weight is forced to vanish at the deleted prime `p` (`w' q = if q = p then 0 else w q`).  At `q = p`

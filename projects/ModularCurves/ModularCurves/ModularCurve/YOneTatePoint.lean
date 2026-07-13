@@ -213,7 +213,7 @@ theorem factors_yOne_iff [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R))
       rw [Nat.mem_properDivisors] at hdmem
       by_cases hd3 : d ≤ 3
       · exact tatePoint_nowhereGeomOrderLEThree R k (τ ≫ t) d hd0 hd3 hdkill
-      · push_neg at hd3
+      · push Not at hd3
         set cp := IsLocalRing.closedPoint k with hcp
         have hxres : (d : ℤ) • EllipticCurve.Point.pull (tateUniversal R)
             ((tateBase R).fromSpecResidueField ((τ ≫ t).base cp)) (tatePoint R) = 0 :=
@@ -224,7 +224,7 @@ theorem factors_yOne_iff [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R))
           ((tateUniversal R).mem_killedLocus_range_iff (tatePoint R) d ((τ ≫ t).base cp)).mpr hxres
         have hy : g.base (τ.base cp) ∈ yOneSet R N := hrange ⟨τ.base cp, rfl⟩
         rw [yOneSet, Set.mem_compl_iff, Set.mem_iUnion₂] at hy
-        push_neg at hy
+        push Not at hy
         refine hy d (by rw [Finset.mem_filter, Nat.mem_properDivisors]
                         exact ⟨⟨hdmem.1, hdmem.2⟩, hd3⟩) ?_
         have hgt : ((tateUniversal R).killedLocusπ (tatePoint R) N).base (g.base (τ.base cp))

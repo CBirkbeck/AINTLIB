@@ -139,7 +139,7 @@ theorem congr_id_trans (C : SmoothPlaneCurve F) (L : Type*) [Field L] [Algebra F
           (A₁ := C.toAffine.CoordinateRing))).trans
         (Algebra.TensorProduct.congr τ (AlgEquiv.refl (R := F)
           (A₁ := C.toAffine.CoordinateRing))) := by
-  apply AlgEquiv.coe_algHom_injective
+  apply AlgEquiv.coe_toAlgHom_injective
   apply Algebra.TensorProduct.ext'
   intro l u
   simp [Algebra.TensorProduct.congr_apply]
@@ -1055,7 +1055,7 @@ theorem towerTensorIncl_congr (R : Type*) [CommRing R] [Algebra F R]
       rw [Algebra.TensorProduct.congr_apply, Algebra.TensorProduct.map_tmul,
         towerTensorIncl_tmul, towerTensorIncl_tmul, Algebra.TensorProduct.congr_apply,
         Algebra.TensorProduct.map_tmul]
-      simp only [AlgEquiv.coe_refl, id_eq, AlgEquiv.coe_algHom]
+      simp only [AlgEquiv.coe_refl, id_eq, AlgEquiv.coe_toAlgHom]
       rw [hστ m]
   | add x y hx hy => rw [map_add, map_add, map_add, map_add, hx, hy]
 

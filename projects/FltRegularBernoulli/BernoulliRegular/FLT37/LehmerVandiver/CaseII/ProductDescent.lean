@@ -822,7 +822,7 @@ the K⁺-trace difference algebraMap image satisfies
 in `𝓞 K`. This is the **first-step factorization** for absorbing the
 K⁺-trace-difference coefficient `γ_η₁ - γ_η₂` as a product of differences of
 roots of unity (each `Associated (ζ - 1)` by
-`ntRootsFinset_pairwise_associated_sub_one_sub_of_prime`),
+`nthRootsFinset_pairwise_associated_sub_one_sub_of_prime`),
 on the way to the Fermat sum identity with unit coefficients. -/
 theorem caseII_eta_trace_diff_factorization
     {η₁ η₂ : 𝓞 K} (hη₁ : η₁ ^ 37 = 1) (hη₂ : η₂ ^ 37 = 1) :
@@ -834,7 +834,7 @@ omit [NumberField.IsCMField K] in
 /-- **K⁺-trace difference Associated `(ζ - 1)²` in `𝓞 K`.** Combining
 `caseII_eta_trace_diff_factorization`
 `(γ_η₁ - γ_η₂) = (η₁ - η₂) · (1 - η₁^36·η₂^36)` with the mathlib lemma
-`ntRootsFinset_pairwise_associated_sub_one_sub_of_prime` (applied to each factor as a
+`nthRootsFinset_pairwise_associated_sub_one_sub_of_prime` (applied to each factor as a
 difference of `nthRootsFinset 37`-members), each factor is `Associated (ζ - 1)`, so the
 product is `Associated (ζ - 1)²`. Caveats: requires `η₁ ≠ η₂` (so first factor is nonzero
 diff) and `η₁·η₂ ≠ 1` (so second factor's other member is ≠ 1 — equivalently
@@ -850,7 +850,7 @@ theorem caseII_eta_trace_diff_associated_zeta_sub_one_sq
       (((zeta_spec 37 ℚ K).toInteger - 1) ^ 2) := by
   rw [caseII_eta_trace_diff_factorization hη₁ hη₂]
   have h1 : Associated ((zeta_spec 37 ℚ K).toInteger - 1) (η₁ - η₂) :=
-    hζ.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    hζ.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       (by decide : Nat.Prime 37)
       ((Polynomial.mem_nthRootsFinset (by norm_num) _).mpr hη₁)
       ((Polynomial.mem_nthRootsFinset (by norm_num) _).mpr hη₂) hne
@@ -871,7 +871,7 @@ theorem caseII_eta_trace_diff_associated_zeta_sub_one_sq
         pow_mul, pow_mul, hη₁, hη₂]
       simp)
   have h2 : Associated ((zeta_spec 37 ℚ K).toInteger - 1) (1 - η₁ ^ 36 * η₂ ^ 36) :=
-    hζ.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+    hζ.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
       (by decide : Nat.Prime 37) hmem1 hmem_prod hprod36.symm
   rw [sq]
   exact (h1.mul_mul h2).symm
@@ -4507,14 +4507,14 @@ theorem caseII_K_trace_sub_two_eq {m : ℕ} (_D : RealCaseIIData37 K m)
   ring
 
 /-- **`Associated (η - 1) (ζ - 1)`** for a 37th root `η ≠ 1`. Instance of mathlib's
-`ntRootsFinset_pairwise_associated_sub_one_sub_of_prime` (associate of `ζ-1` with any
+`nthRootsFinset_pairwise_associated_sub_one_sub_of_prime` (associate of `ζ-1` with any
 difference `η₁ - η₂` of distinct 37th roots), taking `η₁ = η`, `η₂ = 1`. -/
 theorem caseII_root_sub_one_associated {m : ℕ} (D : RealCaseIIData37 K m)
     (η : nthRootsFinset 37 (1 : 𝓞 K)) (hη_ne : (η : 𝓞 K) ≠ 1) :
     Associated ((η : 𝓞 K) - 1) (D.hζ.toInteger - 1) := by
   have h1mem : (1 : 𝓞 K) ∈ nthRootsFinset 37 (1 : 𝓞 K) :=
     one_mem_nthRootsFinset (by norm_num)
-  have hpair := D.hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+  have hpair := D.hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
     (by decide : Nat.Prime 37) η.2 h1mem hη_ne
   exact hpair.symm
 

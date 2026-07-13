@@ -182,7 +182,7 @@ theorem caseII_coprime_two_root_factor_mem_forces_p
     have hne : (ζ ^ j : 𝓞 (CyclotomicField 37 ℚ)) ≠ ζ ^ k :=
       fun h ↦ hjk (D.hζ.toInteger_isPrimitiveRoot.pow_inj hj hk h)
     have hassoc : Associated (ζ - 1) (ζ ^ j - ζ ^ k) :=
-      D.hζ.toInteger_isPrimitiveRoot.ntRootsFinset_pairwise_associated_sub_one_sub_of_prime
+      D.hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
         (by decide : Nat.Prime 37) hmem_j' hmem_k' hne
     obtain ⟨t, ht⟩ := hassoc.symm.dvd
     rw [ht]

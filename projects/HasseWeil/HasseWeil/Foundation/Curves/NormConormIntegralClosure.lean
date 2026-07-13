@@ -493,7 +493,7 @@ private theorem centerIdealOnC₁_isPrime
   · intro a b hab
     rw [mem_centerIdealOnC₁, map_mul, w.map_mul] at hab
     by_contra h
-    push_neg at h
+    push Not at h
     obtain ⟨ha, hb⟩ := h
     rw [mem_centerIdealOnC₁, not_lt] at ha hb
     have ha1 : w (algebraMap C₁.CoordinateRing C₁.FunctionField a) = 1 :=
@@ -1658,7 +1658,7 @@ private theorem finrank_fractionRing_B_eq_of_liftAlgebra
   apply IsLocalization.ringHom_ext (nonZeroDivisors C₂.CoordinateRing)
   refine RingHom.ext fun a => ?_
   simp only [RingHom.comp_apply, RingEquiv.toRingHom_eq_coe, RingEquiv.coe_toRingHom,
-    RingEquiv.refl_apply, AlgEquiv.toRingEquiv_eq_coe, AlgEquiv.coe_ringEquiv]
+    RingEquiv.refl_apply, AlgEquiv.coe_ringEquiv]
   rw [← IsScalarTower.algebraMap_apply C₂.CoordinateRing (FractionRing C₂.CoordinateRing)
       (FractionRing (B (C₁ := C₁) (C₂ := C₂))),
     IsScalarTower.algebraMap_apply C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂))

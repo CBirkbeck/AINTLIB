@@ -154,11 +154,11 @@ theorem xy_family_of_pullbackEvaluation_twoCurve [IsAlgClosed F]
           EvaluatesTo W₁ P By c) := by
       intro P hP
       rw [Set.mem_union, Set.mem_union] at hP
-      push_neg at hP
+      push Not at hP
       obtain ⟨⟨hP1, hP2⟩, hP3⟩ := hP
       rw [Set.mem_setOf_eq, not_not] at hP2
       rw [Set.mem_setOf_eq] at hP3
-      push_neg at hP3
+      push Not at hP3
       -- the witness at the translated point `P + k`
       obtain ⟨xI, yI, hI, heqI, hxI, hyI⟩ := hw (P.translate_of_finite Sk hP2) (hP3 hP2)
       have hι : (P.translate_of_finite Sk hP2).toAffinePoint = P.toAffinePoint + Sk :=

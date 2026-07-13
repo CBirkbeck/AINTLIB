@@ -120,7 +120,7 @@ theorem frobeniusGalois_baseChange_map_eq :
   ext x
   change (FiniteField.frobeniusAlgEquivOfAlgebraic K (AlgebraicClosure K)).toAlgHom.toRingHom.comp
       (algebraMap K (AlgebraicClosure K)) x = algebraMap K (AlgebraicClosure K) x
-  simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, AlgEquiv.coe_algHom]
+  simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, AlgEquiv.coe_toAlgHom]
   exact (FiniteField.frobeniusAlgEquivOfAlgebraic K (AlgebraicClosure K)).commutes x
 
 /-- **`CoordinateRing.map e` is surjective** for a ring **equiv** `e` of the base field: every

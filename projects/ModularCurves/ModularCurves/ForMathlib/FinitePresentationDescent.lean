@@ -501,7 +501,7 @@ theorem t2Space_constructibleTopology {R : Type*} [CommRing R] :
   have h0 : p.asIdeal ≠ q.asIdeal := fun h => hpq (PrimeSpectrum.ext h)
   obtain ⟨f, hf⟩ : ∃ f, ¬(f ∈ p.asIdeal ↔ f ∈ q.asIdeal) := by
     by_contra hc
-    push_neg at hc
+    push Not at hc
     exact h0 (SetLike.ext fun f => hc f)
   have hbasic : IsOpen[constructibleTopology (PrimeSpectrum R)]
       (PrimeSpectrum.basicOpen f : Set (PrimeSpectrum R)) :=
@@ -1163,7 +1163,7 @@ theorem SpreadData.exists_faithfullyFlat_stage (D : SpreadData 𝒮 u B)
         Set.range (PrimeSpectrum.comap
           (algebraMap (𝒮 i₁) (D.spreadStage (t := t) h₁))) := by
     by_contra hc
-    push_neg at hc
+    push Not at hc
     have hWpatch := hW.isOpen_isClosed_constructibleTopology
     haveI hcs : @CompactSpace (PrimeSpectrum (𝒮 i₁)) (constructibleTopology _) :=
       compactSpace_constructibleTopology

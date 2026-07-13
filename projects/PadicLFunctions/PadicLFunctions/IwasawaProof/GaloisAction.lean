@@ -227,7 +227,7 @@ theorem orderOf_galAut_neg_one (hp2 : p ≠ 2) {n : ℕ} (hn : 1 ≤ n) :
         = (1 : (K p n) ≃ₐ[ℚ_[p]] (K p n)) ⟨zetaSys p n, zetaSys_mem_K p n⟩ :=
       Subtype.ext (by rw [hξ]; rfl)
     have heq : (galAut p (-1) n ^ 2) = (1 : (K p n) ≃ₐ[ℚ_[p]] (K p n)) := by
-      apply AlgEquiv.coe_algHom_injective
+      apply AlgEquiv.coe_toAlgHom_injective
       apply AlgHom.ext_of_adjoin_eq_top (adjoin_zetaSysK_eq_top p n)
       rintro z (rfl : z = ⟨zetaSys p n, zetaSys_mem_K p n⟩)
       exact hcongr

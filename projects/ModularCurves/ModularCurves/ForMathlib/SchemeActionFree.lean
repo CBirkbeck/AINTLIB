@@ -51,7 +51,7 @@ theorem isFreeAlgebraAction_of_free {U : X.Opens} (hU : σ.IsStableOpen U)
   letI := σ.gammaMulSemiringAction hU
   intro γ hγ R' _ _ _ φ
   by_contra hcon
-  push_neg at hcon
+  push Not at hcon
   -- `φ` is `γ`-invariant, hence `Spec φ` equalises the action
   have hring : (CommRingCat.ofHom (MulSemiringAction.toRingHom G (↑Γ(X, U)) γ)) ≫
       CommRingCat.ofHom φ.toRingHom = CommRingCat.ofHom φ.toRingHom := by
