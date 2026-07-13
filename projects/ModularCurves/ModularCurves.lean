@@ -27,6 +27,7 @@ import ModularCurves.EllipticCurve.PointsDictionary
 import ModularCurves.EllipticCurve.MulByHomEtale
 import ModularCurves.EllipticCurve.MulByHomQuasiFinite
 import ModularCurves.EllipticCurve.PoleSheaf
+import ModularCurves.EllipticCurve.PoleSheafQuasicoherent
 import ModularCurves.EllipticCurve.RecordGroupUnique
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.WeierstrassModel
