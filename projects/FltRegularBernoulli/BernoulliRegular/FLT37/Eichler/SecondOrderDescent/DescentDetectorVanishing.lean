@@ -138,7 +138,7 @@ theorem samePrimeFiniteLogTerm_eq_zero_of_mem_pow_high_level
       · -- `n ≥ 3`: `2m + (n-1) ≤ n*m`, and `v(n)(p-1) ≤ n-1`.
         have hprod : (n - 2) * 2 ≤ (n - 2) * m := Nat.mul_le_mul_left _ hm
         have hexp : n * m = 2 * m + (n - 2) * m := by
-          conv_lhs => rw [show n = 2 + (n - 2) from by omega]
+          conv_lhs => rw [show n = 2 + (n - 2) by omega]
           rw [add_mul]
         omega
     omega
@@ -208,7 +208,7 @@ theorem valuedLambdaQuotientDworkCoeffModSq_mk_eq_zero_of_mem_pow
     valuedLambdaQuotientDworkCoeffModSq (p := p) (K := K) k
         (Ideal.Quotient.mk ((lambdaIdeal p K) ^ (2 * (p - 1))) z) = 0 := by
   rw [show Ideal.Quotient.mk ((lambdaIdeal p K) ^ (2 * (p - 1))) z =
-      (0 : ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (2 * (p - 1))) from by
+      (0 : ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (2 * (p - 1))) by
     rw [Ideal.Quotient.eq_zero_iff_mem]; exact hz]
   exact valuedLambdaQuotientDworkCoeffModSq_zero (p := p) (K := K) k
 
@@ -228,11 +228,6 @@ u`) has its `varpi^32` mod-`37²` Dwork coordinate equal to `0`, via the split
 `X^{36} - 1 = (X^{36} - c^{36}) + (c^{36} - 1)` with the non-constant part in `λ^{72}` (proven) and
 the constant `c^{36} - 1` contributing only to `varpi^0`. -/
 
-set_option maxHeartbeats 2000000 in
--- The membership ideal `(lambdaIdeal)^(2*(37-1))` over the heavy `adicCompletionIntegers` ring
--- forces
--- a `whnf`/`isDefEq` above the default budget; the §1 coordinate lemmas dodge it but the assembly
--- needs the raised limit (well below the non-terminating `Ideal.pow` `whnf` wall).
 /-- **The `varpi^32` mod-`37²` coordinate of the descent log argument is `0`** (proven,
 axiom-clean).
 For `u : (𝓞 K⁺)ˣ` with `37² ∣ algebraMap u - c`, the `varpi^32` mod-`37²` Dwork coordinate of the
@@ -256,7 +251,7 @@ theorem caseIICor823SecondOrder_argCoeffModSq_eq_zero
         (Ideal.Quotient.mk ((lambdaIdeal 37 (CyclotomicField 37 ℚ)) ^ (2 * (37 - 1)))
           ((EPlus_valuedLocalImage (p := 37) (K := CyclotomicField 37 ℚ) u :
               ValuedIntegerRing 37 (CyclotomicField 37 ℚ)) ^ 36 - 1)) = 0 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   set X : ValuedIntegerRing 37 (CyclotomicField 37 ℚ) :=
     (EPlus_valuedLocalImage (p := 37) (K := CyclotomicField 37 ℚ) u :
       ValuedIntegerRing 37 (CyclotomicField 37 ℚ)) with hX
@@ -286,7 +281,7 @@ theorem caseIICor823SecondOrder_argCoeffModSq_eq_zero
       (Ideal.Quotient.mk ((lambdaIdeal 37 (CyclotomicField 37 ℚ)) ^ (2 * (37 - 1)))
         ((c : ValuedIntegerRing 37 (CyclotomicField 37 ℚ)) ^ 36 - 1)) = 0 := by
     rw [show ((c : ValuedIntegerRing 37 (CyclotomicField 37 ℚ)) ^ 36 - 1) =
-        (((c ^ 36 - 1 : ℤ) : ValuedIntegerRing 37 (CyclotomicField 37 ℚ))) from by
+        (((c ^ 36 - 1 : ℤ) : ValuedIntegerRing 37 (CyclotomicField 37 ℚ))) by
           push_cast; ring]
     exact valuedLambdaQuotientDworkCoeffModSq_mk_intCast_eq_zero (p := 37) k (by rw [hk]; decide)
       (c ^ 36 - 1)
@@ -314,7 +309,6 @@ def caseIICor823DescentDetectorSq
       (completedLog (p := 37) (K := CyclotomicField 37 ℚ)
         (EPlus_completedLogDomainPowPred (p := 37) (K := CyclotomicField 37 ℚ) u)))
 
-set_option maxHeartbeats 2000000 in
 /-- **The mod-`37²` `varpi^32` detector of the descent logarithm vanishes** (proven, axiom-clean).
 For `u : (𝓞 K⁺)ˣ` with `37² ∣ algebraMap u - c`, the named descent detector
 `caseIICor823DescentDetectorSq u` (the mod-`37²` `varpi^32` coordinate of `evalₐ 72
@@ -336,7 +330,7 @@ theorem caseIICor823SecondOrder_detector_descent_eq_zero
           (𝓞 (CyclotomicField 37 ℚ))).toMonoidHom u : (𝓞 (CyclotomicField 37 ℚ))ˣ) -
         (c : 𝓞 (CyclotomicField 37 ℚ)))) :
     caseIICor823DescentDetectorSq u = 0 := by
-  haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
+  have : Fact (Nat.Prime 37) := ⟨by decide⟩
   -- Unfold the named detector to its underlying coefficient (syntactic `unfold`, no `whnf` of the
   -- heavy `adicCompletionIntegers` `Ideal.pow`).
   unfold caseIICor823DescentDetectorSq
