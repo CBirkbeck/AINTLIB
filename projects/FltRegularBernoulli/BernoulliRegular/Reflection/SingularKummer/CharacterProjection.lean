@@ -98,16 +98,8 @@ theorem map_projection_range_eq_range_of_surjective
     (c : Delta p → ZMod p) :
     Submodule.map f (LinearMap.range (projection (p := p) ρM c)) =
       LinearMap.range (projection (p := p) ρN c) := by
-  ext y
-  constructor
-  · rintro ⟨x, hx, rfl⟩
-    obtain ⟨m, rfl⟩ := hx
-    exact ⟨f m, (map_projection_apply (p := p) ρM ρN f hf c m).symm⟩
-  · rintro ⟨n, rfl⟩
-    obtain ⟨m, rfl⟩ := hf_surj n
-    exact
-      ⟨projection (p := p) ρM c m, ⟨m, rfl⟩,
-        map_projection_apply (p := p) ρM ρN f hf c m⟩
+  rw [← LinearMap.range_comp, projection_commute (p := p) ρM ρN f hf c]
+  exact LinearMap.range_comp_of_range_eq_top _ (LinearMap.range_eq_top.mpr hf_surj)
 
 /-- The previous range-surjectivity statement for the standard `i`-th
 character projection. -/
