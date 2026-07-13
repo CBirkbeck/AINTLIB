@@ -31,7 +31,6 @@ theorem ringOfIntegers_faithfullyFlat_maximalRealSubfield
     Module.FaithfullyFlat (𝓞 (NumberField.maximalRealSubfield L)) (𝓞 L) := by
   let R := 𝓞 (NumberField.maximalRealSubfield L)
   let S := 𝓞 L
-  haveI : Module.Flat R S := inferInstance
   have hsurj : Function.Surjective (PrimeSpectrum.comap (algebraMap R S)) := by
     intro q
     obtain ⟨⟨Q, hQprime, hQover⟩⟩ := q.asIdeal.nonempty_primesOver (S := S)
@@ -47,7 +46,7 @@ theorem map_comap_eq_ringOfIntegers
         (algebraMap (𝓞 (NumberField.maximalRealSubfield L)) (𝓞 L)) = J := by
   let R := 𝓞 (NumberField.maximalRealSubfield L)
   let S := 𝓞 L
-  letI : Module.FaithfullyFlat R S := ringOfIntegers_faithfullyFlat_maximalRealSubfield L
+  let _ : Module.FaithfullyFlat R S := ringOfIntegers_faithfullyFlat_maximalRealSubfield L
   simpa using Ideal.comap_map_eq_self_of_faithfullyFlat (A := R) (B := S) J
 
 /-- If `I · 𝒪_K = (b)` with `b` descending from `𝒪_{K⁺}`, then `I` is principal. -/
@@ -71,8 +70,11 @@ theorem isPrincipal_of_map_eq_span_singleton_of_mem
     _ = Ideal.span {b₀} := hspan
 
 include hp_odd in
-/-- Assembled proof of Diekmann Prop. 55 / Washington Thm. 4.14. -/
-theorem isPrincipal_of_isPrincipal_map_Kplus' [IsCMField K]
+/-- **Diekmann Prop. 55** (cf. Washington Thm. 4.14).
+
+If an ideal of `𝒪_{K⁺}` becomes principal after extension to `𝒪_K`, then it
+was already principal. -/
+theorem isPrincipal_of_isPrincipal_map_Kplus [IsCMField K]
     (I : Ideal (𝓞 (K⁺)))
     (hI : (I.map (algebraMap (𝓞 (K⁺)) (𝓞 K))).IsPrincipal) :
     I.IsPrincipal := by
@@ -103,17 +105,6 @@ theorem isPrincipal_of_isPrincipal_map_Kplus' [IsCMField K]
     rw [hIa, ← hb_span]
   rw [← hb₀] at hspan
   exact isPrincipal_of_map_eq_span_singleton_of_mem K I b₀ hspan
-
-include hp_odd in
-/-- **Diekmann Prop. 55** (cf. Washington Thm. 4.14).
-
-If an ideal of `𝒪_{K⁺}` becomes principal after extension to `𝒪_K`, then it
-was already principal. -/
-theorem isPrincipal_of_isPrincipal_map_Kplus [IsCMField K]
-    (I : Ideal (𝓞 (K⁺)))
-    (hI : (I.map (algebraMap (𝓞 (K⁺)) (𝓞 K))).IsPrincipal) :
-    I.IsPrincipal :=
-  isPrincipal_of_isPrincipal_map_Kplus' (p := p) (hp_odd := hp_odd) (K := K) I hI
 
 /-- The natural monoid homomorphism `Cl(𝒪_{K⁺}) → Cl(𝒪_K)` induced by the
 inclusion `𝒪_{K⁺} ↪ 𝒪_K`. -/
