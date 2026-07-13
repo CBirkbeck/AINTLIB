@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.LevelStructure.CartierDivisor
 import ModularCurves.Picard.Dual
 import ModularCurves.Picard.DualPullback.Iso
+import ModularCurves.Picard.DualRestrict
 import ModularCurves.Picard.Pic
 import ModularCurves.Picard.UnitPullback
 import ModularCurves.ForMathlib.PullbackTensorGeneral
@@ -1651,6 +1652,24 @@ noncomputable def sectionPoleSheaf {C S : Scheme.{u}} (π : C ⟶ S)
     [IsSeparated π] (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) : C.Modules :=
   Scheme.Modules.dualObj (sectionIdealModule π z hz)
 
+/-- The pole sheaf of a section commutes with restriction along an open
+immersion of the base. -/
+noncomputable def sectionPoleSheafRestrictIso
+    {C S T : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (t : T ⟶ S) [IsOpenImmersion t] :
+    (Scheme.Modules.restrictFunctor (pullback.fst π t)).obj
+        (sectionPoleSheaf π z hz) ≅
+      sectionPoleSheaf (pullback.snd π t) (sectionBaseChange z hz t)
+        (sectionBaseChange_snd z hz t) := by
+  letI : IsOpenImmersion (pullback.fst π t) :=
+    MorphismProperty.pullback_fst π t inferInstance
+  letI : IsSeparated (pullback.snd π t) :=
+    MorphismProperty.pullback_snd π t inferInstance
+  exact Scheme.Modules.dualRestrictIso
+      (sectionIdealModule π z hz) (pullback.fst π t) ≪≫
+    (Scheme.Modules.dualIsoObj
+      (sectionIdealModuleRestrictIso z hz t)).symm
+
 /-- The simple-pole sheaf of a smooth separated relative curve commutes with
 arbitrary base change. -/
 noncomputable def sectionPoleSheafBaseChangeIso
@@ -1719,6 +1738,42 @@ noncomputable def sectionPoleSheafPowerBaseChangeIso
           (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz)).symm ≪≫
         (sectionPoleSheafPowerBaseChangeIso hsm z hz t n ⊗ᵢ
           sectionPoleSheafBaseChangeIso hsm z hz t)
+
+/-- Every tensor power of the pole sheaf commutes with restriction along an
+open immersion of the base. -/
+noncomputable def sectionPoleSheafPowerRestrictIso
+    {C S T : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (t : T ⟶ S) [IsOpenImmersion t] :
+    ∀ n : ℕ,
+      (Scheme.Modules.restrictFunctor (pullback.fst π t)).obj
+          (sectionPoleSheafPower π z hz n) ≅
+        sectionPoleSheafPower (pullback.snd π t)
+          (sectionBaseChange z hz t) (sectionBaseChange_snd z hz t) n
+  | 0 => by
+      letI : IsOpenImmersion (pullback.fst π t) :=
+        MorphismProperty.pullback_fst π t inferInstance
+      letI : (Scheme.Modules.pullback (pullback.fst π t)).Monoidal :=
+        Scheme.Modules.pullbackMonoidal (pullback.fst π t)
+      letI : (Scheme.Modules.restrictFunctor (pullback.fst π t)).Monoidal :=
+        Functor.Monoidal.transport
+          (Scheme.Modules.restrictFunctorIsoPullback (pullback.fst π t)).symm
+      exact (Functor.Monoidal.εIso
+        (Scheme.Modules.restrictFunctor (pullback.fst π t))).symm
+  | n + 1 => by
+      letI : IsOpenImmersion (pullback.fst π t) :=
+        MorphismProperty.pullback_fst π t inferInstance
+      letI : IsSeparated (pullback.snd π t) :=
+        MorphismProperty.pullback_snd π t inferInstance
+      letI : (Scheme.Modules.pullback (pullback.fst π t)).Monoidal :=
+        Scheme.Modules.pullbackMonoidal (pullback.fst π t)
+      letI : (Scheme.Modules.restrictFunctor (pullback.fst π t)).Monoidal :=
+        Functor.Monoidal.transport
+          (Scheme.Modules.restrictFunctorIsoPullback (pullback.fst π t)).symm
+      exact (Functor.Monoidal.μIso
+          (Scheme.Modules.restrictFunctor (pullback.fst π t))
+          (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz)).symm ≪≫
+        (sectionPoleSheafPowerRestrictIso z hz t n ⊗ᵢ
+          sectionPoleSheafRestrictIso z hz t)
 
 /-- The localized monoidal unit is the structure sheaf. -/
 private noncomputable def monoidalUnitObjIso (X : Scheme.{u}) :
