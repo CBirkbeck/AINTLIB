@@ -6,8 +6,6 @@ public import Mathlib.NumberTheory.NumberField.InfinitePlace.Ramification
 /-!
 # Unit quotients: logarithmic embedding and permutation action
 
-This file proves `REF-07c2`.
-
 The Dirichlet logarithmic embedding in mathlib uses a deleted coordinate
 `NumberField.Units.logSpace K`, where one infinite place is omitted.  That
 space is convenient for Dirichlet's unit theorem, but it is not literally
@@ -34,6 +32,9 @@ open scoped NumberField
 
 namespace BernoulliRegular
 
+-- Hides 1 warning: `cyclotomicFullLogEmbedding_apply` does not use `[NumberField K]`.
+-- Removing it needs `omit`, which drops that binder and so changes the statement —
+-- that is generalisation work (see the linter-suppression census), not cleanup.
 set_option linter.unusedSectionVars false
 
 variable (p : ℕ) [Fact p.Prime]
