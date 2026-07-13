@@ -159,6 +159,49 @@ theorem homOfLE_localQuotientOpenπ {W W' : E.E.Opens} (hW : G.IsStableOpen W)
             map_add' := fun x y => Subtype.ext (map_add _ _ _) }) :=
         (Category.assoc _ _ _).symm
 
+/-- **The quotient projection coequalizes the restricted action pair** — the eqLocus does
+so by definition, transported to schemes by `toSpecΓ` naturality (`toSpecΓ_SpecMap_appLE`). -/
+theorem restrictedAction_localQuotientOpenπ {W : E.E.Opens} (hW : G.IsStableOpen W) :
+    G.restrictedAction hW ≫ G.localQuotientOpenπ hW
+      = G.restrictedProj W ≫ G.localQuotientOpenπ hW := by
+  have hring : CommRingCat.ofHom (G.quotientRing hW).subtype ≫ G.actRing hW
+      = CommRingCat.ofHom (G.quotientRing hW).subtype ≫ G.prRing W := by
+    ext x
+    exact x.2
+  have hactnat := Scheme.Opens.toSpecΓ_SpecMap_appLE G.translationAction.left W
+    (G.actionProj.left ⁻¹ᵁ W) hW
+  have hprnat := Scheme.Opens.toSpecΓ_SpecMap_appLE G.actionProj.left W
+    (G.actionProj.left ⁻¹ᵁ W) le_rfl
+  show G.restrictedAction hW ≫ W.toSpecΓ ≫
+      Spec.map (CommRingCat.ofHom (G.quotientRing hW).subtype)
+    = G.restrictedProj W ≫ W.toSpecΓ ≫
+      Spec.map (CommRingCat.ofHom (G.quotientRing hW).subtype)
+  calc G.restrictedAction hW ≫ W.toSpecΓ ≫
+        Spec.map (CommRingCat.ofHom (G.quotientRing hW).subtype)
+      = (G.restrictedAction hW ≫ W.toSpecΓ) ≫
+          Spec.map (CommRingCat.ofHom (G.quotientRing hW).subtype) :=
+        (Category.assoc _ _ _).symm
+    _ = ((G.actionProj.left ⁻¹ᵁ W).toSpecΓ ≫ Spec.map (G.actRing hW)) ≫
+          Spec.map (CommRingCat.ofHom (G.quotientRing hW).subtype) :=
+        congrArg (· ≫ Spec.map (CommRingCat.ofHom (G.quotientRing hW).subtype)) hactnat.symm
+    _ = (G.actionProj.left ⁻¹ᵁ W).toSpecΓ ≫
+          Spec.map (CommRingCat.ofHom (G.quotientRing hW).subtype ≫ G.actRing hW) :=
+        (Category.assoc _ _ _).trans
+          (congrArg ((G.actionProj.left ⁻¹ᵁ W).toSpecΓ ≫ ·) (Spec.map_comp _ _).symm)
+    _ = (G.actionProj.left ⁻¹ᵁ W).toSpecΓ ≫
+          Spec.map (CommRingCat.ofHom (G.quotientRing hW).subtype ≫ G.prRing W) :=
+        congrArg (fun m => (G.actionProj.left ⁻¹ᵁ W).toSpecΓ ≫ Spec.map m) hring
+    _ = ((G.actionProj.left ⁻¹ᵁ W).toSpecΓ ≫ Spec.map (G.prRing W)) ≫
+          Spec.map (CommRingCat.ofHom (G.quotientRing hW).subtype) :=
+        (congrArg ((G.actionProj.left ⁻¹ᵁ W).toSpecΓ ≫ ·) (Spec.map_comp _ _)).trans
+          (Category.assoc _ _ _).symm
+    _ = (G.restrictedProj W ≫ W.toSpecΓ) ≫
+          Spec.map (CommRingCat.ofHom (G.quotientRing hW).subtype) :=
+        congrArg (· ≫ Spec.map (CommRingCat.ofHom (G.quotientRing hW).subtype)) hprnat
+    _ = G.restrictedProj W ≫ W.toSpecΓ ≫
+          Spec.map (CommRingCat.ofHom (G.quotientRing hW).subtype) :=
+        Category.assoc _ _ _
+
 /-! ### Step 3 — the per-patch comparison with the Hopf model -/
 
 namespace AffineChartPatch
