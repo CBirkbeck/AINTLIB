@@ -2900,6 +2900,162 @@ theorem _root_.AlgebraicGeometry.exists_smul_algHom_eq
   rw [map_sub, AlgHom.commutes, sub_eq_zero] at hz
   exact hz
 
+/-- **Sections over `k̄` in the same fibre of the chosen projection lie in one
+orbit** ([GHB7-geom-o] scheme level): via the affine model, `Spec`-faithfulness, and
+the `k̄`-point orbit lemma. -/
+theorem QuotPkg.exists_smul_of_π_eq (pkg : ∀ X : EllObj R, QuotPkg φ X)
+    (hfree : FreeAction φ)
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base)))
+    {X : EllObj R} (k : Type u) [Field k] [IsAlgClosed k]
+    (hXb : X.base = Spec (CommRingCat.of k))
+    (h₁ h₂ : X.base ⟶ (pkg X).d.Z)
+    (hf₁ : h₁ ≫ (pkg X).d.f = 𝟙 X.base) (hf₂ : h₂ ≫ (pkg X).d.f = 𝟙 X.base)
+    (hπeq : h₁ ≫ (pkg X).π = h₂ ≫ (pkg X).π) :
+    ∃ γ : G, h₂ = h₁ ≫ (pkg X).d.σZ.hom γ := by
+  haveI := (pkg X).d.finite
+  haveI : IsAffineHom (pkg X).d.f := inferInstance
+  haveI : IsAffine X.base := by rw [hXb]; infer_instance
+  haveI : IsAffine (pkg X).d.Z := isAffine_of_isAffineHom (pkg X).d.f
+  -- the global-sections action
+  have htop : (pkg X).d.σZ.IsStableOpen ⊤ := fun γ => by
+    show ((pkg X).d.σZ.hom γ) ⁻¹ᵁ ⊤ = ⊤
+    simp
+  letI := (pkg X).d.σZ.gammaMulSemiringAction htop
+  -- the `k`-algebra structure through the structure map
+  set ψ : CommRingCat.of k ⟶ Γ((pkg X).d.Z, ⊤) :=
+    Spec.preimage ((pkg X).d.Z.isoSpec.inv ≫ (pkg X).d.f ≫
+      (eqToHom hXb : X.base ⟶ Spec (CommRingCat.of k))) with hψdef
+  have hψ : Spec.map ψ = (pkg X).d.Z.isoSpec.inv ≫ (pkg X).d.f ≫ eqToHom hXb :=
+    Spec.map_preimage _
+  letI : Algebra k ↑Γ((pkg X).d.Z, ⊤) := ψ.hom.toAlgebra
+  have hAlg : algebraMap k ↑Γ((pkg X).d.Z, ⊤) = ψ.hom := rfl
+  -- the action bridge: `Spec` of the smul ring hom is the conjugated action
+  have hbridge : ∀ γ : G, (pkg X).d.Z.isoSpec.hom ≫
+      AlgebraicGeometry.specSMul (G := G) (B := ↑Γ((pkg X).d.Z, ⊤)) γ =
+      (pkg X).d.σZ.hom γ ≫ (pkg X).d.Z.isoSpec.hom := by
+    intro γ
+    have hofHom : CommRingCat.ofHom
+        (MulSemiringAction.toRingHom G ↑Γ((pkg X).d.Z, ⊤) γ) =
+        ((pkg X).d.σZ.hom γ).appTop := by
+      ext b
+      show (((pkg X).d.σZ.hom γ).appLE ⊤ ⊤ (htop γ).ge).hom b =
+        (((pkg X).d.σZ.hom γ).appTop).hom b
+      simp [Scheme.Hom.appLE]
+    rw [AlgebraicGeometry.specSMul, hofHom]
+    exact Scheme.isoSpec_hom_naturality ((pkg X).d.σZ.hom γ)
+  -- the action fixes the `k`-structure
+  have hψinv : ∀ (γ : G) (c : k), γ • (ψ.hom c) = ψ.hom c := by
+    intro γ c
+    have hofHom : CommRingCat.ofHom
+        (MulSemiringAction.toRingHom G ↑Γ((pkg X).d.Z, ⊤) γ) =
+        ((pkg X).d.σZ.hom γ).appTop := by
+      ext b
+      show (((pkg X).d.σZ.hom γ).appLE ⊤ ⊤ (htop γ).ge).hom b =
+        (((pkg X).d.σZ.hom γ).appTop).hom b
+      simp [Scheme.Hom.appLE]
+    have hmapeq : Spec.map (ψ ≫ ((pkg X).d.σZ.hom γ).appTop) = Spec.map ψ := by
+      rw [Spec.map_comp, hψ,
+        show Spec.map ((pkg X).d.σZ.hom γ).appTop =
+          (pkg X).d.Z.isoSpec.inv ≫ (pkg X).d.σZ.hom γ ≫
+            (pkg X).d.Z.isoSpec.hom from by
+          rw [← Scheme.isoSpec_hom_naturality, Iso.inv_hom_id_assoc]]
+      simp only [Category.assoc, Iso.hom_inv_id_assoc]
+      rw [reassoc_of% ((pkg X).d.over_base γ)]
+    have hcomp : ψ ≫ ((pkg X).d.σZ.hom γ).appTop = ψ := Spec.map_injective hmapeq
+    have := congrArg (fun (m : CommRingCat.of k ⟶ Γ((pkg X).d.Z, ⊤)) => m.hom c) hcomp
+    simpa [← hofHom] using this
+  haveI : SMulCommClass G k ↑Γ((pkg X).d.Z, ⊤) := ⟨fun γ c s => by
+    show γ • (c • s) = c • (γ • s)
+    rw [Algebra.smul_def, Algebra.smul_def, hAlg, smul_mul', hψinv γ c]⟩
+  -- the two sections as `k`-points of the coordinate ring
+  set φ₁ : Γ((pkg X).d.Z, ⊤) ⟶ CommRingCat.of k :=
+    Spec.preimage ((eqToHom hXb.symm : Spec (CommRingCat.of k) ⟶ X.base) ≫ h₁ ≫
+      (pkg X).d.Z.isoSpec.hom) with hφ₁def
+  set φ₂ : Γ((pkg X).d.Z, ⊤) ⟶ CommRingCat.of k :=
+    Spec.preimage ((eqToHom hXb.symm : Spec (CommRingCat.of k) ⟶ X.base) ≫ h₂ ≫
+      (pkg X).d.Z.isoSpec.hom) with hφ₂def
+  have hφ₁ : Spec.map φ₁ = (eqToHom hXb.symm : Spec (CommRingCat.of k) ⟶ X.base) ≫
+      h₁ ≫ (pkg X).d.Z.isoSpec.hom := Spec.map_preimage _
+  have hφ₂ : Spec.map φ₂ = (eqToHom hXb.symm : Spec (CommRingCat.of k) ⟶ X.base) ≫
+      h₂ ≫ (pkg X).d.Z.isoSpec.hom := Spec.map_preimage _
+  -- `k`-linearity from the section property
+  have hcommutes : ∀ (hh : X.base ⟶ (pkg X).d.Z)
+      (hhf : hh ≫ (pkg X).d.f = 𝟙 X.base)
+      (φ : Γ((pkg X).d.Z, ⊤) ⟶ CommRingCat.of k)
+      (hφ : Spec.map φ = (eqToHom hXb.symm : Spec (CommRingCat.of k) ⟶ X.base) ≫
+        hh ≫ (pkg X).d.Z.isoSpec.hom), ψ ≫ φ = 𝟙 (CommRingCat.of k) := by
+    intro hh hhf φ hφ
+    apply Spec.map_injective
+    rw [Spec.map_comp, hφ, hψ, Spec.map_id]
+    simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    rw [reassoc_of% hhf]
+    simp [eqToHom_trans]
+  have hc₁ := hcommutes h₁ hf₁ φ₁ hφ₁
+  have hc₂ := hcommutes h₂ hf₂ φ₂ hφ₂
+  -- invariance agreement through the descended invariants map
+  have hFinv : ∀ γ : G, (pkg X).d.σZ.hom γ ≫ ((pkg X).d.Z.isoSpec.hom ≫
+      AlgebraicGeometry.invariantsπ G ↑Γ((pkg X).d.Z, ⊤) ℤ) =
+      (pkg X).d.Z.isoSpec.hom ≫
+        AlgebraicGeometry.invariantsπ G ↑Γ((pkg X).d.Z, ⊤) ℤ := by
+    intro γ
+    rw [← Category.assoc, ← hbridge γ, Category.assoc,
+      AlgebraicGeometry.specSMul_invariantsπ]
+  obtain ⟨w, hw, -⟩ := (pkg X).hdesc ((pkg X).d.Z.isoSpec.hom ≫
+    AlgebraicGeometry.invariantsπ G ↑Γ((pkg X).d.Z, ⊤) ℤ) hFinv
+  have hFeq : h₁ ≫ ((pkg X).d.Z.isoSpec.hom ≫
+      AlgebraicGeometry.invariantsπ G ↑Γ((pkg X).d.Z, ⊤) ℤ) =
+      h₂ ≫ ((pkg X).d.Z.isoSpec.hom ≫
+        AlgebraicGeometry.invariantsπ G ↑Γ((pkg X).d.Z, ⊤) ℤ) := by
+    rw [← hw, ← Category.assoc, hπeq, Category.assoc]
+  -- assemble the algebra points and apply the orbit lemma
+  obtain ⟨γ₀, hγ₀⟩ := AlgebraicGeometry.exists_smul_algHom_eq
+    (k := k) (B := ↑Γ((pkg X).d.Z, ⊤)) (G := G)
+    ⟨φ₁.hom, fun c => congrArg
+      (fun (m : CommRingCat.of k ⟶ CommRingCat.of k) => m.hom c) hc₁⟩
+    ⟨φ₂.hom, fun c => congrArg
+      (fun (m : CommRingCat.of k ⟶ CommRingCat.of k) => m.hom c) hc₂⟩
+    (by
+      intro b hbfix
+      have hmem : b ∈ FixedPoints.subalgebra ℤ ↑Γ((pkg X).d.Z, ⊤) G := hbfix
+      have hSpec : Spec.map (CommRingCat.ofHom
+          (algebraMap (FixedPoints.subalgebra ℤ ↑Γ((pkg X).d.Z, ⊤) G)
+            ↑Γ((pkg X).d.Z, ⊤)) ≫ φ₁) =
+          Spec.map (CommRingCat.ofHom
+            (algebraMap (FixedPoints.subalgebra ℤ ↑Γ((pkg X).d.Z, ⊤) G)
+              ↑Γ((pkg X).d.Z, ⊤)) ≫ φ₂) := by
+        rw [Spec.map_comp, Spec.map_comp, hφ₁, hφ₂]
+        show _ ≫ AlgebraicGeometry.invariantsπ G ↑Γ((pkg X).d.Z, ⊤) ℤ =
+          _ ≫ AlgebraicGeometry.invariantsπ G ↑Γ((pkg X).d.Z, ⊤) ℤ
+        simp only [Category.assoc]
+        exact congrArg ((eqToHom hXb.symm :
+          Spec (CommRingCat.of k) ⟶ X.base) ≫ ·) hFeq
+      have hh := Spec.map_injective hSpec
+      exact congrArg (fun (m : CommRingCat.of
+        (FixedPoints.subalgebra ℤ ↑Γ((pkg X).d.Z, ⊤) G) ⟶ CommRingCat.of k) =>
+        m.hom ⟨b, hmem⟩) hh)
+  -- translate the orbit back to the scheme side
+  refine ⟨γ₀, ?_⟩
+  have hφeq : φ₂ = CommRingCat.ofHom
+      (MulSemiringAction.toRingHom G ↑Γ((pkg X).d.Z, ⊤) γ₀) ≫ φ₁ := by
+    ext b
+    exact hγ₀ b
+  have hSpec2 : Spec.map φ₂ = Spec.map φ₁ ≫
+      AlgebraicGeometry.specSMul (G := G) γ₀ := by
+    rw [hφeq, Spec.map_comp]
+    rfl
+  rw [hφ₁, hφ₂] at hSpec2
+  have hσ : (eqToHom hXb.symm : Spec (CommRingCat.of k) ⟶ X.base) ≫ h₂ ≫
+      (pkg X).d.Z.isoSpec.hom =
+      (eqToHom hXb.symm : Spec (CommRingCat.of k) ⟶ X.base) ≫
+        (h₁ ≫ (pkg X).d.σZ.hom γ₀) ≫ (pkg X).d.Z.isoSpec.hom := by
+    rw [hSpec2]
+    simp only [Category.assoc]
+    rw [← hbridge γ₀]
+  have := (cancel_epi (eqToHom hXb.symm :
+    Spec (CommRingCat.of k) ⟶ X.base)).mp hσ
+  exact (cancel_mono (pkg X).d.Z.isoSpec.hom).mp this
+
 end Transport
 
 
