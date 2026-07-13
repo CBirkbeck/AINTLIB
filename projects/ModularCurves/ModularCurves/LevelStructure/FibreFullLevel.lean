@@ -84,4 +84,19 @@ theorem comboFamily_injective_iff_closure_top [Finite G] [NeZero N] (hP : (N : �
   rw [hiff, ← Set.range_eq_univ, range_comboFamily_eq_closure N P Q hP hQ,
     ← AddSubgroup.coe_top, SetLike.coe_set_eq]
 
+variable (N P Q) in
+/-- The `0`-indexed combination is `0`. -/
+theorem comboFamily_zero [NeZero (N ^ 2)] : comboFamily N P Q 0 = 0 := by
+  simp [comboFamily]
+
+variable (N P Q) in
+/-- **[Step D corollary]** If `P, Q` generate `G` (order `N²`), every nonzero-indexed combination
+`[a]P + [b]Q` is nonzero — the form consumed by the Y(N) `[YF-⊆]` no-vanishing argument. -/
+theorem comboFamily_ne_zero_of_closure_top [Finite G] [NeZero N] [NeZero (N ^ 2)]
+    (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0) (hcard : Nat.card G = N ^ 2)
+    (htop : AddSubgroup.closure {P, Q} = ⊤) {i : Fin (N ^ 2)} (hi : i ≠ 0) :
+    comboFamily N P Q i ≠ 0 := fun h0 =>
+  hi ((comboFamily_injective_iff_closure_top N P Q hP hQ hcard).mpr htop
+    (h0.trans (comboFamily_zero N P Q).symm))
+
 end ModularCurves
