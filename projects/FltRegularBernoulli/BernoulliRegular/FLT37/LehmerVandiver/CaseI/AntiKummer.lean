@@ -1,8 +1,8 @@
-import BernoulliRegular.TotallyRealSubfield.ZetaPrime
-import BernoulliRegular.TotallyRealSubfield.FixedAssociate
 import BernoulliRegular.FLT37.LehmerVandiver.CaseI.RealKummerLemma
-import Mathlib.FieldTheory.KummerExtension
+import BernoulliRegular.TotallyRealSubfield.FixedAssociate
+import BernoulliRegular.TotallyRealSubfield.ZetaPrime
 import FltRegular.NumberTheory.KummersLemma.Field
+import Mathlib.FieldTheory.KummerExtension
 
 /-!
 # AK-1: σ-anti radical from case-I Stage 2 data
@@ -108,7 +108,7 @@ theorem antiKummerLift_isCyclic_of_irreducible
     (h_irr : Irreducible (Polynomial.X ^ p - Polynomial.C α₀ : Polynomial K)) :
     IsCyclic (antiKummerLift (p := p) K α₀ hα₀ ≃ₐ[K]
       antiKummerLift (p := p) K α₀ hα₀) := by
-  haveI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
+  have : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
   have hp_pos : 0 < p := (Fact.out : Nat.Prime p).pos
   have hζ_prim : IsPrimitiveRoot (IsCyclotomicExtension.zeta p ℚ K) p :=
     IsCyclotomicExtension.zeta_spec p ℚ K
@@ -404,7 +404,7 @@ theorem antiKummerLift_normal_of_anti_and_adjoin
         (antiKummerLift (p := p) K α₀ hα₀) : Set _) = ⊤) :
     Normal (NumberField.maximalRealSubfield K)
       (antiKummerLift (p := p) K α₀ hα₀) := by
-  haveI : Polynomial.IsSplittingField (NumberField.maximalRealSubfield K)
+  have : Polynomial.IsSplittingField (NumberField.maximalRealSubfield K)
       (antiKummerLift (p := p) K α₀ hα₀)
       (antiKummerKplusPoly (p := p) K α₀ hα₀ h_anti) :=
     ⟨antiKummerKplusPoly_map_L_splits (p := p) K α₀ hα₀ h_anti, h_adjoin⟩
@@ -732,7 +732,7 @@ noncomputable def sigmaTildeHom_anti
     (h_anti : NumberField.IsCMField.complexConj K α₀ = α₀⁻¹) :
     antiKummerLift (p := p) K α₀ hα₀ →ₐ[NumberField.maximalRealSubfield K]
       antiKummerLift (p := p) K α₀ hα₀ :=
-  haveI := antiKummerLift_normal_of_anti (p := p) K α₀ hα₀ h_anti
+  have := antiKummerLift_normal_of_anti (p := p) K α₀ hα₀ h_anti
   sigmaTildeHom (p := p) K α₀ hα₀
 
 /-- **σ̃ K⁺-algebra EQUIV (unconditional in the σ-anti setting)**. -/
@@ -741,8 +741,8 @@ noncomputable def sigmaTildeEquiv_anti
     (h_anti : NumberField.IsCMField.complexConj K α₀ = α₀⁻¹) :
     antiKummerLift (p := p) K α₀ hα₀ ≃ₐ[NumberField.maximalRealSubfield K]
       antiKummerLift (p := p) K α₀ hα₀ :=
-  haveI := antiKummerLift_normal_of_anti (p := p) K α₀ hα₀ h_anti
-  haveI : Module.Finite (NumberField.maximalRealSubfield K)
+  have := antiKummerLift_normal_of_anti (p := p) K α₀ hα₀ h_anti
+  have : Module.Finite (NumberField.maximalRealSubfield K)
       (antiKummerLift (p := p) K α₀ hα₀) :=
     Module.Finite.trans K (antiKummerLift (p := p) K α₀ hα₀)
   sigmaTildeEquiv (p := p) K α₀ hα₀
@@ -753,7 +753,7 @@ theorem antiKummerLift_isGalois_of_anti
     (h_anti : NumberField.IsCMField.complexConj K α₀ = α₀⁻¹) :
     IsGalois (NumberField.maximalRealSubfield K)
       (antiKummerLift (p := p) K α₀ hα₀) := by
-  haveI := antiKummerLift_normal_of_anti (p := p) K α₀ hα₀ h_anti
+  have := antiKummerLift_normal_of_anti (p := p) K α₀ hα₀ h_anti
   exact { }
 
 /-- **Instance: IsScalarTower K⁺ K L** — needed for the FD chain. -/
@@ -984,7 +984,7 @@ theorem antiKummerLiftRoot_adjoin_eq_top
       (A := antiKummerLift (p := p) K α₀ hα₀)).toLinearEquiv.finrank_eq]
     exact antiKummerLift_finrank_Kplus_of_irreducible (p := p) K α₀ hα₀ h_irr
   have hp_pos : 0 < p := (Fact.out : Nat.Prime p).pos
-  haveI h_fd_top : FiniteDimensional (NumberField.maximalRealSubfield K)
+  have h_fd_top : FiniteDimensional (NumberField.maximalRealSubfield K)
       (⊤ : Subalgebra (NumberField.maximalRealSubfield K)
         (antiKummerLift (p := p) K α₀ hα₀)) :=
     Module.finite_of_finrank_pos (by rw [h_top_finrank]; omega)
@@ -1018,7 +1018,7 @@ theorem antiKummerLiftRoot_inv_adjoin_eq_top
       (A := antiKummerLift (p := p) K α₀ hα₀)).toLinearEquiv.finrank_eq]
     exact antiKummerLift_finrank_Kplus_of_irreducible (p := p) K α₀ hα₀ h_irr
   have hp_pos : 0 < p := (Fact.out : Nat.Prime p).pos
-  haveI h_fd_top : FiniteDimensional (NumberField.maximalRealSubfield K)
+  have h_fd_top : FiniteDimensional (NumberField.maximalRealSubfield K)
       (⊤ : Subalgebra (NumberField.maximalRealSubfield K)
         (antiKummerLift (p := p) K α₀ hα₀)) :=
     Module.finite_of_finrank_pos (by rw [h_top_finrank]; omega)
@@ -1219,7 +1219,7 @@ theorem K_adjoin_alpha_eq_top
     rw [(Subalgebra.topEquiv (R := NumberField.maximalRealSubfield K)
       (A := K)).toLinearEquiv.finrank_eq]
     exact h_K_finrank
-  haveI : FiniteDimensional (NumberField.maximalRealSubfield K)
+  have : FiniteDimensional (NumberField.maximalRealSubfield K)
       (⊤ : Subalgebra (NumberField.maximalRealSubfield K) K) :=
     Module.finite_of_finrank_pos (by rw [h_top_finrank]; omega)
   exact Subalgebra.eq_of_le_of_finrank_eq le_top
@@ -1421,10 +1421,10 @@ theorem ak_caseI_false_under_VC_and_inputs
     (inputs : AntiKummerRealSubfieldH94Inputs (p := p) (K := K) pkg)
     (h_VC : ¬ (p : ℕ) ∣ hPlus K) :
     False := by
-  haveI := inputs.finiteDim
-  haveI := inputs.isGalois
-  haveI := inputs.isUnramified
-  haveI := inputs.isCyclic
+  have := inputs.finiteDim
+  have := inputs.isGalois
+  have := inputs.isUnramified
+  have := inputs.isCyclic
   exact no_h94_extension_of_Kplus_under_VC (p := p) (K := K) hp_odd h_VC
     (antiKummerRealSubfield (p := p) (K := K) (α₀ := α₀)
       (hα₀ := hα₀) (h_irr := h_irr) pkg)
