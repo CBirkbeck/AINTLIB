@@ -18995,3 +18995,26 @@ This is a genuine multi-lemma group-scheme sub-development (KM 3.7.1 fibrewise),
 base-changed killing (`restrict`+`asSection_zsmul`, friction-heavy term-mode) into `IsFullLevel over
 fullLevelOpens` `[YF-⊇]`; then `[YF-⊆]` (`range levelSpaceΓι ⊆ fullLevelOpens`, likely a bridge-analog);
 then `isOpenImmersion_levelSpaceΓι_of_taut` → **`[YF-ETALE]` ★**. (NEW-Y1)
+
+## v10.173 — STREAM-YN (fresh worker, CHARTER lane A): RULE-5 CLAIM — [YF-⊇] frontier → [YF-ETALE]
+Fresh STREAM-YN worker (the Y(N) completion). AUDIT-FIRST verdict: charter's "first act [YF-TAUT]" is
+STALE — `FullLevelTautSection.lean` is 0-sorry (done); `FullLevelOpenLocus`/all ForMathlib engines 0-sorry.
+The REAL frontier (per newest sentinel + commit a26a5a6dc) = **2 correct documented sorries in
+`Moduli/FullLevelSupset.lean`**:
+  (1) `sections_residue_eq_of_base_eq` (forced residue for sections: ρ.rFM≫σ.rFM=𝟙 + σ.rFM field-inj ⟹ σ₁.rFM=σ₂.rFM);
+  (2) `mem_pointVanishSet_of_residue_eq` (residue agreement ⟹ x−y vanishes: (x−y)|κ(u) factors through zero ⟹ Spec κ(u)→agreement locus = pointVanishSet).
+CLAIMED. Plan: discharge both → wire pointwise-ne of base-changed combos via
+`sup_ker_eq_top_of_sections_pointwise_ne` → `IsFullLevel over fullLevelOpens` [YF-⊇] → [YF-⊆]
+(`range levelSpaceΓι ⊆ fullLevelOpens`) → `isOpenImmersion_levelSpaceΓι_of_taut` → **[YF-ETALE] ★**.
+Sentinel `beastmode_active.YN` (both worktrees). Marathon norm v10.162. (STREAM-YN)
+
+## v10.174 — STREAM-YN: ★★★ [YF-⊇] COMPLETE + [YF-CLOPEN] WIRED — [YF-ETALE] reduced to ONE gate
+The banked [YF-⊇] residue frontier (NEW-Y1's 2 sorries) is DISCHARGED and the entire ⊇-over-fullLevelOpens leaf is built.
+
+**LANDED (all committed dev/modular-curves-y1):**
+- **`sections_residue_eq_of_base_eq`** (FullLevelSupset) — AXIOM-CLEAN `{propext,Classical.choice,Quot.sound}`: two sections of a separated ρ agreeing topologically at u agree over κ(u) (retraction of a field extension is iso: mono field-hom + split-epi via residueFieldMap_comp/_congr, epi-cancel + residueFieldCongr proof-irrel).
+- **`mem_pointVanishSet_of_residue_eq`** + general **`base_mem_pointVanishSet_of_comp_eq`** (AXIOM-CLEAN): residue/morphism agreement ⟹ x−y vanishes (restrict additivity ⟹ classifiers agree ⟹ factor through agreementι). New reusable engine `base_mem_range_agreementι` (AgreementLocusClopen).
+- **`Moduli/FullLevelClopen.lean` (NEW)**: restrict_zsmul, `Point.asSection_add` (term-mode via point_add_val_congr_base), asSection_zero, combPoint_sub/emod, `combo_eq_asSection_restrict` (Sub-lemma A), **`combSec_ne_of_diff`** (the distinctness engine: over fullLevelOpens combos differing mod N are pointwise-distinct), **`isFullLevel_taut_over_fullLevelOpens`** ([YF-⊇], inherits only boarded Tier-B torsion boxes), **`isOpenImmersion_levelSpaceΓι_full`** ([YF-CLOPEN]).
+- **YFullRoute**: `isOpenImmersion_levelSpaceΓι` now PROVEN (sorries 6→5); **[YF-ETALE] `etale_fullLevelSpaceStruct` now gated ONLY on `range_levelSpaceΓι_subset` ([YF-⊆]) + boarded `torsionπ_etale'`.**
+
+**REMAINING for [YF-ETALE]★ = [YF-⊆] `range_levelSpaceΓι_subset` (1 documented sorry, FullLevelClopen):** full-level pt ⟹ N² combos fibrewise distinct (E[N] étale-reduced) ⟹ no nonzero combo vanishes. HIGH-VALUE SHORTCUT (per v10.163): discharge `fullLevel_divisor_iff_naive_gen` (T-D8-bridge, Basic:125) via T-D2 `isFullSetOfSectionsAlg_iff_fields` + `torsion_geometricFibre_rank_two` — unblocks [YF-⊆]→[YF-ETALE]★ AND isFullLevel_iff_naive AND the D-track. (STREAM-YN)
