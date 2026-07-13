@@ -9,7 +9,7 @@ public import BernoulliRegular.UnitQuotient.TorsionQuotient
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.ConjNormSemiPrimaryAndUnitFactorData
 
 /-!
-# Principal unit factor (REF-18 Phase 2, sub-piece U)
+# Principal unit factor (Phase 2, sub-piece U)
 
 For a nonzero principal ideal `(α)`, the actual multiplicative Φ element
 `Φ((α))` and the explicit Stickelberger principal generator
@@ -162,7 +162,7 @@ theorem unitUnit_conj_mul_self_eq_one_of_conj_gamma_absNorm_pow
   have hn_ne : n ≠ 0 := by
     simpa [n] using (Algebra.norm_ne_zero_iff.mpr hα :
       Algebra.norm ℤ α ≠ 0)
-  have hN_ne : N ≠ 0 := fun hzero =>
+  have hN_ne : N ≠ 0 := fun hzero ↦
     hn_ne ((FaithfulSMul.algebraMap_injective ℤ (𝓞 K)) (by
       simpa [N] using hzero))
   have hNpow_ne : N ^ p ≠ 0 :=
@@ -187,7 +187,7 @@ theorem unitUnit_conj_mul_self_eq_one_of_conj_gamma_absNorm_pow
       have hnatAbs : (n.natAbs : ℤ) = n :=
         Int.natAbs_of_nonneg hn_nonneg
       change (((n.natAbs : ℕ) : ℤ) : 𝓞 K) = N
-      simpa [N] using congrArg (fun z : ℤ => ((z : ℤ) : 𝓞 K)) hnatAbs
+      simpa [N] using congrArg (fun z : ℤ ↦ ((z : ℤ) : 𝓞 K)) hnatAbs
     have hv_eq_one : (v : 𝓞 K) * N ^ p = 1 * N ^ p := by
       calc
         (v : 𝓞 K) * N ^ p =
@@ -207,7 +207,7 @@ theorem unitUnit_conj_mul_self_eq_one_of_conj_gamma_absNorm_pow
           Int.natAbs_of_nonneg (neg_nonneg.mpr hn_nonpos)
         simpa [Int.natAbs_neg] using hneg
       change (((n.natAbs : ℕ) : ℤ) : 𝓞 K) = -N
-      simpa [N] using congrArg (fun z : ℤ => ((z : ℤ) : 𝓞 K)) hnatAbs
+      simpa [N] using congrArg (fun z : ℤ ↦ ((z : ℤ) : 𝓞 K)) hnatAbs
     have hp_odd' : Odd p := (Fact.out : Nat.Prime p).odd_of_ne_two hp_odd
     have hv_eq_neg : (v : 𝓞 K) * N ^ p = -N ^ p := by
       calc
@@ -750,7 +750,7 @@ theorem PrincipalUnitFactorData.isSign_of_primePhiSemi_conjNorm
     (p := p) (K := K) hp_odd hp_two hp_three
     h_conj hα_semi hα_not_dvd hgamma_semi
 
-/-- REF-18-facing U4 endpoint from prime-level Φ semi-primarity and the
+/-- U4 endpoint from prime-level Φ semi-primarity and the
 concrete Φ conjugation product formula.
 
 This version uses the natural singular-recipient hypothesis
@@ -779,7 +779,7 @@ theorem PrincipalUnitFactorData.isSign_of_primePhiSemi_conjNorm_of_span_pair_p_e
       (p := p) (K := K) hp_three hαp_top)
     h_prime_semi
 
-/-- Primary-version REF-18-facing U4 endpoint from prime-level Φ
+/-- Primary-version U4 endpoint from prime-level Φ
 semi-primarity and the concrete Φ conjugation product formula.
 
 This is the same theorem as
