@@ -371,6 +371,15 @@ theorem quotientRing_eq_coinvariants :
     haveI : IsIso P.kappa := inferInstance
     exact ((ConcreteCategory.isIso_iff_bijective P.kappa).mp inferInstance).injective hκ
 
+/-- The glue-model local quotient of a patch is the Hopf-model one (from the subring
+equality). -/
+noncomputable def localQuotientOpenIso [Module.Free P.baseRing P.groupRing] :
+    G.localQuotientOpen P.hstable ≅ P.localQuotient :=
+  eqToIso (by
+    rw [FiniteLocallyFreeSubgroup.localQuotientOpen, localQuotient,
+      P.quotientRing_eq_coinvariants]
+    rfl)
+
 end AffineChartPatch
 
 end FiniteLocallyFreeSubgroup
