@@ -1124,30 +1124,6 @@ theorem pullbackQuotientπSMul_snd {W : Scheme.{u}}
       Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j :=
   Limits.pullback.lift_snd _ _ _
 
-/-- **[GHB5a] Base change commutes with the quotient for a FREE action** (existence of
-descent; KM 7.1.3(3c), the free case — condition (c)). For any base map `j : W ⟶ X/G`,
-the base-changed projection `pullback.snd (quotientπ) j : pullback (quotientπ) j ⟶ W`
-descends every morphism `F` invariant under the base-changed action.
-
-The freeness hypothesis `hfree` is **essential** for arbitrary (non-flat) `j`: the
-chart-local content is `(A ⊗_{R} C)ᴳ = Aᴳ ⊗_{R} C`, which holds *for every* base ring
-`C` exactly when the action is free (KM A7.1.2 / [A711-BC]
-`fixedPointsBaseChange_bijective_of_isFreeAlgebraAction`); the flatness route
-(`exists_invariantsπ_lift_of_isOpenImmersion`, valid for open-immersion = localization
-`j`) does not cover `j = pullback.fst f₀ g`, which is a base change of the arbitrary
-`g : T ⟶ S` and hence not flat. Proof mirrors `exists_quotientπ_lift`'s glue over
-`quotientGlueData`, with the per-chart descent supplied by the free-action affine
-base-change engine (from [A711-BC]). Consumed by [GHB5]
-`exists_quotient_baseChange_of_free` at `j = pullback.fst f₀ g`. -/
-theorem exists_quotientπ_lift_baseChange {W Y : Scheme.{u}}
-    (hfree : ∀ {T : Scheme.{u}} (t : T ⟶ X) (g : G), g ≠ 1 →
-      t ≫ σ.hom g = t → IsEmpty T)
-    (j : W ⟶ σ.quotient V hVs hVa)
-    (F : Limits.pullback (σ.quotientπ V hVs hVa hVmem) j ⟶ Y)
-    (hF : ∀ g : G, σ.pullbackQuotientπSMul V hVs hVa hVmem j g ≫ F = F) :
-    ∃ q : W ⟶ Y, Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j ≫ q = F := by
-  sorry
-
 /-- The open image of the `i`-th piece of a glue data. -/
 private noncomputable def chartOpens (D : Scheme.GlueData.{u}) (i : D.J) : D.glued.Opens :=
   (D.ι i).opensRange
@@ -1328,6 +1304,546 @@ instance isAffineHom_quotientπ : IsAffineHom (σ.quotientπ V hVs hVa hVmem) :=
     exact this
   · rw [quotientπ_preimage_quotientChart σ V hVs hVa hVmem e]
     exact hVa e
+
+include hVa in
+/-- Geometric freeness on `X` restricts, through the affine identification of a stable
+affine chart, to freeness of the section-ring action on `Spec Γ(X, V x)`: a `g`-fixed
+`T`-point of `Spec Γ(X, V x)` is a `g`-fixed `T`-point of `X`. -/
+private theorem specSMul_free_of_free
+    (hfree : ∀ {T : Scheme.{u}} (t : T ⟶ X) (g : G), g ≠ 1 → t ≫ σ.hom g = t → IsEmpty T)
+    (x : X) :
+    letI := σ.gammaMulSemiringAction (hVs x)
+    ∀ {T : Scheme.{u}} (t : T ⟶ Spec (CommRingCat.of ↑Γ(X, V x))) (g : G), g ≠ 1 →
+      t ≫ specSMul g = t → IsEmpty T := by
+  letI := σ.gammaMulSemiringAction (hVs x)
+  intro T t g hg ht
+  refine hfree (t ≫ (hVa x).isoSpec.inv ≫ (V x).ι) g hg ?_
+  calc (t ≫ (hVa x).isoSpec.inv ≫ (V x).ι) ≫ σ.hom g
+      = t ≫ (hVa x).isoSpec.inv ≫ (V x).ι ≫ σ.hom g := by
+        rw [Category.assoc, Category.assoc]
+    _ = t ≫ (hVa x).isoSpec.inv ≫
+          (σ.hom g).resLE (V x) (V x) ((hVs x).le_preimage g) ≫ (V x).ι := by
+        rw [Scheme.Hom.resLE_comp_ι]
+    _ = t ≫ ((hVa x).isoSpec.inv ≫
+          (σ.hom g).resLE (V x) (V x) ((hVs x).le_preimage g)) ≫ (V x).ι := by
+        rw [Category.assoc]
+    _ = t ≫ (specSMul g ≫ (hVa x).isoSpec.inv) ≫ (V x).ι := by
+        rw [specSMul_isoSpec_inv σ (hVs x) (hVa x) g]
+    _ = (t ≫ specSMul g) ≫ (hVa x).isoSpec.inv ≫ (V x).ι := by
+        rw [Category.assoc, Category.assoc]
+    _ = t ≫ (hVa x).isoSpec.inv ≫ (V x).ι := by rw [ht]
+
+include hVmem in
+/-- **The quotient projection of a free action is flat** (chart-locally `Bᴳ ↪ B` with `B`
+projective over `Bᴳ` — KM A7.1.1's finiteness/projectivity package). -/
+private theorem flat_quotientπ
+    (hfree : ∀ {T : Scheme.{u}} (t : T ⟶ X) (g : G), g ≠ 1 → t ≫ σ.hom g = t → IsEmpty T) :
+    Flat (σ.quotientπ V hVs hVa hVmem) := by
+  refine IsZariskiLocalAtTarget.of_iSup_eq_top (P := @Flat) (σ.quotientChart V hVs hVa)
+    (σ.iSup_quotientChart_eq_top V hVs hVa) fun x => ?_
+  rw [morphismRestrict_quotientπ σ V hVs hVa hVmem x,
+    MorphismProperty.cancel_left_of_respectsIso (P := @Flat),
+    MorphismProperty.cancel_right_of_respectsIso (P := @Flat),
+    localQuotientπ_eq σ (hVs x) (hVa x),
+    MorphismProperty.cancel_left_of_respectsIso (P := @Flat)]
+  letI := σ.gammaMulSemiringAction (hVs x)
+  have halg : IsFreeAlgebraAction G ℤ ↑Γ(X, V x) :=
+    isFreeAlgebraAction_of_specSMul_free G ↑Γ(X, V x) ℤ
+      (σ.specSMul_free_of_free V hVs hVa hfree x)
+  haveI : SMulCommClass ℤ G ↑Γ(X, V x) := SMulCommClass.symm G ℤ ↑Γ(X, V x)
+  haveI : Module.Finite (FixedPoints.subalgebra ℤ ↑Γ(X, V x) G) ↑Γ(X, V x) :=
+    Module.Finite.of_isFreeAlgebraAction G ℤ _ halg
+  haveI : Module.Projective (FixedPoints.subalgebra ℤ ↑Γ(X, V x) G) ↑Γ(X, V x) :=
+    Module.Projective.of_isFreeAlgebraAction G ℤ _ halg
+  haveI : Module.Flat (FixedPoints.subalgebra ℤ ↑Γ(X, V x) G) ↑Γ(X, V x) :=
+    Module.Flat.of_projective
+  rw [invariantsπ, AlgebraicGeometry.Flat.SpecMap_iff, CommRingCat.hom_ofHom,
+    RingHom.flat_algebraMap_iff]
+  infer_instance
+
+include hVmem in
+/-- For a FREE action, the base change of the quotient projection along ANY morphism is
+an epimorphism — uniqueness of descent over an arbitrary base. -/
+private theorem epi_pullback_snd_quotientπ
+    (hfree : ∀ {T : Scheme.{u}} (t : T ⟶ X) (g : G), g ≠ 1 → t ≫ σ.hom g = t → IsEmpty T)
+    {W : Scheme.{u}} (j : W ⟶ σ.quotient V hVs hVa) :
+    Epi (Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j) := by
+  haveI : Flat (σ.quotientπ V hVs hVa hVmem) := σ.flat_quotientπ V hVs hVa hVmem hfree
+  haveI : Surjective (σ.quotientπ V hVs hVa hVmem) :=
+    ⟨σ.quotientπ_surjective V hVs hVa hVmem⟩
+  haveI : Surjective (Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j) :=
+    MorphismProperty.pullback_snd _ _ ‹Surjective (σ.quotientπ V hVs hVa hVmem)›
+  exact Flat.epi_of_flat_of_surjective _
+
+include hVmem in
+/-- The comparison morphism between base changes of `quotientπ` (the `quotientπ`-level
+`AffineQuotient.pullbackRes`). -/
+private noncomputable def pullbackResQ {W' W'' : Scheme.{u}}
+    (j'' : W'' ⟶ σ.quotient V hVs hVa) (w : W' ⟶ σ.quotient V hVs hVa)
+    (u : W' ⟶ W'') (hw : w = u ≫ j'') :
+    Limits.pullback (σ.quotientπ V hVs hVa hVmem) w ⟶
+      Limits.pullback (σ.quotientπ V hVs hVa hVmem) j'' :=
+  Limits.pullback.map _ _ _ _ (𝟙 _) u (𝟙 _) (by simp) (by rw [Category.comp_id, hw])
+
+include hVmem in
+@[reassoc]
+private theorem pullbackResQ_fst {W' W'' : Scheme.{u}}
+    (j'' : W'' ⟶ σ.quotient V hVs hVa) (w : W' ⟶ σ.quotient V hVs hVa)
+    (u : W' ⟶ W'') (hw : w = u ≫ j'') :
+    σ.pullbackResQ V hVs hVa hVmem j'' w u hw ≫
+        Limits.pullback.fst (σ.quotientπ V hVs hVa hVmem) j'' =
+      Limits.pullback.fst (σ.quotientπ V hVs hVa hVmem) w :=
+  (Limits.pullback.lift_fst _ _ _).trans (Category.comp_id _)
+
+include hVmem in
+@[reassoc]
+private theorem pullbackResQ_snd {W' W'' : Scheme.{u}}
+    (j'' : W'' ⟶ σ.quotient V hVs hVa) (w : W' ⟶ σ.quotient V hVs hVa)
+    (u : W' ⟶ W'') (hw : w = u ≫ j'') :
+    σ.pullbackResQ V hVs hVa hVmem j'' w u hw ≫
+        Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j'' =
+      Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) w ≫ u :=
+  Limits.pullback.lift_snd _ _ _
+
+include hVmem in
+/-- The comparison morphisms intertwine the base-changed actions. -/
+private theorem pullbackQuotientπSMul_pullbackResQ {W' W'' : Scheme.{u}}
+    (j'' : W'' ⟶ σ.quotient V hVs hVa) (w : W' ⟶ σ.quotient V hVs hVa)
+    (u : W' ⟶ W'') (hw : w = u ≫ j'') (g : G) :
+    σ.pullbackQuotientπSMul V hVs hVa hVmem w g ≫
+        σ.pullbackResQ V hVs hVa hVmem j'' w u hw =
+      σ.pullbackResQ V hVs hVa hVmem j'' w u hw ≫
+        σ.pullbackQuotientπSMul V hVs hVa hVmem j'' g := by
+  refine Limits.pullback.hom_ext ?_ ?_
+  · simp only [Category.assoc, pullbackResQ_fst, pullbackResQ_fst_assoc,
+      pullbackQuotientπSMul_fst]
+  · simp only [Category.assoc, pullbackResQ_snd, pullbackQuotientπSMul_snd,
+      pullbackQuotientπSMul_snd_assoc]
+
+include hVmem in
+/-- **The chart step of free base change**: if the base map factors through the `x`-th
+chart of the quotient, invariant morphisms out of the base change descend. The chart is
+`Spec Γ(X, V x)ᴳ`, over which `quotientπ` restricts to the local `invariantsπ` (the atlas
+square `isPullback_quotientπ_quotientChart`), so this is exactly the free-action affine
+engine `exists_invariantsπ_lift_baseChange_of_free` ([A711-BC] at ground `Γᴳ`) transported
+through the pasted pullback. -/
+private theorem exists_quotientπ_lift_baseChange_of_factors
+    (hfree : ∀ {T : Scheme.{u}} (t : T ⟶ X) (g : G), g ≠ 1 → t ≫ σ.hom g = t → IsEmpty T)
+    {WT Y : Scheme.{u}} (x : X) (wq : WT ⟶ σ.quotient V hVs hVa)
+    (wc : WT ⟶ (σ.quotientChart V hVs hVa x : Scheme.{u}))
+    (hw : wq = wc ≫ (σ.quotientChart V hVs hVa x).ι)
+    (F : Limits.pullback (σ.quotientπ V hVs hVa hVmem) wq ⟶ Y)
+    (hF : ∀ g : G, σ.pullbackQuotientπSMul V hVs hVa hVmem wq g ≫ F = F) :
+    ∃ q : WT ⟶ Y, Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) wq ≫ q = F := by
+  classical
+  letI := σ.gammaMulSemiringAction (hVs x)
+  -- the base map into the local quotient `Spec Γ(X, V x)ᴳ`
+  set jS : WT ⟶ σ.localQuotient (hVs x) :=
+    wc ≫ (σ.quotientChartIso V hVs hVa x).inv with hjS
+  -- the pasted pullback: `pullback (invariantsπ) jS` is the base change of `quotientπ`
+  have sq1 : IsPullback ((hVa x).isoSpec.inv) (invariantsπ G ↑Γ(X, V x) ℤ)
+      (σ.localQuotientπ (hVs x) (hVa x)) (𝟙 (σ.localQuotient (hVs x))) := by
+    refine IsPullback.of_horiz_isIso ⟨?_⟩
+    rw [Category.comp_id, localQuotientπ_eq σ (hVs x) (hVa x), Iso.inv_hom_id_assoc]
+  have sq2 : IsPullback (𝟙 ((V x : Scheme.{u}))) (σ.localQuotientπ (hVs x) (hVa x))
+      (σ.localQuotientπ (hVs x) (hVa x) ≫ (σ.quotientChartIso V hVs hVa x).hom)
+      ((σ.quotientChartIso V hVs hVa x).hom) := by
+    refine IsPullback.of_horiz_isIso ⟨?_⟩
+    rw [Category.id_comp]
+  have hpaste := ((IsPullback.of_hasPullback (invariantsπ G ↑Γ(X, V x) ℤ)
+      jS).paste_horiz ((sq1.paste_horiz sq2).paste_horiz
+        (σ.isPullback_quotientπ_quotientChart V hVs hVa hVmem x)))
+  have htop : (((hVa x).isoSpec.inv ≫ 𝟙 (V x : Scheme.{u})) ≫ (V x).ι) =
+      (hVa x).isoSpec.inv ≫ (V x).ι := by
+    rw [Category.comp_id]
+  have hbot : ((𝟙 (σ.localQuotient (hVs x)) ≫ (σ.quotientChartIso V hVs hVa x).hom) ≫
+      (σ.quotientChart V hVs hVa x).ι) =
+      (σ.quotientChartIso V hVs hVa x).hom ≫ (σ.quotientChart V hVs hVa x).ι := by
+    rw [Category.id_comp]
+  rw [htop, hbot] at hpaste
+  have hbot2 : jS ≫ (σ.quotientChartIso V hVs hVa x).hom ≫
+      (σ.quotientChart V hVs hVa x).ι = wq := by
+    rw [hjS, Category.assoc, Iso.inv_hom_id_assoc, ← hw]
+  rw [hbot2] at hpaste
+  -- the comparison iso and its projections
+  set E := hpaste.isoPullback with hE
+  have hEfst : E.hom ≫ Limits.pullback.fst (σ.quotientπ V hVs hVa hVmem) wq =
+      Limits.pullback.fst (invariantsπ G ↑Γ(X, V x) ℤ) jS ≫
+        (hVa x).isoSpec.inv ≫ (V x).ι := by
+    rw [hE]
+    exact hpaste.isoPullback_hom_fst
+  have hEsnd : E.hom ≫ Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) wq =
+      Limits.pullback.snd (invariantsπ G ↑Γ(X, V x) ℤ) jS := by
+    rw [hE]
+    exact hpaste.isoPullback_hom_snd
+  -- the comparison intertwines the base-changed actions
+  have hact : ∀ g : G, E.hom ≫ σ.pullbackQuotientπSMul V hVs hVa hVmem wq g =
+      pullbackSpecSMul G ↑Γ(X, V x) ℤ jS g ≫ E.hom := by
+    intro g
+    refine Limits.pullback.hom_ext ?_ ?_
+    · calc (E.hom ≫ σ.pullbackQuotientπSMul V hVs hVa hVmem wq g) ≫
+            Limits.pullback.fst (σ.quotientπ V hVs hVa hVmem) wq
+          = E.hom ≫ σ.pullbackQuotientπSMul V hVs hVa hVmem wq g ≫
+              Limits.pullback.fst (σ.quotientπ V hVs hVa hVmem) wq :=
+            Category.assoc _ _ _
+        _ = E.hom ≫ Limits.pullback.fst (σ.quotientπ V hVs hVa hVmem) wq ≫ σ.hom g := by
+            rw [pullbackQuotientπSMul_fst]
+        _ = (E.hom ≫ Limits.pullback.fst (σ.quotientπ V hVs hVa hVmem) wq) ≫ σ.hom g :=
+            (Category.assoc _ _ _).symm
+        _ = (Limits.pullback.fst (invariantsπ G ↑Γ(X, V x) ℤ) jS ≫
+              (hVa x).isoSpec.inv ≫ (V x).ι) ≫ σ.hom g := by rw [hEfst]
+        _ = Limits.pullback.fst (invariantsπ G ↑Γ(X, V x) ℤ) jS ≫
+              (hVa x).isoSpec.inv ≫ (V x).ι ≫ σ.hom g := by
+            rw [Category.assoc, Category.assoc]
+        _ = Limits.pullback.fst (invariantsπ G ↑Γ(X, V x) ℤ) jS ≫ (hVa x).isoSpec.inv ≫
+              (σ.hom g).resLE (V x) (V x) ((hVs x).le_preimage g) ≫ (V x).ι := by
+            rw [Scheme.Hom.resLE_comp_ι]
+        _ = Limits.pullback.fst (invariantsπ G ↑Γ(X, V x) ℤ) jS ≫
+              ((hVa x).isoSpec.inv ≫
+                (σ.hom g).resLE (V x) (V x) ((hVs x).le_preimage g)) ≫ (V x).ι := by
+            rw [Category.assoc]
+        _ = Limits.pullback.fst (invariantsπ G ↑Γ(X, V x) ℤ) jS ≫
+              (specSMul g ≫ (hVa x).isoSpec.inv) ≫ (V x).ι := by
+            rw [specSMul_isoSpec_inv σ (hVs x) (hVa x) g]
+        _ = (Limits.pullback.fst (invariantsπ G ↑Γ(X, V x) ℤ) jS ≫ specSMul g) ≫
+              (hVa x).isoSpec.inv ≫ (V x).ι := by
+            rw [Category.assoc, Category.assoc]
+        _ = (pullbackSpecSMul G ↑Γ(X, V x) ℤ jS g ≫
+              Limits.pullback.fst (invariantsπ G ↑Γ(X, V x) ℤ) jS) ≫
+              (hVa x).isoSpec.inv ≫ (V x).ι := by
+            rw [pullbackSpecSMul_fst]
+        _ = pullbackSpecSMul G ↑Γ(X, V x) ℤ jS g ≫
+              (E.hom ≫ Limits.pullback.fst (σ.quotientπ V hVs hVa hVmem) wq) := by
+            rw [hEfst, Category.assoc]
+        _ = (pullbackSpecSMul G ↑Γ(X, V x) ℤ jS g ≫ E.hom) ≫
+              Limits.pullback.fst (σ.quotientπ V hVs hVa hVmem) wq :=
+            (Category.assoc _ _ _).symm
+    · calc (E.hom ≫ σ.pullbackQuotientπSMul V hVs hVa hVmem wq g) ≫
+            Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) wq
+          = E.hom ≫ σ.pullbackQuotientπSMul V hVs hVa hVmem wq g ≫
+              Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) wq :=
+            Category.assoc _ _ _
+        _ = E.hom ≫ Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) wq := by
+            rw [pullbackQuotientπSMul_snd]
+        _ = Limits.pullback.snd (invariantsπ G ↑Γ(X, V x) ℤ) jS := hEsnd
+        _ = pullbackSpecSMul G ↑Γ(X, V x) ℤ jS g ≫
+              Limits.pullback.snd (invariantsπ G ↑Γ(X, V x) ℤ) jS := by
+            rw [pullbackSpecSMul_snd]
+        _ = pullbackSpecSMul G ↑Γ(X, V x) ℤ jS g ≫
+              (E.hom ≫ Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) wq) := by
+            rw [hEsnd]
+        _ = (pullbackSpecSMul G ↑Γ(X, V x) ℤ jS g ≫ E.hom) ≫
+              Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) wq :=
+            (Category.assoc _ _ _).symm
+  -- transport the invariance and descend via the free-action affine engine
+  have hFE : ∀ g : G, pullbackSpecSMul G ↑Γ(X, V x) ℤ jS g ≫ (E.hom ≫ F) = E.hom ≫ F := by
+    intro g
+    rw [← Category.assoc, ← hact g, Category.assoc, hF g]
+  obtain ⟨q, hq⟩ := exists_invariantsπ_lift_baseChange_of_free G ↑Γ(X, V x) ℤ
+    (σ.specSMul_free_of_free V hVs hVa hfree x) jS (E.hom ≫ F) hFE
+  refine ⟨q, ?_⟩
+  rw [← cancel_epi E.hom, ← Category.assoc, hEsnd]
+  exact hq
+
+/-- The pullback of the quotient-chart cover along a base map `j : W ⟶ X/G`: the pieces
+are `j⁻¹(chart x)`, presented as pullbacks so the chart-factoring is definitional. -/
+@[reducible]
+private noncomputable def chartCover {W : Scheme.{u}} (j : W ⟶ σ.quotient V hVs hVa) :
+    W.OpenCover where
+  I₀ := X
+  X x := Limits.pullback j (σ.quotientChart V hVs hVa x).ι
+  f x := Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι
+  mem₀ := by
+    rw [Scheme.presieve₀_mem_precoverage_iff]
+    refine ⟨fun w => ?_, fun x => inferInstance⟩
+    have h1 : j w ∈ (⊤ : (σ.quotient V hVs hVa).Opens) := trivial
+    rw [← σ.iSup_quotientChart_eq_top V hVs hVa] at h1
+    obtain ⟨x, hx⟩ := TopologicalSpace.Opens.mem_iSup.mp h1
+    refine ⟨x, ?_⟩
+    rw [IsOpenImmersion.range_pullbackFst]
+    exact ⟨⟨j w, hx⟩, rfl⟩
+
+private theorem chartCover_f {W : Scheme.{u}} (j : W ⟶ σ.quotient V hVs hVa) (x : X) :
+    (σ.chartCover V hVs hVa j).f x =
+      Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι := rfl
+
+/-- **[GHB5a] Base change commutes with the quotient for a FREE action** (existence of
+descent; KM 7.1.3(3c), the free case — condition (c)). For any base map `j : W ⟶ X/G`,
+the base-changed projection `pullback.snd (quotientπ) j : pullback (quotientπ) j ⟶ W`
+descends every morphism `F` invariant under the base-changed action.
+
+The freeness hypothesis `hfree` is **essential** for arbitrary (non-flat) `j`: the
+chart-local content is `(A ⊗_{R} C)ᴳ = Aᴳ ⊗_{R} C`, which holds *for every* base ring
+`C` exactly when the action is free (KM A7.1.2 / [A711-BC]
+`fixedPointsBaseChange_bijective_of_isFreeAlgebraAction`); the flatness route
+(`exists_invariantsπ_lift_of_isOpenImmersion`, valid for open-immersion = localization
+`j`) does not cover `j = pullback.fst f₀ g`, which is a base change of the arbitrary
+`g : T ⟶ S` and hence not flat. Proof mirrors `exists_quotientπ_lift`'s glue over
+`quotientGlueData`, with the per-chart descent supplied by the free-action affine
+base-change engine (from [A711-BC]). Consumed by [GHB5]
+`exists_quotient_baseChange_of_free` at `j = pullback.fst f₀ g`. -/
+theorem exists_quotientπ_lift_baseChange {W Y : Scheme.{u}}
+    (hfree : ∀ {T : Scheme.{u}} (t : T ⟶ X) (g : G), g ≠ 1 →
+      t ≫ σ.hom g = t → IsEmpty T)
+    (j : W ⟶ σ.quotient V hVs hVa)
+    (F : Limits.pullback (σ.quotientπ V hVs hVa hVmem) j ⟶ Y)
+    (hF : ∀ g : G, σ.pullbackQuotientπSMul V hVs hVa hVmem j g ≫ F = F) :
+    ∃ q : W ⟶ Y, Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j ≫ q = F := by
+  classical
+  -- chart-wise descents of the restricted morphisms
+  have hFx : ∀ (x : X) (g : G),
+      σ.pullbackQuotientπSMul V hVs hVa hVmem
+          (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j) g ≫
+        (σ.pullbackResQ V hVs hVa hVmem j
+          (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+          (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι) rfl ≫ F) =
+      σ.pullbackResQ V hVs hVa hVmem j
+        (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+        (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι) rfl ≫ F := by
+    intro x g
+    rw [← Category.assoc, pullbackQuotientπSMul_pullbackResQ, Category.assoc, hF g]
+  choose qx hqx using fun x : X =>
+    σ.exists_quotientπ_lift_baseChange_of_factors V hVs hVa hVmem hfree x
+      (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+      (Limits.pullback.snd j (σ.quotientChart V hVs hVa x).ι)
+      Limits.pullback.condition
+      (σ.pullbackResQ V hVs hVa hVmem j
+        (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+        (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι) rfl ≫ F)
+      (hFx x)
+  -- gluing compatibility on overlaps, cancelling the (epi) base-changed projection
+  have hcompat : ∀ x z : X,
+      Limits.pullback.fst ((σ.chartCover V hVs hVa j).f x)
+          ((σ.chartCover V hVs hVa j).f z) ≫ qx x =
+      Limits.pullback.snd ((σ.chartCover V hVs hVa j).f x)
+          ((σ.chartCover V hVs hVa j).f z) ≫ qx z := by
+    intro x z
+    rw [chartCover_f, chartCover_f]
+    have hbase : Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+          (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+          Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j =
+        Limits.pullback.snd (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+          (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+          Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι ≫ j := by
+      rw [← Category.assoc, ← Category.assoc, Limits.pullback.condition]
+    have hσρ : σ.pullbackResQ V hVs hVa hVmem
+          (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+          (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+            Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+          (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι)) rfl ≫
+          σ.pullbackResQ V hVs hVa hVmem j
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι) rfl =
+        σ.pullbackResQ V hVs hVa hVmem
+          (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι ≫ j)
+          (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+            Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+          (Limits.pullback.snd (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι)) hbase ≫
+          σ.pullbackResQ V hVs hVa hVmem j
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι ≫ j)
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) rfl := by
+      refine Limits.pullback.hom_ext ?_ ?_
+      · simp only [Category.assoc, pullbackResQ_fst]
+      · simp only [Category.assoc, pullbackResQ_snd, pullbackResQ_snd_assoc]
+        rw [Limits.pullback.condition
+          (f := Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+          (g := Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι)]
+    haveI := σ.epi_pullback_snd_quotientπ V hVs hVa hVmem hfree
+      (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+        (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+        Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+    refine (cancel_epi (Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem)
+      (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+        (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+        Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j))).mp ?_
+    calc Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem)
+          (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+            Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j) ≫
+          Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫ qx x
+        = (Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem)
+            (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+              Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j) ≫
+            Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι)) ≫ qx x :=
+          (Category.assoc _ _ _).symm
+      _ = (σ.pullbackResQ V hVs hVa hVmem
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+            (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+              Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+            (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι)) rfl ≫
+            Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)) ≫ qx x := by
+          rw [pullbackResQ_snd]
+      _ = σ.pullbackResQ V hVs hVa hVmem
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+            (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+              Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+            (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι)) rfl ≫
+            Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j) ≫ qx x :=
+          Category.assoc _ _ _
+      _ = σ.pullbackResQ V hVs hVa hVmem
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+            (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+              Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+            (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι)) rfl ≫
+            σ.pullbackResQ V hVs hVa hVmem j
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι) rfl ≫ F := by
+          rw [hqx x]
+      _ = (σ.pullbackResQ V hVs hVa hVmem
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+            (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+              Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+            (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι)) rfl ≫
+            σ.pullbackResQ V hVs hVa hVmem j
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι) rfl) ≫ F :=
+          (Category.assoc _ _ _).symm
+      _ = (σ.pullbackResQ V hVs hVa hVmem
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι ≫ j)
+            (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+              Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+            (Limits.pullback.snd (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι)) hbase ≫
+            σ.pullbackResQ V hVs hVa hVmem j
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι ≫ j)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) rfl) ≫ F := by
+          rw [hσρ]
+      _ = σ.pullbackResQ V hVs hVa hVmem
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι ≫ j)
+            (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+              Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+            (Limits.pullback.snd (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι)) hbase ≫
+            σ.pullbackResQ V hVs hVa hVmem j
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι ≫ j)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) rfl ≫ F :=
+          Category.assoc _ _ _
+      _ = σ.pullbackResQ V hVs hVa hVmem
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι ≫ j)
+            (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+              Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+            (Limits.pullback.snd (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι)) hbase ≫
+            Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι ≫ j) ≫ qx z := by
+          rw [← hqx z]
+      _ = (σ.pullbackResQ V hVs hVa hVmem
+            (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι ≫ j)
+            (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+              Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+            (Limits.pullback.snd (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι)) hbase ≫
+            Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι ≫ j)) ≫ qx z :=
+          (Category.assoc _ _ _).symm
+      _ = (Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem)
+            (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+              Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j) ≫
+            Limits.pullback.snd (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι)) ≫ qx z := by
+          rw [pullbackResQ_snd]
+      _ = Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem)
+            (Limits.pullback.fst (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫
+              Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j) ≫
+            Limits.pullback.snd (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+              (Limits.pullback.fst j (σ.quotientChart V hVs hVa z).ι) ≫ qx z :=
+          Category.assoc _ _ _
+  refine ⟨(σ.chartCover V hVs hVa j).glueMorphisms qx hcompat, ?_⟩
+  -- verify the factorization on a cover of the base change
+  refine Scheme.Cover.hom_ext (Scheme.Cover.mkOfCovers (J := X)
+    (fun x => Limits.pullback (Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j)
+      (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι))
+    (fun x => Limits.pullback.fst (Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j)
+      (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι))
+    (fun e => by
+      have h1 : j ((Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j) e) ∈
+          (⊤ : (σ.quotient V hVs hVa).Opens) := trivial
+      rw [← σ.iSup_quotientChart_eq_top V hVs hVa] at h1
+      obtain ⟨x, hx⟩ := TopologicalSpace.Opens.mem_iSup.mp h1
+      have h2 : e ∈ Set.range ⇑(Limits.pullback.fst
+          (Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j)
+          (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)) := by
+        rw [IsOpenImmersion.range_pullbackFst]
+        show (Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j) e ∈
+          Set.range ⇑(Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)
+        rw [IsOpenImmersion.range_pullbackFst]
+        exact ⟨⟨j ((Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j) e), hx⟩, rfl⟩
+      obtain ⟨y', hy'⟩ := h2
+      exact ⟨x, y', hy'⟩)
+    (fun x => inferInstance)) _ _ fun x : X => ?_
+  show Limits.pullback.fst (Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j)
+      (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι) ≫
+      Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j ≫
+        (σ.chartCover V hVs hVa j).glueMorphisms qx hcompat =
+    Limits.pullback.fst (Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j)
+      (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι) ≫ F
+  have hι := (σ.chartCover V hVs hVa j).ι_glueMorphisms qx hcompat x
+  rw [chartCover_f] at hι
+  rw [← Category.assoc,
+    Limits.pullback.condition (f := Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j)
+      (g := Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι),
+    Category.assoc, hι]
+  -- compare through the canonical map into the chart base change
+  set θ : Limits.pullback (Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j)
+      (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι) ⟶
+      Limits.pullback (σ.quotientπ V hVs hVa hVmem)
+        (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j) :=
+    Limits.pullback.lift
+      (Limits.pullback.fst (Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j)
+        (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι) ≫
+        Limits.pullback.fst (σ.quotientπ V hVs hVa hVmem) j)
+      (Limits.pullback.snd (Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j)
+        (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι))
+      (by
+        rw [Category.assoc,
+          Limits.pullback.condition (f := σ.quotientπ V hVs hVa hVmem) (g := j),
+          ← Category.assoc,
+          Limits.pullback.condition
+            (f := Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j)
+            (g := Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι),
+          Category.assoc])
+      with hθ
+  have hθsnd : θ ≫ Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem)
+      (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j) =
+      Limits.pullback.snd (Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j)
+        (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι) := by
+    rw [hθ]
+    exact Limits.pullback.lift_snd _ _ _
+  have hθρ : θ ≫ σ.pullbackResQ V hVs hVa hVmem j
+      (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι ≫ j)
+      (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι) rfl =
+      Limits.pullback.fst (Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j)
+        (Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι) := by
+    refine Limits.pullback.hom_ext ?_ ?_
+    · rw [Category.assoc, pullbackResQ_fst, hθ, Limits.pullback.lift_fst]
+    · rw [Category.assoc, pullbackResQ_snd, ← Category.assoc, hθsnd,
+        Limits.pullback.condition
+          (f := Limits.pullback.snd (σ.quotientπ V hVs hVa hVmem) j)
+          (g := Limits.pullback.fst j (σ.quotientChart V hVs hVa x).ι)]
+  rw [← hθsnd, Category.assoc, hqx x, ← Category.assoc, hθρ]
 
 /-- **The universal property of the quotient** (T-Q5d contract, part 4):
 `quotientπ` is the categorical quotient of `X` by `G` — every invariant morphism

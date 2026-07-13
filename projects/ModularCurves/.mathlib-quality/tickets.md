@@ -17350,7 +17350,29 @@ NEXT (fable-P4): the T-E5f recollement gluing [T-E5f-glue] (now consumes the CLE
 ## Sub-ticket (NEW-GH, v10.166): [GHB5a] concrete base-change of quotientπ — the GHB5-crux engine
 
 ### [GHB5a] `SchemeAction.exists_quotientπ_lift_baseChange` (concrete base-change descent)
-- **Status**: open
+- **Status**: done (STREAM-GH, 2026-07-13 — same-day as GHB5a-i)
+- **Progress** (2026-07-13, STREAM-GH): PROVEN axiom-clean [propext, Classical.choice, Quot.sound];
+  SchemeQuotient.lean now ZERO sorries. Decl MOVED down-file (statement byte-identical) past the
+  chart machinery it needs. Pieces: `specSMul_free_of_free` (geometric freeness → Spec Γ(V x)
+  T-point freeness via isoSpec.inv≫ι + `specSMul_isoSpec_inv`); `flat_quotientπ` (mirrors
+  etale_quotientπ's IsZariskiLocalAtTarget skeleton; freeness → projective → flat chart-locally);
+  `epi_pullback_snd_quotientπ` (flat+surj ⟹ base change of quotientπ is EPI over ANY base);
+  `pullbackResQ` + fst/snd/SMul-naturality; `chartCover` (pullback of the quotient-chart cover
+  along j — **structure-LITERAL Cover, the load-bearing trick**); chart step
+  `exists_quotientπ_lift_baseChange_of_factors` (paste [of_hasPullback ∘ two of_horiz_isIso
+  iso-squares ∘ atlas isPullback_quotientπ_quotientChart] → isoPullback E; action conjugation
+  E.hom-vs-pullbackSpecSMul via resLE_comp_ι + specSMul_isoSpec_inv term-mode calc; then GHB5a-i
+  `exists_invariantsπ_lift_baseChange_of_free` at jS := wc ≫ chartIso.inv — its ARBITRARY-base
+  power means NO affine refinement of the cover is needed); glue = epi-cancel calc + raw-form
+  verification cover. LEAN-OPS (fleet-grade): (1) covers built with `Scheme.Cover.mkOfCovers` are
+  TOXIC in statements — (mkOfCovers …).I₀/X/f projections don't reduce at instances-transparency,
+  poisoning TC + kabstract long-range; build covers as STRUCTURE LITERALS (`where I₀ := …` — the
+  mathlib affineCover pattern; mem₀ via `Scheme.presieve₀_mem_precoverage_iff`) so projections
+  iota-reduce at every transparency. (2) `rw [Limits.pullback.condition]` UNPINNED can grab the
+  wrong square (e.g. INSIDE a composite base-argument) — always pin `(f := …) (g := …)`.
+  (3) rw-with-prebaked cross-form hypotheses fails on invisible instance-arg mismatches — rewrite
+  with freshly-instantiated general lemmas instead. Unblocks: GHB5 (GammaHRepresentability:456)
+  → GHB7 → GHC1 unconditional.
 - **Parent**: GHB5 (`exists_quotient_baseChange_of_free`, GammaHRepresentability.lean:456 crux)
 - **File**: `ModularCurves/ForMathlib/SchemeQuotient.lean` (next to `exists_quotientπ_lift`)
 - **Depends on**: [A711-BC] (PROVEN), `exists_invariantsπ_lift_of_isOpenImmersion` (AffineQuotient, PROVEN),
