@@ -127,6 +127,21 @@ theorem appLE_resLE {Y X : Scheme.{u}} (f : Y ⟶ X) {U U' : X.Opens} (hU : U �
     (X.presheaf.map (homOfLE hU).op ≫ f.appLE U W h).hom r from rfl,
     Scheme.Hom.map_appLE]
 
+/-- Restricting a pulled-back unit is pulling back to the smaller open. -/
+theorem resUnit_map_appLE {Y X : Scheme.{u}} (f : Y ⟶ X) {U : X.Opens} {W W' : Y.Opens}
+    (h : W ≤ f ⁻¹ᵁ U) (h' : W' ≤ W) (g : Γ(X, U)ˣ) :
+    resUnit h' (Units.map ((f.appLE U W h).hom).toMonoidHom g) =
+      Units.map ((f.appLE U W' (h'.trans h)).hom).toMonoidHom g :=
+  Units.ext (by simpa using resLE_appLE f h h' g.val)
+
+/-- Pulling back a restricted unit is pulling back from the larger open. -/
+theorem map_appLE_resUnit {Y X : Scheme.{u}} (f : Y ⟶ X) {U U' : X.Opens} (hU : U ≤ U')
+    {W : Y.Opens} (h : W ≤ f ⁻¹ᵁ U) (g : Γ(X, U')ˣ) :
+    Units.map ((f.appLE U W h).hom).toMonoidHom (resUnit hU g) =
+      Units.map ((f.appLE U' W
+        (h.trans ((Opens.map f.base).map (homOfLE hU)).le)).hom).toMonoidHom g :=
+  Units.ext (by simpa using appLE_resLE f hU h g.val)
+
 /-- **(T-OM-A1)** A normalized Čech 1-cocycle of units on an open cover of a scheme:
 the glueing data of an invertible sheaf trivialized on the cover (Stacks 01AJ,
 rank-one case). `u i j` is the transition from the `j`-th to the `i`-th
@@ -1076,6 +1091,20 @@ noncomputable def pullbackCocycle (c : UnitCocycle X) (f : Y ⟶ X) : UnitCocycl
       Units.map ((f.appLE (c.U i ⊓ c.U j) (f ⁻¹ᵁ c.U i ⊓ f ⁻¹ᵁ c.U j)
         (fun _ hy => ⟨hy.1, hy.2⟩)).hom).toMonoidHom (c.u i j) :=
   rfl
+
+/-- Restrictions of the pulled-back transition units are pullbacks of the units. -/
+theorem pullbackCocycle_resUnit (f : Y ⟶ X) (i j : c.ι) {W' : Y.Opens}
+    (h : W' ≤ (c.pullbackCocycle f).U i ⊓ (c.pullbackCocycle f).U j) :
+    resUnit h ((c.pullbackCocycle f).u i j) =
+      Units.map ((f.appLE (c.U i ⊓ c.U j) W'
+        (fun _ hy => ⟨(h hy).1, (h hy).2⟩)).hom).toMonoidHom (c.u i j) := by
+  refine Units.ext ?_
+  show resLE h (((c.pullbackCocycle f).u i j).val) =
+    (f.appLE (c.U i ⊓ c.U j) W' (fun _ hy => ⟨(h hy).1, (h hy).2⟩)).hom (c.u i j).val
+  rw [show (((c.pullbackCocycle f).u i j).val) =
+    (f.appLE (c.U i ⊓ c.U j) (f ⁻¹ᵁ c.U i ⊓ f ⁻¹ᵁ c.U j)
+      (fun _ hy => ⟨hy.1, hy.2⟩)).hom (c.u i j).val from rfl]
+  erw [resLE_appLE]
 
 /-- **(T-OM-A7b)** Componentwise pullback of sections along `f`. -/
 noncomputable def sectionsPullback (f : Y ⟶ X) {V : X.Opens} (b : c.sections V) :
