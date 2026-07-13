@@ -55,6 +55,7 @@ theorem pointToTorsion_torsionPointsEquiv {S : Scheme.{u}} (E : EllipticCurve S)
           ((Submodule.mem_torsionBy_iff _ _).mp (E.torsionPointsEquiv N g j).2)) = j.1 :=
   congrArg Subtype.val ((E.torsionPointsEquiv N g).left_inv j)
 
+set_option maxHeartbeats 1000000 in
 /-- **(KM 1.6.2, `ℤ/N`-Str — no rank hypothesis, hence no `c4`)** The Drinfeld `Γ₁(N)`
 moduli problem is affine over `Ell`: for each `E/S` the functor of Drinfeld exact-order-`N`
 points is represented by the exact-order locus `Z ⊆ E[N]`, finite (hence affine) over `S`.
@@ -65,6 +66,16 @@ theorem gammaOneDrinfeld_affineOverEll (N : ℕ) [NeZero N] :
   obtain ⟨Z, hZ⟩ := exists_exactOrderLocus X.curve N
   refine ⟨Z.subscheme, Z.subschemeι ≫ X.curve.torsionπ N,
     exactOrderLocus_isAffineHom X.curve N Z, ?_⟩
-  sorry
+  refine ⟨fun {T} g => Equiv.mk (fun h => ⟨EllipticCurve.Point.asSection X.curve g
+      (↑(X.curve.torsionPointsEquiv N g ⟨h.1 ≫ Z.subschemeι, by rw [Category.assoc]; exact h.2⟩)),
+      (hZ g _ ((X.curve.smul_eq_zero_iff_comp_mulByHom g N _).mp ((Submodule.mem_torsionBy_iff _ _).mp
+          (X.curve.torsionPointsEquiv N g ⟨h.1 ≫ Z.subschemeι, by rw [Category.assoc]; exact h.2⟩).2))).mp
+        ⟨h.1, (pointToTorsion_torsionPointsEquiv X.curve N g
+          ⟨h.1 ≫ Z.subschemeι, by rw [Category.assoc]; exact h.2⟩).symm⟩⟩)
+      (fun P => ?_) ?_ ?_, ?_⟩
+  · sorry
+  · sorry
+  · sorry
+  · sorry
 
 end ModularCurves
