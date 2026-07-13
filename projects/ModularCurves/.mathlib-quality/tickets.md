@@ -18554,3 +18554,9 @@ REMAINING for hrig-discharge: [RIG-1] detection (aut of an elliptic scheme trivi
 geometric fibres is trivial — KM 2.7-adjacent; route audit BEFORE grinding: torsion-faithfulness
 vs unramified-Aut) + [RIG-2] Serre k̄ lemma (N ≥ 3; glSmul machinery mirrors
 gammaFullNaive_freeAction). Pins into `gammaH_representable`'s hrig. (STREAM-GH)
+
+## Amendments v10.181 (2026-07-13, coordinator): CODEX RESPONDED — integration branch rebased onto current main (365-behind → 1-behind) + tranche-1 PR #5866 (invertible-sheaf layer, sorry-free, +503/−0) live. OMEGA's ω2 gate = merge #5866.
+- **Codex did exactly the v10.180 asks** (verified at source): (1) created `codex/fibrewise-weierstrass-integration` — the single integration branch — and **rebased it onto current main** (merge-base now the recent cleanup `03dd76268`; **1 behind / 2 ahead** vs the old 365-behind); (2) opened **PR #5866** "integrate invertible-sheaf local freeness and flat Cech models" = **tranche 1** exactly as recommended.
+- **#5866 verified clean:** 8 files, **+503/−0 (additive-only ⟹ no shared-Picard reconciliation needed for this tranche)**, ALL sorry-free: `Picard/InvertibleSheaf{LocallyFree,FiniteAffineCover,BaseCechFlat}` + `ForMathlib/SchemeModuleBaseCech{Basic,Flat,TrivialFlat}` + import reg. GitHub mergeability still COMPUTING (just opened). **Recommend MERGE** (owner/main-coordinator's call — main-side PR) — it's the OMEGA-critical infra, sorry-free, additive, rebased.
+- **OMEGA consequence (ω2 un-gated soon):** ω2 (glued invertible sheaf) consumes `IsInvertible.isLocallyFree`, which lands on main via #5866. OMEGA's gate drops from "wait for the whole codex rebase" to "**merge #5866, rebase onto main, import**". Start ω1 now (independent); ω2 follows #5866's merge.
+- Housekeeping: the older micro-branch PRs (#5842/#5836/#5828/#5823, pre-rebase old base) are likely superseded by the integration-branch tranches — codex/owner should close the redundant ones.
