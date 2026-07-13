@@ -388,6 +388,47 @@ noncomputable def ModuliProblem.EquivariantRelRepData.pullback {R : CommRingCat.
     show Etale (pullback.snd d.f ψ.baseHom)
     infer_instance
 
+/-- **The comparison morphism of equivariant data is equivariant** ([GHB7-2b],
+equivariant upgrade): for two equivariant relative representation data of the same
+problem at the same object, the canonical comparison `RelRepData.compare` intertwines
+the two actions. Lets the [GHB7] per-object quotients glue functorially. -/
+theorem ModuliProblem.EquivariantRelRepData.compare_equivariant {R : CommRingCat.{u}}
+    {Q : ModuliProblem R} {G : Type*} [Group G] [Finite G] {φ : G →* Aut Q}
+    {X : EllObj R} (d₁ d₂ : ModuliProblem.EquivariantRelRepData φ X) (γ : G) :
+    d₁.σZ.hom γ ≫ (d₁.toRelRepData.compare d₂.toRelRepData).1 =
+      (d₁.toRelRepData.compare d₂.toRelRepData).1 ≫ d₂.σZ.hom γ := by
+  have m₁ : (d₁.σZ.hom γ ≫ (d₁.toRelRepData.compare d₂.toRelRepData).1) ≫ d₂.f =
+      d₁.f := by
+    rw [Category.assoc, (d₁.toRelRepData.compare d₂.toRelRepData).2, d₁.over_base γ]
+  have m₂ : ((d₁.toRelRepData.compare d₂.toRelRepData).1 ≫ d₂.σZ.hom γ) ≫ d₂.f =
+      d₁.f := by
+    rw [Category.assoc, d₂.over_base γ, (d₁.toRelRepData.compare d₂.toRelRepData).2]
+  have e1 : d₂.eqv d₁.f ⟨d₁.σZ.hom γ ≫ (d₁.toRelRepData.compare d₂.toRelRepData).1,
+        m₁⟩ = d₁.eqv d₁.f ⟨d₁.σZ.hom γ, d₁.over_base γ⟩ :=
+    ModuliProblem.RelRepData.eqv_comp_compare d₁.toRelRepData d₂.toRelRepData d₁.f
+      ⟨d₁.σZ.hom γ, d₁.over_base γ⟩
+  have e2 : d₁.eqv d₁.f ⟨d₁.σZ.hom γ, d₁.over_base γ⟩ =
+      (φ γ⁻¹).hom.app (Opposite.op (X.pullbackAlong d₁.f))
+        (d₁.eqv d₁.f ⟨𝟙 d₁.Z, Category.id_comp d₁.f⟩) := by
+    rw [show (⟨d₁.σZ.hom γ, d₁.over_base γ⟩ :
+        { s : d₁.Z ⟶ d₁.Z // s ≫ d₁.f = d₁.f }) =
+      ⟨𝟙 d₁.Z ≫ d₁.σZ.hom γ, by rw [Category.id_comp]; exact d₁.over_base γ⟩ from
+      Subtype.ext (Category.id_comp _).symm]
+    exact d₁.equivariant d₁.f ⟨𝟙 d₁.Z, Category.id_comp d₁.f⟩ γ
+  have e3 : d₂.eqv d₁.f ⟨(d₁.toRelRepData.compare d₂.toRelRepData).1 ≫ d₂.σZ.hom γ,
+        m₂⟩ =
+      (φ γ⁻¹).hom.app (Opposite.op (X.pullbackAlong d₁.f))
+        (d₂.eqv d₁.f (d₁.toRelRepData.compare d₂.toRelRepData)) :=
+    d₂.equivariant d₁.f (d₁.toRelRepData.compare d₂.toRelRepData) γ
+  have e4 : d₂.eqv d₁.f (d₁.toRelRepData.compare d₂.toRelRepData) =
+      d₁.eqv d₁.f ⟨𝟙 d₁.Z, Category.id_comp d₁.f⟩ :=
+    ModuliProblem.RelRepData.eqv_compare d₁.toRelRepData d₂.toRelRepData
+  have key : (⟨d₁.σZ.hom γ ≫ (d₁.toRelRepData.compare d₂.toRelRepData).1, m₁⟩ :
+      { s : d₁.Z ⟶ d₂.Z // s ≫ d₂.f = d₁.f }) =
+      ⟨(d₁.toRelRepData.compare d₂.toRelRepData).1 ≫ d₂.σZ.hom γ, m₂⟩ :=
+    (d₂.eqv d₁.f).injective (by rw [e1, e2, e3, e4])
+  exact congrArg Subtype.val key
+
 /-- **[GHB3] (KM 7.1.3(3) existence half; Loeffler Prop 3.6.1's affine patching)** —
 "For any E/S/R, the quotient scheme 𝒫_{E/S}/G exists"; Loeffler 3.6.1 (verbatim): "for
 X = Spec(A) affine, Spec(A^G) works, and one can show that these patch nicely. (One
