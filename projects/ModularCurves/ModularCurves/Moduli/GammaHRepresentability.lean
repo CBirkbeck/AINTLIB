@@ -1480,13 +1480,11 @@ theorem QuotPkg.isIso_mapT_pullbackAlongπ (pkg : ∀ X : EllObj R, QuotPkg φ X
 `quotProb` relatively at `X'`, finite étale (through [GHB6]). The classifying
 bijection composes the pullback universal property with the transport isomorphism
 `isIso_mapT_pullbackAlongπ`; naturality is the transport cocycle. -/
-theorem QuotPkg.relRep_quotProb (pkg : ∀ X : EllObj R, QuotPkg φ X)
+noncomputable def QuotPkg.relRepDatum (pkg : ∀ X : EllObj R, QuotPkg φ X)
     (hfree : FreeAction φ)
     (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
       (Limits.terminal.from X.base))) (X' : EllObj R) :
-    ∃ d' : ModuliProblem.RelRepData (QuotPkg.quotProb pkg hfree hbase) X',
-      IsFinite d'.f ∧ Etale d'.f := by
-  obtain ⟨hfin, het⟩ := (pkg X').f₀_finite_etale hfree (hbase X')
+    ModuliProblem.RelRepData (QuotPkg.quotProb pkg hfree hbase) X' := by
   have hqf : ∀ {T : Scheme.{u}} (g : T ⟶ X'.base),
       QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g) ≫
         (pkg (X'.pullbackAlong g)).f₀ =
@@ -1505,7 +1503,7 @@ theorem QuotPkg.relRep_quotProb (pkg : ∀ X : EllObj R, QuotPkg φ X)
       ((Category.assoc _ _ _).symm.trans
         ((congrArg (· ≫ (pkg (X'.pullbackAlong g)).f₀)
           (IsIso.inv_hom_id _)).trans (Category.id_comp _)))
-  refine ⟨⟨(pkg X').Z₀, (pkg X').f₀, fun {T} g =>
+  refine ⟨(pkg X').Z₀, (pkg X').f₀, fun {T} g =>
     haveI := QuotPkg.isIso_mapT_pullbackAlongπ pkg hfree hbase (X' := X') g; {
     toFun := fun h => ⟨pullback.lift h.1 (𝟙 T)
         (h.2.trans (Category.id_comp g).symm) ≫
@@ -1548,8 +1546,7 @@ theorem QuotPkg.relRep_quotProb (pkg : ∀ X : EllObj R, QuotPkg φ X)
           s.1 ≫ inv (QuotPkg.mapT pkg hfree hbase (X'.pullbackAlongπ g)))).trans
         ((Category.assoc _ _ _).trans ((congrArg (s.1 ≫ ·)
           (IsIso.inv_hom_id (QuotPkg.mapT pkg hfree hbase
-            (X'.pullbackAlongπ g)))).trans (Category.comp_id _)))) }, ?_⟩,
-    hfin, het⟩
+            (X'.pullbackAlongπ g)))).trans (Category.comp_id _)))) }, ?_⟩
   -- naturality in `T` (the transport cocycle along the base-change triangle)
   intro T T' g k h
   refine Subtype.ext ?_
@@ -1660,6 +1657,18 @@ theorem QuotPkg.relRep_quotProb (pkg : ∀ X : EllObj R, QuotPkg φ X)
         hinner).trans (Category.assoc _ _ _)
     · rw [Category.assoc, pullback.lift_snd, hu2, pullback.lift_snd]
   exact hleg _ (pullback.lift_fst _ _ _) (pullback.lift_snd _ _ _)
+
+/-- **The quotient problem is relatively representable, finite étale** ([GHB7-5];
+`relRepDatum` packaged with the [GHB6]-gated conjuncts). -/
+theorem QuotPkg.relRep_quotProb (pkg : ∀ X : EllObj R, QuotPkg φ X)
+    (hfree : FreeAction φ)
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base))) (X' : EllObj R) :
+    ∃ d' : ModuliProblem.RelRepData (QuotPkg.quotProb pkg hfree hbase) X',
+      IsFinite d'.f ∧ Etale d'.f :=
+  ⟨QuotPkg.relRepDatum pkg hfree hbase X',
+    ((pkg X').f₀_finite_etale hfree (hbase X')).1,
+    ((pkg X').f₀_finite_etale hfree (hbase X')).2⟩
 
 /-- **The cross-problem transport** ([GHB7-couniv-i], KM 7.1.3(1) scheme-level
 content): a `G`-invariant morphism to a relatively representable problem induces, at
