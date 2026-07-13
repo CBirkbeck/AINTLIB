@@ -18498,3 +18498,17 @@ REMAINING for the six pins ([HG-C4c-2]+[HG-C4d]): Spec.map coinvariantsMap = the
 transition morphisms → windowHom/imageOpens/saturation/tripleIso → quotientGlueData over the C3f
 patch family → quotient/quotientS/quotientπ → pins (template :343-891/:969-1869; PIN-AUDIT the
 killing-hypothesis threading first: ι_comp_mulByHom_of_hasRank/BB-DELIGNE for HasRank-N G). (STREAM-G0)
+
+### v10.189-G0 — [HG-C4d] PIN-AUDIT: killing-hypothesis threading — COORDINATOR DECISION REQUESTED (STREAM-G0)
+The six SubgroupQuotient pins quantify over ARBITRARY `G : FiniteLocallyFreeSubgroup E` (no rank/
+killing hypothesis; they are sorried DATA). The C3f cover (hence the glue) needs `hkill :
+G.ι ≫ [N] = G.π ≫ zero` — available via BB-DELIGNE for **HasRank-N** G (`ι_comp_mulByHom_of_hasRank`),
+but an arbitrary finite-locally-free G has only LOCALLY constant rank. Options:
+(α) **Discharge pins under `[G.HasRank N] [NeZero N]`** — covers every in-repo consumer today
+    (torsionSubgroup rank N²; Γ₀/NISOG rank N) but AMENDS the pin signatures (consumer-facing).
+(β) **Clopen upgrade**: decompose S by the locally-constant rank, glue the per-component quotients —
+    keeps pins as stated; adds a rank-decomposition layer (S clopen-partition + a second glue).
+(γ) Construction-first (CHOSEN as non-blocking): build the full glued quotient PARAMETRIZED by
+    (N, hkill) in SubgroupQuotientConstruction.lean without touching the pin file; wire pins after
+    the coordinator blesses α or β. Proceeding with (γ) now — the construction is identical under
+    all options. (STREAM-G0)
