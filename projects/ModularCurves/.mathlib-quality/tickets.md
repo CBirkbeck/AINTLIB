@@ -19261,3 +19261,20 @@ REMAINING = plumbing (conceptually clear): (a) `#fst⁻¹(torsionIdeal.support) 
 count via base-change/curveIsoPullback identification); (b) support-cover ⟹ `range g = T`; (c) pigeonhole
 (BUILT); (d) curveIsoPullback link base-changed comboᵢ↔Point.pull ⟹ comboFamily inj; (e) naive_iff
 (BUILT) closes bridge; (f) pointVanishSet + relocate ⟹ [YF-⊆]. (STREAM-YN)
+
+### v10.182 — ★ T-D8-⟹ PIECE (a) COMPLETE: #fst⁻¹(torsionIdeal.support)=N²
+`torsionIdeal_support` (support=range torsionι) + `natCard_fibre_torsion_locus` (the fibre torsion
+locus has N² points) BUILT + committed (LevelStructure/TorsionFibreCount.lean). The count was assembled
+via `pullback.range_snd` + closed-immersion injectivity + the pasting iso `pullbackRightPullbackFstIso`
++ `torsion_baseChange_isPullback` → `natCard_torsion_fibre=N²`. Own-proof sorry-free (inherits torsion
+black boxes). **16 lemmas this session.**
+
+REMAINING for the bridge ⟹ / [YF-⊆] (wiring, all pieces built or routed):
+- (b+c) ASSEMBLY: divisor eq ⟹ `sectionsDivisor_comap_support` (BUILT) + support_comap ⟹ `⋃range=
+  fst⁻¹(torsionIdeal.support)` ⟹ `iUnion_range_eq_range_eval` (BUILT) ⟹ `range g = fst⁻¹` ⟹ with
+  `natCard_fibre_torsion_locus`=N² (JUST BUILT), `injective_of_range_eq_of_natCard_eq` (BUILT) ⟹ the
+  base-changed combos have DISTINCT base-points.
+- (d) curveIsoPullback link: `sectionBaseChange(Pᵢ) t` has snd=𝟙 so its base-pt ⟺ (fst-image = Point.pull
+  base-pt); distinct base-pts ⟺ distinct Point.pull (k-point determinism) ⟺ comboFamily inj. [fiddly]
+- (e) `naive_iff_comboFamily_injective` (BUILT) closes `fullLevel_divisor_iff_naive_gen` (RELOCATE
+  downstream). (f) [YF-⊆]: combo≠0 ⟹ ∉ pointVanishSet via levelSpaceΓ_spec. (STREAM-YN)
