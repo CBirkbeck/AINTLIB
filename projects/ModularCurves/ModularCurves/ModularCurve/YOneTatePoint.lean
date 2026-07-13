@@ -3,9 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ModularCurve.YOneAtlasClassify
 import ModularCurves.EllipticCurve.MulByHomEtale
 import ModularCurves.ModularCurve.YFullRoute
+import ModularCurves.ModularCurve.YOneAtlasClassify
 
 /-!
 # The marked Tate point and `Y₁(N)` (STREAM-Y1 cap file)
@@ -72,7 +72,7 @@ theorem exists_tatePoint :
   -- classifying ∀-clause is the [Y1-ATLAS] deliverable `tateMarkedPoint_classifies`
   -- (YOneAtlasClassify.lean, Loeffler Prop 3.3.4's general case).
   ⟨tateMarkedPoint R, tateMarkedPoint_nowhereGeomOrderLEThree R,
-    fun Y P hP => MarkedChartData.tateMarkedPoint_classifies R Y P hP⟩
+    fun Y P hP ↦ MarkedChartData.tateMarkedPoint_classifies R Y P hP⟩
 
 /-- The marked point `(0, 0)` of the universal Tate curve (Loeffler's `(0 : 0 : 1)`), extracted
 from the master atlas leaf. Downstream consumers use only `tatePoint_nowhereGeomOrderLEThree`
@@ -100,7 +100,7 @@ killed loci `Y_d`, `d ∣ N`, `4 ≤ d < N` — Loeffler's `Y_N − ⋃_{d|N, 4�
 p. 14) with his exact index set (divisors `d ≤ 3` need no removal: the atlas already has no
 order-`≤ 3` points, Cor 3.3.5). -/
 def yOneSet : Set ((tateUniversal R).killedLocus (tatePoint R) N) :=
-  (⋃ d ∈ N.properDivisors.filter (fun d => 4 ≤ d),
+  (⋃ d ∈ N.properDivisors.filter (fun d ↦ 4 ≤ d),
     ((tateUniversal R).killedLocusπ (tatePoint R) N).base ⁻¹'
       Set.range ((tateUniversal R).killedLocusπ (tatePoint R) d).base)ᶜ
 
@@ -108,7 +108,7 @@ def yOneSet : Set ((tateUniversal R).killedLocus (tatePoint R) N) :=
 immersion), the union is finite, and we take the complement of its preimage. -/
 theorem yOneSet_isOpen : IsOpen (yOneSet R N) := by
   rw [yOneSet, isOpen_compl_iff]
-  refine isClosed_biUnion_finset fun d _ => ?_
+  refine isClosed_biUnion_finset fun d _ ↦ ?_
   refine IsClosed.preimage ((tateUniversal R).killedLocusπ (tatePoint R) N).continuous ?_
   exact ((tateUniversal R).killedLocusπ_isClosedImmersion (tatePoint R) d)
     |>.isClosedEmbedding.isClosed_range
@@ -178,7 +178,7 @@ fibrewise clause of `IsNaiveGammaOne`. The factoring `h` is unique (`yOneBase` i
 monomorphism). Loeffler Def 3.3.6 (verbatim, p. 14): *"By construction, this represents the
 functor `S ↦ {elliptic curves E/S with point of exact order N}` on the category of
 `ℤ[1/N]`-schemes."* -/
-theorem factors_yOne_iff [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R))
+theorem factors_yOne_iff [NeZero N] (_hN : 4 ≤ N) (_hinv : IsUnit (N : R))
     {T : Scheme.{u}} (t : T ⟶ tateBase R) :
     (∃ h : T ⟶ yOne R N, h ≫ yOneBase R N = t) ↔
       ((tateUniversal R).baseChange t).IsNaiveGammaOne N
@@ -192,7 +192,7 @@ theorem factors_yOne_iff [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R))
     have hc1 : (N : ℤ) • EllipticCurve.Point.asSection (tateUniversal R) t
         (EllipticCurve.Point.pull (tateUniversal R) t (tatePoint R)) = 0 :=
       ((tateUniversal R).zsmul_asSection_pull_eq_zero_iff (tatePoint R) t (N : ℤ)).mpr hkill
-    refine ⟨hc1, fun k _ _ τ => ⟨?_, ?_⟩⟩
+    refine ⟨hc1, fun k _ _ τ ↦ ⟨?_, ?_⟩⟩
     · -- clause 2a: the fibrewise `N`-kill is the section `N`-kill pulled along `τ`
       rw [← EllipticCurve.Point.pull_zsmul, hc1, EllipticCurve.Point.pull_zero]
     · -- clause 2b: no proper multiple `a < N` kills the fibre
@@ -250,7 +250,7 @@ theorem factors_yOne_iff [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R))
         ((tateBase R).fromSpecResidueField (t.base x)) (tatePoint R) = 0 :=
       ((tateUniversal R).mem_killedLocus_range_iff (tatePoint R) d (t.base x)).mp hmem
     set k := AlgebraicClosure (T.residueField x) with hk
-    haveI : Subsingleton (Spec (CommRingCat.of k)) :=
+    have : Subsingleton (Spec (CommRingCat.of k)) :=
       inferInstanceAs (Subsingleton (PrimeSpectrum k))
     set τ : Spec (CommRingCat.of k) ⟶ T :=
       Spec.map (CommRingCat.ofHom (algebraMap (T.residueField x) k)) ≫ T.fromSpecResidueField x
@@ -267,11 +267,6 @@ theorem factors_yOne_iff [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R))
     exact hne (((tateUniversal R).zsmul_pull_baseChange_asSection_iff (tatePoint R) t τ (d : ℤ)).mpr
       hτkill)
 
-/- **RELOCATED (Y1-CLOSER S4)**: `pull_transportSection_eq_zero_iff` and
-`isNaiveGammaOne_pullSection_iff` now live byte-identical in `Moduli/NaiveProblems.lean`
-(needed by the `gammaOneNaiveProblem.map` membership fill there — the "prove once, consume
-twice" coordination of A's wiring note). -/
-
 /-- **(Y1-D3 — Loeffler Def 3.3.6, representability half of T-E7)** `(Y₁(N), universal curve,
 (0,0))` represents the naive `Γ₁(N)` moduli problem: for every `Y : Ell/R`,
 `Ell/R`-morphisms `Y ⟶ Y₁(N)-object` correspond to naive `Γ₁(N)` structures on `Y.curve`,
@@ -282,16 +277,16 @@ naturality by `EllHom.pullSection_comp` (proven, held file). -/
 theorem yOne_representableBy [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
     Nonempty ((gammaOneNaiveProblem R N).RepresentableBy (yOneEllObj R N)) := by
   classical
-  haveI : IsClosedImmersion ((tateUniversal R).killedLocusπ (tatePoint R) N) :=
+  have : IsClosedImmersion ((tateUniversal R).killedLocusπ (tatePoint R) N) :=
     (tateUniversal R).killedLocusπ_isClosedImmersion (tatePoint R) N
-  haveI : Mono (yOneBase R N) := by
+  have : Mono (yOneBase R N) := by
     show Mono ((yOneOpens R N).ι ≫ (tateUniversal R).killedLocusπ (tatePoint R) N)
     infer_instance
   -- **The D2 + D1 bridge**: for `g : Y ⟶ 𝒴`, the pulled marked section is naive `Γ₁(N)` on
   -- `Y.curve` iff `g`'s base map factors through `Y₁(N)`.
   have bridge : ∀ {Y : EllObj R} (g : Y ⟶ tateEllObj R),
       Y.curve.IsNaiveGammaOne N (EllHom.pullSection R g (tatePoint R)) ↔
-        ∃ h : Y.base ⟶ yOne R N, h ≫ yOneBase R N = g.baseHom := fun {Y} g =>
+        ∃ h : Y.base ⟶ yOne R N, h ≫ yOneBase R N = g.baseHom := fun {Y} g ↦
     (isNaiveGammaOne_pullSection_iff R N g (tatePoint R)).trans
       (factors_yOne_iff R N hN hinv g.baseHom).symm
   -- **`e2`**: pairs `(g, factorisation)` ≃ naive `Γ₁(N)` sections, via the atlas classifier
@@ -299,10 +294,10 @@ theorem yOne_representableBy [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
   -- two existentials. `Equiv.ofBijective` supplies the round-trip laws.
   let e2 : ∀ X : EllObj R,
       {p : (X ⟶ tateEllObj R) × (X.base ⟶ yOne R N) // p.2 ≫ yOneBase R N = p.1.baseHom} ≃
-        {P : X.curve.Section // X.curve.IsNaiveGammaOne N P} := fun X =>
+        {P : X.curve.Section // X.curve.IsNaiveGammaOne N P} := fun X ↦
     Equiv.ofBijective
-      (fun p => ⟨EllHom.pullSection R p.1.1 (tatePoint R), (bridge p.1.1).mpr ⟨p.1.2, p.2⟩⟩)
-      ⟨fun p₁ p₂ hp => by
+      (fun p ↦ ⟨EllHom.pullSection R p.1.1 (tatePoint R), (bridge p.1.1).mpr ⟨p.1.2, p.2⟩⟩)
+      ⟨fun p₁ p₂ hp ↦ by
           obtain ⟨⟨g₁, h₁⟩, hgh₁⟩ := p₁
           obtain ⟨⟨g₂, h₂⟩, hgh₂⟩ := p₂
           simp only [Subtype.mk.injEq] at hp
@@ -313,14 +308,14 @@ theorem yOne_representableBy [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
             apply (cancel_mono (yOneBase R N)).mp
             rw [hgh₁, hgh₂, hg]
           subst hg; subst hh; rfl,
-        fun P => by
+        fun P ↦ by
           obtain ⟨P, hP⟩ := P
           obtain ⟨g, hg, -⟩ := tatePoint_classifies R X P (hP.nowhereGeomOrderLEThree hN)
           obtain ⟨h, hh⟩ := (bridge g).mp (by rw [hg]; exact hP)
           exact ⟨⟨(g, h), hh⟩, Subtype.ext hg⟩⟩
-  refine ⟨{ homEquiv := fun {X} =>
+  refine ⟨{ homEquiv := fun {X} ↦
               (EllObj.homPullbackAlongEquiv (tateEllObj R) (yOneBase R N) X).trans (e2 X)
-            homEquiv_comp := fun {X X'} f v => ?_ }⟩
+            homEquiv_comp := fun {X X'} f v ↦ ?_ }⟩
   refine Subtype.ext ?_
   show EllHom.pullSection R ((f ≫ v) ≫ (tateEllObj R).pullbackAlongπ (yOneBase R N)) (tatePoint R)
     = EllHom.pullSection R f
@@ -355,7 +350,7 @@ family is an open immersion (its diagonal is; mathlib `FormallyUnramified` +
 `IsOpenImmersion (pullback.diagonal _)`), and `{d • P = 0}` is the preimage of it under the
 `d`-multiple classifying section. -/
 theorem killedLocus_preimage_isOpen {S : Scheme.{u}} (E : EllipticCurve S) (P : E.Section)
-    [NeZero N] (hN : NIsInvertible S N) {d : ℕ} (hd : d ∣ N) :
+    [NeZero N] (hN : NIsInvertible S N) {d : ℕ} (_hd : d ∣ N) :
     IsOpen ((E.killedLocusπ P N).base ⁻¹' Set.range (E.killedLocusπ P d).base) := by
   classical
   -- the tautological `N`-killed point of `Y_N` and its `d`-multiple's torsion classifier
@@ -369,17 +364,17 @@ theorem killedLocus_preimage_isOpen {S : Scheme.{u}} (E : EllipticCurve S) (P : 
   have hz0 : ((0 : E.Point (𝟙 S)) : S ⟶ E.E) ≫ E.mulByHom N = 𝟙 S ≫ E.zero := by
     rw [← E.smul_eq_zero_iff_comp_mulByHom, smul_zero]
   set zT := E.pointToTorsion _ hz0 with hzT
-  haveI hEt : Etale (E.torsionπ N) := E.torsionπ_etale' N hN
-  haveI : IsOpenImmersion (Limits.pullback.diagonal (E.torsionπ N)) :=
+  have hEt : Etale (E.torsionπ N) := E.torsionπ_etale' N hN
+  have : IsOpenImmersion (Limits.pullback.diagonal (E.torsionπ N)) :=
     AlgebraicGeometry.FormallyUnramified.isOpenImmersion_diagonal _
   have hsq := Limits.pullback_lift_diagonal_isPullback zT (E.torsionπ N)
   have hzTsec : zT ≫ E.torsionπ N = 𝟙 S := E.pointToTorsion_torsionπ _ _
-  haveI hliftP : IsOpenImmersion
+  have hliftP : IsOpenImmersion
       (Limits.pullback.lift (𝟙 S) zT (by simp) :
         S ⟶ Limits.pullback (zT ≫ E.torsionπ N) (E.torsionπ N)) :=
     MorphismProperty.of_isPullback (P := @IsOpenImmersion) hsq inferInstance
-  haveI : IsIso (zT ≫ E.torsionπ N) := by rw [hzTsec]; infer_instance
-  haveI hzTopen : IsOpenImmersion zT := by
+  have : IsIso (zT ≫ E.torsionπ N) := by rw [hzTsec]; infer_instance
+  have hzTopen : IsOpenImmersion zT := by
     have hdec : zT = (Limits.pullback.lift (𝟙 S) zT (by simp) :
         S ⟶ Limits.pullback (zT ≫ E.torsionπ N) (E.torsionπ N)) ≫
         Limits.pullback.snd _ _ := (Limits.pullback.lift_snd _ _ _).symm
@@ -394,7 +389,7 @@ theorem killedLocus_preimage_isOpen {S : Scheme.{u}} (E : EllipticCurve S) (P : 
   have hιπ : E.torsionι N ≫ E.π = E.torsionπ N := by
     have hcond : E.torsionι N ≫ E.mulByHom (N : ℤ) = E.torsionπ N ≫ E.zero :=
       Limits.pullback.condition
-    have h2 := congrArg (fun m => m ≫ E.π) hcond
+    have h2 := congrArg (fun m ↦ m ≫ E.π) hcond
     simpa [E.mulByHom_π, E.zero_π] using h2
   -- the zero locus of the torsion is exactly the range of the zero section
   have hrange_z : Set.range zT.base = (E.torsionι N).base ⁻¹' Set.range E.zero.base := by
@@ -409,7 +404,7 @@ theorem killedLocus_preimage_isOpen {S : Scheme.{u}} (E : EllipticCurve S) (P : 
     · intro tpt htpt
       obtain ⟨y, hy⟩ := htpt
       refine ⟨(E.torsionπ N).base tpt, ?_⟩
-      haveI := E.torsionι_isClosedImmersion N
+      have := E.torsionι_isClosedImmersion N
       have hinj : Function.Injective (E.torsionι N).base :=
         (Scheme.Hom.isClosedEmbedding (E.torsionι N)).injective
       apply hinj
@@ -457,13 +452,13 @@ locus is clopen in `Y_N`, so `Y₁(N)` is a *clopen* subscheme of the closed sub
 `Y_N ⊆ 𝒴 = Spec R[A,B][∆⁻¹]`; a clopen subset of an affine scheme is the basic open of an
 idempotent (`PrimeSpectrum.exists_idempotent_basicOpen_eq_of_isClopen`), hence affine.
 (Derived — Loeffler displays `Spec` only for `N = 5`; see section header.) -/
-theorem yOne_isAffine [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
+theorem yOne_isAffine [NeZero N] (_hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
     IsAffine (yOne R N) := by
   classical
   -- the ambient killed locus is affine (closed in the affine Tate atlas)
-  haveI hci : IsClosedImmersion ((tateUniversal R).killedLocusπ (tatePoint R) N) :=
+  have hci : IsClosedImmersion ((tateUniversal R).killedLocusπ (tatePoint R) N) :=
     (tateUniversal R).killedLocusπ_isClosedImmersion (tatePoint R) N
-  haveI hXaff : IsAffine ((tateUniversal R).killedLocus (tatePoint R) N) :=
+  have hXaff : IsAffine ((tateUniversal R).killedLocus (tatePoint R) N) :=
     isAffine_of_isAffineHom ((tateUniversal R).killedLocusπ (tatePoint R) N)
   -- `N` is invertible on the Tate atlas
   have hNinv : NIsInvertible (tateBase R) N := by
@@ -478,13 +473,13 @@ theorem yOne_isAffine [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
     constructor
     · rw [yOneSet]
       rw [isClosed_compl_iff]
-      refine isOpen_biUnion fun d hd => ?_
+      refine isOpen_biUnion fun d hd ↦ ?_
       have hdN : d ∣ N := (Nat.mem_properDivisors.mp (Finset.mem_filter.mp hd).1).1
       exact killedLocus_preimage_isOpen (N := N) (tateUniversal R) (tatePoint R) hNinv hdN
     · exact yOneSet_isOpen R N
   -- transport to the spectrum: a clopen of an affine scheme is an idempotent basic open
   set X := (tateUniversal R).killedLocus (tatePoint R) N with hXdef
-  haveI : IsIso X.toSpecΓ := hXaff.affine
+  have : IsIso X.toSpecΓ := hXaff.affine
   set s' := (CategoryTheory.inv X.toSpecΓ).base ⁻¹' (yOneSet R N) with hs'
   have hs'clopen : IsClopen s' :=
     hclopen.preimage (CategoryTheory.inv X.toSpecΓ).continuous
@@ -510,7 +505,7 @@ theorem yOne_isAffine [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
 (Y1-E2) and target `Spec R` affine (`HasAffineProperty @IsAffineHom`). -/
 theorem yOneStructMap_isAffineHom [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
     IsAffineHom (yOneStructMap R N) := by
-  haveI := yOne_isAffine R N hN hinv
+  have := yOne_isAffine R N hN hinv
   exact (HasAffineProperty.iff_of_isAffine (P := @IsAffineHom)).mpr inferInstance
 
 /-- **(Y1-E4 — finite presentation)** `Y₁(N) ⟶ Spec R` is locally of finite presentation: the
@@ -521,22 +516,22 @@ finitely presented) universal curve is a finitely presented closed immersion
 is an open immersion. Loeffler Prop 3.4.3 requires "of finite type … `R` noetherian" — over
 general `R` finite *presentation* is the right form, and it is what mathlib's
 `RingHom.Smooth` consumes. -/
-theorem yOneStructMap_locallyOfFinitePresentation [NeZero N] (hN : 4 ≤ N)
-    (hinv : IsUnit (N : R)) :
+theorem yOneStructMap_locallyOfFinitePresentation [NeZero N] (_hN : 4 ≤ N)
+    (_hinv : IsUnit (N : R)) :
     LocallyOfFinitePresentation (yOneStructMap R N) := by
   -- The zero section is lfp: `zero ≫ π = 𝟙` is lfp and `π` is (smooth ⟹) of finite type.
-  haveI hsm : Smooth (tateUniversal R).π := SmoothOfRelativeDimension.smooth (n := 1) _
-  haveI hzero : LocallyOfFinitePresentation (tateUniversal R).zero := by
+  have hsm : Smooth (tateUniversal R).π := SmoothOfRelativeDimension.smooth (n := 1) _
+  have hzero : LocallyOfFinitePresentation (tateUniversal R).zero := by
     have h : LocallyOfFinitePresentation ((tateUniversal R).zero ≫ (tateUniversal R).π) := by
       rw [(tateUniversal R).zero_π]; infer_instance
     exact LocallyOfFinitePresentation.of_comp_of_locallyOfFiniteType h inferInstance
   -- `Y_N ⟶ 𝒴` is the base change of the zero section, hence lfp.
-  haveI hkl : LocallyOfFinitePresentation ((tateUniversal R).killedLocusπ (tatePoint R) N) :=
+  have hkl : LocallyOfFinitePresentation ((tateUniversal R).killedLocusπ (tatePoint R) N) :=
     MorphismProperty.pullback_fst _ _ hzero
   -- `Y₁(N) ⟶ Y_N` is an open immersion, hence lfp.
-  haveI hι : LocallyOfFinitePresentation (yOneOpens R N).ι := inferInstance
+  have hι : LocallyOfFinitePresentation (yOneOpens R N).ι := inferInstance
   -- `𝒴 ⟶ Spec R` is `Spec` of `R → R[A,B] → R[A,B][Δ⁻¹]` — polynomial then localization away, fp.
-  haveI hstr : LocallyOfFinitePresentation (tateStructMap R) := by
+  have hstr : LocallyOfFinitePresentation (tateStructMap R) := by
     apply (LocallyOfFinitePresentation.SpecMap_iff _).mpr
     rw [CommRingCat.hom_ofHom]
     refine RingHom.FinitePresentation.comp ?_ ?_
@@ -564,7 +559,7 @@ theorem exists_section_lift_of_smooth {X : Scheme.{u}} {B : CommRingCat.{u}}
     have h1 := Scheme.toSpecΓ_naturality f
     rw [show (Spec B).toSpecΓ = Spec.map (Scheme.ΓSpecIso B).hom from
       Scheme.isoSpec_Spec_hom B] at h1
-    have h2 := congrArg (fun m => m ≫ Spec.map (Scheme.ΓSpecIso B).inv) h1
+    have h2 := congrArg (fun m ↦ m ≫ Spec.map (Scheme.ΓSpecIso B).inv) h1
     simp only [Category.assoc, ← Spec.map_comp] at h2
     rw [show Spec.map ((Scheme.ΓSpecIso B).inv ≫ (Scheme.ΓSpecIso B).hom) = 𝟙 _ by
       rw [Iso.inv_hom_id, Spec.map_id], Category.comp_id] at h2
@@ -579,28 +574,28 @@ theorem exists_section_lift_of_smooth {X : Scheme.{u}} {B : CommRingCat.{u}}
     exact hs₀
   set q₀ : ↑Γ(X, ⊤) →ₐ[↑B] ↑(B ⧸ I) :=
     { toRingHom := q₀r.hom
-      commutes' := fun b => congrArg
-        (fun (m : B ⟶ CommRingCat.of (B ⧸ I)) => m.hom b) hq₀comp } with hq₀
-  haveI hFS : Algebra.FormallySmooth ↑B ↑Γ(X, ⊤) := by
+      commutes' := fun b ↦ congrArg
+        (fun (m : B ⟶ CommRingCat.of (B ⧸ I)) ↦ m.hom b) hq₀comp } with hq₀
+  have hFS : Algebra.FormallySmooth ↑B ↑Γ(X, ⊤) := by
     have h : Smooth f := hf
     rw [hftri] at h
-    haveI : IsIso X.toSpecΓ := IsAffine.affine
+    have : IsIso X.toSpecΓ := IsAffine.affine
     rw [MorphismProperty.cancel_left_of_respectsIso (P := @Smooth)] at h
     rw [HasRingHomProperty.Spec_iff (P := @Smooth)] at h
     exact h.1
   set ψB := Algebra.FormallySmooth.lift I hI q₀ with hψB
-  haveI : IsIso X.toSpecΓ := IsAffine.affine
+  have : IsIso X.toSpecΓ := IsAffine.affine
   refine ⟨Spec.map (CommRingCat.ofHom ψB.toRingHom) ≫ CategoryTheory.inv X.toSpecΓ,
     ?_, ?_⟩
   · rw [Category.assoc, hftri, ← Category.assoc (CategoryTheory.inv X.toSpecΓ),
       IsIso.inv_hom_id, Category.id_comp, ← Spec.map_comp]
     rw [show ((Scheme.ΓSpecIso B).inv ≫ f.appTop) ≫ CommRingCat.ofHom ψB.toRingHom =
-      𝟙 B from CommRingCat.hom_ext (RingHom.ext fun b => ψB.commutes b)]
+      𝟙 B from CommRingCat.hom_ext (RingHom.ext fun b ↦ ψB.commutes b)]
     exact Spec.map_id B
   · rw [← Category.assoc, ← Spec.map_comp]
     rw [show CommRingCat.ofHom ψB.toRingHom ≫ CommRingCat.ofHom (Ideal.Quotient.mk I) =
-      q₀r from CommRingCat.hom_ext (RingHom.ext fun c => by
-        have := congrArg (fun (m : ↑Γ(X, ⊤) →ₐ[↑B] ↑(B ⧸ I)) => m c)
+      q₀r from CommRingCat.hom_ext (RingHom.ext fun c ↦ by
+        have := congrArg (fun (m : ↑Γ(X, ⊤) →ₐ[↑B] ↑(B ⧸ I)) ↦ m c)
           (Algebra.FormallySmooth.comp_lift (R := ↑B) I hI q₀)
         exact this)]
     rw [hq₀spec, Category.assoc, IsIso.hom_inv_id, Category.comp_id]
@@ -650,19 +645,13 @@ private theorem bcEquiv_zero {S : Scheme.{u}} (E : EllipticCurve S) {T T' : Sche
     EllipticCurve.Point.baseChangeEquiv E σ t 0 = 0 :=
   map_zero (EllipticCurve.Point.baseChangeEquiv E σ t).toAddMonoidHom
 
-private theorem bcEquiv_nsmul {S : Scheme.{u}} (E : EllipticCurve S) {T T' : Scheme.{u}}
-    (σ : T ⟶ S) (t : T' ⟶ T) (n : ℕ) (P : (E.baseChange σ).Point t) :
-    EllipticCurve.Point.baseChangeEquiv E σ t (n • P) =
-      n • EllipticCurve.Point.baseChangeEquiv E σ t P :=
-  map_nsmul (EllipticCurve.Point.baseChangeEquiv E σ t).toAddMonoidHom n P
-
 /-- **(Y1-E5 pure core)** The étale torsion-point lift against a nilpotent ideal, packaged
 through the marked-atlas classification: an atlas algebra map to `A⧸I` whose marked point is
 `N`-killed lifts, after T-E1-style renormalisation by the classifying morphism of the lifted
 torsion point, to an atlas algebra map to `A` with `N`-killed marked point. Ring-level
 interface (no `A⧸I`-algebra structure) so the caller's `letI` diamonds stay outside. -/
-private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (hN : 4 ≤ N)
-    (hinv : IsUnit (N : R)) {A : Type u} [CommRing A] [Algebra ↑R A]
+private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (_hN : 4 ≤ N)
+    (_hinv : IsUnit (N : R)) {A : Type u} [CommRing A] [Algebra ↑R A]
     (I : Ideal A) (hI : IsNilpotent I)
     (ψ₀r : tateRingOver R →+* (A ⧸ I)) (ψ : tateRingOver R →ₐ[↑R] A)
     (hmkψ : (Ideal.Quotient.mk I).comp (ψ : tateRingOver R →+* A) = ψ₀r)
@@ -685,9 +674,9 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (hN : 4 ≤ N)
     show IsUnit ((N : ℕ) : Γ(Spec (CommRingCat.of A), ⊤))
     have h3 := hinvA.map (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom
     rwa [map_natCast] at h3
-  haveI hEt : Etale (FA.torsionπ N) := FA.torsionπ_etale' N hNinvA
-  haveI : IsFinite (FA.torsionπ N) := FA.torsionπ_isFinite_of_nIsInvertible N hNinvA
-  haveI : IsAffine (FA.torsion N) := isAffine_of_isAffineHom (FA.torsionπ N)
+  have hEt : Etale (FA.torsionπ N) := FA.torsionπ_etale' N hNinvA
+  have : IsFinite (FA.torsionπ N) := FA.torsionπ_isFinite_of_nIsInvertible N hNinvA
+  have : IsAffine (FA.torsion N) := isAffine_of_isAffineHom (FA.torsionπ N)
   -- the killed point over A⧸I, into the universal torsion then lifted through the
   -- base-change square
   have hkill₀ : (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) t₀ (tatePoint R)
@@ -765,7 +754,7 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (hN : 4 ≤ N)
         have h4 := (FA.torsionPointsEquiv N
           (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)))).apply_symm_apply
           ⟨P₀A, (Submodule.mem_torsionBy_iff _ _).mpr hP₀Akill⟩
-        have h5 := congrArg (fun z =>
+        have h5 := congrArg (fun z ↦
           ((z.1 : FA.Point (Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)))) :
             Spec (CommRingCat.of (↑A ⧸ I)) ⟶ FA.E)) h4
         rw [hs₀T]
@@ -808,7 +797,7 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (hN : 4 ≤ N)
     have hτfac : τ = τ₀ ≫ Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) := by
       rw [hτ₀, ← Spec.map_comp]
       rw [show CommRingCat.ofHom (Ideal.Quotient.mk I) ≫ CommRingCat.ofHom ū = u from
-        CommRingCat.hom_ext (RingHom.ext fun x => Ideal.Quotient.lift_mk I u.hom hIu)]
+        CommRingCat.hom_ext (RingHom.ext fun x ↦ Ideal.Quotient.lift_mk I u.hom hIu)]
       exact (Spec.map_preimage τ).symm
     have h1 : (a : ℤ) • (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t τ)
         (EllipticCurve.Point.pull ((tateUniversal R).baseChange t) τ PA) = 0 := by
@@ -859,8 +848,8 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (hN : 4 ≤ N)
     rw [Spec.map_comp, hspec']
     exact hover'
   have hcomm' : ∀ r : ↑R, ψ'r.hom (algebraMap ↑R (tateRingOver R) r) =
-      algebraMap ↑R A r := fun r =>
-    congrArg (fun (m : R ⟶ CommRingCat.of A) => m.hom r) hcomp'
+      algebraMap ↑R A r := fun r ↦
+    congrArg (fun (m : R ⟶ CommRingCat.of A) ↦ m.hom r) hcomp'
   set ψ' : tateRingOver R →ₐ[↑R] A :=
     { toRingHom := ψ'r.hom, commutes' := hcomm' } with hψ'
   have htspec' : tateBaseSpecMap R ψ' = fc.baseHom := by
@@ -960,9 +949,9 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (hN : 4 ≤ N)
       refine Spec.map_injective ?_
       rw [Spec.map_comp, Spec.map_comp, hspec']
       exact hbases
-    refine RingHom.ext fun x => ?_
+    refine RingHom.ext fun x ↦ ?_
     have h8 := congrArg
-      (fun m : CommRingCat.of (tateRingOver R) ⟶ CommRingCat.of (↑A ⧸ I) =>
+      (fun m : CommRingCat.of (tateRingOver R) ⟶ CommRingCat.of (↑A ⧸ I) ↦
         m.hom x) h7
     have h9 := DFunLike.congr_fun hmkψ x
     show Ideal.Quotient.mk I (ψ'r.hom x) = ψ₀r x
@@ -1038,8 +1027,8 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
      mono + `tateRing_homEquiv`-injectivity. `f ≫ yOneStructMap = Spec.map φ` by the
      `t'`-construction over `φ`. -/
   classical
-  haveI : Mono (yOneBase R N) := by
-    haveI : IsClosedImmersion ((tateUniversal R).killedLocusπ (tatePoint R) N) :=
+  have : Mono (yOneBase R N) := by
+    have : IsClosedImmersion ((tateUniversal R).killedLocusπ (tatePoint R) N) :=
       (tateUniversal R).killedLocusπ_isClosedImmersion (tatePoint R) N
     exact mono_comp _ _
   set t₀ := f₀ ≫ yOneBase R N with ht₀
@@ -1069,8 +1058,8 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
       rw [Spec.map_comp, hspec₀]
       exact hover₀
     have hcomm₀ : ∀ r : ↑R, ψ₀r.hom (algebraMap ↑R (tateRingOver R) r) =
-        algebraMap ↑R (A ⧸ I) r := fun r =>
-      congrArg (fun (m : R ⟶ CommRingCat.of (A ⧸ I)) => m.hom r) hcomp₀
+        algebraMap ↑R (A ⧸ I) r := fun r ↦
+      congrArg (fun (m : R ⟶ CommRingCat.of (A ⧸ I)) ↦ m.hom r) hcomp₀
     set ψ₀ : tateRingOver R →ₐ[↑R] (A ⧸ I) :=
       { toRingHom := ψ₀r.hom, commutes' := hcomm₀ } with hψ₀
     -- the classified coefficients and their lift
@@ -1082,9 +1071,9 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
     obtain ⟨β, hβ⟩ := Ideal.Quotient.mk_surjective (I := I) β₀
     -- Δ of the lift is a unit: its image mod the nilpotent `I` is `ψ₀` of the atlas unit
     have hΔ₀unit : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom
-        (algebraMap ↑R (A ⧸ I)) (fun i : Fin 2 => if i = 0 then α₀ else β₀))).Δ) := by
+        (algebraMap ↑R (A ⧸ I)) (fun i : Fin 2 ↦ if i = 0 then α₀ else β₀))).Δ) := by
       have hev : (MvPolynomial.eval₂Hom (algebraMap ↑R (A ⧸ I))
-          (fun i : Fin 2 => if i = 0 then α₀ else β₀)) =
+          (fun i : Fin 2 ↦ if i = 0 then α₀ else β₀)) =
           (ψ₀ : tateRingOver R →+* (A ⧸ I)).comp
             (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R)) := by
         apply MvPolynomial.ringHom_ext
@@ -1099,12 +1088,12 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
       have h2 := h1.map (ψ₀ : tateRingOver R →+* (A ⧸ I))
       simpa [RingHom.comp_apply] using h2
     have hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom
-        (algebraMap ↑R A) (fun i : Fin 2 => if i = 0 then α else β))).Δ) := by
+        (algebraMap ↑R A) (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ) := by
       rw [← IsNilpotent.isUnit_quotient_mk_iff (I := I) hI]
       have hmkev : (Ideal.Quotient.mk I).comp (MvPolynomial.eval₂Hom (algebraMap ↑R A)
-          (fun i : Fin 2 => if i = 0 then α else β)) =
+          (fun i : Fin 2 ↦ if i = 0 then α else β)) =
           MvPolynomial.eval₂Hom (algebraMap ↑R (A ⧸ I))
-            (fun i : Fin 2 => if i = 0 then α₀ else β₀) := by
+            (fun i : Fin 2 ↦ if i = 0 then α₀ else β₀) := by
         apply MvPolynomial.ringHom_ext
         · intro r
           simp only [RingHom.comp_apply, MvPolynomial.eval₂Hom_C]
@@ -1112,9 +1101,9 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
         · intro i
           fin_cases i <;> simp [hα, hβ]
       have h3 : (Ideal.Quotient.mk I) (((tateCurveOver R).map (MvPolynomial.eval₂Hom
-          (algebraMap ↑R A) (fun i : Fin 2 => if i = 0 then α else β))).Δ) =
+          (algebraMap ↑R A) (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ) =
           ((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap ↑R (A ⧸ I))
-            (fun i : Fin 2 => if i = 0 then α₀ else β₀))).Δ := by
+            (fun i : Fin 2 ↦ if i = 0 then α₀ else β₀))).Δ := by
         rw [WeierstrassCurve.map_Δ, WeierstrassCurve.map_Δ, ← hmkev]
         rfl
       rw [h3]
@@ -1159,7 +1148,7 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
       obtain ⟨ψ', h1, h2⟩ := exists_tateAlgLift_core R N hN hinv I hI
         (ψ₀ : tateRingOver R →+* (A ⧸ I)) ψ hmkψr hinvA hkill₀r
       refine ⟨ψ', ?_, h2⟩
-      exact AlgHom.ext fun x => DFunLike.congr_fun h1 x
+      exact AlgHom.ext fun x ↦ DFunLike.congr_fun h1 x
 
     -- assembly: witness with the renormalised map
     refine ⟨tateBaseSpecMap R ψ', ?_, ?_, ?_⟩
@@ -1228,7 +1217,7 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
       have hτfac : τ = τ₀ ≫ Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) := by
         rw [hτ₀, ← Spec.map_comp]
         rw [show CommRingCat.ofHom (Ideal.Quotient.mk I) ≫ CommRingCat.ofHom ū = u from
-          CommRingCat.hom_ext (RingHom.ext fun x => Ideal.Quotient.lift_mk I u.hom hIu)]
+          CommRingCat.hom_ext (RingHom.ext fun x ↦ Ideal.Quotient.lift_mk I u.hom hIu)]
         exact (Spec.map_preimage τ).symm
       have hcomp : τ ≫ t' = τ₀ ≫ t₀ := by
         rw [hτfac, Category.assoc, hrest']
@@ -1243,7 +1232,7 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
         have e1 := EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t' τ
         have h1 : ∀ (P : ((tateUniversal R).baseChange t').Point τ),
             a • P = 0 ↔ a • (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t' τ) P
-              = 0 := fun P => by
+              = 0 := fun P ↦ by
           constructor
           · intro h0
             rw [← bcEquiv_zsmul, h0, bcEquiv_zero]
@@ -1253,7 +1242,7 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
             exact h0
         have h2 : ∀ (P : ((tateUniversal R).baseChange t₀).Point τ₀),
             a • P = 0 ↔ a • (EllipticCurve.Point.baseChangeEquiv (tateUniversal R) t₀ τ₀) P
-              = 0 := fun P => by
+              = 0 := fun P ↦ by
           constructor
           · intro h0
             rw [← bcEquiv_zsmul, h0, bcEquiv_zero]
@@ -1264,7 +1253,7 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
         rw [h1, h2, pullAsSection_dict R t' τ, pullAsSection_dict R t₀ τ₀, hcomp]
       obtain ⟨hk₀, hord₀⟩ := hstruct₀.2 k τ₀
       exact ⟨(hbridge (N : ℤ)).mpr hk₀,
-        fun a ha haN h0 => hord₀ a ha haN ((hbridge (a : ℤ)).mp h0)⟩
+        fun a ha haN h0 ↦ hord₀ a ha haN ((hbridge (a : ℤ)).mp h0)⟩
   obtain ⟨f, hf⟩ := (factors_yOne_iff R N hN hinv t).mpr hstruct
   refine ⟨f, ?_, ?_⟩
   · rw [← cancel_mono (yOneBase R N), Category.assoc, hf, hrest]
@@ -1281,7 +1270,7 @@ artifact §E6). `FormallySmooth + FinitePresentation = Algebra.Smooth = RingHom.
 `HasRingHomProperty.Spec_iff` transports to the scheme morphism. -/
 theorem yOneStructMap_smooth [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
     Smooth (yOneStructMap R N) := by
-  haveI := yOne_isAffine R N hN hinv
+  have := yOne_isAffine R N hN hinv
   rw [HasRingHomProperty.iff_of_isAffine (P := @Smooth)]
   have hFP : RingHom.FinitePresentation ((yOneStructMap R N).appTop).hom := by
     have h := yOneStructMap_locallyOfFinitePresentation R N hN hinv
@@ -1300,27 +1289,27 @@ theorem yOneStructMap_smooth [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
   set s₀ : Spec (CommRingCat.of (B ⧸ I)) ⟶ yOne R N :=
     Spec.map (CommRingCat.ofHom g₀.toRingHom) ≫ CategoryTheory.inv (yOne R N).toSpecΓ
     with hs₀def
-  haveI : IsIso (yOne R N).toSpecΓ := IsAffine.affine
+  have : IsIso (yOne R N).toSpecΓ := IsAffine.affine
   -- the structure triangle of `yOneStructMap` (the hftri pattern)
   have hytri : yOneStructMap R N = (yOne R N).toSpecΓ ≫
       Spec.map ((Scheme.ΓSpecIso R).inv ≫ (yOneStructMap R N).appTop) := by
     have h1 := Scheme.toSpecΓ_naturality (yOneStructMap R N)
     rw [show (Spec R).toSpecΓ = Spec.map (Scheme.ΓSpecIso R).hom from
       Scheme.isoSpec_Spec_hom R] at h1
-    have h2 := congrArg (fun m => m ≫ Spec.map (Scheme.ΓSpecIso R).inv) h1
+    have h2 := congrArg (fun m ↦ m ≫ Spec.map (Scheme.ΓSpecIso R).inv) h1
     simp only [Category.assoc, ← Spec.map_comp] at h2
     rw [show Spec.map ((Scheme.ΓSpecIso R).inv ≫ (Scheme.ΓSpecIso R).hom) = 𝟙 _ by
       rw [Iso.inv_hom_id, Spec.map_id], Category.comp_id] at h2
     exact h2
   have hinvy : CategoryTheory.inv (yOne R N).toSpecΓ ≫ yOneStructMap R N =
       Spec.map ((Scheme.ΓSpecIso R).inv ≫ (yOneStructMap R N).appTop) := by
-    have h3 := congrArg (fun m => CategoryTheory.inv (yOne R N).toSpecΓ ≫ m) hytri
+    have h3 := congrArg (fun m ↦ CategoryTheory.inv (yOne R N).toSpecΓ ≫ m) hytri
     simp only [← Category.assoc, IsIso.inv_hom_id, Category.id_comp] at h3
     exact h3
   have hf₀ : s₀ ≫ yOneStructMap R N =
       Spec.map (φB ≫ CommRingCat.ofHom (Ideal.Quotient.mk I)) := by
     rw [hs₀def, Category.assoc, hinvy, ← Spec.map_comp]
-    refine congrArg Spec.map (CommRingCat.hom_ext (RingHom.ext fun r => ?_))
+    refine congrArg Spec.map (CommRingCat.hom_ext (RingHom.ext fun r ↦ ?_))
     have hc := g₀.commutes ((Scheme.ΓSpecIso R).inv.hom r)
     exact hc
   obtain ⟨fL, hfLrest, hfLover⟩ :=
@@ -1332,22 +1321,22 @@ theorem yOneStructMap_smooth [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
     rw [Spec.map_comp, hqfspec, Category.assoc, ← hytri]
     exact hfLover
   refine ⟨{ toRingHom := qf.hom
-            commutes' := fun c => ?_ }, ?_⟩
+            commutes' := fun c ↦ ?_ }, ?_⟩
   · obtain ⟨r, rfl⟩ : ∃ r, (Scheme.ΓSpecIso R).inv.hom r = c :=
       ⟨(Scheme.ΓSpecIso R).hom.hom c, by
-        have h1 := congrArg (fun (m : Γ(Spec R, ⊤) ⟶ Γ(Spec R, ⊤)) => m.hom c)
+        have h1 := congrArg (fun (m : Γ(Spec R, ⊤) ⟶ Γ(Spec R, ⊤)) ↦ m.hom c)
           (Iso.hom_inv_id (Scheme.ΓSpecIso R))
         exact h1⟩
-    exact congrArg (fun (m : R ⟶ CommRingCat.of B) => m.hom r) hqfcomp
-  · refine AlgHom.ext fun c => ?_
+    exact congrArg (fun (m : R ⟶ CommRingCat.of B) ↦ m.hom r) hqfcomp
+  · refine AlgHom.ext fun c ↦ ?_
     have hmkqf : qf ≫ CommRingCat.ofHom (Ideal.Quotient.mk I) =
         CommRingCat.ofHom g₀.toRingHom := by
       refine Spec.map_injective ?_
       rw [Spec.map_comp, hqfspec]
-      have h1 := congrArg (fun m => m ≫ (yOne R N).toSpecΓ) hfLrest
+      have h1 := congrArg (fun m ↦ m ≫ (yOne R N).toSpecΓ) hfLrest
       simp only [Category.assoc] at h1
       rw [h1, hs₀def, Category.assoc, IsIso.inv_hom_id, Category.comp_id]
-    exact congrArg (fun (m : Γ(yOne R N, ⊤) ⟶ CommRingCat.of (B ⧸ I)) => m.hom c) hmkqf
+    exact congrArg (fun (m : Γ(yOne R N, ⊤) ⟶ CommRingCat.of (B ⧸ I)) ↦ m.hom c) hmkqf
 
 /-! ### F. Transport to arbitrary representing objects, and the T-E7 bridge -/
 
@@ -1364,7 +1353,7 @@ theorem representableBy_smooth_isAffineHom [NeZero N] (hN : 4 ≤ N) (hinv : IsU
     (yOneStructMap_isAffineHom R N hN hinv) X hX
 
 /-- **(Y1-MASTER — the T-E7 bridge; statement identical to the held
-`gammaOneNaive_representable`, `Moduli/Representability.lean:250`)** For `N ≥ 4` invertible in
+`gammaOneNaive_representable`, `Moduli/Representability.lean`)** For `N ≥ 4` invertible in
 `R`, the naive `Γ₁(N)` problem is representable (by `Y₁(N)` — Loeffler Def 3.3.6) and every
 representing object is smooth and affine over `Spec R` (Loeffler Thm 3.4.4 + the clopen-split
 affineness). Term-mode assembly from Y1-D3 and Y1-F1; no `sorry` of its own — discharging the
@@ -1375,20 +1364,7 @@ theorem gammaOneNaive_representable_assembly [NeZero N] (hN : 4 ≤ N)
       ∀ X : EllObj R, Nonempty ((gammaOneNaiveProblem R N).RepresentableBy X) →
         (Smooth X.structMap ∧ IsAffineHom X.structMap) :=
   ⟨⟨⟨yOneEllObj R N, yOne_representableBy R N hN hinv⟩⟩,
-    fun X hX => representableBy_smooth_isAffineHom R N hN hinv X hX⟩
-
-/-- **(T-E7 MASTER closure prep — v10.117)** The held target
-`gammaOneNaive_representable` (`Moduli/Representability.lean`), statement byte-identical,
-closed by the assembly bridge against the relocated interface. CLOSED (v10.152): the
-designed trails are retired and the E-track leaves landed — this theorem's axiom trail
-IS `[propext, Classical.choice, Quot.sound]`; the held upstream statement can relocate
-here by the v10.111 doctrine (coordinator's call), exactly as `exists_tatePoint` did. -/
-theorem gammaOneNaive_representable_closure (N : ℕ) [NeZero N] (hN : 4 ≤ N)
-    (hinv : IsUnit (N : R)) :
-    (gammaOneNaiveProblem R N).Representable ∧
-      ∀ X : EllObj R, Nonempty ((gammaOneNaiveProblem R N).RepresentableBy X) →
-        (Smooth X.structMap ∧ IsAffineHom X.structMap) :=
-  gammaOneNaive_representable_assembly R N hN hinv
+    fun X hX ↦ representableBy_smooth_isAffineHom R N hN hinv X hX⟩
 
 /-- **(T-E7 MASTER, relocated per v10.111/117 — Y1-CLOSER S6)** = Loeffler Thm 3.4.4 + Def 3.3.6; KM 5.x for the Drinfeld upgrade)** For
 `N ≥ 4` and `N` invertible in `R`, the naive `Γ₁(N)` problem is representable, and the
