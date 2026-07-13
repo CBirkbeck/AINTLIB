@@ -8,8 +8,8 @@ public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.TraceFormGa
 /-!
 # `StickelbergerIdealEquality` from a `FullTeichDworkSetup`
 
-This file provides the substantive valuation-descent content of c.1
-(`REF-18c2d-main-c.1`) by showing how to assemble a
+This file provides the substantive valuation-descent content by showing
+how to assemble a
 `StickelbergerIdealEquality (S.Q.under (𝓞 K))` from a
 `FullTeichDworkSetup S` together with a coverage hypothesis on the
 Galois orbit of the descent prime.
@@ -128,7 +128,7 @@ theorem gaussSumInt_pow_p_not_mem_Q_pow_p_mul_stickOrdOrd_succ
   have h_dvd : S.Q ^ s ∣ Ideal.span ({x} : Set (𝓞 R')) := by
     rw [Ideal.dvd_iff_le, Ideal.span_singleton_le_iff_mem]
     exact h_mem
-  have h_not_dvd : ¬ S.Q ^ (s + 1) ∣ Ideal.span ({x} : Set (𝓞 R')) := fun h_dvd' =>
+  have h_not_dvd : ¬ S.Q ^ (s + 1) ∣ Ideal.span ({x} : Set (𝓞 R')) := fun h_dvd' ↦
     h_not ((Ideal.span_singleton_le_iff_mem (I := S.Q ^ (s + 1))).mp
       (Ideal.dvd_iff_le.mp h_dvd'))
   have h_emult :
@@ -296,9 +296,9 @@ theorem exists_descentPrime_pow_mul_stickOrdOrd_div
         ((p * S.stickOrdOrd a) /
           S.toConcreteStickelbergerSetup.descentRamificationIdx) := by
   classical
-  haveI := S.toConcreteStickelbergerSetup.isGalois_K_R'_of_cyclotomic
-  haveI := S.toConcreteStickelbergerSetup.finiteDimensional_K_R'_of_cyclotomic
-  haveI := S.toConcreteStickelbergerSetup.faithfulSMul_OK_OR'_of_cyclotomic
+  have := S.toConcreteStickelbergerSetup.isGalois_K_R'_of_cyclotomic
+  have := S.toConcreteStickelbergerSetup.finiteDimensional_K_R'_of_cyclotomic
+  have := S.toConcreteStickelbergerSetup.faithfulSMul_OK_OR'_of_cyclotomic
   -- Use trace-form Galois compatibility from TraceFormGalois.lean.
   have h_psi :=
     S.toTraceFormStickelbergerSetup.isGalPsiShiftCompatible_traceForm
@@ -374,7 +374,7 @@ def StickelbergerPerConjugateDescent : Prop :=
 This is the substantive content of c.1.4 + Dwork-EXACT-order. -/
 theorem stickelbergerPerConjugateDescent :
     S.StickelbergerPerConjugateDescent :=
-  fun _ ha₁ ha₂ h_ne_zero =>
+  fun _ ha₁ ha₂ h_ne_zero ↦
     S.exists_descentPrime_pow_mul_stickOrdOrd_div ha₁ ha₂ h_ne_zero
 
 /-! ### Atomic decomposition of `StickelbergerOrbitCoverage`
@@ -619,7 +619,7 @@ theorem stickelbergerSupportInOrbit_of_descentGaussSum
   -- Step 1: extract structural facts on `b`.
   have hb_prime_in_uf :=
     UniqueFactorizationMonoid.prime_of_normalized_factor b hb_in
-  haveI hb_isPrime : b.IsPrime := Ideal.isPrime_of_prime hb_prime_in_uf
+  have hb_isPrime : b.IsPrime := Ideal.isPrime_of_prime hb_prime_in_uf
   have hb_ne : b ≠ ⊥ := by
     rw [Ne, ← Ideal.zero_eq_bot]
     exact hb_prime_in_uf.ne_zero
@@ -638,7 +638,7 @@ theorem stickelbergerSupportInOrbit_of_descentGaussSum
   obtain ⟨B, hB_prime, hB_under⟩ :=
     Ideal.exists_ideal_over_prime_of_isIntegral_of_isDomain
       (R := 𝓞 K) (S := 𝓞 R') b hker_le
-  haveI : B.IsPrime := hB_prime
+  have : B.IsPrime := hB_prime
   -- Step 3: algebraMap γ ∈ B (since γ ∈ b = B.comap algebraMap).
   have h_algMap_in_B : algebraMap (𝓞 K) (𝓞 R') γ ∈ B := by
     have : γ ∈ B.comap (algebraMap (𝓞 K) (𝓞 R')) := hB_under ▸ hγ_in_b
@@ -650,7 +650,7 @@ theorem stickelbergerSupportInOrbit_of_descentGaussSum
   -- Step 6: invoke `Q_under_mem_cyclotomicConjugates` with `q = S.descentPrime`,
   -- `Q = B`. We get `B.under (𝓞 K) ∈ cyclotomicConjugates S.descentPrime`,
   -- i.e., `b ∈ cyclotomicConjugates S.descentPrime`.
-  haveI := S.toConcreteStickelbergerSetup.descentPrime_isPrime
+  have := S.toConcreteStickelbergerSetup.descentPrime_isPrime
   have h_descent_under :
       S.toConcreteStickelbergerSetup.descentPrime.under ℤ =
         Ideal.span ({(ℓ : ℤ)} : Set ℤ) := by
@@ -671,15 +671,15 @@ theorem stickelbergerSupportInOrbit_of_descentGaussSum
       rw [hbot, Ideal.mem_bot] at h_ell_in_under
       exact (by exact_mod_cast (Fact.out : ℓ.Prime).ne_zero : (ℓ : ℤ) ≠ 0)
         h_ell_in_under
-    haveI : (S.toConcreteStickelbergerSetup.descentPrime.under ℤ).IsPrime :=
+    have : (S.toConcreteStickelbergerSetup.descentPrime.under ℤ).IsPrime :=
       Ideal.IsPrime.under ℤ (P := S.toConcreteStickelbergerSetup.descentPrime)
-    haveI : (S.toConcreteStickelbergerSetup.descentPrime.under ℤ).IsMaximal :=
+    have : (S.toConcreteStickelbergerSetup.descentPrime.under ℤ).IsMaximal :=
       Ideal.IsPrime.isMaximal inferInstance h_under_ne
-    haveI : (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).IsPrime := by
+    have : (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).IsPrime := by
       rw [Ideal.span_singleton_prime
         (by exact_mod_cast (Fact.out : ℓ.Prime).ne_zero)]
       exact Nat.prime_iff_prime_int.mp (Fact.out : ℓ.Prime)
-    haveI : (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).IsMaximal :=
+    have : (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).IsMaximal :=
       Ideal.IsPrime.isMaximal inferInstance (by
         rw [Ne, Ideal.span_singleton_eq_bot]
         exact_mod_cast (Fact.out : ℓ.Prime).ne_zero)
@@ -774,7 +774,7 @@ In the unramified case more generally, the stabilizer is the inertia
 group, and faithfulness is equivalent to the Galois action being free
 on the orbit. -/
 def StickelbergerOrbitFaithful : Prop :=
-  Function.Injective (fun a : CyclotomicUnitDelta p =>
+  Function.Injective (fun a : CyclotomicUnitDelta p ↦
     cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹
       S.toConcreteStickelbergerSetup.descentPrime)
 
@@ -791,11 +791,11 @@ theorem normalizedFactors_stickelbergerFactor (a : CyclotomicUnitDelta p) :
         ({cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹
             S.toConcreteStickelbergerSetup.descentPrime}
           : Multiset (Ideal (𝓞 K))) := by
-  haveI := S.toConcreteStickelbergerSetup.descentPrime_isPrime
+  have := S.toConcreteStickelbergerSetup.descentPrime_isPrime
   have h_ne : cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹
       S.toConcreteStickelbergerSetup.descentPrime ≠ ⊥ :=
     S.cyclotomicGaloisConjugate_descentPrime_ne_bot a
-  haveI : (cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹
+  have : (cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹
       S.toConcreteStickelbergerSetup.descentPrime).IsPrime :=
     cyclotomicGaloisConjugate_isPrime a⁻¹ _
   have h_prime : Prime (cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹
@@ -821,7 +821,7 @@ theorem normalizedFactors_stickelbergerIdeal_finset_eq
               S.toConcreteStickelbergerSetup.descentPrime}
             : Multiset (Ideal (𝓞 K))) := by
   classical
-  haveI := S.toConcreteStickelbergerSetup.descentPrime_isPrime
+  have := S.toConcreteStickelbergerSetup.descentPrime_isPrime
   induction s using Finset.induction_on with
   | empty =>
     rw [Finset.prod_empty, Finset.sum_empty,
