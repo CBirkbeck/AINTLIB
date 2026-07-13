@@ -371,14 +371,62 @@ theorem quotientRing_eq_coinvariants :
     haveI : IsIso P.kappa := inferInstance
     exact ((ConcreteCategory.isIso_iff_bijective P.kappa).mp inferInstance).injective hκ
 
+/-- The carrier equivalence between the subalgebra-as-subring and the subalgebra. -/
+def coinvSubringEquiv :
+    (coinvariants P.chartCoaction).toSubring ≃+* coinvariants P.chartCoaction where
+  toFun x := ⟨x.1, x.2⟩
+  invFun x := ⟨x.1, x.2⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+  map_mul' _ _ := rfl
+  map_add' _ _ := rfl
+
 /-- The glue-model local quotient of a patch is the Hopf-model one (from the subring
-equality). -/
+equality, as an honest ring equivalence — no `eqToHom`). -/
 noncomputable def localQuotientOpenIso [Module.Free P.baseRing P.groupRing] :
-    G.localQuotientOpen P.hstable ≅ P.localQuotient :=
-  eqToIso (by
-    rw [FiniteLocallyFreeSubgroup.localQuotientOpen, localQuotient,
-      P.quotientRing_eq_coinvariants]
-    rfl)
+    G.localQuotientOpen P.hstable ≅ P.localQuotient where
+  hom := Spec.map (CommRingCat.ofHom
+    (((RingEquiv.subringCongr P.quotientRing_eq_coinvariants).trans
+      P.coinvSubringEquiv).symm.toRingHom))
+  inv := Spec.map (CommRingCat.ofHom
+    (((RingEquiv.subringCongr P.quotientRing_eq_coinvariants).trans
+      P.coinvSubringEquiv).toRingHom))
+  hom_inv_id :=
+    (Spec.map_comp (CommRingCat.ofHom
+        (((RingEquiv.subringCongr P.quotientRing_eq_coinvariants).trans
+          P.coinvSubringEquiv).toRingHom))
+      (CommRingCat.ofHom
+        (((RingEquiv.subringCongr P.quotientRing_eq_coinvariants).trans
+          P.coinvSubringEquiv).symm.toRingHom))).symm.trans (by
+      rw [show (CommRingCat.ofHom
+            (((RingEquiv.subringCongr P.quotientRing_eq_coinvariants).trans
+              P.coinvSubringEquiv).toRingHom) ≫
+          CommRingCat.ofHom
+            (((RingEquiv.subringCongr P.quotientRing_eq_coinvariants).trans
+              P.coinvSubringEquiv).symm.toRingHom)) = 𝟙 _ from by
+        ext x
+        exact congrArg Subtype.val
+          (((RingEquiv.subringCongr P.quotientRing_eq_coinvariants).trans
+            P.coinvSubringEquiv).symm_apply_apply x)]
+      exact Spec.map_id _)
+  inv_hom_id :=
+    (Spec.map_comp (CommRingCat.ofHom
+        (((RingEquiv.subringCongr P.quotientRing_eq_coinvariants).trans
+          P.coinvSubringEquiv).symm.toRingHom))
+      (CommRingCat.ofHom
+        (((RingEquiv.subringCongr P.quotientRing_eq_coinvariants).trans
+          P.coinvSubringEquiv).toRingHom))).symm.trans (by
+      rw [show (CommRingCat.ofHom
+            (((RingEquiv.subringCongr P.quotientRing_eq_coinvariants).trans
+              P.coinvSubringEquiv).symm.toRingHom) ≫
+          CommRingCat.ofHom
+            (((RingEquiv.subringCongr P.quotientRing_eq_coinvariants).trans
+              P.coinvSubringEquiv).toRingHom)) = 𝟙 _ from by
+        ext x
+        exact congrArg Subtype.val
+          (((RingEquiv.subringCongr P.quotientRing_eq_coinvariants).trans
+            P.coinvSubringEquiv).apply_symm_apply x)]
+      exact Spec.map_id _)
 
 /-- **`S1` — the patch quotient projection is flat and surjective**: the invariants
 inclusion is faithfully flat (the Hopf–Galois property, through the step-3 comparison),
@@ -412,6 +460,31 @@ theorem flat_and_surjective_localQuotientOpenπ [Module.Free P.baseRing P.groupR
   · rw [FiniteLocallyFreeSubgroup.localQuotientOpenπ]
     exact ⟨((Spec.map (CommRingCat.ofHom
       (G.quotientRing P.hstable).subtype)).surjective).comp P.U.toSpecΓ.surjective⟩
+
+/-- **`S2`-alignment: the glue projection is the Hopf projection under the patch
+identification** — `eqToHom` naturality across the subring equality. -/
+theorem localQuotientOpenπ_iso [Module.Free P.baseRing P.groupRing] :
+    G.localQuotientOpenπ P.hstable ≫ P.localQuotientOpenIso.hom = P.localQuotientπ := by
+  have hmid : Spec.map (CommRingCat.ofHom (G.quotientRing P.hstable).subtype) ≫
+      Spec.map (CommRingCat.ofHom
+        (((RingEquiv.subringCongr P.quotientRing_eq_coinvariants).trans
+          P.coinvSubringEquiv).symm.toRingHom))
+      = specEqualizerπ P.chartCoaction Algebra.TensorProduct.includeLeft := by
+    refine (Spec.map_comp _ _).symm.trans ?_
+    show Spec.map _ = Spec.map (CommRingCat.ofHom
+      (AlgHom.equalizer P.chartCoaction
+        (Algebra.TensorProduct.includeLeft :
+          P.chartRing →ₐ[P.baseRing]
+            P.chartRing ⊗[P.baseRing] P.groupRing)).val.toRingHom)
+    congr 1
+  show P.U.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (G.quotientRing P.hstable).subtype) ≫
+      Spec.map (CommRingCat.ofHom
+        (((RingEquiv.subringCongr P.quotientRing_eq_coinvariants).trans
+          P.coinvSubringEquiv).symm.toRingHom))
+    = P.hU.isoSpec.hom ≫ specEqualizerπ P.chartCoaction Algebra.TensorProduct.includeLeft
+  exact (congrArg (P.U.toSpecΓ ≫ ·) hmid).trans
+    (congrArg (· ≫ specEqualizerπ P.chartCoaction Algebra.TensorProduct.includeLeft)
+      P.hU.isoSpec_hom.symm)
 
 end AffineChartPatch
 
