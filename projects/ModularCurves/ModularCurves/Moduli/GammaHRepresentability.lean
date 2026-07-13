@@ -1309,7 +1309,67 @@ noncomputable def QuotPkg.projQ (pkg : ∀ X : EllObj R, QuotPkg φ X)
       hsq, Category.assoc, Category.assoc, hqT]
     rfl
 
+/-- **The projection coequalizes the action** ([GHB7-4], KM (Q1)-side): each `φ γ`
+composed with the projection is the projection, since the identity-index
+classification intertwines the action (`equivariant`) and the chosen projection kills
+it (`hπinv`). -/
+theorem QuotPkg.projQ_invariant (pkg : ∀ X : EllObj R, QuotPkg φ X)
+    (hfree : FreeAction φ)
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base))) (γ : G) :
+    (φ γ).hom ≫ QuotPkg.projQ pkg hfree hbase = QuotPkg.projQ pkg hfree hbase := by
+  ext Xop a
+  refine Subtype.ext ?_
+  have hmem : ((((pkg Xop.unop).d.eqv
+      ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+      (Q.map (Xop.unop.pullbackAlongπ
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1 ≫
+      (pkg Xop.unop).d.σZ.hom γ⁻¹) ≫ (pkg Xop.unop).d.f =
+      (𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom := by
+    rw [Category.assoc, (pkg Xop.unop).d.over_base γ⁻¹]
+    exact (((pkg Xop.unop).d.eqv
+      ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+      (Q.map (Xop.unop.pullbackAlongπ
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).2
+  have hkey := ((pkg Xop.unop).d.eqv
+      ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).injective
+    (a₁ := ((pkg Xop.unop).d.eqv
+      ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+      (Q.map (Xop.unop.pullbackAlongπ
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op
+        ((φ γ).hom.app Xop a)))
+    (a₂ := ⟨(((pkg Xop.unop).d.eqv
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+        (Q.map (Xop.unop.pullbackAlongπ
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1 ≫
+      (pkg Xop.unop).d.σZ.hom γ⁻¹, hmem⟩)
+    (by
+      rw [Equiv.apply_symm_apply]
+      have hnat := NatTrans.naturality_apply (φ γ).hom
+        (Xop.unop.pullbackAlongπ
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a
+      rw [← hnat]
+      have heqv := (pkg Xop.unop).d.equivariant
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)
+        (((pkg Xop.unop).d.eqv
+          ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+          (Q.map (Xop.unop.pullbackAlongπ
+            ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)) γ⁻¹
+      rw [inv_inv, Equiv.apply_symm_apply] at heqv
+      exact heqv.symm)
+  show (((pkg Xop.unop).d.eqv
+      ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+      (Q.map (Xop.unop.pullbackAlongπ
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op
+        ((φ γ).hom.app Xop a))).1 ≫ (pkg Xop.unop).π =
+    (((pkg Xop.unop).d.eqv
+      ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).symm
+      (Q.map (Xop.unop.pullbackAlongπ
+        ((𝟙 Xop.unop : Xop.unop ⟶ Xop.unop).baseHom)).op a)).1 ≫ (pkg Xop.unop).π
+  rw [congrArg Subtype.val hkey, Category.assoc, (pkg Xop.unop).hπinv γ⁻¹]
+
 end Transport
+
 
 
 
