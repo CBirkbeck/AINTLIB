@@ -3056,6 +3056,97 @@ theorem QuotPkg.exists_smul_of_π_eq (pkg : ∀ X : EllObj R, QuotPkg φ X)
     Spec (CommRingCat.of k) ⟶ X.base)).mp hσ
   exact (cancel_mono (pkg X).d.Z.isoSpec.hom).mp this
 
+/-- **The fibres of the projection over `k̄` are the `G`-orbits** ([GHB7-geom-o],
+KM 7.1.3(3) injectivity half; Loeffler Fact 3.8.1's "H-orbits"). -/
+theorem QuotPkg.projQ_geom_orbits (pkg : ∀ X : EllObj R, QuotPkg φ X)
+    (hfree : FreeAction φ)
+    (hbase : ∀ X : EllObj R, IsAffineHom (Limits.pullback.diagonal
+      (Limits.terminal.from X.base)))
+    (k : Type u) [Field k] [IsAlgClosed k]
+    {X : EllObj R} (hXb : X.base = Spec (CommRingCat.of k))
+    (a b : Q.obj (Opposite.op X)) :
+    (QuotPkg.projQ pkg hfree hbase).app (Opposite.op X) a =
+      (QuotPkg.projQ pkg hfree hbase).app (Opposite.op X) b ↔
+    ∃ γ : G, (φ γ).hom.app (Opposite.op X) a = b := by
+  constructor
+  · intro heq
+    -- the classifying sections lie in one fibre, hence one orbit
+    have hval : (((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
+        (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op a)).1 ≫
+        (pkg X).π =
+        (((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
+        (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op b)).1 ≫
+        (pkg X).π := congrArg Subtype.val heq
+    obtain ⟨γ₀, hγ₀⟩ := QuotPkg.exists_smul_of_π_eq pkg hfree hbase (X := X) k hXb
+      ((((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
+        (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op a)).1)
+      ((((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
+        (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op b)).1)
+      ((((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
+        (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op a)).2)
+      ((((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
+        (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op b)).2)
+      hval
+    refine ⟨γ₀⁻¹, ?_⟩
+    -- transfer through the equivariance of the classifying bijection
+    have hm : ((((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
+        (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op a)).1 ≫
+        (pkg X).d.σZ.hom γ₀) ≫ (pkg X).d.f = (𝟙 X : X ⟶ X).baseHom := by
+      rw [Category.assoc, (pkg X).d.over_base γ₀]
+      exact ((((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
+        (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op a)).2)
+    have hQside : Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op b =
+        Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op
+          ((φ γ₀⁻¹).hom.app (Opposite.op X) a) := by
+      calc Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op b
+          = (pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)
+            (((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
+              (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op b)) :=
+            (((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).apply_symm_apply _).symm
+        _ = (pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)
+            ⟨(((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
+              (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op a)).1 ≫
+              (pkg X).d.σZ.hom γ₀, hm⟩ :=
+            congrArg _ (Subtype.ext hγ₀)
+        _ = (φ γ₀⁻¹).hom.app (Opposite.op (X.pullbackAlong
+              ((𝟙 X : X ⟶ X).baseHom)))
+            ((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)
+              (((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
+                (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op a))) :=
+            (pkg X).d.equivariant ((𝟙 X : X ⟶ X).baseHom)
+              (((pkg X).d.eqv ((𝟙 X : X ⟶ X).baseHom)).symm
+                (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op a)) γ₀
+        _ = (φ γ₀⁻¹).hom.app (Opposite.op (X.pullbackAlong
+              ((𝟙 X : X ⟶ X).baseHom)))
+            (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op a) :=
+            congrArg _ (((pkg X).d.eqv
+              ((𝟙 X : X ⟶ X).baseHom)).apply_symm_apply _)
+        _ = Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op
+            ((φ γ₀⁻¹).hom.app (Opposite.op X) a) :=
+            NatTrans.naturality_apply (φ γ₀⁻¹).hom
+              (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op a
+    -- recover the values through the tautological roundtrip
+    have hrec : ∀ y : Q.obj (Opposite.op X),
+        Q.map (EllObj.toPullbackAlong (𝟙 X)).op
+          (Q.map (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op y) = y := by
+      intro y
+      exact (FunctorToTypes.map_comp_apply Q
+        (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op
+        (EllObj.toPullbackAlong (𝟙 X)).op y).symm.trans
+        ((congrArg (fun m => Q.map m y)
+          (show (X.pullbackAlongπ ((𝟙 X : X ⟶ X).baseHom)).op ≫
+              (EllObj.toPullbackAlong (𝟙 X)).op = 𝟙 (Opposite.op X) from
+            congrArg Quiver.Hom.op
+              (EllObj.toPullbackAlong_pullbackAlongπ (𝟙 X)))).trans
+          (FunctorToTypes.map_id_apply Q y))
+    have := congrArg (Q.map (EllObj.toPullbackAlong (𝟙 X)).op) hQside
+    rw [hrec b, hrec ((φ γ₀⁻¹).hom.app (Opposite.op X) a)] at this
+    exact this.symm
+  · rintro ⟨γ, rfl⟩
+    exact (congrArg (fun η : Q ⟶ QuotPkg.quotProb pkg hfree hbase =>
+      η.app (Opposite.op X) a)
+      (QuotPkg.projQ_invariant pkg hfree hbase γ)).symm
+
 end Transport
 
 
