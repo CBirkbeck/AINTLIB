@@ -125,7 +125,7 @@ def stickelbergerPSylowClassAction
   ⟨characterSideStickelbergerClassAction (p := p) (L := L)
       (stickelbergerCharacterCoefficientGroupRingTarget (p := p) (L := L) χ),
     by
-      rw [stickelbergerCharacterCoefficientGroupRingTarget_annihilates_minusInput
+      rw [stickelbergerCharacterCoefficientGroupRingTarget_annihilates_primeClass
         (p := p) (L := L) hp_odd hχ]
       exact Subgroup.one_mem _⟩
 
@@ -135,7 +135,7 @@ theorem stickelbergerPSylowClassAction_eq_one
     (hp_odd : p ≠ 2) {χ : DirichletCharacter ℂ p} (hχ : χ ≠ 1) :
     stickelbergerPSylowClassAction (p := p) (L := L) hp_odd χ hχ = 1 := by
   rw [cyclotomicClassGroupPSylow_eq_one_iff]
-  exact stickelbergerCharacterCoefficientGroupRingTarget_annihilates_minusInput
+  exact stickelbergerCharacterCoefficientGroupRingTarget_annihilates_primeClass
     (p := p) (L := L) hp_odd hχ
 
 /-- A component-level transfer lemma: if a class represented inside a declared
