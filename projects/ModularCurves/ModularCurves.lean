@@ -35,6 +35,7 @@ import ModularCurves.ForMathlib.Coaction
 import ModularCurves.ForMathlib.AgreementLocusClopen
 import ModularCurves.ForMathlib.ClosedImmersionFinrankIso
 import ModularCurves.ForMathlib.ComoduleCoinvariants
+import ModularCurves.ForMathlib.EtaleFieldCount
 import ModularCurves.ForMathlib.FiniteLocallyFreeIsoLocus
 import ModularCurves.ForMathlib.GaloisDescentModule
 import ModularCurves.ForMathlib.HomogeneousEval
