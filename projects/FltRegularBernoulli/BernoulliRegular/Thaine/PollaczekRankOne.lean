@@ -111,7 +111,7 @@ abstract eigenspace torsion vanishing to the project's
 `ClassGroupComponentIdentification.componentNontrivial` predicate. This
 is parametric here; substantive proof requires the eigenspace
 decomposition machinery (Dirichlet at character + idempotent action). -/
-def pollaczekUnitComponent_of_rankOne
+theorem pollaczekUnitComponent_of_rankOne
     {p : ℕ} [Fact p.Prime] {K : Type*} [Field K] [NumberField K]
     [IsCyclotomicExtension {p} ℚ K] [NumberField.IsCMField K]
     (id : ClassGroupComponentIdentification p K) (i : ℕ)
@@ -130,7 +130,7 @@ def pollaczekUnitComponent_of_rankOne
     (∀ α : (𝓞 K)ˣ,
         ((FLT37.pollaczekUnitPlus p K i : (𝓞 K)ˣ) : 𝓞 K) ≠
           ((α : (𝓞 K)ˣ) : 𝓞 K) ^ p) →
-    ¬ id.componentNontrivial i := fun h_cert =>
+    ¬ id.componentNontrivial i := fun h_cert ↦
   eigenspaceTrivial <|
     (pollaczek_rankOne_specialisation hp_prime p i K φ hc linkage).mp h_cert
 
