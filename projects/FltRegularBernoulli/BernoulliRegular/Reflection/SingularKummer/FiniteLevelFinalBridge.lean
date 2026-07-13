@@ -50,7 +50,7 @@ theorem torsionComponentNontrivial_of_finiteLevelCharacter
     (p := p) i rho B hV
     (FiniteLevelQuotientComparison.elementaryComponent_le_finiteLevelComponent_image
       (p := p) (m := m) hm i rho chi hcoeff)
-    (fun x => by
+    (fun x ↦ by
       exact FiniteLevelTorsionReduction.mem_torsionComponent_of_mem_finiteLevelComponent
         (p := p) (m := m) hcard hm i rho chi hchi
         (x := ProjectedSubgroupComparison.subgroupTorsionToTorsion B p x)
