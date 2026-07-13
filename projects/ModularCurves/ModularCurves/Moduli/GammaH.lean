@@ -1,6 +1,7 @@
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.Groupoid
 import ModularCurves.EllipticCurve.TorsionFibre
+import ModularCurves.Moduli.PullSectionCanonicity
 import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 import Mathlib.AlgebraicGeometry.AlgClosed.Basic
 import Mathlib.LinearAlgebra.Matrix.SpecialLinearGroup
@@ -1005,7 +1006,8 @@ noncomputable def gammaFullDrinfeldProblem (N : ℕ) [NeZero N] : ModuliProblem 
 (KM 3.2 via KM 1.4.1 — fully sourced Ch. 1 machinery). -/
 noncomputable def gammaOneDrinfeldProblem (N : ℕ) [NeZero N] : ModuliProblem R where
   obj X := { P : X.unop.curve.Section // X.unop.curve.IsGammaOne N P }
-  map f := ↾fun P => ⟨EllHom.pullSection R f.unop P.1, by sorry⟩
+  map f := ↾fun P => ⟨EllHom.pullSection R f.unop P.1,
+    EllHom.hasExactOrder_pullSection R f.unop P.2⟩
   map_id X := by
     ext P
     exact congrArg Subtype.val (EllHom.pullSection_id R P.1)
