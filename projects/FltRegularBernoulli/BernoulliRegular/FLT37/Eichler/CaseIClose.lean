@@ -1424,10 +1424,11 @@ private theorem caseI_evZ_Ltil_mem
   have hclF : DT * evZ (derivative (FpolyTot a b nPos nNeg)) = FT * NF := by
     rw [hDT, hFT, hNF, ← map_mul, ← map_mul, Dpoly_mul_derivative_FpolyTot]
   have hclG : DT * evZ (derivative (GpolyTot a b nPos nNeg)) = GT * NG := by
-    rw [hDT, hGT, hNG, ← map_mul, ← map_mul]
-    congr 1
-    rw [show GpolyTot a b nPos nNeg = FpolyTot a b nNeg nPos from rfl,
-      Dpoly_mul_derivative_FpolyTot]
+    have hpoly : Dpoly a b * derivative (GpolyTot a b nPos nNeg) =
+        GpolyTot a b nPos nNeg * NPoly a b nNeg nPos := by
+      rw [show GpolyTot a b nPos nNeg = FpolyTot a b nNeg nPos from rfl,
+        Dpoly_mul_derivative_FpolyTot]
+    rw [hDT, hGT, hNG, ← map_mul, ← map_mul, hpoly]
   have hderivP : evZ (derivative P) =
       evZ (derivative (FpolyTot a b nPos nNeg)) -
         (v : 𝓞 (CyclotomicField 37 ℚ)) * ζ ^ (v - 1) * GT -
