@@ -21,7 +21,7 @@ The cardinality consequence
 splitting completely purely by the cardinality of the prime fibre.
 
 This is the basic local input for the polar-density / weak-splitting argument
-of `BernoulliRegular/Reflection/kummer_reflection.tex`, Section 5 (REF-21).
+of `BernoulliRegular/Reflection/kummer_reflection.tex`, Section 5.
 
 ## Main definitions
 
@@ -85,7 +85,7 @@ theorem SplitsCompletely.card_primesOverFinset_eq_finrank
       = ∑ _P ∈ IsDedekindDomain.primesOverFinset p S, 1 := Finset.card_eq_sum_ones _
     _ = ∑ P ∈ IsDedekindDomain.primesOverFinset p S,
           p.ramificationIdx' P * p.inertiaDeg' P := by
-        refine Finset.sum_congr rfl fun P hP => ?_
+        refine Finset.sum_congr rfl fun P hP ↦ ?_
         obtain ⟨he, hf⟩ := h P hP
         simp [he, hf]
     _ = Module.finrank K L := Ideal.sum_ramification_inertia S K L hp0
@@ -103,14 +103,14 @@ theorem splitsCompletely_iff_card_primesOverFinset_eq_finrank
     SplitsCompletely S p ↔
       (IsDedekindDomain.primesOverFinset p S).card = Module.finrank K L := by
   classical
-  refine ⟨fun h => SplitsCompletely.card_primesOverFinset_eq_finrank
-    (K := K) (L := L) S hp0 h, fun hcard => ?_⟩
+  refine ⟨fun h ↦ SplitsCompletely.card_primesOverFinset_eq_finrank
+    (K := K) (L := L) S hp0 h, fun hcard ↦ ?_⟩
   intro P hP
   have hone : ∀ Q ∈ IsDedekindDomain.primesOverFinset p S,
       1 ≤ p.ramificationIdx' Q * p.inertiaDeg' Q := by
     intro Q hQ
-    haveI : Q.IsPrime := ((IsDedekindDomain.mem_primesOverFinset_iff hp0 _).mp hQ).1
-    haveI : Q.LiesOver p := ((IsDedekindDomain.mem_primesOverFinset_iff hp0 _).mp hQ).2
+    have : Q.IsPrime := ((IsDedekindDomain.mem_primesOverFinset_iff hp0 _).mp hQ).1
+    have : Q.LiesOver p := ((IsDedekindDomain.mem_primesOverFinset_iff hp0 _).mp hQ).2
     refine Right.one_le_mul ?_ ?_
     · exact Nat.pos_iff_ne_zero.mpr <|
         _root_.Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver _ hp0
