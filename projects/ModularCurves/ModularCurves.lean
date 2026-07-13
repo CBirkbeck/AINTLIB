@@ -51,6 +51,7 @@ import ModularCurves.ForMathlib.WeierstrassInvariant
 import ModularCurves.ForMathlib.WeierstrassProjectivePrime
 import ModularCurves.GroupScheme.MuN
 import ModularCurves.GroupScheme.NIsogeny
+import ModularCurves.GroupScheme.StableCover
 import ModularCurves.GroupScheme.SubgroupQuotient
 import ModularCurves.GroupScheme.TranslationAction
 import ModularCurves.LevelStructure.Basic
