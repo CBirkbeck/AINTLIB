@@ -289,35 +289,35 @@ private theorem omegaCompat_comp_w_val {X X' X'' : EllObj R} (φ : X'' ⟶ X') (
     (i'' : X''.curve.toEllipticCurveGeom.atlas.ι)
     (j' : X'.curve.toEllipticCurveGeom.atlas.ι)
     (j : X.curve.toEllipticCurveGeom.atlas.ι)
-    (V : X''.base.affineOpens)
-    (h1 : V.1 ≤ (omegaCocycle X''.curve.toEllipticCurveGeom).U i'')
-    (h2 : V.1 ≤ φ.baseHom ⁻¹ᵁ (omegaCocycle X'.curve.toEllipticCurveGeom).U j')
-    (h3 : V.1 ≤ φ.baseHom ⁻¹ᵁ
+    (V : X''.base.Opens)
+    (h1 : V ≤ (omegaCocycle X''.curve.toEllipticCurveGeom).U i'')
+    (h2 : V ≤ φ.baseHom ⁻¹ᵁ (omegaCocycle X'.curve.toEllipticCurveGeom).U j')
+    (h3 : V ≤ φ.baseHom ⁻¹ᵁ
       (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j)) :
     Scheme.resLE (le_inf h1 h3) ((omegaCompat (φ ≫ ψ)).w i'' j).val =
       Scheme.resLE (le_inf h1 h2) ((omegaCompat φ).w i'' j').val *
       (φ.baseHom.appLE
           ((omegaCocycle X'.curve.toEllipticCurveGeom).U j' ⊓
-            (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j)) V.1
+            (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j)) V
           (fun _ hy => ⟨h2 hy, h3 hy⟩)).hom ((omegaCompat ψ).w j' j).val := by
   -- pointwise choice: an affine `W'` around `φ(v)` inside the mixed ψ-overlap, and an
   -- affine `Vv` around `v` inside `V ⊓ φ⁻¹W'`
-  have hchoice : ∀ v : V.1,
+  have hchoice : ∀ v : V,
       ∃ (W' : X'.base.affineOpens) (Vv : X''.base.affineOpens),
       W'.1 ≤ (omegaCocycle X'.curve.toEllipticCurveGeom).U j' ⊓
         (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j) ∧
-      v.1 ∈ Vv.1 ∧ Vv.1 ≤ V.1 ∧ Vv.1 ≤ φ.baseHom ⁻¹ᵁ W'.1 := by
+      v.1 ∈ Vv.1 ∧ Vv.1 ≤ V ∧ Vv.1 ≤ φ.baseHom ⁻¹ᵁ W'.1 := by
     intro v
     obtain ⟨W₀, hWaff, hfvW, hWle⟩ := exists_isAffineOpen_mem_and_subset
       (show φ.baseHom.base v.1 ∈ (omegaCocycle X'.curve.toEllipticCurveGeom).U j' ⊓
         (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j) from
         ⟨h2 v.2, h3 v.2⟩)
     obtain ⟨Vv₀, hVvaff, hvVv, hVvle⟩ := exists_isAffineOpen_mem_and_subset
-      (show v.1 ∈ V.1 ⊓ (φ.baseHom ⁻¹ᵁ W₀) from ⟨v.2, hfvW⟩)
+      (show v.1 ∈ V ⊓ (φ.baseHom ⁻¹ᵁ W₀) from ⟨v.2, hfvW⟩)
     exact ⟨⟨W₀, hWaff⟩, ⟨Vv₀, hVvaff⟩, hWle, hvVv,
       le_trans hVvle inf_le_left, le_trans hVvle inf_le_right⟩
   choose W' Vv hW' hvmem hVvV hVvW using hchoice
-  refine TopCat.Sheaf.eq_of_locally_eq' X''.base.sheaf (fun v : V.1 => (Vv v).1) V.1
+  refine TopCat.Sheaf.eq_of_locally_eq' X''.base.sheaf (fun v : V => (Vv v).1) V
     (fun v => homOfLE (hVvV v)) (fun x hx => Opens.mem_iSup.mpr ⟨⟨x, hx⟩, hvmem ⟨x, hx⟩⟩)
     _ _ (fun v => ?_)
   show Scheme.resLE (hVvV v) _ = Scheme.resLE (hVvV v) _
@@ -440,7 +440,7 @@ private theorem omegaCompat_comp_w_val {X X' X'' : EllObj R} (φ : X'' ⟶ X') (
         Scheme.resLE (hVvV v)
           ((φ.baseHom.appLE
             ((omegaCocycle X'.curve.toEllipticCurveGeom).U j' ⊓
-              (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j)) V.1
+              (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j)) V
             (fun _ hy => ⟨h2 hy, h3 hy⟩)).hom ((omegaCompat ψ).w j' j).val) := by
         rw [Units.val_mul]
         congr 1
@@ -448,7 +448,7 @@ private theorem omegaCompat_comp_w_val {X X' X'' : EllObj R} (φ : X'' ⟶ X') (
         · rw [show Scheme.resLE (hVvV v)
               ((φ.baseHom.appLE
                 ((omegaCocycle X'.curve.toEllipticCurveGeom).U j' ⊓
-                  (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j)) V.1
+                  (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j)) V
                 (fun _ hy => ⟨h2 hy, h3 hy⟩)).hom ((omegaCompat ψ).w j' j).val) =
             (φ.baseHom.appLE (W' v).1 (Vv v).1 (hVvW v)).hom
               (Scheme.resLE (hW' v) ((omegaCompat ψ).w j' j).val) from by
@@ -468,4 +468,203 @@ private theorem omegaCompat_comp_w_val {X X' X'' : EllObj R} (φ : X'' ⟶ X') (
           rw [← hT]
           exact (congrArg Units.val hN).symm
 
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(T-OM-B7 ★★)** Contravariant functoriality of the ω-base-change: transporting a
+basis along a composite is the composite of the transports. With `omegaBasisMap_id`
+and `omegaBasisMap_smul` this makes the ω-rigidified moduli problems functors on
+`(Ell/R)ᵒᵖ`. -/
+theorem omegaBasisMap_comp {X X' X'' : EllObj R} (φ : X'' ⟶ X') (ψ : X' ⟶ X)
+    (b : OmegaBasis X.curve.toEllipticCurveGeom) :
+    omegaBasisMap (φ ≫ ψ) b = omegaBasisMap φ (omegaBasisMap ψ b) := by
+  refine Subtype.ext (Subtype.ext (funext fun i'' => ?_))
+  -- separation over the double chart cover
+  refine TopCat.Sheaf.eq_of_locally_eq' X''.base.sheaf
+    (fun p : X'.curve.toEllipticCurveGeom.atlas.ι ×
+        X.curve.toEllipticCurveGeom.atlas.ι =>
+      ((⊤ : X''.base.Opens) ⊓ (omegaCocycle X''.curve.toEllipticCurveGeom).U i'') ⊓
+        (φ.baseHom ⁻¹ᵁ (omegaCocycle X'.curve.toEllipticCurveGeom).U p.1) ⊓
+        (φ.baseHom ⁻¹ᵁ (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U p.2)))
+    ((⊤ : X''.base.Opens) ⊓ (omegaCocycle X''.curve.toEllipticCurveGeom).U i'')
+    (fun p => homOfLE (inf_le_left.trans inf_le_left)) (by
+      intro x hx
+      obtain ⟨j', hxj'⟩ := X'.curve.toEllipticCurveGeom.atlas.covers (φ.baseHom.base x)
+      obtain ⟨j, hxj⟩ := X.curve.toEllipticCurveGeom.atlas.covers
+        (ψ.baseHom.base (φ.baseHom.base x))
+      exact Opens.mem_iSup.mpr ⟨⟨j', j⟩, ⟨hx, hxj'⟩, hxj⟩) _ _ (fun p => ?_)
+  obtain ⟨j', j⟩ := p
+  -- the piece and its inclusions
+  set T := ((⊤ : X''.base.Opens) ⊓ (omegaCocycle X''.curve.toEllipticCurveGeom).U i'') ⊓
+    (φ.baseHom ⁻¹ᵁ (omegaCocycle X'.curve.toEllipticCurveGeom).U j') ⊓
+    (φ.baseHom ⁻¹ᵁ (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j))
+    with hT
+  -- LHS: expand the composite transport at (i'', j) and restrict to `T`
+  have hLHS := congrArg (⇑(Scheme.resLE (X := X''.base)
+    (show T ≤ (⊤ : X''.base.Opens) ⊓
+        (omegaCocycle X''.curve.toEllipticCurveGeom).U i'' ⊓
+        ((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle
+          (φ ≫ ψ).baseHom).U j from
+      le_inf (inf_le_left.trans inf_le_left) inf_le_right)))
+    ((omegaCompat (φ ≫ ψ)).transportFun_res
+      (((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle
+          (φ ≫ ψ).baseHom).sectionsMap
+        (show (⊤ : X''.base.Opens) ≤ (φ ≫ ψ).baseHom ⁻¹ᵁ (⊤ : X.base.Opens) from
+          fun x _ => trivial)
+        ((omegaCocycle X.curve.toEllipticCurveGeom).sectionsPullback
+          (φ ≫ ψ).baseHom b.1)) i'' j)
+  simp only [Scheme.resUnit_val, map_mul, Scheme.resLE_resLE] at hLHS
+  -- RHS: expand the φ-transport at (i'', j') and restrict to `T`
+  have hRHS := congrArg (⇑(Scheme.resLE (X := X''.base)
+    (show T ≤ (⊤ : X''.base.Opens) ⊓
+        (omegaCocycle X''.curve.toEllipticCurveGeom).U i'' ⊓
+        ((omegaCocycle X'.curve.toEllipticCurveGeom).pullbackCocycle
+          φ.baseHom).U j' from
+      le_inf (inf_le_left.trans inf_le_left) (inf_le_left.trans inf_le_right))))
+    ((omegaCompat φ).transportFun_res
+      (((omegaCocycle X'.curve.toEllipticCurveGeom).pullbackCocycle
+          φ.baseHom).sectionsMap
+        (show (⊤ : X''.base.Opens) ≤ φ.baseHom ⁻¹ᵁ (⊤ : X'.base.Opens) from
+          fun x _ => trivial)
+        ((omegaCocycle X'.curve.toEllipticCurveGeom).sectionsPullback
+          φ.baseHom (omegaBasisMap ψ b).1)) i'' j')
+  simp only [Scheme.resUnit_val, map_mul, Scheme.resLE_resLE] at hRHS
+  show Scheme.resLE (inf_le_left.trans inf_le_left)
+      (((omegaCompat (φ ≫ ψ)).transportFun _).1 i'') =
+    Scheme.resLE (inf_le_left.trans inf_le_left)
+      (((omegaCompat φ).transportFun _).1 i'')
+  refine hLHS.trans (Eq.trans ?_ hRHS.symm)
+  -- the piece's inclusions
+  have hT1 : T ≤ (omegaCocycle X''.curve.toEllipticCurveGeom).U i'' :=
+    (inf_le_left.trans inf_le_left).trans inf_le_right
+  have hT2 : T ≤ φ.baseHom ⁻¹ᵁ (omegaCocycle X'.curve.toEllipticCurveGeom).U j' :=
+    inf_le_left.trans inf_le_right
+  have hT3 : T ≤ φ.baseHom ⁻¹ᵁ
+      (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j) :=
+    inf_le_right
+  -- the cocycle condition of the mixed comparisons
+  have hW := omegaCompat_comp_w_val φ ψ i'' j' j T hT1 hT2 hT3
+  -- the pulled `b`-component of the composite side is a single composite pullback
+  have hBL : Scheme.resLE (X := X''.base)
+      (le_inf le_top inf_le_right : T ≤ (⊤ : X''.base.Opens) ⊓
+        (φ.baseHom ⁻¹ᵁ (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j)))
+      ((((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle
+          (φ ≫ ψ).baseHom).sectionsMap
+        (show (⊤ : X''.base.Opens) ≤ (φ ≫ ψ).baseHom ⁻¹ᵁ (⊤ : X.base.Opens) from
+          fun x _ => trivial)
+        ((omegaCocycle X.curve.toEllipticCurveGeom).sectionsPullback
+          (φ ≫ ψ).baseHom b.1)).1 j) =
+      ((φ ≫ ψ).baseHom.appLE
+        ((⊤ : X.base.Opens) ⊓ (omegaCocycle X.curve.toEllipticCurveGeom).U j) T
+        (fun _ hx => ⟨trivial, hx.2⟩)).hom (b.1.1 j) :=
+    (Scheme.resLE_resLE _ _ _).trans (Scheme.resLE_appLE _ _ _ _)
+  -- the pulled `b`-component of the two-step side, before the inner expansion
+  have hBR : Scheme.resLE (X := X''.base)
+      (le_inf le_top (inf_le_left.trans inf_le_right) : T ≤ (⊤ : X''.base.Opens) ⊓
+        (φ.baseHom ⁻¹ᵁ (omegaCocycle X'.curve.toEllipticCurveGeom).U j'))
+      ((((omegaCocycle X'.curve.toEllipticCurveGeom).pullbackCocycle
+          φ.baseHom).sectionsMap
+        (show (⊤ : X''.base.Opens) ≤ φ.baseHom ⁻¹ᵁ (⊤ : X'.base.Opens) from
+          fun x _ => trivial)
+        ((omegaCocycle X'.curve.toEllipticCurveGeom).sectionsPullback
+          φ.baseHom (omegaBasisMap ψ b).1)).1 j') =
+      (φ.baseHom.appLE
+        ((⊤ : X'.base.Opens) ⊓ (omegaCocycle X'.curve.toEllipticCurveGeom).U j') T
+        (fun _ hx => ⟨trivial, hx.1.2⟩)).hom ((omegaBasisMap ψ b).1.1 j') :=
+    (Scheme.resLE_resLE _ _ _).trans (Scheme.resLE_appLE _ _ _ _)
+  -- the inner expansion: pull the ψ-transport description through `φ`
+  have hψ : (φ.baseHom.appLE
+        ((⊤ : X'.base.Opens) ⊓ (omegaCocycle X'.curve.toEllipticCurveGeom).U j') T
+        (fun _ hx => ⟨trivial, hx.1.2⟩)).hom ((omegaBasisMap ψ b).1.1 j') =
+      (φ.baseHom.appLE
+        ((omegaCocycle X'.curve.toEllipticCurveGeom).U j' ⊓
+          (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j)) T
+        (fun _ hx => ⟨hx.1.2, hx.2⟩)).hom ((omegaCompat ψ).w j' j).val *
+      ((φ ≫ ψ).baseHom.appLE
+        ((⊤ : X.base.Opens) ⊓ (omegaCocycle X.curve.toEllipticCurveGeom).U j) T
+        (fun _ hx => ⟨trivial, hx.2⟩)).hom (b.1.1 j) := by
+    -- insert the restriction to the mixed triple on `X'`
+    rw [show (φ.baseHom.appLE
+        ((⊤ : X'.base.Opens) ⊓ (omegaCocycle X'.curve.toEllipticCurveGeom).U j') T
+        (fun _ hx => ⟨trivial, hx.1.2⟩)).hom ((omegaBasisMap ψ b).1.1 j') =
+      (φ.baseHom.appLE
+        ((⊤ : X'.base.Opens) ⊓ (omegaCocycle X'.curve.toEllipticCurveGeom).U j' ⊓
+          ((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle ψ.baseHom).U j) T
+        (fun _ hx => ⟨⟨trivial, hx.1.2⟩, hx.2⟩)).hom
+        (Scheme.resLE inf_le_left ((omegaBasisMap ψ b).1.1 j')) from
+      (Scheme.appLE_resLE φ.baseHom inf_le_left _ _).symm]
+    rw [show Scheme.resLE (X := X'.base) (inf_le_left :
+          (⊤ : X'.base.Opens) ⊓ (omegaCocycle X'.curve.toEllipticCurveGeom).U j' ⊓
+            ((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle ψ.baseHom).U j ≤
+          (⊤ : X'.base.Opens) ⊓ (omegaCocycle X'.curve.toEllipticCurveGeom).U j')
+        ((omegaBasisMap ψ b).1.1 j') =
+      Scheme.resLE (show (⊤ : X'.base.Opens) ⊓
+            (omegaCocycle X'.curve.toEllipticCurveGeom).U j' ⊓
+            ((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle ψ.baseHom).U j ≤
+          (omegaCocycle X'.curve.toEllipticCurveGeom).U j' ⊓
+            ((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle ψ.baseHom).U j
+          by order) ((omegaCompat ψ).w j' j).val *
+      Scheme.resLE (show (⊤ : X'.base.Opens) ⊓
+            (omegaCocycle X'.curve.toEllipticCurveGeom).U j' ⊓
+            ((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle ψ.baseHom).U j ≤
+          (⊤ : X'.base.Opens) ⊓
+            ((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle ψ.baseHom).U j
+          by order)
+        ((((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle
+            ψ.baseHom).sectionsMap
+          (show (⊤ : X'.base.Opens) ≤ ψ.baseHom ⁻¹ᵁ (⊤ : X.base.Opens) from
+            fun x _ => trivial)
+          ((omegaCocycle X.curve.toEllipticCurveGeom).sectionsPullback
+            ψ.baseHom b.1)).1 j) from
+      (omegaCompat ψ).transportFun_res _ j' j]
+    rw [map_mul]
+    congr 1
+    · -- the `w`-factor: collapse the pullback of a restriction
+      exact Scheme.appLE_resLE φ.baseHom _ _ _
+    · -- the `b`-factor: two-step pullback is the composite pullback
+      refine Eq.trans (congrArg (φ.baseHom.appLE _ T _).hom
+        (Scheme.resLE_resLE _ _ _)) ?_
+      refine Eq.trans (Scheme.appLE_resLE φ.baseHom _ _ _) ?_
+      exact DFunLike.congr_fun (congrArg CommRingCat.Hom.hom
+        (Scheme.Hom.appLE_comp_appLE φ.baseHom ψ.baseHom
+          ((⊤ : X.base.Opens) ⊓ (omegaCocycle X.curve.toEllipticCurveGeom).U j)
+          (ψ.baseHom ⁻¹ᵁ (⊤ : X.base.Opens) ⊓
+            ((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle ψ.baseHom).U j)
+          T (fun _ hx => ⟨trivial, hx.2⟩) (fun _ hx => ⟨trivial, hx.2⟩)))
+        (b.1.1 j)
+  calc Scheme.resLE (le_inf hT1 hT3) ((omegaCompat (φ ≫ ψ)).w i'' j).val *
+        Scheme.resLE (X := X''.base)
+          (le_inf le_top inf_le_right : T ≤ (⊤ : X''.base.Opens) ⊓
+            (φ.baseHom ⁻¹ᵁ (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j)))
+          ((((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle
+              (φ ≫ ψ).baseHom).sectionsMap
+            (show (⊤ : X''.base.Opens) ≤ (φ ≫ ψ).baseHom ⁻¹ᵁ (⊤ : X.base.Opens) from
+              fun x _ => trivial)
+            ((omegaCocycle X.curve.toEllipticCurveGeom).sectionsPullback
+              (φ ≫ ψ).baseHom b.1)).1 j)
+      = Scheme.resLE (le_inf hT1 hT2) ((omegaCompat φ).w i'' j').val *
+          ((φ.baseHom.appLE
+            ((omegaCocycle X'.curve.toEllipticCurveGeom).U j' ⊓
+              (ψ.baseHom ⁻¹ᵁ (omegaCocycle X.curve.toEllipticCurveGeom).U j)) T
+            (fun _ hx => ⟨hx.1.2, hx.2⟩)).hom ((omegaCompat ψ).w j' j).val *
+          ((φ ≫ ψ).baseHom.appLE
+            ((⊤ : X.base.Opens) ⊓ (omegaCocycle X.curve.toEllipticCurveGeom).U j) T
+            (fun _ hx => ⟨trivial, hx.2⟩)).hom (b.1.1 j)) :=
+        (congrArg₂ (· * ·) hW hBL).trans (mul_assoc _ _ _)
+    _ = Scheme.resLE (le_inf hT1 hT2) ((omegaCompat φ).w i'' j').val *
+          (φ.baseHom.appLE
+            ((⊤ : X'.base.Opens) ⊓ (omegaCocycle X'.curve.toEllipticCurveGeom).U j') T
+            (fun _ hx => ⟨trivial, hx.1.2⟩)).hom ((omegaBasisMap ψ b).1.1 j') := by
+        rw [hψ]
+    _ = Scheme.resLE (le_inf hT1 hT2) ((omegaCompat φ).w i'' j').val *
+          Scheme.resLE (X := X''.base)
+            (le_inf le_top (inf_le_left.trans inf_le_right) : T ≤ (⊤ : X''.base.Opens) ⊓
+              (φ.baseHom ⁻¹ᵁ (omegaCocycle X'.curve.toEllipticCurveGeom).U j'))
+            ((((omegaCocycle X'.curve.toEllipticCurveGeom).pullbackCocycle
+                φ.baseHom).sectionsMap
+              (show (⊤ : X''.base.Opens) ≤ φ.baseHom ⁻¹ᵁ (⊤ : X'.base.Opens) from
+                fun x _ => trivial)
+              ((omegaCocycle X'.curve.toEllipticCurveGeom).sectionsPullback
+                φ.baseHom (omegaBasisMap ψ b).1)).1 j') :=
+        congrArg₂ (· * ·) rfl hBR.symm
 end ModularCurves
