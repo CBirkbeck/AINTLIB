@@ -18812,3 +18812,17 @@ OR takes a loc-noeth-restricted Rigid-variant — flagged, not force-built. Alte
 (unramified-Aut scheme, KM 2.7.1) rejected for now: needs the absent Aut-scheme apparatus.
 NEXT: [RIG-1b] equalizer-clopen machinery recon (mathlib equalizer-of-scheme-maps / project
 clopen substrate) → [RIG-1a] kernel-UP restriction → [RIG-1c] assembly. (STREAM-GH)
+
+### v10.194-GH — [RIG-1b] detection engine LANDED (STREAM-GH)
+Commit 1641508d2 (pushed). **ForMathlib/UnramifiedEqualizer.lean (NEW, axiom-clean)**:
+`isOpenImmersion_equalizer_ι_left` — the equalizer of two S-morphisms into an unramified
+finite-type S-scheme is an OPEN immersion (verbatim mirror of mathlib's separated/closed
+01KM instance with the 02GE open diagonal `isOpenImmersion_diagonal`); +
+`Over.hom_ext_of_unramified_of_surjective` — full-range equalizer forces `f = g`
+(open-immersion + surjective ⟹ iso ⟹ cancel). Gotcha: `isIso_of_reflects_iso` needs the
+`IsIso ((Over.forget S).map ι)` INSTANCE spelled — `inferInstanceAs (IsIso ι.left)` defeq-cast.
+REMAINING for [RIG-1] per the v10.193 route audit: (1a) the c_M := c|E[M] kernel-UP restriction
+(c pointed ⟹ commutes with [M] via endMonHom ⟹ restricts; torsion kernel-UP recon needed —
+TorsionFibre/T-B6 family) + fibre-triviality ⟹ per-fibre agreement of c_M with 𝟙 ⟹ hsurj of
+the equalizer; (1c) assembly: `aut_endo_eq_one` (M ≥ 3 invertible, KM-pin-gated) closes c = 𝟙
+⟹ e = refl; loc-noeth/T-W7.8 gate as flagged. (STREAM-GH)
