@@ -18327,3 +18327,51 @@ fed by M6's `isHopfGalois_chartCoaction` whose lone Free hypothesis C3f now supp
   structure maps; quotientπ_isInvariant + quotient_lift from the coequalizer property glued
   (template's route via exists_unique_lift_of_isColimit + isInvariant_iff_coequalizes).
 KILLING at assembly: ι_comp_mulByHom_of_hasRank (BB-DELIGNE) supplies hkill for rank-N G. (STREAM-G0)
+
+## Amendments v10.180 (2026-07-13, coordinator): CODEX BRANCH ASSESSMENT — a 35k-line, near-sorry-free Picard/invertible-sheaf/converse development, built ON our shared Picard base; hugely usable (fibrewise⟺LW ✓, invertible-sheaf infra = OMEGA-critical, Pic⁰ dual). Merge = YES, but codex must REBASE first (365-behind). OMEGA re-steered to CONSUME not rebuild.
+
+**Investigated at source** (~100 `codex/fibrewise-weierstrass-*` micro-branches; the codex worker
+runs one-lemma-per-branch). The chain integrates: `codex/fibrewise-weierstrass-affine-glue-base`
+is the recent frontier tip (contains the sibling tips; **334 ahead / 365 behind origin/main**;
+merge-base = `d87d40737`, T-G4 era — they diverged before the four-stream reset and have NOT
+rebased since).
+
+**WHAT'S THERE (35,229 insertions / 129 files vs the old base; near-complete):**
+- **The fibrewise⟺LW converse — essentially PROVEN** (`EllipticCurve/Comparison.lean` on the
+  frontier): `fibrewiseElliptic_projModel_iff_isElliptic` + `locallyWeierstrass_projModel_iff_isElliptic`
+  (both directions), via `isElliptic_of_fibrewiseElliptic_projModel`. This is the OWNER-FLW pin our
+  streams consume — now largely discharged (for globally-presented Weierstrass models).
+- **Invertible-sheaf infrastructure — SORRY-FREE, net-new to us** (`Picard/InvertibleSheafLocallyFree`
+  `.FiniteAffineCover` `.BaseCechFlat`, 0 sorries): headline `IsInvertible.isLocallyFree` +
+  local-trivialization data. **Built ON our shared `Picard/InvertibleSheaf.lean`** (imports OUR
+  `IsInvertible`/`X.Modules`) — an EXTENSION, not a fork.
+- **A huge Pic⁰ dual-pullback development** — `Picard/DualPullback/*` (~20 files), `DualRestrict.lean`
+  (1191 ln, 0 sorries), `UnitPullback`, `PicComparison` (2 sorries) — the dual-abelian-variety /
+  Picard machinery. Overlaps our parked PIC0 arc.
+- **Only 4 sorries across 30 Picard files** — this is a near-finished body of work, not scaffolding.
+
+**OVERLAP IS SHARED-LINEAGE, NOT A COLLISION:** `Picard/Dual.lean` is 950 (ours) vs 955 (codex) lines;
+`Picard/{InvertibleSheaf,PicComparison}.lean` exist on both. Because codex branched from our Picard
+base and both evolved, these reconcile as normal 3-way merges (small diffs), not fork conflicts.
+
+**RECOMMENDATION (answer to "merge some to main for cleaning?"): YES — but STAGED, rebase-first.**
+1. **Step 0 (CODEX WORKER'S JOB): rebase the frontier onto current `origin/main`.** It is 365 commits
+   behind; merging as-is would clobber main's progress / conflict massively. The codex lane has been
+   ISOLATED (no rebases since T-G4 era) — the core process gap. Instruction relayed via owner.
+2. **First merge tranche (post-rebase): the sorry-free, self-contained invertible-sheaf layer**
+   (`InvertibleSheafLocallyFree/FiniteAffineCover/BaseCechFlat`) — clean, mathlib-grade, broadly
+   reusable, low-conflict (extends our shared base). Cleanup fleet polishes it.
+3. **Second: the fibrewise⟺LW converse** (Comparison.lean) — our streams' pin; merging the clean
+   version lets the fleet polish AND lets streams consume it.
+4. **Third: the Pic⁰ dual-pullback machinery** — AFTER reconciling the shared Picard files
+   (Dual/PicComparison/InvertibleSheaf) with our own; main-coordinator integration.
+
+**CROSS-STREAM CONSEQUENCES (act NOW):**
+- **OMEGA re-steered — DO NOT rebuild the invertible sheaf.** v10.179 told OMEGA to build the glued
+  invertible `Scheme.Modules` for ω2 "because mathlib has no line-bundle predicate." **Codex has it
+  sorry-free** (`IsInvertible.isLocallyFree` on our `Picard/InvertibleSheaf` base). OMEGA's ω2 must
+  CONSUME codex's invertible-sheaf layer — the cardinal reuse rule. Gated on the layer reaching our
+  line (tranche 1). OMEGA's /develop --decompose must plan around consuming it; flag ω2 accordingly.
+- **PIC0 stays parked** (correctly): codex's DualPullback/DualRestrict IS the Pic⁰ dual development;
+  resuming our PIC0 arc would duplicate it. On resume, PIC0 consumes codex's, not rebuilds.
+- **Modular-forms stream** (future) also consumes the invertible-sheaf/ω layer.
