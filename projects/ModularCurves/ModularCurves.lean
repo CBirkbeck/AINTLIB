@@ -53,6 +53,7 @@ import ModularCurves.ForMathlib.PullbackLocalAtTarget
 import ModularCurves.ForMathlib.PullbackUnitMonoidal
 import ModularCurves.ForMathlib.QuotientCurveModel
 import ModularCurves.ForMathlib.SchemeActionFree
+import ModularCurves.ForMathlib.SchemeModuleSheaf
 import ModularCurves.ForMathlib.SheafOfModulesMonoidal
 import ModularCurves.ForMathlib.SmoothDescent
 import ModularCurves.ForMathlib.SmoothSectionLift
