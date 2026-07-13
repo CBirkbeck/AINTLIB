@@ -33,6 +33,7 @@ import ModularCurves.EllipticCurve.PoleSheafFibreSections
 import ModularCurves.EllipticCurve.PoleSheafPushforwardBaseChange
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.WeierstrassModel
+import ModularCurves.ForMathlib.AffineOpenImmersionCover
 import ModularCurves.ForMathlib.AffineVanishing
 import ModularCurves.ForMathlib.AffineModulePatchBaseChange
 import ModularCurves.ForMathlib.AffineModulePatchBaseChangeNaturality
