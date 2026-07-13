@@ -532,7 +532,7 @@ def canonicalResidueZetaP_image
     [Algebra K R'] [IsScalarTower ℚ K R']
     {P' : Ideal (𝓞 K)} {𝔭 : Ideal (𝓞 R')}
     (h_over : 𝔭.comap (algebraMap (𝓞 K) (𝓞 R')) = P') : (𝓞 R' ⧸ 𝔭)ˣ :=
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+  have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   -- canonicalResidueZetaP P' ∈ (𝓞 K / P')ˣ. Its image under the embedding
   -- 𝓞 K / P' →+* 𝓞 R' / 𝔭 is a unit (since the embedding is a ring hom
   -- and respects units). We extract the unit form.
@@ -570,7 +570,7 @@ theorem canonicalResidueZetaP_image_val_isPrimitiveRoot
     IsPrimitiveRoot
       ((canonicalResidueZetaP_image (p := p) (K := K) (R' := R')
         h_over) : 𝓞 R' ⧸ 𝔭) p := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+  have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   rw [canonicalResidueZetaP_image_val h_over]
   -- Goal: IsPrimitiveRoot (residueFieldEmbedding ((canonicalResidueZetaP P') : 𝓞 K ⧸ P')) p
   -- The ring element is the image of an existing primitive root via the
@@ -578,9 +578,9 @@ theorem canonicalResidueZetaP_image_val_isPrimitiveRoot
   have h_ring_prim :
       IsPrimitiveRoot (((canonicalResidueZetaP (p := p) (K := K) P') :
           𝓞 K ⧸ P')) p := by
-    haveI := hP'_max.isPrime
-    haveI : NeZero P' := ⟨hP'_bot⟩
-    haveI : Field (𝓞 K ⧸ P') := Ideal.Quotient.field P'
+    have := hP'_max.isPrime
+    have : NeZero P' := ⟨hP'_bot⟩
+    have : Field (𝓞 K ⧸ P') := Ideal.Quotient.field P'
     exact (canonicalResidueZetaP_isPrimitiveRoot hP'_bot hp_in_P').map_of_injective
       (Units.coeHom_injective)
   exact h_ring_prim.map_of_injective
@@ -613,7 +613,7 @@ theorem residueMulChar_ringHomComp_apply_quotient_canonical_eq_pow_pthSymbol
       σ ((zeta_R : R')) ^
         (BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
           (p := p) (K := K) α P).val := by
-  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   rw [MulChar.ringHomComp_apply]
   rw [residueMulChar_apply_quotient_canonical_eq_pow_pthSymbol
     P hbot hdiv hp_in zeta_R hzeta_R hα]
@@ -682,7 +682,7 @@ theorem ideal_quotient_mk_zeta_p_int_eq_canonicalResidueZetaP_image
       (S.zeta_p_int) =
       ((canonicalResidueZetaP_image (p := p) (K := K) (R' := R')
         h_over) : 𝓞 R' ⧸ 𝔭) := by
-  haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
+  have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   rw [h_compat, canonicalResidueZetaP_image_val h_over,
       canonicalResidueZetaP_val P', residueFieldEmbedding_mk h_over]
 
