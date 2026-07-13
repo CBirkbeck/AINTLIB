@@ -74,6 +74,46 @@ universe u
 
 namespace ModularCurves
 
+/-- **(KM-W0, full-level iso-leg)** The Drinfeld full-level condition transports along a
+pointed multiplication-compatible isomorphism of elliptic curves: if `(P, Q)` is a Drinfeld
+`Γ(N)`-structure on `E`, so is `(pointMapOfHom e.hom P, pointMapOfHom e.hom Q)` on `E'`. The
+killing clauses transport by the additive equivalence `pointAddEquiv`; the divisor clause by
+`sectionsDivisor_pointMap_ideal` (the image family is the transported family, via additivity)
+composed with `torsionIdeal_eq_comap`. Companion to `Section.HasExactOrder.pointMap`, for the
+pair / `E[N]` (`Γ(N)`) condition. -/
+lemma isFullLevel_pointMap {S : Scheme.{u}} {E E' : EllipticCurve S}
+    (e : E.asOver ≅ E'.asOver)
+    (hη : η[E.asOver] ≫ e.hom = η[E'.asOver])
+    (hμ : μ[E.asOver] ≫ e.hom = MonoidalCategory.tensorHom e.hom e.hom ≫ μ[E'.asOver])
+    {N : ℕ} [NeZero N] {P Q : E.Section} (h : E.IsFullLevel N P Q) :
+    E'.IsFullLevel N (EllipticCurve.pointMapOfHom e.hom P)
+      (EllipticCurve.pointMapOfHom e.hom Q) := by
+  obtain ⟨⟨hPk, hQk⟩, hdiv⟩ := h
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · rw [show ((N : ℤ) • EllipticCurve.pointMapOfHom e.hom P)
+        = EllipticCurve.pointMapOfHom e.hom ((N : ℤ) • P) from
+        (map_zsmul (EllipticCurve.pointAddEquiv e hμ (𝟙 S)) (N : ℤ) P).symm, hPk]
+    exact map_zero (EllipticCurve.pointAddEquiv e hμ (𝟙 S))
+  · rw [show ((N : ℤ) • EllipticCurve.pointMapOfHom e.hom Q)
+        = EllipticCurve.pointMapOfHom e.hom ((N : ℤ) • Q) from
+        (map_zsmul (EllipticCurve.pointAddEquiv e hμ (𝟙 S)) (N : ℤ) Q).symm, hQk]
+    exact map_zero (EllipticCurve.pointAddEquiv e hμ (𝟙 S))
+  · have hfam : (fun i : Fin (N ^ 2) =>
+          ((((i : ℕ) % N : ℕ) : ℤ) • EllipticCurve.pointMapOfHom e.hom P
+            + ((((i : ℕ) / N : ℕ) : ℤ) • EllipticCurve.pointMapOfHom e.hom Q) :
+            E'.Point (𝟙 S)))
+        = fun i : Fin (N ^ 2) => EllipticCurve.pointMapOfHom e.hom
+            ((((((i : ℕ) % N : ℕ) : ℤ) • P + ((((i : ℕ) / N : ℕ) : ℤ) • Q)) :
+              E.Point (𝟙 S))) := by
+      funext i
+      rw [EllipticCurve.pointMapOfHom_add e.hom hμ]
+      congr 1
+      · exact (map_zsmul (EllipticCurve.pointAddEquiv e hμ (𝟙 S)) _ P).symm
+      · exact (map_zsmul (EllipticCurve.pointAddEquiv e hμ (𝟙 S)) _ Q).symm
+    show (RelEffCartierDiv.sectionsDivisor E'.π _).ideal = E'.torsionIdeal N
+    rw [hfam, EllipticCurve.sectionsDivisor_pointMap_ideal, hdiv,
+      EllipticCurve.torsionIdeal_eq_comap e hη hμ]
+
 namespace EllHom
 
 variable (R : CommRingCat.{u}) {X Y : EllObj R} (f : X ⟶ Y)
