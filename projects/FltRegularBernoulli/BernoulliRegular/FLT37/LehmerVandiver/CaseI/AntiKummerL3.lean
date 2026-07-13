@@ -442,7 +442,7 @@ theorem antiKummerRealSubfield_isUnramified_of_ram_bound
     have h𝔭_bot : 𝔭 ≠ ⊥ := by
       rw [h𝔭_def]
       exact mt Ideal.eq_bot_of_comap_eq_bot h𝔓_bot
-    refine Algebra.isUnramifiedAt_iff_of_isDedekindDomain.mpr ?_
+    refine Ideal.ramificationIdx_eq_one_iff.mp ?_
     rw [← Ideal.ramificationIdx'_eq_ramificationIdx (p := 𝔭) (q := 𝔓) h𝔭_bot]
     exact h_ram_bound 𝔭 𝔓 h𝔭_prime h𝔓_prime h𝔭_bot h𝔓_over
 

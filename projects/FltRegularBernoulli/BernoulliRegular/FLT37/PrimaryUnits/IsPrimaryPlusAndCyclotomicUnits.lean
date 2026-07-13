@@ -741,7 +741,7 @@ theorem zetaSubOne_sq_dvd_factor_sub_taylor (a b : ℤ) (k : ℕ) :
 /-- **`(ζ - 1)^{p-1} ∣ p` in `𝓞 K`.** Cyclotomic ramification: `(p)·𝓞 K`
 factors with `zetaPrime` to multiplicity `p - 1`. We use the project's
 `primesOver_ramificationIdx_eq_prime_sub_one_at_p` and mathlib's
-`Ideal.le_pow_ramificationIdx`. -/
+`Ideal.le_pow_ramificationIdx'`. -/
 theorem zetaSubOne_pow_p_sub_one_dvd_p :
     (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ^ (p - 1) ∣ ((p : ℕ) : 𝓞 K) := by
   -- ramificationIdx' (rationalPrimeIdeal p) (zetaPrime p K) = p - 1.
@@ -749,7 +749,7 @@ theorem zetaSubOne_pow_p_sub_one_dvd_p :
     primesOver_ramificationIdx_eq_prime_sub_one_at_p (p := p) (K := K) (zetaPrime p K)
       (zetaPrime_mem_primesOver_at_p (p := p) (K := K))
   -- map (algebraMap ℤ (𝓞 K)) (rationalPrimeIdeal p) ≤ (zetaPrime p K) ^ (p - 1).
-  have h_le := Ideal.le_pow_ramificationIdx
+  have h_le := Ideal.le_pow_ramificationIdx'
     (R := ℤ) (S := 𝓞 K)
     (p := rationalPrimeIdeal p) (P := zetaPrime p K)
   rw [hram] at h_le

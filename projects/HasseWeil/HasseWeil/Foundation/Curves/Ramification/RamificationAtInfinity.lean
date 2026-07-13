@@ -427,7 +427,7 @@ theorem Sinf.inertiaDeg_eq_finrank_kappa
   letI := data.commRing
   letI := data.algPoly
   intro P _
-  exact Ideal.inertiaDeg_algebraMap _ _
+  exact Ideal.inertiaDeg'_algebraMap _ _
 
 /-- The `Polynomial k ⧸ xIdeal`-finrank of a module agrees with its
 `k`-finrank, given a compatible scalar tower `k → (Polynomial k ⧸ xIdeal)
@@ -471,7 +471,7 @@ theorem Sinf.inertiaDeg_eq_one_of_algebraMap_surjective
   letI : Algebra (Polynomial k ⧸ xIdeal (k := k)) (data.carrier ⧸ P) :=
     Ideal.Quotient.algebraQuotientOfLEComap
       (Ideal.LiesOver.over (p := xIdeal (k := k)) (P := P)).le
-  rw [Ideal.inertiaDeg_algebraMap]
+  rw [Ideal.inertiaDeg'_algebraMap]
   refine le_antisymm ?_ ?_
   · refine finrank_le_one (1 : data.carrier ⧸ P) fun w ↦ ?_
     obtain ⟨c, hc⟩ := h_surj w

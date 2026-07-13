@@ -75,7 +75,7 @@ omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- Image of `descentPrime` in `𝓞 R'` is contained in `S.Q^e`. -/
 theorem map_descentPrime_le : Ideal.map (algebraMap (𝓞 K) (𝓞 R')) S.descentPrime ≤
       S.Q ^ S.descentRamificationIdx :=
-  Ideal.le_pow_ramificationIdx
+  Ideal.le_pow_ramificationIdx'
 
 omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
 /-- For `x ∈ S.descentPrime`, the algebra map sends `x` into `S.Q^e`. -/
@@ -139,7 +139,7 @@ theorem emultiplicity_Q_eq_ramificationIdx_mul_emultiplicity_descentPrime
   have hq_irred : Irreducible S.descentPrime :=
     UniqueFactorizationMonoid.irreducible_iff_prime.mpr
       (Ideal.prime_of_isPrime h_descent_ne_bot S.descentPrime_isPrime)
-  exact Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul
+  exact Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx'_mul
     hspan_ne hq_irred hQ_irred hQ_ne
 
 /-- The descent ramification index is non-zero. -/
@@ -149,7 +149,7 @@ theorem descentRamificationIdx_ne_zero
   haveI := S.descentPrime_isPrime
   haveI := S.hQ_prime
   haveI := S.Q_liesOver_descentPrime
-  exact Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver
+  exact Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver
     S.Q S.descentPrime_ne_bot
 
 /-- The descent ramification index is positive. -/

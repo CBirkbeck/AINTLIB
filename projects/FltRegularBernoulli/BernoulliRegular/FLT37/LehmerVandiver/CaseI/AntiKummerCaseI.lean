@@ -460,7 +460,7 @@ theorem ramificationIdx_L_over_Kplus_le_two
     𝔭.ramificationIdx' 𝔓_L ≤ 2 := by
   have h_tower : Ideal.ramificationIdx' 𝔭 𝔓_L =
       Ideal.ramificationIdx' 𝔭 𝔭_K * Ideal.ramificationIdx' 𝔭_K 𝔓_L :=
-    Ideal.ramificationIdx_algebra_tower' 𝔭 𝔭_K 𝔓_L
+    Ideal.ramificationIdx'_algebra_tower' 𝔭 𝔭_K 𝔓_L
   rw [h_tower, h_LK_unram, mul_one]
   exact ramificationIdx_K_over_Kplus_le_two (K := K) 𝔭 𝔭_K
 
@@ -483,7 +483,7 @@ theorem ramificationIdx_Lplus_dvd_L_over_Kplus
     [𝔓.IsPrime] [𝔓_L.IsPrime]
     [𝔓.LiesOver 𝔭] [𝔓_L.LiesOver 𝔓] :
     Ideal.ramificationIdx' 𝔭 𝔓 ∣ Ideal.ramificationIdx' 𝔭 𝔓_L := by
-  have h_tower := Ideal.ramificationIdx_algebra_tower' 𝔭 𝔓 𝔓_L
+  have h_tower := Ideal.ramificationIdx'_algebra_tower' 𝔭 𝔓 𝔓_L
   rw [h_tower]
   exact ⟨_, rfl⟩
 
@@ -517,7 +517,7 @@ theorem ramificationIdx_Lplus_over_Kplus_le_two_of_LK_unram
     ramificationIdx_L_over_Kplus_le_two 𝔭 𝔭_K 𝔓_L h_LK_unram
   haveI : 𝔓_L.LiesOver 𝔭 := Ideal.LiesOver.trans 𝔓_L 𝔓 𝔭
   have h_pos : 0 < 𝔭.ramificationIdx' 𝔓_L :=
-    Nat.pos_of_ne_zero <| Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver _ h𝔭_ne_bot
+    Nat.pos_of_ne_zero <| Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver _ h𝔭_ne_bot
   exact (Nat.le_of_dvd h_pos h_dvd).trans h_le
 
 /-- **Galois divisibility for L⁺/K⁺**: ramificationIdx' divides [L⁺ : K⁺] = p. -/
@@ -549,7 +549,7 @@ theorem ramificationIdx_Lplus_over_Kplus_dvd_p
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerSigmaTildePkg
           (p := p) K α₀ hα₀ h_anti h_irr h_irr_g h_alpha_sq_ne))) =
       𝔭.ramificationIdx' 𝔓 := by
-    rw [Ideal.ramificationIdx_eq_ramificationIdx' 𝔭 𝔓 h𝔭_ne_bot]
+    rw [Ideal.ramificationIdx'_eq_ramificationIdx 𝔭 𝔓 h𝔭_ne_bot]
     exact Ideal.ramificationIdxIn_eq_ramificationIdx 𝔭 𝔓
       Gal((BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerRealSubfield
         (p := p) (K := K) (α₀ := α₀) (hα₀ := hα₀) (h_irr := h_irr)

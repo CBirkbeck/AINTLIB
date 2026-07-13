@@ -513,7 +513,7 @@ theorem isSimpleModule_quot_of_inertiaDeg_one
     Ideal.Quotient.algebraQuotientOfLEComap (le_of_eq (Q.over_def m))
   haveI hst : IsScalarTower Rp (Rp ⧸ m) (Sp ⧸ Q) := IsScalarTower.of_algebraMap_eq' rfl
   have hfr : Module.finrank (Rp ⧸ m) (Sp ⧸ Q) = 1 := by
-    rw [← Ideal.inertiaDeg_algebraMap m Q]; exact hf
+    rw [← Ideal.inertiaDeg'_algebraMap m Q]; exact hf
   haveI : Nontrivial (Sp ⧸ Q) := Ideal.Quotient.nontrivial_iff.mpr hQ.ne_top
   haveI : FiniteDimensional (Rp ⧸ m) (Sp ⧸ Q) := Module.finite_of_finrank_eq_succ hfr
   have hsurj' : Function.Surjective (algebraMap (Rp ⧸ m) (Sp ⧸ Q)) := by
@@ -752,7 +752,7 @@ theorem Ideal.inertiaDeg_under_eq_one_of_algHom_of_residueField_finrank_one
   haveI : M.LiesOver (M.under R) := Ideal.over_under M
   haveI hmax : (M.under R).IsMaximal := Ideal.IsMaximal.under R M
   haveI : Field (R ⧸ M.under R) := Ideal.Quotient.field _
-  rw [Ideal.inertiaDeg_algebraMap]
+  rw [Ideal.inertiaDeg'_algebraMap]
   haveI : Nontrivial (R ⧸ M) := Ideal.Quotient.nontrivial_iff.mpr hM.ne_top
   haveI : FiniteDimensional F (R ⧸ M) := Module.finite_of_finrank_eq_succ hres
   -- `algebraMap F (R ⧸ M)` is surjective: injective `F`-linear map between equal (= 1) finrank.

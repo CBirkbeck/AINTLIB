@@ -89,7 +89,7 @@ theorem ramificationIdx_span_natCast_eq_one_of_ne
     IsGaloisGroup.of_isFractionRing (Gal(K/ℚ)) ℤ (𝓞 K) ℚ K
   have hℓ_ne : (Ideal.span ({(ℓ : ℤ)} : Set ℤ) : Ideal ℤ) ≠ ⊥ := by
     simp [(Fact.out : Nat.Prime ℓ).ne_zero]
-  rw [Ideal.ramificationIdx_eq_ramificationIdx' _ P hℓ_ne,
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx _ P hℓ_ne,
       ← Ideal.ramificationIdxIn_eq_ramificationIdx
         (p := Ideal.span ({(ℓ : ℤ)} : Set ℤ)) (P := P) (G := Gal(K/ℚ))]
   exact ramificationIdxIn_span_natCast_eq_one_of_ne (K := K) hℓ_ne_p
@@ -112,7 +112,7 @@ theorem inertiaDeg_span_natCast_eq_orderOf_of_ne
     Int.ideal_span_isMaximal_of_prime ℓ
   haveI hP_max : P.IsMaximal :=
     Ideal.IsMaximal.of_liesOver_isMaximal (p := Ideal.span ({(ℓ : ℤ)} : Set ℤ)) (P := P)
-  rw [Ideal.inertiaDeg_eq_inertiaDeg',
+  rw [Ideal.inertiaDeg'_eq_inertiaDeg,
       ← Ideal.inertiaDegIn_eq_inertiaDeg
         (p := Ideal.span ({(ℓ : ℤ)} : Set ℤ)) (P := P) (G := Gal(K/ℚ))]
   exact inertiaDegIn_span_natCast_eq_orderOf_of_ne (K := K) hℓ_ne_p

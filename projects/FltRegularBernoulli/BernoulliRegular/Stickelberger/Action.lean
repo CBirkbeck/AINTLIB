@@ -1,6 +1,6 @@
 module
 
-public import Mathlib.RingTheory.ClassGroup
+public import Mathlib.RingTheory.ClassGroup.Basic
 public import BernoulliRegular.Stickelberger.Integrality
 public import BernoulliRegular.GaussSum.PrimeFactorization.JacobiSums.ClosedForm
 

@@ -561,7 +561,7 @@ theorem canonicalQuotientMap_surjective_of_inertiaDeg_eq_one
   letI : Field (𝓞 K₀ ⧸ P) := Ideal.Quotient.field P
   have hfin :
       Module.finrank (𝓞 K₀ ⧸ P) (𝓞 R' ⧸ Q) = 1 := by
-    simpa [Ideal.inertiaDeg_algebraMap] using h_inertia
+    simpa [Ideal.inertiaDeg'_algebraMap] using h_inertia
   have hQ_ne_top : Q ≠ ⊤ :=
     Ideal.IsPrime.ne_top (I := Q) inferInstance
   haveI : Nontrivial (𝓞 R' ⧸ Q) :=

@@ -619,7 +619,7 @@ private theorem one_le_ramificationIdx_of_liesOver_maximalIdealAt (Q : C₂.Smoo
   haveI : P'.LiesOver (C₂.maximalIdealAt Q) := hP'lies
   have hp0 : C₂.maximalIdealAt Q ≠ ⊥ := C₂.maximalIdealAt_ne_bot Q
   rw [Nat.one_le_iff_ne_zero]
-  exact Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver P' hp0
+  exact Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver P' hp0
 
 /-- **A `ℕ`-valued sum squeeze**: if `∑ c = ∑ a·c` over a finset `s` with every
 `a i ≥ 1` and every `c i ≥ 1`, then `a i₀ = 1` for each `i₀ ∈ s`.  Each summand

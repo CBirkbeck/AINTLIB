@@ -448,7 +448,7 @@ theorem f_eq_one_of_canonicalTraceForm_atSpan
     Int.ideal_span_isMaximal_of_prime ℓ
   have hf_P :
       (Ideal.span ({(ℓ : ℤ)} : Set ℤ)).inertiaDeg' P = 1 := by
-    rw [Ideal.inertiaDeg_eq_inertiaDeg',
+    rw [Ideal.inertiaDeg'_eq_inertiaDeg,
         ← Ideal.inertiaDegIn_eq_inertiaDeg
           (p := Ideal.span ({(ℓ : ℤ)} : Set ℤ)) (P := P) (G := Gal(K/ℚ))]
     exact hf

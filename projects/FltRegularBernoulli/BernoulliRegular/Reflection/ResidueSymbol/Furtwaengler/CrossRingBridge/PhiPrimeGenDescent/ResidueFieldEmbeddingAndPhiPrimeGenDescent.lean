@@ -501,7 +501,7 @@ theorem ConcreteStickelbergerSetup.ramificationIdx_span_ell_Q_eq_ell_sub_one
         ℓ ^ 0 * (ℓ - 1) := by
     have hq_ne : (Ideal.span ({(ℓ : ℤ)} : Set ℤ) : Ideal ℤ) ≠ ⊥ := by
       simp [(Fact.out : Nat.Prime ℓ).ne_zero]
-    rw [Ideal.ramificationIdx_eq_ramificationIdx' _ S.Q hq_ne]
+    rw [Ideal.ramificationIdx'_eq_ramificationIdx _ S.Q hq_ne]
     exact IsCyclotomicExtension.Rat.ramificationIdx_eq (n := ℓ * p) (p := ℓ)
       (k := 0) (m := p) (K := R') (P := S.Q) h_n h_ne_dvd
   simpa using h_ram
@@ -533,7 +533,7 @@ theorem ConcreteStickelbergerSetup.descentRamificationIdx_eq_ell_sub_one_of_unra
       Ideal.ramificationIdx' (S.descentPrime.under ℤ) S.descentPrime = 1 := by
     have hd_ne : S.descentPrime.under ℤ ≠ ⊥ := by
       rw [h_under]; simp [(Fact.out : Nat.Prime ℓ).ne_zero]
-    rw [Ideal.ramificationIdx_eq_ramificationIdx' _ S.descentPrime hd_ne,
+    rw [Ideal.ramificationIdx'_eq_ramificationIdx _ S.descentPrime hd_ne,
         ← Ideal.ramificationIdxIn_eq_ramificationIdx
           (p := S.descentPrime.under ℤ) (P := S.descentPrime) (G := Gal(K/ℚ))]
     exact he
@@ -545,7 +545,7 @@ theorem ConcreteStickelbergerSetup.descentRamificationIdx_eq_ell_sub_one_of_unra
       Ideal.ramificationIdx' (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) S.Q =
         Ideal.ramificationIdx' (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) S.descentPrime *
           Ideal.ramificationIdx' S.descentPrime S.Q := by
-    simpa using Ideal.ramificationIdx_algebra_tower'
+    simpa using Ideal.ramificationIdx'_algebra_tower'
       (p := Ideal.span ({(ℓ : ℤ)} : Set ℤ)) (P := S.descentPrime) (Q := S.Q)
   rw [h_abs, h_base, one_mul] at h_tower
   simpa [ConcreteStickelbergerSetup.descentRamificationIdx] using h_tower.symm
@@ -588,7 +588,7 @@ theorem cyclotomicPair_relative_inertiaDeg_eq_one_of_liesOver_sourcePrime
     Ideal.IsMaximal.of_liesOver_isMaximal (p := q) (P := P)
   have h_abs_K :
       q.inertiaDeg' P = orderOf (ℓ : ZMod p) := by
-    rw [Ideal.inertiaDeg_eq_inertiaDeg']
+    rw [Ideal.inertiaDeg'_eq_inertiaDeg]
     simpa [q] using
       (IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd
         (p := ℓ) (m := p) (K := K) (P := P) hℓ_not_dvd_p)
@@ -604,14 +604,14 @@ theorem cyclotomicPair_relative_inertiaDeg_eq_one_of_liesOver_sourcePrime
     Ideal.IsMaximal.of_liesOver_isMaximal (p := q) (P := Q)
   have h_abs_R :
       q.inertiaDeg' Q = orderOf (ℓ : ZMod p) := by
-    rw [Ideal.inertiaDeg_eq_inertiaDeg']
+    rw [Ideal.inertiaDeg'_eq_inertiaDeg]
     simpa [q] using
       (IsCyclotomicExtension.Rat.inertiaDeg_eq
         (n := ℓ * p) (p := ℓ) (k := 0) (m := p)
         (K := R') (P := Q) h_n hℓ_not_dvd_p)
   have h_tower :
       q.inertiaDeg' Q = q.inertiaDeg' P * P.inertiaDeg' Q :=
-    Ideal.inertiaDeg_algebra_tower q P Q
+    Ideal.inertiaDeg'_algebra_tower q P Q
   have h_order_pos : 0 < orderOf (ℓ : ZMod p) := by
     have hq_pos : 0 < q.inertiaDeg' P := Ideal.inertiaDeg'_pos (p := q) (P := P)
     rwa [h_abs_K] at hq_pos

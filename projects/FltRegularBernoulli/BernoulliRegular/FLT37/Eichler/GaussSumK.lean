@@ -407,7 +407,7 @@ lemma charP_quotient_of_liesOver_ell (𝔓 : Ideal (𝓞 L)) [𝔓.IsPrime]
   have hℓ0 : (Ideal.span {(ℓ : ℤ)} : Ideal ℤ) ≠ ⊥ := by
     simpa using hℓ.out.ne_zero
   haveI : NeZero (Ideal.ramificationIdx' (Ideal.span {(ℓ : ℤ)}) 𝔓) :=
-    ⟨Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver
+    ⟨Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver
       (R := ℤ) (S := 𝓞 L) (p := Ideal.span {(ℓ : ℤ)}) 𝔓 hℓ0⟩
   letI : Algebra (ℤ ⧸ (Ideal.span {(ℓ : ℤ)})) (𝓞 L ⧸ 𝔓) :=
     Ideal.Quotient.algebraQuotientOfRamificationIdxNeZero (Ideal.span {(ℓ : ℤ)}) 𝔓

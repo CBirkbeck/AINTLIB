@@ -200,7 +200,7 @@ theorem CurveMap.CoordHom.inertiaDeg_eq_one_of_isAlgClosed
   letI : Field (C₂.CoordinateRing ⧸ Q) := Ideal.Quotient.field Q
   letI : Field (C₁.CoordinateRing ⧸ P) := Ideal.Quotient.field P
   haveI := hScalarTower
-  rw [Ideal.inertiaDeg_algebraMap,
+  rw [Ideal.inertiaDeg'_algebraMap,
     ← (CurveMap.CoordHom.residueLinearEquiv φ coordHom hQ hP hLies hScalarTower).finrank_eq]
   exact CommSemiring.finrank_self _
 

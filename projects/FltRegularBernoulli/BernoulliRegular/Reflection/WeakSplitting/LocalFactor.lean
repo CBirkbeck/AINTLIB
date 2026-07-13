@@ -62,7 +62,7 @@ theorem SplitsCompletely.absNorm_eq_of_mem
   obtain ⟨_he, hf⟩ := h Q hQ
   haveI : Q.IsPrime := ((IsDedekindDomain.mem_primesOverFinset_iff hp0 _).mp hQ).1
   haveI : Q.LiesOver p := ((IsDedekindDomain.mem_primesOverFinset_iff hp0 _).mp hQ).2
-  rw [_root_.Ideal.absNorm_eq_pow_inertiaDeg_of_liesOver Q p hp_max.isPrime hp0, hf, pow_one]
+  rw [_root_.Ideal.absNorm_eq_pow_inertiaDeg'_of_liesOver Q p hp_max.isPrime hp0, hf, pow_one]
 
 /--
 The local-factor identity at a prime `p` that splits completely in `M / K`:

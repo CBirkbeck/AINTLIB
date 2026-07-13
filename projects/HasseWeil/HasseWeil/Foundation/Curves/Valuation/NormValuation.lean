@@ -938,14 +938,14 @@ theorem maximalIdealAt_mem_primesOver [IsAlgClosed F]
 
 /-- **Helper B M_P ramification ≥ 1**: the ramification index of `maximalIdealAt P`
     over `(X - P.x)` is nonzero. Direct from
-    `Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver`. -/
+    `Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver`. -/
 theorem ramificationIdx_maximalIdealAt_ne_zero [IsAlgClosed F]
     [IsIntegrallyClosed C.CoordinateRing] [C.toAffine.IsElliptic]
     (P : C.SmoothPoint) :
     (Ideal.span {(Polynomial.X - Polynomial.C P.x : Polynomial F)}).ramificationIdx'
         (C.maximalIdealAt P) ≠ 0 := by
   haveI := C.maximalIdealAt_liesOver P
-  refine Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver
+  refine Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver
     (C.maximalIdealAt P) ?_
   intro h_eq
   rw [Ideal.span_singleton_eq_bot] at h_eq
@@ -1074,7 +1074,7 @@ private theorem primesOverExp_eq_one_of_mem_primesOver [IsAlgClosed F]
   haveI : Q.IsPrime := hQ.1
   haveI : Q.LiesOver p := hQ.2
   have h_e_ne_zero : p.ramificationIdx' Q ≠ 0 :=
-    Ideal.IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver Q hp_ne
+    Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver Q hp_ne
   -- `e_Q = s_Q · e_Q` with `0 < e_Q` cancels to `s_Q = 1`
   refine Nat.eq_of_mul_eq_mul_right (Nat.pos_of_ne_zero h_e_ne_zero) ?_
   rw [one_mul, ← h_Q]
