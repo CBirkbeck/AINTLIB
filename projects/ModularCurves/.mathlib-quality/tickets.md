@@ -18782,3 +18782,33 @@ imageOpens; t via desc of the cross-chart window iso ≫ restrictedπ_j; invaria
 restrictedAction_localQuotientOpenπ on the OTHER patch through E-level point matching).
 NEXT: EffectiveEpi instances + descRestrictedπ + windowCrossIso + desc_condition_cross → GlueData →
 quotientπ + universal property → pins (option-γ). (STREAM-G0)
+
+### v10.193-GH — [RIG-2] CORE LANDED + KM handshake flagged + [RIG-1] route audit (STREAM-GH)
+Commits 29c81b682..8f4ba78a8 (pushed). **[RIG-2] `aut_endo_eq_one_of_fixes_point`
+(EllipticCurve/ExactOrderRigidity.lean NEW)** — the level-agnostic orbit-freeness core (KM
+2.7.3/2.7.4 shape): pointed endo ε fixing a point P with `a•P ≠ 0` (0<a<N, the naive/geometric
+order form — HasExactOrder-consumers bridge via the T-D6 register boxes) is `𝟙`, modulo the two
+KM-keystone pins TAKEN AS HYPOTHESES ([KEY-KER] N-injective-killed-points ⟹ N ≤ deg δ;
+[KEY-DEG] deg(ε*𝟙⁻¹) < N). Plumbing ALL PROVEN clean {propext,Classical.choice,Quot.sound}:
+`sub_one_pointed`, `comp_sub_one_eq_one_of_fix` (δ := ε*𝟙⁻¹ kills P via MonObj.comp_mul +
+GrpObj.comp_inv), multiples-kill via IsMonHom.monoidHom.map_zpow + the rfl-transport
+equiv(a•P) = (equiv P)^a, Fin-N-injectivity from hord. Statement-sorryAx ONLY via KM's `endDeg`
+data-sorry (endMonHom audited clean). **HANDSHAKE SENT** (STREAM-KM.md 2026-07-14): exact
+[KEY-KER] signature `le_endDeg_of_killed_injective` + [KEY-DEG] gift-sketches (both derivable
+from their existing endDeg/endTrace pins; N≥5 via ≤4, N=4 via the [−1]-characterization whose
+fix-case my wrapper kills by `2•P = 0` vs hord). Full-level N≥3 side = their `aut_endo_eq_one`
+(already assembled in EndomorphismDegree.lean). Lean gotcha: `open MonObj` captures
+`mul_one`/`inv_one`/`mul_inv_cancel`/`one_zpow` — `_root_.`-qualify group lemmas there.
+**[RIG-1] ROUTE AUDIT (per steer, before grinding)** — chosen route: torsion-equalizer detection.
+Contrapositive: all geometric fibres of e trivial ⟹ e = refl, via (1a) c := e.hom.top restricts
+to c_M : E[M] → E[M] (c pointed+additive [endMonHom] ⟹ commutes with [M] ⟹ kernel-UP restriction);
+(1b) **clopen-equalizer**: Eq(c_M, 𝟙) ⊆ E[M] is closed (E[M] separated/S) + open (E[M] étale/S,
+M invertible) and contains every fibre (fibre-triviality) ⟹ = E[M] ⟹ c fixes E[M] globally;
+(1c) `aut_endo_eq_one` (M ≥ 3; endDeg ε = 1 via endDeg_eq_one_of_isIso) ⟹ c = 𝟙 ⟹ EllHom.ext
+⟹ e = refl. **GATE FINDING**: (1a)/(1c) consume endMonHom ⟹ [IsLocallyNoetherian X.base] —
+fine at geometric fibres, but the bridge's hdetect is ∀ X : EllObj R ⟹ the FINAL ∀X-assembly
+inherits the known T-W7.8 de-gating dependency (the file's own future-proofing note; owner-parked)
+OR takes a loc-noeth-restricted Rigid-variant — flagged, not force-built. Alternative route
+(unramified-Aut scheme, KM 2.7.1) rejected for now: needs the absent Aut-scheme apparatus.
+NEXT: [RIG-1b] equalizer-clopen machinery recon (mathlib equalizer-of-scheme-maps / project
+clopen substrate) → [RIG-1a] kernel-UP restriction → [RIG-1c] assembly. (STREAM-GH)
