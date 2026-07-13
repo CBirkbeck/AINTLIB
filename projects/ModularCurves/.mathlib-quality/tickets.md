@@ -19344,3 +19344,39 @@ point at `w` factors through BOTH — giving `combPoint≠0` (through levelSpace
 lines, all tools built): fullLevelOpenSet membership + dual factoring applications + taut_generates→
 combPoint≠0 (fibre connector: naive_iff → comboFamily inj → comboFamily_ne_zero_of_closure_top, BUILT)
 + agreementι→combPoint=0 + contradiction. Then [YF-⊆] closes → [YF-ETALE]★. Plus ⟸ (missing infra). (STREAM-YN)
+
+### v10.187 — ★★★ [YF-⊆] COMPLETE → [YF-CLOPEN]/[YF-ETALE]★ DISCHARGED + T-D8-bridge ⟸ PROVEN (full iff sorry-free)
+The STREAM-YN YF-chain is **mathematically complete end-to-end**. Full library build green (4212 jobs);
+axioms everywhere = the pre-existing T-B6 registered KM black-boxes (BB-DIFF/BB-QF/BB-FLAT/BB-DEG via
+sorryAx), **no new sorry**.
+
+**[YF-⊆] `range_levelSpaceΓι_subset` (FullLevelClopen) — DONE.** The `range_levelSpaceΓι_subset` Part-2
+integration closed. New supporting lemmas:
+- `comb_ne_zero_of_generates` (FullLevelFibre, group core, axiom-clean-mod-T-B6): over a geometric
+  point where N invertible, if two N-torsion A,B generate the fibre torsion, then [c]A+[d]B ≠ 0 for
+  (c,d)∈[0,N)² not both 0. Pigeonhole via comboFamily_ne_zero_of_closure_top + natCard_fibreTorsion.
+- `taut_generates_restrict` (FullLevelClopen): pushes taut_generates_over_levelSpaceΓ through
+  Point.baseChangeEquiv + Point.castBase (assoc cast) into the `restrict` form.
+- Part 2 proper: at the alg-closed geom point over w (factored through levelSpaceΓι via
+  exists_fromSpecResidueField_factor), taut pair generates ⟹ combPoint(cd)≠0, contradicting Part 1's
+  agreement-locus vanishing (hzero). No Φ needed for the final combo=0 (native restrict + hzero).
+
+**[YF-CLOPEN] `isOpenImmersion_levelSpaceΓι_full` — DONE** (consumes [YF-⊆]+[YF-⊇]).
+**[YF-ETALE]★ `etale_fullLevelSpaceStruct` (YFullRoute:215) — AUTO-DISCHARGED** (already wired to
+`isOpenImmersion_levelSpaceΓι` = `_full`; the Γ(N)-presentation is now genuinely étale mod T-B6).
+
+**T-D8-bridge ⟸ `naive_gen_implies_divisor_eq` (FullLevelClopen) — PROVEN.** The board had this as
+"missing infra (full-set/T-D2 globalization)". It is NOT needed. Cheaper route: a topological collision
+of two combination sections at u∈S makes their DIFFERENCE hit the RATIONAL identity section, so
+`sections_residue_eq_of_base_eq` (separatedness ⟹ forced residue agreement, no Galois freedom) upgrades
+it; pulling to the geom point over u makes the difference vanish, but generation makes the N² combos
+injective (naive_iff_comboFamily_injective) — indices forced equal ⟹ pairwise topological distinctness
+⟹ `sectionsDivisor_ideal_eq_torsionIdeal` ([YF-⊇] chain). Assembled as
+`fullLevel_divisor_iff_naive_gen_downstream` (full iff, sorry-free-mod-T-B6).
+
+**FOR COORDINATOR (relocation, cross-cutting):** Basic.`fullLevel_divisor_iff_naive_gen` (:115) +
+`isFullLevel_iff_naive` (:130) are now dischargeable by the relocation doctrine — byte-identical
+statements move downstream (into FullLevelClopen, which already has the sorry-free proofs), pointer
+comments at the Basic sites, consumers YFullRoute:552 + GammaHRepresentability:641 re-point (both then
+sorry-free-mod-T-B6). Left for coordinator as it touches foundational Basic + a representability file
+outside the STREAM-YN lane. (STREAM-YN)
