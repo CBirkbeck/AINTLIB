@@ -61,7 +61,7 @@ lemma prod_primesOverFinset_of_isUnramifiedAt [IsDedekindDomain S]
   convert (pow_one _).symm
   have : p.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hp ‹_›
   rw [← Finset.mem_coe, IsDedekindDomain.coe_primesOverFinset hp] at hP
-  rw [← Ideal.IsDedekindDomain.ramificationIdx_eq_factors_count hpbot' hP.1
+  rw [← Ideal.IsDedekindDomain.ramificationIdx'_eq_factors_count hpbot' hP.1
     (ne_bot_of_mem_primesOver hp hP)]
   exact hunram _ hP
 
