@@ -1,0 +1,329 @@
+import ModularCurves.Picard.DualPullback
+import Mathlib.CategoryTheory.Bicategory.Strict.Pseudofunctor
+
+/-!
+# Pullback square coherence
+
+Option-free coherence lemmas for pasting pullback squares and comparing the induced
+natural isomorphisms. These are proof dependencies for pullback of sheaf duals.
+-/
+
+open AlgebraicGeometry CategoryTheory CategoryTheory.Bicategory
+
+universe u w₁ w₂ v₁ v₂ u₁ u₂
+
+namespace CategoryTheory.Pseudofunctor
+
+variable {B : Type u₁} {C : Type u₂} [Bicategory.{w₁, v₁} B]
+  [Strict B] [Bicategory.{w₂, v₂} C] (F : B ⥤ᵖ C)
+
+theorem isoMapOfCommSq_vert_comp
+    {X₁ X₂ X₃ Y₁ Y₂ Y₃ : B}
+    {t : X₁ ⟶ Y₁} {l : X₁ ⟶ X₂} {r : Y₁ ⟶ Y₂}
+    {b : X₂ ⟶ Y₂} {l' : X₂ ⟶ X₃} {r' : Y₂ ⟶ Y₃}
+    {b' : X₃ ⟶ Y₃} (sq₁ : CommSq t l r b) (sq₂ : CommSq b l' r' b') :
+    whiskerLeftIso (F.map t) (F.mapComp r r') ≪≫
+        (α_ (F.map t) (F.map r) (F.map r')).symm ≪≫
+        whiskerRightIso (F.isoMapOfCommSq sq₁) (F.map r') ≪≫
+        α_ (F.map l) (F.map b) (F.map r') ≪≫
+        whiskerLeftIso (F.map l) (F.isoMapOfCommSq sq₂) ≪≫
+        (α_ (F.map l) (F.map l') (F.map b')).symm ≪≫
+        whiskerRightIso (F.mapComp l l').symm (F.map b') =
+      F.isoMapOfCommSq (sq₁.vert_comp sq₂) := by
+  rw [F.isoMapOfCommSq_eq sq₁ (t ≫ r) rfl]
+  rw [F.isoMapOfCommSq_eq sq₂ (b ≫ r') rfl]
+  rw [F.isoMapOfCommSq_eq (sq₁.vert_comp sq₂)
+    (t ≫ (r ≫ r')) rfl]
+  apply Iso.ext
+  rw [← F.mapComp'_eq_mapComp r r', ← F.mapComp'_eq_mapComp l l']
+  simp only [Iso.trans_hom, Iso.symm_hom, whiskerLeftIso_hom,
+    whiskerRightIso_hom, whiskerLeft_comp, comp_whiskerRight,
+    Category.assoc]
+  rw [← F.mapComp'₀₁₃_inv_comp_mapComp'₀₂₃_hom_assoc
+    t r r' (t ≫ r) (r ≫ r') (t ≫ (r ≫ r')) rfl rfl rfl]
+  rw [← F.mapComp'₀₂₃_inv_comp_mapComp'₀₁₃_hom_assoc
+    l b r' (t ≫ r) (b ≫ r') (t ≫ (r ≫ r'))
+    sq₁.w.symm rfl (Category.assoc t r r')]
+  rw [Iso.hom_inv_id_assoc]
+  rw [F.mapComp'₀₁₃_hom_comp_whiskerLeft_mapComp'_hom_assoc
+    l l' b' (l ≫ l') (b ≫ r') (t ≫ (r ≫ r'))
+    rfl sq₂.w.symm (by rw [← Category.assoc, ← sq₁.w, Category.assoc])]
+  simp
+
+end CategoryTheory.Pseudofunctor
+
+namespace AlgebraicGeometry.Scheme.Modules
+
+theorem adj_eqToHom_τl_toNatTrans
+    {P Q : Bicategory.Adj Cat} {f g : P ⟶ Q} (h : f = g) :
+    (eqToHom h : f ⟶ g).τl.toNatTrans =
+      eqToHom (congrArg (fun k => k.l.toFunctor) h) := by
+  subst h
+  rfl
+
+theorem adj_eqToIso_hom_τl_toNatTrans
+    {P Q : Bicategory.Adj Cat} {f g : P ⟶ Q} (h : f = g) :
+    (eqToIso h).hom.τl.toNatTrans =
+      eqToHom (congrArg (fun k => k.l.toFunctor) h) := by
+  subst h
+  rfl
+
+noncomputable def pullbackSquareIso
+    {A B C D : Scheme.{u}}
+    (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
+    (h : a ≫ b = c ≫ d) :
+    pullback b ⋙ pullback a ≅ pullback d ⋙ pullback c :=
+  pullbackComp a b ≪≫ pullbackCongr h ≪≫ (pullbackComp c d).symm
+
+noncomputable def pullbackSquareIsoP
+    {A B C D : Scheme.{u}}
+    (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
+    (h : a ≫ b = c ≫ d) :
+    pullback b ⋙ pullback a ≅ pullback d ⋙ pullback c :=
+  (Cat.Hom.toNatIso (Bicategory.Adj.lIso
+    (pseudofunctor.isoMapOfCommSq
+      ((CommSq.mk h : CommSq a c b d).op.toLoc)))).symm
+
+theorem pseudofunctor_isoMapOfCommSq_hom_τl_toNatTrans
+    {A B C D : Scheme.{u}}
+    (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
+    (h : a ≫ b = c ≫ d) :
+    (pseudofunctor.isoMapOfCommSq
+      ((CommSq.mk h : CommSq a c b d).op.toLoc)).hom.τl.toNatTrans =
+      (pullbackSquareIsoP a b c d h).inv := by
+  rfl
+
+theorem pseudofunctor_isoMapOfCommSq_inv_τl_toNatTrans
+    {A B C D : Scheme.{u}}
+    (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
+    (h : a ≫ b = c ≫ d) :
+    (pseudofunctor.isoMapOfCommSq
+      ((CommSq.mk h : CommSq a c b d).op.toLoc)).inv.τl.toNatTrans =
+      (pullbackSquareIsoP a b c d h).hom := by
+  rfl
+
+theorem pseudofunctor_mapComp'_inv_τl_toNatTrans_refl
+    {A B D : Scheme.{u}} (a : A ⟶ B) (b : B ⟶ D) :
+    (pseudofunctor.mapComp' b.op.toLoc a.op.toLoc (a ≫ b).op.toLoc
+      (by rfl)).inv.τl.toNatTrans = (pullbackComp a b).hom := by
+  rfl
+
+theorem pseudofunctor_mapComp'_hom_τl_toNatTrans_eq
+    {A B C D : Scheme.{u}}
+    (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
+    (h : a ≫ b = c ≫ d) :
+    (pseudofunctor.mapComp' d.op.toLoc c.op.toLoc (a ≫ b).op.toLoc
+      (by
+        apply Discrete.ext
+        change d.op ≫ c.op = (a ≫ b).op
+        simpa only [← op_comp] using congrArg Quiver.Hom.op h.symm)).hom.τl.toNatTrans =
+      (pullbackCongr h).hom ≫ (pullbackComp c d).inv := by
+  let hloc : d.op.toLoc ≫ c.op.toLoc = (a ≫ b).op.toLoc := by
+    apply Discrete.ext
+    change d.op ≫ c.op = (a ≫ b).op
+    simpa only [← op_comp] using congrArg Quiver.Hom.op h.symm
+  let η : (a ≫ b).op.toLoc ≅ d.op.toLoc ≫ c.op.toLoc :=
+    eqToIso hloc.symm
+  simp only [Pseudofunctor.mapComp', Iso.trans_hom,
+    Bicategory.Adj.comp_τl, Cat.Hom.toNatTrans_comp,
+    pseudofunctor_mapComp_hom_τl]
+  have hmap :
+      (pseudofunctor.map₂Iso η).hom.τl.toNatTrans =
+        (pullbackCongr h).hom := by
+    rw [PrelaxFunctor.map₂Iso_eqToIso]
+    rw [adj_eqToIso_hom_τl_toNatTrans]
+    unfold pullbackCongr
+    rfl
+  exact congrArg (fun q => q ≫ (pullbackComp c d).inv) hmap
+
+theorem pullbackSquareIso_eq_p
+    {A B C D : Scheme.{u}}
+    (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
+    (h : a ≫ b = c ≫ d) :
+    pullbackSquareIso a b c d h = pullbackSquareIsoP a b c d h := by
+  apply Iso.ext
+  change (pullbackComp a b).hom ≫ (pullbackCongr h).hom ≫
+      (pullbackComp c d).inv = _
+  change _ = (pseudofunctor.isoMapOfCommSq
+    ((CommSq.mk h : CommSq a c b d).op.toLoc)).inv.τl.toNatTrans
+  rw [Pseudofunctor.isoMapOfCommSq_eq pseudofunctor
+    ((CommSq.mk h : CommSq a c b d).op.toLoc) ((a ≫ b).op.toLoc)
+    (by
+      apply Discrete.ext
+      change d.op ≫ c.op = (a ≫ b).op
+      simpa only [← op_comp] using congrArg Quiver.Hom.op h.symm)]
+  simp only [Iso.trans_inv, Bicategory.Adj.comp_τl,
+    Cat.Hom.toNatTrans_comp]
+  rw [pseudofunctor_mapComp'_inv_τl_toNatTrans_refl]
+  let hloc : d.op.toLoc ≫ c.op.toLoc = (a ≫ b).op.toLoc := by
+    apply Discrete.ext
+    change d.op ≫ c.op = (a ≫ b).op
+    simpa only [← op_comp] using congrArg Quiver.Hom.op h.symm
+  change (pullbackComp a b).hom ≫ (pullbackCongr h).hom ≫
+      (pullbackComp c d).inv =
+    (pullbackComp a b).hom ≫
+      (pseudofunctor.mapComp' d.op.toLoc c.op.toLoc (a ≫ b).op.toLoc
+        hloc).hom.τl.toNatTrans
+  rw [pseudofunctor_mapComp'_hom_τl_toNatTrans_eq a b c d h]
+  exact Category.assoc _ _ _
+
+theorem pseudofunctor_mapComp_hom_τl_toNatTrans
+    {A B D : Scheme.{u}} (a : A ⟶ B) (b : B ⟶ D) :
+    (pseudofunctor.mapComp b.op.toLoc a.op.toLoc).hom.τl.toNatTrans =
+      (pullbackComp a b).inv := by
+  rfl
+
+theorem pseudofunctor_mapComp_inv_τl_toNatTrans
+    {A B D : Scheme.{u}} (a : A ⟶ B) (b : B ⟶ D) :
+    (pseudofunctor.mapComp b.op.toLoc a.op.toLoc).inv.τl.toNatTrans =
+      (pullbackComp a b).hom := by
+  rfl
+
+theorem pullbackSquareIso_vcomp
+    {A B C D E F : Scheme.{u}}
+    (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
+    (q : D ⟶ F) (e : C ⟶ E) (r : E ⟶ F)
+    (h₁ : a ≫ b = c ≫ d) (h₂ : d ≫ q = e ≫ r) :
+    (Functor.associator (pullback q) (pullback b) (pullback a) ≪≫
+        Functor.isoWhiskerLeft (pullback q)
+          (pullbackSquareIso a b c d h₁) ≪≫
+        (Functor.associator (pullback q) (pullback d) (pullback c)).symm ≪≫
+        Functor.isoWhiskerRight (pullbackSquareIso d q e r h₂)
+          (pullback c)) =
+      (Functor.isoWhiskerRight (pullbackComp b q) (pullback a) ≪≫
+        pullbackSquareIso a (b ≫ q) (c ≫ e) r
+          (by
+            exact (Category.assoc a b q).symm.trans
+              ((congrArg (· ≫ q) h₁).trans
+                ((Category.assoc c d q).trans
+                  ((congrArg (c ≫ ·) h₂).trans
+                    (Category.assoc c e r).symm)))) ≪≫
+        Functor.isoWhiskerLeft (pullback r) (pullbackComp c e).symm ≪≫
+        (Functor.associator (pullback r) (pullback e) (pullback c)).symm) := by
+  rw [pullbackSquareIso_eq_p a b c d h₁]
+  rw [pullbackSquareIso_eq_p d q e r h₂]
+  rw [pullbackSquareIso_eq_p a (b ≫ q) (c ≫ e) r]
+  let sq₁ : CommSq a c b d := ⟨h₁⟩
+  let sq₂ : CommSq d e q r := ⟨h₂⟩
+  let hpaste : a ≫ (b ≫ q) = (c ≫ e) ≫ r :=
+    (Category.assoc a b q).symm.trans
+      ((congrArg (· ≫ q) h₁).trans
+        ((Category.assoc c d q).trans
+          ((congrArg (c ≫ ·) h₂).trans
+            (Category.assoc c e r).symm)))
+  have H := Pseudofunctor.isoMapOfCommSq_vert_comp pseudofunctor
+    sq₂.op.toLoc sq₁.op.toLoc
+  apply Iso.ext
+  have H' := congrArg (fun z => z.inv.τl.toNatTrans) H
+  simp only [Iso.trans_inv, Iso.symm_inv, Bicategory.whiskerLeftIso_inv,
+    Bicategory.whiskerRightIso_inv, Bicategory.Adj.comp_τl,
+    Bicategory.Adj.whiskerLeft_τl, Bicategory.Adj.whiskerRight_τl,
+    Bicategory.Adj.associator_hom_τl, Bicategory.Adj.associator_inv_τl,
+    Cat.Hom.toNatTrans_comp, Cat.whiskerLeft_toNatTrans,
+    Cat.whiskerRight_toNatTrans, Cat.associator_hom_toNatTrans,
+    Cat.associator_inv_toNatTrans,
+    pseudofunctor_mapComp_hom_τl_toNatTrans,
+    pseudofunctor_mapComp_inv_τl_toNatTrans] at H'
+  let e₀ := Functor.isoWhiskerRight (pullbackComp b q) (pullback a)
+  let e₁ := Functor.associator (pullback q) (pullback b) (pullback a)
+  let e₂ := (pullback q).isoWhiskerLeft
+    (pullbackSquareIsoP a b c d h₁)
+  let e₃ := (Functor.associator
+    (pullback q) (pullback d) (pullback c)).symm
+  let e₄ := Functor.isoWhiskerRight
+    (pullbackSquareIsoP d q e r h₂) (pullback c)
+  let e₅ := pullbackSquareIsoP a (b ≫ q) (c ≫ e) r hpaste
+  let e₆ := (pullback r).isoWhiskerLeft (pullbackComp c e).symm
+  let e₇ := (Functor.associator
+    (pullback r) (pullback e) (pullback c)).symm
+  change ((((((e₀.inv ≫ e₁.hom) ≫ e₂.hom) ≫ e₃.hom) ≫
+    e₄.hom) ≫ e₇.inv) ≫ e₆.inv = e₅.hom) at H'
+  simp only [Iso.trans_hom, Iso.symm_hom, Functor.isoWhiskerLeft_hom,
+    Functor.isoWhiskerRight_hom]
+  change e₁.hom ≫ e₂.hom ≫ e₃.hom ≫ e₄.hom =
+    e₀.hom ≫ e₅.hom ≫ e₆.hom ≫ e₇.hom
+  have H'' := congrArg (fun k => k ≫ e₆.hom ≫ e₇.hom) H'
+  rw [← cancel_epi e₀.inv]
+  simpa only [Category.assoc, Iso.inv_hom_id_assoc, Iso.inv_hom_id,
+    Category.comp_id] using H''
+
+end AlgebraicGeometry.Scheme.Modules
+
+open AlgebraicGeometry CategoryTheory Opposite
+
+namespace AlgebraicGeometry.Scheme.Modules
+
+variable {A B : Scheme.{u}}
+
+theorem restrictFunctorCongr_refl_hom_app
+    (f : A ⟶ B) [IsOpenImmersion f] (M : B.Modules) :
+    (restrictFunctorCongr (rfl : f = f)).hom.app M = 𝟙 _ := by
+  apply _root_.SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro U
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro x
+  change ((restrictFunctorCongr (rfl : f = f)).hom.app M).app U.unop x = x
+  rw [restrictFunctorCongr_hom_app_app]
+  change M.presheaf.map _ x = x
+  erw [M.presheaf.congr_map
+    (Subsingleton.elim _ (𝟙 (Opposite.op (f ''ᵁ U.unop))))]
+  erw [M.presheaf.map_id]
+  rfl
+
+theorem restrictFunctorIsoPullback_congr
+    {f g : A ⟶ B} [IsOpenImmersion f] [IsOpenImmersion g]
+    (h : f = g) (M : B.Modules) :
+    (restrictFunctorCongr h).hom.app M ≫
+        (restrictFunctorIsoPullback g).hom.app M =
+      (restrictFunctorIsoPullback f).hom.app M ≫
+        (pullbackCongr h).hom.app M := by
+  subst h
+  rw [restrictFunctorCongr_refl_hom_app]
+  rfl
+
+theorem restrictFunctorIsoPullback_congr_inv
+    {f g : A ⟶ B} [IsOpenImmersion f] [IsOpenImmersion g]
+    (h : f = g) (M : B.Modules) :
+    (pullbackCongr h).inv.app M ≫
+        (restrictFunctorIsoPullback f).inv.app M ≫
+        (restrictFunctorCongr h).hom.app M =
+      (restrictFunctorIsoPullback g).inv.app M := by
+  let eR := (restrictFunctorCongr h).app M
+  let eP := (pullbackCongr h).app M
+  let eF := (restrictFunctorIsoPullback f).app M
+  let eG := (restrictFunctorIsoPullback g).app M
+  have hhom : eR.hom ≫ eG.hom = eF.hom ≫ eP.hom :=
+    restrictFunctorIsoPullback_congr h M
+  have hiso : eR ≪≫ eG = eF ≪≫ eP := by
+    apply Iso.ext
+    exact hhom
+  have hinv := congrArg Iso.inv hiso
+  simp only [Iso.trans_inv] at hinv
+  change eP.inv ≫ eF.inv ≫ eR.hom = eG.inv
+  rw [← Category.assoc]
+  erw [← hinv]
+  simp
+
+end AlgebraicGeometry.Scheme.Modules
+
+open AlgebraicGeometry CategoryTheory
+
+namespace AlgebraicGeometry.Scheme.Modules
+
+theorem pullbackSquareIso_congr
+    {A B C D : Scheme.{u}}
+    (a : A ⟶ B) {b b' : B ⟶ D} {c c' : A ⟶ C} (d : C ⟶ D)
+    (hb : b = b') (hc : c = c')
+    (h : a ≫ b = c ≫ d) (h' : a ≫ b' = c' ≫ d) :
+    Functor.isoWhiskerRight (pullbackCongr hb) (pullback a) ≪≫
+        pullbackSquareIso a b' c' d h' ≪≫
+        Functor.isoWhiskerLeft (pullback d) (pullbackCongr hc).symm =
+      pullbackSquareIso a b c d h := by
+  subst hb
+  subst hc
+  apply Iso.ext
+  simp [pullbackCongr]
+
+end AlgebraicGeometry.Scheme.Modules

@@ -87,10 +87,14 @@ import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.NaiveProblems
 import ModularCurves.Moduli.QuotientRepresentability
 import ModularCurves.Moduli.Stack
+import ModularCurves.Picard.DualPullback
+import ModularCurves.Picard.DualPullback.Iso
+import ModularCurves.Picard.DualRestrict
 import ModularCurves.Picard.InvertibleSheaf
 import ModularCurves.Picard.InvertibleSheafBaseCechFlat
 import ModularCurves.Picard.InvertibleSheafFiniteAffineCover
 import ModularCurves.Picard.InvertibleSheafLocallyFree
 import ModularCurves.Picard.PicComparison
 import ModularCurves.Picard.PullbackTensorObj
+import ModularCurves.Picard.UnitPullback
 import ModularCurves.WeilPairing.Basic
