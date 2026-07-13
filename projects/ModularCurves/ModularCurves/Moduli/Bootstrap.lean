@@ -162,4 +162,64 @@ theorem legendreBootstrap_relativelyRepresentable_finiteEtale (hR : IsUnit (2 : 
           (legendreBootstrapProblem R).obj (Opposite.op (X.pullbackAlong g))) := by
   sorry
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-ACT)** The `{±1}`-automorphism of the Legendre problem: identity on the
+level datum, sign on the `ω`-datum. -/
+noncomputable def legendreBootstrapNegAut :
+    Aut (legendreBootstrapProblem R) where
+  hom :=
+    { app := fun X => ↾fun x : (gammaFullNaiveProblem R 2).obj X ×
+          OmegaBasis X.unop.curve.toEllipticCurveGeom =>
+        (x.1, (-1 : Γ(X.unop.base, ⊤)ˣ) • x.2)
+      naturality := fun X Y φ => by
+        ext x
+        refine Prod.ext rfl ?_
+        refine Eq.trans ?_ (omegaBasisMap_smul φ.unop (-1) x.2).symm
+        refine (congrArg (· • omegaBasisMap φ.unop x.2) (Units.ext ?_)).symm
+        rw [Units.coe_map, Units.val_neg, Units.val_one]
+        show ((φ.unop.baseHom.appLE ⊤ ⊤ (fun x _ => trivial)).hom) (-1) = -1
+        rw [map_neg, map_one] }
+  inv :=
+    { app := fun X => ↾fun x : (gammaFullNaiveProblem R 2).obj X ×
+          OmegaBasis X.unop.curve.toEllipticCurveGeom =>
+        (x.1, (-1 : Γ(X.unop.base, ⊤)ˣ) • x.2)
+      naturality := fun X Y φ => by
+        ext x
+        refine Prod.ext rfl ?_
+        refine Eq.trans ?_ (omegaBasisMap_smul φ.unop (-1) x.2).symm
+        refine (congrArg (· • omegaBasisMap φ.unop x.2) (Units.ext ?_)).symm
+        rw [Units.coe_map, Units.val_neg, Units.val_one]
+        show ((φ.unop.baseHom.appLE ⊤ ⊤ (fun x _ => trivial)).hom) (-1) = -1
+        rw [map_neg, map_one] }
+  hom_inv_id := by
+    ext X x
+    refine Prod.ext rfl ?_
+    exact (OmegaBasis.mul_smul' _ _ _).trans
+      (by rw [neg_one_mul, neg_neg]; exact OmegaBasis.one_smul' _)
+  inv_hom_id := by
+    ext X x
+    refine Prod.ext rfl ?_
+    exact (OmegaBasis.mul_smul' _ _ _).trans
+      (by rw [neg_one_mul, neg_neg]; exact OmegaBasis.one_smul' _)
+
+/-- **(T-E14-ACT)** The `{±1}`-half of KM 4.6.2's `G = GL₂(ℤ/2) × {±1}` on the
+Legendre problem, in the engine's `G →* Aut Q` interface. -/
+noncomputable def legendreBootstrapSignAction :
+    ℤˣ →* Aut (legendreBootstrapProblem R) where
+  toFun u := if u = 1 then 1 else legendreBootstrapNegAut R
+  map_one' := if_pos rfl
+  map_mul' u v := by
+    rcases Int.units_eq_one_or u with rfl | rfl <;>
+      rcases Int.units_eq_one_or v with rfl | rfl
+    · rw [one_mul, if_pos rfl, one_mul]
+    · rw [one_mul, if_pos rfl, one_mul]
+    · rw [mul_one, if_pos rfl, mul_one]
+    · rw [show (-1 : ℤˣ) * (-1) = 1 from by decide, if_pos rfl, if_neg (by decide)]
+      refine Iso.ext ?_
+      refine Eq.symm ?_
+      ext X x
+      refine Prod.ext rfl ?_
+      exact (OmegaBasis.mul_smul' _ _ _).trans
+        (by rw [neg_one_mul, neg_neg]; exact OmegaBasis.one_smul' _)
+
 end ModularCurves
