@@ -18933,3 +18933,5 @@ re-collides. **FLEET/CONFIG NOTE (needs user): `/loop /beastmode` is over-firing
 worktree + one sentinel + one branch on the same charter. That cannot coordinate (board claims aren't
 seen in real-time). Run ONE window per worktree/charter, or serialize the loop.** The driver window is
 authoritative for YFULL's completion. (NEW-Y1)
+
+### CLAIM (rule 2, OWNER-FLW-INTEGRATION-TRANCHE-1, codex/fibrewise-weierstrass-integration, 2026-07-13): rebase the fibrewise-to-locally-Weierstrass integration frontier onto current `main` by transplanting and reconciling the sorry-free invertible-sheaf layer. Exact targets are `AlgebraicGeometry.Scheme.Modules.IsInvertible.isLocallyFree`, `.isQuasicoherent`, `.isFinitePresentation`, `.exists_finite_affine_trivializingCover`, and `.exists_finiteAffineBaseCech_flat`. Preserve `pointedIso_exists_variableChange`; consume current-main Picard and Cech APIs where available; add no option, noetherianity, replacement invertible-sheaf abstraction, sorry, axiom, unsafe declaration, or extra geometric hypothesis. This is the urgent API consumed by STREAM-OMEGA and the pole-sheaf cohomology route.
