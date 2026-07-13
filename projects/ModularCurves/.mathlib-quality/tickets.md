@@ -18528,3 +18528,18 @@ layer, consuming per-patch colimit + faithfully-flat surjectivity of specEqualiz
 (GlueData + pins) mirror the template nearly verbatim. The C4c-1 layer (coinvariantsMap etc., all
 CLEAN) remains valid as the affine-model comparisons. v10.184-G0's two-stage design is SUPERSEDED
 (no intersection-affineness needed anywhere). (STREAM-G0)
+
+### v10.189-GH — [RIG-3] rigidity bridge PROVEN + fibre machinery (STREAM-GH)
+Commit (GammaHMaster.lean): **`QuotientProblemData.rigid_of_geom_free` AXIOM-CLEAN** (abstract
+over any φ — no gammaHAut dependence): `qpd.prob.Rigid` ⟸ (hdetect = [RIG-1]: base-identical
+e ≠ refl stays ≠ refl on SOME geometric fibre) + (hfree = [RIG-2]: no nontrivial k̄-iso fixes a
+γ-twisted Q-value). Route: `EllHom.fibre` (NEW machinery — base-identical Ell/R-endos restrict
+along any t : T ⟶ X.base; fibre_pullbackAlongπ square; fibre_comp/fibre_id/fibre_congr;
+`EllObj.isoFibre` iso-transport; `iso_eq_refl_of_isEmpty` via isInitialOfIsEmpty); fixed value
+transported by the π-square calc; geom_surjective lifts at the fibre (X.pullbackAlong t IS the
+⟨Spec k̄,sm,E⟩-literal by delta — ONE defeq-cast `have hb' := hb` beats the kabstract mismatch,
+LEAN-OP 13 confirmed again); geom_orbits converts to the γ-twisted fixed point; hfree kills.
+REMAINING for hrig-discharge: [RIG-1] detection (aut of an elliptic scheme trivial on all
+geometric fibres is trivial — KM 2.7-adjacent; route audit BEFORE grinding: torsion-faithfulness
+vs unramified-Aut) + [RIG-2] Serre k̄ lemma (N ≥ 3; glSmul machinery mirrors
+gammaFullNaive_freeAction). Pins into `gammaH_representable`'s hrig. (STREAM-GH)
