@@ -110,7 +110,7 @@ theorem torsionι_π (N : ℕ) : E.torsionι N ≫ E.π = E.torsionπ N := by
 (cancellation along the separated `π`). KM 2.3.1 proof, first reduction ("Because `E`
 is proper over `S`, any `S`-endomorphism of `E` is proper"). -/
 instance mulByHom_isProper (n : ℤ) : IsProper (E.mulByHom n) := by
-  haveI h : IsProper (E.mulByHom n ≫ E.π) := by
+  have h : IsProper (E.mulByHom n ≫ E.π) := by
     rw [E.mulByHom_π]
     exact E.proper
   exact IsProper.of_comp (E.mulByHom n) E.π
@@ -122,14 +122,13 @@ theorem mulByHom_zero : E.mulByHom 0 = E.π ≫ E.zero := by
   show (E.mulBy 0).left = E.π ≫ E.zero
   have h0 : E.mulBy 0 = toUnit E.asOver ≫ (η[E.asOver] : _ ⟶ E.asOver) := rfl
   have ht : (toUnit E.asOver).left = E.π := by
-    have hw := Over.w (toUnit E.asOver)
-    simpa using hw
+    simp
   rw [h0]
   have key : (toUnit E.asOver).left ≫ ((𝟙_ (Over S)).hom ≫ E.zero) = E.π ≫ E.zero :=
-    (congrArg (fun q => q ≫ ((𝟙_ (Over S)).hom ≫ E.zero)) ht).trans
-      (congrArg (fun q => E.π ≫ q) (Category.id_comp E.zero))
+    (congrArg (fun q ↦ q ≫ ((𝟙_ (Over S)).hom ≫ E.zero)) ht).trans
+      (congrArg (fun q ↦ E.π ≫ q) (Category.id_comp E.zero))
   refine Eq.trans ?_ key
-  exact congrArg (fun q => (toUnit E.asOver).left ≫ q) E.one_eq_zero
+  exact congrArg (fun q ↦ (toUnit E.asOver).left ≫ q) E.one_eq_zero
 
 /-- **Black box `BB-QF` (fibre input of KM 2.3.1)**: `[N]` is (locally) quasi-finite
 for `N ≥ 1`. KM 2.3.1 proof: finite fibres are checked geometric fibre by geometric
@@ -155,7 +154,7 @@ theorem mulByHom_finrank (N : ℕ) [NeZero N] (x : E.E) :
 /-- **(KM 2.3.1, finiteness of `[N]`)** `[N]` is finite: proper + quasi-finite via
 Zariski's Main Theorem (`IsFinite.of_isProper_of_locallyQuasiFinite`). -/
 theorem mulByHom_isFinite (N : ℕ) [NeZero N] : IsFinite (E.mulByHom N) := by
-  haveI := E.mulByHom_locallyQuasiFinite N
+  have := E.mulByHom_locallyQuasiFinite N
   exact IsFinite.of_isProper_of_locallyQuasiFinite _
 
 /-- **(T-B4 = KM 2.3.1)** `E[N] ⟶ S` is finite and flat (finite locally free) — of rank
@@ -172,7 +171,7 @@ mono zero section), which is flat over `S` since `π` is smooth; for `N ≥ 1` t
 the base change of `BB-FLAT`. -/
 theorem torsionπ_flat (N : ℕ) : Flat (E.torsionπ N) := by
   rcases eq_or_ne N 0 with rfl | hN
-  · haveI : IsSplitMono E.zero := IsSplitMono.mk' ⟨E.π, E.zero_π⟩
+  · have : IsSplitMono E.zero := IsSplitMono.mk' ⟨E.π, E.zero_π⟩
     show Flat (pullback.snd (E.mulByHom ((0 : ℕ) : ℤ)) E.zero)
     rw [show (((0 : ℕ) : ℤ)) = (0 : ℤ) from rfl, E.mulByHom_zero]
     have hsnd : pullback.snd (E.π ≫ E.zero) E.zero =
@@ -183,17 +182,17 @@ theorem torsionπ_flat (N : ℕ) : Flat (E.torsionπ N) := by
           (pullback.condition (f := E.π ≫ E.zero) (g := E.zero))
       exact ((cancel_mono E.zero).mp hc).symm
     rw [hsnd]
-    haveI : Smooth E.π := SmoothOfRelativeDimension.smooth (n := 1) E.π
+    have : Smooth E.π := SmoothOfRelativeDimension.smooth (n := 1) E.π
     infer_instance
-  · haveI : NeZero N := ⟨hN⟩
+  · have : NeZero N := ⟨hN⟩
     have h := E.mulByHom_flat N
     exact MorphismProperty.pullback_snd _ _ h
 
 /-- **(T-B4, rank part of KM 2.3.1)** `E[N]/S` has constant rank `N²`. -/
 theorem torsion_rank (N : ℕ) [NeZero N] (s : S) :
     (E.torsionπ N).finrank s = N ^ 2 := by
-  haveI := E.mulByHom_flat N
-  haveI := E.mulByHom_isFinite N
+  have := E.mulByHom_flat N
+  have := E.mulByHom_isFinite N
   have h := Scheme.Hom.finrank_pullback_snd (E.mulByHom N) E.zero s
   exact h.trans (E.mulByHom_finrank N _)
 
@@ -201,7 +200,7 @@ theorem torsion_rank (N : ℕ) [NeZero N] (s : S) :
 are the zero ring, and every stalk is a nontrivial local ring). -/
 theorem _root_.ModularCurves.isEmpty_of_nIsInvertible_zero {X : Scheme.{u}}
     (h : NIsInvertible X 0) : IsEmpty X := by
-  refine ⟨fun x => ?_⟩
+  refine ⟨fun x ↦ ?_⟩
   rw [NIsInvertible, Nat.cast_zero] at h
   have h0 : (0 : Γ(X, ⊤)) = 1 := isUnit_zero_iff.mp h
   have hst := congrArg (X.presheaf.germ ⊤ x trivial).hom h0
@@ -213,7 +212,7 @@ locally-finitely-presented `E/S`, by the cancellation
 `ForMathlib.FinitePresentationCancel` (Stacks 01TX). -/
 theorem mulByHom_locallyOfFinitePresentation (N : ℕ) :
     LocallyOfFinitePresentation (E.mulByHom N) := by
-  haveI : Smooth E.π := SmoothOfRelativeDimension.smooth (n := 1) E.π
+  have : Smooth E.π := SmoothOfRelativeDimension.smooth (n := 1) E.π
   have h : LocallyOfFinitePresentation (E.mulByHom N ≫ E.π) := by
     rw [E.mulByHom_π]
     infer_instance
