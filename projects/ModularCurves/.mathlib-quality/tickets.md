@@ -2437,6 +2437,21 @@ adjudicates.
   Deliverable: a `MulAction (GL (Fin 2) (ZMod 2) × ({1, -1} : Subgroup _))`-shaped
   action packaging compatible with `(Ell/R)`-maps (the `InvariantTorsor`-input shape
   of T-Q2/QuotientProblem.lean — match its exact interface when instantiating).
+  **[T-E14a substrate survey (2026-07-14, OMEGA)]**: mathlib HAS the char≠2
+  complete-the-square engine — `WeierstrassCurve.IsCharNeTwoNF`, `toCharNeTwoNF` +
+  `toCharNeTwoNF_spec`, `exists_variableChange_isCharNeTwoNF`
+  (`Mathlib/AlgebraicGeometry/EllipticCurve/NormalForms.lean`) — use it for step 1
+  (kill `a₁, a₃`); the repo's `ForMathlib/TateNormalForm.lean` (0-sorry) is the
+  POINT-BASED normalization pattern to mirror (its `toTateNF` sends a chosen point to
+  `(0,0)` by a `VariableChange`; for Legendre the two chosen 2-torsion points go to
+  `x = 0` and `x = 1`, which pins `r` and `u²`, leaving exactly the third root `λ`
+  free and `u ∈ {±1}` — that residual `{±1}` is precisely axiom 2's ω-factor).
+  Decompose on claim: (a) 2-torsion x-roots of a CharNeTwoNF-curve (cubic factors ⟺
+  fibrewise-nonzero 2-torsion sections; consumes `E[2] − 0` free-rank-3 from the
+  board body); (b) the `(P,Q)`-pinned λ-model `VariableChange` (mirror `toTateNF`);
+  (c) `M'₂ := Spec (ℤ[1/2])[λ][(λ(λ−1))⁻¹]`-object as an `EllObj` with universal
+  `((P,Q), ω)`; (d) `RepresentableBy` via chart-glue (the `omegaProblem`-component of
+  the datum trivialises chartwise by `omegaCocycle_res`).
   **[T-E14a]** (axiom 1, `M'₂` representability): over `ℤ[1/2]` normalise
   `y² = x(x−1)(x−λ)` with `P = (0,0)`, `Q = (1,0)`, `ω = dx/y`: existence+uniqueness
   of the λ-model given `((P,Q), ω)` — the GME Ex 2.2.1 computation; engines:
