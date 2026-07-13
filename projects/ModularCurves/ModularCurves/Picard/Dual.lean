@@ -933,6 +933,11 @@ noncomputable def dualMapObj {M N : X.Modules} (f : M ⟶ N) :
     dualObj N ⟶ dualObj M :=
   ModularCurves.SheafOfModules.dualMap X.ringCatSheaf f
 
+/-- An isomorphism of modules induces the reverse isomorphism of their scheme-level duals. -/
+noncomputable def dualIsoObj {M N : X.Modules} (e : M ≅ N) :
+    dualObj N ≅ dualObj M :=
+  ModularCurves.SheafOfModules.dualIso X.ringCatSheaf e
+
 /-- The dual of the structure sheaf is the structure sheaf. -/
 noncomputable def dualUnitObjIso : dualObj (unitObj X) ≅ unitObj X :=
   ModularCurves.SheafOfModules.dualUnitIso X.ringCatSheaf
