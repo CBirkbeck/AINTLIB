@@ -47,8 +47,8 @@ theorem formallySmooth_mulByHom_appLE (N : ℕ) (h : NIsInvertible S N)
     {V : E.E.Opens} (hV : IsAffineOpen V) (hUW : U ≤ E.π ⁻¹ᵁ W)
     (hVU : V ≤ (E.mulByHom (N : ℤ)) ⁻¹ᵁ U) :
     ((E.mulByHom (N : ℤ)).appLE U V hVU).hom.FormallySmooth := by
-  haveI : Smooth E.π := SmoothOfRelativeDimension.smooth (n := 1) E.π
-  have hVW : V ≤ E.π ⁻¹ᵁ W := fun v hv => by
+  have : Smooth E.π := SmoothOfRelativeDimension.smooth (n := 1) E.π
+  have hVW : V ≤ E.π ⁻¹ᵁ W := fun v hv ↦ by
     have h1 : E.π.base ((E.mulByHom (N : ℤ)).base v) ∈ W := hUW (hVU hv)
     rwa [← Scheme.Hom.comp_apply, E.mulByHom_π] at h1
   -- the chart triangle `Γ(W) ⟶ Γ(U) ⟶ Γ(V)` refines the structure chart map
@@ -65,18 +65,18 @@ theorem formallySmooth_mulByHom_appLE (N : ℕ) (h : NIsInvertible S N)
   letI : Algebra ↑Γ(E.E, U) ↑Γ(E.E, V) :=
     ((E.mulByHom (N : ℤ)).appLE U V hVU).hom.toAlgebra
   show Algebra.FormallySmooth ↑Γ(E.E, U) ↑Γ(E.E, V)
-  refine Algebra.FormallySmooth.of_comp_surjective fun B _ _ I hI ψq => ?_
+  refine Algebra.FormallySmooth.of_comp_surjective fun B _ _ I hI ψq ↦ ?_
   -- the Γ(W)-algebra world in which the smoothness of `E/S` lifts
   letI : Algebra ↑Γ(S, W) ↑Γ(E.E, V) := (E.π.appLE W V hVW).hom.toAlgebra
   letI : Algebra ↑Γ(S, W) B :=
     ((algebraMap ↑Γ(E.E, U) B).comp (E.π.appLE W U hUW).hom).toAlgebra
-  haveI hπfsA : Algebra.FormallySmooth ↑Γ(S, W) ↑Γ(E.E, V) := hπfs
+  have hπfsA : Algebra.FormallySmooth ↑Γ(S, W) ↑Γ(E.E, V) := hπfs
   have hcomm : ∀ r : ↑Γ(S, W), ψq ((E.π.appLE W V hVW).hom r) =
       algebraMap ↑Γ(S, W) (B ⧸ I) r := by
     intro r
     have h1 : (E.π.appLE W V hVW).hom r =
         algebraMap ↑Γ(E.E, U) ↑Γ(E.E, V) ((E.π.appLE W U hUW).hom r) :=
-      congrArg (fun m : Γ(S, W) ⟶ Γ(E.E, V) => m.hom r) happ
+      congrArg (fun m : Γ(S, W) ⟶ Γ(E.E, V) ↦ m.hom r) happ
     rw [h1, ψq.commutes]
     rfl
   obtain ⟨χ, hχ⟩ := Algebra.FormallySmooth.comp_surjective ↑Γ(S, W) ↑Γ(E.E, V) I hI
@@ -95,7 +95,7 @@ theorem formallySmooth_mulByHom_appLE (N : ℕ) (h : NIsInvertible S N)
       Category.assoc, ← hW.SpecMap_appLE_fromSpec E.π hU hUW, ← Category.assoc,
       ← Category.assoc, ← Spec.map_comp, ← Spec.map_comp]
     refine congrArg (· ≫ hW.fromSpec) (congrArg Spec.map (CommRingCat.hom_ext
-      (RingHom.ext fun r => ?_)))
+      (RingHom.ext fun r ↦ ?_)))
     exact χ.commutes r
   set Py : E.Point t := ⟨y, ht.symm⟩ with hPy
   set Pxt : E.Point t := ⟨xt, hxtπ⟩ with hPxt
@@ -104,15 +104,15 @@ theorem formallySmooth_mulByHom_appLE (N : ℕ) (h : NIsInvertible S N)
       hV.fromSpec := by
     rw [hxt, ← Category.assoc, ← Spec.map_comp]
     refine congrArg (· ≫ hV.fromSpec) (congrArg Spec.map (CommRingCat.hom_ext
-      (RingHom.ext fun v => ?_)))
-    exact congrArg (fun m : ↑Γ(E.E, V) →ₐ[↑Γ(S, W)] B ⧸ I => m v) hχ
+      (RingHom.ext fun v ↦ ?_)))
+    exact congrArg (fun m : ↑Γ(E.E, V) →ₐ[↑Γ(S, W)] B ⧸ I ↦ m v) hχ
   -- the `[N]`-compatibility of the test data, geometrized
   have hNbar : Spec.map (CommRingCat.ofHom ψq.toRingHom) ≫
       (hV.fromSpec ≫ E.mulByHom (N : ℤ)) = Spec.map φB ≫ y := by
     rw [← hU.SpecMap_appLE_fromSpec (E.mulByHom (N : ℤ)) hV hVU, hy, ← Category.assoc,
       ← Category.assoc, ← Spec.map_comp, ← Spec.map_comp]
     refine congrArg (· ≫ hU.fromSpec) (congrArg Spec.map (CommRingCat.hom_ext
-      (RingHom.ext fun s => ?_)))
+      (RingHom.ext fun s ↦ ?_)))
     exact ψq.commutes s
   -- the defect is a square-zero point-kernel element
   have hres_eq : Point.restrict E (Spec.map φB) Py =
@@ -188,17 +188,17 @@ theorem formallySmooth_mulByHom_appLE (N : ℕ) (h : NIsInvertible S N)
     rw [Category.assoc, hxVfac]
     exact hresval
   -- package the algebra-level lift
-  refine ⟨{ toRingHom := σC.hom, commutes' := fun s => ?_ }, ?_⟩
-  · exact congrArg (fun m : Γ(E.E, U) ⟶ BC => m.hom s) hUlin
-  · refine AlgHom.ext fun v => ?_
-    exact congrArg (fun m : Γ(E.E, V) ⟶ CommRingCat.of (B ⧸ I) => m.hom v) hlift
+  refine ⟨{ toRingHom := σC.hom, commutes' := fun s ↦ ?_ }, ?_⟩
+  · exact congrArg (fun m : Γ(E.E, U) ⟶ BC ↦ m.hom s) hUlin
+  · refine AlgHom.ext fun v ↦ ?_
+    exact congrArg (fun m : Γ(E.E, V) ⟶ CommRingCat.of (B ⧸ I) ↦ m.hom v) hlift
 
 /-- **(N6)** `[N]` is smooth for `N` invertible on `S` — the (LIFT) translation of
 kernel `N`-divisibility (N5). -/
 theorem mulByHom_smooth_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :
     Smooth (E.mulByHom (N : ℤ)) := by
-  haveI := E.mulByHom_locallyOfFinitePresentation N
-  refine IsZariskiLocalAtSource.iff_exists_resLE.mpr fun x => ?_
+  have := E.mulByHom_locallyOfFinitePresentation N
+  refine IsZariskiLocalAtSource.iff_exists_resLE.mpr fun x ↦ ?_
   -- an affine chart `W` around the base point
   obtain ⟨_, ⟨W, hW, rfl⟩, hxW, -⟩ := S.isBasis_affineOpens.exists_subset_of_mem_open
     (Set.mem_univ (E.π.base x)) isOpen_univ
@@ -226,7 +226,7 @@ theorem mulByHom_smooth_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :
 on `S`. -/
 theorem mulByHom_flat_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :
     Flat (E.mulByHom (N : ℤ)) := by
-  haveI := E.mulByHom_smooth_of_nIsInvertible N h
+  have := E.mulByHom_smooth_of_nIsInvertible N h
   infer_instance
 
 end EllipticCurve

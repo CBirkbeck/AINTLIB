@@ -59,22 +59,22 @@ lemma aeval_negVec_map (f : R →+* R') (W : WeierstrassCurve R) (p : MvPolynomi
 lemma negGradedQuot_comp_baseChangeGradedHom (f : R →+* R') (W : WeierstrassCurve R) :
     (negGradedQuot (W.map f)).comp (baseChangeGradedHom f W)
       = (baseChangeGradedHom f W).comp (negGradedQuot W) := by
-  refine GradedRingHom.ext fun x => ?_
+  refine GradedRingHom.ext fun x ↦ ?_
   obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
   have hbc : ∀ p : MvPolynomial (Fin 3) R,
       baseChangeGradedHom f W (Ideal.Quotient.mk (projIdeal W).toIdeal p)
         = Ideal.Quotient.mk (projIdeal (W.map f)).toIdeal (MvPolynomial.map f p) :=
-    fun p => quotientGradingMap_mk (mvMapGraded f) (projIdeal W) (projIdeal (W.map f))
+    fun p ↦ quotientGradingMap_mk (mvMapGraded f) (projIdeal W) (projIdeal (W.map f))
       (projIdeal_le_comap f W) p
   have hneg : ∀ p : MvPolynomial (Fin 3) R,
       negGradedQuot W (Ideal.Quotient.mk (projIdeal W).toIdeal p)
         = Ideal.Quotient.mk (projIdeal W).toIdeal (aeval (negVec W) p) :=
-    fun p => quotientGradingMap_mk (negGradedPoly W) (projIdeal W) (projIdeal W)
+    fun p ↦ quotientGradingMap_mk (negGradedPoly W) (projIdeal W) (projIdeal W)
       (negGradedPoly_comap W) p
   have hneg' : ∀ p : MvPolynomial (Fin 3) R',
       negGradedQuot (W.map f) (Ideal.Quotient.mk (projIdeal (W.map f)).toIdeal p)
         = Ideal.Quotient.mk (projIdeal (W.map f)).toIdeal (aeval (negVec (W.map f)) p) :=
-    fun p => quotientGradingMap_mk (negGradedPoly (W.map f)) (projIdeal (W.map f))
+    fun p ↦ quotientGradingMap_mk (negGradedPoly (W.map f)) (projIdeal (W.map f))
       (projIdeal (W.map f)) (negGradedPoly_comap (W.map f)) p
   show negGradedQuot (W.map f) (baseChangeGradedHom f W (Ideal.Quotient.mk _ a))
     = baseChangeGradedHom f W (negGradedQuot W (Ideal.Quotient.mk _ a))
