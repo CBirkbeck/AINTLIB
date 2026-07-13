@@ -79,6 +79,12 @@ private noncomputable instance localGeneratorsOfTrivialization_isIso
       SheafOfModules.free.generatingSections_π (R := X.ringCatSheaf.over U)]
     exact p.inv_hom_id
 
+private instance localGeneratorsOfTrivialization_isFiniteType
+    (M : X.Modules) (U : X.Opens)
+    (e : (pullback U.ι).obj M ≅ unitObj U.toScheme) :
+    (localGeneratorsOfTrivialization M U e).IsFiniteType where
+  finite := inferInstanceAs (Finite PUnit.{u + 1})
+
 private structure InvertibleTrivializationData (M : X.Modules) where
   I : Type u
   U : I → X.Opens
@@ -108,6 +114,20 @@ private instance invertibleLocalGeneratorsData_isLocallyFreeData {M : X.Modules}
     (hM : IsInvertible M) : (invertibleLocalGeneratorsData hM).IsLocallyFreeData where
   isIso _ := localGeneratorsOfTrivialization_isIso _ _ _
 
+private instance invertibleLocalGeneratorsData_isFiniteType {M : X.Modules}
+    (hM : IsInvertible M) : (invertibleLocalGeneratorsData hM).IsFiniteType where
+  isFiniteType _ := localGeneratorsOfTrivialization_isFiniteType _ _ _
+
+private instance invertibleQuasicoherentData_isFinitePresentation {M : X.Modules}
+    (hM : IsInvertible M) :
+    (invertibleLocalGeneratorsData hM).quasiCoherentData.IsFinitePresentation where
+  isFinite_presentation i := by
+    constructor
+    · exact (invertibleLocalGeneratorsData_isFiniteType hM).isFiniteType i
+    · constructor
+      dsimp [SheafOfModules.LocalGeneratorsData.quasiCoherentData]
+      infer_instance
+
 /-- An invertible scheme module is locally free in mathlib's sheaf-theoretic sense. -/
 theorem IsInvertible.isLocallyFree {M : X.Modules} (hM : IsInvertible M) :
     M.IsLocallyFree := by
@@ -119,5 +139,12 @@ theorem IsInvertible.isQuasicoherent {M : X.Modules} (hM : IsInvertible M) :
     M.IsQuasicoherent := by
   letI : M.IsLocallyFree := hM.isLocallyFree
   infer_instance
+
+/-- An invertible scheme module is finitely presented in mathlib's sheaf-theoretic sense. -/
+theorem IsInvertible.isFinitePresentation {M : X.Modules} (hM : IsInvertible M) :
+    M.IsFinitePresentation := by
+  exact
+    { exists_quasicoherentData :=
+        ⟨(invertibleLocalGeneratorsData hM).quasiCoherentData, inferInstance⟩ }
 
 end AlgebraicGeometry.Scheme.Modules

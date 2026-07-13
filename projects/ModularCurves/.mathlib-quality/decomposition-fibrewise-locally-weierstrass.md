@@ -626,6 +626,15 @@ cover carrying this comparison whenever the base is affine. This packages the ex
 pole-sheaf module to which the future proper-perfect-complex and arbitrary-base-change
 theorem must apply. It does not infer family-level vanishing from fibrewise vanishing.
 
+The coherent-sheaf input is now explicit as well. The project's cover-local rank-one
+predicate gives a finite sheaf presentation via
+`Scheme.Modules.IsInvertible.isFinitePresentation`: on every trivializing open the
+presentation has one generator and no relations. Consequently
+`sectionPoleSheaf_isFinitePresentation` and
+`sectionPoleSheafPower_isFinitePresentation` prove that `O([0])` and every `O(n[0])`
+are finitely presented without noetherianity or properness. This is an input to, not a
+replacement for, the missing theorem that proper pushforward of these sheaves is perfect.
+
 That explicit model calculation is now complete in
 `EllipticCurve/PoleSheafModelHOne.lean`. For every Weierstrass model over a field and
 `n >= 1`, `exists_projModelPoleLocalSections_sub_eq` expresses every section of
