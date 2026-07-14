@@ -72,6 +72,7 @@ import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 import ModularCurves.ForMathlib.SchemeModulePushforwardBaseChange
 import ModularCurves.ForMathlib.SheafCechCochains
 import ModularCurves.ForMathlib.SheafCechDifferential
+import ModularCurves.ForMathlib.SheafCechSheafAugmentation
 import ModularCurves.ForMathlib.SheafCechSheafComplex
 import ModularCurves.ForMathlib.SheafCechSheafDifferential
 import ModularCurves.ForMathlib.SheafCechSheafTerms
