@@ -210,6 +210,13 @@ theorem ι_comp_mulByHom_of_hasRank {N : ℕ} [NeZero N] (hG : G.HasRank N) :
   have h0 := hG.smul_eq_zero_of_factors G.π ⟨G.ι, G.ι_π⟩ hP
   exact (E.smul_eq_zero_iff_comp_mulByHom G.π N ⟨G.ι, G.ι_π⟩).mp h0
 
+/-- **A constant-rank subgroup carries a killing integer** (KM 1.4.2): `HasRank N ⟹ HasKillingInt`,
+with `N` itself the killing integer. The bridge from the rank datum (a `Prop` hypothesis threaded
+by the moduli layer) to the `HasKillingInt` class that the option-γ quotient `E/G` consumes; a
+consumer with `hrank : G.HasRank N` supplies the instance via `haveI := G.hasKillingInt_of_hasRank hrank`. -/
+theorem hasKillingInt_of_hasRank {N : ℕ} [NeZero N] (hG : G.HasRank N) : G.HasKillingInt :=
+  ⟨N, NeZero.ne N, G.ι_comp_mulByHom_of_hasRank hG⟩
+
 end MulPreimage
 
 /-! ### Stability closure micro-lemmas -/
