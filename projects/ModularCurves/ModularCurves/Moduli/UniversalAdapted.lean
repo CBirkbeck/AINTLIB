@@ -9,6 +9,7 @@ import Mathlib.Algebra.MvPolynomial.CommRing
 import ModularCurves.EllipticCurve.ModelRecord
 import ModularCurves.Moduli.AdaptedModel
 import ModularCurves.Moduli.EllCategory
+import ModularCurves.ForMathlib.PullbackLocalAtTarget
 
 /-!
 # The universal ω-adapted curve and its moduli ring (T-E12, E12-D1)
@@ -708,5 +709,144 @@ theorem classifyingTop_zero {R : CommRingCat.{u}} (Y : EllObj R)
       Spec.map (CommRingCat.ofHom (classifyingRingHom Y b h2 h3)) =
     p.1.1.1.ι ≫ classifyingMap Y b h2 h3 from by rw [Category.assoc]; rfl]
   simp only [Category.assoc]
+
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D3-E4)** The classifying map restricted to a chart-supported affine is the
+`Spec` of the restricted classifying algebra. -/
+theorem restrict_classifyingMap {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤)))
+    (V : Y.base.affineOpens) :
+    V.1.ι ≫ classifyingMap Y b h2 h3 =
+      V.2.isoSpec.hom ≫ Spec.map (CommRingCat.ofHom
+        (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+          (classifyingRingHom Y b h2 h3))) := by
+  have hsplit : Spec.map (CommRingCat.ofHom
+      (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+        (classifyingRingHom Y b h2 h3))) =
+    Spec.map (Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op) ≫
+      Spec.map (CommRingCat.ofHom (classifyingRingHom Y b h2 h3)) := by
+    rw [← Spec.map_comp]
+    rfl
+  rw [hsplit, show V.2.isoSpec.hom = V.1.toSpecΓ from IsAffineOpen.isoSpec_hom _,
+    ← Category.assoc, Scheme.Opens.toSpecΓ_SpecMap_presheaf_map_top, Category.assoc]
+  rfl
+
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(E12-D3-E4)** The per-chart classifying square is cartesian: the chart
+isomorphism square pasted with the model base-change square. -/
+theorem chartPiece_isPullback {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤)))
+    (V : Y.base.affineOpens) (i : Y.curve.toEllipticCurveGeom.atlas.ι)
+    (hVi : V.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U i).1) :
+    IsPullback (chartPiece Y b h2 h3 V i hVi)
+      (pullback.snd Y.curve.toEllipticCurveGeom.π V.1.ι)
+      (projModelπ (universalShortNF R))
+      (V.2.isoSpec.hom ≫ Spec.map (CommRingCat.ofHom
+        (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+          (classifyingRingHom Y b h2 h3)))) := by
+  set Q := adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi with hQ
+  -- left square: the adapted chart isomorphism (with the coefficient match)
+  have hleft : IsPullback
+      (Q.e.hom ≫ eqToHom (congrArg projModel
+        (universalShortNF_map_classifying Y b h2 h3 V i hVi).symm))
+      (pullback.snd Y.curve.toEllipticCurveGeom.π V.1.ι)
+      (projModelπ ((universalShortNF R).map
+        (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+          (classifyingRingHom Y b h2 h3))))
+      V.2.isoSpec.hom := by
+    refine IsPullback.of_horiz_isIso ⟨?_⟩
+    rw [Category.assoc, projModelπ_congr
+      (universalShortNF_map_classifying Y b h2 h3 V i hVi).symm]
+    exact Q.compat_π
+  -- right square: the model base change
+  have hright : IsPullback
+      (projModelBaseChange
+        (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+          (classifyingRingHom Y b h2 h3)) (universalShortNF R))
+      (projModelπ ((universalShortNF R).map
+        (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+          (classifyingRingHom Y b h2 h3))))
+      (projModelπ (universalShortNF R))
+      (Spec.map (CommRingCat.ofHom
+        (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+          (classifyingRingHom Y b h2 h3)))) := by
+    letI : Algebra (ModuliRingE12 R) Γ(Y.base, V.1) :=
+      ((((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+        (classifyingRingHom Y b h2 h3))).toAlgebra
+    exact isPullback_projModelBaseChange (universalShortNF R)
+  have hpaste := hleft.paste_horiz hright
+  rw [show (Q.e.hom ≫ eqToHom (congrArg projModel
+      (universalShortNF_map_classifying Y b h2 h3 V i hVi).symm)) ≫
+    projModelBaseChange
+      (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+        (classifyingRingHom Y b h2 h3)) (universalShortNF R) =
+    chartPiece Y b h2 h3 V i hVi from by
+    rw [chartPiece, Category.assoc]] at hpaste
+  exact hpaste
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(E12-D3-E4 ★★)** The classifying square is cartesian: `Y` is the pullback of the
+universal curve along the classifying map — the universality of GME Thm 2.2.3,
+geometric half. -/
+theorem isPullback_classifyingTop {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤))) :
+    IsPullback (classifyingTop Y b h2 h3) Y.curve.toEllipticCurveGeom.π
+      (projModelπ (universalShortNF R)) (classifyingMap Y b h2 h3) := by
+  refine (isPullback_of_iSup_eq_top (f := Y.curve.toEllipticCurveGeom.π)
+    (g := classifyingTop Y b h2 h3) (h := classifyingMap Y b h2 h3)
+    (k := projModelπ (universalShortNF R))
+    (classifyingTop_π_w Y b h2 h3).symm
+    (ι := {p : Y.base.affineOpens × Y.curve.toEllipticCurveGeom.atlas.ι //
+      p.1.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U p.2).1})
+    (fun p => p.1.1.1) ?_ (fun p => ?_)).flip
+  · -- the chart-supported affines cover the base
+    rw [eq_top_iff]
+    intro x _
+    obtain ⟨i, hxi⟩ := Y.curve.toEllipticCurveGeom.atlas.covers x
+    obtain ⟨V₀, hVaff, hxV, hVle⟩ := exists_isAffineOpen_mem_and_subset
+      (show x ∈ (Y.curve.toEllipticCurveGeom.atlas.U i).1 from hxi)
+    exact TopologicalSpace.Opens.mem_iSup.mpr ⟨⟨⟨⟨V₀, hVaff⟩, i⟩, hVle⟩, hxV⟩
+  · -- the restricted square, through the piece comparison
+    set fpre := (Y.curve.toEllipticCurveGeom.π ⁻¹ᵁ p.1.1.1).ι with hfpre
+    -- the comparison from the preimage to the pullback piece
+    have hcomm : fpre ≫ Y.curve.toEllipticCurveGeom.π =
+        (Y.curve.toEllipticCurveGeom.π ∣_ p.1.1.1) ≫ p.1.1.1.ι :=
+      (morphismRestrict_ι Y.curve.toEllipticCurveGeom.π p.1.1.1).symm
+    set m := pullback.lift fpre (Y.curve.toEllipticCurveGeom.π ∣_ p.1.1.1) hcomm
+      with hm
+    have hm₁ : m ≫ pullback.fst Y.curve.toEllipticCurveGeom.π p.1.1.1.ι = fpre :=
+      pullback.lift_fst _ _ _
+    have hm₂ : m ≫ pullback.snd Y.curve.toEllipticCurveGeom.π p.1.1.1.ι =
+        Y.curve.toEllipticCurveGeom.π ∣_ p.1.1.1 :=
+      pullback.lift_snd _ _ _
+    have hmiso : IsIso m := by
+      refine (isPullback_morphismRestrict Y.curve.toEllipticCurveGeom.π
+        p.1.1.1).flip.isIso_of_isPullback
+        (IsPullback.of_hasPullback Y.curve.toEllipticCurveGeom.π p.1.1.1.ι) m hm₁ hm₂
+    -- the m-square pasted with the piece square
+    have hmsq : IsPullback m (Y.curve.toEllipticCurveGeom.π ∣_ p.1.1.1)
+        (pullback.snd Y.curve.toEllipticCurveGeom.π p.1.1.1.ι) (𝟙 _) :=
+      IsPullback.of_horiz_isIso ⟨by rw [hm₂, Category.comp_id]⟩
+    have hp := hmsq.paste_horiz (chartPiece_isPullback Y b h2 h3 p.1.1 p.1.2 p.2)
+    rw [show m ≫ chartPiece Y b h2 h3 p.1.1 p.1.2 p.2 =
+        (Y.curve.toEllipticCurveGeom.π ⁻¹ᵁ p.1.1.1).ι ≫ classifyingTop Y b h2 h3 from by
+        rw [← classifyingTop_piece Y b h2 h3 p, adaptedTotalCover_f, ← Category.assoc,
+          hm₁],
+      show (𝟙 _) ≫ p.1.1.2.isoSpec.hom ≫ Spec.map (CommRingCat.ofHom
+          (((Y.base.presheaf.map (homOfLE (le_top : p.1.1.1 ≤ ⊤)).op).hom).comp
+            (classifyingRingHom Y b h2 h3))) =
+        p.1.1.1.ι ≫ classifyingMap Y b h2 h3 from by
+        rw [Category.id_comp, ← restrict_classifyingMap]] at hp
+    exact hp.flip
 
 end ModularCurves
