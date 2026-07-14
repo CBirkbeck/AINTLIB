@@ -119,19 +119,6 @@ theorem _root_.ModularCurves.RelEffCartierDiv.IsSubgroup.smul_eq_zero_of_factors
     (hQ : ∃ h : T ⟶ D.ideal.subscheme, h ≫ D.ideal.subschemeι = Q.1) :
     (N : ℤ) • Q = 0 := by sorry
 
-/-- `IdealSheafData.ideal` as a monoid homomorphism (products of ideal sheaves are
-computed pointwise). ForMathlib-bound: generic, no modular-curve content (relocation is a
-generalise-lane task). -/
-noncomputable def _root_.AlgebraicGeometry.Scheme.IdealSheafData.idealMonoidHom
-    (X : Scheme.{u}) :
-    X.IdealSheafData →* (∀ U : X.affineOpens, Ideal Γ(X, U.1)) where
-  toFun := Scheme.IdealSheafData.ideal
-  map_one' := by
-    funext U
-    simp [Scheme.IdealSheafData.one_eq_top, Scheme.IdealSheafData.ideal_top,
-      Ideal.one_eq_top]
-  map_mul' I J := Scheme.IdealSheafData.ideal_mul I J
-
 /-- **(T-D6a-ii, L3 — KM 1.4.4 (1)⟹(2) divisor side)** The order divisor is natural in
 the base: base-changing `[P] + ⋯ + [NP]` along `t : T ⟶ S` gives the order divisor of
 the pulled section on the base-changed curve. -/
