@@ -52,6 +52,7 @@ import ModularCurves.ForMathlib.QuotientCurveModel
 import ModularCurves.ForMathlib.SchemeActionFree
 import ModularCurves.ForMathlib.SheafOfModulesMonoidal
 import ModularCurves.ForMathlib.SmoothDescent
+import ModularCurves.ForMathlib.SmoothSectionLift
 import ModularCurves.ForMathlib.SpecBasicOpenAway
 import ModularCurves.ForMathlib.SpecEqualizer
 import ModularCurves.ForMathlib.WeierstrassInvariant
