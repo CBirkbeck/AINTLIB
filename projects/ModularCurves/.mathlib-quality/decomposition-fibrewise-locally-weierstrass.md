@@ -328,6 +328,11 @@ Completed dependency claim (2026-07-14): proved
 stage later than any prescribed index and identifies their images under the presented
 stage-to-colimit map.
 
+Completed dependency claim (2026-07-14): proved
+`Algebra.SpreadData.FunctorModel.exists_common_unit_liftAtLaterStage`. Units belonging to
+finitely many varying objects of a spread functor can now be represented simultaneously
+at one common later stage, while the entire affine-intersection functor moves with them.
+
 Active dependency claim (2026-07-14): spread the finite family of pair-overlap transition
 units, their inverses, and the triple-overlap equations to one later finite stage of the
 affine-intersection model. This will construct the finite-stage line bundle whose base change

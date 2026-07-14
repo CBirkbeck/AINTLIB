@@ -297,6 +297,68 @@ noncomputable def SpreadData.FunctorModel.mapToStage
   map_colimit f x := (M.object _).mapAtLaterStage_colimit (M.object _) H
     (M.le_stage _) (M.le_stage _) hij (M.map f) (F.map f).hom (M.map_colimit f) x
 
+private structure SpreadData.FunctorModel.UnitLiftStage
+    (M : SpreadData.FunctorModel F H) (X : J) (a : (F.obj X)ˣ) where
+  stage : ι
+  le_stage : M.stage ≤ stage
+  unit : ((M.object X).spreadStage (t := t)
+    ((M.le_stage X).trans le_stage))ˣ
+  unit_colimit : Units.map ((M.object X).stageToColimit H
+    ⟨stage, (M.le_stage X).trans le_stage⟩).toMonoidHom unit = a
+
+private theorem SpreadData.FunctorModel.exists_unitLiftStage
+    (M : SpreadData.FunctorModel F H) (X : J) (a : (F.obj X)ˣ) :
+    Nonempty (M.UnitLiftStage X a) := by
+  obtain ⟨S, hS, a_S, ha_S⟩ :=
+    (M.object X).exists_common_unit_lift_atLaterStage H M.stage
+      (fun _ : Unit => a)
+  exact ⟨⟨S.1, hS, a_S (), ha_S ()⟩⟩
+
+/-- Units in finitely many varying objects of a spread functor can be represented at one
+common later stage. -/
+theorem SpreadData.FunctorModel.exists_common_unit_liftAtLaterStage
+    (M : SpreadData.FunctorModel F H)
+    {ρ : Type u} [Finite ρ] (obj : ρ → J)
+    (a : ∀ r, (F.obj (obj r))ˣ) :
+    ∃ (j : ι) (hij : M.stage ≤ j)
+        (a_j : ∀ r, ((M.object (obj r)).spreadStage (t := t)
+          ((M.le_stage (obj r)).trans hij))ˣ),
+      ∀ r, Units.map ((M.object (obj r)).stageToColimit H
+        ⟨j, (M.le_stage (obj r)).trans hij⟩).toMonoidHom (a_j r) = a r := by
+  classical
+  let C : ∀ r, M.UnitLiftStage (obj r) (a r) := fun r =>
+    Classical.choice (M.exists_unitLiftStage (obj r) (a r))
+  letI : Fintype ρ := Fintype.ofFinite ρ
+  haveI := H.directed
+  haveI := H.nonempty
+  obtain ⟨j, hjall⟩ :=
+    (insert M.stage (Finset.univ.image fun r => (C r).stage)).exists_le
+  have hij : M.stage ≤ j := hjall M.stage (Finset.mem_insert_self _ _)
+  have hC : ∀ r, (C r).stage ≤ j := fun r => hjall (C r).stage
+    (Finset.mem_insert_of_mem
+      (Finset.mem_image_of_mem (fun r => (C r).stage) (Finset.mem_univ r)))
+  let a_j : ∀ r, ((M.object (obj r)).spreadStage (t := t)
+      ((M.le_stage (obj r)).trans hij))ˣ := fun r =>
+    Units.map ((M.object (obj r)).stageTransition H
+      (P := ⟨(C r).stage, (M.le_stage (obj r)).trans (C r).le_stage⟩)
+      (Q := ⟨j, (M.le_stage (obj r)).trans hij⟩) (hC r)).toMonoidHom
+        (C r).unit
+  refine ⟨j, hij, a_j, fun r => ?_⟩
+  apply Units.ext
+  change (M.object (obj r)).stageToColimit H
+      ⟨j, (M.le_stage (obj r)).trans hij⟩
+        ((M.object (obj r)).stageTransition H
+          (P := ⟨(C r).stage, (M.le_stage (obj r)).trans (C r).le_stage⟩)
+          (Q := ⟨j, (M.le_stage (obj r)).trans hij⟩) (hC r)
+            ((C r).unit : (M.object (obj r)).spreadStage (t := t)
+              ((M.le_stage (obj r)).trans (C r).le_stage))) =
+    (a r : F.obj (obj r))
+  exact ((M.object (obj r)).stageToColimit_stageTransition H
+    ((M.le_stage (obj r)).trans (C r).le_stage) (hC r)
+      ((C r).unit : (M.object (obj r)).spreadStage (t := t)
+        ((M.le_stage (obj r)).trans (C r).le_stage))).trans
+          (congrArg Units.val (C r).unit_colimit)
+
 /-- Move a spread functor to a stage where representatives of a finite source family
 have images under one chosen arrow which generate the unit ideal. -/
 theorem SpreadData.FunctorModel.exists_mapCoverAtLaterStage
