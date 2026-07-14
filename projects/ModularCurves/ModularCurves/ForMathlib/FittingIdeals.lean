@@ -5,7 +5,8 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
-import Mathlib
+import Mathlib.LinearAlgebra.Matrix.Rank
+import Mathlib.RingTheory.Ideal.BigOperators
 
 /-!
 # Ideal of minors of a map of finite free modules (Stacks 00N1 / 07ZA) — [T-FIT]
