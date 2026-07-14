@@ -1733,7 +1733,9 @@ theorem SpreadData.mapAtLaterStage_comp
     _ = laterG (laterF (Ideal.Quotient.mk _ (MvPolynomial.X v))) :=
       congrArg laterG (congrArg laterF hvar)
 
-private theorem SpreadData.exists_common_stage_eq
+/-- A finite family of equalities between elements of one spread stage which holds in
+the target colimit holds literally at one common later spread stage. -/
+theorem SpreadData.exists_common_stage_eq
     {B : Type u} [CommRing B] [Algebra A B]
     (D : SpreadData 𝒮 u B) (H : IsFilteredAlgColimit R 𝒮 t A u)
     {κ : Type*} [Finite κ] {P : {q : ι // D.i₀ ≤ q}}

@@ -333,6 +333,12 @@ Completed dependency claim (2026-07-14): proved
 finitely many varying objects of a spread functor can now be represented simultaneously
 at one common later stage, while the entire affine-intersection functor moves with them.
 
+Completed dependency claim (2026-07-14): exposed
+`Algebra.SpreadData.exists_common_stage_eq` and proved
+`Algebra.SpreadData.FunctorModel.exists_common_eq_atLaterStage`. Finite families of
+colimit equalities in varying functor objects can now be made literal at one later stage;
+the proof is decomposed through the one-object wrapper and uses no heartbeat override.
+
 Active dependency claim (2026-07-14): spread the finite family of pair-overlap transition
 units, their inverses, and the triple-overlap equations to one later finite stage of the
 affine-intersection model. This will construct the finite-stage line bundle whose base change

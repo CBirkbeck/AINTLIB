@@ -359,6 +359,66 @@ theorem SpreadData.FunctorModel.exists_common_unit_liftAtLaterStage
         ((M.le_stage (obj r)).trans (C r).le_stage))).trans
           (congrArg Units.val (C r).unit_colimit)
 
+private structure SpreadData.FunctorModel.ElementAgreementStage
+    (M : SpreadData.FunctorModel F H) (X : J)
+    (x y : (M.object X).spreadStage (t := t) (M.le_stage X)) where
+  stage : ι
+  le_stage : M.stage ≤ stage
+  elements_agree : (M.object X).stageTransition H
+      (P := ⟨M.stage, M.le_stage X⟩)
+      (Q := ⟨stage, (M.le_stage X).trans le_stage⟩) le_stage x =
+    (M.object X).stageTransition H
+      (P := ⟨M.stage, M.le_stage X⟩)
+      (Q := ⟨stage, (M.le_stage X).trans le_stage⟩) le_stage y
+
+private theorem SpreadData.FunctorModel.exists_elementAgreementStage
+    (M : SpreadData.FunctorModel F H) (X : J)
+    (x y : (M.object X).spreadStage (t := t) (M.le_stage X))
+    (hxy : (M.object X).stageToColimit H ⟨M.stage, M.le_stage X⟩ x =
+      (M.object X).stageToColimit H ⟨M.stage, M.le_stage X⟩ y) :
+    Nonempty (M.ElementAgreementStage X x y) := by
+  obtain ⟨Q, hQ, hxyQ⟩ := (M.object X).exists_common_stage_eq
+    (P := ⟨M.stage, M.le_stage X⟩) H
+    (fun _ : Unit => x) (fun _ : Unit => y) (fun _ => hxy)
+  exact ⟨⟨Q.1, hQ, hxyQ ()⟩⟩
+
+/-- Finitely many element equalities in varying objects of a spread functor which hold in
+the target colimits hold literally after transport to one common later stage. -/
+theorem SpreadData.FunctorModel.exists_common_eq_atLaterStage
+    (M : SpreadData.FunctorModel F H)
+    {ρ : Type u} [Finite ρ] (obj : ρ → J)
+    (x y : ∀ r, (M.object (obj r)).spreadStage (t := t)
+      (M.le_stage (obj r)))
+    (hxy : ∀ r, (M.object (obj r)).stageToColimit H
+        ⟨M.stage, M.le_stage (obj r)⟩ (x r) =
+      (M.object (obj r)).stageToColimit H
+        ⟨M.stage, M.le_stage (obj r)⟩ (y r)) :
+    ∃ (j : ι) (hij : M.stage ≤ j), ∀ r,
+      (M.object (obj r)).stageTransition H
+          (P := ⟨M.stage, M.le_stage (obj r)⟩)
+          (Q := ⟨j, (M.le_stage (obj r)).trans hij⟩) hij (x r) =
+        (M.object (obj r)).stageTransition H
+          (P := ⟨M.stage, M.le_stage (obj r)⟩)
+          (Q := ⟨j, (M.le_stage (obj r)).trans hij⟩) hij (y r) := by
+  classical
+  let C : ∀ r, M.ElementAgreementStage (obj r) (x r) (y r) := fun r =>
+    Classical.choice (M.exists_elementAgreementStage (obj r) (x r) (y r) (hxy r))
+  letI : Fintype ρ := Fintype.ofFinite ρ
+  haveI := H.directed
+  haveI := H.nonempty
+  obtain ⟨j, hjall⟩ :=
+    (insert M.stage (Finset.univ.image fun r => (C r).stage)).exists_le
+  have hij : M.stage ≤ j := hjall M.stage (Finset.mem_insert_self _ _)
+  have hC : ∀ r, (C r).stage ≤ j := fun r => hjall (C r).stage
+    (Finset.mem_insert_of_mem
+      (Finset.mem_image_of_mem (fun r => (C r).stage) (Finset.mem_univ r)))
+  refine ⟨j, hij, fun r => ?_⟩
+  rw [← (M.object (obj r)).stageTransition_trans H
+      (M.le_stage (obj r)) (C r).le_stage (hC r) (x r),
+    ← (M.object (obj r)).stageTransition_trans H
+      (M.le_stage (obj r)) (C r).le_stage (hC r) (y r),
+    (C r).elements_agree]
+
 /-- Move a spread functor to a stage where representatives of a finite source family
 have images under one chosen arrow which generate the unit ideal. -/
 theorem SpreadData.FunctorModel.exists_mapCoverAtLaterStage
