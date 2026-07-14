@@ -65,4 +65,96 @@ theorem legendreCurve_isElliptic_iff (h2 : IsUnit (2 : R)) (lam : R) :
     rw [show (16 : R) * lam ^ 2 * (lam - 1) ^ 2 = 2 ^ 4 * (lam * (lam - 1)) ^ 2 by ring]
     exact (h2.pow 4).mul (h.pow 2)
 
+/-- **(T-E14a-b0)** `x = 0` is a `2`-torsion abscissa of the Legendre curve: the cubic
+vanishes there. -/
+theorem legendreCurve_cubic_zero (lam : R) :
+    (0 : R) ^ 3 + (legendreCurve lam).a₂ * 0 ^ 2 + (legendreCurve lam).a₄ * 0 +
+      (legendreCurve lam).a₆ = 0 := by
+  simp
+
+/-- **(T-E14a-b0)** `x = 1` is a `2`-torsion abscissa of the Legendre curve. -/
+theorem legendreCurve_cubic_one (lam : R) :
+    (1 : R) ^ 3 + (legendreCurve lam).a₂ * 1 ^ 2 + (legendreCurve lam).a₄ * 1 +
+      (legendreCurve lam).a₆ = 0 := by
+  simp only [legendreCurve_a₂, legendreCurve_a₄, legendreCurve_a₆]
+  ring
+
+/-- **(T-E14a-b1 ★, the KM 4.6.2 normalisation, existence)** A char-≠2-normal-form
+curve (`a₁ = a₃ = 0`) whose cubic has the marked `2`-torsion abscissae `p` and `p + 1`
+(the `x(P₂) = 0, x(Q₂) = 1`-locus shape after the `ω`-pinning of `u`) is carried by the
+pure translation `x ↦ x + p` to the Legendre curve of `λ = −a₂ − 3p − 1`. No scaling is
+needed — the `δ`-condition has already spent it; this is why KM's coupled problem is
+rigid while the plain `Γ(2)`-naive one is not. -/
+theorem translation_smul_eq_legendreCurve {W : WeierstrassCurve R}
+    (h1 : W.a₁ = 0) (h3 : W.a₃ = 0) {p : R}
+    (hp : p ^ 3 + W.a₂ * p ^ 2 + W.a₄ * p + W.a₆ = 0)
+    (hq : (p + 1) ^ 3 + W.a₂ * (p + 1) ^ 2 + W.a₄ * (p + 1) + W.a₆ = 0) :
+    (⟨1, p, 0, 0⟩ : VariableChange R) • W =
+      legendreCurve (-W.a₂ - 3 * p - 1) := by
+  ext
+  · rw [WeierstrassCurve.variableChange_a₁, h1, legendreCurve_a₁]
+    simp
+  · rw [WeierstrassCurve.variableChange_a₂, h1, legendreCurve_a₂]
+    simp only [inv_one, Units.val_one, one_pow, one_mul]
+    ring
+  · rw [WeierstrassCurve.variableChange_a₃, h1, h3, legendreCurve_a₃]
+    simp
+  · rw [WeierstrassCurve.variableChange_a₄, h1, h3, legendreCurve_a₄]
+    simp only [inv_one, Units.val_one, one_pow, one_mul]
+    linear_combination hq - hp
+  · rw [WeierstrassCurve.variableChange_a₆, h1, h3, legendreCurve_a₆]
+    simp only [inv_one, Units.val_one, one_pow, one_mul]
+    linear_combination hp
+
+/-- **(T-E14a-b2 ★, the KM 4.6.2 `{±1}`-rigidity)** A variable change carrying a
+Legendre curve to a Legendre curve and fixing the two marked `2`-torsion abscissae
+(`x' = u⁻²(x − r)` sends `0 ↦ 0` and `1 ↦ 1`) is `⟨u, 0, 0, 0⟩` with `u² = 1`, and the
+`λ`-parameter is unchanged: the coupled problem has exactly the `{±1}`-ambiguity of
+KM's engine group. -/
+theorem legendreCurve_vc_marked (h2 : IsUnit (2 : R)) {C : VariableChange R}
+    {lam lam' : R} (hC : C • legendreCurve lam = legendreCurve lam')
+    (hP : ((C.u⁻¹ : Rˣ) : R) ^ 2 * (0 - C.r) = 0)
+    (hQ : ((C.u⁻¹ : Rˣ) : R) ^ 2 * (1 - C.r) = 1) :
+    C.r = 0 ∧ C.s = 0 ∧ C.t = 0 ∧ (C.u : R) ^ 2 = 1 ∧ lam' = lam := by
+  have hu2 : ((C.u⁻¹ : Rˣ) : R) ^ 2 * (C.u : R) ^ 2 = 1 := by
+    rw [← mul_pow, Units.inv_mul, one_pow]
+  -- the marking pins `r = 0` and `u² = 1`
+  have hr : C.r = 0 := by
+    have h := hP
+    rw [zero_sub, mul_neg, neg_eq_zero] at h
+    calc C.r = (((C.u⁻¹ : Rˣ) : R) ^ 2 * (C.u : R) ^ 2) * C.r := by
+          rw [hu2, one_mul]
+      _ = (C.u : R) ^ 2 * (((C.u⁻¹ : Rˣ) : R) ^ 2 * C.r) := by ring
+      _ = 0 := by rw [h, mul_zero]
+  have hinv2 : ((C.u⁻¹ : Rˣ) : R) ^ 2 = 1 := by
+    rw [← hQ, hr, sub_zero, mul_one]
+  have huu : (C.u : R) ^ 2 = 1 := by
+    have h := hu2
+    rwa [hinv2, one_mul] at h
+  -- the normal form pins `s = 0` and `t = 0`
+  have ha₁ := congrArg WeierstrassCurve.a₁ hC
+  rw [WeierstrassCurve.variableChange_a₁, legendreCurve_a₁, legendreCurve_a₁,
+    zero_add] at ha₁
+  have hs : C.s = 0 := by
+    have h' := congrArg (fun x => (C.u : R) * x) ha₁
+    simp only [← mul_assoc, Units.mul_inv, one_mul, mul_zero] at h'
+    exact (h2.mul_right_eq_zero).mp h'
+  have ha₃ := congrArg WeierstrassCurve.a₃ hC
+  rw [WeierstrassCurve.variableChange_a₃, legendreCurve_a₃, legendreCurve_a₃,
+    legendreCurve_a₁, mul_zero, add_zero, zero_add] at ha₃
+  have ht : C.t = 0 := by
+    have h' := congrArg (fun x => ((C.u : R) ^ 3) * x) ha₃
+    simp only [← mul_assoc, ← mul_pow, Units.mul_inv, one_pow, one_mul,
+      mul_zero] at h'
+    exact (h2.mul_right_eq_zero).mp h'
+  -- the `a₄`-slot then transports `λ` by `u⁻⁴ = 1`
+  have ha₄ := congrArg WeierstrassCurve.a₄ hC
+  rw [WeierstrassCurve.variableChange_a₄, legendreCurve_a₄, legendreCurve_a₄,
+    legendreCurve_a₃, legendreCurve_a₁, legendreCurve_a₂, hr, hs, ht] at ha₄
+  have hlam : lam' = lam := by
+    rw [← ha₄, show ((C.u⁻¹ : Rˣ) : R) ^ 4 = (((C.u⁻¹ : Rˣ) : R) ^ 2) ^ 2 from by
+      ring, hinv2]
+    ring
+  exact ⟨hr, hs, ht, huu, hlam⟩
+
 end ModularCurves
