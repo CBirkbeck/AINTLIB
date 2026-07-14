@@ -92,21 +92,34 @@ private lemma ringMap_comp (F : Finset J ⥤ CommAlgCat.{u} S)
   ext x
   exact ConcreteCategory.congr_hom (F.map_comp f g) x
 
+/-- The singleton index used by an affine finite-intersection functor. -/
+noncomputable abbrev affineIntersectionSingletonIndex (i : J) : Finset J :=
+  singletonIndex i
+
+/-- The pair index used by an affine finite-intersection functor. -/
+noncomputable abbrev affineIntersectionPairIndex (i j : J) : Finset J :=
+  pairIndex i j
+
+/-- The canonical inclusion from a singleton index to a pair index. -/
+noncomputable abbrev affineIntersectionSingletonToPair (i j : J) :
+    affineIntersectionSingletonIndex i ⟶ affineIntersectionPairIndex i j :=
+  singletonToPair i j
+
 /-- The affine chart indexed by a singleton in a finite-intersection functor. -/
 noncomputable abbrev affineIntersectionChart
     (F : Finset J ⥤ CommAlgCat.{u} S) (i : J) : Scheme :=
-  Spec (ringObj F (singletonIndex i))
+  Spec (ringObj F (affineIntersectionSingletonIndex i))
 
 /-- The affine overlap indexed by a pair in a finite-intersection functor. -/
 noncomputable abbrev affineIntersectionOverlap
     (F : Finset J ⥤ CommAlgCat.{u} S) (i j : J) : Scheme :=
-  Spec (ringObj F (pairIndex i j))
+  Spec (ringObj F (affineIntersectionPairIndex i j))
 
 /-- The overlap leg induced by the singleton-to-pair inclusion. -/
 noncomputable def affineIntersectionOverlapι
     (F : Finset J ⥤ CommAlgCat.{u} S) (i j : J) :
     affineIntersectionOverlap F i j ⟶ affineIntersectionChart F i :=
-  Spec.map (ringMap F (singletonToPair i j))
+  Spec.map (ringMap F (affineIntersectionSingletonToPair i j))
 
 /-- The singleton-to-pair maps of an affine finite-intersection functor induce open
 immersions on spectra. -/
@@ -411,7 +424,8 @@ lemma ofAffineIntersectionFunctor_f
 noncomputable def affineIntersectionChartToSpec
     (F : Finset J ⥤ CommAlgCat.{u} S) (i : J) :
     affineIntersectionChart F i ⟶ Spec (CommRingCat.of S) :=
-  Spec.map (CommRingCat.ofHom (algebraMap S (F.obj (singletonIndex i))))
+  Spec.map (CommRingCat.ofHom
+    (algebraMap S (F.obj (affineIntersectionSingletonIndex i))))
 
 private theorem affineIntersectionChartToSpec_compatible
     (F : Finset J ⥤ CommAlgCat.{u} S) (i j : J) :

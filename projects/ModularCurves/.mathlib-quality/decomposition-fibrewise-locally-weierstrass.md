@@ -263,3 +263,10 @@ Integration scope: land `Dual.lean`, `PoleSheaf.lean`, this decomposition artifa
 the global-model declarations in `Comparison.lean`; consume PIC0's landed
 `IsInvertible.tensorObj`. The branch-local pullback-tensor map layer remains preserved on
 `codex/fibrewise-weierstrass-comparison-pre-rebase` for PIC0 integration.
+
+Active dependency claim (2026-07-14): prove
+`SpreadData.FunctorModel.baseChangeSpecIso_inv_affineIntersectionOverlapι`,
+`affineIntersectionGluedBaseChange`, `affineIntersectionGluedBaseChange_isPullback`, and
+`affineIntersectionGluedBaseChangeIso`, with no option, noetherianity, new sorry, or extra
+geometric hypothesis; these globalize the spread chart comparisons needed for arbitrary-base
+pole-sheaf cohomology.
