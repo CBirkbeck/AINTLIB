@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.Basic
 import HasseWeil.Foundation.Ramification
 import HasseWeil.Pic0.ClassGroupNorm
@@ -209,8 +214,7 @@ theorem classNorm_comp_classMap (ch : α.CoordHom) (hinj : Function.Injective ch
     (hfin : @Module.Finite E.CoordinateRing E.CoordinateRing _ _ ch.toAlgebra.toModule)
     (c : ClassGroup E.CoordinateRing) :
     α.classNorm ch hinj hfin (α.classMap ch hinj hfin c) =
-      c ^ (letI := ch.toAlgebra;
-        @Module.finrank E.CoordinateRing E.CoordinateRing _ _ ch.toAlgebra.toModule) := by
+      c ^ @Module.finrank E.CoordinateRing E.CoordinateRing _ _ ch.toAlgebra.toModule := by
   letI := ch.toAlgebra
   haveI hfinI : @Module.Finite E.CoordinateRing E.CoordinateRing _ _ ch.toAlgebra.toModule := hfin
   haveI htfI : @Module.IsTorsionFree E.CoordinateRing E.CoordinateRing _ _ ch.toAlgebra.toModule :=
