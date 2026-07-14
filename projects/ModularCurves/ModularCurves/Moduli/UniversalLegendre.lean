@@ -1488,6 +1488,81 @@ noncomputable def legendreClassifyingEllHom {R : CommRingCat.{u}} {X : EllObj R}
   isPullback := isPullback_legendreTop hD h2
   zero_w := legendreTop_zero hD h2
 
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E14-CLS-7, rt1-level ★)** The marking downstairs: a marked section composed
+with the glued comparison is the classifying map followed by the universal marked
+section. Per witness affine: the section factors through the piece, the marking reads
+it as `[p:q:1]`, and the base-change naturality of affine sections lands on the
+universal marked point. -/
+theorem section_comp_legendreTop {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤)))
+    {σ : X.base ⟶ X.curve.toEllipticCurveGeom.E}
+    (hσ : σ ≫ X.curve.toEllipticCurveGeom.π = 𝟙 X.base) (p q : LegendreModuliRing R)
+    (hpq : (universalLegendre R).toAffine.Equation p q)
+    (hmark : ∀ w : LegendreWitness X L b,
+      w.Pr.MarksAt hσ
+        (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom)
+          (legendreClassifyingRingHom X L b hD h2 p))
+        (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom)
+          (legendreClassifyingRingHom X L b hD h2 q))) :
+    σ ≫ legendreTop hD h2 =
+      legendreClassifyingMap X L b hD h2 ≫
+        projModelAffineSection (universalLegendre R) p q hpq := by
+  refine (legendreBaseCover hD).hom_ext _ _ (fun w => ?_)
+  show w.V.1.ι ≫ σ ≫ legendreTop hD h2 = _
+  -- factor the section through the piece
+  have hfac : w.V.1.ι ≫ σ =
+      sectionLift X.curve.toEllipticCurveGeom hσ w.V ≫
+        (legendreWitnessCover hD).f w := by
+    rw [legendreWitnessCover_f]
+    unfold sectionLift
+    rw [pullback.lift_fst]
+  rw [← Category.assoc, hfac, Category.assoc, legendreTop_piece]
+  -- read the marking through the chart
+  obtain ⟨hpq', hMeq⟩ := hmark w
+  have hMeq' : sectionLift X.curve.toEllipticCurveGeom hσ w.V ≫ w.Pr.e.hom =
+      w.V.2.isoSpec.hom ≫ projModelAffineSection w.Pr.W _ _ hpq' := by
+    calc sectionLift X.curve.toEllipticCurveGeom hσ w.V ≫ w.Pr.e.hom
+        = w.V.2.isoSpec.hom ≫ (w.V.2.isoSpec.inv ≫
+            sectionLift X.curve.toEllipticCurveGeom hσ w.V) ≫ w.Pr.e.hom := by
+          rw [← Category.assoc, ← Category.assoc, Iso.hom_inv_id, Category.id_comp]
+      _ = _ := by rw [hMeq]
+  rw [legendrePiece, ← Category.assoc, hMeq']
+  -- transport the affine section through the coefficient match and the base change
+  rw [Category.assoc, ← Category.assoc (projModelAffineSection w.Pr.W _ _ hpq'),
+    projModelAffineSection_congr
+      (universalLegendre_map_classifying X L b hD h2 w.V w.Pr w.lam
+        w.hAd w.hW w.hMP).symm]
+  letI : Algebra (LegendreModuliRing R) Γ(X.base, w.V.1) :=
+    ((((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+      (legendreClassifyingRingHom X L b hD h2))).toAlgebra
+  have hbc := projModelAffineSection_baseChange (universalLegendre R) p q hpq
+    (WeierstrassCurve.Affine.Equation.map (algebraMap (LegendreModuliRing R)
+      Γ(X.base, w.V.1)) hpq)
+  rw [show projModelAffineSection ((universalLegendre R).map
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (legendreClassifyingRingHom X L b hD h2)))
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom)
+        (legendreClassifyingRingHom X L b hD h2 p))
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom)
+        (legendreClassifyingRingHom X L b hD h2 q))
+      ((universalLegendre_map_classifying X L b hD h2 w.V w.Pr w.lam
+        w.hAd w.hW w.hMP).symm ▸ hpq') ≫
+      projModelBaseChange
+        (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+          (legendreClassifyingRingHom X L b hD h2))
+        (universalLegendre R) =
+    Spec.map (CommRingCat.ofHom
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (legendreClassifyingRingHom X L b hD h2))) ≫
+      projModelAffineSection (universalLegendre R) p q hpq from hbc]
+  rw [← Category.assoc, ← restrict_legendreClassifyingMap hD h2 w.V,
+    Category.assoc]
+  rfl
+
 end TwoTorsion
 
 end ModularCurves
