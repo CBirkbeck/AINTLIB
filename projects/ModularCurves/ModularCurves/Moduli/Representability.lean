@@ -341,8 +341,10 @@ lemma EllHom.transportSection_add (s s' : X.curve.Section) :
             (congrArg₂ lift hcs hcs')))))
 
 /-- The comparison isomorphism is a monoid-object homomorphism: the pointedness plus
-the records-level canonicity primitive (K4 supply). -/
-instance EllHom.isMonHom_curveIsoPullbackOverIso_hom :
+the records-level canonicity primitive (K4 supply). NOT an instance — a global
+`IsMonHom`-instance with these metavariable-heavy arguments sends unrelated
+typeclass searches (e.g. `AddMonoidHomClass` on point-equivs) into timeouts. -/
+theorem EllHom.isMonHom_curveIsoPullbackOverIso_hom :
     IsMonHom (EllHom.curveIsoPullbackOverIso R f).hom := by
   constructor
   · apply Over.OverMorphism.ext
@@ -400,6 +402,8 @@ noncomputable def EllHom.pointTransportEquiv {T : Scheme.{u}} (t : T ⟶ X.base)
     letI : CommGroup (Over.mk t ⟶ (Y.curve.baseChange f.baseHom).asOver) :=
       CategoryTheory.Hom.commGroup
     letI : CommGroup (Over.mk t ⟶ X.curve.asOver) := CategoryTheory.Hom.commGroup
+    haveI : IsMonHom (EllHom.curveIsoPullbackOverIso R f).hom :=
+      EllHom.isMonHom_curveIsoPullbackOverIso_hom R f
     have hadd : (Y.curve.baseChange f.baseHom).pointEquivOverHom t
         (((Y.curve.baseChange f.baseHom).pointEquivOverHom t).symm
           (X.curve.pointEquivOverHom t x ≫
