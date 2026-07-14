@@ -459,6 +459,36 @@ theorem zsmul_injOn_torsionBy {G : Type u} [AddCommGroup G] {ℓ : ℕ} (hℓ : 
       _ = a • (N • R) := by rw [hR, smul_zero, add_zero]
   rw [key P hP, key Q hQ, h]
 
+/-- Dependent-point congruence for `descResidueField ∘ stalkClosedPointTo` on `Spec F`:
+equal morphisms give descents matching across `residueFieldCongr` (the rintro-rfl
+generalization trick — never rewrite a morphism equality under `stalkClosedPointTo`). -/
+theorem descResidueField_stalkClosedPointTo_congr {F : Type u} [Field F]
+    (g₁ g₂ : Spec (CommRingCat.of F) ⟶ Spec (CommRingCat.of F)) (hg : g₁ = g₂)
+    (e : g₁.base (IsLocalRing.closedPoint F) = g₂.base (IsLocalRing.closedPoint F)) :
+    Scheme.descResidueField (Scheme.stalkClosedPointTo g₁)
+      = (Scheme.residueFieldCongr e).hom ≫
+          Scheme.descResidueField (Scheme.stalkClosedPointTo g₂) := by
+  subst hg
+  simp
+
+/-- The canonical sections-to-residue composite retracts the descent of any morphism
+equal to the identity: `σ = id` — the triangle killing the twisted endomorphism in the
+`hiso` leaf (stated for a variable morphism so the `IsLocalHom` instance fires). -/
+theorem phi0_desc_stalkClosedPointTo_of_eq_id {F : Type u} [Field F]
+    (g : Spec (CommRingCat.of F) ⟶ Spec (CommRingCat.of F)) (hg : g = 𝟙 _) :
+    (Scheme.ΓSpecIso (CommRingCat.of F)).inv ≫
+      (Spec (CommRingCat.of F)).presheaf.germ ⊤ (g.base (IsLocalRing.closedPoint F))
+        trivial ≫
+      (Spec (CommRingCat.of F)).residue (g.base (IsLocalRing.closedPoint F)) ≫
+      Scheme.descResidueField (Scheme.stalkClosedPointTo g)
+    = 𝟙 (CommRingCat.of F) := by
+  subst hg
+  rw [Scheme.residue_descResidueField]
+  have h := AlgebraicGeometry.Scheme.germ_stalkClosedPointTo_Spec (𝟙 (CommRingCat.of F))
+  rw [Spec.map_id] at h
+  rw [h]
+  simp
+
 /-- **(w7)** Distinct sections of a scheme over `Spec F`, `F` a field, have distinct
 image points whenever their common image point has residue field `F` — over an
 algebraically closed base every rational section is determined by its topological
