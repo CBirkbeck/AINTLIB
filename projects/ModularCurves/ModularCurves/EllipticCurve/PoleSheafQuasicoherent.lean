@@ -30,4 +30,19 @@ theorem sectionPoleSheafPower_isQuasicoherent
     (sectionPoleSheafPower π z hz n).IsQuasicoherent :=
   (sectionPoleSheafPower_isInvertible hsm z hz n).isQuasicoherent
 
+/-- The simple-pole sheaf of a section of a smooth separated relative curve is finitely
+presented. -/
+theorem sectionPoleSheaf_isFinitePresentation
+    {C S : Scheme.{u}} {π : C ⟶ S} (hsm : SmoothOfRelativeDimension 1 π)
+    [IsSeparated π] (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) :
+    (sectionPoleSheaf π z hz).IsFinitePresentation :=
+  (sectionPoleSheaf_isInvertible hsm z hz).isFinitePresentation
+
+/-- Every nonnegative tensor power of the pole sheaf is finitely presented. -/
+theorem sectionPoleSheafPower_isFinitePresentation
+    {C S : Scheme.{u}} {π : C ⟶ S} (hsm : SmoothOfRelativeDimension 1 π)
+    [IsSeparated π] (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (n : ℕ) :
+    (sectionPoleSheafPower π z hz n).IsFinitePresentation :=
+  (sectionPoleSheafPower_isInvertible hsm z hz n).isFinitePresentation
+
 end ModularCurves
