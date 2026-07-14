@@ -172,6 +172,29 @@ lemma finrank_eq_appTop_finrank_of_affineOpen {X : Scheme.{u}} (f : X ⟶ X)
       isPreconnected_univ (Set.mem_univ _) (Set.mem_univ _)
   rw [hconst, ← Scheme.Hom.finrank_pullback_snd f U.ι x₀, finrank_of_isAffine]
 
+/-- **([N] is surjective)** Multiplication-by-`N` on the projective model is surjective: its fibre
+rank is `≥ 1` at the image of any source point (`one_le_finrank_map`) and is constant on the
+connected integral model (`isLocallyConstant_finrank`), hence `≥ 1` everywhere, which is exactly
+surjectivity (`one_le_finrank_iff_surjective`). This is the isogeny-surjectivity fact behind the
+nonemptiness of the preimage chart `[N]⁻¹Z` (the `[N]⁻¹Z`-side input to the K4b-2 fraction fields). -/
+theorem mulByHom_surjective {K : Type u} [Field K] (W : WeierstrassCurve K) [W.IsElliptic] (N : ℕ)
+    [Flat ((modelEllipticCurve W).mulByHom N)] [IsFinite ((modelEllipticCurve W).mulByHom N)]
+    [LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom N)] :
+    AlgebraicGeometry.Surjective ((modelEllipticCurve W).mulByHom N) := by
+  haveI : AlgebraicGeometry.IsIntegral (modelEllipticCurve W).E :=
+    inferInstanceAs (AlgebraicGeometry.IsIntegral (projModel W))
+  haveI : PreconnectedSpace (modelEllipticCurve W).E :=
+    inferInstanceAs (PreconnectedSpace (projModel W))
+  rw [← Scheme.Hom.one_le_finrank_iff_surjective]
+  intro y
+  obtain ⟨x₀⟩ : Nonempty (modelEllipticCurve W).E := inferInstance
+  have h1 := Scheme.Hom.one_le_finrank_map ((modelEllipticCurve W).mulByHom N) x₀
+  have hconst := (Scheme.Hom.isLocallyConstant_finrank ((modelEllipticCurve W).mulByHom N)
+    ).apply_eq_of_isPreconnected isPreconnected_univ (Set.mem_univ y)
+    (Set.mem_univ (((modelEllipticCurve W).mulByHom N).base x₀))
+  rw [hconst]
+  exact h1
+
 /-- **(K4 (D) chart-reduction to a module rank, general form)** Chaining
 `finrank_eq_appTop_finrank_of_affineOpen` with the `appTop`-to-`Module.finrank` bridge
 `appTop_finrank_eq_module_finrank`: for a finite flat LFP endomorphism `f` of a preconnected scheme,
