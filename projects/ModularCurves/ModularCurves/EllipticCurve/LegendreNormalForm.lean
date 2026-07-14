@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.AlgebraicGeometry.EllipticCurve.NormalForms
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Basic
 
 /-!
 # The Legendre normal form `y² = x(x−1)(x−λ)` (T-E14a)
@@ -64,6 +65,28 @@ theorem legendreCurve_isElliptic_iff (h2 : IsUnit (2 : R)) (lam : R) :
   · intro h
     rw [show (16 : R) * lam ^ 2 * (lam - 1) ^ 2 = 2 ^ 4 * (lam * (lam - 1)) ^ 2 by ring]
     exact (h2.pow 4).mul (h.pow 2)
+
+/-- The Legendre family is natural in the base ring: coefficient-wise mapping. -/
+theorem legendreCurve_map {R' : Type u} [CommRing R'] (f : R →+* R') (lam : R) :
+    (legendreCurve lam).map f = legendreCurve (f lam) := by
+  ext <;> simp [legendreCurve, WeierstrassCurve.map, map_neg, map_add, map_one]
+
+/-- **(T-E14a-b0)** `(0, 0)` lies on the Legendre curve. -/
+theorem legendreCurve_equation_zero (lam : R) :
+    (legendreCurve lam).toAffine.Equation 0 0 := by
+  rw [WeierstrassCurve.Affine.equation_iff]
+  simp
+
+/-- **(T-E14a-b0)** `(1, 0)` lies on the Legendre curve. -/
+theorem legendreCurve_equation_one (lam : R) :
+    (legendreCurve lam).toAffine.Equation 1 0 := by
+  rw [WeierstrassCurve.Affine.equation_iff]
+  show (0:R) ^ 2 + (legendreCurve lam).a₁ * 1 * 0 + (legendreCurve lam).a₃ * 0 =
+    1 ^ 3 + (legendreCurve lam).a₂ * 1 ^ 2 + (legendreCurve lam).a₄ * 1 +
+      (legendreCurve lam).a₆
+  simp only [legendreCurve_a₁, legendreCurve_a₂, legendreCurve_a₃, legendreCurve_a₄,
+    legendreCurve_a₆]
+  ring
 
 /-- **(T-E14a-b0)** `x = 0` is a `2`-torsion abscissa of the Legendre curve: the cubic
 vanishes there. -/

@@ -220,7 +220,7 @@ variable {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
 /-- The scheme-level restriction of `f` intertwines the affine-chart isomorphisms with
 `Spec` of the sections comparison (naturality of `isoSpec`; mirrors
 `SchemeQuotient.resLE_isoSpec_hom`). -/
-private lemma resLE_isoSpec_naturality (f : S' ⟶ S) {V : S.affineOpens}
+lemma resLE_isoSpec_naturality (f : S' ⟶ S) {V : S.affineOpens}
     {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
     f.resLE V.1 V'.1 hV' ≫ V.2.isoSpec.hom =
       V'.2.isoSpec.hom ≫ Spec.map (CommRingCat.ofHom (sectionsMapLE f hV')) := by
@@ -270,7 +270,7 @@ private lemma transport_isPullback (f : S' ⟶ S) (t : G'.E ⟶ G.E)
   rwa [pullback.lift_fst]
 
 /-- The base-change square of the projective model along the sections comparison. -/
-private lemma transport_isPullback_model (f : S' ⟶ S) {V : S.affineOpens}
+lemma transport_isPullback_model (f : S' ⟶ S) {V : S.affineOpens}
     {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) (P : LocalPresentation G V) :
     IsPullback
       (projModelBaseChange (sectionsMapLE f hV') P.W)
