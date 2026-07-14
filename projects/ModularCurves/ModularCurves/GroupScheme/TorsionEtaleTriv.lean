@@ -408,6 +408,128 @@ theorem torsionBaseChangeIso_hom_snd {T : Scheme.{u}} (g : T ⟶ S) (N : ℕ) :
       = (E.baseChange g).torsionπ N :=
   E.torsionBaseChangeHom_snd g N
 
+/-- Invertibility of `N` on a scheme transfers along any morphism. -/
+theorem _root_.ModularCurves.NIsInvertible.of_hom {X Y : Scheme.{u}} (g : X ⟶ Y) {N : ℕ}
+    (h : NIsInvertible Y N) : NIsInvertible X N := by
+  have hmap := h.map g.appTop.hom
+  rwa [map_natCast] at hmap
+
+section SigmaPullback
+
+variable {σ : Type u} {Y : σ → Scheme.{u}} {X S : Scheme.{u}}
+
+/-- The chart component of the pullback–coproduct comparison: the pullback along one
+summand, included into the pullback along the coproduct. -/
+noncomputable def sigmaPullbackComponent (f : X ⟶ S) (q : ∀ i, Y i ⟶ S) (i : σ) :
+    pullback f (q i) ⟶ pullback f (Sigma.desc q) :=
+  (pullback.congrHom rfl (Sigma.ι_desc q i).symm).hom ≫
+    (pullbackLeftPullbackSndIso f (Sigma.desc q) (Sigma.ι Y i)).inv ≫
+    pullback.fst (pullback.snd f (Sigma.desc q)) (Sigma.ι Y i)
+
+instance (f : X ⟶ S) (q : ∀ i, Y i ⟶ S) (i : σ) :
+    IsOpenImmersion (sigmaPullbackComponent f q i) := by
+  haveI hι : IsOpenImmersion (Sigma.ι Y i) := (sigmaOpenCover Y).map_prop i
+  haveI h1 : IsOpenImmersion
+      (pullback.fst (pullback.snd f (Sigma.desc q)) (Sigma.ι Y i)) := inferInstance
+  rw [sigmaPullbackComponent]
+  infer_instance
+
+@[reassoc]
+theorem sigmaPullbackComponent_snd (f : X ⟶ S) (q : ∀ i, Y i ⟶ S) (i : σ) :
+    sigmaPullbackComponent f q i ≫ pullback.snd f (Sigma.desc q)
+      = pullback.snd f (q i) ≫ Sigma.ι Y i := by
+  rw [sigmaPullbackComponent, Category.assoc, Category.assoc,
+    pullbackLeftPullbackSndIso_inv_fst_snd, ← Category.assoc,
+    pullback.congrHom_hom, pullback.lift_snd, Category.comp_id]
+
+@[reassoc]
+theorem sigmaPullbackComponent_fst (f : X ⟶ S) (q : ∀ i, Y i ⟶ S) (i : σ) :
+    sigmaPullbackComponent f q i ≫ pullback.fst f (Sigma.desc q)
+      = pullback.fst f (q i) := by
+  rw [sigmaPullbackComponent, Category.assoc, Category.assoc,
+    pullbackLeftPullbackSndIso_inv_fst, pullback.congrHom_hom, pullback.lift_fst,
+    Category.comp_id]
+
+/-- The range of a chart component is the preimage of the summand. -/
+theorem range_sigmaPullbackComponent (f : X ⟶ S) (q : ∀ i, Y i ⟶ S) (i : σ) :
+    Set.range (sigmaPullbackComponent f q i).base
+      = (pullback.snd f (Sigma.desc q)).base ⁻¹' Set.range (Sigma.ι Y i).base := by
+  have hsplit : sigmaPullbackComponent f q i
+      = ((pullback.congrHom rfl (Sigma.ι_desc q i).symm).hom ≫
+          (pullbackLeftPullbackSndIso f (Sigma.desc q) (Sigma.ι Y i)).inv) ≫
+        pullback.fst (pullback.snd f (Sigma.desc q)) (Sigma.ι Y i) := by
+    rw [sigmaPullbackComponent, Category.assoc]
+  haveI : AlgebraicGeometry.Surjective
+      ((pullback.congrHom rfl (Sigma.ι_desc q i).symm).hom ≫
+        (pullbackLeftPullbackSndIso f (Sigma.desc q) (Sigma.ι Y i)).inv) :=
+    inferInstance
+  rw [hsplit]
+  calc Set.range (((pullback.congrHom rfl (Sigma.ι_desc q i).symm).hom ≫
+        (pullbackLeftPullbackSndIso f (Sigma.desc q) (Sigma.ι Y i)).inv) ≫
+        pullback.fst (pullback.snd f (Sigma.desc q)) (Sigma.ι Y i)).base
+      = Set.range (⇑(pullback.fst (pullback.snd f (Sigma.desc q)) (Sigma.ι Y i)).base ∘
+          ⇑((pullback.congrHom rfl (Sigma.ι_desc q i).symm).hom ≫
+            (pullbackLeftPullbackSndIso f (Sigma.desc q) (Sigma.ι Y i)).inv).base) := rfl
+    _ = ⇑(pullback.fst (pullback.snd f (Sigma.desc q)) (Sigma.ι Y i)).base ''
+          Set.range ((pullback.congrHom rfl (Sigma.ι_desc q i).symm).hom ≫
+            (pullbackLeftPullbackSndIso f (Sigma.desc q) (Sigma.ι Y i)).inv).base :=
+        Set.range_comp _ _
+    _ = ⇑(pullback.fst (pullback.snd f (Sigma.desc q)) (Sigma.ι Y i)).base ''
+          Set.univ := by
+        rw [((pullback.congrHom rfl (Sigma.ι_desc q i).symm).hom ≫
+          (pullbackLeftPullbackSndIso f (Sigma.desc q) (Sigma.ι Y i)).inv).surjective.range_eq]
+    _ = Set.range (pullback.fst (pullback.snd f (Sigma.desc q)) (Sigma.ι Y i)).base := by
+        rw [Set.image_univ]
+    _ = (pullback.snd f (Sigma.desc q)).base ⁻¹' Set.range (Sigma.ι Y i).base :=
+        Scheme.Pullback.range_fst _ _
+
+/-- **Pullback distributes over coproducts of schemes**: the chart components assemble to
+an isomorphism (a surjective open immersion, ranges being the disjoint covering
+preimages of the summands). -/
+noncomputable def sigmaPullbackIso (f : X ⟶ S) (q : ∀ i, Y i ⟶ S) :
+    (∐ fun i => pullback f (q i)) ≅ pullback f (Sigma.desc q) := by
+  haveI hOI : IsOpenImmersion (Sigma.desc (sigmaPullbackComponent f q)) := by
+    refine isOpenImmersion_sigmaDesc _ _ (fun i j hij => ?_)
+    show Disjoint (Set.range (sigmaPullbackComponent f q i).base)
+      (Set.range (sigmaPullbackComponent f q j).base)
+    rw [range_sigmaPullbackComponent, range_sigmaPullbackComponent]
+    refine Disjoint.preimage _ ?_
+    rw [Set.disjoint_left]
+    rintro _ ⟨a, rfl⟩ ⟨b, hb⟩
+    have ha' : sigmaMk Y ⟨i, a⟩ = sigmaMk Y ⟨j, b⟩ := by
+      rw [sigmaMk_mk, sigmaMk_mk]
+      exact hb.symm
+    exact hij (congrArg Sigma.fst ((sigmaMk Y).injective ha'))
+  haveI hSurj : AlgebraicGeometry.Surjective
+      (Sigma.desc (sigmaPullbackComponent f q)) := by
+    refine ⟨fun z => ?_⟩
+    obtain ⟨⟨i, t⟩, ht⟩ := (sigmaMk Y).surjective
+      ((pullback.snd f (Sigma.desc q)).base z)
+    have hz : z ∈ Set.range (sigmaPullbackComponent f q i).base := by
+      rw [range_sigmaPullbackComponent]
+      refine ⟨t, ?_⟩
+      rw [← sigmaMk_mk]
+      exact ht
+    obtain ⟨w, hw⟩ := hz
+    refine ⟨(Sigma.ι (fun i => pullback f (q i)) i).base w, ?_⟩
+    exact ((Scheme.Hom.comp_apply _ _ _).symm.trans (congrArg
+      (fun m : pullback f (q i) ⟶ pullback f (Sigma.desc q) => m.base w)
+      (Sigma.ι_desc _ i))).trans hw
+  haveI : IsIso (Sigma.desc (sigmaPullbackComponent f q)) := by
+    apply isIso_of_isOpenImmersion_of_opensRange_eq_top
+    refine TopologicalSpace.Opens.ext ?_
+    exact (Sigma.desc (sigmaPullbackComponent f q)).surjective.range_eq
+  exact asIso (Sigma.desc (sigmaPullbackComponent f q))
+
+@[reassoc]
+theorem ι_sigmaPullbackIso_hom (f : X ⟶ S) (q : ∀ i, Y i ⟶ S) (i : σ) :
+    Sigma.ι (fun i => pullback f (q i)) i ≫ (sigmaPullbackIso f q).hom
+      = sigmaPullbackComponent f q i := by
+  rw [sigmaPullbackIso]
+  exact Sigma.ι_desc _ i
+
+end SigmaPullback
+
 /-- **T-F1-general (interface — sorried pin)** — the étale-local structure of `E[N]` (KM 2.3.1):
 for `N` invertible on `S` there is a surjective étale cover `p : T ⟶ S` over which the base
 change `E[N] ×_S T` is `T`-isomorphic to the constant scheme `(ℤ/N)²_T`. NEW-Y1's CLOPEN-β
