@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.AlgebraicGeometry.IdealSheaf.Functorial
 import Mathlib.RingTheory.TensorProduct.Quotient
 
@@ -167,21 +172,9 @@ theorem comap_comap_ι_ideal_top (K : Y.IdealSheafData) (f : X ⟶ Y)
     comap_ideal_top_of_isAffine (K.comap V.1.ι) (f.resLE V.1 U.1 hUV)
       (isAffineOpen_top _) (isAffineOpen_top _)]
 
-/-- **The scheme-theoretic preimage of ideal sheaves is multiplicative.**
-
-REMAINING WORK (T-D6a-i; affine case and the resLE ⊤-value formula are proven above):
-glue `comap_mul_of_isAffine` over a cover by affines `U x ≤ f⁻¹(V x)` via
-`ext_of_iSup_eq_top`. The per-`U` value comparison transports through
-`ideal_comap_of_isOpenImmersion` at `W := ⊤`, whose right-hand side is indexed by the
-IMAGE open `(U x).1.ι ''ᵁ ⊤` — propositionally `U x` (`Scheme.Opens.ι_image_top`) but
-a different index, so the equiv `((U x).1.ι.appIso ⊤).commRingCatIsoToRingEquiv` has
-domain `Γ(X, ι''ᵁ⊤)`, not `Γ(X, U x)`. Close the cast either with `rw!` (as mathlib's
-`le_of_iSup_eq_top` does for exactly this index) or by formulating the injectivity
-transport entirely at the image index and casting the GOAL once at the start. Then:
-LHS/RHS ⊤-values via `comap_comap_ι_ideal_top`, inner `(K.comap V.ι).⊤`-values via
-`ideal_comap_of_isOpenImmersion` + `Ideal.comap_symm` (map-form), multiplicativity by
-`ideal_mul`/`Pi.mul_apply` + `Ideal.map_mul` twice, and injectivity of map-along-equiv
-(`Ideal.map_of_equiv` round-trip). -/
+/-- **The scheme-theoretic preimage of ideal sheaves is multiplicative**:
+`(I * J).comap f = I.comap f * J.comap f`. Globalises the affine case
+`comap_mul_of_isAffine` over a cover by affines `U x ≤ f⁻¹(V x)` via `ext_of_iSup_eq_top`. -/
 theorem comap_mul (I J : Y.IdealSheafData) (f : X ⟶ Y) :
     (I * J).comap f = I.comap f * J.comap f := by
   classical
