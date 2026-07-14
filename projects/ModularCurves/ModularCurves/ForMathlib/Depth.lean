@@ -45,7 +45,6 @@ via associated primes (depth-0 localisations), rank stability, a prime-avoidance
 quotient-by-a-nonzerodivisor (00MZ) + induction.  Neither direction of 00N1 invokes 090V/0AVJ.  So
 this file contains NO Auslander–Buchsbaum leaf.
 -/
-import Mathlib
 import ModularCurves.ForMathlib.Grade
 
 noncomputable section

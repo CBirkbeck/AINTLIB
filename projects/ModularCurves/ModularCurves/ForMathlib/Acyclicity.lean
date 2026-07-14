@@ -44,6 +44,7 @@ reading the ACTUAL Stacks proofs:
   NO
   Auslander–Buchsbaum.
 -/
+import Mathlib.RingTheory.TensorProduct.Free
 import ModularCurves.ForMathlib.Depth
 import ModularCurves.ForMathlib.FittingIdeals
 

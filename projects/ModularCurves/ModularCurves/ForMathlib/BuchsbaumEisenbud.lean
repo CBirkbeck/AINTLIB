@@ -54,6 +54,7 @@ make-or-break; the Ext-support idea is a clean optional replacement for [T-GRADE
 research-grade formalization (multi-week+).  Everything else assembles existing pieces and is
 tractable.  See the decomposition doc for the per-leaf verdict.
 -/
+import Mathlib
 import ModularCurves.ForMathlib.FlatLocus
 import ModularCurves.ForMathlib.FittingIdeals
 import ModularCurves.ForMathlib.Grade
