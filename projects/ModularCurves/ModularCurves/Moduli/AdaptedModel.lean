@@ -434,6 +434,151 @@ theorem adapted_shortNF_res_eq {V₁ V₂ : S.affineOpens}
   rw [hVC, one_smul] at hsmul
   exact hsmul.symm
 
+open Scheme WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-C)** The canonical local `ω`-adapted short-normal-form model over a
+chart-supported affine. -/
+noncomputable def adaptedLocal (G : EllipticCurveGeom S) (b : OmegaBasis G)
+    (h2 : IsUnit (2 : Γ(S, ⊤))) (h3 : IsUnit (3 : Γ(S, ⊤)))
+    (V : S.affineOpens) (i : G.atlas.ι) (hVi : V.1 ≤ (G.atlas.U i).1) :
+    LocalPresentation G V :=
+  ((G.atlas.presentation i).restrict hVi).adaptShortNF b
+    (isUnit_ofNat_res h2 V.1) (isUnit_ofNat_res h3 V.1)
+
+theorem adaptedLocal_isAdapted (G : EllipticCurveGeom S) (b : OmegaBasis G)
+    (h2 : IsUnit (2 : Γ(S, ⊤))) (h3 : IsUnit (3 : Γ(S, ⊤)))
+    (V : S.affineOpens) (i : G.atlas.ι) (hVi : V.1 ≤ (G.atlas.U i).1) :
+    (adaptedLocal G b h2 h3 V i hVi).IsAdapted b :=
+  isAdapted_adaptShortNF _ _ _ _
+
+theorem adaptedLocal_isShortNF (G : EllipticCurveGeom S) (b : OmegaBasis G)
+    (h2 : IsUnit (2 : Γ(S, ⊤))) (h3 : IsUnit (3 : Γ(S, ⊤)))
+    (V : S.affineOpens) (i : G.atlas.ι) (hVi : V.1 ≤ (G.atlas.U i).1) :
+    (adaptedLocal G b h2 h3 V i hVi).W.IsShortNF :=
+  isShortNF_adaptShortNF _ _ _ _
+
+open Scheme WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(E12-C ★)** The **global adapted coefficient** `a₄`: the `a₄`-coefficients of
+the unique local `ω`-adapted short-normal-form models glue to a global section
+(overlap agreement = `adapted_shortNF_res_eq`). Together with `adaptedCoeff₆` this is
+the classifying datum of T-E12: the universal curve is `y² = x³ + a₄x + a₆`. -/
+noncomputable def adaptedCoeff₄ (G : EllipticCurveGeom S) (b : OmegaBasis G)
+    (h2 : IsUnit (2 : Γ(S, ⊤))) (h3 : IsUnit (3 : Γ(S, ⊤))) :
+    { g : Γ(S, ⊤) //
+      ∀ (V : S.affineOpens) (i : G.atlas.ι) (hVi : V.1 ≤ (G.atlas.U i).1),
+        Scheme.resLE (le_top : V.1 ≤ ⊤) g =
+          (adaptedLocal G b h2 h3 V i hVi).W.a₄ } := by
+  classical
+  have hcover : (⊤ : S.Opens) ≤
+      iSup (fun p : {p : S.affineOpens × G.atlas.ι //
+        p.1.1 ≤ (G.atlas.U p.2).1} => p.1.1.1) := by
+    intro x _
+    obtain ⟨i, hxi⟩ := G.atlas.covers x
+    obtain ⟨V₀, hVaff, hxV, hVle⟩ := exists_isAffineOpen_mem_and_subset
+      (show x ∈ (G.atlas.U i).1 from hxi)
+    exact Opens.mem_iSup.mpr ⟨⟨⟨⟨V₀, hVaff⟩, i⟩, hVle⟩, hxV⟩
+  have hcoverInf : ∀ p q : {p : S.affineOpens × G.atlas.ι //
+      p.1.1 ≤ (G.atlas.U p.2).1}, p.1.1.1 ⊓ q.1.1.1 ≤
+      iSup (fun r : {W : S.affineOpens // W.1 ≤ p.1.1.1 ⊓ q.1.1.1} => r.1.1) := by
+    intro p q x hx
+    obtain ⟨W₀, hWaff, hxW, hWle⟩ := exists_isAffineOpen_mem_and_subset hx
+    exact Opens.mem_iSup.mpr ⟨⟨⟨W₀, hWaff⟩, hWle⟩, hxW⟩
+  have hpair : TopCat.Presheaf.IsCompatible S.sheaf.1
+      (fun p : {p : S.affineOpens × G.atlas.ι // p.1.1 ≤ (G.atlas.U p.2).1} =>
+        p.1.1.1)
+      (fun p => ((adaptedLocal G b h2 h3 p.1.1 p.1.2 p.2).W.a₄ :
+        Γ(S, p.1.1.1))) := by
+    intro p q
+    refine TopCat.Sheaf.eq_of_locally_eq' S.sheaf
+      (fun r : {W : S.affineOpens // W.1 ≤ p.1.1.1 ⊓ q.1.1.1} => r.1.1)
+      (p.1.1.1 ⊓ q.1.1.1)
+      (fun r => homOfLE r.2) (hcoverInf p q) _ _ (fun r => ?_)
+    show Scheme.resLE r.2 (Scheme.resLE inf_le_left
+        (adaptedLocal G b h2 h3 p.1.1 p.1.2 p.2).W.a₄) =
+      Scheme.resLE r.2 (Scheme.resLE inf_le_right
+        (adaptedLocal G b h2 h3 q.1.1 q.1.2 q.2).W.a₄)
+    rw [Scheme.resLE_resLE, Scheme.resLE_resLE,
+      ← restrict_W_a₄ (adaptedLocal G b h2 h3 p.1.1 p.1.2 p.2)
+        (r.2.trans inf_le_left),
+      ← restrict_W_a₄ (adaptedLocal G b h2 h3 q.1.1 q.1.2 q.2)
+        (r.2.trans inf_le_right),
+      adapted_shortNF_res_eq (adaptedLocal_isAdapted G b h2 h3 p.1.1 p.1.2 p.2)
+        (adaptedLocal_isAdapted G b h2 h3 q.1.1 q.1.2 q.2)
+        (adaptedLocal_isShortNF G b h2 h3 p.1.1 p.1.2 p.2)
+        (adaptedLocal_isShortNF G b h2 h3 q.1.1 q.1.2 q.2) h2 h3
+        (r.2.trans inf_le_left) (r.2.trans inf_le_right)]
+  have hglue := TopCat.Sheaf.existsUnique_gluing' S.sheaf
+    (fun p : {p : S.affineOpens × G.atlas.ι // p.1.1 ≤ (G.atlas.U p.2).1} =>
+      p.1.1.1) ⊤
+    (fun p => homOfLE le_top) hcover
+    (fun p => ((adaptedLocal G b h2 h3 p.1.1 p.1.2 p.2).W.a₄ : Γ(S, p.1.1.1)))
+    hpair
+  refine ⟨hglue.choose, fun V i hVi => ?_⟩
+  exact hglue.choose_spec.1 ⟨⟨V, i⟩, hVi⟩
+
+open Scheme WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(E12-C ★)** The **global adapted coefficient** `a₆`: the `a₆`-coefficients of
+the unique local `ω`-adapted short-normal-form models glue to a global section
+(overlap agreement = `adapted_shortNF_res_eq`). Companion of `adaptedCoeff₄`; together they are
+the classifying data of T-E12. -/
+noncomputable def adaptedCoeff₆ (G : EllipticCurveGeom S) (b : OmegaBasis G)
+    (h2 : IsUnit (2 : Γ(S, ⊤))) (h3 : IsUnit (3 : Γ(S, ⊤))) :
+    { g : Γ(S, ⊤) //
+      ∀ (V : S.affineOpens) (i : G.atlas.ι) (hVi : V.1 ≤ (G.atlas.U i).1),
+        Scheme.resLE (le_top : V.1 ≤ ⊤) g =
+          (adaptedLocal G b h2 h3 V i hVi).W.a₆ } := by
+  classical
+  have hcover : (⊤ : S.Opens) ≤
+      iSup (fun p : {p : S.affineOpens × G.atlas.ι //
+        p.1.1 ≤ (G.atlas.U p.2).1} => p.1.1.1) := by
+    intro x _
+    obtain ⟨i, hxi⟩ := G.atlas.covers x
+    obtain ⟨V₀, hVaff, hxV, hVle⟩ := exists_isAffineOpen_mem_and_subset
+      (show x ∈ (G.atlas.U i).1 from hxi)
+    exact Opens.mem_iSup.mpr ⟨⟨⟨⟨V₀, hVaff⟩, i⟩, hVle⟩, hxV⟩
+  have hcoverInf : ∀ p q : {p : S.affineOpens × G.atlas.ι //
+      p.1.1 ≤ (G.atlas.U p.2).1}, p.1.1.1 ⊓ q.1.1.1 ≤
+      iSup (fun r : {W : S.affineOpens // W.1 ≤ p.1.1.1 ⊓ q.1.1.1} => r.1.1) := by
+    intro p q x hx
+    obtain ⟨W₀, hWaff, hxW, hWle⟩ := exists_isAffineOpen_mem_and_subset hx
+    exact Opens.mem_iSup.mpr ⟨⟨⟨W₀, hWaff⟩, hWle⟩, hxW⟩
+  have hpair : TopCat.Presheaf.IsCompatible S.sheaf.1
+      (fun p : {p : S.affineOpens × G.atlas.ι // p.1.1 ≤ (G.atlas.U p.2).1} =>
+        p.1.1.1)
+      (fun p => ((adaptedLocal G b h2 h3 p.1.1 p.1.2 p.2).W.a₆ :
+        Γ(S, p.1.1.1))) := by
+    intro p q
+    refine TopCat.Sheaf.eq_of_locally_eq' S.sheaf
+      (fun r : {W : S.affineOpens // W.1 ≤ p.1.1.1 ⊓ q.1.1.1} => r.1.1)
+      (p.1.1.1 ⊓ q.1.1.1)
+      (fun r => homOfLE r.2) (hcoverInf p q) _ _ (fun r => ?_)
+    show Scheme.resLE r.2 (Scheme.resLE inf_le_left
+        (adaptedLocal G b h2 h3 p.1.1 p.1.2 p.2).W.a₆) =
+      Scheme.resLE r.2 (Scheme.resLE inf_le_right
+        (adaptedLocal G b h2 h3 q.1.1 q.1.2 q.2).W.a₆)
+    rw [Scheme.resLE_resLE, Scheme.resLE_resLE,
+      ← restrict_W_a₆ (adaptedLocal G b h2 h3 p.1.1 p.1.2 p.2)
+        (r.2.trans inf_le_left),
+      ← restrict_W_a₆ (adaptedLocal G b h2 h3 q.1.1 q.1.2 q.2)
+        (r.2.trans inf_le_right),
+      adapted_shortNF_res_eq (adaptedLocal_isAdapted G b h2 h3 p.1.1 p.1.2 p.2)
+        (adaptedLocal_isAdapted G b h2 h3 q.1.1 q.1.2 q.2)
+        (adaptedLocal_isShortNF G b h2 h3 p.1.1 p.1.2 p.2)
+        (adaptedLocal_isShortNF G b h2 h3 q.1.1 q.1.2 q.2) h2 h3
+        (r.2.trans inf_le_left) (r.2.trans inf_le_right)]
+  have hglue := TopCat.Sheaf.existsUnique_gluing' S.sheaf
+    (fun p : {p : S.affineOpens × G.atlas.ι // p.1.1 ≤ (G.atlas.U p.2).1} =>
+      p.1.1.1) ⊤
+    (fun p => homOfLE le_top) hcover
+    (fun p => ((adaptedLocal G b h2 h3 p.1.1 p.1.2 p.2).W.a₆ : Γ(S, p.1.1.1)))
+    hpair
+  refine ⟨hglue.choose, fun V i hVi => ?_⟩
+  exact hglue.choose_spec.1 ⟨⟨V, i⟩, hVi⟩
+
 end LocalPresentation
 
 end ModularCurves
