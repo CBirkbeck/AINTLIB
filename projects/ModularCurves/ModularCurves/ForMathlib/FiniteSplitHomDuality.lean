@@ -92,6 +92,68 @@ theorem AlgHom.eq_evalAlgHom_of_pi {ι : Type*} [Fintype ι] [DecidableEq ι]
     (fun hni => absurd (Finset.mem_univ i) hni), hi, mul_one]
   rfl
 
+/-- Every `R`-algebra map `(ι → R) →ₐ[R] K` into a field is evaluation at a (unique)
+coordinate followed by the structure map: the orthogonal idempotent images are `0`/`1`. -/
+theorem AlgHom.eq_comp_evalAlgHom_of_pi {R K : Type u} [CommRing R] [Field K]
+    [Algebra R K] {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (f : (ι → R) →ₐ[R] K) : ∃ i, ∀ x : ι → R, f x = algebraMap R K (x i) := by
+  have hidem : ∀ i, f (Pi.single i 1) = 0 ∨ f (Pi.single i 1) = 1 := by
+    intro i
+    have h2 : f (Pi.single i 1) * f (Pi.single i 1) = f (Pi.single i 1) := by
+      rw [← map_mul]
+      congr 1
+      ext j
+      by_cases hj : j = i
+      · subst hj; simp
+      · simp [Pi.single_apply, hj]
+    have h3 : f (Pi.single i 1) * (f (Pi.single i 1) - 1) = 0 := by
+      rw [mul_sub, mul_one, h2, sub_self]
+    rcases mul_eq_zero.mp h3 with h | h
+    · exact Or.inl h
+    · exact Or.inr (sub_eq_zero.mp h)
+  have horth : ∀ i j, i ≠ j → f (Pi.single i 1) * f (Pi.single j 1) = 0 := by
+    intro i j hij
+    rw [← map_mul]
+    have hz : (Pi.single i 1 : ι → R) * Pi.single j 1 = 0 := by
+      ext m
+      by_cases hm : m = i
+      · subst hm; simp [Pi.single_apply, hij]
+      · simp [Pi.single_apply, hm]
+    rw [hz, map_zero]
+  have hsum : ∑ i, f (Pi.single i 1) = 1 := by
+    rw [← map_sum]
+    have hsum1 : (∑ i : ι, Pi.single i (1 : R)) = (1 : ι → R) := by
+      ext j
+      simp [Pi.single_apply]
+    rw [hsum1, map_one]
+  have hone : ∃ i, f (Pi.single i 1) = 1 := by
+    by_contra hno
+    push_neg at hno
+    have hz : ∀ i, f (Pi.single i 1) = 0 := fun i =>
+      (hidem i).resolve_right (hno i)
+    rw [Finset.sum_congr rfl fun i _ => hz i, Finset.sum_const_zero] at hsum
+    exact zero_ne_one hsum
+  obtain ⟨i, hi⟩ := hone
+  refine ⟨i, fun x => ?_⟩
+  have hzero : ∀ j, j ≠ i → f (Pi.single j 1) = 0 := by
+    intro j hj
+    rcases hidem j with h | h
+    · exact h
+    · exfalso
+      have hj2 := horth j i hj
+      rw [h, hi, one_mul] at hj2
+      exact one_ne_zero hj2
+  have hx : x = ∑ j, x j • Pi.single j (1 : R) := by
+    ext m
+    simp [Pi.single_apply]
+  have hfx : f x = ∑ j, algebraMap R K (x j) * f (Pi.single j 1) := by
+    conv_lhs => rw [hx]
+    rw [map_sum]
+    refine Finset.sum_congr rfl fun j _ => ?_
+    rw [map_smul, Algebra.smul_def]
+  rw [hfx, Finset.sum_eq_single i (fun j _ hj => by rw [hzero j hj, mul_zero])
+    (fun hni => absurd (Finset.mem_univ i) hni), hi, mul_one]
+
 namespace Algebra.IsFiniteSplit
 
 variable {A B : Type u} [CommRing A] [CommRing B] [Algebra k A] [Algebra k B]
