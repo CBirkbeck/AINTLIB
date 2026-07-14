@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.IrelandRosen.PrimeFamily
@@ -225,6 +230,7 @@ noncomputable def residueCharIntUnitHom
     S.zeta_p_int_unit_isPrimitiveRoot
 
 omit [Algebra (ZMod ℓ) k] in
+/-- On units, the integral residue character is the unit-group hom. -/
 @[simp]
 theorem residueCharInt_apply_unit
     (S : ConductorFlexibleConcreteStickelbergerSetup ℓ p k K R') (x : kˣ) :
@@ -242,7 +248,7 @@ theorem residueCharIntUnitHom_pow_p
   change ((S.residueCharIntUnitHom x : (𝓞 R')ˣ) : 𝓞 R') ^ p = (1 : 𝓞 R')
   rw [← S.residueCharInt_apply_unit x]
   letI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
-  unfold ConductorFlexibleConcreteStickelbergerSetup.residueCharInt
+  simp only [ConductorFlexibleConcreteStickelbergerSetup.residueCharInt]
   exact residueMulChar_pow_eq_one S.zeta_k S.hzeta_k S.hdiv S.zeta_p_int_unit
     S.zeta_p_int_unit_isPrimitiveRoot x
 
