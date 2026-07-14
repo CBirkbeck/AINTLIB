@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.RingTheory.TensorProduct.Pi
 import ModularCurves.ForMathlib.FiniteEtaleGalois
 
@@ -516,6 +521,7 @@ private noncomputable def actionDiag :
       (H → (F.obj (SingleObj.star H) : Type u)) :=
   LinearMap.pi fun _ => LinearMap.id
 
+omit [Finite H] in
 private lemma eqLocus_actionDelta :
     LinearMap.eqLocus (actionDelta F) (actionDiag F) =
       Subalgebra.toSubmodule (actionFixedPoints F) := by
