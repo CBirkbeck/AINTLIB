@@ -350,6 +350,16 @@ theorem kerBaseChangeComparison_bijective_of_surjective [Module.Projective R Q]
     infer_instance
   exact kerBaseChangeComparison_bijective A f
 
+/-- The algebra-linear degree-zero kernel comparison for a bounded exact sequence of
+flat modules. -/
+theorem kerBaseChangeComparison_bijective_of_bounded_exact
+    (M : ℕ → Type v) [∀ n, AddCommGroup (M n)] [∀ n, Module R (M n)]
+    (d : ∀ n, M n →ₗ[R] M (n + 1)) [∀ n, Module.Flat R (M n)]
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hexact : ∀ n, n < N → Function.Exact (d n) (d (n + 1))) :
+    Function.Bijective (kerBaseChangeComparison A (d 0)) :=
+  kerLTensorComparison_bijective_of_bounded_exact M d A N hexact
+
 end BaseChangeAlgebra
 
 /-- Near a prime where the residue-fibre differential is surjective, a differential
