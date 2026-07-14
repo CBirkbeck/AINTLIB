@@ -22,7 +22,8 @@ translation-covariance `oneSub_hcommPrime_discharged` (`WallAGeometricRealizatio
 * `hdeg_eq` — Silverman V.1.3 `deg(1 − π) = #E(𝔽_q)` (the project's known sharp residual, the same
   one every leaf-2 route carries; carries `sorryAx` upstream exactly as elsewhere);
 * `hcomap` — the **local comap-valuation witnesses** `ComapPointValuationWitness` for the
-  base-changed `1 − π`, i.e. the per-place identities `comap (1−π)^* = (place at (1−π)P)`.  This is a
+  base-changed `1 − π`, i.e. the per-place identities `comap (1−π)^* = (place at (1−π)P)`.
+  This is a
   strictly **sharper** residual than the opaque `ProjOrdTransport (1 − π)` it replaces: it isolates
   the geometric content to the two per-place / per-uniformizer facts (the **SamePlace**
   `φ^*(m_Q) ⊆ m_P` at closed points + the **e = 1** local uniformizer at the image), the reviewer's
@@ -57,7 +58,8 @@ variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
 variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
 variable (p r : ℕ) [Fact p.Prime] [CharP K p] [Fact (Fintype.card K = p ^ r)]
 
-noncomputable local instance instDecEqACOSPOT : DecidableEq (AlgebraicClosure K) := Classical.decEq _
+noncomputable local instance instDecEqACOSPOT : DecidableEq (AlgebraicClosure K) :=
+  Classical.decEq _
 
 variable [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic]
   [IsIntegrallyClosed
@@ -90,14 +92,17 @@ For `(1 − π)_{K̄}` over `L = AlgebraicClosure K`, the symplectic scaling
 from:
 
 * `hdeg_eq` — Silverman V.1.3 `deg(1 − π) = #E(𝔽_q)` (the standing sharp residual);
-* `hcomap` — the local comap-valuation witnesses `ComapPointValuationWitness` for `(1 − π)_{K̄}` (the
+* `hcomap` — the local comap-valuation witnesses `ComapPointValuationWitness` for `(1 −
+π)_{K̄}` (the
   sharpened replacement for the opaque `ProjOrdTransport`, isolating the geometric content to the
   per-place SamePlace + e = 1 facts);
 * `hsurj` — surjectivity of `(1 − π)_{K̄}` over `K̄` (Silverman III.4.10a).
 
 The translation covariance is supplied internally by the proved Wall A
-`oneSub_hcommPrime_discharged`; the divisor-pushforward dual `δ`/`hdc` is automatic via the σ-bridge.
-This is the leanest form of the `1 − π` scaling: it carries only the V.1.3 degree identity, the local
+`oneSub_hcommPrime_discharged`; the divisor-pushforward dual `δ`/`hdc` is automatic via the
+σ-bridge.
+This is the leanest form of the `1 − π` scaling: it carries only the V.1.3 degree identity, the
+local
 comap witnesses, and surjectivity — `hcomm'` is now a theorem, not a hypothesis. -/
 theorem oneSubFrobeniusScaling_of_comapWitness (hq : 2 ≤ Fintype.card K)
     (hdeg_eq :
@@ -121,7 +126,8 @@ omit [IsIntegrallyClosed
 /-- **`deg(1 − π)_{K̄} = #E(𝔽_q)`** (Silverman V.1.3 + degree base-change invariance), assembled.
 Chains the curve-free base-change degree invariance
 `oneSubFrobeniusIsogBaseChange_degree_eq_of_finrankBaseChange` (`deg(1 − π)_{K̄} = deg(1 − π)` over
-`K`, via `baseChangePullback_finrank_eq` / `Module.finrank_baseChange`) with the V.1.3 sharp residual
+`K`, via `baseChangePullback_finrank_eq` / `Module.finrank_baseChange`) with the V.1.3 sharp
+residual
 `isogOneSub_negFrobenius_degree_eq_pointCount` (`deg(1 − π) = pointCount` over `K`).  This
 **discharges the `hdeg_eq` input**; it carries `sorryAx` upstream exactly via V.1.3, the project's
 standing sharp residual that *every* leaf-2 route carries. -/
@@ -136,7 +142,8 @@ surjectivity** (Silverman III.8.6.1), CoordHom-free, with the degree identity `h
 **discharged**.  The symplectic scaling `e_ℓ((id − π̄) S, (id − π̄) T) = e_ℓ(S, T)^{deg(1 − π)}` on
 `E_{K̄}[ℓ]` (every prime `ℓ ≠ p`) holds from the two carried inputs
 
-* `hcomap` — the local comap-valuation witnesses `ComapPointValuationWitness` for `(1 − π)_{K̄}` (the
+* `hcomap` — the local comap-valuation witnesses `ComapPointValuationWitness` for `(1 −
+π)_{K̄}` (the
   SamePlace + `e = 1` content packaged at the valuation level);
 * `hsurj` — surjectivity of `(1 − π)_{K̄}` on `E(K̄)`-points (Silverman III.4.10a, Lang's theorem
   `id − Frob` surjective; the genuinely-geometric residual).
@@ -162,19 +169,24 @@ theorem oneSubFrobeniusScaling_of_comapWitness_surj (hq : 2 ≤ Fintype.card K)
 
 /-- **`OneSubFrobeniusScaling` for `(1 − π)_{K̄}` — `δ`-free and surjectivity-free** (Silverman
 III.8.6.1), CoordHom-free.  The symplectic scaling
-`e_ℓ((id − π̄) S, (id − π̄) T) = e_ℓ(S, T)^{deg(1 − π)}` on `E_{K̄}[ℓ]` (every prime `ℓ ≠ p`), proved
-through the `δ`-free `weilScales_noδ` — **no abstract dual `δ`, no dual relation `hdc`, and no point-map
+`e_ℓ((id − π̄) S, (id − π̄) T) = e_ℓ(S, T)^{deg(1 − π)}` on `E_{K̄}[ℓ]` (every prime `ℓ ≠ p`),
+proved
+through the `δ`-free `weilScales_noδ` — **no abstract dual `δ`, no dual relation `hdc`, and no
+point-map
 surjectivity** (reviewer round-22 Q3, image-restricted route).
 
 Carried inputs:
 * `hdeg_eq` — Silverman V.1.3 `deg(1 − π) = #E(𝔽_q)` (the standing sharp residual every leaf-2 route
   carries; carries `sorryAx` upstream exactly as elsewhere);
-* `hcomap` — the local comap-valuation witnesses `ComapPointValuationWitness` for `(1 − π)_{K̄}` (the
+* `hcomap` — the local comap-valuation witnesses `ComapPointValuationWitness` for `(1 −
+π)_{K̄}` (the
   SamePlace + `e = 1` content, packaged at the valuation level), turned into `ProjOrdTransport` by
   `oneSub_hproj_of_comapWitness`.
 
-The translation covariance is supplied internally by the proved Wall A `oneSub_hcommPrime_discharged`;
-the `[ℓ]`-commutation by `oneSubFrobeniusIsogBaseChange_commute_mulByInt`; the degree match `#ker = deg`
+The translation covariance is supplied internally by the proved Wall A
+`oneSub_hcommPrime_discharged`;
+the `[ℓ]`-commutation by `oneSubFrobeniusIsogBaseChange_commute_mulByInt`; the degree match
+`#ker = deg`
 by `oneSubFrobeniusIsogBaseChange_hkerdeg_of_degree_eq_pointCount` (from `hdeg_eq`).  Relative to
 `oneSubFrobeniusScaling_of_comapWitness`, the `hsurj` input is **gone** — the dual is no longer
 constructed. -/
@@ -230,11 +242,14 @@ theorem oneSubFrobeniusScaling_of_comapWitness_noδ_clean (hq : 2 ≤ Fintype.ca
 omit [IsIntegrallyClosed
     (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
       SmoothPlaneCurve (AlgebraicClosure K)).CoordinateRing] in
-/-- **The local comap-valuation witnesses `ComapPointValuationWitness` for `(1 − π)_{K̄}`**, assembled
+/-- **The local comap-valuation witnesses `ComapPointValuationWitness` for `(1 − π)_{K̄}`**,
+assembled
 from the three proved fields (CoordHom-free, no carried geometric residual).  The structure literal
-packages the affine-image comap identity (`comap_pointValuation_oneSub_eq_affine`), the infinity-image
+packages the affine-image comap identity (`comap_pointValuation_oneSub_eq_affine`), the
+infinity-image
 comap identity (`comap_pointValuation_oneSub_eq_infty`), and the infinity-place order-transport
-(`inftyOrdTransport_oneSub`) for the base-changed separable `1 − π = oneSubFrobeniusIsogBaseChange`. -/
+(`inftyOrdTransport_oneSub`) for the base-changed separable
+`1 − π = oneSubFrobeniusIsogBaseChange`. -/
 theorem comapPointValuationWitness_oneSub (hq : 2 ≤ Fintype.card K) :
     ComapPointValuationWitness (W.baseChange (AlgebraicClosure K))
       (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
@@ -246,16 +261,22 @@ theorem comapPointValuationWitness_oneSub (hq : 2 ≤ Fintype.card K) :
 /-- **`OneSubFrobeniusScaling` for `(1 − π)_{K̄}` — CLOSED with ZERO carried geometric hypotheses**
 (Silverman III.8.6.1), CoordHom-free, `δ`-free, surjectivity-free.
 
-This is leaf 2 of `FrobBaseChangeScalings` (`FrobMatrixData.lean`), discharged outright: the symplectic
-scaling `e_ℓ((id − π̄) S, (id − π̄) T) = e_ℓ(S, T)^{deg(1 − π)}` on `E_{K̄}[ℓ]` (every prime `ℓ ≠ p`)
+This is leaf 2 of `FrobBaseChangeScalings` (`FrobMatrixData.lean`), discharged outright: the
+symplectic
+scaling `e_ℓ((id − π̄) S, (id − π̄) T) = e_ℓ(S, T)^{deg(1 − π)}` on `E_{K̄}[ℓ]` (every prime `ℓ
+≠ p`)
 holds with **no carried hypotheses** — the local comap-valuation witnesses are now fully assembled
-(`comapPointValuationWitness_oneSub`), the surjectivity was eliminated via the `δ`-free `weilScales_noδ`
-route, the translation covariance is the proved Wall A `oneSub_hcommPrime_discharged`, and the degree
+(`comapPointValuationWitness_oneSub`), the surjectivity was eliminated via the `δ`-free
+`weilScales_noδ`
+route, the translation covariance is the proved Wall A `oneSub_hcommPrime_discharged`, and the
+degree
 identity `deg(1 − π) = #E(𝔽_q)` is supplied internally (V.1.3 + degree base change).
 
 Axiom-clean: `#print axioms oneSubFrobeniusScaling_holds = [propext, Classical.choice, Quot.sound]`
-(no `sorryAx`) — the V.1.3 degree identity `sepDegree_oneSub_eq_pointCount` it routes through is itself
-axiom-clean in the current tree, and the entire local comap pipeline assembled here is axiom-clean. -/
+(no `sorryAx`) — the V.1.3 degree identity `sepDegree_oneSub_eq_pointCount` it routes through
+is itself
+axiom-clean in the current tree, and the entire local comap pipeline assembled here is
+axiom-clean. -/
 theorem oneSubFrobeniusScaling_holds (hq : 2 ≤ Fintype.card K) :
     OneSubFrobeniusScaling W p r (AlgebraicClosure K) hq :=
   oneSubFrobeniusScaling_of_comapWitness_noδ_clean W p r hq
