@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.LeadingTerm
@@ -37,21 +42,24 @@ def carryStep (ℓ : ℕ) {f : ℕ} (m : Fin f → ℕ) (i : Fin f) : Fin f → 
   Function.update (Function.update m i (m i - ℓ)) (succCyclic i)
     (Function.update m i (m i - ℓ) (succCyclic i) + 1)
 
+/-- Updating a multi-index at `i` shifts its weight by the difference at `i`. -/
 theorem multiIndexWeight_update_add_eq {f : ℕ}
     (m : Fin f → ℕ) (i : Fin f) (x : ℕ) :
     multiIndexWeight (Function.update m i x) + m i =
       multiIndexWeight m + x := by
-  unfold multiIndexWeight
+  simp only [multiIndexWeight]
   rw [Finset.sum_update_of_mem (s := Finset.univ) (i := i) (f := m) (b := x)
     (by simp), Finset.sdiff_singleton_eq_erase,
     ← Finset.add_sum_erase Finset.univ m (Finset.mem_univ i)]
   omega
 
+/-- Updating a multi-index at `i` shifts its value by the difference at `i`, weighted
+by `ℓ ^ i`. -/
 theorem multiIndexValue_update_add_eq {ℓ f : ℕ}
     (m : Fin f → ℕ) (i : Fin f) (x : ℕ) :
     multiIndexValue ℓ (Function.update m i x) + m i * ℓ ^ (i : ℕ) =
       multiIndexValue ℓ m + x * ℓ ^ (i : ℕ) := by
-  unfold multiIndexValue
+  simp only [multiIndexValue]
   have hupdate :
       (fun j : Fin f => Function.update m i x j * ℓ ^ (j : ℕ)) =
         Function.update (fun j : Fin f => m j * ℓ ^ (j : ℕ)) i
@@ -68,9 +76,11 @@ theorem multiIndexValue_update_add_eq {ℓ f : ℕ}
     ← Finset.add_sum_erase Finset.univ (fun j : Fin f => m j * ℓ ^ (j : ℕ)) (Finset.mem_univ i)]
   omega
 
+/-- The cyclic successor is multiplication by `ℓ` modulo `ℓ ^ f - 1` — the wrap-around
+at the last index is exactly the relation `ℓ ^ f ≡ 1`. -/
 theorem pow_succCyclic_modEq (ℓ : ℕ) (hℓ : 2 ≤ ℓ) {f : ℕ} (i : Fin f) :
     ℓ * ℓ ^ (i : ℕ) ≡ ℓ ^ (succCyclic i : ℕ) [MOD ℓ ^ f - 1] := by
-  unfold succCyclic
+  simp only [succCyclic]
   by_cases h : (i : ℕ) + 1 < f
   · rw [dif_pos h]
     rw [pow_succ, mul_comm]
@@ -89,10 +99,11 @@ theorem pow_succCyclic_modEq (ℓ : ℕ) (hℓ : 2 ≤ ℓ) {f : ℕ} (i : Fin f
     convert hmod using 1
     omega
 
+/-- A carry step trades `ℓ` units of weight at `i` for one unit at its successor. -/
 theorem carryStep_weight_add_eq
     {ℓ f : ℕ} (m : Fin f → ℕ) (i : Fin f) (hi : ℓ ≤ m i) :
     multiIndexWeight (carryStep ℓ m i) + ℓ = multiIndexWeight m + 1 := by
-  unfold carryStep
+  simp only [carryStep]
   set m₁ : Fin f → ℕ := Function.update m i (m i - ℓ)
   have h₁ : multiIndexWeight m₁ + m i = multiIndexWeight m + (m i - ℓ) := by
     simpa [m₁] using multiIndexWeight_update_add_eq m i (m i - ℓ)
@@ -103,16 +114,19 @@ theorem carryStep_weight_add_eq
     simpa using multiIndexWeight_update_add_eq m₁ (succCyclic i) (m₁ (succCyclic i) + 1)
   omega
 
+/-- Hence, for `2 ≤ ℓ`, a carry step strictly decreases the weight — this is what makes
+the carry recursion terminate. -/
 theorem carryStep_weight_lt
     {ℓ f : ℕ} (hℓ : 2 ≤ ℓ) (m : Fin f → ℕ) (i : Fin f) (hi : ℓ ≤ m i) :
     multiIndexWeight (carryStep ℓ m i) < multiIndexWeight m := by
   have h := carryStep_weight_add_eq (ℓ := ℓ) m i hi
   omega
 
+/-- …while leaving the value unchanged modulo `ℓ ^ f - 1`. -/
 theorem carryStep_value_modEq
     {ℓ f : ℕ} (hℓ : 2 ≤ ℓ) (m : Fin f → ℕ) (i : Fin f) (hi : ℓ ≤ m i) :
     multiIndexValue ℓ (carryStep ℓ m i) ≡ multiIndexValue ℓ m [MOD ℓ ^ f - 1] := by
-  unfold carryStep
+  simp only [carryStep]
   set m₁ : Fin f → ℕ := Function.update m i (m i - ℓ)
   have h₁raw :
       multiIndexValue ℓ m₁ + m i * ℓ ^ (i : ℕ) =
@@ -210,6 +224,8 @@ variable {R' : Type w} [Field R'] [NumberField R'] [Algebra K R'] [IsScalarTower
 
 variable (S : TraceFormStickelbergerSetup ℓ p k K R')
 
+/-- A digit vector congruent to a multi-index modulo `#k - 1` inherits its
+`(#k - 1) ∣ B + ·` divisibility. -/
 theorem multiIndex_divisibility_of_digitVec_modEq
     (B : ℕ) {m : Fin S.f → ℕ} {v : digitVec ℓ S.f}
     (hmod : digitValue v ≡ multiIndexValue ℓ m [MOD Fintype.card k - 1])
@@ -293,6 +309,8 @@ variable {R' : Type w} [Field R'] [NumberField R'] [Algebra K R'] [IsScalarTower
 
 variable (S : ConductorFlexibleTraceFormStickelbergerSetup ℓ p k K R')
 
+/-- A digit vector congruent to a multi-index modulo `#k - 1` inherits its
+`(#k - 1) ∣ B + ·` divisibility. -/
 theorem multiIndex_divisibility_of_digitVec_modEq
     (B : ℕ) {m : Fin S.f → ℕ} {v : digitVec ℓ S.f}
     (hmod : digitValue v ≡ multiIndexValue ℓ m [MOD Fintype.card k - 1])
