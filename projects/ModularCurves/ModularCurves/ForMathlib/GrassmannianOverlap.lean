@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: The AINTLIB Authors
+-/
 import ModularCurves.ForMathlib.GrassmannianChart
 import ModularCurves.ForMathlib.GrassmannianTransition
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
@@ -15,9 +20,6 @@ second chart `ι'` is a determinant condition: the **pointwise transition matrix
 — Stacks 089T step (4): the overlap is the basic open `D(det T)` of the ι-chart. The
 generic-matrix-ring half of this statement lives in `GrassmannianTransition.lean`
 ([GR-E3]); the spec tying the two is the next increment.
-
-Decomposition artifact: `.mathlib-quality/decomposition-nisog-grass.md` ([STREAM-FP],
-fable-FP, [GR-E] design).
 -/
 
 universe u
