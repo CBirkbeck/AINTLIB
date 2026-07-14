@@ -480,7 +480,7 @@ theorem glSmul_eq_one_of_eq_self {R : CommRingCat.{u}} (N : ℕ) [NeZero N]
     obtain ⟨j, l, hjl⟩ := hwmem
     refine ⟨![(j : ZMod N), (l : ZMod N)], ?_⟩
     apply Subtype.ext
-    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons]
+    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one]
     rw [zsmul_eq_of_intCast_eq pp hppN (a := (((j : ZMod N)).val : ℤ)) (b := j)
           (by simp [ZMod.natCast_val]),
         zsmul_eq_of_intCast_eq pq hpqN (a := (((l : ZMod N)).val : ℤ)) (b := l)
@@ -500,24 +500,24 @@ theorem glSmul_eq_one_of_eq_self {R : CommRingCat.{u}} (N : ℕ) [NeZero N]
   have hval0 : ((0 : ZMod N).val : ℤ) = 0 := by simp
   have hbase1 : S ![1, 0] = ⟨pp, hppM⟩ := by
     apply Subtype.ext
-    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, hval1, hval0,
+    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, hval1, hval0,
       one_zsmul, zero_zsmul, add_zero]
   have hbase2 : S ![0, 1] = ⟨pq, hpqM⟩ := by
     apply Subtype.ext
-    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons, hval1, hval0,
+    simp only [hS, Matrix.cons_val_zero, Matrix.cons_val_one, hval1, hval0,
       one_zsmul, zero_zsmul, zero_add]
   -- Injectivity forces the columns.
   have heq1 : (![m 0 0, m 1 0] : Fin 2 → ZMod N) = ![1, 0] := hSinj (hcol1.trans hbase1.symm)
   have heq2 : (![m 0 1, m 1 1] : Fin 2 → ZMod N) = ![0, 1] := hSinj (hcol2.trans hbase2.symm)
-  have e00 : m 0 0 = 1 := by have := congrFun heq1 0; simpa using this
-  have e10 : m 1 0 = 0 := by have := congrFun heq1 1; simpa using this
-  have e01 : m 0 1 = 0 := by have := congrFun heq2 0; simpa using this
-  have e11 : m 1 1 = 1 := by have := congrFun heq2 1; simpa using this
+  have e00 : m 0 0 = 1 := by simpa using congrFun heq1 0
+  have e10 : m 1 0 = 0 := by simpa using congrFun heq1 1
+  have e01 : m 0 1 = 0 := by simpa using congrFun heq2 0
+  have e11 : m 1 1 = 1 := by simpa using congrFun heq2 1
   -- Conclude `g = 1`.
   apply Units.ext
   rw [Units.val_one, ← hm]
   ext i j
-  fin_cases i <;> fin_cases j <;> simp [Matrix.one_apply, e00, e10, e01, e11]
+  fin_cases i <;> fin_cases j <;> simp [e00, e10, e01, e11]
 
 /-! ### PART 0 (instantiation) — the `H`-action on the naive full-level problem -/
 
@@ -1004,7 +1004,8 @@ lemma restrict_coprodPoint {R : CommRingCat.{u}} (X : EllObj R)
 open EllipticCurve in
 /-- `FullLevelPt.pullAlong` commutes with the `GL₂`-action: `pullAlong σ (glSmul γ L)
 = glSmul γ (pullAlong σ L)`. Both sides are `asSection ∘ pull` of the `glSmul`-combination,
-and `pull`/`asSection` are `ℤ`-linear (`pull_add`/`pull_zsmul`/`asSection_add`/`asSection_zsmul`). -/
+and `pull`/`asSection` are `ℤ`-linear
+(`pull_add`/`pull_zsmul`/`asSection_add`/`asSection_zsmul`). -/
 lemma pullAlong_glSmul {S : Scheme.{u}} {E : EllipticCurve S} (N : ℕ) [NeZero N]
     {T : Scheme.{u}} (σ : T ⟶ S) (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
     (L : E.FullLevelPt N) :
@@ -1155,7 +1156,8 @@ theorem gammaHNaiveProblem_not_relativelyRepresentable (N : ℕ) [NeZero N]
   obtain ⟨h, hhH, hhAB⟩ := Quotient.exact hsep
   -- Restricting `glSmul h A = B` to the `false` summand (where `A`, `B` agree) forces `h = 1`.
   have hh1 : h = 1 := by
-    refine glSmul_eq_one_of_eq_self N hinv (X.pullbackAlong (Sigma.ι (fun _ : Bool => X.base) false ≫ g))
+    refine glSmul_eq_one_of_eq_self N hinv
+      (X.pullbackAlong (Sigma.ι (fun _ : Bool => X.base) false ≫ g))
       hne h (FullLevelPt.pullAlong (Sigma.ι (fun _ : Bool => X.base) false ≫ g) L)
       (Subtype.ext (Prod.ext ?_ ?_))
     · have hf1 := congrArg (fun M => EllHom.pullSection R
