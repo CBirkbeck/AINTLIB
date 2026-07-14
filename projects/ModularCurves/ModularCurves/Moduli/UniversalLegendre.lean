@@ -835,6 +835,99 @@ theorem universalLegendre_map_classifying {R : CommRingCat.{u}} (X : EllObj R)
   rw [hlift]
   exact hspec
 
+/-- **(T-E14-CLS-5)** A bundled Legendre witness: an affine with an adapted, marked,
+Legendre-charted presentation. The index type of the classifying cover. -/
+structure LegendreWitness {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 2) (b : OmegaBasis X.curve.toEllipticCurveGeom) where
+  /-- The supporting affine. -/
+  V : X.base.affineOpens
+  /-- The witness presentation. -/
+  Pr : LocalPresentation X.curve.toEllipticCurveGeom V
+  /-- The witness Legendre parameter. -/
+  lam : Γ(X.base, V.1)
+  /-- Adaptedness to the `ω`-basis. -/
+  hAd : Pr.IsAdapted b
+  /-- The chart curve is Legendre. -/
+  hW : Pr.W = legendreCurve lam
+  /-- The `P`-marking at `x = 0`. -/
+  hMP : Pr.MarksAt L.1.1.2 0 0
+  /-- The `Q`-marking at `x = 1`. -/
+  hMQ : Pr.MarksAt L.1.2.2 1 0
+
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-CLS-5, ≈E2)** The per-witness piece of the classifying `EllHom`
+(mirrors `chartPiece`). -/
+noncomputable def legendrePiece {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤)))
+    (w : LegendreWitness X L b) :
+    (pullback X.curve.toEllipticCurveGeom.π w.V.1.ι : Scheme.{u}) ⟶
+      projModel (universalLegendre R) :=
+  w.Pr.e.hom ≫
+    eqToHom (congrArg projModel
+      (universalLegendre_map_classifying X L b hD h2 w.V w.Pr w.lam
+        w.hAd w.hW w.hMP).symm) ≫
+    projModelBaseChange
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (legendreClassifyingRingHom X L b hD h2)) (universalLegendre R)
+
+open LocalPresentation WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E14-CLS-5, ≈E3b)** The piece maps are compatible with restriction: restrict
+a witness (adaptedness, Legendre form and markings all restrict) and the piece
+restricts (mirrors `chartPiece_restrict`; uniqueness = `legendre_witness_transVC_eq_one`). -/
+theorem legendrePiece_restrict {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤)))
+    (w w' : LegendreWitness X L b) (h : w'.V.1 ≤ w.V.1) :
+    restrictTheta h ≫ legendrePiece hD h2 w = legendrePiece hD h2 w' := by
+  -- the restricted witness equals the smaller witness, as charts
+  have hres := w.hMP.restrict h
+  rw [map_zero] at hres
+  have hVC : w'.Pr.transVC (w.Pr.restrict h) = 1 :=
+    (legendre_witness_transVC_eq_one w'.hAd (w.hAd.restrict h) w'.hW
+      (restrict_W_legendre w.hW h) w'.hMP hres (isUnit_ofNat_res h2 w'.V.1)).1
+  have hWeq : (w.Pr.restrict h).W = w'.Pr.W := by
+    have := w'.Pr.transVC_smul (w.Pr.restrict h)
+    rwa [hVC, one_smul] at this
+  have hIso := pointedIso_hom_of_transVC_eq_one hVC
+  have hE : (w.Pr.restrict h).e.hom =
+      w'.Pr.e.hom ≫ eqToHom (congrArg projModel hWeq.symm) := by
+    have h1 : w'.Pr.e.inv ≫ (w.Pr.restrict h).e.hom =
+        eqToHom (congrArg projModel hWeq.symm) := by
+      have h0 := hIso
+      rw [show (w'.Pr.pointedIso (w.Pr.restrict h)).hom =
+        w'.Pr.e.inv ≫ (w.Pr.restrict h).e.hom from rfl] at h0
+      exact h0
+    rw [← h1, ← Category.assoc, Iso.hom_inv_id, Category.id_comp]
+  have hσ : ((X.base.presheaf.map (homOfLE (le_top : w'.V.1 ≤ ⊤)).op).hom).comp
+      (legendreClassifyingRingHom X L b hD h2) =
+    (sectionsMapLE (𝟙 X.base) h).comp
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (legendreClassifyingRingHom X L b hD h2)) := by
+    rw [sectionsMapLE_id]
+    show ((X.base.presheaf.map (homOfLE (le_top : w'.V.1 ≤ ⊤)).op).hom).comp
+        (legendreClassifyingRingHom X L b hD h2) =
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op) ≫
+        (X.base.presheaf.map (homOfLE (show w'.V.1 ≤ w.V.1 by
+          simpa using h)).op)).hom).comp
+        (legendreClassifyingRingHom X L b hD h2)
+    rw [← Functor.map_comp, ← op_comp]
+    rfl
+  rw [legendrePiece, legendrePiece, ← Category.assoc, ← restrict_e_baseChange, hE]
+  simp only [Category.assoc]
+  rw [cancel_epi (w'.Pr.e.hom)]
+  rw [projModelBaseChange_congr'' (sectionsMapLE (𝟙 X.base) h)
+      (universalLegendre_map_classifying X L b hD h2 w.V w.Pr w.lam
+        w.hAd w.hW w.hMP).symm]
+  simp only [Category.assoc, eqToHom_trans_assoc, eqToHom_trans, eqToHom_refl,
+    Category.id_comp]
+  rw [← projModelBaseChange_comp',
+    projModelBaseChange_congr_hom hσ.symm (universalLegendre R),
+    ← Category.assoc, eqToHom_trans]
+
 end TwoTorsion
 
 end ModularCurves
