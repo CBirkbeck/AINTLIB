@@ -108,9 +108,7 @@ theorem caseI_is_principal_of_not_dvd_hPlus
   obtain ⟨u, hu⟩ := hαp_span
   refine ⟨u⁻¹, α, ?_⟩
   rw [show (u⁻¹ : (𝓞 (CyclotomicField p ℚ))ˣ).val * α ^ p =
-      α ^ p * (u⁻¹ : (𝓞 (CyclotomicField p ℚ))ˣ).val by ring]
-  rw [← hu]
-  rw [mul_assoc]
+      α ^ p * (u⁻¹ : (𝓞 (CyclotomicField p ℚ))ˣ).val by ring, ← hu, mul_assoc]
   simp [Units.mul_inv]
 
 end CaseI
