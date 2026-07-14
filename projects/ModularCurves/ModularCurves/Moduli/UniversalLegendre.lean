@@ -805,6 +805,36 @@ theorem legendreClassifyingRingHom_algebraMap {R : CommRingCat.{u}} (X : EllObj 
   rw [h1, legendreClassifyingRingHom, IsLocalization.Away.lift_eq]
   simp
 
+open LocalPresentation MvPolynomial in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E14-CLS-4 ★)** The per-witness coefficient match: specializing the universal
+Legendre curve along the classifying map, restricted to a witness affine, recovers
+exactly the witness chart curve (mirrors `universalShortNF_map_classifying`; the
+coefficient input is `legendreLambda`'s universal spec). -/
+theorem universalLegendre_map_classifying {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 2) (b : OmegaBasis X.curve.toEllipticCurveGeom)
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤)))
+    (V : X.base.affineOpens)
+    (Pr : LocalPresentation X.curve.toEllipticCurveGeom V)
+    (lam : Γ(X.base, V.1)) (hAd : Pr.IsAdapted b)
+    (hW : Pr.W = legendreCurve lam) (hMP : Pr.MarksAt L.1.1.2 0 0) :
+    (universalLegendre R).map
+      (((X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+        (legendreClassifyingRingHom X L b hD h2)) = Pr.W := by
+  have hlift : legendreClassifyingRingHom X L b hD h2 (universalLambda R) =
+      (legendreLambda X L b hD h2).1 := by
+    rw [legendreClassifyingRingHom, universalLambda, IsLocalization.Away.lift_eq]
+    simp [eval₂Hom_X']
+  have hspec := (legendreLambda X L b hD h2).2 V Pr lam hAd hW hMP
+  rw [show (universalLegendre R) = legendreCurve (universalLambda R) from rfl,
+    legendreCurve_map, hW]
+  refine congrArg legendreCurve ?_
+  show ((X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom)
+    (legendreClassifyingRingHom X L b hD h2 (universalLambda R)) = lam
+  rw [hlift]
+  exact hspec
+
 end TwoTorsion
 
 end ModularCurves
