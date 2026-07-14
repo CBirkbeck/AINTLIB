@@ -2450,9 +2450,17 @@ adjudicates.
   `adaptedDelta_isUnit` (the global discriminant of the adapted coefficients is a
   unit — germwise through the chart-affine choice + `Δ_of_isShortNF`) and
   **`classifyingRingHom : R[A₄,A₆][Δ⁻¹] →+* Γ(Y.base,⊤)`** (`eval₂` at the glued
-  coefficients through `Away.lift`; with `EllObj.baseRingHom`). REMAINING D3: the
-  Spec-side `Y.base ⟶ Spec R₁` (ΓSpec adjunction: `toSpecΓ`-composite) + the
-  `EllHom` upstairs (chart-glue of the adapted-model isos — the E12-D core geometry);
+  coefficients through `Away.lift`; with `EllObj.baseRingHom`). `classifyingMap`
+  DONE (ac09d65fc). REMAINING D3 = the EllHom upstairs, decomposed (2026-07-14):
+  **[D3-E1]** per-chart coefficient match — `universalShortNF.map (resLE-V ∘
+  classifyingRingHom) = (adaptedLocal V i).W` (WeierstrassCurve.ext; `Away.lift_eq` +
+  `eval₂Hom_X` + the `adaptedCoeff`-specs; zero-coeffs by shortNF both sides);
+  **[D3-E2]** the per-chart piece map `pullback Y.π V.ι ⟶ projModel univ` :=
+  `Q.e.hom ≫ eqToHom (E1) ≫ projModelBaseChange` + π/zero-compat;
+  **[D3-E3]** overlap agreement (adapted uniqueness ⟹ transVC = 1 ⟹ the pieces
+  agree) + `Scheme.Cover.glueMorphisms` over the chart-affine pair cover of `Y.E`
+  (the `negHomOf`-glue pattern) → `classifyingTop : Y.curve.E ⟶ projModel univ`;
+  **[D3-E4]** `IsPullback`/`zero_w` fields → `classifyingEllHom : Y ⟶ X₁`;
   **D4** — `RepresentableBy` packaging (bijectivity from E12-B uniqueness +
   adapted-pullback functoriality).
   ORIGINAL SPEC: the basis-unit of a presentation**: for `b : OmegaBasis G` and
