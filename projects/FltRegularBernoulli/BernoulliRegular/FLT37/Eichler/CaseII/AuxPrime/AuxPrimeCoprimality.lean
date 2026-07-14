@@ -619,7 +619,7 @@ theorem lemma96_radical_isPthPower {Y Z : ℤ}
         algebraMap (𝓞 K37) K37 (F₁ - F₂) := by
       rw [hα_def, sub_mul, div_mul_cancel₀ _ hf₂_ne, one_mul, ← map_sub]
     rw [hαm1]
-    congr 1
+    refine congrArg (algebraMap (𝓞 K37) K37) ?_
     -- `F₁ − F₂ = (ζ³⁶ − ζ)·Z = (ζ−1)³⁷·(ζvw·z')`
     have hZcast : ((Z : ℤ) : 𝓞 K37) = ((37 : ℕ) : 𝓞 K37) * ((z' : ℤ) : 𝓞 K37) := by
       rw [hz']
