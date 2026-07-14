@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Isogeny.Endomorphism
 
 /-!
@@ -136,6 +141,8 @@ theorem isogDual_comp_self_of_witness
     dual.comp α = mulByInt E α.degree :=
   h_dual.1
 
+/-- Witness-parametric form of `α ∘ α̂ = [deg α]`: the second conjunct of
+    `IsDualOf`, extracted. -/
 theorem self_comp_isogDual_of_witness
     (α dual : Isogeny E E) (h_dual : IsDualOf E dual α) :
     α.comp dual = mulByInt E α.degree :=
