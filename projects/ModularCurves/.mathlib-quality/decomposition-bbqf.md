@@ -14,37 +14,31 @@ witness — see QF-NONCONST attack log).
 ## PIPELINE STATUS 2026-07-14 (post-flip; two-G0 pipeline ALPHA/BETA)
 The wall-break made BB-QF a live build; it is now split ALPHA (model fibre-count) / BETA (transport
 assembly), running as a pipeline (two G0 sessions, coordinate-via-commits).
-- **LANDED green (committed):** `mulBy_comp_of_isMonHom` (power-naturality) · `mulByHom_comp_left_of_isMonHom`
-  (`.left` form) · `locallyQuasiFinite_mulByHom_of_isMonHom_iso` (**BETA transport core** — LQF transports
-  across a pointed `IsMonHom` iso of records, via `(Over.forget S).mapIso`) · `coordinateRing_krullDimLE_one`
-  (dim ≤ 1) — all in `MulByHomFibres.lean`. ALPHA toolkit in `ModelFibreCount.lean`:
-  `infinite_primeSpectrum_of_not_isField` ([KEY-INF] Jacobson) · `isClosed_isIrreducible_singleton_or_univ`
-  ([KEY-TOP]).
-- **LEAF FLIP (`0e5faf685`):** the BB-QF leaf is now **`mulByHom_locallyQuasiFinite` (Torsion.lean, sorry)** —
-  the pipeline's natural output shape — and **`mulByHom_finite_fibres` is a PROVED corollary** (LQF +
-  `QuasiCompact` [from `IsProper`] via `Scheme.Hom.finite_preimage_singleton`).
-- **REMAINING (open):**
-  - **ALPHA:** assemble the toolkit → `modelEllipticCurve W`'s `[N]` is `LocallyQuasiFinite` over a field
-    (image infinite via HasseWeil `card_torsion_ellPow_nat` ⟹ fibres proper closed in the dim-1 integral
-    `zChart` ⟹ finite via `IsArtinianScheme.finite`).
-  - **BETA global assembly:** fill `mulByHom_locallyQuasiFinite` via
-    `LocallyQuasiFinite.of_fiberToSpecResidueField` (reduce to each fibre of `[N]`), identify that fibre
-    with a fibre of `[N]_s = (E.baseChange g).mulByHom N` (the fibre-of-endo ↔ fibre-of-`[N]_s` step — the
-    subtle crux), then `locallyQuasiFinite_mulByHom_of_isMonHom_iso` transports ALPHA's model LQF across
-    `E_s ≅ modelEllipticCurve W_s` (localModel + GIT 6.4 rigidity discharging `[IsMonHom]`).
-  - Neither is `abelEnrichment_exists`-gated. `mulByHom_baseChange` (GroupLaw.lean:217) supplies the
-    base-change compat for the fibre-of-endo step.
-
-## Skeleton location (Step 2.5 — written + `lake build`-clean, sorries-only)
+- **BETA TRANSPORT TOOLKIT — COMPLETE, all axiom-clean (committed):**
+  `mulBy_comp_of_isMonHom` + `mulByHom_comp_left_of_isMonHom` (power-naturality, `MulByHomFibres.lean`) ·
+  `coordinateRing_krullDimLE_one` (dim ≤ 1) · `isMonHom_of_pointed` (pointed `E⟶F` ⟹ `IsMonHom`, GIT 6.4) ·
+  **`finite_fibres_mulByHom_of_isMonHom_iso`** (TOPOLOGICAL finite-fibre transport — the shape feeding
+  `Torsion.mulByHom_finite_fibres`) · `locallyQuasiFinite_mulByHom_of_isMonHom_iso` +
+  `mulByHom_locallyQuasiFinite_assembled` (LQF-route alternative) · `EllipticCurve.fibrewiseElliptic`
+  (assembly entry point) — the last four in `MulByHomFibresGlobal.lean`. ALPHA (`ModelFibreCount.lean`,
+  sorry-free ★ mod g5): `Curvelike.finite_preimage_singleton` + `modelMulByHom_finite_preimage_singleton`
+  (master, topological) via [KEY-INF]/[KEY-TOP]/dim-1/g1–g4.
+- **REMAINING = 2 deep pieces (sibling's atlas-context lane, g5-gated) + g5:** (i) raw-iso→asOver wrapping
+  (`FibrewiseElliptic`'s `e : E.π.fiber s ≅ projModel W` → `asOver` iso; `E.π.fiber s` is defeq
+  `(E.baseChange (fromSpecResidueField s)).E`, `heπ`/`hez` give the Over + pointed structure); (ii) the
+  **fibre-of-endo identification** (`(E.mulByHom N).base⁻¹{x}` ↔ base-changed record's `[N]` fibre — **NO
+  mathlib fiber-commutes-with-base-change shortcut**, manual pullback-square work). Then transport (toolkit)
+  + ALPHA's model count closes `Torsion.mulByHom_finite_fibres`.
+- **NOTE:** the earlier LQF leaf-flip was REVERTED (`56f272dab`) — Torsion's leaf is `mulByHom_finite_fibres`
+  (topological, matching ALPHA's output + the sibling's plan); `mulByHom_locallyQuasiFinite` is the banked
+  `of_finite_preimage_singleton` reduction.
+## Skeleton location (Torsion.lean; post-revert)
 `projects/ModularCurves/ModularCurves/EllipticCurve/Torsion.lean`:
-- **`mulByHom_locallyQuasiFinite (N) [NeZero N] : LocallyQuasiFinite (E.mulByHom N) := by sorry`**
-  — the pipeline-target leaf (post-flip). The single remaining BB-QF sorry.
-- **`mulByHom_finite_fibres`** — now a PROVED corollary of the above.
-- **`mulByHom_locallyQuasiFinite (N) [NeZero N] : LocallyQuasiFinite (E.mulByHom N)`**
-  — **PROVED** (reduction half). Body: `LocallyQuasiFinite.of_finite_preimage_singleton _
-  (fun x => E.mulByHom_finite_fibres N x)`. Zero sorry in its own body; `#print axioms` =
-  {propext, Classical.choice, Quot.sound, **sorryAx**} where sorryAx is transitively from the leaf.
-  File-wide `lean_diagnostic_messages severity=error` → **empty** (verified 2026-07-14).
+- **`mulByHom_finite_fibres (N) [NeZero N] (x : E.E) : (⇑(E.mulByHom N).base ⁻¹' {x}).Finite := by sorry`**
+  — the geometric leaf (BETA transport target, matching ALPHA's topological output).
+- **`mulByHom_locallyQuasiFinite`** — PROVED, the banked `of_finite_preimage_singleton` reduction over
+  the leaf (`#print axioms` = {propext, Classical.choice, Quot.sound, sorryAx}, sorryAx transitively from
+  the leaf; file error-free).
 
 ## Plain-English proof (KM 2.3.1 fibre route, transcribed)
 KM 2.3.1 proves `[N] : E → E` is finite locally free of rank `N²`. Quasi-finiteness (the BB-QF
