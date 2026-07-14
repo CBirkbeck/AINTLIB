@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.IrelandRosen.IdealNorm
@@ -329,6 +334,7 @@ noncomputable def phi (D : PrimeSourceData (p := p) (K := K) P) :
     (ℓ := D.ℓ) (p := p) (K := K) (P := P) (R' := D.R')
     D.S D.h_psi D.h_descentPrime D.h_source_coprime D.h_ne_zero D.hℓp D.hf D.he
 
+/-- The φ-element of a prime source is semi-primary. -/
 theorem phi_isSemiPrimary
     (hp_three : 3 ≤ p) (D : PrimeSourceData (p := p) (K := K) P) :
     FLT37.IsSemiPrimary p (K := K) D.phi.gamma := by
@@ -352,6 +358,7 @@ theorem phi_isSemiPrimary
       hp_three D.S D.h_psi D.h_descentPrime D.h_source_coprime
       D.h_ne_zero D.hℓp D.hf D.he D.h_zeta_p_int_eq
 
+/-- Its norm relation: `conj γ * γ = N(P) ^ p`. -/
 theorem phi_conj_mul_self_eq_absNorm_pow
     (D : PrimeSourceData (p := p) (K := K) P) :
     ringOfIntegersComplexConj K D.phi.gamma * D.phi.gamma =
@@ -377,6 +384,8 @@ theorem phi_conj_mul_self_eq_absNorm_pow
       D.hℓp D.hf D.he D.h_zeta_p_int_eq D.conjLift
       D.conjLift_lifts D.conjLift_zeta_ell
 
+/-- Eisenstein reciprocity for the φ-element: the symbol of `γ` at `Q` is the symbol of
+`N(Q)` at `P`. -/
 theorem phi_symbol_eq_norm_symbol
     (D : PrimeSourceData (p := p) (K := K) P)
     {Q : Ideal (𝓞 K)} [Q.IsMaximal]
