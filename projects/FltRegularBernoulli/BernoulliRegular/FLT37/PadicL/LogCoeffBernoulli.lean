@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import BernoulliRegular.FLT37.PadicL.Theorem518Resummation
 import BernoulliRegular.IrregularPrimes.KummerCongruenceFull
 
@@ -102,7 +107,7 @@ this is the *purely algebraic* residue compatibility, the bridge from the abstra
 Gauss-sum functional to the `𝔽_p`-arithmetic of Faulhaber/Bernoulli. -/
 theorem residue_logCoeffSum (c : (ZMod p)ˣ → S.O) (i : ℕ) :
     S.residue (S.logCoeffSum c i) = ∑ j : (ZMod p)ˣ, S.residue (c j) * (j : ZMod p) ^ i := by
-  unfold logCoeffSum
+  simp only [logCoeffSum]
   rw [map_sum]
   refine Finset.sum_congr rfl fun j _ ↦ ?_
   rw [map_mul, S.residue_omega_pow i j]
@@ -359,6 +364,7 @@ theorem pi_dvd_logCoeffSum_of_const_residue {c : (ZMod p)ˣ → S.O}
     S.π ∣ S.logCoeffSum c i :=
   (S.residue_eq_zero_iff _).mp (S.residue_logCoeffSum_eq_zero_of_const_residue hr hi0 hip)
 
+/-- The same divisibility, phrased as a bound on the additive valuation. -/
 theorem one_le_addVal_logCoeffSum_of_const_residue {c : (ZMod p)ˣ → S.O}
     {r : ZMod p} (hr : ∀ j, S.residue (c j) = r) {i : ℕ}
     (hi0 : 0 < i) (hip : i < p - 1) :
