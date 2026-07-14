@@ -131,27 +131,24 @@ theorem mulByHom_zero : E.mulByHom 0 = E.π ≫ E.zero := by
   refine Eq.trans ?_ key
   exact congrArg (fun q => (toUnit E.asOver).left ≫ q) E.one_eq_zero
 
-/-- **Black box `BB-QF` (fibre input of KM 2.3.1): `[N]` is locally quasi-finite for `N ≥ 1`.**
-The **BETA transport pipeline** proves this directly (the natural output shape): per geometric fibre
-`E_s ≅ modelEllipticCurve W_s` is a *pointed* comparison via the **PROVEN**
-`abelEnrichment_unique_of_isLocallyNoetherian` + GIT 6.4 rigidity (`isMonHom_of_one_comp_eq'`) +
-power-naturality (`MulByHomFibres.mulBy_comp_of_isMonHom`), so
-`MulByHomFibres.locallyQuasiFinite_mulByHom_of_isMonHom_iso` transports the field-level model
-fibre-count (`ModelFibreCount.lean`: HasseWeil `card_torsion_ellPow_nat` degree-free + `zChart`
-dim ≤ 1 + `IsArtinianScheme.finite`) fibre-by-fibre via
-`AlgebraicGeometry.LocallyQuasiFinite.of_fiberToSpecResidueField`. The single remaining BB-QF sorry;
-**NOT `abelEnrichment_exists`-gated** (see `.mathlib-quality/decomposition-bbqf.md`). Discharging it
-closes `mulByHom_isFinite` ⟹ `torsionπ_isFinite`. -/
-theorem mulByHom_locallyQuasiFinite (N : ℕ) [NeZero N] :
-    LocallyQuasiFinite (E.mulByHom N) := by sorry
-
-/-- **(BB-QF corollary)** Every (topological) fibre of `[N] : E ⟶ E` is finite — immediate from local
-quasi-finiteness together with quasi-compactness (`[N]` is proper, and `IsProper` extends
-`UniversallyClosed` ⟹ `QuasiCompact`), via mathlib `Scheme.Hom.finite_preimage_singleton`. -/
+/-- **(BB-QF geometric leaf — the substance)** Every (topological) fibre of `[N] : E ⟶ E` is finite.
+This is the shape ALPHA's model fibre-count (`ModelFibreCount.modelMulByHom_finite_preimage_singleton`,
+topological) transports into: per geometric fibre `E_s ≅ modelEllipticCurve W_s` is a *pointed*
+comparison (`FibrewiseElliptic` + GIT 6.4 rigidity `isMonHom_of_one_comp_eq'`/`isMonHom_of_pointed`
++ power-naturality `MulByHomFibres.mulBy_comp_of_isMonHom`), transporting the field-level model finite
+fibres (HasseWeil `card_torsion_ellPow_nat` degree-free + `zChart` dim ≤ 1). The single remaining BB-QF
+sorry; **NOT `abelEnrichment_exists`-gated** (see `.mathlib-quality/decomposition-bbqf.md`). -/
 theorem mulByHom_finite_fibres (N : ℕ) [NeZero N] (x : E.E) :
-    (⇑(E.mulByHom N).base ⁻¹' {x}).Finite := by
-  haveI := E.mulByHom_locallyQuasiFinite N
-  exact (E.mulByHom N).finite_preimage_singleton x
+    (⇑(E.mulByHom N).base ⁻¹' {x}).Finite := by sorry
+
+/-- **Black box `BB-QF` (fibre input of KM 2.3.1): `[N]` is locally quasi-finite for `N ≥ 1`.**
+**The banked reduction (PROVED here).** `[N]` is locally of finite type (proper ⟹ `IsProper` extends
+`LocallyOfFiniteType`), so `LocallyQuasiFinite.of_finite_preimage_singleton` reduces local
+quasi-finiteness to finite fibres — the geometric leaf `mulByHom_finite_fibres` (the BETA transport of
+ALPHA's model finite fibre-count). Discharging that leaf closes `mulByHom_isFinite` ⟹ `torsionπ_isFinite`. -/
+theorem mulByHom_locallyQuasiFinite (N : ℕ) [NeZero N] :
+    LocallyQuasiFinite (E.mulByHom N) :=
+  LocallyQuasiFinite.of_finite_preimage_singleton _ fun x => E.mulByHom_finite_fibres N x
 
 /-- **Black box `BB-FLAT` (flatness input of KM 2.3.1)**: `[N]` is flat for `N ≥ 1`.
 KM 2.3.1 proof: via miracle flatness over the universal (regular) Weierstrass base
