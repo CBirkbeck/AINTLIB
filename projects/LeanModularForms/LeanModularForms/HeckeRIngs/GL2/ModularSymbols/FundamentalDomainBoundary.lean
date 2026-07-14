@@ -50,16 +50,19 @@ contributions `divDiff (γ • c) c`, which are exactly Shimura's boundary symbo
   the potential-difference sum `∑_{i<n} (V (c (i+1)) − V (c i))` over the cycle is `0`
   (`edgePotential_chain_sum` is the open-chain telescoping `… = V (c n) − V (c 0)`).
 * `rawPairing_edgeDivisor_eq_sub` — the period of `f` along an edge is the endpoint-potential
-  difference `cuspValue f P (head e) − cuspValue f P (tail e)`; `rawPairing_edgeDivisor_eq_edgePotential`
+  difference `cuspValue f P (head e) − cuspValue f P (tail e)`;
+  `rawPairing_edgeDivisor_eq_edgePotential`
   packages it as the abstract `edgePotential` with `V = cuspValue f P`.
 * `PairedBoundary.two_smul_boundaryDivisor_eq_cocycle_sum` — **paired-edge collapse** (divisor
   level): twice the total boundary divisor equals the sum of per-pair cocycle defects
   `∂(edge i) − div0Rep(γ i)(∂ edge i)`, i.e. the boundary symbols.
-* `PairedBoundary.two_smul_rawPairing_boundaryDivisor` — the same collapse pushed through `rawPairing
+* `PairedBoundary.two_smul_rawPairing_boundaryDivisor` — the same collapse pushed through
+  `rawPairing
   f`, exhibiting `2 • ⟨boundary period⟩` as a finite `ℂ`-linear combination of periods of `f`
   (`∑ coeffᵢ · rawPairing f (yᵢ)`) — the shape `periodPairingA_eq_boundary_period` consumes.
 * `exists_pairedBoundary_periodPairingA_eq` — **the concrete-FD identification (deliverable 3,
-  isolated)**: existence of a `Γ₁(N)`-paired boundary realising Shimura's `A(f,g)` as such a boundary
+  isolated)**: existence of a `Γ₁(N)`-paired boundary realising Shimura's `A(f,g)` as such a
+  boundary
   period.  The lone residual `sorry` (the research-scale Stokes / model-change step).
 
 ## References
@@ -363,7 +366,8 @@ theorem OrientedCuspEdge.exists_SL2Z_smul_tail_eq_head (e : OrientedCuspEdge) :
 
 /-! ### The Green / Stokes boundary-period interface
 
-The concrete fundamental-domain identification `exists_pairedBoundary_periodPairingA_eq` — exhibiting
+The concrete fundamental-domain identification `exists_pairedBoundary_periodPairingA_eq` —
+exhibiting
 Shimura's period pairing `A(f, g) = (f, g) + (-1)ⁿ (g, f)` as `c · rawPairing f (B.boundaryDivisor ⊗
 P)` for a `Γ₁(N)`-paired boundary `B` — is the *analytic* deliverable (deliverable 3).  It is stated
 and proven in `PeterssonStokes.lean`, since its proof feeds on the per-tile region-Stokes lemma
