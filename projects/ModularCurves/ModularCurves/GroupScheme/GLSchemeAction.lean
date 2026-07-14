@@ -44,6 +44,28 @@ noncomputable def fullLevelHom (L : E.FullLevelPt N) :
         rw [smul_add, smul_comm (N : ℤ) ((v 0).val : ℤ), smul_comm (N : ℤ) ((v 1).val : ℤ),
           L.2.1.1, L.2.1.2, smul_zero, smul_zero, add_zero]))
 
+/-- **The affine sections dictionary** (instance-free form): sections of an affine
+`X` over a `Spec`-point correspond to ring maps of the section algebras under the
+structure triangle. -/
+noncomputable def sectionsEquivRingHomUnder {R K : CommRingCat.{u}} {X : Scheme.{u}}
+    [IsAffine X] (f : X ⟶ Spec R) (φ : R ⟶ Γ(X, ⊤))
+    (hφ : Spec.map φ = X.isoSpec.inv ≫ f) (t : Spec K ⟶ Spec R) :
+    { h : Spec K ⟶ X // h ≫ f = t } ≃
+      { χ : Γ(X, ⊤) ⟶ K // φ ≫ χ = Spec.preimage t } where
+  toFun h := ⟨Spec.preimage (h.1 ≫ X.isoSpec.hom), by
+    apply Spec.map_injective
+    rw [Spec.map_comp, Spec.map_preimage, Spec.map_preimage, hφ, Category.assoc,
+      Iso.hom_inv_id_assoc]
+    exact h.2⟩
+  invFun χ := ⟨Spec.map χ.1 ≫ X.isoSpec.inv, by
+    rw [Category.assoc, ← hφ, ← Spec.map_comp, χ.2, Spec.map_preimage]⟩
+  left_inv h := Subtype.ext (show Spec.map (Spec.preimage (h.1 ≫ X.isoSpec.hom)) ≫
+      X.isoSpec.inv = h.1 by
+    rw [Spec.map_preimage, Category.assoc, Iso.hom_inv_id, Category.comp_id])
+  right_inv χ := Subtype.ext (show Spec.preimage ((Spec.map χ.1 ≫ X.isoSpec.inv) ≫
+      X.isoSpec.hom) = χ.1 by
+    rw [Category.assoc, Iso.inv_hom_id, Category.comp_id, Spec.preimage_map])
+
 /-- The trivialisation map is a morphism over `S`. -/
 @[reassoc]
 theorem fullLevelHom_torsionπ (L : E.FullLevelPt N) :
