@@ -52,11 +52,6 @@ namespace HasseWeil.WeilPairing
 
 open HasseWeil
 
--- These inherited section variables are intentionally shared by the Frobenius setup below.
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedFintypeInType false
-
 section RingHomExt
 
 variable {F : Type*} [Field F] [DecidableEq F]
@@ -64,6 +59,7 @@ variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
 local notation "KE" => W.toAffine.FunctionField
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- Ring-hom extensionality from agreement on the base, `x_gen`, and `y_gen`. -/
 theorem ringHom_ext_base_x_y_gen (ψ₁ ψ₂ : KE →+* KE)
     (hbase : ∀ a : F, ψ₁ (algebraMap F KE a) = ψ₂ (algebraMap F KE a))
@@ -210,6 +206,7 @@ noncomputable def frobeniusFunctionFieldEquivK :
     (z : (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField) :
     frobeniusFunctionFieldEquivK W z = frobeniusFunctionFieldEquiv W z := rfl
 
+omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] in
 /-- The image of the generic point under a `K`-algebra hom, in coordinates. -/
 theorem map_genericPoint_some
     (h : (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField →ₐ[K]
@@ -233,6 +230,7 @@ theorem sigmaFunctionFieldPointKbar_apply
     sigmaFunctionFieldPointKbar W P =
       WeierstrassCurve.Affine.Point.map (W' := W) (frobeniusFunctionFieldEquivK W) P := rfl
 
+omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] in
 /-- The `K̄`-linear translation and its `K`-restriction induce the same point map. -/
 theorem sigmaConjugation_tau_mapW (S : (W.baseChange (AlgebraicClosure K)).toAffine.Point)
     (P : (W_KE (W.baseChange (AlgebraicClosure K))).toAffine.Point) :
