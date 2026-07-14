@@ -43,6 +43,8 @@ noncomputable def curveIsoPullback : X.curve.E ≅ pullback Y.curve.π f.baseHom
 /-- The comparison isomorphism is pointed. -/
 lemma zero_curveIsoPullback :
     X.curve.zero ≫ (curveIsoPullback R f).hom = (Y.curve.baseChange f.baseHom).zero := by
+  -- Term mode throughout: `EllipticCurve.baseChange` is semireducible, so the right-hand side
+  -- is only defeq — not syntactically equal — to a `pullback.lift`, and `rw` cannot see it.
   apply pullback.hom_ext
   · exact (Category.assoc _ _ _).trans <|
       (congrArg (X.curve.zero ≫ ·) (f.isPullback.isoPullback_hom_fst)).trans <|
@@ -63,34 +65,31 @@ noncomputable def transportSection (s : X.curve.Section) :
     (Category.assoc _ _ _).trans <|
       (congrArg (s.1 ≫ ·) (f.isPullback.isoPullback_hom_snd)).trans s.2⟩
 
-lemma transportSection_injective : Function.Injective (transportSection R f) := by
-  intro s s' h
-  refine Subtype.ext ?_
-  have h1 : s.1 ≫ (curveIsoPullback R f).hom = s'.1 ≫ (curveIsoPullback R f).hom :=
-    congrArg Subtype.val h
-  simpa using congrArg (· ≫ (curveIsoPullback R f).inv) h1
+/-- Transport along the comparison isomorphism is injective (it is composition with an iso). -/
+lemma transportSection_injective : Function.Injective (transportSection R f) := fun _ _ h =>
+  Subtype.ext <| (cancel_mono (curveIsoPullback R f).hom).mp (congrArg Subtype.val h)
 
 /-- The transport of a pulled section is the base-changed pullback section. -/
 lemma transportSection_pullSection (P : Y.curve.Section) :
-    (transportSection R f (EllHom.pullSection R f P)).1
+    (transportSection R f (pullSection R f P)).1
       = pullback.lift (f.baseHom ≫ P.1) (𝟙 X.base)
           (by rw [Category.assoc, P.2, Category.comp_id, Category.id_comp]) := by
   apply pullback.hom_ext
   · exact (Category.assoc _ _ _).trans <|
-      (congrArg ((EllHom.pullSection R f P).1 ≫ ·) (f.isPullback.isoPullback_hom_fst)).trans <|
+      (congrArg ((pullSection R f P).1 ≫ ·) (f.isPullback.isoPullback_hom_fst)).trans <|
       (f.isPullback.lift_fst _ _ _).trans (pullback.lift_fst _ _ _).symm
   · exact (Category.assoc _ _ _).trans <|
-      (congrArg ((EllHom.pullSection R f P).1 ≫ ·) (f.isPullback.isoPullback_hom_snd)).trans <|
+      (congrArg ((pullSection R f P).1 ≫ ·) (f.isPullback.isoPullback_hom_snd)).trans <|
       (f.isPullback.lift_snd _ _ _).trans (pullback.lift_snd _ _ _).symm
 
 /-- The dictionary image of a transported pullback section is the plain pullback of the
 section along the composite. -/
 lemma dict_transportSection_pullSection (P : Y.curve.Section) :
     EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom (𝟙 X.base)
-        (transportSection R f (EllHom.pullSection R f P))
+        (transportSection R f (pullSection R f P))
       = EllipticCurve.Point.pull Y.curve (𝟙 X.base ≫ f.baseHom) P := by
   refine Subtype.ext ?_
-  show (transportSection R f (EllHom.pullSection R f P)).1
+  show (transportSection R f (pullSection R f P)).1
       ≫ pullback.fst Y.curve.π f.baseHom = _
   rw [transportSection_pullSection]
   exact (pullback.lift_fst _ _ _).trans
@@ -103,9 +102,9 @@ lemma transportSection_add [IsLocallyNoetherian X.base] (s s' : X.curve.Section)
     transportSection R f (s + s')
       = transportSection R f s + transportSection R f s' := by
   haveI : Smooth X.curve.π := SmoothOfRelativeDimension.smooth (n := 1) (f := X.curve.π)
-  haveI hP : IsProper X.curve.asOver.hom := inferInstanceAs (IsProper X.curve.π)
-  haveI hFl : Flat X.curve.asOver.hom := inferInstanceAs (Flat X.curve.π)
-  haveI hSep : IsSeparated (Y.curve.baseChange f.baseHom).asOver.hom :=
+  haveI : IsProper X.curve.asOver.hom := inferInstanceAs (IsProper X.curve.π)
+  haveI : Flat X.curve.asOver.hom := inferInstanceAs (Flat X.curve.π)
+  haveI : IsSeparated (Y.curve.baseChange f.baseHom).asOver.hom :=
     inferInstanceAs (IsSeparated (Y.curve.baseChange f.baseHom).π)
   have hη : η[X.curve.asOver] ≫ curveIsoPullbackOver R f
       = η[(Y.curve.baseChange f.baseHom).asOver] := by
@@ -115,10 +114,9 @@ lemma transportSection_add [IsLocallyNoetherian X.base] (s s' : X.curve.Section)
       (Category.assoc _ _ _).trans <|
       (congrArg ((𝟙_ (Over X.base)).hom ≫ ·) (zero_curveIsoPullback R f)).trans <|
       (Y.curve.baseChange f.baseHom).one_eq_zero.symm
-  have h64 := @isMonHom_of_one_comp_eq' X.base _ X.curve.asOver
-    (Y.curve.baseChange f.baseHom).asOver _ _ hP hFl
-    X.curve.toEllipticCurveGeom.universallyOConnected hSep
-    (curveIsoPullbackOver R f) hη
+  have h64 := isMonHom_of_one_comp_eq' (A := X.curve.asOver)
+    (G := (Y.curve.baseChange f.baseHom).asOver)
+    X.curve.toEllipticCurveGeom.universallyOConnected (curveIsoPullbackOver R f) hη
   have h64l : (μ[X.curve.asOver]).left ≫ (curveIsoPullback R f).hom
       = (MonoidalCategory.tensorHom (curveIsoPullbackOver R f)
           (curveIsoPullbackOver R f)).left
@@ -168,8 +166,8 @@ The unrestricted `pullSection_add` stays parked behind T-W7.8 (owner decision
 2026-07-08: `EllObj R` keeps arbitrary bases). -/
 theorem pullSection_add_of_isLocallyNoetherian [IsLocallyNoetherian X.base]
     (P Q : Y.curve.Section) :
-    EllHom.pullSection R f (P + Q)
-      = EllHom.pullSection R f P + EllHom.pullSection R f Q := by
+    pullSection R f (P + Q)
+      = pullSection R f P + pullSection R f Q := by
   apply transportSection_injective R f
   rw [transportSection_add]
   apply (EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom (𝟙 X.base)).injective
