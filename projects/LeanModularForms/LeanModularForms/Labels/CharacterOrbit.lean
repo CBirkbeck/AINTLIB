@@ -343,24 +343,6 @@ lemma charOrbitLabel_eq_of_isGaloisConj {χ ψ : DirichletCharacter ℂ N} (h : 
   unfold charOrbitLabel orbitIndex
   rw [orbitRankKey_eq_of_isGaloisConj h]
 
-/-- On a finite linearly ordered set `S`, the rank function `a ↦ #{x ∈ S | x < a}` is strictly
-monotone, hence injective, on `S`. -/
-private lemma rank_injOn {α : Type*} [LinearOrder α] (S : Finset α) {a b : α}
-    (ha : a ∈ S) (hb : b ∈ S)
-    (hcard : (S.filter (· < a)).card = (S.filter (· < b)).card) : a = b := by
-  classical
-  have mono : ∀ x y : α, x ∈ S → x < y →
-      (S.filter (· < x)).card < (S.filter (· < y)).card := by
-    intro x y hx hxy
-    refine Finset.card_lt_card <| (Finset.ssubset_iff_of_subset
-      (Finset.monotone_filter_right S (fun z _ hz => lt_trans hz hxy))).mpr ?_
-    exact ⟨x, Finset.mem_filter.mpr ⟨hx, hxy⟩,
-      fun hmem => lt_irrefl x (Finset.mem_filter.mp hmem).2⟩
-  rcases lt_trichotomy a b with hlt | heq | hgt
-  · exact absurd hcard (ne_of_lt (mono a b ha hlt))
-  · exact heq
-  · exact absurd hcard.symm (ne_of_lt (mono b a hb hgt))
-
 /-- **Rank-injectivity.**  Equal orbit indices force equal ordering keys.  This is the
 order-theoretic fact that the strictly-monotone rank function `key ↦ #{realised keys strictly below
 it}` is injective on the finite set of realised keys (`rank_injOn`); combined with
@@ -369,7 +351,7 @@ lemma orbitIndex_inj {χ ψ : DirichletCharacter ℂ N} (h : orbitIndex χ = orb
     orbitRankKey χ = orbitRankKey ψ := by
   -- `orbitIndex` is the rank of `orbitRankKey` in the finite set of realised keys; this rank is
   -- injective on that set (`rank_injOn`), and both keys are realised.
-  exact rank_injOn _ (Finset.mem_image_of_mem _ (Finset.mem_univ _))
+  exact LeanModularForms.Labels.rank_injOn _ (Finset.mem_image_of_mem _ (Finset.mem_univ _))
     (Finset.mem_image_of_mem _ (Finset.mem_univ _)) h
 
 /-- **The label is injective on distinct orbits.**  If two characters have the same label they are
