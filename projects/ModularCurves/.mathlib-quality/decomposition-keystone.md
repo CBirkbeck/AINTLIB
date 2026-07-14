@@ -317,3 +317,27 @@ is now cleanly `[fully-built fraction-field assembly] + [single L4-core scalar-t
 (the group-law-in-coords ↔ division-poly generic-point identity) remains the sole deep register-box
 grind. KM directive infra (functionFieldMap bridge + [KEY-KER]) and now the entire `[N]⁻¹Z`-side
 fraction-field engine are DONE.
+
+## SESSION APPEND (v10.215, KM) — assembly VERIFIED to the L4-core diamond boundary
+
+Attempted the in-proof K4b-2 assembly via `Algebra.IsAlgebraic.finrank_of_isFractionRing`. **Verified
+(green scratch): BOTH fraction fields assemble** with explicit algebras in the K4b-2 context —
+`hL2 : IsFractionRing Γ(Z) K(E)` (via `isFractionRing_zChartSection`, algebra `algR` = coordRing→K(E))
+and `hEng : IsFractionRing Γ([N]⁻¹Z) K(E)` (via `isFractionRing_top_of_isOpenImmersion` on
+`pullback.fst`, algebra `algS` = `projModelFunctionFieldEquiv ∘ birational-iso ∘ germ`), with the
+`[N]⁻¹Z`-side instances (`Nonempty` via `nonempty_preimage_pullback`, `IsIntegral` via
+`isIntegral_of_isOpenImmersion`, `IsAffine`) all discharged. This confirms the three delivered
+stepping-stones compose correctly on the real goal.
+
+**The remaining assembly IS L4-core (not mechanical).** `finrank_of_isFractionRing` with `R'=S'=K(E)`
+forces an instance DIAMOND on `Algebra Γ(Z) K(E)`: `[Algebra R R']` = `algR` (the L2 direct
+`Γ(Z)→K(E)`) vs `[Algebra R S']` = the appTop-route composite `Γ(Z) →[appTop] Γ([N]⁻¹Z) →[algS] K(E)`.
+The two are equal ⟺ `IsScalarTower Γ(Z) K(E) K(E)` with the mulByInt `Module R' S'` ⟺
+**`appTop-fraction-field-extension = mulByInt_pullbackAlgHom` on K(E)** = L4-core = L4-iii's field-map
+identity. So the `finrank_of_isFractionRing` @-application resolves to exactly one deep sorry
+(the L4-core algebra/scalar-tower equality); everything else (FaithfulSMul/IsAlgebraic/NoZeroDivisors
+from finite-flat appTop, both IsFractionRings, the appTop algebra) is now in hand. The diamond
+literally IS the coordinate↔division-polynomial identity — the register-box BB crux — so the assembly
+is deferred to the L4-iii session (which must supply that algebra equality anyway). K4b-2 kept as a
+clean single sorry; the full mechanical-except-L4-core assembly path is now documented and verified to
+the diamond boundary.
