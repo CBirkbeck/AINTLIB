@@ -198,7 +198,8 @@ lemma Lequiv_Xpow_tmul (i : ℕ) (m : Mr R M) :
   rw [PolynomialModule.monomial_smul_single, one_smul, Nat.add_zero]
 
 lemma eLin_single (i : ℕ) (m : Mr R M) :
-    eLin R M (PolynomialModule.single R i m) = (((X:Polynomial R)^i) ⊗ₜ[R, polyAlg R] m : X2 R M) := by
+    eLin R M (PolynomialModule.single R i m)
+      = (((X:Polynomial R)^i) ⊗ₜ[R, polyAlg R] m : X2 R M) := by
   rw [eLin, LinearEquiv.trans_apply, ← Lequiv_Xpow_tmul, LinearEquiv.symm_apply_apply]
   exact bridgeR_tmul R M _ m
 
@@ -216,7 +217,8 @@ def epsP : P R M →ₗ[Polynomial R] (M : Type u) :=
 
 lemma epsP_single (i : ℕ) (m : Mr R M) :
     epsP R M (PolynomialModule.single R i m) = ((X:Polynomial R)^i) • m := by
-  show (ExtendRestrictScalarsAdj.Counit.map (polyAlg R)).hom (eLin R M (PolynomialModule.single R i m)) = _
+  show (ExtendRestrictScalarsAdj.Counit.map (polyAlg R)).hom
+    (eLin R M (PolynomialModule.single R i m)) = _
   rw [eLin_single, counit_tmul]
 
 /-! ### The injection `φ` -/
@@ -239,7 +241,8 @@ def mapPsi : P R M →ₗ[Polynomial R] P R M where
     rw [PolynomialModule.map_smul, Algebra.algebraMap_self, Polynomial.map_id]
 
 @[simp] lemma mapPsi_single (i : ℕ) (m : Mr R M) :
-    mapPsi R M (PolynomialModule.single R i m) = PolynomialModule.single R i ((X:Polynomial R) • m) := by
+    mapPsi R M (PolynomialModule.single R i m)
+      = PolynomialModule.single R i ((X:Polynomial R) • m) := by
   show PolynomialModule.map R (xAction R M) (PolynomialModule.single R i m) = _
   rw [PolynomialModule.map_single, xAction_apply]
 
