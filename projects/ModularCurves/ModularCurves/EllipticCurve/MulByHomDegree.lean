@@ -92,6 +92,23 @@ noncomputable def projModelFunctionFieldEquiv {K : Type u} [Field K] (W : Weiers
     (projModel W).functionField W.toAffine.FunctionField
     (coordRingToZSection W).symm (MulEquivClass.map_nonZeroDivisors (coordRingToZSection W).symm))
 
+/-- The affine `Z`-chart of `projModel W` (the `X₂ ≠ 0` basic open), on which the global
+sections are `W.toAffine.CoordinateRing` (`coordRingToZSection`). -/
+noncomputable abbrev zChart {K : Type u} [Field K] (W : WeierstrassCurve K) : (projModel W).Opens :=
+  Proj.basicOpen (quotientGrading (projIdeal W))
+    ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+
+/-- **(K4 (D) chart-reduction, step 1)** The fibre rank of the model `[N]` at a point of the affine
+`Z`-chart equals the fibre rank of its base-change along the chart inclusion — reducing the degree
+computation to the affine morphism `[N]⁻¹(Z) → Z` (`finrank_pullback_snd`, needs `[N]` finite flat). -/
+theorem modelEllipticCurve_finrank_zChart {K : Type u} [Field K] (W : WeierstrassCurve K)
+    [W.IsElliptic] (N : ℕ)
+    [Flat ((modelEllipticCurve W).mulByHom N)] [IsFinite ((modelEllipticCurve W).mulByHom N)]
+    (x : (zChart W : (projModel W).Opens)) :
+    ((modelEllipticCurve W).mulByHom N).finrank ((zChart W).ι.base x)
+      = (pullback.snd ((modelEllipticCurve W).mulByHom N) (zChart W).ι).finrank x :=
+  (Scheme.Hom.finrank_pullback_snd ((modelEllipticCurve W).mulByHom N) (zChart W).ι x).symm
+
 /-- **(K4 (D) local-constancy)** The fibre rank of the model `[N]` is constant on the (connected,
 integral) projective model: it suffices to compute it at one convenient point. Uses mathlib's
 `isLocallyConstant_finrank` (finite flat locally-of-finite-presentation) + preconnectedness of the
