@@ -310,6 +310,66 @@ theorem negModelHom_universalLegendreQ (hR : IsUnit (2 : R)) :
       show (universalLegendre R).a₃ = 0 from rfl]
     ring)
 
+open CategoryTheory.CartesianMonoidalCategory in
+attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-LVL-a ★)** On the model curve, multiplication by `−1` IS the model
+negation: the group-object inverse of `modelGrpObj` is `invOver`, whose underlying
+morphism is `negModelHom` (`invOver_left`); `[−1] = (𝟙)⁻¹ = 𝟙 ≫ ι = ι`. -/
+theorem modelEllipticCurve_mulByHom_neg_one {A : Type u} [CommRing A]
+    (W : WeierstrassCurve A) [W.IsElliptic] :
+    (modelEllipticCurve W).mulByHom (-1) = negModelHom W := by
+  show ((modelEllipticCurve W).mulBy (-1)).left = negModelHom W
+  rw [show (modelEllipticCurve W).mulBy (-1) =
+    (letI : Group ((modelEllipticCurve W).asOver ⟶ (modelEllipticCurve W).asOver) :=
+      CategoryTheory.Hom.group
+     (𝟙 (modelEllipticCurve W).asOver) ^ (-1 : ℤ)) from rfl]
+  letI : Group ((modelEllipticCurve W).asOver ⟶ (modelEllipticCurve W).asOver) :=
+    CategoryTheory.Hom.group
+  rw [zpow_neg_one, CategoryTheory.Hom.inv_def, Category.id_comp]
+  rfl
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-LVL-a ★)** The universally marked `P = (0,0)` is `2`-torsion:
+`P = −P` (negation-fix) forces `[2]P = 0`. -/
+theorem two_zsmul_universalLegendreP (hR : IsUnit (2 : R)) :
+    (2 : ℤ) • universalLegendreP R hR = 0 := by
+  haveI := universalLegendre_isElliptic R hR
+  have h1 : ((-1 : ℤ) • universalLegendreP R hR :
+      (universalLegendreObj R hR).curve.Section).1 = (universalLegendreP R hR).1 := by
+    rw [EllipticCurve.point_smul_eq_comp_mulBy]
+    rw [show (universalLegendreObj R hR).curve.mulByHom (-1) =
+      negModelHom (universalLegendre R) from
+      modelEllipticCurve_mulByHom_neg_one (universalLegendre R)]
+    exact negModelHom_universalLegendreP R hR
+  have h2 : -universalLegendreP R hR = universalLegendreP R hR := by
+    rw [← neg_one_zsmul]
+    exact Subtype.ext h1
+  calc (2 : ℤ) • universalLegendreP R hR
+      = universalLegendreP R hR + universalLegendreP R hR := two_zsmul _
+    _ = universalLegendreP R hR + -universalLegendreP R hR := by rw [h2]
+    _ = 0 := add_neg_cancel _
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-LVL-a ★)** The universally marked `Q = (1,0)` is `2`-torsion. -/
+theorem two_zsmul_universalLegendreQ (hR : IsUnit (2 : R)) :
+    (2 : ℤ) • universalLegendreQ R hR = 0 := by
+  haveI := universalLegendre_isElliptic R hR
+  have h1 : ((-1 : ℤ) • universalLegendreQ R hR :
+      (universalLegendreObj R hR).curve.Section).1 = (universalLegendreQ R hR).1 := by
+    rw [EllipticCurve.point_smul_eq_comp_mulBy]
+    rw [show (universalLegendreObj R hR).curve.mulByHom (-1) =
+      negModelHom (universalLegendre R) from
+      modelEllipticCurve_mulByHom_neg_one (universalLegendre R)]
+    exact negModelHom_universalLegendreQ R hR
+  have h2 : -universalLegendreQ R hR = universalLegendreQ R hR := by
+    rw [← neg_one_zsmul]
+    exact Subtype.ext h1
+  calc (2 : ℤ) • universalLegendreQ R hR
+      = universalLegendreQ R hR + universalLegendreQ R hR := two_zsmul _
+    _ = universalLegendreQ R hR + -universalLegendreQ R hR := by rw [h2]
+    _ = 0 := add_neg_cancel _
+
 end TwoTorsion
 
 end ModularCurves
