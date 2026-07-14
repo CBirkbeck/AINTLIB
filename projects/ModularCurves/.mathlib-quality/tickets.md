@@ -2436,6 +2436,15 @@ adjudicates.
   adapted-model isos (chart-glue); **[E12-D4]** `RepresentableBy`: bijection from
   E12-B uniqueness (injectivity) + pullback-functoriality of adapted models
   (surjectivity/naturality). Each of D2–D4 is its own work-session-sized leaf.
+- **E12-D progress (2026-07-14, OMEGA, all sorry-free + axiom-clean)**: **[E12-D1 ★]**
+  `Moduli/UniversalAdapted.lean` — `ModuliRingE12 = R[A₄,A₆][Δ⁻¹]`,
+  `universalShortNF` with `IsShortNF` + `IsElliptic`. **[E12-D2 ω-half ★]**
+  `OmegaBasis.ofPresentation` (the basis a global presentation defines; glued
+  chart-comparisons) + `isAdapted_restrict_ofPresentation` (self-adaptedness — the
+  `ω = dx/y` tautology; `AdaptedModel.lean`). REMAINING D2: the tautological
+  `LocalPresentation G ⊤` for `(modelEllipticCurve W).toEllipticCurveGeom` over
+  `Spec R` (chart-iso = `asIso (pullback.fst)` + `E = projModel W`-defeq +
+  isoSpec-⊤-collapse). Then D3/D4.
   ORIGINAL SPEC: the basis-unit of a presentation**: for `b : OmegaBasis G` and
   `P : LocalPresentation G V`, glue `resLE b_i · (transUnit P|_{V∩U_i} P_i|)`-data over
   the atlas cover into a canonical `basisUnitAt P b : Γ(V)ˣ` (compatibility = b's own
