@@ -81,7 +81,7 @@ LMFDB's *isogeny class* of an elliptic curve is the equivalence class of
 `IsIsogenous`. The `Equivalence`/`Setoid` packaging is assembled here, gated on
 `UniversalDualWitness F`:
 
-* `isIsogenous_refl`, `isIsogenous_trans` — the unconditional half;
+* `IsIsogenous.refl`, `IsIsogenous.trans` — the unconditional half;
 * `IsIsogenous.symm_of_witness` / `IsIsogenous.symm_of` — witness-gated symmetry;
 * `isIsogenousSetoid` / `isIsogenous_equivalence` — the bundled equivalence
   relation (hence the isogeny-class quotient `IsogenyClass`), gated.
@@ -127,10 +127,6 @@ identity isogeny `EC.Isogeny.id`. -/
 theorem IsIsogenous.refl (W : Affine F) [W.IsElliptic] : IsIsogenous W W :=
   ⟨EC.Isogeny.id W⟩
 
-/-- Reflexivity, named for the `Equivalence` packaging. -/
-theorem isIsogenous_refl (W : Affine F) [W.IsElliptic] : IsIsogenous W W :=
-  IsIsogenous.refl W
-
 /-! ### Transitivity (composition of isogenies) -/
 
 /-- **Transitivity**: isogenies compose. If `W₁` is isogenous to `W₂` and `W₂`
@@ -141,12 +137,6 @@ theorem IsIsogenous.trans {W₁ W₂ W₃ : Affine F}
   obtain ⟨φ⟩ := h₁₂
   obtain ⟨ψ⟩ := h₂₃
   exact ⟨ψ.compose φ⟩
-
-/-- Transitivity, named for the `Equivalence` packaging. -/
-theorem isIsogenous_trans {W₁ W₂ W₃ : Affine F}
-    [W₁.IsElliptic] [W₂.IsElliptic] [W₃.IsElliptic]
-    (h₁₂ : IsIsogenous W₁ W₂) (h₂₃ : IsIsogenous W₂ W₃) : IsIsogenous W₁ W₃ :=
-  h₁₂.trans h₂₃
 
 /-! ### Symmetry via the dual isogeny (Silverman III.6.1) — witness-gated
 
@@ -217,11 +207,6 @@ III.6.1, gated form of the former `IsIsogenous.symm`). -/
 theorem IsIsogenous.symm_of (hw : UniversalDualWitness F) {W₁ W₂ : Affine F}
     [W₁.IsElliptic] [W₂.IsElliptic] (h : IsIsogenous W₁ W₂) : IsIsogenous W₂ W₁ :=
   h.symm_of_witness fun φ ↦ hw φ
-
-/-- Symmetry, named for the `Equivalence` packaging (witness-gated). -/
-theorem isIsogenous_symm_of (hw : UniversalDualWitness F) {W₁ W₂ : Affine F}
-    [W₁.IsElliptic] [W₂.IsElliptic] (h : IsIsogenous W₁ W₂) : IsIsogenous W₂ W₁ :=
-  h.symm_of hw
 
 /-! ### The isogeny class as an equivalence relation / setoid (witness-gated)
 
