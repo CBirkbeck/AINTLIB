@@ -2418,6 +2418,16 @@ adjudicates.
   axiom proofs · **Type**: def (done) + 2 theorems (open) · **Depends on**:
   ~~T-E-OMEGA~~ (DISCHARGED ★★), T-E13 ·
   **Sources**: KM 4.6.2 + 2.2.9 (verbatim in the quotes file); GME Ex. 2.2.1 (p. 117).
+- **⚠ T-E14 STATEMENT CORRECTION (2026-07-14, OMEGA — adversarial source check, commit
+  3958babb1)**: KM 4.6.2 VERBATIM couples the two data — pairs `(φ₂, ω)` *"for which
+  the adapted x satisfies x(P₂) = 0, x(Q₂) = 1"*. The plain product
+  `legendreBootstrapProblem = Γ(2)-naive × ω` is the AMBIENT `𝔾ₘ`-bundle over KM's `δ`;
+  the engine axioms are FALSE for it (fibres not finite). The two sorried axiom
+  skeletons were RETRACTED from `Bootstrap.lean` before any proof targeted them.
+  **Consequence for the order of battle: T-E12's `ω`-adapted-model layer (KM 2.2.5 A7
+  normalisation) is a prerequisite for even STATING T-E14's `δ`.** T-E14a's λ-model
+  algebra (LegendreNormalForm.lean, seeded) and the G-action interface ([T-E14-ACT] ★,
+  restricts to the adapted subfunctor) remain valid and in place.
 - **T-E14 continuation decomposition (2026-07-14, OMEGA — post-B9)**: remaining leaves.
   **[T-E14-ACT ★ DONE (2026-07-14, OMEGA)]** — delivered in the engine's `G →* Aut Q`
   interface: `omegaProblemNegAut`/`omegaProblemSignAction` (ℤˣ on the ω-problem),
