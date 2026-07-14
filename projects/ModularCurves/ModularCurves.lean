@@ -55,6 +55,7 @@ import ModularCurves.ForMathlib.SmoothDescent
 import ModularCurves.ForMathlib.SmoothSectionLift
 import ModularCurves.ForMathlib.SpecBasicOpenAway
 import ModularCurves.ForMathlib.SpecEqualizer
+import ModularCurves.ForMathlib.UniquePointFactorsISup
 import ModularCurves.ForMathlib.WeierstrassInvariant
 import ModularCurves.ForMathlib.WeierstrassProjectivePrime
 import ModularCurves.GroupScheme.MuN
