@@ -77,6 +77,17 @@ theorem finite_fibres_mulByHom_of_isMonHom_iso {E F : EllipticCurve S}
   simp only [Set.mem_preimage, Set.mem_singleton_iff] at hx' ⊢
   rw [hbase x', hx']
 
+/-- **(BETA assembly entry point)** An elliptic curve `E/S` is fibrewise elliptic: every fibre of `E.π`,
+pointed by the zero section, is pointed-isomorphic (as a `κ(s)`-scheme) to the projective model of an
+elliptic Weierstrass curve over the residue field. Immediate from the record's `localModel`
+(`LocallyWeierstrass.fibrewiseElliptic`). Supplies, per `s`, the pointed iso
+`e : E.π.fiber s ≅ projModel W` (`heπ` = structure-map compat, `hez` = zero-section compat) that the
+transport assembly wraps into an `asOver` iso + `isMonHom_of_pointed hez` to feed
+`finite_fibres_mulByHom_of_isMonHom_iso` on ALPHA's model finite fibres. -/
+theorem fibrewiseElliptic (E : EllipticCurve S) :
+    FibrewiseElliptic E.π E.zero E.zero_π :=
+  E.localModel.fibrewiseElliptic
+
 /-- **(BB-QF BETA per-fibre sub-leaf — the single remaining BETA obligation)** Each residue-field
 fibre of `[N] : E ⟶ E` is locally quasi-finite. NOTE the fibre's LQF **cannot** come from `[N]`'s own
 LQF (that is circular via `of_fiberToSpecResidueField`); it must come from the model. Precise discharge
