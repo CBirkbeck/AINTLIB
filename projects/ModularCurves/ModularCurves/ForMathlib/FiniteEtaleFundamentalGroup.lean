@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.CategoryTheory.Galois.Equivalence
 import Mathlib.CategoryTheory.Galois.IsFundamentalgroup
 import Mathlib.FieldTheory.Galois.Profinite
@@ -74,8 +79,8 @@ Stated for a general coefficient field `Ω` so that the instance head stays free
 noncomputable instance fiberMulAction (X : (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ) :
     MulAction (Ω ≃ₐ[k] Ω) ((CommAlgCat.FiniteEtale.fiber k Ω).obj X) where
   smul σ x := σ.toAlgHom.comp x
-  one_smul x := AlgHom.ext fun a => rfl
-  mul_smul σ τ x := AlgHom.ext fun a => rfl
+  one_smul _x := AlgHom.ext fun _a => rfl
+  mul_smul _σ _τ _x := AlgHom.ext fun _a => rfl
 
 lemma fiber_smul_def (X : (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ) (σ : Ω ≃ₐ[k] Ω)
     (x : (CommAlgCat.FiniteEtale.fiber k Ω).obj X) :
@@ -84,7 +89,7 @@ lemma fiber_smul_def (X : (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ) (σ : Ω ≃ₐ[
 
 instance : PreGaloisCategory.IsNaturalSMul
     (CommAlgCat.FiniteEtale.fiber k Ω) (Ω ≃ₐ[k] Ω) where
-  naturality σ {X Y} f x := AlgHom.ext fun a => rfl
+  naturality _σ {_X _Y} _f _x := AlgHom.ext fun _a => rfl
 
 end Action
 
