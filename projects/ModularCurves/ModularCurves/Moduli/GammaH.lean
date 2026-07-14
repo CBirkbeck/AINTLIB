@@ -371,6 +371,42 @@ section GammaH
 
 variable (R : CommRingCat.{u})
 
+/-- **(T-H3a)** `pullSection` commutes with integer scalars (from the T-E4a
+additivity). -/
+theorem EllHom.pullSection_zsmul {X Y : EllObj R} (f : X ⟶ Y) (a : ℤ)
+    (P : Y.curve.Section) :
+    EllHom.pullSection R f (a • P) = a • EllHom.pullSection R f P :=
+  map_zsmul (AddMonoidHom.mk' (EllHom.pullSection R f)
+    (EllHom.pullSection_add R f)) a P
+
+/-- **(T-H3b ★)** `pullSection` is `GL₂(ℤ/N)`-equivariant: `glSmul` is an integer
+matrix acting through the section group, and `pullSection` is additive (T-E4a). -/
+theorem EllHom.pullSection_glSmul {X Y : EllObj R} (f : X ⟶ Y) {N : ℕ} [NeZero N]
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (L : Y.curve.FullLevelPt N) :
+    X.curve.glSmul g
+        ⟨⟨EllHom.pullSection R f L.1.1, EllHom.pullSection R f L.1.2⟩,
+          EllHom.isNaiveFullLevel_pullSection R f L.2⟩ =
+      ⟨⟨EllHom.pullSection R f (Y.curve.glSmul g L).1.1,
+        EllHom.pullSection R f (Y.curve.glSmul g L).1.2⟩,
+        EllHom.isNaiveFullLevel_pullSection R f (Y.curve.glSmul g L).2⟩ := by
+  refine Subtype.ext (Prod.ext ?_ ?_)
+  · show (((g : Matrix (Fin 2) (Fin 2) (ZMod N)) 0 0).val : ℤ) •
+        EllHom.pullSection R f L.1.1 +
+      (((g : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 0).val : ℤ) •
+        EllHom.pullSection R f L.1.2 =
+      EllHom.pullSection R f
+        ((((g : Matrix (Fin 2) (Fin 2) (ZMod N)) 0 0).val : ℤ) • L.1.1 +
+         (((g : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 0).val : ℤ) • L.1.2)
+    rw [EllHom.pullSection_add, EllHom.pullSection_zsmul, EllHom.pullSection_zsmul]
+  · show (((g : Matrix (Fin 2) (Fin 2) (ZMod N)) 0 1).val : ℤ) •
+        EllHom.pullSection R f L.1.1 +
+      (((g : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 1).val : ℤ) •
+        EllHom.pullSection R f L.1.2 =
+      EllHom.pullSection R f
+        ((((g : Matrix (Fin 2) (Fin 2) (ZMod N)) 0 1).val : ℤ) • L.1.1 +
+         (((g : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 1).val : ℤ) • L.1.2)
+    rw [EllHom.pullSection_add, EllHom.pullSection_zsmul, EllHom.pullSection_zsmul]
+
 /-- **The moduli problem `P_H`** for `H ≤ GL₂(ℤ/N)`: `E/S ↦ {H`-orbits of (naive) full
 level-`N` structures on `E/S}`. Specialisations: `H = ⊥` is `[Γ(N)]`-naive
 (`gammaHNaive_bot`); `H = {(1 *; 0 *)}` is `[Γ₁(N)]`; `H = {(* *; 0 *)}` is
@@ -382,8 +418,10 @@ noncomputable def gammaHNaiveProblem (N : ℕ) [NeZero N]
   obj X := Quotient (X.unop.curve.hOrbitSetoid H)
   map f := ↾Quotient.map
     (fun L => ⟨⟨EllHom.pullSection R f.unop L.1.1, EllHom.pullSection R f.unop L.1.2⟩,
-      by sorry⟩)
-    (by sorry)
+      EllHom.isNaiveFullLevel_pullSection R f.unop L.2⟩)
+    (by
+      rintro L L' ⟨g, hg, rfl⟩
+      exact ⟨g, hg, EllHom.pullSection_glSmul R f.unop g L⟩)
   map_id X := by
     ext L
     induction L using Quotient.ind with
