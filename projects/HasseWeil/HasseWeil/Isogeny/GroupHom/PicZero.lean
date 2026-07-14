@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.Curves.Divisor.PicZero
 import HasseWeil.Foundation.Curves.Divisor.PicZeroPushforward
 
@@ -63,11 +68,7 @@ noncomputable def picZeroSumOfWitness
     ((⟨W⟩ : Curves.SmoothPlaneCurve F).projPrincipalSubgroup.addSubgroupOf
       (Curves.ProjectiveDivisor.degZero (⟨W⟩ : Curves.SmoothPlaneCurve F)))
     restricted
-    fun D hD ↦ by
-      -- D ∈ addSubgroupOf means D.val ∈ projPrincipalSubgroup
-      -- Apply h_van.
-      show Curves.projectiveDivisorSum W D.val = 0
-      exact h_van D.val hD
+    fun D hD ↦ h_van D.val hD
 
 @[simp] theorem picZeroSumOfWitness_apply_mk
     (W : Affine F) [W.IsElliptic]
@@ -88,8 +89,7 @@ divisor-level fact `projectiveDivisorSum_kappaDivisor`. -/
       Curves.projectiveDivisorSum W D = 0)
     (P : W.Point) :
     picZeroSumOfWitness W h_van (Curves.picZeroOfPoint W P) = P := by
-  unfold Curves.picZeroOfPoint
-  rw [picZeroSumOfWitness_apply_mk]
+  rw [Curves.picZeroOfPoint, picZeroSumOfWitness_apply_mk]
   exact Curves.projectiveDivisorSum_kappaDivisor W P
 
 /-! ### Descent of pushforward to Pic⁰ given the preserves-principal witness -/
@@ -196,12 +196,8 @@ theorem AddHomProperty_of_picZero_witnesses
         pushPic (Curves.picZeroOfPoint W₁ R) :=
     picZeroOfPoint_pushforwardPicZero φ cd h_pres
   -- σ̄_W₁ is injective (from h_inj_W₁: κ ∘ σ̄ = id, so σ̄ has a left inverse).
-  have h_sb1_inj : Function.Injective sb1 := by
-    intro D₁ D₂ h
-    have hh : Curves.picZeroOfPoint W₁ (sb1 D₁) =
-        Curves.picZeroOfPoint W₁ (sb1 D₂) := by rw [h]
-    rw [h_inj_W₁ D₁, h_inj_W₁ D₂] at hh
-    exact hh
+  have h_sb1_inj : Function.Injective sb1 :=
+    Function.LeftInverse.injective h_inj_W₁
   -- κ_W₁ is additive (derived from σ̄_W₁ injective + σ̄ ∘ κ = id + σ̄ group hom).
   have h_κ_W₁_add : ∀ R₁ R₂ : W₁.Point,
       Curves.picZeroOfPoint W₁ (R₁ + R₂) =
