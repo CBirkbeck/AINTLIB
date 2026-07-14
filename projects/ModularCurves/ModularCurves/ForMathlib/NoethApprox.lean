@@ -5,7 +5,6 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-NOETH.
 -/
-import Mathlib
 import ModularCurves.ForMathlib.FlatLocus
 
 /-!
@@ -137,7 +136,7 @@ theorem exists_noetherian_descent (R A : Type u) [CommRing R] [CommRing A] [Alge
       exact ⟨⟨g, hg⟩, Finset.mem_coe.mpr (Finset.mem_attach _ _), hlift ⟨g, hg⟩⟩
   have hI₀map : Ideal.map (MvPolynomial.map (algebraMap R₀ R)) I₀ = I := by
     rw [hI₀, Ideal.map_span, hset, hG]
-  set A₀ : Type u := MvPolynomial (Fin n) R₀ ⧸ I₀ with hA₀
+  set A₀ : Type u := MvPolynomial (Fin n) R₀ ⧸ I₀
   refine ⟨R₀, A₀, inferInstance, inferInstance, hNoeth, ?_, ?_⟩
   · -- `A₀` is finitely presented: it is a quotient of a polynomial algebra by a f.g. ideal.
     exact Algebra.FinitePresentation.quotient (Submodule.fg_span G₀.finite_toSet)
@@ -211,7 +210,8 @@ generated over `ℤ`), so `R ⊗[R₀] A₀ = colimᵢ (Rᵢ ⊗[R₀] A₀)`. T
   of this limit collapses the cover to a single stage `R₁`. This topological engine **is** present
   in mathlib (`AlgebraicGeometry.exists_map_eq_top` / `exists_mem_of_isClosed_of_nonempty`,
   **Stacks 01Z2/01Z3/01Z4**); only wiring the ring colimit `R ⊗[R₀] A₀ = colimᵢ (Rᵢ ⊗[R₀] A₀)` into
-  its scheme-limit cone remains. The irreducible missing ingredient is the pointwise descent above. -/
+  its scheme-limit cone remains. The irreducible missing ingredient is the pointwise descent above.
+  -/
 private theorem exists_subalgebra_flat_baseChange {R : Type u} [CommRing R]
     (R₀ : Subalgebra ℤ R) [IsNoetherianRing R₀]
     (A₀ : Type u) [CommRing A₀] [Algebra R₀ A₀] [Algebra.FinitePresentation R₀ A₀]
