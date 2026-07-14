@@ -369,6 +369,11 @@ Completed dependency claim (2026-07-14): proved
 later-stage transport, and finite families of colimit unit equalities can be synchronized as
 literal equalities at one common stage.
 
+Completed dependency claim (2026-07-14): proved `FunctorModel.map_unit_colimit`, the unit-level
+naturality square between a finite-stage functor map and its target-colimit map. This rewrites
+the synchronized finite-stage Cech equations directly to the geometric transition-unit
+equations.
+
 Active dependency claim (2026-07-14): spread the finite family of pair-overlap transition
 units, their inverses, and the triple-overlap equations to one later finite stage of the
 affine-intersection model. This will construct the finite-stage line bundle whose base change

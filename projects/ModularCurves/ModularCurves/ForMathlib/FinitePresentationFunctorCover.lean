@@ -330,6 +330,21 @@ theorem SpreadData.FunctorModel.mapToStage_map_unitTransition
   exact M.mapToStage_map_stageTransition hij f (x :
     (M.object X).spreadStage (t := t) (M.le_stage X))
 
+/-- Applying a finite-stage functor map to a unit commutes with passage to the target
+colimit functor. -/
+theorem SpreadData.FunctorModel.map_unit_colimit
+    (M : SpreadData.FunctorModel F H) {X Y : J} (f : X ⟶ Y)
+    (x : ((M.object X).spreadStage (t := t) (M.le_stage X))ˣ) :
+    Units.map ((M.object Y).stageToColimit H
+        ⟨M.stage, M.le_stage Y⟩).toMonoidHom
+        (Units.map (M.map f).toMonoidHom x) =
+      Units.map (F.map f).hom.toMonoidHom
+        (Units.map ((M.object X).stageToColimit H
+          ⟨M.stage, M.le_stage X⟩).toMonoidHom x) := by
+  apply Units.ext
+  exact M.map_colimit f (x :
+    (M.object X).spreadStage (t := t) (M.le_stage X))
+
 private structure SpreadData.FunctorModel.UnitLiftStage
     (M : SpreadData.FunctorModel F H) (X : J) (a : (F.obj X)ˣ) where
   stage : ι
