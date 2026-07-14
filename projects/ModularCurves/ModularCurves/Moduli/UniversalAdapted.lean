@@ -584,4 +584,38 @@ theorem classifyingTop_piece {R : CommRingCat.{u}} (Y : EllObj R)
       chartPiece Y b h2 h3 p.1.1 p.1.2 p.2 :=
   (adaptedTotalCover Y).ι_glueMorphisms _ _ p
 
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(E12-D3-E4)** The glued comparison lies over the classifying map: the base
+square of the classifying `EllHom` commutes. -/
+theorem classifyingTop_π_w {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤))) :
+    classifyingTop Y b h2 h3 ≫ projModelπ (universalShortNF R) =
+      Y.curve.toEllipticCurveGeom.π ≫ classifyingMap Y b h2 h3 := by
+  refine (adaptedTotalCover Y).hom_ext _ _ (fun p => ?_)
+  rw [← Category.assoc, classifyingTop_piece, chartPiece_π]
+  have hsplit : Spec.map (CommRingCat.ofHom
+      (((Y.base.presheaf.map (homOfLE (le_top : p.1.1.1 ≤ ⊤)).op).hom).comp
+        (classifyingRingHom Y b h2 h3))) =
+    Spec.map (Y.base.presheaf.map (homOfLE (le_top : p.1.1.1 ≤ ⊤)).op) ≫
+      Spec.map (CommRingCat.ofHom (classifyingRingHom Y b h2 h3)) := by
+    rw [← Spec.map_comp]
+    rfl
+  rw [hsplit,
+    show p.1.1.2.isoSpec.hom = p.1.1.1.toSpecΓ from IsAffineOpen.isoSpec_hom _]
+  rw [show p.1.1.1.toSpecΓ ≫
+      Spec.map (Y.base.presheaf.map (homOfLE (le_top : p.1.1.1 ≤ ⊤)).op) ≫
+      Spec.map (CommRingCat.ofHom (classifyingRingHom Y b h2 h3)) =
+    (p.1.1.1.ι ≫ Y.base.toSpecΓ) ≫
+      Spec.map (CommRingCat.ofHom (classifyingRingHom Y b h2 h3)) from by
+    rw [← Category.assoc, Scheme.Opens.toSpecΓ_SpecMap_presheaf_map_top]]
+  rw [show (p.1.1.1.ι ≫ Y.base.toSpecΓ) ≫
+      Spec.map (CommRingCat.ofHom (classifyingRingHom Y b h2 h3)) =
+    p.1.1.1.ι ≫ classifyingMap Y b h2 h3 from by
+    rw [Category.assoc]; rfl]
+  rw [← Category.assoc, ← pullback.condition, Category.assoc, adaptedTotalCover_f]
+
 end ModularCurves
