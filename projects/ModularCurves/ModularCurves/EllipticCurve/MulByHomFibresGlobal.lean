@@ -103,17 +103,19 @@ theorem fibreModelIsoAsOver (E : EllipticCurve S) (s : S)
     ∃ φ : (E.baseChange (S.fromSpecResidueField s)).asOver ≅ (modelEllipticCurve W).asOver,
       IsMonHom φ.hom := by
   haveI : IsLocallyNoetherian (Spec (S.residueField s)) := inferInstance
-  refine ⟨Over.isoMk e heπ, isMonHom_of_pointed _ ?_⟩
-  -- η-matching (STRUCTURE LANDED; closer scoped). Derivation is mapped: `ext1` reduces to
-  -- `η.left ≫ (Over.isoMk e heπ).hom.left = η.left`; `one_eq_zero` (both records) rewrites each
-  -- `η.left = 𝟙_.hom ≫ zero`, `(E.baseChange _).zero` is defeq `sectionFiberPoint`, and `hez`
-  -- (`sectionFiberPoint ≫ e.hom = projModelZero W = (modelEllipticCurve W).zero`) closes it.
-  -- The SYNTACTIC closer is transparency-blocked: `Over.isoMk e heπ` carries `e`'s defeq-cast type
-  -- (`fiber ≅ projModel` ↦ `asOver.left ≅ asOver.left`), so `Over.isoMk_hom_left`-style rewrites and
-  -- `𝟙_`-base matches (`residueField s` vs `CommRingCat.of ↑(residueField s)`) don't fire under
-  -- `instances` transparency; needs `eqToIso` cast-restructuring (Comparison.lean-style). Atlas-lane closer.
+  -- ascribe `e` to the `asOver.left` types (defeq) so `Over.isoMk_hom_left` fires without cast friction
+  let e' : (E.baseChange (S.fromSpecResidueField s)).asOver.left ≅ (modelEllipticCurve W).asOver.left := e
+  have heπ' : e'.hom ≫ (modelEllipticCurve W).asOver.hom
+      = (E.baseChange (S.fromSpecResidueField s)).asOver.hom := heπ
+  refine ⟨Over.isoMk e' heπ', isMonHom_of_pointed _ ?_⟩
+  -- η-matching: `one_eq_zero` (both) turns `η.left` into `𝟙_.hom ≫ zero`; `(E.baseChange _).zero` is
+  -- defeq `sectionFiberPoint`, so `hez` (`sectionFiberPoint ≫ e.hom = projModelZero W`) closes it.
   ext1
-  sorry
+  rw [Over.comp_left, show (Over.isoMk e' heπ').hom.left = e'.hom from rfl,
+    (E.baseChange (S.fromSpecResidueField s)).one_eq_zero, (modelEllipticCurve W).one_eq_zero]
+  exact (Category.assoc _ _ _).trans
+    (congrArg _ (show (E.baseChange (S.fromSpecResidueField s)).zero ≫ e'.hom
+      = (modelEllipticCurve W).zero from hez))
 
 /-- **(BB-QF BETA per-fibre sub-leaf — the single remaining BETA obligation)** Each residue-field
 fibre of `[N] : E ⟶ E` is locally quasi-finite. NOTE the fibre's LQF **cannot** come from `[N]`'s own
