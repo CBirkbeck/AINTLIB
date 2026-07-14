@@ -928,6 +928,54 @@ theorem legendrePiece_restrict {R : CommRingCat.{u}} {X : EllObj R}
     projModelBaseChange_congr_hom hσ.symm (universalLegendre R),
     ← Category.assoc, eqToHom_trans]
 
+open LocalPresentation WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-CLS-5)** Witnesses restrict to smaller affines (all four conditions
+restrict). -/
+noncomputable def LegendreWitness.restrict {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (w : LegendreWitness X L b) {W : X.base.affineOpens} (h : W.1 ≤ w.V.1) :
+    LegendreWitness X L b where
+  V := W
+  Pr := w.Pr.restrict h
+  lam := Scheme.resLE h w.lam
+  hAd := w.hAd.restrict h
+  hW := restrict_W_legendre w.hW h
+  hMP := by
+    have hres := w.hMP.restrict h
+    rwa [map_zero] at hres
+  hMQ := by
+    have hres := w.hMQ.restrict h
+    rwa [map_one, map_zero] at hres
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+/-- **(T-E14-CLS-5, ≈E3d)** The witness cover of the total space. -/
+noncomputable def legendreWitnessCover {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) :
+    X.curve.toEllipticCurveGeom.E.OpenCover :=
+  Scheme.Cover.mkOfCovers
+    (LegendreWitness X L b)
+    (fun w => pullback X.curve.toEllipticCurveGeom.π w.V.1.ι)
+    (fun w => pullback.fst X.curve.toEllipticCurveGeom.π w.V.1.ι)
+    (fun x => by
+      obtain ⟨V, hxV, Pr, lam, hAd, hW, hMP, hMQ⟩ := hD
+        (X.curve.toEllipticCurveGeom.π.base x)
+      have hx : x ∈ Set.range (pullback.fst X.curve.toEllipticCurveGeom.π
+          V.1.ι).base := by
+        rw [Scheme.Pullback.range_fst, Set.mem_preimage, Scheme.Opens.range_ι,
+          SetLike.mem_coe]
+        exact hxV
+      obtain ⟨y, hy⟩ := hx
+      exact ⟨⟨V, Pr, lam, hAd, hW, hMP, hMQ⟩, y, hy⟩)
+
+open CategoryTheory Limits in
+@[simp] theorem legendreWitnessCover_f {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (w : LegendreWitness X L b) :
+    (legendreWitnessCover hD).f w =
+      pullback.fst X.curve.toEllipticCurveGeom.π w.V.1.ι := rfl
+
 end TwoTorsion
 
 end ModularCurves
