@@ -231,7 +231,7 @@ theorem projModelVCIso_injective (C₁ C₂ : VariableChange R) (W : Weierstrass
 
 /-- The affine scheme's canonical `Spec` isomorphism agrees with the isomorphism attached
 to any proof that its top open is affine. -/
-private lemma isoSpec_hom_comp_isoSpec_inv_top (S : Scheme.{u}) [IsAffine S]
+lemma isoSpec_hom_comp_isoSpec_inv_top (S : Scheme.{u}) [IsAffine S]
     (h : IsAffineOpen (⊤ : S.Opens)) :
     h.isoSpec.hom ≫ S.isoSpec.inv = (⊤ : S.Opens).ι := by
   rw [← IsAffineOpen.fromSpec_top, ← IsAffineOpen.isoSpec_inv_ι,
