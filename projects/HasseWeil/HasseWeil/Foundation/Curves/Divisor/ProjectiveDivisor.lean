@@ -3,9 +3,9 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import HasseWeil.Foundation.Curves.Divisor.Divisors
 import Mathlib.FieldTheory.IsAlgClosed.Basic
 import Mathlib.FieldTheory.RatFunc.Degree
-import HasseWeil.Foundation.Curves.Divisor.Divisors
 
 /-!
 # Projective divisors on a smooth plane curve
@@ -18,7 +18,7 @@ equation, the projective closure has a unique point at infinity
 `SmoothPlaneCurve.ordAtInfty : F(C) → WithTop ℤ` defined in
 `HasseWeil/Curves/Infinity.lean`.
 
-This file provides the minimal type-theoretic scaffolding:
+## Main definitions
 
 * `ProjectiveSmoothPoint C` — inductive type with constructors `affine P`
   (for `P : C.SmoothPoint`) and `infinity`.
@@ -28,17 +28,28 @@ This file provides the minimal type-theoretic scaffolding:
   map with its additive-group-hom packaging.
 * `Divisor.toProjective` — the embedding of the affine divisor group into
   `ProjectiveDivisor C`.
+* `SmoothPlaneCurve.projectiveDivisorOf f` — the projective divisor of a
+  rational function, combining `divisorOf` with `ordAtInfty`.
+* `SmoothPlaneCurve.projPrincipalSubgroup`, `PicProj`, `PicProj₀` — the
+  principal subgroup and the (degree-zero) Picard group on the projective
+  closure.
 
-Future work (this ticket):
+## Main results
 
-* `SmoothPlaneCurve.projectiveDivisorOf f` — the full projective divisor
-  of a rational function, combining `divisorOf` with `ordAtInfty`.
-* Principal subgroup, linear equivalence, `Pic`/`Pic⁰` lifted to the
-  projective setting.
-* Silverman II.3.1(b): `deg(projectiveDivisorOf f) = 0` for nonzero `f`.
+* `projectiveDivisorOf_mul`, `projectiveDivisorOf_inv` — multiplicativity of
+  the projective divisor map on nonzero functions.
+* `projectiveDivisorOf_degree` — the structural decomposition
+  `deg = (divisorOf f).degree + (ordAtInfty f).untopD 0`.
 
-Reference: Silverman, *The Arithmetic of Elliptic Curves*, II.3 (projective
-form).
+## Future work
+
+* Silverman II.3.1(b): `deg(projectiveDivisorOf f) = 0` for nonzero `f`,
+  unconditionally (currently proved only in the Helper-B-factored form
+  `projectiveDivisorOf_degree_eq_zero_of_helperB`).
+
+## References
+
+* [Silverman, *The Arithmetic of Elliptic Curves*], II.3 (projective form).
 -/
 
 namespace HasseWeil.Curves
