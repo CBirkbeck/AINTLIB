@@ -385,7 +385,14 @@ units now lifts to actual units after moving the spread functor to a later stage
 Cech equation holds literally there, and each descended unit maps back to its original
 colimit transition unit.
 
-Active dependency claim (2026-07-14): construct the invertible sheaf on the glued finite-stage
-scheme from the descended unit cocycle, then identify its pullback along the base-change model
-isomorphism with the original invertible sheaf. This is the remaining line-bundle descent step
-before applying arbitrary-base spreading to the pole sheaves used in cohomology and base change.
+Completed dependency claim (2026-07-14): proved
+`AffineIntersectionUnitCocycle.transition_self`, `transition_mul_swap`, and
+`transition_swap`. Thus the diagonal transition is one and reversing an ordered overlap
+gives the inverse transition after the canonical pair-swap, derived from the triple cocycle
+rather than stored as extra descent hypotheses.
+
+Active dependency claim (2026-07-14): convert a finite-stage affine-intersection unit
+cocycle into scalar automorphisms of the unit sheaves on the overlap schemes and prove their
+identity, inverse, and triple-cocycle laws. This is the local module descent datum needed to
+construct the invertible sheaf on the glued finite-stage scheme and compare its base change
+with the original pole sheaf.

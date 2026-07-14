@@ -102,6 +102,104 @@ structure AffineIntersectionUnitCocycle
         (Scheme.GlueData.affineIntersectionPairToTripleRight i j k)).hom.toMonoidHom
       (transition i k)
 
+private theorem functorMapUnits_injective_of_retraction
+    {A J : Type u} [CommRing A] (F : Finset J ⥤ CommAlgCat.{u} A)
+    {s q : Finset J} (f : s ⟶ q) (g : q ⟶ s) :
+    Function.Injective (Units.map (F.map f).hom.toMonoidHom) := by
+  apply Units.map_injective
+  intro x y hxy
+  calc
+    x = (F.map g).hom ((F.map f).hom x) := by
+      rw [← ConcreteCategory.comp_apply, ← F.map_comp]
+      have hfg : f ≫ g = 𝟙 s := Subsingleton.elim _ _
+      rw [hfg, F.map_id]
+      rfl
+    _ = (F.map g).hom ((F.map f).hom y) := congrArg (F.map g).hom hxy
+    _ = y := by
+      rw [← ConcreteCategory.comp_apply, ← F.map_comp]
+      have hfg : f ≫ g = 𝟙 s := Subsingleton.elim _ _
+      rw [hfg, F.map_id]
+      rfl
+
+/-- The transition unit from a chart to itself is trivial. -/
+@[simp]
+theorem AffineIntersectionUnitCocycle.transition_self
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F) (i : J) :
+    c.transition i i = 1 := by
+  classical
+  let f := Scheme.GlueData.affineIntersectionPairToTripleLeft i i i
+  let g : Scheme.GlueData.affineIntersectionTripleIndex i i i ⟶
+      Scheme.GlueData.affineIntersectionPairIndex i i := homOfLE (by
+        simp [Scheme.GlueData.affineIntersectionPairIndex,
+          Scheme.GlueData.affineIntersectionTripleIndex])
+  apply functorMapUnits_injective_of_retraction F f g
+  have hc := c.cocycle i i i
+  have hmiddle :
+      Scheme.GlueData.affineIntersectionPairToTripleMiddle i i i = f :=
+    Subsingleton.elim _ _
+  have hright :
+      Scheme.GlueData.affineIntersectionPairToTripleRight i i i = f :=
+    Subsingleton.elim _ _
+  rw [hmiddle, hright] at hc
+  rw [map_one]
+  apply mul_left_cancel (a := Units.map (F.map f).hom.toMonoidHom (c.transition i i))
+  simpa only [mul_one] using hc
+
+/-- Reversing an ordered pair inverts its transition unit after transport along the
+canonical pair-swap map. -/
+theorem AffineIntersectionUnitCocycle.transition_mul_swap
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F) (i j : J) :
+    c.transition i j *
+        Units.map (F.map
+          (Scheme.GlueData.affineIntersectionPairSwap i j)).hom.toMonoidHom
+          (c.transition j i) = 1 := by
+  classical
+  let f := Scheme.GlueData.affineIntersectionPairToTripleLeft i j i
+  let g : Scheme.GlueData.affineIntersectionTripleIndex i j i ⟶
+      Scheme.GlueData.affineIntersectionPairIndex i j := homOfLE (by
+        intro x hx
+        simpa [Scheme.GlueData.affineIntersectionPairIndex,
+          Scheme.GlueData.affineIntersectionTripleIndex, or_comm] using hx)
+  apply functorMapUnits_injective_of_retraction F f g
+  rw [map_mul, map_one]
+  have hc := c.cocycle i j i
+  have hmiddle :
+      Scheme.GlueData.affineIntersectionPairSwap i j ≫ f =
+        Scheme.GlueData.affineIntersectionPairToTripleMiddle i j i :=
+    Subsingleton.elim _ _
+  have hswap :
+      Units.map (F.map f).hom.toMonoidHom
+          (Units.map (F.map
+            (Scheme.GlueData.affineIntersectionPairSwap i j)).hom.toMonoidHom
+              (c.transition j i)) =
+        Units.map (F.map
+          (Scheme.GlueData.affineIntersectionPairToTripleMiddle i j i)).hom.toMonoidHom
+            (c.transition j i) := by
+    apply Units.ext
+    change (F.map f).hom
+        ((F.map (Scheme.GlueData.affineIntersectionPairSwap i j)).hom
+          (c.transition j i : F.obj
+            (Scheme.GlueData.affineIntersectionPairIndex j i))) =
+      (F.map (Scheme.GlueData.affineIntersectionPairToTripleMiddle i j i)).hom
+        (c.transition j i : F.obj
+          (Scheme.GlueData.affineIntersectionPairIndex j i))
+    rw [← ConcreteCategory.comp_apply, ← F.map_comp, hmiddle]
+  rw [hswap]
+  rw [c.transition_self i, map_one] at hc
+  exact hc
+
+/-- The transition unit on the reversed overlap is the inverse transition unit after
+transport to the original ordered overlap. -/
+theorem AffineIntersectionUnitCocycle.transition_swap
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F) (i j : J) :
+    Units.map (F.map
+        (Scheme.GlueData.affineIntersectionPairSwap i j)).hom.toMonoidHom
+        (c.transition j i) = (c.transition i j)⁻¹ :=
+  eq_inv_of_mul_eq_one_right (c.transition_mul_swap i j)
+
 /-- Affine-intersection transition units are compatible with every restriction map in
 the coordinate-ring functor. -/
 theorem affineIntersectionTransitionUnit_map
