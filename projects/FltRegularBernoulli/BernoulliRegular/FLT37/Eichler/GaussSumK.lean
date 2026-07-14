@@ -410,7 +410,7 @@ lemma charP_quotient_of_liesOver_ell (𝔓 : Ideal (𝓞 L)) [𝔓.IsPrime]
     ⟨Ideal.IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver
       (R := ℤ) (S := 𝓞 L) (p := Ideal.span {(ℓ : ℤ)}) 𝔓 hℓ0⟩
   letI : Algebra (ℤ ⧸ (Ideal.span {(ℓ : ℤ)})) (𝓞 L ⧸ 𝔓) :=
-    Ideal.Quotient.algebraQuotientOfRamificationIdxNeZero (Ideal.span {(ℓ : ℤ)}) 𝔓
+    Ideal.Quotient.algebraQuotientOfLEComap (le_of_eq (𝔓.over_def (Ideal.span {(ℓ : ℤ)})))
   haveI : CharP (ℤ ⧸ (Ideal.span {(ℓ : ℤ)})) ℓ :=
     charP_of_injective_ringHom
       (f := (Int.quotientSpanNatEquivZMod ℓ).symm.toRingHom)
@@ -556,8 +556,8 @@ lemma gaussSumL_count_add_inv_eq_sub_one
   have hcount_ell :
       (UniqueFactorizationMonoid.normalizedFactors
           (Ideal.span ({(ℓ : 𝓞 L)} : Set (𝓞 L)))).count 𝔓 = ℓ - 1 := by
-    rw [Ideal.IsDedekindDomain.ramificationIdx_eq_normalizedFactors_count
-        (R := ℤ) (S := 𝓞 L) (p := Ideal.span {(ℓ : ℤ)}) (P := 𝔓)
+    rw [Ideal.IsDedekindDomain.ramificationIdx'_eq_normalizedFactors_count
+        (p := Ideal.span {(ℓ : ℤ)}) (P := 𝔓)
         hℓmap_ne_bot inferInstance h𝔓_ne_bot, hℓmap] at hram
     exact hram
   have hmuleq : Iχ * Iχinv = Ideal.span ({(ℓ : 𝓞 L)} : Set (𝓞 L)) :=
