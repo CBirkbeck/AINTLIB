@@ -98,17 +98,6 @@ theorem exists_pos_ramificationIdx_at_infinity (φ : Isogeny W₁ W₂) :
 
 /-! ### `∞`-regularity reflection (the `hrefl`/`hramO` residual of `Dual.lean`) -/
 
-/-- `0 ≤ e • x → 0 ≤ x` in `WithTop ℤ` for `e ≥ 1` (order-reflection of `nsmul`).
-A self-contained copy of the same mechanism used in `Dual.lean`. -/
-private theorem nonneg_of_nsmul_nonneg' {e : ℕ} (he : 1 ≤ e) {x : WithTop ℤ}
-    (h : 0 ≤ e • x) : 0 ≤ x := by
-  induction x with
-  | top => exact le_top
-  | coe k =>
-    rw [← WithTop.coe_nsmul, nsmul_eq_mul] at h
-    norm_cast at h ⊢
-    exact (mul_nonneg_iff_of_pos_left (by exact_mod_cast he)).mp h
-
 /-- **`∞`-regularity reflection from an isogeny — unconditional** (Silverman
 III.4.10a, the `hrefl`/`hramO` residual of the dual-isogeny construction,
 discharged for *every* isogeny).  From the ramification formula
@@ -128,7 +117,7 @@ theorem reflects_ordAtInfty (φ : Isogeny W₁ W₂)
   rcases eq_or_ne g 0 with rfl | hg
   · simp
   · obtain ⟨e, he, hformula⟩ := exists_pos_ramificationIdx_at_infinity φ
-    apply nonneg_of_nsmul_nonneg' he
+    apply nonneg_of_nsmul_nonneg he
     rwa [← hformula g hg]
 
 end HasseWeil.EC.Isogeny
