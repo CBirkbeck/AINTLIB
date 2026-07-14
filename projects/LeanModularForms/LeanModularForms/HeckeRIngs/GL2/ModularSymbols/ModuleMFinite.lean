@@ -244,7 +244,7 @@ theorem exists_div0_orbit_span :
   have hsubset : ∀ d ∈ divGenSet gens c₀, d ∈ T := by
     intro d hd
     refine Submodule.subset_span ⟨1, d, hd, ?_⟩
-    simp
+    simp only [OneMemClass.coe_one, map_one, Module.End.one_apply]
   -- One-step generators `(s • c) - (c)` lie in `T` (for representatives `c`).
   have hgen : ∀ s ∈ (gens : Set (CongruenceSubgroup.Gamma1 N)), ∀ c ∈ orbitReps N,
       divDiff (s • c) c ∈ T := by
