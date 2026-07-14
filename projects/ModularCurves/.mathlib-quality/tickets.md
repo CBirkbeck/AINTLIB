@@ -19721,3 +19721,15 @@ injectivity on E[ℓⁿ] + rational-points-have-distinct-topological-points + al
 + finite-fibres-of-κ̄/κ-descent on closed points). Then: model-count → BETA transport
 (localModel-over-field + baseChange-of-model + pointed-iso + GIT 6.4) → `mulByHom_finite_fibres`
 (arbitrary base) → the banked reduction closes BB-QF; Torsion-relocation boarded for coordinator.
+
+## v10.222-G0 (2026-07-14) — ★ ModelFibreCount SORRY-FREE: the model fibre-count is REAL modulo one witness
+g1-g4 ALL DISCHARGED (zChartHomeo; curvelike classification with the new
+`IsPreirreducible.preimage_isOpenEmbedding` reflection lemma + elementary closure-chase;
+Jacobson-infinitude; opens-compact Noetherian-ness). `modelMulByHom_finite_preimage_singleton`:
+every `[N]`-fibre on `projModel W` (any field) is finite GIVEN
+`(Set.range [N].base).Infinite` — **g5, the sole remaining ALPHA leaf** (HasseWeil route boarded
+v10.221). BETA leg (transport: localModel-over-field pointed iso + GIT 6.4 +
+`locallyQuasiFinite_mulByHom_of_isMonHom_iso`) unchanged. LEAN-OP additions: IsIrreducible/
+IsPreirreducible are DEFS — dot-notation fails after `.2`-projection (apply lemmas explicitly);
+`Scheme.Hom.base` needs `⇑` to `set` as a plain function; `Set.nonempty_compl.mpr` for
+complement-nonemptiness.
