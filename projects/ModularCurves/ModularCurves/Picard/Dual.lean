@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.Picard.InvertibleSheaf
 import Mathlib.Algebra.Category.ModuleCat.Sheaf.PushforwardContinuous
 import Mathlib.CategoryTheory.Sites.SheafHom
@@ -417,7 +422,6 @@ theorem dual_val (M : _root_.SheafOfModules R) :
     (dual R M).val = dualPresheaf R M :=
   rfl
 
-set_option maxHeartbeats 4000000 in
 section
 
 private instance overIsMulCommutative (U : C) :
@@ -433,12 +437,14 @@ private noncomputable def iteratedOverEquivalence (U : C) (V : Over U) :
     (S := (R.over U).over V) (R := R.over V.left) (𝟙 _) (𝟙 _)
     (by ext : 2; exact R.1.map_id _) (by ext : 2; exact R.1.map_id _)).symm
 
+set_option maxHeartbeats 2000000 in
 private noncomputable def iteratedDualSectionsEquiv
     (M : _root_.SheafOfModules R) (U : C) (V : Over U) :
     (((M.over U).over V ⟶ _root_.SheafOfModules.unit ((R.over U).over V))) ≃
       (M.over V.left ⟶ _root_.SheafOfModules.unit (R.over V.left)) :=
   (iteratedOverEquivalence R U V).fullyFaithfulFunctor.homEquiv
 
+set_option maxHeartbeats 2000000 in
 private noncomputable def iteratedDualSectionsLinearEquiv
     (M : _root_.SheafOfModules R) (U : C) (V : Over U) :
     letI : Module (R.obj.obj (op V.left))
