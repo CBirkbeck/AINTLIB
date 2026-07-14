@@ -294,7 +294,13 @@ Completed dependency claim (2026-07-14): proved
 packaging a finite affine trivializing cover of an invertible sheaf together with the
 finite-stage proper model and its base-change isomorphism.
 
-Active dependency claim (2026-07-14): prove
-`ModularCurves.SheafOfModules.overUnitScalarEndRingEquiv` and use it to extract units
-from changes of invertible-sheaf trivialization on affine overlaps. These units are the
-finite cocycle data to be descended to the spread model.
+Completed dependency claim (2026-07-14): proved
+`ModularCurves.SheafOfModules.overUnitScalarEndRingEquiv`,
+`Scheme.Modules.trivializationTransitionUnit`, and its identity, inverse, and transitivity
+laws. Thus changes between two trivializations on one open are represented by genuine units
+of its section ring, with the expected cocycle equations and no extra hypotheses.
+
+Active dependency claim (2026-07-14): prove restriction compatibility for
+`trivializationTransitionUnit`, then package the resulting pairwise units and triple-overlap
+cocycle for a finite affine trivializing cover. This is the finite descent datum needed to
+spread the pole line bundle together with the proper affine-intersection model.

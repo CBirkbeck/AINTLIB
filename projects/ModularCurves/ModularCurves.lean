@@ -149,6 +149,7 @@ import ModularCurves.Picard.DualPullback.TrivializationRestriction
 import ModularCurves.Picard.DualRestrict
 import ModularCurves.Picard.InvertibleSheaf
 import ModularCurves.Picard.InvertibleSheafBaseCechFlat
+import ModularCurves.Picard.InvertibleSheafCocycle
 import ModularCurves.Picard.InvertibleSheafFiniteAffineCover
 import ModularCurves.Picard.InvertibleSheafFiniteStageModel
 import ModularCurves.Picard.InvertibleSheafLocallyFree
