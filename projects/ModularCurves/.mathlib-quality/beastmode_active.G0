@@ -1,2 +1,4 @@
-STREAM-G0 CLAIMED 2026-07-14 (v10.219): E[N] finiteness substrate. ONE session (per ruling).
-FOCUS: (1) BB-QF mulByHom_locallyQuasiFinite (Torsion:141) -> closes mulByHom_isFinite; (2) then scope BB-FLAT via /develop --decompose. KM owns degree half.
+STREAM-G0 v10.219 BB-QF wall-break build — PARTITION (two G0 sessions converged into pipeline):
+(ALPHA, this session): MODEL FIBRE-COUNT in NEW FILE ModelFibreCount.lean — [KEY-INF] Spec CR infinite (Jacobson+not-field), [KEY-TOP] irreducible-closed classification, HasseWeil witness, case analysis.
+(BETA, sibling/Opus): TRANSPORT ASSEMBLY — localModel extraction over Spec k, baseChange of modelEllipticCurve, pointed iso -> IsMonHom (GIT 6.4) -> mulByHom_comp_left_of_isMonHom conjugation; global L2 reduction; keep MulByHomFibres.lean yours to extend.
+Shared substrate BANKED green: mulBy_comp_of_isMonHom / mulByHom_comp_left_of_isMonHom / coordinateRing_krullDimLE_one (86a047f27).
