@@ -145,7 +145,7 @@ theorem isPullback_sectionBaseChange {π : C ⟶ S} (z : S ⟶ C) (hz : z ≫ π
     exact h
 
 /-- A section of a separated morphism is a closed immersion. -/
-private lemma sectionsIdealAux_isClosedImmersion {π : C ⟶ S} [IsSeparated π] {z : S ⟶ C}
+private lemma SectionsIdeal.isClosedImmersion {π : C ⟶ S} [IsSeparated π] {z : S ⟶ C}
     (hz : z ≫ π = 𝟙 S) : IsClosedImmersion z := by
   have h1 : IsClosedImmersion (z ≫ π) := by rw [hz]; infer_instance
   exact IsClosedImmersion.of_comp z π
@@ -158,7 +158,7 @@ theorem ker_sectionBaseChange {π : C ⟶ S} [IsSeparated π] (z : S ⟶ C)
         (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]) :
       T ⟶ Limits.pullback π t).ker =
       (Scheme.Hom.ker z).comap (Limits.pullback.fst π t) := by
-  haveI : IsClosedImmersion z := sectionsIdealAux_isClosedImmersion hz
+  haveI : IsClosedImmersion z := SectionsIdeal.isClosedImmersion hz
   rw [← (isPullback_sectionBaseChange z hz t).isoPullback_hom_fst,
     Scheme.Hom.ker_comp_of_isIso,
     Scheme.IdealSheafData.ker_fst_of_isClosedImmersion]
@@ -169,7 +169,7 @@ Its subscheme is isomorphic to `S` itself (`IsIso z.toImage`), so all relative
 finiteness properties transport from the identity. -/
 noncomputable def sectionDivisor (π : C ⟶ S) [IsSeparated π] (z : S ⟶ C)
     (hz : z ≫ π = 𝟙 S) : RelEffCartierDiv π := by
-  haveI hzc : IsClosedImmersion z := sectionsIdealAux_isClosedImmersion hz
+  haveI hzc : IsClosedImmersion z := SectionsIdeal.isClosedImmersion hz
   have hι : z.ker.subschemeι = inv z.toImage ≫ z := by
     rw [IsIso.eq_inv_comp, Scheme.Hom.toImage_imageι]
   have hπ : z.ker.subschemeι ≫ π = inv z.toImage := by
@@ -183,7 +183,7 @@ noncomputable def sectionDivisor (π : C ⟶ S) [IsSeparated π] (z : S ⟶ C)
 /-- **(T-D3, single-section degree)** The divisor of a single section has degree `1`. -/
 theorem sectionDivisor_degree (π : C ⟶ S) [IsSeparated π] (z : S ⟶ C)
     (hz : z ≫ π = 𝟙 S) (s : S) : (sectionDivisor π z hz).degree s = 1 := by
-  haveI hzc : IsClosedImmersion z := sectionsIdealAux_isClosedImmersion hz
+  haveI hzc : IsClosedImmersion z := SectionsIdeal.isClosedImmersion hz
   have hπ : (Scheme.Hom.ker z).subschemeι ≫ π = inv z.toImage := by
     rw [show (Scheme.Hom.ker z).subschemeι = inv z.toImage ≫ z from by
       rw [IsIso.eq_inv_comp, Scheme.Hom.toImage_imageι], Category.assoc, hz,
@@ -835,7 +835,7 @@ theorem exists_affineOpen_ker_principal_nonZeroDivisor (π : C ⟶ S) [IsSeparat
     ∃ V : C.affineOpens, c ∈ V.1 ∧ ∃ f : Γ(C, V.1),
       (Scheme.Hom.ker z).ideal V = Ideal.span {f} ∧
       f ∈ nonZeroDivisors Γ(C, V.1) := by
-  haveI hzc : IsClosedImmersion z := sectionsIdealAux_isClosedImmersion hz
+  haveI hzc : IsClosedImmersion z := SectionsIdeal.isClosedImmersion hz
   by_cases hc : c ∈ (Scheme.Hom.ker z).support
   case neg =>
     -- `c` is off the section: the ideal is the unit ideal on a small affine.
@@ -998,7 +998,7 @@ end KerPrincipal
 /-! #### Register boxes (T-D3/T-D1): the divisor of a family of sections is finite locally
 free of rank `n`
 
-The `sectionsIdealAux` helpers implement the multi-section chart route: around each point
+The `SectionsIdeal` helpers implement the multi-section chart route: around each point
 of the base, group the sections by their value in the fibre; each group is confined to an
 affine chart on which every kernel ideal is principal on a nonzerodivisor (T-D22, via
 common basic-open refinements), charts of different groups being disjoint on the divisor.
@@ -1007,7 +1007,7 @@ subschemes of affine opens, hence affine, and its coordinate ring is a product o
 quotients `A/(∏ᵢ fᵢ)`, each free by the KM 1.1.2 filtration. -/
 
 /-- An ideal sheaf is the unit ideal on any affine open disjoint from its support. -/
-private lemma sectionsIdealAux_ideal_eq_top_of_disjoint (I : C.IdealSheafData)
+private lemma SectionsIdeal.ideal_eq_top_of_disjoint (I : C.IdealSheafData)
     (W : C.affineOpens) (h : Disjoint (I.support : Set C) (W.1 : Set C)) :
     I.ideal W = ⊤ := by
   have h1 : C.zeroLocus (U := W.1) (I.ideal W : Set Γ(C, W.1)) ∩ W.1 = ∅ := by
@@ -1019,7 +1019,7 @@ private lemma sectionsIdealAux_ideal_eq_top_of_disjoint (I : C.IdealSheafData)
   exact PrimeSpectrum.zeroLocus_empty_iff_eq_top.mp h4
 
 /-- Restriction to an affine basic open preserves "principal on a nonzerodivisor". -/
-private lemma sectionsIdealAux_basicOpen_span_nzd {I : C.IdealSheafData} {V : C.affineOpens}
+private lemma SectionsIdeal.basicOpen_span_nzd {I : C.IdealSheafData} {V : C.affineOpens}
     {f : Γ(C, V.1)} (hspan : I.ideal V = Ideal.span {f})
     (hnzd : f ∈ nonZeroDivisors Γ(C, V.1)) (t : Γ(C, V.1)) :
     I.ideal (C.affineBasicOpen t) =
@@ -1035,7 +1035,7 @@ private lemma sectionsIdealAux_basicOpen_span_nzd {I : C.IdealSheafData} {V : C.
 /-- **Multi-section chart**: around any point of the total space there is an affine open on
 which the kernel ideal of *every* section in a finite family is principal on a
 nonzerodivisor (T-D22, iterated via common basic-open refinements). -/
-private lemma sectionsIdealAux_exists_multiChart (π : C ⟶ S) [IsSeparated π]
+private lemma SectionsIdeal.exists_multiChart (π : C ⟶ S) [IsSeparated π]
     (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) (c : C) :
     ∃ V : C.affineOpens, c ∈ V.1 ∧ ∀ i : Fin n, ∃ f : Γ(C, V.1),
@@ -1063,14 +1063,14 @@ private lemma sectionsIdealAux_exists_multiChart (π : C ⟶ S) [IsSeparated π]
     rcases Finset.mem_insert.mp hi with rfl | hi'
     · have hopen : C.affineBasicOpen t₁ = C.affineBasicOpen t₂ := Subtype.ext hteq
       rw [hopen]
-      obtain ⟨h1, h2⟩ := sectionsIdealAux_basicOpen_span_nzd hf₂span hf₂nzd t₂
+      obtain ⟨h1, h2⟩ := SectionsIdeal.basicOpen_span_nzd hf₂span hf₂nzd t₂
       exact ⟨_, h1, h2⟩
     · obtain ⟨f, hspan, hnzd⟩ := hV₁ i hi'
-      obtain ⟨h1, h2⟩ := sectionsIdealAux_basicOpen_span_nzd hspan hnzd t₁
+      obtain ⟨h1, h2⟩ := SectionsIdeal.basicOpen_span_nzd hspan hnzd t₁
       exact ⟨_, h1, h2⟩
 
 /-- Evaluation of a finite product of ideal sheaves on an affine open. -/
-private lemma sectionsIdealAux_ideal_prod {ι : Type*} (s : Finset ι)
+private lemma SectionsIdeal.ideal_prod {ι : Type*} (s : Finset ι)
     (I : ι → C.IdealSheafData) (U : C.affineOpens) :
     (∏ i ∈ s, I i).ideal U = ∏ i ∈ s, (I i).ideal U := by
   classical
@@ -1081,12 +1081,12 @@ private lemma sectionsIdealAux_ideal_prod {ι : Type*} (s : Finset ι)
       Pi.mul_apply, ih]
 
 /-- The support of the product of the section ideals is the union of the section images. -/
-private lemma sectionsIdealAux_support_prod (π : C ⟶ S) [IsSeparated π] {n : ℕ}
+private lemma SectionsIdeal.support_prod (π : C ⟶ S) [IsSeparated π] {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) :
     ((∏ i, Scheme.Hom.ker (P i).1).support : Set C) = ⋃ i, Set.range (P i).1.base := by
   classical
   haveI : ∀ i : Fin n, IsClosedImmersion (P i).1 := fun i ↦
-    sectionsIdealAux_isClosedImmersion (P i).2
+    SectionsIdeal.isClosedImmersion (P i).2
   suffices h : ∀ s : Finset (Fin n),
       ((∏ i ∈ s, Scheme.Hom.ker (P i).1).support : Set C) = ⋃ i ∈ s, Set.range (P i).1.base by
     rw [h Finset.univ]
@@ -1108,7 +1108,7 @@ private lemma sectionsIdealAux_support_prod (π : C ⟶ S) [IsSeparated π] {n :
 any `t : A` the short exact sequence
 `0 → A ⧸ (t) →(·f₀) A ⧸ (f₀·t) →(σ₀) R → 0`
 splits (its cokernel `R` is free, hence projective), giving `A ⧸ (f₀·t) ≃ₗ[R] (A ⧸ (t)) × R`. -/
-private theorem sectionsIdealAux_quotient_prod {R A : Type u} [CommRing R] [CommRing A]
+private theorem SectionsIdeal.quotient_prod {R A : Type u} [CommRing R] [CommRing A]
     [Algebra R A] (f₀ : A) (hf₀ : f₀ ∈ nonZeroDivisors A) (σ₀ : A →ₐ[R] R)
     (hσ₀ : RingHom.ker σ₀ = Ideal.span {f₀}) (t : A) :
     Nonempty ((A ⧸ Ideal.span {f₀ * t}) ≃ₗ[R] (A ⧸ Ideal.span {t}) × R) := by
@@ -1166,7 +1166,7 @@ open Function in
 `R`-algebra `A`, each generating the kernel of an `R`-algebra retraction `σ i : A →ₐ[R] R`,
 then `A ⧸ (∏ᵢ f i)` is a free `R`-module of rank `m` (successive extensions
 `0 → A/(f₁⋯f_{k-1}) → A/(f₀⋯f_{k-1}) → A/(f₀) → 0` split since `A/(f₀) ≅ R` is free). -/
-private theorem sectionsIdealAux_free_quotient {R A : Type u} [CommRing R] [CommRing A]
+private theorem SectionsIdeal.free_quotient {R A : Type u} [CommRing R] [CommRing A]
     [Algebra R A] :
     ∀ (m : ℕ) (f : Fin m → A), (∀ i, f i ∈ nonZeroDivisors A) →
       ∀ σ : Fin m → (A →ₐ[R] R), (∀ i, RingHom.ker (σ i) = Ideal.span {f i}) →
@@ -1184,9 +1184,9 @@ private theorem sectionsIdealAux_free_quotient {R A : Type u} [CommRing R] [Comm
              left_inv := fun x ↦ Subsingleton.elim _ _
              right_inv := fun x ↦ Subsingleton.elim _ _ }⟩
   | m + 1, f, hf, σ, hσ => by
-    obtain ⟨e₂⟩ := sectionsIdealAux_free_quotient m (fun i ↦ f i.succ) (fun i ↦ hf i.succ)
+    obtain ⟨e₂⟩ := SectionsIdeal.free_quotient m (fun i ↦ f i.succ) (fun i ↦ hf i.succ)
       (fun i ↦ σ i.succ) (fun i ↦ hσ i.succ)
-    obtain ⟨e₁⟩ := sectionsIdealAux_quotient_prod (f 0) (hf 0) (σ 0) (hσ 0)
+    obtain ⟨e₁⟩ := SectionsIdeal.quotient_prod (f 0) (hf 0) (σ 0) (hσ 0)
       (∏ i : Fin m, f i.succ)
     have hquot : (A ⧸ Ideal.span {∏ i : Fin (m + 1), f i}) ≃ₗ[R]
         (A ⧸ Ideal.span {f 0 * ∏ i : Fin m, f i.succ}) :=
@@ -1199,7 +1199,7 @@ private theorem sectionsIdealAux_free_quotient {R A : Type u} [CommRing R] [Comm
     exact ⟨hquot.trans (e₁.trans ((e₂.prodCongr (LinearEquiv.refl R R)).trans easm))⟩
 
 /-- `π ∘ z = id` on points, for a section `z`. -/
-private lemma sectionsIdealAux_base_section (π : C ⟶ S) {z : S ⟶ C} (hz : z ≫ π = 𝟙 S)
+private lemma SectionsIdeal.base_section (π : C ⟶ S) {z : S ⟶ C} (hz : z ≫ π = 𝟙 S)
     (x : S) : π.base (z.base x) = x := by
   have h3 : π.base (z.base x) = (z ≫ π).base x := rfl
   rw [h3, hz]
@@ -1208,7 +1208,7 @@ private lemma sectionsIdealAux_base_section (π : C ⟶ S) {z : S ⟶ C} (hz : z
 /-- **Group chart**: around a point `c` of the fibre over `s`, an affine chart contained in
 `π ⁻¹ᵁ U₀`, avoiding all sections not passing through `c` at `s`, on which every section
 ideal is principal on a nonzerodivisor. -/
-private lemma sectionsIdealAux_exists_groupChart (π : C ⟶ S) [IsSeparated π]
+private lemma SectionsIdeal.exists_groupChart (π : C ⟶ S) [IsSeparated π]
     (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) {s : S} (U₀ : S.affineOpens) (hs : s ∈ U₀.1)
     (c : C) (hcπ : π.base c = s) :
@@ -1217,18 +1217,18 @@ private lemma sectionsIdealAux_exists_groupChart (π : C ⟶ S) [IsSeparated π]
       ∀ i : Fin n, ∃ f : Γ(C, W.1), (Scheme.Hom.ker (P i).1).ideal W = Ideal.span {f} ∧
         f ∈ nonZeroDivisors Γ(C, W.1) := by
   classical
-  obtain ⟨V, hcV, hV⟩ := sectionsIdealAux_exists_multiChart π hsm P c
+  obtain ⟨V, hcV, hV⟩ := SectionsIdeal.exists_multiChart π hsm P c
   have hcnot : ∀ i, (P i).1.base s ≠ c → c ∉ Set.range (P i).1.base := by
     rintro i hne ⟨x, hx⟩
     refine hne ?_
-    have h1 : π.base c = x := by rw [← hx, sectionsIdealAux_base_section π (P i).2]
+    have h1 : π.base c = x := by rw [← hx, SectionsIdeal.base_section π (P i).2]
     rw [← hx, ← h1, hcπ]
   set bad : Finset (Fin n) := Finset.univ.filter (fun i ↦ (P i).1.base s ≠ c) with hbad
   set Os : Set C := ((V.1 : Set C) ∩ (π ⁻¹ᵁ U₀.1 : Set C)) ∩
       ⋂ i ∈ bad, (Set.range (P i).1.base)ᶜ with hOs
   have hOsopen : IsOpen Os := by
     haveI : ∀ i : Fin n, IsClosedImmersion (P i).1 := fun i ↦
-      sectionsIdealAux_isClosedImmersion (P i).2
+      SectionsIdeal.isClosedImmersion (P i).2
     refine (V.1.2.inter (π ⁻¹ᵁ U₀.1).2).inter (isOpen_biInter_finset fun i _ ↦ ?_)
     exact (P i).1.isClosedEmbedding.isClosed_range.isOpen_compl
   have hcOs : c ∈ Os := by
@@ -1245,7 +1245,7 @@ private lemma sectionsIdealAux_exists_groupChart (π : C ⟶ S) [IsSeparated π]
     exact Set.mem_iInter₂.mp h2 i (Finset.mem_filter.mpr ⟨Finset.mem_univ i, hne⟩) hr
   · intro i
     obtain ⟨f, hspan, hnzd⟩ := hV i
-    obtain ⟨h1, h2⟩ := sectionsIdealAux_basicOpen_span_nzd hspan hnzd t
+    obtain ⟨h1, h2⟩ := SectionsIdeal.basicOpen_span_nzd hspan hnzd t
     exact ⟨_, h1, h2⟩
 
 
@@ -1254,7 +1254,7 @@ affine `U`, meeting only the sections listed in `g` (the other section ideals be
 unit ideal on `W'`), with retraction pairs and principal-nzd kernel ideals for `i ∈ g`,
 the coordinate ring of the divisor piece is a free module of rank `g.card` over
 `Γ(S, U)`. -/
-private theorem sectionsIdealAux_piece_free (π : C ⟶ S) [IsSeparated π] {n : ℕ}
+private theorem SectionsIdeal.piece_free (π : C ⟶ S) [IsSeparated π] {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) (U : S.affineOpens) (W' : C.affineOpens)
     (hVU : W'.1 ≤ π ⁻¹ᵁ U.1) (g : Finset (Fin n))
     (hsec : ∀ i ∈ g, U.1 ≤ (P i).1 ⁻¹ᵁ W'.1)
@@ -1275,7 +1275,7 @@ private theorem sectionsIdealAux_piece_free (π : C ⟶ S) [IsSeparated π] {n :
         simpa [halg] using h2 } with hσW
   have hkerW : ∀ i : ↥g, RingHom.ker (σW i) = Ideal.span {fW i} := by
     intro i
-    haveI : IsClosedImmersion (P i.1).1 := sectionsIdealAux_isClosedImmersion (P i.1).2
+    haveI : IsClosedImmersion (P i.1).1 := SectionsIdeal.isClosedImmersion (P i.1).2
     have h1 : RingHom.ker ((P i.1).1.app W'.1).hom
         = RingHom.ker ((P i.1).1.appLE W'.1 U.1 (hsec i.1 i.2)).hom :=
       KerPrincipal.ker_app π (P i.1).1 (P i.1).2 hVU (hsec i.1 i.2)
@@ -1286,7 +1286,7 @@ private theorem sectionsIdealAux_piece_free (π : C ⟶ S) [IsSeparated π] {n :
   set e : ↥g ≃ Fin g.card := g.equivFin with he
   have hKid : (∏ i, Scheme.Hom.ker (P i).1).ideal W'
       = Ideal.span {∏ k, fW (e.symm k)} := by
-    rw [sectionsIdealAux_ideal_prod,
+    rw [SectionsIdeal.ideal_prod,
       ← Finset.prod_filter_mul_prod_filter_not Finset.univ (· ∈ g)
         (fun i ↦ (Scheme.Hom.ker (P i).1).ideal W')]
     have hsecond : (∏ i ∈ Finset.univ.filter (¬ · ∈ g),
@@ -1301,7 +1301,7 @@ private theorem sectionsIdealAux_piece_free (π : C ⟶ S) [IsSeparated π] {n :
       exact Fintype.prod_equiv e fW (fun k ↦ fW (e.symm k))
         (fun x ↦ (congrArg fW (e.symm_apply_apply x)).symm)
     rw [hpe]
-  obtain ⟨e₀⟩ := sectionsIdealAux_free_quotient g.card (fun k ↦ fW (e.symm k))
+  obtain ⟨e₀⟩ := SectionsIdeal.free_quotient g.card (fun k ↦ fW (e.symm k))
     (fun k ↦ hfWnzd (e.symm k)) (fun k ↦ σW (e.symm k)) (fun k ↦ hkerW (e.symm k))
   exact ⟨((Submodule.quotEquivOfEq _ _ hKid).restrictScalars Γ(S, U.1)).trans e₀⟩
 
@@ -1328,7 +1328,7 @@ base has an affine neighbourhood `U` over which the subscheme cut out by `∏ᵢ
 an affine open of the subscheme whose coordinate ring is a free `Γ(S, U)`-module of rank
 `n`; consequently the structure map of sections is finite, flat, finitely presented and
 of constant rank `n`. -/
-private theorem sectionsIdealAux_exists_chart (π : C ⟶ S) [IsSeparated π]
+private theorem SectionsIdeal.exists_chart (π : C ⟶ S) [IsSeparated π]
     (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) (s : S) :
     ∃ U : S.affineOpens, s ∈ U.1 ∧
@@ -1354,8 +1354,8 @@ private theorem sectionsIdealAux_exists_chart (π : C ⟶ S) [IsSeparated π]
         f ∈ nonZeroDivisors Γ(C, W.1) := by
     rintro ⟨c, hc⟩
     obtain ⟨i, -, rfl⟩ := Finset.mem_image.mp hc
-    exact sectionsIdealAux_exists_groupChart π hsm P U₀ hsU₀ _
-      (sectionsIdealAux_base_section π (P i).2 s)
+    exact SectionsIdeal.exists_groupChart π hsm P U₀ hsU₀ _
+      (SectionsIdeal.base_section π (P i).2 s)
   choose W hcW hWU₀ hWdisj hWprin using hWex
   -- STEP 3: shrink the base
   set gc : Fin n → ↥G := fun i ↦
@@ -1386,7 +1386,7 @@ private theorem sectionsIdealAux_exists_chart (π : C ⟶ S) [IsSeparated π]
     exact hW'le c h1
   -- membership of a point of the subscheme in a `W`-chart, from support
   have hsupp : (K.support : Set C) = ⋃ i, Set.range (P i).1.base :=
-    sectionsIdealAux_support_prod π P
+    SectionsIdeal.support_prod π P
   have hmem : ∀ x : K.subscheme, q.base x ∈ U.1 → ∃ i : Fin n,
       K.subschemeι.base x ∈ (W' (gc i)).1 := by
     intro x hx
@@ -1397,7 +1397,7 @@ private theorem sectionsIdealAux_exists_chart (π : C ⟶ S) [IsSeparated π]
     obtain ⟨i, u, hu⟩ := Set.mem_iUnion.mp hxsupp
     refine ⟨i, ?_⟩
     have h3 : π.base (K.subschemeι.base x) = u := by
-      rw [← hu, sectionsIdealAux_base_section π (P i).2 u]
+      rw [← hu, SectionsIdeal.base_section π (P i).2 u]
     have hu2 : u ∈ S.basicOpen u₀ := by
       rw [← h3]
       exact hx
@@ -1459,21 +1459,21 @@ private theorem sectionsIdealAux_exists_chart (π : C ⟶ S) [IsSeparated π]
       rw [← h7]
       exact h6
     · show π.base ((P i).1.base x) ∈ S.basicOpen u₀
-      rw [sectionsIdealAux_base_section π (P i).2 x]
+      rw [SectionsIdeal.base_section π (P i).2 x]
       exact hx
   have hprin' : ∀ c : ↥G, ∀ i ∈ gs c, ∃ f : Γ(C, (W' c).1),
       (Scheme.Hom.ker (P i).1).ideal (W' c) = Ideal.span {f} ∧
         f ∈ nonZeroDivisors Γ(C, (W' c).1) := by
     intro c i _
     obtain ⟨f, h1, h2⟩ := hWprin c i
-    obtain ⟨h3, h4⟩ := sectionsIdealAux_basicOpen_span_nzd h1 h2 (tW c)
+    obtain ⟨h3, h4⟩ := SectionsIdeal.basicOpen_span_nzd h1 h2 (tW c)
     exact ⟨_, h3, h4⟩
   have htop' : ∀ c : ↥G, ∀ i ∉ gs c, (Scheme.Hom.ker (P i).1).ideal (W' c) = ⊤ := by
     intro c i hi
     have hne : (P i).1.base s ≠ ↑c := fun h ↦
       hi (Finset.mem_filter.mpr ⟨Finset.mem_univ i, h⟩)
-    haveI : IsClosedImmersion (P i).1 := sectionsIdealAux_isClosedImmersion (P i).2
-    refine sectionsIdealAux_ideal_eq_top_of_disjoint _ _ ?_
+    haveI : IsClosedImmersion (P i).1 := SectionsIdeal.isClosedImmersion (P i).2
+    refine SectionsIdeal.ideal_eq_top_of_disjoint _ _ ?_
     have h1 : ((Scheme.Hom.ker (P i).1).support : Set C) = Set.range (P i).1.base := by
       rw [Scheme.Hom.support_ker]
       exact (P i).1.isClosedEmbedding.isClosed_range.closure_eq
@@ -1488,7 +1488,7 @@ private theorem sectionsIdealAux_exists_chart (π : C ⟶ S) [IsSeparated π]
   have hpiecefree : ∀ c : ↥G, Nonempty
       (Γ(K.subscheme, piece c) ≃ₗ[Γ(S, U.1)] (Fin (gs c).card → Γ(S, U.1))) := by
     intro c
-    obtain ⟨eC⟩ := sectionsIdealAux_piece_free π P U (W' c) (hW'le c) (gs c)
+    obtain ⟨eC⟩ := SectionsIdeal.piece_free π P U (W' c) (hW'le c) (gs c)
       (hsec' c) (hprin' c) (htop' c) rfl
     have hcomp : q.appLE U.1 (piece c) (hple c) ≫ (K.subschemeObjIso (W' c)).hom
         = π.appLE U.1 (W' c).1 (hW'le c) ≫
@@ -1557,7 +1557,7 @@ private theorem sectionsIdealAux_exists_chart (π : C ⟶ S) [IsSeparated π]
 
 /-- The isomorphism square: a restriction of `q` over an affine open with affine preimage
 is a pullback of the `Spec` of its ring map. -/
-private lemma sectionsIdealAux_isPullback {X : Scheme.{u}} (q : X ⟶ S) (U : S.affineOpens)
+private lemma SectionsIdeal.isPullback {X : Scheme.{u}} (q : X ⟶ S) (U : S.affineOpens)
     (haff : IsAffineOpen (q ⁻¹ᵁ U.1)) :
     IsPullback ((q ⁻¹ᵁ U.1).toSpecΓ) (q ∣_ U.1) (Spec.map (q.app U.1)) ((U.1).toSpecΓ) := by
   haveI h1 : IsIso ((q ⁻¹ᵁ U.1).toSpecΓ) := haff.isoSpec_hom ▸ inferInstance
@@ -1567,8 +1567,8 @@ private lemma sectionsIdealAux_isPullback {X : Scheme.{u}} (q : X ⟶ S) (U : S.
 /-- Shared Zariski-local core of `sectionsIdeal_isFinite`/`_flat`/`_lfp`: a morphism property
 `Q` that is Zariski-local at the target and stable under base change holds for
 `(∏ᵢ ker Pᵢ).subschemeι ≫ π` as soon as it holds for the affine chart maps supplied by
-`sectionsIdealAux_exists_chart`. -/
-private lemma sectionsIdealAux_zariski_local (π : C ⟶ S) {n : ℕ}
+`SectionsIdeal.exists_chart`. -/
+private lemma SectionsIdeal.zariski_local (π : C ⟶ S) {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S })
     (Q : MorphismProperty Scheme.{u}) [IsZariskiLocalAtTarget Q] [Q.IsStableUnderBaseChange]
     (U : S → S.affineOpens) (hsU : ∀ s, s ∈ (U s).1)
@@ -1579,7 +1579,7 @@ private lemma sectionsIdealAux_zariski_local (π : C ⟶ S) {n : ℕ}
   · rw [eq_top_iff]
     exact fun s _ ↦ TopologicalSpace.Opens.mem_iSup.mpr ⟨s, hsU s⟩
   · intro s
-    exact MorphismProperty.of_isPullback (sectionsIdealAux_isPullback _ (U s) (haff s)) (hQ s)
+    exact MorphismProperty.of_isPullback (SectionsIdeal.isPullback _ (U s) (haff s)) (hQ s)
 
 /-- **Register box (T-D3/T-D1, finiteness; KM 1.2.2 + 1.2.3)**: over a separated smooth
 relative curve the product of the section ideals cuts out a subscheme finite over the
@@ -1587,7 +1587,7 @@ base. KM 1.2.3 (verbatim quote banked on T-D3): *"Let `D ⊆ C` be a closed sub-
 which is finite and flat over `S`, and of finite presentation over `S`. Then `D` is an
 effective Cartier divisor in `C/S` … Conversely every effective Cartier divisor in
 `C/S` which is proper over `S` is of this form."* Discharged by the multi-section chart
-route (`sectionsIdealAux_exists_chart`): affine-locally on `S` the subscheme is a disjoint
+route (`SectionsIdeal.exists_chart`): affine-locally on `S` the subscheme is a disjoint
 union of closed subschemes of affine charts on which the ideal is principal on a
 nonzerodivisor (T-D22), hence affine with coordinate ring free of rank `n` by the
 KM 1.1.2 filtration. -/
@@ -1595,8 +1595,8 @@ theorem sectionsIdeal_isFinite (π : C ⟶ S) [IsSeparated π]
     (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) :
     IsFinite ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π) := by
-  choose U hsU haff hFin hFlat hFP hrank using sectionsIdealAux_exists_chart π hsm P
-  exact sectionsIdealAux_zariski_local π P @IsFinite U hsU haff
+  choose U hsU haff hFin hFlat hFP hrank using SectionsIdeal.exists_chart π hsm P
+  exact SectionsIdeal.zariski_local π P @IsFinite U hsU haff
     (fun s ↦ (IsFinite.SpecMap_iff _).mpr (hFin s))
 
 /-- **Register box (T-D3/T-D1, flatness; KM 1.2.2 + 1.2.3)** — see
@@ -1605,8 +1605,8 @@ theorem sectionsIdeal_flat (π : C ⟶ S) [IsSeparated π]
     (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) :
     Flat ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π) := by
-  choose U hsU haff hFin hFlat hFP hrank using sectionsIdealAux_exists_chart π hsm P
-  exact sectionsIdealAux_zariski_local π P @Flat U hsU haff
+  choose U hsU haff hFin hFlat hFP hrank using SectionsIdeal.exists_chart π hsm P
+  exact SectionsIdeal.zariski_local π P @Flat U hsU haff
     (fun s ↦ Flat.SpecMap_iff.mpr (hFlat s))
 
 /-- **Register box (T-D3/T-D1, finite presentation; KM 1.2.2 + 1.2.3)** — see
@@ -1615,14 +1615,14 @@ theorem sectionsIdeal_lfp (π : C ⟶ S) [IsSeparated π]
     (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
     (P : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) :
     LocallyOfFinitePresentation ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π) := by
-  choose U hsU haff hFin hFlat hFP hrank using sectionsIdealAux_exists_chart π hsm P
-  exact sectionsIdealAux_zariski_local π P @LocallyOfFinitePresentation U hsU haff
+  choose U hsU haff hFin hFlat hFP hrank using SectionsIdeal.exists_chart π hsm P
+  exact SectionsIdeal.zariski_local π P @LocallyOfFinitePresentation U hsU haff
     (fun s ↦ (LocallyOfFinitePresentation.SpecMap_iff _).mpr (hFP s))
 
 /-- **Register box (T-D3, degree; KM 1.2.6)**: the divisor sum has rank `n` — KM 1.2.6
 (verbatim quote banked on T-D3): *"`deg(D₁ + D₂) = deg(D₁) + deg(D₂)`"*, applied `n`
 times to the degree-1 section divisors (`sectionDivisor_degree`); discharged via the
-rank-`n` local freeness of the chart route (`sectionsIdealAux_exists_chart`), whose SES
+rank-`n` local freeness of the chart route (`SectionsIdeal.exists_chart`), whose SES
 splitting is `Function.Exact.nonempty_linearEquiv_prod_of_projective` (T-D24). -/
 theorem sectionsIdeal_finrank (π : C ⟶ S) [IsSeparated π]
     (hsm : SmoothOfRelativeDimension 1 π) {n : ℕ}
@@ -1632,7 +1632,7 @@ theorem sectionsIdeal_finrank (π : C ⟶ S) [IsSeparated π]
     ((∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π).finrank s = n := by
   haveI := sectionsIdeal_isFinite π hsm P
   haveI := sectionsIdeal_flat π hsm P
-  obtain ⟨U, hsU, haff, hFin, hFlat, hFP, hrank⟩ := sectionsIdealAux_exists_chart π hsm P s
+  obtain ⟨U, hsU, haff, hFin, hFlat, hFP, hrank⟩ := SectionsIdeal.exists_chart π hsm P s
   set q := (∏ i, Scheme.Hom.ker (P i).1).subschemeι ≫ π with hq
   haveI : IsFinite (Spec.map (q.app U.1)) := (IsFinite.SpecMap_iff _).mpr (hFin)
   haveI : Flat (Spec.map (q.app U.1)) := Flat.SpecMap_iff.mpr (hFlat)
@@ -1643,7 +1643,7 @@ theorem sectionsIdeal_finrank (π : C ⟶ S) [IsSeparated π]
     rfl
   have h2 : (q ∣_ U.1).finrank ⟨s, hsU⟩
       = (Spec.map (q.app U.1)).finrank ((U.1).toSpecΓ ⟨s, hsU⟩) :=
-    Scheme.Hom.finrank_of_isPullback _ _ _ _ (sectionsIdealAux_isPullback q U haff) ⟨s, hsU⟩
+    Scheme.Hom.finrank_of_isPullback _ _ _ _ (SectionsIdeal.isPullback q U haff) ⟨s, hsU⟩
   rw [h1, h2, Scheme.Hom.finrank_SpecMap_eq_finrank (hFin) (hFlat)]
   exact hrank _
 
@@ -2651,7 +2651,7 @@ Zariski-local-at-target only (`IsFinite = affineAnd RingHom.Finite`), *not* sour
 𝔸¹` the divisor "escapes to infinity" and `Γ(C,V₀)/I ≅ R[t,t⁻¹]` is a non-finite
 localization. A valid chart must therefore capture the whole (finite, by `IsFinite`) `D`-fibre
 over `π c` — the isolation-of-a-fibre-point construction of KM 1.2.3 (mirrored, for the
-special case of a *sum of sections*, by `sectionsIdealAux_exists_chart`/`exists_groupChart` +
+special case of a *sum of sections*, by `SectionsIdeal.exists_chart`/`exists_groupChart` +
 the disjoint-pieces gluing above). Flatness, finite presentation and `I.FG` are, by contrast,
 source-local and are discharged from `D.flat`/`D.lfp` directly inside `isOfficial`. -/
 private theorem officialAux_exists_finite_chart (π : C ⟶ S) [IsSeparated π]
