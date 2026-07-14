@@ -20115,3 +20115,11 @@ E[2]-classification) | coupled G-action = [T-E14-ACT'] (open). **The remaining S
 to representable_iff are: [T-E14-LVL-b] + [T-E14-ACT'] + [T-E14-AX2] + the T-E15 pair (other
 stream) + the engine T-Q6d.γ (other stream).** The (E,ω)-corner (T-E12/T-E13) and the Legendre
 representability machine are DONE.
+
+## v10.228-G0 (2026-07-14) — ★ seam-i DONE: LocallyQuasiFinite fppf-descent (mathlib gap) axiom-clean
+`ForMathlib/QuasiFiniteDescent.lean`: `Algebra.QuasiFinite.of_quasiFinite_tensorProduct_of_faithfullyFlat`
++ `RingHom.QuasiFinite.codescendsAlong_faithfullyFlat` + `instance DescendsAlong @LocallyQuasiFinite
+(@Surjective ⊓ @Flat ⊓ @QuasiCompact)` — all proven (propext/choice/Quot.sound only). ForMathlib-
+worthy; upstream PR candidate. BB-QF residual: (κ̄-wiring) base-changed model ≅ model-of-base-changed-W
+or the record-route at the unique point; (seam-ii) the fibre-of-endo pullback identification. Then
+fiber_mulByHom_locallyQuasiFinite closes and mulByHom_locallyQuasiFinite_assembled = the Torsion leaf.
