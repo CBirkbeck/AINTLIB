@@ -20053,3 +20053,18 @@ parenthesization where `simpa only [assoc]` fails; variable-morphism statements 
 IsLocalHom-at-𝟙 synthesis. **Sole ALPHA sorry left: `modelMulByHom_range_infinite` (g5-main)** —
 w1/w3/w7 all in place; assembly = HasseWeil cards at W′ := W.baseChange F + projModelPointsAddEquiv
 + point_smul_eq_comp_mulBy base-membership + w3-injectivity + w7-distinctness + Nat.card bound.
+
+## v10.226-G0 (2026-07-14) — ★★ BB-QF ALPHA COMPLETE: modelMulByHom_finite_fibres AXIOM-CLEAN
+**ModelFibreCount.lean is SORRY-FREE.** The headline: over any algebraically closed field, every
+topological fibre of [N] (N ≠ 0) on projModel W is FINITE — axioms = propext/Classical.choice/
+Quot.sound ONLY (no sorryAx, no boxes, no degree facts, char-p-uniform). Chain: exists_good_prime →
+HasseWeil torsion cards at W.baseChange F → projModelPointsAddEquiv → point_smul_eq_comp_mulBy →
+zsmul_injOn_torsionBy → section_base_injective (w7, itself sorry-free via the retraction-iso) →
+Nat.card explosion → Curvelike.finite_preimage_singleton (master topology) via the g1–g4 chart
+instantiation. **REMAINING BB-QF (BETA leg, fully specified in the boards)**: (β1) fibre-curve ≅
+model over residue fields (localModel-over-Spec-k extraction + baseChange of modelEllipticCurve +
+pointed-iso + GIT 6.4 + locallyQuasiFinite_mulByHom_of_isMonHom_iso / or the direct fibre-set
+transport); (β2) κ(s)→κ̄-descent of fibre finiteness (closed-point comparison boarded at v10.221
+g5-spec); (β3) the global L2 reduction discharging `mulByHom_finite_fibres` (Torsion.lean:145) —
+then the banked reduction closes BB-QF and mulByHom_isFinite/torsionπ_isFinite go real, auto-
+cleaning the E[N]/SIGNAL/Y₀(N) finiteness trail. Torsion-relocation ask stands for the coordinator.
