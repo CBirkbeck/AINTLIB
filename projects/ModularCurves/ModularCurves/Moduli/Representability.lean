@@ -542,6 +542,39 @@ theorem EllHom.isNaiveFullLevel_pullSection {N : ℕ} [NeZero N]
     exact (ψ.injective hyx) ▸ hy
 
 
+/-- **(T-E4b ★)** `pullSection` preserves the naive `Γ₁(N)` condition: killing via
+the additivity, and both fibrewise clauses via the point-level comparison equivalence
+(order is preserved and reflected by an `AddEquiv`). -/
+theorem EllHom.isNaiveGammaOne_pullSection {N : ℕ} [NeZero N]
+    {P : Y.curve.Section} (h : Y.curve.IsNaiveGammaOne N P) :
+    X.curve.IsNaiveGammaOne N (EllHom.pullSection R f P) := by
+  obtain ⟨hP, hfib⟩ := h
+  refine ⟨?_, ?_⟩
+  · calc (N : ℤ) • EllHom.pullSection R f P
+        = AddMonoidHom.mk' (EllHom.pullSection R f)
+            (EllHom.pullSection_add R f) ((N : ℤ) • P) :=
+          (map_zsmul (AddMonoidHom.mk' (EllHom.pullSection R f)
+            (EllHom.pullSection_add R f)) (N : ℤ) P).symm
+      _ = AddMonoidHom.mk' (EllHom.pullSection R f)
+            (EllHom.pullSection_add R f) 0 := by rw [hP]
+      _ = 0 := map_zero _
+  · intro k _ _ t
+    obtain ⟨hkill, hord⟩ := hfib k (t ≫ f.baseHom)
+    set ψ := (EllHom.pointTransportEquiv R f t).trans
+      (EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom t) with hψ
+    have hcompat : ψ (EllipticCurve.Point.pull X.curve t
+        (EllHom.pullSection R f P)) =
+      EllipticCurve.Point.pull Y.curve (t ≫ f.baseHom) P :=
+      EllHom.pointTransportEquiv_pull_pullSection R f t P
+    refine ⟨?_, ?_⟩
+    · apply ψ.injective
+      rw [map_zsmul, hcompat, map_zero]
+      exact hkill
+    · intro a ha haN hcon
+      refine hord a ha haN ?_
+      have := congrArg ψ hcon
+      rwa [map_zsmul, hcompat, map_zero] at this
+
 end LevelPreservation
 
 /-- The naive `Γ₁(N)` moduli problem over `R`: `E/S ↦ {P ∈ E(S) : P` has naive exact
@@ -549,7 +582,8 @@ order `N}` (fibrewise; the right notion for `N` invertible, KM 1.4.4). Functor l
 `T-E4`. Source: Loeffler §3.3/§3.8; KM 3.2 + 3.7. -/
 noncomputable def gammaOneNaiveProblem (N : ℕ) [NeZero N] : ModuliProblem R where
   obj X := { P : X.unop.curve.Section // X.unop.curve.IsNaiveGammaOne N P }
-  map f := ↾fun P => ⟨EllHom.pullSection R f.unop P.1, by sorry⟩
+  map f := ↾fun P => ⟨EllHom.pullSection R f.unop P.1,
+    EllHom.isNaiveGammaOne_pullSection R f.unop P.2⟩
   map_id X := by
     ext P
     exact congrArg Subtype.val (EllHom.pullSection_id R P.1)
