@@ -79,7 +79,7 @@ private noncomputable def Opens.piObjIsoIInf {κ : Type v} (V : κ → Opens T) 
     ∏ᶜ V ≅ ⨅ k, V k :=
   IsLimit.conePointUniqueUpToIso (limit.isLimit _) (Preorder.isLimitIInf V)
 
-private theorem Opens.piObj_eq_iInf {κ : Type v} (V : κ → Opens T) :
+theorem Opens.piObj_eq_iInf {κ : Type v} (V : κ → Opens T) :
     (∏ᶜ V) = ⨅ k, V k :=
   (Opens.piObjIsoIInf V).to_eq
 
