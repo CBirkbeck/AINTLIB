@@ -441,6 +441,24 @@ theorem exists_good_prime (F : Type u) [Field F] (N : ℤ) (hN : N ≠ 0) :
     · exact CharP.ringChar_ne_one (R := F) h1
     · omega
 
+/-- **(w3)** Multiplication by `N` is injective on `ℓⁿ`-torsion elements of any abelian
+group when the prime `ℓ` does not divide `N` (Bézout: `N` is invertible mod `ℓⁿ`). -/
+theorem zsmul_injOn_torsionBy {G : Type u} [AddCommGroup G] {ℓ : ℕ} (hℓ : ℓ.Prime)
+    {N : ℤ} (hdvd : ¬ ((ℓ : ℤ) ∣ N)) (n : ℕ) {P Q : G}
+    (hP : ((ℓ : ℤ) ^ n) • P = 0) (hQ : ((ℓ : ℤ) ^ n) • Q = 0)
+    (h : N • P = N • Q) : P = Q := by
+  have hcop : IsCoprime N ((ℓ : ℤ) ^ n) :=
+    ((((Nat.prime_iff_prime_int.mp hℓ)).coprime_iff_not_dvd.mpr hdvd).symm).pow_right
+  obtain ⟨a, b, hab⟩ := hcop
+  have key : ∀ R : G, ((ℓ : ℤ) ^ n) • R = 0 → R = a • (N • R) := by
+    intro R hR
+    calc R = (1 : ℤ) • R := (one_smul ℤ R).symm
+      _ = (a * N + b * (ℓ : ℤ) ^ n) • R := by rw [hab]
+      _ = a • (N • R) + b • (((ℓ : ℤ) ^ n) • R) := by
+          rw [add_smul, mul_smul, mul_smul]
+      _ = a • (N • R) := by rw [hR, smul_zero, add_zero]
+  rw [key P hP, key Q hQ, h]
+
 /-- **(w7)** Distinct sections of a scheme over `Spec F`, `F` a field, have distinct
 image points whenever their common image point has residue field `F` — over an
 algebraically closed base every rational section is determined by its topological
