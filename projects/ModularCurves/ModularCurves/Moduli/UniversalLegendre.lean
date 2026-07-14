@@ -976,6 +976,173 @@ open CategoryTheory Limits in
     (legendreWitnessCover hD).f w =
       pullback.fst X.curve.toEllipticCurveGeom.π w.V.1.ι := rfl
 
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E14-CLS-5, ≈E3c)** The piece map is witness-independent at a fixed affine
+(uniqueness of marked adapted Legendre witnesses). -/
+theorem legendrePiece_congr {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤)))
+    (w₁ w₂ : LegendreWitness X L b) (hV : w₁.V = w₂.V) :
+    legendrePiece hD h2 w₁ =
+      eqToHom (by rw [hV]) ≫ legendrePiece hD h2 w₂ := by
+  obtain ⟨V₁, Pr₁, lam₁, hAd₁, hW₁, hMP₁, hMQ₁⟩ := w₁
+  obtain ⟨V₂, Pr₂, lam₂, hAd₂, hW₂, hMP₂, hMQ₂⟩ := w₂
+  obtain rfl : V₁ = V₂ := hV
+  rw [eqToHom_refl, Category.id_comp]
+  have hVC : Pr₂.transVC Pr₁ = 1 :=
+    (legendre_witness_transVC_eq_one hAd₂ hAd₁ hW₂ hW₁ hMP₂ hMP₁
+      (isUnit_ofNat_res h2 V₁.1)).1
+  have hWeq : Pr₁.W = Pr₂.W := by
+    have := Pr₂.transVC_smul Pr₁
+    rwa [hVC, one_smul] at this
+  have hIso := pointedIso_hom_of_transVC_eq_one hVC
+  have hE : Pr₁.e.hom = Pr₂.e.hom ≫ eqToHom (congrArg projModel hWeq.symm) := by
+    have h1 : Pr₂.e.inv ≫ Pr₁.e.hom = eqToHom (congrArg projModel hWeq.symm) := by
+      have h0 := hIso
+      rw [show (Pr₂.pointedIso Pr₁).hom = Pr₂.e.inv ≫ Pr₁.e.hom from rfl] at h0
+      exact h0
+    rw [← h1, ← Category.assoc, Iso.hom_inv_id, Category.id_comp]
+  show Pr₁.e.hom ≫ _ ≫ _ = Pr₂.e.hom ≫ _ ≫ _
+  rw [hE]
+  simp only [Category.assoc, eqToHom_trans_assoc]
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+private theorem legendrePiece_agree {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤)))
+    (p q : LegendreWitness X L b) :
+    pullback.fst ((legendreWitnessCover hD).f p) ((legendreWitnessCover hD).f q) ≫
+        legendrePiece hD h2 p =
+      pullback.snd ((legendreWitnessCover hD).f p) ((legendreWitnessCover hD).f q) ≫
+        legendrePiece hD h2 q := by
+  haveI hOIp : IsOpenImmersion ((legendreWitnessCover hD).f p) := by
+    rw [legendreWitnessCover_f]; infer_instance
+  haveI hOIq : IsOpenImmersion ((legendreWitnessCover hD).f q) := by
+    rw [legendreWitnessCover_f]; infer_instance
+  have hchoice : ∀ z : (pullback ((legendreWitnessCover hD).f p)
+      ((legendreWitnessCover hD).f q) : Scheme.{u}),
+      ∃ (W : X.base.affineOpens), W.1 ≤ p.V.1 ⊓ q.V.1 ∧
+        X.curve.toEllipticCurveGeom.π.base
+          ((pullback.fst ((legendreWitnessCover hD).f p)
+            ((legendreWitnessCover hD).f q) ≫
+            (legendreWitnessCover hD).f p).base z) ∈ W.1 := by
+    intro z
+    have hsp : X.curve.toEllipticCurveGeom.π.base
+        ((pullback.fst ((legendreWitnessCover hD).f p)
+          ((legendreWitnessCover hD).f q) ≫
+          (legendreWitnessCover hD).f p).base z) ∈ p.V.1 := by
+      have hr : ((pullback.fst ((legendreWitnessCover hD).f p)
+          ((legendreWitnessCover hD).f q) ≫ (legendreWitnessCover hD).f p).base z) ∈
+          Set.range (pullback.fst X.curve.toEllipticCurveGeom.π p.V.1.ι).base :=
+        ⟨(pullback.fst ((legendreWitnessCover hD).f p)
+          ((legendreWitnessCover hD).f q)).base z, rfl⟩
+      rw [Scheme.Pullback.range_fst] at hr
+      simpa [Scheme.Opens.range_ι] using hr
+    have hcond : (pullback.fst ((legendreWitnessCover hD).f p)
+        ((legendreWitnessCover hD).f q) ≫ (legendreWitnessCover hD).f p).base z =
+      (pullback.snd ((legendreWitnessCover hD).f p)
+        ((legendreWitnessCover hD).f q) ≫ (legendreWitnessCover hD).f q).base z := by
+      have := congrArg (fun t => t.base z) (pullback.condition
+        (f := (legendreWitnessCover hD).f p) (g := (legendreWitnessCover hD).f q))
+      simpa using this
+    have hsq : X.curve.toEllipticCurveGeom.π.base
+        ((pullback.fst ((legendreWitnessCover hD).f p)
+          ((legendreWitnessCover hD).f q) ≫
+          (legendreWitnessCover hD).f p).base z) ∈ q.V.1 := by
+      have hr : ((pullback.fst ((legendreWitnessCover hD).f p)
+          ((legendreWitnessCover hD).f q) ≫ (legendreWitnessCover hD).f p).base z) ∈
+          Set.range (pullback.fst X.curve.toEllipticCurveGeom.π q.V.1.ι).base := by
+        rw [hcond]
+        exact ⟨(pullback.snd ((legendreWitnessCover hD).f p)
+          ((legendreWitnessCover hD).f q)).base z, rfl⟩
+      rw [Scheme.Pullback.range_fst] at hr
+      simpa [Scheme.Opens.range_ι] using hr
+    obtain ⟨W₀, hWaff, hxW, hWle⟩ := exists_isAffineOpen_mem_and_subset
+      (show X.curve.toEllipticCurveGeom.π.base
+        ((pullback.fst ((legendreWitnessCover hD).f p)
+          ((legendreWitnessCover hD).f q) ≫
+          (legendreWitnessCover hD).f p).base z) ∈ p.V.1 ⊓ q.V.1 from ⟨hsp, hsq⟩)
+    exact ⟨⟨W₀, hWaff⟩, hWle, hxW⟩
+  choose W hWle hmem using hchoice
+  have hfsteq : ∀ z, (restrictTheta (G := X.curve.toEllipticCurveGeom)
+      ((hWle z).trans inf_le_left) ≫ (legendreWitnessCover hD).f p) =
+    restrictTheta ((hWle z).trans inf_le_right) ≫ (legendreWitnessCover hD).f q := by
+    intro z
+    rw [legendreWitnessCover_f, legendreWitnessCover_f, restrictTheta_fst,
+      restrictTheta_fst]
+  let hω : ∀ z, (pullback X.curve.toEllipticCurveGeom.π (W z).1.ι : Scheme.{u}) ⟶
+      pullback ((legendreWitnessCover hD).f p) ((legendreWitnessCover hD).f q) :=
+    fun z => pullback.lift (restrictTheta ((hWle z).trans inf_le_left))
+      (restrictTheta ((hWle z).trans inf_le_right)) (hfsteq z)
+  have hcomp : ∀ z, hω z ≫ pullback.fst ((legendreWitnessCover hD).f p)
+      ((legendreWitnessCover hD).f q) ≫ (legendreWitnessCover hD).f p =
+    pullback.fst X.curve.toEllipticCurveGeom.π (W z).1.ι := by
+    intro z
+    rw [← Category.assoc, show hω z ≫ pullback.fst ((legendreWitnessCover hD).f p)
+        ((legendreWitnessCover hD).f q) =
+      restrictTheta ((hWle z).trans inf_le_left) from pullback.lift_fst _ _ _,
+      legendreWitnessCover_f, restrictTheta_fst]
+  have hmapOI : ∀ z, IsOpenImmersion (hω z) := by
+    intro z
+    haveI : IsOpenImmersion (pullback.fst ((legendreWitnessCover hD).f p)
+        ((legendreWitnessCover hD).f q) ≫ (legendreWitnessCover hD).f p) :=
+      inferInstance
+    haveI : IsOpenImmersion (hω z ≫ pullback.fst ((legendreWitnessCover hD).f p)
+        ((legendreWitnessCover hD).f q) ≫ (legendreWitnessCover hD).f p) := by
+      rw [hcomp z]; infer_instance
+    exact IsOpenImmersion.of_comp _ (pullback.fst ((legendreWitnessCover hD).f p)
+      ((legendreWitnessCover hD).f q) ≫ (legendreWitnessCover hD).f p)
+  refine (Scheme.Cover.mkOfCovers
+    (X := (pullback ((legendreWitnessCover hD).f p)
+      ((legendreWitnessCover hD).f q) : Scheme.{u}))
+    (pullback ((legendreWitnessCover hD).f p) ((legendreWitnessCover hD).f q) :
+      Scheme.{u})
+    (fun z => pullback X.curve.toEllipticCurveGeom.π (W z).1.ι)
+    (fun z => hω z) ?_ (fun z => hmapOI z)).hom_ext _ _ (fun z => ?_)
+  · intro z
+    have hz : (pullback.fst ((legendreWitnessCover hD).f p)
+        ((legendreWitnessCover hD).f q) ≫ (legendreWitnessCover hD).f p).base z ∈
+      Set.range (pullback.fst X.curve.toEllipticCurveGeom.π (W z).1.ι).base := by
+      rw [Scheme.Pullback.range_fst]
+      simpa [Scheme.Opens.range_ι] using hmem z
+    obtain ⟨w, hw⟩ := hz
+    refine ⟨z, w, ?_⟩
+    have hinj : Function.Injective
+        ((pullback.fst ((legendreWitnessCover hD).f p)
+          ((legendreWitnessCover hD).f q) ≫ (legendreWitnessCover hD).f p).base) :=
+      (pullback.fst ((legendreWitnessCover hD).f p)
+        ((legendreWitnessCover hD).f q) ≫
+        (legendreWitnessCover hD).f p).isOpenEmbedding.injective
+    apply hinj
+    calc (pullback.fst ((legendreWitnessCover hD).f p)
+          ((legendreWitnessCover hD).f q) ≫
+          (legendreWitnessCover hD).f p).base ((hω z).base w)
+        = (hω z ≫ pullback.fst ((legendreWitnessCover hD).f p)
+            ((legendreWitnessCover hD).f q) ≫
+            (legendreWitnessCover hD).f p).base w := rfl
+      _ = (pullback.fst X.curve.toEllipticCurveGeom.π (W z).1.ι).base w := by
+          rw [hcomp z]
+      _ = _ := hw
+  · show hω z ≫ pullback.fst _ _ ≫ legendrePiece hD h2 p =
+      hω z ≫ pullback.snd _ _ ≫ legendrePiece hD h2 q
+    rw [← Category.assoc, show hω z ≫ pullback.fst ((legendreWitnessCover hD).f p)
+        ((legendreWitnessCover hD).f q) =
+      restrictTheta ((hWle z).trans inf_le_left) from pullback.lift_fst _ _ _,
+      ← Category.assoc, show hω z ≫ pullback.snd ((legendreWitnessCover hD).f p)
+        ((legendreWitnessCover hD).f q) =
+      restrictTheta ((hWle z).trans inf_le_right) from pullback.lift_snd _ _ _,
+      legendrePiece_restrict hD h2 p (p.restrict ((hWle z).trans inf_le_left))
+        ((hWle z).trans inf_le_left),
+      legendrePiece_restrict hD h2 q (q.restrict ((hWle z).trans inf_le_right))
+        ((hWle z).trans inf_le_right)]
+    rw [legendrePiece_congr hD h2 (p.restrict ((hWle z).trans inf_le_left))
+      (q.restrict ((hWle z).trans inf_le_right)) rfl, eqToHom_refl,
+      Category.id_comp]
+
 end TwoTorsion
 
 end ModularCurves
