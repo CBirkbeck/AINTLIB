@@ -59,12 +59,16 @@ route (degree-free, NOT `abelEnrichment_exists`-gated):
   is `LocallyQuasiFinite` — image infinite via HasseWeil `card_torsion_ellPow_nat`, so fibres are proper
   closed in the dim-≤1 integral `zChart` (`coordinateRing_krullDimLE_one`), hence finite
   (`IsArtinianScheme.finite`);
-* **(b)** [transport] over `κ̄(s)` (`s := π y`), `E_s ≅ modelEllipticCurve W_s` is a *pointed* iso, so
-  `locallyQuasiFinite_mulByHom_of_isMonHom_iso` gives `LocallyQuasiFinite (E_{κ̄(s)}.mulByHom N)` — the
-  `[IsMonHom]` from GIT 6.4 `isMonHom_of_one_comp_eq'` + the `localModel` pointed iso;
+* **(b)** [transport — ALL building blocks LANDED] over `κ̄(s)` (`s := π y`), `E_s ≅ modelEllipticCurve W_s`
+  is a *pointed* iso, so `locallyQuasiFinite_mulByHom_of_isMonHom_iso` gives
+  `LocallyQuasiFinite (E_{κ̄(s)}.mulByHom N)`; the `[IsMonHom]` is discharged by **`isMonHom_of_pointed`**
+  (this file, PROVEN) from the pointedness of the iso alone;
 * **(c)** [fibre + descent] the fibre `fiberToSpecResidueField y` is a base change of `E_s.mulByHom N`
   (`mulByHom_baseChange`, `GroupLaw.lean:217`); LQF is base-change-stable, and descends `κ̄(s) → κ(y)`.
-Blocked only on (a) (ALPHA's model conclusion) + the (b)/(c) fibre plumbing; a clean, bounded hand-off. -/
+The transport/rigidity/assembly building blocks are all landed green (`locallyQuasiFinite_mulByHom_of_isMonHom_iso`,
+`isMonHom_of_pointed`, `mulByHom_locallyQuasiFinite_assembled`); the ONLY remaining work is (a) ALPHA's
+model conclusion (g1–g5) + the localModel fibre-iso extraction (base-change `localModel`'s `e` to `κ(s)`,
+`compat_zero` gives pointedness) + the (c) fibre-of-endo identification. Bounded, atlas-context hand-off. -/
 theorem fiber_mulByHom_locallyQuasiFinite (E : EllipticCurve S) (N : ℕ) [NeZero N] (y : E.E) :
     LocallyQuasiFinite ((E.mulByHom N).fiberToSpecResidueField y) := by sorry
 
