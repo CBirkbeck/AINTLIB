@@ -146,3 +146,20 @@ post-g5 assembly is a **clean application** (either route):
 → `isMonHom_of_pointed hez` → `finite_fibres_mulByHom_of_isMonHom_iso` on ALPHA's model finite fibres →
 `Torsion.mulByHom_finite_fibres`. Only the raw-iso→asOver wrapping + g5 remain. Torsion leaf re-aligned to
 `finite_fibres` (`56f272dab`, matches ALPHA's topological output). Opus transport lane fully delivered.
+
+### ⟹⟹ MILESTONE (Opus, `20891c295`): raw-iso→asOver wrapping FULLY PROVEN — BETA machinery COMPLETE
+`fibreModelIsoAsOver` (`MulByHomFibresGlobal.lean`) is **fully proven + axiom-clean** — the deep
+transparency-cast piece is CLOSED. The trick: ascribe `e` to the `asOver.left` types via `let e'`
+(defeq, kills the `Over.isoMk` cast), then `show (Over.isoMk e' heπ').hom.left = e'.hom from rfl` +
+`one_eq_zero` (both records) + `(Category.assoc).trans (congrArg _ (hez cast through
+`baseChange.zero ≡ sectionFiberPoint` / `model.zero ≡ projModelZero`))`.
+**Entire BETA transport machinery now PROVEN + axiom-clean:** `mulBy_comp_of_isMonHom`,
+`mulByHom_comp_left_of_isMonHom`, `isMonHom_of_pointed`, `locallyQuasiFinite_mulByHom_of_isMonHom_iso`,
+`finite_fibres_mulByHom_of_isMonHom_iso`, `coordinateRing_krullDimLE_one`, `fibrewiseElliptic`,
+`fibreModelIsoAsOver`, `mulByHom_locallyQuasiFinite_assembled`.
+**ONLY 2 pieces remain for the whole BB-QF close:** (1) the **fibre-of-endo identification**
+(`(E.mulByHom N)`'s topological fibre ↔ the base-changed record's `[N]`-fibre, via `Scheme.Pullback.range_fst`
++ `mulByHom_baseChange_fst` + κ̄/κ descent — deep pullback, no mathlib shortcut) — the single BETA sorry
+`fiber_mulByHom_locallyQuasiFinite`; and (2) **ALPHA's g5** (range-infinitude HasseWeil witness, sibling
+actively grinding w7). Both are atlas-context; the transport machinery makes the fibre-of-endo assembly a
+`fibreModelIsoAsOver` + `finite_fibres_mulByHom_of_isMonHom_iso` application on ALPHA's model count.
