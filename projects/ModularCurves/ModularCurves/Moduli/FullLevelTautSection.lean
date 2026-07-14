@@ -91,7 +91,6 @@ theorem exists_tautSection_of_isFullLevel
   refine ⟨s, ?_⟩
   rw [hs]
   -- the classifying map of the taut pair reconstructs `U.ι`
-  haveI := E.torsionι_isClosedImmersion N
   refine pullback.hom_ext ?_ ?_
   · rw [pullback.lift_fst]
     apply (cancel_mono (E.torsionι N)).mp

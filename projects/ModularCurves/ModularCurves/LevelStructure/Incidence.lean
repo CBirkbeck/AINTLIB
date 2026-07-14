@@ -2464,7 +2464,6 @@ private theorem fullLevelLocusAux_torsionIdeal_baseChange {Y : Scheme.{u}}
     (E : EllipticCurve S) (N : ℕ) (s : Y ⟶ S) :
     (E.baseChange s).torsionIdeal N =
       (E.torsionIdeal N).comap (pullback.fst E.π s) := by
-  haveI := E.torsionι_isClosedImmersion N
   have hker : (E.torsionIdeal N).comap (pullback.fst E.π s) =
       (pullback.fst (pullback.fst E.π s) (E.torsionι N)).ker :=
     (Scheme.IdealSheafData.ker_fst_of_isClosedImmersion (E.torsionι N)
