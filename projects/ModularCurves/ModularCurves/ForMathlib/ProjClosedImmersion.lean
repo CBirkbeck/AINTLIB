@@ -7,8 +7,8 @@ ForMathlib (OURS, not vendored): upstream candidate. Ticket T-A2d.
 -/
 import ModularCurves.ForMathlib.GradedQuotient
 import ModularCurves.ForMathlib.ProjectiveSpaceChart
-import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Functor
 import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
+import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Functor
 
 /-!
 # `Proj` of a quotient grading is a closed subscheme of `Proj`
@@ -27,6 +27,8 @@ open AlgebraicGeometry CategoryTheory HomogeneousLocalization
 variable {R A : Type*} [CommRing R] [CommRing A] [Algebra R A]
   {𝒜 : ℕ → Submodule R A} [GradedAlgebra 𝒜] (I : HomogeneousIdeal 𝒜)
 
+/-- The degree-zero away-localization map induced by a homogeneous quotient is surjective:
+`(A_s)₀ → ((A/I)_s)₀` hits every class, since the quotient grading consists of images. -/
 theorem away_map_quotientGradingHom_surjective {d : ℕ} {s : A} (hs : s ∈ 𝒜 d) :
     Function.Surjective (Away.map (quotientGradingHom I) s) := by
   intro z
@@ -196,7 +198,7 @@ theorem ker_away_map_quotientGradingHom {d : ℕ} {F : A} (hF : F ∈ 𝒜 d)
         rw [h2, h3]
       -- now `p/sⁿ = (F/s^d) · (c'/s^{k+n-d})`, up to an `s`-power shift
       have hc'' : (DirectSum.decompose 𝒜 c (k + n - d) : A) ∈ 𝒜 ((k + n - d) • 1) := by
-        simpa using (DirectSum.decompose 𝒜 c (k + n - d)).2
+        simp
       -- assemble the factorisation, comparing values in the localization
       rw [Ideal.mem_span_singleton]
       refine ⟨HomogeneousLocalization.Away.mk 𝒜 hs (k + n - d)
