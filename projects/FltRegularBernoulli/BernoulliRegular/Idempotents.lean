@@ -65,7 +65,6 @@ open scoped Ring
 -- global hypothesis here since it is genuinely needed for the definition
 -- of `charIdempotent` itself; the linter warnings are silenced.
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 variable {G : Type*} [CommGroup G] [Fintype G] [DecidableEq G]
 variable {R : Type*} [CommRing R]
