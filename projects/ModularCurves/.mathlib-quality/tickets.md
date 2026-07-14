@@ -19919,3 +19919,22 @@ UniversalAdapted.lean, battle-tested):**
   `tautPresentation_marksAt` + `universalLegendre_isLegendreDatum` feed the ⇐; the marked-witness
   uniqueness CLS-1 feeds the determination) → `legendreDelta_representable_by_affine` DISCHARGED
   modulo [T-E14-LVL-b] (the FullLevelPt-clause needs geometric generation = KM keystone).
+
+## v10.230-OMEGA (2026-07-14) — ★★ [T-E14-CLS-5] legendreTop: the classifying comparison upstairs is GLUED
+
+Commits 934caf9c9…: `LegendreWitness` bundle + `legendrePiece` (+_restrict: the STRONG two-witness
+form — subsumes the template's index-congr!) + `LegendreWitness.restrict` + `legendreWitnessCover`
++ `legendrePiece_congr` (witness-independence at fixed affine, via CLS-1) + `legendrePiece_agree`
+(E3d-transposition; the same-affine tail closes by piece_congr at rfl — SIMPLER than the template)
++ **`legendreTop`** (glueMorphisms) + `legendreTop_piece`. All first-or-second-build green,
+axiom-clean by construction (no new sorries).
+
+**Remaining [T-E14-CLS] to discharge AX1:** legendreTop_π_w (≈E4-π: over the classifying map;
+chartPiece_π/classifyingTop_π_w transposition) + legendreTop_zero (zero-section leg; uses
+projModelZero_baseChange + witness compat_zero) + legendreClassifyingMap_structMap (Γ–Spec dance,
+= classifyingMap_structMap) + `legendreClassifyingEllHom` (bundle) + the roundtrip rt1-analog
+(pulled datum = given datum: pulled L = marked pair via the marking-diagrams; pulled ω = b via the
+unit-torsor — the T-E12 rt1 replay with markings in place of adaptedness-normalization) + rt2
+(uniqueness of the classifying EllHom — the T-E12 rt2 replay) + `RepresentableBy` package →
+`legendreDelta_representable_by_affine` DISCHARGED modulo [T-E14-LVL-b]. Then [T-E14-ACT'] +
+[T-E14-AX2].
