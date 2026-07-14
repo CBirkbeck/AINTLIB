@@ -2299,6 +2299,22 @@ theorem legendreTop_pulled (φ : X ⟶ universalLegendreObj R hR)
   rfl
 
 
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+/-- **(T-E14-CLS-8 rt2 ★★★)** Uniqueness half of KM 4.6.2's universal property: ANY
+`Ell/R`-morphism to the universal Legendre object is the classifying morphism of the
+datum it pulls back. -/
+theorem legendreClassifyingEllHom_pulled (φ : X ⟶ universalLegendreObj R hR)
+    (hL : (universalLegendreObj R hR).curve.IsNaiveFullLevel 2
+      (universalLegendreP R hR) (universalLegendreQ R hR))
+    (h2 : IsUnit (2 : Γ(X.base, ⊤))) :
+    legendreClassifyingEllHom
+      (IsLegendreDatum.map φ
+        (universalLegendre_isLegendreDatum R hR hL)
+        ((gammaFullNaiveProblem R 2).map (Opposite.op φ)
+          ⟨⟨universalLegendreP R hR, universalLegendreQ R hR⟩, hL⟩)
+        rfl rfl) h2 hR = φ :=
+  EllHom.ext (legendreClassifyingMap_pulled φ hL h2) (legendreTop_pulled φ hL h2)
+
 end RT2
 
 end TwoTorsion
