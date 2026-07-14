@@ -1,6 +1,0 @@
-FOCUS: STREAM-G0 — charter remnant (C): NISOG close. ENTERING.
-STATE: C5B-2 E[N] package COMPLETE (v10.207 ***, pushed): fullLevelIso + glSchemeSmul + L4 seam
-quartet all green. G0-owned sorries in package: zero.
-STEP 1: Read decomposition-nisog-L15.md IN FULL; inventory which gates are already built
-(grep NIsogeny.lean, cyclicityLocus, HOMOG-FRAME) vs open.
-STEP 2: pick the first open gate with met dependencies and start its declaration.
