@@ -1907,6 +1907,165 @@ theorem SpreadData.exists_common_eq_mapAtLaterStage
   refine ⟨⟨j, hij, ?_⟩⟩
   exact D₁.mapsAgreeAtLaterStage_of_stageTransition_X D₂ H h₁ h₂ hij f g hgen
 
+/-- Successive transitions between spread stages equal the direct transition. -/
+theorem SpreadData.stageTransition_trans
+    {B : Type u} [CommRing B] [Algebra A B]
+    (D : SpreadData 𝒮 u B) (H : IsFilteredAlgColimit R 𝒮 t A u)
+    {i j k : ι} (h : D.i₀ ≤ i) (hij : i ≤ j) (hjk : j ≤ k)
+    (x : D.spreadStage (t := t) h) :
+    D.stageTransition H
+        (show (⟨j, h.trans hij⟩ : {q : ι // D.i₀ ≤ q}) ≤
+          ⟨k, h.trans (hij.trans hjk)⟩ from hjk)
+        (D.stageTransition H
+          (show (⟨i, h⟩ : {q : ι // D.i₀ ≤ q}) ≤
+            ⟨j, h.trans hij⟩ from hij) x) =
+      D.stageTransition H
+        (show (⟨i, h⟩ : {q : ι // D.i₀ ≤ q}) ≤
+          ⟨k, h.trans (hij.trans hjk)⟩ from hij.trans hjk) x := by
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+  rw [D.stageTransition_apply, D.stageTransition_apply, D.stageTransition_apply,
+    presentedT_mk, presentedT_mk, presentedT_mk, MvPolynomial.map_map, H.t_comp]
+
+/-- Transporting a stage map successively to two later stages equals transporting it
+directly to the final stage. -/
+theorem SpreadData.mapAtLaterStage_trans
+    {B₁ B₂ : Type u} [CommRing B₁] [Algebra A B₁]
+    [CommRing B₂] [Algebra A B₂]
+    (D₁ : SpreadData 𝒮 u B₁) (D₂ : SpreadData 𝒮 u B₂)
+    (H : IsFilteredAlgColimit R 𝒮 t A u)
+    {i j k : ι} (h₁ : D₁.i₀ ≤ i) (h₂ : D₂.i₀ ≤ i)
+    (hij : i ≤ j) (hjk : j ≤ k)
+    (f : D₁.spreadStage (t := t) h₁ →ₐ[𝒮 i]
+      D₂.spreadStage (t := t) h₂) :
+    D₁.mapAtLaterStage D₂ H (h₁.trans hij) (h₂.trans hij) hjk
+        (D₁.mapAtLaterStage D₂ H h₁ h₂ hij f) =
+      D₁.mapAtLaterStage D₂ H h₁ h₂ (hij.trans hjk) f := by
+  apply Ideal.Quotient.algHom_ext
+  apply MvPolynomial.algHom_ext
+  intro v
+  simp only [AlgHom.comp_apply, Ideal.Quotient.mkₐ_eq_mk]
+  let P₁ : {q : ι // D₁.i₀ ≤ q} := ⟨i, h₁⟩
+  let Q₁ : {q : ι // D₁.i₀ ≤ q} := ⟨j, h₁.trans hij⟩
+  let S₁ : {q : ι // D₁.i₀ ≤ q} := ⟨k, h₁.trans (hij.trans hjk)⟩
+  let P₂ : {q : ι // D₂.i₀ ≤ q} := ⟨i, h₂⟩
+  let Q₂ : {q : ι // D₂.i₀ ≤ q} := ⟨j, h₂.trans hij⟩
+  let S₂ : {q : ι // D₂.i₀ ≤ q} := ⟨k, h₂.trans (hij.trans hjk)⟩
+  let x₀ : D₁.spreadStage (t := t) h₁ :=
+    Ideal.Quotient.mk _ (MvPolynomial.X v)
+  let tr₁ij := D₁.stageTransition H (P := P₁) (Q := Q₁) hij
+  let tr₁jk := D₁.stageTransition H (P := Q₁) (Q := S₁) hjk
+  let tr₁ik := D₁.stageTransition H (P := P₁) (Q := S₁) (hij.trans hjk)
+  let tr₂ij := D₂.stageTransition H (P := P₂) (Q := Q₂) hij
+  let tr₂jk := D₂.stageTransition H (P := Q₂) (Q := S₂) hjk
+  let tr₂ik := D₂.stageTransition H (P := P₂) (Q := S₂) (hij.trans hjk)
+  let laterIJ := D₁.mapAtLaterStage D₂ H h₁ h₂ hij f
+  let laterJK := D₁.mapAtLaterStage D₂ H (h₁.trans hij) (h₂.trans hij) hjk laterIJ
+  let laterIK := D₁.mapAtLaterStage D₂ H h₁ h₂ (hij.trans hjk) f
+  have hvarIK : tr₁ik x₀ = Ideal.Quotient.mk _ (MvPolynomial.X v) := by
+    dsimp only [tr₁ik]
+    rw [D₁.stageTransition_apply, presentedT_mk, MvPolynomial.map_X]
+  have hvarJK : tr₁jk (tr₁ij x₀) =
+      Ideal.Quotient.mk _ (MvPolynomial.X v) :=
+    (D₁.stageTransition_trans H h₁ hij hjk x₀).trans hvarIK
+  have hmapIJ : laterIJ (tr₁ij x₀) = tr₂ij (f x₀) :=
+    D₁.mapAtLaterStage_stageTransition D₂ H h₁ h₂ hij f x₀
+  have hmapJK : laterJK (tr₁jk (tr₁ij x₀)) =
+      tr₂jk (laterIJ (tr₁ij x₀)) :=
+    D₁.mapAtLaterStage_stageTransition D₂ H (h₁.trans hij) (h₂.trans hij)
+      hjk laterIJ (tr₁ij x₀)
+  have hmapIK : laterIK (tr₁ik x₀) = tr₂ik (f x₀) :=
+    D₁.mapAtLaterStage_stageTransition D₂ H h₁ h₂ (hij.trans hjk) f x₀
+  calc
+    laterJK (Ideal.Quotient.mk _ (MvPolynomial.X v)) =
+        laterJK (tr₁jk (tr₁ij x₀)) := congrArg laterJK hvarJK.symm
+    _ = tr₂jk (laterIJ (tr₁ij x₀)) := hmapJK
+    _ = tr₂jk (tr₂ij (f x₀)) := congrArg tr₂jk hmapIJ
+    _ = tr₂ik (f x₀) := D₂.stageTransition_trans H h₂ hij hjk (f x₀)
+    _ = laterIK (tr₁ik x₀) := hmapIK.symm
+    _ = laterIK (Ideal.Quotient.mk _ (MvPolynomial.X v)) :=
+      congrArg laterIK hvarIK
+
+/-- A finite family of pairs of maps between varying spread models agree after
+transport to a fixed later stage. -/
+def SpreadData.mapsFamilyAgreeAtLaterStage
+    {κ : Type*} (B : κ → Type u) [∀ q, CommRing (B q)] [∀ q, Algebra A (B q)]
+    (D : ∀ q, SpreadData 𝒮 u (B q)) (H : IsFilteredAlgColimit R 𝒮 t A u)
+    {i j : ι} (h : ∀ q, (D q).i₀ ≤ i) (hij : i ≤ j)
+    {ρ : Type*} (src dst : ρ → κ)
+    (f g : ∀ r,
+      (D (src r)).spreadStage (t := t) (h (src r)) →ₐ[𝒮 i]
+        (D (dst r)).spreadStage (t := t) (h (dst r))) : Prop :=
+  ∀ r,
+    (D (src r)).mapAtLaterStage (D (dst r)) H
+        (h (src r)) (h (dst r)) hij (f r) =
+      (D (src r)).mapAtLaterStage (D (dst r)) H
+        (h (src r)) (h (dst r)) hij (g r)
+
+/-- A common later stage carrying literal equality for a finite family of map pairs
+between varying spread models. -/
+structure SpreadData.CommonMapFamilyAgreement
+    {κ : Type*} (B : κ → Type u) [∀ q, CommRing (B q)] [∀ q, Algebra A (B q)]
+    (D : ∀ q, SpreadData 𝒮 u (B q)) (H : IsFilteredAlgColimit R 𝒮 t A u)
+    {i : ι} (h : ∀ q, (D q).i₀ ≤ i)
+    {ρ : Type*} (src dst : ρ → κ)
+    (f g : ∀ r,
+      (D (src r)).spreadStage (t := t) (h (src r)) →ₐ[𝒮 i]
+        (D (dst r)).spreadStage (t := t) (h (dst r))) where
+  stage : ι
+  le_stage : i ≤ stage
+  maps_agree : mapsFamilyAgreeAtLaterStage B D H h le_stage src dst f g
+
+/-- Finitely many pairs of maps between varying spread models which agree in their
+target colimits agree literally after transport to one common later stage. -/
+theorem SpreadData.exists_common_eq_mapFamilyAtLaterStage
+    {κ : Type*} (B : κ → Type u) [∀ q, CommRing (B q)] [∀ q, Algebra A (B q)]
+    (D : ∀ q, SpreadData 𝒮 u (B q)) (H : IsFilteredAlgColimit R 𝒮 t A u)
+    {i : ι} (h : ∀ q, (D q).i₀ ≤ i)
+    {ρ : Type*} [Finite ρ] (src dst : ρ → κ)
+    (f g : ∀ r,
+      (D (src r)).spreadStage (t := t) (h (src r)) →ₐ[𝒮 i]
+        (D (dst r)).spreadStage (t := t) (h (dst r)))
+    (hfg : ∀ r x,
+      (D (dst r)).stageToColimit H ⟨i, h (dst r)⟩ (f r x) =
+        (D (dst r)).stageToColimit H ⟨i, h (dst r)⟩ (g r x)) :
+    Nonempty (CommonMapFamilyAgreement B D H h src dst f g) := by
+  classical
+  letI : Fintype ρ := Fintype.ofFinite ρ
+  haveI := H.directed
+  haveI := H.nonempty
+  let C : ∀ r, (D (src r)).CommonMapAgreement (D (dst r)) H
+      (h (src r)) (h (dst r)) (ρ := Fin 1)
+      (fun _ : Fin 1 => f r) (fun _ : Fin 1 => g r) := fun r =>
+    Classical.choice ((D (src r)).exists_common_eq_mapAtLaterStage
+      (ρ := Fin 1) (D (dst r)) H
+      (h (src r)) (h (dst r)) (fun _ : Fin 1 => f r)
+      (fun _ : Fin 1 => g r)
+      (fun _ x => hfg r x))
+  obtain ⟨j, hjall⟩ := (insert i (Finset.univ.image fun r => (C r).stage)).exists_le
+  have hij : i ≤ j := hjall i (Finset.mem_insert_self i _)
+  have hC : ∀ r, (C r).stage ≤ j := fun r => hjall ((C r).stage)
+    (Finset.mem_insert_of_mem (Finset.mem_image_of_mem (fun r => (C r).stage)
+      (Finset.mem_univ r)))
+  refine ⟨⟨j, hij, ?_⟩⟩
+  intro r
+  let later := (D (src r)).mapAtLaterStage (D (dst r)) H
+    ((h (src r)).trans (C r).le_stage)
+    ((h (dst r)).trans (C r).le_stage) (hC r)
+  have heq := (C r).maps_agree 0
+  calc
+    (D (src r)).mapAtLaterStage (D (dst r)) H
+        (h (src r)) (h (dst r)) hij (f r) =
+      later ((D (src r)).mapAtLaterStage (D (dst r)) H
+        (h (src r)) (h (dst r)) (C r).le_stage (f r)) :=
+          ((D (src r)).mapAtLaterStage_trans (D (dst r)) H
+            (h (src r)) (h (dst r)) (C r).le_stage (hC r) (f r)).symm
+    _ = later ((D (src r)).mapAtLaterStage (D (dst r)) H
+        (h (src r)) (h (dst r)) (C r).le_stage (g r)) := congrArg later heq
+    _ = (D (src r)).mapAtLaterStage (D (dst r)) H
+        (h (src r)) (h (dst r)) hij (g r) :=
+      (D (src r)).mapAtLaterStage_trans (D (dst r)) H
+        (h (src r)) (h (dst r)) (C r).le_stage (hC r) (g r)
+
 open TensorProduct in
 /-- Fibre-nontriviality transfer along a base change of presented models: if the fibre of
 `Q` at the smaller base is nontrivial, so is the fibre of the base-changed model at any
