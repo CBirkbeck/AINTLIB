@@ -367,35 +367,23 @@ structure (`N ≥ 3`). The fixed basis spans the geometric `N`-torsion
 subgroup of the points at every geometric extension, so the torsion restriction agrees
 with the identity on every point of the finite étale `E[N]` — the `UnramifiedEqualizer`
 engine globalises, and `aut_endo_eq_one` (KM 2.7.2, register-box keystone) closes. -/
-theorem gammaFullNaive_fix_absurd (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
+theorem gammaFullNaive_eq_refl_of_fix_sections (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
     (hinv : IsUnit (N : R))
     (k : Type u) [Field k] [IsAlgClosed k]
     (sm : Spec (CommRingCat.of k) ⟶ Spec R)
     (E : EllipticCurve (Spec (CommRingCat.of k)))
     (e : (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R) ≅
       (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
-    (he : e.hom.baseHom = 𝟙 _) (hne : e ≠ Iso.refl _)
+    (he : e.hom.baseHom = 𝟙 _)
     (b : (gammaFullNaiveProblem R N).obj
       (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)))
-    (hfix : (gammaFullNaiveProblem R N).map e.hom.op b = b) : False := by
+    (hPc : b.1.1.1 ≫ e.hom.top = b.1.1.1)
+    (hQc : b.1.2.1 ≫ e.hom.top = b.1.2.1) : e = Iso.refl _ := by
   classical
   haveI : IsLocallyNoetherian (Spec (CommRingCat.of k)) := by
     haveI : IsNoetherianRing k := inferInstance
     infer_instance
   set c := e.hom.top with hc
-  -- the two sections are fixed by `c`
-  have h1 : EllHom.pullSection R e.hom b.1.1 = b.1.1 := congrArg (fun z => z.1.1) hfix
-  have h2 : EllHom.pullSection R e.hom b.1.2 = b.1.2 := congrArg (fun z => z.1.2) hfix
-  have hPc : b.1.1.1 ≫ c = b.1.1.1 := by
-    have hlf : (EllHom.pullSection R e.hom b.1.1).1 ≫ e.hom.top
-        = e.hom.baseHom ≫ b.1.1.1 := e.hom.isPullback.lift_fst _ _ _
-    rw [h1, he, Category.id_comp] at hlf
-    exact hlf
-  have hQc : b.1.2.1 ≫ c = b.1.2.1 := by
-    have hlf : (EllHom.pullSection R e.hom b.1.2).1 ≫ e.hom.top
-        = e.hom.baseHom ≫ b.1.2.1 := e.hom.isPullback.lift_fst _ _ _
-    rw [h2, he, Category.id_comp] at hlf
-    exact hlf
   -- `c` as a pointed `Over`-automorphism (as in the detection theorem)
   have hcπ : c ≫ E.π = E.π := by
     have h := e.hom.isPullback.w
@@ -533,7 +521,290 @@ theorem gammaFullNaive_fix_absurd (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
   have hεid : εO = 𝟙 E.asOver :=
     E.aut_endo_eq_one N hN εO (E.endDeg_eq_one_of_isIso εO) hfixM
   have hcid : c = 𝟙 E.E := congrArg CommaMorphism.left hεid
-  exact hne (Iso.ext (EllHom.ext he hcid))
+  exact Iso.ext (EllHom.ext he hcid)
+
+open EllipticCurve in
+/-- **[RIG-2-wrap, `H = ⊥` core] (classical Γ(N) k̄-rigidity)** — no nontrivial
+base-identical self-iso fixes a naive full level-`N` structure over k̄ (`N ≥ 3`
+invertible): the fixed sections force `e = refl` (`gammaFullNaive_eq_refl_of_fix_sections`). -/
+theorem gammaFullNaive_fix_absurd (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
+    (hinv : IsUnit (N : R))
+    (k : Type u) [Field k] [IsAlgClosed k]
+    (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+    (E : EllipticCurve (Spec (CommRingCat.of k)))
+    (e : (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R) ≅
+      (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
+    (he : e.hom.baseHom = 𝟙 _) (hne : e ≠ Iso.refl _)
+    (b : (gammaFullNaiveProblem R N).obj
+      (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)))
+    (hfix : (gammaFullNaiveProblem R N).map e.hom.op b = b) : False := by
+  have h1 : EllHom.pullSection R e.hom b.1.1 = b.1.1 := congrArg (fun z => z.1.1) hfix
+  have h2 : EllHom.pullSection R e.hom b.1.2 = b.1.2 := congrArg (fun z => z.1.2) hfix
+  have hPc : b.1.1.1 ≫ e.hom.top = b.1.1.1 := by
+    have hlf : (EllHom.pullSection R e.hom b.1.1).1 ≫ e.hom.top
+        = e.hom.baseHom ≫ b.1.1.1 := e.hom.isPullback.lift_fst _ _ _
+    rw [h1, he, Category.id_comp] at hlf
+    exact hlf
+  have hQc : b.1.2.1 ≫ e.hom.top = b.1.2.1 := by
+    have hlf : (EllHom.pullSection R e.hom b.1.2).1 ≫ e.hom.top
+        = e.hom.baseHom ≫ b.1.2.1 := e.hom.isPullback.lift_fst _ _ _
+    rw [h2, he, Category.id_comp] at hlf
+    exact hlf
+  exact hne (gammaFullNaive_eq_refl_of_fix_sections N hN hinv k sm E e he b hPc hQc)
+
+/-- Iterated composition of a self-isomorphism. -/
+noncomputable def isoPow {C : Type*} [Category C] {X : C} (e : X ≅ X) : ℕ → (X ≅ X)
+  | 0 => Iso.refl X
+  | (n + 1) => isoPow e n ≪≫ e
+
+/-- The pure group-arithmetic engine of the `γ`-twist: an additive endomorphism sending
+the `M`-columns of an `N`-torsion pair back to the pair has its `m`-th iterate fix the
+pair, whenever `M ^ m ≡ 1 mod N` entrywise. -/
+private theorem iterate_fix_of_matrix_rel {A : Type*} [AddCommGroup A]
+    {P Q : A} {N : ℕ} (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0)
+    (φ : A →+ A) (M : Matrix (Fin 2) (Fin 2) ℤ)
+    (hrel0 : φ (M 0 0 • P + M 1 0 • Q) = P)
+    (hrel1 : φ (M 0 1 • P + M 1 1 • Q) = Q)
+    (m : ℕ)
+    (hMm : ∀ i j, (N : ℤ) ∣ (M ^ m) i j - (1 : Matrix (Fin 2) (Fin 2) ℤ) i j) :
+    φ^[m] P = P ∧ φ^[m] Q = Q := by
+  classical
+  set pt : (Fin 2 → ℤ) → A := fun v => v 0 • P + v 1 • Q with hpt
+  have pt_congr : ∀ v w : Fin 2 → ℤ, (∀ i, (N : ℤ) ∣ v i - w i) → pt v = pt w := by
+    intro v w hdvd
+    obtain ⟨c0, hc0⟩ := hdvd 0
+    obtain ⟨c1, hc1⟩ := hdvd 1
+    have hv0 : v 0 = w 0 + N * c0 := by linarith
+    have hv1 : v 1 = w 1 + N * c1 := by linarith
+    show v 0 • P + v 1 • Q = w 0 • P + w 1 • Q
+    rw [hv0, hv1, add_smul, add_smul, mul_smul, mul_smul, smul_comm (N : ℤ) c0,
+      smul_comm (N : ℤ) c1, hP, hQ, smul_zero, smul_zero, add_zero, add_zero]
+  have hexp : ∀ (A' : Matrix (Fin 2) (Fin 2) ℤ) (v : Fin 2 → ℤ) (i : Fin 2),
+      A'.mulVec v i = A' i 0 * v 0 + A' i 1 * v 1 := by
+    intro A' v i
+    simp [Matrix.mulVec]
+  have hgen : ∀ v : Fin 2 → ℤ, φ (pt (M.mulVec v)) = pt v := by
+    intro v
+    have hdecomp : pt (M.mulVec v)
+        = v 0 • (M 0 0 • P + M 1 0 • Q) + v 1 • (M 0 1 • P + M 1 1 • Q) := by
+      show (M.mulVec v) 0 • P + (M.mulVec v) 1 • Q = _
+      rw [hexp M v 0, hexp M v 1]
+      module
+    rw [hdecomp, map_add, map_zsmul, map_zsmul, hrel0, hrel1]
+  have hiter : ∀ (mm : ℕ) (v : Fin 2 → ℤ), φ^[mm] (pt ((M ^ mm).mulVec v)) = pt v := by
+    intro mm
+    induction mm with
+    | zero =>
+      intro v
+      rw [pow_zero, Matrix.one_mulVec]
+      rfl
+    | succ n ih =>
+      intro v
+      rw [pow_succ', Function.iterate_succ_apply]
+      have hgrp : (M * M ^ n).mulVec v = M.mulVec ((M ^ n).mulVec v) := by
+        rw [← Matrix.mulVec_mulVec]
+      rw [hgrp, hgen ((M ^ n).mulVec v)]
+      exact ih v
+  have hMmv : ∀ v : Fin 2 → ℤ, pt ((M ^ m).mulVec v) = pt v := by
+    intro v
+    refine pt_congr _ _ ?_
+    intro i
+    have hv : (M ^ m).mulVec v i - v i
+        = ((M ^ m) i 0 - (1 : Matrix (Fin 2) (Fin 2) ℤ) i 0) * v 0
+          + ((M ^ m) i 1 - (1 : Matrix (Fin 2) (Fin 2) ℤ) i 1) * v 1 := by
+      have h1v : v i = (1 : Matrix (Fin 2) (Fin 2) ℤ).mulVec v i := by
+        rw [Matrix.one_mulVec]
+      rw [hexp (M ^ m) v i]
+      nth_rewrite 1 [h1v]
+      rw [hexp (1 : Matrix (Fin 2) (Fin 2) ℤ) v i]
+      ring
+    rw [hv]
+    exact dvd_add ((hMm i 0).mul_right _) ((hMm i 1).mul_right _)
+  constructor
+  · have hstd : pt ![1, 0] = P := by
+      show (1 : ℤ) • P + (0 : ℤ) • Q = P
+      rw [one_smul, zero_smul, add_zero]
+    calc φ^[m] P = φ^[m] (pt ![1, 0]) := by rw [hstd]
+      _ = φ^[m] (pt ((M ^ m).mulVec ![1, 0])) := by rw [hMmv]
+      _ = pt ![1, 0] := hiter m _
+      _ = P := hstd
+  · have hstd : pt ![0, 1] = Q := by
+      show (0 : ℤ) • P + (1 : ℤ) • Q = Q
+      rw [one_smul, zero_smul, zero_add]
+    calc φ^[m] Q = φ^[m] (pt ![0, 1]) := by rw [hstd]
+      _ = φ^[m] (pt ((M ^ m).mulVec ![0, 1])) := by rw [hMmv]
+      _ = pt ![0, 1] := hiter m _
+      _ = Q := hstd
+
+/-- Entrywise congruence of the `orderOf`-power of an integer lift of a `GL₂(ℤ/N)`
+element: `M ^ orderOf g ≡ 1 mod N`. -/
+private theorem pow_entry_dvd_of_map_eq (N : ℕ) [NeZero N]
+    (M : Matrix (Fin 2) (Fin 2) ℤ) (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (hMg : M.map (Int.cast : ℤ → ZMod N) = (g : Matrix (Fin 2) (Fin 2) (ZMod N)))
+    (i j : Fin 2) :
+    (N : ℤ) ∣ (M ^ orderOf g) i j - (1 : Matrix (Fin 2) (Fin 2) ℤ) i j := by
+  have hcast : (M ^ orderOf g).map (Int.cast : ℤ → ZMod N) = 1 := by
+    have hring : (M ^ orderOf g).map (Int.cast : ℤ → ZMod N)
+        = ((Int.castRingHom (ZMod N)).mapMatrix M) ^ orderOf g := by
+      have h := map_pow ((Int.castRingHom (ZMod N)).mapMatrix) M (orderOf g)
+      rw [RingHom.mapMatrix_apply] at h
+      exact h
+    rw [hring]
+    have hMg' : (Int.castRingHom (ZMod N)).mapMatrix M
+        = (g : Matrix (Fin 2) (Fin 2) (ZMod N)) := hMg
+    rw [hMg']
+    have hpow : ((g : Matrix (Fin 2) (Fin 2) (ZMod N))) ^ orderOf g
+        = (((g ^ orderOf g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))) :
+          Matrix (Fin 2) (Fin 2) (ZMod N)) := (Units.val_pow_eq_pow_val _ _).symm
+    rw [hpow, pow_orderOf_eq_one, Units.val_one]
+  have hij : (((M ^ orderOf g) i j : ℤ) : ZMod N)
+      = (((1 : Matrix (Fin 2) (Fin 2) ℤ) i j : ℤ) : ZMod N) := by
+    have hl : (((M ^ orderOf g) i j : ℤ) : ZMod N)
+        = ((M ^ orderOf g).map (Int.cast : ℤ → ZMod N)) i j := rfl
+    rw [hl, hcast, Matrix.one_apply, Matrix.one_apply]
+    split_ifs <;> simp
+  have hmod := (ZMod.intCast_eq_intCast_iff _ _ _).mp hij
+  exact dvd_sub_comm.mp (Int.ModEq.dvd hmod)
+
+open EllipticCurve in
+/-- **[TWIST] (the `γ`-twist iterate — general-`H` engine)** — if a base-identical
+self-iso `e` carries a full level structure to its `glSmul g`-translate, then
+`e^(orderOf g)` is the identity: the induced additive action on points sends the
+`g`-matrix combinations of the basis back to the basis, so its `orderOf g`-th iterate
+fixes the basis outright (the integer matrix power is congruent to `1` mod `N`, and the
+basis is `N`-torsion), and the Γ(N) k̄-rigidity extraction
+(`gammaFullNaive_eq_refl_of_fix_sections`) forces the iterate to be `refl`.
+
+This is the whole geometric content of general-`H` rigidity: the per-`H` arithmetic
+residue is exactly "no `e ≠ refl` with `e^(orderOf γ) = refl` can twist by `γ ∈ H`" —
+the CM-unit/`H`-intersection condition fed by KM's endomorphism-degree keystone. -/theorem gammaFullNaive_twist_pow_refl (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
+    (hinv : IsUnit (N : R))
+    (k : Type u) [Field k] [IsAlgClosed k]
+    (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+    (E : EllipticCurve (Spec (CommRingCat.of k)))
+    (e : (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R) ≅
+      (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
+    (he : e.hom.baseHom = 𝟙 _)
+    (b : (gammaFullNaiveProblem R N).obj
+      (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)))
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (hcon : (gammaFullNaiveProblem R N).map e.hom.op b = E.glSmul g b) :
+    isoPow e (orderOf g) = Iso.refl _ := by
+  classical
+  haveI : IsLocallyNoetherian (Spec (CommRingCat.of k)) := by
+    haveI : IsNoetherianRing k := inferInstance
+    infer_instance
+  set c := e.hom.top with hc
+  -- `c` as a pointed `Over`-automorphism
+  have hcπ : c ≫ E.π = E.π := by
+    have h := e.hom.isPullback.w
+    rw [he, Category.comp_id] at h
+    exact h
+  set εO : E.asOver ⟶ E.asOver := Over.homMk c hcπ with hεO
+  have hzc : E.zero ≫ c = E.zero := by
+    have h := e.hom.zero_w
+    rw [he, Category.id_comp] at h
+    exact h
+  have hη : η[E.asOver] ≫ εO = η[E.asOver] := by
+    refine Over.OverMorphism.ext ?_
+    show (η[E.asOver]).left ≫ c = (η[E.asOver]).left
+    rw [E.one_eq_zero]
+    have s1 : ((𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ E.zero) ≫ c
+        = (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ E.zero ≫ c := Category.assoc _ _ _
+    have s2 : (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ E.zero ≫ c
+        = (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ E.zero :=
+      congrArg (fun mm => (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ mm) hzc
+    exact s1.trans s2
+  letI : CommGroup (Over.mk (𝟙 (Spec (CommRingCat.of k))) ⟶ E.asOver) := Hom.commGroup
+  letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+  haveI : IsMonHom εO := { one_hom := hη, mul_hom := E.endMonHom εO hη }
+  -- the additive point action of `c`
+  set cAct : E.Point (𝟙 (Spec (CommRingCat.of k))) →+
+      E.Point (𝟙 (Spec (CommRingCat.of k))) := AddMonoidHom.mk'
+    (fun x => (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))).symm
+      ((E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) x ≫ εO))
+    (by
+      intro x y
+      have htr : (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) (x + y)
+          = (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) x *
+            (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) y :=
+        E.pointEquivOverHom_add (𝟙 (Spec (CommRingCat.of k))) x y
+      have hmul := (IsMonHom.monoidHom εO (Over.mk (𝟙 (Spec (CommRingCat.of k))))).map_mul
+        ((E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) x)
+        ((E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) y)
+      simp only [IsMonHom.monoidHom_apply] at hmul
+      rw [htr, hmul]
+      refine ((E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))).symm_apply_eq).mpr ?_
+      rw [E.pointEquivOverHom_add]
+      rw [Equiv.apply_symm_apply, Equiv.apply_symm_apply]) with hcAct
+  have cAct_val : ∀ x : E.Point (𝟙 (Spec (CommRingCat.of k))),
+      (cAct x).1 = x.1 ≫ c := fun x => rfl
+  -- the lifted matrix and the two column relations from the twist
+  set M : Matrix (Fin 2) (Fin 2) ℤ :=
+    fun i j => (((g : Matrix (Fin 2) (Fin 2) (ZMod N)) i j).val : ℤ) with hM
+  have h1 : EllHom.pullSection R e.hom b.1.1 = M 0 0 • b.1.1 + M 1 0 • b.1.2 :=
+    congrArg (fun z => z.1.1) hcon
+  have h2 : EllHom.pullSection R e.hom b.1.2 = M 0 1 • b.1.1 + M 1 1 • b.1.2 :=
+    congrArg (fun z => z.1.2) hcon
+  have hrel0 : cAct (M 0 0 • b.1.1 + M 1 0 • b.1.2) = b.1.1 := by
+    refine Subtype.ext ?_
+    rw [cAct_val]
+    show (M 0 0 • b.1.1 + M 1 0 • b.1.2 : E.Point _).1 ≫ c = b.1.1.1
+    rw [← congrArg Subtype.val h1]
+    have hlf : (EllHom.pullSection R e.hom b.1.1).1 ≫ e.hom.top
+        = e.hom.baseHom ≫ b.1.1.1 := e.hom.isPullback.lift_fst _ _ _
+    rw [he, Category.id_comp] at hlf
+    exact hlf
+  have hrel1 : cAct (M 0 1 • b.1.1 + M 1 1 • b.1.2) = b.1.2 := by
+    refine Subtype.ext ?_
+    rw [cAct_val]
+    show (M 0 1 • b.1.1 + M 1 1 • b.1.2 : E.Point _).1 ≫ c = b.1.2.1
+    rw [← congrArg Subtype.val h2]
+    have hlf : (EllHom.pullSection R e.hom b.1.2).1 ≫ e.hom.top
+        = e.hom.baseHom ≫ b.1.2.1 := e.hom.isPullback.lift_fst _ _ _
+    rw [he, Category.id_comp] at hlf
+    exact hlf
+  -- the abstract iterate engine
+  have hdvd : ∀ i j, (N : ℤ) ∣ (M ^ orderOf g) i j - (1 : Matrix (Fin 2) (Fin 2) ℤ) i j :=
+    pow_entry_dvd_of_map_eq N M g (by
+      funext i j
+      show ((((g : Matrix (Fin 2) (Fin 2) (ZMod N)) i j).val : ℤ) : ZMod N)
+        = (g : Matrix (Fin 2) (Fin 2) (ZMod N)) i j
+      simp [ZMod.natCast_val, ZMod.cast_id])
+  obtain ⟨hfixP, hfixQ⟩ := iterate_fix_of_matrix_rel (N := N) (P := b.1.1) (Q := b.1.2)
+    b.2.1.1 b.2.1.2 cAct M hrel0 hrel1 (orderOf g) hdvd
+  -- compositional translation to the iterated iso, then the rigidity extraction
+  have hbase : ∀ mm : ℕ, (isoPow e mm).hom.baseHom = 𝟙 (Spec (CommRingCat.of k)) := by
+    intro mm
+    induction mm with
+    | zero => rfl
+    | succ n ih =>
+      show ((isoPow e n).hom ≫ e.hom).baseHom = 𝟙 _
+      show (isoPow e n).hom.baseHom ≫ e.hom.baseHom = 𝟙 _
+      rw [ih, he, Category.comp_id]
+  have hval : ∀ (mm : ℕ) (x : E.Point (𝟙 (Spec (CommRingCat.of k)))),
+      (cAct^[mm] x).1 = x.1 ≫ (isoPow e mm).hom.top := by
+    intro mm
+    induction mm with
+    | zero =>
+      intro x
+      show x.1 = x.1 ≫ 𝟙 E.E
+      rw [Category.comp_id]
+    | succ n ih =>
+      intro x
+      rw [Function.iterate_succ_apply', cAct_val, ih]
+      show (x.1 ≫ (isoPow e n).hom.top) ≫ c = x.1 ≫ ((isoPow e n).hom.top ≫ c)
+      rw [Category.assoc]
+  have hPfix : b.1.1.1 ≫ (isoPow e (orderOf g)).hom.top = b.1.1.1 := by
+    have h := congrArg Subtype.val hfixP
+    rw [hval] at h
+    exact h
+  have hQfix : b.1.2.1 ≫ (isoPow e (orderOf g)).hom.top = b.1.2.1 := by
+    have h := congrArg Subtype.val hfixQ
+    rw [hval] at h
+    exact h
+  exact gammaFullNaive_eq_refl_of_fix_sections N hN hinv k sm E (isoPow e (orderOf g))
+    (hbase (orderOf g)) b hPfix hQfix
 
 /-- **[RIG-2-wrap at `H = ⊥`]** — the `hfree` pin of `gammaH_rigid` holds outright for
 the trivial subgroup (`γ = 1` forced, so the twisted fix is a plain fix, killed by the
