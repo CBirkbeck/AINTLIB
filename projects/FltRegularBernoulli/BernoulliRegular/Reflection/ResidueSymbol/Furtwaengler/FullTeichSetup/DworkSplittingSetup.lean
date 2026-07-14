@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.FullTeichSetup.TeichmullerSectionConstruction
@@ -171,14 +176,14 @@ def teichUnitFullVal (x : kˣ) : 𝓞 R' := (S.teichUnitFull x : 𝓞 R')
 theorem teichUnitFullVal_mul (x y : kˣ) :
     S.teichUnitFullVal (x * y) =
       S.teichUnitFullVal x * S.teichUnitFullVal y := by
-  unfold teichUnitFullVal
+  simp only [teichUnitFullVal]
   rw [map_mul]
   rfl
 
 /-- The Teichmüller value at `1` is `1`. -/
 @[simp]
 theorem teichUnitFullVal_one : S.teichUnitFullVal 1 = 1 := by
-  unfold teichUnitFullVal
+  simp only [teichUnitFullVal]
   rw [map_one]
   rfl
 
@@ -186,7 +191,7 @@ theorem teichUnitFullVal_one : S.teichUnitFullVal 1 = 1 := by
 @[simp]
 theorem teichUnitFullVal_pow (x : kˣ) (n : ℕ) :
     S.teichUnitFullVal (x ^ n) = S.teichUnitFullVal x ^ n := by
-  unfold teichUnitFullVal
+  simp only [teichUnitFullVal]
   rw [map_pow]
   rfl
 
@@ -219,7 +224,7 @@ omit [DecidableEq k] in
 theorem teichUnitFullVal_pow_card_sub_one (x : kˣ) :
     S.teichUnitFullVal x ^ (Fintype.card k - 1) = 1 := by
   haveI : DecidableEq k := Classical.decEq _
-  unfold teichUnitFullVal
+  simp only [teichUnitFullVal]
   rw [show (Fintype.card k - 1) = Fintype.card kˣ from
     (Fintype.card_units (α := k)).symm]
   rw [← Units.val_pow_eq_pow_val, ← map_pow, pow_card_eq_one, map_one]
