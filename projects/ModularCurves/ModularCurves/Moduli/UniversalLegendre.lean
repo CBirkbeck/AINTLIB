@@ -1864,6 +1864,113 @@ theorem transVC_transport_legendre {R : CommRingCat.{u}} {X : EllObj R}
         _).compat_π
   rw [hkey, Category.assoc, eqToHom_trans, eqToHom_refl, Category.comp_id]
 
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation TopologicalSpace in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(T-E14-CLS-7 rt1 ★★)** Roundtrip, `ω`-half: pulling the universal Legendre
+`ω`-basis back along the classifying morphism recovers the given basis. The ratio
+unit reads as the witness-vs-transported-taut transition unit, which is `1` by the
+geometric rt1-core. -/
+theorem omegaBasisMap_legendreClassifyingEllHom {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤)))
+    (hR : IsUnit (2 : R)) :
+    omegaBasisMap (legendreClassifyingEllHom hD h2 hR)
+      (universalLegendreOmega R hR) = b := by
+  haveI := universalLegendre_isElliptic R hR
+  obtain ⟨u, hu, -⟩ := OmegaBasis.existsUnique_unit_smul b
+    (omegaBasisMap (legendreClassifyingEllHom hD h2 hR)
+      (universalLegendreOmega R hR))
+  have h1 : u = 1 := by
+    refine Scheme.unit_ext_of_res_cover X.base
+      (fun w : LegendreWitness X L b => w.V.1)
+      (fun w => le_top) (fun x _ => ?_) (fun w => ?_)
+    · obtain ⟨V, hxV, Pr, lam, hAd, hW, hMP, hMQ⟩ := hD x
+      exact Opens.mem_iSup.mpr ⟨⟨V, Pr, lam, hAd, hW, hMP, hMQ⟩, hxV⟩
+    · -- the transition unit of the transported taut against the witness is 1
+      have htu : ((tautPresentation (universalLegendre R)).transport
+          (legendreClassifyingEllHom hD h2 hR).baseHom
+          (legendreClassifyingEllHom hD h2 hR).top
+          (legendreClassifyingEllHom hD h2 hR).isPullback
+          (legendreClassifyingEllHom hD h2 hR).zero_w
+          (show w.V.1 ≤ (legendreClassifyingEllHom hD h2 hR).baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (LegendreModuliRing R))).affineOpens).1 from
+            fun x _ => trivial)).transUnit (w.Pr) = 1 := by
+        show (((tautPresentation (universalLegendre R)).transport
+          (legendreClassifyingEllHom hD h2 hR).baseHom
+          (legendreClassifyingEllHom hD h2 hR).top
+          (legendreClassifyingEllHom hD h2 hR).isPullback
+          (legendreClassifyingEllHom hD h2 hR).zero_w
+          (show w.V.1 ≤ (legendreClassifyingEllHom hD h2 hR).baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (LegendreModuliRing R))).affineOpens).1 from
+            fun x _ => trivial)).transVC (w.Pr)).u = 1
+        rw [transVC_transport_legendre hD h2 hR w]
+        rfl
+      have hAT : (w.Pr).transUnit
+          ((tautPresentation (universalLegendre R)).transport
+            (legendreClassifyingEllHom hD h2 hR).baseHom
+            (legendreClassifyingEllHom hD h2 hR).top
+            (legendreClassifyingEllHom hD h2 hR).isPullback
+            (legendreClassifyingEllHom hD h2 hR).zero_w
+            (show w.V.1 ≤ (legendreClassifyingEllHom hD h2 hR).baseHom ⁻¹ᵁ
+              (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+                (LegendreModuliRing R))).affineOpens).1 from
+              fun x _ => trivial)) = 1 := by
+        have h := transUnit_trans (w.Pr)
+          ((tautPresentation (universalLegendre R)).transport
+            (legendreClassifyingEllHom hD h2 hR).baseHom
+            (legendreClassifyingEllHom hD h2 hR).top
+            (legendreClassifyingEllHom hD h2 hR).isPullback
+            (legendreClassifyingEllHom hD h2 hR).zero_w
+            (show w.V.1 ≤ (legendreClassifyingEllHom hD h2 hR).baseHom ⁻¹ᵁ
+              (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+                (LegendreModuliRing R))).affineOpens).1 from
+              fun x _ => trivial))
+          (w.Pr)
+        rw [htu, mul_one, transUnit_self] at h
+        exact h
+      have hTad : (((tautPresentation (universalLegendre R)).transport
+          (legendreClassifyingEllHom hD h2 hR).baseHom
+          (legendreClassifyingEllHom hD h2 hR).top
+          (legendreClassifyingEllHom hD h2 hR).isPullback
+          (legendreClassifyingEllHom hD h2 hR).zero_w
+          (show w.V.1 ≤ (legendreClassifyingEllHom hD h2 hR).baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (LegendreModuliRing R))).affineOpens).1 from
+            fun x _ => trivial)).basisUnitAt
+          (omegaBasisMap (legendreClassifyingEllHom hD h2 hR)
+            (universalLegendreOmega R hR))).1 = 1 :=
+        IsAdapted.transport (legendreClassifyingEllHom hD h2 hR)
+          (tautPresentation_isAdapted_legendre R hR) _
+      have hkey : ((w.Pr).basisUnitAt
+          (omegaBasisMap (legendreClassifyingEllHom hD h2 hR)
+            (universalLegendreOmega R hR))).1 = 1 := by
+        rw [basisUnitAt_transUnit (w.Pr)
+          ((tautPresentation (universalLegendre R)).transport
+            (legendreClassifyingEllHom hD h2 hR).baseHom
+            (legendreClassifyingEllHom hD h2 hR).top
+            (legendreClassifyingEllHom hD h2 hR).isPullback
+            (legendreClassifyingEllHom hD h2 hR).zero_w
+            (show w.V.1 ≤ (legendreClassifyingEllHom hD h2 hR).baseHom ⁻¹ᵁ
+              (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+                (LegendreModuliRing R))).affineOpens).1 from
+              fun x _ => trivial))
+          (omegaBasisMap (legendreClassifyingEllHom hD h2 hR)
+            (universalLegendreOmega R hR)),
+          hAT, hTad, one_mul]
+      have hsm := basisUnitAt_smul (w.Pr) u b
+      rw [hu] at hsm
+      have hALb : ((w.Pr).basisUnitAt b).1 = 1 := w.hAd
+      rw [hkey, hALb, mul_one] at hsm
+      rw [map_one]
+      exact hsm.symm
+  rw [← hu, h1]
+  exact Subtype.ext (by
+    rw [show ((1 : Γ(X.base, ⊤)ˣ) • b).1 =
+      ((1 : Γ(X.base, ⊤)ˣ)).val • b.1 from rfl, Units.val_one, one_smul])
+
 end TwoTorsion
 
 end ModularCurves
