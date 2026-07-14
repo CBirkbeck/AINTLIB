@@ -315,21 +315,25 @@ that is BOTH in short normal form and `ω`-adapted — and by
 `transVC_eq_one_of_isAdapted` it is unique. The `(g₂, g₄?, g₆)`-coefficients of its
 curve are T-E12's classifying functions. -/
 noncomputable def adaptShortNF {V : S.affineOpens} (P : LocalPresentation G V)
-    (b : OmegaBasis G) [Invertible (2 : Γ(S, V.1))] [Invertible (3 : Γ(S, V.1))] :
+    (b : OmegaBasis G) (h2 : IsUnit (2 : Γ(S, V.1))) (h3 : IsUnit (3 : Γ(S, V.1))) :
     LocalPresentation G V :=
+  letI := h2.invertible
+  letI := h3.invertible
   (P.ofVC P.W.toShortNF).adapt b
 
 set_option backward.isDefEq.respectTransparency false in
 theorem isAdapted_adaptShortNF {V : S.affineOpens} (P : LocalPresentation G V)
-    (b : OmegaBasis G) [Invertible (2 : Γ(S, V.1))] [Invertible (3 : Γ(S, V.1))] :
-    (P.adaptShortNF b).IsAdapted b :=
+    (b : OmegaBasis G) (h2 : IsUnit (2 : Γ(S, V.1))) (h3 : IsUnit (3 : Γ(S, V.1))) :
+    (P.adaptShortNF b h2 h3).IsAdapted b :=
   isAdapted_adapt _ b
 
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
 theorem isShortNF_adaptShortNF {V : S.affineOpens} (P : LocalPresentation G V)
-    (b : OmegaBasis G) [Invertible (2 : Γ(S, V.1))] [Invertible (3 : Γ(S, V.1))] :
-    (P.adaptShortNF b).W.IsShortNF := by
+    (b : OmegaBasis G) (h2 : IsUnit (2 : Γ(S, V.1))) (h3 : IsUnit (3 : Γ(S, V.1))) :
+    (P.adaptShortNF b h2 h3).W.IsShortNF := by
+  letI := h2.invertible
+  letI := h3.invertible
   have h0 : (P.ofVC P.W.toShortNF).W.IsShortNF := by
     rw [ofVC_W]
     exact P.W.toShortNF_spec
@@ -338,6 +342,23 @@ theorem isShortNF_adaptShortNF {V : S.affineOpens} (P : LocalPresentation G V)
     (⟨(((P.ofVC P.W.toShortNF).basisUnitAt b).1)⁻¹, 0, 0, 0⟩ :
       VariableChange Γ(S, V.1)) • (P.ofVC P.W.toShortNF).W from rfl]
   exact isShortNF_smul_units h0 _
+
+open WeierstrassCurve in
+/-- Short normal form restricts along ring maps. -/
+theorem isShortNF_map {R R' : Type u} [CommRing R] [CommRing R']
+    {W : WeierstrassCurve R} (hW : W.IsShortNF) (f : R →+* R') :
+    (W.map f).IsShortNF := by
+  constructor <;> simp [WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
+    WeierstrassCurve.map_a₃, hW.a₁, hW.a₂, hW.a₃]
+
+open Scheme in
+/-- Global unit numeral literals restrict to unit numeral literals. -/
+theorem isUnit_ofNat_res {n : ℕ} [n.AtLeastTwo]
+    (hn : IsUnit (OfNat.ofNat n : Γ(S, ⊤))) (V : S.Opens) :
+    IsUnit (OfNat.ofNat n : Γ(S, V)) := by
+  have h := hn.map (S.presheaf.map (homOfLE (le_top : V ≤ ⊤)).op).hom
+  rwa [map_ofNat] at h
+
 
 open Scheme in
 set_option backward.isDefEq.respectTransparency false in
@@ -373,6 +394,45 @@ theorem IsAdapted.restrict {V : S.affineOpens} {P : LocalPresentation G V}
     (P.restrict h).IsAdapted b := by
   show ((P.restrict h).basisUnitAt b).1 = 1
   rw [← basisUnitAt_restrict, hP, map_one]
+
+open Scheme WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- Restriction acts on the chart curve coefficient-wise. -/
+theorem restrict_W_a₄ {V : S.affineOpens} (P : LocalPresentation G V)
+    {V' : S.affineOpens} (h : V'.1 ≤ V.1) :
+    (P.restrict h).W.a₄ = Scheme.resLE h P.W.a₄ := by
+  show (P.W.map (sectionsMapLE (𝟙 S) h)).a₄ = _
+  rw [WeierstrassCurve.map_a₄, sectionsMapLE_id]
+
+open Scheme WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- Restriction acts on the chart curve coefficient-wise. -/
+theorem restrict_W_a₆ {V : S.affineOpens} (P : LocalPresentation G V)
+    {V' : S.affineOpens} (h : V'.1 ≤ V.1) :
+    (P.restrict h).W.a₆ = Scheme.resLE h P.W.a₆ := by
+  show (P.W.map (sectionsMapLE (𝟙 S) h)).a₆ = _
+  rw [WeierstrassCurve.map_a₆, sectionsMapLE_id]
+
+open Scheme WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(E12-C core)** Any two adapted short-normal-form presentations over (possibly
+different) affines have equal chart curves on every common affine subopen: the local
+uniqueness (E12-B) globalises. -/
+theorem adapted_shortNF_res_eq {V₁ V₂ : S.affineOpens}
+    {P₁ : LocalPresentation G V₁} {P₂ : LocalPresentation G V₂} {b : OmegaBasis G}
+    (hA₁ : P₁.IsAdapted b) (hA₂ : P₂.IsAdapted b)
+    (hS₁ : P₁.W.IsShortNF) (hS₂ : P₂.W.IsShortNF)
+    (h2 : IsUnit (2 : Γ(S, ⊤))) (h3 : IsUnit (3 : Γ(S, ⊤)))
+    {W : S.affineOpens} (hW₁ : W.1 ≤ V₁.1) (hW₂ : W.1 ≤ V₂.1) :
+    (P₁.restrict hW₁).W = (P₂.restrict hW₂).W := by
+  have hVC : (P₁.restrict hW₁).transVC (P₂.restrict hW₂) = 1 :=
+    transVC_eq_one_of_isAdapted (hA₁.restrict hW₁) (hA₂.restrict hW₂)
+      (isShortNF_map hS₁ _) (isShortNF_map hS₂ _)
+      (isUnit_ofNat_res h2 W.1) (isUnit_ofNat_res h3 W.1)
+  have hsmul := (P₁.restrict hW₁).transVC_smul (P₂.restrict hW₂)
+  rw [hVC, one_smul] at hsmul
+  exact hsmul.symm
 
 end LocalPresentation
 
