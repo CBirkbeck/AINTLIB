@@ -46,6 +46,7 @@ import ModularCurves.ForMathlib.ClosedImmersionFinrankIso
 import ModularCurves.ForMathlib.ComoduleCoinvariants
 import ModularCurves.ForMathlib.FiniteAffineOpenCover
 import ModularCurves.ForMathlib.FinitePresentationFunctor
+import ModularCurves.ForMathlib.FinitePresentationFunctorCover
 import ModularCurves.ForMathlib.FinitePresentationLocalization
 import ModularCurves.ForMathlib.FinitePresentationPrincipalCover
 import ModularCurves.ForMathlib.FiniteLocallyFreeIsoLocus
