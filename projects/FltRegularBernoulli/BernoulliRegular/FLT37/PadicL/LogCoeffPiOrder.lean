@@ -398,19 +398,18 @@ the genuine `p = 37` instance discharges the core from the actual log-series.) -
 /-- The single-unit witness coefficient family supporting the order-`8` value:
 `c_1 = π⁸·((ω 1)³²)⁻¹`, `c_j = 0` for `j ≠ 1`.  Yields `Λ 32 = π⁸`. -/
 noncomputable def piOrderWitnessCoeff : (ZMod p)ˣ → S.O :=
-  fun j => if j = 1 then S.π ^ 8 * (((S.ω 1) ^ 32 : S.Oˣ)⁻¹ : S.Oˣ) else 0
+  fun j ↦ if j = 1 then S.π ^ 8 * (((S.ω 1) ^ 32 : S.Oˣ)⁻¹ : S.Oˣ) else 0
 
 /-- The witness coefficients give `Λ 32 = π⁸` exactly. -/
 theorem logCoeffSum_piOrderWitnessCoeff :
     S.logCoeffSum (S.piOrderWitnessCoeff) 32 = S.π ^ 8 := by
   classical
   unfold logCoeffSum piOrderWitnessCoeff
-  rw [Finset.sum_eq_single (1 : (ZMod p)ˣ)]
+  rw [Fintype.sum_eq_single (1 : (ZMod p)ˣ)]
   · -- `j = 1` term: `(π⁸·((ω 1)³²)⁻¹) · (ω 1)³² = π⁸`.
     rw [if_pos rfl, mul_assoc, ← Units.val_mul, inv_mul_cancel, Units.val_one, mul_one]
-  · intro j _ hj
+  · intro j hj
     rw [if_neg hj, zero_mul]
-  · intro h; exact absurd (Finset.mem_univ _) h
 
 /-- **Non-vacuity of `IntegralProductBernoulliOrderAt` at `i = 32`** (`p = 37`,
 soundness witness): for every setup `S` there is a `c` with
