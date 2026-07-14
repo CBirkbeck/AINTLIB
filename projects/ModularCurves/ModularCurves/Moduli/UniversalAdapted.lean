@@ -1121,4 +1121,47 @@ theorem IsAdapted.transport {R : CommRingCat.{u}} {Y' Y : EllObj R} (φ : Y' ⟶
     (omegaBasisMap φ b)).1 = 1
   rw [basisUnitAt_transport φ P b hV', hP, map_one]
 
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(E12-D4 rt1)** The section comparison of the classifying map is the restricted
+classifying algebra (`Spec`-side determination through `restrict_classifyingMap`). -/
+theorem sectionsMapLE_classifyingMap {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤)))
+    (V : Y.base.affineOpens) (hTop : V.1 ≤ classifyingMap Y b h2 h3 ⁻¹ᵁ
+      (⊤ : (Spec (CommRingCat.of (ModuliRingE12 R))).Opens)) :
+    (sectionsMapLE (classifyingMap Y b h2 h3) hTop).comp
+      ((Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv.hom) =
+    ((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+      (classifyingRingHom Y b h2 h3) := by
+  have hL : V.2.isoSpec.hom ≫ Spec.map (CommRingCat.ofHom
+      ((sectionsMapLE (classifyingMap Y b h2 h3) hTop).comp
+        ((Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv.hom))) =
+    V.1.ι ≫ classifyingMap Y b h2 h3 := by
+    rw [show CommRingCat.ofHom
+        ((sectionsMapLE (classifyingMap Y b h2 h3) hTop).comp
+          ((Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv.hom)) =
+      (Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv ≫
+        (classifyingMap Y b h2 h3).appLE ⊤ V.1 hTop from rfl,
+      Spec.map_comp,
+      show V.2.isoSpec.hom = V.1.toSpecΓ from IsAffineOpen.isoSpec_hom _,
+      ← Category.assoc, Scheme.Opens.toSpecΓ_SpecMap_appLE, Category.assoc]
+    rw [show (⊤ : (Spec (CommRingCat.of (ModuliRingE12 R))).Opens).toSpecΓ ≫
+        Spec.map (Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv =
+      (⊤ : (Spec (CommRingCat.of (ModuliRingE12 R))).Opens).ι from by
+      rw [Scheme.Opens.toSpecΓ_top, Category.assoc, ← SpecMap_ΓSpecIso_hom,
+        ← Spec.map_comp, Iso.inv_hom_id, Spec.map_id, Category.comp_id]]
+    rw [Scheme.Hom.resLE_comp_ι]
+  have hR : V.2.isoSpec.hom ≫ Spec.map (CommRingCat.ofHom
+      (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+        (classifyingRingHom Y b h2 h3))) =
+    V.1.ι ≫ classifyingMap Y b h2 h3 :=
+    (restrict_classifyingMap Y b h2 h3 V).symm
+  have hSpec := hL.trans hR.symm
+  rw [cancel_epi] at hSpec
+  have hofHom := Spec.map_injective hSpec
+  exact congrArg CommRingCat.Hom.hom hofHom
+
 end ModularCurves
