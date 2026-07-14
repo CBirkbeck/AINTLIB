@@ -617,6 +617,111 @@ theorem legendre_witness_transVC_eq_one {S : Scheme.{u}} {G : EllipticCurveGeom 
   rw [legendreCurve_a₄, legendreCurve_a₄] at h4
   exact h4.symm
 
+open LocalPresentation WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-CLS-2)** The chart curve of a restricted presentation stays Legendre,
+with the restricted parameter. -/
+theorem restrict_W_legendre {S : Scheme.{u}} {G : EllipticCurveGeom S}
+    {V : S.affineOpens} {Pr : LocalPresentation G V} {lam : Γ(S, V.1)}
+    (hW : Pr.W = legendreCurve lam) {V' : S.affineOpens} (h : V'.1 ≤ V.1) :
+    (Pr.restrict h).W = legendreCurve (Scheme.resLE h lam) := by
+  show Pr.W.map (sectionsMapLE (𝟙 S) (by simpa using h)) = _
+  rw [hW, legendreCurve_map]
+  exact congrArg legendreCurve
+    (congrArg (fun (g : Γ(S, V.1) →+* Γ(S, V'.1)) => g lam)
+      (sectionsMapLE_id (by simpa using h)))
+
+open LocalPresentation WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E14-CLS-2 ★)** Witness `λ`-values agree on common affines: restrict both
+witnesses and apply the KM 4.6.2 uniqueness. -/
+theorem legendre_witness_lam_agree {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (h2 : IsUnit (2 : Γ(X.base, ⊤)))
+    {V₁ V₂ : X.base.affineOpens}
+    {Pr₁ : LocalPresentation X.curve.toEllipticCurveGeom V₁}
+    {Pr₂ : LocalPresentation X.curve.toEllipticCurveGeom V₂}
+    {lam₁ : Γ(X.base, V₁.1)} {lam₂ : Γ(X.base, V₂.1)}
+    (hAd₁ : Pr₁.IsAdapted b) (hAd₂ : Pr₂.IsAdapted b)
+    (hW₁ : Pr₁.W = legendreCurve lam₁) (hW₂ : Pr₂.W = legendreCurve lam₂)
+    (hM₁ : Pr₁.MarksAt L.1.1.2 0 0) (hM₂ : Pr₂.MarksAt L.1.1.2 0 0)
+    {W : X.base.affineOpens} (hWV₁ : W.1 ≤ V₁.1) (hWV₂ : W.1 ≤ V₂.1) :
+    Scheme.resLE hWV₁ lam₁ = Scheme.resLE hWV₂ lam₂ := by
+  have hres₁ := hM₁.restrict hWV₁
+  have hres₂ := hM₂.restrict hWV₂
+  rw [map_zero] at hres₁ hres₂
+  exact (legendre_witness_transVC_eq_one
+    (hAd₁.restrict hWV₁) (hAd₂.restrict hWV₂)
+    (restrict_W_legendre hW₁ hWV₁) (restrict_W_legendre hW₂ hWV₂)
+    hres₁ hres₂ (isUnit_ofNat_res h2 W.1)).2
+
+open LocalPresentation WeierstrassCurve TopologicalSpace in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(T-E14-CLS-2 ★★)** The **glued Legendre parameter** of a Legendre datum: the
+witness `λ`'s glue to a global section restricting to EVERY witness's parameter
+(mirrors `adaptedCoeff₄`; agreement = `legendre_witness_lam_agree`). This is KM
+4.6.2's classifying function `λ : S → M'₂`. -/
+noncomputable def legendreLambda {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 2) (b : OmegaBasis X.curve.toEllipticCurveGeom)
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤))) :
+    { g : Γ(X.base, ⊤) //
+      ∀ (V : X.base.affineOpens)
+        (Pr : LocalPresentation X.curve.toEllipticCurveGeom V)
+        (lam : Γ(X.base, V.1)), Pr.IsAdapted b → Pr.W = legendreCurve lam →
+        Pr.MarksAt L.1.1.2 0 0 →
+        Scheme.resLE (le_top : V.1 ≤ ⊤) g = lam } := by
+  classical
+  -- choose a witness at every point
+  choose Vx hxVx Prx lamx hAdx hWx hMPx hMQx using hD
+  have hcover : (⊤ : X.base.Opens) ≤ iSup (fun x : X.base => (Vx x).1) :=
+    fun x _ => Opens.mem_iSup.mpr ⟨x, hxVx x⟩
+  have hcoverInf : ∀ (V V' : X.base.Opens), V ⊓ V' ≤
+      iSup (fun r : {W : X.base.affineOpens // W.1 ≤ V ⊓ V'} => r.1.1) := by
+    intro V V' x hx
+    obtain ⟨W₀, hWaff, hxW, hWle⟩ := exists_isAffineOpen_mem_and_subset hx
+    exact Opens.mem_iSup.mpr ⟨⟨⟨W₀, hWaff⟩, hWle⟩, hxW⟩
+  have hpair : TopCat.Presheaf.IsCompatible X.base.sheaf.1
+      (fun x : X.base => (Vx x).1) (fun x => lamx x) := by
+    intro x y
+    refine TopCat.Sheaf.eq_of_locally_eq' X.base.sheaf
+      (fun r : {W : X.base.affineOpens // W.1 ≤ (Vx x).1 ⊓ (Vx y).1} => r.1.1)
+      ((Vx x).1 ⊓ (Vx y).1) (fun r => homOfLE r.2) (hcoverInf _ _) _ _ (fun r => ?_)
+    show Scheme.resLE r.2 (Scheme.resLE inf_le_left (lamx x)) =
+      Scheme.resLE r.2 (Scheme.resLE inf_le_right (lamx y))
+    rw [Scheme.resLE_resLE, Scheme.resLE_resLE]
+    exact legendre_witness_lam_agree h2 (hAdx x) (hAdx y) (hWx x) (hWx y)
+      (hMPx x) (hMPx y) (r.2.trans inf_le_left) (r.2.trans inf_le_right)
+  have hglue := TopCat.Sheaf.existsUnique_gluing' X.base.sheaf
+    (fun x : X.base => (Vx x).1) ⊤ (fun x => homOfLE le_top) hcover
+    (fun x => lamx x) hpair
+  refine ⟨hglue.choose, fun V Pr lam hAd hW hMP => ?_⟩
+  -- the arbitrary-witness spec, by separation over refined overlaps
+  refine TopCat.Sheaf.eq_of_locally_eq' X.base.sheaf
+    (fun w : {w : X.base.affineOpens × X.base // w.1.1 ≤ V.1 ⊓ (Vx w.2).1} =>
+      w.1.1.1) V.1 (fun w => homOfLE (w.2.trans inf_le_left)) ?_ _ _ (fun w => ?_)
+  · intro x hxV
+    have hx : x ∈ V.1 ⊓ (Vx x).1 := ⟨hxV, hxVx x⟩
+    obtain ⟨W₀, hWaff, hxW, hWle⟩ := exists_isAffineOpen_mem_and_subset hx
+    exact Opens.mem_iSup.mpr ⟨⟨⟨⟨W₀, hWaff⟩, x⟩, hWle⟩, hxW⟩
+  · obtain ⟨⟨W, x⟩, hWle⟩ := w
+    show Scheme.resLE (hWle.trans inf_le_left)
+        (Scheme.resLE (le_top : V.1 ≤ ⊤) hglue.choose) =
+      Scheme.resLE (hWle.trans inf_le_left) lam
+    rw [Scheme.resLE_resLE]
+    have hg : Scheme.resLE ((hWle.trans inf_le_right).trans
+        (le_top : (Vx x).1 ≤ ⊤)) hglue.choose =
+        Scheme.resLE (hWle.trans inf_le_right) (lamx x) := by
+      have h : Scheme.resLE (le_top : (Vx x).1 ≤ ⊤) hglue.choose = lamx x :=
+        hglue.choose_spec.1 x
+      have h' := congrArg (Scheme.resLE (hWle.trans inf_le_right)) h
+      rwa [Scheme.resLE_resLE] at h'
+    rw [show (hWle.trans inf_le_left).trans (le_top : V.1 ≤ ⊤) =
+      ((hWle.trans inf_le_right).trans (le_top : (Vx x).1 ≤ ⊤)) from rfl, hg]
+    exact legendre_witness_lam_agree h2 (hAdx x) hAd (hWx x) hW (hMPx x) hMP
+      (hWle.trans inf_le_right) (hWle.trans inf_le_left)
+
 end TwoTorsion
 
 end ModularCurves
