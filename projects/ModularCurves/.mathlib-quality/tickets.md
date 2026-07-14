@@ -19126,3 +19126,29 @@ is shared-cursor; coordinator owns the merge (v10.189-G0 α/β note stands).
 
 **NEXT (G0 queue)**: L4 seam — glSchemeSmul ↔ hOrbitSetoid compatibility (decomposition-c5b2
 §L4); then charter remnant (C) NISOG (decomposition-nisog-L15).
+
+---
+
+## v10.207-G0 — ★★★ CHARTER REMNANT (B) COMPLETE: THE E[N] PACKAGE (C5B-2) IS DONE (2026-07-14, STREAM-G0)
+
+L4 landed same-day as L2b — **all four C5B-2 leaves are closed**:
+- **L2** `fullLevelIso hinv L : (ℤ/N)²_S ≅ E[N]` (v10.206) — KM 3.1's "full set of sections"
+  as a scheme iso, any base, N invertible.
+- **L3** `glSchemeSmul` + `_one`/`_mul` — the scheme-level GL₂(ℤ/N) action (banked earlier,
+  now on a REAL fullLevelIso).
+- **L4** the seam quartet (NEW): `constGL_hom_fullLevelHom` (constGL g ≫ Φ_L = Φ_{g•L};
+  Drinfeld-combination bilinearity via val_smul_add/mul + `module`), `fullLevelIso_glSmul`,
+  `fullLevelIso_symm_trans_of_glSmul_eq` (transition of trivialisations = glSchemeSmul of the
+  connecting matrix), `exists_glSchemeSmul_of_hOrbit` (hOrbitSetoid-classes ⟹ trivialisation
+  well-defined mod glSchemeSmul H) — **exactly the [Γ(N)]/H consumption form for NEW-GH**
+  (KM 7.1.2; they own the quotient).
+
+Axiom state across the package: G0-owned sorries ZERO; residual sorryAx = BB-QF/BB-DEG
+(KM charter) via the geometric-fibre rank.
+
+**NEW-GH SEAM NOW OPEN**: glSchemeSmul + exists_glSchemeSmul_of_hOrbit are the pinned
+interface (v10.141 GH-2 consumption).
+
+**G0 queue next**: charter remnant (C) — NISOG close (decomposition-nisog-L15.md:
+[HOMOG-FRAME]/[NISOG-L13] gates → exists_cyclicityLocus → L15-c..f → L6 →
+exists_nIsogSpace → Y₀(N)). Deep work (KM 6.x-scale); entering now.
