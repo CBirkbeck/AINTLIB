@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.BundleFromCyclotomic
@@ -216,7 +221,7 @@ The point of this constructor is to make the Stage 4 constructor chain usable by
 the K/U source-data route: the canonical `zeta_k` and `zeta_p_int` fields are
 discharged from the bundle identity, while the actual Gauss-sum non-vanishing
 and descended-span equality remain as the substantive caller inputs. -/
-noncomputable def K2_2SourceData.ofCanonicalConcrete
+theorem K2_2SourceData.ofCanonicalConcrete
     {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
     {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
     {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
@@ -283,7 +288,7 @@ noncomputable def K2_2SourceData.ofCanonicalConcrete
 If the Dwork bundle's trace-form layer is the canonical compatible split-prime
 trace-form constructor, the concrete-layer identity required by
 `ofCanonicalConcrete` follows automatically. -/
-noncomputable def K2_2SourceData.ofCanonicalTraceForm
+theorem K2_2SourceData.ofCanonicalTraceForm
     {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
     {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
     {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
