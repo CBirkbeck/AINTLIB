@@ -143,7 +143,7 @@ theorem esymm_card_eq_prod (s : Multiset A) : s.esymm (Multiset.card s) = s.prod
 maximal ideal (positive degree). -/
 theorem esymm_mem_maximalIdeal [IsLocalRing A] {v : Multiset A}
     (hv : ∀ x ∈ v, x ∈ IsLocalRing.maximalIdeal A) {k : ℕ} (hk : 0 < k)
-    (hkv : k ≤ Multiset.card v) :
+    (_hkv : k ≤ Multiset.card v) :
     v.esymm k ∈ IsLocalRing.maximalIdeal A := by
   rw [Multiset.esymm]
   refine multiset_sum_mem _ fun x hx => ?_
@@ -180,7 +180,7 @@ theorem coeff_prod_X_add_C (w : Multiset A) (i : ℕ) :
 /-- A product of units is a unit (multiset form). -/
 theorem isUnit_multiset_prod {u : Multiset A} (hu : ∀ x ∈ u, IsUnit x) : IsUnit u.prod := by
   induction u using Multiset.induction_on with
-  | empty => simpa using isUnit_one
+  | empty => simp
   | cons a t ih =>
       rw [Multiset.prod_cons]
       exact (hu a (Multiset.mem_cons_self a t)).mul
