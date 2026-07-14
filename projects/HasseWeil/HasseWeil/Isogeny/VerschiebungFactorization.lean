@@ -47,7 +47,7 @@ variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Po
 /-- **Pillar B bottom leaf** (the genuine GAP-DUAL kernel): every `[q]`-pullback is a `q`-th
 power, `∀ z, ∃ g, g^q = [q]* z`. PROVED by Route B's general `q`-th-root witness
 `qth_root_witness_general` (`Verschiebung/QthRootRouteB.lean`). -/
-theorem mulByInt_q_pullback_qth_root (hq : 2 ≤ Fintype.card K) :
+theorem mulByInt_q_pullback_qth_root (_hq : 2 ≤ Fintype.card K) :
     ∀ z : W.toAffine.FunctionField, ∃ g : W.toAffine.FunctionField,
       g ^ Fintype.card K = (mulByInt W.toAffine ((Fintype.card K : ℕ) : ℤ)).pullback z :=
   qth_root_witness_general W
@@ -452,7 +452,8 @@ theorem isogOneSub_negFrobenius_pointCount_le_degree (hq : 2 ≤ Fintype.card K)
     Curves.RamificationAtInfinity.xIdeal_isMaximal
   -- TOTAL weighted sum = 2 · deg (fundamental identity ∘ `l6_B3_tower`, axiom-clean).
   have h_total :
-      ∑ P ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
+      ∑ P ∈ IsDedekindDomain.primesOverFinset
+        (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
         (-(data.ordAt P)).toNat *
           Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) P =
         2 * (isogOneSub_negFrobenius W hq).degree := by
@@ -463,7 +464,8 @@ theorem isogOneSub_negFrobenius_pointCount_le_degree (hq : 2 ≤ Fintype.card K)
     (Finset.univ : Finset (isogOneSub_negFrobenius W hq).kernel).image
       (fun T ↦ bridge_Bi_kernelToPrime_v2 W hq data T) with himage_def
   have h_image_sub : image ⊆
-      IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier := by
+      IsDedekindDomain.primesOverFinset
+        (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier := by
     intro Q hQ
     rw [himage_def, Finset.mem_image] at hQ
     obtain ⟨T, _, rfl⟩ := hQ
@@ -497,7 +499,8 @@ theorem isogOneSub_negFrobenius_pointCount_le_degree (hq : 2 ≤ Fintype.card K)
   have h_mono :
       ∑ Q ∈ image, (-(data.ordAt Q)).toNat *
           Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) Q ≤
-        ∑ P ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
+        ∑ P ∈ IsDedekindDomain.primesOverFinset
+          (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
           (-(data.ordAt P)).toNat *
             Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) P :=
     Finset.sum_le_sum_of_subset_of_nonneg h_image_sub (fun _ _ _ ↦ Nat.zero_le _)
@@ -698,7 +701,7 @@ construction (`map_nonsingular`). Axiom-clean.
 This is the forward map of the classification bijection. Landing `Q_σ − P_gen` in `ker γ`
 (hence descending to `E(F_q)`) is the missing over-`Ω` content — see
 `isogOneSub_negFrobenius_emb_le_card_kernel_gap`. -/
-noncomputable def isogOneSub_negFrobenius_embToPointOmega (hq : 2 ≤ Fintype.card K)
+noncomputable def isogOneSub_negFrobenius_embToPointOmega (_hq : 2 ≤ Fintype.card K)
     (σ : W.toAffine.FunctionField →ₐ[K] AlgebraicClosure W.toAffine.FunctionField) :
     ((W_KE W).map σ.toRingHom).toAffine.Point :=
   Affine.Point.map σ.toRingHom σ.toRingHom.injective (genericPoint W)
@@ -1243,7 +1246,8 @@ theorem Sinf_finrank_witness_via_B3_tower (hq : 2 ≤ Fintype.card K)
     letI := data.commRing
     letI := data.isDedekindDomain
     letI := data.algPoly
-    ∑ P ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
+    ∑ P ∈ IsDedekindDomain.primesOverFinset
+      (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
       (-(data.ordAt P)).toNat *
         Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) P =
       2 * pointCount W.toAffine := by
@@ -1275,7 +1279,8 @@ theorem Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_via_tower (hq : 2 ≤ Fint
     letI := data.isDomain
     letI := data.isDedekindDomain
     letI := data.algPoly
-    ∑ P ∈ IsDedekindDomain.primesOverFinset (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
+    ∑ P ∈ IsDedekindDomain.primesOverFinset
+      (Curves.RamificationAtInfinity.xIdeal (k := K)) data.carrier,
       (Ideal.inertiaDeg' (Curves.RamificationAtInfinity.xIdeal (k := K)) P) =
         pointCount W.toAffine :=
   Sinf_sum_inertiaDeg_over_xIdeal_eq_pointCount_of_finrank_witness W hq data
