@@ -19677,3 +19677,23 @@ direct application no casts). Pins: hLN + hbound. **Unblocks KM's Drinfeld .Repr
 **GATE-LEDGER now (all levels): .Representable = T-E14 (OMEGA) + hLN (T-W7.8) + level-pins
 {Y(N): none; Γ_H: hH; Γ₁: hbound} + register-boxes (KM keystone endDeg/endTrace + E[N] BB family
 + T-D6b/T-E4a statement-boxes).** (STREAM-GH)
+
+## v10.220-G0 (2026-07-14) — BB-QF decomposition boarded; grinding leaves
+### [QF-L1] lft+qc instances for [N]
+- **Status**: open — **File**: EllipticCurve/Torsion.lean (or MulByHomDegree) — **Parent**: BB-QF (v10.219 dispatch)
+- **Statement**: `LocallyOfFiniteType (E.mulByHom N)` + `QuasiCompact (E.mulByHom N)` (instances)
+- **Sketch**: IsProper (mulByHom_isProper, HAVE) extends lft; qc from UniversallyClosed or cancellation `QuasiCompact.of_comp`-style against π. — **Mathlib**: IsProper fields. — **Generality**: E/S arbitrary.
+### [QF-L2] fibre-set reduction to the fibre curve
+- **Status**: open — **Parent**: BB-QF — **Statement**: `((E.mulByHom N) ⁻¹' {y}).Finite` given the corresponding finiteness on `E.baseChange (S.fromSpecResidueField (E.π y))`
+- **Sketch**: preimage ⊆ π⁻¹(π y); mathlib fibre machinery + `mulByHom_baseChange`. — **Mathlib**: `Scheme.Hom.fiber`-family (hunt).
+### [QF-L3] model bridge over a field
+- **Status**: open — **Parent**: BB-QF — **Statement**: over `Spec k`, an `EllipticCurve (Spec k)` is (as needed by L4/L5) chart-covered by/isomorphic to `projModel W`; check in-tree Comparison/ModelRecord/K4 first.
+### [QF-L4] Curvelike: non-generic points of the model are closed
+- **Status**: open — **Parent**: BB-QF — **Statement**: on `projModel W` (field base): every non-generic point closed; proper closed subsets finite (Noetherian).
+- **Sketch**: chains localize to charts (opens generization-stable); chart ring dim ≤ 1 (PIT hunt: ringKrullDim of k[x,y]/(f)).
+### [QF-L5] nonconstancy witness (HasseWeil import)
+- **Status**: open — **Parent**: BB-QF — **Statement**: `E.mulByHom N ≠ E.π ≫ E.zero` over any field base (N ≠ 0)
+- **Sketch**: else all k̄-model-points are N-torsion; HasseWeil `card_torsion_ellPow_nat` (ℓ ∤ char) + `p^a•`-injectivity on E[ℓⁿ] ⟹ image of `p^a•` infinite ⊄ E[m] ⟹ witness. Transport via `projModelPointsEquiv_zsmul`.
+- **Sources**: KM 2.3.1; Silverman III.6.2/6.4; HasseWeil NTorsion (sorry-free).
+### [QF-L6] field-level fibre finiteness  — **Status**: open — **Parent**: BB-QF (assembly of L3–L5 per decomposition-bbqf.md)
+### [QF-L7] BB-QF assembly — **Status**: open — **Parent**: BB-QF — via `locallyQuasiFinite_iff_finite_preimage_singleton`; then `mulByHom_isFinite` closes (ZMT).
