@@ -152,4 +152,30 @@ lemma letterEncode_26 : letterEncode 26 = String.ofList ['b', 'a'] := by
   unfold letterEncode Nat.toLetterDigits digitToLetter
   norm_num [Nat.digits, Nat.digitsAux, List.map]
 
+/-! ### Ranking a finite set
+
+Both label constructions (`CharacterOrbit`, `NewformOrbit`) turn an orbit-invariant *key* into a
+`0`-based index by counting the realised keys strictly below it, then encode that index with
+`letterEncode`.  Injectivity of the label therefore rests on the following purely order-theoretic
+fact, which is shared by both. -/
+
+/-- **The rank function is injective on a finite linearly ordered set.**  On `S : Finset α`, the
+rank `a ↦ #{x ∈ S | x < a}` is strictly monotone along `S`, so two elements of `S` with the same
+rank are equal. -/
+theorem rank_injOn {α : Type*} [LinearOrder α] (S : Finset α) {a b : α}
+    (ha : a ∈ S) (hb : b ∈ S)
+    (hcard : (S.filter (· < a)).card = (S.filter (· < b)).card) : a = b := by
+  classical
+  have mono : ∀ x y : α, x ∈ S → x < y →
+      (S.filter (· < x)).card < (S.filter (· < y)).card := by
+    intro x y hx hxy
+    refine Finset.card_lt_card <| (Finset.ssubset_iff_of_subset
+      (Finset.monotone_filter_right S (fun z _ hz => lt_trans hz hxy))).mpr ?_
+    exact ⟨x, Finset.mem_filter.mpr ⟨hx, hxy⟩,
+      fun hmem => lt_irrefl x (Finset.mem_filter.mp hmem).2⟩
+  rcases lt_trichotomy a b with hlt | heq | hgt
+  · exact absurd hcard (ne_of_lt (mono a b ha hlt))
+  · exact heq
+  · exact absurd hcard.symm (ne_of_lt (mono b a hb hgt))
+
 end LeanModularForms.Labels
