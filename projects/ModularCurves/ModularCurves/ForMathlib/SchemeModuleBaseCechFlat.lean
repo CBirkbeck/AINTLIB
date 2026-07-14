@@ -1,36 +1,20 @@
 import Mathlib.Algebra.Category.ModuleCat.Products
 import Mathlib.RingTheory.Flat.Basic
+import Common
 import ModularCurves.ForMathlib.SchemeModuleBaseCechBasic
 
 /-!
 # Flat terms in the base-linear Cech complex
 
-Finite products of flat modules are flat. Consequently, a degree of the
-base-linear Cech complex is flat whenever all of its intersection-section
-factors are flat.
+A degree of the base-linear Cech complex is flat whenever all of its
+intersection-section factors are flat, via `Module.Flat.pi` (finite products of flat
+modules are flat) from the shared `Common` library.
 -/
 
 open AlgebraicTopology CategoryTheory CategoryTheory.Limits Opposite
   TopologicalSpace
 
-universe u v w
-
-namespace Module.Flat
-
-/-- A finite dependent product of flat modules is flat. (An *arbitrary* product of
-flat modules need not be flat, so the `Finite` hypothesis is essential — mathlib has the
-`directSum`/`dfinsupp`/`finsupp` instances but no `Pi` one.) -/
-instance pi
-    {R : Type u} [CommSemiring R] {ι : Type v} [Finite ι]
-    {M : ι → Type w} [∀ i, AddCommMonoid (M i)]
-    [∀ i, Module R (M i)] [∀ i, Module.Flat R (M i)] :
-    Module.Flat R (∀ i, M i) := by
-  classical
-  letI := Fintype.ofFinite ι
-  exact Module.Flat.of_linearEquiv
-    (DFinsupp.linearEquivFunOnFintype (R := R) (M := M)).symm
-
-end Module.Flat
+universe u
 
 namespace AlgebraicGeometry.Scheme.Modules
 
