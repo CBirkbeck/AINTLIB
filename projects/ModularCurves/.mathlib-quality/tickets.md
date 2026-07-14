@@ -19865,3 +19865,24 @@ no unprivations needed; `mulBy (−1) = (𝟙)⁻¹ = 𝟙 ≫ ι` via `zpow_neg
 [T-E14-LVL-b] (KM-keystone deferral, the ONLY remaining LVL gap) | classification [T-E14-CLS]
 (next: marked-adapted-witness uniqueness ⟹ glued λ ⟹ classifying machinery, T-E12-D replay) |
 coupled G-action [T-E14-ACT'].
+
+## v10.227-OMEGA (2026-07-14) — ★★ [T-E14-CLS-1] KM 4.6.2 UNIQUENESS: marked adapted Legendre witnesses are unique
+
+`legendre_witness_transVC_eq_one` (commit 174a7cc6e, axiom-clean): two `b`-adapted presentations
+over the same affine with Legendre chart curves marking the same section at `x = 0` have
+`transVC = 1` AND equal `λ`'s. The classifying function of KM's `M'₂` is WELL-DEFINED. The pack:
+- **CLS-1a** `projModelVCIso_affineSection` — the VC model iso acts on `[p:q:1]` by the coordinate
+  change `[u²p+r : u³q+su²p+t : 1]` (third fromOfGlobalSections_map instance; family now: negation
+  / base change / variable change — the pattern is fully commoditised).
+- **CLS-1b** `projModelAffineSection_injective` — sections determine coordinates (Z-chart
+  `eq_spec` + `Spec.map_injective` + reading the `X/Z`, `Y/Z` fractions via `affineChartHom_mk`).
+- **CLS-1c** `equation_smul_image` — VC carries curve points to curve points, PROJECTIVELY
+  (evaluate `vcMvSubst_polynomial` at `[p:q:1]`; avoids the classical affine substitution algebra).
+- **CLS-1d** the uniqueness: ω pins `u=1, s=t=0`; the marking chase (transVC_spec →
+  `projModelAffineSection_congr` → CLS-1a → CLS-1b) pins `r = 0`; `a₄`-projection equates λ's.
+
+**Next [T-E14-CLS-2]:** restrict-stability of witnesses (MarksAt/IsAdapted under `restrict`) ⟹
+overlap-agreement of the local λ's ⟹ sheaf-glued global `legendreLambda` ⟹ classifyingRingHom/
+Map/Top/EllHom ⟹ RepresentableBy (the full E12-D3/D4 replay, all templates banked).
+LEAN-OP: `git checkout <file>` to revert a bad DRAFT also destroys uncommitted GREEN lemmas —
+commit green increments BEFORE drafting the next (cost: one re-type of CLS-1a/1b).
