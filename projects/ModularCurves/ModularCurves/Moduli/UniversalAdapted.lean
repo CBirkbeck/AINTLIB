@@ -618,4 +618,95 @@ theorem classifyingTop_π_w {R : CommRingCat.{u}} (Y : EllObj R)
     rw [Category.assoc]; rfl]
   rw [← Category.assoc, ← pullback.condition, Category.assoc, adaptedTotalCover_f]
 
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+/-- **(E12-D3-E4)** The cover of the base by the chart-supported affines. -/
+noncomputable def adaptedBaseCover {R : CommRingCat.{u}} (Y : EllObj R) :
+    Y.base.OpenCover :=
+  Scheme.Cover.mkOfCovers
+    {p : Y.base.affineOpens × Y.curve.toEllipticCurveGeom.atlas.ι //
+      p.1.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U p.2).1}
+    (fun p => p.1.1.1.toScheme)
+    (fun p => p.1.1.1.ι)
+    (fun x => by
+      obtain ⟨i, hxi⟩ := Y.curve.toEllipticCurveGeom.atlas.covers x
+      obtain ⟨V₀, hVaff, hxV, hVle⟩ := exists_isAffineOpen_mem_and_subset
+        (show x ∈ (Y.curve.toEllipticCurveGeom.atlas.U i).1 from hxi)
+      exact ⟨⟨⟨⟨V₀, hVaff⟩, i⟩, hVle⟩, ⟨x, hxV⟩, rfl⟩)
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(E12-D3-E4)** The glued comparison respects the zero sections. -/
+theorem classifyingTop_zero {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤))) :
+    Y.curve.toEllipticCurveGeom.zero ≫ classifyingTop Y b h2 h3 =
+      classifyingMap Y b h2 h3 ≫ projModelZero (universalShortNF R) := by
+  refine (adaptedBaseCover Y).hom_ext _ _ (fun p => ?_)
+  set Q := adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 p.1.1 p.1.2 p.2 with hQ
+  -- the zero section factors through the piece
+  have hzfac : p.1.1.1.ι ≫ Y.curve.toEllipticCurveGeom.zero =
+      pullback.lift (p.1.1.1.ι ≫ Y.curve.toEllipticCurveGeom.zero) (𝟙 _)
+        (by rw [Category.assoc, Y.curve.toEllipticCurveGeom.zero_π,
+          Category.comp_id, Category.id_comp]) ≫
+      (adaptedTotalCover Y).f p := by
+    rw [adaptedTotalCover_f, pullback.lift_fst]
+  rw [show (adaptedBaseCover Y).f p = p.1.1.1.ι from rfl, ← Category.assoc, hzfac,
+    Category.assoc, classifyingTop_piece]
+  -- the chart zero-compatibility
+  have hz := Q.compat_zero
+  have hlift : pullback.lift (p.1.1.1.ι ≫ Y.curve.toEllipticCurveGeom.zero) (𝟙 _)
+      (by rw [Category.assoc, Y.curve.toEllipticCurveGeom.zero_π,
+        Category.comp_id, Category.id_comp]) ≫ Q.e.hom =
+    p.1.1.2.isoSpec.hom ≫ projModelZero Q.W := by
+    rw [← Iso.inv_comp_eq, ← Category.assoc]
+    exact hz
+  rw [chartPiece, ← Category.assoc, hlift]
+  -- transport the zero through the coefficient match and the base change
+  rw [Category.assoc,
+    show projModelZero Q.W = projModelZero ((universalShortNF R).map
+        (((Y.base.presheaf.map (homOfLE (le_top : p.1.1.1 ≤ ⊤)).op).hom).comp
+          (classifyingRingHom Y b h2 h3))) ≫
+      eqToHom (congrArg projModel
+        (universalShortNF_map_classifying Y b h2 h3 p.1.1 p.1.2 p.2)) from
+      projModelZero_congr
+        (universalShortNF_map_classifying Y b h2 h3 p.1.1 p.1.2 p.2).symm]
+  simp only [Category.assoc, eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
+  -- the base-change square of the zero section
+  have hbc : projModelZero ((universalShortNF R).map
+      (((Y.base.presheaf.map (homOfLE (le_top : p.1.1.1 ≤ ⊤)).op).hom).comp
+        (classifyingRingHom Y b h2 h3))) ≫
+      projModelBaseChange
+        (((Y.base.presheaf.map (homOfLE (le_top : p.1.1.1 ≤ ⊤)).op).hom).comp
+          (classifyingRingHom Y b h2 h3)) (universalShortNF R) =
+    Spec.map (CommRingCat.ofHom
+      (((Y.base.presheaf.map (homOfLE (le_top : p.1.1.1 ≤ ⊤)).op).hom).comp
+        (classifyingRingHom Y b h2 h3))) ≫ projModelZero (universalShortNF R) := by
+    letI : Algebra (ModuliRingE12 R) Γ(Y.base, p.1.1.1) :=
+      ((((Y.base.presheaf.map (homOfLE (le_top : p.1.1.1 ≤ ⊤)).op).hom).comp
+        (classifyingRingHom Y b h2 h3))).toAlgebra
+    exact projModelZero_baseChange (universalShortNF R)
+  rw [hbc]
+  -- the Γ–Spec triangle, as in the π-square
+  have hsplit : Spec.map (CommRingCat.ofHom
+      (((Y.base.presheaf.map (homOfLE (le_top : p.1.1.1 ≤ ⊤)).op).hom).comp
+        (classifyingRingHom Y b h2 h3))) =
+    Spec.map (Y.base.presheaf.map (homOfLE (le_top : p.1.1.1 ≤ ⊤)).op) ≫
+      Spec.map (CommRingCat.ofHom (classifyingRingHom Y b h2 h3)) := by
+    rw [← Spec.map_comp]
+    rfl
+  rw [← Category.assoc, hsplit,
+    show p.1.1.2.isoSpec.hom = p.1.1.1.toSpecΓ from IsAffineOpen.isoSpec_hom _]
+  rw [show p.1.1.1.toSpecΓ ≫
+      Spec.map (Y.base.presheaf.map (homOfLE (le_top : p.1.1.1 ≤ ⊤)).op) ≫
+      Spec.map (CommRingCat.ofHom (classifyingRingHom Y b h2 h3)) =
+    (p.1.1.1.ι ≫ Y.base.toSpecΓ) ≫
+      Spec.map (CommRingCat.ofHom (classifyingRingHom Y b h2 h3)) from by
+    rw [← Category.assoc, Scheme.Opens.toSpecΓ_SpecMap_presheaf_map_top]]
+  rw [show (p.1.1.1.ι ≫ Y.base.toSpecΓ) ≫
+      Spec.map (CommRingCat.ofHom (classifyingRingHom Y b h2 h3)) =
+    p.1.1.1.ι ≫ classifyingMap Y b h2 h3 from by rw [Category.assoc]; rfl]
+  simp only [Category.assoc]
+
 end ModularCurves
