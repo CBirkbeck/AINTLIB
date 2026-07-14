@@ -292,4 +292,109 @@ theorem chartPiece_π {R : CommRingCat.{u}} (Y : EllObj R)
     (adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi).compat_π,
     Category.assoc]
 
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(E12-D3-E3b)** The piece maps are compatible with restriction: the classifying
+pieces glue. Core: the restricted adapted model IS the smaller adapted model
+(`transVC_eq_one_of_isAdapted` through `pointedIso_hom_of_transVC_eq_one`) and the
+model base change composes (`projModelBaseChange_comp'`). -/
+theorem chartPiece_restrict {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤)))
+    (V : Y.base.affineOpens) (i : Y.curve.toEllipticCurveGeom.atlas.ι)
+    (hVi : V.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U i).1)
+    {O' : Y.base.affineOpens} (h : O'.1 ≤ V.1) :
+    restrictTheta h ≫ chartPiece Y b h2 h3 V i hVi =
+      chartPiece Y b h2 h3 O' i (h.trans hVi) := by
+  -- notation
+  set Q := adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi with hQ
+  set Q' := adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 O' i (h.trans hVi) with hQ'
+  -- the restricted adapted model equals the smaller adapted model, as charts
+  have hVC : Q'.transVC (Q.restrict h) = 1 :=
+    transVC_eq_one_of_isAdapted
+      (adaptedLocal_isAdapted Y.curve.toEllipticCurveGeom b h2 h3 O' i (h.trans hVi))
+      ((adaptedLocal_isAdapted Y.curve.toEllipticCurveGeom b h2 h3 V i hVi).restrict h)
+      (adaptedLocal_isShortNF Y.curve.toEllipticCurveGeom b h2 h3 O' i (h.trans hVi))
+      (isShortNF_map
+        (adaptedLocal_isShortNF Y.curve.toEllipticCurveGeom b h2 h3 V i hVi) _)
+      (isUnit_ofNat_res h2 O'.1) (isUnit_ofNat_res h3 O'.1)
+  have hWeq : (Q.restrict h).W = Q'.W := by
+    have := Q'.transVC_smul (Q.restrict h)
+    rwa [hVC, one_smul] at this
+  have hIso := pointedIso_hom_of_transVC_eq_one hVC
+  -- pointedIso = Q'.e.inv ≫ (Q.restrict h).e.hom ⟹ the chart isos compare
+  have hE : (Q.restrict h).e.hom =
+      Q'.e.hom ≫ eqToHom (congrArg projModel hWeq.symm) := by
+    have h1 : Q'.e.inv ≫ (Q.restrict h).e.hom =
+        eqToHom (congrArg projModel hWeq.symm) := by
+      have h0 := hIso
+      rw [show (Q'.pointedIso (Q.restrict h)).hom =
+        Q'.e.inv ≫ (Q.restrict h).e.hom from rfl] at h0
+      exact h0
+    rw [← h1, ← Category.assoc, Iso.hom_inv_id, Category.id_comp]
+  -- the coefficient rings compose
+  have hσ : ((Y.base.presheaf.map (homOfLE (le_top : O'.1 ≤ ⊤)).op).hom).comp
+      (classifyingRingHom Y b h2 h3) =
+    (sectionsMapLE (𝟙 Y.base) h).comp
+      (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+        (classifyingRingHom Y b h2 h3)) := by
+    rw [sectionsMapLE_id]
+    show ((Y.base.presheaf.map (homOfLE (le_top : O'.1 ≤ ⊤)).op).hom).comp
+        (classifyingRingHom Y b h2 h3) =
+      (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op) ≫
+        (Y.base.presheaf.map (homOfLE (show O'.1 ≤ V.1 by simpa using h)).op)).hom).comp
+        (classifyingRingHom Y b h2 h3)
+    rw [← Functor.map_comp, ← op_comp]
+    rfl
+  -- assemble
+  rw [chartPiece, chartPiece, ← Category.assoc, ← restrict_e_baseChange, hE]
+  simp only [Category.assoc]
+  rw [cancel_epi (Q'.e.hom)]
+  rw [projModelBaseChange_congr'' (sectionsMapLE (𝟙 Y.base) h)
+      (universalShortNF_map_classifying Y b h2 h3 V i hVi).symm]
+  simp only [Category.assoc, eqToHom_trans_assoc, eqToHom_trans, eqToHom_refl,
+    Category.id_comp]
+  rw [← projModelBaseChange_comp',
+    projModelBaseChange_congr_hom hσ.symm (universalShortNF R),
+    ← Category.assoc, eqToHom_trans]
+
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(E12-D3-E3c)** The piece map does not depend on the chart supporting the affine:
+adapted uniqueness at the shared affine. -/
+theorem chartPiece_index_congr {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤)))
+    (V : Y.base.affineOpens) (i₁ i₂ : Y.curve.toEllipticCurveGeom.atlas.ι)
+    (h₁ : V.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U i₁).1)
+    (h₂ : V.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U i₂).1) :
+    chartPiece Y b h2 h3 V i₁ h₁ = chartPiece Y b h2 h3 V i₂ h₂ := by
+  set Q₁ := adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i₁ h₁ with hQ₁
+  set Q₂ := adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i₂ h₂ with hQ₂
+  have hVC : Q₂.transVC Q₁ = 1 :=
+    transVC_eq_one_of_isAdapted
+      (adaptedLocal_isAdapted Y.curve.toEllipticCurveGeom b h2 h3 V i₂ h₂)
+      (adaptedLocal_isAdapted Y.curve.toEllipticCurveGeom b h2 h3 V i₁ h₁)
+      (adaptedLocal_isShortNF Y.curve.toEllipticCurveGeom b h2 h3 V i₂ h₂)
+      (adaptedLocal_isShortNF Y.curve.toEllipticCurveGeom b h2 h3 V i₁ h₁)
+      (isUnit_ofNat_res h2 V.1) (isUnit_ofNat_res h3 V.1)
+  have hWeq : Q₁.W = Q₂.W := by
+    have := Q₂.transVC_smul Q₁
+    rwa [hVC, one_smul] at this
+  have hIso := pointedIso_hom_of_transVC_eq_one hVC
+  have hE : Q₁.e.hom = Q₂.e.hom ≫ eqToHom (congrArg projModel hWeq.symm) := by
+    have h1 : Q₂.e.inv ≫ Q₁.e.hom = eqToHom (congrArg projModel hWeq.symm) := by
+      have h0 := hIso
+      rw [show (Q₂.pointedIso Q₁).hom = Q₂.e.inv ≫ Q₁.e.hom from rfl] at h0
+      exact h0
+    rw [← h1, ← Category.assoc, Iso.hom_inv_id, Category.id_comp]
+  rw [chartPiece, chartPiece, hE]
+  simp only [Category.assoc]
+  rw [cancel_epi (Q₂.e.hom)]
+  simp only [eqToHom_trans_assoc]
+
 end ModularCurves

@@ -407,6 +407,20 @@ noncomputable def restrict (P : LocalPresentation G V) {V' : S.affineOpens}
 
 /-! ### T-OM-B4: naturality of the comparison under transport -/
 
+lemma projModelBaseChange_congr_hom {R : Type u} [CommRing R] {R' : Type u}
+    [CommRing R'] {σ₁ σ₂ : R →+* R'} (h : σ₁ = σ₂) (W : WeierstrassCurve R) :
+    projModelBaseChange σ₁ W =
+      eqToHom (by rw [h]) ≫ projModelBaseChange σ₂ W := by
+  cases h
+  simp
+
+lemma projModelBaseChange_congr'' {R : Type u} [CommRing R] {R' : Type u} [CommRing R']
+    (σ : R →+* R') {W₁ W₂ : WeierstrassCurve R} (h : W₁ = W₂) :
+    projModelBaseChange σ W₁ =
+      eqToHom (by rw [h]) ≫ projModelBaseChange σ W₂ ≫ eqToHom (by rw [h]) := by
+  cases h
+  simp
+
 lemma projModelπ_congr {R : Type u} [CommRing R] {W₁ W₂ : WeierstrassCurve R}
     (h : W₁ = W₂) :
     eqToHom (congrArg projModel h) ≫ projModelπ W₂ = projModelπ W₁ := by
