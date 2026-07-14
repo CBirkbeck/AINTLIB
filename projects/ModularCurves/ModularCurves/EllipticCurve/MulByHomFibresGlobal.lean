@@ -67,8 +67,13 @@ route (degree-free, NOT `abelEnrichment_exists`-gated):
   (`mulByHom_baseChange`, `GroupLaw.lean:217`); LQF is base-change-stable, and descends `κ̄(s) → κ(y)`.
 The transport/rigidity/assembly building blocks are all landed green (`locallyQuasiFinite_mulByHom_of_isMonHom_iso`,
 `isMonHom_of_pointed`, `mulByHom_locallyQuasiFinite_assembled`); the ONLY remaining work is (a) ALPHA's
-model conclusion (g1–g5) + the localModel fibre-iso extraction (base-change `localModel`'s `e` to `κ(s)`,
-`compat_zero` gives pointedness) + the (c) fibre-of-endo identification. Bounded, atlas-context hand-off. -/
+model conclusion (g1–g5) + the fibre-iso extraction + the (c) fibre-of-endo identification.
+**De-risking note:** the per-fibre pointed iso is a READY structure — `E`'s `FibrewiseElliptic` (from
+`localModel`) yields, at each residue point `p`, a `⟨W', e, heπ, hez⟩` with `e` a *pointed* iso
+(`heπ` = `compat_π`, `hez` = `compat_zero`); see the `obtain ⟨W', hW', e, heπ, hez⟩ := h p` pattern in
+`Comparison.isElliptic_of_fibrewiseElliptic_projModel` (`Comparison.lean:300+`). So step (b)'s iso is a
+clean `FibrewiseElliptic` application, and `hez` feeds `isMonHom_of_pointed` directly — no deep atlas
+navigation. Bounded, atlas-context hand-off to the ALPHA session. -/
 theorem fiber_mulByHom_locallyQuasiFinite (E : EllipticCurve S) (N : ℕ) [NeZero N] (y : E.E) :
     LocallyQuasiFinite ((E.mulByHom N).fiberToSpecResidueField y) := by sorry
 
