@@ -109,13 +109,13 @@ theorem isPthPower_image_iff (hp_odd : p ≠ 2) (u : (𝓞 (NumberField.maximalR
       congrArg (·) (congrArg Subtype.val h_η_p)
     simpa using this
   have h_β_K_pow : β_K ^ p = α ^ p := by
-    rw [hβ_K_def, mul_pow]
-    rw [show ((η : (𝓞 K)ˣ))⁻¹ ^ p = (((η : (𝓞 K)ˣ)) ^ p)⁻¹ from (inv_pow _ _).symm]
-    rw [h_η_unit_pow, inv_one, mul_one]
+    rw [hβ_K_def, mul_pow,
+      show ((η : (𝓞 K)ˣ))⁻¹ ^ p = (((η : (𝓞 K)ˣ)) ^ p)⁻¹ from (inv_pow _ _).symm,
+      h_η_unit_pow, inv_one, mul_one]
   -- β_K ∈ realUnits since unitsMulComplexConjInv K β_K = 1.
   have h_β_K_real : β_K ∈ NumberField.IsCMField.realUnits K := by
-    rw [← NumberField.IsCMField.unitsMulComplexConjInv_ker, MonoidHom.mem_ker]
-    rw [hβ_K_def, map_mul, map_inv]
+    rw [← NumberField.IsCMField.unitsMulComplexConjInv_ker, MonoidHom.mem_ker,
+      hβ_K_def, map_mul, map_inv]
     -- unitsMulComplexConjInv K (η : (𝓞 K)ˣ) = η ^ 2 (apply torsion lemma)
     have h_torsion : NumberField.IsCMField.unitsMulComplexConjInv K ((η : (𝓞 K)ˣ)) = η ^ 2 :=
       NumberField.IsCMField.unitsMulComplexConjInv_apply_torsion (K := K) η
