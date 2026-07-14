@@ -1866,4 +1866,41 @@ theorem classifyingEllHom_omegaBasisMap {R : CommRingCat.{u}} {Y : EllObj R}
   EllHom.ext (classifyingMap_omegaBasisMap φ h2 h3)
     (classifyingTop_omegaBasisMap φ h2 h3)
 
+/-- `2` is a unit whenever `6` is. -/
+theorem isUnit_two_of_six {A : Type u} [CommRing A] (h : IsUnit (6 : A)) :
+    IsUnit (2 : A) :=
+  isUnit_of_mul_isUnit_left (y := (3 : A))
+    (by rw [show (2 : A) * 3 = 6 by norm_num]; exact h)
+
+/-- `3` is a unit whenever `6` is. -/
+theorem isUnit_three_of_six {A : Type u} [CommRing A] (h : IsUnit (6 : A)) :
+    IsUnit (3 : A) :=
+  isUnit_of_mul_isUnit_right (x := (2 : A))
+    (by rw [show (2 : A) * 3 = 6 by norm_num]; exact h)
+
+open AlgebraicGeometry CategoryTheory Scheme in
+/-- If `6` is a unit in `R`, it is a unit in the global sections of every
+`Ell/R`-object's base. -/
+theorem EllObj.isUnit_six {R : CommRingCat.{u}} (Y : EllObj R)
+    (hR : IsUnit (6 : R)) : IsUnit (6 : Γ(Y.base, ⊤)) := by
+  have h := hR.map Y.baseRingHom
+  rwa [map_ofNat] at h
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+/-- **(T-E12 ★★, GME Thm 2.2.3; KM 2.2.6)** THE REPRESENTABILITY PACKAGE: over a base
+ring in which `6` is invertible, the `ω`-moduli problem `[(E, ω)]` is represented by
+the universal object `M₁ = Spec R[A₄, A₆][Δ⁻¹]`. The natural bijection sends `φ` to
+`φ^* ω_univ`; its inverse is the classifying morphism; the roundtrips are
+`omegaBasisMap_classifyingEllHom` and `classifyingEllHom_omegaBasisMap`, and
+naturality is the `ω`-transport functoriality `omegaBasisMap_comp`. -/
+noncomputable def omegaRepresentableBy (R : CommRingCat.{u}) (hR : IsUnit (6 : R)) :
+    (omegaProblem R).RepresentableBy (universalEllObj R) where
+  homEquiv {Y} :=
+    { toFun := fun φ => omegaBasisMap φ (universalOmegaBasis R)
+      invFun := fun b => classifyingEllHom Y b
+        (isUnit_two_of_six (Y.isUnit_six hR)) (isUnit_three_of_six (Y.isUnit_six hR))
+      left_inv := fun φ => classifyingEllHom_omegaBasisMap φ _ _
+      right_inv := fun b => omegaBasisMap_classifyingEllHom Y b _ _ }
+  homEquiv_comp f g := omegaBasisMap_comp f g (universalOmegaBasis R)
+
 end ModularCurves

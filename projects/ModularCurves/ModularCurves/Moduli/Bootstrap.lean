@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.GammaH
 import ModularCurves.Moduli.OmegaFunctor
+import ModularCurves.Moduli.UniversalAdapted
 
 /-!
 # The KM 4.7 bootstrap objects (T-E12–T-E15)
@@ -104,8 +105,11 @@ given `ω` (`WeierstrassModel.lean`'s normalisation machinery + `omegaCocycle_re
 compare `ω`-data chartwise). -/
 theorem omegaProblem_representable_by_affine (hR : IsUnit (6 : R)) :
     ∃ X : EllObj R, IsAffine X.base ∧
-      Nonempty ((omegaProblem R).RepresentableBy X) := by
-  sorry
+      Nonempty ((omegaProblem R).RepresentableBy X) :=
+  ⟨universalEllObj R,
+    inferInstanceAs (IsAffine (AlgebraicGeometry.Spec
+      (CommRingCat.of (ModuliRingE12 R)))),
+    ⟨omegaRepresentableBy R hR⟩⟩
 
 /-- **(T-E13, GME Cor 2.2.4)** `Aut_S(E, ω) = {1}`: the ω-problem is **rigid** over
 `ℤ[1/6]` — no nontrivial automorphism of `E/S` over the identity of `S` fixes an
@@ -113,8 +117,8 @@ theorem omegaProblem_representable_by_affine (hR : IsUnit (6 : R)) :
 rigidity from scratch — `EllipticCurve/Rigidity.lean`'s canonicity chain (in particular
 `isMonHom_of_one_comp_eq'`) is the intended engine for "an automorphism fixing the zero
 section". -/
-theorem omegaProblem_rigid (hR : IsUnit (6 : R)) : (omegaProblem R).Rigid := by
-  sorry
+theorem omegaProblem_rigid (hR : IsUnit (6 : R)) : (omegaProblem R).Rigid :=
+  ModuliProblem.rigid_of_representable (omegaRepresentableBy R hR).isRepresentable
 
 /-! ### T-E14 — the Legendre bootstrap object `M'₂` over `ℤ[1/2]` (KM 4.6.2 / GME Ex. 2.2.1) -/
 
