@@ -932,10 +932,7 @@ theorem IsInvertible.dual {M : X.Modules} (hM : IsInvertible M) :
   obtain ⟨ι, U, hU, htriv⟩ := hM
   refine ⟨ι, U, hU, fun i ↦ ?_⟩
   obtain ⟨e⟩ := htriv i
-  let eRestrict : M.restrict (U i).ι ≅ unitObj (U i).toScheme :=
-    (restrictFunctorIsoPullback (U i).ι).app M ≪≫ e
-  exact ⟨(restrictFunctorIsoPullback (U i).ι).symm.app
-      (dualObj M) ≪≫
-    dualRestrictIsoOfRestrictIso M (U i) eRestrict⟩
+  exact ⟨pullbackIsoOfRestrictIso (dualObj M) (U i)
+    (dualRestrictIsoOfRestrictIso M (U i) (restrictIsoOfPullbackIso M (U i) e))⟩
 
 end AlgebraicGeometry.Scheme.Modules

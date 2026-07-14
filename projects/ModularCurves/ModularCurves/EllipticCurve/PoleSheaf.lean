@@ -775,8 +775,7 @@ theorem idealModule_isInvertible_of_locallyPrincipal {X Y : Scheme.{u}}
   · have hr : r y ∈ f.ker.ideal (U y) := by
       rw [hspan y]
       exact Ideal.mem_span_singleton_self (r y)
-    exact ⟨(Scheme.Modules.restrictFunctorIsoPullback (U y).1.ι).symm.app
-        (idealModule f) ≪≫
+    exact ⟨Scheme.Modules.pullbackIsoOfRestrictIso (idealModule f) (U y).1
       (localIdealGeneratorIso f (U y) (r y) hr (hspan y) (hnzd y)).symm⟩
 
 /-- Multiplication by a top-open section of the structure sheaf. -/
