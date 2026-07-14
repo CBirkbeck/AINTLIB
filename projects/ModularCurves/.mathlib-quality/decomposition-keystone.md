@@ -166,3 +166,39 @@ mulByHom_finrank ⟹ G0's c4 + my E[N]-finiteness; QF1 in parallel; then GH-hand
 degree bridge — the primary risk to validate) on the green `Comparison`/`ModelRecord` scaffolding; then
 K1/K2/K3/K5 assembly → `mulByHom_finrank`; QF1 in parallel. Handshake GH for the `deg(α−1)` signature
 before committing scope (iii)'s Abel-free-vs-dual route.
+
+---
+
+## BEASTMODE GRIND STATUS (2026-07-14, STREAM-KM) — K4 FOUNDATION DELIVERED, CRUX ISOLATED
+
+Source-faithful refinement of the "MODERATE" verdict after reading the actual sources
+(`FlatRank.lean`, `FreeLocus.lean`, `MulByIntPullback.lean`, `PointsDictionary`, `ModelRecord`,
+mathlib `FunctionField.lean`): K4 is **feasible on green scaffolding but BB-DIFF-scale** — the
+field-level finrank bottoms out at the SAME T-B6′ crux (scheme model-[N] ↔ HasseWeil `mulByInt`
+coordinate/pullback match) that leaves BB-DIFF (`formallyUnramified_torsionπ`) sorried. NOT a wall
+(every leaf has concrete mathlib/project support), but a multi-lemma marathon.
+
+**DELIVERED GREEN (committed, `MulByHomDegree.lean` + `FinrankFractionField.lean`):**
+- **Leaf A** `finrank_SpecMap_algebraMap_eq_finrank` — scheme affine finrank = R-module rank over a
+  domain (via `finrank_SpecMap_algebraMap` + `Ideal.finrank_fiber_eq_finrank`). *The primary-risk
+  rank=field-degree step, VALIDATED in code.*
+- **Point-[N]-match** `projModelPointsEquiv_add`/`_AddEquiv`/`_zsmul` — scheme model-[N] = mathlib
+  `Affine.Point` [N] under the green dictionary (`mulModelHom_specPoints` + `point_smul_eq_comp_mulBy`).
+- **(B)** `projModelFunctionFieldEquiv` — `K(projModel W) ≃+* W.toAffine.FunctionField`
+  (`functionField_isFractionRing_of_isAffineOpen` + `coordRingToZSection` + `MulEquivClass.map_nonZeroDivisors`).
+- **(D) local-constancy** `modelEllipticCurve_finrank_const` — finrank(model-[N]) constant on integral
+  `projModel W` (`isLocallyConstant_finrank` + preconnectedness).
+
+**REMAINING (the isolated crux) for `modelEllipticCurve_mulByHom_finrank = N²` (field-level target):**
+- **single-point value**: by local-constancy, compute finrank(model-[N]) at one x₀ ∈ Z-chart:
+  affine-restrict model-[N]|_{[N]⁻¹(Zchart)} = `Spec.map (Γ(Zchart) → Γ([N]⁻¹Zchart))` → Leaf A gives
+  `= Module.finrank W.CoordinateRing Γ([N]⁻¹Zchart)`.
+- **(C) coordinate/pullback match**: that rank = `(mulByInt W.toAffine N).degree = N²`, because the
+  restricted ring map's fraction-field = `mulByInt_pullbackAlgHom` — provable from the GREEN point-[N]-match
+  read at the generic point via `projModelPointsEquiv_some` (coordinate readout = division polynomials =
+  `mulByInt_xHom`). **This is the deep arithmetic anchor (tied to the model's Proj-coordinate structure ↔
+  HasseWeil's division polys) — the true residual crux, shared with BB-DIFF.**
+
+**Then Torsion assembly** (discharges `Torsion.lean:152`): L-K1 fibre-reduction (`finrank_pullback_snd`,
+Torsion's flat/finite) + L-K2 one-point model iso (`E_s ≅ projModel W_s` via `LocallyWeierstrass` over the
+one-point base `Spec κ(s)` + rigidity) ⟹ arbitrary-E `mulByHom_finrank` ⟹ G0's c4 + affineOverEll E[N]-finiteness.
