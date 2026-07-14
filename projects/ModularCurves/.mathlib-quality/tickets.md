@@ -19852,3 +19852,16 @@ The KM-axiom-1 substrate over `M'₂ = Spec R[λ][(λ(λ−1))⁻¹]`:
 LEAN-OP: `MvPolynomial.eval_bind₁` does NOT exist — route `← aeval_eq_eval` then `aeval_bind₁`;
 vector-literal applications `![p,q,1] i` at literal `i` are rfl-reducible — close eval-chains
 with a value-level `show` + `linear_combination`, not cons_val-simp (index 2 has no simp lemma).
+
+## v10.226-OMEGA (2026-07-14) — ★ [T-E14-LVL-a] KILLING HALF DONE: the universal marked pair is 2-torsion
+
+`modelEllipticCurve_mulByHom_neg_one` ([−1] = negModelHom on the model curve: modelGrpObj's inv is
+`invOver` with `invOver_left : (invOver W).left = negModelHom W` — the T-W7 bridge EXISTS PUBLIC,
+no unprivations needed; `mulBy (−1) = (𝟙)⁻¹ = 𝟙 ≫ ι` via `zpow_neg_one` + mathlib's
+`Hom.inv_def`) + `two_zsmul_universalLegendreP/Q` (P = −P from the negation-fix ⟹ [2]P = 0 by
+`neg_one_zsmul`/`two_zsmul`/`add_neg_cancel`). Commit 4fa530f5b, axiom-clean, first-build green.
+
+**The universal-Legendre-datum ladder now reads:** killing clause ✓✓ | geometric generation =
+[T-E14-LVL-b] (KM-keystone deferral, the ONLY remaining LVL gap) | classification [T-E14-CLS]
+(next: marked-adapted-witness uniqueness ⟹ glued λ ⟹ classifying machinery, T-E12-D replay) |
+coupled G-action [T-E14-ACT'].
