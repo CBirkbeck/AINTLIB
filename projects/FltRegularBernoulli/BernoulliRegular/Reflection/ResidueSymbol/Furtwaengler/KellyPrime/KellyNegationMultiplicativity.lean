@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.KellyPrime.StickelbergerNormRelation
@@ -139,7 +144,7 @@ theorem StickelbergerNormRelation_neg_iff_of_odd
     (hp_odd : Odd p) (α : 𝓞 K) (P' : Ideal (𝓞 K)) :
     StickelbergerNormRelation (p := p) (K := K) (-α) P' ↔
       StickelbergerNormRelation (p := p) (K := K) α P' := by
-  unfold StickelbergerNormRelation
+  simp only [StickelbergerNormRelation]
   -- LHS sum: each term σ_{a⁻¹}(-α) ↦ -σ_{a⁻¹}(α), and pthSymbolAtPrime_canonical
   -- (-x) P' = pthSymbolAtPrime_canonical x P' for odd p.
   have h_lhs :
@@ -200,7 +205,7 @@ theorem kellyPrimeEquality_neg_iff_of_odd
       stickelbergerPrincipalGen (p := p) (K := K) (-α) =
         ((-1 : 𝓞 K) ^ (∑ a : CyclotomicUnitDelta p, (a : ZMod p).val)) *
           stickelbergerPrincipalGen (p := p) (K := K) α := by
-    unfold stickelbergerPrincipalGen
+    simp only [stickelbergerPrincipalGen]
     -- (-1)^(∑ a.val) · ∏_a (σ_{a⁻¹} α)^a.val = ∏_a ((-1) · σ_{a⁻¹} α)^a.val
     --                                       = ∏_a (σ_{a⁻¹} (-α))^a.val
     rw [← Finset.prod_pow_eq_pow_sum, ← Finset.prod_mul_distrib]
