@@ -297,6 +297,39 @@ noncomputable def SpreadData.FunctorModel.mapToStage
   map_colimit f x := (M.object _).mapAtLaterStage_colimit (M.object _) H
     (M.le_stage _) (M.le_stage _) hij (M.map f) (F.map f).hom (M.map_colimit f) x
 
+/-- Moving a functor model to a later stage commutes with applying any functor map. -/
+theorem SpreadData.FunctorModel.mapToStage_map_stageTransition
+    (M : SpreadData.FunctorModel F H) {j : ι} (hij : M.stage ≤ j)
+    {X Y : J} (f : X ⟶ Y)
+    (x : (M.object X).spreadStage (t := t) (M.le_stage X)) :
+    (M.mapToStage hij).map f
+        ((M.object X).stageTransition H
+          (P := ⟨M.stage, M.le_stage X⟩)
+          (Q := ⟨j, (M.le_stage X).trans hij⟩) hij x) =
+      (M.object Y).stageTransition H
+        (P := ⟨M.stage, M.le_stage Y⟩)
+        (Q := ⟨j, (M.le_stage Y).trans hij⟩) hij (M.map f x) :=
+  (M.object X).mapAtLaterStage_stageTransition (M.object Y) H
+    (M.le_stage X) (M.le_stage Y) hij (M.map f) x
+
+/-- Moving a functor model to a later stage commutes with applying any functor map to a
+unit. -/
+theorem SpreadData.FunctorModel.mapToStage_map_unitTransition
+    (M : SpreadData.FunctorModel F H) {j : ι} (hij : M.stage ≤ j)
+    {X Y : J} (f : X ⟶ Y)
+    (x : ((M.object X).spreadStage (t := t) (M.le_stage X))ˣ) :
+    Units.map ((M.mapToStage hij).map f).toMonoidHom
+        (Units.map ((M.object X).stageTransition H
+          (P := ⟨M.stage, M.le_stage X⟩)
+          (Q := ⟨j, (M.le_stage X).trans hij⟩) hij).toMonoidHom x) =
+      Units.map ((M.object Y).stageTransition H
+        (P := ⟨M.stage, M.le_stage Y⟩)
+        (Q := ⟨j, (M.le_stage Y).trans hij⟩) hij).toMonoidHom
+          (Units.map (M.map f).toMonoidHom x) := by
+  apply Units.ext
+  exact M.mapToStage_map_stageTransition hij f (x :
+    (M.object X).spreadStage (t := t) (M.le_stage X))
+
 private structure SpreadData.FunctorModel.UnitLiftStage
     (M : SpreadData.FunctorModel F H) (X : J) (a : (F.obj X)ˣ) where
   stage : ι
@@ -418,6 +451,32 @@ theorem SpreadData.FunctorModel.exists_common_eq_atLaterStage
     ← (M.object (obj r)).stageTransition_trans H
       (M.le_stage (obj r)) (C r).le_stage (hC r) (y r),
     (C r).elements_agree]
+
+/-- Finitely many equalities between units in varying objects of a spread functor which
+hold in the target colimits hold literally after transport to one common later stage. -/
+theorem SpreadData.FunctorModel.exists_common_unit_eq_atLaterStage
+    (M : SpreadData.FunctorModel F H)
+    {ρ : Type u} [Finite ρ] (obj : ρ → J)
+    (x y : ∀ r, ((M.object (obj r)).spreadStage (t := t)
+      (M.le_stage (obj r)))ˣ)
+    (hxy : ∀ r, Units.map ((M.object (obj r)).stageToColimit H
+        ⟨M.stage, M.le_stage (obj r)⟩).toMonoidHom (x r) =
+      Units.map ((M.object (obj r)).stageToColimit H
+        ⟨M.stage, M.le_stage (obj r)⟩).toMonoidHom (y r)) :
+    ∃ (j : ι) (hij : M.stage ≤ j), ∀ r,
+      Units.map ((M.object (obj r)).stageTransition H
+          (P := ⟨M.stage, M.le_stage (obj r)⟩)
+          (Q := ⟨j, (M.le_stage (obj r)).trans hij⟩) hij).toMonoidHom (x r) =
+        Units.map ((M.object (obj r)).stageTransition H
+          (P := ⟨M.stage, M.le_stage (obj r)⟩)
+          (Q := ⟨j, (M.le_stage (obj r)).trans hij⟩) hij).toMonoidHom (y r) := by
+  obtain ⟨j, hij, hxyj⟩ := M.exists_common_eq_atLaterStage obj
+    (fun r => (x r : (M.object (obj r)).spreadStage (t := t)
+      (M.le_stage (obj r))))
+    (fun r => (y r : (M.object (obj r)).spreadStage (t := t)
+      (M.le_stage (obj r))))
+    (fun r => congrArg Units.val (hxy r))
+  exact ⟨j, hij, fun r => Units.ext (hxyj r)⟩
 
 /-- Move a spread functor to a stage where representatives of a finite source family
 have images under one chosen arrow which generate the unit ideal. -/

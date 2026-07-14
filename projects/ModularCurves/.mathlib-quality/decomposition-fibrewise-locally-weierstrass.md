@@ -362,6 +362,13 @@ Completed dependency claim (2026-07-14): defined
 now restricts along the canonical pair-to-triple arrows to a literal multiplicative Cech
 equation in every triple object.
 
+Completed dependency claim (2026-07-14): proved
+`FunctorModel.mapToStage_map_stageTransition`,
+`FunctorModel.mapToStage_map_unitTransition`, and
+`FunctorModel.exists_common_unit_eq_atLaterStage`. Functor maps now commute explicitly with
+later-stage transport, and finite families of colimit unit equalities can be synchronized as
+literal equalities at one common stage.
+
 Active dependency claim (2026-07-14): spread the finite family of pair-overlap transition
 units, their inverses, and the triple-overlap equations to one later finite stage of the
 affine-intersection model. This will construct the finite-stage line bundle whose base change
