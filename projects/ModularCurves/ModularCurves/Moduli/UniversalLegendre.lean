@@ -1971,6 +1971,79 @@ theorem omegaBasisMap_legendreClassifyingEllHom {R : CommRingCat.{u}} {X : EllOb
     rw [show ((1 : Γ(X.base, ⊤)ˣ) • b).1 =
       ((1 : Γ(X.base, ⊤)ˣ)).val • b.1 from rfl, Units.val_one, one_smul])
 
+section RT2
+
+variable {R : CommRingCat.{u}} {X : EllObj R} {hR : IsUnit (2 : R)}
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(T-E14-CLS-8 rt2 ★)** The transported tautological witness of the pulled datum:
+for ANY `Ell/R`-morphism `φ` to the universal Legendre object (with the universal
+level clause `hL`), the transported taut chart over any affine is a Legendre witness
+of the pulled datum. This is rt2's per-affine determination data. -/
+noncomputable def pulledWitness (φ : X ⟶ universalLegendreObj R hR)
+    (hL : (universalLegendreObj R hR).curve.IsNaiveFullLevel 2
+      (universalLegendreP R hR) (universalLegendreQ R hR))
+    (V : X.base.affineOpens) :
+    LegendreWitness X
+      ((gammaFullNaiveProblem R 2).map (Opposite.op φ)
+        ⟨⟨universalLegendreP R hR, universalLegendreQ R hR⟩, hL⟩)
+      (omegaBasisMap φ (universalLegendreOmega R hR)) := by
+  haveI := universalLegendre_isElliptic R hR
+  refine
+    { V := V
+      Pr := (tautPresentation (universalLegendre R)).transport
+        φ.baseHom φ.top φ.isPullback φ.zero_w
+        (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial)
+      lam := sectionsMapLE φ.baseHom
+        (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial)
+        ((Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv.hom
+          (universalLambda R))
+      hAd := IsAdapted.transport φ (tautPresentation_isAdapted_legendre R hR) _
+      hW := ?_
+      hMP := ?_
+      hMQ := ?_ }
+  · show (tautPresentation (universalLegendre R)).W.map _ = _
+    rw [show (tautPresentation (universalLegendre R)).W =
+      (universalLegendre R).map ((Scheme.ΓSpecIso (CommRingCat.of
+        (LegendreModuliRing R))).inv.hom) from rfl]
+    rw [show (universalLegendre R) = legendreCurve (universalLambda R) from rfl,
+      legendreCurve_map, legendreCurve_map]
+    rfl
+  · -- the P-marking: transport the universal marking; the pulled section is
+    -- DEFINITIONALLY the pullback-lift, so the square is `lift_fst`
+    have hmark := tautPresentation_marksAt (universalLegendre R) 0 0
+      (legendreCurve_equation_zero (universalLambda R))
+    rw [map_zero] at hmark
+    have hcomm : (EllHom.pullSection R φ (universalLegendreP R hR)).1 ≫ φ.top =
+        φ.baseHom ≫ (universalLegendreP R hR).1 :=
+      φ.isPullback.lift_fst _ _ _
+    have htr := LocalPresentation.MarksAt.transport φ.baseHom φ.top
+      φ.isPullback φ.zero_w hmark
+      (EllHom.pullSection R φ (universalLegendreP R hR)).2 hcomm
+      (V' := V) (fun x _ => trivial)
+    rw [map_zero] at htr
+    exact htr
+  · have hmark := tautPresentation_marksAt (universalLegendre R) 1 0
+      (legendreCurve_equation_one (universalLambda R))
+    rw [map_one, map_zero] at hmark
+    have hcomm : (EllHom.pullSection R φ (universalLegendreQ R hR)).1 ≫ φ.top =
+        φ.baseHom ≫ (universalLegendreQ R hR).1 :=
+      φ.isPullback.lift_fst _ _ _
+    have htr := LocalPresentation.MarksAt.transport φ.baseHom φ.top
+      φ.isPullback φ.zero_w hmark
+      (EllHom.pullSection R φ (universalLegendreQ R hR)).2 hcomm
+      (V' := V) (fun x _ => trivial)
+    rw [map_one, map_zero] at htr
+    exact htr
+
+end RT2
+
 end TwoTorsion
 
 end ModularCurves
