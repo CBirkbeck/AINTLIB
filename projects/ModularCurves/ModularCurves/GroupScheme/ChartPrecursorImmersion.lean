@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
 import ModularCurves.GroupScheme.ChartBridges
+import ModularCurves.GroupScheme.ActPairImmersion
 
 /-!
 # The chart precursor is a closed immersion (`[HG-C2]` geometric heart)
@@ -299,12 +300,190 @@ noncomputable def productOpenToSquare :
     P.productOpen.toScheme ⟶ pullback P.chartToBase P.chartToBase :=
   pullback.lift P.productOpenFst P.productOpenSnd P.productOpenFst_chartToBase
 
-/-- **`[HG-C2]` FINAL CRUX (sharpened)**: the chart action pair is a closed immersion —
-the stable-chart restriction of `isClosedImmersion_actPair_left`
-(`decomposition-c2-heart.md`, step 4; remaining: `productOpenToSquare` is an isomorphism
-and the restriction factorization). -/
+/-- Maps into the ambient square are determined by the two projections. -/
+theorem tensorLeft_hom_ext {T : Scheme.{u}} {g h : T ⟶ (E.asOver ⊗ E.asOver).left}
+    (h1 : g ≫ (fst E.asOver E.asOver).left = h ≫ (fst E.asOver E.asOver).left)
+    (h2 : g ≫ (snd E.asOver E.asOver).left = h ≫ (snd E.asOver E.asOver).left) :
+    g = h := by
+  have hgh : g ≫ (E.asOver ⊗ E.asOver).hom = h ≫ (E.asOver ⊗ E.asOver).hom := by
+    have hw : (E.asOver ⊗ E.asOver).hom
+        = (fst E.asOver E.asOver).left ≫ E.asOver.hom :=
+      (Over.w (fst E.asOver E.asOver)).symm
+    rw [hw, ← Category.assoc, h1, Category.assoc]
+  have hext : (Over.homMk g rfl :
+        Over.mk (g ≫ (E.asOver ⊗ E.asOver).hom) ⟶ E.asOver ⊗ E.asOver)
+      = Over.homMk h hgh.symm := by
+    apply CartesianMonoidalCategory.hom_ext
+    · exact Over.OverMorphism.ext (by exact h1)
+    · exact Over.OverMorphism.ext (by exact h2)
+  exact congrArg CommaMorphism.left hext
+
+/-- The first ambient leg of the chart square. -/
+noncomputable def ambientLegFst :
+    Over.mk (pullback.fst P.chartToBase P.chartToBase ≫ P.U.ι ≫ E.π) ⟶ E.asOver :=
+  Over.homMk (pullback.fst P.chartToBase P.chartToBase ≫ P.U.ι) (Category.assoc _ _ _)
+
+/-- The second ambient leg of the chart square. -/
+noncomputable def ambientLegSnd :
+    Over.mk (pullback.fst P.chartToBase P.chartToBase ≫ P.U.ι ≫ E.π) ⟶ E.asOver :=
+  Over.homMk (pullback.snd P.chartToBase P.chartToBase ≫ P.U.ι) (by
+    show (pullback.snd P.chartToBase P.chartToBase ≫ P.U.ι) ≫ E.π
+      = pullback.fst P.chartToBase P.chartToBase ≫ P.U.ι ≫ E.π
+    rw [Category.assoc, ← P.chartToBase_comp_ι, ← Category.assoc,
+      ← pullback.condition, Category.assoc, P.chartToBase_comp_ι, ← Category.assoc,
+      Category.assoc])
+
+/-- The chart square, mapped into the ambient square. -/
+noncomputable def squareToAmbient :
+    pullback P.chartToBase P.chartToBase ⟶ (E.asOver ⊗ E.asOver).left :=
+  (CartesianMonoidalCategory.lift P.ambientLegFst P.ambientLegSnd).left
+
+@[reassoc]
+theorem squareToAmbient_fst :
+    P.squareToAmbient ≫ (fst E.asOver E.asOver).left
+      = pullback.fst P.chartToBase P.chartToBase ≫ P.U.ι :=
+  congrArg CommaMorphism.left
+    (CartesianMonoidalCategory.lift_fst P.ambientLegFst P.ambientLegSnd)
+
+@[reassoc]
+theorem squareToAmbient_snd :
+    P.squareToAmbient ≫ (snd E.asOver E.asOver).left
+      = pullback.snd P.chartToBase P.chartToBase ≫ P.U.ι :=
+  congrArg CommaMorphism.left
+    (CartesianMonoidalCategory.lift_snd P.ambientLegFst P.ambientLegSnd)
+
+/-- The chart square lands in the product window. -/
+noncomputable def squareToProductOpen :
+    pullback P.chartToBase P.chartToBase ⟶ P.productOpen.toScheme :=
+  IsOpenImmersion.lift P.productOpen.ι P.squareToAmbient (by
+    rintro _ ⟨p, rfl⟩
+    rw [Scheme.Opens.range_ι]
+    constructor
+    · show (fst E.asOver E.asOver).left.base (P.squareToAmbient.base p) ∈ P.U
+      have h := ((Scheme.Hom.comp_apply _ _ _).symm.trans (congrArg
+        (fun m : pullback P.chartToBase P.chartToBase ⟶ E.E => m.base p)
+        P.squareToAmbient_fst)).trans (Scheme.Hom.comp_apply _ _ _)
+      refine Set.mem_of_eq_of_mem (by exact h) ?_
+      rw [← Scheme.Opens.range_ι]
+      exact Set.mem_range_self _
+    · show (snd E.asOver E.asOver).left.base (P.squareToAmbient.base p) ∈ P.U
+      have h := ((Scheme.Hom.comp_apply _ _ _).symm.trans (congrArg
+        (fun m : pullback P.chartToBase P.chartToBase ⟶ E.E => m.base p)
+        P.squareToAmbient_snd)).trans (Scheme.Hom.comp_apply _ _ _)
+      refine Set.mem_of_eq_of_mem (by exact h) ?_
+      rw [← Scheme.Opens.range_ι]
+      exact Set.mem_range_self _)
+
+@[reassoc]
+theorem squareToProductOpen_ι :
+    P.squareToProductOpen ≫ P.productOpen.ι = P.squareToAmbient :=
+  IsOpenImmersion.lift_fac _ _ _
+
+/-- The window comparison is an isomorphism. -/
+instance : IsIso P.productOpenToSquare := by
+  refine ⟨P.squareToProductOpen, ?_, ?_⟩
+  · rw [← cancel_mono P.productOpen.ι, Category.assoc, P.squareToProductOpen_ι,
+      Category.id_comp]
+    refine tensorLeft_hom_ext ?_ ?_
+    · exact (Category.assoc _ _ _).trans ((congrArg (P.productOpenToSquare ≫ ·)
+        P.squareToAmbient_fst).trans (((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ P.U.ι) (pullback.lift_fst _ _ _))).trans P.productOpenFst_ι))
+    · exact (Category.assoc _ _ _).trans ((congrArg (P.productOpenToSquare ≫ ·)
+        P.squareToAmbient_snd).trans (((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ P.U.ι) (pullback.lift_snd _ _ _))).trans P.productOpenSnd_ι))
+  · apply pullback.hom_ext
+    · rw [Category.assoc, Category.id_comp,
+        show P.productOpenToSquare ≫ pullback.fst P.chartToBase P.chartToBase
+          = P.productOpenFst from pullback.lift_fst _ _ _]
+      rw [← cancel_mono P.U.ι]
+      exact (Category.assoc _ _ _).trans ((congrArg (P.squareToProductOpen ≫ ·)
+        P.productOpenFst_ι).trans (((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ (fst E.asOver E.asOver).left) P.squareToProductOpen_ι)).trans
+        P.squareToAmbient_fst))
+    · rw [Category.assoc, Category.id_comp,
+        show P.productOpenToSquare ≫ pullback.snd P.chartToBase P.chartToBase
+          = P.productOpenSnd from pullback.lift_snd _ _ _]
+      rw [← cancel_mono P.U.ι]
+      exact (Category.assoc _ _ _).trans ((congrArg (P.squareToProductOpen ≫ ·)
+        P.productOpenSnd_ι).trans (((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ (snd E.asOver E.asOver).left) P.squareToProductOpen_ι)).trans
+        P.squareToAmbient_snd))
+
+/-- **The restriction factorization**: the chart action pair is the product-window
+restriction of the ambient action pair, through the window comparison and the factor
+swap (the ambient pair is `⟨act, pr⟩`, the chart pair `⟨pr, act⟩`). -/
+theorem chartActPair_factorization :
+    P.chartActPair
+      = (Over.mk G.π ⊗ E.asOver).left.homOfLE
+          (le_of_eq P.actPair_left_preimage_productOpen.symm) ≫
+        (G.actPair.left ∣_ P.productOpen) ≫ P.productOpenToSquare ≫
+        (pullbackSymmetry P.chartToBase P.chartToBase).hom := by
+  have hcact : G.restrictedAction P.hstable ≫ P.U.ι
+      = (G.actionProj.left ⁻¹ᵁ P.U).ι ≫ G.translationAction.left := by
+    rw [restrictedAction]
+    exact Scheme.Hom.resLE_comp_ι _ _
+  have hcpr : G.restrictedProj P.U ≫ P.U.ι
+      = (G.actionProj.left ⁻¹ᵁ P.U).ι ≫ G.actionProj.left := by
+    rw [restrictedProj]
+    exact Scheme.Hom.resLE_comp_ι _ _
+  have hres : (G.actPair.left ∣_ P.productOpen) ≫ P.productOpen.ι
+      = (G.actPair.left ⁻¹ᵁ P.productOpen).ι ≫ G.actPair.left :=
+    morphismRestrict_ι _ _
+  have hOL : (Over.mk G.π ⊗ E.asOver).left.homOfLE
+        (le_of_eq P.actPair_left_preimage_productOpen.symm) ≫
+        (G.actPair.left ⁻¹ᵁ P.productOpen).ι
+      = (G.actionProj.left ⁻¹ᵁ P.U).ι :=
+    Scheme.homOfLE_ι _ _
+  apply pullback.hom_ext
+  · rw [P.chartActPair_fst, ← cancel_mono P.U.ι]
+    have hPOS : P.productOpenToSquare ≫ pullback.snd P.chartToBase P.chartToBase
+        = P.productOpenSnd := pullback.lift_snd _ _ _
+    have hAP2 : G.actPair.left ≫ (snd E.asOver E.asOver).left = G.actionProj.left :=
+      congrArg Over.Hom.left G.actPair_snd
+    simp only [Category.assoc]
+    rw [pullbackSymmetry_hom_comp_fst_assoc, reassoc_of% hPOS, P.productOpenSnd_ι]
+    refine hcpr.trans ?_
+    exact ((congrArg ((Over.mk G.π ⊗ E.asOver).left.homOfLE
+        (le_of_eq P.actPair_left_preimage_productOpen.symm) ≫ ·)
+        (((Category.assoc _ _ _).symm.trans
+          (congrArg (· ≫ (snd E.asOver E.asOver).left) hres)).trans
+          ((Category.assoc _ _ _).trans
+          (congrArg ((G.actPair.left ⁻¹ᵁ P.productOpen).ι ≫ ·) hAP2)))).trans
+      ((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ G.actionProj.left) hOL))).symm
+  · rw [P.chartActPair_snd, ← cancel_mono P.U.ι]
+    have hPOF : P.productOpenToSquare ≫ pullback.fst P.chartToBase P.chartToBase
+        = P.productOpenFst := pullback.lift_fst _ _ _
+    have hAP1 : G.actPair.left ≫ (fst E.asOver E.asOver).left
+        = G.translationAction.left :=
+      congrArg Over.Hom.left G.actPair_fst
+    simp only [Category.assoc]
+    rw [pullbackSymmetry_hom_comp_snd_assoc, reassoc_of% hPOF, P.productOpenFst_ι]
+    refine hcact.trans ?_
+    exact ((congrArg ((Over.mk G.π ⊗ E.asOver).left.homOfLE
+        (le_of_eq P.actPair_left_preimage_productOpen.symm) ≫ ·)
+        (((Category.assoc _ _ _).symm.trans
+          (congrArg (· ≫ (fst E.asOver E.asOver).left) hres)).trans
+          ((Category.assoc _ _ _).trans
+          (congrArg ((G.actPair.left ⁻¹ᵁ P.productOpen).ι ≫ ·) hAP1)))).trans
+      ((Category.assoc _ _ _).symm.trans
+        (congrArg (· ≫ G.translationAction.left) hOL))).symm
+
+/-- **`[HG-C2]` geometric heart, closed**: the chart action pair is a closed immersion —
+the product-window restriction of `isClosedImmersion_actPair_left`, conjugated by the
+window comparison and the factor swap. -/
 theorem isClosedImmersion_chartActPair : IsClosedImmersion P.chartActPair := by
-  sorry
+  haveI hCI : IsClosedImmersion G.actPair.left := isClosedImmersion_actPair_left G
+  haveI : IsIso ((Over.mk G.π ⊗ E.asOver).left.homOfLE
+      (le_of_eq P.actPair_left_preimage_productOpen.symm)) := by
+    refine ⟨(Over.mk G.π ⊗ E.asOver).left.homOfLE
+      (le_of_eq P.actPair_left_preimage_productOpen), ?_, ?_⟩
+    · rw [Scheme.homOfLE_homOfLE]
+      exact Scheme.homOfLE_rfl _ _
+    · rw [Scheme.homOfLE_homOfLE]
+      exact Scheme.homOfLE_rfl _ _
+  rw [P.chartActPair_factorization]
+  infer_instance
 
 /-- **The `Spec` of the Galois precursor is a closed immersion** — conjugate of the chart
 action pair. -/

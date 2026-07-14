@@ -18976,3 +18976,24 @@ restriction of the PROVEN isClosedImmersion_actPair_left via IsLocalAtTarget + s
 StableChartData:134's sorry is GONE (theorem := P.spec_precursor_isClosedImmersion). Full repo
 green 3828 jobs. The ENTIRE quotient tower now rests on the single sharpened chart-geometry
 statement. (STREAM-G0)
+
+### v10.199-G0 — ★★★ SIGNAL (G0-side COMPLETE): all four fronts closed; the quotient tower rests only on KM's chartered black boxes (STREAM-G0)
+**[HG-C2] GEOMETRIC HEART CLOSED, ZERO G0-LANE SORRIES.** ChartPrecursorImmersion.lean lands
+sorry-free: tensorLeft_hom_ext (ambient-square joint monicity via the Over cartesian universal
+property), squareToAmbient/squareToProductOpen (the chart square in the product window),
+IsIso productOpenToSquare (two-sided inverse, all-E-level triangles),
+chartActPair_factorization (chartActPair = homOfLE ≫ (actPair.left ∣_ productOpen) ≫
+comparison ≫ pullbackSymmetry — the swap because the ambient pair is ⟨act,pr⟩ and the chart pair
+⟨pr,act⟩), isClosedImmersion_chartActPair (mathlib's morphismRestrict CI-instance on the PROVEN
+isClosedImmersion_actPair_left + iso sandwich), spec_precursor_isClosedImmersion.
+**AXIOM AUDIT:** isHopfGalois_chartCoaction (M6) and spec_precursor_isClosedImmersion are now
+propext/choice/Quot.sound ONLY. The v10.173 four-front SIGNAL: (1) Hopf instance ✓ (2) C2 heart
+✓ TODAY (3) C3 cover ✓ (4) C4 glue ✓ — with v10.195-197's quotientGlueData + gluedQuotient(π/S) +
+existsUnique lift + invariance: EVERY pin-shaped fact exists, parametrized (N, hkill).
+**RESIDUAL (cross-charter, honest):** gluedQuotient_* still see sorryAx through EXACTLY the
+KM-keystone black boxes — the C3 cover's isAffineOpen_mulByHom_preimage consumes
+mulByHom_isFinite ⟸ BB-QF mulByHom_locallyQuasiFinite (Torsion.lean:141), seated on STREAM-KM
+by v10.192-§C (with BB-DEG). When KM's keystone lands, the entire glued quotient is axiom-clean
+with NO further G0 work. Pin-file wiring awaits the α/β ruling (v10.189-G0). Main-PR cadence
+(v10.172): ★-milestone flag raised for the coordinator (shared dev branch — coordinator merges).
+NEXT (charter remnants): (B) E[N] finite-locally-free package, (C) NISOG close. (STREAM-G0)
