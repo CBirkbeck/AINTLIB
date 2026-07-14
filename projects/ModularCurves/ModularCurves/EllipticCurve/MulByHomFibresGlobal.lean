@@ -88,6 +88,33 @@ theorem fibrewiseElliptic (E : EllipticCurve S) :
     FibrewiseElliptic E.π E.zero E.zero_π :=
   E.localModel.fibrewiseElliptic
 
+/-- **(BETA raw-iso→asOver wrapping — g5-independent)** At each `s : S`, the geometric fibre of `E`
+(as the base-changed record `E.baseChange (fromSpecResidueField s)`) is isomorphic **as a group object**
+to the model `modelEllipticCurve W`: `FibrewiseElliptic`'s raw pointed iso `e` lifts to an `asOver` iso
+(`Over.isoMk e heπ`), and it is `IsMonHom` by `isMonHom_of_pointed` — the pointedness comes from `hez`
+(`(E.baseChange _).zero` is defeq `sectionFiberPoint`) transported through `one_eq_zero` (unit = zero) on
+both sides. This is the wrapping the transport (`finite_fibres_mulByHom_of_isMonHom_iso`) consumes to move
+ALPHA's model fibre-count onto the geometric fibre. -/
+theorem fibreModelIsoAsOver (E : EllipticCurve S) (s : S)
+    (W : WeierstrassCurve (S.residueField s)) [W.IsElliptic]
+    (e : E.π.fiber s ≅ projModel W)
+    (heπ : e.hom ≫ projModelπ W = E.π.fiberToSpecResidueField s)
+    (hez : sectionFiberPoint E.π E.zero E.zero_π s ≫ e.hom = projModelZero W) :
+    ∃ φ : (E.baseChange (S.fromSpecResidueField s)).asOver ≅ (modelEllipticCurve W).asOver,
+      IsMonHom φ.hom := by
+  haveI : IsLocallyNoetherian (Spec (S.residueField s)) := inferInstance
+  refine ⟨Over.isoMk e heπ, isMonHom_of_pointed _ ?_⟩
+  -- η-matching (STRUCTURE LANDED; closer scoped). Derivation is mapped: `ext1` reduces to
+  -- `η.left ≫ (Over.isoMk e heπ).hom.left = η.left`; `one_eq_zero` (both records) rewrites each
+  -- `η.left = 𝟙_.hom ≫ zero`, `(E.baseChange _).zero` is defeq `sectionFiberPoint`, and `hez`
+  -- (`sectionFiberPoint ≫ e.hom = projModelZero W = (modelEllipticCurve W).zero`) closes it.
+  -- The SYNTACTIC closer is transparency-blocked: `Over.isoMk e heπ` carries `e`'s defeq-cast type
+  -- (`fiber ≅ projModel` ↦ `asOver.left ≅ asOver.left`), so `Over.isoMk_hom_left`-style rewrites and
+  -- `𝟙_`-base matches (`residueField s` vs `CommRingCat.of ↑(residueField s)`) don't fire under
+  -- `instances` transparency; needs `eqToIso` cast-restructuring (Comparison.lean-style). Atlas-lane closer.
+  ext1
+  sorry
+
 /-- **(BB-QF BETA per-fibre sub-leaf — the single remaining BETA obligation)** Each residue-field
 fibre of `[N] : E ⟶ E` is locally quasi-finite. NOTE the fibre's LQF **cannot** come from `[N]`'s own
 LQF (that is circular via `of_fiberToSpecResidueField`); it must come from the model. Precise discharge
