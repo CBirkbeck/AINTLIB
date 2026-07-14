@@ -221,4 +221,95 @@ theorem universalLegendre_isLegendreDatum (hR : IsUnit (2 : R))
     rw [map_one, map_zero] at h
     exact h
 
+section TwoTorsion
+
+attribute [local instance] MvPolynomial.gradedAlgebra
+
+open HomogeneousIdeal HomogeneousLocalization in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-LVL, the negation-fix)** The model negation fixes an affine-point section
+whose `y`-coordinate is negation-symmetric (`−q − a₁p − a₃ = q`) — for `2`-torsion
+points this is exactly the fibrewise `P = −P`. Mirrors `negModelHom_zero` via
+`Proj.fromOfGlobalSections_map`; no `allNeg` rescaling is needed since `Z ↦ Z`. -/
+theorem negModelHom_affineSection {A : Type u} [CommRing A] (W : WeierstrassCurve A)
+    (p q : A) (h : W.toAffine.Equation p q) (hq : -q - W.a₁ * p - W.a₃ = q) :
+    projModelAffineSection W p q h ≫ negModelHom W =
+      projModelAffineSection W p q h := by
+  have hfeq : ((Scheme.ΓSpecIso (.of A)).inv.hom.comp
+        (projModelAffineEval W p q h)).comp (negGradedQuot W).toRingHom =
+      (Scheme.ΓSpecIso (.of A)).inv.hom.comp (projModelAffineEval W p q h) := by
+    refine RingHom.ext fun x => ?_
+    obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+    refine congrArg (Scheme.ΓSpecIso (.of A)).inv.hom ?_
+    rw [show (negGradedQuot W).toRingHom (Ideal.Quotient.mk (projIdeal W).toIdeal a) =
+      Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.aeval (negVec W) a) from
+      quotientGradingMap_mk _ _ _ _ a]
+    rw [projModelAffineEval_mk, projModelAffineEval_mk]
+    rw [show (MvPolynomial.aeval (negVec W) a :
+        MvPolynomial (Fin 3) A) = MvPolynomial.bind₁ (negVec W) a from by
+      rw [MvPolynomial.aeval_eq_bind₁]]
+    rw [show MvPolynomial.eval ![p, q, 1] (MvPolynomial.bind₁ (negVec W) a) =
+      MvPolynomial.eval (fun i => MvPolynomial.eval ![p, q, 1] (negVec W i)) a from by
+      rw [← MvPolynomial.aeval_eq_eval, MvPolynomial.aeval_bind₁]
+      rfl]
+    refine congrArg (fun v => MvPolynomial.eval v a) ?_
+    funext i
+    fin_cases i
+    · simp [negVec]
+    · show MvPolynomial.eval ![p, q, 1] (-MvPolynomial.X 1 -
+        MvPolynomial.C W.a₁ * MvPolynomial.X 0 -
+        MvPolynomial.C W.a₃ * MvPolynomial.X 2) = q
+      simp only [MvPolynomial.eval_sub, MvPolynomial.eval_neg, MvPolynomial.eval_mul,
+        MvPolynomial.eval_C, MvPolynomial.eval_X]
+      show -q - W.a₁ * p - W.a₃ * 1 = q
+      linear_combination hq
+    · simp [negVec]
+  have key := Proj.fromOfGlobalSections_map (negGradedQuot W)
+    (negGradedQuot_irrelevant_le W)
+    ((Scheme.ΓSpecIso (.of A)).inv.hom.comp (projModelAffineEval W p q h))
+    (projModelAffineEval_irrelevant_map_top W p q h)
+    (Proj.irrelevant_map_comp_toRingHom_eq_top (negGradedQuot W)
+      (negGradedQuot_irrelevant_le W) _
+      (projModelAffineEval_irrelevant_map_top W p q h))
+  have congr_from : ∀ (g₁ g₂ : projCoordRing W →+* Γ(Spec (.of A), ⊤))
+      (h₁ : (HomogeneousIdeal.irrelevant
+          (quotientGrading (projIdeal W))).toIdeal.map g₁ = ⊤)
+      (h₂ : (HomogeneousIdeal.irrelevant
+          (quotientGrading (projIdeal W))).toIdeal.map g₂ = ⊤)
+      (hg : g₁ = g₂),
+      Proj.fromOfGlobalSections _ g₁ h₁ = Proj.fromOfGlobalSections _ g₂ h₂ := by
+    rintro g₁ g₂ h₁ h₂ rfl
+    rfl
+  rw [show projModelAffineSection W p q h ≫ negModelHom W =
+    Proj.fromOfGlobalSections _
+      (((Scheme.ΓSpecIso (.of A)).inv.hom.comp
+        (projModelAffineEval W p q h)).comp (negGradedQuot W).toRingHom)
+      (Proj.irrelevant_map_comp_toRingHom_eq_top (negGradedQuot W)
+        (negGradedQuot_irrelevant_le W) _
+        (projModelAffineEval_irrelevant_map_top W p q h)) from key]
+  exact congr_from _ _ _ _ hfeq
+
+/-- **(T-E14-LVL)** The universal marked section `P = (0,0)` is negation-fixed:
+`a₁ = a₃ = 0` and `y = 0` make the fibrewise `P = −P` an identity. -/
+theorem negModelHom_universalLegendreP (hR : IsUnit (2 : R)) :
+    (universalLegendreP R hR).1 ≫ negModelHom (universalLegendre R) =
+      (universalLegendreP R hR).1 :=
+  negModelHom_affineSection (universalLegendre R) 0 0 _ (by
+    show -0 - (universalLegendre R).a₁ * 0 - (universalLegendre R).a₃ = 0
+    rw [show (universalLegendre R).a₁ = 0 from rfl,
+      show (universalLegendre R).a₃ = 0 from rfl]
+    ring)
+
+/-- **(T-E14-LVL)** The universal marked section `Q = (1,0)` is negation-fixed. -/
+theorem negModelHom_universalLegendreQ (hR : IsUnit (2 : R)) :
+    (universalLegendreQ R hR).1 ≫ negModelHom (universalLegendre R) =
+      (universalLegendreQ R hR).1 :=
+  negModelHom_affineSection (universalLegendre R) 1 0 _ (by
+    show -0 - (universalLegendre R).a₁ * 1 - (universalLegendre R).a₃ = 0
+    rw [show (universalLegendre R).a₁ = 0 from rfl,
+      show (universalLegendre R).a₃ = 0 from rfl]
+    ring)
+
+end TwoTorsion
+
 end ModularCurves
