@@ -391,8 +391,14 @@ Completed dependency claim (2026-07-14): proved
 gives the inverse transition after the canonical pair-swap, derived from the triple cocycle
 rather than stored as extra descent hypotheses.
 
-Active dependency claim (2026-07-14): convert a finite-stage affine-intersection unit
-cocycle into scalar automorphisms of the unit sheaves on the overlap schemes and prove their
-identity, inverse, and triple-cocycle laws. This is the local module descent datum needed to
-construct the invertible sheaf on the glued finite-stage scheme and compare its base change
+Completed dependency claim (2026-07-14): defined
+`AffineIntersectionUnitCocycle.overlapTransitionSection` and proved its identity, pair-swap
+inverse, and triple-intersection Cech laws. The descended ring units are now genuine invertible
+global functions on the finite-stage overlap schemes, compatible with the geometric restriction
+maps used by affine gluing.
+
+Active dependency claim (2026-07-14): turn each overlap transition section into the
+corresponding scalar automorphism of the unit sheaf and prove the identity, inverse, and
+triple-cocycle laws at the sheaf-morphism level. This is the local module descent datum needed
+to construct the invertible sheaf on the glued finite-stage scheme and compare its base change
 with the original pole sheaf.

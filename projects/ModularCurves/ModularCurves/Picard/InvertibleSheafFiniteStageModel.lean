@@ -200,6 +200,88 @@ theorem AffineIntersectionUnitCocycle.transition_swap
         (c.transition j i) = (c.transition i j)⁻¹ :=
   eq_inv_of_mul_eq_one_right (c.transition_mul_swap i j)
 
+private theorem ΓSpecUnit_naturality
+    {R S : CommRingCat.{u}} (f : R ⟶ S) (r : Rˣ) :
+    Units.map (Spec.map f).appTop.hom.toMonoidHom
+        (Units.map (Scheme.ΓSpecIso R).inv.hom.toMonoidHom r) =
+      Units.map (Scheme.ΓSpecIso S).inv.hom.toMonoidHom
+        (Units.map f.hom.toMonoidHom r) := by
+  apply Units.ext
+  exact (ConcreteCategory.congr_hom
+    (Scheme.ΓSpecIso_inv_naturality f) (r : R)).symm
+
+/-- A transition unit regarded as an invertible global function on its affine overlap
+scheme. -/
+noncomputable def AffineIntersectionUnitCocycle.overlapTransitionSection
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F) (i j : J) :
+    Γ(Scheme.GlueData.affineIntersectionOverlap F i j, ⊤)ˣ :=
+  Units.map (Scheme.ΓSpecIso (CommRingCat.of
+    (F.obj (Scheme.GlueData.affineIntersectionPairIndex i j)))).inv.hom.toMonoidHom
+      (c.transition i j)
+
+/-- The overlap transition section from a chart to itself is one. -/
+@[simp]
+theorem AffineIntersectionUnitCocycle.overlapTransitionSection_self
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F) (i : J) :
+    c.overlapTransitionSection i i = 1 := by
+  rw [overlapTransitionSection, c.transition_self, map_one]
+
+/-- Pulling a reversed overlap transition section across the canonical pair-swap gives
+the inverse transition section. -/
+theorem AffineIntersectionUnitCocycle.overlapTransitionSection_swap
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F) (i j : J) :
+    Units.map (Spec.map (CommRingCat.ofHom ((F.map
+        (Scheme.GlueData.affineIntersectionPairSwap i j)).hom.toRingHom))).appTop.hom.toMonoidHom
+        (c.overlapTransitionSection j i) =
+      (c.overlapTransitionSection i j)⁻¹ := by
+  rw [overlapTransitionSection, ΓSpecUnit_naturality]
+  change Units.map (Scheme.ΓSpecIso (CommRingCat.of
+      (F.obj (Scheme.GlueData.affineIntersectionPairIndex i j)))).inv.hom.toMonoidHom
+      (Units.map (F.map
+        (Scheme.GlueData.affineIntersectionPairSwap i j)).hom.toMonoidHom
+          (c.transition j i)) =
+    (Units.map (Scheme.ΓSpecIso (CommRingCat.of
+      (F.obj (Scheme.GlueData.affineIntersectionPairIndex i j)))).inv.hom.toMonoidHom
+      (c.transition i j))⁻¹
+  rw [c.transition_swap, map_inv]
+
+/-- The overlap transition sections satisfy the multiplicative Cech equation on the
+canonical affine triple intersection. -/
+theorem AffineIntersectionUnitCocycle.overlapTransitionSection_cocycle
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F) (i j k : J) :
+    Units.map (Spec.map (CommRingCat.ofHom ((F.map
+          (Scheme.GlueData.affineIntersectionPairToTripleLeft i j k)).hom.toRingHom))).appTop.hom.toMonoidHom
+        (c.overlapTransitionSection i j) *
+      Units.map (Spec.map (CommRingCat.ofHom ((F.map
+          (Scheme.GlueData.affineIntersectionPairToTripleMiddle i j k)).hom.toRingHom))).appTop.hom.toMonoidHom
+        (c.overlapTransitionSection j k) =
+    Units.map (Spec.map (CommRingCat.ofHom ((F.map
+        (Scheme.GlueData.affineIntersectionPairToTripleRight i j k)).hom.toRingHom))).appTop.hom.toMonoidHom
+      (c.overlapTransitionSection i k) := by
+  rw [overlapTransitionSection, overlapTransitionSection,
+    overlapTransitionSection, ΓSpecUnit_naturality, ΓSpecUnit_naturality,
+    ΓSpecUnit_naturality]
+  change Units.map (Scheme.ΓSpecIso (CommRingCat.of
+      (F.obj (Scheme.GlueData.affineIntersectionTripleIndex i j k)))).inv.hom.toMonoidHom
+      (Units.map (F.map
+        (Scheme.GlueData.affineIntersectionPairToTripleLeft i j k)).hom.toMonoidHom
+          (c.transition i j)) *
+      Units.map (Scheme.ΓSpecIso (CommRingCat.of
+        (F.obj (Scheme.GlueData.affineIntersectionTripleIndex i j k)))).inv.hom.toMonoidHom
+        (Units.map (F.map
+          (Scheme.GlueData.affineIntersectionPairToTripleMiddle i j k)).hom.toMonoidHom
+            (c.transition j k)) =
+    Units.map (Scheme.ΓSpecIso (CommRingCat.of
+      (F.obj (Scheme.GlueData.affineIntersectionTripleIndex i j k)))).inv.hom.toMonoidHom
+      (Units.map (F.map
+        (Scheme.GlueData.affineIntersectionPairToTripleRight i j k)).hom.toMonoidHom
+          (c.transition i k))
+  rw [← map_mul, c.cocycle]
+
 /-- Affine-intersection transition units are compatible with every restriction map in
 the coordinate-ring functor. -/
 theorem affineIntersectionTransitionUnit_map
