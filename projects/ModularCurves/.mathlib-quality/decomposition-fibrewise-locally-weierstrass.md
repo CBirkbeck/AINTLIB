@@ -306,6 +306,12 @@ the Picard restriction layer, and proved `trivializationTransitionUnit_restrict`
 identifies transition units after restricting trivializations with restriction of the
 original unit along the structure-sheaf map.
 
-Active dependency claim (2026-07-14): package pairwise transition units for a finite affine
-trivializing cover and prove their triple-overlap cocycle. This is the finite descent datum
-needed to spread the pole line bundle together with the proper affine-intersection model.
+Completed dependency claim (2026-07-14): defined open-subscheme transition units,
+`trivializingCoverTransitionUnitOn` on arbitrary common refinements, and the canonical
+`trivializingCoverTransitionUnit` on pairwise overlaps. Proved the common-refinement and
+triple-overlap cocycle laws.
+
+Active dependency claim (2026-07-14): identify each direct triple-overlap transition unit
+with the restriction of its canonical pair-overlap unit. This final coherence turns the
+proved common-refinement equation into literal finite Cech descent data for the pole line
+bundle.

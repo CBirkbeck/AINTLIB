@@ -195,6 +195,86 @@ theorem trivializationTransitionUnit_restrict
         X.ringCatSheaf V sV := hcoordinate
     _ = E sV := rfl
 
+/-- The transition unit between two trivializations on an open subscheme. -/
+noncomputable def openTrivializationTransitionUnit
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e g : M.restrict U.ι ≅ unitObj U.toScheme) : Γ(X, U)ˣ :=
+  trivializationTransitionUnit U
+    (overTrivializationOfRestrictIso M U e)
+    (overTrivializationOfRestrictIso M U g)
+
+@[simp]
+theorem openTrivializationTransitionUnit_self
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e : M.restrict U.ι ≅ unitObj U.toScheme) :
+    openTrivializationTransitionUnit M U e e = 1 :=
+  trivializationTransitionUnit_self U _
+
+@[simp]
+theorem openTrivializationTransitionUnit_symm
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e g : M.restrict U.ι ≅ unitObj U.toScheme) :
+    openTrivializationTransitionUnit M U e g *
+      openTrivializationTransitionUnit M U g e = 1 :=
+  trivializationTransitionUnit_symm U _ _
+
+/-- Open-subscheme transition units satisfy the cocycle law. -/
+theorem openTrivializationTransitionUnit_trans
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e g h : M.restrict U.ι ≅ unitObj U.toScheme) :
+    openTrivializationTransitionUnit M U e g *
+        openTrivializationTransitionUnit M U g h =
+      openTrivializationTransitionUnit M U e h :=
+  trivializationTransitionUnit_trans U _ _ _
+
+/-- The transition unit of two members of a trivializing family on any common refinement. -/
+noncomputable def trivializingCoverTransitionUnitOn
+    {X : Scheme.{u}} {M : X.Modules} {ι : Type u}
+    (U : ι → X.Opens)
+    (e : ∀ i, M.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (V : X.Opens) (i j : ι) (hVi : V ≤ U i) (hVj : V ≤ U j) : Γ(X, V)ˣ :=
+  openTrivializationTransitionUnit M V
+    (restrictOpenTrivialization hVi (e i))
+    (restrictOpenTrivialization hVj (e j))
+
+/-- Transition units from a trivializing family satisfy the cocycle law on every common
+refinement. -/
+theorem trivializingCoverTransitionUnitOn_trans
+    {X : Scheme.{u}} {M : X.Modules} {ι : Type u}
+    (U : ι → X.Opens)
+    (e : ∀ i, M.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (V : X.Opens) (i j k : ι)
+    (hVi : V ≤ U i) (hVj : V ≤ U j) (hVk : V ≤ U k) :
+    trivializingCoverTransitionUnitOn U e V i j hVi hVj *
+        trivializingCoverTransitionUnitOn U e V j k hVj hVk =
+      trivializingCoverTransitionUnitOn U e V i k hVi hVk := by
+  exact openTrivializationTransitionUnit_trans M V _ _ _
+
+/-- The canonical transition unit on the pairwise overlap of two members of a trivializing
+family. -/
+noncomputable def trivializingCoverTransitionUnit
+    {X : Scheme.{u}} {M : X.Modules} {ι : Type u}
+    (U : ι → X.Opens)
+    (e : ∀ i, M.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (i j : ι) : Γ(X, U i ⊓ U j)ˣ :=
+  trivializingCoverTransitionUnitOn U e (U i ⊓ U j) i j inf_le_left inf_le_right
+
+/-- The three direct transition units on a triple overlap satisfy the cocycle law. -/
+theorem trivializingCoverTransitionUnitOn_triple
+    {X : Scheme.{u}} {M : X.Modules} {ι : Type u}
+    (U : ι → X.Opens)
+    (e : ∀ i, M.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (i j k : ι) :
+    let V := (U i ⊓ U j) ⊓ U k
+    let hVi : V ≤ U i := inf_le_left.trans inf_le_left
+    let hVj : V ≤ U j := inf_le_left.trans inf_le_right
+    let hVk : V ≤ U k := inf_le_right
+    trivializingCoverTransitionUnitOn U e V i j hVi hVj *
+        trivializingCoverTransitionUnitOn U e V j k hVj hVk =
+      trivializingCoverTransitionUnitOn U e V i k hVi hVk := by
+  dsimp only
+  exact trivializingCoverTransitionUnitOn_trans U e _ i j k _ _ _
+
 end
 
 end AlgebraicGeometry.Scheme.Modules
