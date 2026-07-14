@@ -1640,6 +1640,47 @@ theorem pullSection_legendreClassifyingEllHom_Q {R : CommRingCat.{u}} {X : EllOb
         (universalLegendreQ R hR)).2]
     exact L.1.2.2.symm
 
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-CLS-7 rt1)** The section comparison of the classifying map is the
+restricted classifying algebra (mirrors `sectionsMapLE_classifyingMap`). -/
+theorem sectionsMapLE_legendreClassifyingMap {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤)))
+    (V : X.base.affineOpens) (hTop : V.1 ≤ legendreClassifyingMap X L b hD h2 ⁻¹ᵁ
+      (⊤ : (Spec (CommRingCat.of (LegendreModuliRing R))).Opens)) :
+    (sectionsMapLE (legendreClassifyingMap X L b hD h2) hTop).comp
+      ((Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv.hom) =
+    ((X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+      (legendreClassifyingRingHom X L b hD h2) := by
+  have hL : V.2.isoSpec.hom ≫ Spec.map (CommRingCat.ofHom
+      ((sectionsMapLE (legendreClassifyingMap X L b hD h2) hTop).comp
+        ((Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv.hom))) =
+    V.1.ι ≫ legendreClassifyingMap X L b hD h2 := by
+    rw [show CommRingCat.ofHom
+        ((sectionsMapLE (legendreClassifyingMap X L b hD h2) hTop).comp
+          ((Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv.hom)) =
+      (Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv ≫
+        (legendreClassifyingMap X L b hD h2).appLE ⊤ V.1 hTop from rfl,
+      Spec.map_comp,
+      show V.2.isoSpec.hom = V.1.toSpecΓ from IsAffineOpen.isoSpec_hom _,
+      ← Category.assoc, Scheme.Opens.toSpecΓ_SpecMap_appLE, Category.assoc]
+    rw [show (⊤ : (Spec (CommRingCat.of (LegendreModuliRing R))).Opens).toSpecΓ ≫
+        Spec.map (Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv =
+      (⊤ : (Spec (CommRingCat.of (LegendreModuliRing R))).Opens).ι from by
+      rw [Scheme.Opens.toSpecΓ_top, Category.assoc, ← SpecMap_ΓSpecIso_hom,
+        ← Spec.map_comp, Iso.inv_hom_id, Spec.map_id, Category.comp_id]]
+    rw [Scheme.Hom.resLE_comp_ι]
+  have hR : V.2.isoSpec.hom ≫ Spec.map (CommRingCat.ofHom
+      (((X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+        (legendreClassifyingRingHom X L b hD h2))) =
+    V.1.ι ≫ legendreClassifyingMap X L b hD h2 :=
+    (restrict_legendreClassifyingMap hD h2 V).symm
+  have hSpec := hL.trans hR.symm
+  rw [cancel_epi] at hSpec
+  have hofHom := Spec.map_injective hSpec
+  exact congrArg CommRingCat.Hom.hom hofHom
+
 end TwoTorsion
 
 end ModularCurves
