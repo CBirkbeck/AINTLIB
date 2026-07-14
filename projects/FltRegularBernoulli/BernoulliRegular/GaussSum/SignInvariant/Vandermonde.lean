@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib.LinearAlgebra.Vandermonde
@@ -105,7 +110,7 @@ theorem fourierVandermondeProduct_eq_rootPowerProduct :
     fourierVandermondeProduct p =
       ∏ i : Fin p, ∏ j ∈ Finset.Ioi i,
         ((fourierBaseRoot (p := p)) ^ (j : ℕ) - (fourierBaseRoot (p := p)) ^ (i : ℕ)) := by
-  unfold fourierVandermondeProduct
+  simp only [fourierVandermondeProduct]
   refine Finset.prod_congr rfl ?_
   intro i _
   refine Finset.prod_congr rfl ?_
@@ -133,7 +138,7 @@ theorem fourierRootPowerProduct_eq_weightedRootProduct_mul_fourierCyclotomicDiff
       ((fourierBaseRoot (p := p)) ^ (j : ℕ) - (fourierBaseRoot (p := p)) ^ (i : ℕ))) =
       (∏ i : Fin p, ((fourierBaseRoot (p := p)) ^ (i : ℕ)) ^ (Finset.Ioi i).card) *
         fourierCyclotomicDifferenceProduct p := by
-  unfold fourierCyclotomicDifferenceProduct
+  simp only [fourierCyclotomicDifferenceProduct]
   have hsplit :
       (∏ i : Fin p, ∏ j ∈ Finset.Ioi i,
           ((fourierBaseRoot (p := p)) ^ (j : ℕ) - (fourierBaseRoot (p := p)) ^ (i : ℕ))) =
