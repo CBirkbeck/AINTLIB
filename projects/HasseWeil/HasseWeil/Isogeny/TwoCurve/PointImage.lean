@@ -319,36 +319,16 @@ algebraically closed base has a value — which is the gateway to the constructi
 remaining step being that those two values form a point on `E₂`, by `EvaluatesTo`-arithmetic
 through the Weierstrass equation; see the closing report). -/
 
-/-- **Good-fraction representation** (Fintype-free, mirroring the private helper of
-`CovarianceDischarge`): a function regular at `P` is `algebraMap a / algebraMap s` with the
-denominator `s` not vanishing at `P`. -/
+/-- **Good-fraction representation**: a function regular at `P` is `algebraMap a / algebraMap s`
+with the denominator `s` not vanishing at `P`.  The `W_smooth`-shaped form of
+`Curves.SmoothPlaneCurve.exists_mul_algebraMap_eq_of_pointValuation_le_one`. -/
 theorem exists_mul_algebraMap_eq_of_regular
     {f : (W_smooth W).FunctionField} {P : (W_smooth W).SmoothPoint}
     (hf : (W_smooth W).pointValuation P f ≤ 1) :
     ∃ a s : (W_smooth W).CoordinateRing, s ∉ (W_smooth W).maximalIdealAt P ∧
       f * algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField s =
-        algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField a := by
-  obtain ⟨xL, hxL⟩ :=
-    Curves.SmoothPlaneCurve.mem_localRingAt_image_of_pointValuation_le_one f hf
-  obtain ⟨a, s, hmk⟩ :=
-    IsLocalization.exists_mk'_eq ((W_smooth W).maximalIdealAt P).primeCompl xL
-  refine ⟨a, (s : (W_smooth W).CoordinateRing), s.prop, ?_⟩
-  have h2 : algebraMap ((W_smooth W).localRingAt P) (W_smooth W).FunctionField
-        (IsLocalization.mk' ((W_smooth W).localRingAt P) a s) *
-      algebraMap ((W_smooth W).localRingAt P) (W_smooth W).FunctionField
-        (algebraMap (W_smooth W).CoordinateRing ((W_smooth W).localRingAt P)
-          (s : (W_smooth W).CoordinateRing)) =
-      algebraMap ((W_smooth W).localRingAt P) (W_smooth W).FunctionField
-        (algebraMap (W_smooth W).CoordinateRing ((W_smooth W).localRingAt P) a) :=
-    (map_mul (algebraMap ((W_smooth W).localRingAt P) (W_smooth W).FunctionField) _ _).symm.trans
-      (congrArg (algebraMap ((W_smooth W).localRingAt P) (W_smooth W).FunctionField)
-        (IsLocalization.mk'_spec ((W_smooth W).localRingAt P) a s))
-  rw [hmk, hxL,
-    ← IsScalarTower.algebraMap_apply (W_smooth W).CoordinateRing ((W_smooth W).localRingAt P)
-      (W_smooth W).FunctionField,
-    ← IsScalarTower.algebraMap_apply (W_smooth W).CoordinateRing ((W_smooth W).localRingAt P)
-      (W_smooth W).FunctionField] at h2
-  exact h2
+        algebraMap (W_smooth W).CoordinateRing (W_smooth W).FunctionField a :=
+  Curves.SmoothPlaneCurve.exists_mul_algebraMap_eq_of_pointValuation_le_one hf
 
 /-- **Residue-value existence** (Silverman II.1, residue field `= F` over `F̄`): every function
 `f ∈ K(E)` that is *regular* at a smooth point `P` (`pointValuation P f ≤ 1`) has a value
