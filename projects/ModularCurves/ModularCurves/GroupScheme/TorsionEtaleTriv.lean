@@ -38,6 +38,20 @@ noncomputable def constSchemeSpecIso (T : CommRingCat.{u}) (ι : Type) [Finite �
     Scheme.Spec.mapIso ((RingEquiv.piCongrLeft' (fun _ : ULift.{u} ι => (T : Type u))
       (Equiv.ulift.{u,0})).toCommRingCatIso).symm.op
 
+/-- The summand components of `constSchemeSpecIso`: the `v`-th inclusion corresponds to
+evaluation at `v`. -/
+@[reassoc]
+lemma constSchemeSpecIso_ι_hom (T : CommRingCat.{u}) (ι : Type) [Finite ι] (v : ι) :
+    Sigma.ι (fun _ : ι => Spec T) v ≫ (constSchemeSpecIso T ι).hom
+      = Spec.map (CommRingCat.ofHom (Pi.evalRingHom (fun _ : ι => (T : Type u)) v)) := by
+  simp only [constSchemeSpecIso, Iso.trans_hom, Iso.symm_hom, Sigma.whiskerEquiv_inv,
+    Functor.mapIso_hom, Iso.op_hom, asIso_hom]
+  rw [Sigma.ι_comp_map'_assoc, ι_sigmaSpec_assoc]
+  simp only [eqToHom_refl, Iso.refl_hom, Category.id_comp, Scheme.Spec_map,
+    Quiver.Hom.unop_op]
+  rw [← Spec.map_comp]
+  congr 1
+
 /-- `constSchemeSpecIso` is a morphism over the base: it intertwines the constant-scheme
 projection `constSchemeπ` with the diagonal ring map `T → (ι → T)`. -/
 @[reassoc]
