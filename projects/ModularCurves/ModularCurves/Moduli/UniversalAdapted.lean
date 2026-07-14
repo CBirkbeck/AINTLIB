@@ -237,4 +237,23 @@ theorem universalShortNF_map_classifying {R : CommRingCat.{u}} (Y : EllObj R)
       hlift6]
     exact h6spec
 
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D3-E2)** The per-chart piece of the classifying `EllHom`: through the
+adapted chart isomorphism, the coefficient match, and the model base change. -/
+noncomputable def chartPiece {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤)))
+    (V : Y.base.affineOpens) (i : Y.curve.toEllipticCurveGeom.atlas.ι)
+    (hVi : V.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U i).1) :
+    (pullback Y.curve.toEllipticCurveGeom.π V.1.ι : Scheme.{u}) ⟶
+      projModel (universalShortNF R) :=
+  (adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi).e.hom ≫
+    eqToHom (congrArg projModel
+      (universalShortNF_map_classifying Y b h2 h3 V i hVi).symm) ≫
+    projModelBaseChange
+      (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+        (classifyingRingHom Y b h2 h3)) (universalShortNF R)
+
 end ModularCurves
