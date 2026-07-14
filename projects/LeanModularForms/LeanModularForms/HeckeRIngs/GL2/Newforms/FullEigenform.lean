@@ -37,7 +37,8 @@ lemma heckeT_n_cusp_divN_coeff (p : ℕ) [NeZero p] (hp : Nat.Prime p)
     (hpN : ¬ Nat.Coprime p N) (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (l : ℕ) :
     (qExpansion (1 : ℝ) (heckeT_n_cusp k p f)).coeff l =
       (qExpansion (1 : ℝ) f).coeff (p * l) := by
-  have hForm : (heckeT_n_cusp k p f).toModularForm' = heckeT_p_divN k p hp hpN f.toModularForm' := by
+  have hForm : (heckeT_n_cusp k p f).toModularForm' =
+      heckeT_p_divN k p hp hpN f.toModularForm' := by
     rw [heckeT_n_cusp_toModularForm', heckeT_n_prime k hp,
       show heckeT_p_all k p hp = heckeT_p_divN k p hp hpN from dif_neg hpN]
   have hfun : (⇑(heckeT_n_cusp k p f) : UpperHalfPlane → ℂ) =
@@ -49,6 +50,7 @@ lemma heckeT_n_cusp_divN_coeff (p : ℕ) [NeZero p] (hp : Nat.Prime p)
     qExpansion_one_heckeT_p_divN_coeff hp hpN]
   rfl
 
+omit [NeZero N] in
 /-- Additivity of the canonical (period-1) `q`-coefficient over a cusp-form difference. -/
 private lemma qExpansion_sub_coeff
     (a b : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (n : ℕ) :
@@ -64,6 +66,7 @@ private lemma qExpansion_sub_coeff
   rw [show qExpansion (1 : ℝ) (⇑(a - b) : UpperHalfPlane → ℂ) =
     qExpansion (1 : ℝ) (a - b) from rfl, h_sub_qexp, map_sub]
 
+omit [NeZero N] in
 /-- Scalar multiplication of the canonical (period-1) `q`-coefficient of a cusp form. -/
 private lemma qExpansion_smul_coeff (c : ℂ)
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) (n : ℕ) :
@@ -138,25 +141,6 @@ theorem Newform.heckeT_n_cusp_bad_prime_eq (f : Newform N k)
     (Submodule.disjoint_def.mp cuspFormsOldExtended_disjoint_cuspFormsNewExtended) g hg_old hg_new
   rwa [hg, sub_eq_zero] at hg0
 
-/-- `T_1` is the identity on cusp forms. -/
-private lemma heckeT_n_cusp_one' (g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
-    heckeT_n_cusp k 1 g = g := by
-  apply CuspForm.ext
-  intro z
-  show (heckeT_n k 1 g.toModularForm').toFun z = g z
-  rw [heckeT_n_one]; rfl
-
-/-- Transport an operator factorisation `T_m = T_a · T_b` to the cusp-form level. -/
-private lemma heckeT_n_cusp_decomp (a b m : ℕ) [NeZero a] [NeZero b] [NeZero m]
-    (h_mul : heckeT_n (N := N) k m = heckeT_n k a * heckeT_n k b)
-    (g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
-    heckeT_n_cusp k m g = heckeT_n_cusp k a (heckeT_n_cusp k b g) := by
-  apply CuspForm.ext
-  intro z
-  show ((heckeT_n (N := N) k m) g.toModularForm').toFun z =
-    ((heckeT_n k a) ((heckeT_n k b) g.toModularForm')).toFun z
-  rw [h_mul]; rfl
-
 /-- At a bad prime `p ∣ N`, `T_{p^v} f = a_p(f)^v · f` for a newform `f`. -/
 private lemma Newform.heckeT_ppow_bad_smul (f : Newform N k)
     (p : ℕ) (hp : Nat.Prime p) (hpN : ¬ Nat.Coprime p N) (v : ℕ) :
@@ -165,7 +149,7 @@ private lemma Newform.heckeT_ppow_bad_smul (f : Newform N k)
       (qExpansion (1 : ℝ) f.toCuspForm).coeff p ^ v • f.toCuspForm := by
   haveI : NeZero p := ⟨hp.pos.ne'⟩
   induction v with
-  | zero => simpa using heckeT_n_cusp_one' f.toCuspForm
+  | zero => simpa using heckeT_n_cusp_one f.toCuspForm
   | succ w ih =>
     haveI : NeZero (p ^ (w + 1)) := ⟨(pow_pos hp.pos _).ne'⟩
     haveI : NeZero (p ^ w) := ⟨(pow_pos hp.pos _).ne'⟩
@@ -181,7 +165,7 @@ private lemma Newform.heckeT_ppow_bad_smul (f : Newform N k)
           heckeT_ppow_eq_pow_of_not_coprime k hp hpN (r' + 1)]
     have hmul : heckeT_n (N := N) k (p ^ (w + 1)) = heckeT_n k p * heckeT_n k (p ^ w) := by
       rw [hpow_all (w + 1), hpow_all w, heckeT_n_prime k hp, pow_succ']
-    rw [heckeT_n_cusp_decomp p (p ^ w) (p ^ (w + 1)) hmul, ih,
+    rw [heckeT_n_cusp_decomp_of_mul p (p ^ w) (p ^ (w + 1)) hmul, ih,
       heckeT_n_cusp_smul, f.heckeT_n_cusp_bad_prime_eq p hp hpN, smul_smul, pow_succ]
 
 /-- **[T006-d]** Every Hecke operator `T_n` acts on a newform by a scalar. -/
@@ -198,7 +182,7 @@ theorem Newform.exists_heckeT_n_cusp_smul (f : Newform N k) (n : ℕ) [NeZero n]
   haveI : NeZero m := ⟨hm0⟩
   by_cases hm1 : m = 1
   · subst hm1
-    exact ⟨1, by rw [heckeT_n_cusp_one', one_smul]⟩
+    exact ⟨1, by rw [heckeT_n_cusp_one, one_smul]⟩
   · have hm_gt : 1 < m := by omega
     set p := m.minFac with hp_def
     have hp : Nat.Prime p := Nat.minFac_prime (by omega)
@@ -219,16 +203,13 @@ theorem Newform.exists_heckeT_n_cusp_smul (f : Newform N k) (n : ℕ) [NeZero n]
           f.isEigen ⟨p ^ v, pow_pos hp.pos v⟩ (hpN.pow_left v)⟩
       · exact ⟨_, f.heckeT_ppow_bad_smul p hp hpN v⟩
     refine ⟨cq * cp, ?_⟩
-    rw [heckeT_n_cusp_decomp (p ^ v) (m / p ^ v) m hmul, hcq,
+    rw [heckeT_n_cusp_decomp_of_mul (p ^ v) (m / p ^ v) m hmul, hcq,
       heckeT_n_cusp_smul, hcp, smul_smul]
 
 /-- **[T006]** A `Newform` is a full eigenform: a `T_n`-eigenform for **all** `n ∈ ℕ⁺`
 (Diamond–Shurman Theorem 5.8.2(a)). -/
 theorem Newform.isFullEigenform (f : Newform N k) : IsFullEigenform f.toCuspForm := by
-  refine ⟨fun n ↦
-    haveI : NeZero n.val := ⟨n.pos.ne'⟩
-    (f.exists_heckeT_n_cusp_smul n.val).choose, fun n ↦ ?_⟩
-  haveI : NeZero n.val := ⟨n.pos.ne'⟩
-  exact (f.exists_heckeT_n_cusp_smul n.val).choose_spec
+  exact ⟨fun n ↦ (f.exists_heckeT_n_cusp_smul n.val).choose,
+    fun n ↦ (f.exists_heckeT_n_cusp_smul n.val).choose_spec⟩
 
 end HeckeRing.GL2
