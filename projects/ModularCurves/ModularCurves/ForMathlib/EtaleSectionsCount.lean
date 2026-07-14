@@ -74,7 +74,7 @@ section Schemes
 
 variable {k : Type u} [Field k] [IsSepClosed k]
 
-private def sectionsEquivOfIso {Y Z W : Scheme.{u}} (e : Y ≅ Z) (f : Y ⟶ W) :
+def sectionsEquivOfIso {Y Z W : Scheme.{u}} (e : Y ≅ Z) (f : Y ⟶ W) :
     { s : W ⟶ Y // s ≫ f = 𝟙 W } ≃ { t : W ⟶ Z // t ≫ (e.inv ≫ f) = 𝟙 W } where
   toFun s := ⟨s.1 ≫ e.hom, by
     rw [Category.assoc, Iso.hom_inv_id_assoc]
@@ -83,7 +83,7 @@ private def sectionsEquivOfIso {Y Z W : Scheme.{u}} (e : Y ≅ Z) (f : Y ⟶ W) 
   left_inv s := Subtype.ext (by simp)
   right_inv t := Subtype.ext (by simp)
 
-private noncomputable def sectionsSpecEquivRetractions {R A : CommRingCat.{u}} (ψ : R ⟶ A) :
+noncomputable def sectionsSpecEquivRetractions {R A : CommRingCat.{u}} (ψ : R ⟶ A) :
     { t : Spec R ⟶ Spec A // t ≫ Spec.map ψ = 𝟙 (Spec R) } ≃
       { χ : A ⟶ R // ψ ≫ χ = 𝟙 R } where
   toFun t := ⟨Spec.preimage t.1, Spec.map_injective (by
@@ -92,7 +92,7 @@ private noncomputable def sectionsSpecEquivRetractions {R A : CommRingCat.{u}} (
   left_inv t := Subtype.ext (Spec.map_preimage t.1)
   right_inv χ := Subtype.ext (Spec.preimage_map χ.1)
 
-private def retractionsEquivAlgHom {A : CommRingCat.{u}} (ψ : CommRingCat.of k ⟶ A)
+def retractionsEquivAlgHom {A : CommRingCat.{u}} (ψ : CommRingCat.of k ⟶ A)
     [Algebra k ↑A] (hAlg : algebraMap k ↑A = ψ.hom) :
     { χ : A ⟶ CommRingCat.of k // ψ ≫ χ = 𝟙 (CommRingCat.of k) } ≃ (↑A →ₐ[k] k) where
   toFun χ :=
