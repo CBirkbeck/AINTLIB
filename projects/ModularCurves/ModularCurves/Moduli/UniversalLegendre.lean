@@ -759,6 +759,52 @@ theorem legendreLambda_isUnit {R : CommRingCat.{u}} (X : EllObj R)
   rw [← legendreCurve_isElliptic_iff (isUnit_ofNat_res h2 V.1) lam]
   exact hell
 
+open LocalPresentation MvPolynomial in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-CLS-3 ★)** The classifying ring map of a Legendre datum:
+`R[λ][(λ(λ−1))⁻¹] → Γ(X.base, ⊤)`, `λ ↦ legendreLambda` — the algebra of KM 4.6.2's
+classifying morphism to `M'₂` (mirrors `classifyingRingHom`). -/
+noncomputable def legendreClassifyingRingHom {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 2) (b : OmegaBasis X.curve.toEllipticCurveGeom)
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤))) :
+    LegendreModuliRing R →+* Γ(X.base, ⊤) := by
+  refine IsLocalization.Away.lift (legendrePoly R)
+    (g := eval₂Hom X.baseRingHom ![(legendreLambda X L b hD h2).1]) ?_
+  rw [show (eval₂Hom X.baseRingHom ![(legendreLambda X L b hD h2).1])
+      (legendrePoly R) =
+    (legendreLambda X L b hD h2).1 * ((legendreLambda X L b hD h2).1 - 1) from by
+    rw [show legendrePoly R = MvPolynomial.X 0 * (MvPolynomial.X 0 - 1) from rfl]
+    simp only [map_mul, map_sub, map_one, eval₂Hom_X']
+    rfl]
+  exact legendreLambda_isUnit X L b hD h2
+
+open AlgebraicGeometry CategoryTheory Scheme in
+/-- **(T-E14-CLS-3 ★)** The classifying morphism of a Legendre datum:
+`X.base ⟶ M'₂ = Spec R[λ][(λ(λ−1))⁻¹]` (mirrors `classifyingMap`). -/
+noncomputable def legendreClassifyingMap {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 2) (b : OmegaBasis X.curve.toEllipticCurveGeom)
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤))) :
+    X.base ⟶ Spec (CommRingCat.of (LegendreModuliRing R)) :=
+  X.base.toSpecΓ ≫
+    Spec.map (CommRingCat.ofHom (legendreClassifyingRingHom X L b hD h2))
+
+open AlgebraicGeometry CategoryTheory Scheme MvPolynomial in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-CLS-3)** The classifying algebra restricts to the structure algebra
+(mirrors `classifyingRingHom_algebraMap`). -/
+theorem legendreClassifyingRingHom_algebraMap {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 2) (b : OmegaBasis X.curve.toEllipticCurveGeom)
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤))) (r : R) :
+    legendreClassifyingRingHom X L b hD h2 (algebraMap R (LegendreModuliRing R) r) =
+      X.baseRingHom r := by
+  have h1 : (algebraMap R (LegendreModuliRing R) r) =
+      algebraMap (MvPolynomial (Fin 1) R) (LegendreModuliRing R) (C r) := by
+    rw [IsScalarTower.algebraMap_apply R (MvPolynomial (Fin 1) R)
+      (LegendreModuliRing R)]
+    rfl
+  rw [h1, legendreClassifyingRingHom, IsLocalization.Away.lift_eq]
+  simp
+
 end TwoTorsion
 
 end ModularCurves
