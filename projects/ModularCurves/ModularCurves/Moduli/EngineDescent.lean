@@ -1266,12 +1266,11 @@ theorem lw_chart_at {A : Type u} [CommRing A] [MulSemiringAction G A]
     (φA : EE ≅ projModel W₀A)
     (hπφA : φA.hom ≫ projModelπ W₀A = πE)
     (hzeroφA : zeroE ≫ φA.hom = projModelZero W₀A)
-    -- the action family and its cocycle
+    -- the action family and its variable-change compatibility
     (act : G → (projModel W₀A ⟶ projModel W₀A))
     (hEact : ∀ g, (φA.hom ≫ act g ≫ φA.inv) ≫ qE = qE)
     (Cvc : G → VariableChange A)
     (hCvc : ∀ g, Cvc g • (W₀A.map (MulSemiringAction.toRingHom G A g)) = W₀A)
-    (hcoc : IsVCocycle Cvc)
     (hΨ : ∀ g, (projModelVCIso (Cvc g) (W₀A.map (MulSemiringAction.toRingHom G A g))).hom
         ≫ projModelBaseChange (MulSemiringAction.toRingHom G A g) W₀A
       = eqToHom (congrArg projModel (hCvc g)) ≫ act g)
@@ -1286,8 +1285,6 @@ theorem lw_chart_at {A : Type u} [CommRing A] [MulSemiringAction G A]
     -- the fppf data of the invariants cover
     (hfsur : Surjective (invariantsπ G A ℤ)) (hffl : Flat (invariantsπ G A ℤ))
     (hfqc : QuasiCompact (invariantsπ G A ℤ))
-    -- the freeness (for the localized fixed-point identifications)
-    (hfreeA : IsFreeAlgebraAction G ℤ A)
     -- the point and the descended local model
     (s : ↥(Spec (CommRingCat.of (FixedPoints.subalgebra ℤ A G))))
     (a : FixedPoints.subring A G) (hap : a ∉ s.asIdeal)
@@ -1848,14 +1845,14 @@ theorem locallyWeierstrass_quotientπ_of_globalModel [Finite G] [IsAffine X]
       (zeroSq_transport hzero'c hqiso)
       W₀ hW₀ φ hπφ (zero_transport hzeroφ) ((σE.transport φ).hom)
       (discharge_hEact VE hVEs hVEa hVEmem W₀ φ)
-      Cvc hCvc hcoc hΨ
+      Cvc hCvc hΨ
       (discharge_hlift VE hVEs hVEa hVEmem hfreeE W₀ φ
         (discharge_hEact VE hVEs hVEa hVEmem W₀ φ))
       (discharge_hepi VE hVEs hVEa hVEmem hfreeE)
       (fppf_invariantsπ (G := G) (B := ↑Γ(X, ⊤)) hfreeA).1
       (fppf_invariantsπ (G := G) (B := ↑Γ(X, ⊤)) hfreeA).2.1
       (fppf_invariantsπ (G := G) (B := ↑Γ(X, ⊤)) hfreeA).2.2
-      hfreeA s a hap W₁ E hW₁ hcob
+      s a hap W₁ E hW₁ hcob
   exact lw_of_baseIso π' zero' hz qiso hspec
 
 
