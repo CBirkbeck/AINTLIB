@@ -70,7 +70,7 @@ theorem artinHasseExp_traceCarry_coord_factor_eq_zmod
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
         (ε *
@@ -94,7 +94,7 @@ theorem artinHasseExp_traceCarry_coord_product_eq_zmod
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     (∏ r ∈ Finset.Iic D,
         ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
@@ -125,7 +125,7 @@ theorem artinHasseExp_traceCarry_shifted_coord_factor_eq_zmod
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
         (ε *
@@ -150,7 +150,7 @@ theorem artinHasseExp_traceCarry_shifted_coord_product_eq_zmod
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     (∏ r ∈ Finset.Iic D,
         ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
@@ -180,7 +180,7 @@ theorem artinHasseExp_traceCarry_shifted_coord_range_product_eq_zmod
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     (∏ r ∈ Finset.range D,
         ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
@@ -712,7 +712,7 @@ theorem exists_traceCarry_correction_eq_teichmuller_series_product
   let t : ℕ := (Algebra.trace (ZMod ℓ) k ((F.traceScale : k) * (y : k))).val
   obtain ⟨c, hc⟩ :=
     F.exists_traceNatCast_sub_teichFrobeniusSum_eq_natCast_ell_mul_wittTheta_series N y
-  let u : ℕ → A := fun j =>
+  let u : ℕ → A := fun j ↦
     (ℓ : A) ^ (j + 1) *
       θ (WittVector.teichmuller ℓ
         (((_root_.frobeniusEquiv k ℓ).symm ^ j) (c.coeff j)))
