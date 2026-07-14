@@ -219,4 +219,64 @@ theorem Curvelike.finite_preimage_singleton
 
 end CurvelikeFibres
 
+/-! ### Instantiation on the projective model
+
+The four inputs of `Curvelike.finite_preimage_singleton` for `X := projModel W` over a
+field, as named leaves: the chart homeomorphism, the curvelike classification (chart
+transfer + finite complement), infinitude, and the Noetherian instance. The HasseWeil
+range-infinitude witness is the remaining ALPHA leaf, consumed as a hypothesis by the
+assembly so everything below it is sorry-free. -/
+
+section ProjModelCurvelike
+
+open EllipticCurve
+
+variable {K : Type u} [Field K] (W : WeierstrassCurve K) [W.IsElliptic]
+
+/-- **(leaf g1)** The affine chart of the projective model, as a homeomorphism onto the
+spectrum of the coordinate ring: `isoSpec` for the affine `zChart` composed with
+`Spec` of `zChartSectionCoordRingEquiv`. -/
+noncomputable def zChartHomeo :
+    ((zChart W : (projModel W).Opens) : Set (projModel W)) ≃ₜ
+      PrimeSpectrum W.toAffine.CoordinateRing := by
+  sorry
+
+/-- **(leaf g2)** The projective Weierstrass model is curvelike: every irreducible
+closed subset is finite or everything. Chart transfer of
+`isClosed_isIrreducible_singleton_or_univ` + the single-point complement
+(`mem_range_zero_of_not_mem_zChart`). -/
+theorem projModel_isClosed_isIrreducible_finite_or_univ
+    {C : Set (projModel W)} (hCc : IsClosed C) (hCi : IsIrreducible C) :
+    C.Finite ∨ C = Set.univ := by
+  sorry
+
+/-- **(leaf g3)** The projective model is topologically infinite (the chart is the
+spectrum of a Jacobson non-field domain). -/
+theorem projModel_infinite : Infinite (projModel W) := by
+  sorry
+
+/-- **(leaf g4)** The projective model is a Noetherian topological space (the chart is
+Noetherian, the complement is finite; every open is compact). -/
+theorem projModel_noetherianSpace : TopologicalSpace.NoetherianSpace (projModel W) := by
+  sorry
+
+/-- **THE MODEL FIBRE-COUNT (assembly; sorry-free given the leaves).** If the range of
+`[N]` on the projective model is topologically infinite (the HasseWeil witness, the
+remaining ALPHA leaf), then every fibre of `[N]` is finite. -/
+theorem modelMulByHom_finite_preimage_singleton (N : ℤ)
+    (hfim : (Set.range ((modelEllipticCurve W).mulByHom N).base).Infinite)
+    (y : projModel W) :
+    (((modelEllipticCurve W).mulByHom N).base ⁻¹' {y}).Finite := by
+  haveI := projModel_noetherianSpace W
+  haveI := projModel_infinite W
+  haveI : IsProper ((modelEllipticCurve W).mulByHom N) :=
+    (modelEllipticCurve W).mulByHom_isProper N
+  exact Curvelike.finite_preimage_singleton
+    (fun C hCc hCi => projModel_isClosed_isIrreducible_finite_or_univ W hCc hCi)
+    (Scheme.Hom.continuous _)
+    ((modelEllipticCurve W).mulByHom N).isClosedMap
+    hfim y
+
+end ProjModelCurvelike
+
 end ModularCurves
