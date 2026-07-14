@@ -1,4 +1,5 @@
-STREAM-G0 v10.219 BB-QF wall-break build — PARTITION (two G0 sessions converged into pipeline):
-(ALPHA, this session): MODEL FIBRE-COUNT in NEW FILE ModelFibreCount.lean — [KEY-INF] Spec CR infinite (Jacobson+not-field), [KEY-TOP] irreducible-closed classification, HasseWeil witness, case analysis.
-(BETA, sibling/Opus): TRANSPORT ASSEMBLY — localModel extraction over Spec k, baseChange of modelEllipticCurve, pointed iso -> IsMonHom (GIT 6.4) -> mulByHom_comp_left_of_isMonHom conjugation; global L2 reduction; keep MulByHomFibres.lean yours to extend.
-Shared substrate BANKED green: mulBy_comp_of_isMonHom / mulByHom_comp_left_of_isMonHom / coordinateRing_krullDimLE_one (86a047f27).
+FOCUS: STREAM-G0 BB-QF g5/w7 — EXECUTE NOW (route fully settled, tools verified):
+(w7) section_base_injective_of_isAlgClosed via Scheme.SpecToEquivOfField (ResidueField.lean:342, VERIFIED) + SpecToEquivOfField_eq_iff (:328): apply equiv-injective; first components equal from h at the unique Spec-F point (find the apply-fst accessor lemma near :342); second components r1 r2 : residueField x ⟶ .of F both retract j := pi-residueFieldMap (from the over-condition via residueFieldMap functoriality of P.1 ≫ pi = 1); make kappa(x) an F-algebra via j; r-embedding ⟹ Algebra.IsAlgebraic F kappa(x) (transfer isAlgebraic_self along injective r) ⟹ IsAlgClosed.algebraMap_surjective_of_isAlgebraic ⟹ j bijective ⟹ retractions unique ⟹ r1 = r2 via residueFieldCongr-massage.
+(g5) then modelMulByHom_range_infinite per prior breadcrumb (W-prime := W.baseChange F; HasseWeil cards AT W-prime; projModelPointsAddEquiv W F; point_smul_eq_comp_mulBy for base-membership in range; w3 N-unit-mod-ell-power injectivity; Nat.card contradiction).
+(THEN) BETA transport per v10.221/222 boards -> mulByHom_finite_fibres -> BB-QF closes.
+DISCIPLINE: pathspec commits; sibling-G0 co-edits live (pull before edit bursts); all boards current through v10.222.
