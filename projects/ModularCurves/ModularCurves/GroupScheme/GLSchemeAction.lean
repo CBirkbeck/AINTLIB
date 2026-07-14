@@ -444,12 +444,73 @@ theorem fullLevelHom_baseChange {T' : Scheme.{u}} (σ : T' ⟶ S) (L : E.FullLev
 
 end BaseChangeNaturality
 
+/-- **The naturality square of `fullLevelHom` is cartesian**: the constant scheme over a
+chart is the pullback of the trivialisation map along the torsion base-change
+comparison. Vertical pasting (`IsPullback.of_bot`) of the constant-scheme square over
+the torsion square. -/
+theorem isPullback_fullLevelHom {T' : Scheme.{u}} (σ : T' ⟶ S) (L : E.FullLevelPt N) :
+    IsPullback (constSchemeMapAlong σ (Fin 2 → ZMod N))
+      ((E.baseChange σ).fullLevelHom (L.pullAlong σ)) (E.fullLevelHom L)
+      (E.torsionBaseChangeHom N σ) := by
+  refine IsPullback.of_bot ?_ (E.fullLevelHom_baseChange σ L)
+    (E.torsion_baseChange_isPullback N σ)
+  have hs := isPullback_constSchemeMapAlong σ (Fin 2 → ZMod N)
+  rwa [← fullLevelHom_torsionπ (E := E.baseChange σ) (L := L.pullAlong σ),
+    ← fullLevelHom_torsionπ (E := E) (L := L)] at hs
+
 /-- **L2b** — `fullLevelHom` is an isomorphism for `N` invertible (`E[N]` finite étale of
-rank `N²`, KM 2.3.1): the label map is bijective on every geometric fibre
-(`fullLevelFibreMap_bijective`), and the Γ-side comparison is bijective over affine
-bases (`fullLevelHom_gamma_bijective`), glued over an affine cover. -/
+rank `N²`, KM 2.3.1): over each affine chart the comparison is an isomorphism
+(`fullLevelHom_isIso_of_affine`), and being an isomorphism is Zariski-local on the
+target — the charts of the torsion scheme are the base-change comparisons over an
+affine cover of `S`, along which `fullLevelHom` pulls back to the chart-level
+trivialisations (`isPullback_fullLevelHom`). -/
 theorem fullLevelHom_isIso (hinv : NIsInvertible S N) (L : E.FullLevelPt N) :
-    IsIso (E.fullLevelHom L) := sorry
+    IsIso (E.fullLevelHom L) := by
+  let 𝒰₀ := S.affineCover
+  -- the base-change comparisons are jointly surjective open immersions
+  have hrange : ∀ i : 𝒰₀.I₀, Set.range (E.torsionBaseChangeHom N (𝒰₀.f i))
+      = ⇑(E.torsionπ N) ⁻¹' Set.range (𝒰₀.f i) := by
+    intro i
+    have h := E.torsion_baseChange_isPullback N (𝒰₀.f i)
+    rw [← h.isoPullback_hom_fst]
+    calc Set.range ⇑(h.isoPullback.hom ≫ pullback.fst (E.torsionπ N) (𝒰₀.f i))
+        = Set.range (⇑(pullback.fst (E.torsionπ N) (𝒰₀.f i)) ∘ ⇑h.isoPullback.hom) := rfl
+      _ = ⇑(pullback.fst (E.torsionπ N) (𝒰₀.f i)) '' Set.range ⇑h.isoPullback.hom :=
+          Set.range_comp _ _
+      _ = ⇑(pullback.fst (E.torsionπ N) (𝒰₀.f i)) '' Set.univ := by
+          haveI : Surjective h.isoPullback.hom := inferInstance
+          rw [h.isoPullback.hom.surjective.range_eq]
+      _ = Set.range ⇑(pullback.fst (E.torsionπ N) (𝒰₀.f i)) := Set.image_univ
+      _ = ⇑(E.torsionπ N) ⁻¹' Set.range (𝒰₀.f i) := Scheme.Pullback.range_fst _ _
+  haveI hOI : ∀ i : 𝒰₀.I₀, IsOpenImmersion (E.torsionBaseChangeHom N (𝒰₀.f i)) := by
+    intro i
+    have h := E.torsion_baseChange_isPullback N (𝒰₀.f i)
+    rw [← h.isoPullback_hom_fst]
+    infer_instance
+  let 𝒰 : (E.torsion N).OpenCover := Scheme.Cover.mkOfCovers 𝒰₀.I₀
+    (fun i => (E.baseChange (𝒰₀.f i)).torsion N)
+    (fun i => E.torsionBaseChangeHom N (𝒰₀.f i))
+    (fun x => by
+      obtain ⟨i, y₀, hy₀⟩ := 𝒰₀.exists_eq ((E.torsionπ N) x)
+      have hx : x ∈ Set.range (E.torsionBaseChangeHom N (𝒰₀.f i)) := by
+        rw [hrange i]
+        exact ⟨y₀, hy₀⟩
+      obtain ⟨y, hy⟩ := hx
+      exact ⟨i, y, hy⟩)
+  have hloc : (MorphismProperty.isomorphisms Scheme.{u}) (E.fullLevelHom L) := by
+    refine (IsZariskiLocalAtTarget.iff_of_openCover
+      (P := MorphismProperty.isomorphisms Scheme.{u}) (f := E.fullLevelHom L) 𝒰).mpr
+      fun i => ?_
+    show IsIso (pullback.snd (E.fullLevelHom L) (E.torsionBaseChangeHom N (𝒰₀.f i)))
+    have hA := E.isPullback_fullLevelHom (𝒰₀.f i) L
+    haveI : IsIso ((E.baseChange (𝒰₀.f i)).fullLevelHom (L.pullAlong (𝒰₀.f i))) :=
+      fullLevelHom_isIso_of_affine (E.baseChange (𝒰₀.f i))
+        (NIsInvertible.of_hom (𝒰₀.f i) hinv) (L.pullAlong (𝒰₀.f i))
+    rw [show pullback.snd (E.fullLevelHom L) (E.torsionBaseChangeHom N (𝒰₀.f i))
+        = hA.isoPullback.inv ≫ (E.baseChange (𝒰₀.f i)).fullLevelHom (L.pullAlong (𝒰₀.f i))
+      from by rw [Iso.eq_inv_comp]; exact hA.isoPullback_hom_snd]
+    infer_instance
+  exact hloc
 
 /-- **L2 (crux)** — a naive full level-`N` structure trivialises `E[N]` to the constant scheme
 `(ℤ/N)²_S`, for `N` invertible on `S`. -/
