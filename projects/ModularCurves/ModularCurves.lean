@@ -56,6 +56,7 @@ import ModularCurves.ForMathlib.FinitePresentationLocalization
 import ModularCurves.ForMathlib.FinitePresentationOpenImmersionFamily
 import ModularCurves.ForMathlib.FinitePresentationPrincipalCover
 import ModularCurves.ForMathlib.FinitePresentationPushout
+import ModularCurves.ForMathlib.FinitePresentationPushoutFamily
 import ModularCurves.ForMathlib.FiniteLocallyFreeIsoLocus
 import ModularCurves.ForMathlib.FlasqueCohomology
 import ModularCurves.ForMathlib.GaloisDescentModule
