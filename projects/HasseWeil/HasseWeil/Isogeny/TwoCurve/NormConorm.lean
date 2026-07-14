@@ -3,6 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import HasseWeil.Isogeny.TwoCurve.FixedField
 import HasseWeil.Isogeny.TwoCurve.GroupHom
 import HasseWeil.Foundation.Curves.Fiber.LocalizedDictionary
 import HasseWeil.Foundation.Curves.Divisor.PushforwardDivisor
@@ -88,41 +89,15 @@ transcendence degree `1` over `F`, so `trdeg_{φ*K(E₂)} K(E₁) = 0`), hence f
 `Algebra.finite_of_essFiniteType_of_isAlgebraic`.  This discharges the `hfin` hypothesis of the
 norm–conorm leaf automatically; only `hsep` (genuine separability) remains carried. -/
 
-set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 800000 in
 omit [IsAlgClosed F] in
 /-- **Two-curve isogeny finite-dimensionality (unconditional)**: `K(E₁)` is finite-dimensional over
-`K(E₂)` via `φ.pullback`, for any two-curve isogeny `φ`. -/
+`K(E₂)` via `φ.pullback`, for any two-curve isogeny `φ`.  This is
+`Isogeny.finiteDimensional_toAlgebra_twoCurve` (`TwoCurve/FixedField.lean`), which proves it by the
+same trdeg-additivity + `EssFiniteType` route; kept here under its consumer-facing name. -/
 theorem isogeny_finiteDimensional_twoCurve (φ : HasseWeil.Isogeny W₁ W₂) :
     @FiniteDimensional W₂.toAffine.FunctionField W₁.toAffine.FunctionField _ _
-      φ.toAlgebra.toModule := by
-  letI : Algebra W₂.toAffine.FunctionField W₁.toAffine.FunctionField := φ.toAlgebra
-  haveI tower : IsScalarTower F W₂.toAffine.FunctionField W₁.toAffine.FunctionField :=
-    IsScalarTower.of_algebraMap_eq fun c => (φ.pullback.commutes c).symm
-  haveI hfaith : FaithfulSMul W₂.toAffine.FunctionField W₁.toAffine.FunctionField :=
-    (faithfulSMul_iff_algebraMap_injective W₂.toAffine.FunctionField
-      W₁.toAffine.FunctionField).mpr φ.pullback_injective
-  haveI hfaithF2 : FaithfulSMul F W₂.toAffine.FunctionField :=
-    (faithfulSMul_iff_algebraMap_injective F W₂.toAffine.FunctionField).mpr
-      (algebraMap F W₂.toAffine.FunctionField).injective
-  -- essentially of finite type: `F → K(E₂) → K(E₁)` with `K(E₁)/F` ess. finite type.
-  haveI hessF1 : Algebra.EssFiniteType F W₁.toAffine.FunctionField :=
-    HasseWeil.functionField_essFiniteType_F W₁
-  haveI hess : Algebra.EssFiniteType W₂.toAffine.FunctionField W₁.toAffine.FunctionField :=
-    Algebra.EssFiniteType.of_comp F W₂.toAffine.FunctionField W₁.toAffine.FunctionField
-  -- algebraic: trdeg additivity `F → K(E₂) → K(E₁)`, both legs trdeg 1.
-  haveI halg : Algebra.IsAlgebraic W₂.toAffine.FunctionField W₁.toAffine.FunctionField := by
-    rw [← trdeg_eq_zero_iff]
-    have h_add : Algebra.trdeg F W₂.toAffine.FunctionField +
-        Algebra.trdeg W₂.toAffine.FunctionField W₁.toAffine.FunctionField =
-        Algebra.trdeg F W₁.toAffine.FunctionField :=
-      trdeg_add_eq F W₂.toAffine.FunctionField
-    rw [HasseWeil.weierstrass_functionField_trdeg_eq_one W₂,
-      HasseWeil.weierstrass_functionField_trdeg_eq_one W₁] at h_add
-    refine Cardinal.add_one_inj.mp ?_
-    rw [zero_add, add_comm]; exact h_add
-  exact @Algebra.finite_of_essFiniteType_of_isAlgebraic W₂.toAffine.FunctionField _
-    W₁.toAffine.FunctionField _ _ hess halg
+      φ.toAlgebra.toModule :=
+  HasseWeil.Isogeny.finiteDimensional_toAlgebra_twoCurve φ
 
 /-! ### The `f = u/v` reduction (structural)
 
