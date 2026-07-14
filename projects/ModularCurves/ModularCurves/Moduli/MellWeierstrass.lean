@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+import ModularCurves.EllipticCurve.GroupLawAxioms
 import ModularCurves.EllipticCurve.ModelVariableChange
 import ModularCurves.Moduli.WeierstrassAtlas
 
@@ -280,27 +281,40 @@ private theorem eqToHom_projModelπ {V V' : WeierstrassCurve ↑Γ(S, ⊤)} (h :
   subst h; simp
 
 private theorem uWL_map_ringHomOf :
-    universalWeierstrassLoc.map
-      (@algebraMap _ _ _ _ ((ringHomOfEllipticW W).toAlgebra)) = W.1 := by
-  rw [RingHom.algebraMap_toAlgebra]
-  exact congrArg Subtype.val (ellipticWOfRingHom_ringHomOfEllipticW W)
+    universalWeierstrassLoc.map (ringHomOfEllipticW W) = W.1 :=
+  congrArg Subtype.val (ellipticWOfRingHom_ringHomOfEllipticW W)
+
+/-- The middle base-change square: `W`'s own projective model is the fibre of the universal
+curve over `Spec Γ(S,⊤)`. This is `isPullback_projModelBaseChangeOf` — the `eqToHom`-free
+base-change API — at the classifying ring hom. -/
+private theorem isPullback_curveOfMiddle :
+    IsPullback
+      (projModelBaseChangeOf (ringHomOfEllipticW W) universalWeierstrassLoc W.1
+        (uWL_map_ringHomOf W))
+      (projModelπ W.1) universalCurveπ
+      (Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W))) :=
+  isPullback_projModelBaseChangeOf _ _ _ _
 
 /-- The middle-fibre identification: the fibre of the universal curve over
 `Spec Γ(S,⊤)` is `W`'s own projective model. -/
 private noncomputable def curveOfMiddle :
     pullback universalCurveπ (Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W)))
       ≅ projModel W.1 :=
-  (@isPullback_projModelBaseChange _ _ _ _ (ringHomOfEllipticW W).toAlgebra
-      universalWeierstrassLoc).isoPullback.symm ≪≫
-    eqToIso (congrArg (projModel ·) (uWL_map_ringHomOf W))
+  (isPullback_curveOfMiddle W).isoPullback.symm
+
+/-- The other leg of the middle square: `curveOfMiddle` intertwines the pullback projection to
+the universal curve with the base-change map of projective models. -/
+private theorem curveOfMiddle_baseChange :
+    (curveOfMiddle W).hom ≫
+        projModelBaseChangeOf (ringHomOfEllipticW W) universalWeierstrassLoc W.1
+          (uWL_map_ringHomOf W) =
+      pullback.fst universalCurveπ (Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W))) :=
+  (isPullback_curveOfMiddle W).isoPullback_inv_fst
 
 private theorem curveOfMiddle_π :
     (curveOfMiddle W).hom ≫ projModelπ W.1 =
-      pullback.snd universalCurveπ (Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W))) := by
-  simp only [curveOfMiddle, Iso.trans_hom, Iso.symm_hom, eqToIso.hom, Category.assoc]
-  rw [eqToHom_projModelπ (uWL_map_ringHomOf W)]
-  exact (@isPullback_projModelBaseChange _ _ _ _ (ringHomOfEllipticW W).toAlgebra
-    universalWeierstrassLoc).isoPullback_inv_snd
+      pullback.snd universalCurveπ (Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W))) :=
+  (isPullback_curveOfMiddle W).isoPullback_inv_snd
 
 noncomputable def curveOfPasting :
     (curveOf W).E ≅ pullback (projModelπ W.1) S.toSpecΓ := by
@@ -344,30 +358,18 @@ pulled back to `S`'s fibre, is `W`'s own `projModelZero`. -/
 private theorem curveOfMiddle_zero :
     pullback.lift (classify W ≫ universalCurveZero) S.toSpecΓ (zliftComm W) ≫
         (curveOfMiddle W).hom = S.toSpecΓ ≫ projModelZero W.1 := by
-  have key : pullback.lift (classify W ≫ universalCurveZero) S.toSpecΓ (zliftComm W) ≫
-      (@isPullback_projModelBaseChange _ _ _ _ ((ringHomOfEllipticW W).toAlgebra)
-        universalWeierstrassLoc).isoPullback.inv
-      = S.toSpecΓ ≫ projModelZero (universalWeierstrassLoc.map
-          (@algebraMap _ _ _ _ ((ringHomOfEllipticW W).toAlgebra))) := by
-    rw [Iso.comp_inv_eq]
-    apply pullback.hom_ext
-    · rw [Category.assoc, Category.assoc]
-      erw [(@isPullback_projModelBaseChange _ _ _ _ ((ringHomOfEllipticW W).toAlgebra)
-          universalWeierstrassLoc).isoPullback_hom_fst]
-      rw [pullback.lift_fst]
-      erw [@projModelZero_baseChange _ _ _ _ ((ringHomOfEllipticW W).toAlgebra)
-        universalWeierstrassLoc]
-      show _ = S.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W)) ≫
-        projModelZero universalWeierstrassLoc
-      rw [← Category.assoc]
-      rfl
-    · rw [Category.assoc, Category.assoc]
-      erw [(@isPullback_projModelBaseChange _ _ _ _ ((ringHomOfEllipticW W).toAlgebra)
-          universalWeierstrassLoc).isoPullback_hom_snd]
-      rw [pullback.lift_snd, projModelZero_projModelπ]
-      exact (Category.comp_id _).symm
-  simp only [curveOfMiddle, Iso.trans_hom, eqToIso.hom, Iso.symm_hom, ← Category.assoc]
-  rw [key, Category.assoc, eqToHom_projModelZero (uWL_map_ringHomOf W)]
+  simp only [curveOfMiddle, Iso.symm_hom, Iso.comp_inv_eq]
+  apply pullback.hom_ext
+  · rw [pullback.lift_fst, Category.assoc]
+    erw [(isPullback_curveOfMiddle W).isoPullback_hom_fst]
+    rw [Category.assoc]
+    exact ((congrArg (fun m => S.toSpecΓ ≫ m)
+      (projModelZero_baseChangeOf (ringHomOfEllipticW W) universalWeierstrassLoc W.1
+        (uWL_map_ringHomOf W))).trans (Category.assoc _ _ _).symm).symm
+  · rw [pullback.lift_snd, Category.assoc]
+    erw [(isPullback_curveOfMiddle W).isoPullback_hom_snd]
+    rw [Category.assoc, projModelZero_projModelπ]
+    exact (Category.comp_id _).symm
 
 /-- The pasting identification matches the zero sections.
 
