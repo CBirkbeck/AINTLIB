@@ -226,6 +226,71 @@ theorem modelBaseChangeIsoAsOver (W : WeierstrassCurve k) [W.IsElliptic]
     (modelEllipticCurve (W.map (algebraMap k k'))).one_eq_zero]
   exact (Category.assoc _ _ _).trans (congrArg _ hz)
 
+/-- **(κ̄-wiring master — BB-QF over an arbitrary field)** The model `[N]` is locally
+quasi-finite over ANY field `k`: base-change to the algebraic closure `κ̄` (ALPHA's
+`modelMulByHom_locallyQuasiFinite`), transport across the pointed group-object iso
+`modelBaseChangeIsoAsOver` (GIT 6.4), and fppf-descend along `Spec κ̄ → Spec k`
+(surjective + flat + quasi-compact) using the `DescendsAlong @LocallyQuasiFinite`
+instance (`ForMathlib/QuasiFiniteDescent`) on the `[N]` base-change square. -/
+theorem modelMulByHom_locallyQuasiFinite_of_field (W : WeierstrassCurve k) [W.IsElliptic]
+    (N : ℕ) [NeZero N] :
+    LocallyQuasiFinite ((modelEllipticCurve W).mulByHom N) := by
+  set κ := AlgebraicClosure k
+  set fc : CommRingCat.of k ⟶ CommRingCat.of κ := CommRingCat.ofHom (algebraMap k κ)
+    with hfc
+  -- (1) ALPHA over the algebraic closure
+  haveI h1 : LocallyQuasiFinite
+      ((modelEllipticCurve (W.map (algebraMap k κ))).mulByHom N) :=
+    modelMulByHom_locallyQuasiFinite (W.map (algebraMap k κ)) N
+  -- (2) transport across the pointed group-object iso to the base-changed record
+  obtain ⟨φ, hφ⟩ := modelBaseChangeIsoAsOver W κ
+  haveI := hφ
+  haveI h2 : LocallyQuasiFinite
+      (((modelEllipticCurve W).baseChange (Spec.map fc)).mulByHom N) :=
+    locallyQuasiFinite_mulByHom_of_isMonHom_iso φ N
+  -- (3) the `[N]` base-change square, by cancelling the π-square off the big rectangle
+  have hcomm : ((modelEllipticCurve W).baseChange (Spec.map fc)).mulByHom N ≫
+        pullback.fst (modelEllipticCurve W).π (Spec.map fc)
+      = pullback.fst (modelEllipticCurve W).π (Spec.map fc) ≫
+        (modelEllipticCurve W).mulByHom N :=
+    mulByHom_baseChange_fst (modelEllipticCurve W) (Spec.map fc) N
+  have hsq : IsPullback
+      (((modelEllipticCurve W).baseChange (Spec.map fc)).mulByHom N)
+      (pullback.fst (modelEllipticCurve W).π (Spec.map fc))
+      (pullback.fst (modelEllipticCurve W).π (Spec.map fc))
+      ((modelEllipticCurve W).mulByHom N) := by
+    refine IsPullback.of_right ?_ hcomm
+      ((IsPullback.of_hasPullback (modelEllipticCurve W).π (Spec.map fc)).flip)
+    have e1 : ((modelEllipticCurve W).baseChange (Spec.map fc)).mulByHom N ≫
+          pullback.snd (modelEllipticCurve W).π (Spec.map fc)
+        = pullback.snd (modelEllipticCurve W).π (Spec.map fc) :=
+      mulByHom_π ((modelEllipticCurve W).baseChange (Spec.map fc)) N
+    have e2 : (modelEllipticCurve W).mulByHom N ≫ (modelEllipticCurve W).π
+        = (modelEllipticCurve W).π :=
+      mulByHom_π (modelEllipticCurve W) N
+    rw [e1, e2]
+    exact (IsPullback.of_hasPullback (modelEllipticCurve W).π (Spec.map fc)).flip
+  -- (4) the descent leg `Spec κ̄ → Spec k` is fppf
+  haveI hSurjSpec : Surjective (Spec.map fc) := by
+    refine ⟨fun y => ?_⟩
+    haveI hsing : Subsingleton (↥(Spec (CommRingCat.of k))) :=
+      ⟨fun a b => PrimeSpectrum.ext ((Ideal.eq_bot_of_prime _).trans
+        (Ideal.eq_bot_of_prime _).symm)⟩
+    obtain ⟨x⟩ : Nonempty ↥(Spec (CommRingCat.of κ)) := inferInstance
+    exact ⟨x, Subsingleton.elim _ _⟩
+  haveI hFlatSpec : Flat (Spec.map fc) := by
+    rw [HasRingHomProperty.Spec_iff (P := @Flat)]
+    show (algebraMap k κ).Flat
+    rw [RingHom.flat_algebraMap_iff]
+    infer_instance
+  haveI hQCSpec : QuasiCompact (Spec.map fc) := inferInstance
+  -- (5) descend
+  exact MorphismProperty.of_isPullback_of_descendsAlong
+    (Q := @Surjective ⊓ @Flat ⊓ @QuasiCompact) hsq
+    ⟨⟨MorphismProperty.pullback_fst _ _ hSurjSpec,
+      MorphismProperty.pullback_fst _ _ hFlatSpec⟩,
+      MorphismProperty.pullback_fst _ _ hQCSpec⟩ h2
+
 end KappaBarWiring
 
 end EllipticCurve
