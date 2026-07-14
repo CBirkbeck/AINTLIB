@@ -186,6 +186,18 @@ lemma finrank_eq_module_finrank_of_affineOpen {X : Scheme.{u}} (f : X ⟶ X)
   haveI : IsAffine (pullback f U.ι) := isAffine_of_isAffineHom (pullback.snd f U.ι)
   rw [finrank_eq_appTop_finrank_of_affineOpen f U x₀ x, appTop_finrank_eq_module_finrank]
 
+/-- **(K4b-2, birational leaf)** An open immersion `f : X ⟶ Y` of irreducible schemes induces an
+isomorphism on function fields `Y.functionField ≅ X.functionField`: the generic point is preserved
+(`genericPoint_eq_of_isOpenImmersion`) and `f`'s stalk maps are isomorphisms. This is the
+birational-invariance input for the `[N]⁻¹Z`-side of the K4b-2 identity — the preimage `[N]⁻¹Z` is
+an open of the integral `projModel W`, so its function field is `W.toAffine.FunctionField`. -/
+noncomputable def functionFieldIsoOfOpenImmersion {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f]
+    [IrreducibleSpace X] [IrreducibleSpace Y] :
+    Y.functionField ≅ X.functionField :=
+  eqToIso (show Y.functionField = Y.presheaf.stalk (f.base (genericPoint X)) from
+      congrArg (Y.presheaf.stalk) (genericPoint_eq_of_isOpenImmersion f).symm) ≪≫
+    asIso (f.stalkMap (genericPoint X))
+
 /-- **(K4b-2, leaf L1)** The global sections of the affine `Z`-chart `(zChart W).toScheme` are `W`'s
 affine coordinate ring: `Γ(zChart, ⊤) ≃+* W.CoordinateRing`. Via `Scheme.Opens.topIso` (identifying
 `Γ(U.toScheme, ⊤)` with `Γ(projModel W, U)`) composed with the fixed chart identification
