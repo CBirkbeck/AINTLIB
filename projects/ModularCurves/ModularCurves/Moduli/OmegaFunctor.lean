@@ -180,6 +180,24 @@ noncomputable def omegaBasisMap {X X' : EllObj R} (φ : X' ⟶ X)
       (Scheme.UnitCocycle.isBasis_sectionsPullback
         (omegaCocycle X.curve.toEllipticCurveGeom) φ.baseHom b.2)⟩
 
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D4, public spec)** The mixed comparison unit restricts, on affine opens, to
+the transition unit of the own chart against the transported chart. -/
+theorem omegaCompat_w_res {X X' : EllObj R} (φ : X' ⟶ X)
+    (i' : X'.curve.toEllipticCurveGeom.atlas.ι)
+    (i : X.curve.toEllipticCurveGeom.atlas.ι)
+    (V : X'.base.affineOpens)
+    (hV : V.1 ≤ (omegaCocycle X'.curve.toEllipticCurveGeom).U i' ⊓
+      ((omegaCocycle X.curve.toEllipticCurveGeom).pullbackCocycle φ.baseHom).U i) :
+    Scheme.resUnit hV ((omegaCompat φ).w i' i) =
+      ((X'.curve.toEllipticCurveGeom.atlas.presentation i').restrict
+        (hV.trans inf_le_left)).transUnit
+      ((X.curve.toEllipticCurveGeom.atlas.presentation i).transport φ.baseHom φ.top
+        φ.isPullback φ.zero_w (hV.trans inf_le_right)) := by
+  show Scheme.resUnit hV ((omegaCompatGlue φ i' i).1) = _
+  exact (omegaCompatGlue φ i' i).2 V hV
+
 set_option backward.isDefEq.respectTransparency false in
 /-- **(T-OM-B7)** `omegaBasisMap` is equivariant for the global-unit actions through
 the section comparison of the base morphism — with `negVC_u`, KM 4.6.2's
