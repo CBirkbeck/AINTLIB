@@ -44,7 +44,7 @@ theorem artinHasseExpCurrentRootPeelProduct_natCast_ell_mul_inverse_endpoint_pow
           F.toConcreteStickelbergerSetup.wittThetaModQPow N
         let Eps : PowerSeries A :=
           (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-            fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+            fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
               (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
         let Ips : PowerSeries A :=
           (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -80,14 +80,14 @@ theorem artinHasseExpCurrentRootPeelProduct_natCast_ell_mul_inverse_endpoint_pow
     simpa [Nat.sub_add_cancel hm_pos] using h
   have htail :
       artinHasseExpCurrentRootPeelProduct F N m N δ
-          (WittVector.mk ℓ fun r => (F.traceCarry y).coeff (r + 0)) = 1 := by
+          (WittVector.mk ℓ fun r ↦ (F.traceCarry y).coeff (r + 0)) = 1 := by
     refine
       F.artinHasseExpCurrentRootPeelProduct_traceCarry_tail_eq_one_of_factor_pow_prime_eq_one
         N m N 0 δ y ?_
     intro m' s j hj
     simpa [A, Ips, πbar, δ] using hroot m' s j hj
   have hmk :
-      (WittVector.mk ℓ fun r => (F.traceCarry y).coeff (r + 0)) = F.traceCarry y := by
+      (WittVector.mk ℓ fun r ↦ (F.traceCarry y).coeff (r + 0)) = F.traceCarry y := by
     ext r
     simp
   have hcurrent :
@@ -111,7 +111,7 @@ theorem traceCarryFiniteCharacter_inverse_target_of_traceCarry_factor_roots
           F.toConcreteStickelbergerSetup.wittThetaModQPow N
         let Eps : PowerSeries A :=
           (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-            fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+            fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
               (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
         let Ips : PowerSeries A :=
           (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -135,14 +135,14 @@ theorem traceCarryFiniteCharacter_inverse_target_of_traceCarry_factor_roots
   let δ : A := (PowerSeries.trunc (N + 1) Ips).eval₂ (RingHom.id A) πbar
   have htail :
       artinHasseExpCurrentRootPeelProduct F N m N δ
-          (WittVector.mk ℓ fun r => (F.traceCarry y).coeff (r + 0)) = 1 := by
+          (WittVector.mk ℓ fun r ↦ (F.traceCarry y).coeff (r + 0)) = 1 := by
     refine
       F.artinHasseExpCurrentRootPeelProduct_traceCarry_tail_eq_one_of_factor_pow_prime_eq_one
         N m N 0 δ y ?_
     intro m' s j hj
     simpa [A, Ips, πbar, δ] using hroot m' s j hj
   have hmk :
-      (WittVector.mk ℓ fun r => (F.traceCarry y).coeff (r + 0)) = F.traceCarry y := by
+      (WittVector.mk ℓ fun r ↦ (F.traceCarry y).coeff (r + 0)) = F.traceCarry y := by
     ext r
     simp
   have hcurrent :
