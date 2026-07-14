@@ -157,7 +157,6 @@ theorem pow_card_mem_algebraMap_range (x : W.toAffine.FunctionField) :
       (algebraMap (frobeniusIsog_intermediateField W) W.toAffine.FunctionField).range :=
   ⟨⟨x ^ Fintype.card K, pow_card_mem_frobeniusIsog_intermediateField W x⟩, rfl⟩
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Route B core (Silverman III.6.2 step)**: `K(E) / Im(π*)` is purely
     inseparable. Direct from `pow_card_mem_algebraMap_range`: every
     `x : K(E)` satisfies `x ^ (Fintype.card K) ∈ Im(π*)`, and
