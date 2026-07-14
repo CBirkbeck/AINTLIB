@@ -1348,4 +1348,129 @@ theorem transVC_transport_taut {R : CommRingCat.{u}} (Y : EllObj R)
         _).compat_π
   rw [hkey, Category.assoc, eqToHom_trans, eqToHom_refl, Category.comp_id]
 
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+/-- The tautological presentation is adapted to the universal `ω`-basis it induces
+(the reflexive-restriction case of `isAdapted_restrict_ofPresentation`). -/
+theorem tautPresentation_isAdapted (R : CommRingCat.{u}) :
+    (tautPresentation (universalShortNF R)).IsAdapted (universalOmegaBasis R) := by
+  have h : ((tautPresentation (universalShortNF R)).restrict
+      (le_refl (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+        (ModuliRingE12 R))).affineOpens).1)).IsAdapted (universalOmegaBasis R) :=
+    isAdapted_restrict_ofPresentation rfl (tautPresentation (universalShortNF R))
+      (le_refl _)
+  show ((tautPresentation (universalShortNF R)).basisUnitAt
+    (universalOmegaBasis R)).1 = 1
+  have h' : (((tautPresentation (universalShortNF R)).restrict
+      (le_refl _)).basisUnitAt (universalOmegaBasis R)).1 = 1 := h
+  rw [← basisUnitAt_restrict (tautPresentation (universalShortNF R))
+    (universalOmegaBasis R) (le_refl _)] at h'
+  rw [← h']
+  exact (Units.ext (by simp)).symm
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation TopologicalSpace in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(E12-D4 rt1 ★)** Roundtrip: pulling the universal `ω`-basis back along the
+classifying morphism recovers the given basis, `(classifyingEllHom Y b)^* ω_univ = b`.
+The pulled basis and `b` differ by a global unit `u` (the `𝔾ₘ`-torsor); on every
+chart affine the `b`-adapted local model reads off `u`'s restriction as the ratio of
+basis units, which is `1` by `transVC_transport_taut` + adaptedness on both sides. -/
+theorem omegaBasisMap_classifyingEllHom {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤))) :
+    omegaBasisMap (classifyingEllHom Y b h2 h3) (universalOmegaBasis R) = b := by
+  obtain ⟨u, hu, -⟩ := OmegaBasis.existsUnique_unit_smul b
+    (omegaBasisMap (classifyingEllHom Y b h2 h3) (universalOmegaBasis R))
+  have h1 : u = 1 := by
+    refine Scheme.unit_ext_of_res_cover Y.base
+      (fun p : {q : Y.base.affineOpens × Y.curve.toEllipticCurveGeom.atlas.ι //
+        q.1.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U q.2).1} => p.1.1.1)
+      (fun p => le_top) (fun x _ => ?_) (fun p => ?_)
+    · obtain ⟨i, hxi⟩ := Y.curve.toEllipticCurveGeom.atlas.covers x
+      obtain ⟨W, hWaff, hxW, hWU⟩ := exists_isAffineOpen_mem_and_subset hxi
+      exact Opens.mem_iSup.mpr ⟨⟨⟨⟨W, hWaff⟩, i⟩, hWU⟩, hxW⟩
+    · obtain ⟨⟨V, i⟩, hVi⟩ := p
+      -- the transported tautological chart has trivial comparison to the adapted model
+      have htu : ((tautPresentation (universalShortNF R)).transport
+          (classifyingEllHom Y b h2 h3).baseHom (classifyingEllHom Y b h2 h3).top
+          (classifyingEllHom Y b h2 h3).isPullback
+          (classifyingEllHom Y b h2 h3).zero_w
+          (show V.1 ≤ (classifyingEllHom Y b h2 h3).baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)).transUnit
+          (adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi) = 1 := by
+        show (((tautPresentation (universalShortNF R)).transport
+          (classifyingEllHom Y b h2 h3).baseHom (classifyingEllHom Y b h2 h3).top
+          (classifyingEllHom Y b h2 h3).isPullback
+          (classifyingEllHom Y b h2 h3).zero_w
+          (show V.1 ≤ (classifyingEllHom Y b h2 h3).baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)).transVC
+          (adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi)).u = 1
+        rw [transVC_transport_taut Y b h2 h3 V i hVi]
+        rfl
+      have hAT : (adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i
+          hVi).transUnit
+          ((tautPresentation (universalShortNF R)).transport
+            (classifyingEllHom Y b h2 h3).baseHom (classifyingEllHom Y b h2 h3).top
+            (classifyingEllHom Y b h2 h3).isPullback
+            (classifyingEllHom Y b h2 h3).zero_w
+            (show V.1 ≤ (classifyingEllHom Y b h2 h3).baseHom ⁻¹ᵁ
+              (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+                (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)) = 1 := by
+        have h := transUnit_trans
+          (adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi)
+          ((tautPresentation (universalShortNF R)).transport
+            (classifyingEllHom Y b h2 h3).baseHom (classifyingEllHom Y b h2 h3).top
+            (classifyingEllHom Y b h2 h3).isPullback
+            (classifyingEllHom Y b h2 h3).zero_w
+            (show V.1 ≤ (classifyingEllHom Y b h2 h3).baseHom ⁻¹ᵁ
+              (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+                (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial))
+          (adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi)
+        rw [htu, mul_one, transUnit_self] at h
+        exact h
+      -- the transported chart is adapted to the pulled basis
+      have hTad : (((tautPresentation (universalShortNF R)).transport
+          (classifyingEllHom Y b h2 h3).baseHom (classifyingEllHom Y b h2 h3).top
+          (classifyingEllHom Y b h2 h3).isPullback
+          (classifyingEllHom Y b h2 h3).zero_w
+          (show V.1 ≤ (classifyingEllHom Y b h2 h3).baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)).basisUnitAt
+          (omegaBasisMap (classifyingEllHom Y b h2 h3) (universalOmegaBasis R))).1 =
+          1 :=
+        IsAdapted.transport (classifyingEllHom Y b h2 h3)
+          (tautPresentation_isAdapted R) _
+      -- hence the adapted model reads the pulled basis with unit 1
+      have hkey : ((adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i
+          hVi).basisUnitAt
+          (omegaBasisMap (classifyingEllHom Y b h2 h3) (universalOmegaBasis R))).1 =
+          1 := by
+        rw [basisUnitAt_transUnit
+          (adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi)
+          ((tautPresentation (universalShortNF R)).transport
+            (classifyingEllHom Y b h2 h3).baseHom (classifyingEllHom Y b h2 h3).top
+            (classifyingEllHom Y b h2 h3).isPullback
+            (classifyingEllHom Y b h2 h3).zero_w
+            (show V.1 ≤ (classifyingEllHom Y b h2 h3).baseHom ⁻¹ᵁ
+              (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+                (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial))
+          (omegaBasisMap (classifyingEllHom Y b h2 h3) (universalOmegaBasis R)),
+          hAT, hTad, one_mul]
+      -- compare against the smul computation
+      have hsm := basisUnitAt_smul
+        (adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi) u b
+      rw [hu] at hsm
+      have hALb : ((adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i
+          hVi).basisUnitAt b).1 = 1 :=
+        adaptedLocal_isAdapted Y.curve.toEllipticCurveGeom b h2 h3 V i hVi
+      rw [hkey, hALb, mul_one] at hsm
+      rw [map_one]
+      exact hsm.symm
+  rw [← hu, h1]
+  exact Subtype.ext (by
+    rw [show ((1 : Γ(Y.base, ⊤)ˣ) • b).1 =
+      ((1 : Γ(Y.base, ⊤)ˣ)).val • b.1 from rfl, Units.val_one, one_smul])
+
 end ModularCurves
