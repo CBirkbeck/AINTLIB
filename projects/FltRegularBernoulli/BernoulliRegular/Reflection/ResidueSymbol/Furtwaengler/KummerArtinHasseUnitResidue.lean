@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.KummerArtinHasseLocalModel
@@ -55,6 +60,8 @@ noncomputable def lambdaCompletedUnitResidue :
     (AdicCompletion.evalOneₐ
       (Reflection.Local.localCyclotomicMaximalIdeal p K)).toMonoidHom
 
+/-- Every residue unit lifts: the local-unit residue map is surjective (the residue map
+of a local ring is, and units lift along it). -/
 theorem lambdaLocalUnitResidue_surjective :
     Function.Surjective (lambdaLocalUnitResidue p K) := by
   let R := Reflection.Local.localCyclotomicRing p K
@@ -67,6 +74,7 @@ theorem lambdaLocalUnitResidue_surjective :
       (IsLocalRing.residue R) IsLocalRing.residue_surjective inferInstance
   exact hsurj
 
+/-- Completing a local unit does not change its residue. -/
 @[simp]
 theorem lambdaCompletedUnitResidue_completedLocalCyclotomicUnitMap
     (u : Reflection.Local.localCyclotomicUnitGroup p K) :
@@ -77,6 +85,7 @@ theorem lambdaCompletedUnitResidue_completedLocalCyclotomicUnitMap
   simp [lambdaCompletedUnitResidue, lambdaLocalUnitResidue,
     Reflection.Local.completedLocalCyclotomicUnitMap]
 
+/-- The principal units are exactly the completed units with trivial residue. -/
 theorem mem_principalUnits_one_iff_completedResidue_eq_one
     (u : LambdaUnitGroup p K) :
     u ∈ LambdaPrincipalUnitSubgroup p K 1 ↔
@@ -121,6 +130,7 @@ noncomputable def lambdaResidueUnitLocalLift
     Reflection.Local.localCyclotomicUnitGroup p K :=
   Classical.choose (lambdaLocalUnitResidue_surjective p K a)
 
+/-- The chosen local lift does lift. -/
 @[simp]
 theorem lambdaResidueUnitLocalLift_residue
     (a : LambdaResidueUnitGroup p K) :
@@ -133,6 +143,7 @@ noncomputable def lambdaResidueUnitLift
   Reflection.Local.completedLocalCyclotomicUnitMap p K
     (lambdaResidueUnitLocalLift p K a)
 
+/-- …and so does the chosen completed lift. -/
 @[simp]
 theorem lambdaResidueUnitLift_residue
     (a : LambdaResidueUnitGroup p K) :
@@ -148,6 +159,7 @@ noncomputable def lambdaPrincipalUnitPart
     rw [map_mul, map_inv, lambdaResidueUnitLift_residue]
     simp⟩
 
+/-- The principal-unit part, as an element of the unit group. -/
 @[simp]
 theorem lambdaPrincipalUnitPart_val
     (u : LambdaUnitGroup p K) :
