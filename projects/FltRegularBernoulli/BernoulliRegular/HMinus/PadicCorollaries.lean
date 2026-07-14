@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib.NumberTheory.Bernoulli
@@ -157,11 +162,8 @@ theorem hMinus_formula_teichmuller_mod_p (hp_odd' : p ≠ 2) :
             (-(1 / 2 : ℚ_[p])) * BernoulliGen ((teichmullerCharQp p) ^ j) 1) := by
           refine Finset.prod_congr rfl fun j hj ↦ ?_
           simpa [a, hj] using (Classical.choose_spec (hfactor j hj))
-  have hp_sub_two_odd : Odd (p - 2) := by
-    obtain ⟨k, hk⟩ := hp.out.odd_of_ne_two hp_odd'
-    refine ⟨k - 1, ?_⟩
-    rw [hk]
-    omega
+  have hp_sub_two_odd : Odd (p - 2) :=
+    Nat.Odd.sub_even (by omega) (hp.out.odd_of_ne_two hp_odd') (by decide)
   have hsplit : ((Finset.range (p - 1)).filter fun j ↦ Odd j) = insert (p - 2) S := by
     ext j
     rw [Finset.mem_filter, Finset.mem_range, Finset.mem_insert,
