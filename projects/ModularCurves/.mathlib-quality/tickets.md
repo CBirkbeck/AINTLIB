@@ -20290,3 +20290,41 @@ DEMOTED to a theorem (metavar-heavy instance heads poison unrelated `AddMonoidHo
 global instance). Next: taut-marking (banked generic `tautPresentation_marksAt`) + the Tate-NF
 witness theory (toTateNF; N=3 has NO residual unit — cleaner than Legendre) + the classification
 replay via the transposition pipeline. T-E15b (finite étale, Weil pairing) stays stream-C-gated.
+
+## Board v10.230-G0 (2026-07-14, STREAM-G0) — BB-FLAT front opened: [BBF-A1] fibre-flatness plan
+
+Mathlib re-survey (2026-07-14): NO CohenMacaulay, NO miracle flatness, NO fibrewise
+criterion, NO local flatness criterion (00ME absent) — decomposition-bb-flat.md's gate
+inventory stands (B–E chain: 6 sorries in BuchsbaumEisenbud.lean + 1 in FlatLocus.lean).
+Route A's SHARED fibre leaf [BBF-A1] is however now tractable with the BB-QF toolkit
+(mulByHom_isFinite sorry-free; stalkwise criterion `AlgebraicGeometry.Flat.of_stalkMap`
+in mathlib; `Module.flat_iff_torsion_eq_bot_of_isBezout` for DVR stalks; the DVR recipe
+inline at StandardSmoothStalkDVR.lean:460–540, sorry-free, replayable).
+
+**Sub-tickets (develop-template), file `EllipticCurve/MulByHomFlatFibre.lean` (NEW, G0):**
+- **[FF-1] chart-stalk presentation.** Statement: the stalk of `projModel W` at a
+  zChart point is (ring-)iso to `Localization.AtPrime` of `W.toAffine.CoordinateRing`;
+  ∞-point via `projModelZeroChart` (WeierstrassModel:2656). Sketch: open-immersion stalk
+  iso (`IsOpenImmersion` API) + `zChartHomeo`/`zChartSectionCoordRingEquiv` +
+  Spec-stalk = `StructureSheaf.stalkIso`. Mathlib: `Scheme.stalkMap`,
+  `IsOpenImmersion.stalkIso`, `StructureSheaf.stalkAlgebra/stalkIso`.
+- **[FF-2] DVR stalks.** Statement: for `A` with `RingHom.Locally
+  (IsStandardSmoothOfRelativeDimension 1)` presentation over field k (the
+  WeierstrassModel:1671 artifact), `p` maximal ⟹ `IsDiscreteValuationRing
+  (Localization.AtPrime p)`. Sketch: replay StandardSmoothStalkDVR:460–540 (Kähler
+  coordinate → formally-unramified over k[X] → `map_maximalIdeal` principal →
+  `IsDiscreteValuationRing.of_maximalIdeal_eq_span`); package as reusable ForMathlib.
+- **[FF-3] stalk-map injectivity.** Statement: `[N]`-stalk maps on `projModel W`
+  (integral) are injective. Sketch: `[N]` dominant (range closed [proper] + infinite
+  [LQF finite fibres + Infinite total] + irreducible ⟹ surjective — ModelFibreCount
+  toolkit) ⟹ generic-point compat; localization-into-function-field injectivity
+  (K4 `functionFieldMap` substrate, 209f20297).
+- **[FF-4] assembly.** `modelMulByHom_flat_of_field {k} [Field k] (W) [W.IsElliptic]
+  (N) [NeZero N] : Flat ((modelEllipticCurve W).mulByHom N)` via `Flat.of_stalkMap`:
+  target-stalk field (generic) ⟹ flat trivially; target-stalk DVR (closed, FF-1+FF-2)
+  + torsion-free (FF-3 + domain stalks) ⟹ flat
+  (`Module.flat_iff_torsion_eq_bot_of_isBezout`). THEN record-over-field + κ̄/fppf
+  transport mirroring the BB-QF pattern (pointed iso + DescendsAlong — NOTE: mathlib
+  has NO `DescendsAlong @Flat` instance; add to ForMathlib/QuasiFiniteDescent via
+  `RingHom.Flat.codescendsAlong`?? — verify; else stalkwise directly on the record).
+GATE for full BB-FLAT stays [BBF-A2/A3] (B–E chain) — boarded separately, next arc.
