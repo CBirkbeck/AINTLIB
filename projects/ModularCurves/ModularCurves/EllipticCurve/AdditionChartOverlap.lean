@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.AdditionChartMor
 import ModularCurves.EllipticCurve.AdditionChartProj
 import ModularCurves.EllipticCurve.AdditionChartGlue
@@ -149,7 +154,8 @@ factor rather than being equal. -/
 lemma chartHomOfTriple_smul (k : Fin 3) (t : Fin 3 → S) (u c d : S) (hcd : c * d = 1)
     (hu : t k * u = 1) (ht : (W.map (algebraMap R S)).toProjective.Equation t)
     (hu' : (fun m => c * t m) k * (d * u) = 1) :
-    chartHomOfTriple W k (fun m => c * t m) (d * u) hu' (equation_mul_left W c ⟨⟨c, d, hcd, (mul_comm d c).trans hcd⟩, rfl⟩ t ht) =
+    chartHomOfTriple W k (fun m => c * t m) (d * u) hu' (equation_mul_left W c ⟨⟨c, d, hcd,
+      (mul_comm d c).trans hcd⟩, rfl⟩ t ht) =
       chartHomOfTriple W k t u hu ht := by
   refine chartHomOfTriple_congr W k t (fun m => c * t m) u (d * u) hu hu' ht
     (equation_mul_left W c ⟨⟨c, d, hcd, (mul_comm d c).trans hcd⟩, rfl⟩ t ht) fun m => ?_
@@ -160,7 +166,8 @@ lemma chartHomOfTriple_smul (k : Fin 3) (t : Fin 3 → S) (u c d : S) (hcd : c *
 lemma chartAwayHomOfTriple_smul (k : Fin 3) (t : Fin 3 → S) (u c d : S) (hcd : c * d = 1)
     (hu : t k * u = 1) (ht : (W.map (algebraMap R S)).toProjective.Equation t)
     (hu' : (fun m => c * t m) k * (d * u) = 1) :
-    chartAwayHomOfTriple W k (fun m => c * t m) (d * u) hu' (equation_mul_left W c ⟨⟨c, d, hcd, (mul_comm d c).trans hcd⟩, rfl⟩ t ht) =
+    chartAwayHomOfTriple W k (fun m => c * t m) (d * u) hu' (equation_mul_left W c ⟨⟨c, d, hcd,
+      (mul_comm d c).trans hcd⟩, rfl⟩ t ht) =
       chartAwayHomOfTriple W k t u hu ht := by
   rw [chartAwayHomOfTriple, chartAwayHomOfTriple, chartHomOfTriple_smul W k t u c d hcd hu ht hu']
 
@@ -407,7 +414,8 @@ theorem pieceMorOfTriple_cross_agree (t s : Fin 3 → A)
     congr 2
     exact congrArg CommRingCat.ofHom (congrArg AlgHom.toRingHom halgs)
   rw [hkt, hks]
-  exact congrArg (fun f : chartAway W k →ₐ[R] _ => Spec.map (CommRingCat.ofHom f.toRingHom) ≫ chartι W k)
+  exact congrArg (fun f : chartAway W k →ₐ[R] _ => Spec.map
+    (CommRingCat.ofHom f.toRingHom) ≫ chartι W k)
     (chartAwayHomOfTriple_cross_eq W k
       (awayPairRight R (t k) (s k) (IsLocalization.Away.invSelf (t k)))
       (awayPairLeft R (t k) (s k) (IsLocalization.Away.invSelf (s k)))
@@ -453,8 +461,10 @@ theorem addOnZPieceMor_agree (k l : Fin 3) (hkl : l ≠ k) :
   rw [addOnZPieceMor_eq, addOnZPieceMor_eq]
   exact pieceMorOfTriple_agree W _ _ k l hkl
 
-/-- **(c3, per-piece cross-law agreement)** On `D(lawTwo_k · lawOne_k)`, the k-th law-2 piece and the
-k-th law-1 piece of the two Bosma–Lenstra laws agree. `pieceMorOfTriple_cross_agree` at the two triples,
+/-- **(c3, per-piece cross-law agreement)** On `D(lawTwo_k · lawOne_k)`, the k-th law-2 piece and
+the
+k-th law-1 piece of the two Bosma–Lenstra laws agree. `pieceMorOfTriple_cross_agree` at the two
+triples,
 fed the certified minors `lawOneTriple_mul_lawTwoTriple`. -/
 theorem addOnYPieceMor_eq_addOnZPieceMor (k : Fin 3) :
     Spec.map (CommRingCat.ofHom
