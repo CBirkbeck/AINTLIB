@@ -245,6 +245,52 @@ theorem natCard_liftings_le_finrank {X Y : Scheme.{u}} (f : X ⟶ Y) [Flat f] [I
     ← Scheme.Hom.finrank_pullback_snd f z x₀]
   exact natCard_sections_le_finrank (pullback.snd f z) x₀
 
+omit [IsSepClosed k] in
+/-- The sections of a **finite** scheme over the spectrum of a field form a finite set: they are
+identified with `Γ(X, ⊤) →ₐ[k] k` (the section ↔ retraction ↔ algebra-hom chain of
+`natCard_sections_eq_finrank`), finite because `Γ(X, ⊤)` is finite-dimensional over `k`. -/
+lemma finite_sections {X : Scheme.{u}} (f : X ⟶ Spec (CommRingCat.of k)) [IsFinite f] :
+    Finite { s : Spec (CommRingCat.of k) ⟶ X // s ≫ f = 𝟙 (Spec (CommRingCat.of k)) } := by
+  haveI : IsAffine X := isAffine_of_isAffineHom f
+  set ψ : CommRingCat.of k ⟶ Γ(X, ⊤) := Spec.preimage (X.isoSpec.inv ≫ f) with hψdef
+  have hψ : Spec.map ψ = X.isoSpec.inv ≫ f := Spec.map_preimage _
+  letI : Algebra k ↑Γ(X, ⊤) := ψ.hom.toAlgebra
+  have hAlg : algebraMap k ↑Γ(X, ⊤) = ψ.hom := rfl
+  haveI hF : IsFinite (Spec.map ψ) := by
+    rw [hψ]
+    exact (MorphismProperty.cancel_left_of_respectsIso @IsFinite X.isoSpec.inv f).mpr
+      inferInstance
+  haveI : Module.Finite k ↑Γ(X, ⊤) := (IsFinite.SpecMap_iff ψ).mp hF
+  exact Finite.of_equiv _ (((sectionsEquivOfIso X.isoSpec f).trans
+    (Equiv.subtypeEquivRight fun t => by rw [hψ])).trans
+    ((sectionsSpecEquivRetractions ψ).trans (retractionsEquivAlgHom ψ hAlg))).symm
+
+omit [IsSepClosed k] in
+/-- The liftings of a `k`-point `z` through a **finite** morphism `f` form a finite set (the fibre
+`f⁻¹(z)` has finitely many `k`-points): they are the sections of the finite base change
+`pullback.snd f z` (`liftingsEquivSections`, `finite_sections`). -/
+lemma finite_liftings {X Y : Scheme.{u}} (f : X ⟶ Y) [IsFinite f]
+    (z : Spec (CommRingCat.of k) ⟶ Y) :
+    Finite { a : Spec (CommRingCat.of k) ⟶ X // a ≫ f = z } :=
+  haveI := finite_sections (pullback.snd f z)
+  Finite.of_equiv _ (liftingsEquivSections f z)
+
+omit [IsSepClosed k] in
+/-- **(turnkey [KEY-KER] — an injective family of killed points bounds the rank)** If `N` liftings
+of a `k`-point `z` through a **finite flat** `f : X ⟶ Y` are pairwise distinct, then `N ≤ f.finrank
+(z x₀)`. This is the directly-applicable form of `natCard_liftings_le_finrank`: the caller supplies
+`N` distinct points of the fibre `f⁻¹(z)` (e.g. `N` distinct points killed by an isogeny `δ`, as
+liftings of the zero point through `δ.left`) and reads off the rank bound `N ≤ deg δ`. Works for
+inseparable `f`. -/
+theorem card_le_finrank_of_injective_liftings {X Y : Scheme.{u}} (f : X ⟶ Y) [Flat f] [IsFinite f]
+    (z : Spec (CommRingCat.of k) ⟶ Y) (x₀ : ↑(Spec (CommRingCat.of k))) (N : ℕ)
+    (a : Fin N → { a : Spec (CommRingCat.of k) ⟶ X // a ≫ f = z }) (hinj : Function.Injective a) :
+    N ≤ f.finrank (z x₀) := by
+  haveI := finite_liftings f z
+  have hN : N = Nat.card (Fin N) := by rw [Nat.card_eq_fintype_card, Fintype.card_fin]
+  rw [hN]
+  exact le_trans (Nat.card_le_card_of_injective a hinj) (natCard_liftings_le_finrank f z x₀)
+
 end Schemes
 
 /-- `Spec L`-valued points of `Spec A` over `Spec k` are `k`-algebra homomorphisms
