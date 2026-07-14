@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.TraceBinomial
@@ -231,7 +236,7 @@ theorem traceCharacterChooseSum_zero_eq_zero
     (S : TraceFormStickelbergerSetup ℓ p k K R') (a : ℕ)
     (ha₁ : 1 ≤ a) (ha₂ : a ≤ p - 1) :
     S.traceCharacterChooseSum a 0 = 0 := by
-  unfold traceCharacterChooseSum
+  simp only [traceCharacterChooseSum]
   simp only [Nat.choose_zero_right, Nat.cast_one, mul_one]
   exact MulChar.sum_eq_zero_of_ne_one (S.residueCharInt_pow_ne_one ha₁ ha₂)
 
@@ -244,7 +249,7 @@ theorem traceBinomialApprox_mem_Q_pow_of_traceCharacterChooseSum_mem
       ∀ n, n ≤ s → S.traceCharacterChooseSum a n ∈ S.Q ^ (s - n)) :
     S.traceBinomialApprox a s ∈ S.Q ^ s := by
   classical
-  unfold traceBinomialApprox
+  simp only [traceBinomialApprox]
   refine Ideal.sum_mem _ fun n hn => ?_
   rw [Finset.mem_range] at hn
   have hn_le : n ≤ s := by omega
@@ -404,7 +409,7 @@ theorem no_survivor_of_weight_lt_stickOrd
     (a : ℕ) (ha₁ : 1 ≤ a) (ha₂ : a ≤ p - 1)
     (m : digitVec ℓ S.f) (hm : digitWeight m < S.stickOrd a) :
     ¬ (Fintype.card k - 1) ∣ ((p - a) * S.stickD + digitValue m) := by
-  unfold stickOrd stickD at *
+  simp only [stickOrd, stickD] at *
   exact S.no_survivor_of_weight_lt a ha₁ ha₂ m hm
 
 /-- **L2c3e-1 (stickOrd wrapper, weight half).** The standard digit
@@ -413,7 +418,7 @@ theorem digitWeight_standardDigitVec_eq_stickOrd
     (S : TraceFormStickelbergerSetup ℓ p k K R')
     (a : ℕ) (ha₁ : 1 ≤ a) (ha₂ : a ≤ p - 1) :
     digitWeight (S.standardDigitVec (a * S.stickD)) = S.stickOrd a := by
-  unfold stickOrd stickD
+  simp only [stickOrd, stickD]
   exact (S.standardDigitVec_weight_value a ha₁ ha₂).1
 
 /-- **L2c3e-1 (stickOrd wrapper, value half).** The standard digit
@@ -422,7 +427,7 @@ theorem digitValue_standardDigitVec_eq
     (S : TraceFormStickelbergerSetup ℓ p k K R')
     (a : ℕ) (ha₁ : 1 ≤ a) (ha₂ : a ≤ p - 1) :
     digitValue (S.standardDigitVec (a * S.stickD)) = a * S.stickD := by
-  unfold stickD
+  simp only [stickD]
   exact (S.standardDigitVec_weight_value a ha₁ ha₂).2
 
 /-- **L2c3e-2: Unique survivor at leading weight.** A digit vector of
@@ -481,7 +486,6 @@ theorem unique_survivor_at_stickOrd
   have h_lhs_eq : (p - a) * d + digitValue m = q - 1 := by
     obtain ⟨c, hc⟩ := hdiv
     have hc_eq : (q - 1) * c = (p - a) * d + digitValue m := by
-      change (q - 1) * c = _
       rw [show (Fintype.card k - 1) * c = (q - 1) * c from rfl] at hc
       exact hc.symm
     have hc_pos : 1 ≤ c := by
@@ -514,7 +518,7 @@ theorem residueCharInt_rec_eq_teichUnitFull_pow_stickD
     (a : ℕ) (ha₁ : 1 ≤ a) (ha₂ : a ≤ p - 1) (x : kˣ) :
     S.residueCharInt (x : k) ^ (p - a) =
       (S.teichUnitFull x : 𝓞 R') ^ ((p - a) * S.stickD) := by
-  unfold stickD
+  simp only [stickD]
   exact S.residueCharInt_rec_eq_teichUnitFull_pow a ha₁ ha₂ x
 
 /-! The TraceFormStickelbergerSetup-only digit-sum Stickelberger statements
@@ -567,7 +571,7 @@ theorem leadingCoeff_not_mem_Q
     (a : ℕ) (_ha₁ : 1 ≤ a) (_ha₂ : a ≤ p - 1) :
     S.leadingCoeff a ∉ S.Q := by
   classical
-  unfold leadingCoeff
+  simp only [leadingCoeff]
   intro hmem
   -- (A * B * C) ∈ Q ⇒ (A * B) ∈ Q ∨ C ∈ Q.
   rcases (Ideal.IsPrime.mem_or_mem (hI := inferInstance)) hmem with hAB | hC
@@ -630,7 +634,7 @@ theorem gaussSumIntRec_eq_sum_units [DecidableEq k] (a : ℕ) :
   -- gaussSumIntRec a = gaussSumInt (p - a) = ∑ x : k, χ(x) · ψ(x).
   -- Split univ = insert 0 (univ.erase 0); χ(0) = 0 kills the 0-term.
   change _root_.gaussSum (S.residueCharInt ^ (p - a)) S.psiInt = _
-  unfold _root_.gaussSum
+  simp only [_root_.gaussSum]
   rw [show (Finset.univ : Finset k) = insert 0 (Finset.univ.erase 0) by
     rw [Finset.insert_erase (Finset.mem_univ 0)]]
   rw [Finset.sum_insert (Finset.notMem_erase _ _)]
