@@ -1,0 +1,6 @@
+FOCUS: STREAM-G0 v10.212 route-(a) refactor: extract IsInvariant + six pin STATEMENTS into
+NEW GroupScheme/SubgroupQuotientInterface.lean; rewire TranslationAction to import it;
+SubgroupQuotient imports glue construction, quotient := gluedQuotient, discharge six pins
+in-place -> SIGNAL ★★. c4: consume sorried mulByHom_finrank as register-box BB-DEG.
+STEP 1: read SubgroupQuotient.lean (pins+IsInvariant), SubgroupQuotientGlueData head
+(parametrization), TranslationAction imports. Then design the exact extraction.
