@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.Curves.Valuation.DVR
 import Mathlib.RingTheory.Valuation.Discrete.IsDiscreteValuationRing
 
@@ -87,7 +92,7 @@ private theorem pointValuation_ne_zero {f : C.FunctionField} (hf : f ≠ 0) :
   simp [ord_P]
 
 theorem ord_P_eq_top_iff (f : C.FunctionField) : C.ord_P P f = ⊤ ↔ f = 0 := by
-  unfold ord_P
+  simp only [ord_P]
   split_ifs with h
   · simp [(pointValuation_eq_zero_iff f).mp h]
   · simp only [WithTop.coe_ne_top, false_iff]
@@ -259,7 +264,7 @@ theorem exists_uniformizer (C : SmoothPlaneCurve F) (P : C.SmoothPoint) :
   have hvπ : C.pointValuation P π ≠ 0 := by
     change (IsDedekindDomain.HeightOneSpectrum.valuation _ _) π ≠ 0
     rw [hπ]; exact WithZero.exp_ne_zero
-  unfold Uniformizer
+  simp only [Uniformizer]
   rw [ord_P_of_ne _ hvπ]
   have hunz : WithZero.unzero hvπ = Multiplicative.ofAdd (-1 : ℤ) := by
     rw [← WithZero.coe_inj, WithZero.coe_unzero]
