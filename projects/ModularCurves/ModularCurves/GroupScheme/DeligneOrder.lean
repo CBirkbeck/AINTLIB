@@ -2067,9 +2067,8 @@ base change: constant degree `N` on `S` gives constant degree `N` on any `T`. Th
 (`Module.finrank_baseChange` at the affine-local level; the fibre of `D.baseChange g` over `t`
 is that of `D` over `g t`, base-changed to `κ(t)`). Sole genuinely-absent input to the L1
 reduction below; everything else (factoring transport, `asSection` descent) is proven. -/
-theorem degree_baseChange_eq {D : RelEffCartierDiv E.π} {N : ℕ}
-    (hdeg : ∀ s : S, D.degree s = N) {T : Scheme.{u}} (g : T ⟶ S) (t : T) :
-    (D.baseChange g).degree t = N := by
+theorem degree_baseChange_apply (D : RelEffCartierDiv E.π) {T : Scheme.{u}} (g : T ⟶ S)
+    (t : T) : (D.baseChange g).degree t = D.degree (g t) := by
   haveI := D.finite
   haveI := D.flat
   haveI : IsClosedImmersion (pullback.snd D.ideal.subschemeι (pullback.fst E.π g)) :=
@@ -2087,7 +2086,7 @@ theorem degree_baseChange_eq {D : RelEffCartierDiv E.π} {N : ℕ}
       = inv (pullback.snd D.ideal.subschemeι (pullback.fst E.π g)).toImage
         ≫ pullback.snd D.ideal.subschemeι (pullback.fst E.π g) := by
     rw [IsIso.eq_inv_comp, Scheme.Hom.toImage_imageι]
-  show ((D.baseChange g).ideal.subschemeι ≫ (E.baseChange g).π).finrank t = N
+  show ((D.baseChange g).ideal.subschemeι ≫ (E.baseChange g).π).finrank t = D.degree (g t)
   have hstruct : (D.baseChange g).ideal.subschemeι ≫ (E.baseChange g).π
       = inv (pullback.snd D.ideal.subschemeι (pullback.fst E.π g)).toImage
         ≫ (pullback.snd D.ideal.subschemeι (pullback.fst E.π g) ≫ pullback.snd E.π g) := by
@@ -2102,7 +2101,15 @@ theorem degree_baseChange_eq {D : RelEffCartierDiv E.π} {N : ℕ}
     Scheme.Hom.finrank_comp_left_of_isIso _ _
   have h2 := Scheme.Hom.finrank_of_isPullback _ _ _ _ hsq t
   rw [hstruct]
-  exact (congrFun h1 t).trans (h2.trans (hdeg (g t)))
+  exact (congrFun h1 t).trans h2
+
+/-- **(Layer B, L1 — the relative degree is base-change invariant.)** BOARDED `[T-D5h-degBC]`.
+Constant degree `N` on `S` gives constant degree `N` on any `T` (the pointwise
+`degree_baseChange_apply`). -/
+theorem degree_baseChange_eq {D : RelEffCartierDiv E.π} {N : ℕ}
+    (hdeg : ∀ s : S, D.degree s = N) {T : Scheme.{u}} (g : T ⟶ S) (t : T) :
+    (D.baseChange g).degree t = N :=
+  (degree_baseChange_apply E D g t).trans (hdeg (g t))
 
 /-- **(Layer B, L1 + assembly — the box.)** Deligne's order theorem in the project's
 subgroup-divisor encoding, over an arbitrary base `S` and for an arbitrary `T`-point `Q`

@@ -2246,7 +2246,107 @@ theorem generatorSpace_fibre_isEmpty_of_not_isGammaZeroFppf (N : ℕ) [NeZero N]
     (t : Spec (CommRingCat.of k) ⟶ S)
     (hnc : ¬ (E.baseChange t).IsGammaZeroFppf N (D.baseChange t)) :
     IsEmpty (pullback (E.generatorSpaceπ N D hD) t : Scheme.{u}) := by
-  sorry
+  set hD' := RelEffCartierDiv.IsSubgroup.baseChange E hD t with hhD'
+  refine ⟨fun x => hnc ?_⟩
+  -- transport the fibre point into the base-changed generator space
+  obtain ⟨e, he⟩ := E.generatorSpace_baseChange N D hD t
+  -- the generator space is finite over `Spec k`, hence affine with finite section ring
+  haveI hιfin : IsFinite ((E.baseChange t).generatorSpaceι N (D.baseChange t) hD') :=
+    show IsFinite (((E.baseChange t).exists_generatorLocus N (D.baseChange t)
+      hD').choose.subschemeι) from inferInstance
+  haveI hDfin : IsFinite ((D.baseChange t).ideal.subschemeι ≫ pullback.snd E.π t) :=
+    (D.baseChange t).finite
+  haveI hπfin : IsFinite ((E.baseChange t).generatorSpaceπ N (D.baseChange t) hD') :=
+    show IsFinite ((E.baseChange t).generatorSpaceι N (D.baseChange t) hD' ≫
+      ((D.baseChange t).ideal.subschemeι ≫ pullback.snd E.π t)) from
+      MorphismProperty.IsStableUnderComposition.comp_mem (P := @IsFinite) _ _ ‹_› ‹_›
+  haveI : IsAffine ((E.baseChange t).generatorSpace N (D.baseChange t) hD') :=
+    isAffine_of_isAffineHom ((E.baseChange t).generatorSpaceπ N (D.baseChange t) hD')
+  -- the structure ring map and its finiteness
+  set σ : CommRingCat.of k ⟶ Γ((E.baseChange t).generatorSpace N (D.baseChange t) hD', ⊤) :=
+    Spec.preimage (((E.baseChange t).generatorSpace N (D.baseChange t) hD').isoSpec.inv ≫
+      (E.baseChange t).generatorSpaceπ N (D.baseChange t) hD') with hσ
+  have hσmap : Spec.map σ =
+      ((E.baseChange t).generatorSpace N (D.baseChange t) hD').isoSpec.inv ≫
+        (E.baseChange t).generatorSpaceπ N (D.baseChange t) hD' := Spec.map_preimage _
+  have hσfin : σ.hom.Finite := by
+    rw [← AlgebraicGeometry.IsFinite.SpecMap_iff, hσmap]
+    infer_instance
+  -- the section ring is nontrivial (the fibre point witnesses a prime)
+  haveI hnontriv :
+      Nontrivial ↑Γ((E.baseChange t).generatorSpace N (D.baseChange t) hD', ⊤) := by
+    have y : PrimeSpectrum ↑Γ((E.baseChange t).generatorSpace N (D.baseChange t) hD', ⊤) :=
+      ((E.baseChange t).generatorSpace N (D.baseChange t) hD').isoSpec.hom.base (e.hom.base x)
+    exact ⟨0, 1, fun h01 => y.isPrime.ne_top
+      ((Ideal.eq_top_iff_one _).mpr (h01 ▸ y.asIdeal.zero_mem))⟩
+  -- a maximal ideal gives a finite-residue point
+  obtain ⟨m, hmax⟩ := Ideal.exists_maximal
+    ↑Γ((E.baseChange t).generatorSpace N (D.baseChange t) hD', ⊤)
+  haveI := hmax
+  letI : Field (↑Γ((E.baseChange t).generatorSpace N (D.baseChange t) hD', ⊤) ⧸ m) :=
+    Ideal.Quotient.field m
+  set q : Spec (CommRingCat.of
+      (↑Γ((E.baseChange t).generatorSpace N (D.baseChange t) hD', ⊤) ⧸ m)) ⟶
+      (E.baseChange t).generatorSpace N (D.baseChange t) hD' :=
+    Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk m)) ≫
+      ((E.baseChange t).generatorSpace N (D.baseChange t) hD').isoSpec.inv with hq
+  set h : Spec (CommRingCat.of
+      (↑Γ((E.baseChange t).generatorSpace N (D.baseChange t) hD', ⊤) ⧸ m)) ⟶
+      Spec (CommRingCat.of k) :=
+    q ≫ (E.baseChange t).generatorSpaceπ N (D.baseChange t) hD' with hh
+  have hcomp : h = Spec.map (σ ≫ CommRingCat.ofHom (Ideal.Quotient.mk m)) := by
+    rw [hh, hq, Spec.map_comp, Category.assoc, hσmap]
+    rfl
+  -- the cover properties: surjective, flat, finitely presented
+  have hsurj : Function.Surjective h.base := by
+    haveI : Subsingleton ↑(Spec (CommRingCat.of k)) :=
+      inferInstanceAs (Subsingleton (PrimeSpectrum k))
+    intro s
+    have pt : ↑(Spec (CommRingCat.of
+        (↑Γ((E.baseChange t).generatorSpace N (D.baseChange t) hD', ⊤) ⧸ m))) :=
+      (⟨⊥, Ideal.bot_prime⟩ : PrimeSpectrum
+        (↑Γ((E.baseChange t).generatorSpace N (D.baseChange t) hD', ⊤) ⧸ m))
+    exact ⟨pt, Subsingleton.elim _ _⟩
+  have hρfin : (σ ≫ CommRingCat.ofHom (Ideal.Quotient.mk m)).hom.Finite :=
+    RingHom.Finite.comp
+      (RingHom.Finite.of_surjective _ Ideal.Quotient.mk_surjective) hσfin
+  have hflat : Flat h := by
+    rw [hcomp, HasRingHomProperty.Spec_iff (P := @Flat)]
+    show RingHom.Flat _
+    letI := (σ ≫ CommRingCat.ofHom (Ideal.Quotient.mk m)).hom.toAlgebra
+    show Module.Flat k _
+    infer_instance
+  have hlfp : LocallyOfFinitePresentation h := by
+    rw [hcomp, HasRingHomProperty.Spec_iff (P := @LocallyOfFinitePresentation)]
+    exact RingHom.FinitePresentation.of_finiteType.mp hρfin.to_finiteType
+  -- the tautological generator over the finite-residue point
+  set P : (E.baseChange t).Point h :=
+    ⟨q ≫ (E.baseChange t).generatorSpaceι N (D.baseChange t) hD' ≫
+      (D.baseChange t).ideal.subschemeι, by
+        rw [hh, generatorSpaceπ]
+        simp only [Category.assoc]
+        rfl⟩ with hP
+  have hgen : (E.baseChange t).IsDivisorGenerator N (D.baseChange t) h
+      (Point.asSection (E.baseChange t) h P) :=
+    ((E.baseChange t).generatorSpace_spec N (D.baseChange t) hD' h P
+      (q ≫ (E.baseChange t).generatorSpaceι N (D.baseChange t) hD')
+      (Category.assoc _ _ _)).mp ⟨q, rfl⟩
+  -- degree `N` descends along the surjective cover
+  have hdegT : ∀ s'', (((D.baseChange t).baseChange h)).degree s'' = N := by
+    intro s''
+    have hdiv : Section.orderDivisor ((E.baseChange t).baseChange h)
+        (Point.asSection (E.baseChange t) h P) N = (D.baseChange t).baseChange h :=
+      RelEffCartierDiv.ext hgen.2
+    rw [← hdiv]
+    exact RelEffCartierDiv.sectionsDivisor_degree ((E.baseChange t).baseChange h).π
+      ((E.baseChange t).baseChange h).smooth _ s''
+  have hdeg' : ∀ s : ↑(Spec (CommRingCat.of k)), (D.baseChange t).degree s = N := by
+    intro s
+    obtain ⟨s'', rfl⟩ := hsurj s
+    exact ((degree_baseChange_apply (E.baseChange t) (D.baseChange t) h s'').symm).trans
+      (hdegT s'')
+  exact ⟨hD', hdeg', _, h, hsurj, hflat, hlfp,
+    Point.asSection (E.baseChange t) h P, hgen.1, hgen.2⟩
 
 /-- **(KM 6.4.1 = ticket T-SG3: cyclicity is a closed condition)** For a rank-`N` subgroup
 divisor `D ⊆ E` there is a closed subscheme `Z ⊆ S` universal for cyclicity: `t : T ⟶ S`
