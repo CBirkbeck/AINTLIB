@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.IrelandRosen.PrimeSource
@@ -45,6 +50,7 @@ noncomputable def reciprocalPrincipalPhiElement
   PhiPrimeElement.PhiIdealElement.PhiPrincipalElement.ofPrimeFactors
     (p := p) (K := K) α primePhi
 
+/-- The `γ` of the principal φ-element is the product of the prime-factor `γ`s. -/
 @[simp]
 theorem reciprocalPrincipalPhiElement_gamma
     {p : ℕ} [Fact (Nat.Prime p)]
@@ -81,6 +87,7 @@ theorem reciprocalPrincipalPhiElement_span_eq_stickelbergerIdeal
 
 /-- Semi-primarity of the variable-prime principal Φ product follows from
 semi-primarity of the actual prime factors. -/
+/-- The `γ` of the principal φ-element is the product of the prime-factor `γ`s. -/
 theorem reciprocalPrincipalPhiElement_gamma_isSemiPrimary
     {p : ℕ} [Fact (Nat.Prime p)]
     {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
@@ -167,7 +174,7 @@ theorem reciprocalPrincipalPhiElement_symbol_eq_norm_principal
     (reciprocalPrincipalPhiElement (p := p) (K := K) α primePhi)
     hB hcop ?_
   intro P hP Q hQ
-  unfold PhiPrimeElement.PhiPrimeSymbolIdentityPos
+  simp only [PhiPrimeElement.PhiPrimeSymbolIdentityPos]
   exact h_prime P hP Q hQ
 
 end IrelandRosen
