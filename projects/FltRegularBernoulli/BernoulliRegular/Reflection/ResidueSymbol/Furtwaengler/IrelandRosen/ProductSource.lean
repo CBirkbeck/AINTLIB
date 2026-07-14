@@ -87,7 +87,6 @@ theorem reciprocalPrincipalPhiElement_span_eq_stickelbergerIdeal
 
 /-- Semi-primarity of the variable-prime principal Φ product follows from
 semi-primarity of the actual prime factors. -/
-/-- The `γ` of the principal φ-element is the product of the prime-factor `γ`s. -/
 theorem reciprocalPrincipalPhiElement_gamma_isSemiPrimary
     {p : ℕ} [Fact (Nat.Prime p)]
     {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
