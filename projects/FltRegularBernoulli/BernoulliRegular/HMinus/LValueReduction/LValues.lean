@@ -254,8 +254,7 @@ theorem hPlus_formula_of_evenLValues (hp_odd' : p ≠ 2) :
         Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ evenLValueRhs p χ) :=
   hPlus_formula_of_evenLValues_cyclotomicFactor (p := p) (K := K) hp_odd'
 
-set_option linter.unusedSectionVars false
-
+omit [IsCMField K] in
 /-- The residue formula for `ζ_K` at `s = 1`, rewritten using the explicit odd
 and even evaluations of the character `L`-values. -/
 theorem residue_ready_factorization_explicit_LValues :
