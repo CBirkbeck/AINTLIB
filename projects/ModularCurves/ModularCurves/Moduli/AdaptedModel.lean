@@ -169,6 +169,58 @@ chart differential IS `b`: the basis unit is `1`. -/
 def IsAdapted {V : S.affineOpens} (P : LocalPresentation G V) (b : OmegaBasis G) :
     Prop :=
   (P.basisUnitAt b).1 = 1
+open Scheme WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(E12-B)** Twisting scales the basis unit by the `u`-component of the twist:
+`basisUnitAt (P.ofVC C) b = C.u · basisUnitAt P b`. -/
+theorem basisUnitAt_ofVC {V : S.affineOpens} (P : LocalPresentation G V)
+    (C : VariableChange Γ(S, V.1)) (b : OmegaBasis G) :
+    ((P.ofVC C).basisUnitAt b).1 = C.u * (P.basisUnitAt b).1 := by
+  -- separation over the chart cover of `V`, then over affines
+  refine Scheme.unit_ext_of_res_cover S
+    (fun i : G.atlas.ι => V.1 ⊓ (G.atlas.U i).1) (fun i => inf_le_left)
+    (fun x hxV => by
+      obtain ⟨i, hxi⟩ := G.atlas.covers x
+      exact Opens.mem_iSup.mpr ⟨i, hxV, hxi⟩) (fun i => ?_)
+  rw [((P.ofVC C).basisUnitAt b).2 i, map_mul, (P.basisUnitAt b).2 i]
+  refine Scheme.unit_ext_of_affine_res S (fun W hW => ?_)
+  rw [((P.ofVC C).basisUnitOn b i).2 W hW, map_mul, Scheme.resUnit_resUnit,
+    (P.basisUnitOn b i).2 W hW]
+  -- the twisted comparison splits off `C.u` (`transUnit_trans` +
+  -- `transVC_restrict_ofVC` + `transVC_ofVC`-restricted)
+  have hsplit : ((P.ofVC C).restrict (hW.trans inf_le_left)).transUnit
+      ((G.atlas.presentation i).restrict (hW.trans inf_le_right)) =
+    ((P.ofVC C).restrict (hW.trans inf_le_left)).transUnit
+      (P.restrict (hW.trans inf_le_left)) *
+    (P.restrict (hW.trans inf_le_left)).transUnit
+      ((G.atlas.presentation i).restrict (hW.trans inf_le_right)) :=
+    (transUnit_trans _ _ _).symm
+  have hu : ((P.ofVC C).restrict (hW.trans inf_le_left)).transUnit
+      (P.restrict (hW.trans inf_le_left)) =
+    Scheme.resUnit (hW.trans inf_le_left) C.u := by
+    rw [transUnit, transVC_restrict_ofVC]
+    rfl
+  rw [hsplit, hu]
+  exact mul_left_comm _ _ _
+
+/-- **(E12-B)** The canonical adaptation: twist by the inverse basis unit. -/
+noncomputable def adapt {V : S.affineOpens} (P : LocalPresentation G V)
+    (b : OmegaBasis G) : LocalPresentation G V :=
+  P.ofVC ⟨((P.basisUnitAt b).1)⁻¹, 0, 0, 0⟩
+
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-B ★)** The canonical adaptation IS adapted: every `(E, ω)` admits an
+`ω`-adapted Weierstrass presentation over every chart-supported affine — the
+existence half of KM 2.2.5. -/
+theorem isAdapted_adapt {V : S.affineOpens} (P : LocalPresentation G V)
+    (b : OmegaBasis G) : (P.adapt b).IsAdapted b := by
+  show ((P.adapt b).basisUnitAt b).1 = 1
+  rw [show P.adapt b = P.ofVC ⟨((P.basisUnitAt b).1)⁻¹, 0, 0, 0⟩ from rfl,
+    basisUnitAt_ofVC]
+  exact inv_mul_cancel _
+
 end LocalPresentation
 
 end ModularCurves
