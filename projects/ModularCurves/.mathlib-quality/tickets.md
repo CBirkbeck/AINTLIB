@@ -2469,9 +2469,10 @@ adjudicates.
   `restrict_classifyingMap` (Γ–Spec triangle), `chartPiece_isPullback` (chart-square
   paste), **`isPullback_classifyingTop`** (cover-descent via
   `isPullback_of_iSup_eq_top` — Y IS the pullback of the universal curve; GME 2.2.3
-  geometric universality). REMAINING: the `X₁ : EllObj R`-packaging (base `Spec R₁`,
-  R-structure `Spec.map (algebraMap-composite)`, curve `modelEllipticCurve univ`) +
-  `classifyingEllHom` assembly (base_w = the R-algebra triangle) →
+  geometric universality). **PACKAGING DONE
+  (c428a150a)**: `universalEllObj` + `classifyingRingHom_algebraMap` +
+  `classifyingMap_structMap` + **`classifyingEllHom : Y ⟶ universalEllObj R`** —
+  E12-D3 is COMPLETE ★★ (GME 2.2.3 forward universal property, axiom-clean). →
   **D4** — `RepresentableBy` packaging (bijectivity from E12-B uniqueness +
   adapted-pullback functoriality).
   ORIGINAL SPEC: the basis-unit of a presentation**: for `b : OmegaBasis G` and
