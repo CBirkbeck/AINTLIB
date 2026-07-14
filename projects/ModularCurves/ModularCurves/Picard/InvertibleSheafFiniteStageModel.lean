@@ -378,6 +378,47 @@ theorem AffineIntersectionUnitCocycle.overlapTransitionIso_cocycle
       (c.overlapTransitionSection i k : _) at h
   rw [h]
 
+/-- The transition isomorphism between the chartwise unit sheaves on an ordered overlap.
+The second chart is transported to the ordered overlap by the scheme gluing map. -/
+noncomputable def AffineIntersectionUnitCocycle.chartTransitionIso
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (pullback (D.f i j)).obj (unitObj (D.U i)) ≅
+      (pullback (D.t i j ≫ D.f j i)).obj (unitObj (D.U j)) :=
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  pullbackUnitIso (D.f i j) ≪≫ c.overlapTransitionIso i j ≪≫
+    (pullbackUnitIso (D.t i j ≫ D.f j i)).symm
+
+@[simp]
+theorem AffineIntersectionUnitCocycle.chartTransitionIso_hom
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (c.chartTransitionIso hopen hpush i j).hom =
+      (pullbackUnitIso (D.f i j)).hom ≫ (c.overlapTransitionIso i j).hom ≫
+        (pullbackUnitIso (D.t i j ≫ D.f j i)).inv :=
+  rfl
+
+@[simp]
+theorem AffineIntersectionUnitCocycle.chartTransitionIso_inv
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (c.chartTransitionIso hopen hpush i j).inv =
+      (pullbackUnitIso (D.t i j ≫ D.f j i)).hom ≫
+        (c.overlapTransitionIso i j).inv ≫ (pullbackUnitIso (D.f i j)).inv :=
+  rfl
+
 /-- Affine-intersection transition units are compatible with every restriction map in
 the coordinate-ring functor. -/
 theorem affineIntersectionTransitionUnit_map

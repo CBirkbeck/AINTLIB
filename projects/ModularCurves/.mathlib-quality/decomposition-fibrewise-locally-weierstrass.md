@@ -408,7 +408,13 @@ and triple-intersection Cech laws after canonical pullback. The finite-stage tra
 therefore give axiom-clean scalar automorphisms of the overlap structure sheaves satisfying the
 full line-bundle descent equations.
 
-Active dependency claim (2026-07-14): conjugate the overlap scalar automorphisms by the
-canonical pullback-unit isomorphisms to obtain transition isomorphisms between the restrictions
-of the chartwise unit sheaves. Package these as local module descent data suitable for gluing on
-the finite-stage proper scheme.
+Completed subdependency (2026-07-14): defined
+`AffineIntersectionUnitCocycle.chartTransitionIso`. On the ordered overlap `V i j`, it is the
+isomorphism from the pullback of the `i`th chart's unit sheaf to the pullback of the `j`th chart's
+unit sheaf along `t i j ≫ f j i`, obtained by conjugating the scalar transition through the two
+canonical pullback-unit isomorphisms.
+
+Active dependency claim (2026-07-14): prove the chart transition isomorphisms satisfy the
+identity, inverse, and triple-overlap coherence equations induced by the scheme `GlueData` maps
+`t` and `t'`, then package them as local module descent data suitable for gluing on the
+finite-stage proper scheme.
