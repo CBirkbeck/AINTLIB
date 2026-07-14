@@ -3,11 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Fiber.GoodAffineLocus
 import HasseWeil.Foundation.Curves.Fiber.GenericFiber
-import HasseWeil.Foundation.Curves.Valuation.NormValuation
-import HasseWeil.Foundation.Curves.Valuation.Infinity
+import HasseWeil.Foundation.Curves.Fiber.GoodAffineLocus
 import HasseWeil.Foundation.Curves.Map.PointFunctor
+import HasseWeil.Foundation.Curves.Valuation.Infinity
+import HasseWeil.Foundation.Curves.Valuation.NormValuation
 import Mathlib.Algebra.Polynomial.Lifts
 
 /-!
@@ -836,6 +836,7 @@ section Headline
 variable [ellC₁ : C₁.toAffine.IsElliptic] [ellC₂ : C₂.toAffine.IsElliptic]
 variable [sepKL : Algebra.IsSeparable C₂.FunctionField C₁.FunctionField]
 
+omit algAfK twAfK in
 /-- **The good target point** (avoidance + genericity step of the headline).  Given the
 finite ramification locus `Sram` of `(Af, D)`, off any prescribed finite set `avoid` there
 is a smooth point `Q` of `C₂` that also avoids the zeros of `f` and the pullback of `Sram`.
@@ -878,6 +879,7 @@ private theorem exists_good_target_point [IsAlgClosed F]
   obtain ⟨⟨hQavoid, hQf⟩, hQram⟩ := hQ
   exact ⟨Q, hQavoid, hQf, fun hmem ↦ hQram ⟨hQf, hmem⟩⟩
 
+omit ellC₁ ellC₂ in
 /-- **The fibre count** (`Σ e·f = [K(C₁):K(C₂)]` step of the headline).  For a good target
 point `Q` — off the zeros of `f` (`hfQ`) and off the ramification locus `Sram` (`hQS`) — the
 number of primes of `D = integralClosure Af K(C₁)` over `q = awayIdealAt Af Q` equals
