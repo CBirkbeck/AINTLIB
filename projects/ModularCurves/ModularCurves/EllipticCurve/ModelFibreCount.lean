@@ -270,10 +270,32 @@ spectrum of a Jacobson non-field domain). -/
 theorem projModel_infinite : Infinite (projModel W) :=
   projModel_infinite' W
 
-/-- **(leaf g4)** The projective model is a Noetherian topological space (the chart is
-Noetherian, the complement is finite; every open is compact). -/
+/-- **(leaf g4, DISCHARGED)** The projective model is a Noetherian topological space:
+every open is the union of a compact chart piece (any subset of the Noetherian
+`Spec K[W]` is compact) and a finite off-chart piece (inside the single-point range of
+the zero section). -/
 theorem projModel_noetherianSpace : TopologicalSpace.NoetherianSpace (projModel W) := by
-  sorry
+  haveI : TopologicalSpace.NoetherianSpace ((zChart W).toScheme : Scheme.{u}) := by
+    rw [TopologicalSpace.noetherianSpace_iff_opens]
+    intro s
+    exact (zChartHomeo W).isCompact_image.mp
+      (TopologicalSpace.NoetherianSpace.isCompact _)
+  rw [TopologicalSpace.noetherianSpace_iff_opens]
+  intro V
+  have hUrange : Set.range ((zChart W).ι).base = (zChart W : Set (projModel W)) :=
+    Scheme.Opens.range_ι _
+  have hV : (V : Set (projModel W)) =
+      (((zChart W).ι).base '' (((zChart W).ι).base ⁻¹' (V : Set (projModel W)))) ∪
+        ((V : Set (projModel W)) \ (zChart W : Set (projModel W))) := by
+    rw [Set.image_preimage_eq_inter_range, hUrange]
+    exact (Set.inter_union_diff _ _).symm
+  rw [hV]
+  refine IsCompact.union ?_ ?_
+  · exact (TopologicalSpace.NoetherianSpace.isCompact _).image
+      (Scheme.Hom.continuous _)
+  · refine Set.Finite.isCompact (Set.Finite.subset (Set.finite_range
+      (projModelZero W).base) fun x hx => ?_)
+    exact mem_range_zero_of_not_mem_zChart hx.2
 
 /-- **THE MODEL FIBRE-COUNT (assembly; sorry-free given the leaves).** If the range of
 `[N]` on the projective model is topologically infinite (the HasseWeil witness, the
