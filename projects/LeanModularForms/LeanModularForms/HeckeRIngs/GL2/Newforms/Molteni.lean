@@ -83,20 +83,24 @@ theorem isMultiplicative'_primeRestrict {p : ℕ} (hp : p.Prime) {F : ℕ → �
 
 end IsMultiplicative'
 
-/-- Two functions are *equivalent* if they agree at every prime power `p^a` (`a ≥ 1`) for all
-but finitely many primes `p`.  Equivalently, the set of "bad" primes (those `p` at which some
-positive power `p^a` separates `F` and `G`) is finite. -/
-def Equiv' (F G : ℕ → ℂ) : Prop :=
-  {p : ℕ | p.Prime ∧ ∃ a : ℕ, 1 ≤ a ∧ F (p ^ a) ≠ G (p ^ a)}.Finite
-
-/-- The set of "bad" primes separating `F` and `G`. -/
+/-- The set of "bad" primes separating `F` and `G`: those `p` at which some positive power
+`p^a` separates `F` and `G`. -/
 def badPrimes (F G : ℕ → ℂ) : Set ℕ :=
   {p : ℕ | p.Prime ∧ ∃ a : ℕ, 1 ≤ a ∧ F (p ^ a) ≠ G (p ^ a)}
 
+/-- Two functions are *equivalent* if they agree at every prime power `p^a` (`a ≥ 1`) for all
+but finitely many primes `p`, i.e. if their set of bad primes is finite. -/
+def Equiv' (F G : ℕ → ℂ) : Prop :=
+  (badPrimes F G).Finite
+
 theorem equiv'_iff (F G : ℕ → ℂ) : Equiv' F G ↔ (badPrimes F G).Finite := Iff.rfl
 
-theorem not_equiv'_iff (F G : ℕ → ℂ) : ¬ Equiv' F G ↔ (badPrimes F G).Infinite := by
-  rw [equiv'_iff, Set.not_infinite.symm]; tauto
+theorem not_equiv'_iff (F G : ℕ → ℂ) : ¬ Equiv' F G ↔ (badPrimes F G).Infinite := Iff.rfl
+
+/-- Distinct primes: no power of `q` is divisible by `p`. -/
+private theorem not_dvd_pow_of_prime_ne {p q : ℕ} (hp : p.Prime) (hq : q.Prime) (hqp : q ≠ p)
+    (a : ℕ) : ¬ p ∣ q ^ a := fun h =>
+  hqp ((Nat.prime_dvd_prime_iff_eq hp hq).mp (hp.dvd_of_dvd_pow h)).symm
 
 /-- Two multiplicative functions that agree on all positive powers of all primes are equal
 on every positive natural. -/
@@ -129,12 +133,10 @@ theorem eq_of_eq_on_prime_powers {F G : ℕ → ℂ} (hF : IsMultiplicative' F)
       rw [hm1, mul_one] at hfac
       rw [← hfac]; exact h p hp a ha1
     · -- proper factorisation: both factors are smaller, apply IH multiplicatively.
-      have ha1' : a ≠ 0 := by omega
-      have hpa1 : 1 < p ^ a := Nat.one_lt_pow ha1' hp.one_lt
-      have hm_pos' : 0 < m := hm_pos
+      have hpa1 : 1 < p ^ a := Nat.one_lt_pow (by omega) hp.one_lt
       have hm_lt : m < n := by
         calc m = 1 * m := (one_mul m).symm
-          _ < p ^ a * m := Nat.mul_lt_mul_of_lt_of_le hpa1 le_rfl hm_pos'
+          _ < p ^ a * m := Nat.mul_lt_mul_of_lt_of_le hpa1 le_rfl hm_pos
           _ = n := hfac
       rw [← hfac, hF.map_mul_of_coprime hcop, hG.map_mul_of_coprime hcop,
         h p hp a ha1, ih m hm_lt hm_pos]
@@ -151,24 +153,15 @@ theorem badPrimes_primeRestrict_eq {p : ℕ} (hp : p.Prime) (F G : ℕ → ℂ) 
     -- `q` separates the restrictions ⟹ `q ≠ p` (else both sides are `0`) and `q` separates `F,G`.
     have hqp : q ≠ p := by
       rintro rfl
-      exact hne (by rw [IsMultiplicative'.primeRestrict_of_dvd ⟨q ^ (a - 1), by
-        rw [← pow_succ']; congr 1; omega⟩,
-        IsMultiplicative'.primeRestrict_of_dvd ⟨q ^ (a - 1), by
-        rw [← pow_succ']; congr 1; omega⟩])
-    have hpq : ¬ p ∣ q ^ a := by
-      intro h
-      have hdvd := hp.dvd_of_dvd_pow h
-      rw [Nat.prime_dvd_prime_iff_eq hp hq] at hdvd
-      exact hqp hdvd.symm
+      have hdvd : q ∣ q ^ a := dvd_pow_self q (by omega)
+      exact hne (by rw [IsMultiplicative'.primeRestrict_of_dvd hdvd,
+        IsMultiplicative'.primeRestrict_of_dvd hdvd])
+    have hpq : ¬ p ∣ q ^ a := not_dvd_pow_of_prime_ne hp hq hqp a
     refine ⟨⟨hq, a, ha1, ?_⟩, hqp⟩
     rwa [IsMultiplicative'.primeRestrict_of_not_dvd hpq,
       IsMultiplicative'.primeRestrict_of_not_dvd hpq] at hne
   · rintro ⟨⟨hq, a, ha1, hne⟩, hqp⟩
-    have hpq : ¬ p ∣ q ^ a := by
-      intro h
-      have hdvd := hp.dvd_of_dvd_pow h
-      rw [Nat.prime_dvd_prime_iff_eq hp hq] at hdvd
-      exact hqp hdvd.symm
+    have hpq : ¬ p ∣ q ^ a := not_dvd_pow_of_prime_ne hp hq hqp a
     refine ⟨hq, a, ha1, ?_⟩
     rwa [IsMultiplicative'.primeRestrict_of_not_dvd hpq,
       IsMultiplicative'.primeRestrict_of_not_dvd hpq]
@@ -199,8 +192,8 @@ theorem primeRestrict_rec {p : ℕ} (hp : p.Prime) {w : ℕ → ℂ} {F : ℕ �
     have h2 : IsMultiplicative'.primeRestrict p F q = 0 :=
       IsMultiplicative'.primeRestrict_of_dvd hpq
     rw [if_pos hqp, h1, h2]; ring
-  · have hndq : ¬ p ∣ q := fun h => hqp ((Nat.prime_dvd_prime_iff_eq hp hq).mp h).symm
-    have hnd : ∀ j : ℕ, ¬ p ∣ q ^ j := fun j h => hndq (hp.dvd_of_dvd_pow h)
+  · have hnd : ∀ j : ℕ, ¬ p ∣ q ^ j := not_dvd_pow_of_prime_ne hp hq hqp
+    have hndq : ¬ p ∣ q := by simpa using hnd 1
     rw [if_neg hqp, IsMultiplicative'.primeRestrict_of_not_dvd (hnd (r + 2)),
       IsMultiplicative'.primeRestrict_of_not_dvd hndq,
       IsMultiplicative'.primeRestrict_of_not_dvd (hnd (r + 1)),
@@ -215,8 +208,7 @@ theorem badPrimes_subset_singleton_of_primeRestrict_eq {p : ℕ} (hp : p.Prime) 
   rintro q ⟨hqprime, a, ha1, hne⟩
   rw [Set.mem_singleton_iff]
   by_contra hqp
-  have hnd : ¬ p ∣ q ^ a := fun hd =>
-    hqp ((Nat.prime_dvd_prime_iff_eq hp hqprime).mp (hp.dvd_of_dvd_pow hd)).symm
+  have hnd : ¬ p ∣ q ^ a := not_dvd_pow_of_prime_ne hp hqprime hqp a
   refine hne ?_
   have := congrFun h (q ^ a)
   rwa [IsMultiplicative'.primeRestrict_of_not_dvd hnd,
@@ -234,10 +226,8 @@ theorem mem_badPrimes_of_ne_of_subset_singleton {p : ℕ} {F G : ℕ → ℂ}
   · rw [hF0, hG0]
   refine eq_of_eq_on_prime_powers hF hG (fun q hq a ha => ?_) n hn
   by_contra hqa
-  have : q ∈ badPrimes F G := ⟨hq, a, ha, hqa⟩
-  rcases hsub this with hqp
-  rw [Set.mem_singleton_iff] at hqp
-  exact hp (hqp ▸ this)
+  have hq_bad : q ∈ badPrimes F G := ⟨hq, a, ha, hqa⟩
+  exact hp (Set.mem_singleton_iff.mp (hsub hq_bad) ▸ hq_bad)
 
 /-- **Molteni's linear-independence lemma, all-nonzero (support) form.**  Strong induction on
 `|s|` proving the contrapositive: a family of pairwise non-equivalent multiplicative functions
@@ -279,7 +269,8 @@ theorem support_eq_empty_of_pairwise_not_equiv'
         intro i _
         simp only [hG_def, IsMultiplicative'.primeRestrict_of_dvd hpn, mul_zero]
       · -- `p ∤ n`: `G i n = F i n`; expand `c'` and use `rel(p^a n) − F r(p^a) · rel(n) = 0`.
-        have hpan : Nat.Coprime (p ^ a) n := (Nat.Prime.coprime_iff_not_dvd hp).mpr hpn |>.pow_left a
+        have hpan : Nat.Coprime (p ^ a) n :=
+          ((Nat.Prime.coprime_iff_not_dvd hp).mpr hpn).pow_left a
         have hpan_pos : 1 ≤ p ^ a * n := Nat.one_le_iff_ne_zero.mpr
           (Nat.mul_ne_zero (pow_pos hp.pos a).ne' (by omega))
         have hrelpan := hrel (p ^ a * n) hpan_pos
@@ -333,8 +324,8 @@ theorem support_eq_empty_of_pairwise_not_equiv'
       rcases mul_eq_zero.mp hc'i0 with h | h
       · exact absurd h (hc i his)
       · exact sub_eq_zero.mp h
-  -- From `hkey`: every `i ∈ s` has `F i = F r` on prime powers, hence (multiplicativity) `F i ≃ F r`.
-  -- Case on whether `s` has an element other than `r`.
+  -- From `hkey`: every `i ∈ s` has `F i = F r` on prime powers, hence (by multiplicativity)
+  -- `F i ≃ F r`.  Case on whether `s` has an element other than `r`.
   by_cases hcard1 : 1 < s.card
   · -- Another element `i ≠ r` exists; `F i ≃ F r` contradicts non-equivalence.
     obtain ⟨i, his, hir⟩ : ∃ i ∈ s, i ≠ r := by
