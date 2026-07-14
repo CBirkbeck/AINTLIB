@@ -19965,3 +19965,27 @@ universalLegendreOmega = b via the unit-torsor + transported-taut-vs-witness CLS
 T-E12-rt1 replay; note the transported taut is marked via `MarksAt.transport` of
 `tautPresentation_marksAt` with hcomm = the pullSection-identities JUST PROVEN). Then rt2 +
 RepresentableBy → AX1 modulo [T-E14-LVL-b].
+
+## v10.233-OMEGA (2026-07-14) — rt1(ω) ROUTE CORRECTION (adversarial self-check): the sign is pinned GEOMETRICALLY
+
+**Discovery while drafting rt1(ω):** the abstract-uniqueness route is INSUFFICIENT — CLS-1
+compares witnesses adapted to the SAME basis, but the transported taut is adapted to the PULLED
+basis while the witness is adapted to `b` (the ratio is what rt1 computes!). The basis-free
+marked-Legendre comparison (`legendreCurve_vc_marked`) pins their transVC only to `⟨±1,0,0,0⟩`
+— the sign `y ↦ −y` fixes both marked points, so the LEVEL datum cannot break it. The sign is
+pinned by the GEOMETRY of the glued classifying construction (legendreTop's pieces are built from
+the witnesses' `e`-isos), exactly as in T-E12's rt1-core. **Correct route (T-E12 D4 replay):**
+1. `sectionsMapLE_legendreClassifyingMap` — the Spec-side determination
+   `sectionsMapLE (legendreClassifyingMap) ∘ ΓSpecIso.inv = resLE ∘ legendreClassifyingRingHom`
+   (mirror of `sectionsMapLE_classifyingMap`, UniversalAdapted ~1130: isoSpec-naturality +
+   `Spec.map_injective`).
+2. `transVC_transport_legendre` — the rt1-core: `transVC (transported-taut) (witness) = 1` via
+   `transVC_unique` + `(isPullback_projModelBaseChange taut.W).hom_ext`; bc-leg through
+   `transport_e_baseChange` → `transportTheta_fst` → `legendreTop_piece`-fold →
+   witness-piece-unfold → `cancel_epi` → `projModelBaseChange_congr_hom/comp'` →
+   backward-isoPullback-collapse; π-leg via `projModelπ_congr` + both `compat_π`s.
+   (= `transVC_transport_taut` with legendreTop_piece for classifyingTop_piece.)
+3. The torsor tail (banked template): `basisUnitAt_transUnit` + `IsAdapted.transport
+   tautPresentation_isAdapted_legendre` + `basisUnitAt_smul` + witness-adaptedness ⟹
+   `resUnit u = 1` per witness affine ⟹ `u = 1` by `unit_ext_of_res_cover`.
+Draft reverted cleanly (green tree preserved); rt1-level-half commits stand.
