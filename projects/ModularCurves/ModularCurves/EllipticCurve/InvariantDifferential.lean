@@ -699,7 +699,7 @@ private theorem transVC_restrict_restrict {VP VQ : S.affineOpens}
 set_option backward.isDefEq.respectTransparency false in
 /-- **(T-OM-B5 coherence, unit form)** Restricting a transition unit twice agrees with
 the composite restriction. -/
-private theorem transUnit_restrict_restrict {VP VQ : S.affineOpens}
+theorem transUnit_restrict_restrict {VP VQ : S.affineOpens}
     (P : LocalPresentation G VP) (Q : LocalPresentation G VQ)
     {V V'' : S.affineOpens} (p : V.1 ≤ VP.1) (q : V.1 ≤ VQ.1) (h : V''.1 ≤ V.1) :
     ((P.restrict p).restrict h).transUnit ((Q.restrict q).restrict h) =
