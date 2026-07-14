@@ -69,8 +69,6 @@ namespace HasseWeil.WeilPairing
 open HasseWeil HasseWeil.WeilPairing.DivisorPullback
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.style.longLine false
 
 variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
@@ -116,7 +114,8 @@ theorem pullbackDivisor_comm {f g : W.toAffine.Point →+ W.toAffine.Point}
 `pullbackDivisor [ℓ]` of `kappaDivisor T = (T) − (O)` equals `pullbackDiv [ℓ] T − pullbackDiv [ℓ]
 O`. (Local copy of `PairingNondeg.pullbackDivisor_kappaDivisor`, kept here to avoid the import;
 named `…_local` to avoid the cross-file name clash with the `PairingNondeg` copy, so that downstream
-files importing both `HfactLemma` and `DetDeg`/`PairingNondeg` — e.g. `SeparableScaling` — compile.) -/
+files importing both `HfactLemma` and `DetDeg`/`PairingNondeg` — e.g. `SeparableScaling` — compile.)
+-/
 theorem pullbackDivisor_kappaDivisor_local (ℓ : ℤ)
     [hker : Finite (mulByInt W.toAffine ℓ).toAddMonoidHom.ker] (T : W.toAffine.Point) :
     pullbackDivisor (W := W.toAffine) (mulByInt W.toAffine ℓ).toAddMonoidHom hker
@@ -158,7 +157,8 @@ to `(φ̂ T) − (O) = kappaDivisor (picDual φ T)`, for every torsion point `T`
 
 This is the projective-divisor avatar of `PicDual.Naturality`: `picDual = κ⁻¹ ∘ classMap ∘ κ` is
 defined in the affine ideal class group, where `classMap = ClassGroup.map` is the ideal-extension
-divisor pullback; the identity here is that pullback transported to the projective `ProjectiveDivisor`
+divisor pullback; the identity here is that pullback transported to the projective
+`ProjectiveDivisor`
 model along `κ : E ≅ Pic⁰(E)`. It is dischargeable per isogeny exactly as `ProjOrdTransport` and
 `Naturality` are throughout the project. -/
 def PicDualDivisorClass (φ : Isogeny W.toAffine W.toAffine)
@@ -192,7 +192,8 @@ This isolates the divisor computation (the heavy part) from the constant-extract
 `hfact_of_picDualDivisorClass`.
 
 `div(φ^* g_T) = φ^*([ℓ]^* κT) = [ℓ]^*(φ^* κT)` (`weilFunction_divisor` + `pullbackDivisor_comm`),
-and `φ^* κT = κU + div k₀` (`hk₀_div`), so `= [ℓ]^* κU + [ℓ]^*(div k₀) = div(g_U) + div([ℓ]^* k₀)`. -/
+and `φ^* κT = κU + div k₀` (`hk₀_div`), so `= [ℓ]^* κU + [ℓ]^*(div k₀) = div(g_U) + div([ℓ]^* k₀)`.
+-/
 theorem hfact_projectiveDivisorOf_eq (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
     (φ : Isogeny W.toAffine W.toAffine) [Finite φ.toAddMonoidHom.ker]
     (hφ : ProjOrdTransport φ)
@@ -250,11 +251,13 @@ nonzero constant `c ∈ Fˣ` and a function `k ∈ K(E)` with
 ```
 φ^* g_T = c · (g_U · ([ℓ]^* k)),     U = picDual φ T = φ̂ T.
 ```
-This is exactly the `hfact` hypothesis of `weilPairing_adjoint_core` / `weilPairing_adjoint_picDual`.
+This is exactly the `hfact` hypothesis of `weilPairing_adjoint_core` /
+`weilPairing_adjoint_picDual`.
 
 Proof. `hfact_projectiveDivisorOf_eq` gives `div(φ^* g_T) = div(g_U · ([ℓ]^* k₀))` for the
 Abel–Jacobi function `k₀` of `hpd`; two functions with the same projective divisor differ by a
-nonzero constant `c` (`const_unit_of_projectiveDivisorOf_eq_zero`), giving `hfact` with `k := k₀`. -/
+nonzero constant `c` (`const_unit_of_projectiveDivisorOf_eq_zero`), giving `hfact` with `k := k₀`.
+-/
 theorem hfact_of_picDualDivisorClass (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
     (φ : Isogeny W.toAffine W.toAffine) [Finite φ.toAddMonoidHom.ker]
     (hφ : ProjOrdTransport φ)
@@ -306,15 +309,18 @@ theorem hfact_of_picDualDivisorClass (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
 
 Wiring `hfact_of_picDualDivisorClass` into `weilPairing_adjoint_core` (Silverman III.8.2): the
 existential factorisation produced above is exactly the `hfact` hypothesis, so the adjoint
-`e_ℓ(φS, T) = e_ℓ(S, φ̂T)` follows from the geometric witnesses `hφ`/`hcomm` and the *single* carried
+`e_ℓ(φS, T) = e_ℓ(S, φ̂T)` follows from the geometric witnesses `hφ`/`hcomm` and the *single*
+carried
 residual `hpd : PicDualDivisorClass φ` (the projective-form `picDual` divisor-class identity,
-Silverman III.6.1b) — together with the translation covariance `hcomm'` of `weilPairing_adjoint_core`. -/
+Silverman III.6.1b) — together with the translation covariance `hcomm'` of
+`weilPairing_adjoint_core`. -/
 
 /-- **The separable adjoint, `hfact` discharged via `PicDualDivisorClass`** (Silverman III.8.2). For
 a separable isogeny `φ` of `E`, the `picDual` data `ch`/`hinj`/`hfin`, the divisor-pullback
 functoriality `hφ : ProjOrdTransport φ`, the commutation `[ℓ] ∘ φ = φ ∘ [ℓ]` (`hcommφ`), the
 translation covariance `hcomm'` (`weilPairing_adjoint_core`'s `hcomm`), and the **single carried
-residual** `hpd : PicDualDivisorClass φ` (the projective `picDual` divisor-class identity, III.6.1b),
+residual** `hpd : PicDualDivisorClass φ` (the projective `picDual` divisor-class identity,
+III.6.1b),
 the Weil pairing satisfies the adjoint relation `e_ℓ(φS, T) = e_ℓ(S, φ̂T)` with `φ̂ = picDual φ`.
 
 The `hfact` hypothesis of `weilPairing_adjoint_core` is supplied by `hfact_of_picDualDivisorClass`
