@@ -20204,3 +20204,28 @@ actions transport; T-H3).
 LEAN-OP: a `have`-bound `AddMonoidHom.mk'` is OPAQUE to rw/rfl (proof-term binding) — inline the
 mk'-term at use-sites (or `set … with`); `map_zsmul` then applies with the pullSection-spelling
 accepted by defeq.
+
+## v10.240-OMEGA (2026-07-14) — ★★★ THE T-E4a RIPPLE FULLY HARVESTED: all three naive-problem functors sorry-free; GH's [GH1] UNGATED
+
+Post-v10.239 harvest (commits 29be399a4…5c3baa865, all axiom-clean, all downstream green incl.
+the full Y-assembly chain):
+- **[T-H3 ★★]** `pullSection_zsmul` + `pullSection_glSmul` (GL₂-equivariance is mechanical from
+  additivity) ⟹ **`gammaHNaiveProblem.map` DE-SORRIED** (both the membership and the
+  `Quotient.map`-compatibility sorries).
+- **[T-E4b ★]** `isNaiveGammaOne_pullSection` (killing + both fibrewise clauses through the
+  ψ-AddEquiv — order is preserved AND reflected) ⟹ **`gammaOneNaiveProblem.map` DE-SORRIED**.
+- **Fleet unbreak:** GH's pre-staged T-E4a-gated `pullSection_zsmul` copy in
+  GammaHRepresentability.lean deduplicated (identical statement; upstream T-H3a wins) — GH's
+  file builds green. **⚠ RELAY to STREAM-GH: your [GH1] `gammaHAut` gate (T-E4a) is OPEN.**
+**Functor-data status: γ₁ ✓, Γ(N) ✓, P_H ✓ — every naive moduli functor in
+Representability/GammaH is sorry-free.** Remaining sorries in those files are the
+representability THEOREMS (T-E7/E9/H4/H5/H6, Drinfeld) — engine (T-Q6d.γ)/keystone/stream-C/Q
+chartered, none OMEGA-dispatchable.
+
+## v10.241-OMEGA (2026-07-14) — SESSION TERMINAL (updated): dispatchable frontier exhausted again
+
+Everything in v10.238's terminal statement stands, UPGRADED by v10.239/240: the T-E14-AX1 machine
+and the whole legendreDelta arc are now **axiom-clean (standard 3)**, conditional only on
+[T-E14-LVL-b]. OMEGA's residual gates remain: LVL-b + AX2 (KM keystone), ACT' (coordinator
+ruling, v10.237), engine+T-E15 (other streams). No OMEGA-dispatchable ticket remains on the
+board; the seat idles pending the keystone or a coordinator steer.
