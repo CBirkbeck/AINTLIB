@@ -270,7 +270,7 @@ private theorem pointSharp_comp_π {U : (F.E).Opens} {t : Spec R ⟶ Spec B} (P 
       (t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom) c := by
   show ((F.π.appLE ⊤ U _ ≫ P.1.appLE U ⊤ _) ≫ (Scheme.ΓSpecIso R).hom) c = _
   rw [Scheme.Hom.appLE_comp_appLE P.1 F.π ⊤ U ⊤ _ _,
-    FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_congr_hom P.2 ⊤ ⊤]
+    appLE_congr_hom P.2 ⊤ ⊤]
 
 /-- The augmentation retracts the structure map: `ζ ∘ π♯ = id` (`Γ`-dual of `zero ≫ π = 𝟙`). -/
 private theorem zero_appLE_π_appLE {U : (F.E).Opens}
@@ -278,8 +278,8 @@ private theorem zero_appLE_π_appLE {U : (F.E).Opens}
     F.zero.appLE U ⊤ (fun x _ => heU x) (F.π.appLE ⊤ U (fun x _ => trivial) c) = c := by
   show (F.π.appLE ⊤ U _ ≫ F.zero.appLE U ⊤ _) c = c
   rw [Scheme.Hom.appLE_comp_appLE F.zero F.π ⊤ U ⊤ _ _,
-    FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_congr_hom F.zero_π ⊤ ⊤,
-    FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_id]
+    appLE_congr_hom F.zero_π ⊤ ⊤,
+    appLE_id]
   rfl
 
 
@@ -414,11 +414,11 @@ private theorem pointSharp_fromSpec (hU : IsAffineOpen U)
     pointSharp (R := Γ(F.E, U)) hU.fromSpec htaut = 𝟙 Γ(F.E, U) := by
   show hU.fromSpec.appLE U ⊤ _ ≫ (Scheme.ΓSpecIso Γ(F.E, U)).hom = 𝟙 _
   have hdef : hU.fromSpec = hU.isoSpec.inv ≫ U.ι := rfl
-  rw [FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_congr_hom hdef U ⊤,
+  rw [appLE_congr_hom hdef U ⊤,
     ← Scheme.Hom.appLE_comp_appLE hU.isoSpec.inv U.ι U ⊤ ⊤
       U.ι_preimage_self.ge le_top,
-    FiniteLocallyFreeSubgroup.AffineChartPatch.ι_appLE_top,
-    FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_top_top]
+    ι_appLE_top,
+    appLE_top_top]
   have h1 : hU.isoSpec.inv.appTop ≫ hU.isoSpec.hom.appTop = 𝟙 _ := by
     rw [← Scheme.Hom.comp_appTop, Iso.hom_inv_id, Scheme.Hom.id_appTop]
   have h2 : hU.isoSpec.hom.appTop =
@@ -558,7 +558,7 @@ private theorem pointSharp_specMap_comp {R' R'' : CommRingCat.{u}} (g : R'' ⟶ 
   have hnat : pointSharp v hv ≫ g = (Spec.map g ≫ v).appLE U ⊤
       (fun x _ => hcomp x) ≫ (Scheme.ΓSpecIso R').hom := by
     rw [pointSharp, Category.assoc, ← Scheme.ΓSpecIso_naturality, ← Category.assoc,
-      ← FiniteLocallyFreeSubgroup.AffineChartPatch.appLE_top_top (Spec.map g),
+      ← appLE_top_top (Spec.map g),
       Scheme.Hom.appLE_comp_appLE]
   rw [hnat]
   rfl

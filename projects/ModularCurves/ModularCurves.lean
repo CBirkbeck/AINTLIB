@@ -32,6 +32,7 @@ import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.WeierstrassModel
 import ModularCurves.ForMathlib.BaseChangeKerCoker
 import ModularCurves.ForMathlib.Coaction
+import ModularCurves.ForMathlib.SchemeAppLE
 import ModularCurves.ForMathlib.AgreementLocusClopen
 import ModularCurves.ForMathlib.ClosedImmersionFinrankIso
 import ModularCurves.ForMathlib.ComoduleCoinvariants
