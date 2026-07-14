@@ -731,6 +731,37 @@ theorem SpreadData.baseChange_colim (D : SpreadData 𝒮 u B)
         rw [MvPolynomial.map_map]
         exact congrArg (fun f => MvPolynomial.map f (D.g j')) (H.u_comp h))))).trans eB⟩
 
+/-- Move spread data for a finitely presented algebra to any later stage of the
+filtered system. -/
+noncomputable def SpreadData.mapToStage (D : SpreadData 𝒮 u B)
+    (H : IsFilteredAlgColimit R 𝒮 t A u) ⦃i : ι⦄ (h : D.i₀ ≤ i) :
+    SpreadData 𝒮 u B where
+  i₀ := i
+  m := D.m
+  k := D.k
+  g j := MvPolynomial.map (t h).toRingHom (D.g j)
+  equiv := D.equiv.map fun e =>
+    (Ideal.quotientEquivAlgOfEq A
+      (congrArg (fun f => Ideal.span (Set.range f)) (funext fun j => by
+        rw [MvPolynomial.map_map]
+        exact congrArg (fun f => MvPolynomial.map f (D.g j)) (H.u_comp h)))).trans e
+
+/-- A finite family of finitely presented algebras over a filtered colimit admits
+spread data whose presentations all begin at one common stage. -/
+theorem IsFilteredAlgColimit.exists_common_spreadData
+    (H : IsFilteredAlgColimit R 𝒮 t A u) {κ : Type*} [Finite κ]
+    (B : κ → Type u) [∀ k, CommRing (B k)] [∀ k, Algebra A (B k)]
+    [∀ k, FinitePresentation A (B k)] :
+    ∃ (i : ι) (D : ∀ k, SpreadData 𝒮 u (B k)), ∀ k, (D k).i₀ = i := by
+  classical
+  cases nonempty_fintype κ
+  haveI := H.directed
+  haveI := H.nonempty
+  let D : ∀ k, SpreadData 𝒮 u (B k) := fun k => Classical.choice (exists_spreadData (B k) H)
+  obtain ⟨i, hi⟩ := (Finset.univ.image fun k => (D k).i₀).exists_le
+  refine ⟨i, fun k => (D k).mapToStage H (hi ((D k).i₀) ?_), fun _ => rfl⟩
+  exact Finset.mem_image_of_mem (fun k => (D k).i₀) (Finset.mem_univ k)
+
 
 /-! ## [KL-5] Stage factoring, stage agreement, and the assembly -/
 
