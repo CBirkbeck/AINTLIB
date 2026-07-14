@@ -736,6 +736,31 @@ theorem adaptedDelta_isUnit (G : EllipticCurveGeom S) (b : OmegaBasis G)
   letI := (adaptedLocal G b h2 h3 ⟨V₀, hVaff⟩ i hVle).elliptic
   exact WeierstrassCurve.isUnit_Δ _
 
+open CategoryTheory in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D3-E3)** Presentations with trivial comparison have `eqToHom` as their
+pointed isomorphism: uniqueness upgraded from the variable change to the chart iso. -/
+private theorem projModelVCIso_hom_congr_vc {A : Type u} [CommRing A]
+    {C₁ C₂ : WeierstrassCurve.VariableChange A} (h : C₁ = C₂)
+    (W : WeierstrassCurve A) :
+    (projModelVCIso C₁ W).hom =
+      eqToHom (by rw [h]) ≫ (projModelVCIso C₂ W).hom := by
+  cases h
+  rw [eqToHom_refl, Category.id_comp]
+
+open CategoryTheory in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D3-E3)** Presentations with trivial comparison have `eqToHom` as their
+pointed isomorphism: uniqueness upgraded from the variable change to the chart iso. -/
+theorem pointedIso_hom_of_transVC_eq_one {V : S.affineOpens}
+    {P Q : LocalPresentation G V} (h : P.transVC Q = 1) :
+    (P.pointedIso Q).hom =
+      eqToHom (by rw [show Q.W = P.W from by
+        have := P.transVC_smul Q
+        rwa [h, one_smul] at this]) := by
+  rw [P.transVC_spec Q, projModelVCIso_hom_congr_vc h Q.W, projModelVCIso_one,
+    eqToHom_trans, eqToHom_trans]
+
 end LocalPresentation
 
 end ModularCurves
