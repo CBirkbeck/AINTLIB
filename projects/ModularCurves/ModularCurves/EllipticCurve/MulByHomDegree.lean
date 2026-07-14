@@ -143,6 +143,22 @@ theorem modelEllipticCurve_finrank_const {K : Type u} [Field K] (W : Weierstrass
     Scheme.Hom.isLocallyConstant_finrank _
   exact hlc.apply_eq_of_isPreconnected isPreconnected_univ (Set.mem_univ _) (Set.mem_univ _)
 
+/-- **(K4 (D) chart-reduction, general form)** For a finite flat locally-finitely-presented
+endomorphism `f : X ⟶ X` of a preconnected scheme, the fibre rank at *any* point equals the
+`RingHom.finrank` of the ring map of the affine restriction `f⁻¹(U) → U`, for any affine open `U`
+with a chosen point `x₀`. Combines local constancy (`isLocallyConstant_finrank`),
+`finrank_pullback_snd`, and `finrank_of_isAffine` — stated generically (plain `f`, no structure
+projection) so the `modelEllipticCurve` `.E`-projection never enters instance synthesis. -/
+lemma finrank_eq_appTop_finrank_of_affineOpen {X : Scheme.{u}} (f : X ⟶ X)
+    [Flat f] [IsFinite f] [LocallyOfFinitePresentation f] [PreconnectedSpace X]
+    (U : X.Opens) [IsAffine U.toScheme] (x₀ : U) (x : X) :
+    f.finrank x = (pullback.snd f U.ι).appTop.hom.finrank (U.toScheme.isoSpec.hom.base x₀) := by
+  haveI : IsAffine (pullback f U.ι) := isAffine_of_isAffineHom (pullback.snd f U.ι)
+  have hconst : f.finrank x = f.finrank (U.ι.base x₀) :=
+    (Scheme.Hom.isLocallyConstant_finrank f).apply_eq_of_isPreconnected
+      isPreconnected_univ (Set.mem_univ _) (Set.mem_univ _)
+  rw [hconst, ← Scheme.Hom.finrank_pullback_snd f U.ι x₀, finrank_of_isAffine]
+
 /-- **(K4 crux — the HasseWeil coupling)** Over a field `K`, the scheme-theoretic fibre rank of the
 model `[N]` equals the degree of HasseWeil's multiplication-by-`N` isogeny `mulByInt W.toAffine N`
 (the function-field extension degree `[K(E) : [N]* K(E)]`).
@@ -160,8 +176,25 @@ division-polynomial comparison (shared with `formallyUnramified_torsionπ`). -/
 theorem modelEllipticCurve_finrank_eq_mulByInt_degree {K : Type u} [Field K] [DecidableEq K]
     (W : WeierstrassCurve K) [W.IsElliptic] (N : ℕ) [NeZero N]
     [Flat ((modelEllipticCurve W).mulByHom N)] [IsFinite ((modelEllipticCurve W).mulByHom N)]
+    [LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom N)]
     (x : (modelEllipticCurve W).E) :
     ((modelEllipticCurve W).mulByHom N).finrank x = (HasseWeil.mulByInt W.toAffine (N : ℤ)).degree := by
+  haveI hZaff : IsAffineOpen (zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  haveI : IsAffine (zChart W).toScheme := hZaff
+  haveI hZaffE : IsAffine ((show ((modelEllipticCurve W).E).Opens from zChart W).toScheme) := hZaff
+  haveI : Nontrivial W.toAffine.CoordinateRing := inferInstance
+  haveI : Nontrivial Γ(projModel W, zChart W) := (coordRingToZSection W).toEquiv.symm.nontrivial
+  haveI hNe : Nonempty (zChart W).toScheme := ⟨hZaff.isoSpec.inv.base (Classical.arbitrary _)⟩
+  obtain ⟨x₀⟩ := hNe
+  haveI : PreconnectedSpace (modelEllipticCurve W).E :=
+    inferInstanceAs (PreconnectedSpace (projModel W))
+  refine (finrank_eq_appTop_finrank_of_affineOpen
+    ((modelEllipticCurve W).mulByHom N) (show ((modelEllipticCurve W).E).Opens from zChart W)
+    x₀ x).trans ?_
+  -- K4b: the appTop ring-map rank of `[N]⁻¹(Z) → Z` equals `(mulByInt N).degree`
+  -- (the coordinate ↔ division-polynomial identification; `Γ(Z) = W.CoordinateRing` via
+  -- `coordRingToZSection`, then `finrank_algebraMap_eq_module_finrank` + the pullback = `mulByInt`)
   sorry
 
 /-- **(K4 field-level target)** Over a field `K`, the scheme-theoretic fibre rank of
@@ -175,6 +208,7 @@ which `mulByInt_degree` evaluates to `N²`. The arbitrary-`E/S` assembly
 theorem modelEllipticCurve_mulByHom_finrank {K : Type u} [Field K] [DecidableEq K]
     (W : WeierstrassCurve K) [W.IsElliptic] (N : ℕ) [NeZero N]
     [Flat ((modelEllipticCurve W).mulByHom N)] [IsFinite ((modelEllipticCurve W).mulByHom N)]
+    [LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom N)]
     (x : (modelEllipticCurve W).E) :
     ((modelEllipticCurve W).mulByHom N).finrank x = N ^ 2 := by
   rw [modelEllipticCurve_finrank_eq_mulByInt_degree W N x,
