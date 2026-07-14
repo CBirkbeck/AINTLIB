@@ -19886,3 +19886,17 @@ overlap-agreement of the local λ's ⟹ sheaf-glued global `legendreLambda` ⟹ 
 Map/Top/EllHom ⟹ RepresentableBy (the full E12-D3/D4 replay, all templates banked).
 LEAN-OP: `git checkout <file>` to revert a bad DRAFT also destroys uncommitted GREEN lemmas —
 commit green increments BEFORE drafting the next (cost: one re-type of CLS-1a/1b).
+
+## v10.228-OMEGA (2026-07-14) — ★★ [T-E14-CLS-2] legendreLambda: KM 4.6.2's classifying function is CONSTRUCTED
+
+`legendreLambda` (commit 61b030991, axiom-clean): for any Legendre datum, the local witness `λ`'s
+sheaf-glue to a global `g ∈ Γ(X.base, ⊤)` with the UNIVERSAL spec `resLE g = lam` for every
+witness on every affine. Route: `choose` at every point (the local-∃ IsLegendreDatum) →
+`existsUnique_gluing'` with agreement `legendre_witness_lam_agree` (= restrict both witnesses via
+the new `MarksAt.restrict`/`restrict_W_legendre` + the CLS-1 uniqueness) → arbitrary-witness spec
+by separation over `{W ≤ V ⊓ V_x}` refinements. adaptedCoeff₄'s template transposed cleanly.
+
+**Next [T-E14-CLS-3]:** `IsUnit (g(g−1))` (chartwise from witness ellipticity) →
+`legendreClassifyingRingHom := IsLocalization.Away.lift (legendrePoly R)` at
+`eval₂Hom X.baseRingHom ![g]` → classifyingMap → the Top/EllHom/RepresentableBy ladder
+(E12-D3-E1…E4 + D4 replay; all templates banked in UniversalAdapted.lean).
