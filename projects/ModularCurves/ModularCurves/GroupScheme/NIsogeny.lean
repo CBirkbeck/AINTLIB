@@ -2923,7 +2923,7 @@ theorem quotientHom_isInvariant (G : FiniteLocallyFreeSubgroup E) :
 
 /-- **(pin)** Compatibility with the scheme-level gate: the quotient curve's total space
 is the [T-G3D-INFRA] quotient scheme, identified under the two quotient maps. -/
-theorem quotientCurve_compat (G : FiniteLocallyFreeSubgroup E) :
+theorem quotientCurve_compat (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] :
     ∃ e : G.quotient ≅ G.quotientCurve.E, G.quotientπ ≫ e.hom = G.quotientHom := by
   sorry
 

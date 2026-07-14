@@ -1,4 +1,4 @@
-import ModularCurves.GroupScheme.SubgroupQuotientInterface
+import ModularCurves.GroupScheme.SubgroupQuotientGlueData
 
 /-!
 # The quotient of an elliptic curve by a finite locally free subgroup scheme
@@ -38,43 +38,61 @@ variable {S : Scheme.{u}} {E : EllipticCurve S}
 
 namespace FiniteLocallyFreeSubgroup
 
-/-- **DS-data (T-G3d-infra)** The quotient scheme `E/G` of `E` by the finite locally free subgroup
-scheme `G`, over `S`. Construction: glue the local co-invariant affine quotients on p2's
-`SchemeQuotient` glue-data pattern (`.mathlib-quality/decomposition-g3d-infra.md`). Consumers use
-only the universal-property pins below. -/
-noncomputable def quotient (G : FiniteLocallyFreeSubgroup E) : Scheme.{u} := sorry
+/-- **(T-G3d-infra)** The quotient scheme `E/G` of `E` by the finite locally free subgroup
+scheme `G`, over `S` — **the option-γ glue construction** (`SubgroupQuotientGlueData`): one free
+affine chart patch per point of the curve, one Hopf-coinvariant patch quotient per point, glued
+along the saturated images of the pairwise stable windows. Requires the killing-integer datum
+`[G.HasKillingInt]` (automatic for torsion subgroups; by Deligne–Oort–Tate for constant rank).
+Consumers use only the universal-property pins below. -/
+noncomputable def quotient (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] : Scheme.{u} :=
+  G.gluedQuotient G.killN G.killN_spec
 
-/-- **DS-data (T-G3d-infra)** The structure morphism `E/G ⟶ S`. -/
-noncomputable def quotientS (G : FiniteLocallyFreeSubgroup E) : G.quotient ⟶ S := sorry
+/-- **(T-G3d-infra)** The structure morphism `E/G ⟶ S`. -/
+noncomputable def quotientS (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] :
+    G.quotient ⟶ S :=
+  G.gluedQuotientS G.killN G.killN_spec
 
-/-- **DS-data (T-G3d-infra)** The quotient isogeny `E ⟶ E/G` (finite locally free of degree
+/-- **(T-G3d-infra)** The quotient isogeny `E ⟶ E/G` (finite locally free of degree
 `rank G`; for `G = E[N]` this is the map whose factorization of `[N]` gives `E/E[N] ≅ E`). -/
-noncomputable def quotientπ (G : FiniteLocallyFreeSubgroup E) : E.E ⟶ G.quotient := sorry
+noncomputable def quotientπ (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] :
+    E.E ⟶ G.quotient :=
+  G.gluedQuotientπ G.killN G.killN_spec
 
 /-- **(T-G3d-infra pin)** The quotient isogeny is a morphism over `S`: `π ≫ (E/G ⟶ S) = E.π`. -/
-theorem quotientπ_over (G : FiniteLocallyFreeSubgroup E) :
-    G.quotientπ ≫ G.quotientS = E.π := sorry
+theorem quotientπ_over (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] :
+    G.quotientπ ≫ G.quotientS = E.π :=
+  G.gluedQuotientπ_gluedQuotientS G.killN G.killN_spec
 
 /-- **(T-G3d-infra pin)** The quotient isogeny is `G`-invariant: it collapses each `G`-translate. -/
-theorem quotientπ_isInvariant (G : FiniteLocallyFreeSubgroup E) :
-    G.IsInvariant G.quotientπ := sorry
+theorem quotientπ_isInvariant (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] :
+    G.IsInvariant G.quotientπ :=
+  G.isInvariant_gluedQuotientπ G.killN G.killN_spec
 
 /-- **(T-G3d-infra pin — universal property)** Every `G`-invariant `f : E ⟶ Y` factors **uniquely**
 through the quotient: there is a unique `h : E/G ⟶ Y` with `π ≫ h = f`. This categorical-quotient
 property is what the whole layer exists to supply; the `[N]`-invariance of `[N] : E ⟶ E` then yields
 the factorization `E/E[N] ⟶ E` (T-G3d). -/
-theorem quotient_lift (G : FiniteLocallyFreeSubgroup E) {Y : Scheme.{u}} (f : E.E ⟶ Y)
-    (hf : G.IsInvariant f) : ∃! h : G.quotient ⟶ Y, G.quotientπ ≫ h = f := sorry
+theorem quotient_lift (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] {Y : Scheme.{u}}
+    (f : E.E ⟶ Y) (hf : G.IsInvariant f) :
+    ∃! h : G.quotient ⟶ Y, G.quotientπ ≫ h = f :=
+  G.gluedQuotient_existsUnique_lift G.killN G.killN_spec f hf
 
 /-- **(T-G3d-infra — `π` is an epimorphism)** Morphisms out of `E/G` are determined by their
 composition with the quotient isogeny. PROVED from `quotient_lift` + `quotientπ_isInvariant`
 (the common composite `π ≫ h₁` is `G`-invariant, so both `h₁, h₂` are *the* lift of it). -/
-theorem quotientπ_hom_ext (G : FiniteLocallyFreeSubgroup E) {Y : Scheme.{u}}
+theorem quotientπ_hom_ext (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] {Y : Scheme.{u}}
     (h₁ h₂ : G.quotient ⟶ Y) (H : G.quotientπ ≫ h₁ = G.quotientπ ≫ h₂) : h₁ = h₂ := by
   obtain ⟨_, _, huniq⟩ := G.quotient_lift (G.quotientπ ≫ h₁) (G.quotientπ_isInvariant.comp h₁)
   exact (huniq h₁ rfl).trans (huniq h₂ H.symm).symm
 
 end FiniteLocallyFreeSubgroup
+
+/-- **The torsion subgroup carries its killing integer by definition of the kernel**: the
+pullback condition of `E[N] = E ×_{[N], E, 0} S` says exactly `ι ≫ [N] = π ≫ 0`. -/
+instance (N : ℕ) [NeZero N] : (E.torsionSubgroup N).HasKillingInt :=
+  ⟨N, NeZero.ne N,
+    (pullback.condition (f := E.mulByHom N) (g := E.zero)).trans
+      (congrArg (· ≫ E.zero) (E.torsionι_π N)).symm⟩
 
 /-! ### The leading example: `E/E[N]` and the factored `[N]`
 

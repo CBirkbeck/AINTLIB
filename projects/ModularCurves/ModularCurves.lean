@@ -58,6 +58,7 @@ import ModularCurves.GroupScheme.MuN
 import ModularCurves.GroupScheme.NIsogeny
 import ModularCurves.GroupScheme.StableCover
 import ModularCurves.GroupScheme.SubgroupQuotient
+import ModularCurves.GroupScheme.SubgroupQuotientInterface
 import ModularCurves.GroupScheme.SubgroupQuotientConstruction
 import ModularCurves.GroupScheme.SubgroupQuotientGlue
 import ModularCurves.GroupScheme.SubgroupQuotientGlueData
