@@ -213,6 +213,38 @@ theorem natCard_sections_le_finrank {X : Scheme.{u}} (f : X ⟶ Spec (CommRingCa
   rw [h1, h2, h3, h4]
   exact natCard_algHom_le_finrank k ↑Γ(X, ⊤)
 
+/-- Sections of the pullback projection `pullback.snd f z` (points of `W` landing in the fibre of `f`
+over `z`) are exactly the liftings of `z` through `f` — morphisms `a : W ⟶ X` with `a ≫ f = z`. The
+universal property of the pullback: a section `s` gives `a = s ≫ pullback.fst`, and conversely
+`a` gives `pullback.lift a (𝟙 W)`. -/
+noncomputable def liftingsEquivSections {W X Y : Scheme.{u}} (f : X ⟶ Y) (z : W ⟶ Y) :
+    { s : W ⟶ pullback f z // s ≫ pullback.snd f z = 𝟙 W } ≃ { a : W ⟶ X // a ≫ f = z } where
+  toFun s := ⟨s.1 ≫ pullback.fst f z, by
+    rw [Category.assoc, pullback.condition, ← Category.assoc, s.2, Category.id_comp]⟩
+  invFun a := ⟨pullback.lift a.1 (𝟙 W) (by rw [a.2, Category.id_comp]), by
+    rw [pullback.lift_snd]⟩
+  left_inv s := Subtype.ext (by
+    apply pullback.hom_ext
+    · rw [pullback.lift_fst]
+    · rw [pullback.lift_snd, s.2])
+  right_inv a := Subtype.ext (by dsimp only; rw [pullback.lift_fst])
+
+omit [IsSepClosed k] in
+/-- **(abstract [KEY-KER] core — fibre-point count ≤ fibre rank)** For a **finite flat** morphism
+`f : X ⟶ Y` and a `k`-point `z : Spec k ⟶ Y`, the number of liftings of `z` through `f` (equivalently
+the `k`-rational points of the fibre `f⁻¹(z)`) is at most the fibre rank `f.finrank (z x₀)`. The
+liftings are the sections of the base-changed `pullback.snd f z` (`liftingsEquivSections`), whose
+count is `≤` its rank (`natCard_sections_le_finrank`, no separability needed), and base change
+preserves the rank (`finrank_pullback_snd`). Applied to an isogeny `δ` and the zero point this is the
+kernel bound `|ker δ| ≤ deg δ` ([KEY-KER] for STREAM-GH): `N` distinct killed points inject into the
+fibre over `0`, forcing `N ≤ δ.finrank 0 = deg δ`, even when `δ` is inseparable. -/
+theorem natCard_liftings_le_finrank {X Y : Scheme.{u}} (f : X ⟶ Y) [Flat f] [IsFinite f]
+    (z : Spec (CommRingCat.of k) ⟶ Y) (x₀ : ↑(Spec (CommRingCat.of k))) :
+    Nat.card { a : Spec (CommRingCat.of k) ⟶ X // a ≫ f = z } ≤ f.finrank (z x₀) := by
+  rw [← Nat.card_congr (liftingsEquivSections f z),
+    ← Scheme.Hom.finrank_pullback_snd f z x₀]
+  exact natCard_sections_le_finrank (pullback.snd f z) x₀
+
 end Schemes
 
 /-- `Spec L`-valued points of `Spec A` over `Spec k` are `k`-algebra homomorphisms
