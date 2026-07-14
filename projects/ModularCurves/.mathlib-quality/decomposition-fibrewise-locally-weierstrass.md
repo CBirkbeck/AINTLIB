@@ -402,8 +402,13 @@ which packages multiplication by an invertible top-open section as an automorphi
 scheme's structure module. Its inverse is multiplication by the inverse unit, using the existing
 scalar-composition API and no additional hypotheses.
 
-Active dependency claim (2026-07-14): turn each overlap transition section into the
-corresponding scalar automorphism of the unit sheaf and prove the identity, inverse, and
-triple-cocycle laws at the sheaf-morphism level. This is the local module descent datum needed
-to construct the invertible sheaf on the glued finite-stage scheme and compare its base change
-with the original pole sheaf.
+Completed dependency claim (2026-07-14): defined
+`AffineIntersectionUnitCocycle.overlapTransitionIso` and proved its identity, pair-swap inverse,
+and triple-intersection Cech laws after canonical pullback. The finite-stage transition functions
+therefore give axiom-clean scalar automorphisms of the overlap structure sheaves satisfying the
+full line-bundle descent equations.
+
+Active dependency claim (2026-07-14): conjugate the overlap scalar automorphisms by the
+canonical pullback-unit isomorphisms to obtain transition isomorphisms between the restrictions
+of the chartwise unit sheaves. Package these as local module descent data suitable for gluing on
+the finite-stage proper scheme.

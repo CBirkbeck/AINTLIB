@@ -2,6 +2,7 @@ import ModularCurves.ForMathlib.ProperAffineIntersectionModel
 import ModularCurves.ForMathlib.FinitePresentationFunctorCover
 import ModularCurves.Picard.InvertibleSheafCocycle
 import ModularCurves.Picard.InvertibleSheafFiniteAffineCover
+import ModularCurves.Picard.UnitPullback
 
 /-!
 # Finite-stage models adapted to invertible sheaves
@@ -281,6 +282,101 @@ theorem AffineIntersectionUnitCocycle.overlapTransitionSection_cocycle
         (Scheme.GlueData.affineIntersectionPairToTripleRight i j k)).hom.toMonoidHom
           (c.transition i k))
   rw [← map_mul, c.cocycle]
+
+private theorem unitAutomorphismOfTopUnit_one {X : Scheme.{u}} :
+    ModularCurves.unitAutomorphismOfTopUnit
+      (1 : Γ(X, (⊤ : X.Opens))ˣ) = Iso.refl _ := by
+  apply Iso.ext
+  exact ModularCurves.unitEndomorphismOfTopSection_one
+
+/-- The scalar automorphism of the unit sheaf defined by a transition function on an
+affine overlap. -/
+noncomputable def AffineIntersectionUnitCocycle.overlapTransitionIso
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F) (i j : J) :
+    unitObj (Scheme.GlueData.affineIntersectionOverlap F i j) ≅
+      unitObj (Scheme.GlueData.affineIntersectionOverlap F i j) :=
+  ModularCurves.unitAutomorphismOfTopUnit (c.overlapTransitionSection i j)
+
+/-- The scalar transition automorphism from a chart to itself is the identity. -/
+@[simp]
+theorem AffineIntersectionUnitCocycle.overlapTransitionIso_self
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F) (i : J) :
+    c.overlapTransitionIso i i = Iso.refl _ := by
+  rw [overlapTransitionIso, c.overlapTransitionSection_self]
+  exact unitAutomorphismOfTopUnit_one
+
+/-- Pulling the reversed scalar transition across the canonical pair-swap gives the
+inverse scalar transition. -/
+theorem AffineIntersectionUnitCocycle.overlapTransitionIso_swap
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F) (i j : J) :
+    let f : Scheme.GlueData.affineIntersectionOverlap F i j ⟶
+        Scheme.GlueData.affineIntersectionOverlap F j i :=
+      Spec.map (CommRingCat.ofHom ((F.map
+        (Scheme.GlueData.affineIntersectionPairSwap i j)).hom.toRingHom))
+    let e := pullbackUnitIso f
+    e.inv ≫ (pullback f).map (c.overlapTransitionIso j i).hom ≫ e.hom =
+      (c.overlapTransitionIso i j).inv := by
+  dsimp only
+  rw [overlapTransitionIso, ModularCurves.unitAutomorphismOfTopUnit_hom,
+    ModularCurves.pullback_unitEndomorphismOfTopSection]
+  change ModularCurves.unitEndomorphismOfTopSection
+      ((Spec.map (CommRingCat.ofHom ((F.map
+        (Scheme.GlueData.affineIntersectionPairSwap i j)).hom.toRingHom))).appTop.hom
+          (c.overlapTransitionSection j i : _)) =
+    ModularCurves.unitEndomorphismOfTopSection
+      (↑(c.overlapTransitionSection i j)⁻¹ : _)
+  have h := congrArg Units.val (c.overlapTransitionSection_swap i j)
+  change (Spec.map (CommRingCat.ofHom ((F.map
+      (Scheme.GlueData.affineIntersectionPairSwap i j)).hom.toRingHom))).appTop.hom
+      (c.overlapTransitionSection j i : _) =
+    (↑(c.overlapTransitionSection i j)⁻¹ : _) at h
+  rw [h]
+
+/-- The pulled-back scalar transition automorphisms satisfy the Cech equation on the
+canonical affine triple intersection. -/
+theorem AffineIntersectionUnitCocycle.overlapTransitionIso_cocycle
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F) (i j k : J) :
+    let T := Spec (CommRingCat.of
+      (F.obj (Scheme.GlueData.affineIntersectionTripleIndex i j k)))
+    let fLeft : T ⟶ Scheme.GlueData.affineIntersectionOverlap F i j :=
+      Spec.map (CommRingCat.ofHom ((F.map
+        (Scheme.GlueData.affineIntersectionPairToTripleLeft i j k)).hom.toRingHom))
+    let fMiddle : T ⟶ Scheme.GlueData.affineIntersectionOverlap F j k :=
+      Spec.map (CommRingCat.ofHom ((F.map
+        (Scheme.GlueData.affineIntersectionPairToTripleMiddle i j k)).hom.toRingHom))
+    let fRight : T ⟶ Scheme.GlueData.affineIntersectionOverlap F i k :=
+      Spec.map (CommRingCat.ofHom ((F.map
+        (Scheme.GlueData.affineIntersectionPairToTripleRight i j k)).hom.toRingHom))
+    let eLeft := pullbackUnitIso fLeft
+    let eMiddle := pullbackUnitIso fMiddle
+    let eRight := pullbackUnitIso fRight
+    (eLeft.inv ≫ (pullback fLeft).map (c.overlapTransitionIso i j).hom ≫ eLeft.hom) ≫
+        (eMiddle.inv ≫ (pullback fMiddle).map
+          (c.overlapTransitionIso j k).hom ≫ eMiddle.hom) =
+      eRight.inv ≫ (pullback fRight).map
+        (c.overlapTransitionIso i k).hom ≫ eRight.hom := by
+  dsimp only
+  simp only [overlapTransitionIso,
+    ModularCurves.unitAutomorphismOfTopUnit_hom]
+  rw [ModularCurves.pullback_unitEndomorphismOfTopSection,
+    ModularCurves.pullback_unitEndomorphismOfTopSection,
+    ModularCurves.pullback_unitEndomorphismOfTopSection,
+    ModularCurves.unitEndomorphismOfTopSection_comp]
+  have h := congrArg Units.val (c.overlapTransitionSection_cocycle i j k)
+  change (Spec.map (CommRingCat.ofHom ((F.map
+        (Scheme.GlueData.affineIntersectionPairToTripleLeft i j k)).hom.toRingHom))).appTop.hom
+        (c.overlapTransitionSection i j : _) *
+      (Spec.map (CommRingCat.ofHom ((F.map
+        (Scheme.GlueData.affineIntersectionPairToTripleMiddle i j k)).hom.toRingHom))).appTop.hom
+        (c.overlapTransitionSection j k : _) =
+    (Spec.map (CommRingCat.ofHom ((F.map
+      (Scheme.GlueData.affineIntersectionPairToTripleRight i j k)).hom.toRingHom))).appTop.hom
+      (c.overlapTransitionSection i k : _) at h
+  rw [h]
 
 /-- Affine-intersection transition units are compatible with every restriction map in
 the coordinate-ring functor. -/
