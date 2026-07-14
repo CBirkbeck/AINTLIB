@@ -129,4 +129,59 @@ instance : (universalE3 R).IsElliptic := by
         (universalE3 R).a₃) := h
     exact (isUnit_of_mul_isUnit_right ha₃).mul (isUnit_of_mul_isUnit_right ha₃)
 
+/-- The flex relation vanishes in the moduli ring. -/
+theorem e3Rel_map_eq_zero : e3Map R (e3Rel R) = 0 := by
+  show (algebraMap (E3Quotient R) (E3ModuliRing R))
+    (Ideal.Quotient.mk _ (e3Rel R)) = 0
+  rw [Ideal.Quotient.eq_zero_iff_mem.mpr
+    (Ideal.subset_span (Set.mem_singleton _)), map_zero]
+
+/-- **(T-E15a)** `(0, 0)` lies on the universal curve (`a₆ = 0`). -/
+theorem universalE3_equation_zero :
+    (universalE3 R).toAffine.Equation 0 0 := by
+  rw [WeierstrassCurve.Affine.equation_iff]
+  show (0 : E3ModuliRing R) ^ 2 + (universalE3 R).a₁ * 0 * 0 +
+    (universalE3 R).a₃ * 0 =
+    0 ^ 3 + (universalE3 R).a₂ * 0 ^ 2 + (universalE3 R).a₄ * 0 + (universalE3 R).a₆
+  show (0 : E3ModuliRing R) ^ 2 + (universalE3 R).a₁ * 0 * 0 +
+    (universalE3 R).a₃ * 0 = 0 ^ 3 + 0 * 0 ^ 2 + 0 * 0 + 0
+  ring
+
+/-- **(T-E15a ★)** `Q = (γ, β + γ)` lies on the universal curve: the affine equation
+at `(γ, β+γ)` is EXACTLY the negative of the flex relation `β³ − (β+γ)³`. -/
+theorem universalE3_equation_Q :
+    (universalE3 R).toAffine.Equation (e3Gamma R) (e3Beta R + e3Gamma R) := by
+  rw [WeierstrassCurve.Affine.equation_iff]
+  have hrel : e3Map R (X 0 ^ 3 - (X 0 + X 1) ^ 3) = 0 := e3Rel_map_eq_zero R
+  rw [map_sub, map_pow, map_pow, map_add] at hrel
+  show (e3Beta R + e3Gamma R) ^ 2 +
+      (universalE3 R).a₁ * e3Gamma R * (e3Beta R + e3Gamma R) +
+      (universalE3 R).a₃ * (e3Beta R + e3Gamma R) =
+    e3Gamma R ^ 3 + (universalE3 R).a₂ * e3Gamma R ^ 2 +
+      (universalE3 R).a₄ * e3Gamma R + (universalE3 R).a₆
+  show (e3Beta R + e3Gamma R) ^ 2 +
+      (3 * e3Gamma R - 1) * e3Gamma R * (e3Beta R + e3Gamma R) +
+      (-3 * e3Gamma R ^ 2 - e3Beta R - 3 * e3Beta R * e3Gamma R) *
+        (e3Beta R + e3Gamma R) =
+    e3Gamma R ^ 3 + 0 * e3Gamma R ^ 2 + 0 * e3Gamma R + 0
+  have hrel' : (e3Beta R) ^ 3 - (e3Beta R + e3Gamma R) ^ 3 = 0 := hrel
+  linear_combination hrel'
+
+/-- **(T-E15a)** The universal `Ell/R`-object `ℰ₃`. -/
+def universalE3Obj : EllObj R where
+  base := Spec (CommRingCat.of (E3ModuliRing R))
+  structMap := Spec.map (CommRingCat.ofHom (algebraMap R (E3ModuliRing R)))
+  curve := modelEllipticCurve (universalE3 R)
+
+/-- **(T-E15a)** The universally marked `P = (0, 0)`. -/
+def universalE3P : (universalE3Obj R).curve.Section :=
+  ⟨projModelAffineSection (universalE3 R) 0 0 (universalE3_equation_zero R),
+    projModelAffineSection_projModelπ _ _ _ _⟩
+
+/-- **(T-E15a)** The universally marked `Q = (γ, β + γ)`. -/
+def universalE3Q : (universalE3Obj R).curve.Section :=
+  ⟨projModelAffineSection (universalE3 R) (e3Gamma R) (e3Beta R + e3Gamma R)
+      (universalE3_equation_Q R),
+    projModelAffineSection_projModelπ _ _ _ _⟩
+
 end ModularCurves
