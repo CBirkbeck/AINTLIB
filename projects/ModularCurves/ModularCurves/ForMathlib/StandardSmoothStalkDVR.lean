@@ -253,7 +253,7 @@ private theorem stalkDVRAux_finite_quotient_le {K B : Type u} [Field K] [CommRin
   have hs : Function.Surjective (Ideal.quotientMapₐ J (AlgHom.id K B) hle) := by
     intro z
     obtain ⟨y, rfl⟩ := Ideal.Quotient.mk_surjective z
-    exact ⟨Ideal.Quotient.mk I y, by simp [Ideal.quotientMap_mk]⟩
+    exact ⟨Ideal.Quotient.mk I y, by simp⟩
   exact Module.Finite.of_surjective (Ideal.quotientMapₐ J (AlgHom.id K B) hle).toLinearMap hs
 
 variable (k A : Type u) [Field k] [CommRing A] [Algebra k A]
