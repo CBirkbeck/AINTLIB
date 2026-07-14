@@ -1,6 +1,11 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import HasseWeil.Foundation.Curves.Divisor.Divisors
 import HasseWeil.Foundation.Curves.Divisor.ProjectiveDivisor
 import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
-import HasseWeil.Foundation.Curves.Divisor.Divisors
 
 /-!
 # Route 2A — functions with trivial divisor are constant (pairing step 7c)
@@ -25,8 +30,6 @@ set_option linter.style.longLine false
 
 variable {F : Type*} [Field F] [DecidableEq F] {W : WeierstrassCurve.Affine F}
 
--- The `(⟨W⟩ : SmoothPlaneCurve F)` curve coercion makes instance/`whnf` elaboration heavy.
-set_option maxHeartbeats 1600000 in
 /-- **A function with trivial projective divisor is a constant** (Silverman II.1.2, projective form),
 unconditional over an algebraically closed field. If `projectiveDivisorOf f = 0` (no zeros or poles,
 including at infinity), then `f = algebraMap F _ c` for some `c : F`. -/
