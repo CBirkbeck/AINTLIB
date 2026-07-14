@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.FLT37.LehmerVandiver.PollaczekLog.PollaczekLog
@@ -236,7 +241,6 @@ theorem lehmerVandiverPrime_quotient_squared_bridge_substituted
   rw [← h_lhs, ← h_pre]
   exact h_bridge
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Helper: `Φ((((t^k).val : ℕ) : 𝓞 K / 𝔩)) = (t : ZMod ℓ)^k`.** Direct
 computation via `RingEquiv.map_natCast` and `ZMod.natCast_val`. -/
 theorem lehmerVandiverPrime_quotientEquiv_apply_natCast_tk
@@ -252,7 +256,6 @@ theorem lehmerVandiverPrime_quotientEquiv_apply_natCast_tk
   exact ((map_natCast (lehmerVandiverPrime_quotientEquiv (p := p) ℓ k hℓ
     ht_coprime ht_ne) _).trans (ZMod.natCast_val _)).trans (ZMod.cast_id _ _)
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Combined helper: `Φ(Q((((t^k).val : ℕ) : 𝓞 K))) = (t : ZMod ℓ)^k`.**
 The composition `Φ ∘ Q : 𝓞 K → ZMod ℓ` evaluated on the natural cast
 `(((t^k).val : ℕ) : 𝓞 K)` simplifies to `(t : ZMod ℓ)^k`. Bridges the
@@ -328,7 +331,7 @@ theorem flt37_squared_bridge_lhs_eq_lehmerVandiverProduct :
         (((2 : ZMod 149) ^ 4) ^ b - 1) ^ (4 * b ^ (37 - 1 - 32))) =
       lehmerVandiverProduct 37 32 149 2 4 := by
   have : Fact (Nat.Prime 149) := ⟨by decide⟩
-  unfold lehmerVandiverProduct
+  simp only [lehmerVandiverProduct]
   refine Finset.prod_congr rfl fun b hb => ?_
   obtain ⟨hb1, hb2⟩ := Finset.mem_Ico.mp hb
   -- LHS factor: ((2^4)^b - 1)^(4*b^4)
