@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.AdditionChartRing
 
 /-!
@@ -87,7 +92,8 @@ private lemma innerEquiv_mk_gL :
       MvPolynomial.map (algebraMap R (affineChartRing W j))
         (dehomogenizeAux R i W.toProjective.polynomial) := by
   rw [innerEquiv, AlgEquiv.trans_apply, AlgEquiv.trans_apply, Ideal.quotientEquivAlg_mk,
-    Ideal.quotientEquivAlgOfEq_mk, AlgEquiv.restrictScalars_symm_apply]
+    Ideal.quotientEquivAlgOfEq_mk, AlgEquiv.symm_restrictScalars,
+    AlgEquiv.restrictScalars_apply]
   have hkey : ((sumAlgEquiv R {k : Fin 3 // k ≠ i}
         {k : Fin 3 // k ≠ j}).toAlgHom.toRingHom).comp
       ((rename (Sum.inl : {k : Fin 3 // k ≠ i} →
