@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Isogeny.Endomorphism
 import HasseWeil.Isogeny.Frobenius.FunctionField
 import HasseWeil.Foundation.OrdAtInftyBridge
@@ -91,6 +96,7 @@ theorem ordAtInfty_frobeniusIsog_pullback_y_gen :
   congr 1
   ring
 
+omit [DecidableEq K] W [W.toAffine.IsElliptic] in
 /-- For the finite field `K` (Field + Fintype), `Fintype.card K ≥ 2` since
 `Field` requires `0 ≠ 1`. -/
 private theorem two_le_fintype_card_K : (2 : ℕ) ≤ Fintype.card K :=
@@ -214,11 +220,7 @@ theorem frobeniusIsog_pullback_range :
       Set.range ((· ^ Fintype.card K) :
         W.toAffine.FunctionField → W.toAffine.FunctionField) := by
   ext f
-  refine ⟨?_, ?_⟩
-  · rintro ⟨g, hg⟩
-    exact ⟨g, by rw [← hg, frobeniusIsog_pullback_apply]⟩
-  · rintro ⟨g, hg⟩
-    exact ⟨g, by rwa [frobeniusIsog_pullback_apply]⟩
+  simp only [Set.mem_range, frobeniusIsog_pullback_apply]
 
 /-- The `AlgHom.fieldRange` (subfield image) of `π*` is the subfield of
     `q`-th powers. Equivalent to `frobeniusIsog_pullback_range` but in the
@@ -226,13 +228,7 @@ theorem frobeniusIsog_pullback_range :
     construction. -/
 theorem frobeniusIsog_pullback_mem_iff (f : W.toAffine.FunctionField) :
     f ∈ (frobeniusIsog W).pullback.fieldRange ↔ ∃ g, g ^ Fintype.card K = f := by
-  refine ⟨?_, ?_⟩
-  · rintro ⟨g, hg⟩
-    exact ⟨g, by rwa [← frobeniusIsog_pullback_apply W g]⟩
-  · rintro ⟨g, hg⟩
-    refine ⟨g, ?_⟩
-    change (frobeniusIsog W).pullback g = f
-    rwa [frobeniusIsog_pullback_apply]
+  simp only [AlgHom.mem_fieldRange, frobeniusIsog_pullback_apply]
 
 /-- A `q`-th power lies in the image of `π*` (one direction of the membership
     lemma, packaged for `AlgHom.factor` use). -/
@@ -292,7 +288,7 @@ theorem pointCount_eq_of_witness (β : Isogeny W.toAffine W.toAffine)
     (hβ_deg : (β.degree : ℤ) = pointCount W.toAffine) :
     (pointCount W.toAffine : ℤ) =
       Fintype.card K + 1 - isogTrace (frobeniusIsog W) β := by
-  unfold isogTrace
+  simp only [isogTrace]
   rw [frobeniusIsog_degree, hβ_deg]
   ring
 
