@@ -74,6 +74,7 @@ import ModularCurves.ForMathlib.MonicQuotientDescent
 import ModularCurves.ForMathlib.OpenImmersionOfSection
 import ModularCurves.ForMathlib.OpensMapFinal
 import ModularCurves.ForMathlib.ProjIntegral
+import ModularCurves.ForMathlib.ProperAffineIntersectionModel
 import ModularCurves.ForMathlib.SpecQuotientIso
 import ModularCurves.ForMathlib.SurjectiveFreeSameRank
 import ModularCurves.ForMathlib.TopCatSheafRestrict
