@@ -527,6 +527,49 @@ theorem cechInjectiveResolutionBicomplex_column_zero_exactAt_one
   rw [cechSingletonIntersection_eq U i]
   exact hH (i 0)
 
+private theorem cechInjectiveResolutionAugmentation_comm
+    (F : Sheaf AddCommGrpCat.{u} X) (p p' : ℕ)
+    (_ : (ComplexShape.up ℕ).Rel p p') :
+    (cechInjectiveResolutionAugmentation U F).f p ≫
+        ((cechInjectiveResolutionBicomplex U F).X 0).d p p' =
+      ((cechComplexFunctor U).obj F.obj).d p p' ≫
+        (cechInjectiveResolutionAugmentation U F).f p' := by
+  exact HomologicalComplex.Hom.comm
+    (cechInjectiveResolutionAugmentation U F) p p'
+
+/-- The Cech complex of a sheaf maps into the total Cech complex of its chosen
+injective resolution by the vertical edge. -/
+noncomputable def cechInjectiveResolutionVerticalEdge
+    (F : Sheaf AddCommGrpCat.{u} X) :
+    (cechComplexFunctor U).obj F.obj ⟶
+      (cechInjectiveResolutionBicomplex U F).total (.up ℕ) :=
+  (cechInjectiveResolutionBicomplex U F).totalUpNatVerticalEdge
+    ((cechComplexFunctor U).obj F.obj)
+    (fun p ↦ (cechInjectiveResolutionAugmentation U F).f p)
+    (cechInjectiveResolutionAugmentation_comm U F)
+    (cechInjectiveResolutionAugmentation_f_comp_d U F)
+
+@[simp]
+theorem cechInjectiveResolutionVerticalEdge_f
+    (F : Sheaf AddCommGrpCat.{u} X) (p : ℕ) :
+    (cechInjectiveResolutionVerticalEdge U F).f p =
+      (cechInjectiveResolutionAugmentation U F).f p ≫
+        (cechInjectiveResolutionBicomplex U F).ιTotal
+          (.up ℕ) 0 p p (zero_add p) := by
+  apply HomologicalComplex₂.totalUpNatVerticalEdge_f
+
+/-- If `H¹` vanishes on each cover member, the vertical Cech-to-injective-total
+edge is a quasi-isomorphism in degree one. -/
+theorem cechInjectiveResolutionVerticalEdge_quasiIsoAt_one
+    (F : Sheaf AddCommGrpCat.{u} X)
+    (hH : ∀ i : ι, Subsingleton (CategoryTheory.Sheaf.H
+      ((restrict AddCommGrpCat (U i).isOpenEmbedding).obj F) 1)) :
+    QuasiIsoAt (cechInjectiveResolutionVerticalEdge U F) 1 := by
+  apply HomologicalComplex₂.totalUpNatVerticalEdge_quasiIsoAt_one
+  · exact cechInjectiveResolutionAugmentation_exact U F 0
+  · exact cechInjectiveResolutionAugmentation_exact U F 1
+  · exact cechInjectiveResolutionBicomplex_column_zero_exactAt_one U F hH
+
 end
 
 end TopCat.Sheaf
