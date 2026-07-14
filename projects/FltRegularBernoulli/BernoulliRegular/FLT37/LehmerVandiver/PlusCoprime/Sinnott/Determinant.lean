@@ -131,8 +131,7 @@ theorem cyclotomicUnitNormFormula_proven (p : ℕ) :
       push_cast; ring
     rw [h_eq, norm_one_sub_exp_two_pi_I_mul]
     ring_nf
-  rw [h1, h2]
-  rw [mul_div_mul_left _ _ (by norm_num : (2 : ℝ) ≠ 0)]
+  rw [h1, h2, mul_div_mul_left _ _ (by norm_num : (2 : ℝ) ≠ 0)]
 
 /-- **Log version of the cyclotomic-unit norm formula**: in additive form,
 `log‖φ((1-ζ^k))‖ - log‖φ((1-ζ))‖ = log|sin(πak/p)| - log|sin(πa/p)|`. -/
@@ -145,11 +144,9 @@ theorem log_norm_one_sub_exp_diff (a k p : ℕ) (_hp : 0 < p)
         * Complex.I))‖ =
     Real.log |Real.sin (Real.pi * (a * k / p : ℝ))| -
       Real.log |Real.sin (Real.pi * (a / p : ℝ))| := by
-  rw [norm_one_sub_exp_two_pi_I_mul, norm_one_sub_exp_two_pi_I_mul]
-  rw [Real.log_mul (by norm_num : (2 : ℝ) ≠ 0)
-      (by simp [h_sin_ne_ak])]
-  rw [Real.log_mul (by norm_num : (2 : ℝ) ≠ 0)
-      (by simp [h_sin_ne_a])]
+  rw [norm_one_sub_exp_two_pi_I_mul, norm_one_sub_exp_two_pi_I_mul,
+    Real.log_mul (by norm_num : (2 : ℝ) ≠ 0) (by simp [h_sin_ne_ak]),
+    Real.log_mul (by norm_num : (2 : ℝ) ≠ 0) (by simp [h_sin_ne_a])]
   push_cast
   ring
 
@@ -304,10 +301,7 @@ theorem dirichletCharacter_even_log_sin_full_eq_two_half
         have hcast2 : (Real.pi * (a : ℝ) / (p : ℝ)) =
             (Real.pi * ((a : ℝ) / (p : ℝ))) := by ring
         rw [hcast2]
-        have h_div : (((p - a : ℕ) : ℝ) / (p : ℝ)) =
-            (((p - a : ℕ) : ℕ) : ℝ) / ((p : ℕ) : ℝ) := by norm_cast
         have := abs_sin_pi_sub_div a p ha_le
-        push_cast at this ⊢
         convert this using 2
       rw [h_sin_eq]
   rw [h_high_eq_low]
