@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import BernoulliRegular.FLT37.PadicL.LogCoeffPiDigit
 
 /-!
@@ -441,7 +446,7 @@ compression, and every per-rung residual — with the zero weight family. -/
 `π⁸·(…)` is divisible by `π`). -/
 theorem residue_piOrderWitnessCoeff (S : StickelbergerF1Setup p) (j : (ZMod p)ˣ) :
     S.residue (S.piOrderWitnessCoeff j) = 0 := by
-  unfold piOrderWitnessCoeff
+  simp only [piOrderWitnessCoeff]
   by_cases hj : j = 1
   · rw [if_pos hj]
     refine (S.residue_eq_zero_iff _).mpr ⟨S.π ^ 7 * (((S.ω 1) ^ 32 : S.Oˣ)⁻¹ : S.Oˣ), ?_⟩
