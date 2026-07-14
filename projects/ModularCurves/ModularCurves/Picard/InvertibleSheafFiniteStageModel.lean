@@ -85,6 +85,23 @@ noncomputable def affineIntersectionPairTransitionUnit
       classical
       simp [Scheme.GlueData.affineIntersectionPairIndex])
 
+/-- Multiplicative descent data on the pair and triple objects of an affine-intersection
+algebra functor. -/
+structure AffineIntersectionUnitCocycle
+    {A J : Type u} [CommRing A] (F : Finset J ⥤ CommAlgCat.{u} A) where
+  transition : ∀ i j,
+    (F.obj (Scheme.GlueData.affineIntersectionPairIndex i j))ˣ
+  cocycle : ∀ i j k,
+    Units.map (F.map
+          (Scheme.GlueData.affineIntersectionPairToTripleLeft i j k)).hom.toMonoidHom
+        (transition i j) *
+      Units.map (F.map
+          (Scheme.GlueData.affineIntersectionPairToTripleMiddle i j k)).hom.toMonoidHom
+        (transition j k) =
+    Units.map (F.map
+        (Scheme.GlueData.affineIntersectionPairToTripleRight i j k)).hom.toMonoidHom
+      (transition i k)
+
 /-- Affine-intersection transition units are compatible with every restriction map in
 the coordinate-ring functor. -/
 theorem affineIntersectionTransitionUnit_map
@@ -205,6 +222,16 @@ theorem affineIntersectionTransitionUnit_cocycle
       simp [Scheme.GlueData.affineIntersectionTripleIndex]) (by
       simp [Scheme.GlueData.affineIntersectionTripleIndex]) (by
       simp [Scheme.GlueData.affineIntersectionTripleIndex])
+
+/-- The pair transition units of an invertible sheaf form multiplicative descent data on
+the affine-intersection algebra functor. -/
+noncomputable def affineIntersectionUnitCocycle
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme) :
+    AffineIntersectionUnitCocycle (π.affineIntersectionFunctor U) where
+  transition := affineIntersectionPairTransitionUnit π U e
+  cocycle := affineIntersectionTransitionUnit_cocycle π U e
 
 /-- An invertible sheaf on a proper, locally finitely presented family admits a finite affine
 trivializing cover whose affine-intersection model recovers the family after base change. -/
