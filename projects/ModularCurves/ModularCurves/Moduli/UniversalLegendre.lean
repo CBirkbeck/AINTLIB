@@ -1231,6 +1231,92 @@ theorem legendreTop_π_w {R : CommRingCat.{u}} {X : EllObj R}
     rw [Category.assoc]; rfl]
   rw [← Category.assoc, ← pullback.condition, Category.assoc, legendreWitnessCover_f]
 
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+/-- **(T-E14-CLS-6, ≈E4)** The witness cover of the base. -/
+noncomputable def legendreBaseCover {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) : X.base.OpenCover :=
+  Scheme.Cover.mkOfCovers
+    (LegendreWitness X L b)
+    (fun w => w.V.1.toScheme)
+    (fun w => w.V.1.ι)
+    (fun x => by
+      obtain ⟨V, hxV, Pr, lam, hAd, hW, hMP, hMQ⟩ := hD x
+      exact ⟨⟨V, Pr, lam, hAd, hW, hMP, hMQ⟩, ⟨x, hxV⟩, rfl⟩)
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E14-CLS-6 ★, ≈E4-zero)** The glued comparison respects the zero sections
+(mirrors `classifyingTop_zero`). -/
+theorem legendreTop_zero {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤))) :
+    X.curve.toEllipticCurveGeom.zero ≫ legendreTop hD h2 =
+      legendreClassifyingMap X L b hD h2 ≫ projModelZero (universalLegendre R) := by
+  refine (legendreBaseCover hD).hom_ext _ _ (fun w => ?_)
+  have hzfac : w.V.1.ι ≫ X.curve.toEllipticCurveGeom.zero =
+      pullback.lift (w.V.1.ι ≫ X.curve.toEllipticCurveGeom.zero) (𝟙 _)
+        (by rw [Category.assoc, X.curve.toEllipticCurveGeom.zero_π,
+          Category.comp_id, Category.id_comp]) ≫
+      (legendreWitnessCover hD).f w := by
+    rw [legendreWitnessCover_f, pullback.lift_fst]
+  rw [show (legendreBaseCover hD).f w = w.V.1.ι from rfl, ← Category.assoc, hzfac,
+    Category.assoc, legendreTop_piece]
+  have hz := w.Pr.compat_zero
+  have hlift : pullback.lift (w.V.1.ι ≫ X.curve.toEllipticCurveGeom.zero) (𝟙 _)
+      (by rw [Category.assoc, X.curve.toEllipticCurveGeom.zero_π,
+        Category.comp_id, Category.id_comp]) ≫ w.Pr.e.hom =
+    w.V.2.isoSpec.hom ≫ projModelZero w.Pr.W := by
+    rw [← Iso.inv_comp_eq, ← Category.assoc]
+    exact hz
+  rw [legendrePiece, ← Category.assoc, hlift]
+  rw [Category.assoc,
+    show projModelZero w.Pr.W = projModelZero ((universalLegendre R).map
+        (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+          (legendreClassifyingRingHom X L b hD h2))) ≫
+      eqToHom (congrArg projModel
+        (universalLegendre_map_classifying X L b hD h2 w.V w.Pr w.lam
+          w.hAd w.hW w.hMP)) from
+      projModelZero_congr
+        (universalLegendre_map_classifying X L b hD h2 w.V w.Pr w.lam
+          w.hAd w.hW w.hMP).symm]
+  simp only [Category.assoc, eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
+  have hbc : projModelZero ((universalLegendre R).map
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (legendreClassifyingRingHom X L b hD h2))) ≫
+      projModelBaseChange
+        (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+          (legendreClassifyingRingHom X L b hD h2)) (universalLegendre R) =
+    Spec.map (CommRingCat.ofHom
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (legendreClassifyingRingHom X L b hD h2))) ≫
+      projModelZero (universalLegendre R) := by
+    letI : Algebra (LegendreModuliRing R) Γ(X.base, w.V.1) :=
+      ((((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (legendreClassifyingRingHom X L b hD h2))).toAlgebra
+    exact projModelZero_baseChange (universalLegendre R)
+  rw [hbc]
+  have hsplit : Spec.map (CommRingCat.ofHom
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (legendreClassifyingRingHom X L b hD h2))) =
+    Spec.map (X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op) ≫
+      Spec.map (CommRingCat.ofHom (legendreClassifyingRingHom X L b hD h2)) := by
+    rw [← Spec.map_comp]
+    rfl
+  rw [← Category.assoc, hsplit,
+    show w.V.2.isoSpec.hom = w.V.1.toSpecΓ from IsAffineOpen.isoSpec_hom _]
+  rw [show w.V.1.toSpecΓ ≫
+      Spec.map (X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op) ≫
+      Spec.map (CommRingCat.ofHom (legendreClassifyingRingHom X L b hD h2)) =
+    (w.V.1.ι ≫ X.base.toSpecΓ) ≫
+      Spec.map (CommRingCat.ofHom (legendreClassifyingRingHom X L b hD h2)) from by
+    rw [← Category.assoc, Scheme.Opens.toSpecΓ_SpecMap_presheaf_map_top]]
+  rw [show (w.V.1.ι ≫ X.base.toSpecΓ) ≫
+      Spec.map (CommRingCat.ofHom (legendreClassifyingRingHom X L b hD h2)) =
+    w.V.1.ι ≫ legendreClassifyingMap X L b hD h2 from by rw [Category.assoc]; rfl]
+  simp only [Category.assoc]
+
 end TwoTorsion
 
 end ModularCurves
