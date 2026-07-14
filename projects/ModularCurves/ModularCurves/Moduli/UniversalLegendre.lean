@@ -1317,6 +1317,32 @@ theorem legendreTop_zero {R : CommRingCat.{u}} {X : EllObj R}
     w.V.1.ι ≫ legendreClassifyingMap X L b hD h2 from by rw [Category.assoc]; rfl]
   simp only [Category.assoc]
 
+open AlgebraicGeometry CategoryTheory Scheme in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E14-CLS-6, ≈E4)** The classifying map lies over `Spec R` (mirrors
+`classifyingMap_structMap`). -/
+theorem legendreClassifyingMap_structMap {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤)))
+    (hR : IsUnit (2 : R)) :
+    legendreClassifyingMap X L b hD h2 ≫ (universalLegendreObj R hR).structMap =
+      X.structMap := by
+  show (X.base.toSpecΓ ≫ Spec.map (CommRingCat.ofHom
+      (legendreClassifyingRingHom X L b hD h2))) ≫
+    Spec.map (CommRingCat.ofHom (algebraMap R (LegendreModuliRing R))) = X.structMap
+  rw [Category.assoc, ← Spec.map_comp,
+    show CommRingCat.ofHom (algebraMap R (LegendreModuliRing R)) ≫
+        CommRingCat.ofHom (legendreClassifyingRingHom X L b hD h2) =
+      CommRingCat.ofHom (X.baseRingHom) from by
+      ext r
+      exact legendreClassifyingRingHom_algebraMap X L b hD h2 r,
+    show CommRingCat.ofHom X.baseRingHom =
+      (Scheme.ΓSpecIso R).inv ≫ X.structMap.appTop from rfl,
+    Spec.map_comp, ← Scheme.toSpecΓ_naturality_assoc, ← SpecMap_ΓSpecIso_hom R,
+    ← Spec.map_comp, Iso.inv_hom_id, Spec.map_id]
+  exact Category.comp_id _
+
 end TwoTorsion
 
 end ModularCurves
