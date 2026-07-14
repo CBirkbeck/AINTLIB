@@ -279,6 +279,30 @@ noncomputable def idealMonoidHom (X : Scheme.{u}) :
 @[simp] lemma idealMonoidHom_apply (X : Scheme.{u}) (I : X.IdealSheafData) :
     idealMonoidHom X I = I.ideal := rfl
 
+/-- For an isomorphism of schemes, pushing an ideal sheaf forward along the hom agrees with
+pulling it back along the inverse. -/
+lemma map_hom_eq_comap_inv {X Y : Scheme.{u}} (φ : X ≅ Y) (I : X.IdealSheafData) :
+    I.map φ.hom = I.comap φ.inv := by
+  refine le_antisymm ?_ ?_
+  · have h1 : ((I.map φ.hom).comap φ.hom).comap φ.inv ≤ I.comap φ.inv :=
+      comap_mono φ.inv (comap_map_le _ _)
+    rwa [← comap_comp, φ.inv_hom_id, comap_id] at h1
+  · refine ((map_gc φ.hom) _ _).mp ?_
+    show (I.comap φ.inv).comap φ.hom ≤ I
+    rw [← comap_comp, φ.hom_inv_id, comap_id]
+
+/-- The kernel of a morphism postcomposed with an isomorphism is the `comap` of the kernel
+along the inverse. -/
+lemma _root_.AlgebraicGeometry.Scheme.Hom.ker_comp_iso {T X Y : Scheme.{u}} (z : T ⟶ X)
+    (φ : X ≅ Y) : Scheme.Hom.ker (z ≫ φ.hom) = (Scheme.Hom.ker z).comap φ.inv := by
+  rw [Scheme.Hom.ker_comp]
+  exact map_hom_eq_comap_inv φ z.ker
+
+/-- Precomposition with an isomorphism does not change the kernel ideal sheaf. -/
+lemma _root_.AlgebraicGeometry.Scheme.Hom.ker_iso_comp {X Y Z : Scheme.{u}} (τ : X ⟶ Y)
+    [IsIso τ] (f : Y ⟶ Z) : Scheme.Hom.ker (τ ≫ f) = Scheme.Hom.ker f := by
+  rw [Scheme.Hom.ker_comp, Scheme.Hom.ker_eq_bot_of_isIso, map_bot]
+
 /-- **Factoring through a pulled-back subscheme = factoring through the original after
 composing** (the `comapIso` dictionary). A map `g : T ⟶ X` factors through the scheme-
 theoretic preimage `(I.comap f).subscheme` iff its composite `g ≫ f` factors through
