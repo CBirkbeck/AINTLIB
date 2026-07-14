@@ -3,18 +3,18 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.WeierstrassModel
-import ModularCurves.EllipticCurve.ModelVariableChange
 import ModularCurves.EllipticCurve.Comparison
+import ModularCurves.EllipticCurve.ModelVariableChange
+import ModularCurves.EllipticCurve.WeierstrassModel
 import ModularCurves.ForMathlib.WeierstrassInvariant
 
 /-!
 # The quotient curve's Weierstrass model, geometrically ([a5-iv], geometry)
 
-`ForMathlib/WeierstrassInvariant.lean` proves the **algebraic** heart of `[a5]`: for a free `G`-action
-on `A` with `Aᴳ` local and a `VariableChange`-cocycle action on `W₀ : WeierstrassCurve A`, there is
-`E` and a descended `W₁ : WeierstrassCurve Aᴳ` with `W₁.map (Aᴳ ↪ A) = E⁻¹ • W₀`
-(`exists_invariant_descent`).
+`ForMathlib/WeierstrassInvariant.lean` proves the **algebraic** heart of `[a5]`: for a free
+`G`-action on `A` with `Aᴳ` local and a `VariableChange`-cocycle action on
+`W₀ : WeierstrassCurve A`, there is `E` and a descended `W₁ : WeierstrassCurve Aᴳ` with
+`W₁.map (Aᴳ ↪ A) = E⁻¹ • W₀` (`exists_invariant_descent`).
 
 This file supplies the **geometric** consequence: the universal curve `projModel W₀` over `Spec A`
 is the base change of the quotient model `projModel W₁` over `Spec Aᴳ`:
@@ -81,7 +81,7 @@ theorem isPullback_projModelBaseChange_hom (g : R →+* R) (W : WeierstrassCurve
   have h := isPullback_projModelBaseChange (R := R) (R' := R) W
   have he : (algebraMap R R : R →+* R) = g := g.algebraMap_toAlgebra
   rw [he] at h
-  convert h using 2 <;> rw [he]
+  convert h using 2
 
 /-- **([a5-ii], the pointed iso)** If `g` acts on `projModel W` by a *cartesian* square over
 `Spec (g)` (the geometric `G`-action, `IsCurveAction.cartesian`), then — since base change along `g`
