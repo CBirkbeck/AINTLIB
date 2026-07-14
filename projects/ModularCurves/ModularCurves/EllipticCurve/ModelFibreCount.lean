@@ -237,9 +237,24 @@ variable {K : Type u} [Field K] (W : WeierstrassCurve K) [W.IsElliptic]
 spectrum of the coordinate ring: `isoSpec` for the affine `zChart` composed with
 `Spec` of `zChartSectionCoordRingEquiv`. -/
 noncomputable def zChartHomeo :
-    ((zChart W : (projModel W).Opens) : Set (projModel W)) ≃ₜ
-      PrimeSpectrum W.toAffine.CoordinateRing := by
-  sorry
+    ((zChart W).toScheme : Scheme.{u}) ≃ₜ PrimeSpectrum W.toAffine.CoordinateRing :=
+  haveI hZaff : IsAffineOpen (zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  haveI : IsAffine (zChart W).toScheme := hZaff
+  Scheme.homeoOfIso ((zChart W).toScheme.isoSpec ≪≫
+    Scheme.Spec.mapIso ((zChartSectionCoordRingEquiv W).toCommRingCatIso).symm.op)
+
+/-- **(leaf g3, DISCHARGED)** The projective model is topologically infinite: the chart
+carrier is homeomorphic to the infinite `Spec K[W]`, and the chart inclusion is
+injective. -/
+theorem projModel_infinite' : Infinite (projModel W) := by
+  haveI := coordinateRing_krullDimLE_one W
+  haveI : Infinite (PrimeSpectrum W.toAffine.CoordinateRing) :=
+    infinite_primeSpectrum_of_not_isField (not_isField_coordinateRing W)
+  haveI : Infinite ((zChart W).toScheme : Scheme.{u}) := (zChartHomeo W).symm.injective
+    |> Infinite.of_injective _
+  exact Infinite.of_injective ((zChart W).ι).base
+    ((zChart W).ι.isOpenEmbedding.injective)
 
 /-- **(leaf g2)** The projective Weierstrass model is curvelike: every irreducible
 closed subset is finite or everything. Chart transfer of
@@ -252,8 +267,8 @@ theorem projModel_isClosed_isIrreducible_finite_or_univ
 
 /-- **(leaf g3)** The projective model is topologically infinite (the chart is the
 spectrum of a Jacobson non-field domain). -/
-theorem projModel_infinite : Infinite (projModel W) := by
-  sorry
+theorem projModel_infinite : Infinite (projModel W) :=
+  projModel_infinite' W
 
 /-- **(leaf g4)** The projective model is a Noetherian topological space (the chart is
 Noetherian, the complement is finite; every open is compact). -/
