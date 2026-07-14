@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.ImaginaryQuadratic.CN05.Alpha
@@ -47,7 +52,7 @@ theorem idealNormMultiplicity_at_q_inert_odd (hp3 : p % 4 = 3) (q : ℕ)
   have habsNormP : Ideal.absNorm P = q ^ 2 :=
     absNorm_primeOver_at_q_inert p hp3 q hq_odd hqp h_not_sq P hP_mem
   -- Show the set {I : NonzeroIdeal (Kminus p) // absNorm I = q^k} is empty.
-  unfold idealNormMultiplicity
+  simp only [idealNormMultiplicity]
   rw [Nat.card_eq_zero]
   refine Or.inl ⟨?_⟩
   rintro ⟨⟨I, hI_ne⟩, hI_norm⟩
@@ -195,7 +200,7 @@ theorem idealNormMultiplicity_at_q_inert_even (hp3 : p % 4 = 3) (q : ℕ)
   have habsNormP : Ideal.absNorm P = q ^ 2 :=
     absNorm_primeOver_at_q_inert p hp3 q hq_odd hqp h_not_sq P hP_mem
   have hq_gt_one : 1 < q := (Fact.out : q.Prime).one_lt
-  unfold idealNormMultiplicity
+  simp only [idealNormMultiplicity]
   haveI : Unique {I : NonzeroIdeal (Kminus p) // Ideal.absNorm I.1 = q ^ (2 * m)} :=
     { default := ⟨⟨P ^ m, pow_ne_zero m hP_ne⟩, by
           rw [map_pow, habsNormP, ← pow_mul]⟩
@@ -326,10 +331,10 @@ lemma isSquare_neg_p_iff_isSquare_q (hp3 : p % 4 = 3) (q : ℕ) [hq : Fact q.Pri
   -- legendreSym q (-p : ℤ) = quadraticChar (ZMod q) ((-p : ℤ) : ZMod q) = qc(-p)
   -- legendreSym p (q : ℤ) = quadraticChar (ZMod p) ((q : ℤ) : ZMod p) = qc(q)
   have h_L_neg_p : legendreSym q (-(p : ℤ)) = quadraticChar (ZMod q) (-(p : ZMod q)) := by
-    unfold legendreSym
+    simp only [legendreSym]
     congr 1; push_cast; rfl
   have h_L_q : legendreSym p (q : ℤ) = quadraticChar (ZMod p) ((q : ℕ) : ZMod p) := by
-    unfold legendreSym
+    simp only [legendreSym]
     congr 1; push_cast; rfl
   -- The target: `quadraticChar (ZMod q) (-(p : ZMod q)) = 1`
   -- iff `quadraticChar (ZMod p) (q : ZMod p) = 1`.
@@ -489,7 +494,7 @@ theorem monicFactorsMod_alpha_at_p (hp3 : p % 4 = 3) :
     RingOfIntegers.monicFactorsMod (alphaInOK p hp3) p =
       {Polynomial.X - Polynomial.C ((2 : ZMod p)⁻¹)} := by
   classical
-  unfold RingOfIntegers.monicFactorsMod
+  simp only [RingOfIntegers.monicFactorsMod]
   rw [alphaInOK_minpoly_factor_mod_p p hp3,
       UniqueFactorizationMonoid.normalizedFactors_pow]
   have h_irred : Irreducible (Polynomial.X - Polynomial.C ((2 : ZMod p)⁻¹) :
@@ -596,7 +601,7 @@ theorem idealNormMultiplicity_at_p_eq_one (hp3 : p % 4 = 3) (k : ℕ) :
   haveI : P.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP_ne hP_mem.1
   haveI : P.LiesOver (Ideal.span {(p : ℤ)}) := hP_mem.2
   have habsNormP : Ideal.absNorm P = p := absNorm_primeOver_at_p p hp3 P hP_mem
-  unfold idealNormMultiplicity
+  simp only [idealNormMultiplicity]
   haveI : Unique {I : NonzeroIdeal (Kminus p) // Ideal.absNorm I.1 = p ^ k} :=
     { default := ⟨⟨P ^ k, pow_ne_zero k hP_ne⟩, by rw [map_pow, habsNormP]⟩
       uniq := by
@@ -783,7 +788,7 @@ theorem idealNormMultiplicity_at_q_split_eq (hp3 : p % 4 = 3) (q : ℕ)
     absNorm_primeOver_at_q_split p hp3 q hq_odd hqp hr P₂ hP₂_mem
   have hq_gt_one : 1 < q := (Fact.out : q.Prime).one_lt
   -- Build the bijection with Fin (k+1).
-  unfold idealNormMultiplicity
+  simp only [idealNormMultiplicity]
   -- Helper: for a ≤ k, P₁^a * P₂^(k-a) has absNorm q^k and is ≠ ⊥.
   have h_ideal_ne : ∀ a : ℕ, P₁ ^ a * P₂ ^ (k - a) ≠ ⊥ :=
     fun a ↦ mul_ne_zero (pow_ne_zero _ hP₁_ne) (pow_ne_zero _ hP₂_ne)
