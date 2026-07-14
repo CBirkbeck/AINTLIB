@@ -1563,6 +1563,83 @@ theorem section_comp_legendreTop {R : CommRingCat.{u}} {X : EllObj R}
     Category.assoc]
   rfl
 
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E14-CLS-7, rt1-level ★★)** Pulling the universal marked `P` back along the
+classifying morphism recovers the given `P`. -/
+theorem pullSection_legendreClassifyingEllHom_P {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤)))
+    (hR : IsUnit (2 : R)) :
+    EllHom.pullSection R (legendreClassifyingEllHom hD h2 hR)
+      (universalLegendreP R hR) = L.1.1 := by
+  have hdown : L.1.1.1 ≫ legendreTop hD h2 =
+      legendreClassifyingMap X L b hD h2 ≫
+        projModelAffineSection (universalLegendre R) 0 0
+          (legendreCurve_equation_zero (universalLambda R)) := by
+    refine section_comp_legendreTop hD h2 L.1.1.2 0 0
+      (legendreCurve_equation_zero (universalLambda R)) (fun w => ?_)
+    have hz : ((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom)
+        (legendreClassifyingRingHom X L b hD h2 (0 : LegendreModuliRing R)) =
+      (0 : Γ(X.base, w.V.1)) := by rw [map_zero, map_zero]
+    rw [hz]
+    exact w.hMP
+  refine Subtype.ext ?_
+  refine (legendreClassifyingEllHom hD h2 hR).isPullback.hom_ext ?_ ?_
+  · rw [show (EllHom.pullSection R (legendreClassifyingEllHom hD h2 hR)
+        (universalLegendreP R hR)).1 ≫ (legendreClassifyingEllHom hD h2 hR).top =
+      (legendreClassifyingEllHom hD h2 hR).baseHom ≫ (universalLegendreP R hR).1
+      from (legendreClassifyingEllHom hD h2 hR).isPullback.lift_fst _ _ _]
+    show _ = L.1.1.1 ≫ legendreTop hD h2
+    rw [hdown]
+    rfl
+  · rw [show (EllHom.pullSection R (legendreClassifyingEllHom hD h2 hR)
+        (universalLegendreP R hR)).1 ≫ X.curve.π = 𝟙 X.base from
+      (EllHom.pullSection R (legendreClassifyingEllHom hD h2 hR)
+        (universalLegendreP R hR)).2]
+    exact L.1.1.2.symm
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E14-CLS-7, rt1-level ★★)** Pulling the universal marked `Q` back along the
+classifying morphism recovers the given `Q`. -/
+theorem pullSection_legendreClassifyingEllHom_Q {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤)))
+    (hR : IsUnit (2 : R)) :
+    EllHom.pullSection R (legendreClassifyingEllHom hD h2 hR)
+      (universalLegendreQ R hR) = L.1.2 := by
+  have hdown : L.1.2.1 ≫ legendreTop hD h2 =
+      legendreClassifyingMap X L b hD h2 ≫
+        projModelAffineSection (universalLegendre R) 1 0
+          (legendreCurve_equation_one (universalLambda R)) := by
+    refine section_comp_legendreTop hD h2 L.1.2.2 1 0
+      (legendreCurve_equation_one (universalLambda R)) (fun w => ?_)
+    have ho : ((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom)
+        (legendreClassifyingRingHom X L b hD h2 (1 : LegendreModuliRing R)) =
+      (1 : Γ(X.base, w.V.1)) := by rw [map_one, map_one]
+    have hz : ((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom)
+        (legendreClassifyingRingHom X L b hD h2 (0 : LegendreModuliRing R)) =
+      (0 : Γ(X.base, w.V.1)) := by rw [map_zero, map_zero]
+    rw [ho, hz]
+    exact w.hMQ
+  refine Subtype.ext ?_
+  refine (legendreClassifyingEllHom hD h2 hR).isPullback.hom_ext ?_ ?_
+  · rw [show (EllHom.pullSection R (legendreClassifyingEllHom hD h2 hR)
+        (universalLegendreQ R hR)).1 ≫ (legendreClassifyingEllHom hD h2 hR).top =
+      (legendreClassifyingEllHom hD h2 hR).baseHom ≫ (universalLegendreQ R hR).1
+      from (legendreClassifyingEllHom hD h2 hR).isPullback.lift_fst _ _ _]
+    show _ = L.1.2.1 ≫ legendreTop hD h2
+    rw [hdown]
+    rfl
+  · rw [show (EllHom.pullSection R (legendreClassifyingEllHom hD h2 hR)
+        (universalLegendreQ R hR)).1 ≫ X.curve.π = 𝟙 X.base from
+      (EllHom.pullSection R (legendreClassifyingEllHom hD h2 hR)
+        (universalLegendreQ R hR)).2]
+    exact L.1.2.2.symm
+
 end TwoTorsion
 
 end ModularCurves
