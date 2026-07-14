@@ -525,16 +525,92 @@ theorem section_base_injective_of_isAlgClosed {F : Type u} [Field F] [IsAlgClose
         = π.residueFieldMap x ≫ (Scheme.residueFieldCongr e).hom := by
     rintro x y rfl eY
     simp
-  -- the pullback of residue fields along `π` is an isomorphism (alg-closed leaf)
-  have hiso : IsIso (π.residueFieldMap (P.1 (IsLocalRing.closedPoint F))) := by
-    sorry
-  -- assemble: cancel `jP` in `hchain` after commuting the congruence past `jQ`
-  have hcomm := natMap (h (IsLocalRing.closedPoint F)) e'
-  have hchain2 := hchain.trans (Category.assoc _ _ _).symm
-  have hchain3 := hchain2.trans (congrArg (fun t => t ≫
-    Scheme.descResidueField (Scheme.stalkClosedPointTo Q.1)) hcomm)
-  have hchain4 := hchain3.trans (Category.assoc _ _ _)
-  exact (cancel_epi (π.residueFieldMap (P.1 (IsLocalRing.closedPoint F)))).mp hchain4
+  -- the descents are SPLIT EPIS (canonical retraction triangles) and monos (field
+  -- homs), hence isos; the congruence identity then follows from the canonical maps.
+  have htriP0 := phi0_desc_stalkClosedPointTo_of_eq_id (P.1 ≫ π) P.2
+  have htriQ0 := phi0_desc_stalkClosedPointTo_of_eq_id (Q.1 ≫ π) Q.2
+  have htriP := (congrArg (fun t => (Scheme.ΓSpecIso (CommRingCat.of F)).inv ≫
+      (Spec (CommRingCat.of F)).presheaf.germ ⊤
+        ((P.1 ≫ π) (IsLocalRing.closedPoint F)) trivial ≫
+      (Spec (CommRingCat.of F)).residue
+        ((P.1 ≫ π) (IsLocalRing.closedPoint F)) ≫ t) hcP).symm.trans htriP0
+  have htriQ := (congrArg (fun t => (Scheme.ΓSpecIso (CommRingCat.of F)).inv ≫
+      (Spec (CommRingCat.of F)).presheaf.germ ⊤
+        ((Q.1 ≫ π) (IsLocalRing.closedPoint F)) trivial ≫
+      (Spec (CommRingCat.of F)).residue
+        ((Q.1 ≫ π) (IsLocalRing.closedPoint F)) ≫ t) hcQ).symm.trans htriQ0
+  have hsecP : ((((Scheme.ΓSpecIso (CommRingCat.of F)).inv ≫
+      (Spec (CommRingCat.of F)).presheaf.germ ⊤
+        ((P.1 ≫ π) (IsLocalRing.closedPoint F)) trivial) ≫
+      (Spec (CommRingCat.of F)).residue
+        ((P.1 ≫ π) (IsLocalRing.closedPoint F))) ≫
+      π.residueFieldMap (P.1 (IsLocalRing.closedPoint F))) ≫
+      Scheme.descResidueField (Scheme.stalkClosedPointTo P.1) = 𝟙 _ := by
+    exact htriP
+  have hsecQ : ((((Scheme.ΓSpecIso (CommRingCat.of F)).inv ≫
+      (Spec (CommRingCat.of F)).presheaf.germ ⊤
+        ((Q.1 ≫ π) (IsLocalRing.closedPoint F)) trivial) ≫
+      (Spec (CommRingCat.of F)).residue
+        ((Q.1 ≫ π) (IsLocalRing.closedPoint F))) ≫
+      π.residueFieldMap (Q.1 (IsLocalRing.closedPoint F))) ≫
+      Scheme.descResidueField (Scheme.stalkClosedPointTo Q.1) = 𝟙 _ := by
+    exact htriQ
+  haveI hmonoP : Mono (Scheme.descResidueField (Scheme.stalkClosedPointTo P.1)) :=
+    ConcreteCategory.mono_of_injective _ (RingHom.injective _)
+  haveI hmonoQ : Mono (Scheme.descResidueField (Scheme.stalkClosedPointTo Q.1)) :=
+    ConcreteCategory.mono_of_injective _ (RingHom.injective _)
+  haveI hseP : IsSplitEpi (Scheme.descResidueField (Scheme.stalkClosedPointTo P.1)) :=
+    IsSplitEpi.mk' ⟨_, hsecP⟩
+  haveI hseQ : IsSplitEpi (Scheme.descResidueField (Scheme.stalkClosedPointTo Q.1)) :=
+    IsSplitEpi.mk' ⟨_, hsecQ⟩
+  haveI hisoP : IsIso (Scheme.descResidueField (Scheme.stalkClosedPointTo P.1)) :=
+    isIso_of_mono_of_isSplitEpi _
+  haveI hisoQ : IsIso (Scheme.descResidueField (Scheme.stalkClosedPointTo Q.1)) :=
+    isIso_of_mono_of_isSplitEpi _
+  -- the canonical sections `φ₀ ≫ j` match across the point congruence
+  have hcanon : ∀ {x y : ↥X} (e : x = y) (eY : π.base x = π.base y),
+      ((((Scheme.ΓSpecIso (CommRingCat.of F)).inv ≫
+        (Spec (CommRingCat.of F)).presheaf.germ ⊤ (π.base x) trivial) ≫
+        (Spec (CommRingCat.of F)).residue (π.base x)) ≫ π.residueFieldMap x) ≫
+        (Scheme.residueFieldCongr e).hom
+      = (((Scheme.ΓSpecIso (CommRingCat.of F)).inv ≫
+        (Spec (CommRingCat.of F)).presheaf.germ ⊤ (π.base y) trivial) ≫
+        (Spec (CommRingCat.of F)).residue (π.base y)) ≫ π.residueFieldMap y := by
+    rintro x y rfl eY
+    simp
+  have hkey := hcanon (h (IsLocalRing.closedPoint F)) e'
+  -- turn the two triangles into inverse identities and conclude
+  have hinvP : inv (Scheme.descResidueField (Scheme.stalkClosedPointTo P.1))
+      = (((Scheme.ΓSpecIso (CommRingCat.of F)).inv ≫
+        (Spec (CommRingCat.of F)).presheaf.germ ⊤
+          ((P.1 ≫ π) (IsLocalRing.closedPoint F)) trivial) ≫
+        (Spec (CommRingCat.of F)).residue
+          ((P.1 ≫ π).base (IsLocalRing.closedPoint F))) ≫
+        π.residueFieldMap (P.1 (IsLocalRing.closedPoint F)) := by
+    rw [← Category.id_comp (inv _), ← hsecP, Category.assoc, IsIso.hom_inv_id,
+      Category.comp_id]
+  have hinvQ : inv (Scheme.descResidueField (Scheme.stalkClosedPointTo Q.1))
+      = (((Scheme.ΓSpecIso (CommRingCat.of F)).inv ≫
+        (Spec (CommRingCat.of F)).presheaf.germ ⊤
+          ((Q.1 ≫ π) (IsLocalRing.closedPoint F)) trivial) ≫
+        (Spec (CommRingCat.of F)).residue
+          ((Q.1 ≫ π).base (IsLocalRing.closedPoint F))) ≫
+        π.residueFieldMap (Q.1 (IsLocalRing.closedPoint F)) := by
+    rw [← Category.id_comp (inv _), ← hsecQ, Category.assoc, IsIso.hom_inv_id,
+      Category.comp_id]
+  have hfinal : inv (Scheme.descResidueField (Scheme.stalkClosedPointTo P.1)) ≫
+      (Scheme.residueFieldCongr (h (IsLocalRing.closedPoint F))).hom
+      = inv (Scheme.descResidueField (Scheme.stalkClosedPointTo Q.1)) := by
+    rw [hinvP, hinvQ]
+    exact hkey
+  have h2 : (Scheme.residueFieldCongr (h (IsLocalRing.closedPoint F))).hom
+      = Scheme.descResidueField (Scheme.stalkClosedPointTo P.1) ≫
+        inv (Scheme.descResidueField (Scheme.stalkClosedPointTo Q.1)) := by
+    rw [← hfinal, ← Category.assoc, IsIso.hom_inv_id, Category.id_comp]
+  show Scheme.descResidueField (Scheme.stalkClosedPointTo P.1)
+    = (Scheme.residueFieldCongr (h (IsLocalRing.closedPoint F))).hom ≫
+      Scheme.descResidueField (Scheme.stalkClosedPointTo Q.1)
+  rw [h2, Category.assoc, IsIso.inv_hom_id, Category.comp_id]
 
 /-- **(g5, alg-closed case — w1–w6 per the section header; w7 above)** The topological
 range of `[N]` on the projective model over an algebraically closed field is
