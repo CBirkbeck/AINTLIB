@@ -29,8 +29,8 @@ Everything is mathlib-native: `WeierstrassCurve.map`/`map_Δ` (coefficient base 
   `B`-points of `U`.
 * `ellipticW.map`: functorial base change; `smul` preserves `ellipticW` (the action of
   `VariableChange B`).
-* `toRingHom` / `ofRingHom`: the atlas dictionary, with round-trip and naturality
-  lemmas (sorried leaves of this ticket).
+* `ellipticWOfRingHom` / `ringHomOfEllipticW`: the atlas dictionary, with its round-trip
+  lemmas, bundled as the equivalence `atlasDictionary`.
 
 The groupoid-valued functor `M_ell^W` and the T-W6 equivalence with Weierstrass-data
 records (T-A8) build on this layer in the same file, next increment. Decomposition
@@ -83,8 +83,8 @@ instance : SMul (VariableChange B) (ellipticW B) :=
   rfl
 
 instance : MulAction (VariableChange B) (ellipticW B) where
-  one_smul W := Subtype.ext (one_smul _ _)
-  mul_smul C₁ C₂ W := Subtype.ext (mul_smul _ _ _)
+  one_smul _ := Subtype.ext (one_smul _ _)
+  mul_smul _ _ _ := Subtype.ext (mul_smul _ _ _)
 
 /-- Base-change naturality of the action (mathlib's `map_variableChange`). -/
 theorem map_smul (f : B →+* C) (C' : VariableChange B) (W : ellipticW B) :
@@ -208,7 +208,7 @@ on commutative rings. The scheme-level moduli functor is `Scheme.Γ ⋙ MellW`
 def MellW : CommRingCat.{u} ⥤ Cat.{u, u} where
   obj B := Cat.of (MellWGroupoid B)
   map f := (MellWGroupoid.mapFunctor f.hom).toCatHom
-  map_id B := congrArg Functor.toCatHom MellWGroupoid.mapFunctor_id
+  map_id _ := congrArg Functor.toCatHom MellWGroupoid.mapFunctor_id
   map_comp f g := congrArg Functor.toCatHom (MellWGroupoid.mapFunctor_comp f.hom g.hom)
 
 /-- **The Weierstrass moduli stack functor `M_ell^W = [U/G]` on schemes** (T-W6's
@@ -327,6 +327,13 @@ private theorem eqToHom_projModelZero {V V' : WeierstrassCurve ↑Γ(S, ⊤)} (h
     projModelZero V ≫ eqToHom (congrArg (projModel ·) h) = projModelZero V' := by
   subst h; simp
 
+/-- The commutation making `S.toSpecΓ ≫ projModelZero V.1` a section of `projModel V.1` over
+`S`: the zero-section lift used on both sides of the pasting and coordinate-change squares. -/
+private theorem zerolift_comm (V : ellipticW ↑Γ(S, ⊤)) :
+    (S.toSpecΓ ≫ projModelZero V.1) ≫ projModelπ V.1 = 𝟙 S ≫ S.toSpecΓ := by
+  rw [Category.assoc, projModelZero_projModelπ]
+  exact (Category.comp_id _).trans (Category.id_comp _).symm
+
 private theorem zliftComm :
     (classify W ≫ universalCurveZero) ≫ universalCurveπ =
       S.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W)) := by
@@ -372,9 +379,7 @@ via `IsPullback.isoPullback`-projections + `projModelZero_baseChange` — the ex
 of the atlas file's T-W5a case-c2 battle, one seam-lemma per step. -/
 theorem curveOfPasting_zero :
     (curveOf W).zero ≫ (curveOfPasting W).hom =
-      pullback.lift (S.toSpecΓ ≫ projModelZero W.1) (𝟙 S)
-        (by rw [Category.assoc, projModelZero_projModelπ]
-            exact (Category.comp_id _).trans (Category.id_comp _).symm) := by
+      pullback.lift (S.toSpecΓ ≫ projModelZero W.1) (𝟙 S) (zerolift_comm W) := by
   have hz : (curveOf W).zero ≫ (pullbackLeftPullbackSndIso universalCurveπ
       (Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W))) S.toSpecΓ).inv ≫
       pullback.fst (pullback.snd universalCurveπ
@@ -454,11 +459,6 @@ private theorem vcMiddleIso_snd (hC : C' • W = W') :
   simp only [vcMiddleIso, asIso_hom, vcMiddleMap]
   rw [pullback.lift_snd, Category.comp_id]
 
-private theorem zerolift_comm (V : ellipticW ↑Γ(S, ⊤)) :
-    (S.toSpecΓ ≫ projModelZero V.1) ≫ projModelπ V.1 = 𝟙 S ≫ S.toSpecΓ := by
-  rw [Category.assoc, projModelZero_projModelπ]
-  exact (Category.comp_id _).trans (Category.id_comp _).symm
-
 private theorem vcMiddleIso_zerolift (hC : C' • W = W') :
     pullback.lift (S.toSpecΓ ≫ projModelZero W.1) (𝟙 S) (zerolift_comm W) ≫
       (vcMiddleIso C' hC).hom =
@@ -536,11 +536,10 @@ private theorem vcMiddleMap_one {W : ellipticW ↑Γ(S, ⊤)}
     (hC : (1 : VariableChange ↑Γ(S, ⊤)) • W = W) :
     vcMiddleMap 1 hC = 𝟙 (pullback (projModelπ W.1) S.toSpecΓ) := by
   apply pullback.hom_ext
-  · simp only [vcMiddleMap, Category.assoc, pullback.lift_fst, Category.id_comp]
+  · simp only [vcMiddleMap, pullback.lift_fst, Category.id_comp]
     rw [vcModelHom_one]
     simp
-  · simp only [vcMiddleMap, Category.assoc, pullback.lift_snd, Category.id_comp,
-      Category.comp_id]
+  · simp only [vcMiddleMap, pullback.lift_snd, Category.id_comp, Category.comp_id]
 
 /-- **(T-W6c-ii)** A coordinate change carrying `W` to `W'` induces an isomorphism of
 the presented curves. -/
@@ -598,8 +597,8 @@ instance : Category (PresentedCurve S) where
 
 /-- **(T-W6c-iii) The presentation functor**: the `[U/G]`-groupoid maps to
 Weierstrass-presented elliptic curves — objects present themselves via `curveOf`,
-morphisms act by `curveOfVCIso`. Functor laws are parked on the `projModelVCIso_one`
-cross-lane request (board v10.42b) and the `_mul`-conjugation. -/
+morphisms act by `curveOfVCIso`. The functor laws come from `vcMiddleMap_one`
+(itself the public `projModelVCIso_one`) and `vcMiddleMap_mul` (the `_mul` cocycle). -/
 noncomputable def presentationFunctor :
     MellWGroupoid ↑Γ(S, ⊤) ⥤ PresentedCurve S where
   obj W := ⟨curveOf W.pt, W.pt, Iso.refl _, Category.id_comp _, Category.comp_id _⟩
