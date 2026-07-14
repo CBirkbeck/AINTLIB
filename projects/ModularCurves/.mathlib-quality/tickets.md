@@ -2418,12 +2418,24 @@ adjudicates.
   new left-collapse coherences `transVC/transUnit_restrict_restrict_left`),
   `adapted_shortNF_res_eq` (global uniqueness on common subopens),
   `adaptedLocal` + **`adaptedCoeff₄`/`adaptedCoeff₆`** — the classifying data
-  `(E, ω) ↦ (a₄, a₆) ∈ Γ(S,⊤)²` glued over the chart-affine pair cover. REMAINING
-  E12-D: `M₁ = Spec ℤ[1/6][g₂,g₃][Δ⁻¹]`-representability (universal curve
-  `y² = x³ + a₄x + a₆` as an `EllObj`, classifying map from the global coefficients,
-  `RepresentableBy` from E12-B uniqueness; consumes T-A2/A7.e's Proj-model — the
-  `projModel`-construction is available). Also pending: `Δ = −16(4a₄³+27a₆²)`-unit
-  globalization (chartwise ellipticity).
+  `(E, ω) ↦ (a₄, a₆) ∈ Γ(S,⊤)²` glued over the chart-affine pair cover. **E12-D decompose
+  (2026-07-14, OMEGA; scope-check done — NOT T-A2-gated: `modelEllipticCurve (W)
+  [W.IsElliptic] : EllipticCurve (Spec R)` exists with the full record,
+  ModelRecord.lean:68)**: work R-RELATIVE (the T-E12 statement is over `EllObj R`
+  with `IsUnit (6:R)`): **[E12-D1]** the moduli ring `R₁ := (R[A₄,A₆])[Δ⁻¹]`
+  (`MvPolynomial (Fin 2) R` + `Localization.Away Δ`, `Δ := −16(4A₄³+27A₆²)`), the
+  universal short-NF curve `W₁ := ⟨0,0,0,A₄,A₆⟩` with `W₁.IsElliptic`;
+  **[E12-D2]** `X₁ : EllObj R` := `modelEllipticCurve W₁` over `Spec R₁` with its
+  R-structure map; the universal `ω`-basis `b₁ : OmegaBasis` (singleton-chart
+  trivialization, `trivSection`-based; needs the affine-global-model atlas of
+  `EllipticCurve.toEllipticCurveGeom` — check its construction); adaptedness of the
+  tautological chart; **[E12-D3]** the classifying map: for `(Y, b)` the ring map
+  `R₁ → Γ(Y.base,⊤)`, `A₄ ↦ adaptedCoeff₄, A₆ ↦ adaptedCoeff₆` (Δ-invertibility =
+  chartwise ellipticity of the adapted models — needs the global `IsUnit Δ`-lemma
+  from `adaptedLocal`-ellipticity + gluing, small); the `EllHom Y X₁` from the
+  adapted-model isos (chart-glue); **[E12-D4]** `RepresentableBy`: bijection from
+  E12-B uniqueness (injectivity) + pullback-functoriality of adapted models
+  (surjectivity/naturality). Each of D2–D4 is its own work-session-sized leaf.
   ORIGINAL SPEC: the basis-unit of a presentation**: for `b : OmegaBasis G` and
   `P : LocalPresentation G V`, glue `resLE b_i · (transUnit P|_{V∩U_i} P_i|)`-data over
   the atlas cover into a canonical `basisUnitAt P b : Γ(V)ˣ` (compatibility = b's own
