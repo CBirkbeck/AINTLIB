@@ -40,6 +40,14 @@ noncomputable def fullLevelHom (L : E.FullLevelPt N) :
         rw [smul_add, smul_comm (N : ℤ) ((v 0).val : ℤ), smul_comm (N : ℤ) ((v 1).val : ℤ),
           L.2.1.1, L.2.1.2, smul_zero, smul_zero, add_zero]))
 
+/-- The trivialisation map is a morphism over `S`. -/
+@[reassoc]
+theorem fullLevelHom_torsionπ (L : E.FullLevelPt N) :
+    E.fullLevelHom L ≫ E.torsionπ N = constSchemeπ S (Fin 2 → ZMod N) := by
+  refine Sigma.hom_ext _ _ fun v => ?_
+  rw [← Category.assoc, fullLevelHom, Sigma.ι_desc, constSchemeπ, Sigma.ι_desc]
+  exact E.pointToTorsion_torsionπ _ _
+
 /-- The geometric-fibre label map of a full level structure:
 `v ↦ v₀·P + v₁·Q` into the `N`-torsion of the fibre. -/
 noncomputable def fullLevelFibreMap (L : E.FullLevelPt N) {k : Type u} [Field k]
