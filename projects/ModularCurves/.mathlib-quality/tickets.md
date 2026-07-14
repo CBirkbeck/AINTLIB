@@ -2401,7 +2401,16 @@ adjudicates.
   `linear_combination`), `basisUnitAt` (atlas glue via `existsUnique_gluing'` +
   `isUnit_of_isUnit_germ`), `IsAdapted`. Remaining spec lemmas (naturality under
   restrict/transport; `basisUnitAt (u • b) = resLE u · basisUnitAt b`) fold into
-  E12-B where first needed.] ORIGINAL SPEC: the basis-unit of a presentation**: for `b : OmegaBasis G` and
+  E12-B where first needed.] **E12-B PROGRESS (2026-07-14, OMEGA, all sorry-free +
+  axiom-clean)**: the twist calculus `ofVC`/`transVC_ofVC`/`transVC_restrict_ofVC`
+  (twisting commutes with restriction through the coefficient-mapped VC —
+  `projModelVCIso_map` geometrically; InvariantDifferential.lean) +
+  `basisUnitAt_ofVC` (twisting scales the basis unit by `C.u`) + `adapt`/
+  `isAdapted_adapt` — **adapted presentations EXIST over every chart-supported
+  affine (KM 2.2.5 existence half ★)**. REMAINING E12-B: uniqueness (two adapted
+  short-NF presentations coincide — needs `IsAdapted`-implies-`u`-component-1 via
+  `basisUnitAt`-vs-`transVC` + mathlib `toShortNF`); then E12-C/D.
+  ORIGINAL SPEC: the basis-unit of a presentation**: for `b : OmegaBasis G` and
   `P : LocalPresentation G V`, glue `resLE b_i · (transUnit P|_{V∩U_i} P_i|)`-data over
   the atlas cover into a canonical `basisUnitAt P b : Γ(V)ˣ` (compatibility = b's own
   cocycle-compat + `transUnit_trans`; glue = `exists_unit_glue` + the pointwise affine
@@ -19301,3 +19310,26 @@ the pins are consumable by name NOW); NIsogeny §6-7 quotientCurve layer (compat
 gate); T-G3d `E/E[N] ≅ E` awaits only the degree half (T-G3d-Niso, on BB-DEG).
 
 **MAIN-PR CADENCE**: ★★ milestone — coordinator PR per v10.172. Full build 3830 jobs green.
+
+---
+
+## v10.214-G0 — POST-SIGNAL: T-G3d-Niso ARC-MAP banked; session terminal (2026-07-14, STREAM-G0)
+
+**Probe result**: the glue layer has Flat + Surjective for `localQuotientOpenπ` but NO
+finiteness/degree facts — `E/E[N] ≅ E` (T-G3d-Niso) is a fresh multi-increment arc, mapped
+for the next firing:
+1. **Patch finiteness**: `IsFinite (localQuotientOpenπ)` — A module-finite over A^co via the
+   Hopf–Galois iso `A ⊗_{A^co} A ≅ A ⊗ H` (H free of finite rank) + faithfully-flat descent
+   of Module.Finite (mathlib `Module.Finite.of_faithfullyFlat`-shape — survey).
+2. **Patch degree**: fibre finrank of π = rank H (= N² for E[N]) — same descent, rank form.
+3. **Globalize**: IsFinite is Zariski-local at target (HAVE); finrank fibrewise (HAVE pattern:
+   `Scheme.Hom.finrank_of_isPullback` + the glue's ι-triangles).
+4. **The iso**: `[N] = π ≫ q` (torsionQuotientπ_comp_toSelf, REAL now) + deg [N] = N² (BB-DEG
+   box, sanctioned v10.212) + multiplicativity ⟹ deg q = 1 ⟹ IsIso q (survey mathlib
+   finite-flat-degree-1 ⟹ iso criterion; fallback: mono+flat+surj route).
+This arc completes KM 2.7's `[N]`-isogeny picture and unlocks NIsogeny's quotientCurve DS-pins
+(quotientHom_finite/flat/finrank all follow the same descent pattern).
+
+**Session terminal (PHASE-8)**: the v10.212 dispatch — route-(a) refactor → pin discharge →
+SIGNAL ★★ → c4-as-box — is fully delivered. Remaining charter items are the research gates
+(v10.211 census unchanged) + the new arc above. Board clean, build 3830 green, all pushed.
