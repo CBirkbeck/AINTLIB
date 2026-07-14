@@ -1,4 +1,5 @@
 import Mathlib.AlgebraicGeometry.Morphisms.OpenImmersion
+import Mathlib.AlgebraicGeometry.Morphisms.QuasiCompact
 import ModularCurves.ForMathlib.FinitePresentationFunctorCover
 
 /-!
@@ -108,5 +109,85 @@ theorem isOpenImmersion_SpecMap_of_awayCover
       simp [IsLocalization.Away.map]]
     rw [CommRingCat.ofHom_comp, Spec.map_comp]
     infer_instance
+
+/-- An open immersion between affine schemes admits finitely many target basic opens
+covering its image. Their pullbacks cover the source, and the induced maps between
+the corresponding principal localizations are bijective. -/
+theorem Scheme.Hom.exists_awayCover_of_isOpenImmersion
+    {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y]
+    (f : X ⟶ Y) [IsOpenImmersion f] :
+    ∃ (κ : Type u) (_ : Finite κ) (r : κ → Γ(Y, ⊤)),
+      Ideal.span (Set.range fun k => f.appTop (r k)) = ⊤ ∧
+        ∀ k, Function.Bijective
+          (IsLocalization.Away.map
+            (Localization.Away (r k))
+            (Localization.Away (f.appTop (r k))) f.appTop.hom (r k)) := by
+  have hcompact : IsCompact (f.opensRange : Set Y) := by
+    rw [Scheme.Hom.coe_opensRange]
+    exact isCompact_range f.continuous
+  obtain ⟨s, hs, hscov⟩ :=
+    (isCompact_and_isOpen_iff_finite_and_eq_biUnion_basicOpen (X := Y)).mp
+      ⟨hcompact, f.opensRange.isOpen⟩
+  letI := hs.fintype
+  have hscov' : f.opensRange = ⨆ k : s, Y.basicOpen k.1 := by
+    apply Opens.ext
+    simpa using hscov
+  refine ⟨s, inferInstance, fun k => k.1, ?_, ?_⟩
+  · have htop : (⨆ k : s, X.basicOpen (f.appTop k.1)) = ⊤ := by
+      calc
+        (⨆ k : s, X.basicOpen (f.appTop k.1)) =
+            f ⁻¹ᵁ (⨆ k : s, Y.basicOpen k.1) := by
+              rw [f.preimage_iSup]
+              congr 1
+              funext k
+              exact (f.preimage_basicOpen_top k.1).symm
+        _ = f ⁻¹ᵁ f.opensRange := by rw [hscov']
+        _ = ⊤ := f.preimage_opensRange
+    rw [← (isAffineOpen_top X).iSup_basicOpen_eq_self_iff]
+    calc
+      (⨆ a : Set.range (fun k : s => f.appTop k.1), X.basicOpen a.1) =
+          ⨆ k : s, X.basicOpen (f.appTop k.1) := by
+            apply le_antisymm
+            · rw [iSup_le_iff]
+              rintro ⟨_, k, rfl⟩
+              exact le_iSup (fun k : s => X.basicOpen (f.appTop k.1)) k
+            · rw [iSup_le_iff]
+              intro k
+              exact le_iSup (fun a : Set.range (fun k : s => f.appTop k.1) =>
+                X.basicOpen a.1) ⟨f.appTop k.1, k, rfl⟩
+      _ = ⊤ := htop
+  · intro k
+    have hk : Y.basicOpen k.1 ≤ f.opensRange := by
+      rw [hscov']
+      exact le_iSup (fun k : s => Y.basicOpen k.1) k
+    letI : IsIso (f.app (Y.basicOpen k.1)) := f.isIso_app _ hk
+    have hpre : IsAffineOpen (f ⁻¹ᵁ (⊤ : Y.Opens)) := by
+      simpa using isAffineOpen_top X
+    let gsec := IsLocalization.Away.map
+      Γ(Y, Y.basicOpen k.1)
+      Γ(X, X.basicOpen (f.appTop k.1)) f.appTop.hom k.1
+    let e := (isAffineOpen_top Y).appBasicOpenIsoAwayMap f hpre k.1
+    haveI : IsIso (CommRingCat.ofHom gsec) :=
+      (Arrow.isIso_iff_isIso_of_isIso e.hom).mp inferInstance
+    let graw := IsLocalization.Away.map
+      (Localization.Away k.1)
+      (Localization.Away (f.appTop k.1)) f.appTop.hom k.1
+    let eY := IsLocalization.algEquiv (Submonoid.powers k.1)
+      (Localization.Away k.1) Γ(Y, Y.basicOpen k.1)
+    let eX := IsLocalization.algEquiv (Submonoid.powers (f.appTop k.1))
+      (Localization.Away (f.appTop k.1))
+      Γ(X, X.basicOpen (f.appTop k.1))
+    have hsq : eX.toRingEquiv.toRingHom.comp graw =
+        gsec.comp eY.toRingEquiv.toRingHom := by
+      apply IsLocalization.ringHom_ext (Submonoid.powers k.1)
+      ext a
+      simp [eX, eY, graw, gsec, IsLocalization.Away.map]
+    have hgsec : Function.Bijective gsec := by
+      simpa using ConcreteCategory.bijective_of_isIso (CommRingCat.ofHom gsec)
+    have hright : Function.Bijective (gsec.comp eY.toRingEquiv.toRingHom) :=
+      hgsec.comp eY.toEquiv.bijective
+    have hleft : Function.Bijective (eX.toRingEquiv.toRingHom.comp graw) :=
+      hsq.symm ▸ hright
+    exact (eX.toEquiv.bijective.of_comp_iff' graw).mp hleft
 
 end AlgebraicGeometry
