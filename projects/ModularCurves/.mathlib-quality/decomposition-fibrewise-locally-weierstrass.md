@@ -356,6 +356,12 @@ triple index and its left, middle, and right pair-to-triple arrows. The line-bun
 equations can therefore use the same finite-intersection indexing API as the existing scheme
 gluing construction.
 
+Completed dependency claim (2026-07-14): defined
+`affineIntersectionPairTransitionUnit` and proved
+`affineIntersectionTransitionUnit_cocycle`. The finite family indexed by ordered chart pairs
+now restricts along the canonical pair-to-triple arrows to a literal multiplicative Cech
+equation in every triple object.
+
 Active dependency claim (2026-07-14): spread the finite family of pair-overlap transition
 units, their inverses, and the triple-overlap equations to one later finite stage of the
 affine-intersection model. This will construct the finite-stage line bundle whose base change

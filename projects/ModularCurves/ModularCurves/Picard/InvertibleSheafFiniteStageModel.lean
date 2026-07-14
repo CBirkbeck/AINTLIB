@@ -67,6 +67,24 @@ noncomputable def affineIntersectionTransitionUnit
       (trivializingCoverTransitionUnitOn U e V i j
         (finiteIntersectionOpen_le U s hi) (finiteIntersectionOpen_le U s hj)))
 
+/-- The transition unit in the canonical pair object of the affine-intersection functor. -/
+noncomputable def affineIntersectionPairTransitionUnit
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (i j : J) :
+    ((π.affineIntersectionFunctor U).obj
+      (Scheme.GlueData.affineIntersectionPairIndex i j))ˣ :=
+  affineIntersectionTransitionUnit π U e
+    (Scheme.GlueData.affineIntersectionPairIndex i j) (by
+      classical
+      simp [Scheme.GlueData.affineIntersectionPairIndex])
+    i j (by
+      classical
+      simp [Scheme.GlueData.affineIntersectionPairIndex]) (by
+      classical
+      simp [Scheme.GlueData.affineIntersectionPairIndex])
+
 /-- Affine-intersection transition units are compatible with every restriction map in
 the coordinate-ring functor. -/
 theorem affineIntersectionTransitionUnit_map
@@ -155,6 +173,38 @@ theorem affineIntersectionTransitionUnit_trans
       (fun z => (π.finiteIntersectionRingIso U s hs).hom.hom (V.topIso.inv.hom z))
       (congrArg Units.val
         (trivializingCoverTransitionUnitOn_trans U e V i j k hVi hVj hVk))
+
+/-- The pair-object transition units satisfy the Cech equation after applying the three
+canonical restriction maps to a triple object. -/
+theorem affineIntersectionTransitionUnit_cocycle
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (i j k : J) :
+    Units.map ((π.affineIntersectionFunctor U).map
+          (Scheme.GlueData.affineIntersectionPairToTripleLeft i j k)).hom.toMonoidHom
+        (affineIntersectionPairTransitionUnit π U e i j) *
+      Units.map ((π.affineIntersectionFunctor U).map
+          (Scheme.GlueData.affineIntersectionPairToTripleMiddle i j k)).hom.toMonoidHom
+        (affineIntersectionPairTransitionUnit π U e j k) =
+    Units.map ((π.affineIntersectionFunctor U).map
+        (Scheme.GlueData.affineIntersectionPairToTripleRight i j k)).hom.toMonoidHom
+      (affineIntersectionPairTransitionUnit π U e i k) := by
+  classical
+  unfold affineIntersectionPairTransitionUnit
+  rw [affineIntersectionTransitionUnit_map π U e
+      (Scheme.GlueData.affineIntersectionPairToTripleLeft i j k),
+    affineIntersectionTransitionUnit_map π U e
+      (Scheme.GlueData.affineIntersectionPairToTripleMiddle i j k),
+    affineIntersectionTransitionUnit_map π U e
+      (Scheme.GlueData.affineIntersectionPairToTripleRight i j k)]
+  exact affineIntersectionTransitionUnit_trans π U e
+    (Scheme.GlueData.affineIntersectionTripleIndex i j k) (by
+      simp [Scheme.GlueData.affineIntersectionTripleIndex])
+    i j k (by
+      simp [Scheme.GlueData.affineIntersectionTripleIndex]) (by
+      simp [Scheme.GlueData.affineIntersectionTripleIndex]) (by
+      simp [Scheme.GlueData.affineIntersectionTripleIndex])
 
 /-- An invertible sheaf on a proper, locally finitely presented family admits a finite affine
 trivializing cover whose affine-intersection model recovers the family after base change. -/
