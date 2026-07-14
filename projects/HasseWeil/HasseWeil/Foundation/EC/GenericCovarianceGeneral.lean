@@ -37,7 +37,6 @@ open HasseWeil
 
 -- These instances are intentionally section-scoped for the engine below.
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
@@ -368,6 +367,7 @@ theorem PullbackEvaluation.pullback_x_gen_ne_algebraMap [IsAlgClosed F]
 
 variable (W)
 
+omit [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- The points whose translate by `Sk` is not affine form a finite set. -/
 private theorem notIsSome_add_finite (Sk : (W_smooth W).toAffine.Point) :
     {P : (W_smooth W).SmoothPoint | ¬(P.toAffinePoint + Sk).IsSome}.Finite := by
@@ -380,6 +380,7 @@ private theorem notIsSome_add_finite (Sk : (W_smooth W).toAffine.Point) :
     exact hP
   exact this
 
+omit [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- The points whose translate by `Sk` lands in a finite set form a finite set. -/
 private theorem translate_mem_finite {bad : Set (W_smooth W).SmoothPoint} (hbad : bad.Finite)
     (Sk : (W_smooth W).toAffine.Point) :
