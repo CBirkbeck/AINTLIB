@@ -20025,3 +20025,20 @@ right_inv := rt1, naturality := ambient functoriality) → discharge
 universal marked pair = the sole remaining KM-keystone input). Then [T-E14-ACT'] + [T-E14-AX2].
 LEAN-OP: the template-transposition pipeline (sed-extract → python identifier-map → insert →
 repair 1-2 residuals) is now the FASTEST way to replay D3/D4-scale arcs — use it for rt2.
+
+## v10.235-OMEGA (2026-07-14) — [T-E14-CLS-8abc] rt2's baseHom-determination COMPLETE
+
+`pulledWitness` (the transported-taut witness of the pulled datum over ANY affine — markings via
+lift_fst-square transport of the universal markings; the L'-argument must be passed EXPLICITLY,
+not as `_`, for the component-rfl's to elaborate) + `legendreClassifyingRingHom_pulled` (rt2a:
+ringHom_ext; λ-generator by sheaf-ext over the pulledWitness family + legendreLambda's spec) +
+`legendreClassifyingMap_pulled` (Γ–Spec dance). Commits ee9902757…(this). Axiom-clean.
+
+**rt2 remaining:** the TOP-determination (`legendreTop_pulled`: witnessCover(hD').hom_ext; per
+witness w of the PULLED datum: fst ≫ φ.top = piece(w) via transportTheta_fst +
+transport_e_baseChange + the SAME-BASIS e-determination [w vs pulledWitness at w.V: both adapted
+to pulled-ω + marked + Legendre ⟹ CLS-1 same-basis uniqueness — no sign issue, mirrors
+transport_taut_e_eq] + sectionsMapLE_congr_hom at legendreClassifyingMap_pulled + comp'-fold) →
+`legendreClassifyingEllHom_pulled` (EllHom.ext) → RepresentableBy on legendreDeltaProblem →
+DISCHARGE `legendreDelta_representable_by_affine` modulo [T-E14-LVL-b]. Templates:
+classifyingTop_omegaBasisMap (UniversalAdapted ~1740-1860) via the transposition pipeline.
