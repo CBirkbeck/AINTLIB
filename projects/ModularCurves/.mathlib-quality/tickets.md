@@ -19038,3 +19038,14 @@ mathematical CORE of the L2b criterion. REMAINING L2b plumbing: affine-local red
 IsIso (fullLevelHom), the residue-field engine (BijectiveResidueField:81), the κ(p)→k̄ transfer,
 and the identification of the dual point-map with fullLevelFibreMap (torsionPointsEquiv +
 Γ-Spec adjunction at geometric fibres). (STREAM-G0)
+
+### v10.203-G0 — [C5B-2 L2b] affine conjugation DONE + torsionBaseChange DEDUPED (STREAM-G0)
+GLSchemeAction.lean: `fullLevelHom_torsionπ` (over-S triangle) · `fullLevelHom_isIso_of_affine`
+PROVEN modulo the sharp Γ-residual `fullLevelHom_gamma_bijective` (the conjugation through
+constSchemeSpecIso/isoSpec + Spec.preimage + ConcreteCategory.isIso_iff_bijective all
+discharged). L2b's remaining content = (a) the Γ-residual (residue-engine + field-descent +
+hom-duality criterion + the fibre-point dictionary against fullLevelFibreMap_bijective — all
+engines proven v10.201/202), (b) the affine-cover glue of fullLevelHom_isIso. DEDUP EXECUTED
+(forced by a name clash): TorsionEtaleTriv's hand-built torsionBaseChangeHom/Inv/Iso (~150
+lines) replaced by TorsionFibre's pre-existing `torsion_baseChange_isPullback`.isoPullback —
+the v10.201 dedup-note item is closed. Full repo green 3831. (STREAM-G0)

@@ -1,5 +1,7 @@
 import ModularCurves.Moduli.GammaH
 import ModularCurves.GroupScheme.MuN
+import ModularCurves.GroupScheme.TorsionEtaleTriv
+import ModularCurves.ForMathlib.FiniteSplitHomDuality
 
 /-!
 # The scheme-level `GL₂(ℤ/N)` action on `E[N]` (CHARTER-C5B-2, reading (1))
@@ -93,12 +95,51 @@ theorem fullLevelFibreMap_bijective (L : E.FullLevelPt N) {k : Type u} [Field k]
     obtain ⟨e⟩ := hcard
     exact (Nat.card_congr e.toEquiv).symm
 
+/-- **L2b, Γ-side residual (sharp)**: the global-sections comparison of the
+trivialisation map over an affine base is bijective. Route: the residue-field engine
+(`LinearMap.bijective_of_forall_bijective_lTensor_residueField`) + field-extension
+descent + the split hom-duality criterion (`bijective_of_precomp_bijective`) against
+the PROVEN fibrewise bijectivity (`fullLevelFibreMap_bijective`), through the Γ–Spec
+point dictionary at geometric fibres. -/
+theorem fullLevelHom_gamma_bijective {R : CommRingCat.{u}}
+    (E : EllipticCurve (Spec R)) {N : ℕ} [NeZero N]
+    (hinv : NIsInvertible (Spec R) N) (L : E.FullLevelPt N) :
+    Function.Bijective (Spec.preimage
+      ((constSchemeSpecIso R (Fin 2 → ZMod N)).inv ≫ E.fullLevelHom L ≫
+        (haveI : IsFinite (E.torsionπ N) := E.torsionπ_isFinite N
+         haveI : IsAffine (E.torsion N) := isAffine_of_isAffineHom (E.torsionπ N)
+         (E.torsion N).isoSpec.hom))).hom := sorry
+
+/-- **L2b over an affine base**: the conjugated `Spec`-morphism is an isomorphism, from
+the Γ-bijectivity. -/
+theorem fullLevelHom_isIso_of_affine {R : CommRingCat.{u}}
+    (E : EllipticCurve (Spec R)) {N : ℕ} [NeZero N]
+    (hinv : NIsInvertible (Spec R) N) (L : E.FullLevelPt N) :
+    IsIso (E.fullLevelHom L) := by
+  haveI : IsFinite (E.torsionπ N) := E.torsionπ_isFinite N
+  haveI : IsAffine (E.torsion N) := isAffine_of_isAffineHom (E.torsionπ N)
+  set g : Spec (CommRingCat.of ((Fin 2 → ZMod N) → (R : Type u))) ⟶
+      Spec Γ(E.torsion N, ⊤) :=
+    (constSchemeSpecIso R (Fin 2 → ZMod N)).inv ≫ E.fullLevelHom L ≫
+      (E.torsion N).isoSpec.hom with hg
+  have hbij := E.fullLevelHom_gamma_bijective hinv L
+  haveI hisoψ : IsIso (Spec.preimage g) :=
+    (ConcreteCategory.isIso_iff_bijective _).mpr hbij
+  haveI hisog : IsIso g := by
+    rw [← Spec.map_preimage g]
+    infer_instance
+  have hfac : E.fullLevelHom L
+      = (constSchemeSpecIso R (Fin 2 → ZMod N)).hom ≫ g ≫
+        (E.torsion N).isoSpec.inv := by
+    rw [hg]
+    simp only [Iso.hom_inv_id_assoc, Category.assoc, Iso.hom_inv_id, Category.comp_id]
+  rw [hfac]
+  infer_instance
+
 /-- **L2b** — `fullLevelHom` is an isomorphism for `N` invertible (`E[N]` finite étale of
 rank `N²`, KM 2.3.1): the label map is bijective on every geometric fibre
-(`fullLevelFibreMap_bijective`), and a morphism of finite étale `S`-schemes that is
-bijective on geometric fibres is an isomorphism (the sharpened residual criterion;
-route: `LinearMap.bijective_of_forall_bijective_lTensor_residueField` +
-`isIso_of_isPullback_of_fppf` on the T-F1 cover). -/
+(`fullLevelFibreMap_bijective`), and the Γ-side comparison is bijective over affine
+bases (`fullLevelHom_gamma_bijective`), glued over an affine cover. -/
 theorem fullLevelHom_isIso (hinv : NIsInvertible S N) (L : E.FullLevelPt N) :
     IsIso (E.fullLevelHom L) := sorry
 
