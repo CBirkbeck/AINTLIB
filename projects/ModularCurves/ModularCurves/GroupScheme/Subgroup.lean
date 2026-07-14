@@ -363,12 +363,24 @@ noncomputable def baseChange (G : FiniteLocallyFreeSubgroup E) {T : Scheme.{u}}
   flat := baseChange_prop @Flat G g G.flat
   lfp := baseChange_prop @LocallyOfFinitePresentation G g G.lfp
   subgroup := by
-    -- T-SG1b: the point-level base-change dictionary
-    -- `(E.baseChange g).Point g' ≃+ E.Point (g' ≫ g)` (an `asSection`-type
-    -- correspondence) transports `G.subgroup (g' ≫ g)`; factorisations correspond via
-    -- the universal property of `pullback G.ι (pullback.fst E.π g)`. Blocked on the
-    -- same spelling normalisation as `Point.asSection_zsmul` (GroupLaw.lean, PARKED).
-    sorry
+    -- T-SG1b: transport `G.pointSubgroup (g' ≫ g)` through the additive base-change
+    -- dictionary `Point.baseChangeEquiv`; factorisations correspond via the universal
+    -- property of `pullback G.ι (pullback.fst E.π g)`.
+    intro T' g'
+    refine ⟨(G.pointSubgroup (g' ≫ g)).comap
+      (Point.baseChangeEquiv E g g').toAddMonoidHom, fun P => ?_⟩
+    rw [AddSubgroup.mem_comap]
+    constructor
+    · intro hP
+      obtain ⟨h, hh⟩ := mem_pointSubgroup.mp hP
+      rw [AddEquiv.coe_toAddMonoidHom, Point.baseChangeEquiv_apply_coe] at hh
+      exact ⟨pullback.lift h P.1 hh, pullback.lift_snd _ _ _⟩
+    · rintro ⟨h', hh'⟩
+      refine mem_pointSubgroup.mpr ⟨h' ≫ pullback.fst G.ι (pullback.fst E.π g), ?_⟩
+      rw [AddEquiv.coe_toAddMonoidHom, Point.baseChangeEquiv_apply_coe]
+      exact (Category.assoc _ _ _).trans ((congrArg (h' ≫ ·) pullback.condition).trans
+        ((Category.assoc _ _ _).symm.trans
+          (congrArg (· ≫ pullback.fst E.π g) hh')))
 
 @[simp]
 theorem baseChange_G (G : FiniteLocallyFreeSubgroup E) {T : Scheme.{u}} (g : T ⟶ S) :
