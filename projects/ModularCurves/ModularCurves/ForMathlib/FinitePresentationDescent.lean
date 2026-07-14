@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.RingTheory.FinitePresentation
 import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
 import Mathlib.RingTheory.RingHom.FaithfullyFlat
@@ -450,7 +455,7 @@ noncomputable def presentedBaseChange :
       have hw : (presentedBaseChangeInv g') ((Algebra.ofId W₂ _) w)
           = w ⊗ₜ[W₁] 1 := by
         have := (presentedBaseChangeInv g').commutes w
-        simpa [Algebra.ofId_apply] using this
+        simp [Algebra.ofId_apply]
       rw [hw, Algebra.TensorProduct.tmul_mul_tmul, mul_one, one_mul]
     )
 
@@ -520,10 +525,10 @@ theorem t2Space_constructibleTopology {R : Type*} [CommRing R] :
     exact disjoint_compl_right
   rw [iff_iff_implies_and_implies, not_and_or] at hf
   rcases hf with hf | hf
-  · rw [_root_.not_imp] at hf
+  · rw [Classical.not_imp] at hf
     exact ⟨PrimeSpectrum.zeroLocus {f}, PrimeSpectrum.basicOpen f, hzero, hbasic,
       by simpa using hf.1, by simpa using hf.2, hdisj⟩
-  · rw [_root_.not_imp] at hf
+  · rw [Classical.not_imp] at hf
     exact ⟨PrimeSpectrum.basicOpen f, PrimeSpectrum.zeroLocus {f}, hbasic, hzero,
       by simpa using hf.2, by simpa using hf.1, hdisj.symm⟩
 
@@ -1361,7 +1366,7 @@ noncomputable def concatToTensor :
               (Ideal.Quotient.mkₐ S (Ideal.span (Set.range g₁))) := by
           apply MvPolynomial.algHom_ext
           intro v
-          simp [MvPolynomial.aeval_rename]
+          simp
         have hthis := AlgHom.congr_fun hL (g₁ j)
         simp only [AlgHom.comp_apply] at hthis
         have hj : concatGen g₁ g₂ (Sum.inl j) = MvPolynomial.rename Sum.inl (g₁ j) := rfl
@@ -1381,7 +1386,7 @@ noncomputable def concatToTensor :
               (Ideal.Quotient.mkₐ S (Ideal.span (Set.range g₂))) := by
           apply MvPolynomial.algHom_ext
           intro w
-          simp [MvPolynomial.aeval_rename]
+          simp
         have hthis := AlgHom.congr_fun hR (g₂ j)
         simp only [AlgHom.comp_apply] at hthis
         have hj : concatGen g₁ g₂ (Sum.inr j) = MvPolynomial.rename Sum.inr (g₂ j) := rfl
@@ -1967,16 +1972,20 @@ theorem FinitePresentation.of_comp_of_faithfullyFlat
     exact eC_comp_doubleInr D.g eB (hgenw (PresentationSystem.colimMap R A D.i₀))
   -- the stagewise squares
   have hsqL : ∀ P : {i // D.i₀ ≤ i},
-      (eC.toAlgHom.comp (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P)).comp
+      (eC.toAlgHom.comp (presentedU (PresentationSystem.transition R A)
+          (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P)).comp
         (doubleInl D.g (PresentationSystem.transition R A P.2))
-      = pLim.comp (eB'.toAlgHom.comp (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H D.g P)) := by
+      = pLim.comp (eB'.toAlgHom.comp (presentedU (PresentationSystem.transition R A)
+          (PresentationSystem.colimMap R A) H D.g P)) := by
     intro P
     rw [AlgHom.comp_assoc, presentedU_comp_doubleInl D.g H P, ← AlgHom.comp_assoc, hkeyL,
       AlgHom.comp_assoc]
   have hsqR : ∀ P : {i // D.i₀ ≤ i},
-      (eC.toAlgHom.comp (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P)).comp
+      (eC.toAlgHom.comp (presentedU (PresentationSystem.transition R A)
+          (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P)).comp
         (doubleInr D.g (PresentationSystem.transition R A P.2))
-      = qLim.comp (eB'.toAlgHom.comp (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H D.g P)) := by
+      = qLim.comp (eB'.toAlgHom.comp (presentedU (PresentationSystem.transition R A)
+          (PresentationSystem.colimMap R A) H D.g P)) := by
     intro P
     rw [AlgHom.comp_assoc, presentedU_comp_doubleInr D.g H P, ← AlgHom.comp_assoc, hkeyR,
       AlgHom.comp_assoc]
@@ -1989,9 +1998,12 @@ theorem FinitePresentation.of_comp_of_faithfullyFlat
   obtain ⟨P₂, hP₂γ, hP₂₁⟩ := directed_of (· ≤ ·) Pγ P₁
   have hP₂β : Pβ ≤ P₂ := hP₁β.trans hP₂₁
   -- transported factorizations
-  obtain ⟨β₂, hβ₂⟩ : ∃ b, b = (presentedT (PresentationSystem.transition R A) H D.g hP₂β).comp β := ⟨_, rfl⟩
-  obtain ⟨γ₂, hγ₂⟩ : ∃ c, c = (presentedT (PresentationSystem.transition R A) H (concatGen D.g D.g) hP₂γ).comp γ := ⟨_, rfl⟩
-  have hβ₂colim : (eB'.toAlgHom.comp (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H D.g P₂)).comp β₂
+  obtain ⟨β₂, hβ₂⟩ : ∃ b, b =
+      (presentedT (PresentationSystem.transition R A) H D.g hP₂β).comp β := ⟨_, rfl⟩
+  obtain ⟨γ₂, hγ₂⟩ : ∃ c, c =
+      (presentedT (PresentationSystem.transition R A) H (concatGen D.g D.g) hP₂γ).comp γ := ⟨_, rfl⟩
+  have hβ₂colim : (eB'.toAlgHom.comp (presentedU (PresentationSystem.transition R A)
+      (PresentationSystem.colimMap R A) H D.g P₂)).comp β₂
       = AlgHom.id R B := by
     apply AlgHom.ext
     intro b
@@ -2000,7 +2012,8 @@ theorem FinitePresentation.of_comp_of_faithfullyFlat
     simp only [AlgHom.comp_apply]
     rw [HB0.compat hP₂β (β b)]
     exact AlgHom.congr_fun hβ b
-  have hγ₂colim : (eC.toAlgHom.comp (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P₂)).comp γ₂
+  have hγ₂colim : (eC.toAlgHom.comp (presentedU (PresentationSystem.transition R A)
+      (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P₂)).comp γ₂
       = AlgHom.id R (B ⊗[A] B) := by
     apply AlgHom.ext
     intro c
@@ -2011,16 +2024,20 @@ theorem FinitePresentation.of_comp_of_faithfullyFlat
     exact AlgHom.congr_fun hγ c
   -- the two composites into the C-stage agree in the colimit, hence at a later stage
   have hLagree : (eC.toAlgHom.comp
-        (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P₂)).comp
+        (presentedU (PresentationSystem.transition R A)
+            (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P₂)).comp
         ((doubleInl D.g (PresentationSystem.transition R A P₂.2)).comp β₂)
-      = (eC.toAlgHom.comp (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P₂)).comp
+      = (eC.toAlgHom.comp (presentedU (PresentationSystem.transition R A)
+          (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P₂)).comp
         (γ₂.comp pLim) := by
     rw [← AlgHom.comp_assoc, hsqL P₂, AlgHom.comp_assoc, hβ₂colim, AlgHom.comp_id,
       ← AlgHom.comp_assoc, hγ₂colim, AlgHom.id_comp]
   have hRagree : (eC.toAlgHom.comp
-        (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P₂)).comp
+        (presentedU (PresentationSystem.transition R A)
+            (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P₂)).comp
         ((doubleInr D.g (PresentationSystem.transition R A P₂.2)).comp β₂)
-      = (eC.toAlgHom.comp (presentedU (PresentationSystem.transition R A) (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P₂)).comp
+      = (eC.toAlgHom.comp (presentedU (PresentationSystem.transition R A)
+          (PresentationSystem.colimMap R A) H (concatGen D.g D.g) P₂)).comp
         (γ₂.comp qLim) := by
     rw [← AlgHom.comp_assoc, hsqR P₂, AlgHom.comp_assoc, hβ₂colim, AlgHom.comp_id,
       ← AlgHom.comp_assoc, hγ₂colim, AlgHom.id_comp]
