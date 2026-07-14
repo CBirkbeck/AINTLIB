@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.Algebra.Category.CommAlgCat.Basic
 import Mathlib.Algebra.Category.Ring.Colimits
 import Mathlib.CategoryTheory.Galois.Basic
@@ -48,7 +53,8 @@ instance hasFiniteColimits : HasFiniteColimits (CommAlgCat.{u} k) where
 
 instance hasColimitsOfShapeSingleObjCommRingCat (G : Type u) [Group G] :
     HasColimitsOfShape (SingleObj G) CommRingCat.{u} :=
-  have : HasColimitsOfSize.{u, 0} CommRingCat.{u} := hasColimitsOfSizeShrink.{u, 0, u, u} CommRingCat.{u}
+  have : HasColimitsOfSize.{u, 0} CommRingCat.{u} :=
+    hasColimitsOfSizeShrink.{u, 0, u, u} CommRingCat.{u}
   inferInstance
 
 instance hasColimitsOfShapeSingleObjUnder (G : Type u) [Group G] :
