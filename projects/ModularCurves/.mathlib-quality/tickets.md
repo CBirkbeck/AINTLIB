@@ -19989,3 +19989,16 @@ the witnesses' `e`-isos), exactly as in T-E12's rt1-core. **Correct route (T-E12
    tautPresentation_isAdapted_legendre` + `basisUnitAt_smul` + witness-adaptedness ⟹
    `resUnit u = 1` per witness affine ⟹ `u = 1` by `unit_ext_of_res_cover`.
 Draft reverted cleanly (green tree preserved); rt1-level-half commits stand.
+
+## v10.224-G0 (2026-07-14) — w-leaf sweep: w1/w3 PROVEN; w7 PROVEN modulo hiso
+`exists_good_prime` (w1), `zsmul_injOn_torsionBy` (w3), and `section_base_injective_of_isAlgClosed`
+(w7) all compile — w7 via SpecToEquivOfField + the rintro-rfl generalization trick (dependent-point
+congr identities; NEVER rw a morphism-eq under stalkClosedPointTo) + residueFieldMap point-congr
+naturality + congrArg-postcompose (kabstract-proof) + cancel_epi. Residual w7 sorry = **hiso**:
+`IsIso (π.residueFieldMap x)` for a section-point over Spec F, F alg closed — injective free;
+surjectivity needs σ=id (the twisted retraction endo, killed via the canonical
+φ₀ ≫ desc(stalkClosedPointTo 𝟙) = 𝟙 triangle — evaluate via germ_stalkClosedPointTo_Spec /
+SpecToEquivOfField round-trip) then Algebra.IsAlgebraic-transfer + algebraMap_surjective_of_isAlgebraic
++ CommRingCat.isIso_iff_bijective. Full note in beastmode_active.G0. REMAINING BB-QF queue:
+hiso → g5-main (w2/w4/w5/w6 assembly at W' := W.baseChange F via projModelPointsAddEquiv) →
+BETA transport → global mulByHom_finite_fibres → reduction closes → board ★★ + Torsion-relocation.
