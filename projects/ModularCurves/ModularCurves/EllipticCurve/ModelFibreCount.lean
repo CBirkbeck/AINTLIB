@@ -716,6 +716,16 @@ theorem modelMulByHom_finite_fibres {F : Type u} [Field F] [IsAlgClosed F]
     (((modelEllipticCurve W).mulByHom N).base ⁻¹' {y}).Finite :=
   modelMulByHom_finite_preimage_singleton W N (modelMulByHom_range_infinite W N hN) y
 
+/-- **THE MODEL LQF (the interface BETA consumes)**: over an algebraically closed
+field, `[N]` on the projective Weierstrass model is locally quasi-finite (`N ≠ 0`) —
+`of_finite_preimage_singleton` on the axiom-clean fibre count (`LocallyOfFiniteType`
+is free from properness). -/
+theorem modelMulByHom_locallyQuasiFinite {F : Type u} [Field F] [IsAlgClosed F]
+    (W : WeierstrassCurve F) [W.IsElliptic] (N : ℕ) [NeZero N] :
+    LocallyQuasiFinite ((modelEllipticCurve W).mulByHom N) :=
+  LocallyQuasiFinite.of_finite_preimage_singleton _ fun y =>
+    modelMulByHom_finite_fibres W N (by exact_mod_cast (NeZero.ne N)) y
+
 end RangeWitness
 
 end ModularCurves
