@@ -97,19 +97,10 @@ noncomputable def factorThrough (φ : CurveMap C₁ C₂) (ψ : CurveMap C₁ C�
 The defining property of `factorThroughPullback`. -/
 theorem factorThroughPullback_spec (φ : CurveMap C₁ C₂) (ψ : CurveMap C₁ C₃)
     (h : ψ.pullback.range ≤ φ.pullback.range) (z : C₃.FunctionField) :
-    φ.pullback (factorThroughPullback φ ψ h z) = ψ.pullback z := by
-  change φ.pullback
-      ((AlgEquiv.ofInjective φ.pullback φ.pullback.toRingHom.injective).symm
-        (ψ.pullback.codRestrict φ.pullback.range (fun z ↦ h ⟨z, rfl⟩) z)) = _
-  have key : ∀ x : φ.pullback.range,
-      φ.pullback ((AlgEquiv.ofInjective φ.pullback φ.pullback.toRingHom.injective).symm x)
-        = (x : C₁.FunctionField) := by
-    intro x
-    rw [← AlgEquiv.ofInjective_apply φ.pullback φ.pullback.toRingHom.injective
-        ((AlgEquiv.ofInjective φ.pullback φ.pullback.toRingHom.injective).symm x),
-      AlgEquiv.apply_symm_apply]
-  rw [key]
-  rfl
+    φ.pullback (factorThroughPullback φ ψ h z) = ψ.pullback z :=
+  congrArg Subtype.val (AlgEquiv.apply_symm_apply
+    (AlgEquiv.ofInjective φ.pullback φ.pullback.toRingHom.injective)
+    (ψ.pullback.codRestrict φ.pullback.range (fun z ↦ h ⟨z, rfl⟩) z))
 
 /-- **Factoring identity, curve-map form**: `ψ = χ.comp φ`. -/
 theorem factorThrough_comp (φ : CurveMap C₁ C₂) (ψ : CurveMap C₁ C₃)
