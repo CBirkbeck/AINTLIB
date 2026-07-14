@@ -50,22 +50,26 @@ noncomputable def tautPt₂ : E.Point (tautBase E N) :=
   ⟨pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N, by
     simp only [tautBase]; rw [Category.assoc, E.torsionι_π]; exact pullback.condition.symm⟩
 
-theorem tautPt₁_killed :
-    (tautPt₁ E N).1 ≫ E.mulByHom N = tautBase E N ≫ E.zero := by
-  show (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N) ≫ E.mulByHom N = _
+omit [NeZero N] in
+/-- Both tautological points are killed by `[N]` for the same reason: they factor through
+`torsionι`, whose defining square says `torsionι ≫ [N] = torsionπ ≫ 0`. The only difference
+between `tautPt₁` and `tautPt₂` is which projection recomputes `tautBase`. -/
+private theorem comp_torsionι_killed
+    (f : pullback (E.torsionπ N) (E.torsionπ N) ⟶ E.torsion N)
+    (hf : f ≫ E.torsionπ N = tautBase E N) :
+    (f ≫ E.torsionι N) ≫ E.mulByHom N = tautBase E N ≫ E.zero := by
   rw [Category.assoc,
     show E.torsionι N ≫ E.mulByHom N = E.torsionπ N ≫ E.zero from pullback.condition,
-    ← Category.assoc]
-  rfl
+    ← Category.assoc, hf]
+
+theorem tautPt₁_killed :
+    (tautPt₁ E N).1 ≫ E.mulByHom N = tautBase E N ≫ E.zero :=
+  comp_torsionι_killed E N (pullback.fst (E.torsionπ N) (E.torsionπ N)) rfl
 
 theorem tautPt₂_killed :
-    (tautPt₂ E N).1 ≫ E.mulByHom N = tautBase E N ≫ E.zero := by
-  show (pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N) ≫ E.mulByHom N = _
-  rw [Category.assoc,
-    show E.torsionι N ≫ E.mulByHom N = E.torsionπ N ≫ E.zero from pullback.condition,
-    ← Category.assoc]
-  simp only [tautBase]
-  rw [pullback.condition]
+    (tautPt₂ E N).1 ≫ E.mulByHom N = tautBase E N ≫ E.zero :=
+  comp_torsionι_killed E N (pullback.snd (E.torsionπ N) (E.torsionπ N))
+    pullback.condition.symm
 
 /-- **[YF-TAUT]** Over an open `U` of `E[N] ×_S E[N]` on which the restricted tautological
 pair is a full-level structure, the classifying section reconstructs the inclusion: there
@@ -76,18 +80,17 @@ theorem exists_tautSection_of_isFullLevel
       (Point.asSection E (U.ι ≫ tautBase E N) (Point.restrict E U.ι (tautPt₁ E N)))
       (Point.asSection E (U.ι ≫ tautBase E N) (Point.restrict E U.ι (tautPt₂ E N)))) :
     ∃ s : (U : Scheme.{u}) ⟶ levelSpaceΓ E N, s ≫ levelSpaceΓι E N = U.ι := by
-  -- the killing conditions of the restricted taut points
-  have hP : (Point.restrict E U.ι (tautPt₁ E N)).1 ≫ E.mulByHom N =
-      (U.ι ≫ tautBase E N) ≫ E.zero := by
-    show (U.ι ≫ (tautPt₁ E N).1) ≫ E.mulByHom N = (U.ι ≫ tautBase E N) ≫ E.zero
-    rw [Category.assoc, tautPt₁_killed, ← Category.assoc]
-  have hQ : (Point.restrict E U.ι (tautPt₂ E N)).1 ≫ E.mulByHom N =
-      (U.ι ≫ tautBase E N) ≫ E.zero := by
-    show (U.ι ≫ (tautPt₂ E N).1) ≫ E.mulByHom N = (U.ι ≫ tautBase E N) ≫ E.zero
-    rw [Category.assoc, tautPt₂_killed, ← Category.assoc]
+  -- the killing conditions of the restricted taut points (restriction is precomposition)
+  have hkill : ∀ P : E.Point (tautBase E N),
+      P.1 ≫ E.mulByHom N = tautBase E N ≫ E.zero →
+      (Point.restrict E U.ι P).1 ≫ E.mulByHom N = (U.ι ≫ tautBase E N) ≫ E.zero := by
+    intro P hP
+    show (U.ι ≫ P.1) ≫ E.mulByHom N = (U.ι ≫ tautBase E N) ≫ E.zero
+    rw [Category.assoc, hP, ← Category.assoc]
   -- the classifying section from the level-space universal property
   obtain ⟨s, hs⟩ := (levelSpaceΓ_spec E N (U.ι ≫ tautBase E N)
-    (Point.restrict E U.ι (tautPt₁ E N)) (Point.restrict E U.ι (tautPt₂ E N)) hP hQ).mpr hfull
+    (Point.restrict E U.ι (tautPt₁ E N)) (Point.restrict E U.ι (tautPt₂ E N))
+    (hkill _ (tautPt₁_killed E N)) (hkill _ (tautPt₂_killed E N))).mpr hfull
   refine ⟨s, ?_⟩
   rw [hs]
   -- the classifying map of the taut pair reconstructs `U.ι`
