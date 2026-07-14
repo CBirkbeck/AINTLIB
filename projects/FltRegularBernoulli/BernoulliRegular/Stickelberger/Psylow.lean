@@ -1,5 +1,6 @@
 module
 
+public import BernoulliRegular.Characters
 public import BernoulliRegular.Stickelberger.Annihilation
 public import BernoulliRegular.Stickelberger.Eigenspaces
 public import Mathlib.GroupTheory.Sylow
@@ -220,21 +221,6 @@ lemma complexUnitMulCharDirichlet_ne_one {χ : MulChar (ZMod p)ˣ ℚ} (hχ : χ
 /-- The rational Bernoulli scalar attached to the `χ`-eigenspace. -/
 def pSylowBernoulliScalar (χ : MulChar (ZMod p)ˣ ℚ) : ℚ :=
   BernoulliGen (unitMulCharDirichlet p χ⁻¹) 1
-
-/-- Odd rational unit characters are the rational stand-in for odd
-Teichmüller-indexed eigenspaces in the current `ℚ`-valued idempotent API. -/
-def IsOddUnitCharacter (χ : MulChar (ZMod p)ˣ ℚ) : Prop :=
-  χ (-1 : (ZMod p)ˣ) = -1
-
-lemma IsOddUnitCharacter.ne_one {χ : MulChar (ZMod p)ˣ ℚ}
-    (hχ_odd : IsOddUnitCharacter (p := p) χ) :
-    χ ≠ 1 := by
-  intro hχ
-  have hval : χ (-1 : (ZMod p)ˣ) = 1 := by
-    rw [hχ]
-    exact MulChar.one_apply (R' := ℚ) (Group.isUnit (-1 : (ZMod p)ˣ))
-  rw [hχ_odd] at hval
-  norm_num at hval
 
 /-- The `T034c` package: for an odd component tagged by a rational character
 `χ`, the Stickelberger projection has Bernoulli scalar `B_{1,χ⁻¹}`, and the
