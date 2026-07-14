@@ -19412,3 +19412,22 @@ EXACTLY TWO named pins remain on the whole Γ_H-rigidity front:
     [RIG-2] core + KM's hbound register-box. Γ₁-side: coordinator routes
     `gammaOneDrinfeld_rigid` onto these same pins (v10.212 — "short instantiation once GH's
     pins land"; pins are NOW landed). (STREAM-GH)
+
+### v10.197-GH — ★ Γ(N) k̄-RIGIDITY DISCHARGED (the H=⊥ hfree pin falls) (STREAM-GH)
+Commit abdfd452b (pushed). `gammaFullNaive_fix_absurd` (GammaHMaster.lean): over k̄, NO nontrivial
+base-identical self-iso fixes a naive full level-N structure (N ≥ 3 invertible). Route: fixed
+level structure ⟹ both sections fixed (pullSection lift_fst + base-𝟙) ⟹ the fixed locus of the
+induced pointed Over-automorphism is an AddSubgroup of E.Point t' at EVERY geometric extension t'
+(closure_induction with IsMonHom.monoidHom map_one/map_mul/map_inv through pointEquivOverHom —
+the equiv-transports are rfl-graded) ⟹ IsNaiveFullLevel's SPAN CLAUSE (quantified over exactly
+the t'-shape!) puts every N-torsion point in the fixed closure ⟹ every scheme-point of the finite
+étale E[N] lies in the equalizer range (fromSpecResidueField k̄'-lifts + torsionPointsEquiv for
+the torsionBy-membership) ⟹ UnramifiedEqualizer engine ⟹ torsionRestrict = 𝟙 ⟹ aut_endo_eq_one
+⟹ e = refl, absurd. + `gammaFullNaive_hfree_bot` (γ=1 reduction; map_one closes the gammaHAut
+twist abstractly — no [GH1]-content consumed in the PROOF) + **`gammaBot_rigid`: P_⊥ = [Γ(N)] is
+RIGID down to the single hLN pin** (T-W7.8 gate; keystones = register-boxes: aut_endo_eq_one's
+endDeg/endTrace leaves + E[N] BB family + the problem's own T-E4a map-sorries in statements).
+Γ₁-side note: the SAME fix_absurd-pattern with the exact-order point + [RIG-2] core replaces the
+span argument once KM's hbound lands. Gotchas: AddSubgroup.closure_induction cases are
+zero/add/neg; Submodule.mem_torsionBy_iff takes (a)(x) explicit; stale-olean transients (sibling
+churn) — rebuild the missing module directly, never trust lake env lean. (STREAM-GH)
