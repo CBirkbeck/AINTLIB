@@ -76,12 +76,7 @@ theorem map_prime_ringEquiv (Φ : R ≃+* R') (p : Ideal R) (hp : Prime p) :
   have hmap : (Ideal.map Φ.toRingHom p).IsPrime := Ideal.map_isPrime_of_equiv Φ
   rw [Ideal.prime_iff_isPrime]
   · exact hmap
-  · intro h
-    have hbot : p = ⊥ := by
-      have hle : Ideal.map Φ.toRingHom p ≤ Ideal.map Φ.toRingHom ⊥ := by
-        rw [Ideal.map_bot]; exact le_of_eq h
-      exact le_antisymm ((map_le_map_iff_ringEquiv Φ p ⊥).mp hle) bot_le
-    exact hp.ne_zero hbot
+  · exact map_ne_bot_ringEquiv Φ p hp.ne_zero
 
 /-- Multiplicity is preserved by the ideal-lattice isomorphism `Ideal.map Φ`: the
 `Associates` count of `p` in the factorization of `I` equals the count of `Φ(p)` in
@@ -127,8 +122,7 @@ theorem intValuation_map_ringEquiv (Φ : R ≃+* R')
   by_cases hr : r = 0
   · subst hr
     simp [map_zero]
-  · have hΦr : Φ r ≠ 0 := by
-      simpa using (map_ne_zero_iff Φ.toRingHom (EquivLike.injective Φ)).mpr hr
+  · have hΦr : Φ r ≠ 0 := (map_ne_zero_iff Φ Φ.injective).mpr hr
     rw [HeightOneSpectrum.intValuation_if_neg _ hΦr,
       HeightOneSpectrum.intValuation_if_neg _ hr, hPQ]
     have hspan : Ideal.span {Φ r} = Ideal.map Φ.toRingHom (Ideal.span {r}) := by
