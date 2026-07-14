@@ -39,6 +39,27 @@ theorem IsInvariant.comp {G : FiniteLocallyFreeSubgroup E} {Y Z : Scheme.{u}} {f
     (hf : G.IsInvariant f) (h : Y ⟶ Z) : G.IsInvariant (f ≫ h) := fun _ g x t ht => by
   rw [← Category.assoc, hf g x t ht, Category.assoc]
 
+/-- **The killing-integer hypothesis** of the quotient construction: `G` is annihilated by
+multiplication by some positive integer `N` (`ι ≫ [N] = 0` as maps `G ⟶ E`). Every torsion
+subgroup `E[N]` satisfies it by definition of the kernel (the pullback condition), and every
+constant-rank subgroup satisfies it with `N = rank` (Deligne–Oort–Tate, KM 1.4.2). The option-γ
+glue construction of `E/G` consumes exactly this datum. -/
+class HasKillingInt (G : FiniteLocallyFreeSubgroup E) : Prop where
+  exists_kill : ∃ N : ℕ, N ≠ 0 ∧ G.ι ≫ E.mulByHom N = G.π ≫ E.zero
+
+variable (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt]
+
+/-- A chosen killing integer for `G` (positive: `NeZero G.killN`; kills: `killN_spec`). -/
+noncomputable def killN : ℕ :=
+  (HasKillingInt.exists_kill (G := G)).choose
+
+instance : NeZero G.killN :=
+  ⟨(HasKillingInt.exists_kill (G := G)).choose_spec.1⟩
+
+/-- The chosen killing integer kills `G`. -/
+theorem killN_spec : G.ι ≫ E.mulByHom G.killN = G.π ≫ E.zero :=
+  (HasKillingInt.exists_kill (G := G)).choose_spec.2
+
 end FiniteLocallyFreeSubgroup
 
 end EllipticCurve
