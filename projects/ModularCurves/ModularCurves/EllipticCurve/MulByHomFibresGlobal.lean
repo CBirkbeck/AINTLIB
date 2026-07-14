@@ -51,6 +51,32 @@ theorem isMonHom_of_pointed [IsLocallyNoetherian S] {E F : EllipticCurve S}
     haveI : IsSeparated F.asOver.hom := inferInstanceAs (IsSeparated F.π)
     exact isMonHom_of_one_comp_eq' E.toEllipticCurveGeom.universallyOConnected φ hη
 
+/-- **(BETA topological transport)** Finite fibres of `[n]` transport across a pointed monoid-object
+iso `φ : E.asOver ≅ F.asOver` of elliptic records: if every fibre of `[n]_F` is finite, so is every
+fibre of `[n]_E`. The homeomorphism `φ.hom.left.base` conjugates `[n]_E` to `[n]_F` (power-naturality
+`mulByHom_comp_left_of_isMonHom`), embedding the `E`-fibre over `x` into the finite `F`-fibre over
+`φ.hom.left.base x`. Feeds the topological `mulByHom_finite_fibres` route (ALPHA supplies the model
+finite fibres; `FibrewiseElliptic` + `isMonHom_of_pointed` supply the pointed iso). -/
+theorem finite_fibres_mulByHom_of_isMonHom_iso {E F : EllipticCurve S}
+    (φ : E.asOver ≅ F.asOver) [IsMonHom φ.hom] (n : ℤ)
+    (hF : ∀ y, (⇑(F.mulByHom n) ⁻¹' {y}).Finite) (x : E.E) :
+    (⇑(E.mulByHom n) ⁻¹' {x}).Finite := by
+  have hc := mulByHom_comp_left_of_isMonHom E F φ.hom n
+  have hbase : ∀ x' : E.E,
+      (F.mulByHom n) (φ.hom.left x') = φ.hom.left ((E.mulByHom n) x') := by
+    intro x'
+    exact (congrArg (fun f : E.E ⟶ F.E => f x') hc).symm
+  have hinj : Function.Injective (⇑φ.hom.left) := by
+    have h1 : φ.hom.left ≫ φ.inv.left = 𝟙 _ := by
+      rw [← Over.comp_left, φ.hom_inv_id, Over.id_left]
+    refine Function.LeftInverse.injective (g := ⇑φ.inv.left) fun z => ?_
+    rw [← Scheme.Hom.comp_apply, h1]; simp
+  refine Set.Finite.of_finite_image ?_ hinj.injOn
+  refine (hF (φ.hom.left x)).subset ?_
+  rintro _ ⟨x', hx', rfl⟩
+  simp only [Set.mem_preimage, Set.mem_singleton_iff] at hx' ⊢
+  rw [hbase x', hx']
+
 /-- **(BB-QF BETA per-fibre sub-leaf — the single remaining BETA obligation)** Each residue-field
 fibre of `[N] : E ⟶ E` is locally quasi-finite. NOTE the fibre's LQF **cannot** come from `[N]`'s own
 LQF (that is circular via `of_fiberToSpecResidueField`); it must come from the model. Precise discharge
