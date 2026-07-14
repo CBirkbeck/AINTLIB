@@ -979,7 +979,7 @@ private lemma dictionary_sum_of_piece_aux (W : WeierstrassCurve R) [W.IsElliptic
 
 /-- [e5c-S, Z] The sum-point's dictionary value is `toAffine` of the law-1 triple image. -/
 lemma dictionary_sum_of_pieceZ (W : WeierstrassCurve R) [W.IsElliptic]
-    [IsDomain R] [IsJacobsonRing R] (hΔ : IsUnit W.Δ) (i j k : Fin 3)
+    [IsJacobsonRing R] (hΔ : IsUnit W.Δ) (i j k : Fin 3)
     [IsDomain (biChartRing W i j)]
     {K : Type u} [Field K] [DecidableEq K] [Algebra R K]
     (s : SpecPoints (projModel W) (projModelπ W) K)
@@ -994,7 +994,7 @@ lemma dictionary_sum_of_pieceZ (W : WeierstrassCurve R) [W.IsElliptic]
 
 /-- [e5c-S, Y] The sum-point's dictionary value is `toAffine` of the law-2 triple image. -/
 lemma dictionary_sum_of_pieceY (W : WeierstrassCurve R) [W.IsElliptic]
-    [IsDomain R] [IsJacobsonRing R] (hΔ : IsUnit W.Δ) (i j k : Fin 3)
+    [IsJacobsonRing R] (hΔ : IsUnit W.Δ) (i j k : Fin 3)
     [IsDomain (biChartRing W i j)]
     {K : Type u} [Field K] [DecidableEq K] [Algebra R K]
     (s : SpecPoints (projModel W) (projModelπ W) K)
