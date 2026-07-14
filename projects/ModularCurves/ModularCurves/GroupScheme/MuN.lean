@@ -442,6 +442,92 @@ noncomputable instance constZModGrpObj (S : Scheme.{u}) (N : ℕ) [NeZero N] :
     GrpObj (Over.mk (constSchemeπ S (ZMod N))) :=
   .ofRepresentableBy _ (constGrpFunctor S N) (constRepresentableBy S N)
 
+section ConstBaseChange
+
+/-- The base-change comparison of constant schemes along `k : T ⟶ S`: the copy-wise
+map `∐_A T ⟶ ∐_A S`. -/
+noncomputable def constSchemeMapAlong {T : Scheme.{u}} (k : T ⟶ S) (A : Type) [Finite A] :
+    constScheme T A ⟶ constScheme S A :=
+  Limits.Sigma.map fun _ => k
+
+@[reassoc (attr := simp)]
+theorem ι_constSchemeMapAlong {T : Scheme.{u}} (k : T ⟶ S) (A : Type) [Finite A] (a : A) :
+    Sigma.ι (fun _ : A => T) a ≫ constSchemeMapAlong k A
+      = k ≫ Sigma.ι (fun _ : A => S) a :=
+  Limits.Sigma.ι_map _ _
+
+@[reassoc]
+theorem constSchemeMapAlong_π {T : Scheme.{u}} (k : T ⟶ S) (A : Type) [Finite A] :
+    constSchemeMapAlong k A ≫ constSchemeπ S A = constSchemeπ T A ≫ k := by
+  apply Sigma.hom_ext
+  intro a
+  rw [ι_constSchemeMapAlong_assoc]
+  show k ≫ Sigma.ι (fun _ : A => S) a ≫ Sigma.desc (fun _ => 𝟙 S)
+    = (Sigma.ι (fun _ : A => T) a ≫ Sigma.desc (fun _ => 𝟙 T)) ≫ k
+  rw [Sigma.ι_desc, Sigma.ι_desc, Category.comp_id, Category.id_comp]
+
+private lemma constIndex_mapAlong {T W : Scheme.{u}} (k : T ⟶ S)
+    (h : W ⟶ constScheme T A) (t : W) :
+    constIndex (h ≫ constSchemeMapAlong k A) t = constIndex h t := by
+  rw [constIndex_eq_iff, Scheme.Hom.comp_apply]
+  obtain ⟨y, hy⟩ := constIndex_mem h t
+  rw [← hy, ← Scheme.Hom.comp_apply, ι_constSchemeMapAlong, Scheme.Hom.comp_apply]
+  exact Set.mem_range_self _
+
+/-- **Constant schemes are stable under base change**: the comparison square
+
+    `∐_A T ⟶ ∐_A S`, verticals the structure maps, bottom `k : T ⟶ S`
+
+is cartesian. Proven by the functor-of-points description
+(`constSchemePointsEquiv`): a `W`-point of `∐_A S` together with a lift of its
+base point to `T` is exactly a `W`-point of `∐_A T` — the locally constant label
+is the same. -/
+theorem isPullback_constSchemeMapAlong {T : Scheme.{u}} (k : T ⟶ S)
+    (A : Type) [Finite A] :
+    IsPullback (constSchemeMapAlong k A) (constSchemeπ T A) (constSchemeπ S A) k := by
+  refine IsPullback.of_isLimit (PullbackCone.IsLimit.mk (constSchemeMapAlong_π k A)
+    (fun s => ((constSchemePointsEquiv T A s.snd).symm
+      (constSchemePointsEquiv S A (s.snd ≫ k) ⟨s.fst, s.condition⟩)).1)
+    (fun s => ?_) (fun s => ?_) (fun s m hm₁ hm₂ => ?_)
+    )
+  · -- the first face: composing with the comparison recovers the given point
+    set c := constSchemePointsEquiv S A (s.snd ≫ k) ⟨s.fst, s.condition⟩ with hc
+    set l := (constSchemePointsEquiv T A s.snd).symm c with hl
+    have hπ : (l.1 ≫ constSchemeMapAlong k A) ≫ constSchemeπ S A = s.snd ≫ k := by
+      rw [Category.assoc, constSchemeMapAlong_π, ← Category.assoc, l.2]
+    have himg : constSchemePointsEquiv S A (s.snd ≫ k) ⟨l.1 ≫ constSchemeMapAlong k A, hπ⟩
+        = c := by
+      ext t
+      show constIndex (l.1 ≫ constSchemeMapAlong k A) t = c t
+      rw [constIndex_mapAlong]
+      have hlc : constSchemePointsEquiv T A s.snd l = c := by
+        rw [hl, Equiv.apply_symm_apply]
+      have := congrArg (fun m => m t) (congrArg LocallyConstant.toFun hlc)
+      exact this
+    have := congrArg Subtype.val
+      ((constSchemePointsEquiv S A (s.snd ≫ k)).injective
+        (himg.trans (by rw [hc])))
+    exact this
+  · -- the second face: the structure triangle
+    exact ((constSchemePointsEquiv T A s.snd).symm _).2
+  · -- uniqueness
+    set c := constSchemePointsEquiv S A (s.snd ≫ k) ⟨s.fst, s.condition⟩ with hc
+    have hπ : (m ≫ constSchemeMapAlong k A) ≫ constSchemeπ S A = s.snd ≫ k := by
+      rw [Category.assoc, constSchemeMapAlong_π, ← Category.assoc, hm₂]
+    have himg : constSchemePointsEquiv T A s.snd ⟨m, hm₂⟩ = c := by
+      ext t
+      show constIndex m t = c t
+      rw [← constIndex_mapAlong k m t]
+      have hval : m ≫ constSchemeMapAlong k A = s.fst := hm₁
+      rw [hval]
+      rfl
+    have : (⟨m, hm₂⟩ : { h : _ ⟶ constScheme T A // h ≫ constSchemeπ T A = s.snd })
+        = (constSchemePointsEquiv T A s.snd).symm c := by
+      rw [← himg, Equiv.symm_apply_apply]
+    exact congrArg Subtype.val this
+
+end ConstBaseChange
+
 end ConstPointsFunctor
 
 /-- **(DS3c / T-B2a, specification of DS3a)** The canonical points description of
