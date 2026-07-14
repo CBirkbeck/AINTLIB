@@ -3,10 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.HasseBound.WeilPairing.DetDeg
-import HasseWeil.HasseBound.WeilPairing.Assembly
-import HasseWeil.Isogeny.VerschiebungFactorization
 import HasseWeil.HasseBound.QuadraticForm
+import HasseWeil.HasseBound.WeilPairing.Assembly
+import HasseWeil.HasseBound.WeilPairing.DetDeg
+import HasseWeil.Isogeny.VerschiebungFactorization
 
 set_option linter.style.longLine false
 
@@ -65,11 +65,10 @@ omit [Fintype W.toAffine.Point] in
 Given the per-`ℓ` Frobenius-matrix determinant data `hres` (the output of the Weil-pairing
 `DET-DEG`, `det(ρ_ℓ φ) = deg φ`, for `φ ∈ {π, 1−π, rπ−s}`, on the base change of `E` to `K̄`) and a
 non-negative degree function `deg` realising the third determinant, the Hasse quadratic form
-`(#K)·r² − tr(π)·rs + s²` is non-negative for **all** `(r,s)` — exactly the conclusion the
-legacy `qf_nonneg_skeleton` chain targeted (retired 2026-06-11).
+`(#K)·r² − tr(π)·rs + s²` is non-negative for **all** `(r,s)`.
 
 This is the additivity-free Weil-pairing route to the GAP-QF leaf: the determinant data avoids the
-characteristic-`p` dual-additivity wall (the retired `genuineIsogSmulSub_degree_eq_signed`), because the
+characteristic-`p` dual-additivity wall, because the
 per-isogeny scaling `det(ρ_ℓ φ) = deg φ` holds for every `φ` individually (Silverman III.8.6). It
 composes `det = deg` (`DetDeg`) with the shipped arithmetic reduction
 `qf_nonneg_of_frob_det_residual`. -/
@@ -85,8 +84,8 @@ theorem qf_nonneg_skeleton_of_weil_det_data (hq : 2 ≤ Fintype.card K)
       isogTrace (frobeniusIsog W) (isogOneSub_negFrobenius W hq) * r * s + s ^ 2 := by
   -- `p = char K` is prime; `q = #K > 0`.
   obtain ⟨p, hCharP, ⟨_, _⟩, hp_prime, _⟩ := FiniteField.card' K
-  haveI : Fact p.Prime := ⟨hp_prime⟩
-  haveI : CharP K p := hCharP
+  have : Fact p.Prime := ⟨hp_prime⟩
+  have : CharP K p := hCharP
   have hpchar : ringChar K = p := by
     rw [ringChar.eq_iff]; exact hCharP
   have hqpos : (0 : ℤ) < Fintype.card K := by exact_mod_cast Fintype.card_pos
@@ -96,7 +95,7 @@ theorem qf_nonneg_skeleton_of_weil_det_data (hq : 2 ≤ Fintype.card K)
   exact hres r s (by rwa [hpchar]) ℓ hℓ (by rwa [hpchar])
 
 omit [Fintype W.toAffine.Point] in
-/-- **GAP-QF top leaf via the Weil pairing, coprime-BOTH form** (reviewer round-23, Route B).
+/-- **GAP-QF top leaf via the Weil pairing, coprime-BOTH form**.
 
 Identical to `qf_nonneg_skeleton_of_weil_det_data` but requesting the per-`ℓ` Frobenius det data only
 on the locus `{p ∤ r ∧ p ∤ s}` (both coordinates coprime to `p = char K`).  This is exactly the locus
@@ -115,8 +114,8 @@ theorem qf_nonneg_skeleton_of_weil_det_data_both (hq : 2 ≤ Fintype.card K)
     ∀ r s : ℤ, 0 ≤ (Fintype.card K : ℤ) * r ^ 2 -
       isogTrace (frobeniusIsog W) (isogOneSub_negFrobenius W hq) * r * s + s ^ 2 := by
   obtain ⟨p, hCharP, ⟨_, _⟩, hp_prime, _⟩ := FiniteField.card' K
-  haveI : Fact p.Prime := ⟨hp_prime⟩
-  haveI : CharP K p := hCharP
+  have : Fact p.Prime := ⟨hp_prime⟩
+  have : CharP K p := hCharP
   have hpchar : ringChar K = p := by rw [ringChar.eq_iff]; exact hCharP
   have hqpos : (0 : ℤ) < Fintype.card K := by exact_mod_cast Fintype.card_pos
   refine qf_nonneg_of_frob_det_residual_both hp_prime hqpos deg hdeg_nonneg ?_
@@ -147,7 +146,7 @@ theorem hasse_bound_via_weil_pairing (hq : 2 ≤ Fintype.card K)
     (ker_deg_skeleton W hq)
     (qf_nonneg_skeleton_of_weil_det_data W hq deg hdeg_nonneg hres)
 
-/-- **The Hasse bound via the Weil pairing, coprime-BOTH form** (reviewer round-23, Route B).
+/-- **The Hasse bound via the Weil pairing, coprime-BOTH form**.
 
 `|#E(F_q) − q − 1| ≤ 2√q`, assembled from the per-`ℓ` Frobenius-matrix determinant data `hres`
 requested only on the locus `{p ∤ r ∧ p ∤ s}` (both coordinates coprime to `p = char K`).  This is the
