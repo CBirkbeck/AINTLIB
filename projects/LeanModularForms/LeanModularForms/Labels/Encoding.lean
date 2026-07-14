@@ -119,6 +119,23 @@ def letterDecode (s : String) : ℕ :=
 theorem letterEncode_injective : Function.Injective letterEncode :=
   Function.LeftInverse.injective letterDecode_letterEncode
 
+/-- **A letter label contains no dot.**  The characters of `letterEncode n` are exactly the
+lowercase letters `'a' = 97, …, 'z' = 122`, and `'.' = 46`.
+
+This is what makes a dot a usable separator in the composite LMFDB labels (`N.k.a.x`), so that
+a full label can be parsed back into its components. -/
+lemma letterEncode_dot_not_mem (n : ℕ) : '.' ∉ (letterEncode n).toList := by
+  intro hmem
+  unfold letterEncode at hmem
+  rw [String.toList_ofList, List.mem_map] at hmem
+  obtain ⟨d, hd, heq⟩ := hmem
+  have hd26 : d < 26 := Nat.toLetterDigits_lt_26 hd
+  have hval : (digitToLetter d).toNat = 97 + d :=
+    Char.toNat_ofNat_of_isValidChar (Or.inl (by omega))
+  rw [heq] at hval
+  simp only [show ('.').toNat = 46 from rfl] at hval
+  omega
+
 /-! ### The encoding is a bijection onto its range -/
 
 /-- The range of `letterEncode`: the set of valid LMFDB letter labels. -/
