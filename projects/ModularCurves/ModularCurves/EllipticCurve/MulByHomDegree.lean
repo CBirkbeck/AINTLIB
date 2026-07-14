@@ -186,6 +186,16 @@ lemma finrank_eq_module_finrank_of_affineOpen {X : Scheme.{u}} (f : X ⟶ X)
   haveI : IsAffine (pullback f U.ι) := isAffine_of_isAffineHom (pullback.snd f U.ι)
   rw [finrank_eq_appTop_finrank_of_affineOpen f U x₀ x, appTop_finrank_eq_module_finrank]
 
+/-- **(K4b-2, leaf L1)** The global sections of the affine `Z`-chart `(zChart W).toScheme` are `W`'s
+affine coordinate ring: `Γ(zChart, ⊤) ≃+* W.CoordinateRing`. Via `Scheme.Opens.topIso` (identifying
+`Γ(U.toScheme, ⊤)` with `Γ(projModel W, U)`) composed with the fixed chart identification
+`coordRingToZSection`. This is the base-ring half of the K4b-2 identity: it presents the domain base
+`Γ(Z)` of the module rank `Module.finrank Γ(Z) Γ([N]⁻¹Z)` as `W.CoordinateRing`. -/
+noncomputable def zChartSectionCoordRingEquiv {K : Type u} [Field K] (W : WeierstrassCurve K)
+    [W.IsElliptic] :
+    Γ((zChart W).toScheme, ⊤) ≃+* W.toAffine.CoordinateRing :=
+  (zChart W).topIso.commRingCatIsoToRingEquiv.trans (coordRingToZSection W).symm
+
 /-- **(K4 crux — the HasseWeil coupling)** Over a field `K`, the scheme-theoretic fibre rank of the
 model `[N]` equals the degree of HasseWeil's multiplication-by-`N` isogeny `mulByInt W.toAffine N`
 (the function-field extension degree `[K(E) : [N]* K(E)]`).
