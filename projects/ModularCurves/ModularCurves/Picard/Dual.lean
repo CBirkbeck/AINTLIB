@@ -914,15 +914,6 @@ noncomputable def dualMapObj {M N : X.Modules} (f : M ⟶ N) :
 noncomputable def dualUnitObjIso : dualObj (unitObj X) ≅ unitObj X :=
   ModularCurves.SheafOfModules.dualUnitIso X.ringCatSheaf
 
-/-- A trivialization on an open subscheme induces the corresponding trivialization
-on the over-site of that open. -/
-noncomputable def overTrivializationOfRestrictIso (M : X.Modules) (U : X.Opens)
-    (e : M.restrict U.ι ≅ unitObj U.toScheme) :
-    M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U) :=
-  (overEquiv U).fullyFaithfulFunctor.preimageIso
-    ((overFunctorEquiv U).app M ≪≫ e ≪≫
-      (U.sheafOfModulesEquivOverUnit X.ringCatSheaf).symm)
-
 /-- A restriction trivialization of `M` induces a restriction trivialization of
 its sheaf dual. -/
 noncomputable def dualRestrictIsoOfRestrictIso (M : X.Modules) (U : X.Opens)

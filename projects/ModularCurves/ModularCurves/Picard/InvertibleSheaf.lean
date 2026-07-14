@@ -145,5 +145,13 @@ noncomputable def restrictTrivialization {P : X.Modules} {U W : X.Opens} (e : W 
     (Modules.pullback (X.homOfLE e)).mapIso eP ≪≫
     pullbackUnitIso (X.homOfLE e)
 
+/-- A trivialization on an open subscheme induces the corresponding trivialization
+on the over-site of that open. -/
+noncomputable def overTrivializationOfRestrictIso (M : X.Modules) (U : X.Opens)
+    (e : M.restrict U.ι ≅ unitObj U.toScheme) :
+    M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U) :=
+  (overEquiv U).fullyFaithfulFunctor.preimageIso
+    ((overFunctorEquiv U).app M ≪≫ e ≪≫
+      (U.sheafOfModulesEquivOverUnit X.ringCatSheaf).symm)
 
 end AlgebraicGeometry.Scheme.Modules
