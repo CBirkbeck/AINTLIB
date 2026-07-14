@@ -72,6 +72,6 @@ theorem prod_eq_biInf_of_pairwise_disjoint_support {ι : Type*} (s : Finset ι)
     (h : (s : Set ι).Pairwise (fun i j => Disjoint (I i).support (I j).support)) :
     ∏ i ∈ s, I i = ⨅ i ∈ s, I i :=
   prod_eq_biInf_of_pairwise_sup_eq_top s I
-    (fun i hi j hj hij => sup_eq_top_of_disjoint_support (h hi hj hij))
+    (fun _i hi _j hj hij => sup_eq_top_of_disjoint_support (h hi hj hij))
 
 end AlgebraicGeometry.Scheme.IdealSheafData
