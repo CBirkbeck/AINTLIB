@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.Basic
 import Mathlib.RingTheory.Localization.Away.Basic
 
@@ -36,7 +41,8 @@ elliptic curve `y² = x³ − x` (i.e. `(a₁,…,a₆) = (0,0,0,−1,0)`) over 
 Working over `ℚ` avoids the characteristic-2/3 degeneracies of the discriminant. -/
 theorem universalWeierstrass_Δ_ne_zero : universalWeierstrass.Δ ≠ 0 := by
   intro h
-  have key : (MvPolynomial.aeval ![(0 : ℚ), 0, 0, -1, 0]).toRingHom universalWeierstrass.Δ = 64 := by
+  have key : (MvPolynomial.aeval ![(0 : ℚ), 0, 0, -1, 0]).toRingHom universalWeierstrass.Δ
+      = 64 := by
     rw [← WeierstrassCurve.map_Δ universalWeierstrass
       (MvPolynomial.aeval ![(0 : ℚ), 0, 0, -1, 0]).toRingHom]
     show (universalWeierstrass.map _).Δ = 64
@@ -97,10 +103,11 @@ noncomputable def universalCurveZero : weierstrassAtlas ⟶ universalCurve :=
 theorem universalCurveZero_π : universalCurveZero ≫ universalCurveπ = 𝟙 weierstrassAtlas :=
   projModelZero_projModelπ universalWeierstrassLoc
 
-/-- The crux affine identity: the top affine chart's `isoSpec.hom` composed with the scheme's
-`isoSpec.inv` is the top inclusion. Stated over an arbitrary affine-open proof `h` so it matches
-the `LocallyWeierstrass` witness's proof up to proof irrelevance. -/
-theorem crux_test (h : IsAffineOpen (⊤ : (weierstrassAtlas).Opens)) :
+/-- The top affine chart's `isoSpec.hom`, composed with the scheme's own `isoSpec.inv`, is the
+top inclusion. Stated over an arbitrary affine-open proof `h` (rather than `isAffineOpen_top`)
+so that it matches the `LocallyWeierstrass` witness's proof term up to proof irrelevance. -/
+theorem isAffineOpen_top_isoSpec_hom_isoSpec_inv
+    (h : IsAffineOpen (⊤ : (weierstrassAtlas).Opens)) :
     h.isoSpec.hom ≫ weierstrassAtlas.isoSpec.inv = (⊤ : (weierstrassAtlas).Opens).ι := by
   rw [← IsAffineOpen.fromSpec_top, ← IsAffineOpen.isoSpec_inv_ι, Iso.hom_inv_id_assoc]
 
@@ -132,19 +139,15 @@ theorem universalCurve_localModel :
           ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens))))))).symm ≪≫
       (isPullback_projModelBaseChange universalWeierstrassLoc).isoPullback.symm,
     ?c1, ?c2⟩
-  -- T-W5a: chart compatibilities. Math is trivial (affine single-chart special case of
-  -- `LocallyWeierstrass.baseChange`, proven in EllipticCurve/Basic.lean). Reduction derived:
-  --   c1 = simp [Iso.trans_hom, asIso_hom, asIso_inv, IsPullback.isoPullback_inv_snd]
-  --        + `inv(fst)≫snd = universalCurveπ ≫ inv φ` (pullback.condition)
-  --        + pullback.condition + `⊤.ι ≫ inv φ = isoSpec.hom` (Scheme.isoSpec_Spec_inv,
-  --          IsAffineOpen.fromSpec_top, IsAffineOpen.isoSpec_inv_ι); c2 analogous + projModelZero.
-  -- Blocked on Lean elaboration (not math): `inv φ` fails IsIso synth (defeq at instances
-  -- transparency on algebraMap; `set φ` let-unfolds; `isoSpec` presheaf-type skew). Fix path:
-  -- hoist hid/hbc/c1/c2 to top-level lemmas with explicit `@inv` instance args.
+  -- T-W5a chart compatibilities: the affine single-chart special case of
+  -- `LocallyWeierstrass.baseChange` (`EllipticCurve/Basic.lean`). Both sides are cancelled
+  -- against the affine comparison `φ`, whose crux identity is
+  -- `isAffineOpen_top_isoSpec_hom_isoSpec_inv`.
   have hcrux : ∀ (h : (⊤ : (weierstrassAtlas).Opens) ∈ weierstrassAtlas.affineOpens),
       (IsAffineOpen.isoSpec h).hom ≫ Spec.map (CommRingCat.ofHom
         (algebraMap WeierstrassAtlasRing ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens))))
-      = (⊤ : (weierstrassAtlas).Opens).ι := fun h => hφ_eq ▸ crux_test h
+      = (⊤ : (weierstrassAtlas).Opens).ι :=
+    fun h => hφ_eq ▸ isAffineOpen_top_isoSpec_hom_isoSpec_inv h
   case c1 =>
     rw [← cancel_mono (Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRing
         ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens)))))]
