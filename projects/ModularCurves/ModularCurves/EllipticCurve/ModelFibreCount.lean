@@ -472,6 +472,24 @@ theorem section_base_injective_of_isAlgClosed {F : Type u} [Field F] [IsAlgClose
   apply (Scheme.SpecToEquivOfField F X).injective
   rw [Scheme.SpecToEquivOfField_eq_iff]
   refine ⟨h _, ?_⟩
+  -- the two `descResidueField ∘ stalkClosedPointTo` composition identities, brought to
+  -- the common `𝟙`-source by the generalization trick
+  have key : ∀ (g₁ g₂ : Spec (CommRingCat.of F) ⟶ Spec (CommRingCat.of F)) (hg : g₁ = g₂)
+      (e : g₁.base (IsLocalRing.closedPoint F) = g₂.base (IsLocalRing.closedPoint F)),
+      Scheme.descResidueField (Scheme.stalkClosedPointTo g₁)
+        = (Scheme.residueFieldCongr e).hom ≫
+            Scheme.descResidueField (Scheme.stalkClosedPointTo g₂) := by
+    rintro g₁ g₂ rfl e
+    simp
+  have e' : (P.1 ≫ π).base (IsLocalRing.closedPoint F)
+      = (Q.1 ≫ π).base (IsLocalRing.closedPoint F) := by
+    rw [P.2, Q.2]
+  have hcP := Scheme.descResidueField_stalkClosedPointTo_comp (f := π) P.1
+  have hcQ := Scheme.descResidueField_stalkClosedPointTo_comp (f := π) Q.1
+  have hlink := key (P.1 ≫ π) (Q.1 ≫ π) (P.2.trans Q.2.symm) e'
+  have hchain := hcP.symm.trans (hlink.trans
+    (congrArg (fun t => (Scheme.residueFieldCongr e').hom ≫ t) hcQ))
+  -- hchain : jP ≫ rP = congr.hom ≫ jQ ≫ rQ
   sorry
 
 /-- **(g5, alg-closed case — w1–w6 per the section header; w7 above)** The topological
