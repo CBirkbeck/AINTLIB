@@ -65,6 +65,7 @@ import ModularCurves.ForMathlib.SchemeActionFree
 import ModularCurves.ForMathlib.SchemeModuleSheaf
 import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 import ModularCurves.ForMathlib.SheafCohomologyExact
+import ModularCurves.ForMathlib.SheafCohomologyIso
 import ModularCurves.ForMathlib.SheafCohomologyTerminal
 import ModularCurves.ForMathlib.SheafOfModulesMonoidal
 import ModularCurves.ForMathlib.SmoothDescent
