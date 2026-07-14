@@ -113,3 +113,21 @@ gate is only the general-base flat-locus/B–E chain (~23 sorries, D-chain). Ful
 `decomposition-bbqf.md` + `decomposition-bb-flat.md §5`. **CONTINUING THE BUILD this session** (the frontier
 is sound — no cross-stream wait). Corrected recommendation: BB-QF is progressable now by G0; the
 E[N]-substrate unblock is this build, not T-B6.
+
+### ⟹ BETA layer COMPLETE (Opus, 2026-07-14) — pipeline converging
+The BB-QF BETA (transport) building-block layer is **fully landed green** (committed):
+- `mulByHom_locallyQuasiFinite` leaf **flipped to LQF** (pipeline-aligned); `mulByHom_finite_fibres` now a
+  PROVED corollary (`0e5faf685`).
+- transport core `locallyQuasiFinite_mulByHom_of_isMonHom_iso` (repaired via `(Over.forget S).mapIso`).
+- **`isMonHom_of_pointed`** (`a33a07d48`) — pointed `E⟶F` hom is `IsMonHom` (GIT 6.4, generalises
+  `endMonHom`); discharges the transport's `[IsMonHom]` from pointedness alone.
+- global assembly `mulByHom_locallyQuasiFinite_assembled` via `of_fiberToSpecResidueField` (`6ff60bd3c`).
+- `coordinateRing_krullDimLE_one` (dim ≤ 1).
+
+**ONLY remaining for the whole BB-QF close** (`fiber_mulByHom_locallyQuasiFinite`, sole sorry): (i) ALPHA's
+g1–g5 model-LQF conclusion (sibling actively driving in `ModelFibreCount.lean`), + (ii) the **localModel
+fibre-iso extraction** (base-change `localModel`'s local pointed iso `e` to `κ(s)`; `compat_zero` ⟹ pointed
+⟹ `isMonHom_of_pointed`) + the fibre-of-endo identification. Both are atlas-context work — best completed by
+the ALPHA session (which holds the `localModel`/`projModel` context). Recipe fully specified in
+`MulByHomFibresGlobal.lean` sub-leaf docstring. **Opus BETA structural contribution complete; pipeline
+converging under the active ALPHA session.**
