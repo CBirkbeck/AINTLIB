@@ -3,10 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Dual.Morphism
-import HasseWeil.Isogeny.MulByInt.Basepoint
 import HasseWeil.Foundation.Verschiebung.PurelyInsep
 import HasseWeil.Foundation.Verschiebung.UniversalQthRootWitness
+import HasseWeil.Isogeny.Dual.Morphism
+import HasseWeil.Isogeny.MulByInt.Basepoint
 
 /-!
 # The Frobenius dual — the Verschiebung as an `EC.Isogeny` (Silverman III.6.1 Case 2)
@@ -18,8 +18,8 @@ This file discharges the **inseparable side** of the dual-isogeny story: the
 the defining identity `(V ∘ π)* = [q]*` (Silverman III.6.1 with `ν = [deg π] = [q]`).
 
 This is the Frobenius counterpart of the separable capstone `dualMulByInt`
-(`EC/IsogenyAG/DualGaloisClosed.lean`); together they realize the two cases of
-Silverman III.6.1 inside the witness machinery of `EC/IsogenyAG/Dual.lean`.
+(`Isogeny/Dual/GaloisClosed.lean`); together they realize the two cases of
+Silverman III.6.1 inside the witness machinery of `Isogeny/Dual/Morphism.lean`.
 
 ## The three witness fields, all theorems
 
@@ -33,10 +33,10 @@ Silverman III.6.1 inside the witness machinery of `EC/IsogenyAG/Dual.lean`.
   `EC`-level one (`EC.Isogeny.frobenius`): both are
   `FiniteField.frobeniusAlgHom K K(E)`.
 * **`ν = [q]` basepoint**: `EC.mulByIntBasepoint_holds`
-  (`EC/IsogenyAG/MulByIntBasepoint.lean`), proven for all `n ≠ 0` including
+  (`Isogeny/MulByInt/Basepoint.lean`), proven for all `n ≠ 0` including
   `p ∣ n`, so `n = q = p^r` is covered.
 * **`π` reflects `∞`-regularity**: `EC.frobenius_reflects_ordAtInfty`
-  (`EC/IsogenyAG/Dual.lean`), from `π* g = g^q` and `ord_∞(g^q) = q·ord_∞ g`.
+  (`Isogeny/Dual/Morphism.lean`), from `π* g = g^q` and `ord_∞(g^q) = q·ord_∞ g`.
 
 ## Main definitions and results
 
@@ -111,7 +111,7 @@ III.6.1 Case 2) — every field a theorem:
 * `hbase` is assembled by `hbase_of_reflects` from the `[q]`-basepoint theorem
   (`mulByIntBasepoint_holds`, valid at `n = q` including `p ∣ q`) and the
   `∞`-regularity reflection of `π` (`frobenius_reflects_ordAtInfty`). -/
-noncomputable def frobeniusMulByIntDualWitness :
+theorem frobeniusMulByIntDualWitness :
     Isogeny.HasMulByIntDualWitness (Isogeny.frobenius W)
       ((Fintype.card K : ℕ) : ℤ) intCardK_ne_zero where
   hincl := frobenius_mulByInt_q_rangeIncl W
