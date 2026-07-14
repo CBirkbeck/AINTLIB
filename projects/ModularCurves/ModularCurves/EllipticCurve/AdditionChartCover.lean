@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.AdditionChartMor
 
 /-!
@@ -66,11 +71,16 @@ lemma regularityOpen_ne_top_of_forall_mem (t : Fin 3 → A) (p : PrimeSpectrum A
     Ideal.span_le.mpr (Set.range_subset_iff.mpr hp)
   exact p.isPrime.ne_top ((Ideal.eq_top_iff_one _).mpr (hle htop))
 
-/-- **(c3, the cross-law overlap is same-index)** For two triples `t`, `s` with vanishing `2×2` minors
-(`s m * t n = s n * t m`), the overlap of their regularity opens is covered by the **same-index** loci
-`D(t k · s k)`. The `⊇` half is `basicOpen_mul`; the `⊆` half is the minor argument: a prime `p` avoiding
-`t k` and `s l` also avoids `s k` (since `s k · t l = s l · t k ∉ p`), hence avoids `t k · s k`. This is
-why `addOn_agree` reduces to the same-index piece agreement (`isUnit_of_minor` at the point level). -/
+/-- **(c3, the cross-law overlap is same-index)** For two triples `t`, `s` with vanishing `2×2`
+minors
+(`s m * t n = s n * t m`), the overlap of their regularity opens is covered by the **same-index**
+loci
+`D(t k · s k)`. The `⊇` half is `basicOpen_mul`; the `⊆` half is the minor argument: a prime `p`
+avoiding
+`t k` and `s l` also avoids `s k` (since `s k · t l = s l · t k ∉ p`), hence avoids `t k · s k`.
+This is
+why `addOn_agree` reduces to the same-index piece agreement (`isUnit_of_minor` at the point level).
+-/
 lemma regularityOpen_inf_eq_iSup_basicOpen (t s : Fin 3 → A)
     (hmin : ∀ m n, s m * t n = s n * t m) :
     regularityOpen t ⊓ regularityOpen s =
