@@ -363,8 +363,6 @@ theorem weilPairing_scaling_of_dualComp (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
 
 section WeilScalesBridge
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 /-- **The `WeilScales` bridge from the CoordHom-free scaling** (Silverman III.8.6.1, the
 `FrobMatrixData`-facing form). For a prime `ℓ`, a separable isogeny `φ` over `E` realising the bare
 hom `ψ` (`hψ : φ.toAddMonoidHom = ψ`) with `φ.degree = d` (`hd`), an abstract dual `δ` with the dual
@@ -389,7 +387,7 @@ theorem weilScales_of_dualComp (ℓ : ℕ) [Fact ℓ.Prime] (hℓF : (ℓ : F) �
     (hdc : δ.comp φ.toAddMonoidHom =
       (mulByInt W.toAffine (Nat.card φ.toAddMonoidHom.ker : ℤ)).toAddMonoidHom)
     (hdeg : Nat.card φ.toAddMonoidHom.ker = φ.degree)
-    (hcomm' : ∀ (S T : W.toAffine.Point) (hS : ((ℓ : ℕ) : ℤ) • S = 0)
+    (hcomm' : ∀ (S T : W.toAffine.Point) (_hS : ((ℓ : ℕ) : ℤ) • S = 0)
         (hφT : ((ℓ : ℕ) : ℤ) • φ.toAddMonoidHom T = 0),
       translateAlgEquivOfPoint W S
           (φ.pullback (weilFunction W ((ℓ : ℕ) : ℤ) (by exact_mod_cast hℓF)
@@ -552,7 +550,6 @@ theorem weilPairing_scaling_noδ (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
   rw [weilPairing_adjoint_image_noδ W ℓ hℓ φ hφ hcommφ S T hS hφT hφS hkerT_tor hcomm',
     weilPairing_nsmul_right W ℓ hℓ S T hS hT (Nat.card φ.toAddMonoidHom.ker) hkerT_tor, hdeg]
 
-set_option linter.unusedVariables false in
 /-- **The `δ`-free, surjectivity-free `WeilScales` bridge** (Silverman III.8.6.1, the
 `FrobMatrixData`-facing form).  For a prime `ℓ`, a separable isogeny `φ` over `E` realising the bare
 hom `ψ` (`hψ : φ.toAddMonoidHom = ψ`) with `φ.degree = d` (`hd`), the separable degree match
@@ -571,7 +568,7 @@ theorem weilScales_noδ (ℓ : ℕ) [Fact ℓ.Prime] (hℓF : (ℓ : F) ≠ 0)
     (hcommφ : (mulByInt W.toAffine ((ℓ : ℕ) : ℤ)).toAddMonoidHom.comp φ.toAddMonoidHom =
       φ.toAddMonoidHom.comp (mulByInt W.toAffine ((ℓ : ℕ) : ℤ)).toAddMonoidHom)
     (hdeg : Nat.card φ.toAddMonoidHom.ker = φ.degree)
-    (hcomm' : ∀ (S T : W.toAffine.Point) (hS : ((ℓ : ℕ) : ℤ) • S = 0)
+    (hcomm' : ∀ (S T : W.toAffine.Point) (_hS : ((ℓ : ℕ) : ℤ) • S = 0)
         (hφT : ((ℓ : ℕ) : ℤ) • φ.toAddMonoidHom T = 0),
       translateAlgEquivOfPoint W S
           (φ.pullback (weilFunction W ((ℓ : ℕ) : ℤ) (by exact_mod_cast hℓF)
@@ -619,7 +616,6 @@ theorem weilPairing_scaling_noδ_card (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
   rw [weilPairing_adjoint_image_noδ W ℓ hℓ φ hφ hcommφ S T hS hφT hφS hkerT_tor hcomm',
     weilPairing_nsmul_right W ℓ hℓ S T hS hT (Nat.card φ.toAddMonoidHom.ker) hkerT_tor]
 
-set_option linter.unusedVariables false in
 /-- **The `δ`-free, surjectivity-free `WeilScales` bridge with the `#ker` exponent** (Silverman
 III.8.6.1, the `FrobMatrixData`-facing form). For a prime `ℓ`, a separable isogeny `φ` over `E`
 realising the bare hom `ψ` (`hψ : φ.toAddMonoidHom = ψ`), the divisor-pullback functoriality `hφ :
@@ -637,7 +633,7 @@ theorem weilScales_noδ_card (ℓ : ℕ) [Fact ℓ.Prime] (hℓF : (ℓ : F) ≠
     (ψ : W.toAffine.Point →+ W.toAffine.Point) (hψ : φ.toAddMonoidHom = ψ) (hφ : ProjOrdTransport φ)
     (hcommφ : (mulByInt W.toAffine ((ℓ : ℕ) : ℤ)).toAddMonoidHom.comp φ.toAddMonoidHom =
       φ.toAddMonoidHom.comp (mulByInt W.toAffine ((ℓ : ℕ) : ℤ)).toAddMonoidHom)
-    (hcomm' : ∀ (S T : W.toAffine.Point) (hS : ((ℓ : ℕ) : ℤ) • S = 0)
+    (hcomm' : ∀ (S T : W.toAffine.Point) (_hS : ((ℓ : ℕ) : ℤ) • S = 0)
         (hφT : ((ℓ : ℕ) : ℤ) • φ.toAddMonoidHom T = 0),
       translateAlgEquivOfPoint W S
           (φ.pullback (weilFunction W ((ℓ : ℕ) : ℤ) (by exact_mod_cast hℓF)
