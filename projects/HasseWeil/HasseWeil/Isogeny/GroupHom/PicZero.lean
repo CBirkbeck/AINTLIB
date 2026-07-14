@@ -119,11 +119,11 @@ noncomputable def pushforwardPicZeroOfWitness
       -- Goal: comp ((mk' N₂).comp (pushforwardDegZero φ cd)) D = 0
       -- Strategy: the comp at D produces Quotient.mk of (pushforwardDegZero φ cd D),
       -- and we show this is zero via mk_eq_zero_iff and h_pres.
-      show QuotientAddGroup.mk' _ (pushforwardDegZero φ cd D) = 0
+      change QuotientAddGroup.mk' _ (pushforwardDegZero φ cd D) = 0
       rw [QuotientAddGroup.mk'_apply, QuotientAddGroup.eq_zero_iff]
-      show (pushforwardDegZero φ cd D).val ∈
+      change (pushforwardDegZero φ cd D).val ∈
         (⟨W₂⟩ : Curves.SmoothPlaneCurve F).projPrincipalSubgroup
-      show pushforwardProjectiveDivisor φ cd D.val ∈
+      change pushforwardProjectiveDivisor φ cd D.val ∈
         (⟨W₂⟩ : Curves.SmoothPlaneCurve F).projPrincipalSubgroup
       exact h_pres D.val hD
 
@@ -145,7 +145,7 @@ theorem picZeroOfPoint_pushforwardPicZero
   -- Both sides are `QuotientAddGroup.mk` of degZero-Subtypes whose
   -- underlying divisors agree by `pushforwardProjectiveDivisor_kappaDivisor`.
   -- Reduce to Subtype equality, then to divisor equality.
-  show QuotientAddGroup.mk _ = QuotientAddGroup.mk _
+  change QuotientAddGroup.mk _ = QuotientAddGroup.mk _
   congr 1
   apply Subtype.ext
   exact (pushforwardProjectiveDivisor_kappaDivisor φ cd P).symm
