@@ -40,6 +40,7 @@ import ModularCurves.ForMathlib.BaseChangeKerCoker
 import ModularCurves.ForMathlib.Coaction
 import ModularCurves.ForMathlib.SchemeAppLE
 import ModularCurves.ForMathlib.AgreementLocusClopen
+import ModularCurves.ForMathlib.AcyclicAffineOpenCover
 import ModularCurves.ForMathlib.AffineVanishing
 import ModularCurves.ForMathlib.ClosedImmersionFinrankIso
 import ModularCurves.ForMathlib.ComoduleCoinvariants
