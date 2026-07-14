@@ -34,7 +34,6 @@ variable {N : ℕ} [NeZero N] {k : ℤ}
 endomorphism of the cusp-form space. -/
 noncomputable def heckeEnd (N : ℕ) [NeZero N] (k : ℤ) (n : ℕ+) :
     Module.End ℂ (CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :=
-  haveI : NeZero n.val := ⟨n.pos.ne'⟩
   { toFun := heckeT_n_cusp k n.val
     map_add' := heckeT_n_cusp_add n.val
     map_smul' := fun c f => heckeT_n_cusp_smul n.val c f }
@@ -60,11 +59,9 @@ subalgebra, so *every* element of `heckeAlgℤ` acts on `f` by a scalar; the eig
 `heckeAlgℤ → ℂ` is a ring homomorphism. -/
 
 /-- A newform is nonzero: its normalised first Fourier coefficient is `1 ≠ 0`. -/
-theorem Newform.toCuspForm_ne_zero (f : Newform N k) : f.toCuspForm ≠ 0 := by
-  intro h
-  have hn := f.isNorm
-  rw [h] at hn
-  simp only [CuspForm.coe_zero, UpperHalfPlane.qExpansion_zero, map_zero, zero_ne_one] at hn
+theorem Newform.toCuspForm_ne_zero (f : Newform N k) : f.toCuspForm ≠ 0 := fun h => by
+  simpa only [h, CuspForm.coe_zero, UpperHalfPlane.qExpansion_zero, map_zero, zero_ne_one]
+    using f.isNorm
 
 /-- Every element of `heckeAlgℤ` maps the newform `f` into its eigenline `ℂ ∙ f`: the
 generators do (`isFullEigenform` for Hecke ops, the character `χ` for diamonds) and the
@@ -76,8 +73,7 @@ theorem Newform.heckeAlg_smul_mem_span (f : Newform N k)
   induction hT using Algebra.adjoin_induction with
   | mem T hT =>
     rcases hT with ⟨n, rfl⟩ | ⟨d, rfl⟩
-    · haveI : NeZero n.val := ⟨n.pos.ne'⟩
-      rw [show (heckeEnd N k n) f.toCuspForm = heckeT_n_cusp k n.val f.toCuspForm from rfl, ha n]
+    · rw [show (heckeEnd N k n) f.toCuspForm = heckeT_n_cusp k n.val f.toCuspForm from rfl, ha n]
       exact Submodule.smul_mem _ _ (Submodule.mem_span_singleton_self _)
     · rw [show (diamondOpCusp k d) f.toCuspForm = diamondOpCuspHom k d f.toCuspForm from rfl,
         diamondOpCusp_apply_charSpace k f.χ d
@@ -105,10 +101,9 @@ theorem Newform.eigenScalar_smul (f : Newform N k) (T : heckeAlgℤ N k) :
 
 /-- The eigenline scalar is unique (`f ≠ 0`): any `c` with `c • f = T f` equals `eigenScalar T`. -/
 theorem Newform.eigenScalar_eq (f : Newform N k) (T : heckeAlgℤ N k) {c : ℂ}
-    (h : c • f.toCuspForm = (T : Module.End ℂ _) f.toCuspForm) : f.eigenScalar T = c := by
-  have key : f.eigenScalar T • f.toCuspForm = c • f.toCuspForm := by
-    rw [f.eigenScalar_smul T, ← h]
-  exact smul_left_injective ℂ f.toCuspForm_ne_zero key
+    (h : c • f.toCuspForm = (T : Module.End ℂ _) f.toCuspForm) : f.eigenScalar T = c :=
+  smul_left_injective ℂ f.toCuspForm_ne_zero <|
+    show f.eigenScalar T • f.toCuspForm = c • f.toCuspForm by rw [f.eigenScalar_smul T, ← h]
 
 /-- **[T003]** The newform eigensystem ring homomorphism `heckeAlgℤ → ℂ`: it sends each Hecke
 operator to the scalar by which it acts on the simultaneous eigenvector `f`. -/
@@ -126,7 +121,6 @@ noncomputable def newformEigenHom (f : Newform N k) : heckeAlgℤ N k →+* ℂ 
 /-- On a coprime cusp Hecke operator, `newformEigenHom` returns the classical eigenvalue. -/
 theorem newformEigenHom_heckeEnd (f : Newform N k) (n : ℕ+) (hn : Nat.Coprime n.val N) :
     newformEigenHom f ⟨heckeEnd N k n, heckeEnd_mem n⟩ = f.eigenvalue n := by
-  haveI : NeZero n.val := ⟨n.pos.ne'⟩
   refine f.eigenScalar_eq _ ?_
   show f.eigenvalue n • f.toCuspForm = heckeT_n_cusp k n.val f.toCuspForm
   rw [f.isEigen n hn]
@@ -134,18 +128,19 @@ theorem newformEigenHom_heckeEnd (f : Newform N k) (n : ℕ+) (hn : Nat.Coprime 
 /-! ### [T002 / FIH] The isolated finiteness input + the eigenvalue ring `O_f`
 
 `heckeAlgℤ_finite` is the single deep classical input (the integral Hecke algebra is a finite
-`ℤ`-module).  Our generators `ℤ[Tₙ, ⟨d⟩]` match the source Hecke algebra exactly (Shimura Thm 3.34(1)
-p.70; Miyake Thm 4.5.9 p.142).  Module-finiteness comes from the action on a **full-rank** Hecke-stable
-free `ℤ`-lattice `Λ ⊆ S_k(Γ₁N)`: `heckeAlgℤ ↪ End_ℤ(Λ) ≅ M_r(ℤ)` (Shimura (3.5.20)+ρ₀ p.84, the
-faithful integral representation; the lattice realized by the integral `q`-expansion basis Shimura
-Thm 3.52 p.85 / Miyake Thm 4.5.19(2) p.152; DS weight-2 analogue Defn 6.5.2 + Ex 6.5.1 via `H₁(X₁N,ℤ)`).
+`ℤ`-module).  Our generators `ℤ[Tₙ, ⟨d⟩]` match the source Hecke algebra exactly (Shimura
+Thm 3.34(1) p.70; Miyake Thm 4.5.9 p.142).  Module-finiteness comes from the action on a
+**full-rank** Hecke-stable free `ℤ`-lattice `Λ ⊆ S_k(Γ₁N)`: `heckeAlgℤ ↪ End_ℤ(Λ) ≅ M_r(ℤ)`
+(Shimura (3.5.20)+ρ₀ p.84, the faithful integral representation; the lattice realized by the
+integral `q`-expansion basis Shimura Thm 3.52 p.85 / Miyake Thm 4.5.19(2) p.152; DS weight-2
+analogue Defn 6.5.2 + Ex 6.5.1 via `H₁(X₁N,ℤ)`).
 The deep content is the lattice's **maximal rank** (`Λ ⊗ ℂ = S_k`, the rationality / q-expansion
 principle) — absent from mathlib.  It is stated as a `sorry` instance here; everything downstream
 consumes it as a black box. -/
 
-/-- A **full-rank** (Shimura (3.5.20) "maximal rank"), Hecke-stable, finite free `ℤ`-lattice inside
-`S_k(Γ₁N)`.  `spanning` (`Λ ⊗ ℂ = S_k`) is the deep content; faithfulness of the `heckeAlgℤ`-action is
-*derived* from it, never assumed. -/
+/-- A **full-rank** (Shimura (3.5.20) "maximal rank"), Hecke-stable, finite free `ℤ`-lattice
+inside `S_k(Γ₁N)`.  `spanning` (`Λ ⊗ ℂ = S_k`) is the deep content; faithfulness of the
+`heckeAlgℤ`-action is *derived* from it, never assumed. -/
 structure HeckeStableLattice (N : ℕ) [NeZero N] (k : ℤ) where
   /-- The underlying `ℤ`-submodule of cusp forms. -/
   toSubmodule : Submodule ℤ (CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
@@ -160,7 +155,8 @@ structure HeckeStableLattice (N : ℕ) [NeZero N] (k : ℤ) where
 
 /-- **(FIH — T002, the single isolated research input)** A full-rank Hecke-stable `ℤ`-lattice in
 `S_k(Γ₁N)` exists: the integral Eichler–Shimura / integral-`q`-expansion basis (Shimura Thm 3.52
-p.85, Miyake Thm 4.5.19(2) p.152; DS weight-2 `H₁(X₁N,ℤ)`).  Absent from mathlib; the one `sorry`. -/
+p.85, Miyake Thm 4.5.19(2) p.152; DS weight-2 `H₁(X₁N,ℤ)`).  Absent from mathlib; the one
+`sorry`. -/
 theorem exists_HeckeStableLattice (N : ℕ) [NeZero N] (k : ℤ) :
     Nonempty (HeckeStableLattice N k) := sorry
 
