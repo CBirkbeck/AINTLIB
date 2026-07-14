@@ -256,14 +256,108 @@ theorem projModel_infinite' : Infinite (projModel W) := by
   exact Infinite.of_injective ((zChart W).ι).base
     ((zChart W).ι.isOpenEmbedding.injective)
 
-/-- **(leaf g2)** The projective Weierstrass model is curvelike: every irreducible
-closed subset is finite or everything. Chart transfer of
-`isClosed_isIrreducible_singleton_or_univ` + the single-point complement
-(`mem_range_zero_of_not_mem_zChart`). -/
+/-- Preirreducibility reflects along open embeddings (preimage form). -/
+theorem IsPreirreducible.preimage_isOpenEmbedding {X Y : Type u} [TopologicalSpace X]
+    [TopologicalSpace Y] {s : Set Y} (hs : IsPreirreducible s) {f : X → Y}
+    (hf : Topology.IsOpenEmbedding f) : IsPreirreducible (f ⁻¹' s) := by
+  intro u v hu hv ⟨a, has, hau⟩ ⟨b, hbs, hbv⟩
+  obtain ⟨w, hws, hwu, hwv⟩ := hs (f '' u) (f '' v) (hf.isOpenMap u hu) (hf.isOpenMap v hv)
+    ⟨f a, has, ⟨a, hau, rfl⟩⟩ ⟨f b, hbs, ⟨b, hbv, rfl⟩⟩
+  obtain ⟨a', hau', rfl⟩ := hwu
+  obtain ⟨b', hbv', hb'⟩ := hwv
+  exact ⟨a', hws, hau', hf.injective hb'.symm ▸ hbv'⟩
+
+/-- **(leaf g2, DISCHARGED)** The projective Weierstrass model is curvelike: every
+irreducible closed subset is finite or everything — chart transfer of the `dim ≤ 1`
+classification plus the single-point off-chart complement. -/
 theorem projModel_isClosed_isIrreducible_finite_or_univ
     {C : Set (projModel W)} (hCc : IsClosed C) (hCi : IsIrreducible C) :
     C.Finite ∨ C = Set.univ := by
-  sorry
+  haveI := coordinateRing_krullDimLE_one W
+  set U : Set (projModel W) := (zChart W : Set (projModel W)) with hUdef
+  set ι : ((zChart W).toScheme : Scheme.{u}) → projModel W := ⇑(((zChart W).ι).base) with hιdef
+  have hιemb : Topology.IsOpenEmbedding ι := ((zChart W).ι).isOpenEmbedding
+  have hUrange : Set.range ι = U := Scheme.Opens.range_ι _
+  by_cases hU : (C ∩ U).Nonempty
+  · -- the chart slice, transported to `Spec K[W]`
+    have hApre : IsPreirreducible (ι ⁻¹' C) :=
+      IsPreirreducible.preimage_isOpenEmbedding hCi.2 hιemb
+    have hAne : (ι ⁻¹' C).Nonempty := by
+      obtain ⟨x, hxC, hxU⟩ := hU
+      obtain ⟨a, rfl⟩ := hUrange ▸ hxU
+      exact ⟨a, hxC⟩
+    have hAc : IsClosed (ι ⁻¹' C) := hCc.preimage (Scheme.Hom.continuous _)
+    set h := zChartHomeo W with hhdef
+    have hDc : IsClosed (h '' (ι ⁻¹' C)) := h.isClosedMap _ hAc
+    have hDi : IsIrreducible (h '' (ι ⁻¹' C)) :=
+      IsIrreducible.image ⟨hAne, hApre⟩ _ h.continuous.continuousOn
+    rcases isClosed_isIrreducible_singleton_or_univ hDc hDi with ⟨d, hd⟩ | hduniv
+    · -- singleton case: `C ∩ U = {x₀}` and `closure {x₀} ⊆ {x₀} ∪ Uᶜ ⊆ {x₀} ∪ (finite)`
+      left
+      have hA : ι ⁻¹' C = {h.symm d} := by
+        have := congrArg (fun t => h.symm '' t) hd
+        simpa [Set.image_image, Set.image_singleton] using this
+      have hCU : C ∩ U = {ι (h.symm d)} := by
+        rw [← hUrange, ← Set.image_preimage_eq_inter_range, hA, Set.image_singleton]
+      -- density of the chart slice in `C`
+      have hdense : C ⊆ closure (C ∩ U) := by
+        intro c hc
+        rw [mem_closure_iff]
+        intro V hVopen hcV
+        obtain ⟨w, hwC, hwV, hwU⟩ := hCi.2 V U hVopen (zChart W).2 ⟨c, hc, hcV⟩ hU
+        exact ⟨w, hwV, hwC, hwU⟩
+      -- the chart point is closed in the chart, so its closure adds only off-chart points
+      have hclosure : closure ({ι (h.symm d)} : Set (projModel W)) ⊆
+          {ι (h.symm d)} ∪ Uᶜ := by
+        intro y hy
+        by_cases hyU : y ∈ U
+        · left
+          obtain ⟨b, rfl⟩ := hUrange ▸ hyU
+          have hbA : b ∈ ι ⁻¹' C := by
+            rw [hA]
+            have hbcl : b ∈ closure ({h.symm d} : Set _) := by
+              rw [mem_closure_iff]
+              intro O hOopen hbO
+              have hmeet := (mem_closure_iff.mp hy) (ι '' O) (hιemb.isOpenMap O hOopen)
+                ⟨b, hbO, rfl⟩
+              obtain ⟨z, hzO, hz1⟩ := hmeet
+              obtain ⟨a', ha'O, ha'z⟩ := hzO
+              rw [Set.mem_singleton_iff] at hz1
+              have ha'd : a' = h.symm d := hιemb.injective (ha'z.trans hz1)
+              exact ⟨h.symm d, ha'd ▸ ha'O, rfl⟩
+            have hAcl : closure ({h.symm d} : Set _) = {h.symm d} := by
+              rw [← hA]
+              exact hAc.closure_eq
+            rwa [hAcl] at hbcl
+          rw [hA] at hbA
+          exact congrArg ι hbA
+        · right; exact hyU
+      have hCsub : C ⊆ {ι (h.symm d)} ∪ Uᶜ := fun c hc => by
+        have := hdense hc
+        rw [hCU] at this
+        exact hclosure this
+      refine Set.Finite.subset ?_ hCsub
+      refine (Set.finite_singleton _).union (Set.Finite.subset
+        (Set.finite_range (projModelZero W).base) fun x hx => ?_)
+      exact mem_range_zero_of_not_mem_zChart hx
+    · -- univ case: the chart lies in `C`, and a closed set containing a nonempty open
+      -- of an irreducible space is everything
+      right
+      have hUC : U ⊆ C := by
+        intro x hxU
+        obtain ⟨a, rfl⟩ := hUrange ▸ hxU
+        have : (h a) ∈ h '' (ι ⁻¹' C) := hduniv ▸ Set.mem_univ _
+        obtain ⟨a', ha', haa⟩ := this
+        exact h.injective haa ▸ ha'
+      by_contra hne
+      have hCcne : Cᶜ.Nonempty := Set.nonempty_compl.mpr hne
+      obtain ⟨w, hw⟩ := nonempty_preirreducible_inter hCc.isOpen_compl
+        ((zChart W).2) hCcne ⟨hU.choose, hU.choose_spec.2⟩
+      exact hw.1 (hUC hw.2)
+  · -- no chart points: `C` sits in the single-point complement
+    left
+    refine Set.Finite.subset (Set.finite_range (projModelZero W).base) fun x hx => ?_
+    exact mem_range_zero_of_not_mem_zChart fun hmem => hU ⟨x, hx, hmem⟩
 
 /-- **(leaf g3)** The projective model is topologically infinite (the chart is the
 spectrum of a Jacobson non-field domain). -/
