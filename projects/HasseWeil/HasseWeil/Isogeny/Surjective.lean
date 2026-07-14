@@ -166,7 +166,7 @@ theorem ordAtInftyValuation_coordX :
       WithZero.exp (2 : ℤ) := by
   have := (⟨W⟩ : SmoothPlaneCurve F).ordAtInftyValuation_eq_exp_neg_of_ordAtInfty_eq
     (⟨W⟩ : SmoothPlaneCurve F).coordX_ne_zero (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_coordX
-  rwa [show (-(-2 : ℤ)) = (2 : ℤ) from by norm_num] at this
+  rwa [neg_neg] at this
 
 /-- The infinity place is distinct from every affine place: `coordX` separates them (regular at
 affine points, pole at infinity). -/
@@ -180,8 +180,7 @@ theorem ordAtInftyValuation_ne_pointValuation
     rw [hcontra]
   rw [ordAtInftyValuation_coordX] at h1
   have h_exp2_gt_one : (1 : WithZero (Multiplicative ℤ)) < WithZero.exp (2 : ℤ) := by
-    rw [show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
-      WithZero.exp_zero.symm, WithZero.exp_lt_exp]
+    rw [← WithZero.exp_zero, WithZero.exp_lt_exp]
     norm_num
   exact absurd (h1 ▸ pointValuation_coordX_le_one P) (not_le.mpr h_exp2_gt_one)
 
