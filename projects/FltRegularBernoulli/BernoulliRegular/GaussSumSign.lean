@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib.NumberTheory.LegendreSymbol.QuadraticChar.Basic
@@ -128,7 +133,7 @@ theorem rootNumber_legendreDirichlet_sq (hp_three_mod_four : p % 4 = 3) :
   have h_chi_neg_one : (legendreDirichlet p) (-1) = (-1 : ℂ) := h_odd
   rw [h_chi_neg_one, h_card] at h_gs_sq
   -- Expand `rootNumber`: for odd `η`, `rootNumber η = gaussSum η stdAddChar / I / √p`.
-  unfold DirichletCharacter.rootNumber
+  simp only [DirichletCharacter.rootNumber]
   rw [if_neg h_not_even, pow_one]
   -- Simplify `rootNumber η = gaussSum η stdAddChar / I / p^(1/2)`; square it.
   have hp_ne_zero : (p : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hp.out.ne_zero
@@ -169,7 +174,7 @@ theorem gaussSum_legendreDirichlet_eq (hp_three_mod_four : p % 4 = 3) :
   have h_def : DirichletCharacter.rootNumber (legendreDirichlet p) =
       gaussSum (legendreDirichlet p) (ZMod.stdAddChar : AddChar (ZMod p) ℂ) /
         Complex.I / ((p : ℂ) ^ (1 / 2 : ℂ)) := by
-    unfold DirichletCharacter.rootNumber
+    simp only [DirichletCharacter.rootNumber]
     rw [if_neg h_not_even, pow_one]
   have hp_ne_zero : (p : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hp.out.ne_zero
   have hp_cpow_ne_zero : (p : ℂ) ^ (1 / 2 : ℂ) ≠ 0 :=
