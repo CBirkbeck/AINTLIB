@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
 import ModularCurves.ForMathlib.SpecQuotientIso
-import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
 import Mathlib.AlgebraicGeometry.Morphisms.Affine
+import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
 
 /-!
 # A closed immersion of finite locally free schemes of equal rank is an isomorphism (YFULL γ)
