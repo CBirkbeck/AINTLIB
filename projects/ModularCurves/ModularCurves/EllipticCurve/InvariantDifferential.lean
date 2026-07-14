@@ -1766,6 +1766,29 @@ theorem transVC_restrict_ofVC {V : S.affineOpens} (P : LocalPresentation G V)
         (IsPullback.of_horiz_isIso ⟨by simp⟩) P h).isoPullback_hom_snd
     rw [h0, h1, h2, h3, h4, h5]
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-C coherence)** Left-argument collapse: double restriction in the first
+argument of a comparison. -/
+theorem transVC_restrict_restrict_left {VP : S.affineOpens}
+    (P : LocalPresentation G VP) {V V'' : S.affineOpens}
+    (R : LocalPresentation G V'') (p : V.1 ≤ VP.1) (h : V''.1 ≤ V.1) :
+    ((P.restrict p).restrict h).transVC R = (P.restrict (h.trans p)).transVC R := by
+  have hWWP : (P.restrict (h.trans p)).W = ((P.restrict p).restrict h).W := by
+    show P.W.map _ = (P.W.map _).map _
+    rw [WeierstrassCurve.map_map]
+    congr 1
+    rw [sectionsMapLE_id, sectionsMapLE_id, sectionsMapLE_id, Scheme.resLE_comp]
+  exact transVC_congr _ _ _ _ hWWP rfl (transportE_restrict_restrict P p h)
+    (by rw [eqToHom_refl, Category.comp_id])
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-C coherence, unit form)** -/
+theorem transUnit_restrict_restrict_left {VP : S.affineOpens}
+    (P : LocalPresentation G VP) {V V'' : S.affineOpens}
+    (R : LocalPresentation G V'') (p : V.1 ≤ VP.1) (h : V''.1 ≤ V.1) :
+    ((P.restrict p).restrict h).transUnit R = (P.restrict (h.trans p)).transUnit R := by
+  rw [transUnit, transUnit, transVC_restrict_restrict_left]
+
 end LocalPresentation
 
 end ModularCurves

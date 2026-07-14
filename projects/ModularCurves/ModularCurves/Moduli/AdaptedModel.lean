@@ -339,6 +339,41 @@ theorem isShortNF_adaptShortNF {V : S.affineOpens} (P : LocalPresentation G V)
       VariableChange Γ(S, V.1)) • (P.ofVC P.W.toShortNF).W from rfl]
   exact isShortNF_smul_units h0 _
 
+open Scheme in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(E12-C)** The basis unit restricts: adaptedness is a local property. -/
+theorem basisUnitAt_restrict {V : S.affineOpens} (P : LocalPresentation G V)
+    (b : OmegaBasis G) {V' : S.affineOpens} (h : V'.1 ≤ V.1) :
+    Scheme.resUnit h (P.basisUnitAt b).1 = ((P.restrict h).basisUnitAt b).1 := by
+  refine Scheme.unit_ext_of_res_cover S
+    (fun i : G.atlas.ι => V'.1 ⊓ (G.atlas.U i).1) (fun i => inf_le_left)
+    (fun x hxV => by
+      obtain ⟨i, hxi⟩ := G.atlas.covers x
+      exact Opens.mem_iSup.mpr ⟨i, hxV, hxi⟩) (fun i => ?_)
+  rw [Scheme.resUnit_resUnit, ((P.restrict h).basisUnitAt b).2 i]
+  refine Scheme.unit_ext_of_affine_res S (fun W hW => ?_)
+  rw [Scheme.resUnit_resUnit, ((P.restrict h).basisUnitOn b i).2 W hW]
+  have hWV : W.1 ≤ V.1 ⊓ (G.atlas.U i).1 :=
+    le_inf ((hW.trans inf_le_left).trans h) (hW.trans inf_le_right)
+  rw [show Scheme.resUnit ((hW.trans inf_le_left).trans h) (P.basisUnitAt b).1 =
+      Scheme.resUnit hWV
+        (Scheme.resUnit (inf_le_left : V.1 ⊓ (G.atlas.U i).1 ≤ V.1)
+          (P.basisUnitAt b).1) from by
+      rw [Scheme.resUnit_resUnit],
+    (P.basisUnitAt b).2 i, (P.basisUnitOn b i).2 W hWV]
+  refine congrArg₂ (· * ·) rfl ?_
+  exact (transUnit_restrict_restrict_left P
+    ((G.atlas.presentation i).restrict (hW.trans inf_le_right)) h
+    (hW.trans inf_le_left)).symm
+
+/-- **(E12-C)** Adaptedness restricts. -/
+theorem IsAdapted.restrict {V : S.affineOpens} {P : LocalPresentation G V}
+    {b : OmegaBasis G} (hP : P.IsAdapted b) {V' : S.affineOpens} (h : V'.1 ≤ V.1) :
+    (P.restrict h).IsAdapted b := by
+  show ((P.restrict h).basisUnitAt b).1 = 1
+  rw [← basisUnitAt_restrict, hP, map_one]
+
 end LocalPresentation
 
 end ModularCurves
