@@ -2391,6 +2391,33 @@ adjudicates.
   axiom-clean — laws = `omegaBasisMap_id`/`_comp`); the representability statement is
   `omegaProblem_representable_by_affine` (`Moduli/Bootstrap.lean`, sorry) ·
   **Type**: def (done) + theorem (open) · **Sources**: GME Thm 2.2.3; KM 2.2.
+- **R1-based `/develop --decompose` (2026-07-14, OMEGA; supersedes the A7/RR route for
+  THIS ticket — the RR-box is only needed for presentation-EXISTENCE, which
+  `EllipticCurveGeom` already bundles via its atlas)**. New file
+  `Moduli/AdaptedModel.lean` (imports InvariantDifferential + OmegaFunctor). Leaves:
+  **[E12-A] the basis-unit of a presentation**: for `b : OmegaBasis G` and
+  `P : LocalPresentation G V`, glue `resLE b_i · (transUnit P|_{V∩U_i} P_i|)`-data over
+  the atlas cover into a canonical `basisUnitAt P b : Γ(V)ˣ` (compatibility = b's own
+  cocycle-compat + `transUnit_trans`; glue = `exists_unit_glue` + the pointwise affine
+  refinement pattern of `pulledCocycle_res`). Spec lemmas: `basisUnitAt`-naturality
+  under `restrict`/`transport` (the coherence pack), and `basisUnitAt (u • b) =
+  resLE u · basisUnitAt b`. Def: `P.IsAdapted b := basisUnitAt P b = 1` — KM 2.2.5's
+  "model adapted to ω", chart-locally.
+  **[E12-B] existence+uniqueness of adapted short-NF presentations over ℤ[1/6]**:
+  mathlib `WeierstrassCurve.IsShortNF`/`toShortNF`(+`_spec`) kills `a₁,a₂,a₃` (6
+  invertible); the leftover `u`-ambiguity is pinned by adaptedness (u := basisUnitAt-
+  correction via `VariableChange ⟨u,0,0,0⟩` and `transUnit`-mult.): every affine
+  `V ≤ U_i` carries a UNIQUE `b`-adapted short-NF presentation. Uniqueness: two such
+  differ by a VC preserving short-NF (`r = s = t = 0`) with `u`-component 1 by
+  adaptedness ⟹ VC = 1 (`projModelVCIso_injective`-style through `transVC_unique`).
+  **[E12-C] the `(g₂, g₃)`-invariants glue**: the unique adapted models' coefficients
+  agree on overlaps (uniqueness!) ⟹ glue to global `g₂ g₃ ∈ Γ(S,⊤)` with
+  `Δ = g₂³ − 27g₃² ∈ Γ(S,⊤)ˣ` (ellipticity chartwise).
+  **[E12-D] representability**: `M₁ := Spec ℤ[1/6][g₂,g₃][Δ⁻¹]`-EllObj with universal
+  curve `y² = 4x³ − g₂x − g₃`, `ω = dx/y`; the classifying map from (E12-C)'s global
+  invariants; `RepresentableBy` bijection from (E12-B)-uniqueness. (E12-D is where
+  T-A2/A7.e's Proj-of-one-graded-ring model enters — coordinate with the T-A2 owner;
+  the universal EllObj-construction can consume `projModel` directly.)
 - **Body** (from `decomposition-gme2.md` §E12, fully explicit): `P₁ : S ↦ [(E, ω)]` is
   represented over `ℤ[1/6]` by `M₁ = Spec ℤ[1/6, g₂, g₃, Δ⁻¹]`; proof = A7 uniqueness of
   `(g₂, g₃)` given `ω`; universal curve `y² = 4x³ − g₂x − g₃`.
