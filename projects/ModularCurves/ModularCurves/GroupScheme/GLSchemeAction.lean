@@ -170,6 +170,13 @@ theorem fullLevelHom_gamma_bijective {R : CommRingCat.{u}}
       (E.torsion N).isoSpec.inv (E.torsionπ N)).mpr inferInstance
   haveI : Module.Finite (R : Type u) ↑Γ(E.torsion N, ⊤) :=
     (IsFinite.SpecMap_iff φt).mp hFt
+  haveI hetale : Etale (E.torsionπ N) := E.torsionπ_etale N hinv
+  haveI hEφt : Etale (Spec.map φt) := by
+    rw [hφtmap]
+    exact (MorphismProperty.cancel_left_of_respectsIso (P := @Etale)
+      (E.torsion N).isoSpec.inv (E.torsionπ N)).mpr hetale
+  haveI : Algebra.Etale (R : Type u) ↑Γ(E.torsion N, ⊤) :=
+    (HasRingHomProperty.Spec_iff (P := @Etale)).mp hEφt
   -- the residue-field engine
   suffices hb : Function.Bijective ψlin by exact hb
   refine LinearMap.bijective_of_forall_bijective_lTensor_residueField ψlin ?_
