@@ -3,8 +3,8 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Basic
 import HasseWeil.Foundation.Curves.Ramification.OrdAtInftyRamification
+import HasseWeil.Isogeny.Basic
 
 /-!
 # The ramification-pullback formula at infinity, for isogenies (Silverman II.2.6)
@@ -24,7 +24,7 @@ basepoint** and the pullback formula:
 
 with `e_φ(O) = (ord_∞(φ* (x/y))).toNat` produced explicitly.  This discharges the
 `hramO` residual carried by the dual-isogeny construction
-(`EC.reflects_ordAtInfty_of_ramificationIdx`, file `Dual.lean`).
+(`EC.reflects_ordAtInfty_of_ramificationIdx`, file `Isogeny/Dual/Morphism.lean`).
 
 The positivity `e_φ(O) ≥ 1` (non-triviality of the place above `O`) is also a
 **theorem** here, with no extra hypotheses: `F(E₁)` is algebraic over `φ* F(E₂)`
@@ -96,7 +96,7 @@ theorem exists_pos_ramificationIdx_at_infinity (φ : Isogeny W₁ W₂) :
     (φ.toCurveMap.pullback.toRingHom) φ.pullback_ordAtInfty_nonneg
     (pos_ordAtInfty_pullback_uniformizer φ)
 
-/-! ### `∞`-regularity reflection (the `hrefl`/`hramO` residual of `Dual.lean`) -/
+/-! ### `∞`-regularity reflection (the `hrefl`/`hramO` residual of `Isogeny/Dual/Morphism.lean`) -/
 
 /-- **`∞`-regularity reflection from an isogeny — unconditional** (Silverman
 III.4.10a, the `hrefl`/`hramO` residual of the dual-isogeny construction,
