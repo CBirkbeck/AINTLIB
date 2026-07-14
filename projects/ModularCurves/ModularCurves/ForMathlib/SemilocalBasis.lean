@@ -1,13 +1,18 @@
-import Mathlib.RingTheory.Nakayama
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import Mathlib.GroupTheory.CosetCover
+import Mathlib.LinearAlgebra.Dimension.Free
+import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+import Mathlib.LinearAlgebra.TensorProduct.Basis
+import Mathlib.LinearAlgebra.TensorProduct.Quotient
 import Mathlib.RingTheory.FiniteType
 import Mathlib.RingTheory.LocalRing.ResidueField.Basic
-import Mathlib.LinearAlgebra.Dimension.Free
-import Mathlib.LinearAlgebra.TensorProduct.Quotient
-import Mathlib.LinearAlgebra.TensorProduct.Basis
-import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+import Mathlib.RingTheory.Nakayama
 import Mathlib.RingTheory.TensorProduct.Basic
 import Mathlib.RingTheory.TensorProduct.Finite
-import Mathlib.GroupTheory.CosetCover
 
 /-!
 # Selecting a basis from a generating submodule over a semi-local ring
@@ -399,7 +404,8 @@ theorem Submodule.exists_basis_mem_of_span_eq_top {s : ℕ} (n : Fin s → Ideal
   have hPtop : P = ⊤ := by
     haveI : Module.Finite S (M ⧸ P) :=
       Module.Finite.of_surjective P.mkQ (Submodule.Quotient.mk_surjective P)
-    have hquot : ∀ j, (⊤ : Submodule S (M ⧸ P)) ≤ n j • (⊤ : Submodule S (M ⧸ P)) := by
+    have hquot : ∀ j,
+        (⊤ : Submodule S (M ⧸ P)) ≤ n j • (⊤ : Submodule S (M ⧸ P)) := by
       intro j
       have hmap := congrArg (Submodule.map P.mkQ) (hPfull j)
       rw [Submodule.map_sup, Submodule.map_smul'', Submodule.map_top,
