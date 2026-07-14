@@ -43,7 +43,6 @@ namespace LehmerVandiver
 
 namespace CaseI
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Case I factor ideal is a `p`-th power.** Direct wrapper of
 `FltRegular.exists_ideal`: under FLT case I hypotheses (with
 `p ≥ 5`), each cyclotomic factor `(a + ζ b)` generates an ideal that is
