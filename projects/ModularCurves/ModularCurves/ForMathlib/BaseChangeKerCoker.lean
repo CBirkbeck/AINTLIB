@@ -306,6 +306,45 @@ theorem Module.Projective.ker_of_flat_coker (f : P →ₗ[R] Q) [IsNoetherianRin
     (Module.projective_lifting_property _ _ f.surjective_rangeRestrict)
   exact .of_split _ _ hl
 
+section Exactness
+
+variable {T : Type*} [AddCommGroup T] [Module R T]
+
+/-- The factorization of the first map of a complex through the kernel of the second. -/
+def LinearMap.codRestrictToKer (f : P →ₗ[R] Q) (g : Q →ₗ[R] T)
+    (h : g ∘ₗ f = 0) : P →ₗ[R] LinearMap.ker g :=
+  LinearMap.codRestrict _ f fun x ↦ by
+    rw [LinearMap.mem_ker, ← LinearMap.comp_apply, h, LinearMap.zero_apply]
+
+@[simp]
+theorem LinearMap.codRestrictToKer_coe (f : P →ₗ[R] Q) (g : Q →ₗ[R] T)
+    (h : g ∘ₗ f = 0) (x : P) :
+    (LinearMap.codRestrictToKer f g h x : Q) = f x :=
+  rfl
+
+/-- A complex is exact precisely when its first map surjects onto the kernel of its second. -/
+theorem LinearMap.codRestrictToKer_surjective_iff_exact
+    (f : P →ₗ[R] Q) (g : Q →ₗ[R] T) (h : g ∘ₗ f = 0) :
+    Function.Surjective (LinearMap.codRestrictToKer f g h) ↔ Function.Exact f g := by
+  rw [LinearMap.exact_iff]
+  constructor
+  · intro hsurj
+    apply le_antisymm
+    · intro q hq
+      obtain ⟨p, hp⟩ := hsurj ⟨q, hq⟩
+      exact ⟨p, congrArg Subtype.val hp⟩
+    · intro q hq
+      obtain ⟨p, rfl⟩ := hq
+      rw [LinearMap.mem_ker, ← LinearMap.comp_apply, h, LinearMap.zero_apply]
+  · intro hexact q
+    have hq : (q : Q) ∈ LinearMap.range f := by
+      rw [← hexact]
+      exact q.property
+    obtain ⟨p, hp⟩ := hq
+    exact ⟨p, Subtype.ext hp⟩
+
+end Exactness
+
 section BaseChangeAlgebra
 
 variable (A : Type*) [CommRing A] [Algebra R A] (f : P →ₗ[R] Q)
@@ -360,7 +399,64 @@ theorem kerBaseChangeComparison_bijective_of_bounded_exact
     Function.Bijective (kerBaseChangeComparison A (d 0)) :=
   kerLTensorComparison_bijective_of_bounded_exact M d A N hexact
 
+section Exactness
+
+variable {T : Type*} [AddCommGroup T] [Module R T]
+
+/-- Factoring a complex through its second kernel commutes with algebra base change. -/
+theorem kerBaseChangeComparison_comp_codRestrictToKer_baseChange
+    (f : P →ₗ[R] Q) (g : Q →ₗ[R] T) (h : g ∘ₗ f = 0) :
+    kerBaseChangeComparison A g ∘ₗ
+        (LinearMap.codRestrictToKer f g h).baseChange A =
+      LinearMap.codRestrictToKer (f.baseChange A) (g.baseChange A) (by
+        rw [← LinearMap.baseChange_comp, h, LinearMap.baseChange_zero]) := by
+  apply LinearMap.ext
+  intro x
+  apply Subtype.ext
+  rw [LinearMap.comp_apply, kerBaseChangeComparison_coe,
+    LinearMap.codRestrictToKer_coe]
+  rw [← LinearMap.comp_apply, ← LinearMap.baseChange_comp]
+  rfl
+
+end Exactness
+
 end BaseChangeAlgebra
+
+section Exactness
+
+variable {T : Type*} [AddCommGroup T] [Module R T]
+
+/-- Exactness of a complex can be checked on every field fibre when its homology is finite
+and formation of the second kernel commutes with base change. The flatness hypotheses are the
+module-theoretic criterion ensuring that kernel comparison. -/
+theorem LinearMap.exact_of_forall_field_baseChange_exact_of_finite
+    (f : P →ₗ[R] Q) (g : Q →ₗ[R] T) (h : g ∘ₗ f = 0)
+    [Module.Flat R T] [Module.Flat R (T ⧸ LinearMap.range g)]
+    [Module.Finite R
+      (LinearMap.ker g ⧸ LinearMap.range (LinearMap.codRestrictToKer f g h))]
+    (hfield : ∀ (K : Type u) [Field K] [Algebra R K],
+      Function.Exact (f.baseChange K) (g.baseChange K)) :
+    Function.Exact f g := by
+  apply (LinearMap.codRestrictToKer_surjective_iff_exact f g h).mp
+  have hcoker : Subsingleton
+      (LinearMap.ker g ⧸ LinearMap.range (LinearMap.codRestrictToKer f g h)) :=
+    Module.subsingleton_of_forall_field_tensor_subsingleton _ fun K _ _ ↦ by
+      apply (baseChange_surjective_iff_subsingleton_coker K
+        (LinearMap.codRestrictToKer f g h)).mp
+      have hcomparison := kerBaseChangeComparison_bijective K g
+      have hcomposition : Function.Surjective
+          (kerBaseChangeComparison K g ∘ₗ
+            (LinearMap.codRestrictToKer f g h).baseChange K) := by
+        rw [kerBaseChangeComparison_comp_codRestrictToKer_baseChange]
+        exact (LinearMap.codRestrictToKer_surjective_iff_exact _ _ _).mpr (hfield K)
+      intro y
+      obtain ⟨x, hx⟩ := hcomposition (kerBaseChangeComparison K g y)
+      refine ⟨x, hcomparison.injective ?_⟩
+      simpa only [LinearMap.comp_apply] using hx
+  rw [← LinearMap.range_eq_top, ← Submodule.Quotient.subsingleton_iff]
+  exact hcoker
+
+end Exactness
 
 /-- Near a prime where the residue-fibre differential is surjective, a differential
 between finite projective modules has finite projective kernel, and that kernel commutes
