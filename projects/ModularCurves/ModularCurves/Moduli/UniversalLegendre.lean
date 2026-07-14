@@ -1143,6 +1143,27 @@ private theorem legendrePiece_agree {R : CommRingCat.{u}} {X : EllObj R}
       (q.restrict ((hWle z).trans inf_le_right)) rfl, eqToHom_refl,
       Category.id_comp]
 
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+/-- **(T-E14-CLS-5 ★★, ≈E4)** The classifying morphism upstairs: the witness-glued
+map from the total space to the universal Legendre model (mirrors `classifyingTop`). -/
+noncomputable def legendreTop {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤))) :
+    X.curve.toEllipticCurveGeom.E ⟶ projModel (universalLegendre R) :=
+  (legendreWitnessCover hD).glueMorphisms
+    (fun w => legendrePiece hD h2 w)
+    (legendrePiece_agree hD h2)
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+@[reassoc]
+theorem legendreTop_piece {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤)))
+    (w : LegendreWitness X L b) :
+    (legendreWitnessCover hD).f w ≫ legendreTop hD h2 =
+      legendrePiece hD h2 w :=
+  (legendreWitnessCover hD).ι_glueMorphisms _ _ w
+
 end TwoTorsion
 
 end ModularCurves
