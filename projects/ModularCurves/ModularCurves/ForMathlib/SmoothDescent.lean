@@ -62,7 +62,7 @@ theorem Module.Flat.of_comp_of_faithfullyFlat
     [Module.FaithfullyFlat B A] [Module.Flat C A] : Module.Flat C B := by
   rw [Module.Flat.iff_lTensor_injectiveₛ]
   intro Q _ _ S
-  set f : S →ₗ[C] Q := S.subtype with hf'
+  set f : S →ₗ[C] Q := S.subtype
   have hf : Function.Injective f := Subtype.val_injective
   set g : B ⊗[C] S →ₗ[B] B ⊗[C] Q :=
     AlgebraTensorModule.map (LinearMap.id : B →ₗ[B] B) f with hg
