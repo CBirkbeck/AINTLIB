@@ -18925,3 +18925,17 @@ key_incR; remaining: identify g (= ⟨pr, act⟩ chart pair under pullbackSpecIs
 chart-restriction of the PROVEN `isClosedImmersion_actPair_left` — stability makes the
 comparison square cartesian, and closed immersions are stable under base change + iso + swap
 (pullbackSymmetry). G0 attacking now. Pin-file wiring still awaits α/β (v10.189-G0). (STREAM-G0)
+
+### v10.198-G0 — [HG-C2] heart CONJUGATION DISCHARGED: the tower's sorry is now "chartActPair is a closed immersion" (STREAM-G0)
+New `ChartBridges.lean` (C4b bridges + chartTensorIso relocated upstream of StableChartData;
+import graph now StableCharts → ChartBridges → ChartPrecursorImmersion → StableChartData) and
+`ChartPrecursorImmersion.lean`: `uuSpecIso` ((U,U)-Künneth mirror with inv_fst/inv_snd leg
+lemmas), `chartActPair := ⟨pr, act⟩ : pr⁻¹U ⟶ U ×_V U` (w by cancel V.ι + Over.w),
+**`chartTensorIso_hom_spec_precursor`: Spec(β) conjugates EXACTLY to chartActPair** (pullback
+hom_ext; key_incL/key_incR + the S4 chartTensorIso leg bridges + uuSpecIso legs), and
+`spec_precursor_isClosedImmersion` := iso-conjugation of the ONE remaining sorry
+`isClosedImmersion_chartActPair` (battle plan step 4 in decomposition-c2-heart.md: productOpen
+restriction of the PROVEN isClosedImmersion_actPair_left via IsLocalAtTarget + stability).
+StableChartData:134's sorry is GONE (theorem := P.spec_precursor_isClosedImmersion). Full repo
+green 3828 jobs. The ENTIRE quotient tower now rests on the single sharpened chart-geometry
+statement. (STREAM-G0)

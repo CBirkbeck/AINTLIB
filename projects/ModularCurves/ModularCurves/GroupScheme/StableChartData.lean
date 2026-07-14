@@ -1,6 +1,7 @@
 import ModularCurves.GroupScheme.ChartCoaction
 import ModularCurves.GroupScheme.HopfGaloisCharts
 import ModularCurves.GroupScheme.ActPairImmersion
+import ModularCurves.GroupScheme.ChartPrecursorImmersion
 
 /-!
 # The per-chart Hopf–Galois datum (`[HG-C1d]` assembly + `[HG-C2]` last mile)
@@ -23,8 +24,9 @@ instance with a fresh `Bialgebra`-derived algebra — this file never does that)
 This file supplies:
 * `instModuleFiniteGroupRing : Module.Finite P.baseRing P.groupRing` — from `G.π` finite.
 * `chartCoaction_productMap_surjective` — surjectivity of the Galois precursor (the `Γ`-dual of
-  `isClosedImmersion_actPair_left`); reduced to the one geometric sorry
-  `chartPrecursorSpec_isClosedImmersion`.
+  `isClosedImmersion_actPair_left`); discharged through the conjugation
+  `ChartPrecursorImmersion.spec_precursor_isClosedImmersion` (whose sole remaining input is
+  `isClosedImmersion_chartActPair`, the stable-chart restriction of the action pair).
 * `chartData` / `isHopfGalois_chartCoaction` — the **C1d assembly**: `IsHopfGalois P.chartCoaction`
   (the M6 milestone), consumed by `isColimit_of_isHopfGalois` in the `[HG-C4]` glue. The sole
   hypothesis is `Module.Free P.baseRing P.groupRing` (freeness of `G` per chart, from `[HG-C3]`
@@ -99,39 +101,8 @@ theorem chartPrecursorSpec_isClosedImmersion :
       (Algebra.TensorProduct.productMap
         (Algebra.TensorProduct.includeLeft
           (R := P.baseRing) (A := P.chartRing) (B := P.groupRing))
-        P.chartCoaction).toRingHom)) := by
-  set β := (Algebra.TensorProduct.productMap
-    (Algebra.TensorProduct.includeLeft (R := P.baseRing) (A := P.chartRing) (B := P.groupRing))
-    P.chartCoaction).toRingHom with hβ
-  set e1 := AlgebraicGeometry.pullbackSpecIso P.baseRing P.chartRing P.groupRing with he1
-  set e2 := AlgebraicGeometry.pullbackSpecIso P.baseRing P.chartRing P.chartRing with he2
-  set g := e1.hom ≫ AlgebraicGeometry.Spec.map (CommRingCat.ofHom β) ≫ e2.inv with hg
-  -- `Spec.map β` is `g` conjugated back by the two `pullbackSpecIso`s; conjugation by isos
-  -- preserves closed immersions, so it suffices to show `g` is a closed immersion.
-  have hrw : AlgebraicGeometry.Spec.map (CommRingCat.ofHom β) = e1.inv ≫ g ≫ e2.hom := by
-    rw [hg]
-    simp only [Category.assoc, Iso.inv_hom_id, Category.comp_id, Iso.inv_hom_id_assoc]
-  rw [hrw]
-  suffices hCI : IsClosedImmersion g by
-    haveI := hCI
-    infer_instance
-  -- Leg computations (Step 2): β ∘ includeLeft = includeLeft (into B⊗A), β ∘ includeRight = chartCoaction.
-  have key_incL :
-      β.comp (Algebra.TensorProduct.includeLeftRingHom :
-          P.chartRing →+* P.chartRing ⊗[P.baseRing] P.chartRing)
-        = (Algebra.TensorProduct.includeLeftRingHom :
-          P.chartRing →+* P.chartRing ⊗[P.baseRing] P.groupRing) := by
-    ext b
-    simp [hβ, Algebra.TensorProduct.productMap_apply_tmul]
-  have key_incR :
-      β.comp (Algebra.TensorProduct.includeRight :
-          P.chartRing →ₐ[P.baseRing] P.chartRing ⊗[P.baseRing] P.chartRing).toRingHom
-        = P.chartCoaction.toRingHom := by
-    ext b
-    simp only [hβ, RingHom.coe_comp, Function.comp_apply, RingHom.coe_coe,
-      AlgHom.toRingHom_eq_coe, Algebra.TensorProduct.includeRight_apply,
-      Algebra.TensorProduct.productMap_apply_tmul, map_one, one_mul]
-  sorry
+        P.chartCoaction).toRingHom)) :=
+  P.spec_precursor_isClosedImmersion
 
 /-- **`[HG-C2]` last mile — the Galois precursor is surjective on the chart.** The `Spec` of the
 Galois precursor is a closed immersion (`chartPrecursorSpec_isClosedImmersion`), and its target

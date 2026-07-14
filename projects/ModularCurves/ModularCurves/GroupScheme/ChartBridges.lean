@@ -3,7 +3,7 @@ Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
-import ModularCurves.GroupScheme.StableChartData
+import ModularCurves.GroupScheme.StableCharts
 
 /-!
 # The chart geometry bridges (`[HG-C4b]`)
@@ -309,6 +309,7 @@ noncomputable def chartTensorIso :
 
 /-- The chart tensor identification carries the chart co-action to the restricted
 action (composed C4b bridge, action leg). -/
+@[reassoc]
 theorem chartTensorIso_hom_specMap_chartCoaction :
     P.chartTensorIso.hom ≫ Spec.map (CommRingCat.ofHom P.chartCoaction.toRingHom)
       = G.restrictedAction P.hstable ≫ P.hU.isoSpec.hom := by
@@ -326,6 +327,7 @@ theorem chartTensorIso_hom_specMap_chartCoaction :
 
 /-- The chart tensor identification carries the trivial co-action to the restricted
 projection (composed C4b bridge, projection leg). -/
+@[reassoc]
 theorem chartTensorIso_hom_specMap_includeLeft :
     P.chartTensorIso.hom ≫ Spec.map (CommRingCat.ofHom
         (Algebra.TensorProduct.includeLeft :
