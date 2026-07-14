@@ -379,7 +379,13 @@ Completed dependency claim (2026-07-14): introduced the exact multiplicative des
 invertible sheaf's chosen affine trivializations. It records only pair transition units and
 their canonical triple equation, with no auxiliary sheaf or cohomology hypothesis.
 
-Active dependency claim (2026-07-14): spread the finite family of pair-overlap transition
-units, their inverses, and the triple-overlap equations to one later finite stage of the
-affine-intersection model. This will construct the finite-stage line bundle whose base change
-is the original pole line bundle.
+Completed dependency claim (2026-07-14): proved
+`AffineIntersectionUnitCocycle.exists_modelAtLaterStage`. A finite family of pair-overlap
+units now lifts to actual units after moving the spread functor to a later stage, every triple
+Cech equation holds literally there, and each descended unit maps back to its original
+colimit transition unit.
+
+Active dependency claim (2026-07-14): construct the invertible sheaf on the glued finite-stage
+scheme from the descended unit cocycle, then identify its pullback along the base-change model
+isomorphism with the original invertible sheaf. This is the remaining line-bundle descent step
+before applying arbitrary-base spreading to the pole sheaves used in cohomology and base change.
