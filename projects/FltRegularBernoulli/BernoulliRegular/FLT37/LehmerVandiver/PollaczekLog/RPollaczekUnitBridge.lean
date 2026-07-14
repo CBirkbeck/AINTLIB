@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.FLT37.LehmerVandiver.PollaczekUnit
@@ -59,7 +64,7 @@ theorem prod_cyclotomicUnit_pow_eq_pollaczekUnit_val (i : ℕ) :
     (∏ b ∈ Finset.Ico 1 ((p - 1) / 2 + 1),
         (cyclotomicUnit p K b) ^ (b : ℕ) ^ (p - 1 - i)) =
       ((pollaczekUnit p K i : (𝓞 K)ˣ) : 𝓞 K) := by
-  unfold pollaczekUnit
+  simp only [pollaczekUnit]
   rw [Units.coe_prod, ← Finset.prod_attach]
   refine Finset.prod_congr rfl fun b _ => ?_
   rw [Units.val_pow_eq_pow_val, pollaczekFactor_val]
