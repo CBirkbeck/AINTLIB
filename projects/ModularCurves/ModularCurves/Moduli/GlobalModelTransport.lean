@@ -3,6 +3,8 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import ModularCurves.EllipticCurve.AdditionBaseChange
+import ModularCurves.EllipticCurve.GroupLawAxioms
 import ModularCurves.Moduli.EngineDescent
 
 /-!
@@ -42,26 +44,21 @@ section TwoRing
 
 variable {A B : Type u} [CommRing A] [CommRing B]
 
-/-- Two-ring form of `isPullback_projModelBaseChange` (for an arbitrary ring hom, via
-`RingHom.toAlgebra`). -/
+/-- Two-ring form of `isPullback_projModelBaseChange`: the eqToHom-free base-change square
+`isPullback_projModelBaseChangeOf` at the definitional target `V.map ρ`. -/
 private theorem isPullback_projModelBaseChange_ringHom (ρ : A →+* B) (V : WeierstrassCurve A) :
     IsPullback (projModelBaseChange ρ V) (projModelπ (V.map ρ)) (projModelπ V)
       (Spec.map (CommRingCat.ofHom ρ)) := by
-  letI : Algebra A B := ρ.toAlgebra
-  have h := isPullback_projModelBaseChange (R := A) (R' := B) V
-  have he : (algebraMap A B : A →+* B) = ρ := ρ.algebraMap_toAlgebra
-  rw [he] at h
-  exact h
+  rw [← projModelBaseChangeOf_rfl ρ V]
+  exact isPullback_projModelBaseChangeOf ρ V (V.map ρ) rfl
 
-/-- Two-ring form of `projModelZero_baseChange`. -/
+/-- Two-ring form of `projModelZero_baseChange`: `projModelZero_baseChangeOf` at the
+definitional target `V.map ρ`. -/
 private theorem projModelZero_baseChange_ringHom (ρ : A →+* B) (V : WeierstrassCurve A) :
     projModelZero (V.map ρ) ≫ projModelBaseChange ρ V
       = Spec.map (CommRingCat.ofHom ρ) ≫ projModelZero V := by
-  letI : Algebra A B := ρ.toAlgebra
-  have h := projModelZero_baseChange (R := A) (R' := B) V
-  have he : (algebraMap A B : A →+* B) = ρ := ρ.algebraMap_toAlgebra
-  rw [he] at h
-  exact h
+  rw [← projModelBaseChangeOf_rfl ρ V]
+  exact projModelZero_baseChangeOf ρ V (V.map ρ) rfl
 
 /-- **([B0], abstract core)** A compatible global Weierstrass model is stable under base
 change of the curve, over an abstract ring hom `ρ : A →+* B` with the geometry threaded as
@@ -101,7 +98,9 @@ theorem exists_globalModel_pullback_ringHom (ρ : A →+* B) {E S T : Scheme.{u}
     · rw [Iso.refl_hom, Iso.refl_hom, Category.comp_id, Category.id_comp]
     · rw [Iso.refl_hom, Category.comp_id, Iso.symm_hom, hnat, Iso.inv_hom_id_assoc]
   refine ⟨hcurve.isoIsPullback _ _ hmodel, ?_, ?_⟩
-  · -- π-compatibility, from the snd-leg of the comparison iso
+  · -- π-compatibility, from the snd-leg of the comparison iso. (`rw [← isoIsPullback_hom_snd]`
+    -- is not available here: `pullback.snd p t` occurs in `hcurve`'s own type, so the motive
+    -- is not type correct — hence the `calc`.)
     calc (hcurve.isoIsPullback _ _ hmodel).hom ≫ projModelπ (WQ.map ρ)
         = ((hcurve.isoIsPullback _ _ hmodel).hom
             ≫ (projModelπ (WQ.map ρ) ≫ eT.inv)) ≫ eT.hom := by
