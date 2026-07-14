@@ -387,6 +387,63 @@ theorem fullLevelHom_isIso_of_affine {R : CommRingCat.{u}}
   rw [hfac]
   infer_instance
 
+section BaseChangeNaturality
+
+/-- **Base-change naturality of the trivialisation map**: pulling the level structure
+back along `σ : T' ⟶ S` intertwines the two `fullLevelHom`s through the constant-scheme
+and torsion base-change comparisons. Componentwise: the `v`-combination of the
+pulled-back generators is the pullback of the `v`-combination, transported by the
+additive dictionary `Point.baseChangeEquiv`. -/
+theorem fullLevelHom_baseChange {T' : Scheme.{u}} (σ : T' ⟶ S) (L : E.FullLevelPt N) :
+    constSchemeMapAlong σ (Fin 2 → ZMod N) ≫ E.fullLevelHom L
+      = (E.baseChange σ).fullLevelHom (L.pullAlong σ) ≫ E.torsionBaseChangeHom N σ := by
+  apply Sigma.hom_ext
+  intro v
+  rw [ι_constSchemeMapAlong_assoc, fullLevelHom, fullLevelHom, Sigma.ι_desc_assoc,
+    Sigma.ι_desc]
+  apply pullback.hom_ext
+  · -- the `torsionι` leg
+    show (σ ≫ E.pointToTorsion _ _) ≫ E.torsionι N
+      = ((E.baseChange σ).pointToTorsion _ _ ≫ E.torsionBaseChangeHom N σ) ≫ E.torsionι N
+    rw [Category.assoc, E.pointToTorsion_torsionι, Category.assoc,
+      torsionBaseChangeHom_torsionι, ← Category.assoc,
+      (E.baseChange σ).pointToTorsion_torsionι]
+    -- transport the combination through the additive base-change dictionary
+    have hP : Point.baseChangeEquiv E σ (𝟙 T') (L.pullAlong σ).1.1
+        = Point.pull E (𝟙 T' ≫ σ) L.1.1 := by
+      refine Subtype.ext ?_
+      show (L.pullAlong σ).1.1.1 ≫ pullback.fst E.π σ = (𝟙 T' ≫ σ) ≫ L.1.1.1
+      rw [Category.assoc, Category.id_comp]
+      exact Point.asSection_val_fst E σ _
+    have hQ : Point.baseChangeEquiv E σ (𝟙 T') (L.pullAlong σ).1.2
+        = Point.pull E (𝟙 T' ≫ σ) L.1.2 := by
+      refine Subtype.ext ?_
+      show (L.pullAlong σ).1.2.1 ≫ pullback.fst E.π σ = (𝟙 T' ≫ σ) ≫ L.1.2.1
+      rw [Category.assoc, Category.id_comp]
+      exact Point.asSection_val_fst E σ _
+    have hcomb : Point.baseChangeEquiv E σ (𝟙 T')
+        (((v 0).val : ℤ) • (L.pullAlong σ).1.1 + ((v 1).val : ℤ) • (L.pullAlong σ).1.2)
+        = Point.pull E (𝟙 T' ≫ σ)
+            (((v 0).val : ℤ) • L.1.1 + ((v 1).val : ℤ) • L.1.2) := by
+      rw [map_add, map_zsmul, map_zsmul, hP, hQ, Point.pull_add, Point.pull_zsmul,
+        Point.pull_zsmul]
+    have hval := congrArg Subtype.val hcomb
+    rw [Point.baseChangeEquiv_apply_coe] at hval
+    rw [hval]
+    show (𝟙 T' ≫ σ) ≫ _ = σ ≫ _
+    rw [Category.assoc, Category.id_comp]
+  · -- the `torsionπ` leg
+    show (σ ≫ E.pointToTorsion _ _) ≫ (pullback.snd (E.mulByHom N) E.zero)
+      = ((E.baseChange σ).pointToTorsion _ _ ≫ E.torsionBaseChangeHom N σ) ≫
+        (pullback.snd (E.mulByHom N) E.zero)
+    show (σ ≫ E.pointToTorsion _ _) ≫ E.torsionπ N
+      = ((E.baseChange σ).pointToTorsion _ _ ≫ E.torsionBaseChangeHom N σ) ≫ E.torsionπ N
+    rw [Category.assoc, E.pointToTorsion_torsionπ, Category.assoc,
+      torsionBaseChangeHom_torsionπ, ← Category.assoc,
+      (E.baseChange σ).pointToTorsion_torsionπ, Category.id_comp, Category.comp_id]
+
+end BaseChangeNaturality
+
 /-- **L2b** — `fullLevelHom` is an isomorphism for `N` invertible (`E[N]` finite étale of
 rank `N²`, KM 2.3.1): the label map is bijective on every geometric fibre
 (`fullLevelFibreMap_bijective`), and the Γ-side comparison is bijective over affine
