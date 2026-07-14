@@ -311,12 +311,6 @@ private theorem heckeT_n_adjoint_composite_step (m : ℕ) (hcop : Nat.Coprime m 
       (hpp.factorization_pos_of_dvd (by omega) (Nat.minFac_dvd m)) hpv_cop
       (fun j hj hj_pos hj_cop f₀ g₀ ↦ ih j (hpv_eq ▸ hj) hj_pos hj_cop f₀ g₀) f' g'
 
-private theorem heckeT_n_cusp_one_eq (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
-    heckeT_n_cusp (N := N) k 1 f = f :=
-  CuspForm.ext fun τ ↦ by
-    change (heckeT_n k 1 f.toModularForm').toFun τ = f τ
-    rw [heckeT_n_one]; rfl
-
 /-- The Hecke adjoint for general T_n: `T_n* = ⟨n⟩⁻¹ T_n` on `S_k(Γ₁(N))`,
 w.r.t. the level-N Petersson inner product `petN`. -/
 theorem heckeT_n_adjoint (n : ℕ) [NeZero n] (hn : Nat.Coprime n N)
@@ -338,7 +332,7 @@ theorem heckeT_n_adjoint (n : ℕ) [NeZero n] (hn : Nat.Coprime n N)
     by_cases hle : m ≤ 1
     · obtain rfl : m = 1 := by omega
       have hunit : ZMod.unitOfCoprime 1 hcop = 1 := by ext; simp [ZMod.coe_unitOfCoprime]
-      rw [heckeT_n_cusp_one_eq f', heckeT_n_cusp_one_eq g', hunit, inv_one, diamondOp_cusp_one]
+      rw [heckeT_n_cusp_one f', heckeT_n_cusp_one g', hunit, inv_one, diamondOp_cusp_one]
     · exact heckeT_n_adjoint_composite_step m hcop (by omega) ih f' g'
 
 /-- T_n is normal: `T_n T_n* = T_n* T_n` for `(n,N) = 1`.

@@ -391,25 +391,6 @@ lemma cuspFormsNewExtended_le_cuspFormsNew {N : ℕ} [NeZero N] {k : ℤ} :
     cuspFormsNewExtended N k ≤ cuspFormsNew N k :=
   fun _ hf g hg ↦ hf g (cuspFormsOld_le_cuspFormsOldExtended hg)
 
-private lemma heckeT_n_cusp_decomp_of_mul {L : ℕ} [NeZero L] (k : ℤ) (a b m : ℕ) [NeZero a]
-    [NeZero b] [NeZero m] (h_mul : heckeT_n (N := L) k m = heckeT_n k a * heckeT_n k b)
-    (f : CuspForm ((Gamma1 L).map (mapGL ℝ)) k) :
-    heckeT_n_cusp k m f = heckeT_n_cusp k a (heckeT_n_cusp k b f) := by
-  apply CuspForm.ext
-  intro z
-  show ((heckeT_n (N := L) k m) f.toModularForm').toFun z =
-    ((heckeT_n k a) ((heckeT_n k b) f.toModularForm')).toFun z
-  simp only [ModularForm.toFun_eq_coe]
-  rw [h_mul]
-  rfl
-
-private lemma heckeT_n_cusp_one {L : ℕ} [NeZero L] (k : ℤ)
-    (f : CuspForm ((Gamma1 L).map (mapGL ℝ)) k) : heckeT_n_cusp k 1 f = f := by
-  apply CuspForm.ext
-  intro w
-  show (heckeT_n k 1 f.toModularForm').toFun w = f w
-  rw [heckeT_n_one]; rfl
-
 private lemma heckeT_n_cusp_ppow_succ_succ
     {L : ℕ} [NeZero L] (k : ℤ) {p : ℕ} (hp : Nat.Prime p) (hpL : Nat.Coprime p L)
     (r : ℕ) (f : CuspForm ((Gamma1 L).map (mapGL ℝ)) k) :
@@ -549,7 +530,7 @@ private lemma heckeT_n_levelRaise_comm_step
   by_cases hpv_lt : p ^ v < m
   · have hDecomp : ∀ {L : ℕ} [NeZero L] (f : CuspForm ((Gamma1 L).map (mapGL ℝ)) k),
         heckeT_n_cusp k m f = heckeT_n_cusp k (p ^ v) (heckeT_n_cusp k (m / p ^ v) f) :=
-      fun {L} _ f ↦ heckeT_n_cusp_decomp_of_mul k (p ^ v) (m / p ^ v) m
+      fun {L} _ f ↦ heckeT_n_cusp_decomp_of_mul (p ^ v) (m / p ^ v) m
         (heckeT_n_mul_ppow_quot (N := L) (k := k) m hle p hpp rfl v rfl hv_pos hdiv_pos) f
     rw [hDecomp, ih (m / p ^ v) (heckeT_n_unfold_lt m hle) hdiv_pos
         (Nat.Coprime.coprime_dvd_left (Nat.div_dvd_of_dvd (Nat.ordProj_dvd m p)) hcop) g',
