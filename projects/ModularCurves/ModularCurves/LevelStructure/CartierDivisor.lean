@@ -26,6 +26,7 @@ import ModularCurves.ForMathlib.CharpolyNorm
 import ModularCurves.ForMathlib.FinrankExact
 import ModularCurves.ForMathlib.IdealSheafComapMul
 import ModularCurves.ForMathlib.NormBaseChange
+import ModularCurves.ForMathlib.ReducedSeparation
 import ModularCurves.ForMathlib.SheafDisjointUnion
 import ModularCurves.ForMathlib.StandardSmoothStalkDVR
 
@@ -2889,26 +2890,6 @@ def IsFullSetOfSectionsAlg [Module.Free R B] [Module.Finite R B] {n : ℕ}
     ∀ f : A ⊗[R] B,
       Algebra.norm A f = ∏ i, AlgHom.sectionBaseChange R B A (P i) f
 
-/-- In a reduced commutative ring, two elements are equal as soon as every ring
-homomorphism to a field identifies them (the difference lies in every prime, hence in
-the nilradical). ForMathlib-bound: fully generic, no modular-curve content (the extraction
-itself is a generalise-lane task). -/
-theorem eq_of_forall_field_hom_eq {A₀ : Type u} [CommRing A₀] [IsReduced A₀]
-    {x y : A₀} (h : ∀ (K : Type u) [Field K] (χ : A₀ →+* K), χ x = χ y) : x = y := by
-  have hd : x - y ∈ nilradical A₀ := by
-    rw [nilradical_eq_sInf]
-    refine Ideal.mem_sInf.mpr ?_
-    rintro p hp
-    haveI : p.IsPrime := hp
-    have hχ := h (FractionRing (A₀ ⧸ p))
-      ((algebraMap (A₀ ⧸ p) (FractionRing (A₀ ⧸ p))).comp (Ideal.Quotient.mk p))
-    have hmk : Ideal.Quotient.mk p x = Ideal.Quotient.mk p y := by
-      apply IsFractionRing.injective (A₀ ⧸ p) (FractionRing (A₀ ⧸ p))
-      simpa using hχ
-    simpa [Ideal.Quotient.mk_eq_mk_iff_sub_mem] using hmk
-  rw [nilradical_eq_zero] at hd
-  exact sub_eq_zero.mp (by simpa using hd)
-
 open TensorProduct in
 /-- Sections base-change functorially: transporting `f` along `ψ : A →ₐ[R] A'` and
 evaluating the section agrees with evaluating over `A` and applying `ψ`. -/
@@ -2974,7 +2955,7 @@ theorem isFullSetOfSectionsAlg_iff_fields [IsReduced R] [Module.Free R B]
       ∑ j, (MvPolynomial.X j : A₀) ⊗ₜ[R] (b j) with hf₀
     have huniv : Algebra.norm A₀ f₀ =
         ∏ i, AlgHom.sectionBaseChange R B A₀ (P i) f₀ := by
-      apply eq_of_forall_field_hom_eq
+      apply IsReduced.eq_of_forall_ringHom_field
       intro K _ χ₀
       letI : Algebra R K := (χ₀.comp (algebraMap R A₀)).toAlgebra
       let χ : A₀ →ₐ[R] K := { toRingHom := χ₀, commutes' := fun r => rfl }
