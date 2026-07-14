@@ -90,7 +90,7 @@ theorem translate_pullback_invariance_of_xy_twoCurve
 /-- **Full covariance from the xy-covariance family, two-curve.** The per-generator covariance
 `h_xy_family` extends, via `translate_pullback_invariance_of_xy_twoCurve`, to covariance of every
 kernel translation with `β.pullback` on all of `K(E₂)`. -/
-private theorem hcov_of_xy_family (β : Isogeny W₁ W₂)
+theorem hcov_of_xy_family (β : Isogeny W₁ W₂)
     (h_xy_family : ∀ k : β.kernel,
       (translateAlgEquivOfPoint W₁ k.val (β.pullback (x_gen W₂)) = β.pullback (x_gen W₂)) ∧
       (translateAlgEquivOfPoint W₁ k.val (β.pullback (y_gen W₂)) = β.pullback (y_gen W₂)))
