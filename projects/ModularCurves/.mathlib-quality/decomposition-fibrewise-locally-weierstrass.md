@@ -323,6 +323,11 @@ Completed dependency claim (2026-07-14): proved
 filtered colimit now lifts to actual units at one common stage, by synchronizing values,
 inverses, and their inverse equations without any injectivity hypothesis on transition maps.
 
+Completed dependency claim (2026-07-14): proved
+`Algebra.SpreadData.exists_common_unit_lift_atLaterStage`, which lifts those units at a
+stage later than any prescribed index and identifies their images under the presented
+stage-to-colimit map.
+
 Active dependency claim (2026-07-14): spread the finite family of pair-overlap transition
 units, their inverses, and the triple-overlap equations to one later finite stage of the
 affine-intersection model. This will construct the finite-stage line bundle whose base change

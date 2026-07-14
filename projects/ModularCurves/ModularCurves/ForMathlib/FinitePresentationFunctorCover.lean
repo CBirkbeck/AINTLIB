@@ -52,6 +52,37 @@ theorem SpreadData.exists_common_stageToColimit_eq_atLaterStage
   refine ⟨S, hij, fun k => D.stageTransition H hQj (b_Q k), fun k => ?_⟩
   exact (D.stageToColimit_stageTransition H Q.2 hQj (b_Q k)).trans (hb_Q k)
 
+/-- A finite family of colimit units can be represented by units at a spread stage later
+than any prescribed system index. -/
+theorem SpreadData.exists_common_unit_lift_atLaterStage
+    (D : SpreadData 𝒮 uA B) (H : IsFilteredAlgColimit R 𝒮 t A uA)
+    (i : ι) {κ : Type*} [Finite κ] (a : κ → Bˣ) :
+    ∃ (S : {j : ι // D.i₀ ≤ j}), i ≤ S.1 ∧
+      ∃ (a_S : κ → (D.spreadStage (t := t) S.2)ˣ),
+        ∀ k, Units.map (D.stageToColimit H S).toMonoidHom (a_S k) = a k := by
+  classical
+  letI : ∀ Q : {j : ι // D.i₀ ≤ j},
+      Algebra (𝒮 D.i₀) (D.spreadStage (t := t) Q.2) := fun Q =>
+    ((algebraMap (𝒮 Q.1) (D.spreadStage (t := t) Q.2)).comp
+      (t Q.2).toRingHom).toAlgebra
+  letI : Algebra (𝒮 D.i₀) B :=
+    ((algebraMap A B).comp (uA D.i₀).toRingHom).toAlgebra
+  obtain ⟨P, a_P, ha_P⟩ := (D.isFilteredAlgColimit H).exists_common_unit_lift a
+  haveI := H.directed
+  obtain ⟨j, hij, hPj⟩ := exists_ge_ge i P.1
+  let S : {j : ι // D.i₀ ≤ j} := ⟨j, P.2.trans hPj⟩
+  let a_S : κ → (D.spreadStage (t := t) S.2)ˣ := fun k =>
+    Units.map (D.stageTransition H (P := P) (Q := S) hPj).toMonoidHom (a_P k)
+  refine ⟨S, hij, a_S, fun k => ?_⟩
+  apply Units.ext
+  change D.stageToColimit H S
+      (D.stageTransition H (P := P) (Q := S) hPj
+        (a_P k : D.spreadStage (t := t) P.2)) =
+    (a k : B)
+  exact (D.stageToColimit_stageTransition H P.2 hPj
+    (a_P k : D.spreadStage (t := t) P.2)).trans
+      (congrArg Units.val (ha_P k))
+
 private theorem SpreadData.exists_span_eq_top_atLaterStage
     (D : SpreadData 𝒮 uA B) (H : IsFilteredAlgColimit R 𝒮 t A uA)
     {i : ι} (h : D.i₀ ≤ i) {κ : Type*} [Finite κ]
