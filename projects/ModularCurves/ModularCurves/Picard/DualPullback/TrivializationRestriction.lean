@@ -292,6 +292,60 @@ theorem overTrivializationOfRestrictOpenTrivialization
   rw [overRestrictUnitIso_eq_restrictUnitIsoP]
   rfl
 
+/-- The passage from an open-subscheme trivialization to its over-site trivialization is
+injective. -/
+theorem overTrivializationOfRestrictIso_injective
+    {X : Scheme.{u}} {M : X.Modules} {U : X.Opens}
+    {e g : M.restrict U.ι ≅ unitObj U.toScheme}
+    (h : overTrivializationOfRestrictIso M U e =
+      overTrivializationOfRestrictIso M U g) :
+    e = g := by
+  apply Iso.ext
+  have hhom := congrArg Iso.hom h
+  let G := (overEquiv U).functor
+  have hmap := congrArg (fun q ↦ G.map q) hhom
+  simp only [overTrivializationOfRestrictIso,
+    Functor.FullyFaithful.preimageIso_hom,
+    Functor.FullyFaithful.map_preimage, Iso.trans_hom] at hmap
+  let F := overFunctorEquiv U
+  let C := U.sheafOfModulesEquivOverUnit X.ringCatSheaf
+  change F.hom.app M ≫ e.hom ≫ C.inv =
+    F.hom.app M ≫ g.hom ≫ C.inv at hmap
+  apply (cancel_epi (F.hom.app M)).1
+  apply (cancel_mono C.inv).1
+  exact hmap
+
+/-- Restricting an open-subscheme trivialization through two nested opens agrees with direct
+restriction. -/
+theorem restrictOpenTrivialization_comp
+    {X : Scheme.{u}} {M : X.Modules} {U V W : X.Opens}
+    (hVU : V ≤ U) (hWV : W ≤ V)
+    (e : M.restrict U.ι ≅ unitObj U.toScheme) :
+    restrictOpenTrivialization hWV (restrictOpenTrivialization hVU e) =
+      restrictOpenTrivialization (hWV.trans hVU) e := by
+  apply overTrivializationOfRestrictIso_injective
+  rw [overTrivializationOfRestrictOpenTrivialization hWV]
+  rw [overTrivializationOfRestrictOpenTrivialization hVU]
+  rw [overTrivializationOfRestrictOpenTrivialization (hWV.trans hVU)]
+  let eU := overTrivializationOfRestrictIso M U e
+  let VU : Over U := Over.mk (homOfLE hVU)
+  let WV : Over VU.left := Over.mk (homOfLE hWV)
+  let WU : Over U := Over.mk (homOfLE (hWV.trans hVU))
+  have hcomp := ModularCurves.SheafOfModules.restrictOverTrivialization_comp
+    X.ringCatSheaf M U eU VU WV
+  change ModularCurves.SheafOfModules.restrictOverTrivialization
+      X.ringCatSheaf M VU.left
+        (ModularCurves.SheafOfModules.restrictOverTrivialization
+          X.ringCatSheaf M U eU VU) WV =
+    ModularCurves.SheafOfModules.restrictOverTrivialization
+      X.ringCatSheaf M U eU WU
+  calc
+    _ = ModularCurves.SheafOfModules.restrictOverTrivialization
+        X.ringCatSheaf M U eU ((Over.map VU.hom).obj WV) := hcomp
+    _ = ModularCurves.SheafOfModules.restrictOverTrivialization
+        X.ringCatSheaf M U eU WU := by
+      congr 1
+
 end AlgebraicGeometry.Scheme.Modules
 
 namespace ModularCurves

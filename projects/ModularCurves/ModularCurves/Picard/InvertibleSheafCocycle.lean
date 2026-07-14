@@ -203,6 +203,21 @@ noncomputable def openTrivializationTransitionUnit
     (overTrivializationOfRestrictIso M U e)
     (overTrivializationOfRestrictIso M U g)
 
+/-- Restricting open-subscheme trivializations restricts their transition unit along the
+structure-sheaf map. -/
+theorem openTrivializationTransitionUnit_restrict
+    {X : Scheme.{u}} {M : X.Modules} {U V : X.Opens} (hVU : V ≤ U)
+    (e g : M.restrict U.ι ≅ unitObj U.toScheme) :
+    openTrivializationTransitionUnit M V
+        (restrictOpenTrivialization hVU e)
+        (restrictOpenTrivialization hVU g) =
+      Units.map (X.presheaf.map (homOfLE hVU).op).hom.toMonoidHom
+        (openTrivializationTransitionUnit M U e g) := by
+  unfold openTrivializationTransitionUnit
+  rw [overTrivializationOfRestrictOpenTrivialization,
+    overTrivializationOfRestrictOpenTrivialization,
+    trivializationTransitionUnit_restrict]
+
 @[simp]
 theorem openTrivializationTransitionUnit_self
     {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
@@ -259,6 +274,24 @@ noncomputable def trivializingCoverTransitionUnit
     (i j : ι) : Γ(X, U i ⊓ U j)ˣ :=
   trivializingCoverTransitionUnitOn U e (U i ⊓ U j) i j inf_le_left inf_le_right
 
+/-- Restricting a canonical pair-overlap transition unit to a smaller common refinement
+gives the direct transition unit there. -/
+theorem trivializingCoverTransitionUnit_restrict
+    {X : Scheme.{u}} {M : X.Modules} {ι : Type u}
+    (U : ι → X.Opens)
+    (e : ∀ i, M.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    {V : X.Opens} (i j : ι) (hVij : V ≤ U i ⊓ U j) :
+    Units.map (X.presheaf.map (homOfLE hVij).op).hom.toMonoidHom
+        (trivializingCoverTransitionUnit U e i j) =
+      trivializingCoverTransitionUnitOn U e V i j
+        (hVij.trans inf_le_left) (hVij.trans inf_le_right) := by
+  have h := openTrivializationTransitionUnit_restrict (M := M) hVij
+    (restrictOpenTrivialization inf_le_left (e i))
+    (restrictOpenTrivialization inf_le_right (e j))
+  rw [restrictOpenTrivialization_comp, restrictOpenTrivialization_comp] at h
+  simpa only [trivializingCoverTransitionUnit,
+    trivializingCoverTransitionUnitOn] using h.symm
+
 /-- The three direct transition units on a triple overlap satisfy the cocycle law. -/
 theorem trivializingCoverTransitionUnitOn_triple
     {X : Scheme.{u}} {M : X.Modules} {ι : Type u}
@@ -273,6 +306,33 @@ theorem trivializingCoverTransitionUnitOn_triple
         trivializingCoverTransitionUnitOn U e V j k hVj hVk =
       trivializingCoverTransitionUnitOn U e V i k hVi hVk := by
   dsimp only
+  exact trivializingCoverTransitionUnitOn_trans U e _ i j k _ _ _
+
+/-- The canonical pair-overlap transition units satisfy the Cech cocycle equation after
+restriction to a triple overlap. -/
+theorem trivializingCoverTransitionUnit_cocycle
+    {X : Scheme.{u}} {M : X.Modules} {ι : Type u}
+    (U : ι → X.Opens)
+    (e : ∀ i, M.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (i j k : ι) :
+    let V := (U i ⊓ U j) ⊓ U k
+    let hVij : V ≤ U i ⊓ U j := inf_le_left
+    let hVjk : V ≤ U j ⊓ U k :=
+      le_inf (inf_le_left.trans inf_le_right) inf_le_right
+    let hVik : V ≤ U i ⊓ U k :=
+      le_inf (inf_le_left.trans inf_le_left) inf_le_right
+    Units.map (X.presheaf.map (homOfLE hVij).op).hom.toMonoidHom
+          (trivializingCoverTransitionUnit U e i j) *
+        Units.map (X.presheaf.map (homOfLE hVjk).op).hom.toMonoidHom
+          (trivializingCoverTransitionUnit U e j k) =
+      Units.map (X.presheaf.map (homOfLE hVik).op).hom.toMonoidHom
+        (trivializingCoverTransitionUnit U e i k) := by
+  dsimp only
+  rw [trivializingCoverTransitionUnit_restrict U e i j inf_le_left]
+  rw [trivializingCoverTransitionUnit_restrict U e j k
+    (le_inf (inf_le_left.trans inf_le_right) inf_le_right)]
+  rw [trivializingCoverTransitionUnit_restrict U e i k
+    (le_inf (inf_le_left.trans inf_le_left) inf_le_right)]
   exact trivializingCoverTransitionUnitOn_trans U e _ i j k _ _ _
 
 end

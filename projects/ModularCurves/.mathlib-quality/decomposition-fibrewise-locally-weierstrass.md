@@ -311,7 +311,14 @@ Completed dependency claim (2026-07-14): defined open-subscheme transition units
 `trivializingCoverTransitionUnit` on pairwise overlaps. Proved the common-refinement and
 triple-overlap cocycle laws.
 
-Active dependency claim (2026-07-14): identify each direct triple-overlap transition unit
-with the restriction of its canonical pair-overlap unit. This final coherence turns the
-proved common-refinement equation into literal finite Cech descent data for the pole line
-bundle.
+Completed dependency claim (2026-07-14): proved
+`overTrivializationOfRestrictIso_injective`, `restrictOpenTrivialization_comp`,
+`openTrivializationTransitionUnit_restrict`,
+`trivializingCoverTransitionUnit_restrict`, and
+`trivializingCoverTransitionUnit_cocycle`. The canonical pair-overlap units now form literal
+finite Cech descent data on triple overlaps.
+
+Active dependency claim (2026-07-14): spread the finite family of pair-overlap transition
+units, their inverses, and the triple-overlap equations to one later finite stage of the
+affine-intersection model. This will construct the finite-stage line bundle whose base change
+is the original pole line bundle.
