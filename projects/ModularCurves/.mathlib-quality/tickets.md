@@ -18997,3 +18997,19 @@ by v10.192-§C (with BB-DEG). When KM's keystone lands, the entire glued quotien
 with NO further G0 work. Pin-file wiring awaits the α/β ruling (v10.189-G0). Main-PR cadence
 (v10.172): ★-milestone flag raised for the coordinator (shared dev branch — coordinator merges).
 NEXT (charter remnants): (B) E[N] finite-locally-free package, (C) NISOG close. (STREAM-G0)
+
+### v10.200-G0 — ★ T-F1 CLOSED: the étale-local structure of E[N] (KM 2.3.1) is PROVEN (STREAM-G0)
+`torsion_etaleLocal_triv` (TorsionEtaleTriv.lean, ZERO file sorries): for N invertible on ANY S
+there is a surjective étale p : T → S with E[N] ×_S T ≅ (ℤ/N)²_T over T. All 8 links landed this
+session: the previous seat's affine core salvaged+repaired (links 1-7: extraction, rank chain,
+split cover via exists_tensorProduct_of_etale, coproduct/constScheme identification, cover) +
+NEW: `torsionBaseChangeIso` (torsion commutes with base change — forward/backward lifts through
+mulByHom_baseChange_fst, round trips by nested pullback ext in pure refine/congrArg chains) ·
+`sigmaPullbackIso` (pullback distributes over scheme coproducts — components via
+congrHom ≫ pasting ≫ fst, open immersion by disjoint ranges (sigmaMk), iso by surjectivity;
+ForMathlib-grade, flag for generalise) · link 8 glue (affineCover + per-chart affine case +
+pasting isos + Sigma.mapIso + the label-swap κ of constScheme-coproducts, w-triangle by
+cancel_epi + Sigma.hom_ext through the component triangles). Axioms: rests on the chartered
+BB-QF/BB-FLAT boxes (Torsion.lean, KM-seated) as designed — no new gaps. NEW-Y1's CLOPEN-β pin
+is now LIVE. NEXT: L2b fullLevelIso (base-change φ along the cover + isIso_of_isPullback_of_fppf
+per decomposition-c5b2) → L4 seam → (C) NISOG. (STREAM-G0)

@@ -537,7 +537,112 @@ consumes this as a pin. -/
 theorem torsion_etaleLocal_triv (N : ℕ) [NeZero N] (hinv : NIsInvertible S N) :
     ∃ (T : Scheme.{u}) (p : T ⟶ S), Etale p ∧ Surjective p ∧
       Nonempty (Over.mk (pullback.snd (E.torsionπ N) p) ≅
-        Over.mk (constSchemeπ T (Fin 2 → ZMod N))) := sorry
+        Over.mk (constSchemeπ T (Fin 2 → ZMod N))) := by
+  classical
+  set 𝒰 := S.affineCover with h𝒰
+  have haff : ∀ i : 𝒰.I₀, ∃ (Ti : Scheme.{u}) (pi : Ti ⟶ 𝒰.X i),
+      Etale pi ∧ Surjective pi ∧
+      Nonempty (Over.mk (pullback.snd ((E.baseChange (𝒰.f i)).torsionπ N) pi) ≅
+        Over.mk (constSchemeπ Ti (Fin 2 → ZMod N))) := fun i =>
+    torsion_etaleLocal_triv_affine (E.baseChange (𝒰.f i)) N
+      (NIsInvertible.of_hom (𝒰.f i) hinv)
+  choose Ti pi heti hsuri htrivi using haff
+  set q : ∀ i, Ti i ⟶ S := fun i => pi i ≫ 𝒰.f i with hq
+  have hqet : ∀ i, Etale (q i) := fun i => by
+    haveI := heti i
+    haveI : Etale (𝒰.f i) := inferInstance
+    infer_instance
+  refine ⟨∐ Ti, Sigma.desc q, IsZariskiLocalAtSource.sigmaDesc fun i => hqet i, ?_, ?_⟩
+  · refine Surjective.sigmaDesc_of_union_range_eq_univ ?_
+    refine Set.eq_univ_of_forall fun s => Set.mem_iUnion.mpr ?_
+    have hs : s ∈ ⋃ i, Set.range (𝒰.f i).base := by
+      rw [𝒰.iUnion_range]
+      trivial
+    obtain ⟨i, t, ht⟩ := by simpa only [Set.mem_iUnion, Set.mem_range] using hs
+    obtain ⟨u, hu⟩ := (hsuri i).1 t
+    refine ⟨i, u, ?_⟩
+    show (pi i ≫ 𝒰.f i).base u = s
+    rw [Scheme.Hom.comp_apply, hu, ht]
+  · -- per-chart comparison, with its structure triangle
+    have hΘ : ∀ i, ∃ Θ : pullback (E.torsionπ N) (q i) ≅
+        constScheme (Ti i) (Fin 2 → ZMod N),
+        Θ.hom ≫ constSchemeπ (Ti i) (Fin 2 → ZMod N)
+          = pullback.snd (E.torsionπ N) (q i) := by
+      intro i
+      let Θ1 : pullback (E.torsionπ N) (q i) ≅
+          pullback (pullback.snd (E.torsionπ N) (𝒰.f i)) (pi i) :=
+        (pullbackLeftPullbackSndIso (E.torsionπ N) (𝒰.f i) (pi i)).symm
+      have hw1 : pullback.snd (E.torsionπ N) (𝒰.f i) ≫ 𝟙 (𝒰.X i)
+          = (E.torsionBaseChangeIso (𝒰.f i) N).inv ≫
+            (E.baseChange (𝒰.f i)).torsionπ N := by
+        rw [Category.comp_id, ← E.torsionBaseChangeIso_hom_snd (𝒰.f i) N,
+          ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
+      have hw2 : pi i ≫ 𝟙 (𝒰.X i) = 𝟙 (Ti i) ≫ pi i := by
+        rw [Category.comp_id, Category.id_comp]
+      set m2 := pullback.map (pullback.snd (E.torsionπ N) (𝒰.f i)) (pi i)
+        ((E.baseChange (𝒰.f i)).torsionπ N) (pi i)
+        (E.torsionBaseChangeIso (𝒰.f i) N).inv (𝟙 _) (𝟙 _) hw1 hw2 with hm2
+      let Θ2 : pullback (pullback.snd (E.torsionπ N) (𝒰.f i)) (pi i) ≅
+          pullback ((E.baseChange (𝒰.f i)).torsionπ N) (pi i) := asIso m2
+      let Θ3 : pullback ((E.baseChange (𝒰.f i)).torsionπ N) (pi i) ≅
+          constScheme (Ti i) (Fin 2 → ZMod N) :=
+        (Over.forget _).mapIso (htrivi i).some
+      refine ⟨Θ1 ≪≫ Θ2 ≪≫ Θ3, ?_⟩
+      have h3 : Θ3.hom ≫ constSchemeπ (Ti i) (Fin 2 → ZMod N)
+          = pullback.snd ((E.baseChange (𝒰.f i)).torsionπ N) (pi i) :=
+        Over.w (htrivi i).some.hom
+      have h2 : Θ2.hom ≫ pullback.snd ((E.baseChange (𝒰.f i)).torsionπ N) (pi i)
+          = pullback.snd (pullback.snd (E.torsionπ N) (𝒰.f i)) (pi i) := by
+        rw [show Θ2.hom = m2 from rfl, hm2, pullback.lift_snd, Category.comp_id]
+      have h1 : Θ1.hom ≫ pullback.snd (pullback.snd (E.torsionπ N) (𝒰.f i)) (pi i)
+          = pullback.snd (E.torsionπ N) (q i) :=
+        pullbackLeftPullbackSndIso_inv_snd_snd _ _ _
+      simp only [Iso.trans_hom, Category.assoc]
+      rw [h3, h2, h1]
+    choose Θ hΘπ using hΘ
+    -- the label swap of the constant-scheme coproduct
+    set κ : (∐ fun i => constScheme (Ti i) (Fin 2 → ZMod N)) ⟶
+        constScheme (∐ Ti) (Fin 2 → ZMod N) :=
+      Sigma.desc (fun i => Sigma.desc fun l =>
+        Sigma.ι Ti i ≫ Sigma.ι (fun _ : Fin 2 → ZMod N => ∐ Ti) l) with hκ
+    set κinv : constScheme (∐ Ti) (Fin 2 → ZMod N) ⟶
+        (∐ fun i => constScheme (Ti i) (Fin 2 → ZMod N)) :=
+      Sigma.desc (fun l => Sigma.desc fun i =>
+        Sigma.ι (fun _ : Fin 2 → ZMod N => Ti i) l ≫
+          Sigma.ι (fun i => constScheme (Ti i) (Fin 2 → ZMod N)) i) with hκinv
+    have hκκ : κ ≫ κinv = 𝟙 _ := by
+      refine Sigma.hom_ext _ _ fun i => ?_
+      refine Sigma.hom_ext _ _ fun l => ?_
+      simp [hκ, hκinv, Sigma.ι_desc_assoc, Sigma.ι_desc]
+    have hκκ' : κinv ≫ κ = 𝟙 _ := by
+      refine Sigma.hom_ext _ _ fun l => ?_
+      refine Sigma.hom_ext _ _ fun i => ?_
+      simp [hκ, hκinv, Sigma.ι_desc_assoc, Sigma.ι_desc]
+    have hκπ : ∀ i, Sigma.ι (fun i => constScheme (Ti i) (Fin 2 → ZMod N)) i ≫
+        (κ ≫ constSchemeπ (∐ Ti) (Fin 2 → ZMod N))
+        = constSchemeπ (Ti i) (Fin 2 → ZMod N) ≫ Sigma.ι Ti i := by
+      intro i
+      rw [← Category.assoc, hκ, Sigma.ι_desc]
+      refine Sigma.hom_ext _ _ fun l => ?_
+      simp [constSchemeπ, Sigma.ι_desc, Sigma.ι_desc_assoc]
+    set e : pullback (E.torsionπ N) (Sigma.desc q) ≅
+        constScheme (∐ Ti) (Fin 2 → ZMod N) :=
+      (sigmaPullbackIso (E.torsionπ N) q).symm ≪≫ Sigma.mapIso Θ ≪≫
+        ⟨κ, κinv, hκκ, hκκ'⟩ with he
+    refine ⟨Over.isoMk e ?_⟩
+    show e.hom ≫ constSchemeπ (∐ Ti) (Fin 2 → ZMod N)
+      = pullback.snd (E.torsionπ N) (Sigma.desc q)
+    rw [← cancel_epi (sigmaPullbackIso (E.torsionπ N) q).hom]
+    refine Sigma.hom_ext _ _ fun i => ?_
+    have hcomp : (sigmaPullbackIso (E.torsionπ N) q).hom ≫
+        e.hom ≫ constSchemeπ (∐ Ti) (Fin 2 → ZMod N)
+        = (Sigma.mapIso Θ).hom ≫ κ ≫ constSchemeπ (∐ Ti) (Fin 2 → ZMod N) := by
+      rw [he]
+      simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc, Iso.hom_inv_id_assoc]
+    rw [hcomp, ← Category.assoc, Sigma.ι_mapIso_hom, Category.assoc, hκπ i,
+      ← Category.assoc, hΘπ i]
+    rw [← Category.assoc, ι_sigmaPullbackIso_hom]
+    exact (sigmaPullbackComponent_snd _ _ i).symm
 
 end EllipticCurve
 
