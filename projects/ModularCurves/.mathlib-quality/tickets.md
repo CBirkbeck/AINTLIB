@@ -2441,10 +2441,17 @@ adjudicates.
   `universalShortNF` with `IsShortNF` + `IsElliptic`. **[E12-D2 ω-half ★]**
   `OmegaBasis.ofPresentation` (the basis a global presentation defines; glued
   chart-comparisons) + `isAdapted_restrict_ofPresentation` (self-adaptedness — the
-  `ω = dx/y` tautology; `AdaptedModel.lean`). REMAINING D2: the tautological
-  `LocalPresentation G ⊤` for `(modelEllipticCurve W).toEllipticCurveGeom` over
-  `Spec R` (chart-iso = `asIso (pullback.fst)` + `E = projModel W`-defeq +
-  isoSpec-⊤-collapse). Then D3/D4.
+  `ω = dx/y` tautology; `AdaptedModel.lean`). **D2 COMPLETE ★★ (2026-07-14)**:
+  `tautPresentation` (the tautological global chart of the projective model over its
+  own `Spec`, extracted from `locallyWeierstrass_projModel`) +
+  **`universalOmegaBasis`** — the universal `(E, ω)`-datum over
+  `Spec R[A₄,A₆][Δ⁻¹]` is fully assembled and adapted to its own chart
+  (`isAdapted_restrict_ofPresentation`). REMAINING: **D3** — the classifying map
+  `(Y, b) ↦ (Y.base ⟶ Spec R₁)` from `adaptedCoeff₄/₆` (ring map `A₄ ↦ coeff₄,
+  A₆ ↦ coeff₆`; Δ-invertibility from chartwise ellipticity — small glue lemma
+  needed: `IsUnit (Δ(coeffs))` globally) + the `EllHom` upstairs (chart-glue of the
+  adapted-model isos); **D4** — `RepresentableBy` packaging (bijectivity from E12-B
+  uniqueness + adapted-pullback functoriality).
   ORIGINAL SPEC: the basis-unit of a presentation**: for `b : OmegaBasis G` and
   `P : LocalPresentation G V`, glue `resLE b_i · (transUnit P|_{V∩U_i} P_i|)`-data over
   the atlas cover into a canonical `basisUnitAt P b : Γ(V)ˣ` (compatibility = b's own
