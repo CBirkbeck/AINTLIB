@@ -6,7 +6,9 @@ Authors: Chris Birkbeck
 import ModularCurves.Moduli.GammaHRepresentability
 import ModularCurves.Moduli.QuotientRepresentability
 import ModularCurves.EllipticCurve.TorsionRestrict
+import ModularCurves.EllipticCurve.ExactOrderRigidity
 import ModularCurves.ForMathlib.UnramifiedEqualizer
+import ModularCurves.Moduli.DrinfeldRepresentability
 
 /-!
 # The Γ_H MASTER assembly (KM 4.7.0 applied to `P_H`) — interface
@@ -1022,6 +1024,161 @@ theorem gammaH_representable_of_orderOf (N : ℕ) [NeZero N] (hN : 3 ≤ (N : �
   (ModuliProblem.representable_iff qpd.prob qpd.affineOverEll).mpr
     ⟨qpd.affineOverEll.relativelyRepresentable,
      gammaH_rigid_of_orderOf R N hN H hinv qpd hLN hH⟩
+
+open EllipticCurve in
+/-- **[Γ₁ k̄-core] (T-H9's rigidity content at a geometric point)** — over k̄, no
+nontrivial base-identical self-iso fixes a Drinfeld `Γ₁(N)`-structure (`N ≥ 4`
+invertible), modulo the two register-box pins: the T-D6b geometric-order box
+(`HasExactOrder.pull_nsmul_ne_zero`, consumed through the statement) and the KM
+kernel-degree keystone `hbound` (the [RIG-2] core's frozen contract, quantified over
+the pointed automorphism). Route: the fixed section is `c`-fixed (`pullSection`
+`lift_fst`), its small multiples are nonzero (T-D6b at `t = 𝟙`), and
+`aut_endo_eq_one_of_fixes_point` forces the automorphism to be the identity. -/
+theorem gammaOneDrinfeld_fix_absurd (N : ℕ) [NeZero N] (hN : 4 ≤ N)
+    (hinv : IsUnit (N : R))
+    (k : Type u) [Field k] [IsAlgClosed k]
+    (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+    (E : EllipticCurve (Spec (CommRingCat.of k)))
+    (e : (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R) ≅
+      (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
+    (he : e.hom.baseHom = 𝟙 _) (hne : e ≠ Iso.refl _)
+    (b : (gammaOneDrinfeldProblem R N).obj
+      (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)))
+    (hbound : ∀ ε : E.asOver ⟶ E.asOver, η[E.asOver] ≫ ε = η[E.asOver] →
+      letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+      letI : CommGroup (Over.mk (𝟙 (Spec (CommRingCat.of k))) ⟶ E.asOver) := Hom.commGroup
+      ε * (𝟙 E.asOver)⁻¹ ≠ 1 →
+      ∀ pts : Fin N → E.Point (𝟙 (Spec (CommRingCat.of k))), Function.Injective pts →
+        (∀ i, (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) (pts i) ≫
+          (ε * (𝟙 E.asOver)⁻¹) = 1) → False)
+    (hfix : (gammaOneDrinfeldProblem R N).map e.hom.op b = b) : False := by
+  classical
+  haveI : IsLocallyNoetherian (Spec (CommRingCat.of k)) := by
+    haveI : IsNoetherianRing k := inferInstance
+    infer_instance
+  set c := e.hom.top with hc
+  -- the section is fixed by `c`
+  have h1 : EllHom.pullSection R e.hom b.1 = b.1 := congrArg (fun z => z.1) hfix
+  have hPc : b.1.1 ≫ c = b.1.1 := by
+    have hlf : (EllHom.pullSection R e.hom b.1).1 ≫ e.hom.top
+        = e.hom.baseHom ≫ b.1.1 := e.hom.isPullback.lift_fst _ _ _
+    rw [h1, he, Category.id_comp] at hlf
+    exact hlf
+  -- `c` as a pointed `Over`-endomorphism
+  have hcπ : c ≫ E.π = E.π := by
+    have h := e.hom.isPullback.w
+    rw [he, Category.comp_id] at h
+    exact h
+  set εO : E.asOver ⟶ E.asOver := Over.homMk c hcπ with hεO
+  have hzc : E.zero ≫ c = E.zero := by
+    have h := e.hom.zero_w
+    rw [he, Category.id_comp] at h
+    exact h
+  have hη : η[E.asOver] ≫ εO = η[E.asOver] := by
+    refine Over.OverMorphism.ext ?_
+    show (η[E.asOver]).left ≫ c = (η[E.asOver]).left
+    rw [E.one_eq_zero]
+    have s1 : ((𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ E.zero) ≫ c
+        = (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ E.zero ≫ c := Category.assoc _ _ _
+    have s2 : (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ E.zero ≫ c
+        = (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ E.zero :=
+      congrArg (fun mm => (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ mm) hzc
+    exact s1.trans s2
+  -- the geometric order facts at the base point itself
+  have hkill : (N : ℤ) • b.1 = 0 := b.2.smul_eq_zero
+  have hinvSpec : NIsInvertible (Spec (CommRingCat.of k)) N := by
+    have hinvk : IsUnit ((N : ℕ) : k) := by
+      have h := hinv.map (Spec.preimage sm).hom
+      rwa [map_natCast] at h
+    show IsUnit ((N : ℕ) : Γ(Spec (CommRingCat.of k), ⊤))
+    have h2 := hinvk.map (Scheme.ΓSpecIso (CommRingCat.of k)).inv.hom
+    rwa [map_natCast] at h2
+  have hpull_id : Point.pull E (𝟙 (Spec (CommRingCat.of k))) b.1 = b.1 :=
+    Subtype.ext (Category.id_comp _)
+  have hord : ∀ a : ℕ, 0 < a → a < N → (a : ℤ) • b.1 ≠ 0 := by
+    intro a ha0 haN
+    have h := b.2.pull_nsmul_ne_zero E hinvSpec hkill k
+      (𝟙 (Spec (CommRingCat.of k))) ha0 haN
+    rwa [hpull_id] at h
+  -- the equiv-form fix and the [RIG-2] core
+  have hfix' : (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) b.1 ≫ εO
+      = (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) b.1 := by
+    refine Over.OverMorphism.ext ?_
+    show b.1.1 ≫ c = b.1.1
+    exact hPc
+  have hN3 : 3 ≤ (N : ℤ) := by exact_mod_cast Nat.le_of_succ_le hN
+  have hεid : εO = 𝟙 E.asOver := by
+    refine E.aut_endo_eq_one_of_fixes_point N εO hη b.1 hord hfix' ?_
+    intro hδ pts hinj hkillpts
+    exact hbound εO hη hδ pts hinj hkillpts
+  have hcid : c = 𝟙 E.E := congrArg CommaMorphism.left hεid
+  exact hne (Iso.ext (EllHom.ext he hcid))
+
+open EllipticCurve in
+/-- **[Γ₁ rigidity] (T-H9's Rigid half; KM 5.x-shape)** — the Drinfeld `Γ₁(N)` problem
+is rigid for `N ≥ 4` invertible, at the pins `hLN` (T-W7.8) + `hbound` (the KM
+kernel-degree keystone, ∀-geometric-point form) + the T-D6b register box (in the
+statement of the k̄-core). Route: the PROVEN detection (`exists_isoFibre_ne_refl`, at
+level `N`) finds a geometric fibre where the iso stays nontrivial; the fixed structure
+transports along the fibre square; the k̄-core (`gammaOneDrinfeld_fix_absurd`) kills.
+Unblocks KM's Drinfeld `.Representable` wiring (with their
+`gammaOneDrinfeld_affineOverEll` + the shared T-E14 engine). -/
+theorem gammaOneDrinfeld_rigid (N : ℕ) [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R))
+    (hLN : ∀ X : EllObj R, IsLocallyNoetherian X.base)
+    (hbound : ∀ (k : Type u) [Field k] [IsAlgClosed k]
+      (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+      (E : EllipticCurve (Spec (CommRingCat.of k)))
+      (ε : E.asOver ⟶ E.asOver), η[E.asOver] ≫ ε = η[E.asOver] →
+      letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+      letI : CommGroup (Over.mk (𝟙 (Spec (CommRingCat.of k))) ⟶ E.asOver) := Hom.commGroup
+      ε * (𝟙 E.asOver)⁻¹ ≠ 1 →
+      ∀ pts : Fin N → E.Point (𝟙 (Spec (CommRingCat.of k))), Function.Injective pts →
+        (∀ i, (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) (pts i) ≫
+          (ε * (𝟙 E.asOver)⁻¹) = 1) → False) :
+    (gammaOneDrinfeldProblem R N).Rigid := by
+  intro X e he hne a hfix
+  haveI := hLN X
+  have hN3 : 3 ≤ (N : ℤ) := by exact_mod_cast Nat.le_of_succ_le hN
+  obtain ⟨k, _, _, t, hfib⟩ := EllObj.exists_isoFibre_ne_refl N hN3
+    (YFull.nIsInvertible_over_spec R X.structMap hinv) e he hne
+  set eT := EllObj.isoFibre e he t with heT
+  have hcomp : eT.hom ≫ X.pullbackAlongπ t = X.pullbackAlongπ t ≫ e.hom :=
+    EllHom.fibre_pullbackAlongπ e.hom he t
+  set aT := (gammaOneDrinfeldProblem R N).map (X.pullbackAlongπ t).op a with haT
+  have hfixT : (gammaOneDrinfeldProblem R N).map eT.hom.op aT = aT := by
+    calc (gammaOneDrinfeldProblem R N).map eT.hom.op aT
+        = (gammaOneDrinfeldProblem R N).map ((X.pullbackAlongπ t).op ≫ eT.hom.op) a := by
+          rw [haT, ← Functor.map_comp_apply]
+      _ = (gammaOneDrinfeldProblem R N).map (e.hom.op ≫ (X.pullbackAlongπ t).op) a := by
+          rw [← op_comp, ← op_comp, hcomp]
+      _ = (gammaOneDrinfeldProblem R N).map (X.pullbackAlongπ t).op
+            ((gammaOneDrinfeldProblem R N).map e.hom.op a) := by
+          rw [Functor.map_comp_apply]
+      _ = aT := by rw [hfix, haT]
+  exact gammaOneDrinfeld_fix_absurd R N hN hinv k (t ≫ X.structMap) (X.curve.baseChange t)
+    eT rfl hfib aT (hbound k (t ≫ X.structMap) (X.curve.baseChange t)) hfixT
+
+/-- **[Γ₁ `.Representable`, PREPPED on the shared engine]** — the moment OMEGA's T-E14
+lands, the Drinfeld `Γ₁(N)` problem is representable: affineness is KM's
+`gammaOneDrinfeld_affineOverEll`, rigidity is `gammaOneDrinfeld_rigid`. Pins: `hLN` +
+`hbound` (+ the register boxes in the statements). -/
+theorem gammaOneDrinfeld_representable_prep (N : ℕ) [NeZero N] (hN : 4 ≤ N)
+    (hinv : IsUnit (N : R))
+    (hLN : ∀ X : EllObj R, IsLocallyNoetherian X.base)
+    (hbound : ∀ (k : Type u) [Field k] [IsAlgClosed k]
+      (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+      (E : EllipticCurve (Spec (CommRingCat.of k)))
+      (ε : E.asOver ⟶ E.asOver), η[E.asOver] ≫ ε = η[E.asOver] →
+      letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+      letI : CommGroup (Over.mk (𝟙 (Spec (CommRingCat.of k))) ⟶ E.asOver) := Hom.commGroup
+      ε * (𝟙 E.asOver)⁻¹ ≠ 1 →
+      ∀ pts : Fin N → E.Point (𝟙 (Spec (CommRingCat.of k))), Function.Injective pts →
+        (∀ i, (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) (pts i) ≫
+          (ε * (𝟙 E.asOver)⁻¹) = 1) → False) :
+    (gammaOneDrinfeldProblem R N).Representable :=
+  (ModuliProblem.representable_iff _ (gammaOneDrinfeld_affineOverEll N)).mpr
+    ⟨(gammaOneDrinfeld_affineOverEll N).relativelyRepresentable,
+     gammaOneDrinfeld_rigid R N hN hinv hLN hbound⟩
 
 /-- **[Γ(N) rigidity] (KM 2.7.2 upgraded to the quotient problem at `H = ⊥`)** — the
 quotient problem `P_⊥ = [Γ(N)]` is rigid for `N ≥ 3` invertible, with the k̄
