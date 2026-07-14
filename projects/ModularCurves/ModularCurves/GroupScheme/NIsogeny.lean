@@ -2888,6 +2888,25 @@ namespace FiniteLocallyFreeSubgroup
 
 variable {E : EllipticCurve S}
 
+/-- The standard cyclic subgroup `G_d` has constant rank `d` (the `degree = d` conjunct
+of KM 6.7.2's cyclicity, through the divisor dictionary). -/
+theorem _root_.ModularCurves.EllipticCurve.standardCyclicSubgroup_hasRank {N : ℕ}
+    [NeZero N] {D : RelEffCartierDiv E.π} (hG : E.IsGammaZeroFppf N D) {d : ℕ}
+    [NeZero d] (hd : d ∣ N) : (E.standardCyclicSubgroup hG hd).HasRank d := fun s =>
+  ((E.standardCyclicSubgroup hG hd).toRelEffCartierDiv_degree s).symm.trans <| by
+    show (FiniteLocallyFreeSubgroup.ofRelEffCartierDiv _ _).toRelEffCartierDiv.degree s = d
+    rw [toRelEffCartierDiv_ofRelEffCartierDiv]
+    exact (E.standardCyclicDivisor_isGammaZeroFppf hG hd).2.1 s
+
+/-- The killing-integer instance for standard cyclic subgroups: `G_d` is killed by `d`
+(KM 1.4.2, through the banked bridge `hasKillingInt_of_hasRank`). Powers the
+`[G.HasKillingInt]` hypotheses of the `quotientCurve` layer at every
+`standardCyclicSubgroup` call site of §7 — call sites stay textually unchanged (α-lite). -/
+instance {N : ℕ} [NeZero N] {D : RelEffCartierDiv E.π} (hG : E.IsGammaZeroFppf N D)
+    {d : ℕ} [NeZero d] (hd : d ∣ N) : (E.standardCyclicSubgroup hG hd).HasKillingInt :=
+  (E.standardCyclicSubgroup hG hd).hasKillingInt_of_hasRank
+    (E.standardCyclicSubgroup_hasRank hG hd)
+
 -- ATTACK: (1) the DATA is the curve record, not just a scheme: `E/G` needs zero section,
 -- group law, and the local Weierstrass model — none of which the scheme-level gate
 -- provides; making it separate DS-data (rather than pretending `quotient` is a curve)
@@ -2898,78 +2917,115 @@ variable {E : EllipticCurve S}
 -- take `E := G.quotient` on the nose, upgrading the pin to `rfl`-strength, but consumers
 -- must not rely on that.
 /-- **DS-NISOG-1 (GATE [T-G3D-INFRA])** The quotient elliptic curve `E/G` of `E` by a
-finite locally free subgroup scheme `G` (KM 6.7.6's target curve `E'`). DS-registered
-data; consumers use only the pins (`quotientCurve_compat`, `quotientHom_*`,
-`pointMap_*`). -/
-noncomputable def quotientCurve (G : FiniteLocallyFreeSubgroup E) : EllipticCurve S :=
-  sorry
+finite locally free subgroup scheme `G` (KM 6.7.6's target curve `E'`), built **on the
+SIGNAL quotient scheme `G.quotient` on the nose**: total space `G.quotient`, structure
+map `G.quotientS`, zero section the descended `E.zero ≫ π`. The remaining fields are the
+two register-boxed gates of this layer: ellipticity (`smooth`/`proper`/`localModel` —
+descent of the geometric record along the finite locally free `quotientπ`, KM 6.7.6 /
+DR IV; gate **[ELLQUOT-GEOM]**) and the descended group law (`grp`/`comm`/`one_eq_zero`
+— `μ_{E/G}` via the relative form of `quotient_lift`; gate **[ELLQUOT-GRP]**, discharged
+against the product universal property `[QUOT-BC]`). Consumers use only the pins
+(`quotientCurve_compat`, `quotientHom_*`, `pointMap_*`). -/
+noncomputable def quotientCurve (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] :
+    EllipticCurve S :=
+  { toEllipticCurveGeom :=
+      { E := G.quotient
+        π := G.quotientS
+        zero := E.zero ≫ G.quotientπ
+        zero_π := by rw [Category.assoc, G.quotientπ_over]; exact E.zero_π
+        -- [ELLQUOT-GEOM]: ellipticity of `E/G` descends the smooth/proper/local-Weierstrass
+        -- data along the finite locally free isogeny `π : E ⟶ E/G`; genuine descent,
+        -- register-boxed (KM 6.7.6, DR IV.1).
+        smooth := sorry
+        proper := sorry
+        localModel := sorry }
+    -- [ELLQUOT-GRP]: the group law μ_{E/G} descends from μ_E via the universal property
+    -- (`quotient_lift`, product/relative form [QUOT-BC]); register-boxed pending that pin.
+    grp := sorry
+    comm := sorry
+    one_eq_zero := sorry }
 
 /-- **DS-NISOG-2 (GATE [T-G3D-INFRA])** The quotient `N`-isogeny `π : E ⟶ E/G` (KM
-6.7.6's `π`), as a morphism into the quotient curve's total space. DS-registered data. -/
-noncomputable def quotientHom (G : FiniteLocallyFreeSubgroup E) :
+6.7.6's `π`): the SIGNAL quotient projection itself, into the quotient curve's total
+space (`quotientCurve.E = G.quotient` definitionally). -/
+noncomputable def quotientHom (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] :
     E.E ⟶ G.quotientCurve.E :=
-  sorry
+  G.quotientπ
 
-/-- **(pin)** The quotient isogeny is a morphism over `S`. -/
-theorem quotientHom_over (G : FiniteLocallyFreeSubgroup E) :
-    G.quotientHom ≫ G.quotientCurve.π = E.π := by
-  sorry
+/-- **(pin)** The quotient isogeny is a morphism over `S` — direct from the SIGNAL pin
+`quotientπ_over`. -/
+theorem quotientHom_over (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] :
+    G.quotientHom ≫ G.quotientCurve.π = E.π :=
+  G.quotientπ_over
 
-/-- **(pin)** The quotient isogeny collapses `G`-translates — the [T-G3D-INFRA]
-invariance condition, tying this layer to the scheme-level gate's vocabulary. -/
-theorem quotientHom_isInvariant (G : FiniteLocallyFreeSubgroup E) :
-    G.IsInvariant G.quotientHom := by
-  sorry
+/-- **(pin)** The quotient isogeny collapses `G`-translates — direct from the SIGNAL pin
+`quotientπ_isInvariant`. -/
+theorem quotientHom_isInvariant (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] :
+    G.IsInvariant G.quotientHom :=
+  G.quotientπ_isInvariant
 
 /-- **(pin)** Compatibility with the scheme-level gate: the quotient curve's total space
-is the [T-G3D-INFRA] quotient scheme, identified under the two quotient maps. -/
+IS the [T-G3D-INFRA] quotient scheme (`rfl`-strength — the construction takes
+`E := G.quotient` on the nose — but consumers must go through this pin, not `rfl`). -/
 theorem quotientCurve_compat (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] :
-    ∃ e : G.quotient ≅ G.quotientCurve.E, G.quotientπ ≫ e.hom = G.quotientHom := by
-  sorry
+    ∃ e : G.quotient ≅ G.quotientCurve.E, G.quotientπ ≫ e.hom = G.quotientHom :=
+  ⟨Iso.refl _, Category.comp_id _⟩
 
 /-- The point-level map `E(T) ⟶ (E/G)(T)` induced by the quotient isogeny (KM's
 `P ↦ π(P)`, e.g. the `π_d P` of 6.7.4/6.7.11). Real definition (composition), over-ness
 from the pin `quotientHom_over`. -/
-noncomputable def pointMap (G : FiniteLocallyFreeSubgroup E) {T : Scheme.{u}}
-    {g : T ⟶ S} (x : E.Point g) : G.quotientCurve.Point g :=
+noncomputable def pointMap (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt]
+    {T : Scheme.{u}} {g : T ⟶ S} (x : E.Point g) : G.quotientCurve.Point g :=
   ⟨x.1 ≫ G.quotientHom, by rw [Category.assoc, G.quotientHom_over]; exact x.2⟩
 
 @[simp]
-theorem pointMap_coe (G : FiniteLocallyFreeSubgroup E) {T : Scheme.{u}} {g : T ⟶ S}
-    (x : E.Point g) : (G.pointMap x).1 = x.1 ≫ G.quotientHom :=
+theorem pointMap_coe (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] {T : Scheme.{u}}
+    {g : T ⟶ S} (x : E.Point g) : (G.pointMap x).1 = x.1 ≫ G.quotientHom :=
   rfl
 
-/-- **(pin)** `π` is pointed: the zero section maps to the zero section. -/
-theorem pointMap_zero (G : FiniteLocallyFreeSubgroup E) {T : Scheme.{u}} (g : T ⟶ S) :
-    G.pointMap (0 : E.Point g) = 0 := by
-  sorry
+/-- **(pin)** `π` is pointed: the zero section maps to the zero section — REAL: the
+quotient curve's zero section is the descended `E.zero ≫ π` by construction. -/
+theorem pointMap_zero (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] {T : Scheme.{u}}
+    (g : T ⟶ S) : G.pointMap (0 : E.Point g) = 0 := by
+  refine Subtype.ext ?_
+  rw [pointMap_coe, G.quotientCurve.point_zero_val, E.point_zero_val]
+  show (g ≫ E.zero) ≫ G.quotientπ = g ≫ E.zero ≫ G.quotientπ
+  rw [Category.assoc]
 
-/-- **(pin)** `π` is a homomorphism on `T`-points (the isogeny is a group-scheme map). -/
-theorem pointMap_add (G : FiniteLocallyFreeSubgroup E) {T : Scheme.{u}} {g : T ⟶ S}
-    (x y : E.Point g) : G.pointMap (x + y) = G.pointMap x + G.pointMap y := by
+/-- **(pin)** `π` is a homomorphism on `T`-points (the isogeny is a group-scheme map).
+Discharged with the [ELLQUOT-GRP] gate: `pointMap` intertwines `μ_E` with the descended
+`μ_{E/G}` by the defining lift square. -/
+theorem pointMap_add (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] {T : Scheme.{u}}
+    {g : T ⟶ S} (x y : E.Point g) : G.pointMap (x + y) = G.pointMap x + G.pointMap y := by
   sorry
 
 /-- **(pin — the kernel specification)** `Ker π = G` (KM 6.7.6: *"a cyclic `N`-isogeny
 `π` with kernel `G`"*): a `T`-point of `E` dies in `E/G` iff it lies on `G`. This is the
-load-bearing pin for the whole standard-factorization layer. -/
-theorem pointMap_eq_zero_iff (G : FiniteLocallyFreeSubgroup E) {T : Scheme.{u}}
-    {g : T ⟶ S} (x : E.Point g) :
+load-bearing pin for the whole standard-factorization layer. Gate **[QUOT-KER]** (the
+separation half — fibres of the glued quotient are exactly the `G`-orbits); the reverse
+implication is REAL from invariance. -/
+theorem pointMap_eq_zero_iff (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt]
+    {T : Scheme.{u}} {g : T ⟶ S} (x : E.Point g) :
     G.pointMap x = 0 ↔ x ∈ G.pointSubgroup g := by
   sorry
 
-/-- **(pin)** The quotient isogeny is finite (half of "`π` is an isogeny of degree
-`rank G`"). -/
-theorem quotientHom_finite (G : FiniteLocallyFreeSubgroup E) :
+/-- **(pin — register-box BB-DEG)** The quotient isogeny is finite (half of "`π` is an
+isogeny of degree `rank G`"). Degree-side fact of the Hopf–Galois patch structure;
+consumed as a register-box per the v10.212/v10.215 rulings (auto-cleans on the BB-DEG
+keystone landing). -/
+theorem quotientHom_finite (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] :
     IsFinite G.quotientHom := by
   sorry
 
-/-- **(pin)** The quotient isogeny is flat. -/
-theorem quotientHom_flat (G : FiniteLocallyFreeSubgroup E) : Flat G.quotientHom := by
+/-- **(pin — register-box BB-DEG)** The quotient isogeny is flat. -/
+theorem quotientHom_flat (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt] :
+    Flat G.quotientHom := by
   sorry
 
-/-- **(pin)** The degree of the quotient isogeny is the rank of `G` (KM 6.7.6: a cyclic
-`N`-isogeny has degree `N`). -/
-theorem quotientHom_finrank (G : FiniteLocallyFreeSubgroup E) (y : G.quotientCurve.E) :
+/-- **(pin — register-box BB-DEG)** The degree of the quotient isogeny is the rank of
+`G` (KM 6.7.6: a cyclic `N`-isogeny has degree `N`). -/
+theorem quotientHom_finrank (G : FiniteLocallyFreeSubgroup E) [G.HasKillingInt]
+    (y : G.quotientCurve.E) :
     G.quotientHom.finrank y = G.rank (G.quotientCurve.π y) := by
   sorry
 
