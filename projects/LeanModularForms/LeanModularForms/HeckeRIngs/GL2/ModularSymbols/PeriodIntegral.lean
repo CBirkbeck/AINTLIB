@@ -285,7 +285,8 @@ theorem integrableOn_imagAxisPeriodIntegrand_Ici_one (k : ℤ)
     refine ContinuousOn.locallyIntegrableOn ?_ measurableSet_Ici
     exact (continuousOn_imagAxisPeriodIntegrand k f P).mono
       (fun x hx => by simp only [Set.mem_Ici] at hx; simp only [Set.mem_Ioi]; linarith)
-  exact hloc.integrableOn_of_isBigO_atTop hO ⟨Set.Ioi b, Ioi_mem_atTop b, exp_neg_integrableOn_Ioi b hb⟩
+  exact hloc.integrableOn_of_isBigO_atTop hO
+    ⟨Set.Ioi b, Ioi_mem_atTop b, exp_neg_integrableOn_Ioi b hb⟩
 
 /-! ### Convergence at the cusp `0` (bottom end)
 
@@ -309,13 +310,19 @@ theorem coe_translate_S (k : ℤ) (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) 
     ⇑(CuspForm.translate f (mapGL ℝ ModularGroup.S)) = ⇑f ∣[k] ModularGroup.S :=
   rfl
 
-/-- The `S`-conjugate of the level group is arithmetic, so `f ∣ S` enjoys exponential decay too. -/
-theorem isArithmetic_conj_S :
-    (ConjAct.toConjAct (mapGL ℝ ModularGroup.S)⁻¹ • ((Gamma1 N).map (mapGL ℝ))).IsArithmetic := by
+/-- The `S`-conjugate of an arithmetic group is arithmetic, so `f ∣ S` enjoys exponential decay
+too. -/
+theorem isArithmetic_conj_S' {Γ : Subgroup (GL (Fin 2) ℝ)} [Γ.IsArithmetic] :
+    (ConjAct.toConjAct (mapGL ℝ ModularGroup.S)⁻¹ • Γ).IsArithmetic := by
   have h : (mapGL ℝ ModularGroup.S)⁻¹ = ((mapGL ℚ ModularGroup.S)⁻¹).map (algebraMap ℚ ℝ) := by
     rw [map_inv, map_mapGL]
   rw [h]
-  exact Subgroup.IsArithmetic.conj ((Gamma1 N).map (mapGL ℝ)) (mapGL ℚ ModularGroup.S)⁻¹
+  exact Subgroup.IsArithmetic.conj Γ (mapGL ℚ ModularGroup.S)⁻¹
+
+/-- The `S`-conjugate of the level group is arithmetic, so `f ∣ S` enjoys exponential decay too. -/
+theorem isArithmetic_conj_S :
+    (ConjAct.toConjAct (mapGL ℝ ModularGroup.S)⁻¹ • ((Gamma1 N).map (mapGL ℝ))).IsArithmetic :=
+  isArithmetic_conj_S'
 
 omit [NeZero N] in
 /-- The relation `f(it) = i^k (1/t)^k (f∣S)(i/t)` along the imaginary axis (from the slash action
