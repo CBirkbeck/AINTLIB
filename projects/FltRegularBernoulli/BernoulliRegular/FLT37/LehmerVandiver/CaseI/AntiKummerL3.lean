@@ -100,7 +100,7 @@ theorem antiKummerSigmaTildeInvolutive_apply_root_inv
 
 /-- **σ̃ inverts `ζ_L^k · ρ`** in L (the Kummer roots of the X^p - α₀ factor). -/
 theorem antiKummerSigmaTildeInvolutive_inverts_zeta_pow_rho
-    (hp_odd : p ≠ 2) (α₀ : K) (hα₀ : α₀ ≠ 0)
+    (α₀ : K) (hα₀ : α₀ ≠ 0)
     (h_anti : NumberField.IsCMField.complexConj K α₀ = α₀⁻¹)
     (h_irr : Irreducible (Polynomial.X ^ p - Polynomial.C α₀ : Polynomial K))
     (h_irr_g : Irreducible (antiKummerKplusPoly (p := p) K α₀ hα₀ h_anti))
@@ -122,12 +122,12 @@ theorem antiKummerSigmaTildeInvolutive_inverts_zeta_pow_rho
   rw [← map_pow,
     show ((NumberField.IsCMField.complexConj K) (IsCyclotomicExtension.zeta p ℚ K)) ^ k =
       (IsCyclotomicExtension.zeta p ℚ K ^ k)⁻¹ by
-      rw [← map_pow, complexConj_zeta_pow_eq_inv hp_odd k],
+      rw [← map_pow, complexConj_zeta_pow_eq_inv k],
     map_inv₀, map_pow]
 
 /-- **σ̃ inverts `ζ_L^k · ρ⁻¹`** in L (the Kummer roots of the X^p - α₀⁻¹ factor). -/
 theorem antiKummerSigmaTildeInvolutive_inverts_zeta_pow_rho_inv
-    (hp_odd : p ≠ 2) (α₀ : K) (hα₀ : α₀ ≠ 0)
+    (α₀ : K) (hα₀ : α₀ ≠ 0)
     (h_anti : NumberField.IsCMField.complexConj K α₀ = α₀⁻¹)
     (h_irr : Irreducible (Polynomial.X ^ p - Polynomial.C α₀ : Polynomial K))
     (h_irr_g : Irreducible (antiKummerKplusPoly (p := p) K α₀ hα₀ h_anti))
@@ -149,7 +149,7 @@ theorem antiKummerSigmaTildeInvolutive_inverts_zeta_pow_rho_inv
   rw [← map_pow,
     show ((NumberField.IsCMField.complexConj K) (IsCyclotomicExtension.zeta p ℚ K)) ^ k =
       (IsCyclotomicExtension.zeta p ℚ K ^ k)⁻¹ by
-      rw [← map_pow, complexConj_zeta_pow_eq_inv hp_odd k],
+      rw [← map_pow, complexConj_zeta_pow_eq_inv k],
     map_inv₀, map_pow]
 
 /-- **Every K⁺-AlgEquiv `K ≃ K` commutes with complex conjugation**. -/
@@ -261,7 +261,7 @@ theorem antiKummerSigmaTildeInvolutive_inverts_g_aut_root
       simp [zetaL, map_pow],
       antiKummerSigmaTildeInvolutive_restricts_K (p := p) K α₀ hα₀ h_anti h_irr h_irr_g
       h_alpha_sq_ne,
-      complexConj_zeta_pow_eq_inv hp_odd k, map_inv₀, map_pow]
+      complexConj_zeta_pow_eq_inv k, map_inv₀, map_pow]
   have h_combined : zetaL ^ k = (zetaL ^ k)⁻¹ :=
     calc zetaL ^ k = r * sigmaT r := h_eq
       _ = sigmaT (r * sigmaT r) := h_sigma_apply.symm

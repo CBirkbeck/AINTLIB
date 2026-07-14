@@ -15,11 +15,11 @@ open BernoulliRegular NumberField NumberField.IsCMField
 namespace BernoulliRegular
 
 variable {p : ℕ} [hp : Fact p.Prime]
-variable {K : Type} [Field K] [NumberField K]
+variable {K : Type*} [Field K] [NumberField K]
   [IsCyclotomicExtension {p} ℚ K] [NumberField.IsCMField K]
 
 /-- **`complexConj K (ζ^m) = (ζ^m)⁻¹`** at K-level. -/
-theorem complexConj_zeta_pow_eq_inv (hp_odd : p ≠ 2) (m : ℕ) :
+theorem complexConj_zeta_pow_eq_inv (m : ℕ) :
     complexConj K (IsCyclotomicExtension.zeta p ℚ K ^ m) =
       (IsCyclotomicExtension.zeta p ℚ K ^ m)⁻¹ := by
   have hζ : IsPrimitiveRoot (IsCyclotomicExtension.zeta p ℚ K) p :=
