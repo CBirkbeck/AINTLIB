@@ -287,3 +287,33 @@ Sub-leaves (the sub-ticket plan; L4-iii is the deep one):
 Everything EXCEPT L4-iii (the group-law-machinery ↔ division-poly generic-point identity) is now either
 BUILT or a bounded assembly. L4-iii is the register-box deep grind — NOT the KM fleet blocker (the
 directive's functionFieldMap+Dominant.lean bridge infra AND the [KEY-KER] deliverable are both DONE).
+
+## SESSION APPEND (v10.215, KM) — [N]⁻¹Z-side fraction-field prerequisites for L4-v now BUILT
+
+The L4-v assembly (K4b-2 closes via `Algebra.IsAlgebraic.finrank_of_isFractionRing`) needs BOTH
+fraction fields + the scalar tower. The BASE side (`Frac Γ(Z) = K(E)`) was already built (L1/L2:
+`zChartSectionCoordRingEquiv`, `isFractionRing_zChartSection`). This session builds the `[N]⁻¹Z`-SIDE
+and its inputs (all green, `{propext,Classical.choice,Quot.sound}`, in `MulByHomDegree.lean`):
+
+- **`isFractionRing_top_of_isOpenImmersion`** (general reusable engine): for an open immersion
+  `j : V ⟶ X` with `V` integral affine and `X` irreducible, `Γ(V,⊤)` localises to *any*
+  `L ≃+* X.functionField` (via `functionField_isFractionRing_of_isAffineOpen` +
+  `functionFieldIsoOfOpenImmersion` + `IsLocalization.isLocalization_iff_of_ringEquiv`). Applied with
+  `V = [N]⁻¹Z`, `j = pullback.fst [N] Z.ι`, `X = projModel W`, `L = W.FunctionField`,
+  `e = projModelFunctionFieldEquiv`, this gives `Frac Γ([N]⁻¹Z) = K(E)` — the missing top side.
+  (Companion helper instance `nonempty_top_opens : [Nonempty X] → Nonempty (⊤ : X.Opens)`.)
+- **`mulByHom_surjective`**: `[N]` is surjective (fibre rank `≥1` at any image point via mathlib
+  `one_le_finrank_map`, constant on connected `E` via `isLocallyConstant_finrank`, then
+  `one_le_finrank_iff_surjective`). Fundamental reusable isogeny fact.
+- **`nonempty_preimage_pullback`**: `[N]⁻¹Z` nonempty (surjectivity + `exists_preimage_pullback` on a
+  point of `Z`). The `Nonempty` fibre input for the engine + `isIntegral_of_isOpenImmersion` (which
+  upgrades `[N]⁻¹Z` to integral: `IrreducibleSpace`+`IsReduced`, needed by both the engine and L3).
+
+**Net**: the K4b-2 `finrank_of_isFractionRing` assembly now has every hypothesis in hand EXCEPT the
+single scalar tower `IsScalarTower Γ(Z) K(E) K(E)` — i.e. that the appTop-route composite
+`Γ(Z) → Γ([N]⁻¹Z) → K(E)` agrees with the L2-route `Γ(Z) → K(E) →[mulByInt] K(E)`. **That tower IS
+L4-core** (= L4-iii's field-map identity: `functionFieldMap [N] = mulByInt_pullbackAlgHom`). So K4b-2
+is now cleanly `[fully-built fraction-field assembly] + [single L4-core scalar-tower sorry]`; L4-iii
+(the group-law-in-coords ↔ division-poly generic-point identity) remains the sole deep register-box
+grind. KM directive infra (functionFieldMap bridge + [KEY-KER]) and now the entire `[N]⁻¹Z`-side
+fraction-field engine are DONE.
