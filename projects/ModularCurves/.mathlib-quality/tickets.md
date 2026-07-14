@@ -2457,9 +2457,13 @@ adjudicates.
   `eval₂Hom_X` + the `adaptedCoeff`-specs; zero-coeffs by shortNF both sides);
   **[D3-E2]** the per-chart piece map `pullback Y.π V.ι ⟶ projModel univ` :=
   `Q.e.hom ≫ eqToHom (E1) ≫ projModelBaseChange` + π/zero-compat;
-  **[D3-E3]** overlap agreement (adapted uniqueness ⟹ transVC = 1 ⟹ the pieces
-  agree) + `Scheme.Cover.glueMorphisms` over the chart-affine pair cover of `Y.E`
-  (the `negHomOf`-glue pattern) → `classifyingTop : Y.curve.E ⟶ projModel univ`;
+  **[D3-E3 ★★ DONE
+  (2026-07-14, OMEGA, sorry-free + axiom-clean, ea59e3bc7)]** — `chartPiece_restrict`
+  + `chartPiece_index_congr` (adapted uniqueness through
+  `pointedIso_hom_of_transVC_eq_one`), `adaptedTotalCover`, `chartPiece_agree`
+  (pointwise common-affine refinement; open-immersion `of_comp` + embedding
+  injectivity), **`classifyingTop` + `classifyingTop_piece`** — GME 2.2.3's universal
+  comparison `Y.E ⟶ projModel(universal)` EXISTS;
   **[D3-E4]** `IsPullback`/`zero_w` fields → `classifyingEllHom : Y ⟶ X₁`;
   **D4** — `RepresentableBy` packaging (bijectivity from E12-B uniqueness +
   adapted-pullback functoriality).
