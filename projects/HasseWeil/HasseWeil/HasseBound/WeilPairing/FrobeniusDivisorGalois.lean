@@ -199,8 +199,7 @@ theorem ordAtInfty_algebraMap_crFrobEquiv
   · subst hu
     rw [map_zero, map_zero, map_zero, SmoothPlaneCurve.ordAtInfty_zero,
       SmoothPlaneCurve.ordAtInfty_zero]
-  · have hcu : crFrobEquiv W u ≠ 0 := fun h ↦
-      hu ((EquivLike.injective (crFrobEquiv W)) (by rw [h, map_zero]))
+  · have hcu : crFrobEquiv W u ≠ 0 := (map_ne_zero_iff _ (crFrobEquiv W).injective).mpr hu
     rw [(⟨((W.baseChange (AlgebraicClosure K)).map _).toAffine⟩ :
           SmoothPlaneCurve (AlgebraicClosure K)).ordAtInfty_algebraMap_coordinateRing _ hcu,
       (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
@@ -229,7 +228,7 @@ theorem ordAtInfty_ffFrobEquivRaw
   have hv_ne : v ≠ 0 := nonZeroDivisors.ne_zero hv_nzd
   have hv_map_ne : algebraMap _ (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField v ≠ 0 :=
     (map_ne_zero_iff _ (IsFractionRing.injective _ _)).mpr hv_ne
-  have hu_ne : u ≠ 0 := by intro h; exact hz (by rw [← heq, h, map_zero, zero_div])
+  have hu_ne : u ≠ 0 := fun h ↦ hz (by rw [← heq, h, map_zero, zero_div])
   have hu_map_ne : algebraMap _ (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField u ≠ 0 :=
     (map_ne_zero_iff _ (IsFractionRing.injective _ _)).mpr hu_ne
   rw [← heq, (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
@@ -242,12 +241,12 @@ theorem ordAtInfty_ffFrobEquivRaw
       (coeffFrobEquiv (K := K) : AlgebraicClosure K →+* AlgebraicClosure K)).toAffine.FunctionField
       (crFrobEquiv W u) ≠ 0 :=
     (map_ne_zero_iff _ (IsFractionRing.injective _ _)).mpr
-      (fun h ↦ hu_ne ((EquivLike.injective (crFrobEquiv W)) (by rw [h, map_zero])))
+      ((map_ne_zero_iff _ (crFrobEquiv W).injective).mpr hu_ne)
   have hcv_map_ne : algebraMap _ ((W.baseChange (AlgebraicClosure K)).map
       (coeffFrobEquiv (K := K) : AlgebraicClosure K →+* AlgebraicClosure K)).toAffine.FunctionField
       (crFrobEquiv W v) ≠ 0 :=
     (map_ne_zero_iff _ (IsFractionRing.injective _ _)).mpr
-      (fun h ↦ hv_ne ((EquivLike.injective (crFrobEquiv W)) (by rw [h, map_zero])))
+      ((map_ne_zero_iff _ (crFrobEquiv W).injective).mpr hv_ne)
   rw [(⟨((W.baseChange (AlgebraicClosure K)).map _).toAffine⟩ :
       SmoothPlaneCurve (AlgebraicClosure K)).ordAtInfty_div_eq_mul_inv _ hcu_map_ne hcv_map_ne,
     (⟨((W.baseChange (AlgebraicClosure K)).map _).toAffine⟩ :
