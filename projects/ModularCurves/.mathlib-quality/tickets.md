@@ -19049,3 +19049,17 @@ engines proven v10.201/202), (b) the affine-cover glue of fullLevelHom_isIso. DE
 (forced by a name clash): TorsionEtaleTriv's hand-built torsionBaseChangeHom/Inv/Iso (~150
 lines) replaced by TorsionFibre's pre-existing `torsion_baseChange_isPullback`.isoPullback —
 the v10.201 dedup-note item is closed. Full repo green 3831. (STREAM-G0)
+
+### v10.204-G0 — [C5B-2 L2b per-J] chain (i)-(iii) LANDED: the residual is the dictionary alone (STREAM-G0)
+Per-J progress inside fullLevelHom_gamma_bijective: (i) residue-extension descent
+(`bijective_lTensor_of_bijective_baseChange_ext`, ForMathlib — baseChange_baseChange +
+cancelBaseChange conjugation) applied, reducing to the algebraic closure k̄ (ambient tower
+instances sufficed); (ii) the k̄-algebra upgrade Ψ := Algebra.TensorProduct.map (id) ψalg with
+⇑(ψlin.baseChange k̄) = ⇑Ψ by rfl (ψalg's commutes from hAlgCompat); (iii) BOTH split instances:
+k̄⊗(A→R) via piRight + rid + of_algEquiv; k̄⊗Γtors via the étale frame (torsionπ_etale transfer →
+Algebra.Etale → base change → TotallySplit's IsSepClosed instance — ALL inferInstance).
+bijective_of_precomp_bijective applied. **THE ONLY REMAINING L2b-AFFINE CONTENT: the dictionary
+(iv)** — identify the dual point-map of Ψ with fullLevelFibreMap (PROVEN bijective) via
+liftEquiv (tensor-hom adjunction, mathlib Basic:774) + the sections dictionary
+(EtaleSectionsCount equivs, de-privatized) + torsionPointsEquiv + the per-label Γ-chase.
+Then block (b) cover-glue. (STREAM-G0)

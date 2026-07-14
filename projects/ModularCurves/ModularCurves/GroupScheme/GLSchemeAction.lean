@@ -23,6 +23,7 @@ trivialisation infra it shares.
 -/
 
 open AlgebraicGeometry CategoryTheory Limits
+open scoped TensorProduct
 
 universe u
 
@@ -183,7 +184,43 @@ theorem fullLevelHom_gamma_bijective {R : CommRingCat.{u}}
   intro J hJ
   refine LinearMap.bijective_lTensor_of_bijective_baseChange_ext ψlin J.ResidueField
     (AlgebraicClosure J.ResidueField) ?_
-  -- the geometric-fibre goal: the base-changed comparison over the algebraic closure
+  -- the k̄-algebra form of the base-changed comparison
+  set ψalg : ↑Γ(E.torsion N, ⊤) →ₐ[(R : Type u)] ((Fin 2 → ZMod N) → (R : Type u)) :=
+    { toRingHom := ψ.hom
+      commutes' := fun r => by
+        have h := congrArg (fun m : R ⟶ CommRingCat.of ((Fin 2 → ZMod N) →
+          (R : Type u)) => m.hom r) hAlgCompat
+        simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h
+        exact h } with hψalg
+  set Ψ : (AlgebraicClosure J.ResidueField) ⊗[↑R] (↑Γ(E.torsion N, ⊤) : Type u)
+      →ₐ[AlgebraicClosure J.ResidueField]
+      (AlgebraicClosure J.ResidueField) ⊗[↑R] ((Fin 2 → ZMod N) → (R : Type u)) :=
+    Algebra.TensorProduct.map (AlgHom.id (AlgebraicClosure J.ResidueField)
+      (AlgebraicClosure J.ResidueField)) ψalg with hΨ
+  have hfun : ⇑(ψlin.baseChange (AlgebraicClosure J.ResidueField)) = ⇑Ψ := rfl
+  rw [hfun]
+  -- split instances
+  haveI hsplitPi : Algebra.IsFiniteSplit (AlgebraicClosure J.ResidueField)
+      ((AlgebraicClosure J.ResidueField) ⊗[(R : Type u)]
+        ((Fin 2 → ZMod N) → (R : Type u))) := by
+    classical
+    refine Algebra.IsFiniteSplit.of_algEquiv
+      (S := (Fin 2 → ZMod N) → (AlgebraicClosure J.ResidueField)) ?_
+    exact ((Algebra.TensorProduct.piRight (R : Type u)
+      (AlgebraicClosure J.ResidueField) (AlgebraicClosure J.ResidueField)
+      (fun _ : Fin 2 → ZMod N => (R : Type u))).trans
+      (AlgEquiv.piCongrRight fun _ =>
+        Algebra.TensorProduct.rid (R : Type u) (AlgebraicClosure J.ResidueField)
+          (AlgebraicClosure J.ResidueField))).symm
+  haveI hEtBC : Algebra.Etale (AlgebraicClosure J.ResidueField)
+      ((AlgebraicClosure J.ResidueField) ⊗[(R : Type u)] ↑Γ(E.torsion N, ⊤)) :=
+    inferInstance
+  haveI hsplitT : Algebra.IsFiniteSplit (AlgebraicClosure J.ResidueField)
+      ((AlgebraicClosure J.ResidueField) ⊗[(R : Type u)] ↑Γ(E.torsion N, ⊤)) :=
+    inferInstance
+  refine Algebra.IsFiniteSplit.bijective_of_precomp_bijective Ψ ?_
+  -- the dual point-map is the (proven bijective) fibrewise label map, through the
+  -- sections dictionary
   sorry
 
 /-- **L2b over an affine base**: the conjugated `Spec`-morphism is an isomorphism, from
