@@ -92,6 +92,23 @@ noncomputable def projModelFunctionFieldEquiv {K : Type u} [Field K] (W : Weiers
     (projModel W).functionField W.toAffine.FunctionField
     (coordRingToZSection W).symm (MulEquivClass.map_nonZeroDivisors (coordRingToZSection W).symm))
 
+/-- **(generic helper)** The fibre rank of a finite flat morphism of *affine* schemes equals the
+`RingHom.finrank` of its ring map `f.appTop` (reindexing the point through `Y.isoSpec`). This is the
+public counterpart of mathlib's private `finrank_eq_of_isAffine`, assembled from `isoSpec` naturality
++ `finrank_SpecMap_eq_finrank` + the iso-square reindex `finrank_of_isPullback`. -/
+lemma finrank_of_isAffine {X Y : Scheme.{u}} (f : X ⟶ Y) [IsAffine X] [IsAffine Y]
+    [Flat f] [IsFinite f] (s : Y) :
+    f.finrank s = f.appTop.hom.finrank (Y.isoSpec.hom.base s) := by
+  have pb : IsPullback (𝟙 X) f (f ≫ Y.isoSpec.hom) Y.isoSpec.hom :=
+    IsPullback.of_horiz_isIso ⟨by simp⟩
+  have hreindex : f.finrank s = (f ≫ Y.isoSpec.hom).finrank (Y.isoSpec.hom.base s) :=
+    Scheme.Hom.finrank_of_isPullback (𝟙 X) f (f ≫ Y.isoSpec.hom) Y.isoSpec.hom pb s
+  haveI : IsFinite (Spec.map f.appTop) := (IsFinite.SpecMap_iff f.appTop).mpr f.finite_appTop
+  haveI : Flat (Spec.map f.appTop) := Flat.SpecMap_iff.mpr f.flat_appTop
+  rw [hreindex, ← Scheme.isoSpec_hom_naturality f,
+    Scheme.Hom.finrank_comp_left_of_isIso,
+    Scheme.Hom.finrank_SpecMap_eq_finrank f.finite_appTop f.flat_appTop]
+
 /-- The affine `Z`-chart of `projModel W` (the `X₂ ≠ 0` basic open), on which the global
 sections are `W.toAffine.CoordinateRing` (`coordRingToZSection`). -/
 noncomputable abbrev zChart {K : Type u} [Field K] (W : WeierstrassCurve K) : (projModel W).Opens :=
