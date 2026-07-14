@@ -1,5 +1,16 @@
-import Mathlib.Tactic
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import Mathlib.Algebra.Order.Archimedean.Basic
+import Mathlib.Algebra.Prime.Lemmas
+import Mathlib.Algebra.Ring.Basic
+import Mathlib.Data.Int.GCD
+import Mathlib.Data.Nat.Prime.Basic
 import Mathlib.Data.Nat.Prime.Infinite
+import Mathlib.Tactic.Linarith
+import Mathlib.Tactic.Ring
 
 /-!
 # Route 2A — the discriminant lemma (Silverman V.1.1, Leaf 5)
@@ -84,9 +95,9 @@ theorem qf_nonneg_of_nonneg_on_coprime {q t : ℤ} (hq : 0 < q) {p : ℕ} (hp : 
   exact qf_nonneg_of_disc hq hdisc
 
 /-- **The discriminant lemma, coprime-in-BOTH-coordinates form** (reviewer round-23, Route B).
-If the quadratic form `Q(r,s) = q·r² − t·rs + s²` (with `0 < q`) is non-negative on every `(r,s)` whose
-**both** coordinates are coprime to a prime `p` (`p ∤ r` and `p ∤ s`), then it is non-negative on
-**all** `(r,s)`.
+If the quadratic form `Q(r,s) = q·r² − t·rs + s²` (with `0 < q`) is non-negative on every `(r,s)`
+whose **both** coordinates are coprime to a prime `p` (`p ∤ r` and `p ∤ s`), then it is
+non-negative on **all** `(r,s)`.
 
 This weakens the hypothesis of `qf_nonneg_of_nonneg_on_coprime` (which assumes `≥ 0` on the larger
 set `{p ∤ s}`) to the smaller set `{p ∤ r ∧ p ∤ s}` — exactly the locus on which the Weil-pairing
