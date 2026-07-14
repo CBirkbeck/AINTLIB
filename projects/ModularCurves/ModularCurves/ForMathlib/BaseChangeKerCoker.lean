@@ -178,6 +178,55 @@ theorem Module.Finite.ker_of_surjective_of_projective [Module.Finite R P]
 
 end KerBaseChange
 
+section BoundedFlatComplex
+
+variable (M : ℕ → Type v) [∀ n, AddCommGroup (M n)] [∀ n, Module R (M n)]
+  (d : ∀ n, M n →ₗ[R] M (n + 1))
+
+/-- In a bounded exact sequence of flat modules, every cokernel is flat. This is the
+backwards induction used for a bounded flat Cech complex: the terminal cokernel is zero,
+and exactness identifies each preceding cokernel with the range of the next differential. -/
+theorem Module.Flat.quotient_range_of_bounded_exact [∀ n, Module.Flat R (M n)]
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hexact : ∀ n, n < N → Function.Exact (d n) (d (n + 1)))
+    (n : ℕ) (hn : n ≤ N) :
+    Module.Flat R (M (n + 1) ⧸ LinearMap.range (d n)) := by
+  induction hn using Nat.decreasingInduction with
+  | self => infer_instance
+  | @of_succ k hk ih =>
+      letI : Module.Flat R (M (k + 2) ⧸ LinearMap.range (d (k + 1))) := ih
+      letI : Module.Flat R (LinearMap.range (d (k + 1))) :=
+        Module.Flat.of_flat_quotient _
+      exact Module.Flat.of_linearEquiv
+        (Submodule.quotEquivOfEq (LinearMap.range (d k)) (LinearMap.ker (d (k + 1)))
+            (LinearMap.exact_iff.mp (hexact k hk)).symm ≪≫ₗ
+          LinearMap.quotKerEquivRange (d (k + 1)))
+
+/-- The degree-zero kernel of a bounded exact sequence of flat modules is flat. -/
+theorem Module.Flat.ker_of_bounded_exact [∀ n, Module.Flat R (M n)]
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hexact : ∀ n, n < N → Function.Exact (d n) (d (n + 1))) :
+    Module.Flat R (LinearMap.ker (d 0)) := by
+  letI : Module.Flat R (M 1 ⧸ LinearMap.range (d 0)) :=
+    Module.Flat.quotient_range_of_bounded_exact M d N hexact 0 (Nat.zero_le N)
+  letI : Module.Flat R (LinearMap.range (d 0)) := Module.Flat.of_flat_quotient _
+  letI : Module.Flat R (M 0 ⧸ LinearMap.ker (d 0)) :=
+    Module.Flat.of_linearEquiv (LinearMap.quotKerEquivRange (d 0))
+  exact Module.Flat.of_flat_quotient _
+
+/-- Kernels in degree zero commute with arbitrary tensor products for a bounded exact
+sequence of flat modules. -/
+theorem kerLTensorComparison_bijective_of_bounded_exact
+    (A : Type*) [AddCommGroup A] [Module R A] [∀ n, Module.Flat R (M n)]
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hexact : ∀ n, n < N → Function.Exact (d n) (d (n + 1))) :
+    Function.Bijective (kerLTensorComparison A (d 0)) := by
+  letI : Module.Flat R (M 1 ⧸ LinearMap.range (d 0)) :=
+    Module.Flat.quotient_range_of_bounded_exact M d N hexact 0 (Nat.zero_le N)
+  exact kerLTensorComparison_bijective A (d 0)
+
+end BoundedFlatComplex
+
 private theorem baseChange_surjective_iff_subsingleton_coker
     (A : Type*) [CommRing A] [Algebra R A] (f : P →ₗ[R] Q) :
     Function.Surjective (f.baseChange A) ↔
