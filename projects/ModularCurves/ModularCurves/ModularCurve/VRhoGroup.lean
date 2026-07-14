@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.ModularCurve.YRho
 
 /-!
@@ -144,14 +149,14 @@ noncomputable def rhoSqFst (D : GaloisRepData N) :
     rhoSqContAction D ⟶ rhoContAction D :=
   ObjectProperty.homMk
     { hom := FintypeCat.homMk Prod.fst
-      comm := fun σ => FintypeCat.hom_ext _ _ fun vw => rfl }
+      comm := fun _ => FintypeCat.hom_ext _ _ fun _ => rfl }
 
 /-- Second projection of the square. -/
 noncomputable def rhoSqSnd (D : GaloisRepData N) :
     rhoSqContAction D ⟶ rhoContAction D :=
   ObjectProperty.homMk
     { hom := FintypeCat.homMk Prod.snd
-      comm := fun σ => FintypeCat.hom_ext _ _ fun vw => rfl }
+      comm := fun _ => FintypeCat.hom_ext _ _ fun _ => rfl }
 
 /-- The square with its projections is the categorical binary product in the category
 of continuous Galois sets (leaf F1c-2). -/
