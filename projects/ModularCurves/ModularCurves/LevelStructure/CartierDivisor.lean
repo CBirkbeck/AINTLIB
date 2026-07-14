@@ -204,7 +204,7 @@ with `r • I ≤ (f)`, and inverting `r` (a basic open around the section) make
 section KerPrincipal
 
 /-- Expansion of an element of a module with a singleton basis. -/
-private theorem kerPrincipalAux_basis_expand {A : Type u} [CommRing A] {M : Type*}
+private theorem KerPrincipal.basis_expand {A : Type u} [CommRing A] {M : Type*}
     [AddCommGroup M] [Module A M] {ι : Type*} [Unique ι] (b : Module.Basis ι A M)
     (m : M) : m = b.repr m default • b default := by
   apply b.repr.injective
@@ -215,7 +215,7 @@ private theorem kerPrincipalAux_basis_expand {A : Type u} [CommRing A] {M : Type
 /-- The kernel of a retraction `σ` of an algebra with `Ω[A⁄R]` free of rank one contains
 an element whose differential's coordinate maps to `1` under `σ`. This is surjectivity of
 (the retraction-twisted form of) the conormal map `I/I² → R ⊗[A] Ω[A⁄R]`. -/
-private theorem kerPrincipalAux_exists_repr_one {R A : Type u} [CommRing R] [CommRing A]
+private theorem KerPrincipal.exists_repr_one {R A : Type u} [CommRing R] [CommRing A]
     [Algebra R A] {ι : Type*} [Unique ι] (b : Module.Basis ι A (Ω[A⁄R]))
     (σ : A →ₐ[R] R) :
     ∃ x ∈ RingHom.ker σ,
@@ -272,7 +272,7 @@ open scoped Pointwise in
 /-- The **canonical conormal derivation** attached to an `R`-algebra retraction
 `σ : A →ₐ[R] R`: the `R`-derivation `A → A ⧸ (ker σ)²` given by `a ↦ [a − σ(a)]`. It is a
 derivation because its Leibniz defect `(a − σa)(c − σc)` lies in `(ker σ)²`. -/
-private def kerPrincipalAux_conormalDerivation {R A : Type u} [CommRing R] [CommRing A]
+private def KerPrincipal.conormalDerivation {R A : Type u} [CommRing R] [CommRing A]
     [Algebra R A] (σ : A →ₐ[R] R) :
     Derivation R A (A ⧸ (RingHom.ker σ • RingHom.ker σ)) where
   toLinearMap :=
@@ -304,7 +304,7 @@ The generator is found via the (inverse of the) conormal isomorphism
 `I/I² ≅ R ⊗[A] Ω[A⁄R]`, both directions of which are proved here by hand: surjectivity
 because `d(φσa) = 0`, injectivity via the canonical derivation `a ↦ [a - φ(σ a)]` into
 `A ⧸ I•I`. -/
-private theorem kerPrincipalAux_le_span_sup {R A : Type u} [CommRing R] [CommRing A]
+private theorem KerPrincipal.le_span_sup {R A : Type u} [CommRing R] [CommRing A]
     [Algebra R A] {ι : Type*} [Unique ι] (b : Module.Basis ι A (Ω[A⁄R]))
     (σ : A →ₐ[R] R) :
     ∃ f ∈ RingHom.ker σ,
@@ -328,15 +328,15 @@ private theorem kerPrincipalAux_le_span_sup {R A : Type u} [CommRing R] [CommRin
     rw [h1, map_smul, Finsupp.smul_apply, smul_eq_mul]
   -- expansion of a differential in the singleton basis
   have hDeq : ∀ x : A, KaehlerDifferential.D R A x = κ x • b default := fun x =>
-    kerPrincipalAux_basis_expand b (KaehlerDifferential.D R A x)
-  -- Step (i): the conormal generator, from `kerPrincipalAux_exists_repr_one`
-  obtain ⟨f, hfI, hκf₀⟩ := kerPrincipalAux_exists_repr_one b σ
+    KerPrincipal.basis_expand b (KaehlerDifferential.D R A x)
+  -- Step (i): the conormal generator, from `KerPrincipal.exists_repr_one`
+  obtain ⟨f, hfI, hκf₀⟩ := KerPrincipal.exists_repr_one b σ
   rw [← hI] at hfI
   have hκf : σ (κ f) = 1 := hκf₀
   refine ⟨f, hfI, ?_⟩
   -- Step (ii): the canonical derivation into `A ⧸ I•I`
   set J : Ideal A := I • I with hJdef
-  set 𝔇 : Derivation R A (A ⧸ J) := kerPrincipalAux_conormalDerivation σ with h𝔇def
+  set 𝔇 : Derivation R A (A ⧸ J) := KerPrincipal.conormalDerivation σ with h𝔇def
   have h𝔇 : ∀ a : A, 𝔇 a = Submodule.Quotient.mk (a - algebraMap R A (σ a)) := fun a => rfl
   -- the image of the lift lies in the image of `I`
   obtain ⟨i₀, hi₀I, hi₀⟩ : ∃ i₀ ∈ I,
@@ -380,7 +380,7 @@ private theorem kerPrincipalAux_le_span_sup {R A : Type u} [CommRing R] [CommRin
 /-- For a nontrivial standard-smooth algebra of relative dimension `1`, the chosen basis
 index type of the (free, rank-one) module `Ω[A⁄R]` is a singleton. -/
 @[reducible]
-private noncomputable def kerPrincipalAux_unique_index (R A : Type u) [CommRing R] [CommRing A]
+private noncomputable def KerPrincipal.unique_index (R A : Type u) [CommRing R] [CommRing A]
     [Algebra R A] [Nontrivial A] [Algebra.IsStandardSmoothOfRelativeDimension 1 R A] :
     haveI : Algebra.IsStandardSmooth R A :=
       Algebra.IsStandardSmoothOfRelativeDimension.isStandardSmooth 1
@@ -397,16 +397,16 @@ private noncomputable def kerPrincipalAux_unique_index (R A : Type u) [CommRing 
 /-- Existence of a "Nakayama-inverted" generator for the kernel of a retraction of a
 standard-smooth algebra of relative dimension one: `f ∈ I` and `r ≡ 1 mod I` with
 `r·I ⊆ (f)`. (T-D22 pure-algebra heart.) -/
-private theorem kerPrincipalAux_exists_gen {R A : Type u} [CommRing R] [CommRing A]
+private theorem KerPrincipal.exists_gen {R A : Type u} [CommRing R] [CommRing A]
     [Algebra R A] [Nontrivial A] [Algebra.IsStandardSmoothOfRelativeDimension 1 R A]
     (σ : A →ₐ[R] R) :
     ∃ f ∈ RingHom.ker σ, ∃ r : A, r - 1 ∈ RingHom.ker σ ∧
       ∀ x ∈ RingHom.ker σ, r * x ∈ Ideal.span {f} := by
   haveI : Algebra.IsStandardSmooth R A :=
     Algebra.IsStandardSmoothOfRelativeDimension.isStandardSmooth 1
-  haveI := kerPrincipalAux_unique_index R A
+  haveI := KerPrincipal.unique_index R A
   obtain ⟨f, hfI, hle⟩ :=
-    kerPrincipalAux_le_span_sup (Module.Free.chooseBasis A (Ω[A⁄R])) σ
+    KerPrincipal.le_span_sup (Module.Free.chooseBasis A (Ω[A⁄R])) σ
   have hfg : (RingHom.ker σ).FG := by
     have hsurj : Function.Surjective σ := fun r =>
       ⟨algebraMap R A r, by simp⟩
@@ -417,12 +417,12 @@ private theorem kerPrincipalAux_exists_gen {R A : Type u} [CommRing R] [CommRing
     simpa [smul_eq_mul] using hrsm (Submodule.smul_mem_pointwise_smul x r _ hx)⟩
 
 open TensorProduct in
-/-- **Vanishing in the smoothness localization** (heart of `kerPrincipalAux_nzd`). With `A`
+/-- **Vanishing in the smoothness localization** (heart of `KerPrincipal.nzd`). With `A`
 standard-smooth of relative dimension one over `R`, let `g` be the coordinate of `d f` in the
 rank-one free module `Ω[A⁄R]`. On the localization `A' := A[1/g]`, `d f` *generates* `Ω[A'⁄R]`,
 so `A'` is formally smooth — hence smooth, flat, and `X`-torsion-free — over `P := R[X]`
 (`X ↦ f`). Consequently any `x` with `x·f = 0` in `A` maps to `0` in `A'`. -/
-private theorem kerPrincipalAux_kill {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
+private theorem KerPrincipal.kill {R A : Type u} [CommRing R] [CommRing A] [Algebra R A]
     [Algebra.IsStandardSmoothOfRelativeDimension 1 R A] [Module.Free A (Ω[A⁄R])]
     [Unique (Module.Free.ChooseBasisIndex A (Ω[A⁄R]))] (f : A) :
     ∀ x : A, x * f = 0 →
@@ -443,7 +443,7 @@ private theorem kerPrincipalAux_kill {R A : Type u} [CommRing R] [CommRing A] [A
     simpa using h1
   haveI : Algebra.IsStandardSmooth R A' :=
     Algebra.IsStandardSmoothOfRelativeDimension.isStandardSmooth 1
-  haveI := kerPrincipalAux_unique_index R A'
+  haveI := KerPrincipal.unique_index R A'
   set f' : A' := algebraMap A A' f with hf'def
   have hgu : IsUnit (algebraMap A A' g) :=
     IsLocalization.map_units A' (⟨g, Submonoid.mem_powers g⟩ : Submonoid.powers g)
@@ -452,7 +452,7 @@ private theorem kerPrincipalAux_kill {R A : Type u} [CommRing R] [CommRing A] [A
     have hDf' : KaehlerDifferential.D R A' f'
         = algebraMap A A' g • KaehlerDifferential.map R R A A' (b default) := by
       rw [hf'def, ← KaehlerDifferential.map_D R R A A' f]
-      conv_lhs => rw [kerPrincipalAux_basis_expand b (KaehlerDifferential.D R A f)]
+      conv_lhs => rw [KerPrincipal.basis_expand b (KaehlerDifferential.D R A f)]
       rw [map_smul, algebraMap_smul]
     obtain ⟨u, hu⟩ := hgu
     have hb0 : KaehlerDifferential.map R R A A' (b default)
@@ -469,7 +469,7 @@ private theorem kerPrincipalAux_kill {R A : Type u} [CommRing R] [CommRing A] [A
       obtain ⟨x, rfl⟩ := hm
       refine ⟨algebraMap A A' (b.repr (KaehlerDifferential.D R A x) default) * ↑u⁻¹, ?_⟩
       show KaehlerDifferential.map R R A A' (KaehlerDifferential.D R A x) = _
-      conv_lhs => rw [kerPrincipalAux_basis_expand b (KaehlerDifferential.D R A x)]
+      conv_lhs => rw [KerPrincipal.basis_expand b (KaehlerDifferential.D R A x)]
       rw [map_smul,
         show (b.repr (KaehlerDifferential.D R A x) default)
             • KaehlerDifferential.map R R A A' (b default)
@@ -611,7 +611,7 @@ formally smooth over `P := R[X]` (`X ↦ f`) by the Jacobi–Zariski sequence, h
 nonzerodivisor in `A'`. Finally, if `x·f = 0` in `A` then `x` dies in `A'`, i.e.
 `gⁿ·x = 0`; writing `gⁿ = φ((σ g)ⁿ) + f·c` (binomially, since `g ≡ φ(σ g) mod (f)`)
 and using `x·f = 0` once more gives `φ((σ g)ⁿ)·x = 0` with a unit factor, so `x = 0`. -/
-private theorem kerPrincipalAux_nzd {R A : Type u} [CommRing R] [CommRing A]
+private theorem KerPrincipal.nzd {R A : Type u} [CommRing R] [CommRing A]
     [Algebra R A] [Algebra.IsStandardSmoothOfRelativeDimension 1 R A]
     (σ : A →ₐ[R] R) (f : A) (hf : RingHom.ker σ = Ideal.span {f}) :
     f ∈ nonZeroDivisors A := by
@@ -623,7 +623,7 @@ private theorem kerPrincipalAux_nzd {R A : Type u} [CommRing R] [CommRing A]
   · exact fun x _ => Subsingleton.elim x 0
   haveI : Algebra.IsStandardSmooth R A :=
     Algebra.IsStandardSmoothOfRelativeDimension.isStandardSmooth 1
-  haveI := kerPrincipalAux_unique_index R A
+  haveI := KerPrincipal.unique_index R A
   set b := Module.Free.chooseBasis A (Ω[A⁄R]) with hbdef
   -- the coordinate of `d f`, whose image under `σ` is a unit
   set g : A := b.repr (KaehlerDifferential.D R A f) default with hgdef
@@ -631,7 +631,7 @@ private theorem kerPrincipalAux_nzd {R A : Type u} [CommRing R] [CommRing A]
     have h0 : f ∈ RingHom.ker σ := hf ▸ Ideal.subset_span (Set.mem_singleton f)
     rwa [RingHom.mem_ker] at h0
   have hunit : IsUnit (σ g) := by
-    obtain ⟨f₀, hf₀I, hf₀κ⟩ := kerPrincipalAux_exists_repr_one b σ
+    obtain ⟨f₀, hf₀I, hf₀κ⟩ := KerPrincipal.exists_repr_one b σ
     obtain ⟨c, hc⟩ := Ideal.mem_span_singleton'.mp (hf ▸ hf₀I)
     rw [← hc] at hf₀κ
     have hkmul : b.repr (KaehlerDifferential.D R A (c * f)) default
@@ -644,7 +644,7 @@ private theorem kerPrincipalAux_nzd {R A : Type u} [CommRing R] [CommRing A]
   -- the localization inverting `g`
   set A' := Localization.Away g with hA'def
   -- the key vanishing: any `x` with `x * f = 0` dies in `A'`
-  have hkill : ∀ x : A, x * f = 0 → algebraMap A A' x = 0 := kerPrincipalAux_kill f
+  have hkill : ∀ x : A, x * f = 0 → algebraMap A A' x = 0 := KerPrincipal.kill f
   -- endgame: from `gⁿ x = 0` and `g ≡ φ(σ g) mod (f)`, conclude `x = 0`
   intro x hx
   have h1 : algebraMap A A' x = 0 := hkill x hx
@@ -681,7 +681,7 @@ private theorem kerPrincipalAux_nzd {R A : Type u} [CommRing R] [CommRing A]
 
 /-- Mapping a `⊆`-witnessed principal ideal into a localization inverting the Nakayama
 multiplier makes it exactly principal. -/
-private lemma kerPrincipalAux_ideal_map_span {A B : Type u} [CommRing A] [CommRing B]
+private lemma KerPrincipal.ideal_map_span {A B : Type u} [CommRing A] [CommRing B]
     [Algebra A B] (r : A) [IsLocalization.Away r B] (I : Ideal A) (f : A) (hfI : f ∈ I)
     (hr : ∀ x ∈ I, r * x ∈ Ideal.span {f}) :
     I.map (algebraMap A B) = Ideal.span {algebraMap A B f} := by
@@ -702,7 +702,7 @@ private lemma kerPrincipalAux_ideal_map_span {A B : Type u} [CommRing A] [CommRi
 variable (π) in
 /-- Composing `π.appLE` with `z.appLE` along a "retraction pair" of opens gives the
 identity, because `z ≫ π = 𝟙 S`. -/
-private lemma kerPrincipalAux_retraction (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+private lemma KerPrincipal.retraction (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
     {U : S.Opens} {V : C.Opens} (hVU : V ≤ π ⁻¹ᵁ U) (hUV : U ≤ z ⁻¹ᵁ V) :
     π.appLE U V hVU ≫ z.appLE V U hUV = 𝟙 Γ(S, U) := by
   rw [Scheme.Hom.appLE_comp_appLE]
@@ -715,7 +715,7 @@ private lemma kerPrincipalAux_retraction (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
 
 /-- On a retraction pair `(U, V)`, points of `U` land via `z` in any basic open of `V`
 whose "value along the section" is `1`. -/
-private lemma kerPrincipalAux_le_preimage_basicOpen (z : S ⟶ C)
+private lemma KerPrincipal.le_preimage_basicOpen (z : S ⟶ C)
     {U : S.Opens} {V : C.Opens} (hUV : U ≤ z ⁻¹ᵁ V) (t : Γ(C, V))
     (ht : z.appLE V U hUV t = 1) : U ≤ z ⁻¹ᵁ C.basicOpen t := by
   intro s hs
@@ -735,7 +735,7 @@ private lemma kerPrincipalAux_le_preimage_basicOpen (z : S ⟶ C)
 variable (π) in
 /-- The preimage under the section of an open contained in `π ⁻¹ᵁ U` is contained
 in `U`. -/
-private lemma kerPrincipalAux_preimage_le (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+private lemma KerPrincipal.preimage_le (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
     {U : S.Opens} {V : C.Opens} (hVU : V ≤ π ⁻¹ᵁ U) : z ⁻¹ᵁ V ≤ U := by
   intro s hs
   have h1 : π.base (z.base s) ∈ U := hVU hs
@@ -748,11 +748,11 @@ private lemma kerPrincipalAux_preimage_le (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
 variable (π) in
 /-- Kernels of `z.app` and `z.appLE` agree on a retraction pair (the two target opens
 are equal). -/
-private lemma kerPrincipalAux_ker_app (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+private lemma KerPrincipal.ker_app (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
     {U : S.Opens} {V : C.Opens} (hVU : V ≤ π ⁻¹ᵁ U) (hUV : U ≤ z ⁻¹ᵁ V) :
     RingHom.ker (z.app V).hom = RingHom.ker (z.appLE V U hUV).hom := by
   haveI h3 : IsIso (homOfLE hUV) :=
-    ⟨homOfLE (kerPrincipalAux_preimage_le π z hz hVU), Subsingleton.elim _ _,
+    ⟨homOfLE (KerPrincipal.preimage_le π z hz hVU), Subsingleton.elim _ _,
       Subsingleton.elim _ _⟩
   have h2 : Function.Injective (S.presheaf.map (homOfLE hUV).op).hom :=
     (ConcreteCategory.bijective_of_isIso (S.presheaf.map (homOfLE hUV).op)).1
@@ -765,7 +765,7 @@ private lemma kerPrincipalAux_ker_app (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
 variable (π) in
 /-- Transport of standard-smoothness of relative dimension `1` along a simultaneous
 basic-open shrink of source and target (`IsAffineOpen.appLE_eq_away_map`). -/
-private lemma kerPrincipalAux_stdSmooth_shrink {U₀ : S.Opens} {V₀ : C.Opens}
+private lemma KerPrincipal.stdSmooth_shrink {U₀ : S.Opens} {V₀ : C.Opens}
     (hU₀ : IsAffineOpen U₀) (hV₀ : IsAffineOpen V₀) (e₀ : V₀ ≤ π ⁻¹ᵁ U₀)
     (hstd : RingHom.IsStandardSmoothOfRelativeDimension 1 (π.appLE U₀ V₀ e₀).hom)
     (g : Γ(S, U₀)) :
@@ -781,7 +781,7 @@ private lemma kerPrincipalAux_stdSmooth_shrink {U₀ : S.Opens} {V₀ : C.Opens}
 variable (π) in
 /-- Transport of standard-smoothness of relative dimension `1` along a basic-open
 shrink of the source only. -/
-private lemma kerPrincipalAux_stdSmooth_res {U : S.Opens} {V : C.Opens}
+private lemma KerPrincipal.stdSmooth_res {U : S.Opens} {V : C.Opens}
     (hV : IsAffineOpen V) (hVU : V ≤ π ⁻¹ᵁ U)
     (hstd : RingHom.IsStandardSmoothOfRelativeDimension 1 (π.appLE U V hVU).hom)
     (t : Γ(C, V)) :
@@ -886,10 +886,10 @@ theorem exists_affineOpen_ker_principal_nonZeroDivisor (π : C ⟶ S) [IsSeparat
       exact hs
     -- standard smoothness of relative dimension 1 on the pair
     have hstd₁ : RingHom.IsStandardSmoothOfRelativeDimension 1 (π.appLE U₁ V₁ hVU₁).hom :=
-      kerPrincipalAux_stdSmooth_shrink π hU₀ hV₀ e₀ hstd₀ g
+      KerPrincipal.stdSmooth_shrink π hU₀ hV₀ e₀ hstd₀ g
     set φ₁ := π.appLE U₁ V₁ hVU₁ with hφ₁def
     set σ₁ := z.appLE V₁ U₁ hUV₁ with hσ₁def
-    have hretr₁ : φ₁ ≫ σ₁ = 𝟙 Γ(S, U₁) := kerPrincipalAux_retraction π z hz hVU₁ hUV₁
+    have hretr₁ : φ₁ ≫ σ₁ = 𝟙 Γ(S, U₁) := KerPrincipal.retraction π z hz hVU₁ hUV₁
     letI : Algebra Γ(S, U₁) Γ(C, V₁) := φ₁.hom.toAlgebra
     haveI halg₁ : Algebra.IsStandardSmoothOfRelativeDimension 1 Γ(S, U₁) Γ(C, V₁) := hstd₁
     set σA : Γ(C, V₁) →ₐ[Γ(S, U₁)] Γ(S, U₁) :=
@@ -904,12 +904,12 @@ theorem exists_affineOpen_ker_principal_nonZeroDivisor (π : C ⟶ S) [IsSeparat
         ((Ideal.eq_top_iff_one _).mpr
           (by rw [Subsingleton.elim (1 : Γ(C, V₁)) 0]; exact zero_mem _))
     -- the pure-algebra heart
-    obtain ⟨f₀, hf₀I, r, hr1, hrmul⟩ := kerPrincipalAux_exists_gen σA
+    obtain ⟨f₀, hf₀I, r, hr1, hrmul⟩ := KerPrincipal.exists_gen σA
     have hkerA : RingHom.ker σA = RingHom.ker σ₁.hom := rfl
     -- the kernel-ideal dictionary at `V₁`
     have hker₁ : (Scheme.Hom.ker z).ideal ⟨V₁, hV₁⟩ = RingHom.ker σ₁.hom := by
       rw [Scheme.Hom.ker_apply]
-      exact kerPrincipalAux_ker_app π z hz hVU₁ hUV₁
+      exact KerPrincipal.ker_app π z hz hVU₁ hUV₁
     have hr1' : r - 1 ∈ (Scheme.Hom.ker z).ideal ⟨V₁, hV₁⟩ := by
       rw [hker₁, ← hkerA]; exact hr1
     -- the final affine open `V₂ = D(r)`
@@ -946,7 +946,7 @@ theorem exists_affineOpen_ker_principal_nonZeroDivisor (π : C ⟶ S) [IsSeparat
       have h2 : σ₁.hom r - 1 = 0 := by rwa [map_sub, map_one] at h1
       exact sub_eq_zero.mp h2
     have hUV₂ : U₁ ≤ z ⁻¹ᵁ V₂ :=
-      kerPrincipalAux_le_preimage_basicOpen z hUV₁ r hσ₁r
+      KerPrincipal.le_preimage_basicOpen z hUV₁ r hσ₁r
     have hVU₂ : V₂ ≤ π ⁻¹ᵁ U₁ := (C.basicOpen_le r).trans hVU₁
     letI := hV₁.isLocalization_basicOpen r
     -- the generator over `V₂`
@@ -960,14 +960,14 @@ theorem exists_affineOpen_ker_principal_nonZeroDivisor (π : C ⟶ S) [IsSeparat
       rw [h1', hker₁, ← hkerA]
       have h3 : (C.presheaf.map (homOfLE (C.basicOpen_le r)).op).hom
           = algebraMap Γ(C, V₁) Γ(C, V₂) := rfl
-      rw [h3, kerPrincipalAux_ideal_map_span r (RingHom.ker σA) f₀ hf₀I hrmul, hfalg]
+      rw [h3, KerPrincipal.ideal_map_span r (RingHom.ker σA) f₀ hf₀I hrmul, hfalg]
     -- nonzerodivisor via the isolated leg
     have hstd₂ : RingHom.IsStandardSmoothOfRelativeDimension 1
         (π.appLE U₁ V₂ ((C.basicOpen_le r).trans hVU₁)).hom :=
-      kerPrincipalAux_stdSmooth_res π hV₁ hVU₁ hstd₁ r
+      KerPrincipal.stdSmooth_res π hV₁ hVU₁ hstd₁ r
     set φ₂ := π.appLE U₁ V₂ hVU₂ with hφ₂def
     set σ₂ := z.appLE V₂ U₁ hUV₂ with hσ₂def
-    have hretr₂ : φ₂ ≫ σ₂ = 𝟙 Γ(S, U₁) := kerPrincipalAux_retraction π z hz hVU₂ hUV₂
+    have hretr₂ : φ₂ ≫ σ₂ = 𝟙 Γ(S, U₁) := KerPrincipal.retraction π z hz hVU₂ hUV₂
     letI : Algebra Γ(S, U₁) Γ(C, V₂) := φ₂.hom.toAlgebra
     haveI halg₂ : Algebra.IsStandardSmoothOfRelativeDimension 1 Γ(S, U₁) Γ(C, V₂) := hstd₂
     set σA₂ : Γ(C, V₂) →ₐ[Γ(S, U₁)] Γ(S, U₁) :=
@@ -978,9 +978,9 @@ theorem exists_affineOpen_ker_principal_nonZeroDivisor (π : C ⟶ S) [IsSeparat
     have hker₂ : RingHom.ker σA₂ = Ideal.span {f} := by
       have h1 : (Scheme.Hom.ker z).ideal ⟨V₂, hV₂⟩ = RingHom.ker σ₂.hom := by
         rw [Scheme.Hom.ker_apply]
-        exact kerPrincipalAux_ker_app π z hz hVU₂ hUV₂
+        exact KerPrincipal.ker_app π z hz hVU₂ hUV₂
       rw [show RingHom.ker σA₂ = RingHom.ker σ₂.hom from rfl, ← h1, hideal]
-    exact ⟨⟨V₂, hV₂⟩, hcV₂, f, hideal, kerPrincipalAux_nzd σA₂ f hker₂⟩
+    exact ⟨⟨V₂, hV₂⟩, hcV₂, f, hideal, KerPrincipal.nzd σA₂ f hker₂⟩
 
 /-- The divisor of a section of a smooth separated relative curve is an effective
 Cartier divisor in the official local-principal-nonzerodivisor sense. This direct
@@ -1271,14 +1271,14 @@ private theorem sectionsIdealAux_piece_free (π : C ⟶ S) [IsSeparated π] {n :
     { toRingHom := ((P i.1).1.appLE W'.1 U.1 (hsec i.1 i.2)).hom
       commutes' := fun a ↦ by
         have h2 := congrArg (fun (w : Γ(S, U.1) ⟶ Γ(S, U.1)) ↦ w.hom a)
-          (kerPrincipalAux_retraction π (P i.1).1 (P i.1).2 hVU (hsec i.1 i.2))
+          (KerPrincipal.retraction π (P i.1).1 (P i.1).2 hVU (hsec i.1 i.2))
         simpa [halg] using h2 } with hσW
   have hkerW : ∀ i : ↥g, RingHom.ker (σW i) = Ideal.span {fW i} := by
     intro i
     haveI : IsClosedImmersion (P i.1).1 := sectionsIdealAux_isClosedImmersion (P i.1).2
     have h1 : RingHom.ker ((P i.1).1.app W'.1).hom
         = RingHom.ker ((P i.1).1.appLE W'.1 U.1 (hsec i.1 i.2)).hom :=
-      kerPrincipalAux_ker_app π (P i.1).1 (P i.1).2 hVU (hsec i.1 i.2)
+      KerPrincipal.ker_app π (P i.1).1 (P i.1).2 hVU (hsec i.1 i.2)
     have h2 : (Scheme.Hom.ker (P i.1).1).ideal W' = RingHom.ker ((P i.1).1.app W'.1).hom :=
       Scheme.Hom.ker_apply _ _
     show RingHom.ker ((P i.1).1.appLE W'.1 U.1 (hsec i.1 i.2)).hom = _

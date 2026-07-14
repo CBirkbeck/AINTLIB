@@ -1221,7 +1221,8 @@ theorem pole_of_smul_infty_M (M : Matrix (Fin 2) (Fin 2) ℤ) (hM : M.det ≠ 0)
     rw [Matrix.det_fin_two]; push_cast; ring
   rw [hpoleR] at hdet
   have hz' : (M 1 0 : ℝ) = 0 := by exact_mod_cast hz
-  rw [hz'] at hdet; simp at hdet; exact hM (by exact_mod_cast hdet.symm)
+  rw [hz'] at hdet; simp only [Fin.isValue, mul_zero, sub_self] at hdet
+  exact hM (by exact_mod_cast hdet.symm)
 
 /-- **Determinant-`p` boundary naturality (the isolated geodesic-period crux, `μ ≡ 0`).**  The
 det-`p` analogue of `cuspBoundary_mob_naturality_sl`.  For an integer matrix `M` of positive
@@ -1812,7 +1813,7 @@ theorem commute_heckeT_ppow_mf {p : ℕ} (hp : Nat.Prime p)
     (hTp : Commute T (heckeT_p_all k p hp)) (hTd : Commute T (diamondOp_n k p)) (r : ℕ) :
     Commute T (heckeT_ppow k p hp r) := by
   induction r using Nat.twoStepInduction with
-  | zero => simpa using Commute.one_right T
+  | zero => simp
   | one => simpa using hTp
   | more r ih1 ih2 =>
     rw [heckeT_ppow_succ_succ]
@@ -1850,7 +1851,7 @@ theorem commute_heckeT_p_all_heckeT_n {p : ℕ} (hp : Nat.Prime p) (m : ℕ) [Ne
     intro hj0 hpj
     haveI := hj0
     rcases eq_or_ne j 1 with rfl | hj1
-    · simpa using Commute.one_right _
+    · simp
     · have hj : 1 < j := by have := NeZero.ne j; omega
       rw [heckeT_n_unfold k j hj]
       set q := j.minFac with hq_def
