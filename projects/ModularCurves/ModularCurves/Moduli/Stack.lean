@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.Moduli.EllCategory
 import ModularCurves.Moduli.GammaH
 import Mathlib.AlgebraicGeometry.Sites.Fpqc
@@ -104,11 +109,8 @@ theorem descend_hom_of_effectiveEpi {T T' Z : Scheme.{u}} (f : T' ⟶ T) [Effect
       Limits.pullback.lift_snd _ _ _
     calc g₁ ≫ ζ'
         = (Limits.pullback.lift g₁ g₂ hg ≫ Limits.pullback.fst f f) ≫ ζ' := by rw [hl1]
-      _ = Limits.pullback.lift g₁ g₂ hg ≫ Limits.pullback.fst f f ≫ ζ' := by
-          rw [Category.assoc]
-      _ = Limits.pullback.lift g₁ g₂ hg ≫ Limits.pullback.snd f f ≫ ζ' := by rw [hcoeq]
       _ = (Limits.pullback.lift g₁ g₂ hg ≫ Limits.pullback.snd f f) ≫ ζ' := by
-          rw [Category.assoc]
+          rw [Category.assoc, hcoeq, Category.assoc]
       _ = g₂ ≫ ζ' := by rw [hl2]
   exact ⟨EffectiveEpi.desc f ζ' h, EffectiveEpi.fac f ζ' h,
     fun ζ hζ => EffectiveEpi.uniq f ζ' h ζ hζ⟩
@@ -136,8 +138,8 @@ theorem moduliProblem_fppf_separated (R : CommRingCat.{u}) (P : ModuliProblem R)
   -- unpack the relative-representability datum for `X`
   obtain ⟨Z, fZ, eqv, hnat⟩ := hP X
   -- transport `a`, `b` back to `Z`-points over `g`
-  set ha := (eqv g).symm a with hha
-  set hb := (eqv g).symm b with hhb
+  set ha := (eqv g).symm a
+  set hb := (eqv g).symm b
   have haval : eqv g ha = a := (eqv g).apply_symm_apply a
   have hbval : eqv g hb = b := (eqv g).apply_symm_apply b
   -- the restriction of `a` along `f` is `eqv` of the restricted `Z`-point (naturality)
@@ -184,7 +186,7 @@ theorem moduliProblem_fppf_descent (R : CommRingCat.{u}) (P : ModuliProblem R)
       P.map (X.pullbackAlongMap g f).op a = a' := by
   haveI : Epi f := AlgebraicGeometry.Flat.epi_of_flat_of_surjective f
   obtain ⟨Z, fZ, eqv, hnat⟩ := hP X
-  set hz := (eqv (f ≫ g)).symm a' with hhz
+  set hz := (eqv (f ≫ g)).symm a'
   have hzval : eqv (f ≫ g) hz = a' := (eqv (f ≫ g)).apply_symm_apply a'
   -- Transporting an `eqv`-value between two equal base maps only permutes the (irrelevant)
   -- factorisation proof, so it commutes with the underlying map.
