@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import BernoulliRegular.FLT37.PadicL.GaussSumValuationF1Stickelberger
 import BernoulliRegular.FLT37.PadicL.LpValueFormula
 import Mathlib.Algebra.Group.ForwardDiff
@@ -138,9 +143,11 @@ term is `0`). -/
 noncomputable def geomLogSummand (T : ℚ_[p]) (n : ℕ) : ℚ_[p] :=
   if n = 0 then 0 else T ^ n / (n : ℚ_[p])
 
+/-- The `0`-th term of the geometric log series vanishes. -/
 @[simp] theorem geomLogSummand_zero (T : ℚ_[p]) : geomLogSummand T 0 = 0 := by
   simp [geomLogSummand]
 
+/-- Away from `n = 0`, the summand is `T ^ n / n`. -/
 theorem geomLogSummand_of_ne_zero (T : ℚ_[p]) {n : ℕ} (hn : n ≠ 0) :
     geomLogSummand T n = T ^ n / (n : ℚ_[p]) := by simp [geomLogSummand, hn]
 
@@ -221,7 +228,7 @@ theorem gaussSumTwist_eq_mathlib (i : ℕ) (j : (ZMod p)ˣ) :
       Finset.mem_sdiff, Finset.mem_singleton, φ]
     exact isUnit_iff_ne_zero
   rw [← hmap, Finset.sum_map]
-  unfold StickelbergerF1Setup.gaussSumTwist
+  simp only [StickelbergerF1Setup.gaussSumTwist]
   refine Finset.sum_congr rfl fun a _ ↦ ?_
   rw [Function.Embedding.coeFn_mk, teichCharPow_apply_unit]
   -- `mulShift ψ j (a) = ψ (j·a) = (1+π)^{(j·a).rep}` (and `(j·a).rep = ((j*a : ℤ/p)).val`).
@@ -274,7 +281,7 @@ theorem gaussSumTwist_trivial_eq_zero {i : ℕ} (hi0 : 0 < i) (hip : i < p - 1) 
   simp only [mul_one]
   -- This is exactly `gaussSumCoeff i 0` (the `C(·, 0) = 1` slice), which vanishes.
   have hc0 := S.gaussSumCoeff_zero_eq_zero hi0 hip
-  unfold StickelbergerF1Setup.gaussSumCoeff at hc0
+  simp only [StickelbergerF1Setup.gaussSumCoeff] at hc0
   rw [← hc0]
   refine Finset.sum_congr rfl fun a _ ↦ ?_
   rw [Nat.choose_zero_right, Nat.cast_one, mul_one]
@@ -326,7 +333,7 @@ Each inner sum collapses by `gaussSumTwist_collapse`, then `gaussSum i` factors 
 of the `j`-sum. -/
 theorem logSumViaSeries_eq (c : (ZMod p)ˣ → S.O) (i : ℕ) :
     S.logSumViaSeries c i = S.logCoeffSum c i * S.gaussSum i := by
-  unfold logSumViaSeries logCoeffSum
+  simp only [logSumViaSeries, logCoeffSum]
   rw [Finset.sum_mul]
   refine Finset.sum_congr rfl fun j _ ↦ ?_
   rw [S.gaussSumTwist_collapse i j, mul_assoc]
