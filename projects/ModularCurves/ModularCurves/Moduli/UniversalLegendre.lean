@@ -1198,6 +1198,39 @@ theorem legendrePiece_π {R : CommRingCat.{u}} {X : EllObj R}
         w.hAd w.hW w.hMP).symm]
   rw [← Category.assoc, w.Pr.compat_π, Category.assoc]
 
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E14-CLS-6, ≈E4-π ★)** The glued comparison lies over the classifying map
+(mirrors `classifyingTop_π_w`). -/
+theorem legendreTop_π_w {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤))) :
+    legendreTop hD h2 ≫ projModelπ (universalLegendre R) =
+      X.curve.toEllipticCurveGeom.π ≫ legendreClassifyingMap X L b hD h2 := by
+  refine (legendreWitnessCover hD).hom_ext _ _ (fun w => ?_)
+  rw [← Category.assoc, legendreTop_piece, legendrePiece_π]
+  have hsplit : Spec.map (CommRingCat.ofHom
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (legendreClassifyingRingHom X L b hD h2))) =
+    Spec.map (X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op) ≫
+      Spec.map (CommRingCat.ofHom (legendreClassifyingRingHom X L b hD h2)) := by
+    rw [← Spec.map_comp]
+    rfl
+  rw [hsplit,
+    show w.V.2.isoSpec.hom = w.V.1.toSpecΓ from IsAffineOpen.isoSpec_hom _]
+  rw [show w.V.1.toSpecΓ ≫
+      Spec.map (X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op) ≫
+      Spec.map (CommRingCat.ofHom (legendreClassifyingRingHom X L b hD h2)) =
+    (w.V.1.ι ≫ X.base.toSpecΓ) ≫
+      Spec.map (CommRingCat.ofHom (legendreClassifyingRingHom X L b hD h2)) from by
+    rw [← Category.assoc, Scheme.Opens.toSpecΓ_SpecMap_presheaf_map_top]]
+  rw [show (w.V.1.ι ≫ X.base.toSpecΓ) ≫
+      Spec.map (CommRingCat.ofHom (legendreClassifyingRingHom X L b hD h2)) =
+    w.V.1.ι ≫ legendreClassifyingMap X L b hD h2 from by
+    rw [Category.assoc]; rfl]
+  rw [← Category.assoc, ← pullback.condition, Category.assoc, legendreWitnessCover_f]
+
 end TwoTorsion
 
 end ModularCurves
