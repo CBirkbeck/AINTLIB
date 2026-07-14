@@ -69,7 +69,8 @@ private theorem cechInjectiveResolutionHorizontalAugmentation_comp_d
     ((cechComplexFunctor U).obj (I.cocomplex.X q).obj).d 0 1 = 0
   exact cechGlobalSectionsAugmentation_comp_d (I.cocomplex.X q) U
 
-private noncomputable def cechGlobalSectionsNativeShortComplex
+/-- The native Cech short complex augmented by global sections. -/
+noncomputable def cechGlobalSectionsNativeShortComplex
     (F : Sheaf AddCommGrpCat.{u} X) :
     ShortComplex AddCommGrpCat.{u} :=
   ShortComplex.mk (cechGlobalSectionsAugmentation F U)
@@ -112,7 +113,9 @@ private theorem cechGlobalSections_map_augmented_exact_and_mono
   intro x hx
   exact hex x hx
 
-private theorem cechGlobalSectionsNativeShortComplex_exact
+/-- The native Cech short complex augmented by global sections is exact for an
+open cover. -/
+theorem cechGlobalSectionsNativeShortComplex_exact
     (F : Sheaf AddCommGrpCat.{u} X) (hU : ⨆ i, U i = ⊤) :
     (cechGlobalSectionsNativeShortComplex U F).Exact := by
   let S := cechAugmentedShortComplex F U
@@ -136,7 +139,8 @@ private theorem cechGlobalSectionsNativeShortComplex_exact
         rw [Category.id_comp]) hcomm
   exact ShortComplex.exact_of_iso e hmap.1
 
-private theorem cechGlobalSectionsAugmentation_mono
+/-- The native Cech augmentation on global sections is monic for an open cover. -/
+theorem cechGlobalSectionsAugmentation_mono
     (F : Sheaf AddCommGrpCat.{u} X) (hU : ⨆ i, U i = ⊤) :
     Mono (cechGlobalSectionsAugmentation F U) := by
   have hmap := cechGlobalSections_map_augmented_exact_and_mono U F hU
