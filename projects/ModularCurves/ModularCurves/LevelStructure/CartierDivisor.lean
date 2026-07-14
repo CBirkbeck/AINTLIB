@@ -1817,7 +1817,7 @@ theorem flatPullback_flatPullback (D : RelEffCartierDiv π) {C' C'' : Scheme.{u}
     Scheme.IdealSheafData.comap_comp]
 
 /-- Kernel of the `R`-algebra quotient map, as an `R`-submodule. -/
-private theorem sliceAux_ker_mkₐ (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
+private theorem Slice.ker_mkₐ (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
     (I : Ideal A) :
     LinearMap.ker (Ideal.Quotient.mkₐ R I).toLinearMap = I.restrictScalars R := by
   ext x; simp [Ideal.Quotient.eq_zero_iff_mem]
@@ -1826,7 +1826,7 @@ private theorem sliceAux_ker_mkₐ (R A : Type u) [CommRing R] [CommRing A] [Alg
 the ideal `(f)` is `R`-flat. Proof: `(f) ↪ A ↠ A ⧸ (f)` with flat quotient makes `B ⊗ (f) ↪ B ⊗ A`
 injective for every `B` (`lTensor_injective_of_exact_of_flat`); combined with `A`-flatness in the
 naturality square this gives the flatness criterion for `(f)`. -/
-private theorem sliceAux_span_flat (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
+private theorem Slice.span_flat (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
     [Module.Flat R A] (f : A) (hq : Module.Flat R (A ⧸ Ideal.span {f})) :
     Module.Flat R ((Ideal.span {f}).restrictScalars R) := by
   set I : Ideal A := Ideal.span {f}
@@ -1837,7 +1837,7 @@ private theorem sliceAux_span_flat (R A : Type u) [CommRing R] [CommRing A] [Alg
       (Ideal.Quotient.mkₐ R I).toLinearMap ?_ (I.restrictScalars R).subtype
       (Submodule.injective_subtype _) ?_ B
     · exact fun z => by obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective z; exact ⟨a, rfl⟩
-    · rw [LinearMap.exact_iff, sliceAux_ker_mkₐ, Submodule.range_subtype]
+    · rw [LinearMap.exact_iff, Slice.ker_mkₐ, Submodule.range_subtype]
   rw [Module.Flat.iff_rTensor_preserves_injective_linearMap]
   intro N N' _ _ _ _ h hinj
   have hsquare : (LinearMap.lTensor N' (I.restrictScalars R).subtype) ∘ₗ
@@ -1854,7 +1854,7 @@ private theorem sliceAux_span_flat (R A : Type u) [CommRing R] [CommRing A] [Alg
   exact key.of_comp
 
 /-- The range of left multiplication by `f` is the principal ideal `(f)`. -/
-private theorem sliceAux_range_mulLeft (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
+private theorem Slice.range_mulLeft (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
     (f : A) :
     LinearMap.range (LinearMap.mulLeft R f) = (Ideal.span {f}).restrictScalars R := by
   ext y
@@ -1868,10 +1868,10 @@ open TensorProduct in
 /-- **Homological input (EGA IV 11.3.8, the Tor-free half).** For `A` and `A ⧸ (f)` both `R`-flat
 and `f` a nonzerodivisor in every field fibre, the annihilator `ker(·f)` of `f` becomes zero after
 tensoring with any field `K` over `R`: `K ⊗_R ker(·f) = 0`. Route: `(f)` is `R`-flat
-(`sliceAux_span_flat`), so `K ⊗ ker(·f) ≃ ker(K ⊗ (·f))` via `kerLTensorEquivOfSurjective`, and the
+(`Slice.span_flat`), so `K ⊗ ker(·f) ≃ ker(K ⊗ (·f))` via `kerLTensorEquivOfSurjective`, and the
 latter is `0` because `·f` is injective on the fibre `A ⊗_R K` (`hfib`, transported by
 `TensorProduct.comm`). -/
-private theorem sliceAux_tmul_ann_subsingleton (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
+private theorem Slice.tmul_ann_subsingleton (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
     [Module.Flat R A] (f : A) (hq : Module.Flat R (A ⧸ Ideal.span {f}))
     (hfib : ∀ (K : Type u) [Field K] [Algebra R K],
       f ⊗ₜ[R] (1 : K) ∈ nonZeroDivisors (A ⊗[R] K)) :
@@ -1880,7 +1880,7 @@ private theorem sliceAux_tmul_ann_subsingleton (R A : Type u) [CommRing R] [Comm
   intro K _ _
   set μ : A →ₗ[R] A := LinearMap.mulLeft R f with hμ
   haveI hrangeflat : Module.Flat R (LinearMap.range μ) := by
-    rw [sliceAux_range_mulLeft]; exact sliceAux_span_flat R A f hq
+    rw [Slice.range_mulLeft]; exact Slice.span_flat R A f hq
   have hrT : Function.Injective (LinearMap.rTensor K μ) := by
     have heq : ⇑(LinearMap.rTensor K μ) = ⇑(LinearMap.mulLeft (A ⊗[R] K) (f ⊗ₜ[R] (1 : K))) := by
       funext x
@@ -1923,7 +1923,7 @@ private theorem sliceAux_tmul_ann_subsingleton (R A : Type u) [CommRing R] [Comm
 open TensorProduct in
 /-- The canonical base-change surjection `M ⊗[R] N ↠ M ⊗[A] N` for an `R`-algebra `A` and
 `A`-modules `M`, `N` (scalars are further identified over `A`). -/
-private noncomputable def sliceAux_baseChange (R A M N : Type u) [CommRing R] [CommRing A]
+private noncomputable def Slice.baseChange (R A M N : Type u) [CommRing R] [CommRing A]
     [Algebra R A] [AddCommGroup M] [Module R M] [Module A M] [IsScalarTower R A M]
     [AddCommGroup N] [Module R N] [Module A N] [IsScalarTower R A N] :
     M ⊗[R] N →ₗ[R] M ⊗[A] N :=
@@ -1934,14 +1934,14 @@ private noncomputable def sliceAux_baseChange (R A M N : Type u) [CommRing R] [C
 
 open TensorProduct in
 /-- The base-change map `M ⊗[R] N → M ⊗[A] N` is surjective. -/
-private theorem sliceAux_baseChange_surjective (R A M N : Type u) [CommRing R] [CommRing A]
+private theorem Slice.baseChange_surjective (R A M N : Type u) [CommRing R] [CommRing A]
     [Algebra R A] [AddCommGroup M] [Module R M] [Module A M] [IsScalarTower R A M]
     [AddCommGroup N] [Module R N] [Module A N] [IsScalarTower R A N] :
-    Function.Surjective (sliceAux_baseChange R A M N) := by
+    Function.Surjective (Slice.baseChange R A M N) := by
   intro z
   induction z using TensorProduct.induction_on with
   | zero => exact ⟨0, map_zero _⟩
-  | tmul m n => exact ⟨m ⊗ₜ[R] n, by simp [sliceAux_baseChange]⟩
+  | tmul m n => exact ⟨m ⊗ₜ[R] n, by simp [Slice.baseChange]⟩
   | add x y hx hy =>
     obtain ⟨a, rfl⟩ := hx; obtain ⟨b, rfl⟩ := hy
     exact ⟨a + b, map_add _ _ _⟩
@@ -1952,7 +1952,7 @@ for every field `K` over `R`, one has `Ann = 0`. Route: `Ann` is `A`-finite; for
 `𝔪 ⊇ Ann` the fibre `Ann ⧸ 𝔪·Ann = (A ⧸ 𝔪) ⊗_A Ann` is a quotient of `(A ⧸ 𝔪) ⊗_R Ann = 0`, so
 `𝔪 ∉ Supp Ann` (`Module.support_quotient`), contradicting `Ann ≤ 𝔪`. Hence `Ann` lies in no
 maximal ideal, so `Supp Ann = ∅` and `Ann = 0`. -/
-private theorem sliceAux_ann_subsingleton (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
+private theorem Slice.ann_subsingleton (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
     [IsNoetherianRing A] (Ann : Ideal A)
     (hI : ∀ (K : Type u) [Field K] [Algebra R K], Subsingleton (K ⊗[R] (Ann : Submodule A A))) :
     Subsingleton (Ann : Submodule A A) := by
@@ -1968,7 +1968,7 @@ private theorem sliceAux_ann_subsingleton (R A : Type u) [CommRing R] [CommRing 
   letI : Field (A ⧸ 𝔪) := Ideal.Quotient.field 𝔪
   haveI := hI (A ⧸ 𝔪)
   have hsub : Subsingleton ((A ⧸ 𝔪) ⊗[A] (Ann : Submodule A A)) :=
-    (sliceAux_baseChange_surjective R A (A ⧸ 𝔪) (Ann : Submodule A A)).subsingleton
+    (Slice.baseChange_surjective R A (A ⧸ 𝔪) (Ann : Submodule A A)).subsingleton
   have hquot : Subsingleton ((Ann : Submodule A A) ⧸ 𝔪 • (⊤ : Submodule A (Ann : Submodule A A))) :=
     (TensorProduct.quotTensorEquivQuotSMul (Ann : Submodule A A) 𝔪).toEquiv.subsingleton_congr.mp hsub
   have hemp : Module.support A ((Ann : Submodule A A) ⧸ 𝔪 • ⊤) = ∅ :=
@@ -1981,15 +1981,15 @@ private theorem sliceAux_ann_subsingleton (R A : Type u) [CommRing R] [CommRing 
 open TensorProduct in
 /-- **T-FLAT1-SLICE at the Noetherian stage (EGA IV 11.3.8).** The slicing nonzerodivisor
 criterion when `A` is already a Noetherian ring: the honest Tor-free + support/Nakayama argument,
-with no dévissage needed. Combines `sliceAux_tmul_ann_subsingleton` (homology) and
-`sliceAux_ann_subsingleton` (support). -/
-private theorem sliceAux_nzd_of_isNoetherianRing (R A : Type u) [CommRing R] [CommRing A]
+with no dévissage needed. Combines `Slice.tmul_ann_subsingleton` (homology) and
+`Slice.ann_subsingleton` (support). -/
+private theorem Slice.nzd_of_isNoetherianRing (R A : Type u) [CommRing R] [CommRing A]
     [Algebra R A] [Module.Flat R A] [IsNoetherianRing A] (f : A)
     (hq : Module.Flat R (A ⧸ Ideal.span {f}))
     (hfib : ∀ (K : Type u) [Field K] [Algebra R K],
       f ⊗ₜ[R] (1 : K) ∈ nonZeroDivisors (A ⊗[R] K)) :
     f ∈ nonZeroDivisors A := by
-  have hI := sliceAux_tmul_ann_subsingleton R A f hq hfib
+  have hI := Slice.tmul_ann_subsingleton R A f hq hfib
   set Ann : Ideal A := LinearMap.ker (LinearMap.mulLeft A f) with hAnn
   have hbridge : (Ann : Submodule A A).restrictScalars R = LinearMap.ker (LinearMap.mulLeft R f) := by
     ext x; simp [hAnn, LinearMap.mulLeft_apply]
@@ -1998,7 +1998,7 @@ private theorem sliceAux_nzd_of_isNoetherianRing (R A : Type u) [CommRing R] [Co
     intro K _ _
     have := hI K
     rwa [← hbridge] at this
-  have hss : Subsingleton (Ann : Submodule A A) := sliceAux_ann_subsingleton R A Ann hI'
+  have hss : Subsingleton (Ann : Submodule A A) := Slice.ann_subsingleton R A Ann hI'
   have hAnnbot : Ann = ⊥ := by
     rw [Submodule.eq_bot_iff]
     intro x hx
@@ -2010,15 +2010,15 @@ private theorem sliceAux_nzd_of_isNoetherianRing (R A : Type u) [CommRing R] [Co
 
 open TensorProduct in
 /-- **T-FLAT1-SLICE over a Noetherian base.** If the base `R` is Noetherian then the
-finitely-presented `A` is a Noetherian ring, and `sliceAux_nzd_of_isNoetherianRing` applies. -/
-private theorem sliceAux_nzd_of_noetherianBase (R A : Type u) [CommRing R] [CommRing A]
+finitely-presented `A` is a Noetherian ring, and `Slice.nzd_of_isNoetherianRing` applies. -/
+private theorem Slice.nzd_of_noetherianBase (R A : Type u) [CommRing R] [CommRing A]
     [Algebra R A] [Algebra.FinitePresentation R A] [Module.Flat R A] [IsNoetherianRing R] (f : A)
     (hq : Module.Flat R (A ⧸ Ideal.span {f}))
     (hfib : ∀ (K : Type u) [Field K] [Algebra R K],
       f ⊗ₜ[R] (1 : K) ∈ nonZeroDivisors (A ⊗[R] K)) :
     f ∈ nonZeroDivisors A := by
   haveI : IsNoetherianRing A := Algebra.FiniteType.isNoetherianRing R A
-  exact sliceAux_nzd_of_isNoetherianRing R A f hq hfib
+  exact Slice.nzd_of_isNoetherianRing R A f hq hfib
 
 open TensorProduct in
 /-- **[ISOLATED SUB-PIECE — Noetherian approximation, EGA IV 11.2.6 / Stacks 07RF spreading-out].**
@@ -2059,9 +2059,9 @@ valuation ring `R` take `M := m` (flat, as torsion-free) and `u := 0`: `M/mM = 0
 `M ≠ 0`. The finite-presentation hypotheses are therefore load-bearing, and the honest
 proof is EGA's noetherian-approximation dévissage (the plan's HB-NOETH machine).
 
-STATUS: discharged. The Noetherian-stage argument (`sliceAux_nzd_of_isNoetherianRing`, the
-Tor-free homological step `sliceAux_tmul_ann_subsingleton` + the support/Nakayama step
-`sliceAux_ann_subsingleton`) is fully proven. The dévissage that reduces the general
+STATUS: discharged. The Noetherian-stage argument (`Slice.nzd_of_isNoetherianRing`, the
+Tor-free homological step `Slice.tmul_ann_subsingleton` + the support/Nakayama step
+`Slice.ann_subsingleton`) is fully proven. The dévissage that reduces the general
 finitely-presented base to a Noetherian one (`sliceAux_exists_noetherianStage`) is isolated as
 the sole remaining sorry: it is the *compatible* spreading-out of `hq`/`hfib` (EGA IV 11.2.6 /
 Stacks 07RF) plus the filtered-colimit descent of the annihilator relation, infrastructure that
@@ -2074,7 +2074,7 @@ theorem nonZeroDivisor_of_flat_of_fibrewise_nonZeroDivisor (R A : Type u) [CommR
     f ∈ nonZeroDivisors A := by
   obtain ⟨R', A', _, _, _, _, _, _, ψ, f', hq', hfib', hrel⟩ :=
     sliceAux_exists_noetherianStage R A f hq hfib
-  have hf' : f' ∈ nonZeroDivisors A' := sliceAux_nzd_of_noetherianBase R' A' f' hq' hfib'
+  have hf' : f' ∈ nonZeroDivisors A' := Slice.nzd_of_noetherianBase R' A' f' hq' hfib'
   have hkey : ∀ x : A, f * x = 0 → x = 0 := by
     intro x hx
     obtain ⟨x', hxeq, hx'⟩ := hrel x hx
@@ -2086,7 +2086,7 @@ theorem nonZeroDivisor_of_flat_of_fibrewise_nonZeroDivisor (R A : Type u) [CommR
 open TensorProduct in
 /-- Flatness of `A ⧸ I` over `R` forces `I ∩ pA ≤ p·I` (here only the `≤` direction),
 i.e. `Tor₁ᴿ(A ⧸ I, R ⧸ p) = 0`. Proved by a tensor-product diagram chase. -/
-private theorem officialAux_flat_ideal_inf_le {R A : Type u} [CommRing R] [CommRing A]
+private theorem Official.flat_ideal_inf_le {R A : Type u} [CommRing R] [CommRing A]
     [Algebra R A] (I : Ideal A) (hflat : Module.Flat R (A ⧸ I)) (p : Ideal R) :
     I ⊓ p.map (algebraMap R A) ≤ p.map (algebraMap R A) * I := by
   set π : A →ₗ[R] (A ⧸ I) := (Ideal.Quotient.mkₐ R I).toLinearMap with hπ
@@ -2157,7 +2157,7 @@ private theorem officialAux_flat_ideal_inf_le {R A : Type u} [CommRing R] [CommR
 structure, the extended ideal `I·O` is principal (equal to `span {u}` for some `u : O`), then
 it is already generated by the image of an element of `I`. (Pick `f ∈ I` whose image escapes
 `𝔪·(I·O)`; then `image f = c·u` with `c` a unit, so `span {image f} = span {u} = I·O`.) -/
-private theorem officialAux_exists_mem_of_map_eq_span_localRing {A O : Type u} [CommRing A]
+private theorem Official.exists_mem_of_map_eq_span_localRing {A O : Type u} [CommRing A]
     [CommRing O] [Algebra A O] [IsLocalRing O] (I : Ideal A) {u : O}
     (hmapeq : I.map (algebraMap A O) = Ideal.span {u}) :
     ∃ f ∈ I, I.map (algebraMap A O) = Ideal.span {algebraMap A O f} := by
@@ -2198,7 +2198,7 @@ principal, generated by the image of some `f ∈ I`. Route: base-change to the s
 `κ ⊗[R] A` over `κ = FractionRing (R ⧸ p)`, apply the field-case principality
 (`ModularCurves.exists_span_nonZeroDivisor_map_localizationAtPrime`) at the fibre prime, and
 transport the resulting principal-ideal equation along `Localization.AtPrime q̄ → O`. -/
-private theorem officialAux_exists_mem_fibre_principal (R A : Type u) [CommRing R] [CommRing A]
+private theorem Official.exists_mem_fibre_principal (R A : Type u) [CommRing R] [CommRing A]
     [Algebra R A] [Algebra.IsStandardSmoothOfRelativeDimension 1 R A]
     (I : Ideal A) (hfin : Module.Finite R (A ⧸ I))
     (q : Ideal A) [q.IsPrime] (hIq : I ≤ q) :
@@ -2323,7 +2323,7 @@ private theorem officialAux_exists_mem_fibre_principal (R A : Type u) [CommRing 
   have hmapeq : I.map (algebraMap A O) = Ideal.span {Ψhat g} := by
     rw [← step1, hIκrh, Ideal.map_map, hcomp2]
   -- === generator descent (Nakayama) to a generator with `f ∈ I` ===
-  exact officialAux_exists_mem_of_map_eq_span_localRing I hmapeq
+  exact Official.exists_mem_of_map_eq_span_localRing I hmapeq
 
 /-- **Nakayama, from a fibre generator.** In a local ring `S`, a finitely generated ideal
 `JS` that becomes principal modulo `pS ≤ 𝔪` — generated there by the image of some `fS ∈ JS`
@@ -2361,11 +2361,11 @@ private theorem le_span_of_fibre_span_of_inter_le {S : Type u} [CommRing S] [IsL
 /-- **Fibre-stalk principality (T-FLAT1 crux).** For `A` standard-smooth of relative
 dimension one over `R`, an ideal `I` with `A ⧸ I` flat and finite over `R`, and a prime
 `q ⊇ I`: in the local ring `A_q` the ideal `I` is principal, generated by (the image of)
-some element of `I`. Combines the flat-intersection fact `officialAux_flat_ideal_inf_le`
+some element of `I`. Combines the flat-intersection fact `Official.flat_ideal_inf_le`
 (localized via `IsLocalization.map_inf`) with the fibre principality
-`officialAux_exists_mem_fibre_principal`, then Nakayama over the local ring `A_q`. The
+`Official.exists_mem_fibre_principal`, then Nakayama over the local ring `A_q`. The
 flatness hypothesis is essential: without it `I·A_q` need not be principal. -/
-private theorem officialAux_stalk_span (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
+private theorem Official.stalk_span (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
     [Algebra.IsStandardSmoothOfRelativeDimension 1 R A]
     (I : Ideal A) (hfg : I.FG) (hflat : Module.Flat R (A ⧸ I))
     (hfin : Module.Finite R (A ⧸ I)) (q : Ideal A) [q.IsPrime] (hIq : I ≤ q) :
@@ -2388,9 +2388,9 @@ private theorem officialAux_stalk_span (R A : Type u) [CommRing R] [CommRing A] 
   obtain ⟨f, hfI, hfib⟩ : ∃ f ∈ I,
       Ideal.map (Ideal.Quotient.mk pS) JS
         = Ideal.span {Ideal.Quotient.mk pS (algebraMap A S f)} :=
-    officialAux_exists_mem_fibre_principal R A I hfin q hIq
+    Official.exists_mem_fibre_principal R A I hfin q hIq
   -- INGREDIENT (i): flat intersection  (A-level fact, then localize via map_inf)
-  have hA : I ⊓ pA ≤ pA * I := officialAux_flat_ideal_inf_le I hflat p
+  have hA : I ⊓ pA ≤ pA * I := Official.flat_ideal_inf_le I hflat p
   have hinter : JS ⊓ pS ≤ pS • JS := by
     have e1 : (I ⊓ pA).map (algebraMap A S) = JS ⊓ pS :=
       IsLocalization.map_inf q.primeCompl S I pA
@@ -2441,7 +2441,7 @@ private theorem exists_denom_mul_eq_mul_of_mem_of_map_atPrime_span {A : Type u} 
 
 /-- Spreading principality from the stalk `A_q` to a basic open `A[1/r]` with `r ∉ q`:
 elementary denominator clearing using that `I` is finitely generated. -/
-private theorem officialAux_spread (A : Type u) [CommRing A] (I : Ideal A) (hfg : I.FG)
+private theorem Official.spread (A : Type u) [CommRing A] (I : Ideal A) (hfg : I.FG)
     (f : A) (hfI : f ∈ I) (q : Ideal A) [q.IsPrime]
     (hq : I.map (algebraMap A (Localization.AtPrime q))
         = Ideal.span {algebraMap A (Localization.AtPrime q) f}) :
@@ -2481,7 +2481,7 @@ private theorem officialAux_spread (A : Type u) [CommRing A] (I : Ideal A) (hfg 
 and `S` is a localization of `B` (at `M`), then `S ⧸ I·S` is a finite `K`-module, being a
 quotient of the Artinian ring `B ⧸ I`. (Re-derived here from the wave-2 private analogue
 `stalkDVRAux_finite_quotient_loc`, which is `private` and so not importable.) -/
-private theorem officialAux_finite_quotient_loc {K B : Type u} [Field K] [CommRing B]
+private theorem Official.finite_quotient_loc {K B : Type u} [Field K] [CommRing B]
     [Algebra K B] (M : Submonoid B) (S : Type u) [CommRing S] [Algebra B S] [Algebra K S]
     [IsScalarTower K B S] [IsLocalization M S] (I : Ideal B)
     (hfin : Module.Finite K (B ⧸ I)) :
@@ -2510,7 +2510,7 @@ image of the principal generator `f` in the fibre `A[1/r] ⊗_R K` is a nonzerod
 fibre is a standard-smooth curve over `K` and cuts out the finite `K`-algebra
 `(A ⧸ I)[1/r] ⊗_R K` (a localization of the Artinian `(A ⧸ I) ⊗_R K`), so
 `ModularCurves.mem_nonZeroDivisors_of_finite_quotient` applies. -/
-private theorem officialAux_fibre_nzd (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
+private theorem Official.fibre_nzd (R A : Type u) [CommRing R] [CommRing A] [Algebra R A]
     [Algebra.IsStandardSmoothOfRelativeDimension 1 R A]
     (I : Ideal A) (hfin : Module.Finite R (A ⧸ I)) (f : A) (r : A)
     (hspan : I.map (algebraMap A (Localization.Away r))
@@ -2550,7 +2550,7 @@ private theorem officialAux_fibre_nzd (R A : Type u) [CommRing R] [CommRing A] [
       haveI hfinG : Module.Finite K ((K ⊗[R] A) ⧸ I_lem) :=
         Module.Finite.equiv
           (Algebra.TensorProduct.tensorQuotientEquiv (R := R) K A K I).toLinearEquiv
-      have hfinG' := officialAux_finite_quotient_loc
+      have hfinG' := Official.finite_quotient_loc
         ((Submonoid.powers r).map (Algebra.TensorProduct.includeRight (R := R) (A := K)))
         (K ⊗[R] B) I_lem hfinG
       have hideal : I_lem.map (algebraMap (K ⊗[R] A) (K ⊗[R] B))
@@ -2620,7 +2620,7 @@ private theorem officialAux_away_nzd (R A : Type u) [CommRing R] [CommRing A] [A
         I).restrictScalars R).toLinearEquiv
   · -- fibrewise nonzerodivisor
     intro K _ _
-    exact officialAux_fibre_nzd R A I hfin f r hspan K
+    exact Official.fibre_nzd R A I hfin f r hspan K
 
 open TensorProduct in
 /-- **T-FLAT1-SLICE, ideal-theoretic core.** For `A` standard-smooth of relative dimension
@@ -2636,8 +2636,8 @@ private theorem officialAux_exists_away_span (R A : Type u) [CommRing R] [CommRi
       I.map (algebraMap A (Localization.Away r)) =
         Ideal.span {algebraMap A (Localization.Away r) f} ∧
       algebraMap A (Localization.Away r) f ∈ nonZeroDivisors (Localization.Away r) := by
-  obtain ⟨f, hfI, hstalk⟩ := officialAux_stalk_span R A I hfg hflat hfin q hIq
-  obtain ⟨r, hrq, hspanr⟩ := officialAux_spread A I hfg f hfI q hstalk
+  obtain ⟨f, hfI, hstalk⟩ := Official.stalk_span R A I hfg hflat hfin q hIq
+  obtain ⟨r, hrq, hspanr⟩ := Official.spread A I hfg f hfI q hstalk
   exact ⟨r, hrq, f, hfI, hspanr, officialAux_away_nzd R A I hflat hfin f r hspanr⟩
 
 /-- **[ISOLATED SUB-PIECE — finiteness/fibre-isolation input to `isOfficial`]** Around a
