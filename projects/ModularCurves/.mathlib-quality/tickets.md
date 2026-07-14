@@ -19191,3 +19191,19 @@ research-gated: [KM-62-63-HOMOG] (6.1.1 hard direction + G^×⊆D), [NISOG-GRASS
 [T-D10-FPPF] (standard-cyclic descent), [KM-FMT-FLAT] (squarefree), [KM-1.11.2], quotientCurve
 DS (group-law descent effectivity), KM 3.7.1 (isGammaZero_iff_fppf). Next: audit
 decomposition-km-62-63.md for tractable HOMOG-FRAME leaves.
+
+---
+
+## v10.210-G0 — T-SG1b CLOSED: subgroup base change axiom-clean (2026-07-14, STREAM-G0)
+
+Third kill of the sweep. `FiniteLocallyFreeSubgroup.baseChange`'s sorried `subgroup` field is
+PROVEN (**the def is now fully axiom-clean**): comap the point subgroup along the additive
+base-change dictionary `Point.baseChangeEquiv`; factorisations correspond through the pullback
+universal property. The 2026-07-08-era blocker note ("asSection_zsmul spelling, PARKED") was
+stale — the ≃+ dictionary landed 2026-07-07. This also completes **C5B-2 leaf L1** and removes
+the T-SG1b sorryAx from the subgroup-base-change trail (D2's cyclicity-transfer chain).
+
+**Sweep summary (v10.208–v10.210)**: three chartered-adjacent sorries closed in one day —
+KM 6.4.2 dichotomy (axiom-clean), KM 6.1.1(2)-half (BB-DELIGNE-only), T-SG1b (axiom-clean).
+Every remaining NISOG-side sorry is research-gated ([HOMOG-FRAME] = KM §5.2 charter-scale,
+[NISOG-GRASS], [T-D10-FPPF], [KM-FMT-FLAT], [KM-1.11.2], quotientCurve DS, KM 3.7.1).
