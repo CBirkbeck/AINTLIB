@@ -53,4 +53,18 @@ noncomputable def Scheme.Hom.functionFieldMap (f : X ⟶ Y) [IsDominant f]
       congrArg (Y.presheaf.stalk) (genericPoint_eq_of_isDominant f).symm) ≫
     f.stalkMap (genericPoint X)
 
+/-- The function field pullback of a dominant morphism of **integral** schemes is injective — it is a
+homomorphism of fields `K(Y) → K(X)`, hence the field extension `K(Y) ↪ K(X)`. -/
+theorem functionFieldMap_injective (f : X ⟶ Y) [IsDominant f] [IsIntegral X] [IsIntegral Y] :
+    Function.Injective f.functionFieldMap.hom :=
+  f.functionFieldMap.hom.injective
+
+/-- `X`'s function field as an algebra over `Y`'s, via the dominant-morphism pullback
+`functionFieldMap` — the field extension `K(Y) → K(X)` along `f`, whose degree is the
+generic-fibre degree of `f`. -/
+noncomputable abbrev functionFieldAlgebra (f : X ⟶ Y) [IsDominant f]
+    [IrreducibleSpace X] [IrreducibleSpace Y] :
+    Algebra Y.functionField X.functionField :=
+  f.functionFieldMap.hom.toAlgebra
+
 end AlgebraicGeometry
