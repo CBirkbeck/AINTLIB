@@ -2464,7 +2464,14 @@ adjudicates.
   (pointwise common-affine refinement; open-immersion `of_comp` + embedding
   injectivity), **`classifyingTop` + `classifyingTop_piece`** — GME 2.2.3's universal
   comparison `Y.E ⟶ projModel(universal)` EXISTS;
-  **[D3-E4]** `IsPullback`/`zero_w` fields → `classifyingEllHom : Y ⟶ X₁`;
+  **[D3-E4 ★★ DONE except packaging (2026-07-14, OMEGA, 8dd113d84)]**:
+  `classifyingTop_π_w` (base square), `classifyingTop_zero` (zero sections),
+  `restrict_classifyingMap` (Γ–Spec triangle), `chartPiece_isPullback` (chart-square
+  paste), **`isPullback_classifyingTop`** (cover-descent via
+  `isPullback_of_iSup_eq_top` — Y IS the pullback of the universal curve; GME 2.2.3
+  geometric universality). REMAINING: the `X₁ : EllObj R`-packaging (base `Spec R₁`,
+  R-structure `Spec.map (algebraMap-composite)`, curve `modelEllipticCurve univ`) +
+  `classifyingEllHom` assembly (base_w = the R-algebra triangle) →
   **D4** — `RepresentableBy` packaging (bijectivity from E12-B uniqueness +
   adapted-pullback functoriality).
   ORIGINAL SPEC: the basis-unit of a presentation**: for `b : OmegaBasis G` and
