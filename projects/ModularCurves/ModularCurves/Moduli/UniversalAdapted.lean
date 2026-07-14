@@ -1473,4 +1473,252 @@ theorem omegaBasisMap_classifyingEllHom {R : CommRingCat.{u}} (Y : EllObj R)
     rw [show ((1 : Γ(Y.base, ⊤)ˣ) • b).1 =
       ((1 : Γ(Y.base, ⊤)ˣ)).val • b.1 from rfl, Units.val_one, one_smul])
 
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D4 rt2a)** For ANY `Ell/R`-morphism `φ` to the universal object, the
+transported tautological chart compares trivially with the adapted local model of the
+pulled basis: both are adapted to the pulled basis and in short normal form, so
+KM 2.2.5 uniqueness (`transVC_eq_one_of_isAdapted`) pins the comparison. -/
+theorem transVC_transport_adapted {R : CommRingCat.{u}} {Y : EllObj R}
+    (φ : Y ⟶ universalEllObj R)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤)))
+    (V : Y.base.affineOpens) (i : Y.curve.toEllipticCurveGeom.atlas.ι)
+    (hVi : V.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U i).1) :
+    ((tautPresentation (universalShortNF R)).transport
+        φ.baseHom φ.top φ.isPullback φ.zero_w
+        (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)).transVC
+      (adaptedLocal Y.curve.toEllipticCurveGeom
+        (omegaBasisMap φ (universalOmegaBasis R)) h2 h3 V i hVi) = 1 :=
+  transVC_eq_one_of_isAdapted
+    (IsAdapted.transport φ (tautPresentation_isAdapted R) _)
+    (adaptedLocal_isAdapted _ _ h2 h3 V i hVi)
+    (isShortNF_map (isShortNF_map
+      (inferInstance : (universalShortNF R).IsShortNF) _) _)
+    (adaptedLocal_isShortNF _ _ h2 h3 V i hVi)
+    (isUnit_ofNat_res h2 V.1) (isUnit_ofNat_res h3 V.1)
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D4 rt2a)** W-form: the transported tautological chart curve IS the adapted
+local model curve of the pulled basis. -/
+theorem transport_taut_W_eq {R : CommRingCat.{u}} {Y : EllObj R}
+    (φ : Y ⟶ universalEllObj R)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤)))
+    (V : Y.base.affineOpens) (i : Y.curve.toEllipticCurveGeom.atlas.ι)
+    (hVi : V.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U i).1) :
+    ((tautPresentation (universalShortNF R)).transport
+        φ.baseHom φ.top φ.isPullback φ.zero_w
+        (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)).W =
+      (adaptedLocal Y.curve.toEllipticCurveGeom
+        (omegaBasisMap φ (universalOmegaBasis R)) h2 h3 V i hVi).W := by
+  have h := ((tautPresentation (universalShortNF R)).transport
+      φ.baseHom φ.top φ.isPullback φ.zero_w
+      (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)).transVC_smul
+    (adaptedLocal Y.curve.toEllipticCurveGeom
+      (omegaBasisMap φ (universalOmegaBasis R)) h2 h3 V i hVi)
+  rw [transVC_transport_adapted φ h2 h3 V i hVi, one_smul] at h
+  exact h.symm
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D4 rt2b)** e-form: the transported tautological chart isomorphism is the
+adapted local model's, up to the induced `eqToHom` — the chart data of `φ` over `V` is
+completely pinned by the pulled basis. -/
+theorem transport_taut_e_eq {R : CommRingCat.{u}} {Y : EllObj R}
+    (φ : Y ⟶ universalEllObj R)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤)))
+    (V : Y.base.affineOpens) (i : Y.curve.toEllipticCurveGeom.atlas.ι)
+    (hVi : V.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U i).1) :
+    ((tautPresentation (universalShortNF R)).transport
+        φ.baseHom φ.top φ.isPullback φ.zero_w
+        (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)).e.hom =
+      (adaptedLocal Y.curve.toEllipticCurveGeom
+          (omegaBasisMap φ (universalOmegaBasis R)) h2 h3 V i hVi).e.hom ≫
+        eqToHom (congrArg projModel (transport_taut_W_eq φ h2 h3 V i hVi).symm) := by
+  have h := pointedIso_hom_of_transVC_eq_one
+    (transVC_transport_adapted φ h2 h3 V i hVi)
+  rw [pointedIso, Iso.trans_hom, Iso.symm_hom, Iso.inv_comp_eq] at h
+  rw [h, Category.assoc, eqToHom_trans, eqToHom_refl, Category.comp_id]
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation MvPolynomial in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(E12-D4 rt2a ★)** The classifying algebra of the pulled basis is the algebra of
+`φ` itself: any `Ell/R`-morphism to the universal object induces on global sections
+exactly the classifying ring map of the basis it pulls back. Generators: `C`-scalars
+by `base_w`, and `A₄`/`A₆` by the chartwise `W`-determination `transport_taut_W_eq`. -/
+theorem classifyingRingHom_omegaBasisMap {R : CommRingCat.{u}} {Y : EllObj R}
+    (φ : Y ⟶ universalEllObj R)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤))) :
+    classifyingRingHom Y (omegaBasisMap φ (universalOmegaBasis R)) h2 h3 =
+      ((Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv ≫
+        φ.baseHom.appTop).hom := by
+  have hψR : ∀ r : R,
+      ((Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv ≫
+        φ.baseHom.appTop).hom (algebraMap R (ModuliRingE12 R) r) =
+      Y.baseRingHom r := by
+    intro r
+    have hb : CommRingCat.ofHom (algebraMap R (ModuliRingE12 R)) ≫
+        (Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv ≫
+          φ.baseHom.appTop =
+        CommRingCat.ofHom Y.baseRingHom := by
+      rw [Scheme.ΓSpecIso_inv_naturality_assoc, ← Scheme.Hom.comp_appTop,
+        show φ.baseHom ≫ Spec.map (CommRingCat.ofHom
+            (algebraMap R (ModuliRingE12 R))) = Y.structMap from φ.base_w]
+      rfl
+    exact congrArg (fun g => CommRingCat.Hom.hom g r) hb
+  -- coefficient naturality on the two generators
+  have hcover : (⊤ : Y.base.Opens) ≤
+      iSup (fun p : {p : Y.base.affineOpens × Y.curve.toEllipticCurveGeom.atlas.ι //
+        p.1.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U p.2).1} => p.1.1.1) := by
+    intro x _
+    obtain ⟨i, hxi⟩ := Y.curve.toEllipticCurveGeom.atlas.covers x
+    obtain ⟨V₀, hVaff, hxV, hVle⟩ := exists_isAffineOpen_mem_and_subset
+      (show x ∈ (Y.curve.toEllipticCurveGeom.atlas.U i).1 from hxi)
+    exact TopologicalSpace.Opens.mem_iSup.mpr ⟨⟨⟨⟨V₀, hVaff⟩, i⟩, hVle⟩, hxV⟩
+  have hnat : ∀ j : Fin 2,
+      (![(adaptedCoeff₄ Y.curve.toEllipticCurveGeom
+          (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).1,
+        (adaptedCoeff₆ Y.curve.toEllipticCurveGeom
+          (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).1] j) =
+      ((Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv ≫
+        φ.baseHom.appTop).hom
+        (algebraMap (MvPolynomial (Fin 2) R) (ModuliRingE12 R) (X j)) := by
+    intro j
+    refine TopCat.Sheaf.eq_of_locally_eq' Y.base.sheaf
+      (fun p : {p : Y.base.affineOpens × Y.curve.toEllipticCurveGeom.atlas.ι //
+        p.1.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U p.2).1} => p.1.1.1) ⊤
+      (fun p => homOfLE le_top) hcover _ _ (fun p => ?_)
+    show Scheme.resLE le_top
+        (![(adaptedCoeff₄ Y.curve.toEllipticCurveGeom
+            (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).1,
+          (adaptedCoeff₆ Y.curve.toEllipticCurveGeom
+            (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).1] j) =
+      Scheme.resLE le_top
+        (((Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv ≫
+          φ.baseHom.appTop).hom
+          (algebraMap (MvPolynomial (Fin 2) R) (ModuliRingE12 R) (X j)))
+    have hres : Scheme.resLE (le_top : p.1.1.1 ≤ ⊤)
+        (((Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv ≫
+          φ.baseHom.appTop).hom
+          (algebraMap (MvPolynomial (Fin 2) R) (ModuliRingE12 R) (X j))) =
+        sectionsMapLE φ.baseHom
+          (show p.1.1.1 ≤ φ.baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)
+          ((Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv.hom
+            (algebraMap (MvPolynomial (Fin 2) R) (ModuliRingE12 R) (X j))) := rfl
+    rw [hres]
+    fin_cases j
+    · show Scheme.resLE le_top
+          (![(adaptedCoeff₄ Y.curve.toEllipticCurveGeom
+              (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).1,
+            (adaptedCoeff₆ Y.curve.toEllipticCurveGeom
+              (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).1] 0) =
+        sectionsMapLE φ.baseHom
+          (show p.1.1.1 ≤ φ.baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)
+          ((Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv.hom
+            (algebraMap (MvPolynomial (Fin 2) R) (ModuliRingE12 R) (X 0)))
+      rw [show Scheme.resLE le_top
+          (![(adaptedCoeff₄ Y.curve.toEllipticCurveGeom
+              (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).1,
+            (adaptedCoeff₆ Y.curve.toEllipticCurveGeom
+              (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).1] 0) =
+          (adaptedLocal Y.curve.toEllipticCurveGeom
+            (omegaBasisMap φ (universalOmegaBasis R)) h2 h3
+            p.1.1 p.1.2 p.2).W.a₄ from
+          (adaptedCoeff₄ Y.curve.toEllipticCurveGeom
+            (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).2 p.1.1 p.1.2 p.2,
+        ← transport_taut_W_eq φ h2 h3 p.1.1 p.1.2 p.2]
+      rfl
+    · show Scheme.resLE le_top
+          (![(adaptedCoeff₄ Y.curve.toEllipticCurveGeom
+              (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).1,
+            (adaptedCoeff₆ Y.curve.toEllipticCurveGeom
+              (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).1] 1) =
+        sectionsMapLE φ.baseHom
+          (show p.1.1.1 ≤ φ.baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)
+          ((Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv.hom
+            (algebraMap (MvPolynomial (Fin 2) R) (ModuliRingE12 R) (X 1)))
+      rw [show Scheme.resLE le_top
+          (![(adaptedCoeff₄ Y.curve.toEllipticCurveGeom
+              (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).1,
+            (adaptedCoeff₆ Y.curve.toEllipticCurveGeom
+              (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).1] 1) =
+          (adaptedLocal Y.curve.toEllipticCurveGeom
+            (omegaBasisMap φ (universalOmegaBasis R)) h2 h3
+            p.1.1 p.1.2 p.2).W.a₆ from
+          (adaptedCoeff₆ Y.curve.toEllipticCurveGeom
+            (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).2 p.1.1 p.1.2 p.2,
+        ← transport_taut_W_eq φ h2 h3 p.1.1 p.1.2 p.2]
+      rfl
+  refine IsLocalization.ringHom_ext (Submonoid.powers (shortDeltaPoly R)) ?_
+  refine MvPolynomial.ringHom_ext (fun r => ?_) (fun j => ?_)
+  · show classifyingRingHom Y (omegaBasisMap φ (universalOmegaBasis R)) h2 h3
+      (algebraMap (MvPolynomial (Fin 2) R) (ModuliRingE12 R) (C r)) = _
+    rw [show algebraMap (MvPolynomial (Fin 2) R) (ModuliRingE12 R) (C r) =
+        algebraMap R (ModuliRingE12 R) r from by
+      rw [IsScalarTower.algebraMap_apply R (MvPolynomial (Fin 2) R)
+        (ModuliRingE12 R)]
+      rfl]
+    rw [classifyingRingHom_algebraMap]
+    show Y.baseRingHom r =
+      ((Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv ≫
+        φ.baseHom.appTop).hom
+        (algebraMap (MvPolynomial (Fin 2) R) (ModuliRingE12 R) (C r))
+    rw [show algebraMap (MvPolynomial (Fin 2) R) (ModuliRingE12 R) (C r) =
+        algebraMap R (ModuliRingE12 R) r from by
+      rw [IsScalarTower.algebraMap_apply R (MvPolynomial (Fin 2) R)
+        (ModuliRingE12 R)]
+      rfl]
+    exact (hψR r).symm
+  · show classifyingRingHom Y (omegaBasisMap φ (universalOmegaBasis R)) h2 h3
+      (algebraMap (MvPolynomial (Fin 2) R) (ModuliRingE12 R) (X j)) = _
+    rw [classifyingRingHom, IsLocalization.Away.lift_eq]
+    rw [show (eval₂Hom Y.baseRingHom
+        ![(adaptedCoeff₄ Y.curve.toEllipticCurveGeom
+            (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).1,
+          (adaptedCoeff₆ Y.curve.toEllipticCurveGeom
+            (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).1]) (X j) =
+      ![(adaptedCoeff₄ Y.curve.toEllipticCurveGeom
+          (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).1,
+        (adaptedCoeff₆ Y.curve.toEllipticCurveGeom
+          (omegaBasisMap φ (universalOmegaBasis R)) h2 h3).1] j from
+      eval₂Hom_X' _ _ _]
+    exact hnat j
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D4 rt2a ★)** BaseHom determination: the classifying map of the pulled
+basis IS `φ`'s base morphism (Γ–Spec adjunction + `classifyingRingHom_omegaBasisMap`). -/
+theorem classifyingMap_omegaBasisMap {R : CommRingCat.{u}} {Y : EllObj R}
+    (φ : Y ⟶ universalEllObj R)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤))) :
+    classifyingMap Y (omegaBasisMap φ (universalOmegaBasis R)) h2 h3 = φ.baseHom := by
+  show Y.base.toSpecΓ ≫ Spec.map (CommRingCat.ofHom
+    (classifyingRingHom Y (omegaBasisMap φ (universalOmegaBasis R)) h2 h3)) =
+    φ.baseHom
+  rw [show CommRingCat.ofHom
+      (classifyingRingHom Y (omegaBasisMap φ (universalOmegaBasis R)) h2 h3) =
+    (Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv ≫ φ.baseHom.appTop from by
+    rw [classifyingRingHom_omegaBasisMap φ h2 h3]
+    rfl]
+  rw [Spec.map_comp, ← Scheme.toSpecΓ_naturality_assoc]
+  show φ.baseHom ≫ (Spec (CommRingCat.of (ModuliRingE12 R))).toSpecΓ ≫
+    Spec.map (Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv = φ.baseHom
+  rw [← SpecMap_ΓSpecIso_hom, ← Spec.map_comp, Iso.inv_hom_id, Spec.map_id]
+  exact Category.comp_id _
+
 end ModularCurves
