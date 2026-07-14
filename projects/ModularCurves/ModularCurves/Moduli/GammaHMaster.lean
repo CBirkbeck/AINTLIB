@@ -431,6 +431,40 @@ theorem ModuliProblem.QuotientProblemData.rigid_of_geom_free {Q : ModuliProblem 
 
 variable (R : CommRingCat.{u})
 
+/-- **[Γ_H rigidity, interface] (KM 4.7.2-shape)** — the quotient problem `P_H` is
+rigid, assembled from the PROVEN spine: the bridge `rigid_of_geom_free` fed by the
+PROVEN detection `exists_isoFibre_ne_refl` (at the level `N ≥ 3` itself, invertible by
+`hinv` on every base through `nIsInvertible_over_spec`). The two remaining NAMED PINS:
+
+* `hLN` — local noetherianity of all `Ell/R`-bases, the T-W7.8 spreading-out gate
+  (`endMonHom`'s hypothesis; drops out when T-W7.8 lands — future-proofing pattern);
+* `hfree` — the k̄ `H`-orbit-freeness: no nontrivial base-identical iso fixes a
+  `γ`-twisted full level structure. Its discharge is the [RIG-2] core
+  (`aut_endo_eq_one_of_fixes_point`, PROVEN clean) through the `glSmul`-matrix
+  translation + KM's keystone `hbound` (register-box until the K4 bridge lands). -/
+theorem gammaH_rigid (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
+    (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
+    (hinv : IsUnit (N : R))
+    (qpd : ModuliProblem.QuotientProblemData (gammaHAut R N H))
+    (hLN : ∀ X : EllObj R, IsLocallyNoetherian X.base)
+    (hfree : ∀ (k : Type u) [Field k] [IsAlgClosed k]
+      (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+      (E : EllipticCurve (Spec (CommRingCat.of k)))
+      (e : (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R) ≅
+        (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)),
+      e.hom.baseHom = 𝟙 _ → e ≠ Iso.refl _ →
+      ∀ (b : (gammaFullNaiveProblem R N).obj
+          (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))) (γ : ↥H),
+        (gammaHAut R N H γ).hom.app
+          (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
+          ((gammaFullNaiveProblem R N).map e.hom.op b) ≠ b) :
+    qpd.prob.Rigid := by
+  refine qpd.rigid_of_geom_free ?_ hfree
+  intro X e he hne hbase
+  haveI := hLN X
+  exact EllObj.exists_isoFibre_ne_refl N hN
+    (YFull.nIsInvertible_over_spec R X.structMap hinv) e he hne
+
 /-- **[Γ_H MASTER, interface] (KM 4.7.0 for `P_H`; Loeffler 3.8.2 upgraded to a fine
 scheme)** — the quotient problem `P_H` is representable, given the engine's pin-set: the
 Y(N) representability (`hQrep`, STREAM-YN), the full-group torsor datum (`htors`, c5β's
