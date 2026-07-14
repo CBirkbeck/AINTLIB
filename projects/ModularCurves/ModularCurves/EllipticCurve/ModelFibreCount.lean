@@ -144,4 +144,79 @@ theorem not_isField_coordinateRing : ¬ IsField W.toAffine.CoordinateRing := fun
 
 end CoordinateRingInstances
 
+/-! ### The generic curve-topology fibre-count
+
+Pure topology: on a `T0` Noetherian space in which every irreducible closed subset is
+finite or everything ("curvelike"), a continuous closed self-map with infinite range has
+finite fibres. This is KM 2.3.1's "a nonconstant morphism of proper smooth connected
+curves has finite fibres", axiomatised so the scheme side only has to supply the three
+inputs (curvelike-ness from `dim ≤ 1` charts, infinitude from Jacobson-ness, infinite
+range from the HasseWeil torsion witness). -/
+
+section CurvelikeFibres
+
+open TopologicalSpace
+
+variable {X : Type u} [TopologicalSpace X] [T0Space X] [NoetherianSpace X] [Infinite X]
+
+/-- **Fibre finiteness on a curvelike space.** If every irreducible closed subset of `X`
+is finite or all of `X`, and `f : X → X` is continuous, closed, with infinite range,
+then every fibre `f ⁻¹' {y}` is finite. -/
+theorem Curvelike.finite_preimage_singleton
+    (hclass : ∀ C : Set X, IsClosed C → IsIrreducible C → C.Finite ∨ C = Set.univ)
+    {f : X → X} (hfc : Continuous f) (hfcl : IsClosedMap f)
+    (hfim : (Set.range f).Infinite) (y : X) : (f ⁻¹' {y}).Finite := by
+  rcases hclass (closure {y}) isClosed_closure (isIrreducible_singleton.closure)
+    with hyfin | hyuniv
+  · -- `closure {y}` finite: an infinite preimage would force `f⁻¹(closure {y}) = X`,
+    -- making the whole range land in the finite `closure {y}`.
+    by_contra hinf
+    rw [Set.not_finite] at hinf
+    have hCy : (f ⁻¹' closure {y}).Infinite :=
+      hinf.mono (Set.preimage_mono subset_closure)
+    have hCyc : IsClosed (f ⁻¹' closure {y}) := isClosed_closure.preimage hfc
+    -- decompose the closed set into finitely many irreducible closeds; one is infinite
+    obtain ⟨S, hSfin, hSc, hSi, hSU⟩ :=
+      TopologicalSpace.NoetherianSpace.exists_finite_set_isClosed_irreducible hCyc
+    have hZ : ∃ Z ∈ S, Z.Infinite := by
+      by_contra hall
+      push_neg at hall
+      exact hCy (hSU ▸ Set.Finite.sUnion hSfin fun t ht => hall t ht)
+    obtain ⟨Z, hZS, hZinf⟩ := hZ
+    have hZuniv : Z = Set.univ := by
+      rcases hclass Z (hSc Z hZS) (hSi Z hZS) with h | h
+      · exact absurd h hZinf
+      · exact h
+    have hrange : Set.range f ⊆ closure {y} := by
+      rintro b ⟨x, rfl⟩
+      have hxC : x ∈ f ⁻¹' closure {y} := by
+        rw [hSU]
+        exact Set.subset_sUnion_of_mem hZS (hZuniv ▸ Set.mem_univ x)
+      exact hxC
+    exact hfim (hyfin.subset hrange)
+  · -- `closure {y} = univ`: `y` is the unique generic point; any `x` in the fibre has
+    -- `f(closure {x}) = X`, so `closure {x}` is infinite, hence everything — so the
+    -- fibre is a subsingleton by `T0`.
+    have hgen : ∀ x ∈ f ⁻¹' {y}, closure ({x} : Set X) = Set.univ := by
+      intro x hx
+      have hcl : IsClosed (f '' closure {x}) := hfcl _ isClosed_closure
+      have hy : y ∈ f '' closure {x} := ⟨x, subset_closure rfl, hx⟩
+      have himg : f '' closure {x} = Set.univ :=
+        Set.eq_univ_of_univ_subset
+          (hyuniv ▸ closure_minimal (Set.singleton_subset_iff.mpr hy) hcl)
+      have hclx_inf : (closure ({x} : Set X)).Infinite := by
+        intro hfin
+        have : (Set.univ : Set X).Finite := himg ▸ hfin.image f
+        exact Set.infinite_univ this
+      rcases hclass (closure {x}) isClosed_closure (isIrreducible_singleton.closure)
+        with h | h
+      · exact absurd h hclx_inf
+      · exact h
+    refine Set.Subsingleton.finite fun x hx x' hx' => ?_
+    have h1 := hgen x hx
+    have h2 := hgen x' hx'
+    exact (inseparable_iff_closure_eq.mpr (h1.trans h2.symm)).eq
+
+end CurvelikeFibres
+
 end ModularCurves
