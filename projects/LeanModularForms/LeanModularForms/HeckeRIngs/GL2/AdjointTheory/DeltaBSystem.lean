@@ -174,7 +174,7 @@ private theorem mapGL_gamma0_mul_ds_family_eq_T_p_lower_mul_mapGL_factor
     exact mapGL_gamma0_mul_T_p_upper_eq_T_p_lower_mul_mapGL_delta N p hp hpN b.val
 
 open UpperHalfPlane ModularGroup MeasureTheory in
-private lemma UpperHalfPlane_smul_eq_of_matrix_smul_eq
+lemma UpperHalfPlane_smul_eq_of_matrix_smul_eq
     (α β : GL (Fin 2) ℝ) (hα : 0 < α.det.val) (hβ : 0 < β.det.val)
     (c : ℝ) (hc : c ≠ 0)
     (hMat : (α : Matrix (Fin 2) (Fin 2) ℝ) = c • (β : Matrix (Fin 2) (Fin 2) ℝ))
@@ -220,7 +220,7 @@ private lemma UpperHalfPlane_smul_eq_of_matrix_smul_eq
   rw [h_num, h_den, mul_div_mul_left _ _ hc_ne_zero]
 
 /-- The real image `mapGL ℝ γ` of `γ ∈ SL₂(ℤ)` has unit determinant. -/
-private theorem mapGL_SL_det_val_eq_one (γ : SL(2, ℤ)) :
+theorem mapGL_SL_det_val_eq_one (γ : SL(2, ℤ)) :
     ((mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ) γ).det.val = 1 := by
   show ((mapGL ℝ γ : GL (Fin 2) ℝ) : Matrix (Fin 2) (Fin 2) ℝ).det = 1
   rw [show ((mapGL ℝ γ : GL (Fin 2) ℝ) : Matrix (Fin 2) (Fin 2) ℝ) =
@@ -444,7 +444,7 @@ conjugation identity `A' · (mapGL ℝ x) · A'⁻¹ = mapGL ℝ y`, then conjug
 image `SL2Z_to_PSL2R x` by `g = GLPos_to_PSL_R_term A'` gives `SL2Z_to_PSL2R y`.  The
 determinant normalization in `GLPos_to_SLR` cancels under conjugation, so the `SL(2, ℝ)`
 representatives of both sides have *equal matrices*. -/
-private lemma toConjAct_GLPos_smul_SL2Z_to_PSL2R
+lemma toConjAct_GLPos_smul_SL2Z_to_PSL2R
     (A' : GL(2, ℝ)⁺) (x y : SL(2, ℤ))
     (hxy : (A' : GL (Fin 2) ℝ) * (mapGL ℝ x : GL (Fin 2) ℝ) * (A' : GL (Fin 2) ℝ)⁻¹ =
       (mapGL ℝ y : GL (Fin 2) ℝ)) :
@@ -504,7 +504,7 @@ private lemma toConjAct_GLPos_smul_SL2Z_to_PSL2R
 open UpperHalfPlane Pointwise in
 /-- The det-`1` `GL`-action tile `(mapGL ℝ γ) • S` equals the `PSL`-action tile
 `SL2Z_to_PSL2R γ • S` for `γ : SL(2, ℤ)`. -/
-private lemma mapGL_smul_set_eq_SL2Z_to_PSL2R_smul (γ : SL(2, ℤ)) (S : Set ℍ) :
+lemma mapGL_smul_set_eq_SL2Z_to_PSL2R_smul (γ : SL(2, ℤ)) (S : Set ℍ) :
     ((mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ) γ : GL (Fin 2) ℝ) • S =
       (SL2Z_to_PSL2R γ : PSL(2, ℝ)) • S := by
   ext τ
@@ -517,7 +517,7 @@ open CongruenceSubgroup Pointwise ConjAct in
 `g = GLPos_to_PSL_R_term ⟨α.map (Rat.castHom ℝ), _⟩`, the conjugate group
 `K = toConjAct g • (Γ_p(α)).map SL2Z_to_PSL2R` is contained in `Γ₁(N).map SL2Z_to_PSL2R`.
 (`K = α(α⁻¹Γ₁α ∩ Γ₁)α⁻¹ = Γ₁ ∩ αΓ₁α⁻¹ ≤ Γ₁`, via `Gamma_p_α_conjBy_spec` through the bridge.) -/
-private lemma toConjAct_GLPos_Gamma_p_α_le_Gamma1_map
+lemma toConjAct_GLPos_Gamma_p_α_le_Gamma1_map
     (α : GL (Fin 2) ℚ) (hα : 0 < ((α.map (Rat.castHom ℝ)) : GL (Fin 2) ℝ).det.val) :
     (ConjAct.toConjAct (GLPos_to_PSL_R_term ⟨(α.map (Rat.castHom ℝ) : GL (Fin 2) ℝ), hα⟩) •
         ((Gamma_p_α (N := N) α).map SL2Z_to_PSL2R) : Subgroup PSL(2, ℝ)) ≤
@@ -577,7 +577,7 @@ private lemma Gamma_p_α_conjBy_mem_Gamma_up
 open CongruenceSubgroup Pointwise ConjAct in
 /-- Determinant of the conjugate-back matrix `[[y₀₀, j], [p·y₁₀, y₁₁]]` for `y ∈ SL(2,ℤ)` and
 `j` satisfying `y₀₁ = p·j`. -/
-private lemma conjBack_matrix_det
+lemma conjBack_matrix_det
     (p : ℕ) {y : SL(2, ℤ)} {j : ℤ} (hj : y.val 0 1 = (p : ℤ) * j) :
     (!![y.val 0 0, j; (p : ℤ) * y.val 1 0, y.val 1 1] :
       Matrix (Fin 2) (Fin 2) ℤ).det = 1 := by
@@ -719,7 +719,7 @@ open CongruenceSubgroup in
 /-- The kernel `±I = center SL(2, ℤ)` lies in `Γ⁰(p)` (scalar matrices have zero
 upper-right entry).  This is the `±I`-absorption fact that makes the `SL(2, ℤ) → PSL(2, ℝ)`
 quotient transport work for *all* `N` (not just `N > 2`). -/
-private lemma center_le_Gamma_up (p : ℕ) : Subgroup.center SL(2, ℤ) ≤ Gamma_up p := by
+lemma center_le_Gamma_up (p : ℕ) : Subgroup.center SL(2, ℤ) ≤ Gamma_up p := by
   intro c hc
   rw [Matrix.SpecialLinearGroup.mem_center_iff] at hc
   obtain ⟨r, _, hr⟩ := hc
@@ -733,7 +733,7 @@ omit [NeZero N] in
 /-- **`±I`-absorption.** For `w ∈ Γ₁(N)`, `SL2Z_to_PSL2R w ∈ (Γ₁ ∩ Γ⁰(p)).map` iff
 `w ∈ Γ₁ ∩ Γ⁰(p)`.  The forward direction uses `center SL(2, ℤ) ≤ Γ⁰(p)` to absorb the
 `±I` ambiguity of the projection. -/
-private lemma SL2Z_to_PSL2R_mem_Gamma1_inf_Gamma_up_map_iff
+lemma SL2Z_to_PSL2R_mem_Gamma1_inf_Gamma_up_map_iff
     (p : ℕ) {w : SL(2, ℤ)} (hw : w ∈ Gamma1 N) :
     SL2Z_to_PSL2R w ∈ ((Gamma1 N ⊓ Gamma_up p).map SL2Z_to_PSL2R) ↔
       w ∈ Gamma1 N ⊓ Gamma_up p := by
@@ -987,7 +987,7 @@ private theorem T_p_lower_tile_transversal_bijective
 open CongruenceSubgroup Pointwise ConjAct UpperHalfPlane MeasureTheory in
 /-- Base fundamental domain for `G = (Γ₁ N).map SL2Z_to_PSL2R` is `Gamma1_fundDomain_PSL N`.
 This is `isFundamentalDomain_Gamma1_PSL_R` after rewriting the map. -/
-private lemma isFundamentalDomain_Gamma1_map_PSL_R :
+lemma isFundamentalDomain_Gamma1_map_PSL_R :
     IsFundamentalDomain ((Gamma1 N).map SL2Z_to_PSL2R)
       (Gamma1_fundDomain_PSL N) μ_hyp := by
   rw [map_SL2Z_to_PSL2R_eq_imageGamma1_PSL_R]
