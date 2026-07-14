@@ -20042,3 +20042,14 @@ transport_taut_e_eq] + sectionsMapLE_congr_hom at legendreClassifyingMap_pulled 
 `legendreClassifyingEllHom_pulled` (EllHom.ext) → RepresentableBy on legendreDeltaProblem →
 DISCHARGE `legendreDelta_representable_by_affine` modulo [T-E14-LVL-b]. Templates:
 classifyingTop_omegaBasisMap (UniversalAdapted ~1740-1860) via the transposition pipeline.
+
+## v10.225-G0 (2026-07-14) — ★ w7 SORRY-FREE: rational-section point-injectivity proven; hiso leaf eliminated
+`section_base_injective_of_isAlgClosed` fully proven (in fact alg-closure UNUSED — generalizable in
+cleanup). Design: descents are split-epi (canonical retraction = σ=id triangle
+`phi0_desc_stalkClosedPointTo_of_eq_id` + `descResidueField_stalkClosedPointTo_comp`) + mono (field
+hom) ⟹ isos; inverses = canonical `φ₀ ≫ residueFieldMap` composites; point-congruence matching by
+rintro-rfl generalization; invert. LEAN-OP: CommRingCat `≫` is defeq-associative — `exact` crosses
+parenthesization where `simpa only [assoc]` fails; variable-morphism statements dodge
+IsLocalHom-at-𝟙 synthesis. **Sole ALPHA sorry left: `modelMulByHom_range_infinite` (g5-main)** —
+w1/w3/w7 all in place; assembly = HasseWeil cards at W′ := W.baseChange F + projModelPointsAddEquiv
++ point_smul_eq_comp_mulBy base-membership + w3-injectivity + w7-distinctness + Nat.card bound.
