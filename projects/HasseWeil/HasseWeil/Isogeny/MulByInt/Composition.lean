@@ -298,7 +298,7 @@ open DUAL-2 leaf for an abstract isogeny). The resulting dual satisfies
 `((ψ∘φ)^ ∘ (ψ∘φ))* = [m·n]*` (`mulByIntDual_comp_pullback`), with `m·n = deg(ψ∘φ)`
 when `m = deg φ`, `n = deg ψ` (`compose_degree`) — the faithful Silverman bookkeeping, upgrading the
 conjugation-form `HasDualWitness.compose`. -/
-noncomputable def compose {ψ : Isogeny W₂ W₃} {φ : Isogeny W₁ W₂}
+theorem compose {ψ : Isogeny W₂ W₃} {φ : Isogeny W₁ W₂}
     {n m : ℤ} {hn : n ≠ 0} {hm : m ≠ 0}
     (wψ : ψ.HasMulByIntDualWitness n hn) (wφ : φ.HasMulByIntDualWitness m hm)
     (hcov : φ.MulByIntPullbackCovariant n hn) :
@@ -354,7 +354,7 @@ theorem mulByInt_self_rangeIncl {ℓ : ℤ} (hℓ : ℓ ≠ 0) :
 `[ℓ]^ = [ℓ]`), field-general, every field a theorem: `hincl` is free from multiplicativity
 (`mulByInt_self_rangeIncl`), `hbase` from the `[ℓ·ℓ]`-basepoint theorem and `∞`-regularity
 reflection. -/
-noncomputable def mulByIntSelfDualWitness {ℓ : ℤ} (hℓ : ℓ ≠ 0) :
+theorem mulByIntSelfDualWitness {ℓ : ℤ} (hℓ : ℓ ≠ 0) :
     (Isogeny.mulByInt W hℓ).HasMulByIntDualWitness (ℓ * ℓ) (mul_ne_zero hℓ hℓ) where
   hincl := mulByInt_self_rangeIncl W hℓ
   hbase := Isogeny.hbase_of_reflects (Isogeny.mulByInt W hℓ)
@@ -382,7 +382,7 @@ variable (W : Affine K) [W.IsElliptic]
 /-- **The faithful `[q·q]`-witness for `π ∘ π`** — the faithful upgrade of
 `hasDualWitness_frobenius_compose_frobenius` (whose conjugation `ν` is now the genuine
 `[q·q] = [deg (π∘π)]`). Every field a theorem. -/
-noncomputable def frobeniusSquareMulByIntDualWitness :
+theorem frobeniusSquareMulByIntDualWitness :
     ((Isogeny.frobenius W).compose (Isogeny.frobenius W)).HasMulByIntDualWitness
       (((Fintype.card K : ℕ) : ℤ) * ((Fintype.card K : ℕ) : ℤ))
       (mul_ne_zero intCardK_ne_zero intCardK_ne_zero) :=
@@ -406,7 +406,7 @@ theorem frobeniusSquare_mulByIntDual_compose :
 `[ℓ·ℓ]`-witness for `[ℓ]` with the `[q]`-witness for `π` along the (free) Frobenius
 covariance. `q·(ℓ·ℓ) = deg π · deg [ℓ] = deg ([ℓ]∘π)` is Silverman's bookkeeping. Every
 field a theorem. -/
-noncomputable def mulByIntCompFrobeniusDualWitness {ℓ : ℤ} (hℓ : ℓ ≠ 0) :
+theorem mulByIntCompFrobeniusDualWitness {ℓ : ℤ} (hℓ : ℓ ≠ 0) :
     ((Isogeny.mulByInt W hℓ).compose (Isogeny.frobenius W)).HasMulByIntDualWitness
       (((Fintype.card K : ℕ) : ℤ) * (ℓ * ℓ))
       (mul_ne_zero intCardK_ne_zero (mul_ne_zero hℓ hℓ)) :=
@@ -415,7 +415,7 @@ noncomputable def mulByIntCompFrobeniusDualWitness {ℓ : ℤ} (hℓ : ℓ ≠ 0
 
 /-- **The faithful `[ℓ²·q]`-witness for `π ∘ [ℓ]`** — the opposite composition order,
 exercising the `[m]`-covariance instance (from multiplicativity). Every field a theorem. -/
-noncomputable def frobeniusCompMulByIntDualWitness {ℓ : ℤ} (hℓ : ℓ ≠ 0) :
+theorem frobeniusCompMulByIntDualWitness {ℓ : ℤ} (hℓ : ℓ ≠ 0) :
     ((Isogeny.frobenius W).compose (Isogeny.mulByInt W hℓ)).HasMulByIntDualWitness
       ((ℓ * ℓ) * ((Fintype.card K : ℕ) : ℤ))
       (mul_ne_zero (mul_ne_zero hℓ hℓ) intCardK_ne_zero) :=
