@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import BernoulliRegular.FLT37.PadicL.IwasawaModSqCorrected
 import BernoulliRegular.FLT37.Eichler.HerbrandBoundAnalytic
 
@@ -117,7 +122,7 @@ From the norm equality `‖37·B‖ = 37⁻²` and `37·B ≠ 0`, `Padic.norm_eq
 gives `(37:ℝ)^(-v) = (37:ℝ)^(-2)`, so `v = 2` by injectivity of `zpow` at base `37 > 1`.
 **No Kellner / `B_{1184}` input.** -/
 theorem bernoulliGenOmegaValuationTwo37_proved : bernoulliGenOmegaValuationTwo37 := by
-  unfold bernoulliGenOmegaValuationTwo37
+  simp only [bernoulliGenOmegaValuationTwo37]
   -- `37·B ≠ 0`: its norm is `37⁻² ≠ 0`.
   have hnorm := norm_thirtyseven_mul_bernoulliGenOmega_thirtytwo
   have hne : (37 : ℚ_[37]) * bernoulliGenOmega 37 32 ≠ 0 := by
