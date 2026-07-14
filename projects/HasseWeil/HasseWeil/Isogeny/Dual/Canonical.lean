@@ -192,7 +192,8 @@ theorem Isogeny.HasMulByIntDualWitness.dual {φ : Isogeny W₁ W₂} {n : ℤ} {
     (w : φ.HasMulByIntDualWitness n hn) (hcov : φ.MulByIntPullbackCovariant n hn) :
     (Isogeny.mulByIntDual w).HasMulByIntDualWitness n hn := by
   -- Recast the second-composition equation pointwise via `change` (defeq) so the concrete
-  -- isogeny pullback never `whnf`-unfolds (the pattern of `Composition.lean`'s `compose_rangeIncl`).
+  -- isogeny pullback never `whnf`-unfolds (the pattern of `Composition.lean`'s
+  -- `compose_rangeIncl`).
   have hcomp : (Isogeny.compose φ (Isogeny.mulByIntDual w)).toCurveMap.pullback =
       (Isogeny.mulByInt W₂ hn).toCurveMap.pullback :=
     congrArg (fun ψ : Isogeny W₂ W₂ ↦ ψ.toCurveMap.pullback)
@@ -511,7 +512,6 @@ section AlgClosedWiring
 variable {F : Type*} [Field F] [DecidableEq F] [IsAlgClosed F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
-set_option maxHeartbeats 800000 in
 /-- **The defining composition of the Galois-built `[ℓ]`-dual**:
 `dualMulByInt ∘ [ℓ] = [deg [ℓ]]` in fully bundled form. -/
 theorem dualMulByInt_compose_mulByInt (ℓ : ℤ) (hℓ : ℓ ≠ 0) (hℓF : (ℓ : F) ≠ 0) :
