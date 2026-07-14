@@ -8,6 +8,7 @@ import Mathlib.RingTheory.Localization.Away.Basic
 import Mathlib.Algebra.MvPolynomial.CommRing
 import ModularCurves.EllipticCurve.ModelRecord
 import ModularCurves.Moduli.AdaptedModel
+import ModularCurves.Moduli.EllCategory
 
 /-!
 # The universal ω-adapted curve and its moduli ring (T-E12, E12-D1)
@@ -132,5 +133,37 @@ tautological presentation defines. -/
 noncomputable def universalOmegaBasis :
     OmegaBasis (modelEllipticCurve (universalShortNF R)).toEllipticCurveGeom :=
   OmegaBasis.ofPresentation rfl (tautPresentation (universalShortNF R))
+
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+/-- The structure ring map of an `Ell/R`-object: `R → Γ(Y.base, ⊤)`. -/
+noncomputable def EllObj.baseRingHom {R : CommRingCat.{u}} (Y : EllObj R) :
+    R →+* Γ(Y.base, ⊤) :=
+  ((Scheme.ΓSpecIso R).inv ≫ Y.structMap.appTop).hom
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation MvPolynomial in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D3 ★)** The classifying ring map of an `(E, ω)`-datum:
+`R[A₄, A₆][Δ⁻¹] → Γ(Y.base, ⊤)`, `A₄ ↦ adaptedCoeff₄, A₆ ↦ adaptedCoeff₆` — the
+algebra of GME Thm 2.2.3's classifying morphism `Y.base ⟶ M₁`. -/
+noncomputable def classifyingRingHom {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤))) :
+    ModuliRingE12 R →+* Γ(Y.base, ⊤) := by
+  refine IsLocalization.Away.lift (shortDeltaPoly R)
+    (g := eval₂Hom Y.baseRingHom
+      ![(adaptedCoeff₄ Y.curve.toEllipticCurveGeom b h2 h3).1,
+        (adaptedCoeff₆ Y.curve.toEllipticCurveGeom b h2 h3).1]) ?_
+  have hΔ := adaptedDelta_isUnit Y.curve.toEllipticCurveGeom b h2 h3
+  rw [show (eval₂Hom Y.baseRingHom
+      ![(adaptedCoeff₄ Y.curve.toEllipticCurveGeom b h2 h3).1,
+        (adaptedCoeff₆ Y.curve.toEllipticCurveGeom b h2 h3).1]) (shortDeltaPoly R) =
+    (-16 : Γ(Y.base, ⊤)) *
+      (4 * ((adaptedCoeff₄ Y.curve.toEllipticCurveGeom b h2 h3).1) ^ 3 +
+        27 * ((adaptedCoeff₆ Y.curve.toEllipticCurveGeom b h2 h3).1) ^ 2) from by
+    simp only [shortDeltaPoly, map_mul, map_add, map_pow, map_neg, map_ofNat,
+      eval₂Hom_X']
+    norm_num [Matrix.cons_val_zero, Matrix.cons_val_one]]
+  exact hΔ
 
 end ModularCurves
