@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.IrelandRosen.Theorem1.CanonicalPrimeSourceData
@@ -37,7 +42,7 @@ theorem canonicalZetaPIntFlexible_isPrimitiveRoot
   haveI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
   haveI : FaithfulSMul (𝓞 K) (𝓞 R') :=
     FaithfulSMul.of_field_isFractionRing (𝓞 K) (𝓞 R') K R'
-  unfold canonicalZetaPIntFlexible
+  simp only [canonicalZetaPIntFlexible]
   exact (cyclotomicZetaInteger_isPrimitiveRoot (p := p) (K := K)).map_of_injective
     (FaithfulSMul.algebraMap_injective (𝓞 K) (𝓞 R'))
 
@@ -52,6 +57,7 @@ noncomputable def canonicalZetaPFlexible
     (FaithfulSMul.algebraMap_injective (𝓞 R') R')).isUnit
     (Fact.out : Nat.Prime p).ne_zero).unit
 
+/-- The integral primitive root maps to the unit primitive root in `R'`. -/
 @[simp]
 theorem algebraMap_canonicalZetaPIntFlexible
     (p : ℕ) [Fact p.Prime]
@@ -97,7 +103,7 @@ theorem canonicalZetaPIntFlexible_residue_of_kAlgebraCompat
           (𝓞 K ⧸ P)ˣ) : 𝓞 K ⧸ P) := by
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  unfold canonicalZetaPIntFlexible
+  simp only [canonicalZetaPIntFlexible]
   rw [CyclotomicLocalSetup.residueMap_of_split_algebraMap
     (K₀ := K) Q P iso h_compat]
   rfl
