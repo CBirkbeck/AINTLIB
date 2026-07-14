@@ -118,14 +118,19 @@ The one usable germ: `RingTheory/Flat/TorsionFree.lean` (torsion-free ⟹ flat o
 the **fibre case** [BBF-A1] once `[N]_s̄` is finite over the 1-dim regular geometric fibre — but that
 finiteness is BB-QF's `QF-NONCONST`, i.e. **T-B6 again**.
 
-**(d) Convergence observation (both G0 boxes bottom out at T-B6).** BB-QF's `QF-NONCONST` and BB-FLAT's
-fibrewise input [BBF-A1] both require the geometric-fibre structure of `[N]_s̄`, i.e. the T-B6
-scheme-fibre↔`WeierstrassCurve` comparison (sorried `abelEnrichment_exists`). BB-FLAT additionally needs
-the ~23-sorry flat-locus/B–E general-base assembly on top of T-B6.
+**(d) Convergence observation (CORRECTED 2026-07-14 — the fibre input is NOT T-B6-gated).** BB-QF's
+`QF-NONCONST` and BB-FLAT's fibrewise input [BBF-A1] both need the geometric-fibre structure of `[N]_s̄`.
+The earlier framing called this "T-B6, rooted in the sorried `abelEnrichment_exists`" — that is **wrong**:
+a *pointed* field-fibre comparison needs only the PROVEN `abelEnrichment_unique_of_isLocallyNoetherian`
++ GIT 6.4 rigidity + power-naturality (`mulBy_comp_of_isMonHom`, PROVEN) — the BB-QF wall-break
+(`MulByHomFibres.lean`, `decomposition-bbqf.md`). So **BB-FLAT's fibre input [BBF-A1] is likewise NOT
+T-B6-gated** — once the BB-QF field-fibre machinery lands, [BBF-A1]'s "`[N]_s̄` finite over the 1-dim
+regular fibre ⟹ flat (`Flat/TorsionFree.lean`)" follows. **BB-FLAT's real remaining gate is the
+general-base flat-locus/B–E assembly** (~23 sorries), NOT the fibre or T-B6.
 
-**VERDICT (task ii):** BB-FLAT is **NOT G0-session-bounded**. It is gated on (Route A) the project's own
-flat-locus/B–E commutative-algebra program [~23 sorries, D-chain territory] + T-B6, OR (Route B) a
-mathlib-absent Cohen–Macaulay/miracle-flatness development. **RECOMMENDATION:** park BB-FLAT behind the
-flat-locus/B–E chain + T-B6; do not attempt discharge now. Both G0 finiteness/flatness boxes are
-T-B6-gated on their fibre inputs — the highest-leverage unblock for the whole E[N] substrate is **T-B6
-(stream-B)**, not more G0 grinding on BB-QF/BB-FLAT.
+**VERDICT (task ii):** BB-FLAT is **NOT G0-session-bounded**, gated on (Route A) the project's own
+flat-locus/B–E commutative-algebra program [~23 sorries, D-chain territory] for the general-base
+spread-out, OR (Route B) a mathlib-absent Cohen–Macaulay/miracle-flatness development. Its *fibrewise*
+input is unblocked by the BB-QF wall-break (shared machinery). **RECOMMENDATION:** the highest-leverage
+BB-FLAT unblock is the **flat-locus/B–E chain** (D-chain territory) — NOT T-B6, and NOT G0 grinding.
+Park BB-FLAT behind that chain; do not attempt the general-base discharge now.

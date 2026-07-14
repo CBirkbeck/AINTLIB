@@ -88,3 +88,28 @@ without T-B6 delivered. Residual is genuinely cross-stream-blocked (T-B6 = strea
 BB-FLAT-fibrewise + BB-DEG + BB-DIFF simultaneously; (2) the flat-locus/B–E chain (~23 sorries) is the
 separate BB-FLAT general-base gate, best owned by the D-chain; (3) G0 seat awaits owner re-charter (per
 v10.219 "candidate for a larger re-charter"). Firing ONE G0 session only, as instructed.
+
+---
+
+## ⟹⟹ CORRECTION (same session, rule-5: checked the in-progress code) — BB-QF is NOT T-B6-gated
+
+Retracting the "T-B6-gated / prioritise T-B6" recommendation above. On checking my own pre-compaction
+frontier (`MulByHomFibres.lean` + the repo-root focus sentinel), the "gated on the sorried
+`abelEnrichment_exists`" verdict is **wrong** — it conflated the *existence* box with the *pointed
+comparison* the fibre argument actually needs. **WALL-BREAK (foundations all verified 0-sorry):**
+- the pointed field-fibre comparison `E_s ↔ modelEllipticCurve W_s` intertwining `[N]` needs only
+  **rigidity** — `abelEnrichment_unique_of_isLocallyNoetherian` (PROVEN, `Rigidity.lean:1577`) + GIT 6.4
+  `isMonHom_of_one_comp_eq'` (PROVEN, used `EndomorphismDegree.lean:70`) + power-naturality
+  `mulBy_comp_of_isMonHom` (**PROVEN**, `MulByHomFibres.lean`) — **no existence box, no stream-B T-B6**;
+- `localModel` (real atlas field) supplies the pointed iso; HasseWeil `card_torsion_ellPow_nat`
+  (`TorsionPowStructure.lean`, **0-sorry**, prime-to-char, degree-free) is the nonconstancy witness;
+- the model fibre-count closes field-level via Krull-PIT dim≤1 + `IsArtinianScheme.finite` (mathlib-present).
+
+**Corrected status:** BB-QF's `mulByHom_finite_fibres` is a **SOUND, degree-free, G0-ownable BUILD**
+(not a cross-stream gate). Reduction banked; power-naturality landed; **remaining = the model fibre-count
++ the transport assembly** (a real multi-lemma frontier, being built in `MulByHomFibres.lean`).
+Likewise **BB-FLAT's fibre input [BBF-A1] is NOT T-B6-gated** (same wall-break machinery); BB-FLAT's real
+gate is only the general-base flat-locus/B–E chain (~23 sorries, D-chain). Full corrected trees:
+`decomposition-bbqf.md` + `decomposition-bb-flat.md §5`. **CONTINUING THE BUILD this session** (the frontier
+is sound — no cross-stream wait). Corrected recommendation: BB-QF is progressable now by G0; the
+E[N]-substrate unblock is this build, not T-B6.

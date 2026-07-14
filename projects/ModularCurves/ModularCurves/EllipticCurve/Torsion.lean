@@ -135,11 +135,14 @@ theorem mulByHom_zero : E.mulByHom 0 = E.π ≫ E.zero := by
 Every (topological) fibre of `[N] : E ⟶ E` is finite. Over a point `x` lying above `s ∈ S`,
 the fibre `[N]⁻¹{x}` is contained in the curve `E_s`, on which `[N]_s` is nonconstant, and a
 nonconstant morphism of proper smooth curves has finite (`0`-dimensional) fibres.
-**GATED — not dischargeable in-project today** (see `.mathlib-quality/decomposition-bb-qf.md`):
-reaching field-level nonconstancy of `[N]_s` needs the group-compatible scheme-fibre ↔
-`WeierstrassCurve κ(s)` comparison (**T-B6**, stream-B, transitively gated on the sorried
-`abelEnrichment_exists`), and "nonconstant morphism of curves ⟹ finite fibres" is a genuine
-**mathlib API gap** (mathlib has no scheme fibre-dimension / relative-dimension theory). -/
+**Route (sound — NOT `abelEnrichment_exists`-gated; being built in `MulByHomFibres.lean`):** the
+field-fibre nonconstancy needs only a *pointed* comparison `E_s ↔ modelEllipticCurve W_s`, and that
+needs only the **PROVEN** `abelEnrichment_unique_of_isLocallyNoetherian` + GIT 6.4 rigidity
+(`isMonHom_of_one_comp_eq'`) + power-naturality (`mulBy_comp_of_isMonHom`) — no existence box. The
+model fibre-count is field-level: HasseWeil `card_torsion_ellPow_nat` (0-sorry, prime-to-char, KM-degree
+free) forces `[N]`'s image topologically infinite ⟹ each fibre a proper closed subset of the integral
+`zChart` curve (dim ≤ 1 via Krull PIT) ⟹ finite (mathlib `IsArtinianScheme.finite`). Remaining leaves:
+the model fibre-count + the transport assembly. See `.mathlib-quality/decomposition-bbqf.md`. -/
 theorem mulByHom_finite_fibres (N : ℕ) [NeZero N] (x : E.E) :
     (⇑(E.mulByHom N).base ⁻¹' {x}).Finite := by sorry
 

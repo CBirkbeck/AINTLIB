@@ -106,11 +106,17 @@ Equivalently `[N]_s ≠ 0`, i.e. `∃ P ∈ E_s, N·P ≠ 0`.
   1. **The degree** `mulByInt_degree = N² ≠ 0 ⟹ [N] ≠ 0` (KM's `mulByHom_finrank`) — **FORBIDDEN by
      de-confliction** (KM's box).
   2. **HasseWeil's torsion witness** `card_torsion_ellPow_nat` / `torsion_ellPow_finite`
-     (`#E[ℓⁿ] = ℓ²ⁿ`, `ℓ ≠ char`) ⟹ `∃ P, N·P ≠ 0` — degree-free (**satisfies de-confliction**), BUT
-     stated for `WeierstrassCurve.Point` over a field. Transporting it to `E_s` needs the
-     **group-compatible scheme-fibre ↔ `WeierstrassCurve κ(s)` comparison carrying scheme-`[N]` →
-     model-`[N]`** = **T-B6′**, which is **rooted in the sorried `abelEnrichment_exists`**
-     (`GroupLaw.lean:75`) — stream-B's several-hundred-LOC box, NOT a G0 leaf.
+     (`#E[ℓⁿ] = ℓ²ⁿ`, `ℓ ≠ char`, `TorsionPowStructure.lean` **0-sorry**) ⟹ `∃ P, N·P ≠ 0` — degree-free
+     (**satisfies de-confliction**), stated for `WeierstrassCurve.Point` over a field. Transporting it to
+     `E_s` needs a **pointed** comparison `E_s ↔ modelEllipticCurve W_s` carrying scheme-`[N]` →
+     model-`[N]`. **WALL-BREAK (2026-07-14, correcting an earlier "gated" verdict):** a *pointed*
+     comparison does NOT need the sorried existence box `abelEnrichment_exists` — it needs only
+     **uniqueness/rigidity**, which IS proven: `abelEnrichment_unique_of_isLocallyNoetherian`
+     (`Rigidity.lean:1577`, PROVEN) + GIT 6.4 `isMonHom_of_one_comp_eq'` (PROVEN, used
+     `EndomorphismDegree.lean:70`) upgrades any pointed morphism of group objects to a monoid hom, and
+     `mulBy_comp_of_isMonHom` (**PROVEN**, `MulByHomFibres.lean`) conjugates `[N]`. The pointed iso itself
+     is `localModel` (real atlas field, `ModelRecord.lean:76 := locallyWeierstrass_projModel W`). So the
+     transport is **sound with proven foundations — no existence box, no stream-B T-B6.**
 - Source-of-record quote (`black-box-plan.md` §BB-DIFF L-B, verbatim): *"a group-compatible scheme-fibre
   ↔ `WeierstrassCurve k̄` comparison `E.baseChange t ≅ projModel W_k̄` carrying scheme-`[N]`→Weierstrass-`[N]`.
   Does not exist anywhere … the group-compat leg is transitively gated on the sorried
@@ -124,10 +130,15 @@ Equivalently `[N]_s ≠ 0`, i.e. `∃ P ∈ E_s, N·P ≠ 0`.
     either its degree or a point-witness; the point-witness lives in the model (HasseWeil). No dodge.
     WALL holds.
   - [3] `mulByHom_surjective` attack: it is proved (`MulByHomDegree.lean:180`) and degree-free-ish
-    (`one_le_finrank_iff_surjective`), giving nonconstancy — BUT its signature is
-    `{K}[Field K](W : WeierstrassCurve K)[W.IsElliptic]` = **field/model-level only**. Applying it to
-    `E_s` is again the T-B6 transport. Same wall. SURVIVED (as a wall).
-- Verdict: **WALL. `QF-NONCONST` is gated on T-B6 (stream-B), unavoidably, on every degree-free route.**
+    (`one_le_finrank_iff_surjective`), giving nonconstancy at field/model level. Applying it to `E_s`
+    needs the SAME pointed transport — which the wall-break above supplies. Consistent.
+  - **[4] WALL-BREAK (the attack that succeeded against my own "gated" verdict):** the "T-B6 transport"
+    was assumed to need the sorried `abelEnrichment_exists`. FALSE for a *pointed* comparison — rigidity
+    (`abelEnrichment_unique_of_isLocallyNoetherian` + GIT 6.4, both PROVEN) suffices, and
+    `mulBy_comp_of_isMonHom` (PROVEN) conjugates `[N]`. Foundations verified 0-sorry (see source-2 bullet).
+- Verdict: **NOT a wall. `QF-NONCONST` has a SOUND degree-free route with proven foundations (pointed
+  comparison via rigidity, not existence). What remains is a real multi-lemma BUILD (the model
+  fibre-count + the transport assembly), tracked in `MulByHomFibres.lean` — not a gate.**
 
 ## Confidence gate (Step 5) — **DOES NOT PASS**
 1. Every leaf discharged/gap-classified: ✓ (`QF-REDUCE` mathlib-discharged; `QF-DIM` bounded-mathlib;
@@ -138,23 +149,30 @@ Equivalently `[N]_s ≠ 0`, i.e. `∃ P ∈ E_s, N·P ≠ 0`.
 5. Prior-B2 log: no BB-QF entry by name/shape (`b2_log.jsonl` checked).
 6. Mirrors source structure: ✓ (KM 2.3.1 fibre-by-fibre; `black-box-plan.md` "**Depends on T-B6**").
 7. Single-conclusion: ✓.
-- **BLOCKER: `QF-NONCONST` is REVIEW-PENDING/GATED on T-B6 (a sorried stream-B box).** Per the gate,
-  a subtree with a gated leaf is **not ready for ticket creation**. Gate passes only for `QF-REDUCE`
-  (already banked).
+- **STATUS (corrected 2026-07-14): no T-B6 gate.** `QF-REDUCE` banked; `QF-NONCONST` + `QF-DIM` are a
+  sound degree-free BUILD (foundations proven/verified 0-sorry) tracked in `MulByHomFibres.lean` — a
+  real multi-lemma frontier (model fibre-count + transport), NOT a gated/REVIEW-PENDING leaf. Ready for
+  ticket creation as a build (not blocked on another stream).
 
-## Feasibility verdict
-**BB-QF is NOT dischargeable in-project today.** Verified this pass: (i) the mathlib-criterion
-reduction is real and now **banked as proved code** (`mulByHom_locallyQuasiFinite`); (ii) the
-dimension/finiteness content (`QF-DIM`) is more tractable than previously feared — mathlib carries
-`topologicalKrullDim → IsLocallyArtinian → Finite` — needing only a rel-dim-1⟹fibre-dim-1 bridge;
-but (iii) the **nonconstancy witness `QF-NONCONST` is a hard wall gated on T-B6** (the group-compatible
-scheme-fibre ↔ `WeierstrassCurve` comparison, rooted in the sorried `abelEnrichment_exists`,
-stream-B's box), and this holds on **every** route that honours the KM-degree de-confliction. This
-**confirms the `black-box-plan.md` GATING CORRECTION** ("BB-QF … gated on T-B6 … no black box is fully
-dischargeable in-project today without stream-B (T-B6) landing") with hard mathlib evidence, and
-sharpens it: the *only* missing piece is T-B6-for-nonconstancy — the moment T-B6 lands, `QF-NONCONST`
-+ `QF-DIM` close and `mulByHom_finite_fibres` (hence the whole E[N]-finiteness trail:
-`mulByHom_isFinite` → `torsionπ_isFinite`) falls out against the already-banked `QF-REDUCE`.
+## Feasibility verdict (CORRECTED 2026-07-14 — supersedes the "gated" reading)
+**BB-QF is dischargeable in-project via a sound degree-free route; a real multi-lemma build remains,
+but it is NOT gated on another stream.** The earlier verdict this pass ("gated on T-B6, rooted in the
+sorried `abelEnrichment_exists`") was **wrong** — it conflated the *existence* box with the *pointed
+comparison* the fibre argument actually needs. Corrected picture, foundations all verified 0-sorry:
+1. **`QF-REDUCE`** — banked as proved code (`mulByHom_locallyQuasiFinite`); `IsProper`⟹`LocallyOfFiniteType`.
+2. **The pointed field-fibre comparison** `E_s ↔ modelEllipticCurve W_s` intertwining `[N]` needs only
+   **rigidity** (`abelEnrichment_unique_of_isLocallyNoetherian` PROVEN + GIT 6.4 PROVEN) +
+   power-naturality (`mulBy_comp_of_isMonHom` PROVEN) + `localModel` (real atlas field) — **NO existence
+   box, NO stream-B T-B6.**
+3. **The model fibre-count** is field-level and degree-free: HasseWeil `card_torsion_ellPow_nat` (0-sorry)
+   ⟹ `[N]`-image infinite ⟹ fibres proper closed in the integral `zChart` curve (dim ≤ 1, Krull PIT) ⟹
+   finite (`IsArtinianScheme.finite`; `topologicalKrullDim → IsLocallyArtinian → Finite`, mathlib-present).
+**Remaining work = a genuine multi-lemma BUILD** (the model fibre-count [Krull-PIT dim≤1 + Jacobson +
+HasseWeil density] and the transport assembly), being built in `MulByHomFibres.lean` (power-naturality
+already landed). This is G0-ownable frontier, not a cross-stream block — it **refutes** the
+`black-box-plan.md` GATING CORRECTION's claim that BB-QF needs stream-B's T-B6 to land. On completion,
+`mulByHom_finite_fibres` closes ⟹ the banked `QF-REDUCE` gives `mulByHom_locallyQuasiFinite` axiom-clean
+⟹ the whole E[N]-finiteness trail (`mulByHom_isFinite` → `torsionπ_isFinite`).
 
 ## Consumers on discharge
 Discharging `mulByHom_finite_fibres` makes `mulByHom_locallyQuasiFinite` axiom-clean, which closes
