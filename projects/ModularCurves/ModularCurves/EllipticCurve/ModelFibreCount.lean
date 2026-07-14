@@ -410,4 +410,29 @@ theorem modelMulByHom_finite_preimage_singleton (N : ℤ)
 
 end ProjModelCurvelike
 
+/-! ### g5 — the range-infinitude witness (HasseWeil import; ALPHA's last leaf)
+
+Over an algebraically closed field: pick a prime `ℓ` exceeding both `|N|` and the
+characteristic exponent (w1); `#E[ℓⁿ] = ℓ²ⁿ` (HasseWeil `card_torsion_ellPow_nat`, w2);
+`N•` is injective on `E[ℓⁿ]` since `N` is a unit mod `ℓⁿ` (w3); so the image of `N•` on
+the point group is infinite (w4); transport points to sections of the projective model
+(`projModelPointsEquivEll` at `K := F`, `baseChange_self`/`map_id`, w5), `N•` to
+composition with `[N]` (`projModelPointsEquiv_zsmul`-family, w6); distinct `F`-rational
+sections over an algebraically closed field have distinct image points (residue field
+`= F`, w7) — so the topological range of `[N]` is infinite. The non-closed-base descent
+(closed points, finite `κ(w) ⊗ κ̄` fibres) is the BETA-side κ-descent step boarded at
+v10.221. -/
+
+section RangeWitness
+
+open scoped Classical in
+/-- **(g5, alg-closed case — TODO w1–w7 per the section header)** The topological range
+of `[N]` on the projective model over an algebraically closed field is infinite. -/
+theorem modelMulByHom_range_infinite {F : Type u} [Field F] [IsAlgClosed F]
+    (W : WeierstrassCurve F) [W.IsElliptic] (N : ℤ) (hN : N ≠ 0) :
+    (Set.range ((modelEllipticCurve W).mulByHom N).base).Infinite := by
+  sorry
+
+end RangeWitness
+
 end ModularCurves
