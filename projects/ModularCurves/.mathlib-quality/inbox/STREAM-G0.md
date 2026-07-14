@@ -163,3 +163,16 @@ transparency-cast piece is CLOSED. The trick: ascribe `e` to the `asOver.left` t
 `fiber_mulByHom_locallyQuasiFinite`; and (2) **ALPHA's g5** (range-infinitude HasseWeil witness, sibling
 actively grinding w7). Both are atlas-context; the transport machinery makes the fibre-of-endo assembly a
 `fibreModelIsoAsOver` + `finite_fibres_mulByHom_of_isMonHom_iso` application on ALPHA's model count.
+
+### ⟹ SESSION TERMINAL (Opus BETA lane) — B3: complete delivery; last piece g5-gated
+**BETA transport machinery COMPLETE + fully proven + axiom-clean** (MulByHomFibres.lean 0-sorry;
+MulByHomFibresGlobal.lean: only `fiber_mulByHom_locallyQuasiFinite` remains). Delivered this session:
+power-naturality, `.left` form, `isMonHom_of_pointed`, LQF + topological transport, `coordinateRing_krullDimLE_one`,
+`fibrewiseElliptic`, **`fibreModelIsoAsOver`** (raw-iso→asOver wrapping incl. the transparency-cast η-matching —
+CLOSED), `mulByHom_locallyQuasiFinite_assembled`; + verdict-correction, Torsion re-alignment, BB-FLAT scope.
+**B3 — last piece blocked:** `fiber_mulByHom_locallyQuasiFinite` (LQF of the endo's fibre over κ(y)) needs the
+model's finiteness (can't be circular via base-change), which is **g5-gated** (ALPHA's
+`modelMulByHom_finite_preimage_singleton` hfim = g5, NOT landed) + a two-residue-level deep atlas pullback
+connection (`Scheme.Pullback.range_fst` + `mulByHom_baseChange` + fiberHomeo). Both are the ALPHA session's
+active/atlas lane (sibling grinding g5-w7). The transport machinery makes it a clean application once g5 lands.
+Opus BETA lane fully delivered; pipeline converges under the active ALPHA session (sentinel = sibling's live g5 focus, preserved).
