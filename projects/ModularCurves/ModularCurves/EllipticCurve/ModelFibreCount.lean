@@ -101,3 +101,47 @@ theorem isClosed_isIrreducible_singleton_or_univ {C : Set (PrimeSpectrum R)}
         exact subset_rfl
     exact hC.symm.trans hZ
 
+
+end DimOneTopology
+
+/-! ### The coordinate ring is a Jacobson non-field
+
+`W.CoordinateRing` is module-finite over `K[X]` (the power basis `{1, y}`), hence
+integral, so it inherits Jacobson-ness from `K[X]` and — being a domain mapping
+injectively from `K[X]` — cannot be a field (else `K[X]` would be one). Together with
+`coordinateRing_krullDimLE_one` this activates the whole `DimOne`/`Jacobson` toolkit
+above for the affine chart of the projective model. -/
+
+section CoordinateRingInstances
+
+variable {K : Type u} [Field K] (W : WeierstrassCurve K)
+
+noncomputable instance : Module.Finite (Polynomial K) W.toAffine.CoordinateRing :=
+  Module.Finite.of_basis (WeierstrassCurve.Affine.CoordinateRing.basis W.toAffine)
+
+instance : Algebra.IsIntegral (Polynomial K) W.toAffine.CoordinateRing :=
+  Algebra.IsIntegral.of_finite _ _
+
+instance : IsJacobsonRing W.toAffine.CoordinateRing :=
+  isJacobsonRing_of_isIntegral (R := Polynomial K)
+
+/-- The structure map `K[X] → K[W]` is injective (`AdjoinRoot.of` of a degree-`2`
+polynomial over a domain). -/
+theorem coordinateRing_algebraMap_injective :
+    Function.Injective (algebraMap (Polynomial K) W.toAffine.CoordinateRing) := by
+  have hdeg : (W.toAffine.polynomial).degree ≠ 0 := by
+    rw [Polynomial.degree_eq_natDegree W.toAffine.monic_polynomial.ne_zero,
+      WeierstrassCurve.Affine.natDegree_polynomial]
+    exact Nat.cast_ne_zero.mpr two_ne_zero
+  exact AdjoinRoot.of.injective_of_degree_ne_zero hdeg
+
+/-- **The coordinate ring of a Weierstrass curve is not a field**: it is integral over
+`K[X]` with injective structure map, and `K[X]` is not a field. -/
+theorem not_isField_coordinateRing : ¬ IsField W.toAffine.CoordinateRing := fun hF =>
+  Polynomial.not_isField K
+    (isField_of_isIntegral_of_isField (R := Polynomial K)
+      (coordinateRing_algebraMap_injective W) hF)
+
+end CoordinateRingInstances
+
+end ModularCurves
