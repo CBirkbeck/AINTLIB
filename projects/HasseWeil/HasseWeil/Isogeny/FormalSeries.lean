@@ -1537,13 +1537,6 @@ theorem orderTop_localExpand_algebraMap_fracPolyX
   rw [hk, h_intDeg, WithTop.coe_inj]
   linarith [h_ord]
 
-omit [DecidableEq F] [W.toAffine.IsElliptic] in
-/-- `y_gen W` and `(W_smooth W).coordYInFunctionField` are the same element of
-`KE`: both are `algebraMap R KE (AdjoinRoot.root W.polynomial)` (the curve of
-`W_smooth W` is `W.toAffine` definitionally). -/
-theorem y_gen_eq_coordYInFunctionField :
-    y_gen W = (W_smooth W).coordYInFunctionField := rfl
-
 /-- `orderTop (localExpand (y_gen W)) = -3`, matching `ordAtInfty (y_gen W) = -3`. -/
 theorem orderTop_localExpand_y_gen :
     (localExpand W (y_gen W)).orderTop = ((-3 : ℤ) : WithTop ℤ) := by

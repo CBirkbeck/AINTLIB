@@ -314,21 +314,6 @@ theorem mulByInt_pullbackAlgHom_y_gen (n : ℤ) (hn : n ≠ 0) :
     dif_neg hn
   exact hpb ▸ mulByInt_pullback_y W n hn
 
-/-- `mulByInt_y W n ≠ 0`: it is the image of `y_gen ≠ 0` under the field
-embedding `[n]^*`. -/
-theorem mulByInt_y_ne_zero' (n : ℤ) (hn : n ≠ 0) : mulByInt_y W n ≠ 0 := by
-  classical
-  rw [← mulByInt_pullbackAlgHom_y_gen W n hn]
-  exact (map_ne_zero (mulByInt_pullbackAlgHom W n hn)).mpr (y_gen_ne_zero W)
-
-/-- `y_gen W` and `(W_smooth W).coordYInFunctionField` are the same element of
-`KE`. -/
-theorem y_gen_eq_coordYInFunctionField' :
-    y_gen W = (W_smooth W).coordYInFunctionField := by
-  classical
-  exact (coordY_W_smooth_eq_y_gen W).symm.trans
-    ((W_smooth W).coordY_eq_coordYInFunctionField)
-
 /-- The pullback of a polynomial in `x`: `[n]^*(p(x)) = p(mulByInt_x W n)`.
 The algebraMap factors through the coordinate ring, where the pullback is
 `mulByInt_coordHom = AdjoinRoot.lift (mulByInt_xHom W n) …`, and on
@@ -408,11 +393,6 @@ theorem ord_mulByInt_pullback_algebraMap_fracPolyX (n : ℤ) (hn : n ≠ 0)
 
 /-! ### The one-sided `y`-order bound from the curve equation -/
 
-omit [W.toAffine.IsElliptic] in
-private theorem le_ordAtInfty_zero' (b : WithTop ℤ) :
-    b ≤ (W_smooth W).ordAtInfty (0 : KE) :=
-  le_of_le_of_eq le_top ((W_smooth W).ordAtInfty_zero).symm
-
 /-- **One-sided `y`-order bound**: if `ord_∞(mulByInt_x W n) = 2m` with
 `m ≤ -1`, then `ord_∞(mulByInt_y W n) ≥ 3m` — **no** `(n : F) ≠ 0` hypothesis.
 
@@ -466,7 +446,7 @@ private theorem ordAtInfty_mulByInt_pullback_fracPolyX_nonneg (n : ℤ) (hn : n 
         (algebraMap (FractionRing (Polynomial F)) KE r)) := by
   rcases eq_or_ne r 0 with rfl | hr
   · rw [map_zero, map_zero]
-    exact le_ordAtInfty_zero' W _
+    exact le_of_le_of_eq le_top ((W_smooth W).ordAtInfty_zero).symm
   · obtain ⟨t, hsrc, himg⟩ :=
       ord_mulByInt_pullback_algebraMap_fracPolyX W n hn hM hMneg hr
     rw [hsrc] at hr_ord
@@ -495,10 +475,11 @@ private theorem ordAtInfty_mulByInt_pullback_y_term_nonneg (n : ℤ) (hn : n ≠
     0 ≤ (W_smooth W).ordAtInfty
       (mulByInt_pullbackAlgHom W n hn
         (algebraMap (FractionRing (Polynomial F)) KE r) * mulByInt_y W n) := by
+  classical
   have hMneg : 2 * m < 0 := by omega
   rcases eq_or_ne r 0 with rfl | hr
   · rw [map_zero, map_zero, zero_mul]
-    exact le_ordAtInfty_zero' W _
+    exact le_of_le_of_eq le_top ((W_smooth W).ordAtInfty_zero).symm
   · obtain ⟨t, hsrc, himg⟩ :=
       ord_mulByInt_pullback_algebraMap_fracPolyX W n hn hM hMneg hr
     rw [hsrc] at hr_ord
@@ -514,7 +495,7 @@ private theorem ordAtInfty_mulByInt_pullback_y_term_nonneg (n : ℤ) (hn : n ≠
       ((W_smooth W).ordAtInfty_eq_top_iff _).not.mp
         (ne_of_eq_of_ne himg WithTop.coe_ne_top)
     have hy_ne : mulByInt_y W n ≠ 0 :=
-      mulByInt_y_ne_zero' W n hn
+      mulByInt_y_ne_zero W n hn
     have hmul := (W_smooth W).ordAtInfty_mul himg_ne hy_ne
     rw [himg] at hmul
     calc (0 : WithTop ℤ) ≤ ((t * (2 * m) + 3 * m : ℤ) : WithTop ℤ) := by
@@ -558,7 +539,7 @@ theorem mulByInt_pullbackAlgHom_ordAtInfty_nonneg (n : ℤ) (hn : n ≠ 0)
   obtain ⟨r₁, r₂, hf_decomp⟩ := (W_smooth W).exists_decomp f
   have hf_eq : f = algebraMap (FractionRing (Polynomial F)) KE r₁ +
       algebraMap (FractionRing (Polynomial F)) KE r₂ * y_gen W := by
-    rw [hf_decomp, y_gen_eq_coordYInFunctionField' W, Algebra.smul_def, mul_one,
+    rw [hf_decomp, y_gen_eq_coordYInFunctionField W, Algebra.smul_def, mul_one,
       Algebra.smul_def]
     rfl
   -- split the hypothesis through the parity/min formula
