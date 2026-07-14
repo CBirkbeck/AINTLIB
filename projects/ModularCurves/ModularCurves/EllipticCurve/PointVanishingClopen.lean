@@ -36,7 +36,6 @@ variable {S : Scheme.{u}} (E : EllipticCurve S) (N : ℕ) [NeZero N]
 composite of the closed immersion `torsionι N` and the (proper, hence separated) structure
 map `E.π`. -/
 instance isSeparated_torsionπ : IsSeparated (E.torsionπ N) := by
-  haveI := E.torsionι_isClosedImmersion N
   haveI : IsSeparated E.π := E.proper.toIsSeparated
   rw [← E.torsionι_π]
   infer_instance

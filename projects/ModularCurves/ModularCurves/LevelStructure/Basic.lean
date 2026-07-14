@@ -90,7 +90,6 @@ itself, compatibly with the inclusions. Discharge: `torsionι_isClosedImmersion`
 theorem torsionIdeal_subscheme (N : ℕ) :
     ∃ e : (E.torsionIdeal N).subscheme ≅ E.torsion N,
       e.hom ≫ E.torsionι N = (E.torsionIdeal N).subschemeι := by
-  have _ := E.torsionι_isClosedImmersion N
   have hker : (E.torsionι N).ker = ((E.torsionIdeal N).subschemeι).ker :=
     (Scheme.IdealSheafData.ker_subschemeι _).symm
   have _ := IsClosedImmersion.isIso_lift (E.torsionι N)

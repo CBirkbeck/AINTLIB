@@ -95,6 +95,11 @@ theorem torsionι_isClosedImmersion (N : ℕ) :
   have h2 : IsClosedImmersion E.zero := IsClosedImmersion.of_comp (f := E.zero) (g := E.π)
   exact MorphismProperty.pullback_fst _ _ h2
 
+/-- Instance form of `torsionι_isClosedImmersion` (T-B3): typeclass search discharges
+`IsClosedImmersion (E.torsionι N)` automatically, so consumers need no local
+`haveI := E.torsionι_isClosedImmersion N`. -/
+instance (N : ℕ) : IsClosedImmersion (E.torsionι N) := E.torsionι_isClosedImmersion N
+
 /-- The torsion inclusion followed by the structure morphism is the torsion structure
 morphism. -/
 @[reassoc]
