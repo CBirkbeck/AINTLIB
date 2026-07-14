@@ -9,6 +9,7 @@ import Mathlib.Algebra.MvPolynomial.CommRing
 import ModularCurves.EllipticCurve.ModelRecord
 import ModularCurves.Moduli.AdaptedModel
 import ModularCurves.Moduli.EllCategory
+import ModularCurves.Moduli.OmegaFunctor
 import ModularCurves.ForMathlib.PullbackLocalAtTarget
 
 /-!
@@ -909,5 +910,200 @@ noncomputable def classifyingEllHom {R : CommRingCat.{u}} (Y : EllObj R)
   top := classifyingTop Y b h2 h3
   isPullback := isPullback_classifyingTop Y b h2 h3
   zero_w := classifyingTop_zero Y b h2 h3
+
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 6400000 in
+/-- **(E12-D4 bridge)** The basis unit is natural under `Ell/R`-transport: the basis
+unit of a transported presentation against the pulled basis is the section-comparison
+image of the original basis unit (transport-analogue of `basisUnitAt_restrict`). -/
+theorem basisUnitAt_transport {R : CommRingCat.{u}} {Y' Y : EllObj R} (φ : Y' ⟶ Y)
+    {V : Y.base.affineOpens}
+    (P : LocalPresentation Y.curve.toEllipticCurveGeom V)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    {V' : Y'.base.affineOpens} (hV' : V'.1 ≤ φ.baseHom ⁻¹ᵁ V.1) :
+    ((P.transport φ.baseHom φ.top φ.isPullback φ.zero_w hV').basisUnitAt
+        (omegaBasisMap φ b)).1 =
+      Units.map (sectionsMapLE φ.baseHom hV').toMonoidHom (P.basisUnitAt b).1 := by
+  refine Scheme.unit_ext_of_res_cover Y'.base
+    (fun i' : Y'.curve.toEllipticCurveGeom.atlas.ι =>
+      V'.1 ⊓ (Y'.curve.toEllipticCurveGeom.atlas.U i').1) (fun i' => inf_le_left)
+    (fun x hxV => by
+      obtain ⟨i', hxi⟩ := Y'.curve.toEllipticCurveGeom.atlas.covers x
+      exact TopologicalSpace.Opens.mem_iSup.mpr ⟨i', hxV, hxi⟩) (fun i' => ?_)
+  rw [((P.transport φ.baseHom φ.top φ.isPullback φ.zero_w hV').basisUnitAt
+    (omegaBasisMap φ b)).2 i']
+  refine Scheme.unit_ext_of_affine_res Y'.base (fun W' hW' => ?_)
+  rw [((P.transport φ.baseHom φ.top φ.isPullback φ.zero_w hV').basisUnitOn
+    (omegaBasisMap φ b) i').2 W' hW']
+  -- pointwise choice: a Y-chart at the image point and factoring affines
+  have hchoice : ∀ w : W'.1, ∃ (j : Y.curve.toEllipticCurveGeom.atlas.ι)
+      (WS : Y.base.affineOpens) (T : Y'.base.affineOpens),
+      WS.1 ≤ V.1 ⊓ (Y.curve.toEllipticCurveGeom.atlas.U j).1 ∧
+      w.1 ∈ T.1 ∧ T.1 ≤ W'.1 ∧ T.1 ≤ φ.baseHom ⁻¹ᵁ WS.1 := by
+    intro w
+    obtain ⟨j, hj⟩ := Y.curve.toEllipticCurveGeom.atlas.covers (φ.baseHom.base w.1)
+    have hwV : φ.baseHom.base w.1 ∈ V.1 := hV' ((hW' w.2).1)
+    obtain ⟨WS₀, hWSaff, hfw, hWSle⟩ := exists_isAffineOpen_mem_and_subset
+      (show φ.baseHom.base w.1 ∈ V.1 ⊓ (Y.curve.toEllipticCurveGeom.atlas.U j).1 from
+        ⟨hwV, hj⟩)
+    obtain ⟨T₀, hTaff, hwT, hTle⟩ := exists_isAffineOpen_mem_and_subset
+      (show w.1 ∈ W'.1 ⊓ (φ.baseHom ⁻¹ᵁ WS₀) from ⟨w.2, hfw⟩)
+    exact ⟨j, ⟨WS₀, hWSaff⟩, ⟨T₀, hTaff⟩, hWSle, hwT,
+      hTle.trans inf_le_left, hTle.trans inf_le_right⟩
+  choose j WS T hWS hwT hTW' hTpre using hchoice
+  refine Scheme.unit_ext_of_res_cover Y'.base (fun w : W'.1 => (T w).1) hTW'
+    (fun x hx => TopologicalSpace.Opens.mem_iSup.mpr ⟨⟨x, hx⟩, hwT ⟨x, hx⟩⟩)
+    (fun w => ?_)
+  rw [Scheme.resUnit_resUnit, Scheme.resUnit_resUnit, map_mul]
+  -- RHS: through the appLE-commutation and the Y-side glue spec at `WS w`
+  have hRHS : Scheme.resUnit (((hTW' w).trans hW').trans inf_le_left)
+      (Units.map (sectionsMapLE φ.baseHom hV').toMonoidHom (P.basisUnitAt b).1) =
+    Units.map ((φ.baseHom.appLE (WS w).1 (T w).1 (hTpre w)).hom).toMonoidHom
+      (Scheme.resUnit (show (WS w).1 ≤ V.1 from (hWS w).trans inf_le_left)
+        (P.basisUnitAt b).1) := by
+    rw [show Units.map (sectionsMapLE φ.baseHom hV').toMonoidHom (P.basisUnitAt b).1 =
+      Units.map ((φ.baseHom.appLE V.1 V'.1 hV').hom).toMonoidHom
+        (P.basisUnitAt b).1 from rfl,
+      Scheme.resUnit_map_appLE,
+      ← Scheme.map_appLE_resUnit φ.baseHom
+        (show (WS w).1 ≤ V.1 from (hWS w).trans inf_le_left) (hTpre w)]
+  rw [hRHS]
+  -- the Y-side basis unit at `WS w`, through the specs
+  have hYspec : Scheme.resUnit (show (WS w).1 ≤ V.1 from (hWS w).trans inf_le_left)
+      (P.basisUnitAt b).1 =
+    Scheme.resUnit (le_inf le_top ((hWS w).trans inf_le_right)) (b.2 (j w)).unit *
+      ((P.restrict ((hWS w).trans inf_le_left)).transUnit
+        ((Y.curve.toEllipticCurveGeom.atlas.presentation (j w)).restrict
+          ((hWS w).trans inf_le_right))) := by
+    rw [show Scheme.resUnit (show (WS w).1 ≤ V.1 from (hWS w).trans inf_le_left)
+        (P.basisUnitAt b).1 =
+      Scheme.resUnit (show (WS w).1 ≤ V.1 ⊓
+          (Y.curve.toEllipticCurveGeom.atlas.U (j w)).1 from
+        le_inf ((hWS w).trans inf_le_left) ((hWS w).trans inf_le_right))
+        (Scheme.resUnit (inf_le_left : V.1 ⊓
+          (Y.curve.toEllipticCurveGeom.atlas.U (j w)).1 ≤ V.1)
+          (P.basisUnitAt b).1) from by rw [Scheme.resUnit_resUnit],
+      (P.basisUnitAt b).2 (j w), (P.basisUnitOn b (j w)).2 (WS w)
+        (le_inf ((hWS w).trans inf_le_left) ((hWS w).trans inf_le_right))]
+  rw [hYspec, map_mul]
+  -- LHS comparison factor: push the restriction inside and collapse to `T`-level
+  rw [← transUnit_restrict _ _ (hTW' w), transUnit_restrict_restrict_left,
+    transUnit_transport_restrict_left, transUnit_restrict_restrict_right]
+  -- the transported `Y`-chart at `T`
+  have hTj : (T w).1 ≤ φ.baseHom ⁻¹ᵁ
+      (Y.curve.toEllipticCurveGeom.atlas.U (j w)).1 :=
+    (hTpre w).trans
+      ((TopologicalSpace.Opens.map φ.baseHom.base).map
+        (homOfLE ((hWS w).trans inf_le_right))).le
+  set Pj := (Y.curve.toEllipticCurveGeom.atlas.presentation (j w)).transport
+    φ.baseHom φ.top φ.isPullback φ.zero_w hTj with hPj
+  -- split the comparison through the transported chart
+  have h1 : (P.transport φ.baseHom φ.top φ.isPullback φ.zero_w
+      (((hTW' w).trans (hW'.trans inf_le_left)).trans hV')).transUnit
+      ((Y'.curve.toEllipticCurveGeom.atlas.presentation i').restrict
+        (((hTW' w).trans (hW'.trans inf_le_right)))) =
+    (P.transport φ.baseHom φ.top φ.isPullback φ.zero_w
+        (((hTW' w).trans (hW'.trans inf_le_left)).trans hV')).transUnit Pj *
+    Pj.transUnit ((Y'.curve.toEllipticCurveGeom.atlas.presentation i').restrict
+      (((hTW' w).trans (hW'.trans inf_le_right)))) :=
+    (transUnit_trans _ _ _).symm
+  -- the first factor is the section-comparison image (restrict at `WS`, transport)
+  have h3 : (P.transport φ.baseHom φ.top φ.isPullback φ.zero_w
+      (((hTW' w).trans (hW'.trans inf_le_left)).trans hV')).transUnit Pj =
+    Units.map ((φ.baseHom.appLE (WS w).1 (T w).1 (hTpre w)).hom).toMonoidHom
+      ((P.restrict ((hWS w).trans inf_le_left)).transUnit
+        ((Y.curve.toEllipticCurveGeom.atlas.presentation (j w)).restrict
+          ((hWS w).trans inf_le_right))) := by
+    rw [hPj, ← transUnit_restrict_pair_transport φ.baseHom φ.top φ.isPullback
+        φ.zero_w P (Y.curve.toEllipticCurveGeom.atlas.presentation (j w))
+        ((hWS w).trans inf_le_left) ((hWS w).trans inf_le_right) (hTpre w),
+      transUnit_transport]
+    rfl
+  -- the pulled-basis component: `w_res` + the pulled section through `WS`
+  have h2 : Scheme.resUnit (hTW' w)
+      (Scheme.resUnit (le_inf le_top (hW'.trans inf_le_right))
+        (((omegaBasisMap φ b)).2 i').unit) =
+    ((Y'.curve.toEllipticCurveGeom.atlas.presentation i').restrict
+        ((hTW' w).trans (hW'.trans inf_le_right))).transUnit Pj *
+    Units.map ((φ.baseHom.appLE (WS w).1 (T w).1 (hTpre w)).hom).toMonoidHom
+      (Scheme.resUnit (le_inf le_top ((hWS w).trans inf_le_right))
+        (b.2 (j w)).unit) := by
+    refine Units.ext ?_
+    simp only [Units.val_mul, Scheme.resUnit_val, Scheme.resLE_resLE, Units.coe_map,
+      MonoidHom.coe_coe]
+    rw [show (((omegaBasisMap φ b)).2 i').unit.val = (omegaBasisMap φ b).1.1 i' from
+      IsUnit.unit_spec _,
+      show ((b.2 (j w)).unit : Γ(Y.base, (⊤ : Y.base.Opens) ⊓
+        (omegaCocycle Y.curve.toEllipticCurveGeom).U (j w))) = b.1.1 (j w) from
+      IsUnit.unit_spec _]
+    -- expand the transported component at `(i', j w)` over `T w`
+    have hcomp := congrArg (⇑(Scheme.resLE (X := Y'.base)
+      (show (T w).1 ≤ (⊤ : Y'.base.Opens) ⊓
+          (omegaCocycle Y'.curve.toEllipticCurveGeom).U i' ⊓
+          ((omegaCocycle Y.curve.toEllipticCurveGeom).pullbackCocycle
+            φ.baseHom).U (j w) from
+        le_inf (le_inf le_top ((hTW' w).trans (hW'.trans inf_le_right)))
+          ((hTpre w).trans
+            ((TopologicalSpace.Opens.map φ.baseHom.base).map
+              (homOfLE ((hWS w).trans inf_le_right))).le))))
+      ((omegaCompat φ).transportFun_res
+        (((omegaCocycle Y.curve.toEllipticCurveGeom).pullbackCocycle
+            φ.baseHom).sectionsMap
+          (show (⊤ : Y'.base.Opens) ≤ φ.baseHom ⁻¹ᵁ (⊤ : Y.base.Opens) from
+            fun x _ => trivial)
+          ((omegaCocycle Y.curve.toEllipticCurveGeom).sectionsPullback
+            φ.baseHom b.1)) i' (j w))
+    simp only [Scheme.resUnit_val, Scheme.resLE_resLE, map_mul] at hcomp
+    show Scheme.resLE (hTW' w) (Scheme.resLE (le_inf le_top (hW'.trans inf_le_right))
+        (((omegaCompat φ).transportFun
+          (((omegaCocycle Y.curve.toEllipticCurveGeom).pullbackCocycle
+              φ.baseHom).sectionsMap
+            (show (⊤ : Y'.base.Opens) ≤ φ.baseHom ⁻¹ᵁ (⊤ : Y.base.Opens) from
+              fun x _ => trivial)
+            ((omegaCocycle Y.curve.toEllipticCurveGeom).sectionsPullback
+              φ.baseHom b.1))).1 i')) =
+      (((Y'.curve.toEllipticCurveGeom.atlas.presentation i').restrict
+          ((hTW' w).trans (hW'.trans inf_le_right))).transUnit Pj).val *
+      (φ.baseHom.appLE (WS w).1 (T w).1 (hTpre w)).hom
+        (Scheme.resLE (le_inf le_top ((hWS w).trans inf_le_right)) (b.1.1 (j w)))
+    erw [Scheme.resLE_resLE]
+    refine Eq.trans hcomp ?_
+    -- identify the two factors
+    refine congrArg₂ (· * ·) ?_ ?_
+    · -- the `w`-factor is the transition unit `w_res`
+      have hw := congrArg Units.val (omegaCompat_w_res φ i' (j w) (T w)
+        (le_inf ((hTW' w).trans (hW'.trans inf_le_right))
+          ((hTpre w).trans
+            ((TopologicalSpace.Opens.map φ.baseHom.base).map
+              (homOfLE ((hWS w).trans inf_le_right))).le)))
+      simp only [Scheme.resUnit_val] at hw
+      rw [show Scheme.resLE (X := Y'.base) _ ((omegaCompat φ).w i' (j w)).val =
+        (((Y'.curve.toEllipticCurveGeom.atlas.presentation i').restrict
+            ((hTW' w).trans (hW'.trans inf_le_right))).transUnit Pj).val from hw]
+    · -- the pulled component through `WS`
+      erw [Scheme.resLE_resLE, Scheme.resLE_appLE]
+      exact (Scheme.appLE_resLE φ.baseHom
+        (le_inf le_top ((hWS w).trans inf_le_right)) _ _).symm
+  -- assemble
+  rw [h1, h3, h2]
+  rw [mul_mul_mul_comm]
+  have hcancel : ((Y'.curve.toEllipticCurveGeom.atlas.presentation i').restrict
+        ((hTW' w).trans (hW'.trans inf_le_right))).transUnit Pj *
+      Pj.transUnit ((Y'.curve.toEllipticCurveGeom.atlas.presentation i').restrict
+        ((hTW' w).trans (hW'.trans inf_le_right))) = 1 := by
+    rw [transUnit_trans, transUnit_self]
+  have hc := congrArg Units.val hcancel
+  refine Units.ext ?_
+  simp only [Units.val_mul, Units.val_one] at hc ⊢
+  linear_combination
+    ((Units.map ((φ.baseHom.appLE (WS w).1 (T w).1 (hTpre w)).hom).toMonoidHom
+      ((P.restrict ((hWS w).trans inf_le_left)).transUnit
+        ((Y.curve.toEllipticCurveGeom.atlas.presentation (j w)).restrict
+          ((hWS w).trans inf_le_right)))).val *
+     (Units.map ((φ.baseHom.appLE (WS w).1 (T w).1 (hTpre w)).hom).toMonoidHom
+      (Scheme.resUnit (le_inf le_top ((hWS w).trans inf_le_right))
+        (b.2 (j w)).unit)).val) * hc
 
 end ModularCurves

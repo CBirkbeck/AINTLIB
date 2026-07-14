@@ -1802,6 +1802,62 @@ theorem transVC_restrict_restrict_left {VP : S.affineOpens}
     (by rw [eqToHom_refl, Category.comp_id])
 
 set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D4 coherence)** Left-argument collapse of a restricted transport. -/
+theorem transVC_transport_restrict_left {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
+    (f : S' ⟶ S) (t : G'.E ⟶ G.E)
+    (hsq : IsPullback t G'.π G.π f) (hz : G'.zero ≫ t = f ≫ G.zero)
+    {VP : S.affineOpens} (P : LocalPresentation G VP)
+    {V' V'' : S'.affineOpens} (R' : LocalPresentation G' V'')
+    (hV' : V'.1 ≤ f ⁻¹ᵁ VP.1) (h : V''.1 ≤ V'.1) :
+    ((P.transport f t hsq hz hV').restrict h).transVC R' =
+      (P.transport f t hsq hz (h.trans hV')).transVC R' := by
+  have hWW : (P.transport f t hsq hz (h.trans hV')).W =
+      ((P.transport f t hsq hz hV').restrict h).W := by
+    show P.W.map _ = (P.W.map _).map _
+    rw [WeierstrassCurve.map_map]
+    congr 1
+    rw [sectionsMapLE_id, sectionsMapLE_comp_resLE f hV' h]
+  exact transVC_congr _ _ _ _ hWW rfl
+    (transportE_restrict_transport f t hsq hz P hV' h)
+    (by rw [eqToHom_refl, Category.comp_id])
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D4 coherence, unit form)** -/
+theorem transUnit_transport_restrict_left {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
+    (f : S' ⟶ S) (t : G'.E ⟶ G.E)
+    (hsq : IsPullback t G'.π G.π f) (hz : G'.zero ≫ t = f ≫ G.zero)
+    {VP : S.affineOpens} (P : LocalPresentation G VP)
+    {V' V'' : S'.affineOpens} (R' : LocalPresentation G' V'')
+    (hV' : V'.1 ≤ f ⁻¹ᵁ VP.1) (h : V''.1 ≤ V'.1) :
+    ((P.transport f t hsq hz hV').restrict h).transUnit R' =
+      (P.transport f t hsq hz (h.trans hV')).transUnit R' := by
+  rw [transUnit, transUnit, transVC_transport_restrict_left]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D4 coherence)** Right-argument collapse: double restriction in the second
+argument of a comparison. -/
+theorem transVC_restrict_restrict_right {VQ : S.affineOpens}
+    {V V'' : S.affineOpens} (R' : LocalPresentation G V'')
+    (Q : LocalPresentation G VQ) (q : V.1 ≤ VQ.1) (h : V''.1 ≤ V.1) :
+    R'.transVC ((Q.restrict q).restrict h) = R'.transVC (Q.restrict (h.trans q)) := by
+  have hWWQ : (Q.restrict (h.trans q)).W = ((Q.restrict q).restrict h).W := by
+    show Q.W.map _ = (Q.W.map _).map _
+    rw [WeierstrassCurve.map_map]
+    congr 1
+    rw [sectionsMapLE_id, sectionsMapLE_id, sectionsMapLE_id, Scheme.resLE_comp]
+  exact transVC_congr _ _ _ _ rfl hWWQ
+    (by rw [eqToHom_refl, Category.comp_id]) (transportE_restrict_restrict Q q h)
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D4 coherence, unit form)** -/
+theorem transUnit_restrict_restrict_right {VQ : S.affineOpens}
+    {V V'' : S.affineOpens} (R' : LocalPresentation G V'')
+    (Q : LocalPresentation G VQ) (q : V.1 ≤ VQ.1) (h : V''.1 ≤ V.1) :
+    R'.transUnit ((Q.restrict q).restrict h) =
+      R'.transUnit (Q.restrict (h.trans q)) := by
+  rw [transUnit, transUnit, transVC_restrict_restrict_right]
+
+set_option backward.isDefEq.respectTransparency false in
 /-- **(E12-C coherence, unit form)** -/
 theorem transUnit_restrict_restrict_left {VP : S.affineOpens}
     (P : LocalPresentation G VP) {V V'' : S.affineOpens}
