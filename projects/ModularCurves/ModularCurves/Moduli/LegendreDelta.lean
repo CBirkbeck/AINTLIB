@@ -143,6 +143,25 @@ theorem MarksAt.transport {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
     rw [pullback.lift_snd, Category.id_comp, Iso.inv_hom_id]
     exact rfl
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-CLS-2)** Markings restrict: the identity-square case of
+`MarksAt.transport`, with `sectionsMapLE (𝟙 S) = resLE`. -/
+theorem MarksAt.restrict {V : S.affineOpens} {Pr : LocalPresentation G V}
+    {σ : S ⟶ G.E} {hσ : σ ≫ G.π = 𝟙 S} {p q : Γ(S, V.1)}
+    (hM : Pr.MarksAt hσ p q) {V' : S.affineOpens} (h : V'.1 ≤ V.1) :
+    (Pr.restrict h).MarksAt hσ
+      (Scheme.resLE h p) (Scheme.resLE h q) := by
+  have hres := MarksAt.transport (𝟙 S) (𝟙 G.E)
+    (IsPullback.of_horiz_isIso ⟨by simp⟩) (by simp) hM hσ
+    (by rw [Category.comp_id, Category.id_comp])
+    (V' := V') (by simpa using h)
+  have hval : ∀ r : Γ(S, V.1),
+      sectionsMapLE (𝟙 S) (V' := V'.1) (by simpa using h) r = Scheme.resLE h r :=
+    fun r => congrArg (fun (g : Γ(S, V.1) →+* Γ(S, V'.1)) => g r)
+      (sectionsMapLE_id (by simpa using h))
+  rw [hval p, hval q] at hres
+  exact hres
+
 /-- Marking only depends on the section (the section-property is proof-irrelevant). -/
 theorem MarksAt.congr_section {V : S.affineOpens} {Pr : LocalPresentation G V}
     {σ₁ σ₂ : S ⟶ G.E} (hs : σ₁ = σ₂) {h₁ : σ₁ ≫ G.π = 𝟙 S}
