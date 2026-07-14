@@ -20229,3 +20229,48 @@ and the whole legendreDelta arc are now **axiom-clean (standard 3)**, conditiona
 [T-E14-LVL-b]. OMEGA's residual gates remain: LVL-b + AX2 (KM keystone), ACT' (coordinator
 ruling, v10.237), engine+T-E15 (other streams). No OMEGA-dispatchable ticket remains on the
 board; the seat idles pending the keystone or a coordinator steer.
+
+## Board v10.229-G0 (2026-07-14, STREAM-G0) — ★★★ BB-QF DISCHARGED END-TO-END
+
+**The box is CLOSED.** Full chain, all axiom-clean (propext/Classical.choice/Quot.sound):
+
+1. **κ̄-wiring step-2** `modelBaseChangeIsoAsOver` (MulByHomFibresGlobal): pointed
+   group-object iso `baseChange(model) ≅ model(W.map)` — T-A5a `isoPullback` +
+   `projModelZero_baseChange` zero-leg + `isMonHom_of_pointed` (GIT 6.4).
+2. **κ̄-master** `modelMulByHom_locallyQuasiFinite_of_field`: model `[N]` LQF over ANY
+   field — ALPHA at κ̄ + iso-transport + fppf descent along `Spec κ̄ → Spec k` via the
+   NEW `DescendsAlong @LocallyQuasiFinite` instance (ForMathlib/QuasiFiniteDescent);
+   the `[N]`-base-change `IsPullback` square by `IsPullback.of_right` cancellation of
+   the flipped π-square (`mulByHom_baseChange_fst` = the commuting `p`).
+3. **Any-field model fibre-count** `modelMulByHom_finite_fibres_of_field`: LQF + proper
+   (endo of proper model, `IsProper.of_comp`) ⟹ QC ⟹ mathlib
+   `Scheme.Hom.finite_preimage_singleton`. Kills ALPHA's `[IsAlgClosed]` hypothesis.
+4. **Global fibre-count** `mulByHom_finite_preimage_singleton` (ARBITRARY base): fibre
+   over `y` ⊆ π-fibre over `s := π y`; `fibrewiseElliptic` + `fibreModelIsoAsOver` +
+   `finite_fibres_mulByHom_of_isMonHom_iso` transport (3) onto the base-changed record;
+   `fiberι`-embedding chase (`range_fiberι` + `isEmbedding.injective` +
+   `Scheme.Hom.comp_apply` term-chains) carries finiteness up.
+5. **Direct global assembly** `mulByHom_locallyQuasiFinite_global` + the per-fibre
+   sub-leaf `fiber_mulByHom_locallyQuasiFinite` DE-SORRIED as a COROLLARY
+   (`MorphismProperty.pullback_snd` base-change stability — the "deep pullback"
+   seam-ii evaporated: no fibre-of-endo identification needed).
+6. **TORSION RELOCATION DONE** (was boarded for coordinator; import-graph analysis made
+   it a 3-line change): cut the unused `MulByHomFibres → EndomorphismDegree` edge
+   (+ direct mathlib QuasiFinite import), relocated `mulByHom_isProper` to
+   MulByHomFibres, `Torsion imports MulByHomFibresGlobal` — NO cycle (verified by BFS
+   over the 63-module closure). `Torsion.mulByHom_finite_fibres :=
+   mulByHom_finite_preimage_singleton E N x`.
+
+**Downstream now sorry-free + axiom-clean:** `mulByHom_locallyQuasiFinite`,
+`mulByHom_isFinite` (KM 2.3.1 via ZMT). `torsionπ_isFinite` still gated on BB-FLAT only.
+
+**Integration fallout (mechanical, repaired):** DrinfeldRegularity antidiagonal-if rw
+made instance-robust (`simp [Finset.mem_antidiagonal, hmem]`); GammaH +
+GammaHRepresentability: file-wide `synthInstance.maxHeartbeats 80000` (the enlarged
+import closure slows `map_zsmul`/`map_zero` synthesis on `≃+`). Full build green (4212).
+
+**Remaining in Torsion:** BB-FLAT (:150; sibling's decomposition-bb-flat.md scoped the
+general-base B–E chain), BB-DEG (:156, KM carve-out — NOT ours), FormallyUnramified
+(:232). Cleanup notes: `section_base_injective_of_isAlgClosed`'s `[IsAlgClosed]` unused;
+ALPHA's alg-closed `modelMulByHom_finite_fibres` now subsumed by (3) — dedup candidate;
+QuasiFiniteDescent.lean = mathlib-PR candidate.
