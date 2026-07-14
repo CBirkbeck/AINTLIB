@@ -480,23 +480,6 @@ is genuinely dischargeable for real isogenies — not vacuous — we discharge i
 nonnegative `ord_∞ g`. This is the `φ̂* = V*` Verschiebung side of Silverman
 III.6.1 Case 2. -/
 
-/-- The coercion `ℤ → WithTop ℤ` commutes with `nsmul`. -/
-theorem withTop_coe_nsmul (q : ℕ) (k : ℤ) :
-    (q • (k : WithTop ℤ)) = (((q • k : ℤ)) : WithTop ℤ) := by
-  induction q with
-  | zero => simp
-  | succ n ih => rw [succ_nsmul, succ_nsmul, ih, ← WithTop.coe_add]
-
-/-- `0 ≤ q • x → 0 ≤ x` in `WithTop ℤ` for `q ≥ 1`. (Order-reflection of `nsmul`.) -/
-theorem nonneg_of_nsmul_nonneg {q : ℕ} (hq : 1 ≤ q) {x : WithTop ℤ}
-    (h : 0 ≤ q • x) : 0 ≤ x := by
-  induction x with
-  | top => exact le_top
-  | coe k =>
-    rw [withTop_coe_nsmul, ← WithTop.coe_zero, WithTop.coe_le_coe, nsmul_eq_mul] at h
-    rw [← WithTop.coe_zero, WithTop.coe_le_coe]
-    exact (mul_nonneg_iff_of_pos_left (by exact_mod_cast hq : (0 : ℤ) < q)).mp h
-
 /-! ### RAMI-1 — `∞`-regularity reflection from the ramification index at `O`
 
 The `hrefl` field of the dual witness — `0 ≤ ord_∞ (φ* g) ⟹ 0 ≤ ord_∞ g` — is the
