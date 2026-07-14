@@ -1,5 +1,6 @@
 import ModularCurves.WeilPairing.Basic
 import ModularCurves.EllipticCurve.TorsionFibre
+import ModularCurves.EllipticCurve.MulByHomUnramified
 import ModularCurves.ForMathlib.FiniteEtaleGalois
 import ModularCurves.ForMathlib.FiniteEtaleFundamentalGroup
 
