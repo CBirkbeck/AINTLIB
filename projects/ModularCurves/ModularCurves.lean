@@ -27,6 +27,7 @@ import ModularCurves.EllipticCurve.PointsDictionary
 import ModularCurves.EllipticCurve.MulByHomEtale
 import ModularCurves.EllipticCurve.MulByHomQuasiFinite
 import ModularCurves.EllipticCurve.PoleSheaf
+import ModularCurves.EllipticCurve.PoleSheafFibreHOne
 import ModularCurves.EllipticCurve.PoleSheafModel
 import ModularCurves.EllipticCurve.PoleSheafModelHOne
 import ModularCurves.EllipticCurve.PoleSheafPointedIso
