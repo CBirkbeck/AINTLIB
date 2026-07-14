@@ -1,4 +1,4 @@
-import ModularCurves.GroupScheme.SubgroupQuotient
+import ModularCurves.GroupScheme.SubgroupQuotientInterface
 
 /-!
 # The translation action of a finite locally free subgroup scheme
