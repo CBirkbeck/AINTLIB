@@ -318,6 +318,11 @@ Completed dependency claim (2026-07-14): proved
 `trivializingCoverTransitionUnit_cocycle`. The canonical pair-overlap units now form literal
 finite Cech descent data on triple overlaps.
 
+Completed dependency claim (2026-07-14): proved
+`Algebra.IsFilteredAlgColimit.exists_common_unit_lift`. A finite family of units in a
+filtered colimit now lifts to actual units at one common stage, by synchronizing values,
+inverses, and their inverse equations without any injectivity hypothesis on transition maps.
+
 Active dependency claim (2026-07-14): spread the finite family of pair-overlap transition
 units, their inverses, and the triple-overlap equations to one later finite stage of the
 affine-intersection model. This will construct the finite-stage line bundle whose base change

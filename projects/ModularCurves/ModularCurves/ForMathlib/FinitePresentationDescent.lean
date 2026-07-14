@@ -618,6 +618,30 @@ theorem IsFilteredAlgColimit.exists_common_eq (H : IsFilteredAlgColimit R 𝒮 t
   show t ((hj k).trans h') (x k) = t ((hj k).trans h') (y k)
   rw [← H.t_trans (hj k) h', ← H.t_trans (hj k) h', he k]
 
+/-- Finitely many units of the colimit lift jointly to units at one common stage. -/
+theorem IsFilteredAlgColimit.exists_common_unit_lift
+    (H : IsFilteredAlgColimit R 𝒮 t A u)
+    {κ : Type*} [Finite κ] (a : κ → Aˣ) :
+    ∃ (i : ι) (x : κ → (𝒮 i)ˣ),
+      ∀ k, Units.map (u i).toMonoidHom (x k) = a k := by
+  let b : κ ⊕ κ → A
+    | Sum.inl k => a k
+    | Sum.inr k => ↑(a k)⁻¹
+  obtain ⟨i, x, hx⟩ := H.exists_common_lift b
+  obtain ⟨j, hij, hmul⟩ := H.exists_common_eq
+    (fun k => x (Sum.inl k) * x (Sum.inr k)) (fun _ : κ => 1) (fun k => by
+      rw [map_mul, hx, hx, map_one]
+      exact Units.val_inv (a k))
+  let xj : κ → (𝒮 j)ˣ := fun k =>
+    ⟨t hij (x (Sum.inl k)), t hij (x (Sum.inr k)), by
+      simpa only [map_mul, map_one] using hmul k, by
+      rw [mul_comm]
+      simpa only [map_mul, map_one] using hmul k⟩
+  refine ⟨j, xj, fun k => ?_⟩
+  apply Units.ext
+  change u j (t hij (x (Sum.inl k))) = (a k : A)
+  rw [H.compat, hx]
+
 variable (𝒮 t u) in
 /-- **[KL-2] spread data.** A presentation of the `A`-algebra `B` descended to the stage
 `i₀` of a filtered system with colimit `A`: `m` variables, `k` relation polynomials `g`
