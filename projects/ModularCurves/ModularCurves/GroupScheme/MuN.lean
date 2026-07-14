@@ -620,9 +620,8 @@ private lemma muNModel_isPushout (A : Type u) [CommRing A] (N : ℕ) :
         (AdjoinRoot.root (muNModelPoly A N)) = s.inr (muNRingGen N)
       exact AdjoinRoot.lift_root (test s)))
     (fun s m' hleft hright ↦ ?_))
-  have hC : m'.hom.comp (AdjoinRoot.of (muNModelPoly A N)) = s.inl.hom := by
-    have h3 := congrArg CommRingCat.Hom.hom hleft
-    exact h3
+  have hC : m'.hom.comp (AdjoinRoot.of (muNModelPoly A N)) = s.inl.hom :=
+    congrArg CommRingCat.Hom.hom hleft
   have hX : m'.hom (AdjoinRoot.root (muNModelPoly A N)) = s.inr (muNRingGen N) := by
     have h2 := congrArg (fun (t : muNRing N ⟶ s.pt) ↦ t (muNRingGen N)) hright
     simpa [CommRingCat.comp_apply,
