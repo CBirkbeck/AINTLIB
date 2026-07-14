@@ -20088,3 +20088,30 @@ transfer (hunt `IsAlgClosed.of_ringEquiv`).
 (fromSpecResidueField (π y))).mulByHom N` — mulByHom_baseChange + Pullback/Triplet toolkit.
 With (i)+(ii): fiber_mulByHom_LQF closes → `mulByHom_locallyQuasiFinite_assembled` (PROVEN) is the
 Torsion-leaf verbatim → BB-QF CLOSES (relocation ask stands). ALPHA remains axiom-clean and idle.
+
+## v10.236-OMEGA (2026-07-14) — ★★★★ [T-E14-AX1] KM 4.6.2's ENGINE AXIOM 1: THE REPRESENTABILITY MACHINE IS COMPLETE
+
+**`legendreDeltaRepresentableBy R hR hL : (legendreDeltaProblem R).RepresentableBy
+(universalLegendreObj R hR)`** and Bootstrap's `legendreDelta_representable_by_affine` is REDUCED
+to the single geometric `E[2]`-generation clause (killing-half discharged inline). Commits
+ee9902757…(this). The full rt2+package arc this sweep:
+- `pulledWitness` (transported-taut witness of the pulled datum over ANY affine).
+- rt2a `legendreClassifyingRingHom_pulled` (λ-generator via pulledWitness-family sheaf-ext +
+  legendreLambda's spec) + `legendreClassifyingMap_pulled` (Γ–Spec).
+- rt2b `legendreTop_pulled` — the top-determination; **`legendrePiece_congr` at the pulledWitness
+  REPLACES the e-determination step** (structurally simpler than the T-E12 template!); final
+  eqToHom-bookkeeping closes by PROOF-IRRELEVANT `rfl` (eqToHom h₁ ≡ eqToHom h₂ definitionally —
+  no eqToHom_trans-shows needed when both sides stack identically).
+- rt2 `legendreClassifyingEllHom_pulled` (EllHom.ext) — **carries the upstream sorryAx of
+  `gammaFullNaiveProblem.map`'s IsNaiveFullLevel-preservation (Representability.lean:229 — ANOTHER
+  ticket's WIP; T-E14's own mathematics is sorry-free)**.
+- **`legendreDeltaRepresentableBy`** (homEquiv = yoneda-form map-of-universal-element; inverse =
+  classifying EllHom with `EllObj.isUnit_two`-plumbing; left_inv = rt2, right_inv = rt1;
+  naturality = map_comp_apply) + `legendreDelta_representable_by_affine_of_level` + the Bootstrap
+  wiring (AX1's sorry is now EXACTLY the [T-E14-LVL-b] generation clause).
+
+**T-E14 status:** δ ✓ statable+functorial | AX1 ✓ modulo LVL-b | AX2 = [T-E14-AX2] (open; needs
+E[2]-classification) | coupled G-action = [T-E14-ACT'] (open). **The remaining STRUCTURAL inputs
+to representable_iff are: [T-E14-LVL-b] + [T-E14-ACT'] + [T-E14-AX2] + the T-E15 pair (other
+stream) + the engine T-Q6d.γ (other stream).** The (E,ω)-corner (T-E12/T-E13) and the Legendre
+representability machine are DONE.
