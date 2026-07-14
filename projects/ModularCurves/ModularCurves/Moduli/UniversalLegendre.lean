@@ -722,6 +722,43 @@ noncomputable def legendreLambda {R : CommRingCat.{u}} (X : EllObj R)
     exact legendre_witness_lam_agree h2 (hAdx x) hAd (hWx x) hW (hMPx x) hMP
       (hWle.trans inf_le_right) (hWle.trans inf_le_left)
 
+open LocalPresentation WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E14-CLS-3 ★)** The glued parameter satisfies the moduli condition:
+`λ(λ−1)` is a global unit — chartwise it is the witness's `lam(lam−1)`, a unit by
+ellipticity of the witness chart curve (mirrors `adaptedDelta_isUnit`). -/
+theorem legendreLambda_isUnit {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 2) (b : OmegaBasis X.curve.toEllipticCurveGeom)
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤))) :
+    IsUnit ((legendreLambda X L b hD h2).1 *
+      ((legendreLambda X L b hD h2).1 - 1)) := by
+  apply X.base.toRingedSpace.isUnit_of_isUnit_germ
+  intro x _
+  obtain ⟨V, hxV, Pr, lam, hAd, hW, hMP, hMQ⟩ := hD x
+  have hgerm : X.base.presheaf.germ ⊤ x trivial
+      ((legendreLambda X L b hD h2).1 * ((legendreLambda X L b hD h2).1 - 1)) =
+    X.base.presheaf.germ V.1 x hxV (Scheme.resLE (le_top : V.1 ≤ ⊤)
+      ((legendreLambda X L b hD h2).1 * ((legendreLambda X L b hD h2).1 - 1))) := by
+    rw [show Scheme.resLE (le_top : V.1 ≤ ⊤) _ =
+      (X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom
+        ((legendreLambda X L b hD h2).1 *
+          ((legendreLambda X L b hD h2).1 - 1)) from rfl]
+    exact (X.base.presheaf.germ_res_apply (homOfLE le_top) x hxV _).symm
+  rw [hgerm]
+  refine IsUnit.map _ ?_
+  have hres : Scheme.resLE (le_top : V.1 ≤ ⊤)
+      ((legendreLambda X L b hD h2).1 * ((legendreLambda X L b hD h2).1 - 1)) =
+      lam * (lam - 1) := by
+    have hspec := (legendreLambda X L b hD h2).2 V Pr lam hAd hW hMP
+    rw [map_mul, map_sub, map_one, hspec]
+  rw [hres]
+  have hell : (legendreCurve lam).IsElliptic := by
+    rw [← hW]
+    exact Pr.elliptic
+  rw [← legendreCurve_isElliptic_iff (isUnit_ofNat_res h2 V.1) lam]
+  exact hell
+
 end TwoTorsion
 
 end ModularCurves
