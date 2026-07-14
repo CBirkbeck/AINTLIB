@@ -806,6 +806,51 @@ the CM-unit/`H`-intersection condition fed by KM's endomorphism-degree keystone.
   exact gammaFullNaive_eq_refl_of_fix_sections N hN hinv k sm E (isoPow e (orderOf g))
     (hbase (orderOf g)) b hPfix hQfix
 
+open EllipticCurve in
+/-- **[Γ_H hfree, general `H`] — the `γ`-twist reduction.** The `hfree` pin of
+`gammaH_rigid` follows from the per-`H` finite-order pin `hH`: a `γ`-twisted fix is an
+untwisted `glSmul γ`-translate fix (undo the twist by the inverse action), so the
+`[TWIST]` engine forces `e^(orderOf γ) = refl`, which `hH` (the CM-unit/`H`
+intersection arithmetic — KM-keystone territory) forbids for `e ≠ refl`. At `H = ⊥`
+the pin is vacuously dischargeable (`orderOf 1 = 1`, `isoPow e 1 = e`-fix), recovering
+`gammaFullNaive_hfree_bot`. -/
+theorem gammaH_hfree_of_orderOf_absurd (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
+    (hinv : IsUnit (N : R))
+    (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
+    (hH : ∀ (k : Type u) [Field k] [IsAlgClosed k]
+      (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+      (E : EllipticCurve (Spec (CommRingCat.of k)))
+      (e : (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R) ≅
+        (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)),
+      e.hom.baseHom = 𝟙 _ → e ≠ Iso.refl _ → ∀ γ : ↥H,
+        isoPow e (orderOf ((γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))) =
+          Iso.refl _ → False)
+    (k : Type u) [Field k] [IsAlgClosed k]
+    (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+    (E : EllipticCurve (Spec (CommRingCat.of k)))
+    (e : (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R) ≅
+      (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
+    (he : e.hom.baseHom = 𝟙 _) (hne : e ≠ Iso.refl _)
+    (b : (gammaFullNaiveProblem R N).obj
+      (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)))
+    (γ : ↥H) :
+    (gammaHAut R N H γ).hom.app
+      (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
+      ((gammaFullNaiveProblem R N).map e.hom.op b) ≠ b := by
+  intro hcon
+  rw [gammaHAut_app_val] at hcon
+  have hcon2 := congrArg
+    (E.glSmul (((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))⁻¹) hcon
+  rw [← E.glSmul_mul, mul_inv_cancel, E.glSmul_one] at hcon2
+  have hu : (((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))⁻¹
+      = (γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) := by
+    rw [show (((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
+        = ((γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))⁻¹ from rfl, inv_inv]
+  rw [hu] at hcon2
+  exact hH k sm E e he hne γ
+    (gammaFullNaive_twist_pow_refl N hN hinv k sm E e he b
+      ((γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))) hcon2)
+
 /-- **[RIG-2-wrap at `H = ⊥`]** — the `hfree` pin of `gammaH_rigid` holds outright for
 the trivial subgroup (`γ = 1` forced, so the twisted fix is a plain fix, killed by the
 Γ(N) k̄-rigidity `gammaFullNaive_fix_absurd`). With `hLN`, this makes `P_⊥ = [Γ(N)]`
@@ -931,6 +976,29 @@ theorem gammaH_rigid (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
   haveI := hLN X
   exact EllObj.exists_isoFibre_ne_refl N hN
     (YFull.nIsInvertible_over_spec R X.structMap hinv) e he hne
+
+/-- **[Γ_H rigidity, general `H`] (the charter goal, KM 4.7.x-shape)** — the quotient
+problem `P_H` is rigid for any `H`, given the two honest pins: `hLN` (T-W7.8) and the
+per-`H` finite-order arithmetic `hH` (no nontrivial base-identical iso has
+`e^(orderOf γ) = refl` for `γ ∈ H` — the CM-unit/`H` intersection condition, fed by
+KM's endomorphism-degree keystone). Subsumes `Γ₁`/`Γ₀` as special `H`. -/
+theorem gammaH_rigid_of_orderOf (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
+    (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
+    (hinv : IsUnit (N : R))
+    (qpd : ModuliProblem.QuotientProblemData (gammaHAut R N H))
+    (hLN : ∀ X : EllObj R, IsLocallyNoetherian X.base)
+    (hH : ∀ (k : Type u) [Field k] [IsAlgClosed k]
+      (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+      (E : EllipticCurve (Spec (CommRingCat.of k)))
+      (e : (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R) ≅
+        (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)),
+      e.hom.baseHom = 𝟙 _ → e ≠ Iso.refl _ → ∀ γ : ↥H,
+        isoPow e (orderOf ((γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))) =
+          Iso.refl _ → False) :
+    qpd.prob.Rigid :=
+  gammaH_rigid R N hN H hinv qpd hLN
+    (fun k _ _ sm E e he hne b γ =>
+      gammaH_hfree_of_orderOf_absurd N hN hinv H hH k sm E e he hne b γ)
 
 /-- **[Γ(N) rigidity] (KM 2.7.2 upgraded to the quotient problem at `H = ⊥`)** — the
 quotient problem `P_⊥ = [Γ(N)]` is rigid for `N ≥ 3` invertible, with the k̄
