@@ -47,6 +47,7 @@ import ModularCurves.ForMathlib.ComoduleCoinvariants
 import ModularCurves.ForMathlib.FiniteAffineOpenCover
 import ModularCurves.ForMathlib.FinitePresentationFunctor
 import ModularCurves.ForMathlib.FinitePresentationLocalization
+import ModularCurves.ForMathlib.FinitePresentationPrincipalCover
 import ModularCurves.ForMathlib.FiniteLocallyFreeIsoLocus
 import ModularCurves.ForMathlib.FlasqueCohomology
 import ModularCurves.ForMathlib.GaloisDescentModule
