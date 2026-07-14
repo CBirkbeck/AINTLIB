@@ -3,6 +3,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Mathlib.AlgebraicGeometry.Morphisms.FlatRank
 import Mathlib.RingTheory.Etale.Field
 import Mathlib.LinearAlgebra.Dimension.Free
+import Mathlib.FieldTheory.Fixed
 
 /-!
 # Counting points of finite étale algebras over a separably closed field
@@ -67,6 +68,24 @@ theorem natCard_algHom_eq_finrank : Nat.card (A →ₐ[K] K) = Module.finrank K 
   rw [Nat.card_congr (algHomEquivPrimeSpectrum K A),
     (equivPiOfIsSepClosed K A).toLinearEquiv.finrank_eq, Module.finrank_pi,
     Nat.card_eq_fintype_card]
+
+/-- **(general finite-dimensional inequality — no étale hypothesis)** For *any* finite-dimensional
+algebra `B` over a field `k`, the number of `k`-algebra homomorphisms `B →ₐ[k] k` is at most
+`Module.finrank k B`. Distinct algebra homs are `k`-linearly independent in the dual `B →ₗ[k] k`
+(Dedekind/Artin linear independence of characters, packaged by `cardinalMk_algHom`), whose dimension
+is `finrank k B` (`Subspace.dual_finrank_eq`). This is the inseparable-tolerant companion of
+`natCard_algHom_eq_finrank` (which upgrades `≤` to `=` under a formal-étale, separably-closed
+hypothesis): it bounds the number of `k`-points of the fibre of a finite morphism by its rank even
+when the fibre is non-reduced — the form needed for the kernel-cardinality bound `|ker δ| ≤ deg δ`
+of a (possibly inseparable) isogeny. -/
+theorem natCard_algHom_le_finrank (k B : Type*) [Field k] [Ring B] [Algebra k B]
+    [FiniteDimensional k B] :
+    Nat.card (B →ₐ[k] k) ≤ Module.finrank k B := by
+  have h := cardinalMk_algHom k B k
+  rw [show Module.finrank k (B →ₗ[k] k) = Module.finrank k B from Subspace.dual_finrank_eq] at h
+  have hlt : (Module.finrank k B : Cardinal) < Cardinal.aleph0 := Cardinal.natCast_lt_aleph0
+  have h2 := Cardinal.toNat_le_toNat h hlt
+  rwa [Cardinal.toNat_natCast, ← Nat.card] at h2
 
 open AlgebraicGeometry CategoryTheory Limits
 
