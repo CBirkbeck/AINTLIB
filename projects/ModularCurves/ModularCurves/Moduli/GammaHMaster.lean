@@ -5,6 +5,8 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.GammaHRepresentability
 import ModularCurves.Moduli.QuotientRepresentability
+import ModularCurves.EllipticCurve.TorsionRestrict
+import ModularCurves.ForMathlib.UnramifiedEqualizer
 
 /-!
 # The Γ_H MASTER assembly (KM 4.7.0 applied to `P_H`) — interface
@@ -35,7 +37,10 @@ The assembly itself is pure: relative representability of `P_H` is repackaged fr
 
 universe u
 
-open CategoryTheory AlgebraicGeometry
+open CategoryTheory AlgebraicGeometry MonoidalCategory CartesianMonoidalCategory MonObj
+
+attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
+  CategoryTheory.Over.braidedCategory
 
 namespace ModularCurves
 
@@ -187,6 +192,172 @@ noncomputable def EllObj.isoFibre {X : EllObj R} (e : X ≅ X) (he : e.hom.baseH
     have h₂₁ : (e.inv ≫ e.hom).baseHom = 𝟙 X.base := by rw [e.inv_hom_id]; rfl
     rw [← EllHom.fibre_comp e.inv e.hom (EllObj.isoInv_baseHom e he) he h₂₁ t,
       EllHom.fibre_congr e.inv_hom_id h₂₁ rfl t, EllHom.fibre_id]
+
+/-! ### [RIG-1] Geometric detection of nontrivial base-identical isos
+
+A base-identical iso trivial on every geometric fibre is trivial: its top map `c`
+restricts to the finite étale `M`-torsion (`torsionRestrict`), where fibrewise
+agreement with the identity globalises by the `UnramifiedEqualizer` engine; the
+`M`-torsion fix then forces `c = 𝟙` through `aut_endo_eq_one` (KM 2.7.2; consumed as
+the register-box keystone, v10.212-§D). -/
+
+open EllipticCurve in
+/-- **[RIG-1] (detection, contrapositive form)** — a base-identical self-iso of an
+`Ell/R`-object that restricts to the identity on every geometric fibre is the identity,
+given an invertible torsion level `M ≥ 3` on the (locally noetherian) base. -/
+theorem EllObj.eq_refl_of_forall_isoFibre_eq_refl {X : EllObj R}
+    [IsLocallyNoetherian X.base] (M : ℕ) [NeZero M] (hM : 3 ≤ (M : ℤ))
+    (hinv : NIsInvertible X.base M)
+    (e : X ≅ X) (he : e.hom.baseHom = 𝟙 X.base)
+    (htriv : ∀ (k : Type u) [Field k] [IsAlgClosed k]
+      (t : Spec (CommRingCat.of k) ⟶ X.base), EllObj.isoFibre e he t = Iso.refl _) :
+    e = Iso.refl X := by
+  classical
+  set E := X.curve with hE
+  set c := e.hom.top with hc
+  -- `c` as an `Over X.base`-endomorphism
+  have hcπ : c ≫ E.π = E.π := by
+    have h := e.hom.isPullback.w
+    rw [he, Category.comp_id] at h
+    exact h
+  set εO : E.asOver ⟶ E.asOver := Over.homMk c hcπ with hεO
+  -- `εO` is pointed
+  have hzc : E.zero ≫ c = E.zero := by
+    have h := e.hom.zero_w
+    rw [he, Category.id_comp] at h
+    exact h
+  have hη : η[E.asOver] ≫ εO = η[E.asOver] := by
+    refine Over.OverMorphism.ext ?_
+    show (η[E.asOver]).left ≫ c = (η[E.asOver]).left
+    rw [E.one_eq_zero]
+    have s1 : ((𝟙_ (Over X.base)).hom ≫ E.zero) ≫ c
+        = (𝟙_ (Over X.base)).hom ≫ E.zero ≫ c := Category.assoc _ _ _
+    have s2 : (𝟙_ (Over X.base)).hom ≫ E.zero ≫ c
+        = (𝟙_ (Over X.base)).hom ≫ E.zero :=
+      congrArg (fun m => (𝟙_ (Over X.base)).hom ≫ m) hzc
+    exact s1.trans s2
+  -- `εO` is an isomorphism (inverse from `e.inv`)
+  have hcπ' : e.inv.top ≫ E.π = E.π := by
+    have h := e.inv.isPullback.w
+    rw [EllObj.isoInv_baseHom e he, Category.comp_id] at h
+    exact h
+  have htop_hom_inv : c ≫ e.inv.top = 𝟙 E.E := by
+    have h := congrArg EllHom.top e.hom_inv_id
+    exact h
+  have htop_inv_hom : e.inv.top ≫ c = 𝟙 E.E := by
+    have h := congrArg EllHom.top e.inv_hom_id
+    exact h
+  haveI : IsIso εO := by
+    refine ⟨Over.homMk e.inv.top hcπ', ?_, ?_⟩
+    · exact Over.OverMorphism.ext htop_hom_inv
+    · exact Over.OverMorphism.ext htop_inv_hom
+  -- the torsion restriction, compared with the identity through the equalizer engine
+  set cM := E.torsionRestrict εO hη M with hcM
+  haveI : Etale ((Over.mk (E.torsionπ M)).hom) := E.torsionπ_etale M hinv
+  set fO : Over.mk (E.torsionπ M) ⟶ Over.mk (E.torsionπ M) :=
+    Over.homMk cM (E.torsionRestrict_π εO hη M) with hfO
+  have hcMid : cM = 𝟙 (E.torsion M) := by
+    have hfeq : fO = 𝟙 (Over.mk (E.torsionπ M)) := by
+      refine AlgebraicGeometry.Over.hom_ext_of_unramified_of_surjective fO
+        (𝟙 (Over.mk (E.torsionπ M))) ?_
+      -- every point of `E[M]` lies in the equalizer's range
+      intro q
+      -- the geometric point through `q`
+      set κ := (E.torsion M).residueField q with hκ
+      set k := AlgebraicClosure κ with hk
+      set xbar : Spec (CommRingCat.of k) ⟶ E.torsion M :=
+        Spec.map (CommRingCat.ofHom (algebraMap κ k)) ≫
+          (E.torsion M).fromSpecResidueField q with hxbar
+      set t : Spec (CommRingCat.of k) ⟶ X.base := xbar ≫ E.torsionπ M with ht
+      -- fibre triviality at `t`, projected to the top map of the fibre
+      have htt := htriv k t
+      have htop : (EllObj.isoFibre e he t).hom.top = (Iso.refl (X.pullbackAlong t)).hom.top :=
+        congrArg EllHom.top (congrArg Iso.hom htt)
+      -- the `E`-point under `q̄` is fixed by `c`
+      set p : Spec (CommRingCat.of k) ⟶ E.E := xbar ≫ E.torsionι M with hp
+      have hpπ : p ≫ E.π = t := by
+        rw [hp, ht, Category.assoc, E.torsionι_π]
+      have hpc : p ≫ c = p := by
+        set ℓ : Spec (CommRingCat.of k) ⟶ Limits.pullback E.π t :=
+          Limits.pullback.lift p (𝟙 _) (by rw [hpπ, Category.id_comp]) with hℓ
+        have hfix' : ℓ ≫ (EllObj.isoFibre e he t).hom.top = ℓ := by
+          refine (congrArg (fun m => ℓ ≫ m) htop).trans ?_
+          show ℓ ≫ 𝟙 _ = ℓ
+          rw [Category.comp_id]
+        calc p ≫ c = (ℓ ≫ Limits.pullback.fst E.π t) ≫ c := by
+              rw [hℓ, Limits.pullback.lift_fst]
+          _ = ℓ ≫ Limits.pullback.fst E.π t ≫ c := Category.assoc _ _ _
+          _ = ℓ ≫ (EllObj.isoFibre e he t).hom.top ≫ Limits.pullback.fst E.π t := by
+              refine congrArg (fun m => ℓ ≫ m) ?_
+              exact (Limits.pullback.lift_fst _ _ _).symm
+          _ = (ℓ ≫ (EllObj.isoFibre e he t).hom.top) ≫ Limits.pullback.fst E.π t :=
+              (Category.assoc _ _ _).symm
+          _ = ℓ ≫ Limits.pullback.fst E.π t := congrArg
+              (fun m => m ≫ Limits.pullback.fst E.π t) hfix'
+          _ = p := by rw [hℓ, Limits.pullback.lift_fst]
+      -- hence `q̄` is fixed by the torsion restriction
+      haveI := E.torsionι_isClosedImmersion M
+      have hpc' : (xbar ≫ E.torsionι M) ≫ εO.left = xbar ≫ E.torsionι M := hpc
+      have hxcι : (xbar ≫ cM) ≫ E.torsionι M = xbar ≫ E.torsionι M := by
+        have s1 : (xbar ≫ cM) ≫ E.torsionι M = xbar ≫ cM ≫ E.torsionι M :=
+          Category.assoc _ _ _
+        have s2 : xbar ≫ cM ≫ E.torsionι M = xbar ≫ E.torsionι M ≫ εO.left :=
+          congrArg (fun m => xbar ≫ m) (E.torsionRestrict_ι εO hη M)
+        have s3 : xbar ≫ E.torsionι M ≫ εO.left = (xbar ≫ E.torsionι M) ≫ εO.left :=
+          (Category.assoc _ _ _).symm
+        exact s1.trans (s2.trans (s3.trans hpc'))
+      have hxc : xbar ≫ cM = xbar := (cancel_mono (E.torsionι M)).mp hxcι
+      -- package as an `Over`-morphism and factor through the equalizer
+      set xbarO : Over.mk t ⟶ Over.mk (E.torsionπ M) := Over.homMk xbar rfl with hxbarO
+      have hw : xbarO ≫ fO = xbarO ≫ 𝟙 (Over.mk (E.torsionπ M)) := by
+        refine Over.OverMorphism.ext ?_
+        show xbar ≫ cM = xbar ≫ 𝟙 _
+        rw [hxc, Category.comp_id]
+      set ℓq := Limits.equalizer.lift xbarO hw with hℓq
+      have hℓι : ℓq ≫ Limits.equalizer.ι fO (𝟙 (Over.mk (E.torsionπ M))) = xbarO :=
+        Limits.equalizer.lift_ι _ _
+      have hleft : ℓq.left ≫ (Limits.equalizer.ι fO (𝟙 (Over.mk (E.torsionπ M)))).left
+          = xbar := congrArg CommaMorphism.left hℓι
+      -- the closed point of the geometric point witnesses range membership
+      obtain ⟨s⟩ : Nonempty (Spec (CommRingCat.of k)) :=
+        inferInstanceAs (Nonempty (PrimeSpectrum k))
+      refine ⟨ℓq.left.base s, ?_⟩
+      have happ : (Limits.equalizer.ι fO (𝟙 (Over.mk (E.torsionπ M)))).left
+          (ℓq.left s) = xbar s := by
+        rw [← Scheme.Hom.comp_apply, hleft]
+        rfl
+      have hxq : xbar s = q := by
+        rw [hxbar, Scheme.Hom.comp_apply, Scheme.fromSpecResidueField_apply]
+      exact happ.trans hxq
+    have h := congrArg CommaMorphism.left hfeq
+    exact h
+  -- conclude: `c` fixes `E[M]`, so `εO = 𝟙` by KM 2.7.2, so `e = refl`
+  have hfixM : E.torsionι M ≫ c = E.torsionι M :=
+    E.torsionι_comp_left_eq_of_torsionRestrict_eq_id εO hη M hcMid
+  have hεid : εO = 𝟙 E.asOver := by
+    refine E.aut_endo_eq_one M hM εO (E.endDeg_eq_one_of_isIso εO) ?_
+    exact hfixM
+  have hcid : c = 𝟙 E.E := congrArg CommaMorphism.left hεid
+  refine Iso.ext (EllHom.ext ?_ ?_)
+  · exact he
+  · exact hcid
+
+/-- **[RIG-1] (detection, existential form — the bridge's `hdetect` shape)** — a
+base-identical self-iso `e ≠ refl` stays nontrivial on SOME geometric fibre, given an
+invertible torsion level `M ≥ 3` on the locally noetherian base. Contrapositive of
+`eq_refl_of_forall_isoFibre_eq_refl`. -/
+theorem EllObj.exists_isoFibre_ne_refl {X : EllObj R}
+    [IsLocallyNoetherian X.base] (M : ℕ) [NeZero M] (hM : 3 ≤ (M : ℤ))
+    (hinv : NIsInvertible X.base M)
+    (e : X ≅ X) (he : e.hom.baseHom = 𝟙 X.base) (hne : e ≠ Iso.refl X) :
+    ∃ (k : Type u) (_ : Field k) (_ : IsAlgClosed k)
+      (t : Spec (CommRingCat.of k) ⟶ X.base),
+      EllObj.isoFibre e he t ≠ Iso.refl (X.pullbackAlong t) := by
+  by_contra hcon
+  refine hne (EllObj.eq_refl_of_forall_isoFibre_eq_refl M hM hinv e he ?_)
+  intro k _ _ t
+  by_contra hne'
+  exact hcon ⟨k, ‹_›, ‹_›, t, hne'⟩
 
 /-- Over an empty base every `Ell/R`-self-iso is the identity: the base and the total
 space are initial schemes. -/
