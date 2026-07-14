@@ -2476,13 +2476,18 @@ adjudicates.
   **D4** — `RepresentableBy` packaging, decomposed (2026-07-14, OMEGA):
   homEquiv-toFun := `omegaBasisMap · (universalOmegaBasis)` (naturality =
   `omegaBasisMap_comp` ✓ done); inverse := `classifyingEllHom` (2,3-units at Y-level
-  from `IsUnit (6:R)` via `baseRingHom`). **[D4-bridge]** (the enabling layer):
-  `basisUnitAt_transport` — the basis unit of a transported presentation against the
-  pulled basis is the ring-image of the original (transport-analogue of
-  `basisUnitAt_restrict`; uses `transUnit_transport` + the transportFun-glue specs) ⟹
-  `IsAdapted.transport` (adaptedness is stable under `Ell/R`-pullback) ⟹ the
-  transported adapted models ARE the pulled basis' adapted models (E12-B uniqueness)
-  ⟹ `adaptedCoeff`-naturality. **[D4-rt1]** right_inv:
+  from `IsUnit (6:R)` via `baseRingHom`). **[D4-bridge ★★ DONE (2026-07-14,
+  17330519a+)]**: `basisUnitAt_transport` (chart-cover + pointwise (j, WS, T)-choices;
+  transportFun_res + public `omegaCompat_w_res`; the new
+  transport-restrict-left/right-collapse coherences +
+  `transUnit_restrict_pair_transport` + `transUnit_transport`; crossed factors cancel
+  by trans+self) and `IsAdapted.transport`. REMAINING for the roundtrips:
+  **[rt1-core]** `transVC((tautPresentation univ).transport-classifyingEllHom,
+  adaptedLocal-b) = 1` (the transported tautological chart IS the adapted chart —
+  same W by `universalShortNF_map_classifying`; e-comparison through the
+  `chartPiece_isPullback`-square identities, the ~isoPullback-hom_ext pattern);
+  **[basisUnitAt_smul]** small glue-lemma (mirror of `basisUnitAt_ofVC`); then rt1 by
+  the unit-torsor and rt2 by coefficient-determination + pullback-lift uniqueness. **[D4-rt1]** right_inv:
   `omegaBasisMap (classifyingEllHom Y b) universalOmegaBasis = b` — the universal
   basis is adapted to the tautological chart; its pullback is adapted to the
   transported chart = the adapted chart of `b` (bridge + uniqueness) ⟹ equal bases
