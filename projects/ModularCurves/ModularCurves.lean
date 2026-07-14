@@ -53,6 +53,7 @@ import ModularCurves.ForMathlib.FinitePresentationEquiv
 import ModularCurves.ForMathlib.FinitePresentationFunctor
 import ModularCurves.ForMathlib.FinitePresentationFunctorCover
 import ModularCurves.ForMathlib.FinitePresentationLocalization
+import ModularCurves.ForMathlib.FinitePresentationOpenImmersionFamily
 import ModularCurves.ForMathlib.FinitePresentationPrincipalCover
 import ModularCurves.ForMathlib.FiniteLocallyFreeIsoLocus
 import ModularCurves.ForMathlib.FlasqueCohomology
