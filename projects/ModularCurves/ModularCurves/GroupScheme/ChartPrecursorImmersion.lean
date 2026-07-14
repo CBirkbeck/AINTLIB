@@ -222,9 +222,87 @@ theorem chartTensorIso_hom_spec_precursor :
     rw [← Category.assoc, P.chartTensorIso_hom_specMap_chartCoaction, Category.assoc,
       Iso.hom_inv_id, Category.comp_id]
 
+/-- The product window of the chart in the ambient square. -/
+noncomputable def productOpen : (E.asOver ⊗ E.asOver).left.Opens :=
+  (fst E.asOver E.asOver).left ⁻¹ᵁ P.U ⊓ (snd E.asOver E.asOver).left ⁻¹ᵁ P.U
+
+/-- **Stability absorbs the action side**: the action pair pulls the product window back
+to the plain chart window. -/
+theorem actPair_left_preimage_productOpen :
+    G.actPair.left ⁻¹ᵁ P.productOpen = G.actionProj.left ⁻¹ᵁ P.U := by
+  rw [productOpen, Scheme.Hom.preimage_inf, ← Scheme.Hom.comp_preimage,
+    ← Scheme.Hom.comp_preimage]
+  have h1 : G.actPair.left ≫ (fst E.asOver E.asOver).left = G.translationAction.left :=
+    congrArg Over.Hom.left (G.actPair_fst)
+  have h2 : G.actPair.left ≫ (snd E.asOver E.asOver).left = G.actionProj.left :=
+    congrArg Over.Hom.left (G.actPair_snd)
+  rw [h1, h2]
+  exact inf_eq_right.mpr P.hstable
+
+/-- The first chart leg of the product window. -/
+noncomputable def productOpenFst : P.productOpen.toScheme ⟶ P.U.toScheme :=
+  IsOpenImmersion.lift P.U.ι (P.productOpen.ι ≫ (fst E.asOver E.asOver).left) (by
+    rintro _ ⟨w, rfl⟩
+    rw [Scheme.Opens.range_ι]
+    have hw : P.productOpen.ι.base w ∈ P.productOpen := by
+      rw [← SetLike.mem_coe, ← Scheme.Opens.range_ι]
+      exact Set.mem_range_self w
+    exact Set.mem_of_eq_of_mem (Scheme.Hom.comp_apply _ _ _) hw.1)
+
+@[reassoc]
+theorem productOpenFst_ι :
+    P.productOpenFst ≫ P.U.ι = P.productOpen.ι ≫ (fst E.asOver E.asOver).left :=
+  IsOpenImmersion.lift_fac _ _ _
+
+/-- The second chart leg of the product window. -/
+noncomputable def productOpenSnd : P.productOpen.toScheme ⟶ P.U.toScheme :=
+  IsOpenImmersion.lift P.U.ι (P.productOpen.ι ≫ (snd E.asOver E.asOver).left) (by
+    rintro _ ⟨w, rfl⟩
+    rw [Scheme.Opens.range_ι]
+    have hw : P.productOpen.ι.base w ∈ P.productOpen := by
+      rw [← SetLike.mem_coe, ← Scheme.Opens.range_ι]
+      exact Set.mem_range_self w
+    exact Set.mem_of_eq_of_mem (Scheme.Hom.comp_apply _ _ _) hw.2)
+
+@[reassoc]
+theorem productOpenSnd_ι :
+    P.productOpenSnd ≫ P.U.ι = P.productOpen.ι ≫ (snd E.asOver E.asOver).left :=
+  IsOpenImmersion.lift_fac _ _ _
+
+/-- The two window legs agree over the base patch. -/
+theorem productOpenFst_chartToBase :
+    P.productOpenFst ≫ P.chartToBase = P.productOpenSnd ≫ P.chartToBase := by
+  rw [← cancel_mono P.V.ι]
+  have hw : (fst E.asOver E.asOver).left ≫ E.π = (snd E.asOver E.asOver).left ≫ E.π :=
+    (Over.w (fst E.asOver E.asOver)).trans (Over.w (snd E.asOver E.asOver)).symm
+  calc (P.productOpenFst ≫ P.chartToBase) ≫ P.V.ι
+      = P.productOpenFst ≫ P.chartToBase ≫ P.V.ι := Category.assoc _ _ _
+    _ = P.productOpenFst ≫ P.U.ι ≫ E.π :=
+        congrArg (P.productOpenFst ≫ ·) P.chartToBase_comp_ι
+    _ = (P.productOpenFst ≫ P.U.ι) ≫ E.π := (Category.assoc _ _ _).symm
+    _ = (P.productOpen.ι ≫ (fst E.asOver E.asOver).left) ≫ E.π :=
+        congrArg (· ≫ E.π) P.productOpenFst_ι
+    _ = P.productOpen.ι ≫ (fst E.asOver E.asOver).left ≫ E.π := Category.assoc _ _ _
+    _ = P.productOpen.ι ≫ (snd E.asOver E.asOver).left ≫ E.π :=
+        congrArg (P.productOpen.ι ≫ ·) hw
+    _ = (P.productOpen.ι ≫ (snd E.asOver E.asOver).left) ≫ E.π :=
+        (Category.assoc _ _ _).symm
+    _ = (P.productOpenSnd ≫ P.U.ι) ≫ E.π :=
+        (congrArg (· ≫ E.π) P.productOpenSnd_ι).symm
+    _ = P.productOpenSnd ≫ P.U.ι ≫ E.π := Category.assoc _ _ _
+    _ = P.productOpenSnd ≫ P.chartToBase ≫ P.V.ι :=
+        (congrArg (P.productOpenSnd ≫ ·) P.chartToBase_comp_ι).symm
+    _ = (P.productOpenSnd ≫ P.chartToBase) ≫ P.V.ι := (Category.assoc _ _ _).symm
+
+/-- The comparison from the product window to the chart square. -/
+noncomputable def productOpenToSquare :
+    P.productOpen.toScheme ⟶ pullback P.chartToBase P.chartToBase :=
+  pullback.lift P.productOpenFst P.productOpenSnd P.productOpenFst_chartToBase
+
 /-- **`[HG-C2]` FINAL CRUX (sharpened)**: the chart action pair is a closed immersion —
 the stable-chart restriction of `isClosedImmersion_actPair_left`
-(`decomposition-c2-heart.md`, step 4). -/
+(`decomposition-c2-heart.md`, step 4; remaining: `productOpenToSquare` is an isomorphism
+and the restriction factorization). -/
 theorem isClosedImmersion_chartActPair : IsClosedImmersion P.chartActPair := by
   sorry
 
