@@ -1124,7 +1124,7 @@ equal degree whose coefficients agree at every affine place agree at infinity as
 well.  (The difference is supported only at infinity, so its degree *is* its
 infinity coefficient.)  This pins the place at infinity in `II.3.6` once the affine
 coefficients are matched and both divisors have degree `0`. -/
-private theorem projDivisor_infinity_coeff_eq_of_affine_eq {C : SmoothPlaneCurve F}
+theorem projDivisor_infinity_coeff_eq_of_affine_eq {C : SmoothPlaneCurve F}
     (D₁ D₂ : ProjectiveDivisor C) (hdeg : D₁.degree = D₂.degree)
     (haff : ∀ Q : C.SmoothPoint,
       D₁ (ProjectiveSmoothPoint.affine Q) = D₂ (ProjectiveSmoothPoint.affine Q)) :

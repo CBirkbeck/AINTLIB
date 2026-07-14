@@ -54,7 +54,8 @@ variable [IsAlgClosed F]
 /-! ### The field-norm conorm `N_φ f ∈ K(E₂)`
 
 The conorm of a function `f ∈ K(E₁)` is the field norm `N_φ f = Algebra.norm_{K(E₁)/φ*K(E₂)} f`,
-landing in `K(E₂)` (mathlib's `Algebra.norm` already lands in the base, as for `CurveMap.pushforward`).
+landing in `K(E₂)` (mathlib's `Algebra.norm` already lands in the base, as for
+`CurveMap.pushforward`).
 This is the principal-divisor witness: `div(N_φ f) = placeRestrictionPushforward φ (div f)`. -/
 
 /-- **The conorm** `N_φ : K(E₁) →* K(E₂)`, the field norm of the pullback algebra structure. -/
@@ -149,6 +150,7 @@ private theorem placeRestrictionPushforward_projectiveDivisorOf_eq_sub
   rw [← hfav, (⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf_mul hf hav, map_add]
   abel
 
+omit [IsAlgClosed F] in
 /-- **RHS additivity for the `u/v` reduction**: if `f * av = au` with `N_φ f, N_φ av ≠ 0`, then
 `projectiveDivisorOf (N_φ f)` is the difference of those of `N_φ au` and `N_φ av`.  Pure
 additivity: `conorm φ` (the field norm) and `projectiveDivisorOf` are both multiplicative, so
@@ -243,7 +245,7 @@ for the smooth curve `E₂`, in its general (non-`B`) form.  The proof is the sa
 generic surjective `ℤᵐ⁰`-valued valuation with prescribed affine center. -/
 
 omit [DecidableEq F] [IsAlgClosed F] in
-/-- **The valuation subring of a surjective `ℤᵐ⁰`-valued valuation is proper** (`≠ ⊤`).  A surjective
+/-- **The valuation subring of a surjective `ℤᵐ⁰`-valued valuation is proper** (`≠ ⊤`). A surjective
 `w` is nontrivial — it hits `exp 1 ≠ 0, 1` — so by `Valuation.valuationSubring_eq_top_iff` its
 valuation subring cannot be all of `K`.  (Local helper for `eq_pointValuation_of_center`; the
 `NormConormIntegralClosure` analogue is private to its file.) -/
@@ -263,7 +265,8 @@ private theorem valuationSubring_ne_top_of_surjective_withZeroInt {K : Type*} [F
 set_option synthInstance.maxHeartbeats 400000 in
 set_option maxHeartbeats 800000 in
 omit [DecidableEq F] [IsAlgClosed F] in
-/-- **`O_Q ⊆ O_w` for a valuation with affine center `m_Q`** (the DVR-domination containment, downward
+/-- **`O_Q ⊆ O_w` for a valuation with affine center `m_Q`** (the DVR-domination containment,
+downward
 half).  If `w ≤ 1` on the coordinate ring `F[C]` and has center exactly `m_Q`, then every
 `pointValuation Q`-integer is a `w`-integer: write such an `f = a / s` with `a ∈ F[C]`,
 `s ∉ m_Q`; then `w(s) = 1` (it is `≤ 1` by `hle` and not `< 1` since `s ∉ m_Q` via `hcenter`), so
@@ -345,9 +348,11 @@ theorem eq_pointValuation_of_center
 /-! ### The reverse place dictionary: a regular point gives a `B`-prime (surjectivity)
 
 The fibre bijection also needs the *reverse* of `bPrime_valuation_eq_pointValuation`: a point `P`
-at which both pulled-back generators are regular (`P ∉ poleLocus`, equivalently its place-restriction
-image is an *affine* place of `E₂`) is cut out by *some* `B`-prime.  At such a `P` the whole image of
-`F[E₂]` lands in the local ring `O_P` (the generators are regular there), so the integral closure `B`
+at which both pulled-back generators are regular (`P ∉ poleLocus`, equivalently its
+place-restriction
+image is an *affine* place of `E₂`) is cut out by *some* `B`-prime. At such a `P` the whole image of
+`F[E₂]` lands in the local ring `O_P` (the generators are regular there), so the integral closure
+`B`
 lands in `O_P` (integrally closed); the contraction of `m_P` is then a height-one prime of `B` whose
 adic valuation is `pointValuation P`. -/
 
@@ -413,7 +418,8 @@ set_option maxHeartbeats 1600000 in
 omit [IsAlgClosed F] in
 /-- **The pulled-back coordinate ring of `E₂` is `≤ 1` at a regular point `P`** (value bound, the
 generator induction).  If `φ^*(x_gen₂)`, `φ^*(y_gen₂)` are `≤ 1` at `P`, then `φ^*(algebraMap c)` is
-`≤ 1` at `P` for every `c ∈ F[E₂]` (it is a polynomial in the two generators with `F`-constant — i.e.
+`≤ 1` at `P` for every `c ∈ F[E₂]` (it is a polynomial in the two generators with `F`-constant —
+i.e.
 unit — coefficients).  This is the `E₁`-point analogue of
 `valuation_algebraMap_coordinateRing_C₁_le_one`, transported through `φ^*`. -/
 theorem pointValuation_le_one_pullback_coordinateRing
@@ -506,17 +512,19 @@ private theorem pointValuation_le_one_of_mem_B
 set_option synthInstance.maxHeartbeats 400000 in
 set_option maxHeartbeats 1600000 in
 omit [IsAlgClosed F] in
+omit [DecidableEq F] [W₂.toAffine.IsElliptic] in
 /-- **A `B`-prime whose center is the place of `P` has adic valuation `pointValuation P`** (the
 DVR-domination tail).  Let `v` be a height-one prime of `B` whose ideal is exactly the center
 `{b : B | pv (algebraMap_B b) < 1}` (`hcenter`) of `pv = pointValuation P`, and suppose `pv ≤ 1` on
-`B` (`hreg`, from `pointValuation_le_one_of_mem_B`).  Then `v.valuation = pv`: the `O_v`-integers sit
+`B` (`hreg`, from `pointValuation_le_one_of_mem_B`). Then `v.valuation = pv`: the `O_v`-integers sit
 inside `O_P` (an `O_v`-integer `f = n/d` with `d ∉ v.asIdeal` has `pv (algebraMap_B d) = 1`, via
-`exists_primeCompl_mul_eq_of_integer`), `O_P ≠ ⊤` (`valuationSubring_ne_top_of_surjective_withZeroInt`,
+`exists_primeCompl_mul_eq_of_integer`), `O_P ≠ ⊤`
+(`valuationSubring_ne_top_of_surjective_withZeroInt`,
 `pv` surjective), so by rank-one DVR domination the two valuation subrings agree and the two
 surjective `ℤᵐ⁰`-valuations are equal.  (Local helper for
 `exists_bPrime_eq_pointValuation_of_notMem_poleLocus`.) -/
 private theorem bPrime_valuation_eq_pointValuation_of_center
-    [algKL : Algebra W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [_algKL : Algebra W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
     [algCR1 : Algebra (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing W₁.toAffine.FunctionField]
     [IsScalarTower (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
       W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
@@ -549,7 +557,8 @@ private theorem bPrime_valuation_eq_pointValuation_of_center
   have hwsurj : Function.Surjective (v.valuation W₁.toAffine.FunctionField) :=
     v.valuation_surjective W₁.toAffine.FunctionField
   have hpvsurj : Function.Surjective ((⟨W₁⟩ : SmoothPlaneCurve F).pointValuation P) :=
-    (IsDiscreteValuationRing.maximalIdeal ((⟨W₁⟩ : SmoothPlaneCurve F).localRingAt P)).valuation_surjective
+    (IsDiscreteValuationRing.maximalIdeal
+      ((⟨W₁⟩ : SmoothPlaneCurve F).localRingAt P)).valuation_surjective
       W₁.toAffine.FunctionField
   haveI : IsDiscreteValuationRing (v.valuation W₁.toAffine.FunctionField).valuationSubring :=
     valuationSubring_isDVR_of_surjective_withZeroInt _ hwsurj
@@ -721,6 +730,7 @@ private theorem pullback_algebraMap_coordinateRing_eq_algebraMap_bPrime
       W₂.toAffine.FunctionField W₁.toAffine.FunctionField b]
 
 omit [IsAlgClosed F] in
+omit [DecidableEq F] [W₂.toAffine.IsElliptic] in
 /-- The element `x_gen₂ − Q.x = algebraMap (X − Q.x)` lies in the maximal ideal `m_Q` of `F[E₂]`:
 it evaluates to `Q.x − Q.x = 0` at `Q`, so it is in `ker (evalAt Q) = m_Q`.  (Local helper for
 `placeRestrictionPlaceImage_affine_eq_of_bPrime`.) -/
@@ -737,10 +747,13 @@ private theorem X_sub_x_mem_maximalIdealAt (Q : (W_smooth W₂).SmoothPoint) :
       (algebraMap (Polynomial F) W₂.toAffine.CoordinateRing Polynomial.X -
         algebraMap F W₂.toAffine.CoordinateRing Q.x) = 0 :=
     (map_sub ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q) _ _).trans
-      (by rw [hx]; exact sub_eq_zero_of_eq ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt_algebraMap Q Q.x).symm)
+      (by
+        rw [hx]
+        exact sub_eq_zero_of_eq ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt_algebraMap Q Q.x).symm)
   exact (⟨W₂⟩ : SmoothPlaneCurve F).ker_evalAt Q ▸ RingHom.mem_ker.mpr h0
 
 omit [IsAlgClosed F] in
+omit [DecidableEq F] [W₂.toAffine.IsElliptic] in
 /-- The element `y_gen₂ − Q.y = root − Q.y` lies in the maximal ideal `m_Q` of `F[E₂]`: it
 evaluates to `Q.y − Q.y = 0` at `Q`, so it is in `ker (evalAt Q) = m_Q`.  (Local helper for
 `placeRestrictionPlaceImage_affine_eq_of_bPrime`.) -/
@@ -754,15 +767,18 @@ private theorem root_sub_y_mem_maximalIdealAt (Q : (W_smooth W₂).SmoothPoint) 
       (AdjoinRoot.root W₂.toAffine.polynomial -
         algebraMap F W₂.toAffine.CoordinateRing Q.y) = 0 :=
     (map_sub ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt Q) _ _).trans
-      (by rw [hy]; exact sub_eq_zero_of_eq ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt_algebraMap Q Q.y).symm)
+      (by
+        rw [hy]
+        exact sub_eq_zero_of_eq ((⟨W₂⟩ : SmoothPlaneCurve F).evalAt_algebraMap Q Q.y).symm)
   exact (⟨W₂⟩ : SmoothPlaneCurve F).ker_evalAt Q ▸ RingHom.mem_ker.mpr h0
 
 /-! ### The point-map image of a `B`-prime over `m_Q` is `Q` (the fibre matching, value-level)
 
 For a `B`-prime `v` lying over the affine place `m_Q` of `E₂`, the point `P` of `E₁` cut out by
-`v` (place dictionary) satisfies `placeRestrictionPointMap φ P = Q`.  Crucially this is proved at the
+`v` (place dictionary) satisfies `placeRestrictionPointMap φ P = Q`. Crucially this is proved at the
 *value* level — `φ^*(x_gen₂)`, `φ^*(y_gen₂)` evaluate at `P` to `Q.x`, `Q.y` — which needs **only**
-`v` over `m_Q` (a generator `x_gen₂ − Q.x = algebraMap(b)` with `b ∈ m_Q` pulls back to a `B`-element
+`v` over `m_Q` (a generator `x_gen₂ − Q.x = algebraMap(b)` with `b ∈ m_Q` pulls back to a
+`B`-element
 in `v.asIdeal`), *not* the exact comap-valuation equality (and hence not the ramification index
 `e = 1`).  The image is then read off by `placeRestrictionPointMap_residue_agreement`. -/
 
@@ -824,14 +840,17 @@ theorem placeRestrictionPlaceImage_affine_eq_of_bPrime
     -- `algebraMap_{F[E₂]→B} b ∈ v.asIdeal` (since `b ∈ m_Q = v.asIdeal.under`)
     have hmem : algebraMap (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
         (NormConormIntegralClosure.B
-          (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F)) (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) b ∈ v.asIdeal := by
+          (C₁ := (⟨W₁⟩ : SmoothPlaneCurve F))
+          (C₂ := (⟨W₂⟩ : SmoothPlaneCurve F))) b ∈ v.asIdeal := by
       have : b ∈ v.asIdeal.under (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing := by rw [hQ]; exact hb
       rwa [Ideal.mem_under] at this
     -- `φ^*(algebraMap b) = algebraMap_B (algebraMap_{F[E₂]→B} b)`, value `< 1 ↔ ∈ v.asIdeal`.
     rw [halgB b, ← hP, IsDedekindDomain.HeightOneSpectrum.valuation_lt_one_iff_mem]
     exact hmem
-  -- `x_gen₂ − Q.x = algebraMap (X − Q.x)`, `X − Q.x ∈ m_Q`; pull back ⟹ `EvaluatesTo P (φ^*x_gen₂) Q.x`.
-  have hbx_mem : (algebraMap (Polynomial F) (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing Polynomial.X -
+  -- `x_gen₂ − Q.x = algebraMap (X − Q.x)`, `X − Q.x ∈ m_Q`; pull back
+  -- ⟹ `EvaluatesTo P (φ^*x_gen₂) Q.x`.
+  have hbx_mem : (algebraMap (Polynomial F) (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing
+        Polynomial.X -
       algebraMap F (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing Q.x) ∈
       (⟨W₂⟩ : SmoothPlaneCurve F).maximalIdealAt Q := X_sub_x_mem_maximalIdealAt Q
   have hby_mem : (AdjoinRoot.root W₂.toAffine.polynomial -
@@ -877,7 +896,8 @@ theorem placeRestrictionPlaceImage_affine_eq_of_bPrime
     intro b
     rw [halgB b, ← hP]
     exact v.valuation_le_one (K := W₁.toAffine.FunctionField) _
-  -- `P ∉ poleLocus` (both generators are regular at `P`), and the residue agreement gives the image.
+  -- `P ∉ poleLocus` (both generators are regular at `P`), and the residue agreement gives the
+  -- image.
   have hPnotMem : P ∉ twoCurvePoleLocus φ := by
     intro hmem
     rcases hmem with hx | hy
@@ -906,15 +926,18 @@ matched, term by term, to the `mapDomain` fibre sum of `placeRestrictionPushforw
 (`placeRestrictionPushforward_apply_affine`).
 
 **Route map for the remaining leaf** (the integral-closure re-derivation):
-* The localized-`D` *setup* is templated verbatim by `EC.KernelCountGeneral.card_kernel_eq_degree_of_separable`
+* The localized-`D` *setup* is templated verbatim by
+`EC.KernelCountGeneral.card_kernel_eq_degree_of_separable`
   (the `βAlg`/`algAfK`/`algAfL`/`twAfKL`/`twFKL` instance dance + `exists_denominator` +
   `Localization.Away f₀`): take `f₀` clearing the minpoly denominators of `x_gen₁, y_gen₁` over
   `φ*K(E₂)`, then `F[E₁] ⊆ D := integralClosure Af K(E₁)` by
-  `LocalizedDictionary.coordRing_mem_integralClosure`, so `algebraMap w ∈ D` (via `coordRingToClosure`).
+  `LocalizedDictionary.coordRing_mem_integralClosure`, so `algebraMap w ∈ D` (via
+  `coordRingToClosure`).
 * The *weighted* count `count_{q_Q}(relNorm_Af(span{w})) = Σ_{P' | q_Q} count_{P'}(span{w})` and the
   `s = 1` core `relNorm_Af(m_{P'}) = q_{φP'}` must be **re-derived over `D`** — these are
   `CurveMap.count_relNorm_eq_sum_fiber` / `relNorm_maximalIdealAt_eq` (`PushforwardDivisor.lean`)
-  with `Af → D` in place of `F[E₂] → F[E₁]`, using `LocalizedDictionary.inertiaDeg_eq_one_of_under_eq`
+  with `Af → D` in place of `F[E₂] → F[E₁]`, using
+  `LocalizedDictionary.inertiaDeg_eq_one_of_under_eq`
   (`f = 1`) + `Ideal.sum_ramification_inertia` (`Σ ef = deg`).  `LocalizedDictionary` supplies the
   *cardinality* count but NOT this *per-element weighted* count — that is the genuine new work.
 * The `pointAt`/place-identification (`LocalizedDictionary.pointAt`,
@@ -994,15 +1017,18 @@ private theorem bPrime_exists_point_image_of_mem_primesOver
 
 set_option synthInstance.maxHeartbeats 800000 in
 set_option maxHeartbeats 1600000 in
+omit [DecidableEq F] [W₂.toAffine.IsElliptic] [IsAlgClosed F] in
 /-- **Count of a `B`-prime matches the divisor coefficient (the count-match leaf).**  If a prime
-`vP` of `B` has the same valuation as a smooth point `P` of `E₁` (`vP.valuation = pointValuation P`),
+`vP` of `B` has the same valuation as a smooth point `P` of `E₁` (`vP.valuation = pointValuation
+P`),
 and `wB : B` represents the function-field element `algebraMap w`, then the multiplicity of `vP` in
 `span {wB}` equals the coefficient of `affine P` in `projectiveDivisorOf (algebraMap w)`.  Both
 sides are read off the common valuation `vP.valuation aw = pointValuation P aw = exp(-count)`
-(`valuation_of_algebraMap` / `intValuation_if_neg` on the left, `pointValuation_algebraMap_eq_exp_count`
+(`valuation_of_algebraMap` / `intValuation_if_neg` on the left,
+`pointValuation_algebraMap_eq_exp_count`
 on the right).  Local count-match helper for `twoCurve_ord_conorm_eq_sum_fiber`. -/
 private theorem bPrime_count_eq_projectiveDivisorOf_of_valuation_eq
-    [algKL : Algebra W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
+    [_algKL : Algebra W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
     [IsScalarTower F W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
     [FiniteDimensional W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
     [Algebra.IsSeparable W₂.toAffine.FunctionField W₁.toAffine.FunctionField]
@@ -1280,7 +1306,8 @@ theorem twoCurve_ord_conorm_eq_sum_fiber
     have hv1 := hptF_val P₁ h₁
     have hv2 := hptF_val P₂ h₂
     rw [heq] at hv1
-    -- `(hPrimeData P₁ _).choose` and `(hPrimeData P₂ _).choose` have equal valuations ⟹ equal ideals
+    -- `(hPrimeData P₁ _).choose` and `(hPrimeData P₂ _).choose` have equal valuations ⟹ equal
+    -- ideals
     have hvaleq : (hPrimeData P₁ h₁).choose.valuation W₁.toAffine.FunctionField =
         (hPrimeData P₂ h₂).choose.valuation W₁.toAffine.FunctionField := by rw [hv1, hv2]
     -- equal valuations ⟹ equal `asIdeal` (both are the `< 1`-locus of the valuation).
@@ -1363,7 +1390,8 @@ theorem twoCurve_ord_conorm_eq_sum_fiber
         exact_mod_cast Nat.one_le_iff_ne_zero.mpr hcount_ne
       obtain ⟨vP, hvP⟩ := exists_bPrime_eq_pointValuation_of_notMem_poleLocus φ
         (fun g => rfl) P' hP'_notpole hwB_ne hP'_vanish
-      -- `vP` lies over the affine place `m_{Q'}` of its point's image `Q'`; `Q' = Q` (from `hx_img`).
+      -- `vP` lies over the affine place `m_{Q'}` of its point's image `Q'`; `Q' = Q` (from
+      -- `hx_img`).
       obtain ⟨Q', hQ'⟩ := NormConormIntegralClosure.exists_smoothPoint_under vP
       have himg' : placeRestrictionPlaceImage φ (ProjectiveSmoothPoint.affine P') =
           ProjectiveSmoothPoint.affine Q' :=
@@ -1441,42 +1469,6 @@ private theorem conorm_projectiveDivisorOf_apply_affine_eq
   rw [(⟨W₂⟩ : SmoothPlaneCurve F).projectiveDivisorOf_apply_affine,
     twoCurve_ord_conorm_eq_sum_fiber φ hfin hsep hreg hw Q, WithTop.untopD_coe]
 
-/-- **Infinity coefficient pinned by degree**: two projective divisors on `C` with equal degree
-whose coefficients agree at every affine place also agree at infinity.  (Their difference is
-supported only at infinity, so its degree *is* its infinity coefficient.)  This pins the place at
-infinity in `II.3.6` once the affine coefficients match and both divisors have degree `0`.  Local
-mirror of `HasseWeil.Curves.…projDivisor_infinity_coeff_eq_of_affine_eq`, which is `private` to its
-file. -/
-private theorem projDivisor_infinity_coeff_eq_of_affine_eq_local {C : SmoothPlaneCurve F}
-    (D₁ D₂ : ProjectiveDivisor C) (hdeg : D₁.degree = D₂.degree)
-    (haff : ∀ Q : C.SmoothPoint,
-      D₁ (ProjectiveSmoothPoint.affine Q) = D₂ (ProjectiveSmoothPoint.affine Q)) :
-    D₁ ProjectiveSmoothPoint.infinity = D₂ ProjectiveSmoothPoint.infinity := by
-  classical
-  set E : ProjectiveDivisor C := D₁ - D₂ with hE_def
-  have hE_aff : ∀ Q : C.SmoothPoint, E (ProjectiveSmoothPoint.affine Q) = 0 := by
-    intro Q; rw [hE_def, Finsupp.sub_apply, haff Q, sub_self]
-  have hE_supp : E.support ⊆ {ProjectiveSmoothPoint.infinity} := by
-    intro x hx
-    rw [Finsupp.mem_support_iff] at hx
-    cases x with
-    | affine Q => exact absurd (hE_aff Q) hx
-    | infinity => exact Finset.mem_singleton_self _
-  have hE_single : E = Finsupp.single ProjectiveSmoothPoint.infinity
-      (E ProjectiveSmoothPoint.infinity) :=
-    (Finsupp.support_subset_singleton.mp hE_supp)
-  have hE_deg : E.degree = 0 := by
-    rw [hE_def, ProjectiveDivisor.degree_sub, hdeg, sub_self]
-  have hEinf : E ProjectiveSmoothPoint.infinity = 0 := by
-    have : E.degree = E ProjectiveSmoothPoint.infinity := by
-      conv_lhs => rw [hE_single]
-      unfold ProjectiveDivisor.degree
-      rw [Finsupp.sum_single_index rfl]
-    rw [this] at hE_deg; exact hE_deg
-  have hdiff : D₁ ProjectiveSmoothPoint.infinity - D₂ ProjectiveSmoothPoint.infinity = 0 := by
-    rw [← Finsupp.sub_apply]; exact hEinf
-  linarith [hdiff]
-
 /-- **The `algebraMap` case of the norm–conorm identity (CoordHom-free)**: for `w ∈ F[E₁]` nonzero,
 `div(N_φ(algebraMap w)) = placeRestrictionPushforward φ (div(algebraMap w))`.  Affine coefficients
 via `twoCurve_ord_conorm_eq_sum_fiber`; infinity coefficient forced by degree `0`. -/
@@ -1517,7 +1509,7 @@ theorem placeRestrictionPushforward_projectiveDivisorOf_algebraMap
   cases v with
   | affine Q => exact h_aff Q
   | infinity =>
-    exact projDivisor_infinity_coeff_eq_of_affine_eq_local LHS RHS
+    exact CurveMap.projDivisor_infinity_coeff_eq_of_affine_eq LHS RHS
       (hLHS_deg.trans hRHS_deg.symm) h_aff
 
 /-! ### The norm–conorm identity and `PlaceRestrictionPreservesPrincipal` -/
@@ -1580,7 +1572,8 @@ theorem placeRestrictionPreservesPrincipal_of_separable
 
 /-- **`PlaceRestrictionPreservesPrincipal` from separability alone, char-zero form.**  In
 characteristic zero the `PerfectField (FractionRing F[E₂])` instance is automatic (`K(E₂)` has
-characteristic zero, hence is perfect), so the norm–conorm wall holds with no instance side-condition
+characteristic zero, hence is perfect), so the norm–conorm wall holds with no instance
+side-condition
 beyond the standing `[IsAlgClosed F]` (the III.4.10c setting).  This is the convenient form to wire
 into `placeRestrictionRealizationOfPreservesPrincipal` at the `twoCurveGeometricDualData` call site
 (where the ambient field is `CharZero`). -/
