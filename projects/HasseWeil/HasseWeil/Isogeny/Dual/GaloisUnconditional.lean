@@ -111,16 +111,13 @@ theorem isGalois_of_xy_family_card (β : Isogeny W.toAffine W.toAffine)
         FixedPoints.subfield (Multiplicative β.kernel) W.toAffine.FunctionField := by
     intro z
     have hz : β.pullback z ∈ β.pullback.fieldRange := ⟨z, rfl⟩
-    rw [h_eq] at hz
-    exact hz
+    rwa [h_eq] at hz
   -- ... and surjects onto the fixed subfield (backward inclusion, via Im = Fix)
   have hsurj : ∀ w : W.toAffine.FunctionField,
       w ∈ FixedPoints.subfield (Multiplicative β.kernel) W.toAffine.FunctionField →
       ∃ z, β.pullback z = w := by
     intro w hw
-    have hw' : w ∈ β.pullback.fieldRange := by
-      rw [h_eq]
-      exact hw
+    have hw' : w ∈ β.pullback.fieldRange := by rwa [h_eq]
     exact hw'
   -- the base isomorphism `K(E) ≃+* Fix(ker β)` induced by `β^*`
   let e : W.toAffine.FunctionField ≃+*
