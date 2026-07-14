@@ -241,9 +241,125 @@ theorem fullLevelHom_gamma_bijective {R : CommRingCat.{u}}
       ((AlgebraicClosure J.ResidueField) ⊗[(R : Type u)] ↑Γ(E.torsion N, ⊤)) :=
     inferInstance
   refine Algebra.IsFiniteSplit.bijective_of_precomp_bijective Ψ ?_
-  -- the dual point-map is the (proven bijective) fibrewise label map, through the
-  -- sections dictionary
-  sorry
+  -- the dual point-map is the fibrewise label map, through the sections dictionary
+  set t : Spec (CommRingCat.of (AlgebraicClosure J.ResidueField)) ⟶ Spec R :=
+    Spec.map (CommRingCat.ofHom (algebraMap (R : Type u)
+      (AlgebraicClosure J.ResidueField))) with ht
+  have htpre : Spec.preimage t = CommRingCat.ofHom (algebraMap (R : Type u)
+      (AlgebraicClosure J.ResidueField)) := Spec.preimage_map _
+  set secE := sectionsEquivRingHomUnder (E.torsionπ N) φt hφtmap t with hsecE
+  set ptE := E.torsionPointsEquiv N t with hptE
+  have hN : ((N : ℕ) : AlgebraicClosure J.ResidueField) ≠ 0 := by
+    have h2 := hinv.map (Scheme.ΓSpecIso R).hom.hom
+    rw [map_natCast] at h2
+    have h3 := h2.map (algebraMap (R : Type u) (AlgebraicClosure J.ResidueField))
+    rw [map_natCast] at h3
+    exact h3.ne_zero
+  have hfib := E.fullLevelFibreMap_bijective L t hN
+  -- the label points of the constant side
+  set χlab : (Fin 2 → ZMod N) → (((Fin 2 → ZMod N) → (R : Type u)) →ₐ[(R : Type u)]
+      (AlgebraicClosure J.ResidueField)) := fun v =>
+    ((Algebra.ofId (R : Type u) (AlgebraicClosure J.ResidueField)).comp
+      (Pi.evalAlgHom (R : Type u) (fun _ => (R : Type u)) v)) with hχlab
+  -- sections attached to restricted algebra maps
+  have hsecArg : ∀ (χ : ↑Γ(E.torsion N, ⊤) →ₐ[(R : Type u)]
+      (AlgebraicClosure J.ResidueField)),
+      φt ≫ CommRingCat.ofHom χ.toRingHom = Spec.preimage t := by
+    intro χ
+    apply CommRingCat.hom_ext
+    ext r
+    show χ (φt.hom r) = (Spec.preimage t).hom r
+    rw [htpre]
+    exact χ.commutes r
+  set sectionOf : (↑Γ(E.torsion N, ⊤) →ₐ[(R : Type u)]
+      (AlgebraicClosure J.ResidueField)) →
+      { h : Spec (CommRingCat.of (AlgebraicClosure J.ResidueField)) ⟶ E.torsion N //
+        h ≫ E.torsionπ N = t } := fun χ =>
+    secE.symm ⟨CommRingCat.ofHom χ.toRingHom, hsecArg χ⟩ with hsectionOf
+  have hsectionOf_inj : Function.Injective sectionOf := by
+    intro χ₁ χ₂ h12
+    have h3 := secE.symm.injective h12
+    exact AlgHom.coe_ringHom_injective (congrArg CommRingCat.Hom.hom
+      (congrArg Subtype.val h3))
+  -- the restriction of a Pi-side point through Ψ
+  have hrestr : ∀ gp : (AlgebraicClosure J.ResidueField) ⊗[↑R]
+      ((Fin 2 → ZMod N) → (R : Type u)) →ₐ[AlgebraicClosure J.ResidueField]
+        (AlgebraicClosure J.ResidueField),
+      (AlgHom.liftEquiv ..).symm (gp.comp Ψ)
+        = ((AlgHom.liftEquiv ..).symm gp).comp ψalg := by
+    intro gp
+    refine AlgHom.ext fun x => ?_
+    show (gp.comp Ψ) (1 ⊗ₜ[↑R] x) = gp (1 ⊗ₜ[↑R] (ψalg x))
+    rw [AlgHom.comp_apply, hΨ]
+    exact congrArg gp (by simp [Algebra.TensorProduct.map_tmul])
+  -- the per-label section identity: the geometric heart
+  have hkey : ∀ v : Fin 2 → ZMod N,
+      Spec.map (CommRingCat.ofHom ((χlab v).comp ψalg).toRingHom) ≫
+        (E.torsion N).isoSpec.inv
+      = t ≫ Sigma.ι (fun _ : Fin 2 → ZMod N => Spec (R : CommRingCat.{u})) v ≫
+          E.fullLevelHom L := by
+    intro v
+    have hsplit : CommRingCat.ofHom ((χlab v).comp ψalg).toRingHom
+        = ψ ≫ CommRingCat.ofHom (Pi.evalRingHom (fun _ : Fin 2 → ZMod N =>
+            (R : Type u)) v) ≫ CommRingCat.ofHom (algebraMap (R : Type u)
+            (AlgebraicClosure J.ResidueField)) := rfl
+    rw [hsplit, Spec.map_comp, Spec.map_comp, hψ, hg]
+    rw [show Spec.map (CommRingCat.ofHom (Pi.evalRingHom
+        (fun _ : Fin 2 → ZMod N => (R : Type u)) v))
+      = Sigma.ι (fun _ : Fin 2 → ZMod N => Spec (R : CommRingCat.{u})) v ≫
+        (constSchemeSpecIso R (Fin 2 → ZMod N)).hom
+      from (constSchemeSpecIso_ι_hom R (Fin 2 → ZMod N) v).symm]
+    rw [← ht]
+    simp only [Category.assoc, Iso.hom_inv_id_assoc, Iso.hom_inv_id, Category.comp_id]
+  -- the point of a pulled-back label is the fibre label point
+  have hpoint : ∀ v : Fin 2 → ZMod N,
+      ptE (sectionOf ((χlab v).comp ψalg)) = E.fullLevelFibreMap L t v := by
+    intro v
+    apply Subtype.ext
+    apply Subtype.ext
+    show (sectionOf ((χlab v).comp ψalg)).1 ≫ E.torsionι N
+      = ((E.fullLevelFibreMap L t v) : E.Point t).1
+    have hval : (sectionOf ((χlab v).comp ψalg)).1
+        = Spec.map (CommRingCat.ofHom ((χlab v).comp ψalg).toRingHom) ≫
+          (E.torsion N).isoSpec.inv := rfl
+    rw [hval, hkey v]
+    have hcomp : Sigma.ι (fun _ : Fin 2 → ZMod N => Spec (R : CommRingCat.{u})) v ≫
+        E.fullLevelHom L ≫ E.torsionι N
+        = (((v 0).val : ℤ) • L.1.1 + ((v 1).val : ℤ) • L.1.2).1 := by
+      rw [fullLevelHom, Sigma.ι_desc_assoc, E.pointToTorsion_torsionι]
+    simp only [Category.assoc]
+    rw [hcomp]
+    show t ≫ (((v 0).val : ℤ) • L.1.1 + ((v 1).val : ℤ) • L.1.2).1
+      = ((((v 0).val : ℤ) • Point.pull E t L.1.1) +
+        (((v 1).val : ℤ) • Point.pull E t L.1.2)).1
+    rw [← Point.pull_zsmul, ← Point.pull_zsmul, ← Point.pull_add]
+    rfl
+  constructor
+  · -- injectivity of the dual map
+    intro gp₁ gp₂ hgp
+    obtain ⟨v₁, hv₁⟩ :=
+      AlgHom.eq_comp_evalAlgHom_of_pi ((AlgHom.liftEquiv ..).symm gp₁)
+    obtain ⟨v₂, hv₂⟩ :=
+      AlgHom.eq_comp_evalAlgHom_of_pi ((AlgHom.liftEquiv ..).symm gp₂)
+    have hχ₁ : (AlgHom.liftEquiv ..).symm gp₁ = χlab v₁ := AlgHom.ext fun x => hv₁ x
+    have hχ₂ : (AlgHom.liftEquiv ..).symm gp₂ = χlab v₂ := AlgHom.ext fun x => hv₂ x
+    have hres : ((χlab v₁).comp ψalg) = ((χlab v₂).comp ψalg) := by
+      rw [← hχ₁, ← hχ₂, ← hrestr gp₁, ← hrestr gp₂]
+      exact congrArg (AlgHom.liftEquiv ..).symm hgp
+    have hveq : v₁ = v₂ := by
+      apply hfib.1
+      rw [← hpoint v₁, ← hpoint v₂, hres]
+    apply (AlgHom.liftEquiv ..).symm.injective
+    rw [hχ₁, hχ₂, hveq]
+  · -- surjectivity of the dual map
+    intro q
+    obtain ⟨v, hv⟩ := hfib.2 (ptE (sectionOf ((AlgHom.liftEquiv ..).symm q)))
+    refine ⟨(AlgHom.liftEquiv ..) (χlab v), ?_⟩
+    apply (AlgHom.liftEquiv ..).symm.injective
+    rw [hrestr, Equiv.symm_apply_apply]
+    apply hsectionOf_inj
+    apply ptE.injective
+    rw [hpoint v, hv]
 
 /-- **L2b over an affine base**: the conjugated `Spec`-morphism is an isomorphism, from
 the Γ-bijectivity. -/
