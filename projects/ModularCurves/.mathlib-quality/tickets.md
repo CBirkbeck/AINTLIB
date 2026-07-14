@@ -20274,3 +20274,19 @@ general-base B–E chain), BB-DEG (:156, KM carve-out — NOT ours), FormallyUnr
 (:232). Cleanup notes: `section_base_injective_of_isAlgClosed`'s `[IsAlgClosed]` unused;
 ALPHA's alg-closed `modelMulByHom_finite_fibres` now subsumed by (3) — dedup candidate;
 QuasiFiniteDescent.lean = mathlib-PR candidate.
+
+## v10.242-OMEGA (2026-07-14) — [T-E15a] CLAIMED + stages 1-2: the ℰ₃ object EXISTS (KM Ex. 2.2.2)
+
+Post-v10.241 re-audit: T-E15a (`naiveLevelThree_representable_by_affine`) was UNASSIGNED and
+board-unblocked since v10.153 — claimed by OMEGA (the engine's ℤ[1/3]-instantiation; the exact
+T-E14-AX1 replay profile). `Moduli/UniversalLevelThree.lean` (commits 79a89b667+77848bcff,
+axiom-clean): `E3ModuliRing = R[β,γ][((a₁³−27a₃)a₃)⁻¹]/(β³−(β+γ)³)` (quotient-then-localize) +
+`universalE3` (`y² + a₁xy + a₃y = x³`, `a₁ = 3γ−1`, `a₃ = −3γ²−β−3βγ` — the `[3]P=0` normal form)
++ `IsElliptic` (Δ = a₃³(a₁³−27a₃) self-localization) + `universalE3Obj/P/Q` — **Q = (γ, β+γ)'s
+equation is EXACTLY the flex relation** (the KM-design verification: `universalE3_equation_Q` by
+`linear_combination hrel`). Also fixed this sweep: the global `IsMonHom` instance from T-E4b
+DEMOTED to a theorem (metavar-heavy instance heads poison unrelated `AddMonoidHomClass` searches
+— GammaH synth-timeout regression; LEAN-OP: never register `IsMonHom (complicated-term)` as a
+global instance). Next: taut-marking (banked generic `tautPresentation_marksAt`) + the Tate-NF
+witness theory (toTateNF; N=3 has NO residual unit — cleaner than Legendre) + the classification
+replay via the transposition pipeline. T-E15b (finite étale, Weil pairing) stays stream-C-gated.
