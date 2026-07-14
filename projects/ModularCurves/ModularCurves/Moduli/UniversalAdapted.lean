@@ -1164,4 +1164,188 @@ theorem sectionsMapLE_classifyingMap {R : CommRingCat.{u}} (Y : EllObj R)
   have hofHom := Spec.map_injective hSpec
   exact congrArg CommRingCat.Hom.hom hofHom
 
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 6400000 in
+/-- **(E12-D4 rt1-core ★★)** Transporting the tautological chart of the universal
+curve along the classifying morphism recovers the adapted local model: the geometric
+content of the right-inverse roundtrip. -/
+theorem transVC_transport_taut {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤)))
+    (V : Y.base.affineOpens) (i : Y.curve.toEllipticCurveGeom.atlas.ι)
+    (hVi : V.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U i).1) :
+    ((tautPresentation (universalShortNF R)).transport
+        (classifyingEllHom Y b h2 h3).baseHom (classifyingEllHom Y b h2 h3).top
+        (classifyingEllHom Y b h2 h3).isPullback
+        (classifyingEllHom Y b h2 h3).zero_w
+        (show V.1 ≤ (classifyingEllHom Y b h2 h3).baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)).transVC
+      (adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi) = 1 := by
+  -- the transported chart curve is the adapted model's curve
+  have hWeq : ((tautPresentation (universalShortNF R)).transport
+      (classifyingEllHom Y b h2 h3).baseHom (classifyingEllHom Y b h2 h3).top
+      (classifyingEllHom Y b h2 h3).isPullback (classifyingEllHom Y b h2 h3).zero_w
+      (show V.1 ≤ (classifyingEllHom Y b h2 h3).baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)).W =
+    (adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi).W := by
+    letI : Algebra (ModuliRingE12 R)
+        Γ(Spec (CommRingCat.of (ModuliRingE12 R)), ⊤) :=
+      (Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv.hom.toAlgebra
+    show ((universalShortNF R).map _).map _ =
+      (adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi).W
+    rw [WeierstrassCurve.map_map,
+      show ((sectionsMapLE (classifyingEllHom Y b h2 h3).baseHom
+          (show V.1 ≤ (classifyingEllHom Y b h2 h3).baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)).comp
+        (algebraMap (ModuliRingE12 R)
+          Γ(Spec (CommRingCat.of (ModuliRingE12 R)), ⊤))) =
+      ((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+        (classifyingRingHom Y b h2 h3) from
+      sectionsMapLE_classifyingMap Y b h2 h3 V _]
+    exact universalShortNF_map_classifying Y b h2 h3 V i hVi
+  refine (transVC_unique _ _ 1 (by rw [one_smul, hWeq]) ?_).symm
+  rw [projModelVCIso_one, eqToHom_trans]
+  show ((tautPresentation (universalShortNF R)).transport
+      (classifyingEllHom Y b h2 h3).baseHom (classifyingEllHom Y b h2 h3).top
+      (classifyingEllHom Y b h2 h3).isPullback (classifyingEllHom Y b h2 h3).zero_w
+      _).e.inv ≫
+    (adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi).e.hom = eqToHom _
+  rw [Iso.inv_comp_eq]
+  letI : Algebra Γ(Spec (CommRingCat.of (ModuliRingE12 R)), ⊤) Γ(Y.base, V.1) :=
+    (sectionsMapLE (classifyingEllHom Y b h2 h3).baseHom
+      (show V.1 ≤ (classifyingEllHom Y b h2 h3).baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)).toAlgebra
+  have hkey : ((tautPresentation (universalShortNF R)).transport
+      (classifyingEllHom Y b h2 h3).baseHom (classifyingEllHom Y b h2 h3).top
+      (classifyingEllHom Y b h2 h3).isPullback (classifyingEllHom Y b h2 h3).zero_w
+      (show V.1 ≤ (classifyingEllHom Y b h2 h3).baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)).e.hom =
+    (adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi).e.hom ≫
+      eqToHom (congrArg projModel hWeq.symm) := by
+    letI : Algebra (ModuliRingE12 R)
+        Γ(Spec (CommRingCat.of (ModuliRingE12 R)), ⊤) :=
+      (Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv.hom.toAlgebra
+    haveI : IsIso (⊤ : (Spec (CommRingCat.of (ModuliRingE12 R))).Opens).ι := by
+      rw [← Scheme.topIso_hom]
+      infer_instance
+    haveI : IsIso (Spec.map (CommRingCat.ofHom (algebraMap (ModuliRingE12 R)
+        Γ(Spec (CommRingCat.of (ModuliRingE12 R)), ⊤)))) := by
+      have h : CommRingCat.ofHom (algebraMap (ModuliRingE12 R)
+          Γ(Spec (CommRingCat.of (ModuliRingE12 R)), ⊤)) =
+        (Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv := rfl
+      rw [h]
+      infer_instance
+    refine (isPullback_projModelBaseChange
+      (tautPresentation (universalShortNF R)).W).hom_ext ?_ ?_
+    · -- the base-change leg, through `classifyingTop_piece`
+      rw [show ((tautPresentation (universalShortNF R)).transport
+          (classifyingEllHom Y b h2 h3).baseHom (classifyingEllHom Y b h2 h3).top
+          (classifyingEllHom Y b h2 h3).isPullback
+          (classifyingEllHom Y b h2 h3).zero_w
+          (show V.1 ≤ (classifyingEllHom Y b h2 h3).baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial)).e.hom ≫
+        projModelBaseChange (algebraMap
+          Γ(Spec (CommRingCat.of (ModuliRingE12 R)),
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (ModuliRingE12 R))).affineOpens).1) Γ(Y.base, V.1))
+          (tautPresentation (universalShortNF R)).W =
+        transportTheta (classifyingEllHom Y b h2 h3).baseHom
+          (classifyingEllHom Y b h2 h3).top
+          (classifyingEllHom Y b h2 h3).isPullback
+          (show V.1 ≤ (classifyingEllHom Y b h2 h3).baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial) ≫
+          (tautPresentation (universalShortNF R)).e.hom from
+        transport_e_baseChange _ _ _ _ _ _]
+      rw [show (tautPresentation (universalShortNF R)).e.hom =
+        (asIso (pullback.fst (projModelπ (universalShortNF R))
+          (⊤ : (Spec (CommRingCat.of (ModuliRingE12 R))).Opens).ι) ≪≫
+        (asIso (pullback.fst (projModelπ (universalShortNF R))
+          (Spec.map (CommRingCat.ofHom (algebraMap (ModuliRingE12 R)
+            Γ(Spec (CommRingCat.of (ModuliRingE12 R)), ⊤)))))).symm ≪≫
+        (isPullback_projModelBaseChange (universalShortNF R)).isoPullback.symm).hom
+        from rfl]
+      simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv]
+      rw [← Category.assoc, ← Category.assoc,
+        show (transportTheta (classifyingEllHom Y b h2 h3).baseHom
+            (classifyingEllHom Y b h2 h3).top
+            (classifyingEllHom Y b h2 h3).isPullback
+            (show V.1 ≤ (classifyingEllHom Y b h2 h3).baseHom ⁻¹ᵁ
+              (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+                (ModuliRingE12 R))).affineOpens).1 from fun x _ => trivial) ≫
+          pullback.fst (projModelπ (universalShortNF R))
+            (⊤ : (Spec (CommRingCat.of (ModuliRingE12 R))).Opens).ι) =
+        pullback.fst Y.curve.toEllipticCurveGeom.π V.1.ι ≫
+          (classifyingEllHom Y b h2 h3).top from
+        transportTheta_fst _ _ _ _]
+      rw [show pullback.fst Y.curve.toEllipticCurveGeom.π V.1.ι ≫
+          (classifyingEllHom Y b h2 h3).top =
+        chartPiece Y b h2 h3 V i hVi from by
+        rw [show (classifyingEllHom Y b h2 h3).top =
+          classifyingTop Y b h2 h3 from rfl,
+          ← classifyingTop_piece Y b h2 h3 ⟨⟨V, i⟩, hVi⟩, adaptedTotalCover_f]]
+      rw [chartPiece]
+      simp only [Category.assoc]
+      rw [cancel_epi
+        ((adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi).e.hom)]
+      -- universal side: the base-change chain collapses
+      rw [projModelBaseChange_congr_hom
+          ((sectionsMapLE_classifyingMap Y b h2 h3 V
+            (fun x _ => trivial)).symm)
+          (universalShortNF R),
+        projModelBaseChange_comp']
+      simp only [Category.assoc]
+      have htail : projModelBaseChange
+            ((Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv.hom)
+            (universalShortNF R) ≫
+          inv (pullback.fst (projModelπ (universalShortNF R))
+            (Spec.map (CommRingCat.ofHom (algebraMap (ModuliRingE12 R)
+              Γ(Spec (CommRingCat.of (ModuliRingE12 R)), ⊤))))) ≫
+          (isPullback_projModelBaseChange (universalShortNF R)).isoPullback.inv =
+        𝟙 _ := by
+        have h0 := (isPullback_projModelBaseChange
+          (R' := Γ(Spec (CommRingCat.of (ModuliRingE12 R)), ⊤))
+          (universalShortNF R)).isoPullback_hom_fst
+        rw [← Category.assoc, Iso.comp_inv_eq, Category.id_comp, IsIso.comp_inv_eq]
+        exact h0.symm
+      rw [htail, Category.comp_id]
+      show eqToHom _ ≫ eqToHom _ ≫
+          projModelBaseChange (sectionsMapLE (classifyingMap Y b h2 h3)
+            (show V.1 ≤ classifyingMap Y b h2 h3 ⁻¹ᵁ
+              (⊤ : (Spec (CommRingCat.of (ModuliRingE12 R))).Opens) from
+              fun x _ => trivial))
+            ((universalShortNF R).map
+              (Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv.hom) =
+        eqToHom _ ≫
+          projModelBaseChange (sectionsMapLE (classifyingMap Y b h2 h3)
+            (show V.1 ≤ classifyingMap Y b h2 h3 ⁻¹ᵁ
+              (⊤ : (Spec (CommRingCat.of (ModuliRingE12 R))).Opens) from
+              fun x _ => trivial))
+            ((universalShortNF R).map
+              (Scheme.ΓSpecIso (CommRingCat.of (ModuliRingE12 R))).inv.hom)
+      rw [eqToHom_trans_assoc]
+    · -- the `π` leg
+      rw [Category.assoc,
+        show eqToHom (congrArg projModel hWeq.symm) ≫
+            projModelπ ((tautPresentation (universalShortNF R)).W.map
+              (algebraMap Γ(Spec (CommRingCat.of (ModuliRingE12 R)),
+                (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+                  (ModuliRingE12 R))).affineOpens).1) Γ(Y.base, V.1))) =
+          projModelπ ((adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V
+            i hVi).W) from projModelπ_congr hWeq.symm,
+        (adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi).compat_π]
+      exact ((tautPresentation (universalShortNF R)).transport
+        (classifyingEllHom Y b h2 h3).baseHom (classifyingEllHom Y b h2 h3).top
+        (classifyingEllHom Y b h2 h3).isPullback (classifyingEllHom Y b h2 h3).zero_w
+        _).compat_π
+  rw [hkey, Category.assoc, eqToHom_trans, eqToHom_refl, Category.comp_id]
+
 end ModularCurves

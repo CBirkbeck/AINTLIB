@@ -1,1 +1,1 @@
-FOCUS: [E12-A] basisUnitAt in NEW Moduli/AdaptedModel.lean — glue resLE(b_i)*transUnit(P|,P_i|) over the atlas cover via exists_unit_glue + pointwise refinement; then IsAdapted + spec lemmas. T-E12 decompose boarded.
+FOCUS: [E12-D4 rt1] omegaBasisMap (classifyingEllHom Y b h2 h3) (universalOmegaBasis R) = b — pulled basis IsAdapted to adaptedLocal via IsAdapted.transport(isAdapted_restrict_ofPresentation) + rt1-core (transVC_transport_taut DONE ✓); then u-torsor: existsUnique_unit_smul + basisUnitAt_smul ⟹ u=1. rt1-core GREEN+axiom-clean, committed.
