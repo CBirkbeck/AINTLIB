@@ -296,12 +296,15 @@ private theorem coreData_qinv_full {P Q : ModuliProblem R} {G : Type u} [Group G
 
 /-- **Descent of a `G`-deck-invariant `Ell/R`-morphism along the δ-torsor** (KM p. 115). A morphism
 `g : Y.pullbackAlong td.f ⟶ X` invariant under the deck action `ρ γ` descends through the torsor
-projection `π_td = Y.pullbackAlongπ td.f`: the base map descends by `existsUnique_descent_of_torsor`,
-the curve top by the same on the fppf curve-torsor `pullback.snd td.f Y.curve.π` (base change of `td.f`,
+projection `π_td = Y.pullbackAlongπ td.f`: the base map descends by
+`existsUnique_descent_of_torsor`,
+the curve top by the same on the fppf curve-torsor `pullback.snd td.f Y.curve.π` (base change of
+`td.f`,
 `isIso_torsorCompare_pullback`), and `base_w`/`zero_w` by `td.f` being an epimorphism.
 
 VERIFIED here except the cartesian square `IsPullback vtop Y.curve.π X.curve.π f₀`, which is the
-fppf descent of `g.isPullback` along `td.f` (the comparison `Y.curve.E ⟶ X.curve.E ×_{X.base} Y.base`
+fppf descent of `g.isPullback` along `td.f` (the comparison `Y.curve.E ⟶ X.curve.E ×_{X.base}
+Y.base`
 is an iso by `isIso_of_isPullback_of_fppf`, its base change along `td.f` being `g.top` via the
 `pullbackRightPullbackFstIso` pasting and `g.isPullback.isoPullback`). -/
 private theorem descend_deckInvariant {Q : ModuliProblem R} {G : Type u} [Group G] [Finite G]
@@ -363,7 +366,8 @@ private theorem descend_deckInvariant {Q : ModuliProblem R} {G : Type u} [Group 
     have h := hvtop_raw
     rw [← pullbackSymmetry_hom_comp_fst td.f Y.curve.π, Category.assoc] at h
     exact (cancel_epi (pullbackSymmetry td.f Y.curve.π).hom).mp h
-  -- (c) `base_w`/`zero_w` by `td.f`-epi; the cartesian square is the fppf descent of `g.isPullback`.
+  -- (c) `base_w`/`zero_w` by `td.f`-epi; the cartesian square is the fppf descent of
+  -- `g.isPullback`.
   have hbw : f₀ ≫ X.structMap = Y.structMap := by
     refine (cancel_epi td.f).mp ?_
     rw [← Category.assoc, hf₀]; exact g.base_w
@@ -392,7 +396,8 @@ private theorem descend_deckInvariant {Q : ModuliProblem R} {G : Type u} [Group 
 `moduliProblem_fppf_separated`, `Moduli/Stack.lean`): restriction of `P`-values along the fppf
 projection `Y.pullbackAlongπ f` (for `f` flat + locally of finite presentation + surjective) is
 injective. (Re-stated here because `Stack.lean` is transitively unimportable through an unrelated
-`GammaH` breakage; the proof is the classifying-section `cancel_epi` of `moduliProblem_fppf_separated`
+`GammaH` breakage; the proof is the classifying-section `cancel_epi` of
+`moduliProblem_fppf_separated`
 composed with the identity-chart iso `Y ≅ Y.pullbackAlong (𝟙 Y.base)`.) -/
 private theorem P_pullbackAlongπ_inj {P : ModuliProblem R} (hPrr : P.RelativelyRepresentable)
     {Y : EllObj R} {Z : Scheme.{u}} (f : Z ⟶ Y.base)
@@ -451,7 +456,7 @@ theorem coreData_surjective (P Q : ModuliProblem R) {G : Type u} [Group G] [Fini
   haveI : Flat td.f := inferInstance
   haveI : QuasiCompact td.f := inferInstance
   have htorsZ : IsIso (torsorCompare td.f td.σZ td.over_base) := td.torsor
-  set fb : td.Z ⟶ cd.XM.base := bijClassBase cd td α with hfb
+  set fb : td.Z ⟶ cd.XM.base := bijClassBase cd td α
   -- (i)+(ii) descend `fb ≫ q.baseHom` (invariant) through `td.f` to `f₀ : Y.base ⟶ X₀.base`.
   -- Equivariance: `σZ.hom γ ≫ fb = fb ≫ (A γ).hom.baseHom` (ofAut inverts, so `(A γ).hom.baseHom`
   -- is the moduli action `σ.hom γ⁻¹`); then `q.baseHom`-invariance follows from `cd.hqinv`.
@@ -483,7 +488,8 @@ theorem coreData_surjective (P Q : ModuliProblem R) {G : Type u} [Group G] [Fini
   set f_ell : Y.pullbackAlong td.f ⟶ cd.XM :=
     cd.rM.homEquiv.symm (P.map (Y.pullbackAlongπ td.f).op α,
       td.eqv td.f ⟨𝟙 td.Z, Category.id_comp td.f⟩) with hf_ell
-  -- Curve-level `q`-invariance: `(A γ).hom ≫ q = q` at the full Ell/R level (from `coreData_qinv_full`).
+  -- Curve-level `q`-invariance: `(A γ).hom ≫ q = q` at the full Ell/R level (from
+  -- `coreData_qinv_full`).
   have hAq : ∀ γ, (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom ≫ cd.q = cd.q := by
     intro γ
     have hqi := coreData_qinv_full cd hrig γ
