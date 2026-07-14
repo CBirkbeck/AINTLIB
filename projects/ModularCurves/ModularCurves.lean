@@ -54,6 +54,8 @@ import ModularCurves.ForMathlib.ProjIntegral
 import ModularCurves.ForMathlib.SpecQuotientIso
 import ModularCurves.ForMathlib.SurjectiveFreeSameRank
 import ModularCurves.ForMathlib.TopCatSheafRestrict
+import ModularCurves.ForMathlib.PresheafPullbackCompMonoidal
+import ModularCurves.ForMathlib.PullbackCompMonoidal
 import ModularCurves.ForMathlib.PullbackLocalAtTarget
 import ModularCurves.ForMathlib.PullbackUnitMonoidal
 import ModularCurves.ForMathlib.QuotientCurveModel

@@ -32,6 +32,96 @@ universe v₁ v₂ v₃ u₁ u₂ u₃ u w w'
 
 open CategoryTheory MonoidalCategory Functor
 
+namespace CategoryTheory
+
+variable {C : Type u₁} {D : Type u₂}
+  [Category.{v₁} C] [Category.{v₂} D]
+  [MonoidalCategory C] [MonoidalCategory D]
+  {L₁ L₂ : C ⥤ D} {R₁ R₂ : D ⥤ C}
+
+/-- Taking the mate of a monoidal natural transformation between right adjoints
+produces a monoidal natural transformation between the corresponding left adjoints. -/
+theorem conjugateEquiv_symm_isMonoidal
+    (adj₁ : L₁ ⊣ R₁) (adj₂ : L₂ ⊣ R₂)
+    [L₁.Monoidal] [L₂.Monoidal] [R₁.LaxMonoidal] [R₂.LaxMonoidal]
+    (hadj₁ : adj₁.IsMonoidal) (hadj₂ : adj₂.IsMonoidal)
+    (α : R₁ ⟶ R₂) (hα : α.IsMonoidal) :
+    ((conjugateEquiv adj₁ adj₂).symm α).IsMonoidal := by
+  letI := hadj₁
+  letI := hadj₂
+  letI := hα
+  let β : L₂ ⟶ L₁ :=
+    L₂.leftUnitor.inv ≫
+      Functor.whiskerRight adj₁.unit L₂ ≫
+      (Functor.associator L₁ R₁ L₂).hom ≫
+      Functor.whiskerLeft L₁ (Functor.whiskerRight α L₂) ≫
+      Functor.whiskerLeft L₁ adj₂.counit ≫
+      L₁.rightUnitor.hom
+  have hβ : β.IsMonoidal := by
+    dsimp only [β]
+    infer_instance
+  rw [show (conjugateEquiv adj₁ adj₂).symm α = β by
+    ext X
+    rw [conjugateEquiv_symm_apply_app]
+    simp only [β, NatTrans.comp_app, Functor.leftUnitor_inv_app,
+      Functor.whiskerRight_app, Functor.associator_hom_app,
+      Functor.whiskerLeft_app, Functor.rightUnitor_hom_app]
+    erw [Category.id_comp, Category.id_comp, Category.comp_id]
+    rfl]
+  exact hβ
+
+variable {E : Type u₃} [Category.{v₃} E] [MonoidalCategory E]
+
+/-- Monoidality of a natural transformation can be checked after precomposition
+with a monoidal localization functor. -/
+theorem NatTrans.IsMonoidal.of_whiskerLeft_localization
+    (L : C ⥤ D) (W : MorphismProperty C) [L.IsLocalization W]
+    [W.ContainsIdentities] [L.Monoidal]
+    {F G : D ⥤ E} [F.Monoidal] [G.Monoidal]
+    (τ : F ⟶ G) (h : (Functor.whiskerLeft L τ).IsMonoidal) :
+    τ.IsMonoidal := by
+  letI := h
+  refine { unit := ?_, tensor := fun X Y ↦ ?_ }
+  · have hu := NatTrans.IsMonoidal.unit
+      (τ := Functor.whiskerLeft L τ)
+    change (Functor.LaxMonoidal.ε F ≫
+        F.map (Functor.LaxMonoidal.ε L)) ≫
+      τ.app (L.obj (𝟙_ C)) =
+        Functor.LaxMonoidal.ε G ≫
+          G.map (Functor.LaxMonoidal.ε L) at hu
+    apply (cancel_mono (G.map (Functor.LaxMonoidal.ε L))).1
+    rw [Category.assoc, ← τ.naturality]
+    simpa only [Category.assoc] using hu
+  · let lhs : MonoidalCategory.curriedTensorPre F ⟶
+        MonoidalCategory.curriedTensorPost G :=
+      (Functor.curriedTensorPreIsoPost F).hom ≫
+        MonoidalCategory.curriedTensorPostFunctor.map τ
+    let rhs : MonoidalCategory.curriedTensorPre F ⟶
+        MonoidalCategory.curriedTensorPost G :=
+      MonoidalCategory.curriedTensorPreFunctor.map τ ≫
+        (Functor.curriedTensorPreIsoPost G).hom
+    have hcurried : lhs = rhs := by
+      apply Localization.natTrans₂_ext L L W W
+      intro A B
+      change Functor.LaxMonoidal.μ F (L.obj A) (L.obj B) ≫
+          τ.app (L.obj A ⊗ L.obj B) =
+        (τ.app (L.obj A) ⊗ₘ τ.app (L.obj B)) ≫
+          Functor.LaxMonoidal.μ G (L.obj A) (L.obj B)
+      apply (cancel_mono (G.map (Functor.LaxMonoidal.μ L A B))).1
+      rw [Category.assoc, ← τ.naturality]
+      have ht := NatTrans.IsMonoidal.tensor
+        (τ := Functor.whiskerLeft L τ) A B
+      simp only [Functor.LaxMonoidal.comp_μ,
+        Functor.whiskerLeft_app] at ht
+      rw [Category.assoc] at ht
+      conv_rhs at ht => rw [← Category.assoc]
+      change @Eq (F.obj (L.obj A) ⊗ F.obj (L.obj B) ⟶
+        G.obj (L.obj (A ⊗ B))) _ _ at ht
+      exact ht
+    exact NatTrans.congr_app (NatTrans.congr_app hcurried X) Y
+
+end CategoryTheory
+
 namespace PresheafOfModules
 
 section RestrictScalarsLax
