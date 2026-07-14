@@ -3,8 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.EllipticCurve.Basic
+import Mathlib.Algebra.Polynomial.Basis
+import Mathlib.LinearAlgebra.Basis.Submodule
 import Mathlib.RingTheory.AdjoinRoot
+import Mathlib.RingTheory.AlgebraTower
+import ModularCurves.EllipticCurve.Basic
 
 /-!
 # The pole-order filtration and global sections of the projective Weierstrass model
@@ -222,6 +225,116 @@ theorem linearIndependent_one_coordX_coordY (W : WeierstrassCurve R) :
     simpa using congrArg (Polynomial.coeff · 0) hq
   intro i
   fin_cases i <;> assumption
+
+private abbrev PoleOrderIndex (n : ℕ) := Fin (n / 2 + 1) ⊕ Fin ((n - 1) / 2)
+
+private noncomputable def coordinateRingMonomialBasis (W : WeierstrassCurve R) :
+    Module.Basis (ℕ × Fin 2) R W.toAffine.CoordinateRing :=
+  (Polynomial.basisMonomials R).smulTower
+    (WeierstrassCurve.Affine.CoordinateRing.basis W.toAffine)
+
+private def poleOrderIndexEmbedding (n : ℕ) : PoleOrderIndex n ↪ ℕ × Fin 2 where
+  toFun
+    | Sum.inl i => (i, 0)
+    | Sum.inr i => (i, 1)
+  inj' := by
+    intro i j h
+    rcases i with i | i <;> rcases j with j | j
+    · simp only [Sum.inl.injEq]
+      exact Fin.ext (congrArg Prod.fst h)
+    · have := congrArg (fun q => (q.2 : ℕ)) h
+      simp at this
+    · have := congrArg (fun q => (q.2 : ℕ)) h
+      simp at this
+    · simp only [Sum.inr.injEq]
+      exact Fin.ext (congrArg Prod.fst h)
+
+@[simp]
+private lemma poleOrderIndexEmbedding_inl (n : ℕ) (i : Fin (n / 2 + 1)) :
+    poleOrderIndexEmbedding n (Sum.inl i) = ((i : ℕ), (0 : Fin 2)) := rfl
+
+@[simp]
+private lemma poleOrderIndexEmbedding_inr (n : ℕ) (i : Fin ((n - 1) / 2)) :
+    poleOrderIndexEmbedding n (Sum.inr i) = ((i : ℕ), (1 : Fin 2)) := rfl
+
+private noncomputable def poleOrderMonomial (W : WeierstrassCurve R) (n : ℕ) :
+    PoleOrderIndex n → W.toAffine.CoordinateRing
+  | Sum.inl i => coordX W ^ (i : ℕ)
+  | Sum.inr i => coordX W ^ (i : ℕ) * coordY W
+
+private lemma coordinateRingMonomialBasis_comp_embedding
+    (W : WeierstrassCurve R) (n : ℕ) :
+    coordinateRingMonomialBasis W ∘ poleOrderIndexEmbedding n = poleOrderMonomial W n := by
+  funext i
+  rcases i with i | i
+  · simp only [Function.comp_apply, poleOrderIndexEmbedding_inl, poleOrderMonomial,
+      coordinateRingMonomialBasis, Module.Basis.smulTower_apply,
+      Polynomial.coe_basisMonomials,
+      WeierstrassCurve.Affine.CoordinateRing.basis_zero]
+    rw [WeierstrassCurve.Affine.CoordinateRing.smul, mul_one]
+    change AdjoinRoot.mk W.toAffine.polynomial
+        (Polynomial.C (Polynomial.monomial (i : ℕ) 1)) = coordX W ^ (i : ℕ)
+    rw [← Polynomial.C_mul_X_pow_eq_monomial, map_mul, map_pow]
+    simp only [map_one, one_mul]
+    rfl
+  · simp only [Function.comp_apply, poleOrderIndexEmbedding_inr, poleOrderMonomial,
+      coordinateRingMonomialBasis, Module.Basis.smulTower_apply,
+      Polynomial.coe_basisMonomials,
+      WeierstrassCurve.Affine.CoordinateRing.basis_one]
+    rw [WeierstrassCurve.Affine.CoordinateRing.smul]
+    change AdjoinRoot.mk W.toAffine.polynomial
+        (Polynomial.C (Polynomial.monomial (i : ℕ) 1)) * coordY W =
+      coordX W ^ (i : ℕ) * coordY W
+    rw [← Polynomial.C_mul_X_pow_eq_monomial, map_mul, map_pow]
+    simp only [map_one, one_mul]
+    rfl
+
+private lemma range_poleOrderMonomial (W : WeierstrassCurve R) (n : ℕ) :
+    Set.range (poleOrderMonomial W n) =
+      {g | ∃ i : ℕ, 2 * i ≤ n ∧ g = coordX W ^ i} ∪
+        {g | ∃ i : ℕ, 2 * i + 3 ≤ n ∧ g = coordX W ^ i * coordY W} := by
+  ext g
+  constructor
+  · rintro ⟨i, rfl⟩
+    rcases i with i | i
+    · exact Or.inl ⟨i, by omega, rfl⟩
+    · exact Or.inr ⟨i, by omega, rfl⟩
+  · rintro (⟨i, hi, rfl⟩ | ⟨i, hi, rfl⟩)
+    · exact ⟨Sum.inl ⟨i, by omega⟩, rfl⟩
+    · exact ⟨Sum.inr ⟨i, by omega⟩, rfl⟩
+
+private noncomputable def poleOrderFiltrationBasisAux (W : WeierstrassCurve R) (n : ℕ) :
+    Module.Basis (PoleOrderIndex n) R (poleOrderFiltration W n) := by
+  let b := coordinateRingMonomialBasis W
+  let e := poleOrderIndexEmbedding n
+  have hli : LinearIndependent R (poleOrderMonomial W n) := by
+    rw [← coordinateRingMonomialBasis_comp_embedding W n]
+    exact b.linearIndependent.comp e e.injective
+  have hspan : Submodule.span R (Set.range (poleOrderMonomial W n)) =
+      poleOrderFiltration W n := by
+    rw [range_poleOrderMonomial]
+    rfl
+  exact (Module.Basis.span hli).map (LinearEquiv.ofEq _ _ hspan)
+
+private lemma card_poleOrderIndex {n : ℕ} (hn : 1 ≤ n) :
+    Fintype.card (PoleOrderIndex n) = n := by
+  simp only [PoleOrderIndex, Fintype.card_sum, Fintype.card_fin]
+  omega
+
+/-- For `n ≥ 1`, the monomials `xⁱ` of pole order `2i` and `xⁱy` of pole order
+`2i + 3` form an `R`-basis of the pole-order filtration `Fₙ`. -/
+noncomputable def poleOrderFiltrationBasis (W : WeierstrassCurve R) {n : ℕ} (hn : 1 ≤ n) :
+    Module.Basis (Fin n) R (poleOrderFiltration W n) :=
+  (poleOrderFiltrationBasisAux W n).reindex
+    (Fintype.equivFinOfCardEq (card_poleOrderIndex hn))
+
+/-- For a nonzero base ring and `n ≥ 1`, the pole-order filtration `Fₙ` has rank `n`. -/
+theorem poleOrderFiltration_finrank [Nontrivial R] (W : WeierstrassCurve R)
+    {n : ℕ} (hn : 1 ≤ n) : Module.finrank R (poleOrderFiltration W n) = n := by
+  let b := poleOrderFiltrationBasis W hn
+  letI : Module.Free R (poleOrderFiltration W n) := Module.Free.of_basis b
+  letI : Module.Finite R (poleOrderFiltration W n) := Module.Finite.of_basis b
+  rw [Module.finrank_eq_card_basis b, Fintype.card_fin]
 
 /-- The `s = X/Y` coordinate index of the infinity chart. -/
 abbrev infChartS : {j : Fin 3 // j ≠ 1} := ⟨0, by decide⟩

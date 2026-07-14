@@ -9,8 +9,11 @@ import ModularCurves.Picard.DualPullback.Iso
 import ModularCurves.Picard.DualRestrict
 import ModularCurves.Picard.Pic
 import ModularCurves.Picard.UnitPullback
+import ModularCurves.ForMathlib.PullbackCompMonoidal
 import ModularCurves.ForMathlib.PullbackTensorGeneral
 import ModularCurves.ForMathlib.PullbackTensorMonoidal
+import ModularCurves.ForMathlib.PullbackUnitMonoidal
+import ModularCurves.Picard.DualPullback.TrivializationRestriction
 import Mathlib.Algebra.Category.ModuleCat.Kernels
 import Mathlib.Algebra.Category.ModuleCat.Presheaf.Sheafification
 import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackFree
@@ -27,7 +30,7 @@ identify this kernel sheaf locally with the structure sheaf.
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory SheafOfModules
   TopologicalSpace
 
-universe u
+universe v u
 
 set_option backward.isDefEq.respectTransparency false in
 local instance (X : Scheme.{u}) :
@@ -794,6 +797,20 @@ noncomputable def affineOpenAmbientSection {Y : Scheme.{u}} (U : Y.affineOpens)
     ((U.1.ι.appIso ⊤).inv r)
 
 @[simp]
+theorem affineOpenAmbientSection_add {Y : Scheme.{u}} (U : Y.affineOpens)
+    (r s : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))) :
+    affineOpenAmbientSection U (r + s) =
+      affineOpenAmbientSection U r + affineOpenAmbientSection U s := by
+  unfold affineOpenAmbientSection
+  rw [map_add, map_add]
+
+@[simp]
+theorem affineOpenAmbientSection_zero {Y : Scheme.{u}} (U : Y.affineOpens) :
+    affineOpenAmbientSection U 0 = 0 := by
+  unfold affineOpenAmbientSection
+  rw [map_zero, map_zero]
+
+@[simp]
 theorem affineOpenTopSection_ambientSection {Y : Scheme.{u}}
     (U : Y.affineOpens) (r : Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens))) :
     affineOpenTopSection U (affineOpenAmbientSection U r) = r := by
@@ -811,6 +828,17 @@ theorem affineOpenTopSection_ambientSection {Y : Scheme.{u}}
   rw [hmap]
   change (U.1.ι.appIso ⊤).hom ((U.1.ι.appIso ⊤).inv r) = r
   exact Iso.inv_hom_id_apply _ r
+
+@[simp]
+theorem affineOpenAmbientSection_topSection {Y : Scheme.{u}}
+    (U : Y.affineOpens) (r : Γ(Y, U.1)) :
+    affineOpenAmbientSection U (affineOpenTopSection U r) = r := by
+  rw [affineOpenAmbientSection, affineOpenTopSection]
+  rw [Iso.hom_inv_id_apply]
+  change (Y.presheaf.map (eqToHom U.1.ι_image_top).op ≫
+    Y.presheaf.map (homOfLE U.1.ι_image_top.ge).op) r = r
+  rw [← Y.presheaf.map_comp]
+  simp
 
 /-- The ambient affine section obtained by pulling a chart section through a
 restricted morphism. -/
@@ -1780,6 +1808,59 @@ private noncomputable def monoidalUnitObjIso (X : Scheme.{u}) :
     𝟙_ X.Modules ≅ Scheme.Modules.unitObj X :=
   Scheme.Modules.sheafifyValIso (Scheme.Modules.unitObj X)
 
+/-- The explicit structure module is the monoidal unit, so its tensor square is
+canonically the structure module again. -/
+private noncomputable def unitObjTensorIso (X : Scheme.{u}) :
+    Scheme.Modules.unitObj X ⊗ Scheme.Modules.unitObj X ≅
+      Scheme.Modules.unitObj X :=
+  ((monoidalUnitObjIso X).symm ⊗ᵢ (monoidalUnitObjIso X).symm) ≪≫
+    λ_ (𝟙_ X.Modules) ≪≫ monoidalUnitObjIso X
+
+/-- Conjugating the tensor of two endomorphisms through an identification with the
+monoidal unit gives their composite. -/
+private theorem tensorUnitIso_hom_naturality
+    {D : Type u} [Category.{v} D] [MonoidalCategory D]
+    {X : D} (e : 𝟙_ D ≅ X) (f g : X ⟶ X) :
+    (f ⊗ₘ g) ≫ (e.inv ⊗ₘ e.inv) ≫ (λ_ (𝟙_ D)).hom ≫ e.hom =
+      (e.inv ⊗ₘ e.inv) ≫ (λ_ (𝟙_ D)).hom ≫ e.hom ≫ f ≫ g := by
+  let a : 𝟙_ D ⟶ 𝟙_ D := e.hom ≫ f ≫ e.inv
+  let b : 𝟙_ D ⟶ 𝟙_ D := e.hom ≫ g ≫ e.inv
+  have hf : f ≫ e.inv = e.inv ≫ a := by
+    simp [a]
+  have hg : g ≫ e.inv = e.inv ≫ b := by
+    simp [b]
+  have hab : (a ⊗ₘ b) ≫ (λ_ (𝟙_ D)).hom =
+      (λ_ (𝟙_ D)).hom ≫ a ≫ b := by
+    rw [tensorHom_def, Category.assoc, leftUnitor_naturality]
+    rw [unitors_equal, ← Category.assoc, rightUnitor_naturality]
+    rw [Category.assoc]
+  rw [← Category.assoc, tensorHom_comp_tensorHom]
+  rw [hf, hg, ← tensorHom_comp_tensorHom]
+  rw [Category.assoc]
+  rw [← Category.assoc (a ⊗ₘ b) (λ_ (𝟙_ D)).hom e.hom, hab]
+  simp [a, b, Category.assoc]
+
+/-- Under `𝒪_X ⊗ 𝒪_X ≅ 𝒪_X`, tensoring multiplication by `r` and by `s`
+is multiplication by `r * s`. -/
+private theorem unitObjTensorIso_hom_comp_scalars (X : Scheme.{u})
+    (r s : Γ(X, (⊤ : X.Opens))) :
+    (unitEndomorphismOfTopSection r ⊗ₘ
+        unitEndomorphismOfTopSection s) ≫ (unitObjTensorIso X).hom =
+      (unitObjTensorIso X).hom ≫ unitEndomorphismOfTopSection (r * s) := by
+  change (unitEndomorphismOfTopSection r ⊗ₘ
+      unitEndomorphismOfTopSection s) ≫
+      ((monoidalUnitObjIso X).inv ⊗ₘ (monoidalUnitObjIso X).inv) ≫
+        (λ_ (𝟙_ X.Modules)).hom ≫ (monoidalUnitObjIso X).hom =
+    ((monoidalUnitObjIso X).inv ⊗ₘ (monoidalUnitObjIso X).inv) ≫
+      (λ_ (𝟙_ X.Modules)).hom ≫ (monoidalUnitObjIso X).hom ≫
+        unitEndomorphismOfTopSection (r * s)
+  calc
+    _ = ((monoidalUnitObjIso X).inv ⊗ₘ (monoidalUnitObjIso X).inv) ≫
+        (λ_ (𝟙_ X.Modules)).hom ≫ (monoidalUnitObjIso X).hom ≫
+          unitEndomorphismOfTopSection r ≫ unitEndomorphismOfTopSection s :=
+      tensorUnitIso_hom_naturality (monoidalUnitObjIso X) _ _
+    _ = _ := by rw [unitEndomorphismOfTopSection_comp]
+
 /-- The localized coherent tensor agrees with the explicit sheafified tensor used by
 the cover-local invertibility API. -/
 private noncomputable def monoidalTensorObjIso {X : Scheme.{u}} (M N : X.Modules) :
@@ -1790,6 +1871,1546 @@ private noncomputable def monoidalTensorObjIso {X : Scheme.{u}} (M N : X.Modules
       (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj))
       (PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj))
       (Iso.refl _) M.val N.val
+
+/-- Restriction along an open immersion preserves the localized monoidal unit. -/
+private noncomputable def restrictMonoidalUnitIso
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f] :
+    (Scheme.Modules.restrictFunctor f).obj (𝟙_ Y.Modules) ≅ 𝟙_ X.Modules := by
+  letI : (Scheme.Modules.pullback f).Monoidal :=
+    Scheme.Modules.pullbackMonoidal f
+  exact (Scheme.Modules.restrictFunctorIsoPullback f).app (𝟙_ Y.Modules) ≪≫
+    (Functor.Monoidal.εIso (Scheme.Modules.pullback f)).symm
+
+/-- Restriction along an open immersion preserves the localized tensor product. -/
+private noncomputable def restrictMonoidalTensorIso
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f]
+    (M N : Y.Modules) :
+    (Scheme.Modules.restrictFunctor f).obj (M ⊗ N) ≅
+      (Scheme.Modules.restrictFunctor f).obj M ⊗
+        (Scheme.Modules.restrictFunctor f).obj N := by
+  letI : (Scheme.Modules.pullback f).Monoidal :=
+    Scheme.Modules.pullbackMonoidal f
+  exact (Scheme.Modules.restrictFunctorIsoPullback f).app (M ⊗ N) ≪≫
+    (Functor.Monoidal.μIso (Scheme.Modules.pullback f) M N).symm ≪≫
+    ((Scheme.Modules.restrictFunctorIsoPullback f).symm.app M ⊗ᵢ
+      (Scheme.Modules.restrictFunctorIsoPullback f).symm.app N)
+
+/-- A trivialization of the simple-pole sheaf on an open induces compatible
+trivializations of all of its tensor powers on that open. -/
+noncomputable def sectionPoleSheafPowerTrivialization
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.Opens)
+    (e : (sectionPoleSheaf π z hz).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme) :
+    ∀ n : ℕ,
+      (sectionPoleSheafPower π z hz n).restrict U.ι ≅
+        Scheme.Modules.unitObj U.toScheme
+  | 0 => restrictMonoidalUnitIso U.ι ≪≫ monoidalUnitObjIso U.toScheme
+  | n + 1 =>
+      restrictMonoidalTensorIso U.ι
+          (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≪≫
+        (sectionPoleSheafPowerTrivialization z hz U e n ⊗ᵢ e) ≪≫
+        unitObjTensorIso U.toScheme
+
+/-- A scalar transition between simple-pole trivializations raises to its `n`th
+power on the induced trivializations of `𝒪(n[0])`. -/
+theorem sectionPoleSheafPowerTrivialization_hom_eq_comp_scalar
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.Opens)
+    (e g : (sectionPoleSheaf π z hz).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme)
+    (r : Γ(U.toScheme, (⊤ : U.toScheme.Opens)))
+    (h : e.hom = g.hom ≫ unitEndomorphismOfTopSection r) :
+    ∀ n : ℕ,
+      (sectionPoleSheafPowerTrivialization z hz U e n).hom =
+        (sectionPoleSheafPowerTrivialization z hz U g n).hom ≫
+          unitEndomorphismOfTopSection (r ^ n)
+  | 0 => by
+      rw [pow_zero, unitEndomorphismOfTopSection_one, Category.comp_id]
+      rfl
+  | n + 1 => by
+      have hn := sectionPoleSheafPowerTrivialization_hom_eq_comp_scalar
+        z hz U e g r h n
+      simp only [sectionPoleSheafPowerTrivialization, Iso.trans_hom,
+        MonoidalCategory.tensorIso_hom, Category.assoc]
+      rw [hn, h]
+      rw [← MonoidalCategory.tensorHom_comp_tensorHom]
+      rw [Category.assoc]
+      slice_lhs 3 4 => rw [unitObjTensorIso_hom_comp_scalars]
+      rw [pow_succ]
+
+section PolePowerRestriction
+
+noncomputable local instance {X Y : Scheme.{u}} (f : X ⟶ Y) :
+    (Scheme.Modules.pullback f).Monoidal :=
+  Scheme.Modules.pullbackMonoidal f
+
+/-- The tensor-power trivialization formed directly in the pullback functor. -/
+private noncomputable def sectionPoleSheafPowerPullbackTrivialization
+    {C S T : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (f : T ⟶ C)
+    (e : (Scheme.Modules.pullback f).obj (sectionPoleSheaf π z hz) ≅
+      Scheme.Modules.unitObj T) :
+    ∀ n : ℕ,
+      (Scheme.Modules.pullback f).obj (sectionPoleSheafPower π z hz n) ≅
+        Scheme.Modules.unitObj T
+  | 0 =>
+      (Functor.Monoidal.εIso (Scheme.Modules.pullback f)).symm ≪≫
+        monoidalUnitObjIso T
+  | n + 1 =>
+      (Functor.Monoidal.μIso (Scheme.Modules.pullback f)
+        (sectionPoleSheafPower π z hz n)
+        (sectionPoleSheaf π z hz)).symm ≪≫
+      (sectionPoleSheafPowerPullbackTrivialization z hz f e n ⊗ᵢ e) ≪≫
+      unitObjTensorIso T
+
+/-- The restriction-functor pole-power trivialization agrees with its direct
+pullback-functor presentation. -/
+private theorem sectionPoleSheafPowerTrivialization_eq_pullback
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (U : C.Opens)
+    (e : (sectionPoleSheaf π z hz).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme) :
+    ∀ n : ℕ,
+      sectionPoleSheafPowerTrivialization z hz U e n =
+        (Scheme.Modules.restrictFunctorIsoPullback U.ι).app
+            (sectionPoleSheafPower π z hz n) ≪≫
+          sectionPoleSheafPowerPullbackTrivialization z hz U.ι
+            ((Scheme.Modules.restrictFunctorIsoPullback U.ι).symm.app
+                (sectionPoleSheaf π z hz) ≪≫ e) n
+  | 0 => by
+      rfl
+  | n + 1 => by
+      apply Iso.ext
+      simp only [sectionPoleSheafPowerTrivialization,
+        sectionPoleSheafPowerPullbackTrivialization, Iso.trans_hom,
+        MonoidalCategory.tensorIso_hom]
+      rw [sectionPoleSheafPowerTrivialization_eq_pullback z hz U e n]
+      change
+        ((Scheme.Modules.restrictFunctorIsoPullback U.ι).hom.app
+              (sectionPoleSheafPower π z hz n ⊗ sectionPoleSheaf π z hz) ≫
+            Functor.OplaxMonoidal.δ (Scheme.Modules.pullback U.ι)
+              (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≫
+            ((Scheme.Modules.restrictFunctorIsoPullback U.ι).inv.app
+                (sectionPoleSheafPower π z hz n) ⊗ₘ
+              (Scheme.Modules.restrictFunctorIsoPullback U.ι).inv.app
+                (sectionPoleSheaf π z hz))) ≫
+          (((Scheme.Modules.restrictFunctorIsoPullback U.ι).hom.app
+                  (sectionPoleSheafPower π z hz n) ≫
+                (sectionPoleSheafPowerPullbackTrivialization z hz U.ι
+                  ((Scheme.Modules.restrictFunctorIsoPullback U.ι).symm.app
+                    (sectionPoleSheaf π z hz) ≪≫ e) n).hom) ⊗ₘ e.hom) ≫
+          (unitObjTensorIso U.toScheme).hom =
+        (Scheme.Modules.restrictFunctorIsoPullback U.ι).hom.app
+              (sectionPoleSheafPower π z hz n ⊗ sectionPoleSheaf π z hz) ≫
+            Functor.OplaxMonoidal.δ (Scheme.Modules.pullback U.ι)
+              (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≫
+            (((sectionPoleSheafPowerPullbackTrivialization z hz U.ι
+                  ((Scheme.Modules.restrictFunctorIsoPullback U.ι).symm.app
+                    (sectionPoleSheaf π z hz) ≪≫ e) n).hom) ⊗ₘ
+              ((Scheme.Modules.restrictFunctorIsoPullback U.ι).inv.app
+                (sectionPoleSheaf π z hz) ≫ e.hom)) ≫
+          (unitObjTensorIso U.toScheme).hom
+      simp only [Category.assoc]
+      slice_lhs 3 4 => rw [MonoidalCategory.tensorHom_comp_tensorHom]
+      simp
+
+/-- The direct pullback tensor-power trivialization with values in the monoidal
+unit. -/
+private noncomputable def sectionPoleSheafPowerPullbackMonoidalTrivialization
+    {C S T : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (f : T ⟶ C)
+    (e : (Scheme.Modules.pullback f).obj (sectionPoleSheaf π z hz) ≅
+      𝟙_ T.Modules) :
+    ∀ n : ℕ,
+      (Scheme.Modules.pullback f).obj (sectionPoleSheafPower π z hz n) ≅
+        𝟙_ T.Modules
+  | 0 => (Functor.Monoidal.εIso (Scheme.Modules.pullback f)).symm
+  | n + 1 =>
+      (Functor.Monoidal.μIso (Scheme.Modules.pullback f)
+        (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz)).symm ≪≫
+      (sectionPoleSheafPowerPullbackMonoidalTrivialization z hz f e n ⊗ᵢ e) ≪≫
+      λ_ (𝟙_ T.Modules)
+
+/-- The induced simple-pole trivialization for a composite monoidal pullback. -/
+private noncomputable def sectionPoleSheafPowerCompMonoidalTrivialization
+    {C S T U : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (f : T ⟶ C) (g : U ⟶ T) (h : U ⟶ C)
+    (α : Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g ≅
+      Scheme.Modules.pullback h)
+    (e : (Scheme.Modules.pullback f).obj (sectionPoleSheaf π z hz) ≅
+      𝟙_ T.Modules) :
+    (Scheme.Modules.pullback h).obj (sectionPoleSheaf π z hz) ≅
+      𝟙_ U.Modules :=
+  (α.app (sectionPoleSheaf π z hz)).symm ≪≫
+    (Scheme.Modules.pullback g).mapIso e ≪≫
+      (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).symm
+
+/-- Monoidal pullback composition commutes with the recursively induced
+tensor-power trivializations. -/
+private theorem sectionPoleSheafPowerPullbackMonoidalTrivialization_comp
+    {C S T U : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (f : T ⟶ C) (g : U ⟶ T) (h : U ⟶ C)
+    (α : Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g ≅
+      Scheme.Modules.pullback h) [α.hom.IsMonoidal]
+    (e : (Scheme.Modules.pullback f).obj (sectionPoleSheaf π z hz) ≅
+      𝟙_ T.Modules) :
+    ∀ n : ℕ,
+      sectionPoleSheafPowerPullbackMonoidalTrivialization z hz h
+          (sectionPoleSheafPowerCompMonoidalTrivialization
+            z hz f g h α e) n =
+        (α.app (sectionPoleSheafPower π z hz n)).symm ≪≫
+          (Scheme.Modules.pullback g).mapIso
+            (sectionPoleSheafPowerPullbackMonoidalTrivialization
+              z hz f e n) ≪≫
+          (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).symm
+  | 0 => by
+      apply Iso.ext
+      simp only [sectionPoleSheafPowerPullbackMonoidalTrivialization,
+        sectionPoleSheafPower, Iso.trans_hom, Iso.symm_hom,
+        Functor.mapIso_hom]
+      have hunit := NatTrans.IsMonoidal.unit (τ := α.hom)
+      rw [Functor.LaxMonoidal.comp_ε] at hunit
+      simp only [Category.assoc] at hunit
+      change (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).hom ≫
+          (Scheme.Modules.pullback g).map
+              (Functor.Monoidal.εIso (Scheme.Modules.pullback f)).hom ≫
+            α.hom.app (𝟙_ C.Modules) =
+        (Functor.Monoidal.εIso (Scheme.Modules.pullback h)).hom at hunit
+      apply (cancel_epi
+        (Functor.Monoidal.εIso (Scheme.Modules.pullback h)).hom).1
+      rw [Iso.hom_inv_id]
+      rw [← hunit]
+      simp only [Category.assoc]
+      slice_rhs 3 4 => erw [(α.app (𝟙_ C.Modules)).hom_inv_id]
+      erw [Category.id_comp]
+      slice_rhs 2 3 => erw [Functor.Monoidal.map_ε_η]
+      simp
+  | n + 1 => by
+      apply Iso.ext
+      simp only [sectionPoleSheafPowerPullbackMonoidalTrivialization,
+        sectionPoleSheafPower, Iso.trans_hom, Iso.symm_hom,
+        Functor.mapIso_hom, MonoidalCategory.tensorIso_hom]
+      rw [sectionPoleSheafPowerPullbackMonoidalTrivialization_comp
+        z hz f g h α e n]
+      have htensor := NatTrans.IsMonoidal.tensor (τ := α.hom)
+        (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz)
+      change (Functor.Monoidal.μIso
+          (Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g)
+          (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz)).hom ≫
+            (α.app (sectionPoleSheafPower π z hz n ⊗
+              sectionPoleSheaf π z hz)).hom =
+        ((α.app (sectionPoleSheafPower π z hz n)).hom ⊗ₘ
+            (α.app (sectionPoleSheaf π z hz)).hom) ≫
+          (Functor.Monoidal.μIso (Scheme.Modules.pullback h)
+            (sectionPoleSheafPower π z hz n)
+              (sectionPoleSheaf π z hz)).hom at htensor
+      have hhom_delta :
+          (α.app (sectionPoleSheafPower π z hz n ⊗
+              sectionPoleSheaf π z hz)).hom ≫
+              Functor.OplaxMonoidal.δ (Scheme.Modules.pullback h)
+                (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) =
+            Functor.OplaxMonoidal.δ
+                (Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g)
+                (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≫
+              ((α.app (sectionPoleSheafPower π z hz n)).hom ⊗ₘ
+                (α.app (sectionPoleSheaf π z hz)).hom) := by
+        apply (cancel_epi (Functor.Monoidal.μIso
+          (Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g)
+          (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz)).hom).1
+        slice_lhs 1 2 => rw [htensor]
+        slice_lhs 2 3 => erw [Functor.Monoidal.μ_δ]
+        slice_rhs 1 2 => erw [Functor.Monoidal.μ_δ]
+        simp
+      have hinv_delta :
+          (α.app (sectionPoleSheafPower π z hz n ⊗
+              sectionPoleSheaf π z hz)).inv ≫
+              Functor.OplaxMonoidal.δ
+                (Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g)
+                (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) =
+            Functor.OplaxMonoidal.δ (Scheme.Modules.pullback h)
+                (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≫
+              ((α.app (sectionPoleSheafPower π z hz n)).inv ⊗ₘ
+                (α.app (sectionPoleSheaf π z hz)).inv) := by
+        apply (cancel_epi (α.app (sectionPoleSheafPower π z hz n ⊗
+          sectionPoleSheaf π z hz)).hom).1
+        slice_lhs 1 2 => erw [(α.app (sectionPoleSheafPower π z hz n ⊗
+          sectionPoleSheaf π z hz)).hom_inv_id]
+        rw [Category.id_comp]
+        slice_rhs 1 2 => rw [hhom_delta]
+        slice_rhs 2 3 => erw [MonoidalCategory.tensorHom_comp_tensorHom]
+        simp
+      let p :=
+        (sectionPoleSheafPowerPullbackMonoidalTrivialization z hz f e n).hom
+      let q := e.hom
+      let etaG := Functor.OplaxMonoidal.η (Scheme.Modules.pullback g)
+      have hunit_tensor :
+          Functor.OplaxMonoidal.δ (Scheme.Modules.pullback g)
+              (𝟙_ T.Modules) (𝟙_ T.Modules) ≫
+              (etaG ⊗ₘ etaG) ≫ (λ_ (𝟙_ U.Modules)).hom =
+            (Scheme.Modules.pullback g).map (λ_ (𝟙_ T.Modules)).hom ≫
+              etaG := by
+        dsimp only [etaG]
+        rw [tensorHom_def]
+        simp only [Category.assoc]
+        rw [MonoidalCategory.leftUnitor_naturality]
+        rw [Functor.OplaxMonoidal.left_unitality_hom_assoc]
+      have hchain :
+          (((α.app (sectionPoleSheafPower π z hz n)).inv ≫
+                (Scheme.Modules.pullback g).map p ≫ etaG) ⊗ₘ
+              ((α.app (sectionPoleSheaf π z hz)).inv ≫
+                (Scheme.Modules.pullback g).map q ≫ etaG)) =
+            ((α.app (sectionPoleSheafPower π z hz n)).inv ⊗ₘ
+              (α.app (sectionPoleSheaf π z hz)).inv) ≫
+              ((Scheme.Modules.pullback g).map p ⊗ₘ
+                (Scheme.Modules.pullback g).map q) ≫ (etaG ⊗ₘ etaG) := by
+        rw [MonoidalCategory.tensorHom_comp_tensorHom]
+        rw [MonoidalCategory.tensorHom_comp_tensorHom]
+      change
+        Functor.OplaxMonoidal.δ (Scheme.Modules.pullback h)
+              (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≫
+              (((α.app (sectionPoleSheafPower π z hz n)).inv ≫
+                  (Scheme.Modules.pullback g).map p ≫ etaG) ⊗ₘ
+                ((α.app (sectionPoleSheaf π z hz)).inv ≫
+                  (Scheme.Modules.pullback g).map q ≫ etaG)) ≫
+              (λ_ (𝟙_ U.Modules)).hom =
+          (α.app (sectionPoleSheafPower π z hz n ⊗
+              sectionPoleSheaf π z hz)).inv ≫
+            (Scheme.Modules.pullback g).map
+              (Functor.OplaxMonoidal.δ (Scheme.Modules.pullback f)
+                (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz) ≫
+              (p ⊗ₘ q) ≫ (λ_ (𝟙_ T.Modules)).hom) ≫ etaG
+      rw [hchain]
+      simp only [Category.assoc]
+      slice_lhs 1 2 => rw [← hinv_delta]
+      rw [Functor.OplaxMonoidal.comp_δ]
+      slice_lhs 3 4 => erw [Functor.OplaxMonoidal.δ_natural]
+      slice_lhs 4 6 => rw [hunit_tensor]
+      simp only [Functor.map_comp]
+      erw [Category.assoc]
+      erw [Category.assoc]
+
+/-- Converting the monoidal-unit pullback trivialization to the structure sheaf
+recovers the direct pullback trivialization. -/
+private theorem sectionPoleSheafPowerPullbackTrivialization_eq_monoidal
+    {C S T : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S) (f : T ⟶ C)
+    (e : (Scheme.Modules.pullback f).obj (sectionPoleSheaf π z hz) ≅
+      Scheme.Modules.unitObj T) :
+    ∀ n : ℕ,
+      sectionPoleSheafPowerPullbackTrivialization z hz f e n =
+        sectionPoleSheafPowerPullbackMonoidalTrivialization z hz f
+            (e ≪≫ (monoidalUnitObjIso T).symm) n ≪≫
+          monoidalUnitObjIso T
+  | 0 => rfl
+  | n + 1 => by
+      apply Iso.ext
+      simp only [sectionPoleSheafPowerPullbackTrivialization,
+        sectionPoleSheafPowerPullbackMonoidalTrivialization,
+        Iso.trans_hom, Iso.symm_hom,
+        MonoidalCategory.tensorIso_hom, unitObjTensorIso]
+      rw [sectionPoleSheafPowerPullbackTrivialization_eq_monoidal
+        z hz f e n]
+      simp only [Iso.trans_hom, Category.assoc]
+      have htensor :
+          (((sectionPoleSheafPowerPullbackMonoidalTrivialization z hz f
+                (e ≪≫ (monoidalUnitObjIso T).symm) n).hom ≫
+              (monoidalUnitObjIso T).hom) ⊗ₘ e.hom) ≫
+              ((monoidalUnitObjIso T).inv ⊗ₘ
+                (monoidalUnitObjIso T).inv) =
+            (sectionPoleSheafPowerPullbackMonoidalTrivialization z hz f
+                (e ≪≫ (monoidalUnitObjIso T).symm) n).hom ⊗ₘ
+              (e.hom ≫ (monoidalUnitObjIso T).inv) := by
+        rw [MonoidalCategory.tensorHom_comp_tensorHom]
+        simp
+      change
+        (Functor.Monoidal.μIso (Scheme.Modules.pullback f)
+              (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz)).inv ≫
+            ((((sectionPoleSheafPowerPullbackMonoidalTrivialization z hz f
+                    (e ≪≫ (monoidalUnitObjIso T).symm) n).hom ≫
+                  (monoidalUnitObjIso T).hom) ⊗ₘ e.hom) ≫
+              ((monoidalUnitObjIso T).inv ⊗ₘ
+                (monoidalUnitObjIso T).inv)) ≫
+            (λ_ (𝟙_ T.Modules)).hom ≫ (monoidalUnitObjIso T).hom =
+          (Functor.Monoidal.μIso (Scheme.Modules.pullback f)
+              (sectionPoleSheafPower π z hz n) (sectionPoleSheaf π z hz)).inv ≫
+            ((sectionPoleSheafPowerPullbackMonoidalTrivialization z hz f
+                  (e ≪≫ (monoidalUnitObjIso T).symm) n).hom ⊗ₘ
+                (e.hom ≫ (monoidalUnitObjIso T).inv)) ≫
+            (λ_ (𝟙_ T.Modules)).hom ≫ (monoidalUnitObjIso T).hom
+      rw [htensor]
+
+/-- The structure-sheaf trivialization induced along a composite pullback. -/
+private noncomputable def sectionPoleSheafPowerCompPullbackTrivialization
+    {C S T U : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (f : T ⟶ C) (g : U ⟶ T) (h : U ⟶ C)
+    (α : Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g ≅
+      Scheme.Modules.pullback h)
+    (e : (Scheme.Modules.pullback f).obj (sectionPoleSheaf π z hz) ≅
+      Scheme.Modules.unitObj T) :
+    (Scheme.Modules.pullback h).obj (sectionPoleSheaf π z hz) ≅
+      Scheme.Modules.unitObj U :=
+  (α.app (sectionPoleSheaf π z hz)).symm ≪≫
+    (Scheme.Modules.pullback g).mapIso e ≪≫
+      Scheme.Modules.pullbackUnitIso g
+
+/-- Pullback composition commutes with pole-power trivializations valued in the
+structure sheaf. -/
+private theorem sectionPoleSheafPowerPullbackTrivialization_comp
+    {C S T U : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    (f : T ⟶ C) (g : U ⟶ T) (h : U ⟶ C)
+    (α : Scheme.Modules.pullback f ⋙ Scheme.Modules.pullback g ≅
+      Scheme.Modules.pullback h) [α.hom.IsMonoidal]
+    (e : (Scheme.Modules.pullback f).obj (sectionPoleSheaf π z hz) ≅
+      Scheme.Modules.unitObj T) :
+    ∀ n : ℕ,
+      sectionPoleSheafPowerPullbackTrivialization z hz h
+          (sectionPoleSheafPowerCompPullbackTrivialization
+            z hz f g h α e) n =
+        (α.app (sectionPoleSheafPower π z hz n)).symm ≪≫
+          (Scheme.Modules.pullback g).mapIso
+            (sectionPoleSheafPowerPullbackTrivialization z hz f e n) ≪≫
+          Scheme.Modules.pullbackUnitIso g := by
+  intro n
+  let uT := monoidalUnitObjIso T
+  let uU := monoidalUnitObjIso U
+  let e₀ := e ≪≫ uT.symm
+  let eComp := sectionPoleSheafPowerCompPullbackTrivialization
+    z hz f g h α e
+  let eComp₀ := sectionPoleSheafPowerCompMonoidalTrivialization
+    z hz f g h α e₀
+  have hunit := Scheme.Modules.pullback_monoidalUnitObjIso g
+  change (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).symm ≪≫ uU =
+      (Scheme.Modules.pullback g).mapIso uT ≪≫
+        Scheme.Modules.pullbackUnitIso g at hunit
+  have hunitHom := congrArg Iso.hom hunit
+  simp only [Iso.trans_hom, Iso.symm_hom, Functor.mapIso_hom] at hunitHom
+  change (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv ≫ uU.hom =
+    ((Scheme.Modules.pullback g).mapIso uT).hom ≫
+      (Scheme.Modules.pullbackUnitIso g).hom at hunitHom
+  have hunitInv :
+      Scheme.Modules.pullbackUnitIso g ≪≫ uU.symm =
+        ((Scheme.Modules.pullback g).mapIso uT).symm ≪≫
+          (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).symm := by
+    apply Iso.ext
+    simp only [Iso.trans_hom, Iso.symm_hom]
+    calc
+      (Scheme.Modules.pullbackUnitIso g).hom ≫ uU.inv =
+          ((Scheme.Modules.pullback g).mapIso uT).inv ≫
+            (((Scheme.Modules.pullback g).mapIso uT).hom ≫
+              (Scheme.Modules.pullbackUnitIso g).hom) ≫ uU.inv := by simp
+      _ = ((Scheme.Modules.pullback g).mapIso uT).inv ≫
+          (((Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv ≫
+            uU.hom) ≫ uU.inv) := by rw [hunitHom]
+      _ = ((Scheme.Modules.pullback g).mapIso uT).inv ≫
+          (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv := by simp
+  have hsimple : eComp ≪≫ uU.symm = eComp₀ := by
+    apply Iso.ext
+    simp only [eComp, eComp₀, e₀,
+      sectionPoleSheafPowerCompPullbackTrivialization,
+      sectionPoleSheafPowerCompMonoidalTrivialization,
+      Iso.trans_hom, Iso.symm_hom, Functor.mapIso_hom, Category.assoc]
+    rw [← Category.assoc]
+    rw [show (Scheme.Modules.pullbackUnitIso g).hom ≫ uU.inv =
+        ((Scheme.Modules.pullback g).mapIso uT).inv ≫
+          (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv by
+      exact congrArg Iso.hom hunitInv]
+    change (α.app (sectionPoleSheaf π z hz)).inv ≫
+        (Scheme.Modules.pullback g).map e.hom ≫
+          (Scheme.Modules.pullback g).map uT.inv ≫
+            (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv =
+      (α.app (sectionPoleSheaf π z hz)).inv ≫
+        (Scheme.Modules.pullback g).map (e.hom ≫ uT.inv) ≫
+          (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv
+    have hmapComp :=
+      ((Scheme.Modules.pullback g).map_comp e.hom uT.inv).symm
+    calc
+      (α.app (sectionPoleSheaf π z hz)).inv ≫
+            (Scheme.Modules.pullback g).map e.hom ≫
+            (Scheme.Modules.pullback g).map uT.inv ≫
+            (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv =
+          (α.app (sectionPoleSheaf π z hz)).inv ≫
+            ((Scheme.Modules.pullback g).map e.hom ≫
+            (Scheme.Modules.pullback g).map uT.inv) ≫
+            (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv := by
+            simp only [Category.assoc]
+      _ = (α.app (sectionPoleSheaf π z hz)).inv ≫
+            ((Scheme.Modules.pullback g).map (e.hom ≫ uT.inv) ≫
+              (Functor.Monoidal.εIso (Scheme.Modules.pullback g)).inv) :=
+        congrArg (fun q => (α.app (sectionPoleSheaf π z hz)).inv ≫
+          (q ≫ (Functor.Monoidal.εIso
+            (Scheme.Modules.pullback g)).inv)) hmapComp
+      _ = _ := rfl
+  rw [sectionPoleSheafPowerPullbackTrivialization_eq_monoidal
+    z hz h eComp n]
+  rw [hsimple]
+  rw [sectionPoleSheafPowerPullbackMonoidalTrivialization_comp
+    z hz f g h α e₀ n]
+  rw [CategoryTheory.Iso.trans_assoc]
+  rw [CategoryTheory.Iso.trans_assoc]
+  rw [hunit]
+  have hmap :
+      (Scheme.Modules.pullback g).mapIso
+          (sectionPoleSheafPowerPullbackMonoidalTrivialization
+            z hz f e₀ n) ≪≫
+        (Scheme.Modules.pullback g).mapIso uT =
+      (Scheme.Modules.pullback g).mapIso
+        (sectionPoleSheafPowerPullbackTrivialization z hz f e n) := by
+    rw [← (Scheme.Modules.pullback g).mapIso_trans]
+    rw [← sectionPoleSheafPowerPullbackTrivialization_eq_monoidal
+      z hz f e n]
+  have hmap' := congrArg
+    (fun q => q ≪≫ Scheme.Modules.pullbackUnitIso g) hmap
+  rw [CategoryTheory.Iso.trans_assoc] at hmap'
+  have hmap'' := congrArg
+    (fun q => (α.app (sectionPoleSheafPower π z hz n)).symm ≪≫ q) hmap'
+  exact hmap''
+
+private theorem pullbackCongr_inv_isMonoidal
+    {X Y : Scheme.{u}} {f g : X ⟶ Y} (hfg : f = g) :
+    (Scheme.Modules.pullbackCongr hfg).inv.IsMonoidal := by
+  subst g
+  change NatTrans.IsMonoidal (𝟙 (Scheme.Modules.pullback f))
+  infer_instance
+
+/-- Restricting a pole-power trivialization to a smaller open agrees with the
+power trivialization induced by the restricted simple-pole trivialization. -/
+theorem sectionPoleSheafPowerTrivialization_restrictOpen
+    {C S : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (z : S ⟶ C) (hz : z ≫ π = 𝟙 S)
+    {U V : C.Opens} (hVU : V ≤ U)
+    (e : (sectionPoleSheaf π z hz).restrict U.ι ≅
+      Scheme.Modules.unitObj U.toScheme) :
+    ∀ n : ℕ,
+      Scheme.Modules.restrictOpenTrivialization hVU
+          (sectionPoleSheafPowerTrivialization z hz U e n) =
+        sectionPoleSheafPowerTrivialization z hz V
+          (Scheme.Modules.restrictOpenTrivialization hVU e) n := by
+  intro n
+  let j := C.homOfLE hVU
+  let α : Scheme.Modules.pullback U.ι ⋙ Scheme.Modules.pullback j ≅
+      Scheme.Modules.pullback V.ι :=
+    Scheme.Modules.pullbackComp j U.ι ≪≫
+      (Scheme.Modules.pullbackCongr (C.homOfLE_ι hVU).symm).symm
+  let eU := (Scheme.Modules.restrictFunctorIsoPullback U.ι).symm.app
+    (sectionPoleSheaf π z hz) ≪≫ e
+  let eV := (Scheme.Modules.restrictFunctorIsoPullback V.ι).symm.app
+      (sectionPoleSheaf π z hz) ≪≫
+    Scheme.Modules.restrictOpenTrivialization hVU e
+  let eComp := sectionPoleSheafPowerCompPullbackTrivialization
+    z hz U.ι j V.ι α eU
+  letI hcomp : (Scheme.Modules.pullbackComp j U.ι).hom.IsMonoidal :=
+    Scheme.Modules.pullbackComp_hom_isMonoidal j U.ι
+  letI hcongr :
+      (Scheme.Modules.pullbackCongr
+        (C.homOfLE_ι hVU).symm).inv.IsMonoidal :=
+    pullbackCongr_inv_isMonoidal (C.homOfLE_ι hVU).symm
+  letI halpha : α.hom.IsMonoidal := by
+    change NatTrans.IsMonoidal
+      ((Scheme.Modules.pullbackComp j U.ι).hom ≫
+        (Scheme.Modules.pullbackCongr (C.homOfLE_ι hVU).symm).inv)
+    exact NatTrans.IsMonoidal.comp _ _
+  have heV : eV = eComp := by
+    dsimp only [eV]
+    rw [Scheme.Modules.restrictOpenTrivialization_eq_pullback hVU e]
+    apply Iso.ext
+    simp only [eComp,
+      sectionPoleSheafPowerCompPullbackTrivialization,
+      Scheme.Modules.restrictOpenTrivializationPullback,
+      Scheme.Modules.restrictTrivialization, eU, α, j,
+      Iso.trans_hom, Iso.symm_hom, Functor.mapIso_hom]
+    simp
+  rw [sectionPoleSheafPowerTrivialization_eq_pullback
+    z hz V (Scheme.Modules.restrictOpenTrivialization hVU e) n]
+  change _ = (Scheme.Modules.restrictFunctorIsoPullback V.ι).app
+      (sectionPoleSheafPower π z hz n) ≪≫
+        sectionPoleSheafPowerPullbackTrivialization z hz V.ι eV n
+  rw [heV]
+  rw [sectionPoleSheafPowerPullbackTrivialization_comp
+    z hz U.ι j V.ι α eU n]
+  rw [Scheme.Modules.restrictOpenTrivialization_eq_pullback hVU
+    (sectionPoleSheafPowerTrivialization z hz U e n)]
+  simp only [Scheme.Modules.restrictOpenTrivializationPullback,
+    Scheme.Modules.restrictTrivialization]
+  rw [sectionPoleSheafPowerTrivialization_eq_pullback z hz U e n]
+  simp only [eU, α, j]
+  let rInv := (Scheme.Modules.restrictFunctorIsoPullback U.ι).symm.app
+    (sectionPoleSheafPower π z hz n)
+  let rHom := (Scheme.Modules.restrictFunctorIsoPullback U.ι).app
+    (sectionPoleSheafPower π z hz n)
+  let q := sectionPoleSheafPowerPullbackTrivialization z hz U.ι
+    ((Scheme.Modules.restrictFunctorIsoPullback U.ι).symm.app
+      (sectionPoleSheaf π z hz) ≪≫ e) n
+  have hinside : rInv ≪≫ rHom ≪≫ q = q := by
+    dsimp only [rInv, rHom]
+    apply Iso.ext
+    simp
+  have hmapInside := congrArg
+    (fun k => (Scheme.Modules.pullback j).mapIso k) hinside
+  dsimp only [rInv, rHom, q] at hmapInside
+  have halphaApp :
+      (α.app (sectionPoleSheafPower π z hz n)).symm =
+        (Scheme.Modules.pullbackCongr
+            (C.homOfLE_ι hVU).symm).app
+              (sectionPoleSheafPower π z hz n) ≪≫
+          ((Scheme.Modules.pullbackComp j U.ι).app
+            (sectionPoleSheafPower π z hz n)).symm := by
+    rfl
+  rw [halphaApp]
+  have hfull := congrArg
+    (fun k => (Scheme.Modules.restrictFunctorIsoPullback V.ι).app
+        (sectionPoleSheafPower π z hz n) ≪≫
+      (Scheme.Modules.pullbackCongr
+          (C.homOfLE_ι hVU).symm).app
+            (sectionPoleSheafPower π z hz n) ≪≫
+      ((Scheme.Modules.pullbackComp j U.ι).app
+          (sectionPoleSheafPower π z hz n)).symm ≪≫ k ≪≫
+      Scheme.Modules.pullbackUnitIso j) hmapInside
+  simpa only [j, CategoryTheory.Iso.trans_assoc] using hfull
+
+end PolePowerRestriction
+
+/-- A global module section, restricted to the top open of an affine open
+subscheme. -/
+noncomputable def localTrivializationRestriction {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens) (m : Γ(M, (⊤ : X.Opens))) :
+    Γ(M.restrict U.1.ι, (⊤ : U.1.toScheme.Opens)) :=
+  (M.restrictAppIso U.1.ι (⊤ : U.1.toScheme.Opens)).inv
+    (M.presheaf.map (eqToHom U.1.ι_image_top).op
+      (M.presheaf.map (homOfLE le_top).op m))
+
+@[simp]
+theorem localTrivializationRestriction_add {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens) (m n : Γ(M, (⊤ : X.Opens))) :
+    localTrivializationRestriction M U (m + n) =
+      localTrivializationRestriction M U m +
+        localTrivializationRestriction M U n := by
+  simp [localTrivializationRestriction, map_add]
+
+@[simp]
+theorem localTrivializationRestriction_zero {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens) : localTrivializationRestriction M U 0 = 0 := by
+  simp [localTrivializationRestriction, map_zero]
+
+/-- A restricted section, expressed in the trivial unit module. -/
+noncomputable def localTrivializationTopSection {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (m : Γ(M, (⊤ : X.Opens))) :
+    Γ(U.1.toScheme, (⊤ : U.1.toScheme.Opens)) :=
+  e.hom.val.app (.op ⊤) (localTrivializationRestriction M U m)
+
+@[simp]
+theorem localTrivializationTopSection_add {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (m n : Γ(M, (⊤ : X.Opens))) :
+    localTrivializationTopSection M U e (m + n) =
+      localTrivializationTopSection M U e m +
+        localTrivializationTopSection M U e n := by
+  unfold localTrivializationTopSection
+  rw [localTrivializationRestriction_add]
+  exact (e.hom.val.app (.op ⊤)).hom.map_add _ _
+
+@[simp]
+theorem localTrivializationTopSection_zero {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme) :
+    localTrivializationTopSection M U e 0 = 0 := by
+  unfold localTrivializationTopSection
+  rw [localTrivializationRestriction_zero]
+  exact (e.hom.val.app (.op ⊤)).hom.map_zero
+
+/-- The coefficient of a global module section in a chosen trivialization on an
+affine open. -/
+noncomputable def localTrivializationCoefficient {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (m : Γ(M, (⊤ : X.Opens))) : Γ(X, U.1) :=
+  affineOpenAmbientSection U (localTrivializationTopSection M U e m)
+
+@[simp]
+theorem localTrivializationCoefficient_add {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (m n : Γ(M, (⊤ : X.Opens))) :
+    localTrivializationCoefficient M U e (m + n) =
+      localTrivializationCoefficient M U e m +
+        localTrivializationCoefficient M U e n := by
+  unfold localTrivializationCoefficient
+  rw [localTrivializationTopSection_add, affineOpenAmbientSection_add]
+
+@[simp]
+theorem localTrivializationCoefficient_zero {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme) :
+    localTrivializationCoefficient M U e 0 = 0 := by
+  unfold localTrivializationCoefficient
+  rw [localTrivializationTopSection_zero, affineOpenAmbientSection_zero]
+
+/-- A ring section, viewed as a module section through an over-site
+trivialization. -/
+noncomputable def overTrivializationSection {X : Scheme.{u}} (M : X.Modules)
+    (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (r : Γ(X, U)) : Γ(M, U) :=
+  e.inv.val.app (.op (Over.mk (𝟙 U))) r
+
+/-- The coefficient of the module section constructed through a trivialization
+is the original ring section. -/
+theorem overTrivializationSection_coefficient {X : Scheme.{u}} (M : X.Modules)
+    (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (r : Γ(X, U)) :
+    e.hom.val.app (.op (Over.mk (𝟙 U)))
+        (overTrivializationSection M U e r) = r := by
+  have hcomp := congrArg (fun q => q.val.app (.op (Over.mk (𝟙 U))))
+    e.inv_hom_id
+  exact ConcreteCategory.congr_hom hcomp r
+
+@[simp]
+theorem overTrivializationSection_add {X : Scheme.{u}} (M : X.Modules)
+    (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (r s : Γ(X, U)) :
+    overTrivializationSection M U e (r + s) =
+      overTrivializationSection M U e r + overTrivializationSection M U e s := by
+  exact (e.inv.val.app (.op (Over.mk (𝟙 U)))).hom.map_add r s
+
+@[simp]
+theorem overTrivializationSection_zero {X : Scheme.{u}} (M : X.Modules)
+    (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)) :
+    overTrivializationSection M U e 0 = 0 := by
+  exact (e.inv.val.app (.op (Over.mk (𝟙 U)))).hom.map_zero
+
+/-- Constructing a section through a trivialization commutes with restriction
+to a smaller open and the induced trivialization. -/
+theorem overTrivializationSection_restrict {X : Scheme.{u}} (M : X.Modules)
+    {U V : X.Opens} (hVU : V ≤ U)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (r : Γ(X, U)) :
+    M.presheaf.map (homOfLE hVU).op (overTrivializationSection M U e r) =
+      overTrivializationSection M V
+        (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M U e
+          (Over.mk (homOfLE hVU)))
+        (X.presheaf.map (homOfLE hVU).op r) := by
+  unfold overTrivializationSection
+  let VU : Over U := Over.mk (homOfLE hVU)
+  let k : VU ⟶ Over.mk (𝟙 U) := Over.mkIdTerminal.from VU
+  have hnat := PresheafOfModules.naturality_apply e.inv.val k.op r
+  change M.presheaf.map (homOfLE hVU).op
+      (e.inv.val.app (.op (Over.mk (𝟙 U))) r) =
+    e.inv.val.app (.op ((Over.map VU.hom).obj (Over.mk (𝟙 V))))
+      (X.presheaf.map (homOfLE hVU).op r)
+  change M.presheaf.map (Over.mkIdTerminal.from VU).left.op
+      (e.inv.val.app (.op (Over.mk (𝟙 U))) r) =
+    e.inv.val.app (.op VU)
+      (X.presheaf.map (Over.mkIdTerminal.from VU).left.op r)
+  exact hnat.symm
+
+/-- Ring sections satisfying the scalar transition equation define the same
+module section through the corresponding trivializations. -/
+theorem overTrivializationSection_eq_of_transition
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (r a b : Γ(X, U))
+    (h : e.hom = g.hom ≫
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r)
+    (hab : a = b * r) :
+    overTrivializationSection M U e a =
+      overTrivializationSection M U g b := by
+  have hright : e.hom.val.app (.op (Over.mk (𝟙 U)))
+      (overTrivializationSection M U g b) = b * r := by
+    have happ := congrArg
+      (fun q => q.val.app (.op (Over.mk (𝟙 U)))) h
+    have hx := ConcreteCategory.congr_hom happ
+      (overTrivializationSection M U g b)
+    change e.hom.val.app (.op (Over.mk (𝟙 U)))
+        (g.inv.val.app (.op (Over.mk (𝟙 U))) b) =
+      (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r).val.app
+        (.op (Over.mk (𝟙 U)))
+        (g.hom.val.app (.op (Over.mk (𝟙 U)))
+          (g.inv.val.app (.op (Over.mk (𝟙 U))) b)) at hx
+    have hg : g.hom.val.app (.op (Over.mk (𝟙 U)))
+        (g.inv.val.app (.op (Over.mk (𝟙 U))) b) = b := by
+      have hcomp := congrArg
+        (fun q => q.val.app (.op (Over.mk (𝟙 U)))) g.inv_hom_id
+      exact ConcreteCategory.congr_hom hcomp b
+    rw [hg] at hx
+    rw [SheafOfModules.overUnitScalarEnd_app_apply] at hx
+    change e.hom.val.app (.op (Over.mk (𝟙 U)))
+        (overTrivializationSection M U g b) =
+      b * X.presheaf.map (𝟙 (.op U)) r at hx
+    rw [X.presheaf.map_id, ConcreteCategory.id_apply] at hx
+    exact hx
+  have heq : e.hom.val.app (.op (Over.mk (𝟙 U)))
+      (overTrivializationSection M U e a) =
+      e.hom.val.app (.op (Over.mk (𝟙 U)))
+        (overTrivializationSection M U g b) := by
+    rw [overTrivializationSection_coefficient, hright, hab]
+  have heq' := congrArg
+    (fun x => e.inv.val.app (.op (Over.mk (𝟙 U))) x) heq
+  have hcancel (x : (M.over U).val.obj (.op (Over.mk (𝟙 U)))) :
+      e.inv.val.app (.op (Over.mk (𝟙 U)))
+          (e.hom.val.app (.op (Over.mk (𝟙 U))) x) = x := by
+    have hcomp := congrArg
+      (fun q => q.val.app (.op (Over.mk (𝟙 U)))) e.hom_inv_id
+    have hx := ConcreteCategory.congr_hom hcomp x
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply] at hx
+    exact hx
+  change (show (M.over U).val.obj (.op (Over.mk (𝟙 U))) from
+      overTrivializationSection M U e a) =
+    (show (M.over U).val.obj (.op (Over.mk (𝟙 U))) from
+      overTrivializationSection M U g b)
+  simpa only [hcancel] using heq'
+
+/-- The coefficient of a global section in a trivialization on the over-site of an
+open subset. -/
+noncomputable def overTrivializationCoefficient {X : Scheme.{u}} (M : X.Modules)
+    (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (m : Γ(M, (⊤ : X.Opens))) : Γ(X, U) :=
+  e.hom.val.app (.op (Over.mk (𝟙 U)))
+    (M.presheaf.map (homOfLE le_top).op m)
+
+/-- Equality of coefficients in an over-site trivialization detects equality
+of the corresponding restricted module sections. -/
+theorem restrict_eq_of_overTrivializationCoefficient_eq
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (m n : Γ(M, (⊤ : X.Opens)))
+    (h : overTrivializationCoefficient M U e m =
+      overTrivializationCoefficient M U e n) :
+    M.presheaf.map (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op m =
+      M.presheaf.map (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op n := by
+  let T : Over U := Over.mk (𝟙 U)
+  let mU := M.presheaf.map
+    (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op m
+  let nU := M.presheaf.map
+    (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op n
+  change e.hom.val.app (.op T) mU = e.hom.val.app (.op T) nU at h
+  have h' := congrArg (fun x => e.inv.val.app (.op T) x) h
+  have hcancel (x : (M.over U).val.obj (.op T)) :
+      e.inv.val.app (.op T) (e.hom.val.app (.op T) x) = x := by
+    have hcomp := congrArg (fun q => q.val.app (.op T)) e.hom_inv_id
+    have hx := ConcreteCategory.congr_hom hcomp x
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply] at hx
+    exact hx
+  change (show (M.over U).val.obj (.op T) from mU) =
+    (show (M.over U).val.obj (.op T) from nU)
+  simpa only [hcancel] using h'
+
+/-- Expressing a scalar multiple in an over-site trivialization restricts the
+scalar and multiplies the coefficient. -/
+theorem overTrivializationCoefficient_smul {X : Scheme.{u}} (M : X.Modules)
+    (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (a : Γ(X, (⊤ : X.Opens))) (m : Γ(M, (⊤ : X.Opens))) :
+    overTrivializationCoefficient M U e (a • m) =
+      X.presheaf.map (homOfLE le_top).op a *
+        overTrivializationCoefficient M U e m := by
+  unfold overTrivializationCoefficient
+  rw [M.map_smul]
+  let T : Over U := Over.mk (𝟙 U)
+  let c : (X.ringCatSheaf.over U).obj.obj (.op T) :=
+    X.presheaf.map (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op a
+  let x : (M.over U).val.obj (.op T) :=
+    M.presheaf.map (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op m
+  have h := (e.hom.val.app (.op T)).hom.map_smul c x
+  change (show (X.ringCatSheaf.over U).obj.obj (.op T) from
+      e.hom.val.app (.op T) (c • x)) =
+    c * (show (X.ringCatSheaf.over U).obj.obj (.op T) from
+      e.hom.val.app (.op T) x) at h
+  exact h
+
+/-- Coefficients in a restricted over-site trivialization are restrictions of the
+original coefficients. -/
+theorem overTrivializationCoefficient_restrict {X : Scheme.{u}} (M : X.Modules)
+    {U V : X.Opens} (hVU : V ≤ U)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (m : Γ(M, (⊤ : X.Opens))) :
+    overTrivializationCoefficient M V
+        (SheafOfModules.restrictOverTrivialization X.ringCatSheaf M U e
+          (Over.mk (homOfLE hVU))) m =
+      X.presheaf.map (homOfLE hVU).op
+        (overTrivializationCoefficient M U e m) := by
+  unfold overTrivializationCoefficient
+  unfold SheafOfModules.restrictOverTrivialization
+  simp only [Iso.trans_hom, Iso.symm_hom, Functor.mapIso_hom]
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply]
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply]
+  let VU : Over U := Over.mk (homOfLE hVU)
+  change e.hom.val.app (.op VU)
+      (M.presheaf.map (homOfLE (le_top : V ≤ (⊤ : X.Opens))).op m) =
+    X.presheaf.map (homOfLE hVU).op
+      (e.hom.val.app (.op (Over.mk (𝟙 U)))
+        (M.presheaf.map (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op m))
+  let k : VU ⟶ Over.mk (𝟙 U) := Over.mkIdTerminal.from VU
+  let mU := M.presheaf.map
+    (homOfLE (le_top : U ≤ (⊤ : X.Opens))).op m
+  have hnat := PresheafOfModules.naturality_apply e.hom.val k.op mU
+  change e.hom.val.app (.op VU)
+      ((M.over U).val.map k.op mU) =
+    (X.ringCatSheaf.over U).obj.map k.op
+      (e.hom.val.app (.op (Over.mk (𝟙 U))) mU) at hnat
+  dsimp only [k] at hnat
+  change e.hom.val.app (.op VU)
+      (M.presheaf.map (Over.mkIdTerminal.from VU).left.op mU) =
+    X.presheaf.map (Over.mkIdTerminal.from VU).left.op
+      (e.hom.val.app (.op (Over.mk (𝟙 U))) mU) at hnat
+  rw [Over.mkIdTerminal_from_left] at hnat
+  change e.hom.val.app (.op VU)
+      (M.presheaf.map (homOfLE hVU).op mU) =
+    X.presheaf.map (homOfLE hVU).op
+      (e.hom.val.app (.op (Over.mk (𝟙 U))) mU) at hnat
+  rw [← M.presheaf.map_comp_apply] at hnat
+  exact hnat
+
+/-- Coefficients transform by the same scalar as their over-site
+trivializations. -/
+theorem overTrivializationCoefficient_eq_mul_of_transition
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (r : Γ(X, U))
+    (h : e.hom = g.hom ≫
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r)
+    (m : Γ(M, (⊤ : X.Opens))) :
+    overTrivializationCoefficient M U e m =
+      overTrivializationCoefficient M U g m * r := by
+  unfold overTrivializationCoefficient
+  rw [h]
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply]
+  rw [SheafOfModules.overUnitScalarEnd_app_apply]
+  change _ * X.presheaf.map (𝟙 (.op U)) r = _ * r
+  rw [X.presheaf.map_id]
+  rw [ConcreteCategory.id_apply]
+
+/-- An over-site trivialization gives the corresponding trivialization on the open
+subscheme. -/
+noncomputable def restrictTrivializationOfOverIso
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)) :
+    M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme :=
+  (Scheme.Modules.overFunctorEquiv U).symm.app M ≪≫
+    (Scheme.Modules.overEquiv U).functor.mapIso e ≪≫
+      U.sheafOfModulesEquivOverUnit X.ringCatSheaf
+
+/-- Passing from over-site trivializations to open-subscheme trivializations
+preserves scalar transitions. -/
+theorem restrictTrivializationOfOverIso_hom_eq_comp_scalar
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (r : Γ(X, U))
+    (h : e.hom = g.hom ≫
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r) :
+    (restrictTrivializationOfOverIso M U e).hom =
+      (restrictTrivializationOfOverIso M U g).hom ≫
+        unitEndomorphismOfTopSection (Scheme.Modules.openTopSection U r) := by
+  unfold restrictTrivializationOfOverIso
+  simp only [Iso.trans_hom, Functor.mapIso_hom]
+  let F := Scheme.Modules.overFunctorEquiv U
+  let G := (Scheme.Modules.overEquiv U).functor
+  let C₀ := (U.sheafOfModulesEquivOverUnit X.ringCatSheaf).hom
+  let q := SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r
+  let d := unitEndomorphismOfTopSection (Scheme.Modules.openTopSection U r)
+  change F.inv.app M ≫ G.map e.hom ≫ C₀ =
+    (F.inv.app M ≫ G.map g.hom ≫ C₀) ≫ d
+  have hs : G.map q ≫ C₀ = C₀ ≫ d := by
+    exact Scheme.Modules.overEquiv_unitScalarEnd U r
+  calc
+    F.inv.app M ≫ G.map e.hom ≫ C₀ =
+        F.inv.app M ≫ G.map (g.hom ≫ q) ≫ C₀ := by rw [h]
+    _ = F.inv.app M ≫ (G.map g.hom ≫ G.map q) ≫ C₀ := by
+      rw [Functor.map_comp]
+      rfl
+    _ = F.inv.app M ≫ G.map g.hom ≫ (G.map q ≫ C₀) := by
+      simp only [Category.assoc]
+    _ = F.inv.app M ≫ G.map g.hom ≫ (C₀ ≫ d) :=
+      congrArg (fun p ↦ F.inv.app M ≫ G.map g.hom ≫ p) hs
+    _ = (F.inv.app M ≫ G.map g.hom ≫ C₀) ≫ d := by
+      simp only [Category.assoc]
+
+/-- Passing from open-subscheme trivializations back to over-site
+trivializations preserves scalar transitions. -/
+theorem overTrivializationOfRestrictIso_hom_eq_comp_scalar
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e g : M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme)
+    (r : Γ(X, U))
+    (h : e.hom = g.hom ≫
+      unitEndomorphismOfTopSection (Scheme.Modules.openTopSection U r)) :
+    (Scheme.Modules.overTrivializationOfRestrictIso M U e).hom =
+      (Scheme.Modules.overTrivializationOfRestrictIso M U g).hom ≫
+        SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r := by
+  let G := (Scheme.Modules.overEquiv U).functor
+  let F := Scheme.Modules.overFunctorEquiv U
+  let C := U.sheafOfModulesEquivOverUnit X.ringCatSheaf
+  let q := SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r
+  let d := unitEndomorphismOfTopSection (Scheme.Modules.openTopSection U r)
+  apply G.map_injective
+  change G.map (Scheme.Modules.overTrivializationOfRestrictIso M U e).hom =
+    G.map ((Scheme.Modules.overTrivializationOfRestrictIso M U g).hom ≫ q)
+  rw [Functor.map_comp]
+  simp only [Scheme.Modules.overTrivializationOfRestrictIso,
+    Functor.FullyFaithful.preimageIso_hom,
+    Functor.FullyFaithful.map_preimage, Iso.trans_hom]
+  change (F.hom.app M ≫ e.hom ≫ C.inv) =
+    (F.hom.app M ≫ g.hom ≫ C.inv) ≫ G.map q
+  rw [h]
+  have hs := Scheme.Modules.overEquiv_unitScalarEnd U r
+  change G.map q ≫ C.hom = C.hom ≫ d at hs
+  have hsC := congrArg (fun k ↦ k ≫ C.inv) hs
+  have hsC' : G.map q = (C.hom ≫ d) ≫ C.inv := by
+    have hcancel : G.map q = (G.map q ≫ C.hom) ≫ C.inv := by
+      calc
+        G.map q = G.map q ≫ 𝟙 _ := (Category.comp_id _).symm
+        _ = G.map q ≫ (C.hom ≫ C.inv) :=
+          congrArg (fun k ↦ G.map q ≫ k) C.hom_inv_id.symm
+        _ = (G.map q ≫ C.hom) ≫ C.inv :=
+          (Category.assoc _ _ _).symm
+    exact hcancel.trans hsC
+  let A := F.hom.app M ≫ g.hom
+  change A ≫ d ≫ C.inv = A ≫ C.inv ≫ G.map q
+  rw [hsC']
+  have hconj : C.inv ≫ ((C.hom ≫ d) ≫ C.inv) = d ≫ C.inv := by
+    calc
+      C.inv ≫ ((C.hom ≫ d) ≫ C.inv) =
+          (C.inv ≫ (C.hom ≫ d)) ≫ C.inv :=
+        (Category.assoc _ _ _).symm
+      _ = ((C.inv ≫ C.hom) ≫ d) ≫ C.inv :=
+        congrArg (fun k ↦ k ≫ C.inv) (Category.assoc _ _ _).symm
+      _ = ((𝟙 _) ≫ d) ≫ C.inv :=
+        congrArg (fun k ↦ (k ≫ d) ≫ C.inv) C.inv_hom_id
+      _ = d ≫ C.inv := by rw [Category.id_comp]
+  exact (congrArg (fun k ↦ A ≫ k) hconj).symm
+
+/-- Converting an over-site trivialization to the open subscheme and back
+recovers the original trivialization. -/
+theorem overTrivializationOfRestrictTrivializationOfOverIso
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)) :
+    Scheme.Modules.overTrivializationOfRestrictIso M U
+        (restrictTrivializationOfOverIso M U e) = e := by
+  apply Iso.ext
+  let G := (Scheme.Modules.overEquiv U).functor
+  apply G.map_injective
+  simp only [Scheme.Modules.overTrivializationOfRestrictIso,
+    restrictTrivializationOfOverIso,
+    Functor.FullyFaithful.preimageIso_hom,
+    Functor.FullyFaithful.map_preimage, Iso.trans_hom,
+    Functor.mapIso_hom]
+  let F := Scheme.Modules.overFunctorEquiv U
+  let C := U.sheafOfModulesEquivOverUnit X.ringCatSheaf
+  change F.hom.app M ≫ F.inv.app M ≫ G.map e.hom ≫ C.hom ≫ C.inv =
+    G.map e.hom
+  rw [F.hom_inv_id_app_assoc]
+  calc
+    G.map e.hom ≫ C.hom ≫ C.inv =
+        G.map e.hom ≫ (C.hom ≫ C.inv) :=
+      (Category.assoc _ _ _).symm
+    _ = G.map e.hom ≫ 𝟙 _ :=
+      congrArg (fun k ↦ G.map e.hom ≫ k) C.hom_inv_id
+    _ = G.map e.hom := Category.comp_id _
+
+/-- Converting an open-subscheme trivialization to the over-site and back
+recovers the original trivialization. -/
+theorem restrictTrivializationOfOverTrivializationOfRestrictIso
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e : M.restrict U.ι ≅ Scheme.Modules.unitObj U.toScheme) :
+    restrictTrivializationOfOverIso M U
+        (Scheme.Modules.overTrivializationOfRestrictIso M U e) = e := by
+  apply Iso.ext
+  unfold restrictTrivializationOfOverIso
+  simp only [Scheme.Modules.overTrivializationOfRestrictIso,
+    Iso.trans_hom, Functor.mapIso_hom,
+    Functor.FullyFaithful.preimageIso_hom,
+    Functor.FullyFaithful.map_preimage]
+  let F := Scheme.Modules.overFunctorEquiv U
+  let C := U.sheafOfModulesEquivOverUnit X.ringCatSheaf
+  change F.inv.app M ≫ F.hom.app M ≫ e.hom ≫ C.inv ≫ C.hom = e.hom
+  rw [F.inv_hom_id_app_assoc]
+  calc
+    e.hom ≫ C.inv ≫ C.hom = e.hom ≫ (C.inv ≫ C.hom) :=
+      (Category.assoc _ _ _).symm
+    _ = e.hom ≫ 𝟙 _ := congrArg (fun k ↦ e.hom ≫ k) C.inv_hom_id
+    _ = e.hom := Category.comp_id _
+
+private theorem restrictTrivializationOfOverIso_hom_top_apply
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (x : ((M.restrict U.ι).val.obj (.op (⊤ : U.toScheme.Opens)))) :
+    (restrictTrivializationOfOverIso M U e).hom.val.app (.op ⊤) x =
+      e.hom.val.app
+        (.op (U.overEquivalence.symm.functor.obj (⊤ : U.toScheme.Opens)))
+        (((Scheme.Modules.overFunctorEquiv U).inv.app M).val.app (.op ⊤) x) := by
+  unfold restrictTrivializationOfOverIso
+  simp only [Iso.trans_hom, Functor.mapIso_hom]
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply]
+
+private theorem affineOpenTopSection_eq_overMap_terminal
+    {X : Scheme.{u}} (U : X.affineOpens) (r : Γ(X, U.1)) :
+    let V := U.1.overEquivalence.symm.functor.obj
+      (⊤ : U.1.toScheme.Opens)
+    let k : V ⟶ Over.mk (𝟙 U.1) := Over.mkIdTerminal.from V
+    affineOpenTopSection U r =
+      (X.ringCatSheaf.over U.1).obj.map k.op r := by
+  dsimp only
+  unfold affineOpenTopSection
+  rw [U.1.ι_appIso]
+  change X.presheaf.map (eqToHom U.1.ι_image_top).op r =
+    X.presheaf.map
+      (Over.mkIdTerminal.from
+        (U.1.overEquivalence.symm.functor.obj
+          (⊤ : U.1.toScheme.Opens))).left.op r
+  congr 2
+  exact congrArg X.presheaf.map (Subsingleton.elim _ _)
+
+private theorem localTrivializationRestriction_eq_overMap_terminal
+    {X : Scheme.{u}} (M : X.Modules) (U : X.affineOpens)
+    (m : Γ(M, (⊤ : X.Opens))) :
+    let V := U.1.overEquivalence.symm.functor.obj
+      (⊤ : U.1.toScheme.Opens)
+    let k : V ⟶ Over.mk (𝟙 U.1) := Over.mkIdTerminal.from V
+    ((Scheme.Modules.overFunctorEquiv U.1).inv.app M).val.app (.op ⊤)
+        (localTrivializationRestriction M U m) =
+      (M.over U.1).val.map k.op
+        (M.presheaf.map (homOfLE le_top).op m) := by
+  dsimp only
+  rw [Scheme.Modules.overFunctorEquiv_inv_app_apply]
+  unfold localTrivializationRestriction
+  change M.presheaf.map (eqToHom U.1.ι_image_top).op
+      (M.presheaf.map (homOfLE le_top).op m) =
+    M.presheaf.map
+      (Over.mkIdTerminal.from
+        (U.1.overEquivalence.symm.functor.obj
+          (⊤ : U.1.toScheme.Opens))).left.op
+      (M.presheaf.map (homOfLE le_top).op m)
+  congr 2
+  exact congrArg M.presheaf.map (Subsingleton.elim _ _)
+
+private theorem overTrivializationCoefficient_eq_local_of_overIso
+    {X : Scheme.{u}} (M : X.Modules) (U : X.affineOpens)
+    (e : M.over U.1 ≅ SheafOfModules.unit (X.ringCatSheaf.over U.1))
+    (m : Γ(M, (⊤ : X.Opens))) :
+    overTrivializationCoefficient M U.1 e m =
+      localTrivializationCoefficient M U
+        (restrictTrivializationOfOverIso M U.1 e) m := by
+  rw [← affineOpenAmbientSection_topSection U
+    (overTrivializationCoefficient M U.1 e m)]
+  unfold localTrivializationCoefficient
+  congr 1
+  unfold localTrivializationTopSection overTrivializationCoefficient
+  rw [restrictTrivializationOfOverIso_hom_top_apply]
+  rw [localTrivializationRestriction_eq_overMap_terminal]
+  rw [affineOpenTopSection_eq_overMap_terminal]
+  let V := U.1.overEquivalence.symm.functor.obj
+    (⊤ : U.1.toScheme.Opens)
+  let k : V ⟶ Over.mk (𝟙 U.1) := Over.mkIdTerminal.from V
+  let mU := M.presheaf.map
+    (homOfLE (le_top : U.1 ≤ (⊤ : X.Opens))).op m
+  have hnat := PresheafOfModules.naturality_apply e.hom.val k.op mU
+  exact hnat.symm
+
+/-- The over-site coefficient associated to an affine-open trivialization is the
+same as the coefficient obtained directly on the open subscheme. -/
+theorem overTrivializationCoefficient_overTrivializationOfRestrictIso
+    {X : Scheme.{u}} (M : X.Modules) (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (m : Γ(M, (⊤ : X.Opens))) :
+    overTrivializationCoefficient M U.1
+        (Scheme.Modules.overTrivializationOfRestrictIso M U.1 e) m =
+      localTrivializationCoefficient M U e m := by
+  calc
+    overTrivializationCoefficient M U.1
+        (Scheme.Modules.overTrivializationOfRestrictIso M U.1 e) m =
+      localTrivializationCoefficient M U
+        (restrictTrivializationOfOverIso M U.1
+          (Scheme.Modules.overTrivializationOfRestrictIso M U.1 e)) m :=
+      overTrivializationCoefficient_eq_local_of_overIso M U _ m
+    _ = localTrivializationCoefficient M U e m := by
+      rw [restrictTrivializationOfOverTrivializationOfRestrictIso]
+
+/-- Equality of coefficients in an affine-open trivialization detects equality
+of the corresponding restricted module sections. -/
+theorem restrict_eq_of_localTrivializationCoefficient_eq
+    {X : Scheme.{u}} (M : X.Modules) (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (m n : Γ(M, (⊤ : X.Opens)))
+    (h : localTrivializationCoefficient M U e m =
+      localTrivializationCoefficient M U e n) :
+    M.presheaf.map (homOfLE (le_top : U.1 ≤ (⊤ : X.Opens))).op m =
+      M.presheaf.map (homOfLE (le_top : U.1 ≤ (⊤ : X.Opens))).op n := by
+  apply restrict_eq_of_overTrivializationCoefficient_eq M U.1
+    (Scheme.Modules.overTrivializationOfRestrictIso M U.1 e)
+  rwa [overTrivializationCoefficient_overTrivializationOfRestrictIso,
+    overTrivializationCoefficient_overTrivializationOfRestrictIso]
+
+/-- Expressing a scalar multiple in an affine-open trivialization restricts
+the scalar and multiplies the coefficient. -/
+theorem localTrivializationCoefficient_smul {X : Scheme.{u}} (M : X.Modules)
+    (U : X.affineOpens)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (a : Γ(X, (⊤ : X.Opens))) (m : Γ(M, (⊤ : X.Opens))) :
+    localTrivializationCoefficient M U e (a • m) =
+      X.presheaf.map (homOfLE le_top).op a *
+        localTrivializationCoefficient M U e m := by
+  rw [← overTrivializationCoefficient_overTrivializationOfRestrictIso,
+    ← overTrivializationCoefficient_overTrivializationOfRestrictIso]
+  exact overTrivializationCoefficient_smul M U.1 _ a m
+
+/-- Restricting a coefficient computed in an affine-open trivialization agrees
+with computing it in the induced over-site trivialization. -/
+theorem localTrivializationCoefficient_restrict
+    {X : Scheme.{u}} (M : X.Modules) (U : X.affineOpens)
+    {V : X.Opens} (hVU : V ≤ U.1)
+    (e : M.restrict U.1.ι ≅ Scheme.Modules.unitObj U.1.toScheme)
+    (m : Γ(M, (⊤ : X.Opens))) :
+    overTrivializationCoefficient M V
+        (Scheme.Modules.overTrivializationOfRestrictIso M V
+          (Scheme.Modules.restrictOpenTrivialization hVU e)) m =
+      X.presheaf.map (homOfLE hVU).op
+        (localTrivializationCoefficient M U e m) := by
+  rw [Scheme.Modules.overTrivializationOfRestrictOpenTrivialization]
+  rw [overTrivializationCoefficient_restrict]
+  rw [overTrivializationCoefficient_overTrivializationOfRestrictIso]
+
+/-- An equation expressing an ideal generator in an over-site trivialization
+restricts to the corresponding equation for the restricted generator. -/
+theorem restrictOverTrivialization_inv_comp_over
+    {X : Scheme.{u}} {M : X.Modules}
+    (i : M ⟶ Scheme.Modules.unitObj X) (U : X.Opens)
+    (e : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (r : Γ(X, U))
+    (h : e.inv ≫ i.over U =
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U r)
+    {V : X.Opens} (hVU : V ≤ U) :
+    let j : Over U := Over.mk (homOfLE hVU)
+    let eV := SheafOfModules.restrictOverTrivialization
+      X.ringCatSheaf M U e j
+    eV.inv ≫ i.over V =
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf V
+        (X.presheaf.map (homOfLE hVU).op r) := by
+  dsimp only
+  let j : Over U := Over.mk (homOfLE hVU)
+  let eV := SheafOfModules.restrictOverTrivialization
+    X.ringCatSheaf M U e j
+  change eV.inv ≫ i.over V =
+    SheafOfModules.overUnitScalarEnd X.ringCatSheaf V
+      (X.presheaf.map (homOfLE hVU).op r)
+  apply SheafOfModules.hom_ext
+  ext Z
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply]
+  rw [SheafOfModules.restrictOverTrivialization_inv_app_apply]
+  have happ := congrArg (fun q ↦ q.val.app
+    (.op ((Over.map j.hom).obj Z.unop))) h
+  have hx := ConcreteCategory.congr_hom happ
+    (show (X.ringCatSheaf.over U).obj.obj
+      (.op ((Over.map j.hom).obj Z.unop)) from 1)
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply] at hx
+  change i.val.app (.op Z.unop.left)
+      (e.inv.val.app (.op ((Over.map j.hom).obj Z.unop))
+        (show (X.ringCatSheaf.over U).obj.obj
+          (.op ((Over.map j.hom).obj Z.unop)) from 1)) =
+    (1 : X.presheaf.obj (.op Z.unop.left)) *
+      X.presheaf.map Z.unop.hom.op
+        (X.presheaf.map (homOfLE hVU).op r)
+  change i.val.app (.op ((Over.map j.hom).obj Z.unop).left)
+      (e.inv.val.app (.op ((Over.map j.hom).obj Z.unop))
+        (show (X.ringCatSheaf.over U).obj.obj
+          (.op ((Over.map j.hom).obj Z.unop)) from 1)) =
+    (1 : X.presheaf.obj (.op ((Over.map j.hom).obj Z.unop).left)) *
+      X.presheaf.map ((Over.map j.hom).obj Z.unop).hom.op r at hx
+  have hmap : X.presheaf.map Z.unop.hom.op
+      (X.presheaf.map (homOfLE hVU).op r) =
+    X.presheaf.map ((Over.map j.hom).obj Z.unop).hom.op r := by
+    have hc := congrArg (fun φ ↦ CommRingCat.Hom.hom φ r)
+      ((X.presheaf.map_comp (homOfLE hVU).op Z.unop.hom.op).symm)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hc
+    refine hc.trans ?_
+    exact congrArg (fun ψ ↦ (CommRingCat.Hom.hom (X.presheaf.map ψ)) r)
+      (Subsingleton.elim _ _)
+  rw [hmap]
+  exact hx
+
+section
+
+local instance (X : Scheme.{u}) :
+    ∀ U, IsMulCommutative (X.ringCatSheaf.obj.obj U) :=
+  fun U ↦ by
+    change IsMulCommutative (X.presheaf.obj U)
+    exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
+
+/-- If two trivializations differ by multiplication by `s`, then their dual
+coordinates differ by multiplication by `s` in the opposite direction. -/
+theorem dualTrivializationLinearEquiv_eq_mul_of_transition
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (s : Γ(X, U))
+    (h : g.hom = e.hom ≫
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s)
+    (alpha : M.over U ⟶ SheafOfModules.unit (X.ringCatSheaf.over U)) :
+    (show Γ(X, U) from
+      SheafOfModules.dualTrivializationLinearEquiv X.ringCatSheaf M U e alpha) =
+      s * (show Γ(X, U) from
+        SheafOfModules.dualTrivializationLinearEquiv
+          X.ringCatSheaf M U g alpha) := by
+  let T : Over U := Over.mk (𝟙 U)
+  let oneU : (X.ringCatSheaf.over U).obj.obj (.op T) := 1
+  let sU : (X.ringCatSheaf.over U).obj.obj (.op T) := s
+  change (show (X.ringCatSheaf.over U).obj.obj (.op T) from
+      alpha.val.app (.op T) (e.inv.val.app (.op T) oneU)) =
+    sU * (show (X.ringCatSheaf.over U).obj.obj (.op T) from
+      alpha.val.app (.op T) (g.inv.val.app (.op T) oneU))
+  have he_one : e.hom.val.app (.op T) (e.inv.val.app (.op T) oneU) = oneU := by
+    have hcomp := congrArg (fun q ↦ q.val.app (.op T)) e.inv_hom_id
+    have happ := ConcreteCategory.congr_hom hcomp oneU
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply] at happ
+    exact happ
+  have hge : g.hom.val.app (.op T) (e.inv.val.app (.op T) oneU) = sU := by
+    rw [h]
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply]
+    rw [he_one]
+    rw [SheafOfModules.overUnitScalarEnd_app_apply]
+    change (1 : Γ(X, U)) * X.presheaf.map (𝟙 (.op U)) s = s
+    rw [X.presheaf.map_id]
+    simp
+  have hg_cancel (x : (M.over U).val.obj (.op T)) :
+      g.inv.val.app (.op T) (g.hom.val.app (.op T) x) = x := by
+    have hcomp := congrArg (fun q ↦ q.val.app (.op T)) g.hom_inv_id
+    have happ := ConcreteCategory.congr_hom hcomp x
+    erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+      ModuleCat.comp_apply] at happ
+    exact happ
+  have hgen : e.inv.val.app (.op T) oneU =
+      sU • g.inv.val.app (.op T) oneU := by
+    calc
+      e.inv.val.app (.op T) oneU =
+          g.inv.val.app (.op T)
+            (g.hom.val.app (.op T) (e.inv.val.app (.op T) oneU)) :=
+        (hg_cancel (e.inv.val.app (.op T) oneU)).symm
+      _ = g.inv.val.app (.op T) sU :=
+        congrArg (fun x ↦ g.inv.val.app (.op T) x) hge
+      _ = g.inv.val.app (.op T) (sU • oneU) := by simp [oneU, sU]
+      _ = sU • g.inv.val.app (.op T) oneU :=
+        (g.inv.val.app (.op T)).hom.map_smul sU oneU
+  rw [hgen, (alpha.val.app (.op T)).hom.map_smul]
+  rfl
+
+/-- Restriction of over-site trivializations preserves a scalar transition. -/
+theorem restrictOverTrivialization_hom_eq_comp_scalar
+    {X : Scheme.{u}} (M : X.Modules) {U V : X.Opens} (hVU : V ≤ U)
+    (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (s : Γ(X, U))
+    (h : g.hom = e.hom ≫
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s) :
+    let j : Over U := Over.mk (homOfLE hVU)
+    (SheafOfModules.restrictOverTrivialization
+        X.ringCatSheaf M U g j).hom =
+      (SheafOfModules.restrictOverTrivialization
+          X.ringCatSheaf M U e j).hom ≫
+        SheafOfModules.overUnitScalarEnd X.ringCatSheaf V
+          (X.presheaf.map (homOfLE hVU).op s) := by
+  dsimp only
+  let j : Over U := Over.mk (homOfLE hVU)
+  apply SheafOfModules.hom_ext
+  ext Z x
+  change g.hom.val.app (.op ((Over.map j.hom).obj Z.unop)) x = _
+  have happ := congrArg (fun q ↦ q.val.app
+    (.op ((Over.map j.hom).obj Z.unop))) h
+  have hx := ConcreteCategory.congr_hom happ x
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply] at hx
+  rw [SheafOfModules.overUnitScalarEnd_app_apply] at hx
+  erw [SheafOfModules.overUnitScalarEnd_app_apply]
+  have hmap : X.presheaf.map Z.unop.hom.op
+      (X.presheaf.map (homOfLE hVU).op s) =
+    X.presheaf.map ((Over.map j.hom).obj Z.unop).hom.op s := by
+    have hc := congrArg (fun φ ↦ CommRingCat.Hom.hom φ s)
+      ((X.presheaf.map_comp (homOfLE hVU).op Z.unop.hom.op).symm)
+    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hc
+    refine hc.trans ?_
+    exact congrArg (fun ψ ↦ (CommRingCat.Hom.hom (X.presheaf.map ψ)) s)
+      (Subsingleton.elim _ _)
+  have he :
+      (SheafOfModules.restrictOverTrivialization
+        X.ringCatSheaf M U e (Over.mk (homOfLE hVU))).hom.val.app Z x =
+      e.hom.val.app (.op ((Over.map j.hom).obj Z.unop)) x := by
+    rfl
+  convert hx using 1
+  all_goals first | exact congrArg₂ (fun a b ↦ a * b) he hmap | rfl
+
+/-- Dualization reverses a scalar transition between trivializations. -/
+theorem dualOverIsoOfIso_hom_eq_comp_scalar
+    {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
+    (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
+    (s : Γ(X, U))
+    (h : g.hom = e.hom ≫
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s) :
+    (SheafOfModules.dualOverIsoOfIso X.ringCatSheaf M U e).hom =
+      (SheafOfModules.dualOverIsoOfIso X.ringCatSheaf M U g).hom ≫
+        SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s := by
+  apply SheafOfModules.hom_ext
+  ext V alpha
+  let eV := SheafOfModules.restrictOverTrivialization
+    X.ringCatSheaf M U e V.unop
+  let gV := SheafOfModules.restrictOverTrivialization
+    X.ringCatSheaf M U g V.unop
+  let sV : X.ringCatSheaf.obj.obj (.op V.unop.left) :=
+    X.presheaf.map V.unop.hom.op s
+  have hV : gV.hom = eV.hom ≫
+      SheafOfModules.overUnitScalarEnd X.ringCatSheaf V.unop.left sV := by
+    have hV' := restrictOverTrivialization_hom_eq_comp_scalar
+      M (leOfHom V.unop.hom) e g s h
+    convert hV' using 1
+    all_goals rfl
+  have hcoord := dualTrivializationLinearEquiv_eq_mul_of_transition
+    M V.unop.left eV gV sV hV alpha
+  change SheafOfModules.dualTrivializationLinearEquiv
+      X.ringCatSheaf M V.unop.left eV alpha = _
+  change SheafOfModules.dualTrivializationLinearEquiv
+      X.ringCatSheaf M V.unop.left eV alpha =
+    (SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s).val.app V
+      ((SheafOfModules.dualOverIsoOfIso
+        X.ringCatSheaf M U g).hom.val.app V alpha)
+  rw [SheafOfModules.overUnitScalarEnd_app_apply]
+  have hg : (SheafOfModules.dualOverIsoOfIso
+      X.ringCatSheaf M U g).hom.val.app V alpha =
+    SheafOfModules.dualTrivializationLinearEquiv
+      X.ringCatSheaf M V.unop.left gV alpha := by
+    rfl
+  rw [hg]
+  change SheafOfModules.dualTrivializationLinearEquiv
+      X.ringCatSheaf M V.unop.left eV alpha =
+    SheafOfModules.dualTrivializationLinearEquiv
+      X.ringCatSheaf M V.unop.left gV alpha * sV
+  change SheafOfModules.dualTrivializationLinearEquiv
+      X.ringCatSheaf M V.unop.left eV alpha =
+    sV * SheafOfModules.dualTrivializationLinearEquiv
+      X.ringCatSheaf M V.unop.left gV alpha at hcoord
+  exact hcoord.trans (mul_comm' sV
+    (SheafOfModules.dualTrivializationLinearEquiv
+      X.ringCatSheaf M V.unop.left gV alpha))
+
+/-- The over-site trivialization induced by a principal generator identifies the
+inclusion of the ideal module with multiplication by that generator. -/
+theorem localIdealGeneratorOverTrivialization_inv_comp
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [QuasiCompact f]
+    (U : Y.affineOpens) (r : Γ(Y, U.1)) (hr : r ∈ f.ker.ideal U)
+    (hspan : f.ker.ideal U = Ideal.span {r})
+    (hnzd : r ∈ nonZeroDivisors Γ(Y, U.1)) :
+    let eGen := localIdealGeneratorIso f U r hr hspan hnzd
+    let eOver := Scheme.Modules.overTrivializationOfRestrictIso
+      (idealModule f) U.1 eGen.symm
+    eOver.inv ≫ (idealModuleToUnit f).over U.1 =
+      SheafOfModules.overUnitScalarEnd Y.ringCatSheaf U.1 r := by
+  dsimp only
+  let eGen := localIdealGeneratorIso f U r hr hspan hnzd
+  let eOver := Scheme.Modules.overTrivializationOfRestrictIso
+    (idealModule f) U.1 eGen.symm
+  change eOver.inv ≫ (idealModuleToUnit f).over U.1 =
+    SheafOfModules.overUnitScalarEnd Y.ringCatSheaf U.1 r
+  let G := (Scheme.Modules.overEquiv U.1).functor
+  let F := Scheme.Modules.overFunctorEquiv U.1
+  let C := (U.1.sheafOfModulesEquivOverUnit Y.ringCatSheaf).hom
+  let A := G.map eOver.inv
+  let B := G.map ((idealModuleToUnit f).over U.1)
+  let D := G.map
+    (SheafOfModules.overUnitScalarEnd Y.ringCatSheaf U.1 r)
+  apply G.map_injective
+  change A ≫ B = D
+  apply (cancel_mono C).1
+  change (A ≫ B) ≫ C = D ≫ C
+  have hscalar := Scheme.Modules.overEquiv_unitScalarEnd (X := Y) U.1 r
+  change D ≫ C = C ≫
+    unitEndomorphismOfTopSection (Scheme.Modules.openTopSection U.1 r) at hscalar
+  rw [hscalar]
+  let FI := F.app (idealModule f)
+  let FO := F.app (Scheme.Modules.unitObj Y)
+  have hC : FO.hom ≫ (Scheme.Modules.restrictUnitIso U.1.ι).hom = C := by
+    dsimp only [FO, F, C]
+    rw [Scheme.Modules.overFunctorEquiv_unitP]
+    change (Scheme.Modules.restrictUnitIso U.1.ι).inv ≫
+      (Scheme.Modules.restrictUnitIso U.1.ι).hom = 𝟙 _
+    exact (Scheme.Modules.restrictUnitIso U.1.ι).inv_hom_id
+  have hnat := F.hom.naturality (idealModuleToUnit f)
+  let q := (Scheme.Modules.restrictFunctor U.1.ι).map (idealModuleToUnit f)
+  let eO := (Scheme.Modules.restrictUnitIso U.1.ι).hom
+  let H := restrictIdealModuleToUnit f U.1.ι
+  change B ≫ FO.hom = FI.hom ≫ q at hnat
+  have hBC : B ≫ C = FI.hom ≫ H := by
+    change B ≫ C = FI.hom ≫ (q ≫ eO)
+    rw [← hC]
+    rw [← Category.assoc]
+    have hnatComp := congrArg (fun p ↦ p ≫ eO) hnat
+    exact hnatComp
+  have hA : A = C ≫ eGen.hom ≫ FI.inv := by
+    dsimp only [A, eOver, Scheme.Modules.overTrivializationOfRestrictIso]
+    simp only [Functor.FullyFaithful.preimageIso_inv,
+      Functor.FullyFaithful.map_preimage, Iso.trans_inv]
+    rfl
+  calc
+    (A ≫ B) ≫ C = A ≫ (B ≫ C) := Category.assoc _ _ _
+    _ = (C ≫ eGen.hom ≫ FI.inv) ≫
+        (FI.hom ≫ H) :=
+      congrArg₂ (fun p q ↦ p ≫ q) hA hBC
+    _ = C ≫ eGen.hom ≫ H := by
+      have hcanc : FI.inv ≫ FI.hom ≫ H = H := FI.inv_hom_id_assoc H
+      have hcongr := congrArg (fun p ↦ C ≫ eGen.hom ≫ p) hcanc
+      convert hcongr using 1
+      all_goals simp only [Category.assoc]
+      all_goals rfl
+    _ = C ≫ unitEndomorphismOfTopSection
+        (Scheme.Modules.openTopSection U.1 r) := by
+      have hbase := localIdealGeneratorHom_comp_restrictIdealModuleToUnit
+        f U r hr
+      change eGen.hom ≫ H =
+        unitEndomorphismOfTopSection
+          (Scheme.Modules.openTopSection U.1 r) at hbase
+      exact congrArg (fun p ↦ C ≫ p) hbase
+
+end
+
+/-- The restriction of `O([0])` to a residue fibre is the pole sheaf of the induced
+marked point on that fibre. -/
+noncomputable def sectionPoleSheafFiberIso
+    {E S : Scheme.{u}} {π : E ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) (s : S) :
+    letI : IsSeparated (π.fiberToSpecResidueField s) :=
+      MorphismProperty.pullback_snd π (S.fromSpecResidueField s) inferInstance
+    (Scheme.Modules.pullback (π.fiberι s)).obj (sectionPoleSheaf π z hz) ≅
+      sectionPoleSheaf (π.fiberToSpecResidueField s)
+        (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _) :=
+  sectionPoleSheafBaseChangeIso hsm z hz (S.fromSpecResidueField s)
+
+/-- The restriction of `O(n[0])` to a residue fibre is the corresponding tensor power
+of the pole sheaf of the induced marked point. -/
+noncomputable def sectionPoleSheafPowerFiberIso
+    {E S : Scheme.{u}} {π : E ⟶ S}
+    (hsm : SmoothOfRelativeDimension 1 π) [IsSeparated π]
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) (s : S) (n : ℕ) :
+    letI : IsSeparated (π.fiberToSpecResidueField s) :=
+      MorphismProperty.pullback_snd π (S.fromSpecResidueField s) inferInstance
+    (Scheme.Modules.pullback (π.fiberι s)).obj
+          (sectionPoleSheafPower π z hz n) ≅
+        sectionPoleSheafPower (π.fiberToSpecResidueField s)
+          (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _) n :=
+  sectionPoleSheafPowerBaseChangeIso hsm z hz
+    (S.fromSpecResidueField s) n
 
 /-- Cover-local invertibility is invariant under isomorphism. -/
 private theorem isInvertible_of_iso {X : Scheme.{u}} {M N : X.Modules}
