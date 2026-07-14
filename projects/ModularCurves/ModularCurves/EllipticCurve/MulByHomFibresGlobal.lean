@@ -119,40 +119,6 @@ theorem fibreModelIsoAsOver (E : EllipticCurve S) (s : S)
     (congrArg _ (show (E.baseChange (S.fromSpecResidueField s)).zero ≫ e'.hom
       = (modelEllipticCurve W).zero from hez))
 
-/-- **(BB-QF BETA per-fibre sub-leaf — the single remaining BETA obligation)** Each residue-field
-fibre of `[N] : E ⟶ E` is locally quasi-finite. NOTE the fibre's LQF **cannot** come from `[N]`'s own
-LQF (that is circular via `of_fiberToSpecResidueField`); it must come from the model. Precise discharge
-route (degree-free, NOT `abelEnrichment_exists`-gated):
-* **(a)** [ALPHA, `ModelFibreCount.lean`, in progress] over the field, `modelEllipticCurve W`'s `[N]`
-  is `LocallyQuasiFinite` — image infinite via HasseWeil `card_torsion_ellPow_nat`, so fibres are proper
-  closed in the dim-≤1 integral `zChart` (`coordinateRing_krullDimLE_one`), hence finite
-  (`IsArtinianScheme.finite`);
-* **(b)** [transport — ALL building blocks LANDED] over `κ̄(s)` (`s := π y`), `E_s ≅ modelEllipticCurve W_s`
-  is a *pointed* iso, so `locallyQuasiFinite_mulByHom_of_isMonHom_iso` gives
-  `LocallyQuasiFinite (E_{κ̄(s)}.mulByHom N)`; the `[IsMonHom]` is discharged by **`isMonHom_of_pointed`**
-  (this file, PROVEN) from the pointedness of the iso alone;
-* **(c)** [fibre + descent] the fibre `fiberToSpecResidueField y` is a base change of `E_s.mulByHom N`
-  (`mulByHom_baseChange`, `GroupLaw.lean:217`); LQF is base-change-stable, and descends `κ̄(s) → κ(y)`.
-**ALL transport machinery now PROVEN + axiom-clean:** `fibrewiseElliptic`, **`fibreModelIsoAsOver`** (the
-raw-iso→asOver wrapping INCL. its `IsMonHom` η-matching — the deep transparency-cast piece, now closed),
-`finite_fibres_mulByHom_of_isMonHom_iso`, `locallyQuasiFinite_mulByHom_of_isMonHom_iso`,
-`mulByHom_locallyQuasiFinite_assembled`. So this sub-leaf reduces to: `fibreModelIsoAsOver` (at `s := π y`)
-+ `finite_fibres_mulByHom_of_isMonHom_iso` transport ALPHA's model finite fibres
-(`modelMulByHom_finite_preimage_singleton`, mod g5) onto `(E.baseChange (fromSpecResidueField s)).mulByHom N`;
-then the **fibre-of-endo identification** — `(E.mulByHom N)`'s fibre ↔ the base-changed record's `[N]`-fibre
-via the pullback square (`Scheme.Pullback.range_fst` + `mulByHom_baseChange_fst`) + κ̄/κ descent. The ONLY
-remaining pieces: the fibre-of-endo id (deep pullback, no mathlib shortcut) + ALPHA's g5. -/
-theorem fiber_mulByHom_locallyQuasiFinite (E : EllipticCurve S) (N : ℕ) [NeZero N] (y : E.E) :
-    LocallyQuasiFinite ((E.mulByHom N).fiberToSpecResidueField y) := by sorry
-
-/-- **(BB-QF BETA global assembly — PROVED here)** `[N] : E ⟶ E` is locally quasi-finite, by the
-mathlib fibrewise criterion `LocallyQuasiFinite.of_fiberToSpecResidueField` applied to the per-fibre
-sub-leaf `fiber_mulByHom_locallyQuasiFinite`. This is the assembled form of `Torsion`'s BB-QF leaf
-`mulByHom_locallyQuasiFinite` (identical statement); the boarded relocation wires it in. -/
-theorem mulByHom_locallyQuasiFinite_assembled (E : EllipticCurve S) (N : ℕ) [NeZero N] :
-    LocallyQuasiFinite (E.mulByHom N) :=
-  LocallyQuasiFinite.of_fiberToSpecResidueField _ fun y => E.fiber_mulByHom_locallyQuasiFinite N y
-
 /-! ### κ̄-wiring: the model LQF over an arbitrary field (seam-i application)
 
 Base-change the model to the algebraic closure (T-A5a: `projModel (W.baseChange κ̄)` IS
@@ -291,7 +257,139 @@ theorem modelMulByHom_locallyQuasiFinite_of_field (W : WeierstrassCurve k) [W.Is
       MorphismProperty.pullback_fst _ _ hFlatSpec⟩,
       MorphismProperty.pullback_fst _ _ hQCSpec⟩ h2
 
+/-- **(model fibre-count over an arbitrary field)** Every topological fibre of the model
+`[N]` is finite over ANY field `k`: the κ̄-master gives local quasi-finiteness, `[N]` is
+proper (an endomorphism of the proper model, cancellation along the separated `π`), hence
+quasi-compact, and mathlib's `Scheme.Hom.finite_preimage_singleton` finishes. Removes the
+`[IsAlgClosed]` hypothesis from ALPHA's `modelMulByHom_finite_fibres`. -/
+theorem modelMulByHom_finite_fibres_of_field (W : WeierstrassCurve k) [W.IsElliptic]
+    (N : ℕ) [NeZero N] (y : (modelEllipticCurve W).E) :
+    (⇑((modelEllipticCurve W).mulByHom N).base ⁻¹' {y}).Finite := by
+  haveI := modelMulByHom_locallyQuasiFinite_of_field W N
+  haveI hp : IsProper ((modelEllipticCurve W).mulByHom N) := by
+    haveI h : IsProper ((modelEllipticCurve W).mulByHom N ≫ (modelEllipticCurve W).π) := by
+      rw [mulByHom_π]
+      exact (modelEllipticCurve W).proper
+    exact IsProper.of_comp ((modelEllipticCurve W).mulByHom N) (modelEllipticCurve W).π
+  exact ((modelEllipticCurve W).mulByHom N).finite_preimage_singleton y
+
 end KappaBarWiring
+
+/-- **(BB-QF global fibre-count — the geometric leaf over an arbitrary base)** Every
+topological fibre of `[N] : E ⟶ E` is finite. The fibre over `y` lies inside the `π`-fibre
+over `s := π y`, which is the (pointed-model-isomorphic) base-changed record over `κ(s)`;
+`finite_fibres_mulByHom_of_isMonHom_iso` transports the any-field model fibre-count
+`modelMulByHom_finite_fibres_of_field` onto it, and the fibre embedding `pullback.fst`
+(= `fiberι`) carries the finiteness up. This is exactly the `Torsion.lean` BB-QF leaf
+`mulByHom_finite_fibres`, proved here over ANY base and in EVERY characteristic. -/
+theorem mulByHom_finite_preimage_singleton (E : EllipticCurve S) (N : ℕ) [NeZero N]
+    (y : E.E) : (⇑(E.mulByHom N).base ⁻¹' {y}).Finite := by
+  set s := E.π.base y with hs
+  have hrange : Set.range ⇑(pullback.fst E.π (S.fromSpecResidueField s))
+      = ⇑E.π ⁻¹' {s} := E.π.range_fiberι s
+  have hinj : Function.Injective ⇑(pullback.fst E.π (S.fromSpecResidueField s)) :=
+    (E.π.fiberι s).isEmbedding.injective
+  -- pointed model on the π-fibre + any-field model fibre-count, transported
+  obtain ⟨W, hWell, e, heπ, hez⟩ := fibrewiseElliptic E s
+  haveI := hWell
+  obtain ⟨φ, hφ⟩ := fibreModelIsoAsOver E s W e heπ hez
+  haveI := hφ
+  have hbc : ∀ z, (⇑((E.baseChange (S.fromSpecResidueField s)).mulByHom (N : ℤ))
+      ⁻¹' {z}).Finite :=
+    fun z => finite_fibres_mulByHom_of_isMonHom_iso φ (N : ℤ)
+      (fun w => modelMulByHom_finite_fibres_of_field W N w) z
+  -- points of the `[N]`-fibre lie over `s`
+  have hπN : ∀ x : E.E, E.π ((E.mulByHom (N : ℤ)) x) = E.π x := by
+    intro x
+    rw [← Scheme.Hom.comp_apply, E.mulByHom_π]
+  -- `y` itself lies over `s`
+  have hyr : y ∈ Set.range ⇑(pullback.fst E.π (S.fromSpecResidueField s)) := by
+    rw [hrange]
+    exact hs.symm
+  obtain ⟨ytil, hytil⟩ := hyr
+  -- the fibre is contained in the fibre-inclusion image of the base-changed fibre
+  refine Set.Finite.subset
+    ((hbc ytil).image ⇑(pullback.fst E.π (S.fromSpecResidueField s))) ?_
+  intro x hx
+  have hxy : (E.mulByHom (N : ℤ)) x = y := hx
+  have hxr : x ∈ Set.range ⇑(pullback.fst E.π (S.fromSpecResidueField s)) := by
+    rw [hrange]
+    show E.π x = s
+    have h2 : s = E.π ((E.mulByHom (N : ℤ)) x) := by rw [hxy]
+    exact (h2.trans (hπN x)).symm
+  obtain ⟨xtil, hxtil⟩ := hxr
+  refine ⟨xtil, ?_, hxtil⟩
+  have key : ∀ a : ↥(pullback E.π (S.fromSpecResidueField s)),
+      (E.mulByHom (N : ℤ)) ((pullback.fst E.π (S.fromSpecResidueField s)) a)
+      = (pullback.fst E.π (S.fromSpecResidueField s))
+          (((E.baseChange (S.fromSpecResidueField s)).mulByHom (N : ℤ)) a) := by
+    intro a
+    have h1 := congrFun (congrArg
+      (fun f : (E.baseChange (S.fromSpecResidueField s)).E ⟶ E.E => ⇑f)
+      (mulByHom_baseChange_fst E (S.fromSpecResidueField s) (N : ℤ))) a
+    exact (Scheme.Hom.comp_apply _ _ _).symm.trans
+      (h1.symm.trans (Scheme.Hom.comp_apply _ _ _))
+  apply hinj
+  calc (pullback.fst E.π (S.fromSpecResidueField s))
+        (((E.baseChange (S.fromSpecResidueField s)).mulByHom (N : ℤ)) xtil)
+      = (E.mulByHom (N : ℤ)) ((pullback.fst E.π (S.fromSpecResidueField s)) xtil) :=
+        (key xtil).symm
+    _ = (E.mulByHom (N : ℤ)) x := by rw [hxtil]
+    _ = y := hxy
+    _ = (pullback.fst E.π (S.fromSpecResidueField s)) ytil := hytil.symm
+
+/-- **(BB-QF CLOSED — direct global assembly)** `[N] : E ⟶ E` is locally quasi-finite over
+an arbitrary base, via `LocallyQuasiFinite.of_finite_preimage_singleton` on the global
+fibre-count (`[N]` is proper, hence locally of finite type). This is the full content of
+the `Torsion.lean` BB-QF box, and makes the per-fibre sub-leaf below a corollary
+(base-change stability) rather than an input. -/
+theorem mulByHom_locallyQuasiFinite_global (E : EllipticCurve S) (N : ℕ) [NeZero N] :
+    LocallyQuasiFinite (E.mulByHom N) := by
+  haveI hp : IsProper (E.mulByHom N) := by
+    haveI h : IsProper (E.mulByHom N ≫ E.π) := by
+      rw [E.mulByHom_π]
+      exact E.proper
+    exact IsProper.of_comp (E.mulByHom N) E.π
+  exact LocallyQuasiFinite.of_finite_preimage_singleton _
+    fun x => mulByHom_finite_preimage_singleton E N x
+
+/-- **(BB-QF BETA per-fibre sub-leaf — the single remaining BETA obligation)** Each residue-field
+fibre of `[N] : E ⟶ E` is locally quasi-finite. NOTE the fibre's LQF **cannot** come from `[N]`'s own
+LQF (that is circular via `of_fiberToSpecResidueField`); it must come from the model. Precise discharge
+route (degree-free, NOT `abelEnrichment_exists`-gated):
+* **(a)** [ALPHA, `ModelFibreCount.lean`, in progress] over the field, `modelEllipticCurve W`'s `[N]`
+  is `LocallyQuasiFinite` — image infinite via HasseWeil `card_torsion_ellPow_nat`, so fibres are proper
+  closed in the dim-≤1 integral `zChart` (`coordinateRing_krullDimLE_one`), hence finite
+  (`IsArtinianScheme.finite`);
+* **(b)** [transport — ALL building blocks LANDED] over `κ̄(s)` (`s := π y`), `E_s ≅ modelEllipticCurve W_s`
+  is a *pointed* iso, so `locallyQuasiFinite_mulByHom_of_isMonHom_iso` gives
+  `LocallyQuasiFinite (E_{κ̄(s)}.mulByHom N)`; the `[IsMonHom]` is discharged by **`isMonHom_of_pointed`**
+  (this file, PROVEN) from the pointedness of the iso alone;
+* **(c)** [fibre + descent] the fibre `fiberToSpecResidueField y` is a base change of `E_s.mulByHom N`
+  (`mulByHom_baseChange`, `GroupLaw.lean:217`); LQF is base-change-stable, and descends `κ̄(s) → κ(y)`.
+**ALL transport machinery now PROVEN + axiom-clean:** `fibrewiseElliptic`, **`fibreModelIsoAsOver`** (the
+raw-iso→asOver wrapping INCL. its `IsMonHom` η-matching — the deep transparency-cast piece, now closed),
+`finite_fibres_mulByHom_of_isMonHom_iso`, `locallyQuasiFinite_mulByHom_of_isMonHom_iso`,
+`mulByHom_locallyQuasiFinite_assembled`. So this sub-leaf reduces to: `fibreModelIsoAsOver` (at `s := π y`)
++ `finite_fibres_mulByHom_of_isMonHom_iso` transport ALPHA's model finite fibres
+(`modelMulByHom_finite_preimage_singleton`, mod g5) onto `(E.baseChange (fromSpecResidueField s)).mulByHom N`;
+then the **fibre-of-endo identification** — `(E.mulByHom N)`'s fibre ↔ the base-changed record's `[N]`-fibre
+via the pullback square (`Scheme.Pullback.range_fst` + `mulByHom_baseChange_fst`) + κ̄/κ descent. The ONLY
+remaining pieces: the fibre-of-endo id (deep pullback, no mathlib shortcut) + ALPHA's g5. -/
+theorem fiber_mulByHom_locallyQuasiFinite (E : EllipticCurve S) (N : ℕ) [NeZero N] (y : E.E) :
+    LocallyQuasiFinite ((E.mulByHom N).fiberToSpecResidueField y) := by
+  haveI := mulByHom_locallyQuasiFinite_global E N
+  exact MorphismProperty.pullback_snd _ _ this
+
+/-- **(BB-QF BETA global assembly — PROVED here)** `[N] : E ⟶ E` is locally quasi-finite, by the
+mathlib fibrewise criterion `LocallyQuasiFinite.of_fiberToSpecResidueField` applied to the per-fibre
+sub-leaf `fiber_mulByHom_locallyQuasiFinite`. This is the assembled form of `Torsion`'s BB-QF leaf
+`mulByHom_locallyQuasiFinite` (identical statement); the boarded relocation wires it in. -/
+theorem mulByHom_locallyQuasiFinite_assembled (E : EllipticCurve S) (N : ℕ) [NeZero N] :
+    LocallyQuasiFinite (E.mulByHom N) :=
+  LocallyQuasiFinite.of_fiberToSpecResidueField _ fun y => E.fiber_mulByHom_locallyQuasiFinite N y
+
+
 
 end EllipticCurve
 
