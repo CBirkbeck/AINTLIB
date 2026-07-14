@@ -64,6 +64,36 @@ theorem unitEndomorphismOfTopSection_one {X : Scheme.{u}} :
       (homOfLE (le_top : U.unop ≤ (⊤ : X.Opens))).op 1 = 1
   rw [map_one, mul_one]
 
+/-- A unit on the top open acts as an automorphism of the structure sheaf. -/
+noncomputable def unitAutomorphismOfTopUnit {X : Scheme.{u}}
+    (r : Γ(X, (⊤ : X.Opens))ˣ) :
+    Scheme.Modules.unitObj X ≅ Scheme.Modules.unitObj X where
+  hom := unitEndomorphismOfTopSection r
+  inv := unitEndomorphismOfTopSection (↑r⁻¹ : Γ(X, (⊤ : X.Opens)))
+  hom_inv_id := by
+    rw [unitEndomorphismOfTopSection_comp]
+    have h : (r : Γ(X, (⊤ : X.Opens))) *
+        (↑r⁻¹ : Γ(X, (⊤ : X.Opens))) = 1 := r.mul_inv
+    rw [h, unitEndomorphismOfTopSection_one]
+  inv_hom_id := by
+    rw [unitEndomorphismOfTopSection_comp]
+    have h : (↑r⁻¹ : Γ(X, (⊤ : X.Opens))) *
+        (r : Γ(X, (⊤ : X.Opens))) = 1 := r.inv_mul
+    rw [h, unitEndomorphismOfTopSection_one]
+
+@[simp]
+theorem unitAutomorphismOfTopUnit_hom {X : Scheme.{u}}
+    (r : Γ(X, (⊤ : X.Opens))ˣ) :
+    (unitAutomorphismOfTopUnit r).hom = unitEndomorphismOfTopSection r :=
+  rfl
+
+@[simp]
+theorem unitAutomorphismOfTopUnit_inv {X : Scheme.{u}}
+    (r : Γ(X, (⊤ : X.Opens))ˣ) :
+    (unitAutomorphismOfTopUnit r).inv =
+      unitEndomorphismOfTopSection (↑r⁻¹ : Γ(X, (⊤ : X.Opens))) :=
+  rfl
+
 theorem unitEndomorphismOfTopSection_comp_unitToPushforward
     {X Y : Scheme.{u}} (f : X ⟶ Y) (r : Γ(Y, (⊤ : Y.Opens))) :
     unitEndomorphismOfTopSection r ≫

@@ -397,6 +397,11 @@ inverse, and triple-intersection Cech laws. The descended ring units are now gen
 global functions on the finite-stage overlap schemes, compatible with the geometric restriction
 maps used by affine gluing.
 
+Completed subdependency (2026-07-14): defined `ModularCurves.unitAutomorphismOfTopUnit`,
+which packages multiplication by an invertible top-open section as an automorphism of the
+scheme's structure module. Its inverse is multiplication by the inverse unit, using the existing
+scalar-composition API and no additional hypotheses.
+
 Active dependency claim (2026-07-14): turn each overlap transition section into the
 corresponding scalar automorphism of the unit sheaf and prove the identity, inverse, and
 triple-cocycle laws at the sheaf-morphism level. This is the local module descent datum needed
