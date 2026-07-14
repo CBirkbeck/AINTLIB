@@ -163,7 +163,7 @@ theorem quotient_mk_artinHasseThetaTruncProductAtTo_eq_prod_trunc_eval
     let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     Ideal.Quotient.mk (F.Q ^ (N + 1))
         (artinHasseThetaTruncProductAtTo F γ N y) =
@@ -178,9 +178,9 @@ theorem quotient_mk_artinHasseThetaTruncProductAtTo_eq_prod_trunc_eval
     F.toConcreteStickelbergerSetup
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let hE : DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) :=
-    fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n
+    fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n
   let Eps : PowerSeries A := hE.mapTo (S0.rIntegralRatToQuotient N)
-  let u : Fin F.toConcreteStickelbergerSetup.f → 𝓞 R' := fun i =>
+  let u : Fin F.toConcreteStickelbergerSetup.f → 𝓞 R' := fun i ↦
     (F.teichUnitFullVal (F.traceScale * y)) ^ (ℓ ^ (i : ℕ))
   calc
     Ideal.Quotient.mk (F.Q ^ (N + 1))
@@ -214,7 +214,7 @@ theorem quotient_mk_artinHasseThetaTruncProductAtTo_approx_eq_prod_inverse_trunc
     let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let Ips : PowerSeries A :=
       (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -235,14 +235,14 @@ theorem quotient_mk_artinHasseThetaTruncProductAtTo_approx_eq_prod_inverse_trunc
     F.toConcreteStickelbergerSetup
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let hE : DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) :=
-    fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n
+    fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n
   let Eps : PowerSeries A := hE.mapTo (S0.rIntegralRatToQuotient N)
   let Ips : PowerSeries A :=
     (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
       (S0.rIntegralRatToQuotient N)
   let πbar : A := Ideal.Quotient.mk (F.Q ^ (N + 1)) F.π
   let γ : 𝓞 R' := artinHasseDworkParameterApproxTo S0 N
-  let u : Fin F.toConcreteStickelbergerSetup.f → 𝓞 R' := fun i =>
+  let u : Fin F.toConcreteStickelbergerSetup.f → 𝓞 R' := fun i ↦
     (F.teichUnitFullVal (F.traceScale * y)) ^ (ℓ ^ (i : ℕ))
   have hγ :
       Ideal.Quotient.mk (F.Q ^ (N + 1)) γ =
@@ -281,7 +281,7 @@ theorem quotient_mk_artinHasseThetaTruncProductAtTo_approx_eq_rescaled_inverse_e
     let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let Ips : PowerSeries A :=
       (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -303,14 +303,14 @@ theorem quotient_mk_artinHasseThetaTruncProductAtTo_approx_eq_rescaled_inverse_e
     F.toConcreteStickelbergerSetup
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let hE : DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) :=
-    fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n
+    fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n
   let Eps : PowerSeries A := hE.mapTo (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Ips : PowerSeries A :=
     (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
       (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let πbar : A := Ideal.Quotient.mk (F.Q ^ (N + 1)) F.π
   let δ : A := (PowerSeries.trunc (N + 1) Ips).eval₂ (RingHom.id A) πbar
-  let u : Fin F.toConcreteStickelbergerSetup.f → A := fun i =>
+  let u : Fin F.toConcreteStickelbergerSetup.f → A := fun i ↦
     Ideal.Quotient.mk (F.Q ^ (N + 1))
       ((F.teichUnitFullVal (F.traceScale * y)) ^ (ℓ ^ (i : ℕ)))
   calc
@@ -335,7 +335,7 @@ theorem quotient_mk_artinHasseThetaTruncProductAtTo_approx_eq_rescaled_inverse_e
             simpa using
               (Polynomial.eval₂_finsetProd
                 (s := (Finset.univ : Finset (Fin F.toConcreteStickelbergerSetup.f)))
-                (g := fun i : Fin F.toConcreteStickelbergerSetup.f =>
+                (g := fun i : Fin F.toConcreteStickelbergerSetup.f ↦
                   PowerSeries.trunc (N + 1) (PowerSeries.rescale (u i) Eps))
                 (f := RingHom.id A) (x := δ)).symm
 
@@ -347,7 +347,7 @@ theorem psiInt_sub_artinHasseThetaTruncProductAtTo_approx_mem_Q_pow_succ_iff
     let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let Ips : PowerSeries A :=
       (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -369,7 +369,7 @@ theorem psiInt_sub_artinHasseThetaTruncProductAtTo_approx_mem_Q_pow_succ_iff
   dsimp only
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let hE : DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) :=
-    fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n
+    fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n
   let Eps : PowerSeries A := hE.mapTo (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Ips : PowerSeries A :=
     (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -421,7 +421,7 @@ theorem psiInt_sub_artinHasseThetaTruncProductAtTo_approx_mem_Q_pow_succ_iff_bas
     let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let Ips : PowerSeries A :=
       (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -446,7 +446,7 @@ theorem psiInt_sub_artinHasseThetaTruncProductAtTo_approx_mem_Q_pow_succ_iff_bas
     F.toConcreteStickelbergerSetup
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let hE : DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) :=
-    fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n
+    fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n
   let Eps : PowerSeries A := hE.mapTo (S0.rIntegralRatToQuotient N)
   let Ips : PowerSeries A :=
     (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -472,7 +472,7 @@ def artinHasseApproxDworkOneAddPiProductIdentity (N : ℕ) (y : kˣ) : Prop :=
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Ips : PowerSeries A :=
     (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -496,7 +496,7 @@ def artinHasseApproxDworkBaseProductIdentity (N : ℕ) (y : kˣ) : Prop :=
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Ips : PowerSeries A :=
     (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -572,7 +572,7 @@ noncomputable def artinHasseWittTeichFactor
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let θ : WittVector ℓ k →+* A :=
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
@@ -595,7 +595,7 @@ theorem artinHasseWittTeichFactor_unit_eq_trunc_eval
     let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let zbar : A := Ideal.Quotient.mk (F.Q ^ (N + 1)) (F.teichUnitFullVal x)
     F.artinHasseWittTeichFactor N ε (x : k) =
@@ -604,7 +604,7 @@ theorem artinHasseWittTeichFactor_unit_eq_trunc_eval
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let zbar : A := Ideal.Quotient.mk (F.Q ^ (N + 1)) (F.teichUnitFullVal x)
   rw [artinHasseWittTeichFactor]
@@ -619,11 +619,11 @@ theorem artinHasseWittTeichProduct_frobeniusTrace_teichmuller_unit
     let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let zbar : A := Ideal.Quotient.mk (F.Q ^ (N + 1)) (F.teichUnitFullVal x)
     F.artinHasseWittTeichProduct N ε (Finset.univ : Finset (Fin f))
-        (fun i : Fin f => (x : k) ^ (ℓ ^ (i : ℕ))) =
+        (fun i : Fin f ↦ (x : k) ^ (ℓ ^ (i : ℕ))) =
       ∏ i : Fin f,
         (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
           (ε * zbar ^ (ℓ ^ (i : ℕ))) := by
@@ -632,7 +632,7 @@ theorem artinHasseWittTeichProduct_frobeniusTrace_teichmuller_unit
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let zbar : A := Ideal.Quotient.mk (F.Q ^ (N + 1)) (F.teichUnitFullVal x)
   rw [artinHasseWittTeichProduct]
@@ -656,13 +656,13 @@ theorem artinHasseWittTeichProduct_traceScale_eq_frobenius_product
     let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let zbar : A :=
       Ideal.Quotient.mk (F.Q ^ (N + 1)) (F.teichUnitFullVal (F.traceScale * y))
     F.artinHasseWittTeichProduct N ε
         (Finset.univ : Finset (Fin F.toConcreteStickelbergerSetup.f))
-        (fun i : Fin F.toConcreteStickelbergerSetup.f =>
+        (fun i : Fin F.toConcreteStickelbergerSetup.f ↦
           ((F.traceScale * y : kˣ) : k) ^ (ℓ ^ (i : ℕ))) =
       ∏ i : Fin F.toConcreteStickelbergerSetup.f,
         (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
@@ -679,7 +679,7 @@ theorem artinHasseExp_trunc_eval_frobenius_shift_product
     let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let Ips : PowerSeries A :=
       (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -699,7 +699,7 @@ theorem artinHasseExp_trunc_eval_frobenius_shift_product
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Ips : PowerSeries A :=
     (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -709,7 +709,7 @@ theorem artinHasseExp_trunc_eval_frobenius_shift_product
   let z : 𝓞 R' := F.teichUnitFullVal (F.traceScale * y)
   let zbar : A := Ideal.Quotient.mk (F.Q ^ (N + 1)) z
   let f : ℕ := F.toConcreteStickelbergerSetup.f
-  let g : ℕ → A := fun i =>
+  let g : ℕ → A := fun i ↦
     (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
       (δ ^ ℓ * zbar ^ (ℓ ^ i))
   have hzperiod : zbar ^ (ℓ ^ f) = zbar := by
@@ -719,7 +719,7 @@ theorem artinHasseExp_trunc_eval_frobenius_shift_product
         exact (Nat.sub_add_cancel (Nat.succ_le_of_lt hcard_pos)).symm]
       rw [pow_succ]
       have hunit := F.teichUnitFullVal_pow_card_sub_one (F.traceScale * y)
-      simpa [z] using congrArg (fun a : 𝓞 R' => a * z) hunit
+      simpa [z] using congrArg (fun a : 𝓞 R' ↦ a * z) hunit
     have hz : z ^ (ℓ ^ f) = z := by
       rw [← F.toConcreteStickelbergerSetup.card_k_eq]
       exact hcard
@@ -739,7 +739,7 @@ theorem artinHasseExp_trunc_eval_frobenius_shift_product
               (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
                 ((δ * zbar ^ (ℓ ^ i)) ^ ℓ) :=
               (Finset.prod_range
-                (f := fun i : ℕ =>
+                (f := fun i : ℕ ↦
                   (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
                     ((δ * zbar ^ (ℓ ^ i)) ^ ℓ))).symm
       _ = ∏ i ∈ Finset.range f, g (i + 1) := by
@@ -747,7 +747,7 @@ theorem artinHasseExp_trunc_eval_frobenius_shift_product
               intro i hi
               have hpow : (zbar ^ (ℓ ^ i)) ^ ℓ = zbar ^ (ℓ ^ (i + 1)) := by
                 rw [← pow_mul]
-                exact congrArg (fun n : ℕ => zbar ^ n) (by rw [pow_succ] : ℓ ^ i * ℓ = ℓ ^ (i + 1))
+                exact congrArg (fun n : ℕ ↦ zbar ^ n) (by rw [pow_succ] : ℓ ^ i * ℓ = ℓ ^ (i + 1))
               rw [mul_pow, hpow]
   have hright :
       (∏ i : Fin f,
@@ -762,7 +762,7 @@ theorem artinHasseExp_trunc_eval_frobenius_shift_product
               (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
                 (δ ^ ℓ * zbar ^ (ℓ ^ i)) :=
               (Finset.prod_range
-                (f := fun i : ℕ =>
+                (f := fun i : ℕ ↦
                   (PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
                     (δ ^ ℓ * zbar ^ (ℓ ^ i))).symm)
       _ = ∏ i ∈ Finset.range f, g i := rfl
@@ -778,7 +778,7 @@ theorem artinHasseExp_trunc_eval_frobenius_product_pow_prime_eq_correction_mul_p
     let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let Ips : PowerSeries A :=
       (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -804,7 +804,7 @@ theorem artinHasseExp_trunc_eval_frobenius_product_pow_prime_eq_correction_mul_p
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Ips : PowerSeries A :=
     (artinHasseExpInverseSeries_isRIntegral ℓ).mapTo
@@ -821,7 +821,7 @@ theorem artinHasseExp_trunc_eval_frobenius_product_pow_prime_eq_correction_mul_p
       (S := F.toConcreteStickelbergerSetup)
       (N := N)
       (s := (Finset.univ : Finset (Fin F.toConcreteStickelbergerSetup.f)))
-      (u := fun i : Fin F.toConcreteStickelbergerSetup.f => zbar ^ (ℓ ^ (i : ℕ)))
+      (u := fun i : Fin F.toConcreteStickelbergerSetup.f ↦ zbar ^ (ℓ ^ (i : ℕ)))
   have hshift :=
     F.artinHasseExp_trunc_eval_frobenius_shift_product N y
   calc
@@ -889,7 +889,7 @@ theorem artinHasseExp_trunc_eval_frobenius_correction_product_eq_trace_sum
       (δ := δ)
       hδ
       (s := (Finset.univ : Finset (Fin F.toConcreteStickelbergerSetup.f)))
-      (u := fun i : Fin F.toConcreteStickelbergerSetup.f => zbar ^ (ℓ ^ (i : ℕ)))
+      (u := fun i : Fin F.toConcreteStickelbergerSetup.f ↦ zbar ^ (ℓ ^ (i : ℕ)))
   simpa [A, Ips, Rps, πbar, δ, zbar] using hprod
 
 end FullTeichStickelbergerSetup
