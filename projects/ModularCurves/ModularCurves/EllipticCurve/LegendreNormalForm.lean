@@ -66,6 +66,9 @@ theorem legendreCurve_isElliptic_iff (h2 : IsUnit (2 : R)) (lam : R) :
     rw [show (16 : R) * lam ^ 2 * (lam - 1) ^ 2 = 2 ^ 4 * (lam * (lam - 1)) ^ 2 by ring]
     exact (h2.pow 4).mul (h.pow 2)
 
+instance (lam : R) : (legendreCurve lam).IsCharNeTwoNF :=
+  ⟨rfl, rfl⟩
+
 /-- The Legendre family is natural in the base ring: coefficient-wise mapping. -/
 theorem legendreCurve_map {R' : Type u} [CommRing R'] (f : R →+* R') (lam : R) :
     (legendreCurve lam).map f = legendreCurve (f lam) := by

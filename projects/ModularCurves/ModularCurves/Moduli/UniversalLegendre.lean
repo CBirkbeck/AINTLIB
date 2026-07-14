@@ -370,6 +370,253 @@ theorem two_zsmul_universalLegendreQ (hR : IsUnit (2 : R)) :
     _ = universalLegendreQ R hR + -universalLegendreQ R hR := by rw [h2]
     _ = 0 := add_neg_cancel _
 
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-CLS-1c)** The variable change carries curve-points to curve-points, in
+coordinates: if `(p, q)` lies on `C • W` then `(u²p + r, u³q + su²p + t)` lies on `W`
+(the coordinate form of the projective identity `vcMvSubst_polynomial`). -/
+theorem equation_smul_image {A : Type u} [CommRing A]
+    (C : VariableChange A) (W : WeierstrassCurve A) {p q : A}
+    (h : (C • W).toAffine.Equation p q) :
+    W.toAffine.Equation ((C.u : A) ^ 2 * p + C.r)
+      ((C.u : A) ^ 3 * q + C.s * (C.u : A) ^ 2 * p + C.t) := by
+  have hproj : MvPolynomial.eval ![p, q, 1] (C • W).toProjective.polynomial = 0 := by
+    rw [WeierstrassCurve.Projective.eval_polynomial]
+    have he := (WeierstrassCurve.Affine.equation_iff
+      (W := (C • W).toAffine) p q).mp h
+    show q ^ 2 * 1 + (C • W).a₁ * p * q * 1 + (C • W).a₃ * q * 1 ^ 2 -
+      (p ^ 3 + (C • W).a₂ * p ^ 2 * 1 + (C • W).a₄ * p * 1 ^ 2 +
+        (C • W).a₆ * 1 ^ 3) = 0
+    linear_combination he
+  have hsub : MvPolynomial.eval ![(C.u : A) ^ 2 * p + C.r,
+      (C.u : A) ^ 3 * q + C.s * (C.u : A) ^ 2 * p + C.t, 1]
+      W.toProjective.polynomial =
+    MvPolynomial.eval ![p, q, 1]
+      (MvPolynomial.aeval (vcMvSubst C) W.toProjective.polynomial) := by
+    rw [show (MvPolynomial.aeval (vcMvSubst C) W.toProjective.polynomial :
+        MvPolynomial (Fin 3) A) =
+      MvPolynomial.bind₁ (vcMvSubst C) W.toProjective.polynomial from by
+      rw [MvPolynomial.aeval_eq_bind₁]]
+    rw [show MvPolynomial.eval ![p, q, 1]
+        (MvPolynomial.bind₁ (vcMvSubst C) W.toProjective.polynomial) =
+      MvPolynomial.eval (fun i => MvPolynomial.eval ![p, q, 1] (vcMvSubst C i))
+        W.toProjective.polynomial from by
+      rw [← MvPolynomial.aeval_eq_eval, MvPolynomial.aeval_bind₁]
+      rfl]
+    refine congrArg (fun v => MvPolynomial.eval v W.toProjective.polynomial) ?_
+    funext i
+    fin_cases i
+    · show ((C.u : A) ^ 2 * p + C.r : A) =
+        MvPolynomial.eval ![p, q, 1] ((C.u : A) ^ 2 • MvPolynomial.X 0 +
+          C.r • MvPolynomial.X 2)
+      simp only [MvPolynomial.smul_eq_C_mul, MvPolynomial.eval_add,
+        MvPolynomial.eval_mul, MvPolynomial.eval_C, MvPolynomial.eval_X]
+      show (C.u : A) ^ 2 * p + C.r = (C.u : A) ^ 2 * p + C.r * 1
+      ring
+    · show ((C.u : A) ^ 3 * q + C.s * (C.u : A) ^ 2 * p + C.t : A) =
+        MvPolynomial.eval ![p, q, 1] ((C.u : A) ^ 3 • MvPolynomial.X 1 +
+          (C.s * (C.u : A) ^ 2) • MvPolynomial.X 0 + C.t • MvPolynomial.X 2)
+      simp only [MvPolynomial.smul_eq_C_mul, MvPolynomial.eval_add,
+        MvPolynomial.eval_mul, MvPolynomial.eval_C, MvPolynomial.eval_X]
+      show _ = (C.u : A) ^ 3 * q + C.s * (C.u : A) ^ 2 * p + C.t * 1
+      ring
+    · simp [vcMvSubst]
+  have hzero : MvPolynomial.eval ![(C.u : A) ^ 2 * p + C.r,
+      (C.u : A) ^ 3 * q + C.s * (C.u : A) ^ 2 * p + C.t, 1]
+      W.toProjective.polynomial = 0 := by
+    rw [hsub, vcMvSubst_polynomial C W]
+    rw [show ((C.u : A) ^ 6 • (C • W).toProjective.polynomial :
+      MvPolynomial (Fin 3) A) =
+      MvPolynomial.C ((C.u : A) ^ 6) * (C • W).toProjective.polynomial from
+      MvPolynomial.smul_eq_C_mul _ _]
+    rw [MvPolynomial.eval_mul, MvPolynomial.eval_C, hproj, mul_zero]
+  rw [WeierstrassCurve.Projective.eval_polynomial] at hzero
+  have hzero' : ((C.u : A) ^ 3 * q + C.s * (C.u : A) ^ 2 * p + C.t) ^ 2 * 1 +
+      W.a₁ * ((C.u : A) ^ 2 * p + C.r) *
+        ((C.u : A) ^ 3 * q + C.s * (C.u : A) ^ 2 * p + C.t) * 1 +
+      W.a₃ * ((C.u : A) ^ 3 * q + C.s * (C.u : A) ^ 2 * p + C.t) * 1 ^ 2 -
+      (((C.u : A) ^ 2 * p + C.r) ^ 3 + W.a₂ * ((C.u : A) ^ 2 * p + C.r) ^ 2 * 1 +
+        W.a₄ * ((C.u : A) ^ 2 * p + C.r) * 1 ^ 2 + W.a₆ * 1 ^ 3) = 0 := hzero
+  rw [WeierstrassCurve.Affine.equation_iff]
+  linear_combination hzero'
+
+open HomogeneousIdeal HomogeneousLocalization in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-CLS-1a ★)** The variable-change model isomorphism acts on affine-point
+sections by the coordinate change: `[p : q : 1]` of `C • W` is carried to
+`[u²p + r : u³q + su²p + t : 1]` of `W`. Mirrors `negModelHom_affineSection`
+(`projModelVCIso.hom = Proj.map (vcGradedHom C W)`, substitution `vcMvSubst`). -/
+theorem projModelVCIso_affineSection {A : Type u} [CommRing A]
+    (C : WeierstrassCurve.VariableChange A) (W : WeierstrassCurve A) (p q : A)
+    (h : (C • W).toAffine.Equation p q)
+    (h' : W.toAffine.Equation ((C.u : A) ^ 2 * p + C.r)
+      ((C.u : A) ^ 3 * q + C.s * (C.u : A) ^ 2 * p + C.t)) :
+    projModelAffineSection (C • W) p q h ≫ (projModelVCIso C W).hom =
+      projModelAffineSection W ((C.u : A) ^ 2 * p + C.r)
+        ((C.u : A) ^ 3 * q + C.s * (C.u : A) ^ 2 * p + C.t) h' := by
+  have hfeq : ((Scheme.ΓSpecIso (.of A)).inv.hom.comp
+        (projModelAffineEval (C • W) p q h)).comp (vcGradedHom C W).toRingHom =
+      (Scheme.ΓSpecIso (.of A)).inv.hom.comp
+        (projModelAffineEval W ((C.u : A) ^ 2 * p + C.r)
+          ((C.u : A) ^ 3 * q + C.s * (C.u : A) ^ 2 * p + C.t) h') := by
+    refine RingHom.ext fun x => ?_
+    obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+    refine congrArg (Scheme.ΓSpecIso (.of A)).inv.hom ?_
+    rw [show (vcGradedHom C W).toRingHom (Ideal.Quotient.mk (projIdeal W).toIdeal a) =
+      Ideal.Quotient.mk (projIdeal (C • W)).toIdeal
+        (MvPolynomial.aeval (vcMvSubst C) a) from
+      quotientGradingMap_mk _ _ _ _ a]
+    rw [projModelAffineEval_mk, projModelAffineEval_mk]
+    rw [show (MvPolynomial.aeval (vcMvSubst C) a :
+        MvPolynomial (Fin 3) A) = MvPolynomial.bind₁ (vcMvSubst C) a from by
+      rw [MvPolynomial.aeval_eq_bind₁]]
+    rw [show MvPolynomial.eval ![p, q, 1] (MvPolynomial.bind₁ (vcMvSubst C) a) =
+      MvPolynomial.eval (fun i => MvPolynomial.eval ![p, q, 1] (vcMvSubst C i)) a from by
+      rw [← MvPolynomial.aeval_eq_eval, MvPolynomial.aeval_bind₁]
+      rfl]
+    refine congrArg (fun v => MvPolynomial.eval v a) ?_
+    funext i
+    fin_cases i
+    · show MvPolynomial.eval ![p, q, 1] ((C.u : A) ^ 2 • MvPolynomial.X 0 +
+        C.r • MvPolynomial.X 2) = (C.u : A) ^ 2 * p + C.r
+      simp only [MvPolynomial.smul_eq_C_mul, MvPolynomial.eval_add,
+        MvPolynomial.eval_mul, MvPolynomial.eval_C, MvPolynomial.eval_X]
+      show (C.u : A) ^ 2 * p + C.r * 1 = (C.u : A) ^ 2 * p + C.r
+      ring
+    · show MvPolynomial.eval ![p, q, 1] ((C.u : A) ^ 3 • MvPolynomial.X 1 +
+        (C.s * (C.u : A) ^ 2) • MvPolynomial.X 0 + C.t • MvPolynomial.X 2) =
+        (C.u : A) ^ 3 * q + C.s * (C.u : A) ^ 2 * p + C.t
+      simp only [MvPolynomial.smul_eq_C_mul, MvPolynomial.eval_add,
+        MvPolynomial.eval_mul, MvPolynomial.eval_C, MvPolynomial.eval_X]
+      show (C.u : A) ^ 3 * q + C.s * (C.u : A) ^ 2 * p + C.t * 1 = _
+      ring
+    · simp [vcMvSubst]
+  have key := Proj.fromOfGlobalSections_map (vcGradedHom C W)
+    (vcGradedHom_irrelevant_le C W)
+    ((Scheme.ΓSpecIso (.of A)).inv.hom.comp (projModelAffineEval (C • W) p q h))
+    (projModelAffineEval_irrelevant_map_top (C • W) p q h)
+    (Proj.irrelevant_map_comp_toRingHom_eq_top (vcGradedHom C W)
+      (vcGradedHom_irrelevant_le C W) _
+      (projModelAffineEval_irrelevant_map_top (C • W) p q h))
+  have congr_from : ∀ (g₁ g₂ : projCoordRing W →+* Γ(Spec (.of A), ⊤))
+      (h₁ : (HomogeneousIdeal.irrelevant
+          (quotientGrading (projIdeal W))).toIdeal.map g₁ = ⊤)
+      (h₂ : (HomogeneousIdeal.irrelevant
+          (quotientGrading (projIdeal W))).toIdeal.map g₂ = ⊤)
+      (hg : g₁ = g₂),
+      Proj.fromOfGlobalSections _ g₁ h₁ = Proj.fromOfGlobalSections _ g₂ h₂ := by
+    rintro g₁ g₂ h₁ h₂ rfl
+    rfl
+  rw [show projModelAffineSection (C • W) p q h ≫ (projModelVCIso C W).hom =
+    Proj.fromOfGlobalSections _
+      (((Scheme.ΓSpecIso (.of A)).inv.hom.comp
+        (projModelAffineEval (C • W) p q h)).comp (vcGradedHom C W).toRingHom)
+      (Proj.irrelevant_map_comp_toRingHom_eq_top (vcGradedHom C W)
+        (vcGradedHom_irrelevant_le C W) _
+        (projModelAffineEval_irrelevant_map_top (C • W) p q h)) from key]
+  exact congr_from _ _ _ _ hfeq
+
+open HomogeneousIdeal HomogeneousLocalization in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-CLS-1b ★)** Affine-point sections determine their coordinates: the
+`Z`-chart factorisation is `Spec` of the evaluation, and evaluating the chart
+fractions `X/Z`, `Y/Z` reads back `p` and `q`. -/
+theorem projModelAffineSection_injective {A : Type u} [CommRing A]
+    (W : WeierstrassCurve A) {p₁ q₁ p₂ q₂ : A}
+    (h₁ : W.toAffine.Equation p₁ q₁) (h₂ : W.toAffine.Equation p₂ q₂)
+    (heq : projModelAffineSection W p₁ q₁ h₁ = projModelAffineSection W p₂ q₂ h₂) :
+    p₁ = p₂ ∧ q₁ = q₂ := by
+  have hchart : projModelAffineChart W p₁ q₁ h₁ = projModelAffineChart W p₂ q₂ h₂ := by
+    rw [← cancel_mono (Proj.awayι (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+      (mk_X_mem_quotientGrading_one W 2) one_pos),
+      projModelAffineChart_fac, projModelAffineChart_fac, heq]
+  rw [projModelAffineChart_eq_spec, projModelAffineChart_eq_spec] at hchart
+  have hhom : affineChartHom W p₁ q₁ h₁ = affineChartHom W p₂ q₂ h₂ := by
+    have := Spec.map_injective hchart
+    exact congrArg CommRingCat.Hom.hom this
+  constructor
+  · have hx := congrArg (fun g => g (HomogeneousLocalization.Away.mk
+      (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 2) 1
+      (Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X 0))
+      (mk_X_mem_quotientGrading_one W 0))) hhom
+    simpa only [affineChartHom_mk, projModelAffineEval_mk, MvPolynomial.eval_X,
+      Matrix.cons_val_zero] using hx
+  · have hy := congrArg (fun g => g (HomogeneousLocalization.Away.mk
+      (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W 2) 1
+      (Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X 1))
+      (mk_X_mem_quotientGrading_one W 1))) hhom
+    have hy' : (![p₁, q₁, 1] : Fin 3 → A) 1 = (![p₂, q₂, 1] : Fin 3 → A) 1 := by
+      simpa only [affineChartHom_mk, projModelAffineEval_mk,
+        MvPolynomial.eval_X] using hy
+    exact hy'
+
+/-- Affine-point sections transport along equalities of curves. -/
+theorem projModelAffineSection_congr {A : Type u} [CommRing A]
+    {W₁ W₂ : WeierstrassCurve A} (hW : W₁ = W₂) (p q : A)
+    (h : W₁.toAffine.Equation p q) :
+    projModelAffineSection W₁ p q h ≫ eqToHom (congrArg projModel hW) =
+      projModelAffineSection W₂ p q (hW ▸ h) := by
+  cases hW
+  rw [eqToHom_refl, Category.comp_id]
+
+open LocalPresentation WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E14-CLS-1 ★★, KM 4.6.2 uniqueness)** Marked adapted Legendre witnesses are
+UNIQUE: two `b`-adapted presentations over the same affine whose chart curves are
+Legendre and which mark the same section at `x = 0` have comparison `1` and equal
+`λ`'s — the `ω` pins `u = 1, s = t = 0` (`transVC_of_isAdapted_charNeTwo`) and the
+marking pins `r = 0`. KM's classifying function is well-defined. -/
+theorem legendre_witness_transVC_eq_one {S : Scheme.{u}} {G : EllipticCurveGeom S}
+    {V : S.affineOpens} {Pr Qr : LocalPresentation G V} {b : OmegaBasis G}
+    (hPrAd : Pr.IsAdapted b) (hQrAd : Qr.IsAdapted b)
+    {lamP lamQ : Γ(S, V.1)} (hPrW : Pr.W = legendreCurve lamP)
+    (hQrW : Qr.W = legendreCurve lamQ)
+    {σ : S ⟶ G.E} {hσ : σ ≫ G.π = 𝟙 S}
+    (hPrM : Pr.MarksAt hσ 0 0) (hQrM : Qr.MarksAt hσ 0 0)
+    (h2 : IsUnit (2 : Γ(S, V.1))) :
+    Pr.transVC Qr = 1 ∧ lamP = lamQ := by
+  have hPrNF : Pr.W.IsCharNeTwoNF := by rw [hPrW]; infer_instance
+  have hQrNF : Qr.W.IsCharNeTwoNF := by rw [hQrW]; infer_instance
+  have hC := transVC_of_isAdapted_charNeTwo hPrAd hQrAd hPrNF hQrNF h2
+  obtain ⟨hP0, hPeq⟩ := hPrM
+  obtain ⟨hQ0, hQeq⟩ := hQrM
+  -- the marking chase: both witnesses read `σ` on `Qr`'s chart
+  have hchase : projModelAffineSection Pr.W 0 0 hP0 ≫ (Pr.pointedIso Qr).hom =
+      projModelAffineSection Qr.W 0 0 hQ0 := by
+    rw [← hPeq, ← hQeq]
+    show ((V.2.isoSpec.inv ≫ sectionLift G hσ V) ≫ Pr.e.hom) ≫
+      (Pr.e.symm ≪≫ Qr.e).hom = _
+    rw [Iso.trans_hom, Iso.symm_hom, Category.assoc, Category.assoc,
+      Iso.hom_inv_id_assoc]
+    rw [Category.assoc]
+  rw [Pr.transVC_spec Qr] at hchase
+  have hWeq : Pr.W = Pr.transVC Qr • Qr.W := (Pr.transVC_smul Qr).symm
+  rw [← Category.assoc, projModelAffineSection_congr hWeq 0 0 hP0] at hchase
+  rw [projModelVCIso_affineSection (Pr.transVC Qr) Qr.W 0 0 (hWeq ▸ hP0)
+    (equation_smul_image (Pr.transVC Qr) Qr.W (hWeq ▸ hP0))] at hchase
+  -- injectivity reads off the translation
+  have hcoords := projModelAffineSection_injective Qr.W _ hQ0 hchase
+  have hr : (Pr.transVC Qr).r = 0 := by
+    have h := hcoords.1
+    rwa [mul_zero, zero_add] at h
+  -- assemble `C = 1`
+  have hone : Pr.transVC Qr = 1 := by
+    rw [hC, hr]
+    rfl
+  refine ⟨hone, ?_⟩
+  -- equal curves force equal `λ`'s
+  have hWW : Qr.W = Pr.W := by
+    have h := Pr.transVC_smul Qr
+    rwa [hone, one_smul] at h
+  have hLL : legendreCurve lamQ = legendreCurve lamP := by
+    rw [← hPrW, ← hQrW]
+    exact hWW
+  have h4 := congrArg WeierstrassCurve.a₄ hLL
+  rw [legendreCurve_a₄, legendreCurve_a₄] at h4
+  exact h4.symm
+
 end TwoTorsion
 
 end ModularCurves
