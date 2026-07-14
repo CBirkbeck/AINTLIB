@@ -1,3 +1,4 @@
+import Mathlib.AlgebraicGeometry.PullbackCarrier
 import Mathlib.AlgebraicGeometry.Pullbacks
 import ModularCurves.ForMathlib.FinitePresentationFunctorBaseChange
 import ModularCurves.ForMathlib.FinitePresentationSchemeGlueData
@@ -65,6 +66,41 @@ theorem SpreadData.FunctorModel.baseChangeSpecIso_inv_fst
   congr 1
   ext a
   exact (M.baseChangeIso.hom.app X).hom.commutes a
+
+/-- The inverse affine base-change comparison exhibits the original affine scheme as the
+base change of its modeled affine scheme. -/
+theorem SpreadData.FunctorModel.baseChangeSpecIso_inv_isPullback
+    (M : SpreadData.FunctorModel F H) (X : J) :
+    letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+    IsPullback
+      ((M.baseChangeSpecIso X).inv ≫
+        pullback.snd
+          (AlgebraicGeometry.Spec.map
+            (CommRingCat.ofHom (algebraMap (𝒮 M.stage) A)))
+          (AlgebraicGeometry.Spec.map
+            (CommRingCat.ofHom
+              (algebraMap (𝒮 M.stage) (M.toFunctor.obj X)))))
+      (AlgebraicGeometry.Spec.map
+        (CommRingCat.ofHom (algebraMap A (F.obj X))))
+      (AlgebraicGeometry.Spec.map
+        (CommRingCat.ofHom
+          (algebraMap (𝒮 M.stage) (M.toFunctor.obj X))))
+      (AlgebraicGeometry.Spec.map
+        (CommRingCat.ofHom (algebraMap (𝒮 M.stage) A))) := by
+  letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+  let base := AlgebraicGeometry.Spec.map
+    (CommRingCat.ofHom (algebraMap (𝒮 M.stage) A))
+  let toStage := AlgebraicGeometry.Spec.map
+    (CommRingCat.ofHom
+      (algebraMap (𝒮 M.stage) (M.toFunctor.obj X)))
+  refine (IsPullback.of_hasPullback base toStage).flip.of_iso
+    (M.baseChangeSpecIso X) (Iso.refl _) (Iso.refl _) (Iso.refl _)
+    ?_ ?_ ?_ ?_
+  · rw [Iso.hom_inv_id_assoc, Iso.refl_hom, Category.comp_id]
+  · rw [← M.baseChangeSpecIso_inv_fst X]
+    rw [Iso.hom_inv_id_assoc, Iso.refl_hom, Category.comp_id]
+  · rfl
+  · rfl
 
 /-- A modeled restriction map induces the corresponding map between affine base changes. -/
 noncomputable def SpreadData.FunctorModel.baseChangeSpecMap
@@ -614,6 +650,238 @@ theorem SpreadData.FunctorModel.affineIntersectionGluedBaseChange_toSpec
   rw [← pullback.condition, ← Category.assoc, M.baseChangeSpecIso_inv_fst]
   rw [horiginal']
   rfl
+
+private theorem SpreadData.FunctorModel.baseChangeSpecIso_inv_affineIntersectionOverlapι_isPullback
+    {K : Type u} {G : Finset K ⥤ CommAlgCat.{u} A}
+    (M : SpreadData.FunctorModel G H) (i j : K) :
+    letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+    IsPullback
+      (AlgebraicGeometry.Scheme.GlueData.affineIntersectionOverlapι G i j)
+      ((M.baseChangeSpecIso
+          (AlgebraicGeometry.Scheme.GlueData.affineIntersectionPairIndex i j)).inv ≫
+        pullback.snd
+          (AlgebraicGeometry.Spec.map
+            (CommRingCat.ofHom (algebraMap (𝒮 M.stage) A)))
+          (AlgebraicGeometry.Spec.map
+            (CommRingCat.ofHom
+              (algebraMap (𝒮 M.stage)
+                (M.toFunctor.obj
+                  (AlgebraicGeometry.Scheme.GlueData.affineIntersectionPairIndex i j))))))
+      ((M.baseChangeSpecIso
+          (AlgebraicGeometry.Scheme.GlueData.affineIntersectionSingletonIndex i)).inv ≫
+        pullback.snd
+          (AlgebraicGeometry.Spec.map
+            (CommRingCat.ofHom (algebraMap (𝒮 M.stage) A)))
+          (AlgebraicGeometry.Scheme.GlueData.affineIntersectionChartToSpec
+            M.toFunctor i))
+      (AlgebraicGeometry.Scheme.GlueData.affineIntersectionOverlapι
+        M.toFunctor i j) := by
+  letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+  exact M.baseChangeSpecIso_inv_map_isPullback
+    (AlgebraicGeometry.Scheme.GlueData.affineIntersectionSingletonToPair i j)
+
+private theorem SpreadData.FunctorModel.affineIntersectionChartBaseChange_isPullback
+    {K : Type u} {G : Finset K ⥤ CommAlgCat.{u} A}
+    (M : SpreadData.FunctorModel G H) (i : K) :
+    letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+    IsPullback
+      ((M.baseChangeSpecIso
+          (AlgebraicGeometry.Scheme.GlueData.affineIntersectionSingletonIndex i)).inv ≫
+        pullback.snd
+          (AlgebraicGeometry.Spec.map
+            (CommRingCat.ofHom (algebraMap (𝒮 M.stage) A)))
+          (AlgebraicGeometry.Scheme.GlueData.affineIntersectionChartToSpec M.toFunctor i))
+      (AlgebraicGeometry.Scheme.GlueData.affineIntersectionChartToSpec G i)
+      (AlgebraicGeometry.Scheme.GlueData.affineIntersectionChartToSpec M.toFunctor i)
+      (AlgebraicGeometry.Spec.map
+        (CommRingCat.ofHom (algebraMap (𝒮 M.stage) A))) := by
+  letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+  exact M.baseChangeSpecIso_inv_isPullback
+    (AlgebraicGeometry.Scheme.GlueData.affineIntersectionSingletonIndex i)
+
+private theorem SpreadData.FunctorModel.affineIntersectionGluedBaseChange_preimage_range_ι
+    {K : Type u} {G : Finset K ⥤ CommAlgCat.{u} A}
+    (M : SpreadData.FunctorModel G H)
+    (hopenG : AlgebraicGeometry.Scheme.GlueData.IsOpenAffineIntersectionFunctor G)
+    (hpushG : AlgebraicGeometry.Scheme.GlueData.IsPushoutAffineIntersectionFunctor G)
+    (hopenM : AlgebraicGeometry.Scheme.GlueData.IsOpenAffineIntersectionFunctor M.toFunctor)
+    (hpushM : AlgebraicGeometry.Scheme.GlueData.IsPushoutAffineIntersectionFunctor M.toFunctor)
+    (i : K) :
+    letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+    let DG := AlgebraicGeometry.Scheme.GlueData.ofAffineIntersectionFunctor G hopenG hpushG
+    let DM := AlgebraicGeometry.Scheme.GlueData.ofAffineIntersectionFunctor
+      M.toFunctor hopenM hpushM
+    (M.affineIntersectionGluedBaseChange hopenG hpushG hopenM hpushM).base ⁻¹'
+        Set.range (DM.ι i).base =
+      Set.range (DG.ι i).base := by
+  classical
+  letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+  let DG := AlgebraicGeometry.Scheme.GlueData.ofAffineIntersectionFunctor G hopenG hpushG
+  let DM := AlgebraicGeometry.Scheme.GlueData.ofAffineIntersectionFunctor
+    M.toFunctor hopenM hpushM
+  let base := AlgebraicGeometry.Spec.map
+    (CommRingCat.ofHom (algebraMap (𝒮 M.stage) A))
+  let chartMap (k : K) : DG.U k ⟶ DM.U k :=
+    (M.baseChangeSpecIso
+        (AlgebraicGeometry.Scheme.GlueData.affineIntersectionSingletonIndex k)).inv ≫
+      pullback.snd base
+        (AlgebraicGeometry.Scheme.GlueData.affineIntersectionChartToSpec M.toFunctor k)
+  let overlapMap (p q : K) : DG.V (p, q) ⟶ DM.V (p, q) :=
+    (M.baseChangeSpecIso
+        (AlgebraicGeometry.Scheme.GlueData.affineIntersectionPairIndex p q)).inv ≫
+      pullback.snd base
+        (AlgebraicGeometry.Spec.map
+          (CommRingCat.ofHom
+            (algebraMap (𝒮 M.stage)
+              (M.toFunctor.obj
+                (AlgebraicGeometry.Scheme.GlueData.affineIntersectionPairIndex p q)))))
+  have hglobal (k : K) :
+      DG.ι k ≫ M.affineIntersectionGluedBaseChange hopenG hpushG hopenM hpushM =
+        chartMap k ≫ DM.ι k := by
+    exact M.affineIntersectionGluedBaseChange_ι hopenG hpushG hopenM hpushM k
+  have hoverlap (p q : K) :
+      IsPullback (DG.f p q) (overlapMap p q) (chartMap p) (DM.f p q) := by
+    exact M.baseChangeSpecIso_inv_affineIntersectionOverlapι_isPullback p q
+  ext x
+  constructor
+  · intro hx
+    obtain ⟨j, y, rfl⟩ := DG.ι_jointly_surjective x
+    obtain ⟨xi, hxi⟩ := hx
+    have hglobal_apply :
+        (M.affineIntersectionGluedBaseChange hopenG hpushG hopenM hpushM).base
+            ((DG.ι j).base y) =
+          (DM.ι j).base ((chartMap j).base y) := by
+      simpa only [AlgebraicGeometry.Scheme.Hom.comp_apply] using
+        congrArg (fun q => q.base y) (hglobal j)
+    have heq : (DM.ι i).base xi = (DM.ι j).base ((chartMap j).base y) :=
+      hxi.trans hglobal_apply
+    obtain ⟨v, -, hvj⟩ := (DM.ι_eq_iff i j xi ((chartMap j).base y)).mp heq
+    obtain ⟨vg, hvgj, -⟩ :=
+      AlgebraicGeometry.Scheme.exists_preimage_of_isPullback
+        (hoverlap j i) y ((DM.t i j).base v) (by
+          simpa only [AlgebraicGeometry.Scheme.Hom.comp_apply] using hvj.symm)
+    refine ⟨(DG.t j i ≫ DG.f i j).base vg, ?_⟩
+    calc
+      (DG.ι i).base ((DG.t j i ≫ DG.f i j).base vg) =
+          (DG.ι j).base ((DG.f j i).base vg) := by
+        simpa only [AlgebraicGeometry.Scheme.Hom.comp_apply] using
+          congrArg (fun q => q.base vg) (DG.glue_condition j i)
+      _ = (DG.ι j).base y := by rw [hvgj]
+  · rintro ⟨y, rfl⟩
+    refine ⟨(chartMap i).base y, ?_⟩
+    simpa only [AlgebraicGeometry.Scheme.Hom.comp_apply] using
+      (congrArg (fun q => q.base y) (hglobal i)).symm
+
+private theorem SpreadData.FunctorModel.affineIntersectionGluedBaseChange_chart_isPullback
+    {K : Type u} {G : Finset K ⥤ CommAlgCat.{u} A}
+    (M : SpreadData.FunctorModel G H)
+    (hopenG : AlgebraicGeometry.Scheme.GlueData.IsOpenAffineIntersectionFunctor G)
+    (hpushG : AlgebraicGeometry.Scheme.GlueData.IsPushoutAffineIntersectionFunctor G)
+    (hopenM : AlgebraicGeometry.Scheme.GlueData.IsOpenAffineIntersectionFunctor M.toFunctor)
+    (hpushM : AlgebraicGeometry.Scheme.GlueData.IsPushoutAffineIntersectionFunctor M.toFunctor)
+    (i : K) :
+    letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+    let DG := AlgebraicGeometry.Scheme.GlueData.ofAffineIntersectionFunctor G hopenG hpushG
+    let DM := AlgebraicGeometry.Scheme.GlueData.ofAffineIntersectionFunctor
+      M.toFunctor hopenM hpushM
+    IsPullback
+      ((M.baseChangeSpecIso
+          (AlgebraicGeometry.Scheme.GlueData.affineIntersectionSingletonIndex i)).inv ≫
+        pullback.snd
+          (AlgebraicGeometry.Spec.map
+            (CommRingCat.ofHom (algebraMap (𝒮 M.stage) A)))
+          (AlgebraicGeometry.Scheme.GlueData.affineIntersectionChartToSpec M.toFunctor i))
+      (DG.ι i) (DM.ι i)
+      (M.affineIntersectionGluedBaseChange hopenG hpushG hopenM hpushM) := by
+  classical
+  letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+  let DG := AlgebraicGeometry.Scheme.GlueData.ofAffineIntersectionFunctor G hopenG hpushG
+  let DM := AlgebraicGeometry.Scheme.GlueData.ofAffineIntersectionFunctor
+    M.toFunctor hopenM hpushM
+  letI : AlgebraicGeometry.IsOpenImmersion (DG.ι i) :=
+    AlgebraicGeometry.Scheme.GlueData.ι_isOpenImmersion DG i
+  letI : AlgebraicGeometry.IsOpenImmersion (DM.ι i) :=
+    AlgebraicGeometry.Scheme.GlueData.ι_isOpenImmersion DM i
+  refine AlgebraicGeometry.IsOpenImmersion.isPullback _ _ _ _ ?_ ?_
+  · exact M.affineIntersectionGluedBaseChange_ι hopenG hpushG hopenM hpushM i
+  · apply TopologicalSpace.Opens.ext
+    exact M.affineIntersectionGluedBaseChange_preimage_range_ι
+      hopenG hpushG hopenM hpushM i
+
+/-- The original glued affine-intersection scheme is the base change of its finite-stage
+spread model. -/
+theorem SpreadData.FunctorModel.affineIntersectionGluedBaseChange_isPullback
+    {K : Type u} {G : Finset K ⥤ CommAlgCat.{u} A}
+    (M : SpreadData.FunctorModel G H)
+    (hopenG : AlgebraicGeometry.Scheme.GlueData.IsOpenAffineIntersectionFunctor G)
+    (hpushG : AlgebraicGeometry.Scheme.GlueData.IsPushoutAffineIntersectionFunctor G)
+    (hopenM : AlgebraicGeometry.Scheme.GlueData.IsOpenAffineIntersectionFunctor M.toFunctor)
+    (hpushM : AlgebraicGeometry.Scheme.GlueData.IsPushoutAffineIntersectionFunctor M.toFunctor) :
+    letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+    IsPullback
+      (M.affineIntersectionGluedBaseChange hopenG hpushG hopenM hpushM)
+      (AlgebraicGeometry.Scheme.GlueData.affineIntersectionToSpec G hopenG hpushG)
+      (AlgebraicGeometry.Scheme.GlueData.affineIntersectionToSpec
+        M.toFunctor hopenM hpushM)
+      (AlgebraicGeometry.Spec.map
+        (CommRingCat.ofHom (algebraMap (𝒮 M.stage) A))) := by
+  classical
+  letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+  let DG := AlgebraicGeometry.Scheme.GlueData.ofAffineIntersectionFunctor G hopenG hpushG
+  let DM := AlgebraicGeometry.Scheme.GlueData.ofAffineIntersectionFunctor
+    M.toFunctor hopenM hpushM
+  let global := M.affineIntersectionGluedBaseChange hopenG hpushG hopenM hpushM
+  let toBaseG := AlgebraicGeometry.Scheme.GlueData.affineIntersectionToSpec G hopenG hpushG
+  let toBaseM := AlgebraicGeometry.Scheme.GlueData.affineIntersectionToSpec
+    M.toFunctor hopenM hpushM
+  let base := AlgebraicGeometry.Spec.map
+    (CommRingCat.ofHom (algebraMap (𝒮 M.stage) A))
+  apply AlgebraicGeometry.Scheme.isPullback_of_openCover
+    global toBaseG toBaseM base DM.openCover
+  rintro (i : K)
+  let chartMap : DG.U i ⟶ DM.U i :=
+    (M.baseChangeSpecIso
+        (AlgebraicGeometry.Scheme.GlueData.affineIntersectionSingletonIndex i)).inv ≫
+      pullback.snd base
+        (AlgebraicGeometry.Scheme.GlueData.affineIntersectionChartToSpec M.toFunctor i)
+  have hchart : IsPullback chartMap (DG.ι i) (DM.ι i) global :=
+    M.affineIntersectionGluedBaseChange_chart_isPullback
+      hopenG hpushG hopenM hpushM i
+  have hlocal : IsPullback chartMap
+      (AlgebraicGeometry.Scheme.GlueData.affineIntersectionChartToSpec G i)
+      (AlgebraicGeometry.Scheme.GlueData.affineIntersectionChartToSpec M.toFunctor i)
+      base := M.affineIntersectionChartBaseChange_isPullback i
+  let e : DG.U i ≅ (DM.openCover.pullback₁ global).X i :=
+    hchart.isoPullback ≪≫ pullbackSymmetry (DM.ι i) global
+  have e_snd :
+      e.hom ≫ pullback.snd global (DM.ι i) = chartMap := by
+    change (hchart.isoPullback.hom ≫ (pullbackSymmetry (DM.ι i) global).hom) ≫
+      pullback.snd global (DM.ι i) = chartMap
+    rw [Category.assoc, pullbackSymmetry_hom_comp_snd,
+      hchart.isoPullback_hom_fst]
+  have e_fst :
+      e.hom ≫ pullback.fst global (DM.ι i) = DG.ι i := by
+    change (hchart.isoPullback.hom ≫ (pullbackSymmetry (DM.ι i) global).hom) ≫
+      pullback.fst global (DM.ι i) = DG.ι i
+    rw [Category.assoc, pullbackSymmetry_hom_comp_fst,
+      hchart.isoPullback_hom_snd]
+  refine hlocal.of_iso e (Iso.refl _) (Iso.refl _) (Iso.refl _)
+    ?_ ?_ ?_ ?_
+  · change chartMap = e.hom ≫ pullback.snd global (DM.ι i)
+    exact e_snd.symm
+  · change AlgebraicGeometry.Scheme.GlueData.affineIntersectionChartToSpec G i =
+      e.hom ≫ pullback.fst global (DM.ι i) ≫ toBaseG
+    rw [← Category.assoc, e_fst]
+    exact
+      (AlgebraicGeometry.Scheme.GlueData.ofAffineIntersectionFunctor_ι_affineIntersectionToSpec
+        G hopenG hpushG i).symm
+  · change AlgebraicGeometry.Scheme.GlueData.affineIntersectionChartToSpec M.toFunctor i =
+      DM.ι i ≫ toBaseM
+    exact
+      (AlgebraicGeometry.Scheme.GlueData.ofAffineIntersectionFunctor_ι_affineIntersectionToSpec
+        M.toFunctor hopenM hpushM i).symm
+  · change base = base
+    rfl
 
 end
 
