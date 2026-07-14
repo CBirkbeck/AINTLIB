@@ -3,6 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import Mathlib.AlgebraicGeometry.EllipticCurve.NormalForms
 import ModularCurves.EllipticCurve.InvariantDifferential
 
 /-!
@@ -258,6 +259,85 @@ theorem transUnit_eq_one_of_isAdapted {V : S.affineOpens}
   have h := basisUnitAt_transUnit P Q b
   rw [hP, hQ, mul_one] at h
   exact h.symm
+
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-B ★, KM 2.2.5 uniqueness)** Over a base with `2` and `3` invertible, two
+`b`-adapted short-normal-form presentations over the same affine have EQUAL comparison:
+the `ω`-datum pins `u = 1` and short normal form pins the translations. Hence the
+`(g₂, g₃)`-normalised adapted model is unique. -/
+theorem transVC_eq_one_of_isAdapted {V : S.affineOpens}
+    {P Q : LocalPresentation G V} {b : OmegaBasis G}
+    (hP : P.IsAdapted b) (hQ : Q.IsAdapted b)
+    (hPW : P.W.IsShortNF) (hQW : Q.W.IsShortNF)
+    (h2 : IsUnit (2 : Γ(S, V.1))) (h3 : IsUnit (3 : Γ(S, V.1))) :
+    P.transVC Q = 1 := by
+  have hu : (P.transVC Q).u = 1 := transUnit_eq_one_of_isAdapted hP hQ
+  have hsmul := P.transVC_smul Q
+  set C := P.transVC Q with hC
+  -- coefficient equations of `C • Q.W = P.W` in short normal form
+  have ha₁ : C.u⁻¹.val * (Q.W.a₁ + 2 * C.s) = P.W.a₁ := by
+    rw [← variableChange_a₁, hsmul]
+  have hs : C.s = 0 := by
+    rw [hPW.a₁, hQW.a₁, hu, inv_one, Units.val_one, one_mul, zero_add] at ha₁
+    exact (h2.mul_right_eq_zero).mp ha₁
+  have ha₃ : C.u⁻¹.val ^ 3 * (Q.W.a₃ + C.r * Q.W.a₁ + 2 * C.t) = P.W.a₃ := by
+    rw [← variableChange_a₃, hsmul]
+  have ha₂ : C.u⁻¹.val ^ 2 * (Q.W.a₂ - C.s * Q.W.a₁ + 3 * C.r - C.s ^ 2) = P.W.a₂ := by
+    rw [← variableChange_a₂, hsmul]
+  have hr : C.r = 0 := by
+    rw [hPW.a₂, hQW.a₂, hu, inv_one, Units.val_one, one_pow, one_mul, hs] at ha₂
+    rw [show (0 : Γ(S, V.1)) - 0 * Q.W.a₁ + 3 * C.r - 0 ^ 2 = 3 * C.r by ring] at ha₂
+    exact (h3.mul_right_eq_zero).mp ha₂
+  have ht : C.t = 0 := by
+    rw [hPW.a₃, hQW.a₃, hu, inv_one, Units.val_one, one_pow, one_mul, hQW.a₁, hr,
+      mul_zero, zero_add, zero_add] at ha₃
+    exact (h2.mul_right_eq_zero).mp ha₃
+  ext
+  · exact congrArg Units.val hu
+  · exact hr
+  · exact hs
+  · exact ht
+
+open WeierstrassCurve in
+/-- A pure-`u` variable change preserves short normal form. -/
+theorem isShortNF_smul_units {R : Type u} [CommRing R] {W : WeierstrassCurve R}
+    (hW : W.IsShortNF) (u : Rˣ) :
+    ((⟨u, 0, 0, 0⟩ : VariableChange R) • W).IsShortNF := by
+  constructor <;>
+    simp [variableChange_a₁, variableChange_a₂, variableChange_a₃, hW.a₁, hW.a₂, hW.a₃]
+
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-B ★★, KM 2.2.5 / GME 2.2.3 local form)** Over a base with `2` and `3`
+invertible, every `(E, ω)` admits, over every chart-supported affine, a presentation
+that is BOTH in short normal form and `ω`-adapted — and by
+`transVC_eq_one_of_isAdapted` it is unique. The `(g₂, g₄?, g₆)`-coefficients of its
+curve are T-E12's classifying functions. -/
+noncomputable def adaptShortNF {V : S.affineOpens} (P : LocalPresentation G V)
+    (b : OmegaBasis G) [Invertible (2 : Γ(S, V.1))] [Invertible (3 : Γ(S, V.1))] :
+    LocalPresentation G V :=
+  (P.ofVC P.W.toShortNF).adapt b
+
+set_option backward.isDefEq.respectTransparency false in
+theorem isAdapted_adaptShortNF {V : S.affineOpens} (P : LocalPresentation G V)
+    (b : OmegaBasis G) [Invertible (2 : Γ(S, V.1))] [Invertible (3 : Γ(S, V.1))] :
+    (P.adaptShortNF b).IsAdapted b :=
+  isAdapted_adapt _ b
+
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+theorem isShortNF_adaptShortNF {V : S.affineOpens} (P : LocalPresentation G V)
+    (b : OmegaBasis G) [Invertible (2 : Γ(S, V.1))] [Invertible (3 : Γ(S, V.1))] :
+    (P.adaptShortNF b).W.IsShortNF := by
+  have h0 : (P.ofVC P.W.toShortNF).W.IsShortNF := by
+    rw [ofVC_W]
+    exact P.W.toShortNF_spec
+  show ((P.ofVC P.W.toShortNF).adapt b).W.IsShortNF
+  rw [show ((P.ofVC P.W.toShortNF).adapt b).W =
+    (⟨(((P.ofVC P.W.toShortNF).basisUnitAt b).1)⁻¹, 0, 0, 0⟩ :
+      VariableChange Γ(S, V.1)) • (P.ofVC P.W.toShortNF).W from rfl]
+  exact isShortNF_smul_units h0 _
 
 end LocalPresentation
 
