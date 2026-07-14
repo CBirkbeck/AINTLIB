@@ -19772,3 +19772,45 @@ mid-objects — pin the mid with a type-ascribed `(eqToHom _ : A ⟶ B-spelled)`
 `show`. (4) `fin_cases j` leaves `(fun i ↦ i) ⟨0,⋯⟩`-indices — open each branch with a literal-index
 `show`. (5) LSP serving stale oleans ⟹ garbage goals + phantom sorryAx in lean_verify — trust
 `lake build` + a fresh `lake env lean` #print-axioms probe.
+
+## v10.224-OMEGA (2026-07-14) — ★★ T-E14's CORRECTED δ IS STATABLE: legendreDeltaProblem + both engine-axiom statements LAND
+
+**The v10.219 charter milestone is DELIVERED (commits f9c640e32…6b4d639ce).** KM 4.6.2's coupled
+Legendre problem is now a `ModuliProblem R` with its two engine axioms stated in Bootstrap.lean.
+The full T-E14b statement-layer stack, all sorry-free & axiom-clean except the two axiom sorries:
+
+- **[T-E14a leaf-b ★]** `translation_smul_eq_legendreCurve` (char≠2-NF + marked 2-torsion abscissae
+  p, p+1 ⟹ pure translation to `legendreCurve (−a₂−3p−1)`; NO scaling — the δ has already spent it,
+  which is exactly why KM's coupled problem is rigid) + `legendreCurve_vc_marked` (a VC between
+  Legendre curves fixing the marked abscissae is `⟨u,0,0,0⟩`, `u² = 1`, λ unchanged — the `{±1}`).
+  Both PROPEXT-ONLY. + legendreCurve_map + (0,0)/(1,0)-equation lemmas.
+- **[T-E14b-1 ★]** char-≠2 adapted models (`adaptCharNeTwoNF`, only `IsUnit 2`; existence + specs)
+  + `transVC_of_isAdapted_charNeTwo` (KM 2.2.9: ω pins u=1, the form pins s=t=0, **r stays free**
+  — the translation torsor the marking spends).
+- **[T-E14b-2 ★]** `projModelAffineSection` (the section `[p:q:1] : Spec R ⟶ projModel W` through
+  an affine point; mirrors projModelZero) + Z-chart factorisation + **`projModelAffineSection_
+  baseChange`** (the compat_zero-grade naturality; Y-chart-block mirror, ~300 lines).
+- **[T-E14b-3 ★★]** `LocalPresentation.MarksAt` (chart carries a section to `[p:q:1]` — the formal
+  "x(σ)=p") + **`MarksAt.transport`** (markings transport along cartesian pointed squares) +
+  `IsLegendreDatum` (KM 4.6.2 verbatim, local-existence form) + `IsLegendreDatum.map`
+  (Ell/R-functoriality via pullSection lift_fst + IsAdapted.transport + legendreCurve_map).
+- **[T-E14 ★★]** `legendreDeltaProblem : ModuliProblem R` (the δ-subfunctor) + Bootstrap statements
+  `legendreDelta_representable_by_affine` (AX1, M'₂ = Spec R[λ][(λ(λ−1))⁻¹]) and
+  `legendreDelta_relativelyRepresentable_finiteEtale` (AX2, |G|=12 torsor shape, torsor-free
+  packaging matching T-E15b).
+
+**REMAINING T-E14 obligations (OMEGA continues NOW):**
+1. **[T-E14-AX1]** the universal Legendre object + classification (T-E12-D replay at charNeTwo:
+   marked adapted models glue λ; classifying map; roundtrips — the D3/D4 playbook transposes).
+2. **[T-E14-ACT']** the COUPLED G-action on δ (GL₂ re-marks the pair AND re-scales ω by
+   u² = x(Q)−x(P); the ambient product action does NOT restrict — statement-layer discovery of
+   this sweep; the fibre count 6×2 = |GL₂(ℤ/2)×{±1}| = 12 checks).
+3. **[T-E14-AX2]** finite-étale relative representability (consumes E[2]-classification — leaf-(a)
+   defers to KM's keystone per the standing de-confliction).
+
+LEAN-OP: `ext x` on a subtype-of-product functor-law goes exactly TWO levels (Subtype.val +
+Prod.ext) — supply ambient `FunctorToTypes.map_id/comp_apply` leaves per component; term-mode
+funext fails on `↾f = 𝟙` (asHom blocks @funext unification). `exists_isAffineOpen_mem_and_subset`
+returns Set-⊆ — rebind through an `affineOpens`-typed `have hle : (⟨V₀,haff⟩ : affineOpens).1 ≤ …`
+before feeding `≤`-consumers. Private cross-file blockers unprivated this sweep:
+`resLE_isoSpec_naturality`, `transport_isPullback_model`, `awayι_awayCongr`.
