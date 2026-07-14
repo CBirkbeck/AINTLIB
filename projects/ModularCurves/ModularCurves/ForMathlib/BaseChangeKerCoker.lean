@@ -133,6 +133,43 @@ theorem kerLTensorComparison_bijective
         LinearMap.subtype_comp_codRestrict]
   exact ((lTensor_exact M hexact f.surjective_rangeRestrict z).mp h0).imp fun _ ↦ Subtype.ext
 
+private noncomputable def sectionOfSurjective [Module.Projective R Q]
+    (hf : Function.Surjective f) : Q →ₗ[R] P :=
+  (Module.projective_lifting_property f .id hf).choose
+
+private lemma comp_sectionOfSurjective [Module.Projective R Q]
+    (hf : Function.Surjective f) :
+    f ∘ₗ sectionOfSurjective f hf = .id :=
+  (Module.projective_lifting_property f .id hf).choose_spec
+
+private noncomputable def kerRetractionOfSurjective [Module.Projective R Q]
+    (hf : Function.Surjective f) : P →ₗ[R] LinearMap.ker f :=
+  LinearMap.codRestrict _ (.id - sectionOfSurjective f hf ∘ₗ f) fun x ↦ by
+    rw [LinearMap.mem_ker, LinearMap.sub_apply, LinearMap.id_apply, map_sub]
+    have h := DFunLike.congr_fun (comp_sectionOfSurjective f hf) (f x)
+    simpa only [LinearMap.comp_apply, LinearMap.id_apply] using sub_eq_zero.mpr h.symm
+
+private lemma kerRetractionOfSurjective_comp_subtype [Module.Projective R Q]
+    (hf : Function.Surjective f) :
+    kerRetractionOfSurjective f hf ∘ₗ (LinearMap.ker f).subtype = .id := by
+  ext x
+  simp [kerRetractionOfSurjective, LinearMap.mem_ker.mp x.property]
+
+/-- The kernel of a surjection between projective modules is projective, over an arbitrary
+base ring. -/
+theorem Module.Projective.ker_of_surjective [Module.Projective R P]
+    [Module.Projective R Q] (hf : Function.Surjective f) :
+    Module.Projective R (LinearMap.ker f) :=
+  .of_split (LinearMap.ker f).subtype (kerRetractionOfSurjective f hf)
+    (kerRetractionOfSurjective_comp_subtype f hf)
+
+/-- The kernel of a surjection from a finite module onto a projective module is finite. -/
+theorem Module.Finite.ker_of_surjective_of_projective [Module.Finite R P]
+    [Module.Projective R Q] (hf : Function.Surjective f) :
+    Module.Finite R (LinearMap.ker f) :=
+  .of_surjective (kerRetractionOfSurjective f hf) fun x ↦
+    ⟨x, DFunLike.congr_fun (kerRetractionOfSurjective_comp_subtype f hf) x⟩
+
 end KerBaseChange
 
 /-- **The kernel is projective** (GME Corollary 1.10.5: "If `R¹f_*𝓛` is locally
@@ -184,6 +221,18 @@ theorem kerBaseChangeComparison_bijective
   -- `rfl`); if a mathlib bump breaks this, transport along that lemma with
   -- `congrArg Subtype.val` / `Subtype.ext` in each direction.
   kerLTensorComparison_bijective A f
+
+/-- If the differential is surjective and its target is projective, its kernel commutes with
+every algebra base change. This is the arbitrary-base endpoint used when a length-one
+Grothendieck complex has vanishing degree-one cohomology. -/
+theorem kerBaseChangeComparison_bijective_of_surjective [Module.Projective R Q]
+    (hf : Function.Surjective f) :
+    Function.Bijective (kerBaseChangeComparison A f) := by
+  have hrange : LinearMap.range f = ⊤ := LinearMap.range_eq_top.mpr hf
+  haveI : Subsingleton (Q ⧸ LinearMap.range f) := by
+    rw [hrange]
+    infer_instance
+  exact kerBaseChangeComparison_bijective A f
 
 end BaseChangeAlgebra
 
