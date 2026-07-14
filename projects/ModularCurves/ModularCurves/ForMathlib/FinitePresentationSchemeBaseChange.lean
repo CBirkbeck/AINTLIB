@@ -97,6 +97,69 @@ noncomputable def SpreadData.FunctorModel.baseChangeSpecMap
       simpa only [Category.comp_id, ← AlgebraicGeometry.Spec.map_comp] using
         congrArg AlgebraicGeometry.Spec.map hbase)
 
+/-- Base change carries every modeled affine restriction square to a pullback square. -/
+theorem SpreadData.FunctorModel.baseChangeSpecMap_isPullback
+    (M : SpreadData.FunctorModel F H) {X Y : J} (f : X ⟶ Y) :
+    letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+    IsPullback
+      (M.baseChangeSpecMap f)
+      (pullback.snd
+        (AlgebraicGeometry.Spec.map
+          (CommRingCat.ofHom (algebraMap (𝒮 M.stage) A)))
+        (AlgebraicGeometry.Spec.map
+          (CommRingCat.ofHom
+            (algebraMap (𝒮 M.stage) (M.toFunctor.obj Y)))))
+      (pullback.snd
+        (AlgebraicGeometry.Spec.map
+          (CommRingCat.ofHom (algebraMap (𝒮 M.stage) A)))
+        (AlgebraicGeometry.Spec.map
+          (CommRingCat.ofHom
+            (algebraMap (𝒮 M.stage) (M.toFunctor.obj X)))))
+      (AlgebraicGeometry.Spec.map
+        (CommRingCat.ofHom (M.toFunctor.map f).hom.toRingHom)) := by
+  letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+  let base := AlgebraicGeometry.Spec.map
+    (CommRingCat.ofHom (algebraMap (𝒮 M.stage) A))
+  let toStageX := AlgebraicGeometry.Spec.map
+    (CommRingCat.ofHom
+      (algebraMap (𝒮 M.stage) (M.toFunctor.obj X)))
+  let toStageY := AlgebraicGeometry.Spec.map
+    (CommRingCat.ofHom
+      (algebraMap (𝒮 M.stage) (M.toFunctor.obj Y)))
+  let mapYX := AlgebraicGeometry.Spec.map
+    (CommRingCat.ofHom (M.toFunctor.map f).hom.toRingHom)
+  have hright : IsPullback
+      (pullback.fst base toStageX) (pullback.snd base toStageX)
+      base toStageX := IsPullback.of_hasPullback _ _
+  have hbase :
+      CommRingCat.ofHom
+          (algebraMap (𝒮 M.stage) (M.toFunctor.obj Y)) =
+        CommRingCat.ofHom
+            (algebraMap (𝒮 M.stage) (M.toFunctor.obj X)) ≫
+          CommRingCat.ofHom (M.toFunctor.map f).hom.toRingHom := by
+    ext x
+    exact ((M.toFunctor.map f).hom.commutes x).symm
+  have hmap_fst :
+      M.baseChangeSpecMap f ≫ pullback.fst base toStageX =
+        pullback.fst base toStageY := by
+    dsimp [SpreadData.FunctorModel.baseChangeSpecMap, pullback.map,
+      base, toStageX, toStageY]
+    rw [pullback.lift_fst, Category.comp_id]
+  have hmap_snd :
+      M.baseChangeSpecMap f ≫ pullback.snd base toStageX =
+        pullback.snd base toStageY ≫ mapYX := by
+    dsimp [SpreadData.FunctorModel.baseChangeSpecMap, pullback.map,
+      base, toStageX, toStageY, mapYX]
+    rw [pullback.lift_snd]
+  have hstage : mapYX ≫ toStageX = toStageY := by
+    simpa only [mapYX, toStageX, toStageY, ← AlgebraicGeometry.Spec.map_comp] using
+      (congrArg AlgebraicGeometry.Spec.map hbase).symm
+  have houter : IsPullback
+      (M.baseChangeSpecMap f ≫ pullback.fst base toStageX)
+      (pullback.snd base toStageY) base (mapYX ≫ toStageX) := by
+    simpa only [hmap_fst, hstage] using IsPullback.of_hasPullback base toStageY
+  exact houter.of_right hmap_snd hright
+
 private theorem SpreadData.FunctorModel.pullbackSpecIso_inv_baseChangeSpecMap
     (M : SpreadData.FunctorModel F H) {X Y : J} (f : X ⟶ Y) :
     letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
@@ -149,6 +212,38 @@ theorem SpreadData.FunctorModel.baseChangeSpecIso_naturality
   congr 1
   exact congrArg (fun q => CommRingCat.ofHom q.hom.toRingHom)
     (M.baseChangeIso.inv.naturality f).symm
+
+/-- The original affine restriction square is cartesian over its modeled restriction square. -/
+theorem SpreadData.FunctorModel.baseChangeSpecIso_inv_map_isPullback
+    (M : SpreadData.FunctorModel F H) {X Y : J} (f : X ⟶ Y) :
+    letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+    IsPullback
+      (AlgebraicGeometry.Spec.map
+        (CommRingCat.ofHom (F.map f).hom.toRingHom))
+      ((M.baseChangeSpecIso Y).inv ≫
+        pullback.snd
+          (AlgebraicGeometry.Spec.map
+            (CommRingCat.ofHom (algebraMap (𝒮 M.stage) A)))
+          (AlgebraicGeometry.Spec.map
+            (CommRingCat.ofHom
+              (algebraMap (𝒮 M.stage) (M.toFunctor.obj Y)))))
+      ((M.baseChangeSpecIso X).inv ≫
+        pullback.snd
+          (AlgebraicGeometry.Spec.map
+            (CommRingCat.ofHom (algebraMap (𝒮 M.stage) A)))
+          (AlgebraicGeometry.Spec.map
+            (CommRingCat.ofHom
+              (algebraMap (𝒮 M.stage) (M.toFunctor.obj X)))))
+      (AlgebraicGeometry.Spec.map
+        (CommRingCat.ofHom (M.toFunctor.map f).hom.toRingHom)) := by
+  letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+  refine (M.baseChangeSpecMap_isPullback f).of_iso
+    (M.baseChangeSpecIso Y) (M.baseChangeSpecIso X)
+    (Iso.refl _) (Iso.refl _) ?_ ?_ ?_ ?_
+  · exact M.baseChangeSpecIso_naturality f
+  · simp
+  · simp
+  · simp
 
 /-- The inverses of the affine-scheme base-change comparisons are natural in the modeled
 diagram. -/
