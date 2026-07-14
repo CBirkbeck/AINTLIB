@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.HMinus.KplusPrimeArithmetic
@@ -72,7 +77,7 @@ lemma idealNormMultiplicityNF_p_pow_eq_one_plus (hp_odd : p ≠ 2) (k : ℕ) :
         rw [← primesOverPlus_inertiaDeg_eq_one_at_p (p := p) (K := K) PPlus hPPlusmem]
         exact Ideal.absNorm_eq_pow_inertiaDeg' PPlus hp.out
       _ = p := by simp
-  unfold idealNormMultiplicityNF idealNormMultiplicity
+  simp only [idealNormMultiplicityNF, idealNormMultiplicity]
   haveI : Unique {I : NonzeroIdealNF K⁺ // Ideal.absNorm I.1 = p ^ k} :=
     { default := ⟨⟨PPlus ^ k, pow_ne_zero k hPPlus_ne⟩, by
           rw [map_pow, habsNormPPlus]⟩
@@ -236,7 +241,7 @@ lemma idealNormMultiplicityNF_prime_pow_eq_zero_of_not_dvd_plus
     (hp_odd : p ≠ 2) {q : Nat.Primes} [Fact (q : ℕ).Prime] (hq : (q : ℕ) ≠ p)
     {k : ℕ} (hk : ¬ localResidueDegreePlus (p := p) (q : ℕ) hq ∣ k) :
     idealNormMultiplicityNF K⁺ ((q : ℕ) ^ k) = 0 := by
-  unfold idealNormMultiplicityNF idealNormMultiplicity
+  simp only [idealNormMultiplicityNF, idealNormMultiplicity]
   rw [Nat.card_eq_zero]
   refine Or.inl ⟨?_⟩
   rintro ⟨⟨I, hI_ne⟩, hI_norm⟩
@@ -380,7 +385,7 @@ lemma idealNormMultiplicityNF_prime_pow_mul_localResidueDegreePlus_eq_card_sym
     simpa [hofSym_nfactors s] using htoSym_map_val (ofSym s)
   let e : β ≃ Sym α n :=
     ⟨toSym, ofSym, hleft, hright⟩
-  unfold idealNormMultiplicityNF idealNormMultiplicity
+  simp only [idealNormMultiplicityNF, idealNormMultiplicity]
   simpa [β, α, hd, Nat.card_eq_fintype_card] using Nat.card_congr e
 
 lemma dedekind_prime_power_series_eq_localFactorPlus_at_p
@@ -515,7 +520,7 @@ lemma evenLProduct_eq_tprod_localFactors {s : ℂ} (hs : 1 < s.re) :
         ∏ χ ∈ evenNontrivialCharacters (p := p),
           (1 - χ ((q : ℕ) : ZMod p) * ((q : ℕ) : ℂ) ^ (-s))⁻¹ := by
   classical
-  unfold evenLProduct
+  simp only [evenLProduct]
   rw [Finset.prod_congr rfl (fun χ _ ↦ LFunction_eq_prime_tprod_of_localFactors p χ hs)]
   exact (Multipliable.tprod_finsetProd
     (s := evenNontrivialCharacters (p := p))
@@ -527,7 +532,7 @@ lemma evenLProduct_eq_eulerProduct {s : ℂ} (hs : 1 < s.re) :
   classical
   rw [evenLProduct_eq_tprod_localFactors (p := p) hs]
   refine tprod_congr fun q ↦ ?_
-  unfold evenCharLocalFactor
+  simp only [evenCharLocalFactor]
   rw [Finset.prod_inv_distrib]
 
 lemma evenCharLocalFactor_at_p {s : ℂ} :
@@ -580,7 +585,7 @@ theorem dedekindZeta_eq_riemannZeta_mul_evenLProduct_of_one_lt_re
             ∏ χ ∈ evenNontrivialCharacters (p := p),
               (1 - χ ((q : ℕ) : ZMod p) * ((q : ℕ) : ℂ) ^ (-s))⁻¹) := by
       funext q
-      unfold evenCharLocalFactor
+      simp only [evenCharLocalFactor]
       rw [Finset.prod_inv_distrib]
     rw [h1]
     exact multipliable_prod (s := evenNontrivialCharacters (p := p)) fun χ _ ↦
