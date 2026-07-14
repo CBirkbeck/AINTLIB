@@ -177,4 +177,64 @@ noncomputable def classifyingMap {R : CommRingCat.{u}} (Y : EllObj R)
     Y.base ⟶ Spec (CommRingCat.of (ModuliRingE12 R)) :=
   Y.base.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (classifyingRingHom Y b h2 h3))
 
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation MvPolynomial in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 800000 in
+/-- **(E12-D3-E1)** The per-chart coefficient match: specializing the universal curve
+along the classifying map, restricted to a chart-supported affine, recovers exactly
+the adapted local model. -/
+theorem universalShortNF_map_classifying {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤)))
+    (V : Y.base.affineOpens) (i : Y.curve.toEllipticCurveGeom.atlas.ι)
+    (hVi : V.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U i).1) :
+    (universalShortNF R).map
+      (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+        (classifyingRingHom Y b h2 h3)) =
+      (adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi).W := by
+  haveI := adaptedLocal_isShortNF Y.curve.toEllipticCurveGeom b h2 h3 V i hVi
+  have h4spec := (adaptedCoeff₄ Y.curve.toEllipticCurveGeom b h2 h3).2 V i hVi
+  have h6spec := (adaptedCoeff₆ Y.curve.toEllipticCurveGeom b h2 h3).2 V i hVi
+  have hlift4 : classifyingRingHom Y b h2 h3
+      (algebraMap (MvPolynomial (Fin 2) R) (ModuliRingE12 R) (X 0)) =
+    (adaptedCoeff₄ Y.curve.toEllipticCurveGeom b h2 h3).1 := by
+    rw [classifyingRingHom]
+    rw [IsLocalization.Away.lift_eq]
+    simp [eval₂Hom_X']
+  have hlift6 : classifyingRingHom Y b h2 h3
+      (algebraMap (MvPolynomial (Fin 2) R) (ModuliRingE12 R) (X 1)) =
+    (adaptedCoeff₆ Y.curve.toEllipticCurveGeom b h2 h3).1 := by
+    rw [classifyingRingHom]
+    rw [IsLocalization.Away.lift_eq]
+    simp [eval₂Hom_X']
+  ext
+  · show ((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom)
+      (classifyingRingHom Y b h2 h3 (universalShortNF R).a₁) = _
+    rw [show (universalShortNF R).a₁ = 0 from rfl, map_zero, map_zero]
+    exact ((adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i
+      hVi).W.a₁_of_isShortNF).symm
+  · show ((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom)
+      (classifyingRingHom Y b h2 h3 (universalShortNF R).a₂) = _
+    rw [show (universalShortNF R).a₂ = 0 from rfl, map_zero, map_zero]
+    exact ((adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i
+      hVi).W.a₂_of_isShortNF).symm
+  · show ((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom)
+      (classifyingRingHom Y b h2 h3 (universalShortNF R).a₃) = _
+    rw [show (universalShortNF R).a₃ = 0 from rfl, map_zero, map_zero]
+    exact ((adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i
+      hVi).W.a₃_of_isShortNF).symm
+  · show ((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom)
+      (classifyingRingHom Y b h2 h3 (universalShortNF R).a₄) = _
+    rw [show (universalShortNF R).a₄ =
+      algebraMap (MvPolynomial (Fin 2) R) (ModuliRingE12 R) (X 0) from rfl,
+      hlift4]
+    exact h4spec
+  · show ((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom)
+      (classifyingRingHom Y b h2 h3 (universalShortNF R).a₆) = _
+    rw [show (universalShortNF R).a₆ =
+      algebraMap (MvPolynomial (Fin 2) R) (ModuliRingE12 R) (X 1) from rfl,
+      hlift6]
+    exact h6spec
+
 end ModularCurves
