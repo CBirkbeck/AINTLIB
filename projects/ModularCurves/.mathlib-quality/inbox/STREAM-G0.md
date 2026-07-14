@@ -176,3 +176,12 @@ model's finiteness (can't be circular via base-change), which is **g5-gated** (A
 connection (`Scheme.Pullback.range_fst` + `mulByHom_baseChange` + fiberHomeo). Both are the ALPHA session's
 active/atlas lane (sibling grinding g5-w7). The transport machinery makes it a clean application once g5 lands.
 Opus BETA lane fully delivered; pipeline converges under the active ALPHA session (sentinel = sibling's live g5 focus, preserved).
+
+### [g5 FOCUS RECOVERY — ALPHA session] snapshot at Opus BETA-lane B3 terminal
+```
+FOCUS: STREAM-G0 w7 endgame — goal (after banked opening): (SpecToEquivOfField F X P.1).snd = (residueFieldCongr (h _)).hom ≫ (equiv Q.1).snd, i.e. descResidueField (stalkClosedPointTo P.1) vs Q-side. TOOLS: descResidueField_stalkClosedPointTo_comp (ResidueField.lean:359: desc(stalk(g ≫ f)) = residueFieldMap f (g pt) ≫ desc(stalk g)) applied at P.2/Q.2 (P.1 ≫ pi = 1) gives retraction identities against j := Hom.residueFieldMap pi x; need desc(stalkClosedPointTo (1 : Spec F ⟶ Spec F)) value (hunt stalkClosedPointTo_id / descResidueField-id simp) + residueField-of-Spec-field iso; then j epi/iso via IsAlgClosed.algebraMap_surjective_of_isAlgebraic (kappa(x) algebraic over F since it embeds in F: Algebra.IsAlgebraic transfer along injective) => cancel_epi j closes. THEN g5 assembly + BETA per boards v10.221-222.
+
+W7-MICRO (delta): do NOT rw P.2 inside desc-stalk (dependent point!). Instead: hcompP/hcompQ := descResidueField_stalkClosedPointTo_comp (f := pi) P.1/Q.1; both LHS are desc(stalk(P.1 ≫ pi)) whose SOURCE-point (P.1≫pi)(pt) equals 1(pt) propositionally; bring BOTH identities to common source via residueFieldCongr-isos (congr-lemma composition), yielding j ≫ r_P-adj = j ≫ r_Q-adj with the SAME canonical LHS (value of desc-stalk-1 never needed); then j iso (kappa algebraic via r-embedding transfer + IsAlgClosed.algebraMap_surjective_of_isAlgebraic + IsAlgClosed.of_ringEquiv on the residue-of-Spec-F type; bijective field hom -> CommRingCat iso via ConcreteCategory) -> cancel_epi/IsIso.eq of retractions -> snd-goal closes.
+```
+(Opus cleared the shared repo-root beastmode_active trigger to conclude the completed BETA lane;
+ ALPHA/g5 continues — re-establish the trigger with the focus above on the next ALPHA turn.)
