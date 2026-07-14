@@ -1473,6 +1473,21 @@ theorem isPullback_legendreTop {R : CommRingCat.{u}} {X : EllObj R}
         rw [Category.id_comp, ← restrict_legendreClassifyingMap]] at hp
     exact hp.flip
 
+open AlgebraicGeometry CategoryTheory Scheme in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-CLS-6 ★★)** The classifying morphism of a Legendre datum in `Ell/R`:
+KM 4.6.2's universal property, forward direction (mirrors `classifyingEllHom`). -/
+noncomputable def legendreClassifyingEllHom {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤)))
+    (hR : IsUnit (2 : R)) :
+    X ⟶ universalLegendreObj R hR where
+  baseHom := legendreClassifyingMap X L b hD h2
+  base_w := legendreClassifyingMap_structMap hD h2 hR
+  top := legendreTop hD h2
+  isPullback := isPullback_legendreTop hD h2
+  zero_w := legendreTop_zero hD h2
+
 end TwoTorsion
 
 end ModularCurves
