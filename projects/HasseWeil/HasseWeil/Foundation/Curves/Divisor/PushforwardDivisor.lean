@@ -3,8 +3,8 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Map.CoordHomFinite
 import HasseWeil.Foundation.Curves.Divisor.PicZeroPushforward
+import HasseWeil.Foundation.Curves.Map.CoordHomFinite
 import HasseWeil.Foundation.Curves.Valuation.NormValuation
 
 /-!
@@ -115,7 +115,6 @@ section NormConorm
 
 variable [IsAlgClosed F]
   [IsDedekindDomain C₁.CoordinateRing] [IsDedekindDomain C₂.CoordinateRing]
-  [IsIntegrallyClosed C₁.CoordinateRing] [IsIntegrallyClosed C₂.CoordinateRing]
   (φ : CurveMap C₁ C₂) (cd : φ.CoordHom)
 
 /-- The coordinate-ring comorphism `cd.toAlgHom : F[C₂] → F[C₁]` is injective:
@@ -267,7 +266,6 @@ section NormConormSteps
 
 variable [IsAlgClosed F]
   [IsDedekindDomain C₁.CoordinateRing] [IsDedekindDomain C₂.CoordinateRing]
-  [IsIntegrallyClosed C₁.CoordinateRing] [IsIntegrallyClosed C₂.CoordinateRing]
   (φ : CurveMap C₁ C₂) (cd : φ.CoordHom)
 
 include φ cd in
@@ -277,7 +275,7 @@ as the injective comorphism `cd.toAlgHom` followed by the injective localisation
 `F[C₁] → K(C₁)`, so it is injective.  Packaged for reuse by the function-field
 finiteness/degree arguments. -/
 private theorem faithfulSMul_coordinateRing_functionField :
-    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
     FaithfulSMul C₂.CoordinateRing C₁.FunctionField := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField := by
@@ -300,8 +298,8 @@ The `K(C₂) → K(C₁)` map is `φ.pullback`, and `cd.compat` says it agrees w
 `IsScalarTower.of_algebraMap_smul`.  Packaged for reuse by the function-field
 finiteness/integral-norm arguments. -/
 private theorem isScalarTower_coordinateRing_functionField :
-    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
-    letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
+    letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
     IsScalarTower C₂.CoordinateRing C₂.FunctionField C₁.FunctionField := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
@@ -322,7 +320,7 @@ algebraicity transfers to the fraction fields by `IsFractionRing.isAlgebraic_iff
 (over `F[C₂]`) and then `IsFractionRing.comap_isAlgebraic_iff` (descending the base
 to `K(C₂)`).  This is the algebraicity input to the localisation-finiteness step. -/
 private theorem isAlgebraic_functionField :
-    letI algFF : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
+    letI : Algebra C₂.FunctionField C₁.FunctionField := φ.toAlgebra
     Algebra.IsAlgebraic C₂.FunctionField C₁.FunctionField := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField := by
@@ -389,7 +387,7 @@ identifies that lift-algebra with `φ.toAlgebra` via `IsFractionRing.lift_unique
 by `rfl`.  This supplies the global balance `relNorm(m_Q·F[C₁]) = m_Q^{φ.degree}`. -/
 private theorem finrank_functionField_eq_degree :
     letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
-    haveI tower2 : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField := by
+    haveI : IsScalarTower C₂.CoordinateRing C₁.CoordinateRing C₁.FunctionField := by
       refine IsScalarTower.of_algebraMap_eq fun x ↦ ?_
       rw [RingHom.algebraMap_toAlgebra]
       rfl
@@ -577,7 +575,7 @@ private theorem degree_eq_sum_relNormExp_mul_ramificationIdx (Q : C₂.SmoothPoi
   have hfact : Ideal.map (algebraMap C₂.CoordinateRing C₁.CoordinateRing) p =
       ∏ P' ∈ (p.primesOver C₁.CoordinateRing).toFinset, P' ^ p.ramificationIdx' P' := by
     rw [hfact0]
-    refine Finset.prod_congr rfl fun P' hP' => ?_
+    refine Finset.prod_congr rfl fun P' hP' ↦ ?_
     obtain ⟨hP'_prime, hP'_over⟩ := Set.mem_toFinset.mp hP'
     rw [Ideal.ramificationIdx'_eq_ramificationIdx p P' hp0]
   have hrel := congr_arg (Ideal.relNorm C₂.CoordinateRing) hfact
@@ -741,7 +739,7 @@ Were `Q' = ⊥`, its contraction `Q'.under = comap ⊥` would be `⊥` (the como
 injective), forcing `p = ⊥`. -/
 private theorem primesOverFinset_ne_bot {p : Ideal C₂.CoordinateRing}
     (hpMax : p.IsMaximal) (hp_ne : p ≠ ⊥) :
-    letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
+    letI : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
     ∀ Q' ∈ IsDedekindDomain.primesOverFinset p C₁.CoordinateRing, Q' ≠ ⊥ := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
@@ -1717,7 +1715,6 @@ Here the general `f = u/v` reduces to `f = algebraMap u`, `u ∈ F[C₁]` nonzer
 (`projectiveDivisorOf_mul`, `pushforward_mul`, `pushforwardDivisorVal` a hom). -/
 theorem projectiveDivisorOf_pushforward_eq_pushforwardDivisorVal [IsAlgClosed F]
     [IsDedekindDomain C₁.CoordinateRing] [IsDedekindDomain C₂.CoordinateRing]
-    [IsIntegrallyClosed C₁.CoordinateRing] [IsIntegrallyClosed C₂.CoordinateRing]
     (φ : CurveMap C₁ C₂) (cd : φ.CoordHom)
     (f : C₁.FunctionField) :
     C₂.projectiveDivisorOf (φ.pushforward f) =
@@ -1772,8 +1769,6 @@ principal. -/
 theorem pushforward_preserves_principal [IsAlgClosed F]
     [IsDedekindDomain (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing]
     [IsDedekindDomain (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W₁⟩ : SmoothPlaneCurve F).CoordinateRing]
-    [IsIntegrallyClosed (⟨W₂⟩ : SmoothPlaneCurve F).CoordinateRing]
     (φ : Isogeny W₁ W₂) (cd : φ.toCurveMap.CoordHom)
     (D : ProjectiveDivisor (⟨W₁⟩ : SmoothPlaneCurve F))
     (hD : D ∈ (⟨W₁⟩ : SmoothPlaneCurve F).projPrincipalSubgroup) :
