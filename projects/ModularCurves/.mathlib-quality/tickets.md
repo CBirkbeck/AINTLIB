@@ -19733,3 +19733,42 @@ v10.221). BETA leg (transport: localModel-over-field pointed iso + GIT 6.4 +
 IsPreirreducible are DEFS — dot-notation fails after `.2`-projection (apply lemmas explicitly);
 `Scheme.Hom.base` needs `⇑` to `set` as a plain function; `Set.nonempty_compl.mpr` for
 complement-nonemptiness.
+
+## v10.223-OMEGA (2026-07-14) — ★★★ T-E12 + T-E13 SORRY-FREE: THE (E,ω)-PROBLEM IS REPRESENTABLE + RIGID OVER ℤ[1/6]
+
+**Bootstrap.lean's `omegaProblem_representable_by_affine` and `omegaProblem_rigid` are DISCHARGED
+(commit 50af1d8bd; axiom-probe clean: propext/Classical.choice/Quot.sound only).** GME Thm 2.2.3
++ Cor 2.2.4 are theorems: `omegaRepresentableBy R hR : (omegaProblem R).RepresentableBy
+(universalEllObj R)` with `M₁ = Spec R[A₄,A₆][Δ⁻¹]` affine. Full D4 arc this sweep:
+- **rt1-core** `transVC_transport_taut` (transported taut chart ≡ adaptedLocal, transVC = 1) —
+  the hom_ext e-leg closed via backward `Iso.comp_inv_eq`-solve (motive-free isoPullback collapse)
+  + mid-object-pinned eqToHom shows.
+- **rt1** `omegaBasisMap_classifyingEllHom`: pulled universal basis = b via the 𝔾ₘ-torsor
+  (`existsUnique_unit_smul`) + chartwise unit-reading (`basisUnitAt_transUnit`/`_smul`) + two-stage
+  `unit_ext_of_res_cover` over {affine V ≤ U_i} (+ `tautPresentation_isAdapted`: reflexive-restrict
+  of `isAdapted_restrict_ofPresentation` + `resLE_rfl`).
+- **rt2** `classifyingEllHom_omegaBasisMap` (UNIQUENESS, GME 2.2.3): for ANY φ the transported taut
+  chart is adapted-to-pulled + shortNF ⟹ `transVC_eq_one_of_isAdapted` pins it to adaptedLocal
+  (**`transVC_transport_adapted`** — the φ-general rt1-core, 6 lines from E12-B uniqueness!) ⟹
+  `transport_taut_W_eq`/`transport_taut_e_eq`. baseHom: `classifyingRingHom_omegaBasisMap`
+  (IsLocalization.ringHom_ext + MvPolynomial.ringHom_ext; C-scalars via base_w +
+  ΓSpecIso_inv_naturality; A₄/A₆ via sheaf-ext + adaptedCoeff-spec + W-eq) → `classifyingMap_
+  omegaBasisMap` (Γ–Spec dance). top: `classifyingTop_omegaBasisMap` via adaptedTotalCover.hom_ext
+  + transportTheta_fst + transport_e_baseChange + e-eq + comp'-fold + `sectionsMapLE_congr_hom`
+  (new InvariantDifferential congr-transport). EllHom.ext closes.
+- **T-E12** := package (naturality = `omegaBasisMap_comp`); **T-E13** := `rigid_of_representable`.
+
+**CONSEQUENCE: the ℤ[1/6]-corner of the KM 4.7 bootstrap is COMPLETE. `representable_iff`'s ⇐ now
+needs ONLY T-E14** (Legendre δ over ℤ[1/2]: corrected adaptedness-coupled statement + engine
+axioms 1/2), and all three levels flip representable at once. OMEGA proceeds to T-E14 NOW
+(LegendreNormalForm.lean seeded: legendreCurve/Δ/ellipticity; leaf-(a) 2-torsion defers to KM
+keystone per de-confliction; leaf-(b) = the ±1-normalisation VC).
+
+LEAN-OP (for the fleet): (1) `have h0 := lemma-with-instance-implicit-R'` STICKS on Algebra-mvar —
+pin `(R' := …)` explicitly. (2) isoPullback-collapse rws motive-fail (the iso's IsPullback-proof
+CONTAINS the rewritten leg) — solve BACKWARD: `rw [← assoc, Iso.comp_inv_eq, id_comp,
+IsIso.comp_inv_eq]; exact spec.symm`. (3) eqToHom_trans won't fire across defeq-but-not-syntactic
+mid-objects — pin the mid with a type-ascribed `(eqToHom _ : A ⟶ B-spelled)` inside a full-goal
+`show`. (4) `fin_cases j` leaves `(fun i ↦ i) ⟨0,⋯⟩`-indices — open each branch with a literal-index
+`show`. (5) LSP serving stale oleans ⟹ garbage goals + phantom sorryAx in lean_verify — trust
+`lake build` + a fresh `lake env lean` #print-axioms probe.
