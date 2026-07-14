@@ -24,7 +24,8 @@ import Mathlib.AlgebraicGeometry.Sites.Fpqc
   the `torsorCompare` presentation reduces the kernel-pair coequalizing condition to invariance,
   and a quasi-compact + surjective + flat morphism is an fpqc effective epimorphism.
 * `isIso_torsorCompare_pullback`, `isIso_sigmaDesc_of_isPullback`, `isIso_sigmaDesc_section` —
-  the base-change/trivialization helpers (also used by the KM 4.7.0 bijection's curve-level descent).
+  the base-change/trivialization helpers (also used by the KM 4.7.0 bijection's curve-level
+  descent).
 
 These are the torsor facts of the KM 4.7.0 representability argument.
 -/
