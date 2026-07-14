@@ -5,9 +5,9 @@ Authors: The AINTLIB Authors
 -/
 import Mathlib.AlgebraicGeometry.Morphisms.FiniteType
 import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
+import Mathlib.AlgebraicGeometry.PullbackCarrier
 import Mathlib.FieldTheory.IsAlgClosed.Basic
 import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
-import Mathlib.AlgebraicGeometry.PullbackCarrier
 
 /-!
 # Point counting on Jacobson schemes (BB-QF bridge, ForMathlib)
@@ -16,7 +16,7 @@ Two bridge facts for fibre-finiteness arguments over a field:
 
 * `finite_of_jacobsonSpace_of_finite_closedPoints` — a Jacobson space with finitely many
   closed points is finite (the space *is* its closed points).
-* `Scheme.exists_section_of_isClosed_singleton` — on a scheme locally of finite type over
+* `Scheme.exists_section_through_closedPoint` — on a scheme locally of finite type over
   `Spec k` with `k` algebraically closed, every closed point is hit by a `k`-section
   (Zariski's lemma / Nullstellensatz: the residue field at a closed point is a finite,
   hence trivial, extension of `k`).
