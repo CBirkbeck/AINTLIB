@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Isogeny.Basic
-import Mathlib.FieldTheory.SeparableClosure
 import Mathlib.FieldTheory.PurelyInseparable.Basic
+import Mathlib.FieldTheory.SeparableClosure
 
 /-!
 # Inseparable degree API for isogenies (Silverman II.2.10-12)
@@ -90,8 +90,6 @@ theorem inseparableDegree_eq_finInsepDegree (α : Isogeny W W)
   show α.degree / α.separableDegree =
       Field.finInsepDegree W.FunctionField W.FunctionField
   have h_mul := separableDegree_mul_finInsepDegree α
-  show α.degree / α.separableDegree =
-      Field.finInsepDegree W.FunctionField W.FunctionField
   rw [show α.degree = α.separableDegree *
       Field.finInsepDegree W.FunctionField W.FunctionField from h_mul.symm]
   exact Nat.mul_div_cancel_left _ h_sep_pos
@@ -163,19 +161,16 @@ The maximal intermediate field over which `K(E)` is purely inseparable.
 Direct specialisation of `Mathlib.FieldTheory.separableClosure` to
 `α.pullback.fieldRange ⊆ K(E)`. -/
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **The separable closure of `α^*(K(E))` inside `K(E)`**. This is the
 maximal intermediate field over which `K(E)` is purely inseparable. -/
 noncomputable def separableSubfield (α : Isogeny W W) :
     IntermediateField α.pullback.fieldRange W.FunctionField :=
   separableClosure α.pullback.fieldRange W.FunctionField
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **Bottom inclusion**: `α^*(K(E)) ⊆ separableSubfield`. -/
 theorem separableSubfield_includes_pullbackRange (α : Isogeny W W) :
     ⊥ ≤ α.separableSubfield := bot_le
 
-set_option backward.isDefEq.respectTransparency false in
 /-- **`K(E)` is purely inseparable over `α.separableSubfield`**: direct
 from mathlib's `separableClosure.isPurelyInseparable`, under the
 algebraicity assumption (automatic for `Module.Finite`). -/
