@@ -23,8 +23,8 @@ second is the normalization `e = 1` (the ramification index), which for `[ℓ]` 
 content of separability.
 
 The main export is `comap_pointValuation_eq_of_isEquiv_of_ord_eq_one`, plus the small valuation glue
-lemmas it rests on (re-derived here, Fintype-free, so the file is independent of the
-`[Fintype K]`-scoped versions in `Hasse/L6Witnesses.lean`).
+lemmas it rests on (`Fintype`-free; the `[Fintype K]`-scoped versions they were derived from lived
+in `Hasse/L6Witnesses.lean`, which no longer exists, so these are now the only copies).
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, II.2.5–2.6, III.4.10c.
 -/
@@ -52,9 +52,9 @@ namespace Curves.SmoothPlaneCurve
 
 variable (C : SmoothPlaneCurve F)
 
-/-- **`pointValuation` is surjective onto `ℤᵐ⁰`** at a smooth point `P`.  (Fintype-free
-re-derivation of `Hasse/L6Witnesses.lean`'s `pointValuation_surjective`.)  The local ring is a DVR
-with a uniformizer `t` (`ord_P t = 1`) realising `exp (-1)`; values are integer powers of it. -/
+/-- **`pointValuation` is surjective onto `ℤᵐ⁰`** at a smooth point `P` (`Fintype`-free).  The local
+ring is a DVR with a uniformizer `t` (`ord_P t = 1`) realising `exp (-1)`; values are integer powers
+of it. -/
 theorem pointValuation_surjective' (P : C.SmoothPoint) :
     Function.Surjective (C.pointValuation P) := by
   obtain ⟨t, ht⟩ := C.exists_uniformizer P
@@ -64,8 +64,7 @@ theorem pointValuation_surjective' (P : C.SmoothPoint) :
 
 end Curves.SmoothPlaneCurve
 
-/-- **Two surjective `ℤᵐ⁰`-valued valuations that are equivalent are equal.**  (Fintype-free
-re-derivation of `Hasse/L6Witnesses.lean`'s `Valuation.isEquiv_iff_eq_of_surjective_withZeroInt`.)
+/-- **Two surjective `ℤᵐ⁰`-valued valuations that are equivalent are equal.**  (`Fintype`-free.)
 The order-isomorphism of value groups underlying `IsEquiv` is forced to be the identity because the
 only positive divisor of `1` in `ℤ` is `1`. -/
 theorem Valuation.isEquiv_eq_of_surjective_withZeroInt
