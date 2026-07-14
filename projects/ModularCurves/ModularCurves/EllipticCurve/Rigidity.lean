@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.GroupLaw
 -- NOTE (P4, 2026-07-07): `import ModularCurves.EllipticCurve.PoleFiltration` deliberately
 -- deferred to the T-W7.r-supply ticket (which will consume
@@ -518,7 +523,6 @@ theorem germ_eq_zero_of_fromSpecStalk_app {X : Scheme.{u}} {U : X.Opens} {x : X}
   | simpa using h
   | (rw [map_zero]; simpa using h)
   | (rw [map_zero]; simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h ⊢; exact h)
-  | (rw [map_zero]; simp only [← Category.assoc] at h ⊢; simpa using h)
 
 /-- **(T-W7.r2·c·i — SORRIED SUB-LEAF, the one remaining gap of `rigidity`)** Sections of
 the equalizer ideal die in every infinitesimal neighbourhood of a collapsed fibre: if the
@@ -543,7 +547,7 @@ theorem germ_ker_mem_pow_of_fibre_subset [IsLocallyNoetherian S] [IsProper p]
         (IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x)))) ^ n := by
   subst hgconst
   rcases n with - | n
-  · simpa using Submodule.mem_top
+  · simp
   -- the (n+1)-st infinitesimal neighbourhood of `p x`, as a scheme over `S`
   set gT : Spec (CommRingCat.of (S.presheaf.stalk (p.base x) ⧸
       (IsLocalRing.maximalIdeal (S.presheaf.stalk (p.base x))) ^ (n + 1))) ⟶ S :=
