@@ -266,6 +266,19 @@ lemma comap_prod {ι : Type*} (s : Finset ι) (K : ι → Y.IdealSheafData) (f :
     (∏ i ∈ s, K i).comap f = ∏ i ∈ s, (K i).comap f :=
   map_prod (comapMonoidHom f) K s
 
+/-- `IdealSheafData.ideal` as a monoid homomorphism: products of ideal sheaves are
+computed pointwise (`ideal_mul`), and the unit ideal sheaf `⊤` has value the unit ideal. -/
+noncomputable def idealMonoidHom (X : Scheme.{u}) :
+    X.IdealSheafData →* (∀ U : X.affineOpens, Ideal Γ(X, U.1)) where
+  toFun := ideal
+  map_one' := by
+    funext U
+    simp [one_eq_top, ideal_top, Ideal.one_eq_top]
+  map_mul' I J := ideal_mul I J
+
+@[simp] lemma idealMonoidHom_apply (X : Scheme.{u}) (I : X.IdealSheafData) :
+    idealMonoidHom X I = I.ideal := rfl
+
 /-- **Factoring through a pulled-back subscheme = factoring through the original after
 composing** (the `comapIso` dictionary). A map `g : T ⟶ X` factors through the scheme-
 theoretic preimage `(I.comap f).subscheme` iff its composite `g ≫ f` factors through
