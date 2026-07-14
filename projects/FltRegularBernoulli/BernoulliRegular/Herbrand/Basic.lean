@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.KummerCongruence.Bridge
@@ -24,7 +29,6 @@ open scoped NumberField Pointwise nonZeroDivisors
 
 namespace BernoulliRegular
 
-set_option linter.unusedSectionVars false
 
 section Herbrand
 
