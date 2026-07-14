@@ -136,36 +136,24 @@ noncomputable def legendreBootstrapProblem : ModuliProblem R where
     · exact FunctorToTypes.map_comp_apply (gammaFullNaiveProblem R 2) φ ψ x.1
     · exact FunctorToTypes.map_comp_apply (omegaProblem R) φ ψ x.2
 
-/-- **(T-E14a, KM engine axiom 1 for `δ = ` Legendre)** Over a base in which `2` is
-invertible, the Legendre problem is representable by an object with **affine** base —
-explicitly `M'₂ = Spec ℤ[1/2][λ][(λ(λ−1))⁻¹]`, universal curve `y² = x(x−1)(x−λ)` with
-`P = (0, 0)`, `Q = (1, 0)`, `ω = dx/y` (KM 4.6.2; GME Ex. 2.2.1 p. 117). Route:
-normalise `y² = x³ + a₂x² + a₄x + a₆` (2 invertible), `E[2] − {0}` free of rank 3,
-place the roots at `0, 1, λ`. -/
-theorem legendreBootstrap_representable_by_affine (hR : IsUnit (2 : R)) :
-    ∃ X : EllObj R, IsAffine X.base ∧
-      Nonempty ((legendreBootstrapProblem R).RepresentableBy X) := by
-  sorry
+/-! #### T-E14 statement-layer correction (2026-07-14, OMEGA — adversarial source check)
 
-/-- **(T-E14b, KM engine axiom 2 for `δ = ` Legendre)** For every `E/S` over a base in
-which `2` is invertible, the `S`-scheme relatively representing the Legendre problem is
-**finite étale over `S`** — the underlying scheme of the `GL₂(ℤ/2) × {±1}`-torsor of
-KM 4.6.2's axiom 2. Stated in the torsor-free shape matching
-`naiveLevelThree_relativelyRepresentable_finiteEtale`; the simply-transitive action is
-supplied separately (T-Q2's `InvariantTorsor` datum). Route: `E[2]` finite étale when
-`2` is invertible (T-B5) for the level factor; the `ω`-factor is the `𝔾ₘ`-torsor
-`OmegaBasis` restricted to a `{±1}`-torsor by the normalisation — KM 2.2.9. -/
-theorem legendreBootstrap_relativelyRepresentable_finiteEtale (hR : IsUnit (2 : R))
-    (X : EllObj R) :
-    ∃ (Z : Scheme.{u}) (f : Z ⟶ X.base), IsFinite f ∧ Etale f ∧
-      ∀ {T : Scheme.{u}} (g : T ⟶ X.base), Nonempty
-        ({ h : T ⟶ Z // h ≫ f = g } ≃
-          (legendreBootstrapProblem R).obj (Opposite.op (X.pullbackAlong g))) := by
-  sorry
+KM 4.6.2 VERBATIM defines the Legendre problem as pairs `(φ₂, ω)` **"for which the
+adapted `x` satisfies `x(P₂) = 0, x(Q₂) = 1`"** — the `ω`-datum and the level datum are
+COUPLED through the `ω`-adapted Weierstrass model (KM 2.2.5/2.2.9). The plain product
+`legendreBootstrapProblem = Γ(2)-naive × ω` above is the AMBIENT functor, a `𝔾ₘ`-bundle
+over KM's `δ`; the two engine axioms are FALSE for it (its fibres are not finite), so
+the two axiom-statement skeletons previously recorded here were RETRACTED before any
+proof work targeted them. Stating KM's true `δ` needs the `(E, ω)`-adapted-model layer
+— exactly T-E12's A7-normalisation machinery — so the corrected order of battle is:
+T-E12 (adapted models + `M₁`) → T-E14' (the adapted subfunctor + axioms 1/2 over
+`M'₂ = Spec ℤ[1/2][λ][(λ(λ−1))⁻¹]`). The `GL₂(ℤ/2) × {±1}`-action infrastructure below
+remains valid: KM's `δ` is a `G`-stable subfunctor of the ambient product, and the
+action restricts. -/
 
 set_option backward.isDefEq.respectTransparency false in
-/-- **(T-E14-ACT)** The `{±1}`-automorphism of the Legendre problem: identity on the
-level datum, sign on the `ω`-datum. -/
+/-- **(T-E14-ACT)** The `{±1}`-automorphism of the (ambient) Legendre problem:
+identity on the level datum, sign on the `ω`-datum. -/
 noncomputable def legendreBootstrapNegAut :
     Aut (legendreBootstrapProblem R) where
   hom :=
@@ -204,7 +192,7 @@ noncomputable def legendreBootstrapNegAut :
       (by rw [neg_one_mul, neg_neg]; exact OmegaBasis.one_smul' _)
 
 /-- **(T-E14-ACT)** The `{±1}`-half of KM 4.6.2's `G = GL₂(ℤ/2) × {±1}` on the
-Legendre problem, in the engine's `G →* Aut Q` interface. -/
+(ambient) Legendre problem, in the engine's `G →* Aut Q` interface. -/
 noncomputable def legendreBootstrapSignAction :
     ℤˣ →* Aut (legendreBootstrapProblem R) where
   toFun u := if u = 1 then 1 else legendreBootstrapNegAut R
