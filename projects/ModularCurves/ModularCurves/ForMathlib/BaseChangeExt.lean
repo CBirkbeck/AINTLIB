@@ -1,4 +1,16 @@
-import Mathlib
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
+import Mathlib.Algebra.Category.Grp.AB
+import Mathlib.Algebra.Category.ModuleCat.Ext.DimensionShifting
+import Mathlib.Algebra.FiveLemma
+import Mathlib.Algebra.Homology.DerivedCategory.Ext.Map
+import Mathlib.Algebra.Module.StablyFree.Basic
+import Mathlib.CategoryTheory.Abelian.Ext
+import Mathlib.RingTheory.LocalProperties.ProjectiveDimension
+import Mathlib.RingTheory.PicardGroup
 
 open CategoryTheory Abelian Limits ModuleCat
 open scoped ModuleCat.Algebra
@@ -330,8 +342,10 @@ in `Mathlib/.../Ext/MapBijective.lean`, replacing "bijective for a fully faithfu
   (`LinearMap.bijective_of_surjective_of_bijective_of_right_exact`) to the comparison ladder of
   `LocalizedModule.lift`s, whose neighbouring rungs are bijective by the induction hypothesis at
   degree `n` for the finite modules `K` and `P` (via `isLocalizedModule_iff_bijective_lift`).
-  Naturality of the comparison comes from `Ext.mapExactFunctor_comp` and `Ext.mapExactFunctor_extClass`.
-* **Base case `n = 0` (proved in `isLocalizedModule_mapExt_zero`).** Here `F.mapExtLinearMap S X Y 0`
+  Naturality of the comparison comes from `Ext.mapExactFunctor_comp` and
+  `Ext.mapExactFunctor_extClass`.
+* **Base case `n = 0` (proved in `isLocalizedModule_mapExt_zero`).** Here
+  `F.mapExtLinearMap S X Y 0`
   is, through `Ext.linearEquiv₀`/`ModuleCat.homLinearEquiv` (the identification `Ext _ _ 0 ≃ Hom`),
   the localization map `IsLocalizedModule.mapExtendScalars 𝔪 …` on the hom-space, which is a
   localization because `X` is finitely presented
@@ -340,9 +354,10 @@ in `Mathlib/.../Ext/MapBijective.lean`, replacing "bijective for a fully faithfu
   `ModuleCat.Algebra` `Module S`-structure, while `mapExtendScalars` uses the `LocalizedModule` one;
   these are provably-equal but not defeq, so unifying them naively (which would touch
   `LocalizedModule.mk e s` for every `s`) is prohibitively expensive. We avoid the unification by
-  pinning the `LocalizedModule` `Module S`-structure (plus its scalar tower and `SMulCommClass`) with
-  `letI`, keeping the `L`-linear identification `w` diamond-free, and transferring the three
-  localization axioms from `mapExtendScalars` to `mapExtLinearMap` elementwise through the bijections
+  pinning the `LocalizedModule` `Module S`-structure (plus its scalar tower and
+  `SMulCommClass`) with `letI`, keeping the `L`-linear identification `w` diamond-free, and
+  transferring the three localization axioms from `mapExtendScalars` to `mapExtLinearMap`
+  elementwise through the bijections
   (only ever using `LocalizedModule.mk _ 1`, never a general `mk e s`). -/
 lemma isLocalizedModule_mapExt [IsNoetherianRing S] (X Y : ModuleCat.{u} S)
     [Module.Finite S X] (n : ℕ) :
@@ -363,8 +378,10 @@ theorem localizedModule_ext_subsingleton_iff {S : Type u} [CommRing S] [IsNoethe
         (Ext (ModuleCat.of S (S ⧸ I)) (ModuleCat.of S S) i))
       ↔ Subsingleton (Ext
           (ModuleCat.of (Localization q.asIdeal.primeCompl)
-            (Localization q.asIdeal.primeCompl ⧸ I.map (algebraMap S (Localization q.asIdeal.primeCompl))))
-          (ModuleCat.of (Localization q.asIdeal.primeCompl) (Localization q.asIdeal.primeCompl)) i) := by
+            (Localization q.asIdeal.primeCompl ⧸
+              I.map (algebraMap S (Localization q.asIdeal.primeCompl))))
+          (ModuleCat.of (Localization q.asIdeal.primeCompl)
+            (Localization q.asIdeal.primeCompl)) i) := by
   set 𝔪 := q.asIdeal.primeCompl with h𝔪
   haveI : IsLocalizedModule 𝔪
       ((ModuleCat.localizedModuleFunctor.{u} 𝔪).mapExtLinearMap S
