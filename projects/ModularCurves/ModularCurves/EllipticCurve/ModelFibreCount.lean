@@ -425,6 +425,22 @@ v10.221. -/
 
 section RangeWitness
 
+/-- **(w1)** For `N ≠ 0` over any field there is a prime `ℓ` not dividing `N` with
+`(ℓ : F) ≠ 0`: any prime beyond `max |N| (ringChar F)` works. -/
+theorem exists_good_prime (F : Type u) [Field F] (N : ℤ) (hN : N ≠ 0) :
+    ∃ ℓ : ℕ, ℓ.Prime ∧ ¬ ((ℓ : ℤ) ∣ N) ∧ (ℓ : F) ≠ 0 := by
+  obtain ⟨ℓ, hle, hℓ⟩ := Nat.exists_infinite_primes (max N.natAbs (ringChar F) + 1)
+  have hgtN : N.natAbs < ℓ := lt_of_le_of_lt (le_max_left _ _) (Nat.lt_of_succ_le hle)
+  have hgtC : ringChar F < ℓ := lt_of_le_of_lt (le_max_right _ _) (Nat.lt_of_succ_le hle)
+  refine ⟨ℓ, hℓ, fun hdvd => ?_, fun h0 => ?_⟩
+  · have h1 : ℓ ∣ N.natAbs := Int.natCast_dvd_natCast.mp (Int.dvd_natAbs.mpr hdvd)
+    have h2 : ℓ ≤ N.natAbs := Nat.le_of_dvd (Int.natAbs_pos.mpr hN) h1
+    omega
+  · have hchar : ringChar F ∣ ℓ := ringChar.dvd (by exact_mod_cast h0)
+    rcases (Nat.Prime.eq_one_or_self_of_dvd hℓ _ hchar) with h1 | h1
+    · exact CharP.ringChar_ne_one (R := F) h1
+    · omega
+
 /-- **(w7)** Distinct sections of a scheme over `Spec F`, `F` a field, have distinct
 image points whenever their common image point has residue field `F` — over an
 algebraically closed base every rational section is determined by its topological
