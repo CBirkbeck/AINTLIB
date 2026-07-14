@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.FLT37.Primary
@@ -47,6 +52,7 @@ def idealNormPrincipalIdeal (B : Ideal (𝓞 K)) : Ideal (𝓞 K) :=
 def pthSymbolAtInt_canonical (α : 𝓞 K) (a : ℤ) : ZMod p :=
   pthSymbolAtIdeal_canonical (p := p) (K := K) α (rationalIntIdeal (K := K) a)
 
+/-- The integer-denominator symbol is the ideal symbol at the generated ideal. -/
 @[simp] theorem pthSymbolAtInt_canonical_eq_atIdeal
     (α : 𝓞 K) (a : ℤ) :
     pthSymbolAtInt_canonical (p := p) (K := K) α a =
