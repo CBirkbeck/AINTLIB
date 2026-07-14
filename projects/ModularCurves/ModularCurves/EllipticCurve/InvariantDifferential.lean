@@ -1789,6 +1789,26 @@ theorem transUnit_restrict_restrict_left {VP : S.affineOpens}
     ((P.restrict p).restrict h).transUnit R = (P.restrict (h.trans p)).transUnit R := by
   rw [transUnit, transUnit, transVC_restrict_restrict_left]
 
+open Scheme in
+/-- **(E12-D3-E3)** The inclusion of chart pullbacks along a smaller affine (the
+`f = 𝟙` comparison map, exposed). -/
+noncomputable def restrictTheta {G : EllipticCurveGeom S} {V V' : S.affineOpens}
+    (h : V'.1 ≤ V.1) :
+    (pullback G.π V'.1.ι : Scheme.{u}) ⟶ pullback G.π V.1.ι :=
+  transportTheta (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
+    (show V'.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ V.1 from h)
+
+open Scheme in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D3-E3)** The restricted chart isomorphism intertwines the model base change
+with the pullback inclusion (`transportE_baseChange` at the identity square). -/
+theorem restrict_e_baseChange {G : EllipticCurveGeom S} {V : S.affineOpens}
+    (P : LocalPresentation G V) {V' : S.affineOpens} (h : V'.1 ≤ V.1) :
+    (P.restrict h).e.hom ≫ projModelBaseChange (sectionsMapLE (𝟙 S) h) P.W =
+      restrictTheta h ≫ P.e.hom :=
+  transportE_baseChange (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩) P
+    (show V'.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ V.1 from h)
+
 end LocalPresentation
 
 end ModularCurves
