@@ -20123,3 +20123,58 @@ representability machine are DONE.
 worthy; upstream PR candidate. BB-QF residual: (κ̄-wiring) base-changed model ≅ model-of-base-changed-W
 or the record-route at the unique point; (seam-ii) the fibre-of-endo pullback identification. Then
 fiber_mulByHom_locallyQuasiFinite closes and mulByHom_locallyQuasiFinite_assembled = the Torsion leaf.
+
+## v10.237-OMEGA (2026-07-14) — ⚠ [T-E14-ACT'] ADVERSARIAL FINDING for the coordinator/engine-owner: the G-action on the corrected δ does NOT exist as a naive functor-action
+
+**The analysis (blocking the `φ : G →* Aut Q` engine-input for `Q = legendreDeltaProblem`):**
+γ ∈ GL₂(ℤ/2) re-marks the pair; the re-marked adapted `x'` is `x' = u'⁻²(x − a)` where
+`(a, b)` are the old-`x`-values of the new pair and `u'² = b − a ∈ {±1, ±λ, ±(λ−1)}`. A δ-point
+`(L, ω)` carries NO canonical square root of `b − a`, and over `M'₂ = Spec ℤ[1/2][λ][(λ(λ−1))⁻¹]`
+these ratios are not even Zariski-locally squares — so `γ • (L, ω)` has no canonical `ω'`, and the
+universal datum's γ-translate is NOT an `IsLegendreDatum` over `M'₂` (it becomes one only after
+the étale double cover extracting `√(b−a)`). The relative δ-SCHEME is the 12-sheeted
+`⨿_{orderings} Spec 𝒪[u]/(u² − (b−a))` — finite étale over `S[1/2]` ✓ (consistent with KM's
+"finite étale GL(2,ℤ/2)×{±1} torsor", which asserts the torsor property of the SCHEME) — and the
+G-action exists on THAT scheme (a sheet-point carries its own `u`), i.e. on the ÉTALE SHEAF, but
+NOT on the Zariski-local-existence functor. **Consequence:** the engine interface
+`representable_of_rigid_of_torsor (φ : G →* Aut Q)` (QuotientProblem.lean, T-Q6d) cannot be fed
+`Q = legendreDeltaProblem` as-is. Options for the engine-owner/coordinator to adjudicate:
+(a) state the N=2 application with `Q := the étale-sheafified δ` (the action exists there);
+(b) weaken the engine input to TorsorData-only (σZ on the relative scheme, no functor-action) —
+    the KM p.112 axioms as quoted require "G operates upon δ", but the PROOF (pp. 114-116) may
+    only consume the scheme-action;
+(c) N=2-specific bypass: KM 4.6.5-style direct quotient of `M'₂`. (KM pdf pp. 118-126 have no
+    extractable text layer — the transcription in km47-source-quotes.md stops at the torsor
+    assertion; whoever holds the OCR should extract the 4.6.2-4.6.5 action-construction.)
+The λ-line S₃-action (λ ↦ 1−λ, 1/λ, …) needs `u² = −1`-style variable changes — NOT admissible
+Weierstrass VCs over ℤ[1/2][λ]; the classical anharmonic action lives on coarse λ-space, not on
+the (E, φ₂, ω)-functor. This finding is load-bearing for [T-E14-AX2]'s statement too.
+
+## v10.238-OMEGA (2026-07-14) — SESSION TERMINAL STATE: OMEGA's dispatchable frontier is EXHAUSTED (all residuals cross-charter-gated)
+
+**The v10.219 charter ("EllHom-upstairs + RepresentableBy → T-E12 → T-E13 → T-E14 ★★ — the
+highest-leverage deliverable in the project") is DELIVERED:**
+- **T-E12 ★★ SORRY-FREE** (`omegaProblem_representable_by_affine` — GME Thm 2.2.3): the full
+  D3+D4 arc (classifyingEllHom, rt1-core, rt1, rt2, omegaRepresentableBy). Axiom-clean.
+- **T-E13 ★ SORRY-FREE** (`omegaProblem_rigid` — GME Cor 2.2.4, via rigid_of_representable).
+- **T-E14: the corrected δ STATABLE + FUNCTORIAL ★★** (MarksAt/IsLegendreDatum/
+  legendreDeltaProblem — KM 4.6.2 verbatim) **+ AX1's REPRESENTABILITY MACHINE COMPLETE ★★★**
+  (`legendreDeltaRepresentableBy`; Bootstrap's AX1 reduced to the single E[2]-generation clause)
+  + T-E14a leaves (Legendre normalization VC, {±1}-rigidity, 2-torsionness of the marked pair —
+  killing clause ✓✓) + supporting theory: char≠2 adapted models (translation-torsor),
+  `projModelAffineSection` (+ Z-chart + base-change + VC-action + injectivity),
+  `equation_smul_image`, CLS-1 witness-uniqueness, `legendreLambda` (glued classifying function),
+  the full legendrePiece/Top/EllHom ladder, `negModelHom_affineSection`, `[−1] = negModelHom`.
+**Residual gates (NONE dispatchable by OMEGA):**
+1. [T-E14-LVL-b] geometric E[2]-generation — **KM-keystone (STREAM-KM, L4-iii)** per the standing
+   coordinator de-confliction.
+2. [T-E14-AX2] finite-étale relative representability — needs E[2]-classification (same keystone)
+   + the ACT'-adjudication (v10.237).
+3. [T-E14-ACT'] — **coordinator/engine-owner ruling required** (v10.237 finding: the naive
+   functor-action does not exist; engine-interface options (a)/(b)/(c) boarded).
+4. The upstream `gammaFullNaiveProblem.map` IsNaiveFullLevel-preservation sorry
+   (Representability.lean:229 — pre-existing, another ticket) — rt2/RepresentableBy inherit its
+   sorryAx; T-E14's own mathematics is sorry-free.
+**For the coordinator:** T-E14 is no longer the funnel — the funnel is now the KM keystone
+(feeds LVL-b + AX2 + the register-boxes) and the ACT'-ruling. `representable_iff`'s ⇐ = engine
+(T-Q6d.γ) + T-E15 (both other-stream) + the above.
