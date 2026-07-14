@@ -531,14 +531,17 @@ noncomputable def phi
   letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
   B.D.phi
 
+section SourceBundle
+
+variable {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
+  {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
+  {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
+  [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
+  [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
+
 /-- Build a prime-factor bundle from the canonical trace-form split prime data
 and the exact-exponent theorem for the index-one Φ element. -/
 noncomputable def ofCanonicalTraceForm_atomic_split
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -603,11 +606,6 @@ noncomputable def ofCanonicalTraceForm_atomic_split
 from the canonical trace-form identity and accepts split conditions directly on
 `P`. -/
 noncomputable def ofCanonicalTraceForm_atomic_split_atPrime
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -660,11 +658,6 @@ noncomputable def ofCanonicalTraceForm_atomic_split_atPrime
 /-- Prime-factor bundle constructor that derives both the descent-prime equality
 and `ℓ ≠ p` from the source-prime membership/nonmembership hypotheses. -/
 noncomputable def ofCanonicalTraceForm_atomic_split_atPrime_of_mem_notMem
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -717,11 +710,6 @@ noncomputable def ofCanonicalTraceForm_atomic_split_atPrime_of_mem_notMem
 /-- Prime-factor bundle constructor that derives `P ≠ ⊥`, the descent-prime
 equality, and `ℓ ≠ p` from the source-prime hypotheses. -/
 noncomputable def ofCanonicalTraceForm_atomic_split_atPrime_of_mem_notMem_maximal
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -773,11 +761,6 @@ noncomputable def ofCanonicalTraceForm_atomic_split_atPrime_of_mem_notMem_maxima
 /-- Prime-factor bundle constructor that accepts splitting of the rational
 prime ideal `(ℓ)` instead of splitting written on `P.under ℤ`. -/
 noncomputable def ofCanonicalTraceForm_atomic_split_atSpan_of_mem_notMem_maximal
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -825,6 +808,8 @@ noncomputable def ofCanonicalTraceForm_atomic_split_atSpan_of_mem_notMem_maximal
     K2_2SourceData.ofCanonicalTraceForm_atomic_split_atSpan_of_mem_notMem_maximal
       (P := P) (Q := Q) (iso := iso)
       hℓ_in_P hp_notin_P hQ_in h_compat h_trace h_ne_zero h_exp he hf
+
+end SourceBundle
 
 end K2_2PrimeFactorBundle
 end PhiPrimeElement

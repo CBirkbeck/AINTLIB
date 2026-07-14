@@ -141,6 +141,14 @@ theorem
     (fun P hP => (h_prime_facts P hP).2.2)
     h_coprime
 
+section AtomicSplit
+
+variable {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
+  {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
+  {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
+  [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
+  [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
+
 /-- **`h_span` discharge from atomic Stickelberger predicates (split case).**
 
 Reduces the substantive `K2_2SourceData.h_span` field to:
@@ -161,11 +169,6 @@ The remaining open content is exactly the per-conjugate exact-exponent
 predicate `StickelbergerExactConjugateExponents` for the descended γ —
 the substantive Stickelberger order statement for Gauss sums. -/
 theorem K2_2SourceData_h_span_of_atomic_split
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-    [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal] [Algebra (ZMod ℓ) (𝓞 K ⧸ P)]
     {S : letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
       FullTeichDworkSetup ℓ p (𝓞 K ⧸ P) K R'}
@@ -214,11 +217,6 @@ The descended element is the actual Gauss-sum
 `phiPrimeGenDescent S (p - 1)`, matching the no-sorry REF-18 exact-exponent
 theorem proved from pair-field covariance. -/
 theorem K2_2ReciprocalSourceData_h_span_of_atomic_split
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-    [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal] [Algebra (ZMod ℓ) (𝓞 K ⧸ P)]
     {S : letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
       FullTeichDworkSetup ℓ p (𝓞 K ⧸ P) K R'}
@@ -271,11 +269,6 @@ This removes a bookkeeping hypothesis from source-data constructors: once
 bundle, the descent prime is forced by the K-algebra-compatible residue-field
 iso. -/
 theorem descentPrime_eq_of_canonicalTraceForm
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-    [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -331,11 +324,6 @@ theorem descentPrime_eq_of_canonicalTraceForm
 /-- In the canonical split-prime trace-form bundle, the abstract residue
 degree `S.f` is the inertia degree of the source prime over `(ℓ)`. -/
 theorem f_eq_inertiaDeg_of_canonicalTraceForm
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-    [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -390,6 +378,8 @@ theorem f_eq_inertiaDeg_of_canonicalTraceForm
     CyclotomicLocalSetup.mkConcreteSetup_ofSplitPrime_canonical
     CyclotomicLocalSetup.mkConcreteSetup_ofSplitPrime
   rfl
+
+end AtomicSplit
 
 /-- In the canonical split-prime trace-form bundle, rational splitting of
 `(ℓ)` forces the concrete residue degree field `S.f` to be one. -/
@@ -454,6 +444,14 @@ theorem f_eq_one_of_canonicalTraceForm_atSpan
     exact hf
   exact hf_S.trans hf_P
 
+section AtomicSplitConstructors
+
+variable {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
+  {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
+  {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
+  [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
+  [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
+
 /-- **Actual K2-2 source data from the canonical trace-form split bundle
 and the exact-exponent theorem.**
 
@@ -463,11 +461,6 @@ This is the honest source constructor for the current K/U route.  The produced
 `K2_2SourceData_h_span_of_atomic_split` for that same element.  No
 `StickelbergerIdealEquality.gen` choice is introduced. -/
 noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -535,11 +528,6 @@ noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split
 the descent-prime equality from the canonical trace-form identity and accepts
 the split conditions directly for `P`. -/
 noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -602,11 +590,6 @@ noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime
 /-- Variant of `K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime` that
 derives `ℓ ≠ p` from `(ℓ : 𝓞 K) ∈ P` and `(p : 𝓞 K) ∉ P`. -/
 noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime_of_mem_notMem
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -659,11 +642,6 @@ noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime_of_me
 `K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime_of_mem_notMem`
 that also derives `P ≠ ⊥` from maximality of the source prime. -/
 noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime_of_mem_notMem_maximal
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -717,11 +695,6 @@ noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime_of_me
 that accepts splitting of the rational prime ideal `(ℓ)` instead of splitting
 written on `P.under ℤ`. -/
 noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_atSpan_of_mem_notMem_maximal
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -783,11 +756,6 @@ noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_atSpan_of_mem
 that derives the rational-prime split equalities from the cyclotomic
 ramification theorem and the honest order-one condition for `ℓ` modulo `p`. -/
 noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_orderOfOne_of_mem_notMem_maximal
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -837,6 +805,8 @@ noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_orderOfOne_of
       hℓ_in_P hp_notin_P hQ_in h_compat h_trace h_ne_zero h_exp
       (ramificationIdxIn_span_natCast_eq_one_of_ne (K := K) hℓ_ne_p)
       (inertiaDegIn_span_natCast_eq_one_of_orderOf (K := K) hℓ_ne_p h_order)
+
+end AtomicSplitConstructors
 
 end PhiPrimeElement
 
