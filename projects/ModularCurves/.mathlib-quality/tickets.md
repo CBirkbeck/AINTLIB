@@ -20328,3 +20328,28 @@ inline at StandardSmoothStalkDVR.lean:460–540, sorry-free, replayable).
   has NO `DescendsAlong @Flat` instance; add to ForMathlib/QuasiFiniteDescent via
   `RingHom.Flat.codescendsAlong`?? — verify; else stalkwise directly on the record).
 GATE for full BB-FLAT stays [BBF-A2/A3] (B–E chain) — boarded separately, next arc.
+
+## v10.243-OMEGA (2026-07-14) — ★★ [T-E15a stage 4] THE UNIQUENESS CERTIFICATE (worked by hand; implement next)
+
+**Marked E3-witness uniqueness** (two presentations over the same affine, both `IsE3Form` at
+`(βᵢ, γᵢ)`, both elliptic, marking the same `σP` at `(0,0)` and the same `σQ` at `(γᵢ, βᵢ+γᵢ)`):
+`transVC = 1 ∧ β₁ = β₂ ∧ γ₁ = γ₂`. The `{±ω}`-danger is REAL (in char 2 over 𝔽₄ the system
+`w(3uγ₁+1) = 0` admits `u = ω`, `u³ = 1`-solutions with all markings consistent) and is killed
+ONLY by the `(a₁³ − 27a₃)`-unit — the certificate, with `C = ⟨u,r,s,t⟩`, `w := u − 1`:
+1. `P`-marking chase (CLS-1d template + `projModelVCIso_affineSection` + injectivity): `r = 0`,
+   `t = 0`. Then `a₄`-transform (`a₄` both 0) ⟹ `s·a₃Q = 0` ⟹ `s = 0` (`a₃Q` unit from Δ).
+2. `Q`-marking: `γ₂ = u²γ₁`, `β₂ + γ₂ = u³(β₁+γ₁)`. `a₁`-transform: `3γ₂−1 = u(3γ₁−1)` ⟹
+   **[A]** `w(3uγ₁ + 1) = 0`, i.e. the scalar action `γ₁·w = −(3u)⁻¹·w` (3, u units).
+3. Flex of witness 1 (`γ₁q₁ = 0`, `q₁ = 3β₁²+3β₁γ₁+γ₁²` — from the Q-marking equation!) ⟹
+   `q₁w = 0` ⟹ **[E]** `w(27u²β₁² − 9uβ₁ + 1) = 0`.
+4. Flex of witness 2, substituted (`β₂ = u³β₁ + u²γ₁w`) and reduced by flex-1 + the scalar
+   action ⟹ **[G']** `9u²β₁w = 2w² + w`.
+5. [E] + [G'] eliminate `β₁`: `w((2w+1)² − 3u(2w+1) + 3u²) = 0` ⟹ (with `u = w+1`)
+   **[W]** `w(w² + w + 1) = 0` (hence `w⁴ = w`).
+6. **The D-unit kill:** reduce `u³·(a₁P³ − 27·a₃P)·w` by the scalar action + [G']:
+   `u³·D_P·w = w(1 − w³) = w(1−w)(1+w+w²) = 0` by [W] ⟹ `w = 0` since `u³D_P` is a UNIT. ∎
+   Then `s=t=r=0, u=1` ⟹ `transVC = 1`; `γ₂ = γ₁`, `β₂ = β₁` from 2.
+Sanity (𝔽₄, char 2): `γ=ω², β=ω²·ω²` passes v₁-unit but `D = a₁³+a₃ = ω³+1 = 0` — exactly the
+D-unit exclusion ✓. NOTE: uniqueness does NOT need the level/generation clause — the
+ellipticity-units suffice (unlike my first fear). All steps are `linear_combination`-certifiable
+with the explicit coefficients above.
