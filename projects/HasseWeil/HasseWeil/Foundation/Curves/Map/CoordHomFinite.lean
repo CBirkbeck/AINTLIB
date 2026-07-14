@@ -14,7 +14,7 @@ For a curve map `φ : C₁ → C₂` with a coordinate-ring pullback witness
 `Module.Finite` hypothesis (`hfin`) carried throughout the isogeny theory by
 `CurveMap.sum_ramificationIdx_mul_inertiaDeg_eq_degree`,
 `EC.Isogeny.addHomProperty` / `toBasicIsogeny` (K̄-level),
-`EC.Isogeny.addHomProperty_descend_of_finite` / `toBasicIsogenyDescend`
+`EC.Isogeny.addHomProperty_descend` / `toBasicIsogenyDescend`
 (K-level), `Isogeny.pushforward` (`Curves/PushforwardDivisor.lean`),
 `EC/KernelCount.lean`, and friends.
 
@@ -481,7 +481,7 @@ Unconditional: no separability, no integral closedness, and no algebraically
 closed base are required.  This discharges the `hfin` arguments of
 `CurveMap.sum_ramificationIdx_mul_inertiaDeg_eq_degree`,
 `EC.Isogeny.addHomProperty`, `EC.Isogeny.toBasicIsogeny`,
-`EC.Isogeny.addHomProperty_descend_of_finite`, `Isogeny.pushforward`, and
+`EC.Isogeny.addHomProperty_descend`, `Isogeny.pushforward`, and
 the `KernelCount` chain. -/
 theorem module_finite (cd : φ.CoordHom) :
     @Module.Finite C₂.CoordinateRing C₁.CoordinateRing _ _ cd.toAlgebra.toModule :=
