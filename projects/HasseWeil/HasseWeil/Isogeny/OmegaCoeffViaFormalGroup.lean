@@ -48,16 +48,6 @@ variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
 local notation "KE" => W.toAffine.FunctionField
 
-/-- `mulByInt_y W n ≠ 0` for `n ≠ 0` (its image under the injective `[n]`-pullback
-is `y_gen ≠ 0`). -/
-theorem mulByInt_y_ne_zero (n : ℤ) (hn : n ≠ 0) : mulByInt_y W n ≠ 0 := by
-  intro h
-  apply y_gen_ne_zero W
-  apply (mulByInt W.toAffine n).pullback_injective
-  rw [map_zero,
-    show (mulByInt W.toAffine n).pullback (y_gen W) = mulByInt_y W n from
-      mulByInt_pullback_y W n hn, h]
-
 /-- `[n]^* t = -mulByInt_x n / mulByInt_y n` for `n ≠ 0`: the pullback of the local
 parameter `t = -x/y` in division-polynomial coordinates. -/
 theorem mulByInt_pullback_localParam (n : ℤ) (hn : n ≠ 0) :

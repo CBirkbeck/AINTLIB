@@ -599,7 +599,7 @@ theorem ofEquationPullback_ordAtInfty_nonneg
   obtain ⟨r₁, r₂, hf_decomp⟩ := (W_smooth V).exists_decomp f
   have hf_eq : f = algebraMap (FractionRing (Polynomial F)) (V.toAffine.FunctionField) r₁ +
       algebraMap (FractionRing (Polynomial F)) (V.toAffine.FunctionField) r₂ * y_gen V := by
-    rw [hf_decomp, y_gen_eq_coordYInFunctionField' V, Algebra.smul_def, mul_one,
+    rw [hf_decomp, y_gen_eq_coordYInFunctionField V, Algebra.smul_def, mul_one,
       Algebra.smul_def]
     rfl
   -- split the hypothesis through the parity/min formula

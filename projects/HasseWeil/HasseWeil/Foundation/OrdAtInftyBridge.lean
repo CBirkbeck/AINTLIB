@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.MulByIntPullback
+import HasseWeil.Foundation.OmegaPullbackCoeff
 import HasseWeil.Foundation.Curves.Valuation.Infinity
 
 /-!
@@ -101,6 +102,22 @@ theorem x_gen_ne_zero : x_gen W ≠ 0 := by
 /-- `y_gen W ≠ 0` follows from `(W_smooth W).coordY_ne_zero` via the bridge. -/
 theorem y_gen_ne_zero : y_gen W ≠ 0 := by
   rw [← coordY_W_smooth_eq_y_gen]; exact (W_smooth W).coordY_ne_zero
+
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
+/-- `y_gen W` and `(W_smooth W).coordYInFunctionField` are the same element of
+`KE`: both are `algebraMap R KE (AdjoinRoot.root W.polynomial)` (the curve of
+`W_smooth W` is `W.toAffine` definitionally). -/
+theorem y_gen_eq_coordYInFunctionField :
+    y_gen W = (W_smooth W).coordYInFunctionField := rfl
+
+/-- `mulByInt_y W n ≠ 0` for `n ≠ 0`: it is the image of `y_gen ≠ 0` under the
+field embedding `[n]^*`. -/
+theorem mulByInt_y_ne_zero (n : ℤ) (hn : n ≠ 0) : mulByInt_y W n ≠ 0 := by
+  have hpb : (mulByInt W.toAffine n).pullback = mulByInt_pullbackAlgHom W n hn := dif_neg hn
+  have h : mulByInt_pullbackAlgHom W n hn (y_gen W) = mulByInt_y W n :=
+    hpb ▸ mulByInt_pullback_y W n hn
+  rw [← h]
+  exact (map_ne_zero (mulByInt_pullbackAlgHom W n hn)).mpr (y_gen_ne_zero W)
 
 /-- `ord_∞(x_gen^n) = n • (-2)`. -/
 theorem ordAtInfty_x_gen_pow (n : ℕ) :
