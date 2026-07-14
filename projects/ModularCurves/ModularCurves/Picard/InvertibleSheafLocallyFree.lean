@@ -37,18 +37,12 @@ private noncomputable def freePUnitIsoUnit (U : X.Opens) :
   (SheafOfModules.isColimitFreeCofan PUnit.{u + 1}).coconePointUniqueUpToIso
     (unitPUnitCofanIsColimit U)
 
-private noncomputable def overTrivialization (M : X.Modules) (U : X.Opens)
-    (e : (pullback U.ι).obj M ≅ unitObj U.toScheme) :
-    M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U) :=
-  (overEquiv U).fullyFaithfulFunctor.preimageIso
-    ((overFunctorEquiv U).app M ≪≫
-      (restrictFunctorIsoPullback U.ι).app M ≪≫ e ≪≫
-      (U.sheafOfModulesEquivOverUnit X.ringCatSheaf).symm)
-
 private noncomputable def localFreeTrivializationIso (M : X.Modules) (U : X.Opens)
     (e : (pullback U.ι).obj M ≅ unitObj U.toScheme) :
     SheafOfModules.free (R := X.ringCatSheaf.over U) PUnit.{u + 1} ≅ M.over U :=
-  freePUnitIsoUnit U ≪≫ (overTrivialization M U e).symm
+  freePUnitIsoUnit U ≪≫
+    (overTrivializationOfRestrictIso M U
+      ((restrictFunctorIsoPullback U.ι).app M ≪≫ e)).symm
 
 private noncomputable def localGeneratorsOfTrivialization (M : X.Modules) (U : X.Opens)
     (e : (pullback U.ι).obj M ≅ unitObj U.toScheme) :
