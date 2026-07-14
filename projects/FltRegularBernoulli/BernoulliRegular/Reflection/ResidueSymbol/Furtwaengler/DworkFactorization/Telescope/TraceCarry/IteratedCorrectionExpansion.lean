@@ -79,7 +79,7 @@ theorem artinHasseExpTraceCarryIterCorrection_eq_prod
   let zbar : A :=
     Ideal.Quotient.mk (F.Q ^ (N + 1)) (F.teichUnitFullVal (F.traceScale * y))
   let t : ℕ := (Algebra.trace (ZMod ℓ) k ((F.traceScale : k) * (y : k))).val
-  let a : ℕ → A := fun j =>
+  let a : ℕ → A := fun j ↦
     (PowerSeries.trunc (N + 1) Rps).eval₂ (RingHom.id A)
       (ε ^ (ℓ ^ j) *
         ((t : A) -
@@ -242,7 +242,7 @@ theorem exists_traceCarryIterCorrection_eq_teichmuller_series_product_powers
   let zbar : A :=
     Ideal.Quotient.mk (F.Q ^ (N + 1)) (F.teichUnitFullVal (F.traceScale * y))
   let t : ℕ := (Algebra.trace (ZMod ℓ) k ((F.traceScale : k) * (y : k))).val
-  let stepRoot : ℕ → WittVector ℓ k := fun j =>
+  let stepRoot : ℕ → WittVector ℓ k := fun j ↦
     Classical.choose
       (F.exists_traceCarry_correction_eq_teichmuller_series_product_powers_of_parameter
         N y (ε ^ (ℓ ^ j))
@@ -333,10 +333,10 @@ theorem exists_traceCarryIterCorrection_eq_teichmuller_series_product_powers_con
   let t : ℕ := (Algebra.trace (ZMod ℓ) k ((F.traceScale : k) * (y : k))).val
   obtain ⟨c, hc⟩ :=
     F.exists_traceNatCast_sub_teichFrobeniusSum_eq_natCast_ell_mul_wittTheta_series N y
-  let coord : ℕ → A := fun r =>
+  let coord : ℕ → A := fun r ↦
     θ (WittVector.teichmuller ℓ
       (((_root_.frobeniusEquiv k ℓ).symm ^ r) (c.coeff r)))
-  let u : ℕ → A := fun r => (ℓ : A) ^ (r + 1) * coord r
+  let u : ℕ → A := fun r ↦ (ℓ : A) ^ (r + 1) * coord r
   have hsum :
       (t : A) -
           (∑ i : Fin F.toConcreteStickelbergerSetup.f, zbar ^ (ℓ ^ (i : ℕ))) =
@@ -473,10 +473,10 @@ theorem traceCarryIterCorrection_eq_teichmuller_series_product_powers_traceCarry
   let zbar : A :=
     Ideal.Quotient.mk (F.Q ^ (N + 1)) (F.teichUnitFullVal (F.traceScale * y))
   let t : ℕ := (Algebra.trace (ZMod ℓ) k ((F.traceScale : k) * (y : k))).val
-  let coord : ℕ → A := fun r =>
+  let coord : ℕ → A := fun r ↦
     θ (WittVector.teichmuller ℓ
       (((_root_.frobeniusEquiv k ℓ).symm ^ r) ((F.traceCarry y).coeff r)))
-  let u : ℕ → A := fun r => (ℓ : A) ^ (r + 1) * coord r
+  let u : ℕ → A := fun r ↦ (ℓ : A) ^ (r + 1) * coord r
   have hseries :
       θ (F.traceCarry y) =
         ∑ r ∈ Finset.Iic N,
@@ -597,7 +597,7 @@ theorem exists_traceCarryIterCorrection_mul_teichmuller_frobenius_tail_eq_tail
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     ∃ c : WittVector ℓ k,
       F.artinHasseExpTraceCarryIterCorrection N y ε m *
@@ -622,7 +622,7 @@ theorem exists_traceCarryIterCorrection_mul_teichmuller_frobenius_tail_eq_tail
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Rps : PowerSeries A :=
     (rescale_exp_isRIntegral ℓ).mapTo
@@ -630,20 +630,20 @@ theorem exists_traceCarryIterCorrection_mul_teichmuller_frobenius_tail_eq_tail
   obtain ⟨c, hcarry⟩ :=
     F.exists_traceCarryIterCorrection_eq_teichmuller_series_product_powers_const
       N m y ε hε
-  let coord : ℕ → k := fun r =>
+  let coord : ℕ → k := fun r ↦
     ((_root_.frobeniusEquiv k ℓ).symm ^ r) (c.coeff r)
-  let C : ℕ → A := fun j =>
+  let C : ℕ → A := fun j ↦
     ∏ r ∈ Finset.Iic N,
       ((PowerSeries.trunc (N + 1) Rps).eval₂ (RingHom.id A)
         (ε ^ (ℓ ^ j) * θ (WittVector.teichmuller ℓ (coord r)))) ^
         (ℓ ^ (r + 1))
-  let S : ℕ → A := fun j =>
+  let S : ℕ → A := fun j ↦
     ∏ r ∈ Finset.Iic N,
       ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
         ((ε ^ (ℓ ^ j)) ^ ℓ *
           θ (WittVector.teichmuller ℓ ((coord r) ^ ℓ)))) ^
         (ℓ ^ (r + 1))
-  let T : ℕ → A := fun j =>
+  let T : ℕ → A := fun j ↦
     ∏ r ∈ Finset.Iic N,
       ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
         (ε ^ (ℓ ^ j) * θ (WittVector.teichmuller ℓ (coord r)))) ^
@@ -701,7 +701,7 @@ theorem traceCarryIterCorrection_mul_teichmuller_frobenius_tail_eq_tail_traceCar
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     F.artinHasseExpTraceCarryIterCorrection N y ε m *
       (∏ j ∈ Finset.range m,
@@ -727,26 +727,26 @@ theorem traceCarryIterCorrection_mul_teichmuller_frobenius_tail_eq_tail_traceCar
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Rps : PowerSeries A :=
     (rescale_exp_isRIntegral ℓ).mapTo
       (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let c : WittVector ℓ k := F.traceCarry y
-  let coord : ℕ → k := fun r =>
+  let coord : ℕ → k := fun r ↦
     ((_root_.frobeniusEquiv k ℓ).symm ^ r) (c.coeff r)
-  let C : ℕ → A := fun j =>
+  let C : ℕ → A := fun j ↦
     ∏ r ∈ Finset.Iic N,
       ((PowerSeries.trunc (N + 1) Rps).eval₂ (RingHom.id A)
         (ε ^ (ℓ ^ j) * θ (WittVector.teichmuller ℓ (coord r)))) ^
         (ℓ ^ (r + 1))
-  let S : ℕ → A := fun j =>
+  let S : ℕ → A := fun j ↦
     ∏ r ∈ Finset.Iic N,
       ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
         ((ε ^ (ℓ ^ j)) ^ ℓ *
           θ (WittVector.teichmuller ℓ ((coord r) ^ ℓ)))) ^
         (ℓ ^ (r + 1))
-  let T : ℕ → A := fun j =>
+  let T : ℕ → A := fun j ↦
     ∏ r ∈ Finset.Iic N,
       ((PowerSeries.trunc (N + 1) Eps).eval₂ (RingHom.id A)
         (ε ^ (ℓ ^ j) * θ (WittVector.teichmuller ℓ (coord r)))) ^
