@@ -295,7 +295,7 @@ algebraic-closure hypothesis by *surjectivity* of `algebraMap F (F[C]⧸M)`. For
 maximal ideal `M` whose residue field is `F`, there exist `a, b ∈ F` mapping to
 the `X`- and `Y`-classes. This is the `F`-rationality (inertia-1) form. -/
 theorem exists_coordinates_of_isMaximal_of_surjective
-    {M : Ideal C.CoordinateRing} (hM : M.IsMaximal)
+    {M : Ideal C.CoordinateRing} (_hM : M.IsMaximal)
     (h_surj : letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
       Function.Surjective (algebraMap F (C.CoordinateRing ⧸ M))) :
     letI : Field (C.CoordinateRing ⧸ M) := Ideal.Quotient.field M
@@ -778,7 +778,7 @@ theorem map_algebraMap_X_sub_C_eq_prod_primesOver_pow [IsAlgClosed F]
   have hp_bot : p ≠ (⊥ : Ideal (Polynomial F)) := by
     rwa [← Ideal.zero_eq_bot]
   rw [Ideal.map_algebraMap_eq_finsetProd_pow (R := C.CoordinateRing) hp_ne]
-  refine Finset.prod_congr rfl fun P hP => ?_
+  refine Finset.prod_congr rfl fun P hP ↦ ?_
   have hP' : P ∈ p.primesOver C.CoordinateRing := Set.mem_toFinset.mp hP
   obtain ⟨hP_prime, hP_over⟩ := hP'
   rw [Ideal.ramificationIdx'_eq_ramificationIdx p P hp_bot]
@@ -1145,7 +1145,7 @@ end SmoothPlaneCurve
     in `Localization.AtPrime M`. The image becomes the unit ideal because
     `v.asIdeal` contains some element `x ∉ M`, and `algMap x` is a unit in
     the localization. -/
-theorem map_eq_top_of_ne_localization {A : Type*} [CommRing A] [IsDomain A]
+theorem map_eq_top_of_ne_localization {A : Type*} [CommRing A]
     [IsDedekindDomain A]
     (M : Ideal A) [hM : M.IsMaximal]
     (v : IsDedekindDomain.HeightOneSpectrum A) (hv_ne_M : v.asIdeal ≠ M) :
@@ -1169,7 +1169,7 @@ theorem map_eq_top_of_ne_localization {A : Type*} [CommRing A] [IsDomain A]
 
 /-- **Unit-collapse for non-M-as-HeightOneSpectrum**: special case packaging
     when M is wrapped as a HeightOneSpectrum element via `vM = ⟨M, _, _⟩`. -/
-theorem map_eq_top_of_ne_heightOneSpectrum {A : Type*} [CommRing A] [IsDomain A]
+theorem map_eq_top_of_ne_heightOneSpectrum {A : Type*} [CommRing A]
     [IsDedekindDomain A]
     (M : Ideal A) [hM : M.IsMaximal] (hM_ne : M ≠ ⊥)
     (v : IsDedekindDomain.HeightOneSpectrum A)
@@ -1183,7 +1183,7 @@ theorem map_eq_top_of_ne_heightOneSpectrum {A : Type*} [CommRing A] [IsDomain A]
 /-- **Power identity at M**: for `n : ℕ`, `Ideal.map alg (M^n) =
     (IsLocalRing.maximalIdeal localization)^n`. Direct from `Ideal.map_pow`
     and `Localization.AtPrime.map_eq_maximalIdeal`. -/
-theorem map_M_pow_eq_localRing_max_pow {A : Type*} [CommRing A] [IsDomain A]
+theorem map_M_pow_eq_localRing_max_pow {A : Type*} [CommRing A]
     [IsDedekindDomain A]
     (M : Ideal A) [hM : M.IsMaximal] (n : ℕ) :
     Ideal.map (algebraMap A (Localization.AtPrime M)) (M ^ n) =
@@ -1212,7 +1212,7 @@ theorem Ideal.map_finset_prod {A B : Type*} [CommRing A] [CommRing B]
 /-- **Count of a height-one prime in its own power**: for any height-one prime
     `v` of a Dedekind domain, the count of `v.asIdeal` in `(v.asIdeal)^n.factors`
     is `n`. Direct from `Associates.count_pow` + `Associates.count_self`. -/
-theorem count_self_pow_heightOneSpectrum {R : Type*} [CommRing R] [IsDomain R]
+theorem count_self_pow_heightOneSpectrum {R : Type*} [CommRing R]
     [IsDedekindDomain R]
     (v : IsDedekindDomain.HeightOneSpectrum R) (n : ℕ) :
     (Associates.mk v.asIdeal).count (Associates.mk (v.asIdeal ^ n)).factors = n := by
@@ -1227,7 +1227,7 @@ theorem count_self_pow_heightOneSpectrum {R : Type*} [CommRing R] [IsDomain R]
 /-- **Count of `(IsLocalRing.maximalIdeal localization)^n`**: the M-adic count
     of `local_max^n` at the unique nonzero prime of the localization. Useful
     intermediate for the count-preservation closure. -/
-theorem count_localRing_max_pow {A : Type*} [CommRing A] [IsDomain A]
+theorem count_localRing_max_pow {A : Type*} [CommRing A]
     [IsDedekindDomain A]
     (M : Ideal A) [hM : M.IsMaximal] (hM_ne : M ≠ ⊥) (n : ℕ) :
     (Associates.mk (IsLocalRing.maximalIdeal (Localization.AtPrime M))).count
@@ -1249,7 +1249,7 @@ namespace Conditional
     the witness `Ideal.map alg I = local_max^(count_M I)`, the count-preservation
     follows mechanically. -/
 theorem count_preservation_of_structural_witness
-    {A : Type*} [CommRing A] [IsDomain A] [IsDedekindDomain A]
+    {A : Type*} [CommRing A] [IsDedekindDomain A]
     (M : Ideal A) [hM : M.IsMaximal] (hM_ne : M ≠ ⊥) (I : Ideal A)
     (h_witness : Ideal.map (algebraMap A (Localization.AtPrime M)) I =
       (IsLocalRing.maximalIdeal (Localization.AtPrime M)) ^
@@ -1266,7 +1266,7 @@ end Conditional
 /-- **Specialized at M-power**: for `I = M^n`, the count-preservation holds
     unconditionally. Direct from `map_M_pow_eq_localRing_max_pow` +
     `count_localRing_max_pow` + the count of M in `M^n` formula. -/
-theorem count_preservation_M_pow {A : Type*} [CommRing A] [IsDomain A]
+theorem count_preservation_M_pow {A : Type*} [CommRing A]
     [IsDedekindDomain A]
     (M : Ideal A) [hM : M.IsMaximal] (hM_ne : M ≠ ⊥) (n : ℕ) :
     (Associates.mk (Ideal.map (algebraMap A (Localization.AtPrime M)) M)).count
@@ -1288,7 +1288,7 @@ theorem count_preservation_M_pow {A : Type*} [CommRing A] [IsDomain A]
     This is the unconditional foundational step — composes mathlib lemmas without
     requiring the substantive count-preservation. -/
 theorem localization_max_count_eq_map_count
-    {A : Type*} [CommRing A] [IsDomain A] [IsDedekindDomain A]
+    {A : Type*} [CommRing A] [IsDedekindDomain A]
     (M : Ideal A) [hM : M.IsMaximal] (u : A) :
     (Associates.mk (IsLocalRing.maximalIdeal
           (Localization.AtPrime M))).count
@@ -1311,7 +1311,7 @@ namespace Conditional
     localization map, the local-ring count of `span {algebraMap u}` at the local
     maximal ideal equals the M-adic count of `u` in `A`. -/
 theorem count_preservation_localization_of_witness
-    {A : Type*} [CommRing A] [IsDomain A] [IsDedekindDomain A]
+    {A : Type*} [CommRing A] [IsDedekindDomain A]
     (M : Ideal A) [hM : M.IsMaximal] (u : A)
     (h_count_pres : (Associates.mk (Ideal.map
           (algebraMap A (Localization.AtPrime M)) M)).count
@@ -1340,7 +1340,7 @@ end Conditional
     map to the localization; for `v ≠ M`, the term collapses to `⊤` (since `v ⊄ M`);
     the surviving `v = M` term gives `local_max^count_M I`. -/
 theorem map_eq_localRing_max_pow_count
-    {A : Type*} [CommRing A] [IsDomain A] [IsDedekindDomain A]
+    {A : Type*} [CommRing A] [IsDedekindDomain A]
     (M : Ideal A) [hM : M.IsMaximal] (hM_ne : M ≠ ⊥) {I : Ideal A} (hI : I ≠ ⊥) :
     Ideal.map (algebraMap A (Localization.AtPrime M)) I =
       (IsLocalRing.maximalIdeal (Localization.AtPrime M)) ^
@@ -1380,7 +1380,7 @@ theorem map_eq_localRing_max_pow_count
     in `A`. Discharges the substantive witness of
     `Conditional.count_preservation_of_structural_witness`. -/
 theorem count_preservation_map_localization
-    {A : Type*} [CommRing A] [IsDomain A] [IsDedekindDomain A]
+    {A : Type*} [CommRing A] [IsDedekindDomain A]
     (M : Ideal A) [hM : M.IsMaximal] (hM_ne : M ≠ ⊥) {I : Ideal A} (hI : I ≠ ⊥) :
     (Associates.mk (Ideal.map (algebraMap A (Localization.AtPrime M)) M)).count
         (Associates.mk (Ideal.map (algebraMap A (Localization.AtPrime M)) I)).factors =
@@ -1397,7 +1397,7 @@ theorem count_preservation_map_localization
     obtained by discharging the witness via `count_preservation_map_localization`.
     The `u = 0` case is handled separately (both sides reduce to `count _ ⊤ = 0`). -/
 theorem count_preservation_localization
-    {A : Type*} [CommRing A] [IsDomain A] [IsDedekindDomain A]
+    {A : Type*} [CommRing A] [IsDedekindDomain A]
     (M : Ideal A) [hM : M.IsMaximal] (hM_ne : M ≠ ⊥) (u : A) :
     (Associates.mk (IsLocalRing.maximalIdeal
           (Localization.AtPrime M))).count
