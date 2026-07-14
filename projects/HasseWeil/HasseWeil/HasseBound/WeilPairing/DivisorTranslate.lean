@@ -39,7 +39,6 @@ namespace HasseWeil
 open HasseWeil.WeilPairing
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
