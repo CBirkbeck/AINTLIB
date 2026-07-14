@@ -234,7 +234,7 @@ variable {R} {U : Type u} [CommRing U] (f : U →+* R)
   [W₀.IsElliptic] [W.IsElliptic]
 
 /-- Shorthand: the base-change pullback square of the model. -/
-noncomputable def wPB : IsPullback
+theorem wPB : IsPullback
     (projModelBaseChangeOf f W₀ W h)
     (projModelπ W) (projModelπ W₀)
     (Spec.map (CommRingCat.ofHom f)) :=
@@ -254,7 +254,7 @@ theorem hsnd : pullbackMapBaseChangeOf f W₀ W h ≫
       projModelBaseChangeOf f W₀ W h :=
   Limits.pullback.lift_snd _ _ _
 
-noncomputable def sqIsPullback : IsPullback
+theorem sqIsPullback : IsPullback
     (pullbackMapBaseChangeOf f W₀ W h)
     (pullback.fst (projModelπ W) (projModelπ W) ≫ projModelπ W)
     (pullback.fst (projModelπ W₀) (projModelπ W₀) ≫ projModelπ W₀)
@@ -662,7 +662,7 @@ section StageIso
 variable {R} (W : WeierstrassCurve R) [W.IsElliptic]
 
 /-- The stage model against the base-changed system object (at `g := projModelπ (wZero W)`). -/
-noncomputable def stageModelPB (T : Over (wStageOp W)) : IsPullback
+theorem stageModelPB (T : Over (wStageOp W)) : IsPullback
     (projModelBaseChangeOf (Subalgebra.inclusion (wStage_le_stage W T)).toRingHom
       (wZero W) (stageW W T) rfl)
     (projModelπ (stageW W T)) (projModelπ (wZero W))
@@ -670,7 +670,7 @@ noncomputable def stageModelPB (T : Over (wStageOp W)) : IsPullback
   isPullback_projModelBaseChangeOf _ (wZero W) (stageW W T) rfl
 
 /-- The stage square against the base-changed square system object. -/
-noncomputable def stageSqPB (T : Over (wStageOp W)) : IsPullback
+theorem stageSqPB (T : Over (wStageOp W)) : IsPullback
     (pullbackMapBaseChangeOf (Subalgebra.inclusion (wStage_le_stage W T)).toRingHom
       (wZero W) (stageW W T) rfl)
     (Limits.pullback.fst (projModelπ (stageW W T)) (projModelπ (stageW W T)) ≫
@@ -1732,7 +1732,7 @@ theorem modelGrpObj_unique (G : GrpObj (modelOver W))
       (modelComparison W).inv ≫ (axInclL W).left := by
     have h1 := axApex_comparison W
     have h2 := congrArg (fun m => (modelComparison W).inv ≫ m ≫ (sqComparison W).inv) h1
-    simp only [Category.assoc, Iso.hom_inv_id, Category.comp_id, Iso.inv_hom_id_assoc]
+    simp only [Category.assoc, Iso.inv_hom_id_assoc]
       at h2
     exact h2.trans (congrArg ((modelComparison W).inv ≫ ·)
       ((Category.assoc _ _ _).trans ((congrArg ((axInclL W).left ≫ ·)
@@ -1808,7 +1808,7 @@ theorem modelGrpObj_unique (G : GrpObj (modelOver W))
       (modelComparison W).inv ≫ (axInclR W).left := by
     have h1 := axApexR_comparison W
     have h2 := congrArg (fun m => (modelComparison W).inv ≫ m ≫ (sqComparison W).inv) h1
-    simp only [Category.assoc, Iso.hom_inv_id, Category.comp_id, Iso.inv_hom_id_assoc]
+    simp only [Category.assoc, Iso.inv_hom_id_assoc]
       at h2
     exact h2.trans (congrArg ((modelComparison W).inv ≫ ·)
       ((Category.assoc _ _ _).trans ((congrArg ((axInclR W).left ≫ ·)
