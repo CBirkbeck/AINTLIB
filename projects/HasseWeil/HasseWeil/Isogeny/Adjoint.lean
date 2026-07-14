@@ -61,8 +61,6 @@ namespace HasseWeil.WeilPairing
 
 open HasseWeil
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 /-! ### Group-theoretic preliminaries (no pairing) -/
 
