@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.HasseBound.WeilPairing.Reduction
 import HasseWeil.HasseBound.WeilPairing.Discriminant
 import HasseWeil.HasseBound.WeilPairing.PairingDet
@@ -45,12 +50,14 @@ theorem qf_nonneg_of_frob_det_residual {p : ℕ} (hp : p.Prime) {q t : ℤ} (hq 
     deg_eq_of_frob_det_data (hres r s hps)
   rw [← hd]; exact hdeg_nonneg r s
 
-/-- **Route-2A capstone (coprime-BOTH): `qf_nonneg` from the Weil-pairing det-residual on `p ∤ r ∧ p ∤ s`.**
+/-- **Route-2A capstone (coprime-BOTH): `qf_nonneg` from the Weil-pairing det-residual on
+`p ∤ r ∧ p ∤ s`.**
 
 Identical to `qf_nonneg_of_frob_det_residual` but requesting the per-`ℓ` Frobenius det data only on
 the **smaller** locus `{p ∤ r ∧ p ∤ s}` (both coordinates coprime to `p`) — exactly where the
 Weil-pairing pencil scaling is available without the inseparable `p ∣ r` geometric input.  The
-discriminant lift is the stronger `qf_nonneg_of_nonneg_on_coprime_both` (reviewer round-23, Route B);
+discriminant lift is the stronger `qf_nonneg_of_nonneg_on_coprime_both` (reviewer round-23,
+Route B);
 its proof is identical to the `{p ∤ s}` version (`deg_eq_of_frob_det_data` per `(r,s)` with
 `p ∤ r ∧ p ∤ s`). -/
 theorem qf_nonneg_of_frob_det_residual_both {p : ℕ} (hp : p.Prime) {q t : ℤ} (hq : 0 < q)
