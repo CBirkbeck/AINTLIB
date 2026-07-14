@@ -265,6 +265,24 @@ theorem trivializingCoverTransitionUnitOn_trans
       trivializingCoverTransitionUnitOn U e V i k hVi hVk := by
   exact openTrivializationTransitionUnit_trans M V _ _ _
 
+/-- Restricting a transition unit on a common refinement gives the direct transition
+unit on every smaller common refinement. -/
+theorem trivializingCoverTransitionUnitOn_restrict
+    {X : Scheme.{u}} {M : X.Modules} {ι : Type u}
+    (U : ι → X.Opens)
+    (e : ∀ i, M.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    {V W : X.Opens} (hWV : W ≤ V) (i j : ι)
+    (hVi : V ≤ U i) (hVj : V ≤ U j) :
+    Units.map (X.presheaf.map (homOfLE hWV).op).hom.toMonoidHom
+        (trivializingCoverTransitionUnitOn U e V i j hVi hVj) =
+      trivializingCoverTransitionUnitOn U e W i j
+        (hWV.trans hVi) (hWV.trans hVj) := by
+  have h := openTrivializationTransitionUnit_restrict (M := M) hWV
+    (restrictOpenTrivialization hVi (e i))
+    (restrictOpenTrivialization hVj (e j))
+  rw [restrictOpenTrivialization_comp, restrictOpenTrivialization_comp] at h
+  simpa only [trivializingCoverTransitionUnitOn] using h.symm
+
 /-- The canonical transition unit on the pairwise overlap of two members of a trivializing
 family. -/
 noncomputable def trivializingCoverTransitionUnit

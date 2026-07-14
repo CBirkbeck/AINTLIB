@@ -339,6 +339,11 @@ Completed dependency claim (2026-07-14): exposed
 colimit equalities in varying functor objects can now be made literal at one later stage;
 the proof is decomposed through the one-object wrapper and uses no heartbeat override.
 
+Completed dependency claim (2026-07-14): proved
+`trivializingCoverTransitionUnitOn_restrict`. Transition units on arbitrary common
+refinements are now functorial under further restriction, which connects the local Cech
+cocycle to the restriction maps in the affine-intersection algebra functor.
+
 Active dependency claim (2026-07-14): spread the finite family of pair-overlap transition
 units, their inverses, and the triple-overlap equations to one later finite stage of the
 affine-intersection model. This will construct the finite-stage line bundle whose base change
