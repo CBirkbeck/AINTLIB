@@ -463,23 +463,6 @@ theorem differentiable_lcompletedΛN
 
 /-! ### Analytic continuation of `L(·, f)` at level `N` -/
 
-/-- The half-plane `{s | x < Re s}` (with `x : EReal`) is preconnected. -/
-private lemma isPreconnected_re_gt_ERealN (x : EReal) :
-    IsPreconnected {z : ℂ | x < (z.re : EReal)} := by
-  induction x using EReal.rec with
-  | bot =>
-    have : {z : ℂ | (⊥ : EReal) < (z.re : EReal)} = Set.univ := by
-      ext z; simp [bot_lt_iff_ne_bot]
-    rw [this]; exact isPreconnected_univ
-  | coe r =>
-    have : {z : ℂ | (↑r : EReal) < (z.re : EReal)} = {z : ℂ | r < z.re} := by
-      ext z; simp [EReal.coe_lt_coe_iff]
-    rw [this]; exact (convex_halfSpace_re_gt r).isPreconnected
-  | top =>
-    have : {z : ℂ | (⊤ : EReal) < (z.re : EReal)} = (∅ : Set ℂ) := by
-      ext z; simp
-    rw [this]; exact isPreconnected_empty
-
 open ModularForm in
 /-- The entire witness for the continuation of `L(·, f)` at level `N`:
 `s ↦ (2π)^s · Λ_N(s, f) / (N^{s/2} · Γ(s))`. -/
@@ -566,7 +549,7 @@ theorem lSeriesN_hasEntireExtension
     exact lSeriesExtensionN_eq_of_re_gt f hw₁ hk hz
   intro s hs
   exact AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq hGan hLan
-    (isPreconnected_re_gt_ERealN _) hz₀U hnhd hs
+    (isPreconnected_re_gt_EReal _) hz₀U hnhd hs
 
 /-! ### Level-`1` subsumption
 
