@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.ImaginaryQuadratic.ClassNumber
@@ -129,7 +134,7 @@ theorem CN05_of_CN05CoeffEq (h_coeff : CN05CoeffEq p) : CN05Hypothesis p := by
   have h_LHS : NumberField.dedekindZeta (Kminus p) s =
       LSeries (fun n : ℕ ↦ (idealNormMultiplicity (Kminus p) n : ℂ)) s := by
     rw [dedekindZeta_eq_tsum_idealNormMultiplicity (Kminus p) hs]
-    unfold LSeries LSeries.term
+    simp only [LSeries, LSeries.term]
     congr 1
     ext n
     by_cases hn : n = 0
