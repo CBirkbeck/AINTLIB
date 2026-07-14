@@ -93,6 +93,23 @@ theorem mulByHom_comp_left_of_isMonHom (E F : EllipticCurve S) (φ : E.asOver �
   simp only [Over.comp_left] at h
   exact h
 
+/-- **(BETA transport core)** Local quasi-finiteness of `[n]` transports across a pointed
+monoid-object iso of elliptic-curve records: if `φ : E.asOver ≅ F.asOver` is `IsMonHom` and `[n]_F`
+is locally quasi-finite, so is `[n]_E`. `φ.hom.left` is an iso, power-naturality conjugates
+`[n]_E = φ.hom.left ≫ [n]_F ≫ (φ.hom.left)⁻¹`, and `LocallyQuasiFinite` is closed under composition
+with isos. This is the record-level engine of the fibre transport (applied at each geometric fibre
+`E_s ≅ modelEllipticCurve W_s`, whose model side is `ModelFibreCount.lean`). -/
+theorem locallyQuasiFinite_mulByHom_of_isMonHom_iso {E F : EllipticCurve S}
+    (φ : E.asOver ≅ F.asOver) [IsMonHom φ.hom] (n : ℤ)
+    [LocallyQuasiFinite (F.mulByHom n)] : LocallyQuasiFinite (E.mulByHom n) := by
+  let ψ : E.E ≅ F.E := (Over.forget S).mapIso φ
+  have hconj : E.mulByHom n = ψ.hom ≫ F.mulByHom n ≫ ψ.inv := by
+    have h : E.mulByHom n ≫ ψ.hom = ψ.hom ≫ F.mulByHom n :=
+      mulByHom_comp_left_of_isMonHom E F φ.hom n
+    rw [← Category.assoc, ← h, Category.assoc, ψ.hom_inv_id, Category.comp_id]
+  rw [hconj]
+  infer_instance
+
 end EllipticCurve
 
 /-! ### Spectra of dimension-≤-1 domains: the curve-topology toolkit
