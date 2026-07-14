@@ -30,11 +30,20 @@ namespace EllipticCurve
 
 variable {S : Scheme.{u}}
 
-/-- **(BB-QF BETA per-fibre sub-leaf)** Each residue-field fibre of `[N] : E ⟶ E` is locally
-quasi-finite. Over the residue field `κ(y)`, the fibre transports from the field-level model
-fibre-count (`ModelFibreCount.lean`, ALPHA) across the pointed comparison `E_s ≅ modelEllipticCurve W_s`
-(`locallyQuasiFinite_mulByHom_of_isMonHom_iso`, with `[IsMonHom]` from GIT 6.4 rigidity + the localModel
-pointed iso). Degree-free (HasseWeil torsion witness only); NOT `abelEnrichment_exists`-gated. -/
+/-- **(BB-QF BETA per-fibre sub-leaf — the single remaining BETA obligation)** Each residue-field
+fibre of `[N] : E ⟶ E` is locally quasi-finite. NOTE the fibre's LQF **cannot** come from `[N]`'s own
+LQF (that is circular via `of_fiberToSpecResidueField`); it must come from the model. Precise discharge
+route (degree-free, NOT `abelEnrichment_exists`-gated):
+* **(a)** [ALPHA, `ModelFibreCount.lean`, in progress] over the field, `modelEllipticCurve W`'s `[N]`
+  is `LocallyQuasiFinite` — image infinite via HasseWeil `card_torsion_ellPow_nat`, so fibres are proper
+  closed in the dim-≤1 integral `zChart` (`coordinateRing_krullDimLE_one`), hence finite
+  (`IsArtinianScheme.finite`);
+* **(b)** [transport] over `κ̄(s)` (`s := π y`), `E_s ≅ modelEllipticCurve W_s` is a *pointed* iso, so
+  `locallyQuasiFinite_mulByHom_of_isMonHom_iso` gives `LocallyQuasiFinite (E_{κ̄(s)}.mulByHom N)` — the
+  `[IsMonHom]` from GIT 6.4 `isMonHom_of_one_comp_eq'` + the `localModel` pointed iso;
+* **(c)** [fibre + descent] the fibre `fiberToSpecResidueField y` is a base change of `E_s.mulByHom N`
+  (`mulByHom_baseChange`, `GroupLaw.lean:217`); LQF is base-change-stable, and descends `κ̄(s) → κ(y)`.
+Blocked only on (a) (ALPHA's model conclusion) + the (b)/(c) fibre plumbing; a clean, bounded hand-off. -/
 theorem fiber_mulByHom_locallyQuasiFinite (E : EllipticCurve S) (N : ℕ) [NeZero N] (y : E.E) :
     LocallyQuasiFinite ((E.mulByHom N).fiberToSpecResidueField y) := by sorry
 
