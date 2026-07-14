@@ -1,4 +1,4 @@
-import Mathlib.Algebra.Homology.TotalComplex
+import Mathlib.Algebra.Homology.TotalComplexSymmetry
 
 /-!
 # Total complexes of first-quadrant bicomplexes
@@ -32,6 +32,36 @@ instance upNat_tensorSigns : TensorSigns (up ℕ) where
 
 @[simp]
 lemma ε_up_ℕ (n : ℕ) : (up ℕ).ε n = (-1 : ℤˣ) ^ n :=
+  rfl
+
+/-- The standard Koszul symmetry for first-quadrant total complexes. -/
+instance upNat_totalComplexShapeSymmetry :
+    TotalComplexShapeSymmetry (up ℕ) (up ℕ) (up ℕ) where
+  symm p q := add_comm q p
+  σ p q := (-1 : ℤˣ) ^ (p * q)
+  σ_ε₁ := by
+    rintro p _ rfl q
+    dsimp
+    rw [mul_one, add_mul, one_mul]
+    calc
+      (-1 : ℤˣ) ^ (p * q) =
+          ((-1 : ℤˣ) ^ q * (-1 : ℤˣ) ^ q) * (-1 : ℤˣ) ^ (p * q) := by
+        rw [Int.units_mul_self, one_mul]
+      _ = (-1 : ℤˣ) ^ q *
+          ((-1 : ℤˣ) ^ (p * q) * (-1 : ℤˣ) ^ q) := by
+        ac_rfl
+      _ = (-1 : ℤˣ) ^ q * (-1 : ℤˣ) ^ (p * q + q) := by
+        exact congrArg (fun z ↦ (-1 : ℤˣ) ^ q * z)
+          (pow_add (-1 : ℤˣ) (p * q) q).symm
+  σ_ε₂ := by
+    rintro p q _ rfl
+    dsimp
+    rw [one_mul, mul_add, mul_one]
+    exact (pow_add (-1 : ℤˣ) (p * q) p).symm
+
+@[simp]
+lemma σ_up_ℕ (p q : ℕ) :
+    σ (up ℕ) (up ℕ) (up ℕ) p q = (-1 : ℤˣ) ^ (p * q) :=
   rfl
 
 end ComplexShape
