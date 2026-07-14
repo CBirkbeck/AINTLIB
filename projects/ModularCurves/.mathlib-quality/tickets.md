@@ -2395,7 +2395,13 @@ adjudicates.
   THIS ticket — the RR-box is only needed for presentation-EXISTENCE, which
   `EllipticCurveGeom` already bundles via its atlas)**. New file
   `Moduli/AdaptedModel.lean` (imports InvariantDifferential + OmegaFunctor). Leaves:
-  **[E12-A] the basis-unit of a presentation**: for `b : OmegaBasis G` and
+  **[E12-A ★ DONE (2026-07-14, OMEGA)** — `Moduli/AdaptedModel.lean`, sorry-free,
+  axiom-clean: `basisUnitOn` (stage-1 per-chart glue), `basisUnitOn_agree` (overlap
+  compat = b-cocycle through `omegaCocycle_res` + `transUnit_trans`, value-level
+  `linear_combination`), `basisUnitAt` (atlas glue via `existsUnique_gluing'` +
+  `isUnit_of_isUnit_germ`), `IsAdapted`. Remaining spec lemmas (naturality under
+  restrict/transport; `basisUnitAt (u • b) = resLE u · basisUnitAt b`) fold into
+  E12-B where first needed.] ORIGINAL SPEC: the basis-unit of a presentation**: for `b : OmegaBasis G` and
   `P : LocalPresentation G V`, glue `resLE b_i · (transUnit P|_{V∩U_i} P_i|)`-data over
   the atlas cover into a canonical `basisUnitAt P b : Γ(V)ˣ` (compatibility = b's own
   cocycle-compat + `transUnit_trans`; glue = `exists_unit_glue` + the pointwise affine
