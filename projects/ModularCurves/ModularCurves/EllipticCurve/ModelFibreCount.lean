@@ -428,6 +428,20 @@ section RangeWitness
 open scoped Classical in
 /-- **(g5, alg-closed case — TODO w1–w7 per the section header)** The topological range
 of `[N]` on the projective model over an algebraically closed field is infinite. -/
+/-- **(w7)** Distinct sections of a scheme over `Spec F`, `F` a field, have distinct
+image points whenever their common image point has residue field `F` — over an
+algebraically closed base every rational section is determined by its topological
+point. Route: a section factors through `Spec κ(x) → X` (`fromSpecResidueField`), and
+`F → κ(x) → F` forces the residue comparison to be the identity. -/
+theorem section_base_injective_of_isAlgClosed {F : Type u} [Field F] [IsAlgClosed F]
+    {X : Scheme.{u}} (π : X ⟶ Spec (CommRingCat.of F))
+    (P Q : { g : Spec (CommRingCat.of F) ⟶ X // g ≫ π = 𝟙 _ })
+    (h : ∀ p : Spec (CommRingCat.of F), P.1.base p = Q.1.base p) : P = Q := by
+  sorry
+
+/-- **(g5, alg-closed case — w1–w6 per the section header; w7 above)** The topological
+range of `[N]` on the projective model over an algebraically closed field is
+infinite. -/
 theorem modelMulByHom_range_infinite {F : Type u} [Field F] [IsAlgClosed F]
     (W : WeierstrassCurve F) [W.IsElliptic] (N : ℤ) (hN : N ≠ 0) :
     (Set.range ((modelEllipticCurve W).mulByHom N).base).Infinite := by
