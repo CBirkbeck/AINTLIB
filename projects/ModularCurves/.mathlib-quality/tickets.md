@@ -2473,8 +2473,23 @@ adjudicates.
   (c428a150a)**: `universalEllObj` + `classifyingRingHom_algebraMap` +
   `classifyingMap_structMap` + **`classifyingEllHom : Y ⟶ universalEllObj R`** —
   E12-D3 is COMPLETE ★★ (GME 2.2.3 forward universal property, axiom-clean). →
-  **D4** — `RepresentableBy` packaging (bijectivity from E12-B uniqueness +
-  adapted-pullback functoriality).
+  **D4** — `RepresentableBy` packaging, decomposed (2026-07-14, OMEGA):
+  homEquiv-toFun := `omegaBasisMap · (universalOmegaBasis)` (naturality =
+  `omegaBasisMap_comp` ✓ done); inverse := `classifyingEllHom` (2,3-units at Y-level
+  from `IsUnit (6:R)` via `baseRingHom`). **[D4-bridge]** (the enabling layer):
+  `basisUnitAt_transport` — the basis unit of a transported presentation against the
+  pulled basis is the ring-image of the original (transport-analogue of
+  `basisUnitAt_restrict`; uses `transUnit_transport` + the transportFun-glue specs) ⟹
+  `IsAdapted.transport` (adaptedness is stable under `Ell/R`-pullback) ⟹ the
+  transported adapted models ARE the pulled basis' adapted models (E12-B uniqueness)
+  ⟹ `adaptedCoeff`-naturality. **[D4-rt1]** right_inv:
+  `omegaBasisMap (classifyingEllHom Y b) universalOmegaBasis = b` — the universal
+  basis is adapted to the tautological chart; its pullback is adapted to the
+  transported chart = the adapted chart of `b` (bridge + uniqueness) ⟹ equal bases
+  (`existsUnique_unit_smul`-torsor + adaptedness pins the unit to 1). **[D4-rt2]**
+  left_inv: EllHom-determination — baseHom from `adaptedCoeff`-naturality (the
+  classifying algebra is determined), top from the cartesian square
+  (pullback-lift uniqueness against `isPullback_classifyingTop`).
   ORIGINAL SPEC: the basis-unit of a presentation**: for `b : OmegaBasis G` and
   `P : LocalPresentation G V`, glue `resLE b_i · (transUnit P|_{V∩U_i} P_i|)`-data over
   the atlas cover into a canonical `basisUnitAt P b : Γ(V)ˣ` (compatibility = b's own
