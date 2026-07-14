@@ -42,8 +42,10 @@ variable {R : Type u} [CommRing R]
 lemma pointedIsoCoordEquiv_congr {W W' : WeierstrassCurve R}
     (e₁ e₂ : projModel W ≅ projModel W')
     (heq : e₁.hom = e₂.hom)
-    (h1π : e₁.hom ≫ projModelπ W' = projModelπ W) (h1z : projModelZero W ≫ e₁.hom = projModelZero W')
-    (h2π : e₂.hom ≫ projModelπ W' = projModelπ W) (h2z : projModelZero W ≫ e₂.hom = projModelZero W') :
+    (h1π : e₁.hom ≫ projModelπ W' = projModelπ W)
+    (h1z : projModelZero W ≫ e₁.hom = projModelZero W')
+    (h2π : e₂.hom ≫ projModelπ W' = projModelπ W)
+    (h2z : projModelZero W ≫ e₂.hom = projModelZero W') :
     pointedIsoCoordEquiv e₁ h1π h1z = pointedIsoCoordEquiv e₂ h2π h2z := by
   obtain rfl : e₁ = e₂ := Iso.ext heq
   rfl
