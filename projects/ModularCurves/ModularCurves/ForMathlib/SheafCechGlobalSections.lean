@@ -21,12 +21,7 @@ variable {X : TopCat.{u}}
 variable (F : Sheaf AddCommGrpCat.{u} X)
 variable {ι : Type u} (U : ι → Opens X)
 
-private abbrev globalSections (X : TopCat.{u}) :
-    CategoryTheory.Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{u} ⥤
-      AddCommGrpCat.{u} :=
-  CategoryTheory.Sheaf.Γ (Opens.grothendieckTopology X) AddCommGrpCat.{u}
-
-noncomputable local instance : (globalSections X).Additive :=
+noncomputable local instance : (globalSectionsFunctor X).Additive :=
   (CategoryTheory.constantSheafΓAdj
     (Opens.grothendieckTopology X) AddCommGrpCat.{u}).right_adjoint_additive
 
@@ -203,17 +198,131 @@ private theorem cechTopSectionsAddEquiv_d (n : ℕ) :
 /-- Global sections of a sheaf-level Cech term agree with the corresponding term of
 the native Cech complex of the underlying presheaf. -/
 noncomputable def cechGlobalSectionsXIso (n : ℕ) :
-    (globalSections X).obj (cechTerm F U n) ≅
+    (globalSectionsFunctor X).obj (cechTerm F U n) ≅
       ((cechComplexFunctor U).obj F.obj).X n :=
   (CategoryTheory.Sheaf.ΓNatIsoSheafSections
       (Opens.grothendieckTopology X) AddCommGrpCat.{u} isTerminalTop).app
         (cechTerm F U n) ≪≫
     (cechTopSectionsAddEquiv F U n).toAddCommGrpIso
 
+/-- Global sections followed by the sheaf-level Cech augmentation, identified
+with degree zero of the native Cech complex. -/
+noncomputable def cechGlobalSectionsAugmentation :
+    (globalSectionsFunctor X).obj F ⟶ ((cechComplexFunctor U).obj F.obj).X 0 :=
+  (globalSectionsFunctor X).map (cechAugmentation F U) ≫
+    (cechGlobalSectionsXIso F U 0).hom
+
+/-- The global Cech augmentation restricts a global section to every
+one-fold intersection in the cover. -/
+theorem cechGlobalSectionsAugmentation_apply
+    (x : (globalSectionsFunctor X).obj F) (i : Fin 1 → ι) :
+    cechCochainAddEquiv F.obj U 0
+        (cechGlobalSectionsAugmentation F U x) i =
+      F.obj.map (homOfLE (show
+        (∏ᶜ fun k : Fin 1 ↦ U (i k)) ≤ ⊤ from le_top)).op
+        ((CategoryTheory.Sheaf.ΓNatIsoSheafSections
+          (Opens.grothendieckTopology X) AddCommGrpCat.{u}
+            isTerminalTop).hom.app F x) := by
+  let eΓ := CategoryTheory.Sheaf.ΓNatIsoSheafSections
+    (Opens.grothendieckTopology X) AddCommGrpCat.{u} isTerminalTop
+  let y := eΓ.hom.app (cechTerm F U 0)
+    ((globalSectionsFunctor X).map (cechAugmentation F U) x)
+  have hy : y = (cechAugmentation F U).hom.app (op ⊤)
+      (eΓ.hom.app F x) := by
+    have h := ConcreteCategory.congr_hom
+      (eΓ.hom.naturality (cechAugmentation F U)) x
+    simp only [ConcreteCategory.comp_apply] at h
+    change eΓ.hom.app (cechTerm F U 0)
+        ((globalSectionsFunctor X).map (cechAugmentation F U) x) =
+      (cechAugmentation F U).hom.app (op ⊤) (eΓ.hom.app F x) at h
+    exact h
+  change cechCochainAddEquiv F.obj U 0
+    ((cechTopSectionsAddEquiv F U 0).toAddCommGrpIso.hom y) i = _
+  rw [hy]
+  change cechCochainAddEquiv F.obj U 0
+    (cechTopSectionsAddEquiv F U 0
+      ((cechAugmentation F U).hom.app (op ⊤) (eΓ.hom.app F x))) i = _
+  rw [cechTopSectionsAddEquiv_apply, cechAugmentation_apply]
+  change (F.obj.map _ ≫ F.obj.map _) _ = F.obj.map _ _
+  rw [← F.obj.map_comp]
+  exact ConcreteCategory.congr_hom
+    (congrArg F.obj.map (Subsingleton.elim _ _)) _
+
+/-- The global-sections Cech augmentation is natural in the sheaf. -/
+theorem cechGlobalSectionsAugmentation_naturality
+    {G : Sheaf AddCommGrpCat.{u} X} (f : F ⟶ G) :
+    cechGlobalSectionsAugmentation F U ≫
+        ((cechComplexFunctor U).map f.hom).f 0 =
+      (globalSectionsFunctor X).map f ≫ cechGlobalSectionsAugmentation G U := by
+  apply ConcreteCategory.hom_ext
+  intro x
+  apply (cechCochainAddEquiv G.obj U 0).injective
+  funext i
+  let eΓ := CategoryTheory.Sheaf.ΓNatIsoSheafSections
+    (Opens.grothendieckTopology X) AddCommGrpCat.{u} isTerminalTop
+  have hnative :
+      ((cechComplexFunctor U).map f.hom).f 0 ≫
+          Limits.Pi.π (fun j : Fin 1 → ι ↦
+            G.obj.obj (op (∏ᶜ fun k : Fin 1 ↦ U (j k)))) i =
+        Limits.Pi.π (fun j : Fin 1 → ι ↦
+            F.obj.obj (op (∏ᶜ fun k : Fin 1 ↦ U (j k)))) i ≫
+          f.hom.app (op (∏ᶜ fun k : Fin 1 ↦ U (i k))) := by
+    change Limits.Pi.map (fun j : Fin 1 → ι ↦ f.hom.app
+      (op (∏ᶜ fun k : Fin 1 ↦ U (j k)))) ≫ _ = _
+    exact Limits.Pi.map_π _ i
+  have hmap := ConcreteCategory.congr_hom hnative
+    (cechGlobalSectionsAugmentation F U x)
+  have hmap' :
+      cechCochainAddEquiv G.obj U 0
+          (((cechComplexFunctor U).map f.hom).f 0
+            (cechGlobalSectionsAugmentation F U x)) i =
+        f.hom.app (op (∏ᶜ fun k : Fin 1 ↦ U (i k)))
+          (cechCochainAddEquiv F.obj U 0
+            (cechGlobalSectionsAugmentation F U x) i) := by
+    rw [cechCochainAddEquiv_apply, cechCochainAddEquiv_apply]
+    change
+      (Limits.Pi.π (fun j : Fin 1 → ι ↦
+        G.obj.obj (op (∏ᶜ fun k : Fin 1 ↦ U (j k)))) i)
+          (((cechComplexFunctor U).map f.hom).f 0
+            (cechGlobalSectionsAugmentation F U x)) =
+        f.hom.app (op (∏ᶜ fun k : Fin 1 ↦ U (i k)))
+          ((Limits.Pi.π (fun j : Fin 1 → ι ↦
+            F.obj.obj (op (∏ᶜ fun k : Fin 1 ↦ U (j k)))) i)
+              (cechGlobalSectionsAugmentation F U x))
+    calc
+      _ = (Limits.Pi.π (fun j : Fin 1 → ι ↦
+            F.obj.obj (op (∏ᶜ fun k : Fin 1 ↦ U (j k)))) i ≫
+          f.hom.app (op (∏ᶜ fun k : Fin 1 ↦ U (i k))))
+            (cechGlobalSectionsAugmentation F U x) := hmap
+      _ = _ := rfl
+  have hΓ := ConcreteCategory.congr_hom (eΓ.hom.naturality f) x
+  simp only [ConcreteCategory.comp_apply] at hΓ
+  have hΓ' :
+      f.hom.app (op ⊤) (eΓ.hom.app F x) =
+        eΓ.hom.app G ((globalSectionsFunctor X).map f x) := by
+    exact hΓ.symm
+  calc
+    _ = f.hom.app (op (∏ᶜ fun k : Fin 1 ↦ U (i k)))
+        (cechCochainAddEquiv F.obj U 0
+          (cechGlobalSectionsAugmentation F U x) i) := hmap'
+    _ = f.hom.app (op (∏ᶜ fun k : Fin 1 ↦ U (i k)))
+        (F.obj.map (homOfLE le_top).op (eΓ.hom.app F x)) := by
+      rw [cechGlobalSectionsAugmentation_apply]
+    _ = G.obj.map (homOfLE le_top).op
+        (f.hom.app (op ⊤) (eΓ.hom.app F x)) := by
+      exact ConcreteCategory.congr_hom
+        (f.hom.naturality (homOfLE le_top).op) _
+    _ = G.obj.map (homOfLE le_top).op
+        (eΓ.hom.app G ((globalSectionsFunctor X).map f x)) := by rw [hΓ']
+    _ = cechCochainAddEquiv G.obj U 0
+        (cechGlobalSectionsAugmentation G U ((globalSectionsFunctor X).map f x)) i := by
+      rw [cechGlobalSectionsAugmentation_apply]
+    _ = _ := rfl
+
 /-- Applying global sections degreewise to the sheaf-level Cech complex gives the
 native Cech complex of the underlying presheaf. -/
 noncomputable def cechGlobalSectionsComplexIso :
-    ((globalSections X).mapHomologicalComplex (.up ℕ)).obj (cechComplex F U) ≅
+    ((globalSectionsFunctor X).mapHomologicalComplex (.up ℕ)).obj (cechComplex F U) ≅
       (cechComplexFunctor U).obj F.obj :=
   HomologicalComplex.Hom.isoOfComponents (cechGlobalSectionsXIso F U) (by
     intro i j hij
@@ -226,7 +335,7 @@ noncomputable def cechGlobalSectionsComplexIso :
             (cechTerm F U i) ≫
           (cechTopSectionsAddEquiv F U i).toAddCommGrpIso.hom) ≫
           ((cechComplexFunctor U).obj F.obj).d i (i + 1) =
-        (globalSections X).map (cechDifferential F U i) ≫
+        (globalSectionsFunctor X).map (cechDifferential F U i) ≫
           ((CategoryTheory.Sheaf.ΓNatIsoSheafSections
               (Opens.grothendieckTopology X) AddCommGrpCat.{u} isTerminalTop).hom.app
                 (cechTerm F U (i + 1)) ≫
@@ -250,16 +359,41 @@ noncomputable def cechGlobalSectionsComplexIso :
             (cechDifferential F U i).hom.app (op ⊤)) ≫
           (cechTopSectionsAddEquiv F U (i + 1)).toAddCommGrpIso.hom :=
         (Category.assoc _ _ _).symm
-      _ = ((globalSections X).map (cechDifferential F U i) ≫
+      _ = ((globalSectionsFunctor X).map (cechDifferential F U i) ≫
             eΓ.hom.app (cechTerm F U (i + 1))) ≫
           (cechTopSectionsAddEquiv F U (i + 1)).toAddCommGrpIso.hom :=
         congrArg (fun f => f ≫
           (cechTopSectionsAddEquiv F U (i + 1)).toAddCommGrpIso.hom)
             (eΓ.hom.naturality (cechDifferential F U i)).symm
-      _ = (globalSections X).map (cechDifferential F U i) ≫
+      _ = (globalSectionsFunctor X).map (cechDifferential F U i) ≫
           (eΓ.hom.app (cechTerm F U (i + 1)) ≫
             (cechTopSectionsAddEquiv F U (i + 1)).toAddCommGrpIso.hom) :=
         Category.assoc _ _ _)
+
+/-- The global Cech augmentation followed by the first native Cech differential
+is zero. -/
+@[reassoc]
+theorem cechGlobalSectionsAugmentation_comp_d :
+    cechGlobalSectionsAugmentation F U ≫
+      ((cechComplexFunctor U).obj F.obj).d 0 1 = 0 := by
+  have hcomm := (cechGlobalSectionsComplexIso F U).hom.comm 0 1
+  change (cechGlobalSectionsXIso F U 0).hom ≫
+      ((cechComplexFunctor U).obj F.obj).d 0 1 =
+    (globalSectionsFunctor X).map (cechDifferential F U 0) ≫
+      (cechGlobalSectionsXIso F U 1).hom at hcomm
+  have hzero : cechAugmentation F U ≫ cechDifferential F U 0 = 0 :=
+    cechAugmentation_comp F U
+  have hmapzero :
+      (globalSectionsFunctor X).map (cechAugmentation F U) ≫
+        (globalSectionsFunctor X).map (cechDifferential F U 0) = 0 := by
+    calc
+      _ = (globalSectionsFunctor X).map
+          (cechAugmentation F U ≫ cechDifferential F U 0) :=
+        ((globalSectionsFunctor X).map_comp _ _).symm
+      _ = (globalSectionsFunctor X).map 0 := congrArg (globalSectionsFunctor X).map hzero
+      _ = 0 := (globalSectionsFunctor X).map_zero _ _
+  rw [cechGlobalSectionsAugmentation, Category.assoc, hcomm]
+  rw [← Category.assoc, hmapzero, zero_comp]
 
 end
 
