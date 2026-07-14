@@ -1000,6 +1000,29 @@ theorem gammaH_rigid_of_orderOf (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
     (fun k _ _ sm E e he hne b γ =>
       gammaH_hfree_of_orderOf_absurd N hN hinv H hH k sm E e he hne b γ)
 
+/-- **[Γ_H `.Representable`, PREPPED on the shared engine]** — the moment OMEGA's T-E14
+de-sorries `representable_iff`'s ⇐ (the KM 4.7.0 engine instantiated at level 3 +
+Legendre), `P_H` is representable: relative representability and affineness come from
+`qpd` itself, rigidity from `gammaH_rigid_of_orderOf`. Pins: `hLN` (T-W7.8) + `hH`
+(per-`H` finite-order, KM keystone) — nothing else. -/
+theorem gammaH_representable_of_orderOf (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
+    (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
+    (hinv : IsUnit (N : R))
+    (qpd : ModuliProblem.QuotientProblemData (gammaHAut R N H))
+    (hLN : ∀ X : EllObj R, IsLocallyNoetherian X.base)
+    (hH : ∀ (k : Type u) [Field k] [IsAlgClosed k]
+      (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+      (E : EllipticCurve (Spec (CommRingCat.of k)))
+      (e : (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R) ≅
+        (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)),
+      e.hom.baseHom = 𝟙 _ → e ≠ Iso.refl _ → ∀ γ : ↥H,
+        isoPow e (orderOf ((γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))) =
+          Iso.refl _ → False) :
+    qpd.prob.Representable :=
+  (ModuliProblem.representable_iff qpd.prob qpd.affineOverEll).mpr
+    ⟨qpd.affineOverEll.relativelyRepresentable,
+     gammaH_rigid_of_orderOf R N hN H hinv qpd hLN hH⟩
+
 /-- **[Γ(N) rigidity] (KM 2.7.2 upgraded to the quotient problem at `H = ⊥`)** — the
 quotient problem `P_⊥ = [Γ(N)]` is rigid for `N ≥ 3` invertible, with the k̄
 orbit-freeness discharged OUTRIGHT (`gammaFullNaive_hfree_bot`); only the `hLN`
@@ -1012,6 +1035,19 @@ theorem gammaBot_rigid (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ)) (hinv : IsUni
   gammaH_rigid R N hN ⊥ hinv qpd hLN
     (fun k _ _ sm E e he hne b γ =>
       gammaFullNaive_hfree_bot N hN hinv k sm E e he hne b γ)
+
+/-- **[Γ(N) = Y(N) `.Representable`, PREPPED]** — at `H = ⊥` the `hH` pin is free, so
+Y(N)'s representability is gated on exactly `hLN` + the shared T-E14 engine. -/
+theorem gammaBot_representable (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
+    (hinv : IsUnit (N : R))
+    (qpd : ModuliProblem.QuotientProblemData
+      (gammaHAut R N (⊥ : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))))
+    (hLN : ∀ X : EllObj R, IsLocallyNoetherian X.base) :
+    qpd.prob.Representable :=
+  (ModuliProblem.representable_iff qpd.prob qpd.affineOverEll).mpr
+    ⟨qpd.affineOverEll.relativelyRepresentable,
+     gammaBot_rigid R N hN hinv qpd hLN⟩
+
 
 /-- **[Γ_H MASTER, interface] (KM 4.7.0 for `P_H`; Loeffler 3.8.2 upgraded to a fine
 scheme)** — the quotient problem `P_H` is representable, given the engine's pin-set: the
