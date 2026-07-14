@@ -21,21 +21,20 @@ Drinfeld exact order (`Section.hasExactOrder_iff_geometric` / the T-D6b register
 bridge from `Section.HasExactOrder`); keeping the hypothesis in this raw form makes
 the core independent of the Cartier-divisor apparatus.
 
-The two arithmetic inputs are **KM-keystone pins** (STREAM-KM's endomorphism-degree
-charter, `EndomorphismDegree.lean`; flagged v10.193-GH — consume, never re-prove):
+The arithmetic input is the single **KM-keystone pin** `hbound` (STREAM-KM's
+endomorphism-degree charter; handshake v10.193-GH, Q2 ruled **Abel-FREE** v10.212):
+*a nonzero difference endomorphism cannot kill `N` pairwise-distinct sections*. The
+pin is stated with NO degree carrier at all, so KM discharges it through the
+Abel-free fibre/finrank quantities (kernel size ≤ scheme `finrank`, `finrank(ε−1) < N`
+— the `mulByHom_finrank` family), never through the Abel/Pic⁰-gated `endDual`/`endDeg`
+data. Numerically: `#ker(ε−1) ≤ deg(ε−1) = 2 − tr ε ≤ 4`, with `= 4` only for
+`ε = [-1]` — so the pin holds for `N ≥ 5` outright and for `N = 4` after excluding
+`[-1]` (whose fixed points die on `2 • P = 0` against `hord`).
 
-* **[KEY-KER]** (`le_endDeg_of_killed_injective`, flagged signature): `N` pairwise
-  distinct sections killed by a nonzero endomorphism `δ` force `N ≤ deg δ`
-  (the kernel of an isogeny has at most `deg` points; fibre anchor HasseWeil).
-* **[KEY-DEG]** `deg(ε − 1) < N` for the relevant automorphism `ε` — for `N ≥ 5`
-  unconditional from the Hasse bound (`deg(ε−1) = 2 − tr ε ≤ 4`), for `N = 4` after
-  excluding `ε = [-1]` (`deg(ε−1) = 4 ⟹ tr ε = −2 ⟹ deg(ε+1) = 0 ⟹ ε = [-1]` by
-  positive-definiteness) — both derivable from the existing `endDeg`/`endTrace` pins.
-
-What is proved HERE (sorry-free): the whole group-object plumbing — the difference
-endomorphism `δ = ε * 𝟙⁻¹` (Hom.commGroup spelling of `ε − 1`) is pointed, kills the
-entire cyclic subgroup `⟨P⟩` as soon as `ε` fixes `P`, and `⟨P⟩` has `N` distinct
-members; so the keystones force `ε = 𝟙`.
+What is proved HERE (sorry-free, axiom-clean): the whole group-object plumbing — the
+difference endomorphism `δ = ε * 𝟙⁻¹` (Hom.commGroup spelling of `ε − 1`) is pointed,
+kills the entire cyclic subgroup `⟨P⟩` as soon as `ε` fixes `P`, and `⟨P⟩` has `N`
+distinct members; so the pin forces `δ = 0`, i.e. `ε = 𝟙`.
 -/
 
 open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
@@ -76,26 +75,23 @@ theorem comp_sub_one_eq_one_of_fix (ε : E.asOver ⟶ E.asOver) (P : E.Point (�
 
 /-- **[RIG-2] CORE (level-agnostic orbit-freeness; KM 2.7.3/2.7.4 shape)** — a pointed
 endomorphism `ε` of `E/S` fixing a point `P` whose first `N − 1` multiples are nonzero
-is the identity, GIVEN the two KM-keystone pins: **[KEY-KER]** (`hkey`: `N` pairwise
-distinct sections killed by the nonzero difference `δ = ε * 𝟙⁻¹` force `N ≤ deg δ`)
-and **[KEY-DEG]** (`hdeglt`: `deg δ < N`). The plumbing proved here: `δ` is pointed,
-hence additive (`endMonHom`), hence kills every multiple `a • P`; those multiples are
-pairwise distinct by the order hypothesis; the keystones then clash unless `δ` is the
-zero endomorphism, i.e. `ε = 𝟙`. -/
+is the identity, GIVEN the (degree-carrier-free, Abel-free) KM-keystone pin `hbound`:
+*the nonzero difference `δ = ε * 𝟙⁻¹` cannot kill `N` pairwise-distinct sections*.
+The plumbing proved here: `δ` is pointed, hence additive (`endMonHom`), hence kills
+every multiple `a • P`; those multiples are pairwise distinct by the order hypothesis;
+the pin then forces `δ` to be the zero endomorphism, i.e. `ε = 𝟙`. -/
 theorem aut_endo_eq_one_of_fixes_point [IsLocallyNoetherian S] (N : ℕ) [NeZero N]
     (ε : E.asOver ⟶ E.asOver) (hη : η[E.asOver] ≫ ε = η[E.asOver])
     (P : E.Point (𝟙 S))
     (hord : ∀ a : ℕ, 0 < a → a < N → (a : ℤ) • P ≠ 0)
     (hfix : (E.pointEquivOverHom (𝟙 S)) P ≫ ε = (E.pointEquivOverHom (𝟙 S)) P)
-    (hkey :
+    (hbound :
       letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
       letI : CommGroup (Over.mk (𝟙 S) ⟶ E.asOver) := Hom.commGroup
+      ε * (𝟙 E.asOver)⁻¹ ≠ 1 →
       ∀ pts : Fin N → E.Point (𝟙 S), Function.Injective pts →
         (∀ i, (E.pointEquivOverHom (𝟙 S)) (pts i) ≫ (ε * (𝟙 E.asOver)⁻¹) = 1) →
-        ε * (𝟙 E.asOver)⁻¹ ≠ 1 → (N : ℤ) ≤ E.endDeg (ε * (𝟙 E.asOver)⁻¹))
-    (hdeglt :
-      letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
-      E.endDeg (ε * (𝟙 E.asOver)⁻¹) < N) :
+        False) :
     ε = 𝟙 E.asOver := by
   letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
   letI : CommGroup (Over.mk (𝟙 S) ⟶ E.asOver) := Hom.commGroup
@@ -144,8 +140,7 @@ theorem aut_endo_eq_one_of_fixes_point [IsLocallyNoetherian S] (N : ℕ) [NeZero
           rw [← neg_smul, ← h]
           exact hsub
         exact neg_eq_zero.mp h2
-    exact absurd (hkey (fun i => ((i : ℕ) : ℤ) • P) hinj (fun i => hkillA _) hδ1)
-      (not_le.mpr hdeglt)
+    exact hbound hδ1 (fun i => ((i : ℕ) : ℤ) • P) hinj (fun i => hkillA _)
 
 end EllipticCurve
 
