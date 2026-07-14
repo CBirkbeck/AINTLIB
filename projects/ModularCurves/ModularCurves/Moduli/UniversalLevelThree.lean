@@ -3,7 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.LegendreDelta
+import ModularCurves.Moduli.UniversalLegendre
 
 /-!
 # The universal naive level-3 object `ℰ₃` over `ℤ[1/3]` (T-E15a)
@@ -183,5 +183,41 @@ def universalE3Q : (universalE3Obj R).curve.Section :=
   ⟨projModelAffineSection (universalE3 R) (e3Gamma R) (e3Beta R + e3Gamma R)
       (universalE3_equation_Q R),
     projModelAffineSection_projModelπ _ _ _ _⟩
+
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E15a stage 3 ★)** The tautological presentation marks the universal `P` at
+`(0, 0)` (the banked generic universal marking, instantiated at `ℰ₃`). -/
+theorem tautPresentation_marksAt_e3P :
+    (tautPresentation (universalE3 R)).MarksAt
+      (universalE3P R).2
+      ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv.hom 0)
+      ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv.hom 0) :=
+  tautPresentation_marksAt (universalE3 R) 0 0 (universalE3_equation_zero R)
+
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E15a stage 3 ★)** The tautological presentation marks the universal `Q` at
+`(γ, β + γ)`. -/
+theorem tautPresentation_marksAt_e3Q :
+    (tautPresentation (universalE3 R)).MarksAt
+      (universalE3Q R).2
+      ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv.hom (e3Gamma R))
+      ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv.hom
+        (e3Beta R + e3Gamma R)) :=
+  tautPresentation_marksAt (universalE3 R) (e3Gamma R) (e3Beta R + e3Gamma R)
+    (universalE3_equation_Q R)
+
+/-- **(T-E15a)** The `[3]`-normal-form shape: `a₂ = a₄ = a₆ = 0` with `a₁, a₃` the
+`ℰ₃`-parameter expressions at `(β, γ)`-values. A chart curve of this shape with the
+markings is a level-3 witness (KM Ex. 2.2.2: the flex-at-origin normal form). -/
+def IsE3Form {A : Type u} [CommRing A] (W : WeierstrassCurve A) (β γ : A) : Prop :=
+  W.a₁ = 3 * γ - 1 ∧ W.a₂ = 0 ∧ W.a₃ = -3 * γ ^ 2 - β - 3 * β * γ ∧
+    W.a₄ = 0 ∧ W.a₆ = 0
+
+/-- The universal curve is of `ℰ₃`-form at the universal parameters. -/
+theorem universalE3_isE3Form :
+    IsE3Form (universalE3 R) (e3Beta R) (e3Gamma R) :=
+  ⟨rfl, rfl, rfl, rfl, rfl⟩
 
 end ModularCurves
