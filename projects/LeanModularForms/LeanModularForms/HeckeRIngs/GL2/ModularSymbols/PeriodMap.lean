@@ -176,14 +176,6 @@ theorem genIntegrableOn_Ici_one [CuspFormClass F Γ k] [Γ.IsArithmetic] (f : F)
   exact hloc.integrableOn_of_isBigO_atTop hO
     ⟨Set.Ioi b, Ioi_mem_atTop b, exp_neg_integrableOn_Ioi b hb⟩
 
-/-- The `S`-conjugate of an arithmetic group is arithmetic, so `F ∣ S` enjoys exponential decay. -/
-theorem isArithmetic_conj_S' [Γ.IsArithmetic] :
-    (ConjAct.toConjAct (mapGL ℝ ModularGroup.S)⁻¹ • Γ).IsArithmetic := by
-  have h : (mapGL ℝ ModularGroup.S)⁻¹ = ((mapGL ℚ ModularGroup.S)⁻¹).map (algebraMap ℚ ℝ) := by
-    rw [map_inv, map_mapGL]
-  rw [h]
-  exact Subgroup.IsArithmetic.conj Γ (mapGL ℚ ModularGroup.S)⁻¹
-
 /-- **Convergence at the cusp `0`.**  For a cusp form `F` of an arithmetic group, the polymorphic
 integrand tends to `0` as `t → 0⁺`: applying the slash action of `S`, the exponential decay of
 `F ∣ S` at `i∞` beats the polynomial factors. -/
@@ -377,7 +369,8 @@ theorem transMat_eq_map (q : ℚ) :
 /-- The `transMat q`-conjugate of an arithmetic group is arithmetic (`q ∈ ℚ`). -/
 theorem isArithmetic_conj_transMat {Γ : Subgroup (GL (Fin 2) ℝ)} [Γ.IsArithmetic] (q : ℚ) :
     (toConjAct (transMat q)⁻¹ • Γ).IsArithmetic := by
-  have h : (transMat q)⁻¹ = ((Matrix.GeneralLinearGroup.upperRightHom q)⁻¹).map (Rat.castHom ℝ) := by
+  have h : (transMat q)⁻¹ =
+      ((Matrix.GeneralLinearGroup.upperRightHom q)⁻¹).map (Rat.castHom ℝ) := by
     rw [transMat_eq_map, ← map_inv]
   rw [h]
   exact Subgroup.IsArithmetic.conj Γ (Matrix.GeneralLinearGroup.upperRightHom q)⁻¹
@@ -636,7 +629,8 @@ The algebraic heart of the `Γ`-invariance is Shimura (8.2.15): with the `symRep
 `symRep γ = substAlgHom (γ⁻¹)` (the `g⁻¹`-substitution), one has
 `evalSym1 m (symRep γ P) (γ • z) = (cz + d)^{-m} · evalSym1 m P z`, where `[[a,b],[c,d]] = γ` and
 `cz + d` is the automorphy factor.  Combined with `f(γ • z) = (cz + d)^k f(z)` (slash invariance,
-for `γ ∈ Γ₁(N)`) and `dz = (cz+d)^{-2} d(γz)`, the exponents combine as `(cz+d)^{k - (k-2) - 2} = 1`,
+for `γ ∈ Γ₁(N)`) and `dz = (cz+d)^{-2} d(γz)`, the exponents combine as
+`(cz+d)^{k - (k-2) - 2} = 1`,
 which is exactly the cancellation making the period pairing `Γ`-invariant.  We give the
 self-contained verification that the `g⁻¹`-substitution convention of `symRep` aligns. -/
 
@@ -669,8 +663,9 @@ theorem evalSym1_div (m : ℕ) (P : SymPow ℂ m) (z D : ℂ) (_hD : D ≠ 0) :
 
 /-- **Möbius covariance of `evalSym1` (Shimura 8.2.15).**  For `γ ∈ SL(2, ℤ)`, writing
 `γ = [[a, b], [c, d]]`, the substitution convention of `symRep` gives
-`evalSym1 m (symRep γ P) (γ • z) = (c·z + d)^{-m} · evalSym1 m P z`.  This is the change-of-variables
-identity at the core of the modular-symbol `Γ`-invariance: the convention `symRep γ = substAlgHom γ⁻¹`
+`evalSym1 m (symRep γ P) (γ • z) = (c·z + d)^{-m} · evalSym1 m P z`.  This is the
+change-of-variables identity at the core of the modular-symbol `Γ`-invariance: the convention
+`symRep γ = substAlgHom γ⁻¹`
 makes the automorphy factors cancel exactly. -/
 theorem evalSym1_symRep_smul {m : ℕ} (γ : SL(2, ℤ)) (P : SymPow ℂ m) (z : ℍ) :
     evalSym1 m (symRep ℂ m γ P) ((γ • z : ℍ) : ℂ) =
@@ -679,7 +674,8 @@ theorem evalSym1_symRep_smul {m : ℕ} (γ : SL(2, ℤ)) (P : SymPow ℂ m) (z :
     have hd := UpperHalfPlane.denom_ne_zero (Matrix.SpecialLinearGroup.mapGL ℝ γ) z
     have hval : ∀ i j, ((Matrix.SpecialLinearGroup.mapGL ℝ γ : Matrix (Fin 2) (Fin 2) ℝ) i j) =
         ((γ i j : ℝ)) := fun i j => by
-      rw [Matrix.SpecialLinearGroup.mapGL_coe_matrix]; simp [Matrix.SpecialLinearGroup.map_apply_coe]
+      rw [Matrix.SpecialLinearGroup.mapGL_coe_matrix]
+      simp [Matrix.SpecialLinearGroup.map_apply_coe]
     rw [UpperHalfPlane.denom, hval, hval] at hd
     intro hc; apply hd
     push_cast at hc ⊢
@@ -727,7 +723,8 @@ relation `𝔡(f)∘α = χ(α)𝔡(f)` — is the *modular-symbol invariance* o
 augmentation subspace `Div⁰` and is exactly the statement that the period integral over the geodesic
 `β → α` is unchanged under the simultaneous `γ`-action on the cusps and the `symRep`-action on the
 coefficient.  Its algebraic core is `evalSym1_symRep_smul` (above); its analytic core is the
-deformation/path-independence of the cusp-difference integral (Cauchy's theorem on the region between
+deformation/path-independence of the cusp-difference integral (Cauchy's theorem on the region
+between
 the geodesics `β→α` and `γβ→γα`), which is the remaining analytic input.
 
 We package the descent so that the period map is produced from any proof of this invariance. -/
