@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.WeierstrassModel
 import Mathlib.AlgebraicGeometry.Fiber
 
@@ -194,7 +199,8 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
     rw [show CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)) = g.appLE U.1 V hVle from rfl,
       ← Iso.comp_inv_eq, Category.assoc, hsp2, ← Category.assoc, Iso.hom_inv_id,
       Category.id_comp]
-  -- `e' := restriction ≅ pullback(snd π U.1.ι, gV) ≅ pullback(projModelπ W, Spec.map φ) ≅ projModel W'`
+  -- `e' := restriction ≅ pullback(snd π U.1.ι, gV) ≅ pullback(projModelπ W, Spec.map φ)`
+  -- `      ≅ projModel W'`
   refine ⟨hP2.isoPullback ≪≫ asIso (pullback.map (pullback.snd π U.1.ι) gV (projModelπ W)
       (Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)))) e.hom hVaff.isoSpec.hom
       U.2.isoSpec.hom heπ.symm hbridge.symm) ≪≫ hB.isoPullback.symm, ?_, ?_⟩
@@ -211,7 +217,8 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
       -- FINAL STEP (T-A8a, fully derived): the section naturality
       --   `hnat : sVlift ≫ hP2top = gV ≫ sU`  (sU := pullback.lift (U.1.ι ≫ z) (𝟙 ↑U) …),
       -- proven by `pullback.hom_ext` on `pullback π U.1.ι`:
-      --   · fst: sVlift≫hP2top≫fst(π,U.1.ι) = Vι≫g≫z = gV≫U.1.ι≫z = (gV≫sU)≫fst  [lift_fst ×3 + hgVfac];
+      --   · fst: sVlift≫hP2top≫fst(π,U.1.ι) = Vι≫g≫z = gV≫U.1.ι≫z = (gV≫sU)≫fst
+      --     [lift_fst ×3 + hgVfac];
       --   · snd: sVlift≫hP2top≫snd(π,U.1.ι) = 𝟙≫gV = gV = (gV≫sU)≫snd            [lift_snd ×2].
       -- Then rw hnat; from hez, `sU ≫ e.hom = isoSpecU.hom ≫ projModelZero W`; from hbridge,
       -- `isoSpecV.inv ≫ gV ≫ isoSpecU.hom = Spec.map φ`; finish with `projModelZero_baseChange`.
@@ -326,7 +333,7 @@ theorem fibrewiseElliptic_projModel {R : Type u} [CommRing R] (W : WeierstrassCu
   · simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc]
     rw [(Iso.inv_comp_eq _).mpr hbc.isoPullback_hom_snd.symm, hfib.isoPullback_hom_snd]
   · rw [← cancel_mono hbc.isoPullback.hom]
-    simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc, Iso.inv_hom_id_assoc,
+    simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc,
       Iso.inv_hom_id, Category.comp_id]
     apply pullback.hom_ext
     · simp only [Category.assoc]
@@ -427,8 +434,7 @@ theorem LocallyWeierstrass.fibrewiseElliptic {E S : Scheme.{u}} {π : E ⟶ S} {
           = U.2.isoSpec.inv ≫ pullback.lift (U.1.ι ≫ z) (𝟙 _)
             (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp]) from
           by rw [← hez, Category.assoc, Iso.hom_inv_id, Category.comp_id])]
-      simp only [sectionFiberPoint, pullback.lift_fst, Category.assoc,
-        pullback.lift_fst_assoc]
+      simp only [sectionFiberPoint, pullback.lift_fst]
       rw [← hbot]
       simp only [Category.assoc]
     · rw [Category.assoc, hgrand.isoPullback_hom_snd]
