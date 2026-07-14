@@ -221,6 +221,44 @@ theorem isAdapted_adapt {V : S.affineOpens} (P : LocalPresentation G V)
     basisUnitAt_ofVC]
   exact inv_mul_cancel _
 
+open Scheme in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(E12-B)** The basis unit is a `transUnit`-cocycle in the presentation: comparing
+through any second presentation over the same affine splits off their comparison
+unit. -/
+theorem basisUnitAt_transUnit {V : S.affineOpens} (P Q : LocalPresentation G V)
+    (b : OmegaBasis G) :
+    (P.basisUnitAt b).1 = P.transUnit Q * (Q.basisUnitAt b).1 := by
+  refine Scheme.unit_ext_of_res_cover S
+    (fun i : G.atlas.ι => V.1 ⊓ (G.atlas.U i).1) (fun i => inf_le_left)
+    (fun x hxV => by
+      obtain ⟨i, hxi⟩ := G.atlas.covers x
+      exact Opens.mem_iSup.mpr ⟨i, hxV, hxi⟩) (fun i => ?_)
+  rw [(P.basisUnitAt b).2 i, map_mul, (Q.basisUnitAt b).2 i]
+  refine Scheme.unit_ext_of_affine_res S (fun W hW => ?_)
+  rw [(P.basisUnitOn b i).2 W hW, map_mul, Scheme.resUnit_resUnit,
+    (Q.basisUnitOn b i).2 W hW]
+  have hsplit : (P.restrict (hW.trans inf_le_left)).transUnit
+      ((G.atlas.presentation i).restrict (hW.trans inf_le_right)) =
+    (P.restrict (hW.trans inf_le_left)).transUnit
+      (Q.restrict (hW.trans inf_le_left)) *
+    (Q.restrict (hW.trans inf_le_left)).transUnit
+      ((G.atlas.presentation i).restrict (hW.trans inf_le_right)) :=
+    (transUnit_trans _ _ _).symm
+  rw [hsplit, transUnit_restrict P Q (hW.trans inf_le_left)]
+  exact mul_left_comm _ _ _
+
+/-- **(E12-B, KM 2.2.5 uniqueness half)** Two `b`-adapted presentations over the same
+affine compare by a variable change of unit `1`: the `ω`-datum pins the model up to
+the translations `(r, s, t)`. -/
+theorem transUnit_eq_one_of_isAdapted {V : S.affineOpens}
+    {P Q : LocalPresentation G V} {b : OmegaBasis G}
+    (hP : P.IsAdapted b) (hQ : Q.IsAdapted b) : P.transUnit Q = 1 := by
+  have h := basisUnitAt_transUnit P Q b
+  rw [hP, hQ, mul_one] at h
+  exact h.symm
+
 end LocalPresentation
 
 end ModularCurves
