@@ -1,10 +1,16 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.BundleFromCyclotomic
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PhiPrimeElement
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor
 public import Mathlib.NumberTheory.NumberField.Basic
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PhiSourceFromCyclotomic.K2_2SourceDataFromCyclotomic
+public import
+BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PhiSourceFromCyclotomic.K2_2SourceDataFromCyclotomic
 
 /-!
 # Prime Φ source data from cyclotomic split-prime bundles
@@ -460,7 +466,7 @@ This is the honest source constructor for the current K/U route.  The produced
 `phiPrimeGenDescent S 1 ...`, because the `h_span` field is discharged by
 `K2_2SourceData_h_span_of_atomic_split` for that same element.  No
 `StickelbergerIdealEquality.gen` choice is introduced. -/
-noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split
+theorem K2_2SourceData.ofCanonicalTraceForm_atomic_split
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -527,7 +533,7 @@ noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split
 /-- Variant of `K2_2SourceData.ofCanonicalTraceForm_atomic_split` that derives
 the descent-prime equality from the canonical trace-form identity and accepts
 the split conditions directly for `P`. -/
-noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime
+theorem K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -589,7 +595,7 @@ noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime
 
 /-- Variant of `K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime` that
 derives `ℓ ≠ p` from `(ℓ : 𝓞 K) ∈ P` and `(p : 𝓞 K) ∉ P`. -/
-noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime_of_mem_notMem
+theorem K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime_of_mem_notMem
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -641,7 +647,7 @@ noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime_of_me
 /-- Variant of
 `K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime_of_mem_notMem`
 that also derives `P ≠ ⊥` from maximality of the source prime. -/
-noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime_of_mem_notMem_maximal
+theorem K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime_of_mem_notMem_maximal
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -694,7 +700,7 @@ noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime_of_me
 `K2_2SourceData.ofCanonicalTraceForm_atomic_split_atPrime_of_mem_notMem_maximal`
 that accepts splitting of the rational prime ideal `(ℓ)` instead of splitting
 written on `P.under ℤ`. -/
-noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_atSpan_of_mem_notMem_maximal
+theorem K2_2SourceData.ofCanonicalTraceForm_atomic_split_atSpan_of_mem_notMem_maximal
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -755,7 +761,7 @@ noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_atSpan_of_mem
 `K2_2SourceData.ofCanonicalTraceForm_atomic_split_atSpan_of_mem_notMem_maximal`
 that derives the rational-prime split equalities from the cyclotomic
 ramification theorem and the honest order-one condition for `ℓ` modulo `p`. -/
-noncomputable def K2_2SourceData.ofCanonicalTraceForm_atomic_split_orderOfOne_of_mem_notMem_maximal
+theorem K2_2SourceData.ofCanonicalTraceForm_atomic_split_orderOfOne_of_mem_notMem_maximal
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
