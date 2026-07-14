@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Pic0.PicDualDegreeViaGeometricInjectivity
 
 /-!
@@ -88,7 +93,6 @@ omit [DecidableEq K] [WeierstrassCurve.IsElliptic W.toAffine] in
     (frobeniusCurveMapCoordHom W).toAlgHom =
       FiniteField.frobeniusAlgHom K W.toAffine.CoordinateRing := rfl
 
-set_option maxHeartbeats 800000 in
 omit [DecidableEq K] in
 /-- **Frobenius geometric image at a rational point is the identity.** The image
 of `(x, y) ∈ W(K)` under the Frobenius comorphism `CurveMap.toPointMap` has
@@ -142,7 +146,7 @@ theorem frobeniusIsog_toPointMap_compat (x y : K) (h : W.toAffine.Nonsingular x 
           (⟨W.toAffine⟩ :
             HasseWeil.Curves.SmoothPlaneCurve K).SmoothPoint)).toAffinePoint := by
   rw [frobeniusCurveMap_toPointMap]
-  -- `frobeniusIsog.toAddMonoidHom = AddMonoidHom.id`, so LHS = `some x y h`; RHS is `toAffinePoint`.
+  -- `frobeniusIsog.toAddMonoidHom = id`; after the rewrite both sides are `some x y h`.
   rfl
 
 end HasseWeil.Pic0.RouteCGeometric
