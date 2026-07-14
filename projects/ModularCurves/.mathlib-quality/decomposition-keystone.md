@@ -262,3 +262,28 @@ scheme-morphism → function-field functoriality mathlib lacked.
   ⟹ `N ≤ δ.left.finrank (zero point)`. GH identifies `δ.left.finrank 0 = E.endDeg δ` (the
   endDeg-via-K4-scheme-finrank ruling) to close `(N:ℤ) ≤ E.endDeg δ`. `δ.left` flat+finite are the
   isogeny fibre inputs (instance hypotheses, register-box). This does NOT touch the endDeg DATA-sorry.
+
+## L4-CORE SUB-PLAN (STREAM-KM, the sole remaining K4b-2 leaf; = shared BB-DIFF crux, register-box)
+
+With `functionFieldMap` + `functionFieldMap_germToFunctionField` now BUILT, L4-core is precisely:
+`functionFieldMap (mulByHom N) = mulByInt_pullbackAlgHom` (as K(E)-endos, mod `projModelFunctionFieldEquiv`).
+Sub-leaves (the sub-ticket plan; L4-iii is the deep one):
+- **L4-i** (tautological point): the generic point of `projModel W` ↔ the tautological `K(E)`-point `τ`
+  (`projModelPointsEquiv` of the identity `Affine.Point` over `K(E) = W.FunctionField`, coords = field
+  generators `x,y`). Entry: `PointsDictionary.projModelPointsEquiv` + the generic-point group-axiom
+  machinery (T-W7.0g).
+- **L4-ii** (functionFieldMap on coords): `functionFieldMap (mulByHom N) (x) = germ of (mulByHom N).app(x)`
+  [have: `functionFieldMap_germToFunctionField`] `= x∘[N]` at the generic point `= x`-coord of `N·τ`.
+- **L4-iii** (GENERIC-POINT ZSMUL — the deep leaf): `x`-coord of `N·τ = mulByInt_x W N`. Threads the
+  2000+-line group-law chart machinery (`AdditionChartGlobal.mulModelHom`, `AdditionSpecPoints.mulModelHom_specPoints`)
+  to HasseWeil's division polynomial `mulByInt_x` (Basic.lean) via `projModelPointsEquiv_zsmul` at `τ` +
+  `mulByInt_apply`. THIS is the shared BB-DIFF crux (the scheme group-law `[N]`-in-coordinates = division
+  polynomials). Genuine multi-session; register-box (owner-tracked BB-DEG).
+- **L4-iv** (HasseWeil side, HAVE): `mulByInt_pullbackAlgHom (x) = mulByInt_x` — Basic.lean:362.
+- **L4-v** (assemble): two `K(E)`-algebra endos agreeing on the generator `x` (and `y`) are equal
+  (`K(E) = F(x,y)`); then K4b-2 closes via L3 (`Algebra.IsAlgebraic.finrank_of_isFractionRing`) +
+  `finrank_SpecMap_eq_functionField_finrank` (T-B6, now BUILT) + `projModelFunctionFieldEquiv`.
+
+Everything EXCEPT L4-iii (the group-law-machinery ↔ division-poly generic-point identity) is now either
+BUILT or a bounded assembly. L4-iii is the register-box deep grind — NOT the KM fleet blocker (the
+directive's functionFieldMap+Dominant.lean bridge infra AND the [KEY-KER] deliverable are both DONE).
