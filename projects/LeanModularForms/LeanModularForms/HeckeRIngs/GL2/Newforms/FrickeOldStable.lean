@@ -84,8 +84,7 @@ private lemma frickeGL_eq_frickeGL_mul_diagQ {M : ℕ} [NeZero M] (d : ℕ) [NeZ
   rw [GeneralLinearGroup.coe_mul, frickeGL_coe, frickeGL_coe, diagQ_coe]
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp only [Matrix.mul_apply, Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.of_apply] <;> push_cast [← heq] <;> ring
+    simp [Matrix.mul_apply, Fin.sum_univ_two, ← heq, mul_comm]
 
 /-- **Raise → include matrix identity** (machine-verified): `diag(d, 1) * frickeGL N =
 frickeGL M * diag(d, d)` as `GL₂(ℚ)` elements, for `d * M = N`.  Concretely
@@ -98,8 +97,7 @@ private lemma diagQ_mul_frickeGL {M : ℕ} [NeZero M] (d : ℕ) [NeZero d]
     diagQ_coe, scalQ_coe]
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp only [Matrix.mul_apply, Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one,
-      Matrix.of_apply] <;> push_cast [← heq] <;> ring
+    simp [Matrix.mul_apply, Fin.sum_univ_two, ← heq, mul_comm]
 
 /-- `glMap (scalQ d)` has positive determinant `d² > 0`. -/
 private lemma glMap_scalQ_det_pos (d : ℕ) [NeZero d] :
