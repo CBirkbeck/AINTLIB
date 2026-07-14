@@ -22,9 +22,11 @@ noetherianness is used **exclusively** to produce the group-homomorphism equatio
 the comparison isomorphism `curveIsoPullbackOver`; everything downstream is noetherian-free
 group algebra. So:
 
-* `transportSection_add_of_isMonHom` takes that group-hom equation as a **hypothesis** and
-  proves transport additivity **sorry-free, over an arbitrary base**. This is the single
-  "one transport proof" that closes the whole family.
+* `transportSection_add_of_isMonHom` (proved in `Moduli/PullSectionAdd.lean`, next to the
+  noetherian specialisation that consumes it) takes that group-hom equation as a
+  **hypothesis** and proves transport additivity **sorry-free, over an arbitrary base**.
+  This is the single "one transport proof" that closes the whole family; this file supplies
+  the hypothesis from the finite-presentation route.
 
 The hypothesis is supplied three ways, all feeding the *same* lemma:
 * `isMonHom_of_one_comp_eq'` (`Rigidity.lean`, noetherian) — recovers the existing
@@ -77,74 +79,6 @@ namespace EllHom
 
 variable (R : CommRingCat.{u}) {X Y : EllObj R} (f : X ⟶ Y)
 
-/-- **(T-E4a, the one transport proof — sorry-free, arbitrary base)** Transport of sections
-along the pointed comparison isomorphism is additive, **given** that the comparison morphism
-`curveIsoPullbackOver` is a homomorphism of the two independent group structures (the
-equation `h64`). This is the noetherian-free core of `transportSection_add`: the base's
-noetherianness in that lemma is used *only* to produce `h64` (via `isMonHom_of_one_comp_eq'`).
-Supplying `h64` from the arbitrary-base canonicity (route (a)/(c)) removes the restriction. -/
-lemma transportSection_add_of_isMonHom
-    (h64 : μ[X.curve.asOver] ≫ curveIsoPullbackOver R f
-        = MonoidalCategory.tensorHom (curveIsoPullbackOver R f) (curveIsoPullbackOver R f)
-          ≫ μ[(Y.curve.baseChange f.baseHom).asOver])
-    (s s' : X.curve.Section) :
-    transportSection R f (s + s')
-      = transportSection R f s + transportSection R f s' := by
-  have h64l : (μ[X.curve.asOver]).left ≫ (curveIsoPullback R f).hom
-      = (MonoidalCategory.tensorHom (curveIsoPullbackOver R f)
-          (curveIsoPullbackOver R f)).left
-        ≫ (μ[(Y.curve.baseChange f.baseHom).asOver]).left :=
-    ((Over.comp_left _ _ _ _ _).symm.trans (congrArg CommaMorphism.left h64)).trans
-      (Over.comp_left _ _ _ _ _)
-  have hcs : X.curve.pointEquivOverHom (𝟙 X.base) s ≫ curveIsoPullbackOver R f
-      = (Y.curve.baseChange f.baseHom).pointEquivOverHom (𝟙 X.base)
-          (transportSection R f s) :=
-    Over.OverMorphism.ext rfl
-  have hcs' : X.curve.pointEquivOverHom (𝟙 X.base) s' ≫ curveIsoPullbackOver R f
-      = (Y.curve.baseChange f.baseHom).pointEquivOverHom (𝟙 X.base)
-          (transportSection R f s') :=
-    Over.OverMorphism.ext rfl
-  refine Subtype.ext ?_
-  have hx : (s + s').1
-      = (lift (X.curve.pointEquivOverHom (𝟙 X.base) s)
-          (X.curve.pointEquivOverHom (𝟙 X.base) s')).left
-        ≫ (μ[X.curve.asOver]).left :=
-    (congrArg CommaMorphism.left (X.curve.pointEquivOverHom_add (𝟙 X.base) s s')).trans
-      (Over.comp_left _ _ _ _ _)
-  have hR : (transportSection R f s + transportSection R f s').1
-      = (lift ((Y.curve.baseChange f.baseHom).pointEquivOverHom (𝟙 X.base)
-            (transportSection R f s))
-          ((Y.curve.baseChange f.baseHom).pointEquivOverHom (𝟙 X.base)
-            (transportSection R f s'))).left
-        ≫ (μ[(Y.curve.baseChange f.baseHom).asOver]).left :=
-    (congrArg CommaMorphism.left
-      ((Y.curve.baseChange f.baseHom).pointEquivOverHom_add (𝟙 X.base) _ _)).trans
-      (Over.comp_left _ _ _ _ _)
-  show (s + s').1 ≫ (curveIsoPullback R f).hom = _
-  rw [hR]
-  exact (congrArg (· ≫ (curveIsoPullback R f).hom) hx).trans <|
-    (Category.assoc _ _ _).trans <|
-    (congrArg ((lift (X.curve.pointEquivOverHom (𝟙 X.base) s)
-        (X.curve.pointEquivOverHom (𝟙 X.base) s')).left ≫ ·) h64l).trans <|
-    (Category.assoc _ _ _).symm.trans <|
-    (congrArg (· ≫ (μ[(Y.curve.baseChange f.baseHom).asOver]).left)
-      ((Over.comp_left _ _ _ _ _).symm.trans
-        (congrArg CommaMorphism.left
-          ((lift_map _ _ _ _).trans
-            (congrArg₂ lift hcs hcs')))))
-
-/-- The comparison morphism is unit-compatible (noetherian-free). Extracted from
-`transportSection_add`'s internal `hη`. -/
-lemma curveIsoPullbackOver_one :
-    η[X.curve.asOver] ≫ curveIsoPullbackOver R f
-      = η[(Y.curve.baseChange f.baseHom).asOver] := by
-  apply Over.OverMorphism.ext
-  show (η[X.curve.asOver] : _ ⟶ X.curve.asOver).left ≫ (curveIsoPullback R f).hom = _
-  exact (congrArg (· ≫ (curveIsoPullback R f).hom) X.curve.one_eq_zero).trans <|
-    (Category.assoc _ _ _).trans <|
-    (congrArg ((𝟙_ (Over X.base)).hom ≫ ·) (zero_curveIsoPullback R f)).trans <|
-    (Y.curve.baseChange f.baseHom).one_eq_zero.symm
-
 /-- **(T-E4a over an arbitrary base — modulo the single route (a)/(c) canonicity primitive)**
 Transport additivity, with the group-hom equation supplied by the arbitrary-base GIT Cor 6.4
 `isMonHom_of_one_comp_eq'_of_finitePresentation` (route (a), `RigiditySpreadingOut.lean`).
@@ -175,8 +109,8 @@ primitive. Same proof as `pullSection_add_of_isLocallyNoetherian` but routed thr
 `transportSection_add_of_finitePresentation`, so the only remaining dependency is the
 arbitrary-base GIT Cor 6.4 (not `[IsLocallyNoetherian]`). -/
 theorem pullSection_add_of_finitePresentation (P Q : Y.curve.Section) :
-    EllHom.pullSection R f (P + Q)
-      = EllHom.pullSection R f P + EllHom.pullSection R f Q := by
+    pullSection R f (P + Q)
+      = pullSection R f P + pullSection R f Q := by
   apply transportSection_injective R f
   rw [transportSection_add_of_finitePresentation]
   apply (EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom (𝟙 X.base)).injective
@@ -188,8 +122,8 @@ over an arbitrary base, from `pullSection_add_of_finitePresentation` via `map_zs
 `EllHom.pullSection_zsmul` (which assumes the noetherian/parked `pullSection_add`). Transports
 the `(N : ℤ) • P = 0` killing clause of `IsNaiveGammaOne`/`IsNaiveFullLevel`. -/
 theorem pullSection_zsmul_of_finitePresentation (n : ℤ) (P : Y.curve.Section) :
-    EllHom.pullSection R f (n • P) = n • EllHom.pullSection R f P :=
-  map_zsmul (AddMonoidHom.mk' (EllHom.pullSection R f)
+    pullSection R f (n • P) = n • pullSection R f P :=
+  map_zsmul (AddMonoidHom.mk' (pullSection R f)
     (pullSection_add_of_finitePresentation R f)) n P
 
 end EllHom

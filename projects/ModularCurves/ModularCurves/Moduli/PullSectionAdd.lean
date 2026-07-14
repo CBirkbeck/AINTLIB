@@ -95,28 +95,31 @@ lemma dict_transportSection_pullSection (P : Y.curve.Section) :
   exact (pullback.lift_fst _ _ _).trans
     (congrArg (· ≫ P.1) (Category.id_comp f.baseHom)).symm
 
-/-- **(GME Cor 2.2.5 over a locally noetherian base)** The transport along the pointed
-comparison isomorphism is additive: the two independent group structures correspond, by
-the canonicity chain (`isMonHom_of_one_comp_eq'`, GIT Cor 6.4). -/
-lemma transportSection_add [IsLocallyNoetherian X.base] (s s' : X.curve.Section) :
+/-- The comparison morphism is unit-compatible: it carries `X.curve`'s unit to the
+base-changed curve's unit. No hypothesis on the base. -/
+lemma curveIsoPullbackOver_one :
+    η[X.curve.asOver] ≫ curveIsoPullbackOver R f
+      = η[(Y.curve.baseChange f.baseHom).asOver] := by
+  apply Over.OverMorphism.ext
+  show (η[X.curve.asOver] : _ ⟶ X.curve.asOver).left ≫ (curveIsoPullback R f).hom = _
+  exact (congrArg (· ≫ (curveIsoPullback R f).hom) X.curve.one_eq_zero).trans <|
+    (Category.assoc _ _ _).trans <|
+    (congrArg ((𝟙_ (Over X.base)).hom ≫ ·) (zero_curveIsoPullback R f)).trans <|
+    (Y.curve.baseChange f.baseHom).one_eq_zero.symm
+
+/-- **(GME Cor 2.2.5, the noetherian-free core)** Transport along the pointed comparison
+isomorphism is additive **given** that the comparison morphism is a homomorphism of the two
+independent group structures (the equation `h64`). Everything here is group algebra: the
+base plays no role. The canonicity chain enters only when `h64` is supplied — over a locally
+noetherian base by `isMonHom_of_one_comp_eq'` (`transportSection_add` below), over an
+arbitrary base by the finite-presentation route (`Moduli/PullSectionCanonicity.lean`). -/
+lemma transportSection_add_of_isMonHom
+    (h64 : μ[X.curve.asOver] ≫ curveIsoPullbackOver R f
+        = MonoidalCategory.tensorHom (curveIsoPullbackOver R f) (curveIsoPullbackOver R f)
+          ≫ μ[(Y.curve.baseChange f.baseHom).asOver])
+    (s s' : X.curve.Section) :
     transportSection R f (s + s')
       = transportSection R f s + transportSection R f s' := by
-  haveI : Smooth X.curve.π := SmoothOfRelativeDimension.smooth (n := 1) (f := X.curve.π)
-  haveI : IsProper X.curve.asOver.hom := inferInstanceAs (IsProper X.curve.π)
-  haveI : Flat X.curve.asOver.hom := inferInstanceAs (Flat X.curve.π)
-  haveI : IsSeparated (Y.curve.baseChange f.baseHom).asOver.hom :=
-    inferInstanceAs (IsSeparated (Y.curve.baseChange f.baseHom).π)
-  have hη : η[X.curve.asOver] ≫ curveIsoPullbackOver R f
-      = η[(Y.curve.baseChange f.baseHom).asOver] := by
-    apply Over.OverMorphism.ext
-    show (η[X.curve.asOver] : _ ⟶ X.curve.asOver).left ≫ (curveIsoPullback R f).hom = _
-    exact (congrArg (· ≫ (curveIsoPullback R f).hom) X.curve.one_eq_zero).trans <|
-      (Category.assoc _ _ _).trans <|
-      (congrArg ((𝟙_ (Over X.base)).hom ≫ ·) (zero_curveIsoPullback R f)).trans <|
-      (Y.curve.baseChange f.baseHom).one_eq_zero.symm
-  have h64 := isMonHom_of_one_comp_eq' (A := X.curve.asOver)
-    (G := (Y.curve.baseChange f.baseHom).asOver)
-    X.curve.toEllipticCurveGeom.universallyOConnected (curveIsoPullbackOver R f) hη
   have h64l : (μ[X.curve.asOver]).left ≫ (curveIsoPullback R f).hom
       = (MonoidalCategory.tensorHom (curveIsoPullbackOver R f)
           (curveIsoPullbackOver R f)).left
@@ -159,6 +162,23 @@ lemma transportSection_add [IsLocallyNoetherian X.base] (s s' : X.curve.Section)
         (congrArg CommaMorphism.left
           ((lift_map _ _ _ _).trans
             (congrArg₂ lift hcs hcs')))))
+
+/-- **(GME Cor 2.2.5 over a locally noetherian base)** The transport along the pointed
+comparison isomorphism is additive: the two independent group structures correspond, by
+the canonicity chain (`isMonHom_of_one_comp_eq'`, GIT Cor 6.4). -/
+lemma transportSection_add [IsLocallyNoetherian X.base] (s s' : X.curve.Section) :
+    transportSection R f (s + s')
+      = transportSection R f s + transportSection R f s' := by
+  haveI : Smooth X.curve.π := SmoothOfRelativeDimension.smooth (n := 1) (f := X.curve.π)
+  haveI : IsProper X.curve.asOver.hom := inferInstanceAs (IsProper X.curve.π)
+  haveI : Flat X.curve.asOver.hom := inferInstanceAs (Flat X.curve.π)
+  haveI : IsSeparated (Y.curve.baseChange f.baseHom).asOver.hom :=
+    inferInstanceAs (IsSeparated (Y.curve.baseChange f.baseHom).π)
+  exact transportSection_add_of_isMonHom R f
+    (isMonHom_of_one_comp_eq' (A := X.curve.asOver)
+      (G := (Y.curve.baseChange f.baseHom).asOver)
+      X.curve.toEllipticCurveGeom.universallyOConnected (curveIsoPullbackOver R f)
+      (curveIsoPullbackOver_one R f)) s s'
 
 /-- **(T-E4a-noeth)** Section-pullback along an `Ell/R` morphism is additive when the
 source base is locally noetherian: GME Cor 2.2.5 through the T-W7.7 canonicity chain.
