@@ -289,7 +289,12 @@ Completed dependency claim (2026-07-14): proved
 finite affine cover that already trivializes the pole line bundle, rather than introducing
 a second cover.
 
-Active dependency claim (2026-07-14): prove
+Completed dependency claim (2026-07-14): proved
 `Scheme.Modules.IsInvertible.exists_affineIntersectionModelBaseChangeIso_of_isProper`,
 packaging a finite affine trivializing cover of an invertible sheaf together with the
 finite-stage proper model and its base-change isomorphism.
+
+Active dependency claim (2026-07-14): prove
+`ModularCurves.SheafOfModules.overUnitScalarEndRingEquiv` and use it to extract units
+from changes of invertible-sheaf trivialization on affine overlaps. These units are the
+finite cocycle data to be descended to the spread model.

@@ -150,6 +150,7 @@ import ModularCurves.Picard.DualRestrict
 import ModularCurves.Picard.InvertibleSheaf
 import ModularCurves.Picard.InvertibleSheafBaseCechFlat
 import ModularCurves.Picard.InvertibleSheafFiniteAffineCover
+import ModularCurves.Picard.InvertibleSheafFiniteStageModel
 import ModularCurves.Picard.InvertibleSheafLocallyFree
 import ModularCurves.Picard.PicComparison
 import ModularCurves.Picard.PullbackTensorObj
