@@ -397,4 +397,191 @@ theorem chartPiece_index_congr {R : CommRingCat.{u}} (Y : EllObj R)
   rw [cancel_epi (Q₂.e.hom)]
   simp only [eqToHom_trans_assoc]
 
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+/-- **(E12-D3-E3d)** The cover of the total space by the chart-supported affine
+pieces. -/
+noncomputable def adaptedTotalCover {R : CommRingCat.{u}} (Y : EllObj R) :
+    Y.curve.toEllipticCurveGeom.E.OpenCover :=
+  Scheme.Cover.mkOfCovers
+    {p : Y.base.affineOpens × Y.curve.toEllipticCurveGeom.atlas.ι //
+      p.1.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U p.2).1}
+    (fun p => pullback Y.curve.toEllipticCurveGeom.π p.1.1.1.ι)
+    (fun p => pullback.fst Y.curve.toEllipticCurveGeom.π p.1.1.1.ι)
+    (fun x => by
+      obtain ⟨i, hxi⟩ := Y.curve.toEllipticCurveGeom.atlas.covers
+        (Y.curve.toEllipticCurveGeom.π.base x)
+      obtain ⟨V₀, hVaff, hxV, hVle⟩ := exists_isAffineOpen_mem_and_subset
+        (show Y.curve.toEllipticCurveGeom.π.base x ∈
+          (Y.curve.toEllipticCurveGeom.atlas.U i).1 from hxi)
+      have hx : x ∈ Set.range (pullback.fst Y.curve.toEllipticCurveGeom.π
+          (⟨V₀, hVaff⟩ : Y.base.affineOpens).1.ι).base := by
+        rw [Scheme.Pullback.range_fst, Set.mem_preimage, Scheme.Opens.range_ι,
+          SetLike.mem_coe]
+        exact hxV
+      obtain ⟨y, hy⟩ := hx
+      exact ⟨⟨⟨⟨V₀, hVaff⟩, i⟩, hVle⟩, y, hy⟩)
+
+open CategoryTheory Limits in
+@[simp] theorem adaptedTotalCover_f {R : CommRingCat.{u}} (Y : EllObj R)
+    (p : {p : Y.base.affineOpens × Y.curve.toEllipticCurveGeom.atlas.ι //
+      p.1.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U p.2).1}) :
+    (adaptedTotalCover Y).f p =
+      pullback.fst Y.curve.toEllipticCurveGeom.π p.1.1.1.ι := rfl
+
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(E12-D3-E3d)** The classifying pieces agree on overlaps: refine the fibre
+product by common affines; per-affine two restrictions plus the index congruence. -/
+private theorem chartPiece_agree {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤)))
+    (p q : {p : Y.base.affineOpens × Y.curve.toEllipticCurveGeom.atlas.ι //
+      p.1.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U p.2).1}) :
+    pullback.fst ((adaptedTotalCover Y).f p) ((adaptedTotalCover Y).f q) ≫
+        chartPiece Y b h2 h3 p.1.1 p.1.2 p.2 =
+      pullback.snd ((adaptedTotalCover Y).f p) ((adaptedTotalCover Y).f q) ≫
+        chartPiece Y b h2 h3 q.1.1 q.1.2 q.2 := by
+  haveI hOIp : IsOpenImmersion ((adaptedTotalCover Y).f p) := by
+    rw [adaptedTotalCover_f]; infer_instance
+  haveI hOIq : IsOpenImmersion ((adaptedTotalCover Y).f q) := by
+    rw [adaptedTotalCover_f]; infer_instance
+  -- pointwise choice of a common affine below both charts' affines
+  have hchoice : ∀ z : (pullback ((adaptedTotalCover Y).f p)
+      ((adaptedTotalCover Y).f q) : Scheme.{u}),
+      ∃ (W : Y.base.affineOpens), W.1 ≤ p.1.1.1 ⊓ q.1.1.1 ∧
+        Y.curve.toEllipticCurveGeom.π.base
+          ((pullback.fst ((adaptedTotalCover Y).f p) ((adaptedTotalCover Y).f q) ≫
+            (adaptedTotalCover Y).f p).base z) ∈ W.1 := by
+    intro z
+    have hsp : Y.curve.toEllipticCurveGeom.π.base
+        ((pullback.fst ((adaptedTotalCover Y).f p) ((adaptedTotalCover Y).f q) ≫
+          (adaptedTotalCover Y).f p).base z) ∈ p.1.1.1 := by
+      have hr : ((pullback.fst ((adaptedTotalCover Y).f p)
+          ((adaptedTotalCover Y).f q) ≫ (adaptedTotalCover Y).f p).base z) ∈
+          Set.range (pullback.fst Y.curve.toEllipticCurveGeom.π p.1.1.1.ι).base :=
+        ⟨(pullback.fst ((adaptedTotalCover Y).f p)
+          ((adaptedTotalCover Y).f q)).base z, rfl⟩
+      rw [Scheme.Pullback.range_fst] at hr
+      simpa [Scheme.Opens.range_ι] using hr
+    have hcond : (pullback.fst ((adaptedTotalCover Y).f p)
+        ((adaptedTotalCover Y).f q) ≫ (adaptedTotalCover Y).f p).base z =
+      (pullback.snd ((adaptedTotalCover Y).f p) ((adaptedTotalCover Y).f q) ≫
+        (adaptedTotalCover Y).f q).base z := by
+      have := congrArg (fun t => t.base z) (pullback.condition
+        (f := (adaptedTotalCover Y).f p) (g := (adaptedTotalCover Y).f q))
+      simpa using this
+    have hsq : Y.curve.toEllipticCurveGeom.π.base
+        ((pullback.fst ((adaptedTotalCover Y).f p) ((adaptedTotalCover Y).f q) ≫
+          (adaptedTotalCover Y).f p).base z) ∈ q.1.1.1 := by
+      have hr : ((pullback.fst ((adaptedTotalCover Y).f p)
+          ((adaptedTotalCover Y).f q) ≫ (adaptedTotalCover Y).f p).base z) ∈
+          Set.range (pullback.fst Y.curve.toEllipticCurveGeom.π q.1.1.1.ι).base := by
+        rw [hcond]
+        exact ⟨(pullback.snd ((adaptedTotalCover Y).f p)
+          ((adaptedTotalCover Y).f q)).base z, rfl⟩
+      rw [Scheme.Pullback.range_fst] at hr
+      simpa [Scheme.Opens.range_ι] using hr
+    obtain ⟨W₀, hWaff, hxW, hWle⟩ := exists_isAffineOpen_mem_and_subset
+      (show Y.curve.toEllipticCurveGeom.π.base
+        ((pullback.fst ((adaptedTotalCover Y).f p) ((adaptedTotalCover Y).f q) ≫
+          (adaptedTotalCover Y).f p).base z) ∈ p.1.1.1 ⊓ q.1.1.1 from ⟨hsp, hsq⟩)
+    exact ⟨⟨W₀, hWaff⟩, hWle, hxW⟩
+  choose W hWle hmem using hchoice
+  -- the piece-inclusions into the fibre product
+  have hfsteq : ∀ z, (restrictTheta (G := Y.curve.toEllipticCurveGeom)
+      ((hWle z).trans inf_le_left) ≫ (adaptedTotalCover Y).f p) =
+    restrictTheta ((hWle z).trans inf_le_right) ≫ (adaptedTotalCover Y).f q := by
+    intro z
+    rw [adaptedTotalCover_f, adaptedTotalCover_f, restrictTheta_fst, restrictTheta_fst]
+  let hω : ∀ z, (pullback Y.curve.toEllipticCurveGeom.π (W z).1.ι : Scheme.{u}) ⟶
+      pullback ((adaptedTotalCover Y).f p) ((adaptedTotalCover Y).f q) := fun z =>
+    pullback.lift (restrictTheta ((hWle z).trans inf_le_left))
+      (restrictTheta ((hWle z).trans inf_le_right)) (hfsteq z)
+  -- each inclusion is an open immersion (cancel against the composite into `E`)
+  have hcomp : ∀ z, hω z ≫ pullback.fst ((adaptedTotalCover Y).f p)
+      ((adaptedTotalCover Y).f q) ≫ (adaptedTotalCover Y).f p =
+    pullback.fst Y.curve.toEllipticCurveGeom.π (W z).1.ι := by
+    intro z
+    rw [← Category.assoc, show hω z ≫ pullback.fst ((adaptedTotalCover Y).f p)
+        ((adaptedTotalCover Y).f q) =
+      restrictTheta ((hWle z).trans inf_le_left) from pullback.lift_fst _ _ _,
+      adaptedTotalCover_f, restrictTheta_fst]
+  have hmapOI : ∀ z, IsOpenImmersion (hω z) := by
+    intro z
+    haveI : IsOpenImmersion (pullback.fst ((adaptedTotalCover Y).f p)
+        ((adaptedTotalCover Y).f q) ≫ (adaptedTotalCover Y).f p) := inferInstance
+    haveI : IsOpenImmersion (hω z ≫ pullback.fst ((adaptedTotalCover Y).f p)
+        ((adaptedTotalCover Y).f q) ≫ (adaptedTotalCover Y).f p) := by
+      rw [hcomp z]; infer_instance
+    exact IsOpenImmersion.of_comp _ (pullback.fst ((adaptedTotalCover Y).f p)
+      ((adaptedTotalCover Y).f q) ≫ (adaptedTotalCover Y).f p)
+  -- the refining cover and the extension argument
+  refine (Scheme.Cover.mkOfCovers
+    (X := (pullback ((adaptedTotalCover Y).f p) ((adaptedTotalCover Y).f q) :
+      Scheme.{u}))
+    (pullback ((adaptedTotalCover Y).f p) ((adaptedTotalCover Y).f q) : Scheme.{u})
+    (fun z => pullback Y.curve.toEllipticCurveGeom.π (W z).1.ι)
+    (fun z => hω z) ?_ (fun z => hmapOI z)).hom_ext _ _ (fun z => ?_)
+  · -- covers, via injectivity of the open-immersion composite into `E`
+    intro z
+    have hz : (pullback.fst ((adaptedTotalCover Y).f p)
+        ((adaptedTotalCover Y).f q) ≫ (adaptedTotalCover Y).f p).base z ∈
+      Set.range (pullback.fst Y.curve.toEllipticCurveGeom.π (W z).1.ι).base := by
+      rw [Scheme.Pullback.range_fst]
+      simpa [Scheme.Opens.range_ι] using hmem z
+    obtain ⟨w, hw⟩ := hz
+    refine ⟨z, w, ?_⟩
+    have hinj : Function.Injective
+        ((pullback.fst ((adaptedTotalCover Y).f p) ((adaptedTotalCover Y).f q) ≫
+          (adaptedTotalCover Y).f p).base) :=
+      (pullback.fst ((adaptedTotalCover Y).f p) ((adaptedTotalCover Y).f q) ≫
+        (adaptedTotalCover Y).f p).isOpenEmbedding.injective
+    apply hinj
+    calc (pullback.fst ((adaptedTotalCover Y).f p) ((adaptedTotalCover Y).f q) ≫
+          (adaptedTotalCover Y).f p).base ((hω z).base w)
+        = (hω z ≫ pullback.fst ((adaptedTotalCover Y).f p)
+            ((adaptedTotalCover Y).f q) ≫ (adaptedTotalCover Y).f p).base w := rfl
+      _ = (pullback.fst Y.curve.toEllipticCurveGeom.π (W z).1.ι).base w := by
+          rw [hcomp z]
+      _ = _ := hw
+  · -- per-piece agreement: two restrictions + the index congruence
+    show hω z ≫ pullback.fst _ _ ≫ chartPiece Y b h2 h3 p.1.1 p.1.2 p.2 =
+      hω z ≫ pullback.snd _ _ ≫ chartPiece Y b h2 h3 q.1.1 q.1.2 q.2
+    rw [← Category.assoc, show hω z ≫ pullback.fst ((adaptedTotalCover Y).f p)
+        ((adaptedTotalCover Y).f q) =
+      restrictTheta ((hWle z).trans inf_le_left) from pullback.lift_fst _ _ _,
+      ← Category.assoc, show hω z ≫ pullback.snd ((adaptedTotalCover Y).f p)
+        ((adaptedTotalCover Y).f q) =
+      restrictTheta ((hWle z).trans inf_le_right) from pullback.lift_snd _ _ _,
+      chartPiece_restrict Y b h2 h3 p.1.1 p.1.2 p.2 ((hWle z).trans inf_le_left),
+      chartPiece_restrict Y b h2 h3 q.1.1 q.1.2 q.2 ((hWle z).trans inf_le_right),
+      chartPiece_index_congr Y b h2 h3 (W z) p.1.2 q.1.2
+        (((hWle z).trans inf_le_left).trans p.2)
+        (((hWle z).trans inf_le_right).trans q.2)]
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+/-- **(E12-D3 ★★)** The classifying morphism upstairs: the chart-glued map from the
+total space to the universal projective model — GME Thm 2.2.3's universal comparison. -/
+noncomputable def classifyingTop {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤))) :
+    Y.curve.toEllipticCurveGeom.E ⟶ projModel (universalShortNF R) :=
+  (adaptedTotalCover Y).glueMorphisms
+    (fun p => chartPiece Y b h2 h3 p.1.1 p.1.2 p.2)
+    (chartPiece_agree Y b h2 h3)
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+@[reassoc]
+theorem classifyingTop_piece {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤)))
+    (p : {p : Y.base.affineOpens × Y.curve.toEllipticCurveGeom.atlas.ι //
+      p.1.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U p.2).1}) :
+    (adaptedTotalCover Y).f p ≫ classifyingTop Y b h2 h3 =
+      chartPiece Y b h2 h3 p.1.1 p.1.2 p.2 :=
+  (adaptedTotalCover Y).ι_glueMorphisms _ _ p
+
 end ModularCurves

@@ -1813,6 +1813,16 @@ noncomputable def restrictTheta {G : EllipticCurveGeom S} {V V' : S.affineOpens}
     (show V'.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ V.1 from h)
 
 open Scheme in
+@[reassoc (attr := simp)]
+theorem restrictTheta_fst {G : EllipticCurveGeom S} {V V' : S.affineOpens}
+    (h : V'.1 ≤ V.1) :
+    restrictTheta (G := G) h ≫ pullback.fst G.π V.1.ι =
+      pullback.fst G.π V'.1.ι := by
+  show transportTheta (𝟙 S) (𝟙 G.E) _ _ ≫ pullback.fst G.π V.1.ι = _
+  unfold transportTheta
+  rw [pullback.lift_fst, Category.comp_id]
+
+open Scheme in
 set_option backward.isDefEq.respectTransparency false in
 /-- **(E12-D3-E3)** The restricted chart isomorphism intertwines the model base change
 with the pullback inclusion (`transportE_baseChange` at the identity square). -/
