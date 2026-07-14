@@ -794,6 +794,87 @@ theorem basisUnitAt_smul {V : S.affineOpens} (P : LocalPresentation G V)
   rw [hu]
   exact mul_assoc _ _ _
 
+/-! ### T-E14b: the char-≠2 adapted models (KM 2.2.9 / 4.6.2 layer over `ℤ[1/2]`)
+
+The Legendre bootstrap needs the adapted-model theory with only `2` invertible: the
+`a₁ = a₃ = 0` normal form (mathlib's `IsCharNeTwoNF`) replaces short normal form. The
+`ω`-datum still pins `u = 1` and the form pins `s = t = 0`, but the translation `r`
+stays FREE — adapted char-≠2 models form an `r`-translation torsor
+(`transVC_of_isAdapted_charNeTwo`); the Legendre marking `x(P₂) = 0` is what will pin
+`r` (leaf (a), deferred to the `E[2]`-section keystone). -/
+
+open WeierstrassCurve in
+/-- A pure-`u` variable change preserves char-≠2 normal form. -/
+theorem isCharNeTwoNF_smul_units {R : Type u} [CommRing R] {W : WeierstrassCurve R}
+    (hW : W.IsCharNeTwoNF) (u : Rˣ) :
+    ((⟨u, 0, 0, 0⟩ : VariableChange R) • W).IsCharNeTwoNF := by
+  constructor <;>
+    simp [variableChange_a₁, variableChange_a₃, hW.a₁, hW.a₃]
+
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14b, KM 2.2.9 existence)** Over a base with `2` invertible, every `(E, ω)`
+admits, over every chart-supported affine, a presentation that is BOTH in char-≠2
+normal form and `ω`-adapted. -/
+noncomputable def adaptCharNeTwoNF {V : S.affineOpens}
+    (P : LocalPresentation G V) (b : OmegaBasis G)
+    (h2 : IsUnit (2 : Γ(S, V.1))) : LocalPresentation G V :=
+  letI := h2.invertible
+  (P.ofVC P.W.toCharNeTwoNF).adapt b
+
+set_option backward.isDefEq.respectTransparency false in
+theorem isAdapted_adaptCharNeTwoNF {V : S.affineOpens}
+    (P : LocalPresentation G V) (b : OmegaBasis G) (h2 : IsUnit (2 : Γ(S, V.1))) :
+    (P.adaptCharNeTwoNF b h2).IsAdapted b :=
+  isAdapted_adapt _ b
+
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+theorem isCharNeTwoNF_adaptCharNeTwoNF {V : S.affineOpens}
+    (P : LocalPresentation G V) (b : OmegaBasis G) (h2 : IsUnit (2 : Γ(S, V.1))) :
+    (P.adaptCharNeTwoNF b h2).W.IsCharNeTwoNF := by
+  letI := h2.invertible
+  have h0 : (P.ofVC P.W.toCharNeTwoNF).W.IsCharNeTwoNF := by
+    rw [ofVC_W]
+    exact P.W.toCharNeTwoNF_spec
+  show ((P.ofVC P.W.toCharNeTwoNF).adapt b).W.IsCharNeTwoNF
+  rw [show ((P.ofVC P.W.toCharNeTwoNF).adapt b).W =
+    (⟨(((P.ofVC P.W.toCharNeTwoNF).basisUnitAt b).1)⁻¹, 0, 0, 0⟩ :
+      VariableChange Γ(S, V.1)) • (P.ofVC P.W.toCharNeTwoNF).W from rfl]
+  exact isCharNeTwoNF_smul_units h0 _
+
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14b ★, KM 2.2.9 uniqueness: the translation torsor)** Over a base with `2`
+invertible, two `b`-adapted char-≠2-normal-form presentations over the same affine
+compare by a PURE TRANSLATION: the `ω`-datum pins `u = 1`, the form pins `s = t = 0`,
+and the translation `r` is the exact residual freedom (to be spent on `x(P₂) = 0`). -/
+theorem transVC_of_isAdapted_charNeTwo {V : S.affineOpens}
+    {P Q : LocalPresentation G V} {b : OmegaBasis G}
+    (hP : P.IsAdapted b) (hQ : Q.IsAdapted b)
+    (hPW : P.W.IsCharNeTwoNF) (hQW : Q.W.IsCharNeTwoNF)
+    (h2 : IsUnit (2 : Γ(S, V.1))) :
+    P.transVC Q = ⟨1, (P.transVC Q).r, 0, 0⟩ := by
+  have hu : (P.transVC Q).u = 1 := transUnit_eq_one_of_isAdapted hP hQ
+  have hsmul := P.transVC_smul Q
+  set C := P.transVC Q with hC
+  have ha₁ : C.u⁻¹.val * (Q.W.a₁ + 2 * C.s) = P.W.a₁ := by
+    rw [← variableChange_a₁, hsmul]
+  have hs : C.s = 0 := by
+    rw [hPW.a₁, hQW.a₁, hu, inv_one, Units.val_one, one_mul, zero_add] at ha₁
+    exact (h2.mul_right_eq_zero).mp ha₁
+  have ha₃ : C.u⁻¹.val ^ 3 * (Q.W.a₃ + C.r * Q.W.a₁ + 2 * C.t) = P.W.a₃ := by
+    rw [← variableChange_a₃, hsmul]
+  have ht : C.t = 0 := by
+    rw [hPW.a₃, hQW.a₃, hu, inv_one, Units.val_one, one_pow, one_mul, hQW.a₁,
+      mul_zero, add_zero, zero_add] at ha₃
+    exact (h2.mul_right_eq_zero).mp ha₃
+  ext
+  · exact congrArg Units.val hu
+  · rfl
+  · exact hs
+  · exact ht
+
 end LocalPresentation
 
 end ModularCurves
