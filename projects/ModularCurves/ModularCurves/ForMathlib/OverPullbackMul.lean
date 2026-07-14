@@ -54,18 +54,8 @@ lemma monObjMkPullbackSnd_mul_left_fst [MonObj (Over.mk f)] :
         = pullback.fst (Over.mk f ⊗ Over.mk f).hom g ≫ h.left := fun h => by
     simp only [Over.pullback]
     exact pullback.lift_fst _ _ _
-  have hmapfst : ((Over.pullback g).map (fst (Over.mk f) (Over.mk f))).left
-        ≫ pullback.fst f g
-      = pullback.fst (Over.mk f ⊗ Over.mk f).hom g
-        ≫ (fst (Over.mk f) (Over.mk f)).left := by
-    simp only [Over.pullback]
-    exact pullback.lift_fst _ _ _
-  have hmapsnd : ((Over.pullback g).map (snd (Over.mk f) (Over.mk f))).left
-        ≫ pullback.fst f g
-      = pullback.fst (Over.mk f ⊗ Over.mk f).hom g
-        ≫ (snd (Over.mk f) (Over.mk f)).left := by
-    simp only [Over.pullback]
-    exact pullback.lift_fst _ _ _
+  have hmapfst := hmap (fst (Over.mk f) (Over.mk f))
+  have hmapsnd := hmap (snd (Over.mk f) (Over.mk f))
   have h1 := congrArg CommaMorphism.left
     (Functor.Monoidal.μ_fst (F := Over.pullback g) (Over.mk f) (Over.mk f))
   have h2 := congrArg CommaMorphism.left
