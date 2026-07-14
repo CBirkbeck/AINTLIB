@@ -2185,7 +2185,99 @@ theorem isDivisorGenerator_smul (N : ℕ) [NeZero N] {D : RelEffCartierDiv E.π}
     (hord : P₀.HasExactOrder E N) (hgen : (P₀.orderDivisor E N).ideal = D.ideal)
     {a : ℤ} (ha : a.gcd N = 1) :
     (a • P₀).HasExactOrder E N ∧ ((a • P₀).orderDivisor E N).ideal = D.ideal := by
-  sorry
+  have hkill : (N : ℤ) • P₀ = 0 := hord.smul_eq_zero
+  -- multiples of `P₀` only depend on the exponent mod `N`
+  have hF : ∀ m : ℤ, (m • P₀ : E.Point (𝟙 S))
+      = ((((m : ZMod N)).val : ℤ) • P₀ : E.Point (𝟙 S)) := by
+    intro m
+    have hz : ((m - (((m : ZMod N)).val : ℤ) : ℤ) : ZMod N) = 0 := by
+      push_cast
+      rw [ZMod.natCast_val, ZMod.cast_id]
+      ring
+    obtain ⟨q, hq⟩ := (ZMod.intCast_zmod_eq_zero_iff_dvd _ _).mp hz
+    have hm : m = (((m : ZMod N)).val : ℤ) + (N : ℤ) * q := by linarith
+    calc m • P₀ = ((((m : ZMod N)).val : ℤ) + (N : ℤ) * q) • P₀ := by rw [← hm]
+      _ = (((m : ZMod N)).val : ℤ) • P₀ + ((N : ℤ) * q) • P₀ := add_smul _ _ _
+      _ = (((m : ZMod N)).val : ℤ) • P₀ := by
+          rw [mul_comm ((N : ℕ) : ℤ) q, mul_smul, hkill, smul_zero, add_zero]
+  -- the order-divisor ideal as an indexed product
+  have hpos : IsSeparated E.π ∧ SmoothOfRelativeDimension 1 E.π := ⟨inferInstance, E.smooth⟩
+  have hidealQ : ∀ Q : E.Section, (Q.orderDivisor E N).ideal
+      = ∏ b : Fin N, Scheme.Hom.ker (((((b : ℕ) : ℤ) + 1) • Q : E.Point (𝟙 S))).1 := by
+    intro Q
+    rw [Section.orderDivisor, RelEffCartierDiv.sectionsDivisor, dif_pos hpos]
+  -- reindexing `Fin N` through `b ↦ (b : ZMod N) + 1`
+  have hbij : Function.Bijective (fun b : Fin N => ((b : ℕ) : ZMod N) + 1) := by
+    rw [Fintype.bijective_iff_injective_and_card]
+    refine ⟨fun b₁ b₂ h12 => ?_, by rw [ZMod.card]; exact (Fintype.card_fin N)⟩
+    have h13 : ((b₁ : ℕ) : ZMod N) = ((b₂ : ℕ) : ZMod N) := by
+      simpa using h12
+    have hv := congrArg ZMod.val h13
+    rw [ZMod.val_cast_of_lt b₁.2, ZMod.val_cast_of_lt b₂.2] at hv
+    exact Fin.ext hv
+  have hprod : ∀ {M : Type u} [CommMonoid M] (f : ZMod N → M),
+      ∏ b : Fin N, f (((b : ℕ) : ZMod N) + 1) = ∏ z : ZMod N, f z := by
+    intro M _ f
+    exact Fintype.prod_bijective _ hbij _ _ (fun b => rfl)
+  -- `a` is a unit mod `N`
+  have hcop : Nat.Coprime a.natAbs N := by
+    have : a.gcd (N : ℤ) = a.natAbs.gcd ((N : ℤ)).natAbs := rfl
+    rwa [this, Int.natAbs_natCast] at ha
+  have hunit : IsUnit ((a : ℤ) : ZMod N) := by
+    rcases Int.natAbs_eq a with hpm | hpm
+    · rw [hpm, Int.cast_natCast, ← ZMod.coe_unitOfCoprime a.natAbs hcop]
+      exact (ZMod.unitOfCoprime a.natAbs hcop).isUnit
+    · rw [hpm, Int.cast_neg, Int.cast_natCast, ← ZMod.coe_unitOfCoprime a.natAbs hcop]
+      exact (ZMod.unitOfCoprime a.natAbs hcop).isUnit.neg
+  obtain ⟨u, hu⟩ := hunit
+  have hmulbij : Function.Bijective (fun z : ZMod N => z * ((a : ℤ) : ZMod N)) := by
+    rw [← hu]
+    exact (Units.mulRight u).bijective
+  -- the permuted-product identity
+  have hmain : ((a • P₀).orderDivisor E N).ideal = (P₀.orderDivisor E N).ideal := by
+    rw [hidealQ (a • P₀), hidealQ P₀]
+    have hstep1 : ∀ b : Fin N,
+        Scheme.Hom.ker (((((b : ℕ) : ℤ) + 1) • (a • P₀) : E.Point (𝟙 S))).1
+          = Scheme.Hom.ker ((((((((b : ℕ) : ZMod N) + 1) * ((a : ℤ) : ZMod N))).val : ℤ)
+              • P₀ : E.Point (𝟙 S))).1 := by
+      intro b
+      congr 2
+      rw [smul_smul, hF ((((b : ℕ) : ℤ) + 1) * a)]
+      congr 3
+      push_cast
+      ring
+    have hstep2 : ∀ b : Fin N,
+        Scheme.Hom.ker (((((b : ℕ) : ℤ) + 1) • P₀ : E.Point (𝟙 S))).1
+          = Scheme.Hom.ker ((((((b : ℕ) : ZMod N) + 1)).val : ℤ)
+              • P₀ : E.Point (𝟙 S)).1 := by
+      intro b
+      congr 2
+      rw [hF (((b : ℕ) : ℤ) + 1)]
+      congr 3
+      push_cast
+      ring
+    calc ∏ b : Fin N, Scheme.Hom.ker (((((b : ℕ) : ℤ) + 1) • (a • P₀) : E.Point (𝟙 S))).1
+        = ∏ b : Fin N, Scheme.Hom.ker ((((((((b : ℕ) : ZMod N) + 1) *
+            ((a : ℤ) : ZMod N))).val : ℤ) • P₀ : E.Point (𝟙 S))).1 :=
+          Finset.prod_congr rfl fun b _ => hstep1 b
+      _ = ∏ z : ZMod N, Scheme.Hom.ker ((((z * ((a : ℤ) : ZMod N)).val : ℤ)
+            • P₀ : E.Point (𝟙 S))).1 :=
+          hprod (fun z => Scheme.Hom.ker ((((z * ((a : ℤ) : ZMod N)).val : ℤ)
+            • P₀ : E.Point (𝟙 S))).1)
+      _ = ∏ z : ZMod N, Scheme.Hom.ker (((z.val : ℤ) • P₀ : E.Point (𝟙 S))).1 :=
+          Fintype.prod_bijective _ hmulbij _ _ (fun z => rfl)
+      _ = ∏ b : Fin N, Scheme.Hom.ker ((((((b : ℕ) : ZMod N) + 1)).val : ℤ)
+            • P₀ : E.Point (𝟙 S)).1 :=
+          (hprod (fun z => Scheme.Hom.ker (((z.val : ℤ) • P₀ : E.Point (𝟙 S))).1)).symm
+      _ = ∏ b : Fin N, Scheme.Hom.ker (((((b : ℕ) : ℤ) + 1) • P₀ : E.Point (𝟙 S))).1 :=
+          Finset.prod_congr rfl fun b _ => (hstep2 b).symm
+  have hideal : ((a • P₀).orderDivisor E N).ideal = D.ideal := hmain.trans hgen
+  refine ⟨?_, hideal⟩
+  -- exact order transports across the divisor identification
+  have hdiveq : (a • P₀).orderDivisor E N = D := RelEffCartierDiv.ext hideal
+  show ((a • P₀).orderDivisor E N).IsSubgroup E
+  rw [hdiveq]
+  exact hD
 
 /-- **(KM 6.1.1(2), second half: `G^× ⊆ D`; GATE [KM-62-63-HOMOG])** Every generator of
 `D_T` lies on the prime-to-`N` order divisor of a chosen global generator `P₀`. This is the
@@ -2304,7 +2396,7 @@ theorem generatorSpace_fibre_isEmpty_of_not_isGammaZeroFppf (N : ℕ) [NeZero N]
     intro s
     have pt : ↑(Spec (CommRingCat.of
         (↑Γ((E.baseChange t).generatorSpace N (D.baseChange t) hD', ⊤) ⧸ m))) :=
-      (⟨⊥, Ideal.bot_prime⟩ : PrimeSpectrum
+      (⟨⊥, Ideal.isPrime_bot⟩ : PrimeSpectrum
         (↑Γ((E.baseChange t).generatorSpace N (D.baseChange t) hD', ⊤) ⧸ m))
     exact ⟨pt, Subsingleton.elim _ _⟩
   have hρfin : (σ ≫ CommRingCat.ofHom (Ideal.Quotient.mk m)).hom.Finite :=
