@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.Moduli.EllCategory
 import ModularCurves.EllipticCurve.EndomorphismDegree
 import ModularCurves.Moduli.NaiveProblems
@@ -52,9 +57,6 @@ instance : Category (EllipticCurve S) where
   id E := ⟨𝟙 E.E, by simp, by simp⟩
   comp f g := ⟨f.hom ≫ g.hom, by rw [Category.assoc, g.over_w, f.over_w],
     by rw [← Category.assoc, f.zero_w, g.zero_w]⟩
-  id_comp := by intros; ext; simp
-  comp_id := by intros; ext; simp
-  assoc := by intros; ext; simp [Category.assoc]
 
 -- (T-G1 DELETED, adversarial pass 2026-07-06.) The former claim "every pointed
 -- `S`-morphism is an isomorphism" is FALSE — `[2] : E ⟶ E` is a pointed `S`-morphism
