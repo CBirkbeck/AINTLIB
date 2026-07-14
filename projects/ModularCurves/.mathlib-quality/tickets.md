@@ -19026,3 +19026,15 @@ bijective_of_forall_bijective_lTensor_residueField + isIso_of_isPullback_of_fppf
 DEDUP NOTE for cleanup lane: TorsionFibre.lean already had torsionBaseChangeHom +
 torsion_baseChange_isPullback (:243) — my TorsionEtaleTriv torsionBaseChangeIso overlaps
 (iso-form vs IsPullback-form); reconcile when the fleet passes. (STREAM-G0)
+
+### v10.202-G0 — [C5B-2 L2b-ii core] the split-algebra hom-duality criterion PROVEN (STREAM-G0)
+NEW ForMathlib/FiniteSplitHomDuality.lean (0 sorries, ForMathlib-grade — flag generalise lane):
+`AlgHom.eq_evalAlgHom_of_pi` (every k-point of ι→k is a coordinate evaluation — orthogonal
+idempotent analysis, char-free) · `eq_zero_of_forall_algHom_eq_zero` (k-points separate split
+algebras) · `card_algHom` (point count = finrank) · **`bijective_of_precomp_bijective`** (an
+algebra map of finite split algebras whose dual map on k-points is bijective is bijective —
+separation gives injectivity, the point-count + rank-nullity gives surjectivity). This is the
+mathematical CORE of the L2b criterion. REMAINING L2b plumbing: affine-local reduction of
+IsIso (fullLevelHom), the residue-field engine (BijectiveResidueField:81), the κ(p)→k̄ transfer,
+and the identification of the dual point-map with fullLevelFibreMap (torsionPointsEquiv +
+Γ-Spec adjunction at geometric fibres). (STREAM-G0)

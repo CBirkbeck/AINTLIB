@@ -196,6 +196,22 @@ noncomputable def zChartSectionCoordRingEquiv {K : Type u} [Field K] (W : Weiers
     Γ((zChart W).toScheme, ⊤) ≃+* W.toAffine.CoordinateRing :=
   (zChart W).topIso.commRingCatIsoToRingEquiv.trans (coordRingToZSection W).symm
 
+/-- **(K4b-2, leaf L2)** `W.toAffine.FunctionField` is a fraction field of the `Z`-chart sections
+`Γ((zChart W).toScheme, ⊤)`, for the algebra structure induced by `zChartSectionCoordRingEquiv` (L1)
+followed by `W.CoordinateRing → W.FunctionField`. Transports the canonical
+`IsFractionRing W.CoordinateRing W.FunctionField` along the L1 ring iso
+(`IsFractionRing.of_ringEquiv_left`). This is the `Frac Γ(Z) = K(E)` half of `L3`
+(`finrank_of_isFractionRing`) — completing the base (`Γ(Z)`) side of the K4b-2 identity. -/
+lemma isFractionRing_zChartSection {K : Type u} [Field K] (W : WeierstrassCurve K) [W.IsElliptic] :
+    letI : Algebra Γ((zChart W).toScheme, ⊤) W.toAffine.FunctionField :=
+      ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField).comp
+        (zChartSectionCoordRingEquiv W).toRingHom).toAlgebra
+    IsFractionRing Γ((zChart W).toScheme, ⊤) W.toAffine.FunctionField := by
+  letI : Algebra Γ((zChart W).toScheme, ⊤) W.toAffine.FunctionField :=
+    ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField).comp
+      (zChartSectionCoordRingEquiv W).toRingHom).toAlgebra
+  exact IsFractionRing.of_ringEquiv_left (zChartSectionCoordRingEquiv W) (fun _ => rfl)
+
 /-- **(K4 crux — the HasseWeil coupling)** Over a field `K`, the scheme-theoretic fibre rank of the
 model `[N]` equals the degree of HasseWeil's multiplication-by-`N` isogeny `mulByInt W.toAffine N`
 (the function-field extension degree `[K(E) : [N]* K(E)]`).
