@@ -381,8 +381,13 @@ theorem lcompletedSeries_functional_equation (f : F) (hw : Γ.strictWidthInfty =
 
 /-! ### Analytic continuation of `L(·, f)` -/
 
-/-- The half-plane `{s | x < Re s}` (with `x : EReal`) is preconnected. -/
-private lemma isPreconnected_re_gt_EReal (x : EReal) :
+/-- The half-plane `{s | x < Re s}` (with `x : EReal`) is preconnected.
+
+Stated for `EReal` so it applies directly to `{s | abscissaOfAbsConv a < Re s}`, the natural domain
+of an `LSeries`.  Not modular-form-specific: it is the identity-theorem input shared by every
+analytic-continuation argument here, so it is public and reused at level `N`
+(`LFunctionFEqN.lean`). -/
+lemma isPreconnected_re_gt_EReal (x : EReal) :
     IsPreconnected {z : ℂ | x < (z.re : EReal)} := by
   induction x using EReal.rec with
   | bot =>
