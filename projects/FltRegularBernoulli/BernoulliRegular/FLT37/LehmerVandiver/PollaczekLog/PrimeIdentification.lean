@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import FltRegular.NumberTheory.CyclotomicRing
@@ -140,7 +145,7 @@ theorem cyclotomicReduction_zeta
     (ht_ne : (t : ZMod ℓ) ^ k ≠ 1) :
     cyclotomicReduction p ℓ k hℓ ht_coprime ht_ne (CyclotomicIntegers.zeta p) =
       (t : ZMod ℓ) ^ k := by
-  unfold cyclotomicReduction CyclotomicIntegers.zeta
+  simp only [cyclotomicReduction, CyclotomicIntegers.zeta]
   exact AdjoinRoot.lift_root _
 
 end CyclotomicReduction
@@ -171,7 +176,7 @@ theorem lehmerVandiverPrime_isPrime
     (hℓ : ℓ = k * p + 1) {t : ℕ} (ht_coprime : t.Coprime ℓ)
     (ht_ne : (t : ZMod ℓ) ^ k ≠ 1) :
     (lehmerVandiverPrime p ℓ k hℓ ht_coprime ht_ne).IsPrime := by
-  unfold lehmerVandiverPrime
+  simp only [lehmerVandiverPrime]
   -- The kernel of the cyclotomic reduction (target is the field `ZMod ℓ`,
   -- hence an integral domain) is prime, and primality is preserved under
   -- `Ideal.comap`.
@@ -192,7 +197,7 @@ theorem lehmerVandiverPrime_zeta_sub_tk_mem
   -- The element is in `lehmerVandiverPrime` iff its image under
   -- `equiv⁻¹` is in `RingHom.ker cyclotomicReduction`, i.e. the
   -- cyclotomic reduction of that image is `0` in `ZMod ℓ`.
-  unfold lehmerVandiverPrime
+  simp only [lehmerVandiverPrime]
   rw [Ideal.mem_comap, RingEquiv.toRingHom_eq_coe, RingHom.coe_coe,
     RingHom.mem_ker, map_sub]
   -- Compute each summand.
@@ -217,7 +222,7 @@ theorem lehmerVandiverPrime_natCast_ℓ_mem
     (ht_ne : (t : ZMod ℓ) ^ k ≠ 1) :
     ((ℓ : ℕ) : 𝓞 (CyclotomicField p ℚ)) ∈
       lehmerVandiverPrime p ℓ k hℓ ht_coprime ht_ne := by
-  unfold lehmerVandiverPrime
+  simp only [lehmerVandiverPrime]
   rw [Ideal.mem_comap, RingEquiv.toRingHom_eq_coe, RingHom.coe_coe,
     RingHom.mem_ker, map_natCast, map_natCast, ZMod.natCast_self]
 
