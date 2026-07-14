@@ -74,7 +74,8 @@ structure GaloisRepData (N : ℕ) [NeZero N] where
   /-- Cyclotomic determinant: `det ∘ ρ` is the mod-`N` cyclotomic character of `ℚ`. -/
   det_cyclo : ∀ σ : GalQ,
     Matrix.GeneralLinearGroup.det (ρ σ) =
-      modularCyclotomicCharacter (AlgebraicClosure ℚ) (card_rootsOfUnity_algClosureQ N) σ.toRingEquiv
+      modularCyclotomicCharacter (AlgebraicClosure ℚ) (card_rootsOfUnity_algClosureQ N)
+        σ.toRingEquiv
   /-- The pairing normalisation `p`: a group isomorphism from `ℤ/N` (the line `Λ²ρ`,
   carrying the Galois action through `det ∘ ρ`) to `μ_N(ℚ̄)`, Galois-equivariantly. -/
   p : Multiplicative (ZMod N) ≃* rootsOfUnity N (AlgebraicClosure ℚ)
@@ -202,43 +203,46 @@ lemma rhoAction_ker_open (D : GaloisRepData N) :
   exact D.ker_open.preimage continuous_galSepMulEquivGalQ
 
 open scoped Pointwise in
-/-- The `ρ`-action is continuous (the fiber is discrete and the kernel is open). -/
-lemma rhoAction_isContinuous (D : GaloisRepData N) :
-    (rhoAction D).IsContinuous := by
+/-- **Continuity criterion for a finite Galois set.** A finite `Γ`-set is continuous as soon as
+some open `K ∋ 1` acts trivially on it: the stabiliser of every point then contains the open
+neighbourhood `σ₀ • K` of each of its elements, so the action map into the discrete carrier is
+locally constant. Every continuity proof in the `ρ`-tower (`rhoAction`, `rhoSqAction`,
+`pointAction`) is this lemma at a different `K`. -/
+lemma isContinuous_of_isOpen_of_trivial
+    (A : Action FintypeCat.{0} (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ))
+    (K : Set (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) (hK : IsOpen K) (hK1 : (1 : _) ∈ K)
+    (hact : ∀ τ ∈ K, A.ρ τ = 𝟙 A.V) : A.IsContinuous := by
   constructor
   haveI : DiscreteTopology
       ((CategoryTheory.forget₂ (Action FintypeCat.{0}
-        (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) TopCat).obj (rhoAction D) :
-          Type 0) := ⟨rfl⟩
+        (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) TopCat).obj A : Type 0) := ⟨rfl⟩
   refine continuous_discrete_rng.mpr fun w => ?_
   have hdecomp : (fun p : (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) ×
-        (CategoryTheory.forget₂ _ TopCat).obj (rhoAction D) => p.1 • p.2) ⁻¹'
-        ({w} : Set _) =
-      ⋃ v : (CategoryTheory.forget₂ _ TopCat).obj (rhoAction D),
-        {σ | σ • v = w} ×ˢ ({v} : Set _) := by
+        (CategoryTheory.forget₂ _ TopCat).obj A => p.1 • p.2) ⁻¹' ({w} : Set _) =
+      ⋃ v : (CategoryTheory.forget₂ _ TopCat).obj A, {σ | σ • v = w} ×ˢ ({v} : Set _) := by
     ext ⟨σ, v⟩
     simp
   rw [hdecomp]
   refine isOpen_iUnion fun v => IsOpen.prod ?_ trivial
   refine isOpen_iff_mem_nhds.mpr fun σ₀ hσ₀ => ?_
-  have hnb : σ₀ • {σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ |
-      D.ρ (galSepMulEquivGalQ σ) = 1} ∈ nhds σ₀ := by
-    refine IsOpen.mem_nhds ((rhoAction_ker_open D).smul σ₀) ?_
-    exact ⟨1, by simp only [Set.mem_setOf_eq, map_one], mul_one σ₀⟩
-  refine Filter.mem_of_superset hnb ?_
+  refine Filter.mem_of_superset (IsOpen.mem_nhds (hK.smul σ₀) ⟨1, hK1, mul_one σ₀⟩) ?_
   rintro σ ⟨τ, hτ, rfl⟩
-  have hτ1 : D.ρ (galSepMulEquivGalQ τ) = 1 := hτ
-  have hAct : (rhoAction D).ρ τ = 𝟙 _ := by
-    refine FintypeCat.hom_ext _ _ fun x => ?_
-    show D.ρ (galSepMulEquivGalQ τ) • (x : Fin 2 → ZMod N) = x
-    rw [hτ1, one_smul]
   calc (σ₀ * τ) • v = σ₀ • τ • v := mul_smul σ₀ τ v
     _ = σ₀ • v := by
         congr 1
-        show ((CategoryTheory.forget₂ _ TopCat).map ((rhoAction D).ρ τ)) v = v
-        rw [hAct, CategoryTheory.Functor.map_id]
+        show ((CategoryTheory.forget₂ _ TopCat).map (A.ρ τ)) v = v
+        rw [hact τ hτ, CategoryTheory.Functor.map_id]
         rfl
     _ = w := hσ₀
+
+/-- The `ρ`-action is continuous (the fiber is discrete and the kernel is open). -/
+lemma rhoAction_isContinuous (D : GaloisRepData N) :
+    (rhoAction D).IsContinuous :=
+  isContinuous_of_isOpen_of_trivial _ _ (rhoAction_ker_open D)
+    (by simp only [Set.mem_setOf_eq, map_one]) fun τ hτ =>
+      FintypeCat.hom_ext _ _ fun x => by
+        show D.ρ (galSepMulEquivGalQ τ) • (x : Fin 2 → ZMod N) = x
+        rw [show D.ρ (galSepMulEquivGalQ τ) = 1 from hτ, one_smul]
 
 /-- The `ρ`-twisted `(ℤ/N)²` as a continuous Galois set. -/
 noncomputable abbrev rhoContAction (D : GaloisRepData N) :
