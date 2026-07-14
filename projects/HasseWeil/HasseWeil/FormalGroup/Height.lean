@@ -68,8 +68,7 @@ theorem FormalGroupHom.height_zero_toSeries {F G : FormalGroup R} (p : ℕ)
 theorem FormalGroupHom.height_of_ne_zero {F G : FormalGroup R} (p : ℕ)
     (f : FormalGroupHom F G) (hf : f.toSeries ≠ 0) :
     f.height p = padicValNat p f.toSeries.order.toNat := by
-  rw [FormalGroupHom.height]
-  rw [← PowerSeries.coe_toNat_order hf]
+  rw [FormalGroupHom.height, ← PowerSeries.coe_toNat_order hf]
   rfl
 
 /-- The **height** of a formal group `F` over a ring of prime characteristic
@@ -115,8 +114,8 @@ private theorem ENat.map_padicValNat_mul (p : ℕ) [Fact p.Prime] {a b : ℕ∞}
         intro h; apply ha; simp [h]
       have hn : n ≠ 0 := by
         intro h; apply hb; simp [h]
-      rw [show ((m : ℕ∞) * (n : ℕ∞) : ℕ∞) = ((m * n : ℕ) : ℕ∞) from by push_cast; ring]
-      rw [ENat.map_coe, ENat.map_coe, ENat.map_coe, _root_.padicValNat.mul hm hn]
+      rw [← Nat.cast_mul, ENat.map_coe, ENat.map_coe, ENat.map_coe,
+        _root_.padicValNat.mul hm hn]
       push_cast
       rfl
 
