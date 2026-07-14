@@ -1164,6 +1164,40 @@ theorem legendreTop_piece {R : CommRingCat.{u}} {X : EllObj R}
       legendrePiece hD h2 w :=
   (legendreWitnessCover hD).ι_glueMorphisms _ _ w
 
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 800000 in
+/-- **(T-E14-CLS-6, ≈E2-π)** The piece map lies over the restricted classifying map
+(mirrors `chartPiece_π`). -/
+theorem legendrePiece_π {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 2} {b : OmegaBasis X.curve.toEllipticCurveGeom}
+    (hD : IsLegendreDatum X L b) (h2 : IsUnit (2 : Γ(X.base, ⊤)))
+    (w : LegendreWitness X L b) :
+    legendrePiece hD h2 w ≫ projModelπ (universalLegendre R) =
+      pullback.snd X.curve.toEllipticCurveGeom.π w.V.1.ι ≫ w.V.2.isoSpec.hom ≫
+        Spec.map (CommRingCat.ofHom
+          (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+            (legendreClassifyingRingHom X L b hD h2))) := by
+  have hw : projModelBaseChange
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (legendreClassifyingRingHom X L b hD h2)) (universalLegendre R) ≫
+      projModelπ (universalLegendre R) =
+    projModelπ ((universalLegendre R).map
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (legendreClassifyingRingHom X L b hD h2))) ≫
+      Spec.map (CommRingCat.ofHom
+        (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+          (legendreClassifyingRingHom X L b hD h2))) := by
+    letI : Algebra (LegendreModuliRing R) Γ(X.base, w.V.1) :=
+      ((((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (legendreClassifyingRingHom X L b hD h2))).toAlgebra
+    exact (isPullback_projModelBaseChange (universalLegendre R)).w
+  rw [legendrePiece, Category.assoc, Category.assoc, hw,
+    reassoc_of% projModelπ_congr
+      (universalLegendre_map_classifying X L b hD h2 w.V w.Pr w.lam
+        w.hAd w.hW w.hMP).symm]
+  rw [← Category.assoc, w.Pr.compat_π, Category.assoc]
+
 end TwoTorsion
 
 end ModularCurves
