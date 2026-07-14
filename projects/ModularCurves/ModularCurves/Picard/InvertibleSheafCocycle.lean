@@ -147,6 +147,54 @@ theorem trivializationTransitionUnit_trans
       simp
     _ = E (trivializationTransitionUnit U e h : Γ(X, U)) := heh.symm
 
+/-- Restricting two trivializations restricts their transition unit along the structure
+sheaf map. -/
+theorem trivializationTransitionUnit_restrict
+    {X : Scheme.{u}} {M : X.Modules} {U V : X.Opens} (hVU : V ≤ U)
+    (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)) :
+    let j : Over U := Over.mk (homOfLE hVU)
+    trivializationTransitionUnit V
+        (ModularCurves.SheafOfModules.restrictOverTrivialization
+          X.ringCatSheaf M U e j)
+        (ModularCurves.SheafOfModules.restrictOverTrivialization
+          X.ringCatSheaf M U g j) =
+      Units.map (X.presheaf.map (homOfLE hVU).op).hom.toMonoidHom
+        (trivializationTransitionUnit U e g) := by
+  dsimp only
+  let j : Over U := Over.mk (homOfLE hVU)
+  let eV := ModularCurves.SheafOfModules.restrictOverTrivialization
+    X.ringCatSheaf M U e j
+  let gV := ModularCurves.SheafOfModules.restrictOverTrivialization
+    X.ringCatSheaf M U g j
+  let s := trivializationTransitionUnit U e g
+  let sV : Γ(X, V) := X.presheaf.map (homOfLE hVU).op (s : Γ(X, U))
+  have htransition : g.hom = e.hom ≫
+      ModularCurves.SheafOfModules.overUnitScalarEnd
+        X.ringCatSheaf U (s : Γ(X, U)) := by
+    rw [overUnitScalarEnd_transitionUnit]
+    simp
+  have hrestrict : gV.hom = eV.hom ≫
+      ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf V sV := by
+    have h := ModularCurves.restrictOverTrivialization_hom_eq_comp_scalar
+      M hVU e g (s : Γ(X, U)) htransition
+    simpa only [j, eV, gV, sV] using h
+  have hcoordinate : eV.inv ≫ gV.hom =
+      ModularCurves.SheafOfModules.overUnitScalarEnd X.ringCatSheaf V sV := by
+    rw [hrestrict]
+    exact eV.inv_hom_id_assoc _
+  apply Units.ext
+  change (trivializationTransitionUnit V eV gV : Γ(X, V)) = sV
+  let E := ModularCurves.SheafOfModules.overUnitScalarEndRingEquiv
+    X.ringCatSheaf V
+  apply E.injective
+  calc
+    E (trivializationTransitionUnit V eV gV : Γ(X, V)) =
+        (show End (SheafOfModules.unit (X.ringCatSheaf.over V)) from
+          eV.inv ≫ gV.hom) := overUnitScalarEnd_transitionUnit V eV gV
+    _ = ModularCurves.SheafOfModules.overUnitScalarEnd
+        X.ringCatSheaf V sV := hcoordinate
+    _ = E sV := rfl
+
 end
 
 end AlgebraicGeometry.Scheme.Modules

@@ -3210,49 +3210,6 @@ theorem dualTrivializationLinearEquiv_eq_mul_of_transition
   rw [hgen, (alpha.val.app (.op T)).hom.map_smul]
   rfl
 
-/-- Restriction of over-site trivializations preserves a scalar transition. -/
-theorem restrictOverTrivialization_hom_eq_comp_scalar
-    {X : Scheme.{u}} (M : X.Modules) {U V : X.Opens} (hVU : V ≤ U)
-    (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U))
-    (s : Γ(X, U))
-    (h : g.hom = e.hom ≫
-      SheafOfModules.overUnitScalarEnd X.ringCatSheaf U s) :
-    let j : Over U := Over.mk (homOfLE hVU)
-    (SheafOfModules.restrictOverTrivialization
-        X.ringCatSheaf M U g j).hom =
-      (SheafOfModules.restrictOverTrivialization
-          X.ringCatSheaf M U e j).hom ≫
-        SheafOfModules.overUnitScalarEnd X.ringCatSheaf V
-          (X.presheaf.map (homOfLE hVU).op s) := by
-  dsimp only
-  let j : Over U := Over.mk (homOfLE hVU)
-  apply SheafOfModules.hom_ext
-  ext Z x
-  change g.hom.val.app (.op ((Over.map j.hom).obj Z.unop)) x = _
-  have happ := congrArg (fun q ↦ q.val.app
-    (.op ((Over.map j.hom).obj Z.unop))) h
-  have hx := ConcreteCategory.congr_hom happ x
-  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
-    ModuleCat.comp_apply] at hx
-  rw [SheafOfModules.overUnitScalarEnd_app_apply] at hx
-  erw [SheafOfModules.overUnitScalarEnd_app_apply]
-  have hmap : X.presheaf.map Z.unop.hom.op
-      (X.presheaf.map (homOfLE hVU).op s) =
-    X.presheaf.map ((Over.map j.hom).obj Z.unop).hom.op s := by
-    have hc := congrArg (fun φ ↦ CommRingCat.Hom.hom φ s)
-      ((X.presheaf.map_comp (homOfLE hVU).op Z.unop.hom.op).symm)
-    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hc
-    refine hc.trans ?_
-    exact congrArg (fun ψ ↦ (CommRingCat.Hom.hom (X.presheaf.map ψ)) s)
-      (Subsingleton.elim _ _)
-  have he :
-      (SheafOfModules.restrictOverTrivialization
-        X.ringCatSheaf M U e (Over.mk (homOfLE hVU))).hom.val.app Z x =
-      e.hom.val.app (.op ((Over.map j.hom).obj Z.unop)) x := by
-    rfl
-  convert hx using 1
-  all_goals first | exact congrArg₂ (fun a b ↦ a * b) he hmap | rfl
-
 /-- Dualization reverses a scalar transition between trivializations. -/
 theorem dualOverIsoOfIso_hom_eq_comp_scalar
     {X : Scheme.{u}} (M : X.Modules) (U : X.Opens)
