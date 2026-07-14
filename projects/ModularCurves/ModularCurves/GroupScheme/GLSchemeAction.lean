@@ -594,10 +594,67 @@ theorem glSchemeSmul_mul (hinv : NIsInvertible S N)
   rw [glSchemeSmul, glSchemeSmul, glSchemeSmul, constGL_mul]
   simp only [Iso.trans_assoc, Iso.self_symm_id_assoc]
 
--- **L4 (seam, consumed by NEW-GH)** — the scheme-level action realises `glSmul`: pushing the
--- full level `L` through `glSchemeSmul g` recovers `g • L`, so `[Γ(N)]/H` (`hOrbitSetoid`) sees the
--- scheme action. Stated precisely once L2 (`fullLevelIso`) lands and NEW-GH pins the exact
--- consumption form (KM 7.1.2; they own the quotient). Placeholder removed — no non-statement.
+section Seam
+
+/-- **L4 (seam)** — the constant linear automorphism realises `glSmul` through the
+trivialisation map: `constGL g` followed by the `L`-trivialisation is the
+`g • L`-trivialisation. Componentwise: bilinearity of the Drinfeld combination in the
+`ZMod N` valuations (`val_smul_add`/`val_smul_mul` + `module`). -/
+theorem constGL_hom_fullLevelHom (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+    (L : E.FullLevelPt N) :
+    (constGL (S := S) g).hom ≫ E.fullLevelHom L = E.fullLevelHom (E.glSmul g L) := by
+  refine Sigma.hom_ext _ _ fun v => ?_
+  show Sigma.ι (fun _ : (Fin 2 → ZMod N) => S) v ≫ Sigma.desc (fun a =>
+      Sigma.ι (fun _ : (Fin 2 → ZMod N) => S) (glEquiv g a)) ≫ E.fullLevelHom L
+    = Sigma.ι (fun _ : (Fin 2 → ZMod N) => S) v ≫ E.fullLevelHom (E.glSmul g L)
+  rw [Sigma.ι_desc_assoc, fullLevelHom, fullLevelHom, Sigma.ι_desc, Sigma.ι_desc]
+  have hP : (N : ℤ) • L.1.1 = 0 := L.2.1.1
+  have hQ : (N : ℤ) • L.1.2 = 0 := L.2.1.2
+  have harith : ((glEquiv g v 0).val : ℤ) • L.1.1 + ((glEquiv g v 1).val : ℤ) • L.1.2
+      = ((v 0).val : ℤ) • (E.glSmul g L).1.1 + ((v 1).val : ℤ) • (E.glSmul g L).1.2 := by
+    show ((((g : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec v) 0).val : ℤ) • L.1.1
+        + ((((g : Matrix (Fin 2) (Fin 2) (ZMod N)).mulVec v) 1).val : ℤ) • L.1.2
+      = ((v 0).val : ℤ) • ((((g : Matrix (Fin 2) (Fin 2) (ZMod N)) 0 0).val : ℤ) • L.1.1
+          + (((g : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 0).val : ℤ) • L.1.2)
+        + ((v 1).val : ℤ) • ((((g : Matrix (Fin 2) (Fin 2) (ZMod N)) 0 1).val : ℤ) • L.1.1
+          + (((g : Matrix (Fin 2) (Fin 2) (ZMod N)) 1 1).val : ℤ) • L.1.2)
+    simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_two]
+    rw [val_smul_add E L.1.1 hP, val_smul_add E L.1.2 hQ,
+      val_smul_mul E L.1.1 hP, val_smul_mul E L.1.1 hP,
+      val_smul_mul E L.1.2 hQ, val_smul_mul E L.1.2 hQ]
+    module
+  simp only [harith]
+
+/-- The trivialisation of `g • L` is `constGL g` followed by the `L`-trivialisation. -/
+theorem fullLevelIso_glSmul (hinv : NIsInvertible S N)
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (L : E.FullLevelPt N) :
+    E.fullLevelIso hinv (E.glSmul g L) = constGL (S := S) g ≪≫ E.fullLevelIso hinv L := by
+  ext1
+  show E.fullLevelHom (E.glSmul g L) = (constGL (S := S) g).hom ≫ E.fullLevelHom L
+  exact (E.constGL_hom_fullLevelHom g L).symm
+
+/-- **L4 (orbit form, consumed by NEW-GH)** — the transition between the trivialisations
+of two `glSmul`-related full level structures IS the scheme-level action of the
+connecting matrix. -/
+theorem fullLevelIso_symm_trans_of_glSmul_eq (hinv : NIsInvertible S N)
+    {g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)} {L L' : E.FullLevelPt N}
+    (h : E.glSmul g L = L') :
+    (E.fullLevelIso hinv L).symm ≪≫ E.fullLevelIso hinv L' = E.glSchemeSmul hinv g L := by
+  subst h
+  rw [fullLevelIso_glSmul, glSchemeSmul]
+
+/-- **L4 (hOrbit form)** — `hOrbitSetoid`-equivalent level structures have trivialisations
+differing by the scheme action of an element of `H`: the torsion trivialisation is
+well defined on `[Γ(N)]/H`-classes modulo `glSchemeSmul H`. -/
+theorem exists_glSchemeSmul_of_hOrbit (hinv : NIsInvertible S N)
+    (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
+    {L L' : E.FullLevelPt N} (h : (E.hOrbitSetoid H).r L L') :
+    ∃ g ∈ H, (E.fullLevelIso hinv L).symm ≪≫ E.fullLevelIso hinv L'
+      = E.glSchemeSmul hinv g L := by
+  obtain ⟨g, hg, hgl⟩ := h
+  exact ⟨g, hg, E.fullLevelIso_symm_trans_of_glSmul_eq hinv hgl⟩
+
+end Seam
 
 end EllipticCurve
 
