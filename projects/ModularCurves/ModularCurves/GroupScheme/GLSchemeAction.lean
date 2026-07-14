@@ -174,6 +174,9 @@ theorem fullLevelHom_gamma_bijective {R : CommRingCat.{u}}
   suffices hb : Function.Bijective ψlin by exact hb
   refine LinearMap.bijective_of_forall_bijective_lTensor_residueField ψlin ?_
   intro J hJ
+  refine LinearMap.bijective_lTensor_of_bijective_baseChange_ext ψlin J.ResidueField
+    (AlgebraicClosure J.ResidueField) ?_
+  -- the geometric-fibre goal: the base-changed comparison over the algebraic closure
   sorry
 
 /-- **L2b over an affine base**: the conjugated `Spec`-morphism is an isomorphism, from
