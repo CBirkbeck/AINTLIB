@@ -28,6 +28,9 @@ statement here is about such a map, in the maximal module-theoretic generality.
   module all of whose fibres at `R`-fields vanish is zero (GME p. 107, the step
   "`(R¹f_*𝓛) ⊗ k(s) = 0` for all geometric points `s` ⟹ `R¹f_*𝓛 = 0`"). The finiteness
   hypothesis is necessary: `ℚ/ℤ` over `ℤ` has vanishing fibres at every `ℤ`-field.
+* `LinearMap.exists_away_baseChange_surjective_of_residueField`: if a differential with
+  finite target is surjective after tensoring with `κ(p)`, it is surjective after
+  inverting one element outside `p`.
 * `Module.Flat.lTensor_subtype_injective_of_flat_quotient` (purity): a submodule with
   flat quotient stays injected after any base change (Tor-free form of the mechanism in
   Mumford §5 Lemma 2 / Stacks 00HL).
@@ -41,6 +44,9 @@ statement here is about such a map, in the maximal module-theoretic generality.
 * `kerBaseChangeComparison_bijective`: the `A`-linear fibre identification
   `A ⊗[R] ker d ≃ ker (d.baseChange A)` — the shape "(`f_*𝓛) ⊗ k(s) ≅ f_*(𝓛(s))`"
   consumed at GME (2.15) and (2.17).
+* `LinearMap.exists_away_finiteProjective_ker_of_residueField_surjective`: the local
+  finite-projective kernel and arbitrary further-base-change endpoint obtained by
+  combining the preceding principal-neighbourhood theorem with a two-term complex.
 
 Decomposition, verbatim source quotes and adversarial attack logs:
 `.mathlib-quality/decomposition-pic-coh.md` (stream v10.11, worker fable-PIC0).
@@ -172,6 +178,67 @@ theorem Module.Finite.ker_of_surjective_of_projective [Module.Finite R P]
 
 end KerBaseChange
 
+private theorem baseChange_surjective_iff_subsingleton_coker
+    (A : Type*) [CommRing A] [Algebra R A] (f : P →ₗ[R] Q) :
+    Function.Surjective (f.baseChange A) ↔
+      Subsingleton (A ⊗[R] (Q ⧸ LinearMap.range f)) := by
+  have hexact : Function.Exact
+      ((LinearMap.range f).subtype.baseChange A)
+      ((LinearMap.range f).mkQ.baseChange A) :=
+    lTensor_exact A (LinearMap.exact_subtype_mkQ (LinearMap.range f))
+      (Submodule.mkQ_surjective (LinearMap.range f))
+  have hquotSurj : Function.Surjective ((LinearMap.range f).mkQ.baseChange A) :=
+    LinearMap.baseChange_surjective A (Submodule.mkQ_surjective (LinearMap.range f))
+  have hquotKer :
+      LinearMap.ker ((LinearMap.range f).mkQ.baseChange A) =
+        (LinearMap.range f).baseChange A :=
+    hexact.linearMap_ker_eq
+  have hcoker :
+      (LinearMap.range f).baseChange A = ⊤ ↔
+        Subsingleton (A ⊗[R] (Q ⧸ LinearMap.range f)) := by
+    rw [← hquotKer, ← Submodule.Quotient.subsingleton_iff]
+    exact (((LinearMap.range f).mkQ.baseChange A).quotKerEquivOfSurjective
+      hquotSurj).toEquiv.subsingleton_congr
+  have hfac :
+      f.baseChange A =
+        ((LinearMap.range f).subtype.baseChange A) ∘ₗ
+          (f.rangeRestrict.baseChange A) := by
+    rw [← LinearMap.baseChange_comp]
+    rfl
+  have hrange :
+      LinearMap.range (f.baseChange A) = (LinearMap.range f).baseChange A := by
+    rw [hfac, LinearMap.range_comp,
+      LinearMap.range_eq_top.mpr
+        (LinearMap.baseChange_surjective A (LinearMap.surjective_rangeRestrict f)),
+      Submodule.map_top]
+    rfl
+  rw [← LinearMap.range_eq_top, hrange, hcoker]
+
+/-- If a linear map with finite target is surjective on the residue fibre at a prime,
+then it is surjective after restricting to a principal neighbourhood of that prime. -/
+theorem LinearMap.exists_away_baseChange_surjective_of_residueField
+    [Module.Finite R Q] (f : P →ₗ[R] Q) (p : Ideal R) [p.IsPrime]
+    (h : Function.Surjective (f.baseChange p.ResidueField)) :
+    ∃ r : R, r ∉ p ∧
+      Function.Surjective (f.baseChange (Localization.Away r)) := by
+  let C := Q ⧸ LinearMap.range f
+  haveI : Module.Finite R C :=
+    Module.Finite.of_surjective (LinearMap.range f).mkQ
+      (Submodule.mkQ_surjective (LinearMap.range f))
+  have hκC : Subsingleton (p.ResidueField ⊗[R] C) :=
+    (baseChange_surjective_iff_subsingleton_coker p.ResidueField f).mp h
+  have hp : (⟨p, inferInstance⟩ : PrimeSpectrum R) ∉ Module.support R C := by
+    rw [Module.mem_support_iff_nontrivial_residueField_tensorProduct]
+    exact not_nontrivial_iff_subsingleton.mpr hκC
+  haveI : Subsingleton (LocalizedModule p.primeCompl C) :=
+    Module.notMem_support_iff.mp hp
+  obtain ⟨r, hr, haway⟩ := LocalizedModule.exists_subsingleton_away (M := C) p
+  have htensor : Subsingleton (Localization.Away r ⊗[R] C) :=
+    (LocalizedModule.equivTensorProduct (Submonoid.powers r) C).toEquiv.subsingleton_congr.mp
+      haway
+  exact ⟨r, hr, (baseChange_surjective_iff_subsingleton_coker
+    (Localization.Away r) f).mpr htensor⟩
+
 /-- **The kernel is projective** (GME Corollary 1.10.5: "If `R¹f_*𝓛` is locally
 `O_S`-free, then `f_*𝓛` is also locally `O_S`-free"; cf. Mumford p. 49: "`K⁰` is
 `A`-projective, since it is `A`-flat and finitely generated over a noetherian `A`").
@@ -235,5 +302,30 @@ theorem kerBaseChangeComparison_bijective_of_surjective [Module.Projective R Q]
   exact kerBaseChangeComparison_bijective A f
 
 end BaseChangeAlgebra
+
+/-- Near a prime where the residue-fibre differential is surjective, a differential
+between finite projective modules has finite projective kernel, and that kernel commutes
+with every further algebra base change. -/
+theorem LinearMap.exists_away_finiteProjective_ker_of_residueField_surjective
+    [Module.Finite R P] [Module.Projective R P]
+    [Module.Finite R Q] [Module.Projective R Q]
+    (f : P →ₗ[R] Q) (p : Ideal R) [p.IsPrime]
+    (h : Function.Surjective (f.baseChange p.ResidueField)) :
+    ∃ r : R, r ∉ p ∧
+      Function.Surjective (f.baseChange (Localization.Away r)) ∧
+      Module.Finite (Localization.Away r)
+        (LinearMap.ker (f.baseChange (Localization.Away r))) ∧
+      Module.Projective (Localization.Away r)
+        (LinearMap.ker (f.baseChange (Localization.Away r))) ∧
+      ∀ (A : Type*) [CommRing A] [Algebra (Localization.Away r) A],
+        Function.Bijective
+          (kerBaseChangeComparison A (f.baseChange (Localization.Away r))) := by
+  obtain ⟨r, hr, hsurj⟩ :=
+    ModularCurves.LinearMap.exists_away_baseChange_surjective_of_residueField f p h
+  refine ⟨r, hr, hsurj, ?_, ?_, ?_⟩
+  · exact Module.Finite.ker_of_surjective_of_projective _ hsurj
+  · exact Module.Projective.ker_of_surjective _ hsurj
+  · intro A _ _
+    exact kerBaseChangeComparison_bijective_of_surjective A _ hsurj
 
 end ModularCurves
