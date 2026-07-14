@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.ImaginaryQuadratic.Foundations
@@ -162,7 +167,7 @@ theorem gaussSum_eq_I_mul_sqrt_of_B_neg
   have h_def : DirichletCharacter.rootNumber (legendreDirichlet p) =
       gaussSum (legendreDirichlet p) (ZMod.stdAddChar : AddChar (ZMod p) ℂ) /
         Complex.I / ((p : ℂ) ^ (1 / 2 : ℂ)) := by
-    unfold DirichletCharacter.rootNumber
+    simp only [DirichletCharacter.rootNumber]
     rw [if_neg h_not_even, pow_one]
   rw [h_W_one] at h_def
   have hp_ne_zero : (p : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hp.out.ne_zero
