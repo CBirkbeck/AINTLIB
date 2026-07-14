@@ -629,7 +629,7 @@ theorem hasDerivAt_fdBoundaryFun_seg1 (H : ℝ) {t : ℝ} (ht : t < 1 / 5) :
     have h1 := (((((hbase.const_mul (5 : ℂ)).mul_const ((H : ℂ) - (Real.sqrt 3 : ℝ) / 2)).const_sub
       (H : ℂ)).mul_const Complex.I).const_add (1 / 2 : ℂ))
     convert h1 using 1
-    push_cast; ring
+    ring
   · have hmem : Set.Iio (1 / 5 : ℝ) ∈ nhds t := IsOpen.mem_nhds isOpen_Iio ht
     filter_upwards [hmem] with s hs
     simp only [fdBoundaryFun, show s ≤ 1 / 5 from le_of_lt (Set.mem_Iio.mp hs), if_true]
@@ -698,7 +698,7 @@ theorem hasDerivAt_fdBoundaryFun_seg4 (H : ℝ) {t : ℝ} (ht1 : 3 / 5 < t) (ht2
       ((H : ℂ) - (↑(Real.sqrt 3) / 2 : ℂ))).const_add (↑(Real.sqrt 3) / 2 : ℂ)).mul_const
       Complex.I).const_add (-1 / 2 : ℂ))
     convert h1 using 1
-    push_cast; ring
+    ring
   · have hmem : Set.Ioo (3 / 5 : ℝ) (4 / 5) ∈ nhds t := IsOpen.mem_nhds isOpen_Ioo ⟨ht1, ht2⟩
     filter_upwards [hmem] with s hs
     simp only [fdBoundaryFun, show ¬ s ≤ 1 / 5 by linarith [hs.1],
@@ -713,7 +713,7 @@ theorem hasDerivAt_fdBoundaryFun_seg5 (H : ℝ) {t : ℝ} (ht : 4 / 5 < t) :
   · have hbase : HasDerivAt (fun s : ℝ => (s : ℂ)) 1 t := Complex.ofRealCLM.hasDerivAt
     have h1 := (((hbase.const_mul (5 : ℂ)).sub_const (9 / 2 : ℂ)).add_const ((H : ℂ) * Complex.I))
     convert h1 using 1
-    push_cast; ring
+    ring
   · have hmem : Set.Ioi (4 / 5 : ℝ) ∈ nhds t := IsOpen.mem_nhds isOpen_Ioi ht
     filter_upwards [hmem] with s hs
     have hs' : (4 / 5 : ℝ) < s := Set.mem_Ioi.mp hs
@@ -813,7 +813,7 @@ theorem continuousOn_comp_fdBoundaryFun {W : ℂ → ℂ}
     (hWc : ContinuousOn W {z : ℂ | 0 < z.im}) (H : ℝ) (hH : 1 < H) :
     ContinuousOn (fun t : ℝ => W (fdBoundaryFun H t)) (Set.Icc (0 : ℝ) 1) :=
   hWc.comp (fdBoundaryFun_continuous H).continuousOn
-    (fun t ht => fdBoundaryFun_im_pos_Icc H hH ht)
+    (fun _t ht => fdBoundaryFun_im_pos_Icc H hH ht)
 
 /-! ## Contour integral as a sum of five segment integrals
 
@@ -1284,7 +1284,7 @@ theorem setIntegral_fdRegion_split_at_zero (H : ℝ) (f : ℝ × ℝ → ℂ)
   -- Pointwise: off the `x = 0` slice, `R` and `Rp ∪ Rm` coincide.
   have hmem : ∀ p : ℝ × ℝ, p.1 ≠ 0 → (p ∈ R ↔ p ∈ Rp ∪ Rm) := by
     rintro ⟨x, y⟩ hx0
-    simp only [Prod.fst] at hx0
+    simp only [] at hx0
     simp only [hR, hRp, hRm, Set.mem_union, regionBetween, mem_regionBetweenX, Set.mem_setOf_eq,
       Set.mem_Ioo, fdArc]
     constructor
@@ -1378,7 +1378,7 @@ theorem region_typeII_piece (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → �
   have hy0 : 0 < y := lt_trans (by positivity) hy.1
   have hd := (hasDerivAt_Phi_horizontal g P Fp hFp had hy0 x).const_mul (-Complex.I)
   refine hd.congr_deriv ?_
-  simp only [gXField, PhiField]
+  simp only [gXField]
 
 include k Γ in
 /-- **(A) The `∂_xF` Type-II reduction.**  Splitting the `fd`-region `R` at `x = 0` into the two
@@ -1389,7 +1389,7 @@ include k Γ in
 theorem region_xhalf_typeII (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → ℂ)
     (hFp : ∀ z : ℂ, 0 < z.im → HasDerivAt Fp (periodForm g P z) z)
     {a a'der : ℂ → ℂ} (had : ∀ z : ℂ, 0 < z.im → HasDerivAt a (a'der z) z)
-    (hadc : ContinuousOn a'der {z : ℂ | 0 < z.im}) (H : ℝ) (hH : 1 < H) :
+    (hadc : ContinuousOn a'der {z : ℂ | 0 < z.im}) (H : ℝ) (_hH : 1 < H) :
     (∫ p in regionBetween fdArc (fun _ => H) (Set.Ioo (-(1 / 2)) (1 / 2)),
         gXField g P Fp a a'der p ∂(volume.prod volume)) =
       ((∫ y in Set.Ioo (Real.sqrt 3 / 2) H, -Complex.I * PhiField Fp a (1 / 2, y)) -
@@ -1491,7 +1491,7 @@ match the (negated) two arc-segment contour integrals, via `x = cos θ`, `y = si
 theorem arc_reparam_segments (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → ℂ)
     (hFp : ∀ z : ℂ, 0 < z.im → HasDerivAt Fp (periodForm g P z) z)
     {a a'der : ℂ → ℂ} (had : ∀ z : ℂ, 0 < z.im → HasDerivAt a (a'der z) z)
-    (hadc : ContinuousOn a'der {z : ℂ | 0 < z.im}) (H : ℝ) (hH : 1 < H) :
+    (_hadc : ContinuousOn a'der {z : ℂ | 0 < z.im}) (H : ℝ) (hH : 1 < H) :
     (∫ y in Set.Ioo (Real.sqrt 3 / 2) H,
         (-Complex.I * PhiField Fp a (-fdArc y, y) - -Complex.I * PhiField Fp a (fdArc y, y))) +
       ∫ x in Set.Ioo (-(1 / 2 : ℝ)) (1 / 2), PhiField Fp a (x, fdArc x) =
@@ -1828,7 +1828,7 @@ theorem arc_reparam_segments (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → 
       rw [← intervalIntegral.integral_add hii_G1 hii_G2lo]
       refine intervalIntegral.integral_congr (fun θ hθ => ?_)
       rw [Set.uIcc_of_le hpi3] at hθ
-      simp only [Function.comp_apply, hIAfdef, hPhi_sin θ hθ, hPhi_neg_sin θ hθ, smul_eq_mul,
+      simp only [Function.comp_apply, hIAfdef, hPhi_sin θ hθ, hPhi_neg_sin θ hθ,
         Complex.real_smul]
       ring
     rw [hsplit]
@@ -1934,7 +1934,7 @@ theorem seg4_eq (Fp : ℂ → ℂ) (a : ℂ → ℂ) (H : ℝ) (hH : 1 < H) :
       show c * (3 / 5) + d = Real.sqrt 3 / 2 by rw [hc, hd]; ring,
       show c * (4 / 5) + d = H by rw [hc, hd]; ring]
   · -- pointwise integrand on the segment.
-    simp only [hseg t ht, segDeriv4, PhiField, Complex.real_smul, hc, map_mul, map_neg, map_ofNat,
+    simp only [hseg t ht, segDeriv4, PhiField, Complex.real_smul, hc, map_mul, map_ofNat,
       map_sub, map_div₀, Complex.conj_I, Complex.conj_ofReal]
     push_cast
     ring
@@ -2542,6 +2542,7 @@ theorem symmArea_eq_symm_stdTile_sum
     setIntegral_Gamma1_fundDomain_PSL_eq_sum _
         (integrableOn_petersson_Gamma1_fundDomain_PSL g f)]
 
+omit [NeZero N] in
 /-- **(M0, step (a) — FOUNDED, sorry-free) Per-tile change-of-variables onto the standard `SL₂(ℤ)`
 domain.**  Each Petersson *area* integral over a coset tile `p⁻¹ • fdo` (`p ∈ PSL(2, ℤ)`) equals the
 area integral over the *standard* open domain `fdo` of the integrand of the **slashed** cusp forms
