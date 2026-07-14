@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.ModularCurve.YRho
 
 /-!
@@ -38,44 +43,15 @@ noncomputable abbrev rhoSqAction (D : GaloisRepData N) :
         rw [map_mul, map_mul, mul_smul, mul_smul]
         rfl }
 
-open scoped Pointwise in
-/-- The diagonal action on the square is continuous: the kernel of `ρ` acts trivially. -/
+/-- The diagonal action on the square is continuous: the kernel of `ρ` acts trivially.
+(`isContinuous_of_isOpen_of_trivial` at `K = ker ρ`, as for `rhoAction`.) -/
 lemma rhoSqAction_isContinuous (D : GaloisRepData N) :
-    (rhoSqAction D).IsContinuous := by
-  constructor
-  haveI : DiscreteTopology
-      ((CategoryTheory.forget₂ (Action FintypeCat.{0}
-        (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) TopCat).obj (rhoSqAction D) :
-          Type 0) := ⟨rfl⟩
-  refine continuous_discrete_rng.mpr fun w => ?_
-  have hdecomp : (fun p : (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) ×
-        (CategoryTheory.forget₂ _ TopCat).obj (rhoSqAction D) => p.1 • p.2) ⁻¹'
-        ({w} : Set _) =
-      ⋃ v : (CategoryTheory.forget₂ _ TopCat).obj (rhoSqAction D),
-        {σ | σ • v = w} ×ˢ ({v} : Set _) := by
-    ext ⟨σ, v⟩
-    simp
-  rw [hdecomp]
-  refine isOpen_iUnion fun v => IsOpen.prod ?_ trivial
-  refine isOpen_iff_mem_nhds.mpr fun σ₀ hσ₀ => ?_
-  have hnb : σ₀ • {σ : SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ |
-      D.ρ (galSepMulEquivGalQ σ) = 1} ∈ nhds σ₀ := by
-    refine IsOpen.mem_nhds ((rhoAction_ker_open D).smul σ₀) ?_
-    exact ⟨1, by simp only [Set.mem_setOf_eq, map_one], mul_one σ₀⟩
-  refine Filter.mem_of_superset hnb ?_
-  rintro σ ⟨τ, hτ, rfl⟩
-  have hτ1 : D.ρ (galSepMulEquivGalQ τ) = 1 := hτ
-  have hAct : (rhoSqAction D).ρ τ = 𝟙 _ := by
-    refine FintypeCat.hom_ext _ _ fun x => ?_
-    show (D.ρ (galSepMulEquivGalQ τ) • x.1, D.ρ (galSepMulEquivGalQ τ) • x.2) = x
-    rw [hτ1, one_smul, one_smul]
-  calc (σ₀ * τ) • v = σ₀ • τ • v := mul_smul σ₀ τ v
-    _ = σ₀ • v := by
-        congr 1
-        show ((CategoryTheory.forget₂ _ TopCat).map ((rhoSqAction D).ρ τ)) v = v
-        rw [hAct, CategoryTheory.Functor.map_id]
-        rfl
-    _ = w := hσ₀
+    (rhoSqAction D).IsContinuous :=
+  isContinuous_of_isOpen_of_trivial _ _ (rhoAction_ker_open D)
+    (by simp only [Set.mem_setOf_eq, map_one]) fun τ hτ =>
+      FintypeCat.hom_ext _ _ fun x => by
+        show (D.ρ (galSepMulEquivGalQ τ) • x.1, D.ρ (galSepMulEquivGalQ τ) • x.2) = x
+        rw [show D.ρ (galSepMulEquivGalQ τ) = 1 from hτ, one_smul, one_smul]
 
 /-- The square as a continuous Galois set. -/
 noncomputable abbrev rhoSqContAction (D : GaloisRepData N) :
@@ -101,20 +77,11 @@ noncomputable abbrev pointAction :
          map_one' := rfl
          map_mul' := fun _ _ => rfl }
 
-lemma pointAction_isContinuous : pointAction.IsContinuous := by
-  constructor
-  haveI : DiscreteTopology
-      ((CategoryTheory.forget₂ (Action FintypeCat.{0}
-        (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ)) TopCat).obj pointAction :
-          Type 0) := ⟨rfl⟩
-  refine continuous_discrete_rng.mpr fun y => ?_
-  have huniv : (fun p : (SeparableClosure ℚ ≃ₐ[ℚ] SeparableClosure ℚ) ×
-      (CategoryTheory.forget₂ _ TopCat).obj pointAction => p.1 • p.2) ⁻¹'
-      ({y} : Set _) = Set.univ := by
-    ext p
-    exact ⟨fun _ => trivial, fun _ => rfl⟩
-  rw [huniv]
-  exact isOpen_univ
+/-- The one-point Galois set is continuous: *everything* acts trivially on it
+(`isContinuous_of_isOpen_of_trivial` at `K = univ`). -/
+lemma pointAction_isContinuous : pointAction.IsContinuous :=
+  isContinuous_of_isOpen_of_trivial _ Set.univ isOpen_univ (Set.mem_univ _) fun _ _ =>
+    FintypeCat.hom_ext _ _ fun _ => rfl
 
 /-- The zero section: the one-point continuous Galois set. -/
 noncomputable abbrev rhoPointContAction :
@@ -144,14 +111,14 @@ noncomputable def rhoSqFst (D : GaloisRepData N) :
     rhoSqContAction D ⟶ rhoContAction D :=
   ObjectProperty.homMk
     { hom := FintypeCat.homMk Prod.fst
-      comm := fun σ => FintypeCat.hom_ext _ _ fun vw => rfl }
+      comm := fun _ => FintypeCat.hom_ext _ _ fun _ => rfl }
 
 /-- Second projection of the square. -/
 noncomputable def rhoSqSnd (D : GaloisRepData N) :
     rhoSqContAction D ⟶ rhoContAction D :=
   ObjectProperty.homMk
     { hom := FintypeCat.homMk Prod.snd
-      comm := fun σ => FintypeCat.hom_ext _ _ fun vw => rfl }
+      comm := fun _ => FintypeCat.hom_ext _ _ fun _ => rfl }
 
 /-- The square with its projections is the categorical binary product in the category
 of continuous Galois sets (leaf F1c-2). -/
