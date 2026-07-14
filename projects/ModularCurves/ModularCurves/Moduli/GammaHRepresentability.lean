@@ -68,6 +68,10 @@ attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
 
 universe u
 
+-- The `MulByHomFibresGlobal` import subtree (BB-QF closure via `Torsion`) enlarges the
+-- instance pool; `map_zsmul`/`map_zero` synthesis on `≃+` needs more headroom here.
+set_option synthInstance.maxHeartbeats 80000
+
 namespace ModularCurves
 
 /-! ### PART 0 — vocabulary: free actions, equivariant relative data, quotient problems

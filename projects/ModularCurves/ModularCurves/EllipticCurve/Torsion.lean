@@ -1,4 +1,5 @@
 import ModularCurves.EllipticCurve.GroupLaw
+import ModularCurves.EllipticCurve.MulByHomFibresGlobal
 import ModularCurves.ForMathlib.FinitePresentationCancel
 import Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
@@ -106,15 +107,6 @@ theorem torsionι_π (N : ℕ) : E.torsionι N ≫ E.π = E.torsionπ N := by
     _ = pullback.snd (E.mulByHom N) E.zero ≫ 𝟙 S := by rw [E.zero_π]
     _ = pullback.snd (E.mulByHom N) E.zero := Category.comp_id _
 
-/-- `[n]` is proper: it is an `S`-endomorphism of the proper `S`-scheme `E`
-(cancellation along the separated `π`). KM 2.3.1 proof, first reduction ("Because `E`
-is proper over `S`, any `S`-endomorphism of `E` is proper"). -/
-instance mulByHom_isProper (n : ℤ) : IsProper (E.mulByHom n) := by
-  haveI h : IsProper (E.mulByHom n ≫ E.π) := by
-    rw [E.mulByHom_π]
-    exact E.proper
-  exact IsProper.of_comp (E.mulByHom n) E.π
-
 /-- The zero morphism `[0]` factors through the base: it is `π` followed by the zero
 section (the unit of the hom-group is `toUnit ≫ η`, and the unit of the group object
 is the zero section by `one_eq_zero`). -/
@@ -139,7 +131,8 @@ comparison (`FibrewiseElliptic` + GIT 6.4 rigidity `isMonHom_of_one_comp_eq'`/`i
 fibres (HasseWeil `card_torsion_ellPow_nat` degree-free + `zChart` dim ≤ 1). The single remaining BB-QF
 sorry; **NOT `abelEnrichment_exists`-gated** (see `.mathlib-quality/decomposition-bbqf.md`). -/
 theorem mulByHom_finite_fibres (N : ℕ) [NeZero N] (x : E.E) :
-    (⇑(E.mulByHom N).base ⁻¹' {x}).Finite := by sorry
+    (⇑(E.mulByHom N).base ⁻¹' {x}).Finite :=
+  mulByHom_finite_preimage_singleton E N x
 
 /-- **Black box `BB-QF` (fibre input of KM 2.3.1): `[N]` is locally quasi-finite for `N ≥ 1`.**
 **The banked reduction (PROVED here).** `[N]` is locally of finite type (proper ⟹ `IsProper` extends

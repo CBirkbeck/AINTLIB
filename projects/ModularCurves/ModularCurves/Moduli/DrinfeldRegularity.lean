@@ -136,7 +136,9 @@ private lemma coeff_add_pow_cross (m i : ℕ) (hi : i ≤ m) :
   rw [hcoe, ← MvPolynomial.coe_pow, MvPolynomial.coeff_coe, MvPolynomial.coeff_add_pow]
   have hd0 : d 0 = i := by rw [hd_def]; simp
   have hd1 : d 1 = m - i := by rw [hd_def]; simp
-  rw [hd0, hd1, if_pos (Finset.mem_antidiagonal.mpr (by omega))]
+  rw [hd0, hd1]
+  have hmem : i + (m - i) = m := by omega
+  simp [Finset.mem_antidiagonal, hmem]
 
 /-- **[KM-W1-1] (KM 5.3.4, first conclusion).** If a two-variable power series `G` with
 `G ≡ X₀ + X₁ (mod degree ≥ 2)` satisfies `G^{pⁿ} ∈ (X₀^{pⁿ}, X₁^{pⁿ})`, then `p = 0`

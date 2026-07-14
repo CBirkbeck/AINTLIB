@@ -1,6 +1,6 @@
 import ModularCurves.EllipticCurve.MulByHomDegree
-import ModularCurves.EllipticCurve.EndomorphismDegree
 import HasseWeil.NTorsion.TorsionPowStructure
+import Mathlib.AlgebraicGeometry.Morphisms.QuasiFinite
 
 /-!
 # Finite fibres of `[N]` — the BB-QF geometric leaf (QF-FIBFIN)
@@ -62,6 +62,17 @@ when `φ` is a `IsMonHom` (`IsMonHom.monoidHom`). Both send `𝟙` to `φ`, so e
 two monoid homs on `(𝟙)^n` identifies `mulBy n ≫ φ = φ ≫ mulBy n`. -/
 
 variable {S : Scheme.{u}}
+
+/-- `[n]` is proper: it is an `S`-endomorphism of the proper `S`-scheme `E`
+(cancellation along the separated `π`). KM 2.3.1 proof, first reduction ("Because `E`
+is proper over `S`, any `S`-endomorphism of `E` is proper"). Relocated here (below
+`GroupLaw`, above `Torsion`) so the BB-QF closure chain can consume it without cycling
+through `Torsion`. -/
+instance mulByHom_isProper (E : EllipticCurve S) (n : ℤ) : IsProper (E.mulByHom n) := by
+  haveI h : IsProper (E.mulByHom n ≫ E.π) := by
+    rw [E.mulByHom_π]
+    exact E.proper
+  exact IsProper.of_comp (E.mulByHom n) E.π
 
 /-- **A monoid-object homomorphism between elliptic-curve records intertwines `mulBy`**:
 `[n]_E ≫ φ = φ ≫ [n]_F` for every `n : ℤ`. Power-naturality: both sides are the `n`-th
