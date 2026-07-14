@@ -131,15 +131,15 @@ route (degree-free, NOT `abelEnrichment_exists`-gated):
   (this file, PROVEN) from the pointedness of the iso alone;
 * **(c)** [fibre + descent] the fibre `fiberToSpecResidueField y` is a base change of `E_s.mulByHom N`
   (`mulByHom_baseChange`, `GroupLaw.lean:217`); LQF is base-change-stable, and descends `κ̄(s) → κ(y)`.
-The transport/rigidity/assembly building blocks are all landed green (`locallyQuasiFinite_mulByHom_of_isMonHom_iso`,
-`isMonHom_of_pointed`, `mulByHom_locallyQuasiFinite_assembled`); the ONLY remaining work is (a) ALPHA's
-model conclusion (g1–g5) + the fibre-iso extraction + the (c) fibre-of-endo identification.
-**De-risking note:** the per-fibre pointed iso is a READY structure — `E`'s `FibrewiseElliptic` (from
-`localModel`) yields, at each residue point `p`, a `⟨W', e, heπ, hez⟩` with `e` a *pointed* iso
-(`heπ` = `compat_π`, `hez` = `compat_zero`); see the `obtain ⟨W', hW', e, heπ, hez⟩ := h p` pattern in
-`Comparison.isElliptic_of_fibrewiseElliptic_projModel` (`Comparison.lean:300+`). So step (b)'s iso is a
-clean `FibrewiseElliptic` application, and `hez` feeds `isMonHom_of_pointed` directly — no deep atlas
-navigation. Bounded, atlas-context hand-off to the ALPHA session. -/
+**ALL transport machinery now PROVEN + axiom-clean:** `fibrewiseElliptic`, **`fibreModelIsoAsOver`** (the
+raw-iso→asOver wrapping INCL. its `IsMonHom` η-matching — the deep transparency-cast piece, now closed),
+`finite_fibres_mulByHom_of_isMonHom_iso`, `locallyQuasiFinite_mulByHom_of_isMonHom_iso`,
+`mulByHom_locallyQuasiFinite_assembled`. So this sub-leaf reduces to: `fibreModelIsoAsOver` (at `s := π y`)
++ `finite_fibres_mulByHom_of_isMonHom_iso` transport ALPHA's model finite fibres
+(`modelMulByHom_finite_preimage_singleton`, mod g5) onto `(E.baseChange (fromSpecResidueField s)).mulByHom N`;
+then the **fibre-of-endo identification** — `(E.mulByHom N)`'s fibre ↔ the base-changed record's `[N]`-fibre
+via the pullback square (`Scheme.Pullback.range_fst` + `mulByHom_baseChange_fst`) + κ̄/κ descent. The ONLY
+remaining pieces: the fibre-of-endo id (deep pullback, no mathlib shortcut) + ALPHA's g5. -/
 theorem fiber_mulByHom_locallyQuasiFinite (E : EllipticCurve S) (N : ℕ) [NeZero N] (y : E.E) :
     LocallyQuasiFinite ((E.mulByHom N).fiberToSpecResidueField y) := by sorry
 
