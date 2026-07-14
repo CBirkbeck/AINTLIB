@@ -2,6 +2,7 @@ import ModularCurves.Moduli.GammaH
 import ModularCurves.GroupScheme.MuN
 import ModularCurves.GroupScheme.TorsionEtaleTriv
 import ModularCurves.ForMathlib.FiniteSplitHomDuality
+import ModularCurves.ForMathlib.BijectiveResidueField
 
 /-!
 # The scheme-level `GL₂(ℤ/N)` action on `E[N]` (CHARTER-C5B-2, reading (1))
@@ -108,7 +109,72 @@ theorem fullLevelHom_gamma_bijective {R : CommRingCat.{u}}
       ((constSchemeSpecIso R (Fin 2 → ZMod N)).inv ≫ E.fullLevelHom L ≫
         (haveI : IsFinite (E.torsionπ N) := E.torsionπ_isFinite N
          haveI : IsAffine (E.torsion N) := isAffine_of_isAffineHom (E.torsionπ N)
-         (E.torsion N).isoSpec.hom))).hom := sorry
+         (E.torsion N).isoSpec.hom))).hom := by
+  haveI : IsFinite (E.torsionπ N) := E.torsionπ_isFinite N
+  haveI : IsAffine (E.torsion N) := isAffine_of_isAffineHom (E.torsionπ N)
+  set g : Spec (CommRingCat.of ((Fin 2 → ZMod N) → (R : Type u))) ⟶
+      Spec Γ(E.torsion N, ⊤) :=
+    (constSchemeSpecIso R (Fin 2 → ZMod N)).inv ≫ E.fullLevelHom L ≫
+      (E.torsion N).isoSpec.hom with hg
+  set ψ : Γ(E.torsion N, ⊤) ⟶ CommRingCat.of ((Fin 2 → ZMod N) → (R : Type u)) :=
+    Spec.preimage g with hψdef
+  have hψ : Spec.map ψ = g := Spec.map_preimage g
+  -- the structure map of the torsion sections
+  set φt : R ⟶ Γ(E.torsion N, ⊤) :=
+    Spec.preimage ((E.torsion N).isoSpec.inv ≫ E.torsionπ N) with hφt
+  have hφtmap : Spec.map φt = (E.torsion N).isoSpec.inv ≫ E.torsionπ N :=
+    Spec.map_preimage _
+  letI : Algebra (R : Type u) ↑Γ(E.torsion N, ⊤) := φt.hom.toAlgebra
+  -- over-`S` compatibility: `ψ` is the ring-level over-`R` map
+  have hAlgCompat : φt ≫ ψ = CommRingCat.ofHom (Pi.constRingHom (Fin 2 → ZMod N)
+      (R : Type u)) := by
+    apply Spec.map_injective
+    rw [Spec.map_comp, hψ, hg]
+    calc ((constSchemeSpecIso R (Fin 2 → ZMod N)).inv ≫ E.fullLevelHom L ≫
+          (E.torsion N).isoSpec.hom) ≫ Spec.map φt
+        = (constSchemeSpecIso R (Fin 2 → ZMod N)).inv ≫ E.fullLevelHom L ≫
+          (E.torsion N).isoSpec.hom ≫ (E.torsion N).isoSpec.inv ≫ E.torsionπ N := by
+          rw [hφtmap]
+          simp only [Category.assoc]
+      _ = (constSchemeSpecIso R (Fin 2 → ZMod N)).inv ≫ E.fullLevelHom L ≫
+          E.torsionπ N := by
+          rw [Iso.hom_inv_id_assoc]
+      _ = (constSchemeSpecIso R (Fin 2 → ZMod N)).inv ≫
+          constSchemeπ (Spec R) (Fin 2 → ZMod N) := by
+          rw [E.fullLevelHom_torsionπ L]
+      _ = Spec.map (CommRingCat.ofHom (Pi.constRingHom (Fin 2 → ZMod N)
+            (R : Type u))) := by
+          rw [← constSchemeSpecIso_hom_π R (Fin 2 → ZMod N), Iso.inv_hom_id_assoc]
+  -- the `R`-linear form of `ψ`
+  set ψlin : ↑Γ(E.torsion N, ⊤) →ₗ[(R : Type u)]
+      ((Fin 2 → ZMod N) → (R : Type u)) :=
+    { toFun := ψ.hom
+      map_add' := fun x y => map_add ψ.hom x y
+      map_smul' := fun r x => by
+        have hcomp := congrArg (fun m : R ⟶ CommRingCat.of ((Fin 2 → ZMod N) →
+          (R : Type u)) => m.hom r) hAlgCompat
+        simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hcomp
+        show ψ.hom (algebraMap (R : Type u) ↑Γ(E.torsion N, ⊤) r * x)
+          = r • ψ.hom x
+        rw [map_mul]
+        show ψ.hom (φt.hom r) * ψ.hom x = r • ψ.hom x
+        rw [hcomp]
+        ext v
+        show Pi.constRingHom (Fin 2 → ZMod N) (R : Type u) r v * ψ.hom x v
+          = r * ψ.hom x v
+        rfl } with hψlin
+  -- finiteness of the section algebra
+  haveI hFt : IsFinite (Spec.map φt) := by
+    rw [hφtmap]
+    exact (MorphismProperty.cancel_left_of_respectsIso (P := @IsFinite)
+      (E.torsion N).isoSpec.inv (E.torsionπ N)).mpr inferInstance
+  haveI : Module.Finite (R : Type u) ↑Γ(E.torsion N, ⊤) :=
+    (IsFinite.SpecMap_iff φt).mp hFt
+  -- the residue-field engine
+  suffices hb : Function.Bijective ψlin by exact hb
+  refine LinearMap.bijective_of_forall_bijective_lTensor_residueField ψlin ?_
+  intro J hJ
+  sorry
 
 /-- **L2b over an affine base**: the conjugated `Spec`-morphism is an isomorphism, from
 the Γ-bijectivity. -/
