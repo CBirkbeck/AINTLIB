@@ -264,9 +264,15 @@ the global-model declarations in `Comparison.lean`; consume PIC0's landed
 `IsInvertible.tensorObj`. The branch-local pullback-tensor map layer remains preserved on
 `codex/fibrewise-weierstrass-comparison-pre-rebase` for PIC0 integration.
 
-Active dependency claim (2026-07-14): prove
+Completed dependency claim (2026-07-14): proved
 `SpreadData.FunctorModel.baseChangeSpecIso_inv_affineIntersectionOverlapι`,
 `affineIntersectionGluedBaseChange`, `affineIntersectionGluedBaseChange_isPullback`, and
 `affineIntersectionGluedBaseChangeIso`, with no option, noetherianity, new sorry, or extra
 geometric hypothesis; these globalize the spread chart comparisons needed for arbitrary-base
 pole-sheaf cohomology.
+
+Active dependency claim (2026-07-14): prove
+`Scheme.Hom.affineIntersectionModelBaseChangeIso`, identifying a proper family's original
+scheme with the base change of a spread finite-stage affine-intersection model. This packages
+the preceding global comparison for later descent of the pole line bundle, with no option,
+noetherianity, new sorry, or additional geometric hypothesis.

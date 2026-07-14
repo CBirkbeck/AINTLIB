@@ -1,6 +1,7 @@
 import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
 import ModularCurves.ForMathlib.FiniteAffineOpenCover
 import ModularCurves.ForMathlib.FiniteIntersectionGlueComparison
+import ModularCurves.ForMathlib.FinitePresentationSchemeBaseChange
 
 /-!
 # Finite-stage models of proper affine-intersection diagrams
@@ -13,7 +14,7 @@ presentation of the base ring while retaining the geometric gluing conditions.
 
 universe u
 
-open CategoryTheory TopologicalSpace
+open CategoryTheory CategoryTheory.Limits TopologicalSpace
 
 namespace AlgebraicGeometry
 
@@ -39,6 +40,36 @@ theorem Scheme.Hom.affineIntersectionFunctor_obj_finitePresentation
   · obtain rfl := Finset.not_nonempty_iff_eq_empty.mp hs
     rw [π.affineIntersectionFunctor_obj_empty U]
     exact Algebra.FinitePresentation.self _
+
+/-- A spread affine-intersection model recovers the original scheme after base change
+from its finite stage. -/
+noncomputable def Scheme.Hom.affineIntersectionModelBaseChangeIso
+    {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+    {𝒮 : ι → Type u} [∀ i, CommRing (𝒮 i)] [∀ i, Algebra R (𝒮 i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (𝒮 i →ₐ[R] 𝒮 j)}
+    (π : X ⟶ S) [IsAffine S] [Algebra R Γ(S, (⊤ : S.Opens))]
+    {uS : ∀ i, 𝒮 i →ₐ[R] Γ(S, (⊤ : S.Opens))}
+    {H : Algebra.IsFilteredAlgColimit R 𝒮 t Γ(S, (⊤ : S.Opens)) uS}
+    (U : J → X.Opens) (hcover : IsOpenCover U)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (M : Algebra.SpreadData.FunctorModel (π.affineIntersectionFunctor U) H)
+    (hopenM : Scheme.GlueData.IsOpenAffineIntersectionFunctor M.toFunctor)
+    (hpushM : Scheme.GlueData.IsPushoutAffineIntersectionFunctor M.toFunctor) :
+    letI : Algebra (𝒮 M.stage) Γ(S, (⊤ : S.Opens)) :=
+      (uS M.stage).toRingHom.toAlgebra
+    pullback
+        (Scheme.GlueData.affineIntersectionToSpec M.toFunctor hopenM hpushM)
+        (Spec.map (CommRingCat.ofHom
+          (algebraMap (𝒮 M.stage) Γ(S, (⊤ : S.Opens))))) ≅ X := by
+  classical
+  letI : Algebra (𝒮 M.stage) Γ(S, (⊤ : S.Opens)) :=
+    (uS M.stage).toRingHom.toAlgebra
+  let hopenG := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let hpushG := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  letI : IsIso (π.affineIntersectionGluedToOriginal U hU) :=
+    π.isIso_affineIntersectionGluedToOriginal U hcover hU
+  exact M.affineIntersectionGluedBaseChangeIso hopenG hpushG hopenM hpushM ≪≫
+    asIso (π.affineIntersectionGluedToOriginal U hU)
 
 /-- A proper, locally finitely presented family over an affine base admits a
 finite affine-intersection model whose gluing conditions hold at one stage of
