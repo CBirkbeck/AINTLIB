@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.ComparisonInjective
 
 /-!
@@ -168,7 +173,8 @@ theorem pointedIso_exists_variableChange (W W' : WeierstrassCurve R)
   obtain ⟨C, hW, hx, hy⟩ := exists_variableChange_of_filtration
     (pointedIsoCoordEquiv e heπ hez) (fun n => pointedIsoCoordEquiv_filtration e heπ hez n)
   refine ⟨C, hW, ?_⟩
-  set e' : projModel W ≅ projModel W' := eqToIso (congrArg projModel hW.symm) ≪≫ projModelVCIso C W' with he'def
+  set e' : projModel W ≅ projModel W' := eqToIso
+    (congrArg projModel hW.symm) ≪≫ projModelVCIso C W' with he'def
   have he'hom : e'.hom = eqToHom (congrArg projModel hW.symm) ≫ (projModelVCIso C W').hom := by
     rw [he'def, Iso.trans_hom, eqToIso.hom]
   have transπ : ∀ {A B : WeierstrassCurve R} (h : A = B),
@@ -184,35 +190,53 @@ theorem pointedIso_exists_variableChange (W W' : WeierstrassCurve R)
   have coordEquiv_ext : ∀ (φ ψ : W'.toAffine.CoordinateRing →ₐ[R] W.toAffine.CoordinateRing),
       φ (coordX W') = ψ (coordX W') → φ (coordY W') = ψ (coordY W') → φ = ψ := by
     intro φ ψ hX hY
-    have htest : (AdjoinRoot.of W'.toAffine.polynomial) Polynomial.X = coordX W' := by rw [coordX]; rfl
-    have hofC : ∀ a : R, AdjoinRoot.of W'.toAffine.polynomial (Polynomial.C a) = algebraMap R W'.toAffine.CoordinateRing a := by
-      intro a; rw [← AdjoinRoot.algebraMap_eq, ← Polynomial.algebraMap_eq, ← IsScalarTower.algebraMap_apply]
-    have key : ∀ r : Polynomial R, AdjoinRoot.of W'.toAffine.polynomial r = Polynomial.aeval (coordX W') r := by
+    have htest :
+      (AdjoinRoot.of W'.toAffine.polynomial) Polynomial.X = coordX W' := by rw [coordX]; rfl
+    have hofC : ∀ a : R,
+      AdjoinRoot.of W'.toAffine.polynomial
+      (Polynomial.C a) = algebraMap R W'.toAffine.CoordinateRing a := by
+      intro a; rw [← AdjoinRoot.algebraMap_eq, ← Polynomial.algebraMap_eq,
+        ← IsScalarTower.algebraMap_apply]
+    have key : ∀ r : Polynomial R,
+      AdjoinRoot.of W'.toAffine.polynomial r = Polynomial.aeval (coordX W') r := by
       intro r
       induction r using Polynomial.induction_on with
       | C a => rw [Polynomial.aeval_C, hofC]
       | add p q hp hq => rw [map_add, map_add, hp, hq]
-      | monomial n a ih => rw [map_mul, map_pow, map_mul, map_pow, htest, hofC, Polynomial.aeval_X, Polynomial.aeval_C]
-    have hof : ∀ r : Polynomial R, φ (AdjoinRoot.of W'.toAffine.polynomial r) = ψ (AdjoinRoot.of W'.toAffine.polynomial r) := by
+      | monomial n a ih => rw [map_mul, map_pow, map_mul, map_pow, htest, hofC, Polynomial.aeval_X,
+        Polynomial.aeval_C]
+    have hof : ∀ r : Polynomial R,
+      φ (AdjoinRoot.of W'.toAffine.polynomial r) = ψ (AdjoinRoot.of W'.toAffine.polynomial r) := by
       intro r
       rw [key, ← Polynomial.aeval_algHom_apply, ← Polynomial.aeval_algHom_apply, hX]
     apply AlgHom.ext
     intro a
     obtain ⟨p, q, rfl⟩ := WeierstrassCurve.Affine.CoordinateRing.exists_smul_basis_eq a
-    rw [WeierstrassCurve.Affine.CoordinateRing.smul, WeierstrassCurve.Affine.CoordinateRing.smul, mul_one, map_add, map_add, map_mul, map_mul,
-      show Affine.CoordinateRing.mk W'.toAffine (Polynomial.C p) = AdjoinRoot.of W'.toAffine.polynomial p from rfl,
-      show Affine.CoordinateRing.mk W'.toAffine (Polynomial.C q) = AdjoinRoot.of W'.toAffine.polynomial q from rfl,
+    rw [WeierstrassCurve.Affine.CoordinateRing.smul, WeierstrassCurve.Affine.CoordinateRing.smul,
+      mul_one, map_add, map_add, map_mul, map_mul,
+      show Affine.CoordinateRing.mk W'.toAffine
+        (Polynomial.C p) = AdjoinRoot.of W'.toAffine.polynomial p from rfl,
+      show Affine.CoordinateRing.mk W'.toAffine
+        (Polynomial.C q) = AdjoinRoot.of W'.toAffine.polynomial q from rfl,
       show Affine.CoordinateRing.mk W'.toAffine Polynomial.X = coordY W' from rfl,
       hof p, hof q, hY]
-  have hXagree : (pointedIsoCoordEquiv e heπ hez) (coordX W') = (pointedIsoCoordEquiv e' heπ' hez') (coordX W') := by
-    rw [hx, transport_general hW.symm e' (projModelVCIso C W') heπ' hez' (projModelVCIso_π C W') (projModelVCIso_zero C W') he'hom (coordX W'), bridge_coordX]
+  have hXagree : (pointedIsoCoordEquiv e heπ hez) (coordX W') = (pointedIsoCoordEquiv e' heπ' hez')
+    (coordX W') := by
+    rw [hx,
+      transport_general hW.symm e' (projModelVCIso C W') heπ' hez' (projModelVCIso_π C W')
+      (projModelVCIso_zero C W') he'hom (coordX W'), bridge_coordX]
     simp only [map_add, coordRingCongr_algebraMap_mul_coordX, coordRingCongr_algebraMap]
-  have hYagree : (pointedIsoCoordEquiv e heπ hez) (coordY W') = (pointedIsoCoordEquiv e' heπ' hez') (coordY W') := by
-    rw [hy, transport_general hW.symm e' (projModelVCIso C W') heπ' hez' (projModelVCIso_π C W') (projModelVCIso_zero C W') he'hom (coordY W'), bridge_coordY]
-    simp only [map_add, coordRingCongr_algebraMap_mul_coordY, coordRingCongr_algebraMap_mul_coordX, coordRingCongr_algebraMap]
+  have hYagree : (pointedIsoCoordEquiv e heπ hez) (coordY W') = (pointedIsoCoordEquiv e' heπ' hez')
+    (coordY W') := by
+    rw [hy,
+      transport_general hW.symm e' (projModelVCIso C W') heπ' hez' (projModelVCIso_π C W')
+      (projModelVCIso_zero C W') he'hom (coordY W'), bridge_coordY]
+    simp only [map_add, coordRingCongr_algebraMap_mul_coordY, coordRingCongr_algebraMap_mul_coordX,
+      coordRingCongr_algebraMap]
   have hcoord : pointedIsoCoordEquiv e heπ hez = pointedIsoCoordEquiv e' heπ' hez' := by
     refine AlgEquiv.ext fun x => ?_
-    exact DFunLike.congr_fun (coordEquiv_ext (pointedIsoCoordEquiv e heπ hez).toAlgHom (pointedIsoCoordEquiv e' heπ' hez').toAlgHom hXagree hYagree) x
+    exact DFunLike.congr_fun (coordEquiv_ext (pointedIsoCoordEquiv e heπ hez).toAlgHom
+      (pointedIsoCoordEquiv e' heπ' hez').toAlgHom hXagree hYagree) x
   have hΓ : pointedIsoΓ e hez = pointedIsoΓ e' hez' :=
     pointedIsoΓ_eq_of_coordEquiv e e' heπ hez heπ' hez' hcoord
   have hhom : e.hom = e'.hom := pointedIso_hom_eq_of_pointedIsoΓ e e' hez hez' hΓ
