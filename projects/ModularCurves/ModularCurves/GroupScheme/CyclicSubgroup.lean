@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.GroupScheme.Subgroup
 import ModularCurves.LevelStructure.Basic
 
@@ -57,17 +62,18 @@ namespace FiniteLocallyFreeSubgroup
 
 variable {E : EllipticCurve S}
 
--- ATTACK (IsCyclic): (1) it is stated via the *divisor* `toRelEffCartierDiv`, whose base
--- change (inside `IsGammaZeroFppf`) is the PROVEN `RelEffCartierDiv.baseChange` (T-D20),
--- NOT the parked subgroup base change (T-SG1b) — so this definition is sorry-free and does
--- not inherit the `asSection_zsmul` spelling block. (2) the redundant `IsSubgroup` conjunct
--- of `IsGammaZeroFppf` is always satisfiable here (`toRelEffCartierDiv_isSubgroup`), so
--- `IsCyclic` admits no spurious inhabitants a bare divisor would. (3) rank is NOT a separate
--- hypothesis: `IsGammaZeroFppf`'s `degree = N` conjunct forces `HasRank N` via
--- `toRelEffCartierDiv_degree` (`IsCyclic.hasRank`), matching KM 3.4's *"of order N"*.
--- (4) char `p ∣ N` is INCLUDED (unlike the naive surrogate): `Ker F ⊂ E` supersingular is
--- cyclic with Drinfeld generator `0`, and `IsGammaZeroFppf` is honest there (the geometric
--- surrogate's char-p defect was the ADVERSARIAL FIX banked at `IsGammaZero`).
+-- Why this is the right definition:
+-- * It is stated through the *divisor* `toRelEffCartierDiv`, whose base change (inside
+--   `IsGammaZeroFppf`) is the proven `RelEffCartierDiv.baseChange` (T-D20) rather than the
+--   parked subgroup base change (T-SG1b) — so it is sorry-free.
+-- * The `IsSubgroup` conjunct of `IsGammaZeroFppf` is automatic here
+--   (`toRelEffCartierDiv_isSubgroup`), so `IsCyclic` admits no inhabitant that a bare divisor
+--   would admit.
+-- * Rank is not a separate hypothesis: the `degree = N` conjunct forces `HasRank N` through
+--   `toRelEffCartierDiv_degree` (see `IsCyclic.hasRank`), matching KM 3.4's "of order `N`".
+-- * The case `p ∣ N` in characteristic `p` is included, unlike the geometric-fibre surrogate:
+--   for supersingular `E`, `Ker F ⊆ E` is cyclic with Drinfeld generator `0`, and
+--   `IsGammaZeroFppf` is correct there.
 /-- **KM 1.4.1 cyclicity, the Γ₀(N) definition of record** for the subgroup-scheme layer:
 a finite locally free subgroup scheme `G ⊆ E` is *cyclic of order `N`* when its underlying
 subgroup divisor `G.toRelEffCartierDiv` is `IsGammaZeroFppf` — i.e. f.p.p.f.-locally on `S`
@@ -125,18 +131,19 @@ theorem isCyclic_of_generator {G : FiniteLocallyFreeSubgroup E} {N : ℕ} [NeZer
 
 end FiniteLocallyFreeSubgroup
 
--- ATTACK (GammaZeroStructure): (1) `subgroup` is the DATUM (a `FiniteLocallyFreeSubgroup`,
--- a `Type`), `isCyclic`+`hasRank` are `Prop` fields — the moduli problem quantifies over
--- this whole structure, so two structures with distinct total spaces are distinct terms
--- (identification is up to isomorphism in the moduli problem, exactly as for T-SG1).
--- (2) `hasRank` is a SEPARATE field even though `isCyclic.hasRank` derives it: KM 3.4 lists
--- *"finite locally free of rank N"* and *"cyclic"* as separate clauses, and downstream
--- rank-`N` hypotheses (degeneracy maps, incidence) read `hasRank` directly without unfolding
--- `IsGammaZeroFppf`; the redundancy is a convenience, not a soundness gap
--- (`isCyclic.hasRank = hasRank` for any inhabitant). (3) NO representability is asserted
--- here — this is the datum a `Γ₀(N)` moduli FUNCTOR (T-H4 / downstream) will quantify over,
--- and the review GATE requires that functor to use THIS (f.p.p.f. record), never the
--- geometric surrogate `IsGammaZero`.
+-- Notes on the shape of this structure:
+-- * `subgroup` is the datum (a `FiniteLocallyFreeSubgroup`, i.e. a `Type`), while `isCyclic`
+--   and `hasRank` are `Prop` fields. The moduli problem quantifies over the whole structure,
+--   so two structures with distinct total spaces are distinct terms; they are identified only
+--   up to isomorphism, exactly as for T-SG1.
+-- * `hasRank` is kept as a field even though `isCyclic.hasRank` derives it. KM 3.4 lists
+--   "finite locally free of rank `N`" and "cyclic" as separate clauses, and downstream
+--   rank-`N` hypotheses read `hasRank` directly rather than unfolding `IsGammaZeroFppf`. The
+--   redundancy is a convenience, not a soundness gap: `isCyclic.hasRank = hasRank` for any
+--   inhabitant.
+-- * No representability is asserted here. This is only the datum that a `Γ₀(N)` moduli functor
+--   quantifies over, and that functor must use this f.p.p.f. record rather than the
+--   geometric-fibre surrogate `IsGammaZero`.
 /-- **A Γ₀(N)-structure (KM 3.4), the datum of record**: a finite locally free subgroup
 scheme `G ⊆ E` of rank `N` that is cyclic (KM 1.4.1, f.p.p.f. sense). This is what a
 `Γ₀(N)` moduli problem quantifies over — the review's GATE requires representability to
@@ -165,8 +172,8 @@ theorem ofIsCyclic_subgroup {N : ℕ} [NeZero N] (G : FiniteLocallyFreeSubgroup 
     (h : G.IsCyclic N) : (ofIsCyclic G h).subgroup = G :=
   rfl
 
-/-- The rank of a Γ₀(N)-structure's subgroup scheme is `N²`? No — it is `N`: a Γ₀(N)-cyclic
-subgroup has order (rank) `N`, in contrast to the full `N`-torsion `E[N]` (rank `N²`). -/
+/-- The subgroup scheme of a Γ₀(N)-structure has rank `N` — the order of the cyclic subgroup,
+not the rank `N²` of the full `N`-torsion `E[N]`. -/
 theorem rank_eq {N : ℕ} [NeZero N] (Γ : GammaZeroStructure E N) (s : S) :
     Γ.subgroup.rank s = N :=
   Γ.hasRank s
