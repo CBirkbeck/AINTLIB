@@ -77,6 +77,7 @@ import ModularCurves.ForMathlib.SheafCechSheafComplex
 import ModularCurves.ForMathlib.SheafCechSheafDifferential
 import ModularCurves.ForMathlib.SheafCechSheafLocalContraction
 import ModularCurves.ForMathlib.SheafCechSheafPositiveExact
+import ModularCurves.ForMathlib.SheafCechSheafResolution
 import ModularCurves.ForMathlib.SheafCechSheafTerms
 import ModularCurves.ForMathlib.SheafCechSheafZeroExact
 import ModularCurves.ForMathlib.SheafCohomologyExact
