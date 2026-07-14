@@ -19271,3 +19271,33 @@ Owner relayed G0 (checkpoint + session-terminal), GH, KM reports with "give new 
 | **KM** | LIVE | field-level BB-DEG green mod 1 sorry; endDeg API | the division-polynomial bridge (functionFieldMap + Dominant.lean) → BB-DEG axiom-clean (+ BB-DIFF) |
 | **OMEGA** | LIVE | ω2 ★; [E12-A] adapted models | E13 → **ω5 = T-E14** → flips `representable_iff` ★★ |
 **Headline critical path:** `.Representable` (all 3 levels) = RelativelyRepresentable (✓✓✓ done) ∧ Rigid, via `representable_iff`. Two live gates: **engine** (representable_iff ⇐, = OMEGA's T-E14) + **Rigid** (GH bridge + KM keystone). Both actively staffed. Everything else (incl. G0's SIGNAL) completes modulo BB-DEG (a register-box, not a blocker).
+
+---
+
+## v10.213-G0 — ★★ THE SIGNAL: THE SIX SubgroupQuotient PINS ARE DISCHARGED — `E/G` IS REAL (2026-07-14, STREAM-G0)
+
+**`SubgroupQuotient.lean` has ZERO sorries.** The v10.212 route-(a) refactor is complete and the
+quotient tower is wired end-to-end:
+
+- **Interface layer** (`SubgroupQuotientInterface.lean`, new low file): `IsInvariant` +
+  `IsInvariant.comp` + NEW **`HasKillingInt`** class (∃ N ≠ 0, ι ≫ [N] = π ≫ 0) with chosen
+  `killN`/`killN_spec`. `TranslationAction` imports THIS — cycle broken.
+- **Pin discharge** (`SubgroupQuotient.lean`, imports the glue construction):
+  `quotient := gluedQuotient` · `quotientS` · `quotientπ` · `quotientπ_over` ·
+  `quotientπ_isInvariant` · `quotient_lift` (the ∃!-universal property) — all REAL, all from
+  the option-γ glue (`SubgroupQuotientGlueData`). `quotientπ_hom_ext` + the `[N]`-factoring
+  tail (`torsionQuotientToSelf`) compile against the real pins unchanged.
+- **Killing-integer resolution of v10.189-α/β**: α-lite — the pins carry `[G.HasKillingInt]`
+  INSTANCE-implicitly, so consumer call-sites are textually unchanged; `torsionSubgroup N`
+  instance = the kernel pullback condition verbatim; constant-rank G get it via BB-DELIGNE.
+  Sole external consumer (`quotientCurve_compat`, sorried DS-pin in NIsogeny) amended with the
+  binder.
+- **Axiom state**: residual sorryAx under the pins = exactly the v10.192-§C register-box trail
+  (BB-QF/BB-DEG — consumed per the v10.212 ruling; c4's `mulByHom_finrank` = BB-DEG stands as
+  the box). **No G0-owned sorry anywhere in the quotient chain.**
+
+**CONSUMERS UNBLOCKED (board LOUDLY per charter)**: STREAM-GH's quotient step (KM 7.1.3 Part B —
+the pins are consumable by name NOW); NIsogeny §6-7 quotientCurve layer (compat pin gains its
+gate); T-G3d `E/E[N] ≅ E` awaits only the degree half (T-G3d-Niso, on BB-DEG).
+
+**MAIN-PR CADENCE**: ★★ milestone — coordinator PR per v10.172. Full build 3830 jobs green.
