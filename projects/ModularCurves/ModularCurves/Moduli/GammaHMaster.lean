@@ -359,8 +359,204 @@ theorem EllObj.exists_isoFibre_ne_refl {X : EllObj R}
   by_contra hne'
   exact hcon ⟨k, ‹_›, ‹_›, t, hne'⟩
 
-/-- Over an empty base every `Ell/R`-self-iso is the identity: the base and the total
-space are initial schemes. -/
+open EllipticCurve in
+/-- **[RIG-2-wrap, `H = ⊥` core] (classical Γ(N) k̄-rigidity)** — over an algebraically
+closed field, no nontrivial base-identical self-iso fixes a naive full level-`N`
+structure (`N ≥ 3`). The fixed basis spans the geometric `N`-torsion
+(`IsNaiveFullLevel`'s span clause), the fixed locus of the induced endomorphism is a
+subgroup of the points at every geometric extension, so the torsion restriction agrees
+with the identity on every point of the finite étale `E[N]` — the `UnramifiedEqualizer`
+engine globalises, and `aut_endo_eq_one` (KM 2.7.2, register-box keystone) closes. -/
+theorem gammaFullNaive_fix_absurd (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
+    (hinv : IsUnit (N : R))
+    (k : Type u) [Field k] [IsAlgClosed k]
+    (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+    (E : EllipticCurve (Spec (CommRingCat.of k)))
+    (e : (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R) ≅
+      (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
+    (he : e.hom.baseHom = 𝟙 _) (hne : e ≠ Iso.refl _)
+    (b : (gammaFullNaiveProblem R N).obj
+      (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)))
+    (hfix : (gammaFullNaiveProblem R N).map e.hom.op b = b) : False := by
+  classical
+  haveI : IsLocallyNoetherian (Spec (CommRingCat.of k)) := by
+    haveI : IsNoetherianRing k := inferInstance
+    infer_instance
+  set c := e.hom.top with hc
+  -- the two sections are fixed by `c`
+  have h1 : EllHom.pullSection R e.hom b.1.1 = b.1.1 := congrArg (fun z => z.1.1) hfix
+  have h2 : EllHom.pullSection R e.hom b.1.2 = b.1.2 := congrArg (fun z => z.1.2) hfix
+  have hPc : b.1.1.1 ≫ c = b.1.1.1 := by
+    have hlf : (EllHom.pullSection R e.hom b.1.1).1 ≫ e.hom.top
+        = e.hom.baseHom ≫ b.1.1.1 := e.hom.isPullback.lift_fst _ _ _
+    rw [h1, he, Category.id_comp] at hlf
+    exact hlf
+  have hQc : b.1.2.1 ≫ c = b.1.2.1 := by
+    have hlf : (EllHom.pullSection R e.hom b.1.2).1 ≫ e.hom.top
+        = e.hom.baseHom ≫ b.1.2.1 := e.hom.isPullback.lift_fst _ _ _
+    rw [h2, he, Category.id_comp] at hlf
+    exact hlf
+  -- `c` as a pointed `Over`-automorphism (as in the detection theorem)
+  have hcπ : c ≫ E.π = E.π := by
+    have h := e.hom.isPullback.w
+    rw [he, Category.comp_id] at h
+    exact h
+  set εO : E.asOver ⟶ E.asOver := Over.homMk c hcπ with hεO
+  have hzc : E.zero ≫ c = E.zero := by
+    have h := e.hom.zero_w
+    rw [he, Category.id_comp] at h
+    exact h
+  have hη : η[E.asOver] ≫ εO = η[E.asOver] := by
+    refine Over.OverMorphism.ext ?_
+    show (η[E.asOver]).left ≫ c = (η[E.asOver]).left
+    rw [E.one_eq_zero]
+    have s1 : ((𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ E.zero) ≫ c
+        = (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ E.zero ≫ c := Category.assoc _ _ _
+    have s2 : (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ E.zero ≫ c
+        = (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ E.zero :=
+      congrArg (fun m => (𝟙_ (Over (Spec (CommRingCat.of k)))).hom ≫ m) hzc
+    exact s1.trans s2
+  haveI : IsIso εO := by
+    have hcπ' : e.inv.top ≫ E.π = E.π := by
+      have h := e.inv.isPullback.w
+      rw [EllObj.isoInv_baseHom e he, Category.comp_id] at h
+      exact h
+    refine ⟨Over.homMk e.inv.top hcπ', ?_, ?_⟩
+    · exact Over.OverMorphism.ext (congrArg EllHom.top e.hom_inv_id)
+    · exact Over.OverMorphism.ext (congrArg EllHom.top e.inv_hom_id)
+  letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+  haveI : IsMonHom εO := { one_hom := hη, mul_hom := E.endMonHom εO hη }
+  -- the fixed locus is a subgroup of the points at every geometric extension
+  have hfixed : ∀ (k' : Type u) [Field k'] [IsAlgClosed k']
+      (t' : Spec (CommRingCat.of k') ⟶ Spec (CommRingCat.of k)) (x : E.Point t'),
+      x ∈ AddSubgroup.closure {Point.pull E t' b.1.1, Point.pull E t' b.1.2} →
+      (E.pointEquivOverHom t') x ≫ εO = (E.pointEquivOverHom t') x := by
+    intro k' _ _ t' x hx
+    letI : CommGroup (Over.mk t' ⟶ E.asOver) := Hom.commGroup
+    induction hx using AddSubgroup.closure_induction with
+    | mem y hy =>
+      rcases hy with hy | hy
+      · subst hy
+        refine Over.OverMorphism.ext ?_
+        show (t' ≫ b.1.1.1) ≫ c = t' ≫ b.1.1.1
+        rw [Category.assoc, hPc]
+      · subst hy
+        refine Over.OverMorphism.ext ?_
+        show (t' ≫ b.1.2.1) ≫ c = t' ≫ b.1.2.1
+        rw [Category.assoc, hQc]
+    | zero =>
+      have hmap := (IsMonHom.monoidHom εO (Over.mk t')).map_one
+      simp only [IsMonHom.monoidHom_apply] at hmap
+      exact hmap
+    | add y z _ _ hy hz =>
+      have hmap := (IsMonHom.monoidHom εO (Over.mk t')).map_mul
+        ((E.pointEquivOverHom t') y) ((E.pointEquivOverHom t') z)
+      simp only [IsMonHom.monoidHom_apply] at hmap
+      show (E.pointEquivOverHom t') (y + z) ≫ εO = (E.pointEquivOverHom t') (y + z)
+      have htr : (E.pointEquivOverHom t') (y + z)
+          = (E.pointEquivOverHom t') y * (E.pointEquivOverHom t') z :=
+        E.pointEquivOverHom_add t' y z
+      rw [htr, hmap, hy, hz]
+    | neg y _ hy =>
+      have hmap := (IsMonHom.monoidHom εO (Over.mk t')).map_inv
+        ((E.pointEquivOverHom t') y)
+      simp only [IsMonHom.monoidHom_apply] at hmap
+      have htr : (E.pointEquivOverHom t') (-y) = ((E.pointEquivOverHom t') y)⁻¹ := rfl
+      rw [htr, hmap, hy]
+  -- every point of `E[N]` lies in the equalizer of the torsion restriction and `𝟙`
+  set cM := E.torsionRestrict εO hη N with hcM
+  have hinvk : IsUnit ((N : ℕ) : k) := by
+    have h := hinv.map (Spec.preimage sm).hom
+    rwa [map_natCast] at h
+  have hinvSpec : NIsInvertible (Spec (CommRingCat.of k)) N := by
+    show IsUnit ((N : ℕ) : Γ(Spec (CommRingCat.of k), ⊤))
+    have h2 := hinvk.map (Scheme.ΓSpecIso (CommRingCat.of k)).inv.hom
+    rwa [map_natCast] at h2
+  haveI : Etale ((Over.mk (E.torsionπ N)).hom) := E.torsionπ_etale N hinvSpec
+  haveI := E.torsionι_isClosedImmersion N
+  set fO : Over.mk (E.torsionπ N) ⟶ Over.mk (E.torsionπ N) :=
+    Over.homMk cM (E.torsionRestrict_π εO hη N) with hfO
+  have hcMid : cM = 𝟙 (E.torsion N) := by
+    have hfeq : fO = 𝟙 (Over.mk (E.torsionπ N)) := by
+      refine AlgebraicGeometry.Over.hom_ext_of_unramified_of_surjective fO
+        (𝟙 (Over.mk (E.torsionπ N))) ?_
+      intro q
+      set κ := (E.torsion N).residueField q with hκ
+      set k' := AlgebraicClosure κ with hk'
+      set xbar : Spec (CommRingCat.of k') ⟶ E.torsion N :=
+        Spec.map (CommRingCat.ofHom (algebraMap κ k')) ≫
+          (E.torsion N).fromSpecResidueField q with hxbar
+      set t' : Spec (CommRingCat.of k') ⟶ Spec (CommRingCat.of k) :=
+        xbar ≫ E.torsionπ N with ht'
+      -- the point of `E` under `q̄` is `N`-torsion, hence in the span, hence fixed
+      set xpt := E.torsionPointsEquiv N t' ⟨xbar, rfl⟩ with hxpt
+      have hxmem : xpt.1 ∈ AddSubgroup.closure
+          {Point.pull E t' b.1.1, Point.pull E t' b.1.2} := by
+        refine b.2.2 k' t' xpt.1 ?_
+        exact (Submodule.mem_torsionBy_iff _ _).mp xpt.2
+      have hxfix := hfixed k' t' xpt.1 hxmem
+      have hpc2 : (xbar ≫ E.torsionι N) ≫ c = xbar ≫ E.torsionι N :=
+        congrArg CommaMorphism.left hxfix
+      have hpc' : (xbar ≫ E.torsionι N) ≫ εO.left = xbar ≫ E.torsionι N := hpc2
+      have hxcι : (xbar ≫ cM) ≫ E.torsionι N = xbar ≫ E.torsionι N := by
+        have s1 : (xbar ≫ cM) ≫ E.torsionι N = xbar ≫ cM ≫ E.torsionι N :=
+          Category.assoc _ _ _
+        have s2 : xbar ≫ cM ≫ E.torsionι N = xbar ≫ E.torsionι N ≫ εO.left :=
+          congrArg (fun m => xbar ≫ m) (E.torsionRestrict_ι εO hη N)
+        have s3 : xbar ≫ E.torsionι N ≫ εO.left = (xbar ≫ E.torsionι N) ≫ εO.left :=
+          (Category.assoc _ _ _).symm
+        exact s1.trans (s2.trans (s3.trans hpc'))
+      have hxc : xbar ≫ cM = xbar := (cancel_mono (E.torsionι N)).mp hxcι
+      set xbarO : Over.mk t' ⟶ Over.mk (E.torsionπ N) := Over.homMk xbar rfl with hxbarO
+      have hw : xbarO ≫ fO = xbarO ≫ 𝟙 (Over.mk (E.torsionπ N)) := by
+        refine Over.OverMorphism.ext ?_
+        show xbar ≫ cM = xbar ≫ 𝟙 _
+        rw [hxc, Category.comp_id]
+      set ℓq := Limits.equalizer.lift xbarO hw with hℓq
+      have hℓι : ℓq ≫ Limits.equalizer.ι fO (𝟙 (Over.mk (E.torsionπ N))) = xbarO :=
+        Limits.equalizer.lift_ι _ _
+      have hleft : ℓq.left ≫ (Limits.equalizer.ι fO (𝟙 (Over.mk (E.torsionπ N)))).left
+          = xbar := congrArg CommaMorphism.left hℓι
+      obtain ⟨s⟩ : Nonempty (Spec (CommRingCat.of k')) :=
+        inferInstanceAs (Nonempty (PrimeSpectrum k'))
+      refine ⟨ℓq.left.base s, ?_⟩
+      have happ : (Limits.equalizer.ι fO (𝟙 (Over.mk (E.torsionπ N)))).left
+          (ℓq.left s) = xbar s := by
+        rw [← Scheme.Hom.comp_apply, hleft]
+        rfl
+      have hxq : xbar s = q := by
+        rw [hxbar, Scheme.Hom.comp_apply, Scheme.fromSpecResidueField_apply]
+      exact happ.trans hxq
+    exact congrArg CommaMorphism.left hfeq
+  have hfixM : E.torsionι N ≫ c = E.torsionι N :=
+    E.torsionι_comp_left_eq_of_torsionRestrict_eq_id εO hη N hcMid
+  have hεid : εO = 𝟙 E.asOver :=
+    E.aut_endo_eq_one N hN εO (E.endDeg_eq_one_of_isIso εO) hfixM
+  have hcid : c = 𝟙 E.E := congrArg CommaMorphism.left hεid
+  exact hne (Iso.ext (EllHom.ext he hcid))
+
+/-- **[RIG-2-wrap at `H = ⊥`]** — the `hfree` pin of `gammaH_rigid` holds outright for
+the trivial subgroup (`γ = 1` forced, so the twisted fix is a plain fix, killed by the
+Γ(N) k̄-rigidity `gammaFullNaive_fix_absurd`). With `hLN`, this makes `P_⊥ = [Γ(N)]`
+rigidity UNCONDITIONAL (mod the register-box keystones). -/
+theorem gammaFullNaive_hfree_bot (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
+    (hinv : IsUnit (N : R)) (k : Type u) [Field k] [IsAlgClosed k]
+    (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+    (E : EllipticCurve (Spec (CommRingCat.of k)))
+    (e : (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R) ≅
+      (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
+    (he : e.hom.baseHom = 𝟙 _) (hne : e ≠ Iso.refl _)
+    (b : (gammaFullNaiveProblem R N).obj
+      (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)))
+    (γ : ↥(⊥ : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))) :
+    (gammaHAut R N ⊥ γ).hom.app
+      (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
+      ((gammaFullNaiveProblem R N).map e.hom.op b) ≠ b := by
+  intro hcon
+  have hγ1 : γ = 1 := Subtype.ext ((Subgroup.mem_bot).mp γ.2)
+  rw [hγ1, map_one] at hcon
+  exact gammaFullNaive_fix_absurd N hN hinv k sm E e he hne b hcon
+
 theorem EllObj.iso_eq_refl_of_isEmpty {X : EllObj R} (h : IsEmpty X.base) (e : X ≅ X) :
     e = Iso.refl X := by
   haveI := h
@@ -464,6 +660,19 @@ theorem gammaH_rigid (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
   haveI := hLN X
   exact EllObj.exists_isoFibre_ne_refl N hN
     (YFull.nIsInvertible_over_spec R X.structMap hinv) e he hne
+
+/-- **[Γ(N) rigidity] (KM 2.7.2 upgraded to the quotient problem at `H = ⊥`)** — the
+quotient problem `P_⊥ = [Γ(N)]` is rigid for `N ≥ 3` invertible, with the k̄
+orbit-freeness discharged OUTRIGHT (`gammaFullNaive_hfree_bot`); only the `hLN`
+locally-noetherian pin (T-W7.8 gate) remains. -/
+theorem gammaBot_rigid (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ)) (hinv : IsUnit (N : R))
+    (qpd : ModuliProblem.QuotientProblemData
+      (gammaHAut R N (⊥ : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))))
+    (hLN : ∀ X : EllObj R, IsLocallyNoetherian X.base) :
+    qpd.prob.Rigid :=
+  gammaH_rigid R N hN ⊥ hinv qpd hLN
+    (fun k _ _ sm E e he hne b γ =>
+      gammaFullNaive_hfree_bot N hN hinv k sm E e he hne b γ)
 
 /-- **[Γ_H MASTER, interface] (KM 4.7.0 for `P_H`; Loeffler 3.8.2 upgraded to a fine
 scheme)** — the quotient problem `P_H` is representable, given the engine's pin-set: the
