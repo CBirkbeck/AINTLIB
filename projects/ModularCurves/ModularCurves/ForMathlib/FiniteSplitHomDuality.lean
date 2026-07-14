@@ -180,3 +180,22 @@ theorem LinearMap.bijective_of_bijective_lTensor_field {k : Type u} [Field k]
     Function.Bijective φ := by
   haveI : Module.FaithfullyFlat k K := inferInstance
   exact (Module.FaithfullyFlat.lTensor_bijective_iff_bijective k K φ).mp h
+
+/-- Bijectivity of a residue-tensored map follows from bijectivity after a further
+field extension: `φ ⊗ K` bijective implies `φ ⊗ κ` bijective, for `R → κ → K`. -/
+theorem LinearMap.bijective_lTensor_of_bijective_baseChange_ext
+    {R M N : Type u} [CommRing R] [AddCommGroup M] [Module R M]
+    [AddCommGroup N] [Module R N] (φ : M →ₗ[R] N)
+    (κ : Type u) [Field κ] [Algebra R κ]
+    (K : Type u) [Field K] [Algebra κ K] [Algebra R K] [IsScalarTower R κ K]
+    (h : Function.Bijective (φ.baseChange K)) :
+    Function.Bijective (φ.lTensor κ) := by
+  have hfun : ⇑(φ.lTensor κ) = ⇑(φ.baseChange κ) := rfl
+  rw [hfun]
+  refine LinearMap.bijective_of_bijective_lTensor_field (k := κ) K (φ.baseChange κ) ?_
+  have hfun2 : ⇑((φ.baseChange κ).lTensor K) = ⇑((φ.baseChange κ).baseChange K) := rfl
+  rw [hfun2, LinearMap.baseChange_baseChange]
+  simp only [LinearMap.coe_comp, LinearEquiv.coe_coe]
+  exact ((TensorProduct.AlgebraTensorModule.cancelBaseChange R κ K K
+    N).symm.bijective.comp h).comp
+    (TensorProduct.AlgebraTensorModule.cancelBaseChange R κ K K M).bijective
