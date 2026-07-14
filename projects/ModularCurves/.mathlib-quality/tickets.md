@@ -2413,9 +2413,17 @@ adjudicates.
   (+ short-NF pins `r,s,t` over 2,3-invertible bases — full KM 2.2.5 uniqueness),
   `adaptShortNF`/`isAdapted_adaptShortNF`/`isShortNF_adaptShortNF` (existence via
   mathlib `toShortNF` + the pure-`u` adaptation twist). KM 2.2.5 / GME 2.2.3's local
-  normalisation is DONE. NEXT: E12-C (the unique model's coefficients glue over
-  affine covers — uniqueness gives overlap-agreement; `a₄ a₆ ∈ Γ(S,⊤)` global) then
-  E12-D (M₁-representability).
+  normalisation is DONE. **E12-C DONE ★ (2026-07-14, OMEGA, sorry-free +
+  axiom-clean)**: `basisUnitAt_restrict`/`IsAdapted.restrict` (adaptedness is local;
+  new left-collapse coherences `transVC/transUnit_restrict_restrict_left`),
+  `adapted_shortNF_res_eq` (global uniqueness on common subopens),
+  `adaptedLocal` + **`adaptedCoeff₄`/`adaptedCoeff₆`** — the classifying data
+  `(E, ω) ↦ (a₄, a₆) ∈ Γ(S,⊤)²` glued over the chart-affine pair cover. REMAINING
+  E12-D: `M₁ = Spec ℤ[1/6][g₂,g₃][Δ⁻¹]`-representability (universal curve
+  `y² = x³ + a₄x + a₆` as an `EllObj`, classifying map from the global coefficients,
+  `RepresentableBy` from E12-B uniqueness; consumes T-A2/A7.e's Proj-model — the
+  `projModel`-construction is available). Also pending: `Δ = −16(4a₄³+27a₆²)`-unit
+  globalization (chartwise ellipticity).
   ORIGINAL SPEC: the basis-unit of a presentation**: for `b : OmegaBasis G` and
   `P : LocalPresentation G V`, glue `resLE b_i · (transUnit P|_{V∩U_i} P_i|)`-data over
   the atlas cover into a canonical `basisUnitAt P b : Γ(V)ˣ` (compatibility = b's own
