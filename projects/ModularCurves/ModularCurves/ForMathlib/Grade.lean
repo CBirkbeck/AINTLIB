@@ -52,7 +52,8 @@ adjusted here rather than in a consumer.)
   characterisation is assembled from two classical facts:
   * the **Rees / Stacks 00LW ideal-grade theorem** over the local ring `S_𝔮`
     (`gradeGE_or_top_iff_forall_subsingleton_ext_local`) — **proved here in full** by the classical
-    Rees induction (`Ext⁰ ≅ Hom` boundary + the covariant long exact `Ext`-sequence dimension shift),
+    Rees induction (`Ext⁰ ≅ Hom` boundary + the covariant long exact `Ext`-sequence dimension
+    shift),
     and
   * the **`Ext`-localisation compatibility** `(Extⁱ_S(S/I,S))_𝔮 ≅ Extⁱ_{S_𝔮}(S_𝔮/I_𝔮, S_𝔮)`
     (`localizedModule_ext_subsingleton_iff`, in `ForMathlib.BaseChangeExt`, imported) — **proved in
@@ -61,7 +62,8 @@ adjusted here rather than in a consumer.)
     the *flat base change for `Ext`* core `isLocalizedModule_mapExt`
     (`(Extⁱ_S(X,Y))_𝔮 ≅ Extⁱ_{S_𝔮}(X_𝔮,Y_𝔮)` for finite `X` over Noetherian `S`) — proved by
     induction on `i`: the degree-`0` Hom base change
-    (`Module.FinitePresentation.isLocalizedModule_mapExtendScalars`) and the derived-functor step via
+    (`Module.FinitePresentation.isLocalizedModule_mapExtendScalars`) and the derived-functor step
+    via
     the five lemma on the localised contravariant `Ext` long exact sequence of a finite projective
     presentation (mirroring `Functor.mapExt_bijective_of_preservesProjectiveObjects`, with the exact
     projective-preserving `localizedModuleFunctor` and `IsLocalizedModule` in place of
@@ -89,7 +91,8 @@ def Ideal.gradeGE {S : Type*} [CommRing S] (I : Ideal S) (k : ℕ) : Prop :=
 If `I` contains an `S`-regular sequence of length `k`, then in `Localization T` either the extended
 ideal `I.map (algebraMap …)` still contains a regular sequence of length `k` (its grade stays
 `≥ k`) **or** it is the whole ring.  The mapped sequence is automatically *weakly* regular
-(localisation is flat, `IsWeaklyRegular.of_isLocalization`); it stays *regular* unless it degenerates
+(localisation is flat, `IsWeaklyRegular.of_isLocalization`); it stays *regular* unless it
+degenerates
 to the unit ideal, in which case `I.map … = ⊤`.  The unit-ideal disjunct is unavoidable — see the
 file header counterexample (`S = k[x]`, `I = (x)`, `T = S \ {0}`, giving the field `k(x)`). -/
 theorem Ideal.gradeGE_localize {S : Type*} [CommRing S] [IsNoetherianRing S]
@@ -135,7 +138,8 @@ The pointwise residual splits into two classical facts (see the module header an
 * **(B) Rees / Stacks 00LW (ideal-grade form)** over a LOCAL Noetherian ring — proved below in full
   as `gradeGE_or_top_iff_forall_subsingleton_ext_local`.  The proof is the classical Rees induction:
   the boundary `grade ≥ 1 ⟺ Hom(R/I, M) = 0` is `IsSMulRegular.subsingleton_linearMap_iff`
-  (`Ext⁰ ≅ Hom`), and the dimension shift uses the covariant long exact `Ext`-sequence of the regular
+  (`Ext⁰ ≅ Hom`), and the dimension shift uses the covariant long exact `Ext`-sequence of the
+  regular
   short exact sequence `0 → M →ˣ M → M/xM → 0` (`ModuleCat.smulShortComplex`,
   `Ext.covariant_sequence_exact₁/₂/₃`) together with the fact that `x ∈ ann(R/I)` acts as `0` on
   `Ext(R/I, M)`.
@@ -311,14 +315,16 @@ end ReesLocal
 /- **(A) `Ext`-localisation compatibility** is proved *in full* in `ForMathlib.BaseChangeExt`
 (imported above) as the theorem `localizedModule_ext_subsingleton_iff`: localising `Extⁱ_S(S/I, S)`
 at a prime `𝔮` gives `Extⁱ_{S_𝔮}(S_𝔮/I_𝔮, S_𝔮)`, so the former is subsingleton (i.e. `= 0` after
-localisation) iff the latter vanishes.  It is assembled from the localisation functor's `S`-linearity,
+localisation) iff the latter vanishes.  It is assembled from the localisation functor's
+`S`-linearity,
 the two object isomorphisms `(S)_𝔮 ≅ S_𝔮` and `(S/I)_𝔮 ≅ S_𝔮/I_𝔮`, transport of `Ext` along
 isomorphisms, and the **flat base change for `Ext`** core `isLocalizedModule_mapExt`
 (`Extⁱ_S(X, Y)_𝔮 ≅ Extⁱ_{S_𝔮}(X_𝔮, Y_𝔮)` for finite `X` over Noetherian `S`) — itself proved by
 induction on `i` from the degree-`0` Hom base change
 (`Module.FinitePresentation.isLocalizedModule_mapExtendScalars`) and the five-lemma dévissage on the
 localised contravariant `Ext` long exact sequence of a finite projective presentation.  This closes
-the last classical gap; the whole development is `sorry`-free and axiom-clean.  See `BaseChangeExt.lean`
+the last classical gap; the whole development is `sorry`-free and axiom-clean.  See
+`BaseChangeExt.lean`
 for the full development (References: Stacks 00DL / 0AUJ; Bruns–Herzog 1.2.9; Matsumura, p. 140). -/
 
 /-- For a prime `𝔮`, the extended ideal `I·S_𝔮` has grade `≥ k` **or** is the unit ideal *iff* every
@@ -329,7 +335,8 @@ form of the identity "grade-or-unit locus `=` complement of the Ext-supports"; t
 
 The proof composes the Rees theorem over the local ring `S_𝔮`
 (`gradeGE_or_top_iff_forall_subsingleton_ext_local`, proved in full) with the `Ext`-localisation
-compatibility `localizedModule_ext_subsingleton_iff` (from `ForMathlib.BaseChangeExt`, also proved in
+compatibility `localizedModule_ext_subsingleton_iff` (from `ForMathlib.BaseChangeExt`, also proved
+in
 full — flat base change for `Ext`).  Both halves are complete, so this theorem is axiom-clean. -/
 private theorem gradeGE_or_top_iff_forall_subsingleton_localizedExt {S : Type*} [CommRing S]
     [IsNoetherianRing S] (I : Ideal S) (k : ℕ) (q : PrimeSpectrum S) :
@@ -364,7 +371,8 @@ theorem gradeGE_or_top_locus_eq_iInter_compl_zeroLocus {S : Type*} [CommRing S]
   rw [← Module.support_eq_zeroLocus, Module.notMem_support_iff]
 
 /-- [T-GRADE.open] Openness of the grade locus: `{𝔮 : grade(I_𝔮) ≥ k or I_𝔮 = ⊤}` is OPEN.  Via Ext
-this is the complement of `⋃_{i<k} Supp Extⁱ_S(S/I,S)` (each closed by `Module.support_eq_zeroLocus`,
+this is the complement of `⋃_{i<k} Supp Extⁱ_S(S/I,S)` (each closed by
+`Module.support_eq_zeroLocus`,
 here as `zeroLocus` of the annihilator); it is the replacement for Stacks 10.129.2 inside the
 fibre-exact openness argument (00RB).  The unit-ideal disjunct `∨ … = ⊤` is required (see the file
 header counterexample: the pure grade-`≥ k` locus need not be open). -/
