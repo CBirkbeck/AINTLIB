@@ -19173,3 +19173,21 @@ gives the generator; degree N descends along the surjective cover pointwise.
 now rests ONLY on `generatorSpace_finiteLocallyFree_of_isGammaZeroFppf` (KM 6.1.1 "only if",
 gate [KM-62-63-HOMOG] — the formal-group homogeneity computation; ring-theoretic cores already
 banked sorry-free in HomogeneityLemmas.lean, the FRAME re-attachment is the open work).
+
+---
+
+## v10.209-G0 — NISOG: `isDivisorGenerator_smul` PROVEN (KM 6.1.1(2), first half) (2026-07-14, STREAM-G0)
+
+Second (C)-chain kill of the day. **`isDivisorGenerator_smul`** — prime-to-N multiples of a
+generator are generators — was boarded gate-[KM-FMT-FLAT]; in the subgroup-divisor encoding it
+is PURE ALGEBRA and is now proven (residual sorryAx = BB-DELIGNE only):
+- `hF`: multiples of P₀ depend only on the exponent mod N (Deligne kill);
+- the orderDivisor-ideal product over `Fin N` reindexes through `b ↦ (b : ZMod N)+1` and the
+  `mulRight`-permutation by the unit `(a : ZMod N)` (`unitOfCoprime`, both `natAbs` signs);
+- exact order transports across `RelEffCartierDiv.ext`.
+
+**(C)-frontier audit after v10.208+v10.209**: every remaining NIsogeny.lean sorry is genuinely
+research-gated: [KM-62-63-HOMOG] (6.1.1 hard direction + G^×⊆D), [NISOG-GRASS] (multi-lane),
+[T-D10-FPPF] (standard-cyclic descent), [KM-FMT-FLAT] (squarefree), [KM-1.11.2], quotientCurve
+DS (group-law descent effectivity), KM 3.7.1 (isGammaZero_iff_fppf). Next: audit
+decomposition-km-62-63.md for tractable HOMOG-FRAME leaves.
