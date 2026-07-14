@@ -169,7 +169,6 @@ chart differential IS `b`: the basis unit is `1`. -/
 def IsAdapted {V : S.affineOpens} (P : LocalPresentation G V) (b : OmegaBasis G) :
     Prop :=
   (P.basisUnitAt b).1 = 1
-
 end LocalPresentation
 
 end ModularCurves

@@ -407,7 +407,7 @@ noncomputable def restrict (P : LocalPresentation G V) {V' : S.affineOpens}
 
 /-! ### T-OM-B4: naturality of the comparison under transport -/
 
-private lemma projModelπ_congr {R : Type u} [CommRing R] {W₁ W₂ : WeierstrassCurve R}
+lemma projModelπ_congr {R : Type u} [CommRing R] {W₁ W₂ : WeierstrassCurve R}
     (h : W₁ = W₂) :
     eqToHom (congrArg projModel h) ≫ projModelπ W₂ = projModelπ W₁ := by
   cases h; simp
@@ -1619,6 +1619,152 @@ theorem transUnit_transport_neg (i : G.atlas.ι)
         ((G.atlas.presentation i).transport (𝟙 S) G.negHom hsq hz hV') = -1 := by
   rw [transUnit, transVC_transport_neg]
   rfl
+
+open Scheme WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-B)** Twist a presentation by a variable change: same chart of `E`, the
+model read through `projModelVCIso`. The chart curve becomes `C • P.W`. -/
+noncomputable def ofVC {V : S.affineOpens} (P : LocalPresentation G V)
+    (C : VariableChange Γ(S, V.1)) : LocalPresentation G V where
+  W := C • P.W
+  elliptic := by letI := P.elliptic; infer_instance
+  e := P.e ≪≫ (projModelVCIso C P.W).symm
+  compat_π := by
+    rw [Iso.trans_hom, Iso.symm_hom, Category.assoc, ← P.compat_π]
+    congr 1
+    rw [← projModelVCIso_π C P.W, Iso.inv_hom_id_assoc]
+  compat_zero := by
+    rw [Iso.trans_hom, Iso.symm_hom, ← Category.assoc, P.compat_zero,
+      Iso.comp_inv_eq]
+    exact (projModelVCIso_zero C P.W).symm
+
+@[simp] theorem ofVC_W {V : S.affineOpens} (P : LocalPresentation G V)
+    (C : WeierstrassCurve.VariableChange Γ(S, V.1)) : (P.ofVC C).W = C • P.W :=
+  rfl
+
+open Scheme in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-B)** The comparison of a twist against the original is the twisting
+variable change itself. -/
+theorem transVC_ofVC {V : S.affineOpens} (P : LocalPresentation G V)
+    (C : WeierstrassCurve.VariableChange Γ(S, V.1)) :
+    (P.ofVC C).transVC P = C := by
+  refine ((P.ofVC C).transVC_unique P C rfl ?_).symm
+  show ((P.ofVC C).e.symm ≪≫ P.e).hom = _
+  rw [Iso.trans_hom, Iso.symm_hom,
+    show (P.ofVC C).e = P.e ≪≫ (projModelVCIso C P.W).symm from rfl]
+  rw [Iso.trans_inv, Iso.symm_inv, Category.assoc, Iso.inv_hom_id, Category.comp_id,
+    eqToHom_refl, Category.id_comp]
+
+open Scheme WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(E12-B)** Twisting commutes with restriction through the base-changed variable
+change: the comparison of the restricted twist against the restriction is the
+coefficient-mapped variable change (`projModelVCIso_map` geometrically). -/
+theorem transVC_restrict_ofVC {V : S.affineOpens} (P : LocalPresentation G V)
+    (C : VariableChange Γ(S, V.1)) {V' : S.affineOpens} (h : V'.1 ≤ V.1) :
+    ((P.ofVC C).restrict h).transVC (P.restrict h) =
+      C.map (sectionsMapLE (𝟙 S) h) := by
+  letI := P.elliptic
+  letI : Algebra Γ(S, V.1) Γ(S, V'.1) := (sectionsMapLE (𝟙 S) h).toAlgebra
+  have hWeq : ((P.ofVC C).restrict h).W =
+      (C.map (sectionsMapLE (𝟙 S) h)) • (P.restrict h).W :=
+    (map_variableChange ..).symm
+  refine (transVC_unique _ _ _ hWeq.symm ?_).symm
+  show (((P.ofVC C).restrict h).e.symm ≪≫ (P.restrict h).e).hom = _
+  rw [Iso.trans_hom, Iso.symm_hom, Iso.inv_comp_eq]
+  show (transportE (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩) P h).hom =
+    (transportE (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩) (P.ofVC C) h).hom ≫
+      eqToHom (congrArg projModel hWeq) ≫
+      (projModelVCIso (C.map (sectionsMapLE (𝟙 S) h))
+        (P.W.map (sectionsMapLE (𝟙 S) h))).hom
+  unfold transportE
+  rw [Iso.trans_hom, Iso.trans_hom, Iso.symm_hom, Iso.symm_hom, Iso.comp_inv_eq]
+  simp only [Category.assoc]
+  refine pullback.hom_ext ?_ ?_
+  · -- the base-change leg: `projModelVCIso_map`
+    simp only [Category.assoc]
+    have hmap : projModelBaseChange (sectionsMapLE (𝟙 S) h) (C • P.W) ≫
+        (projModelVCIso C P.W).hom =
+      eqToHom (by rw [map_variableChange]) ≫
+        (projModelVCIso (C.map (sectionsMapLE (𝟙 S) h))
+          (P.W.map (sectionsMapLE (𝟙 S) h))).hom ≫
+        projModelBaseChange (sectionsMapLE (𝟙 S) h) P.W :=
+      projModelVCIso_map C P.W
+    have hmap' : (projModelVCIso (C.map (sectionsMapLE (𝟙 S) h))
+          (P.W.map (sectionsMapLE (𝟙 S) h))).hom ≫
+        projModelBaseChange (sectionsMapLE (𝟙 S) h) P.W =
+      eqToHom (congrArg projModel (map_variableChange ..)) ≫
+        projModelBaseChange (sectionsMapLE (𝟙 S) h) (C • P.W) ≫
+        (projModelVCIso C P.W).hom := by
+      have h2 := congrArg
+        (fun t => eqToHom (congrArg projModel (map_variableChange
+          (φ := sectionsMapLE (𝟙 S) h) (C := C) (W := P.W))) ≫ t) hmap
+      simp only [eqToHom_trans_assoc, eqToHom_refl, Category.id_comp] at h2
+      exact h2.symm
+    rw [(transport_isPullback' (𝟙 S) (𝟙 G.E) (IsPullback.of_horiz_isIso ⟨by simp⟩)
+        P h).isoPullback_hom_fst,
+      show (transport_isPullback_model (𝟙 S) h P).isoPullback.hom ≫
+          pullback.fst (projModelπ P.W)
+            (Spec.map (CommRingCat.ofHom (sectionsMapLE (𝟙 S) h))) =
+        projModelBaseChange (sectionsMapLE (𝟙 S) h) P.W from
+        (transport_isPullback_model (𝟙 S) h P).isoPullback_hom_fst,
+      hmap', eqToHom_trans_assoc, eqToHom_refl]
+    simp only [Category.id_comp]
+    have hinvfst : (transport_isPullback_model (𝟙 S) h
+        (P.ofVC C)).isoPullback.inv ≫
+        projModelBaseChange (sectionsMapLE (𝟙 S) h) (C • P.W) =
+      pullback.fst (projModelπ (P.ofVC C).W)
+        (Spec.map (CommRingCat.ofHom (sectionsMapLE (𝟙 S) h))) :=
+      (transport_isPullback_model (𝟙 S) h (P.ofVC C)).isoPullback_inv_fst
+    rw [reassoc_of% hinvfst,
+      reassoc_of% (transport_isPullback' (𝟙 S) (𝟙 G.E)
+        (IsPullback.of_horiz_isIso ⟨by simp⟩) (P.ofVC C) h).isoPullback_hom_fst]
+    show transportTheta (𝟙 S) (𝟙 G.E) _ h ≫ P.e.hom =
+      transportTheta (𝟙 S) (𝟙 G.E) _ h ≫ ((P.e ≪≫ (projModelVCIso C P.W).symm).hom ≫
+        (projModelVCIso C P.W).hom)
+    rw [Iso.trans_hom, Iso.symm_hom, Category.assoc, Iso.inv_hom_id]
+    simp only [Category.comp_id]
+  · -- the `π` leg
+    simp only [Category.assoc]
+    have h1 : (transport_isPullback_model (𝟙 S) h P).isoPullback.hom ≫
+        pullback.snd (projModelπ P.W)
+          (Spec.map (CommRingCat.ofHom (sectionsMapLE (𝟙 S) h))) =
+      projModelπ (P.W.map (sectionsMapLE (𝟙 S) h)) :=
+      (transport_isPullback_model (𝟙 S) h P).isoPullback_hom_snd
+    have h2 : (projModelVCIso (C.map (sectionsMapLE (𝟙 S) h))
+          (P.W.map (sectionsMapLE (𝟙 S) h))).hom ≫
+        projModelπ (P.W.map (sectionsMapLE (𝟙 S) h)) =
+      projModelπ ((C.map (sectionsMapLE (𝟙 S) h)) •
+        (P.W.map (sectionsMapLE (𝟙 S) h))) :=
+      projModelVCIso_π _ _
+    have h3 : eqToHom (congrArg projModel hWeq) ≫
+        projModelπ ((C.map (sectionsMapLE (𝟙 S) h)) •
+          (P.W.map (sectionsMapLE (𝟙 S) h))) =
+      projModelπ ((C • P.W).map (sectionsMapLE (𝟙 S) h)) :=
+      projModelπ_congr ((map_variableChange (φ := sectionsMapLE (𝟙 S) h)
+        (C := C) (W := P.W)).symm)
+    have h4 : (transport_isPullback_model (𝟙 S) h (P.ofVC C)).isoPullback.inv ≫
+        projModelπ ((C • P.W).map (sectionsMapLE (𝟙 S) h)) =
+      pullback.snd (projModelπ (P.ofVC C).W)
+        (Spec.map (CommRingCat.ofHom (sectionsMapLE (𝟙 S) h))) :=
+      (transport_isPullback_model (𝟙 S) h (P.ofVC C)).isoPullback_inv_snd
+    have h5 : (transport_isPullback' (𝟙 S) (𝟙 G.E)
+        (IsPullback.of_horiz_isIso ⟨by simp⟩) (P.ofVC C) h).isoPullback.hom ≫
+        pullback.snd (projModelπ (P.ofVC C).W)
+          (Spec.map (CommRingCat.ofHom (sectionsMapLE (𝟙 S) h))) =
+      pullback.snd G.π V'.1.ι ≫ V'.2.isoSpec.hom :=
+      (transport_isPullback' (𝟙 S) (𝟙 G.E)
+        (IsPullback.of_horiz_isIso ⟨by simp⟩) (P.ofVC C) h).isoPullback_hom_snd
+    have h0 : (transport_isPullback' (𝟙 S) (𝟙 G.E)
+        (IsPullback.of_horiz_isIso ⟨by simp⟩) P h).isoPullback.hom ≫
+        pullback.snd (projModelπ P.W)
+          (Spec.map (CommRingCat.ofHom (sectionsMapLE (𝟙 S) h))) =
+      pullback.snd G.π V'.1.ι ≫ V'.2.isoSpec.hom :=
+      (transport_isPullback' (𝟙 S) (𝟙 G.E)
+        (IsPullback.of_horiz_isIso ⟨by simp⟩) P h).isoPullback_hom_snd
+    rw [h0, h1, h2, h3, h4, h5]
 
 end LocalPresentation
 
