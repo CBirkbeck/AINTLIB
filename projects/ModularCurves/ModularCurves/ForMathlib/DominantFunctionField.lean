@@ -67,4 +67,38 @@ noncomputable abbrev functionFieldAlgebra (f : X ⟶ Y) [IsDominant f]
     Algebra Y.functionField X.functionField :=
   f.functionFieldMap.hom.toAlgebra
 
+/-- The generic point of `X` lies in the preimage of any nonempty open of `Y` under a dominant `f`
+(its image is the generic point of `Y`, which lies in every nonempty open). -/
+theorem genericPoint_mem_preimage (f : X ⟶ Y) [IsDominant f]
+    [IrreducibleSpace X] [IrreducibleSpace Y] (U : Y.Opens) [hU : Nonempty U] :
+    genericPoint X ∈ f ⁻¹ᵁ U := by
+  show f.base (genericPoint X) ∈ U
+  rw [genericPoint_eq_of_isDominant f]
+  exact ((genericPoint_spec Y).mem_open_set_iff U.isOpen).mpr (by simpa using hU)
+
+/-- **(germ transport along a point equality)** Applying the stalk isomorphism `eqToHom` induced by
+an equality of points `a = b` to the germ of a section at `a` yields its germ at `b`. This is the
+elementary transport lemma that lets one move a germ between two *equal* points; it is what turns the
+abstract `eqToHom` in `functionFieldMap` into a concrete germ at the generic point. -/
+theorem germ_eqToHom_stalk_apply (Z : Scheme.{u}) (U : Z.Opens) {a b : Z} (hab : a = b)
+    (ha : a ∈ U) (hb : b ∈ U) (s : Γ(Z, U)) :
+    (eqToHom (congrArg (Z.presheaf.stalk) hab)) (Z.presheaf.germ U a ha s)
+      = Z.presheaf.germ U b hb s := by
+  subst hab
+  simp
+
+/-- **(function field pullback = section pullback on germs)** `functionFieldMap f` sends the class in
+`K(Y)` of a section `s ∈ Γ(Y, U)` to the class in `K(X)` of its pullback `f.app U s ∈ Γ(X, f⁻¹U)`.
+This is the concrete action of the abstract stalk-map `functionFieldMap`: it computes `f`'s
+function-field pullback on any regular function, the substrate for identifying it with an explicit
+coordinate/rational-function formula. -/
+theorem functionFieldMap_germToFunctionField (f : X ⟶ Y) [IsDominant f]
+    [IrreducibleSpace X] [IrreducibleSpace Y] (U : Y.Opens) [Nonempty U] (s : Γ(Y, U)) :
+    f.functionFieldMap (Y.germToFunctionField U s) =
+      X.presheaf.germ (f ⁻¹ᵁ U) (genericPoint X) (genericPoint_mem_preimage f U) (f.app U s) := by
+  have hx : f.base (genericPoint X) ∈ U := genericPoint_mem_preimage f U
+  rw [Scheme.Hom.functionFieldMap, CommRingCat.comp_apply,
+    germ_eqToHom_stalk_apply Y U (genericPoint_eq_of_isDominant f).symm _ hx s]
+  exact Scheme.Hom.germ_stalkMap_apply f U (genericPoint X) hx s
+
 end AlgebraicGeometry
