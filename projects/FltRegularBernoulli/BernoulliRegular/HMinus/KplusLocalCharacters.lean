@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 import Mathlib.NumberTheory.RamificationInertia.Galois
@@ -659,7 +664,7 @@ lemma trivial_mul_evenCharLocalFactor_eq_pow_localResidueDegreePlus
       (1 - (ℓ : ℂ) ^ (-s)) * evenCharLocalFactor p ℓ s =
         Finset.prod (Finset.univ.filter fun χ : DirichletCharacter ℂ p ↦ χ.Even)
           (fun χ ↦ (1 - χ (ℓ : ZMod p) * (ℓ : ℂ) ^ (-s))) := by
-    unfold evenCharLocalFactor
+    simp only [evenCharLocalFactor]
     rw [hrewrite, ← Finset.mul_prod_erase
       (Finset.univ.filter fun χ : DirichletCharacter ℂ p ↦ χ.Even)
       (fun χ : DirichletCharacter ℂ p ↦ (1 - χ (ℓ : ZMod p) * (ℓ : ℂ) ^ (-s)))]
