@@ -407,6 +407,57 @@ lemma ofAffineIntersectionFunctor_f
       affineIntersectionOverlapι F i j :=
   rfl
 
+/-- The canonical morphism from a singleton chart to the spectrum of the base ring. -/
+noncomputable def affineIntersectionChartToSpec
+    (F : Finset J ⥤ CommAlgCat.{u} S) (i : J) :
+    affineIntersectionChart F i ⟶ Spec (CommRingCat.of S) :=
+  Spec.map (CommRingCat.ofHom (algebraMap S (F.obj (singletonIndex i))))
+
+private theorem affineIntersectionChartToSpec_compatible
+    (F : Finset J ⥤ CommAlgCat.{u} S) (i j : J) :
+    affineIntersectionOverlapι F i j ≫ affineIntersectionChartToSpec F i =
+      overlapTransition F i j ≫ affineIntersectionOverlapι F j i ≫
+        affineIntersectionChartToSpec F j := by
+  simp only [affineIntersectionOverlapι, affineIntersectionChartToSpec, overlapTransition]
+  rw [← Spec.map_comp, ← Spec.map_comp, ← Spec.map_comp]
+  congr 1
+  ext x
+  simp [ringMap]
+
+/-- The affine-intersection glued scheme carries the structural morphism induced by the
+base-algebra structure on every chart. -/
+noncomputable def affineIntersectionToSpec
+    (F : Finset J ⥤ CommAlgCat.{u} S)
+    (hopen : IsOpenAffineIntersectionFunctor F)
+    (hpush : IsPushoutAffineIntersectionFunctor F) :
+    (ofAffineIntersectionFunctor F hopen hpush).glued ⟶ Spec (CommRingCat.of S) := by
+  let D : Scheme.GlueData := ofAffineIntersectionFunctor F hopen hpush
+  change D.glued ⟶ Spec (CommRingCat.of S)
+  letI : HasMulticoequalizer D.diagram :=
+    _root_.AlgebraicGeometry.Scheme.GlueData.instHasMulticoequalizerDiagram D
+  fapply Multicoequalizer.desc D.diagram
+  · exact affineIntersectionChartToSpec F
+  rintro ⟨i, j⟩
+  exact affineIntersectionChartToSpec_compatible F i j
+
+/-- The structural morphism of an affine-intersection glue restricts to the canonical
+structural morphism on each singleton chart. -/
+@[reassoc]
+theorem ofAffineIntersectionFunctor_ι_affineIntersectionToSpec
+    (F : Finset J ⥤ CommAlgCat.{u} S)
+    (hopen : IsOpenAffineIntersectionFunctor F)
+    (hpush : IsPushoutAffineIntersectionFunctor F) (i : J) :
+    (ofAffineIntersectionFunctor F hopen hpush).ι i ≫
+        affineIntersectionToSpec F hopen hpush =
+      affineIntersectionChartToSpec F i := by
+  let D : Scheme.GlueData := ofAffineIntersectionFunctor F hopen hpush
+  change D.ι i ≫ affineIntersectionToSpec F hopen hpush =
+    affineIntersectionChartToSpec F i
+  letI : HasMulticoequalizer D.diagram :=
+    _root_.AlgebraicGeometry.Scheme.GlueData.instHasMulticoequalizerDiagram D
+  change Multicoequalizer.π D.diagram i ≫ _ = _
+  exact Multicoequalizer.π_desc _ _ _ _ _
+
 end
 
 end AlgebraicGeometry.Scheme.GlueData
