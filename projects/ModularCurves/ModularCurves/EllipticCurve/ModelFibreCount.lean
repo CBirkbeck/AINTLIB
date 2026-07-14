@@ -434,6 +434,10 @@ theorem section_base_injective_of_isAlgClosed {F : Type u} [Field F] [IsAlgClose
     {X : Scheme.{u}} (π : X ⟶ Spec (CommRingCat.of F))
     (P Q : { g : Spec (CommRingCat.of F) ⟶ X // g ≫ π = 𝟙 _ })
     (h : ∀ p : Spec (CommRingCat.of F), P.1.base p = Q.1.base p) : P = Q := by
+  apply Subtype.ext
+  apply (Scheme.SpecToEquivOfField F X).injective
+  rw [Scheme.SpecToEquivOfField_eq_iff]
+  refine ⟨h _, ?_⟩
   sorry
 
 /-- **(g5, alg-closed case — w1–w6 per the section header; w7 above)** The topological
