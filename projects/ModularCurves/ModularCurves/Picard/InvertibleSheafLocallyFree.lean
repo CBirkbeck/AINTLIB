@@ -41,8 +41,7 @@ private noncomputable def localFreeTrivializationIso (M : X.Modules) (U : X.Open
     (e : (pullback U.ι).obj M ≅ unitObj U.toScheme) :
     SheafOfModules.free (R := X.ringCatSheaf.over U) PUnit.{u + 1} ≅ M.over U :=
   freePUnitIsoUnit U ≪≫
-    (overTrivializationOfRestrictIso M U
-      ((restrictFunctorIsoPullback U.ι).app M ≪≫ e)).symm
+    (overTrivializationOfRestrictIso M U (restrictIsoOfPullbackIso M U e)).symm
 
 private noncomputable def localGeneratorsOfTrivialization (M : X.Modules) (U : X.Opens)
     (e : (pullback U.ι).obj M ≅ unitObj U.toScheme) :

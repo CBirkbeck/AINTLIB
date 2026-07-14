@@ -63,28 +63,16 @@ the monoidal presheaf pullback, and collapse the double sheafification
 theorem nonempty_pullback_tensorObj (f : Y ⟶ X) (M N : X.Modules) :
     Nonempty ((Modules.pullback f).obj (tensorObj M N) ≅
       tensorObj ((Modules.pullback f).obj M) ((Modules.pullback f).obj N)) := by
-  letI : (PresheafOfModules.pullback.{u} (f.toRingCatSheafHom.hom :
-      (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat) ⟶
-        (TopologicalSpace.Opens.map f.base).op ⋙
-          (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat))).Monoidal :=
-    _root_.PresheafOfModules.pullbackMonoidal f
   -- E1: the pullback of the sheafified tensor is the sheafification of the presheaf
   -- pullback of the presheaf tensor
   have E1 : (Modules.pullback f).obj (tensorObj M N) ≅
       (PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).obj
         ((PresheafOfModules.pullback f.toRingCatSheafHom.hom).obj (M.val ⊗ N.val)) :=
     (SheafOfModules.sheafificationCompPullback.{u} f.toRingCatSheafHom).app (M.val ⊗ N.val)
-  -- E2: the tensorator of the monoidal presheaf pullback
-  have E2 : (PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).obj
-        ((PresheafOfModules.pullback f.toRingCatSheafHom.hom).obj (M.val ⊗ N.val)) ≅
-      (PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).obj
-        ((PresheafOfModules.pullback f.toRingCatSheafHom.hom).obj M.val ⊗
-          (PresheafOfModules.pullback f.toRingCatSheafHom.hom).obj N.val) :=
-    (PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)).mapIso
-      (Functor.Monoidal.μIso (PresheafOfModules.pullback.{u} (f.toRingCatSheafHom.hom :
-        (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat) ⟶
-          (TopologicalSpace.Opens.map f.base).op ⋙
-            (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat))) M.val N.val).symm
+  -- E2: the tensorator of the monoidal presheaf pullback, already packaged as
+  -- `nonempty_sheafify_presheafPullback_tensor` (same statement, `CommRingCat`-derived
+  -- clothing — definitionally the spelling used here)
+  obtain ⟨E2⟩ := nonempty_sheafify_presheafPullback_tensor f M.val N.val
   -- E3: collapse the double sheafification (the D-Idem leaf)
   obtain ⟨E3⟩ := _root_.PresheafOfModules.nonempty_sheafify_tensor_idem
     Y.sheaf.obj Y.ringCatSheaf.cond

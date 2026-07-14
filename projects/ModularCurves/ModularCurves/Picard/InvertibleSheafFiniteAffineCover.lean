@@ -38,8 +38,7 @@ theorem IsInvertible.exists_finite_affine_trivializingCover
     exact j.1.2.1
   · intro j
     obtain ⟨e⟩ := htriv j.1.1.2
-    exact ⟨(restrictFunctorIsoPullback (W j.1).ι).app M ≪≫
-      restrictTrivialization j.1.2.2 e⟩
+    exact ⟨restrictIsoOfPullbackIso M (W j.1) (restrictTrivialization j.1.2.2 e)⟩
 
 end
 

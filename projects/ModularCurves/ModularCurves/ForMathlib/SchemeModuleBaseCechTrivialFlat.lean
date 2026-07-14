@@ -112,9 +112,8 @@ theorem baseCechFactor_flat_of_trivializingCover
   change Module.Flat Γ(S, (⊤ : S.Opens))
     ((baseModulePresheaf π M).obj (op W))
   exact baseModulePresheaf_obj_flat_of_restrictIso π M hW
-    ((restrictFunctorIsoPullback W.ι).app M ≪≫
-      restrictTrivialization hWU
-        ((restrictFunctorIsoPullback (U (i 0)).ι).symm.app M ≪≫ e))
+    (restrictIsoOfPullbackIso M W
+      (restrictTrivialization hWU (pullbackIsoOfRestrictIso M (U (i 0)) e)))
 
 /-- Every term of the finite base-linear Cech complex is flat when the cover
 consists of affine opens carrying trivializations. -/
