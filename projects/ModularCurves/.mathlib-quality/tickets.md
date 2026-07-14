@@ -19938,3 +19938,19 @@ unit-torsor — the T-E12 rt1 replay with markings in place of adaptedness-norma
 (uniqueness of the classifying EllHom — the T-E12 rt2 replay) + `RepresentableBy` package →
 `legendreDelta_representable_by_affine` DISCHARGED modulo [T-E14-LVL-b]. Then [T-E14-ACT'] +
 [T-E14-AX2].
+
+## v10.231-OMEGA (2026-07-14) — ★★★ [T-E14-CLS-6] legendreClassifyingEllHom: KM 4.6.2's FORWARD UNIVERSAL PROPERTY IS COMPLETE
+
+Commits 974cfdbca…9331b52cb, ALL axiom-clean, almost all FIRST-BUILD green (the E12-D3 templates
+transpose frictionlessly): `legendrePiece_π` → `legendreTop_π_w` → `legendreBaseCover` +
+`legendreTop_zero` → `legendreClassifyingMap_structMap` → `restrict_legendreClassifyingMap` →
+`legendrePiece_isPullback` → **`isPullback_legendreTop`** (X IS the pullback of the universal
+Legendre curve along the classifying map) → **`legendreClassifyingEllHom : X ⟶
+universalLegendreObj R hR`** (full EllHom bundle).
+
+**AX1 remaining = the D4-rt arc:** rt1 (pulled datum = given datum: pulled marked pair via the
+marking diagrams + pulled ω = b via the unit-torsor — T-E12-rt1 replay with `legendreTop_piece`
+playing chartPiece's role) + rt2 (EllHom-determination — T-E12-rt2 replay: transported-taut
+adaptedness/marking vs witness-uniqueness CLS-1 ⟹ ringHom-determination on the λ-generator +
+top-determination via adaptedTotalCover-analog hom_ext) + RepresentableBy package. Plus the
+standing gaps: [T-E14-LVL-b] (geometric generation, KM-keystone), [T-E14-ACT'], [T-E14-AX2].
