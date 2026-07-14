@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib.NumberTheory.Bernoulli
@@ -112,8 +117,7 @@ theorem p_dvd_hMinus_iff_p_dvd_some_bernoulli (hp_odd' : p ≠ 2) :
             (p : ℚ_[p]) * (z : ℚ_[p]) := hz
       _ = ((A : ℤ_[p]) : ℚ_[p]) + (p : ℚ_[p]) * (z : ℚ_[p]) := by rw [hA_cast]
   have hpz_lt : ‖(p : ℚ_[p]) * (z : ℚ_[p])‖ < 1 := by
-    have hp_lt : ‖(p : ℚ_[p])‖ < 1 := by
-      simpa using (Padic.norm_natCast_lt_one_iff (p := p) (n := p)).2 (dvd_rfl)
+    have hp_lt : ‖(p : ℚ_[p])‖ < 1 := Padic.norm_p_lt_one
     calc
       ‖(p : ℚ_[p]) * (z : ℚ_[p])‖ = ‖(z : ℚ_[p])‖ * ‖(p : ℚ_[p])‖ := by
         rw [norm_mul, mul_comm]
