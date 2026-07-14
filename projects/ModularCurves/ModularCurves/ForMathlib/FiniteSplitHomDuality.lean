@@ -170,3 +170,13 @@ theorem bijective_of_precomp_bijective [Algebra.IsFiniteSplit k A]
   exact hlin
 
 end Algebra.IsFiniteSplit
+
+/-- Bijectivity of a linear map over a field descends from any field extension:
+`ψ ⊗ K` bijective implies `ψ` bijective (faithful flatness of `K/k`). -/
+theorem LinearMap.bijective_of_bijective_lTensor_field {k : Type u} [Field k]
+    (K : Type u) [Field K] [Algebra k K] {M N : Type u}
+    [AddCommGroup M] [Module k M] [AddCommGroup N] [Module k N]
+    (φ : M →ₗ[k] N) (h : Function.Bijective (φ.lTensor K)) :
+    Function.Bijective φ := by
+  haveI : Module.FaithfullyFlat k K := inferInstance
+  exact (Module.FaithfullyFlat.lTensor_bijective_iff_bijective k K φ).mp h
