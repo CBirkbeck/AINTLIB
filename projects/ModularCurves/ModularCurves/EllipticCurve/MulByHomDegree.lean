@@ -109,6 +109,19 @@ lemma finrank_of_isAffine {X Y : Scheme.{u}} (f : X ⟶ Y) [IsAffine X] [IsAffin
     Scheme.Hom.finrank_comp_left_of_isIso,
     Scheme.Hom.finrank_SpecMap_eq_finrank f.finite_appTop f.flat_appTop]
 
+/-- **(K4b-1, general form)** For a finite flat morphism `g : A ⟶ B` of affine schemes with `Γ(B)`
+a domain, the `RingHom.finrank` of the ring map `g.appTop` at any prime equals the module rank of
+`Γ(A)` over `Γ(B)` — turning the affine `appTop` rank produced by `finrank_of_isAffine` into a
+concrete `Module.finrank` over the (domain) base coordinate ring (`finrank_algebraMap_eq_module_finrank`). -/
+lemma appTop_finrank_eq_module_finrank {A B : Scheme.{u}} (g : A ⟶ B) [IsAffine A] [IsAffine B]
+    [Flat g] [IsFinite g] [IsDomain Γ(B, ⊤)] (pt : PrimeSpectrum Γ(B, ⊤)) :
+    letI := g.appTop.hom.toAlgebra
+    g.appTop.hom.finrank pt = Module.finrank Γ(B, ⊤) Γ(A, ⊤) := by
+  letI := g.appTop.hom.toAlgebra
+  haveI : Module.Finite Γ(B, ⊤) Γ(A, ⊤) := g.finite_appTop
+  haveI : Module.Flat Γ(B, ⊤) Γ(A, ⊤) := g.flat_appTop
+  exact _root_.ModularCurves.finrank_algebraMap_eq_module_finrank Γ(B, ⊤) Γ(A, ⊤) pt
+
 /-- The affine `Z`-chart of `projModel W` (the `X₂ ≠ 0` basic open), on which the global
 sections are `W.toAffine.CoordinateRing` (`coordRingToZSection`). -/
 noncomputable abbrev zChart {K : Type u} [Field K] (W : WeierstrassCurve K) : (projModel W).Opens :=
@@ -159,6 +172,20 @@ lemma finrank_eq_appTop_finrank_of_affineOpen {X : Scheme.{u}} (f : X ⟶ X)
       isPreconnected_univ (Set.mem_univ _) (Set.mem_univ _)
   rw [hconst, ← Scheme.Hom.finrank_pullback_snd f U.ι x₀, finrank_of_isAffine]
 
+/-- **(K4 (D) chart-reduction to a module rank, general form)** Chaining
+`finrank_eq_appTop_finrank_of_affineOpen` with the `appTop`-to-`Module.finrank` bridge
+`appTop_finrank_eq_module_finrank`: for a finite flat LFP endomorphism `f` of a preconnected scheme,
+the fibre rank at any point equals the module rank of `Γ(f⁻¹U)` over the (domain) coordinate ring
+`Γ(U)` of any affine open. All scheme plumbing is discharged generically — the crux then reduces to
+the pure ring-theoretic identity `Module.finrank Γ(U) Γ(f⁻¹U) = (mulByInt N).degree`. -/
+lemma finrank_eq_module_finrank_of_affineOpen {X : Scheme.{u}} (f : X ⟶ X)
+    [Flat f] [IsFinite f] [LocallyOfFinitePresentation f] [PreconnectedSpace X]
+    (U : X.Opens) [IsAffine U.toScheme] [IsDomain Γ(U.toScheme, ⊤)] (x₀ : U) (x : X) :
+    letI := (pullback.snd f U.ι).appTop.hom.toAlgebra
+    f.finrank x = Module.finrank Γ(U.toScheme, ⊤) Γ(pullback f U.ι, ⊤) := by
+  haveI : IsAffine (pullback f U.ι) := isAffine_of_isAffineHom (pullback.snd f U.ι)
+  rw [finrank_eq_appTop_finrank_of_affineOpen f U x₀ x, appTop_finrank_eq_module_finrank]
+
 /-- **(K4 crux — the HasseWeil coupling)** Over a field `K`, the scheme-theoretic fibre rank of the
 model `[N]` equals the degree of HasseWeil's multiplication-by-`N` isogeny `mulByInt W.toAffine N`
 (the function-field extension degree `[K(E) : [N]* K(E)]`).
@@ -189,12 +216,16 @@ theorem modelEllipticCurve_finrank_eq_mulByInt_degree {K : Type u} [Field K] [De
   obtain ⟨x₀⟩ := hNe
   haveI : PreconnectedSpace (modelEllipticCurve W).E :=
     inferInstanceAs (PreconnectedSpace (projModel W))
-  refine (finrank_eq_appTop_finrank_of_affineOpen
+  haveI : IsIntegral (modelEllipticCurve W).E := inferInstanceAs (IsIntegral (projModel W))
+  haveI : Nonempty (show ((modelEllipticCurve W).E).Opens from zChart W).toScheme := ⟨x₀⟩
+  refine (finrank_eq_module_finrank_of_affineOpen
     ((modelEllipticCurve W).mulByHom N) (show ((modelEllipticCurve W).E).Opens from zChart W)
     x₀ x).trans ?_
-  -- K4b: the appTop ring-map rank of `[N]⁻¹(Z) → Z` equals `(mulByInt N).degree`
-  -- (the coordinate ↔ division-polynomial identification; `Γ(Z) = W.CoordinateRing` via
-  -- `coordRingToZSection`, then `finrank_algebraMap_eq_module_finrank` + the pullback = `mulByInt`)
+  -- K4b (the isolated deep identity): `Module.finrank Γ(Z) Γ([N]⁻¹Z) = (mulByInt N).degree`.
+  -- All scheme plumbing is discharged; what remains is the coordinate ↔ division-polynomial
+  -- comparison: `Γ(Z) = W.CoordinateRing` (`coordRingToZSection`), and the `[N]`-pullback of
+  -- `Γ([N]⁻¹Z)` = HasseWeil `mulByInt`'s pullback (both realise `[N]`), so the module rank over the
+  -- domain coordinate ring = the function-field degree `(mulByInt N).degree = N²`.
   sorry
 
 /-- **(K4 field-level target)** Over a field `K`, the scheme-theoretic fibre rank of
