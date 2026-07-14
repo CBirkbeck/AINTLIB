@@ -788,6 +788,28 @@ theorem IsFilteredAlgColimit.exists_factor_of_finitePresentation
   rw [AlgHom.comp_apply, AlgHom.comp_apply] at hc
   exact hc
 
+/-- A finite family of algebra maps from finitely presented source algebras into a
+filtered colimit factors through one common stage. -/
+theorem IsFilteredAlgColimit.exists_common_factor_of_finitePresentation
+    (H : IsFilteredAlgColimit R 𝒮 t A u) {κ : Type*} [Finite κ]
+    (B : κ → Type u) [∀ k, CommRing (B k)] [∀ k, Algebra R (B k)]
+    [∀ k, FinitePresentation R (B k)] (f : ∀ k, B k →ₐ[R] A) :
+    ∃ i : ι, ∀ k, ∃ f' : B k →ₐ[R] 𝒮 i, (u i).comp f' = f k := by
+  classical
+  cases nonempty_fintype κ
+  haveI := H.directed
+  haveI := H.nonempty
+  choose i₀ f₀ hf₀ using fun k ↦
+    H.exists_factor_of_finitePresentation (B k) (f k)
+  obtain ⟨i, hi⟩ := (Finset.univ.image i₀).exists_le
+  refine ⟨i, fun k ↦ ⟨(t (hi (i₀ k)
+    (Finset.mem_image_of_mem i₀ (Finset.mem_univ k)))).comp (f₀ k), ?_⟩⟩
+  apply AlgHom.ext
+  intro x
+  simp only [AlgHom.comp_apply]
+  rw [H.compat]
+  exact AlgHom.congr_fun (hf₀ k) x
+
 /-- **[KL-5b] (concrete Stacks 00QO injectivity).** Two `R`-algebra maps from a
 finite-type algebra into a stage that agree in the colimit agree at a later stage.
 (Concrete twin of `RingHom.EssFiniteType.exists_comp_map_eq_of_isColimit`.) -/
@@ -805,6 +827,31 @@ theorem IsFilteredAlgColimit.exists_eq_at_stage_of_finiteType
       ≤ AlgHom.equalizer ((t h).comp f) ((t h).comp g) :=
     Algebra.adjoin_le fun b hb => he ⟨b, hb⟩
   exact AlgHom.ext fun b => hle (hs ▸ Algebra.mem_top)
+
+/-- A finite family of pairs of maps from finite-type algebras which agree in a
+filtered colimit agree simultaneously at one later stage. -/
+theorem IsFilteredAlgColimit.exists_common_eq_at_stage_of_finiteType
+    (H : IsFilteredAlgColimit R 𝒮 t A u) {κ : Type*} [Finite κ]
+    (B : κ → Type u) [∀ k, CommRing (B k)] [∀ k, Algebra R (B k)]
+    [∀ k, FiniteType R (B k)] {i : ι} (f g : ∀ k, B k →ₐ[R] 𝒮 i)
+    (hfg : ∀ k, (u i).comp (f k) = (u i).comp (g k)) :
+    ∃ (j : ι) (h : i ≤ j), ∀ k, (t h).comp (f k) = (t h).comp (g k) := by
+  classical
+  cases nonempty_fintype κ
+  haveI := H.directed
+  haveI := H.nonempty
+  choose j₀ hj₀ heq using fun k ↦
+    H.exists_eq_at_stage_of_finiteType (B k) (f k) (g k) (hfg k)
+  obtain ⟨j, hj⟩ := (insert i (Finset.univ.image j₀)).exists_le
+  have hij : i ≤ j := hj i (Finset.mem_insert_self i _)
+  refine ⟨j, hij, fun k ↦ ?_⟩
+  have hjk : j₀ k ≤ j := hj (j₀ k)
+    (Finset.mem_insert_of_mem (Finset.mem_image_of_mem j₀ (Finset.mem_univ k)))
+  apply AlgHom.ext
+  intro x
+  change t ((hj₀ k).trans hjk) (f k x) = t ((hj₀ k).trans hjk) (g k x)
+  rw [← H.t_trans (hj₀ k) hjk, ← H.t_trans (hj₀ k) hjk]
+  exact congrArg (t hjk) (AlgHom.congr_fun (heq k) x)
 
 
 /-! ### Presented systems over a filtered base ([KL-2d]) -/
