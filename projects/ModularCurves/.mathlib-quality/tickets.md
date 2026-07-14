@@ -19481,3 +19481,28 @@ Owner relayed OMEGA (T-E12 6/7), G0 (SIGNAL ★★ + next-arc triage), GH (`gamm
 - G0's Γ₀ arc runs in parallel to Y₀(N) (concrete isogeny route).
 
 **§F — MAIN-PR CADENCE:** PR-A **#5680** (dev→main) is OPEN and tracks HEAD — the SIGNAL ★★, `gammaBot_rigid` ★, and the E12 chain are all in it (cadence satisfied for visibility). A producer→main MERGE of #5680 is DUE at these ★ milestones, but needs a clean-room whole-branch green build + owner go (heavy op) — flagged as a pending coordinator action, not executed this sweep.
+
+### v10.198-GH — ★★ GENERAL-H Γ_H RIGIDITY (the charter goal) (STREAM-GH)
+Commits ..b36a9409c (pushed). **fork (a) DELIVERED.**
+**(1) ★ [TWIST] `gammaFullNaive_twist_pow_refl`** — the general-H engine: a `glSmul g`-twisted
+fix forces `isoPow e (orderOf g) = Iso.refl` — proven at the POINT level (NO [GH1]-naturality!):
+the additive point action cAct inverts the ℤ-lifted matrix on the level basis
+(`iterate_fix_of_matrix_rel`, abstract AddCommGroup engine: cAct^[m] fixes the pair when
+M^m ≡ 1 mod N entrywise; `pow_entry_dvd_of_map_eq` via RingHom.mapMatrix map_pow +
+ZMod.intCast_eq_intCast_iff + dvd_sub_comm), then the refactored extraction
+`gammaFullNaive_eq_refl_of_fix_sections` (fix_absurd's tail, now standalone) closes.
+whnf-TIMEOUT beaten by CONTEXT ISOLATION (pure-algebra lemmas extracted private at file
+level — never maxHeartbeats); `module` tactic kills the smul-decomposition goal.
+**(2) `gammaH_hfree_of_orderOf_absurd`** — hfree for general H: undo the γ-twist by the
+inverse glSmul action (`glSmul_mul` right-action law + `glSmul_one` + coe_inv-rfl + inv_inv),
+feed [TWIST], kill by the per-H pin; `gammaHAut_app_val` consumed as register-box spec.
+**(3) ★★ `gammaH_rigid_of_orderOf`** — **P_H.Rigid for ANY H**, two pins: hLN (T-W7.8,
+owner-parked) + **hH** (per-H finite-order arithmetic: no base-identical `e ≠ refl` with
+`e^(orderOf γ) = refl` for `γ ∈ H` — the CM-unit/H-intersection condition, EXACTLY KM's
+keystone territory; `H = ⊥` discharges by `orderOf 1 = 1`). Subsumes Γ₁/Γ₀ as special H.
+Axioms: register-boxes only. **KM-FLAG (hH-shape)**: your CM-unit enumeration (deg-1 endos of
+finite order have order ∈ {1,2,3,4,6} with pinned torsion-matrices) discharges hH per-H —
+the finite-order form is the exact consumable; no new handshake round needed, it composes
+with [KEY-DEG]'s `=4→[−1]`-style characterizations. Gotchas: shared-tree UU-conflict from a
+sibling mid-merge blocks ALL commits — wait for owner, never resolve their file; `set` now
+abstracts hypotheses too; AddSubgroup.closure_induction cases zero/add/neg. (STREAM-GH)
