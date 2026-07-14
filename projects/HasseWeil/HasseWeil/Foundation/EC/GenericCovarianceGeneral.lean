@@ -278,8 +278,10 @@ def PullbackEvaluation (β : Isogeny W.toAffine W.toAffine)
 
 variable {W}
 
-/-- `toAffinePoint` is injective on smooth points. -/
-private theorem toAffinePoint_injective :
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
+/-- `toAffinePoint` is injective on smooth points.  The single home of this fact: the copies in
+`Foundation/EC/KernelCount` and `Isogeny/TwoCurve/Covariance` now delegate here. -/
+theorem toAffinePoint_injective :
     Function.Injective
       (fun P : (W_smooth W).SmoothPoint ↦ P.toAffinePoint) := by
   intro P Q h
