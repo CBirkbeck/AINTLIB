@@ -6,12 +6,12 @@ Authors: AINTLIB ModularCurves project
 ForMathlib (OURS, not vendored): upstream candidate.
 -/
 import ModularCurves.EllipticCurve.WeierstrassModel
-import Mathlib.RingTheory.Polynomial.Eisenstein.Basic
-import Mathlib.RingTheory.Polynomial.UniqueFactorization
-import Mathlib.Algebra.MvPolynomial.Equiv
 import Mathlib.Algebra.MvPolynomial.Division
+import Mathlib.Algebra.MvPolynomial.Equiv
 import Mathlib.RingTheory.Ideal.Maximal
 import Mathlib.RingTheory.Ideal.Quotient.Basic
+import Mathlib.RingTheory.Polynomial.Eisenstein.Basic
+import Mathlib.RingTheory.Polynomial.UniqueFactorization
 
 /-!
 # The projective Weierstrass cubic is prime
