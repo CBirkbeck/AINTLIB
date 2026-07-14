@@ -19207,3 +19207,31 @@ the T-SG1b sorryAx from the subgroup-base-change trail (D2's cyclicity-transfer 
 KM 6.4.2 dichotomy (axiom-clean), KM 6.1.1(2)-half (BB-DELIGNE-only), T-SG1b (axiom-clean).
 Every remaining NISOG-side sorry is research-gated ([HOMOG-FRAME] = KM §5.2 charter-scale,
 [NISOG-GRASS], [T-D10-FPPF], [KM-FMT-FLAT], [KM-1.11.2], quotientCurve DS, KM 3.7.1).
+
+---
+
+## v10.211-G0 — STREAM-G0 SESSION TERMINAL: dispatchable board EMPTY (2026-07-14)
+
+**Full-sweep verdict**: no tractable in-lane sorry remains. Census of every G0-adjacent open
+item and its blocking class:
+- **Register boxes (cited black-boxes by design)**: BB-DELIGNE chain (DeligneOrder :47/:172/
+  :2061/:2120 + ExactOrder :115), T-D6b/c + T-D7-bridge (ExactOrder :278-321), BB-QF/BB-DEG
+  (Torsion, KM charter v10.192-§C).
+- **Research gates (boarded, escalation-scale)**: [HOMOG-FRAME] = KM §5.2 Axiomatic Regularity
+  + Ch.5 deformation theory (charter-scale, decomposition-km-62-63 §4 verdict; 6.3 ring-cores
+  banked); [NISOG-GRASS] (multi-lane); [T-D10-FPPF]; [KM-FMT-FLAT]; [KM-1.11.2]; quotientCurve
+  DS (group-law descent effectivity); KM 3.7.1 isGammaZero_iff_fppf.
+- **Coordinator-blocked**: the six SubgroupQuotient pins (α/β ruling, v10.189-G0); main-PR
+  cadence at the ★-milestones (charter: coordinator merges the shared dev branch).
+- **Other-stream charters**: [GHA3] levelSpaceΓπ_etale (P2-Weil primary; NOTE: its stated
+  KM-3.7.1 fallback route now has ALL substrate in-tree — torsion_etaleLocal_triv +
+  fullLevelIso + isPullback_constSchemeMapAlong; flagged for GH), [GH1] gammaHAut, YN/KM/FP
+  files per the reset.
+- **NEAR-TRACTABLE NOTE for any successor**: T-D6b's 2026-07-08 route lists 3 missing pieces;
+  2 are now substantially in-tree (split-algebra quotients-of-k̄ⁿ via FiniteSplitHomDuality;
+  length↔point-count via torsionPointsEquiv + EtaleSectionsCount). Only the divisor↔subscheme
+  bridge is genuinely new. Bounded (~300 LOC); unseated (ex-A-lane).
+
+**The day (2026-07-14, one marathon session)**: v10.205 L2b-affine ★ · v10.206 L2b-general/
+fullLevelIso ★★ · v10.207 C5B-2 COMPLETE (L4 seam quartet) ★★★ · v10.208 KM 6.4.2 axiom-clean ·
+v10.209 KM 6.1.1(2)-half · v10.210 T-SG1b axiom-clean. All green (3829 jobs), all pushed.
