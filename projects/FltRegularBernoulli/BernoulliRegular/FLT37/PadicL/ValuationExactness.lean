@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.NumberTheory.Padics.PadicIntegers
 import Mathlib.NumberTheory.Padics.PadicNumbers
 
@@ -43,7 +48,7 @@ theorem Padic.valuation_neg (x : ℚ_[p]) : (-x).valuation = x.valuation := by
 
 /-- The `ℤ_[p]`-valuation is invariant under negation. -/
 theorem PadicInt.valuation_neg (x : ℤ_[p]) : (-x).valuation = x.valuation := by
-  unfold _root_.PadicInt.valuation
+  simp only [_root_.PadicInt.valuation]
   rw [_root_.PadicInt.coe_neg, Padic.valuation_neg]
 
 /-- A `p`-adic integer with valuation `0` is a unit. -/
