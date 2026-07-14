@@ -695,6 +695,47 @@ theorem isAdapted_restrict_ofPresentation {V₀ : S.affineOpens} (hV₀ : V₀.1
     transUnit_restrict_restrict_left _ _ _ _]
   rw [transUnit_trans, transUnit_self]
 
+open Scheme WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(E12-D3)** The global discriminant of the adapted coefficients is a unit:
+chartwise it is the discriminant of the (elliptic) adapted model. -/
+theorem adaptedDelta_isUnit (G : EllipticCurveGeom S) (b : OmegaBasis G)
+    (h2 : IsUnit (2 : Γ(S, ⊤))) (h3 : IsUnit (3 : Γ(S, ⊤))) :
+    IsUnit ((-16 : Γ(S, ⊤)) * (4 * ((adaptedCoeff₄ G b h2 h3).1) ^ 3 +
+      27 * ((adaptedCoeff₆ G b h2 h3).1) ^ 2)) := by
+  apply S.toRingedSpace.isUnit_of_isUnit_germ
+  intro x _
+  obtain ⟨i, hxi⟩ := G.atlas.covers x
+  obtain ⟨V₀, hVaff, hxV, hVle⟩ := exists_isAffineOpen_mem_and_subset
+    (show x ∈ (G.atlas.U i).1 from hxi)
+  have hgerm : S.presheaf.germ ⊤ x trivial
+      ((-16 : Γ(S, ⊤)) * (4 * ((adaptedCoeff₄ G b h2 h3).1) ^ 3 +
+        27 * ((adaptedCoeff₆ G b h2 h3).1) ^ 2)) =
+    S.presheaf.germ V₀ x hxV (Scheme.resLE (le_top : V₀ ≤ ⊤)
+      ((-16 : Γ(S, ⊤)) * (4 * ((adaptedCoeff₄ G b h2 h3).1) ^ 3 +
+        27 * ((adaptedCoeff₆ G b h2 h3).1) ^ 2))) := by
+    rw [show Scheme.resLE (le_top : V₀ ≤ ⊤) _ =
+      (S.presheaf.map (homOfLE (le_top : V₀ ≤ ⊤)).op).hom
+        ((-16 : Γ(S, ⊤)) * (4 * ((adaptedCoeff₄ G b h2 h3).1) ^ 3 +
+          27 * ((adaptedCoeff₆ G b h2 h3).1) ^ 2)) from rfl]
+    exact (S.presheaf.germ_res_apply (homOfLE le_top) x hxV _).symm
+  rw [hgerm]
+  refine IsUnit.map _ ?_
+  -- the restricted expression is the discriminant of the adapted local model
+  have hres : Scheme.resLE (le_top : V₀ ≤ ⊤)
+      ((-16 : Γ(S, ⊤)) * (4 * ((adaptedCoeff₄ G b h2 h3).1) ^ 3 +
+        27 * ((adaptedCoeff₆ G b h2 h3).1) ^ 2)) =
+    (adaptedLocal G b h2 h3 ⟨V₀, hVaff⟩ i hVle).W.Δ := by
+    have h4 := (adaptedCoeff₄ G b h2 h3).2 ⟨V₀, hVaff⟩ i hVle
+    have h6 := (adaptedCoeff₆ G b h2 h3).2 ⟨V₀, hVaff⟩ i hVle
+    haveI := adaptedLocal_isShortNF G b h2 h3 ⟨V₀, hVaff⟩ i hVle
+    rw [WeierstrassCurve.Δ_of_isShortNF, ← h4, ← h6]
+    simp only [map_mul, map_add, map_pow, map_neg, map_ofNat]
+  rw [hres]
+  letI := (adaptedLocal G b h2 h3 ⟨V₀, hVaff⟩ i hVle).elliptic
+  exact WeierstrassCurve.isUnit_Δ _
+
 end LocalPresentation
 
 end ModularCurves
