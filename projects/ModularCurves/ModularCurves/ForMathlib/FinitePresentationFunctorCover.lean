@@ -38,6 +38,81 @@ theorem SpreadData.exists_common_stageToColimit_eq_atLaterStage
   refine ⟨S, hij, fun k => D.stageTransition H hQj (b_Q k), fun k => ?_⟩
   exact (D.stageToColimit_stageTransition H Q.2 hQj (b_Q k)).trans (hb_Q k)
 
+private theorem SpreadData.exists_span_eq_top_atLaterStage
+    (D : SpreadData 𝒮 uA B) (H : IsFilteredAlgColimit R 𝒮 t A uA)
+    {i : ι} (h : D.i₀ ≤ i) {κ : Type*} [Finite κ]
+    (b_i : κ → D.spreadStage (t := t) h)
+    (hspan : Ideal.span (Set.range fun k =>
+      D.stageToColimit H ⟨i, h⟩ (b_i k)) = ⊤) :
+    ∃ (j : ι) (hij : i ≤ j),
+      Ideal.span (Set.range fun k =>
+        D.stageTransition H
+          (P := ⟨i, h⟩) (Q := ⟨j, h.trans hij⟩) hij (b_i k)) = ⊤ := by
+  classical
+  cases nonempty_fintype κ
+  let b : κ → B := fun k => D.stageToColimit H ⟨i, h⟩ (b_i k)
+  have hsurj : Function.Surjective (Fintype.linearCombination B b) :=
+    (span_range_eq_top_iff_surjective_fintypeLinearCombination B b).mp hspan
+  obtain ⟨c, hc⟩ := hsurj 1
+  obtain ⟨P, hiP, c_P, hc_P⟩ :=
+    D.exists_common_stageToColimit_eq_atLaterStage H i c
+  let b_P : κ → D.spreadStage (t := t) P.2 :=
+    fun k => D.stageTransition H
+      (P := ⟨i, h⟩) (Q := P) hiP (b_i k)
+  have hb_P (k : κ) : D.stageToColimit H P (b_P k) = b k :=
+    D.stageToColimit_stageTransition H h hiP (b_i k)
+  have hsum_colimit :
+      D.stageToColimit H P (∑ k, c_P k * b_P k) =
+        D.stageToColimit H P 1 := by
+    rw [map_sum, map_one]
+    calc
+      ∑ k, D.stageToColimit H P (c_P k * b_P k) =
+          ∑ k, D.stageToColimit H P (c_P k) *
+            D.stageToColimit H P (b_P k) := by
+              apply Finset.sum_congr rfl
+              intro k _
+              rw [map_mul]
+      _ = ∑ k, c k * b k := by
+        apply Finset.sum_congr rfl
+        intro k _
+        rw [hc_P k, hb_P k]
+      _ = 1 := by
+        simpa [Fintype.linearCombination_apply, smul_eq_mul] using hc
+  letI : ∀ Q : {j // D.i₀ ≤ j},
+      Algebra (𝒮 D.i₀) (D.spreadStage (t := t) Q.2) :=
+    fun Q => ((algebraMap (𝒮 Q.1) (D.spreadStage (t := t) Q.2)).comp
+      (t Q.2).toRingHom).toAlgebra
+  letI : Algebra (𝒮 D.i₀) B :=
+    ((algebraMap A B).comp (uA D.i₀).toRingHom).toAlgebra
+  obtain ⟨Q, hPQ, hsum⟩ :=
+    (D.isFilteredAlgColimit H).eq_at_stage _ _ hsum_colimit
+  let b_Q : κ → D.spreadStage (t := t) Q.2 :=
+    fun k => D.stageTransition H
+      (P := P) (Q := Q) hPQ (b_P k)
+  let c_Q : κ → D.spreadStage (t := t) Q.2 :=
+    fun k => D.stageTransition H
+      (P := P) (Q := Q) hPQ (c_P k)
+  have hsum_stage : ∑ k, c_Q k * b_Q k = 1 := by
+    calc
+      ∑ k, c_Q k * b_Q k =
+          D.stageTransition H (P := P) (Q := Q) hPQ
+            (∑ k, c_P k * b_P k) := by
+              simp [b_Q, c_Q, map_sum, map_mul]
+      _ = D.stageTransition H (P := P) (Q := Q) hPQ 1 := hsum
+      _ = 1 := map_one _
+  refine ⟨Q.1, hiP.trans hPQ, (Ideal.eq_top_iff_one _).mpr ?_⟩
+  have hb_Q (k : κ) :
+      D.stageTransition H
+        (P := ⟨i, h⟩) (Q := Q) (hiP.trans hPQ) (b_i k) = b_Q k := by
+    exact (D.stageTransition_trans H h hiP hPQ (b_i k)).symm
+  rw [show (fun k => D.stageTransition H
+      (P := ⟨i, h⟩) (Q := Q) (hiP.trans hPQ) (b_i k)) = b_Q by
+    funext k
+    exact hb_Q k]
+  rw [← hsum_stage]
+  exact Ideal.sum_mem _ fun k _ =>
+    Ideal.mul_mem_left _ _ (Ideal.subset_span (Set.mem_range_self k))
+
 /-- A finite unit-ideal family can be represented at a spread stage later than any
 prescribed index while retaining its unit-ideal relation. -/
 theorem SpreadData.exists_common_stageToColimit_eq_span_eq_top_atLaterStage
@@ -48,61 +123,110 @@ theorem SpreadData.exists_common_stageToColimit_eq_span_eq_top_atLaterStage
       ∃ (b_S : κ → D.spreadStage (t := t) S.2),
         (∀ k, D.stageToColimit H S (b_S k) = b k) ∧
           Ideal.span (Set.range b_S) = ⊤ := by
-  classical
-  cases nonempty_fintype κ
-  have hsurj : Function.Surjective (Fintype.linearCombination B b) :=
-    (span_range_eq_top_iff_surjective_fintypeLinearCombination B b).mp hspan
-  obtain ⟨c, hc⟩ := hsurj 1
-  let bc : κ ⊕ κ → B := Sum.elim b c
-  obtain ⟨P, hiP, bc_i, hbc_i⟩ :=
-    D.exists_common_stageToColimit_eq_atLaterStage H i bc
-  let b_i : κ → D.spreadStage (t := t) P.2 := fun k => bc_i (Sum.inl k)
-  let c_i : κ → D.spreadStage (t := t) P.2 := fun k => bc_i (Sum.inr k)
-  have hsum_colimit :
-      D.stageToColimit H P (∑ k, c_i k * b_i k) =
-        D.stageToColimit H P 1 := by
-    rw [map_sum, map_one]
-    calc
-      ∑ k, D.stageToColimit H P (c_i k * b_i k) =
-          ∑ k, D.stageToColimit H P (c_i k) *
-            D.stageToColimit H P (b_i k) := by
-            apply Finset.sum_congr rfl
-            intro k _
-            rw [map_mul]
-      _ = ∑ k, c k * b k := by
-        apply Finset.sum_congr rfl
-        intro k _
-        rw [show D.stageToColimit H P (c_i k) = c k by
-          exact hbc_i (Sum.inr k),
-          show D.stageToColimit H P (b_i k) = b k by
-            exact hbc_i (Sum.inl k)]
-      _ = 1 := by
-        simpa [Fintype.linearCombination_apply, smul_eq_mul] using hc
-  letI : ∀ Q : {i // D.i₀ ≤ i},
-      Algebra (𝒮 D.i₀) (D.spreadStage (t := t) Q.2) :=
-    fun Q => ((algebraMap (𝒮 Q.1) (D.spreadStage (t := t) Q.2)).comp
-      (t Q.2).toRingHom).toAlgebra
-  letI : Algebra (𝒮 D.i₀) B :=
-    ((algebraMap A B).comp (uA D.i₀).toRingHom).toAlgebra
-  obtain ⟨Q, hPQ, hsum⟩ :=
-    (D.isFilteredAlgColimit H).eq_at_stage _ _ hsum_colimit
-  let b_j : κ → D.spreadStage (t := t) Q.2 :=
-    fun k => D.stageTransition H hPQ (b_i k)
-  let c_j : κ → D.spreadStage (t := t) Q.2 :=
-    fun k => D.stageTransition H hPQ (c_i k)
-  have hsum_stage : ∑ k, c_j k * b_j k = 1 := by
-    calc
-      ∑ k, c_j k * b_j k =
-          D.stageTransition H hPQ (∑ k, c_i k * b_i k) := by
-            simp [b_j, c_j, map_sum, map_mul]
-      _ = D.stageTransition H hPQ 1 := hsum
-      _ = 1 := map_one _
-  refine ⟨Q, hiP.trans hPQ, b_j, fun k => ?_, (Ideal.eq_top_iff_one _).mpr ?_⟩
-  · exact (D.stageToColimit_stageTransition H P.2 hPQ (b_i k)).trans
-      (hbc_i (Sum.inl k))
-  · rw [← hsum_stage]
-    exact Ideal.sum_mem _ fun k _ =>
-      Ideal.mul_mem_left _ _ (Ideal.subset_span (Set.mem_range_self k))
+  obtain ⟨P, hiP, b_P, hb_P⟩ :=
+    D.exists_common_stageToColimit_eq_atLaterStage H i b
+  have hspan_P : Ideal.span (Set.range fun k =>
+      D.stageToColimit H P (b_P k)) = ⊤ := by
+    rw [show (fun k => D.stageToColimit H P (b_P k)) = b by
+      funext k
+      exact hb_P k]
+    exact hspan
+  obtain ⟨j, hPj, hspan_j⟩ :=
+    D.exists_span_eq_top_atLaterStage H P.2 b_P hspan_P
+  let S : {j : ι // D.i₀ ≤ j} := ⟨j, P.2.trans hPj⟩
+  let b_j : κ → D.spreadStage (t := t) S.2 :=
+    fun k => D.stageTransition H (P := P) (Q := S) hPj (b_P k)
+  refine ⟨S, hiP.trans hPj, b_j, fun k => ?_, hspan_j⟩
+  exact (D.stageToColimit_stageTransition H P.2 hPj (b_P k)).trans (hb_P k)
+
+private theorem SpreadData.exists_map_span_eq_top_atLaterStage
+    {B₁ B₂ : Type u} [CommRing B₁] [CommRing B₂]
+    [Algebra A B₁] [Algebra A B₂]
+    (D₁ : SpreadData 𝒮 uA B₁) (D₂ : SpreadData 𝒮 uA B₂)
+    (H : IsFilteredAlgColimit R 𝒮 t A uA)
+    {i : ι} (h₁ : D₁.i₀ ≤ i) (h₂ : D₂.i₀ ≤ i)
+    (f_i : D₁.spreadStage (t := t) h₁ →ₐ[𝒮 i]
+      D₂.spreadStage (t := t) h₂)
+    (F : B₁ →ₐ[A] B₂)
+    (hf : ∀ x, D₂.stageToColimit H ⟨i, h₂⟩ (f_i x) =
+      F (D₁.stageToColimit H ⟨i, h₁⟩ x))
+    {κ : Type*} [Finite κ]
+    (b_i : κ → D₁.spreadStage (t := t) h₁)
+    (hspan : Ideal.span (Set.range fun k =>
+      F (D₁.stageToColimit H ⟨i, h₁⟩ (b_i k))) = ⊤) :
+    ∃ (j : ι) (hij : i ≤ j),
+      Ideal.span (Set.range fun k =>
+        D₁.mapAtLaterStage D₂ H h₁ h₂ hij f_i
+          (D₁.stageTransition H
+            (P := ⟨i, h₁⟩) (Q := ⟨j, h₁.trans hij⟩) hij (b_i k))) = ⊤ := by
+  have hspan_i : Ideal.span (Set.range fun k =>
+      D₂.stageToColimit H ⟨i, h₂⟩ (f_i (b_i k))) = ⊤ := by
+    rw [show (fun k => D₂.stageToColimit H ⟨i, h₂⟩ (f_i (b_i k))) =
+      fun k => F (D₁.stageToColimit H ⟨i, h₁⟩ (b_i k)) by
+        funext k
+        exact hf (b_i k)]
+    exact hspan
+  obtain ⟨j, hij, hspan_j⟩ :=
+    D₂.exists_span_eq_top_atLaterStage H h₂
+      (fun k => f_i (b_i k)) hspan_i
+  refine ⟨j, hij, ?_⟩
+  rw [show (fun k =>
+      D₁.mapAtLaterStage D₂ H h₁ h₂ hij f_i
+        (D₁.stageTransition H
+          (P := ⟨i, h₁⟩) (Q := ⟨j, h₁.trans hij⟩) hij (b_i k))) =
+      fun k => D₂.stageTransition H
+        (P := ⟨i, h₂⟩) (Q := ⟨j, h₂.trans hij⟩) hij (f_i (b_i k)) by
+          funext k
+          exact D₁.mapAtLaterStage_stageTransition D₂ H
+            h₁ h₂ hij f_i (b_i k)]
+  exact hspan_j
+
+private theorem SpreadData.exists_mapCoverAtLaterStage
+    {B₁ B₂ : Type u} [CommRing B₁] [CommRing B₂]
+    [Algebra A B₁] [Algebra A B₂]
+    (D₁ : SpreadData 𝒮 uA B₁) (D₂ : SpreadData 𝒮 uA B₂)
+    (H : IsFilteredAlgColimit R 𝒮 t A uA)
+    {i : ι} (h₁ : D₁.i₀ ≤ i) (h₂ : D₂.i₀ ≤ i)
+    (f_i : D₁.spreadStage (t := t) h₁ →ₐ[𝒮 i]
+      D₂.spreadStage (t := t) h₂)
+    (F : B₁ →ₐ[A] B₂)
+    (hf : ∀ x, D₂.stageToColimit H ⟨i, h₂⟩ (f_i x) =
+      F (D₁.stageToColimit H ⟨i, h₁⟩ x))
+    {κ : Type*} [Finite κ] (b : κ → B₁)
+    (hspan : Ideal.span (Set.range fun k => F (b k)) = ⊤) :
+    ∃ (j : ι) (hij : i ≤ j)
+        (b_j : κ → D₁.spreadStage (t := t) (h₁.trans hij)),
+      (∀ k, D₁.stageToColimit H ⟨j, h₁.trans hij⟩ (b_j k) = b k) ∧
+        Ideal.span (Set.range fun k =>
+          D₁.mapAtLaterStage D₂ H h₁ h₂ hij f_i (b_j k)) = ⊤ := by
+  obtain ⟨P, hiP, b_P, hb_P⟩ :=
+    D₁.exists_common_stageToColimit_eq_atLaterStage H i b
+  let f_P := D₁.mapAtLaterStage D₂ H h₁ h₂ hiP f_i
+  have hf_P (x) :
+      D₂.stageToColimit H ⟨P.1, h₂.trans hiP⟩ (f_P x) =
+        F (D₁.stageToColimit H ⟨P.1, h₁.trans hiP⟩ x) :=
+    D₁.mapAtLaterStage_colimit D₂ H h₁ h₂ hiP f_i F hf x
+  have hspan_P : Ideal.span (Set.range fun k =>
+      F (D₁.stageToColimit H ⟨P.1, h₁.trans hiP⟩ (b_P k))) = ⊤ := by
+    rw [show (fun k => F (D₁.stageToColimit H
+      ⟨P.1, h₁.trans hiP⟩ (b_P k))) = fun k => F (b k) by
+        funext k
+        rw [hb_P k]]
+    exact hspan
+  obtain ⟨Q, hPQ, hspan_Q⟩ :=
+    D₁.exists_map_span_eq_top_atLaterStage D₂ H
+      (h₁.trans hiP) (h₂.trans hiP) f_P F hf_P b_P hspan_P
+  let hiQ : i ≤ Q := hiP.trans hPQ
+  let b_Q : κ → D₁.spreadStage (t := t) (h₁.trans hiQ) :=
+    fun k => D₁.stageTransition H
+      (P := ⟨P.1, h₁.trans hiP⟩) (Q := ⟨Q, h₁.trans hiQ⟩) hPQ (b_P k)
+  have hb_Q (k : κ) :
+      D₁.stageToColimit H ⟨Q, h₁.trans hiQ⟩ (b_Q k) = b k :=
+    (D₁.stageToColimit_stageTransition H (h₁.trans hiP) hPQ (b_P k)).trans
+      (hb_P k)
+  refine ⟨Q, hiQ, b_Q, hb_Q, ?_⟩
+  rw [← D₁.mapAtLaterStage_trans D₂ H h₁ h₂ hiP hPQ f_i]
+  exact hspan_Q
 
 section Functor
 
@@ -127,6 +251,23 @@ noncomputable def SpreadData.FunctorModel.mapToStage
       (M.le_stage _) (M.le_stage _) (M.le_stage _) hij (M.map f) (M.map g)
   map_colimit f x := (M.object _).mapAtLaterStage_colimit (M.object _) H
     (M.le_stage _) (M.le_stage _) hij (M.map f) (F.map f).hom (M.map_colimit f) x
+
+/-- Move a spread functor to a stage where representatives of a finite source family
+have images under one chosen arrow which generate the unit ideal. -/
+theorem SpreadData.FunctorModel.exists_mapCoverAtLaterStage
+    (M : SpreadData.FunctorModel F H) {X Y : J} (a : X ⟶ Y)
+    {κ : Type*} [Finite κ] (b : κ → F.obj X)
+    (hspan : Ideal.span (Set.range fun k => (F.map a).hom (b k)) = ⊤) :
+    ∃ (j : ι) (hij : M.stage ≤ j)
+        (b_j : κ → (M.object X).spreadStage (t := t)
+          ((M.le_stage X).trans hij)),
+      (∀ k, (M.object X).stageToColimit H
+          ⟨j, (M.le_stage X).trans hij⟩ (b_j k) = b k) ∧
+        Ideal.span (Set.range fun k =>
+          (M.mapToStage hij).map a (b_j k)) = ⊤ := by
+  exact (M.object X).exists_mapCoverAtLaterStage
+    (M.object Y) H (M.le_stage X) (M.le_stage Y) (M.map a)
+      (F.map a).hom (M.map_colimit a) b hspan
 
 /-- Move a spread functor to a stage where a finite principal cover on one chosen
 object is represented. The cover relation, finite presentation of each principal
