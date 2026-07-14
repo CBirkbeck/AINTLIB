@@ -2042,6 +2042,103 @@ noncomputable def pulledWitness (φ : X ⟶ universalLegendreObj R hR)
     rw [map_one, map_zero] at htr
     exact htr
 
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation MvPolynomial in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(T-E14-CLS-8 rt2a ★)** The classifying algebra of the pulled datum is the
+algebra of `φ` itself (mirrors `classifyingRingHom_omegaBasisMap`): `C`-scalars via
+`base_w`, and the `λ`-generator via the pulled-witness family + `legendreLambda`'s
+universal spec. -/
+theorem legendreClassifyingRingHom_pulled (φ : X ⟶ universalLegendreObj R hR)
+    (hL : (universalLegendreObj R hR).curve.IsNaiveFullLevel 2
+      (universalLegendreP R hR) (universalLegendreQ R hR))
+    (h2 : IsUnit (2 : Γ(X.base, ⊤))) :
+    legendreClassifyingRingHom X
+      ((gammaFullNaiveProblem R 2).map (Opposite.op φ)
+        ⟨⟨universalLegendreP R hR, universalLegendreQ R hR⟩, hL⟩)
+      (omegaBasisMap φ (universalLegendreOmega R hR))
+      (IsLegendreDatum.map φ
+        (universalLegendre_isLegendreDatum R hR hL)
+        ((gammaFullNaiveProblem R 2).map (Opposite.op φ)
+          ⟨⟨universalLegendreP R hR, universalLegendreQ R hR⟩, hL⟩)
+        rfl rfl) h2 =
+    ((Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv ≫
+      φ.baseHom.appTop).hom := by
+  haveI := universalLegendre_isElliptic R hR
+  set hD' := IsLegendreDatum.map φ
+    (universalLegendre_isLegendreDatum R hR hL)
+    ((gammaFullNaiveProblem R 2).map (Opposite.op φ)
+      ⟨⟨universalLegendreP R hR, universalLegendreQ R hR⟩, hL⟩)
+    rfl rfl with hD'def
+  have hψR : ∀ r : R,
+      ((Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv ≫
+        φ.baseHom.appTop).hom (algebraMap R (LegendreModuliRing R) r) =
+      X.baseRingHom r := by
+    intro r
+    have hb : CommRingCat.ofHom (algebraMap R (LegendreModuliRing R)) ≫
+        (Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv ≫
+          φ.baseHom.appTop =
+        CommRingCat.ofHom X.baseRingHom := by
+      rw [Scheme.ΓSpecIso_inv_naturality_assoc, ← Scheme.Hom.comp_appTop,
+        show φ.baseHom ≫ Spec.map (CommRingCat.ofHom
+            (algebraMap R (LegendreModuliRing R))) = X.structMap from φ.base_w]
+      rfl
+    exact congrArg (fun g => CommRingCat.Hom.hom g r) hb
+  -- the λ-generator: sheaf-ext over the pulled-witness family
+  have hcover : (⊤ : X.base.Opens) ≤
+      iSup (fun V : X.base.affineOpens => V.1) := by
+    intro x _
+    obtain ⟨V₀, hVaff, hxV, -⟩ := exists_isAffineOpen_mem_and_subset
+      (show x ∈ (⊤ : X.base.Opens) from trivial)
+    exact TopologicalSpace.Opens.mem_iSup.mpr ⟨⟨V₀, hVaff⟩, hxV⟩
+  have hnat : (legendreLambda X _ _ hD' h2).1 =
+      ((Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv ≫
+        φ.baseHom.appTop).hom (universalLambda R) := by
+    refine TopCat.Sheaf.eq_of_locally_eq' X.base.sheaf
+      (fun V : X.base.affineOpens => V.1) ⊤
+      (fun V => homOfLE le_top) hcover _ _ (fun V => ?_)
+    show Scheme.resLE le_top (legendreLambda X _ _ hD' h2).1 =
+      Scheme.resLE le_top
+        (((Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv ≫
+          φ.baseHom.appTop).hom (universalLambda R))
+    have hres : Scheme.resLE (le_top : V.1 ≤ ⊤)
+        (((Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv ≫
+          φ.baseHom.appTop).hom (universalLambda R)) =
+        sectionsMapLE φ.baseHom
+          (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial)
+          ((Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv.hom
+            (universalLambda R)) := rfl
+    rw [hres]
+    exact (legendreLambda X _ _ hD' h2).2
+      (pulledWitness φ hL V).V (pulledWitness φ hL V).Pr
+      (pulledWitness φ hL V).lam (pulledWitness φ hL V).hAd
+      (pulledWitness φ hL V).hW (pulledWitness φ hL V).hMP
+  refine IsLocalization.ringHom_ext (Submonoid.powers (legendrePoly R)) ?_
+  refine MvPolynomial.ringHom_ext (fun r => ?_) (fun j => ?_)
+  · show legendreClassifyingRingHom X _ _ hD' h2
+      (algebraMap (MvPolynomial (Fin 1) R) (LegendreModuliRing R) (C r)) = _
+    rw [show algebraMap (MvPolynomial (Fin 1) R) (LegendreModuliRing R) (C r) =
+        algebraMap R (LegendreModuliRing R) r from by
+      rw [IsScalarTower.algebraMap_apply R (MvPolynomial (Fin 1) R)
+        (LegendreModuliRing R)]
+      rfl]
+    rw [legendreClassifyingRingHom_algebraMap]
+    exact (hψR r).symm
+  · show legendreClassifyingRingHom X _ _ hD' h2
+      (algebraMap (MvPolynomial (Fin 1) R) (LegendreModuliRing R)
+        (MvPolynomial.X j)) = _
+    rw [legendreClassifyingRingHom, IsLocalization.Away.lift_eq]
+    rw [show (eval₂Hom X.baseRingHom
+        ![(legendreLambda X _ _ hD' h2).1]) (MvPolynomial.X j) =
+      ![(legendreLambda X _ _ hD' h2).1] j from eval₂Hom_X' _ _ _]
+    have hj : j = 0 := Subsingleton.elim j 0
+    subst hj
+    show (legendreLambda X _ _ hD' h2).1 = _
+    rw [hnat]
+    rfl
+
 end RT2
 
 end TwoTorsion
