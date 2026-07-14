@@ -1,0 +1,2 @@
+STREAM-G0 CLAIMED 2026-07-14 (v10.219): E[N] finiteness substrate. ONE session (per ruling).
+FOCUS: (1) BB-QF mulByHom_locallyQuasiFinite (Torsion:141) -> closes mulByHom_isFinite; (2) then scope BB-FLAT via /develop --decompose. KM owns degree half.
