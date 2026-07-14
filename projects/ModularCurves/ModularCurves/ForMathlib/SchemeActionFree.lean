@@ -3,10 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.SchemeQuotient
 import ModularCurves.ForMathlib.InvariantTorsor
-import Mathlib.AlgebraicGeometry.Morphisms.Finite
+import ModularCurves.ForMathlib.SchemeQuotient
 import Mathlib.AlgebraicGeometry.Morphisms.Etale
+import Mathlib.AlgebraicGeometry.Morphisms.Finite
 
 /-!
 # Geometric freeness ⟹ algebraic freeness (the T-Q2 bridge)
@@ -38,10 +38,11 @@ variable {G : Type*} [Group G] {X : Scheme.{u}} (σ : SchemeAction G X)
 `G`-stable affine open `U` the induced action on the section ring `Γ(X, U)` is free in the sense
 of Katz–Mazur A7.1.1 (`IsFreeAlgebraAction`).
 
-Given a ring point `φ : Γ(X, U) →ₐ[ℤ] R'` with `R'` nontrivial and `φ ∘ (γ • ·) = φ`, the
-morphism `t : Spec R' ⟶ Spec Γ(X, U) ≅ U ↪ X` is `γ`-fixed (`specSMul_isoSpec_inv` is exactly the
-statement that `Spec` of the ring action *is* the restricted geometric action), so `Spec R'` is
-empty — impossible, since a nontrivial ring has a prime ideal. -/
+Given a ring point `φ : Γ(X, U) →ₐ[ℤ] R'` with `R'` nontrivial and
+`φ ∘ (γ • ·) = φ`, the morphism `t : Spec R' ⟶ Spec Γ(X, U) ≅ U ↪ X` is `γ`-fixed
+(`specSMul_isoSpec_inv` is exactly the statement that `Spec` of the ring action *is* the
+restricted geometric action), so `Spec R'` is empty — impossible, since a nontrivial ring
+has a prime ideal. -/
 theorem isFreeAlgebraAction_of_free {U : X.Opens} (hU : σ.IsStableOpen U)
     (hUa : IsAffineOpen U)
     (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X),
@@ -116,8 +117,8 @@ include hfree in
 morphism.
 
 `IsFinite` is Zariski-local at the target, the quotient charts cover `X/G`, and over the `x`-th
-chart the projection *is* `V x ⟶ Spec Γ(X, V x)ᴳ` (`morphismRestrict_quotientπ`), i.e. `Spec` of
-`Γ(X,V x)ᴳ ↪ Γ(X,V x)`, which is module-finite by `finite_gamma_of_free` (KM A7.1.1). -/
+chart the projection *is* `V x ⟶ Spec Γ(X, V x)ᴳ` (`morphismRestrict_quotientπ`), i.e. `Spec`
+of `Γ(X,V x)ᴳ ↪ Γ(X,V x)`, which is module-finite by `finite_gamma_of_free` (KM A7.1.1). -/
 theorem isFinite_quotientπ : IsFinite (σ.quotientπ V hVs hVa hVmem) := by
   refine IsZariskiLocalAtTarget.of_iSup_eq_top (P := @IsFinite) (σ.quotientChart V hVs hVa)
     (σ.iSup_quotientChart_eq_top V hVs hVa) fun x => ?_
@@ -151,32 +152,35 @@ theorem etale_quotientπ : Etale (σ.quotientπ V hVs hVa hVmem) := by
   rw [invariantsπ, HasRingHomProperty.Spec_iff (P := @Etale)]
   exact RingHom.etale_algebraMap.mpr inferInstance
 
+omit [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from X))] in
 /-- **(T-Q2, geometric)** For a **free** action, `localQuotientπ : ↥U ⟶ Spec Γ(X,U)ᴳ` is an
 **epimorphism** — it is an fppf cover (finite étale surjection = flat + surjective). Used to
 cancel `localQuotientπ` when identifying the descended structure map with the invariant quotient
 map on a chart (`[a3-ii]`). -/
 theorem epi_localQuotientπ {U : X.Opens} (hU : σ.IsStableOpen U) (hUa : IsAffineOpen U)
-    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X), t ≫ σ.hom γ = t → IsEmpty T) :
+    (hfree : ∀ γ : G, γ ≠ 1 → ∀ (T : Scheme.{u}) (t : T ⟶ X),
+      t ≫ σ.hom γ = t → IsEmpty T) :
     Epi (σ.localQuotientπ hU hUa) := by
   letI := σ.gammaMulSemiringAction hU
   haveI : Module.Finite (FixedPoints.subalgebra ℤ (↑Γ(X, U)) G) ↑Γ(X, U) :=
     Module.Finite.of_isFreeAlgebraAction G ℤ _ (σ.isFreeAlgebraAction_of_free hU hUa hfree)
   haveI : Module.Projective (FixedPoints.subalgebra ℤ (↑Γ(X, U)) G) ↑Γ(X, U) :=
     Module.Projective.of_isFreeAlgebraAction G ℤ _ (σ.isFreeAlgebraAction_of_free hU hUa hfree)
-  haveI : Module.Flat (FixedPoints.subalgebra ℤ (↑Γ(X, U)) G) ↑Γ(X, U) := Module.Flat.of_projective
+  haveI : Module.Flat (FixedPoints.subalgebra ℤ (↑Γ(X, U)) G) ↑Γ(X, U) :=
+    Module.Flat.of_projective
   haveI : Flat (invariantsπ G (↑Γ(X, U)) ℤ) := by
     rw [invariantsπ, AlgebraicGeometry.Flat.SpecMap_iff, CommRingCat.hom_ofHom,
       RingHom.flat_algebraMap_iff]
     infer_instance
   haveI : Surjective (invariantsπ G (↑Γ(X, U)) ℤ) := ⟨invariantsπ_surjective G _ ℤ⟩
-  haveI : Epi (invariantsπ G (↑Γ(X, U)) ℤ) := AlgebraicGeometry.Flat.epi_of_flat_of_surjective _
+  haveI : Epi (invariantsπ G (↑Γ(X, U)) ℤ) :=
+    AlgebraicGeometry.Flat.epi_of_flat_of_surjective _
   rw [SchemeAction.localQuotientπ_eq]
   infer_instance
 
 end Quotient
 
 end SchemeAction
-
 
 variable {G : Type u} [Group G] {B : Type u} [CommRing B] [MulSemiringAction G B]
 
