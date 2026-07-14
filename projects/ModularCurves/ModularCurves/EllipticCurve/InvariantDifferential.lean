@@ -205,6 +205,14 @@ noncomputable def _root_.ModularCurves.sectionsMapLE {S' : Scheme.{u}} (f : S' �
     {V : S.Opens} {V' : S'.Opens} (h : V' ≤ f ⁻¹ᵁ V) : Γ(S, V) →+* Γ(S', V') :=
   (f.appLE V V' h).hom
 
+/-- The sections comparison map only depends on the morphism (congruence transport;
+the inclusion proof adapts along the equality). -/
+theorem _root_.ModularCurves.sectionsMapLE_congr_hom {S' : Scheme.{u}} {f g : S' ⟶ S}
+    (hfg : f = g) {V : S.Opens} {V' : S'.Opens} (h : V' ≤ f ⁻¹ᵁ V) :
+    sectionsMapLE f h = sectionsMapLE g (hfg ▸ h) := by
+  cases hfg
+  rfl
+
 section Transport
 
 variable {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
@@ -239,7 +247,7 @@ private lemma resLE_isoSpec_naturality (f : S' ⟶ S) {V : S.affineOpens}
   rw [CommRingCat.ofHom_hom]
 
 /-- The induced comparison of the restricted curves over a cartesian pointed square. -/
-private noncomputable def transportTheta (f : S' ⟶ S) (t : G'.E ⟶ G.E)
+noncomputable def transportTheta (f : S' ⟶ S) (t : G'.E ⟶ G.E)
     (hsq : IsPullback t G'.π G.π f) {V : S.affineOpens}
     {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
     (pullback G'.π V'.1.ι : Scheme.{u}) ⟶ pullback G.π V.1.ι :=
@@ -1883,6 +1891,31 @@ theorem restrictTheta_fst {G : EllipticCurveGeom S} {V V' : S.affineOpens}
   show transportTheta (𝟙 S) (𝟙 G.E) _ _ ≫ pullback.fst G.π V.1.ι = _
   unfold transportTheta
   rw [pullback.lift_fst, Category.comp_id]
+
+open Scheme in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D4)** The transported chart isomorphism intertwines the model base change
+with the square comparison (`transportE_baseChange`, exposed). -/
+theorem transport_e_baseChange {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
+    (f : S' ⟶ S) (t : G'.E ⟶ G.E)
+    (hsq : IsPullback t G'.π G.π f) (hz : G'.zero ≫ t = f ≫ G.zero)
+    {V : S.affineOpens} (P : LocalPresentation G V)
+    {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
+    (P.transport f t hsq hz hV').e.hom ≫
+        projModelBaseChange (sectionsMapLE f hV') P.W =
+      transportTheta f t hsq hV' ≫ P.e.hom :=
+  transportE_baseChange f t hsq P hV'
+
+open Scheme in
+@[reassoc]
+theorem transportTheta_fst {S' : Scheme.{u}} {G' : EllipticCurveGeom S'}
+    (f : S' ⟶ S) (t : G'.E ⟶ G.E)
+    (hsq : IsPullback t G'.π G.π f)
+    {V : S.affineOpens} {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
+    transportTheta f t hsq hV' ≫ pullback.fst G.π V.1.ι =
+      pullback.fst G'.π V'.1.ι ≫ t := by
+  unfold transportTheta
+  rw [pullback.lift_fst]
 
 open Scheme in
 set_option backward.isDefEq.respectTransparency false in
