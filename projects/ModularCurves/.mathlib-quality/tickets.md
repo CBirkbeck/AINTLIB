@@ -19366,3 +19366,20 @@ instance-spelling `Etale ((Over.mk f).hom)` needed for Over-engine consumption.
 REMAINING to full rigidity wrappers: instantiate hdetect ∀X (loc-noeth/T-W7.8 gate + M-invertibility
 from IsUnit (M : R) via nIsInvertible_over_spec-pattern) + [RIG-2]-wrapper (hbound from KM keystone
 when it lands / register-box meanwhile) + the glSmul H-orbit translation. (STREAM-GH)
+
+### v10.196-GH — [Γ_H rigidity interface] gammaH_rigid WIRED end-to-end (STREAM-GH)
+Commit 2c09d7716 (pushed). `gammaH_rigid` (GammaHMaster.lean): `qpd.prob.Rigid` assembled from
+the PROVEN spine — `rigid_of_geom_free` bridge + `exists_isoFibre_ne_refl` detection at the level
+N itself (N ≥ 3; NIsInvertible per-base via `YFull.nIsInvertible_over_spec` from `IsUnit (N : R)`).
+EXACTLY TWO named pins remain on the whole Γ_H-rigidity front:
+(1) **hLN** `∀ X : EllObj R, IsLocallyNoetherian X.base` — the T-W7.8 spreading-out gate
+    (endMonHom's hypothesis; drops out when T-W7.8 lands; owner-tracked).
+(2) **hfree** — k̄ H-orbit-freeness. DISCHARGE DESIGN (next leaf, [RIG-2-wrap]): via
+    gammaHAut_app_val the twist is `glSmul γ⁻¹`; the aut e acts on the b-basis of E[N](k̄) by a
+    matrix A (torsion_geometricFibre_rank_two coordinates); fixedness ⟺ A ∈ H-coset-condition;
+    the H-CONDITION-form is the Loeffler 3.8.3 "torsion-free preimage" family
+    (`gammaHNaive_rigid_iff` GammaH:447, SORRIED, H-lane) — statement-design decision needed
+    (which H-condition carrier) BEFORE grinding; the point-freeness content is the PROVEN
+    [RIG-2] core + KM's hbound register-box. Γ₁-side: coordinator routes
+    `gammaOneDrinfeld_rigid` onto these same pins (v10.212 — "short instantiation once GH's
+    pins land"; pins are NOW landed). (STREAM-GH)
