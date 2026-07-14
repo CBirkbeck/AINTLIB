@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 import Mathlib.NumberTheory.RamificationInertia.Basic
@@ -60,7 +65,7 @@ lemma primesOverFinsetPlus_card_eq_ncard (ℓ : ℕ) [Fact ℓ.Prime] :
   have hne : (rationalPrimeIdeal ℓ) ≠ ⊥ := by
     rw [rationalPrimeIdeal, Ne, Ideal.span_singleton_eq_bot]
     exact_mod_cast (Fact.out : ℓ.Prime).ne_zero
-  unfold primesOverFinsetPlus
+  simp only [primesOverFinsetPlus]
   rw [← Set.ncard_coe_finset, IsDedekindDomain.coe_primesOverFinset hne]
 
 lemma mem_primesOverFinsetPlus_iff {ℓ : ℕ} [Fact ℓ.Prime] {P : Ideal (𝓞 (K⁺))} :
@@ -460,7 +465,7 @@ lemma map_ringOfIntegersComplexConj_eq_self_iff_localResidueDegreePlus_eq_half
     by_contra hodd
     have hself := localResidueDegreePlus_eq_self (p := p) hℓp hodd
     have hpos : 0 < localResidueDegree (p := p) ℓ hℓp := by
-      unfold localResidueDegree unitOfPrimeNe
+      simp only [localResidueDegree, unitOfPrimeNe]
       exact orderOf_pos _
     rw [hself] at hhalf
     omega
@@ -740,7 +745,7 @@ lemma dedekindLocalFactor_eq_pow_localResidueDegreePlus (hp_odd : p ≠ 2)
   have hcard_eq : (primesOverFinsetPlus (K := K) ℓ).card = localPrimeCountPlus (p := p) ℓ hℓp := by
     rw [primesOverFinsetPlus_card_eq_ncard (K := K) (ℓ := ℓ)]
     exact ncard_primesOverPlus_eq_localPrimeCountPlus (p := p) (K := K) hp_odd hℓp
-  unfold dedekindLocalFactor
+  simp only [dedekindLocalFactor]
   change Finset.prod (primesOverFinsetPlus (K := K) ℓ) (fun PPlus ↦
       (1 - (Ideal.absNorm PPlus : ℂ) ^ (-s))) =
         (1 - (ℓ : ℂ) ^ (-(localResidueDegreePlus (p := p) ℓ hℓp : ℂ) * s)) ^
@@ -910,7 +915,7 @@ lemma primesOverPlus_at_p_package (hp_odd : p ≠ 2) :
 lemma dedekindLocalFactorPlus_at_p {s : ℂ} :
     dedekindLocalFactor K⁺ p s = 1 - (p : ℂ) ^ (-s) := by
   classical
-  unfold dedekindLocalFactor primesOverFinset rationalPrimeIdeal
+  simp only [dedekindLocalFactor, primesOverFinset, rationalPrimeIdeal]
   have hne : (Ideal.span {(p : ℤ)} : Ideal ℤ) ≠ ⊥ := by
     rw [Ne, Ideal.span_singleton_eq_bot]
     exact_mod_cast hp.out.ne_zero
