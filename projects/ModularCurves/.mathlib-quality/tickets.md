@@ -19510,3 +19510,29 @@ the finite-order form is the exact consumable; no new handshake round needed, it
 with [KEY-DEG]'s `=4→[−1]`-style characterizations. Gotchas: shared-tree UU-conflict from a
 sibling mid-merge blocks ALL commits — wait for owner, never resolve their file; `set` now
 abstracts hypotheses too; AddSubgroup.closure_induction cases zero/add/neg. (STREAM-GH)
+
+## v10.216-G0 (2026-07-14) — E/C DESCENT LANDED: quotientCurve is a REAL elliptic curve modulo geometry-only gates
+**Increment 2 of the v10.215 dispatch.** `quotientCurve := quotientCurveGeom.toEllipticCurve` — the
+**T-W7a atlas enrichment on the SIGNAL scheme**: total space `G.quotient` ON THE NOSE, `quotientS`,
+descended `quotientZero`. **The group law carries NO gate** (GroupLawDescent's atlas law; grp/comm/
+one_eq_zero REAL). Sorry-debt of the whole DS-NISOG block now EXACTLY: [ELLQUOT-GEOM]×3
+(`quotient_smoothOfRelativeDimension`/`quotient_isProper`/`quotient_locallyWeierstrass` — named gates,
+KM 6.7.6/DR IV descent along quotientπ), [QUOT-KER] (forward half of `pointMap_eq_zero_iff`), BB-DEG×3
+(finite/flat/finrank — register-boxes per ruling), + the cross-charter T-W7.8 consume (below).
+**REAL and green**: `quotientHom := quotientπ`; pins `quotientHom_over`/`_isInvariant`/`quotientCurve_compat`
+(rfl-strength) direct from SIGNAL pins; `pointMap_zero`; `pointMap_eq_zero_iff` ⟸-half (invariance);
+**`pointMap_add` PROVEN** — route: `quotientHomOver` pointed (`quotientHomOver_one`, both units = zero
+sections) ⟹ GIT Cor 6.4 arbitrary-base (**consumes GH's parked T-W7.8 pin**
+`isMonHom_of_one_comp_eq'_of_finitePresentation` — hypotheses all supplied: E proper/flat/lfp/
+universallyOConnected in-tree; quotient separated+lfp from [ELLQUOT-GEOM] fields) ⟹ `quotientHomOver_mul`
+⟹ hom-group transport (`IsMonHom.monoidHom` map_mul). Scoped `section OverMonoidal` (file-wide monoidal
+opens BREAK NIsogeny's existing proofs — kabstract/ambiguity fallout; keep the section pattern).
+**α-lite intact**: `[G.HasKillingInt]` threaded through the DS block; §7 call sites textually unchanged
+via the new `standardCyclicSubgroup` instance (rank-d via `standardCyclicSubgroup_hasRank`, consuming
+session-B's banked `hasKillingInt_of_hasRank` — StableCover:217; deduped, not re-proven).
+**SEAT NOTE**: two G0 sessions ran concurrently (claim 155f288c9 @11:53 vs bridge c9ad1351e @12:00);
+consolidated per rule-5 first-claim, partition boarded in beastmode_active.G0 (B → glue-layer relative
+lift = [QUOT-BC]; A → NIsogeny §6/§7 + capstones). No work lost: B's bridge consumed, B's staged
+skeleton restored+extended.
+NEXT: the Y₀(N) capstones (exists_nIsogSpace :3280 / exists_gammaZeroSpace :3294) — recon GH's
+GammaHMaster Borel state first (cross-link, don't duplicate).
