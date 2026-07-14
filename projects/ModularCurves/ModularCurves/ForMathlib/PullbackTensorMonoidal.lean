@@ -82,7 +82,8 @@ theorem nonempty_sheafify_tensor_idem
           (((sheafification
                 (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj)).obj A).val ⊗
             ((sheafification
-                (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj)).obj B).val)) := by
+                (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ :
+                  Sheaf J RingCat.{u}).obj)).obj B).val)) := by
   have hunit : ∀ (M : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat)),
       sheafificationW
         (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj)
@@ -167,8 +168,6 @@ variable {C : Type u₁} [Category.{v₁} C] {T₁ T₂ : Cᵒᵖ ⥤ CommRingCa
   (ψ : T₁ ⋙ forget₂ CommRingCat RingCat ⟶ T₂ ⋙ forget₂ CommRingCat RingCat)
   [∀ X : Cᵒᵖ, IsIso (ψ.app X)]
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **[PIC-P1b-MONO], leaf ι-PF⊗ (restriction half).** Restriction of scalars of presheaves
 of modules along a *componentwise-isomorphic* morphism of presheaves of commutative rings is
 strongly monoidal at the object level: `rs(M) ⊗ rs(N) ≅ rs(M ⊗ N)`. Componentwise this is
@@ -279,7 +278,7 @@ noncomputable def restrictRingHom (f : Y ⟶ X) [IsOpenImmersion f] :
     Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat ⟶
       f.opensFunctor.op ⋙ (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat) where
   app U := (forget₂ CommRingCat RingCat).map (f.appIso U.unop).inv
-  naturality {U V} i :=
+  naturality {_U _V} i :=
     ((forget₂ CommRingCat RingCat).map_comp _ _).symm.trans
       ((congrArg (fun g => (forget₂ CommRingCat RingCat).map g)
         (f.appIso_inv_naturality i)).trans
@@ -367,8 +366,6 @@ noncomputable instance (X : Scheme.{u}) : SymmetricCategory X.PresheafOfModules 
   inferInstanceAs (SymmetricCategory
     (_root_.PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)))
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 variable (X) in
 /-- The sheafification unit of any presheaf of modules on a scheme is inverted by
 sheafification (its underlying map is `toSheafify`, a `J.W`-member). Scheme-side workhorse
@@ -423,8 +420,6 @@ theorem nonempty_sheafify_tensor_right_collapse (A B : X.PresheafOfModules) :
   rw [PresheafOfModules.sheafificationW_iff] at hstab
   exact ⟨@asIso _ _ _ _ _ hstab⟩
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **Associativity of the sheafified tensor**, `(M ⊗ N) ⊗ P ≅ M ⊗ (N ⊗ P)` — GME p. 108's
 implicit group-law coherence, now gap-free: collapse both re-sheafifications and transport
 the presheaf associator. Input to the Picard-group multiplication. -/
@@ -436,8 +431,6 @@ theorem nonempty_tensorObj_assoc (M N P : X.Modules) :
     (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).mapIso (α_ M.val N.val P.val) ≪≫
     eR⟩
 
-set_option backward.defeqAttrib.useBackward true in
-set_option backward.isDefEq.respectTransparency false in
 /-- **Commutativity of the sheafified tensor**, `M ⊗ N ≅ N ⊗ M` (the presheaf braiding,
 sheafified). Input to the Picard group's commutativity. -/
 theorem nonempty_tensorObj_comm (M N : X.Modules) :
