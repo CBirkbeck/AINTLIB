@@ -849,4 +849,65 @@ theorem isPullback_classifyingTop {R : CommRingCat.{u}} (Y : EllObj R)
         rw [Category.id_comp, ← restrict_classifyingMap]] at hp
     exact hp.flip
 
+
+open AlgebraicGeometry CategoryTheory Scheme in
+/-- **(E12-D4)** The universal `Ell/R`-object: `M₁ = Spec R[A₄,A₆][Δ⁻¹]` carrying the
+universal short-normal-form curve. -/
+noncomputable def universalEllObj (R : CommRingCat.{u}) : EllObj R where
+  base := Spec (CommRingCat.of (ModuliRingE12 R))
+  structMap := Spec.map (CommRingCat.ofHom (algebraMap R (ModuliRingE12 R)))
+  curve := modelEllipticCurve (universalShortNF R)
+
+open AlgebraicGeometry CategoryTheory Scheme MvPolynomial in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D4)** The classifying algebra restricts to the structure algebra on `R`. -/
+theorem classifyingRingHom_algebraMap {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤))) (r : R) :
+    classifyingRingHom Y b h2 h3 (algebraMap R (ModuliRingE12 R) r) =
+      Y.baseRingHom r := by
+  have h1 : (algebraMap R (ModuliRingE12 R) r) =
+      algebraMap (MvPolynomial (Fin 2) R) (ModuliRingE12 R) (C r) := by
+    rw [IsScalarTower.algebraMap_apply R (MvPolynomial (Fin 2) R) (ModuliRingE12 R)]
+    rfl
+  rw [h1, classifyingRingHom, IsLocalization.Away.lift_eq]
+  simp
+
+open AlgebraicGeometry CategoryTheory Scheme in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(E12-D4)** The classifying map lies over `Spec R`. -/
+theorem classifyingMap_structMap {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤))) :
+    classifyingMap Y b h2 h3 ≫ (universalEllObj R).structMap = Y.structMap := by
+  show (Y.base.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (classifyingRingHom Y b h2 h3))) ≫
+    Spec.map (CommRingCat.ofHom (algebraMap R (ModuliRingE12 R))) = Y.structMap
+  rw [Category.assoc, ← Spec.map_comp,
+    show CommRingCat.ofHom (algebraMap R (ModuliRingE12 R)) ≫
+        CommRingCat.ofHom (classifyingRingHom Y b h2 h3) =
+      CommRingCat.ofHom (Y.baseRingHom) from by
+      ext r
+      exact classifyingRingHom_algebraMap Y b h2 h3 r,
+    show CommRingCat.ofHom Y.baseRingHom =
+      (Scheme.ΓSpecIso R).inv ≫ Y.structMap.appTop from rfl,
+    Spec.map_comp, ← Scheme.toSpecΓ_naturality_assoc, ← SpecMap_ΓSpecIso_hom R,
+    ← Spec.map_comp, Iso.inv_hom_id, Spec.map_id]
+  exact Category.comp_id _
+
+
+open AlgebraicGeometry CategoryTheory Scheme in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D4 ★★)** The classifying morphism of an `(E, ω)`-datum in `Ell/R`:
+GME Thm 2.2.3's universal property, forward direction. -/
+noncomputable def classifyingEllHom {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤))) :
+    Y ⟶ universalEllObj R where
+  baseHom := classifyingMap Y b h2 h3
+  base_w := classifyingMap_structMap Y b h2 h3
+  top := classifyingTop Y b h2 h3
+  isPullback := isPullback_classifyingTop Y b h2 h3
+  zero_w := classifyingTop_zero Y b h2 h3
+
 end ModularCurves
