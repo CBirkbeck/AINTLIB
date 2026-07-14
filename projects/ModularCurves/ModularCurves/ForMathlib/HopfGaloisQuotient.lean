@@ -1,16 +1,21 @@
+/-
+Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: The AINTLIB Authors
+-/
 import ModularCurves.ForMathlib.HopfGalois
 import ModularCurves.ForMathlib.SpecEqualizer
-import Mathlib.AlgebraicGeometry.Morphisms.Flat
-import Mathlib.AlgebraicGeometry.EffectiveEpi
-import Mathlib.AlgebraicGeometry.Pullbacks
 import Mathlib.Algebra.Category.Ring.Constructions
+import Mathlib.AlgebraicGeometry.EffectiveEpi
+import Mathlib.AlgebraicGeometry.Morphisms.Flat
+import Mathlib.AlgebraicGeometry.Pullbacks
 import Mathlib.CategoryTheory.Limits.Shapes.KernelPair
 
 /-!
 # The affine quotient map is a regular epimorphism
 
-Construction support for `T-G3d-infra` Piece 3 (`.mathlib-quality/decomposition-g3d-piece3.md`): the
-first, **route-independent** half of the `@[stacks 023Q]` application. Given the co-invariant
+Construction support for `T-G3d-infra` Piece 3: the first, **route-independent** half of the
+`@[stacks 023Q]` application. Given the co-invariant
 faithful-flatness half of the Hopf-Galois property (`Module.FaithfullyFlat B^{coρ} B`), the affine
 quotient map `π = specEqualizerπ ρ includeLeft : Spec B ⟶ Spec B^{coρ}` is a **regular epimorphism**
 (= the coequalizer of its kernel pair), via `isRegularEpi_of_flat_of_surjective_of_isAffine`.
