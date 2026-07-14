@@ -88,3 +88,44 @@ fibre-exactness predicates (`SpecialFibreExact`/`FibreExactAt`) authored — the
 KM 2.3.1 §2.3 print ~p.45 (verbatim TODO) · EGA IV 11.3.10 (fibrewise flatness) · AK-1 V.3.6 (miracle flatness) ·
 Silverman III.6.4(b) / `HasseWeil/.../TorsionGeneralN.lean` (fibrewise `E[N]≅(ℤ/N)²`) · our FlatLocus/Acyclicity/
 NoethApprox (Route-A toolbox, 00RB/00MI, done modulo T-BE-TAIL) · board v10.29 / 8724 / 8866 (BB-FLAT = D2).
+
+---
+
+## 5. Re-verification 2026-07-14 (STREAM-G0, re-tasked BB-FLAT owner per v10.219 — adversarial `/develop --decompose`)
+
+Re-checked the D2 scoping above against current mathlib (5 days of daily bumps) + current project state.
+**The D2 verdict stands and is confirmed: BB-FLAT is a MAJOR box (the deep regularity / flat-locus
+program), NOT a bounded miracle-flatness application. No cheap bankable reduction exists.**
+
+**(a) Project flat-locus / B–E chain — STILL SORRIED (not landed since 2026-07-09):**
+`ForMathlib/LocalFlatnessCriterion.lean` **6 sorries** (00ME local criterion), `BuchsbaumEisenbud.lean`
+**8**, `Depth.lean` **2**, `Grade.lean` **2**, `FlatLocus.lean` **2**, `Acyclicity.lean` **1**,
+`NoethApprox.lean` **2** ≈ **23 sorries** across the chain — a multi-session commutative-algebra frontier,
+exactly the D-chain's own territory. Route A (fibrewise / flat-locus, EGA IV 11.3.10) remains gated on it.
+
+**(b) mathlib — STILL ABSENT:** re-survey finds NO `CohenMacaulay`/`IsCohenMacaulay`, NO `Module.depth`,
+NO Auslander–Buchsbaum, NO miracle-flatness (`flat_of_finite_of_regular`), NO scheme-level fibrewise
+flatness criterion. (Confirmed structurally: the project only maintains its own `Depth.lean` /
+`LocalFlatnessCriterion.lean` *because* mathlib lacks them.) Route B (miracle flatness) stays mathlib-absent.
+
+**(c) No bankable reduction (contrast with BB-QF, which DID bank one this pass).** mathlib's `Flat`
+morphism criteria — `AlgebraicGeometry.flat_iff` (affine-local `appLE.Flat`) and
+`AlgebraicGeometry.Flat.iff_flat_stalkMap` (`Flat f ↔ ∀ x, (f.stalkMap x).hom.Flat`) — reduce flatness
+only to *stalk/affine-local `RingHom.Flat`*, which IS the whole substance (each local map flat = the
+local flatness criterion 00ME, absent). So there is no analogue of BB-QF's
+`of_finite_preimage_singleton` reduction to land as proved code; the `mulByHom_flat` sorry stays whole.
+The one usable germ: `RingTheory/Flat/TorsionFree.lean` (torsion-free ⟹ flat over a Dedekind/PID) covers
+the **fibre case** [BBF-A1] once `[N]_s̄` is finite over the 1-dim regular geometric fibre — but that
+finiteness is BB-QF's `QF-NONCONST`, i.e. **T-B6 again**.
+
+**(d) Convergence observation (both G0 boxes bottom out at T-B6).** BB-QF's `QF-NONCONST` and BB-FLAT's
+fibrewise input [BBF-A1] both require the geometric-fibre structure of `[N]_s̄`, i.e. the T-B6
+scheme-fibre↔`WeierstrassCurve` comparison (sorried `abelEnrichment_exists`). BB-FLAT additionally needs
+the ~23-sorry flat-locus/B–E general-base assembly on top of T-B6.
+
+**VERDICT (task ii):** BB-FLAT is **NOT G0-session-bounded**. It is gated on (Route A) the project's own
+flat-locus/B–E commutative-algebra program [~23 sorries, D-chain territory] + T-B6, OR (Route B) a
+mathlib-absent Cohen–Macaulay/miracle-flatness development. **RECOMMENDATION:** park BB-FLAT behind the
+flat-locus/B–E chain + T-B6; do not attempt discharge now. Both G0 finiteness/flatness boxes are
+T-B6-gated on their fibre inputs — the highest-leverage unblock for the whole E[N] substrate is **T-B6
+(stream-B)**, not more G0 grinding on BB-QF/BB-FLAT.

@@ -30,3 +30,61 @@
 - [2026-07-14, coordinator, v10.219] **★ Y₀(N) assembled — RATIFIED; [ELLQUOT-GEOM] RULED (box it); your Γ₀ charter is COMPLETE → re-tasked to the E[N] finiteness substrate.** Verified: `quotientCurve` (NIsogeny:2976, a REAL elliptic curve, group law free from the T-W7a atlas) + `pointMap_add` + `exists_gammaZeroSpace`/`exists_nIsogSpace` (:2609+) — Y₀(N) via the concrete Hopf-Galois route, sorry-free mod L15+boxes. ★ — **the Γ₀ charter's GOAL, DELIVERED.** (Double-G0 collision resolved per rule-5; **fire ONE G0 session only** henceforth.)
   **[ELLQUOT-GEOM]×3 RULED → BOX IT (your option a).** `quotient_smoothOfRelativeDimension`/`_isProper`/`_locallyWeierstrass` = register-box family **BB-ELLQUOT, cite DR IV.1** (matches the BB-DEG pattern). It's DR IV-scale geometry NOT on the Y₀(N) representability critical path (L15 is) — a dedicated Vélu arc is a FUTURE charter only if a consumer (Hecke / explicit modular interpretation) demands it. Do NOT build it now.
   **RE-TASK → the E[N] FINITENESS substrate** (your E[N]/Hopf territory; the finiteness half — KM owns the DEGREE half `mulByHom_finrank`): (i) **BB-QF** `mulByHom_locallyQuasiFinite` (Torsion:141) — [N] quasi-finite (finite N-torsion fibres) — bounded; discharging it closes `mulByHom_isFinite` ⟹ **your own SIGNAL/Y₀(N) `isFinite` register-box auto-cleans**; (ii) then **scope BB-FLAT** `mulByHom_flat` (Torsion:147, miracle flatness / EGA IV 11.3.10) via `/develop --decompose` — bounded miracle-flatness application vs the deep regularity program. De-conflicted from KM's degree carve-out. FIRST ACT: `/beastmode` on BB-QF. Rule-5 + sentinel `beastmode_active.G0`. Marathon v10.162. (Seat is a candidate for a larger re-charter after — owner's call.)
+
+---
+
+## ⟹ STREAM-G0 REPORT (2026-07-14, commit 873febd9e)
+
+**BB-QF (i) — reduction BANKED, core is T-B6-gated (adversarial `/develop --decompose`).**
+- **PROVED + landed:** `mulByHom_locallyQuasiFinite` is now real code —
+  `LocallyQuasiFinite.of_finite_preimage_singleton _ (fun x => mulByHom_finite_fibres N x)`.
+  Key seam: `LocallyOfFiniteType (E.mulByHom N)` is **free by inferInstance** (`IsProper` *extends*
+  `LocallyOfFiniteType`, mathlib `Proper.lean:42`; `mulByHom_isProper` is an instance) — so
+  `of_finite_preimage_singleton` needs no `QuasiCompact` hyp. File error-free file-wide.
+- **The single remaining BB-QF sorry** is the isolated geometric leaf
+  `mulByHom_finite_fibres (x) : (⇑(E.mulByHom N).base ⁻¹' {x}).Finite` (net sorry count unchanged; the
+  sorry is now precisely on the wall, and the mathlib-criterion half is banked).
+- **Verdict (verified vs mathlib, `decomposition-bbqf.md` rewritten):** BB-QF is **NOT dischargeable
+  in-project today.** Two sub-leaves:
+  - `QF-DIM` (curve ⟹ finite proper-closed-subsets) is **more tractable than feared** — mathlib HAS
+    `topologicalKrullDim → IsLocallyArtinian.of_topologicalKrullDim_le_zero → IsArtinianScheme.finite`
+    (+ `finite_irreducibleComponents_of_isNoetherian`); needs only a rel-dim-1⟹fibre-dim-1 bridge.
+  - `QF-NONCONST` (nonconstancy of `[N]_s`) is the **one decisive WALL, gated on T-B6** (the
+    group-compatible scheme-fibre↔`WeierstrassCurve` bridge, rooted in the sorried
+    `abelEnrichment_exists`, stream-B's box). Holds on **every** route honouring the de-confliction:
+    the only degree-free nonconstancy source is HasseWeil's torsion witness (`card_torsion_ellPow_nat`),
+    and transporting it to `E_s` IS the T-B6 bridge. `mulByHom_surjective` is field/model-level only
+    (same wall). The "third source" (rel-dim-1 forces `E_s ≠ E_s[N]`) is CIRCULAR on this very LQF.
+- **De-confliction honoured:** zero use of KM's `mulByHom_finrank`. Confirms `black-box-plan.md`
+  GATING CORRECTION with hard mathlib evidence, and sharpens it: **the moment T-B6 lands, BB-QF closes**
+  (`QF-NONCONST`+`QF-DIM` → `mulByHom_finite_fibres` → the banked reduction → `mulByHom_isFinite` →
+  `torsionπ_isFinite` → G0's SIGNAL/Y₀(N) `isFinite` register-box auto-cleans).
+- **RECOMMENDATION:** park BB-QF behind T-B6 (stream-B). The banked reduction + decomposition are the
+  maximal G0 contribution without T-B6; do NOT force it through KM's degree (de-confliction) nor
+  build stream-B's fibre-comparison from G0.
+
+**(ii) BB-FLAT — SCOPED (`/develop --decompose`, re-verified 2026-07-14; `decomposition-bb-flat.md` §5).**
+Re-checked the prior D2 scoping vs current mathlib (5 days of bumps) + project state. **Verdict: BB-FLAT
+is a MAJOR box (deep regularity / flat-locus program), NOT a bounded miracle-flatness application, and
+has NO bankable reduction** (contrast BB-QF).
+- Route A (fibrewise / flat-locus, EGA IV 11.3.10) gated on the project's own B–E chain — STILL
+  **~23 sorries** (`LocalFlatnessCriterion` 6, `BuchsbaumEisenbud` 8, `Depth` 2, `Grade` 2, `FlatLocus`
+  2, `Acyclicity` 1, `NoethApprox` 2) — D-chain territory — PLUS T-B6 for the fibrewise input [BBF-A1].
+- Route B (miracle flatness) STILL mathlib-absent (no `CohenMacaulay`/`Module.depth`/Auslander–Buchsbaum).
+- No cheap reduction: mathlib's `flat_iff` / `Flat.iff_flat_stalkMap` reduce only to stalk-local
+  `RingHom.Flat` = the whole substance (needs 00ME local criterion, absent). `Flat/TorsionFree.lean`
+  covers the 1-dim FIBRE case but that needs `[N]_s̄` finite = T-B6 again.
+
+**⟹ CONVERGENCE FINDING (the actionable takeaway): both G0 boxes bottom out at T-B6.** BB-QF's
+`QF-NONCONST` and BB-FLAT's [BBF-A1] both need the T-B6 scheme-fibre↔`WeierstrassCurve` comparison
+(sorried `abelEnrichment_exists`, stream-B). **The single highest-leverage unblock for the entire E[N]
+finiteness/flatness substrate is T-B6 (stream-B) — not more G0 grinding.** BB-FLAT additionally needs
+the ~23-sorry flat-locus/B–E program on top.
+
+**SESSION TERMINAL (dispatch v10.219 complete).** (i) BB-QF: reduction BANKED (real proved code), leaf
+isolated, T-B6-gated. (ii) BB-FLAT: scoped, MAJOR, T-B6 + flat-locus-gated. Maximal G0 contribution
+without T-B6 delivered. Residual is genuinely cross-stream-blocked (T-B6 = stream-B; not a G0 leaf per
+`black-box-plan.md`). **RECOMMEND to owner:** (1) prioritise T-B6 (stream-B) — it unblocks BB-QF +
+BB-FLAT-fibrewise + BB-DEG + BB-DIFF simultaneously; (2) the flat-locus/B–E chain (~23 sorries) is the
+separate BB-FLAT general-base gate, best owned by the D-chain; (3) G0 seat awaits owner re-charter (per
+v10.219 "candidate for a larger re-charter"). Firing ONE G0 session only, as instructed.
