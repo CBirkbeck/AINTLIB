@@ -121,7 +121,7 @@ theorem Isogeny.finiteDimensional_toAlgebra (φ : Isogeny W₁ W₂) :
 unconditionally. Generalizes `EC.Isogeny.degree_pos` (which is endomorphism-only). -/
 theorem Isogeny.degree_pos' (φ : Isogeny W₁ W₂) : 0 < φ.degree := by
   change 0 < φ.toCurveMap.degree
-  unfold CurveMap.degree
+  simp only [CurveMap.degree]
   exact @Module.finrank_pos W₂.FunctionField W₁.FunctionField _ _
     φ.toCurveMap.toAlgebra.toModule _ φ.finiteDimensional_toAlgebra _ _ _
 
@@ -470,7 +470,6 @@ theorem twistedFrobeniusFactorization (φ : Isogeny E.toAffine V) :
 
 -- `[DecidableEq F]` enters through `twistedFrobeniusFactorization` (whose statement names
 -- `relativeFrobenius`) in the proof; the linter only inspects the surface type.
-set_option linter.unusedDecidableInType false in
 /-- **The pullback-level corollary of II.2.12**: every pullback of `φ` is a `p^k`-th
 power in `K(E)`, `k` the twisted exponent — `φ* z = (g_z)^{p^k}`. -/
 theorem twistedFrobeniusFactorization_pow_root (φ : Isogeny E.toAffine V) :
@@ -576,7 +575,6 @@ variable (p : ℕ) [Fact p.Prime] [CharP K p]
 
 -- `[DecidableEq K]` enters through the twisted factorization in the proof; the linter
 -- only inspects the surface type.
-set_option linter.unusedDecidableInType false in
 /-- **II.2.12 same-curve existence over a prime field, re-derived through the twist**
 (`s = 1`, divisibility automatic): an independent confirmation of
 `frobeniusFactorization_of_card_eq_prime` via `twistedFrobeniusFactorization` +
@@ -646,7 +644,6 @@ theorem Isogeny.mulByInt_p_not_isSeparable_of_coeff_eq_zero
 
 -- `[DecidableEq F]` enters through `omegaPullbackCoeff` in the proof; the linter only
 -- inspects the surface type.
-set_option linter.unusedDecidableInType false in
 omit [PerfectField F] in
 /-- **`[p]` is inseparable over a general characteristic-`p` base — axiom-clean**
 (Silverman III.5.6(b)). Discharges `a_{[p]} = 0` through
@@ -660,8 +657,6 @@ theorem Isogeny.mulByInt_p_not_isSeparable :
 
 -- `[DecidableEq F]`/`[Fintype F]` enter through the Route B coefficient computation in
 -- the proof; the linter only inspects the surface type.
-set_option linter.unusedDecidableInType false in
-set_option linter.unusedFintypeInType false in
 omit [PerfectField F] in
 /-- **`[p]` is inseparable over a finite base — axiom-clean** (Silverman III.5.6(b)):
 `a_{[p]} = p = 0` by the `[Fintype K]`-scoped chord-recursion Route B
@@ -818,7 +813,6 @@ noncomputable def Isogeny.hasDualWitness_of_twistedFactorization {k : ℕ} [ExpC
 
 -- `[DecidableEq F]` enters through the twisted factorization and the Verschiebung
 -- witness in the proof; the linter only inspects the surface type.
-set_option linter.unusedDecidableInType false in
 /-- **THE FULLY GENERAL dual existence, modulo the separable side** (deliverable d,
 finale, hypothesis-threaded form): over a perfect field of characteristic `p`, *every*
 isogeny `φ : E → E'` carries a dual witness, given the `[p]`-inseparability input and
@@ -835,7 +829,6 @@ theorem nonempty_hasDualWitness_of_twisted_separable_witnessesOf
   exact ⟨φ.hasDualWitness_of_twistedFactorization p E φs hfact ws
     (hasDualWitnessRelativeFrobeniusOf p E hinsep k)⟩
 
-set_option linter.unusedDecidableInType false in
 /-- The finale over a general perfect base (inherits the standing III.5.3 `sorryAx`
 through the `[p]`-inseparability input; no new sorries). -/
 theorem nonempty_hasDualWitness_of_twisted_separable_witnesses
@@ -845,8 +838,6 @@ theorem nonempty_hasDualWitness_of_twisted_separable_witnesses
   nonempty_hasDualWitness_of_twisted_separable_witnessesOf p E
     (Isogeny.mulByInt_p_not_isSeparable p E) hsepw φ
 
-set_option linter.unusedDecidableInType false in
-set_option linter.unusedFintypeInType false in
 /-- **The finale over a finite base — axiom-clean**: every isogeny out of `E/𝔽_q` (to any
 target curve) carries a dual witness, modulo only the separable side's witnesses on the
 Frobenius twists. -/
