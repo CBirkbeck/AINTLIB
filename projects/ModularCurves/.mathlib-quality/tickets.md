@@ -2407,9 +2407,15 @@ adjudicates.
   `projModelVCIso_map` geometrically; InvariantDifferential.lean) +
   `basisUnitAt_ofVC` (twisting scales the basis unit by `C.u`) + `adapt`/
   `isAdapted_adapt` — **adapted presentations EXIST over every chart-supported
-  affine (KM 2.2.5 existence half ★)**. REMAINING E12-B: uniqueness (two adapted
-  short-NF presentations coincide — needs `IsAdapted`-implies-`u`-component-1 via
-  `basisUnitAt`-vs-`transVC` + mathlib `toShortNF`); then E12-C/D.
+  affine (KM 2.2.5 existence half ★)**. **E12-B COMPLETE ★★
+  (2026-07-14, OMEGA, sorry-free + axiom-clean)**: `basisUnitAt_transUnit` +
+  `transUnit_eq_one_of_isAdapted` (ω pins `u`), `transVC_eq_one_of_isAdapted`
+  (+ short-NF pins `r,s,t` over 2,3-invertible bases — full KM 2.2.5 uniqueness),
+  `adaptShortNF`/`isAdapted_adaptShortNF`/`isShortNF_adaptShortNF` (existence via
+  mathlib `toShortNF` + the pure-`u` adaptation twist). KM 2.2.5 / GME 2.2.3's local
+  normalisation is DONE. NEXT: E12-C (the unique model's coefficients glue over
+  affine covers — uniqueness gives overlap-agreement; `a₄ a₆ ∈ Γ(S,⊤)` global) then
+  E12-D (M₁-representability).
   ORIGINAL SPEC: the basis-unit of a presentation**: for `b : OmegaBasis G` and
   `P : LocalPresentation G V`, glue `resLE b_i · (transUnit P|_{V∩U_i} P_i|)`-data over
   the atlas cover into a canonical `basisUnitAt P b : Γ(V)ˣ` (compatibility = b's own
