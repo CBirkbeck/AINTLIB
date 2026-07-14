@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.Groupoid
 import ModularCurves.EllipticCurve.TorsionFibre
@@ -855,7 +860,7 @@ theorem EllipticCurve.exists_isNaiveFullLevel_of_le_two (k : Type u) [Field k]
 theorem EllObj.exists_geometricPoint (X : EllObj R) (hne : Nonempty X.base)
     (N : ℕ) (hinv : IsUnit ((N : ℕ) : R)) :
     ∃ (k : Type u) (_ : Field k) (_ : IsAlgClosed k)
-      (t : Spec (CommRingCat.of k) ⟶ X.base), (N : k) ≠ 0 := by
+      (_t : Spec (CommRingCat.of k) ⟶ X.base), (N : k) ≠ 0 := by
   obtain ⟨s⟩ := hne
   refine ⟨AlgebraicClosure (X.base.residueField s), inferInstance, inferInstance,
     Spec.map (CommRingCat.ofHom (algebraMap (X.base.residueField s)
