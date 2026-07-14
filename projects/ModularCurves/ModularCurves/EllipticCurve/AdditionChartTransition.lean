@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: The AINTLIB Authors
+-/
 import ModularCurves.EllipticCurve.AdditionChartOverlap
 
 /-!
@@ -21,7 +26,7 @@ No new universal property, no explicit transition matrices.
 
 The payoff (`transHom_lawTwoTriple`): under `transHom`, the `(i',j')` law-2 triple is the `(i,j)`
 law-2 triple rescaled by the bidegree-`(2,2)` factor. Combined with
-`chartAwayHomOfTriple_dblAddXYZ_smul` (ac80a22d) this says the two chart-products define the SAME
+`chartAwayHomOfTriple_dblAddXYZ_smul` this says the two chart-products define the SAME
 morphism on their overlap — the cross-chart-product agreement, at ring level.
 -/
 
@@ -473,7 +478,7 @@ noncomputable def transAlgHom : biChartRing W i j →ₐ[R] transRing W i j i' j
 /-- Tower factorization of the structure map through `transAlgHom`, for any further localization of
 `transRing`. Proved at the definition site: the `transAlgHom.toRingHom = algebraMap` step is `rfl`
 here (in the light context), but whnf-explodes downstream once the concrete triple-localization is in
-scope (v10.24), so it is captured once as a lemma. -/
+scope, so it is captured once as a lemma. -/
 lemma algebraMap_biChartRing_eq (g : transRing W i j i' j') :
     algebraMap (biChartRing W i j) (Localization.Away g) =
       (algebraMap (transRing W i j i' j') (Localization.Away g)).comp
