@@ -19063,3 +19063,36 @@ bijective_of_precomp_bijective applied. **THE ONLY REMAINING L2b-AFFINE CONTENT:
 liftEquiv (tensor-hom adjunction, mathlib Basic:774) + the sections dictionary
 (EtaleSectionsCount equivs, de-privatized) + torsionPointsEquiv + the per-label Γ-chase.
 Then block (b) cover-glue. (STREAM-G0)
+
+---
+
+## v10.205-G0 — ★ L2b AFFINE CLOSED: `fullLevelHom_gamma_bijective` SORRY-FREE (2026-07-14, STREAM-G0)
+
+The (iv)-dictionary landed in one pass. `fullLevelHom_gamma_bijective` — the Γ-side
+comparison bijectivity over an affine base — is **sorry-free**; with it
+`fullLevelHom_isIso_of_affine` is complete modulo cross-charter BB only.
+
+**The assembly** (GLSchemeAction.lean): `bijective_of_precomp_bijective` reduces to the
+dual point-map on `Spec k̄(J)`-points; then four dictionaries transport it to
+`fullLevelFibreMap_bijective`:
+1. `hrestr` — `liftEquiv.symm (gp ∘ Ψ) = liftEquiv.symm gp ∘ ψalg` (tensor-map naturality);
+2. `hkey` — per-label Spec-square: `Spec.map ((χlab v ∘ ψalg).toRingHom) ≫ isoSpec.inv
+   = t ≫ Sigma.ι v ≫ fullLevelHom` — proven by ONE rw-chain through `hψ`/`hg` +
+   `constSchemeSpecIso_ι_hom` (β) + iso-collapse;
+3. `hpoint` — its torsion point is `fullLevelFibreMap L t v` (`Sigma.ι_desc_assoc` +
+   `pointToTorsion_torsionι` + `Point.pull_zsmul/add`);
+4. injectivity/surjectivity: classify Pi-points as labels via (α)
+   `eq_comp_evalAlgHom_of_pi`, chase through `sectionsEquivRingHomUnder` (γ.1) +
+   `torsionPointsEquiv` injectivity.
+
+**Axiom state**: `fullLevelHom_gamma_bijective` + `fullLevelHom_isIso_of_affine` residual
+sorryAx = **BB-QF/BB-DEG only** (enters via `torsion_geometricFibre_rank_two` →
+`fullLevelFibreMap_bijective`; KM charter v10.192-§C). No G0-owned sorry remains in the
+affine L2b chain.
+
+**Remaining for L2b general** (block (b), the LAST L2b step): `fullLevelHom_isIso` over an
+arbitrary base — glue `isIso_of_affine` over an affine cover via IsZariskiLocalAtTarget
+(target = torsion N; `fullLevelHom` is over S… route: affine cover of S, pull back E and L
+along each `S.affineCover.map i` (FullLevelPt.pullAlong), naturality square
+`fullLevelHom (L.pullAlong g) = pullback-transport of fullLevelHom L`, then
+`IsZariskiLocalAtTarget`/openCover-isIso criterion on torsionπ-preimages).
