@@ -131,3 +131,18 @@ fibre-iso extraction** (base-change `localModel`'s local pointed iso `e` to `κ(
 the ALPHA session (which holds the `localModel`/`projModel` context). Recipe fully specified in
 `MulByHomFibresGlobal.lean` sub-leaf docstring. **Opus BETA structural contribution complete; pipeline
 converging under the active ALPHA session.**
+
+### ⟹ BETA transport TOOLKIT COMPLETE (Opus, final) — both routes axiom-clean
+The full BETA transport machinery is landed + **axiom-clean** (`MulByHomFibresGlobal.lean`), so the sibling's
+post-g5 assembly is a **clean application** (either route):
+- **`isMonHom_of_pointed`** — pointed `E⟶F` hom ⟹ `IsMonHom` (GIT 6.4; discharges `[IsMonHom]` from a
+  `FibrewiseElliptic` `hez`=`compat_zero`). Axiom-clean.
+- **`finite_fibres_mulByHom_of_isMonHom_iso`** (`7d5b6098c`) — **TOPOLOGICAL** transport: `[n]_F` finite
+  fibres ⟹ `[n]_E` finite fibres across a pointed iso. Axiom-clean. **This is the exact shape feeding
+  `Torsion.mulByHom_finite_fibres`** from ALPHA's topological `modelMulByHom_finite_preimage_singleton`.
+- **`locallyQuasiFinite_mulByHom_of_isMonHom_iso`** + `mulByHom_locallyQuasiFinite_assembled` — the LQF-route
+  alternative (of_fiberToSpecResidueField).
+**Post-g5 assembly** (sibling, atlas context): `FibrewiseElliptic` per-fibre `⟨W',e,heπ,hez⟩` (raw-iso→asOver)
+→ `isMonHom_of_pointed hez` → `finite_fibres_mulByHom_of_isMonHom_iso` on ALPHA's model finite fibres →
+`Torsion.mulByHom_finite_fibres`. Only the raw-iso→asOver wrapping + g5 remain. Torsion leaf re-aligned to
+`finite_fibres` (`56f272dab`, matches ALPHA's topological output). Opus transport lane fully delivered.
