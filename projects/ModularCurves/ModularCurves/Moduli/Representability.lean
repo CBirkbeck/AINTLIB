@@ -1,4 +1,5 @@
 import ModularCurves.Moduli.EllCategory
+import ModularCurves.EllipticCurve.RecordGroupUnique
 import ModularCurves.ForMathlib.TateNormalForm
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
 import Mathlib.RingTheory.Localization.Away.Basic
@@ -193,6 +194,154 @@ theorem EllHom.pullSection_comp {X Y Z : EllObj R} (f : X ⟶ Y) (g : Y ⟶ Z)
   · rw [(EllHom.pullSection R (f ≫ g) P).2,
       (EllHom.pullSection R f (EllHom.pullSection R g P)).2]
 
+section PullSectionAdditivity
+
+open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
+
+variable {X Y : EllObj R} (f : X ⟶ Y)
+
+/-- The comparison isomorphism from the total space of `X.curve` onto the total space of
+the base change of `Y.curve` along `f.baseHom`, from the cartesian square of `f`. -/
+noncomputable def EllHom.curveIsoPullback : X.curve.E ≅ pullback Y.curve.π f.baseHom :=
+  f.isPullback.isoPullback
+
+/-- The comparison isomorphism is pointed. -/
+lemma EllHom.zero_curveIsoPullback :
+    X.curve.zero ≫ (EllHom.curveIsoPullback R f).hom =
+      (Y.curve.baseChange f.baseHom).zero := by
+  apply pullback.hom_ext
+  · exact (Category.assoc _ _ _).trans <|
+      (congrArg (X.curve.zero ≫ ·) (f.isPullback.isoPullback_hom_fst)).trans <|
+      f.zero_w.trans (pullback.lift_fst _ _ _).symm
+  · exact (Category.assoc _ _ _).trans <|
+      (congrArg (X.curve.zero ≫ ·) (f.isPullback.isoPullback_hom_snd)).trans <|
+      X.curve.zero_π.trans (pullback.lift_snd _ _ _).symm
+
+/-- The comparison isomorphism as an isomorphism over the base. -/
+noncomputable def EllHom.curveIsoPullbackOverIso :
+    X.curve.asOver ≅ (Y.curve.baseChange f.baseHom).asOver :=
+  Over.isoMk (EllHom.curveIsoPullback R f) (f.isPullback.isoPullback_hom_snd)
+
+/-- The comparison isomorphism as a morphism over the base (the pre-existing
+consumer-facing form). -/
+noncomputable def EllHom.curveIsoPullbackOver :
+    X.curve.asOver ⟶ (Y.curve.baseChange f.baseHom).asOver :=
+  Over.homMk (EllHom.curveIsoPullback R f).hom (f.isPullback.isoPullback_hom_snd)
+
+/-- The transport of sections along the comparison isomorphism. -/
+noncomputable def EllHom.transportSection (s : X.curve.Section) :
+    (Y.curve.baseChange f.baseHom).Section :=
+  ⟨s.1 ≫ (EllHom.curveIsoPullback R f).hom,
+    (Category.assoc _ _ _).trans <|
+      (congrArg (s.1 ≫ ·) (f.isPullback.isoPullback_hom_snd)).trans s.2⟩
+
+lemma EllHom.transportSection_injective :
+    Function.Injective (EllHom.transportSection R f) := by
+  intro s s' h
+  refine Subtype.ext ?_
+  have h1 : s.1 ≫ (EllHom.curveIsoPullback R f).hom =
+      s'.1 ≫ (EllHom.curveIsoPullback R f).hom :=
+    congrArg Subtype.val h
+  simpa using congrArg (· ≫ (EllHom.curveIsoPullback R f).inv) h1
+
+/-- The transport of a pulled section is the base-changed pullback section. -/
+lemma EllHom.transportSection_pullSection (P : Y.curve.Section) :
+    (EllHom.transportSection R f (EllHom.pullSection R f P)).1
+      = pullback.lift (f.baseHom ≫ P.1) (𝟙 X.base)
+          (by rw [Category.assoc, P.2, Category.comp_id, Category.id_comp]) := by
+  apply pullback.hom_ext
+  · exact (Category.assoc _ _ _).trans <|
+      (congrArg ((EllHom.pullSection R f P).1 ≫ ·)
+        (f.isPullback.isoPullback_hom_fst)).trans <|
+      (f.isPullback.lift_fst _ _ _).trans (pullback.lift_fst _ _ _).symm
+  · exact (Category.assoc _ _ _).trans <|
+      (congrArg ((EllHom.pullSection R f P).1 ≫ ·)
+        (f.isPullback.isoPullback_hom_snd)).trans <|
+      (f.isPullback.lift_snd _ _ _).trans (pullback.lift_snd _ _ _).symm
+
+/-- The dictionary image of a transported pullback section is the plain pullback of the
+section along the composite. -/
+lemma EllHom.dict_transportSection_pullSection (P : Y.curve.Section) :
+    EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom (𝟙 X.base)
+        (EllHom.transportSection R f (EllHom.pullSection R f P))
+      = EllipticCurve.Point.pull Y.curve (𝟙 X.base ≫ f.baseHom) P := by
+  refine Subtype.ext ?_
+  show (EllHom.transportSection R f (EllHom.pullSection R f P)).1
+      ≫ pullback.fst Y.curve.π f.baseHom = _
+  rw [EllHom.transportSection_pullSection]
+  exact (pullback.lift_fst _ _ _).trans
+    (congrArg (· ≫ P.1) (Category.id_comp f.baseHom)).symm
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(GME Cor 2.2.5, arbitrary base)** The transport along the pointed comparison
+isomorphism is additive: the two independent group structures correspond by the
+records-level canonicity primitive `isMonHom_of_pointedIso_records` (the K4 supply —
+no noetherian hypothesis). -/
+lemma EllHom.transportSection_add (s s' : X.curve.Section) :
+    EllHom.transportSection R f (s + s')
+      = EllHom.transportSection R f s + EllHom.transportSection R f s' := by
+  have hη : (η[X.curve.asOver] : 𝟙_ (Over X.base) ⟶ X.curve.asOver) ≫
+      (EllHom.curveIsoPullbackOverIso R f).hom
+      = η[(Y.curve.baseChange f.baseHom).asOver] := by
+    apply Over.OverMorphism.ext
+    show (η[X.curve.asOver] : _ ⟶ X.curve.asOver).left ≫
+      (EllHom.curveIsoPullback R f).hom = _
+    exact (congrArg (· ≫ (EllHom.curveIsoPullback R f).hom)
+        X.curve.one_eq_zero).trans <|
+      (Category.assoc _ _ _).trans <|
+      (congrArg ((𝟙_ (Over X.base)).hom ≫ ·)
+        (EllHom.zero_curveIsoPullback R f)).trans <|
+      (Y.curve.baseChange f.baseHom).one_eq_zero.symm
+  have h64 := isMonHom_of_pointedIso_records X.curve
+    (Y.curve.baseChange f.baseHom) (EllHom.curveIsoPullbackOverIso R f) hη
+  have h64l : (μ[X.curve.asOver]).left ≫ (EllHom.curveIsoPullback R f).hom
+      = (MonoidalCategory.tensorHom (EllHom.curveIsoPullbackOverIso R f).hom
+          (EllHom.curveIsoPullbackOverIso R f).hom).left
+        ≫ (μ[(Y.curve.baseChange f.baseHom).asOver]).left :=
+    ((Over.comp_left _ _ _ _ _).symm.trans (congrArg CommaMorphism.left h64)).trans
+      (Over.comp_left _ _ _ _ _)
+  have hcs : X.curve.pointEquivOverHom (𝟙 X.base) s ≫
+      (EllHom.curveIsoPullbackOverIso R f).hom
+      = (Y.curve.baseChange f.baseHom).pointEquivOverHom (𝟙 X.base)
+          (EllHom.transportSection R f s) :=
+    Over.OverMorphism.ext rfl
+  have hcs' : X.curve.pointEquivOverHom (𝟙 X.base) s' ≫
+      (EllHom.curveIsoPullbackOverIso R f).hom
+      = (Y.curve.baseChange f.baseHom).pointEquivOverHom (𝟙 X.base)
+          (EllHom.transportSection R f s') :=
+    Over.OverMorphism.ext rfl
+  refine Subtype.ext ?_
+  have hx : (s + s').1
+      = (lift (X.curve.pointEquivOverHom (𝟙 X.base) s)
+          (X.curve.pointEquivOverHom (𝟙 X.base) s')).left
+        ≫ (μ[X.curve.asOver]).left :=
+    (congrArg CommaMorphism.left
+      (X.curve.pointEquivOverHom_add (𝟙 X.base) s s')).trans
+      (Over.comp_left _ _ _ _ _)
+  have hRR : (EllHom.transportSection R f s + EllHom.transportSection R f s').1
+      = (lift ((Y.curve.baseChange f.baseHom).pointEquivOverHom (𝟙 X.base)
+            (EllHom.transportSection R f s))
+          ((Y.curve.baseChange f.baseHom).pointEquivOverHom (𝟙 X.base)
+            (EllHom.transportSection R f s'))).left
+        ≫ (μ[(Y.curve.baseChange f.baseHom).asOver]).left :=
+    (congrArg CommaMorphism.left
+      ((Y.curve.baseChange f.baseHom).pointEquivOverHom_add (𝟙 X.base) _ _)).trans
+      (Over.comp_left _ _ _ _ _)
+  show (s + s').1 ≫ (EllHom.curveIsoPullback R f).hom = _
+  rw [hRR]
+  exact (congrArg (· ≫ (EllHom.curveIsoPullback R f).hom) hx).trans <|
+    (Category.assoc _ _ _).trans <|
+    (congrArg ((lift (X.curve.pointEquivOverHom (𝟙 X.base) s)
+        (X.curve.pointEquivOverHom (𝟙 X.base) s')).left ≫ ·) h64l).trans <|
+    (Category.assoc _ _ _).symm.trans <|
+    (congrArg (· ≫ (μ[(Y.curve.baseChange f.baseHom).asOver]).left)
+      ((Over.comp_left _ _ _ _ _).symm.trans
+        (congrArg CommaMorphism.left
+          ((lift_map _ _ _ _).trans
+            (congrArg₂ lift hcs hcs')))))
+
+end PullSectionAdditivity
+
 /-- **(T-E4a, additivity of section-pullback — surfaced by the adversarial pass
 2026-07-06)** `pullSection` is a group homomorphism. NOT free: `EllHom` carries no
 group-compatibility field and the two curves' `grp` data are independent, so this
@@ -204,7 +353,20 @@ canonicity chain A6.δ that the earlier "nothing depends on it" amendment droppe
 theorem EllHom.pullSection_add {X Y : EllObj R} (f : X ⟶ Y)
     (P Q : Y.curve.Section) :
     EllHom.pullSection R f (P + Q) =
-      EllHom.pullSection R f P + EllHom.pullSection R f Q := by sorry
+      EllHom.pullSection R f P + EllHom.pullSection R f Q := by
+  -- DE-SORRIED (STREAM-OMEGA 2026-07-14): the T-W7.8 park-reason dissolved — the
+  -- records-level canonicity primitive `isMonHom_of_pointedIso_records` (K4 supply,
+  -- `RecordGroupUnique.lean`) needs no noetherian hypothesis. Proof: transport along
+  -- the pointed comparison isomorphism onto the base-changed curve; the two group
+  -- structures correspond by the K4 supply; the base-changed side is additive by the
+  -- `Point.baseChangeEquiv` dictionary and `Point.pull_add`; the transport is
+  -- injective.
+  apply EllHom.transportSection_injective R f
+  rw [EllHom.transportSection_add]
+  apply (EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom (𝟙 X.base)).injective
+  rw [map_add, EllHom.dict_transportSection_pullSection,
+    EllHom.dict_transportSection_pullSection,
+    EllHom.dict_transportSection_pullSection, EllipticCurve.Point.pull_add]
 
 /-- The naive `Γ₁(N)` moduli problem over `R`: `E/S ↦ {P ∈ E(S) : P` has naive exact
 order `N}` (fibrewise; the right notion for `N` invertible, KM 1.4.4). Functor laws are
