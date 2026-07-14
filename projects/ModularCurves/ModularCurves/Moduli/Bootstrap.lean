@@ -8,6 +8,7 @@ import ModularCurves.Moduli.GammaH
 import ModularCurves.Moduli.OmegaFunctor
 import ModularCurves.Moduli.UniversalAdapted
 import ModularCurves.Moduli.LegendreDelta
+import ModularCurves.Moduli.UniversalLegendre
 
 /-!
 # The KM 4.7 bootstrap objects (T-E12–T-E15)
@@ -153,7 +154,13 @@ pins the translation; `legendreCurve_vc_marked` pins the rest). -/
 theorem legendreDelta_representable_by_affine (hR : IsUnit (2 : R)) :
     ∃ X : EllObj R, IsAffine X.base ∧
       Nonempty ((legendreDeltaProblem R).RepresentableBy X) := by
-  sorry
+  -- DISCHARGED modulo [T-E14-LVL-b] by `legendreDelta_representable_by_affine_of_level`
+  -- (Moduli/UniversalLegendre.lean): the sole remaining input is the naive-full-level
+  -- clause for the universal marked pair — killing ✓ (`two_zsmul_universalLegendreP/Q`);
+  -- geometric `E[2]`-generation = the KM-keystone deferral.
+  refine legendreDelta_representable_by_affine_of_level R hR ⟨?_, ?_⟩
+  · exact ⟨two_zsmul_universalLegendreP R hR, two_zsmul_universalLegendreQ R hR⟩
+  · sorry
 
 /-- **(T-E14-AX2, KM engine axiom 2 for the corrected Legendre `δ`)** For every
 elliptic curve `E/S` over a base in which `2` is invertible, the `S`-scheme relatively
