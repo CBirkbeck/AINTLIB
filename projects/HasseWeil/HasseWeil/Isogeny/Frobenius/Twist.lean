@@ -764,6 +764,7 @@ noncomputable def EC.Isogeny.relativeFrobenius (e : ℕ) :
 
 /-! #### The compositional identity and the pullback field range -/
 
+omit [DecidableEq F] [E.toAffine.IsElliptic] in
 /-- Base-ring agreement for the compositional identity: on the polynomial base
 `AdjoinRoot.mk _ (C q)`, the relative-Frobenius coordinate-ring hom precomposed with
 `CoordinateRing.map (iterateFrobenius F p e)` agrees with the iterate-Frobenius on `K(E)`
@@ -830,6 +831,7 @@ private theorem relativeFrobenius_coordRingHom_eq_on_root (e : ℕ) :
         (y_gen E ^ p ^ e) (iterateFrobeniusTwist_generic_equation p E e)]
   rfl
 
+omit [DecidableEq F] [E.toAffine.IsElliptic] in
 /-- **Compositional identity**: the relative Frobenius pullback of the
 `CoordinateRing.map (iterateFrobenius F p e)`-image of `r` is the `p^e`-th power of
 the image of `r` (mirror of `frobeniusRelativeCoordRingHom_comp_map`). The
