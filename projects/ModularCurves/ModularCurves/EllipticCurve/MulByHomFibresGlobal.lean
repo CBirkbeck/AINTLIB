@@ -1,4 +1,6 @@
 import ModularCurves.EllipticCurve.MulByHomFibres
+import ModularCurves.EllipticCurve.ModelFibreCount
+import ModularCurves.ForMathlib.QuasiFiniteDescent
 
 /-!
 # BB-QF BETA global assembly — `[N]` locally quasi-finite from the per-fibre transport
@@ -150,6 +152,81 @@ sub-leaf `fiber_mulByHom_locallyQuasiFinite`. This is the assembled form of `Tor
 theorem mulByHom_locallyQuasiFinite_assembled (E : EllipticCurve S) (N : ℕ) [NeZero N] :
     LocallyQuasiFinite (E.mulByHom N) :=
   LocallyQuasiFinite.of_fiberToSpecResidueField _ fun y => E.fiber_mulByHom_locallyQuasiFinite N y
+
+/-! ### κ̄-wiring: the model LQF over an arbitrary field (seam-i application)
+
+Base-change the model to the algebraic closure (T-A5a: `projModel (W.baseChange κ̄)` IS
+the pullback of `projModel W`), transport ALPHA's algebraically-closed LQF through the
+pointed iso, and descend along the fppf `Spec κ̄ → Spec k` with the new
+`DescendsAlong @LocallyQuasiFinite` instance. -/
+
+section KappaBarWiring
+
+open WeierstrassCurve
+
+variable {k : Type u} [Field k]
+
+/-- **(κ̄-wiring, pointed iso)** The base change of the model record along a field
+extension is pointed-isomorphic, as a group object, to the model record of the
+base-changed Weierstrass curve: the T-A5a pullback + the `projModelZero_baseChange`
+zero-leg, upgraded by GIT 6.4 (`isMonHom_of_pointed`). -/
+theorem modelBaseChangeIsoAsOver (W : WeierstrassCurve k) [W.IsElliptic]
+    (k' : Type u) [Field k'] [Algebra k k'] :
+    ∃ φ : ((modelEllipticCurve W).baseChange
+        (Spec.map (CommRingCat.ofHom (algebraMap k k')))).asOver ≅
+      (modelEllipticCurve (W.map (algebraMap k k'))).asOver,
+      IsMonHom φ.hom := by
+  have b := isPullback_projModelBaseChange (R' := k') W
+  -- ascribe the pullback iso to the `asOver.left` types (defeq) so `Over.isoMk` fires cleanly
+  let e' : ((modelEllipticCurve W).baseChange
+        (Spec.map (CommRingCat.ofHom (algebraMap k k')))).asOver.left ≅
+      (modelEllipticCurve (W.map (algebraMap k k'))).asOver.left := b.isoPullback.symm
+  have heπ' : e'.hom ≫ (modelEllipticCurve (W.map (algebraMap k k'))).asOver.hom
+      = ((modelEllipticCurve W).baseChange
+        (Spec.map (CommRingCat.ofHom (algebraMap k k')))).asOver.hom := by
+    show b.isoPullback.inv ≫ projModelπ (W.map (algebraMap k k')) = _
+    rw [Iso.inv_comp_eq]
+    exact b.isoPullback_hom_snd.symm
+  refine ⟨Over.isoMk e' heπ', isMonHom_of_pointed _ ?_⟩
+  -- zero-compat: `baseChange-zero ≫ isoPullback.inv = projModelZero (W.map _)`
+  have hz : ((modelEllipticCurve W).baseChange
+        (Spec.map (CommRingCat.ofHom (algebraMap k k')))).zero ≫ e'.hom
+      = (modelEllipticCurve (W.map (algebraMap k k'))).zero := by
+    -- the two pullback components of the base-changed zero section (defeq `pullback.lift`)
+    have hfst : ((modelEllipticCurve W).baseChange
+          (Spec.map (CommRingCat.ofHom (algebraMap k k')))).zero ≫
+          pullback.fst (modelEllipticCurve W).π
+            (Spec.map (CommRingCat.ofHom (algebraMap k k')))
+        = Spec.map (CommRingCat.ofHom (algebraMap k k')) ≫ (modelEllipticCurve W).zero :=
+      pullback.lift_fst _ _ _
+    have hsnd : ((modelEllipticCurve W).baseChange
+          (Spec.map (CommRingCat.ofHom (algebraMap k k')))).zero ≫
+          pullback.snd (modelEllipticCurve W).π
+            (Spec.map (CommRingCat.ofHom (algebraMap k k')))
+        = 𝟙 _ :=
+      pullback.lift_snd _ _ _
+    -- forward form: the model zero maps to the base-changed zero under the pullback iso
+    have hz2 : projModelZero (W.map (algebraMap k k')) ≫ b.isoPullback.hom
+        = ((modelEllipticCurve W).baseChange
+          (Spec.map (CommRingCat.ofHom (algebraMap k k')))).zero := by
+      refine pullback.hom_ext ?_ ?_
+      · refine (Category.assoc _ _ _).trans ?_
+        refine (congrArg (CategoryStruct.comp _) b.isoPullback_hom_fst).trans ?_
+        exact (projModelZero_baseChange (R' := k') W).trans hfst.symm
+      · refine (Category.assoc _ _ _).trans ?_
+        refine (congrArg (CategoryStruct.comp _) b.isoPullback_hom_snd).trans ?_
+        exact (projModelZero_projModelπ (W.map (algebraMap k k'))).trans hsnd.symm
+    show _ ≫ b.isoPullback.inv = projModelZero (W.map (algebraMap k k'))
+    rw [Iso.comp_inv_eq]
+    exact hz2.symm
+  ext1
+  rw [Over.comp_left, show (Over.isoMk e' heπ').hom.left = e'.hom from rfl,
+    ((modelEllipticCurve W).baseChange
+      (Spec.map (CommRingCat.ofHom (algebraMap k k')))).one_eq_zero,
+    (modelEllipticCurve (W.map (algebraMap k k'))).one_eq_zero]
+  exact (Category.assoc _ _ _).trans (congrArg _ hz)
+
+end KappaBarWiring
 
 end EllipticCurve
 
