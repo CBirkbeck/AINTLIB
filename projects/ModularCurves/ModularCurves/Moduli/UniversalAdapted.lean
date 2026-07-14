@@ -1106,4 +1106,19 @@ theorem basisUnitAt_transport {R : CommRingCat.{u}} {Y' Y : EllObj R} (φ : Y' �
       (Scheme.resUnit (le_inf le_top ((hWS w).trans inf_le_right))
         (b.2 (j w)).unit)).val) * hc
 
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D4)** Adaptedness is stable under `Ell/R`-transport. -/
+theorem IsAdapted.transport {R : CommRingCat.{u}} {Y' Y : EllObj R} (φ : Y' ⟶ Y)
+    {V : Y.base.affineOpens}
+    {P : LocalPresentation Y.curve.toEllipticCurveGeom V}
+    {b : OmegaBasis Y.curve.toEllipticCurveGeom} (hP : P.IsAdapted b)
+    {V' : Y'.base.affineOpens} (hV' : V'.1 ≤ φ.baseHom ⁻¹ᵁ V.1) :
+    (P.transport φ.baseHom φ.top φ.isPullback φ.zero_w hV').IsAdapted
+      (omegaBasisMap φ b) := by
+  show ((P.transport φ.baseHom φ.top φ.isPullback φ.zero_w hV').basisUnitAt
+    (omegaBasisMap φ b)).1 = 1
+  rw [basisUnitAt_transport φ P b hV', hP, map_one]
+
 end ModularCurves
