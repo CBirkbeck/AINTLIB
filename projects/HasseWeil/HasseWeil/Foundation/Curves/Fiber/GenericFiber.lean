@@ -1,10 +1,15 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.Curves.Map.CoordHomFinite
 import HasseWeil.Foundation.Curves.Map.CurveMap
 import HasseWeil.Foundation.Curves.Valuation.SmoothPointPrime
+import Mathlib.FieldTheory.IsAlgClosed.Basic
 import Mathlib.NumberTheory.RamificationInertia.Unramified
 import Mathlib.RingTheory.DedekindDomain.Different
 import Mathlib.RingTheory.DedekindDomain.Factorization
-import Mathlib.FieldTheory.IsAlgClosed.Basic
 
 /-!
 # Generic fiber cardinality (T-II-2-009, Silverman II.2.6(b))
@@ -271,7 +276,7 @@ end CurveMap
 
 Over an algebraically closed base `F` with `[IsElliptic]`, the coordinate
 ring `C.CoordinateRing` has infinitely many height-one primes. The proof
-goes via worker-I's `smoothPointEquivHeightOneSpectrum` bijection
+goes via the `smoothPointEquivHeightOneSpectrum` bijection
 (in `HasseWeil/Curves/SmoothPointPrime.lean`), reducing to showing
 `C.SmoothPoint` is infinite. This follows because for each `x ∈ F`, the
 Weierstrass equation in `y` is a quadratic over an algebraically closed
@@ -361,12 +366,12 @@ between `Module.Free` from `Ideal.Quotient` vs `DivisionRing` paths —
 we package the residue-field F-rank: `finrank F (C.CoordinateRing /
 maximalIdealAt P) = 1`. Any consumer wanting `inertiaDeg' = 1` over an
 F-rational SmoothPoint combines this (for source + target) with the
-tower `finrank_mul_finrank`; worker-K has the direct
-`inertiaDeg_maximalIdealAt` for the specific `F[X] → F[C]` case. -/
+tower `finrank_mul_finrank`; the direct
+`inertiaDeg_maximalIdealAt` covers the specific `F[X] → F[C]` case. -/
 
 /-- **T-II-2-009 Piece 7 (residue field)**: the residue field of
 `C.CoordinateRing` at a smooth point `P` equals `F` (as `F`-module of
-rank 1). Direct re-export of worker-K's `finrank_quotientMaximalIdealAt`
+rank 1). Direct re-export of `finrank_quotientMaximalIdealAt`
 for use in the Piece 8 chain. -/
 theorem finrank_quotientMaximalIdealAt_eq_one
     (C : SmoothPlaneCurve F) (P : C.SmoothPoint) :
@@ -380,7 +385,7 @@ and ([IsAlgClosed F] providing infinite spectrum + residue-degree=1),
 there's a maximal ideal of `C₂.CoordinateRing` whose fiber (primes above
 it in `C₁.CoordinateRing`) has cardinality equal to `φ.separableDegree`.
 
-Following the user's tactical guidance: the `f_P = 1` side of the inertia
+The `f_P = 1` side of the inertia
 computation is supplied as a **witness hypothesis** (`h_inertia_one`)
 rather than proven in-line, due to the `Module.Free` diamond between
 `Ideal.Quotient.semiring` and `DivisionRing.toDivisionSemiring.toSemiring`
@@ -397,7 +402,7 @@ has cardinality `φ.separableDegree`.
 The existence of an unramified Q (via Pieces 1–6 for alg-closed base) is
 bundled as `h_unramified_Q`. The trivial residue degree is bundled as
 `h_inertia_one` (follows from Piece 7 over [IsAlgClosed F] via the
-`maximalIdealAt` ↔ `HeightOneSpectrum` bijection from worker-I's
+`maximalIdealAt` ↔ `HeightOneSpectrum` bijection from
 `smoothPointEquivHeightOneSpectrum`). -/
 theorem exists_heightOneSpectrum_fiber_card_eq_sepDegree
     [IsIntegrallyClosed C₂.CoordinateRing]
@@ -430,8 +435,8 @@ intermediate extension. Specifically:
   `DivisionRing.toDivisionSemiring.toSemiring`.
 - The expected instance on `(C₂.CR/Q)`-module `(C₁.CR/P)` goes through
   `Ideal.Quotient.semiring` and `Algebra.toModule`.
-- These two `Semiring` parent-paths do not unify — same diamond
-  worker-K documented (note 2026-04-21T10:45Z).
+- These two `Semiring` parent-paths do not unify — the same `Module.Free`
+  diamond between the two `Semiring` structures.
 
 The narrower witness form (`exists_heightOneSpectrum_fiber_card_eq_sepDegree`,
 Piece 8 above) takes the `e_P · f_P = 1` hypothesis as input and is the
@@ -495,7 +500,7 @@ The **alternative path** `#ker β_pc = sepDeg β_pc` (for the specific
 gives the real function-field pullback, from which `deg β_pc =
 [K(E) : φ*K(E)] = q + 1 − t` follows via explicit computation, and
 `#ker β_pc = pointCount = q + 1 − t` then furnishes `#ker β_pc = deg
-β_pc` directly. This is the stream-D path. -/
+β_pc` directly. -/
 
 end CurveMap
 
