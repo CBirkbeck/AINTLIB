@@ -88,9 +88,7 @@ the level-`71` unscaled Dwork-parameter normalized finite log, the summand of th
 `valuedLambdaQuotientDworkCoeffModSq_dworkParameterNormalizedCoordFiniteLogN71_eq_sum`. -/
 
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
-variable [NumberField.IsCMField K]
 
-omit [NumberField.IsCMField K] in
 /-- **The `varpi^{32}` coordinate of the degree-`d` homogeneous slice of the level-`71` unscaled
 Dwork log** (a name): `unscaled32SliceCoord K d` is the mod-`37²` `varpi^{32}` coordinate of the
 degree-`d` slice of `dworkParameterNormalizedCoordFiniteLogN 71`, i.e. the `d`-summand of the proven
@@ -104,7 +102,6 @@ def unscaled32SliceCoord (d : ℕ) : ZMod (37 ^ 2) :=
       (dworkParameterApprox (p := 37) (K := K) (71 + 1))
       (dworkParameterApprox_mem_lambdaIdeal (p := 37) (K := K) (71 + 1)))
 
-omit [NumberField.IsCMField K] in
 /-- **The level-`71` unscaled `varpi^{32}` coordinate is the sum of the degree-slice coordinates**
 (proven, axiom-clean): `coordModSq 32 (dworkParameterNormalizedCoordFiniteLogN 71) =
 ∑_{d ∈ range 2664} unscaled32SliceCoord d`.  Specialisation of the proven `N`-generic slice-sum
@@ -121,7 +118,6 @@ theorem unscaled32Coord_eq_sum :
 
 /-! ## 2. The proven degree-`32` slice value, on the `unscaled32SliceCoord` name -/
 
-omit [NumberField.IsCMField K] in
 /-- **The degree-`32` slice coordinate is `37·(32!)⁻¹`** (proven, axiom-clean), displayed on the
 `unscaled32SliceCoord` name: `unscaled32SliceCoord 32 = 37·(32!)⁻¹`.  Re-export of the proven
 `deg32SliceCoordModSq37_eq` (which solves the factorial-`32` extraction
@@ -168,14 +164,12 @@ The proven slice-sum (`§1`) with the proven deg-`32` value (`§2`) extracted as
 known term, isolating the **correction sum** over `d ≠ 32` — the genuine content piece 2 wrongly
 asserts to be `0`.  The degree-`68` slice (`§3`) is a summand of that correction sum. -/
 
-omit [NumberField.IsCMField K] in
 /-- **`32` is in the slice-sum range** (`32 < samePrimeFiniteLogCutoff 71 = 2664`).  Needed to split
 the deg-`32` term off the proven slice-sum. -/
 theorem thirtytwo_mem_cutoff_range :
     (32 : ℕ) ∈ Finset.range (samePrimeFiniteLogCutoff (p := 37) 71) := by
   rw [Finset.mem_range, samePrimeFiniteLogCutoff]; norm_num
 
-omit [NumberField.IsCMField K] in
 /-- **The sound degree-slice decomposition of piece 2** (proven, axiom-clean): the level-`71`
 unscaled `varpi^{32}` coordinate, with the **proven** degree-`32` value `37·(32!)⁻¹` split off,
 equals the sum of the remaining degree-slice coordinates:
@@ -196,7 +190,6 @@ theorem unscaled32Coord_eq_thirtytwo_add_correction :
   rw [unscaled32Coord_eq_sum (K := K), ← unscaled32SliceCoord_thirtytwo_eq (K := K)]
   exact (Finset.add_sum_erase _ (unscaled32SliceCoord (K := K)) thirtytwo_mem_cutoff_range).symm
 
-omit [NumberField.IsCMField K] in
 /-- **The degree-`68` slice is a summand of the correction sum** (proven, axiom-clean): `68` lies in
 `(range 2664).erase 32`, so `unscaled32SliceCoord 68` is one of the terms of the correction sum of
 `unscaled32Coord_eq_thirtytwo_add_correction`.  Combined with `§3`
