@@ -40,10 +40,57 @@ noncomputable def fullLevelHom (L : E.FullLevelPt N) :
         rw [smul_add, smul_comm (N : ℤ) ((v 0).val : ℤ), smul_comm (N : ℤ) ((v 1).val : ℤ),
           L.2.1.1, L.2.1.2, smul_zero, smul_zero, add_zero]))
 
-/-- **L2b** — `fullLevelHom` is an isomorphism for `N` invertible (`E[N]` finite étale of rank
-`N²`, KM 2.3.1; `φ` is a fibrewise iso by `IsNaiveFullLevel` generation, hence an iso by the
-finite-étale fibrewise-iso criterion `isIso_of_isPullback_of_fppf`). Shares the machinery of
-`torsion_etaleLocal_triv` (T-F1). -/
+/-- The geometric-fibre label map of a full level structure:
+`v ↦ v₀·P + v₁·Q` into the `N`-torsion of the fibre. -/
+noncomputable def fullLevelFibreMap (L : E.FullLevelPt N) {k : Type u} [Field k]
+    (t : Spec (CommRingCat.of k) ⟶ S) (v : Fin 2 → ZMod N) :
+    Submodule.torsionBy ℤ (E.Point t) (N : ℤ) :=
+  ⟨((v 0).val : ℤ) • Point.pull E t L.1.1 + ((v 1).val : ℤ) • Point.pull E t L.1.2, by
+    have hP : (N : ℤ) • Point.pull E t L.1.1 = 0 := by
+      rw [← Point.pull_zsmul, L.2.1.1, Point.pull_zero]
+    have hQ : (N : ℤ) • Point.pull E t L.1.2 = 0 := by
+      rw [← Point.pull_zsmul, L.2.1.2, Point.pull_zero]
+    rw [Submodule.mem_torsionBy_iff, smul_add, smul_comm ((N : ℤ)) (((v 0).val : ℤ)),
+      smul_comm ((N : ℤ)) (((v 1).val : ℤ)), hP, hQ, smul_zero, smul_zero, add_zero]⟩
+
+/-- **`L2b-i` — fibrewise bijectivity of a full level structure**: on every geometric
+fibre with `N` invertible the label map is a bijection onto the `N`-torsion — surjective
+by the generation clause of `IsNaiveFullLevel`, bijective by the `N²`-count
+(`torsion_geometricFibre_rank_two`). -/
+theorem fullLevelFibreMap_bijective (L : E.FullLevelPt N) {k : Type u} [Field k]
+    [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S) (hN : (N : k) ≠ 0) :
+    Function.Bijective (E.fullLevelFibreMap L t) := by
+  refine (Nat.bijective_iff_surjective_and_card _).mpr ⟨?_, ?_⟩
+  · rintro ⟨x, hx⟩
+    have hgen := L.2.2 k t x ((Submodule.mem_torsionBy_iff _ _).mp hx)
+    rw [AddSubgroup.mem_closure_pair] at hgen
+    obtain ⟨a, b, hab⟩ := hgen
+    have hP : (N : ℤ) • Point.pull E t L.1.1 = 0 := by
+      rw [← Point.pull_zsmul, L.2.1.1, Point.pull_zero]
+    have hQ : (N : ℤ) • Point.pull E t L.1.2 = 0 := by
+      rw [← Point.pull_zsmul, L.2.1.2, Point.pull_zero]
+    refine ⟨![(a : ZMod N), (b : ZMod N)], ?_⟩
+    apply Subtype.ext
+    show (((![(a : ZMod N), (b : ZMod N)] 0).val : ℤ)) • Point.pull E t L.1.1 +
+        (((![(a : ZMod N), (b : ZMod N)] 1).val : ℤ)) • Point.pull E t L.1.2 = x
+    have h1 : ((((a : ZMod N)).val : ℤ)) • Point.pull E t L.1.1
+        = a • Point.pull E t L.1.1 :=
+      zsmul_eq_of_intCast_eq _ hP (by push_cast [ZMod.natCast_val, ZMod.intCast_cast]; simp)
+    have h2 : ((((b : ZMod N)).val : ℤ)) • Point.pull E t L.1.2
+        = b • Point.pull E t L.1.2 :=
+      zsmul_eq_of_intCast_eq _ hQ (by push_cast [ZMod.natCast_val, ZMod.intCast_cast]; simp)
+    rw [show ![(a : ZMod N), (b : ZMod N)] 0 = (a : ZMod N) from rfl,
+      show ![(a : ZMod N), (b : ZMod N)] 1 = (b : ZMod N) from rfl, h1, h2, hab]
+  · have hcard := E.torsion_geometricFibre_rank_two N k t hN
+    obtain ⟨e⟩ := hcard
+    exact (Nat.card_congr e.toEquiv).symm
+
+/-- **L2b** — `fullLevelHom` is an isomorphism for `N` invertible (`E[N]` finite étale of
+rank `N²`, KM 2.3.1): the label map is bijective on every geometric fibre
+(`fullLevelFibreMap_bijective`), and a morphism of finite étale `S`-schemes that is
+bijective on geometric fibres is an isomorphism (the sharpened residual criterion;
+route: `LinearMap.bijective_of_forall_bijective_lTensor_residueField` +
+`isIso_of_isPullback_of_fppf` on the T-F1 cover). -/
 theorem fullLevelHom_isIso (hinv : NIsInvertible S N) (L : E.FullLevelPt N) :
     IsIso (E.fullLevelHom L) := sorry
 

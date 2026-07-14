@@ -19013,3 +19013,16 @@ cancel_epi + Sigma.hom_ext through the component triangles). Axioms: rests on th
 BB-QF/BB-FLAT boxes (Torsion.lean, KM-seated) as designed — no new gaps. NEW-Y1's CLOPEN-β pin
 is now LIVE. NEXT: L2b fullLevelIso (base-change φ along the cover + isIso_of_isPullback_of_fppf
 per decomposition-c5b2) → L4 seam → (C) NISOG. (STREAM-G0)
+
+### v10.201-G0 — [C5B-2 L2b-i] fibrewise bijectivity of full level structures PROVEN (STREAM-G0)
+GLSchemeAction.lean: `fullLevelFibreMap` (the geometric-fibre label map v ↦ v₀P + v₁Q into
+N-torsion, well-defined by the killing clauses) + **`fullLevelFibreMap_bijective`** — surjective
+by IsNaiveFullLevel's generation clause (mem_closure_pair + zsmul_eq_of_intCast_eq mod-N
+reduction), bijective by Nat.bijective_iff_surjective_and_card against
+torsion_geometricFibre_rank_two's N²-count. First try green. The L2b sorry
+(`fullLevelHom_isIso`) is now SHARPENED to the pure criterion: a morphism of finite étale
+S-schemes bijective on geometric fibres is an iso (route banked in the docstring:
+bijective_of_forall_bijective_lTensor_residueField + isIso_of_isPullback_of_fppf/T-F1).
+DEDUP NOTE for cleanup lane: TorsionFibre.lean already had torsionBaseChangeHom +
+torsion_baseChange_isPullback (:243) — my TorsionEtaleTriv torsionBaseChangeIso overlaps
+(iso-form vs IsPullback-form); reconcile when the fleet passes. (STREAM-G0)

@@ -202,3 +202,33 @@ coordinate/pullback match) that leaves BB-DIFF (`formallyUnramified_torsionπ`) 
 **Then Torsion assembly** (discharges `Torsion.lean:152`): L-K1 fibre-reduction (`finrank_pullback_snd`,
 Torsion's flat/finite) + L-K2 one-point model iso (`E_s ≅ projModel W_s` via `LocallyWeierstrass` over the
 one-point base `Spec κ(s)` + rigidity) ⟹ arbitrary-E `mulByHom_finrank` ⟹ G0's c4 + affineOverEll E[N]-finiteness.
+
+## BEASTMODE GRIND STATUS (2026-07-14 cont'd, STREAM-KM) — K4a + K4b-1 GREEN; K4b-2 = SINGLE ISOLATED WALL
+
+The field-level target `modelEllipticCurve_mulByHom_finrank = N²` is now **GREEN modulo ONE pure-algebra
+sorry**. Everything scheme-theoretic AND affine-algebraic is discharged. New green (committed):
+- **Target** `modelEllipticCurve_mulByHom_finrank = N²` = crux `modelEllipticCurve_finrank_eq_mulByInt_degree`
+  (`finrank x = (mulByInt N).degree`) + `HasseWeil.mulByInt_degree`. GREEN-modulo-crux.
+- **K4a** (scheme reduction, GREEN): general helpers `finrank_eq_appTop_finrank_of_affineOpen`,
+  `finrank_of_isAffine` — a finite-flat-LFP endomorphism of a preconnected scheme has fibre rank =
+  `appTop` RingHom.finrank of its restriction `f⁻¹(U)→U` (local-constancy + `finrank_pullback_snd` +
+  `isoSpec`/`finrank_SpecMap_eq_finrank`). *Stated generically → the `(modelEllipticCurve W).E` vs
+  `projModel W` instance-transparency wall is breached at the model call via `show ((…).E).Opens from …` casts.*
+- **K4b-1** (appTop→module rank, GREEN): `appTop_finrank_eq_module_finrank` + `finrank_algebraMap_eq_module_finrank`
+  + `finrank_eq_module_finrank_of_affineOpen` — over a domain base, `appTop.finrank = Module.finrank Γ(U) Γ(f⁻¹U)`.
+  `IsDomain Γ(Z-chart)` auto (`IsIntegral projModel` + `Nonempty` → mathlib `Properties.lean:244`).
+
+**K4b-2 (THE isolated wall)** — the sole remaining sorry, cleanest possible form:
+`Module.finrank Γ(Z) Γ([N]⁻¹Z) = (mulByInt W.toAffine N).degree`. Decomposition (source-faithful) + hinges:
+- **L1** `Γ(Z) ≃+* W.CoordinateRing` — `coordRingToZSection` (green) + `Γ(U.toScheme,⊤)`↔`Γ(X,U)` bridge.
+- **L3** rank over domain = rank over Frac — **mathlib `finrank_of_isFractionRing`** (Algebraic/Integral.lean:552,
+  needs `FaithfulSMul`/`IsAlgebraic`/`NoZeroDivisors`, all from finite-flat + `[N]⁻¹Z` integral-open-of-projModel).
+- **L4 (deep)** `Frac Γ(Z) = Frac Γ([N]⁻¹Z) = W.FunctionField` **and the appTop map = `mulByInt_pullbackAlgHom`** —
+  i.e. the scheme morphism `[N]`'s function-field pullback = HasseWeil's division-polynomial `mulByInt` pullback.
+  Both realise `[N]` (green dictionary `projModelPointsEquiv_zsmul`; `mulByInt_apply`), matched at the GENERIC point.
+  **mathlib LACKS a packaged `Scheme.Hom.functionFieldMap`** (only `germToFunctionField` + stalk algebra) → L4 needs
+  BUILDING the scheme-morphism function-field pullback + the generic-point coordinate readout = division polys
+  (HasseWeil `GenericPointZsmul.lean`). This is the genuine multi-session infra, the SAME crux as BB-DIFF.
+
+Note: full `Torsion.lean:152` (arbitrary `E/S`) additionally needs K1/K2/K3/K5 (fibre base-change of finrank to
+`κ(s)` via `fiberToSpecResidueField` + `(projModelπ W).fiber ≅ projModel(W.map …)` in Comparison.lean) ON TOP of K4.
