@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.ImaginaryQuadratic.CN05.Statement
@@ -202,7 +207,7 @@ theorem alphaGenerates (hp3 : p % 4 = 3) :
     rw [NumberField.discr_eq_discr (Kminus p) B]
     exact discr_Kminus_eq_neg_p p hp3
   -- Step 3: Use `Algebra.discr_of_matrix_vecMul` to relate them.
-  set M : Matrix (Fin 2) (Fin 2) ℤ := B.toMatrix v with hM_def
+  set M : Matrix (Fin 2) (Fin 2) ℤ := B.toMatrix v
   have h_vecMul : v = Matrix.vecMul (⇑B) (M.map (algebraMap ℤ (𝓞 (Kminus p)))) := by
     symm; exact B.toMatrix_map_vecMul v
   have h_disc_eq : Algebra.discr ℤ v = M.det ^ 2 * Algebra.discr ℤ ⇑B := by
@@ -457,7 +462,7 @@ theorem monicFactorsMod_alpha_at_q_split (hp3 : p % 4 = 3) (q : ℕ)
   have hr_ne : r ≠ 0 := split_r_ne_zero p q hqp hr
   have h_distinct : ((1 + r) * (2 : ZMod q)⁻¹) ≠ ((1 - r) * (2 : ZMod q)⁻¹) :=
     split_roots_distinct q hq_odd hr_ne
-  unfold RingOfIntegers.monicFactorsMod
+  simp only [RingOfIntegers.monicFactorsMod]
   rw [alphaInOK_minpoly_factor_mod_q_split p hp3 q hq_odd hr]
   have hu_ne_zero : (Polynomial.X - Polynomial.C ((1 + r) * (2 : ZMod q)⁻¹) :
       Polynomial (ZMod q)) ≠ 0 := (Polynomial.monic_X_sub_C _).ne_zero
@@ -535,7 +540,7 @@ theorem monicFactorsMod_alpha_at_q_inert (hp3 : p % 4 = 3) (q : ℕ)
     refine lt_of_le_of_lt ?_ (by decide : (1 : WithBot ℕ) < 2)
     refine max_le (le_refl _) ?_
     exact (Polynomial.degree_C_le).trans (by decide)
-  unfold RingOfIntegers.monicFactorsMod
+  simp only [RingOfIntegers.monicFactorsMod]
   rw [alphaInOK_minpoly_int_mod_q p hp3 q]
   rw [UniqueFactorizationMonoid.normalizedFactors_irreducible h_irred,
     h_monic.normalize_eq_self]
