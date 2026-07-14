@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
 import ModularCurves.EllipticCurve.GroupLawConstruction
+import ModularCurves.ForMathlib.UniquePointFactorsISup
 
 /-!
 # Field-points of the two-law multiplication (T-W7.0c·c6, [C6-SPECPOINTS])
@@ -22,29 +23,6 @@ namespace ModularCurves
 
 variable {R : Type u} [CommRing R]
 
-/-- [C6-a'] A field-valued point of an `iSup`-of-opens subscheme factors through one of the
-members: the unique point of `Spec K` lies in some member, and the member inclusion is an open
-immersion.
-
-ForMathlib candidate: a general fact about `Scheme`s and `iSup`-of-opens, with no elliptic-curve
-content. -/
-theorem specPoint_factors_iSup {X : Scheme.{u}} {ι : Type*} (U : ι → X.Opens)
-    (K : Type u) [Field K] (g : Spec (CommRingCat.of K) ⟶ (⨆ i, U i).toScheme) :
-    ∃ (i : ι) (h : Spec (CommRingCat.of K) ⟶ (U i).toScheme),
-      h ≫ X.homOfLE (le_iSup U i) = g := by
-  have hmem : (⨆ i, U i).ι.base (g.base default) ∈ (⨆ i, U i : X.Opens) := by
-    have h1 : (⨆ i, U i).ι.base (g.base default) ∈ Set.range (⨆ i, U i).ι.base := ⟨_, rfl⟩
-    rwa [Scheme.Opens.range_ι] at h1
-  obtain ⟨i, hi⟩ := TopologicalSpace.Opens.mem_iSup.mp hmem
-  refine ⟨i, IsOpenImmersion.lift (X.homOfLE (le_iSup U i)) g ?_, IsOpenImmersion.lift_fac _ _ _⟩
-  rw [Set.range_unique (f := g.base)]
-  refine Set.singleton_subset_iff.mpr ?_
-  have hor : (X.homOfLE (le_iSup U i)).opensRange =
-      (⨆ j, U j).ι ⁻¹ᵁ (U i) := Scheme.opensRange_homOfLE _
-  have : g.base default ∈ (X.homOfLE (le_iSup U i)).opensRange := by
-    rw [hor]
-    exact hi
-  exact this
 /-- [C6-a] A field-valued point of `E ×_R E` factors through `blOpenZ` or `blOpenY`. -/
 theorem specPoint_factors_blOpenZ_or_blOpenY (W : WeierstrassCurve R) [W.IsElliptic]
     (K : Type u) [Field K] [Algebra R K]
@@ -75,7 +53,7 @@ theorem specPoint_addOnZ_family (hΔ : IsUnit W.Δ) {K : Type u} [Field K]
     ∃ (p : Fin 2 × Fin 2) (h₁ : Spec (CommRingCat.of K) ⟶ (blOpenZFamily W p).toScheme),
       h₁ ≫ (pullback (projModelπ W) (projModelπ W)).homOfLE (le_iSup (blOpenZFamily W) p) = h ∧
       h ≫ WeierstrassCurve.Projective.addOnZ W hΔ = h₁ ≫ addOnZFamily W hΔ p := by
-  obtain ⟨p, h₁, hh₁⟩ := specPoint_factors_iSup (blOpenZFamily W) K h
+  obtain ⟨p, h₁, hh₁⟩ := exists_lift_iSup_of_unique (blOpenZFamily W) h
   exact ⟨p, h₁, hh₁, (congrArg (· ≫ WeierstrassCurve.Projective.addOnZ W hΔ) hh₁.symm).trans
     ((Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (homOfLE_le_addOnZ W hΔ p)))⟩
 
@@ -86,7 +64,7 @@ theorem specPoint_addOnY_family (hΔ : IsUnit W.Δ) {K : Type u} [Field K]
     ∃ (p : Fin 2 × Fin 2) (h₁ : Spec (CommRingCat.of K) ⟶ (blOpenYFamily W p).toScheme),
       h₁ ≫ (pullback (projModelπ W) (projModelπ W)).homOfLE (le_iSup (blOpenYFamily W) p) = h ∧
       h ≫ WeierstrassCurve.Projective.addOnY W hΔ = h₁ ≫ addOnYFamily W hΔ p := by
-  obtain ⟨p, h₁, hh₁⟩ := specPoint_factors_iSup (blOpenYFamily W) K h
+  obtain ⟨p, h₁, hh₁⟩ := exists_lift_iSup_of_unique (blOpenYFamily W) h
   exact ⟨p, h₁, hh₁, (congrArg (· ≫ WeierstrassCurve.Projective.addOnY W hΔ) hh₁.symm).trans
     ((Category.assoc _ _ _).trans (congrArg (h₁ ≫ ·) (homOfLE_le_addOnY W hΔ p)))⟩
 
@@ -128,7 +106,7 @@ theorem specPoint_addOnZOnImage_factors' (hΔ : IsUnit W.Δ) {K : Type u} [Field
     ∃ (k : Fin 3) (ψ : Localization.Away (lawOneTriple W i j k) →+* K),
       h ≫ addOnZOnImage W hΔ i j = Spec.map (CommRingCat.ofHom ψ) ≫ addOnZPieceMor W i j k hΔ ∧
       Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayZι W i j k = h ≫ (blOpenZImage W i j).ι := by
-  obtain ⟨k, h₂, hh₂⟩ := specPoint_factors_iSup (blOpenZPieceFamily W i j) K
+  obtain ⟨k, h₂, hh₂⟩ := exists_lift_iSup_of_unique (blOpenZPieceFamily W i j)
     (h ≫ (Scheme.Hom.isoImage (pieceι W i j) (⨆ k, blOpenZPieceFamily W i j k)).inv)
   refine ⟨k, CommRingCat.Hom.hom (Spec.preimage (h₂ ≫ morphismRestrict (chartPieceIso W i j).hom
       (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)) ≫
@@ -188,7 +166,7 @@ theorem specPoint_addOnYOnImage_factors' (hΔ : IsUnit W.Δ) {K : Type u} [Field
     ∃ (k : Fin 3) (ψ : Localization.Away (lawTwoTriple W i j k) →+* K),
       h ≫ addOnYOnImage W hΔ i j = Spec.map (CommRingCat.ofHom ψ) ≫ addOnYPieceMor W i j k hΔ ∧
       Spec.map (CommRingCat.ofHom ψ) ≫ pieceAwayι W i j k = h ≫ (blOpenYImage W i j).ι := by
-  obtain ⟨k, h₂, hh₂⟩ := specPoint_factors_iSup (blOpenYPieceFamily W i j) K
+  obtain ⟨k, h₂, hh₂⟩ := exists_lift_iSup_of_unique (blOpenYPieceFamily W i j)
     (h ≫ (Scheme.Hom.isoImage (pieceι W i j) (⨆ k, blOpenYPieceFamily W i j k)).inv)
   refine ⟨k, CommRingCat.Hom.hom (Spec.preimage (h₂ ≫ morphismRestrict (chartPieceIso W i j).hom
       (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)) ≫
