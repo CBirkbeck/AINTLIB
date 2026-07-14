@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.Auxiliary.Universal
 import HasseWeil.Foundation.Curves.Basic
 import Mathlib.LinearAlgebra.Dimension.Finrank
@@ -54,9 +59,6 @@ theorem finrank_coordinateRing_over_polynomialX :
 
 /-! ### Base change to `Frac F[X]` -/
 
-set_option synthInstance.maxHeartbeats 40000 in
--- Instance synthesis climbs through the `F[X] → F[C] → F(C)` tower with
--- multiple `Algebra`/`IsScalarTower` steps, requiring extra heartbeats.
 noncomputable instance faithfulSMul_polynomialX_functionField :
     FaithfulSMul (Polynomial F) C.FunctionField where
   eq_of_smul_eq_smul h := by
