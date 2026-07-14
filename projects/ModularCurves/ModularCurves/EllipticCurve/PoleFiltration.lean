@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.Basic
 import Mathlib.RingTheory.AdjoinRoot
 
@@ -2118,7 +2123,8 @@ noncomputable def chartYSectionsRingEquiv (W : WeierstrassCurve R) :
 
 /-- Restriction of the `t`-section of the `Y`-chart to the chart overlap is a unit. -/
 private lemma isUnit_res_tSection (W : WeierstrassCurve R) :
-    IsUnit (((projModel W).presheaf.map (homOfLE (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+    IsUnit (((projModel W).presheaf.map (homOfLE (Proj.basicOpen_mono _ ((quotientGradingHom
+      (projIdeal W)) (MvPolynomial.X 1))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
           (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⟨_, rfl⟩)).op).hom
       ((chartYSectionsRingEquiv W).symm (infChartTElem W))) := by
@@ -2171,7 +2177,8 @@ private lemma isUnit_res_tSection (W : WeierstrassCurve R) :
         (mk_X_mem_quotientGrading_one W 2)) (by omega)).hom).hom
   rw [← hsq] at this
   have hcancel2 := congrArg (fun φ => CommRingCat.Hom.hom φ
-    (((projModel W).presheaf.map (homOfLE (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
+    (((projModel W).presheaf.map (homOfLE (Proj.basicOpen_mono _ ((quotientGradingHom (projIdeal W))
+      (MvPolynomial.X 1))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1) *
           (quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) ⟨_, rfl⟩)).op).hom
       ((chartYSectionsRingEquiv W).symm (infChartTElem W))))
@@ -3634,7 +3641,7 @@ lemma tel_mul_sectionUnitElem (W : WeierstrassCurve R) :
           algebraMap (Polynomial R) _ (Polynomial.C W.a₂ * Polynomial.X)) := by
   have h := infChart_root_relation W
   unfold sectionUnitElem
-  simp only [map_add, map_sub, map_mul, map_pow] at h ⊢
+  simp only [map_sub, map_mul, map_pow] at h ⊢
   linear_combination -h
 
 /-- `U − 1` lies in the section ideal `(s,t)`. -/
@@ -3656,7 +3663,7 @@ lemma sectionUnitElem_sub_one_mem (W : WeierstrassCurve R) :
         - algebraMap (Polynomial R) _ (Polynomial.C W.a₆ * Polynomial.X)) *
           infChartTElem W := by
     unfold sectionUnitElem
-    simp only [map_add, map_sub, map_mul, map_pow]
+    simp only [map_mul, map_pow]
     rw [show algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) Polynomial.X =
       infChartTElem W from rfl]
     ring
@@ -3836,7 +3843,8 @@ lemma projModelZero_appLE_chartYSection (W : WeierstrassCurve R)
         (le_of_eq (projModelZero_preimage_yChart W).symm)).hom)
         ((chartYSectionsRingEquiv W).symm b) =
       ((f.appLE (Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) ⊤ h').hom) ((chartYSectionsRingEquiv W).symm b) := by
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) ⊤ h').hom)
+          ((chartYSectionsRingEquiv W).symm b) := by
     intro f hf h'
     subst hf
     rfl
@@ -3847,9 +3855,11 @@ lemma projModelZero_appLE_chartYSection (W : WeierstrassCurve R)
       (Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
         (mk_X_mem_quotientGrading_one W 1) one_pos).inv ≫
-      CommRingCat.ofHom (zeroChartHom W))) ((Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+      CommRingCat.ofHom (zeroChartHom W))) ((Proj.isAffineOpen_basicOpen (quotientGrading
+        (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec) (Proj.basicOpen (quotientGrading (projIdeal W))
+      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec) (Proj.basicOpen (quotientGrading
+        (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) ⊤ ⊤
       (le_of_eq ((Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
@@ -3858,7 +3868,8 @@ lemma projModelZero_appLE_chartYSection (W : WeierstrassCurve R)
   -- the fromSpec leg is the ΓSpec identification
   have hfs : (((Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec.appLE (Proj.basicOpen (quotientGrading (projIdeal W))
+      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec.appLE (Proj.basicOpen (quotientGrading
+        (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) ⊤
       (le_of_eq ((Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
@@ -3870,9 +3881,11 @@ lemma projModelZero_appLE_chartYSection (W : WeierstrassCurve R)
     have happ := congrArg (fun φ : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) ⟶
         Γ(Spec Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))), (Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))), (Proj.isAffineOpen_basicOpen
+          (quotientGrading (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W))
+      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec ⁻¹ᵁ (Proj.basicOpen (quotientGrading
+        (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))) =>
         (CommRingCat.Hom.hom ((Spec Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).presheaf.map (homOfLE
@@ -3981,12 +3994,14 @@ lemma projModelZero_appLE_chartYSection (W : WeierstrassCurve R)
   exact (hz (Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
         (mk_X_mem_quotientGrading_one W 1) one_pos).inv ≫
-      CommRingCat.ofHom (zeroChartHom W)) ≫ (Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+      CommRingCat.ofHom (zeroChartHom W)) ≫ (Proj.isAffineOpen_basicOpen (quotientGrading
+        (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
       (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec) (projModelZero_eq_fromSpec W)
       (by rw [← projModelZero_eq_fromSpec W]
           exact le_of_eq (projModelZero_preimage_yChart W).symm)).trans
-    (hsplit.symm.trans ((congrArg (((Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+    (hsplit.symm.trans ((congrArg (((Spec.map ((Proj.basicOpenIsoAway (quotientGrading
+      (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
         (mk_X_mem_quotientGrading_one W 1) one_pos).inv ≫
       CommRingCat.ofHom (zeroChartHom W))).appLE ⊤ ⊤ le_top).hom) hfs).trans
