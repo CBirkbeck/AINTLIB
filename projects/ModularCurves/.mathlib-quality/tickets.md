@@ -19152,3 +19152,24 @@ interface (v10.141 GH-2 consumption).
 **G0 queue next**: charter remnant (C) — NISOG close (decomposition-nisog-L15.md:
 [HOMOG-FRAME]/[NISOG-L13] gates → exists_cyclicityLocus → L15-c..f → L6 →
 exists_nIsogSpace → Y₀(N)). Deep work (KM 6.x-scale); entering now.
+
+---
+
+## v10.208-G0 — NISOG chain: KM 6.4.2 fibre dichotomy CLOSED, axiom-clean (2026-07-14, STREAM-G0)
+
+Remnant (C) opening move. **`generatorSpace_fibre_isEmpty_of_not_isGammaZeroFppf` (KM 6.4.2,
+the empty-fibre branch) is PROVEN and fully axiom-clean** (no sorryAx — the generator-locus
+machinery underneath is clean). Also new: `degree_baseChange_apply` (DeligneOrder, pointwise
+`(D.baseChange g).degree t = D.degree (g t)`; `degree_baseChange_eq` now a corollary).
+
+**Proof shape** (all-ring-side, no descent theory): fibre point ⟹ section ring A of the finite
+affine generator space is a nonzero finite k-algebra (IsFinite.SpecMap_iff extraction) ⟹
+maximal ideal ⟹ finite-residue point Spec(A/m) → D^×; the cover Spec(A/m) → Spec k is fppf
+(RingHom.Finite.comp + flat-over-field + FinitePresentation.of_finiteType/Noetherian, injected
+through HasRingHomProperty.Spec_iff); generatorSpace_spec at the tautological factorisation
+gives the generator; degree N descends along the surjective cover pointwise.
+
+**Chain state**: `exists_cyclicityLocus` (KM 6.4.1, T-SG3 — real proof, no sorry of its own)
+now rests ONLY on `generatorSpace_finiteLocallyFree_of_isGammaZeroFppf` (KM 6.1.1 "only if",
+gate [KM-62-63-HOMOG] — the formal-group homogeneity computation; ring-theoretic cores already
+banked sorry-free in HomogeneityLemmas.lean, the FRAME re-attachment is the open work).
