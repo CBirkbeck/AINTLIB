@@ -89,10 +89,14 @@ lemma frickeR_det_pos (N : ℕ) [NeZero N] : 0 < (frickeR N).det.val := by
 
 variable {N : ℕ} [NeZero N] {k : ℤ}
 
+/-- `√N > 0`, the positivity of the scaling factor.  Used throughout to justify `t ↦ t / √N`. -/
+private lemma sqrt_natCast_pos : 0 < Real.sqrt N :=
+  Real.sqrt_pos.mpr (by exact_mod_cast NeZero.pos N)
+
 /-- The point `i · t / √N ∈ ℍ`, for `t > 0`. -/
 private noncomputable def scaledImLift {t : ℝ} (ht : 0 < t) : ℍ :=
   ⟨Complex.I * (t / Real.sqrt N : ℝ), by
-    have hN : 0 < Real.sqrt N := Real.sqrt_pos.mpr (by exact_mod_cast NeZero.pos N)
+    have hN : 0 < Real.sqrt N := sqrt_natCast_pos
     simp only [Complex.mul_im, Complex.I_im, Complex.I_re, Complex.ofReal_re, Complex.ofReal_im,
       one_mul, zero_mul]
     positivity⟩
@@ -103,7 +107,7 @@ private lemma scaledImLift_coe {t : ℝ} (ht : 0 < t) :
 /-- `F.resToImagAxis (t / √N) = F (i·t/√N)` for `t > 0` (raw-function form). -/
 private lemma resToImagAxisScaled_eq (F : ℍ → ℂ) {t : ℝ} (ht : 0 < t) :
     F.resToImagAxis (t / Real.sqrt N) = F (scaledImLift (N := N) ht) := by
-  have hN : 0 < Real.sqrt N := Real.sqrt_pos.mpr (by exact_mod_cast NeZero.pos N)
+  have hN : 0 < Real.sqrt N := sqrt_natCast_pos
   have htN : 0 < t / Real.sqrt N := by positivity
   simp only [Function.resToImagAxis_apply, ResToImagAxis, htN, ↓reduceDIte]
   congr 1
@@ -112,7 +116,7 @@ private lemma resToImagAxisScaled_eq (F : ℍ → ℂ) {t : ℝ} (ht : 0 < t) :
 `W_N • (i·t/√N) = i·(1/t)/√N`. -/
 private lemma frickeR_smul_scaledImLift {t : ℝ} (ht : 0 < t) :
     frickeR N • scaledImLift (N := N) ht = scaledImLift (N := N) (one_div_pos.mpr ht) := by
-  have hN : 0 < Real.sqrt N := Real.sqrt_pos.mpr (by exact_mod_cast NeZero.pos N)
+  have hN : 0 < Real.sqrt N := sqrt_natCast_pos
   have hNc : (Real.sqrt N : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hN.ne'
   have htc : (t : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr ht.ne'
   have hsqN : (Real.sqrt N : ℂ) * (Real.sqrt N : ℂ) = (N : ℂ) := by
@@ -145,7 +149,7 @@ theorem frickeImagAxisSlash (F : ℍ → ℂ) {t : ℝ} (ht : 0 < t) :
     (F ∣[k] frickeR N).resToImagAxis (t / Real.sqrt N) =
       (Real.sqrt N : ℂ) ^ (k - 2) * Complex.I ^ (-k) * (t : ℂ) ^ (-k) *
         F.resToImagAxis (1 / t / Real.sqrt N) := by
-  have hN : 0 < Real.sqrt N := Real.sqrt_pos.mpr (by exact_mod_cast NeZero.pos N)
+  have hN : 0 < Real.sqrt N := sqrt_natCast_pos
   have hNc : (Real.sqrt N : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hN.ne'
   have htc : (t : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr ht.ne'
   have hsqN : (Real.sqrt N : ℂ) * (Real.sqrt N : ℂ) = (N : ℂ) := by
@@ -220,7 +224,7 @@ theorem mellin_resToImagAxisScaled_eq [Γ.IsArithmetic] [CuspFormClass F Γ k] (
     (hw : Γ.strictWidthInfty = 1) (hk : 0 < k) {s : ℂ} (hs : (k : ℝ) / 2 + 1 < s.re) :
     mellin (fun t : ℝ ↦ (f : ℍ → ℂ).resToImagAxis (t / Real.sqrt N)) s =
       lcompletedSeriesN N f s := by
-  have hN : 0 < Real.sqrt N := Real.sqrt_pos.mpr (by exact_mod_cast NeZero.pos N)
+  have hN : 0 < Real.sqrt N := sqrt_natCast_pos
   have hNinv : 0 < (Real.sqrt N)⁻¹ := inv_pos.mpr hN
   -- write the scaled restriction as a multiplicative shift `t ↦ g(t · (√N)⁻¹)`
   have heq : (fun t : ℝ ↦ (f : ℍ → ℂ).resToImagAxis (t / Real.sqrt N)) =
@@ -241,7 +245,7 @@ private noncomputable def scaledImAxisLift (t : ℝ) : ℍ :=
 
 private lemma scaledImAxisLift_coe {t : ℝ} (ht : 0 < t) :
     ((scaledImAxisLift (N := N) t : ℍ) : ℂ) = Complex.I * (t / Real.sqrt N : ℝ) := by
-  have hN : 0 < Real.sqrt N := Real.sqrt_pos.mpr (by exact_mod_cast NeZero.pos N)
+  have hN : 0 < Real.sqrt N := sqrt_natCast_pos
   rw [scaledImAxisLift, UpperHalfPlane.ofComplex_apply_of_im_pos
     (z := Complex.I * (t / Real.sqrt N : ℝ)) (by
       simp only [Complex.mul_im, Complex.I_im, Complex.I_re, Complex.ofReal_re, Complex.ofReal_im,
@@ -254,8 +258,7 @@ private lemma scaledImAxisLift_im_of_pos {t : ℝ} (ht : 0 < t) :
     Complex.ofReal_re, Complex.ofReal_im]
   ring
 
-private lemma resToImagAxisScaled_eq_comp {Γ : Subgroup (GL (Fin 2) ℝ)} {F : Type*}
-    [FunLike F ℍ ℂ] [ModularFormClass F Γ k] (f : F) {t : ℝ} (ht : 0 < t) :
+private lemma resToImagAxisScaled_eq_comp [ModularFormClass F Γ k] (f : F) {t : ℝ} (ht : 0 < t) :
     (f : ℍ → ℂ).resToImagAxis (t / Real.sqrt N) = f (scaledImAxisLift (N := N) t) := by
   rw [resToImagAxisScaled_eq (f : ℍ → ℂ) ht]
   congr 1
@@ -264,7 +267,7 @@ private lemma resToImagAxisScaled_eq_comp {Γ : Subgroup (GL (Fin 2) ℝ)} {F : 
 
 /-- The scaled lift tends to `atImInfty` as `t → ∞` (since `t/√N → ∞`). -/
 private lemma tendsto_scaledImAxisLift : Tendsto (scaledImAxisLift (N := N)) atTop atImInfty := by
-  have hN : 0 < Real.sqrt N := Real.sqrt_pos.mpr (by exact_mod_cast NeZero.pos N)
+  have hN : 0 < Real.sqrt N := sqrt_natCast_pos
   refine UpperHalfPlane.tendsto_comap_im_ofComplex.comp ?_
   rw [tendsto_comap_iff]
   have htend : Tendsto (fun t : ℝ ↦ t / Real.sqrt N) atTop atTop :=
@@ -274,8 +277,7 @@ private lemma tendsto_scaledImAxisLift : Tendsto (scaledImAxisLift (N := N)) atT
 
 /-- **Exponential decay of the scaled restriction.**  For a weight-`k` cusp form of strict
 width `1` at `∞`, `t ↦ f(i·t/√N) =O[atTop] (fun t => exp(-2π t/√N))`. -/
-private lemma isBigO_resToImagAxisScaled_exp {Γ : Subgroup (GL (Fin 2) ℝ)} {F : Type*}
-    [FunLike F ℍ ℂ] [Γ.IsArithmetic] [CuspFormClass F Γ k] (f : F)
+private lemma isBigO_resToImagAxisScaled_exp [Γ.IsArithmetic] [CuspFormClass F Γ k] (f : F)
     (hw : Γ.strictWidthInfty = 1) :
     (fun t : ℝ ↦ (f : ℍ → ℂ).resToImagAxis (t / Real.sqrt N)) =O[atTop]
       fun t : ℝ ↦ Real.exp (-2 * π * (t / Real.sqrt N)) := by
@@ -293,11 +295,10 @@ private lemma isBigO_resToImagAxisScaled_exp {Γ : Subgroup (GL (Fin 2) ℝ)} {F
 /-- **Rapid decay of the scaled restriction.**  For a weight-`k` cusp form of strict width `1`,
 `t ↦ f(i·t/√N) =O[atTop] (·^r)` for every real exponent `r`.  This is the `hf_top`/`hg_top` field
 of a `StrongFEPair`. -/
-private lemma isBigO_resToImagAxisScaled_rpow {Γ : Subgroup (GL (Fin 2) ℝ)} {F : Type*}
-    [FunLike F ℍ ℂ] [Γ.IsArithmetic] [CuspFormClass F Γ k] (f : F)
+private lemma isBigO_resToImagAxisScaled_rpow [Γ.IsArithmetic] [CuspFormClass F Γ k] (f : F)
     (hw : Γ.strictWidthInfty = 1) (r : ℝ) :
     (fun t : ℝ ↦ (f : ℍ → ℂ).resToImagAxis (t / Real.sqrt N)) =O[atTop] fun t : ℝ ↦ t ^ r := by
-  have hN : 0 < Real.sqrt N := Real.sqrt_pos.mpr (by exact_mod_cast NeZero.pos N)
+  have hN : 0 < Real.sqrt N := sqrt_natCast_pos
   refine (isBigO_resToImagAxisScaled_exp f hw).trans ?_
   -- `exp(-2π t/√N) = exp(-(2π/√N)·t)` is `o(t^r)` (decays faster than any power)
   have hlit : (fun t : ℝ ↦ Real.exp (-(2 * π / Real.sqrt N) * t)) =o[atTop] fun t : ℝ ↦ t ^ r :=
@@ -307,10 +308,9 @@ private lemma isBigO_resToImagAxisScaled_rpow {Γ : Subgroup (GL (Fin 2) ℝ)} {
   field_simp
 
 /-- The scaled restriction is locally integrable on `Ioi 0` (continuous there). -/
-private lemma locallyIntegrableOn_resToImagAxisScaled {Γ : Subgroup (GL (Fin 2) ℝ)} {F : Type*}
-    [FunLike F ℍ ℂ] [ModularFormClass F Γ k] (f : F) :
+private lemma locallyIntegrableOn_resToImagAxisScaled [ModularFormClass F Γ k] (f : F) :
     LocallyIntegrableOn (fun t : ℝ ↦ (f : ℍ → ℂ).resToImagAxis (t / Real.sqrt N)) (Ioi 0) := by
-  have hN : 0 < Real.sqrt N := Real.sqrt_pos.mpr (by exact_mod_cast NeZero.pos N)
+  have hN : 0 < Real.sqrt N := sqrt_natCast_pos
   refine ContinuousOn.locallyIntegrableOn ?_ measurableSet_Ioi
   refine fun t (ht : 0 < t) ↦ ?_
   -- `t ↦ res(t/√N)` is differentiable at `t > 0` (chain rule on the linear scaling)
@@ -341,7 +341,7 @@ private lemma resToImagAxisScaled_feq (F G : ℍ → ℂ)
     (hG : G = (Real.sqrt N : ℂ) ^ (2 - k) • (F ∣[k] frickeR N)) {t : ℝ} (ht : 0 < t) :
     F.resToImagAxis (1 / t / Real.sqrt N) =
       (Complex.I ^ k * ((t ^ (k : ℝ) : ℝ) : ℂ)) • G.resToImagAxis (t / Real.sqrt N) := by
-  have hN : 0 < Real.sqrt N := Real.sqrt_pos.mpr (by exact_mod_cast NeZero.pos N)
+  have hN : 0 < Real.sqrt N := sqrt_natCast_pos
   have hNc : (Real.sqrt N : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hN.ne'
   have htc : (t : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr ht.ne'
   -- `G̃(t) = (√N)^{2-k} · (F∣W_N).resToImagAxis(t/√N) = I^{-k} · t^{-k} · F̃(1/t)`.
@@ -511,8 +511,7 @@ private lemma differentiable_lSeriesExtensionN
 
 open ModularForm in
 /-- On the half-plane `k/2 + 1 < Re s`, the witness equals `L(s, f)`. -/
-private lemma lSeriesExtensionN_eq_of_re_gt {Γ : Subgroup (GL (Fin 2) ℝ)} {F : Type*}
-    [FunLike F ℍ ℂ] [Γ.IsArithmetic] [CuspFormClass F Γ k] (f : F) (hw : Γ.strictWidthInfty = 1)
+private lemma lSeriesExtensionN_eq_of_re_gt [Γ.IsArithmetic] [CuspFormClass F Γ k] (f : F) (hw : Γ.strictWidthInfty = 1)
     (hk : 0 < k) {s : ℂ} (hs : (k : ℝ) / 2 + 1 < s.re) :
     lSeriesExtensionN (N := N) f s = LSeries (lCoeff f) s := by
   have hs0re : 0 < s.re := lt_trans (by positivity) hs
