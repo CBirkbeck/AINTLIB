@@ -1,5 +1,6 @@
 module
 
+public import BernoulliRegular.Characters
 public import BernoulliRegular.UnitQuotient.Structure
 
 /-!
@@ -47,13 +48,6 @@ namespace BernoulliRegular
 variable (p : ℕ) [Fact p.Prime]
 variable (K : Type*) [Field K] [NumberField K]
 
-/-- A character `χ : Δ → ℚ` is *odd* when `χ(-1) = -1`. This matches the
-classical notion that `ε_χ` acts by `-1` on the complex-conjugation
-involution. Duplicates the convention `IsOddUnitCharacter` used in the
-Stickelberger layer, but avoids importing it to keep `UnitQuotient` light. -/
-def IsOddDeltaCharacter (χ : MulChar (CyclotomicUnitDelta p) ℚ) : Prop :=
-  χ (-1 : (ZMod p)ˣ) = -1
-
 /-- The vanishing predicate for the mod-`p` cyclotomic unit quotient.
 
 Records that the `Δ`-component decomposition of `E/E^p` encoded by `S`
@@ -70,10 +64,10 @@ structure CyclotomicUnitModPOddVanishing
   (classically `ω`, the Teichmüller character mod `p`). -/
   distinguishedCharacter : MulChar (CyclotomicUnitDelta p) ℚ
   /-- The distinguished character is odd. -/
-  distinguishedOdd : IsOddDeltaCharacter (p := p) distinguishedCharacter
+  distinguishedOdd : IsOddUnitCharacter (p := p) distinguishedCharacter
   /-- Every other odd character has trivial component. -/
   vanishing : ∀ χ : MulChar (CyclotomicUnitDelta p) ℚ,
-    IsOddDeltaCharacter (p := p) χ →
+    IsOddUnitCharacter (p := p) χ →
     χ ≠ distinguishedCharacter →
     (S.components.component χ).carrier = ⊥
 
@@ -87,7 +81,7 @@ omit [NumberField K] in
 distinguished one, the component carrier is the trivial subgroup. -/
 theorem component_eq_bot (V : CyclotomicUnitModPOddVanishing (p := p) K S)
     {χ : MulChar (CyclotomicUnitDelta p) ℚ}
-    (hχ_odd : IsOddDeltaCharacter (p := p) χ)
+    (hχ_odd : IsOddUnitCharacter (p := p) χ)
     (hχ_ne : χ ≠ V.distinguishedCharacter) :
     (S.components.component χ).carrier = ⊥ :=
   V.vanishing χ hχ_odd hχ_ne
@@ -98,7 +92,7 @@ the reflection rank inequality consumes. -/
 theorem component_natCard_eq_one
     (V : CyclotomicUnitModPOddVanishing (p := p) K S)
     {χ : MulChar (CyclotomicUnitDelta p) ℚ}
-    (hχ_odd : IsOddDeltaCharacter (p := p) χ)
+    (hχ_odd : IsOddUnitCharacter (p := p) χ)
     (hχ_ne : χ ≠ V.distinguishedCharacter) :
     Nat.card (S.components.component χ).Carrier = 1 := by
   simp [CyclotomicUnitQuotientComponent.Carrier, V.component_eq_bot hχ_odd hχ_ne]

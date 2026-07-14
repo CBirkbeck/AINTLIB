@@ -103,7 +103,7 @@ theorem reflection_gal_card_le_one_of_oddVanishing
     (V : CyclotomicUnitModPOddVanishing (p := p) K S)
     (Br : KummerToUnitQuotientInclusion (p := p) (K := K) R S)
     {χ : MulChar (ZMod p)ˣ ℚ}
-    (hχ_odd_dual : IsOddDeltaCharacter (p := p) (characterTwistDual p χ))
+    (hχ_odd_dual : IsOddUnitCharacter (p := p) (characterTwistDual p χ))
     (hχ_ne_dual : characterTwistDual p χ ≠ V.distinguishedCharacter) :
     Nat.card (R.galComponent χ : Type _) ≤ 1 := by
   have hunit_one :
