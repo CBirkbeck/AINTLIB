@@ -3,8 +3,8 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.SchemeActionFree
 import ModularCurves.ForMathlib.AffineQuotient
+import ModularCurves.ForMathlib.SchemeActionFree
 
 /-!
 # Morphism descent over an open of the scheme quotient ([a5-W2])
@@ -26,8 +26,6 @@ open AlgebraicGeometry CategoryTheory Limits
 universe u
 namespace AlgebraicGeometry.SchemeAction
 variable {G : Type u} [Group G] {X : Scheme.{u}} (σ : SchemeAction G X)
-
--- W2 target: see QLIFT_SPEC.md — (1) epi_pullback_snd_quotientπ, (2) exists_quotientπ_lift_of_isOpenImmersion
 
 /-- **(W2, uniqueness half)** For a free action, the pullback of the quotient projection
 `X ⟶ X/G` along an open immersion `j : Q' ⟶ X/G` is an epimorphism: the restricted quotient
