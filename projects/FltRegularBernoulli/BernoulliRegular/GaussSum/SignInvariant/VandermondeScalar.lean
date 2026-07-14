@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib.Algebra.Group.Nat.Even
@@ -223,7 +228,7 @@ theorem fourierCyclotomicSingleDifferenceProduct_eq_weightedPairProduct
   have hp_sub : p - 1 = n + n := by
     have := congrArg (fun m : ℕ => m - 1) hp_eqn
     simpa [two_mul, add_assoc, add_left_comm, add_comm] using this
-  unfold fourierCyclotomicSingleDifferenceProduct
+  simp only [fourierCyclotomicSingleDifferenceProduct]
   rw [hp_sub, Finset.prod_range_add]
   have hfirst :
       ∏ d ∈ Finset.range n,
