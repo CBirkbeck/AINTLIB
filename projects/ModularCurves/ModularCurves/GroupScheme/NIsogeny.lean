@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.GroupScheme.CyclicSubgroup
 import ModularCurves.GroupScheme.SubgroupQuotient
 import ModularCurves.LevelStructure.Incidence
@@ -872,12 +877,12 @@ private noncomputable def locallyFreeRankLocusSheaf (n : ℕ)
       IsScalarTower.of_algebraMap_eq' (by
         rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
           RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp]
-        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.map_appLE, Scheme.Hom.appLE_map])
+        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.map_appLE])
     haveI : IsScalarTower Γ(S, U.1) Γ(W, f ⁻¹ᵁ U.1) Γ(W, f ⁻¹ᵁ S.basicOpen g) :=
       IsScalarTower.of_algebraMap_eq' (by
         rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
           RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp]
-        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.map_appLE, Scheme.Hom.appLE_map])
+        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.appLE_map])
     haveI := locallyFreeRankLocusSheaf_fp f U
     -- the `.1`-spelled givens at the basic open, re-keyed by defeq ascription
     haveI hfpV : letI := ((f.app (S.basicOpen g)).hom).toAlgebra
@@ -984,6 +989,7 @@ open scoped TensorProduct
 
 variable {W : Scheme.{u}} (f : W ⟶ S) [IsFinite f] [LocallyOfFinitePresentation f]
 
+omit [LocallyOfFinitePresentation f] in
 /-- The geometric identification behind the chart bridge: the pullback of `f` along an
 affine chart point is the `Spec` of the section tensor product, with the projection
 matching the `Spec` of the left inclusion (sealed; consumed by the bridge and by the
@@ -1055,6 +1061,7 @@ private theorem locallyFreeRankLocus_pullback_iso {X : Scheme.{u}} [IsAffine X]
   slice_rhs 2 3 => rw [← h₂]
   slice_rhs 1 2 => rw [← h₁]
 
+omit [IsFinite f] [LocallyOfFinitePresentation f] in
 /-- The section-ring identification behind the chart bridge, sealed behind its own
 constant (the construction is let-heavy; consumers only need existence). -/
 private theorem locallyFreeRankLocus_sections_equiv {X : Scheme.{u}} [IsAffine X]
@@ -1093,7 +1100,7 @@ private theorem locallyFreeRankLocus_sections_equiv {X : Scheme.{u}} [IsAffine X
       (Algebra.TensorProduct.includeLeftRingHom_comp_algebraMap
         (R := Γ(S, U.1)) (A := Γ(X, ⊤)) (B := Γ(W, f ⁻¹ᵁ U.1)))
     simp only [RingHom.comp_apply, Algebra.TensorProduct.includeLeftRingHom_apply,
-      Algebra.TensorProduct.includeRight_apply] at h2
+] at h2
     have h3 : (algebraMap Γ(S, U.1) Γ(X, ⊤))
         (((Scheme.Opens.topIso U.1).hom).hom u) = (x'.appTop).hom u := by
       rw [RingHom.algebraMap_toAlgebra, RingHom.comp_apply]
@@ -1236,6 +1243,7 @@ private theorem locallyFreeRankLocus_finrank_le_of_span {R B K M : Type u} [Comm
           simpa using finrank_span_le_card ((s.image ⇑Φ : Finset (K ⊗[R] M)) : Set (K ⊗[R] M))
     _ ≤ s.card := Finset.card_image_le
 
+omit [LocallyOfFinitePresentation f] in
 /-- Emptiness transport for the chart bridge: if the pullback of `f` along an affine chart
 point is the empty scheme, the section tensor product is trivial (sealed; the empty branch
 of the fibre dichotomy). -/
@@ -1251,6 +1259,7 @@ private theorem locallyFreeRankLocus_sections_subsingleton {X : Scheme.{u}} [IsA
   rw [← PrimeSpectrum.isEmpty_iff_subsingleton]
   exact ⟨fun p => hE.false (eP.inv.base p)⟩
 
+omit [LocallyOfFinitePresentation f] in
 /-- **[L1-e0, the affine chart bridge]** For an affine test scheme `X` mapping into an
 affine chart `U` of `S`, the geometric rank-`n` local-freeness of the pulled-back `f` is
 the module-theoretic condition for the pushforward sections, base-changed to `Γ(X)`. This
@@ -1701,20 +1710,29 @@ theorem exists_generatorLocus (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
     ← le_antisymm_iff, RelEffCartierDiv.baseChange_ideal, RelEffCartierDiv.baseChange_ideal]
   -- REMAINING (coherence) — PRECISELY SCOPED via LSP 2026-07-09.  After
   --   `rw [← baseChange_ideal, ← baseChange_ideal, Section.orderDivisor_baseChange]` the goal is
-  --     `(orderDivisor ((E.baseChange π_B).baseChange h) (asSection h (pull (asSection π_B taut))) N).ideal
-  --        = ((D.baseChange π_B).baseChange h).ideal  ↔  IsDivisorGenerator N D t (asSection E t P)`,
-  --   i.e. an `orderDivisor.ideal = D.ideal` equality over the curve `(E.baseChange π_B).baseChange h`
+  --     `(orderDivisor ((E.baseChange π_B).baseChange h) (asSection h (pull (asSection π_B taut)))
+  -- N).ideal
+  --        = ((D.baseChange π_B).baseChange h).ideal  ↔  IsDivisorGenerator N D t (asSection E t
+  -- P)`,
+  --   i.e. an `orderDivisor.ideal = D.ideal` equality over the curve `(E.baseChange π_B).baseChange
+  -- h`
   --   versus one over `E.baseChange t` — the two total spaces are iso (not equal) via
-  --   `pullbackLeftPullbackSndIso E.π π_B h`.  Closing it needs the ORDER-DIVISOR-IDEAL NATURALITY engine:
+  --   `pullbackLeftPullbackSndIso E.π π_B h`.  Closing it needs the ORDER-DIVISOR-IDEAL NATURALITY
+  -- engine:
   --     • D side: `baseChange_baseChange_ideal` + `h ≫ π_B = t` (from `hcomp` + `P.1 ≫ E.π = t`).
-  --     • OD side: `sectionsDivisor.ideal = ∏ ker` → `IdealSheafData.comap_prod` → `Finset.prod_congr`
+  --     • OD side: `sectionsDivisor.ideal = ∏ ker` → `IdealSheafData.comap_prod` →
+  -- `Finset.prod_congr`
   --       → per-factor `exactOrderLocusAux_ker_comap_eq` with the sections matched by
   --       `divisorTautPoint_restrict` — EXACTLY the proven twin `fullLevelLocusAux_P1/P2` pattern.
-  --     • then `and_iff_right (hasExactOrder_of_orderDivisor_ideal_eq N D hD t (asSection E t P) ·)`.
-  --   BLOCKER: that engine (`exactOrderLocusAux_ker_comap_eq` L1583, `subgroupLocusAux_val` L985 +snd,
+  --     • then `and_iff_right (hasExactOrder_of_orderDivisor_ideal_eq N D hD t (asSection E t P)
+  -- ·)`.
+  --   BLOCKER: that engine (`exactOrderLocusAux_ker_comap_eq` L1583, `subgroupLocusAux_val` L985
+  -- +snd,
   --   `exactOrderLocusAux_val_isClosedImmersion` L1630, and a general `sectionsDivisor_ideal` — the
-  --   fullLevel one at L2350 is specialised) is all `private` to Incidence.lean.  CLEAN PATH: expose the
-  --   general ones (visibility-only; Incidence.lean is sorry-free/stable) + this ~25-line assembly.  A
+  --   fullLevel one at L2350 is specialised) is all `private` to Incidence.lean.  CLEAN PATH:
+  -- expose the
+  --   general ones (visibility-only; Incidence.lean is sorry-free/stable) + this ~25-line assembly.
+  --  A
   --   cross-file API change worth flagging to the coordinator; not an inline close.
   have hct : h ≫ (D.ideal.subschemeι ≫ E.π) = t := by
     rw [← Category.assoc, hcomp]; exact P.2
@@ -1755,7 +1773,8 @@ theorem exists_generatorLocus (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
     exact key
   refine Iff.trans (Iff.of_eq (congrArg₂ Eq hP1 hP2)) ?_
   simp only [EllipticCurve.IsDivisorGenerator]
-  exact ⟨fun hb => ⟨E.hasExactOrder_of_orderDivisor_ideal_eq N D hD t (Point.asSection E t P) hb, hb⟩,
+  exact ⟨fun hb => ⟨E.hasExactOrder_of_orderDivisor_ideal_eq N D hD t (Point.asSection E t P) hb,
+  hb⟩,
     fun hh => hh.2⟩
 
 /-- **The scheme of generators `D^×`** (KM 6.1's `G^×` = "`ℤ/Nℤ-Gen(G/S)`" of KM 1.10.13):
