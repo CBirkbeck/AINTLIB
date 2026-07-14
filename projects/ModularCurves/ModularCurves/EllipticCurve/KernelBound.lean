@@ -5,6 +5,7 @@ Authors: AINTLIB ModularCurves project
 -/
 import ModularCurves.ForMathlib.EtaleSectionsCount
 import ModularCurves.EllipticCurve.TorsionFibre
+import ModularCurves.EllipticCurve.EndomorphismDegree
 
 /-!
 # The isogeny kernel bound `|ker δ| ≤ deg δ` ([KEY-KER], STREAM-GH input to KM 2.7.2)
@@ -67,6 +68,41 @@ theorem le_finrank_of_killed_injective
   have hval : (pts i : Spec (CommRingCat.of k) ⟶ E.E)
       = (pts j : Spec (CommRingCat.of k) ⟶ E.E) := congrArg (·.1) hij
   exact hinj (Subtype.ext hval)
+
+/-- **(UNIFICATION bridge — `endDeg` = scheme fibre rank; register-box, K4-landing pin)** Over a
+field, the KM endomorphism degree `E.endDeg δ` of a finite-flat isogeny `δ` equals the
+scheme-theoretic fibre rank `δ.left.finrank` at the zero point. This is the **Abel-FREE ruling**
+(`decomposition-keystone.md` ④, ratified v10.212): the isogeny degree `[K(E) : δ*K(E)]` *is* the
+generic-fibre rank, so `endDeg` is grounded on `Scheme.Hom.finrank` — **not** on the Abel/Pic⁰-gated
+`endDual`. It is the single tracked register-box the K4 division-polynomial bridge (L4-iii) discharges:
+once `endDeg` is grounded on the finrank, `modelEllipticCurve_mulByHom_finrank = N²` gives
+`endDeg_mulBy = N²` and this identity becomes definitional. A new specification pin extending the
+`endDeg` DATA-SORRY REGISTER (`EndomorphismDegree.lean`); `δ.left` finite/flat are the isogeny fibre
+inputs (register-box BB, the same `δ ≠ 1 ⟹ isogeny` funnel). -/
+theorem endDeg_eq_left_finrank (E : EllipticCurve (Spec (CommRingCat.of k)))
+    (δ : E.asOver ⟶ E.asOver) [Flat δ.left] [IsFinite δ.left]
+    (x₀ : ↑(Spec (CommRingCat.of k))) :
+    E.endDeg δ = (δ.left.finrank (E.zero x₀) : ℤ) := sorry
+
+/-- **([KEY-KER], `endDeg` form — GH's `hH` second consumer, v10.219)** If a finite-flat endomorphism
+`δ ≠ 1` of `E / Spec k` kills `N` pairwise-distinct points, then `(N : ℤ) ≤ E.endDeg δ`. This is the
+Abel-free kernel bound in `endDeg` language: the finrank kernel bound `le_finrank_of_killed_injective`
+(`N ≤ δ.left.finrank 0`, no Abel, no dual isogeny) composed with the UNIFICATION bridge
+`endDeg_eq_left_finrank` (`endDeg δ = δ.left.finrank 0`). GH's general-`H` rigidity `hH` pin
+(`gammaH_rigid_of_orderOf`) consumes it against the CM-unit degree bound `E.endDeg (ε − 1) ≤ 4`
+(step (b), the `endDeg` quadratic form) to force `N ≤ 4`, contradicting exact order `N ≥ 5`. The
+`endDeg`-vs-finrank bridge is the single register-box (K4 L4-iii landing); everything else is
+sorry-free. -/
+theorem le_endDeg_of_killed_injective
+    (E : EllipticCurve (Spec (CommRingCat.of k))) (N : ℕ) [NeZero N]
+    (δ : E.asOver ⟶ E.asOver) [Flat δ.left] [IsFinite δ.left]
+    (pts : Fin N → E.Point (𝟙 (Spec (CommRingCat.of k))))
+    (hinj : Function.Injective pts)
+    (hkill : ∀ i, (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) (pts i) ≫ δ = 1)
+    (_hδ : δ ≠ 1) (x₀ : ↑(Spec (CommRingCat.of k))) :
+    (N : ℤ) ≤ E.endDeg δ := by
+  rw [endDeg_eq_left_finrank E δ x₀]
+  exact_mod_cast le_finrank_of_killed_injective E N δ pts hinj hkill x₀
 
 end EllipticCurve
 
