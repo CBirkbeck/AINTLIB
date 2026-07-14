@@ -489,8 +489,22 @@ theorem section_base_injective_of_isAlgClosed {F : Type u} [Field F] [IsAlgClose
   have hlink := key (P.1 ≫ π) (Q.1 ≫ π) (P.2.trans Q.2.symm) e'
   have hchain := hcP.symm.trans (hlink.trans
     (congrArg (fun t => (Scheme.residueFieldCongr e').hom ≫ t) hcQ))
-  -- hchain : jP ≫ rP = congr.hom ≫ jQ ≫ rQ
-  sorry
+  -- naturality of the point-congruence under `residueFieldMap`
+  have natMap : ∀ {x y : ↥X} (e : x = y) (eY : π.base x = π.base y),
+      (Scheme.residueFieldCongr eY).hom ≫ π.residueFieldMap y
+        = π.residueFieldMap x ≫ (Scheme.residueFieldCongr e).hom := by
+    rintro x y rfl eY
+    simp
+  -- the pullback of residue fields along `π` is an isomorphism (alg-closed leaf)
+  have hiso : IsIso (π.residueFieldMap (P.1 (IsLocalRing.closedPoint F))) := by
+    sorry
+  -- assemble: cancel `jP` in `hchain` after commuting the congruence past `jQ`
+  have hcomm := natMap (h (IsLocalRing.closedPoint F)) e'
+  have hchain2 := hchain.trans (Category.assoc _ _ _).symm
+  have hchain3 := hchain2.trans (congrArg (fun t => t ≫
+    Scheme.descResidueField (Scheme.stalkClosedPointTo Q.1)) hcomm)
+  have hchain4 := hchain3.trans (Category.assoc _ _ _)
+  exact (cancel_epi (π.residueFieldMap (P.1 (IsLocalRing.closedPoint F)))).mp hchain4
 
 /-- **(g5, alg-closed case — w1–w6 per the section header; w7 above)** The topological
 range of `[N]` on the projective model over an algebraically closed field is
