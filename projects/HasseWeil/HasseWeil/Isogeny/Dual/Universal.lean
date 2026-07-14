@@ -88,8 +88,6 @@ variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
 -- `[Fintype K]`/`[DecidableEq K]` are genuinely required: the statement is about
 -- the `q`-power Frobenius (which only exists over a finite field with decidable
 -- equality), but the linter only inspects the surface signature.
-set_option linter.unusedDecidableInType false in
-set_option linter.unusedFintypeInType false in
 /-- **`DualGaloisData` is empty for the `q`-power Frobenius** (B2 refutation core).
 No automorphism family realises the `hfix` fixed-field equality
 `Im(π*) = Fix(transAut)`: every member would fix all `q`-th powers, hence be the
