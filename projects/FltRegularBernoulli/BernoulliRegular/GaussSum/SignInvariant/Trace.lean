@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import Mathlib.LinearAlgebra.Basis.Basic
@@ -91,7 +96,7 @@ noncomputable def quadraticDftTraceInvariant : ℂ :=
 /-- Unfolding the invariant just gives the diagonal kernel sum. -/
 theorem quadraticDftTraceInvariant_def :
     quadraticDftTraceInvariant p =
-      ∑ x : ZMod p, ZMod.stdAddChar (N := p) (-(x ^ 2)) := by
+      ∑ x : ZMod p, ZMod.stdAddChar (N := p) (-(x ^ 2)) :=
   rfl
 
 /-- The sign invariant is literally the trace of `ZMod.dft` on the standard
