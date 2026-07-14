@@ -2450,7 +2450,7 @@ private lemma piece_fst_natural (W : WeierstrassCurve R) (j : Fin 3) :
 
 set_option backward.isDefEq.respectTransparency false in
 /-- `Proj.awayι` absorbs the transport along an element equality. -/
-private lemma awayι_awayCongr (W' : WeierstrassCurve R') {s t : projCoordRing W'}
+lemma awayι_awayCongr (W' : WeierstrassCurve R') {s t : projCoordRing W'}
     (h : s = t) (hs : s ∈ quotientGrading (projIdeal W') 1) :
     Spec.map ((awayCongr (𝒜 := quotientGrading (projIdeal W'))
         h).toCommRingCatIso.hom) ≫
