@@ -67,16 +67,12 @@ theorem Isogeny.endCurveMap_degree (β : Isogeny W.toAffine W.toAffine) :
   rfl
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
-/-- `toAffinePoint` is injective on smooth points (same proof as the private lemma in
-`GenericCovarianceGeneral`). -/
+/-- `toAffinePoint` is injective on smooth points — the `(W)`-explicit form of
+`WeilPairing.toAffinePoint_injective` (`GenericCovarianceGeneral`). -/
 theorem smoothPoint_toAffinePoint_injective :
     Function.Injective
-      (fun P : (W_smooth W).SmoothPoint ↦ P.toAffinePoint) := by
-  intro P Q h
-  simp only [Curves.SmoothPlaneCurve.SmoothPoint.toAffinePoint_def] at h
-  obtain ⟨hx, hy⟩ := (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mp h
-  cases P; cases Q
-  simp_all
+      (fun P : (W_smooth W).SmoothPoint ↦ P.toAffinePoint) :=
+  WeilPairing.toAffinePoint_injective
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- A coordinate-ring element evaluates (in the `EvaluatesTo` valuation idiom) to its
