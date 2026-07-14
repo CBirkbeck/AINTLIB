@@ -170,6 +170,49 @@ theorem natCard_sections_eq_finrank {X : Scheme.{u}} (f : X ⟶ Spec (CommRingCa
     rfl
   rw [h1, h2, h3, h4]
 
+omit [IsSepClosed k] in
+/-- **(inseparable-tolerant companion of `natCard_sections_eq_finrank`)** A *finite* scheme over the
+spectrum of a field has at most `finrank` many sections: the number of `k`-rational points of a
+finite `k`-scheme is bounded by its rank, with **no** étale / separability hypothesis, so it holds
+for a possibly non-reduced fibre. The section space is identified with `Γ(X, ⊤) →ₐ[k] k` (as in
+`natCard_sections_eq_finrank`); over a field `Γ(X, ⊤)` is automatically free, so the fibre rank is
+its `finrank`, and `natCard_algHom_le_finrank` supplies the bound. This is the scheme-level form of
+the kernel-cardinality bound `|ker δ| ≤ deg δ` for a (possibly inseparable) isogeny ([KEY-KER]). -/
+theorem natCard_sections_le_finrank {X : Scheme.{u}} (f : X ⟶ Spec (CommRingCat.of k))
+    [IsFinite f] (x₀ : ↑(Spec (CommRingCat.of k))) :
+    Nat.card { s : Spec (CommRingCat.of k) ⟶ X // s ≫ f = 𝟙 (Spec (CommRingCat.of k)) }
+      ≤ f.finrank x₀ := by
+  haveI : IsAffine X := isAffine_of_isAffineHom f
+  set ψ : CommRingCat.of k ⟶ Γ(X, ⊤) := Spec.preimage (X.isoSpec.inv ≫ f) with hψdef
+  have hψ : Spec.map ψ = X.isoSpec.inv ≫ f := Spec.map_preimage _
+  letI : Algebra k ↑Γ(X, ⊤) := ψ.hom.toAlgebra
+  have hAlg : algebraMap k ↑Γ(X, ⊤) = ψ.hom := rfl
+  haveI hF : IsFinite (Spec.map ψ) := by
+    rw [hψ]
+    exact (MorphismProperty.cancel_left_of_respectsIso @IsFinite X.isoSpec.inv f).mpr
+      inferInstance
+  have hRF : RingHom.Finite ψ.hom := (IsFinite.SpecMap_iff ψ).mp hF
+  haveI : Module.Finite k ↑Γ(X, ⊤) := hRF
+  have hcard :
+      Nat.card { s : Spec (CommRingCat.of k) ⟶ X //
+          s ≫ f = 𝟙 (Spec (CommRingCat.of k)) } =
+        Nat.card (↑Γ(X, ⊤) →ₐ[k] k) := by
+    refine Nat.card_congr (((sectionsEquivOfIso X.isoSpec f).trans
+      (Equiv.subtypeEquivRight fun t => ?_)).trans
+      ((sectionsSpecEquivRetractions ψ).trans (retractionsEquivAlgHom ψ hAlg)))
+    rw [hψ]
+  rw [hcard]
+  have h1 : f.finrank x₀ = (X.isoSpec.inv ≫ f).finrank x₀ :=
+    (congrFun (Scheme.Hom.finrank_comp_left_of_isIso X.isoSpec.inv f) x₀).symm
+  have h2 : (X.isoSpec.inv ≫ f).finrank x₀ = (Spec.map ψ).finrank x₀ := by rw [hψ]
+  have h3 : (Spec.map ψ).finrank x₀ = Module.rankAtStalk (R := k) ↑Γ(X, ⊤) x₀ :=
+    Scheme.Hom.finrank_SpecMap_algebraMap k ↑Γ(X, ⊤) x₀
+  have h4 : Module.rankAtStalk (R := k) ↑Γ(X, ⊤) x₀ = Module.finrank k ↑Γ(X, ⊤) := by
+    rw [Module.rankAtStalk_eq_finrank_of_free]
+    rfl
+  rw [h1, h2, h3, h4]
+  exact natCard_algHom_le_finrank k ↑Γ(X, ⊤)
+
 end Schemes
 
 /-- `Spec L`-valued points of `Spec A` over `Spec k` are `k`-algebra homomorphisms
