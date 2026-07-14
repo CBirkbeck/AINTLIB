@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.KummerArtinHassePadicBase
@@ -32,6 +37,7 @@ variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 abbrev lambdaPadicPrime : Nat.Primes :=
   ⟨p, Fact.out⟩
 
+/-- The bundled prime `lambdaPadicPrime p` is `p`. -/
 @[simp]
 theorem lambdaPadicPrime_val : (lambdaPadicPrime p).1 = p :=
   rfl
@@ -61,6 +67,8 @@ theorem lambdaRationalValuation_le_one_iff_den (x : ℚ) :
     (Rat.valuation_le_one_iff_den
       (R := ℤ) (𝔭 := lambdaRationalHeightOneSpectrum p) (x := x))
 
+/-- The rational height-one place at `p` is the one `Rat.HeightOneSpectrum.primesEquiv`
+assigns to `p`. -/
 theorem lambdaRationalHeightOneSpectrum_eq_primesEquiv_symm :
     lambdaRationalHeightOneSpectrum p =
       (Rat.HeightOneSpectrum.primesEquiv (R := ℤ)).symm (lambdaPadicPrime p) := by
@@ -71,6 +79,7 @@ theorem lambdaRationalHeightOneSpectrum_eq_primesEquiv_symm :
     lambdaRationalPrimeIdeal, lambdaPadicPrime, Rat.IsIntegralClosure.intEquiv,
     Ideal.mem_comap, Ideal.mem_span_singleton]
 
+/-- …stated in the other direction. -/
 theorem primesEquiv_lambdaRationalHeightOneSpectrum :
     Rat.HeightOneSpectrum.primesEquiv
         (R := ℤ) (lambdaRationalHeightOneSpectrum p) =
@@ -142,6 +151,7 @@ def rationalToLambdaComapWithValRingHom :
       (WithVal.equiv
         (((lambdaHeightOneSpectrum p K).valuation K).comap (algebraMap ℚ K))).toRingHom)
 
+/-- The comparison map on the comap-valued rationals is the algebra map. -/
 @[simp]
 theorem rationalToLambdaComapWithValRingHom_apply
     (x : WithVal (((lambdaHeightOneSpectrum p K).valuation K).comap (algebraMap ℚ K))) :
@@ -160,6 +170,7 @@ def rationalToLambdaWithValRingHom :
   (rationalToLambdaComapWithValRingHom (p := p) (K := K)).comp
     (lambdaValuation_comap_rat_isEquiv (p := p) (K := K)).orderRingIso.toRingHom
 
+/-- …and likewise on the `p`-valued rationals. -/
 @[simp]
 theorem rationalToLambdaWithValRingHom_apply
     (x : WithVal ((lambdaRationalHeightOneSpectrum p).valuation ℚ)) :
@@ -264,6 +275,7 @@ def rationalToLambdaCompletionRingHom :
       (IsDedekindDomain.HeightOneSpectrum.adicCompletion.equiv ℚ
         (lambdaRationalHeightOneSpectrum p)).toRingHom)
 
+/-- The completion map agrees with the uncompleted one on rationals. -/
 @[simp]
 theorem rationalToLambdaCompletionRingHom_coe
     (x : WithVal ((lambdaRationalHeightOneSpectrum p).valuation ℚ)) :
@@ -279,6 +291,7 @@ theorem rationalToLambdaCompletionRingHom_coe
       (continuous_rationalToLambdaWithValRingHom (p := p) (K := K)) x]
   rfl
 
+/-- The completion map commutes with the algebra map from `ℚ`. -/
 @[simp]
 theorem rationalToLambdaCompletionRingHom_algebraMap (q : ℚ) :
     rationalToLambdaCompletionRingHom (p := p) (K := K)
@@ -287,7 +300,7 @@ theorem rationalToLambdaCompletionRingHom_algebraMap (q : ℚ) :
   rw [IsDedekindDomain.HeightOneSpectrum.algebraMap_adicCompletion, Function.comp_apply,
     IsDedekindDomain.HeightOneSpectrum.algebraMap_adicCompletion, Function.comp_apply,
     rationalToLambdaCompletionRingHom_coe]
-  simp only [rationalToLambdaWithValRingHom, RingHom.comp_apply, map_ratCast]
+  simp only [rationalToLambdaWithValRingHom, RingHom.comp_apply]
   rfl
 
 /-- The canonical continuous `ℚ`-algebra equivalence from mathlib's `ℚ_[p]`
@@ -307,6 +320,7 @@ def padicToLambdaCompletionRingHom :
   (rationalToLambdaCompletionRingHom (p := p) (K := K)).comp
     (lambdaPadicToRationalCompletionAlgEquiv (p := p)).toAlgEquiv.toRingEquiv.toRingHom
 
+/-- …and so does the version starting from `ℚ_p`. -/
 @[simp]
 theorem padicToLambdaCompletionRingHom_algebraMap (q : ℚ) :
     padicToLambdaCompletionRingHom (p := p) (K := K)
@@ -332,6 +346,7 @@ def lambdaValuedCompletionAlgebraPadic :
     Algebra ℚ_[lambdaPadicPrime p] (LambdaValuedCompletion p K) :=
   (padicToLambdaCompletionRingHom (p := p) (K := K)).toAlgebra
 
+/-- The `ℚ_p`-algebra structure on the completion is the one given by that ring hom. -/
 theorem algebraMap_lambdaValuedCompletionAlgebraPadic :
     letI : Algebra ℚ_[lambdaPadicPrime p] (LambdaValuedCompletion p K) :=
       lambdaValuedCompletionAlgebraPadic (p := p) (K := K)
@@ -347,6 +362,7 @@ def rationalCompletionToLambdaAlgebra :
       (LambdaValuedCompletion p K) :=
   (rationalToLambdaCompletionRingHom (p := p) (K := K)).toAlgebra
 
+/-- Likewise for the rational-completion algebra structure. -/
 theorem algebraMap_rationalCompletionToLambdaAlgebra :
     letI : Algebra ((lambdaRationalHeightOneSpectrum p).adicCompletion ℚ)
         (LambdaValuedCompletion p K) :=
@@ -356,6 +372,7 @@ theorem algebraMap_rationalCompletionToLambdaAlgebra :
       rationalToLambdaCompletionRingHom (p := p) (K := K) := by
   rfl
 
+/-- That algebra map is continuous. -/
 theorem continuous_algebraMap_rationalCompletionToLambdaAlgebra :
     letI : Algebra ((lambdaRationalHeightOneSpectrum p).adicCompletion ℚ)
         (LambdaValuedCompletion p K) :=
@@ -377,6 +394,7 @@ theorem continuous_algebraMap_rationalCompletionToLambdaAlgebra :
     (IsDedekindDomain.HeightOneSpectrum.adicCompletion.continuous_toCompletion
       (K := ℚ) (v := lambdaRationalHeightOneSpectrum p))
 
+/-- Hence the scalar action is continuous. -/
 theorem continuousSMul_rationalCompletionToLambdaAlgebra :
     letI : Algebra ((lambdaRationalHeightOneSpectrum p).adicCompletion ℚ)
         (LambdaValuedCompletion p K) :=
@@ -397,6 +415,7 @@ def padicToRationalCompletionAlgebra :
       ((lambdaRationalHeightOneSpectrum p).adicCompletion ℚ) :=
   (lambdaPadicToRationalCompletionAlgEquiv (p := p)).toAlgEquiv.toRingEquiv.toRingHom.toAlgebra
 
+/-- `ℚ_p` → the rational adic completion is module-finite (they are isomorphic). -/
 theorem padicToRationalCompletion_moduleFinite :
     letI : Algebra ℚ_[lambdaPadicPrime p]
         ((lambdaRationalHeightOneSpectrum p).adicCompletion ℚ) :=
@@ -415,6 +434,7 @@ abbrev lambdaRationalIntegerHeightOneSpectrum :
     IsDedekindDomain.HeightOneSpectrum (𝓞 ℚ) :=
   (Rat.HeightOneSpectrum.primesEquiv (R := 𝓞 ℚ)).symm (lambdaPadicPrime p)
 
+/-- The `𝓞 ℚ`-flavoured height-one place at `p`, identified with `p`. -/
 theorem primesEquiv_lambdaRationalIntegerHeightOneSpectrum :
     Rat.HeightOneSpectrum.primesEquiv
         (R := 𝓞 ℚ) (lambdaRationalIntegerHeightOneSpectrum p) =
@@ -432,6 +452,7 @@ def lambdaRationalIntegerToPadicAlgEquiv :
       (A := PadicOfPrime)
       (primesEquiv_lambdaRationalIntegerHeightOneSpectrum (p := p)))
 
+/-- The `ℚ_p` → completion map is continuous. -/
 theorem continuous_padicToLambdaCompletionRingHom :
     Continuous (padicToLambdaCompletionRingHom (p := p) (K := K)) := by
   change Continuous fun x =>
@@ -450,6 +471,7 @@ def rationalIntegerCompletionToLambdaAlgebra :
   ((padicToLambdaCompletionRingHom (p := p) (K := K)).comp
     (lambdaRationalIntegerToPadicAlgEquiv (p := p)).toAlgEquiv.toRingEquiv.toRingHom).toAlgebra
 
+/-- Continuity of the scalar action, `𝓞 ℚ`-flavoured. -/
 theorem continuousSMul_rationalIntegerCompletionToLambdaAlgebra :
     letI : Algebra ((lambdaRationalIntegerHeightOneSpectrum p).adicCompletion ℚ)
         (LambdaValuedCompletion p K) :=
@@ -466,6 +488,7 @@ theorem continuousSMul_rationalIntegerCompletionToLambdaAlgebra :
   exact (continuous_padicToLambdaCompletionRingHom (p := p) (K := K)).comp
     (lambdaRationalIntegerToPadicAlgEquiv (p := p)).continuous
 
+/-- The `ℚ` / rational-integer-completion / λ-completion tower. -/
 theorem isScalarTower_rationalIntegerCompletionToLambdaAlgebra :
     letI : Algebra ((lambdaRationalIntegerHeightOneSpectrum p).adicCompletion ℚ)
         (LambdaValuedCompletion p K) :=
@@ -489,6 +512,8 @@ theorem isScalarTower_rationalIntegerCompletionToLambdaAlgebra :
   rw [hcomm, padicToLambdaCompletionRingHom_algebraMap (p := p) (K := K) q]
   exact IsScalarTower.algebraMap_apply ℚ K (LambdaValuedCompletion p K) q
 
+/-- The λ-completion is module-finite over the rational-integer completion — it is a
+finite extension of local fields. -/
 theorem lambdaValuedCompletion_moduleFinite_rationalIntegerCompletion :
     letI : Algebra ((lambdaRationalIntegerHeightOneSpectrum p).adicCompletion ℚ)
         (LambdaValuedCompletion p K) :=
@@ -514,6 +539,7 @@ def padicToRationalIntegerCompletionAlgebra :
       ((lambdaRationalIntegerHeightOneSpectrum p).adicCompletion ℚ) :=
   (lambdaRationalIntegerToPadicAlgEquiv (p := p)).symm.toAlgEquiv.toRingEquiv.toRingHom.toAlgebra
 
+/-- …and that completion is module-finite over `ℚ_p`. -/
 theorem padicToRationalIntegerCompletion_moduleFinite :
     letI : Algebra ℚ_[lambdaPadicPrime p]
         ((lambdaRationalIntegerHeightOneSpectrum p).adicCompletion ℚ) :=
@@ -527,6 +553,7 @@ theorem padicToRationalIntegerCompletion_moduleFinite :
     ((lambdaRationalIntegerToPadicAlgEquiv (p := p)).symm.toAlgEquiv.toRingEquiv.toRingHom).Finite
   exact (lambdaRationalIntegerToPadicAlgEquiv (p := p)).symm.toAlgEquiv.toRingEquiv.finite
 
+/-- The `ℚ_p` / rational-integer-completion / λ-completion tower. -/
 theorem isScalarTower_padic_rationalIntegerCompletion_lambdaCompletion :
     letI : Algebra ℚ_[lambdaPadicPrime p]
         ((lambdaRationalIntegerHeightOneSpectrum p).adicCompletion ℚ) :=
@@ -554,6 +581,7 @@ theorem isScalarTower_padic_rationalIntegerCompletion_lambdaCompletion :
         ((lambdaRationalIntegerToPadicAlgEquiv (p := p)).symm x))
   rw [(lambdaRationalIntegerToPadicAlgEquiv (p := p)).apply_symm_apply]
 
+/-- Composing the tower: the λ-completion is module-finite over `ℚ_p`. -/
 theorem lambdaValuedCompletion_moduleFinitePadic :
     letI : Algebra ℚ_[lambdaPadicPrime p] (LambdaValuedCompletion p K) :=
       lambdaValuedCompletionAlgebraPadic (p := p) (K := K)
@@ -579,6 +607,7 @@ theorem lambdaValuedCompletion_moduleFinitePadic :
   exact Module.Finite.trans ((lambdaRationalIntegerHeightOneSpectrum p).adicCompletion ℚ)
     (LambdaValuedCompletion p K)
 
+/-- Equivalently, it is a finite-dimensional `ℚ_p`-vector space. -/
 theorem lambdaValuedCompletion_finiteDimensionalPadic :
     letI : Algebra ℚ_[lambdaPadicPrime p] (LambdaValuedCompletion p K) :=
       lambdaValuedCompletionAlgebraPadic (p := p) (K := K)
