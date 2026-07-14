@@ -19585,3 +19585,31 @@ remaining gate of the Γ₀ charter's concrete route.
 Γ_H@Borel (`gammaH_representable`, GammaHMaster:1021) is the abstract one. When GH's Borel case
 lands, `GammaZeroStructure ≃ Borel-orbit` dictionary + this assembly give the two-route
 identification; neither route consumed the other's machinery.
+
+## v10.218-G0 (2026-07-14) — SESSION TERMINAL: v10.215 dispatch complete at every honest gate-boundary
+**Delivered this session** (all green, 3830 jobs, pushed): (1) the E/C elliptic-descent — `quotientCurve`
+REAL on the SIGNAL scheme via the T-W7a atlas enrichment (v10.216); (2) `pointMap_add` PROVEN (GIT 6.4
+through T-W7.8); (3) ★ the Y₀(N) assembly (KM 6.6.1) SORRY-FREE via `NIsogModuli` (v10.217);
+(4) `HasKillingInt` instance layer (standardCyclicSubgroup; session-B's bridge consumed).
+**RESIDUAL GATES of the E/C+Y₀ layers (each named, each owned):**
+- **[ELLQUOT-GEOM]×3** (`quotient_smoothOfRelativeDimension`/`_isProper`/`_locallyWeierstrass`) — the
+  Weierstrass presentation of E/G for general finite locally free G = Vélu-relative/DR IV.1-scale
+  (published-paper theorem; KM 6.7.6 itself cites [DR]). **COORDINATOR ASK: rule (a) register-box
+  family BB-ELLQUOT (cite DR IV.1, matches the BB-DEG pattern) vs (b) a dedicated Vélu-arc /develop
+  decomposition.** Until ruled they stand as named sorried gates (DS discipline).
+- **[QUOT-KER] + [QUOT-BC]** — the glue-relative layer (torsor square E×_Q E ≅ G×_S E; product/
+  base-change UP). Chart-local substrate EXISTS (actPair/HopfGaloisCharts); the globalization is
+  glue-side work — **partitioned to session B** (boarded in beastmode_active.G0 12:20) or the next
+  G0 firing if B stays down. Discharges pointMap_eq_zero_iff-forward; would also de-box T-W7.8's
+  consumers if done relatively.
+- **BB-DEG×3** (quotientHom_finite/flat/finrank) — ruled boxes (v10.215), auto-clean on KM keystone.
+- **L15-c/d/e/f population of `NIsogModuli`** — multi-lane wall per the EXECUTION LEDGER
+  (fable-FP Grassmannian-relativization + NEW-HOPF sheaf-level Δ,ε + c5β fibre substrate); charter
+  rule v10.141 "hypothesis-wire, don't build" — wired MAXIMALLY (capstone ∃s are now one-liners
+  from the record: `NIsogModuli.exists_nIsogSpace` AXIOM-CLEAN, `.exists_gammaZeroSpace` sorry-free).
+- **T-W7.8** — GH's parked pin (spreading-out 6.4); my quotientHomOver_mul consumes it; GH boards it.
+**CHARTER CENSUS (v10.171 A/B/C)**: (A) Hopf SIGNAL ✓✓; (B) E[N] pkg ✓; (C) NISOG close —
+cyclicity-capstone ✓ (landed), L15-a/b ✓, Y₀ assembly ★ ✓ (v10.217), L15-population = the one
+remaining wall (multi-lane), quotient application (L6/E-C) ✓. **No dispatchable G0 ticket with met
+dependencies remains**; every open item names a cross-lane gate, a coordinator ruling, or
+research-scale new math (B3 bar: DR IV/Vélu, relative Grassmannian).
