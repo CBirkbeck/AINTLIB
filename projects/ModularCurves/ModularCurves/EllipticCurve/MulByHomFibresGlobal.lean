@@ -20,7 +20,10 @@ Once `fiber_mulByHom_locallyQuasiFinite` lands, `mulByHom_locallyQuasiFinite_ass
 closes ⟹ `mulByHom_isFinite` ⟹ `torsionπ_isFinite` (the whole E[N]-finiteness trail).
 -/
 
-open AlgebraicGeometry CategoryTheory Limits
+open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
+
+attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
+  CategoryTheory.Over.braidedCategory
 
 universe u
 
@@ -29,6 +32,24 @@ namespace ModularCurves
 namespace EllipticCurve
 
 variable {S : Scheme.{u}}
+
+/-- **(BETA transport building block — GIT 6.4 rigidity, general `E ⟶ F`)** Over a locally
+noetherian base, a **pointed** hom of elliptic-curve records `φ : E.asOver ⟶ F.asOver` (fixing the
+zero section, `η ≫ φ = η`) is a monoid-object homomorphism. Generalises
+`EndomorphismDegree.endMonHom` (the `E = F` case) to distinct records by feeding the source's
+`EllipticCurveGeom.universallyOConnected` (+ proper/flat, and the target's separatedness) to the
+sorry-free rigidity engine `isMonHom_of_one_comp_eq'`. This discharges the `[IsMonHom φ]` hypothesis
+of `locallyQuasiFinite_mulByHom_of_isMonHom_iso` for the localModel fibre comparison
+`E_s ≅ modelEllipticCurve W_s` (whose pointedness is `localModel`'s `compat_zero`). -/
+theorem isMonHom_of_pointed [IsLocallyNoetherian S] {E F : EllipticCurve S}
+    (φ : E.asOver ⟶ F.asOver) (hη : η[E.asOver] ≫ φ = η[F.asOver]) : IsMonHom φ where
+  one_hom := hη
+  mul_hom := by
+    haveI : Smooth E.π := SmoothOfRelativeDimension.smooth (n := 1) (f := E.π)
+    haveI : IsProper E.asOver.hom := inferInstanceAs (IsProper E.π)
+    haveI : Flat E.asOver.hom := inferInstanceAs (Flat E.π)
+    haveI : IsSeparated F.asOver.hom := inferInstanceAs (IsSeparated F.π)
+    exact isMonHom_of_one_comp_eq' E.toEllipticCurveGeom.universallyOConnected φ hη
 
 /-- **(BB-QF BETA per-fibre sub-leaf — the single remaining BETA obligation)** Each residue-field
 fibre of `[N] : E ⟶ E` is locally quasi-finite. NOTE the fibre's LQF **cannot** come from `[N]`'s own
