@@ -564,7 +564,8 @@ noncomputable def gammaFullNaiveProblem (N : ℕ) [NeZero N] : ModuliProblem R w
   obj X := { PQ : X.unop.curve.Section × X.unop.curve.Section //
     X.unop.curve.IsNaiveFullLevel N PQ.1 PQ.2 }
   map f := ↾fun PQ => ⟨⟨EllHom.pullSection R f.unop PQ.1.1,
-    EllHom.pullSection R f.unop PQ.1.2⟩, by sorry⟩
+    EllHom.pullSection R f.unop PQ.1.2⟩,
+    EllHom.isNaiveFullLevel_pullSection R f.unop PQ.2⟩
   map_id X := by
     ext PQ
     · exact congrArg Subtype.val (EllHom.pullSection_id R PQ.1.1)
