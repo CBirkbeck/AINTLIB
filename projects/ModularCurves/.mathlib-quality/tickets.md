@@ -19096,3 +19096,33 @@ arbitrary base — glue `isIso_of_affine` over an affine cover via IsZariskiLoca
 along each `S.affineCover.map i` (FullLevelPt.pullAlong), naturality square
 `fullLevelHom (L.pullAlong g) = pullback-transport of fullLevelHom L`, then
 `IsZariskiLocalAtTarget`/openCover-isIso criterion on torsionπ-preimages).
+
+---
+
+## v10.206-G0 — ★★ L2b GENERAL CLOSED: `fullLevelIso` COMPLETE (2026-07-14, STREAM-G0)
+
+**The L2 crux is assembled**: `fullLevelIso hinv L : constScheme S (Fin 2 → ZMod N) ≅ E.torsion N`
+— a naive full level-N structure trivialises E[N] over ANY base with N invertible (KM 2.3.1
+consequence). The whole L2b chain (affine Γ-bijectivity → affine iso → general iso) has **zero
+G0-owned sorries**; residual sorryAx = BB-QF/BB-DEG only (KM charter v10.192-§C).
+
+**New this cycle** (beyond v10.205's affine closure):
+- `constSchemeMapAlong` + ι/π lemmas + **`isPullback_constSchemeMapAlong`** (MuN.lean, AXIOM-CLEAN):
+  constant schemes are stable under base change — proven by the functor-of-points description
+  (`constSchemePointsEquiv` + private `constIndex` machinery; no coproduct-geometry needed, no
+  universe friction — the direct IsLimit argument via locally-constant labels).
+- `fullLevelHom_baseChange` (GLSchemeAction): naturality of the trivialisation map in the base —
+  per-component `pullback.hom_ext`; ι-leg transports the v-combination through the ADDITIVE
+  dictionary `Point.baseChangeEquiv` (map_add/map_zsmul; avoids the nonexistent asSection_add).
+- `isPullback_fullLevelHom`: naturality square cartesian = `IsPullback.of_bot` vertical pasting.
+- `fullLevelHom_isIso`: Zariski-local-at-target glue — cover E[N] by `torsionBaseChangeHom` over
+  `S.affineCover` (mkOfCovers; ranges via isoPullback + `Scheme.Pullback.range_fst`), per chart
+  conjugate `pullbackHom` to the chart trivialisation via `isoPullback_hom_snd`.
+
+**Consumers unblocked**: glEquiv/glSchemeSmul layer now has its iso input; L4 seam next.
+
+**★ CADENCE FLAG (coordinator)**: charter says main-PR at every ★ milestone — dev/modular-curves
+is shared-cursor; coordinator owns the merge (v10.189-G0 α/β note stands).
+
+**NEXT (G0 queue)**: L4 seam — glSchemeSmul ↔ hOrbitSetoid compatibility (decomposition-c5b2
+§L4); then charter remnant (C) NISOG (decomposition-nisog-L15).
