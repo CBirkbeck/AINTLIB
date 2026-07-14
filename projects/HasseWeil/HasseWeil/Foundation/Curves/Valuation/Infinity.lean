@@ -1498,6 +1498,36 @@ theorem mem_localRingAt_image_of_pointValuation_le_one
       IsUnit.unit_spec hd_unit]
   rw [h_inv, ← h_eq, mul_assoc, mul_inv_cancel₀ h_alg_d_ne, mul_one]
 
+/-- **The good-fraction representation of a local function** (curve-generic, to keep the
+localization instances uniform): a function with `v_Q ≤ 1` is a quotient of coordinate-ring
+elements whose denominator does not vanish at `Q`.  Lift to the local ring at `Q`
+(`mem_localRingAt_image_of_pointValuation_le_one`) and clear the `mk'` denominator. -/
+theorem exists_mul_algebraMap_eq_of_pointValuation_le_one
+    {C : SmoothPlaneCurve F} {Q : C.SmoothPoint} {h : C.FunctionField}
+    (hh : C.pointValuation Q h ≤ 1) :
+    ∃ a b : C.CoordinateRing, b ∉ C.maximalIdealAt Q ∧
+      h * algebraMap C.CoordinateRing C.FunctionField b =
+        algebraMap C.CoordinateRing C.FunctionField a := by
+  obtain ⟨xL, hxL⟩ :=
+    Curves.SmoothPlaneCurve.mem_localRingAt_image_of_pointValuation_le_one h hh
+  obtain ⟨a, s, hmk⟩ := IsLocalization.exists_mk'_eq (C.maximalIdealAt Q).primeCompl xL
+  refine ⟨a, (s : C.CoordinateRing), s.prop, ?_⟩
+  have h2 : algebraMap (C.localRingAt Q) C.FunctionField
+        (IsLocalization.mk' (C.localRingAt Q) a s) *
+      algebraMap (C.localRingAt Q) C.FunctionField
+        (algebraMap C.CoordinateRing (C.localRingAt Q) (s : C.CoordinateRing)) =
+      algebraMap (C.localRingAt Q) C.FunctionField
+        (algebraMap C.CoordinateRing (C.localRingAt Q) a) :=
+    (map_mul (algebraMap (C.localRingAt Q) C.FunctionField) _ _).symm.trans
+      (congrArg (algebraMap (C.localRingAt Q) C.FunctionField)
+        (IsLocalization.mk'_spec (C.localRingAt Q) a s))
+  rw [hmk, hxL,
+    ← IsScalarTower.algebraMap_apply C.CoordinateRing (C.localRingAt Q) C.FunctionField,
+    ← IsScalarTower.algebraMap_apply C.CoordinateRing (C.localRingAt Q)
+      C.FunctionField] at h2
+  exact h2
+
+
 /-- **Step (B'') foundational structural identification (biconditional)**:
 combines `pointValuation_algebraMap_localRingAt_le_one` and
 `mem_localRingAt_image_of_pointValuation_le_one` into the canonical iff form.
