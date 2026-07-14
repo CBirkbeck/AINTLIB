@@ -36,17 +36,20 @@ universe u v
 
 namespace K2_2ReciprocalPrimeFactorBundle
 
+section ReciprocalBundle
+
+variable {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
+  {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
+  [IsGalois ℚ K]
+  {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
+  [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
+  [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
+  [FaithfulSMul (𝓞 K) (𝓞 R')]
+  [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
+
 /-- Reciprocal prime-factor bundle constructor that derives the rational-prime
 split facts from `orderOf (ℓ : ZMod p) = 1`. -/
 noncomputable def ofCanonicalTraceForm_pairSigma_split_orderOfOne_of_mem_notMem_maximal
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {P : Ideal (𝓞 K)} [P.IsMaximal]
     (hℓ_in_P : (ℓ : 𝓞 K) ∈ P)
     (hp_notin_P : (p : 𝓞 K) ∉ P)
@@ -83,14 +86,6 @@ noncomputable def ofCanonicalTraceForm_pairSigma_split_orderOfOne_of_mem_notMem_
 /-- Reciprocal prime-factor bundle constructor for a normalized source factor
 of `(α)`. -/
 noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {α : 𝓞 K} (hα_ne : α ≠ 0)
     {P : Ideal (𝓞 K)}
     (hP_factor : P ∈ normalizedFactors (Ideal.span ({α} : Set (𝓞 K))))
@@ -136,14 +131,6 @@ noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor
 /-- Reciprocal prime-factor bundle constructor for a normalized source factor
 of `(α)` that derives `(p : 𝓞 K) ∉ P` from `(α, p) = ⊤`. -/
 noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor_pairTop
-    {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)] [NeZero p]
-    {K : Type u} [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
-      [IsGalois ℚ K]
-    {R' : Type v} [Field R'] [NumberField R'] [Algebra K R']
-      [IsScalarTower ℚ K R'] [IsCyclotomicExtension {p, ℓ} ℚ R']
-    [IsScalarTower ℤ (𝓞 K) (𝓞 R')]
-    [FaithfulSMul (𝓞 K) (𝓞 R')]
-    [Module.IsTorsionFree (𝓞 K) (𝓞 R')]
     {α : 𝓞 K} (hα_ne : α ≠ 0)
     (hαp_top : Ideal.span ({α, (p : 𝓞 K)} : Set (𝓞 K)) = ⊤)
     {P : Ideal (𝓞 K)}
@@ -188,6 +175,8 @@ noncomputable def ofCanonicalTraceForm_orderOfOne_normalizedFactor_pairTop
     K2_2ReciprocalSourceData.ofCanonicalTraceForm_orderOfOne_normalizedFactor_pairTop
       (P := P) (Q := Q) (iso := iso)
       hα_ne hαp_top hP_factor hℓ_in_P hQ_in h_compat h_trace h_order
+
+end ReciprocalBundle
 
 end K2_2ReciprocalPrimeFactorBundle
 
