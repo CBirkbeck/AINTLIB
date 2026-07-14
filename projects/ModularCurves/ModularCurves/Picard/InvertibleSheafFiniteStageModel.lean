@@ -1,4 +1,6 @@
 import ModularCurves.ForMathlib.ProperAffineIntersectionModel
+import ModularCurves.ForMathlib.FinitePresentationFunctorCover
+import ModularCurves.Picard.InvertibleSheafCocycle
 import ModularCurves.Picard.InvertibleSheafFiniteAffineCover
 
 /-!
@@ -16,6 +18,143 @@ open CategoryTheory CategoryTheory.Limits TopologicalSpace
 namespace AlgebraicGeometry.Scheme.Modules
 
 noncomputable section
+
+private theorem topIso_hom_naturality
+    {X : Scheme.{u}} {U V : X.Opens} (hVU : V ≤ U) :
+    (X.homOfLE hVU).appTop ≫ V.topIso.hom =
+      U.topIso.hom ≫ X.presheaf.map (homOfLE hVU).op := by
+  exact (Scheme.restrictFunctorΓ (X := X)).hom.naturality (homOfLE hVU).op
+
+private theorem topIso_inv_naturality
+    {X : Scheme.{u}} {U V : X.Opens} (hVU : V ≤ U) :
+    U.topIso.inv ≫ (X.homOfLE hVU).appTop =
+      X.presheaf.map (homOfLE hVU).op ≫ V.topIso.inv := by
+  calc
+    U.topIso.inv ≫ (X.homOfLE hVU).appTop =
+        (U.topIso.inv ≫ (X.homOfLE hVU).appTop) ≫
+          (V.topIso.hom ≫ V.topIso.inv) := by
+            rw [V.topIso.hom_inv_id, Category.comp_id]
+    _ = U.topIso.inv ≫
+        ((X.homOfLE hVU).appTop ≫ V.topIso.hom) ≫ V.topIso.inv := by
+          simp only [Category.assoc]
+    _ = U.topIso.inv ≫
+        (U.topIso.hom ≫ X.presheaf.map (homOfLE hVU).op) ≫
+          V.topIso.inv := by
+            rw [topIso_hom_naturality hVU]
+    _ = X.presheaf.map (homOfLE hVU).op ≫ V.topIso.inv := by
+      simpa only [Category.assoc] using U.topIso.inv_hom_id_assoc
+        (X.presheaf.map (homOfLE hVU).op ≫ V.topIso.inv)
+
+private theorem finiteIntersectionOpen_le
+    {X : Scheme.{u}} {J : Type u} (U : J → X.Opens)
+    (s : Finset J) {i : J} (hi : i ∈ s) :
+    X.finiteIntersectionOpen U s ≤ U i := by
+  rw [← X.finiteIntersectionOpen_singleton U i]
+  exact X.finiteIntersectionOpen_antitone U
+    (Finset.singleton_subset_iff.mpr hi)
+
+/-- The transition unit between two chosen trivializations, transported to a nonempty
+object of the affine-intersection coordinate-ring functor. -/
+noncomputable def affineIntersectionTransitionUnit
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (s : Finset J) (hs : s.Nonempty) (i j : J) (hi : i ∈ s) (hj : j ∈ s) :
+    ((π.affineIntersectionFunctor U).obj s)ˣ :=
+  let V := X.finiteIntersectionOpen U s
+  Units.map (π.finiteIntersectionRingIso U s hs).hom.hom.toMonoidHom
+    (Units.map V.topIso.inv.hom.toMonoidHom
+      (trivializingCoverTransitionUnitOn U e V i j
+        (finiteIntersectionOpen_le U s hi) (finiteIntersectionOpen_le U s hj)))
+
+/-- Affine-intersection transition units are compatible with every restriction map in
+the coordinate-ring functor. -/
+theorem affineIntersectionTransitionUnit_map
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    {s q : Finset J} (f : s ⟶ q) (hs : s.Nonempty) (hq : q.Nonempty)
+    (i j : J) (hi : i ∈ s) (hj : j ∈ s) :
+    Units.map ((π.affineIntersectionFunctor U).map f).hom.toMonoidHom
+        (affineIntersectionTransitionUnit π U e s hs i j hi hj) =
+      affineIntersectionTransitionUnit π U e q hq i j
+        (leOfHom f hi) (leOfHom f hj) := by
+  let V := X.finiteIntersectionOpen U s
+  let W := X.finiteIntersectionOpen U q
+  let hWV : W ≤ V := X.finiteIntersectionOpen_antitone U (leOfHom f)
+  let hVi : V ≤ U i := finiteIntersectionOpen_le U s hi
+  let hVj : V ≤ U j := finiteIntersectionOpen_le U s hj
+  let gV := trivializingCoverTransitionUnitOn U e V i j hVi hVj
+  let gW := trivializingCoverTransitionUnitOn U e W i j
+    (hWV.trans hVi) (hWV.trans hVj)
+  have hg : Units.map
+      (X.presheaf.map (homOfLE hWV).op).hom.toMonoidHom gV = gW := by
+    exact trivializingCoverTransitionUnitOn_restrict U e hWV i j hVi hVj
+  have htop := ConcreteCategory.congr_hom (topIso_inv_naturality hWV) (gV : Γ(X, V))
+  have hrestrict :
+      (π.finiteIntersectionRestriction U (leOfHom f)).hom
+          (V.topIso.inv.hom (gV : Γ(X, V))) =
+        W.topIso.inv.hom (gW : Γ(X, W)) := by
+    calc
+      (π.finiteIntersectionRestriction U (leOfHom f)).hom
+          (V.topIso.inv.hom (gV : Γ(X, V))) =
+        (X.homOfLE hWV).appTop.hom (V.topIso.inv.hom (gV : Γ(X, V))) :=
+          ConcreteCategory.congr_hom
+            (π.finiteIntersectionRestriction_forget U f)
+              (V.topIso.inv.hom (gV : Γ(X, V)))
+      _ = W.topIso.inv.hom
+          ((X.presheaf.map (homOfLE hWV).op).hom (gV : Γ(X, V))) := htop
+      _ = W.topIso.inv.hom (gW : Γ(X, W)) := by
+        exact congrArg W.topIso.inv.hom (congrArg Units.val hg)
+  apply Units.ext
+  change ((π.affineIntersectionFunctor U).map f).hom
+      ((π.finiteIntersectionRingIso U s hs).hom.hom
+        (V.topIso.inv.hom (gV : Γ(X, V)))) =
+    (π.finiteIntersectionRingIso U q hq).hom.hom
+      (W.topIso.inv.hom (gW : Γ(X, W)))
+  exact (ConcreteCategory.congr_hom
+    (π.finiteIntersectionRestriction_ringIso U f hs hq)
+      (V.topIso.inv.hom (gV : Γ(X, V)))).symm.trans
+        (congrArg (π.finiteIntersectionRingIso U q hq).hom.hom hrestrict)
+
+/-- Affine-intersection transition units satisfy the multiplicative transition law in
+every nonempty functor object. -/
+theorem affineIntersectionTransitionUnit_trans
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (s : Finset J) (hs : s.Nonempty) (i j k : J)
+    (hi : i ∈ s) (hj : j ∈ s) (hk : k ∈ s) :
+    affineIntersectionTransitionUnit π U e s hs i j hi hj *
+        affineIntersectionTransitionUnit π U e s hs j k hj hk =
+      affineIntersectionTransitionUnit π U e s hs i k hi hk := by
+  let V := X.finiteIntersectionOpen U s
+  let hVi : V ≤ U i := finiteIntersectionOpen_le U s hi
+  let hVj : V ≤ U j := finiteIntersectionOpen_le U s hj
+  let hVk : V ≤ U k := finiteIntersectionOpen_le U s hk
+  let g (a b : J) (ha : V ≤ U a) (hb : V ≤ U b) :=
+    trivializingCoverTransitionUnitOn U e V a b ha hb
+  apply Units.ext
+  change (π.finiteIntersectionRingIso U s hs).hom.hom
+        (V.topIso.inv.hom (g i j hVi hVj : Γ(X, V))) *
+      (π.finiteIntersectionRingIso U s hs).hom.hom
+        (V.topIso.inv.hom (g j k hVj hVk : Γ(X, V))) =
+    (π.finiteIntersectionRingIso U s hs).hom.hom
+      (V.topIso.inv.hom (g i k hVi hVk : Γ(X, V)))
+  calc
+    _ = (π.finiteIntersectionRingIso U s hs).hom.hom
+        (V.topIso.inv.hom (g i j hVi hVj : Γ(X, V)) *
+          V.topIso.inv.hom (g j k hVj hVk : Γ(X, V))) :=
+      ((π.finiteIntersectionRingIso U s hs).hom.hom.map_mul _ _).symm
+    _ = (π.finiteIntersectionRingIso U s hs).hom.hom
+        (V.topIso.inv.hom
+          ((g i j hVi hVj : Γ(X, V)) * (g j k hVj hVk : Γ(X, V)))) :=
+      congrArg (π.finiteIntersectionRingIso U s hs).hom.hom
+        (V.topIso.inv.hom.map_mul _ _).symm
+    _ = _ := congrArg
+      (fun z => (π.finiteIntersectionRingIso U s hs).hom.hom (V.topIso.inv.hom z))
+      (congrArg Units.val
+        (trivializingCoverTransitionUnitOn_trans U e V i j k hVi hVj hVk))
 
 /-- An invertible sheaf on a proper, locally finitely presented family admits a finite affine
 trivializing cover whose affine-intersection model recovers the family after base change. -/
