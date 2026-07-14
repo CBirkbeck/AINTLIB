@@ -20068,3 +20068,23 @@ transport); (β2) κ(s)→κ̄-descent of fibre finiteness (closed-point compari
 g5-spec); (β3) the global L2 reduction discharging `mulByHom_finite_fibres` (Torsion.lean:145) —
 then the banked reduction closes BB-QF and mulByHom_isFinite/torsionπ_isFinite go real, auto-
 cleaning the E[N]/SIGNAL/Y₀(N) finiteness trail. Torsion-relocation ask stands for the coordinator.
+
+## v10.227-G0 (2026-07-14) — BB-QF endgame seam-map: the LQF-descent recipe (mathlib-gap, bounded)
+BETA's sole sorry (`fiber_mulByHom_locallyQuasiFinite`) reduces to TWO seams:
+**(seam-i) κ̄→κ descent of model-LQF.** Mathlib has NO `DescendsAlong @LocallyQuasiFinite
+(@Surjective ⊓ @Flat ⊓ @QuasiCompact)` instance and NO `RingHom.QuasiFinite.codescendsAlong_faithfullyFlat`.
+RECIPE (bounded, ~60 lines, all ingredients located): ring-level codescends via the FiniteType-part
+(`RingHom.FiniteType.codescendsAlong_faithfullyFlat`, RingTheory/Finiteness/Descent:120) + fibre-part
+(`Module.Finite.of_finite_tensorProduct_of_faithfullyFlat`, :34 — descend `Module.Finite
+P.ResidueField (P.Fiber S)` along the residue-field extension of a prime p' over p, p' from
+fppf-surjectivity on spectra); then the scheme instance is the one-liner
+`HasRingHomProperty.descendsAlong_flat` exactly as LocalFlatDescent:35-47. Also needed upstream of
+the descent-application: base-change of modelEllipticCurve ≅-pointed modelEllipticCurve (W.baseChange κ̄)
+(the projModel-baseChange IsPullback family in WeierstrassModel — `projModelZero_baseChange` etc.) OR
+apply fibrewiseElliptic to the base-changed record at its unique point + residue ≅ κ̄ + IsAlgClosed
+transfer (hunt `IsAlgClosed.of_ringEquiv`).
+**(seam-ii) fibre-of-endo identification** (sibling-flagged "deep pullback, no mathlib shortcut"):
+`(E.mulByHom N).fiberToSpecResidueField y` as a base change of `(E.baseChange
+(fromSpecResidueField (π y))).mulByHom N` — mulByHom_baseChange + Pullback/Triplet toolkit.
+With (i)+(ii): fiber_mulByHom_LQF closes → `mulByHom_locallyQuasiFinite_assembled` (PROVEN) is the
+Torsion-leaf verbatim → BB-QF CLOSES (relocation ask stands). ALPHA remains axiom-clean and idle.
