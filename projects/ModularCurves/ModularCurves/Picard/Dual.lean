@@ -520,6 +520,21 @@ theorem dualUnitSectionsEquiv_symm_apply (U : C) (r : R.obj.obj (op U)) :
     (dualUnitSectionsEquiv R U).symm r = overUnitScalarEnd R U r :=
   rfl
 
+/-- Endomorphisms of the unit module on `Over U` are exactly scalar multiplications by
+sections over `U`, as rings. -/
+noncomputable def overUnitScalarEndRingEquiv (U : C) :
+    R.obj.obj (op U) ≃+*
+      End (_root_.SheafOfModules.unit (R.over U)) :=
+  RingEquiv.ofBijective (overUnitScalarEndRingHom R U) <| by
+    refine Function.bijective_iff_has_inverse.mpr
+      ⟨dualUnitSectionsEquiv R U, ?_, ?_⟩
+    · intro r
+      change dualUnitSectionsEquiv R U ((dualUnitSectionsEquiv R U).symm r) = r
+      exact Equiv.apply_symm_apply _ r
+    · intro f
+      change (dualUnitSectionsEquiv R U).symm (dualUnitSectionsEquiv R U f) = f
+      exact Equiv.symm_apply_apply _ f
+
 /-- The identification of unit endomorphisms with scalars is linear for the
 postcomposition action used on the dual. -/
 @[reducible]
