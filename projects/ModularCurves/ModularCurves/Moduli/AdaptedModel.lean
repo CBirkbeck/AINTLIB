@@ -579,6 +579,122 @@ noncomputable def adaptedCoeff₆ (G : EllipticCurveGeom S) (b : OmegaBasis G)
   refine ⟨hglue.choose, fun V i hVi => ?_⟩
   exact hglue.choose_spec.1 ⟨⟨V, i⟩, hVi⟩
 
+open Scheme in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(E12-D2)** The per-chart comparison unit of a global presentation: glue
+`transUnit (Pᵢ|_W) (P|_W)` over the affines of `⊤ ⊓ U i`. -/
+private noncomputable def ofPresentationUnit {V₀ : S.affineOpens} (hV₀ : V₀.1 = ⊤)
+    (P : LocalPresentation G V₀) (i : G.atlas.ι) :
+    { g : Γ(S, (⊤ : S.Opens) ⊓ (G.atlas.U i).1)ˣ //
+      ∀ (W : S.affineOpens) (hW : W.1 ≤ (⊤ : S.Opens) ⊓ (G.atlas.U i).1),
+        Scheme.resUnit hW g =
+          ((G.atlas.presentation i).restrict (hW.trans inf_le_right)).transUnit
+            (P.restrict (show W.1 ≤ V₀.1 from hV₀ ▸ le_top)) } := by
+  have hglue := Scheme.exists_unit_glue S ((⊤ : S.Opens) ⊓ (G.atlas.U i).1)
+    (fun W hW =>
+      ((G.atlas.presentation i).restrict (hW.trans inf_le_right)).transUnit
+        (P.restrict (show W.1 ≤ V₀.1 from hV₀ ▸ le_top)))
+    (fun W W' hW h => by
+      rw [← transUnit_restrict _ _ h, transUnit_restrict_restrict])
+  exact ⟨hglue.choose, hglue.choose_spec.1⟩
+
+open Scheme in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(E12-D2 ★)** The `ω`-basis associated to a global presentation over an affine
+base: chartwise the comparison unit against the presentation. This is the universal
+`ω = dx/y` of T-E12's representing object (KM 2.2.5: the basis the model is adapted
+to). -/
+noncomputable def _root_.ModularCurves.OmegaBasis.ofPresentation
+    {V₀ : S.affineOpens} (hV₀ : V₀.1 = ⊤) (P : LocalPresentation G V₀) :
+    OmegaBasis G := by
+  refine ⟨⟨fun i => (ofPresentationUnit hV₀ P i).1.val, fun i j => ?_⟩,
+    fun i => (ofPresentationUnit hV₀ P i).1.isUnit⟩
+  refine TopCat.Sheaf.eq_of_locally_eq' S.sheaf
+    (fun r : {W : S.affineOpens //
+        W.1 ≤ (⊤ : S.Opens) ⊓ (omegaCocycle G).U i ⊓ (omegaCocycle G).U j} => r.1.1)
+    ((⊤ : S.Opens) ⊓ (omegaCocycle G).U i ⊓ (omegaCocycle G).U j)
+    (fun r => homOfLE r.2) (by
+      intro x hx
+      obtain ⟨W₀, hWaff, hxW, hWle⟩ := exists_isAffineOpen_mem_and_subset hx
+      exact Opens.mem_iSup.mpr ⟨⟨⟨W₀, hWaff⟩, hWle⟩, hxW⟩) _ _ (fun r => ?_)
+  have hri : r.1.1 ≤ (⊤ : S.Opens) ⊓ (G.atlas.U i).1 :=
+    r.2.trans inf_le_left
+  have hrj : r.1.1 ≤ (⊤ : S.Opens) ⊓ (G.atlas.U j).1 :=
+    le_inf le_top (r.2.trans inf_le_right)
+  have hrij : r.1.1 ≤ (omegaCocycle G).U i ⊓ (omegaCocycle G).U j :=
+    le_inf (r.2.trans (inf_le_left.trans inf_le_right)) (r.2.trans inf_le_right)
+  have hunits : Scheme.resUnit hri (ofPresentationUnit hV₀ P i).1 =
+      Scheme.resUnit hrij ((omegaCocycle G).u i j) *
+      Scheme.resUnit hrj (ofPresentationUnit hV₀ P j).1 := by
+    rw [(ofPresentationUnit hV₀ P i).2 r.1 hri,
+      (ofPresentationUnit hV₀ P j).2 r.1 hrj]
+    refine Eq.trans ((transUnit_trans _
+      ((G.atlas.presentation j).restrict (hrj.trans inf_le_right)) _).symm) ?_
+    exact congrArg₂ (· * ·) (omegaCocycle_res G i j r.1 hrij).symm rfl
+  have hv := congrArg Units.val hunits
+  simp only [Units.val_mul, Scheme.resUnit_val, Scheme.resLE_resLE] at hv
+  show Scheme.resLE r.2 (Scheme.resLE inf_le_left
+      (ofPresentationUnit hV₀ P i).1.val) =
+    Scheme.resLE r.2 ((Scheme.resUnit (le_inf (inf_le_left.trans inf_le_right)
+        inf_le_right) ((omegaCocycle G).u i j)).val *
+      Scheme.resLE (le_inf (inf_le_left.trans inf_le_left) inf_le_right :
+          (⊤ : S.Opens) ⊓ (omegaCocycle G).U i ⊓ (omegaCocycle G).U j ≤
+            (⊤ : S.Opens) ⊓ (G.atlas.U j).1)
+        (ofPresentationUnit hV₀ P j).1.val)
+  rw [Scheme.resLE_resLE, map_mul,
+    show Scheme.resLE r.2 ((Scheme.resUnit (le_inf (inf_le_left.trans inf_le_right)
+        inf_le_right) ((omegaCocycle G).u i j)).val) =
+      Scheme.resLE (r.2.trans (le_inf (inf_le_left.trans inf_le_right)
+        inf_le_right)) ((omegaCocycle G).u i j).val from by
+      rw [Scheme.resUnit_val, Scheme.resLE_resLE]]
+  erw [Scheme.resLE_resLE]
+  exact hv
+
+open Scheme in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(E12-D2 ★)** A global presentation is adapted to its own basis: KM 2.2.5's
+tautology — the model is adapted to the `ω` it defines. Stated for restrictions so it
+feeds `adaptedLocal`-style consumers directly. -/
+theorem isAdapted_restrict_ofPresentation {V₀ : S.affineOpens} (hV₀ : V₀.1 = ⊤)
+    (P : LocalPresentation G V₀) {V : S.affineOpens} (h : V.1 ≤ V₀.1) :
+    (P.restrict h).IsAdapted (OmegaBasis.ofPresentation hV₀ P) := by
+  show ((P.restrict h).basisUnitAt _).1 = 1
+  refine Scheme.unit_ext_of_res_cover S
+    (fun i : G.atlas.ι => V.1 ⊓ (G.atlas.U i).1) (fun i => inf_le_left)
+    (fun x hxV => by
+      obtain ⟨i, hxi⟩ := G.atlas.covers x
+      exact Opens.mem_iSup.mpr ⟨i, hxV, hxi⟩) (fun i => ?_)
+  rw [((P.restrict h).basisUnitAt _).2 i, map_one]
+  refine Scheme.unit_ext_of_affine_res S (fun W hW => ?_)
+  rw [((P.restrict h).basisUnitOn _ i).2 W hW, map_one]
+  have hb : Scheme.resUnit (le_inf le_top (hW.trans inf_le_right))
+      (((OmegaBasis.ofPresentation hV₀ P).2 i).unit) =
+    ((G.atlas.presentation i).restrict
+        ((le_inf le_top (hW.trans inf_le_right)).trans inf_le_right :
+          W.1 ≤ (G.atlas.U i).1)).transUnit
+      (P.restrict (show W.1 ≤ V₀.1 from hV₀ ▸ le_top)) := by
+    have hspec := (ofPresentationUnit hV₀ P i).2 W
+      (le_inf le_top (hW.trans inf_le_right))
+    refine Units.ext ?_
+    have h1 : (((OmegaBasis.ofPresentation hV₀ P).2 i).unit :
+        Γ(S, (⊤ : S.Opens) ⊓ (omegaCocycle G).U i)) =
+      (ofPresentationUnit hV₀ P i).1.val := IsUnit.unit_spec _
+    calc (Scheme.resUnit (le_inf le_top (hW.trans inf_le_right))
+          (((OmegaBasis.ofPresentation hV₀ P).2 i).unit)).val
+        = Scheme.resLE (le_inf le_top (hW.trans inf_le_right))
+            (ofPresentationUnit hV₀ P i).1.val := by
+          rw [Scheme.resUnit_val, h1]
+      _ = _ := congrArg Units.val hspec
+  rw [hb]
+  rw [show ((P.restrict h).restrict (hW.trans inf_le_left)).transUnit
+      ((G.atlas.presentation i).restrict (hW.trans inf_le_right)) =
+    (P.restrict ((hW.trans inf_le_left).trans h)).transUnit
+      ((G.atlas.presentation i).restrict (hW.trans inf_le_right)) from
+    transUnit_restrict_restrict_left _ _ _ _]
+  rw [transUnit_trans, transUnit_self]
+
 end LocalPresentation
 
 end ModularCurves
