@@ -86,6 +86,13 @@ namespace Modules
 
 variable (φ : X ≅ Y)
 
+/-- Pullback of scheme modules along a scheme isomorphism is an equivalence. -/
+theorem pullback_isEquivalence_of_iso :
+    (pullback φ.hom).IsEquivalence :=
+  Functor.IsEquivalence.mk' (pullback φ.inv)
+    ((pullbackComp φ.inv φ.hom ≪≫ pullbackCongr φ.inv_hom_id ≪≫ pullbackId Y).symm)
+    (pullbackComp φ.hom φ.inv ≪≫ pullbackCongr φ.hom_inv_id ≪≫ pullbackId X)
+
 /-- Restricting along an isomorphism and then along its inverse is naturally the identity. -/
 def restrictFunctor_inv_restrictFunctor_hom_id :
     restrictFunctor φ.inv ⋙ restrictFunctor φ.hom ≅ 𝟭 X.Modules :=
