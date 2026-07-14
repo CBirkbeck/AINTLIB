@@ -84,6 +84,38 @@ noncomputable def Scheme.Hom.affineIntersectionModelBaseChangeIso
   exact M.affineIntersectionGluedBaseChangeIso hopenG hpushG hopenM hpushM ≪≫
     asIso (π.affineIntersectionGluedToOriginal U hU)
 
+/-- A chosen finite affine cover of a proper, locally finitely presented family spreads to
+an affine-intersection model at one stage of a filtered presentation of the base ring. -/
+theorem Scheme.Hom.exists_affineIntersectionModelAtLaterStage_of_isProper_of_cover
+    {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+    {𝒮 : ι → Type u} [∀ i, CommRing (𝒮 i)] [∀ i, Algebra R (𝒮 i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (𝒮 i →ₐ[R] 𝒮 j)}
+    (π : X ⟶ S) [IsProper π] [IsAffine S] [LocallyOfFinitePresentation π]
+    [Algebra R Γ(S, (⊤ : S.Opens))]
+    {uS : ∀ i, 𝒮 i →ₐ[R] Γ(S, (⊤ : S.Opens))}
+    (H : Algebra.IsFilteredAlgColimit R 𝒮 t Γ(S, (⊤ : S.Opens)) uS)
+    [Finite J] (U : J → X.Opens) (hcover : IsOpenCover U)
+    (hUaff : ∀ i, IsAffineOpen (U i)) :
+    ∃ (hU : ∀ s : Finset J, s.Nonempty →
+        IsAffineOpen (X.finiteIntersectionOpen U s))
+      (M : Algebra.SpreadData.FunctorModel (π.affineIntersectionFunctor U) H)
+      (j : ι) (hMj : M.stage ≤ j),
+      Scheme.GlueData.IsOpenAffineIntersectionFunctor (M.mapToStage hMj).toFunctor ∧
+        Scheme.GlueData.IsPushoutAffineIntersectionFunctor (M.mapToStage hMj).toFunctor ∧
+          IsIso (π.affineIntersectionGluedToOriginal U hU) := by
+  letI : Fintype J := Fintype.ofFinite J
+  let hU := π.isAffineOpen_finiteIntersectionOpen_of_isProper U hUaff
+  letI : ∀ s : Finset J,
+      Algebra.FinitePresentation Γ(S, (⊤ : S.Opens))
+        ((π.affineIntersectionFunctor U).obj s) :=
+    fun s => π.affineIntersectionFunctor_obj_finitePresentation U hU s
+  let M := Classical.choice (H.exists_spreadFunctor (π.affineIntersectionFunctor U))
+  obtain ⟨j, hMj, hopen, hpush⟩ := M.exists_affineIntersectionConditionsAtLaterStage
+    (π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU)
+    (π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU)
+  exact ⟨hU, M, j, hMj, hopen, hpush,
+    π.isIso_affineIntersectionGluedToOriginal U hcover hU⟩
+
 /-- A proper, locally finitely presented family over an affine base admits a
 finite affine-intersection model whose gluing conditions hold at one stage of
 any filtered presentation of the base ring. -/
@@ -103,20 +135,12 @@ theorem Scheme.Hom.exists_affineIntersectionModelAtLaterStage_of_isProper
       Scheme.GlueData.IsOpenAffineIntersectionFunctor (M.mapToStage hMj).toFunctor ∧
         Scheme.GlueData.IsPushoutAffineIntersectionFunctor (M.mapToStage hMj).toFunctor ∧
           IsIso (π.affineIntersectionGluedToOriginal U hU) := by
-  obtain ⟨J, hJ, U, hcover, _, hU⟩ :=
+  obtain ⟨J, hJ, U, hcover, hUaff, _⟩ :=
     π.exists_finite_affine_openCover_of_isProper
   letI : Finite J := hJ
-  letI : Fintype J := Fintype.ofFinite J
-  letI : ∀ s : Finset J,
-      Algebra.FinitePresentation Γ(S, (⊤ : S.Opens))
-        ((π.affineIntersectionFunctor U).obj s) :=
-    fun s => π.affineIntersectionFunctor_obj_finitePresentation U hU s
-  let M := Classical.choice (H.exists_spreadFunctor (π.affineIntersectionFunctor U))
-  obtain ⟨j, hMj, hopen, hpush⟩ := M.exists_affineIntersectionConditionsAtLaterStage
-    (π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU)
-    (π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU)
-  exact ⟨J, hJ, U, hcover, hU, M, j, hMj, hopen, hpush,
-    π.isIso_affineIntersectionGluedToOriginal U hcover hU⟩
+  obtain ⟨hU', M, j, hMj, hopen, hpush, hglue⟩ :=
+    π.exists_affineIntersectionModelAtLaterStage_of_isProper_of_cover H U hcover hUaff
+  exact ⟨J, hJ, U, hcover, hU', M, j, hMj, hopen, hpush, hglue⟩
 
 /-- A proper, locally finitely presented family over an affine filtered-colimit base is the
 base change of a finite-stage affine-intersection model. -/
