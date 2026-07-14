@@ -101,4 +101,18 @@ theorem functionFieldMap_germToFunctionField (f : X ⟶ Y) [IsDominant f]
     germ_eqToHom_stalk_apply Y U (genericPoint_eq_of_isDominant f).symm _ hx s]
   exact Scheme.Hom.germ_stalkMap_apply f U (genericPoint X) hx s
 
+/-- **(function field pullback = fraction-field extension of the section map)** The commuting square
+identifying `functionFieldMap f` as the fraction-field extension of the section pullback `f.app U`:
+`germToFunctionField U ≫ functionFieldMap f = f.app U ≫ germToFunctionField (f⁻¹U)`. Morphism-level
+form of `functionFieldMap_germToFunctionField`. Since `germToFunctionField` is the localisation
+`Γ(Y,U) → K(Y)` (`IsFractionRing`, for `U` affine), this says `functionFieldMap f` is *the* extension
+of `f.app U` to fraction fields — the compatibility that turns `finrank Γ(Y,U) Γ(X,f⁻¹U)` into the
+function-field degree `finrank K(Y) K(X)` (the scalar-tower input for `finrank_of_isFractionRing`). -/
+theorem functionFieldMap_comp_germToFunctionField (f : X ⟶ Y) [IsDominant f]
+    [IrreducibleSpace X] [IrreducibleSpace Y] (U : Y.Opens) [Nonempty U] [Nonempty (f ⁻¹ᵁ U)] :
+    Y.germToFunctionField U ≫ f.functionFieldMap = f.app U ≫ X.germToFunctionField (f ⁻¹ᵁ U) := by
+  ext s
+  show f.functionFieldMap (Y.germToFunctionField U s) = X.germToFunctionField (f ⁻¹ᵁ U) (f.app U s)
+  rw [functionFieldMap_germToFunctionField f U s]
+
 end AlgebraicGeometry
