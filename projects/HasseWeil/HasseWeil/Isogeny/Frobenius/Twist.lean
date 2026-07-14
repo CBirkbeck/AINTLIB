@@ -254,6 +254,7 @@ theorem ofEquationCoordRingHom_smul_basis_eq (a b : Polynomial F) :
     · exact AdjoinRoot.lift_of _
     · exact AdjoinRoot.lift_root _
 
+omit [DecidableEq F] in
 /-- **Norm factorization of a rank-2 element** (curve-generic): for any Weierstrass
 curve `W` over `F`, the image under `algebraMap` of the `Polynomial F`-norm of
 `a • 1 + b • Y` factors as `(a • 1 + b • Y) * conj`, where `conj` is the
@@ -365,7 +366,7 @@ omit [WeierstrassCurve.IsElliptic E.toAffine] [WeierstrassCurve.IsElliptic V.toA
 /-- The pullback sends `x_gen V ↦ u`. -/
 theorem ofEquationPullback_x_gen :
     ofEquationPullback E V u v h_eqn h_trans (x_gen V) = u := by
-  unfold ofEquationPullback
+  simp only [ofEquationPullback]
   rw [IsFractionRing.liftAlgHom_apply]
   change IsFractionRing.lift _ (algebraMap _ _ _) = _
   rw [IsFractionRing.lift_algebraMap]
@@ -375,7 +376,7 @@ omit [WeierstrassCurve.IsElliptic E.toAffine] [WeierstrassCurve.IsElliptic V.toA
 /-- The pullback sends `y_gen V ↦ v`. -/
 theorem ofEquationPullback_y_gen :
     ofEquationPullback E V u v h_eqn h_trans (y_gen V) = v := by
-  unfold ofEquationPullback
+  simp only [ofEquationPullback]
   rw [IsFractionRing.liftAlgHom_apply]
   change IsFractionRing.lift _ (algebraMap _ _ _) = _
   rw [IsFractionRing.lift_algebraMap]
@@ -388,7 +389,7 @@ theorem ofEquationPullback_algebraMap_polynomial (q : Polynomial F) :
       (algebraMap (Polynomial F) KV q) = Polynomial.aeval u q := by
   rw [IsScalarTower.algebraMap_apply (Polynomial F) V.toAffine.CoordinateRing
     (V.toAffine.FunctionField) q]
-  unfold ofEquationPullback
+  simp only [ofEquationPullback]
   rw [IsFractionRing.liftAlgHom_apply]
   rw [IsFractionRing.lift_algebraMap]
   exact ofEquationCoordRingHom_algebraMap_polynomial E V u v h_eqn q
@@ -396,7 +397,6 @@ theorem ofEquationPullback_algebraMap_polynomial (q : Polynomial F) :
 /-! #### The basepoint condition for `ofEquationPullback` -/
 
 omit [WeierstrassCurve.IsElliptic E.toAffine] in
-set_option maxHeartbeats 800000 in
 /-- **Order transport for `F(x)`-elements**: for nonzero `r ∈ F(x)` and
 `ord_∞ u = M < 0`, there is `t ∈ ℤ` with `ord_∞^V(r) = -2t` and
 `ord_∞^E(pullback r) = t·M`. Mirror of
@@ -567,8 +567,6 @@ private theorem ordAtInfty_ofEquationPullback_y_term_nonneg
     exact ofEquation_ord_mul_nonneg_aux hm ht himg h_y hv_ne
 
 omit [WeierstrassCurve.IsElliptic E.toAffine] in
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 800000 in
 /-- **The basepoint condition**: the pullback preserves regularity at infinity,
 provided `ord_∞ u = 2m` is even and `≤ -2`. The `{1, y}`-parity route of
 `mulByInt_pullbackAlgHom_ordAtInfty_nonneg`, with the `y`-image order bound coming
@@ -697,7 +695,7 @@ omit [DecidableEq F] [WeierstrassCurve.IsElliptic E.toAffine] in
 theorem iterateFrobeniusTwist_map_KE_eq (e : ℕ) :
     (E.iterateFrobeniusTwist p e).map (algebraMap F KE) =
       (W_KE E).map (iterateFrobenius KE p e) := by
-  unfold WeierstrassCurve.iterateFrobeniusTwist W_KE
+  simp only [WeierstrassCurve.iterateFrobeniusTwist, W_KE]
   rw [WeierstrassCurve.map_map, WeierstrassCurve.map_map,
       RingHom.iterateFrobenius_comm (algebraMap F (E.toAffine.FunctionField)) p e]
 
@@ -803,6 +801,7 @@ private theorem relativeFrobenius_coordRingHom_eq_on_C (e : ℕ) (q : Polynomial
     algebraMap _ _ ((AdjoinRoot.of _) q)
   exact (algebraMap_CR_KE_of_eq_eval₂ E q).symm
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic E.toAffine] in
 /-- Root agreement for the compositional identity: at `AdjoinRoot.root` both sides of the
 identity evaluate to `y_gen E ^ p ^ e` (the relative-Frobenius hom sends the root to the
 twisted `y`-generator via `ofEquationCoordAlgHom_y`, the iterate-Frobenius side via the
@@ -866,7 +865,7 @@ theorem relativeFrobenius_pullback_coordRingMap (e : ℕ) (r : E.toAffine.Coordi
       (x_gen E ^ p ^ e) (y_gen E ^ p ^ e)
       (iterateFrobeniusTwist_generic_equation p E e)
       (x_gen_pow_p_pow_transcendental p E e) _ = _
-    unfold ofEquationPullback
+    simp only [ofEquationPullback]
     rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
     rfl
   rw [h1]
@@ -902,7 +901,6 @@ private theorem coordinateRingMap_iterateFrobenius_surjective [PerfectField F] (
   exact ⟨AdjoinRoot.mk _ q',
     (WeierstrassCurve.Affine.CoordinateRing.map_mk (iterateFrobenius F p e) q')⟩
 
-set_option maxHeartbeats 800000 in
 /-- **Range identification over a perfect base**: the pullback field range of the
 relative `p^e`-Frobenius is exactly the subfield `K(E)^{p^e}` of `p^e`-th powers. -/
 theorem relativeFrobenius_fieldRange_toSubfield [PerfectField F] (e : ℕ) :
@@ -960,7 +958,6 @@ private theorem finrank_subfield_congr {L : Type*} [Field L] {S T : Subfield L}
   rfl
 
 omit [DecidableEq F] [WeierstrassCurve.IsElliptic E.toAffine] in
-set_option maxHeartbeats 800000 in
 /-- **The tower step**: `[K(E) : K(E)^{p^{e+1}}] = [K(E) : K(E)^p] · [K(E) : K(E)^{p^e}]`.
 The first factor of the tower law `[K(E)^{p^e} : K(E)^{p^{e+1}}]` is transported to
 `[K(E) : K(E)^p]` along the `p^e`-power isomorphism `K(E) ≅ K(E)^{p^e}`. -/
