@@ -414,7 +414,14 @@ isomorphism from the pullback of the `i`th chart's unit sheaf to the pullback of
 unit sheaf along `t i j ≫ f j i`, obtained by conjugating the scalar transition through the two
 canonical pullback-unit isomorphisms.
 
-Active dependency claim (2026-07-14): prove the chart transition isomorphisms satisfy the
-identity, inverse, and triple-overlap coherence equations induced by the scheme `GlueData` maps
-`t` and `t'`, then package them as local module descent data suitable for gluing on the
-finite-stage proper scheme.
+Active dependency claim (2026-07-14): in a new `InvertibleSheafGlueData` layer, prove
+`chartTransitionIso_toUnit` and the diagonal, pair-swap inverse, and triple-overlap coherence
+equations for `AffineIntersectionUnitCocycle.chartTransitionIso`, with all type transports supplied
+by the existing `pullbackCongr`/`pullbackComp` API. Package exactly these laws as local module
+descent data suitable for gluing on the finite-stage proper scheme.
+
+Completed subdependency (2026-07-14): introduced `InvertibleSheafGlueData.lean` and proved
+`AffineIntersectionUnitCocycle.chartTransitionIso_toUnit` together with the type-correct diagonal
+law `chartTransitionIso_self`. The latter identifies the diagonal transition with canonical
+`pullbackCongr` transport along `f i i = t i i ≫ f i i`; both declarations are option-free and
+axiom-clean.
