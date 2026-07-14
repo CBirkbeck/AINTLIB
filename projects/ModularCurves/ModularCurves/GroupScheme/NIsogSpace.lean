@@ -170,4 +170,118 @@ theorem exists_nIsogSpace_of_representation (r : NIsogRepresentation E N) :
         Nonempty (NIsogenyStructure (E.baseChange t) N ≃ { h : T ⟶ W // h ≫ w = t }) :=
   ⟨r.W, r.w, r.finite, r.classify⟩
 
-end ModularCurves
+/-! ## The naturalized moduli record and the Y₀(N) assembly (KM 6.6.1)
+
+The Y₀(N) assembly finding (`decomposition-nisog-L15.md`, D2 2026-07-12) identified the
+exact gap between `NIsogRepresentation` and the Γ₀(N) space: the `Nonempty` per-`T`
+equivalences carry **no naturality**, but cutting the cyclicity locus requires the
+structure classified by `h : T ⟶ W` to be (cyclicity-equivalent to) the pullback of the
+universal structure along `h`. `NIsogModuli` is the naturality-strengthened record —
+`classifyFun` is *data*, and `compat` pins the naturality **at the cyclicity register**
+(the only register the Γ₀ assembly reads), which the L15 constructor discharges via
+`isCyclic_baseChange_iff` + the classify-pullback identity of the concrete Grassmannian
+construction. In exchange, `exists_gammaZeroSpace_of_moduli` below is **sorry-free**:
+KM 6.6.1's *"[Γ₀(N)] is relatively represented by the closed subscheme of [N-Isog] over
+which the universal N-isogeny is cyclic"* holds with zero further mathematics the moment
+the record is populated. -/
+
+/-- **The naturalized `[N-Isog]` moduli datum** (KM 6.5.1 + the Y₀(N)-assembly
+naturality): a finite `S`-scheme `W`, a *chosen* classifying equivalence per test
+morphism, a universal datum over `W`, and the compatibility pinning classified
+structures to pullbacks of the universal one at the cyclicity register. -/
+structure NIsogModuli where
+  /-- The moduli scheme of `N`-isogeny data. -/
+  W : Scheme.{u}
+  /-- Its structure morphism to the base. -/
+  w : W ⟶ S
+  /-- Finiteness over the base (KM 6.5.1). -/
+  finite : IsFinite w
+  /-- The universal `N`-isogeny datum over the moduli space. -/
+  univ : NIsogenyStructure (E.baseChange w) N
+  /-- The classifying equivalence — *data*, not `Nonempty` (the constructive form the
+  opaque-interface rule anticipated: "the eventual constructive form will name the
+  classifying scheme and its universal datum"). -/
+  classifyFun : ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S),
+    NIsogenyStructure (E.baseChange t) N ≃ { h : T ⟶ W // h ≫ w = t }
+  /-- **Naturality at the cyclicity register**: the structure classified by `h` is
+  cyclic iff the universal divisor pulled back along `h` is Γ₀(N)-cyclic. (Via
+  `isCyclic_baseChange_iff`, the right-hand side is exactly cyclicity of
+  `univ.subgroup.baseChange h`, i.e. "the classified structure is the pullback of the
+  universal one", read at the only register the Γ₀ assembly consumes.) -/
+  compat : ∀ ⦃T : Scheme.{u}⦄ (h : T ⟶ W),
+    ((classifyFun (h ≫ w)).symm ⟨h, rfl⟩).subgroup.IsCyclic N ↔
+      ((E.baseChange w).baseChange h).IsGammaZeroFppf N
+        (univ.subgroup.toRelEffCartierDiv.baseChange h)
+
+variable {E N} in
+/-- Forget the naturality: a naturalized moduli datum is in particular a
+representation, so `exists_nIsogSpace` follows (`exists_nIsogSpace_of_representation`). -/
+noncomputable def NIsogModuli.toRepresentation (m : NIsogModuli E N) :
+    NIsogRepresentation E N :=
+  ⟨m.W, m.w, m.finite, fun _ t => ⟨m.classifyFun t⟩⟩
+
+variable {E N} in
+/-- **The `[N-Isog]` capstone from the naturalized record** — the statement of
+`exists_nIsogSpace`, sorry-free given the record. -/
+theorem NIsogModuli.exists_nIsogSpace (m : NIsogModuli E N) :
+    ∃ (W : Scheme.{u}) (w : W ⟶ S), IsFinite w ∧
+      ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S),
+        Nonempty (NIsogenyStructure (E.baseChange t) N ≃ { h : T ⟶ W // h ≫ w = t }) :=
+  exists_nIsogSpace_of_representation E N m.toRepresentation
+
+variable {E N} in
+/-- **THE Y₀(N) ASSEMBLY (KM 6.6.1), sorry-free from the naturalized record.** *"[Γ₀(N)]
+is relatively represented by the closed subscheme of the finite `S`-scheme
+`[N-Isog]_{E/S}` over which the universal `N`-isogeny is cyclic"* (print p. 166): cut the
+cyclicity locus `Z` (`exists_cyclicityLocus`, KM 6.4.1 = T-SG3, PROVEN) of the universal
+divisor on `E ×_S W` over `W`; then for every `t : T ⟶ S` the Γ₀(N)-structures on
+`E ×_S T` correspond to the `T`-points of `Z` over `t` — cyclic structures ↔ classifying
+maps landing in the locus, by `compat` + the locus's universal property. This is the
+concrete-isogeny-route Γ₀(N) space: the statement of `exists_gammaZeroSpace` holds with
+`W_{Γ₀} := Z`, finite over `S` as a closed subscheme of the finite `W`. -/
+theorem NIsogModuli.exists_gammaZeroSpace (m : NIsogModuli E N) :
+    ∃ (W' : Scheme.{u}) (w' : W' ⟶ S), IsFinite w' ∧
+      ∀ ⦃T : Scheme.{u}⦄ (t : T ⟶ S),
+        Nonempty (GammaZeroStructure (E.baseChange t) N ≃
+          { h : T ⟶ W' // h ≫ w' = t }) := by
+  classical
+  -- the universal subgroup divisor and its rank data
+  have hDsub : m.univ.subgroup.toRelEffCartierDiv.IsSubgroup (E.baseChange m.w) :=
+    m.univ.subgroup.toRelEffCartierDiv_isSubgroup
+  have hDdeg : ∀ s, m.univ.subgroup.toRelEffCartierDiv.degree s = N := fun s =>
+    (m.univ.subgroup.toRelEffCartierDiv_degree s).trans (m.univ.hasRank s)
+  -- the cyclicity locus of the universal divisor (KM 6.4.1, PROVEN)
+  obtain ⟨Z, hZ⟩ := (E.baseChange m.w).exists_cyclicityLocus N
+    m.univ.subgroup.toRelEffCartierDiv hDsub hDdeg
+  haveI : IsFinite m.w := m.finite
+  refine ⟨Z.subscheme, Z.subschemeι ≫ m.w, inferInstance, fun T t => ⟨?_⟩⟩
+  -- Step 1: Γ₀(N)-structures are the cyclic N-isogeny data.
+  have e₁ : GammaZeroStructure (E.baseChange t) N ≃
+      { nis : NIsogenyStructure (E.baseChange t) N // nis.subgroup.IsCyclic N } :=
+    ⟨fun Γ => ⟨Γ.toNIsogeny, Γ.isCyclic⟩,
+      fun p => GammaZeroStructure.ofIsCyclic p.1.subgroup p.2,
+      fun Γ => rfl, fun p => rfl⟩
+  -- Step 2: transport along the classifying equivalence; cyclicity becomes the
+  -- factoring-through-Z condition by `compat` + the locus's universal property.
+  have e₂ : { nis : NIsogenyStructure (E.baseChange t) N // nis.subgroup.IsCyclic N } ≃
+      { p : { h : T ⟶ m.W // h ≫ m.w = t } //
+        ∃ k : T ⟶ Z.subscheme, k ≫ Z.subschemeι = p.1 } :=
+    Equiv.subtypeEquiv (m.classifyFun t) fun nis => by
+      rcases hE : m.classifyFun t nis with ⟨h, hh⟩
+      have hnis : nis = (m.classifyFun t).symm ⟨h, hh⟩ := (Equiv.eq_symm_apply _).mpr hE
+      subst hh
+      rw [hnis]
+      exact (m.compat h).trans (hZ h).symm
+  -- Step 3: repackage the factoring subtype as morphisms to the locus subscheme.
+  have e₃ : { p : { h : T ⟶ m.W // h ≫ m.w = t } //
+        ∃ k : T ⟶ Z.subscheme, k ≫ Z.subschemeι = p.1 } ≃
+      { k : T ⟶ Z.subscheme // k ≫ (Z.subschemeι ≫ m.w) = t } :=
+    { toFun := fun p => ⟨p.2.choose, by
+        rw [← Category.assoc, p.2.choose_spec]; exact p.1.2⟩
+      invFun := fun k => ⟨⟨k.1 ≫ Z.subschemeι, by rw [Category.assoc]; exact k.2⟩,
+        ⟨k.1, rfl⟩⟩
+      left_inv := fun p => Subtype.ext (Subtype.ext p.2.choose_spec)
+      right_inv := fun k => Subtype.ext
+        ((cancel_mono Z.subschemeι).mp
+          (⟨k.1, rfl⟩ : ∃ k', k' ≫ Z.subschemeι = k.1 ≫ Z.subschemeι).choose_spec) }
+  exact (e₁.trans e₂).trans e₃

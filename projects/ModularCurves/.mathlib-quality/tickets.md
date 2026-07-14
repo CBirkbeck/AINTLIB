@@ -19544,3 +19544,29 @@ lift = [QUOT-BC]; A → NIsogeny §6/§7 + capstones). No work lost: B's bridge 
 skeleton restored+extended.
 NEXT: the Y₀(N) capstones (exists_nIsogSpace :3280 / exists_gammaZeroSpace :3294) — recon GH's
 GammaHMaster Borel state first (cross-link, don't duplicate).
+
+## v10.217-G0 (2026-07-14) — ★ THE Y₀(N) ASSEMBLY (KM 6.6.1) SORRY-FREE: Γ₀(N)-representability reduced to the L15 record
+**Increment 3 of v10.215 — the capstone layer, concrete-isogeny route.** `NIsogSpace.lean`:
+- **`NIsogModuli E N`** — the naturality-strengthened [N-Isog] record D2's Y₀-finding demanded
+  (decomposition-nisog-L15.md): `classifyFun` as DATA (the "eventual constructive form" the
+  opaque-interface note anticipated) + `univ` (universal datum over W) + **`compat` = naturality at
+  the cyclicity register only** ("structure classified by h is cyclic ⟺ universal divisor pulled
+  back along h is Γ₀-fppf"). Design point: stating compat at the cyclicity register DODGES the
+  L5-style curve-composition coherence entirely (no `E.baseChange (h≫w)` vs `(E.baseChange w).baseChange h`
+  transport anywhere in the assembly; the L15 constructor pays it once via `isCyclic_baseChange_iff`
+  where both sides are visibly the same divisor).
+- **`NIsogModuli.exists_gammaZeroSpace` — KM 6.6.1 PROVEN** (sorry-free; sorryAx = inherited
+  `exists_cyclicityLocus` box trail only): W_Γ₀ := cyclicity locus Z of the universal divisor on
+  E×_S W over W (`exists_cyclicityLocus` — T-SG3, PROVEN, fed by my 6.4.2 dichotomy kill);
+  IsFinite (ι ≫ w) by instances; classification = e₁ (Γ₀-structure ≃ cyclic NIsog datum — defeq/
+  proof-irrelevance rfl-equiv) ∘ e₂ (`Equiv.subtypeEquiv classifyFun` + the rcases-hE/subst/compat/
+  hZ chain) ∘ e₃ (factoring-subtype ≃ locus-points; choose + cancel_mono subschemeι roundtrips).
+- **`NIsogModuli.exists_nIsogSpace` — AXIOM-CLEAN** (via toRepresentation forgetting naturality).
+**STATUS OF THE CAPSTONE ∃-PINS (NIsogeny:3280/3294)**: they now discharge with ZERO further math
+the moment `NIsogModuli` is POPULATED — the population is the L15-c/d/e/f Grassmannian arc
+([NISOG-GRASS]: fable-FP grassmannianScheme + bi-ideal locus + NEW-HOPF dictionary), the one
+remaining gate of the Γ₀ charter's concrete route.
+**CONVERGENCE NOTE FOR GH** (cross-link, don't duplicate): this is the CONCRETE Y₀(N); GH's
+Γ_H@Borel (`gammaH_representable`, GammaHMaster:1021) is the abstract one. When GH's Borel case
+lands, `GammaZeroStructure ≃ Borel-orbit` dictionary + this assembly give the two-route
+identification; neither route consumed the other's machinery.
