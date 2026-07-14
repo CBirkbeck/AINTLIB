@@ -290,9 +290,8 @@ theorem eq_id_of_baseHom_of_comp {V X : EllObj R} (v : V ⟶ X) (ξ : V ⟶ V)
       rw [Category.assoc, toPullbackAlong_pullbackAlongπ, h2]
     · show ξ.baseHom ≫ 𝟙 V.base = 𝟙 V.base
       rw [Category.comp_id, h1]
-  have := (cancel_mono (toPullbackAlong v)).mp
+  exact (cancel_mono (toPullbackAlong v)).mp
     (key.trans (Category.id_comp (toPullbackAlong v)).symm)
-  exact this
 
 end EllObj
 
@@ -574,15 +573,15 @@ read as equivariance. -/
 theorem simulSchemeActionTotal_π (P Q : ModuliProblem R) {G : Type*} [Group G]
     (φ : G →* Aut Q) {XM : EllObj R} (rM : (P.simul Q).RepresentableBy XM) (γ : G) :
     (P.simulSchemeActionTotal Q φ rM).hom γ ≫ XM.curve.π =
-      XM.curve.π ≫ (P.simulSchemeAction Q φ rM).hom γ := by
-  exact (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.isPullback.w
+      XM.curve.π ≫ (P.simulSchemeAction Q φ rM).hom γ :=
+  (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.isPullback.w
 
 /-- **([a1], the zero section is equivariant)** -/
 theorem simulSchemeActionTotal_zero (P Q : ModuliProblem R) {G : Type*} [Group G]
     (φ : G →* Aut Q) {XM : EllObj R} (rM : (P.simul Q).RepresentableBy XM) (γ : G) :
     XM.curve.zero ≫ (P.simulSchemeActionTotal Q φ rM).hom γ =
-      (P.simulSchemeAction Q φ rM).hom γ ≫ XM.curve.zero := by
-  exact (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.zero_w
+      (P.simulSchemeAction Q φ rM).hom γ ≫ XM.curve.zero :=
+  (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.zero_w
 
 /-- **([a1], each `γ` acts cartesianly)** Every `γ ∈ G` acts on `E` by an isomorphism whose
 square over the base action is **cartesian**. Equivalently: `E` is the pullback of itself
@@ -590,8 +589,8 @@ along `σ_base γ`. This is what makes `E → E/G` a `G`-torsor over `X → X/G`
 theorem simulSchemeActionTotal_isPullback (P Q : ModuliProblem R) {G : Type*} [Group G]
     (φ : G →* Aut Q) {XM : EllObj R} (rM : (P.simul Q).RepresentableBy XM) (γ : G) :
     IsPullback ((P.simulSchemeActionTotal Q φ rM).hom γ) XM.curve.π XM.curve.π
-      ((P.simulSchemeAction Q φ rM).hom γ) := by
-  exact (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.isPullback
+      ((P.simulSchemeAction Q φ rM).hom γ) :=
+  (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.isPullback
 
 section Engine
 
@@ -760,36 +759,24 @@ theorem simulSchemeAction_free_of_rigid (P Q : ModuliProblem R)
         (rM.homEquiv (XM.pullbackAlongπ t)).2) (φ γ).inv_hom_id
   -- transport into the torsor chart at the identity base map
   obtain ⟨td⟩ := htors (XM.pullbackAlong t)
+  -- `β` is the δ-value read in the chart at the identity base map, and `z` its classifying
+  -- map to the torsor `td.Z`
+  set β := Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
+    (rM.homEquiv (XM.pullbackAlongπ t)).2 with hβ_def
+  set z := ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm β).1 with hz_def
   have hβ : (φ γ).hom.app
-      (Opposite.op ((XM.pullbackAlong t).pullbackAlong (𝟙 _)))
-      (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
-        (rM.homEquiv (XM.pullbackAlongπ t)).2) =
-      Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
-        (rM.homEquiv (XM.pullbackAlongπ t)).2 := by
-    rw [NatTrans.naturality_apply, hfixval]
-  have hZfix : ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm
-      (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
-        (rM.homEquiv (XM.pullbackAlongπ t)).2)).1 ≫ td.σZ.hom γ =
-      ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm
-      (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
-        (rM.homEquiv (XM.pullbackAlongπ t)).2)).1 := by
+      (Opposite.op ((XM.pullbackAlong t).pullbackAlong (𝟙 _))) β = β := by
+    rw [hβ_def, NatTrans.naturality_apply, hfixval]
+  have hZfix : z ≫ td.σZ.hom γ = z := by
     have heq := td.equivariant (𝟙 (XM.pullbackAlong t).base)
-      ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm
-        (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
-          (rM.homEquiv (XM.pullbackAlongπ t)).2)) γ
+      ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm β) γ
     rw [Equiv.apply_symm_apply, hβ] at heq
     exact congrArg Subtype.val ((td.eqv _).injective
       (heq.trans (Equiv.apply_symm_apply _ _).symm))
   -- torsor endgame: the point factors through two distinct summands
   haveI := td.torsor
-  have hpt : ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm
-      (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
-        (rM.homEquiv (XM.pullbackAlongπ t)).2)).1 ≫
-        Limits.Sigma.ι (fun _ : G => td.Z) γ =
-      ((td.eqv (𝟙 (XM.pullbackAlong t).base)).symm
-      (Q.map (EllObj.isoPullbackAlong (𝟙 (XM.pullbackAlong t))).inv.op
-        (rM.homEquiv (XM.pullbackAlongπ t)).2)).1 ≫
-        Limits.Sigma.ι (fun _ : G => td.Z) (1 : G) := by
+  have hpt : z ≫ Limits.Sigma.ι (fun _ : G => td.Z) γ =
+      z ≫ Limits.Sigma.ι (fun _ : G => td.Z) (1 : G) := by
     rw [← cancel_mono ((Limits.Sigma.desc fun γ' : G =>
       Limits.pullback.lift (td.σZ.hom γ') (𝟙 td.Z)
         (by rw [Category.id_comp]; exact td.over_base γ')) :
