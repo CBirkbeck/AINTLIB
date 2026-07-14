@@ -195,6 +195,18 @@ theorem mulByHom_surjective {K : Type u} [Field K] (W : WeierstrassCurve K) [W.I
   rw [hconst]
   exact h1
 
+/-- **([N] is dominant — L4-iii enabler)** Multiplication-by-`N` on the projective model is dominant
+(dense range), being surjective (`mulByHom_surjective`). This is the instance that makes the scheme
+function-field pullback `(mulByHom N).functionFieldMap : K(E) → K(E)` (the LHS of the L4-iii
+coordinate↔division-polynomial identity `functionFieldMap [N] = mulByInt_pullbackAlgHom`)
+well-defined without manual dominance plumbing. -/
+instance mulByHom_isDominant {K : Type u} [Field K] (W : WeierstrassCurve K) [W.IsElliptic] (N : ℕ)
+    [Flat ((modelEllipticCurve W).mulByHom N)] [IsFinite ((modelEllipticCurve W).mulByHom N)]
+    [LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom N)] :
+    IsDominant ((modelEllipticCurve W).mulByHom N) :=
+  haveI := mulByHom_surjective W N
+  inferInstance
+
 /-- **(K4b-2, [N]⁻¹Z nonempty)** The preimage chart `[N]⁻¹Z = pullback [N] Z.ι` is nonempty: `[N]` is
 surjective (`mulByHom_surjective`), so any point `z₀` of the (nonempty) affine chart `Z` has an
 `[N]`-preimage, which lifts to a point of the pullback (`Scheme.Pullback.exists_preimage_pullback`).
