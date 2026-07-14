@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.KummerArtinHasseTeichmuller
@@ -44,6 +49,7 @@ def lambdaPiIntegral
     𝓞 K :=
   (zeta_spec p ℚ K).toInteger - 1
 
+/-- The uniformizer `ζ - 1` is nonzero. -/
 @[simp]
 theorem lambdaPiIntegral_ne_zero
     (p : ℕ) [Fact p.Prime]
@@ -61,6 +67,7 @@ def lambdaPiFieldUnit
     ((FaithfulSMul.algebraMap_injective (𝓞 K) K).ne
       (lambdaPiIntegral_ne_zero (p := p) (K := K)))
 
+/-- The underlying field element of the uniformizer unit. -/
 @[simp]
 theorem lambdaPiFieldUnit_val
     (p : ℕ) [Fact p.Prime]
@@ -99,6 +106,8 @@ def lambdaGlobalExponent
     (x : Kˣ) : ℤ :=
   -(((lambdaHeightOne p K).valuation K (x : K)).log)
 
+/-- Twisting a unit by the right power of the uniformizer normalises its valuation
+to zero. -/
 theorem lambdaPiFieldUnit_zpow_valuation_eq
     (p : ℕ) [Fact p.Prime]
     (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
@@ -119,7 +128,7 @@ theorem lambdaPiFieldUnit_zpow_valuation_eq
   rw [map_zpow₀]
   rw [lambdaPiFieldUnit_valuation]
   rw [WithZero.log_zpow, WithZero.log_exp]
-  unfold lambdaGlobalExponent
+  simp only [lambdaGlobalExponent]
   ring
 
 /-- Normalize a global field unit to a lambda-local unit using the explicit
@@ -158,6 +167,7 @@ def lambdaGlobalLocalCyclotomicUnit
   Reflection.SingularKummer.SingularPair.cyclotomicLocalUnitSubgroupToLocalCyclotomicUnitHom
     (p := p) (K := K) (lambdaGlobalNormalizedUnit p K x)
 
+/-- The localized-ring unit maps back to the normalized global unit. -/
 @[simp]
 theorem localCyclotomicRingToField_lambdaGlobalLocalCyclotomicUnit
     (x : Kˣ) :
@@ -185,6 +195,7 @@ def lambdaTeichmullerPrincipalUnitPart
     rw [map_mul, map_inv, lambdaTeichmullerUnitLift_residue]
     simp⟩
 
+/-- The principal-unit part of the Teichmüller decomposition, as a unit. -/
 @[simp]
 theorem lambdaTeichmullerPrincipalUnitPart_val
     (u : LambdaUnitGroup p K) :
