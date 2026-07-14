@@ -142,6 +142,36 @@ theorem Scheme.Hom.exists_affineIntersectionModelAtLaterStage_of_isProper
     π.exists_affineIntersectionModelAtLaterStage_of_isProper_of_cover H U hcover hUaff
   exact ⟨J, hJ, U, hcover, hU', M, j, hMj, hopen, hpush, hglue⟩
 
+/-- A chosen finite affine cover of a proper, locally finitely presented family has a
+finite-stage affine-intersection model whose base change is the original scheme. -/
+theorem Scheme.Hom.exists_affineIntersectionModelBaseChangeIso_of_isProper_of_cover
+    {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+    {𝒮 : ι → Type u} [∀ i, CommRing (𝒮 i)] [∀ i, Algebra R (𝒮 i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (𝒮 i →ₐ[R] 𝒮 j)}
+    (π : X ⟶ S) [IsProper π] [IsAffine S] [LocallyOfFinitePresentation π]
+    [Algebra R Γ(S, (⊤ : S.Opens))]
+    {uS : ∀ i, 𝒮 i →ₐ[R] Γ(S, (⊤ : S.Opens))}
+    (H : Algebra.IsFilteredAlgColimit R 𝒮 t Γ(S, (⊤ : S.Opens)) uS)
+    [Finite J] (U : J → X.Opens) (hcover : IsOpenCover U)
+    (hUaff : ∀ i, IsAffineOpen (U i)) :
+    ∃ (_ : ∀ s : Finset J, s.Nonempty →
+        IsAffineOpen (X.finiteIntersectionOpen U s))
+      (M : Algebra.SpreadData.FunctorModel (π.affineIntersectionFunctor U) H)
+      (hopenM : Scheme.GlueData.IsOpenAffineIntersectionFunctor M.toFunctor)
+      (hpushM : Scheme.GlueData.IsPushoutAffineIntersectionFunctor M.toFunctor),
+      Nonempty
+        (letI : Algebra (𝒮 M.stage) Γ(S, (⊤ : S.Opens)) :=
+            (uS M.stage).toRingHom.toAlgebra;
+          pullback
+              (Scheme.GlueData.affineIntersectionToSpec M.toFunctor hopenM hpushM)
+              (Spec.map (CommRingCat.ofHom
+                (algebraMap (𝒮 M.stage) Γ(S, (⊤ : S.Opens))))) ≅ X) := by
+  obtain ⟨hU, M, j, hMj, hopenM, hpushM, _⟩ :=
+    π.exists_affineIntersectionModelAtLaterStage_of_isProper_of_cover H U hcover hUaff
+  let M' := M.mapToStage hMj
+  refine ⟨hU, M', hopenM, hpushM, ?_⟩
+  exact ⟨π.affineIntersectionModelBaseChangeIso U hcover hU M' hopenM hpushM⟩
+
 /-- A proper, locally finitely presented family over an affine filtered-colimit base is the
 base change of a finite-stage affine-intersection model. -/
 theorem Scheme.Hom.exists_affineIntersectionModelBaseChangeIso_of_isProper
@@ -165,11 +195,13 @@ theorem Scheme.Hom.exists_affineIntersectionModelBaseChangeIso_of_isProper
               (Scheme.GlueData.affineIntersectionToSpec M.toFunctor hopenM hpushM)
               (Spec.map (CommRingCat.ofHom
                 (algebraMap (𝒮 M.stage) Γ(S, (⊤ : S.Opens))))) ≅ X) := by
-  obtain ⟨J, hJ, U, hcover, hU, M, j, hMj, hopenM, hpushM, _⟩ :=
-    π.exists_affineIntersectionModelAtLaterStage_of_isProper H
-  let M' := M.mapToStage hMj
-  refine ⟨J, hJ, U, hcover, hU, M', hopenM, hpushM, ?_⟩
-  exact ⟨π.affineIntersectionModelBaseChangeIso U hcover hU M' hopenM hpushM⟩
+  obtain ⟨J, hJ, U, hcover, hUaff, _⟩ :=
+    π.exists_finite_affine_openCover_of_isProper
+  letI : Finite J := hJ
+  obtain ⟨hU, M, hopenM, hpushM, e⟩ :=
+    π.exists_affineIntersectionModelBaseChangeIso_of_isProper_of_cover
+      H U hcover hUaff
+  exact ⟨J, hJ, U, hcover, hU, M, hopenM, hpushM, e⟩
 
 end
 

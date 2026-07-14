@@ -282,7 +282,14 @@ Completed dependency claim (2026-07-14): proved
 affine cover, spread model, finite-stage gluing conditions, and the resulting base-change
 isomorphism in one theorem consumable by pole-sheaf descent.
 
+Completed dependency claim (2026-07-14): proved
+`Scheme.Hom.isAffineOpen_finiteIntersectionOpen_of_isProper`,
+`exists_affineIntersectionModelAtLaterStage_of_isProper_of_cover`, and
+`exists_affineIntersectionModelBaseChangeIso_of_isProper_of_cover`. These permit using a
+finite affine cover that already trivializes the pole line bundle, rather than introducing
+a second cover.
+
 Active dependency claim (2026-07-14): prove
-`Scheme.Hom.isAffineOpen_finiteIntersectionOpen_of_isProper` and the chosen-cover variant
-of the finite-stage model theorem. This permits using a finite affine cover that already
-trivializes the pole line bundle, rather than introducing a second cover.
+`Scheme.Modules.IsInvertible.exists_affineIntersectionModelBaseChangeIso_of_isProper`,
+packaging a finite affine trivializing cover of an invertible sheaf together with the
+finite-stage proper model and its base-change isomorphism.
