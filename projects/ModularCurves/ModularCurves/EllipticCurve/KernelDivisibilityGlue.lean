@@ -4,15 +4,15 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The AINTLIB Authors
 -/
 import ModularCurves.EllipticCurve.KernelDivisibilityChart
-import ModularCurves.EllipticCurve.MulByHomFlat
 import ModularCurves.EllipticCurve.ModelRecord
+import ModularCurves.EllipticCurve.MulByHomFlat
 import ModularCurves.EllipticCurve.RecordGroupUnique
 import ModularCurves.LevelStructure.IsoTransport
 
 /-!
 # Kernel divisibility: from the chart to arbitrary records (BB-FLAT N5)
 
-The glue phase of board v10.150: `KernelNDivisible` for arbitrary records and tests, from
+The glue phase: `KernelNDivisible` for arbitrary records and tests, from
 the chart-local calculus (`KernelDivisibilityChart.lean`). This file instantiates the
 chart theorems at the projective model's Y-chart, transports them along the
 `Point.baseChangeEquiv`/`pointAddEquiv` chain (the BB-QF pattern, hμ from K3), and glues
@@ -40,6 +40,7 @@ noncomputable def modelYChart : (projModel W).Opens :=
   Proj.basicOpen (projIdeal W).quotientGrading
     ((projIdeal W).quotientGradingHom (MvPolynomial.X 1))
 
+omit [W.IsElliptic] in
 theorem modelYChart_isAffineOpen : IsAffineOpen (modelYChart W) :=
   Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 1) one_pos
 
@@ -316,8 +317,8 @@ section Overlap
 
 variable {A' : CommRingCat.{u}} (a b : ↑A')
 
-/-- The overlap ring of two basic localizations — a registered `def` (v10.129 registry:
-inline tensor-of-localizations churns instance paths). -/
+/-- The overlap ring of two basic localizations — kept as a separate `def` because inlining
+the tensor-of-localizations churns instance paths. -/
 private def OverlapRing : Type u :=
   Localization.Away a ⊗[↑A'] Localization.Away b
 
