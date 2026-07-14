@@ -92,6 +92,23 @@ noncomputable def projModelFunctionFieldEquiv {K : Type u} [Field K] (W : Weiers
     (projModel W).functionField W.toAffine.FunctionField
     (coordRingToZSection W).symm (MulEquivClass.map_nonZeroDivisors (coordRingToZSection W).symm))
 
+/-- **(K4 (D) local-constancy)** The fibre rank of the model `[N]` is constant on the (connected,
+integral) projective model: it suffices to compute it at one convenient point. Uses mathlib's
+`isLocallyConstant_finrank` (finite flat locally-of-finite-presentation) + preconnectedness of the
+integral `projModel W`. -/
+theorem modelEllipticCurve_finrank_const {K : Type u} [Field K] (W : WeierstrassCurve K)
+    [W.IsElliptic] (N : ℕ)
+    [Flat ((modelEllipticCurve W).mulByHom N)] [IsFinite ((modelEllipticCurve W).mulByHom N)]
+    [LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom N)]
+    (x x' : (modelEllipticCurve W).E) :
+    ((modelEllipticCurve W).mulByHom N).finrank x
+      = ((modelEllipticCurve W).mulByHom N).finrank x' := by
+  haveI : PreconnectedSpace (modelEllipticCurve W).E :=
+    inferInstanceAs (PreconnectedSpace (projModel W))
+  have hlc : IsLocallyConstant ((modelEllipticCurve W).mulByHom N).finrank :=
+    Scheme.Hom.isLocallyConstant_finrank _
+  exact hlc.apply_eq_of_isPreconnected isPreconnected_univ (Set.mem_univ _) (Set.mem_univ _)
+
 /-- **(K4 field-level target)** Over a field `K`, the scheme-theoretic fibre rank of
 multiplication-by-`N` on the projective model of an elliptic Weierstrass curve is `N²`.
 
