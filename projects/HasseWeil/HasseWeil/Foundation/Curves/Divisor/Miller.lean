@@ -3,8 +3,8 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Foundation.Curves.Fiber.AFConditional
 import HasseWeil.Foundation.Curves.Divisor.EffectiveSumReduce
+import HasseWeil.Foundation.Curves.Fiber.AFConditional
 import HasseWeil.Foundation.Curves.Valuation.NoFinitePolesBridge
 import HasseWeil.Foundation.Curves.Valuation.NormValuation
 import HasseWeil.Isogeny.BaseChange.Basic
@@ -1248,6 +1248,7 @@ theorem miller_hypothesis_holds
       · exact miller_at_some_some_degen W h₁ h₂ hxy
       · exact miller_at_some_some_nondegen W h₁ h₂ hxy
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- Degree of a single-point divisor: `deg (single P n) = n`. Helper for the
 `single_add` step of `general_kappa_reduce`. -/
 private lemma degree_single_eq
@@ -1257,6 +1258,7 @@ private lemma degree_single_eq
   unfold ProjectiveDivisor.degree
   exact Finsupp.sum_single_index rfl
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- Scaled single-minus-infinity identity: `single P n − n • (∞) = n • κ(P)`.
 The `ℤ`-scaled form of `single_minus_inf_eq_kappaDivisor`; helper for the
 `single_add` step of `general_kappa_reduce`. -/
@@ -1275,6 +1277,7 @@ private lemma single_sub_nsmul_inf_eq_nsmul_kappaDivisor
   rw [smul_sub, Finsupp.smul_single, smul_eq_mul, mul_one] at this
   exact this
 
+omit [WeierstrassCurve.IsElliptic W] in
 /-- Combined `zsmul` + `add` linear equivalence for `kappaDivisor`:
 `n • κ(P) + κ(σ D') ~ κ(n • P + σ D')`. Helper for the `single_add` step of
 `general_kappa_reduce`, packaging `kappaDivisor_zsmul_linEquiv_of_miller` and
@@ -1316,6 +1319,7 @@ private lemma nsmul_kappaDivisor_add_linEquiv_of_miller
     exact h_neg
   exact h_step.trans h_add
 
+omit [WeierstrassCurve.IsElliptic W] in
 /-- `abel`-regrouping of the `single_add` reduction goal of
 `general_kappa_reduce` into its three principal summands (the single-point
 part, the inductive `D'` part, and the `kappaDivisor` correction term). -/
