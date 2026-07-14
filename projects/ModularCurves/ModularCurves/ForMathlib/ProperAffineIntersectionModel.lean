@@ -22,6 +22,19 @@ noncomputable section
 
 variable {X S : Scheme.{u}} {J : Type u}
 
+/-- Every nonempty finite intersection in an affine open cover of the source of a proper
+morphism to an affine scheme is affine. -/
+theorem Scheme.Hom.isAffineOpen_finiteIntersectionOpen_of_isProper
+    (π : X ⟶ S) [IsProper π] [IsAffine S]
+    (U : J → X.Opens) (hU : ∀ i, IsAffineOpen (U i))
+    (s : Finset J) (hs : s.Nonempty) :
+    IsAffineOpen (X.finiteIntersectionOpen U s) := by
+  letI : X.IsSeparated := ⟨by
+    rw [← terminal.comp_from π]
+    infer_instance⟩
+  exact IsAffineOpen.biInf (s : Set J) s.finite_toSet
+    (Finset.coe_nonempty.mpr hs) fun i _ ↦ hU i
+
 /-- Every object in an affine-intersection diagram is finitely presented over
 the affine base when the family is locally of finite presentation. -/
 theorem Scheme.Hom.affineIntersectionFunctor_obj_finitePresentation

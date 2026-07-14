@@ -277,7 +277,12 @@ scheme with the base change of a spread finite-stage affine-intersection model. 
 the preceding global comparison for later descent of the pole line bundle, with no option,
 noetherianity, new sorry, or additional geometric hypothesis.
 
-Active dependency claim (2026-07-14): prove
+Completed dependency claim (2026-07-14): proved
 `Scheme.Hom.exists_affineIntersectionModelBaseChangeIso_of_isProper`, producing the finite
 affine cover, spread model, finite-stage gluing conditions, and the resulting base-change
 isomorphism in one theorem consumable by pole-sheaf descent.
+
+Active dependency claim (2026-07-14): prove
+`Scheme.Hom.isAffineOpen_finiteIntersectionOpen_of_isProper` and the chosen-cover variant
+of the finite-stage model theorem. This permits using a finite affine cover that already
+trivializes the pole line bundle, rather than introducing a second cover.
