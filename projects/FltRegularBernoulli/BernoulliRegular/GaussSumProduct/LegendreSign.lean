@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.GaussSumProduct.RootNumberPairing
@@ -47,13 +52,13 @@ theorem legendreDirichlet_L1_rootNumber_relation (hp_three_mod_four : p % 4 = 3)
       oddLValueRhs p (legendreDirichlet p) :=
     odd_LFunction_one_eq_oddLValueRhs (p := p) h_prim h_odd h_ne_one
   -- Expand oddLValueRhs: `(π·I / p) · τ(η) · B_{1, η⁻¹}`.
-  unfold oddLValueRhs at h_L1
+  simp only [oddLValueRhs] at h_L1
   rw [h_inv_eq] at h_L1
   -- rootNumber η = gaussSum η stdAddChar / I / √p  (from the definition for odd)
   have h_root_def : DirichletCharacter.rootNumber (legendreDirichlet p) =
       gaussSum (legendreDirichlet p) (ZMod.stdAddChar : AddChar (ZMod p) ℂ) /
         Complex.I / ((p : ℂ) ^ (1 / 2 : ℂ)) := by
-    unfold DirichletCharacter.rootNumber
+    simp only [DirichletCharacter.rootNumber]
     rw [if_neg h_not_even, pow_one]
   -- Solve for gaussSum: gaussSum = rootNumber · I · √p.
   have hp_ne_zero : (p : ℂ) ≠ 0 := Nat.cast_ne_zero.mpr hp.out.ne_zero
