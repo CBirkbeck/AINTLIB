@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.LevelStructure.ExactOrder
 import ModularCurves.EllipticCurve.TorsionFibre
 import Mathlib.AlgebraicGeometry.IdealSheaf.Subscheme
@@ -217,12 +222,17 @@ def HasRank (G : FiniteLocallyFreeSubgroup E) (r : ℕ) : Prop :=
 (KM 1.3.6). This is the interface SG2 uses to say "the divisor `Σₐ [aP₀]` equals `G`"
 and the route by which the Deligne/Oort–Tate box is consumed. -/
 
+/-- The subscheme of `ι.ker` is `G.G` transported along the iso `ι.toImage` (`ι` is a closed
+immersion). Every property and degree comparison between `G` and its divisor goes through
+this identity. -/
+private theorem ker_subschemeι_eq (G : FiniteLocallyFreeSubgroup E) :
+    G.ι.ker.subschemeι = inv G.ι.toImage ≫ G.ι := by
+  rw [IsIso.eq_inv_comp, Scheme.Hom.toImage_imageι]
+
 private theorem ker_prop (P : MorphismProperty Scheme.{u}) [P.RespectsIso]
     (G : FiniteLocallyFreeSubgroup E) (hG : P (G.ι ≫ E.π)) :
     P (G.ι.ker.subschemeι ≫ E.π) := by
-  have hι : G.ι.ker.subschemeι = inv G.ι.toImage ≫ G.ι := by
-    rw [IsIso.eq_inv_comp, Scheme.Hom.toImage_imageι]
-  rw [hι, Category.assoc]
+  rw [G.ker_subschemeι_eq, Category.assoc]
   exact (MorphismProperty.cancel_left_of_respectsIso P _ _).mpr hG
 
 -- ATTACK (toRelEffCartierDiv): (1) the subscheme of `ι.ker` is NOT `G.G` itself, only
@@ -255,9 +265,7 @@ theorem toRelEffCartierDiv_isSubgroup (G : FiniteLocallyFreeSubgroup E) :
     G.toRelEffCartierDiv.IsSubgroup E := by
   intro T g
   obtain ⟨H, hH⟩ := G.subgroup g
-  set j := inv G.ι.toImage with hj
-  have hjeq : j ≫ G.ι = G.ι.ker.subschemeι := by
-    rw [hj, IsIso.inv_comp_eq, Scheme.Hom.toImage_imageι]
+  have hjeq : inv G.ι.toImage ≫ G.ι = G.ι.ker.subschemeι := G.ker_subschemeι_eq.symm
   refine ⟨H, fun P => (hH P).trans ?_⟩
   simp only [toRelEffCartierDiv_ideal]
   constructor
@@ -266,7 +274,7 @@ theorem toRelEffCartierDiv_isSubgroup (G : FiniteLocallyFreeSubgroup E) :
     rw [Category.assoc, Scheme.Hom.toImage_imageι]
     exact hh
   · rintro ⟨k, hk⟩
-    refine ⟨k ≫ j, ?_⟩
+    refine ⟨k ≫ inv G.ι.toImage, ?_⟩
     rw [Category.assoc, hjeq]
     exact hk
 
@@ -274,10 +282,8 @@ theorem toRelEffCartierDiv_isSubgroup (G : FiniteLocallyFreeSubgroup E) :
 `finrank` along the iso `ι.toImage`). -/
 theorem toRelEffCartierDiv_degree (G : FiniteLocallyFreeSubgroup E) (s : S) :
     G.toRelEffCartierDiv.degree s = G.rank s := by
-  have hι : G.ι.ker.subschemeι = inv G.ι.toImage ≫ G.ι := by
-    rw [IsIso.eq_inv_comp, Scheme.Hom.toImage_imageι]
   show (G.ι.ker.subschemeι ≫ E.π).finrank s = (G.ι ≫ E.π).finrank s
-  rw [hι, Category.assoc, Scheme.Hom.finrank_comp_left_of_isIso]
+  rw [G.ker_subschemeι_eq, Category.assoc, Scheme.Hom.finrank_comp_left_of_isIso]
 
 -- ATTACK (ofRelEffCartierDiv): (1) the `subgroup` field is `hD` VERBATIM — the KM 1.3.6
 -- predicate `RelEffCartierDiv.IsSubgroup` was mirrored exactly so that this bridge is
