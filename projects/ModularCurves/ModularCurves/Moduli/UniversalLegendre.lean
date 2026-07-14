@@ -2139,6 +2139,46 @@ theorem legendreClassifyingRingHom_pulled (φ : X ⟶ universalLegendreObj R hR)
     rw [hnat]
     rfl
 
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-CLS-8 rt2a ★)** BaseHom determination (mirrors
+`classifyingMap_omegaBasisMap`). -/
+theorem legendreClassifyingMap_pulled (φ : X ⟶ universalLegendreObj R hR)
+    (hL : (universalLegendreObj R hR).curve.IsNaiveFullLevel 2
+      (universalLegendreP R hR) (universalLegendreQ R hR))
+    (h2 : IsUnit (2 : Γ(X.base, ⊤))) :
+    legendreClassifyingMap X
+      ((gammaFullNaiveProblem R 2).map (Opposite.op φ)
+        ⟨⟨universalLegendreP R hR, universalLegendreQ R hR⟩, hL⟩)
+      (omegaBasisMap φ (universalLegendreOmega R hR))
+      (IsLegendreDatum.map φ
+        (universalLegendre_isLegendreDatum R hR hL)
+        ((gammaFullNaiveProblem R 2).map (Opposite.op φ)
+          ⟨⟨universalLegendreP R hR, universalLegendreQ R hR⟩, hL⟩)
+        rfl rfl) h2 = φ.baseHom := by
+  show X.base.toSpecΓ ≫ Spec.map (CommRingCat.ofHom
+    (legendreClassifyingRingHom X _ _ _ h2)) = φ.baseHom
+  rw [show CommRingCat.ofHom
+      (legendreClassifyingRingHom X
+        ((gammaFullNaiveProblem R 2).map (Opposite.op φ)
+          ⟨⟨universalLegendreP R hR, universalLegendreQ R hR⟩, hL⟩)
+        (omegaBasisMap φ (universalLegendreOmega R hR))
+        (IsLegendreDatum.map φ
+          (universalLegendre_isLegendreDatum R hR hL)
+          ((gammaFullNaiveProblem R 2).map (Opposite.op φ)
+            ⟨⟨universalLegendreP R hR, universalLegendreQ R hR⟩, hL⟩)
+          rfl rfl) h2) =
+    (Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv ≫
+      φ.baseHom.appTop from by
+    rw [legendreClassifyingRingHom_pulled φ hL h2]
+    rfl]
+  rw [Spec.map_comp, ← Scheme.toSpecΓ_naturality_assoc]
+  show φ.baseHom ≫ (Spec (CommRingCat.of (LegendreModuliRing R))).toSpecΓ ≫
+    Spec.map (Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv =
+    φ.baseHom
+  rw [← SpecMap_ΓSpecIso_hom, ← Spec.map_comp, Iso.inv_hom_id, Spec.map_id]
+  exact Category.comp_id _
+
 end RT2
 
 end TwoTorsion
