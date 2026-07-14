@@ -7,6 +7,7 @@ import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.GammaH
 import ModularCurves.Moduli.OmegaFunctor
 import ModularCurves.Moduli.UniversalAdapted
+import ModularCurves.Moduli.LegendreDelta
 
 /-!
 # The KM 4.7 bootstrap objects (T-E12–T-E15)
@@ -139,6 +140,38 @@ noncomputable def legendreBootstrapProblem : ModuliProblem R where
     ext x
     · exact FunctorToTypes.map_comp_apply (gammaFullNaiveProblem R 2) φ ψ x.1
     · exact FunctorToTypes.map_comp_apply (omegaProblem R) φ ψ x.2
+
+/-- **(T-E14-AX1, KM engine axiom 1 for the corrected Legendre `δ`; KM 4.6.2 / GME
+Ex. 2.2.1)** Over a base in which `2` is invertible, the Legendre-marked problem is
+representable by an object whose base is **affine** — explicitly
+`M'₂ = Spec R[λ][(λ(λ−1))⁻¹]` carrying the Legendre curve `y² = x(x−1)(x−λ)` with the
+tautological marking `P = (0,0), Q = (1,0)` and `ω = dx/y`. Route (the T-E12-D replay
+for the Legendre datum): the universal Legendre object via `tautPresentation` +
+`projModelAffineSection`; classification by the glued `λ`-function of the unique
+marked adapted local models (`transVC_of_isAdapted_charNeTwo` + KM 2.2.9's marking
+pins the translation; `legendreCurve_vc_marked` pins the rest). -/
+theorem legendreDelta_representable_by_affine (hR : IsUnit (2 : R)) :
+    ∃ X : EllObj R, IsAffine X.base ∧
+      Nonempty ((legendreDeltaProblem R).RepresentableBy X) := by
+  sorry
+
+/-- **(T-E14-AX2, KM engine axiom 2 for the corrected Legendre `δ`)** For every
+elliptic curve `E/S` over a base in which `2` is invertible, the `S`-scheme relatively
+representing the Legendre-marked problem is **finite étale over `S`** — the underlying
+scheme of the `GL₂(ℤ/2) × {±1}`-torsor of KM 4.6.2's axiom 2 (`|G| = 12`: six
+orderings of the three `2`-torsion abscissae × the `±ω` pair fixing the scale
+`u² = x(Q) − x(P)`). Stated in the torsor-free shape matching
+`naiveLevelThree_relativelyRepresentable_finiteEtale`; the `G`-action on `δ` itself is
+the COUPLED action (the `GL₂`-factor re-marks the pair and re-scales `ω`
+accordingly — NOT the ambient product action of `legendreBootstrapGAction`), tracked
+as ticket [T-E14-ACT']. -/
+theorem legendreDelta_relativelyRepresentable_finiteEtale (hR : IsUnit (2 : R))
+    (X : EllObj R) :
+    ∃ (Z : Scheme.{u}) (f : Z ⟶ X.base), IsFinite f ∧ Etale f ∧
+      ∀ {T : Scheme.{u}} (g : T ⟶ X.base), Nonempty
+        ({ h : T ⟶ Z // h ≫ f = g } ≃
+          (legendreDeltaProblem R).obj (Opposite.op (X.pullbackAlong g))) := by
+  sorry
 
 /-! #### T-E14 statement-layer correction (2026-07-14, OMEGA — adversarial source check)
 

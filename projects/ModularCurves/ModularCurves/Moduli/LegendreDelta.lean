@@ -203,4 +203,25 @@ theorem IsLegendreDatum.map {R : CommRingCat.{u}} {X' X : EllObj R} (φ : X' ⟶
     rw [map_one, map_zero] at h1
     exact MarksAt.congr_section hL'Q.symm L'.1.2.2 h1
 
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14, the corrected `δ` of KM 4.6.2 ★★)** The Legendre moduli problem: the
+subfunctor of the ambient `Γ(2)-naive × ω` product cut out by the marking condition
+*"the adapted `x` satisfies `x(P₂) = 0, x(Q₂) = 1`"*. This — not the ambient
+product — is the `δ` whose engine axioms feed KM 4.7.0 over `ℤ[1/2]`. -/
+noncomputable def legendreDeltaProblem (R : CommRingCat.{u}) : ModuliProblem R where
+  obj X := { x : (gammaFullNaiveProblem R 2).obj X × (omegaProblem R).obj X //
+    IsLegendreDatum X.unop x.1 x.2 }
+  map φ := ↾fun x => ⟨⟨(gammaFullNaiveProblem R 2).map φ x.1.1,
+    (omegaProblem R).map φ x.1.2⟩,
+    IsLegendreDatum.map φ.unop x.2 _ rfl rfl⟩
+  map_id X := by
+    ext x
+    · exact FunctorToTypes.map_id_apply (gammaFullNaiveProblem R 2) x.1.1
+    · exact FunctorToTypes.map_id_apply (omegaProblem R) x.1.2
+  map_comp {X Y Z} φ ψ := by
+    ext x
+    · exact FunctorToTypes.map_comp_apply (gammaFullNaiveProblem R 2) φ ψ x.1.1
+    · exact FunctorToTypes.map_comp_apply (omegaProblem R) φ ψ x.1.2
+
 end ModularCurves
