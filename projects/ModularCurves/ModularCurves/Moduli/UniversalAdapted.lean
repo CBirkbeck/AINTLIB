@@ -256,4 +256,40 @@ noncomputable def chartPiece {R : CommRingCat.{u}} (Y : EllObj R)
       (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
         (classifyingRingHom Y b h2 h3)) (universalShortNF R)
 
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 800000 in
+/-- **(E12-D3-E2)** The piece map lies over the restricted classifying map. -/
+theorem chartPiece_π {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤)))
+    (V : Y.base.affineOpens) (i : Y.curve.toEllipticCurveGeom.atlas.ι)
+    (hVi : V.1 ≤ (Y.curve.toEllipticCurveGeom.atlas.U i).1) :
+    chartPiece Y b h2 h3 V i hVi ≫ projModelπ (universalShortNF R) =
+      pullback.snd Y.curve.toEllipticCurveGeom.π V.1.ι ≫ V.2.isoSpec.hom ≫
+        Spec.map (CommRingCat.ofHom
+          (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+            (classifyingRingHom Y b h2 h3))) := by
+  have hw : projModelBaseChange
+      (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+        (classifyingRingHom Y b h2 h3)) (universalShortNF R) ≫
+      projModelπ (universalShortNF R) =
+    projModelπ ((universalShortNF R).map
+      (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+        (classifyingRingHom Y b h2 h3))) ≫
+      Spec.map (CommRingCat.ofHom
+        (((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+          (classifyingRingHom Y b h2 h3))) := by
+    letI : Algebra (ModuliRingE12 R) Γ(Y.base, V.1) :=
+      ((((Y.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+        (classifyingRingHom Y b h2 h3))).toAlgebra
+    exact (isPullback_projModelBaseChange (universalShortNF R)).w
+  rw [chartPiece, Category.assoc, Category.assoc, hw,
+    reassoc_of% projModelπ_congr
+      (universalShortNF_map_classifying Y b h2 h3 V i hVi).symm]
+  rw [← Category.assoc,
+    (adaptedLocal Y.curve.toEllipticCurveGeom b h2 h3 V i hVi).compat_π,
+    Category.assoc]
+
 end ModularCurves
