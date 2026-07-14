@@ -20178,3 +20178,29 @@ highest-leverage deliverable in the project") is DELIVERED:**
 **For the coordinator:** T-E14 is no longer the funnel — the funnel is now the KM keystone
 (feeds LVL-b + AX2 + the register-boxes) and the ACT'-ruling. `representable_iff`'s ⇐ = engine
 (T-Q6d.γ) + T-E15 (both other-stream) + the above.
+
+## v10.239-OMEGA (2026-07-14) — ★★★ T-E4a/T-E4b DE-SORRIED: pullSection additivity UNRESTRICTED + the naive full-level functor is SORRY-FREE — the T-E14-AX1 machine is now AXIOM-CLEAN
+
+**Un-park justification:** T-E4a was "parked behind T-W7.8 (owner decision 2026-07-08)"; the K4
+records-level canonicity supply (`isMonHom_of_pointedIso_records`, RecordGroupUnique — landed by
+the KM/K4 arc) needs NO noetherian hypothesis, dissolving the park-reason. Delivered
+(commits 234ab8bd4 + 40e490ea4 + wiring, all axiom-clean):
+- **`EllHom.pullSection_add`** (T-E4a, GME Cor 2.2.5 over ARBITRARY bases): machinery
+  (curveIsoPullback/transportSection/dictionary + transport-additivity through the pointed-iso
+  MonHom) moved into Representability.lean; PullSectionAdd.lean = SUPERSEDED noetherian alias;
+  consumer-facing `curveIsoPullbackOver` preserved for PullSectionCanonicity.
+- **`EllHom.isNaiveFullLevel_pullSection`** (T-E4b): `IsMonHom` instance for the comparison iso +
+  `pointTransportEquiv` (point-level additive transport, `MonObj.mul_comp`) + the pull-compat
+  dictionary + killing via inlined `AddMonoidHom.mk'` + generation via the composite AddEquiv and
+  closure-map (the EllHom-form of T-H2b's `isNaiveFullLevel_pullAlong`).
+- **`gammaFullNaiveProblem.map` DE-SORRIED** ⟹ `legendreClassifyingEllHom_pulled`,
+  `legendreDeltaRepresentableBy`, and the whole rt2-arc now probe **propext/Classical.choice/
+  Quot.sound ONLY**. T-E14-AX1 = fully axiom-clean modulo the single hL-hypothesis (LVL-b).
+**UNPARKED FOR THEIR OWNERS (not OMEGA scope, now feasible with T-E4a/b + the same pattern):**
+the `gammaOneNaiveProblem.map` sorry (needs exact-order-preservation — pointTransportEquiv +
+zsmul-transport gives the skeleton) and the `gammaHNaiveProblem.map` orbit sorries (need
+glSmul-equivariance of pullSection — pullSection is now an AddMonoidHom, so integer-matrix
+actions transport; T-H3).
+LEAN-OP: a `have`-bound `AddMonoidHom.mk'` is OPAQUE to rw/rfl (proof-term binding) — inline the
+mk'-term at use-sites (or `set … with`); `map_zsmul` then applies with the pullSection-spelling
+accepted by defeq.
