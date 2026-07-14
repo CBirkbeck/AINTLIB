@@ -195,6 +195,24 @@ theorem mulByHom_surjective {K : Type u} [Field K] (W : WeierstrassCurve K) [W.I
   rw [hconst]
   exact h1
 
+/-- **(K4b-2, [N]⁻¹Z nonempty)** The preimage chart `[N]⁻¹Z = pullback [N] Z.ι` is nonempty: `[N]` is
+surjective (`mulByHom_surjective`), so any point `z₀` of the (nonempty) affine chart `Z` has an
+`[N]`-preimage, which lifts to a point of the pullback (`Scheme.Pullback.exists_preimage_pullback`).
+This is the `Nonempty` fibre input for the `[N]⁻¹Z`-side fraction field (feeds
+`isFractionRing_top_of_isOpenImmersion` and `isIntegral_of_isOpenImmersion`). -/
+lemma nonempty_preimage_pullback {K : Type u} [Field K] (W : WeierstrassCurve K) [W.IsElliptic]
+    (N : ℕ) [Flat ((modelEllipticCurve W).mulByHom N)] [IsFinite ((modelEllipticCurve W).mulByHom N)]
+    [LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom N)]
+    (z₀ : ((modelEllipticCurve W).E)) (hz₀ : z₀ ∈ (zChart W : (projModel W).Opens)) :
+    Nonempty (pullback ((modelEllipticCurve W).mulByHom N)
+      (show ((modelEllipticCurve W).E).Opens from zChart W).ι : Scheme.{u}) := by
+  obtain ⟨x, hx⟩ := (mulByHom_surjective W N).surj z₀
+  obtain ⟨z, -, -⟩ := AlgebraicGeometry.Scheme.Pullback.exists_preimage_pullback
+    (f := (modelEllipticCurve W).mulByHom N)
+    (g := (show ((modelEllipticCurve W).E).Opens from zChart W).ι)
+    x ⟨z₀, hz₀⟩ hx
+  exact ⟨z⟩
+
 /-- **(K4 (D) chart-reduction to a module rank, general form)** Chaining
 `finrank_eq_appTop_finrank_of_affineOpen` with the `appTop`-to-`Module.finrank` bridge
 `appTop_finrank_eq_module_finrank`: for a finite flat LFP endomorphism `f` of a preconnected scheme,
