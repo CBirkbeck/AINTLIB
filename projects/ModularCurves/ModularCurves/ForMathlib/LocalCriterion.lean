@@ -93,7 +93,8 @@ private theorem exists_fibre_adapted_surjection
   · -- `φ` surjective, by Nakayama at `I` (the lifted basis generates `M ⧸ IM`)
     rw [← LinearMap.range_eq_top, hφ_def, Fintype.range_linearCombination]
     have hfeq : ⇑(I • (⊤ : Submodule S M)).mkQ ∘ x = ⇑b := funext (fun i => hx i)
-    have hgenI : Submodule.map (I • (⊤ : Submodule S M)).mkQ (Submodule.span S (Set.range x)) = ⊤ := by
+    have hgenI : Submodule.map (I • (⊤ : Submodule S M)).mkQ
+        (Submodule.span S (Set.range x)) = ⊤ := by
       rw [Submodule.map_span, ← Set.range_comp, hfeq]; exact hb_span
     have hNN : (⊤ : Submodule S M) ≤ Submodule.span S (Set.range x) ⊔ I • (⊤ : Submodule S M) := by
       have h2 : (I • (⊤ : Submodule S M)) ⊔ Submodule.span S (Set.range x) = ⊤ :=
@@ -206,7 +207,8 @@ theorem Module.free_of_flat_of_fibre_free [Module.Flat R M]
       (Module.Flat.lTensor_preserves_injective_linearMap _ Subtype.val_injective)
   have hcomp : φR ∘ₗ (LinearMap.restrictScalars R Ksub.subtype) = 0 := by
     ext w; exact LinearMap.mem_ker.mp w.2
-  -- `k ⊗_R K = 0`: `ι ⊗ k` is injective (A) and lands in `ker (φ ⊗ k) = 0` (as `φ ⊗ k` is injective).
+  -- `k ⊗_R K = 0`: `ι ⊗ k` is injective (A) and lands in `ker (φ ⊗ k) = 0`
+  -- (as `φ ⊗ k` is injective).
   have hkK : Subsingleton (k ⊗[R] Ksub) := by
     refine (subsingleton_iff_forall_eq 0).mpr fun z => ?_
     have hz : LinearMap.lTensor k (LinearMap.restrictScalars R Ksub.subtype) z = 0 := by
