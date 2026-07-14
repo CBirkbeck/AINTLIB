@@ -618,7 +618,103 @@ infinite. -/
 theorem modelMulByHom_range_infinite {F : Type u} [Field F] [IsAlgClosed F]
     (W : WeierstrassCurve F) [W.IsElliptic] (N : ℤ) (hN : N ≠ 0) :
     (Set.range ((modelEllipticCurve W).mulByHom N).base).Infinite := by
-  sorry
+  haveI := Classical.decEq F
+  intro hfin
+  obtain ⟨ℓ, hℓ, hℓN, hℓF⟩ := exists_good_prime F N hN
+  -- the Spec-side base morphism is the identity
+  have hbase : Spec.map (CommRingCat.ofHom (algebraMap F F))
+      = 𝟙 (Spec (CommRingCat.of F)) := by
+    have : CommRingCat.ofHom (algebraMap F F) = 𝟙 (CommRingCat.of F) := by
+      ext a
+      simp
+    rw [this, Spec.map_id]
+  -- Spec of a field is a single point
+  haveI hsing : Subsingleton (↥(Spec (CommRingCat.of F))) := by
+    constructor
+    intro a b
+    exact PrimeSpectrum.ext ((Ideal.eq_bot_of_prime _).trans
+      (Ideal.eq_bot_of_prime _).symm)
+  -- per-level injections of `ℓⁿ`-torsion into the range
+  have hinj : ∀ n : ℕ,
+      ∃ f : ↥(HasseWeil.torsionSubgroup (W.baseChange F).toAffine ((ℓ ^ n : ℕ) : ℤ)) →
+        ↥(Set.range ((modelEllipticCurve W).mulByHom N).base),
+      Function.Injective f := by
+    intro n
+    set e := EllipticCurve.projModelPointsAddEquiv W F with he
+    refine ⟨fun t => ⟨((e.symm ((N : ℤ) • (t : (W.baseChange F).toAffine.Point))).1).base
+      (IsLocalRing.closedPoint F), ?_⟩, ?_⟩
+    · -- the point of the `N`-multiple lies in the range of `[N]`
+      set Pt := e.symm (t : (W.baseChange F).toAffine.Point) with hPt
+      have hsm : e.symm ((N : ℤ) • (t : (W.baseChange F).toAffine.Point))
+          = (N : ℤ) • Pt := map_zsmul e.symm (N : ℤ) _
+      have hval := (modelEllipticCurve W).point_smul_eq_comp_mulBy
+        (Spec.map (CommRingCat.ofHom (algebraMap F F))) (N : ℤ) Pt
+      refine ⟨(Pt.1).base (IsLocalRing.closedPoint F), ?_⟩
+      have hb := congrArg
+        (fun m : Spec (CommRingCat.of F) ⟶ projModel W =>
+          m.base (IsLocalRing.closedPoint F)) hval
+      simp only [Scheme.Hom.comp_base, TopCat.coe_comp, Function.comp_apply] at hb
+      rw [hsm]
+      exact hb.symm
+    · -- injectivity: same point ⟹ same section (w7) ⟹ same multiple ⟹ same torsion elt
+      intro t₁ t₂ hpt
+      set Pt₁ := e.symm (t₁ : (W.baseChange F).toAffine.Point) with hPt₁
+      set Pt₂ := e.symm (t₂ : (W.baseChange F).toAffine.Point) with hPt₂
+      have hsm₁ : e.symm ((N : ℤ) • (t₁ : (W.baseChange F).toAffine.Point))
+          = (N : ℤ) • Pt₁ := map_zsmul e.symm (N : ℤ) _
+      have hsm₂ : e.symm ((N : ℤ) • (t₂ : (W.baseChange F).toAffine.Point))
+          = (N : ℤ) • Pt₂ := map_zsmul e.symm (N : ℤ) _
+      have hpt' := congrArg Subtype.val hpt
+      simp only [hsm₁, hsm₂] at hpt'
+      -- w7 at the two sections
+      have hmul : (N : ℤ) • Pt₁ = (N : ℤ) • Pt₂ := by
+        have h12 := section_base_injective_of_isAlgClosed (projModelπ W)
+          ⟨((N : ℤ) • Pt₁).1, (((N : ℤ) • Pt₁).2).trans hbase⟩
+          ⟨((N : ℤ) • Pt₂).1, (((N : ℤ) • Pt₂).2).trans hbase⟩
+          (fun p => by
+            have hp : p = IsLocalRing.closedPoint F := Subsingleton.elim _ _
+            rw [hp]
+            exact hpt')
+        have hval := congrArg Subtype.val h12
+        exact Subtype.ext hval
+      have hmul' : (N : ℤ) • (t₁ : (W.baseChange F).toAffine.Point)
+          = (N : ℤ) • (t₂ : (W.baseChange F).toAffine.Point) := by
+        have := congrArg e hmul
+        simpa [hPt₁, hPt₂, map_zsmul] using this
+      -- torsion hypotheses for the Bézout cancellation
+      have htor₁ : ((ℓ : ℤ) ^ n) • (t₁ : (W.baseChange F).toAffine.Point) = 0 := by
+        have := t₁.2
+        rw [HasseWeil.mem_torsionSubgroup] at this
+        exact_mod_cast this
+      have htor₂ : ((ℓ : ℤ) ^ n) • (t₂ : (W.baseChange F).toAffine.Point) = 0 := by
+        have := t₂.2
+        rw [HasseWeil.mem_torsionSubgroup] at this
+        exact_mod_cast this
+      exact Subtype.ext (zsmul_injOn_torsionBy hℓ hℓN n htor₁ htor₂ hmul')
+  -- cardinality explosion against the finite range
+  haveI hfinT := hfin.to_subtype
+  have hCbound : ∀ n : ℕ, (ℓ ^ n) ^ 2 ≤
+      Nat.card ↥(Set.range ((modelEllipticCurve W).mulByHom N).base) := by
+    intro n
+    obtain ⟨f, hf⟩ := hinj n
+    calc (ℓ ^ n) ^ 2
+        = Nat.card (↥(HasseWeil.torsionSubgroup (W.baseChange F).toAffine ((ℓ ^ n : ℕ) : ℤ))) :=
+          (HasseWeil.NTorsion.card_torsion_ellPow_nat (W.baseChange F) ℓ hℓF n).symm
+      _ ≤ _ := Nat.card_le_card_of_injective f hf
+  set C := Nat.card ↥(Set.range ((modelEllipticCurve W).mulByHom N).base) with hC
+  have h1 : C < 2 ^ C := Nat.lt_two_pow_self (n := C)
+  have h2 : 2 ^ C ≤ ℓ ^ C := Nat.pow_le_pow_left hℓ.two_le C
+  have h3 : ℓ ^ C ≤ (ℓ ^ C) ^ 2 := Nat.le_self_pow two_ne_zero _
+  have h4 := hCbound C
+  omega
+
+/-- **THE MODEL FIBRE-COUNT, unconditional (BB-QF ALPHA complete)**: over an
+algebraically closed field, every topological fibre of `[N]` (`N ≠ 0`) on the projective
+Weierstrass model is finite. -/
+theorem modelMulByHom_finite_fibres {F : Type u} [Field F] [IsAlgClosed F]
+    (W : WeierstrassCurve F) [W.IsElliptic] (N : ℤ) (hN : N ≠ 0) (y : projModel W) :
+    (((modelEllipticCurve W).mulByHom N).base ⁻¹' {y}).Finite :=
+  modelMulByHom_finite_preimage_singleton W N (modelMulByHom_range_infinite W N hN) y
 
 end RangeWitness
 
