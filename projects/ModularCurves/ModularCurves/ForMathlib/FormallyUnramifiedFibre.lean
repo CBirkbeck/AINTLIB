@@ -18,7 +18,8 @@ import Mathlib.RingTheory.Unramified.Basic
 
 Unlike the smooth analogue (`AlgebraicGeometry.Smooth.of_smooth_fiberToSpecResidueField`), formal
 unramifiedness is a *fibrewise* condition that needs **no flatness**: the module of Kähler
-differentials commutes with base change unconditionally (`KaehlerDifferential.tensorKaehlerEquivBase`),
+differentials commutes with base change unconditionally
+(`KaehlerDifferential.tensorKaehlerEquivBase`),
 so a finite morphism whose fibres are all formally unramified is itself formally unramified.
 
 ## Main results
@@ -41,7 +42,8 @@ open scoped TensorProduct
 /-- If `A` is a module-finite `R`-algebra whose fibre `κ(p) ⊗[R] A` over every prime `p` is formally
 unramified over the residue field `κ(p)`, then `A` is formally unramified over `R`.
 
-The proof needs no flatness: `Ω[A⁄R]` is a finite `R`-module, and `κ(p) ⊗[R] Ω[A⁄R] ≃ Ω[(κ(p) ⊗ A)⁄κ(p)]`
+The proof needs no flatness: `Ω[A⁄R]` is a finite `R`-module, and `κ(p) ⊗[R] Ω[A⁄R] ≃ Ω[(κ(p) ⊗
+A)⁄κ(p)]`
 (`KaehlerDifferential.tensorKaehlerEquivBase`) vanishes for every `p`, so `Ω[A⁄R]` has empty support
 and is therefore trivial. -/
 lemma Algebra.FormallyUnramified.of_forall_residueField_fiber
