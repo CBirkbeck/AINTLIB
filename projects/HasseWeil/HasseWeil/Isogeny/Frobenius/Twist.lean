@@ -4,12 +4,12 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Curves.Map.Maps
+import HasseWeil.Isogeny.BaseChange.Basic
 import HasseWeil.Isogeny.Basic
-import HasseWeil.Isogeny.MulByInt.Basepoint
 import HasseWeil.Isogeny.Dual.Reduction
+import HasseWeil.Isogeny.MulByInt.Basepoint
 import HasseWeil.Isogeny.OmegaCoeffViaFormalGroup
 import HasseWeil.Isogeny.VerschiebungFactorization
-import HasseWeil.Isogeny.BaseChange.Basic
 
 /-!
 # G2: the explicit Frobenius-twist package (cross-curve relative Frobenius)
@@ -21,20 +21,20 @@ inseparable degree is not a `q`-power.
 This file builds ON the existing twist machinery, it does not duplicate it:
 
 * the twist curve `E^{(p^e)}` is the existing `WeierstrassCurve.iterateFrobeniusTwist`
-  (`Curves/Maps.lean`, defined as `E.map (iterateFrobenius F p e)`);
-* the single-`p` relative Frobenius pullback construction of `Curves/Maps.lean`
+  (`Curves/Map/Maps.lean`, defined as `E.map (iterateFrobenius F p e)`);
+* the single-`p` relative Frobenius pullback construction of `Curves/Map/Maps.lean`
   (`frobeniusRelativePullback`, in the parametric `HasseWeil.Isogeny` framework)
   is **generalised** here into a reusable builder `EC.Isogeny.ofEquation`
   producing genuine `EC.Isogeny`s (with the `ord_∞` basepoint condition proven,
   not carried) from an `Equation` witness plus transcendence of the `x`-image;
 * the basepoint condition is discharged by the `{1, y}`-parity route of
-  `EC/IsogenyAG/MulByIntBasepoint.lean`, with *exact* generator orders
+  `Isogeny/MulByInt/Basepoint.lean`, with *exact* generator orders
   `ord_∞(x^{p^e}) = -2p^e`, `ord_∞(y^{p^e}) = -3p^e`.
 
 ## The six package items
 
 1. **Twist curve** `E^{(p^e)}`: `WeierstrassCurve.iterateFrobeniusTwist p E e`
-   (already shipped in `Curves/Maps.lean`; iteration laws added here).
+   (already shipped in `Curves/Map/Maps.lean`; iteration laws added here).
 2. **Ellipticity preserved**: `iterateFrobeniusTwist_isElliptic` (instance) and
    `iterateFrobeniusTwist_Δ : Δ(E^{(p^e)}) = Δ(E)^{p^e} ≠ 0` via mathlib's
    `WeierstrassCurve.map_Δ` naturality.
@@ -45,7 +45,7 @@ This file builds ON the existing twist machinery, it does not duplicate it:
 4. **Degree** `= p^e`: `relativeFrobenius_degree` over a perfect base, via the
    imperfection tower `[K(E) : K(E)^{p^e}] = p^e`
    (`finrank_KE_over_iterateFrobeniusRange`, proven here by induction from the
-   `e = 1` case `GapQfKernel.finrank_KE_over_frobeniusRange_p`, transporting each
+   `e = 1` case `finrank_KE_over_frobeniusRange_p`, transporting each
    rung along the `p^e`-power isomorphism `K(E) ≅ K(E)^{p^e}`).
 5. **Iteration**: curve-level `iterateFrobeniusTwist_iterateFrobeniusTwist`
    (`(E^{(p^a)})^{(p^b)} = E^{(p^{a+b})}`) and the pullback-level composition law
@@ -126,11 +126,11 @@ the Weierstrass equation of a second curve `V` (base-changed to `K(E)`), with `u
 transcendental over `F` and of even negative order at infinity, we obtain a genuine
 `EC.Isogeny E.toAffine V.toAffine` whose pullback sends `x_gen V ↦ u`, `y_gen V ↦ v`.
 
-This abstracts the single-`p` relative-Frobenius construction of `Curves/Maps.lean`
+This abstracts the single-`p` relative-Frobenius construction of `Curves/Map/Maps.lean`
 (`frobeniusRelativeBaseHom` → `frobeniusRelativeCoordRingHom` →
 `frobeniusRelativePullback`) over the image pair, and discharges the basepoint
 condition `pullback_ordAtInfty_nonneg` by the `{1, y}`-parity route of
-`MulByIntBasepoint.lean`. -/
+`MulByInt/Basepoint.lean`. -/
 
 section Builder
 
@@ -1011,7 +1011,7 @@ private theorem finrank_iterFrobRange_succ (e : ℕ) :
 
 /-- **The imperfection tower** `[K(E) : K(E)^{p^e}] = p^e` over a perfect base
 field: induction on `e` with the tower step `finrank_iterFrobRange_succ`, the
-`e = 1` case `finrank_KE_over_frobeniusRange_p` (`GapQfKernel.lean`), and the
+`e = 1` case `finrank_KE_over_frobeniusRange_p` (`OmegaCoeffViaFormalGroup.lean`), and the
 trivial base `e = 0`. -/
 theorem finrank_KE_over_iterateFrobeniusRange [PerfectField F] (e : ℕ) :
     Module.finrank ↥((iterateFrobenius KE p e).fieldRange) KE = p ^ e := by
@@ -1115,7 +1115,7 @@ variable {F : Type*} [Field F]
 
 /-- Two `F`-algebra homs out of a Weierstrass function field agreeing on `x_gen`
 and `y_gen` are equal. Fintype-free restatement of `algHom_ext_x_y_gen_omega`
-(`GapSpines.lean`, whose section carries a `[Fintype K]`); same reduction chain
+(`VerschiebungFactorization.lean`, whose section carries a `[Fintype K]`); same reduction chain
 `IsLocalization.algHom_ext` → `AdjoinRoot.algHom_ext'` → `Polynomial.algHom_ext`. -/
 theorem functionField_algHom_ext {V : WeierstrassCurve F} [V.toAffine.IsElliptic]
     {Ω : Type*} [Field Ω] [Algebra F Ω]
