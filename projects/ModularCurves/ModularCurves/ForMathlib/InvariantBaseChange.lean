@@ -5,10 +5,10 @@ Authors: AINTLIB ModularCurves project
 
 ForMathlib (OURS, not vendored): upstream candidate. Ticket T-Q4 (KM A7 appendix).
 -/
-import Mathlib.RingTheory.TensorProduct.Maps
 import Mathlib.Algebra.Algebra.Subalgebra.Operations
-import Mathlib.RingTheory.Flat.Basic
 import Mathlib.LinearAlgebra.TensorProduct.Pi
+import Mathlib.RingTheory.Flat.Basic
+import Mathlib.RingTheory.TensorProduct.Maps
 import Mathlib.SetTheory.Cardinal.Finite
 
 /-!
