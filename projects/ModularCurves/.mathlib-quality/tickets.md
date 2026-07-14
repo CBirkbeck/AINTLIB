@@ -19697,3 +19697,27 @@ direct application no casts). Pins: hLN + hbound. **Unblocks KM's Drinfeld .Repr
 - **Sources**: KM 2.3.1; Silverman III.6.2/6.4; HasseWeil NTorsion (sorry-free).
 ### [QF-L6] field-level fibre finiteness  — **Status**: open — **Parent**: BB-QF (assembly of L3–L5 per decomposition-bbqf.md)
 ### [QF-L7] BB-QF assembly — **Status**: open — **Parent**: BB-QF — via `locallyQuasiFinite_iff_finite_preimage_singleton`; then `mulByHom_isFinite` closes (ZMT).
+
+## v10.221-G0 (2026-07-14) — BB-QF wall-break: master fibre-count PROVEN; 5 bounded leaves remain
+**The QF-NONCONST "T-B6 wall" is BROKEN** (corrected verdict boarded 037fa25e3): uniqueness
+(`abelEnrichment_unique_of_isLocallyNoetherian`, PROVEN) + GIT 6.4 + power-naturality replace the
+sorried existence box. Banked GREEN this session (MulByHomFibres.lean + ModelFibreCount.lean):
+`mulBy_comp_of_isMonHom` + `.left` form + `locallyQuasiFinite_mulByHom_of_isMonHom_iso` (BETA core,
+repaired via `(Over.forget S).mapIso` — uniform-typing beats the Over.Hom.left kabstract wall);
+`coordinateRing_krullDimLE_one` (chain-lift past (W.polynomial) in dim-2 K[X][Y]);
+`infinite_setOf_isMaximal_of_not_isField` + `infinite_primeSpectrum_of_not_isField` (Jacobson);
+`isClosed_isIrreducible_singleton_or_univ` (dim ≤ 1); CoordinateRing = Jacobson non-field
+(Module.Finite K[X] via power basis, AdjoinRoot.of injective, isField-descent);
+**`Curvelike.finite_preimage_singleton`** — THE master topological fibre-count (T0 + Noetherian +
+finite-or-univ classification + closed map + infinite range ⟹ finite fibres; both cases proven).
+**Assembly REAL**: `modelMulByHom_finite_preimage_singleton` (range-infinitude as hypothesis).
+**REMAINING LEAVES** (each bounded, specs in ModelFibreCount.lean + focus sentinel):
+g1 `zChartHomeo` (isoSpec ∘ Spec(zChartSectionCoordRingEquiv) plumbing); g2 chart-transfer of the
+classification (+ complement via `mem_range_zero_of_not_mem_zChart`, Unique (PrimeSpectrum K));
+g3 `projModel_infinite`; g4 `projModel_noetherianSpace` (opens-compact: chart Noetherian + finite
+complement); g5 THE WITNESS `(Set.range [N].base).Infinite` over κ̄ + κ-descent (HasseWeil
+`card_torsion_ellPow_nat` ℓ ∤ N·char + `projModelPointsEquivEll` sections + N-invertible-mod-ℓⁿ
+injectivity on E[ℓⁿ] + rational-points-have-distinct-topological-points + algebraic-residue⟹closed
++ finite-fibres-of-κ̄/κ-descent on closed points). Then: model-count → BETA transport
+(localModel-over-field + baseChange-of-model + pointed-iso + GIT 6.4) → `mulByHom_finite_fibres`
+(arbitrary base) → the banked reduction closes BB-QF; Torsion-relocation boarded for coordinator.
