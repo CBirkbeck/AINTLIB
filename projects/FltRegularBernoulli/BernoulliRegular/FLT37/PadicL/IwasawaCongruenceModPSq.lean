@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import BernoulliRegular.FLT37.PadicL.LpValue
 import BernoulliRegular.IrregularPrimes.KummerCongruenceFull
 
@@ -74,6 +79,7 @@ valuation (Washington Cor 5.13, the Euler factor `1 - p^{-1}` being a unit). -/
 noncomputable def bernoulliGenOmega (p : ℕ) [Fact p.Prime] (i : ℕ) : ℚ_[p] :=
   BernoulliGen ((teichmullerCharQp p) ^ (i - 1)) 1
 
+/-- `bernoulliGenOmega` unfolds to the generalized Bernoulli number at `ω ^ (i - 1)`. -/
 theorem bernoulliGenOmega_def (p : ℕ) [Fact p.Prime] (i : ℕ) :
     bernoulliGenOmega p i = BernoulliGen ((teichmullerCharQp p) ^ (i - 1)) 1 := rfl
 
@@ -180,6 +186,7 @@ noncomputable def toPadicLFunction
   valuation_eq_bernoulliFactor i h1 h2 hev :=
     D.valuation_Lp_eq_bernoulliFactor h1 h2 hev (hreg i h1 h2 hev).1 (hreg i h1 h2 hev).2
 
+/-- The packaged `p`-adic `L`-function has the expected `L_p`. -/
 @[simp] theorem toPadicLFunction_Lp
     (hreg : ∀ i, 2 ≤ i → i ≤ p - 3 → Even i →
       (bernoulliFactorQp p i) ≠ 0 ∧ (bernoulliFactorQp p i).valuation ≤ 1) :
