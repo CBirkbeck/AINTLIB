@@ -1,3 +1,4 @@
+import ModularCurves.ForMathlib.FinitePresentationOpenImmersionFamily
 import ModularCurves.ForMathlib.FinitePresentationPushoutFamily
 import Mathlib.AlgebraicGeometry.AffineScheme
 import Mathlib.AlgebraicGeometry.Gluing
@@ -120,6 +121,139 @@ def IsPushoutAffineIntersectionFunctor (F : Finset J ⥤ CommAlgCat.{u} S) : Pro
     (ringMap F (singletonToPair i k))
     (ringMap F (pairToTripleLeft i j k))
     (ringMap F (pairToTripleRight i j k))
+
+section Spread
+
+variable {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+  {𝒮 : ι → Type u} [∀ i, CommRing (𝒮 i)] [∀ i, Algebra R (𝒮 i)]
+  {t : ∀ ⦃i j : ι⦄, i ≤ j → (𝒮 i →ₐ[R] 𝒮 j)}
+  [Algebra R S] {uS : ∀ i, 𝒮 i →ₐ[R] S}
+  {F : Finset J ⥤ CommAlgCat.{u} S}
+  {H : Algebra.IsFilteredAlgColimit R 𝒮 t S uS}
+
+private theorem exists_openAffineIntersectionFunctorAtLaterStage
+    [Finite J] (M : Algebra.SpreadData.FunctorModel F H)
+    (hopen : IsOpenAffineIntersectionFunctor F) :
+    ∃ (j : ι) (hij : M.stage ≤ j),
+      IsOpenAffineIntersectionFunctor (M.mapToStage hij).toFunctor := by
+  classical
+  obtain ⟨j, hij, hj⟩ := M.exists_common_isOpenImmersion_mapToStage
+    (fun r : J × J => singletonIndex r.1)
+    (fun r : J × J => pairIndex r.1 r.2)
+    (fun r : J × J => singletonToPair r.1 r.2)
+    (fun r => by
+      simpa [affineIntersectionOverlapι, ringMap] using hopen r.1 r.2)
+  refine ⟨j, hij, fun i k => ?_⟩
+  change IsOpenImmersion (Spec.map (CommRingCat.ofHom
+    ((M.mapToStage hij).map (singletonToPair i k)).toRingHom))
+  exact hj (i, k)
+
+private theorem exists_pushoutAffineIntersectionFunctorAtLaterStage
+    [Finite J] (M : Algebra.SpreadData.FunctorModel F H)
+    (hpush : IsPushoutAffineIntersectionFunctor F) :
+    ∃ (j : ι) (hij : M.stage ≤ j),
+      IsPushoutAffineIntersectionFunctor (M.mapToStage hij).toFunctor := by
+  classical
+  obtain ⟨j, hij, hj⟩ := M.exists_common_isPushout_mapToStage
+    (fun r : J × (J × J) => singletonIndex r.1)
+    (fun r : J × (J × J) => pairIndex r.1 r.2.1)
+    (fun r : J × (J × J) => pairIndex r.1 r.2.2)
+    (fun r : J × (J × J) => tripleIndex r.1 r.2.1 r.2.2)
+    (fun r : J × (J × J) => singletonToPair r.1 r.2.1)
+    (fun r : J × (J × J) => singletonToPair r.1 r.2.2)
+    (fun r : J × (J × J) => pairToTripleLeft r.1 r.2.1 r.2.2)
+    (fun r : J × (J × J) => pairToTripleRight r.1 r.2.1 r.2.2)
+    (fun _ => Subsingleton.elim _ _)
+    (fun r => by
+      simpa [ringMap] using hpush r.1 r.2.1 r.2.2)
+  refine ⟨j, hij, fun i k l => ?_⟩
+  change IsPushout
+    (CommRingCat.ofHom
+      ((M.mapToStage hij).map (singletonToPair i k)).toRingHom)
+    (CommRingCat.ofHom
+      ((M.mapToStage hij).map (singletonToPair i l)).toRingHom)
+    (CommRingCat.ofHom
+      ((M.mapToStage hij).map (pairToTripleLeft i k l)).toRingHom)
+    (CommRingCat.ofHom
+      ((M.mapToStage hij).map (pairToTripleRight i k l)).toRingHom)
+  exact hj (i, k, l)
+
+private theorem openAffineIntersectionFunctor_mapToStage_trans
+    (M : Algebra.SpreadData.FunctorModel F H)
+    {i j : ι} (hMi : M.stage ≤ i) (hij : i ≤ j)
+    (hopen : IsOpenAffineIntersectionFunctor
+      ((M.mapToStage hMi).mapToStage hij).toFunctor) :
+    IsOpenAffineIntersectionFunctor (M.mapToStage (hMi.trans hij)).toFunctor := by
+  intro p q
+  change IsOpenImmersion (Spec.map (CommRingCat.ofHom
+    ((M.object (singletonIndex p)).mapAtLaterStage
+      (M.object (pairIndex p q)) H
+      (M.le_stage (singletonIndex p)) (M.le_stage (pairIndex p q))
+      (hMi.trans hij) (M.map (singletonToPair p q))).toRingHom))
+  rw [← (M.object (singletonIndex p)).mapAtLaterStage_trans
+    (M.object (pairIndex p q)) H
+    (M.le_stage (singletonIndex p)) (M.le_stage (pairIndex p q))
+    hMi hij (M.map (singletonToPair p q))]
+  have hpq := hopen p q
+  change IsOpenImmersion (Spec.map (CommRingCat.ofHom
+    (((M.mapToStage hMi).mapToStage hij).map
+      (singletonToPair p q)).toRingHom)) at hpq
+  exact hpq
+
+private theorem pushoutAffineIntersectionFunctor_mapToStage_trans
+    (M : Algebra.SpreadData.FunctorModel F H)
+    {i j : ι} (hMi : M.stage ≤ i) (hij : i ≤ j)
+    (hpush : IsPushoutAffineIntersectionFunctor (M.mapToStage hMi).toFunctor) :
+    IsPushoutAffineIntersectionFunctor (M.mapToStage (hMi.trans hij)).toFunctor := by
+  intro p q r
+  have h := (M.object (singletonIndex p)).isPushout_mapAtLaterStage_trans
+    (M.object (pairIndex p q)) (M.object (pairIndex p r))
+    (M.object (tripleIndex p q r)) H
+    (M.le_stage (singletonIndex p)) (M.le_stage (pairIndex p q))
+    (M.le_stage (pairIndex p r)) (M.le_stage (tripleIndex p q r))
+    hMi hij (M.map (singletonToPair p q)) (M.map (singletonToPair p r))
+    (M.map (pairToTripleLeft p q r)) (M.map (pairToTripleRight p q r))
+    (by
+      have hpqr := hpush p q r
+      change IsPushout
+        (CommRingCat.ofHom
+          ((M.mapToStage hMi).map (singletonToPair p q)).toRingHom)
+        (CommRingCat.ofHom
+          ((M.mapToStage hMi).map (singletonToPair p r)).toRingHom)
+        (CommRingCat.ofHom
+          ((M.mapToStage hMi).map (pairToTripleLeft p q r)).toRingHom)
+        (CommRingCat.ofHom
+          ((M.mapToStage hMi).map (pairToTripleRight p q r)).toRingHom) at hpqr
+      exact hpqr)
+  change IsPushout
+    (CommRingCat.ofHom
+      ((M.mapToStage (hMi.trans hij)).map (singletonToPair p q)).toRingHom)
+    (CommRingCat.ofHom
+      ((M.mapToStage (hMi.trans hij)).map (singletonToPair p r)).toRingHom)
+    (CommRingCat.ofHom
+      ((M.mapToStage (hMi.trans hij)).map (pairToTripleLeft p q r)).toRingHom)
+    (CommRingCat.ofHom
+      ((M.mapToStage (hMi.trans hij)).map (pairToTripleRight p q r)).toRingHom)
+  exact h
+
+/-- The open-immersion and pushout conditions of a finite affine-intersection
+functor hold simultaneously at one later spread stage. -/
+theorem _root_.Algebra.SpreadData.FunctorModel.exists_affineIntersectionConditionsAtLaterStage
+    [Finite J] (M : Algebra.SpreadData.FunctorModel F H)
+    (hopen : IsOpenAffineIntersectionFunctor F)
+    (hpush : IsPushoutAffineIntersectionFunctor F) :
+    ∃ (j : ι) (hij : M.stage ≤ j),
+      IsOpenAffineIntersectionFunctor (M.mapToStage hij).toFunctor ∧
+        IsPushoutAffineIntersectionFunctor (M.mapToStage hij).toFunctor := by
+  obtain ⟨i, hMi, hpush_i⟩ :=
+    exists_pushoutAffineIntersectionFunctorAtLaterStage M hpush
+  obtain ⟨j, hij, hopen_j⟩ :=
+    exists_openAffineIntersectionFunctorAtLaterStage (M.mapToStage hMi) hopen
+  exact ⟨j, hMi.trans hij,
+    openAffineIntersectionFunctor_mapToStage_trans M hMi hij hopen_j,
+    pushoutAffineIntersectionFunctor_mapToStage_trans M hMi hij hpush_i⟩
+
+end Spread
 
 private noncomputable def overlapTransition
     (F : Finset J ⥤ CommAlgCat.{u} S) (i j : J) :
