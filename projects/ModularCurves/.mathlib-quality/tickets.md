@@ -19954,3 +19954,14 @@ playing chartPiece's role) + rt2 (EllHom-determination — T-E12-rt2 replay: tra
 adaptedness/marking vs witness-uniqueness CLS-1 ⟹ ringHom-determination on the λ-generator +
 top-determination via adaptedTotalCover-analog hom_ext) + RepresentableBy package. Plus the
 standing gaps: [T-E14-LVL-b] (geometric generation, KM-keystone), [T-E14-ACT'], [T-E14-AX2].
+
+## v10.232-OMEGA (2026-07-14) — ★★ [T-E14-CLS-7ab] rt1's LEVEL-HALF: the pulled universal marked pair IS the given pair
+
+`section_comp_legendreTop` (the marking downstairs: σ ≫ legendreTop = clsMap ≫ [p:q:1]-universal,
+per witness-affine via the marking + affineSection congr/baseChange + restrict_legendreClassifying
+Map) + `pullSection_legendreClassifyingEllHom_P/Q` (isPullback.hom_ext; fst = marking-downstairs,
+snd = section-property). Commits c7cfecfaa + (this). **rt1 remaining: the ω-half** (pulled
+universalLegendreOmega = b via the unit-torsor + transported-taut-vs-witness CLS-1 comparison —
+T-E12-rt1 replay; note the transported taut is marked via `MarksAt.transport` of
+`tautPresentation_marksAt` with hcomm = the pullSection-identities JUST PROVEN). Then rt2 +
+RepresentableBy → AX1 modulo [T-E14-LVL-b].
