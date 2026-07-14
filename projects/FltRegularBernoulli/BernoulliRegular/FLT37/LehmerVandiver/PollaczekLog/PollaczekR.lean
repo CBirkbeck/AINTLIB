@@ -3,6 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.FLT37.LehmerVandiver.PollaczekUnit
@@ -69,6 +74,7 @@ This is `(zeta_spec p ℚ K).toInteger` viewed in `(𝓞 K)ˣ`; its value is
 noncomputable def zetaUnitR : (𝓞 K)ˣ :=
   ((zeta_spec p ℚ K).toInteger_isPrimitiveRoot.isUnit hp.1.ne_zero).unit
 
+/-- The underlying ring element of `zetaUnitR` is `ζ`. -/
 @[simp]
 theorem zetaUnitR_coe : ((zetaUnitR p K : (𝓞 K)ˣ) : 𝓞 K) = (zeta_spec p ℚ K).toInteger :=
   IsUnit.unit_spec _
@@ -117,7 +123,7 @@ excluded by the standing assumption that the Pollaczek index `i` is
 even and positive). -/
 theorem pollaczekR_one (h : p = 1) :
     pollaczekR p K i = 1 := by
-  unfold pollaczekR
+  simp only [pollaczekR]
   subst h
   rw [show Finset.Ico (1 : ℕ) 1 = ∅ from Finset.Ico_self 1, Finset.prod_empty]
 
@@ -125,7 +131,7 @@ theorem pollaczekR_one (h : p = 1) :
 using that `2` is invertible in `ZMod p` for odd `p`. -/
 theorem two_mul_pollaczekRExp (hp_odd : p ≠ 2) (a : ℕ) :
     (2 : ZMod p) * pollaczekRExp p a = (a : ZMod p) := by
-  unfold pollaczekRExp
+  simp only [pollaczekRExp]
   have h2 : (2 : ZMod p) ≠ 0 := by
     intro h
     have h_nat : ((2 : ℕ) : ZMod p) = 0 := by exact_mod_cast h
@@ -151,7 +157,7 @@ theorem pollaczekRFactor_eq_neg_half_mul_sub (a : ℕ) :
         (((zetaUnitR p K ^
                 (2 * ((pollaczekRExp p a).val : ℤ)) :
               (𝓞 K)ˣ) : 𝓞 K) - 1) := by
-  unfold pollaczekRFactor
+  simp only [pollaczekRFactor]
   set ζ : (𝓞 K)ˣ := zetaUnitR p K
   set m : ℤ := ((pollaczekRExp p a).val : ℤ)
   have hpow : ((ζ ^ (-m) : (𝓞 K)ˣ) : 𝓞 K) *
@@ -227,7 +233,7 @@ theorem pollaczekR_factorisation (hp_odd : p ≠ 2) :
         ∏ a ∈ Finset.Ico 1 p,
           ((zetaUnitR p K : 𝓞 K) ^ a - 1) ^
             (a : ℕ) ^ (p - 1 - i) := by
-  unfold pollaczekR
+  simp only [pollaczekR]
   rw [← Finset.prod_mul_distrib]
   refine Finset.prod_congr rfl fun a _ => ?_
   rw [pollaczekRFactor_eq_neg_half_mul_zeta_pow_sub_one p K hp_odd a, mul_pow]
@@ -243,7 +249,7 @@ in `ZMod p`. Consequence of `((p - a : ℕ) : ZMod p) = -(a : ZMod p)` for
 `a ≤ p`, since `(p : ZMod p) = 0`. -/
 theorem pollaczekRExp_p_sub {a : ℕ} (ha : a ≤ p) :
     pollaczekRExp p (p - a) = -pollaczekRExp p a := by
-  unfold pollaczekRExp
+  simp only [pollaczekRExp]
   have h_sub : ((p - a : ℕ) : ZMod p) = -(a : ZMod p) := by
     rw [Nat.cast_sub ha, ZMod.natCast_self, zero_sub]
   rw [h_sub, neg_mul]
@@ -254,7 +260,7 @@ the integer-cast identity `(-x).val ≡ -x.val (mod p)`, and `ζ^p = 1` to
 swap the two ζ-exponents. -/
 theorem pollaczekRFactor_p_sub_eq_neg {a : ℕ} (ha : a ≤ p) :
     pollaczekRFactor p K (p - a) = -pollaczekRFactor p K a := by
-  unfold pollaczekRFactor
+  simp only [pollaczekRFactor]
   set ζ : (𝓞 K)ˣ := zetaUnitR p K
   have hζp : ζ ^ (p : ℤ) = 1 := by
     rw [zpow_natCast]; exact zeta_unit_pow_p_eq_one p K
@@ -391,7 +397,7 @@ theorem pollaczekR_split_reindex (hp_odd : p ≠ 2) (i : ℕ) :
   obtain ⟨k, hk⟩ := hp.out.odd_of_ne_two hp_odd
   have hk_pos : 1 ≤ k := by omega
   have hp_div2 : (p - 1) / 2 = k := by omega
-  unfold pollaczekR
+  simp only [pollaczekR]
   simp only [hp_div2]
   clear hp_div2
   rw [show Finset.Ico (1 : ℕ) p = Finset.Ico 1 (k + 1) ∪ Finset.Ico (k + 1) p from
