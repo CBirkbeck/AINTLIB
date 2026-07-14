@@ -44,6 +44,10 @@ statement here is about such a map, in the maximal module-theoretic generality.
 * `kerBaseChangeComparison_bijective`: the `A`-linear fibre identification
   `A ⊗[R] ker d ≃ ker (d.baseChange A)` — the shape "(`f_*𝓛) ⊗ k(s) ≅ f_*(𝓛(s))`"
   consumed at GME (2.15) and (2.17).
+* `LinearMap.exact_of_bounded_forall_field_baseChange_exact`: a bounded complex of
+  finite projective modules that is exact over every field fibre is exact over the base.
+* `kerBaseChangeComparison_bijective_of_bounded_forall_field_baseChange_exact`: its
+  degree-zero kernel is finite projective and commutes with arbitrary algebra base change.
 * `LinearMap.exists_away_finiteProjective_ker_of_residueField_surjective`: the local
   finite-projective kernel and arbitrary further-base-change endpoint obtained by
   combining the preceding principal-neighbourhood theorem with a two-term complex.
@@ -457,6 +461,163 @@ theorem LinearMap.exact_of_forall_field_baseChange_exact_of_finite
   exact hcoker
 
 end Exactness
+
+private theorem projective_range_of_projective_coker
+    (f : P →ₗ[R] Q) [Module.Projective R Q]
+    [Module.Projective R (Q ⧸ LinearMap.range f)] :
+    Module.Projective R (LinearMap.range f) := by
+  letI : Module.Projective R (LinearMap.ker (LinearMap.range f).mkQ) :=
+    Module.Projective.ker_of_surjective _
+      (Submodule.mkQ_surjective (LinearMap.range f))
+  rw [← Submodule.ker_mkQ (LinearMap.range f)]
+  infer_instance
+
+/-- Over an arbitrary ring, the kernel of a map between projective modules with projective
+cokernel is projective. -/
+theorem Module.Projective.ker_of_projective_coker
+    (f : P →ₗ[R] Q) [Module.Projective R P] [Module.Projective R Q]
+    [Module.Projective R (Q ⧸ LinearMap.range f)] :
+    Module.Projective R (LinearMap.ker f) := by
+  letI : Module.Projective R (LinearMap.range f) :=
+    projective_range_of_projective_coker f
+  letI : Module.Projective R (LinearMap.ker f.rangeRestrict) :=
+    Module.Projective.ker_of_surjective f.rangeRestrict f.surjective_rangeRestrict
+  rw [← LinearMap.ker_rangeRestrict]
+  infer_instance
+
+/-- Over an arbitrary ring, the kernel of a map from a finite module to a projective module
+with projective cokernel is finite. -/
+theorem Module.Finite.ker_of_projective_coker
+    (f : P →ₗ[R] Q) [Module.Finite R P] [Module.Projective R Q]
+    [Module.Projective R (Q ⧸ LinearMap.range f)] :
+    Module.Finite R (LinearMap.ker f) := by
+  letI : Module.Projective R (LinearMap.range f) :=
+    projective_range_of_projective_coker f
+  letI : Module.Finite R (LinearMap.ker f.rangeRestrict) :=
+    Module.Finite.ker_of_surjective_of_projective f.rangeRestrict
+      f.surjective_rangeRestrict
+  rw [← LinearMap.ker_rangeRestrict]
+  infer_instance
+
+section BoundedFiniteProjectiveComplex
+
+variable (M : ℕ → Type v) [∀ n, AddCommGroup (M n)] [∀ n, Module R (M n)]
+  (d : ∀ n, M n →ₗ[R] M (n + 1)) [∀ n, Module.Finite R (M n)]
+  [∀ n, Module.Projective R (M n)]
+
+private theorem boundedCokerFiniteProjectiveAndExact
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hcomp : ∀ n, d (n + 1) ∘ₗ d n = 0)
+    (hfield : ∀ n, n < N → ∀ (K : Type u) [Field K] [Algebra R K],
+      Function.Exact ((d n).baseChange K) ((d (n + 1)).baseChange K))
+    (n : ℕ) (hn : n ≤ N) :
+    (Module.Finite R (M (n + 1) ⧸ LinearMap.range (d n)) ∧
+      Module.Projective R (M (n + 1) ⧸ LinearMap.range (d n))) ∧
+      (n < N → Function.Exact (d n) (d (n + 1))) := by
+  induction hn using Nat.decreasingInduction with
+  | self =>
+      exact ⟨⟨inferInstance, inferInstance⟩, fun hn ↦ (Nat.lt_irrefl N hn).elim⟩
+  | @of_succ k hk ih =>
+      letI : Module.Finite R (M (k + 2) ⧸ LinearMap.range (d (k + 1))) := ih.1.1
+      letI : Module.Projective R (M (k + 2) ⧸ LinearMap.range (d (k + 1))) := ih.1.2
+      letI : Module.Projective R (LinearMap.range (d (k + 1))) :=
+        projective_range_of_projective_coker (d (k + 1))
+      letI : Module.Finite R (LinearMap.range (d (k + 1))) :=
+        Module.Finite.of_surjective (d (k + 1)).rangeRestrict
+          (d (k + 1)).surjective_rangeRestrict
+      letI : Module.Projective R (LinearMap.ker (d (k + 1))) :=
+        Module.Projective.ker_of_projective_coker (d (k + 1))
+      letI : Module.Finite R (LinearMap.ker (d (k + 1))) :=
+        Module.Finite.ker_of_projective_coker (d (k + 1))
+      letI : Module.Finite R
+          (LinearMap.ker (d (k + 1)) ⧸
+            LinearMap.range (LinearMap.codRestrictToKer (d k) (d (k + 1)) (hcomp k))) :=
+        Module.Finite.of_surjective _
+          (Submodule.mkQ_surjective (LinearMap.range
+            (LinearMap.codRestrictToKer (d k) (d (k + 1)) (hcomp k))))
+      have hexact : Function.Exact (d k) (d (k + 1)) :=
+        LinearMap.exact_of_forall_field_baseChange_exact_of_finite
+          (d k) (d (k + 1)) (hcomp k) (hfield k hk)
+      let e : (M (k + 1) ⧸ LinearMap.range (d k)) ≃ₗ[R]
+          LinearMap.range (d (k + 1)) :=
+        Submodule.quotEquivOfEq (LinearMap.range (d k)) (LinearMap.ker (d (k + 1)))
+            (LinearMap.exact_iff.mp hexact).symm ≪≫ₗ
+          LinearMap.quotKerEquivRange (d (k + 1))
+      exact ⟨⟨Module.Finite.equiv e.symm, Module.Projective.of_equiv' e.symm⟩,
+        fun _ ↦ hexact⟩
+
+/-- Every cokernel in a bounded finite-projective complex is finite when the complex is
+exact after base change to every field. -/
+theorem Module.Finite.quotient_range_of_bounded_forall_field_baseChange_exact
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hcomp : ∀ n, d (n + 1) ∘ₗ d n = 0)
+    (hfield : ∀ n, n < N → ∀ (K : Type u) [Field K] [Algebra R K],
+      Function.Exact ((d n).baseChange K) ((d (n + 1)).baseChange K))
+    (n : ℕ) (hn : n ≤ N) :
+    Module.Finite R (M (n + 1) ⧸ LinearMap.range (d n)) :=
+  (boundedCokerFiniteProjectiveAndExact M d N hcomp hfield n hn).1.1
+
+/-- Every cokernel in a bounded finite-projective complex is projective when the complex is
+exact after base change to every field. -/
+theorem Module.Projective.quotient_range_of_bounded_forall_field_baseChange_exact
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hcomp : ∀ n, d (n + 1) ∘ₗ d n = 0)
+    (hfield : ∀ n, n < N → ∀ (K : Type u) [Field K] [Algebra R K],
+      Function.Exact ((d n).baseChange K) ((d (n + 1)).baseChange K))
+    (n : ℕ) (hn : n ≤ N) :
+    Module.Projective R (M (n + 1) ⧸ LinearMap.range (d n)) :=
+  (boundedCokerFiniteProjectiveAndExact M d N hcomp hfield n hn).1.2
+
+/-- A bounded complex of finite projective modules is exact when every field base change is
+exact. -/
+theorem LinearMap.exact_of_bounded_forall_field_baseChange_exact
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hcomp : ∀ n, d (n + 1) ∘ₗ d n = 0)
+    (hfield : ∀ n, n < N → ∀ (K : Type u) [Field K] [Algebra R K],
+      Function.Exact ((d n).baseChange K) ((d (n + 1)).baseChange K))
+    (n : ℕ) (hn : n < N) :
+    Function.Exact (d n) (d (n + 1)) :=
+  (boundedCokerFiniteProjectiveAndExact M d N hcomp hfield n hn.le).2 hn
+
+/-- The degree-zero kernel of a bounded finite-projective complex that is exact on every
+field fibre is finite. -/
+theorem Module.Finite.ker_of_bounded_forall_field_baseChange_exact
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hcomp : ∀ n, d (n + 1) ∘ₗ d n = 0)
+    (hfield : ∀ n, n < N → ∀ (K : Type u) [Field K] [Algebra R K],
+      Function.Exact ((d n).baseChange K) ((d (n + 1)).baseChange K)) :
+    Module.Finite R (LinearMap.ker (d 0)) := by
+  letI : Module.Projective R (M 1 ⧸ LinearMap.range (d 0)) :=
+    Module.Projective.quotient_range_of_bounded_forall_field_baseChange_exact
+      M d N hcomp hfield 0 (Nat.zero_le N)
+  exact Module.Finite.ker_of_projective_coker (d 0)
+
+/-- The degree-zero kernel of a bounded finite-projective complex that is exact on every
+field fibre is projective. -/
+theorem Module.Projective.ker_of_bounded_forall_field_baseChange_exact
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hcomp : ∀ n, d (n + 1) ∘ₗ d n = 0)
+    (hfield : ∀ n, n < N → ∀ (K : Type u) [Field K] [Algebra R K],
+      Function.Exact ((d n).baseChange K) ((d (n + 1)).baseChange K)) :
+    Module.Projective R (LinearMap.ker (d 0)) := by
+  letI : Module.Projective R (M 1 ⧸ LinearMap.range (d 0)) :=
+    Module.Projective.quotient_range_of_bounded_forall_field_baseChange_exact
+      M d N hcomp hfield 0 (Nat.zero_le N)
+  exact Module.Projective.ker_of_projective_coker (d 0)
+
+/-- The degree-zero kernel of a bounded finite-projective complex that is exact on every
+field fibre commutes with arbitrary algebra base change. -/
+theorem kerBaseChangeComparison_bijective_of_bounded_forall_field_baseChange_exact
+    (A : Type*) [CommRing A] [Algebra R A]
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hcomp : ∀ n, d (n + 1) ∘ₗ d n = 0)
+    (hfield : ∀ n, n < N → ∀ (K : Type u) [Field K] [Algebra R K],
+      Function.Exact ((d n).baseChange K) ((d (n + 1)).baseChange K)) :
+    Function.Bijective (kerBaseChangeComparison A (d 0)) :=
+  kerBaseChangeComparison_bijective_of_bounded_exact A M d N
+    (LinearMap.exact_of_bounded_forall_field_baseChange_exact M d N hcomp hfield)
+
+end BoundedFiniteProjectiveComplex
 
 /-- Near a prime where the residue-fibre differential is surjective, a differential
 between finite projective modules has finite projective kernel, and that kernel commutes
