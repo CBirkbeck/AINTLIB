@@ -3803,12 +3803,8 @@ noncomputable def coprodFullLevel {R : CommRingCat.{u}} (N : ℕ) [NeZero N] (X 
     obtain ⟨y, hy, hyx⟩ := hKle h1
     exact ((Point.baseChangeEquiv X.curve g t).injective hyx) ▸ hy
 
-/-- `EllHom.pullSection` is `ℤ`-linear (derived from `pullSection_add` via `map_zsmul`).
-Companion to `EllHom.pullSection_add`. -/
-theorem EllHom.pullSection_zsmul {R : CommRingCat.{u}} {X Y : EllObj R} (f : X ⟶ Y)
-    (n : ℤ) (P : Y.curve.Section) :
-    EllHom.pullSection R f (n • P) = n • EllHom.pullSection R f P :=
-  map_zsmul (AddMonoidHom.mk' (EllHom.pullSection R f) (EllHom.pullSection_add R f)) n P
+-- (`EllHom.pullSection_zsmul` now lives upstream in `Moduli/GammaH.lean`, T-H3a —
+-- the identical local copy was deduplicated when T-E4a landed; STREAM-OMEGA 2026-07-14.)
 
 open EllipticCurve in
 /-- `baseChangeEquiv` undoes `asSection`: `e (asSection g R) = R.restrict (𝟙)`. The
