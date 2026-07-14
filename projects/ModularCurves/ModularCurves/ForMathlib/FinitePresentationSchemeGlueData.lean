@@ -105,6 +105,11 @@ noncomputable abbrev affineIntersectionSingletonToPair (i j : J) :
     affineIntersectionSingletonIndex i ⟶ affineIntersectionPairIndex i j :=
   singletonToPair i j
 
+/-- The canonical index map interchanging an ordered pair. -/
+noncomputable abbrev affineIntersectionPairSwap (i j : J) :
+    affineIntersectionPairIndex j i ⟶ affineIntersectionPairIndex i j :=
+  pairSwap i j
+
 /-- The affine chart indexed by a singleton in a finite-intersection functor. -/
 noncomputable abbrev affineIntersectionChart
     (F : Finset J ⥤ CommAlgCat.{u} S) (i : J) : Scheme :=
@@ -271,12 +276,12 @@ end Spread
 private noncomputable def overlapTransition
     (F : Finset J ⥤ CommAlgCat.{u} S) (i j : J) :
     affineIntersectionOverlap F i j ⟶ affineIntersectionOverlap F j i :=
-  Spec.map (ringMap F (pairSwap i j))
+  Spec.map (ringMap F (affineIntersectionPairSwap i j))
 
 private lemma overlapTransition_self (F : Finset J ⥤ CommAlgCat.{u} S) (i : J) :
     overlapTransition F i i = 𝟙 _ := by
   rw [overlapTransition]
-  have h : pairSwap i i = 𝟙 _ := Subsingleton.elim _ _
+  have h : affineIntersectionPairSwap i i = 𝟙 _ := Subsingleton.elim _ _
   rw [h, ringMap_id, Spec.map_id]
 
 private theorem affineIntersectionOverlapι_self_isIso
