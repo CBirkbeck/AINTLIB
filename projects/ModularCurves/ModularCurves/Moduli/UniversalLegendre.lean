@@ -2179,6 +2179,126 @@ theorem legendreClassifyingMap_pulled (φ : X ⟶ universalLegendreObj R hR)
   rw [← SpecMap_ΓSpecIso_hom, ← Spec.map_comp, Iso.inv_hom_id, Spec.map_id]
   exact Category.comp_id _
 
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 6400000 in
+/-- **(T-E14-CLS-8 rt2b ★★)** Top determination: the glued classifying comparison of
+the pulled datum IS `φ`'s total-space morphism (mirrors `classifyingTop_omegaBasisMap`;
+`legendrePiece_congr` at the pulled witness replaces the e-determination step). -/
+theorem legendreTop_pulled (φ : X ⟶ universalLegendreObj R hR)
+    (hL : (universalLegendreObj R hR).curve.IsNaiveFullLevel 2
+      (universalLegendreP R hR) (universalLegendreQ R hR))
+    (h2 : IsUnit (2 : Γ(X.base, ⊤))) :
+    legendreTop (IsLegendreDatum.map φ
+      (universalLegendre_isLegendreDatum R hR hL)
+      ((gammaFullNaiveProblem R 2).map (Opposite.op φ)
+        ⟨⟨universalLegendreP R hR, universalLegendreQ R hR⟩, hL⟩)
+      rfl rfl) h2 = φ.top := by
+  haveI := universalLegendre_isElliptic R hR
+  set hD' := IsLegendreDatum.map φ
+    (universalLegendre_isLegendreDatum R hR hL)
+    ((gammaFullNaiveProblem R 2).map (Opposite.op φ)
+      ⟨⟨universalLegendreP R hR, universalLegendreQ R hR⟩, hL⟩)
+    rfl rfl with hD'def
+  letI : Algebra (LegendreModuliRing R)
+      Γ(Spec (CommRingCat.of (LegendreModuliRing R)), ⊤) :=
+    (Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv.hom.toAlgebra
+  haveI : IsIso (⊤ : (Spec (CommRingCat.of (LegendreModuliRing R))).Opens).ι := by
+    rw [← Scheme.topIso_hom]
+    infer_instance
+  haveI : IsIso (Spec.map (CommRingCat.ofHom (algebraMap (LegendreModuliRing R)
+      Γ(Spec (CommRingCat.of (LegendreModuliRing R)), ⊤)))) := by
+    have h : CommRingCat.ofHom (algebraMap (LegendreModuliRing R)
+        Γ(Spec (CommRingCat.of (LegendreModuliRing R)), ⊤)) =
+      (Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv := rfl
+    rw [h]
+    infer_instance
+  have hfst : pullback.fst (projModelπ (universalLegendre R))
+      (⊤ : (Spec (CommRingCat.of (LegendreModuliRing R))).Opens).ι =
+      (tautPresentation (universalLegendre R)).e.hom ≫
+        (isPullback_projModelBaseChange (universalLegendre R)).isoPullback.hom ≫
+        pullback.fst (projModelπ (universalLegendre R))
+          (Spec.map (CommRingCat.ofHom (algebraMap (LegendreModuliRing R)
+            Γ(Spec (CommRingCat.of (LegendreModuliRing R)), ⊤)))) := by
+    rw [show (tautPresentation (universalLegendre R)).e.hom =
+      (asIso (pullback.fst (projModelπ (universalLegendre R))
+        (⊤ : (Spec (CommRingCat.of (LegendreModuliRing R))).Opens).ι) ≪≫
+      (asIso (pullback.fst (projModelπ (universalLegendre R))
+        (Spec.map (CommRingCat.ofHom (algebraMap (LegendreModuliRing R)
+          Γ(Spec (CommRingCat.of (LegendreModuliRing R)), ⊤)))))).symm ≪≫
+      (isPullback_projModelBaseChange (universalLegendre R)).isoPullback.symm).hom
+      from rfl]
+    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv, Category.assoc,
+      Iso.inv_hom_id_assoc, IsIso.inv_hom_id, Category.comp_id]
+  refine (legendreWitnessCover hD').hom_ext _ _ (fun w => ?_)
+  rw [legendreTop_piece hD' h2 w, legendreWitnessCover_f]
+  rw [legendrePiece_congr hD' h2 w (pulledWitness φ hL w.V) rfl, eqToHom_refl,
+    Category.id_comp]
+  -- now: chartPiece(pulled) = fst ≫ φ.top; unfold the φ-side through the transport
+  rw [show pullback.fst X.curve.toEllipticCurveGeom.π w.V.1.ι ≫ φ.top =
+    transportTheta φ.baseHom φ.top φ.isPullback
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial) ≫
+      pullback.fst (projModelπ (universalLegendre R))
+        (⊤ : (Spec (CommRingCat.of (LegendreModuliRing R))).Opens).ι from
+    (transportTheta_fst φ.baseHom φ.top φ.isPullback _).symm]
+  rw [hfst, ← Category.assoc,
+    show transportTheta φ.baseHom φ.top φ.isPullback
+        (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial) ≫
+      (tautPresentation (universalLegendre R)).e.hom =
+    ((tautPresentation (universalLegendre R)).transport
+      φ.baseHom φ.top φ.isPullback φ.zero_w
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial)).e.hom ≫
+      projModelBaseChange (sectionsMapLE φ.baseHom
+        (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial))
+        (tautPresentation (universalLegendre R)).W from
+    (transport_e_baseChange φ.baseHom φ.top φ.isPullback φ.zero_w
+      (tautPresentation (universalLegendre R)) _).symm]
+  -- collapse the universal-side chain into a single base change along the composite
+  have hσ : (sectionsMapLE φ.baseHom
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial)).comp
+      ((Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv.hom) =
+      ((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (legendreClassifyingRingHom X _ _ hD' h2) := by
+    rw [sectionsMapLE_congr_hom (legendreClassifyingMap_pulled φ hL h2).symm
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial)]
+    exact sectionsMapLE_legendreClassifyingMap hD' h2 w.V (fun x _ => trivial)
+  rw [show projModelBaseChange (sectionsMapLE φ.baseHom
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial))
+      (tautPresentation (universalLegendre R)).W =
+    projModelBaseChange (sectionsMapLE φ.baseHom
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (LegendreModuliRing R))).affineOpens).1 from fun x _ => trivial))
+      ((universalLegendre R).map
+        ((Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv.hom)) from rfl]
+  rw [show (isPullback_projModelBaseChange (universalLegendre R)).isoPullback.hom ≫
+      pullback.fst (projModelπ (universalLegendre R))
+        (Spec.map (CommRingCat.ofHom (algebraMap (LegendreModuliRing R)
+          Γ(Spec (CommRingCat.of (LegendreModuliRing R)), ⊤)))) =
+    projModelBaseChange
+      ((Scheme.ΓSpecIso (CommRingCat.of (LegendreModuliRing R))).inv.hom)
+      (universalLegendre R) from
+    (isPullback_projModelBaseChange (universalLegendre R)).isoPullback_hom_fst]
+  rw [Category.assoc, ← projModelBaseChange_comp',
+    projModelBaseChange_congr_hom hσ (universalLegendre R)]
+  rw [legendrePiece]
+  rfl
+
+
 end RT2
 
 end TwoTorsion
