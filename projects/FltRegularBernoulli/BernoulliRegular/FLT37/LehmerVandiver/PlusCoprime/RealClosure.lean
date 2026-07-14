@@ -92,8 +92,7 @@ theorem complexConj_zeta_sub_one_pow_eq
     [IsCyclotomicExtension {p} ℚ K] [IsCMField K] (n : ℕ) :
     ringOfIntegersComplexConj K ((((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ^ n) =
       ((((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - 1) - 1) ^ n) := by
-  rw [map_pow, map_sub, map_one]
-  rw [complexConj_apply_zeta (p := p) (K := K)]
+  rw [map_pow, map_sub, map_one, complexConj_apply_zeta (p := p) (K := K)]
 
 /-- **Connection: `(unitsComplexConj K u : 𝓞 K) = ringOfIntegersComplexConj K (u : 𝓞 K)`.**
 The two complex-conjugation operations agree on underlying elements:
@@ -162,10 +161,9 @@ theorem zeta_pow_sub_one_double_prod_eq_pollaczekUnitPlus_pow_four
               (4 * ∑ b ∈ Ico 1 ((p - 1) / 2 + 1), b ^ (p - 1 - i))) *
             ((pollaczekUnit p K i : 𝓞 K) ^ 4)) :=
     congrArg (ringOfIntegersComplexConj K) h_bare
-  rw [map_mul] at h_sigma_app
-  rw [complexConj_zeta_pow_sub_one_prod_eq p K (fun b ↦ 4 * b ^ (p - 1 - i))] at h_sigma_app
-  rw [complexConj_zeta_sub_one_pow_eq p K
-    (4 * ∑ b ∈ Ico 1 ((p - 1) / 2 + 1), b ^ (p - 1 - i))] at h_sigma_app
+  rw [map_mul, complexConj_zeta_pow_sub_one_prod_eq p K (fun b ↦ 4 * b ^ (p - 1 - i)),
+    complexConj_zeta_sub_one_pow_eq p K
+      (4 * ∑ b ∈ Ico 1 ((p - 1) / 2 + 1), b ^ (p - 1 - i))] at h_sigma_app
   -- Now h_sigma_app : LHS_sigma = (ζ^{p-1} - 1)^{4S} · σ(E^4)
   -- Multiply h_bare and h_sigma_app: LHS_bare · LHS_sigma = ... · E^4 · σ(E^4)
   have h_combined := congrArg₂ (· * ·) h_bare h_sigma_app
@@ -237,8 +235,7 @@ theorem lehmerVandiverPrime_quotient_complexConj_lhs_eq_of_exp
   rw [map_prod, map_prod]
   refine Finset.prod_congr rfl fun b _ ↦ ?_
   -- Rewrite (ζ^{p-1})^b to ζ^{(p-1)·b}
-  rw [← pow_mul]
-  rw [map_pow, map_pow]
+  rw [← pow_mul, map_pow, map_pow]
   congr 1
   -- Apply existing residue substitution at index (p-1)·b.
   exact lehmerVandiverPrime_quotient_zeta_pow_sub_one_eq
