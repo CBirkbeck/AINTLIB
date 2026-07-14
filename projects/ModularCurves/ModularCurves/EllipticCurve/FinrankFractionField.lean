@@ -34,4 +34,15 @@ lemma finrank_SpecMap_algebraMap_eq_finrank (R S : Type u) [CommRing R] [CommRin
   rw [Scheme.Hom.finrank_SpecMap_algebraMap R S x, Module.rankAtStalk_eq]
   exact x.asIdeal.finrank_fiber_eq_finrank
 
+/-- **(K4 algebraic core, `RingHom` form)** For a finite flat algebra `S` over a **domain** `R`, the
+`RingHom.finrank` of `algebraMap R S` at any prime equals the `R`-module rank of `S`. This is the
+bare `RingHom.finrank` counterpart of `finrank_SpecMap_algebraMap_eq_finrank`: it turns the `appTop`
+ring-map rank produced by `finrank_of_isAffine` (on the affine `Z`-chart of the model) into a
+concrete module rank `Module.finrank Γ(Z) Γ([N]⁻¹Z)`, which is then the fibre degree of `[N]`. -/
+lemma finrank_algebraMap_eq_module_finrank (R S : Type u) [CommRing R] [CommRing S] [Algebra R S]
+    [IsDomain R] [Module.Finite R S] [Module.Flat R S] (x : PrimeSpectrum R) :
+    (algebraMap R S).finrank x = Module.finrank R S := by
+  rw [RingHom.finrank_algebraMap, Module.rankAtStalk_eq]
+  exact x.asIdeal.finrank_fiber_eq_finrank
+
 end ModularCurves

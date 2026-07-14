@@ -143,19 +143,43 @@ theorem modelEllipticCurve_finrank_const {K : Type u} [Field K] (W : Weierstrass
     Scheme.Hom.isLocallyConstant_finrank _
   exact hlc.apply_eq_of_isPreconnected isPreconnected_univ (Set.mem_univ _) (Set.mem_univ _)
 
+/-- **(K4 crux — the HasseWeil coupling)** Over a field `K`, the scheme-theoretic fibre rank of the
+model `[N]` equals the degree of HasseWeil's multiplication-by-`N` isogeny `mulByInt W.toAffine N`
+(the function-field extension degree `[K(E) : [N]* K(E)]`).
+
+This is the one deep identification the field-level keystone rests on: the scheme morphism
+`mulByHom N` and HasseWeil's `mulByInt N` both realise mathlib's `[N]` on points (the *green*
+dictionary `projModelPointsEquiv_zsmul` on the model side; `mulByInt_apply : (mulByInt W n).toAddMonoidHom P
+= n • P` on the HasseWeil side), so the maps they induce on the function field
+(`projModelFunctionFieldEquiv : (projModel W).functionField ≃+* W.toAffine.FunctionField`) agree.
+Hence the scheme fibre rank — computed over the affine `Z`-chart as
+`Module.finrank Γ(Z) Γ([N]⁻¹Z)` (`finrank_of_isAffine` + `finrank_algebraMap_eq_module_finrank`),
+`= [Frac : Frac]` over the domain coordinate ring — equals `(mulByInt N).degree
+= Module.finrank K(E) K(E)` via `mulByInt`'s pullback. This is the BB-DIFF-scale coordinate ↔
+division-polynomial comparison (shared with `formallyUnramified_torsionπ`). -/
+theorem modelEllipticCurve_finrank_eq_mulByInt_degree {K : Type u} [Field K] [DecidableEq K]
+    (W : WeierstrassCurve K) [W.IsElliptic] (N : ℕ) [NeZero N]
+    [Flat ((modelEllipticCurve W).mulByHom N)] [IsFinite ((modelEllipticCurve W).mulByHom N)]
+    (x : (modelEllipticCurve W).E) :
+    ((modelEllipticCurve W).mulByHom N).finrank x = (HasseWeil.mulByInt W.toAffine (N : ℤ)).degree := by
+  sorry
+
 /-- **(K4 field-level target)** Over a field `K`, the scheme-theoretic fibre rank of
 multiplication-by-`N` on the projective model of an elliptic Weierstrass curve is `N²`.
 
 The finiteness/flatness of `[N]` (the accepted KM 2.3.1 `BB-QF`/`BB-FLAT` fibre inputs) are taken
-as hypotheses — this lemma supplies the *degree* content on top of them (the charter's scope (i)),
-anchored in HasseWeil `mulByInt_degree`. The arbitrary-`E/S` assembly (`Torsion.mulByHom_finrank`)
-discharges them from `mulByHom_flat`/`mulByHom_isFinite`. -/
-theorem modelEllipticCurve_mulByHom_finrank {K : Type u} [Field K] (W : WeierstrassCurve K)
-    [W.IsElliptic] (N : ℕ) [NeZero N]
+as hypotheses — this lemma supplies the *degree* content on top of them (the charter's scope (i)):
+the fibre rank is the HasseWeil isogeny degree (`modelEllipticCurve_finrank_eq_mulByInt_degree`),
+which `mulByInt_degree` evaluates to `N²`. The arbitrary-`E/S` assembly
+(`Torsion.mulByHom_finrank`) discharges the fibre hypotheses from `mulByHom_flat`/`mulByHom_isFinite`. -/
+theorem modelEllipticCurve_mulByHom_finrank {K : Type u} [Field K] [DecidableEq K]
+    (W : WeierstrassCurve K) [W.IsElliptic] (N : ℕ) [NeZero N]
     [Flat ((modelEllipticCurve W).mulByHom N)] [IsFinite ((modelEllipticCurve W).mulByHom N)]
     (x : (modelEllipticCurve W).E) :
     ((modelEllipticCurve W).mulByHom N).finrank x = N ^ 2 := by
-  sorry
+  rw [modelEllipticCurve_finrank_eq_mulByInt_degree W N x,
+    HasseWeil.mulByInt_degree W.toAffine (N : ℤ) (by exact_mod_cast NeZero.ne N),
+    show ((N : ℤ)) ^ 2 = ((N ^ 2 : ℕ) : ℤ) by push_cast; ring, Int.toNat_natCast]
 
 end EllipticCurve
 
