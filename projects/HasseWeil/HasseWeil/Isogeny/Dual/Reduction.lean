@@ -489,7 +489,7 @@ theorem Isogeny.exists_dual_of_separablePart_witness (φ : Isogeny W W) (r : ℕ
 /-- **The conjugation-form reduction**: a *generic* dual witness for the separable part
 yields one for `φ`, via `HasDualWitness.compose` (no integer bookkeeping, no covariance).
 Pairs with the separable-side `DualGaloisData` capstones
-(`EC/IsogenyAG/DualGaloisClosed.lean`), whose output is a `HasDualWitness`. -/
+(`Isogeny/Dual/GaloisClosed.lean`), whose output is a `HasDualWitness`. -/
 noncomputable def Isogeny.hasDualWitness_of_separablePart (φ : Isogeny W W) (r : ℕ)
     (hincl : φ.toCurveMap.pullback.range ≤
       (Isogeny.frobeniusPower W r).toCurveMap.pullback.range)
@@ -577,8 +577,8 @@ def FrobeniusFactorization (W : Affine K) [W.IsElliptic] : Prop :=
 factors through a power of Frobenius with separable quotient (`FrobeniusFactorization`,
 the II.2.12 gap) and every *separable* isogeny carries a faithful dual witness (the
 separable-side gap, cf. the `DualGaloisData` capstones in
-`EC/IsogenyAG/DualGaloisClosed.lean`), then **every** isogeny carries a dual witness —
-the `universal_dual_witness` shape of `EC/IsogenyAG/Dual.lean`, reduced over a finite
+`Isogeny/Dual/GaloisClosed.lean`), then **every** isogeny carries a dual witness —
+the `universal_dual_witness` shape of `Isogeny/Dual/Morphism.lean`, reduced over a finite
 field to its two honest inputs. -/
 theorem nonempty_hasDualWitness_of_frobeniusFactorization (W : Affine K) [W.IsElliptic]
     (hfact : FrobeniusFactorization W)
