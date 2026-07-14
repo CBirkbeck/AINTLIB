@@ -19339,3 +19339,30 @@ This arc completes KM 2.7's `[N]`-isogeny picture and unlocks NIsogeny's quotien
 **Session terminal (PHASE-8)**: the v10.212 dispatch — route-(a) refactor → pin discharge →
 SIGNAL ★★ → c4-as-box — is fully delivered. Remaining charter items are the research gates
 (v10.211 census unchanged) + the new arc above. Board clean, build 3830 green, all pushed.
+
+### v10.195-GH — ★ [RIG-1] DETECTION PROVEN + Abel-free re-statement + KM reply (STREAM-GH)
+Commits ..99232f1cb (pushed). Per the v10.212 steer, in order:
+**(1) [RIG-2] core RE-STATED degree-carrier-free** (Abel-FREE ruling): `aut_endo_eq_one_of_fixes_point`
+now takes the SINGLE pin `hbound` (nonzero difference `ε*𝟙⁻¹` cannot kill N injective sections —
+NO endDeg mention) ⟹ the core is now **FULLY AXIOM-CLEAN** (was: statement-sorryAx via endDeg).
+**(2) KM handshake REPLY sent** (STREAM-KM.md): Q1 BOTH forms (single-point mine + whole-E[N]
+theirs); Q2 the frozen contract = hbound verbatim + recommended fibre/finrank factorization
+(kernel-card ≤ finrank + finrank(ε−1) ≤ 4 + =4→[−1]); Q3 N≥4 single-point / N≥3 whole-E[N].
+**(3) [RIG-1a] TorsionRestrict.lean (NEW, all axiom-clean)**: pointed endos restrict to E[M]
+(`torsionRestrict` kernel-lift; `mulByHom_comp_comm` via endMonHom map_zpow + GrpObj.comp_zpow;
+`zero_comp_left` from one_eq_zero) + the fix-form bridge `torsionι_comp_left_eq_of_torsionRestrict_eq_id`.
+**(4) ★ [RIG-1] DETECTION PROVEN** (GammaHMaster.lean): `EllObj.eq_refl_of_forall_isoFibre_eq_refl`
+— a base-identical iso trivial on every geometric fibre IS refl (M ≥ 3 invertible, loc-noeth base):
+c := e.hom.top is pointed+iso as Over-endo; restricts to cM on the finite étale E[M]; every point q
+of E[M] lifts to Spec k̄(q)-bar which the fibre-triviality fixes (pullback-lift transport) ⟹ the
+UnramifiedEqualizer engine globalises cM = 𝟙 ⟹ `aut_endo_eq_one` forces c = 𝟙 ⟹ e = refl. Plus
+`exists_isoFibre_ne_refl` (the bridge-hdetect ∃-shape). AXIOM-HONESTY: sorryAx ONLY via the two
+ratified register-box funnels — KM-keystone (aut_endo_eq_one's endDeg/endTrace leaves) + the E[N]
+BB family (torsionπ_etale/mulByHom) — my proof layer clean (v10.212-§D consumption).
+LEAN-OPS: (19) mixed E.E-vs-asOver.left comp-@-args make rw/calc-Trans fail INVISIBLY — typed-have
++ .trans-chains + have-ascription defeq-casts; (20) η[..]-notation needs open MonObj + the Over
+cartesianMonoidalCategory local instances; (21) `Over.OverMorphism.ext` (namespace Over!);
+instance-spelling `Etale ((Over.mk f).hom)` needed for Over-engine consumption.
+REMAINING to full rigidity wrappers: instantiate hdetect ∀X (loc-noeth/T-W7.8 gate + M-invertibility
+from IsUnit (M : R) via nIsInvertible_over_spec-pattern) + [RIG-2]-wrapper (hbound from KM keystone
+when it lands / register-box meanwhile) + the glSmul H-orbit translation. (STREAM-GH)
