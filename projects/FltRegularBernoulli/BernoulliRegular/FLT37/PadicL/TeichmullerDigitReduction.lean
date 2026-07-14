@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import BernoulliRegular.FLT37.PadicL.ColemanDigitCoeff
 
 /-!
@@ -134,7 +139,7 @@ noncomputable def teichGeomCofactor (j : (ZMod p)ˣ) : S.O :=
 theorem omega_sub_natCast_mul_geomCofactor (j : (ZMod p)ˣ) :
     S.teichGeomCofactor j * (((S.ω j : S.O)) - (((j : ZMod p).val : S.O)))
       = 1 - (((j : ZMod p).val : S.O)) ^ (p - 1) := by
-  unfold teichGeomCofactor
+  simp only [teichGeomCofactor]
   rw [geom_sum₂_mul]
   -- `(ω j : O)^{p-1} = ((ω j)^{p-1} : Oˣ) = 1`.
   rw [show ((S.ω j : S.O)) ^ (p - 1) = (((S.ω j) ^ (p - 1) : S.Oˣ) : S.O) from
@@ -145,7 +150,7 @@ theorem omega_sub_natCast_mul_geomCofactor (j : (ZMod p)ˣ) :
 `j^{p-2}`). -/
 theorem residue_teichGeomCofactor (j : (ZMod p)ˣ) :
     S.residue (S.teichGeomCofactor j) = ((p : ℕ) - 1 : ℕ) • (j : ZMod p) ^ (p - 2) := by
-  unfold teichGeomCofactor
+  simp only [teichGeomCofactor]
   rw [map_sum, Finset.sum_congr rfl (fun k hk => ?_), Finset.sum_const, Finset.card_range]
   -- Each summand residue is `j^k · j^{p-2-k} = j^{p-2}`.
   rw [Finset.mem_range] at hk
@@ -245,7 +250,7 @@ theorem logCoeffSum_sub_integerLogCoeffSum_addVal_ge (c : (ZMod p)ˣ → S.O) (i
   -- Rewrite the difference as the sum of the per-term differences.
   have hsub : S.logCoeffSum c i - S.integerLogCoeffSum c i
       = ∑ j : (ZMod p)ˣ, c j * ((((S.ω j) ^ i : S.Oˣ) : S.O) - (((j : ZMod p).val : S.O)) ^ i) := by
-    unfold logCoeffSum integerLogCoeffSum
+    simp only [logCoeffSum, integerLogCoeffSum]
     rw [← Finset.sum_sub_distrib]
     refine Finset.sum_congr rfl fun j _ => ?_
     rw [mul_sub]
@@ -290,7 +295,7 @@ the leading digit is unchanged. -/
 theorem residue_integerLogCoeffSum (c : (ZMod p)ˣ → S.O) (i : ℕ) :
     S.residue (S.integerLogCoeffSum c i)
       = ∑ j : (ZMod p)ˣ, S.residue (c j) * (j : ZMod p) ^ i := by
-  unfold integerLogCoeffSum
+  simp only [integerLogCoeffSum]
   rw [map_sum]
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_mul, map_pow, S.residue_natCast_teichRep]
@@ -389,7 +394,7 @@ so the integer and Teichmüller powers coincide). -/
 theorem integerLogCoeffSum_piOrderWitnessCoeff (S : StickelbergerF1Setup p) :
     S.integerLogCoeffSum (S.piOrderWitnessCoeff) 32 = S.logCoeffSum (S.piOrderWitnessCoeff) 32 := by
   classical
-  unfold integerLogCoeffSum logCoeffSum piOrderWitnessCoeff
+  simp only [integerLogCoeffSum, logCoeffSum, piOrderWitnessCoeff]
   refine Finset.sum_congr rfl fun j _ => ?_
   by_cases hj : j = 1
   · -- At `j = 1`: `(1.val : O)^32 = 1^32 = 1 = (ω 1)^32`-value? Both reduce via `c_1` factor.
