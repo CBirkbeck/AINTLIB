@@ -41,7 +41,7 @@ theorem adjusted_product_pow_prime_eq_trace_recursion_traceCarry_of_parameter
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let Rps : PowerSeries A :=
       (rescale_exp_isRIntegral ℓ).mapTo
@@ -65,7 +65,7 @@ theorem adjusted_product_pow_prime_eq_trace_recursion_traceCarry_of_parameter
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Rps : PowerSeries A :=
     (rescale_exp_isRIntegral ℓ).mapTo
@@ -119,7 +119,7 @@ theorem adjusted_product_teichmuller_series_pow_prime_eq_trace_recursion_traceCa
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let Rps : PowerSeries A :=
       (rescale_exp_isRIntegral ℓ).mapTo
@@ -147,7 +147,7 @@ theorem adjusted_product_teichmuller_series_pow_prime_eq_trace_recursion_traceCa
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Rps : PowerSeries A :=
     (rescale_exp_isRIntegral ℓ).mapTo
@@ -196,7 +196,7 @@ theorem adjusted_product_zmod_series_pow_prime_eq_trace_recursion_of_parameter
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let Rps : PowerSeries A :=
       (rescale_exp_isRIntegral ℓ).mapTo
@@ -224,7 +224,7 @@ theorem adjusted_product_zmod_series_pow_prime_eq_trace_recursion_of_parameter
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Rps : PowerSeries A :=
     (rescale_exp_isRIntegral ℓ).mapTo
@@ -274,7 +274,7 @@ theorem adjusted_product_pow_prime_mul_zmod_product_eq_trace_recursion_of_parame
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let Rps : PowerSeries A :=
       (rescale_exp_isRIntegral ℓ).mapTo
@@ -302,7 +302,7 @@ theorem adjusted_product_pow_prime_mul_zmod_product_eq_trace_recursion_of_parame
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Rps : PowerSeries A :=
     (rescale_exp_isRIntegral ℓ).mapTo
@@ -387,7 +387,7 @@ theorem exists_traceCarry_correction_eq_teichmuller_series_product_of_parameter
   let t : ℕ := (Algebra.trace (ZMod ℓ) k ((F.traceScale : k) * (y : k))).val
   obtain ⟨c, hc⟩ :=
     F.exists_traceNatCast_sub_teichFrobeniusSum_eq_natCast_ell_mul_wittTheta_series N y
-  let u : ℕ → A := fun j =>
+  let u : ℕ → A := fun j ↦
     (ℓ : A) ^ (j + 1) *
       θ (WittVector.teichmuller ℓ
         (((_root_.frobeniusEquiv k ℓ).symm ^ j) (c.coeff j)))
@@ -508,7 +508,7 @@ theorem exists_adjusted_product_teichmuller_series_pow_prime_eq_trace_recursion_
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let Rps : PowerSeries A :=
       (rescale_exp_isRIntegral ℓ).mapTo
@@ -540,7 +540,7 @@ theorem exists_adjusted_product_teichmuller_series_pow_prime_eq_trace_recursion_
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Rps : PowerSeries A :=
     (rescale_exp_isRIntegral ℓ).mapTo
@@ -550,7 +550,7 @@ theorem exists_adjusted_product_teichmuller_series_pow_prime_eq_trace_recursion_
   let t : ℕ := (Algebra.trace (ZMod ℓ) k ((F.traceScale : k) * (y : k))).val
   obtain ⟨c, hc⟩ :=
     F.exists_traceNatCast_sub_teichFrobeniusSum_eq_natCast_ell_mul_wittTheta_series N y
-  let coord : ℕ → A := fun j =>
+  let coord : ℕ → A := fun j ↦
     θ (WittVector.teichmuller ℓ
       (((_root_.frobeniusEquiv k ℓ).symm ^ j) (c.coeff j)))
   let carryBase : A := ∑ j ∈ Finset.Iic N, (ℓ : A) ^ j * coord j
@@ -575,7 +575,7 @@ theorem exists_adjusted_product_teichmuller_series_pow_prime_eq_trace_recursion_
         (δ := ε)
         hε
         (s := Finset.Iic N)
-        (u := fun j => (ℓ : A) ^ j * coord j)
+        (u := fun j ↦ (ℓ : A) ^ j * coord j)
     simpa [A, θ, Rps, coord, carryBase, correction] using hprod
   have hcorrection_pow :
       correction ^ ℓ =
@@ -646,7 +646,7 @@ theorem artinHasseExp_product_carry_mul_base_next_eq_base_pow_mul_product_next_o
     let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let Rps : PowerSeries A :=
       (rescale_exp_isRIntegral ℓ).mapTo
@@ -670,7 +670,7 @@ theorem artinHasseExp_product_carry_mul_base_next_eq_base_pow_mul_product_next_o
   let A : Type _ := 𝓞 R' ⧸ F.Q ^ (N + 1)
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Rps : PowerSeries A :=
     (rescale_exp_isRIntegral ℓ).mapTo
@@ -725,7 +725,7 @@ theorem exists_adjusted_product_pow_prime_mul_base_next_eq_base_pow_mul_product_
       F.toConcreteStickelbergerSetup.wittThetaModQPow N
     let Eps : PowerSeries A :=
       (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-        fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+        fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
           (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
     let Rps : PowerSeries A :=
       (rescale_exp_isRIntegral ℓ).mapTo
@@ -750,7 +750,7 @@ theorem exists_adjusted_product_pow_prime_mul_base_next_eq_base_pow_mul_product_
     F.toConcreteStickelbergerSetup.wittThetaModQPow N
   let Eps : PowerSeries A :=
     (show DieudonneDwork.IsRIntegralPS ℓ (artinHasseExpSeries ℓ) from
-      fun n => artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
+      fun n ↦ artinHasseExpSeries_coeff_isRIntegral ℓ n).mapTo
         (F.toConcreteStickelbergerSetup.rIntegralRatToQuotient N)
   let Rps : PowerSeries A :=
     (rescale_exp_isRIntegral ℓ).mapTo
