@@ -4,8 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import HasseWeil.Foundation.Basic
-import HasseWeil.Isogeny.Frobenius.PointCount
 import HasseWeil.Isogeny.BaseChange.Basic
+import HasseWeil.Isogeny.Frobenius.PointCount
 import HasseWeil.Isogeny.Kernel
 
 /-!
@@ -87,7 +87,7 @@ theorem frobeniusTwist_eq_self_of_prime_field
     [DecidableEq K] [Fact (Fintype.card K = p)]
     (W : WeierstrassCurve K) :
     W.frobeniusTwist p = W := by
-  show W.map (frobenius K p) = W
+  change W.map (frobenius K p) = W
   rw [Isogeny.frobenius_eq_id_of_charP_prime p (k := K), W.map_id]
 
 end HasseWeil
