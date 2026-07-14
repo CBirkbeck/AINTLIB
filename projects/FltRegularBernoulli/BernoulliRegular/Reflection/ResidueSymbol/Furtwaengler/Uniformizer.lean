@@ -325,7 +325,7 @@ theorem upstairsComplexConj_lifts_downstairs
 /-- For `Q` with `(ℓ : R) ∈ Q` and `Q` non-zero, the prime under `Q` in
 `ℤ` has absolute norm `ℓ`. -/
 theorem absNorm_under_eq_of_ell_mem
-    {ℓ : ℕ} [Fact ℓ.Prime] {R : Type*} [CommRing R] [IsDomain R]
+    {ℓ : ℕ} [Fact ℓ.Prime] {R : Type*} [CommRing R]
     [IsDedekindDomain R] [Module.Free ℤ R] [Algebra.IsIntegral ℤ R]
     {Q : Ideal R} [Q.IsPrime] (hQ_ne : Q ≠ ⊥) (hℓ : (ℓ : R) ∈ Q) :
     Ideal.absNorm (Q.under ℤ) = ℓ := by
@@ -405,7 +405,7 @@ theorem associated_mem_ideal_iff
 /-- For `Q` with `(ℓ : R) ∈ Q` and `Q` non-zero prime, `Q` lies over the
 prime ideal `Ideal.span {↑ℓ}` of `ℤ`. -/
 theorem liesOver_span_ell_of_ell_mem
-    {ℓ : ℕ} [Fact ℓ.Prime] {R : Type*} [CommRing R] [IsDomain R]
+    {ℓ : ℕ} [Fact ℓ.Prime] {R : Type*} [CommRing R]
     [IsDedekindDomain R] [Module.Free ℤ R] [Algebra.IsIntegral ℤ R]
     (Q : Ideal R) [Q.IsPrime] (hQ_ne : Q ≠ ⊥) (hℓ : (ℓ : R) ∈ Q) :
     Q.LiesOver (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) := by
