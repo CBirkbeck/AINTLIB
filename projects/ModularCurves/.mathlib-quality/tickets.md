@@ -19814,3 +19814,41 @@ funext fails on `↾f = 𝟙` (asHom blocks @funext unification). `exists_isAffi
 returns Set-⊆ — rebind through an `affineOpens`-typed `have hle : (⟨V₀,haff⟩ : affineOpens).1 ≤ …`
 before feeding `≤`-consumers. Private cross-file blockers unprivated this sweep:
 `resLE_isoSpec_naturality`, `transport_isPullback_model`, `awayι_awayCongr`.
+
+## v10.225-OMEGA (2026-07-14) — ★ T-E14-AX1 UNIVERSAL LEGENDRE OBJECT: stages 1-4 + the negation-fix heart of 2-torsionness
+
+**UniversalLegendre.lean lands (commits f5cff3dc0…9d3d2d410), all sorry-free & axiom-clean.**
+The KM-axiom-1 substrate over `M'₂ = Spec R[λ][(λ(λ−1))⁻¹]`:
+- **Stage 1-2:** `LegendreModuliRing` + `universalLegendre` (= `legendreCurve universalLambda`,
+  `IsCharNeTwoNF`) + `universalLegendre_isElliptic` (needs `IsUnit (2:R)`; Δ = 2⁴(λ(λ−1))²,
+  self-localization unit — MOTIVE-SAFE via forward-term `e1` then goal-side rw; rewriting a
+  localization's defining element inside `algebraMap`-statements motive-fails BOTH directions,
+  the instances carry the element) + `universalLegendreObj`/`P`/`Q` (marked sections :=
+  `projModelAffineSection` at (0,0)/(1,0)) + `universalLegendreOmega`.
+- **Stage 3 ★:** `tautPresentation_marksAt` — the CURVE-GENERIC universal marking: the taut chart
+  carries `projModelAffineSection W p q h` to the mapped affine point. compat_zero-mirror with
+  `projModelAffineSection_baseChange`; closes with an instance-defeq `rfl`.
+- **Stage 4 ★:** `tautPresentation_isAdapted_legendre` + **`universalLegendre_isLegendreDatum`**:
+  GIVEN the naive-full-level clause for the marked pair (hypothesis `hL`), the tautological
+  datum IS a Legendre datum — witness = taut presentation at ⊤-affine, λ-value = image of
+  `universalLambda` (`legendreCurve_map`), markings via `map_zero`/`map_one` transport.
+- **[T-E14-LVL] heart:** `negModelHom_affineSection` — the model negation fixes `[p:q:1]` when
+  `−q−a₁p−a₃ = q` (fromOfGlobalSections_map + negGradedQuot-mk via `aeval_bind₁`; NO allNeg
+  rescaling — `Z ↦ Z`, unlike the zero-section case) + `negModelHom_universalLegendreP/Q`.
+
+**Remaining AX1/AX2 obligations (boarded, in priority order):**
+1. **[T-E14-LVL-a]** `[2]P = 0` from the negation-fix — needs the model-curve **grp-inv =
+   negModelHom bridge** (T-W7 internals: `EllipticCurveGeom.invHomG_left : invHomG.left = negHom`
+   is `private` in GroupLawDescent; the model curve's negHom vs negModelHom via the one-chart
+   atlas). Then `2•P = 0 ↔ P = −P` is group algebra.
+2. **[T-E14-LVL-b]** geometric generation of `E[2]` by the marked pair — **defers to KM's
+   E[2]-classification keystone** per the standing coordinator de-confliction (leaf-(a)).
+3. **[T-E14-CLS]** the classification half of AX1 (Legendre datum ⟹ classifying map to `M'₂`,
+   roundtrips) — the T-E12-D3/D4 replay at charNeTwo: marked adapted models are UNIQUE
+   (`transVC_of_isAdapted_charNeTwo` + `legendreCurve_vc_marked` pin transVC = 1), so their
+   λ's glue; then classifyingRingHom/Map/EllHom + the rt1/rt2 arc verbatim.
+4. **[T-E14-ACT']** the coupled G-action on δ (GL₂ re-marks + re-scales ω; u² = x(Q)−x(P)).
+
+LEAN-OP: `MvPolynomial.eval_bind₁` does NOT exist — route `← aeval_eq_eval` then `aeval_bind₁`;
+vector-literal applications `![p,q,1] i` at literal `i` are rfl-reducible — close eval-chains
+with a value-level `show` + `linear_combination`, not cons_val-simp (index 2 has no simp lemma).
