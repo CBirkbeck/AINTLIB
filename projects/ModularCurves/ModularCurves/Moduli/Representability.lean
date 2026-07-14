@@ -340,6 +340,107 @@ lemma EllHom.transportSection_add (s s' : X.curve.Section) :
           ((lift_map _ _ _ _).trans
             (congrArg₂ lift hcs hcs')))))
 
+/-- The comparison isomorphism is a monoid-object homomorphism: the pointedness plus
+the records-level canonicity primitive (K4 supply). -/
+instance EllHom.isMonHom_curveIsoPullbackOverIso_hom :
+    IsMonHom (EllHom.curveIsoPullbackOverIso R f).hom := by
+  constructor
+  · apply Over.OverMorphism.ext
+    show (η[X.curve.asOver] : _ ⟶ X.curve.asOver).left ≫
+      (EllHom.curveIsoPullback R f).hom = _
+    exact (congrArg (· ≫ (EllHom.curveIsoPullback R f).hom)
+        X.curve.one_eq_zero).trans <|
+      (Category.assoc _ _ _).trans <|
+      (congrArg ((𝟙_ (Over X.base)).hom ≫ ·)
+        (EllHom.zero_curveIsoPullback R f)).trans <|
+      (Y.curve.baseChange f.baseHom).one_eq_zero.symm
+  · exact isMonHom_of_pointedIso_records X.curve
+      (Y.curve.baseChange f.baseHom) (EllHom.curveIsoPullbackOverIso R f) (by
+        apply Over.OverMorphism.ext
+        show (η[X.curve.asOver] : _ ⟶ X.curve.asOver).left ≫
+          (EllHom.curveIsoPullback R f).hom = _
+        exact (congrArg (· ≫ (EllHom.curveIsoPullback R f).hom)
+            X.curve.one_eq_zero).trans <|
+          (Category.assoc _ _ _).trans <|
+          (congrArg ((𝟙_ (Over X.base)).hom ≫ ·)
+            (EllHom.zero_curveIsoPullback R f)).trans <|
+          (Y.curve.baseChange f.baseHom).one_eq_zero.symm)
+
+/-- The point-level transport along the comparison isomorphism, as an additive
+equivalence (the arbitrary-`t` form of `transportSection`; additivity via
+`MonObj.mul_comp` at the `IsMonHom` comparison). -/
+noncomputable def EllHom.pointTransportEquiv {T : Scheme.{u}} (t : T ⟶ X.base) :
+    X.curve.Point t ≃+ (Y.curve.baseChange f.baseHom).Point t where
+  toFun x := ((Y.curve.baseChange f.baseHom).pointEquivOverHom t).symm
+    (X.curve.pointEquivOverHom t x ≫ (EllHom.curveIsoPullbackOverIso R f).hom)
+  invFun y := (X.curve.pointEquivOverHom t).symm
+    ((Y.curve.baseChange f.baseHom).pointEquivOverHom t y ≫
+      (EllHom.curveIsoPullbackOverIso R f).inv)
+  left_inv x := by
+    show (X.curve.pointEquivOverHom t).symm
+      (((Y.curve.baseChange f.baseHom).pointEquivOverHom t)
+        (((Y.curve.baseChange f.baseHom).pointEquivOverHom t).symm
+          (X.curve.pointEquivOverHom t x ≫
+            (EllHom.curveIsoPullbackOverIso R f).hom)) ≫
+        (EllHom.curveIsoPullbackOverIso R f).inv) = x
+    rw [Equiv.apply_symm_apply, Category.assoc, Iso.hom_inv_id, Category.comp_id,
+      Equiv.symm_apply_apply]
+  right_inv y := by
+    show ((Y.curve.baseChange f.baseHom).pointEquivOverHom t).symm
+      ((X.curve.pointEquivOverHom t)
+        ((X.curve.pointEquivOverHom t).symm
+          ((Y.curve.baseChange f.baseHom).pointEquivOverHom t y ≫
+            (EllHom.curveIsoPullbackOverIso R f).inv)) ≫
+        (EllHom.curveIsoPullbackOverIso R f).hom) = y
+    rw [Equiv.apply_symm_apply, Category.assoc, Iso.inv_hom_id, Category.comp_id,
+      Equiv.symm_apply_apply]
+  map_add' x y := by
+    apply ((Y.curve.baseChange f.baseHom).pointEquivOverHom t).injective
+    rw [Equiv.apply_symm_apply]
+    letI : CommGroup (Over.mk t ⟶ (Y.curve.baseChange f.baseHom).asOver) :=
+      CategoryTheory.Hom.commGroup
+    letI : CommGroup (Over.mk t ⟶ X.curve.asOver) := CategoryTheory.Hom.commGroup
+    have hadd : (Y.curve.baseChange f.baseHom).pointEquivOverHom t
+        (((Y.curve.baseChange f.baseHom).pointEquivOverHom t).symm
+          (X.curve.pointEquivOverHom t x ≫
+            (EllHom.curveIsoPullbackOverIso R f).hom) +
+         ((Y.curve.baseChange f.baseHom).pointEquivOverHom t).symm
+          (X.curve.pointEquivOverHom t y ≫
+            (EllHom.curveIsoPullbackOverIso R f).hom)) =
+      (X.curve.pointEquivOverHom t x ≫ (EllHom.curveIsoPullbackOverIso R f).hom) *
+        (X.curve.pointEquivOverHom t y ≫
+          (EllHom.curveIsoPullbackOverIso R f).hom) := by
+      rw [(Y.curve.baseChange f.baseHom).pointEquivOverHom_add,
+        Equiv.apply_symm_apply, Equiv.apply_symm_apply]
+    rw [hadd, X.curve.pointEquivOverHom_add,
+      MonObj.mul_comp (X.curve.pointEquivOverHom t x)
+        (X.curve.pointEquivOverHom t y)
+        (EllHom.curveIsoPullbackOverIso R f).hom]
+
+/-- The transport-then-base-change dictionary sends the pull of a pulled section to the
+plain pull along the composite. -/
+lemma EllHom.pointTransportEquiv_pull_pullSection {T : Scheme.{u}} (t : T ⟶ X.base)
+    (P : Y.curve.Section) :
+    EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom t
+        (EllHom.pointTransportEquiv R f t
+          (EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f P)))
+      = EllipticCurve.Point.pull Y.curve (t ≫ f.baseHom) P := by
+  refine Subtype.ext ?_
+  show ((EllHom.pointTransportEquiv R f t
+      (EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f P))).1 ≫
+    pullback.fst Y.curve.π f.baseHom) = (t ≫ f.baseHom) ≫ P.1
+  have hval : (EllHom.pointTransportEquiv R f t
+      (EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f P))).1 =
+    (t ≫ (EllHom.pullSection R f P).1) ≫ (EllHom.curveIsoPullback R f).hom := rfl
+  rw [hval]
+  show t ≫ (EllHom.pullSection R f P).1 ≫ ((EllHom.curveIsoPullback R f).hom ≫
+    pullback.fst Y.curve.π f.baseHom) = (t ≫ f.baseHom) ≫ P.1
+  rw [show (EllHom.curveIsoPullback R f).hom ≫ pullback.fst Y.curve.π f.baseHom =
+    f.top from f.isPullback.isoPullback_hom_fst]
+  rw [show (EllHom.pullSection R f P).1 ≫ f.top = f.baseHom ≫ P.1 from
+    f.isPullback.lift_fst _ _ _]
+  rw [← Category.assoc]
+
 end PullSectionAdditivity
 
 /-- **(T-E4a, additivity of section-pullback — surfaced by the adversarial pass
@@ -367,6 +468,81 @@ theorem EllHom.pullSection_add {X Y : EllObj R} (f : X ⟶ Y)
   rw [map_add, EllHom.dict_transportSection_pullSection,
     EllHom.dict_transportSection_pullSection,
     EllHom.dict_transportSection_pullSection, EllipticCurve.Point.pull_add]
+
+section LevelPreservation
+
+open CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory MonObj
+
+variable {X Y : EllObj R} (f : X ⟶ Y)
+
+/-- `pullSection` sends zero to zero (both are the zero section, by `hom_ext` on the
+cartesian square). -/
+lemma EllHom.pullSection_zero :
+    EllHom.pullSection R f (0 : Y.curve.Section) = (0 : X.curve.Section) := by
+  have h := EllHom.pullSection_add R f (0 : Y.curve.Section) 0
+  rw [add_zero] at h
+  exact (add_left_cancel (a := EllHom.pullSection R f 0)
+    (by rw [← h, add_zero])).symm
+
+/-- **(T-E4b ★, the level-preservation input — de-parks the naive functor sorries)**
+`pullSection` preserves the naive full-level condition: killing transports through the
+additivity (T-E4a), and fibrewise generation transports through the point-level
+comparison `pointTransportEquiv` followed by the base-change dictionary — the
+`EllHom`-form of `isNaiveFullLevel_pullAlong`. -/
+theorem EllHom.isNaiveFullLevel_pullSection {N : ℕ} [NeZero N]
+    {P Q : Y.curve.Section} (h : Y.curve.IsNaiveFullLevel N P Q) :
+    X.curve.IsNaiveFullLevel N
+      (EllHom.pullSection R f P) (EllHom.pullSection R f Q) := by
+  obtain ⟨⟨hP, hQ⟩, hgen⟩ := h
+  refine ⟨⟨?_, ?_⟩, ?_⟩
+  · calc (N : ℤ) • EllHom.pullSection R f P
+        = AddMonoidHom.mk' (EllHom.pullSection R f)
+            (EllHom.pullSection_add R f) ((N : ℤ) • P) :=
+          (map_zsmul (AddMonoidHom.mk' (EllHom.pullSection R f)
+            (EllHom.pullSection_add R f)) (N : ℤ) P).symm
+      _ = AddMonoidHom.mk' (EllHom.pullSection R f)
+            (EllHom.pullSection_add R f) 0 := by rw [hP]
+      _ = 0 := map_zero _
+  · calc (N : ℤ) • EllHom.pullSection R f Q
+        = AddMonoidHom.mk' (EllHom.pullSection R f)
+            (EllHom.pullSection_add R f) ((N : ℤ) • Q) :=
+          (map_zsmul (AddMonoidHom.mk' (EllHom.pullSection R f)
+            (EllHom.pullSection_add R f)) (N : ℤ) Q).symm
+      _ = AddMonoidHom.mk' (EllHom.pullSection R f)
+            (EllHom.pullSection_add R f) 0 := by rw [hQ]
+      _ = 0 := map_zero _
+  · intro k _ _ t x hx
+    set ψ := (EllHom.pointTransportEquiv R f t).trans
+      (EllipticCurve.Point.baseChangeEquiv Y.curve f.baseHom t) with hψ
+    have hdx : (N : ℤ) • ψ x = 0 := by
+      rw [← map_zsmul ψ, hx, map_zero]
+    have h1 := hgen k (t ≫ f.baseHom) (ψ x) hdx
+    have hcompatP : ψ (EllipticCurve.Point.pull X.curve t
+        (EllHom.pullSection R f P)) =
+      EllipticCurve.Point.pull Y.curve (t ≫ f.baseHom) P :=
+      EllHom.pointTransportEquiv_pull_pullSection R f t P
+    have hcompatQ : ψ (EllipticCurve.Point.pull X.curve t
+        (EllHom.pullSection R f Q)) =
+      EllipticCurve.Point.pull Y.curve (t ≫ f.baseHom) Q :=
+      EllHom.pointTransportEquiv_pull_pullSection R f t Q
+    rw [← hcompatP, ← hcompatQ] at h1
+    have hKle : AddSubgroup.closure
+        ({ψ (EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f P)),
+          ψ (EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f Q))} :
+          Set (Y.curve.Point (t ≫ f.baseHom)))
+        ≤ (AddSubgroup.closure
+            {EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f P),
+             EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f Q)}).map
+          ψ.toAddMonoidHom := by
+      rw [AddSubgroup.closure_le]
+      rintro z (rfl | rfl)
+      · exact ⟨_, AddSubgroup.subset_closure (Set.mem_insert _ _), rfl⟩
+      · exact ⟨_, AddSubgroup.subset_closure (Set.mem_insert_of_mem _ rfl), rfl⟩
+    obtain ⟨y, hy, hyx⟩ := hKle h1
+    exact (ψ.injective hyx) ▸ hy
+
+
+end LevelPreservation
 
 /-- The naive `Γ₁(N)` moduli problem over `R`: `E/S ↦ {P ∈ E(S) : P` has naive exact
 order `N}` (fibrewise; the right notion for `N` invertible, KM 1.4.4). Functor laws are
