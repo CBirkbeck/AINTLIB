@@ -1,35 +1,20 @@
 import Mathlib.Algebra.Category.ModuleCat.Products
 import Mathlib.RingTheory.Flat.Basic
+import Common
 import ModularCurves.ForMathlib.SchemeModuleBaseCechBasic
 
 /-!
 # Flat terms in the base-linear Cech complex
 
-Finite products of flat modules are flat. Consequently, a degree of the
-base-linear Cech complex is flat whenever all of its intersection-section
-factors are flat.
+A degree of the base-linear Cech complex is flat whenever all of its
+intersection-section factors are flat, via `Module.Flat.pi` (finite products of flat
+modules are flat) from the shared `Common` library.
 -/
 
 open AlgebraicTopology CategoryTheory CategoryTheory.Limits Opposite
   TopologicalSpace
 
-universe u v w
-
-namespace Module.Flat
-
-/-- A finite dependent product of flat modules is flat. -/
-theorem pi_of_finite
-    {R : Type u} [CommSemiring R] {ι : Type v} [Finite ι]
-    (M : ι → Type w) [∀ i, AddCommMonoid (M i)]
-    [∀ i, Module R (M i)] (hM : ∀ i, Module.Flat R (M i)) :
-    Module.Flat R (∀ i, M i) := by
-  classical
-  letI := Fintype.ofFinite ι
-  letI : ∀ i, Module.Flat R (M i) := hM
-  exact Module.Flat.of_linearEquiv
-    (DFinsupp.linearEquivFunOnFintype (R := R) (M := M)).symm
-
-end Module.Flat
+universe u
 
 namespace AlgebraicGeometry.Scheme.Modules
 
@@ -64,9 +49,8 @@ theorem baseCechComplex_X_flat_of_factors
     (hflat : ∀ i : Fin (n + 1) → ι,
       Module.Flat Γ(S, (⊤ : S.Opens)) (baseCechFactor π M U n i)) :
     Module.Flat Γ(S, (⊤ : S.Opens)) ((baseCechComplex π M U).X n) := by
-  letI : Module.Flat Γ(S, (⊤ : S.Opens))
-      (∀ i : Fin (n + 1) → ι, baseCechFactor π M U n i) :=
-    Module.Flat.pi_of_finite _ hflat
+  haveI : ∀ i : Fin (n + 1) → ι,
+      Module.Flat Γ(S, (⊤ : S.Opens)) (baseCechFactor π M U n i) := hflat
   exact Module.Flat.of_linearEquiv
     (baseCechXIsoPi π M U n).toLinearEquiv
 
