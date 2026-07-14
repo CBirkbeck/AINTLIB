@@ -20002,3 +20002,26 @@ SpecToEquivOfField round-trip) then Algebra.IsAlgebraic-transfer + algebraMap_su
 + CommRingCat.isIso_iff_bijective. Full note in beastmode_active.G0. REMAINING BB-QF queue:
 hiso → g5-main (w2/w4/w5/w6 assembly at W' := W.baseChange F via projModelPointsAddEquiv) →
 BETA transport → global mulByHom_finite_fibres → reduction closes → board ★★ + Torsion-relocation.
+
+## v10.234-OMEGA (2026-07-14) — ★★★ [T-E14-CLS-7] RT1 COMPLETE: the classifying pullback recovers the Legendre datum
+
+Commits 2f146d44e…80ff0f6f9, all axiom-clean, near-all first-build green:
+- `sectionsMapLE_legendreClassifyingMap` (Spec-side determination, D4-bridge mirror).
+- **`transVC_transport_legendre`** (rt1-core: transported taut vs witness transVC = 1 — the
+  GEOMETRIC sign-pinning; produced by MECHANICAL template-transposition of transVC_transport_taut
+  via a python identifier-map over the extracted source — the 179-line hom_ext chase transposed in
+  minutes; this is the transposition-technology validating the whole D-replay approach).
+- `omegaBasisMap_legendreClassifyingEllHom` (ω-half: ratio-unit = witness-vs-taut transUnit = 1 by
+  the core; glued over the witness cover) + the level-half (v10.232's pullSection P/Q).
+
+**AX1 remaining:** rt2 (EllHom-determination: any φ with pulled datum = given datum equals the
+classifying EllHom — T-E12-rt2 replay: λ-generator determination via the pulled-datum witnesses +
+IsLocalization/MvPolynomial ringHom_ext; top via witnessCover.hom_ext + transport_e_baseChange +
+the rt2a e-determination trick transVC_transport_adapted-analog) + the `RepresentableBy` package
+(needs the FULL datum-subtype: obj = legendreDeltaProblem.obj — homEquiv toFun := pulled datum
+[uses rt1's three components + IsLegendreDatum.map], invFun := classifyingEllHom, left_inv := rt2,
+right_inv := rt1, naturality := ambient functoriality) → discharge
+`legendreDelta_representable_by_affine` modulo [T-E14-LVL-b] (geometric generation of the
+universal marked pair = the sole remaining KM-keystone input). Then [T-E14-ACT'] + [T-E14-AX2].
+LEAN-OP: the template-transposition pipeline (sed-extract → python identifier-map → insert →
+repair 1-2 residuals) is now the FASTEST way to replay D3/D4-scale arcs — use it for rt2.
