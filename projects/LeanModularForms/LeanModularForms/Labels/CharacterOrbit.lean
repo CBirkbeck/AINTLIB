@@ -89,6 +89,11 @@ namespace DirichletCharacter
 
 variable {N : ℕ} [NeZero N]
 
+/-- `DirichletCharacter ℂ N` is finite (the character group of a finite group into `ℂ`), hence we
+may sum and quantify over all characters of modulus `N`, and enumerate orbits.  Noncomputable;
+used by the orbit-separation proof and by the ranking `Finset.univ`. -/
+noncomputable instance : Fintype (DirichletCharacter ℂ N) := Fintype.ofFinite _
+
 /-! ### Order of a Dirichlet character -/
 
 /-- The **order** of a Dirichlet character: the least `n > 0` with `χ ^ n = 1` (the trivial
@@ -251,13 +256,12 @@ The proof is Artin–Dedekind linear independence of distinct multiplicative cha
 character induces a monoid hom `(ZMod N)ˣ →* ℂ` (`MulChar.equivToUnitHom` followed by
 `Units.coeHom`); distinct characters give distinct such homs, which are `ℂ`-linearly independent
 (`linearIndependent_monoidHom`).  Since `orbitTraceAt χ j = Σ_{ρ ∈ galoisOrbit χ} ρ(j)` is the
-value at `j` of the `{0,1}`-indicator-weighted sum of these homs over the orbit, equal trace tuples
-force equal indicator coefficients, hence `galoisOrbit χ = galoisOrbit ψ`, hence Galois conjugacy. -/
+value at `j` of the `{0,1}`-indicator-weighted sum of these homs over the orbit, equal trace
+tuples force equal indicator coefficients, hence `galoisOrbit χ = galoisOrbit ψ`, hence Galois
+conjugacy. -/
 lemma orbitRankKey_injOn_orbits {χ ψ : DirichletCharacter ℂ N}
     (h : orbitRankKey χ = orbitRankKey ψ) : IsGaloisConj χ ψ := by
   classical
-  -- `DirichletCharacter ℂ N` is finite, so we may sum/quantify over all characters.
-  haveI : Fintype (DirichletCharacter ℂ N) := Fintype.ofFinite _
   -- The map sending a character to the monoid hom `(ZMod N)ˣ →* ℂ` it induces on units.
   let G : DirichletCharacter ℂ N → ((ZMod N)ˣ →* ℂ) :=
     fun χ => (Units.coeHom ℂ).comp (MulChar.equivToUnitHom χ)
@@ -310,10 +314,6 @@ one. -/
 
 section Ranking
 
-/-- `DirichletCharacter ℂ N` is finite (the character group of a finite group into `ℂ`), hence we
-may enumerate orbits.  Noncomputable, used only for the ranking `Finset.univ`. -/
-noncomputable instance : Fintype (DirichletCharacter ℂ N) := Fintype.ofFinite _
-
 /-- A fixed linear order on the orbit keys, used purely to *rank* orbits and produce a concrete
 label.  The first (order-of-character) component is the genuine LMFDB primary key; we linearise the
 whole key type with a classically-chosen well-order (`WellOrderingRel`).
@@ -355,8 +355,9 @@ lemma orbitIndex_inj {χ ψ : DirichletCharacter ℂ N} (h : orbitIndex χ = orb
     (Finset.mem_image_of_mem _ (Finset.mem_univ _)) h
 
 /-- **The label is injective on distinct orbits.**  If two characters have the same label they are
-Galois-conjugate.  This is a clean reduction: `letterEncode` is injective (`letterEncode_injective`),
-so equal labels give equal `orbitIndex`; `orbitIndex_inj` then gives equal ordering keys; and
+Galois-conjugate.  This is a clean reduction: `letterEncode` is injective
+(`letterEncode_injective`), so equal labels give equal `orbitIndex`; `orbitIndex_inj` then gives
+equal ordering keys; and
 `orbitRankKey_injOn_orbits` concludes Galois conjugacy. -/
 lemma charOrbitLabel_injOn_orbits {χ ψ : DirichletCharacter ℂ N}
     (h : charOrbitLabel χ = charOrbitLabel ψ) : IsGaloisConj χ ψ := by
