@@ -232,3 +232,33 @@ sorry**. Everything scheme-theoretic AND affine-algebraic is discharged. New gre
 
 Note: full `Torsion.lean:152` (arbitrary `E/S`) additionally needs K1/K2/K3/K5 (fibre base-change of finrank to
 `κ(s)` via `fiberToSpecResidueField` + `(projModelπ W).fiber ≅ projModel(W.map …)` in Comparison.lean) ON TOP of K4.
+
+## BEASTMODE GRIND STATUS (2026-07-14 cont'd #2, STREAM-KM) — functionFieldMap BUILT; [KEY-KER] fibre/finrank chain DELIVERED
+
+Two reusable-infra deliverables landed GREEN + sorry-free this firing:
+
+**(A) L4's missing piece is BUILT** — `ForMathlib/DominantFunctionField.lean` (new): the
+scheme-morphism → function-field functoriality mathlib lacked.
+- `genericPoint_eq_of_isDominant` (dense-range generic-point transport, generalises the open-immersion case),
+- `Scheme.Hom.functionFieldMap : Y.functionField ⟶ X.functionField` (+ `functionFieldMap_injective`,
+  `functionFieldAlgebra`, `genericPoint_mem_preimage`),
+- `germ_eqToHom_stalk_apply` (germ transport along a point equality) +
+  **`functionFieldMap_germToFunctionField`** — the concrete section-pullback action
+  `functionFieldMap f (germ s) = germ (f.app U s)`. This is the substrate for the L4-core
+  identification `functionFieldMap (mulByHom N) = mulByInt_pullbackAlgHom`: both maps are now
+  computable on regular functions via germs, so L4 reduces to the coordinate agreement
+  (group-law-in-coords = division polys) at the generic point. **L4-core is now the sole
+  remaining K4b-2 leaf** (the pure field-map equality; needs the HasseWeil `mulByInt_x/y`
+  coordinate readout matched to the scheme `[N]` pullback on x,y via `functionFieldMap_germToFunctionField`).
+
+**(B) [KEY-KER] delivered to STREAM-GH in fibre/finrank form** — the Abel-free isogeny kernel bound
+`|ker δ| ≤ deg δ`, entirely sorry-free (propext/choice/Quot.sound only):
+- `ForMathlib/EtaleSectionsCount.lean` (extended): `natCard_algHom_le_finrank` (general finite-dim
+  inequality, inseparable-tolerant companion of the étale `natCard_algHom_eq_finrank`);
+  `natCard_sections_le_finrank`; `liftingsEquivSections` + `natCard_liftings_le_finrank` (fibre-point
+  count ≤ fibre rank for finite-flat f); `finite_sections`/`finite_liftings` +
+  `card_le_finrank_of_injective_liftings` (turnkey injection form).
+- `EllipticCurve/KernelBound.lean` (new): `le_finrank_of_killed_injective` — N distinct killed points
+  ⟹ `N ≤ δ.left.finrank (zero point)`. GH identifies `δ.left.finrank 0 = E.endDeg δ` (the
+  endDeg-via-K4-scheme-finrank ruling) to close `(N:ℤ) ≤ E.endDeg δ`. `δ.left` flat+finite are the
+  isogeny fibre inputs (instance hypotheses, register-box). This does NOT touch the endDeg DATA-sorry.
