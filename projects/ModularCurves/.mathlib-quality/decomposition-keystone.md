@@ -15,8 +15,13 @@ The keystone is the arithmetic root under {GH rigidity, both levels} + {G0 c4 = 
 - **(i)** `mulByHom_finrank (E) N x = N²` (`Torsion.lean:152`, sorry) — the SCHEME-theoretic fibre
   rank of `[N]`. **G0 consumes** for c4 (`torsion_rank`, Torsion.lean:193, already reduces to it via
   `finrank_pullback_snd`). Route: HasseWeil `mulByInt_degree` + the T-B6 fibrewise-degree→finrank bridge.
-- **(ii)** `mulByHom_locallyQuasiFinite (E) N` (`Torsion.lean:140`, sorry) — `[N]` locally quasi-finite.
-  **My own** `gammaOneDrinfeld_affineOverEll` E[N]-finiteness dep (via `torsionπ_isFinite`→`mulByHom_isFinite`).
+- **(ii)** `mulByHom_locallyQuasiFinite (E) N` — `[N]` locally quasi-finite. **PROVED** 2026-07-14 as
+  the mathlib-criterion reduction (`of_finite_preimage_singleton`, `IsProper`⟹`LocallyOfFiniteType`);
+  the single remaining sorry is the isolated geometric leaf `mulByHom_finite_fibres (x) :
+  ([N]⁻¹{x}).Finite`. That leaf is **GATED on T-B6** (nonconstancy witness transport; the degree-free
+  route needs HasseWeil torsion + the group-compatible fibre-model bridge = sorried `abelEnrichment_exists`).
+  Full adversarial re-decomposition: `.mathlib-quality/decomposition-bbqf.md`. **My own**
+  `gammaOneDrinfeld_affineOverEll` E[N]-finiteness dep (via `torsionπ_isFinite`→`mulByHom_isFinite`).
 - **(iii)** `deg(α−1)` for CM autos = the rigidity root. **GH consumes** via `aut_endo_eq_one`
   (`EndomorphismDegree.lean:240`, KM Cor 2.7.2(1)) / `endDeg_mulBy` (:107). Handshake the exact
   `deg(α−1)` signature with GH ([RIG-2] "Aut(E/k̄) acts freely on exact-order-N points, N≥3").

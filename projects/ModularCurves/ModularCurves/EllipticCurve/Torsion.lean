@@ -131,14 +131,27 @@ theorem mulByHom_zero : E.mulByHom 0 = E.π ≫ E.zero := by
   refine Eq.trans ?_ key
   exact congrArg (fun q => (toUnit E.asOver).left ≫ q) E.one_eq_zero
 
-/-- **Black box `BB-QF` (fibre input of KM 2.3.1)**: `[N]` is (locally) quasi-finite
-for `N ≥ 1`. KM 2.3.1 proof: finite fibres are checked geometric fibre by geometric
-fibre — on an elliptic curve over an algebraically closed field `[N]` is nonconstant
-(for `M` prime to `N·char k` it permutes the `M²`-many `M`-torsion points), and a
-nonconstant morphism of proper smooth connected curves has finite fibres. To be
-discharged via the fibre-comparison stream (T-B6 + HasseWeil `mulByInt_degree`). -/
+/-- **(BB-QF geometric leaf `QF-FIBFIN` — the substance of KM 2.3.1's quasi-finiteness)**
+Every (topological) fibre of `[N] : E ⟶ E` is finite. Over a point `x` lying above `s ∈ S`,
+the fibre `[N]⁻¹{x}` is contained in the curve `E_s`, on which `[N]_s` is nonconstant, and a
+nonconstant morphism of proper smooth curves has finite (`0`-dimensional) fibres.
+**GATED — not dischargeable in-project today** (see `.mathlib-quality/decomposition-bb-qf.md`):
+reaching field-level nonconstancy of `[N]_s` needs the group-compatible scheme-fibre ↔
+`WeierstrassCurve κ(s)` comparison (**T-B6**, stream-B, transitively gated on the sorried
+`abelEnrichment_exists`), and "nonconstant morphism of curves ⟹ finite fibres" is a genuine
+**mathlib API gap** (mathlib has no scheme fibre-dimension / relative-dimension theory). -/
+theorem mulByHom_finite_fibres (N : ℕ) [NeZero N] (x : E.E) :
+    (⇑(E.mulByHom N).base ⁻¹' {x}).Finite := by sorry
+
+/-- **Black box `BB-QF` (fibre input of KM 2.3.1): `[N]` is locally quasi-finite for `N ≥ 1`.**
+**Reduction half — PROVED here.** `[N]` is locally of finite type (it is proper — an
+`S`-endomorphism of the proper `E/S` — and `IsProper` extends `LocallyOfFiniteType`), so by
+mathlib's `LocallyQuasiFinite.of_finite_preimage_singleton` it is locally quasi-finite as soon as
+every fibre is finite. The finite-fibre input is the gated geometric leaf `mulByHom_finite_fibres`
+(KM 2.3.1); this lemma is the bounded mathlib-criterion half that consumes it. -/
 theorem mulByHom_locallyQuasiFinite (N : ℕ) [NeZero N] :
-    LocallyQuasiFinite (E.mulByHom N) := by sorry
+    LocallyQuasiFinite (E.mulByHom N) :=
+  LocallyQuasiFinite.of_finite_preimage_singleton _ fun x => E.mulByHom_finite_fibres N x
 
 /-- **Black box `BB-FLAT` (flatness input of KM 2.3.1)**: `[N]` is flat for `N ≥ 1`.
 KM 2.3.1 proof: via miracle flatness over the universal (regular) Weierstrass base
