@@ -198,6 +198,32 @@ noncomputable def functionFieldIsoOfOpenImmersion {X Y : Scheme.{u}} (f : X ⟶ 
       congrArg (Y.presheaf.stalk) (genericPoint_eq_of_isOpenImmersion f).symm) ≪≫
     asIso (f.stalkMap (genericPoint X))
 
+/-- The whole space is a nonempty open of a nonempty scheme — the instance needed to form
+`germToFunctionField ⊤` (the global-section-to-function-field map) from `Nonempty X` alone. -/
+instance nonempty_top_opens {X : Scheme.{u}} [Nonempty X] : Nonempty (⊤ : X.Opens) :=
+  ⟨⟨Classical.arbitrary X, TopologicalSpace.Opens.mem_top _⟩⟩
+
+/-- **(K4b-2, birational fraction-field, general form)** For an open immersion `j : V ⟶ X` with `V`
+integral affine and `X` irreducible, the global sections `Γ(V, ⊤)` localise to *any* field
+`L ≃+* X.functionField`: `V`'s own function field is `Frac Γ(V, ⊤)`
+(`functionField_isFractionRing_of_isAffineOpen`), and the birational iso
+`functionFieldIsoOfOpenImmersion` identifies it with `X.functionField ≃+* L`. The algebra is the
+composite `Γ(V, ⊤) → K(V) ≅ K(X) ≃+* L`. This is the reusable engine behind both sides of the K4b-2
+`[Frac : Frac]` reduction — in particular the `[N]⁻¹Z`-side, where `V = [N]⁻¹Z` sits in the integral
+`projModel W` via `pullback.fst` and `L = W.toAffine.FunctionField` via `projModelFunctionFieldEquiv`. -/
+lemma isFractionRing_top_of_isOpenImmersion {V X : Scheme.{u}} (j : V ⟶ X) (L : Type u) [Field L]
+    [IsOpenImmersion j] [AlgebraicGeometry.IsIntegral V] [IsAffine V] [IrreducibleSpace X]
+    [Nonempty V] (e : X.functionField ≃+* L) :
+    letI : Algebra Γ(V, ⊤) L :=
+      (e.toRingHom.comp ((functionFieldIsoOfOpenImmersion j).inv.hom.comp
+        (V.germToFunctionField ⊤).hom)).toAlgebra
+    IsFractionRing Γ(V, ⊤) L := by
+  haveI hfrV : IsFractionRing Γ(V, ⊤) V.functionField :=
+    functionField_isFractionRing_of_isAffineOpen V ⊤ (isAffineOpen_top V)
+  letI φ : V.functionField ≃+* L :=
+    ((functionFieldIsoOfOpenImmersion j).commRingCatIsoToRingEquiv.symm).trans e
+  exact (IsLocalization.isLocalization_iff_of_ringEquiv (nonZeroDivisors Γ(V, ⊤)) φ).mp hfrV
+
 /-- **(K4b-2, leaf L1)** The global sections of the affine `Z`-chart `(zChart W).toScheme` are `W`'s
 affine coordinate ring: `Γ(zChart, ⊤) ≃+* W.CoordinateRing`. Via `Scheme.Opens.topIso` (identifying
 `Γ(U.toScheme, ⊤)` with `Γ(projModel W, U)`) composed with the fixed chart identification
