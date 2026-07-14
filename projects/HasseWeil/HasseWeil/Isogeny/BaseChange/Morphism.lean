@@ -594,7 +594,7 @@ noncomputable def baseChangeCoordHom [IsAlgClosed L] :
           (baseChange_generic_equation W φ L)
           (baseChangeXgen_transcendental W φ L)
           (algebraMap _ _ u') = _
-      unfold ofEquationPullback
+      simp only [ofEquationPullback]
       rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
       rfl
     exact h1.trans (RingHom.congr_fun
