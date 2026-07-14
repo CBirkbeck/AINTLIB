@@ -3,19 +3,19 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Basic
-import HasseWeil.Foundation.OrdAtInftyBridge
-import HasseWeil.Foundation.OmegaPullbackCoeff
 import HasseWeil.Foundation.AdditionPullback
 import HasseWeil.Foundation.Curves.Ramification.OrdAtInftyRamification
 import HasseWeil.Foundation.Curves.WithTopArith
+import HasseWeil.Foundation.OmegaPullbackCoeff
+import HasseWeil.Foundation.OrdAtInftyBridge
+import HasseWeil.Isogeny.Basic
 
 /-!
 # The basepoint condition for `[n]`: `MulByIntBasepoint` holds unconditionally
 
 This file discharges `HasseWeil.EC.MulByIntBasepoint W hn` (the
 `ord_∞`-regularity basepoint condition for the pullback of `[n]`,
-`IsogenyAG.lean`) for **every** `n ≠ 0`, with **no** separability hypothesis
+`Isogeny/Basic.lean`) for **every** `n ≠ 0`, with **no** separability hypothesis
 `(n : F) ≠ 0` — the inseparable case `char F ∣ n` is covered.
 
 ## The `{1, y}`-parity route
@@ -399,7 +399,7 @@ theorem ord_mulByInt_pullback_algebraMap_fracPolyX (n : ℤ) (hn : n ≠ 0)
 The pair `(mulByInt_x, mulByInt_y)` satisfies the Weierstrass equation
 (`pullback_equation` + `mulByInt_pullback_x/y`), so the abstract bound
 `le_ordAtInfty_y_of_weierstrass` applies. One-sided companion of
-`ordAtInfty_mulByInt_y_eq_of_x` (`AdditionPullback/Frobenius.lean`, which is
+`ordAtInfty_mulByInt_y_eq_of_x` (`Isogeny/Frobenius/OrdAtInfty.lean`, which is
 `[Fintype K]`-scoped). -/
 theorem le_ordAtInfty_mulByInt_y (n : ℤ) (hn : n ≠ 0) {m : ℤ} (hm : m ≤ -1)
     (hM : (W_smooth W).ordAtInfty (mulByInt_x W n) = ((2 * m : ℤ) : WithTop ℤ)) :
@@ -573,7 +573,7 @@ namespace EC
 variable {F : Type*} [Field F]
 
 /-- **`MulByIntBasepoint W hn` holds for every `n ≠ 0`** — the keystone
-residual of `IsogenyAG.lean`. No separability hypothesis: the inseparable case
+residual of `Isogeny/Basic.lean`. No separability hypothesis: the inseparable case
 `char F ∣ n` is included (the even `x`-order is `2m ≤ -2` rather than `-2`,
 and all bounds are one-sided). -/
 theorem mulByIntBasepoint_holds (W : Affine F) [W.IsElliptic] {n : ℤ}
