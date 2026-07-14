@@ -280,6 +280,7 @@ private theorem dictPoint₂_killed (h : T ⟶ levelSpaceΓ E N) (g : T ⟶ S)
   simp only [Category.assoc, hcond]
   exact hbase
 
+omit [NeZero N] in
 /-- Morphisms into `E[N]` agree once they agree into `E` and over `S` (the kernel
 pullback's ext principle, stated at the `torsionι`/`torsionπ` spelling so rewriting
 never crosses the `torsion` definitional fold). -/
@@ -418,7 +419,8 @@ theorem pullSection_asSection {R : CommRingCat.{u}} (X : EllObj R)
   refine Subtype.ext (pullback.hom_ext ?_ ?_)
   · refine ((congrArg ((EllHom.pullSection R (X.pullbackAlongMap g k)
         (EllipticCurve.Point.asSection X.curve g P)).1 ≫ ·) htop.symm).trans ?_).trans
-      (EllipticCurve.Point.asSection_val_fst X.curve (k ≫ g) (EllipticCurve.Point.restrict X.curve k P)).symm
+      (EllipticCurve.Point.asSection_val_fst X.curve (k ≫ g)
+        (EllipticCurve.Point.restrict X.curve k P)).symm
     refine (Category.assoc _ _ _).symm.trans ?_
     refine (congrArg (· ≫ pullback.fst X.curve.π g)
       ((X.pullbackAlongMap g k).isPullback.lift_fst _ _ _)).trans ?_
@@ -426,7 +428,8 @@ theorem pullSection_asSection {R : CommRingCat.{u}} (X : EllObj R)
       (congrArg (k ≫ ·) (EllipticCurve.Point.asSection_val_fst X.curve g P))
   · exact (EllHom.pullSection R (X.pullbackAlongMap g k)
       (EllipticCurve.Point.asSection X.curve g P)).2.trans
-      (EllipticCurve.Point.asSection_val_snd X.curve (k ≫ g) (EllipticCurve.Point.restrict X.curve k P)).symm
+      (EllipticCurve.Point.asSection_val_snd X.curve (k ≫ g)
+        (EllipticCurve.Point.restrict X.curve k P)).symm
 
 end Dictionary
 
