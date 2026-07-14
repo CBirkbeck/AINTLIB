@@ -19900,3 +19900,22 @@ by separation over `{W ≤ V ⊓ V_x}` refinements. adaptedCoeff₄'s template t
 `legendreClassifyingRingHom := IsLocalization.Away.lift (legendrePoly R)` at
 `eval₂Hom X.baseRingHom ![g]` → classifyingMap → the Top/EllHom/RepresentableBy ladder
 (E12-D3-E1…E4 + D4 replay; all templates banked in UniversalAdapted.lean).
+
+## v10.229-OMEGA (2026-07-14) — [T-E14-CLS-3] classifying morphism to M'₂ CONSTRUCTED
+
+`legendreLambda_isUnit` (germwise from witness ellipticity) + `legendreClassifyingRingHom`
+(Away.lift at `eval₂Hom baseRingHom ![λ]`) + `legendreClassifyingMap` (Γ–Spec) +
+`legendreClassifyingRingHom_algebraMap` (C-scalar compat). Commits f4b375f67 + de8dcdb56.
+
+**The remaining [T-E14-CLS] ladder = the E12-D3-E1…E4 + D4 replay (ALL templates banked in
+UniversalAdapted.lean, battle-tested):**
+- CLS-4 (≈E1): `universalLegendre_map_classifying` — specializing the universal Legendre curve
+  along the classifying map, restricted to a witness affine, recovers the witness curve
+  (template: `universalShortNF_map_classifying`; the λ-spec of `legendreLambda` is the input).
+- CLS-5 (≈E2-E4): chartPiece → cover-glue → legendreClassifyingTop → π_w/zero → EllHom
+  (templates: chartPiece/classifyingTop/classifyingTop_π_w/classifyingTop_zero/classifyingEllHom;
+  the cover = witness-affines instead of chart-affines — use the choose-family from hD).
+- CLS-6 (≈D4-rt1/rt2): roundtrips — pulled datum = given datum (universal marking
+  `tautPresentation_marksAt` + `universalLegendre_isLegendreDatum` feed the ⇐; the marked-witness
+  uniqueness CLS-1 feeds the determination) → `legendreDelta_representable_by_affine` DISCHARGED
+  modulo [T-E14-LVL-b] (the FullLevelPt-clause needs geometric generation = KM keystone).
