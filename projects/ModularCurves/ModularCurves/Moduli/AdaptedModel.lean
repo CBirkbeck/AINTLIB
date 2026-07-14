@@ -761,6 +761,39 @@ theorem pointedIso_hom_of_transVC_eq_one {V : S.affineOpens}
   rw [P.transVC_spec Q, projModelVCIso_hom_congr_vc h Q.W, projModelVCIso_one,
     eqToHom_trans, eqToHom_trans]
 
+open Scheme in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(E12-D4)** The basis unit is equivariant for the global-unit action. -/
+theorem basisUnitAt_smul {V : S.affineOpens} (P : LocalPresentation G V)
+    (u : Γ(S, ⊤)ˣ) (b : OmegaBasis G) :
+    (P.basisUnitAt (u • b)).1 =
+      Scheme.resUnit (le_top : V.1 ≤ ⊤) u * (P.basisUnitAt b).1 := by
+  refine Scheme.unit_ext_of_res_cover S
+    (fun i : G.atlas.ι => V.1 ⊓ (G.atlas.U i).1) (fun i => inf_le_left)
+    (fun x hxV => by
+      obtain ⟨i, hxi⟩ := G.atlas.covers x
+      exact TopologicalSpace.Opens.mem_iSup.mpr ⟨i, hxV, hxi⟩) (fun i => ?_)
+  rw [(P.basisUnitAt (u • b)).2 i, map_mul, (P.basisUnitAt b).2 i]
+  refine Scheme.unit_ext_of_affine_res S (fun W hW => ?_)
+  rw [(P.basisUnitOn (u • b) i).2 W hW, map_mul, Scheme.resUnit_resUnit,
+    Scheme.resUnit_resUnit, (P.basisUnitOn b i).2 W hW]
+  have hu : Scheme.resUnit (le_inf le_top (hW.trans inf_le_right))
+      (((u • b)).2 i).unit =
+    Scheme.resUnit (le_top : W.1 ≤ ⊤) u *
+      Scheme.resUnit (le_inf le_top (hW.trans inf_le_right)) (b.2 i).unit := by
+    refine Units.ext ?_
+    simp only [Units.val_mul, Scheme.resUnit_val]
+    rw [show (((u • b)).2 i).unit.val = (u • b).1.1 i from IsUnit.unit_spec _,
+      show ((b.2 i).unit : Γ(S, (⊤ : S.Opens) ⊓ (omegaCocycle G).U i)) = b.1.1 i from
+        IsUnit.unit_spec _,
+      show ((u • b)).1 = u.val • b.1 from rfl]
+    show Scheme.resLE _ (Scheme.resLE inf_le_left u.val * b.1.1 i) = _
+    rw [map_mul]
+    erw [Scheme.resLE_resLE]
+  rw [hu]
+  exact mul_assoc _ _ _
+
 end LocalPresentation
 
 end ModularCurves
