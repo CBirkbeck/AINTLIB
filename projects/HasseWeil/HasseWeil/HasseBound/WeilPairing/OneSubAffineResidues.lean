@@ -75,9 +75,6 @@ namespace HasseWeil.WeilPairing
 open HasseWeil IsogenyBaseChangeConcrete
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedFintypeInType false
-set_option linter.style.longLine false
 
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
 variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
