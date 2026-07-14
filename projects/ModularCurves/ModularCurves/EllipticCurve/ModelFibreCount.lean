@@ -425,9 +425,6 @@ v10.221. -/
 
 section RangeWitness
 
-open scoped Classical in
-/-- **(g5, alg-closed case — TODO w1–w7 per the section header)** The topological range
-of `[N]` on the projective model over an algebraically closed field is infinite. -/
 /-- **(w7)** Distinct sections of a scheme over `Spec F`, `F` a field, have distinct
 image points whenever their common image point has residue field `F` — over an
 algebraically closed base every rational section is determined by its topological
