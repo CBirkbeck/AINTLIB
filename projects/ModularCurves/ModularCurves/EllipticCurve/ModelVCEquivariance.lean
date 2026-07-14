@@ -320,8 +320,10 @@ private theorem mulModelHom_vc_bcLeg (φ : vcUnivRing →+* R)
             (projModelπ (vcUnivW₀.map φ)) (projModelπ (vcUnivW₀.map φ))
             (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
             (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 (Spec (CommRingCat.of R)))
-            (by rw [Category.comp_id]; exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
-            (by rw [Category.comp_id]; exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
+            (by rw [Category.comp_id]; exact (projModelVCIso_π (vcUnivC.map φ)
+              (vcUnivW₀.map φ)).symm)
+            (by rw [Category.comp_id]; exact (projModelVCIso_π (vcUnivC.map φ)
+              (vcUnivW₀.map φ)).symm) ≫
           mulModelHom (vcUnivW₀.map φ)) ≫
         projModelBaseChange φ vcUnivW₀ := by
   letI : Algebra vcUnivRing R := φ.toAlgebra
@@ -353,18 +355,21 @@ private theorem mulModelHom_vc_bcLeg (φ : vcUnivRing →+* R)
           projModelBaseChange φ (vcUnivC • vcUnivW₀) ≫
             (projModelVCIso vcUnivC vcUnivW₀).hom := (Category.assoc _ _ _).symm
     _ = (pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
-            (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e) (projModelπ_eqToHom_w e) ≫
+            (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e)
+              (projModelπ_eqToHom_w e) ≫
           mulModelHom ((vcUnivC • vcUnivW₀).map φ)) ≫
           projModelBaseChange φ (vcUnivC • vcUnivW₀) ≫
             (projModelVCIso vcUnivC vcUnivW₀).hom := by rw [mulModelHom_congr e]
     _ = pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
-            (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e) (projModelπ_eqToHom_w e) ≫
+            (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e)
+              (projModelπ_eqToHom_w e) ≫
           (mulModelHom ((vcUnivC • vcUnivW₀).map φ) ≫
             projModelBaseChange φ (vcUnivC • vcUnivW₀)) ≫
             (projModelVCIso vcUnivC vcUnivW₀).hom := by
         simp only [Category.assoc]
     _ = pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
-            (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e) (projModelπ_eqToHom_w e) ≫
+            (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e)
+              (projModelπ_eqToHom_w e) ≫
           (pullback.map _ _ _ _ (projModelBaseChange φ (vcUnivC • vcUnivW₀))
               (projModelBaseChange φ (vcUnivC • vcUnivW₀))
               (Spec.map (CommRingCat.ofHom φ))
@@ -373,7 +378,8 @@ private theorem mulModelHom_vc_bcLeg (φ : vcUnivRing →+* R)
             mulModelHom (vcUnivC • vcUnivW₀)) ≫
             (projModelVCIso vcUnivC vcUnivW₀).hom := by rw [hβ]
     _ = pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
-            (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e) (projModelπ_eqToHom_w e) ≫
+            (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e)
+              (projModelπ_eqToHom_w e) ≫
           pullback.map _ _ _ _ (projModelBaseChange φ (vcUnivC • vcUnivW₀))
               (projModelBaseChange φ (vcUnivC • vcUnivW₀))
               (Spec.map (CommRingCat.ofHom φ))
@@ -383,7 +389,8 @@ private theorem mulModelHom_vc_bcLeg (φ : vcUnivRing →+* R)
               (projModelVCIso vcUnivC vcUnivW₀).hom) := by
         simp only [Category.assoc]
     _ = pullback.map _ _ _ _ (eqToHom (congrArg projModel e))
-            (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e) (projModelπ_eqToHom_w e) ≫
+            (eqToHom (congrArg projModel e)) (𝟙 _) (projModelπ_eqToHom_w e)
+              (projModelπ_eqToHom_w e) ≫
           pullback.map _ _ _ _ (projModelBaseChange φ (vcUnivC • vcUnivW₀))
               (projModelBaseChange φ (vcUnivC • vcUnivW₀))
               (Spec.map (CommRingCat.ofHom φ))
@@ -409,7 +416,8 @@ private theorem mulModelHom_vc_bcLeg (φ : vcUnivRing →+* R)
         rw [pullback.map_comp, pullback.map_comp, pullback.map_comp]
         have hleg : (eqToHom (congrArg projModel e) ≫ projModelBaseChange φ (vcUnivC • vcUnivW₀)) ≫
               (projModelVCIso vcUnivC vcUnivW₀).hom =
-            (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom ≫ projModelBaseChange φ vcUnivW₀ := by
+            (projModelVCIso (vcUnivC.map φ)
+              (vcUnivW₀.map φ)).hom ≫ projModelBaseChange φ vcUnivW₀ := by
           rw [Category.assoc, ← hγ'']
         have hbase : (𝟙 (Spec (CommRingCat.of R)) ≫ Spec.map (CommRingCat.ofHom φ)) ≫
               𝟙 (Spec (CommRingCat.of vcUnivRing)) =
@@ -447,8 +455,10 @@ private theorem mulModelHom_vc_πLeg (φ : vcUnivRing →+* R)
             (projModelπ (vcUnivW₀.map φ)) (projModelπ (vcUnivW₀.map φ))
             (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom
             (projModelVCIso (vcUnivC.map φ) (vcUnivW₀.map φ)).hom (𝟙 (Spec (CommRingCat.of R)))
-            (by rw [Category.comp_id]; exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm)
-            (by rw [Category.comp_id]; exact (projModelVCIso_π (vcUnivC.map φ) (vcUnivW₀.map φ)).symm) ≫
+            (by rw [Category.comp_id]; exact (projModelVCIso_π (vcUnivC.map φ)
+              (vcUnivW₀.map φ)).symm)
+            (by rw [Category.comp_id]; exact (projModelVCIso_π (vcUnivC.map φ)
+              (vcUnivW₀.map φ)).symm) ≫
           mulModelHom (vcUnivW₀.map φ)) ≫
         projModelπ (vcUnivW₀.map φ) := by
   calc (mulModelHom (vcUnivC.map φ • vcUnivW₀.map φ) ≫
