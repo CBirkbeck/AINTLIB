@@ -113,8 +113,7 @@ theorem norm_oddBernoulliFactor_eq_one_of_not_dvd_num (hp_odd : p ≠ 2)
   have hcz_int : ‖((c * z : ℤ_[p]) : ℚ_[p])‖ ≤ 1 := by
     simpa [PadicInt.padic_norm_e_of_padicInt] using (c * z).2
   have herr : ‖(p : ℚ_[p]) * ((c : ℚ_[p]) * (z : ℚ_[p]))‖ < 1 := by
-    have hp_lt : ‖(p : ℚ_[p])‖ < 1 :=
-      (Padic.norm_natCast_lt_one_iff (p := p) (n := p)).2 dvd_rfl
+    have hp_lt : ‖(p : ℚ_[p])‖ < 1 := Padic.norm_p_lt_one
     have hczeq : (c : ℚ_[p]) * (z : ℚ_[p]) = ((c * z : ℤ_[p]) : ℚ_[p]) := by
       rw [PadicInt.coe_mul]
     rw [hczeq]
@@ -138,8 +137,7 @@ theorem norm_boundary_factor_eq_one (hp_odd : p ≠ 2) :
         BernoulliGen ((teichmullerCharQp p) ^ (p - 2)) 1)‖ = 1 := by
   obtain ⟨z₀, hz₀⟩ := boundary_teichmuller_factor_eq_one_add_p_mul (p := p) hp_odd
   have herr : ‖(p : ℚ_[p]) * (z₀ : ℚ_[p])‖ < 1 := by
-    have hp_lt : ‖(p : ℚ_[p])‖ < 1 :=
-      (Padic.norm_natCast_lt_one_iff (p := p) (n := p)).2 dvd_rfl
+    have hp_lt : ‖(p : ℚ_[p])‖ < 1 := Padic.norm_p_lt_one
     calc
       ‖(p : ℚ_[p]) * (z₀ : ℚ_[p])‖ = ‖(p : ℚ_[p])‖ * ‖(z₀ : ℚ_[p])‖ := norm_mul _ _
       _ ≤ ‖(p : ℚ_[p])‖ * 1 := by
