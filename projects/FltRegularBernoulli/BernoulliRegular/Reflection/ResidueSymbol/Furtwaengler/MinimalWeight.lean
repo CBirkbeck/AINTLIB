@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.DigitSum
@@ -47,8 +52,8 @@ Then the main theorem follows by induction on `f`: write
 Uniqueness follows from a strict-inequality version of step 1
 (when `k 0 ≥ ℓ`, there's a carry that strictly decreases the weight).
 
-These three auxiliary lemmas are stated below as separate `sorry`s
-for clarity; the main theorem is then a one-line induction.
+These three auxiliary lemmas are proved below as separate results; the main
+theorem is then a one-line induction.
 -/
 
 @[expose] public section
