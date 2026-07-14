@@ -3,12 +3,12 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import HasseWeil.Isogeny.Dual.Morphism
-import HasseWeil.Isogeny.Bridge
 import HasseWeil.Foundation.EC.SeparableKernelTorsor
 import HasseWeil.HasseBound.PointCount
-import HasseWeil.Isogeny.SeparableWitnessReductions
 import HasseWeil.HasseBound.WeilPairing.PencilCovariance
+import HasseWeil.Isogeny.Bridge
+import HasseWeil.Isogeny.Dual.Morphism
+import HasseWeil.Isogeny.SeparableWitnessReductions
 
 /-!
 # Discharging the dual-isogeny fixed-field equality from the project's Galois infra
