@@ -166,4 +166,15 @@ noncomputable def classifyingRingHom {R : CommRingCat.{u}} (Y : EllObj R)
     norm_num [Matrix.cons_val_zero, Matrix.cons_val_one]]
   exact hΔ
 
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+/-- **(E12-D3 ★)** The classifying morphism of an `(E, ω)`-datum:
+`Y.base ⟶ M₁ = Spec R[A₄,A₆][Δ⁻¹]` through the `Γ–Spec` adjunction — GME Thm 2.2.3's
+map to the moduli space. -/
+noncomputable def classifyingMap {R : CommRingCat.{u}} (Y : EllObj R)
+    (b : OmegaBasis Y.curve.toEllipticCurveGeom)
+    (h2 : IsUnit (2 : Γ(Y.base, ⊤))) (h3 : IsUnit (3 : Γ(Y.base, ⊤))) :
+    Y.base ⟶ Spec (CommRingCat.of (ModuliRingE12 R)) :=
+  Y.base.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (classifyingRingHom Y b h2 h3))
+
 end ModularCurves
