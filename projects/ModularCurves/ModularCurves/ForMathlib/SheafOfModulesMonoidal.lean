@@ -99,6 +99,7 @@ section Tensor
 variable {S : Cᵒᵖ ⥤ CommRingCat.{u}}
   {M₁ M₂ N₁ N₂ : PresheafOfModules.{u} (S ⋙ forget₂ CommRingCat RingCat)}
 
+omit [J.WEqualsLocallyBijective AddCommGrpCat] [HasWeakSheafify J AddCommGrpCat] in
 /-- The locally-surjective half of the [GAP1-W-MONO] tensor-stability leaf: the tensor
 product of locally surjective morphisms of presheaves of modules is locally surjective.
 Sections of the tensor presheaf are finite sums of simple tensors; each factor is
@@ -138,6 +139,7 @@ lemma isLocallySurjective_tensorHom (f : M₁ ⟶ M₂) (g : N₁ ⟶ N₂)
       rw [hx₁', hx₂']
       rfl
 
+omit [J.WEqualsLocallyBijective AddCommGrpCat] [HasWeakSheafify J AddCommGrpCat] in
 /-- **([W-MONO-inj])** Precomposition with the tensor of locally surjective morphisms
 is injective on morphisms into a presheaf of modules whose underlying presheaf is a
 sheaf: two maps out of the tensor agreeing after `f ⊗ₘ g` agree on simple tensors
@@ -207,6 +209,8 @@ variable {C : Type u} [Category.{u} C] {J : GrothendieckTopology C}
   (hP : Presheaf.IsSheaf J P.presheaf) (χ : M₁ ⊗ N₁ ⟶ P)
 
 include hP in
+omit [Presheaf.IsLocallySurjective J ((toPresheaf _).map f)]
+  [Presheaf.IsLocallySurjective J ((toPresheaf _).map g)] in
 /-- Any two preimage-pairs of the same sections give the same `χ`-value: locally the
 pairs agree (local injectivity), so the values agree locally, so they agree
 (separatedness). The workhorse of the [W-MONO-glue] construction. -/
@@ -362,6 +366,8 @@ private lemma chi_value {V W : C} (q : W ⟶ V) (a : M₁.obj (Opposite.op V))
 
 variable {f g} in
 include hP in
+omit [Presheaf.IsLocallyInjective J ((toPresheaf _).map f)]
+  [Presheaf.IsLocallyInjective J ((toPresheaf _).map g)] in
 private lemma isPairingSection_unique {U : Cᵒᵖ} {m : M₂.obj U} {n : N₂.obj U}
     {s s' : P.obj U} (hs : IsPairingSection f g χ m n s)
     (hs' : IsPairingSection f g χ m n s') : s = s' := by
@@ -725,10 +731,10 @@ instance instSheafificationW_isMonoidal_commRingSheaf :
 two registrations above (the reflective localization and the monoidality of the localizing
 class — this file's leaf), mathlib's `LocalizedMonoidal` equips the localization of
 presheaves of modules over a sheaf of commutative rings with a `MonoidalCategory` structure.
-That localized category is definitionally `SheafOfModules ⟨S ⋙ forget₂ _ _, hS⟩` — so sheaves
-of modules over a sheaf of commutative rings form a monoidal category, monoidally under
-sheafification. This is the GAP-1 payoff; downstream consumers name the localized category
-and read off the tensor product, unit, and Pic coherences. -/
+That localized category is definitionally `SheafOfModules ⟨S ⋙ forget₂ _ _, hS⟩` — so
+sheaves of modules over a sheaf of commutative rings form a monoidal category,
+monoidally under sheafification. This is the GAP-1 payoff; downstream consumers name the
+localized category and read off the tensor product, unit, and Pic coherences. -/
 theorem sheafOfModules_monoidalCategory_nonempty : Nonempty (MonoidalCategory
     (LocalizedMonoidal
       (sheafification.{u} (𝟙 (⟨S ⋙ forget₂ CommRingCat RingCat, hS⟩ : Sheaf J RingCat.{u}).obj))
