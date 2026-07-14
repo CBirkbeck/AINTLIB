@@ -52,6 +52,12 @@ private noncomputable def pairToTripleLeft (i j k : J) :
     classical
     simp [pairIndex, tripleIndex])
 
+private noncomputable def pairToTripleMiddle (i j k : J) :
+    pairIndex j k ⟶ tripleIndex i j k :=
+  homOfLE (by
+    classical
+    simp [pairIndex, tripleIndex])
+
 private noncomputable def pairToTripleRight (i j k : J) :
     pairIndex i k ⟶ tripleIndex i j k :=
   homOfLE (by
@@ -100,10 +106,29 @@ noncomputable abbrev affineIntersectionSingletonIndex (i : J) : Finset J :=
 noncomputable abbrev affineIntersectionPairIndex (i j : J) : Finset J :=
   pairIndex i j
 
+/-- The triple index used by an affine finite-intersection functor. -/
+noncomputable abbrev affineIntersectionTripleIndex (i j k : J) : Finset J :=
+  tripleIndex i j k
+
 /-- The canonical inclusion from a singleton index to a pair index. -/
 noncomputable abbrev affineIntersectionSingletonToPair (i j : J) :
     affineIntersectionSingletonIndex i ⟶ affineIntersectionPairIndex i j :=
   singletonToPair i j
+
+/-- The canonical inclusion from the first pair index to a triple index. -/
+noncomputable abbrev affineIntersectionPairToTripleLeft (i j k : J) :
+    affineIntersectionPairIndex i j ⟶ affineIntersectionTripleIndex i j k :=
+  pairToTripleLeft i j k
+
+/-- The canonical inclusion from the middle pair index to a triple index. -/
+noncomputable abbrev affineIntersectionPairToTripleMiddle (i j k : J) :
+    affineIntersectionPairIndex j k ⟶ affineIntersectionTripleIndex i j k :=
+  pairToTripleMiddle i j k
+
+/-- The canonical inclusion from the outer pair index to a triple index. -/
+noncomputable abbrev affineIntersectionPairToTripleRight (i j k : J) :
+    affineIntersectionPairIndex i k ⟶ affineIntersectionTripleIndex i j k :=
+  pairToTripleRight i j k
 
 /-- The canonical index map interchanging an ordered pair. -/
 noncomputable abbrev affineIntersectionPairSwap (i j : J) :

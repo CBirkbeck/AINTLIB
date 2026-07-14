@@ -351,6 +351,11 @@ Completed dependency claim (2026-07-14): defined
 nonempty object of the affine-intersection coordinate-ring functor, commute with all its
 restriction maps, and satisfy the multiplicative transition law there.
 
+Completed dependency claim (2026-07-14): exposed the affine-gluing diagram's canonical
+triple index and its left, middle, and right pair-to-triple arrows. The line-bundle Cech
+equations can therefore use the same finite-intersection indexing API as the existing scheme
+gluing construction.
+
 Active dependency claim (2026-07-14): spread the finite family of pair-overlap transition
 units, their inverses, and the triple-overlap equations to one later finite stage of the
 affine-intersection model. This will construct the finite-stage line bundle whose base change
