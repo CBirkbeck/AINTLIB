@@ -2315,6 +2315,59 @@ theorem legendreClassifyingEllHom_pulled (φ : X ⟶ universalLegendreObj R hR)
         rfl rfl) h2 hR = φ :=
   EllHom.ext (legendreClassifyingMap_pulled φ hL h2) (legendreTop_pulled φ hL h2)
 
+open AlgebraicGeometry CategoryTheory Scheme in
+/-- If `2` is a unit in `R`, it is a unit in the global sections of every
+`Ell/R`-object's base. -/
+theorem EllObj.isUnit_two {R : CommRingCat.{u}} (Y : EllObj R)
+    (hR : IsUnit (2 : R)) : IsUnit (2 : Γ(Y.base, ⊤)) := by
+  have h := hR.map Y.baseRingHom
+  rwa [map_ofNat] at h
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E14-AX1 ★★★, KM 4.6.2's engine axiom 1, conditional form)** GIVEN the
+naive-full-level clause for the universal marked pair (ticket [T-E14-LVL-b]: the
+geometric `E[2]`-generation, deferred to the KM keystone), the Legendre `δ` is
+representable by the universal Legendre object: the natural bijection sends `φ` to
+the pulled datum; its inverse is the classifying morphism; the roundtrips are rt1
+and rt2. -/
+noncomputable def legendreDeltaRepresentableBy (R : CommRingCat.{u})
+    (hR : IsUnit (2 : R))
+    (hL : (universalLegendreObj R hR).curve.IsNaiveFullLevel 2
+      (universalLegendreP R hR) (universalLegendreQ R hR)) :
+    (legendreDeltaProblem R).RepresentableBy (universalLegendreObj R hR) where
+  homEquiv {X} :=
+    { toFun := fun φ => (legendreDeltaProblem R).map (Opposite.op φ)
+        ⟨⟨⟨⟨universalLegendreP R hR, universalLegendreQ R hR⟩, hL⟩,
+          universalLegendreOmega R hR⟩,
+          universalLegendre_isLegendreDatum R hR hL⟩
+      invFun := fun x => legendreClassifyingEllHom x.2
+        (X.isUnit_two hR) hR
+      left_inv := fun φ => legendreClassifyingEllHom_pulled φ hL (X.isUnit_two hR)
+      right_inv := fun x => by
+        refine Subtype.ext (Prod.ext (Subtype.ext (Prod.ext ?_ ?_)) ?_)
+        · exact pullSection_legendreClassifyingEllHom_P x.2 (X.isUnit_two hR) hR
+        · exact pullSection_legendreClassifyingEllHom_Q x.2 (X.isUnit_two hR) hR
+        · exact omegaBasisMap_legendreClassifyingEllHom x.2 (X.isUnit_two hR) hR }
+  homEquiv_comp {X X'} f g :=
+    FunctorToTypes.map_comp_apply (legendreDeltaProblem R)
+      (Opposite.op g) (Opposite.op f) _
+
+open AlgebraicGeometry CategoryTheory Scheme in
+/-- **(T-E14-AX1, conditional discharge ★★★)** KM engine axiom 1 for the corrected
+Legendre `δ`, modulo the [T-E14-LVL-b] level clause: the `δ` is representable by an
+object with affine base — `M'₂ = Spec R[λ][(λ(λ−1))⁻¹]`. -/
+theorem legendreDelta_representable_by_affine_of_level (R : CommRingCat.{u})
+    (hR : IsUnit (2 : R))
+    (hL : (universalLegendreObj R hR).curve.IsNaiveFullLevel 2
+      (universalLegendreP R hR) (universalLegendreQ R hR)) :
+    ∃ X : EllObj R, IsAffine X.base ∧
+      Nonempty ((legendreDeltaProblem R).RepresentableBy X) :=
+  ⟨universalLegendreObj R hR,
+    inferInstanceAs (IsAffine (Spec (CommRingCat.of (LegendreModuliRing R)))),
+    ⟨legendreDeltaRepresentableBy R hR hL⟩⟩
+
 end RT2
 
 end TwoTorsion
