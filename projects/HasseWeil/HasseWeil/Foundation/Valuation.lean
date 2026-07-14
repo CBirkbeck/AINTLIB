@@ -42,9 +42,11 @@ variable (W : Affine F)
 
 /-! ### Point ideal -/
 
+/-- The maximal ideal of the coordinate ring cutting out the point `(x, y)`. -/
 noncomputable def pointIdeal (x : F) (y : F) : Ideal W.CoordinateRing :=
   Affine.CoordinateRing.XYIdeal W x (Polynomial.C y)
 
+/-- At a nonsingular point, the point ideal is maximal. -/
 theorem pointIdeal_isMaximal {x y : F} (h : W.Nonsingular x y) :
     (pointIdeal W x y).IsMaximal :=
   Ideal.Quotient.maximal_of_isField _
