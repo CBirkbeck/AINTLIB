@@ -54,9 +54,6 @@ open WeierstrassCurve HasseWeil.Curves
 
 namespace HasseWeil.EC
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-
 variable {F : Type*} [Field F] [DecidableEq F] {W : WeierstrassCurve.Affine F} [W.IsElliptic]
 
 /-- Local abbreviation for the function field `K(E)`. -/
@@ -73,14 +70,17 @@ noncomputable def projValuation (Q : W.Point) :
   | .zero => (⟨W⟩ : SmoothPlaneCurve F).ordAtInftyValuation
   | .some x y h => (⟨W⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h⟩
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 @[simp] theorem projValuation_zero :
     projValuation (W := W) (0 : W.Point) =
       (⟨W⟩ : SmoothPlaneCurve F).ordAtInftyValuation := rfl
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 @[simp] theorem projValuation_some {x y : F} (h : W.Nonsingular x y) :
     projValuation (W := W) (Affine.Point.some x y h) =
       (⟨W⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h⟩ := rfl
 
+omit [WeierstrassCurve.IsElliptic W] in
 /-- The projective place valuation is surjective onto `ℤᵐ⁰` at every point. -/
 theorem projValuation_surjective (Q : W.Point) :
     Function.Surjective (projValuation (W := W) Q) := by
@@ -147,6 +147,7 @@ theorem projValuation_comap_pullback_eq_of_projOrdTransport {φ : HasseWeil.Isog
 
 /-! ### Point ↔ place injectivity (at the valuation level) -/
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- `coordX` is regular at every affine point: `pointValuation P coordX ≤ 1`. It is the image of
 the coordinate-ring element `X`, so `pointValuation_algebraMap_le_one` applies. -/
 theorem pointValuation_coordX_le_one (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint) :
@@ -160,6 +161,7 @@ theorem pointValuation_coordX_le_one (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothP
         (⟨W⟩ : SmoothPlaneCurve F).CoordinateRing (⟨W⟩ : SmoothPlaneCurve F).FunctionField]
   rw [hcr]; exact (⟨W⟩ : SmoothPlaneCurve F).pointValuation_algebraMap_le_one _ P
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- `coordX` has a pole of order `2` at infinity: `ordAtInftyValuation coordX = exp 2 > 1`. -/
 theorem ordAtInftyValuation_coordX :
     (⟨W⟩ : SmoothPlaneCurve F).ordAtInftyValuation (⟨W⟩ : SmoothPlaneCurve F).coordX =
@@ -168,6 +170,7 @@ theorem ordAtInftyValuation_coordX :
     (⟨W⟩ : SmoothPlaneCurve F).coordX_ne_zero (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_coordX
   rwa [neg_neg] at this
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W] in
 /-- The infinity place is distinct from every affine place: `coordX` separates them (regular at
 affine points, pole at infinity). -/
 theorem ordAtInftyValuation_ne_pointValuation
@@ -184,6 +187,7 @@ theorem ordAtInftyValuation_ne_pointValuation
     norm_num
   exact absurd (h1 ▸ pointValuation_coordX_le_one P) (not_le.mpr h_exp2_gt_one)
 
+omit [WeierstrassCurve.IsElliptic W] in
 /-- **Point ↔ place injectivity** (at the valuation level): if the place valuations at two
 projective points are equivalent, the points are equal. Affine points are separated from each other
 by `maximalIdealAt`-injectivity, and the infinity point is separated from affine points by `coordX`
