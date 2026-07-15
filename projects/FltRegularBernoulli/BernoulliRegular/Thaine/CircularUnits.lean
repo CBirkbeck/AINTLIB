@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitFamily
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitFamily
 
 /-!
 # T-Q1-CSINNOTT: Sinnott `C_S(K⁺)` vs Washington `C_cl(K⁺)` for prime conductor

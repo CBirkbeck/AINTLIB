@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealConjugate
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealConjugate
 
 /-!
 # LV010-class-eq-1b: Ideal p-th root cancellation in Dedekind domains

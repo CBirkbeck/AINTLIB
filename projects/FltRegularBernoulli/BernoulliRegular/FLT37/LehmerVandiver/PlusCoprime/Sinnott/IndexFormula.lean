@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitFamily
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.Bridge
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Cor8_19Forward
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitFamily
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.Bridge
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Cor8_19Forward
 
 /-!
 # Sinnott index formula: structural decomposition
