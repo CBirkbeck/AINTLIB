@@ -531,6 +531,47 @@ theorem projModelPointsEquiv_genericSpecPoint :
       = genericPoint W :=
   projModelPointsEquiv_chartSpecPoint W (x_gen W) (y_gen W) (generic_equation W)
 
+/-- The `[n]`-image coordinates satisfy the Weierstrass equation (extracted from
+`zsmul_genericPoint`'s witness). -/
+theorem mulByInt_equation {n : ℤ} (hn : n ≠ 0) :
+    (W.baseChange W.toAffine.FunctionField).toAffine.Equation
+      (mulByInt_x W n) (mulByInt_y W n) := by
+  obtain ⟨h, -⟩ := zsmul_genericPoint W hn
+  exact WeierstrassCurve.Affine.equation_iff_nonsingular.mpr h
+
+/-- **(L4-iii brick 5 — the explicit chart factorization of `τ ≫ [n]`)** Composing the
+tautological point with multiplication-by-`n` gives exactly the chart-constructed point with the
+division-polynomial coordinates. -/
+theorem genericSpecPoint_comp_mulByHom {n : ℤ} (hn : n ≠ 0) :
+    (genericSpecPoint W).1 ≫ (modelEllipticCurve W).mulByHom n
+      = (chartSpecPoint W (mulByInt_x W n) (mulByInt_y W n) (mulByInt_equation W hn)).1 := by
+  -- view τ as a point of the model elliptic curve over `Spec K(E)`
+  set g : Spec (CommRingCat.of W.toAffine.FunctionField) ⟶ Spec (CommRingCat.of K) :=
+    Spec.map (CommRingCat.ofHom (algebraMap K W.toAffine.FunctionField)) with hg
+  set τP : (modelEllipticCurve W).Point g := genericSpecPoint W with hτ
+  -- the smul acts by composition with [n]
+  have hsm : ((n • τP : (modelEllipticCurve W).Point g) :
+      Spec (CommRingCat.of W.toAffine.FunctionField) ⟶ (modelEllipticCurve W).E)
+      = (τP : Spec (CommRingCat.of W.toAffine.FunctionField) ⟶ (modelEllipticCurve W).E)
+        ≫ (modelEllipticCurve W).mulByHom n :=
+    point_smul_eq_comp_mulBy (modelEllipticCurve W) g n τP
+  -- the dictionary value of n • τ
+  have hdict : projModelPointsEquiv W W.toAffine.FunctionField (n • τP)
+      = n • genericPoint W := by
+    rw [projModelPointsEquiv_zsmul W n τP]
+    congr 1
+    exact projModelPointsEquiv_genericSpecPoint W
+  obtain ⟨hns, hzs⟩ := zsmul_genericPoint W hn
+  rw [hzs] at hdict
+  -- readback: n • τ is the chart point
+  have hchart := eq_chartSpecPoint_of_projModelPointsEquiv_some W hdict
+  have hval : ((n • τP : (modelEllipticCurve W).Point g) :
+      Spec (CommRingCat.of W.toAffine.FunctionField) ⟶ (modelEllipticCurve W).E)
+      = (chartSpecPoint W (mulByInt_x W n) (mulByInt_y W n)
+          (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hns)).1 :=
+    congrArg Subtype.val hchart
+  exact hsm.symm.trans hval
+
 end TautologicalPoint
 
 /-- **(L4-v enabler: generator extensionality for `K(E)`)** Two `K`-algebra homomorphisms out of
