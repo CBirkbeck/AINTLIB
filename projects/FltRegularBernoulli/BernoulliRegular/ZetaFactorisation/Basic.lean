@@ -190,7 +190,7 @@ lemma charLocalFactor_eq_trivial_mul_nontrivial {ℓ : ℕ} [Fact ℓ.Prime]
     charLocalFactor (p := p) ℓ s =
       (1 - (ℓ : ℂ) ^ (-s)) * nontrivialCharLocalFactor p ℓ s := by
   classical
-  unfold charLocalFactor nontrivialCharLocalFactor
+  simp only [charLocalFactor, nontrivialCharLocalFactor]
   rw [show nontrivialCharacters (p := p) = Finset.univ.erase 1 from rfl,
     ← Finset.mul_prod_erase Finset.univ
       (fun χ : DirichletCharacter ℂ p ↦ 1 - χ (ℓ : ZMod p) * (ℓ : ℂ) ^ (-s))
@@ -236,7 +236,7 @@ lemma char_values_factor_through_unit_order {ℓ : ℕ} [Fact ℓ.Prime] (hℓp 
     χ (ℓ : ZMod p) ^ localResidueDegree (p := p) ℓ hℓp = 1 := by
   have hval : ((unitOfPrimeNe p ℓ hℓp : (ZMod p)ˣ) : ZMod p) = (ℓ : ZMod p) := by
     simp [unitOfPrimeNe]
-  unfold localResidueDegree
+  simp only [localResidueDegree]
   rw [← hval, ← map_pow, ← Units.val_pow_eq_pow_val, pow_orderOf_eq_one,
     Units.val_one, map_one]
 
@@ -473,7 +473,7 @@ lemma prod_nontrivial_characters_eval_eq_even_mul_odd (u : (ZMod p)ˣ) (T : ℂ)
       Finset.prod (evenNontrivialCharacters (p := p)) (fun χ ↦ (1 - χ (u : ZMod p) * T)) *
         Finset.prod (oddCharacters (p := p)) (fun χ ↦ (1 - χ (u : ZMod p) * T)) := by
   classical
-  unfold nontrivialCharacters evenNontrivialCharacters oddCharacters
+  simp only [nontrivialCharacters, evenNontrivialCharacters, oddCharacters]
   have hdisj : Disjoint
       (Finset.univ.filter fun χ : DirichletCharacter ℂ p ↦ χ.Even ∧ χ ≠ 1)
       (Finset.univ.filter fun χ : DirichletCharacter ℂ p ↦ χ.Odd) := by
@@ -506,9 +506,9 @@ lemma charLocalFactor_prime_ne_p_via_unit_order {ℓ : ℕ} [Fact ℓ.Prime]
         (Nat.card (DirichletCharacter ℂ p) / localResidueDegree (p := p) ℓ hℓp) := by
   have hval : ((unitOfPrimeNe p ℓ hℓp : (ZMod p)ˣ) : ZMod p) = (ℓ : ZMod p) := by
     simp [unitOfPrimeNe]
-  unfold charLocalFactor
+  simp only [charLocalFactor]
   rw [← hval]
-  unfold localResidueDegree
+  simp only [localResidueDegree]
   exact prod_characters_eval_eq_pow p (unitOfPrimeNe p ℓ hℓp) ((ℓ : ℂ) ^ (-s))
 
 /-- The fiber-size is constant for `χ ↦ χ(ℓ)` over its image (the
@@ -719,7 +719,7 @@ lemma primesOverFinset_card_eq_ncard (ℓ : ℕ) [Fact ℓ.Prime] :
   have hne : (rationalPrimeIdeal ℓ) ≠ ⊥ := by
     rw [rationalPrimeIdeal, Ne, Ideal.span_singleton_eq_bot]
     exact_mod_cast (Fact.out : ℓ.Prime).ne_zero
-  unfold primesOverFinset
+  simp only [primesOverFinset]
   rw [← Set.ncard_coe_finset, IsDedekindDomain.coe_primesOverFinset hne]
 
 lemma mem_primesOverFinset_iff {ℓ : ℕ} [Fact ℓ.Prime] {P : Ideal (𝓞 K)} :
@@ -778,7 +778,7 @@ lemma monicFactorsMod_natDegree_eq_localResidueDegree {ℓ : ℕ} [Fact ℓ.Prim
     rw [hmin, Polynomial.map_cyclotomic_int] at hQ'
     exact Multiset.mem_toFinset.mp hQ'
   rw [Polynomial.natDegree_of_mem_normalizedFactors_cyclotomic hFcard hcop hQmem]
-  unfold localResidueDegree unitOfPrimeNe
+  simp only [localResidueDegree, unitOfPrimeNe]
   rw [← orderOf_units (y := ZMod.unitOfCoprime _ _),
     ← orderOf_units (y := ZMod.unitOfCoprime ℓ _),
     ZMod.coe_unitOfCoprime, ZMod.coe_unitOfCoprime, pow_one]
@@ -795,10 +795,10 @@ lemma monicFactorsMod_card_eq_localPrimeCount {ℓ : ℕ} [Fact ℓ.Prime] (hℓ
   have hcop : ℓ.Coprime p := (coprime_of_prime_ne (p := p) hℓp).symm
   have hFcard : Fintype.card (ZMod ℓ) = ℓ ^ 1 := by
     rw [pow_one]; exact ZMod.card ℓ
-  unfold RingOfIntegers.monicFactorsMod
+  simp only [RingOfIntegers.monicFactorsMod]
   rw [hmin, Polynomial.map_cyclotomic_int,
     Polynomial.normalizedFactors_cyclotomic_card hFcard hcop]
-  unfold localPrimeCount localResidueDegree unitOfPrimeNe
+  simp only [localPrimeCount, localResidueDegree, unitOfPrimeNe]
   rw [card_dirichletCharacter_complex (p := p), Nat.totient_prime hp.out,
     ← orderOf_units (y := ZMod.unitOfCoprime _ _),
     ← orderOf_units (y := ZMod.unitOfCoprime ℓ _),
@@ -828,7 +828,7 @@ lemma cyclotomic_mod_p_eq_X_sub_one_pow :
 lemma monicFactorsMod_at_p_singleton :
     (RingOfIntegers.monicFactorsMod (θ := zetaInteger (p := p) (K := K)) (p := p)).card = 1 := by
   classical
-  unfold RingOfIntegers.monicFactorsMod
+  simp only [RingOfIntegers.monicFactorsMod]
   rw [cyclotomic_mod_p_eq_X_sub_one_pow (p := p) (K := K)]
   have hirr : Irreducible (X - 1 : (ZMod p)[X]) :=
     irreducible_X_sub_C 1
@@ -892,7 +892,7 @@ lemma primesOver_inertiaDeg_eq_localResidueDegree {ℓ : ℕ} [Fact ℓ.Prime]
     Ideal.IsMaximal.of_liesOver_isMaximal (p := Ideal.span {(ℓ : ℤ)}) (P := P)
   simp only [rationalPrimeIdeal, Ideal.inertiaDeg'_eq_inertiaDeg,
     IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd ℓ K P hcop]
-  unfold localResidueDegree unitOfPrimeNe
+  simp only [localResidueDegree, unitOfPrimeNe]
   rw [← orderOf_units]
   rfl
 
@@ -945,7 +945,7 @@ lemma dedekindLocalFactor_eq_pow_localResidueDegree {ℓ : ℕ} [Fact ℓ.Prime]
     have h1 := ncard_primesOver_eq_localPrimeCount p K hℓp
     rw [← hcoe, Set.ncard_coe_finset] at h1
     exact h1
-  unfold dedekindLocalFactor
+  simp only [dedekindLocalFactor]
   have hprod_eq : ∀ P ∈ primesOverFinset K ℓ,
       (1 - (Ideal.absNorm P : ℂ) ^ (-s)) =
         1 - (ℓ : ℂ) ^ (-(localResidueDegree (p := p) ℓ hℓp : ℂ) * s) := by
@@ -971,7 +971,7 @@ lemma dedekindLocalFactor_eq_pow_localResidueDegree {ℓ : ℕ} [Fact ℓ.Prime]
 lemma dedekindLocalFactor_at_p {s : ℂ} :
     dedekindLocalFactor K p s = 1 - (p : ℂ) ^ (-s) := by
   classical
-  unfold dedekindLocalFactor primesOverFinset rationalPrimeIdeal
+  simp only [dedekindLocalFactor, primesOverFinset, rationalPrimeIdeal]
   have hne : (Ideal.span {(p : ℤ)} : Ideal ℤ) ≠ ⊥ := by
     rw [Ne, Ideal.span_singleton_eq_bot]
     exact_mod_cast hp.out.ne_zero

@@ -150,7 +150,7 @@ theorem stickelbergerOrbitCoverage_of_perConjugateGenerator
     -- Ideal.span {∏ γ_a} = ∏ Ideal.span {γ_a} = ∏ (σ_{a⁻¹} q_K)^a.val
     rw [← Ideal.prod_span_singleton (Finset.univ : Finset (CyclotomicUnitDelta p)) γ_a]
     -- Goal: ∏ Ideal.span {γ_a} = stickelbergerIdeal q_K
-    unfold stickelbergerIdeal
+    simp only [stickelbergerIdeal]
     refine Finset.prod_congr rfl ?_
     intro a _
     exact hγ_a_eq a
@@ -216,7 +216,7 @@ theorem stickelbergerConjugateIsPrincipal_of_principal
       S.toConcreteStickelbergerSetup.descentPrime) :
     S.StickelbergerConjugateIsPrincipal := by
   intro a
-  unfold cyclotomicGaloisConjugate
+  simp only [cyclotomicGaloisConjugate]
   exact h_princ.map_ringHom (cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹)
 
 /-- **Constructing per-conjugate generators from principality.**

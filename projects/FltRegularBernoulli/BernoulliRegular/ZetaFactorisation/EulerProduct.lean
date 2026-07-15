@@ -63,7 +63,7 @@ lemma idealNormMultiplicity_p_pow_eq_one (k : ℕ) :
         rw [← primesOver_inertiaDeg_eq_one_at_p (p := p) (K := K) P hPmem]
         exact Ideal.absNorm_eq_pow_inertiaDeg' P hp.out
       _ = p := by simp
-  unfold idealNormMultiplicity
+  simp only [idealNormMultiplicity]
   have : Unique {I : NonzeroIdeal K // Ideal.absNorm I.1 = p ^ k} :=
     { default := ⟨⟨P ^ k, pow_ne_zero k hP_ne⟩, by
           rw [map_pow, habsNormP]⟩
@@ -224,7 +224,7 @@ lemma idealNormMultiplicity_prime_pow_eq_zero_of_not_dvd
     {q : Nat.Primes} [Fact (q : ℕ).Prime] (hq : (q : ℕ) ≠ p) {k : ℕ}
     (hk : ¬ localResidueDegree (p := p) (q : ℕ) hq ∣ k) :
     idealNormMultiplicity K ((q : ℕ) ^ k) = 0 := by
-  unfold idealNormMultiplicity
+  simp only [idealNormMultiplicity]
   rw [Nat.card_eq_zero]
   refine Or.inl ⟨?_⟩
   rintro ⟨⟨I, hI_ne⟩, hI_norm⟩
@@ -357,7 +357,7 @@ lemma idealNormMultiplicity_prime_pow_mul_localResidueDegree_eq_card_sym
     simpa [hofSym_nfactors s] using htoSym_map_val (ofSym s)
   let e : β ≃ Sym α n :=
     ⟨toSym, ofSym, hleft, hright⟩
-  unfold idealNormMultiplicity
+  simp only [idealNormMultiplicity]
   simpa [β, α, hd, Nat.card_eq_fintype_card] using Nat.card_congr e
 
 lemma dedekind_prime_power_series_eq_localFactor_at_p {s : ℂ} (hs : 1 < s.re) :
@@ -490,7 +490,7 @@ lemma LProduct_eq_tprod_localFactors {s : ℂ} (hs : 1 < s.re) :
     LProduct (p := p) s =
       ∏' q : Nat.Primes, ∏ χ : DirichletCharacter ℂ p,
         (1 - χ ((q : ℕ) : ZMod p) * ((q : ℕ) : ℂ) ^ (-s))⁻¹ := by
-  unfold LProduct
+  simp only [LProduct]
   rw [Finset.prod_congr rfl (fun χ _ ↦ LFunction_eq_prime_tprod_of_localFactors p χ hs)]
   exact finite_character_product_tprod_swap (p := p)
     (fun χ q ↦ (1 - χ ((q : ℕ) : ZMod p) * ((q : ℕ) : ℂ) ^ (-s))⁻¹)
@@ -513,7 +513,7 @@ lemma LProduct_eq_eulerProduct {s : ℂ} (hs : 1 < s.re) :
       ∏' q : Nat.Primes, (charLocalFactor (p := p) (q : ℕ) s)⁻¹ := by
   rw [LProduct_eq_tprod_localFactors p hs]
   refine tprod_congr fun q ↦ ?_
-  unfold charLocalFactor
+  simp only [charLocalFactor]
   rw [Finset.prod_inv_distrib]
 
 lemma dedekindZeta_eq_eulerProduct
@@ -583,7 +583,7 @@ lemma LProduct_eq_trivial_mul_nontrivial {s : ℂ} :
     LProduct (p := p) s =
       DirichletCharacter.LFunctionTrivChar p s * nontrivialLProduct p s := by
   classical
-  unfold LProduct nontrivialLProduct
+  simp only [LProduct, nontrivialLProduct]
   rw [show nontrivialCharacters (p := p) = Finset.univ.erase 1 from rfl,
     ← Finset.mul_prod_erase Finset.univ (fun χ ↦ DirichletCharacter.LFunction χ s)
       (Finset.mem_univ 1)]

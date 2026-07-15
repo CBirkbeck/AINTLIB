@@ -90,7 +90,7 @@ theorem cyclotomicUnit_mul_frobeniusPower_val_eq_residueOrbit
       (((a * (ZMod.unitOfCoprime ℓ hℓp : CyclotomicUnitDelta p) ^ i :
           CyclotomicUnitDelta p) : ZMod p)) =
         (residueOrbit ℓ p (a : ZMod p).val i : ZMod p) := by
-    unfold residueOrbit
+    simp only [residueOrbit]
     simp [Units.val_mul, Units.val_pow_eq_pow_val, ZMod.coe_unitOfCoprime]
   have h := congrArg ZMod.val hcast
   rwa [ZMod.val_natCast_of_lt hlt] at h
@@ -209,7 +209,7 @@ theorem normalizedFactors_stickelbergerIdeal_descentPrime_eq :
               S.toConcreteStickelbergerSetup.descentPrime}
             : Multiset (Ideal (𝓞 K))) := by
   classical
-  unfold stickelbergerIdeal
+  simp only [stickelbergerIdeal]
   exact S.normalizedFactors_stickelbergerIdeal_finset_eq Finset.univ
 
 /-- **Discharge of `StickelbergerIdealConjugateMultiplicity` under faithfulness.**
@@ -685,7 +685,7 @@ theorem stickelbergerExactConjugateExponents_iff (γ : 𝓞 K) :
             S.toConcreteStickelbergerSetup.descentPrime ^
             ((a : ZMod p).val + 1) ∣
           Ideal.span ({γ} : Set (𝓞 K)) := by
-  unfold StickelbergerExactConjugateExponents
+  simp only [StickelbergerExactConjugateExponents]
   refine forall_congr' fun a ↦ ?_
   exact emultiplicity_eq_coe
 

@@ -552,7 +552,7 @@ lemma sigmaOfUnitPrimeExponent_eq_distinguishedPrimeExponent
     (a : (ZMod p)ˣ) (χ : DirichletCharacter ℂ p) :
     sigmaOfUnitPrimeExponent (p := p) (L := L) a χ =
       distinguishedPrimeExponent (p := p) (L := L) χ := by
-  unfold sigmaOfUnitPrimeExponent distinguishedPrimeExponent primeAbovePExponent
+  simp only [sigmaOfUnitPrimeExponent, distinguishedPrimeExponent, primeAbovePExponent]
   rw [sigmaOfUnit_smul_distinguishedPrimeAboveP_eq (p := p) (L := L) a]
 
 /-- The additive prime orbit is the singleton `{P₀}`. -/

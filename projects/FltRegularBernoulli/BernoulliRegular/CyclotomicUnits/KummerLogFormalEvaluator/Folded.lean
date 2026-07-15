@@ -269,7 +269,7 @@ theorem valuedLambdaQuotientDworkCoeffModP_scaledNormalizedFiniteLog_eq_smul
       (a : ZMod p) ^ (i : ℕ) *
         valuedLambdaQuotientDworkCoeffModP (p := p) (K := K) i
           (dworkParameterNormalizedFiniteLogApprox (p := p) (K := K)) := by
-  unfold scaledDworkParameterNormalizedFiniteLogApprox
+  simp only [scaledDworkParameterNormalizedFiniteLogApprox]
   rw [samePrimeFiniteLog_scaledNormalizedCoordApprox_eq_quotientMap
       (p := p) (K := K) a,
     quotientMap_valuedIntegerCyclotomicEquiv_factorPow

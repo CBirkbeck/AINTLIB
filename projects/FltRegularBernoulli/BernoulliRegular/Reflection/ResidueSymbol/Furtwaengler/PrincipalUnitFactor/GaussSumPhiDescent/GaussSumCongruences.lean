@@ -132,7 +132,7 @@ theorem gaussSum_one_eq_neg_one_of_addChar_ne_one
   calc
     _root_.gaussSum (1 : MulChar F R) ψ =
         (Finset.univ.erase (0 : F)).sum (fun x ↦ ψ x) := by
-      unfold _root_.gaussSum
+      simp only [_root_.gaussSum]
       rw [← Finset.sum_erase_add (Finset.univ : Finset F)
         (fun x ↦ (1 : MulChar F R) x * ψ x) (Finset.mem_univ (0 : F))]
       simp only [MulChar.map_zero, zero_mul, add_zero]
@@ -156,7 +156,7 @@ theorem gaussSum_add_one_mem_ideal_of_mulChar_sub_one_mem
   classical
   have hdiff :
       _root_.gaussSum χ ψ - _root_.gaussSum (1 : MulChar F R) ψ ∈ I := by
-    unfold _root_.gaussSum
+    simp only [_root_.gaussSum]
     rw [← Finset.sum_sub_distrib]
     refine Ideal.sum_mem _ fun x _ => ?_
     by_cases hx : x = 0
@@ -321,7 +321,7 @@ theorem gaussSumInt_add_one_mem_zeta_p_sub_one
     (hψ : S.psiInt ≠ 1) :
     S.gaussSumInt a + 1 ∈
       Ideal.span ({S.zeta_p_int - 1} : Set (𝓞 R')) := by
-  unfold ConcreteStickelbergerSetup.gaussSumInt
+  simp only [ConcreteStickelbergerSetup.gaussSumInt]
   exact gaussSum_add_one_mem_ideal_of_mulChar_sub_one_mem
     (S.residueCharInt ^ a) S.psiInt hψ
     (fun x hx => S.residueCharInt_pow_apply_sub_one_mem_zeta_p_sub_one a hx)
@@ -484,7 +484,7 @@ theorem residueCharInt_pow_eq_one
     (S : ConductorFlexibleConcreteStickelbergerSetup ℓ p k K R') :
     S.residueCharInt ^ p = 1 := by
   let : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
-  unfold ConductorFlexibleConcreteStickelbergerSetup.residueCharInt
+  simp only [ConductorFlexibleConcreteStickelbergerSetup.residueCharInt]
   exact residueMulChar_pow_eq_one_mulChar
     S.zeta_k S.hzeta_k S.hdiv S.zeta_p_int_unit
     S.zeta_p_int_unit_isPrimitiveRoot
@@ -518,7 +518,7 @@ theorem gaussSumInt_add_one_mem_zeta_p_sub_one
     (hψ : S.psiInt ≠ 1) :
     S.gaussSumInt a + 1 ∈
       Ideal.span ({S.zeta_p_int - 1} : Set (𝓞 R')) := by
-  unfold ConductorFlexibleConcreteStickelbergerSetup.gaussSumInt
+  simp only [ConductorFlexibleConcreteStickelbergerSetup.gaussSumInt]
   exact gaussSum_add_one_mem_ideal_of_mulChar_sub_one_mem
     (S.residueCharInt ^ a) S.psiInt hψ
     (fun x hx => S.residueCharInt_pow_apply_sub_one_mem_zeta_p_sub_one a hx)

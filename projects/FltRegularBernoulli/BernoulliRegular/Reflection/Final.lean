@@ -90,7 +90,7 @@ def ReflectionMinusNontrivialityBridge.ofRegular
       hp_prime.coprime_iff_not_dvd.mp hreg
     have hdvd : hPlus K ∣ Fintype.card (ClassGroup (𝓞 K)) := by
       have hh := hPlus_dvd_h p hp_odd K
-      unfold BernoulliRegular.h at hh
+      simp only [BernoulliRegular.h] at hh
       convert hh
     exact fun h => h_not_dvd_h (h.trans hdvd)
 

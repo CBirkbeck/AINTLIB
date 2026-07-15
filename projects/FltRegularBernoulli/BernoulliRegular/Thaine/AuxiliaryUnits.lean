@@ -84,7 +84,7 @@ theorem auxiliaryCyclotomicUnitOneMinus_eq_neg
     [IsCyclotomicExtension {ℓ} K M] :
     auxiliaryCyclotomicUnitOneMinus ℓ K M =
       -(auxiliaryCyclotomicUnitMinusOne ℓ K M) := by
-  unfold auxiliaryCyclotomicUnitOneMinus auxiliaryCyclotomicUnitMinusOne
+  simp only [auxiliaryCyclotomicUnitOneMinus, auxiliaryCyclotomicUnitMinusOne]
   ring
 
 end Thaine

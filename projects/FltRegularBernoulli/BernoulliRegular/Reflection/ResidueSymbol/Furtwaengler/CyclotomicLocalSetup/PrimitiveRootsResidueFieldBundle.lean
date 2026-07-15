@@ -428,7 +428,7 @@ theorem residueMap_of_split_ker {R' : Type w} [Field R'] [NumberField R'] [Algeb
     (Q : Ideal (𝓞 R')) (P : Ideal (𝓞 K₀))
     (iso : (𝓞 R' ⧸ Q) ≃+* (𝓞 K₀ ⧸ P)) :
     RingHom.ker (residueMap_of_split Q P iso) = Q := by
-  unfold residueMap_of_split
+  simp only [residueMap_of_split]
   ext x
   constructor
   · intro hx
@@ -470,7 +470,7 @@ theorem residueMap_of_split_algebraMap {R' : Type w} [Field R'] [NumberField R']
     (x : 𝓞 K₀) :
     residueMap_of_split Q P iso (algebraMap (𝓞 K₀) (𝓞 R') x) =
       (Ideal.Quotient.mk P) x := by
-  unfold residueMap_of_split
+  simp only [residueMap_of_split]
   simp only [RingHom.coe_comp, Function.comp_apply]
   exact h_compat x
 
@@ -604,7 +604,7 @@ theorem canonicalSplittingIso_isKAlgebraCompatible
   -- iso (Quotient.mk Q (algebraMap x)) = Quotient.mk P x
   -- ⟺ Quotient.mk Q (algebraMap x) = (canonicalQuotientMap) (Quotient.mk P x)
   -- and the RHS = Quotient.mk Q (algebraMap x) by canonicalQuotientMap_mk.
-  unfold canonicalSplittingIso
+  simp only [canonicalSplittingIso]
   apply (RingEquiv.ofBijective (canonicalQuotientMap P Q h_lies) _).injective
   rw [RingEquiv.apply_symm_apply]
   exact (canonicalQuotientMap_mk P Q h_lies x).symm

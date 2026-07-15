@@ -173,7 +173,7 @@ theorem le_samePrimeArtinHasseTailTermOrder_of_two_lt
   have hgoalZ :
       (r : ℤ) ≤ (samePrimeArtinHasseTailTermOrder (p := p) r : ℤ) := by
     rw [intCast_samePrimeArtinHasseTailTermOrder (p := p) r]
-    unfold FormalDwork.artinHasseTailValuationIndex
+    simp only [FormalDwork.artinHasseTailValuationIndex]
     nlinarith
   exact_mod_cast hgoalZ
 
@@ -328,7 +328,7 @@ theorem samePrimeFiniteArtinHasseTail_eq_of_sub_mem
     samePrimeFiniteArtinHasseTail (p := p) (K := K) N x hx =
       samePrimeFiniteArtinHasseTail (p := p) (K := K) N y hy := by
   classical
-  unfold samePrimeFiniteArtinHasseTail
+  simp only [samePrimeFiniteArtinHasseTail]
   refine Finset.sum_congr rfl ?_
   intro r hr
   exact samePrimeFiniteArtinHasseTailTerm_eq_of_sub_mem
@@ -736,7 +736,7 @@ theorem artinHasseTail_evalₐ (hp_two : 2 < p) (N : ℕ) :
     AdicCompletion.evalₐ (lambdaIdeal p K) N
         (artinHasseTail (p := p) (K := K) hp_two) =
       dworkParameterFiniteArtinHasseTailCoord (p := p) (K := K) N := by
-  unfold artinHasseTail
+  simp only [artinHasseTail]
   let hEq :
       ((lambdaIdeal p K) ^ N • ⊤ : Ideal (ValuedIntegerRing p K)) =
         (lambdaIdeal p K) ^ N := by
@@ -807,7 +807,7 @@ theorem artinHasseTailUnit_evalₐ (hp_two : 2 < p) (N : ℕ) :
     AdicCompletion.evalₐ (lambdaIdeal p K) N
         (artinHasseTailUnit (p := p) (K := K) hp_two) =
       dworkParameterFiniteArtinHasseTailUnitCoord (p := p) (K := K) N := by
-  unfold artinHasseTailUnit
+  simp only [artinHasseTailUnit]
   let hEq :
       ((lambdaIdeal p K) ^ N • ⊤ : Ideal (ValuedIntegerRing p K)) =
         (lambdaIdeal p K) ^ N := by
@@ -849,7 +849,7 @@ theorem samePrimeFiniteArtinHasseTail_eq_zero_of_succ_le_sq
     (hN : N + 1 ≤ (p - 1) ^ 2) :
     samePrimeFiniteArtinHasseTail (p := p) (K := K) N x hx = 0 := by
   classical
-  unfold samePrimeFiniteArtinHasseTail
+  simp only [samePrimeFiniteArtinHasseTail]
   exact Finset.sum_eq_zero fun r hr ↦
     samePrimeFiniteArtinHasseTailTerm_eq_zero_of_succ_le
       (p := p) (K := K) (N := N) hx

@@ -33,7 +33,7 @@ local instance : NeZero (p - 1) := ⟨Nat.sub_ne_zero_of_lt hp.out.one_lt⟩
 
 @[simp] lemma distinguishedPrimeExponent_one :
     distinguishedPrimeExponent (p := p) (L := L) (1 : DirichletCharacter ℂ p) = 0 := by
-  unfold distinguishedPrimeExponent gaussSumIdeal
+  simp only [distinguishedPrimeExponent, gaussSumIdeal]
   have hτ :
       gaussSumIntegers p L (1 : DirichletCharacter ℂ p) = (-1 : 𝓞 L) := by
     apply Subtype.ext
@@ -86,7 +86,7 @@ lemma stickelbergerEmbedding_jacobiSumLift
             (Units.mk0 (1 - x) (by
               apply sub_ne_zero.mpr
               simpa [eq_comm] using hx1))
-  unfold jacobiSumLift jacobiSum
+  simp only [jacobiSumLift, jacobiSum]
   let f : 𝓞 L →+* ℂ :=
     (stickelbergerEmbedding p L).toRingHom.comp (algebraMap (𝓞 L) L)
   change f (∑ x : ZMod p, term x) =
@@ -114,7 +114,7 @@ lemma gaussSumLiftCharacterValue_mem_characterSubfield
     IntermediateField.subset_adjoin ℚ
       ({(((gaussSumLiftCharacterRoot (p := p) L : 𝓞 L) : L))} : Set L)
       (by simp)
-  unfold gaussSumLiftCharacterValue
+  simp only [gaussSumLiftCharacterValue]
   exact pow_mem hroot
     ((stickelbergerCharacterExponent (p := p) χ : ℕ) *
       (characterUnitGeneratorExponent (p := p) a : ℕ))
@@ -132,7 +132,7 @@ lemma jacobiSumLift_mem_characterSubfield
               (Units.mk0 (1 - x) (by
                 apply sub_ne_zero.mpr
                 simpa [eq_comm] using hx1)))
-  unfold jacobiSumLift
+  simp only [jacobiSumLift]
   have hsum : ∑ x : ZMod p, term x ∈
       (characterSubfield (L := L) (p := p)).toSubring :=
     sum_mem fun x hx => by
@@ -193,7 +193,7 @@ lemma gaussSumIdeal_mul_eq_jacobiSumLift_mul_gaussSumIdeal
         gaussSumIdeal (p := p) (L := L) ψ =
       Ideal.span ({jacobiSumLift (p := p) (L := L) χ ψ} : Set (𝓞 L)) *
         gaussSumIdeal (p := p) (L := L) (χ * ψ) := by
-  unfold gaussSumIdeal
+  simp only [gaussSumIdeal]
   rw [Ideal.span_singleton_mul_span_singleton,
     Ideal.span_singleton_mul_span_singleton]
   exact congrArg (fun x : 𝓞 L => Ideal.span ({x} : Set (𝓞 L)))

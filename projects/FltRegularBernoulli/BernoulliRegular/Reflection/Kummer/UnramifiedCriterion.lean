@@ -208,7 +208,7 @@ theorem count_auxFractionalIdealRoot
     FractionalIdeal.count K v (auxFractionalIdealRoot P) =
       FractionalIdeal.count K v
         (toPrincipalIdeal (𝓞 K) K P.genUnit : FractionalIdeal (𝓞 K)⁰ K) / (p : ℤ) := by
-  unfold auxFractionalIdealRoot
+  simp only [auxFractionalIdealRoot]
   rw [FractionalIdeal.count_finprod K v
     (fun w ↦ FractionalIdeal.count K w
       (toPrincipalIdeal (𝓞 K) K P.genUnit : FractionalIdeal (𝓞 K)⁰ K) / (p : ℤ))
@@ -217,7 +217,7 @@ theorem count_auxFractionalIdealRoot
 /-- The auxiliary ideal `J` is nonzero. -/
 theorem auxFractionalIdealRoot_ne_zero (P : KummerPresentation Ext) :
     auxFractionalIdealRoot P ≠ 0 := by
-  unfold auxFractionalIdealRoot
+  simp only [auxFractionalIdealRoot]
   -- The finprod is over `v.asIdeal ^ (e_v)`, all nonzero.
   -- Use `finprod_mem_induction` with `I ≠ 0` as the property.
   apply finprod_induction (fun I : FractionalIdeal (𝓞 K)⁰ K ↦ I ≠ 0)

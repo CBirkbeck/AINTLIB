@@ -302,7 +302,7 @@ theorem det_D_nontriv_sq_sub_rank_one_via_matrix_det_lemma
               w ≠ NumberField.Units.dirichletUnitTheorem.w₀}) =>
             -sinnottCorrectionColVec (p := p) K
               ((equivNontrivCharKplusNeW₀ p K hp_two).symm w).val)).det := by
-  unfold SinnottDiagonalEigenvalueDetUnit at hD
+  simp only [SinnottDiagonalEigenvalueDetUnit] at hD
   exact Matrix.det_add_replicateCol_mul_replicateRow hD _ _
 
 set_option backward.isDefEq.respectTransparency false in

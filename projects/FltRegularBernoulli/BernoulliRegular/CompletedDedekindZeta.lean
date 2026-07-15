@@ -69,7 +69,7 @@ theorem completedDedekindZetaCyclotomic_one_sub (s : ℂ) :
         (∏ χ ∈ nontrivialCharacters p, DirichletCharacter.rootNumber χ) *
         completedDedekindZetaCyclotomic p s := by
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
-  unfold completedDedekindZetaCyclotomic
+  simp only [completedDedekindZetaCyclotomic]
   rw [completedRiemannZeta_one_sub,
     prod_completedLFunction_nontrivial_one_sub p s,
     card_nontrivialCharacters p]
@@ -90,7 +90,7 @@ theorem prod_rootNumber_eq_one_of_cleanFE
   have hp_cpow_ne : ((p : ℂ) ^ (((p : ℕ) - 2 : ℕ) * (s - 1 / 2 : ℂ))) ≠ 0 :=
     Complex.cpow_ne_zero_iff.mpr (Or.inl (by exact_mod_cast hp.out.ne_zero))
   have h_Λ_ne : completedDedekindZetaCyclotomic p s ≠ 0 := by
-    unfold completedDedekindZetaCyclotomic
+    simp only [completedDedekindZetaCyclotomic]
     exact mul_ne_zero (completedRiemannZeta_ne_zero_of_one_lt_re hs)
       (Finset.prod_ne_zero_iff.mpr fun χ _ ↦ completedLFunction_ne_zero_of_one_lt_re χ hs)
   -- From h_half: p^{...} · Λ_K(s) = p^{...} · (∏ W_χ) · Λ_K(s).

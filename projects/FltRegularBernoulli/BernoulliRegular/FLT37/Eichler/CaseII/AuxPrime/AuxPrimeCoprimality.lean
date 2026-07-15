@@ -817,7 +817,7 @@ theorem lemma96ResidueMap_zeta : lemma96ResidueMap ζ₀ = ((2 : ℕ) : ZMod 149
       CyclotomicIntegers.zeta 37 := by
     rw [← CyclotomicIntegers.equiv_zeta]
     exact RingEquiv.symm_apply_apply _ _
-  unfold lemma96ResidueMap
+  simp only [lemma96ResidueMap]
   rw [RingHom.comp_apply, RingEquiv.toRingHom_eq_coe, RingHom.coe_coe, hζ_toInt, hsymm]
   exact BernoulliRegular.FLT37.cyclotomicReduction_zeta 37 149 4 _ _ _
 

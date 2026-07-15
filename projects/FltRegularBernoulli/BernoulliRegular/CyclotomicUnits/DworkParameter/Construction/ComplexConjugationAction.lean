@@ -162,7 +162,7 @@ theorem map_cyclotomicRingOfIntegersEquiv_coe
     (a : CyclotomicUnitDelta p) (x : 𝓞 K) :
     ((cyclotomicRingOfIntegersEquiv (p := p) K a x : 𝓞 K) : K) =
       cyclotomicSigmaOfUnit (p := p) K a (x : K) := by
-  unfold cyclotomicRingOfIntegersEquiv
+  simp only [cyclotomicRingOfIntegersEquiv]
   change (cyclotomicSigmaOfUnit (p := p) K a • x : K) =
     cyclotomicSigmaOfUnit (p := p) K a (x : K)
   exact algebraMap.coe_smul' (cyclotomicSigmaOfUnit (p := p) K a) x K

@@ -298,7 +298,7 @@ theorem samePrimeFiniteLog_quotientMap_cyclotomic {N : ℕ}
         (valuedIntegerCyclotomicEquiv (p := p) K a x)
         (valuedIntegerCyclotomicEquiv_mem_lambdaIdeal (p := p) (K := K) a hx) := by
   classical
-  unfold samePrimeFiniteLog
+  simp only [samePrimeFiniteLog]
   rw [map_sum]
   exact Finset.sum_congr rfl fun n _hn ↦
     samePrimeFiniteLogTerm_quotientMap_cyclotomic (p := p) (K := K) a hx

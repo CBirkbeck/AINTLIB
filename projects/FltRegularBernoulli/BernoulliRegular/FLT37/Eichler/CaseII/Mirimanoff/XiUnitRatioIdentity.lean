@@ -97,7 +97,7 @@ noncomputable def xiUnit (a : ℕ) (ha : a.Coprime p) : (𝓞 K)ˣ :=
 theorem xiUnit_val (a : ℕ) (ha : a.Coprime p) :
     (xiUnit p K a ha : 𝓞 K) =
       (zetaU p K ^ (halfExp (p := p) (a : ℤ)) : (𝓞 K)ˣ) * cyclotomicUnit p K a := by
-  unfold xiUnit
+  simp only [xiUnit]
   rw [Units.val_mul, cyclotomicUnitUnit_val]
 
 /-! ### `ζ`-power exponent reduction modulo `p`
@@ -203,7 +203,7 @@ theorem halfExp_shift (hp_odd : p ≠ 2) {j : ℤ} {s d : ℕ}
   have h2 := two_mul_inv2_int (p := p) hp_odd
   obtain ⟨t, ht⟩ := hdvd
   -- `s - d = 2j + p·t`.  Then `2·(halfExp d - halfExp s - j) = (s-d)(p+1) - 2j = p·(...)`.
-  unfold halfExp
+  simp only [halfExp]
   -- `(1-d)c - ((1-s)c + j) = (s-d)c - j = (2j+pt)c - j = j(2c-1) + ptc = p·(j + tc)`,
   -- using `2c = p+1` (so `2c - 1 = p`).  Witness: `j + t·c`.
   refine ⟨j + t * ((p + 1) / 2 : ℕ), ?_⟩

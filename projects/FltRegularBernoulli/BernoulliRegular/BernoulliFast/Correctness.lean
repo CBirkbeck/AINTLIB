@@ -105,7 +105,7 @@ theorem binomSum_loop_eq (m : ℕ) (bs : List ℚ) (k : ℕ) (c acc : ℚ)
 theorem binomSum_eq (bs : List ℚ) (m : ℕ) :
     binomSum bs m =
       ∑ k ∈ range bs.length, ↑(m.choose k) * bs.getD k 0 := by
-  unfold binomSum
+  simp only [binomSum]
   rw [binomSum_loop_eq m bs 0 1 0 (by simp)]
   simp
 
@@ -239,7 +239,7 @@ theorem eq_bernoulli_of_sum_eq (f : ℕ → ℚ)
 
 /-- `bernoulliCompute n = bernoulli n`. -/
 theorem bernoulliCompute_eq (n : ℕ) : bernoulliCompute n = bernoulli n := by
-  unfold bernoulliCompute
+  simp only [bernoulliCompute]
   rw [List.getLast!_eq_getElem!, List.getElem!_eq_getElem?_getD,
     ← List.getD_eq_getElem?_getD]
   simpa [bernoulliList_length] using bernoulliList_getD_eq n n le_rfl

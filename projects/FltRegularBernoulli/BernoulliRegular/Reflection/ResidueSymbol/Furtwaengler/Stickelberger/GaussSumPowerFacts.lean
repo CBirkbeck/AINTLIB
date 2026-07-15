@@ -316,7 +316,7 @@ theorem gaussSum_mem_ideal_of_addChar_sub_one_mem
     {I : Ideal R'} (h : ∀ x : R, ψ x - 1 ∈ I) :
     gaussSum χ ψ ∈ I := by
   have h_split : gaussSum χ ψ = ∑ x, χ x * (ψ x - 1) + ∑ x, χ x := by
-    unfold gaussSum
+    simp only [gaussSum]
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl fun x _ ↦ ?_
     rw [mul_sub, mul_one, sub_add_cancel]
@@ -476,7 +476,7 @@ theorem residueJacobiSum_mem_closure
     jacobiSum (residueMulChar zeta_q hzeta_q hdiv zeta_R hzeta_R)
         ((residueMulChar zeta_q hzeta_q hdiv zeta_R hzeta_R) ^ i) ∈
       Subring.closure {((zeta_R : R'ˣ) : R')} := by
-  unfold jacobiSum
+  simp only [jacobiSum]
   apply Subring.sum_mem
   intro x _
   apply Subring.mul_mem

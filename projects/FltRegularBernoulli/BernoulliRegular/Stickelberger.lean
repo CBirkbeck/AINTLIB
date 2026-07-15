@@ -96,7 +96,7 @@ lemma stickelbergerScaled_eq_stickelbergerCoefficientPackage :
     stickelbergerScaled p =
       stickelbergerCoefficientPackage (p := p)
         (fun a : (ZMod p)ˣ ↦ ((a : ZMod p).val : ℤ)) := by
-  unfold stickelbergerScaled stickelbergerCoefficientPackage
+  simp only [stickelbergerScaled, stickelbergerCoefficientPackage]
   exact Finset.sum_congr rfl fun a _ ↦ by rw [MonoidAlgebra.smul_single]; simp
 
 /-- The coefficient at `a⁻¹` in `p · θ_p`. -/

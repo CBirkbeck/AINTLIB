@@ -106,7 +106,7 @@ theorem caseIIResidueProvenance_eigenvector_castSucc
       cyclotomicUnitFreePartModPClass (p := 37) (CyclotomicField 37 ℚ)
         (Additive.ofMul (cyclotomicUnitFreeClass (CyclotomicField 37 ℚ)
           (FLT37.pollaczekUnit 37 (CyclotomicField 37 ℚ) (2 * (k : ℕ) + 2)))) := by
-  unfold caseIIConjugateResidue_eigenvector
+  simp only [caseIIConjugateResidue_eigenvector]
   congr 2
 
 /-- **Every free-part class decomposes over the `Fin 18` eigenvectors** (proven, axiom-clean).

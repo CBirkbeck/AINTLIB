@@ -143,7 +143,7 @@ theorem caseII_unitsComplexConj_xiUnit (b : ℕ) (hb : b.Coprime 37) :
       zetaPow 37 (CyclotomicField 37 ℚ) (halfExp (p := 37) (b : ℤ)) := by
     apply zetaPow_congr
     have h2 := two_mul_inv2_int (p := 37) (by decide)
-    unfold halfExp
+    simp only [halfExp]
     -- `-(1-b)c + (1-b) - (1-b)c = (1-b)(1 - 2c) = (1-b)·(-37)`.
     refine ⟨-(1 - (b : ℤ)), ?_⟩
     linear_combination -(1 - (b : ℤ)) * h2

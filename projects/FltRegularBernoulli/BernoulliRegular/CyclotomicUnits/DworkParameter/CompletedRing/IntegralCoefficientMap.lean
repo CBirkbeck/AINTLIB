@@ -330,7 +330,7 @@ def dworkParameterApprox (N : ℕ) : ValuedIntegerRing p K :=
 @[simp]
 theorem dworkParameterApprox_two :
     dworkParameterApprox p K 2 = valuedCyclotomicLambdaInteger p K := by
-  unfold dworkParameterApprox
+  simp only [dworkParameterApprox]
   rw [integralInverseSeries_trunc_two]
   simp
 

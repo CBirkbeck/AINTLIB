@@ -55,7 +55,7 @@ theorem normalizedFactors_stickelbergerIdeal_descentPrime_eq :
               S.concrete.descentPrime}
             : Multiset (Ideal (𝓞 K))) := by
   classical
-  unfold stickelbergerIdeal
+  simp only [stickelbergerIdeal]
   exact S.normalizedFactors_stickelbergerIdeal_finset_eq Finset.univ
 
 /-- Flexible repeated Stickelberger multiplicity at an actual prime ideal.
@@ -98,7 +98,7 @@ theorem StickelbergerRepeatedMultiplicity_conjugate_eq_frobeniusCosetSum
       S.concrete.descentPrime S.concrete.descentPrime_contains_ell
   let : S.concrete.descentPrime.LiesOver (Ideal.span ({(ℓ : ℤ)} : Set ℤ)) :=
     ⟨h_under.symm⟩
-  unfold StickelbergerRepeatedMultiplicity
+  simp only [StickelbergerRepeatedMultiplicity]
   refine Finset.sum_congr rfl ?_
   intro b _hb
   by_cases h :
@@ -124,7 +124,7 @@ theorem normalizedFactors_stickelbergerIdeal_count_eq_repeatedMultiplicity
       S.StickelbergerRepeatedMultiplicity Q := by
   classical
   rw [S.normalizedFactors_stickelbergerIdeal_descentPrime_eq]
-  unfold StickelbergerRepeatedMultiplicity
+  simp only [StickelbergerRepeatedMultiplicity]
   rw [Multiset.count_sum']
   refine Finset.sum_congr rfl ?_
   intro a _ha

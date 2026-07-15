@@ -61,7 +61,7 @@ theorem dworkThetaFrobeniusProduct_eq_piFinset_sum
       ∑ m ∈ Fintype.piFinset (fun _ : Fin f => Finset.range (N + 1)),
         dworkMultiIndexTerm ℓ dworkCoeff u m := by
   classical
-  unfold dworkThetaFrobeniusProduct dworkThetaTrunc dworkMultiIndexTerm
+  simp only [dworkThetaFrobeniusProduct, dworkThetaTrunc, dworkMultiIndexTerm]
   rw [Finset.prod_univ_sum]
   refine Finset.sum_congr rfl fun m _hm => ?_
   rw [Finset.prod_mul_distrib]

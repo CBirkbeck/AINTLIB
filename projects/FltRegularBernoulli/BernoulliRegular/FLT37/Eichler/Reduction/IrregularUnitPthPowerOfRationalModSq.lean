@@ -112,7 +112,7 @@ theorem caseIICor823_CPlusExponentProduct_mem_pPowerSubgroup_of_dvd
     CPlusExponentProduct (p := 37) (K := CyclotomicField 37 ℚ) (by decide) s e ∈
       pPowerSubgroup (EPlus (K := CyclotomicField 37 ℚ)) 37 := by
   classical
-  unfold CPlusExponentProduct
+  simp only [CPlusExponentProduct]
   -- The sign factor `(−1)^s` is a `37`-th power.
   refine Subgroup.mul_mem _
     ((pPowerSubgroup (EPlus (K := CyclotomicField 37 ℚ)) 37).zpow_mem

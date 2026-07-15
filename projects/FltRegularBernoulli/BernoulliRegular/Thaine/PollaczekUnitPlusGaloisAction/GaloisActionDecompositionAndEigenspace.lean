@@ -65,7 +65,7 @@ theorem cyclotomicSigmaOfUnit_smul_pollaczekUnitPlus_decomp
       ((pollaczekUnit p K i : (𝓞 K)ˣ) : 𝓞 K) *
       ((NumberField.IsCMField.unitsComplexConj K (pollaczekUnit p K i) :
         (𝓞 K)ˣ) : 𝓞 K) := by
-    unfold pollaczekUnitPlus
+    simp only [pollaczekUnitPlus]
     rw [Units.val_mul]
   rw [h_def, smul_mul']
   -- Bridge unitsComplexConj K (pollaczekUnit) val = σ_{-1} • pollaczekUnit val (T-EIG-B0).
@@ -680,7 +680,7 @@ theorem flt37_pollaczekUnit_class_in_powerQuotient_ne_one
   rw [cyclotomicUnitPowerClass, QuotientGroup.mk'_apply,
       QuotientGroup.eq_one_iff] at h_eq
   -- h_eq : pollaczekUnit ∈ CyclotomicUnitPowerSubgroup (= range of pow 37).
-  unfold CyclotomicUnitPowerSubgroup at h_eq
+  simp only [CyclotomicUnitPowerSubgroup] at h_eq
   rw [MonoidHom.mem_range] at h_eq
   obtain ⟨α, hα⟩ := h_eq
   -- hα : α^37 = pollaczekUnit (as units).
@@ -724,7 +724,7 @@ theorem flt37_pollaczekUnitPlus_class_in_powerQuotient_ne_one
   intro h_eq
   rw [cyclotomicUnitPowerClass, QuotientGroup.mk'_apply,
       QuotientGroup.eq_one_iff] at h_eq
-  unfold CyclotomicUnitPowerSubgroup at h_eq
+  simp only [CyclotomicUnitPowerSubgroup] at h_eq
   rw [MonoidHom.mem_range] at h_eq
   obtain ⟨α, hα⟩ := h_eq
   exact flt37_pollaczekUnitPlus_unit_ne_pow_37 α hα.symm

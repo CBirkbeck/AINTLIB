@@ -53,7 +53,7 @@ theorem range_cyclotomicUnitFamilyKplusFinRank_eq
   ext x
   constructor
   · rintro ⟨i, rfl⟩
-    simp only [FLT37.Sinnott.cyclotomicUnitFamilyKplusFinRank]
+    unfold FLT37.Sinnott.cyclotomicUnitFamilyKplusFinRank
     exact ⟨i.cast ((NumberField.IsCMField.units_rank_eq_units_rank (K := K)).trans
       (units_rank_eq_prime_sub_three_div_two (p := p) (K := K))), rfl⟩
   · rintro ⟨i, rfl⟩

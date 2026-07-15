@@ -248,7 +248,7 @@ private theorem neg_natCast_ne_zero_of_pos_of_lt {p m : ℕ} (hpos : 0 < m) (hlt
 /-- The constant coefficient of `mirimanoffPolynomial p n` is `0`. -/
 theorem mirimanoffPolynomial_coeff_zero (p : ℕ) [Fact p.Prime] (n : ℕ) :
     (mirimanoffPolynomial p n).coeff 0 = 0 := by
-  simp only [mirimanoffPolynomial]
+  unfold mirimanoffPolynomial
   rw [Polynomial.finsetSum_coeff]
   apply Finset.sum_eq_zero
   intro k hk
@@ -268,7 +268,7 @@ is `0`. -/
 theorem mirimanoffPolynomial_coeff_of_p_le (p : ℕ) [Fact p.Prime] (n k : ℕ)
     (hk : p ≤ k) :
     (mirimanoffPolynomial p n).coeff k = 0 := by
-  simp only [mirimanoffPolynomial]
+  unfold mirimanoffPolynomial
   rw [Polynomial.finsetSum_coeff]
   apply Finset.sum_eq_zero
   intro j hj
@@ -296,7 +296,7 @@ theorem mirimanoffPolynomial_coeff_of_mem_Ico (p : ℕ) [Fact p.Prime] (n k : �
     (hk : k ∈ Finset.Ico 1 p) :
     (mirimanoffPolynomial p n).coeff k = (k : ZMod p) ^ (n - 1) := by
   rw [Finset.mem_Ico] at hk
-  simp only [mirimanoffPolynomial]
+  unfold mirimanoffPolynomial
   rw [Polynomial.finsetSum_coeff]
   rw [Finset.sum_eq_single k]
   · rw [Polynomial.coeff_C_mul, Polynomial.coeff_X_pow_self, mul_one]
@@ -417,7 +417,7 @@ theorem mirimanoffPolynomial_coeff (p : ℕ) [Fact p.Prime] (n k : ℕ) :
 
 theorem mirimanoffPolynomial_eval_zero (p : ℕ) [Fact p.Prime] (n : ℕ) :
     (mirimanoffPolynomial p n).eval 0 = 0 := by
-  simp only [mirimanoffPolynomial]
+  unfold mirimanoffPolynomial
   rw [Polynomial.eval_finsetSum]
   apply Finset.sum_eq_zero
   intro k hk
@@ -428,7 +428,7 @@ theorem mirimanoffPolynomial_eval_zero (p : ℕ) [Fact p.Prime] (n : ℕ) :
 
 theorem mirimanoffPolynomial_natDegree_le (p : ℕ) [Fact p.Prime] (n : ℕ) :
     (mirimanoffPolynomial p n).natDegree ≤ p - 1 := by
-  simp only [mirimanoffPolynomial]
+  unfold mirimanoffPolynomial
   refine Polynomial.natDegree_sum_le_of_forall_le _ _ fun k hk => ?_
   rw [Finset.mem_Ico] at hk
   refine (Polynomial.natDegree_C_mul_le _ _).trans ?_
@@ -440,7 +440,7 @@ expected explicit sum. -/
 theorem mirimanoffPolynomial_eval (p : ℕ) [Fact p.Prime] (n : ℕ) (t : ZMod p) :
     (mirimanoffPolynomial p n).eval t =
       ∑ k ∈ Finset.Ico 1 p, (k : ZMod p) ^ (n - 1) * t ^ k := by
-  simp only [mirimanoffPolynomial]
+  unfold mirimanoffPolynomial
   rw [Polynomial.eval_finsetSum]
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_pow, Polynomial.eval_X]
@@ -531,7 +531,7 @@ the sum of all positive-degree monomials below `X^p`. -/
 theorem mirimanoffPolynomial_one (p : ℕ) [Fact p.Prime] :
     mirimanoffPolynomial p 1 =
       ∑ k ∈ Finset.Ico 1 p, Polynomial.X ^ k := by
-  simp only [mirimanoffPolynomial]
+  unfold mirimanoffPolynomial
   refine Finset.sum_congr rfl fun k _ => ?_
   rw [show (1 : ℕ) - 1 = 0 from rfl, pow_zero, Polynomial.C_1, one_mul]
 
@@ -549,7 +549,7 @@ theorem mirimanoffPolynomial_succ_eq_X_mul_derivative (p : ℕ) [Fact p.Prime]
     {n : ℕ} (hn : 1 ≤ n) :
     mirimanoffPolynomial p (n + 1) =
       Polynomial.X * (mirimanoffPolynomial p n).derivative := by
-  simp only [mirimanoffPolynomial]
+  unfold mirimanoffPolynomial
   rw [Polynomial.derivative_sum, Finset.mul_sum]
   refine Finset.sum_congr rfl fun k hk => ?_
   rw [Finset.mem_Ico] at hk
@@ -603,7 +603,7 @@ theorem sum_Ico_natCast_eq_sum_ne_zero {p : ℕ} [hp : Fact p.Prime] {α : Type*
 theorem mirimanoffPolynomial_add_card_sub_one (p : ℕ) [Fact p.Prime] {n : ℕ}
     (hn : 1 ≤ n) :
     mirimanoffPolynomial p (n + (p - 1)) = mirimanoffPolynomial p n := by
-  simp only [mirimanoffPolynomial]
+  unfold mirimanoffPolynomial
   refine Finset.sum_congr rfl fun k hk => ?_
   rw [Finset.mem_Ico] at hk
   have hk_ne : (k : ZMod p) ≠ 0 := natCast_ne_zero_of_pos_of_lt (by omega) hk.2
@@ -616,7 +616,7 @@ theorem mirimanoffPolynomial_add_card_sub_one (p : ℕ) [Fact p.Prime] {n : ℕ}
 theorem mirimanoffPolynomial_at_p (p : ℕ) [hp : Fact p.Prime] :
     mirimanoffPolynomial p p =
       ∑ k ∈ Finset.Ico 1 p, Polynomial.X ^ k := by
-  simp only [mirimanoffPolynomial]
+  unfold mirimanoffPolynomial
   refine Finset.sum_congr rfl fun k hk => ?_
   rw [Finset.mem_Ico] at hk
   have hk_ne : (k : ZMod p) ≠ 0 := natCast_ne_zero_of_pos_of_lt (by omega) hk.2

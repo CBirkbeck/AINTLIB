@@ -112,7 +112,7 @@ theorem pollaczekUnitPlus_val
       ((pollaczekUnit p K i : (𝓞 K)ˣ) : 𝓞 K) *
         ringOfIntegersComplexConj K
           ((pollaczekUnit p K i : (𝓞 K)ˣ) : 𝓞 K) := by
-  unfold pollaczekUnitPlus
+  simp only [pollaczekUnitPlus]
   rw [Units.val_mul, unitsComplexConj_val_eq_ringOfIntegersComplexConj]
 
 set_option backward.isDefEq.respectTransparency false in

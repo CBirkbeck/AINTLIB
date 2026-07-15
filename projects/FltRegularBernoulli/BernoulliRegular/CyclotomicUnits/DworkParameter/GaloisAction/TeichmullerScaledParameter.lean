@@ -429,7 +429,7 @@ theorem samePrimeFiniteLog_eq_mk_of_mem_pow_of_two_le
   classical
   have hxI : x ∈ lambdaIdeal p K :=
     Ideal.pow_le_self (Nat.ne_of_gt (lt_of_lt_of_le (by decide : 0 < 2) hm)) hx
-  unfold samePrimeFiniteLog
+  simp only [samePrimeFiniteLog]
   rw [Finset.sum_eq_single 1]
   · exact samePrimeFiniteLogTerm_one_eq_mk (p := p) (K := K) m hxI
   · intro n hn_range hn_ne_one
@@ -573,7 +573,7 @@ theorem samePrimeFiniteLog_eq_sum_Icc_add_p_term_pow_pred
   have hpnot : p ∉ Finset.Icc 1 (p - 1) := by
     simp
     omega
-  unfold samePrimeFiniteLog
+  simp only [samePrimeFiniteLog]
   change (∑ n ∈ Finset.range C, f n) =
     (∑ n ∈ Finset.Icc 1 (p - 1), f n) + f p
   rw [hrestrict, hrange]

@@ -284,7 +284,7 @@ theorem caseIICor823Level71Unscaled32CoordValue37Corrected_of_deg68Onward
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (hCorr : CaseIICor823Level71Deg68OnwardCorrection37) :
     CaseIICor823Level71Unscaled32CoordValue37Corrected := by
-  unfold CaseIICor823Level71Unscaled32CoordValue37Corrected
+  simp only [CaseIICor823Level71Unscaled32CoordValue37Corrected]
   rw [unscaled32Coord_eq_thirtytwo_add_correction (K := CyclotomicField 37 ℚ),
     thirtyseven_mul_factorialThirtytwoInv_eq_thirtyseven_mul_thirteen, hCorr]
   -- `37·13 + 37·4 = 37·17` in `ZMod 37²`.

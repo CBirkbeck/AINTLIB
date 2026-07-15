@@ -25,7 +25,7 @@ namespace BernoulliRegular
 underlying integer divisibility being decidable. -/
 instance NoSecondOrderIrregularPair.decidable (p i : ℕ) :
     Decidable (NoSecondOrderIrregularPair p i) := by
-  unfold NoSecondOrderIrregularPair
+  simp only [NoSecondOrderIrregularPair]
   infer_instance
 
 /-- **`NoSecondOrderIrregularPair` from explicit non-divisibility.**

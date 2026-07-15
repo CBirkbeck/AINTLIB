@@ -121,7 +121,7 @@ theorem realCyclotomicUnitZMod_complexConj [IsCMField K] (k : ZMod p) :
 theorem realCyclotomicUnitZMod_two [IsCMField K] (hp_three : 3 ≤ p) :
     realCyclotomicUnitZMod p K (2 : ZMod p) = realCyclotomicUnit p K 2 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold realCyclotomicUnitZMod
+  simp only [realCyclotomicUnitZMod]
   congr 1
   exact ZMod.val_two_eq_two_mod p |>.trans (Nat.mod_eq_of_lt (by omega))
 
@@ -129,7 +129,7 @@ theorem realCyclotomicUnitZMod_two [IsCMField K] (hp_three : 3 ≤ p) :
 theorem realCyclotomicUnitZMod_three [IsCMField K] (hp_five : 5 ≤ p) :
     realCyclotomicUnitZMod p K (3 : ZMod p) = realCyclotomicUnit p K 3 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold realCyclotomicUnitZMod
+  simp only [realCyclotomicUnitZMod]
   congr 1
   rw [show (3 : ZMod p) = ((3 : ℕ) : ZMod p) from by push_cast; rfl,
     ZMod.val_natCast, Nat.mod_eq_of_lt (by omega)]
@@ -143,25 +143,25 @@ theorem zetaSubOne_dvd_realCyclotomicUnitZMod_sub_sq [IsCMField K] (k : ZMod p) 
 
 theorem realCyclotomicUnitZMod_natCast [IsCMField K] (k : ℕ) [NeZero p] :
     realCyclotomicUnitZMod p K (k : ZMod p) = realCyclotomicUnit p K k := by
-  unfold realCyclotomicUnitZMod
+  simp only [realCyclotomicUnitZMod]
   rw [ZMod.val_natCast, ← realCyclotomicUnit_mod_p]
 
 theorem realCyclotomicUnitZMod_zero [IsCMField K] [NeZero p] :
     realCyclotomicUnitZMod p K (0 : ZMod p) = 0 := by
-  unfold realCyclotomicUnitZMod
+  simp only [realCyclotomicUnitZMod]
   rw [ZMod.val_zero, realCyclotomicUnit_zero]
 
 theorem realCyclotomicUnitZMod_one [IsCMField K] :
     realCyclotomicUnitZMod p K (1 : ZMod p) = 1 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold realCyclotomicUnitZMod
+  simp only [realCyclotomicUnitZMod]
   rw [ZMod.val_one, realCyclotomicUnit_one]
 
 /-- `realCyclotomicUnitZMod p K k = 0 ↔ k = 0`. -/
 theorem realCyclotomicUnitZMod_eq_zero_iff [IsCMField K] (k : ZMod p) :
     realCyclotomicUnitZMod p K k = 0 ↔ k = 0 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold realCyclotomicUnitZMod
+  simp only [realCyclotomicUnitZMod]
   rw [realCyclotomicUnit_eq_zero_iff]
   refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
   · rw [show (0 : ZMod p) = ((0 : ℕ) : ZMod p) from by push_cast; rfl,
@@ -175,7 +175,7 @@ theorem isUnit_realCyclotomicUnitZMod_of_units [IsCMField K] (k : (ZMod p)ˣ)
     (hp_two : 2 ≤ p) :
     IsUnit (realCyclotomicUnitZMod p K (k : ZMod p)) := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold realCyclotomicUnitZMod
+  simp only [realCyclotomicUnitZMod]
   exact isUnit_realCyclotomicUnit p K (k : ZMod p).val
     (ZMod.val_coe_unit_coprime k) hp_two
 
@@ -195,7 +195,7 @@ theorem isUnit_realCyclotomicUnitZMod_iff [IsCMField K] (k : ZMod p) :
 /-- The K-side cyclotomic unit `(0 : ZMod p)`-indexed equals `0`. -/
 theorem cyclotomicUnitZMod_eq_iff_val_dvd (k : ZMod p) :
     cyclotomicUnitZMod p K k = 0 ↔ p ∣ k.val := by
-  unfold cyclotomicUnitZMod
+  simp only [cyclotomicUnitZMod]
   rw [cyclotomicUnit_eq_zero_iff]
 
 /-- For ZMod-indexed cyclotomic unit at unit-class element. -/
@@ -206,7 +206,7 @@ theorem cyclotomicUnitZMod_units_val (k : (ZMod p)ˣ) :
 theorem cyclotomicUnitZMod_two (hp_three : 3 ≤ p) :
     cyclotomicUnitZMod p K (2 : ZMod p) = cyclotomicUnit p K 2 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold cyclotomicUnitZMod
+  simp only [cyclotomicUnitZMod]
   congr 1
   exact ZMod.val_two_eq_two_mod p |>.trans (Nat.mod_eq_of_lt (by omega))
 
@@ -214,7 +214,7 @@ theorem cyclotomicUnitZMod_two (hp_three : 3 ≤ p) :
 theorem cyclotomicUnitZMod_three (hp_five : 5 ≤ p) :
     cyclotomicUnitZMod p K (3 : ZMod p) = cyclotomicUnit p K 3 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold cyclotomicUnitZMod
+  simp only [cyclotomicUnitZMod]
   congr 1
   rw [show (3 : ZMod p) = ((3 : ℕ) : ZMod p) from by push_cast; rfl,
     ZMod.val_natCast, Nat.mod_eq_of_lt (by omega)]
@@ -233,14 +233,14 @@ noncomputable def realCyclotomicUnitPlusZMod [IsCMField K] (k : ZMod p) :
 
 theorem realCyclotomicUnitPlusZMod_natCast [IsCMField K] (k : ℕ) [NeZero p] :
     realCyclotomicUnitPlusZMod p K (k : ZMod p) = realCyclotomicUnitPlus p K k := by
-  unfold realCyclotomicUnitPlusZMod
+  simp only [realCyclotomicUnitPlusZMod]
   rw [ZMod.val_natCast, ← realCyclotomicUnitPlus_mod_p]
 
 theorem algebraMap_realCyclotomicUnitPlusZMod [IsCMField K] (k : ZMod p) :
     algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)
         (realCyclotomicUnitPlusZMod p K k) =
       realCyclotomicUnitZMod p K k := by
-  unfold realCyclotomicUnitPlusZMod realCyclotomicUnitZMod
+  simp only [realCyclotomicUnitPlusZMod, realCyclotomicUnitZMod]
   rw [algebraMap_realCyclotomicUnitPlus]
 
 theorem realCyclotomicUnitPlusZMod_zero [IsCMField K] [NeZero p] :
@@ -270,7 +270,7 @@ theorem realCyclotomicUnitPlusZMod_eq_zero_iff [IsCMField K] (k : ZMod p) :
 theorem realCyclotomicUnitPlusZMod_two [IsCMField K] (hp_three : 3 ≤ p) :
     realCyclotomicUnitPlusZMod p K (2 : ZMod p) = realCyclotomicUnitPlus p K 2 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold realCyclotomicUnitPlusZMod
+  simp only [realCyclotomicUnitPlusZMod]
   congr 1
   exact ZMod.val_two_eq_two_mod p |>.trans (Nat.mod_eq_of_lt (by omega))
 
@@ -278,7 +278,7 @@ theorem realCyclotomicUnitPlusZMod_two [IsCMField K] (hp_three : 3 ≤ p) :
 theorem realCyclotomicUnitPlusZMod_three [IsCMField K] (hp_five : 5 ≤ p) :
     realCyclotomicUnitPlusZMod p K (3 : ZMod p) = realCyclotomicUnitPlus p K 3 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold realCyclotomicUnitPlusZMod
+  simp only [realCyclotomicUnitPlusZMod]
   congr 1
   rw [show (3 : ZMod p) = ((3 : ℕ) : ZMod p) from by push_cast; rfl,
     ZMod.val_natCast, Nat.mod_eq_of_lt (by omega)]
@@ -331,7 +331,7 @@ theorem isUnit_realCyclotomicUnitPlusZMod_of_units [IsCMField K] (k : (ZMod p)ˣ
     (hp_two : 2 ≤ p) :
     IsUnit (realCyclotomicUnitPlusZMod p K (k : ZMod p)) := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold realCyclotomicUnitPlusZMod
+  simp only [realCyclotomicUnitPlusZMod]
   exact isUnit_realCyclotomicUnitPlus p K (k : ZMod p).val
     (ZMod.val_coe_unit_coprime k) hp_two
 

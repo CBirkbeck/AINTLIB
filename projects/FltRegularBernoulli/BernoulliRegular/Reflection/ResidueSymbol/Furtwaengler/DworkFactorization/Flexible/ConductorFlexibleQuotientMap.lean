@@ -152,7 +152,7 @@ theorem rIntegralRatToQuotientVal_den_mul
     Ideal.Quotient.mk (S.Q ^ (N + 1)) ((((q : ℚ).den : ℕ) : 𝓞 R')) *
         S.rIntegralRatToQuotientVal N q =
       Ideal.Quotient.mk (S.Q ^ (N + 1)) (((q : ℚ).num : ℤ) : 𝓞 R') := by
-  unfold rIntegralRatToQuotientVal
+  simp only [rIntegralRatToQuotientVal]
   calc
     Ideal.Quotient.mk (S.Q ^ (N + 1)) ((((q : ℚ).den : ℕ) : 𝓞 R')) *
         (Ideal.Quotient.mk (S.Q ^ (N + 1)) (((q : ℚ).num : ℤ) : 𝓞 R') *
@@ -563,7 +563,7 @@ theorem quotient_mk_artinHasseDworkParameterApproxTo_factor_eq
 
 theorem artinHasseDworkParameterApproxTo_mem_Q (N : ℕ) :
     S.artinHasseDworkParameterApproxTo N ∈ S.Q := by
-  unfold artinHasseDworkParameterApproxTo
+  simp only [artinHasseDworkParameterApproxTo]
   apply Ideal.sum_mem
   intro n hn
   by_cases hn0 : n = 0

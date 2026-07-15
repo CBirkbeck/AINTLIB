@@ -56,7 +56,7 @@ theorem samePrimeFiniteLogProductCoord_powCoord
     samePrimeFiniteLogProductCoord (p := p) (K := K)
         (samePrimeFiniteLogPowCoord (p := p) (K := K) n x) x =
       samePrimeFiniteLogPowCoord (p := p) (K := K) (n + 1) x := by
-  unfold samePrimeFiniteLogProductCoord samePrimeFiniteLogPowCoord
+  simp only [samePrimeFiniteLogProductCoord, samePrimeFiniteLogPowCoord]
   rw [pow_succ]
   ring
 
@@ -626,7 +626,7 @@ theorem artinHasseLog_eval_dworkParameter_evalₐ (N : ℕ) :
     AdicCompletion.evalₐ (lambdaIdeal p K) N
         (artinHasseLog_eval_dworkParameter p K) =
       dworkParameterFiniteArtinHasseLogCoord (p := p) (K := K) N := by
-  unfold artinHasseLog_eval_dworkParameter
+  simp only [artinHasseLog_eval_dworkParameter]
   have hEq :
       ((lambdaIdeal p K) ^ N • ⊤ : Ideal (ValuedIntegerRing p K)) =
         (lambdaIdeal p K) ^ N := by

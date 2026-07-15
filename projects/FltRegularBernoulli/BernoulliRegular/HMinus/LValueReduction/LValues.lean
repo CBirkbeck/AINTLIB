@@ -32,7 +32,7 @@ theorem oddLProduct_one_eq_prod_oddLValueRhs :
     oddLProduct p (1 : ℂ) =
       Finset.prod (oddCharacters (p := p)) fun χ ↦ oddLValueRhs p χ := by
   classical
-  unfold oddLProduct
+  simp only [oddLProduct]
   refine Finset.prod_congr rfl fun χ hχ ↦ ?_
   have hχ_odd : χ.Odd := (Finset.mem_filter.mp hχ).2
   have hχ_ne_one : χ ≠ 1 := by
@@ -50,7 +50,7 @@ theorem evenLProduct_one_eq_prod_evenLValueRhs :
     evenLProduct p (1 : ℂ) =
       Finset.prod (evenNontrivialCharacters (p := p)) fun χ ↦ evenLValueRhs p χ := by
   classical
-  unfold evenLProduct
+  simp only [evenLProduct]
   refine Finset.prod_congr rfl fun χ hχ ↦ ?_
   have hχ_mem := Finset.mem_filter.mp hχ
   have hχ_even : χ.Even := hχ_mem.2.1
@@ -273,7 +273,7 @@ theorem oddLValueRhs_product_eq_gauss_product_mul_bernoulli_product :
         ((((Real.pi : ℝ) : ℂ) * Complex.I) * gaussSum χ (ZMod.stdAddChar (N := p)) / (p : ℂ))) *
         Finset.prod (oddCharacters (p := p)) (fun χ ↦ BernoulliGen χ⁻¹ 1) := by
   classical
-  unfold oddLValueRhs
+  simp only [oddLValueRhs]
   rw [Finset.prod_mul_distrib]
 
 end LValues

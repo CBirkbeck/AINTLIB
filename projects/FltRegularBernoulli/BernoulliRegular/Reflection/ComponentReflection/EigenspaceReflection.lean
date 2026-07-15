@@ -144,7 +144,7 @@ theorem standardEigenspaceProjection_mem_eigenspace
   intro a
   show galAction a (standardEigenspaceProjection galAction k v) =
     ((a : ZMod p) ^ k) • standardEigenspaceProjection galAction k v
-  unfold standardEigenspaceProjection
+  simp only [standardEigenspaceProjection]
   -- LHS: σ_a((p-1)⁻¹ • ∑_b b^{-k} • σ_b(v))
   rw [LinearMap.map_smul, map_sum]
   -- LHS now: (p-1)⁻¹ • ∑_b σ_a(b^{-k} • σ_b(v))
@@ -206,7 +206,7 @@ theorem standardEigenspaceProjection_phi_eq
     (v : V) :
     phi (standardEigenspaceProjection galAction k v) = phi v := by
   classical
-  unfold standardEigenspaceProjection
+  simp only [standardEigenspaceProjection]
   -- phi((p-1)⁻¹ • ∑_a a^{-k} • σ_a v)
   -- = (p-1)⁻¹ * phi(∑_a a^{-k} • σ_a v)
   -- = (p-1)⁻¹ * ∑_a a^{-k} * phi(σ_a v)
@@ -323,7 +323,7 @@ theorem standardEigenspaceDecompositionComplete_proof
     StandardEigenspaceDecompositionComplete galAction := by
   classical
   intro v
-  unfold standardEigenspaceProjection
+  simp only [standardEigenspaceProjection]
   -- Goal: ∑_k (#units)⁻¹ • ∑_a (a^k)⁻¹ • galAction a v = v
   -- Step 1: pull `(#units)⁻¹` out of the outer sum.
   rw [← Finset.smul_sum]
@@ -501,7 +501,7 @@ theorem standardEigenspaceProjection_commute_galAction
     standardEigenspaceProjection galAction k (galAction b v) =
       galAction b (standardEigenspaceProjection galAction k v) := by
   classical
-  unfold standardEigenspaceProjection
+  simp only [standardEigenspaceProjection]
   rw [LinearMap.map_smul, map_sum]
   congr 1
   apply Finset.sum_congr rfl

@@ -155,7 +155,7 @@ The residue map `𝓞 K → 𝓞 K / lv149 ≃+* ZMod 149` carries the integer c
 exactly `(n : ZMod 149) = 0`, i.e. `149 ∣ n`. -/
 theorem caseII_intCast_mem_lv149_iff (n : ℤ) :
     (n : 𝓞 (CyclotomicField 37 ℚ)) ∈ lv149 ↔ (n : ZMod 149) = 0 := by
-  unfold lv149 lehmerVandiverPrime
+  simp only [lv149, lehmerVandiverPrime]
   rw [Ideal.mem_comap, RingEquiv.toRingHom_eq_coe, RingHom.coe_coe, RingHom.mem_ker,
     map_intCast, map_intCast]
 

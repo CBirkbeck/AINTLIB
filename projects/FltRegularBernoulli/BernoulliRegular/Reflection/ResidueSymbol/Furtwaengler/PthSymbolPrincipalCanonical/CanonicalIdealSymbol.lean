@@ -65,7 +65,7 @@ noncomputable def pthSymbolAtIdeal_canonical
 @[simp] theorem pthSymbolAtIdeal_canonical_one
     (α : 𝓞 K) :
     pthSymbolAtIdeal_canonical (p := p) (K := K) α (1 : Ideal (𝓞 K)) = 0 := by
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   rw [UniqueFactorizationMonoid.normalizedFactors_one]
   simp
 
@@ -80,7 +80,7 @@ noncomputable def pthSymbolAtIdeal_canonical
 @[simp] theorem pthSymbolAtIdeal_canonical_bot
     (α : 𝓞 K) :
     pthSymbolAtIdeal_canonical (p := p) (K := K) α (⊥ : Ideal (𝓞 K)) = 0 := by
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   rw [← Ideal.zero_eq_bot, UniqueFactorizationMonoid.normalizedFactors_zero]
   simp
 
@@ -90,7 +90,7 @@ theorem pthSymbolAtIdeal_canonical_mul_ideal
     pthSymbolAtIdeal_canonical (p := p) (K := K) α (I * J) =
       pthSymbolAtIdeal_canonical (p := p) (K := K) α I +
         pthSymbolAtIdeal_canonical (p := p) (K := K) α J := by
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   have hI' : (I : Ideal (𝓞 K)) ≠ 0 := by rwa [Ne, Ideal.zero_eq_bot]
   have hJ' : (J : Ideal (𝓞 K)) ≠ 0 := by rwa [Ne, Ideal.zero_eq_bot]
   rw [UniqueFactorizationMonoid.normalizedFactors_mul hI' hJ',
@@ -102,7 +102,7 @@ theorem pthSymbolAtIdeal_canonical_pow_ideal
     (α : 𝓞 K) (I : Ideal (𝓞 K)) (n : ℕ) :
     pthSymbolAtIdeal_canonical (p := p) (K := K) α (I ^ n) =
       n * pthSymbolAtIdeal_canonical (p := p) (K := K) α I := by
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   rw [UniqueFactorizationMonoid.normalizedFactors_pow,
       Multiset.map_nsmul, Multiset.sum_nsmul, nsmul_eq_mul]
 
@@ -142,7 +142,7 @@ theorem pthSymbolAtIdeal_canonical_prime_eq_pthSymbolAtPrime_canonical
     (α : 𝓞 K) {P : Ideal (𝓞 K)} [hP_prime : P.IsPrime] (hP_ne : P ≠ ⊥) :
     pthSymbolAtIdeal_canonical (p := p) (K := K) α P =
       pthSymbolAtPrime_canonical (p := p) (K := K) α P := by
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   have hP_prime_in_R : Prime P := (Ideal.prime_iff_isPrime hP_ne).mpr hP_prime
   have hP_irreducible : Irreducible P := hP_prime_in_R.irreducible
   have h_factors :
@@ -196,9 +196,9 @@ theorem pthSymbolAtPrincipal_canonical_eq_stickelberger_sum
           pthSymbolAtPrime_canonical (p := p) (K := K) α
             (cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ q_K) := by
   classical
-  unfold pthSymbolAtPrincipal_canonical
+  simp only [pthSymbolAtPrincipal_canonical]
   rw [h_stick.span_gen]
-  unfold stickelbergerIdeal
+  simp only [stickelbergerIdeal]
   rw [pthSymbolAtIdeal_canonical_finset_prod (p := p) Finset.univ
     (fun a : CyclotomicUnitDelta p ↦
       cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ q_K ^ ((a : ZMod p).val))
@@ -301,7 +301,7 @@ theorem pthSymbolAtPrime_canonical_term_eq
     · -- ¬hdiv: unfold canonical symbol directly to 0 via the bad-case branch.
       -- pthSymbolAtPrime_canonical α q with hdiv false yields 0 by definition.
       have h_lhs_zero : pthSymbolAtPrime_canonical (p := p) (K := K) α q = 0 := by
-        unfold pthSymbolAtPrime_canonical
+        simp only [pthSymbolAtPrime_canonical]
         rw [dif_neg hq_ne_bot, dif_pos hq_max, dif_neg hα, dif_neg hdiv]
       have hdiv' : ¬ p ∣ Fintype.card (𝓞 K ⧸ q_K) - 1 := by
         intro h
@@ -314,7 +314,7 @@ theorem pthSymbolAtPrime_canonical_term_eq
       have h_rhs_zero :
           pthSymbolAtPrime_canonical (p := p) (K := K)
             (cyclotomicRingOfIntegersEquiv (p := p) K a α) q_K = 0 := by
-        unfold pthSymbolAtPrime_canonical
+        simp only [pthSymbolAtPrime_canonical]
         rw [dif_neg hq_ne, dif_pos hq_K_max, dif_neg hα', dif_neg hdiv']
       rw [h_lhs_zero, h_rhs_zero]; ring
   · -- (p : 𝓞 K) ∉ q_K. Then (p : 𝓞 K) ∉ q either.
@@ -347,7 +347,7 @@ theorem pthSymbolAtPrime_canonical_term_eq
       exact ZMod.natCast_zmod_val (a : ZMod p)
     · -- ¬hdiv: both sides are 0.
       have h_lhs_zero : pthSymbolAtPrime_canonical (p := p) (K := K) α q = 0 := by
-        unfold pthSymbolAtPrime_canonical
+        simp only [pthSymbolAtPrime_canonical]
         rw [dif_neg hq_ne_bot, dif_pos hq_max, dif_neg hα, dif_neg hdiv]
       have hdiv' : ¬ p ∣ Fintype.card (𝓞 K ⧸ q_K) - 1 := by
         intro h
@@ -363,7 +363,7 @@ theorem pthSymbolAtPrime_canonical_term_eq
       have h_rhs_zero :
           pthSymbolAtPrime_canonical (p := p) (K := K)
             (cyclotomicRingOfIntegersEquiv (p := p) K a α) q_K = 0 := by
-        unfold pthSymbolAtPrime_canonical
+        simp only [pthSymbolAtPrime_canonical]
         rw [dif_neg hq_ne, dif_pos hq_K_max, dif_neg hα', dif_neg hdiv']
       rw [h_lhs_zero, h_rhs_zero]; ring
 
@@ -446,7 +446,7 @@ theorem pthSymbolAtIdeal_canonical_eq_zero_of_forall_prime
     (h : ∀ P ∈ UniqueFactorizationMonoid.normalizedFactors I,
             pthSymbolAtPrime_canonical (p := p) (K := K) α P = 0) :
     pthSymbolAtIdeal_canonical (p := p) (K := K) α I = 0 := by
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   rw [Multiset.map_congr rfl h]
   simp
 
@@ -482,7 +482,7 @@ theorem pthSymbolAtIdeal_canonical_mul_α
     pthSymbolAtIdeal_canonical (p := p) (K := K) (α * β) I =
       pthSymbolAtIdeal_canonical (p := p) (K := K) α I +
         pthSymbolAtIdeal_canonical (p := p) (K := K) β I := by
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   have hmap :
       ((UniqueFactorizationMonoid.normalizedFactors I).map
         (fun P ↦ pthSymbolAtPrime_canonical (p := p) (K := K) (α * β) P)) =
@@ -503,7 +503,7 @@ theorem pthSymbolAtIdeal_canonical_pow_α
     (n : ℕ) :
     pthSymbolAtIdeal_canonical (p := p) (K := K) (α ^ n) I =
       (n : ZMod p) * pthSymbolAtIdeal_canonical (p := p) (K := K) α I := by
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   have hmap :
       ((UniqueFactorizationMonoid.normalizedFactors I).map
         (fun P ↦ pthSymbolAtPrime_canonical (p := p) (K := K) (α ^ n) P)) =
@@ -524,7 +524,7 @@ theorem pthSymbolAtIdeal_canonical_pow_α_uncond
     pthSymbolAtIdeal_canonical (p := p) (K := K) (α ^ n) I =
       (n : ZMod p) * pthSymbolAtIdeal_canonical (p := p) (K := K) α I := by
   classical
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   have hmap :
       ((UniqueFactorizationMonoid.normalizedFactors I).map
         (fun P ↦ pthSymbolAtPrime_canonical (p := p) (K := K) (α ^ n) P)) =
@@ -564,7 +564,7 @@ contribution `pthSymbolAtPrime_canonical (α^p) P = 0`. -/
 theorem pthSymbolAtIdeal_canonical_pow_p_α_eq_zero_uncond
     (α : 𝓞 K) (I : Ideal (𝓞 K)) :
     pthSymbolAtIdeal_canonical (p := p) (K := K) (α ^ p) I = 0 := by
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   refine Multiset.sum_eq_zero ?_
   intro x hx
   obtain ⟨P, _, rfl⟩ := Multiset.mem_map.mp hx
@@ -621,7 +621,7 @@ theorem pthSymbolAtIdeal_canonical_mul_unit_α_eq_self
     (I : Ideal (𝓞 K)) :
     pthSymbolAtIdeal_canonical (p := p) (K := K) (α * u) I =
       pthSymbolAtIdeal_canonical (p := p) (K := K) α I := by
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   refine congrArg Multiset.sum ?_
   refine Multiset.map_congr rfl fun P _ ↦ ?_
   -- pthSymbolAtPrime_canonical (α · u) P = pthSymbolAtPrime_canonical α P
@@ -702,7 +702,7 @@ theorem pthSymbolAtIdeal_canonical_mul_unit_pow_p_of_support_subset_α_eq_self
     (I : Ideal (𝓞 K)) :
     pthSymbolAtIdeal_canonical (p := p) (K := K) (α * (u * β ^ p)) I =
       pthSymbolAtIdeal_canonical (p := p) (K := K) α I := by
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   refine congrArg Multiset.sum ?_
   refine Multiset.map_congr rfl fun P _ ↦ ?_
   by_cases hbot : P = ⊥

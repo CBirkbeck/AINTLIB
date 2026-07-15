@@ -105,7 +105,7 @@ def cor8_19Bridge_of_regular {i : ℕ} (hp_odd : p ≠ 2)
   -- hPlus K ∣ h K, and h K is definitionally Fintype.card (ClassGroup (𝓞 K))
   have hdvd : hPlus K ∣ Fintype.card (ClassGroup (𝓞 K)) := by
     have hh := hPlus_dvd_h p hp_odd K
-    unfold BernoulliRegular.h at hh
+    simp only [BernoulliRegular.h] at hh
     convert hh
   exact fun h => h_not_dvd_h (h.trans hdvd)
 
