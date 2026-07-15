@@ -1,4 +1,6 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogCoefficient
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogCoefficient
 
 /-!
 # Formal-to-finite evaluator bridge for Kummer logarithm coefficients

@@ -1,5 +1,7 @@
-import BernoulliRegular.CyclotomicUnits.IndexFormula
-import BernoulliRegular.CyclotomicUnits.SaturationIndex
+module
+
+public import BernoulliRegular.CyclotomicUnits.IndexFormula
+public import BernoulliRegular.CyclotomicUnits.SaturationIndex
 
 /-!
 # Unit-side forward step (WF-814a): nontrivial `p`-torsion in `(𝓞 K⁺)ˣ / C⁺`

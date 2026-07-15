@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DworkCoeffModSquare
+module
+
+public import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DworkCoeffModSquare
 
 /-!
 # The third-order (mod `p³`) Dwork-coordinate coefficient machinery

@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative
 
 /-!
 # Bridge from substantive matrix content to RegOf-squared form

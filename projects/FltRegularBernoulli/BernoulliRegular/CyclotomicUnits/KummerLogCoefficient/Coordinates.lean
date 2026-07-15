@@ -1,4 +1,6 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogCoefficient.Basic
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogCoefficient.Basic
 
 /-!
 # Dwork-coordinate coefficient maps for Kummer logarithms

@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.FrobeniusDetFormulaCharacterMatrix
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.FrobeniusDetFormulaCharacterMatrix
 
 /-!
 # Sinnott matrix embedding index bridge

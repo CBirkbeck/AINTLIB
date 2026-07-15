@@ -1,4 +1,6 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogFormalEvaluator.Folded
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogFormalEvaluator.Folded
 
 /-!
 # Homogeneous finite-log coordinates

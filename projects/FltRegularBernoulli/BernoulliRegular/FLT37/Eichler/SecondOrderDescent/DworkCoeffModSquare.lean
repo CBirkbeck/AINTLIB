@@ -1,4 +1,6 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogCoefficient.Evaluator
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogCoefficient.Evaluator
 
 /-!
 # The second-order (mod `p²`) Dwork-coordinate coefficient machinery

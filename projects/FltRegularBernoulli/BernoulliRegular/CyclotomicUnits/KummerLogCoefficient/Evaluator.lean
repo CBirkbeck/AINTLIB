@@ -1,4 +1,6 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogCoefficient.Coordinates
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogCoefficient.Coordinates
 
 /-!
 # Specialized finite-log coefficient evaluators
