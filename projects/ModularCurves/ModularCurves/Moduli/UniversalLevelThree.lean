@@ -1647,6 +1647,47 @@ theorem restrict_e3ClassifyingMap {R : CommRingCat.{u}} {X : EllObj R}
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
+/-- **([T-E15-NORM] rt2c helper)** The sectionsMapLE ∘ ΓSpecIso.inv compat for e3ClassifyingMap (adapts sectionsMapLE_legendreClassifyingMap, ω-free). -/
+theorem sectionsMapLE_e3ClassifyingMap {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3}
+    (hD : IsE3Datum X L) (h3 : IsUnit (3 : Γ(X.base, ⊤)))
+    (V : X.base.affineOpens) (hTop : V.1 ≤ e3ClassifyingMap X L hD h3 ⁻¹ᵁ
+      (⊤ : (Spec (CommRingCat.of (E3ModuliRing R))).Opens)) :
+    (sectionsMapLE (e3ClassifyingMap X L hD h3) hTop).comp
+      ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv.hom) =
+    ((X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+      (e3ClassifyingRingHom X L hD h3) := by
+  have hLm : V.2.isoSpec.hom ≫ Spec.map (CommRingCat.ofHom
+      ((sectionsMapLE (e3ClassifyingMap X L hD h3) hTop).comp
+        ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv.hom))) =
+    V.1.ι ≫ e3ClassifyingMap X L hD h3 := by
+    rw [show CommRingCat.ofHom
+        ((sectionsMapLE (e3ClassifyingMap X L hD h3) hTop).comp
+          ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv.hom)) =
+      (Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv ≫
+        (e3ClassifyingMap X L hD h3).appLE ⊤ V.1 hTop from rfl,
+      Spec.map_comp,
+      show V.2.isoSpec.hom = V.1.toSpecΓ from IsAffineOpen.isoSpec_hom _,
+      ← Category.assoc, Scheme.Opens.toSpecΓ_SpecMap_appLE, Category.assoc]
+    rw [show (⊤ : (Spec (CommRingCat.of (E3ModuliRing R))).Opens).toSpecΓ ≫
+        Spec.map (Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv =
+      (⊤ : (Spec (CommRingCat.of (E3ModuliRing R))).Opens).ι from by
+      rw [Scheme.Opens.toSpecΓ_top, Category.assoc, ← SpecMap_ΓSpecIso_hom,
+        ← Spec.map_comp, Iso.inv_hom_id, Spec.map_id, Category.comp_id]]
+    rw [Scheme.Hom.resLE_comp_ι]
+  have hRm : V.2.isoSpec.hom ≫ Spec.map (CommRingCat.ofHom
+      (((X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3))) =
+    V.1.ι ≫ e3ClassifyingMap X L hD h3 :=
+    (restrict_e3ClassifyingMap hD h3 V).symm
+  have hSpec := hLm.trans hRm.symm
+  rw [cancel_epi] at hSpec
+  have hofHom := Spec.map_injective hSpec
+  exact congrArg CommRingCat.Hom.hom hofHom
+
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 /-- **(T-E14-CLS-6, ≈E4)** The per-witness classifying square is cartesian (mirrors
 `chartPiece_isPullback`). -/
@@ -2118,6 +2159,119 @@ theorem e3ClassifyingMap_pulled (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
     φ.baseHom
   rw [← SpecMap_ΓSpecIso_hom, ← Spec.map_comp, Iso.inv_hom_id, Spec.map_id]
   exact Category.comp_id _
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 6400000 in
+/-- **([T-E15-NORM] rt2c ★★)** Top determination: the glued classifying comparison of the
+pulled datum IS φ's total-space morphism. Adapts legendreTop_pulled (ω-basis-independent
+transport/pullback; e3Piece_congr at e3PulledWitness). -/
+theorem e3Top_pulled (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    e3Top (IsE3Datum.map φ (universalE3_isE3Datum R hL)
+      ((gammaFullNaiveProblem R 3).map (Opposite.op φ)
+        ⟨⟨universalE3P R, universalE3Q R⟩, hL⟩) rfl rfl) h3 = φ.top := by
+  set hD' := IsE3Datum.map φ
+    (universalE3_isE3Datum R hL)
+    ((gammaFullNaiveProblem R 3).map (Opposite.op φ)
+      ⟨⟨universalE3P R, universalE3Q R⟩, hL⟩)
+    rfl rfl with hD'def
+  letI : Algebra (E3ModuliRing R)
+      Γ(Spec (CommRingCat.of (E3ModuliRing R)), ⊤) :=
+    (Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv.hom.toAlgebra
+  haveI : IsIso (⊤ : (Spec (CommRingCat.of (E3ModuliRing R))).Opens).ι := by
+    rw [← Scheme.topIso_hom]
+    infer_instance
+  haveI : IsIso (Spec.map (CommRingCat.ofHom (algebraMap (E3ModuliRing R)
+      Γ(Spec (CommRingCat.of (E3ModuliRing R)), ⊤)))) := by
+    have h : CommRingCat.ofHom (algebraMap (E3ModuliRing R)
+        Γ(Spec (CommRingCat.of (E3ModuliRing R)), ⊤)) =
+      (Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv := rfl
+    rw [h]
+    infer_instance
+  have hfst : pullback.fst (projModelπ (universalE3 R))
+      (⊤ : (Spec (CommRingCat.of (E3ModuliRing R))).Opens).ι =
+      (tautPresentation (universalE3 R)).e.hom ≫
+        (isPullback_projModelBaseChange (universalE3 R)).isoPullback.hom ≫
+        pullback.fst (projModelπ (universalE3 R))
+          (Spec.map (CommRingCat.ofHom (algebraMap (E3ModuliRing R)
+            Γ(Spec (CommRingCat.of (E3ModuliRing R)), ⊤)))) := by
+    rw [show (tautPresentation (universalE3 R)).e.hom =
+      (asIso (pullback.fst (projModelπ (universalE3 R))
+        (⊤ : (Spec (CommRingCat.of (E3ModuliRing R))).Opens).ι) ≪≫
+      (asIso (pullback.fst (projModelπ (universalE3 R))
+        (Spec.map (CommRingCat.ofHom (algebraMap (E3ModuliRing R)
+          Γ(Spec (CommRingCat.of (E3ModuliRing R)), ⊤)))))).symm ≪≫
+      (isPullback_projModelBaseChange (universalE3 R)).isoPullback.symm).hom
+      from rfl]
+    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv, Category.assoc,
+      Iso.inv_hom_id_assoc, IsIso.inv_hom_id, Category.comp_id]
+  refine (e3WitnessCover hD').hom_ext _ _ (fun w => ?_)
+  rw [e3Top_piece hD' h3 w, e3WitnessCover_f]
+  rw [e3Piece_congr hD' h3 w (e3PulledWitness φ hL w.V) rfl, eqToHom_refl,
+    Category.id_comp]
+  -- now: chartPiece(pulled) = fst ≫ φ.top; unfold the φ-side through the transport
+  rw [show pullback.fst X.curve.toEllipticCurveGeom.π w.V.1.ι ≫ φ.top =
+    transportTheta φ.baseHom φ.top φ.isPullback
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (E3ModuliRing R))).affineOpens).1 from fun x _ => trivial) ≫
+      pullback.fst (projModelπ (universalE3 R))
+        (⊤ : (Spec (CommRingCat.of (E3ModuliRing R))).Opens).ι from
+    (transportTheta_fst φ.baseHom φ.top φ.isPullback _).symm]
+  rw [hfst, ← Category.assoc,
+    show transportTheta φ.baseHom φ.top φ.isPullback
+        (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (E3ModuliRing R))).affineOpens).1 from fun x _ => trivial) ≫
+      (tautPresentation (universalE3 R)).e.hom =
+    ((tautPresentation (universalE3 R)).transport
+      φ.baseHom φ.top φ.isPullback φ.zero_w
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (E3ModuliRing R))).affineOpens).1 from fun x _ => trivial)).e.hom ≫
+      projModelBaseChange (sectionsMapLE φ.baseHom
+        (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (E3ModuliRing R))).affineOpens).1 from fun x _ => trivial))
+        (tautPresentation (universalE3 R)).W from
+    (transport_e_baseChange φ.baseHom φ.top φ.isPullback φ.zero_w
+      (tautPresentation (universalE3 R)) _).symm]
+  -- collapse the universal-side chain into a single base change along the composite
+  have hσ : (sectionsMapLE φ.baseHom
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (E3ModuliRing R))).affineOpens).1 from fun x _ => trivial)).comp
+      ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv.hom) =
+      ((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X _ hD' h3) := by
+    rw [sectionsMapLE_congr_hom (e3ClassifyingMap_pulled φ hL h3).symm
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (E3ModuliRing R))).affineOpens).1 from fun x _ => trivial)]
+    exact sectionsMapLE_e3ClassifyingMap hD' h3 w.V (fun x _ => trivial)
+  rw [show projModelBaseChange (sectionsMapLE φ.baseHom
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (E3ModuliRing R))).affineOpens).1 from fun x _ => trivial))
+      (tautPresentation (universalE3 R)).W =
+    projModelBaseChange (sectionsMapLE φ.baseHom
+      (show w.V.1 ≤ φ.baseHom ⁻¹ᵁ
+        (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+          (E3ModuliRing R))).affineOpens).1 from fun x _ => trivial))
+      ((universalE3 R).map
+        ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv.hom)) from rfl]
+  rw [show (isPullback_projModelBaseChange (universalE3 R)).isoPullback.hom ≫
+      pullback.fst (projModelπ (universalE3 R))
+        (Spec.map (CommRingCat.ofHom (algebraMap (E3ModuliRing R)
+          Γ(Spec (CommRingCat.of (E3ModuliRing R)), ⊤)))) =
+    projModelBaseChange
+      ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv.hom)
+      (universalE3 R) from
+    (isPullback_projModelBaseChange (universalE3 R)).isoPullback_hom_fst]
+  rw [Category.assoc, ← projModelBaseChange_comp',
+    projModelBaseChange_congr_hom hσ (universalE3 R)]
+  rw [e3Piece]
+  rfl
 
 end Rt2
 
