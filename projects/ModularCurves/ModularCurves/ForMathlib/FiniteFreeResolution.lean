@@ -106,6 +106,7 @@ noncomputable def augRank : ℕ := (augData S M).1
 /-- The augmentation map `ε : F₀ →ₗ M` of the resolution. -/
 noncomputable def aug : (Fin (augRank S M) → S) →ₗ[S] M := (augData S M).2.1
 
+/-- The augmentation `ε : F₀ ↠ M` of the resolution is surjective. -/
 theorem aug_surjective : Surjective (aug S M) := (augData S M).2.2
 
 variable [IsNoetherianRing S]
