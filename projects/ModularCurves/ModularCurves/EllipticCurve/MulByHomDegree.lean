@@ -1,6 +1,7 @@
 import ModularCurves.EllipticCurve.ModelRecord
 import ModularCurves.EllipticCurve.PointsDictionary
 import ModularCurves.EllipticCurve.FinrankFractionField
+import ModularCurves.ForMathlib.DominantFunctionField
 import HasseWeil.Foundation.Basic
 import HasseWeil.Foundation.EC.GenericPoint
 
