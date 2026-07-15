@@ -108,7 +108,7 @@ theorem realUnitToFreePartModP_CPlusExponentProduct (s : ℤ)
         (Additive.ofMul (CPlusExponentProduct (p := 37) (K := K) (by norm_num) s e)) =
       ∑ a : Fin ((37 - 3) / 2), e a • realUnitToFreePartModP (K := K)
         (Additive.ofMul (CPlusGenerator (p := 37) (K := K) (by norm_num) a)) := by
-  unfold CPlusExponentProduct
+  simp only [CPlusExponentProduct]
   rw [ofMul_mul, map_add, ofMul_zpow, map_zsmul, realUnitToFreePartModP_neg_one,
     zsmul_zero, zero_add, ofMul_prod, map_sum]
   refine Finset.sum_congr rfl (fun a _ ↦ ?_)

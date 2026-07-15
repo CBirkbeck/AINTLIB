@@ -114,7 +114,7 @@ theorem cyclotomicUnitFreePartPadicLinearEquiv_apply_tmul
     (a : CyclotomicUnitDelta p) (z : ℤ_[p]) (v : CyclotomicUnitFreePart K) :
     cyclotomicUnitFreePartPadicLinearEquiv (p := p) K a (z ⊗ₜ[ℤ] v) =
       z ⊗ₜ[ℤ] cyclotomicUnitFreePartLinearEquiv (p := p) K a v := by
-  unfold cyclotomicUnitFreePartPadicLinearEquiv
+  simp only [cyclotomicUnitFreePartPadicLinearEquiv]
   rw [LinearEquiv.baseChange_tmul]
 
 /-- **Teichmüller character on `CyclotomicUnitDelta p`** (= `(ZMod p)ˣ`),
@@ -647,8 +647,7 @@ theorem cyclotomicUnitFreePartPadicReduceModP_projector_compat
   classical
   let : Invertible ((Fintype.card (CyclotomicUnitDelta p) : ZMod p)) :=
     cyclotomicUnitDeltaCardInvertibleZMod (p := p) hp_gt_two
-  unfold cyclotomicUnitFreePartPadicCharacterProjector
-    cyclotomicUnitFreePartModPDeltaCharacterProjector
+  simp only [cyclotomicUnitFreePartPadicCharacterProjector, cyclotomicUnitFreePartModPDeltaCharacterProjector]
   rw [charIdempotent_def, charIdempotent_def, map_smul, map_smul,
       LinearMap.smul_apply, LinearMap.smul_apply,
       cyclotomicUnitFreePartPadicReduceModP_smul_compat]
@@ -683,7 +682,7 @@ theorem cyclotomicUnitFreePartPadicReduceModP_eigenspace_surjective
     cyclotomicUnitFreePartPadicCharacterProjector_mem_eigenspace
       (p := p) K hp_gt_two χ z, ?_⟩
   rw [cyclotomicUnitFreePartPadicReduceModP_projector_compat (p := p) K hp_gt_two χ z, hz]
-  unfold cyclotomicUnitFreePartModPDeltaCharacterProjector
+  simp only [cyclotomicUnitFreePartModPDeltaCharacterProjector]
   exact characterProjector_apply_of_mem_eigenspace
     (cyclotomicUnitFreePartModPDeltaRepresentation (p := p) K)
     (MulChar.padicToZMod (p := p) χ) hy
