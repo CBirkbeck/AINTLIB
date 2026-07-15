@@ -127,7 +127,7 @@ the canonical evaluation map `φ ↦ (φ A, φ B)` — naturality in `A` follows
 pin.
 
 Proven register item: no direct code consumer project-wide — the Y₁ atlas uses the
-concrete `tateRingOverAlgLift` (`ModularCurve/YOneAtlasClassify.lean`) in practice. -/
+concrete `TateAtlas.ringOverAlgLift` (`ModularCurve/YOneAtlasClassify.lean`) in practice. -/
 theorem tateRing_homEquiv (A : Type u) [CommRing A] :
     ∃ e : (tateRing →+* A) ≃
         { c : A × A //

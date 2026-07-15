@@ -698,13 +698,13 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (_hN : 4 ≤ N)
       (Spec.map (CommRingCat.ofHom ψ₀r)) (tatePoint R) = 0) :
     ∃ ψ' : tateRingOver R →ₐ[↑R] A,
       (Ideal.Quotient.mk I).comp (ψ' : tateRingOver R →+* A) = ψ₀r ∧
-      (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) (tateBaseSpecMap R ψ')
+      (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) (TateAtlas.baseSpecMap R ψ')
         (tatePoint R) = 0 := by
   classical
   set t₀ := Spec.map (CommRingCat.ofHom ψ₀r) with ht₀
-  set t := tateBaseSpecMap R ψ with htdef
+  set t := TateAtlas.baseSpecMap R ψ with htdef
   have hrestRaw : Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ t = t₀ := by
-    rw [htdef, tateBaseSpecMap, ← Spec.map_comp, ht₀]
+    rw [htdef, TateAtlas.baseSpecMap, ← Spec.map_comp, ht₀]
     refine congrArg Spec.map (CommRingCat.hom_ext ?_)
     exact hmkψ
   set FA := (tateUniversal R).baseChange t with hFA
@@ -858,7 +858,7 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (_hN : 4 ≤ N)
       Spec.map (CommRingCat.ofHom (algebraMap ↑R A)) := by
     refine fc.base_w.trans ?_
     show t ≫ tateStructMap R = Spec.map (CommRingCat.ofHom (algebraMap ↑R A))
-    exact tateBaseSpecMap_tateStructMap R ψ
+    exact TateAtlas.BaseSpecMap.over R ψ
   set ψ'r := Spec.preimage fc.baseHom with hψ'r
   have hspec' : Spec.map ψ'r = fc.baseHom := Spec.map_preimage _
   have hcomp' : CommRingCat.ofHom ((algebraMap (MvPolynomial (Fin 2) R)
@@ -872,12 +872,12 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (_hN : 4 ≤ N)
     congrArg (fun (m : R ⟶ CommRingCat.of A) ↦ m.hom r) hcomp'
   set ψ' : tateRingOver R →ₐ[↑R] A :=
     { toRingHom := ψ'r.hom, commutes' := hcomm' } with hψ'
-  have htspec' : tateBaseSpecMap R ψ' = fc.baseHom := by
+  have htspec' : TateAtlas.baseSpecMap R ψ' = fc.baseHom := by
     show Spec.map (CommRingCat.ofHom ψ'r.hom) = fc.baseHom
     exact hspec'
   -- clause (b): the pulled marked point is `N`-killed (pullSection is ℤ-linear)
   have hψ'kill : (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R)
-      (tateBaseSpecMap R ψ') (tatePoint R) = 0 := by
+      (TateAtlas.baseSpecMap R ψ') (tatePoint R) = 0 := by
     have hNsec : EllHom.pullSection R fc ((N : ℤ) • tatePoint R) = 0 := by
       have hz := map_zsmul (AddMonoidHom.mk' (EllHom.pullSection R fc)
         (EllHom.pullSection_add R fc)) (N : ℤ) (tatePoint R)
@@ -896,9 +896,9 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (_hN : 4 ≤ N)
     rw [h4] at h3
     refine Subtype.ext ?_
     rw [(tateUniversal R).point_smul_eq_comp_mulBy, (tateUniversal R).point_zero_val]
-    show (tateBaseSpecMap R ψ' ≫ ((tatePoint R) : tateBase R ⟶ (tateUniversal R).E))
+    show (TateAtlas.baseSpecMap R ψ' ≫ ((tatePoint R) : tateBase R ⟶ (tateUniversal R).E))
         ≫ (tateUniversal R).mulByHom (N : ℤ) =
-      tateBaseSpecMap R ψ' ≫ (tateUniversal R).zero
+      TateAtlas.baseSpecMap R ψ' ≫ (tateUniversal R).zero
     rw [htspec', Category.assoc]
     rw [show ((tatePoint R) : tateBase R ⟶ (tateUniversal R).E) ≫
         (tateUniversal R).mulByHom (N : ℤ) =
@@ -1022,7 +1022,7 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
      directly: finite over affine ⟹ affine) and `Algebra.FormallySmooth`/`Algebra.Etale`
      ring-level lifting applies).
   4. RENORMALISE: `P` gives `(x, y) : A²` through the `Z`-chart dictionary
-     (`chartSolutionsEquiv`/`zChartEval` as in `pt_hord`); `NowhereOrderLEThree` holds
+     (`chartSolutionsEquiv`/`ZChart.eval` as in `pt_hord`); `NowhereOrderLEThree` holds
      because orders are fibrewise and `Spec A`, `Spec (A⧸I)` share fibres (nilpotent `I`);
      T-E1 `exists_unique_variableChange_isTateNormal` yields the unique `vc` with
      `vc • E(α,β)` Tate-normal marking `(x,y) ↦ (0,0)`; the corrected coefficients define
@@ -1122,12 +1122,12 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
     -- THE PURE CORE (ledger steps 3–4): a renormalised classifying algebra map whose
     -- marked point is globally N-killed. Its production = the étale torsion-point lift
     -- (affine ring-level, against the nilpotent I) + T-E1 renormalisation; the raw lift
-    -- (α, β, hΔ, ψ := tateRingOverAlgLift) above feeds it.
-    set ψ := tateRingOverAlgLift R α β hΔ with hψ
+    -- (α, β, hΔ, ψ := TateAtlas.ringOverAlgLift) above feeds it.
+    set ψ := TateAtlas.ringOverAlgLift R α β hΔ with hψ
     obtain ⟨ψ', hψ'res, hψ'kill⟩ :
         ∃ ψ' : tateRingOver R →ₐ[↑R] A,
           (Ideal.Quotient.mkₐ ↑R I).comp ψ' = ψ₀ ∧
-          (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) (tateBaseSpecMap R ψ')
+          (N : ℤ) • EllipticCurve.Point.pull (tateUniversal R) (TateAtlas.baseSpecMap R ψ')
             (tatePoint R) = 0 := by
       have hinvA : IsUnit ((N : ℕ) : A) := by
         have h2 := hinv.map φ.hom
@@ -1135,11 +1135,11 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
       have hmkψ : (Ideal.Quotient.mkₐ ↑R I).comp ψ = ψ₀ := by
         have h0 : ψ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R)
             (MvPolynomial.X 0)) = α := by
-          rw [hψ]; exact tateRingOverAlgLift_X_zero R α β hΔ
+          rw [hψ]; exact TateAtlas.ringOverAlgLift_X_zero R α β hΔ
         have h1 : ψ (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R)
             (MvPolynomial.X 1)) = β := by
-          rw [hψ]; exact tateRingOverAlgLift_X_one R α β hΔ
-        apply tateRingOver_algHom_ext
+          rw [hψ]; exact TateAtlas.ringOverAlgLift_X_one R α β hΔ
+        apply TateAtlas.RingOver.algHom_ext
         · rw [AlgHom.comp_apply, h0]
           show Ideal.Quotient.mk I α = _
           exact hα.trans hα₀
@@ -1162,18 +1162,18 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
       exact AlgHom.ext fun x ↦ DFunLike.congr_fun h1 x
 
     -- assembly: witness with the renormalised map
-    refine ⟨tateBaseSpecMap R ψ', ?_, ?_, ?_⟩
+    refine ⟨TateAtlas.baseSpecMap R ψ', ?_, ?_, ?_⟩
     · -- restriction (the proven raw-leg template, at ψ')
-      rw [tateBaseSpecMap, ← Spec.map_comp, ← hspec₀]
+      rw [TateAtlas.baseSpecMap, ← Spec.map_comp, ← hspec₀]
       refine congrArg Spec.map (CommRingCat.hom_ext ?_)
       exact congrArg AlgHom.toRingHom hψ'res
-    · exact (tateBaseSpecMap_tateStructMap R ψ').trans
+    · exact (TateAtlas.BaseSpecMap.over R ψ').trans
         (congrArg Spec.map (CommRingCat.hom_ext rfl))
     · -- the naive structure: killing from the core, fibrewise clauses transported from
       -- `hstruct₀` (every geometric point of `Spec A` factors through `Spec (A⧸I)`)
-      set t' := tateBaseSpecMap R ψ' with ht'
+      set t' := TateAtlas.baseSpecMap R ψ' with ht'
       have hrest' : Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ t' = t₀ := by
-        rw [ht', tateBaseSpecMap, ← Spec.map_comp, ← hspec₀]
+        rw [ht', TateAtlas.baseSpecMap, ← Spec.map_comp, ← hspec₀]
         exact congrArg Spec.map (CommRingCat.hom_ext (congrArg AlgHom.toRingHom hψ'res))
       have hkill' : (N : ℤ) • EllipticCurve.Point.asSection (tateUniversal R) t'
           (EllipticCurve.Point.pull (tateUniversal R) t' (tatePoint R)) = 0 := by
