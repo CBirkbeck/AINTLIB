@@ -99,7 +99,7 @@ algebraMap commutes with Frobenius on coefficients). -/
 theorem frobeniusTwist_baseChange_KE_eq_W_KE_map_frobenius :
     (E.frobeniusTwist p).map (algebraMap k KE) =
       (W_KE E).map (frobenius KE p) := by
-  unfold WeierstrassCurve.frobeniusTwist W_KE
+  simp only [WeierstrassCurve.frobeniusTwist, W_KE]
   rw [WeierstrassCurve.map_map, WeierstrassCurve.map_map,
       RingHom.frobenius_comm (algebraMap k KE) p]
 
@@ -481,7 +481,7 @@ theorem frobeniusIsog_relative_pullback_x_gen :
     (frobeniusIsog_relative p E).pullback (x_gen (E.frobeniusTwist p)) =
       x_gen E ^ p := by
   change frobeniusRelativePullback p E (x_gen (E.frobeniusTwist p)) = _
-  unfold frobeniusRelativePullback
+  simp only [frobeniusRelativePullback]
   rw [IsFractionRing.liftAlgHom_apply]
   change IsFractionRing.lift _ (algebraMap _ _ _) = _
   rw [IsFractionRing.lift_algebraMap]
@@ -493,7 +493,7 @@ theorem frobeniusIsog_relative_pullback_y_gen :
     (frobeniusIsog_relative p E).pullback (y_gen (E.frobeniusTwist p)) =
       y_gen E ^ p := by
   change frobeniusRelativePullback p E (y_gen (E.frobeniusTwist p)) = _
-  unfold frobeniusRelativePullback
+  simp only [frobeniusRelativePullback]
   rw [IsFractionRing.liftAlgHom_apply]
   change IsFractionRing.lift _ (algebraMap _ _ _) = _
   rw [IsFractionRing.lift_algebraMap]
@@ -649,7 +649,7 @@ theorem algebraMap_CR_KE_pow_p_mem_fieldRange (r : E.toAffine.CoordinateRing) :
     (E.frobeniusTwist p).toAffine.FunctionField
     (WeierstrassCurve.Affine.CoordinateRing.map E.toAffine (frobenius k p) r), ?_⟩
   change frobeniusRelativePullback p E _ = _
-  unfold frobeniusRelativePullback
+  simp only [frobeniusRelativePullback]
   rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
   change frobeniusRelativeCoordRingHom p E _ = _
   exact frobeniusRelative_compose_eq_pow p E r
