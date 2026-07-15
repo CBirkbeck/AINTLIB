@@ -225,6 +225,59 @@ theorem pullbackComp_four_congr_app
         ((Category.assoc R₂ R₃ Q).trans (congrArg (R₂ ≫ ·) htail)))
   exact hfourQ.trans hright
 
+/-- Fourfold pullback composition remains coherent after a further transport from the chosen
+composite to a common target morphism. -/
+theorem pullbackComp_four_congr_trans_app
+    {A B C D E : Scheme.{u}}
+    (q : A ⟶ B) (p : B ⟶ C) (d : C ⟶ D) (g : D ⟶ E)
+    (s : B ⟶ D) (hp : p ≫ d = s) (w : A ⟶ E)
+    (h₁ : (q ≫ p) ≫ (d ≫ g) = (q ≫ s) ≫ g)
+    (h₂ : (q ≫ s) ≫ g = w) (N : E.Modules) :
+    (pullbackComp q p).hom.app
+          ((pullback d).obj ((pullback g).obj N)) ≫
+        (pullback (q ≫ p)).map ((pullbackComp d g).hom.app N) ≫
+        ((((pullbackComp (q ≫ p) (d ≫ g)).app N) ≪≫
+          ((pullbackCongr (h₁.trans h₂)).app N)).hom) =
+      (pullback q).map
+          ((((pullbackComp p d).app ((pullback g).obj N)) ≪≫
+            ((pullbackCongr hp).app ((pullback g).obj N))).hom) ≫
+        (pullbackComp q s).hom.app ((pullback g).obj N) ≫
+      (pullbackComp (q ≫ s) g).hom.app N ≫
+        ((pullbackCongr h₂).app N).hom := by
+  have hbase := pullbackComp_four_congr_app q p d g s hp h₁ N
+  simp only [Iso.trans_hom]
+  let L₁ := (pullbackComp q p).hom.app
+    ((pullback d).obj ((pullback g).obj N))
+  let L₂ := (pullback (q ≫ p)).map ((pullbackComp d g).hom.app N)
+  let P := ((pullbackComp (q ≫ p) (d ≫ g)).app N).hom
+  let Q₁ := ((pullbackCongr h₁).app N).hom
+  let Q₂ := ((pullbackCongr h₂).app N).hom
+  let Q₁₂ := ((pullbackCongr (h₁.trans h₂)).app N).hom
+  let R₁ := (pullback q).map
+    ((((pullbackComp p d).app ((pullback g).obj N)) ≪≫
+      ((pullbackCongr hp).app ((pullback g).obj N))).hom)
+  let R₂ := (pullbackComp q s).hom.app ((pullback g).obj N)
+  let R₃ := (pullbackComp (q ≫ s) g).hom.app N
+  change L₁ ≫ L₂ ≫ (P ≫ Q₁₂) = R₁ ≫ R₂ ≫ R₃ ≫ Q₂
+  change L₁ ≫ L₂ ≫ (P ≫ Q₁) = R₁ ≫ R₂ ≫ R₃ at hbase
+  have htrans := pullbackCongr_trans h₁ h₂
+  have htransApp := congrArg (fun z => z.hom.app N) htrans
+  change Q₁ ≫ Q₂ = Q₁₂ at htransApp
+  have hbaseQ := congrArg (fun z => z ≫ Q₂) hbase
+  have hPQ : (P ≫ Q₁) ≫ Q₂ = P ≫ Q₁₂ :=
+    (Category.assoc P Q₁ Q₂).trans (congrArg (P ≫ ·) htransApp)
+  have hleft : (L₁ ≫ L₂ ≫ (P ≫ Q₁)) ≫ Q₂ =
+      L₁ ≫ L₂ ≫ (P ≫ Q₁₂) :=
+    (Category.assoc L₁ (L₂ ≫ (P ≫ Q₁)) Q₂).trans
+      (congrArg (L₁ ≫ ·)
+        ((Category.assoc L₂ (P ≫ Q₁) Q₂).trans
+          (congrArg (L₂ ≫ ·) hPQ)))
+  have hright : (R₁ ≫ R₂ ≫ R₃) ≫ Q₂ =
+      R₁ ≫ R₂ ≫ R₃ ≫ Q₂ :=
+    (Category.assoc R₁ (R₂ ≫ R₃) Q₂).trans
+      (congrArg (R₁ ≫ ·) (Category.assoc R₂ R₃ Q₂))
+  exact hleft.symm.trans (hbaseQ.trans hright)
+
 theorem pullbackCompCongr_transition_app
     {A B C D : Scheme.{u}}
     (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
