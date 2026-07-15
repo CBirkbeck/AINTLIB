@@ -236,7 +236,6 @@ private theorem degree_le_card_kernel_of_good_fiber_twoCurve (β : Isogeny W₁ 
 
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 400000 in
-set_option maxHeartbeats 1600000 in
 /-- **T-B1 — `#ker β = deg β` for a general separable two-curve isogeny**: over an algebraically
 closed field, a separable `β : Isogeny W₁ W₂` carrying only the cofinite two-curve
 pullback-evaluation coherence `hw` (no global `CoordHom`) has `Nat.card β.kernel = β.degree`. -/
