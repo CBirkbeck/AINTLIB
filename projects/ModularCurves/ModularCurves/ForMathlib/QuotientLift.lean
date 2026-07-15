@@ -180,6 +180,24 @@ private theorem exists_chart_isPullback_lift {Y : Scheme.{u}} [IsOpenImmersion j
 
 end Lift
 
+/-- The pulled-back quotient charts `j ⁻¹ᵁ (quotientChart x)` cover `Q'`: every point of `Q'`
+lies in some chart preimage, since the quotient charts cover `X/G` and `j` maps into it.
+Extracted from `exists_quotientπ_lift_of_isOpenImmersion`. -/
+private lemma exists_mem_quotientChart_preimage [Finite G]
+    [IsAffineHom (pullback.diagonal (terminal.from X))]
+    (V : X → X.Opens) (hVs : ∀ x, σ.IsStableOpen (V x)) (hVa : ∀ x, IsAffineOpen (V x))
+    {Q' : Scheme.{u}} (j : Q' ⟶ σ.quotient V hVs hVa) (p : Q') :
+    ∃ (x : X) (y : ((j ⁻¹ᵁ σ.quotientChart V hVs hVa x) : Scheme.{u})),
+      (j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι y = p := by
+  have hmem : j p ∈ (⊤ : (σ.quotient V hVs hVa).Opens) := trivial
+  rw [← σ.iSup_quotientChart_eq_top V hVs hVa] at hmem
+  obtain ⟨x, hx⟩ := TopologicalSpace.Opens.mem_iSup.mp hmem
+  have h : p ∈ Set.range ⇑(j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι := by
+    rw [Scheme.Opens.range_ι]
+    exact hx
+  obtain ⟨y, hy⟩ := h
+  exact ⟨x, y, hy⟩
+
 /-- **(W2, existence half)** A `G`-invariant morphism out of the restriction of the total space
 over an open `j : Q' ⟶ X/G` of the quotient descends to `Q'`: the restricted quotient map
 `pullback.snd : X ×_{X/G} Q' ⟶ Q'` has the universal property of the quotient of the open
@@ -200,16 +218,8 @@ theorem exists_quotientπ_lift_of_isOpenImmersion [Finite G]
   choose P ρ sd qx hPB hq using σ.exists_chart_isPullback_lift V hVs hVa hVmem j f hf
   -- the chart preimages cover `Q'`
   have hcov : ∀ p : Q', ∃ (x : X) (y : ((j ⁻¹ᵁ σ.quotientChart V hVs hVa x) : Scheme.{u})),
-      (j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι y = p := by
-    intro p
-    have hmem : j p ∈ (⊤ : (σ.quotient V hVs hVa).Opens) := trivial
-    rw [← σ.iSup_quotientChart_eq_top V hVs hVa] at hmem
-    obtain ⟨x, hx⟩ := TopologicalSpace.Opens.mem_iSup.mp hmem
-    have h : p ∈ Set.range ⇑(j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι := by
-      rw [Scheme.Opens.range_ι]
-      exact hx
-    obtain ⟨y, hy⟩ := h
-    exact ⟨x, y, hy⟩
+      (j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι y = p :=
+    fun p => σ.exists_mem_quotientChart_preimage V hVs hVa j p
   -- the local descents agree on overlaps, by the epi property of the restricted cover
   have hover : ∀ x y : X,
       pullback.fst ((j ⁻¹ᵁ σ.quotientChart V hVs hVa x).ι)
