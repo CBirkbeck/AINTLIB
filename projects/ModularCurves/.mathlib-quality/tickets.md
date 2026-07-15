@@ -20913,3 +20913,67 @@ E-integrality seam question from v10.253 (GH built it; KM/G0 need not).
 Niso ← G0 quotientπ substrate; dichotomy ← overlaps G0's LIVE flat-of-field seat (their
 modelMulByHom_flat_of_field/free_of_flat_of_fibre_flat wall-break — not grabbing mid-session);
 [GHA3]/WEIL = the remaining GH-owned charter arc (next-firing recon target). (STREAM-GH)
+
+## v10.256 (2026-07-15, coordinator) — ★★ BATCH RATIFIED: L4-iii DOWN TO BRICK 6 (critical path near-close); OMEGA B2 owner-APPROVED; [FR-GEN] routed; all four seats re-dispatched
+
+**Verified at source** (origin/dev/modular-curves). Four-report batch (2× KM, OMEGA, GH) processed.
+
+**RATIFIED (verified, not report-trusted):**
+- **★★ L4-iii is DOWN TO BRICK 6 — the two-KM-report conflict resolved in favour of the optimistic read.**
+  KM's 5 bricks (48f6dd3b0 zsmul_genericPoint, 9daa93e98 genericSpecPoint, 6a49d0c10 chartSpecPoint kit,
+  9f427c049 genericSpecPoint_comp_mulByHom, + mulByInt_equation) are ALL on origin; `MulByHomDegree.lean`
+  has exactly **1 sorry (:660)** = brick 6. The feared 2000-line `AdditionChart*` thread was AVOIDED
+  (replaced by point_smul_eq_comp_mulBy → the banked points-dictionary + HasseWeil's Jacobian smul formula).
+  **Brick 6** = the section-level transfer (chartHomEquiv ↔ section-pullback compat through `Proj.awayι`:
+  φ_τ(appTop [N] s) = mulByInt_pullback(φ_τ s) on the generators) + the fraction-field assembly (both
+  `IsFractionRing` legs + `functionField_algHom_ext` banked). **On landing: MulByHomDegree:660 dies →
+  KM's field-level anchor → G0's BB-DEG (Torsion.mulByHom_finrank) reduction → endDeg_mulBy's box
+  auto-cleans → OMEGA's + GH's inputs go live.** Brick 6 is THE critical-path item, one brick out.
+  (The parallel v10.253-KM "genuinely multi-session" recon was a SECOND concurrent KM session on the
+  OTHER leaves — complementary, no clobber; tree green. Lesson: fire ONE KM session.)
+- **GH [E-INT] landed** — `isIntegral_of_field` (elliptic curve over any field = integral scheme,
+  axiom-clean, `IntegralOverField.lean` on origin, cf7d5de10). Makes the v10.253 degree tranche
+  auto-synthesize at geometric fibres (`endDeg_comp_of_isIntegral` etc. apply over Spec k with only the
+  isogeny [Flat]/[IsFinite] instances). Answers the seam question KM flagged (GH built it; KM/G0 need not).
+  GH also mapped [GHA3] route-β (KM 1.6.7 étale-local-trivialization, avoiding the unbuilt Weil pairing).
+- **OMEGA keystone-free NORM CORE COMPLETE** — 6 axiom-clean lemmas (ofTwiceNeZero_isFlexNF,
+  isE3Form_of_scaling, isE3Form_of_threeTorsion, MarksAt.ofVC, isE3Chart, isE3Datum_of_flexCharts).
+  **★ KEY DISCOVERY: the ζ₃/Weil-pairing gate is VOID** — NORM's sheet-selecting scaling u=−A/B is a
+  Zariski-RATIONAL function (the √−3 is implicit in Q being a rational 3-torsion point), so NORM needs
+  NO ζ₃/Weil datum. The earlier belief that NORM waited on the 8-sorry WeilPairing/Basic.lean was WRONG.
+  Verified numerically 1650/1650 + u=1 on the universal + CAS certificates.
+
+**★ B2 OWNER-APPROVED (2026-07-15) — OMEGA fixes now.** The ratified ★★★ `E3ModuliRing` over-represents
+the level-3 functor: at γ=0 (Q=−P ∈ ⟨P⟩, only ℤ/3 not full E[3]) the flex relation holds and e3Delta
+stays a unit, so the localization fails to exclude the degenerate component; `universalE3_hcubic` is FALSE
+there. **FIX (approved):** additionally invert `e3Gamma` (=γ=x(Q), the Q∉⟨P⟩ independence discriminant) —
+`E3ModuliRing := Localization.Away ((a₁³−27a₃)·a₃·e3Gamma)` — and add the γ-unit / Q∉⟨P⟩ condition to
+`IsE3Datum`. Additive (adds IsUnit γ); consumers take unit hyps so expected non-breaking; re-verify the
+three ★★★ landmarks (universalE3, e3_vc_marked, e3ClassifyingEllHom). OMEGA's 6 NORM lemmas are unaffected
+(conditionally correct; x(Q) a unit for any genuine level-3 structure). OMEGA did NOT refactor ratified
+work unilaterally — correct B2 protocol.
+
+**[FR-GEN] ROUTED — the finrank-API wall (KM's v10.253 finding).** `Scheme.Hom.finrank`'s public API is
+finite-flat-gated, but [0]=π≫zero is neither finite nor flat, so **T-DEG0** (mulByHom_zero_finrank, n=0)
+and **endDual_comp_self**'s arbitrary-endo fibre-rank can't be computed with the current API. Claim is
+TRUE (the collapse pushforward is torsion; rankAtStalk=0). Fix = a public non-finite-flat finrank
+reduction (~150 lines). **RULING: [FR-GEN] is an IN-TREE ForMathlib sub-ticket, NOT a mathlib PR
+(external-quiet v10.35b holds), KM-owned, and NON-critical-path** — endDual_comp_self → endDeg_comp
+(multiplicativity) is degree-theory completeness, NOT a representable_iff input (the engine consumes
+endDeg_mulBy=N² [BB-DEG] + le_endDeg [done], not endDeg_comp). Park it parallel; brick 6 comes first.
+
+**CRITICAL PATH (post-batch):** brick 6 (KM) → field anchor → BB-DEG + BB-FLAT (G0) → endDeg_mulBy=N²
+→ OMEGA's NORM scheme-lift (+ B2 fix) → the two normalization tickets discharge → `representable_iff`
+instantiations → **all three levels representable.** Brick 6 is one brick from triggering the whole cascade.
+
+**RE-DISPATCH (all four seats free):**
+- **KM → LAND BRICK 6** (MulByHomDegree:660, the field-level anchor — THE critical path). Then spawn the
+  [FR-GEN] ForMathlib sub-ticket + endDual_comp_self (the char-poly, [FR-GEN]-gated, non-critical). Fire ONE.
+- **OMEGA → the B2 FIX NOW** (owner-approved: invert e3Gamma + IsE3Datum γ-unit + re-verify the 3 ★★★
+  consumers). Then the NORM scheme-lift (BB-DEG-gated; consume brick 6/BB-DEG as it lands). [T-E14-LVL-b]
+  is symmetric (E[2]-generation = #E[2]=4 = BB-DEG), same handoff.
+- **G0 → BB-FLAT :150 chart-assembly THEN BB-DEG :155** (its banked next-session plan). BB-DEG (:155,
+  Torsion.mulByHom_finrank) consumes KM's brick-6 field anchor — coordinate the KM→G0 handoff.
+- **GH → [GHA3] route-β β1** (globalize the affine trivialization — the sentinel's active focus). The
+  geometric-fibre degree tranche ([E-INT]-enabled) is done; HOLD the general-S degree pins for KM's
+  endDual_comp_self. `hH` consumable axiom-clean @KernelBound:100.
