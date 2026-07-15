@@ -211,7 +211,7 @@ theorem unitsComplexConj_mem_cyclotomicUnitsSubgroup_of_mem (hp_two : 2 ≤ p)
       Subgroup.comap (unitsComplexConj K).toMonoidHom
         (cyclotomicUnitsSubgroup p K hp_two) by
     exact h_le hu
-  unfold cyclotomicUnitsSubgroup
+  simp only [cyclotomicUnitsSubgroup]
   refine sup_le ?_ ?_
   ·
     rw [Subgroup.closure_le]
