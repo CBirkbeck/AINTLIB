@@ -220,4 +220,81 @@ theorem universalE3_isE3Form :
     IsE3Form (universalE3 R) (e3Beta R) (e3Gamma R) :=
   ⟨rfl, rfl, rfl, rfl, rfl⟩
 
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E15a stage 4, the ring-level uniqueness certificate ★★)** A variable change
+between marked `ℰ₃`-forms is trivial and identifies the parameters: given `r = t = 0`
+(from the `P`-marking) and the `Q`-marking coordinate identities, the `a₁/a₄`-
+transforms plus the flex relation force `w := u − 1` to satisfy `w(w²+w+1) = 0`, and
+the `(a₁³−27a₃)`-unit kills the residual `ω`-branch: `u³·D·w = w(1−w³) = 0`. -/
+theorem e3_vc_marked {A : Type u} [CommRing A] {C : VariableChange A}
+    {W₁ W₂ : WeierstrassCurve A} {β₁ γ₁ β₂ γ₂ : A}
+    (hW₁ : IsE3Form W₁ β₁ γ₁) (hW₂ : IsE3Form W₂ β₂ γ₂)
+    (hC : C • W₂ = W₁) (hr : C.r = 0) (ht : C.t = 0)
+    (hγ : (C.u : A) ^ 2 * γ₁ = γ₂)
+    (hβγ : (C.u : A) ^ 3 * (β₁ + γ₁) + C.s * (C.u : A) ^ 2 * γ₁ = β₂ + γ₂)
+    (hflex₁ : γ₁ * (3 * β₁ ^ 2 + 3 * β₁ * γ₁ + γ₁ ^ 2) = 0)
+    (hflex₂ : γ₂ * (3 * β₂ ^ 2 + 3 * β₂ * γ₂ + γ₂ ^ 2) = 0)
+    (ha₃ : IsUnit W₂.a₃)
+    (hD : IsUnit (W₁.a₁ ^ 3 - 27 * W₁.a₃)) (h3 : IsUnit (3 : A)) :
+    C = 1 ∧ γ₁ = γ₂ ∧ β₁ = β₂ := by
+  obtain ⟨h₁a₁, h₁a₂, h₁a₃, h₁a₄, h₁a₆⟩ := hW₁
+  obtain ⟨h₂a₁, h₂a₂, h₂a₃, h₂a₄, h₂a₆⟩ := hW₂
+  have hu : (C.u : A) * ((C.u⁻¹ : Aˣ) : A) = 1 := by
+    rw [← Units.val_mul, mul_inv_cancel C.u, Units.val_one]
+  have hcanc4 : (C.u : A) ^ 4 * ((C.u⁻¹ : Aˣ) : A) ^ 4 = 1 := by
+    rw [← mul_pow, hu, one_pow]
+  -- s = 0 from the a₄-transform (a₄ vanishes on both sides; a₃Q is a unit)
+  have ha₄ := congrArg WeierstrassCurve.a₄ hC
+  rw [variableChange_a₄, hr, ht, h₁a₄, h₂a₄, h₂a₃, h₂a₂, h₂a₁] at ha₄
+  have hs : C.s = 0 := by
+    have h'' : W₂.a₃ * C.s = 0 := by
+      rw [h₂a₃]
+      linear_combination (-(C.u : A) ^ 4) * ha₄ +
+        (-(C.s * (-3 * γ₂ ^ 2 - β₂ - 3 * β₂ * γ₂))) * hcanc4
+    exact (ha₃.mul_right_eq_zero).mp h''
+  -- the a₁-transform gives [A]: `w := u − 1` acts as the scalar `3uγ₁`
+  have ha₁ := congrArg WeierstrassCurve.a₁ hC
+  rw [variableChange_a₁, hs, h₁a₁, h₂a₁] at ha₁
+  set w : A := (C.u : A) - 1 with hwdef
+  have h' : 3 * γ₂ - 1 = (C.u : A) * (3 * γ₁ - 1) := by
+    linear_combination (C.u : A) * ha₁ - (3 * γ₂ - 1) * hu
+  have hA : w * (3 * (C.u : A) * γ₁ + 1) = 0 := by
+    rw [hwdef]; linear_combination h' + 3 * hγ
+  -- flex 2, unit-reduced: divide off the `u²`
+  have hgq2 : γ₁ * (3 * β₂ ^ 2 + 3 * β₂ * γ₂ + γ₂ ^ 2) = 0 := by
+    refine ((C.u.isUnit.pow 2).mul_right_eq_zero).mp ?_
+    rw [show (C.u : A) ^ 2 * (γ₁ * (3 * β₂ ^ 2 + 3 * β₂ * γ₂ + γ₂ ^ 2)) =
+        ((C.u : A) ^ 2 * γ₁) * (3 * β₂ ^ 2 + 3 * β₂ * γ₂ + γ₂ ^ 2) by ring, hγ]
+    exact hflex₂
+  -- the substituted `β₂`
+  have hβ₂ : β₂ = (C.u : A) ^ 3 * β₁ + (C.u : A) ^ 2 * γ₁ * w := by
+    linear_combination -hβγ + ((C.u : A) + C.s - w) * hγ + γ₂ * hs - γ₂ * hwdef
+  -- [G']: the scalar `9u²β₁` is pinned  (CAS-certified cofactors)
+  have hGp : 9 * (C.u : A) ^ 2 * β₁ * w - 2 * w ^ 2 - w = 0 := by
+    linear_combination (-81*β₁*β₂*(C.u : A)^2*γ₁ - 27*β₁*(C.u : A)^3*γ₁ - 81*β₁*(C.u : A)^2*γ₁*γ₂ + 9*β₁*(C.u : A)^2 + 27*β₁*(C.u : A)*γ₂ - 81*β₂*(C.u : A)*γ₁^2*w - 27*β₂*(C.u : A)*γ₁ + 27*β₂*γ₁*w - 27*(C.u : A)^3*γ₁^2 + 9*(C.u : A)^2*γ₁ - 81*(C.u : A)*γ₁^2*γ₂*w - 27*(C.u : A)*γ₁^2*γ₂ + 9*(C.u : A)*γ₁*γ₂ - 3*(C.u : A)*γ₁ - 2*(C.u : A) + 27*γ₁*γ₂*w + 9*γ₁*γ₂ - 3*γ₂ + 1) * hA + (-27*(C.u : A)^5) * hflex₁ + (81*γ₁*w + 27) * hgq2 + (-81*β₁*(C.u : A)^2*γ₁ - 243*β₂*γ₁^2*w - 81*β₂*γ₁ - 81*(C.u : A)^2*γ₁^2 - 243*γ₁^2*γ₂*w + 27*γ₁*w) * hβ₂ + (-81*β₁*β₂*(C.u : A) + 81*β₁*β₂*w + 81*β₁*β₂ + 27*β₁*(C.u : A)*w + 81*β₂*γ₁ + 27*(C.u : A)^3*γ₁^2 + 27*(C.u : A)*γ₁*γ₂ + 81*γ₁^2*γ₂*w - 27*γ₁*γ₂*w + 27*γ₁*w^2 + 9*γ₁*w - 3*w) * hγ + (81*β₁*β₂*γ₂ - 27*β₂*γ₁*w - 27*γ₁*γ₂^2 - 2*w) * hwdef
+  -- the D-unit kill:  3·u³·D·w = 0  (CAS-certified cofactors)
+  have hDp : W₁.a₁ ^ 3 - 27 * W₁.a₃ =
+      (3 * γ₁ - 1) ^ 3 - 27 * (-3 * γ₁ ^ 2 - β₁ - 3 * β₁ * γ₁) := by
+    rw [h₁a₁, h₁a₃]
+  have hkill : (3 * (C.u : A) ^ 3 *
+      ((3 * γ₁ - 1) ^ 3 - 27 * (-3 * γ₁ ^ 2 - β₁ - 3 * β₁ * γ₁))) * w = 0 := by
+    linear_combination (-81*β₁^2*(C.u : A)^5 - 162*β₁^2*(C.u : A)^4*w + 324*β₁^2*(C.u : A)^4 - 81*β₁*(C.u : A)^5*γ₁ - 162*β₁*(C.u : A)^4*γ₁*w + 324*β₁*(C.u : A)^4*γ₁ + 27*β₁*(C.u : A)^4 + 54*β₁*(C.u : A)^3*w - 108*β₁*(C.u : A)^3 + 81*β₁*(C.u : A)^2 - 27*(C.u : A)^5*γ₁^2 - 54*(C.u : A)^4*γ₁^2*w + 108*(C.u : A)^4*γ₁^2 + 9*(C.u : A)^4*γ₁ + 18*(C.u : A)^3*γ₁*w - 36*(C.u : A)^3*γ₁ - 3*(C.u : A)^3 + 27*(C.u : A)^2*γ₁^2 + 54*(C.u : A)^2*γ₁ - 6*(C.u : A)^2*w + 21*(C.u : A)^2 - 9*(C.u : A)*γ₁ - 18*(C.u : A) + 3) * hA + (81*(C.u : A)^6*w + 162*(C.u : A)^5*w^2 - 324*(C.u : A)^5*w) * hflex₁ + (9*β₁*(C.u : A)^3 + 18*β₁*(C.u : A)^2*w - 36*β₁*(C.u : A)^2 - 3*(C.u : A)^2 - 4*(C.u : A)*w + 22*(C.u : A) + 4*w^2 - 6*w - 13) * hGp + (24*(C.u : A)*w + 8*w^3 - 16*w^2 - 16*w) * hwdef
+  have hunit : IsUnit (3 * (C.u : A) ^ 3 *
+      ((3 * γ₁ - 1) ^ 3 - 27 * (-3 * γ₁ ^ 2 - β₁ - 3 * β₁ * γ₁))) := by
+    rw [← hDp]; exact (h3.mul (C.u.isUnit.pow 3)).mul hD
+  have hwzero : w = 0 := (hunit.mul_right_eq_zero).mp hkill
+  have hu1 : (C.u : A) = 1 := by
+    have := hwzero; rw [hwdef] at this; linear_combination this
+  have huu1 : C.u = 1 := Units.ext hu1
+  refine ⟨?_, ?_, ?_⟩
+  · ext
+    · exact hu1
+    · exact hr
+    · exact hs
+    · exact ht
+  · rw [← hγ, hu1]; ring
+  · rw [hβ₂, hu1, hwzero]; ring
+
 end ModularCurves
