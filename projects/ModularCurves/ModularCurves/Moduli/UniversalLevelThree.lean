@@ -325,6 +325,30 @@ theorem isE3Form_of_threeTorsion {A : Type u} [CommRing A] {W : WeierstrassCurve
     (by rw [hunit]; exact hwurel)
     (by rw [hunit, ← hBex, ← hAex]; exact hsheet)
 
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **([T-E15-NORM] marking transport under `ofVC` ★)** If a presentation `P` marks a
+section `σ` at the `C`-preimage `(u²p+r, u³q+su²p+t)`, then the `C`-twisted presentation
+`P.ofVC C` marks `σ` at `(p, q)`. For the `ℰ₃`-scaling `C = ⟨u,0,0,0⟩` this sends a
+`Q`-marking `(p₀, q₀)` to `(p₀·u⁻², q₀·u⁻³) = (γ, β+γ)` — exactly the `ℰ₃`-datum marking.
+Built on `projModelVCIso_affineSection` (the VC-iso ↔ affine-section compatibility). -/
+theorem LocalPresentation.MarksAt.ofVC {S : Scheme.{u}} {G : EllipticCurveGeom S}
+    {V : S.affineOpens} (P : LocalPresentation G V)
+    {σ : S ⟶ G.E} {hσ : σ ≫ G.π = 𝟙 S} (C : WeierstrassCurve.VariableChange Γ(S, V.1))
+    {p q : Γ(S, V.1)} (hEq : (C • P.W).toAffine.Equation p q)
+    (hM : P.MarksAt hσ ((C.u : Γ(S, V.1)) ^ 2 * p + C.r)
+      ((C.u : Γ(S, V.1)) ^ 3 * q + C.s * (C.u : Γ(S, V.1)) ^ 2 * p + C.t)) :
+    (P.ofVC C).MarksAt hσ p q := by
+  obtain ⟨h', hMeq⟩ := hM
+  refine ⟨hEq, ?_⟩
+  have he : (P.ofVC C).e.hom = P.e.hom ≫ (projModelVCIso C P.W).inv := by
+    show (P.e ≪≫ (projModelVCIso C P.W).symm).hom = _
+    rw [Iso.trans_hom, Iso.symm_hom]
+  rw [he, show (V.2.isoSpec.inv ≫ sectionLift G hσ V) ≫ P.e.hom ≫ (projModelVCIso C P.W).inv
+      = ((V.2.isoSpec.inv ≫ sectionLift G hσ V) ≫ P.e.hom) ≫ (projModelVCIso C P.W).inv from
+    (Category.assoc _ _ _).symm, hMeq, Iso.comp_inv_eq]
+  exact (projModelVCIso_affineSection C P.W p q hEq h').symm
+
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
