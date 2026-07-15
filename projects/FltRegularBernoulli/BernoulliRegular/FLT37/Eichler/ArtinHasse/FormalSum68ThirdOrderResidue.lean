@@ -1,6 +1,5 @@
 import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasseLogCoeffDeg68Value
 
-set_option linter.style.longLine false
 
 /-!
 # The mod-`37³` residue of `formalSum68` and the genuine deg-`68` slice second digit `c₆₈ = 4`,

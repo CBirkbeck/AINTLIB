@@ -18,7 +18,6 @@ open PadicLogSetup PadicLogSetup.DworkParameter
 variable (p : ℕ) [Fact p.Prime]
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
-set_option linter.style.longLine false in
 theorem quotient_mk_samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_weighted_sum_eq_formal
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeQuotientMap (p := p) (K := K) N
@@ -478,7 +477,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_eval_
     (by simp [samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousNumerator])
     hnum0 _
 
-set_option linter.style.longLine false in
 theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_zero_of_factorial_weighted_sum_mem
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hclear :
@@ -527,7 +525,6 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_zero_
             (p := p) (K := K) N d hx
     _ = 0 := htransport
 
-set_option linter.style.longLine false in
 /-- Multiplying a normalized homogeneous finite-log degree slice by `d!`
 clears the same-prime denominators and gives the factorial-weighted numerator
 sum in the finite quotient. -/
@@ -637,7 +634,6 @@ theorem natCast_factorial_mul_samePrimeFiniteArtinHasseNormalizedCoordLogHomogen
             (f := fun n : ℕ ↦
               q (((d.factorial / n : ℕ) : ValuedIntegerRing p K) * z n)))
 
-set_option linter.style.longLine false in
 /-- Factorial-cleared normalized homogeneous degree slice, expressed through
 the formal normalized Artin-Hasse logarithm coefficient. -/
 theorem natCast_factorial_mul_samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_formal
@@ -655,7 +651,6 @@ theorem natCast_factorial_mul_samePrimeFiniteArtinHasseNormalizedCoordLogHomogen
   exact quotient_mk_samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_weighted_sum_eq_formal
     (p := p) (K := K) N d hx
 
-set_option linter.style.longLine false in
 theorem samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_weighted_sub_precision_mem_lambdaIdeal_pow
     (N M n d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hNM : N ≤ M) (hn1 : 1 ≤ n) (hnd : n ≤ d) :
@@ -737,7 +732,6 @@ theorem samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_wei
     omega
   exact Ideal.pow_le_pow_right htarget hweighted
 
-set_option linter.style.longLine false in
 theorem samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_weighted_sub_highPrecision_mem_lambdaIdeal_pow
     (N n d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hn1 : 1 ≤ n) (hnd : n ≤ d) :
@@ -752,7 +746,6 @@ theorem samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_wei
     (p := p) (K := K) N (N + d.factorial.factorization p * (p - 1)) n d hx
     (Nat.le_add_right N (d.factorial.factorization p * (p - 1))) hn1 hnd
 
-set_option linter.style.longLine false in
 theorem samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_weighted_sum_mem_lambdaIdeal_pow_of_coeff_log_eq_zero
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hcoeff :
@@ -840,7 +833,6 @@ theorem samePrimeFiniteArtinHasseNormalizedLogHomogeneousNumerator_factorial_wei
   rw [hsplit]
   exact I.add_mem hdiff hsumM
 
-set_option linter.style.longLine false in
 theorem samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_zero_of_coeff_log_eq_zero
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hcoeff :
