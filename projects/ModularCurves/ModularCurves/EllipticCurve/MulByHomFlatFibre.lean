@@ -42,4 +42,40 @@ theorem injective_of_denseRange_comap {R S : Type*} [CommRing R] [CommRing S] [I
   rw [PrimeSpectrum.denseRange_comap_iff_ker_le_nilRadical] at h
   rwa [nilradical_eq_bot_iff.mpr ‹IsReduced R›] at h
 
+open EllipticCurve WeierstrassCurve
+
+variable {k : Type u} [Field k]
+
+/-- **The model `[N]` is surjective over any field.** `[N]` has finite fibres
+(`mulByHom_finite_preimage_singleton`, any base) and `projModel W` is infinite, so the
+range is infinite; it is closed (`[N]` proper) and irreducible (continuous image of the
+integral `projModel W`), hence — by the `finite-or-univ` classification of closed
+irreducibles on the dim-≤1 curve — the whole space. -/
+theorem modelMulByHom_surjective (W : WeierstrassCurve k) [W.IsElliptic]
+    (N : ℕ) [NeZero N] :
+    Function.Surjective ⇑((modelEllipticCurve W).mulByHom (N : ℤ)).base := by
+  haveI hpr : IsProper ((modelEllipticCurve W).mulByHom (N : ℤ)) :=
+    (modelEllipticCurve W).mulByHom_isProper (N : ℤ)
+  haveI : IrreducibleSpace (projModel W) := inferInstance
+  haveI : Infinite (projModel W) := projModel_infinite W
+  set f : (modelEllipticCurve W).E → (modelEllipticCurve W).E :=
+    ⇑((modelEllipticCurve W).mulByHom (N : ℤ)).base with hf
+  have hcont : Continuous f := ((modelEllipticCurve W).mulByHom (N : ℤ)).continuous
+  have hcl : IsClosed (Set.range f) :=
+    ((modelEllipticCurve W).mulByHom (N : ℤ)).isClosedMap.isClosed_range
+  have hirr : IsIrreducible (Set.range f) := by
+    rw [← Set.image_univ]
+    exact (IrreducibleSpace.isIrreducible_univ (projModel W)).image f hcont.continuousOn
+  have hfibre : ∀ y, (f ⁻¹' {y}).Finite := fun y =>
+    ModularCurves.EllipticCurve.mulByHom_finite_preimage_singleton (modelEllipticCurve W) N y
+  have hinf : (Set.range f).Infinite := by
+    intro hfinr
+    have hufin : (Set.univ : Set (projModel W)).Finite :=
+      (hfinr.biUnion fun y _ => hfibre y).subset fun x _ =>
+        Set.mem_biUnion (Set.mem_range_self x) rfl
+    exact (Set.infinite_univ (α := projModel W)) hufin
+  rcases projModel_isClosed_isIrreducible_finite_or_univ W hcl hirr with hfin | huniv
+  · exact absurd hfin hinf
+  · exact Set.range_eq_univ.mp huniv
+
 end ModularCurves
