@@ -279,7 +279,8 @@ theorem norm_sub_strictMonoOn_right
     · intro t ht
       rw [h_int] at ht
       have hL_sq_pos : 0 < ‖L‖^2 := by positivity
-      linarith [(hr_data t ⟨ht.1, le_of_lt ht.2⟩).2, sub_pos.mpr ht.1, mul_pos (sub_pos.mpr ht.1) hL_sq_pos]
+      linarith [(hr_data t ⟨ht.1, le_of_lt ht.2⟩).2, sub_pos.mpr ht.1,
+        mul_pos (sub_pos.mpr ht.1) hL_sq_pos]
   intro a ha b hb hab
   exact lt_of_pow_lt_pow_left₀ 2 (norm_nonneg _) (h_f_strictMono ha hb hab)
 
