@@ -158,7 +158,7 @@ def localUniformizerExponent (x : Kˣ) : ℤ :=
 @[simp]
 theorem localUniformizerExponent_one :
     localUniformizerExponent (R := R) (K := K) v 1 = 0 := by
-  unfold localUniformizerExponent
+  simp only [localUniformizerExponent]
   rw [Units.val_one, map_one, WithZero.log_one]
   norm_num
 
@@ -166,7 +166,7 @@ theorem localUniformizerExponent_mul (x y : Kˣ) :
     localUniformizerExponent (R := R) (K := K) v (x * y) =
       localUniformizerExponent (R := R) (K := K) v x +
         localUniformizerExponent (R := R) (K := K) v y := by
-  unfold localUniformizerExponent
+  simp only [localUniformizerExponent]
   rw [Units.val_mul, map_mul]
   rw [WithZero.log_mul]
   · ring
@@ -176,7 +176,7 @@ theorem localUniformizerExponent_mul (x y : Kˣ) :
 theorem localUniformizerExponent_eq_neg_valuationOfNeZero (x : Kˣ) :
     localUniformizerExponent (R := R) (K := K) v x =
       -((v.valuationOfNeZero x).toAdd) := by
-  unfold localUniformizerExponent
+  simp only [localUniformizerExponent]
   rw [← IsDedekindDomain.HeightOneSpectrum.valuationOfNeZero_eq (K := K) v x]
   cases h : v.valuationOfNeZero x
   change -((WithZero.exp _).log) = -_
@@ -256,7 +256,7 @@ theorem localUniformizerUnit_zpow_valuation_eq (x : Kˣ) :
   rw [map_zpow₀]
   rw [localUniformizerUnit_valuation]
   rw [WithZero.log_zpow, WithZero.log_exp]
-  unfold localUniformizerExponent
+  simp only [localUniformizerExponent]
   ring
 
 theorem localUnitNormalization_mem (x : Kˣ) :
@@ -281,7 +281,7 @@ def localUnitNormalization (x : Kˣ) :
 theorem localUniformizerExponent_eq_zero_of_mem {x : Kˣ}
     (hx : x ∈ localUnitSubgroupAt (R := R) (K := K) v) :
     localUniformizerExponent (R := R) (K := K) v x = 0 := by
-  unfold localUniformizerExponent
+  simp only [localUniformizerExponent]
   rw [(mem_localUnitSubgroupAt_iff (R := R) (K := K) v).mp hx]
   rw [WithZero.log_one]
   norm_num

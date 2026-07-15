@@ -294,7 +294,7 @@ theorem primesOverFinset_card_eq_reduced_minpoly_factor_card
   have hKD :=
     normalizedFactors_ideal_map_eq_normalizedFactors_min_poly_mk_map
       (R := R) (S := S) (x := x) (I := I) inferInstance hI0 hxcond hxint
-  unfold IsDedekindDomain.primesOverFinset
+  simp only [IsDedekindDomain.primesOverFinset]
   rw [factors_eq_normalizedFactors, hKD, Multiset.toFinset_map]
   have h_image :
       (Finset.image

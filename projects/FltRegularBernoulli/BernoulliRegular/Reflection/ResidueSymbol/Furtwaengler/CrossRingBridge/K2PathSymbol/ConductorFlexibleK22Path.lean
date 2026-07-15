@@ -566,7 +566,7 @@ theorem conductorFlexibleSetupZetaCompatible_of_zeta_p_int_eq
         (algebraMap (𝓞 K) (𝓞 R'))
           (BernoulliRegular.cyclotomicZetaInteger (p := p) K)) :
     ConductorFlexibleSetupZetaCompatible S (𝔭 := 𝔭) := by
-  unfold ConductorFlexibleSetupZetaCompatible
+  simp only [ConductorFlexibleSetupZetaCompatible]
   rw [h_zeta_p_int_eq]
 
 /-- Under flexible zeta compatibility, the setup's `zeta_p_int` reduction is
@@ -599,7 +599,7 @@ theorem ConductorFlexibleConcreteStickelbergerSetup.residueCharInt_pow_eq_one_cr
     (S : ConductorFlexibleConcreteStickelbergerSetup ℓ p k K R') :
     S.residueCharInt ^ p = 1 := by
   letI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
-  unfold ConductorFlexibleConcreteStickelbergerSetup.residueCharInt
+  simp only [ConductorFlexibleConcreteStickelbergerSetup.residueCharInt]
   exact residueMulChar_pow_eq_one_mulChar
     S.zeta_k S.hzeta_k S.hdiv S.zeta_p_int_unit
     S.zeta_p_int_unit_isPrimitiveRoot
@@ -652,7 +652,7 @@ theorem ConductorFlexibleFullTeichDworkSetup.ideal_quotient_mk_gaussSumInt
           (Ideal.Quotient.mk 𝔭))
         ((Ideal.Quotient.mk 𝔭).toMonoidHom.compAddChar
           S.psiInt) := by
-  unfold ConductorFlexibleConcreteStickelbergerSetup.gaussSumInt
+  simp only [ConductorFlexibleConcreteStickelbergerSetup.gaussSumInt]
   exact gaussSum_ringHomComp _ _ (Ideal.Quotient.mk 𝔭)
 
 /-- Flexible K2-1 cancellation in the cross-ring residue field. -/

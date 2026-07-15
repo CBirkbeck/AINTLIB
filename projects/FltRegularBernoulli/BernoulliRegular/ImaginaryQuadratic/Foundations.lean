@@ -108,7 +108,7 @@ lemma sqPlusPrime_natDegree : (sqPlusPrime p).natDegree = 2 := by
 /-- `X² + p` has no rational root for `p > 0` (since `-p` is not a rational square). -/
 lemma sqPlusPrime_no_root (q : ℚ) : ¬ (sqPlusPrime p).IsRoot q := by
   intro h_root
-  unfold sqPlusPrime at h_root
+  simp only [sqPlusPrime] at h_root
   simp only [Polynomial.IsRoot, Polynomial.eval_add, Polynomial.eval_pow, Polynomial.eval_X,
     Polynomial.eval_C] at h_root
   -- q^2 + p = 0 ⟹ q^2 = -p. But q^2 ≥ 0 and -p < 0. Contradiction.
@@ -149,7 +149,7 @@ theorem finrank_Kminus : Module.finrank ℚ (Kminus p) = 2 := by
 /-- For `p > 0` prime, `X² + p` has no real roots. -/
 lemma sqPlusPrime_no_real_root (x : ℝ) : ¬ (Polynomial.aeval x (sqPlusPrime p) = 0) := by
   intro h
-  unfold sqPlusPrime at h
+  simp only [sqPlusPrime] at h
   simp only [map_add, map_pow, Polynomial.aeval_X, Polynomial.aeval_C,
     eq_ratCast, Rat.cast_natCast] at h
   have hp_pos : (0 : ℝ) < (p : ℝ) := by exact_mod_cast hp.out.pos

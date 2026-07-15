@@ -291,7 +291,7 @@ field-valued Gauss sum used in the abstract Stickelberger setup. -/
 theorem algebraMap_gaussSumInt (a : ℕ) :
     algebraMap (𝓞 R') R' (S.gaussSumInt a) =
       _root_.gaussSum (S.residueChar ^ a) S.psi := by
-  unfold ConductorFlexibleConcreteStickelbergerSetup.gaussSumInt
+  simp only [ConductorFlexibleConcreteStickelbergerSetup.gaussSumInt]
   rw [gaussSum_ringHomComp]
   have hχ :
       (S.residueCharInt ^ a).ringHomComp (algebraMap (𝓞 R') R') =

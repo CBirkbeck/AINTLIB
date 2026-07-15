@@ -96,7 +96,7 @@ theorem pollaczekUnitPlus_class_eq_two_smul_pollaczekUnit_class_in_modp_freepart
         (Additive.ofMul (pollaczekUnitPlus 37 K 32)) =
       (2 : ℕ) • cyclotomicUnitToFreePartModPAdd (p := 37) K
         (Additive.ofMul (pollaczekUnit 37 K 32)) := by
-  unfold pollaczekUnitPlus
+  simp only [pollaczekUnitPlus]
   rw [ofMul_mul]
   rw [map_add]
   -- Goal: ... K (ofMul PU) + ... K (ofMul (unitsComplexConj K PU)) = 2 • ... K (ofMul PU).
@@ -235,7 +235,7 @@ eigenspace lemmas requiring `IsEvenDeltaCharacter`. Since `32` is even,
 `(-1)^32 = 1`, and the character `ω^32` sends `-1 ↦ 1`. -/
 theorem cyclotomicOmegaChar_even_of_even (k : ℕ) (hk : Even k) :
     IsEvenDeltaCharacter (p := p) (cyclotomicOmegaChar (p := p) k) := by
-  unfold IsEvenDeltaCharacter
+  simp only [IsEvenDeltaCharacter]
   rw [cyclotomicOmegaChar_apply]
   -- Goal: ((-1 : CyclotomicUnitDelta p) : ZMod p)^k = 1.
   -- (-1 : CyclotomicUnitDelta p) corresponds to (-1 : ZMod p), and (-1)^k = 1 for k even.

@@ -560,7 +560,7 @@ theorem cyclotomicGaloisConjugate_span_singleton'
         (Ideal.span ({γ} : Set (𝓞 K))) =
       Ideal.span
         ({cyclotomicRingOfIntegersEquiv (p := p) K a γ} : Set (𝓞 K)) := by
-  unfold cyclotomicGaloisConjugate
+  simp only [cyclotomicGaloisConjugate]
   rw [Ideal.map_span, Set.image_singleton]
 
 /-- Flexible API: multiplicity at a conjugate prime is the selected-prime

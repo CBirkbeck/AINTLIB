@@ -271,7 +271,7 @@ theorem caseIICor823DetSqLog_add
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (X Y : DworkCompleteIntegerRing 37 (CyclotomicField 37 ℚ)) :
     caseIICor823DetSqLog (X + Y) = caseIICor823DetSqLog X + caseIICor823DetSqLog Y := by
-  unfold caseIICor823DetSqLog
+  simp only [caseIICor823DetSqLog]
   rw [map_add, valuedLambdaQuotientDworkCoeffModSq_add]
 
 -- As above, the `map_mul` / `map_natCast` on the `evalₐ` `AlgHom` need raised elaboration and
@@ -281,7 +281,7 @@ theorem caseIICor823DetSqLog_nsmul_thirtyseven
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (Y : DworkCompleteIntegerRing 37 (CyclotomicField 37 ℚ)) :
     caseIICor823DetSqLog ((37 : ℕ) • Y) = (37 : ZMod (37 ^ 2)) * caseIICor823DetSqLog Y := by
-  unfold caseIICor823DetSqLog
+  simp only [caseIICor823DetSqLog]
   -- Convert `nsmul` to a ring multiplication first, then push the `(37 : _)` natCast through
   -- `evalₐ` (a `RingHom`) and use the second-order coefficient's natCast-scaling law.
   rw [nsmul_eq_mul]
@@ -297,7 +297,7 @@ theorem caseIICor823DescentDetectorSq_eq_detSqLog
     caseIICor823DescentDetectorSq u =
       caseIICor823DetSqLog (completedLog (p := 37) (K := CyclotomicField 37 ℚ)
         (EPlus_completedLogDomainPowPred (p := 37) (K := CyclotomicField 37 ℚ) u)) := by
-  unfold caseIICor823DescentDetectorSq caseIICor823DetSqLog
+  simp only [caseIICor823DescentDetectorSq, caseIICor823DetSqLog]
   -- The two sides differ only in the (proof-irrelevant) `Fin` membership proof of `⟨32, _⟩`.
   congr 1
 
@@ -346,7 +346,7 @@ theorem caseIICor823DetSqLog_coe_fixedSubalgebra_eq
   -- Rewrite the RHS `rationalPadicIntegerToZModSq (repr …)` into the `evalₐ` form via the bridge;
   -- then both sides are `valuedLambdaQuotientDworkCoeffModSq (idx).1 (evalₐ 72 (S:Dwork))`.
   rw [caseIICor823SecondOrder_coeffModSq_eq_evalₐ S (15 : Fin (kummerLogRank 37))]
-  unfold caseIICor823DetSqLog
+  simp only [caseIICor823DetSqLog]
   rw [show (⟨32, by norm_num⟩ : Fin (37 - 1)) =
       (kummerLogEvenPowerIndex (p := 37) (by norm_num) (15 : Fin (kummerLogRank 37))).1 from rfl]
 
@@ -362,7 +362,7 @@ theorem castHom_caseIICor823DetSqLog
       valuedLambdaQuotientDworkCoeffModP (p := 37) (K := CyclotomicField 37 ℚ)
         (⟨32, by norm_num⟩ : Fin (37 - 1))
         (AdicCompletion.evalₐ (lambdaIdeal 37 (CyclotomicField 37 ℚ)) (37 - 1) X) := by
-  unfold caseIICor823DetSqLog
+  simp only [caseIICor823DetSqLog]
   rw [valuedLambdaQuotientDworkCoeffModP_eq_castHom_modSq (p := 37) (K := CyclotomicField 37 ℚ)
     (by norm_num) (⟨32, by norm_num⟩ : Fin (37 - 1)) X]
 

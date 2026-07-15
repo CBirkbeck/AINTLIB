@@ -1335,7 +1335,7 @@ noncomputable def caseII_data_pair_realGenerator_K {m : ℕ} (D : RealCaseIIData
     (η : nthRootsFinset 37 (1 : 𝓞 K)) :
     caseII_data_pair_realGenerator_K D η =
       (D.x + D.y * (η : 𝓞 K)) * (D.x + D.y * (η : 𝓞 K) ^ 36) := by
-  unfold caseII_data_pair_realGenerator_K caseII_data_pair_realGenerator
+  simp only [caseII_data_pair_realGenerator_K, caseII_data_pair_realGenerator]
   exact (caseII_data_pair_product_descends D η).choose_spec
 
 /-- **The `𝓞 K`-pair-generator is σ-fixed (REAL).** -/
@@ -1893,7 +1893,7 @@ theorem caseII_LambdaCyc_pow_dvd_pair_realGenerator_at_etaZero {m : ℕ}
     (D : RealCaseIIData37 K m) (hp : (37 : ℕ) ≠ 2) :
     caseII_LambdaCyc D ^ (37 * m + 1) ∣ caseII_data_pair_realGenerator D D.etaZero := by
   obtain ⟨c, hc⟩ := caseII_LambdaCyc_algebraMap_pow_dvd_pair_realGenerator_K_at_etaZero D hp
-  unfold caseII_data_pair_realGenerator_K at hc
+  simp only [caseII_data_pair_realGenerator_K] at hc
   have h_alg_Lambda_pow_fixed :
       NumberField.IsCMField.ringOfIntegersComplexConj K
           ((algebraMap _ (𝓞 K) (caseII_LambdaCyc D)) ^ (37 * m + 1)) =
@@ -1976,7 +1976,7 @@ theorem caseII_LambdaCyc_dvd_pair_realGenerator {m : ℕ}
     (η : nthRootsFinset 37 (1 : 𝓞 K)) :
     caseII_LambdaCyc D ∣ caseII_data_pair_realGenerator D η := by
   obtain ⟨c, hc⟩ := caseII_LambdaCyc_algebraMap_dvd_pair_realGenerator_K D hp η
-  unfold caseII_data_pair_realGenerator_K at hc
+  simp only [caseII_data_pair_realGenerator_K] at hc
   have h_alg_Lambda_fixed :
       NumberField.IsCMField.ringOfIntegersComplexConj K
           (algebraMap _ (𝓞 K) (caseII_LambdaCyc D)) =
@@ -3085,7 +3085,7 @@ theorem caseII_sigma_pair_pow37_cross_realGenerator_unit_fixed {m : ℕ}
   rw [h_x_fixed, h_P_fixed, h_y_fixed, h_P0_fixed] at h_σ
   rw [← hu] at h_σ
   have h_P_K_ne_zero : caseII_data_pair_realGenerator_K D η ≠ 0 := by
-    unfold caseII_data_pair_realGenerator_K
+    simp only [caseII_data_pair_realGenerator_K]
     rw [Ne, map_eq_zero_iff _
       (FaithfulSMul.algebraMap_injective (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K))]
     exact caseII_data_pair_realGenerator_ne_zero D hp η
@@ -3419,7 +3419,7 @@ theorem caseII_K_symmetric_at_etaTwo_ne_zero {m : ℕ} (D : RealCaseIIData37 K m
     D.x ^ 2 + D.x * D.y * ((D.etaTwo : 𝓞 K) + (D.etaTwo : 𝓞 K) ^ 36) + D.y ^ 2 ≠ 0 := by
   rw [← caseII_pair_product_symmetric_expansion D D.etaTwo,
     ← caseII_data_pair_realGenerator_K_eq D D.etaTwo]
-  unfold caseII_data_pair_realGenerator_K
+  simp only [caseII_data_pair_realGenerator_K]
   rw [Ne, map_eq_zero_iff _
     (FaithfulSMul.algebraMap_injective (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K))]
   exact caseII_data_pair_realGenerator_ne_zero D hp D.etaTwo
@@ -3431,7 +3431,7 @@ theorem caseII_K_symmetric_at_etaOne_ne_zero {m : ℕ} (D : RealCaseIIData37 K m
     D.x ^ 2 + D.x * D.y * ((D.etaOne : 𝓞 K) + (D.etaOne : 𝓞 K) ^ 36) + D.y ^ 2 ≠ 0 := by
   rw [← caseII_pair_product_symmetric_expansion D D.etaOne,
     ← caseII_data_pair_realGenerator_K_eq D D.etaOne]
-  unfold caseII_data_pair_realGenerator_K
+  simp only [caseII_data_pair_realGenerator_K]
   rw [Ne, map_eq_zero_iff _
     (FaithfulSMul.algebraMap_injective (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K))]
   exact caseII_data_pair_realGenerator_ne_zero D hp D.etaOne

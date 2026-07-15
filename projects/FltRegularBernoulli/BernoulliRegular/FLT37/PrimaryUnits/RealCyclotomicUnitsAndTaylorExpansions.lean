@@ -432,27 +432,27 @@ noncomputable def cyclotomicUnitZMod (k : ZMod p) : 𝓞 K :=
 
 theorem cyclotomicUnitZMod_natCast (k : ℕ) [NeZero p] :
     cyclotomicUnitZMod p K (k : ZMod p) = cyclotomicUnit p K k := by
-  unfold cyclotomicUnitZMod
+  simp only [cyclotomicUnitZMod]
   rw [ZMod.val_natCast, ← cyclotomicUnit_mod_p]
 
 /-- `cyclotomicUnitZMod p K 0 = 0`. -/
 theorem cyclotomicUnitZMod_zero [NeZero p] :
     cyclotomicUnitZMod p K (0 : ZMod p) = 0 := by
-  unfold cyclotomicUnitZMod
+  simp only [cyclotomicUnitZMod]
   rw [ZMod.val_zero, cyclotomicUnit_zero]
 
 /-- `cyclotomicUnitZMod p K 1 = 1` for `p ≥ 2`. -/
 theorem cyclotomicUnitZMod_one :
     cyclotomicUnitZMod p K (1 : ZMod p) = 1 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold cyclotomicUnitZMod
+  simp only [cyclotomicUnitZMod]
   rw [ZMod.val_one, cyclotomicUnit_one]
 
 /-- `cyclotomicUnitZMod p K k = 0 ↔ k = 0`. -/
 theorem cyclotomicUnitZMod_eq_zero_iff (k : ZMod p) :
     cyclotomicUnitZMod p K k = 0 ↔ k = 0 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold cyclotomicUnitZMod
+  simp only [cyclotomicUnitZMod]
   rw [cyclotomicUnit_eq_zero_iff]
   refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
   · rw [show (0 : ZMod p) = ((0 : ℕ) : ZMod p) from by push_cast; rfl,
@@ -465,7 +465,7 @@ theorem cyclotomicUnitZMod_eq_zero_iff (k : ZMod p) :
 theorem isUnit_cyclotomicUnitZMod_iff (k : ZMod p) :
     IsUnit (cyclotomicUnitZMod p K k) ↔ k ≠ 0 := by
   haveI : NeZero p := ⟨hp.1.ne_zero⟩
-  unfold cyclotomicUnitZMod
+  simp only [cyclotomicUnitZMod]
   rw [isUnit_cyclotomicUnit_iff]
   refine ⟨fun h hk ↦ ?_, fun h hdvd ↦ ?_⟩
   · subst hk
@@ -536,7 +536,7 @@ theorem zetaSubOne_dvd_realCyclotomicUnit_sub_natCast_sq [IsCMField K]
     (k : ℕ) :
     (((zeta_spec p ℚ K).toInteger : 𝓞 K) - 1) ∣
       (realCyclotomicUnit p K k - ((k : 𝓞 K)) ^ 2) := by
-  unfold realCyclotomicUnit
+  simp only [realCyclotomicUnit]
   -- realCyclotomicUnit_k = cyclotomicUnit_k · σ(cyclotomicUnit_k).
   -- mod (ζ-1): both factors ≡ k, so product ≡ k^2.
   have h1 := zetaSubOne_dvd_cyclotomicUnit_sub_natCast p K k
@@ -554,13 +554,13 @@ theorem zetaSubOne_dvd_realCyclotomicUnit_sub_natCast_sq [IsCMField K]
 /-- For `k = 1`, the real cyclotomic combination is `1`. -/
 theorem realCyclotomicUnit_one [IsCMField K] :
     realCyclotomicUnit p K 1 = 1 := by
-  unfold realCyclotomicUnit
+  simp only [realCyclotomicUnit]
   rw [cyclotomicUnit_one, map_one, mul_one]
 
 /-- For `k = 0`, the real cyclotomic combination is `0`. -/
 theorem realCyclotomicUnit_zero [IsCMField K] :
     realCyclotomicUnit p K 0 = 0 := by
-  unfold realCyclotomicUnit
+  simp only [realCyclotomicUnit]
   rw [cyclotomicUnit_zero, zero_mul]
 
 /-- For `k = 2`, the real cyclotomic combination is
@@ -569,7 +569,7 @@ theorem realCyclotomicUnit_two [IsCMField K] :
     realCyclotomicUnit p K 2 =
       (1 + ((zeta_spec p ℚ K).toInteger : 𝓞 K)) *
         (1 + ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - 1)) := by
-  unfold realCyclotomicUnit
+  simp only [realCyclotomicUnit]
   rw [cyclotomicUnit_two, map_add, map_one, complexConj_apply_zeta (p := p) (K := K)]
 
 /-- For `k = 3`, the real cyclotomic combination is
@@ -580,7 +580,7 @@ theorem realCyclotomicUnit_three [IsCMField K] :
          ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ 2) *
         (1 + ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - 1) +
          ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (2 * (p - 1))) := by
-  unfold realCyclotomicUnit
+  simp only [realCyclotomicUnit]
   rw [cyclotomicUnit_three, map_add, map_add, map_one, map_pow,
     complexConj_apply_zeta (p := p) (K := K), ← pow_mul]
   ring
@@ -588,13 +588,13 @@ theorem realCyclotomicUnit_three [IsCMField K] :
 /-- For `k = p`, the real cyclotomic combination is `0`. -/
 theorem realCyclotomicUnit_p_eq_zero [IsCMField K] :
     realCyclotomicUnit p K p = 0 := by
-  unfold realCyclotomicUnit
+  simp only [realCyclotomicUnit]
   rw [cyclotomicUnit_p_eq_zero, zero_mul]
 
 /-- The real cyclotomic combination is periodic in its index modulo `p`. -/
 theorem realCyclotomicUnit_add_p [IsCMField K] (a : ℕ) :
     realCyclotomicUnit p K (a + p) = realCyclotomicUnit p K a := by
-  unfold realCyclotomicUnit
+  simp only [realCyclotomicUnit]
   rw [cyclotomicUnit_add_p]
 
 /-- `realCyclotomicUnit p K (p + 1) = 1`. -/
@@ -605,19 +605,19 @@ theorem realCyclotomicUnit_p_add_one [IsCMField K] :
 /-- Iterated periodicity for the real cyclotomic combination. -/
 theorem realCyclotomicUnit_add_mul_p [IsCMField K] (a m : ℕ) :
     realCyclotomicUnit p K (a + m * p) = realCyclotomicUnit p K a := by
-  unfold realCyclotomicUnit
+  simp only [realCyclotomicUnit]
   rw [cyclotomicUnit_add_mul_p]
 
 /-- `realCyclotomicUnit p K k` only depends on `k mod p`. -/
 theorem realCyclotomicUnit_mod_p [IsCMField K] (k : ℕ) :
     realCyclotomicUnit p K k = realCyclotomicUnit p K (k % p) := by
-  unfold realCyclotomicUnit
+  simp only [realCyclotomicUnit]
   rw [cyclotomicUnit_mod_p]
 
 /-- `realCyclotomicUnit p K k = 0 ↔ p ∣ k`. -/
 theorem realCyclotomicUnit_eq_zero_iff [IsCMField K] (k : ℕ) :
     realCyclotomicUnit p K k = 0 ↔ p ∣ k := by
-  unfold realCyclotomicUnit
+  simp only [realCyclotomicUnit]
   rw [mul_eq_zero, cyclotomicUnit_eq_zero_iff]
   refine ⟨?_, fun h ↦ Or.inl h⟩
   rintro (h | h)
@@ -633,7 +633,7 @@ the combination simplifies to `ζ^p = 1`. -/
 theorem realCyclotomicUnit_p_sub_one [IsCMField K] :
     realCyclotomicUnit p K (p - 1) = 1 := by
   have hp_pos : 1 ≤ p := hp.1.pos
-  unfold realCyclotomicUnit
+  simp only [realCyclotomicUnit]
   rw [cyclotomicUnit_p_sub_one, map_neg, map_pow,
     complexConj_apply_zeta (p := p) (K := K), ← pow_mul]
   have hζp : ((zeta_spec p ℚ K).toInteger : 𝓞 K) ^ p = 1 :=
@@ -652,7 +652,7 @@ theorem realCyclotomicUnit_p_sub_one [IsCMField K] :
 theorem realCyclotomicUnit_complexConj [IsCMField K] (k : ℕ) :
     ringOfIntegersComplexConj K (realCyclotomicUnit p K k) =
       realCyclotomicUnit p K k := by
-  unfold realCyclotomicUnit
+  simp only [realCyclotomicUnit]
   rw [map_mul, show ringOfIntegersComplexConj K
         (ringOfIntegersComplexConj K (cyclotomicUnit p K k)) =
       cyclotomicUnit p K k from by
@@ -667,7 +667,7 @@ theorem realCyclotomicUnit_norm_int [IsCMField K] (k : ℕ) (hk : k.Coprime p)
     Algebra.norm ℤ (realCyclotomicUnit p K k) = (1 : ℤ) := by
   -- realCyclotomicUnit = cyclotomicUnit · σ(cyclotomicUnit)
   -- norm(σ x) = norm(x), so norm(realCyclotomicUnit) = norm(cyclotomicUnit)^2 = 1
-  unfold realCyclotomicUnit
+  simp only [realCyclotomicUnit]
   rw [map_mul]
   have h_conj : Algebra.norm ℤ (ringOfIntegersComplexConj K (cyclotomicUnit p K k)) =
       Algebra.norm ℤ (cyclotomicUnit p K k) := by
@@ -775,7 +775,7 @@ theorem exists_realCyclotomicUnit_sub_sq_eq [IsCMField K] (k : ℕ) :
 theorem isUnit_realCyclotomicUnit [IsCMField K] (k : ℕ)
     (hk : k.Coprime p) (hp_two : 2 ≤ p) :
     IsUnit (realCyclotomicUnit p K k) := by
-  unfold realCyclotomicUnit
+  simp only [realCyclotomicUnit]
   exact (isUnit_cyclotomicUnit p K k hk hp_two).mul
     ((isUnit_cyclotomicUnit p K k hk hp_two).map
       (ringOfIntegersComplexConj K).toRingEquiv.toRingHom)

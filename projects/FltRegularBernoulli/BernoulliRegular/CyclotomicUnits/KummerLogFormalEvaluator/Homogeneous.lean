@@ -458,7 +458,7 @@ theorem normalizedFiniteLogApprox_evenCoeff_eq_ordinaryTerms
             (samePrimeFiniteLogTerm (p := p) (K := K) (p - 2) p x hx)) = 0 :=
     valuedLambdaQuotientDworkCoeffModP_samePrimeFiniteLogTerm_p_even_eq_zero
       (p := p) (K := K) hp_five j hx
-  unfold dworkParameterNormalizedFiniteLogApprox
+  simp only [dworkParameterNormalizedFiniteLogApprox]
   change
     valuedLambdaQuotientDworkCoeffModP (p := p) (K := K) i
         (Ideal.Quotient.factorPow (lambdaIdeal p K) hle

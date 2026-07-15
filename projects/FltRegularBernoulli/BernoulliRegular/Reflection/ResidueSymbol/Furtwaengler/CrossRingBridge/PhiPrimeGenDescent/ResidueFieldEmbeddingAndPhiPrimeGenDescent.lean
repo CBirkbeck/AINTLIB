@@ -82,7 +82,7 @@ def residueFieldEmbedding
     (x : 𝓞 K) :
     residueFieldEmbedding h_over (Ideal.Quotient.mk P x) =
       Ideal.Quotient.mk 𝔭 (algebraMap (𝓞 K) (𝓞 R') x) := by
-  unfold residueFieldEmbedding
+  simp only [residueFieldEmbedding]
   exact Ideal.quotientMap_mk
 
 /-- **Injectivity of the residue-field embedding**: `𝓞 K / P → 𝓞 R' / 𝔭`
@@ -94,7 +94,7 @@ theorem residueFieldEmbedding_injective
     {P : Ideal (𝓞 K)} {𝔭 : Ideal (𝓞 R')}
     (h_over : 𝔭.comap (algebraMap (𝓞 K) (𝓞 R')) = P) :
     Function.Injective (residueFieldEmbedding h_over) := by
-  unfold residueFieldEmbedding
+  simp only [residueFieldEmbedding]
   -- Ideal.quotientMap is injective when the comap equals the source ideal.
   rw [injective_iff_map_eq_zero]
   intro x hx

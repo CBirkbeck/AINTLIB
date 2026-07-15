@@ -170,7 +170,7 @@ theorem even_LFunction_one_eq_evenLValueRhs
   have hboundary :
       ∑ a : ZMod p, χ⁻¹ a * HurwitzZeta.cosZeta (ZMod.toAddCircle a) 1 =
         -evenLValueLogSum p χ := by
-    unfold evenLValueLogSum
+    simp only [evenLValueLogSum]
     calc
       ∑ a : ZMod p, χ⁻¹ a * HurwitzZeta.cosZeta (ZMod.toAddCircle a) 1
           = ∑ a : ZMod p,

@@ -391,7 +391,7 @@ theorem ConcreteStickelbergerSetup.residueCharInt_pow_eq_one
     (S : ConcreteStickelbergerSetup ℓ p k K R') :
     S.residueCharInt ^ p = 1 := by
   letI : NeZero p := ⟨(Fact.out : Nat.Prime p).ne_zero⟩
-  unfold ConcreteStickelbergerSetup.residueCharInt
+  simp only [ConcreteStickelbergerSetup.residueCharInt]
   exact residueMulChar_pow_eq_one_mulChar
     S.zeta_k S.hzeta_k S.hdiv S.zeta_p_int_unit
     S.zeta_p_int_unit_isPrimitiveRoot

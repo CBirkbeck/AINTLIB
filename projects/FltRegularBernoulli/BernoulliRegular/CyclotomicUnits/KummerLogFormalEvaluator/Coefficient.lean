@@ -37,7 +37,7 @@ theorem normalizedFiniteLogApprox_evenCoeff_eq_homogeneousDegreeSums
               (dworkParameterApprox p K ((p - 2) + 1))
               (dworkParameterApprox_mem_lambdaIdeal
                 (p := p) (K := K) ((p - 2) + 1)))) := by
-  unfold dworkParameterNormalizedFiniteLogApprox
+  simp only [dworkParameterNormalizedFiniteLogApprox]
   simp only [dworkParameterNormalizedCoordApprox_eq]
   exact valuedLambdaQuotientDworkCoeffModP_factorPow_samePrimeFiniteLog_normalizedCoord
     (p := p) (K := K) (kummerLogEvenPowerIndex (p := p) hp_five j).1

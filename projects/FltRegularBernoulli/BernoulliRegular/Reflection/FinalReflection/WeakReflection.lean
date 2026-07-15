@@ -417,7 +417,7 @@ theorem plusClassGroupImage_index_eq_hMinus
   have hhmul : h K = hPlus K * hMinus K :=
     h_eq_hPlus_mul_hMinus p hp_odd K
   have hpos : 0 < hPlus K := by
-    unfold hPlus
+    simp only [hPlus]
     exact Fintype.card_pos
   exact Nat.eq_of_mul_eq_mul_left hpos (by
     rw [hmul, hhmul])

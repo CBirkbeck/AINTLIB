@@ -104,7 +104,7 @@ theorem caseII_thirtyseven_notMem_lv149 :
   intro h37
   -- `149 ∈ lv149` (lv149 lies over the rational prime 149).
   have h149 : ((149 : ℕ) : 𝓞 (CyclotomicField 37 ℚ)) ∈ lv149 := by
-    unfold lv149
+    simp only [lv149]
     exact FLT37.lehmerVandiverPrime_natCast_ℓ_mem 37 149 4
       (by decide : (149 : ℕ) = 4 * 37 + 1)
       (by decide : (2 : ℕ).Coprime 149)

@@ -70,7 +70,7 @@ lemma stickelbergerCorrectedCoeff_mul_p (c b : (ZMod p)ˣ) :
     (p : ℤ) * stickelbergerCorrectedCoeff p c b =
       ((c : ZMod p).val * (b : ZMod p).val -
         ((c * b : (ZMod p)ˣ) : ZMod p).val : ℤ) := by
-  unfold stickelbergerCorrectedCoeff
+  simp only [stickelbergerCorrectedCoeff]
   exact Int.mul_ediv_cancel' (val_mul_sub_val_mul_dvd p c b)
 
 /-- Rational form: the coefficient difference equals `p * (corrected coeff : ℚ)`. -/
@@ -128,7 +128,7 @@ theorem p_smul_stickelbergerCorrectedInt (c : (ZMod p)ˣ) :
     (p : ℤ) • stickelbergerCorrectedInt p c =
       (((c : ZMod p).val : ℤ) • (1 : MonoidAlgebra ℤ (ZMod p)ˣ) -
         MonoidAlgebra.single c (1 : ℤ)) * stickelbergerScaled p := by
-  unfold stickelbergerCorrectedInt
+  simp only [stickelbergerCorrectedInt]
   rw [sub_mul, smul_one_mul_stickelbergerScaled, single_mul_stickelbergerScaled]
   rw [show ((p : ℤ) • ∑ b : (ZMod p)ˣ,
       stickelbergerCorrectedCoeff p c b • MonoidAlgebra.single b⁻¹ (1 : ℤ)) =

@@ -80,7 +80,7 @@ Proved by kernel `decide` with bumped `maxRecDepth` and `maxHeartbeats`,
 matching the convention of `lehmerVandiverNonTrivial_thirtyseven`. -/
 theorem lehmerVandiverProduct_thirtyseven_ne_one :
     lehmerVandiverProduct 37 32 149 2 4 ≠ 1 := by
-  unfold lehmerVandiverProduct
+  simp only [lehmerVandiverProduct]
   decide
 
 /-- **Fermat-trivial residue identity for FLT37.** In `ZMod 149`,

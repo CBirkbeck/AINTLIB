@@ -97,7 +97,7 @@ has even `k`. -/
 theorem VandiverIIIHypothesis_iff_isIrregularIndex (ℓ : ℕ) :
     VandiverIIIHypothesis ℓ ↔
       ℓ % 4 = 1 ∧ ∀ k, IsIrregularIndex ℓ k → Even k := by
-  unfold VandiverIIIHypothesis IsIrregularIndex
+  simp only [VandiverIIIHypothesis, IsIrregularIndex]
   refine ⟨?_, ?_⟩
   · rintro ⟨h4, h⟩
     exact ⟨h4, fun k ⟨h1, h2, hd⟩ ↦ h k h1 h2 hd⟩

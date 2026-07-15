@@ -61,7 +61,7 @@ theorem classGroupPlusComponentTrivial_of_unique_irregular
     (i_irreg : ℕ) (_ : UniqueIrregularIndex p i_irreg) :
     ∀ j : ℕ, j ≠ i_irreg → ClassGroupPlusComponentTrivial p K j := by
   intro j _
-  unfold ClassGroupPlusComponentTrivial
+  simp only [ClassGroupPlusComponentTrivial]
   intro _
   trivial
 

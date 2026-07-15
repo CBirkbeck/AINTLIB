@@ -46,7 +46,7 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_eval_sum
                 (samePrimeFiniteArtinHasseExpCoordLogHomogeneousNumerator_mem_lambdaIdeal_pow
                   (p := p) (K := K) N a.1 d hx))) := by
   classical
-  unfold samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum
+  simp only [samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum]
   refine Finset.sum_congr rfl ?_
   intro a _ha
   have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1

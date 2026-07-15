@@ -29,14 +29,14 @@ noncomputable def idealNormMultiplicity (n : ℕ) : ℕ :=
   Nat.card {I : NonzeroIdeal L // Ideal.absNorm I.1 = n}
 
 lemma idealNormMultiplicity_zero : idealNormMultiplicity L 0 = 0 := by
-  unfold idealNormMultiplicity
+  simp only [idealNormMultiplicity]
   rw [Nat.card_eq_zero]
   refine Or.inl ⟨?_⟩
   rintro ⟨⟨I, hI⟩, hnorm⟩
   exact hI (Ideal.absNorm_eq_zero_iff.mp hnorm)
 
 lemma idealNormMultiplicity_one : idealNormMultiplicity L 1 = 1 := by
-  unfold idealNormMultiplicity
+  simp only [idealNormMultiplicity]
   haveI : Unique {I : NonzeroIdeal L // Ideal.absNorm I.1 = 1} :=
     { default := ⟨⟨⊤, by simp⟩, Ideal.absNorm_top⟩
       uniq := by
@@ -226,7 +226,7 @@ lemma idealNormMultiplicity_mul {m n : ℕ} (hcop : Nat.Coprime m n) :
           refine Prod.ext (Subtype.ext (Subtype.ext ?_)) (Subtype.ext (Subtype.ext ?_))
           · exact h_inv_m J L' hJ_norm hL_norm
           · exact h_inv_n J L' hJ_norm hL_norm }
-    unfold idealNormMultiplicity
+    simp only [idealNormMultiplicity]
     rw [Nat.card_congr h_equiv, Nat.card_prod]
   · interval_cases n
     simp [idealNormMultiplicity_one]
@@ -239,9 +239,9 @@ lemma idealNormMultiplicity_mul {m n : ℕ} (hcop : Nat.Coprime m n) :
 lemma dedekindZeta_eq_tsum_idealNormMultiplicity {s : ℂ} (hs : 1 < s.re) :
     NumberField.dedekindZeta L s =
       ∑' n : ℕ, (idealNormMultiplicity L n : ℂ) * (n : ℂ) ^ (-s) := by
-  unfold NumberField.dedekindZeta LSeries
+  simp only [NumberField.dedekindZeta, LSeries]
   refine tsum_congr fun n => ?_
-  unfold LSeries.term
+  simp only [LSeries.term]
   rcases Nat.eq_zero_or_pos n with rfl | hn
   · simp only [↓reduceIte]
     rw [idealNormMultiplicity_zero]
@@ -256,7 +256,7 @@ lemma dedekindZeta_eq_tsum_idealNormMultiplicity {s : ℂ} (hs : 1 < s.re) :
   · simp only [hn.ne', ↓reduceIte]
     rw [Complex.cpow_neg, div_eq_mul_inv]
     congr 1
-    unfold idealNormMultiplicity
+    simp only [idealNormMultiplicity]
     have hequiv : {I : Ideal (𝓞 L) // Ideal.absNorm I = n} ≃
         {I : NonzeroIdeal L // Ideal.absNorm I.1 = n} := by
       refine {

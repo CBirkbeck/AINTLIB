@@ -74,7 +74,7 @@ lemma sigmaOfCharacterUnit_smul_gaussSumIdeal
     (b : (ZMod (p - 1))ˣ) (χ : DirichletCharacter ℂ p) :
     sigmaOfCharacterUnit (p := p) L b • gaussSumIdeal (p := p) (L := L) χ =
       gaussSumIdeal (p := p) (L := L) (χ ^ (b : ZMod (p - 1)).val) := by
-  unfold gaussSumIdeal
+  simp only [gaussSumIdeal]
   rw [Ideal.pointwise_smul_def, Ideal.map_span, Set.image_singleton]
   exact congrArg (fun x : 𝓞 L => Ideal.span ({x} : Set (𝓞 L)))
     (sigmaOfCharacterUnit_smul_gaussSumIntegers (p := p) (L := L) b χ)
@@ -131,7 +131,7 @@ lemma stickelbergerEmbedding_sigmaOfUnit_smul_gaussSumLiftRootSum
                 ((sigmaOfUnit (p := p) L a)
                   (gaussSumLiftRootSum (p := p) (L := L) χ))
               = _
-            unfold gaussSumLiftRootSum
+            simp only [gaussSumLiftRootSum]
             let term : Fin (p - 1) → L := fun m =>
               ζchar ^ ((stickelbergerCharacterExponent (p := p) χ : ℕ) * (m : ℕ)) *
                 ζadd ^ ((((characterUnitGenerator (p := p)) ^ (m : ℕ) : (ZMod p)ˣ) : ZMod p).val)
@@ -261,7 +261,7 @@ lemma sigmaOfUnit_smul_gaussSumIdeal
     {χ : DirichletCharacter ℂ p} (hχ : χ ≠ 1) (a : (ZMod p)ˣ) :
     sigmaOfUnit (p := p) L a • gaussSumIdeal (p := p) (L := L) χ =
       gaussSumIdeal (p := p) (L := L) χ := by
-  unfold gaussSumIdeal
+  simp only [gaussSumIdeal]
   rw [Ideal.pointwise_smul_def, Ideal.map_span, Set.image_singleton]
   change
     Ideal.span ({sigmaOfUnit (p := p) L a • gaussSumIntegers p L χ} : Set (𝓞 L)) =

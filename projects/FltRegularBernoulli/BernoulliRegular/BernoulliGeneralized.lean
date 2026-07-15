@@ -87,7 +87,7 @@ character-sum identity (our T004). -/
 lemma BernoulliGen_zero_of_ne_one [IsDomain R] [NeZero N]
     {χ : DirichletCharacter R N} (hχ : χ ≠ 1) :
     BernoulliGen χ 0 = 0 := by
-  unfold BernoulliGen
+  simp only [BernoulliGen]
   simp only [Polynomial.bernoulli_zero, Polynomial.eval_one, map_one, mul_one]
   rw [show (N : R) ^ (0 - 1) = 1 by norm_num, one_mul,
     MulChar.sum_eq_zero_of_ne_one hχ]
@@ -99,7 +99,7 @@ lemma BernoulliGen_one_of_ne_one [IsDomain R] [NeZero N]
     {χ : DirichletCharacter R N} (hχ : χ ≠ 1) :
     BernoulliGen χ 1 =
       ∑ a : ZMod N, χ a * algebraMap ℚ R ((a.val : ℚ) / N) := by
-  unfold BernoulliGen
+  simp only [BernoulliGen]
   rw [show (1 - 1 : ℕ) = 0 from rfl, pow_zero, one_mul, Polynomial.bernoulli_one]
   simp_rw [Polynomial.eval_sub, Polynomial.eval_X, Polynomial.eval_C, map_sub, mul_sub]
   rw [Finset.sum_sub_distrib]

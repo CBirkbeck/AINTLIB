@@ -83,7 +83,7 @@ theorem monicFactorsMod_alpha_at_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 7) :
       {Polynomial.X, Polynomial.X + Polynomial.C (1 : ZMod 2)} := by
   classical
   haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
-  unfold RingOfIntegers.monicFactorsMod
+  simp only [RingOfIntegers.monicFactorsMod]
   rw [alphaInOK_minpoly_factor_mod_two_split p hp3 hp7]
   have hX_ne_zero : (Polynomial.X : Polynomial (ZMod 2)) ≠ 0 := Polynomial.X_ne_zero
   have hXp1_ne_zero : (Polynomial.X + Polynomial.C (1 : ZMod 2) : Polynomial (ZMod 2)) ≠ 0 := by
@@ -173,7 +173,7 @@ theorem monicFactorsMod_alpha_at_two_inert (hp3 : p % 4 = 3) (hp3_8 : p % 8 = 3)
     refine max_le ?_ ?_
     · rw [Polynomial.degree_X]
     · exact (Polynomial.degree_C_le).trans (by decide)
-  unfold RingOfIntegers.monicFactorsMod
+  simp only [RingOfIntegers.monicFactorsMod]
   rw [alphaInOK_minpoly_factor_mod_two_inert p hp3 hp3_8]
   rw [UniqueFactorizationMonoid.normalizedFactors_irreducible h_irred,
     h_monic.normalize_eq_self]
@@ -421,7 +421,7 @@ theorem idealNormMultiplicity_at_two_split_eq (hp3 : p % 4 = 3) (hp7 : p % 8 = 7
   have habsNormP₁ : Ideal.absNorm P₁ = 2 := absNorm_primeOver_at_two_split p hp3 hp7 P₁ hP₁_mem
   have habsNormP₂ : Ideal.absNorm P₂ = 2 := absNorm_primeOver_at_two_split p hp3 hp7 P₂ hP₂_mem
   have hq_gt_one : (1 : ℕ) < 2 := by decide
-  unfold idealNormMultiplicity
+  simp only [idealNormMultiplicity]
   have h_ideal_ne : ∀ a : ℕ, P₁ ^ a * P₂ ^ (k - a) ≠ ⊥ :=
     fun a ↦ mul_ne_zero (pow_ne_zero _ hP₁_ne) (pow_ne_zero _ hP₂_ne)
   have h_ideal_norm : ∀ a ≤ k, Ideal.absNorm (P₁ ^ a * P₂ ^ (k - a)) = 2 ^ k := by
@@ -501,7 +501,7 @@ theorem idealNormMultiplicity_at_two_inert_odd (hp3 : p % 4 = 3) (hp3_8 : p % 8 
   haveI : P.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP_ne hP_mem.1
   haveI : P.LiesOver (Ideal.span {((2 : ℕ) : ℤ)}) := hP_mem.2
   have habsNormP : Ideal.absNorm P = 4 := absNorm_primeOver_at_two_inert p hp3 hp3_8 P hP_mem
-  unfold idealNormMultiplicity
+  simp only [idealNormMultiplicity]
   rw [Nat.card_eq_zero]
   refine Or.inl ⟨?_⟩
   rintro ⟨⟨I, hI_ne⟩, hI_norm⟩
@@ -568,7 +568,7 @@ theorem idealNormMultiplicity_at_two_inert_even (hp3 : p % 4 = 3) (hp3_8 : p % 8
   haveI : P.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP_ne hP_mem.1
   haveI : P.LiesOver (Ideal.span {((2 : ℕ) : ℤ)}) := hP_mem.2
   have habsNormP : Ideal.absNorm P = 4 := absNorm_primeOver_at_two_inert p hp3 hp3_8 P hP_mem
-  unfold idealNormMultiplicity
+  simp only [idealNormMultiplicity]
   haveI : Unique {I : NonzeroIdeal (Kminus p) // Ideal.absNorm I.1 = 2 ^ (2 * m)} :=
     { default := ⟨⟨P ^ m, pow_ne_zero m hP_ne⟩, by
           rw [map_pow, habsNormP]

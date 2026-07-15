@@ -90,9 +90,9 @@ theorem prod_cyclotomicRingOfIntegersEquiv_eq_intNorm (α : 𝓞 K) :
     intro σ
     have ha : cyclotomicSigmaOfUnit (p := p) K
         (cyclotomicGalEquivZMod (p := p) K σ) = σ := by
-      unfold cyclotomicSigmaOfUnit
+      simp only [cyclotomicSigmaOfUnit]
       exact (cyclotomicGalEquivZMod (p := p) K).symm_apply_apply σ
-    unfold cyclotomicRingOfIntegersEquiv
+    simp only [cyclotomicRingOfIntegersEquiv]
     change σ (α : K) =
       algebraMap (𝓞 K) K
         ((MulSemiringAction.toRingEquiv (Gal(K / ℚ)) (𝓞 K)

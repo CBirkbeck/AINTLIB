@@ -234,7 +234,7 @@ lemma characterSubfieldPrimeGenerator_isPrimitiveRoot :
     IsPrimitiveRoot
       (characterSubfieldPrimeGenerator (p := p) (L := L) (Pchar := Pchar))
       (p - 1) := by
-  unfold characterSubfieldPrimeGenerator
+  simp only [characterSubfieldPrimeGenerator]
   exact
     (quotient_mk_gaussSumLiftCharacterRootCharacterSubfieldInteger_isPrimitiveRoot
       (p := p) (L := L) (Pchar := Pchar)).map_of_injective

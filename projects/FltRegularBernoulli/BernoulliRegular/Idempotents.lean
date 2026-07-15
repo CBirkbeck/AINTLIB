@@ -170,7 +170,7 @@ lemma sum_char_mul_char_inv_of_ne [IsDomain R] (h : χ ≠ ψ) :
 /-- Diekmann Lemma 50 (part 1): `ε_χ` is an idempotent element. -/
 theorem isIdempotentElem_charIdempotent (χ : MulChar G R) :
     IsIdempotentElem (charIdempotent χ) := by
-  unfold IsIdempotentElem
+  simp only [IsIdempotentElem]
   rw [charIdempotent_mul_aux χ χ, sum_char_mul_char_inv_self χ, charIdempotent_def]
   -- (⅟n * ⅟n) • (n • ε) = ⅟n • ε via cancellation.
   rw [smul_smul, mul_assoc, invOf_mul_self, mul_one]

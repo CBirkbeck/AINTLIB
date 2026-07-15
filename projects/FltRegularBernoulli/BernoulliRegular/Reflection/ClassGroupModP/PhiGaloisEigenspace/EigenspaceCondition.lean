@@ -490,7 +490,7 @@ theorem strongEigenspaceCondition_stickelbergerIdeal_eq_pow_mul_principal
       (p := p) (K := K) h hη hb_ne a⁻¹
   choose u hu using hroot
   refine ⟨∏ a : CyclotomicUnitDelta p, u a ^ ((a : ZMod p).val), ?_⟩
-  unfold stickelbergerIdeal
+  simp only [stickelbergerIdeal]
   calc
     (∏ a : CyclotomicUnitDelta p,
         cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ b ^
@@ -579,7 +579,7 @@ theorem strongEigenspaceCondition_stickelbergerIdeal_eq_pow_of_unit_witness
         b ^ (((a⁻¹ : CyclotomicUnitDelta p) : ZMod p).val ^ i) := fun a ↦
     strongEigenspaceCondition_ideal_pth_root_form_of_unit_witness
       (p := p) (K := K) h hη hb_ne a⁻¹
-  unfold stickelbergerIdeal
+  simp only [stickelbergerIdeal]
   calc
     (∏ a : CyclotomicUnitDelta p,
         cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ b ^

@@ -109,7 +109,7 @@ theorem PhiPrimeElement.PhiIdealElement.conj_mul_self_eq_absNorm_pow_of_prime_co
         (PhiPrimeElement.PhiIdealElement.idealNormFactorElement
           (p := p) (K := K) A) ^ p := by
           congr 1
-          unfold PhiPrimeElement.PhiIdealElement.idealNormFactorElement
+          simp only [PhiPrimeElement.PhiIdealElement.idealNormFactorElement]
           exact congrArg Multiset.prod
             (Multiset.attach_map_val' (normalizedFactors A)
               (fun P : Ideal (𝓞 K) ↦ (((Ideal.absNorm P : ℤ) : 𝓞 K))))
@@ -144,7 +144,7 @@ theorem isSemiPrimary_stickelbergerPrincipalGen
     (hα : FLT37.IsSemiPrimary p (K := K) α) :
     FLT37.IsSemiPrimary p (K := K)
       (stickelbergerPrincipalGen (p := p) (K := K) α) := by
-  unfold stickelbergerPrincipalGen
+  simp only [stickelbergerPrincipalGen]
   refine isSemiPrimary_finset_prod
     (p := p) (K := K) (Finset.univ : Finset (CyclotomicUnitDelta p))
     (fun a ↦
@@ -165,7 +165,7 @@ theorem not_zetaSubOne_dvd_stickelbergerPrincipalGen
     ¬ FLT37.zetaSubOne p K ∣
       stickelbergerPrincipalGen (p := p) (K := K) α := by
   classical
-  unfold stickelbergerPrincipalGen
+  simp only [stickelbergerPrincipalGen]
   refine (FLT37.zetaSubOne_prime (p := p) (K := K)).not_dvd_finsetProd ?_
   intro a _
   have ha :
@@ -242,7 +242,7 @@ theorem ringOfIntegersComplexConj_stickelbergerPrincipalGen_of_eq_sigma_neg_one
       ∏ a : CyclotomicUnitDelta p,
         (cyclotomicRingOfIntegersEquiv (p := p) K ((-a)⁻¹) α) ^
           ((a : ZMod p).val) := by
-  unfold stickelbergerPrincipalGen
+  simp only [stickelbergerPrincipalGen]
   rw [map_prod]
   refine Finset.prod_congr rfl fun a _ ↦ ?_
   rw [map_pow, hconj, ← cyclotomicRingOfIntegersEquiv_mul_apply]
@@ -268,7 +268,7 @@ theorem ringOfIntegersComplexConj_stickelbergerPrincipalGen_mul_self_of_eq_sigma
   classical
   rw [ringOfIntegersComplexConj_stickelbergerPrincipalGen_of_eq_sigma_neg_one
     (p := p) (K := K) hconj]
-  unfold stickelbergerPrincipalGen
+  simp only [stickelbergerPrincipalGen]
   have h_reindex :
       (∏ a : CyclotomicUnitDelta p,
           (cyclotomicRingOfIntegersEquiv (p := p) K ((-a)⁻¹) α) ^

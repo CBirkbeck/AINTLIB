@@ -40,7 +40,7 @@ lemma gaussSumIntegers_eq_rootSum
             gaussSumLiftAdditiveRoot (p := p) L ^
               ((((characterUnitGenerator (p := p)) ^ (m : ℕ) : (ZMod p)ˣ) : ZMod p).val))
   rw [gaussSumLift_eq_gaussSumLiftRootSum (p := p) (L := L)]
-  unfold gaussSumLiftRootSum
+  simp only [gaussSumLiftRootSum]
   rw [map_sum]
   apply Finset.sum_congr rfl
   intro m hm
@@ -364,7 +364,7 @@ lemma primeAbovePExponent_normalizedBoundaryPrime_inverseGenerator_eq_one
     primeAbovePExponent (p := p) (L := L)
         (normalizedBoundaryPrime (p := p) (L := L))
         (stickelbergerComplexCharacterGenerator (p := p) ^ (p - 2)) = 1 := by
-  unfold primeAbovePExponent gaussSumIdeal
+  simp only [primeAbovePExponent, gaussSumIdeal]
   apply Ideal.count_normalizedFactors_eq
   · rw [pow_one, Ideal.span_singleton_le_iff_mem]
     exact gaussSumIntegers_inverseGenerator_mem_normalizedBoundaryPrime

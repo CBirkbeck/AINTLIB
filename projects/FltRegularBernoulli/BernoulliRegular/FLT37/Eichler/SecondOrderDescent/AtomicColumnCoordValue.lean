@@ -182,7 +182,7 @@ no second-order correction beyond the first-order normalization.  We rewrite `(b
 numerator/denominator to their proven values (`bernoulli_thirtytwo_num_eq`,
 `bernoulli_thirtytwo_den_eq`) so the residue is a `decide` over numerals. -/
 theorem firstOrderStructureLiftFactor_eq : firstOrderStructureLiftFactor = 407 := by
-  unfold firstOrderStructureLiftFactor
+  simp only [firstOrderStructureLiftFactor]
   rw [bernoulli_thirtytwo_num_eq, bernoulli_thirtytwo_den_eq]
   decide +kernel
 
@@ -193,7 +193,7 @@ symbolic numerator `(bernoulli 32).num` to its proven value `-7709321041217`
 (`bernoulli_thirtytwo_num_eq`) so the residue is a `decide` over numerals. -/
 theorem caseIICor823SecondOrderBernoulliFactorModSq_eq_val :
     caseIICor823SecondOrderBernoulliFactorModSq = 1073 := by
-  unfold caseIICor823SecondOrderBernoulliFactorModSq
+  simp only [caseIICor823SecondOrderBernoulliFactorModSq]
   rw [bernoulli_thirtytwo_num_eq]
   decide +kernel
 

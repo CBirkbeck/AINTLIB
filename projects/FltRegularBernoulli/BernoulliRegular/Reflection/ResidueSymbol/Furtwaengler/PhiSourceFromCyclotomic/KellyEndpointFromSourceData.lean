@@ -290,7 +290,7 @@ theorem ofReciprocalPhiCandidateAtomicSplit_symbol_pos_cyclotomic_sourceCoprime
       hP'_bot hp_notin_P'
       (natCast_notMem_of_absNorm_coprime_of_natCast_mem
         (P := P) (P' := P') hP_bot hP'_bot hℓ_in_P hcop)
-  unfold PhiPrimeSymbolIdentityPos
+  simp only [PhiPrimeSymbolIdentityPos]
   have hsym := K2_2ReciprocalSourceData.symbol_eq_norm_symbol D T hcop
   simpa [K2_2ReciprocalSourceData.phi, reciprocalPhiCandidate,
     Ideal.absNorm_apply, Submodule.cardQuot_apply, Nat.card_eq_fintype_card] using hsym

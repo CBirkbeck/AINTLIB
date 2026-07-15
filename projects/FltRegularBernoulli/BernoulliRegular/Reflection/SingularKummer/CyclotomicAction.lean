@@ -454,7 +454,7 @@ theorem cyclotomicSingularGroupClassMapToPTorsion_equivariant
         (singularGroupClassMapToPTorsion (R := 𝓞 K) (K := K) p x) =
       singularGroupClassMapToPTorsion (R := 𝓞 K) (K := K) p
         (cyclotomicSingularGroupAction K p a x) := by
-  unfold cyclotomicSingularGroupAction cyclotomicClassGroupPTorsionAction
+  simp only [cyclotomicSingularGroupAction, cyclotomicClassGroupPTorsionAction]
   exact
     PrincipalIdealPreservingEquiv.singularGroupClassMapToPTorsion_equivariant
       (A := cyclotomicPrincipalIdealPreservingEquiv (K := K) (p := p) a) p x
