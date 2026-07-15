@@ -168,6 +168,86 @@ private noncomputable def AffineIntersectionUnitCocycle.chartGlueSource
     D.glued.Modules :=
   ∏ᶜ fun i : J ↦ c.chartExtension hopen hpush i
 
+/-- Over a fixed chart, the restricted Cech source is the product of the
+structure sheaves pushed forward from its ordered overlaps with all charts. -/
+noncomputable def AffineIntersectionUnitCocycle.chartGlueSourceRestrictIso
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (@restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)).obj
+        (c.chartGlueSource hopen hpush) ≅
+      ∏ᶜ fun i : J ↦
+        (pushforward (D.t i k ≫ D.f k i)).obj (unitObj (D.V (i, k))) := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  letI : IsOpenImmersion (D.ι k) := D.ι_isOpenImmersion k
+  letI : PreservesLimits (restrictFunctor (D.ι k)) :=
+    restrictFunctor_preservesLimits (D.ι k)
+  let e : Discrete.functor (fun i : J ↦ c.chartExtension hopen hpush i) ⋙
+      restrictFunctor (D.ι k) ≅
+      Discrete.functor (fun i : J ↦
+        (restrictFunctor (D.ι k)).obj (c.chartExtension hopen hpush i)) :=
+    Discrete.natIso fun _ ↦ Iso.refl _
+  exact preservesLimitIso (restrictFunctor (D.ι k))
+      (Discrete.functor fun i : J ↦ c.chartExtension hopen hpush i) ≪≫
+    HasLimit.isoOfNatIso e ≪≫
+      Pi.mapIso fun i ↦ c.chartExtensionRestrictIso hopen hpush k i
+
+@[reassoc]
+theorem AffineIntersectionUnitCocycle.chartGlueSourceRestrictIso_hom_π
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k i : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (c.chartGlueSourceRestrictIso hopen hpush k).hom ≫
+        Pi.π (fun j : J ↦
+          (pushforward (D.t j k ≫ D.f k j)).obj (unitObj (D.V (j, k)))) i =
+      (@restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)).map
+          (Pi.π (fun j : J ↦ c.chartExtension hopen hpush j) i) ≫
+        (c.chartExtensionRestrictIso hopen hpush k i).hom := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  letI : IsOpenImmersion (D.ι k) := D.ι_isOpenImmersion k
+  letI : PreservesLimits (restrictFunctor (D.ι k)) :=
+    restrictFunctor_preservesLimits (D.ι k)
+  let e : Discrete.functor (fun j : J ↦ c.chartExtension hopen hpush j) ⋙
+      restrictFunctor (D.ι k) ≅
+      Discrete.functor (fun j : J ↦
+        (restrictFunctor (D.ι k)).obj (c.chartExtension hopen hpush j)) :=
+    Discrete.natIso fun _ ↦ Iso.refl _
+  have hproj :
+      (preservesLimitIso (restrictFunctor (D.ι k))
+          (Discrete.functor fun j : J ↦ c.chartExtension hopen hpush j)).hom ≫
+        (HasLimit.isoOfNatIso e).hom ≫
+          Pi.π (fun j : J ↦
+            (restrictFunctor (D.ι k)).obj (c.chartExtension hopen hpush j)) i =
+      (restrictFunctor (D.ι k)).map
+        (Pi.π (fun j : J ↦ c.chartExtension hopen hpush j) i) := by
+    change (preservesLimitIso (restrictFunctor (D.ι k))
+          (Discrete.functor fun j : J ↦ c.chartExtension hopen hpush j)).hom ≫
+        ((HasLimit.isoOfNatIso e).hom ≫
+          limit.π (Discrete.functor fun j : J ↦
+            (restrictFunctor (D.ι k)).obj (c.chartExtension hopen hpush j))
+            (Discrete.mk i)) = _
+    rw [HasLimit.isoOfNatIso_hom_π]
+    change (preservesLimitIso (restrictFunctor (D.ι k))
+          (Discrete.functor fun j : J ↦ c.chartExtension hopen hpush j)).hom ≫
+        limit.π ((Discrete.functor fun j : J ↦ c.chartExtension hopen hpush j) ⋙
+          restrictFunctor (D.ι k)) (Discrete.mk i) ≫ 𝟙 _ =
+      (restrictFunctor (D.ι k)).map
+        (limit.π (Discrete.functor fun j : J ↦ c.chartExtension hopen hpush j)
+          (Discrete.mk i))
+    rw [Category.comp_id]
+    exact preservesLimitIso_hom_π _ _ _
+  dsimp only [AffineIntersectionUnitCocycle.chartGlueSourceRestrictIso,
+    AffineIntersectionUnitCocycle.chartGlueSource]
+  simp only [Iso.trans_hom, Category.assoc, Pi.mapIso_hom_π]
+  simpa only [Category.assoc] using
+    congrArg (fun q ↦ q ≫ (c.chartExtensionRestrictIso hopen hpush k i).hom) hproj
+
 private noncomputable def AffineIntersectionUnitCocycle.chartGlueTarget
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
     (c : AffineIntersectionUnitCocycle F)

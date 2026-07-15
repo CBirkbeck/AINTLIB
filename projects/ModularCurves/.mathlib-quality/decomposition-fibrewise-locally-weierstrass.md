@@ -495,3 +495,10 @@ Completed subdependency (2026-07-14): defined
 to `U_k` is now canonically identified with the pushforward of `O_{V(i,k)}` along the right-hand
 overlap leg. This is the factorwise local description of the Cech product; it is option-free and
 its axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.
+
+Completed subdependency (2026-07-14): defined
+`AffineIntersectionUnitCocycle.chartGlueSourceRestrictIso` and proved its projection formula
+`chartGlueSourceRestrictIso_hom_π`. The restricted chart Cech source is therefore identified
+with the product of all ordered-overlap pushforwards, compatibly with every product projection.
+Both declarations are option-free and their axiom audits are exactly `propext`,
+`Classical.choice`, and `Quot.sound`.
