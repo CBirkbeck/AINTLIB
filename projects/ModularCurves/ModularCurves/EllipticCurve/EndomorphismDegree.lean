@@ -11,12 +11,27 @@ The `End(E/S)` / degree / Hasse layer feeding rigidity (`aut_hom_eq_id_of_fullLe
 (group-`1` = zero morphism = ring `0`, group-`*` = pointwise sum = ring `+`, `f ^ n` = `[n]·f`,
 `E.mulBy n = (𝟙 E.asOver) ^ n = [n]`); ring-`1` = `𝟙 E.asOver`; ring-`*` = composition `≫`.
 
-**This file is a `/develop --decompose` skeleton** (T-END0, tickets.md §v10.5): the degree, dual
-isogeny and trace are stated as DATA sorries governed by the DATA-SORRY REGISTER (their KM sources
-are in the docstrings, their construction tickets are T-END0b, and the pins below are their
-specification lemmas — downstream code may use them only through those). The leaf theorems
-T-G3b/c/d/e are `theorem`-level sorries. Full plan + verbatim KM quotes:
-`.mathlib-quality/decomposition-end0.md`.
+**Foundation spine status (v10.250):** `endDeg`/`endTrace`/`endDual` are now **CONSTRUCTED**,
+Abel-FREE (the v10.212 UNIFICATION ruling): `endDeg` is the scheme-theoretic fibre rank
+`Scheme.Hom.finrank` of `f.left` at the zero-section basepoint; `endTrace` is the `deg(1+f)`
+polarization cross-term; `endDual` is the trace reflection `[tr f] − f`. The construction makes
+`endTrace_spec` pure group algebra and `endDeg_one_add` definitional; `endDeg_mulBy = n²` reduces
+to the BB-DEG scheme substrate (`Torsion.mulByHom_finrank`, G0's seat) + the T-DEG0 rank-zero leaf.
+The remaining pins are theorem-level leaves (T-G3b/c/d/e + the characteristic polynomial
+`endDual_comp_self` = the degree quadratic form, where the Abel content now concentrates). Full
+plan + verbatim KM quotes: `.mathlib-quality/decomposition-end0.md`.
+
+**DEGENERATE-BASE NOTE (binding for pin-provers):** `endDeg` is a single integer, evaluated at a
+basepoint (junk `1` over the empty base — over `∅` every endomorphism IS `𝟙`, so degree-`1` junk
+keeps `endDeg_one`/`endDeg_eq_one_of_isIso`/`endDeg_comp`/`eq_zero_of_endDeg_eq_zero` true with no
+hypotheses). Pins that force an explicit `[n]`-value (`endDeg_mulBy`, `endDual_mulBy`, and the
+scalings `endDeg_comp_mulBy`/`endTrace_comp_mulBy`) are FALSE over `S = ∅` (all endomorphisms
+coincide there) and carry `[Nonempty S]`. Over a DISCONNECTED base an endomorphism can have
+different fibre degrees on different components, so pins comparing ranks at different points of
+`E.E` (`endDeg_comp`, `endDual_comp_self`, `eq_zero_of_endDeg_eq_zero`, `endTrace_sq_le`) are
+honest only componentwise — prove them with the hypotheses they need (e.g.
+`[PreconnectedSpace E.E]`); every downstream consumer instantiates at geometric fibres
+`S = Spec k`, where all such hypotheses synthesize.
 
 Sources (KM, verbatim in the decl docstrings): 2.5.1 (pointed ⟹ hom; dual via Abel), 2.6.1
 (`f^t f = [deg f]`), 2.6.1.1 (`deg[N] = N²`, `f^{tt} = f`), 2.6.2 (dual additive), 2.6.2.2 (trace),
@@ -37,20 +52,41 @@ namespace EllipticCurve
 
 variable {S : Scheme.{u}} (E : EllipticCurve S)
 
-/-- **DS-data (T-END0b — KM 2.6.1)** The degree `deg : End(E/S) → ℤ`. KM (verbatim, Thm 2.6.1):
-*"f^t f = deg(f) := { N if f is an isogeny of degree N; 0 if f = 0 }."* Pinned by
-`endDual_comp_self`, `endDeg_mulBy`. -/
-noncomputable def endDeg (f : E.asOver ⟶ E.asOver) : ℤ := sorry
+/-- **DS-data (T-END0b — KM 2.6.1), CONSTRUCTED Abel-FREE (v10.250 foundation spine).** The degree
+`deg : End(E/S) → ℤ`. KM (verbatim, Thm 2.6.1): *"f^t f = deg(f) := { N if f is an isogeny of
+degree N; 0 if f = 0 }."* **Construction (the v10.212 UNIFICATION ruling):** the scheme-theoretic
+fibre rank `Scheme.Hom.finrank` of `f.left` at the zero-section basepoint `E.zero s₀` (for a
+chosen point `s₀ : S`; junk `1` over the empty base, where every endomorphism *is* the identity,
+of degree `1`). For a finite flat isogeny this is the
+fibrewise isogeny degree (= HasseWeil's `Isogeny.degree` through the K4 bridge); for `f = [0]` the
+fibre module is torsion, of rank `0` — so one formula realises KM's case split, with **no**
+Abel/Pic⁰ input. Pinned by `endDual_comp_self`, `endDeg_mulBy`. -/
+noncomputable def endDeg (f : E.asOver ⟶ E.asOver) : ℤ :=
+  haveI := Classical.propDecidable (Nonempty S)
+  if h : Nonempty S then
+    (Scheme.Hom.finrank (X := E.E) (S := E.E) f.left (E.zero h.some) : ℤ)
+  else 1
 
-/-- **DS-data (T-END0b — KM 2.5/2.6.1)** The dual (transpose) isogeny `f ↦ f^t`. KM (verbatim,
-proof of 2.5.1, print p.79): *"f^t = Pic(f) = f^* : Pic⁰_{E′/S} → Pic⁰_{E/S} … via Abel's
-isomorphism … an S-homomorphism f^t : E′ → E."* Pinned by `endDual_comp_self`, `endDual_mulBy`. -/
-noncomputable def endDual (f : E.asOver ⟶ E.asOver) : E.asOver ⟶ E.asOver := sorry
+/-- **DS-data (T-END0d — KM 2.6.2.2), CONSTRUCTED.** The trace `tr : End(E/S) → ℤ`. KM (verbatim,
+Cor 2.6.2.2): *"there exists an integer, called trace(f), such that f + f^t = trace(f)."*
+**Construction:** the polarization cross-term of the degree at the identity,
+`tr f := deg(1 + f) − 1 − deg f` (KM, proof of Cor 2.6.2.2: *"deg(1+f) = 1 + deg(f) + (f + f^t)"*),
+which makes the polarization pin `endDeg_one_add` definitional. Pinned by `endTrace_spec`. -/
+noncomputable def endTrace (f : E.asOver ⟶ E.asOver) : ℤ :=
+  letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+  E.endDeg (𝟙 E.asOver * f) - 1 - E.endDeg f
 
-/-- **DS-data (T-END0d — KM 2.6.2.2)** The trace `tr : End(E/S) → ℤ`. KM (verbatim, Cor 2.6.2.2):
-*"there exists an integer, called trace(f), such that f + f^t = trace(f)."* Pinned by
-`endTrace_spec`. -/
-noncomputable def endTrace (f : E.asOver ⟶ E.asOver) : ℤ := sorry
+/-- **DS-data (T-END0b — KM 2.5/2.6.1), CONSTRUCTED Abel-FREE.** The dual (transpose) isogeny
+`f ↦ f^t`. KM (verbatim, proof of 2.5.1, print p.79): *"f^t = Pic(f) = f^* : Pic⁰_{E′/S} →
+Pic⁰_{E/S} … via Abel's isomorphism … an S-homomorphism f^t : E′ → E."* **Construction
+(Abel-free):** KM's Cor 2.6.2.2 identity `f + f^t = [tr f]` is *solved for the dual*:
+`f^t := [tr f] − f` (spelled `E.mulBy (endTrace f) * f⁻¹` in the multiplicative hom-group). This
+trace-reflection definition makes `endTrace_spec` pure group algebra and concentrates the entire
+Abel/quadratic content in the characteristic-polynomial pin `endDual_comp_self`
+(`f^t ∘ f = [deg f]`, KM 2.6.1). Pinned by `endDual_comp_self`, `endDual_mulBy`. -/
+noncomputable def endDual (f : E.asOver ⟶ E.asOver) : E.asOver ⟶ E.asOver :=
+  letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+  E.mulBy (E.endTrace f) * f⁻¹
 
 /-- **(T-END0a foundation — KM 2.5.1, PROVEN via `isMonHom_of_one_comp_eq'`)** Over a locally
 noetherian base, a **pointed** endomorphism of `E/S` (one fixing the group unit / zero section)
@@ -98,18 +134,98 @@ theorem mulBy_pointed (n : ℤ) : η[E.asOver] ≫ E.mulBy n = η[E.asOver] := b
 theorem mulBy_one : E.mulBy 1 = 𝟙 E.asOver := by
   simp only [EllipticCurve.mulBy, zpow_one]
 
+/-- `[m] ≫ [n] = [m·n]`: composing multiplications multiplies the multipliers. Pre-composition
+into a hom-group power distributes (`GrpObj.comp_zpow`), so `[m] ≫ (𝟙)^n = ([m] ≫ 𝟙)^n = ((𝟙)^m)^n
+= (𝟙)^{mn}` by `zpow_mul`. -/
+theorem mulBy_comp (m n : ℤ) : E.mulBy m ≫ E.mulBy n = E.mulBy (m * n) := by
+  simp only [EllipticCurve.mulBy]
+  rw [GrpObj.comp_zpow, Category.comp_id, ← zpow_mul]
+
+/-- `[m] + [n] = [m + n]`: the multiplications compose additively in the hom-group
+(`(𝟙)^m * (𝟙)^n = (𝟙)^{m+n}`, `zpow_add`). -/
+theorem mulBy_mul (m n : ℤ) :
+    letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+    E.mulBy m * E.mulBy n = E.mulBy (m + n) := by
+  letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+  simp only [EllipticCurve.mulBy]
+  rw [← zpow_add]
+
+/-- `[-1]` is an automorphism of `E/S`: it is its own inverse (`[-1] ≫ [-1] = [1] = 𝟙`). -/
+instance isIso_mulBy_neg_one : IsIso (E.mulBy (-1)) :=
+  ⟨E.mulBy (-1), by rw [E.mulBy_comp, show (-1 : ℤ) * -1 = 1 by norm_num, E.mulBy_one],
+    by rw [E.mulBy_comp, show (-1 : ℤ) * -1 = 1 by norm_num, E.mulBy_one]⟩
+
+/-- The underlying scheme morphism of `[-1]` is an isomorphism (`Over.forget` preserves isos). -/
+instance isIso_mulByHom_neg_one : IsIso (E.mulByHom (-1)) :=
+  inferInstanceAs (IsIso ((Over.forget S).map (E.mulBy (-1))))
+
+/-- **(T-DEG0 leaf)** The `[0]` endomorphism has fibre rank `0` at every point. `[0]` factors
+through the base (`(mulBy 0).left = π ≫ zero.left`-shaped), so its pullback module along an affine
+chart at `x` is cut by the fibre ideal of the zero section — a torsion module over the chart's
+local ring (smoothness of `E.π` of relative dimension `1` supplies a nonzerodivisor fibre
+parameter in the kernel), hence of `rankAtStalk` zero. Consumed only by the `n = 0` case of
+`endDeg_mulBy`. -/
+theorem mulByHom_zero_finrank (x : E.E) : (E.mulByHom 0).finrank x = 0 := by sorry
+
+/-- `Spec R` is nonempty for a nontrivial ring — the scheme-carrier form of
+`PrimeSpectrum.instNonempty`, provided as an instance so the `[Nonempty S]` hypotheses of the
+degree pins synthesize at every geometric-fibre call site `S = Spec k`. -/
+instance (R : Type u) [CommRing R] [Nontrivial R] : Nonempty (Spec (CommRingCat.of R)) :=
+  inferInstanceAs (Nonempty (PrimeSpectrum R))
+
 /-- **(T-END0b pin — KM 2.6.1)** The defining identity of the degree: `f^t ∘ f = [deg f]`. -/
 theorem endDual_comp_self (f : E.asOver ⟶ E.asOver) :
     E.endDual f ≫ f = E.mulBy (E.endDeg f) := sorry
 
 /-- **(T-END0c — KM 2.6.1.1)** `deg [N] = N²` (KM: *"deg([N]) = N²"*, displayed in the proof of
-Cor 2.6.1.1). Fibre anchor: HasseWeil `mulByInt_degree` (BB-DEG) via T-B6. -/
-theorem endDeg_mulBy (n : ℤ) : E.endDeg (E.mulBy n) = n ^ 2 := sorry
+Cor 2.6.1.1). Fibre anchor: HasseWeil `mulByInt_degree` (BB-DEG) via T-B6. **Reduction (this
+proof):** `endDeg` evaluates `(mulByHom n).finrank` at the zero basepoint; for `n > 0` that is
+BB-DEG `Torsion.mulByHom_finrank` (G0's E[N]-scheme substrate seat); for `n < 0` the `[-1]`-twist
+`[n] = [-1] ≫ [-n]` reduces to the positive case by `finrank_comp_left_of_isIso` (side conditions
+from `mulByHom_isFinite` + BB-FLAT); for `n = 0` it is the T-DEG0 torsion-rank leaf. `[Nonempty S]`
+is required — over the empty base all endomorphisms coincide (DEGENERATE-BASE NOTE). -/
+theorem endDeg_mulBy [hne : Nonempty S] (n : ℤ) : E.endDeg (E.mulBy n) = n ^ 2 := by
+  have hpt : ∀ g : E.asOver ⟶ E.asOver,
+      E.endDeg g
+        = (Scheme.Hom.finrank (X := E.E) (S := E.E) g.left (E.zero hne.some) : ℤ) := by
+    intro g
+    simp only [endDeg, dif_pos hne]
+  obtain ⟨m, rfl | rfl⟩ := Int.eq_nat_or_neg n
+  · rcases Nat.eq_zero_or_pos m with rfl | hm
+    · simp only [Nat.cast_zero] at hpt ⊢
+      rw [hpt, E.mulByHom_zero_finrank]
+      norm_num
+    · haveI : NeZero m := ⟨hm.ne'⟩
+      rw [hpt, E.mulByHom_finrank m]
+      push_cast
+      ring
+  · rcases Nat.eq_zero_or_pos m with rfl | hm
+    · simp only [Nat.cast_zero, neg_zero] at hpt ⊢
+      rw [hpt, E.mulByHom_zero_finrank]
+      norm_num
+    · haveI : NeZero m := ⟨hm.ne'⟩
+      haveI : Flat (E.mulByHom (m : ℤ)) := E.mulByHom_flat m
+      haveI : IsFinite (E.mulByHom (m : ℤ)) := E.mulByHom_isFinite m
+      have hsplit : E.mulBy (-(m : ℤ)) = E.mulBy (-1) ≫ E.mulBy (m : ℤ) := by
+        rw [E.mulBy_comp, show (-1 : ℤ) * m = -(m : ℤ) by ring]
+      have hleft : E.mulByHom (-(m : ℤ)) = E.mulByHom (-1) ≫ E.mulByHom (m : ℤ) := by
+        rw [show E.mulByHom (-(m : ℤ)) = (E.mulBy (-(m : ℤ))).left from rfl, hsplit]
+        rfl
+      have hcomp : Scheme.Hom.finrank (X := E.E) (S := E.E) (E.mulByHom (-(m : ℤ)))
+          = Scheme.Hom.finrank (X := E.E) (S := E.E) (E.mulByHom (m : ℤ)) := by
+        rw [hleft, Scheme.Hom.finrank_comp_left_of_isIso]
+      rw [hpt, hcomp, E.mulByHom_finrank m]
+      push_cast
+      ring
 
 /-- **(T-END0b pin — KM 2.6.1)** The degree is non-negative: `0 ≤ deg f` (KM 2.6.1 defines
 `deg f = N ≥ 0` for an isogeny of degree `N`, and `deg 0 = 0`). Supplies the `0 ≤ d` hypothesis of
 `gme_deg_trace_forces_zero` in the rigidity computation. -/
-theorem endDeg_nonneg (f : E.asOver ⟶ E.asOver) : 0 ≤ E.endDeg f := sorry
+theorem endDeg_nonneg (f : E.asOver ⟶ E.asOver) : 0 ≤ E.endDeg f := by
+  simp only [endDeg]
+  split
+  · exact Int.natCast_nonneg _
+  · exact zero_le_one
 
 /-- **(T-END0c pin — KM 2.6.1, `deg` multiplicative)** The degree is multiplicative under
 composition: `deg(f ≫ g) = deg f · deg g`. KM (Thm 2.6.1 / Cor 2.6.1.1): the degree of a composite
@@ -117,10 +233,13 @@ isogeny is the product of the degrees (`(f∘g)^t (f∘g) = g^t (f^t f) g = [deg
 theorem endDeg_comp (f g : E.asOver ⟶ E.asOver) :
     E.endDeg (f ≫ g) = E.endDeg f * E.endDeg g := sorry
 
-/-- The identity endomorphism has degree `1`: `deg 𝟙 = 1` (`𝟙 = [1]` and `deg [1] = 1² = 1`).
-Proved from `mulBy_one` + `endDeg_mulBy` (no data-sorry of its own). -/
+/-- The identity endomorphism has degree `1`: `deg 𝟙 = 1` (`𝟙 = [1]` and `deg [1] = 1² = 1`;
+over the empty base by the junk convention). Proved from `mulBy_one` + `endDeg_mulBy`
+(no data-sorry of its own). -/
 theorem endDeg_one : E.endDeg (𝟙 E.asOver) = 1 := by
-  rw [← E.mulBy_one, E.endDeg_mulBy, one_pow]
+  by_cases hS : Nonempty S
+  · rw [← E.mulBy_one, E.endDeg_mulBy, one_pow]
+  · simp only [endDeg, dif_neg hS]
 
 /-- **(deg of an automorphism = 1 — KM 2.7.1)** An invertible endomorphism (an automorphism of
 `E/S`) has degree `1`. From multiplicativity `deg f · deg (f⁻¹) = deg(f ≫ f⁻¹) = deg 𝟙 = 1` and
@@ -134,14 +253,33 @@ theorem endDeg_eq_one_of_isIso (f : E.asOver ⟶ E.asOver) [IsIso f] : E.endDeg 
   · exact h
   · have := E.endDeg_nonneg f; omega
 
-/-- **(KM 2.6.2.1)** The transpose of `[N]` is `[N]` itself: `[N]^t = [N]`. -/
-theorem endDual_mulBy (n : ℤ) : E.endDual (E.mulBy n) = E.mulBy n := sorry
+/-- **(KM 2.6.2.1)** The transpose of `[N]` is `[N]` itself: `[N]^t = [N]`. With the constructed
+dual this is the trace computation `tr [n] = deg [1+n] − 1 − deg [n] = (1+n)² − 1 − n² = 2n`
+(via `endDeg_mulBy`), then `[n]^t = [2n] − [n] = [n]` in the hom-group. -/
+theorem endDual_mulBy [Nonempty S] (n : ℤ) : E.endDual (E.mulBy n) = E.mulBy n := by
+  letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+  have htr : E.endTrace (E.mulBy n) = 2 * n := by
+    simp only [endTrace]
+    rw [← E.mulBy_one, E.mulBy_mul, E.endDeg_mulBy (1 + n), E.endDeg_mulBy n]
+    ring
+  have hinv : (E.mulBy n)⁻¹ = E.mulBy (-n) := by
+    simp only [EllipticCurve.mulBy]
+    rw [← zpow_neg]
+  simp only [endDual]
+  rw [htr, hinv, E.mulBy_mul]
+  congr 1
+  ring
 
 /-- **(T-END0d pin — KM 2.6.2.2)** The trace identity `f + f^t = [tr f]` (`*` is the endomorphism
-addition, the pointwise `Hom.commGroup` operation). -/
+addition, the pointwise `Hom.commGroup` operation). With the trace-reflection construction
+`f^t = [tr f] * f⁻¹` this is pure commutative-group algebra: `f * ([tr f] * f⁻¹) = [tr f]`. -/
 theorem endTrace_spec (f : E.asOver ⟶ E.asOver) :
     letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
-    f * E.endDual f = E.mulBy (E.endTrace f) := sorry
+    f * E.endDual f = E.mulBy (E.endTrace f) := by
+  letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+  simp only [endDual]
+  rw [← _root_.mul_assoc, _root_.mul_comm f (E.mulBy (E.endTrace f)), _root_.mul_assoc,
+    mul_inv_cancel, _root_.mul_one]
 
 /-- **(T-END0d pin — KM 2.6.2.2 proof, polarization)** The defining polarization of the trace as
 the cross term of `deg` at the identity: `deg(1 + f) = 1 + deg f + tr f` (`1 = 𝟙 E.asOver`, `+` is
@@ -149,7 +287,9 @@ the `Hom.commGroup` operation `*`). KM (verbatim, proof of Cor 2.6.2.2): *"deg(1
 (f + f^t)"*, with `f + f^t = [tr f]`. This is the bilinear-form engine of the T-G3b expansion. -/
 theorem endDeg_one_add (f : E.asOver ⟶ E.asOver) :
     letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
-    E.endDeg (𝟙 E.asOver * f) = 1 + E.endDeg f + E.endTrace f := sorry
+    E.endDeg (𝟙 E.asOver * f) = 1 + E.endDeg f + E.endTrace f := by
+  simp only [endTrace]
+  ring
 
 /-- **(T-END0c pin — KM 2.6.1.1, `deg` multiplicative)** The degree scales quadratically under
 post-composition by `[n]`: `deg(g ∘ [n]) = n² · deg g`. KM (verbatim, Cor 2.6.1.1): *"deg is

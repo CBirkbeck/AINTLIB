@@ -69,20 +69,24 @@ theorem le_finrank_of_killed_injective
       = (pts j : Spec (CommRingCat.of k) ⟶ E.E) := congrArg (·.1) hij
   exact hinj (Subtype.ext hval)
 
-/-- **(UNIFICATION bridge — `endDeg` = scheme fibre rank; register-box, K4-landing pin)** Over a
-field, the KM endomorphism degree `E.endDeg δ` of a finite-flat isogeny `δ` equals the
-scheme-theoretic fibre rank `δ.left.finrank` at the zero point. This is the **Abel-FREE ruling**
-(`decomposition-keystone.md` ④, ratified v10.212): the isogeny degree `[K(E) : δ*K(E)]` *is* the
-generic-fibre rank, so `endDeg` is grounded on `Scheme.Hom.finrank` — **not** on the Abel/Pic⁰-gated
-`endDual`. It is the single tracked register-box the K4 division-polynomial bridge (L4-iii) discharges:
-once `endDeg` is grounded on the finrank, `modelEllipticCurve_mulByHom_finrank = N²` gives
-`endDeg_mulBy = N²` and this identity becomes definitional. A new specification pin extending the
-`endDeg` DATA-SORRY REGISTER (`EndomorphismDegree.lean`); `δ.left` finite/flat are the isogeny fibre
-inputs (register-box BB, the same `δ ≠ 1 ⟹ isogeny` funnel). -/
+/-- **(UNIFICATION bridge — `endDeg` = scheme fibre rank; PROVEN by construction)** Over a field,
+the KM endomorphism degree `E.endDeg δ` of a finite-flat isogeny `δ` equals the scheme-theoretic
+fibre rank `δ.left.finrank` at the zero point. This is the **Abel-FREE ruling**
+(`decomposition-keystone.md` ④, ratified v10.212), now *definitional*: the v10.250 foundation spine
+constructs `endDeg` as exactly this fibre rank at the zero-section basepoint, and over a field the
+base has a **unique** point (`Unique (PrimeSpectrum k)`), so the chosen basepoint is `x₀`. The
+`[Flat]`/`[IsFinite]` instances record the isogeny fibre semantics (the rank is then the honest
+constant fibre degree); the identity itself no longer needs them. -/
 theorem endDeg_eq_left_finrank (E : EllipticCurve (Spec (CommRingCat.of k)))
     (δ : E.asOver ⟶ E.asOver) [Flat δ.left] [IsFinite δ.left]
     (x₀ : ↑(Spec (CommRingCat.of k))) :
-    E.endDeg δ = (δ.left.finrank (E.zero x₀) : ℤ) := sorry
+    E.endDeg δ = (δ.left.finrank (E.zero x₀) : ℤ) := by
+  haveI hne : Nonempty ↑(Spec (CommRingCat.of k)) := ⟨x₀⟩
+  haveI : Subsingleton ↑(Spec (CommRingCat.of k)) :=
+    inferInstanceAs (Subsingleton (PrimeSpectrum k))
+  have hpt : (hne.some : ↑(Spec (CommRingCat.of k))) = x₀ := Subsingleton.elim _ _
+  simp only [EllipticCurve.endDeg, dif_pos hne, hpt]
+  rfl
 
 /-- **([KEY-KER], `endDeg` form — GH's `hH` second consumer, v10.219)** If a finite-flat endomorphism
 `δ ≠ 1` of `E / Spec k` kills `N` pairwise-distinct points, then `(N : ℤ) ≤ E.endDeg δ`. This is the
