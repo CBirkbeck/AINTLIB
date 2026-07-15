@@ -669,7 +669,7 @@ theorem e3BaseMap_e3Rel {R : CommRingCat.{u}} (X : EllObj R)
     show e3Rel R = MvPolynomial.X 0 ^ 3 - (MvPolynomial.X 0 + MvPolynomial.X 1) ^ 3
       from rfl]
   simp only [map_sub, map_pow, map_add, eval₂Hom_X', Matrix.cons_val_zero,
-    Matrix.cons_val_one, Matrix.head_cons]
+    Matrix.cons_val_one]
   linear_combination e3_glued_flex X L hD h3
 
 open LocalPresentation MvPolynomial in
@@ -1109,5 +1109,326 @@ theorem e3Top_piece {R : CommRingCat.{u}} {X : EllObj R}
     (e3WitnessCover hD).f w ≫ e3Top hD h3 =
       e3Piece hD h3 w :=
   (e3WitnessCover hD).ι_glueMorphisms _ _ w
+
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 800000 in
+/-- **(T-E14-CLS-6, ≈E2-π)** The piece map lies over the restricted classifying map
+(mirrors `chartPiece_π`). -/
+theorem e3Piece_π {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3}
+    (hD : IsE3Datum X L) (h3 : IsUnit (3 : Γ(X.base, ⊤)))
+    (w : E3Witness X L) :
+    e3Piece hD h3 w ≫ projModelπ (universalE3 R) =
+      pullback.snd X.curve.toEllipticCurveGeom.π w.V.1.ι ≫ w.V.2.isoSpec.hom ≫
+        Spec.map (CommRingCat.ofHom
+          (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+            (e3ClassifyingRingHom X L hD h3))) := by
+  have hw : projModelBaseChange
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3)) (universalE3 R) ≫
+      projModelπ (universalE3 R) =
+    projModelπ ((universalE3 R).map
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3))) ≫
+      Spec.map (CommRingCat.ofHom
+        (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+          (e3ClassifyingRingHom X L hD h3))) := by
+    letI : Algebra (E3ModuliRing R) Γ(X.base, w.V.1) :=
+      ((((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3))).toAlgebra
+    exact (isPullback_projModelBaseChange (universalE3 R)).w
+  rw [e3Piece, Category.assoc, Category.assoc, hw,
+    reassoc_of% projModelπ_congr
+      (universalE3_map_classifying X L hD h3 w.V w.Pr w.β w.γ
+        w.hF w.hP w.hQ).symm]
+  rw [← Category.assoc, w.Pr.compat_π, Category.assoc]
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E14-CLS-6, ≈E4-π ★)** The glued comparison lies over the classifying map
+(mirrors `classifyingTop_π_w`). -/
+theorem e3Top_π_w {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3}
+    (hD : IsE3Datum X L) (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    e3Top hD h3 ≫ projModelπ (universalE3 R) =
+      X.curve.toEllipticCurveGeom.π ≫ e3ClassifyingMap X L hD h3 := by
+  refine (e3WitnessCover hD).hom_ext _ _ (fun w => ?_)
+  rw [← Category.assoc, e3Top_piece, e3Piece_π]
+  have hsplit : Spec.map (CommRingCat.ofHom
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3))) =
+    Spec.map (X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op) ≫
+      Spec.map (CommRingCat.ofHom (e3ClassifyingRingHom X L hD h3)) := by
+    rw [← Spec.map_comp]
+    rfl
+  rw [hsplit,
+    show w.V.2.isoSpec.hom = w.V.1.toSpecΓ from IsAffineOpen.isoSpec_hom _]
+  rw [show w.V.1.toSpecΓ ≫
+      Spec.map (X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op) ≫
+      Spec.map (CommRingCat.ofHom (e3ClassifyingRingHom X L hD h3)) =
+    (w.V.1.ι ≫ X.base.toSpecΓ) ≫
+      Spec.map (CommRingCat.ofHom (e3ClassifyingRingHom X L hD h3)) from by
+    rw [← Category.assoc, Scheme.Opens.toSpecΓ_SpecMap_presheaf_map_top]]
+  rw [show (w.V.1.ι ≫ X.base.toSpecΓ) ≫
+      Spec.map (CommRingCat.ofHom (e3ClassifyingRingHom X L hD h3)) =
+    w.V.1.ι ≫ e3ClassifyingMap X L hD h3 from by
+    rw [Category.assoc]; rfl]
+  rw [← Category.assoc, ← pullback.condition, Category.assoc, e3WitnessCover_f]
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+/-- **(T-E14-CLS-6, ≈E4)** The witness cover of the base. -/
+noncomputable def e3BaseCover {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3}
+    (hD : IsE3Datum X L) : X.base.OpenCover :=
+  Scheme.Cover.mkOfCovers
+    (E3Witness X L)
+    (fun w => w.V.1.toScheme)
+    (fun w => w.V.1.ι)
+    (fun x => by
+      obtain ⟨V, hxV, Pr, lam, hAd, hW, hMP, hMQ⟩ := hD x
+      exact ⟨⟨V, Pr, lam, hAd, hW, hMP, hMQ⟩, ⟨x, hxV⟩, rfl⟩)
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E14-CLS-6 ★, ≈E4-zero)** The glued comparison respects the zero sections
+(mirrors `classifyingTop_zero`). -/
+theorem e3Top_zero {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3}
+    (hD : IsE3Datum X L) (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    X.curve.toEllipticCurveGeom.zero ≫ e3Top hD h3 =
+      e3ClassifyingMap X L hD h3 ≫ projModelZero (universalE3 R) := by
+  refine (e3BaseCover hD).hom_ext _ _ (fun w => ?_)
+  have hzfac : w.V.1.ι ≫ X.curve.toEllipticCurveGeom.zero =
+      pullback.lift (w.V.1.ι ≫ X.curve.toEllipticCurveGeom.zero) (𝟙 _)
+        (by rw [Category.assoc, X.curve.toEllipticCurveGeom.zero_π,
+          Category.comp_id, Category.id_comp]) ≫
+      (e3WitnessCover hD).f w := by
+    rw [e3WitnessCover_f, pullback.lift_fst]
+  rw [show (e3BaseCover hD).f w = w.V.1.ι from rfl, ← Category.assoc, hzfac,
+    Category.assoc, e3Top_piece]
+  have hz := w.Pr.compat_zero
+  have hlift : pullback.lift (w.V.1.ι ≫ X.curve.toEllipticCurveGeom.zero) (𝟙 _)
+      (by rw [Category.assoc, X.curve.toEllipticCurveGeom.zero_π,
+        Category.comp_id, Category.id_comp]) ≫ w.Pr.e.hom =
+    w.V.2.isoSpec.hom ≫ projModelZero w.Pr.W := by
+    rw [← Iso.inv_comp_eq, ← Category.assoc]
+    exact hz
+  rw [e3Piece, ← Category.assoc, hlift]
+  rw [Category.assoc,
+    show projModelZero w.Pr.W = projModelZero ((universalE3 R).map
+        (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+          (e3ClassifyingRingHom X L hD h3))) ≫
+      eqToHom (congrArg projModel
+        (universalE3_map_classifying X L hD h3 w.V w.Pr w.β w.γ
+          w.hF w.hP w.hQ)) from
+      projModelZero_congr
+        (universalE3_map_classifying X L hD h3 w.V w.Pr w.β w.γ
+          w.hF w.hP w.hQ).symm]
+  simp only [Category.assoc, eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
+  have hbc : projModelZero ((universalE3 R).map
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3))) ≫
+      projModelBaseChange
+        (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+          (e3ClassifyingRingHom X L hD h3)) (universalE3 R) =
+    Spec.map (CommRingCat.ofHom
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3))) ≫
+      projModelZero (universalE3 R) := by
+    letI : Algebra (E3ModuliRing R) Γ(X.base, w.V.1) :=
+      ((((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3))).toAlgebra
+    exact projModelZero_baseChange (universalE3 R)
+  rw [hbc]
+  have hsplit : Spec.map (CommRingCat.ofHom
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3))) =
+    Spec.map (X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op) ≫
+      Spec.map (CommRingCat.ofHom (e3ClassifyingRingHom X L hD h3)) := by
+    rw [← Spec.map_comp]
+    rfl
+  rw [← Category.assoc, hsplit,
+    show w.V.2.isoSpec.hom = w.V.1.toSpecΓ from IsAffineOpen.isoSpec_hom _]
+  rw [show w.V.1.toSpecΓ ≫
+      Spec.map (X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op) ≫
+      Spec.map (CommRingCat.ofHom (e3ClassifyingRingHom X L hD h3)) =
+    (w.V.1.ι ≫ X.base.toSpecΓ) ≫
+      Spec.map (CommRingCat.ofHom (e3ClassifyingRingHom X L hD h3)) from by
+    rw [← Category.assoc, Scheme.Opens.toSpecΓ_SpecMap_presheaf_map_top]]
+  rw [show (w.V.1.ι ≫ X.base.toSpecΓ) ≫
+      Spec.map (CommRingCat.ofHom (e3ClassifyingRingHom X L hD h3)) =
+    w.V.1.ι ≫ e3ClassifyingMap X L hD h3 from by rw [Category.assoc]; rfl]
+  simp only [Category.assoc]
+
+open AlgebraicGeometry CategoryTheory Scheme in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E14-CLS-6, ≈E4)** The classifying map lies over `Spec R` (mirrors
+`classifyingMap_structMap`). -/
+theorem e3ClassifyingMap_structMap {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3}
+    (hD : IsE3Datum X L) (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    e3ClassifyingMap X L hD h3 ≫ (universalE3Obj R).structMap =
+      X.structMap := by
+  show (X.base.toSpecΓ ≫ Spec.map (CommRingCat.ofHom
+      (e3ClassifyingRingHom X L hD h3))) ≫
+    Spec.map (CommRingCat.ofHom (algebraMap R (E3ModuliRing R))) = X.structMap
+  rw [Category.assoc, ← Spec.map_comp,
+    show CommRingCat.ofHom (algebraMap R (E3ModuliRing R)) ≫
+        CommRingCat.ofHom (e3ClassifyingRingHom X L hD h3) =
+      CommRingCat.ofHom (X.baseRingHom) from by
+      ext r
+      exact e3ClassifyingRingHom_algebraMap X L hD h3 r,
+    show CommRingCat.ofHom X.baseRingHom =
+      (Scheme.ΓSpecIso R).inv ≫ X.structMap.appTop from rfl,
+    Spec.map_comp, ← Scheme.toSpecΓ_naturality_assoc, ← SpecMap_ΓSpecIso_hom R,
+    ← Spec.map_comp, Iso.inv_hom_id, Spec.map_id]
+  exact Category.comp_id _
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-CLS-6)** The classifying map restricted to a witness affine (mirrors
+`restrict_classifyingMap`). -/
+theorem restrict_e3ClassifyingMap {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3}
+    (hD : IsE3Datum X L) (h3 : IsUnit (3 : Γ(X.base, ⊤)))
+    (V : X.base.affineOpens) :
+    V.1.ι ≫ e3ClassifyingMap X L hD h3 =
+      V.2.isoSpec.hom ≫ Spec.map (CommRingCat.ofHom
+        (((X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+          (e3ClassifyingRingHom X L hD h3))) := by
+  have hsplit : Spec.map (CommRingCat.ofHom
+      (((X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3))) =
+    Spec.map (X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op) ≫
+      Spec.map (CommRingCat.ofHom (e3ClassifyingRingHom X L hD h3)) := by
+    rw [← Spec.map_comp]
+    rfl
+  rw [hsplit, show V.2.isoSpec.hom = V.1.toSpecΓ from IsAffineOpen.isoSpec_hom _,
+    ← Category.assoc, Scheme.Opens.toSpecΓ_SpecMap_presheaf_map_top, Category.assoc]
+  rfl
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E14-CLS-6, ≈E4)** The per-witness classifying square is cartesian (mirrors
+`chartPiece_isPullback`). -/
+theorem e3Piece_isPullback {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3}
+    (hD : IsE3Datum X L) (h3 : IsUnit (3 : Γ(X.base, ⊤)))
+    (w : E3Witness X L) :
+    IsPullback (e3Piece hD h3 w)
+      (pullback.snd X.curve.toEllipticCurveGeom.π w.V.1.ι)
+      (projModelπ (universalE3 R))
+      (w.V.2.isoSpec.hom ≫ Spec.map (CommRingCat.ofHom
+        (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+          (e3ClassifyingRingHom X L hD h3)))) := by
+  have hleft : IsPullback
+      (w.Pr.e.hom ≫ eqToHom (congrArg projModel
+        (universalE3_map_classifying X L hD h3 w.V w.Pr w.β w.γ
+          w.hF w.hP w.hQ).symm))
+      (pullback.snd X.curve.toEllipticCurveGeom.π w.V.1.ι)
+      (projModelπ ((universalE3 R).map
+        (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+          (e3ClassifyingRingHom X L hD h3))))
+      w.V.2.isoSpec.hom := by
+    refine IsPullback.of_horiz_isIso ⟨?_⟩
+    rw [Category.assoc, projModelπ_congr
+      (universalE3_map_classifying X L hD h3 w.V w.Pr w.β w.γ
+        w.hF w.hP w.hQ).symm]
+    exact w.Pr.compat_π
+  have hright : IsPullback
+      (projModelBaseChange
+        (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+          (e3ClassifyingRingHom X L hD h3)) (universalE3 R))
+      (projModelπ ((universalE3 R).map
+        (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+          (e3ClassifyingRingHom X L hD h3))))
+      (projModelπ (universalE3 R))
+      (Spec.map (CommRingCat.ofHom
+        (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+          (e3ClassifyingRingHom X L hD h3)))) := by
+    letI : Algebra (E3ModuliRing R) Γ(X.base, w.V.1) :=
+      ((((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3))).toAlgebra
+    exact isPullback_projModelBaseChange (universalE3 R)
+  have hpaste := hleft.paste_horiz hright
+  rw [show (w.Pr.e.hom ≫ eqToHom (congrArg projModel
+      (universalE3_map_classifying X L hD h3 w.V w.Pr w.β w.γ
+        w.hF w.hP w.hQ).symm)) ≫
+    projModelBaseChange
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3)) (universalE3 R) =
+    e3Piece hD h3 w from by
+    rw [e3Piece, Category.assoc]] at hpaste
+  exact hpaste
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(T-E14-CLS-6 ★★, ≈E4)** The classifying square is cartesian: `X` is the
+pullback of the universal Legendre curve along the classifying map (mirrors
+`isPullback_classifyingTop`). -/
+theorem isPullback_e3Top {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3}
+    (hD : IsE3Datum X L) (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    IsPullback (e3Top hD h3) X.curve.toEllipticCurveGeom.π
+      (projModelπ (universalE3 R)) (e3ClassifyingMap X L hD h3) := by
+  refine (isPullback_of_iSup_eq_top (f := X.curve.toEllipticCurveGeom.π)
+    (g := e3Top hD h3) (h := e3ClassifyingMap X L hD h3)
+    (k := projModelπ (universalE3 R))
+    (e3Top_π_w hD h3).symm
+    (ι := E3Witness X L)
+    (fun w => w.V.1) ?_ (fun w => ?_)).flip
+  · rw [eq_top_iff]
+    intro x _
+    obtain ⟨V, hxV, Pr, lam, hAd, hW, hMP, hMQ⟩ := hD x
+    exact TopologicalSpace.Opens.mem_iSup.mpr
+      ⟨⟨V, Pr, lam, hAd, hW, hMP, hMQ⟩, hxV⟩
+  · set fpre := (X.curve.toEllipticCurveGeom.π ⁻¹ᵁ w.V.1).ι with hfpre
+    have hcomm : fpre ≫ X.curve.toEllipticCurveGeom.π =
+        (X.curve.toEllipticCurveGeom.π ∣_ w.V.1) ≫ w.V.1.ι :=
+      (morphismRestrict_ι X.curve.toEllipticCurveGeom.π w.V.1).symm
+    set m := pullback.lift fpre (X.curve.toEllipticCurveGeom.π ∣_ w.V.1) hcomm
+      with hm
+    have hm₁ : m ≫ pullback.fst X.curve.toEllipticCurveGeom.π w.V.1.ι = fpre :=
+      pullback.lift_fst _ _ _
+    have hm₂ : m ≫ pullback.snd X.curve.toEllipticCurveGeom.π w.V.1.ι =
+        X.curve.toEllipticCurveGeom.π ∣_ w.V.1 :=
+      pullback.lift_snd _ _ _
+    have hmiso : IsIso m := by
+      refine (isPullback_morphismRestrict X.curve.toEllipticCurveGeom.π
+        w.V.1).flip.isIso_of_isPullback
+        (IsPullback.of_hasPullback X.curve.toEllipticCurveGeom.π w.V.1.ι) m hm₁ hm₂
+    have hmsq : IsPullback m (X.curve.toEllipticCurveGeom.π ∣_ w.V.1)
+        (pullback.snd X.curve.toEllipticCurveGeom.π w.V.1.ι) (𝟙 _) :=
+      IsPullback.of_horiz_isIso ⟨by rw [hm₂, Category.comp_id]⟩
+    have hp := hmsq.paste_horiz (e3Piece_isPullback hD h3 w)
+    rw [show m ≫ e3Piece hD h3 w =
+        (X.curve.toEllipticCurveGeom.π ⁻¹ᵁ w.V.1).ι ≫ e3Top hD h3 from by
+        rw [← e3Top_piece hD h3 w, e3WitnessCover_f, ← Category.assoc,
+          hm₁],
+      show (𝟙 _) ≫ w.V.2.isoSpec.hom ≫ Spec.map (CommRingCat.ofHom
+          (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+            (e3ClassifyingRingHom X L hD h3))) =
+        w.V.1.ι ≫ e3ClassifyingMap X L hD h3 from by
+        rw [Category.id_comp, ← restrict_e3ClassifyingMap]] at hp
+    exact hp.flip
+
+open AlgebraicGeometry CategoryTheory Scheme in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E14-CLS-6 ★★)** The classifying morphism of a Legendre datum in `Ell/R`:
+KM 4.6.2's universal property, forward direction (mirrors `classifyingEllHom`). -/
+noncomputable def e3ClassifyingEllHom {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3}
+    (hD : IsE3Datum X L) (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    X ⟶ universalE3Obj R where
+  baseHom := e3ClassifyingMap X L hD h3
+  base_w := e3ClassifyingMap_structMap hD h3
+  top := e3Top hD h3
+  isPullback := isPullback_e3Top hD h3
+  zero_w := e3Top_zero hD h3
 
 end ModularCurves
