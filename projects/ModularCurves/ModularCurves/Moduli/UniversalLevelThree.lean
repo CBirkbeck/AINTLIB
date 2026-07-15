@@ -1499,4 +1499,71 @@ theorem section_comp_e3Top {R : CommRingCat.{u}} {X : EllObj R}
   rw [← Category.assoc, ← restrict_e3ClassifyingMap hD h3 w.V, Category.assoc]
   rfl
 
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E15a stage 11, rt1 ★★)** Pulling the universal marked `P` back recovers `P`. -/
+theorem pullSection_e3ClassifyingEllHom_P {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3} (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    EllHom.pullSection R (e3ClassifyingEllHom hD h3) (universalE3P R) = L.1.1 := by
+  have hdown : L.1.1.1 ≫ e3Top hD h3 =
+      e3ClassifyingMap X L hD h3 ≫
+        projModelAffineSection (universalE3 R) 0 0 (universalE3_equation_zero R) := by
+    refine section_comp_e3Top hD h3 L.1.1.2 0 0 (universalE3_equation_zero R)
+      (fun w => ?_)
+    have hz : ((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom)
+        (e3ClassifyingRingHom X L hD h3 (0 : E3ModuliRing R)) =
+      (0 : Γ(X.base, w.V.1)) := by rw [map_zero, map_zero]
+    rw [hz]; exact w.hP
+  refine Subtype.ext ?_
+  refine (e3ClassifyingEllHom hD h3).isPullback.hom_ext ?_ ?_
+  · rw [show (EllHom.pullSection R (e3ClassifyingEllHom hD h3)
+        (universalE3P R)).1 ≫ (e3ClassifyingEllHom hD h3).top =
+      (e3ClassifyingEllHom hD h3).baseHom ≫ (universalE3P R).1
+      from (e3ClassifyingEllHom hD h3).isPullback.lift_fst _ _ _]
+    show _ = L.1.1.1 ≫ e3Top hD h3
+    rw [hdown]; rfl
+  · rw [show (EllHom.pullSection R (e3ClassifyingEllHom hD h3)
+        (universalE3P R)).1 ≫ X.curve.π = 𝟙 X.base from
+      (EllHom.pullSection R (e3ClassifyingEllHom hD h3) (universalE3P R)).2]
+    exact L.1.1.2.symm
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E15a stage 11, rt1 ★★)** Pulling the universal marked `Q` back recovers `Q`. -/
+theorem pullSection_e3ClassifyingEllHom_Q {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3} (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    EllHom.pullSection R (e3ClassifyingEllHom hD h3) (universalE3Q R) = L.1.2 := by
+  have hdown : L.1.2.1 ≫ e3Top hD h3 =
+      e3ClassifyingMap X L hD h3 ≫
+        projModelAffineSection (universalE3 R) (e3Gamma R) (e3Beta R + e3Gamma R)
+          (universalE3_equation_Q R) := by
+    refine section_comp_e3Top hD h3 L.1.2.2 (e3Gamma R) (e3Beta R + e3Gamma R)
+      (universalE3_equation_Q R) (fun w => ?_)
+    have hg : ((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom)
+        (e3ClassifyingRingHom X L hD h3 (e3Gamma R)) = w.γ := by
+      rw [e3ClassifyingRingHom_gamma]
+      exact (e3GammaGlued X L hD h3).2 w.V w.Pr w.β w.γ w.hF w.hP w.hQ
+    have hb : ((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom)
+        (e3ClassifyingRingHom X L hD h3 (e3Beta R + e3Gamma R)) = w.β + w.γ := by
+      rw [map_add, e3ClassifyingRingHom_beta, e3ClassifyingRingHom_gamma, map_add,
+        (e3BetaGlued X L hD h3).2 w.V w.Pr w.β w.γ w.hF w.hP w.hQ,
+        (e3GammaGlued X L hD h3).2 w.V w.Pr w.β w.γ w.hF w.hP w.hQ]
+    rw [hg, hb]; exact w.hQ
+  refine Subtype.ext ?_
+  refine (e3ClassifyingEllHom hD h3).isPullback.hom_ext ?_ ?_
+  · rw [show (EllHom.pullSection R (e3ClassifyingEllHom hD h3)
+        (universalE3Q R)).1 ≫ (e3ClassifyingEllHom hD h3).top =
+      (e3ClassifyingEllHom hD h3).baseHom ≫ (universalE3Q R).1
+      from (e3ClassifyingEllHom hD h3).isPullback.lift_fst _ _ _]
+    show _ = L.1.2.1 ≫ e3Top hD h3
+    rw [hdown]; rfl
+  · rw [show (EllHom.pullSection R (e3ClassifyingEllHom hD h3)
+        (universalE3Q R)).1 ≫ X.curve.π = 𝟙 X.base from
+      (EllHom.pullSection R (e3ClassifyingEllHom hD h3) (universalE3Q R)).2]
+    exact L.1.2.2.symm
+
 end ModularCurves
