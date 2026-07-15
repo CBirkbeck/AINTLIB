@@ -612,16 +612,16 @@ theorem mulOver_comm (W : WeierstrassCurve R) [W.IsElliptic] :
 
 /-- (e₂) The single-factor base-change compatibility over `Spec`: the model structure map
 commutes with the base change. -/
-private lemma modelOver_hom_baseChangeOf (f : WeierstrassAtlasRingU.{u} →+* R)
+private lemma BaseChangeOf.modelOver_hom (f : WeierstrassAtlasRingU.{u} →+* R)
     [((𝕌).map f).IsElliptic] :
     (modelOver ((𝕌).map f)).hom ≫ Spec.map (CommRingCat.ofHom f) =
       projModelBaseChangeOf f 𝕌 ((𝕌).map f) rfl ≫ (modelOver 𝕌).hom := by
-  simp only [modelOver_hom]
+  simp only [ModularCurves.modelOver_hom]
   exact (isPullback_projModelBaseChangeOf f 𝕌 ((𝕌).map f) rfl).w.symm
 
 /-- (e₁) The tensor-square base-change compatibility over `Spec`: the tensor structure map
 commutes with the fibre-square base change. -/
-private lemma tensorObj_hom_baseChangeOf (f : WeierstrassAtlasRingU.{u} →+* R)
+private lemma BaseChangeOf.tensorObj_hom (f : WeierstrassAtlasRingU.{u} →+* R)
     [((𝕌).map f).IsElliptic] :
     (modelOver ((𝕌).map f) ⊗
         modelOver ((𝕌).map f)).hom ≫
@@ -630,7 +630,7 @@ private lemma tensorObj_hom_baseChangeOf (f : WeierstrassAtlasRingU.{u} →+* R)
           ((𝕌).map f) rfl ≫
         (modelOver 𝕌 ⊗ modelOver 𝕌).hom := by
   rw [Over.tensorObj_hom, Over.tensorObj_hom]
-  simp only [modelOver_hom]
+  simp only [ModularCurves.modelOver_hom]
   have hmap : pullbackMapBaseChangeOf f 𝕌
       ((𝕌).map f) rfl ≫
       pullback.fst (projModelπ 𝕌)
@@ -673,7 +673,7 @@ private lemma tensorObj_hom_baseChangeOf (f : WeierstrassAtlasRingU.{u} →+* R)
 /-- The triple-tensor base-change comparison, hoisted to a top-level definition so its
 `pullback.map` obligations (the e₁/e₂ compatibilities) elaborate once, outside the
 tensor-heavy proof context (avoiding a `whnf` timeout inside the tactic block). -/
-private noncomputable def tripleMapBaseChangeOf (f : WeierstrassAtlasRingU.{u} →+* R)
+private noncomputable def BaseChangeOf.tripleMap (f : WeierstrassAtlasRingU.{u} →+* R)
     [((𝕌).map f).IsElliptic] :
     ((modelOver ((𝕌).map f) ⊗
         modelOver ((𝕌).map f)) ⊗
@@ -691,46 +691,46 @@ private noncomputable def tripleMapBaseChangeOf (f : WeierstrassAtlasRingU.{u} �
     (projModelBaseChangeOf f 𝕌
       ((𝕌).map f) rfl)
     (Spec.map (CommRingCat.ofHom f))
-    (tensorObj_hom_baseChangeOf f) (modelOver_hom_baseChangeOf f)
+    (BaseChangeOf.tensorObj_hom f) (BaseChangeOf.modelOver_hom f)
 
 /-- The fibre-square base change, retyped at the Over-monoidal tensor: these helpers live in
 the `Over` spelling, and the standard-spelled content bridges to them by term-mode `exact`. -/
-private noncomputable def pairMapBaseChangeOf (f : WeierstrassAtlasRingU.{u} →+* R)
+private noncomputable def BaseChangeOf.pairMap (f : WeierstrassAtlasRingU.{u} →+* R)
     [((𝕌).map f).IsElliptic] :
     (modelOver ((𝕌).map f) ⊗ modelOver ((𝕌).map f)).left ⟶
       (modelOver 𝕌 ⊗ modelOver 𝕌).left :=
   pullbackMapBaseChangeOf f 𝕌 ((𝕌).map f) rfl
 
-private lemma pairMapBaseChangeOf_fst (f : WeierstrassAtlasRingU.{u} →+* R)
+private lemma BaseChangeOf.pairMap_fst (f : WeierstrassAtlasRingU.{u} →+* R)
     [((𝕌).map f).IsElliptic] :
-    pairMapBaseChangeOf f ≫
+    BaseChangeOf.pairMap f ≫
       pullback.fst (modelOver 𝕌).hom (modelOver 𝕌).hom =
       pullback.fst (modelOver ((𝕌).map f)).hom (modelOver ((𝕌).map f)).hom ≫
         projModelBaseChangeOf f 𝕌 ((𝕌).map f) rfl :=
   (limit.lift_π _ _).trans rfl
 
-private lemma pairMapBaseChangeOf_snd (f : WeierstrassAtlasRingU.{u} →+* R)
+private lemma BaseChangeOf.pairMap_snd (f : WeierstrassAtlasRingU.{u} →+* R)
     [((𝕌).map f).IsElliptic] :
-    pairMapBaseChangeOf f ≫
+    BaseChangeOf.pairMap f ≫
       pullback.snd (modelOver 𝕌).hom (modelOver 𝕌).hom =
       pullback.snd (modelOver ((𝕌).map f)).hom (modelOver ((𝕌).map f)).hom ≫
         projModelBaseChangeOf f 𝕌 ((𝕌).map f) rfl :=
   (limit.lift_π _ _).trans rfl
 
-/-- Triple projection, `pairMapBaseChangeOf`-spelled (fst). -/
-private lemma tripleMapBaseChangeOf_fst (f : WeierstrassAtlasRingU.{u} →+* R)
+/-- Triple projection, `BaseChangeOf.pairMap`-spelled (fst). -/
+private lemma BaseChangeOf.tripleMap_fst (f : WeierstrassAtlasRingU.{u} →+* R)
     [((𝕌).map f).IsElliptic] :
-    tripleMapBaseChangeOf f ≫
+    BaseChangeOf.tripleMap f ≫
       pullback.fst (modelOver 𝕌 ⊗ modelOver 𝕌).hom
         (modelOver 𝕌).hom =
       pullback.fst (modelOver ((𝕌).map f) ⊗ modelOver ((𝕌).map f)).hom
-        (modelOver ((𝕌).map f)).hom ≫ pairMapBaseChangeOf f :=
+        (modelOver ((𝕌).map f)).hom ≫ BaseChangeOf.pairMap f :=
   (limit.lift_π _ _).trans rfl
 
 /-- Triple projection, Over-spelled (snd). -/
-private lemma tripleMapBaseChangeOf_snd (f : WeierstrassAtlasRingU.{u} →+* R)
+private lemma BaseChangeOf.tripleMap_snd (f : WeierstrassAtlasRingU.{u} →+* R)
     [((𝕌).map f).IsElliptic] :
-    tripleMapBaseChangeOf f ≫
+    BaseChangeOf.tripleMap f ≫
       pullback.snd (modelOver 𝕌 ⊗ modelOver 𝕌).hom
         (modelOver 𝕌).hom =
       pullback.snd (modelOver ((𝕌).map f) ⊗ modelOver ((𝕌).map f)).hom
@@ -741,9 +741,9 @@ private lemma tripleMapBaseChangeOf_snd (f : WeierstrassAtlasRingU.{u} →+* R)
 /-- **(T-G4 shared BC-leg)** The multiplication morphism intertwines the base change to
 `(𝕌).map f`: pushing `mulModelHom` across `projModelBaseChangeOf` equals whiskering
 `pullbackMapBaseChangeOf` into the universal `mulModelHom`. This is the base-change leg shared,
-verbatim, by the `*_of_map` transports (`mulOver_left_baseChangeOf`, `mulOver_oneOver_of_map`,
+verbatim, by the `*_of_map` transports (`BaseChangeOf.mulOver_left`, `mulOver_oneOver_of_map`,
 `invOver_mulOver_of_map`); each `hbc` step is a call to this lemma. -/
-private lemma mulModelHom_baseChangeOf (f : WeierstrassAtlasRingU.{u} →+* R)
+private lemma BaseChangeOf.mulModelHom (f : WeierstrassAtlasRingU.{u} →+* R)
     [((𝕌).map f).IsElliptic] :
     mulModelHom ((𝕌).map f) ≫ projModelBaseChangeOf f 𝕌 ((𝕌).map f) rfl =
       pullbackMapBaseChangeOf f 𝕌 ((𝕌).map f) rfl ≫
@@ -752,28 +752,28 @@ private lemma mulModelHom_baseChangeOf (f : WeierstrassAtlasRingU.{u} →+* R)
   exact mulModelHomBC_baseChange f 𝕌 (𝕌).isUnit_Δ ((𝕌).map f) rfl
 
 /-- The multiplication intertwines the base change, in the Over spelling (`hbc` bridged). -/
-private lemma mulOver_left_baseChangeOf (f : WeierstrassAtlasRingU.{u} →+* R)
+private lemma BaseChangeOf.mulOver_left (f : WeierstrassAtlasRingU.{u} →+* R)
     [((𝕌).map f).IsElliptic] :
     (mulOver ((𝕌).map f)).left ≫
       projModelBaseChangeOf f 𝕌 ((𝕌).map f) rfl =
-      pairMapBaseChangeOf f ≫ (mulOver 𝕌).left := by
-  have hbc := mulModelHom_baseChangeOf f
+      BaseChangeOf.pairMap f ≫ (mulOver 𝕌).left := by
+  have hbc := BaseChangeOf.mulModelHom f
   have hmm : (mulOver 𝕌).left =
       WeierstrassCurve.Projective.mulModelHom 𝕌
         (𝕌).isUnit_Δ := by
-    rw [mulOver_left, mulModelHom_universalWeierstrassLocU]
-  rw [mulOver_left, hmm]
+    rw [ModularCurves.mulOver_left, mulModelHom_universalWeierstrassLocU]
+  rw [ModularCurves.mulOver_left, hmm]
   exact hbc
 
 /-- The associator-then-snd composite intertwines the base changes (the `mid` bridge of the
 ◁-side naturality; both legs meet on the triple projections). -/
-private lemma assocSnd_pairMap_baseChangeOf (f : WeierstrassAtlasRingU.{u} →+* R)
+private lemma BaseChangeOf.assocSnd_pairMap (f : WeierstrassAtlasRingU.{u} →+* R)
     [((𝕌).map f).IsElliptic] :
     ((α_ (modelOver ((𝕌).map f)) (modelOver ((𝕌).map f)) (modelOver ((𝕌).map f))).hom.left ≫
         pullback.snd (modelOver ((𝕌).map f)).hom
           (pullback.fst (modelOver ((𝕌).map f)).hom (modelOver ((𝕌).map f)).hom ≫
-            (modelOver ((𝕌).map f)).hom)) ≫ pairMapBaseChangeOf f =
-    tripleMapBaseChangeOf f ≫
+            (modelOver ((𝕌).map f)).hom)) ≫ BaseChangeOf.pairMap f =
+    BaseChangeOf.tripleMap f ≫
       (α_ (modelOver 𝕌) (modelOver 𝕌) (modelOver 𝕌)).hom.left ≫
         pullback.snd (modelOver 𝕌).hom
           (pullback.fst (modelOver 𝕌).hom (modelOver 𝕌).hom ≫
@@ -784,40 +784,40 @@ private lemma assocSnd_pairMap_baseChangeOf (f : WeierstrassAtlasRingU.{u} →+*
         (modelOver ((𝕌).map f))).hom.left ≫
         pullback.snd (modelOver ((𝕌).map f)).hom
           (pullback.fst (modelOver ((𝕌).map f)).hom (modelOver ((𝕌).map f)).hom ≫
-            (modelOver ((𝕌).map f)).hom) ≫ ·) (pairMapBaseChangeOf_fst f)).trans ?_
+            (modelOver ((𝕌).map f)).hom) ≫ ·) (BaseChangeOf.pairMap_fst f)).trans ?_
     refine (Over.associator_hom_left_snd_fst_assoc (modelOver ((𝕌).map f))
         (modelOver ((𝕌).map f)) (modelOver ((𝕌).map f))
         (projModelBaseChangeOf f 𝕌 ((𝕌).map f) rfl)).trans ?_
     refine Eq.symm ?_
     refine (Category.assoc _ _ _).trans ?_
-    refine (congrArg (tripleMapBaseChangeOf f ≫ ·) (Category.assoc _ _ _)).trans ?_
-    refine (congrArg (tripleMapBaseChangeOf f ≫ ·)
+    refine (congrArg (BaseChangeOf.tripleMap f ≫ ·) (Category.assoc _ _ _)).trans ?_
+    refine (congrArg (BaseChangeOf.tripleMap f ≫ ·)
         (Over.associator_hom_left_snd_fst (modelOver 𝕌)
           (modelOver 𝕌) (modelOver 𝕌))).trans ?_
     refine (Category.assoc _ _ _).symm.trans ?_
     refine (congrArg (· ≫ pullback.snd (modelOver 𝕌).hom (modelOver 𝕌).hom)
-        (tripleMapBaseChangeOf_fst f)).trans ?_
+        (BaseChangeOf.tripleMap_fst f)).trans ?_
     refine (Category.assoc _ _ _).trans ?_
     exact congrArg (pullback.fst (modelOver ((𝕌).map f) ⊗ modelOver ((𝕌).map f)).hom
-        (modelOver ((𝕌).map f)).hom ≫ ·) (pairMapBaseChangeOf_snd f)
+        (modelOver ((𝕌).map f)).hom ≫ ·) (BaseChangeOf.pairMap_snd f)
   · refine (Category.assoc _ _ _).trans ?_
     refine (congrArg ((α_ (modelOver ((𝕌).map f)) (modelOver ((𝕌).map f))
         (modelOver ((𝕌).map f))).hom.left ≫
         pullback.snd (modelOver ((𝕌).map f)).hom
           (pullback.fst (modelOver ((𝕌).map f)).hom (modelOver ((𝕌).map f)).hom ≫
-            (modelOver ((𝕌).map f)).hom) ≫ ·) (pairMapBaseChangeOf_snd f)).trans ?_
+            (modelOver ((𝕌).map f)).hom) ≫ ·) (BaseChangeOf.pairMap_snd f)).trans ?_
     refine (Over.associator_hom_left_snd_snd_assoc (modelOver ((𝕌).map f))
         (modelOver ((𝕌).map f)) (modelOver ((𝕌).map f))
         (projModelBaseChangeOf f 𝕌 ((𝕌).map f) rfl)).trans ?_
     refine Eq.symm ?_
     refine (Category.assoc _ _ _).trans ?_
-    refine (congrArg (tripleMapBaseChangeOf f ≫ ·) (Category.assoc _ _ _)).trans ?_
-    refine (congrArg (tripleMapBaseChangeOf f ≫ ·)
+    refine (congrArg (BaseChangeOf.tripleMap f ≫ ·) (Category.assoc _ _ _)).trans ?_
+    refine (congrArg (BaseChangeOf.tripleMap f ≫ ·)
         (Over.associator_hom_left_snd_snd (modelOver 𝕌)
           (modelOver 𝕌) (modelOver 𝕌))).trans ?_
-    exact tripleMapBaseChangeOf_snd f
+    exact BaseChangeOf.tripleMap_snd f
 
-private lemma whiskerLeftMul_fst_f (f : WeierstrassAtlasRingU.{u} →+* R)
+private lemma BaseChangeOf.whisker_fst_f (f : WeierstrassAtlasRingU.{u} →+* R)
     [((𝕌).map f).IsElliptic] :
     (modelOver ((𝕌).map f) ◁ mulOver ((𝕌).map f)).left ≫
       pullback.fst (modelOver ((𝕌).map f)).hom (modelOver ((𝕌).map f)).hom =
@@ -826,14 +826,14 @@ private lemma whiskerLeftMul_fst_f (f : WeierstrassAtlasRingU.{u} →+* R)
           (modelOver ((𝕌).map f)).hom) :=
   Over.whiskerLeft_left_fst (mulOver ((𝕌).map f))
 
-private lemma whiskerLeftMul_fst_U :
+private lemma BaseChangeOf.whisker_fst_U :
     (modelOver 𝕌 ◁ mulOver 𝕌).left ≫
       pullback.fst (modelOver 𝕌).hom (modelOver 𝕌).hom =
       pullback.fst (modelOver 𝕌).hom
         (pullback.fst (modelOver 𝕌).hom (modelOver 𝕌).hom ≫ (modelOver 𝕌).hom) :=
   Over.whiskerLeft_left_fst (mulOver 𝕌)
 
-private lemma whiskerLeftMul_snd_f (f : WeierstrassAtlasRingU.{u} →+* R)
+private lemma BaseChangeOf.whisker_snd_f (f : WeierstrassAtlasRingU.{u} →+* R)
     [((𝕌).map f).IsElliptic] :
     (modelOver ((𝕌).map f) ◁ mulOver ((𝕌).map f)).left ≫
       pullback.snd (modelOver ((𝕌).map f)).hom (modelOver ((𝕌).map f)).hom =
@@ -843,7 +843,7 @@ private lemma whiskerLeftMul_snd_f (f : WeierstrassAtlasRingU.{u} →+* R)
         (mulOver ((𝕌).map f)).left :=
   Over.whiskerLeft_left_snd (mulOver ((𝕌).map f))
 
-private lemma whiskerLeftMul_snd_U :
+private lemma BaseChangeOf.whisker_snd_U :
     (modelOver 𝕌 ◁ mulOver 𝕌).left ≫
       pullback.snd (modelOver 𝕌).hom (modelOver 𝕌).hom =
       pullback.snd (modelOver 𝕌).hom
@@ -851,7 +851,7 @@ private lemma whiskerLeftMul_snd_U :
         (mulOver 𝕌).left :=
   Over.whiskerLeft_left_snd (mulOver 𝕌)
 
-private lemma assocMul_fst_f (f : WeierstrassAtlasRingU.{u} →+* R)
+private lemma BaseChangeOf.assoc_fst_f (f : WeierstrassAtlasRingU.{u} →+* R)
     [((𝕌).map f).IsElliptic] :
     (α_ (modelOver ((𝕌).map f)) (modelOver ((𝕌).map f)) (modelOver ((𝕌).map f))).hom.left ≫
       pullback.fst (modelOver ((𝕌).map f)).hom
@@ -862,7 +862,7 @@ private lemma assocMul_fst_f (f : WeierstrassAtlasRingU.{u} →+* R)
   Over.associator_hom_left_fst (modelOver ((𝕌).map f)) (modelOver ((𝕌).map f))
     (modelOver ((𝕌).map f))
 
-private lemma assocMul_fst_U :
+private lemma BaseChangeOf.assoc_fst_U :
     (α_ (modelOver 𝕌) (modelOver 𝕌) (modelOver 𝕌)).hom.left ≫
       pullback.fst (modelOver 𝕌).hom
         (pullback.fst (modelOver 𝕌).hom (modelOver 𝕌).hom ≫ (modelOver 𝕌).hom) =
@@ -872,11 +872,11 @@ private lemma assocMul_fst_U :
 
 /-- The ◁-whisker/associator side of the assoc transport: the base-change naturality of
 `α ≫ (mo ◁ mulOver)`, Over-spelled. -/
-private lemma assoc_whiskerLeft_baseChangeOf (f : WeierstrassAtlasRingU.{u} →+* R)
+private lemma BaseChangeOf.assoc_whiskerLeft (f : WeierstrassAtlasRingU.{u} →+* R)
     [((𝕌).map f).IsElliptic] :
     (α_ (modelOver ((𝕌).map f)) (modelOver ((𝕌).map f)) (modelOver ((𝕌).map f))).hom.left ≫
-      (modelOver ((𝕌).map f) ◁ mulOver ((𝕌).map f)).left ≫ pairMapBaseChangeOf f =
-    tripleMapBaseChangeOf f ≫
+      (modelOver ((𝕌).map f) ◁ mulOver ((𝕌).map f)).left ≫ BaseChangeOf.pairMap f =
+    BaseChangeOf.tripleMap f ≫
       (α_ (modelOver 𝕌) (modelOver 𝕌) (modelOver 𝕌)).hom.left ≫
         (modelOver 𝕌 ◁ mulOver 𝕌).left := by
   apply pullback.hom_ext
@@ -884,46 +884,46 @@ private lemma assoc_whiskerLeft_baseChangeOf (f : WeierstrassAtlasRingU.{u} →+
     refine (congrArg ((α_ (modelOver ((𝕌).map f)) (modelOver ((𝕌).map f))
         (modelOver ((𝕌).map f))).hom.left ≫ ·) ((Category.assoc _ _ _).trans
         ((congrArg ((modelOver ((𝕌).map f) ◁ mulOver ((𝕌).map f)).left ≫ ·)
-          (pairMapBaseChangeOf_fst f)).trans
+          (BaseChangeOf.pairMap_fst f)).trans
           ((Category.assoc _ _ _).symm.trans
             (congrArg (· ≫ projModelBaseChangeOf f 𝕌
-              ((𝕌).map f) rfl) (whiskerLeftMul_fst_f f)))))).trans ?_
+              ((𝕌).map f) rfl) (BaseChangeOf.whisker_fst_f f)))))).trans ?_
     refine ((Category.assoc _ _ _).symm.trans
         (congrArg (· ≫ projModelBaseChangeOf f 𝕌
-          ((𝕌).map f) rfl) (assocMul_fst_f f))).trans ?_
+          ((𝕌).map f) rfl) (BaseChangeOf.assoc_fst_f f))).trans ?_
     refine (Category.assoc _ _ _).trans ?_
     refine (congrArg (pullback.fst (modelOver ((𝕌).map f) ⊗ modelOver ((𝕌).map f)).hom
-        (modelOver ((𝕌).map f)).hom ≫ ·) (pairMapBaseChangeOf_fst f).symm).trans ?_
+        (modelOver ((𝕌).map f)).hom ≫ ·) (BaseChangeOf.pairMap_fst f).symm).trans ?_
     refine (Category.assoc _ _ _).symm.trans ?_
     refine (congrArg (· ≫ pullback.fst (modelOver 𝕌).hom (modelOver 𝕌).hom)
-        (tripleMapBaseChangeOf_fst f).symm).trans ?_
+        (BaseChangeOf.tripleMap_fst f).symm).trans ?_
     refine (Category.assoc _ _ _).trans ?_
-    refine Eq.trans (congrArg (tripleMapBaseChangeOf f ≫ ·) ?_) (Category.assoc _ _ _).symm
-    refine assocMul_fst_U.symm.trans ?_
+    refine Eq.trans (congrArg (BaseChangeOf.tripleMap f ≫ ·) ?_) (Category.assoc _ _ _).symm
+    refine BaseChangeOf.assoc_fst_U.symm.trans ?_
     exact Eq.trans (congrArg ((α_ (modelOver 𝕌) (modelOver 𝕌)
-        (modelOver 𝕌)).hom.left ≫ ·) whiskerLeftMul_fst_U.symm)
+        (modelOver 𝕌)).hom.left ≫ ·) BaseChangeOf.whisker_fst_U.symm)
       (Category.assoc _ _ _).symm
   · refine (Category.assoc _ _ _).trans ?_
     refine (congrArg ((α_ (modelOver ((𝕌).map f)) (modelOver ((𝕌).map f))
         (modelOver ((𝕌).map f))).hom.left ≫ ·) ((Category.assoc _ _ _).trans
         ((congrArg ((modelOver ((𝕌).map f) ◁ mulOver ((𝕌).map f)).left ≫ ·)
-          (pairMapBaseChangeOf_snd f)).trans
+          (BaseChangeOf.pairMap_snd f)).trans
           ((Category.assoc _ _ _).symm.trans
             ((congrArg (· ≫ projModelBaseChangeOf f 𝕌
-              ((𝕌).map f) rfl) (whiskerLeftMul_snd_f f)).trans
+              ((𝕌).map f) rfl) (BaseChangeOf.whisker_snd_f f)).trans
               ((Category.assoc _ _ _).trans
                 (congrArg (pullback.snd (modelOver ((𝕌).map f)).hom
                   (pullback.fst (modelOver ((𝕌).map f)).hom (modelOver ((𝕌).map f)).hom ≫
                     (modelOver ((𝕌).map f)).hom) ≫ ·)
-                  (mulOver_left_baseChangeOf f)))))))).trans ?_
+                  (BaseChangeOf.mulOver_left f)))))))).trans ?_
     refine (Category.assoc _ _ _).symm.trans ?_
     refine (congrArg (· ≫ (mulOver 𝕌).left)
-        ((Category.assoc _ _ _).symm.trans (assocSnd_pairMap_baseChangeOf f))).trans ?_
+        ((Category.assoc _ _ _).symm.trans (BaseChangeOf.assocSnd_pairMap f))).trans ?_
     refine (Category.assoc _ _ _).trans ?_
-    refine Eq.trans (congrArg (tripleMapBaseChangeOf f ≫ ·) ?_) (Category.assoc _ _ _).symm
+    refine Eq.trans (congrArg (BaseChangeOf.tripleMap f ≫ ·) ?_) (Category.assoc _ _ _).symm
     refine (Category.assoc _ _ _).trans ?_
     exact Eq.trans (congrArg ((α_ (modelOver 𝕌) (modelOver 𝕌)
-        (modelOver 𝕌)).hom.left ≫ ·) whiskerLeftMul_snd_U.symm)
+        (modelOver 𝕌)).hom.left ≫ ·) BaseChangeOf.whisker_snd_U.symm)
       (Category.assoc _ _ _).symm
 
 /-- **(T-G4 raw assoc)** The `.left` (raw scheme-level) projection of the atlas associativity
@@ -956,29 +956,29 @@ theorem mulOver_assoc_of_map (f : WeierstrassAtlasRingU.{u} →+* R)
   rw [Over.comp_left, Over.comp_left, Over.comp_left]
   have raw := mulOver_assoc_atlas_left
   have hL : (mulOver ((𝕌).map f) ▷
-        modelOver ((𝕌).map f)).left ≫ pairMapBaseChangeOf f =
-      tripleMapBaseChangeOf f ≫
+        modelOver ((𝕌).map f)).left ≫ BaseChangeOf.pairMap f =
+      BaseChangeOf.tripleMap f ≫
         (mulOver 𝕌 ▷ modelOver 𝕌).left := by
     apply pullback.hom_ext
     · exact (Category.assoc _ _ _).trans
-        ((congrArg (_ ≫ ·) (pairMapBaseChangeOf_fst f)).trans
+        ((congrArg (_ ≫ ·) (BaseChangeOf.pairMap_fst f)).trans
           ((Category.assoc _ _ _).symm.trans
             ((congrArg (· ≫ _) (Over.whiskerRight_left_fst
                 (mulOver ((𝕌).map f)))).trans
               ((Category.assoc _ _ _).trans
-                ((congrArg (_ ≫ ·) (mulOver_left_baseChangeOf f)).trans
+                ((congrArg (_ ≫ ·) (BaseChangeOf.mulOver_left f)).trans
                   ((Category.assoc _ _ _).symm.trans
-                    ((congrArg (· ≫ _) (tripleMapBaseChangeOf_fst f).symm).trans
+                    ((congrArg (· ≫ _) (BaseChangeOf.tripleMap_fst f).symm).trans
                       ((Category.assoc _ _ _).trans
                         ((congrArg (_ ≫ ·) (Over.whiskerRight_left_fst
                             (mulOver 𝕌)).symm).trans
                           (Category.assoc _ _ _).symm)))))))))
     · exact (Category.assoc _ _ _).trans
-        ((congrArg (_ ≫ ·) (pairMapBaseChangeOf_snd f)).trans
+        ((congrArg (_ ≫ ·) (BaseChangeOf.pairMap_snd f)).trans
           ((Category.assoc _ _ _).symm.trans
             ((congrArg (· ≫ _) (Over.whiskerRight_left_snd
                 (mulOver ((𝕌).map f)))).trans
-              ((tripleMapBaseChangeOf_snd f).symm.trans
+              ((BaseChangeOf.tripleMap_snd f).symm.trans
                 ((congrArg (_ ≫ ·) (Over.whiskerRight_left_snd
                     (mulOver 𝕌)).symm).trans
                   (Category.assoc _ _ _).symm)))))
@@ -986,19 +986,19 @@ theorem mulOver_assoc_of_map (f : WeierstrassAtlasRingU.{u} →+* R)
         (modelOver ((𝕌).map f))
         (modelOver ((𝕌).map f))).hom.left ≫
       (modelOver ((𝕌).map f) ◁
-        mulOver ((𝕌).map f)).left ≫ pairMapBaseChangeOf f =
-      tripleMapBaseChangeOf f ≫
+        mulOver ((𝕌).map f)).left ≫ BaseChangeOf.pairMap f =
+      BaseChangeOf.tripleMap f ≫
         (α_ (modelOver 𝕌) (modelOver 𝕌)
             (modelOver 𝕌)).hom.left ≫
           (modelOver 𝕌 ◁ mulOver 𝕌).left :=
-    assoc_whiskerLeft_baseChangeOf f
+    BaseChangeOf.assoc_whiskerLeft f
   -- assembly: hom_ext legs of the base-change square
   apply (isPullback_projModelBaseChangeOf f 𝕌
     ((𝕌).map f) rfl).hom_ext
   · -- fst-leg: push the multiplication across the base change on both sides, then hL/hR + raw
     refine (Category.assoc _ _ _).trans ?_
     refine (congrArg ((mulOver ((𝕌).map f) ▷
-        modelOver ((𝕌).map f)).left ≫ ·) (mulOver_left_baseChangeOf f)).trans ?_
+        modelOver ((𝕌).map f)).left ≫ ·) (BaseChangeOf.mulOver_left f)).trans ?_
     refine (Category.assoc _ _ _).symm.trans ?_
     refine (congrArg (· ≫ (mulOver 𝕌).left) hL).trans ?_
     refine (Category.assoc _ _ _).trans ?_
@@ -1009,14 +1009,14 @@ theorem mulOver_assoc_of_map (f : WeierstrassAtlasRingU.{u} →+* R)
     refine (congrArg (fun m => (α_ (modelOver ((𝕌).map f)) (modelOver ((𝕌).map f))
         (modelOver ((𝕌).map f))).hom.left ≫
         (modelOver ((𝕌).map f) ◁ mulOver ((𝕌).map f)).left ≫ m)
-        (mulOver_left_baseChangeOf f)).trans ?_
+        (BaseChangeOf.mulOver_left f)).trans ?_
     refine (congrArg ((α_ (modelOver ((𝕌).map f)) (modelOver ((𝕌).map f))
         (modelOver ((𝕌).map f))).hom.left ≫ ·) (Category.assoc _ _ _).symm).trans ?_
     refine (Category.assoc _ _ _).symm.trans ?_
     refine (congrArg (· ≫ (mulOver 𝕌).left)
         ((Category.assoc _ _ _).trans hR)).trans ?_
     refine (Category.assoc _ _ _).trans ?_
-    exact congrArg (tripleMapBaseChangeOf f ≫ ·) raw.symm
+    exact congrArg (BaseChangeOf.tripleMap f ≫ ·) raw.symm
   · -- snd-leg: structural Over.w on both original Over morphisms
     have hga := Over.w (((mulOver ((𝕌).map f) ▷
         modelOver ((𝕌).map f)) ≫
@@ -1075,7 +1075,7 @@ theorem mulOver_oneOver_of_map (f : WeierstrassAtlasRingU.{u} →+* R)
   apply Over.OverMorphism.ext
   rw [Over.comp_left, mulOver_left, Over.rightUnitor_hom_left]
   have raw := mulOver_oneOver_atlas_left
-  have hbc := mulModelHom_baseChangeOf f
+  have hbc := BaseChangeOf.mulModelHom f
   have hw1 : projModelπ ((𝕌).map f) ≫ Spec.map (CommRingCat.ofHom f) =
       projModelBaseChangeOf f 𝕌
         ((𝕌).map f) rfl ≫ projModelπ 𝕌 :=
@@ -1165,7 +1165,7 @@ theorem invOver_mulOver_of_map (f : WeierstrassAtlasRingU.{u} →+* R)
   apply Over.OverMorphism.ext
   rw [Over.comp_left, Over.comp_left, mulOver_left, Over.toUnit_left, oneOver_left]
   have raw := invOver_mulOver_atlas_left
-  have hbc := mulModelHom_baseChangeOf f
+  have hbc := BaseChangeOf.mulModelHom f
   have hnat : (lift (invOver ((𝕌).map f))
         (𝟙 (modelOver ((𝕌).map f)))).left ≫
       pullbackMapBaseChangeOf f 𝕌
