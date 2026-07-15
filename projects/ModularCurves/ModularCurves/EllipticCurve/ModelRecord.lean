@@ -15,7 +15,7 @@ packaging" half of the v10.123-CASCADE gate verdict, unlocked by T-G4 (v10.138-C
 Over-level group laws at every commutative ring):
 
 * `modelEllipticCurve W` — the working record on `projModel W`: geometry the projective model
-  (`fibreGeom`-pattern), group structure `mulOver`/`oneOver`/`invOver` with the T-G4 laws,
+  (`Fibre.geom`-pattern), group structure `mulOver`/`oneOver`/`invOver` with the T-G4 laws,
   commutativity `mulOver_comm`, unit normalisation `oneOver_left`.
 * `modelEllipticCurve_point_add_val` — addition of `Spec`-points of the model record **computes
   as `mulModelHom`**: `(P + Q).1 = pullback.lift P.1 Q.1 _ ≫ mulModelHom W`.
@@ -68,7 +68,7 @@ the left one by commutativity and the braiding. -/
 
 /-- **(T-B6′ packaging, the working record)** The projective model of an elliptic
 Weierstrass curve as a working record `EllipticCurve (Spec R)`: geometry as in
-`MarkedChartData.fibreGeom`, group structure `modelGrpObj` (the T-G4 laws at every ring),
+`MarkedChartData.Fibre.geom`, group structure `modelGrpObj` (the T-G4 laws at every ring),
 commutativity `mulOver_comm`, unit normalisation `oneOver_left`. -/
 noncomputable def modelEllipticCurve (W : WeierstrassCurve R) [W.IsElliptic] :
     EllipticCurve (Spec (CommRingCat.of R)) where
