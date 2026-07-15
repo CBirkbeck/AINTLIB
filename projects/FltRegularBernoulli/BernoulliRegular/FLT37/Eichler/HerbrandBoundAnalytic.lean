@@ -332,7 +332,7 @@ theorem sum_range_pow_mod_eq :
     ((Finset.range 37).sum (fun a ↦ a ^ (42440 : ℕ))) % (37 ^ 3) = 31487 := by
   decide
 
-set_option linter.unusedSectionVars false in
+omit [NumberField.IsCMField (CyclotomicField 37 ℚ)] in
 /-- The explicit mod-`37³` value of the irregular power sum: in `ℤ_[37]`,
 `∑_{a : ZMod 37} (a.val)^{42440} ≡ 31487 (mod 37³)`, where `42440 = 31·37²+1` is
 the exponent produced by the Teichmüller bridge for the index `i = 31`.
@@ -393,7 +393,7 @@ def Flt37SharpHMinusValuation : Prop :=
     (37 : ℝ) ^ (-2 : ℤ) <
       ‖(-(1 / 2 : ℚ_[37])) * BernoulliGen ((teichmullerCharQp 37) ^ 31) 1‖
 
-set_option linter.unusedSectionVars false in
+omit [NumberField.IsCMField (CyclotomicField 37 ℚ)] in
 /-- The conductor-cleared irregular Bernoulli number realised in `ℤ_[37]`:
 `37 · B_{1,ω^{31}} = (S : ℚ_[37])` where `S = ∑_{a} ω³¹(a)·a.val ∈ ℤ_[37]`.
 
@@ -422,7 +422,7 @@ theorem thirtyseven_mul_bernoulliGen_eq_intSum :
   have h37 : (37 : ℚ_[37]) = ((37 : ℕ) : ℚ_[37]) := by norm_cast
   rw [h37, hB, ← hS_coe]
 
-set_option linter.unusedSectionVars false in
+omit [NumberField.IsCMField (CyclotomicField 37 ℚ)] in
 set_option maxRecDepth 8000 in
 /-- The integral sum `S = ∑_{a} ω³¹(a)·a.val` is congruent to `31487` modulo
 `37³` in `ℤ_[37]`.
@@ -440,7 +440,7 @@ theorem intSum_sModEq_const :
   have h := teichmullerChar_pow_mul_val_sModEq (p := 37) 31 a
   rwa [hexp] at h
 
-set_option linter.unusedSectionVars false in
+omit [NumberField.IsCMField (CyclotomicField 37 ℚ)] in
 set_option maxRecDepth 8000 in
 /-- **Norm bridge.** From the `mod 37³` congruence `37·B_{1,ω^{31}} ≡ 31487`
 in `ℤ_[37]`, the difference in `ℚ_[37]` has norm `≤ 37⁻³`:
@@ -464,7 +464,7 @@ theorem norm_thirtyseven_mul_bernoulliGen_sub_const_le :
   rw [hcoe_eq, PadicInt.padic_norm_e_of_padicInt]
   exact hnorm_int
 
-set_option linter.unusedSectionVars false in
+omit [NumberField.IsCMField (CyclotomicField 37 ℚ)] in
 /-- The constant `31487 = 37²·23` has `37`-adic norm exactly `37⁻²` (since
 `37 ∤ 23`). -/
 theorem norm_const_eq :
@@ -482,7 +482,7 @@ theorem norm_const_eq :
     (Padic.norm_natCast_eq_one_iff (p := 37) (n := 23)).2 (by decide)
   rw [h1, h2, mul_one]
 
-set_option linter.unusedSectionVars false in
+omit [NumberField.IsCMField (CyclotomicField 37 ℚ)] in
 /-- **The sharp valuation, proved.** `(37 : ℝ)^{-2} < ‖-½·B_{1,ω^{31}}‖`, i.e.
 `v₃₇(B_{1,ω^{31}}) ≤ 1`, established unconditionally by the Teichmüller modular
 computation `37·B_{1,ω^{31}} ≡ 31487 = 37²·23 (mod 37³)`.
@@ -526,7 +526,7 @@ theorem flt37SharpHMinusValuation_proved : Flt37SharpHMinusValuation := by
   apply zpow_lt_zpow_right₀ (by norm_num : (1 : ℝ) < 37)
   norm_num
 
-set_option linter.unusedSectionVars false in
+omit [NumberField.IsCMField (CyclotomicField 37 ℚ)] in
 /-- The classical irregular Bernoulli ratio `B₃₂/32`, as a `37`-adic number,
 has norm `> 37⁻²` — equivalently `v₃₇(B₃₂/32) ≤ 1`.  This is **proved** from the
 banked `kellner_at_zero_not_dvd` (`37² ∤ B₃₂.num`): if `‖(B₃₂/32 : ℚ₃₇)‖ ≤ 37⁻²`
@@ -593,7 +593,7 @@ def Flt37KummerCongruenceModSq : Prop :=
     ‖BernoulliGen ((teichmullerCharQp 37) ^ 31) 1 -
         (((bernoulli 32 : ℚ) / 32 : ℚ) : ℚ_[37])‖ ≤ (37 : ℝ) ^ (-2 : ℤ)
 
-set_option linter.unusedSectionVars false in
+omit [NumberField.IsCMField (CyclotomicField 37 ℚ)] in
 /-- **The sharp valuation from the mod-`37²` Kummer congruence.**  Given the
 congruence `B_{1,ω^{31}} ≡ B₃₂/32 (mod 37²)`, ultrametricity with
 `norm_bernoulli_thirtytwo_ratio_gt` (`‖B₃₂/32‖ > 37⁻²`) yields
@@ -624,7 +624,6 @@ end SharpInput
 
 section ChainStep1
 
-set_option linter.unusedSectionVars false in
 /-- **Step 1: `37² ∤ h⁻`** from the sharp valuation input.
 
 By `dvd_sq_hMinus_iff_norm_irregularFactor_le`, `37² ∣ h⁻` is equivalent to
@@ -634,13 +633,11 @@ theorem flt37_not_dvd_sq_hMinus (h_sharp : Flt37SharpHMinusValuation) :
   rw [dvd_sq_hMinus_iff_norm_irregularFactor_le]
   exact not_le.mpr h_sharp
 
-set_option linter.unusedSectionVars false in
 /-- **Step 1 ⇒ Step 3 packaged: `37² ∤ h` from the sharp valuation input.** -/
 theorem flt37_not_dvd_sq_h (h_sharp : Flt37SharpHMinusValuation) :
     ¬ (37 : ℕ) ^ 2 ∣ h (CyclotomicField 37 ℚ) :=
   flt37_not_dvd_sq_h_of_not_dvd_sq_hMinus (flt37_not_dvd_sq_hMinus h_sharp)
 
-set_option linter.unusedSectionVars false in
 /-- **`37² ∤ h⁻`, unconditional.** The sharp `37`-adic valuation
 `v₃₇(h⁻) = v₃₇(B_{1,ω^{31}}) = 1` is supplied by the Teichmüller modular
 computation (`flt37SharpHMinusValuation_proved`), so no hypothesis remains. -/
@@ -648,7 +645,6 @@ theorem flt37_not_dvd_sq_hMinus_uncond :
     ¬ (37 : ℕ) ^ 2 ∣ hMinus (CyclotomicField 37 ℚ) :=
   flt37_not_dvd_sq_hMinus flt37SharpHMinusValuation_proved
 
-set_option linter.unusedSectionVars false in
 /-- **`37² ∤ h`, unconditional.** Combines the unconditional `37² ∤ h⁻`
 (`flt37_not_dvd_sq_hMinus_uncond`), `37 ∤ h⁺` (Sinnott), and `h = h⁺·h⁻`. -/
 theorem flt37_not_dvd_sq_h_uncond :
@@ -691,7 +687,7 @@ section HerbrandBound
 
 variable [Fact (Nat.Prime 37)] [NumberField.IsCMField (CyclotomicField 37 ℚ)]
 
-set_option linter.unusedSectionVars false in
+omit [NumberField.IsCMField (CyclotomicField 37 ℚ)] in
 /-- **The Case-I Herbrand bound, `37² ∤ h` form.** For any `37`-torsion subgroup
 `C⁻ ⊆ ClassGroup (𝓞 (CyclotomicField 37 ℚ))` (i.e. `x ^ 37 = 1` for all
 `x ∈ C⁻`), `Nat.card C⁻ ≤ 37`.
@@ -718,7 +714,6 @@ theorem caseI_pRank_minus_bound (h_sharp : Flt37SharpHMinusValuation)
     Nat.card C ≤ 37 :=
   caseI_pRank_minus_bound_of_not_dvd_sq_h (flt37_not_dvd_sq_h h_sharp) C hC
 
-set_option linter.unusedSectionVars false in
 /-- **The Case-I Herbrand bound, unconditional.** For any `37`-torsion subgroup
 `C⁻ ⊆ ClassGroup (𝓞 (CyclotomicField 37 ℚ))`, `Nat.card C⁻ ≤ 37`.
 
