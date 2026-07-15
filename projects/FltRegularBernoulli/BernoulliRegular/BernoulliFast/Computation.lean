@@ -36,7 +36,6 @@ This module defines a fully computable version of the Bernoulli sequence
   from the list.
 -/
 
-set_option linter.unusedVariables false
 
 namespace BernoulliRegular.BernoulliFast
 
