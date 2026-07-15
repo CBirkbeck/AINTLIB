@@ -154,7 +154,8 @@ theorem deriv_intervalIntegrable_piece (γ : ClosedPwC1Curve x) {a b : ℝ}
   have h_dw_cont : ContinuousOn (derivWithin γ.toPath.extend (Icc a b)) (Icc a b) :=
     hcd.continuousOn_derivWithin (uniqueDiffOn_Icc h.2.2.1) le_rfl
   refine (h_dw_cont.intervalIntegrable_of_Icc hab).congr_ae ?_
-  refine Filter.eventuallyEq_iff_exists_mem.mpr ⟨Ioo a b, ?_, fun _ ht ↦ derivWithin_eq_deriv_on_Ioo _ ht⟩
+  refine Filter.eventuallyEq_iff_exists_mem.mpr
+    ⟨Ioo a b, ?_, fun _ ht ↦ derivWithin_eq_deriv_on_Ioo _ ht⟩
   rw [MeasureTheory.mem_ae_iff, MeasureTheory.Measure.restrict_apply' measurableSet_uIoc]
   refine MeasureTheory.measure_mono_null (t := ({b} : Set ℝ)) ?_ Real.volume_singleton
   intro t ⟨ht_compl, ht_in⟩
