@@ -623,6 +623,31 @@ def IsE3Datum {R : CommRingCat.{u}} (X : EllObj R)
       IsE3Form Pr.W β γ ∧ Pr.MarksAt L.1.1.2 0 0 ∧
       Pr.MarksAt L.1.2.2 γ (β + γ)
 
+open LocalPresentation in
+/-- **([T-E15-NORM] the `ℰ₃`-datum from per-point flex-NF charts ★★, the cover assembly)** An
+`IsE3Datum` is exactly a choice, at every point of the base, of a **flex-normal-form chart**
+(`a₂=a₄=a₆=0`) marking the order-`3` section `P` at the origin and the second generator `Q` at some
+`(p, q)`, together with the `3`-torsion coordinate relation and the unit conditions. This is the
+reduction of NORM to its two remaining inputs — both supplied by the torsion→coordinate bridges:
+`3•P=0 ⟹ μ_P=0` (which produces the flex-NF chart with `P` at the origin) and `3•Q=0 ⟹ hcubic`. Each
+point's data is fed through `isE3Chart`; the `(β,γ)` and the `ℰ₃`-form chart come out. Keystone-free
+apart from the bridge outputs carried in the hypothesis. -/
+theorem isE3Datum_of_flexCharts {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 3)
+    (h : ∀ s : X.base, ∃ (V : X.base.affineOpens) (_ : s ∈ V.1)
+      (P₀ : LocalPresentation X.curve.toEllipticCurveGeom V) (p q : Γ(X.base, V.1)),
+        P₀.W.a₂ = 0 ∧ P₀.W.a₄ = 0 ∧ P₀.W.a₆ = 0 ∧
+        P₀.MarksAt L.1.1.2 0 0 ∧ P₀.MarksAt L.1.2.2 p q ∧
+        3 * p ^ 3 + P₀.W.a₁ ^ 2 * p ^ 2 + 3 * P₀.W.a₁ * P₀.W.a₃ * p + 3 * P₀.W.a₃ ^ 2 = 0 ∧
+        IsUnit P₀.W.a₃ ∧ IsUnit (3 : Γ(X.base, V.1)) ∧
+        IsUnit (P₀.W.a₁ ^ 3 * p + P₀.W.a₁ ^ 2 * P₀.W.a₃ + P₀.W.a₁ ^ 2 * q + 6 * P₀.W.a₁ * p ^ 2
+          + 3 * P₀.W.a₃ * p + 6 * p * q)) :
+    IsE3Datum X L := by
+  intro s
+  obtain ⟨V, hsV, P₀, p, q, ha₂, ha₄, ha₆, hMP, hMQ, hcubic, ha₃, h3, hB⟩ := h s
+  obtain ⟨Pr, β, γ, hE3, hMPr, hMQr⟩ := isE3Chart P₀ ha₂ ha₄ ha₆ hMP hMQ hcubic ha₃ h3 hB
+  exact ⟨V, hsV, Pr, β, γ, hE3, hMPr, hMQr⟩
+
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
