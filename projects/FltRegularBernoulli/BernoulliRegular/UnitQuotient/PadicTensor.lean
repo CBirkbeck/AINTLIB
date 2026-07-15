@@ -39,12 +39,6 @@ open NumberField TensorProduct
 
 namespace BernoulliRegular
 
--- Hides 6 warnings: several theorems below do not use `[NumberField K]` /
--- `[IsCyclotomicExtension {p} ℚ K]`. Removing it needs `omit`, which drops those binders and so
--- changes the statements — that is generalisation work (see the linter-suppression census),
--- not cleanup.
-set_option linter.unusedSectionVars false
-
 variable (p : ℕ) [Fact p.Prime]
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
@@ -65,6 +59,7 @@ instance : Module.Free ℤ_[p] (CyclotomicUnitFreePartPadic (p := p) K) := by
   classical
   exact Module.Free.tensor
 
+omit [IsCyclotomicExtension {p} ℚ K] in
 /-- **The Padic free part has finrank `NumberField.Units.rank K` over `ℤ_[p]`**.
 Direct from `Module.finrank_baseChange` plus the existing `cyclotomicUnitFreePart_finrank`. -/
 @[simp]
@@ -94,6 +89,7 @@ def cyclotomicUnitFreePartToPadic :
     CyclotomicUnitFreePart K →ₗ[ℤ] CyclotomicUnitFreePartPadic (p := p) K :=
   TensorProduct.mk ℤ ℤ_[p] (CyclotomicUnitFreePart K) (1 : ℤ_[p])
 
+omit [NumberField K] [IsCyclotomicExtension {p} ℚ K] in
 @[simp]
 theorem cyclotomicUnitFreePartToPadic_apply (v : CyclotomicUnitFreePart K) :
     cyclotomicUnitFreePartToPadic (p := p) K v = (1 : ℤ_[p]) ⊗ₜ[ℤ] v :=
@@ -278,6 +274,7 @@ noncomputable def cyclotomicUnitFreePartPadicReduceRight :
       TensorProduct ℤ ℤ_[p] (CyclotomicUnitFreePartModP (p := p) K) :=
   LinearMap.lTensor ℤ_[p] (cyclotomicUnitFreePartModPClassLinear (p := p) K)
 
+omit [NumberField K] [IsCyclotomicExtension {p} ℚ K] in
 @[simp]
 theorem cyclotomicUnitFreePartPadicReduceRight_tmul
     (z : ℤ_[p]) (v : CyclotomicUnitFreePart K) :
@@ -303,6 +300,7 @@ noncomputable def cyclotomicUnitFreePartPadicReduceLeft :
   LinearMap.rTensor (CyclotomicUnitFreePartModP (p := p) K)
     (padicToZModLinear (p := p))
 
+omit [NumberField K] [IsCyclotomicExtension {p} ℚ K] in
 @[simp]
 theorem cyclotomicUnitFreePartPadicReduceLeft_tmul
     (z : ℤ_[p]) (m : CyclotomicUnitFreePartModP (p := p) K) :
@@ -335,6 +333,7 @@ noncomputable def cyclotomicUnitFreePartModPSmulFromTensor :
       rw [smul_assoc]
   }
 
+omit [NumberField K] [IsCyclotomicExtension {p} ℚ K] in
 @[simp]
 theorem cyclotomicUnitFreePartModPSmulFromTensor_tmul
     (c : ZMod p) (m : CyclotomicUnitFreePartModP (p := p) K) :
@@ -351,6 +350,7 @@ noncomputable def cyclotomicUnitFreePartPadicReduceModP :
     (cyclotomicUnitFreePartPadicReduceLeft (p := p) K).comp <|
       cyclotomicUnitFreePartPadicReduceRight (p := p) K
 
+omit [NumberField K] [IsCyclotomicExtension {p} ℚ K] in
 @[simp]
 theorem cyclotomicUnitFreePartPadicReduceModP_tmul
     (z : ℤ_[p]) (v : CyclotomicUnitFreePart K) :
@@ -359,6 +359,7 @@ theorem cyclotomicUnitFreePartPadicReduceModP_tmul
         cyclotomicUnitFreePartModPClass (p := p) K v :=
   rfl
 
+omit [NumberField K] [IsCyclotomicExtension {p} ℚ K] in
 /-- **Reduction sends `1 ⊗ v ↦ [v]`** (the natural inclusion-reduction). -/
 @[simp]
 theorem cyclotomicUnitFreePartPadicReduceModP_one_tmul
@@ -420,6 +421,7 @@ theorem cyclotomicUnitFreePartModPDeltaCharacterEigenspace_local_eq
   ext x
   rfl
 
+omit [NumberField K] [IsCyclotomicExtension {p} ℚ K] in
 /-- **The reduction map sends `c • x` to `c.toZMod • reduce(x)`** for the
 `Module ℤ_[p]` smul on the source. This is the key compatibility
 showing the reduction map intertwines the ℤ_[p]-action (on Padic) with
@@ -441,6 +443,7 @@ theorem cyclotomicUnitFreePartPadicReduceModP_smul_compat
   | add x y hx hy =>
     rw [smul_add, map_add, hx, hy, map_add, smul_add]
 
+omit [NumberField K] [IsCyclotomicExtension {p} ℚ K] in
 /-- **The reduction map is surjective**: every element of `FreePartModP`
 arises as the image of some Padic element (specifically `1 ⊗ v` for any
 representative `v` of the class). -/
@@ -694,6 +697,7 @@ abbrev cyclotomicUnitFreePartPadic_pSmulSubmodule :
   LinearMap.range
     (LinearMap.lsmul ℤ_[p] (CyclotomicUnitFreePartPadic (p := p) K) ((p : ℕ) : ℤ_[p]))
 
+omit [NumberField K] [IsCyclotomicExtension {p} ℚ K] in
 /-- **Reduction kills `p • V_p`**: any element of `p • V_p` reduces to zero. -/
 theorem cyclotomicUnitFreePartPadicReduceModP_pSmul_eq_zero
     {x : CyclotomicUnitFreePartPadic (p := p) K}
@@ -706,6 +710,7 @@ theorem cyclotomicUnitFreePartPadicReduceModP_pSmul_eq_zero
     rw [map_natCast]; exact ZMod.natCast_self p]
   exact zero_smul _ _
 
+omit [IsCyclotomicExtension {p} ℚ K] in
 /-- **Kernel of red equals `p • V_p`**: the reverse inclusion via basis transport.
 For `x ∈ V_p` with `red x = 0`, expand `x = Σ c_i • (1 ⊗ e_i)` in the Padic
 basis (lifted from V_int's Dirichlet basis). The reduction sends the basis
