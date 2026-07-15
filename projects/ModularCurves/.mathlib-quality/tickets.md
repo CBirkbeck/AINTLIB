@@ -21010,3 +21010,24 @@ Torsion.lean sorry count: **1** (BB-DIFF `mulByHom_formallyUnramified`, relative
 (E[N] finite-locally-free-rank-N² is what they consume, N ∈ {2,3} — for their ℤ[1/6]-bases
 `torsionπ_flat`+`torsion_rank` now fire); G0's own SIGNAL/Y₀(N) `isFinite` register-boxes
 already auto-cleaned at BB-QF; KM's K4 chain instance hypotheses discharged over fields.
+
+### v10.257-GH — [GHA3 route-β] opened + β1 DISCOVERED-DONE + β4 shell + β2-ambient landed (STREAM-GH)
+Commits faefc387c/e8cc91dc1 (pushed). New `Moduli/LevelSpaceEtale.lean`:
+- **β1 status correction:** `torsion_etaleLocal_triv` (global) is ALREADY FULLY PROVEN in
+  TorsionEtaleTriv.lean (complete Sigma-glue proof; docstring "sorried pin" is STALE — zero
+  sorries in file; sorryAx only via upstream funnel boxes). β1 needs no work.
+- **`exists_iso_of_factor_iff`** (category-general, propext-only!): monos into a common target
+  with the same factorization predicate differ by an iso over it — the β2 subscheme-comparison
+  mechanism.
+- **`etale_of_etale_pullback_snd_of_cover`** (β4 COMPLETE, axiom-clean): étaleness descends along
+  any surjective flat lfp cover — mathlib DescendsAlong @Etale (fpqc) + the fppf upgrade; no
+  quasi-compactness needed (right for the sigma cover).
+- **`torsionPairBaseChangeHom` + `torsionPair_baseChange_isPullback`** (β2-ambient, AXIOM-CLEAN):
+  E_T[N] ×_T E_T[N] → E[N] ×_S E[N] over T → S is cartesian (direct limit construction threading
+  the single-factor square).
+**Remaining [GHA3]:** β2-L (pull the levelSpaceΓ subscheme through the ambient square:
+pullbackRightPullbackFstIso-cancel + iso-leg transport → the pulled-back closed immersion into
+E_T[N]×E_T[N]) → β2-heart (factor-iff via levelSpaceΓ_spec both sides + the
+fullLevel_divisor_iff_naive_gen box + double-base-change point transport — the (B1) curve
+composition iso is the leaf to scope: InvariantDifferential's transportE_baseChange machinery)
+→ β3 (constant-form clopen). (STREAM-GH)

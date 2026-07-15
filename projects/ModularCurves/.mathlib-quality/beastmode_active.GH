@@ -1,7 +1,1 @@
-FOCUS: next firing = [GHA3] levelSpaceGammapi_etale EXECUTION (route-beta, KM 1.6.7 fallback — recon DONE v10.255):
- beta1: torsion_etaleLocal_triv GLOBAL from the PROVEN affine form (TorsionEtaleTriv:104, NO sorries in file) — glue over affine cover of S.
- beta2: base-change levelSpaceGamma along the trivializing cover T->S to the CONSTANT form (levelSpaceGamma_spec functoriality).
- beta3: constant-form incidence locus in ((Z/N)^2 x (Z/N)^2)_T is CLOPEN (decidable predicate on finite index -> constScheme clopen components) => etale over T.
- beta4: descend Etale along the etale surjective cover — mathlib HAS Morphisms/Descent+FlatDescent+LocalFlatDescent (DescendsAlong, 125 hits) — check Etale instance.
- Unramified free (closed imm into etale); finiteness [GHA2] PROVEN. Consumer: gammaFullNaive_relRepData:3524 (the GHC1 qpd cone).
- MEANWHILE: trace pins <- KM endDual_comp_self; Niso <- G0 quotientpi substrate; dichotomy <- coordinate w/ G0.
+FOCUS: [GHA3 beta2-L] pull levelSpace subscheme through the pair square: pullback (levelSpaceGammapi E N) p =~ pullback (levelSpaceGammaiota E N) (torsionPairBaseChangeHom E p N) via pullbackRightPullbackFstIso + isoPullback-leg transport; then snd is the pulled-back closed immersion into the primed ambient. Then beta2-heart (factor-iff; scope transportE_baseChange for B1).
