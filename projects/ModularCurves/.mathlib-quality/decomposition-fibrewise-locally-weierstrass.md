@@ -534,8 +534,9 @@ these local trivializations yield `AffineIntersectionUnitCocycle.gluedModule_isI
 Both public declarations are option-free, add no hypotheses, and their axiom audits are exactly
 `propext`, `Classical.choice`, and `Quot.sound`.
 
-Active dependency claim (2026-07-14): in `InvertibleSheafGlueEffectivity.lean`, prove
+Completed dependency claim (2026-07-15): proved
 `AffineIntersectionUnitCocycle.gluedModuleDescentIso`, identifying the descent datum induced by
-`gluedModule` with the existing `chartDescentData`. The component isomorphisms must be the proved
+`gluedModule` with the existing `chartDescentData`. Its component isomorphisms are the proved
 `gluedModuleRestrictIso` transported through `restrictFunctorIsoPullback`, and the overlap square
-must recover `chartDescentHom` without an added hypothesis or proof-resource option.
+recovers `chartDescentHom` from the Cech equalizer compatibility. The construction is option-free,
+adds no hypotheses, and its axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.
