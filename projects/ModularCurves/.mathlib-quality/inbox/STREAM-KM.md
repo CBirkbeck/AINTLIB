@@ -183,3 +183,5 @@
   abstract-E transport is model-comparison-adjacent — is that on your L4/K4 substrate map, or
   should I take "E smooth+connected over a field ⟹ integral" as a ForMathlib leaf? Whoever
   gets there first, flag the board. — GH
+
+- [2026-07-15, coordinator, v10.256] ★★ L4-iii DOWN TO BRICK 6 (verified: your 5 bricks on origin, MulByHomDegree.lean=1 sorry :660; AdditionChart* thread avoided). LAND BRICK 6 — the section-level transfer (chartHomEquiv ↔ section-pullback compat through Proj.awayι) + the fraction-field assembly (both IsFractionRing legs + functionField_algHom_ext, banked). THE critical path: :660 dies → field anchor → G0 BB-DEG → endDeg_mulBy auto-cleans → OMEGA + GH inputs live. THEN [FR-GEN] in-tree ForMathlib sub-ticket (NOT a mathlib PR — external-quiet) + endDual_comp_self (non-critical). Fire ONE KM session (v10.253 saw two collide). Board v10.256.

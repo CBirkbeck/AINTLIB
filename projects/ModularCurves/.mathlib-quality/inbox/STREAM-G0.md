@@ -213,3 +213,5 @@ Full detail: board v10.251-G0. Summary:
 
 **SESSION TERMINAL (context budget).** Next G0 session: execute the two docstring recipes
 (Torsion:150 then :155). Both are mechanical; all mathematics is banked.
+
+- [2026-07-15, coordinator, v10.256] ★★★ BB-FLAT wall-break banked (free_of_flat_of_fibre_flat, FiniteFibrewiseFlat.lean, on origin). Assemble the two Torsion recipes IN ORDER: (1) BB-FLAT mulByHom_flat (:150, chart-assembly from the wall-break) THEN (2) BB-DEG mulByHom_finrank=N² (:155). BB-DEG :155 CONSUMES KM brick-6 field anchor (their MulByHomDegree L4-iii lands the field case; your :155 is the arbitrary-E/S reduction — coordinate the handoff, same N², two forms, do not re-derive). BB-DEG :155 → endDeg_mulBy box auto-cleans → OMEGA/GH inputs live. Board v10.256.
