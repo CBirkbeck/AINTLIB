@@ -762,7 +762,8 @@ theorem chartMatrix_normMap (n : ℕ) (ι : Fin k ↪ Fin n) (f : A →ₐ[R] B)
       unfold chartMatrix
       rfl
     rw [hval, hsk_val]
-  -- `ψf` factors through `baseChangeMkQ`, so its kernel contains `(normMap f N).toSubmodule` (`hψ2`)
+  -- `ψf` factors through `baseChangeMkQ`, so its kernel contains
+  -- `(normMap f N).toSubmodule` (`hψ2`)
   have hK : (normMap n f N).toSubmodule ≤ LinearMap.ker ψf := by
     have hnm : (normMap n f N).toSubmodule
         = Submodule.map qB.toLinearMap (baseChangeMkQ B P.toSubmodule).ker := by
@@ -790,7 +791,8 @@ variable (R)
 goes to the standard basis, the complementary coordinates to the generic matrix
 variables. -/
 noncomputable def genericRetraction (n : ℕ) (ι : Fin k ↪ Fin n) :
-    (Fin n → MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R) →ₗ[MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R]
+    (Fin n → MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R)
+      →ₗ[MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R]
       (Fin k → MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R) := by
   classical
   exact (Pi.basisFun (MvPolynomial ({j : Fin n // j ∉ Set.range ι} × Fin k) R)
