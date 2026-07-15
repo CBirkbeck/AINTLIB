@@ -51,7 +51,7 @@ theorem pullback_equation (α : Isogeny W.toAffine W.toAffine) :
     (W_KE W).toAffine.Equation (α.pullback (x_gen W)) (α.pullback (y_gen W)) := by
   have hmapped := Affine.Equation.map α.pullback.toRingHom (generic_equation W)
   rw [show (W_KE W).toAffine.map α.pullback.toRingHom = (W_KE W).toAffine by
-    unfold W_KE
+    simp only [W_KE]
     rw [Affine.map, WeierstrassCurve.map_map]
     congr 1
     ext x
@@ -119,7 +119,6 @@ noncomputable def addPullbackAlgHom (hxy : AddNonInverse W α)
     (hinj : Function.Injective (addCoordAlgHom hxy)) : KE →ₐ[F] KE :=
   IsFractionRing.liftAlgHom hinj
 
-set_option linter.unusedSectionVars false in
 /-- `addBaseHom` coincides with `Polynomial.aeval (addPullback_x W α)` as a ring hom. -/
 theorem addBaseHom_eq_aeval :
     (addBaseHom W α : Polynomial F →+* KE) =
@@ -753,7 +752,6 @@ theorem AddNonInversePair_of_y_ne {α₁ α₂ : Isogeny W.toAffine W.toAffine}
     AddNonInversePair α₁ α₂ :=
   fun ⟨_, h⟩ ↦ h_y h
 
-set_option linter.unusedSectionVars false in
 /-- `addBaseHomPair` coincides with `Polynomial.aeval (addPullback_x_pair α₁ α₂)`
 as a ring hom. -/
 theorem addBaseHomPair_eq_aeval (α₁ α₂ : Isogeny W.toAffine W.toAffine) :
@@ -848,7 +846,7 @@ theorem addSlopePair_eq_of_x_ne {α₁ α₂ : Isogeny W.toAffine W.toAffine}
     addSlopePair α₁ α₂ =
       (α₁.pullback (y_gen W) - α₂.pullback (y_gen W)) /
       (α₁.pullback (x_gen W) - α₂.pullback (x_gen W)) := by
-  unfold addSlopePair
+  simp only [addSlopePair]
   exact Affine.slope_of_X_ne h_x_ne
 
 /-- **σ-action sum identity for the pair slope**: if both pullbacks satisfy
@@ -899,7 +897,7 @@ theorem addPullback_x_pair_sigma_invariant {α₁ α₂ : Isogeny W.toAffine W.t
               algebraMap F KE W.toAffine.a₃) :
     (mulByInt W.toAffine (-1)).pullback (addPullback_x_pair α₁ α₂) =
       addPullback_x_pair α₁ α₂ := by
-  unfold addPullback_x_pair WeierstrassCurve.Affine.addX
+  simp only [addPullback_x_pair, WeierstrassCurve.Affine.addX]
   have h_a1 : (W_KE W).toAffine.a₁ = algebraMap F KE W.toAffine.a₁ := rfl
   have h_a2 : (W_KE W).toAffine.a₂ = algebraMap F KE W.toAffine.a₂ := rfl
   rw [h_a1, h_a2]
