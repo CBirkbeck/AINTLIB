@@ -20438,3 +20438,30 @@ affine opens (only the std-smooth basic-open pieces have std-smooth section ring
 Est. ~150 lines of scheme plumbing (dominance-transfer is the fiddly leaf). Closes NO Torsion
 sorry — feeds the fibrewise criterion [BBF-A3] whose flat-locus openness [BBF-A2] = the
 research-grade B–E chain (decomposition-bb-flat.md). BB-DEG=KM; BB-DIFF=scheme-Ω¹ (separate).
+
+## v10.244-OMEGA (2026-07-15) — ★★★ [T-E15a stage 4] e3_vc_marked: THE E3 UNIQUENESS CERTIFICATE, AXIOM-CLEAN
+
+`e3_vc_marked` (commit 1a05d7ad3; axioms: propext, Quot.sound ONLY — no Classical.choice): two
+marked E3-form presentations sharing the P,Q markings have transVC=1 and equal (β,γ). This is the
+KM Ex. 2.2.2 rigidity — the level-3 analog of Legendre's `legendre_witness_transVC_eq_one`, but
+HARDER because the u-ambiguity is a full VC unit killed only by the `(a₁³−27a₃)`-discriminant unit
+(no ω here; the level-3 datum rigidifies alone). Derivation = human chain + CAS-certified
+cofactors:
+- hs=0 (a₄-transform, a₃Q unit); [A] scalar action `w(3uγ₁+1)=0`; hgq2 (flex2 ÷ u² via IsUnit);
+  hβ₂ substitution; **[G']** `9u²β₁w=2w²+w`; **`3·u³·D·w=0`**; w=0 (D,3,u³ units) ⟹ C=1, γ₁=γ₂,
+  β₁=β₂.
+- The [G'] and kill cofactors are IMPRACTICAL by hand (the ideal needs high-degree Gröbner
+  certificates because the human proof divides by units the polynomial ideal can't). SOLUTION:
+  computed them with **sympy** — gauss_jordan lift over ℚ with `u,w` kept independent + the
+  relation `w=u−1` as a generator, cleared denominators by ×3 for integer cofactors, auto-emitted
+  the `linear_combination` strings. This CAS-cofactor pipeline is the general tool for any such
+  unit-division-flavored ring identity.
+
+**T-E15a status:** object+marked pair ✓ (v10.242) + taut-markings ✓ (v10.243) + **uniqueness ✓**
+(this). Remaining: the classification assembly (glued (β,γ) → classifying map/Top/EllHom → rt1/rt2
+→ RepresentableBy) via the transposition pipeline, then discharge `naiveLevelThree_representable_
+by_affine` modulo the level clause (exact-order-3 generation = the analog of Legendre's LVL-b,
+KM-keystone-gated). T-E15b (finite étale, Weil pairing) stays stream-C-gated. LEAN-OP added:
+`IsUnit.mul_right_eq_zero`/`(u.isUnit.pow n)` for unit-cancellation; a `have`-bound
+`AddMonoidHom.mk'` is opaque to rw — inline it (v10.239) — but for units, `IsUnit.mul_right_eq_zero`
+composes cleanly.
