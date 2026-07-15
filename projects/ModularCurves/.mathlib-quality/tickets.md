@@ -20896,3 +20896,20 @@ Commit ec3b3fc74 (pushed). :336's content now lives PROVEN in `EllipticCurve/Tor
   expected type re-runs instance-synthesis at the wrong spelling — hoist `inv q ≫ w` into an
   atomic fvar and pin `(U := E.asOver) (V := E.asOver)`; `letI`-wrapped ∃-goals break the
   instance cache inside `refine` — `show` the plain ∃ first. (STREAM-GH)
+
+### v10.255-GH — ★ [E-INT] `isIntegral_of_field` INSTANCE (fully clean) — the degree tranche is consumable at every geometric fibre (STREAM-GH)
+Commit cf7d5de10 (pushed). `EllipticCurve/IntegralOverField.lean`:
+**`instance isIntegral_of_field {k} [Field k] (E : EllipticCurve (Spec (CommRingCat.of k))) :
+IsIntegral E.E`** — AXIOM-CLEAN {propext, Classical.choice, Quot.sound}. Proof: the single-point
+base makes the `LocallyWeierstrass` chart global (U = ⊤ by `top_unique` + Subsingleton;
+`isIso_of_isOpenImmersion_of_opensRange_eq_top` on ι), the chart ring is a field
+(presheaf.mapIso + ΓSpecIso + `MulEquiv.isField`), and `isIntegral_projModel_u`
+(GroupLawAxioms — the universe-u form) transports along `E.E ≅ pullback ≅ projModel W` via
+`IsIntegral.of_isIso`. SMOKE-TESTED: `endDeg_comp_of_isIntegral` now applies over `Spec k` with
+only the isogeny instances — the whole v10.253 `_of_isIntegral` tranche (`endDeg_comp`,
+`endDeg_comp_mulBy`, `endo_surjective`) auto-synthesizes at the k̄ call sites, closing the
+E-integrality seam question from v10.253 (GH built it; KM/G0 need not).
+**GH-adjacent ledger after this:** trace pins ← KM `endDual_comp_self` (:179, still sorried);
+Niso ← G0 quotientπ substrate; dichotomy ← overlaps G0's LIVE flat-of-field seat (their
+modelMulByHom_flat_of_field/free_of_flat_of_fibre_flat wall-break — not grabbing mid-session);
+[GHA3]/WEIL = the remaining GH-owned charter arc (next-firing recon target). (STREAM-GH)
