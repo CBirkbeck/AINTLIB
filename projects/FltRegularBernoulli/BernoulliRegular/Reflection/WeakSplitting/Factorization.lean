@@ -71,7 +71,7 @@ theorem dedekindLocalFactorRat_eq_mul_partial (F : Finset (Ideal (𝓞 L)))
             (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 L)) ∩ F,
           (1 - (Ideal.absNorm Q : ℂ) ^ (-s)) := by
   classical
-  unfold dedekindLocalFactorRat dedekindLocalFactorRatPartial
+  simp only [dedekindLocalFactorRat, dedekindLocalFactorRatPartial]
   set T : Finset (Ideal (𝓞 L)) :=
     IsDedekindDomain.primesOverFinset (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 L)
   rw [show T \ F = T \ (T ∩ F) from (Finset.sdiff_inter_self_left T F).symm]
@@ -99,7 +99,7 @@ theorem dedekindLocalFactorRat_inv_mul_factor_eq_partial_inv
       (∏ Q ∈ T ∩ F, ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-s))) ≠ 0 := by
     refine Finset.prod_ne_zero_iff.mpr fun Q hQ ↦ ?_
     have h_full := dedekindLocalFactorRat_ne_zero L hq hs
-    unfold dedekindLocalFactorRat at h_full
+    simp only [dedekindLocalFactorRat] at h_full
     exact Finset.prod_ne_zero_iff.mp h_full Q (Finset.mem_inter.mp hQ).1
   rw [dedekindLocalFactorRat_eq_mul_partial L F q s, mul_inv, mul_assoc,
     inv_mul_cancel₀ h_inter_ne, mul_one]
@@ -132,7 +132,7 @@ theorem dedekindLocalFactorRatPartial_eq_pow_of_splits {q : ℕ} (hq : q.Prime)
     IsDedekindDomain.primesOverFinset (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 K)
   set T_L : Finset (Ideal (𝓞 L)) :=
     IsDedekindDomain.primesOverFinset (Ideal.span ({(q : ℤ)} : Set ℤ)) (𝓞 L)
-  unfold dedekindLocalFactorRatPartial
+  simp only [dedekindLocalFactorRatPartial]
   have h_index_eq :
       T_L \ (S.biUnion (fun P ↦ IsDedekindDomain.primesOverFinset P (𝓞 L))) =
         (T_K \ S).biUnion (fun P ↦ IsDedekindDomain.primesOverFinset P (𝓞 L)) := by

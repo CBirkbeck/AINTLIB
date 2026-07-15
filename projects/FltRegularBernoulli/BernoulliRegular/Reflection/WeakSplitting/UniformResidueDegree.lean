@@ -155,7 +155,7 @@ theorem idealNormMultiplicity_prime_pow_eq_zero_of_uniform_of_not_dvd
     {k : ℕ} (hk : ¬ d ∣ k) :
     idealNormMultiplicity L (q ^ k) = 0 := by
   classical
-  unfold idealNormMultiplicity
+  simp only [idealNormMultiplicity]
   rw [Nat.card_eq_zero]
   refine Or.inl ⟨?_⟩
   rintro ⟨⟨I, hI_ne⟩, hI_norm⟩
@@ -272,7 +272,7 @@ theorem idealNormMultiplicity_prime_pow_mul_d_eq_card_sym_of_uniform
     apply Subtype.ext
     apply Multiset.map_injective Subtype.val_injective
     simpa [hofSym_nfactors s] using htoSym_map_val (ofSym s)
-  unfold idealNormMultiplicity
+  simp only [idealNormMultiplicity]
   rw [Nat.card_congr (⟨toSym, ofSym, hleft, hright⟩ : β ≃ Sym α n),
     Nat.card_eq_fintype_card]
 

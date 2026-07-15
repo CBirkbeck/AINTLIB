@@ -94,7 +94,7 @@ lemma buildIdealFromMult_ne_bot {q : ℕ} (hq : q.Prime)
     (f : ↥(tQ L q) → ℕ) :
     buildIdealFromMult L f ≠ ⊥ := by
   classical
-  unfold buildIdealFromMult
+  simp only [buildIdealFromMult]
   refine Finset.prod_ne_zero_iff.mpr fun Q _ ↦ ?_
   exact pow_ne_zero _ (tQ_isPrime_and_ne_bot L hq Q).2
 
@@ -108,7 +108,7 @@ lemma buildIdealFromMult_absNorm_isPow {q : ℕ} (hq : q.Prime)
   have hq_ne : (Ideal.span ({(q : ℤ)} : Set ℤ)) ≠ ⊥ := by
     rw [Ne, Ideal.span_singleton_eq_bot]
     exact_mod_cast hq.ne_zero
-  unfold buildIdealFromMult
+  simp only [buildIdealFromMult]
   let d : ↥(tQ L q) → ℕ := fun Q ↦
     Ideal.inertiaDeg' (Ideal.span ({(q : ℤ)} : Set ℤ)) Q.1
   have h_each : ∀ Q : ↥(tQ L q), Ideal.absNorm Q.1 = q ^ d Q := fun Q ↦ by
@@ -146,7 +146,7 @@ lemma buildIdealFromMult_mult_eq_self {q : ℕ} (hq : q.Prime)
     (I : QPowerNormIdeal L q) :
     buildIdealFromMult L (QPowerNormIdeal.mult L I) = I.1 := by
   classical
-  unfold buildIdealFromMult QPowerNormIdeal.mult
+  simp only [buildIdealFromMult, QPowerNormIdeal.mult]
   obtain ⟨I, hI_ne, k, hI_norm⟩ := I
   have h_subset : (UniqueFactorizationMonoid.normalizedFactors I).toFinset ⊆ tQ L q :=
     normalizedFactors_subset_primesOverFinset_of_qpow L hq hI_ne hI_norm
@@ -164,7 +164,7 @@ lemma count_normalizedFactors_buildIdealFromMult {q : ℕ} (hq : q.Prime)
     Multiset.count Q'.1
       (UniqueFactorizationMonoid.normalizedFactors (buildIdealFromMult L f)) = f Q' := by
   classical
-  unfold buildIdealFromMult
+  simp only [buildIdealFromMult]
   have h_pow_factors : ∀ Q : ↥(tQ L q), ∀ n : ℕ,
       UniqueFactorizationMonoid.normalizedFactors (Q.1 ^ n) =
         Multiset.replicate n Q.1 := fun Q n ↦ by
@@ -211,7 +211,7 @@ Norm formula on `buildIdealFromMult`: `absNorm (∏ Q^(f Q)) = ∏ (absNorm Q)^(
 lemma absNorm_buildIdealFromMult {q : ℕ} (f : ↥(tQ L q) → ℕ) :
     Ideal.absNorm (buildIdealFromMult L f) =
       ∏ Q ∈ (tQ L q).attach, (Ideal.absNorm Q.1) ^ f Q := by
-  unfold buildIdealFromMult
+  simp only [buildIdealFromMult]
   rw [map_prod]
   exact Finset.prod_congr rfl fun Q _ ↦ map_pow _ _ _
 
@@ -286,7 +286,7 @@ private def sigmaToQPowerNormIdeal {q : ℕ}
 private lemma sigmaToQPowerNormIdeal_injective {q : ℕ} (hq : q.Prime) :
     Function.Injective (sigmaToQPowerNormIdeal L (q := q)) := by
   rintro ⟨k, ⟨⟨I, hI_ne⟩, hI⟩⟩ ⟨k', ⟨⟨I', hI'_ne⟩, hI'⟩⟩ h
-  unfold sigmaToQPowerNormIdeal at h
+  simp only [sigmaToQPowerNormIdeal] at h
   have hI_eq : I = I' := congrArg Subtype.val h
   subst hI_eq
   have hpow_eq : q^k = q^k' := by rw [← hI, ← hI']
