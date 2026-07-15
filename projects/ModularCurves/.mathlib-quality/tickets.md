@@ -21265,3 +21265,21 @@ hL/hArb assembly closes Bootstrap:74 (ℤ[1/3]) + the Legendre half (ℤ[1/6]) �
   board v10.252-G0. [Owner may redirect to the hL/hArb E[N]-bridges or support-OMEGA.]
 - **GH → [GHA3] β2-heart + β3** (the double-base-change geometric-pull transport via transportE_baseChange +
   the constant-form clopen enumeration). HOLD the general-S degree pins for KM's endDual_comp_self.
+
+## v10.263 (2026-07-16, STREAM-OMEGA) — [T-E15-NORM] BOTH assemblies TURNKEY: brick 6 → one-liner → representable
+
+Both KM-axiom-1 instantiations are now wired to their machines; the sole remaining sorries are the
+brick-6/BB-DEG-gated inputs:
+- **E3 (ℤ[1/3]): `naiveLevelThree_representable_by_affine` (Bootstrap:74)** — now
+  `refine naiveLevelThree_representable_by_affine_of_conditions R hR ?_ ?_` (imports UniversalLevelThree);
+  the 2 goals are `hL` (universal (P,Q) is a level-3 structure = E[3] keystone) + `hArb` (every naive
+  struct is an ℰ₃-datum = isE3Datum_of_flexCharts + torsion→coord bridges). Build green (3994).
+- **Legendre (ℤ[1/2]): `legendreDelta_representable_by_affine` (Bootstrap:170)** — already turnkey
+  (`refine legendreDelta_representable_by_affine_of_level R hR ⟨killing✓, sorry⟩`; killing done via
+  `two_zsmul_universalLegendre P/Q`, only E[2]-generation sorry = [T-E14-LVL-b]).
+
+The engine (`representable_iff`, EllCategory:274) consumes each δ's `AffineOverEll` independently — no
+combined ℤ[1/6] lemma needed. NB asymmetry: the Legendre killing is done (2-torsion negation-fix
+`two_zsmul`); the E3 killing has no such shortcut (3-torsion) so it's folded into `hL`, brick-6-gated.
+**The instant KM brick 6 → G0 BB-DEG lands, both discharges fill by one-liners → both engine
+instantiations → the representability headline across all three levels.** Next: support GH β2-heart.
