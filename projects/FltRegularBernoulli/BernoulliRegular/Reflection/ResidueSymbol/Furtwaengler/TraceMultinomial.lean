@@ -60,7 +60,7 @@ theorem traceSum_pow_eq_sum_multinomial (ℓ f : ℕ) (x : R) (n : ℕ) :
       ∑ k ∈ Finset.piAntidiag (Finset.range f) n,
         Nat.multinomial (Finset.range f) k *
           ∏ i ∈ Finset.range f, (x ^ (ℓ ^ i)) ^ k i := by
-  unfold traceSum
+  simp only [traceSum]
   exact Finset.sum_pow_eq_sum_piAntidiag (Finset.range f) (fun i => x ^ (ℓ ^ i)) n
 
 /-- **Multinomial expansion of `(traceSum x)^n`, simplified power form.**
@@ -89,7 +89,7 @@ theorem algebraMap_trace_pow_eq_traceSum_pow
     algebraMap K L (Algebra.trace K L x) ^ n = (traceSum ℓ f x) ^ n := by
   congr 1
   rw [FiniteField.algebraMap_trace_eq_sum_pow]
-  unfold traceSum
+  simp only [traceSum]
   rw [h_finrank]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [h_card_K]

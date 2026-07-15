@@ -246,7 +246,7 @@ theorem pthSymbolAtPrime_canonical_eq_zero_of_residue_isPow
   have : q.IsPrime := hmax.isPrime
   let : Field (𝓞 K ⧸ q) := Ideal.Quotient.field q
   rw [pthSymbolAtPrime_canonical_eq_primeExponent hbot hmax hα hdiv hp_in]
-  unfold Reflection.ResidueSymbol.PowerResidue.primeExponent
+  simp only [Reflection.ResidueSymbol.PowerResidue.primeExponent]
   exact Reflection.ResidueSymbol.PowerResidue.finiteFieldExponent_eq_zero_of_isPow
     _ (canonicalResidueZetaP_isPrimitiveRoot hbot hp_in) hdiv h_pow
 

@@ -37,7 +37,7 @@ theorem cyclotomicGaloisConjugate_sup
     cyclotomicGaloisConjugate (p := p) (K := K) a (I ⊔ J) =
       cyclotomicGaloisConjugate (p := p) (K := K) a I ⊔
         cyclotomicGaloisConjugate (p := p) (K := K) a J := by
-  unfold cyclotomicGaloisConjugate
+  simp only [cyclotomicGaloisConjugate]
   exact Ideal.map_sup _ I J
 
 /-- Coprimality is transported by Galois conjugation.  The input is stated
@@ -283,7 +283,7 @@ theorem pthSymbolAtIdeal_canonical_galois_numerator_of_pow_mul_pow_p
         (cyclotomicRingOfIntegersEquiv (p := p) K a η) I =
       ((a : ZMod p).val ^ i : ZMod p) *
         pthSymbolAtIdeal_canonical (p := p) (K := K) η I := by
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   rw [show
       ((normalizedFactors I).map
         (fun P ↦ pthSymbolAtPrime_canonical (p := p) (K := K)
@@ -387,7 +387,7 @@ theorem pthSymbolAtIdeal_canonical_galois_numerator_of_clear_denominators
         (cyclotomicRingOfIntegersEquiv (p := p) K a η) I =
       (n : ZMod p) *
         pthSymbolAtIdeal_canonical (p := p) (K := K) η I := by
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   rw [show
       ((normalizedFactors I).map
         (fun P ↦ pthSymbolAtPrime_canonical (p := p) (K := K)

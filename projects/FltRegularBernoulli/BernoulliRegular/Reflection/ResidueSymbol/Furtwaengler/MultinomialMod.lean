@@ -33,7 +33,7 @@ def standardDigit (ℓ a i : ℕ) : ℕ :=
 base. -/
 theorem standardDigit_lt_base {ℓ a i : ℕ} (hℓ : 2 ≤ ℓ) :
     standardDigit ℓ a i < ℓ := by
-  unfold standardDigit
+  simp only [standardDigit]
   rw [Nat.getD_digits a i hℓ]
   exact Nat.mod_lt _ (lt_of_lt_of_le (by decide : 0 < 2) hℓ)
 

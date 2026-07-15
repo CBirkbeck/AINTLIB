@@ -129,7 +129,7 @@ theorem pthSymbolAtIdeal_canonical_galoisAction
       (a : ZMod p) *
         pthSymbolAtIdeal_canonical (p := p) (K := K) α I := by
   classical
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   -- Use the multiset bijection.
   rw [← normalizedFactors_cyclotomicGaloisConjugate a hI, Multiset.map_map]
   -- Show pointwise equality of the mapped functions.
@@ -164,7 +164,7 @@ theorem cyclotomicGaloisConjugate_span_singleton
     (a : CyclotomicUnitDelta p) (β : 𝓞 K) :
     cyclotomicGaloisConjugate (p := p) (K := K) a (Ideal.span ({β} : Set (𝓞 K))) =
       Ideal.span ({cyclotomicRingOfIntegersEquiv (p := p) K a β} : Set (𝓞 K)) := by
-  unfold cyclotomicGaloisConjugate
+  simp only [cyclotomicGaloisConjugate]
   rw [Ideal.map_span]
   congr 1
   ext x
@@ -191,7 +191,7 @@ theorem pthSymbolAtPrincipal_canonical_galoisAction
         (cyclotomicRingOfIntegersEquiv (p := p) K a β) =
       (a : ZMod p) *
         pthSymbolAtPrincipal_canonical (p := p) (K := K) α β := by
-  unfold pthSymbolAtPrincipal_canonical
+  simp only [pthSymbolAtPrincipal_canonical]
   rw [← cyclotomicGaloisConjugate_span_singleton]
   apply pthSymbolAtIdeal_canonical_galoisAction a α
   · -- I ≠ ⊥.
@@ -314,7 +314,7 @@ theorem pthSymbolAtIdeal_canonical_galoisAction_unconditional
       (a : ZMod p) *
         pthSymbolAtIdeal_canonical (p := p) (K := K) α I := by
   classical
-  unfold pthSymbolAtIdeal_canonical
+  simp only [pthSymbolAtIdeal_canonical]
   rw [← normalizedFactors_cyclotomicGaloisConjugate a hI, Multiset.map_map]
   have hmap : (normalizedFactors I).map
         ((fun P ↦ pthSymbolAtPrime_canonical (p := p) (K := K)

@@ -323,7 +323,7 @@ theorem cyclotomicRingOfIntegersEquiv_inv_notMem_of_absNorm_span_coprime
   have hσP_ne_top : σP ≠ ⊤ := (inferInstance : σP.IsMaximal).ne_top
   have hα_mem_σP : α ∈ σP := by
     change α ∈ cyclotomicGaloisConjugate (p := p) (K := K) a P
-    unfold cyclotomicGaloisConjugate
+    simp only [cyclotomicGaloisConjugate]
     rw [Ideal.mem_map_of_equiv]
     refine ⟨cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α, hmem, ?_⟩
     rw [← cyclotomicRingOfIntegersEquiv_mul_apply (p := p) (K := K) a a⁻¹ α,
@@ -347,7 +347,7 @@ theorem cyclotomicRingOfIntegersEquiv_inv_notMem_of_absNorm_span_coprime
     have hdvd :
         cyclotomicGaloisConjugate (p := p) (K := K) a B ∣
           cyclotomicConjugateProductIdeal (p := p) (K := K) B := by
-      unfold cyclotomicConjugateProductIdeal
+      simp only [cyclotomicConjugateProductIdeal]
       exact Finset.dvd_prod_of_mem
         (fun b : CyclotomicUnitDelta p ↦
           cyclotomicGaloisConjugate (p := p) (K := K) b B)

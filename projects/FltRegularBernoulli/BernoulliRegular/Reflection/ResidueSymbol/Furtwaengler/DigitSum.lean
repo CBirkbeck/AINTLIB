@@ -41,14 +41,14 @@ def digitSum (ℓ a : ℕ) : ℕ := (Nat.digits ℓ a).sum
 
 /-- `digitSum ℓ a ≤ a`: the digit sum never exceeds the number itself. -/
 theorem digitSum_le_self (ℓ a : ℕ) : digitSum ℓ a ≤ a := by
-  unfold digitSum
+  simp only [digitSum]
   exact Nat.digit_sum_le ℓ a
 
 /-- For `a < ℓ` and `2 ≤ ℓ`, the only digit is `a` itself, so
 `digitSum ℓ a = a`. -/
 theorem digitSum_eq_self_of_lt {ℓ a : ℕ} (hℓ : 2 ≤ ℓ) (ha : a < ℓ) :
     digitSum ℓ a = a := by
-  unfold digitSum
+  simp only [digitSum]
   rcases a with _ | a
   · simp
   · rw [Nat.digits_def' hℓ (Nat.succ_pos a)]
