@@ -21031,3 +21031,29 @@ E_T[N]×E_T[N]) → β2-heart (factor-iff via levelSpaceΓ_spec both sides + the
 fullLevel_divisor_iff_naive_gen box + double-base-change point transport — the (B1) curve
 composition iso is the leaf to scope: InvariantDifferential's transportE_baseChange machinery)
 → β3 (constant-form clopen). (STREAM-GH)
+
+## v10.257 (2026-07-15, STREAM-OMEGA) — ★★ [T-E15-NORM] B2 FIX LANDED (owner-approved) — E3ModuliRing corrected, 3 ★★★ landmarks survived axiom-clean; universalE3_hcubic unblocked; scheme-lift now BB-DEG-gated only
+
+**B2 fix (v10.256 owner-approved) — DONE, build 3992 green, axiom-clean:** `e3Delta := mk((a₁³−27a₃)·a₃·γ)`
+(added the `γ = MvPolynomial.X 1` factor) so `E3ModuliRing = Localization.Away` inverts `γ = x(Q)`,
+**excluding the degenerate `γ=0` (Q=−P∈⟨P⟩) locus** that over-represented the level-3 functor.
+`IsE3Datum` now carries `∧ IsUnit γ` (the `Q∉⟨P⟩` basis condition). Ripple repaired + re-verified
+axiom-clean: `e3Delta_map`, `IsElliptic`, **new `isUnit_e3Gamma`**, `e3Delta_glued_isUnit` (+γ, threads
+the datum's `IsUnit γ`), `e3ClassifyingRingHom` `Away.lift` (+γ; **`MvPolynomial.X 1` qualified** — the
+`EllObj X` param shadows `X`), the 3 `e3*Glued` `choose`s + cover `obtain`s, `isE3Chart`/
+`isE3Datum_of_flexCharts` (now SUPPLY `IsUnit γ` from `γ=p·u⁻²`, `p`&`u` units). **The 3 ratified ★★★
+landmarks (`universalE3`/`e3_vc_marked`/`e3ClassifyingEllHom`) SURVIVED axiom-clean** — the owner's
+"expected non-breaking" prediction confirmed.
+
+**Bonus (B2-unblocked): `universalE3_hcubic` ✓ axiom-clean** — `x(Q)=γ` roots the 3-division cofactor
+`3x³+a₁²x²+3a₁a₃x+3a₃²`. Was FALSE pre-B2 (on the excluded γ=0 component); now via the flex relation
+`γ(3β²+3βγ+γ²)=0` + `isUnit_e3Gamma` ⟹ `3β²+3βγ+γ²=0` ⟹ `hcubic=(3γ+1)²·0=0`. This is the universal
+instance of `isE3Datum_of_flexCharts`'s `hcubic` hypothesis.
+
+**REMAINING = BB-DEG-gated only.** `universalE3_isE3Datum` (⟹ closes `naiveLevelThree_representable_by_affine`,
+Bootstrap:74 sorry) needs the universal `L : FullLevelPt 3` = the section-level killing `3•P=0`/`3•Q=0`
+(the torsion→coord bridges) + generation — verified still sorry (`Torsion` `mulByHom_finrank`:155,
+`MulByHomDegree`:660 = KM brick 6, `EndomorphismDegree` 10-sorry). Consume as KM brick 6 / G0 BB-DEG land.
+Then the rt2/RepresentableBy transposition (Legendre CLS ladder — RT1 `pullSection_e3ClassifyingEllHom_P/Q`
+already done) closes the discharge. The keystone-free NORM core (6 lemmas) + the B2 fix + `universalE3_hcubic`
+are all axiom-clean and banked.
