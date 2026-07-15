@@ -852,7 +852,8 @@ theorem log_one_add_le_quintic {u : ℝ} (hu : 0 ≤ u) :
       exact ((hderiv x hx).continuousAt).continuousWithinAt
     · rw [interior_Ici]
       intro x hx
-      exact ((hderiv x (Set.mem_Ici.mpr (Set.mem_Ioi.mp hx).le)).differentiableAt).differentiableWithinAt
+      exact ((hderiv x
+        (Set.mem_Ici.mpr (Set.mem_Ioi.mp hx).le)).differentiableAt).differentiableWithinAt
     · rw [interior_Ici]
       intro x hx
       rw [(hderiv x (Set.mem_Ici.mpr (Set.mem_Ioi.mp hx).le)).deriv]
