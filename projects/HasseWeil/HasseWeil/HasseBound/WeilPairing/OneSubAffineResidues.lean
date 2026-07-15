@@ -74,8 +74,6 @@ namespace HasseWeil.WeilPairing
 
 open HasseWeil IsogenyBaseChangeConcrete
 
-set_option linter.unusedSectionVars false
-
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
 variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
 variable (p r : ℕ) [Fact p.Prime] [CharP K p] [Fact (Fintype.card K = p ^ r)]
@@ -186,6 +184,7 @@ theorem negFrobBaseChange_pullback_y_gen :
     hffx, hffy, hc₁, hc₃]
   rfl
 
+omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic] in
 /-- **`(W_KE W).map functionFieldMap = W_KE (W.baseChange K̄)`** — the curve over `K(E)` base-changes,
 along the function-field inclusion `functionFieldMap`, to the curve over `K̄(E)`.  Both are `W`
 base-changed to the respective function field; the ring homs `functionFieldMap ∘ algebraMap K K(E)`
@@ -284,6 +283,7 @@ theorem addPullback_y_pair_id_negFrobBaseChange :
 
 variable [Fintype W.toAffine.Point]
 
+omit [Fintype W.toAffine.Point] in
 /-- **The `x`-generator pullback decomposition for `(1 − π)_{K̄}`**:
 `(1 − π)^* x_gen = addPullback_x_pair (id) α₂` over `K̄`, the `hpb_x` input of
 `isog_coords_at_affine_of_decomp`.  Chains the WallA realisation
@@ -301,6 +301,7 @@ theorem oneSub_pullback_x_gen_eq_addPullback_x_pair (hq : 2 ≤ Fintype.card K) 
     oneSub_pullback_x_gen_eq W hq, ← addPullback_x_pair_id (HasseWeil.negFrobeniusIsog W),
     ← addPullback_x_pair_id_negFrobBaseChange W p r]
 
+omit [Fintype W.toAffine.Point] in
 /-- **The `y`-generator pullback decomposition for `(1 − π)_{K̄}`**:
 `(1 − π)^* y_gen = addPullback_y_pair (id) α₂` over `K̄`.  The `y`-analogue of
 `oneSub_pullback_x_gen_eq_addPullback_x_pair`. -/
@@ -315,6 +316,7 @@ theorem oneSub_pullback_y_gen_eq_addPullback_y_pair (hq : 2 ≤ Fintype.card K) 
     oneSub_pullback_y_gen_eq W hq, ← addPullback_y_pair_id (HasseWeil.negFrobeniusIsog W),
     ← addPullback_y_pair_id_negFrobBaseChange W p r]
 
+omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic] [Fintype W.toAffine.Point] in
 /-- `resid`-form: `x_gen^{K̄} ≡ P.x` modulo `m_P` (the generic `x`-coordinate residues to `P.x`).
 Public re-derivation of `SamePlace.resid_x_gen`. -/
 theorem residPV_x_gen (P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K)).SmoothPoint) :
@@ -325,6 +327,7 @@ theorem residPV_x_gen (P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
   exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
     (C := (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K))) _ P).mpr (HasseWeil.XClass_mem_maximalIdealAt _ P P.x rfl)
 
+omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic] [Fintype W.toAffine.Point] in
 /-- A residue `u ≡ a` makes `u` regular at `P` (`pV P u ≤ 1`). -/
 theorem residPV_le_one {P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K)).SmoothPoint}
     {u : (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField} {a : AlgebraicClosure K}
@@ -338,6 +341,7 @@ theorem residPV_le_one {P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ 
   exact pointValuation_add_le_one (W.baseChange (AlgebraicClosure K)) P (le_of_lt h)
     ((⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K)).pointValuation_algebraMap_F_le_one P a)
 
+omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic] [Fintype W.toAffine.Point] in
 /-- Residues multiply: `u ≡ a`, `v ≡ b` ⟹ `u·v ≡ a·b`. -/
 theorem residPV_mul {P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K)).SmoothPoint}
     {u v : (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField} {a b : AlgebraicClosure K}
@@ -360,6 +364,7 @@ theorem residPV_mul {P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : S
   · exact pointValuation_mul_lt_one_of_le_and_lt (W.baseChange (AlgebraicClosure K)) P
       ((⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K)).pointValuation_algebraMap_F_le_one P b) hu
 
+omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic] [Fintype W.toAffine.Point] in
 /-- Residues raise to a power: `u ≡ a` ⟹ `u^n ≡ a^n`. -/
 theorem residPV_pow {P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K)).SmoothPoint}
     {u : (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField} {a : AlgebraicClosure K}
@@ -373,6 +378,7 @@ theorem residPV_pow {P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : S
     exact zero_lt_one
   | succ k ih => rw [pow_succ, pow_succ]; exact residPV_mul W ih hu
 
+omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic] [Fintype W.toAffine.Point] in
 /-- A scalar `algebraMap c` residues to `c`. -/
 theorem residPV_const (P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
       SmoothPlaneCurve (AlgebraicClosure K)).SmoothPoint) (c : AlgebraicClosure K) :
@@ -381,6 +387,7 @@ theorem residPV_const (P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
         algebraMap (AlgebraicClosure K) (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField c) < 1 := by
   rw [sub_self, map_zero]; exact zero_lt_one
 
+omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic] [Fintype W.toAffine.Point] in
 /-- Residues subtract: `u ≡ a`, `v ≡ b` ⟹ `u − v ≡ a − b`. -/
 theorem residPV_sub {P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
       SmoothPlaneCurve (AlgebraicClosure K)).SmoothPoint}
@@ -401,6 +408,7 @@ theorem residPV_sub {P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
     (((⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K)).pointValuation P).map_sub _ _)
     (max_lt hu hv)
 
+omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic] [Fintype W.toAffine.Point] in
 /-- Residues add: `u ≡ a`, `v ≡ b` ⟹ `u + v ≡ a + b`. -/
 theorem residPV_add {P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
       SmoothPlaneCurve (AlgebraicClosure K)).SmoothPoint}
@@ -421,6 +429,7 @@ theorem residPV_add {P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
     (((⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K)).pointValuation P).map_add _ _)
     (max_lt hu hv)
 
+omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic] [Fintype W.toAffine.Point] in
 /-- Residues negate: `u ≡ a` ⟹ `−u ≡ −a`. -/
 theorem residPV_neg {P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
       SmoothPlaneCurve (AlgebraicClosure K)).SmoothPoint}
@@ -440,6 +449,7 @@ theorem residPV_neg {P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
   have := residPV_sub W h0 hu
   rwa [zero_sub, zero_sub] at this
 
+omit [Fintype W.toAffine.Point] in
 /-- **`π̄` on a finite point** `some x y`: `frobeniusHomBaseChange (some x y) =
 some (frobeniusAlgHom x) (frobeniusAlgHom y) _` (`= some (x^q) (y^q)` since `frobeniusAlgHom = (·^q)`),
 with the nonsingularity proof carried by `geomFrobeniusPointFun_some`.  Via the linchpin
@@ -456,6 +466,7 @@ theorem frobeniusHomBaseChange_apply_some {x y : AlgebraicClosure K}
   rw [frobeniusHomBaseChange_eq_geomFrobeniusPoint, geomFrobeniusPoint_apply,
     geomFrobeniusPointFun_some]
 
+omit [Fintype W.toAffine.Point] in
 /-- **`α₂` on a finite point** `some x y`: `α₂(some x y) = some (x^q) (negY (x^q) (y^q)) _`, the
 negation of the geometric `q`-power Frobenius image (`−π̄`).  From
 `negFrobBaseChange_toAddMonoidHom` (point map `= −frobeniusHomBaseChange`),
@@ -475,6 +486,7 @@ theorem negFrobBaseChange_apply_some {x y : AlgebraicClosure K}
   rw [negFrobBaseChange_toAddMonoidHom, AddMonoidHom.neg_apply,
     frobeniusHomBaseChange_apply_some, WeierstrassCurve.Affine.Point.neg_some]
 
+omit [Fintype W.toAffine.Point] in
 /-- **The two generator residues for `(1 − π)_{K̄}` at a non-doubling affine image** (CoordHom-free).
 For a smooth point `P` of `E_{K̄}` whose image `(1 − π)P = some x y` is finite and *non-doubling*
 (`P.x ≠ P.x^q`), the two generator residues hold:
@@ -559,6 +571,7 @@ theorem oneSub_two_residues_nondoubling (hq : 2 ≤ Fintype.card K)
     (oneSub_pullback_y_gen_eq_addPullback_y_pair W p r hq)
     P h_ns hα₁ hα₂ hx₁ hx₂ hy₁ hy₂ hx_ne hsum_pt hQ
 
+omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic] [Fintype W.toAffine.Point] in
 /-- A residue `u ≡ a` with `a ≠ 0` makes `u` a unit at `P` (`pV P u = 1`). -/
 theorem residPV_unit {P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
       SmoothPlaneCurve (AlgebraicClosure K)).SmoothPoint}
@@ -576,6 +589,7 @@ theorem residPV_unit {P : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
     ((⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K)).pointValuation P).map_add_eq_of_lt_right
       (by rw [hconst]; exact h), hconst]
 
+omit [Fintype W.toAffine.Point] in
 /-- **Frobenius acts as `−1` on a doubling point with affine `(1 − π)`-image.**  For `P.x = P.x^q` and
 `(1 − π)P = some x y` affine, `π̄(P) = some (P.x^q) (P.y^q)` satisfies `P.y^q = negY(P.x, P.y)` (so
 `π̄(P) = −P`), and `P` is non-2-torsion (`P.y ≠ P.y^q`). -/
@@ -632,6 +646,7 @@ set_option maxHeartbeats 5000000 in
 -- `FunctionField` type through `set Wb/C/f/g/φ` + `Dω`/`addSlopePair` unfoldings; the resulting
 -- `whnf` defeq cost exceeds the default budget. Decomposing the `Dω`/residue sub-blocks into
 -- standalone lemmas (`/decompose-proof`) is the proper fix; until then the budget is raised.
+omit [Fintype W.toAffine.Point] in
 /-- **The doubling slope residue `addSlopePair (id, −π) ≡ ν(P)/u(P)`** (the tangent / `L'Hôpital`
 step).  In the doubling case `P.x = P.x^q`, the `K(E)`-element `addSlopePair (id) (−π)` is the *secant*
 `(y_gen − (−π)^*y_gen)/(x_gen − x_gen^q)` (the pullbacks are distinct in `K(E)`), but it residues at
@@ -852,6 +867,7 @@ theorem oneSub_addSlopePair_resid_doubling (hq : 2 ≤ Fintype.card K)
         _ ≤ C.ord_P P φ + (-((1 : ℤ) : WithTop ℤ)) := by gcongr
     exact (C.one_le_ord_P_iff_pointValuation_lt_one (P := P) hdiff_ne).mp hord_diff
 
+omit [Fintype W.toAffine.Point] in
 /-- **The two generator residues for `(1 − π)_{K̄}` at a doubling affine image** (CoordHom-free).
 For a smooth point `P` of `E_{K̄}` whose image `(1 − π)P = some x y` is finite and *doubling*
 (`P.x = P.x^q`), the two generator residues hold:
@@ -960,6 +976,7 @@ theorem oneSub_two_residues_doubling (hq : 2 ≤ Fintype.card K)
     (oneSub_pullback_y_gen_eq_addPullback_y_pair W p r hq)
     P h_ns hα₁ hα₂ hx₁ hx₂ hy₁ hL hxy_pts hsum_pt hQ
 
+omit [Fintype W.toAffine.Point] in
 /-- **The non-2-torsion-image unit `ord_P (α^*u) = 0` for `(1 − π)_{K̄}`** (CoordHom-free).  For a
 smooth point `P` whose image `(1 − π)P = some x y` is finite *non-doubling* (`P.x ≠ P.x^q`) and
 *non-2-torsion* (`2y + a₁x + a₃ ≠ 0`), the pulled-back invariant-differential denominator
@@ -1015,6 +1032,7 @@ theorem oneSub_alpha_star_u_ord_eq_zero (hq : 2 ≤ Fintype.card K)
     (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K))
     hau_ne).mpr hunit
 
+omit [Fintype W.toAffine.Point] in
 /-- **The non-2-torsion-image unit `ord_P (α^*u) = 0`, from the two residues** (CoordHom-free).  Same
 as `oneSub_alpha_star_u_ord_eq_zero` but taking the two generator residues `(1−π)^*x_gen ≡ x`,
 `(1−π)^*y_gen ≡ y` directly (so it serves *both* the doubling and non-doubling cases). -/
@@ -1075,6 +1093,7 @@ theorem oneSub_alpha_star_u_ord_eq_zero_of_residues (hq : 2 ≤ Fintype.card K)
     (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K))
     hau_ne).mpr hunit
 
+omit [Fintype W.toAffine.Point] in
 /-- **The 2-torsion-image `y`-numerator unit `ord_P ((1−π)^*ν) = 0`, from the two residues**
 (CoordHom-free).  At a *2-torsion* image `Q = (1−π)P` (`2y + a₁x + a₃ = 0`), the pulled-back
 `y`-numerator `(1−π)^*ν = 3((1−π)^*x_gen)²+2a₂((1−π)^*x_gen)+a₄−a₁((1−π)^*y_gen)` is a *unit* at `P`
@@ -1157,6 +1176,7 @@ theorem oneSub_alpha_star_polyX_ord_eq_zero_of_residues (hq : 2 ≤ Fintype.card
     exact zero_ne_one hunit
   exact (Curves.SmoothPlaneCurve.ord_P_eq_zero_iff_pointValuation_eq_one (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K)) hν_ne).mpr hunit
 
+omit [Fintype W.toAffine.Point] in
 /-- **The affine comap-valuation identity for `(1 − π)_{K̄}` at a non-doubling, non-2-torsion image**
 (CoordHom-free, `e = 1` derived, no carried `OneSubAffineResidues`).
 
@@ -1197,6 +1217,7 @@ theorem comap_pointValuation_oneSub_eq_affine_nondoubling
     (omegaPullbackCoeff_oneSubFrobeniusIsogBaseChange_ne_zero W p r hq)
     P h_ns hx hy (oneSub_alpha_star_u_ord_eq_zero W p r hq P h_ns hx_ne h2tor hQ)
 
+omit [Fintype W.toAffine.Point] in
 /-- **The affine comap-valuation identity for `(1 − π)_{K̄}`, UNCONDITIONAL** (CoordHom-free,
 `e = 1` derived, no carried `OneSubAffineResidues`, no non-doubling/non-2-torsion hypotheses).
 
