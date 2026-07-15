@@ -20399,3 +20399,42 @@ infrastructure for the eventual [BBF-A3] assembly.
 - BB-DEG `mulByHom_finrank` (:156) — **KM's carve-out, NOT G0's** (degree = N²).
 - BB-DIFF `mulByHom_formallyUnramified` (:232) — invariant-differential / scheme-level
   relative Ω¹ API (separate large sub-development; also gates `mulBy_etale` alongside BB-FLAT).
+
+## Board v10.232-G0 (2026-07-15, STREAM-G0) — BB-FLAT fibre-leg SUBSTRATE COMPLETE; assembly turnkey
+
+**Built + pushed this session (all axiom-clean):**
+- `ForMathlib/StandardSmoothMaximalDVR.lean`: **[FF-2]** `isDiscreteValuationRing_localizationAtPrime_of_isStandardSmooth`
+  (closed-pt stalks of std-smooth dim-1 curve/field = DVR); **[FF-alg]**
+  `flat_of_isDomain_of_injective_of_isStandardSmooth` (finite torsion-free algebra over
+  such is FLAT, via the ValuationRing-localization criterion — NO scheme-stalk bridge).
+- `EllipticCurve/MulByHomFlatFibre.lean`: `injective_of_denseRange_comap` (dominance⟹inj on
+  reduced sections); **`modelMulByHom_surjective`** (model `[N]` surjective over ANY field —
+  finite fibres + infinite integral curve ⟹ range = univ; gives `IsDominant`).
+
+**Remaining: `modelMulByHom_flat_of_field` assembly (TURNKEY — scout-verified lemma list):**
+Route `AlgebraicGeometry.IsZariskiLocalAtTarget.of_iSup_eq_top` (Morphisms/Basic.lean:145) —
+NOT `HasRingHomProperty.iff_appLE` (RingHomProperties:314), which over-quantifies to ALL
+affine opens (only the std-smooth basic-open pieces have std-smooth section rings).
+1. **Cover:** from `locally_isStandardSmooth_algebraMap_gradeZero_away` (WeierstrassModel:1671,
+   `RingHom.Locally (IsStandardSmoothOfRelativeDimension 1)`) unfold via `RingHom.Locally` def
+   (RingTheory/RingHom/Locally:62 = ∃ spanning set {t}, each `k → C_i[1/t]` std-smooth) +
+   `modelChartCover` (WeierstrassModel:2217) ⟹ a family `U : ι → (projModel W).Opens` of
+   std-smooth affine basic opens with `iSup U = ⊤`.
+2. **Per piece `Flat (f ∣_ U_i)`:** `U_i` affine (basic open of affine chart); `f ⁻¹ᵁ U_i`
+   affine (`IsFinite` extends `IsAffineHom` — Finite:39 — + `IsAffineOpen.preimage` Affine:50).
+   `Flat (f ∣_ U_i) ↔ RingHom.Flat ((f∣U_i).appTop).hom` via `HasRingHomProperty.iff_of_isAffine`
+   (RingHomProperties:352) or `Flat.SpecMap_iff` (Flat:66). Ring map `C_i → D_i`:
+   - `C_i` std-smooth dim-1 (`isStandardSmoothOfRelativeDimension_algebraMap`
+     RingHom/StandardSmooth:64 bridges RingHom↔Algebra) + IsDomain (AdditionChartDomain, or
+     `IsIntegral.component_integral` Properties:242 since projModel integral);
+   - `D_i` IsDomain (`IsIntegral.component_integral`, `f⁻¹U_i` nonempty as `f` surjective);
+   - `C_i → D_i` INJECTIVE: **comap is SURJECTIVE** (cleaner than dense) — `f` surjective ⟹
+     `f(f⁻¹U_i) = U_i`, and via `IsAffineOpen.SpecMap_appLE_fromSpec` (AffineScheme:477) +
+     `Spec.map_base` (Scheme:555) + fromSpec embedding-injectivity ⟹ `range(comap)=univ`;
+     then `injective_of_denseRange_comap` (this file, `C_i` reduced via
+     `IsReduced.component_reduced` Properties:72) — OR directly `denseRange_of_surjective`.
+   - ⟹ **[FF-alg]** `Flat C_i D_i`.
+3. **Assemble:** `IsZariskiLocalAtTarget.of_iSup_eq_top U hU (fun i => …)`.
+Est. ~150 lines of scheme plumbing (dominance-transfer is the fiddly leaf). Closes NO Torsion
+sorry — feeds the fibrewise criterion [BBF-A3] whose flat-locus openness [BBF-A2] = the
+research-grade B–E chain (decomposition-bb-flat.md). BB-DEG=KM; BB-DIFF=scheme-Ω¹ (separate).
