@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.MulByIntPullback
 import HasseWeil.FormalGroup.FormalGroup
 import Mathlib.RingTheory.LaurentSeries
@@ -292,6 +297,7 @@ theorem formalW_ps_order : (formalW W).order = 3 := by
       PowerSeries.order_zero_of_unit (formalU_isUnit W)]
   rfl
 
+omit [DecidableEq F] in
 /-- Helper: `HahnSeries.C a * HahnSeries.single n 1 = HahnSeries.single n a` in
     `LaurentSeries F`. -/
 private theorem hC_single' (a : F) (n : ℤ) :
@@ -300,12 +306,14 @@ private theorem hC_single' (a : F) (n : ℤ) :
   rw [show (HahnSeries.C a : LaurentSeries F) = HahnSeries.single (0 : ℤ) a from rfl,
       HahnSeries.single_mul_single, zero_add, mul_one]
 
+omit [DecidableEq F] in
 /-- Helper: `HahnSeries.single 1 1 ^ k = HahnSeries.single (k : ℤ) 1` in
     `LaurentSeries F`. -/
 private theorem single_one_pow' (k : ℕ) :
     (HahnSeries.single (1 : ℤ) (1 : F)) ^ k = HahnSeries.single (k : ℤ) (1 : F) := by
   rw [HahnSeries.single_pow, one_pow, nsmul_eq_mul, mul_one]
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- The lifted version of `formalW_recurrence` in `LaurentSeries F`, in a form
     where `ring` can handle the algebraic structure. Uses `z := single 1 1` as
     the formal variable and `HahnSeries.C aᵢ` as the constants. -/
@@ -491,7 +499,7 @@ theorem x_gen_ne_zero : x_gen W ≠ 0 := by
 
 /-- The local parameter is nonzero in `K(E)`. -/
 theorem localParam_ne_zero : localParam W ≠ 0 := by
-  unfold localParam
+  simp only [localParam]
   rw [ne_eq, div_eq_zero_iff, not_or, neg_eq_zero]
   exact ⟨x_gen_ne_zero W, y_gen_ne_zero W⟩
 
@@ -531,7 +539,7 @@ private theorem localExpand_weierstrass_eval :
         W.toAffine.polynomial = 0 := by
   -- Unfold `localExpand_inner` and use `eval₂_eval₂RingHom_apply` to rewrite as
   -- `evalEval` over the mapped polynomial.
-  unfold localExpand_inner
+  simp only [localExpand_inner]
   rw [Polynomial.eval₂_eval₂RingHom_apply, ← Affine.map_polynomial,
     Affine.evalEval_polynomial]
   -- The goal matches `formalXY_weierstrass` up to `algebraMap F _ a ↔ ofPowerSeries C a`.
@@ -798,7 +806,7 @@ noncomputable def localExpand : KE →+* LaurentSeries F :=
 
 /-- `localExpand` sends `x_gen` to `formalX W`. -/
 @[simp] theorem localExpand_x_gen : localExpand W (x_gen W) = formalX W := by
-  unfold localExpand x_gen
+  simp only [localExpand, x_gen]
   rw [IsFractionRing.lift_algebraMap]
   -- Goal: localExpand_coordHom W (algebraMap (Polynomial F) R X) = formalX W
   change localExpand_coordHom W
@@ -807,7 +815,7 @@ noncomputable def localExpand : KE →+* LaurentSeries F :=
 
 /-- `localExpand` sends `y_gen` to `formalY W`. -/
 @[simp] theorem localExpand_y_gen : localExpand W (y_gen W) = formalY W := by
-  unfold localExpand y_gen
+  simp only [localExpand, y_gen]
   rw [IsFractionRing.lift_algebraMap, localExpand_coordHom_root]
 
 /-- `localExpand` is an `F`-algebra hom. -/
