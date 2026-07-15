@@ -26,9 +26,9 @@ Open.
 
 ## Formalization
 
-We define `IsSousperfectoid` locally: a Tate ring `A` is sousperfectoid if there exists a
-perfectoid ring `B` and a continuous ring homomorphism `A → B` that admits a continuous
-`A`-module section. The problem asks whether all stably uniform rings are sousperfectoid.
+We define `IsSousperfectoid` locally by requiring a perfectoid ring `B`, a continuous ring
+homomorphism `A →+* B`, and a continuous left inverse of its underlying function. The problem asks
+whether all stably uniform rings are sousperfectoid.
 -/
 
 open TopologicalRing ValuationSpectrum
@@ -37,9 +37,9 @@ namespace ScottishBook
 
 universe u
 
-/-- A Tate ring `A` is **sousperfectoid** if there exists a perfectoid Tate ring `B` and a
-continuous ring homomorphism `f : A →+* B` admitting a continuous `A`-module splitting
-(i.e., a continuous `A`-linear map `g : B →ₗ[A] A` with `g ∘ f = id`).
+/-- A ring `A` is **sousperfectoid** here if there exists a perfectoid ring `B` and a continuous
+ring homomorphism `f : A →+* B` whose underlying function admits a continuous left inverse
+`g : B → A`.
 
 This notion was introduced by Hansen in the context of Problem 6 of the Nonarchimedean
 Scottish Book. -/
