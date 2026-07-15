@@ -221,6 +221,54 @@ theorem universalE3_isE3Form :
   ⟨rfl, rfl, rfl, rfl, rfl⟩
 
 open WeierstrassCurve in
+/-- **([T-E15-NORM] the Q-normalization certificate ★★)** The `ℰ₃`-form emerges from a
+flex normal form by *pure scaling*. Given `W` already in flex shape (`a₂ = a₄ = a₆ = 0`,
+supplied by `ofTwiceNeZero` at an order-`3` point `P` — see
+`EllipticCurve/E3NormalForm.lean`), a marked point `(p, q)` (the second generator `Q`),
+and a **unit** `u` satisfying
+
+* `hurel : u² + a₁·u = 3·p` — the scaling relation, which is exactly `a₁' = 3γ − 1`, and
+* `hsheet : B·u + A = 0` — the sheet-selecting relation, where
+  `A = −3a₁²p² − 3a₁a₃p − 3a₁pq − 9p³`, `B = a₁³p + a₁²a₃ + a₁²q + 6a₁p² + 3a₃p + 6pq`,
+
+the scaled curve `⟨u,0,0,0⟩ • W` is of `ℰ₃`-form with `γ = p·u⁻²`, `β = q·u⁻³ − p·u⁻²`.
+
+The content is that no `√-3` / Weil-pairing datum is needed: the correct scaling
+`u = −A/B` is a *rational function of the coordinates*, so the level-3 normalization is
+Zariski-local. Only `a₁' = 3γ−1` (`hurel`) and `a₃' = −3γ²−β−3βγ` (`hsheet`) are
+non-trivial; `a₂', a₄', a₆'` vanish because `W` is already in flex shape. -/
+theorem isE3Form_of_scaling {A : Type u} [CommRing A] {W : WeierstrassCurve A}
+    (ha₂ : W.a₂ = 0) (ha₄ : W.a₄ = 0) (ha₆ : W.a₆ = 0)
+    (p q : A) (u : Aˣ)
+    (hurel : (u : A) ^ 2 + W.a₁ * (u : A) = 3 * p)
+    (hsheet : (W.a₁ ^ 3 * p + W.a₁ ^ 2 * W.a₃ + W.a₁ ^ 2 * q + 6 * W.a₁ * p ^ 2
+                + 3 * W.a₃ * p + 6 * p * q) * (u : A)
+              + (-3 * W.a₁ ^ 2 * p ^ 2 - 3 * W.a₁ * W.a₃ * p - 3 * W.a₁ * p * q
+                - 9 * p ^ 3) = 0) :
+    IsE3Form ((⟨u, 0, 0, 0⟩ : VariableChange A) • W)
+      (q * ((u⁻¹ : Aˣ) : A) ^ 3 - p * ((u⁻¹ : Aˣ) : A) ^ 2)
+      (p * ((u⁻¹ : Aˣ) : A) ^ 2) := by
+  have hv : ((u⁻¹ : Aˣ) : A) * (u : A) = 1 := u.inv_mul
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩
+  · rw [variableChange_a₁]
+    linear_combination ((u⁻¹ : Aˣ) : A) ^ 2 * hurel
+      - (W.a₁ * ((u⁻¹ : Aˣ) : A) + 1 + ((u⁻¹ : Aˣ) : A) * (u : A)) * hv
+  · rw [variableChange_a₂, ha₂]; ring
+  · have hmul : (u : A) * ((W.a₃ + q) * (u : A) ^ 2 - p * (u : A) ^ 3 + 3 * p * q) = 0 := by
+      linear_combination (-W.a₁ ^ 2 * p - W.a₁ * W.a₃ + W.a₁ * p * (u : A) - W.a₁ * q
+        + W.a₃ * (u : A) - 3 * p ^ 2 - p * (u : A) ^ 2 + q * (u : A)) * hurel + hsheet
+    have hE5 : (W.a₃ + q) * (u : A) ^ 2 - p * (u : A) ^ 3 + 3 * p * q = 0 :=
+      (u.isUnit.mul_right_eq_zero).mp hmul
+    rw [variableChange_a₃]
+    linear_combination ((u⁻¹ : Aˣ) : A) ^ 5 * hE5
+      + (-W.a₃ * (u : A) * ((u⁻¹ : Aˣ) : A) ^ 4 - W.a₃ * ((u⁻¹ : Aˣ) : A) ^ 3
+        + p * (u : A) ^ 2 * ((u⁻¹ : Aˣ) : A) ^ 4 + p * (u : A) * ((u⁻¹ : Aˣ) : A) ^ 3
+        + p * ((u⁻¹ : Aˣ) : A) ^ 2 - q * (u : A) * ((u⁻¹ : Aˣ) : A) ^ 4
+        - q * ((u⁻¹ : Aˣ) : A) ^ 3) * hv
+  · rw [variableChange_a₄, ha₄]; ring
+  · rw [variableChange_a₆, ha₆]; ring
+
+open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 /-- **(T-E15a stage 4, the ring-level uniqueness certificate ★★)** A variable change
