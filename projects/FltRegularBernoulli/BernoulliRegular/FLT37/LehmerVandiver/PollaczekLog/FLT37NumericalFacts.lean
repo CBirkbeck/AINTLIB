@@ -71,7 +71,6 @@ namespace LehmerVandiver
 section FLT37NumericalFacts
 
 set_option maxRecDepth 4000000
-set_option linter.style.setOption false in
 
 /-- **`lehmerVandiverProduct ≠ 1` for FLT37.** Numerical fact in `ZMod 149`:
 the LV001/2 product side `∏_{b=1}^{18} (2^{4b}-1)^{4·b^4}` is not `1`. Its
