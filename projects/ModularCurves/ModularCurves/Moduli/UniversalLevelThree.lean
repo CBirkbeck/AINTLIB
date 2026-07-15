@@ -1901,4 +1901,21 @@ theorem pullSection_e3ClassifyingEllHom_Q {R : CommRingCat.{u}} {X : EllObj R}
       (EllHom.pullSection R (e3ClassifyingEllHom hD h3) (universalE3Q R)).2]
     exact L.1.2.2.symm
 
+open CategoryTheory in
+/-- **([T-E15-NORM] the `ℰ₃` datum problem)** The subfunctor of the naive level-`3`
+problem cut out by "the marked pair is an `ℰ₃`-datum" (locally normalisable to `ℰ₃`-form).
+This — like the Legendre `δ` — is the object whose representability by `universalE3Obj` is
+the KM 4.7.0 `(3, GL₂(𝔽₃))`-engine input over `ℤ[1/3]`. Adapts `legendreDeltaProblem`,
+dropping the ω-basis factor (the `ℰ₃`-form is rigid without a chosen invariant differential). -/
+noncomputable def e3DatumProblem (R : CommRingCat.{u}) : ModuliProblem R where
+  obj X := { x : (gammaFullNaiveProblem R 3).obj X // IsE3Datum X.unop x }
+  map φ := ↾fun x => ⟨(gammaFullNaiveProblem R 3).map φ x.1,
+    IsE3Datum.map φ.unop x.2 _ rfl rfl⟩
+  map_id X := by
+    ext x
+    exact FunctorToTypes.map_id_apply (gammaFullNaiveProblem R 3) x.1
+  map_comp {X Y Z} φ ψ := by
+    ext x
+    exact FunctorToTypes.map_comp_apply (gammaFullNaiveProblem R 3) φ ψ x.1
+
 end ModularCurves
