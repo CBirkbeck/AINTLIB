@@ -21125,3 +21125,32 @@ transposition** — E3 has no ω-basis, so `legendreLambda`/`omegaBasisMap` must
 Then `naiveLevelThree_representable_by_affine` (Bootstrap:74) = `e3DatumRepresentableBy` + the naive↔datum
 equivalence (arbitrary-datum, **bridge-gated** = KM brick 6 / G0 BB-DEG). Best approached as a focused
 rt2-ladder session.
+
+## Board v10.259-KM (2026-07-16, STREAM-KM) — BRICK 6 reduced to 4 precise leaves (pushed)
+
+`modelEllipticCurve_finrank_eq_mulByInt_degree` :660 opaque sorry → **4 precise, documented,
+turnkey leaves** (MulByHomDegree.lean, all pushed; theorem closes from the 2 bricks; axiom-sound —
+sorryAx flows only through these 4, filling them auto-cleans BB-DEG → the fleet):
+- **D-REDUCTION INTEGRATED** (`brick6_intertwining`, the deep part PROVEN): the field identity
+  `∀ z, e(functionFieldMap[N] z) = mulByInt_pullbackAlgHom(e z)` reduces — via `IsLocalization.ringHom_ext`
+  (nonZeroDivisors Γ(Z)) + `RingHom.cancel_right … coordRingToZSection.surjective` + `AdjoinRoot.ringHom_ext`
+  + `Polynomial.ringHom_ext` — to THREE generator leaves (helpers `he_gtff`/`hxgen`/`hygen`/`hcgen` all proven):
+  - **FFM_X** (:658): `e (functionFieldMap[N] (germ_Z (coordRingToZSection (coordX W)))) = mulByInt_x`.
+  - **FFM_Y** (:662): same for coordY / mulByInt_y.
+  - **FFM_C** (:667): K-constants — `functionFieldMap[N]` fixes the K-image (via `mulByHom_π`: [N]≫π=π ⟹
+    K-linear). Likely the most tractable.
+- **A+B** (`brick6_from_intertwining`, :750): the finrank-of-isFractionRing tower + `pullbackRestrictIsoRestrict`
+  transport + degree-via-`hinter` — route fully specified in the v10.258 decomposition-keystone append
+  (instance-friction diagnosed: `set f` + explicit `IsFinite/Flat/LFP` transfer).
+
+**FFM_X/Y ARE THE DEEP CRUX (the germ-evaluation via the tautological point):**
+`functionFieldMap[N] (germ_Z x_Z)` = (`functionFieldMap_germToFunctionField`) `germ_{[N]⁻¹Z}([N].app x_Z)`;
+then `projModelFunctionFieldEquiv` of that germ = τ-evaluation = (**brick 5** `genericSpecPoint_comp_mulByHom`:
+τ.1 ≫ [N] = σ.1 with σ = chartSpecPoint(mulByInt_x, mulByInt_y)) = σ's x-coord = `mulByInt_x`. Needs a
+**τStalkMap** (localization-lift of the tautological-point evaluation, shown = projModelFunctionFieldEquiv by
+`IsLocalization.ringHom_ext`) + the point-evaluation-of-germ compat. This is the SAME deep germ-evaluation
+flagged since v10.252 — a focused fresh pass with the reduction + brick 5 both banked.
+
+**Net:** the entire deep REDUCTION (ringHom_ext/AdjoinRoot/coordRingToZSection) is DONE; brick 6 is down to
+3 germ-evaluations (FFM_X/Y/C, τStalkMap) + the A+B finrank tower. Two subagents ground the reduction (D) +
+attempted A+B; the D-reduction landed, FFM leaves + A+B remain for a focused pass.
