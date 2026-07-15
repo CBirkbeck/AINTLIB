@@ -74,7 +74,6 @@ private lemma abs_sub_le_one_div_of_ceil_natCast_mul_eq {n : ℕ} (hn : 0 < (n :
 
 -- The `Fintype ι` instance is needed for the `sup`-metric on `ι → ℝ`, so the
 -- `unusedFintypeInType` linter (which only inspects the conclusion) is a false positive here.
-set_option linter.unusedFintypeInType false in
 /-- The `index n`-image of a bounded set is finite: only finitely many cells of the `n⁻¹ℤ^ι`
 grid meet a bounded set. -/
 theorem setFinite_index_image_of_isBounded (n : ℕ) {T : Set (ι → ℝ)}
