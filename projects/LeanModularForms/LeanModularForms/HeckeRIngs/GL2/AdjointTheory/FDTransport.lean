@@ -482,7 +482,8 @@ theorem sum_SL_tile_eq_fiberwise_PSL_tile_Gamma_p_α (α : GL (Fin 2) ℚ)
       = ∑ q : SL(2, ℤ) ⧸ Gamma_p_α (N := N) α,
           ∫ τ in ((slToPslQuot_Gamma_p_α (N := N) α q).out : PSL(2, ℤ))⁻¹ •
             (fdo : Set ℍ), h τ ∂μ_hyp :=
-        Finset.sum_congr rfl fun q _ ↦ setIntegral_SL_tile_eq_PSL_tile_Gamma_p_α (N := N) α h h_inv q
+        Finset.sum_congr rfl fun q _ ↦
+          setIntegral_SL_tile_eq_PSL_tile_Gamma_p_α (N := N) α h h_inv q
     _ = ∑ q' : PSL(2, ℤ) ⧸ image_Gamma_p_α_PSL (N := N) α,
           ∑ q ∈ Finset.univ.filter (fun q : SL(2, ℤ) ⧸ Gamma_p_α (N := N) α ↦
             slToPslQuot_Gamma_p_α (N := N) α q = q'),
