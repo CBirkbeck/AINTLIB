@@ -1,6 +1,8 @@
-import FltRegular.NumberTheory.KummersLemma.Field
-import FltRegular.NumberTheory.Unramified
-import Mathlib.FieldTheory.KummerExtension
+module
+
+public import FltRegular.NumberTheory.KummersLemma.Field
+public import FltRegular.NumberTheory.Unramified
+public import Mathlib.FieldTheory.KummerExtension
 
 /-!
 # [FLT37-CASEII-NONUNIT-POLY] flt-regular's Kummer `poly` for a non-unit primary radical

@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.CharacterIdentification
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Symmetrisation
-import BernoulliRegular.FLT37.LehmerVandiver.PollaczekLog.PthPower
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.CharacterIdentification
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Symmetrisation
+public import BernoulliRegular.FLT37.LehmerVandiver.PollaczekLog.PthPower
 
 /-!
 # LV005c bridge: Cor 8.19 (real Pollaczek unit)

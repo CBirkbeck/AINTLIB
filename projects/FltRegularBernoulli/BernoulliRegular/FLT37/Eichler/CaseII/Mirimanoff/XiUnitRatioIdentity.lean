@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PollaczekUnit
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PollaczekUnit
 
 /-!
 # Washington §8.1 Lemma 8.1: the real cyclotomic generators `ξ_a`, for `p = 37`

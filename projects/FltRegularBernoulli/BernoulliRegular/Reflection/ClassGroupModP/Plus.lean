@@ -1,7 +1,9 @@
-import BernoulliRegular.Reflection.ClassGroupModP.Module
-import BernoulliRegular.TotallyRealSubfield.ClassGroup
-import BernoulliRegular.TotallyRealSubfield.Basic
-import Mathlib.RingTheory.Ideal.Norm.RelNorm
+module
+
+public import BernoulliRegular.Reflection.ClassGroupModP.Module
+public import BernoulliRegular.TotallyRealSubfield.ClassGroup
+public import BernoulliRegular.TotallyRealSubfield.Basic
+public import Mathlib.RingTheory.Ideal.Norm.RelNorm
 
 /-!
 # Plus-side descent of ClassGroupModP

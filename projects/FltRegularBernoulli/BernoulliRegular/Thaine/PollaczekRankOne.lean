@@ -1,6 +1,8 @@
-import BernoulliRegular.Thaine.RankOneComponent
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Symmetrisation
-import BernoulliRegular.Reflection.SubstantiveAtoms
+module
+
+public import BernoulliRegular.Thaine.RankOneComponent
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Symmetrisation
+public import BernoulliRegular.Reflection.SubstantiveAtoms
 
 /-!
 # T-Q1-RANK-ONE specialisation: Pollaczek-generator equivalence
