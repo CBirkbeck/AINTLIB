@@ -414,7 +414,7 @@ isomorphism from the pullback of the `i`th chart's unit sheaf to the pullback of
 unit sheaf along `t i j ≫ f j i`, obtained by conjugating the scalar transition through the two
 canonical pullback-unit isomorphisms.
 
-Active dependency claim (2026-07-14): in a new `InvertibleSheafGlueData` layer, prove
+Completed dependency claim (2026-07-14): in a new `InvertibleSheafGlueData` layer, prove
 `chartTransitionIso_toUnit` and the diagonal, pair-swap inverse, and triple-overlap coherence
 equations for `AffineIntersectionUnitCocycle.chartTransitionIso`, with all type transports supplied
 by the existing `pullbackCongr`/`pullbackComp` API. Package exactly these laws as local module
@@ -464,3 +464,11 @@ Completed subdependency (2026-07-14): proved
 chosen pullback of adjacent pair overlaps over the middle chart, with all three legs definitionally
 given by the existing left, middle, and right restriction maps. The construction is option-free and
 all three public declarations depend only on `propext`, `Classical.choice`, and `Quot.sound`.
+
+Completed dependency claim (2026-07-14): defined
+`AffineIntersectionUnitCocycle.chartDescentData`, packaging the chartwise unit modules and overlap
+transition morphisms as mathlib `Pseudofunctor.DescentData'` for the canonical pair and triple
+pullbacks. Its diagonal and triple fields are proved from the previously established transition
+laws, it introduces no additional hypotheses or proof-resource options, and its axiom audit is
+exactly `propext`, `Classical.choice`, and `Quot.sound`. This is the effectivity input for gluing the
+finite-stage invertible sheaf before identifying its pullback with the original pole sheaf.

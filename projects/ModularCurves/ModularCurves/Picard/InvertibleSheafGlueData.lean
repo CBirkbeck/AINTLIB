@@ -1,5 +1,5 @@
 import ModularCurves.Picard.InvertibleSheafFiniteStageModel
-import ModularCurves.Picard.DualPullback.UnitComp
+import ModularCurves.Picard.PullbackPseudofunctorUnit
 import Mathlib.CategoryTheory.Sites.Descent.DescentDataPrime
 
 /-!
@@ -17,11 +17,6 @@ open CategoryTheory CategoryTheory.Limits
 namespace AlgebraicGeometry.Scheme.Modules
 
 noncomputable section
-
-/-- The contravariant, `Cat`-valued pseudofunctor of sheaves of modules on schemes. This is
-the left-adjoint part of `Scheme.Modules.pseudofunctor`. -/
-def pullbackPseudofunctor :=
-  pseudofunctor.comp Bicategory.Adj.forget₁
 
 /-- The ordered affine overlap in the glue datum, regarded as the chosen pullback of the two
 chart maps into the glued scheme. -/
@@ -270,55 +265,6 @@ theorem AffineIntersectionUnitCocycle.chartTransitionIso_self
   exact (ModularCurves.pullbackUnitIso_congrLow
     (diagonalFac
       (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush) i)).symm
-
-private theorem isoEntry
-    {C : Type u} [Category C] {O P N Q : C}
-    (u : P ≅ O) (e : N ≅ P) (b : Q ≅ O) (a : N ⟶ Q)
-    (h : e.hom ≫ u.hom = a ≫ b.hom) :
-    u.inv ≫ e.inv ≫ a = b.inv := by
-  rw [← cancel_mono b.hom]
-  rw [Category.assoc, Category.assoc, ← h]
-  simp only [Iso.inv_hom_id_assoc, Iso.inv_hom_id]
-
-private theorem unitCompEntry
-    {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
-    (pullbackUnitIso (f ≫ g)).inv ≫
-        ((pullbackComp f g).app (unitObj Z)).inv ≫
-        (pullback f).map (pullbackUnitIso g).hom =
-      (pullbackUnitIso f).inv := by
-  let u := pullbackUnitIso (f ≫ g)
-  let e := (pullbackComp f g).app (unitObj Z)
-  let b := pullbackUnitIso f
-  let a := (pullback f).map (pullbackUnitIso g).hom
-  exact isoEntry u e b a (ModularCurves.pullbackUnitIso_compLow f g)
-
-private theorem isoExit
-    {C : Type u} [Category C] {O P N Q K : C}
-    (a : N ≅ Q) (e : N ≅ P) (r : P ≅ K)
-    (u : P ≅ O) (v : K ≅ O) (b : Q ≅ O)
-    (hr : r.hom ≫ v.hom = u.hom)
-    (he : e.hom ≫ u.hom = a.hom ≫ b.hom) :
-    a.inv ≫ e.hom ≫ r.hom ≫ v.hom = b.hom := by
-  rw [hr, he]
-  simp only [Iso.inv_hom_id_assoc]
-
-private theorem unitCompExit
-    {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z)
-    {k : X ⟶ Z} (h : f ≫ g = k) :
-    (pullback f).map (pullbackUnitIso g).inv ≫
-        ((pullbackComp f g).app (unitObj Z)).hom ≫
-        ((pullbackCongr h).app (unitObj Z)).hom ≫
-        (pullbackUnitIso k).hom =
-      (pullbackUnitIso f).hom := by
-  let a := (pullback f).mapIso (pullbackUnitIso g)
-  let e := (pullbackComp f g).app (unitObj Z)
-  let r := (pullbackCongr h).app (unitObj Z)
-  let u := pullbackUnitIso (f ≫ g)
-  let v := pullbackUnitIso k
-  let b := pullbackUnitIso f
-  exact isoExit a e r u v b
-    (ModularCurves.pullbackUnitIso_congrLow h)
-    (ModularCurves.pullbackUnitIso_compLow f g)
 
 private theorem pairSwapFac
     (D : Scheme.GlueData) (i j : D.J) :
@@ -592,6 +538,25 @@ noncomputable def AffineIntersectionUnitCocycle.chartTransitionIsoCoordinatePull
   (pullbackUnitIso g).inv ≫
     chartTransitionIsoCoordinatePullbackMiddle c hopen hpush i j g ≫
     (pullbackUnitIso g).hom
+
+/-- The pulled-back chart transition before simplifying it to the overlap transition
+function. This is the form used by the generic pullback descent coherence theorem. -/
+theorem AffineIntersectionUnitCocycle.chartTransitionIsoCoordinatePullback_chartTransition
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) {T : Scheme.{u}}
+    (g : T ⟶ (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).V (i, j)) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    c.chartTransitionIsoCoordinatePullback hopen hpush i j g =
+      (pullbackUnitIso g).inv ≫
+        (((pullback g).mapIso (pullbackUnitIso (D.f i j))).inv ≫
+          (pullback g).map (c.chartTransitionIso hopen hpush i j).hom ≫
+          ((pullback g).mapIso
+            (pullbackUnitIso (D.t i j ≫ D.f j i))).hom) ≫
+        (pullbackUnitIso g).hom := by
+  rfl
 
 /-- In unit coordinates, a pulled-back chart transition is multiplication by the pulled-back
 overlap transition function. -/
