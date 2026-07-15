@@ -2,15 +2,15 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
+import «Adic spaces».AdicCompletionBridge
+import «Adic spaces».CompletionLocalization
 import «Adic spaces».Presheaf
 import «Adic spaces».PresheafIdentification
-import «Adic spaces».AdicCompletionBridge
 import «Adic spaces».TopologyComparison
-import «Adic spaces».CompletionLocalization
-import «Adic spaces».WedhornLocTopologyLinear
 import «Adic spaces».WedhornAwayMapSaturation
-import Mathlib.RingTheory.AdicCompletion.Exactness
+import «Adic spaces».WedhornLocTopologyLinear
 import Mathlib.RingTheory.AdicCompletion.AsTensorProduct
+import Mathlib.RingTheory.AdicCompletion.Exactness
 
 /-!
 # Tate Ring Structure on Presheaf Values (Wedhorn Proposition 8.15)
@@ -414,14 +414,11 @@ private theorem idealOfDef_pow_isClosed_aux (D₀ : RationalLocData A) (n : ℕ)
       Ideal (presheafValue_ringOfDef D₀)) :
       Set (presheafValue_ringOfDef D₀)) := by
   letI := D₀.uniformSpace; letI := D₀.isUniformAddGroup; letI := D₀.isTopologicalRing
-  have hclosed_ring : IsClosed (presheafValue_ringOfDef D₀ : Set (presheafValue D₀)) :=
-    Subring.isClosed_topologicalClosure _
   haveI : IsTopologicalRing (presheafValue_ringOfDef D₀) :=
     Subring.instIsTopologicalRing _
   have hadic_eq := locSubring_induced_eq_adicTopology D₀
   set J := locIdeal D₀.P D₀.T D₀.s with hJ_def
   set g := locSubringToRingOfDef D₀ with hg_def
-  set gJn := g '' (↑(J ^ n) : Set (locSubring D₀.P D₀.T D₀.s)) with hgJn_def
   have hg_dense : DenseRange g := locSubringToRingOfDef_denseRange D₀
   -- Proof: idealOfDef^n = ker(π) for a continuous ring hom
   --   π : ringOfDef → locSubring ⧸ (J ^ n)
@@ -800,11 +797,6 @@ theorem presheafValue_isAdic (D₀ : RationalLocData A) :
     refine ⟨d, ?_⟩
     change D₀.coeRingHom ((locSubring D₀.P D₀.T D₀.s).subtype d) = x
     exact hdy ▸ hyx
-  have hclosure_sub : ∀ n,
-      closure (f '' (locNhd D₀.P D₀.T D₀.s n :
-        Set (Localization.Away D₀.s))) ⊆
-      (presheafValue_ringOfDef D₀ : Set (presheafValue D₀)) :=
-    fun n ↦ closure_mono (himage_sub n)
   have hsubspace_basis : (nhds (0 : presheafValue_ringOfDef D₀)).HasBasis
       (fun _ : ℕ ↦ True) (fun n ↦ Subtype.val ⁻¹'
         (closure (f '' (locNhd D₀.P D₀.T D₀.s n :
