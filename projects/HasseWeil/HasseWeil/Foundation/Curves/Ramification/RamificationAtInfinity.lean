@@ -269,18 +269,11 @@ structure Sinf.{u} {L : Type*} [Field L] [Algebra k L] (f : L) where
 
 section SinfConstruction
 
-set_option backward.isDefEq.respectTransparency false
 
 /-- Canonical construction of `Sinf` from Mathlib's `integralClosure`
 Subalgebra. Given the ambient finite-separability hypotheses, all the
 required instances are synthesised once here; downstream code consumes
-them only by field projection.
-
-The local `set_option backward.isDefEq.respectTransparency false` matches
-Mathlib's `NormalClosure` pattern (see `Mathlib/RingTheory/NormalClosure.lean`
-line 79) for the `Algebra ↥(integralClosure …) _` instance synthesis —
-without this option the `Meta.SynthInstance.tryResolve` metavariable wall
-hits us exactly here. -/
+them only by field projection. -/
 noncomputable def Sinf.ofIntegralClosure
     {L : Type*} [Field L] [Algebra k L] (f : L) [Fact (Transcendental k f⁻¹)]
     [Module.Finite (FractionRing (Polynomial k)) (LinfAt (k := k) f)]
