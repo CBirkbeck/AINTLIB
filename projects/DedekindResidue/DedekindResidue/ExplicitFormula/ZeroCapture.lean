@@ -1112,7 +1112,8 @@ theorem rectangle_zero_capture {a T : ℝ} (ha : 0 < a) (ha' : a ≤ 1/4) (hT : 
         rw [h]
         linarith
   -- witness in the enlarged rectangle
-  have hw₀mem : ((1+a : ℝ) : ℂ) ∈ Set.Ioo (z.re - 1) (w.re + 1) ×ℂ Set.Ioo (z.im - 1) (w.im + 1) := by
+  have hw₀mem : ((1+a : ℝ) : ℂ) ∈ Set.Ioo (z.re - 1) (w.re + 1) ×ℂ
+      Set.Ioo (z.im - 1) (w.im + 1) := by
     rw [Complex.mem_reProdIm, hzre, hwre, hzim, hwim]
     constructor
     · rw [Set.mem_Ioo]
