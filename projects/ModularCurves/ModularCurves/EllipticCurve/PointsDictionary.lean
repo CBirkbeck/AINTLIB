@@ -1,8 +1,13 @@
-import ModularCurves.Moduli.WeierstrassAtlas
-import ModularCurves.ForMathlib.ProjIntegral
-import ModularCurves.ForMathlib.WeierstrassProjectivePrime
+/-
+Copyright (c) 2026 The AINTLIB Authors. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: The AINTLIB Authors
+-/
 import Mathlib.AlgebraicGeometry.Geometrically.Integral
 import Mathlib.AlgebraicGeometry.Morphisms.UniversallyOpen
+import ModularCurves.ForMathlib.ProjIntegral
+import ModularCurves.ForMathlib.WeierstrassProjectivePrime
+import ModularCurves.Moduli.WeierstrassAtlas
 
 /-!
 # T-W7 lane P2 — geometric integrality of `E_U^n` and the field-points dictionary
