@@ -491,7 +491,7 @@ computation `37·B_{1,ω^{31}} ≡ 31487 = 37²·23 (mod 37³)`.
 dividing by the `37`-unit `37·(-½)⁻¹` gives `‖-½·B‖ = ‖37·B‖/37⁻¹·… = 37⁻¹ > 37⁻²`. -/
 theorem flt37SharpHMinusValuation_proved : Flt37SharpHMinusValuation := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  unfold Flt37SharpHMinusValuation
+  simp only [Flt37SharpHMinusValuation]
   have hlt : ‖(37 : ℚ_[37]) * BernoulliGen ((teichmullerCharQp 37) ^ 31) 1 - (31487 : ℚ_[37])‖ <
       ‖(31487 : ℚ_[37])‖ := by
     rw [norm_const_eq]
@@ -600,8 +600,8 @@ congruence `B_{1,ω^{31}} ≡ B₃₂/32 (mod 37²)`, ultrametricity with
 `‖B_{1,ω^{31}}‖ = ‖B₃₂/32‖ > 37⁻²`, hence `Flt37SharpHMinusValuation`. -/
 theorem flt37SharpHMinusValuation_of_kummerCongruenceModSq
     (h : Flt37KummerCongruenceModSq) : Flt37SharpHMinusValuation := by
-  unfold Flt37KummerCongruenceModSq at h
-  unfold Flt37SharpHMinusValuation
+  simp only [Flt37KummerCongruenceModSq] at h
+  simp only [Flt37SharpHMinusValuation]
   have hhalf : ‖(-(1 / 2 : ℚ_[37]))‖ = 1 := by
     rw [norm_neg]
     have : ‖(2 : ℚ_[37])‖ = 1 := by

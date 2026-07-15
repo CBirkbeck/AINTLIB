@@ -275,7 +275,7 @@ theorem flt37_pollaczekUnitPlusKplus_not_isPthPower
   have h_alg_eq :=
     Sinnott.algebraMapPollaczekUnitPlusKplus_eq 37 (CyclotomicField 37 ℚ) 32
       (by decide : (37 : ℕ) ≠ 2) hp_three
-  unfold Sinnott.AlgebraMapPollaczekUnitPlusKplus_eq at h_alg_eq
+  simp only [Sinnott.AlgebraMapPollaczekUnitPlusKplus_eq] at h_alg_eq
   exact not_isPthPower_Kplus_of_not_isPthPower_K (p' := 37)
     (K' := CyclotomicField 37 ℚ) 32 FLT37.flt37_realLocalCert_global
     (Sinnott.pollaczekUnitPlusKplus 37 (CyclotomicField 37 ℚ) 32
@@ -305,7 +305,7 @@ theorem flt37_not_dvd_hPlus_of_pollaczekForward
   have h_alg_eq :=
     Sinnott.algebraMapPollaczekUnitPlusKplus_eq 37 (CyclotomicField 37 ℚ) 32
       (by decide : (37 : ℕ) ≠ 2) hp_three
-  unfold Sinnott.AlgebraMapPollaczekUnitPlusKplus_eq at h_alg_eq
+  simp only [Sinnott.AlgebraMapPollaczekUnitPlusKplus_eq] at h_alg_eq
   have h_mem :=
     Sinnott.pollaczekUnitPlusKplus_mem 37 (CyclotomicField 37 ℚ) 32
       (by decide : (37 : ℕ) ≠ 2) hp_three

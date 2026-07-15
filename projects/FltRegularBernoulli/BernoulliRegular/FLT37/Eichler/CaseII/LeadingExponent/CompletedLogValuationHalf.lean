@@ -26,7 +26,7 @@ theorem completedLogVanishingThroughLevel36_37_proven
     CompletedLogVanishingThroughLevel36_37 := by
   intro u hu N hN
   revert hu
-  unfold CompletedLogArgHighValuation37
+  simp only [CompletedLogArgHighValuation37]
   rcases N with _ | M
   ·
     intro _hu

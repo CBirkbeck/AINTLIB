@@ -229,7 +229,7 @@ theorem antiRadical_spanSingleton_div
       FractionalIdeal.spanSingleton (𝓞 K)⁰
         (NumberField.IsCMField.complexConj K
           (algebraMap (𝓞 K) K ((a : 𝓞 K) + ζ * (b : 𝓞 K)))) := by
-  unfold BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
+  simp only [BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical]
   rw [FractionalIdeal.spanSingleton_div_spanSingleton]
 
 omit hp [IsCyclotomicExtension {p} ℚ K] in
@@ -507,7 +507,7 @@ theorem antiKummerLift_isUnramified_via_AK5
         hα₀_ne)
       (Polynomial.X ^ p - Polynomial.C
         (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical K a b ζ hab)) := by
-    unfold BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift
+    simp only [BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift]
     infer_instance
   have : Polynomial.IsSplittingField K
       (BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiKummerLift (p := p) K
@@ -1849,7 +1849,7 @@ theorem AK5a_PrincipalMinusIdeals_of_CaseIAntiKummerLKUnramified_and_not_dvd_hPl
     (h_LK : CaseIAntiKummerLKUnramified) :
     AK5a_PrincipalMinusIdeals (p := 37) (K := CyclotomicField 37 ℚ) := by
   have : Fact (Nat.Prime 37) := ⟨by decide⟩
-  unfold AK5a_PrincipalMinusIdeals
+  simp only [AK5a_PrincipalMinusIdeals]
   intro a b c hgcd hcaseI heq ζ hζ hab I hI_ne hI_pow
   exact
     (AK5a_PrincipalMinusIdeals_of_AK_unramified_and_not_dvd_hPlus

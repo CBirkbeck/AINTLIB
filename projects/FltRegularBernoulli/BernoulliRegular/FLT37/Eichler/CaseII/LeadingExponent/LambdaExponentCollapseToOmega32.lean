@@ -152,7 +152,7 @@ theorem caseIILeadingExponent_completedLogArg_mem_lambdaIdeal_pow_pred
         (c : 𝓞 (CyclotomicField 37 ℚ)))) :
     CompletedLogArgHighValuation37 u := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  unfold CompletedLogArgHighValuation37
+  simp only [CompletedLogArgHighValuation37]
   set I : Ideal (ValuedIntegerRing 37 (CyclotomicField 37 ℚ)) :=
     (lambdaIdeal 37 (CyclotomicField 37 ℚ)) ^ 36 with hI
   let f := algebraMap (𝓞 (CyclotomicField 37 ℚ)) (ValuedIntegerRing 37 (CyclotomicField 37 ℚ))

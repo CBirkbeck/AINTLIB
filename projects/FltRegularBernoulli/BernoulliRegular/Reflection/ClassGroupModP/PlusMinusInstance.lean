@@ -148,7 +148,7 @@ theorem cyclotomicGaloisConjugate_neg_one_extended_ideal
     Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) (-1)
         (Ideal.map (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)) qPlus) =
       Ideal.map (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)) qPlus := by
-  unfold Furtwaengler.cyclotomicGaloisConjugate
+  simp only [Furtwaengler.cyclotomicGaloisConjugate]
   -- Cast both maps to RingHom for `Ideal.map_map`.
   rw [← Ideal.map_coe (cyclotomicRingOfIntegersEquiv (p := p) K (-1))
         (qPlus.map (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K))),
@@ -227,7 +227,7 @@ theorem cyclotomicGalActionMonoidHomModP_neg_one_classGroupMap
     cyclotomicGalActionMonoidHomModP (p := p) (K := K) (-1)
         (QuotientGroup.mk (classGroupMap K cPlus)) =
       QuotientGroup.mk (classGroupMap K cPlus) := by
-  unfold cyclotomicGalActionMonoidHomModP
+  simp only [cyclotomicGalActionMonoidHomModP]
   rw [QuotientGroup.map_mk]
   rw [cyclotomicGalActionMonoidHom_neg_one_classGroupMap hp_odd cPlus]
 

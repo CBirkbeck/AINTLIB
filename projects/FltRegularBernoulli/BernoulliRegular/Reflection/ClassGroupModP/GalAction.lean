@@ -177,7 +177,7 @@ theorem cyclotomicGaloisShiftedClass_class_invariant
   obtain ⟨x, y, hx_ne, hy_ne, h_eq⟩ :=
     ClassGroup.mk0_eq_mk0_iff.mp h_class
   -- Apply σ_a to both sides via Ideal.map.
-  unfold cyclotomicGaloisShiftedClass cyclotomicGaloisConjugateNonZeroDivisors
+  simp only [cyclotomicGaloisShiftedClass, cyclotomicGaloisConjugateNonZeroDivisors]
   -- Need: mk0 (σ_a I₁) = mk0 (σ_a I₂).
   -- Use mk0_eq_mk0_iff with σ_a x, σ_a y.
   apply ClassGroup.mk0_eq_mk0_iff.mpr
@@ -196,12 +196,12 @@ theorem cyclotomicGaloisShiftedClass_class_invariant
     have hx_span : Ideal.span ({cyclotomicRingOfIntegersEquiv (p := p) K a x} : Set _) =
         Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) a
           (Ideal.span ({x} : Set (𝓞 K))) := by
-      unfold Furtwaengler.cyclotomicGaloisConjugate
+      simp only [Furtwaengler.cyclotomicGaloisConjugate]
       rw [Ideal.map_span, Set.image_singleton]
     have hy_span : Ideal.span ({cyclotomicRingOfIntegersEquiv (p := p) K a y} : Set _) =
         Furtwaengler.cyclotomicGaloisConjugate (p := p) (K := K) a
           (Ideal.span ({y} : Set (𝓞 K))) := by
-      unfold Furtwaengler.cyclotomicGaloisConjugate
+      simp only [Furtwaengler.cyclotomicGaloisConjugate]
       rw [Ideal.map_span, Set.image_singleton]
     rw [hx_span, hy_span,
         ← Furtwaengler.cyclotomicGaloisConjugate_mul_ideal,
@@ -229,7 +229,7 @@ theorem cyclotomicGalActionOnClassGroup_mk0
     (a : CyclotomicUnitDelta p) (I : (Ideal (𝓞 K))⁰) :
     cyclotomicGalActionOnClassGroup (p := p) (K := K) a (ClassGroup.mk0 I) =
       cyclotomicGaloisShiftedClass (p := p) (K := K) a I := by
-  unfold cyclotomicGalActionOnClassGroup
+  simp only [cyclotomicGalActionOnClassGroup]
   apply cyclotomicGaloisShiftedClass_class_invariant a
   -- The chosen rep via surjInv satisfies mk0 (surjInv c) = c.
   exact Function.surjInv_eq ClassGroup.mk0_surjective (ClassGroup.mk0 I)

@@ -152,12 +152,12 @@ theorem caseI_factor_class_galAction_eq {p : ℕ} [Fact p.Prime]
       (K := CyclotomicField p ℚ) g I = J := by
     apply ideal_pow_right_injective_ordIntegers (Fact.out (p := p.Prime)).ne_zero
     rw [← Furtwaengler.cyclotomicGaloisConjugate_pow_ideal, ← hI, ← hJ]
-    unfold Furtwaengler.cyclotomicGaloisConjugate
+    simp only [Furtwaengler.cyclotomicGaloisConjugate]
     rw [Ideal.map_span, Set.image_singleton]
     congr 2
     rw [map_add, map_mul, map_intCast, map_intCast]
   rw [cyclotomicGalActionOnClassGroup_mk0]
-  unfold cyclotomicGaloisShiftedClass cyclotomicGaloisConjugateNonZeroDivisors
+  simp only [cyclotomicGaloisShiftedClass, cyclotomicGaloisConjugateNonZeroDivisors]
   apply congrArg ClassGroup.mk0
   apply Subtype.ext
   exact hmap

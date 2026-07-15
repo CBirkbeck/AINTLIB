@@ -141,7 +141,7 @@ theorem phiOnClassGroupModPLinear_galois_of_fixed_at_mk0
           (ClassGroup.mk0 I)) : ClassGroupModP K p) := by
     change Additive.ofMul (cyclotomicGalActionMonoidHomModP (p := p) (K := K) a
         (QuotientGroup.mk (ClassGroup.mk0 I))) = _
-    unfold cyclotomicGalActionMonoidHomModP
+    simp only [cyclotomicGalActionMonoidHomModP]
     rw [QuotientGroup.map_mk]
   rw [h_galAction]
   -- Express `cyclotomicGalActionMonoidHom a (mk0 I)` as `mk0 (σ_a I')` for
@@ -241,7 +241,7 @@ theorem phiOnClassGroupModPLinear_galois_of_fixed
           ClassGroupModP K p) := by
     change Additive.ofMul (cyclotomicGalActionMonoidHomModP (p := p) (K := K) a
         (QuotientGroup.mk c)) = _
-    unfold cyclotomicGalActionMonoidHomModP
+    simp only [cyclotomicGalActionMonoidHomModP]
     rw [QuotientGroup.map_mk]
   rw [h_galAction, h_phi]
   -- cyclotomicGalActionMonoidHom a c = cyclotomicGalActionOnClassGroup a c.

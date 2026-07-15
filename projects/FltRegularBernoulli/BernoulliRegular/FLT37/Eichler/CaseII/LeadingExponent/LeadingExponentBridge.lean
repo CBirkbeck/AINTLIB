@@ -107,7 +107,7 @@ theorem caseIIEx811_samePrimeFiniteLog_level_one_eq_zero
     (hy' : y ∈ lambdaIdeal 37 (CyclotomicField 37 ℚ)) :
     samePrimeFiniteLog (p := 37) (K := CyclotomicField 37 ℚ) 1 y hy' = 0 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
-  unfold samePrimeFiniteLog
+  simp only [samePrimeFiniteLog]
   rw [Finset.sum_eq_single 1]
   · rw [samePrimeFiniteLogTerm_one_eq_mk (p := 37) (K := CyclotomicField 37 ℚ) 1 hy',
       Ideal.Quotient.eq_zero_iff_mem]

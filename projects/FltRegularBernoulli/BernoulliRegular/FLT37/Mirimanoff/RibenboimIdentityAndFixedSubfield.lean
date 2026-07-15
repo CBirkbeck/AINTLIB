@@ -63,7 +63,7 @@ theorem partialPowerSum_p_sub_one_eq_zero (p : ℕ) [hp : Fact p.Prime]
   -- term is `0^e = 0` for `e ≥ 1`.
   have h_rewrite : partialPowerSum p e (p - 1) =
       ∑ j ∈ Finset.range p, (j : ZMod p) ^ e := by
-    unfold partialPowerSum
+    simp only [partialPowerSum]
     have h_succ : p - 1 + 1 = p := by omega
     rw [h_succ, Finset.sum_range_eq_add_Ico (f := fun j ↦ (j : ZMod p) ^ e)
         (by omega : 0 < p)]
@@ -126,7 +126,7 @@ theorem mirimanoffPolynomial_eval_eq_one_sub_t_mul_partialPowerSum_eval
     Polynomial.eval_X] at heval
   rw [← heval]
   congr 1
-  unfold partialPowerSumPolynomial
+  simp only [partialPowerSumPolynomial]
   rw [Polynomial.eval_finsetSum]
   exact Finset.sum_congr rfl
     (fun k _ ↦ by rw [Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_pow,
