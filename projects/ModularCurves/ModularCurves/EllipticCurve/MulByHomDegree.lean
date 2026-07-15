@@ -618,6 +618,45 @@ theorem functionField_algHom_ext {K : Type u} [Field K] (W : WeierstrassCurve K)
         (AdjoinRoot.root W.toAffine.polynomial))
     exact hy
 
+/-- **(L4-iii brick 6, step C+D — the field intertwining)** The scheme function-field pullback
+`functionFieldMap [N]` on `K(pM) = (projModel W).functionField`, conjugated to
+`W.toAffine.FunctionField` by `projModelFunctionFieldEquiv`, equals HasseWeil's division-polynomial
+pullback `mulByInt_pullbackAlgHom`. By `functionField_algHom_ext` this reduces to the two generator
+identities (FFM-X/FFM-Y), which discharge from **brick 5** (`genericSpecPoint_comp_mulByHom`, the
+scheme-morphism identity `τ ≫ [n] = (division-polynomial chart point)`) transported to the germ
+level through the tautological-point stalk map. -/
+theorem brick6_intertwining {K : Type u} [Field K] [DecidableEq K] (W : WeierstrassCurve K)
+    [W.IsElliptic] (N : ℕ) [NeZero N]
+    [Flat ((modelEllipticCurve W).mulByHom N)] [IsFinite ((modelEllipticCurve W).mulByHom N)]
+    [LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom N)] (hn : (N : ℤ) ≠ 0) :
+    haveI : IsIntegral (modelEllipticCurve W).E := inferInstanceAs (IsIntegral (projModel W))
+    haveI : IrreducibleSpace (modelEllipticCurve W).E := inferInstance
+    ∀ z : (projModel W).functionField,
+      projModelFunctionFieldEquiv W (((modelEllipticCurve W).mulByHom N).functionFieldMap z)
+        = HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn (projModelFunctionFieldEquiv W z) := sorry
+
+/-- **(L4-iii brick 6, steps A+B — the fraction-field tower assembly)** Given the field intertwining,
+the module rank `Module.finrank Γ(Z) Γ([N]⁻¹Z)` equals `(mulByInt N).degree`. Transport the appTop
+module to `Γ(E, [N]⁻¹ᵁZ)` (`pullbackRestrictIsoRestrict`); both localise to `K(pM)` via
+`germToFunctionField`; the scalar tower is the banked square `functionFieldMap_comp_germToFunctionField`;
+`Algebra.IsAlgebraic.finrank_of_isFractionRing` gives `= Module.finrank K(pM) K(pM)` (via
+`functionFieldMap [N]`), which the intertwining transports to `Module.finrank K(E) K(E)` (via
+`mulByInt_pullbackAlgHom`) `= (mulByInt N).degree`. -/
+theorem brick6_from_intertwining {K : Type u} [Field K] [DecidableEq K] (W : WeierstrassCurve K)
+    [W.IsElliptic] (N : ℕ) [NeZero N]
+    [Flat ((modelEllipticCurve W).mulByHom N)] [IsFinite ((modelEllipticCurve W).mulByHom N)]
+    [LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom N)] (hn : (N : ℤ) ≠ 0)
+    (hinter :
+      haveI : IsIntegral (modelEllipticCurve W).E := inferInstanceAs (IsIntegral (projModel W))
+      haveI : IrreducibleSpace (modelEllipticCurve W).E := inferInstance
+      ∀ z : (projModel W).functionField,
+        projModelFunctionFieldEquiv W (((modelEllipticCurve W).mulByHom N).functionFieldMap z)
+          = HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn (projModelFunctionFieldEquiv W z)) :
+    letI := (pullback.snd ((modelEllipticCurve W).mulByHom N) (zChart W).ι).appTop.hom.toAlgebra
+    Module.finrank Γ((zChart W).toScheme, ⊤)
+        Γ(pullback ((modelEllipticCurve W).mulByHom N) (zChart W).ι, ⊤)
+      = (HasseWeil.mulByInt W.toAffine (N : ℤ)).degree := sorry
+
 /-- **(K4 crux — the HasseWeil coupling)** Over a field `K`, the scheme-theoretic fibre rank of the
 model `[N]` equals the degree of HasseWeil's multiplication-by-`N` isogeny `mulByInt W.toAffine N`
 (the function-field extension degree `[K(E) : [N]* K(E)]`).
@@ -653,12 +692,9 @@ theorem modelEllipticCurve_finrank_eq_mulByInt_degree {K : Type u} [Field K] [De
   refine (finrank_eq_module_finrank_of_affineOpen
     ((modelEllipticCurve W).mulByHom N) (show ((modelEllipticCurve W).E).Opens from zChart W)
     x₀ x).trans ?_
-  -- K4b (the isolated deep identity): `Module.finrank Γ(Z) Γ([N]⁻¹Z) = (mulByInt N).degree`.
-  -- All scheme plumbing is discharged; what remains is the coordinate ↔ division-polynomial
-  -- comparison: `Γ(Z) = W.CoordinateRing` (`coordRingToZSection`), and the `[N]`-pullback of
-  -- `Γ([N]⁻¹Z)` = HasseWeil `mulByInt`'s pullback (both realise `[N]`), so the module rank over the
-  -- domain coordinate ring = the function-field degree `(mulByInt N).degree = N²`.
-  sorry
+  -- K4b (brick 6): the field intertwining (via brick 5) + the fraction-field tower assembly.
+  have hn : (N : ℤ) ≠ 0 := by exact_mod_cast NeZero.ne N
+  exact brick6_from_intertwining W N hn (brick6_intertwining W N hn)
 
 /-- **(K4 field-level target)** Over a field `K`, the scheme-theoretic fibre rank of
 multiplication-by-`N` on the projective model of an elliptic Weierstrass curve is `N²`.
