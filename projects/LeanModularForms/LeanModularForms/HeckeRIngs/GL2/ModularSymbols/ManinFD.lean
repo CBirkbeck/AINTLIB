@@ -15,9 +15,11 @@ integral Eichler–Shimura `k ≥ 2` substrate,
 verdict are in `.mathlib-quality/decomposition-maninFD.md`.
 
 The target reduces (after the *proven* model-change half `symmetrised_petersson_fundDomain_eq`) to a
-geometric boundary-period identity over a `Γ₁(N)`-fundamental domain whose boundary is a `Γ₁(N)`-paired
+geometric boundary-period identity over a `Γ₁(N)`-fundamental domain whose boundary is a
+`Γ₁(N)`-paired
 cycle of rational-cusp geodesic edges.  The decomposition isolates the genuine research-scale core
-(`maninArea_eq_boundary_period`, leaf **M0**: the interior-edge side-pairing cancellation + Manin↔Siegel
+(`maninArea_eq_boundary_period`, leaf **M0**: the interior-edge side-pairing cancellation +
+Manin↔Siegel
 potential matching) from the founded-but-laborious infrastructure (leaves **M1–M5**).
 
 ## Leaf map (see decomposition-maninFD.md §3)
@@ -25,8 +27,10 @@ potential matching) from the founded-but-laborious infrastructure (leaves **M1�
 * `idealTriangle_isFundamentalDomain`  — **M2/M2′** (FOUNDED via the subgroup-tiling engine
   `IsFundamentalDomain.iUnion_smul_of_transversal`; the recommended route just takes
   `D = Gamma1_fundDomain_PSL N`, already proven a FD).
-* `exists_fdTile_pairedBoundary`       — **M4** (API-GAP, combinatorial; founded by `PairedBoundary`).
-* `maninArea_eq_boundary_period`       — **M0** (RESEARCH; the single deep wall — region-Stokes glue,
+* `exists_fdTile_pairedBoundary`       — **M4** (API-GAP, combinatorial; founded by
+  `PairedBoundary`).
+* `maninArea_eq_boundary_period`       — **M0** (RESEARCH; the single deep wall —
+  region-Stokes glue,
   interior-edge cancellation, `H→∞` cap limit, FTC-potential = `cuspValue`).
 * `exists_manin_fundDomain_boundary_period'` — **M5** assembly mirroring the target.
 
@@ -54,7 +58,8 @@ The recommended route (decomposition §5) takes `D := Gamma1_fundDomain_PSL N`, 
 proven to be an `imageGamma1_PSL N`-fundamental domain (`isFundamentalDomain_Gamma1_PSL`).  The
 literal "Manin ideal triangle" `D = ⋃ γᵢ • T₀` would instead use the subgroup-tiling engine
 `IsFundamentalDomain.iUnion_smul_of_transversal` over a base PSL-FD `T₀`; via the "ideal triangle =
-2 × standard `𝒟`" shortcut (answer (b)), the base case `T₀` is founded from `isFundamentalDomain_fdo_PSL`.
+2 × standard `𝒟`" shortcut (answer (b)), the base case `T₀` is founded from
+`isFundamentalDomain_fdo_PSL`.
 
 This leaf records the existence of *some* Manin-style fundamental domain `D`.  As the recommended
 route does, it is discharged by the founded witness `⟨Gamma1_fundDomain_PSL N,
@@ -83,8 +88,10 @@ forms `f, g`, the symmetrised Petersson *area* integral over the concrete Siegel
 `Gamma1_fundDomain_PSL N` equals `c · rawPairing f ((maninPairedBoundary N).boundaryDivisor ⊗ P)`.
 
 The reduction (all *individual* ingredients proven): the Sym-weight binomial bridge
-(`petersson_binomial_periodForm`); per-term region-Stokes (`exists_tile_boundary_periodForm_term`, on
-top of `tile_stokes_fd`); the `H → ∞` cap limit (`tendsto_horizontal_cap`, `periodForm_norm_le`); the
+(`petersson_binomial_periodForm`); per-term region-Stokes
+(`exists_tile_boundary_periodForm_term`, on
+top of `tile_stokes_fd`); the `H → ∞` cap limit (`tendsto_horizontal_cap`,
+`periodForm_norm_le`); the
 interior-edge pairwise cancellation + paired-edge collapse (`two_smul_rawPairing_boundaryDivisor`);
 and each surviving edge's FTC potential = `cuspValue` difference (`rawPairing_edgeDivisor_eq_sub`,
 `cuspValue_eq_top_sub_botVal`).
@@ -95,17 +102,20 @@ mathlib analogue), and the **Manin↔Siegel model change**.  This is Shimura (8.
 mathlib foothold (no modular curves / modular symbols / Eichler–Shimura map).
 
 It is **the lone `sorry`** of the whole `k ≥ 2` substrate, stated faithfully against the *concrete*
-`maninPairedBoundary N`, as `maninArea_eq_boundary_period` in `PeterssonStokes.lean` (co-located with
+`maninPairedBoundary N`, as `maninArea_eq_boundary_period` in `PeterssonStokes.lean`
+(co-located with
 M4 and the target).  See `HeckeRing.GL2.ModularSymbols.maninArea_eq_boundary_period`. -/
 
 /-! ## (M5) Assembly — FOUNDED (plumbing)
 
 Wire the target `exists_manin_fundDomain_boundary_period` from the *concrete* data: take the Siegel
 coset-tiling domain `D := Gamma1_fundDomain_PSL N` (already a proven `imageGamma1_PSL N`-fundamental
-domain, `isFundamentalDomain_Gamma1_PSL`), the Manin-symbol paired boundary `B := maninPairedBoundary
+domain, `isFundamentalDomain_Gamma1_PSL`), the Manin-symbol paired boundary
+`B := maninPairedBoundary
 N` (M4, sorry-free), and the concrete boundary-period identity `maninArea_eq_boundary_period` (M0,
 the lone sorry).  This is the straight assembly the existing
-`exists_pairedBoundary_fundDomain_petersson_eq` consumes (via `symmetrised_petersson_fundDomain_eq`),
+`exists_pairedBoundary_fundDomain_petersson_eq` consumes (via
+`symmetrised_petersson_fundDomain_eq`),
 now with a *concrete* `D` and `B` rather than existential witnesses. -/
 theorem exists_manin_fundDomain_boundary_period' (hk : 2 ≤ k)
     (f g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
