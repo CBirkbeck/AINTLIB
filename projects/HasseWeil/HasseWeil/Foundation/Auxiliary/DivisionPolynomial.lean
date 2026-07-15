@@ -111,7 +111,7 @@ lemma ψc_spec (n : ℤ) : W.ψ n * W.ψc n = W.ψ (2 * n) :=
   simp [ω, redInvarDenom_zero, complEDSAux₂_zero, ψ_zero]
 
 @[simp] lemma ω_one : W.ω 1 = Y := by
-  unfold ω ψ₂ negPolynomial polynomialY
+  simp only [ω, ψ₂, negPolynomial, polynomialY]
   rw [redInvarDenom_one, complEDSAux₂_one, ψ_one]
   simp only [one_pow]
   C_simp
@@ -496,7 +496,7 @@ theorem zsmul_point_eq_smulField : (n • Jacobian.point).point = ⟦smulField n
   ext i; fin_cases i <;> simp [Affine.smulX, Affine.smulY, this, inv_mul_eq_div]
 
 private lemma ω_neg_eq_neg_negY : curve.ω (-n) = -negY curvePoly (smulPoly n) := by
-  unfold smulPoly WeierstrassCurve.Jacobian.negY curvePoly
+  simp only [smulPoly, WeierstrassCurve.Jacobian.negY, curvePoly]
   simp_rw [ω_neg, fin3_def_ext, WeierstrassCurve.baseChange, WeierstrassCurve.map,
     show ∀ x, CC x = (algebraMap _ Poly) x from fun _ ↦ rfl]
   norm_num; ring
@@ -509,7 +509,7 @@ lemma smulRing_neg : smulRing (-n) = (-1 : Universal.Ring) • neg curveRing (sm
     ← WeierstrassCurve.Jacobian.map_neg, map_neg, map_one]; rfl
 
 private lemma dblZ_smulPoly : dblZ curvePoly (smulPoly n) = curve.ψ (2 * n) := by
-  unfold dblZ smulPoly WeierstrassCurve.Jacobian.negY curvePoly
+  simp only [dblZ, smulPoly, WeierstrassCurve.Jacobian.negY, curvePoly]
   simp_rw [fin3_def_ext, WeierstrassCurve.baseChange, WeierstrassCurve.map]
   rw [← ψc_spec _ n]; congr; convert curve.ω_spec n using 1
   simp_rw [show ∀ x, CC x = (algebraMap _ Poly) x from fun _ ↦ rfl]
