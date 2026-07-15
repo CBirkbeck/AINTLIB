@@ -1431,4 +1431,72 @@ noncomputable def e3ClassifyingEllHom {R : CommRingCat.{u}} {X : EllObj R}
   isPullback := isPullback_e3Top hD h3
   zero_w := e3Top_zero hD h3
 
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E15a stage 11, rt1)** The marking downstairs: a marked section composed with
+the glued comparison is the classifying map followed by the universal marked point. -/
+theorem section_comp_e3Top {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3} (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤)))
+    {σ : X.base ⟶ X.curve.toEllipticCurveGeom.E}
+    (hσ : σ ≫ X.curve.toEllipticCurveGeom.π = 𝟙 X.base) (p q : E3ModuliRing R)
+    (hpq : (universalE3 R).toAffine.Equation p q)
+    (hmark : ∀ w : E3Witness X L,
+      w.Pr.MarksAt hσ
+        (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom)
+          (e3ClassifyingRingHom X L hD h3 p))
+        (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom)
+          (e3ClassifyingRingHom X L hD h3 q))) :
+    σ ≫ e3Top hD h3 =
+      e3ClassifyingMap X L hD h3 ≫
+        projModelAffineSection (universalE3 R) p q hpq := by
+  refine (e3BaseCover hD).hom_ext _ _ (fun w => ?_)
+  show w.V.1.ι ≫ σ ≫ e3Top hD h3 = _
+  have hfac : w.V.1.ι ≫ σ =
+      sectionLift X.curve.toEllipticCurveGeom hσ w.V ≫
+        (e3WitnessCover hD).f w := by
+    rw [e3WitnessCover_f]
+    unfold sectionLift
+    rw [pullback.lift_fst]
+  rw [← Category.assoc, hfac, Category.assoc, e3Top_piece]
+  obtain ⟨hpq', hMeq⟩ := hmark w
+  have hMeq' : sectionLift X.curve.toEllipticCurveGeom hσ w.V ≫ w.Pr.e.hom =
+      w.V.2.isoSpec.hom ≫ projModelAffineSection w.Pr.W _ _ hpq' := by
+    calc sectionLift X.curve.toEllipticCurveGeom hσ w.V ≫ w.Pr.e.hom
+        = w.V.2.isoSpec.hom ≫ (w.V.2.isoSpec.inv ≫
+            sectionLift X.curve.toEllipticCurveGeom hσ w.V) ≫ w.Pr.e.hom := by
+          rw [← Category.assoc, ← Category.assoc, Iso.hom_inv_id, Category.id_comp]
+      _ = _ := by rw [hMeq]
+  rw [e3Piece, ← Category.assoc, hMeq']
+  rw [Category.assoc, ← Category.assoc (projModelAffineSection w.Pr.W _ _ hpq'),
+    projModelAffineSection_congr
+      (universalE3_map_classifying X L hD h3 w.V w.Pr w.β w.γ
+        w.hF w.hP w.hQ).symm]
+  letI : Algebra (E3ModuliRing R) Γ(X.base, w.V.1) :=
+    ((((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+      (e3ClassifyingRingHom X L hD h3))).toAlgebra
+  have hbc := projModelAffineSection_baseChange (universalE3 R) p q hpq
+    (WeierstrassCurve.Affine.Equation.map (algebraMap (E3ModuliRing R)
+      Γ(X.base, w.V.1)) hpq)
+  rw [show projModelAffineSection ((universalE3 R).map
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3)))
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom)
+        (e3ClassifyingRingHom X L hD h3 p))
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom)
+        (e3ClassifyingRingHom X L hD h3 q))
+      ((universalE3_map_classifying X L hD h3 w.V w.Pr w.β w.γ
+        w.hF w.hP w.hQ).symm ▸ hpq') ≫
+      projModelBaseChange
+        (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+          (e3ClassifyingRingHom X L hD h3))
+        (universalE3 R) =
+    Spec.map (CommRingCat.ofHom
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3))) ≫
+      projModelAffineSection (universalE3 R) p q hpq from hbc]
+  rw [← Category.assoc, ← restrict_e3ClassifyingMap hD h3 w.V, Category.assoc]
+  rfl
+
 end ModularCurves
