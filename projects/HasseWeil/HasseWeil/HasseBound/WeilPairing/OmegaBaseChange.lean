@@ -46,8 +46,6 @@ omega coefficient gives the value transport.
 * Silverman, *The Arithmetic of Elliptic Curves*, III.5.2, III.5.3, III.5.5.
 -/
 
-set_option linter.unusedSectionVars false
-
 open WeierstrassCurve HasseWeil.Curves
 open scoped TensorProduct
 
@@ -69,6 +67,8 @@ noncomputable scoped instance algFunctionFieldBaseChange :
     Algebra W.toAffine.FunctionField (W.baseChange L).toAffine.FunctionField :=
   ((⟨W.toAffine⟩ : SmoothPlaneCurve K).functionField_baseChange L).toAlgebra
 
+omit [DecidableEq K] [W.toAffine.IsElliptic] [DecidableEq L] [Algebra.IsAlgebraic K L]
+  [(W.baseChange L).toAffine.IsElliptic] in
 /-- `algebraMap K(E) K(E_L) = functionFieldMap` (definitional via `functionField_baseChange`). -/
 theorem algebraMap_functionField_baseChange_eq (z : W.toAffine.FunctionField) :
     algebraMap W.toAffine.FunctionField (W.baseChange L).toAffine.FunctionField z =
@@ -101,6 +101,8 @@ noncomputable def omegaDiffMap :
       KaehlerDifferential L (W.baseChange L).toAffine.FunctionField :=
   KaehlerDifferential.map K L W.toAffine.FunctionField (W.baseChange L).toAffine.FunctionField
 
+omit [DecidableEq K] [W.toAffine.IsElliptic] [DecidableEq L] [Algebra.IsAlgebraic K L]
+  [(W.baseChange L).toAffine.IsElliptic] in
 /-- `omegaDiffMap (D_K z) = D_L (functionFieldMap z)` (`KaehlerDifferential.map_D`). -/
 theorem omegaDiffMap_D (z : W.toAffine.FunctionField) :
     omegaDiffMap W L (KaehlerDifferential.D K W.toAffine.FunctionField z) =
@@ -108,6 +110,8 @@ theorem omegaDiffMap_D (z : W.toAffine.FunctionField) :
         (algebraMap W.toAffine.FunctionField (W.baseChange L).toAffine.FunctionField z) :=
   KaehlerDifferential.map_D K L W.toAffine.FunctionField (W.baseChange L).toAffine.FunctionField z
 
+omit [DecidableEq K] [W.toAffine.IsElliptic] [DecidableEq L] [Algebra.IsAlgebraic K L]
+  [(W.baseChange L).toAffine.IsElliptic] in
 /-- `omegaDiffMap (s • ω) = s • omegaDiffMap ω` (`K(E)`-linearity, the `K(E)`-action on
 `Ω[K(E_L)/L]`
 factoring through `functionFieldMap`). -/
@@ -164,6 +168,7 @@ theorem omegaDiffMap_pullbackKaehler
     rw [algebraMap_functionField_baseChange_eq, algebraMap_functionField_baseChange_eq]
     exact functionFieldMap_pullback W L α α_L hpb s
 
+omit [DecidableEq K] [DecidableEq L] in
 /-- **`functionFieldMap (u_gen) = u_gen` over `L`** (the invariant-differential denominator
 `u = 2y + a₁x + a₃` base-changes, since `x_gen`, `y_gen`, `a₁`, `a₃` do). -/
 theorem functionFieldMap_u_gen :
@@ -184,6 +189,7 @@ theorem functionFieldMap_u_gen :
     SmoothPlaneCurve.functionFieldMap_algebraMap_F, SmoothPlaneCurve.functionFieldMap_algebraMap_F]
   congr 2
 
+omit [DecidableEq K] [DecidableEq L] in
 /-- **The invariant differential transports**: `omegaDiffMap (ω_K) = ω_L`.  Both are
 `u⁻¹ • D(x_gen)`, and `functionFieldMap` carries `u_gen ↦ u_gen` (`functionFieldMap_u_gen`) and
 `x_gen ↦ x_gen` (`functionFieldMap_x_gen`). -/
