@@ -787,8 +787,10 @@ private lemma i_E_tendsto (H : ℝ) (_ : 1 < H) (threshold : ℝ) (hthresh_pos :
       Complex.log (fdBoundary_H H (2 + 12 / Real.pi * Real.arcsin (ε / 2)) - I) -
       2 * ↑Real.pi * I - -(I * ↑Real.pi) =
       -(↑((12 / Real.pi * Real.arcsin (ε / 2)) * Real.pi / 6) * I) := by
-    rw [← Complex.re_add_im (Complex.log (fdBoundary_H H (2 - 12 / Real.pi * Real.arcsin (ε / 2)) - I)),
-        ← Complex.re_add_im (Complex.log (fdBoundary_H H (2 + 12 / Real.pi * Real.arcsin (ε / 2)) - I)),
+    rw [← Complex.re_add_im
+          (Complex.log (fdBoundary_H H (2 - 12 / Real.pi * Real.arcsin (ε / 2)) - I)),
+        ← Complex.re_add_im
+          (Complex.log (fdBoundary_H H (2 + 12 / Real.pi * Real.arcsin (ε / 2)) - I)),
         Complex.log_re, Complex.log_re, Complex.log_im, Complex.log_im,
         arg_approach_i_left (H := H) hδ_pos hδ_lt_one,
         arg_approach_i_right (H := H) hδ_pos hδ_lt_one, h_nL, h_nR]
