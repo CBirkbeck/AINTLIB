@@ -4246,85 +4246,619 @@ theorem ProjModelBaseChange.projTateMap
   have hxy₂ : (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)).toAffine.Equation
       ((algebraMap ↑Γ(Y.base, D.U.1) k)
         (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)))
-      ((algebraMap ↑Γ(Y.base, D.U.1) k) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))) := by
+      ((algebraMap ↑Γ(Y.base, D.U.1) k) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY
+          D.W))) := by
     rw [← hx, ← hy]
-    exact ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))
+    exact ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))
   have hord₂ : NowhereOrderLEThree (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
       ((algebraMap ↑Γ(Y.base, D.U.1) k)
         (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)))
-      ((algebraMap ↑Γ(Y.base, D.U.1) k) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))) := by
+      ((algebraMap ↑Γ(Y.base, D.U.1) k) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY
+          D.W))) := by
     rw [← hx, ← hy]
     exact Fibre.pt_hord D k P hP
   -- (F2) the two T-E1 normalisations
   have hC : TateAtlas.TateNormal.variableChange (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
       (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
-        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))))
+        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base,
+            D.U.1) k))))
       (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
-        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))))
-      (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) =
-      (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
-      (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k) :=
-    (TateAtlas.TateNormal.variableChange_congr (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) hx hy (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) hxy₂ hord₂).trans
-      (TateAtlas.TateNormal.variableChange_map (algebraMap ↑Γ(Y.base, D.U.1) k) D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
-        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) hxy₂ hord₂).symm
+        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base,
+            D.U.1) k))))
+      (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+          (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) =
+      (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+          (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+      (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map
+          (algebraMap ↑Γ(Y.base, D.U.1) k) :=
+    (TateAtlas.TateNormal.variableChange_congr (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) hx hy
+        (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) hxy₂
+        hord₂).trans
+      (TateAtlas.TateNormal.variableChange_map (algebraMap ↑Γ(Y.base, D.U.1) k) D.W (ZChart.eval D.W
+          (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+          hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) hxy₂
+            hord₂).symm
   -- (F3) the two pointed atlas ring maps
   have hL : TateAtlas.Point.ringOverLift R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
       (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
-        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))))
+        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base,
+            D.U.1) k))))
       (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
-        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))))
-      (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) =
-      (algebraMap ↑Γ(Y.base, D.U.1) k).comp (TateAtlas.Point.ringOverLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base,
+            D.U.1) k))))
+      (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+          (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) =
+      (algebraMap ↑Γ(Y.base, D.U.1) k).comp (TateAtlas.Point.ringOverLift R D.W (ZChart.eval D.W
+          (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+          hP) (coordY D.W))
         (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) :=
-    (TateAtlas.Point.ringOverLift_congr R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) hx hy (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) hxy₂ hord₂).trans
-      (TateAtlas.Point.ringOverLift_comp (algebraMap ↑Γ(Y.base, D.U.1) k) R htower D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
-        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) hxy₂ hord₂).symm
+    (TateAtlas.Point.ringOverLift_congr R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) hx hy
+        (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) hxy₂
+        hord₂).trans
+      (TateAtlas.Point.ringOverLift_comp (algebraMap ↑Γ(Y.base, D.U.1) k) R htower D.W (ZChart.eval
+          D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P)
+          (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) hxy₂
+            hord₂).symm
   -- (G1) T-W7.0h: move the base change past the variable-change isomorphism
-  have hG1 := projModelVCIso_map (R := ↑Γ(Y.base, D.U.1)) (R' := k) (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) D.W
+  have hG1 := projModelVCIso_map (R := ↑Γ(Y.base, D.U.1)) (R' := k)
+      (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+      (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+      (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) D.W
   -- unfold both classifying maps to their canonical composites
   rw [projTateMap_unfold R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P hP),
     projTateMap_unfold R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
       (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (Fibre.pt_hord D k P hP),
-    ← cancel_epi (projModelVCIso ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).hom]
-  have hstar : (projModelVCIso ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).hom ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) D.W =
-      eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W) ≫ (projModelVCIso (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) D.W).hom := by
+    ← cancel_epi (projModelVCIso ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).hom]
+  have hstar : (projModelVCIso ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+      (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY
+      D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map
+      (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).hom ≫
+      projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) D.W =
+      eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+          (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+          (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+          hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) =
+          projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+          (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+          (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+          hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw
+          [WeierstrassCurve.map_variableChange]) ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1)
+          k) ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+          hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+          (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W) ≫
+          (projModelVCIso (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+          (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+          (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+          hP)) D.W).hom := by
     refine Eq.trans ?_ (congrArg (fun m ↦
-      eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ m) hG1.symm)
+      eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+          (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+          (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+          hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) =
+          projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+          (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+          (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+          hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw
+          [WeierstrassCurve.map_variableChange]) ≫ m) hG1.symm)
     rw [eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
-  have hslide := projModelBaseChange_eqToHom (algebraMap ↑Γ(Y.base, D.U.1) k) (TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P hP))
-  have hcomp := ProjModelBaseChange.comp_eqToHom ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (algebraMap ↑Γ(Y.base, D.U.1) k) (tateCurveLocOver R)
-  have hL' : (algebraMap ↑Γ(Y.base, D.U.1) k).comp ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) = ((((TateAtlas.Point.ringOverAlgLift R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) := hL.symm
-  have hbcL : projModelBaseChange ((algebraMap ↑Γ(Y.base, D.U.1) k).comp ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))) (tateCurveLocOver R) =
-      eqToHom (show projModel ((tateCurveLocOver R).map ((algebraMap ↑Γ(Y.base, D.U.1) k).comp ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))))) = projModel ((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k))) by rw [hL']) ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) (tateCurveLocOver R) :=
+  have hslide := projModelBaseChange_eqToHom (algebraMap ↑Γ(Y.base, D.U.1) k)
+      (TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P hP))
+  have hcomp := ProjModelBaseChange.comp_eqToHom ((((TateAtlas.Point.ringOverAlgLift R D.W
+      (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P)
+      (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart
+      P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+*
+      ↑Γ(Y.base, D.U.1))) (algebraMap ↑Γ(Y.base, D.U.1) k) (tateCurveLocOver R)
+  have hL' : (algebraMap ↑Γ(Y.base, D.U.1) k).comp ((((TateAtlas.Point.ringOverAlgLift R D.W
+      (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P)
+      (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart
+      P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+*
+      ↑Γ(Y.base, D.U.1))) = ((((TateAtlas.Point.ringOverAlgLift R (D.W.map (algebraMap ↑Γ(Y.base,
+      D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+      (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base,
+      D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+      (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base,
+      D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D
+      k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) :
+      tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) := hL.symm
+  have hbcL : projModelBaseChange ((algebraMap ↑Γ(Y.base, D.U.1) k).comp
+      ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+      (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+      (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) :
+      tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))))
+      (tateCurveLocOver R) =
+      eqToHom (show projModel ((tateCurveLocOver R).map ((algebraMap ↑Γ(Y.base, D.U.1) k).comp
+          ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+          (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+          (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) :
+          tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))))) =
+          projModel ((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R (D.W.map
+          (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
+          (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map
+          (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1)
+          k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map
+          (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap
+          ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)))
+          (Fibre.pt_hord D k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k))) by rw [hL'])
+          ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R (D.W.map (algebraMap
+          ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D
+          k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap
+          ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt
+          D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap
+          ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1)
+          k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D
+          k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) (tateCurveLocOver R) :=
     ProjModelBaseChange.ringHom_congr hL' (tateCurveLocOver R)
-  have hinvC : (projModelVCIso (TateAtlas.TateNormal.variableChange (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).inv = (projModelVCIso ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).inv ≫ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel ((TateAtlas.TateNormal.variableChange (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) by rw [hC]) :=
+  have hinvC : (projModelVCIso (TateAtlas.TateNormal.variableChange (D.W.map (algebraMap ↑Γ(Y.base,
+      D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+      (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base,
+      D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+      (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base,
+      D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D
+      k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP)) (D.W.map
+      (algebraMap ↑Γ(Y.base, D.U.1) k))).inv = (projModelVCIso ((TateAtlas.TateNormal.variableChange
+      D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P)
+      (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart
+      P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base,
+      D.U.1) k))).inv ≫ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W
+      (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P)
+      (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart
+      P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap
+      ↑Γ(Y.base, D.U.1) k))) = projModel ((TateAtlas.TateNormal.variableChange (D.W.map (algebraMap
+      ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+      (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base,
+      D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+      (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base,
+      D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D
+      k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP)) • (D.W.map
+      (algebraMap ↑Γ(Y.base, D.U.1) k))) by rw [hC]) :=
     projModelVCIso_inv_congr hC (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
-  calc (projModelVCIso ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).hom ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) D.W ≫ (projModelVCIso (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) D.W).inv ≫ eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P hP))).symm ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R)
-      = ((projModelVCIso ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).hom ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) D.W) ≫ (projModelVCIso (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) D.W).inv ≫ eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P hP))).symm ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R) :=
+  calc (projModelVCIso ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+      (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY
+      D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map
+      (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).hom ≫
+      projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) D.W ≫ (projModelVCIso
+      (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+      (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+      (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) D.W).inv ≫
+      eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart
+      P hP) (D.pt_hord P hP))).symm ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R D.W
+      (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P)
+      (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart
+      P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+*
+      ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R)
+      = ((projModelVCIso ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+          (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+          (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+          hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).hom
+          ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) D.W) ≫ (projModelVCIso
+          (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+          (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+          (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) D.W).inv
+          ≫ eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R D.W (D.pt P)
+          (D.pt_mem_zChart P hP) (D.pt_hord P hP))).symm ≫ projModelBaseChange
+          ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+          (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+          (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) :
+          tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))
+          (tateCurveLocOver R) :=
         (Category.assoc _ _ _).symm
-    _ = (eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W) ≫ (projModelVCIso (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) D.W).hom) ≫ (projModelVCIso (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) D.W).inv ≫ eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P hP))).symm ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R) :=
-        congrArg (· ≫ (projModelVCIso (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) D.W).inv ≫ eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P hP))).symm ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R)) hstar
-    _ = eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W) ≫ (projModelVCIso (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) D.W).hom ≫ (projModelVCIso (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) D.W).inv ≫ eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P hP))).symm ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R) := by
+    _ = (eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt
+        P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) =
+        projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw
+        [WeierstrassCurve.map_variableChange]) ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1)
+        k) ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+        hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W) ≫
+        (projModelVCIso (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)) D.W).hom) ≫ (projModelVCIso (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W
+        (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+        hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord
+        P hP)) D.W).inv ≫ eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R D.W (D.pt
+        P) (D.pt_mem_zChart P hP) (D.pt_hord P hP))).symm ≫ projModelBaseChange
+        ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) :
+        tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))
+        (tateCurveLocOver R) :=
+        congrArg (· ≫ (projModelVCIso (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W
+            (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart
+            P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP))
+            (D.pt_hord P hP)) D.W).inv ≫ eqToHom (congrArg projModel
+            (TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P
+            hP))).symm ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval
+            D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P)
+            (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P)
+            (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) :
+            tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R)) hstar
+    _ = eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) =
+        projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw
+        [WeierstrassCurve.map_variableChange]) ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1)
+        k) ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+        hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W) ≫
+        (projModelVCIso (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)) D.W).hom ≫ (projModelVCIso (TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W
+        (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+        hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord
+        P hP)) D.W).inv ≫ eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R D.W (D.pt
+        P) (D.pt_mem_zChart P hP) (D.pt_hord P hP))).symm ≫ projModelBaseChange
+        ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) :
+        tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))
+        (tateCurveLocOver R) := by
         simp only [Category.assoc]
-    _ = eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W) ≫ eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P hP))).symm ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R) :=
-        congrArg (fun m ↦ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W) ≫ m) (Iso.hom_inv_id_assoc _ _)
-    _ = eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ (projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W) ≫ eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P hP))).symm) ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R) := by
+    _ = eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) =
+        projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw
+        [WeierstrassCurve.map_variableChange]) ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1)
+        k) ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+        hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W) ≫
+        eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (D.pt_hord P hP))).symm ≫ projModelBaseChange
+        ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) :
+        tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))
+        (tateCurveLocOver R) :=
+        congrArg (fun m ↦ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W
+            (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P)
+            (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P)
+            (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) •
+            (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel
+            (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+            hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+            (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) •
+            D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange])
+            ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k)
+            ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+            hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+            (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W)
+            ≫ m) (Iso.hom_inv_id_assoc _ _)
+    _ = eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) =
+        projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw
+        [WeierstrassCurve.map_variableChange]) ≫ (projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1)
+        k) ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+        hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W) ≫
+        eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (D.pt_hord P hP))).symm) ≫ projModelBaseChange
+        ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) :
+        tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))
+        (tateCurveLocOver R) := by
         simp only [Category.assoc]
-    _ = eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ (eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P hP)]) ≫ projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) ((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))))) ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R) :=
-        congrArg (fun m ↦ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ m ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R)) hslide
-    _ = eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P hP)]) ≫ (projModelBaseChange (algebraMap ↑Γ(Y.base, D.U.1) k) ((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))) ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R)) := by
+    _ = eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) =
+        projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw
+        [WeierstrassCurve.map_variableChange]) ≫ (eqToHom (show projModel
+        (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map
+        (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map
+        ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) :
+        tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map
+        (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [TateAtlas.CurveLocOver.map_marked R D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (D.pt_hord P hP)]) ≫ projModelBaseChange (algebraMap ↑Γ(Y.base,
+        D.U.1) k) ((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval
+        D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart
+        P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP))
+        (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base,
+        D.U.1))))) ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W
+        (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+        hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord
+        P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))
+        (tateCurveLocOver R) :=
+        congrArg (fun m ↦ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W
+            (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P)
+            (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P)
+            (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) •
+            (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel
+            (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+            hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+            (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) •
+            D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange])
+            ≫ m ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W
+            (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart
+            P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP))
+            (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+*
+            ↑Γ(Y.base, D.U.1))) (tateCurveLocOver R)) hslide
+    _ = eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) =
+        projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw
+        [WeierstrassCurve.map_variableChange]) ≫ eqToHom (show projModel
+        (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map
+        (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map
+        ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) :
+        tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map
+        (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [TateAtlas.CurveLocOver.map_marked R D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (D.pt_hord P hP)]) ≫ (projModelBaseChange (algebraMap ↑Γ(Y.base,
+        D.U.1) k) ((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval
+        D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart
+        P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP))
+        (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base,
+        D.U.1)))) ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W
+        (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+        hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord
+        P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))
+        (tateCurveLocOver R)) := by
         simp only [Category.assoc]
-    _ = eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P hP)]) ≫ (eqToHom (congrArg projModel (WeierstrassCurve.map_map (tateCurveLocOver R) ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (algebraMap ↑Γ(Y.base, D.U.1) k))) ≫
-          projModelBaseChange ((algebraMap ↑Γ(Y.base, D.U.1) k).comp ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))) (tateCurveLocOver R)) :=
-        congrArg (fun m ↦ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P hP)]) ≫ m) hcomp
-    _ = eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P hP)]) ≫ (eqToHom (congrArg projModel (WeierstrassCurve.map_map (tateCurveLocOver R) ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (algebraMap ↑Γ(Y.base, D.U.1) k))) ≫ (eqToHom (show projModel ((tateCurveLocOver R).map ((algebraMap ↑Γ(Y.base, D.U.1) k).comp ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))))) = projModel ((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k))) by rw [hL']) ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) (tateCurveLocOver R))) :=
-        congrArg (fun m ↦ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange]) ≫ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P hP)]) ≫ (eqToHom (congrArg projModel (WeierstrassCurve.map_map (tateCurveLocOver R) ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (algebraMap ↑Γ(Y.base, D.U.1) k))) ≫ m)) hbcL
-    _ = eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel ((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k))) by rw [WeierstrassCurve.map_variableChange, ← TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P hP), WeierstrassCurve.map_map, hL']) ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) (tateCurveLocOver R) := by
+    _ = eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) =
+        projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw
+        [WeierstrassCurve.map_variableChange]) ≫ eqToHom (show projModel
+        (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map
+        (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map
+        ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) :
+        tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map
+        (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [TateAtlas.CurveLocOver.map_marked R D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (D.pt_hord P hP)]) ≫ (eqToHom (congrArg projModel
+        (WeierstrassCurve.map_map (tateCurveLocOver R) ((((TateAtlas.Point.ringOverAlgLift R D.W
+        (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P)
+        (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) :
+        tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (algebraMap ↑Γ(Y.base, D.U.1) k))) ≫
+          projModelBaseChange ((algebraMap ↑Γ(Y.base, D.U.1) k).comp
+              ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+              hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+              (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) :
+              tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))))
+              (tateCurveLocOver R)) :=
+        congrArg (fun m ↦ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W
+            (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P)
+            (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P)
+            (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) •
+            (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel
+            (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+            hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+            (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) •
+            D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange])
+            ≫ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W
+            (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart
+            P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP))
+            (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel
+            (((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W
+            (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart
+            P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP))
+            (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+*
+            ↑Γ(Y.base, D.U.1)))).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw
+            [TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P
+            hP)]) ≫ m) hcomp
+    _ = eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) =
+        projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw
+        [WeierstrassCurve.map_variableChange]) ≫ eqToHom (show projModel
+        (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) • D.W).map
+        (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel (((tateCurveLocOver R).map
+        ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) :
+        tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))).map
+        (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [TateAtlas.CurveLocOver.map_marked R D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (D.pt_hord P hP)]) ≫ (eqToHom (congrArg projModel
+        (WeierstrassCurve.map_map (tateCurveLocOver R) ((((TateAtlas.Point.ringOverAlgLift R D.W
+        (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P)
+        (D.pt_mem_zChart P hP)) (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) :
+        tateRingOver R →+* ↑Γ(Y.base, D.U.1))) (algebraMap ↑Γ(Y.base, D.U.1) k))) ≫ (eqToHom (show
+        projModel ((tateCurveLocOver R).map ((algebraMap ↑Γ(Y.base, D.U.1) k).comp
+        ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+        (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) :
+        tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1))))) =
+        projModel ((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R (D.W.map
+        (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
+        (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map
+        (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
+        (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map
+        (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap
+        ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)))
+        (Fibre.pt_hord D k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k))) by rw [hL']) ≫
+        projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R (D.W.map (algebraMap ↑Γ(Y.base,
+        D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base,
+        D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base,
+        D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt
+        D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) :
+        tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) (tateCurveLocOver R))) :=
+        congrArg (fun m ↦ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W
+            (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P)
+            (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P)
+            (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) •
+            (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel
+            (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+            hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+            (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)) •
+            D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw [WeierstrassCurve.map_variableChange])
+            ≫ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W
+            (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart
+            P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP))
+            (D.pt_hord P hP)) • D.W).map (algebraMap ↑Γ(Y.base, D.U.1) k)) = projModel
+            (((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W
+            (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart
+            P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP))
+            (D.pt_hord P hP) : tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+*
+            ↑Γ(Y.base, D.U.1)))).map (algebraMap ↑Γ(Y.base, D.U.1) k)) by rw
+            [TateAtlas.CurveLocOver.map_marked R D.W (D.pt P) (D.pt_mem_zChart P hP) (D.pt_hord P
+            hP)]) ≫ (eqToHom (congrArg projModel (WeierstrassCurve.map_map (tateCurveLocOver R)
+            ((((TateAtlas.Point.ringOverAlgLift R D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P
+            hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W))
+            (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP) :
+            tateRingOver R →ₐ[R] ↑Γ(Y.base, D.U.1))) : tateRingOver R →+* ↑Γ(Y.base, D.U.1)))
+            (algebraMap ↑Γ(Y.base, D.U.1) k))) ≫ m)) hbcL
+    _ = eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) =
+        projModel ((tateCurveLocOver R).map ((((TateAtlas.Point.ringOverAlgLift R (D.W.map
+        (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
+        (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map
+        (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
+        (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map
+        (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap
+        ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)))
+        (Fibre.pt_hord D k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k))) by rw
+        [WeierstrassCurve.map_variableChange, ← TateAtlas.CurveLocOver.map_marked R D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (D.pt_hord P hP), WeierstrassCurve.map_map, hL']) ≫
+        projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R (D.W.map (algebraMap ↑Γ(Y.base,
+        D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base,
+        D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base,
+        D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt
+        D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) :
+        tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) (tateCurveLocOver R) := by
         simp only [eqToHom_trans_assoc]
-    _ = (projModelVCIso ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).hom ≫ (projModelVCIso (TateAtlas.TateNormal.variableChange (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).inv ≫ eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (Fibre.pt_hord D k P hP))).symm ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) (tateCurveLocOver R) := by
+    _ = (projModelVCIso ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+        (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+        (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P
+        hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).hom ≫
+        (projModelVCIso (TateAtlas.TateNormal.variableChange (D.W.map (algebraMap ↑Γ(Y.base, D.U.1)
+        k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base,
+        D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base,
+        D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt
+        D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP))
+        (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).inv ≫ eqToHom (congrArg projModel
+        (TateAtlas.CurveLocOver.map_marked R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D
+        k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (Fibre.pt_hord D k P hP))).symm ≫
+        projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R (D.W.map (algebraMap ↑Γ(Y.base,
+        D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base,
+        D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+        (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base,
+        D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt
+        D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) :
+        tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) (tateCurveLocOver R) := by
         rw [hinvC]
-        rw [show (projModelVCIso ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).hom ≫ ((projModelVCIso ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))).inv ≫ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel ((TateAtlas.TateNormal.variableChange (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) by rw [hC])) ≫ eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (Fibre.pt_hord D k P hP))).symm ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) (tateCurveLocOver R) =
-            (eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel ((TateAtlas.TateNormal.variableChange (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) by rw [hC]) ≫ eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (Fibre.pt_hord D k P hP))).symm) ≫ projModelBaseChange ((((TateAtlas.Point.ringOverAlgLift R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP))) (Fibre.pt_hord D k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k)) (tateCurveLocOver R) from
+        rw [show (projModelVCIso ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W (D.pt P)
+            (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP)
+            (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP)) (D.pt_hord
+            P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base, D.U.1)
+            k))).hom ≫ ((projModelVCIso ((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W
+            (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart
+            P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P) (D.pt_mem_zChart P hP))
+            (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) (D.W.map (algebraMap ↑Γ(Y.base,
+            D.U.1) k))).inv ≫ eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W
+            (ZChart.eval D.W (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P)
+            (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P)
+            (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) •
+            (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel
+            ((TateAtlas.TateNormal.variableChange (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
+            (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+            (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap
+            ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
+            (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map
+            (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap
+            ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P
+            hP))) (Fibre.pt_hord D k P hP)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) by rw
+            [hC])) ≫ eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R (D.W.map
+            (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P
+            (D.pt_mem_zChart P hP)) (Fibre.pt_hord D k P hP))).symm ≫ projModelBaseChange
+            ((((TateAtlas.Point.ringOverAlgLift R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
+            (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+            (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap
+            ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
+            (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map
+            (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap
+            ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P
+            hP))) (Fibre.pt_hord D k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k))
+            (tateCurveLocOver R) =
+            (eqToHom (show projModel (((TateAtlas.TateNormal.variableChange D.W (ZChart.eval D.W
+                (D.pt P) (D.pt_mem_zChart P hP) (coordX D.W)) (ZChart.eval D.W (D.pt P)
+                (D.pt_mem_zChart P hP) (coordY D.W)) (ZChart.eval_equation_self D.W (D.pt P)
+                (D.pt_mem_zChart P hP)) (D.pt_hord P hP)).map (algebraMap ↑Γ(Y.base, D.U.1) k)) •
+                (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) = projModel
+                ((TateAtlas.TateNormal.variableChange (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
+                (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+                (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap
+                ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
+                (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map
+                (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap
+                ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P
+                hP))) (Fibre.pt_hord D k P hP)) • (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))) by rw
+                [hC]) ≫ eqToHom (congrArg projModel (TateAtlas.CurveLocOver.map_marked R (D.W.map
+                (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P
+                (D.pt_mem_zChart P hP)) (Fibre.pt_hord D k P hP))).symm) ≫ projModelBaseChange
+                ((((TateAtlas.Point.ringOverAlgLift R (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
+                (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P)
+                (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordX (D.W.map (algebraMap
+                ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k))
+                (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P hP)) (coordY (D.W.map
+                (algebraMap ↑Γ(Y.base, D.U.1) k)))) (ZChart.eval_equation_self (D.W.map (algebraMap
+                ↑Γ(Y.base, D.U.1) k)) (Fibre.pt D k P) (Fibre.pt_mem_zChart D k P (D.pt_mem_zChart P
+                hP))) (Fibre.pt_hord D k P hP) : tateRingOver R →ₐ[R] k)) : tateRingOver R →+* k))
+                (tateCurveLocOver R) from
           ((congrArg (_ ≫ ·) (Category.assoc _ _ _)).trans
             (Iso.hom_inv_id_assoc _ _)).trans (Category.assoc _ _ _).symm]
         rw [eqToHom_trans]
