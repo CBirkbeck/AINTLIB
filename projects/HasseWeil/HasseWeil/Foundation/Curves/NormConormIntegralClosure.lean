@@ -450,28 +450,9 @@ noncomputable def centerIdealOnC₁
       v.valuation C₁.FunctionField (algebraMap C₁.CoordinateRing C₁.FunctionField a) < 1 :=
   Iff.rfl
 
-/-- **A surjective `ℤᵐ⁰`-valued valuation is nontrivial.**  Surjectivity hits `exp 1`, an element
-with valuation `≠ 0, 1`.  The shared rank-one input to the DVR-domination step (`O ≠ ⊤`), used by
-both the point case and the `∞` case of the place classification below. -/
-private theorem isNontrivial_of_surjective_withZeroInt
-    (w : Valuation C₁.FunctionField (WithZero (Multiplicative ℤ)))
-    (hwsurj : Function.Surjective w) :
-    w.IsNontrivial := by
-  refine ⟨?_⟩
-  obtain ⟨z, hz⟩ := hwsurj (WithZero.exp (1 : ℤ))
-  refine ⟨z, ?_, ?_⟩
-  · rw [hz]; exact WithZero.exp_ne_zero
-  · rw [hz, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
-      (WithZero.exp_zero).symm, Ne, WithZero.exp_inj]; norm_num
-
-/-- **The valuation subring of a surjective `ℤᵐ⁰`-valued valuation is proper** (`≠ ⊤`).  Direct from
-nontriviality (`isNontrivial_of_surjective_withZeroInt`) via `valuationSubring_eq_top_iff`. -/
-private theorem valuationSubring_ne_top_of_surjective
-    (w : Valuation C₁.FunctionField (WithZero (Multiplicative ℤ)))
-    (hwsurj : Function.Surjective w) :
-    w.valuationSubring ≠ ⊤ := fun htop =>
-  (Valuation.valuationSubring_eq_top_iff _).mp htop
-    (isNontrivial_of_surjective_withZeroInt w hwsurj)
+/- `isNontrivial_of_surjective_withZeroInt` + `valuationSubring_ne_top_of_surjective` were
+private general facts re-proved from `Valuation/RankOneDomination.lean`'s family — now PUBLIC
+there in `{F : Type*}` generality (#7620); this file consumes them via the parent namespace. -/
 
 /-- **The center ideal of a `B`-prime on `C₁` is prime** (point case): `centerIdealOnC₁ v hx hy` is a
 prime ideal.  Properness is `w 1 = 1 ≮ 1`; primality is the non-archimedean factorisation
@@ -631,7 +612,7 @@ theorem bPrime_valuation_eq_pointValuation_of_coordGen_le_one
   -- DVR-domination forces the subrings (`O_v ≠ ⊤` as `w` is nontrivial) and hence the valuations equal.
   have hEq : (C₁.pointValuation P).valuationSubring = w.valuationSubring :=
     rankOne_valuationSubring_le_eq_of_ne_top _ _ hBA
-      (valuationSubring_ne_top_of_surjective w hwsurj)
+      (valuationSubring_ne_top_of_surjective_withZeroInt w hwsurj)
   refine Valuation.isEquiv_iff_eq_of_surjective_withZeroInt _ _ hwsurj
     ((IsDiscreteValuationRing.maximalIdeal (C₁.localRingAt P)).valuation_surjective
       C₁.FunctionField) ?_
@@ -673,7 +654,7 @@ theorem bPrime_valuation_eq_ordAtInfty_of_subring_le
   -- then upgrade equal subrings to the value identity.
   have hEq : w.valuationSubring = C₁.ordAtInftyValuation.valuationSubring :=
     rankOne_valuationSubring_le_eq_of_ne_top _ _ hsub
-      (valuationSubring_ne_top_of_surjective _ C₁.ordAtInftyValuation_surjective)
+      (valuationSubring_ne_top_of_surjective_withZeroInt _ C₁.ordAtInftyValuation_surjective)
   refine Valuation.isEquiv_iff_eq_of_surjective_withZeroInt _ _ hwsurj
     C₁.ordAtInftyValuation_surjective ?_
   rw [Valuation.isEquiv_iff_valuationSubring]; exact hEq
@@ -1241,16 +1222,9 @@ theorem valuation_le_one_of_ordAtInfty_nonneg
 `ℤᵐ⁰`).  Needed for the `∞`-domination. -/
 theorem valuationSubring_ne_top
     (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) :
-    (v.valuation C₁.FunctionField).valuationSubring ≠ ⊤ := by
-  have hNontriv : (v.valuation C₁.FunctionField).IsNontrivial := by
-    refine ⟨?_⟩
-    obtain ⟨z, hz⟩ := v.valuation_surjective C₁.FunctionField (WithZero.exp (1 : ℤ))
-    refine ⟨z, ?_, ?_⟩
-    · rw [hz]; exact WithZero.exp_ne_zero
-    · rw [hz, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
-        (WithZero.exp_zero).symm, Ne, WithZero.exp_inj]; norm_num
-  intro htop
-  exact (Valuation.valuationSubring_eq_top_iff _).mp htop hNontriv
+    (v.valuation C₁.FunctionField).valuationSubring ≠ ⊤ :=
+  valuationSubring_ne_top_of_surjective_withZeroInt _
+    (v.valuation_surjective C₁.FunctionField)
 
 /-- **No `B`-prime has an `x₁`-pole** (the `coordXFun` half of `BPrimeValuationCoordGenLeOne`,
 discharged via the `∞`-exclusion `hreg`): for a `B`-prime `v`, `w_v(x₁) ≤ 1`.  By contradiction: if

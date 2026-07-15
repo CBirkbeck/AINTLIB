@@ -219,23 +219,10 @@ for the smooth curve `E₂`, in its general (non-`B`) form.  The proof is the sa
 `NormConormIntegralClosure.bPrime_valuation_eq_pointValuation_of_coordGen_le_one`, transcribed to a
 generic surjective `ℤᵐ⁰`-valued valuation with prescribed affine center. -/
 
-omit [DecidableEq F] [IsAlgClosed F] in
-/-- **The valuation subring of a surjective `ℤᵐ⁰`-valued valuation is proper** (`≠ ⊤`). A surjective
-`w` is nontrivial — it hits `exp 1 ≠ 0, 1` — so by `Valuation.valuationSubring_eq_top_iff` its
-valuation subring cannot be all of `K`.  (Local helper for `eq_pointValuation_of_center`; the
-`NormConormIntegralClosure` analogue is private to its file.) -/
-private theorem valuationSubring_ne_top_of_surjective_withZeroInt {K : Type*} [Field K]
-    (w : Valuation K (WithZero (Multiplicative ℤ))) (hwsurj : Function.Surjective w) :
-    w.valuationSubring ≠ ⊤ := by
-  have hNontriv : w.IsNontrivial := by
-    refine ⟨?_⟩
-    obtain ⟨z, hz⟩ := hwsurj (WithZero.exp (1 : ℤ))
-    refine ⟨z, ?_, ?_⟩
-    · rw [hz]; exact WithZero.exp_ne_zero
-    · rw [hz, show (1 : WithZero (Multiplicative ℤ)) = WithZero.exp (0 : ℤ) from
-        (WithZero.exp_zero).symm, Ne, WithZero.exp_inj]; norm_num
-  intro htop
-  exact (Valuation.valuationSubring_eq_top_iff _).mp htop hNontriv
+/- `valuationSubring_ne_top_of_surjective_withZeroInt` was a private byte-copy of the
+`NormConormIntegralClosure` helper — the general form is now PUBLIC in
+`Foundation/Curves/Valuation/RankOneDomination.lean` (#7620); uses below resolve to it via
+`open HasseWeil.Curves`. -/
 
 set_option synthInstance.maxHeartbeats 400000 in
 omit [DecidableEq F] [IsAlgClosed F] in
