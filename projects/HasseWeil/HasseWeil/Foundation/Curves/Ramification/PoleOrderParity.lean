@@ -29,9 +29,8 @@ fact, weakened to the special case `(P) − (O)` is principal ⇒ P = O).
 
 namespace HasseWeil.Curves.SmoothPlaneCurve
 
-variable {F : Type*} [Field F] (C : SmoothPlaneCurve F) [C.toAffine.IsElliptic]
+variable {F : Type*} [Field F] (C : SmoothPlaneCurve F)
 
-omit [C.toAffine.IsElliptic] in
 /-- The order at infinity of `algebraMap p` for a nonzero polynomial `p` is
 `-2 · natDeg p`, an even integer, hence never `-1`.
 
@@ -45,7 +44,6 @@ private theorem ordAtInfty_algebraMap_polynomial_ne_neg_one
   have h_int : (-2 * (p.natDegree : ℤ) : ℤ) = -1 := WithTop.coe_injective h_eq
   omega
 
-omit [C.toAffine.IsElliptic] in
 /-- The order at infinity of `algebraMap q · coordY` for a nonzero polynomial `q`
 is `-2 · natDeg q - 3`, an odd integer `≤ -3`, hence never `-1`.
 
@@ -67,7 +65,6 @@ private theorem ordAtInfty_algebraMap_mul_coordY_ne_neg_one
   rw [← WithTop.coe_add, WithTop.coe_inj] at h_eq
   omega
 
-omit [C.toAffine.IsElliptic] in
 /-- For `p, q` both nonzero, the order at infinity of the image of `p • 1 + q • Y`
 is `-max(2·natDeg p, 2·natDeg q + 3) ≤ -3`, hence never `-1`.
 
@@ -87,7 +84,6 @@ private theorem ordAtInfty_smul_basis_both_ne_zero_ne_neg_one
     apply le_max_of_le_right; omega
   omega
 
-omit [C.toAffine.IsElliptic] in
 /-- **Parity obstruction**: for any nonzero coordinate-ring element
 `u ∈ F[E]`, the order at infinity of its image in `F(E)` is never
 exactly `-1`. The decomposition `u = p · 1 + q · y` gives
@@ -122,7 +118,6 @@ theorem coordRingImage_ordAtInfty_ne_neg_one
       rw [← hpq]
       exact C.ordAtInfty_smul_basis_both_ne_zero_ne_neg_one hp hq
 
-omit [C.toAffine.IsElliptic] in
 /-- Function-field version: for any `f ∈ K(E)*` lying in the image of
 the coordinate ring, `ord_∞(f) ≠ -1`. Directly from the parity lemma. -/
 theorem funcField_image_ordAtInfty_ne_neg_one
