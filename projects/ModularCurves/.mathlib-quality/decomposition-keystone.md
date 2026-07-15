@@ -346,3 +346,34 @@ literally IS the coordinate↔division-polynomial identity — the register-box 
 is deferred to the L4-iii session (which must supply that algebra equality anyway). K4b-2 kept as a
 clean single sorry; the full mechanical-except-L4-core assembly path is now documented and verified to
 the diamond boundary.
+
+## SESSION APPEND (v10.250, KM) — FOUNDATION SPINE LANDED; the keystone's remaining shape
+
+The three data-defs are CONSTRUCTED (commit `6595238b2`, fleet-green 4214 jobs, zero consumer edits):
+`endDeg f = (f.left.finrank (E.zero s₀) : ℤ)` (basepoint; junk **1** over `∅` — keeps
+`endDeg_one`/`endDeg_eq_one_of_isIso`/`endDeg_comp`/`eq_zero_of_endDeg_eq_zero` hypothesis-free),
+`endTrace f = deg(𝟙*f) − 1 − deg f` (polarization-as-definition ⟹ `endDeg_one_add` definitional),
+`endDual f = [tr f] * f⁻¹` (trace reflection ⟹ `endTrace_spec` pure group algebra). PROVEN CLEAN:
+`endTrace_spec`, `endDeg_one_add`, `le_endDeg_of_killed_injective` (the [KEY-KER] endDeg form — the
+KernelBound UNIFICATION bridge `endDeg_eq_left_finrank` is now PROVEN via `Unique (PrimeSpectrum k)`).
+`endDeg_mulBy = n²` [Nonempty S] wired: n>0 → BB-DEG `Torsion.mulByHom_finrank` (G0); n<0 →
+`[-1]`-twist + `finrank_comp_left_of_isIso` (side conditions BB-FLAT + `mulByHom_isFinite`); n=0 →
+**T-DEG0** `mulByHom_zero_finrank` (NEW small leaf, sorried in-file).
+
+**T-DEG0 route (assessed this session):** `(mulBy 0).left = π ≫ zero`; pullback along an affine chart
+`U ∋ x` pastes to `E ×_S W`, `W = S ×_{zero,E} U` (affine: closed in affine `U`); module =
+`Γ(E ×_S W) ≅ Γ(W)` (universallyOConnected on the base-changed π) `= Γ(U)/I` (zero a closed
+immersion of affines) — a cyclic quotient; `rankAtStalk = 0` because `I` locally contains a
+NONZERODIVISOR (the zero section is an effective Cartier divisor on the rel-dim-1 smooth curve —
+the LevelStructure/CartierDivisor `orderDivisor` machinery has this substance). Bounded but real:
+pullback-pasting + universallyOConnected-appTop + rankAtStalk-of-cyclic-quotient. Own sub-session.
+
+**Where the deep content now lives (post-spine):** `endDual_comp_self` = `[tr f]∘f − f∘f = [deg f]`
+(KM 2.6.3 char-poly). With the trace-reflection dual, this is exactly "deg is the quadratic form with
+polarization tr" — fibrewise it is HasseWeil `DegreeQuadraticForm` at the basepoint fibre, but the
+morphism-level identity needs (i) fibre-rank = fibre-degree for ARBITRARY endos (K4-general, not just
+`[N]`), (ii) postcomp-distributivity `([tr]−f)≫f` (endPostcomp_mul needs f pointed — general Over-endos
+include translations; note the identity IS true for translations: dual(τ_P) = τ_{−P}, deg = 1), and
+(iii) a fibre-to-morphism globalisation (rigidity/T-W7.8-class). This is the honest single big sorry —
+NOT closable by assembly; the L4-core (`functionFieldMap [N] = mulByInt_pullbackAlgHom`) remains the
+other deep leaf, and its landing discharges BB-DEG (K4b-2) which feeds `endDeg_mulBy`'s box.
