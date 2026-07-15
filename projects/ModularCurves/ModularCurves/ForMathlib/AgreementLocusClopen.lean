@@ -44,7 +44,7 @@ instance isOpenImmersion_agreementι [FormallyUnramified f] [LocallyOfFiniteType
     (a b : Z ⟶ X) (hab : a ≫ f = b ≫ f) :
     IsOpenImmersion (agreementι f a b hab) := by
   haveI : IsOpenImmersion (pullback.diagonal f) :=
-    AlgebraicGeometry.FormallyUnramified.isOpenImmersion_diagonal f
+    FormallyUnramified.isOpenImmersion_diagonal f
   exact inferInstanceAs (IsOpenImmersion (pullback.fst _ _))
 
 /-- For `f` separated, the agreement-locus inclusion is a closed immersion (pullback of
@@ -62,7 +62,7 @@ agreement-locus inclusion of `a b : Z ⟶ X` (with `a ≫ f = b ≫ f`) is clope
 theorem isClopen_range_agreementι [FormallyUnramified f] [LocallyOfFiniteType f]
     [IsSeparated f] (a b : Z ⟶ X) (hab : a ≫ f = b ≫ f) :
     IsClopen (Set.range (agreementι f a b hab).base) :=
-  ⟨(AlgebraicGeometry.IsClosedImmersion.isClosedEmbedding
+  ⟨(IsClosedImmersion.isClosedEmbedding
       (agreementι f a b hab)).isClosed_range,
     (agreementι f a b hab).isOpenEmbedding.isOpen_range⟩
 
