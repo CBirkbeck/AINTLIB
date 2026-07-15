@@ -504,6 +504,249 @@ theorem projModelPointsEquiv_chartSpecPoint (x y : L)
       Equiv.apply_symm_apply]
     rfl
 
+
+set_option maxHeartbeats 1600000
+
+open HomogeneousLocalization
+
+/-- The solution ring hom attached to a chart point datum (the underlying hom of
+`chartSolutionsEquiv.symm`). -/
+noncomputable def chartSolutionHom (x y : L) (h : (W.baseChange L).toAffine.Equation x y) :
+    Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) →+* L :=
+  ((chartSolutionsEquiv W 2 L).symm (chartSolution W x y h)).1
+
+/-- **(T1a)** The solution hom sends the `X₀/X₂` localization element to `x`. -/
+lemma chartSolutionHom_x (x y : L) (h : (W.baseChange L).toAffine.Equation x y) :
+    chartSolutionHom W x y h (HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 0)) = x := by
+  have hval : ((chartSolutionsEquiv W 2 L)
+      ((chartSolutionsEquiv W 2 L).symm (chartSolution W x y h))).1 ⟨0, by decide⟩
+      = (chartSolution W x y h).1 ⟨0, by decide⟩ := by
+    rw [Equiv.apply_symm_apply]
+  have hread : ((chartSolutionsEquiv W 2 L)
+      ((chartSolutionsEquiv W 2 L).symm (chartSolution W x y h))).1 ⟨0, by decide⟩
+      = chartSolutionHom W x y h (chartCoordEquiv W 2 (Ideal.Quotient.mk _
+          (MvPolynomial.X (⟨0, by decide⟩ : {j : Fin 3 // j ≠ 2})))) := rfl
+  rw [chartCoordEquiv_mk_X] at hread
+  have : chartSolutionHom W x y h (HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 0))
+      = (chartSolution W x y h).1 ⟨0, by decide⟩ := by
+    rw [← hread, hval]
+  rw [this]
+  rfl
+
+/-- **(T1b)** The solution hom sends the `X₁/X₂` localization element to `y`. -/
+lemma chartSolutionHom_y (x y : L) (h : (W.baseChange L).toAffine.Equation x y) :
+    chartSolutionHom W x y h (HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 1)) = y := by
+  have hval : ((chartSolutionsEquiv W 2 L)
+      ((chartSolutionsEquiv W 2 L).symm (chartSolution W x y h))).1 ⟨1, by decide⟩
+      = (chartSolution W x y h).1 ⟨1, by decide⟩ := by
+    rw [Equiv.apply_symm_apply]
+  have hread : ((chartSolutionsEquiv W 2 L)
+      ((chartSolutionsEquiv W 2 L).symm (chartSolution W x y h))).1 ⟨1, by decide⟩
+      = chartSolutionHom W x y h (chartCoordEquiv W 2 (Ideal.Quotient.mk _
+          (MvPolynomial.X (⟨1, by decide⟩ : {j : Fin 3 // j ≠ 2})))) := rfl
+  rw [chartCoordEquiv_mk_X] at hread
+  have hcomb : chartSolutionHom W x y h (HomogeneousLocalization.Away.isLocalizationElem
+      (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 1))
+      = (chartSolution W x y h).1 ⟨1, by decide⟩ := by
+    rw [← hread, hval]
+  rw [hcomb]
+  rfl
+
+/-- **(T2 — the chart factoring of `chartSpecPoint`)** The underlying morphism of the
+chart-constructed point is `Spec.map` of its solution hom followed by the chart immersion. -/
+lemma chartSpecPoint_val (x y : L) (h : (W.baseChange L).toAffine.Equation x y) :
+    (chartSpecPoint W x y h).1
+      = Spec.map (CommRingCat.ofHom (chartSolutionHom W x y h))
+          ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+            (mk_X_mem_quotientGrading_one W 2) one_pos := by
+  set φ := (chartSolutionsEquiv W 2 L).symm (chartSolution W x y h) with hφ
+  -- the tautological chart-factored point of φ
+  have hover : (Spec.map (CommRingCat.ofHom φ.1)
+      ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+        (mk_X_mem_quotientGrading_one W 2) one_pos) ≫ projModelπ W
+      = Spec.map (CommRingCat.ofHom (algebraMap K L)) := by
+    rw [Category.assoc, awayι_projModelπ W 2, ← Spec.map_comp]
+    congr 1
+    ext r
+    exact RingHom.congr_fun φ.2 r
+  set g' : { g : SpecPoints (projModel W) (projModelπ W) L //
+      ∃ h' : Spec (.of L) ⟶ Spec (.of (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))),
+        h' ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+          (mk_X_mem_quotientGrading_one W 2) one_pos = g.1 } :=
+    ⟨⟨Spec.map (CommRingCat.ofHom φ.1)
+      ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+        (mk_X_mem_quotientGrading_one W 2) one_pos, hover⟩,
+      ⟨Spec.map (CommRingCat.ofHom φ.1), rfl⟩⟩ with hg'
+  have h1 : chartHomEquiv W 2 L g' = φ :=
+    chartHomEquiv_eq_of_specMap W 2 g' φ rfl
+  have h2 : chartHomEquiv W 2 L ⟨chartSpecPoint W x y h, inZChart_chartSpecPoint W x y h⟩
+      = φ := chartHomEquiv_chartSpecPoint W x y h (inZChart_chartSpecPoint W x y h)
+  have h3 : (⟨chartSpecPoint W x y h, inZChart_chartSpecPoint W x y h⟩ :
+      { g : SpecPoints (projModel W) (projModelπ W) L //
+        ∃ h' : Spec (.of L) ⟶ Spec (.of (Away (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))),
+          h' ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+            (mk_X_mem_quotientGrading_one W 2) one_pos = g.1 }) = g' :=
+    (chartHomEquiv W 2 L).injective (h2.trans h1.symm)
+  have := congrArg (fun z => z.1.1) h3
+  exact this
+
+/-- **(T1c)** The solution hom is `K`-algebra compatible on grade-zero constants. -/
+lemma chartSolutionHom_fromZero (x y : L) (h : (W.baseChange L).toAffine.Equation x y) (r : K) :
+    chartSolutionHom W x y h ((HomogeneousLocalization.fromZeroRingHom
+      (quotientGrading (projIdeal W)) (Submonoid.powers
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+      ((algebraMapGradeZero (projIdeal W)) r)) = algebraMap K L r :=
+  RingHom.congr_fun ((chartSolutionsEquiv W 2 L).symm (chartSolution W x y h)).2 r
+
+/-- **(T3-away — the chart immersion evaluates sections through `awayToSection`)** The
+`appLE`-pullback of `basicOpen`-sections along `awayι`, read through `ΓSpecIso`, is the inverse of
+the `awayToSection` presentation. -/
+lemma awayι_appLE_eval
+    (hZle : (⊤ : (Spec (CommRingCat.of (Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).Opens)
+      ≤ (Proj.awayι (quotientGrading (projIdeal W)) _
+          (mk_X_mem_quotientGrading_one W 2) one_pos) ⁻¹ᵁ (zChart W : (projModel W).Opens)) :
+    (Proj.awayι (quotientGrading (projIdeal W)) _
+        (mk_X_mem_quotientGrading_one W 2) one_pos).appLE
+      (zChart W : (projModel W).Opens) ⊤ hZle
+      ≫ (Scheme.ΓSpecIso (CommRingCat.of (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).hom
+    = (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).inv := by
+  show ((Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
+          (mk_X_mem_quotientGrading_one W 2) one_pos).inv
+        ≫ (Proj.basicOpen (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).ι).appLE
+      (zChart W : (projModel W).Opens) ⊤ hZle
+      ≫ (Scheme.ΓSpecIso (CommRingCat.of (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).hom
+    = (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).inv
+  rw [← Scheme.Hom.appLE_comp_appLE
+    (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
+      (mk_X_mem_quotientGrading_one W 2) one_pos).inv
+    (Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).ι
+    (zChart W : (projModel W).Opens) ⊤ ⊤
+    (Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).ι_preimage_self.ge le_rfl]
+  -- the ι-part is the top-sections identification
+  have hι : (Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).ι.appLE
+      (zChart W : (projModel W).Opens) ⊤
+      (Proj.basicOpen (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).ι_preimage_self.ge
+      = (Proj.basicOpen (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).topIso.inv := by
+    rw [Scheme.Opens.ι_appLE, Scheme.Opens.topIso]
+    show (projModel W).presheaf.map _ = ((projModel W).presheaf.mapIso _).inv
+    rw [Functor.mapIso_inv]
+    exact congrArg (projModel W).presheaf.map (Subsingleton.elim _ _)
+  rw [hι]
+  -- the isoSpec-inverse part: appTop of the inverse is the inverse of the appTop
+  have hspec : (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
+        (mk_X_mem_quotientGrading_one W 2) one_pos).inv.appLE ⊤ ⊤ le_rfl
+      = (Proj.basicOpen (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).topIso.hom
+        ≫ (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+            (mk_X_mem_quotientGrading_one W 2) one_pos).inv
+        ≫ (Scheme.ΓSpecIso (CommRingCat.of (Away (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).inv := by
+    have happ : (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
+          (mk_X_mem_quotientGrading_one W 2) one_pos).inv.appLE ⊤ ⊤ le_rfl
+        = (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
+            (mk_X_mem_quotientGrading_one W 2) one_pos).inv.appTop := by
+      exact (Scheme.Hom.app_eq_appLE _).symm
+    have hround : (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
+          (mk_X_mem_quotientGrading_one W 2) one_pos).hom.appTop
+        ≫ (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
+            (mk_X_mem_quotientGrading_one W 2) one_pos).inv.appTop = 𝟙 _ := by
+      rw [← Scheme.Hom.comp_appTop, Iso.inv_hom_id, Scheme.Hom.id_appTop]
+    have hBA : ((Proj.basicOpen (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).topIso.hom
+          ≫ (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+              ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+              (mk_X_mem_quotientGrading_one W 2) one_pos).inv
+          ≫ (Scheme.ΓSpecIso (CommRingCat.of (Away (quotientGrading (projIdeal W))
+              ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).inv)
+        ≫ (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
+            (mk_X_mem_quotientGrading_one W 2) one_pos).hom.appTop = 𝟙 _ := by
+      rw [show (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
+            (mk_X_mem_quotientGrading_one W 2) one_pos).hom
+          = Proj.basicOpenToSpec (quotientGrading (projIdeal W))
+              ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) from
+        Proj.basicOpenIsoSpec_hom _ _ _ _]
+      rw [show (Proj.basicOpenToSpec (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).appTop
+          = (Scheme.ΓSpecIso _).hom
+            ≫ Proj.awayToSection _ _
+            ≫ (Proj.basicOpen (quotientGrading (projIdeal W))
+                ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))).topIso.inv from
+        Proj.basicOpenToSpec_app_top _ _]
+      rw [show Proj.awayToSection (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          = (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+              ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+              (mk_X_mem_quotientGrading_one W 2) one_pos).hom from rfl]
+      simp only [Category.assoc, Iso.inv_hom_id_assoc, Iso.hom_inv_id]
+    calc (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
+          (mk_X_mem_quotientGrading_one W 2) one_pos).inv.appLE ⊤ ⊤ le_rfl
+        = ((_ ≫ (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
+              (mk_X_mem_quotientGrading_one W 2) one_pos).hom.appTop)
+          ≫ (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
+              (mk_X_mem_quotientGrading_one W 2) one_pos).inv.appTop) := by
+          rw [hBA, Category.id_comp, happ]
+      _ = _ ≫ ((Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
+              (mk_X_mem_quotientGrading_one W 2) one_pos).hom.appTop
+            ≫ (Proj.basicOpenIsoSpec (quotientGrading (projIdeal W)) _
+              (mk_X_mem_quotientGrading_one W 2) one_pos).inv.appTop) := by
+          rw [Category.assoc]
+      _ = _ := by rw [hround, Category.comp_id]
+  rw [hspec]
+  simp only [Category.assoc, Iso.inv_hom_id, Category.comp_id, Iso.inv_hom_id_assoc]
+
+/-- **(T3 — evaluation of a chart-factored point on chart sections)** Pulling a `zChart`-section
+back along `chartSpecPoint` and reading the global section of `Spec L` computes the solution hom
+through the `awayToSection` presentation. -/
+lemma chartSpecPoint_appLE_eval (x y : L) (h : (W.baseChange L).toAffine.Equation x y)
+    (hle : ⊤ ≤ (chartSpecPoint W x y h).1 ⁻¹ᵁ (zChart W : (projModel W).Opens)) :
+    (chartSpecPoint W x y h).1.appLE (zChart W : (projModel W).Opens) ⊤ hle
+        ≫ (Scheme.ΓSpecIso (CommRingCat.of L)).hom
+      = (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+            (mk_X_mem_quotientGrading_one W 2) one_pos).inv
+          ≫ CommRingCat.ofHom (chartSolutionHom W x y h) := by
+  have hZle : (⊤ : (Spec (CommRingCat.of (Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))).Opens)
+      ≤ (Proj.awayι (quotientGrading (projIdeal W)) _
+          (mk_X_mem_quotientGrading_one W 2) one_pos) ⁻¹ᵁ (zChart W : (projModel W).Opens) := by
+    intro x _
+    have hx : (Proj.awayι (quotientGrading (projIdeal W)) _
+        (mk_X_mem_quotientGrading_one W 2) one_pos).base x
+        ∈ (Proj.awayι (quotientGrading (projIdeal W)) _
+          (mk_X_mem_quotientGrading_one W 2) one_pos).opensRange := ⟨x, rfl⟩
+    rwa [Proj.opensRange_awayι] at hx
+  simp only [chartSpecPoint_val W x y h]
+  rw [← Scheme.Hom.appLE_comp_appLE
+    (Spec.map (CommRingCat.ofHom (chartSolutionHom W x y h)))
+    (Proj.awayι (quotientGrading (projIdeal W)) _
+      (mk_X_mem_quotientGrading_one W 2) one_pos)
+    (zChart W : (projModel W).Opens) ⊤ ⊤ hZle le_rfl]
+  have happ2 : (Spec.map (CommRingCat.ofHom (chartSolutionHom W x y h))).appLE ⊤ ⊤ le_rfl
+      = (Spec.map (CommRingCat.ofHom (chartSolutionHom W x y h))).appTop :=
+    (Scheme.Hom.app_eq_appLE _).symm
+  rw [happ2, Category.assoc, Scheme.ΓSpecIso_naturality, ← Category.assoc,
+    awayι_appLE_eval W hZle]
+
 /-- **(L4-iii brick 4 — the readout-back)** A model point whose dictionary value is the affine
 point `some x y` IS the chart-constructed point `chartSpecPoint x y` — by injectivity of the
 dictionary. This turns a computed dictionary value into an explicit chart factorization (with a
