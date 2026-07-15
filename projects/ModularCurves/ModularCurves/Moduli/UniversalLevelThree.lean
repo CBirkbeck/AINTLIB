@@ -297,4 +297,102 @@ theorem e3_vc_marked {A : Type u} [CommRing A] {C : VariableChange A}
   · rw [← hγ, hu1]; ring
   · rw [hβ₂, hu1, hwzero]; ring
 
+open LocalPresentation WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E15a stage 5)** From `IsE3Form` + ellipticity: `a₃` and `a₁³−27a₃` are
+units (the two factors of the discriminant `Δ = a₃³(a₁³−27a₃)`). -/
+theorem e3form_units {A : Type u} [CommRing A] {W : WeierstrassCurve A} {β γ : A}
+    (hW : IsE3Form W β γ) (hell : W.IsElliptic) :
+    IsUnit W.a₃ ∧ IsUnit (W.a₁ ^ 3 - 27 * W.a₃) := by
+  obtain ⟨ha₁, ha₂, ha₃, ha₄, ha₆⟩ := hW
+  have hΔ : W.Δ = W.a₃ ^ 3 * (W.a₁ ^ 3 - 27 * W.a₃) := by
+    simp only [WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
+      WeierstrassCurve.b₆, WeierstrassCurve.b₈, ha₂, ha₄, ha₆]
+    ring
+  have hu : IsUnit (W.a₃ ^ 3 * (W.a₁ ^ 3 - 27 * W.a₃)) := by
+    rw [← hΔ]; exact (WeierstrassCurve.isElliptic_iff W).mp hell
+  refine ⟨?_, isUnit_of_mul_isUnit_right hu⟩
+  have h3 : IsUnit (W.a₃ ^ 3) := isUnit_of_mul_isUnit_left hu
+  exact (isUnit_pow_iff (n := 3) (by norm_num)).mp h3
+
+open LocalPresentation WeierstrassCurve in
+/-- **(T-E15a stage 5)** `Q = (γ, β+γ)` on an `E3`-form curve is the flex relation
+`γ(3β²+3βγ+γ²) = 0`. -/
+theorem e3form_flex {A : Type u} [CommRing A] {W : WeierstrassCurve A} {β γ : A}
+    (hW : IsE3Form W β γ) (hQ : W.toAffine.Equation γ (β + γ)) :
+    γ * (3 * β ^ 2 + 3 * β * γ + γ ^ 2) = 0 := by
+  obtain ⟨ha₁, ha₂, ha₃, ha₄, ha₆⟩ := hW
+  rw [WeierstrassCurve.Affine.equation_iff] at hQ
+  rw [ha₁, ha₂, ha₃, ha₄, ha₆] at hQ
+  linear_combination -hQ
+
+open LocalPresentation WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 800000 in
+/-- **(T-E15a stage 5)** The marking chase: a section marked at `(p₁,q₁)` on `Pr` and
+`(p₂,q₂)` on `Qr` gives the variable-change coordinate identities for `Pr.transVC Qr`. -/
+theorem e3_markChase {S : Scheme.{u}} {G : EllipticCurveGeom S} {V : S.affineOpens}
+    {Pr Qr : LocalPresentation G V} {σ : S ⟶ G.E} {hσ : σ ≫ G.π = 𝟙 S}
+    {p₁ q₁ p₂ q₂ : Γ(S, V.1)}
+    (hPrM : Pr.MarksAt hσ p₁ q₁) (hQrM : Qr.MarksAt hσ p₂ q₂) :
+    ((Pr.transVC Qr).u : Γ(S, V.1)) ^ 2 * p₁ + (Pr.transVC Qr).r = p₂ ∧
+      ((Pr.transVC Qr).u : Γ(S, V.1)) ^ 3 * q₁ +
+        (Pr.transVC Qr).s * ((Pr.transVC Qr).u : Γ(S, V.1)) ^ 2 * p₁ +
+        (Pr.transVC Qr).t = q₂ := by
+  obtain ⟨hP1, hPeq⟩ := hPrM
+  obtain ⟨hP2, hQeq⟩ := hQrM
+  have hchase : projModelAffineSection Pr.W p₁ q₁ hP1 ≫ (Pr.pointedIso Qr).hom =
+      projModelAffineSection Qr.W p₂ q₂ hP2 := by
+    rw [← hPeq, ← hQeq]
+    show ((V.2.isoSpec.inv ≫ sectionLift G hσ V) ≫ Pr.e.hom) ≫
+      (Pr.e.symm ≪≫ Qr.e).hom = _
+    rw [Iso.trans_hom, Iso.symm_hom, Category.assoc, Category.assoc,
+      Iso.hom_inv_id_assoc, Category.assoc]
+  rw [Pr.transVC_spec Qr] at hchase
+  have hWeq : Pr.W = Pr.transVC Qr • Qr.W := (Pr.transVC_smul Qr).symm
+  rw [← Category.assoc, projModelAffineSection_congr hWeq p₁ q₁ hP1] at hchase
+  rw [projModelVCIso_affineSection (Pr.transVC Qr) Qr.W p₁ q₁ (hWeq ▸ hP1)
+    (equation_smul_image (Pr.transVC Qr) Qr.W (hWeq ▸ hP1))] at hchase
+  exact projModelAffineSection_injective Qr.W _ hP2 hchase
+
+open LocalPresentation WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E15a stage 5 ★★)** KM Ex. 2.2.2 uniqueness at the presentation level: two
+`E3`-form witnesses marking the same `P` at `(0,0)` and `Q` at `(γᵢ, βᵢ+γᵢ)` have
+`transVC = 1` and equal parameters. -/
+theorem e3_witness_transVC_eq_one {S : Scheme.{u}} {G : EllipticCurveGeom S}
+    {V : S.affineOpens} {Pr Qr : LocalPresentation G V}
+    {β₁ γ₁ β₂ γ₂ : Γ(S, V.1)}
+    (hPrW : IsE3Form Pr.W β₁ γ₁) (hQrW : IsE3Form Qr.W β₂ γ₂)
+    {σP σQ : S ⟶ G.E} {hσP : σP ≫ G.π = 𝟙 S} {hσQ : σQ ≫ G.π = 𝟙 S}
+    (hPrP : Pr.MarksAt hσP 0 0) (hQrP : Qr.MarksAt hσP 0 0)
+    (hPrQ : Pr.MarksAt hσQ γ₁ (β₁ + γ₁)) (hQrQ : Qr.MarksAt hσQ γ₂ (β₂ + γ₂))
+    (h3 : IsUnit (3 : Γ(S, V.1))) :
+    Pr.transVC Qr = 1 ∧ γ₁ = γ₂ ∧ β₁ = β₂ := by
+  set C := Pr.transVC Qr with hCdef
+  have hPchase := e3_markChase hPrP hQrP
+  have hQchase := e3_markChase hPrQ hQrQ
+  have hr : C.r = 0 := by
+    have h := hPchase.1; simp only [mul_zero, zero_add] at h; exact h
+  have ht : C.t = 0 := by
+    have h := hPchase.2; simp only [mul_zero, zero_add] at h; exact h
+  have hγ : (C.u : Γ(S, V.1)) ^ 2 * γ₁ = γ₂ := by
+    have h := hQchase.1; rwa [hr, add_zero] at h
+  have hβγ : (C.u : Γ(S, V.1)) ^ 3 * (β₁ + γ₁) +
+      C.s * (C.u : Γ(S, V.1)) ^ 2 * γ₁ = β₂ + γ₂ := by
+    have h := hQchase.2; rwa [ht, add_zero] at h
+  -- ellipticity of the witness curves (from the E3-form + IsElliptic instance on the
+  -- chart)
+  have hell₁ : Pr.W.IsElliptic := Pr.elliptic
+  have hell₂ : Qr.W.IsElliptic := Qr.elliptic
+  obtain ⟨ha₃₂, _⟩ := e3form_units hQrW hell₂
+  obtain ⟨_, hD₁⟩ := e3form_units hPrW hell₁
+  obtain ⟨hPeq0, _⟩ := hPrQ
+  obtain ⟨hQeq0, _⟩ := hQrQ
+  have hflex₁ := e3form_flex hPrW hPeq0
+  have hflex₂ := e3form_flex hQrW hQeq0
+  exact e3_vc_marked hPrW hQrW (Pr.transVC_smul Qr) hr ht hγ hβγ hflex₁ hflex₂
+    ha₃₂ hD₁ h3
+
 end ModularCurves
