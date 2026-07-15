@@ -317,7 +317,12 @@ private lemma transportE_π (f : S' ⟶ S) (t : G'.E ⟶ G.E)
       (transport_isPullback_model f hV' P).isoPullback_inv_snd,
     (transport_isPullback' f t hsq P hV').isoPullback_hom_snd]
 
-private lemma transportE_baseChange (f : S' ⟶ S) (t : G'.E ⟶ G.E)
+/-- **(T-OM-B3 helper, exposed for GH's [GHA3] β2-heart, STREAM-OMEGA v10.262)** The
+transported chart isomorphism factors as `transportTheta ≫ P.e` post-composed with the
+coefficient base change: the geometric-pull leg of the transport. GH's β2-heart consumes
+this as the double-base-change geometric-pull transport (`levelSpaceΓ` on `E` vs `E_T`
+matched through the T-D8 fibrewise-generation bridge). -/
+lemma transportE_baseChange (f : S' ⟶ S) (t : G'.E ⟶ G.E)
     (hsq : IsPullback t G'.π G.π f) {V : S.affineOpens} (P : LocalPresentation G V)
     {V' : S'.affineOpens} (hV' : V'.1 ≤ f ⁻¹ᵁ V.1) :
     (transportE f t hsq P hV').hom ≫ projModelBaseChange (sectionsMapLE f hV') P.W =
