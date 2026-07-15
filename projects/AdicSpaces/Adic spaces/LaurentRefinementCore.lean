@@ -298,7 +298,6 @@ theorem prodImage_mul_comm (T₁ T₂ : Finset A) :
   constructor <;> rintro ⟨a, b, hp, rfl⟩ <;>
     exact ⟨b, a, Finset.mem_product.mpr (Finset.mem_product.mp hp).symm, mul_comm b a⟩
 
-set_option maxHeartbeats 400000 in
 -- heavy `Subring.closure_induction` over `locSubring` (6 cases × ring ops)
 /-- For `b ∈ I^N₁` (first datum), `divByS (b·s₂) (s₁·s₂)` lands in the product
 `locSubring` (lift of `D₁`'s `locSubring` along `Away s₁ → Away (s₁·s₂)`). -/

@@ -2128,7 +2128,6 @@ private lemma presheafValue_mvRestricted_iU_denseRange
   refine closure_minimal (fun g hg ↦ ?_) isClosed_closure
   exact hbox g hg
 
-set_option maxHeartbeats 1600000 in
 omit [CompatiblePlusSubring A] in
 /-- **`mk(s)` is a unit in the quotient `γ = source ⧸ ker Ψ`** (helper for
 `presheafValue_mvRestricted_surjection`). Mirrors `example638_isUnit_mk_s`: the relation
@@ -2253,7 +2252,6 @@ private lemma presheafValue_mvRestricted_isUnit_mk_s
   rw [hΨ_alg D.s]
   rw [← map_mul, canonicalMap_s_mul_invS, map_one]
 
-set_option maxHeartbeats 1600000 in
 omit [CompatiblePlusSubring A] in
 /-- **Uniform continuity of `fU : U → γ`** (helper for `presheafValue_mvRestricted_surjection`),
 where `U = (Localization.Away D.s)[Y]` carries the pullback uniformity along `iU` and
@@ -2494,7 +2492,6 @@ private lemma presheafValue_mvRestricted_fU_uniformContinuous
 -- nbhd-basis chases (`hUnitS`, `hi_dense`, `hf_unif`) over the heavy reducible quotient-Tate
 -- uniform structures on `γ = C ⧸ ker Ψ`; the cumulative `isDefEq`/`whnf` cost exceeds the default
 -- heartbeat budget even though each step is elementary.
-set_option maxHeartbeats 1600000 in
 omit [CompatiblePlusSubring A] in
 /-- **Relative Example 6.38 surjection** (the genuine residual for strong-noetherian propagation).
 For `n = |D.T|` and any `m : ℕ`, the `(n+m)`-variable restricted power series over `A` surject
