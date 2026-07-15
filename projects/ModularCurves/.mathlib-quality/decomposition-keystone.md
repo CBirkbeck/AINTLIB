@@ -473,3 +473,45 @@ archaeology item). Then equiv(germ_V([N].app x_Z)) = τStalkMap(germ_V(...)) = �
 **Sub-brick order:** B6-arch (read coordRingToZSection def; the Γ(pM,Z) ↔ Away-ring triangle) →
 B6-1 τStalkMap + = equiv (ringHom_ext) → B6-2 (FFM-X/Y) via brick 5 → B6-3 the field intertwining
 (algHom_ext) → B6-4 the (B)-tower assembly → B6-5 the (A)-transport + close :660.
+
+## SESSION APPEND (v10.258, KM) — BRICK 6 STAGED + both halves' turnkey frontier
+
+:660 REFACTORED (pushed) from one opaque sorry into TWO precise, documented, interface-validated
+bricks (`MulByHomDegree.lean`, theorem closes from their composition at the old :660 site):
+- `brick6_intertwining` (:636) — the field identity `∀ z, projModelFunctionFieldEquiv (functionFieldMap [N] z)
+  = mulByInt_pullbackAlgHom (projModelFunctionFieldEquiv z)`.
+- `brick6_from_intertwining` (:658) — takes that, proves `Module.finrank Γ(Z) Γ(pullback [N] Z.ι) = (mulByInt N).degree`.
+Import `ModularCurves.ForMathlib.DominantFunctionField` added (functionFieldMap + the tower square).
+Staging axiom-sound: the theorem depends only on {propext, sorryAx, Classical.choice, Quot.sound},
+sorryAx flowing ONLY through the 2 bricks ⟹ filling both → the whole downstream
+(`modelEllipticCurve_mulByHom_finrank` :671 → `Torsion.mulByHom_finrank` → BB-DEG) auto-cleans.
+
+**D (`brick6_intertwining`) — REDUCED CLEANLY to 3 generator leaves (the deep reduction is DONE).**
+Route (verified compiling to the 3 leaves): `IsLocalization.ringHom_ext (nonZeroDivisors Γ(Z))` reduces
+`∀ z` to a Γ(Z)-ring-hom equality; `RingHom.cancel_right … coordRingToZSection.surjective` pushes it to
+`W.CoordinateRing`; `AdjoinRoot.ringHom_ext` + `Polynomial.ringHom_ext` split into the three generator
+identities, each `e (fFMr (gtff (cRTZ ·)))` vs the HasseWeil side (`mulByInt_pullbackAlgHom_x_gen/_y_gen`
+close the RHS). Helpers proven: `he_gtff` (`e(gtff(cRTZ c)) = algebraMap CoordinateRing KE c` via
+`IsLocalization.ringEquivOfRingEquiv_eq`), `hxg/hyg/hcg` (AdjoinRoot generators = x_gen/y_gen/const),
+`H1` (algebraMap Γ(Z) K(pM) = germToFunctionField). REMAINING = 3 sorries:
+  **FFM_X**: `e (fFMr (gtff (cRTZ (coordX W)))) = mulByInt_x`  (+ FFM_Y for coordY, FFM_C for K-constants).
+  These are: `functionFieldMap [N] (germ_Z x_Z)` = (`functionFieldMap_germToFunctionField`)
+  `germ_{[N]⁻¹Z}([N].app x_Z)`, then `projModelFunctionFieldEquiv` of it = the τ-evaluation = (brick 5
+  `genericSpecPoint_comp_mulByHom`: τ.1 ≫ [N] = σ.1) = σ's x-coord = `mulByInt_x`. FFM_C (constants) is
+  the K-linearity of functionFieldMap (via `mulByHom_π`: [N]≫π=π) — likely easiest. FFM_X/Y need the
+  germ-evaluation-via-τ (τStalkMap or the point-pullback compat). Full skeleton in scratch `interD.lean`.
+
+**A+B (`brick6_from_intertwining`) — the finrank tower route.** (1) degree = `Module.finrank KE KE` via
+`mulByInt_pullbackAlgHom` (Isogeny.degree, `(mulByInt N).pullback = mulByInt_pullbackAlgHom` by `dif_neg`);
+(2) transport to `Module.finrank K(pM) K(pM)` via `projModelFunctionFieldEquiv` + `hinter` (a
+`LinearEquiv.finrank_eq`); (3) `Algebra.IsAlgebraic.finrank_of_isFractionRing Γ(Z) K(pM) Γ([N]⁻¹Z) K(pM)`
+with both legs `functionField_isFractionRing_of_isAffineOpen` (Z + V=[N]⁻¹ᵁZ affine via
+`IsAffineOpen.preimage`), module = `functionFieldMap [N]`, scalar tower = **`functionFieldMap_comp_germToFunctionField`**
+(the banked square), side-instances FaithfulSMul/IsAlgebraic/NoZeroDivisors; (4) transport
+`Γ([N]⁻¹ᵁZ)` (restrict-open, matches the tower) ↔ `Γ(pullback [N] Z.ι)` (goal's module) via
+`pullbackRestrictIsoRestrict`. **INSTANCE-FRICTION (diagnosed):** the concrete `mulByHom N` +
+`↑N`-coercion makes `IsFinite`/`IsAffineHom` synthesis finicky — `set f := (modelEllipticCurve W).mulByHom N`
+does NOT auto-transfer the `[IsFinite/Flat/LFP …]` variables (they abstract to `f` but synthesis on the
+concrete form breaks); resolve by explicit `haveI : IsFinite f := by rw [hf]; infer_instance` OR work with
+the concrete form and grab `IsAffineHom` via `IsFinite.toIsAffineHom` (works in clean context). This is
+the tedium that stalled the A+B grind — a fresh focused pass with these notes lands it.
