@@ -575,7 +575,8 @@ lemma heckeMultiplicity_mul_one_eq_zero (g₁ : P.Δ) (A : HeckeCoset P)
   refine h ?_
   rw [show A = ⟦HeckeCoset.rep A⟧ from (Quotient.out_eq A).symm]
   exact ((mulMap_T_one_eq P g₁ i j).symm.trans
-    (doubleCoset_eq_of_rightCoset_eq P g₁ (HeckeCoset.one P).rep (HeckeCoset.rep A) (i, j) heq)).symm
+    (doubleCoset_eq_of_rightCoset_eq P g₁ (HeckeCoset.one P).rep (HeckeCoset.rep A) (i, j)
+      heq)).symm
 
 /-- Right multiplication by `HeckeCoset.one` acts as the identity:
 `m(g₁, one.rep) = δ_{⟦g₁⟧}`. -/
@@ -612,7 +613,8 @@ lemma heckeMultiplicity_one_mul_eq_zero (g₁ : P.Δ) (A : HeckeCoset P)
   refine h ?_
   rw [show A = ⟦HeckeCoset.rep A⟧ from (Quotient.out_eq A).symm]
   exact ((mulMap_one_T_eq P g₁ i j).symm.trans
-    (doubleCoset_eq_of_rightCoset_eq P (HeckeCoset.one P).rep g₁ (HeckeCoset.rep A) (i, j) heq)).symm
+    (doubleCoset_eq_of_rightCoset_eq P (HeckeCoset.one P).rep g₁ (HeckeCoset.rep A) (i, j)
+      heq)).symm
 
 /-- Left multiplication by `HeckeCoset.one` acts as the identity:
 `m(one.rep, g₁) = δ_{⟦g₁⟧}`. -/
