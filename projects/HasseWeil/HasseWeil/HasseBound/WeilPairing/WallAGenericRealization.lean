@@ -64,8 +64,6 @@ open scoped TensorProduct
 namespace HasseWeil.WeilPairing.IsogenyBaseChangeConcrete
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.style.longLine false
 
 section Compat
 

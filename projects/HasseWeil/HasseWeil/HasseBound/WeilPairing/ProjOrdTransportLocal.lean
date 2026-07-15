@@ -52,9 +52,6 @@ open WeierstrassCurve HasseWeil.Curves
 
 namespace HasseWeil.WeilPairing.DivisorPullback
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.style.longLine false
 
 variable {F : Type*} [Field F] [DecidableEq F]
 variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]

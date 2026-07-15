@@ -25,8 +25,6 @@ namespace HasseWeil.WeilPairing
 open HasseWeil IsogenyBaseChangeConcrete
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedFintypeInType false
 
 section General
 
@@ -195,7 +193,7 @@ theorem pencil_isGenuineWith_Kbar (r' s' : ℤ) (hr : r' ≠ 0) (hs : s' ≠ 0)
       (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K) X := by
     simp only [pencilIsogBaseChange_pullback]
     rw [hXeq, ← functionFieldMap_x_gen W (AlgebraicClosure K)]
-    unfold pencilBaseChangePullback
+    simp only [pencilBaseChangePullback]
     exact baseChangePullback_functionFieldMap _ _ _ _
   have hpby : (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s'
         (pencilBaseChangePullback W (AlgebraicClosure K) r' s' hr hs hrK hsK)).pullback
@@ -203,7 +201,7 @@ theorem pencil_isGenuineWith_Kbar (r' s' : ℤ) (hr : r' ≠ 0) (hs : s' ≠ 0)
       (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K) Y := by
     simp only [pencilIsogBaseChange_pullback]
     rw [hYeq, ← functionFieldMap_y_gen W (AlgebraicClosure K)]
-    unfold pencilBaseChangePullback
+    simp only [pencilBaseChangePullback]
     exact baseChangePullback_functionFieldMap _ _ _ _
   exact ⟨_, _, _, hgen, hpbx.symm, hpby.symm⟩
 
