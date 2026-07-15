@@ -435,4 +435,31 @@ def IsE3Datum {R : CommRingCat.{u}} (X : EllObj R)
       IsE3Form Pr.W β γ ∧ Pr.MarksAt L.1.1.2 0 0 ∧
       Pr.MarksAt L.1.2.2 γ (β + γ)
 
+open LocalPresentation WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E15a stage 6 ★)** Witness `(β,γ)`-values agree on common affines: restrict
+both witnesses and apply the KM Ex. 2.2.2 uniqueness. -/
+theorem e3_witness_param_agree {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3} (h3 : IsUnit (3 : Γ(X.base, ⊤)))
+    {V₁ V₂ : X.base.affineOpens}
+    {Pr₁ : LocalPresentation X.curve.toEllipticCurveGeom V₁}
+    {Pr₂ : LocalPresentation X.curve.toEllipticCurveGeom V₂}
+    {β₁ γ₁ : Γ(X.base, V₁.1)} {β₂ γ₂ : Γ(X.base, V₂.1)}
+    (hW₁ : IsE3Form Pr₁.W β₁ γ₁) (hW₂ : IsE3Form Pr₂.W β₂ γ₂)
+    (hP₁ : Pr₁.MarksAt L.1.1.2 0 0) (hP₂ : Pr₂.MarksAt L.1.1.2 0 0)
+    (hQ₁ : Pr₁.MarksAt L.1.2.2 γ₁ (β₁ + γ₁))
+    (hQ₂ : Pr₂.MarksAt L.1.2.2 γ₂ (β₂ + γ₂))
+    {W : X.base.affineOpens} (hWV₁ : W.1 ≤ V₁.1) (hWV₂ : W.1 ≤ V₂.1) :
+    Scheme.resLE hWV₁ γ₁ = Scheme.resLE hWV₂ γ₂ ∧
+      Scheme.resLE hWV₁ β₁ = Scheme.resLE hWV₂ β₂ := by
+  have hP₁' := hP₁.restrict hWV₁; have hP₂' := hP₂.restrict hWV₂
+  rw [map_zero] at hP₁' hP₂'
+  have hQ₁' := hQ₁.restrict hWV₁; have hQ₂' := hQ₂.restrict hWV₂
+  rw [map_add] at hQ₁' hQ₂'
+  have key := e3_witness_transVC_eq_one
+    (restrict_W_e3form hW₁ hWV₁) (restrict_W_e3form hW₂ hWV₂)
+    hP₁' hP₂' hQ₁' hQ₂' (isUnit_ofNat_res h3 W.1)
+  exact ⟨key.2.1, key.2.2⟩
+
 end ModularCurves
