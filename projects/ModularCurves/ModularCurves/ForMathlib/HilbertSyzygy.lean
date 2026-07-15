@@ -2,7 +2,10 @@
 Copyright (c) 2026 AINTLIB contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib
+import Mathlib.Algebra.Category.ModuleCat.Descent
+import Mathlib.Algebra.Category.ModuleCat.ProjectiveDimension
+import Mathlib.Algebra.Polynomial.Module.TensorProduct
+import Mathlib.CategoryTheory.Preadditive.Projective.Preserves
 
 /-!
 # Hilbert's syzygy theorem
