@@ -179,7 +179,7 @@ theorem tendsto_sum_pow_div_eq_neg_log {z : ℂ} (hz : ‖z‖ = 1) (hz1 : z ≠
 omit [NeZero N] in
 private lemma isPrimitive_inv {θ : DirichletCharacter ℂ N} (hθ : θ.IsPrimitive) :
     θ⁻¹.IsPrimitive := by
-  unfold DirichletCharacter.IsPrimitive at hθ ⊢
+  simp only [DirichletCharacter.IsPrimitive] at hθ ⊢
   rwa [DirichletCharacter.conductor_inv]
 
 private lemma gaussSum_inv_ne_zero {θ : DirichletCharacter ℂ N} (hθ : θ.IsPrimitive)
