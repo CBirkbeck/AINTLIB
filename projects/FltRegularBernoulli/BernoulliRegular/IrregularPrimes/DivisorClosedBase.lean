@@ -3,9 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.Data.Finset.Lattice.Fold
-import Mathlib.Data.Nat.Prime.Factorial
-import Mathlib.Tactic
+module
+
+public import Mathlib.Data.Finset.Lattice.Fold
+public import Mathlib.Data.Nat.Prime.Factorial
+public import Mathlib.Tactic
 
 /-!
 # Divisor-closed finite multipliers
@@ -18,6 +20,7 @@ The ticket board suggests an lcm over `q - 1`.  This file uses the stronger
 factorial base `2 * M!`; it is larger but has the same formal role and gives
 simpler closure proofs.
 -/
+@[expose] public section
 
 open scoped Nat
 

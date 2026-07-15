@@ -1,6 +1,8 @@
-import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
-import Mathlib.NumberTheory.MulChar.Basic
-import Mathlib.Tactic
+module
+
+public import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+public import Mathlib.NumberTheory.MulChar.Basic
+public import Mathlib.Tactic
 
 /-!
 # Deleted Fourier matrices on the augmentation subspace
@@ -12,6 +14,7 @@ finite abelian group `G`, a function `q : G → ℂ`, and the deleted matrix
 the nontrivial Fourier coefficients.  The proof uses the deleted character
 matrix and includes the rank-one correction in its inverse.
 -/
+@[expose] public section
 
 noncomputable section
 

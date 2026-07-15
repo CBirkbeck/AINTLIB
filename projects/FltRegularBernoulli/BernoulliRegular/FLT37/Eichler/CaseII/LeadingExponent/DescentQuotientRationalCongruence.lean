@@ -1,4 +1,6 @@
-import FltRegular.CaseII.InductionStep
+module
+
+public import FltRegular.CaseII.InductionStep
 
 /-!
 # Case-II descent quotient is congruent to a rational integer mod `37`
@@ -59,6 +61,7 @@ It imports only from `flt-regular` and `mathlib`; it does **not** depend on any 
 The lemma is stated for a general `K` with `[IsCyclotomicExtension {37} ℚ K]` (so it applies to
 `CyclotomicField 37 ℚ` and to any concrete `ℚ(ζ₃₇)`).
 -/
+@[expose] public section
 
 open scoped NumberField
 
