@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.Curves.Divisor.PicZero
 import HasseWeil.Isogeny.Basic
 
@@ -79,7 +84,7 @@ theorem degree_pushforwardProjectiveDivisor (φ : Isogeny W₁ W₂)
     Curves.ProjectiveDivisor.degree (pushforwardProjectiveDivisor φ cd D) =
       Curves.ProjectiveDivisor.degree D := by
   rw [pushforwardProjectiveDivisor_apply]
-  unfold Curves.ProjectiveDivisor.degree
+  simp only [Curves.ProjectiveDivisor.degree]
   rw [Finsupp.sum_mapDomain_index (h := fun _ n => n)
     (fun _ => rfl) (fun _ _ _ => rfl)]
 
@@ -123,8 +128,7 @@ theorem pushforwardProjectiveDivisor_kappaDivisor (φ : Isogeny W₁ W₂)
       Curves.kappaDivisor W₂ (φ.toPointMap cd P) := by
   have h_zero : φ.toPointMap cd (0 : W₁.Point) = (0 : W₂.Point) :=
     Isogeny.toPointMap_zero φ cd
-  unfold Curves.kappaDivisor
-  simp only [map_sub, pushforwardProjectiveDivisor_single,
+  simp only [Curves.kappaDivisor, map_sub, pushforwardProjectiveDivisor_single,
     Affine.Point.toProjectiveSmoothPoint_toAffinePoint,
     Curves.ProjectiveSmoothPoint.toAffinePoint_infinity, h_zero,
     Affine.Point.toProjectiveSmoothPoint_zero]
