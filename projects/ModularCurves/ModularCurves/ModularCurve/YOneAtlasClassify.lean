@@ -52,7 +52,10 @@ variable (R : CommRingCat.{u}) {A : Type u} [CommRing A] [Algebra R A]
 
 /-- The relative Tate-ring map attached to coefficients `(α, β)` over an `R`-algebra, provided
 the corresponding Tate-normal discriminant is a unit.  Scheme-theoretically, `Spec` of this map is
-the local map to the Tate atlas `tateBase R`. -/
+the local map to the Tate atlas `tateBase R`.
+
+This is the working `R`-relative analogue of `tateRing_homEquiv` (T-E2, the absolute ℤ-base
+form of Loeffler Cor 3.3.5, in `Moduli/Representability.lean`) — the route the Y₁ tower uses. -/
 noncomputable def TateAtlas.ringOverLift (α β : A)
     (hΔ : IsUnit (((tateCurveOver R).map (MvPolynomial.eval₂Hom (algebraMap R A)
       (fun i : Fin 2 ↦ if i = 0 then α else β))).Δ)) :
