@@ -20876,3 +20876,23 @@ Commits 2073415bb/d723e5e96-4f1d48bf7/7b4bbaf8d (all pushed). Job-(2) tranche, f
   IsIntegral E.E** at the k̄-consumers (smooth+connected over field ⟹ integral; projModel-side
   integrality EXISTS in GroupLawAxioms — the abstract-E transport is model-comparison-adjacent,
   i.e. your/G0's substrate seam). Flagged, not grabbed. (STREAM-GH)
+
+### v10.254-GH — ★ [T-G3d] divisibility EXECUTED against G0's quotient (1 pin: T-G3d-Niso) (STREAM-GH)
+Commit ec3b3fc74 (pushed). :336's content now lives PROVEN in `EllipticCurve/TorsionDivisibility.lean`:
+- `sub_one_isInvariant_torsionSubgroup` — ε−1 is E[N]-translation-invariant (additivity of the
+  pointed difference + torsion-kill via the `mem_pointSubgroup` FACTORING form — deliberately NOT
+  the smul-bridge, so this leg adds no new box-dependence).
+- `exists_eq_one_add_mulBy_comp_of_fixesTorsion_of_isIso` — KM 2.7.2's "ε−1 = g·N", modulo the
+  SINGLE instance-pin `[IsIso (E.torsionQuotientToSelf N)]` (= **T-G3d-Niso**, `E/E[N] ≅ E`).
+  Route: `quotient_lift` descent (G0's UP — verified AXIOM-CLEAN at source!) + iso-refactor
+  through `[N] = π ≫ toSelf` + `mulBy_comp_comm` to the KM order; ε-pointedness DERIVED from
+  hfix (zero section ∈ E[N]). sorryAx flows only via the standing GroupLaw Point-group boxes +
+  the quotient toSelf-funnel.
+- **T-G3d-Niso is now ENGINE-READY**: `deg(toSelf) = 1` falls out of `Scheme.Hom.finrank_comp`
+  (v10.253) + `isIso_iff_finrank_eq` (mathlib) the moment G0's quotientπ substrate lands
+  ([Flat/IsFinite quotientπ] + `finrank quotientπ = N²` — G0's construction layer; flagged).
+- Lean-ops banked: quotient_lift's implicit Y forces the .left-typing — retype the descent input
+  at `E.E` FIRST (`set δl : E.E ⟶ E.E := (…).left`); `inv` under `Over.homMk`'s half-meta
+  expected type re-runs instance-synthesis at the wrong spelling — hoist `inv q ≫ w` into an
+  atomic fvar and pin `(U := E.asOver) (V := E.asOver)`; `letI`-wrapped ∃-goals break the
+  instance cache inside `refine` — `show` the plain ∃ first. (STREAM-GH)
