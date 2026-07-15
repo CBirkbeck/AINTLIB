@@ -21283,3 +21283,26 @@ combined ℤ[1/6] lemma needed. NB asymmetry: the Legendre killing is done (2-to
 `two_zsmul`); the E3 killing has no such shortcut (3-torsion) so it's folded into `hL`, brick-6-gated.
 **The instant KM brick 6 → G0 BB-DEG lands, both discharges fill by one-liners → both engine
 instantiations → the representability headline across all three levels.** Next: support GH β2-heart.
+
+### v10.263-GH — [GHA3 β2-heart U1] transport compats landed; U2 bridge recipe pinned (STREAM-GH)
+Commit d85ebca57 (pushed). LevelSpaceEtale.lean gains (axiom-clean): `Point.congrBase`
+(▸-transported AddEquiv for base-morphism equalities — the assoc-alignment glue),
+`Point.pullAlong` (general-g pull), `baseChangeEquiv_pull_asSection` (the T-H2b dictionary
+carries pull∘asSection to pullAlong — 3-line coe-chase). KEY DISCOVERY: the (B1)
+double-base-change machinery ALREADY EXISTS — `Point.baseChangeEquiv (σ)(t) :
+(E.baseChange σ).Point t ≃+ E.Point (t ≫ σ)` (GroupLaw:393, T-H2b, with rfl coe-lemma) — no
+transportE needed.
+**U2 (the bridge, next firing) — complete recipe:** statement
+`isFullLevel_baseChange_comp_iff (t' : V ⟶ T) (hNV : NIsInvertible V N) (P' Q' : (E.baseChange
+p).Point t') : (E.baseChange (t'≫p)).IsFullLevel N (asSection (baseChangeEquiv E p t' P')) (…Q')
+↔ ((E.baseChange p).baseChange t').IsFullLevel N (asSection P') (asSection Q')`. Proof: rw
+[isFullLevel_iff_naive] both sides (PROVEN mod the T-D8 box, Basic.lean; needs NIsInvertible V ✓
+via .of_hom); kill-conjuncts transport via the asSection↔baseChangeEquiv.symm∘congrBase identity;
+span-clause per k̄-point t̄ via the AddEquiv chain cR := congrBase(assoc) ∘ baseChangeEquiv E p
+(t̄≫t') ∘ baseChangeEquiv (E.baseChange p) t' t̄ vs cL := baseChangeEquiv E (t'≫p) t̄ — both
+closure-sets land on pullAlong-forms with IDENTICAL coes t̄ ≫ P'.1 ≫ pE (U1 lemma + rfl-coes);
+closure-membership along AddEquiv via map_closure/mem_map_equiv. IsNaiveFullLevel (Basic:45) is
+exactly the transport-friendly form (kill ∧ ∀k̄∀x closure-membership).
+**U3 after U2:** the factor-iff assembly (v-decomposition into point-legs + spec-E/spec-E_T both
+sides + U2) → `exists_iso_of_factor_iff` → the base-change identification; then β3 (constant-form
+clopen) → β4-shell → :3497. (STREAM-GH)
