@@ -169,6 +169,62 @@ theorem pullbackComp_four_assoc_app
   exact (Category.assoc α δ ε).symm.trans
     (hcomp.trans (Category.assoc ζ η ε))
 
+/-- Reassociating the first three maps before composing with a fourth map is absorbed by the
+corresponding pullback congruence. -/
+theorem pullbackComp_assoc_congr_app
+    {A B C D E : Scheme.{u}}
+    (q : A ⟶ B) (p : B ⟶ C) (d : C ⟶ D) (g : D ⟶ E)
+    (h : (q ≫ p) ≫ (d ≫ g) = (q ≫ (p ≫ d)) ≫ g)
+    (N : E.Modules) :
+    (pullbackComp ((q ≫ p) ≫ d) g).hom.app N ≫
+        ((pullbackCongr h).app N).hom =
+      (pullbackComp (q ≫ (p ≫ d)) g).hom.app N := by
+  rfl
+
+/-- Fourfold pullback composition is compatible with replacing the middle composite by an
+equal morphism. -/
+theorem pullbackComp_four_congr_app
+    {A B C D E : Scheme.{u}}
+    (q : A ⟶ B) (p : B ⟶ C) (d : C ⟶ D) (g : D ⟶ E)
+    (s : B ⟶ D) (hp : p ≫ d = s)
+    (h : (q ≫ p) ≫ (d ≫ g) = (q ≫ s) ≫ g)
+    (N : E.Modules) :
+    (pullbackComp q p).hom.app
+          ((pullback d).obj ((pullback g).obj N)) ≫
+        (pullback (q ≫ p)).map ((pullbackComp d g).hom.app N) ≫
+        ((((pullbackComp (q ≫ p) (d ≫ g)).app N) ≪≫
+          ((pullbackCongr h).app N)).hom) =
+      (pullback q).map
+          ((((pullbackComp p d).app ((pullback g).obj N)) ≪≫
+            ((pullbackCongr hp).app ((pullback g).obj N))).hom) ≫
+        (pullbackComp q s).hom.app ((pullback g).obj N) ≫
+      (pullbackComp (q ≫ s) g).hom.app N := by
+  subst s
+  simp only [Iso.trans_hom]
+  have hinner :
+      ((pullbackComp p d).app ((pullback g).obj N)).hom ≫
+          ((pullbackCongr (rfl : p ≫ d = p ≫ d)).app
+            ((pullback g).obj N)).hom =
+        ((pullbackComp p d).app ((pullback g).obj N)).hom := by
+    change _ ≫ 𝟙 _ = _
+    exact Category.comp_id _
+  rw [hinner]
+  let Q := ((pullbackCongr h).app N).hom
+  have hfour := pullbackComp_four_assoc_app q p d g N
+  have htail := pullbackComp_assoc_congr_app q p d g h N
+  have hfourQ := congrArg (fun z => z ≫ Q) hfour
+  let R₁ := (pullback q).map
+    ((pullbackComp p d).hom.app ((pullback g).obj N))
+  let R₂ := (pullbackComp q (p ≫ d)).hom.app ((pullback g).obj N)
+  let R₃ := (pullbackComp ((q ≫ p) ≫ d) g).hom.app N
+  let R₄ := (pullbackComp (q ≫ (p ≫ d)) g).hom.app N
+  change R₃ ≫ Q = R₄ at htail
+  have hright : (R₁ ≫ (R₂ ≫ R₃)) ≫ Q = R₁ ≫ (R₂ ≫ R₄) :=
+    (Category.assoc R₁ (R₂ ≫ R₃) Q).trans
+      (congrArg (R₁ ≫ ·)
+        ((Category.assoc R₂ R₃ Q).trans (congrArg (R₂ ≫ ·) htail)))
+  exact hfourQ.trans hright
+
 theorem pullbackCompCongr_transition_app
     {A B C D : Scheme.{u}}
     (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
