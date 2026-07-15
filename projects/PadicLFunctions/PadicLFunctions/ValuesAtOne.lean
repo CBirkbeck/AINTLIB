@@ -738,7 +738,6 @@ private theorem summable_seriesEval_Ftilde {N : ℕ} [NeZero N] (_hN : 1 < N)
     refine le_trans hbd (le_trans ?_ (le_mul_of_one_le_left (by positivity) (le_max_right _ _)))
     linarith
 
-set_option maxHeartbeats 800000 in
 -- The c₀-design proof chains many `rw`s over `PowerSeries.coeff`/`derivativeFun`
 -- through the heavy `rhoTheta`/`twist` measure terms; the elaboration is heartbeat-heavy.
 /-- P6-p6' (the constant pin, c₀-design — replan R6.6; Lem 6.3 made

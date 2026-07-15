@@ -362,7 +362,6 @@ local instance instComplete_K (n : ℕ) : CompleteSpace (K p n) := by
 set_option synthInstance.maxHeartbeats 1000000 in
 -- the `det ∘ lmul` continuity runs through the nested `IntermediateField (K p n) (extendScalars …)`
 -- layer (`finrank`/instance synthesis on the relative extension); both bumps exceed the defaults
-set_option maxHeartbeats 1000000 in
 /-- **ST3a — the level norm is continuous** (RJW §12.5 tower-descent gateway): the map
 `x ↦ (N_{n+1,n}(x) : ℂ_[p])` is continuous on `K_{n+1}` (with the `ℂ_[p]`-subspace topology).
 `N_{n+1,n} = Algebra.norm (K_n) = det ∘ lmul` on the finite extension `K_{n+1}/K_n`; both

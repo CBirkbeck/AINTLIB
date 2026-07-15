@@ -459,7 +459,6 @@ set_option synthInstance.maxHeartbeats 1000000 in
 -- the `adjoin.powerBasis`/`Basis.sum_repr` computation runs through the
 -- `IntermediateField.adjoin ℚ_[p] {π_n}` power-basis layer; instance synthesis and the
 -- power-basis term elaboration exceed the defaults
-set_option maxHeartbeats 1000000 in
 /-- **The residue step** (RJW TeX 2542–2547): every `x ∈ 𝒪_n` is `≡ a mod π_n·𝒪_n`
 for some `a : ℤ_p` — i.e. `‖x − a‖ ≤ ‖π_n‖`. Total ramification gives `𝒪_n/(π_n) ≅ 𝔽_p`
 and `ℤ_p ↠ 𝔽_p`; we realise this through the orthogonal `ℚ_p`-power expansion at the

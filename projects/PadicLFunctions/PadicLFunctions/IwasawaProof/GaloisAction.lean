@@ -328,7 +328,6 @@ private theorem adjoinSimple_zetaSysK_eq_top (n : ℕ) :
     (isIntegral_zetaSysK p n).isAlgebraic, IntermediateField.top_toSubalgebra,
     adjoin_zetaSysK_eq_top p n]
 
-set_option maxHeartbeats 1600000 in
 -- Field theory over the `restrict`-subtype `↥(KPlusRestrict p n)` (a `fieldRange` of an
 -- inclusion) makes instance search and `compute_degree`/`minpoly.min` heavy; raised limits.
 set_option synthInstance.maxHeartbeats 400000 in
