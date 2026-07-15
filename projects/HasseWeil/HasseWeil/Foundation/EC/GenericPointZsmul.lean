@@ -72,7 +72,7 @@ variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 theorem genericPoint_eq_mulByInt_one :
     genericPoint W = Affine.Point.some (mulByInt_x W 1) (mulByInt_y W 1)
       (by rw [mulByInt_x_one, mulByInt_y_one]; exact generic_nonsingular W) := by
-  unfold genericPoint
+  simp only [genericPoint]
   congr 1
   · exact (mulByInt_x_one W).symm
   · exact (mulByInt_y_one W).symm
@@ -95,7 +95,7 @@ local notation "KE" => W.toAffine.FunctionField
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- `ψ_ff W (-n) = -ψ_ff W n` in `K(E)`: negation passes through `mk` and `algebraMap`. -/
 @[simp] theorem ψ_ff_neg (n : ℤ) : ψ_ff W (-n) = -ψ_ff W n := by
-  unfold ψ_ff
+  simp only [ψ_ff]
   rw [W.ψ_neg n, map_neg, map_neg]
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
@@ -113,6 +113,7 @@ private lemma algebraMap_mk_CC (r : F) :
       = algebraMap F R r := rfl
   rw [h, ← IsScalarTower.algebraMap_apply F R KE r]
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 private lemma ω_ff_neg (n : ℤ) :
     ω_ff W (-n) = ω_ff W n
       + algebraMap F KE W.a₁ * Φ_ff W n * ψ_ff W n
@@ -142,10 +143,11 @@ theorem mulByInt_y_neg (n : ℤ) (hn : n ≠ 0) :
   rw [ψ_ff_neg, ω_ff_neg W n]
   change _ = -mulByInt_y W n - (W_KE W).a₁ * mulByInt_x W n - (W_KE W).a₃
   rw [W_KE_a₁, W_KE_a₃]
-  unfold mulByInt_y mulByInt_x
+  simp only [mulByInt_y, mulByInt_x]
   rw [← ψ_ff_sq_eq_ΨSq_ff W n]
   exact mulByInt_y_neg_aux hψ
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 private lemma Φ_ff_eq (n : ℤ) :
     Φ_ff W n = x_gen W * ψ_ff W n ^ 2 - ψ_ff W (n + 1) * ψ_ff W (n - 1) := by
   rw [← φ_ff_eq_Φ_ff, show W.φ n
@@ -165,7 +167,7 @@ theorem mulByInt_x_eq (n : ℤ) (hn : n ≠ 0) :
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- `ψ_ff W 1 = 1`: the 1-division polynomial image is the identity of `K(E)`. -/
 @[simp] theorem ψ_ff_one : ψ_ff W 1 = 1 := by
-  unfold ψ_ff
+  simp only [ψ_ff]
   rw [W.ψ_one]
   simp [Affine.CoordinateRing.mk]
 
@@ -212,6 +214,7 @@ theorem mulByInt_x_ne_mulByInt_x (m n : ℤ) (hm : m ≠ 0) (hn : n ≠ 0) (hne 
   exact div_ne_zero (mul_ne_zero (ψ_ff_ne_zero W hnm) (ψ_ff_ne_zero W hn_sub_m))
     (pow_ne_zero _ <| mul_ne_zero (ψ_ff_ne_zero W hn) (ψ_ff_ne_zero W hm))
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 private lemma ψc_ff_eq (n : ℤ) :
     algebraMap R KE (Affine.CoordinateRing.mk W.toAffine (W.ψc n)) =
       2 * ω_ff W n + algebraMap F KE W.a₁ * Φ_ff W n * ψ_ff W n
@@ -299,7 +302,7 @@ theorem ψ_ff_three_eq :
   rw [← IsScalarTower.algebraMap_apply (Polynomial F) R KE W.Ψ₃,
     algebraMap_Poly_KE_eval₂]
   rw [mulByInt_x_one]
-  unfold WeierstrassCurve.Ψ₃
+  simp only [WeierstrassCurve.Ψ₃]
   simp only [Polynomial.eval₂_add, Polynomial.eval₂_mul, Polynomial.eval₂_pow,
     Polynomial.eval₂_C, Polynomial.eval₂_X, Polynomial.eval₂_ofNat]
   rw [show (algebraMap F KE) W.b₂ = (W_KE W).b₂ from (WeierstrassCurve.map_b₂ _ _).symm,
@@ -324,7 +327,7 @@ theorem slopeOne_eq :
       (3 * mulByInt_x W 1 ^ 2 + 2 * (W_KE W).a₂ * mulByInt_x W 1 + (W_KE W).a₄
         - (W_KE W).a₁ * mulByInt_y W 1)
       / ψ_ff W 2 := by
-  unfold slopeOne
+  simp only [slopeOne]
   rw [WeierstrassCurve.Affine.slope_of_Y_ne rfl (mulByInt_y_one_ne_negY W),
     mulByInt_y_one_sub_negY]
 
@@ -350,6 +353,7 @@ theorem addX_mulByInt_one_mulByInt_one :
   linear_combination (-(W_KE W).a₁ ^ 2 - 4 * (W_KE W).a₂
     - 12 * mulByInt_x W 1) * heq
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Coordinate-wise equality of affine points** (opaque form): two `.some` points
     with equal `x`- and `y`-coordinates are equal.  Stated over *opaque* coordinates
     `x₁ x₂ y₁ y₂ : KE` with the two coordinate equalities as hypotheses, so that
@@ -474,7 +478,7 @@ private lemma toAffineLift_zsmul_fromAffine_eq_toAffine (m : ℤ) {x₀ y₀ : K
           (Affine.Point.some x₀ y₀ h_ns)) =
       WeierstrassCurve.Jacobian.Point.toAffine (W_KE W)
         (smulEval (W_KE W) x₀ y₀ m) := by
-  unfold WeierstrassCurve.Jacobian.Point.toAffineLift
+  simp only [WeierstrassCurve.Jacobian.Point.toAffineLift]
   rw [WeierstrassCurve.zsmul_eq_smulEval (W := W_KE W) h_ns m]
   rfl
 
@@ -657,7 +661,7 @@ private lemma mulByInt_pullback_algebraMap_mk (n : ℤ) (hn : n ≠ 0)
         (algebraMap R KE (Affine.CoordinateRing.mk W.toAffine p)) =
       mulByInt_coordHom W n hn (Affine.CoordinateRing.mk W.toAffine p) := by
   have h_pullback : (mulByInt W.toAffine n).pullback = mulByInt_pullbackAlgHom W n hn := by
-    unfold mulByInt
+    simp only [mulByInt]
     simp [hn]
   rw [h_pullback]
   change mulByInt_pullbackRingHom W n hn _ = _
