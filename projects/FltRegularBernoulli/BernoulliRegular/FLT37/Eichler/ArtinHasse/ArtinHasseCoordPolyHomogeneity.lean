@@ -1,4 +1,6 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.ArtinHasseFiniteLogDecomposition
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.ArtinHasseFiniteLogDecomposition
 
 /-!
 # Homogeneity of the Artin-Hasse normalized coordinate polynomial powers
