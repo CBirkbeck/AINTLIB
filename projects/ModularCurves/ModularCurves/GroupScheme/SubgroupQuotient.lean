@@ -53,7 +53,8 @@ def FiniteLocallyFreeSubgroup.IsInvariant (G : FiniteLocallyFreeSubgroup E) {Y :
 
 namespace FiniteLocallyFreeSubgroup
 
-/-- Invariance is preserved by post-composition: if `f` collapses `G`-translates, so does `f ≫ h`. -/
+/-- Invariance is preserved by post-composition: if `f` collapses `G`-translates, so does
+`f ≫ h`. -/
 theorem IsInvariant.comp {G : FiniteLocallyFreeSubgroup E} {Y Z : Scheme.{u}} {f : E.E ⟶ Y}
     (hf : G.IsInvariant f) (h : Y ⟶ Z) : G.IsInvariant (f ≫ h) := fun _ g x t ht => by
   rw [← Category.assoc, hf g x t ht, Category.assoc]
