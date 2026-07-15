@@ -341,6 +341,66 @@ theorem AffineIntersectionUnitCocycle.chartTransitionIsoSwapHom_eq_inv
   · exact c.overlapTransitionIso_swap i j
   · exact c.chartTransitionIso_inv_toUnit hopen hpush i j
 
+private noncomputable def chartTransitionIsoCoordinatePullbackMiddle
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) {T : Scheme.{u}}
+    (g : T ⟶ (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).V (i, j)) :
+    (pullback g).obj (unitObj
+        ((Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).V (i, j))) ⟶
+      (pullback g).obj (unitObj
+        ((Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).V (i, j))) :=
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  (pullback g).map (pullbackUnitIso (D.f i j)).inv ≫
+    (pullback g).map (c.chartTransitionIso hopen hpush i j).hom ≫
+    (pullback g).map (pullbackUnitIso (D.t i j ≫ D.f j i)).hom
+
+private theorem chartTransitionIsoCoordinatePullbackMiddle_eq
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) {T : Scheme.{u}}
+    (g : T ⟶ (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).V (i, j)) :
+    chartTransitionIsoCoordinatePullbackMiddle c hopen hpush i j g =
+      (pullback g).map (c.overlapTransitionIso i j).hom := by
+  dsimp only [chartTransitionIsoCoordinatePullbackMiddle]
+  have h := congrArg (fun k => (pullback g).map k)
+    (c.chartTransitionIso_toUnit hopen hpush i j)
+  simpa only [Functor.map_comp] using h
+
+/-- A chart transition pulled back to a further overlap and expressed as an endomorphism of
+that overlap's unit sheaf. -/
+noncomputable def AffineIntersectionUnitCocycle.chartTransitionIsoCoordinatePullback
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) {T : Scheme.{u}}
+    (g : T ⟶ (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).V (i, j)) :
+    unitObj T ⟶ unitObj T :=
+  (pullbackUnitIso g).inv ≫
+    chartTransitionIsoCoordinatePullbackMiddle c hopen hpush i j g ≫
+    (pullbackUnitIso g).hom
+
+/-- In unit coordinates, a pulled-back chart transition is multiplication by the pulled-back
+overlap transition function. -/
+theorem AffineIntersectionUnitCocycle.chartTransitionIsoCoordinatePullback_eq
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) {T : Scheme.{u}}
+    (g : T ⟶ (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).V (i, j)) :
+    c.chartTransitionIsoCoordinatePullback hopen hpush i j g =
+      (pullbackUnitIso g).inv ≫
+        (pullback g).map (c.overlapTransitionIso i j).hom ≫
+        (pullbackUnitIso g).hom := by
+  rw [chartTransitionIsoCoordinatePullback,
+    chartTransitionIsoCoordinatePullbackMiddle_eq]
+
 end
 
 

@@ -437,3 +437,9 @@ Completed dependency claim (2026-07-14): defined
 along the glue-data pair swap in canonical pullback-unit normal form, and proved
 `chartTransitionIsoSwapHom_eq_inv`. Thus the chart transitions satisfy the full pair-swap inverse
 law without any added hypothesis or proof resource option; both declarations are axiom-clean.
+
+Completed subdependency (2026-07-14): defined
+`AffineIntersectionUnitCocycle.chartTransitionIsoCoordinatePullback` for an arbitrary map into an
+ordered overlap and proved `chartTransitionIsoCoordinatePullback_eq`. Thus every further pullback of
+a chart transition is canonically multiplication by the pulled transition section on the unit
+sheaf; the construction is option-free and axiom-clean.
