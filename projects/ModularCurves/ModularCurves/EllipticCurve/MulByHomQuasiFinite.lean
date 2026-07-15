@@ -120,6 +120,42 @@ theorem Point.torsionBy_finite_of_geometric {k : Type u} [Field k] [IsAlgClosed 
   exact Finite.of_equiv _
     ((Submodule.torsionByCongr eqchain (N : ℤ)).trans (Equiv.subtypeEquivRight hker)).symm
 
+/-- The `N`-division points `h : Spec K ⟶ E.E` of a geometric point `g` (sections with
+`h ≫ [N] = g`) form a finite set, for `N` nonzero in the algebraically closed field `K`:
+any two differ by an `N`-torsion point, and the `N`-torsion at a geometric point is finite
+(`Point.torsionBy_finite_of_geometric`). Extracted from
+`MulByHom.locallyQuasiFinite_of_nIsInvertible`. -/
+private lemma finite_sections_mulByHom {K : Type u} [Field K] [IsAlgClosed K]
+    (N : ℕ) (hNk : (N : K) ≠ 0) (g : Spec (CommRingCat.of K) ⟶ E.E) :
+    Finite {h : Spec (CommRingCat.of K) ⟶ E.E // h ≫ E.mulByHom N = g} := by
+  by_cases hne : Nonempty {h : Spec (CommRingCat.of K) ⟶ E.E // h ≫ E.mulByHom N = g}
+  · obtain ⟨h₀⟩ := hne
+    set t : Spec (CommRingCat.of K) ⟶ S := g ≫ E.π with ht
+    have hpt : ∀ hh : {h : Spec (CommRingCat.of K) ⟶ E.E // h ≫ E.mulByHom N = g},
+        hh.1 ≫ E.π = t := by
+      rintro ⟨hv, hp⟩
+      show hv ≫ E.π = t
+      rw [ht, ← hp, Category.assoc, E.mulByHom_π]
+    have hsmul : ∀ hh : {h : Spec (CommRingCat.of K) ⟶ E.E // h ≫ E.mulByHom N = g},
+        ((N : ℤ) • (⟨hh.1, hpt hh⟩ : E.Point t) : E.Point t) = ⟨g, rfl⟩ := fun hh => by
+      apply Subtype.ext
+      rw [E.point_smul_eq_comp_mulBy]
+      exact hh.2
+    haveI := Point.torsionBy_finite_of_geometric E t N hNk
+    refine Finite.of_injective (fun hh => (⟨(⟨hh.1, hpt hh⟩ : E.Point t) -
+      (⟨h₀.1, hpt h₀⟩ : E.Point t), ?_⟩ :
+        Submodule.torsionBy ℤ (E.Point t) (N : ℤ))) ?_
+    · rw [Submodule.mem_torsionBy_iff, smul_sub, hsmul hh, hsmul h₀, sub_self]
+    · intro h₁ h₂ h12
+      have h3 := congrArg Subtype.val h12
+      have h4 : (⟨h₁.1, hpt h₁⟩ : E.Point t) = ⟨h₂.1, hpt h₂⟩ := by
+        have := sub_left_injective (G := E.Point t) h3
+        exact this
+      have h5 : h₁.1 = h₂.1 := congrArg (fun P : E.Point t => P.1) h4
+      exact Subtype.ext h5
+  · haveI := not_nonempty_iff.mp hne
+    infer_instance
+
 /-- **(BB-QF, invertible case — KM 2.3.1 quasi-finiteness)** `[N] : E ⟶ E` is locally
 quasi-finite when `N` is invertible on the base. -/
 theorem MulByHom.locallyQuasiFinite_of_nIsInvertible (N : ℕ) [NeZero N]
@@ -172,34 +208,8 @@ theorem MulByHom.locallyQuasiFinite_of_nIsInvertible (N : ℕ) [NeZero N]
   -- the geometric fibre has finitely many sections, hence finite space
   haveI : LocallyOfFiniteType (pullback.snd (E.mulByHom N) yg) :=
     MorphismProperty.pullback_snd _ _ hlft
-  haveI hsol : Finite {h : Spec (CommRingCat.of k) ⟶ E.E // h ≫ E.mulByHom N = yg} := by
-    by_cases hne : Nonempty {h : Spec (CommRingCat.of k) ⟶ E.E // h ≫ E.mulByHom N = yg}
-    · obtain ⟨h₀⟩ := hne
-      set t : Spec (CommRingCat.of k) ⟶ S := yg ≫ E.π with ht
-      have hpt : ∀ hh : {h : Spec (CommRingCat.of k) ⟶ E.E // h ≫ E.mulByHom N = yg},
-          hh.1 ≫ E.π = t := by
-        rintro ⟨hv, hp⟩
-        show hv ≫ E.π = t
-        rw [ht, ← hp, Category.assoc, E.mulByHom_π]
-      have hsmul : ∀ hh : {h : Spec (CommRingCat.of k) ⟶ E.E // h ≫ E.mulByHom N = yg},
-          ((N : ℤ) • (⟨hh.1, hpt hh⟩ : E.Point t) : E.Point t) = ⟨yg, rfl⟩ := fun hh => by
-        apply Subtype.ext
-        rw [E.point_smul_eq_comp_mulBy]
-        exact hh.2
-      haveI := Point.torsionBy_finite_of_geometric E t N hNk
-      refine Finite.of_injective (fun hh => (⟨(⟨hh.1, hpt hh⟩ : E.Point t) -
-        (⟨h₀.1, hpt h₀⟩ : E.Point t), ?_⟩ :
-          Submodule.torsionBy ℤ (E.Point t) (N : ℤ))) ?_
-      · rw [Submodule.mem_torsionBy_iff, smul_sub, hsmul hh, hsmul h₀, sub_self]
-      · intro h₁ h₂ h12
-        have h3 := congrArg Subtype.val h12
-        have h4 : (⟨h₁.1, hpt h₁⟩ : E.Point t) = ⟨h₂.1, hpt h₂⟩ := by
-          have := sub_left_injective (G := E.Point t) h3
-          exact this
-        have h5 : h₁.1 = h₂.1 := congrArg (fun P : E.Point t => P.1) h4
-        exact Subtype.ext h5
-    · haveI := not_nonempty_iff.mp hne
-      infer_instance
+  haveI hsol : Finite {h : Spec (CommRingCat.of k) ⟶ E.E // h ≫ E.mulByHom N = yg} :=
+    E.finite_sections_mulByHom N hNk yg
   haveI hFfin : Finite ↑(pullback (E.mulByHom N) yg) := by
     refine Scheme.finite_of_finite_sections (pullback.snd (E.mulByHom N) yg) ?_
     exact Finite.of_equiv _ (Scheme.pullbackSndSectionEquiv (E.mulByHom N) yg).symm
