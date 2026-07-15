@@ -297,9 +297,9 @@ theorem caseIICor823DescentDetectorSq_eq_detSqLog
     caseIICor823DescentDetectorSq u =
       caseIICor823DetSqLog (completedLog (p := 37) (K := CyclotomicField 37 ℚ)
         (EPlus_completedLogDomainPowPred (p := 37) (K := CyclotomicField 37 ℚ) u)) := by
+  -- v4.32.0: `simp only` closes this directly (the two sides differ only in the
+  -- proof-irrelevant `Fin` membership proof of `⟨32, _⟩`); the prior `congr 1` is now redundant.
   simp only [caseIICor823DescentDetectorSq, caseIICor823DetSqLog]
-  -- The two sides differ only in the (proof-irrelevant) `Fin` membership proof of `⟨32, _⟩`.
-  congr 1
 
 -- The heavy `DworkCompleteIntegerRing` `completedLog` additivity / power identities exceed the
 -- default heartbeat budget.
