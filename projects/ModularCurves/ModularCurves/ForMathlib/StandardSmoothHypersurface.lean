@@ -245,6 +245,49 @@ private lemma hypersurfaceRel_mul_eq_one :
   ring
 
 omit [Fintype σ] [DecidableEq σ] in
+/-- The `X none` generator survives the round trip `fromAway ∘ toAway = id`: this is the
+Eisenstein-style relation `w · ∂f = 1` in the model, so `w = w · ∂f · w⁻¹` collapses to
+`w`. Extracted from `fromAway_toAway` (the harder of its two `algHom_ext` branches). -/
+private lemma fromAway_toAway_apply_X_none :
+    hypersurfaceFromAway f i (hypersurfaceToAway f i
+      (Ideal.Quotient.mk (Ideal.span (Set.range (hypersurfaceRels f i)))
+        (X (none : Option σ)))) =
+      Ideal.Quotient.mk (Ideal.span (Set.range (hypersurfaceRels f i))) (X none) := by
+  rw [hypersurfaceToAway_mk]
+  rw [show toAwayAux f i (X (none : Option σ)) =
+    IsLocalization.Away.invSelf (S := Localization.Away
+      (Ideal.Quotient.mk (Ideal.span {f}) (pderiv i f)))
+      (Ideal.Quotient.mk (Ideal.span {f}) (pderiv i f)) from
+    MvPolynomial.aeval_X _ _]
+  have h1 : hypersurfaceFromAway f i (algebraMap _ _
+      (Ideal.Quotient.mk (Ideal.span {f}) (pderiv i f))) *
+      hypersurfaceFromAway f i (IsLocalization.Away.invSelf
+        (S := Localization.Away (Ideal.Quotient.mk (Ideal.span {f})
+          (pderiv i f))) (Ideal.Quotient.mk (Ideal.span {f}) (pderiv i f))) =
+      1 := by
+    rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one]
+  rw [hypersurfaceFromAway_algebraMap, hypersurfaceOfS_mk] at h1
+  calc hypersurfaceFromAway f i (IsLocalization.Away.invSelf
+        (S := Localization.Away (Ideal.Quotient.mk (Ideal.span {f})
+          (pderiv i f))) (Ideal.Quotient.mk (Ideal.span {f}) (pderiv i f)))
+      = (Ideal.Quotient.mk _ (X (none : Option σ)) *
+          Ideal.Quotient.mk _ (rename Option.some (pderiv i f))) *
+          hypersurfaceFromAway f i (IsLocalization.Away.invSelf
+            (S := Localization.Away (Ideal.Quotient.mk (Ideal.span {f})
+              (pderiv i f)))
+            (Ideal.Quotient.mk (Ideal.span {f}) (pderiv i f))) := by
+        rw [mul_comm (Ideal.Quotient.mk _ (X (none : Option σ))),
+          hypersurfaceRel_mul_eq_one, one_mul]
+    _ = Ideal.Quotient.mk _ (X (none : Option σ)) *
+          (Ideal.Quotient.mk _ (rename Option.some (pderiv i f)) *
+            hypersurfaceFromAway f i (IsLocalization.Away.invSelf
+              (S := Localization.Away (Ideal.Quotient.mk (Ideal.span {f})
+                (pderiv i f)))
+              (Ideal.Quotient.mk (Ideal.span {f}) (pderiv i f)))) :=
+        mul_assoc _ _ _
+    _ = Ideal.Quotient.mk _ (X (none : Option σ)) := by rw [h1, mul_one]
+
+omit [Fintype σ] [DecidableEq σ] in
 private lemma fromAway_toAway :
     (hypersurfaceFromAway f i).comp (hypersurfaceToAway f i) =
       AlgHom.id R (HypersurfaceModel f i) := by
@@ -255,41 +298,7 @@ private lemma fromAway_toAway :
       Ideal.Quotient.mkₐ R (Ideal.span (Set.range (hypersurfaceRels f i))) := by
     refine MvPolynomial.algHom_ext fun o => ?_
     rcases o with _ | j
-    · show hypersurfaceFromAway f i (hypersurfaceToAway f i
-        (Ideal.Quotient.mk _ (X (none : Option σ)))) = Ideal.Quotient.mk _ (X none)
-      rw [hypersurfaceToAway_mk]
-      rw [show toAwayAux f i (X (none : Option σ)) =
-        IsLocalization.Away.invSelf (S := Localization.Away
-          (Ideal.Quotient.mk (Ideal.span {f}) (pderiv i f)))
-          (Ideal.Quotient.mk (Ideal.span {f}) (pderiv i f)) from
-        MvPolynomial.aeval_X _ _]
-      have h1 : hypersurfaceFromAway f i (algebraMap _ _
-          (Ideal.Quotient.mk (Ideal.span {f}) (pderiv i f))) *
-          hypersurfaceFromAway f i (IsLocalization.Away.invSelf
-            (S := Localization.Away (Ideal.Quotient.mk (Ideal.span {f})
-              (pderiv i f))) (Ideal.Quotient.mk (Ideal.span {f}) (pderiv i f))) =
-          1 := by
-        rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one]
-      rw [hypersurfaceFromAway_algebraMap, hypersurfaceOfS_mk] at h1
-      calc hypersurfaceFromAway f i (IsLocalization.Away.invSelf
-            (S := Localization.Away (Ideal.Quotient.mk (Ideal.span {f})
-              (pderiv i f))) (Ideal.Quotient.mk (Ideal.span {f}) (pderiv i f)))
-          = (Ideal.Quotient.mk _ (X (none : Option σ)) *
-              Ideal.Quotient.mk _ (rename Option.some (pderiv i f))) *
-              hypersurfaceFromAway f i (IsLocalization.Away.invSelf
-                (S := Localization.Away (Ideal.Quotient.mk (Ideal.span {f})
-                  (pderiv i f)))
-                (Ideal.Quotient.mk (Ideal.span {f}) (pderiv i f))) := by
-            rw [mul_comm (Ideal.Quotient.mk _ (X (none : Option σ))),
-              hypersurfaceRel_mul_eq_one, one_mul]
-        _ = Ideal.Quotient.mk _ (X (none : Option σ)) *
-              (Ideal.Quotient.mk _ (rename Option.some (pderiv i f)) *
-                hypersurfaceFromAway f i (IsLocalization.Away.invSelf
-                  (S := Localization.Away (Ideal.Quotient.mk (Ideal.span {f})
-                    (pderiv i f)))
-                  (Ideal.Quotient.mk (Ideal.span {f}) (pderiv i f)))) :=
-            mul_assoc _ _ _
-        _ = Ideal.Quotient.mk _ (X (none : Option σ)) := by rw [h1, mul_one]
+    · exact fromAway_toAway_apply_X_none f i
     · show hypersurfaceFromAway f i (hypersurfaceToAway f i
         (Ideal.Quotient.mk _ (X (Option.some j)))) = Ideal.Quotient.mk _ (X (.some j))
       rw [hypersurfaceToAway_mk]
