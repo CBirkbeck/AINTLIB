@@ -31,7 +31,7 @@ p > 1), `LFunction χ 0 = 0`. Direct from mathlib's
 theorem lValueAtZeroFormula_proven (χ : DirichletCharacter ℂ p)
     [NeZero p] (hp_two : 2 ≤ p) : LValueAtZeroFormula p χ := by
   intro hχ_even hχ_ne_one
-  unfold DirichletCharacter.LFunction
+  simp only [DirichletCharacter.LFunction]
   rw [ZMod.LFunction_apply_zero_of_even hχ_even.to_fun]
   have h_p_neq_one : p ≠ 1 := by omega
   -- χ 0 = 0 for nontrivial χ.
@@ -109,7 +109,7 @@ theorem evenLValueLogSum_eq_neg_DirichletLogSum_inv
     BernoulliRegular.evenLValueLogSum p χ = -DirichletLogSum p χ⁻¹ := by
   have : NeZero p := ⟨hp.out.ne_zero⟩
   have hp_pos : 0 < p := hp.out.pos
-  unfold BernoulliRegular.evenLValueLogSum DirichletLogSum
+  simp only [BernoulliRegular.evenLValueLogSum, DirichletLogSum]
   rw [neg_neg]
   set f : ZMod p → ℂ := fun a =>
     χ⁻¹ a * ((Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p) a‖ : ℝ) : ℂ)
@@ -182,7 +182,7 @@ theorem DirichletLogSum_principal_eq_neg_log :
     DirichletLogSum p (1 : DirichletCharacter ℂ p) = -((Real.log p : ℝ) : ℂ) := by
   have : NeZero p := ⟨hp.out.ne_zero⟩
   have hp_pos : 0 < p := hp.out.pos
-  unfold DirichletLogSum
+  simp only [DirichletLogSum]
   -- Step 1: replace (1 : DirichletCharacter) a with 1 for a ∈ Ico 1 p.
   have h_eval : ∑ a ∈ Finset.Ico 1 p,
         ((1 : DirichletCharacter ℂ p) ((a : ℕ) : ZMod p)) *
@@ -266,7 +266,7 @@ theorem evenLValueRhs_eq_gaussSum_inv_mul_DirichletLogSum
     (χ : DirichletCharacter ℂ p) :
     BernoulliRegular.evenLValueRhs p χ =
       (gaussSum χ⁻¹ (ZMod.stdAddChar (N := p)))⁻¹ * DirichletLogSum p χ⁻¹ := by
-  unfold BernoulliRegular.evenLValueRhs
+  simp only [BernoulliRegular.evenLValueRhs]
   rw [evenLValueLogSum_eq_neg_DirichletLogSum_inv]
   ring
 

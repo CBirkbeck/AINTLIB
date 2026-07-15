@@ -69,8 +69,8 @@ theorem KummerDirichletDeterminant_of_FrobeniusDetIdentity
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p)
     (h_frob : FrobeniusDetIdentity (p := p) K hp_odd hp_three) :
     FLT37.Sinnott.KummerDirichletDeterminant p K hp_odd hp_three := by
-  unfold FLT37.Sinnott.KummerDirichletDeterminant
-  unfold FrobeniusDetIdentity at h_frob
+  simp only [FLT37.Sinnott.KummerDirichletDeterminant]
+  simp only [FrobeniusDetIdentity] at h_frob
   -- h_frob : ↑regOfFamily ^ 2 = (∏ DLS χ⁻¹)² in ℂ
   have h_analytic := hPlus_mul_regulator_sq_eq (p := p) K hp_odd hp_three
   -- h_analytic : (↑hPlus · ↑regulator)² = (∏ DLS χ⁻¹)² / 2^(p-3) in ℂ
@@ -564,7 +564,7 @@ theorem sum_units_logNorm_eq_log_p :
   rw [sum_units_val_eq_sum_Ico (p := p)
       (fun n ↦ ((Real.log (2 * |Real.sin (Real.pi * n / p)|) : ℝ) : ℂ))]
   have h_dls := DirichletLogSum_principal_eq_neg_log p
-  unfold DirichletLogSum at h_dls
+  simp only [DirichletLogSum] at h_dls
   have h_eval : ∀ n ∈ Finset.Ico 1 p,
       (1 : DirichletCharacter ℂ p) ((n : ℕ) : ZMod p) *
         ((Real.log (2 * |Real.sin (Real.pi * n / p)|) : ℝ) : ℂ) =
@@ -613,7 +613,7 @@ theorem dirichletOfQuotientChar_apply_unit
     (a : BernoulliRegular.CyclotomicUnitDelta p) :
     dirichletOfQuotientChar p ξ ((a : ZMod p)) =
       ξ (BernoulliRegular.cyclotomicEvenDeltaQuotient p a) := by
-  unfold dirichletOfQuotientChar
+  simp only [dirichletOfQuotientChar]
   rw [MulChar.ofUnitHom_coe, MonoidHom.comp_apply, MulChar.coe_toUnitHom]
   change (BernoulliRegular.evenDeltaCharacterPullback (p := p) ξ)
       ((toUnits a).val) = _
@@ -738,7 +738,7 @@ theorem frobenius_eigenvalue_eq_neg_DirichletLogSum
         χ a * ((Real.log ‖(1 : ℂ) -
           ZMod.stdAddChar (N := p) a‖ : ℝ) : ℂ) =
       BernoulliRegular.evenLValueLogSum p χ⁻¹ := by
-    unfold BernoulliRegular.evenLValueLogSum
+    simp only [BernoulliRegular.evenLValueLogSum]
     refine Finset.sum_congr rfl ?_
     intro a _
     rw [inv_inv]
