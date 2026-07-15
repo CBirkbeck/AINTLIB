@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.Basic
 import Mathlib.RingTheory.Kaehler.Basic
 import Mathlib.RingTheory.Kaehler.Polynomial
@@ -121,7 +126,6 @@ private lemma not_isAlgebraic_x (E : Affine F) [E.IsElliptic] :
   exact hp_ne (algebraMap_polynomial_injective E
     ((aeval_x_eq_algebraMap' E p).symm.trans hp_eval |>.trans (map_zero _).symm))
 
-set_option maxHeartbeats 3200000 in
 /-- `D(x) ≠ 0` in `Ω[K(E)/F]`. The proof assumes `D(x) = 0` and derives that `Ω = 0`
 (hence `K(E)/F` is formally unramified, hence separable algebraic), contradicting
 `x` being transcendental over `F`. The key step uses the Weierstrass relation:
@@ -289,7 +293,7 @@ noncomputable def invariantDifferential : KaehlerDifferential F E.FunctionField 
     Reference: Silverman, Proposition III.1.5. -/
 theorem invariantDifferential_ne_zero :
     invariantDifferential E ≠ 0 := by
-  unfold invariantDifferential
+  simp only [invariantDifferential]
   exact smul_ne_zero (inv_ne_zero (denom_ne_zero E)) (D_x_ne_zero E)
 
 end InvariantDifferential
