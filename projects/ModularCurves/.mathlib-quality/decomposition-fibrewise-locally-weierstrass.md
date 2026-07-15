@@ -472,3 +472,8 @@ pullbacks. Its diagonal and triple fields are proved from the previously establi
 laws, it introduces no additional hypotheses or proof-resource options, and its axiom audit is
 exactly `propext`, `Classical.choice`, and `Quot.sound`. This is the effectivity input for gluing the
 finite-stage invertible sheaf before identifying its pullback with the original pole sheaf.
+
+Active dependency claim (2026-07-14): in `InvertibleSheafGlueEffectivity.lean`, construct
+`AffineIntersectionUnitCocycle.gluedModule` as the concrete Cech equalizer attached to
+`chartDescentData`, prove `AffineIntersectionUnitCocycle.gluedModuleRestrictIso` on every chart,
+and derive `AffineIntersectionUnitCocycle.gluedModule_isInvertible` without adding hypotheses.
