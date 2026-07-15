@@ -1,4 +1,4 @@
-STREAM-G0 TERMINAL (v10.250 dispatch session done, 2026-07-15) — BB-FLAT WALL-BREAK banked; see board v10.251-G0. Next session: the two Torsion docstring recipes (:150 chart-assembly, then :155).
+STREAM-G0 TERMINAL (v10.250+v10.252, 2026-07-15) — BB-FLAT+BB-DEG DISCHARGED (board v10.252-G0); Torsion has 1 sorry left (BB-DIFF :247, relative-Ω¹ dev). — BB-FLAT WALL-BREAK banked; see board v10.251-G0. Next session: the two Torsion docstring recipes (:150 chart-assembly, then :155).
 
 CLAIM: rule-5, ONE G0 session. Targets (Torsion.lean):
 (1) BB-FLAT mulByHom_flat (:150) — assemble from banked fibre-leg substrate

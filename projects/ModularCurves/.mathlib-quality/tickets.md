@@ -20977,3 +20977,36 @@ instantiations → **all three levels representable.** Brick 6 is one brick from
 - **GH → [GHA3] route-β β1** (globalize the affine trivialization — the sentinel's active focus). The
   geometric-fibre degree tranche ([E-INT]-enabled) is done; HOLD the general-S degree pins for KM's
   endDual_comp_self. `hH` consumable axiom-clean @KernelBound:100.
+
+## Board v10.252-G0 (2026-07-15, STREAM-G0, same session resumed by owner order) — ★★★ BB-FLAT + BB-DEG DISCHARGED: E[N] IS FINITE LOCALLY FREE OF RANK N² (KM 2.3.1 end-to-end)
+
+**The v10.251 "remaining chart-plumbing leaf" is DONE — both Torsion targets are REAL PROOFS.**
+- `mulByHom_flat` (Torsion) := `mulByHom_flat_general` (new `EllipticCurve/MulByHomFlat.lean`,
+  aa0afc205) — **AXIOM-CLEAN**. The chart assembly: `IsZariskiLocalAtTarget.of_iSup_eq_top` over
+  affine `V ≤ π⁻¹U`; per piece `flat_morphismRestrict_of_flat_appLE` (isoSpec arrow-square) + the
+  ring criterion (`T` finite by `IsFinite.finite_app`, fp by `finitePresentation_appLE` + 0564,
+  `A`-flat by `Smooth.flat_appLE`); per prime `q` the fibre input is
+  `flat_mulByHom_baseChange_of_field` at `chartPoint`, matched through TWO `isoIsPullback`
+  comparisons (the restricted-fibre square `isPullback_chart` = paste_vert of morphismRestrict
+  against the base-change square; the `Spec (κ(q) ⊗[A] Γ(E,V))` square `isPullback_chartSpec` =
+  `isPushout_tensorProduct` → Spec, cospan extended along the mono `fromSpec`, isoSpec absorbed);
+  the `[N]`-compat is `IsPullback.hom_ext` against the Spec square with the two tensor triangles
+  (`map_comp_includeLeft/Right`).
+- `mulByHom_finrank` (Torsion) := `mulByHom_finrank_general` (1b8406872) — rank read off the
+  residue fibre (`finrank_of_isPullback` twice: the base-change square + the pointed-iso
+  conjugation square), landing on **KM's field-level `modelEllipticCurve_mulByHom_finrank`**,
+  whose `[Flat]/[IsFinite]/[LFP]` instance hypotheses are discharged by G0's field-level flat.
+  **Cross-link honoured: KM's `:346` HasseWeil coupling is the ONLY sorryAx in the chain** —
+  BB-DEG auto-cleans the moment KM lands it. Degree NOT re-derived.
+
+**AXIOM LEDGER (verified `#print axioms`):** `mulByHom_flat`, `torsionπ_flat`,
+`torsionπ_isFinite` = `propext, Classical.choice, Quot.sound` ✅✅✅;
+`mulByHom_finrank`, `torsion_rank` = + `sorryAx` from KM `:346` ONLY (by design).
+**⟹ `E[N] → S` is finite flat for EVERY elliptic curve over EVERY base — unconditional;
+rank `N²` modulo KM's single anchor. `torsionπ_etale` now needs only BB-DIFF (:247).**
+Torsion.lean sorry count: **1** (BB-DIFF `mulByHom_formallyUnramified`, relative-Ω¹ dev, as scoped).
+
+**Consumers unblocked:** OMEGA's [T-E15-NORM]/[T-E14-LVL-b] E[N]-classification substrate
+(E[N] finite-locally-free-rank-N² is what they consume, N ∈ {2,3} — for their ℤ[1/6]-bases
+`torsionπ_flat`+`torsion_rank` now fire); G0's own SIGNAL/Y₀(N) `isFinite` register-boxes
+already auto-cleaned at BB-QF; KM's K4 chain instance hypotheses discharged over fields.

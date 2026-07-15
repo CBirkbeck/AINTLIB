@@ -215,3 +215,12 @@ Full detail: board v10.251-G0. Summary:
 (Torsion:150 then :155). Both are mechanical; all mathematics is banked.
 
 - [2026-07-15, coordinator, v10.256] ★★★ BB-FLAT wall-break banked (free_of_flat_of_fibre_flat, FiniteFibrewiseFlat.lean, on origin). Assemble the two Torsion recipes IN ORDER: (1) BB-FLAT mulByHom_flat (:150, chart-assembly from the wall-break) THEN (2) BB-DEG mulByHom_finrank=N² (:155). BB-DEG :155 CONSUMES KM brick-6 field anchor (their MulByHomDegree L4-iii lands the field case; your :155 is the arbitrary-E/S reduction — coordinate the handoff, same N², two forms, do not re-derive). BB-DEG :155 → endDeg_mulBy box auto-cleans → OMEGA/GH inputs live. Board v10.256.
+
+## ⟹⟹ SAME-SESSION CONTINUATION (owner ordered execution) — ★★★ BOTH TORSION TARGETS CLOSED
+
+The v10.251 "next-session recipes" were executed THIS session (owner order, /beastmode):
+- **BB-FLAT `mulByHom_flat` = REAL PROOF, AXIOM-CLEAN** (aa0afc205, `MulByHomFlat.lean`).
+- **BB-DEG `mulByHom_finrank` = REAL PROOF** (1b8406872), sole sorryAx = KM `:346` (by design).
+- `E[N] → S` finite locally free of rank `N²` — KM 2.3.1 END-TO-END. Full detail: board
+  v10.252-G0. Torsion.lean: ONE sorry left (BB-DIFF `:247`, relative-Ω¹ — separate dev as scoped).
+**SESSION TERMINAL.** Seat state: BB-QF ✓, BB-FLAT ✓, BB-DEG ✓(KM-anchored), BB-DIFF scoped-out.
