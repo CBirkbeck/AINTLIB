@@ -20353,3 +20353,49 @@ Sanity (𝔽₄, char 2): `γ=ω², β=ω²·ω²` passes v₁-unit but `D = a�
 D-unit exclusion ✓. NOTE: uniqueness does NOT need the level/generation clause — the
 ellipticity-units suffice (unlike my first fear). All steps are `linear_combination`-certifiable
 with the explicit coefficients above.
+
+## Board v10.231-G0 (2026-07-15, STREAM-G0) — BB-FLAT fibre-leg ring-heart BANKED; scheme-wiring frontier pinned
+
+**Delivered this session (axiom-clean, ForMathlib/StandardSmoothMaximalDVR.lean, upstream-worthy):**
+- **[FF-2]** `isDiscreteValuationRing_localizationAtPrime_of_isStandardSmooth k A q`
+  (`[q.IsMaximal]`): closed-point stalks of a standard-smooth dim-1 curve over a field
+  are DVRs. IsDomain bundled in the ∃ (needed at statement-elaboration).
+- **[FF-alg]** `flat_of_isDomain_of_injective_of_isStandardSmooth k A B`
+  (`[IsDomain A] [IsDomain B]`, `algebraMap A B` injective): finite* torsion-free algebra
+  over a standard-smooth dim-1 curve/field is FLAT. **KEY INSIGHT** that collapsed the
+  original FF-1/stalk-DVR plan: `Module.Flat.flat_iff_torsion_eq_bot_of_valuationRing_localization_isMaximal`
+  (mathlib, RingTheory/Flat/TorsionFree:125) needs only ValuationRing maximal-localizations
+  (⟸ FF-2 DVR), NO scheme-stalk bridge. Torsion-freeness is immediate (B domain +
+  injective). This is the ring-level heart of [BBF-A1].
+
+**Remaining for `modelMulByHom_flat_of_field` (scheme wiring — the fibre leg tail):**
+Route: `IsLocalAtTarget` (Flat is `HasRingHomProperty`) over a cover of the TARGET
+`projModel W` by standard-smooth affine basic opens, `FF-alg` on each piece.
+- Cover source: `modelChartCover W : (projModel W).AffineOpenCover` (WeierstrassModel:2217,
+  three charts `Away (quotientGrading (projIdeal W)) (X j)`). BUT `locally_isStandardSmooth_algebraMap_gradeZero_away`
+  (:1671) gives only `RingHom.Locally (IsStandardSmoothOfRelativeDimension 1)` — so each
+  chart must be REFINED to the standard-smooth basic-open sub-cover (unfold `RingHom.Locally`
+  = ∃ finite spanning set with each localization standard-smooth). **[FF-cover]**
+- On each std-smooth affine piece `V = Spec C` (C = chart-away-localization, IsDomain from
+  projModel integral): `[N]⁻¹V → V` is affine (finite morphism ⟹ affine) with ring map
+  `C → D`, D = Γ([N]⁻¹V), D finite C-algebra, IsDomain (integral). **[FF-preimage]**
+- `algebraMap C D` INJECTIVE from [N] dominant (= surjective: ModelFibreCount
+  `modelMulByHom_range_infinite` + closedness [proper] + irreducibility ⟹ range = univ).
+  **[FF-dominance]** — the hardest leaf: needs "dominant morphism of integral schemes ⟹
+  injective on affine sections" (survey mathlib: `PrimeSpectrum` dense-range ↔ `ker ⊆ nilradical`;
+  for reduced C, dominant ⟹ injective). May be a genuine scheme-level gap needing a hand-rolled
+  bridge through `Scheme.Hom.appLE` + `IsDominant`.
+- Assemble: FF-alg per piece ⟹ `Flat ([N] ∣_V)` ⟹ (IsLocalAtTarget) `Flat [N]`. **[FF-assemble]**
+
+**GATE STATUS (unchanged):** full BB-FLAT over ARBITRARY base still needs the fibrewise
+criterion [BBF-A2/A3] = the B–E flat-locus chain (BuchsbaumEisenbud.lean 6 sorries +
+FlatLocus.lean 1 sorry; 00ME two-term local criterion is load-bearing) — the boarded
+multi-session frontier. The fibre leg above only supplies the "flat on fibres" hypothesis.
+So `modelMulByHom_flat_of_field` (fibre leg) closes NO Torsion sorry alone; it is banked
+infrastructure for the eventual [BBF-A3] assembly.
+
+**Torsion.lean residual sorries (all large sub-developments, none bounded):**
+- BB-FLAT `mulByHom_flat` (:150) — B–E chain (above).
+- BB-DEG `mulByHom_finrank` (:156) — **KM's carve-out, NOT G0's** (degree = N²).
+- BB-DIFF `mulByHom_formallyUnramified` (:232) — invariant-differential / scheme-level
+  relative Ω¹ API (separate large sub-development; also gates `mulBy_etale` alongside BB-FLAT).
