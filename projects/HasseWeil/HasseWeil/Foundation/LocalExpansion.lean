@@ -435,67 +435,15 @@ follows because if `y_gen = 0`, the Weierstrass equation forces
 `x_gen³ + a₂x_gen² + a₄x_gen + a₆ = 0`, contradicting the transcendence of
 `x_gen` over `F` (since the leading coefficient is `1 ≠ 0`). -/
 
-/-- `y_gen ≠ 0` in `K(E)`.
-
-    This follows from `y_gen = algebraMap R KE (AdjoinRoot.root W.polynomial)`
-    being the image of `Y` modulo the Weierstrass polynomial `W.polynomial`,
-    which is a polynomial of natDegree 1 in the outer variable. Since
-    `W.polynomial` has natDegree 2 > 1, the class of `Y` is nonzero in the
-    coordinate ring by `AdjoinRoot.mk_ne_zero_of_natDegree_lt`. The algebra
-    map to the function field is injective (`IsFractionRing.injective`), so
-    `y_gen ≠ 0` in `K(E)`.
-
-    Reference: Silverman III.3 (the coordinate ring of an affine Weierstrass
-    curve is a two-dimensional extension of `F[x]`). -/
-theorem y_gen_ne_zero : y_gen W ≠ 0 := by
-  intro h
-  have hinj : Function.Injective (algebraMap W.toAffine.CoordinateRing KE) :=
-    IsFractionRing.injective _ _
-  have h_root_zero : AdjoinRoot.root W.toAffine.polynomial =
-      (0 : W.toAffine.CoordinateRing) := by
-    apply hinj
-    show algebraMap W.toAffine.CoordinateRing KE
-        (AdjoinRoot.root W.toAffine.polynomial) = algebraMap _ _ 0
-    rw [map_zero]
-    exact h
-  have h_root_ne : AdjoinRoot.root W.toAffine.polynomial ≠
-      (0 : W.toAffine.CoordinateRing) := by
-    change AdjoinRoot.mk W.toAffine.polynomial Polynomial.X ≠ 0
-    apply AdjoinRoot.mk_ne_zero_of_natDegree_lt Affine.monic_polynomial
-      Polynomial.X_ne_zero
-    rw [Polynomial.natDegree_X, Affine.natDegree_polynomial]
-    decide
-  exact h_root_ne h_root_zero
+/- `y_gen_ne_zero` HOISTED to `Foundation/MulByIntPullback.lean` next to the `y_gen` def
+(#7621) — it was declared here AND in `OrdAtInftyBridge.lean`, an import-clash landmine. -/
 
 /-- The **local parameter** at `O`: `t = -x/y` in `K(E)`. This is a uniformizer
     at the place corresponding to `O` (Silverman IV.1). -/
 noncomputable def localParam : KE :=
   -(x_gen W) / y_gen W
 
-/-- `x_gen ≠ 0` in `K(E)`. Follows from the same argument as `y_gen_ne_zero`:
-    `x_gen = algebraMap R KE (mk W.polynomial (C X))`, where `C X` has natDegree 0
-    in the outer variable (< 2), so its class in `R = F[X][Y]/(W.polynomial)` is
-    nonzero by `AdjoinRoot.mk_ne_zero_of_natDegree_lt`, and the algebra map
-    `R → KE` is injective. -/
-theorem x_gen_ne_zero : x_gen W ≠ 0 := by
-  intro h
-  have hinj_R : Function.Injective (algebraMap W.toAffine.CoordinateRing KE) :=
-    IsFractionRing.injective _ _
-  have h_poly_zero : algebraMap (Polynomial F) W.toAffine.CoordinateRing
-      Polynomial.X = (0 : W.toAffine.CoordinateRing) := by
-    apply hinj_R
-    change algebraMap W.toAffine.CoordinateRing KE
-        (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X) =
-      algebraMap _ _ 0
-    rw [map_zero]
-    exact h
-  have h_poly_ne : algebraMap (Polynomial F) W.toAffine.CoordinateRing
-      Polynomial.X ≠ (0 : W.toAffine.CoordinateRing) := by
-    change (Affine.CoordinateRing.mk W.toAffine (Polynomial.C Polynomial.X)) ≠ 0
-    apply AdjoinRoot.mk_ne_zero_of_natDegree_lt Affine.monic_polynomial
-    · exact Polynomial.C_ne_zero.mpr Polynomial.X_ne_zero
-    · rw [Polynomial.natDegree_C, Affine.natDegree_polynomial]; decide
-  exact h_poly_ne h_poly_zero
+/- `x_gen_ne_zero` HOISTED to `Foundation/MulByIntPullback.lean` (#7621). -/
 
 /-- The local parameter is nonzero in `K(E)`. -/
 theorem localParam_ne_zero : localParam W ≠ 0 := by
