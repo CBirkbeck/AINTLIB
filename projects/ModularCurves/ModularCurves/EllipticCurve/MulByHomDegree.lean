@@ -747,6 +747,43 @@ lemma chartSpecPoint_appLE_eval (x y : L) (h : (W.baseChange L).toAffine.Equatio
   rw [happ2, Category.assoc, Scheme.ΓSpecIso_naturality, ← Category.assoc,
     awayι_appLE_eval W hZle]
 
+
+/-- **(L4-iii brick 4 — the readout-back)** A model point whose dictionary value is the affine
+point `some x y` IS the chart-constructed point `chartSpecPoint x y` — by injectivity of the
+dictionary. This turns a computed dictionary value into an explicit chart factorization (with a
+known chart-hom), the step that reads the division-polynomial coordinates of `[N]∘τ` back into
+the scheme world. -/
+theorem eq_chartSpecPoint_of_projModelPointsEquiv_some
+    {g : SpecPoints (projModel W) (projModelπ W) L} {x y : L}
+    {hxy : (W.baseChange L).toAffine.Nonsingular x y}
+    (hg : projModelPointsEquiv W L g = WeierstrassCurve.Affine.Point.some x y hxy) :
+    g = chartSpecPoint W x y (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hxy) := by
+  apply (projModelPointsEquiv W L).injective
+  rw [hg, projModelPointsEquiv_chartSpecPoint]
+
+/-- **(L4-iii brick 2a — the tautological `K(E)`-point of the model)** The chart-constructed
+point with the generic coordinates `(x_gen, y_gen)`. -/
+noncomputable def genericSpecPoint :
+    SpecPoints (projModel W) (projModelπ W) W.toAffine.FunctionField :=
+  chartSpecPoint W (x_gen W) (y_gen W) (generic_equation W)
+
+theorem inZChart_genericSpecPoint : InZChart W (genericSpecPoint W) :=
+  inZChart_chartSpecPoint W _ _ (generic_equation W)
+
+/-- **(L4-iii brick 2b — the dictionary reads the tautological point as the generic point)** -/
+theorem projModelPointsEquiv_genericSpecPoint :
+    projModelPointsEquiv W W.toAffine.FunctionField (genericSpecPoint W)
+      = genericPoint W :=
+  projModelPointsEquiv_chartSpecPoint W (x_gen W) (y_gen W) (generic_equation W)
+
+/-- The `[n]`-image coordinates satisfy the Weierstrass equation (extracted from
+`zsmul_genericPoint`'s witness). -/
+theorem mulByInt_equation {n : ℤ} (hn : n ≠ 0) :
+    (W.baseChange W.toAffine.FunctionField).toAffine.Equation
+      (mulByInt_x W n) (mulByInt_y W n) := by
+  obtain ⟨h, -⟩ := zsmul_genericPoint W hn
+  exact WeierstrassCurve.Affine.equation_iff_nonsingular.mpr h
+
 /-- **(PHI — the tautological solution hom is the canonical embedding)** The solution hom of the
 generic datum `(x_gen, y_gen)`, transported through the chart identification `chartZRingEquiv`,
 is the canonical coordinate-ring embedding into the function field. -/
@@ -867,42 +904,6 @@ lemma genericSpecPoint_base_closedPoint :
     (X := Spec (CommRingCat.of (Away (quotientGrading (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))))
 
-
-/-- **(L4-iii brick 4 — the readout-back)** A model point whose dictionary value is the affine
-point `some x y` IS the chart-constructed point `chartSpecPoint x y` — by injectivity of the
-dictionary. This turns a computed dictionary value into an explicit chart factorization (with a
-known chart-hom), the step that reads the division-polynomial coordinates of `[N]∘τ` back into
-the scheme world. -/
-theorem eq_chartSpecPoint_of_projModelPointsEquiv_some
-    {g : SpecPoints (projModel W) (projModelπ W) L} {x y : L}
-    {hxy : (W.baseChange L).toAffine.Nonsingular x y}
-    (hg : projModelPointsEquiv W L g = WeierstrassCurve.Affine.Point.some x y hxy) :
-    g = chartSpecPoint W x y (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hxy) := by
-  apply (projModelPointsEquiv W L).injective
-  rw [hg, projModelPointsEquiv_chartSpecPoint]
-
-/-- **(L4-iii brick 2a — the tautological `K(E)`-point of the model)** The chart-constructed
-point with the generic coordinates `(x_gen, y_gen)`. -/
-noncomputable def genericSpecPoint :
-    SpecPoints (projModel W) (projModelπ W) W.toAffine.FunctionField :=
-  chartSpecPoint W (x_gen W) (y_gen W) (generic_equation W)
-
-theorem inZChart_genericSpecPoint : InZChart W (genericSpecPoint W) :=
-  inZChart_chartSpecPoint W _ _ (generic_equation W)
-
-/-- **(L4-iii brick 2b — the dictionary reads the tautological point as the generic point)** -/
-theorem projModelPointsEquiv_genericSpecPoint :
-    projModelPointsEquiv W W.toAffine.FunctionField (genericSpecPoint W)
-      = genericPoint W :=
-  projModelPointsEquiv_chartSpecPoint W (x_gen W) (y_gen W) (generic_equation W)
-
-/-- The `[n]`-image coordinates satisfy the Weierstrass equation (extracted from
-`zsmul_genericPoint`'s witness). -/
-theorem mulByInt_equation {n : ℤ} (hn : n ≠ 0) :
-    (W.baseChange W.toAffine.FunctionField).toAffine.Equation
-      (mulByInt_x W n) (mulByInt_y W n) := by
-  obtain ⟨h, -⟩ := zsmul_genericPoint W hn
-  exact WeierstrassCurve.Affine.equation_iff_nonsingular.mpr h
 
 /-- **(L4-iii brick 5 — the explicit chart factorization of `τ ≫ [n]`)** Composing the
 tautological point with multiplication-by-`n` gives exactly the chart-constructed point with the
