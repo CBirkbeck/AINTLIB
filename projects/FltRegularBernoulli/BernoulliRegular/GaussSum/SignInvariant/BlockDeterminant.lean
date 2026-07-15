@@ -565,7 +565,7 @@ theorem inv_mem_nonselfdualCharacterFinset {χ : DirichletCharacter ℂ p}
     _ = quadraticCharComplex p := by simp [quadraticCharComplex_inv (p := p)]
 
 /-- A non-self-dual character is, indeed, not its own inverse. -/
-theorem ne_inv_of_mem_nonselfdualCharacterFinset {hp₂ : p ≠ 2} {χ : DirichletCharacter ℂ p}
+theorem ne_inv_of_mem_nonselfdualCharacterFinset (hp₂ : p ≠ 2) {χ : DirichletCharacter ℂ p}
     (hχ : χ ∈ nonselfdualCharacterFinset (p := p)) :
     χ ≠ χ⁻¹ := by
   rcases (mem_nonselfdualCharacterFinset_iff (p := p) χ).1 hχ with ⟨hχ1, hχquad⟩
@@ -600,11 +600,11 @@ theorem inv_not_mem_nonselfdualCharacterReps {χ : DirichletCharacter ℂ p}
   exact lt_irrefl _ (lt_trans hlt hlt_inv)
 
 /-- …and at least one of them is. -/
-theorem mem_reps_or_inv_mem_reps {hp₂ : p ≠ 2} {χ : DirichletCharacter ℂ p}
+theorem mem_reps_or_inv_mem_reps (hp₂ : p ≠ 2) {χ : DirichletCharacter ℂ p}
     (hχ : χ ∈ nonselfdualCharacterFinset (p := p)) :
     χ ∈ nonselfdualCharacterReps (p := p) ∨ χ⁻¹ ∈ nonselfdualCharacterReps (p := p) := by
   have hne : χ ≠ χ⁻¹ :=
-    ne_inv_of_mem_nonselfdualCharacterFinset (p := p) (hp₂ := hp₂) hχ
+    ne_inv_of_mem_nonselfdualCharacterFinset (p := p) hp₂ hχ
   have hij :
       characterIndexEquiv (p := p) χ ≠ characterIndexEquiv (p := p) χ⁻¹ := fun hidx ↦
     hne <| (characterIndexEquiv (p := p)).injective hidx
@@ -624,7 +624,7 @@ theorem nonselfdualCharacterFinset_eq_union_reps_image_inv (hp₂ : p ≠ 2) :
   ext χ
   constructor
   · intro hχ
-    rcases mem_reps_or_inv_mem_reps (p := p) (hp₂ := hp₂) hχ with hrep | hinvrep
+    rcases mem_reps_or_inv_mem_reps (p := p) hp₂ hχ with hrep | hinvrep
     · exact Finset.mem_union.mpr (Or.inl hrep)
     · exact Finset.mem_union.mpr (Or.inr (Finset.mem_image.mpr ⟨χ⁻¹, hinvrep, by simp⟩))
   · intro hχ
