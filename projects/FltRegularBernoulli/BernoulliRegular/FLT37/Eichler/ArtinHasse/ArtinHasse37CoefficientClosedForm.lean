@@ -1,4 +1,6 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.NormalizedUnitLog
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.NormalizedUnitLog
 
 /-!
 # The degree-`68` Artin-Hasse exponential structure: `E₃₇ ≡ exp(T)·(1 + T³⁷/37) mod T⁷⁴`,
