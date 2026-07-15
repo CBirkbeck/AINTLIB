@@ -359,7 +359,7 @@ omit [DecidableEq F] in
 /-- `idealNatDegree ⟨g⟩ = g.natDegree`: the generator of `⟨g⟩` is associated to `g`, hence has the
 same degree. -/
 theorem idealNatDegree_span (g : F[X]) : idealNatDegree (Ideal.span {g}) = g.natDegree := by
-  unfold idealNatDegree
+  simp only [idealNatDegree]
   have h : Associated (Submodule.IsPrincipal.generator (Ideal.span ({g} : Set F[X]))) g := by
     rw [← Ideal.span_singleton_eq_span_singleton, Ideal.span_singleton_generator]
   exact natDegree_eq_of_degree_eq (degree_eq_degree_of_associated h)
