@@ -633,3 +633,11 @@ lemma applies to both affine-overlap legs and replaces the over-specialized fact
 exceeded the default elaboration budget. It introduces no options or additional geometric
 hypotheses. The focused build is green, and its axiom audit is exactly `propext`,
 `Classical.choice`, and `Quot.sound`.
+
+Completed spawned dependency (2026-07-15): proved
+`pullbackSquareTrivialization_two_transition`. Two square-transported trivializations sharing a
+common lower composite now differ by exactly the scalar relating their ordinary restrictions.
+The lemma combines both fourfold normalizations with the two inverse/hom cancellations, so the
+affine-intersection transition proof needs only one specialization of the large pullback diagram.
+It introduces no options or additional hypotheses. The focused build is green, and its axiom
+audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.

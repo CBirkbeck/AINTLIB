@@ -280,6 +280,73 @@ theorem pullbackSquareTrivialization_four_restrict
   rw [htail]
   exact (reassoc_of% hnorm) (restrictTrivialization hWU t).hom
 
+private theorem transition_of_normalized
+    {C : Type u} [Category C] {A B C' D E : C}
+    (L₁ : A ≅ B) (L₂ : C' ≅ B) (K : B ⟶ D)
+    (T₁ T₂ : D ≅ E) (scalar : E ⟶ E)
+    (hscalar : T₁.inv ≫ T₂.hom = scalar) :
+    (L₁.hom ≫ K ≫ T₁.hom) ≫ scalar =
+      (L₁.hom ≫ L₂.inv) ≫ (L₂.hom ≫ K ≫ T₂.hom) := by
+  rw [← hscalar]
+  simp only [Category.assoc, Iso.hom_inv_id_assoc, Iso.inv_hom_id_assoc]
+
+/-- Two square-transported trivializations with a common lower composite differ by the
+transition scalar of their ordinary restrictions. -/
+theorem pullbackSquareTrivialization_two_transition
+    {X A B₁ B₂ D : Scheme.{u}} {N : X.Modules}
+    {U₁ U₂ W : X.Opens} (hWU₁ : W ≤ U₁) (hWU₂ : W ≤ U₂)
+    (q : W.toScheme ⟶ A) (p₁ : A ⟶ B₁) (p₂ : A ⟶ B₂)
+    (d₁ : B₁ ⟶ D) (d₂ : B₂ ⟶ D) (g : D ⟶ X) (s : A ⟶ D)
+    (c₁ : W.toScheme ⟶ U₁.toScheme) (c₂ : W.toScheme ⟶ U₂.toScheme)
+    (hp₁ : p₁ ≫ d₁ = s) (hp₂ : p₂ ≫ d₂ = s)
+    (hSquare₁ : (q ≫ p₁) ≫ (d₁ ≫ g) = c₁ ≫ U₁.ι)
+    (hSquare₂ : (q ≫ p₂) ≫ (d₂ ≫ g) = c₂ ≫ U₂.ι)
+    (hc₁ : c₁ = X.homOfLE hWU₁) (hc₂ : c₂ = X.homOfLE hWU₂)
+    (hSource₁ : (q ≫ p₁) ≫ (d₁ ≫ g) = (q ≫ s) ≫ g)
+    (hSource₂ : (q ≫ p₂) ≫ (d₂ ≫ g) = (q ≫ s) ≫ g)
+    (hCommon : (q ≫ s) ≫ g = W.ι)
+    (t₁ : (pullback U₁.ι).obj N ≅ unitObj U₁.toScheme)
+    (t₂ : (pullback U₂.ι).obj N ≅ unitObj U₂.toScheme)
+    (scalar : unitObj W.toScheme ⟶ unitObj W.toScheme)
+    (hscalar : (restrictTrivialization hWU₁ t₁).inv ≫
+      (restrictTrivialization hWU₂ t₂).hom = scalar) :
+    ((pullbackComp q p₁).hom.app
+            ((pullback d₁).obj ((pullback g).obj N)) ≫
+        (pullback (q ≫ p₁)).map ((pullbackComp d₁ g).hom.app N) ≫
+          (pullbackSquareTrivialization (q ≫ p₁) (d₁ ≫ g)
+            c₁ U₁.ι hSquare₁ N t₁).hom) ≫ scalar =
+      ((pullback q).map
+            ((((pullbackComp p₁ d₁).app ((pullback g).obj N)) ≪≫
+              ((pullbackCongr hp₁).app ((pullback g).obj N))).hom) ≫
+          (pullback q).map
+            ((((pullbackComp p₂ d₂).app ((pullback g).obj N)) ≪≫
+              ((pullbackCongr hp₂).app ((pullback g).obj N))).inv)) ≫
+        ((pullbackComp q p₂).hom.app
+              ((pullback d₂).obj ((pullback g).obj N)) ≫
+          (pullback (q ≫ p₂)).map ((pullbackComp d₂ g).hom.app N) ≫
+            (pullbackSquareTrivialization (q ≫ p₂) (d₂ ≫ g)
+              c₂ U₂.ι hSquare₂ N t₂).hom) := by
+  let L₁ := ((pullbackComp p₁ d₁).app ((pullback g).obj N)) ≪≫
+    ((pullbackCongr hp₁).app ((pullback g).obj N))
+  let L₂ := ((pullbackComp p₂ d₂).app ((pullback g).obj N)) ≪≫
+    ((pullbackCongr hp₂).app ((pullback g).obj N))
+  let pre := (pullback q).map L₁.hom ≫ (pullback q).map L₂.inv
+  let Q₁ := (pullback q).mapIso L₁
+  let Q₂ := (pullback q).mapIso L₂
+  let K := (pullbackComp q s).hom.app ((pullback g).obj N) ≫
+    (pullbackComp (q ≫ s) g).hom.app N ≫ ((pullbackCongr hCommon).app N).hom
+  let T₁ := restrictTrivialization hWU₁ t₁
+  let T₂ := restrictTrivialization hWU₂ t₂
+  have hleft := pullbackSquareTrivialization_four_restrict hWU₁ q p₁ d₁ g s c₁
+    hp₁ hSquare₁ hc₁ hSource₁ hCommon t₁
+  have hright := pullbackSquareTrivialization_four_restrict hWU₂ q p₂ d₂ g s c₂
+    hp₂ hSquare₂ hc₂ hSource₂ hCommon t₂
+  refine (congrArg (· ≫ scalar) hleft).trans ?_
+  refine Eq.trans ?_ (congrArg (pre ≫ ·) hright.symm)
+  change (Q₁.hom ≫ K ≫ T₁.hom) ≫ scalar =
+    (Q₁.hom ≫ Q₂.inv) ≫ (Q₂.hom ≫ K ≫ T₂.hom)
+  exact transition_of_normalized Q₁ Q₂ K T₁ T₂ scalar hscalar
+
 /-- Transporting a trivialization across two vertically composable squares agrees with
 transport across the outer square. -/
 theorem pullbackSquareTrivialization_vcomp
