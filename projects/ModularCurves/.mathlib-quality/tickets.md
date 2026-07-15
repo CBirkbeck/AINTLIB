@@ -20465,3 +20465,41 @@ KM-keystone-gated). T-E15b (finite étale, Weil pairing) stays stream-C-gated. L
 `IsUnit.mul_right_eq_zero`/`(u.isUnit.pow n)` for unit-cancellation; a `have`-bound
 `AddMonoidHom.mk'` is opaque to rw — inline it (v10.239) — but for units, `IsUnit.mul_right_eq_zero`
 composes cleanly.
+
+## v10.245-OMEGA (2026-07-15) — ★★ T-E15a ASSEMBLY: datum → glued (β,γ) → classifying ring hom + map, all axiom-clean
+
+Continuing the ℤ[1/3] engine instantiation past the uniqueness certificate (v10.244). Commits
+21e758a3a…49f8595bd, all axiom-clean, all first-or-second-build green (Legendre-pipeline
+transposition):
+- **e3_witness_transVC_eq_one** (★★, v10.244-follow): presentation-level uniqueness via the marking
+  chase — `e3_markChase` (P-marking pins r=0,t=0; Q-marking pins hγ,hβγ; curve-generic CLS-1
+  lemmas reused from Legendre) + `e3form_units` (a₃, a₁³−27a₃ = discriminant factors, from
+  ellipticity) + `e3form_flex` (Q-on-curve = flex) → `e3_vc_marked`.
+- **IsE3Datum** (the corrected KM Ex. 2.2.2 datum: locally an E3-form presentation marking P at
+  (0,0), Q at (γ,β+γ)) + `restrict_W_e3form` + `e3_witness_param_agree` (β,γ agree on overlaps).
+- **e3GammaGlued / e3BetaGlued** (glued classifying functions; legendreLambda sheaf-glue ×2) +
+  **e3_glued_flex** (β³=(β+γ)³ globally) + **e3Delta_glued_isUnit** (disc a global unit, germwise).
+- **e3ClassifyingRingHom** `R[β,γ][δ⁻¹]/(β³−(β+γ)³) → Γ` (base map → quotient-by-flex → Away-lift;
+  the genuinely-different-from-Legendre part: quotient ring + localization) + **e3ClassifyingMap**
+  + `e3ClassifyingRingHom_algebraMap` (C-scalar compat).
+
+**REMAINING T-E15a (the mechanical Top-ladder + one genuine gap):**
+1. **[T-E15-CLS-TOP]** the chart-piece → cover-glue → `e3ClassifyingTop` ladder + π_w + zero +
+   isPullback + `e3ClassifyingEllHom` — DIRECT transposition of Legendre CLS-4/5/6
+   (`universalLegendre_map_classifying` → `legendrePiece`/`legendreTop`/`legendrePiece_isPullback`
+   /`legendreClassifyingEllHom`). Needs `universalE3_map_classifying` (specializing universalE3
+   along the classifying map recovers the witness curve — the E1 analog) + an `E3Witness` bundle.
+   ~400 lines, use the sed+python transposition pipeline (validated on transVC_transport_legendre).
+2. **[T-E15-CLS-RT]** rt1 (pulled universal marked P,Q = given L, via `section_comp` + isPullback
+   hom_ext — the level-half, NO ω-half since E3 has no ω!) + rt2 (uniqueness → determination) +
+   `RepresentableBy`.
+3. **[T-E15-NORM ⚠ GENUINE GAP, not pure transposition]** discharge
+   `naiveLevelThree_representable_by_affine` needs "every naive level-3 (E,P,Q) with 3 inv IS an
+   IsE3Datum" — i.e. the E3-flex-normalization EXISTS. **P has order 3 ⟹ P is a FLEX** (3P=0, the
+   tangent at P meets E only at P) ⟹ the `[3]P=0`-normal form exists. This is KM Ex. 2.2.2 /
+   GME 2.2.10's normalization. **NOTE: mathlib's `toTateNF` needs 3P≠0 (ThriceNeZero) — it does NOT
+   apply here (3P=0)**; the flex normalization is its own construction (order-3-point ⟹ flex ⟹
+   a₂=0 form). This existence is the E3 analog of Legendre's [T-E14-LVL-b] and is
+   **E[3]-structure / keystone-adjacent** — board for the keystone owner or a dedicated flex-NF
+   ticket. (Uniqueness — the HARD part — is DONE axiom-clean; only existence remains.)
+T-E15b (finite étale, Weil pairing) stays stream-C-gated.
