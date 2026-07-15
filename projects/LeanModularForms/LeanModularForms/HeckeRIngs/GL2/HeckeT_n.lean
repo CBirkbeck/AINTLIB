@@ -205,7 +205,8 @@ lemma moebiusFin'_injective (p : ℕ) (hp : Nat.Prime p)
       simp only [hA₁_def, hA₂_def, hB₁_def, hB₂_def]; push_cast; ring
     have h0 : B₁ * A₂ - B₂ * A₁ = 0 := by rw [hcross]; ring
     rw [h0, hdet_p, mul_one] at h_cross_det
-    exact fin_val_eq_of_dvd_sub hp b₁ b₂ ((ZMod.intCast_zmod_eq_zero_iff_dvd _ _).mp h_cross_det.symm)
+    exact fin_val_eq_of_dvd_sub hp b₁ b₂
+      ((ZMod.intCast_zmod_eq_zero_iff_dvd _ _).mp h_cross_det.symm)
 
 /-- Determinant of the moebius conjugating matrix is `1`, from the integer relations
 `A·M₁₁ - B·M₁₀ = 1` (the row-swapped `det σ`) and `B - A·j = p·q`. -/
@@ -906,7 +907,8 @@ private lemma heckeT_p_comm_distinct_both_coprime [NeZero N] (k : ℤ) {p q : �
     (heckeT_p_ut_slash_lower_comm k hp hq hpq (diamondOp k (ZMod.unitOfCoprime q hqN) f)) w
   simp only [heckeT_p_ut, SlashAction.sum_slash, Finset.sum_apply] at hC1
   have hC2 := congr_fun
-    (heckeT_p_ut_slash_lower_comm k hq hp (Ne.symm hpq) (diamondOp k (ZMod.unitOfCoprime p hpN) f)) w
+    (heckeT_p_ut_slash_lower_comm k hq hp (Ne.symm hpq)
+      (diamondOp k (ZMod.unitOfCoprime p hpN) f)) w
   simp only [heckeT_p_ut, SlashAction.sum_slash, Finset.sum_apply] at hC2
   have hLL : (((⇑(diamondOp k (ZMod.unitOfCoprime q hqN)
         (diamondOp k (ZMod.unitOfCoprime p hpN) f))) ∣[k]
