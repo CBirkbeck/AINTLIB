@@ -17,7 +17,7 @@ The **geometric-fibre point comparison** for the KM 2.3 box **T-B6**, consumed b
 **T-B6 board spec** (verbatim, `decomposition-km2.3-b5d.md` §L-B, KM 2.3.1 proof p. 74):
 > "the scheme fibre `E_{k̄}` ↔ HasseWeil `WeierstrassCurve k̄` comparison (template:
 > `WeilPairing/GaloisEquivariance.lean`'s `E.Point t ↔ W.toAffine.Point` identification), which
-> must be built **non-circularly** (the current T-B6 routes through `torsionπ_etale`)."
+> must be built **non-circularly** (the current T-B6 routes through `Torsionπ.etale`)."
 and (`decomposition-2026-07-05-phase1.md`, B4): "fibre comparison `E[N] ×_S Spec k̄ ≅ (ℤ/N)²`".
 
 The **set** bijection `projModelPointsEquiv : SpecPoints (projModel W) (projModelπ W) K ≃

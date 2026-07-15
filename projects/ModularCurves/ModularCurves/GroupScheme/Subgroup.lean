@@ -83,7 +83,7 @@ SG3 states closedness of the cyclicity condition.
 * `torsionSubgroup` introduces **no new sorries**: the closed immersion is T-B3
   (`torsionι_isClosedImmersion`, proved), finiteness/flatness/rank are T-B4 (proved in
   Torsion.lean modulo the registered boxes BB-QF/BB-FLAT/BB-DEG), local finite
-  presentation is `mulByHom_locallyOfFinitePresentation` (proved), and the subgroup
+  presentation is `MulByHom.locallyOfFinitePresentation` (proved), and the subgroup
   condition is proved outright below (`torsionι_factors_iff`, from the kernel universal
   property `pointToTorsion` + `smul_eq_zero_iff_comp_mulByHom`).
 -/
@@ -416,11 +416,11 @@ characteristic `p`) will follow the same recipe once their sources exist; the
 variable (E : EllipticCurve S)
 
 /-- `E[N] ⟶ S` is locally of finite presentation: base change of
-`mulByHom_locallyOfFinitePresentation` (the `lfp` sibling of `torsionπ_isFinite` /
+`MulByHom.locallyOfFinitePresentation` (the `lfp` sibling of `torsionπ_isFinite` /
 `torsionπ_flat`, T-B4). -/
 theorem torsionπ_locallyOfFinitePresentation (N : ℕ) :
     LocallyOfFinitePresentation (E.torsionπ N) := by
-  have h := E.mulByHom_locallyOfFinitePresentation N
+  have h := MulByHom.locallyOfFinitePresentation E N
   exact MorphismProperty.pullback_snd _ _ h
 
 /-- A point of `E` factors through `E[N] ⟶ E` iff it is killed by `N` — the kernel

@@ -14,7 +14,7 @@ import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
 /-!
 # Unramifiedness of `[N]` via the `E[N]`-torsor (T-B5D / BB-DIFF, scoping skeleton)
 
-`/develop --decompose` skeleton for **BB-DIFF** = `mulByHom_formallyUnramified` (`Torsion.lean:228`,
+`/develop --decompose` skeleton for **BB-DIFF** = `MulByHom.formallyUnramified` (`Torsion.lean:228`,
 held): `[N] : E ⟶ E` is formally unramified when `N` is invertible on `S`. It states the leaves of
 the **non-circular, HasseWeil-anchored** route (beastmode-B's `tb5z_architecture.md` route (c),
 grounded in KM §2.3) as `:= by sorry`, and assembles the target from them. NEW bridge file; the held
@@ -28,7 +28,7 @@ grounded in KM §2.3) as `:= by sorry`, and assembles the target from them. NEW 
   API.
 - **Chart route** (categorical `mulByHom = (mulBy N).left` on `GrpObj` ↔ Weierstrass-chart `[N]`):
   that comparison is **T-W7 scope** (A-lane, in progress) — collides.
-- The `torsionπ_etale ⟸ mulBy_etale ⟸ mulByHom_formallyUnramified` chain (`Torsion.lean:233-250`)
+- The `Torsionπ.etale ⟸ MulByHom.etale ⟸ MulByHom.formallyUnramified` chain (`Torsion.lean:233-250`)
   and the T-B6 fibre count are currently **circular** in `BB-DIFF`.
 
 ## The route (KM §2.3, non-circular)
@@ -41,17 +41,17 @@ KM Thm 2.3.1: `[N]` is finite locally free of rank `N²`, and its kernel `E[N]` 
 `NTorsion/TorsionGeneralN`) — verified present. So the leaves:
 
 * **L-A** (self-contained core, "build first", route-independent) —
-  `formallyUnramified_mulByHom_of_torsionπ`:
+  `MulByHom.formallyUnramified_of_torsionπ`:
   `FormallyUnramified (torsionπ N) → FormallyUnramified (mulByHom N)`, via the `E[N]`-torsor
   structure
   (KM 2.3.2) / group infinitesimal-lifting. Cannot collide with any lane.
-* **L-BC** (API-gap sub-tree) — `formallyUnramified_torsionπ`: `E[N] → S` is formally unramified
+* **L-BC** (API-gap sub-tree) — `Torsionπ.formallyUnramified`: `E[N] → S` is formally unramified
   when
   `N` is invertible, from (L-B) HasseWeil geometric fibres `E[N]_{k̄}` étale (the crux **T-B6**
   scheme-fibre ↔ HasseWeil-`WeierstrassCurve` comparison) + (L-C = **T-DISC**) the "finite +
   geometric
   fibres unramified ⟹ unramified" criterion.
-* **MASTER** — `mulByHom_formallyUnramified'` = L-A ∘ L-BC (assembled, term-mode; discharges
+* **MASTER** — `MulByHom.formallyUnramified'` = L-A ∘ L-BC (assembled, term-mode; discharges
   `Torsion.lean:228` once L-A and L-BC land).
 
 AINTLIB ModularCurves T-B5D + T-DISC (stream v10.10; planning-only, BB-DIFF discharge route).
@@ -82,7 +82,7 @@ differ
 by a map into `E[N]` vanishing there, which is `0` once `E[N] → S` is formally unramified — hence
 `g₁ = g₂`. Uses only the `GrpObj` group structure of `E` and mathlib's `FormallyUnramified` morphism
 property; collides with no lane. This is the piece to land first. -/
-theorem formallyUnramified_mulByHom_of_torsionπ (N : ℕ)
+theorem MulByHom.formallyUnramified_of_torsionπ (N : ℕ)
     (htors : FormallyUnramified (E.torsionπ N)) :
     FormallyUnramified (E.mulByHom N) := by
   apply FormallyUnramified.of_hom_ext
@@ -147,9 +147,9 @@ thickening vanish, because evaluation on the augmentation ideal of a chart at th
 is additive mod `I² = 0` and `N` is a unit (`TorsionUnramifiedFibre.lean`; no differentials,
 no degree counts, no algebraic closure) — plus the **T-DISC** "finite + fibres unramified ⟹
 unramified" criterion. -/
-theorem formallyUnramified_torsionπ (N : ℕ) (h : NIsInvertible S N) :
+theorem Torsionπ.formallyUnramified (N : ℕ) (h : NIsInvertible S N) :
     FormallyUnramified (E.torsionπ N) :=
-  E.formallyUnramified_torsionπ_of_nIsInvertible N h
+  Torsionπ.formallyUnramified_of_nIsInvertible E N h
 
 /-- **(L-BC funnel — hypothesis-funneled pre-wire, v10.123-CASCADE)** L-BC from its single
 remaining fibre input: once every residue-field fibre of `E[N] ⟶ S` is formally unramified,
@@ -162,7 +162,7 @@ at gate-fire it is produced from the group-compatible fibre dictionary
 HasseWeil's field-level separability/torsion count (`mulByInt_isSeparable`,
 `torsion_genN_linearEquiv`) to the scheme fibres. Nothing else remains between this funnel
 and BB-DIFF. -/
-theorem formallyUnramified_torsionπ_of_fibres (N : ℕ) [NeZero N]
+theorem Torsionπ.formallyUnramified_of_fibres (N : ℕ) [NeZero N]
     (hfib : ∀ y, FormallyUnramified ((E.torsionπ N).fiberToSpecResidueField y)) :
     FormallyUnramified (E.torsionπ N) :=
   haveI := E.torsionπ_isFinite N
@@ -170,22 +170,22 @@ theorem formallyUnramified_torsionπ_of_fibres (N : ℕ) [NeZero N]
 
 /-- **(BB-DIFF MASTER, hypothesis-funneled form)** `[N]` is formally unramified given only
 the fibre input of the funnel — L-A ∘ the L-BC funnel. At gate-fire the `hfib` input
-discharges and `mulByHom_formallyUnramified` (Torsion.lean) closes through
-`mulByHom_formallyUnramified'`. -/
-theorem mulByHom_formallyUnramified_of_fibres (N : ℕ) [NeZero N]
+discharges and `MulByHom.formallyUnramified` (Torsion.lean) closes through
+`MulByHom.formallyUnramified'`. -/
+theorem MulByHom.formallyUnramified_of_fibres (N : ℕ) [NeZero N]
     (hfib : ∀ y, FormallyUnramified ((E.torsionπ N).fiberToSpecResidueField y)) :
     FormallyUnramified (E.mulByHom N) :=
-  E.formallyUnramified_mulByHom_of_torsionπ N
-    (E.formallyUnramified_torsionπ_of_fibres N hfib)
+  MulByHom.formallyUnramified_of_torsionπ E N
+    (Torsionπ.formallyUnramified_of_fibres E N hfib)
 
 /-- **(T-B5D, MASTER — assembly)** BB-DIFF: `[N]` is formally unramified when `N` is invertible,
 assembled from L-A ∘ L-BC. Term-mode (no `sorry` of its own): discharging
-`formallyUnramified_torsionπ`
-(L-BC) and `formallyUnramified_mulByHom_of_torsionπ` (L-A) proves this, which is defeq to the held
-`Torsion.lean:228` `mulByHom_formallyUnramified`. -/
-theorem mulByHom_formallyUnramified' (N : ℕ) (h : NIsInvertible S N) :
+`Torsionπ.formallyUnramified`
+(L-BC) and `MulByHom.formallyUnramified_of_torsionπ` (L-A) proves this, which is defeq to the held
+`Torsion.lean:228` `MulByHom.formallyUnramified`. -/
+theorem MulByHom.formallyUnramified' (N : ℕ) (h : NIsInvertible S N) :
     FormallyUnramified (E.mulByHom N) :=
-  E.formallyUnramified_mulByHom_of_torsionπ N (E.formallyUnramified_torsionπ N h)
+  MulByHom.formallyUnramified_of_torsionπ E N (Torsionπ.formallyUnramified E N h)
 
 /-! ## The discharged BB-DIFF chain (relocated from `Torsion.lean`, Y1-CLOSER S2)
 
@@ -193,20 +193,20 @@ The three theorems below are relocated byte-identically (statements unchanged) f
 `EllipticCurve/Torsion.lean` — pointer comments at the old site. Their proofs need the
 L-A/L-BC machinery of this file and `TorsionUnramifiedFibre.lean`, which import
 `Torsion.lean`, so the discharge must live here. `torsion_geometricFibre_rank_two` follows
-its consumer `torsionπ_etale` down from `TorsionFibre.lean` for the same reason. -/
+its consumer `Torsionπ.etale` down from `TorsionFibre.lean` for the same reason. -/
 
 /-- **Black box `BB-DIFF` (T-B5 = Loeffler 3.4.2(2), unramifiedness) — DISCHARGED
 (Y1-CLOSER S2)**: if `N` is invertible on `S` then `[N]` is formally unramified.
 Loeffler (verbatim): *"The morphism `[N]` multiplies a global differential by `N`, so it
 induces an isomorphism of tangent space."* Proven differential-free: L-A (the `E[N]`-torsor
 reduction) ∘ L-BC (the augmentation-ideal fibre argument + T-DISC). -/
-theorem mulByHom_formallyUnramified (N : ℕ) (h : NIsInvertible S N) :
+theorem MulByHom.formallyUnramified (N : ℕ) (h : NIsInvertible S N) :
     FormallyUnramified (E.mulByHom N) :=
-  E.mulByHom_formallyUnramified' N h
+  MulByHom.formallyUnramified' E N h
 
 /-- **(T-B5 = Loeffler 3.4.2(2))** If `N` is invertible on `S`, then `[N] : E ⟶ E` is étale
 (it induces multiplication by `N`, an isomorphism, on the invariant differential). -/
-theorem mulBy_etale (N : ℕ) (h : NIsInvertible S N) :
+theorem MulByHom.etale (N : ℕ) (h : NIsInvertible S N) :
     Etale (E.mulByHom N) := by
   rcases eq_or_ne N 0 with rfl | hN
   · haveI hS : IsEmpty S := ModularCurves.isEmpty_of_nIsInvertible_zero h
@@ -214,15 +214,15 @@ theorem mulBy_etale (N : ℕ) (h : NIsInvertible S N) :
     infer_instance
   · haveI : NeZero N := ⟨hN⟩
     haveI := E.mulByHom_flat N
-    haveI := E.mulByHom_formallyUnramified N h
-    haveI := E.mulByHom_locallyOfFinitePresentation N
+    haveI := MulByHom.formallyUnramified E N h
+    haveI := MulByHom.locallyOfFinitePresentation E N
     exact Etale.of_formallyUnramified_of_flat (E.mulByHom N)
 
 /-- **(T-B5′)** If `N` is invertible on `S`, then `E[N] ⟶ S` is (finite) étale.
 Source: Loeffler §3.4; KM 2.3.5. -/
-theorem torsionπ_etale (N : ℕ) (h : NIsInvertible S N) :
+theorem Torsionπ.etale (N : ℕ) (h : NIsInvertible S N) :
     Etale (E.torsionπ N) := by
-  have he := E.mulBy_etale N h
+  have he := MulByHom.etale E N h
   exact MorphismProperty.pullback_snd _ _ he
 
 /-- **(T-B6 headline)** Over an algebraically closed field in which `N` is invertible,
@@ -230,7 +230,7 @@ the `N`-torsion of the geometric point group is `(ℤ/N)²`. Proof route: counti
 (KM 2.3.5/[Sil] III.6.4) — étale rank-`d²` kernels over `k̄` have exactly `d ^ 2`
 points, and the divisor-count spectrum pins the group. Rests on the registered
 KM 2.3.1/3.4.2 black boxes (`BB-QF`/`BB-FLAT`/`BB-DEG`/`BB-DIFF`) via
-`torsionπ_isFinite`/`torsionπ_etale`/`torsion_rank`. -/
+`torsionπ_isFinite`/`Torsionπ.etale`/`torsion_rank`. -/
 theorem torsion_geometricFibre_rank_two (N : ℕ) [NeZero N] (k : Type u) [Field k]
     [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S) (hN : (N : k) ≠ 0) :
     Nonempty (Submodule.torsionBy ℤ (E.Point t) (N : ℤ) ≃+ (Fin 2 → ZMod N)) := by
@@ -250,7 +250,7 @@ theorem torsion_geometricFibre_rank_two (N : ℕ) [NeZero N] (k : Type u) [Field
       apply hN
       rw [hc, Nat.cast_mul, h0, zero_mul]
     haveI hEt : Etale ((E.baseChange t).torsionπ d) :=
-      (E.baseChange t).torsionπ_etale d ((nIsInvertible_spec_iff k d).mpr hdk)
+      Torsionπ.etale (E.baseChange t) d ((nIsInvertible_spec_iff k d).mpr hdk)
     haveI hFin : IsFinite ((E.baseChange t).torsionπ d) :=
       (E.baseChange t).torsionπ_isFinite d
     calc Nat.card {x : Submodule.torsionBy ℤ (E.Point t) (N : ℤ) // d • x = 0}

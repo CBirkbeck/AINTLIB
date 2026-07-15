@@ -2289,10 +2289,10 @@ theorem exists_exactOrderLocus (E : EllipticCurve S) (N : ℕ) [NeZero N] :
 namespace FullLevelLocus
 
 /-- `E[N] ⟶ S` is locally of finite presentation (base change of
-`mulByHom_locallyOfFinitePresentation`). -/
+`MulByHom.locallyOfFinitePresentation`). -/
 private theorem torsionπ_lfp {Y : Scheme.{u}} (F : EllipticCurve Y)
     (N : ℕ) : LocallyOfFinitePresentation (F.torsionπ N) :=
-  MorphismProperty.pullback_snd _ _ (F.mulByHom_locallyOfFinitePresentation N)
+  MorphismProperty.pullback_snd _ _ (EllipticCurve.MulByHom.locallyOfFinitePresentation F N)
 
 private theorem torsionDivisor_prop {Y : Scheme.{u}}
     (F : EllipticCurve Y) (N : ℕ) (P : MorphismProperty Scheme.{u}) [P.RespectsIso]

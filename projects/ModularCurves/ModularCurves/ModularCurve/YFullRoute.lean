@@ -162,7 +162,7 @@ theorem isAffineHom_fullLevelSpaceStruct (hinv : NIsInvertible X.base N) :
   have hι : IsClosedImmersion (levelSpaceΓι X.curve N) :=
     inferInstanceAs (IsClosedImmersion (Scheme.IdealSheafData.subschemeι _))
   have hπ : IsFinite (X.curve.torsionπ N) :=
-    X.curve.torsionπ_isFinite_of_nIsInvertible N hinv
+    EllipticCurve.Torsionπ.isFinite_of_nIsInvertible X.curve N hinv
   have hfst : IsFinite (pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N)) :=
     MorphismProperty.pullback_fst _ _ hπ
   infer_instance
@@ -181,7 +181,7 @@ theorem isFinite_fullLevelSpaceStruct (hinv : NIsInvertible X.base N) :
       inferInstanceAs (IsClosedImmersion (Scheme.IdealSheafData.subschemeι _))
     infer_instance
   have hπ : IsFinite (X.curve.torsionπ N) :=
-    X.curve.torsionπ_isFinite_of_nIsInvertible N hinv
+    EllipticCurve.Torsionπ.isFinite_of_nIsInvertible X.curve N hinv
   have hfst : IsFinite (pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N)) :=
     MorphismProperty.pullback_fst _ _ hπ
   infer_instance
@@ -197,7 +197,7 @@ CHARTER-P2 phase 2);
 (β) KM 3.7.1 (p. 104–105): étale-locally on `S`, `E[N] ≅ (ℤ/N)²` is constant
 (*"reduce to the case when E[N] is the constant group-scheme (ℤ/NZ)²"*), the locus is a
 union of connected components of the constant scheme (indexed by the bases of `(ℤ/N)²`),
-hence clopen; clopen-ness descends along the étale cover — consumes `torsionπ_etale`
+hence clopen; clopen-ness descends along the étale cover — consumes `Torsionπ.etale`
 (BB-DIFF, CHARTER-P3B3) + étale-local trivialization of `E[N]` (T-B6 family).
 GATE: [YF-CLOPEN] — T-C1 or the CHARTER-P3B3 étale toolkit; not buildable from the
 current sorry-free layer alone. -/
@@ -209,7 +209,7 @@ theorem isOpenImmersion_levelSpaceΓι {S : Scheme.{u}} (E : EllipticCurve S) (N
 /-- **([YF-ETALE] = the étale half of KM 3.7.1 / [Loe] 3.8.2 for `[Γ(N)]`)** For `N`
 invertible in `R`, the Γ(N)-presentation is étale over the base: open immersion
 ([YF-CLOPEN]) ≫ pullback of finite étale ≫ finite étale, with `E[N] → S` étale from
-`torsionπ_etale` (GATE: BB-DIFF `mulByHom_formallyUnramified`, CHARTER-P3B3 items 1–2).
+`Torsionπ.etale` (GATE: BB-DIFF `MulByHom.formallyUnramified`, CHARTER-P3B3 items 1–2).
 KM 3.7.1 (verbatim, p. 104): *"Each is represented by a finite etale S-scheme."* -/
 theorem etale_fullLevelSpaceStruct (X : EllObj R) (N : ℕ) [NeZero N]
     (hinv : IsUnit (N : R)) : Etale (fullLevelSpaceStruct X N) := by
@@ -220,7 +220,7 @@ theorem etale_fullLevelSpaceStruct (X : EllObj R) (N : ℕ) [NeZero N]
     have hoi : IsOpenImmersion (levelSpaceΓι X.curve N) :=
       isOpenImmersion_levelSpaceΓι X.curve N hinvS
     infer_instance
-  have hπ : Etale (X.curve.torsionπ N) := X.curve.torsionπ_etale' N hinvS
+  have hπ : Etale (X.curve.torsionπ N) := EllipticCurve.Torsionπ.etale' X.curve N hinvS
   have hfst : Etale (pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N)) :=
     MorphismProperty.pullback_fst _ _ hπ
   infer_instance
