@@ -89,6 +89,27 @@ theorem pullbackCongr_inv
   subst g
   rfl
 
+theorem pullbackComp_assoc_app
+    {A B C D : Scheme.{u}} (f : A ⟶ B) (g : B ⟶ C)
+    (h : C ⟶ D) (M : D.Modules) :
+    (pullback f).map ((pullbackComp g h).hom.app M) ≫
+        (pullbackComp f (g ≫ h)).hom.app M =
+      (pullbackComp f g).hom.app ((pullback h).obj M) ≫
+        (pullbackComp (f ≫ g) h).hom.app M := by
+  have H := congrArg (fun z => z.hom.app M)
+    (SheafOfModules.pullback_assoc.{u}
+      h.toRingCatSheafHom g.toRingCatSheafHom f.toRingCatSheafHom)
+  simp only [Iso.trans_hom, NatTrans.comp_app,
+    Functor.isoWhiskerLeft_hom, Functor.isoWhiskerRight_hom,
+    Functor.whiskerLeft_app, Functor.whiskerRight_app,
+    Iso.symm_hom, Functor.associator_inv_app] at H
+  change
+    (pullbackComp f g).hom.app ((pullback h).obj M) ≫
+        (pullbackComp (f ≫ g) h).hom.app M =
+      (pullback f).map ((pullbackComp g h).hom.app M) ≫
+        (pullbackComp f (g ≫ h)).hom.app M at H
+  exact H.symm
+
 theorem pullbackCompCongr_transition_app
     {A B C D : Scheme.{u}}
     (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
