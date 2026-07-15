@@ -96,13 +96,9 @@ theorem ordAtInfty_algebraMap_F_nonzero {c : F} (hc : c ≠ 0) :
 
 /-! ### Powers of generators -/
 
-/-- `x_gen W ≠ 0` follows from `(W_smooth W).coordX_ne_zero` via the bridge. -/
-theorem x_gen_ne_zero : x_gen W ≠ 0 := by
-  rw [← coordX_W_smooth_eq_x_gen]; exact (W_smooth W).coordX_ne_zero
-
-/-- `y_gen W ≠ 0` follows from `(W_smooth W).coordY_ne_zero` via the bridge. -/
-theorem y_gen_ne_zero : y_gen W ≠ 0 := by
-  rw [← coordY_W_smooth_eq_y_gen]; exact (W_smooth W).coordY_ne_zero
+/- `x_gen_ne_zero` / `y_gen_ne_zero` HOISTED to `Foundation/MulByIntPullback.lean` next to
+the defs (#7621) — they were declared BOTH here and in `LocalExpansion.lean` (same names,
+same namespace), so no module could import both files without an environment clash. -/
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- `y_gen W` and `(W_smooth W).coordYInFunctionField` are the same element of

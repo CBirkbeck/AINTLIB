@@ -46,6 +46,49 @@ noncomputable def x_gen : KE :=
 noncomputable def y_gen : KE :=
   algebraMap R KE (AdjoinRoot.root W.toAffine.polynomial)
 
+omit [W.toAffine.IsElliptic] in
+/-- `x_gen W ≠ 0` in `K(E)`: the class of `C X` in `R = F[X][Y]/(W.polynomial)` is nonzero
+(`natDegree` in the outer variable is `0 < 2`), and `R → K(E)` is injective. -/
+theorem x_gen_ne_zero : x_gen W ≠ 0 := by
+  intro h
+  have hinj_R : Function.Injective (algebraMap W.toAffine.CoordinateRing KE) :=
+    IsFractionRing.injective _ _
+  have h_poly_zero : algebraMap (Polynomial F) W.toAffine.CoordinateRing
+      Polynomial.X = (0 : W.toAffine.CoordinateRing) := by
+    apply hinj_R
+    rw [map_zero]
+    exact h
+  have h_poly_ne : algebraMap (Polynomial F) W.toAffine.CoordinateRing
+      Polynomial.X ≠ (0 : W.toAffine.CoordinateRing) := by
+    change (Affine.CoordinateRing.mk W.toAffine (Polynomial.C Polynomial.X)) ≠ 0
+    apply AdjoinRoot.mk_ne_zero_of_natDegree_lt Affine.monic_polynomial
+    · exact Polynomial.C_ne_zero.mpr Polynomial.X_ne_zero
+    · rw [Polynomial.natDegree_C, Affine.natDegree_polynomial]; decide
+  exact h_poly_ne h_poly_zero
+
+omit [W.toAffine.IsElliptic] in
+/-- `y_gen W ≠ 0` in `K(E)`: the class of `Y` in `R = F[X][Y]/(W.polynomial)` is nonzero
+(`natDegree 1 < 2`, Silverman III.3), and `R → K(E)` is injective. -/
+theorem y_gen_ne_zero : y_gen W ≠ 0 := by
+  intro h
+  have hinj : Function.Injective (algebraMap W.toAffine.CoordinateRing KE) :=
+    IsFractionRing.injective _ _
+  have h_root_zero : AdjoinRoot.root W.toAffine.polynomial =
+      (0 : W.toAffine.CoordinateRing) := by
+    apply hinj
+    show algebraMap W.toAffine.CoordinateRing KE
+        (AdjoinRoot.root W.toAffine.polynomial) = algebraMap _ _ 0
+    rw [map_zero]
+    exact h
+  have h_root_ne : AdjoinRoot.root W.toAffine.polynomial ≠
+      (0 : W.toAffine.CoordinateRing) := by
+    change AdjoinRoot.mk W.toAffine.polynomial Polynomial.X ≠ 0
+    apply AdjoinRoot.mk_ne_zero_of_natDegree_lt Affine.monic_polynomial
+      Polynomial.X_ne_zero
+    rw [Polynomial.natDegree_X, Affine.natDegree_polynomial]
+    decide
+  exact h_root_ne h_root_zero
+
 /-- The base change of `W` to `K(E)`. The generic point `(x_gen, y_gen)` is a
 `K(E)`-rational point on it. -/
 noncomputable def W_KE : WeierstrassCurve KE := W.map (algebraMap F KE)
