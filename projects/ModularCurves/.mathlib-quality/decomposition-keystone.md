@@ -430,3 +430,46 @@ gated on [FR-GEN] (a mathlib-API-scale finrank prerequisite); L4-iii is gated on
 coordinate-reading bridge (b). None is closable in a bounded pass with the current API. Recommend:
 route [FR-GEN] as a ForMathlib/mathlib-PR sub-ticket (unblocks BOTH T-DEG0 and endDual's arbitrary-endo
 fibre-rank); L4-iii's coordinate-reading bridge (b) is the honest next deep grind (own multi-session).
+
+## SESSION APPEND (v10.256, KM) — BRICK 6: the converged assembly design (analysis complete)
+
+The :660 goal is `Module.finrank Γ(Z) Γ(pullback [N] Z.ι) = (mulByInt N).degree` (appTop algebra).
+Converged route (every named piece BANKED unless flagged):
+
+**(A) Transport to opens.** `pullbackRestrictIsoRestrict [N] Z : pullback [N] Z.ι ≅ ([N]⁻¹ᵁZ).toScheme`
+(mathlib) carries the appTop-module to `Γ(E, Z) → Γ(E, [N]⁻¹ᵁZ)` = `[N].app Z` (morphismRestrict-app
+compat). Finrank invariant along the ring-iso-compatible module transport (small lemma).
+
+**(B) The tower is the BANKED SQUARE.** Take R := Γ(pM, Z), S := Γ(pM, [N]⁻¹ᵁZ), both fraction
+fields = K(pM) via `germToFunctionField` (`functionField_isFractionRing_of_isAffineOpen`; for the
+S-side need `IsAffineOpen ([N]⁻¹ᵁZ)` = preimage of affine open under the AFFINE morphism [N] —
+mathlib preimage lemma). Module R' S' := via `functionFieldMap [N]` (`mulByHom_isDominant` banked).
+The scalar tower `IsScalarTower R K(pM) K(pM)` is EXACTLY `functionFieldMap_comp_germToFunctionField`
+(banked, DominantFunctionField.lean). `Algebra.IsAlgebraic.finrank_of_isFractionRing` then gives
+`finrank Γ(Z) Γ([N]⁻¹Z) = Module.finrank K(pM) K(pM) (via functionFieldMap [N])`. Side instances:
+FaithfulSMul (flat + nontrivial over domain), IsAlgebraic (finite), NoZeroDivisors ✓.
+
+**(C) Degree transport = the L4-iii FIELD identity.** Remaining: `finrank K(pM) K(pM) (functionFieldMap
+[N]) = finrank KE KE (mulByInt-pullback) = degree`. Needs the intertwining
+`projModelFunctionFieldEquiv ∘ functionFieldMap [N] = mulByInt_pullbackAlgHom ∘ projModelFunctionFieldEquiv`,
+which by `functionField_algHom_ext` (banked; upgrade the two sides to K-AlgHoms) reduces to the TWO
+GENERATOR IDENTITIES:
+  (FFM-X): equiv(fFM[N](equiv.symm x_gen)) = mulByInt_x   (+ FFM-Y for y_gen).
+Unfolding equiv.symm x_gen = germ_Z(x_Z) (`IsLocalization.ringEquivOfRingEquiv_eq`; equiv extends
+`coordRingToZSection.symm`) and the banked square, (FFM-X) becomes: **equiv(germ_{[N]⁻¹Z}([N].app Z
+x_Z)) = mulByInt_x**.
+
+**(D) The τ-stalk-map discharges (FFM-X/Y) from brick 5.** Define `τStalkMap : K(pM) →+* KE` := the
+map induced by the tautological point τ (IsLocalization.lift of τ-evaluation on Z-sections over the
+germ_Z localization). Two field maps K(pM) → KE agreeing on Γ(pM,Z)-germs are EQUAL
+(`IsLocalization.ringHom_ext`): τStalkMap = projModelFunctionFieldEquiv, since both extend the same
+evaluation on the chart ring (τ's chart-hom φ_τ sends x_Z ↦ x_gen BY CONSTRUCTION = coordRingToZSection-
+route of the equiv — needs the `coordRingToZSection ↔ chart-Away-ring` identification, the ONE remaining
+archaeology item). Then equiv(germ_V([N].app x_Z)) = τStalkMap(germ_V(...)) = τ-pullback value of
+[N].app x_Z = (τ.1 ≫ [N])-pullback of x_Z = **σ.1-pullback of x_Z (BRICK 5!)** = φ_σ(x_Z) =
+**mulByInt_x by σ's chartSpecPoint construction** ✓. (Also needs: τ-stalk/germ-pullback compat at V-germs
+— the point-evaluation-of-germ lemma, fromSpecStalk-free since τStalkMap is DEFINED via localization.)
+
+**Sub-brick order:** B6-arch (read coordRingToZSection def; the Γ(pM,Z) ↔ Away-ring triangle) →
+B6-1 τStalkMap + = equiv (ringHom_ext) → B6-2 (FFM-X/Y) via brick 5 → B6-3 the field intertwining
+(algHom_ext) → B6-4 the (B)-tower assembly → B6-5 the (A)-transport + close :660.
