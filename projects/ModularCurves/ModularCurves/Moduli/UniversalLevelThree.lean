@@ -256,6 +256,21 @@ theorem universalE3_isE3Form :
     IsE3Form (universalE3 R) (e3Beta R) (e3Gamma R) :=
   ⟨rfl, rfl, rfl, rfl, rfl⟩
 
+/-- **(T-E15a)** `IsE3Form` is functorial under a ring hom: the `ℰ₃`-form shape (five
+coefficient equations) is preserved by `WeierstrassCurve.map`. -/
+theorem IsE3Form.map {A B : Type u} [CommRing A] [CommRing B] (f : A →+* B)
+    {W : WeierstrassCurve A} {β γ : A} (h : IsE3Form W β γ) :
+    IsE3Form (W.map f) (f β) (f γ) := by
+  obtain ⟨ha₁, ha₂, ha₃, ha₄, ha₆⟩ := h
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩
+  · rw [WeierstrassCurve.map_a₁, ha₁]
+    simp only [map_sub, map_mul, map_ofNat, map_one]
+  · rw [WeierstrassCurve.map_a₂, ha₂, map_zero]
+  · rw [WeierstrassCurve.map_a₃, ha₃]
+    simp only [map_sub, map_neg, map_mul, map_ofNat, map_pow]
+  · rw [WeierstrassCurve.map_a₄, ha₄, map_zero]
+  · rw [WeierstrassCurve.map_a₆, ha₆, map_zero]
+
 open WeierstrassCurve in
 /-- **([T-E15-NORM] the Q-normalization certificate ★★)** The `ℰ₃`-form emerges from a
 flex normal form by *pure scaling*. Given `W` already in flex shape (`a₂ = a₄ = a₆ = 0`,
@@ -690,6 +705,35 @@ theorem isE3Datum_of_flexCharts {R : CommRingCat.{u}} (X : EllObj R)
   obtain ⟨V, hsV, P₀, p, q, ha₂, ha₄, ha₆, hMP, hMQ, hcubic, ha₃, h3, hB⟩ := h s
   obtain ⟨Pr, β, γ, hE3, hMPr, hMQr, hγu⟩ := isE3Chart P₀ ha₂ ha₄ ha₆ hMP hMQ hcubic ha₃ h3 hB
   exact ⟨V, hsV, Pr, β, γ, hE3, hMPr, hMQr, hγu⟩
+
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **([T-E15-NORM] the universal `ℰ₃`-datum ★★★, B2-fix-unblocked)** Given the naive-full-
+level-`3` clause `hL` for the universal marked pair (the section-level killing `[3]P=[3]Q=0`
++ geometric generation — the [T-E15-NORM] level input, gated on the E[3]/BB-DEG substrate),
+the tautologically marked universal `(P, Q)` IS an `ℰ₃`-datum: the tautological presentation
+is of `ℰ₃`-form (`universalE3_isE3Form` transported by `IsE3Form.map`), marks `P` at `(0,0)`
+and `Q` at `(γ, β+γ)` (`tautPresentation_marksAt_e3P/Q`), and `γ` is a unit (`isUnit_e3Gamma`
+— **the B2 fix**, certifying `Q ∉ ⟨P⟩`). Everything but `hL` is now discharged. -/
+theorem universalE3_isE3Datum
+    (hL : (universalE3Obj R).curve.IsNaiveFullLevel 3
+      (universalE3P R) (universalE3Q R)) :
+    IsE3Datum (universalE3Obj R) ⟨⟨universalE3P R, universalE3Q R⟩, hL⟩ := by
+  haveI : IsAffine (universalE3Obj R).base :=
+    inferInstanceAs (IsAffine (Spec (CommRingCat.of (E3ModuliRing R))))
+  intro s
+  refine ⟨⟨⊤, isAffineOpen_top _⟩, trivial, tautPresentation (universalE3 R),
+    (Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv.hom (e3Beta R),
+    (Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv.hom (e3Gamma R),
+    ?_, ?_, ?_, ?_⟩
+  · exact IsE3Form.map _ (universalE3_isE3Form R)
+  · have h := tautPresentation_marksAt_e3P R
+    rw [map_zero] at h
+    exact h
+  · have h := tautPresentation_marksAt_e3Q R
+    rw [map_add] at h
+    exact h
+  · exact (isUnit_e3Gamma R).map _
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
