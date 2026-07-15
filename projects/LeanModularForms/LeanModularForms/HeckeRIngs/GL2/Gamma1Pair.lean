@@ -246,7 +246,8 @@ theorem Gamma0MapUnits_surjective [NeZero N] :
   obtain ⟨g, hg⟩ := SL2Reduction.SL2_reduction_surjective N
     ⟨!![↑d⁻¹, 0; 0, ↑d], by simp [Matrix.det_fin_two]⟩
   have hg11 := congr_fun (congr_fun (congr_arg Subtype.val hg) 1)
-  exact ⟨⟨g, Gamma0_mem.mpr (by simpa using hg11 0)⟩, Units.ext <| by simpa [Gamma0Map] using hg11 1⟩
+  exact ⟨⟨g, Gamma0_mem.mpr (by simpa using hg11 0)⟩,
+    Units.ext <| by simpa [Gamma0Map] using hg11 1⟩
 
 /-- The diamond operator `⟨d⟩` on modular forms for `Gamma1(N)`, indexed by
 `d : (ZMod N)ˣ`. -/
