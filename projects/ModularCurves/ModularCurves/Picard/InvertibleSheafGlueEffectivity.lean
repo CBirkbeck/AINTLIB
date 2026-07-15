@@ -4039,6 +4039,60 @@ theorem affineIntersectionUnitCocycle_pullback_overlapTransitionIso
     ModularCurves.unitAutomorphismOfTopUnit_hom, pullbackUnitIso_scalar,
     affineIntersectionUnitCocycle_overlapTransitionSection]
 
+/-- On the geometric intersection, the left affine-overlap chart map is the canonical open
+inclusion. -/
+theorem affineIntersectionOverlapIso_inv_comp_left_chartIso
+    {X S : Scheme.{u}} (π : X ⟶ S) {J : Type u}
+    (U : J → X.Opens)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i j : J) :
+    let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let sq := affineIntersectionChartChosenPullback hopen hpush
+    let q := π.affineIntersectionOverlapIso U hU i j
+    (q.inv ≫ (sq i j).p₁) ≫
+        (π.affineIntersectionChartIso U hU i).hom =
+      X.homOfLE (inf_le_left : U i ⊓ U j ≤ U i) := by
+  dsimp only [affineIntersectionChartChosenPullback]
+  let q := π.affineIntersectionOverlapIso U hU i j
+  have h := π.affineIntersectionGlueData_f_chartIso U hU i j
+  calc
+    (q.inv ≫ (π.affineIntersectionGlueData U hU).f i j) ≫
+        (π.affineIntersectionChartIso U hU i).hom =
+      q.inv ≫ ((π.affineIntersectionGlueData U hU).f i j ≫
+        (π.affineIntersectionChartIso U hU i).hom) :=
+          Category.assoc _ _ _
+    _ = _ := (congrArg (q.inv ≫ ·) h).trans
+      ((π.affineIntersectionOverlapIso U hU i j).inv_hom_id_assoc _)
+
+/-- On the geometric intersection, the right affine-overlap chart map is the canonical open
+inclusion. -/
+theorem affineIntersectionOverlapIso_inv_comp_right_chartIso
+    {X S : Scheme.{u}} (π : X ⟶ S) {J : Type u}
+    (U : J → X.Opens)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i j : J) :
+    let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let sq := affineIntersectionChartChosenPullback hopen hpush
+    let q := π.affineIntersectionOverlapIso U hU i j
+    (q.inv ≫ (sq i j).p₂) ≫
+        (π.affineIntersectionChartIso U hU j).hom =
+      X.homOfLE (inf_le_right : U i ⊓ U j ≤ U j) := by
+  dsimp only [affineIntersectionChartChosenPullback]
+  let q := π.affineIntersectionOverlapIso U hU i j
+  have h := π.affineIntersectionGlueData_t_f_chartIso U hU i j
+  calc
+    (q.inv ≫ ((π.affineIntersectionGlueData U hU).t i j ≫
+        (π.affineIntersectionGlueData U hU).f j i)) ≫
+          (π.affineIntersectionChartIso U hU j).hom =
+      q.inv ≫ ((π.affineIntersectionGlueData U hU).t i j ≫
+        (π.affineIntersectionGlueData U hU).f j i ≫
+          (π.affineIntersectionChartIso U hU j).hom) := by
+            simp only [Category.assoc]
+    _ = _ := (congrArg (q.inv ≫ ·) h).trans
+      ((π.affineIntersectionOverlapIso U hU i j).inv_hom_id_assoc _)
+
 /-- A chosen trivialization on an original open induces a trivialization on the corresponding
 chart of the affine-intersection glued model. -/
 noncomputable def affineIntersectionOriginalChartTrivialization
