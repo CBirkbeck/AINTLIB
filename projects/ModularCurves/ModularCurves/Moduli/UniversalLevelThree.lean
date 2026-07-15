@@ -1975,6 +1975,118 @@ noncomputable def e3PulledWitness (V : X.base.affineOpens) :
     rw [map_add] at htr
     exact htr
 
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation MvPolynomial in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **([T-E15-NORM] rt2a ★)** The classifying ring map of the pulled datum is the ring map
+of `φ` itself. Adapts Legendre's `legendreClassifyingRingHom_pulled`: `R`-scalars via
+`base_w` (`hψR`), then the **two** generators `γ, β` via the pulled-witness family +
+`e3GammaGlued`/`e3BetaGlued`'s universal specs (`hnat_γ`, `hnat_β`); the ext peels the `Away`
+localization, then the **`E3Quotient` layer** (`mk_surjective` + `MvPolynomial.induction_on`),
+then closes on `R`/`β`/`γ`. -/
+theorem e3ClassifyingRingHom_pulled (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    e3ClassifyingRingHom X
+      ((gammaFullNaiveProblem R 3).map (Opposite.op φ)
+        ⟨⟨universalE3P R, universalE3Q R⟩, hL⟩)
+      (IsE3Datum.map φ (universalE3_isE3Datum R hL)
+        ((gammaFullNaiveProblem R 3).map (Opposite.op φ)
+          ⟨⟨universalE3P R, universalE3Q R⟩, hL⟩) rfl rfl) h3 =
+    ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv ≫
+      φ.baseHom.appTop).hom := by
+  set hD' := IsE3Datum.map φ (universalE3_isE3Datum R hL)
+    ((gammaFullNaiveProblem R 3).map (Opposite.op φ)
+      ⟨⟨universalE3P R, universalE3Q R⟩, hL⟩) rfl rfl with hD'def
+  have hψR : ∀ r : R,
+      ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv ≫
+        φ.baseHom.appTop).hom (algebraMap R (E3ModuliRing R) r) = X.baseRingHom r := by
+    intro r
+    have hb : CommRingCat.ofHom (algebraMap R (E3ModuliRing R)) ≫
+        (Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv ≫ φ.baseHom.appTop =
+        CommRingCat.ofHom X.baseRingHom := by
+      rw [Scheme.ΓSpecIso_inv_naturality_assoc, ← Scheme.Hom.comp_appTop,
+        show φ.baseHom ≫ Spec.map (CommRingCat.ofHom
+            (algebraMap R (E3ModuliRing R))) = X.structMap from φ.base_w]
+      rfl
+    exact congrArg (fun g => CommRingCat.Hom.hom g r) hb
+  have hcover : (⊤ : X.base.Opens) ≤
+      iSup (fun V : X.base.affineOpens => V.1) := by
+    intro x _
+    obtain ⟨V₀, hVaff, hxV, -⟩ := exists_isAffineOpen_mem_and_subset
+      (show x ∈ (⊤ : X.base.Opens) from trivial)
+    exact TopologicalSpace.Opens.mem_iSup.mpr ⟨⟨V₀, hVaff⟩, hxV⟩
+  have hnat_γ : (e3GammaGlued X _ hD' h3).1 =
+      ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv ≫
+        φ.baseHom.appTop).hom (e3Gamma R) := by
+    refine TopCat.Sheaf.eq_of_locally_eq' X.base.sheaf
+      (fun V : X.base.affineOpens => V.1) ⊤
+      (fun V => homOfLE le_top) hcover _ _ (fun V => ?_)
+    show Scheme.resLE le_top (e3GammaGlued X _ hD' h3).1 =
+      Scheme.resLE le_top
+        (((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv ≫
+          φ.baseHom.appTop).hom (e3Gamma R))
+    have hres : Scheme.resLE (le_top : V.1 ≤ ⊤)
+        (((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv ≫
+          φ.baseHom.appTop).hom (e3Gamma R)) =
+        sectionsMapLE φ.baseHom
+          (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (E3ModuliRing R))).affineOpens).1 from fun x _ => trivial)
+          ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv.hom
+            (e3Gamma R)) := rfl
+    rw [hres]
+    exact (e3GammaGlued X _ hD' h3).2
+      (e3PulledWitness φ hL V).V (e3PulledWitness φ hL V).Pr
+      (e3PulledWitness φ hL V).β (e3PulledWitness φ hL V).γ
+      (e3PulledWitness φ hL V).hF (e3PulledWitness φ hL V).hP
+      (e3PulledWitness φ hL V).hQ
+  have hnat_β : (e3BetaGlued X _ hD' h3).1 =
+      ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv ≫
+        φ.baseHom.appTop).hom (e3Beta R) := by
+    refine TopCat.Sheaf.eq_of_locally_eq' X.base.sheaf
+      (fun V : X.base.affineOpens => V.1) ⊤
+      (fun V => homOfLE le_top) hcover _ _ (fun V => ?_)
+    show Scheme.resLE le_top (e3BetaGlued X _ hD' h3).1 =
+      Scheme.resLE le_top
+        (((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv ≫
+          φ.baseHom.appTop).hom (e3Beta R))
+    have hres : Scheme.resLE (le_top : V.1 ≤ ⊤)
+        (((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv ≫
+          φ.baseHom.appTop).hom (e3Beta R)) =
+        sectionsMapLE φ.baseHom
+          (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+            (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+              (E3ModuliRing R))).affineOpens).1 from fun x _ => trivial)
+          ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv.hom
+            (e3Beta R)) := rfl
+    rw [hres]
+    exact (e3BetaGlued X _ hD' h3).2
+      (e3PulledWitness φ hL V).V (e3PulledWitness φ hL V).Pr
+      (e3PulledWitness φ hL V).β (e3PulledWitness φ hL V).γ
+      (e3PulledWitness φ hL V).hF (e3PulledWitness φ hL V).hP
+      (e3PulledWitness φ hL V).hQ
+  refine IsLocalization.ringHom_ext (Submonoid.powers (e3Delta R)) ?_
+  refine RingHom.ext fun x => ?_
+  obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+  rw [RingHom.comp_apply]
+  induction a using MvPolynomial.induction_on with
+  | C r =>
+    have hcr : (algebraMap (E3Quotient R) (E3ModuliRing R))
+        (Ideal.Quotient.mk _ (MvPolynomial.C r)) = algebraMap R (E3ModuliRing R) r := by
+      rw [IsScalarTower.algebraMap_apply R (E3Quotient R) (E3ModuliRing R),
+        IsScalarTower.algebraMap_apply R (MvPolynomial (Fin 2) R) (E3Quotient R)]
+      rfl
+    rw [hcr, e3ClassifyingRingHom_algebraMap]
+    exact (hψR r).symm
+  | add p q hp hq => simp only [map_add, hp, hq]
+  | mul_X p j hp =>
+    simp only [map_mul, hp]
+    congr 1
+    fin_cases j
+    · show e3ClassifyingRingHom X _ hD' h3 (e3Beta R) = _
+      rw [e3ClassifyingRingHom_beta]; exact hnat_β
+    · show e3ClassifyingRingHom X _ hD' h3 (e3Gamma R) = _
+      rw [e3ClassifyingRingHom_gamma]; exact hnat_γ
+
 end Rt2
 
 end ModularCurves
