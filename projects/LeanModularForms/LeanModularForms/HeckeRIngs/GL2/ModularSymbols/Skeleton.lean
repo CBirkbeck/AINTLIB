@@ -3,10 +3,11 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LeanModularForms contributors
 -/
-import Mathlib.RepresentationTheory.Coinvariants
-import Mathlib.LinearAlgebra.Projectivization.Action
-import Mathlib.RingTheory.MvPolynomial.Homogeneous
 import Mathlib.LinearAlgebra.FreeModule.PID
+import Mathlib.LinearAlgebra.Projectivization.Action
+import Mathlib.RepresentationTheory.Coinvariants
+import Mathlib.RingTheory.MvPolynomial.Homogeneous
+
 import LeanModularForms.Labels.HeckeFieldArithmetic
 
 /-!
@@ -70,8 +71,8 @@ def div0Rep (R : Type u) [CommRing R] :
 restricted to `Γ₁(N)`. Shimura Prop 8.2: the cuspidal modular-symbol space is `X / ⟨(α-1)X⟩`, i.e.
 `Representation.Coinvariants`. -/
 
-/-- The tensor coefficient representation `Div⁰ ⊗ Sym^{k-2}` of `SL₂(ℤ)`, restricted to `Γ₁(N)`.
-*This much typechecks against mathlib v4.31.* -/
+/-- The tensor coefficient representation `Div⁰ ⊗ Sym^{k-2}` of `SL₂(ℤ)`, restricted to
+`Γ₁(N)`. *This much typechecks against mathlib v4.31.* -/
 noncomputable def modSymRep (N : ℕ) [NeZero N] (k : ℤ) (R : Type u) [CommRing R] :
     Representation R (CongruenceSubgroup.Gamma1 N)
       (Div0 R ⊗[R] SymPow R (k - 2).toNat) :=
