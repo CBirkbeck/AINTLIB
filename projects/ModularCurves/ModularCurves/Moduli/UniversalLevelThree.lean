@@ -2273,6 +2273,64 @@ theorem e3Top_pulled (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
   rw [e3Piece]
   rfl
 
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+/-- **([T-E15-NORM] rt2 ★★★, the uniqueness half of KM Ex. 2.2.2's universal property)**
+ANY `Ell/R`-morphism to the universal `ℰ₃` object IS the classifying morphism of the
+datum it pulls back. Assembles the baseHom (rt2b) + top (rt2c) determinations via
+`EllHom.ext`. Adapts `legendreClassifyingEllHom_pulled`. -/
+theorem e3ClassifyingEllHom_pulled (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    e3ClassifyingEllHom
+      (IsE3Datum.map φ (universalE3_isE3Datum R hL)
+        ((gammaFullNaiveProblem R 3).map (Opposite.op φ)
+          ⟨⟨universalE3P R, universalE3Q R⟩, hL⟩) rfl rfl) h3 = φ :=
+  EllHom.ext (e3ClassifyingMap_pulled φ hL h3) (e3Top_pulled φ hL h3)
+
 end Rt2
+
+open AlgebraicGeometry CategoryTheory Scheme in
+/-- If `3` is a unit in `R`, it is a unit in the global sections of every `Ell/R`-object's
+base. -/
+theorem EllObj.isUnit_three {R : CommRingCat.{u}} (Y : EllObj R)
+    (hR : IsUnit (3 : R)) : IsUnit (3 : Γ(Y.base, ⊤)) := by
+  have h := hR.map Y.baseRingHom
+  rwa [map_ofNat] at h
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **([T-E15-NORM] KM 4.7.0's `(3, GL₂(𝔽₃))` engine axiom 1, conditional on `hL`)** GIVEN
+the naive-full-level-`3` clause for the universal marked pair (the [T-E15-NORM] level input,
+bridge-gated on the E[3]/BB-DEG substrate), the `ℰ₃` datum problem is representable by the
+universal `ℰ₃` object: `φ ↦` the pulled datum; inverse `= e3ClassifyingEllHom`; roundtrips
+are rt1 (`pullSection_e3ClassifyingEllHom_P/Q`) and rt2 (`e3ClassifyingEllHom_pulled`). -/
+noncomputable def e3DatumRepresentableBy (R : CommRingCat.{u}) (hR : IsUnit (3 : R))
+    (hL : (universalE3Obj R).curve.IsNaiveFullLevel 3
+      (universalE3P R) (universalE3Q R)) :
+    (e3DatumProblem R).RepresentableBy (universalE3Obj R) where
+  homEquiv {X} :=
+    { toFun := fun φ => (e3DatumProblem R).map (Opposite.op φ)
+        ⟨⟨⟨universalE3P R, universalE3Q R⟩, hL⟩, universalE3_isE3Datum R hL⟩
+      invFun := fun x => e3ClassifyingEllHom x.2 (X.isUnit_three hR)
+      left_inv := fun φ => e3ClassifyingEllHom_pulled φ hL (X.isUnit_three hR)
+      right_inv := fun x => by
+        refine Subtype.ext (Subtype.ext (Prod.ext ?_ ?_))
+        · exact pullSection_e3ClassifyingEllHom_P x.2 (X.isUnit_three hR)
+        · exact pullSection_e3ClassifyingEllHom_Q x.2 (X.isUnit_three hR) }
+  homEquiv_comp {X X'} f g :=
+    FunctorToTypes.map_comp_apply (e3DatumProblem R)
+      (Opposite.op g) (Opposite.op f) _
+
+open AlgebraicGeometry CategoryTheory Scheme in
+/-- **([T-E15-NORM] the ℰ₃ datum-problem discharge, conditional on `hL`)** The `ℰ₃` datum
+problem is representable by an object with **affine** base — `Y(3) = Spec E3ModuliRing`.
+The `naiveLevelThree_representable_by_affine` headline (for the raw naive functor) adds the
+bridge-gated naive↔datum equivalence on top of this. -/
+theorem e3Datum_representable_by_affine_of_level (R : CommRingCat.{u}) (hR : IsUnit (3 : R))
+    (hL : (universalE3Obj R).curve.IsNaiveFullLevel 3
+      (universalE3P R) (universalE3Q R)) :
+    ∃ X : EllObj R, IsAffine X.base ∧
+      Nonempty ((e3DatumProblem R).RepresentableBy X) :=
+  ⟨universalE3Obj R,
+    inferInstanceAs (IsAffine (Spec (CommRingCat.of (E3ModuliRing R)))),
+    ⟨e3DatumRepresentableBy R hR hL⟩⟩
 
 end ModularCurves
