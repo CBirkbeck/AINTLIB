@@ -2593,6 +2593,22 @@ noncomputable def AffineIntersectionUnitCocycle.gluedModule
   equalizer (c.chartGlueLeft hopen hpush) (c.chartGlueRight hopen hpush)
 
 private noncomputable def
+    AffineIntersectionUnitCocycle.chartLocalEqualizerInclusion
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    let R := @restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)
+    R.obj (c.gluedModule hopen hpush) ⟶
+      R.obj (c.chartGlueSource hopen hpush) :=
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  let R := @restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)
+  R.map (equalizer.ι
+    (c.chartGlueLeft hopen hpush) (c.chartGlueRight hopen hpush))
+
+private noncomputable def
     AffineIntersectionUnitCocycle.chartLocalEqualizerComponent
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
     (c : AffineIntersectionUnitCocycle F)
@@ -2605,8 +2621,7 @@ private noncomputable def
       (pushforward (D.t i k ≫ D.f k i)).obj (unitObj (D.V (i, k))) := by
   let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
   let R := @restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)
-  exact R.map (equalizer.ι
-        (c.chartGlueLeft hopen hpush) (c.chartGlueRight hopen hpush)) ≫
+  exact c.chartLocalEqualizerInclusion hopen hpush k ≫
       R.map (Pi.π (fun l : J ↦ c.chartExtension hopen hpush l) i) ≫
     (c.chartExtensionRestrictIso hopen hpush k i).hom
 
@@ -2649,6 +2664,7 @@ private theorem
     (fun m ↦ R.map (equalizer.ι
       (c.chartGlueLeft hopen hpush) (c.chartGlueRight hopen hpush)) ≫ m) hright
   dsimp only [AffineIntersectionUnitCocycle.chartLocalEqualizerComponent,
+    AffineIntersectionUnitCocycle.chartLocalEqualizerInclusion,
     AffineIntersectionUnitCocycle.gluedModule,
     AffineIntersectionUnitCocycle.chartLocalLeftMap,
     AffineIntersectionUnitCocycle.chartLocalRightMap]
@@ -2785,6 +2801,178 @@ private theorem AffineIntersectionUnitCocycle.chartLocalLift_projection
   rw [c.chartLocalLift_ι_assoc]
   rw [c.chartLocalSource_π_assoc]
   simp
+
+private theorem
+    AffineIntersectionUnitCocycle.chartLocalProjection_tupleComponent
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k i : J) :
+    c.chartLocalProjection hopen hpush k ≫
+        c.chartLocalTupleComponent hopen hpush k i =
+      c.chartLocalEqualizerComponent hopen hpush k i := by
+  letI : IsIso (c.chartLocalTupleComponent hopen hpush k k) :=
+    c.chartLocalTupleComponent_self_isIso hopen hpush k
+  letI : IsIso (c.chartLocalLeftMap hopen hpush k i k) :=
+    c.chartLocalLeftMap_right_self_isIso hopen hpush k i
+  apply (cancel_mono (c.chartLocalLeftMap hopen hpush k i k)).1
+  have htuple := c.chartLocalTupleComponent_equalizes_maps
+    hopen hpush k i k
+  have hequalizer := c.chartLocalEqualizerComponent_equalizes
+    hopen hpush k i k
+  change
+    (c.chartLocalEqualizerComponent hopen hpush k k ≫
+          inv (c.chartLocalTupleComponent hopen hpush k k) ≫
+        c.chartLocalTupleComponent hopen hpush k i) ≫
+        c.chartLocalLeftMap hopen hpush k i k =
+      c.chartLocalEqualizerComponent hopen hpush k i ≫
+        c.chartLocalLeftMap hopen hpush k i k
+  simp only [Category.assoc]
+  rw [htuple]
+  simpa only [IsIso.inv_hom_id_assoc] using hequalizer.symm
+
+private theorem AffineIntersectionUnitCocycle.chartLocalProjection_source
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k : J) :
+    c.chartLocalProjection hopen hpush k ≫
+        c.chartLocalSource hopen hpush k =
+      c.chartLocalEqualizerInclusion hopen hpush k := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  let R := @restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)
+  apply (cancel_mono (c.chartGlueSourceRestrictIso hopen hpush k).hom).1
+  apply Pi.hom_ext
+  intro i
+  simp only [Category.assoc]
+  rw [c.chartGlueSourceRestrictIso_hom_π]
+  let e := c.chartExtensionRestrictIso hopen hpush k i
+  have hsource := c.chartLocalSource_π hopen hpush k i
+  have hsource' := congrArg
+    (fun m ↦ c.chartLocalProjection hopen hpush k ≫ m ≫ e.hom) hsource
+  have hprojection := c.chartLocalProjection_tupleComponent
+    hopen hpush k i
+  calc
+    c.chartLocalProjection hopen hpush k ≫
+          c.chartLocalSource hopen hpush k ≫
+        R.map (Pi.π (fun j : J ↦ c.chartExtension hopen hpush j) i) ≫
+      e.hom =
+        c.chartLocalProjection hopen hpush k ≫
+            c.chartLocalTupleComponent hopen hpush k i ≫ e.inv ≫
+          e.hom := by simpa only [Category.assoc] using hsource'
+    _ = c.chartLocalProjection hopen hpush k ≫
+        c.chartLocalTupleComponent hopen hpush k i := by simp
+    _ = c.chartLocalEqualizerComponent hopen hpush k i := hprojection
+    _ = c.chartLocalEqualizerInclusion hopen hpush k ≫
+          R.map (Pi.π (fun j : J ↦ c.chartExtension hopen hpush j) i) ≫
+        e.hom := rfl
+
+private theorem AffineIntersectionUnitCocycle.chartLocalLift_inclusion
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k : J) :
+    c.chartLocalLift hopen hpush k ≫
+        c.chartLocalEqualizerInclusion hopen hpush k =
+      c.chartLocalSource hopen hpush k := by
+  exact c.chartLocalLift_ι hopen hpush k
+
+private theorem AffineIntersectionUnitCocycle.chartLocalEqualizerInclusion_mono
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k : J) :
+    Mono (c.chartLocalEqualizerInclusion hopen hpush k) := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  letI : IsOpenImmersion (D.ι k) := D.ι_isOpenImmersion k
+  let R := @restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)
+  letI : PreservesLimits R := restrictFunctor_preservesLimits (D.ι k)
+  letI : R.PreservesMonomorphisms := by infer_instance
+  letI : Mono (equalizer.ι
+      (c.chartGlueLeft hopen hpush) (c.chartGlueRight hopen hpush)) := by
+    infer_instance
+  change Mono (R.map (equalizer.ι
+    (c.chartGlueLeft hopen hpush) (c.chartGlueRight hopen hpush)))
+  infer_instance
+
+private theorem AffineIntersectionUnitCocycle.chartLocalProjection_lift
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k : J) :
+    c.chartLocalProjection hopen hpush k ≫
+        c.chartLocalLift hopen hpush k = 𝟙 _ := by
+  letI : Mono (c.chartLocalEqualizerInclusion hopen hpush k) :=
+    c.chartLocalEqualizerInclusion_mono hopen hpush k
+  apply (cancel_mono (c.chartLocalEqualizerInclusion hopen hpush k)).1
+  rw [Category.assoc, c.chartLocalLift_inclusion hopen hpush k]
+  rw [c.chartLocalProjection_source hopen hpush k]
+  rw [Category.id_comp]
+
+/-- The Cech equalizer obtained from an affine-intersection unit cocycle restricts
+to the structure sheaf on every gluing chart. -/
+noncomputable def AffineIntersectionUnitCocycle.gluedModuleRestrictIso
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (@restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)).obj
+        (c.gluedModule hopen hpush) ≅ unitObj (D.U k) where
+  hom := c.chartLocalProjection hopen hpush k
+  inv := c.chartLocalLift hopen hpush k
+  hom_inv_id := c.chartLocalProjection_lift hopen hpush k
+  inv_hom_id := c.chartLocalLift_projection hopen hpush k
+
+private noncomputable def trivializationOnOpensRange
+    {X Y : Scheme.{u}} (f : Y ⟶ X) [IsOpenImmersion f]
+    (M : X.Modules) (e : (restrictFunctor f).obj M ≅ unitObj Y) :
+    (pullback f.opensRange.ι).obj M ≅ unitObj (f.opensRange : Scheme.{u}) := by
+  let q := f.isoOpensRange
+  let e' : (pullback f).obj M ≅ unitObj Y :=
+    (restrictFunctorIsoPullback f).symm.app M ≪≫ e
+  exact (pullbackCongr f.isoOpensRange_inv_comp).symm.app M ≪≫
+    (pullbackComp q.inv f).symm.app M ≪≫
+    (pullback q.inv).mapIso e' ≪≫ pullbackUnitIso q.inv
+
+private def affineIntersectionChartOpen
+    (D : Scheme.GlueData.{u}) (k : D.J) : D.glued.Opens :=
+  @Scheme.Hom.opensRange _ _ (D.ι k) (D.ι_isOpenImmersion k)
+
+private theorem affineIntersectionChart_iSup_opensRange
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    ⨆ k, affineIntersectionChartOpen D k = ⊤ := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  apply TopologicalSpace.Opens.ext
+  rw [TopologicalSpace.Opens.coe_iSup]
+  ext x
+  simp only [affineIntersectionChartOpen, Set.mem_iUnion,
+    TopologicalSpace.Opens.coe_top, Set.mem_univ, iff_true]
+  exact D.ι_jointly_surjective x
+
+/-- The Cech equalizer attached to an affine-intersection unit cocycle is an
+invertible sheaf on the glued scheme. -/
+theorem AffineIntersectionUnitCocycle.gluedModule_isInvertible
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F) :
+    IsInvertible (c.gluedModule hopen hpush) := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  refine ⟨J, fun k ↦ affineIntersectionChartOpen D k,
+    affineIntersectionChart_iSup_opensRange hopen hpush, fun k ↦ ?_⟩
+  letI : IsOpenImmersion (D.ι k) := D.ι_isOpenImmersion k
+  exact ⟨trivializationOnOpensRange (D.ι k) (c.gluedModule hopen hpush)
+    (c.gluedModuleRestrictIso hopen hpush k)⟩
 
 end
 

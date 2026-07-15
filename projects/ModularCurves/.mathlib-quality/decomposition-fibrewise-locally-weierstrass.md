@@ -473,7 +473,7 @@ laws, it introduces no additional hypotheses or proof-resource options, and its 
 exactly `propext`, `Classical.choice`, and `Quot.sound`. This is the effectivity input for gluing the
 finite-stage invertible sheaf before identifying its pullback with the original pole sheaf.
 
-Active dependency claim (2026-07-14): in `InvertibleSheafGlueEffectivity.lean`, construct
+Completed dependency claim (2026-07-14): in `InvertibleSheafGlueEffectivity.lean`, construct
 `AffineIntersectionUnitCocycle.gluedModule` as the concrete Cech equalizer attached to
 `chartDescentData`, prove `AffineIntersectionUnitCocycle.gluedModuleRestrictIso` on every chart,
 and derive `AffineIntersectionUnitCocycle.gluedModule_isInvertible` without adding hypotheses.
@@ -525,3 +525,11 @@ isomorphism natural in the input module and proved that its structure-sheaf spec
 with `Scheme.Modules.restrictPushforwardUnitIsoOfIsPullback`. This supplies the naturality needed
 to normalize the two restricted Cech arrows without adding a second public base-change API; the
 new comparison layer is private, option-free, and introduces no new hypotheses.
+
+Completed subdependency (2026-07-14): proved
+`AffineIntersectionUnitCocycle.gluedModuleRestrictIso` by identifying the restricted Cech
+equalizer with the chart unit module and proving both inverse identities from componentwise
+overlap compatibility. The chart image opens cover the glued scheme by joint surjectivity, so
+these local trivializations yield `AffineIntersectionUnitCocycle.gluedModule_isInvertible`.
+Both public declarations are option-free, add no hypotheses, and their axiom audits are exactly
+`propext`, `Classical.choice`, and `Quot.sound`.
