@@ -66,14 +66,14 @@ theorem unitsComplexConj_unitsComplexConj (u : (𝓞 K)ˣ) :
 theorem unitsComplexConj_cyclotomicRealUnit {a : ℕ} (ha : a.Coprime p) (hp_two : 2 ≤ p) :
     unitsComplexConj K (cyclotomicRealUnit p K ha hp_two) =
       cyclotomicRealUnit p K ha hp_two := by
-  unfold cyclotomicRealUnit
+  simp only [cyclotomicRealUnit]
   rw [map_mul, unitsComplexConj_unitsComplexConj, mul_comm]
 
 /-- The real cyclotomic unit is in the cyclotomic-units subgroup. -/
 theorem cyclotomicRealUnit_mem_cyclotomicUnitsSubgroup
     {a : ℕ} (ha : a.Coprime p) (ha_pos : 1 ≤ a) (ha_lt : a < p) (hp_two : 2 ≤ p) :
     cyclotomicRealUnit p K ha hp_two ∈ cyclotomicUnitsSubgroup p K hp_two := by
-  unfold cyclotomicRealUnit
+  simp only [cyclotomicRealUnit]
   apply Subgroup.mul_mem
   · exact cyclotomicUnitUnit_mem_cyclotomicUnitsSubgroup p K ha ha_pos ha_lt hp_two
   · exact unitsComplexConj_cyclotomicUnitUnit_mem (p := p) (K := K)
@@ -106,7 +106,7 @@ omit hp in
 theorem cyclotomicRealUnitIndexSet_bounds
     (hp_two : 2 < p) {a : ℕ} (ha : a ∈ cyclotomicRealUnitIndexSet p) :
     1 ≤ a ∧ a < p := by
-  unfold cyclotomicRealUnitIndexSet at ha
+  simp only [cyclotomicRealUnitIndexSet] at ha
   rw [Finset.mem_Ico] at ha
   refine ⟨by omega, ?_⟩
   -- a ≤ (p-1)/2 < p for p ≥ 3.
@@ -158,7 +158,7 @@ theorem isUnit_realCyclotomicUnitPlus
     rw [map_mul, map_one, FLT37.algebraMap_realCyclotomicUnitPlus, hv_inv]
     have h_u_eq : FLT37.realCyclotomicUnit p K a =
         ((cyclotomicRealUnit p K ha hp_two : (𝓞 K)ˣ) : 𝓞 K) := by
-      unfold cyclotomicRealUnit FLT37.realCyclotomicUnit
+      simp only [cyclotomicRealUnit, FLT37.realCyclotomicUnit]
       rw [Units.val_mul, cyclotomicUnitUnit_val]
       rfl
     rw [h_u_eq, ← Units.val_mul, h_mul, Units.val_one]
@@ -167,7 +167,7 @@ theorem isUnit_realCyclotomicUnitPlus
     rw [map_mul, map_one, FLT37.algebraMap_realCyclotomicUnitPlus, hv_inv]
     have h_u_eq : FLT37.realCyclotomicUnit p K a =
         ((cyclotomicRealUnit p K ha hp_two : (𝓞 K)ˣ) : 𝓞 K) := by
-      unfold cyclotomicRealUnit FLT37.realCyclotomicUnit
+      simp only [cyclotomicRealUnit, FLT37.realCyclotomicUnit]
       rw [Units.val_mul, cyclotomicUnitUnit_val]
       rfl
     rw [h_u_eq, ← Units.val_mul]

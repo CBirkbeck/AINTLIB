@@ -54,14 +54,14 @@ def classGroupMinus : Subgroup (ClassGroup (𝓞 K)) where
     change complexConjOnClassGroup p K 1 = 1⁻¹
     rw [inv_one]
     -- σ(1) = 1 since σ is a group hom.
-    unfold complexConjOnClassGroup
+    simp only [complexConjOnClassGroup]
     -- cyclotomicGalActionOnClassGroup is a group hom
     exact map_one (cyclotomicGalActionMonoidHom (p := p) (K := K)
       (-1 : CyclotomicUnitDelta p))
   mul_mem' := by
     intro c₁ c₂ h₁ h₂
     change complexConjOnClassGroup p K (c₁ * c₂) = (c₁ * c₂)⁻¹
-    unfold complexConjOnClassGroup at *
+    simp only [complexConjOnClassGroup] at *
     rw [cyclotomicGalActionOnClassGroup_mul,
       show cyclotomicGalActionOnClassGroup (p := p) (K := K) (-1) c₁ = c₁⁻¹ from h₁,
       show cyclotomicGalActionOnClassGroup (p := p) (K := K) (-1) c₂ = c₂⁻¹ from h₂]
@@ -69,7 +69,7 @@ def classGroupMinus : Subgroup (ClassGroup (𝓞 K)) where
   inv_mem' := by
     intro c h
     change complexConjOnClassGroup p K c⁻¹ = (c⁻¹)⁻¹
-    unfold complexConjOnClassGroup at *
+    simp only [complexConjOnClassGroup] at *
     -- σ(c⁻¹) = σ(c)⁻¹ = (c⁻¹)⁻¹ = c, and (c⁻¹)⁻¹ = c.
     rw [show cyclotomicGalActionOnClassGroup (p := p) (K := K) (-1) c⁻¹ =
       (cyclotomicGalActionOnClassGroup (p := p) (K := K) (-1) c)⁻¹ from
@@ -101,7 +101,7 @@ omit [IsCMField K] in
 @[simp]
 theorem complexConjOnClassGroup_involutive (c : ClassGroup (𝓞 K)) :
     complexConjOnClassGroup p K (complexConjOnClassGroup p K c) = c := by
-  unfold complexConjOnClassGroup
+  simp only [complexConjOnClassGroup]
   -- σ_{(-1)} ∘ σ_{(-1)} = σ_{(-1)·(-1)} = σ_{1} = id.
   have h_compose :
       cyclotomicGalActionMonoidHom (p := p) (K := K) ((-1) * (-1)) c =
@@ -130,7 +130,7 @@ omit [IsCMField K] in
 @[simp]
 theorem complexConjOnClassGroup_inv (c : ClassGroup (𝓞 K)) :
     complexConjOnClassGroup p K c⁻¹ = (complexConjOnClassGroup p K c)⁻¹ := by
-  unfold complexConjOnClassGroup
+  simp only [complexConjOnClassGroup]
   exact map_inv (cyclotomicGalActionMonoidHom (p := p) (K := K)
     (-1 : CyclotomicUnitDelta p)) c
 
@@ -139,7 +139,7 @@ omit [IsCMField K] in
 @[simp]
 theorem complexConjOnClassGroup_pow (c : ClassGroup (𝓞 K)) (n : ℕ) :
     complexConjOnClassGroup p K (c ^ n) = (complexConjOnClassGroup p K c) ^ n := by
-  unfold complexConjOnClassGroup
+  simp only [complexConjOnClassGroup]
   exact map_pow (cyclotomicGalActionMonoidHom (p := p) (K := K)
     (-1 : CyclotomicUnitDelta p)) c n
 
