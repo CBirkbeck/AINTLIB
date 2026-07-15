@@ -84,24 +84,20 @@ theorem awayIdealAt_eq_maximalIdealAt (Q : C₂.SmoothPoint) :
 
 /-! ### The Dedekind/finite/torsion-free/fraction-ring instances for `B` (T-A1) -/
 
-set_option backward.isDefEq.respectTransparency false in
 /-- `B` is a Dedekind domain (Krull–Akizuki, separable case). -/
 instance instDedekindB : IsDedekindDomain (B (C₁ := C₁) (C₂ := C₂)) :=
   RamificationFinite.isDedekindDomain C₂.CoordinateRing C₂.FunctionField C₁.FunctionField _
 
-set_option backward.isDefEq.respectTransparency false in
 /-- `B` is module-finite over `C₂.CoordinateRing`. -/
 instance instModuleFiniteB :
     Module.Finite C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂)) :=
   RamificationFinite.module_finite C₂.CoordinateRing C₂.FunctionField C₁.FunctionField _
 
-set_option backward.isDefEq.respectTransparency false in
 /-- `B` has fraction field `C₁.FunctionField`. -/
 instance instFractionRingB :
     IsFractionRing (B (C₁ := C₁) (C₂ := C₂)) C₁.FunctionField :=
   RamificationFinite.isFractionRing C₂.CoordinateRing C₂.FunctionField C₁.FunctionField _
 
-set_option backward.isDefEq.respectTransparency false in
 /-- `B` is a torsion-free `C₂.CoordinateRing`-module. -/
 instance instTorsionFreeB :
     Module.IsTorsionFree C₂.CoordinateRing (B (C₁ := C₁) (C₂ := C₂)) :=
@@ -868,7 +864,6 @@ theorem weierstrass_relation_coordFun :
   simp only [map_add, map_mul, map_pow, hX, hC] at hsq
   linear_combination hsq
 
-set_option maxHeartbeats 800000 in
 /-- The `v`-valuation of `coordXFun C₁` is nonzero (it is a nonzero field element). -/
 theorem valuation_coordXFun_ne_zero
     (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂))) :
@@ -876,7 +871,6 @@ theorem valuation_coordXFun_ne_zero
   have hne : coordXFun C₁ ≠ 0 := by rw [coordXFun_eq_coordX]; exact C₁.coordX_ne_zero
   rw [Ne, Valuation.zero_iff]; exact hne
 
-set_option maxHeartbeats 800000 in
 /-- `w_v(a₁·x₁ + a₃) ≤ w_v(x₁)` when `1 < w_v(x₁)` (the linear Weierstrass coefficient is dominated
 by `x₁`, since the constants are `v`-units `≤ 1 < w_v(x₁)`). -/
 theorem valuation_a₁X_add_a₃_le
@@ -899,8 +893,6 @@ theorem valuation_a₁X_add_a₃_le
     · rw [valuation_algebraMap_F_eq_one v h0]; exact le_of_lt hx
   exact le_trans (w.map_add _ _) (max_le ha₁x ha₃)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 400000 in
 /-- **Generic ultrametric monomial bound** (instance-light): if a valuation `w` on `K(C₁)` is `≤ 1`
 on the `F`-constant `algebraMap_F c` (`hc`) and `m ≤ X := w t`, then `w (algebraMap_F c * t^k) ≤ X^k`
 ... specialised below.  Stated as a free lemma over an *arbitrary* valuation `w` and element `t` to
@@ -915,8 +907,6 @@ theorem valuation_const_mul_pow_le {Γ₀ : Type*} [LinearOrderedCommGroupWithZe
     _ = w t ^ k := one_mul _
     _ ≤ w t ^ 3 := pow_le_pow_right₀ h1 hk
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 400000 in
 /-- **Generic ultrametric Weierstrass-cubic bound** (instance-light): for an arbitrary valuation `w`
 that is `≤ 1` on `F`-constants and has `1 ≤ w t`, the value of the Weierstrass cubic in `t` is
 `≤ (w t)^3`. -/
@@ -942,7 +932,6 @@ theorem valuation_weierstrassCubic_le_generic {Γ₀ : Type*}
     le_trans (w.map_add _ _) (max_le hstep1 ha₄)
   exact le_trans (w.map_add _ _) (max_le hstep2 ha₆)
 
-set_option maxHeartbeats 1600000 in
 /-- `w_v(x₁³ + a₂x₁² + a₄x₁ + a₆) ≤ w_v(x₁)³` when `1 < w_v(x₁)`: the `B`-prime specialisation of
 `valuation_weierstrassCubic_le_generic`. -/
 theorem valuation_weierstrassCubic_le
@@ -961,8 +950,6 @@ theorem valuation_weierstrassCubic_le
         exact zero_le
       · exact le_of_eq (valuation_algebraMap_F_eq_one v h0))
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 400000 in
 /-- **Generic linear-coefficient bound** (instance-light): `w (a₁ x₁ + a₃) ≤ w x₁` for an arbitrary
 valuation `w` with `1 ≤ w x₁` that is `≤ 1` on `F`-constants. -/
 theorem valuation_a₁X_add_a₃_le_generic {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
@@ -980,8 +967,6 @@ theorem valuation_a₁X_add_a₃_le_generic {Γ₀ : Type*} [LinearOrderedCommGr
     le_trans (hc _) h1
   exact le_trans (w.map_add _ _) (max_le ha₁x ha₃)
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 400000 in
 /-- **Generic `y₁`-pole bound** (instance-light): for an arbitrary valuation `w` with `1 < w x₁`
 that is `≤ 1` on `F`-constants, `w y₁ ≤ (w x₁)²`.  This is the explicit "`y₁/x₁²` is integral over
 `F[1/x₁]`" fact, proved by ultrametric on the Weierstrass relation `y₁² = c − b·y₁`:
@@ -1062,7 +1047,6 @@ theorem valuation_algebraMap_polynomial_eq
   exact Polynomial.valuation_aeval_eq_valuation_X_pow_natDegree_of_one_lt_valuation_X
     (coordXFun C₁) hx hp
 
-set_option maxHeartbeats 1600000 in
 /-- **The `F(x₁)`-regular-at-∞ bound (sublemma I)**: for `r ∈ FractionRing F[X]` whose image in
 `K(C₁)` is *regular at `∞`* (`0 ≤ ord_∞`), and a `B`-prime `v` with `1 < w_v(x₁)`, the value
 `w_v(algebraMap r) ≤ 1`.  Writing `r = p/d` with `p, d ∈ F[X]`, regularity at `∞` reads
@@ -1120,7 +1104,6 @@ theorem valuation_algebraMap_fracPolyX_le_one_of_ordAtInfty_nonneg
   rw [div_le_one₀ (pow_ne_zero _ (by rw [hXdef]; exact valuation_coordXFun_ne_zero v) |>.bot_lt)]
   exact pow_le_pow_right₀ h1X hdeg
 
-set_option maxHeartbeats 1600000 in
 /-- `w_v(y₁ / x₁²) ≤ 1` for a `B`-prime `v` with `1 < w_v(x₁)` (from `w_v(y₁) ≤ w_v(x₁)²`). -/
 theorem valuation_coordYFun_div_coordXFun_sq_le_one
     (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
@@ -1187,7 +1170,6 @@ private theorem ordAtInfty_algebraMap_fracPolyX_mul_coordXFun_sq_nonneg
     show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_le_coe]
   omega
 
-set_option maxHeartbeats 1600000 in
 /-- **A regular `F(x₁)`-multiple of `y₁` has `w_v ≤ 1`** (sublemma (II) of the `∞`-domination): for a
 `B`-prime `v` with `1 < w_v(x₁)` and `b = algebraMap q` (`q ∈ F(x₁)`), if `b·y₁` is regular at `∞`
 then `w_v(b·y₁) ≤ 1`.  Write `b·y₁ = (b·x₁²)·(y₁/x₁²)`
@@ -1221,7 +1203,6 @@ private theorem valuation_algebraMap_fracPolyX_mul_coordYInFunctionField_le_one
       ≤ 1 * 1 := mul_le_mul' hwbx2 (valuation_coordYFun_div_coordXFun_sq_le_one v hx)
     _ = 1 := mul_one 1
 
-set_option maxHeartbeats 2400000 in
 /-- **`O_∞ ⊆ O_v` (the curve-completeness crux, value form)**: for a `B`-prime `v` with `1 < w_v(x₁)`
 and any `g` regular at `∞` of `C₁` (`0 ≤ ord_∞ g`), the value `w_v(g) ≤ 1`.  Decompose
 `g = a + b·y₁` with `a, b ∈ F(x₁)`; regularity at `∞` gives `0 ≤ ord_∞ a` and `0 ≤ ord_∞(b·y₁)`,
@@ -1271,7 +1252,6 @@ theorem valuationSubring_ne_top
   intro htop
   exact (Valuation.valuationSubring_eq_top_iff _).mp htop hNontriv
 
-set_option maxHeartbeats 1600000 in
 /-- **No `B`-prime has an `x₁`-pole** (the `coordXFun` half of `BPrimeValuationCoordGenLeOne`,
 discharged via the `∞`-exclusion `hreg`): for a `B`-prime `v`, `w_v(x₁) ≤ 1`.  By contradiction: if
 `1 < w_v(x₁)`, then `O_∞ ⊆ O_v` (`valuation_le_one_of_ordAtInfty_nonneg`), so the rank-one domination
@@ -1295,8 +1275,6 @@ theorem valuation_coordXFun_le_one (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ :=
   exact bPrime_valuation_ne_ordAtInfty hreg v
     (bPrime_valuation_eq_ordAtInfty_of_subring_ge v hsup (valuationSubring_ne_top v))
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 400000 in
 /-- **Generic ultrametric monomial bound, `≤ 1` regime** (instance-light): if a valuation `w` on
 `K(C₁)` is `≤ 1` on the `F`-constant `algebraMap_F c` (`hc`) and `w t ≤ 1`, then
 `w (algebraMap_F c * t^k) ≤ 1`.  The `w t ≤ 1` dual of `valuation_const_mul_pow_le` (bound by `1`
@@ -1312,8 +1290,6 @@ private theorem valuation_const_mul_pow_le_one_generic {Γ₀ : Type*}
       ≤ 1 * 1 := mul_le_mul' (hc c) (pow_le_one₀ zero_le h1)
     _ = 1 := mul_one 1
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 400000 in
 /-- **Generic ultrametric Weierstrass-cubic bound, `≤ 1` regime** (instance-light): for an arbitrary
 valuation `w` that is `≤ 1` on `F`-constants and has `w t ≤ 1`, the Weierstrass cubic in `t` is
 `≤ 1`.  The `w t ≤ 1` dual of `valuation_weierstrassCubic_le_generic`. -/
@@ -1336,8 +1312,6 @@ private theorem valuation_weierstrassCubic_le_one_generic {Γ₀ : Type*}
     le_trans (w.map_add _ _) (max_le hstep1 ha₄)
   exact le_trans (w.map_add _ _) (max_le hstep2 (hc _))
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 400000 in
 /-- **Generic linear-coefficient bound, `≤ 1` regime** (instance-light): `w (a₁ x₁ + a₃) ≤ 1` for an
 arbitrary valuation `w` with `w x₁ ≤ 1` that is `≤ 1` on `F`-constants.  The `w x₁ ≤ 1` dual of
 `valuation_a₁X_add_a₃_le_generic`. -/
@@ -1354,8 +1328,6 @@ private theorem valuation_a₁X_add_a₃_le_one_generic {Γ₀ : Type*}
       _ = 1 := mul_one 1
   exact le_trans (w.map_add _ _) (max_le ha₁ (hc _))
 
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 400000 in
 /-- **Generic `y₁`-integrality bound, `≤ 1` regime** (instance-light): for an arbitrary valuation `w`
 with `w x₁ ≤ 1` that is `≤ 1` on `F`-constants, `w y₁ ≤ 1`.  Proved by ultrametric on the rearranged
 Weierstrass relation `y₁² = c − b·y₁`: a pole `1 < w y₁` would give
@@ -1800,7 +1772,6 @@ private theorem sum_ramificationIdx_eq_finrank (Q : C₂.SmoothPoint) :
     (IsDedekindDomain.mem_primesOverFinset_iff (B := B (C₁ := C₁) (C₂ := C₂)) hp0).mp hP'
   rw [inertiaDeg_eq_one_of_mem_primesOver Q P' hmem, mul_one]
 
-set_option maxHeartbeats 1600000 in
 /-- **The degree balance `[K(C₁):K(C₂)] = Σ sfn(P')·e(P')`**: if, over a smooth point `Q` of `C₂`,
 the relative norm of each prime `P' / m_Q` is the power `relNorm(P') = m_Q ^ sfn(P')`, then
 `[K(C₁):K(C₂)] = Σ_{P' / m_Q} sfn(P')·e_{P'}`.  Apply `relNorm` to the prime factorisation
@@ -1864,7 +1835,6 @@ private theorem eq_one_of_sum_eq_sum_mul {ι : Type*} (s : Finset ι) (a c : ι 
   have hi := heach i₀ hi₀
   nlinarith [hi, hc i₀ hi₀]
 
-set_option maxHeartbeats 1600000 in
 /-- **The `s = 1` core — Silverman II.3.6**: for a maximal ideal `P` of `B` lying over the
 maximal ideal `m_Q` of `C₂.CoordinateRing`, `relNorm_{C₂.CoordinateRing}(P) = m_Q`.
 
@@ -1961,7 +1931,6 @@ private theorem associates_relNorm_B_pow_ne_zero
   rw [Ne, Ideal.zero_eq_bot, Ideal.relNorm_eq_bot_iff]
   exact P.ne_bot
 
-set_option maxHeartbeats 1600000 in
 /-- **The relative norm of `span{w}` factors as a support sum of counts (over `B`)**: the
 multiplicity of `m_Q` in `relNorm(span{w})` for `w ∈ B` equals `∑_{P ∈ S} count_{m_Q}((relNorm
 P.asIdeal)^(count_P(span{w})))` for any finset `S` containing the multiplicative support of `P ↦
@@ -2008,7 +1977,6 @@ private theorem count_relNorm_span_B_eq_sum_support (Q : C₂.SmoothPoint)
       map_prod (Associates.mkMonoidHom (M := Ideal C₂.CoordinateRing)) _ _]
   rw [count_finset_prod_factors (fun P _ => associates_relNorm_B_pow_ne_zero P _) h_vp_irr]
 
-set_option maxHeartbeats 1600000 in
 /-- **Per-term count split** of the `relNorm`-factorisation product (over `B`): the count of `m_Q`
 in `(relNorm P.asIdeal)^k` is `k` when `P` lies over `m_Q` and `0` otherwise.  In the matching
 branch `relNorm(P) = m_Q` (via `relNorm_eq_under`, using `LiesOver`), so the count is `k`; in the
@@ -2105,7 +2073,6 @@ multiplicities of the `B`-primes over `m_Q`.  Built on the `s = 1` core `relNorm
 (`relNorm(P) = P.under` for a maximal `P` of `B`) — the genuine arithmetic of Silverman II.3.6 —
 together with `relNorm` multiplicativity and `relNorm_singleton`. -/
 
-set_option maxHeartbeats 1600000 in
 /-- **The per-place norm–divisor count over `B`** (T-A2): for `w ∈ B` nonzero and a smooth point
 `Q` of `C₂`, the `m_Q`-adic multiplicity of `relNorm(span{w})` equals the sum over the `B`-primes
 `P` above `m_Q` of the `P`-adic multiplicity of `span{w}`.  All inertia degrees are `1`
