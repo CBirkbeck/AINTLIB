@@ -78,9 +78,6 @@ namespace HasseWeil.WeilPairing
 open HasseWeil HasseWeil.WeilPairing.DivisorPullback HasseWeil.WeilPairing.TorsionGeometric
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.unusedFintypeInType false
-set_option linter.style.longLine false
 
 /-! ### The concrete base-changed isogeny `(rπ − s)_{K̄}` -/
 
