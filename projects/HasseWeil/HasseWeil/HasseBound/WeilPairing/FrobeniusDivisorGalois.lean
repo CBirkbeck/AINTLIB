@@ -419,7 +419,7 @@ theorem ord_P_frobeniusFunctionFieldEquiv
         SmoothPlaneCurve (AlgebraicClosure K)).ord_P P (frobeniusFunctionFieldEquiv W g) =
       (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
         SmoothPlaneCurve (AlgebraicClosure K)).ord_P (geomFrobSmoothPointInv W P) g := by
-  unfold HasseWeil.Curves.SmoothPlaneCurve.ord_P
+  simp only [HasseWeil.Curves.SmoothPlaneCurve.ord_P]
   rw [pointValuation_frobeniusFunctionFieldEquiv W P (geomFrobSmoothPointInv W P)
     (coeffFrobEquiv_geomFrobSmoothPointInv_x W P).symm
     (coeffFrobEquiv_geomFrobSmoothPointInv_y W P).symm g]
