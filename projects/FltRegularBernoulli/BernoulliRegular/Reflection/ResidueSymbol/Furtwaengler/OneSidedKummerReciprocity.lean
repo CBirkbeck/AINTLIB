@@ -1,7 +1,7 @@
 module
 
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PthSymbolPrincipalCanonical
 public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.LambdaLocalPthPower
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PthSymbolPrincipalCanonical
 
 /-!
 # One-sided Kummer principal reciprocity
@@ -102,11 +102,8 @@ theorem isCoprime_ideal_of_isCoprime_normalizedFactors
     (hcop :
       ∀ P ∈ UniqueFactorizationMonoid.normalizedFactors J, IsCoprime I P) :
     IsCoprime I J := by
-  rw [Ideal.isCoprime_iff_sup_eq]
-  rw [← Ideal.prod_normalizedFactors_eq_self hJ_ne]
-  exact Ideal.sup_multiset_prod_eq_top (by
-    intro P hP
-    exact Ideal.isCoprime_iff_sup_eq.mp (hcop P hP))
+  rw [Ideal.isCoprime_iff_sup_eq, ← Ideal.prod_normalizedFactors_eq_self hJ_ne]
+  exact Ideal.sup_multiset_prod_eq_top fun P hP => Ideal.isCoprime_iff_sup_eq.mp (hcop P hP)
 
 /-- Bad-set form of principal-ideal vanishing for locally primary
 pseudo-units.
