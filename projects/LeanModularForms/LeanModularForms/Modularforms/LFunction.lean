@@ -325,7 +325,7 @@ def coprimeStrip (S : Finset Nat.Primes) (f : ℕ → ℂ) : ℕ → ℂ :=
 @[simp]
 lemma coprimeStrip_one (S : Finset Nat.Primes) (f : ℕ → ℂ) :
     coprimeStrip S f 1 = f 1 := by
-  unfold coprimeStrip
+  simp only [coprimeStrip]
   rw [if_pos (fun p _ h_dvd ↦ p.prop.one_lt.ne' (Nat.dvd_one.mp h_dvd))]
 
 end LSeries
