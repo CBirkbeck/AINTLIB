@@ -212,6 +212,18 @@ theorem exists_digitVec_modEq_of_multiIndex
           omega
         · exact hv_mod.trans (by simpa [m'] using carryStep_value_modEq hℓ m i hi)
 
+/-- A digit vector congruent to a multi-index modulo `N` inherits its `N ∣ B + ·`
+divisibility.  Setup-independent core of the two `…StickelbergerSetup` methods, with
+the modulus `N` and arity `f` as plain arguments. -/
+theorem multiIndex_divisibility_of_digitVec_modEq {ℓ f : ℕ} (N B : ℕ)
+    {m : Fin f → ℕ} {v : digitVec ℓ f}
+    (hmod : digitValue v ≡ multiIndexValue ℓ m [MOD N])
+    (hdiv : N ∣ B + multiIndexValue ℓ m) :
+    N ∣ B + digitValue v := by
+  have h0 : B + multiIndexValue ℓ m ≡ 0 [MOD N] := (Nat.modEq_zero_iff_dvd).2 hdiv
+  have hsum : B + digitValue v ≡ B + multiIndexValue ℓ m [MOD N] := Nat.ModEq.add_left B hmod
+  exact (Nat.modEq_zero_iff_dvd).1 (hsum.trans h0)
+
 end MultiIndexCarry
 
 namespace TraceFormStickelbergerSetup
@@ -230,12 +242,8 @@ theorem multiIndex_divisibility_of_digitVec_modEq
     (B : ℕ) {m : Fin S.f → ℕ} {v : digitVec ℓ S.f}
     (hmod : digitValue v ≡ multiIndexValue ℓ m [MOD Fintype.card k - 1])
     (hdiv : (Fintype.card k - 1) ∣ B + multiIndexValue ℓ m) :
-    (Fintype.card k - 1) ∣ B + digitValue v := by
-  have h0 : B + multiIndexValue ℓ m ≡ 0 [MOD Fintype.card k - 1] :=
-    (Nat.modEq_zero_iff_dvd).2 hdiv
-  have hsum : B + digitValue v ≡ B + multiIndexValue ℓ m [MOD Fintype.card k - 1] :=
-    Nat.ModEq.add_left B hmod
-  exact (Nat.modEq_zero_iff_dvd).1 (hsum.trans h0)
+    (Fintype.card k - 1) ∣ B + digitValue v :=
+  MultiIndexCarry.multiIndex_divisibility_of_digitVec_modEq (Fintype.card k - 1) B hmod hdiv
 
 /-- No unbounded multi-index of weight below `S.stickOrd a` survives the
 reciprocal residue-class divisibility test. -/
@@ -315,12 +323,8 @@ theorem multiIndex_divisibility_of_digitVec_modEq
     (B : ℕ) {m : Fin S.f → ℕ} {v : digitVec ℓ S.f}
     (hmod : digitValue v ≡ multiIndexValue ℓ m [MOD Fintype.card k - 1])
     (hdiv : (Fintype.card k - 1) ∣ B + multiIndexValue ℓ m) :
-    (Fintype.card k - 1) ∣ B + digitValue v := by
-  have h0 : B + multiIndexValue ℓ m ≡ 0 [MOD Fintype.card k - 1] :=
-    (Nat.modEq_zero_iff_dvd).2 hdiv
-  have hsum : B + digitValue v ≡ B + multiIndexValue ℓ m [MOD Fintype.card k - 1] :=
-    Nat.ModEq.add_left B hmod
-  exact (Nat.modEq_zero_iff_dvd).1 (hsum.trans h0)
+    (Fintype.card k - 1) ∣ B + digitValue v :=
+  MultiIndexCarry.multiIndex_divisibility_of_digitVec_modEq (Fintype.card k - 1) B hmod hdiv
 
 /-- No unbounded multi-index of weight below `S.stickOrd a` survives the
 conductor-flexible reciprocal residue-class divisibility test. -/
