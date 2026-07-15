@@ -1,6 +1,10 @@
 import ModularCurves.EllipticCurve.Torsion
+import ModularCurves.EllipticCurve.MulByHomUnramifiedField
 import ModularCurves.ForMathlib.EtaleSectionsCount
 import ModularCurves.ForMathlib.FiniteAbelianRankTwo
+import ModularCurves.ForMathlib.FormallyUnramifiedFibre
+import ModularCurves.ForMathlib.NilpotentKerSpecMap
+import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
 
 /-!
 # Fibre comparison for the torsion subscheme (ticket T-B6)
@@ -353,6 +357,172 @@ private def torsionByNsmulKerEquiv (G : Type u) [AddCommGroup G] (N d : ℕ)
     exact (Submodule.mem_torsionBy_iff _ _).mp y.2⟩
   left_inv x := Subtype.ext (Subtype.ext rfl)
   right_inv y := Subtype.ext rfl
+
+/-! ### BB-DIFF (T-B5 = Loeffler 3.4.2(2)): `[N]` and `E[N] ⟶ S` are unramified/étale
+for `N` invertible
+
+The torsor reduction (`formallyUnramified_mulByHom_of_torsionπ`, migrated from the
+BB-DIFF skeleton), the residue-fibre criterion (`FormallyUnramifiedFibre`), and the
+field-level fibre leg (`MulByHomUnramifiedField`) assemble `mulByHom_formallyUnramified`
+and the étale trio, relocated here from `Torsion.lean` (statements unchanged) because
+their proofs run through this file's torsion machinery. -/
+
+/-- `pointEquivOverHom` carries point-subtraction to the division of `Over`-homs (companion to
+`pointEquivOverHom_add`). -/
+theorem pointEquivOverHom_sub {T : Scheme.{u}} (g : T ⟶ S) (P Q : E.Point g) :
+    letI : CommGroup (Over.mk g ⟶ E.asOver) := Hom.commGroup
+    (E.pointEquivOverHom g) (P - Q) =
+      (E.pointEquivOverHom g) P / (E.pointEquivOverHom g) Q := rfl
+
+/-- Restriction of a point along `k` corresponds, under `pointEquivOverHom`, to precomposition by
+the induced `Over`-morphism `Over.mk (k ≫ g) ⟶ Over.mk g`. -/
+theorem pointEquivOverHom_restrict {T T' : Scheme.{u}} {g : T ⟶ S} (k : T' ⟶ T) (P : E.Point g) :
+    E.pointEquivOverHom (k ≫ g) (Point.restrict E k P) =
+      (Over.homMk k : Over.mk (k ≫ g) ⟶ Over.mk g) ≫ E.pointEquivOverHom g P := by
+  apply Over.OverMorphism.ext
+  simp only [pointEquivOverHom, Equiv.coe_fn_mk, Point.restrict, Over.comp_left, Over.homMk_left]
+  rfl
+
+/-- `Point.restrict` is additive on subtraction (precomposition is a group homomorphism). -/
+theorem restrict_sub {T T' : Scheme.{u}} {g : T ⟶ S} (k : T' ⟶ T) (P Q : E.Point g) :
+    Point.restrict E k (P - Q) = Point.restrict E k P - Point.restrict E k Q := by
+  apply (E.pointEquivOverHom (k ≫ g)).injective
+  simp only [E.pointEquivOverHom_restrict, E.pointEquivOverHom_sub, GrpObj.comp_div]
+
+/-- **(BB-DIFF, L-A — the torsor reduction)** If the `N`-torsion `E[N] → S` is formally
+unramified, then so is `[N] : E ⟶ E`. Route-independent: `[N]` is an f.p.p.f `E[N]`-torsor (KM Cor.
+2.3.2), so two infinitesimal lifts `g₁, g₂` of `[N]` agreeing on a square-zero closed subscheme differ
+by a map into `E[N]` vanishing there, which is `0` once `E[N] → S` is formally unramified — hence
+`g₁ = g₂`. Uses only the `GrpObj` group structure of `E` and mathlib's `FormallyUnramified` morphism
+property. -/
+theorem formallyUnramified_mulByHom_of_torsionπ (N : ℕ)
+    (htors : FormallyUnramified (E.torsionπ N)) :
+    FormallyUnramified (E.mulByHom N) := by
+  apply FormallyUnramified.of_hom_ext
+  intro R S' φ hφ hφ2 g₁ g₂ hthick hf
+  -- both lifts share a base `s`
+  have hbase : g₁ ≫ E.π = g₂ ≫ E.π := by
+    have h := congrArg (fun m => m ≫ E.π) hf
+    simpa only [Category.assoc, E.mulByHom_π] using h
+  set s : Spec R ⟶ S := g₁ ≫ E.π with hs
+  let P₁ : E.Point s := ⟨g₁, hs.symm⟩
+  let P₂ : E.Point s := ⟨g₂, hbase.symm.trans hs.symm⟩
+  -- the difference is killed by `N`
+  have hNP : ((N : ℤ) • P₁ : E.Point s) = (N : ℤ) • P₂ := by
+    apply Subtype.ext
+    rw [E.point_smul_eq_comp_mulBy, E.point_smul_eq_comp_mulBy]
+    exact hf
+  have hNh : ((N : ℤ) • (P₁ - P₂) : E.Point s) = 0 := by rw [smul_sub, hNP, sub_self]
+  have hkill : ((P₁ - P₂ : E.Point s) : Spec R ⟶ E.E) ≫ E.mulByHom N = s ≫ E.zero :=
+    (E.smul_eq_zero_iff_comp_mulByHom s N (P₁ - P₂)).mp hNh
+  have hzero : ((0 : E.Point s) : Spec R ⟶ E.E) ≫ E.mulByHom N = s ≫ E.zero :=
+    (E.smul_eq_zero_iff_comp_mulByHom s N 0).mp (smul_zero _)
+  -- on the thickening, the difference restricts to `0`
+  have hci : IsClosedImmersion (Spec.map φ) := IsClosedImmersion.spec_of_surjective φ hφ
+  have hrestrict : Spec.map φ ≫ ((P₁ - P₂ : E.Point s) : Spec R ⟶ E.E) =
+      Spec.map φ ≫ (s ≫ E.zero) := by
+    have hPeq : Point.restrict E (Spec.map φ) P₁ = Point.restrict E (Spec.map φ) P₂ :=
+      Subtype.ext hthick
+    have hh0 : Point.restrict E (Spec.map φ) (P₁ - P₂) = 0 := by
+      rw [E.restrict_sub, hPeq, sub_self]
+    have hval := congrArg Subtype.val hh0
+    simp only [Point.restrict, E.point_zero_val] at hval
+    rw [hval, Category.assoc]
+  -- the two torsion points agree after the thickening and after `torsionπ`
+  have e1 : (Spec.map φ ≫ E.pointToTorsion (P₁ - P₂) hkill) ≫ E.torsionι N =
+      (Spec.map φ ≫ E.pointToTorsion (0 : E.Point s) hzero) ≫ E.torsionι N := by
+    rw [Category.assoc, Category.assoc, E.pointToTorsion_torsionι, E.pointToTorsion_torsionι,
+      E.point_zero_val]
+    exact hrestrict
+  have e2 : (Spec.map φ ≫ E.pointToTorsion (P₁ - P₂) hkill) ≫ E.torsionπ N =
+      (Spec.map φ ≫ E.pointToTorsion (0 : E.Point s) hzero) ≫ E.torsionπ N := by
+    rw [Category.assoc, Category.assoc, E.pointToTorsion_torsionπ, E.pointToTorsion_torsionπ]
+  have hig : Spec.map φ ≫ E.pointToTorsion (P₁ - P₂) hkill =
+      Spec.map φ ≫ E.pointToTorsion (0 : E.Point s) hzero :=
+    pullback.hom_ext e1 e2
+  have hgf : E.pointToTorsion (P₁ - P₂) hkill ≫ E.torsionπ N =
+      E.pointToTorsion (0 : E.Point s) hzero ≫ E.torsionπ N := by
+    rw [E.pointToTorsion_torsionπ, E.pointToTorsion_torsionπ]
+  have hPz : E.pointToTorsion (P₁ - P₂) hkill = E.pointToTorsion (0 : E.Point s) hzero :=
+    FormallyUnramified.hom_ext (Spec.map φ) (isNilpotent_ker_SpecMap φ hφ2) (E.torsionπ N) hig hgf
+  -- project back to the points
+  have hfin : ((P₁ - P₂ : E.Point s) : Spec R ⟶ E.E) = ((0 : E.Point s) : Spec R ⟶ E.E) := by
+    have h := congrArg (fun m => m ≫ E.torsionι N) hPz
+    rwa [E.pointToTorsion_torsionι, E.pointToTorsion_torsionι] at h
+  have hP : (P₁ : E.Point s) = P₂ := sub_eq_zero.mp (Subtype.ext hfin)
+  exact congrArg Subtype.val hP
+
+/-- **(BB-DIFF, T-DISC funnel)** `E[N] ⟶ S` is formally unramified once every
+residue-field fibre is: T-DISC (`of_finite_fiberToSpecResidueField`) + `torsionπ_isFinite`. -/
+theorem formallyUnramified_torsionπ_of_fibres (N : ℕ) [NeZero N]
+    (hfib : ∀ y, FormallyUnramified ((E.torsionπ N).fiberToSpecResidueField y)) :
+    FormallyUnramified (E.torsionπ N) :=
+  haveI := E.torsionπ_isFinite N
+  FormallyUnramified.of_finite_fiberToSpecResidueField (f := E.torsionπ N) hfib
+
+/-- **(BB-DIFF, L-BC)** If `N` is invertible on `S`, the `N`-torsion `E[N] ⟶ S` is
+formally unramified: each residue fibre is the torsion of the fibre curve
+(`torsion_baseChange_isPullback`), which is a base change of the fibre curve's `[N]`
+(unramified by the field-level leg `formallyUnramified_mulByHom_baseChange_residueField`
+via the model comparison). -/
+theorem formallyUnramified_torsionπ (N : ℕ) (h : NIsInvertible S N) :
+    FormallyUnramified (E.torsionπ N) := by
+  rcases eq_or_ne N 0 with rfl | hN0
+  · haveI hS : IsEmpty S := ModularCurves.isEmpty_of_nIsInvertible_zero h
+    haveI : IsEmpty (E.torsion 0) := ⟨fun x => hS.false ((E.torsionπ 0).base x)⟩
+    infer_instance
+  · haveI : NeZero N := ⟨hN0⟩
+    refine E.formallyUnramified_torsionπ_of_fibres N (fun y => ?_)
+    -- `N ≠ 0` in the residue field
+    have hy : (N : S.residueField y) ≠ 0 :=
+      (nIsInvertible_spec_iff (S.residueField y) N).mp
+        (h.of_hom (S.fromSpecResidueField y))
+    -- `[N]` on the fibre curve is formally unramified, hence so is its torsion
+    haveI hNfib : FormallyUnramified
+        ((E.baseChange (S.fromSpecResidueField y)).mulByHom (N : ℤ)) :=
+      formallyUnramified_mulByHom_baseChange_residueField E N y hy
+    haveI hTfib : FormallyUnramified
+        ((E.baseChange (S.fromSpecResidueField y)).torsionπ N) :=
+      MorphismProperty.pullback_snd _ _ hNfib
+    -- the scheme-theoretic fibre is the other pullback of the same cospan
+    have sq1 := E.torsion_baseChange_isPullback N (S.fromSpecResidueField y)
+    have hw : sq1.isoPullback.inv ≫ (E.baseChange (S.fromSpecResidueField y)).torsionπ N
+        = pullback.snd (E.torsionπ N) (S.fromSpecResidueField y) ≫ 𝟙 _ := by
+      rw [Category.comp_id]
+      exact sq1.isoPullback_inv_snd
+    show FormallyUnramified (pullback.snd (E.torsionπ N) (S.fromSpecResidueField y))
+    exact (MorphismProperty.arrow_mk_iso_iff (P := @FormallyUnramified)
+      (Arrow.isoMk sq1.isoPullback.symm (Iso.refl _) hw)).mpr hTfib
+
+/-- **(BB-DIFF master, T-B5 = Loeffler 3.4.2(2))**: if `N` is invertible on `S` then
+`[N]` is formally unramified — Loeffler (verbatim): *"The morphism `[N]` multiplies a
+global differential by `N`, so it induces an isomorphism of tangent space."* Assembled
+as L-A ∘ L-BC; the single remaining mathematical leaf is the field-level
+`modelMulByHom_formallyUnramified_of_field`. -/
+theorem mulByHom_formallyUnramified (N : ℕ) (h : NIsInvertible S N) :
+    FormallyUnramified (E.mulByHom N) :=
+  E.formallyUnramified_mulByHom_of_torsionπ N (E.formallyUnramified_torsionπ N h)
+
+/-- **(T-B5 = Loeffler 3.4.2(2))** If `N` is invertible on `S`, then `[N] : E ⟶ E` is étale
+(it induces multiplication by `N`, an isomorphism, on the invariant differential). -/
+theorem mulBy_etale (N : ℕ) (h : NIsInvertible S N) :
+    Etale (E.mulByHom N) := by
+  rcases eq_or_ne N 0 with rfl | hN
+  · haveI hS : IsEmpty S := ModularCurves.isEmpty_of_nIsInvertible_zero h
+    haveI hE : IsEmpty E.E := ⟨fun x => hS.false (E.π x)⟩
+    infer_instance
+  · haveI : NeZero N := ⟨hN⟩
+    haveI := E.mulByHom_flat N
+    haveI := E.mulByHom_formallyUnramified N h
+    haveI := E.mulByHom_locallyOfFinitePresentation N
+    exact Etale.of_formallyUnramified_of_flat (E.mulByHom N)
+
+/-- **(T-B5′)** If `N` is invertible on `S`, then `E[N] ⟶ S` is (finite) étale.
+Source: Loeffler §3.4; KM 2.3.5. -/
+theorem torsionπ_etale (N : ℕ) (h : NIsInvertible S N) :
+    Etale (E.torsionπ N) := by
+  have he := E.mulBy_etale N h
+  exact MorphismProperty.pullback_snd _ _ he
 
 /-- **(T-B6 headline)** Over an algebraically closed field in which `N` is invertible,
 the `N`-torsion of the geometric point group is `(ℤ/N)²`. Proof route: counting

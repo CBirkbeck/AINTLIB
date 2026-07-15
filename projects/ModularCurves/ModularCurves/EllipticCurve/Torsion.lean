@@ -49,6 +49,12 @@ variable {S : Scheme.{u}} (E : EllipticCurve S)
 def _root_.ModularCurves.NIsInvertible (X : Scheme.{u}) (N : ℕ) : Prop :=
   IsUnit (N : Γ(X, ⊤))
 
+/-- Invertibility of `N` on a scheme transfers along any morphism. -/
+theorem _root_.ModularCurves.NIsInvertible.of_hom {X Y : Scheme.{u}} (g : X ⟶ Y) {N : ℕ}
+    (h : NIsInvertible Y N) : NIsInvertible X N := by
+  have hmap := h.map g.appTop.hom
+  rwa [map_natCast] at hmap
+
 /-- The `N`-torsion subscheme `E[N]`: the kernel of `[N]`, as the fibre product
 `E ×_{[N], E, 0} S` of `[N] : E ⟶ E` against the zero section.
 Source: KM 2.3; Loeffler §3.4. -/
@@ -237,35 +243,10 @@ theorem mulByHom_locallyOfFinitePresentation (N : ℕ) :
     infer_instance
   exact LocallyOfFinitePresentation.of_comp_of_locallyOfFiniteType h inferInstance
 
-/-- **Black box `BB-DIFF` (T-B5 = Loeffler 3.4.2(2), unramifiedness)**: if `N` is
-invertible on `S` then `[N]` is formally unramified — Loeffler (verbatim): *"The
-morphism `[N]` multiplies a global differential by `N`, so it induces an isomorphism
-of tangent space."* Discharge needs the invariant-differential API (relative `Ω¹` +
-group-translation invariance) — sub-development gated on mathlib's scheme-level
-differentials. -/
-theorem mulByHom_formallyUnramified (N : ℕ) (h : NIsInvertible S N) :
-    FormallyUnramified (E.mulByHom N) := by sorry
-
-/-- **(T-B5 = Loeffler 3.4.2(2))** If `N` is invertible on `S`, then `[N] : E ⟶ E` is étale
-(it induces multiplication by `N`, an isomorphism, on the invariant differential). -/
-theorem mulBy_etale (N : ℕ) (h : NIsInvertible S N) :
-    Etale (E.mulByHom N) := by
-  rcases eq_or_ne N 0 with rfl | hN
-  · haveI hS : IsEmpty S := ModularCurves.isEmpty_of_nIsInvertible_zero h
-    haveI hE : IsEmpty E.E := ⟨fun x => hS.false (E.π x)⟩
-    infer_instance
-  · haveI : NeZero N := ⟨hN⟩
-    haveI := E.mulByHom_flat N
-    haveI := E.mulByHom_formallyUnramified N h
-    haveI := E.mulByHom_locallyOfFinitePresentation N
-    exact Etale.of_formallyUnramified_of_flat (E.mulByHom N)
-
-/-- **(T-B5′)** If `N` is invertible on `S`, then `E[N] ⟶ S` is (finite) étale.
-Source: Loeffler §3.4; KM 2.3.5. -/
-theorem torsionπ_etale (N : ℕ) (h : NIsInvertible S N) :
-    Etale (E.torsionπ N) := by
-  have he := E.mulBy_etale N h
-  exact MorphismProperty.pullback_snd _ _ he
+/-! `BB-DIFF` (T-B5 = Loeffler 3.4.2(2), unramifiedness of `[N]`) and its étale
+consequences `mulBy_etale` / `torsionπ_etale` live in `TorsionFibre.lean` — their
+discharge runs through the `E[N]`-torsor argument and the residue-fibre criterion,
+which sit downstream of this file. -/
 
 end EllipticCurve
 

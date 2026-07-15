@@ -205,12 +205,6 @@ theorem torsionBaseChangeIso_hom_snd {T : Scheme.{u}} (g : T ⟶ S) (N : ℕ) :
       = (E.baseChange g).torsionπ N :=
   (E.torsion_baseChange_isPullback N g).isoPullback_hom_snd
 
-/-- Invertibility of `N` on a scheme transfers along any morphism. -/
-theorem _root_.ModularCurves.NIsInvertible.of_hom {X Y : Scheme.{u}} (g : X ⟶ Y) {N : ℕ}
-    (h : NIsInvertible Y N) : NIsInvertible X N := by
-  have hmap := h.map g.appTop.hom
-  rwa [map_natCast] at hmap
-
 section SigmaPullback
 
 variable {σ : Type u} {Y : σ → Scheme.{u}} {X S : Scheme.{u}}
