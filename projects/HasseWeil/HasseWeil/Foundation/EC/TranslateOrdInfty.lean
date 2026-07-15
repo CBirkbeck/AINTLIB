@@ -65,7 +65,7 @@ theorem pointValuation_eq_exp_neg_of_ord_P_eq {C : Curves.SmoothPlaneCurve F} {P
     C.pointValuation P f = WithZero.exp (-n) := by
   have hv : C.pointValuation P f ≠ 0 := (C.pointValuation P).ne_zero_iff.mpr hf
   have hord : C.ord_P P f = ((-(WithZero.unzero hv).toAdd : ℤ) : WithTop ℤ) := by
-    unfold Curves.SmoothPlaneCurve.ord_P
+    simp only [Curves.SmoothPlaneCurve.ord_P]
     rw [dif_neg hv]
   have hneq : n = -(WithZero.unzero hv).toAdd := by exact_mod_cast (hord.symm.trans hn).symm
   rw [hneq, neg_neg, WithZero.exp, ofAdd_toAdd, WithZero.coe_unzero]
