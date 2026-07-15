@@ -242,16 +242,21 @@ theorem endDeg_one : E.endDeg (𝟙 E.asOver) = 1 := by
   · simp only [endDeg, dif_neg hS]
 
 /-- **(deg of an automorphism = 1 — KM 2.7.1)** An invertible endomorphism (an automorphism of
-`E/S`) has degree `1`. From multiplicativity `deg f · deg (f⁻¹) = deg(f ≫ f⁻¹) = deg 𝟙 = 1` and
-`deg ≥ 0`, `deg f` is a non-negative integer dividing `1`, hence `1`. This discharges the
-`deg ε = 1` bridge of `aut_hom_eq_id_of_fullLevel`. -/
+`E/S`) has degree `1`: the underlying scheme morphism is an isomorphism (`Over.forget` preserves
+isos), and an isomorphism has fibre rank `1` at every point
+(`Scheme.Hom.finrank_eq_one_of_isIso`); over the empty base it is the degree-`1` junk value.
+Proved directly from the `finrank` construction — independent of the multiplicativity pin
+`endDeg_comp`. This discharges the `deg ε = 1` bridge of `aut_hom_eq_id_of_fullLevel`. -/
 theorem endDeg_eq_one_of_isIso (f : E.asOver ⟶ E.asOver) [IsIso f] : E.endDeg f = 1 := by
-  have hmul : E.endDeg f * E.endDeg (inv f) = 1 := by
-    rw [← E.endDeg_comp, IsIso.hom_inv_id, E.endDeg_one]
-  have hdvd : E.endDeg f ∣ 1 := ⟨E.endDeg (inv f), hmul.symm⟩
-  rcases Int.isUnit_iff.mp (isUnit_of_dvd_one hdvd) with h | h
-  · exact h
-  · have := E.endDeg_nonneg f; omega
+  haveI : IsIso (show E.E ⟶ E.E from f.left) :=
+    inferInstanceAs (IsIso ((Over.forget S).map f))
+  have h1 : Scheme.Hom.finrank (X := E.E) (S := E.E) f.left = 1 :=
+    Scheme.Hom.finrank_eq_one_of_isIso (X := E.E) (Y := E.E) f.left
+  simp only [endDeg]
+  split
+  · rw [h1]
+    norm_num
+  · rfl
 
 /-- **(KM 2.6.2.1)** The transpose of `[N]` is `[N]` itself: `[N]^t = [N]`. With the constructed
 dual this is the trace computation `tr [n] = deg [1+n] − 1 − deg [n] = (1+n)² − 1 − n² = 2n`
