@@ -8,7 +8,6 @@ import HasseWeil.HasseBound.WeilPairing.Assembly
 import HasseWeil.HasseBound.WeilPairing.DetDeg
 import HasseWeil.Isogeny.VerschiebungFactorization
 
-set_option linter.style.longLine false
 
 /-!
 # Route 2A — the capstone assembly: Weil-pairing Frobenius data → the Hasse bound (V.2.3.1)

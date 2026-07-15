@@ -392,7 +392,6 @@ theorem frobeniusSquareMulByIntDualWitness :
 -- `[DecidableEq K]` is genuinely required: the statement names the composed witness
 -- `frobeniusSquareMulByIntDualWitness` (which carries it), but the witness sits in a
 -- proof-irrelevant position, so the linter cannot see the dependence.
-set_option linter.unusedDecidableInType false in
 /-- **`(π∘π)^ ∘ (π∘π) = [q·q]` as `EC.Isogeny`s** — Silverman III.6.1 for the composite
 `π ∘ π`, in fully bundled form, via the faithful composed witness. -/
 theorem frobeniusSquare_mulByIntDual_compose :

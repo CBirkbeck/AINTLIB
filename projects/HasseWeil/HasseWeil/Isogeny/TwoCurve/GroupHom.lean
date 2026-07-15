@@ -54,7 +54,6 @@ namespace HasseWeil.WeilPairing
 open HasseWeil HasseWeil.Curves HasseWeil.EC.Isogeny
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 variable {F : Type*} [Field F] [DecidableEq F]
 variable {W₁ W₂ : WeierstrassCurve F} [W₁.toAffine.IsElliptic] [W₂.toAffine.IsElliptic]

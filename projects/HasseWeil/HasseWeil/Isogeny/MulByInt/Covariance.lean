@@ -1029,7 +1029,6 @@ theorem relativeFrobenius_compose_relativeVerschiebungFinite [Fintype F] (e : �
 -- `[Fintype F]` is genuinely required: the statement names the finite-base witness
 -- `mulByInt_p_not_isSeparable_finite` (which carries it), but the witness sits in a
 -- proof-irrelevant position, so the linter cannot see the dependence.
-set_option linter.unusedFintypeInType false in
 /-- **The relative-Frobenius double dual over a finite base** (axiom-clean
 instantiation): `V̂^ = Frob` for the finite-base Verschiebung. -/
 theorem relativeVerschiebungFinite_dual_eq_relativeFrobenius [Fintype F] (e : ℕ) :
