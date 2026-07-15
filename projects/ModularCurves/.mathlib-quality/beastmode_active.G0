@@ -1,11 +1,8 @@
-STREAM-G0 ACTIVE (v10.262 dispatch, 2026-07-16) — BB-DIFF :247 (mulByHom_formallyUnramified).
+STREAM-G0 TERMINAL (v10.264-G0, 2026-07-16) — BB-DIFF ASSEMBLED.
 
-CLAIM: rule-5, ONE session. Target: [N] formally unramified for N invertible on S
-(T-B5 = Loeffler 3.4.2(2)) — last gate on mulBy_etale/torsionπ_etale.
-PLANNED ARCHITECTURE (mirror of the BB-FLAT delivery):
-(1) ring-level fibrewise criterion for FormallyUnramified (fg Ω + per-prime NAK +
-    Ω base-change — lighter than the flat engine);
-(2) scheme assembly REUSING the MulByHomFlat chart squares/arrow-iso;
-(3) field-level: κ̄-descent via mathlib DescendsAlong @FormallyUnramified
-    (LQF-κ̄-wiring pattern), then over k̄: translation-homogeneity to the kernel
-    fibre + splitness (#E[N](k̄) = rank ⟹ reduced ⟹ Ω = 0).
+mulByHom_formallyUnramified / mulBy_etale / torsionπ_etale: REAL proofs, single
+residual sorry = modelMulByHom_formallyUnramified_of_isAlgClosed
+(MulByHomUnramifiedField.lean:45). Torsion.lean SORRY-FREE. Build green (4222 jobs).
+Commits c4ec6a839 / 79af85fc7 / 063064524 pushed. Boards: tickets.md v10.264-G0;
+stream report appended. Leaf fire-plan: R-count glue (~1 session) once KM's
+MulByHomDegree.lean stabilizes. No claims held.

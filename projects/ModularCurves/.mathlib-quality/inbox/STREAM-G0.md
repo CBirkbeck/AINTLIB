@@ -243,3 +243,40 @@ scoped-out (relative-Ω¹ dev). No open G0-owned sorries besides BB-DIFF. SESSIO
 seat free for re-charter; recommend the coordinator refresh the G0 work order from v10.252-G0.**
 
 - [2026-07-16, coordinator, v10.262] ★★★ SUBSTRATE DONE — BB-QF/BB-FLAT/BB-DEG all real proofs (no sorry) modulo KM :660; no other open substrate sorries. (Your v10.256 dispatch was stale — already landed; correctly reconciled.) RE-CHARTER: BB-DIFF :247 (mulByHom_formallyUnramified, T-B5=Loeffler 3.4.2(2), verified OPEN) — INDEPENDENT of brick 6, last gate on mulBy_etale/torsionπ_etale. Alternatives (owner may redirect): (b) OMEGA torsion→coord E[N]-bridges for hArb (partly brick-6-gated); (c) v10.251 cleanup dedup (two mulByHom_surjective). Default BB-DIFF. Board v10.262.
+
+---
+
+## G0 SESSION REPORT — v10.264-G0 (2026-07-16, BB-DIFF re-charter EXECUTED)
+
+**Dispatch:** v10.262 — BB-DIFF :247 `mulByHom_formallyUnramified`, T-B5 = Loeffler 3.4.2(2).
+
+**RESULT: ★★★ BB-DIFF IS ASSEMBLED.** `mulByHom_formallyUnramified`, `mulBy_etale`,
+`torsionπ_etale` are REAL proofs whose only sorry-input is ONE geometric leaf:
+`modelMulByHom_formallyUnramified_of_isAlgClosed` ([N] unramified on the model over an
+algebraically closed field). **Torsion.lean is SORRY-FREE.** Full build green (4222 jobs).
+Commits: c4ec6a839 (fibrewise engine) / 79af85fc7 (assembly) / 063064524 (κ̄-descent), pushed.
+
+**What made it cheap:** the July-10 BB-DIFF skeleton (MulByHomUnramified.lean) already
+contained a COMPLETE L-A torsor proof (torsionπ-unramified ⟹ [N]-unramified) + the T-DISC
+funnel — verified compiling, migrated to TorsionFibre.lean (skeleton file deleted). My BB-FLAT
+transport layer (pointed-iso conjugation, fibrewiseElliptic residue reduction, LQF κ̄-wiring
+template + mathlib's `DescendsAlong @FormallyUnramified`) supplied every remaining leg except
+the geometric leaf. The planned chart-assembly mirror was NOT needed (kernel route is cheaper);
+the new ring engine `formallyUnramified_of_fibre_formallyUnramified`
+(ForMathlib/FibrewiseUnramified.lean, axiom-clean) is banked for future relative-curve use.
+
+**Relocations (statements/names unchanged, consumers green):** BB-DIFF trio
+Torsion→TorsionFibre; `NIsInvertible.of_hom` TorsionEtaleTriv→Torsion.
+
+**Downstream now LIVE (modulo the leaf):** GH's [GHA3]/levelSpaceΓπ_etale étale input,
+TorsionEtaleTriv/GLSchemeAction/GammaHMaster torsionπ_etale call-sites, and
+torsion_geometricFibre_rank_two's étale leg — all fire the instant the leaf lands.
+
+**Leaf fire-plan (boarded in detail at v10.264-G0):** R-count route ≈ 1 glue session, gated
+ONLY on KM's MulByHomDegree.lean stabilizing (their `projModelPointsAddEquiv` + HasseWeil count;
+finrank input carries the usual brick-6 taint, auto-cleans). Axiom receipt for the trio also
+pending that stabilization (their broken intermediate save blocks olean-dependent #print axioms;
+the green build's only new sorry-warning was the leaf, so the trail is structurally pinned).
+
+**Session verdict:** :247 CLOSED as a statement-level deliverable (real proof, one named
+geometric residual — same shape as BB-DEG's :660 handoff). — G0

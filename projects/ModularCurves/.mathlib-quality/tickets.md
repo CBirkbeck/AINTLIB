@@ -21306,3 +21306,55 @@ exactly the transport-friendly form (kill ∧ ∀k̄∀x closure-membership).
 **U3 after U2:** the factor-iff assembly (v-decomposition into point-legs + spec-E/spec-E_T both
 sides + U2) → `exists_iso_of_factor_iff` → the base-change identification; then β3 (constant-form
 clopen) → β4-shell → :3497. (STREAM-GH)
+
+### v10.264-G0 — ★★★ BB-DIFF ASSEMBLED: mulByHom_formallyUnramified + mulBy_etale + torsionπ_etale are REAL PROOFS modulo ONE geometric leaf; Torsion.lean is SORRY-FREE (STREAM-G0)
+Commits c4ec6a839 / 79af85fc7 / 063064524 (pushed). The v10.262 re-charter (BB-DIFF :247) is
+**assembled end-to-end**; the entire étale trio now fires from a single remaining sorry.
+
+**The chain (all REAL, axiom trail = the one leaf):**
+- `ForMathlib/FibrewiseUnramified.lean` (NEW, axiom-clean ✓ propext/Classical.choice/Quot.sound):
+  `formallyUnramified_of_fibre_formallyUnramified` — A→R→T, T ess-finite-type over R, all residue
+  fibres (same `fiberInclusion` interface as the BB-FLAT engine) unramified ⟹ R→T unramified.
+  fg-Ω + per-prime NAK + `tensorKaehlerEquivBase` + `cancelBaseChangeAlg`-transport. (Battle note:
+  the residue-transfer map is stated over an ABSTRACT module M — instance search on Ω[T⁄R]
+  diverges at any maxHeartbeats if Ω is concrete; abstraction is the cure. Root-sentinel-worthy.)
+  [Engine banked; the assembly below ended up NOT needing it — kept for the general chart route
+  and future relative-curve uses.]
+- `EllipticCurve/MulByHomUnramifiedField.lean` (NEW): `modelMulByHom_formallyUnramified_of_field`
+  is a REAL proof by κ̄-descent (pointed-iso transport `modelBaseChangeIsoAsOver` + mathlib
+  `DescendsAlong @FormallyUnramified` on the [N] base-change square — the verbatim LQF κ̄-wiring
+  template). **THE single BB-DIFF residual = `modelMulByHom_formallyUnramified_of_isAlgClosed`
+  (:45, sorry)**: [N] unramified on the model over an ALGEBRAICALLY CLOSED field, (N:κ̄)≠0.
+  Plus `formallyUnramified_mulByHom_of_isMonHom_iso`, `formallyUnramified_mulByHom_baseChange_residueField`
+  (mirrors of the flat legs).
+- `EllipticCurve/TorsionFibre.lean` (tail): the discharge. L-A torsor reduction
+  `formallyUnramified_mulByHom_of_torsionπ` (the July-10 skeleton's COMPLETE proof, migrated —
+  `MulByHomUnramified.lean` deleted, its content absorbed); T-DISC funnel
+  (`of_finite_fiberToSpecResidueField` + `torsionπ_isFinite`); L-BC `formallyUnramified_torsionπ`
+  (fibre = base-changed torsion via `torsion_baseChange_isPullback`/isoPullback + torsionπ' =
+  pullback.snd of [N]-along-zero via `MorphismProperty.pullback_snd` + the residue field leg;
+  N=0 via `isEmpty_of_nIsInvertible_zero`); then `mulByHom_formallyUnramified` = L-A ∘ L-BC and
+  `mulBy_etale`/`torsionπ_etale` VERBATIM.
+- **RELOCATION (coordinator note):** the BB-DIFF trio moved Torsion.lean → TorsionFibre.lean
+  (statements/names unchanged; proofs need the torsion machinery downstream of Torsion.lean).
+  `NIsInvertible.of_hom` hoisted TorsionEtaleTriv.lean → Torsion.lean (name/statement unchanged).
+  All consumers (TorsionEtaleTriv, GLSchemeAction, GammaH chain, Moduli) rebuilt green untouched.
+  **Torsion.lean is now SORRY-FREE.** Full ModularCurves build green (4222 jobs) at assembly time.
+- Axiom printout receipt: pending — KM's MulByHomDegree.lean is mid-refactor on disk (broken
+  intermediate save; their sorry set currently :993/:1102, was :660), which blocks olean-dependent
+  #print axioms on anything importing it. Structural guarantee: the only NEW sorry-warning in the
+  green build was MulByHomUnramifiedField:45 (the leaf); the trio's sorryAx therefore flows
+  through the leaf alone (+ pre-existing KM anchor via mulByHom_flat's finrank consumers — none
+  in the trio). Will print the receipt next firing.
+
+**THE LEAF's fire-conditions (residual, precisely):** over κ̄ the two live routes both gate on
+sibling in-flight work:
+(R-count) per closed pt: #fibre-points = fibre-finrank = N² ⟹ multiplicity-1 ⟹ unramified-at-pt
+  (`isUnramifiedAt_iff_map_eq`; separability of κ̄/κ̄ free). Inputs: KM's `projModelPointsAddEquiv`
+  (BANKED at MulByHomDegree:59 but file in flux) + HasseWeil torsion count + fibre-transitivity
+  (surjectivity ✓ banked + point-group translate) + finrank=N² (BB-DEG, brick-6-tainted, auto-
+  cleans). ~1 session of glue ONCE KM's file stabilizes.
+(R-ω) OMEGA's normalization ([N]*ω = Nω scheme-level, T-E15-NORM/T-E14-LVL-b in flight) +
+  cotangent-at-identity + translation-homogeneity (NO translation API banked — bigger build).
+G0 recommends R-count at KM-stabilization; the brick-6 taint on the finrank input auto-cleans
+exactly like BB-DEG.
