@@ -2,6 +2,7 @@ import ModularCurves.EllipticCurve.ModelRecord
 import ModularCurves.EllipticCurve.PointsDictionary
 import ModularCurves.EllipticCurve.FinrankFractionField
 import HasseWeil.Foundation.Basic
+import HasseWeil.Foundation.EC.GenericPoint
 
 /-!
 # The degree of `[N]` on the projective model: `finrank = N²` (K4 field-level crux)
@@ -335,6 +336,84 @@ theorem mulByInt_pullbackAlgHom_y_gen {K : Type u} [Field K] (W : WeierstrassCur
   show HasseWeil.mulByInt_pullbackRingHom W n hn (HasseWeil.y_gen W) = _
   rw [HasseWeil.y_gen, HasseWeil.mulByInt_pullbackRingHom, IsLocalization.lift_eq]
   rw [HasseWeil.mulByInt_coordHom, AdjoinRoot.lift_root]
+
+section GenericPointSmul
+
+open WeierstrassCurve HasseWeil
+
+variable {K : Type u} [Field K] [DecidableEq K] (W : WeierstrassCurve K)
+  [W.toAffine.IsElliptic]
+
+/-- The division-polynomial triple at the generic point, componentwise
+(`smulEval_generic_X/Y/Z` bundled as a function identity). -/
+lemma smulEval_generic (n : ℤ) :
+    smulEval (W_KE W) (x_gen W) (y_gen W) n = ![Φ_ff W n, ω_ff W n, ψ_ff W n] := by
+  funext i
+  fin_cases i
+  · simpa using smulEval_generic_X W n
+  · simpa using smulEval_generic_Y W n
+  · simpa using smulEval_generic_Z W n
+
+/-- The Jacobian point class of `n • genericPoint` is the division-polynomial triple
+(HasseWeil `zsmul_eq_smulEval` + `smulEval_generic`). -/
+lemma zsmul_genericPoint_point (n : ℤ) :
+    (n • Jacobian.Point.fromAffine (genericPoint W)).point
+      = (⟦![Φ_ff W n, ω_ff W n, ψ_ff W n]⟧ :
+          Jacobian.PointClass W.toAffine.FunctionField) := by
+  rw [show genericPoint W
+      = WeierstrassCurve.Affine.Point.some (x_gen W) (y_gen W) (generic_nonsingular W) from rfl,
+    zsmul_eq_smulEval (W := W_KE W) (generic_nonsingular W) n, smulEval_generic]
+
+/-- Coordinate helper: the affine `x`-slot of the division-polynomial triple. -/
+lemma divTriple_x_div_z_sq (n : ℤ) :
+    (![Φ_ff W n, ω_ff W n, ψ_ff W n]) 0 / (![Φ_ff W n, ω_ff W n, ψ_ff W n]) 2 ^ 2
+      = mulByInt_x W n := by
+  show Φ_ff W n / ψ_ff W n ^ 2 = mulByInt_x W n
+  rw [mulByInt_x, ψ_ff_sq_eq_ΨSq_ff]
+
+/-- Coordinate helper: the affine `y`-slot of the division-polynomial triple. -/
+lemma divTriple_y_div_z_cb (n : ℤ) :
+    (![Φ_ff W n, ω_ff W n, ψ_ff W n]) 1 / (![Φ_ff W n, ω_ff W n, ψ_ff W n]) 2 ^ 3
+      = mulByInt_y W n := rfl
+
+/-- **(L4-iii brick 1 — the generic-point `[n]`-image is the division-polynomial point)**
+Multiplication by `n ≠ 0` sends the generic point `(x_gen, y_gen)` of `W_KE` to
+`(mulByInt_x, mulByInt_y) = (Φₙ/Ψₙ², ωₙ/ψₙ³)`: HasseWeil's Jacobian smul formula
+`zsmul_eq_smulEval` evaluated at the generic point (`smulEval_generic_X/Y/Z`), converted to
+affine coordinates through `toAffineAddEquiv`/`toAffineLift_of_Z_ne_zero` (`ψₙ ≠ 0` for `n ≠ 0`).
+Realises the promise in `HasseWeil.genericPoint`'s docstring; the (c)-leg of the L4-iii chain
+(dictionary τ ↦ genericPoint, then `N•` on both sides, then this identity reads off the
+coordinates that `mulByInt_pullbackAlgHom_x_gen/_y_gen` match on the pullback side). -/
+theorem zsmul_genericPoint {n : ℤ} (hn : n ≠ 0) :
+    ∃ h, n • genericPoint W
+      = WeierstrassCurve.Affine.Point.some (mulByInt_x W n) (mulByInt_y W n) h := by
+  have hround : n • genericPoint W
+      = (n • Jacobian.Point.fromAffine (genericPoint W)).toAffineLift := by
+    conv_lhs => rw [show genericPoint W
+        = (Jacobian.Point.toAffineAddEquiv (W_KE W).toJacobian)
+            (Jacobian.Point.fromAffine (genericPoint W)) from
+      ((Jacobian.Point.toAffineAddEquiv (W_KE W).toJacobian).apply_symm_apply
+        (genericPoint W)).symm]
+    rw [← map_zsmul (Jacobian.Point.toAffineAddEquiv (W_KE W).toJacobian)]
+    rfl
+  have hψ : ψ_ff W n ≠ 0 := ψ_ff_ne_zero W hn
+  have hψz : (![Φ_ff W n, ω_ff W n, ψ_ff W n]) (2 : Fin 3) ≠ 0 := by simpa using hψ
+  rcases hE : n • Jacobian.Point.fromAffine (genericPoint W) with @⟨p, hp⟩
+  have hpt : p = (⟦![Φ_ff W n, ω_ff W n, ψ_ff W n]⟧ :
+      Jacobian.PointClass W.toAffine.FunctionField) := by
+    have h := zsmul_genericPoint_point W n
+    rw [hE] at h
+    exact h
+  subst hpt
+  have hns : (W_KE W).toAffine.Nonsingular (mulByInt_x W n) (mulByInt_y W n) := by
+    rw [← divTriple_x_div_z_sq W n, ← divTriple_y_div_z_cb W n]
+    exact (Jacobian.nonsingular_of_Z_ne_zero hψz).mp hp
+  refine ⟨hns, ?_⟩
+  rw [hround, hE, Jacobian.Point.toAffineLift_of_Z_ne_zero hψz]
+  simp only [WeierstrassCurve.Affine.Point.some.injEq]
+  exact ⟨divTriple_x_div_z_sq W n, divTriple_y_div_z_cb W n⟩
+
+end GenericPointSmul
 
 /-- **(L4-v enabler: generator extensionality for `K(E)`)** Two `K`-algebra homomorphisms out of
 the function field agree iff they agree on the generic coordinates `x_gen`, `y_gen`: `K(E)` is the
