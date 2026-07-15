@@ -39,7 +39,7 @@ omit [NumberField R'] in
 theorem finiteLogProductCoord_powCoord (n : ℕ) (x : 𝓞 R') :
     finiteLogProductCoord (finiteLogPowCoord n x) x =
       finiteLogPowCoord (n + 1) x := by
-  unfold finiteLogProductCoord finiteLogPowCoord
+  simp only [finiteLogProductCoord, finiteLogPowCoord]
   rw [pow_succ]
   ring
 
@@ -104,7 +104,7 @@ theorem finiteLogPowCoord_ell_pi_eq_zero :
     ring
   have hpow : F.zeta_ell_int ^ ℓ = (1 : 𝓞 R') :=
     F.concrete.zeta_ell_int_isPrimitiveRoot.pow_eq_one
-  unfold finiteLogPowCoord
+  simp only [finiteLogPowCoord]
   rw [hzeta, hpow]
   ring
 
