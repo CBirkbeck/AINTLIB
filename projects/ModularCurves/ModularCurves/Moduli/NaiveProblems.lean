@@ -52,7 +52,8 @@ iso-cancellation on the total spaces (`curveIsoPullback` is an iso, hence mono).
 private lemma pull_transportSection_eq_zero_iff {X Y : EllObj R} (f : X ⟶ Y) {k : Type u} [Field k]
     (τ : Spec (CommRingCat.of k) ⟶ X.base) (w : X.curve.Section) :
     EllipticCurve.Point.pull X.curve τ w = 0 ↔
-      EllipticCurve.Point.pull (Y.curve.baseChange f.baseHom) τ (EllHom.transportSection R f w) = 0 := by
+      EllipticCurve.Point.pull (Y.curve.baseChange f.baseHom) τ
+          (EllHom.transportSection R f w) = 0 := by
   -- `iso.hom`'s codomain is inferred as `(baseChange).E` from these equations, matching
   -- `zero_curveIsoPullback` (avoiding the `pullback … = (baseChange).E` syntactic mismatch).
   have key : (EllipticCurve.Point.pull (Y.curve.baseChange f.baseHom) τ
@@ -88,7 +89,8 @@ theorem isNaiveGammaOne_pullSection_iff (N : ℕ) [NeZero N] {X Y : EllObj R} (f
   have hΦ0 : ∀ y, Φ y = 0 ↔ y = 0 := fun y ↦ by rw [← map_zero Φ]; exact hinj.eq_iff
   -- dictionary: the transport of the pulled section IS the base-changed pulled point-section.
   have hdict : Φ (EllHom.pullSection R f Q)
-      = EllipticCurve.Point.asSection Y.curve f.baseHom (EllipticCurve.Point.pull Y.curve f.baseHom Q) := by
+      = EllipticCurve.Point.asSection Y.curve f.baseHom
+          (EllipticCurve.Point.pull Y.curve f.baseHom Q) := by
     refine Subtype.ext ?_
     show (EllHom.transportSection R f (EllHom.pullSection R f Q)).1 = _
     rw [EllHom.transportSection_pullSection]
@@ -98,7 +100,8 @@ theorem isNaiveGammaOne_pullSection_iff (N : ℕ) [NeZero N] {X Y : EllObj R} (f
       ((N : ℤ) • EllipticCurve.Point.asSection Y.curve f.baseHom
         (EllipticCurve.Point.pull Y.curve f.baseHom Q) = 0) := by
     rw [← hdict, ← map_zsmul Φ, hΦ0]
-  -- fibrewise, any integer scalar: pull ∘ (a • ·) then iso-cancel (`pull_transportSection_eq_zero_iff`).
+  -- fibrewise, any integer scalar: pull ∘ (a • ·) then iso-cancel
+  -- (`pull_transportSection_eq_zero_iff`).
   have hbridge : ∀ (a : ℤ) {k : Type u} [Field k] (t : Spec (CommRingCat.of k) ⟶ X.base),
       (a • EllipticCurve.Point.pull X.curve t (EllHom.pullSection R f Q) = 0 ↔
         a • EllipticCurve.Point.pull (Y.curve.baseChange f.baseHom) t
