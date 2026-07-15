@@ -4157,6 +4157,559 @@ noncomputable def affineIntersectionOriginalChartTrivialization
     (pullback q.hom).mapIso e' ≪≫
     pullbackUnitIso q.hom
 
+private theorem affineIntersectionOriginalChartTrivialization_eq_square
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i : J) :
+    let D := π.affineIntersectionGlueData U hU
+    let g := π.affineIntersectionGluedToOriginal U hU
+    let q := π.affineIntersectionChartIso U hU i
+    let e' : (pullback (U i).ι).obj N ≅ unitObj (U i).toScheme :=
+      (restrictFunctorIsoPullback (U i).ι).symm.app N ≪≫ e i
+    let h : D.ι i ≫ g = q.hom ≫ (U i).ι :=
+      π.affineIntersectionGlueData_ι_affineIntersectionGluedToOriginal_eq_chartIso U hU i
+    affineIntersectionOriginalChartTrivialization π U e hU i =
+      pullbackSquareTrivialization (D.ι i) g q.hom (U i).ι h N e' := by
+  rfl
+
+private theorem pullbackRestrictOpenTrivialization
+    {X : Scheme.{u}} {N : X.Modules} {U V : X.Opens} (hVU : V ≤ U)
+    (e : N.restrict U.ι ≅ unitObj U.toScheme) :
+    (restrictFunctorIsoPullback V.ι).symm.app N ≪≫
+        restrictOpenTrivialization hVU e =
+      restrictTrivialization hVU
+        ((restrictFunctorIsoPullback U.ι).symm.app N ≪≫ e) := by
+  rw [restrictOpenTrivialization_eq_pullback]
+  unfold restrictOpenTrivializationPullback
+  apply Iso.ext
+  simp only [Iso.trans_hom]
+  let R := (restrictFunctorIsoPullback V.ι).app N
+  change R.inv ≫ R.hom ≫ _ = _
+  exact R.inv_hom_id_assoc _
+
+private noncomputable def affineIntersectionTransportedChartTrivialization
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (k : J) {Y Z : Scheme.{u}}
+    (p : Y ⟶ (π.affineIntersectionGlueData U hU).U k) (f : Z ⟶ Y) :
+    let D := π.affineIntersectionGlueData U hU
+    let g := π.affineIntersectionGluedToOriginal U hU
+    (pullback f).obj
+          ((pullback p).obj ((pullback (D.ι k)).obj ((pullback g).obj N))) ⟶
+      unitObj Z :=
+  let D := π.affineIntersectionGlueData U hU
+  let g := π.affineIntersectionGluedToOriginal U hU
+  let q := π.affineIntersectionChartIso U hU k
+  let e' : (pullback (U k).ι).obj N ≅ unitObj (U k).toScheme :=
+    (restrictFunctorIsoPullback (U k).ι).symm.app N ≪≫ e k
+  let h : D.ι k ≫ g = q.hom ≫ (U k).ι :=
+    π.affineIntersectionGlueData_ι_affineIntersectionGluedToOriginal_eq_chartIso
+      U hU k
+  let hOuter : (f ≫ p) ≫ (D.ι k ≫ g) =
+      ((f ≫ p) ≫ q.hom) ≫ (U k).ι :=
+    (Category.assoc (f ≫ p) (D.ι k) g).symm.trans
+      ((congrArg ((f ≫ p) ≫ ·) h).trans
+        (Category.assoc (f ≫ p) q.hom (U k).ι))
+  (pullbackComp f p).hom.app
+        ((pullback (D.ι k)).obj ((pullback g).obj N)) ≫
+    (pullback (f ≫ p)).map ((pullbackComp (D.ι k) g).hom.app N) ≫
+      (pullbackSquareTrivialization (f ≫ p) (D.ι k ≫ g)
+        ((f ≫ p) ≫ q.hom) (U k).ι hOuter N e').hom
+
+private theorem affineIntersectionOriginalChartTrivialization_comp_precomp_hom
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (k : J) {Y Z : Scheme.{u}}
+    (p : Y ⟶ (π.affineIntersectionGlueData U hU).U k) (f : Z ⟶ Y) :
+    (pullback f).map ((pullback p).map
+          (affineIntersectionOriginalChartTrivialization π U e hU k).hom) ≫
+        (pullback f).map (pullbackUnitIso p).hom ≫
+      (pullbackUnitIso f).hom =
+    affineIntersectionTransportedChartTrivialization π U e hU k p f := by
+  dsimp only [affineIntersectionTransportedChartTrivialization]
+  let D := π.affineIntersectionGlueData U hU
+  let g := π.affineIntersectionGluedToOriginal U hU
+  let q := π.affineIntersectionChartIso U hU k
+  let e' : (pullback (U k).ι).obj N ≅ unitObj (U k).toScheme :=
+    (restrictFunctorIsoPullback (U k).ι).symm.app N ≪≫ e k
+  let h : D.ι k ≫ g = q.hom ≫ (U k).ι :=
+    π.affineIntersectionGlueData_ι_affineIntersectionGluedToOriginal_eq_chartIso
+      U hU k
+  have hpre := pullbackSquareTrivialization_comp_precomp_hom
+    f p (D.ι k) g q.hom (U k).ι h N e'
+  rw [← affineIntersectionOriginalChartTrivialization_eq_square
+    π U e hU k] at hpre
+  exact hpre
+
+private theorem affineIntersection_chartTransition_comp_flattenRight
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i j : J) :
+    let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let sq := affineIntersectionChartChosenPullback hopen hpush
+    let c := affineIntersectionUnitCocycle π U e
+    let q := π.affineIntersectionOverlapIso U hU i j
+    let s := openTopSection (U i ⊓ U j)
+      (trivializingCoverTransitionUnitOn U e (U i ⊓ U j) i j
+        inf_le_left inf_le_right : Γ(X, U i ⊓ U j))
+    (pullback q.inv).map (c.chartTransitionIso hopen hpush i j).hom ≫
+          (pullback q.inv).map (pullbackUnitIso (sq i j).p₂).hom ≫
+        (pullbackUnitIso q.inv).hom =
+      (pullback q.inv).map (pullbackUnitIso (sq i j).p₁).hom ≫
+          (pullbackUnitIso q.inv).hom ≫
+        ModularCurves.unitEndomorphismOfTopSection s := by
+  dsimp only
+  dsimp only [affineIntersectionChartChosenPullback]
+  rw [AffineIntersectionUnitCocycle.chartTransitionIso_hom]
+  let D := π.affineIntersectionGlueData U hU
+  let q := π.affineIntersectionOverlapIso U hU i j
+  let c := affineIntersectionUnitCocycle π U e
+  have hcancel := pullback_unitTransition_comp_flattenRight
+    (D.f i j) (D.t i j ≫ D.f j i) q (c.overlapTransitionIso i j)
+  rw [hcancel]
+  have hscalar := affineIntersectionUnitCocycle_pullback_overlapTransitionIso
+    π U e hU i j
+  exact congrArg
+    (fun z =>
+      (pullback q.inv).map
+        (pullbackUnitIso (D.f i j)).hom ≫ z) hscalar
+
+private theorem eq_of_map_components
+    {C : Type u₁} [Category.{v₁} C]
+    {D : Type u₂} [Category.{v₂} D]
+    (F : C ⥤ D) [F.Faithful]
+    {X Y Z W V : C} (f : X ⟶ Y) (t : Y ⟶ Z)
+    (a : X ⟶ W) (b : W ⟶ V) (g : V ⟶ Z)
+    (h : F.map f ≫ F.map t = (F.map a ≫ F.map b) ≫ F.map g) :
+    f ≫ t = (a ≫ b) ≫ g := by
+  apply F.map_injective
+  rw [F.map_comp, F.map_comp, F.map_comp]
+  exact h
+
+private theorem comp_four_assoc
+    {C : Type u₁} [Category.{v₁} C]
+    {A B C' D E : C} (f : A ⟶ B) (g : B ⟶ C')
+    (h : C' ⟶ D) (k : D ⟶ E) :
+    ((f ≫ g) ≫ h) ≫ k = f ≫ (g ≫ h ≫ k) := by
+  simp only [Category.assoc]
+
+private theorem comp_four_group_first_three
+    {C : Type u₁} [Category.{v₁} C]
+    {A B C' D E : C} (f : A ⟶ B) (g : B ⟶ C')
+    (h : C' ⟶ D) (k : D ⟶ E) :
+    f ≫ g ≫ h ≫ k = (f ≫ g ≫ h) ≫ k := by
+  simp only [Category.assoc]
+
+private theorem comp_five_group_last_three
+    {C : Type u₁} [Category.{v₁} C]
+    {A B C' D E F : C} (f : A ⟶ B) (g : B ⟶ C')
+    (h : C' ⟶ D) (k : D ⟶ E) (l : E ⟶ F) :
+    ((((f ≫ g) ≫ h) ≫ k) ≫ l) = (f ≫ g) ≫ (h ≫ k ≫ l) := by
+  simp only [Category.assoc]
+
+private theorem comp_pair_with_triple_of_eq
+    {C : Type u₁} [Category.{v₁} C]
+    {A B C' D E F : C} (f : A ⟶ B) (g : B ⟶ C')
+    (h : C' ⟶ D) (k : D ⟶ E) (l : E ⟶ F) (t : C' ⟶ F)
+    (ht : h ≫ k ≫ l = t) :
+    ((((f ≫ g) ≫ h) ≫ k) ≫ l) = (f ≫ g) ≫ t :=
+  (comp_five_group_last_three f g h k l).trans
+    (congrArg ((f ≫ g) ≫ ·) ht)
+
+private theorem overlap_source_map
+    {C : Type u₁} [Category.{v₁} C]
+    {W A B G X : C} (f : W ⟶ A) (p : A ⟶ B)
+    (d : B ⟶ G) (s : A ⟶ G) (g : G ⟶ X)
+    (hp : p ≫ d = s) :
+    (f ≫ p) ≫ (d ≫ g) = (f ≫ s) ≫ g :=
+  (Category.assoc (f ≫ p) d g).symm.trans
+    (congrArg (· ≫ g)
+      ((Category.assoc f p d).trans (congrArg (f ≫ ·) hp)))
+
+private theorem restrictTrivialization_transition
+    {X : Scheme.{u}} {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (i j : J) :
+    let W := U i ⊓ U j
+    let ei : (pullback (U i).ι).obj N ≅ unitObj (U i).toScheme :=
+      (restrictFunctorIsoPullback (U i).ι).symm.app N ≪≫ e i
+    let ej : (pullback (U j).ι).obj N ≅ unitObj (U j).toScheme :=
+      (restrictFunctorIsoPullback (U j).ι).symm.app N ≪≫ e j
+    (restrictTrivialization (inf_le_left : W ≤ U i) ei).inv ≫
+        (restrictTrivialization (inf_le_right : W ≤ U j) ej).hom =
+      ModularCurves.unitEndomorphismOfTopSection
+        (openTopSection W
+          (trivializingCoverTransitionUnitOn U e W i j
+            inf_le_left inf_le_right : Γ(X, W))) := by
+  dsimp only
+  let W := U i ⊓ U j
+  let eWi := restrictOpenTrivialization
+    (inf_le_left : W ≤ U i) (e i)
+  let eWj := restrictOpenTrivialization
+    (inf_le_right : W ≤ U j) (e j)
+  let R := (restrictFunctorIsoPullback W.ι).app N
+  have hi := pullbackRestrictOpenTrivialization
+    (inf_le_left : W ≤ U i) (e i)
+  have hj := pullbackRestrictOpenTrivialization
+    (inf_le_right : W ≤ U j) (e j)
+  have hscalar := openTrivializationTransitionUnit_hom W eWi eWj
+  rw [← hi, ← hj]
+  change (eWi.inv ≫ R.hom) ≫ R.inv ≫ eWj.hom = _
+  rw [Category.assoc, R.hom_inv_id_assoc]
+  exact hscalar
+
+private theorem precomp_square
+    {C : Type u₁} [Category.{v₁} C]
+    {W A B V X : C} (f : W ⟶ A) (p : A ⟶ B)
+    (d : B ⟶ X) (q : B ⟶ V) (ι : V ⟶ X)
+    (h : d = q ≫ ι) :
+    (f ≫ p) ≫ d = ((f ≫ p) ≫ q) ≫ ι :=
+  (congrArg ((f ≫ p) ≫ ·) h).trans (Category.assoc _ q ι).symm
+
+private noncomputable abbrev affineIntersectionLeftOuterStatement
+    {X S : Scheme.{u}} (π : X ⟶ S) {J : Type u}
+    (U : J → X.Opens)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i j : J) : Prop :=
+  let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let D := π.affineIntersectionGlueData U hU
+  let sq := affineIntersectionChartChosenPullback hopen hpush
+  let q := π.affineIntersectionOverlapIso U hU i j
+  let g := π.affineIntersectionGluedToOriginal U hU
+  let qi := π.affineIntersectionChartIso U hU i
+  (q.inv ≫ (sq i j).p₁) ≫ (D.ι i ≫ g) =
+    ((q.inv ≫ (sq i j).p₁) ≫ qi.hom) ≫ (U i).ι
+
+private theorem affineIntersectionLeftOuterProof
+    {X S : Scheme.{u}} (π : X ⟶ S) {J : Type u}
+    (U : J → X.Opens)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i j : J) :
+    affineIntersectionLeftOuterStatement π U hU i j := by
+  dsimp only [affineIntersectionLeftOuterStatement]
+  let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let D := π.affineIntersectionGlueData U hU
+  let sq := affineIntersectionChartChosenPullback hopen hpush
+  let q := π.affineIntersectionOverlapIso U hU i j
+  let g := π.affineIntersectionGluedToOriginal U hU
+  let qi := π.affineIntersectionChartIso U hU i
+  let hi : D.ι i ≫ g = qi.hom ≫ (U i).ι :=
+    π.affineIntersectionGlueData_ι_affineIntersectionGluedToOriginal_eq_chartIso U hU i
+  exact precomp_square q.inv (sq i j).p₁ (D.ι i ≫ g) qi.hom (U i).ι hi
+
+private noncomputable abbrev affineIntersectionRightOuterStatement
+    {X S : Scheme.{u}} (π : X ⟶ S) {J : Type u}
+    (U : J → X.Opens)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i j : J) : Prop :=
+  let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let D := π.affineIntersectionGlueData U hU
+  let sq := affineIntersectionChartChosenPullback hopen hpush
+  let q := π.affineIntersectionOverlapIso U hU i j
+  let g := π.affineIntersectionGluedToOriginal U hU
+  let qj := π.affineIntersectionChartIso U hU j
+  (q.inv ≫ (sq i j).p₂) ≫ (D.ι j ≫ g) =
+    ((q.inv ≫ (sq i j).p₂) ≫ qj.hom) ≫ (U j).ι
+
+private theorem affineIntersectionRightOuterProof
+    {X S : Scheme.{u}} (π : X ⟶ S) {J : Type u}
+    (U : J → X.Opens)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i j : J) :
+    affineIntersectionRightOuterStatement π U hU i j := by
+  dsimp only [affineIntersectionRightOuterStatement]
+  let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let D := π.affineIntersectionGlueData U hU
+  let sq := affineIntersectionChartChosenPullback hopen hpush
+  let q := π.affineIntersectionOverlapIso U hU i j
+  let g := π.affineIntersectionGluedToOriginal U hU
+  let qj := π.affineIntersectionChartIso U hU j
+  let hj : D.ι j ≫ g = qj.hom ≫ (U j).ι :=
+    π.affineIntersectionGlueData_ι_affineIntersectionGluedToOriginal_eq_chartIso U hU j
+  exact precomp_square q.inv (sq i j).p₂ (D.ι j ≫ g) qj.hom (U j).ι hj
+
+private theorem affineIntersectionTwoTransition
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i j : J) :
+    let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let D := π.affineIntersectionGlueData U hU
+    let sq := affineIntersectionChartChosenPullback hopen hpush
+    let g := π.affineIntersectionGluedToOriginal U hU
+    let M := (pullback g).obj N
+    let q := π.affineIntersectionOverlapIso U hU i j
+    let Li := ((pullbackComp (sq i j).p₁ (D.ι i)).app M) ≪≫
+      ((pullbackCongr (sq i j).hp₁).app M)
+    let Lj := ((pullbackComp (sq i j).p₂ (D.ι j)).app M) ≪≫
+      ((pullbackCongr (sq i j).hp₂).app M)
+    let scalar := ModularCurves.unitEndomorphismOfTopSection
+      (openTopSection (U i ⊓ U j)
+        (trivializingCoverTransitionUnitOn U e (U i ⊓ U j) i j
+          inf_le_left inf_le_right : Γ(X, U i ⊓ U j)))
+    affineIntersectionTransportedChartTrivialization
+          π U e hU i (sq i j).p₁ q.inv ≫ scalar =
+      ((pullback q.inv).map Li.hom ≫ (pullback q.inv).map Lj.inv) ≫
+        affineIntersectionTransportedChartTrivialization
+          π U e hU j (sq i j).p₂ q.inv := by
+  classical
+  dsimp only
+  let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let D := π.affineIntersectionGlueData U hU
+  let sq := affineIntersectionChartChosenPullback hopen hpush
+  let g := π.affineIntersectionGluedToOriginal U hU
+  let q := π.affineIntersectionOverlapIso U hU i j
+  let hcI := affineIntersectionOverlapIso_inv_comp_left_chartIso π U hU i j
+  let hcJ := affineIntersectionOverlapIso_inv_comp_right_chartIso π U hU i j
+  let hSourceI : (q.inv ≫ (sq i j).p₁) ≫ (D.ι i ≫ g) =
+      (q.inv ≫ (sq i j).p) ≫ g :=
+    overlap_source_map q.inv (sq i j).p₁ (D.ι i) (sq i j).p g (sq i j).hp₁
+  let hSourceJ : (q.inv ≫ (sq i j).p₂) ≫ (D.ι j ≫ g) =
+      (q.inv ≫ (sq i j).p) ≫ g :=
+    overlap_source_map q.inv (sq i j).p₂ (D.ι j) (sq i j).p g (sq i j).hp₂
+  let hCommon : (q.inv ≫ (sq i j).p) ≫ g = (U i ⊓ U j).ι :=
+    affineIntersectionOverlapIso_inv_comp_gluedToOriginal π U hU i j
+  have hscalar := restrictTrivialization_transition U e i j
+  apply pullbackSquareTrivialization_two_transition
+    (X := X) (A := (sq i j).pullback) (B₁ := D.U i) (B₂ := D.U j)
+    (D := D.glued) (N := N) (U₁ := U i) (U₂ := U j) (W := U i ⊓ U j)
+  · exact hcI
+  · exact hcJ
+  · exact hSourceI
+  · exact hSourceJ
+  · exact hCommon
+  · exact hscalar
+
+private theorem affineIntersectionLeftScalarNormalization
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i j : J) :
+    let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let sq := affineIntersectionChartChosenPullback hopen hpush
+    let q := π.affineIntersectionOverlapIso U hU i j
+    let scalar := ModularCurves.unitEndomorphismOfTopSection
+      (openTopSection (U i ⊓ U j)
+        (trivializingCoverTransitionUnitOn U e (U i ⊓ U j) i j
+          inf_le_left inf_le_right : Γ(X, U i ⊓ U j)))
+    (pullback q.inv).map
+          ((pullback (sq i j).p₁).map
+            (affineIntersectionOriginalChartTrivialization π U e hU i).hom) ≫
+        (pullback q.inv).map (pullbackUnitIso (sq i j).p₁).hom ≫
+          (pullbackUnitIso q.inv).hom ≫ scalar =
+      affineIntersectionTransportedChartTrivialization
+          π U e hU i (sq i j).p₁ q.inv ≫ scalar := by
+  classical
+  dsimp only
+  let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let sq := affineIntersectionChartChosenPullback hopen hpush
+  let q := π.affineIntersectionOverlapIso U hU i j
+  let scalar := ModularCurves.unitEndomorphismOfTopSection
+    (openTopSection (U i ⊓ U j)
+      (trivializingCoverTransitionUnitOn U e (U i ⊓ U j) i j
+        inf_le_left inf_le_right : Γ(X, U i ⊓ U j)))
+  have hi := affineIntersectionOriginalChartTrivialization_comp_precomp_hom
+    π U e hU i (sq i j).p₁ q.inv
+  exact (comp_four_group_first_three _ _ _ _).trans
+    (congrArg (fun z => z ≫ scalar) hi)
+
+private theorem affineIntersectionRightPrefixNormalization
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i j : J) :
+    let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let D := π.affineIntersectionGlueData U hU
+    let sq := affineIntersectionChartChosenPullback hopen hpush
+    let g := π.affineIntersectionGluedToOriginal U hU
+    let M := (pullback g).obj N
+    let q := π.affineIntersectionOverlapIso U hU i j
+    let Li := ((pullbackComp (sq i j).p₁ (D.ι i)).app M) ≪≫
+      ((pullbackCongr (sq i j).hp₁).app M)
+    let Lj := ((pullbackComp (sq i j).p₂ (D.ι j)).app M) ≪≫
+      ((pullbackCongr (sq i j).hp₂).app M)
+    let tj := (pullback (sq i j).p₂).map
+      (affineIntersectionOriginalChartTrivialization π U e hU j).hom
+    ((((pullback q.inv).map Li.hom ≫ (pullback q.inv).map Lj.inv) ≫
+          (pullback q.inv).map tj) ≫
+        (pullback q.inv).map (pullbackUnitIso (sq i j).p₂).hom) ≫
+      (pullbackUnitIso q.inv).hom =
+      ((pullback q.inv).map Li.hom ≫ (pullback q.inv).map Lj.inv) ≫
+        affineIntersectionTransportedChartTrivialization
+          π U e hU j (sq i j).p₂ q.inv := by
+  classical
+  dsimp only
+  let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let D := π.affineIntersectionGlueData U hU
+  let sq := affineIntersectionChartChosenPullback hopen hpush
+  let g := π.affineIntersectionGluedToOriginal U hU
+  let M := (pullback g).obj N
+  let q := π.affineIntersectionOverlapIso U hU i j
+  let Li := ((pullbackComp (sq i j).p₁ (D.ι i)).app M) ≪≫
+    ((pullbackCongr (sq i j).hp₁).app M)
+  let Lj := ((pullbackComp (sq i j).p₂ (D.ι j)).app M) ≪≫
+    ((pullbackCongr (sq i j).hp₂).app M)
+  let tj := (pullback (sq i j).p₂).map
+    (affineIntersectionOriginalChartTrivialization π U e hU j).hom
+  have hj := affineIntersectionOriginalChartTrivialization_comp_precomp_hom
+    π U e hU j (sq i j).p₂ q.inv
+  exact comp_pair_with_triple_of_eq
+    ((pullback q.inv).map Li.hom)
+    ((pullback q.inv).map Lj.inv)
+    ((pullback q.inv).map tj)
+    ((pullback q.inv).map (pullbackUnitIso (sq i j).p₂).hom)
+    (pullbackUnitIso q.inv).hom _ hj
+
+private theorem affineIntersectionOriginalChartTrivialization_scalar_transition
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i j : J) :
+    let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let D := π.affineIntersectionGlueData U hU
+    let sq := affineIntersectionChartChosenPullback hopen hpush
+    let g := π.affineIntersectionGluedToOriginal U hU
+    let M := (pullback g).obj N
+    let q := π.affineIntersectionOverlapIso U hU i j
+    let Li := ((pullbackComp (sq i j).p₁ (D.ι i)).app M) ≪≫
+      ((pullbackCongr (sq i j).hp₁).app M)
+    let Lj := ((pullbackComp (sq i j).p₂ (D.ι j)).app M) ≪≫
+      ((pullbackCongr (sq i j).hp₂).app M)
+    let tj := (pullback (sq i j).p₂).map
+      (affineIntersectionOriginalChartTrivialization π U e hU j).hom
+    let scalar := ModularCurves.unitEndomorphismOfTopSection
+      (openTopSection (U i ⊓ U j)
+        (trivializingCoverTransitionUnitOn U e (U i ⊓ U j) i j
+          inf_le_left inf_le_right : Γ(X, U i ⊓ U j)))
+    (pullback q.inv).map
+          ((pullback (sq i j).p₁).map
+            (affineIntersectionOriginalChartTrivialization π U e hU i).hom) ≫
+        (pullback q.inv).map (pullbackUnitIso (sq i j).p₁).hom ≫
+          (pullbackUnitIso q.inv).hom ≫ scalar =
+    ((((pullback q.inv).map Li.hom ≫ (pullback q.inv).map Lj.inv) ≫
+          (pullback q.inv).map tj) ≫
+        (pullback q.inv).map (pullbackUnitIso (sq i j).p₂).hom) ≫
+      (pullbackUnitIso q.inv).hom := by
+  exact (affineIntersectionLeftScalarNormalization π U e hU i j).trans
+    ((affineIntersectionTwoTransition π U e hU i j).trans
+      (affineIntersectionRightPrefixNormalization π U e hU i j).symm)
+
+private theorem affineIntersectionOriginalChartTrivialization_pulled_transition
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i j : J) :
+    let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let D := π.affineIntersectionGlueData U hU
+    let sq := affineIntersectionChartChosenPullback hopen hpush
+    let g := π.affineIntersectionGluedToOriginal U hU
+    let M := (pullback g).obj N
+    let c := affineIntersectionUnitCocycle π U e
+    let q := π.affineIntersectionOverlapIso U hU i j
+    let Li := ((pullbackComp (sq i j).p₁ (D.ι i)).app M) ≪≫
+      ((pullbackCongr (sq i j).hp₁).app M)
+    let Lj := ((pullbackComp (sq i j).p₂ (D.ι j)).app M) ≪≫
+      ((pullbackCongr (sq i j).hp₂).app M)
+    let tj := (pullback (sq i j).p₂).map
+      (affineIntersectionOriginalChartTrivialization π U e hU j).hom
+    (pullback q.inv).map
+          ((pullback (sq i j).p₁).map
+            (affineIntersectionOriginalChartTrivialization π U e hU i).hom) ≫
+        (pullback q.inv).map (c.chartTransitionIso hopen hpush i j).hom =
+      ((pullback q.inv).map Li.hom ≫ (pullback q.inv).map Lj.inv) ≫
+        (pullback q.inv).map tj := by
+  classical
+  dsimp only
+  let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let D := π.affineIntersectionGlueData U hU
+  let sq := affineIntersectionChartChosenPullback hopen hpush
+  let g := π.affineIntersectionGluedToOriginal U hU
+  let M := (pullback g).obj N
+  let c := affineIntersectionUnitCocycle π U e
+  let q := π.affineIntersectionOverlapIso U hU i j
+  let Li := ((pullbackComp (sq i j).p₁ (D.ι i)).app M) ≪≫
+    ((pullbackCongr (sq i j).hp₁).app M)
+  let Lj := ((pullbackComp (sq i j).p₂ (D.ι j)).app M) ≪≫
+    ((pullbackCongr (sq i j).hp₂).app M)
+  let tj := (pullback (sq i j).p₂).map
+    (affineIntersectionOriginalChartTrivialization π U e hU j).hom
+  apply (cancel_mono
+    ((pullback q.inv).map (pullbackUnitIso (sq i j).p₂).hom)).1
+  apply (cancel_mono (pullbackUnitIso q.inv).hom).1
+  refine Eq.trans (comp_four_assoc _ _ _ _) ?_
+  have htransition := affineIntersection_chartTransition_comp_flattenRight
+    π U e hU i j
+  refine Eq.trans (congrArg
+    (fun z =>
+      (pullback q.inv).map
+        ((pullback (sq i j).p₁).map
+          (affineIntersectionOriginalChartTrivialization π U e hU i).hom) ≫ z)
+    htransition) ?_
+  exact affineIntersectionOriginalChartTrivialization_scalar_transition
+    π U e hU i j
+
+/-- The chart trivializations induced from an affine cover of the original scheme have the
+transition maps used by the affine-intersection gluing construction. -/
+theorem affineIntersectionOriginalChartTrivialization_transition
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i j : J) :
+    let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let D := π.affineIntersectionGlueData U hU
+    let sq := affineIntersectionChartChosenPullback hopen hpush
+    let g := π.affineIntersectionGluedToOriginal U hU
+    let M := (pullback g).obj N
+    let c := affineIntersectionUnitCocycle π U e
+    (pullback (sq i j).p₁).map
+          (affineIntersectionOriginalChartTrivialization π U e hU i).hom ≫
+        (c.chartTransitionIso hopen hpush i j).hom =
+      ((((pullbackComp (sq i j).p₁ (D.ι i)).app M) ≪≫
+            ((pullbackCongr (sq i j).hp₁).app M)).hom ≫
+          (((pullbackComp (sq i j).p₂ (D.ι j)).app M) ≪≫
+            ((pullbackCongr (sq i j).hp₂).app M)).inv) ≫
+        (pullback (sq i j).p₂).map
+          (affineIntersectionOriginalChartTrivialization π U e hU j).hom := by
+  classical
+  dsimp only
+  let q := π.affineIntersectionOverlapIso U hU i j
+  letI : (pullback q.inv).IsEquivalence :=
+    pullback_isEquivalence_of_iso q.symm
+  letI : (pullback q.inv).Faithful := by infer_instance
+  apply eq_of_map_components (pullback q.inv)
+  exact affineIntersectionOriginalChartTrivialization_pulled_transition
+    π U e hU i j
+
 private noncomputable def trivializationOnOpensRange
     {X Y : Scheme.{u}} (f : Y ⟶ X) [IsOpenImmersion f]
     (M : X.Modules) (e : (restrictFunctor f).obj M ≅ unitObj Y) :

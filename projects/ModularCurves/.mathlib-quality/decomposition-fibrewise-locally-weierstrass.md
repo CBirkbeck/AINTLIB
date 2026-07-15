@@ -641,3 +641,21 @@ The lemma combines both fourfold normalizations with the two inverse/hom cancell
 affine-intersection transition proof needs only one specialization of the large pullback diagram.
 It introduces no options or additional hypotheses. The focused build is green, and its axiom
 audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.
+
+Completed dependency claim (2026-07-15): proved
+`affineIntersectionOriginalChartTrivialization_transition`. The chart trivializations induced
+from an invertible sheaf on the original scheme now intertwine the pullback descent transition
+with `AffineIntersectionUnitCocycle.chartTransitionIso` on every chosen pairwise overlap. The
+proof factors through the geometric intersection, normalizes both transported trivializations,
+and identifies their quotient with the original change-of-basis unit. It uses the default proof
+resource limits, adds no options or geometric hypotheses, and its focused build is green. The
+axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.
+
+Active dependency claim (2026-07-15): construct
+`affineIntersectionOriginalDescentIso`, identifying the pullback descent datum of
+`(pullback (affineIntersectionGluedToOriginal U hU)).obj N` with
+`(affineIntersectionUnitCocycle π U e).chartDescentData`. Its component isomorphisms must be
+`affineIntersectionOriginalChartTrivialization`, with the completed transition theorem supplying
+the sole overlap condition. Then apply `AffineIntersectionUnitCocycle.gluedModuleIsoOfDescentIso`
+to recover the pulled-back original invertible sheaf from the concrete Cech gluing, without new
+hypotheses or proof-resource options.
