@@ -203,7 +203,7 @@ theorem ordProj_translate (S : (W_smooth W).toAffine.Point)
     · rw [placeTranslate_affine_of_isSome W S P h, ordProj_affine, ordProj_affine]
       exact ord_P_translate W P S h f hf
     · have hz : P.toAffinePoint + S = (0 : W.toAffine.Point) := by
-        unfold WeierstrassCurve.Affine.Point.IsSome at h
+        simp only [WeierstrassCurve.Affine.Point.IsSome] at h
         exact not_not.mp h
       exact ordProj_translate_infinity W S f hf (ProjectiveSmoothPoint.affine P)
         (Or.inr (placeTranslate_affine_eq_infinity W S P hz))

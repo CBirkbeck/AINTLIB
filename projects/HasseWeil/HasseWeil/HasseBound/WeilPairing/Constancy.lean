@@ -26,7 +26,6 @@ namespace HasseWeil.WeilPairing
 
 open Curves
 
-set_option linter.style.longLine false
 
 variable {F : Type*} [Field F] [DecidableEq F] {W : WeierstrassCurve.Affine F}
 

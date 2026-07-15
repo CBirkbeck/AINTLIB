@@ -128,7 +128,7 @@ theorem card_add_one_sub_isogTrace_eq_degree (hq : 2 ≤ Fintype.card K) :
     (Fintype.card K + 1 -
         isogTrace (frobeniusIsog W) (isogOneSub_negFrobenius W hq) : ℤ) =
       ((isogOneSub_negFrobenius W hq).degree : ℤ) := by
-  unfold isogTrace
+  simp only [isogTrace]
   rw [frobeniusIsog_degree]
   ring
 
