@@ -747,6 +747,127 @@ lemma chartSpecPoint_appLE_eval (x y : L) (h : (W.baseChange L).toAffine.Equatio
   rw [happ2, Category.assoc, Scheme.ΓSpecIso_naturality, ← Category.assoc,
     awayι_appLE_eval W hZle]
 
+/-- **(PHI — the tautological solution hom is the canonical embedding)** The solution hom of the
+generic datum `(x_gen, y_gen)`, transported through the chart identification `chartZRingEquiv`,
+is the canonical coordinate-ring embedding into the function field. -/
+lemma chartSolutionHom_generic_comp :
+    (chartSolutionHom W (x_gen W.toAffine) (y_gen W.toAffine) (generic_equation W.toAffine)).comp
+        ((chartZRingEquiv W).symm : W.toAffine.CoordinateRing →+* _)
+      = algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField := by
+  apply AdjoinRoot.ringHom_ext
+  · apply Polynomial.ringHom_ext
+    · intro a
+      show chartSolutionHom W _ _ _ ((chartZRingEquiv W).symm
+          ((AdjoinRoot.of W.toAffine.polynomial) (Polynomial.C a))) = _
+      have h1 : (AdjoinRoot.of W.toAffine.polynomial) (Polynomial.C a)
+          = algebraMap K W.toAffine.CoordinateRing a := rfl
+      rw [h1, show (chartZRingEquiv W).symm (algebraMap K W.toAffine.CoordinateRing a)
+          = (HomogeneousLocalization.fromZeroRingHom
+              (quotientGrading (projIdeal W)) (Submonoid.powers
+                ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+            ((algebraMapGradeZero (projIdeal W)) a) from
+        (RingEquiv.symm_apply_eq _).mpr (chartZRingEquiv_fromZero W a).symm]
+      rw [chartSolutionHom_fromZero]
+      exact (IsScalarTower.algebraMap_apply K W.toAffine.CoordinateRing
+        W.toAffine.FunctionField a).symm
+    · show chartSolutionHom W _ _ _ ((chartZRingEquiv W).symm
+          ((AdjoinRoot.of W.toAffine.polynomial) Polynomial.X)) = _
+      have h1 : (AdjoinRoot.of W.toAffine.polynomial) Polynomial.X = coordX W := rfl
+      rw [h1, show (chartZRingEquiv W).symm (coordX W)
+          = HomogeneousLocalization.Away.isLocalizationElem
+              (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 0) from
+        (RingEquiv.symm_apply_eq _).mpr (chartZRingEquiv_x W).symm]
+      rw [chartSolutionHom_x]
+      rfl
+  · show chartSolutionHom W _ _ _ ((chartZRingEquiv W).symm
+        (AdjoinRoot.root W.toAffine.polynomial)) = _
+    have h1 : AdjoinRoot.root W.toAffine.polynomial = coordY W := rfl
+    rw [h1, show (chartZRingEquiv W).symm (coordY W)
+        = HomogeneousLocalization.Away.isLocalizationElem
+            (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 1) from
+      (RingEquiv.symm_apply_eq _).mpr (chartZRingEquiv_y W).symm]
+    rw [chartSolutionHom_y]
+    rfl
+
+/-- The tautological solution hom is injective (it is the canonical embedding, PHI). -/
+lemma chartSolutionHom_generic_injective :
+    Function.Injective
+      (chartSolutionHom W (x_gen W.toAffine) (y_gen W.toAffine)
+        (generic_equation W.toAffine)) := by
+  have hcomp := chartSolutionHom_generic_comp W
+  have : (chartSolutionHom W (x_gen W.toAffine) (y_gen W.toAffine)
+      (generic_equation W.toAffine))
+      = (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField).comp
+          ((chartZRingEquiv W) : _ →+* W.toAffine.CoordinateRing) := by
+    rw [← hcomp, RingHom.comp_assoc]
+    ext a
+    simp only [RingHom.comp_apply, RingHom.coe_coe, RingEquiv.symm_apply_apply]
+  rw [this]
+  exact (IsFractionRing.injective W.toAffine.CoordinateRing W.toAffine.FunctionField).comp
+    (chartZRingEquiv W).injective
+
+/-- **(τ hits the generic point)** The tautological `K(E)`-point lands on the generic point of the
+projective model. -/
+lemma genericSpecPoint_base_closedPoint :
+    (genericSpecPoint W).1.base
+        (IsLocalRing.closedPoint (W.toAffine.FunctionField))
+      = genericPoint (projModel W) := by
+  haveI : IsDomain (Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) :=
+    (chartZRingEquiv W).toMulEquiv.isDomain W.toAffine.CoordinateRing
+  haveI : IrreducibleSpace (projModel W) :=
+    inferInstanceAs (IrreducibleSpace (projModel W))
+  haveI : Nontrivial (Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))) := inferInstance
+  haveI : IsDominant (Proj.awayι (quotientGrading (projIdeal W)) _
+      (mk_X_mem_quotientGrading_one W 2) one_pos) := by
+    constructor
+    have hrange : Set.range (Proj.awayι (quotientGrading (projIdeal W)) _
+        (mk_X_mem_quotientGrading_one W 2) one_pos).base
+        = ((zChart W : (projModel W).Opens) : Set (projModel W)) := by
+      rw [← Scheme.Hom.coe_opensRange, Proj.opensRange_awayι]
+    haveI : Nonempty (Spec (CommRingCat.of (Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))) :=
+      inferInstanceAs (Nonempty (PrimeSpectrum (Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))))
+    rw [DenseRange, hrange]
+    refine (zChart W : (projModel W).Opens).isOpen.dense ?_
+    refine ⟨(Proj.awayι (quotientGrading (projIdeal W)) _
+        (mk_X_mem_quotientGrading_one W 2) one_pos).base (Classical.arbitrary _), ?_⟩
+    rw [← hrange]
+    exact Set.mem_range_self _
+  -- the underlying morphism factors through the chart
+  have hval : (genericSpecPoint W).1
+      = Spec.map (CommRingCat.ofHom (chartSolutionHom W (x_gen W.toAffine)
+          (y_gen W.toAffine) (generic_equation W.toAffine)))
+        ≫ Proj.awayι (quotientGrading (projIdeal W)) _
+            (mk_X_mem_quotientGrading_one W 2) one_pos :=
+    chartSpecPoint_val W _ _ _
+  rw [hval]
+  have hstep : (Spec.map (CommRingCat.ofHom (chartSolutionHom W (x_gen W.toAffine)
+      (y_gen W.toAffine) (generic_equation W.toAffine)))).base
+        (IsLocalRing.closedPoint (W.toAffine.FunctionField))
+      = genericPoint (Spec (CommRingCat.of (Away (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))) := by
+    rw [genericPoint_eq_bot_of_affine]
+    show PrimeSpectrum.comap (chartSolutionHom W _ _ _)
+        (IsLocalRing.closedPoint (W.toAffine.FunctionField)) = ⊥
+    have hclosed : (IsLocalRing.closedPoint (W.toAffine.FunctionField)).asIdeal = ⊥ :=
+      IsLocalRing.maximalIdeal_eq_bot
+    ext1
+    show Ideal.comap (chartSolutionHom W _ _ _)
+        (IsLocalRing.closedPoint (W.toAffine.FunctionField)).asIdeal = ⊥
+    rw [hclosed]
+    exact (RingHom.injective_iff_ker_eq_bot _).mp
+      (chartSolutionHom_generic_injective W)
+  rw [Scheme.Hom.comp_apply, hstep]
+  exact genericPoint_eq_of_isDominant
+    (Proj.awayι (quotientGrading (projIdeal W)) _
+      (mk_X_mem_quotientGrading_one W 2) one_pos)
+    (X := Spec (CommRingCat.of (Away (quotientGrading (projIdeal W))
+      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)))))
+
+
 /-- **(L4-iii brick 4 — the readout-back)** A model point whose dictionary value is the affine
 point `some x y` IS the chart-constructed point `chartSpecPoint x y` — by injectivity of the
 dictionary. This turns a computed dictionary value into an explicit chart factorization (with a
