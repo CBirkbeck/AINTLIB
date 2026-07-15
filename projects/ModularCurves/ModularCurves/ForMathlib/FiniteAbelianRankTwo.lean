@@ -97,6 +97,20 @@ private lemma natCard_nsmul_ker_zmod_of_coprime (d n : ℕ) (hd : Nat.Coprime d 
       hu.mul_left_cancel (hy.trans (mul_zero ((d : ℕ) : ZMod n)).symm)
     rw [hx0, hy0]
 
+/-- The `p ^ j`-torsion of `ZMod (q ^ e)` for a prime `p`, where `q = p` whenever `e ≠ 0`,
+has exactly `p ^ min j e` elements. (When `e = 0` the group is trivial; otherwise `q = p`
+and this is `natCard_nsmul_ker_zmod`.) -/
+private lemma natCard_nsmul_ker_zmod_pow (p q e j : ℕ) (hp : p.Prime)
+    (hq : e ≠ 0 → q = p) :
+    Nat.card {y : ZMod (q ^ e) // p ^ j • y = 0} = p ^ min j e := by
+  rcases eq_or_ne e 0 with hE | hE
+  · subst hE
+    rw [natCard_nsmul_ker_zmod_of_coprime _ _
+      (by rw [pow_zero]; exact Nat.coprime_one_right _)]
+    simp
+  · rw [hq hE]
+    exact natCard_nsmul_ker_zmod p e j hp
+
 /-- Transport of `d`-torsion along an additive equivalence. -/
 private def nsmulKerCongr {G H : Type*} [AddCommGroup G] [AddCommGroup H] (e : G ≃+ H)
     (d : ℕ) : {x : G // d • x = 0} ≃ {y : H // d • y = 0} :=
@@ -155,6 +169,42 @@ private def prodAddEquivFinTwoArrow (A : Type u) [AddCommGroup A] :
       funext t
       fin_cases t <;> rfl }
 
+/-- Each elementary-divisor summand of an abelian group killed by `m` divides `m`: if
+`G ≃+ ⨁ i, ZMod (P i ^ E i)` and `m • x = 0` for every `x`, then `P i ^ E i ∣ m`. -/
+private lemma orderSummand_dvd_of_kill {ι : Type} (P E : ι → ℕ) {G : Type u}
+    [AddCommGroup G] (e : G ≃+ ⨁ i, ZMod (P i ^ E i)) (m : ℕ)
+    (hkill : ∀ x : G, m • x = 0) (i : ι) : P i ^ E i ∣ m := by
+  classical
+  have h1 : m • (DirectSum.of (fun i => ZMod (P i ^ E i)) i 1) = 0 := by
+    have h2 := congrArg e (hkill (e.symm (DirectSum.of (fun i => ZMod (P i ^ E i)) i 1)))
+    rwa [map_nsmul, e.apply_symm_apply, map_zero] at h2
+  have h5 : m • (1 : ZMod (P i ^ E i)) = 0 := by
+    have h1' : DirectSum.of (fun i => ZMod (P i ^ E i)) i (m • 1) = 0 := by
+      rw [map_nsmul]
+      exact h1
+    have h6 := congrArg (fun z => z i) h1'
+    simpa [DirectSum.of_eq_same] using h6
+  rw [← ZMod.addOrderOf_one (P i ^ E i)]
+  exact addOrderOf_dvd_iff_nsmul_eq_zero.mpr h5
+
+/-- The torsion count forces the truncated exponent sum: if `G ≃+ ⨁ i, ZMod (P i ^ E i)`
+with each `P i` equal to `p` when `E i ≠ 0`, and the `p ^ j`-torsion of `G` has `(p ^ j) ^ 2`
+elements, then `∑ i, min j (E i) = 2 * j`. -/
+private lemma sum_min_exponent {ι : Type} [Fintype ι] (P E : ι → ℕ) (p j : ℕ)
+    (hp : p.Prime) (hPp : ∀ i, E i ≠ 0 → P i = p) {G : Type u} [AddCommGroup G]
+    (e : G ≃+ ⨁ i, ZMod (P i ^ E i))
+    (hcountj : Nat.card {x : G // p ^ j • x = 0} = (p ^ j) ^ 2) :
+    ∑ i, min j (E i) = 2 * j := by
+  have hprod : ∏ i, Nat.card {y : ZMod (P i ^ E i) // p ^ j • y = 0} = (p ^ j) ^ 2 := by
+    rw [← natCard_nsmul_ker_directSum (fun i => P i ^ E i) (p ^ j),
+      ← Nat.card_congr (nsmulKerCongr e (p ^ j))]
+    exact hcountj
+  have hterm : ∀ i, Nat.card {y : ZMod (P i ^ E i) // p ^ j • y = 0} = p ^ min j (E i) :=
+    fun i => natCard_nsmul_ker_zmod_pow p (P i) (E i) j hp (hPp i)
+  rw [Finset.prod_congr rfl fun i _ => hterm i, Finset.prod_pow_eq_pow_sum, ← pow_mul,
+    mul_comm j 2] at hprod
+  exact Nat.pow_right_injective hp.two_le hprod
+
 /-- The prime-power case: an abelian group killed by `p ^ v` whose `p ^ j`-torsion has
 `(p ^ j) ^ 2` elements for all `j ≤ v` is `(ZMod (p ^ v))²`. -/
 private lemma primePow_case (p v : ℕ) (hp : p.Prime) (hv : 0 < v) (H : Type u)
@@ -170,19 +220,7 @@ private lemma primePow_case (p v : ℕ) (hp : p.Prime) (hv : 0 < v) (H : Type u)
       rw [hH]
       exact pow_ne_zero 2 (pow_ne_zero v hp.ne_zero))
   obtain ⟨ι, hfin, P, hP, E, ⟨e⟩⟩ := AddCommGroup.equiv_directSum_zmod_of_finite H
-  have hdvd : ∀ i, P i ^ E i ∣ p ^ v := by
-    intro i
-    have h1 : p ^ v • (DirectSum.of (fun i => ZMod (P i ^ E i)) i 1) = 0 := by
-      have h2 := congrArg e (hkill (e.symm (DirectSum.of (fun i => ZMod (P i ^ E i)) i 1)))
-      rwa [map_nsmul, e.apply_symm_apply, map_zero] at h2
-    have h5 : p ^ v • (1 : ZMod (P i ^ E i)) = 0 := by
-      have h1' : DirectSum.of (fun i => ZMod (P i ^ E i)) i (p ^ v • 1) = 0 := by
-        rw [map_nsmul]
-        exact h1
-      have h6 := congrArg (fun z => z i) h1'
-      simpa [DirectSum.of_eq_same] using h6
-    rw [← ZMod.addOrderOf_one (P i ^ E i)]
-    exact addOrderOf_dvd_iff_nsmul_eq_zero.mpr h5
+  have hdvd : ∀ i, P i ^ E i ∣ p ^ v := orderSummand_dvd_of_kill P E e (p ^ v) hkill
   have hPp : ∀ i, E i ≠ 0 → P i = p := by
     intro i hE
     have h1 : P i ∣ p ^ v := (dvd_pow_self (P i) hE).trans (hdvd i)
@@ -194,24 +232,8 @@ private lemma primePow_case (p v : ℕ) (hp : p.Prime) (hv : 0 < v) (H : Type u)
     · have h1 := hdvd i
       rw [hPp i hE] at h1
       exact (Nat.pow_dvd_pow_iff_le_right hp.one_lt).mp h1
-  have hsum : ∀ j : ℕ, j ≤ v → ∑ i, min j (E i) = 2 * j := by
-    intro j hj
-    have hprod : ∏ i, Nat.card {y : ZMod (P i ^ E i) // p ^ j • y = 0} = (p ^ j) ^ 2 := by
-      rw [← natCard_nsmul_ker_directSum (fun i => P i ^ E i) (p ^ j),
-        ← Nat.card_congr (nsmulKerCongr e (p ^ j))]
-      exact hcount j hj
-    have hterm : ∀ i, Nat.card {y : ZMod (P i ^ E i) // p ^ j • y = 0} =
-        p ^ min j (E i) := by
-      intro i
-      rcases eq_or_ne (E i) 0 with hE | hE
-      · rw [natCard_nsmul_ker_zmod_of_coprime _ _
-          (by rw [hE, pow_zero]; exact Nat.coprime_one_right _), hE]
-        simp
-      · rw [hPp i hE]
-        exact natCard_nsmul_ker_zmod p (E i) j hp
-    rw [Finset.prod_congr rfl fun i _ => hterm i, Finset.prod_pow_eq_pow_sum, ← pow_mul,
-      mul_comm j 2] at hprod
-    exact Nat.pow_right_injective hp.two_le hprod
+  have hsum : ∀ j : ℕ, j ≤ v → ∑ i, min j (E i) = 2 * j :=
+    fun j hj => sum_min_exponent P E p j hp hPp e (hcount j hj)
   set σ : Finset ι := Finset.univ.filter (fun i => E i ≠ 0) with hσdef
   have hσcard : σ.card = 2 := by
     have h1 := hsum 1 hv
