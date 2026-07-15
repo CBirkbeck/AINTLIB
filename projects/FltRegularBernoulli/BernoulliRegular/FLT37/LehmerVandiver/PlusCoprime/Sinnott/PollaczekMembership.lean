@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitGroup
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.SigmaPreservation
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Symmetrisation
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitGroup
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.SigmaPreservation
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Symmetrisation
 
 /-!
 # Pollaczek units in cyclotomic-unit subgroups

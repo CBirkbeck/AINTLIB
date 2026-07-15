@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ClassEqDischarge
-import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.Uniformizer
-import BernoulliRegular.TotallyRealSubfield.ZetaPrime
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.ClassEqDischarge
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.Uniformizer
+public import BernoulliRegular.TotallyRealSubfield.ZetaPrime
 
 /-!
 # Proved auxiliary lemmas ported from pre-origin-merge

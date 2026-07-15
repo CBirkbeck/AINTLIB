@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealFactorisation
-import BernoulliRegular.Reflection.ClassGroupModP.GalAction
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealFactorisation
+public import BernoulliRegular.Reflection.ClassGroupModP.GalAction
 
 /-!
 # Eichler module structure: `p`-torsion of the case-I factor ideal class

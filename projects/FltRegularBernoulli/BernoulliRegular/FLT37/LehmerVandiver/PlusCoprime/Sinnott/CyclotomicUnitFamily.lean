@@ -1,7 +1,9 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.SigmaPreservation
-import BernoulliRegular.FLT37.CyclotomicUnitsKplus
-import BernoulliRegular.HMinus.ClassNumberFormula
-import Mathlib.NumberTheory.NumberField.Units.Regulator
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.SigmaPreservation
+public import BernoulliRegular.FLT37.CyclotomicUnitsKplus
+public import BernoulliRegular.HMinus.ClassNumberFormula
+public import Mathlib.NumberTheory.NumberField.Units.Regulator
 
 /-!
 # Max-rank family of real cyclotomic units
