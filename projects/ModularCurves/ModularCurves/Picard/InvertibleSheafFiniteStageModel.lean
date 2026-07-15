@@ -26,7 +26,8 @@ private theorem topIso_hom_naturality
       U.topIso.hom ≫ X.presheaf.map (homOfLE hVU).op := by
   exact (Scheme.restrictFunctorΓ (X := X)).hom.naturality (homOfLE hVU).op
 
-private theorem topIso_inv_naturality
+/-- Inverse top-section comparisons commute with restriction along an inclusion of opens. -/
+theorem topIso_inv_naturality
     {X : Scheme.{u}} {U V : X.Opens} (hVU : V ≤ U) :
     U.topIso.inv ≫ (X.homOfLE hVU).appTop =
       X.presheaf.map (homOfLE hVU).op ≫ V.topIso.inv := by

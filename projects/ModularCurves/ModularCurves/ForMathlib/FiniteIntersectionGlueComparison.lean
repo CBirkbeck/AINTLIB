@@ -55,17 +55,21 @@ private noncomputable def comparisonPairSwap (i j : J) :
     intro x hx
     simpa [comparisonPairIndex, or_comm] using hx)
 
-private theorem finiteIntersectionOpen_pair (U : J → X.Opens) (i j : J) :
-    X.finiteIntersectionOpen U (comparisonPairIndex i j) = U i ⊓ U j := by
+/-- The finite intersection attached to the public pair index is the infimum of the two
+corresponding opens. -/
+theorem Scheme.finiteIntersectionOpen_affineIntersectionPairIndex
+    (U : J → X.Opens) (i j : J) :
+    X.finiteIntersectionOpen U (Scheme.GlueData.affineIntersectionPairIndex i j) =
+      U i ⊓ U j := by
   classical
   apply le_antisymm
   · exact le_inf
-      (iInf_le_of_le i (iInf_le_of_le (by simp [comparisonPairIndex]) le_rfl))
-      (iInf_le_of_le j (iInf_le_of_le (by simp [comparisonPairIndex]) le_rfl))
+      (iInf_le_of_le i (iInf_le_of_le (by simp) le_rfl))
+      (iInf_le_of_le j (iInf_le_of_le (by simp) le_rfl))
   · rw [Scheme.finiteIntersectionOpen]
     refine le_iInf fun k => le_iInf fun hk => ?_
     have hk' : k = i ∨ k = j := by
-      simpa [comparisonPairIndex] using hk
+      simpa using hk
     rcases hk' with rfl | rfl
     · exact inf_le_left
     · exact inf_le_right
@@ -206,7 +210,7 @@ noncomputable def Scheme.Hom.affineIntersectionOverlapIso
   change Spec (CommRingCat.of ((π.affineIntersectionFunctor U).obj
       (comparisonPairIndex i j))) ≅ (U i ⊓ U j).toScheme
   exact π.affineIntersectionSchemeIso U (comparisonPairIndex i j) hij (hU _ hij) ≪≫
-    X.isoOfEq (finiteIntersectionOpen_pair U i j)
+    X.isoOfEq (X.finiteIntersectionOpen_affineIntersectionPairIndex U i j)
 
 private noncomputable def Scheme.Hom.affineIntersectionChartMap
     (π : X ⟶ S) (U : J → X.Opens)
@@ -257,7 +261,8 @@ private theorem Scheme.Hom.affineIntersectionOverlapIso_hom_ι
   have hij : (comparisonPairIndex i j).Nonempty := by
     simp [comparisonPairIndex]
   change (π.affineIntersectionSchemeIso U (comparisonPairIndex i j) hij (hU _ hij)).hom ≫
-        (X.isoOfEq (finiteIntersectionOpen_pair U i j)).hom ≫ (U i ⊓ U j).ι =
+        (X.isoOfEq (X.finiteIntersectionOpen_affineIntersectionPairIndex U i j)).hom ≫
+          (U i ⊓ U j).ι =
     (π.affineIntersectionSchemeIso U (comparisonPairIndex i j) hij (hU _ hij)).hom ≫
       (X.finiteIntersectionOpen U (comparisonPairIndex i j)).ι
   rw [Scheme.isoOfEq_hom, Scheme.homOfLE_ι]
