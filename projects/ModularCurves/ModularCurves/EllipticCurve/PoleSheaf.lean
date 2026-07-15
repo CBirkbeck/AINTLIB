@@ -486,7 +486,6 @@ theorem idealModuleAppIdealIso_hom_localIdealElement {X Y : Scheme.{u}}
     (idealModuleAppIdealIso f U).hom (localIdealElement f U r hr) = ⟨r, hr⟩ := by
   simp [localIdealElement]
 
-set_option maxHeartbeats 800000 in
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
 /-- Under the affine kernel identification, restricting `localIdealElement` to an
@@ -657,7 +656,6 @@ theorem ideal_chartBasicOpenImage_span_nzd {Y : Scheme.{u}} (I : Y.IdealSheafDat
     cases hmap
     rfl
 
-set_option maxHeartbeats 800000 in
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
 /-- On a chart basic open, the local generator morphism is multiplication by the
@@ -694,7 +692,6 @@ theorem localIdealGeneratorHom_chartBasicOpen_formula {X Y : Scheme.{u}}
       (Subsingleton.elim _ _)).hom (localIdealElement f U r hr))
   · rfl
 
-set_option maxHeartbeats 800000 in
 /-- A Cartier generator makes the local ideal-generator morphism bijective on every
 basic open of its affine chart. -/
 theorem localIdealGeneratorHom_chartBasicOpen_bijective {X Y : Scheme.{u}}
@@ -846,7 +843,6 @@ theorem affineOpenTopSection_affinePullbackSection
       (f.resLE V.1 U.1 hUV).appTop.hom (affineOpenTopSection V r) := by
   simp [affinePullbackSection]
 
-set_option maxHeartbeats 800000 in
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
 theorem localIdealGeneratorHom_comp_restrictIdealModuleToUnit
@@ -1228,7 +1224,6 @@ theorem pulledIdealModuleToUnit_mono_of_isOpenImmersion
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1200000 in
 theorem pullbackUnitIso_comp {X Y Z : Scheme.{u}}
     (f : X ⟶ Y) (g : Y ⟶ Z) :
     ((Scheme.Modules.pullbackComp f g).app (Scheme.Modules.unitObj Z)).hom ≫
@@ -1491,7 +1486,6 @@ theorem pullbackLocalIdealGeneratorIso_hom_comp_toUnit
 
 set_option backward.defeqAttrib.useBackward true in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1200000 in
 /-- On affine Cartier charts, the canonical section-ideal base-change map is an
 isomorphism. -/
 theorem idealModuleBaseChangeHom_isIso_on_affine
@@ -1636,7 +1630,6 @@ theorem sectionIdealModule_isInvertible {C S : Scheme.{u}} {π : C ⟶ S}
   exact idealModule_isInvertible_of_locallyPrincipal z
     (RelEffCartierDiv.sectionDivisor_isOfficial hsm z hz).locallyPrincipal
 
-set_option maxHeartbeats 1200000 in
 /-- The ideal module of the zero section commutes with arbitrary base change. -/
 theorem idealModuleBaseChangeHom_isIso
     {C S T : Scheme.{u}} {π : C ⟶ S}
