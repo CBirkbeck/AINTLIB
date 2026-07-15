@@ -21179,3 +21179,28 @@ direction = `isE3Datum_of_flexCharts` + the **torsion→coordinate bridges** (`3
 **bridge-gated** on KM brick 6 (`MulByHomDegree`:660, nearly landed — reduced to a few leaves) / G0 BB-DEG
 (`Torsion`:155). Bootstrap:74 also needs the import wiring (it doesn't yet import UniversalLevelThree).
 The datum-problem discharge (the KM-engine input) is DONE; the raw-naive headline is one bridge away.
+
+## v10.261 (2026-07-15, STREAM-OMEGA) — ★★★★ [T-E15-NORM] MACHINE COMPLETE — BOTH the ℰ₃ datum problem AND the RAW naive functor are representable (conditional on hL+hArb ONLY)
+
+The entire ℰ₃ representability machine is now built and axiom-clean, conditional on the two
+keystone/bridge inputs ONLY:
+- **`e3Datum_representable_by_affine_of_level`** (given `hL`) — the ℰ₃ datum problem is representable
+  by `universalE3Obj` (KM 4.7.0's (3,GL₂𝔽₃) engine axiom 1 for the δ).
+- **`naiveLevelThreeRepresentableBy` + `naiveLevelThree_representable_by_affine_of_conditions`**
+  (given `hL` + `hArb`) — the RAW naive functor `gammaFullNaiveProblem R 3` is representable by
+  `universalE3Obj`. This IS `Bootstrap:74` modulo the two inputs. KEY: `IsE3Datum` is a `Prop`, so
+  `hArb X x` is DEFEQ (proof-irrelevance) to the pulled datum ⟹ `left_inv` = rt2
+  (`e3ClassifyingEllHom_pulled` directly), `right_inv` = rt1 (`pullSection_P/Q`).
+
+**~20 axiom-clean results this arc** (B2 fix → universalE3_isE3Datum → rt2 ladder → both RepresentableBy).
+
+**REMAINING = purely G0/KM substrate (both inputs):**
+- **`hL`** = the universal `(P,Q)` is a level-3 structure = section-level killing `[3]P=[3]Q=0` +
+  geometric generation = **E[3] keystone**.
+- **`hArb`** = every naive level-3 structure IS an ℰ₃-datum = `isE3Datum_of_flexCharts` + the
+  **torsion→coordinate bridges** (`3•P=0→μ_P=0`, `3•Q=0→cubic`) = **KM brick 6** (`MulByHomDegree`:660,
+  nearly landed — reduced to a few leaves) / **G0 BB-DEG** (`Torsion`:155).
+
+**To close `Bootstrap:74`:** import `UniversalLevelThree`, derive `hL` (keystone) + `hArb` (bridges),
+then `exact naiveLevelThree_representable_by_affine_of_conditions R hR hL hArb`. The whole NORM
+structural machine is done; the discharge is now literally `keystone + bridges` away.
