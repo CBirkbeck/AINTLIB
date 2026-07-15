@@ -540,3 +540,13 @@ Completed dependency claim (2026-07-15): proved
 `gluedModuleRestrictIso` transported through `restrictFunctorIsoPullback`, and the overlap square
 recovers `chartDescentHom` from the Cech equalizer compatibility. The construction is option-free,
 adds no hypotheses, and its axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.
+
+Completed dependency claim (2026-07-15): proved
+`AffineIntersectionUnitCocycle.gluedModuleIsoOfDescentIso`. For any module `M` on the
+affine-intersection glued scheme, an isomorphism from the pullback descent datum induced by `M`
+to `chartDescentData` now induces a global isomorphism
+`M ≅ AffineIntersectionUnitCocycle.gluedModule`. The forward map is constructed through the
+concrete Cech equalizer; its pullback to each chart is identified with the supplied descent
+isomorphism, and Zariski-local detection proves it is globally invertible. The proof adds no
+geometric hypotheses or proof-resource options. The focused module build is green, and the
+axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.

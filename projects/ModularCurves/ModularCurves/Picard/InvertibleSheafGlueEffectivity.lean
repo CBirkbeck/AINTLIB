@@ -1,5 +1,6 @@
 import ModularCurves.Picard.InvertibleSheafGlueDataDescent
 import ModularCurves.Picard.DualPullback.OpenAdjunction
+import ModularCurves.Picard.PicComparison
 import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 
 /-!
@@ -3531,17 +3532,6 @@ noncomputable def AffineIntersectionUnitCocycle.gluedModuleDescentIso
     simpa only [Category.assoc] using
         c.gluedModuleLocalIso_transition hopen hpush i j
 
-private noncomputable def trivializationOnOpensRange
-    {X Y : Scheme.{u}} (f : Y ⟶ X) [IsOpenImmersion f]
-    (M : X.Modules) (e : (restrictFunctor f).obj M ≅ unitObj Y) :
-    (pullback f.opensRange.ι).obj M ≅ unitObj (f.opensRange : Scheme.{u}) := by
-  let q := f.isoOpensRange
-  let e' : (pullback f).obj M ≅ unitObj Y :=
-    (restrictFunctorIsoPullback f).symm.app M ≪≫ e
-  exact (pullbackCongr f.isoOpensRange_inv_comp).symm.app M ≪≫
-    (pullbackComp q.inv f).symm.app M ≪≫
-    (pullback q.inv).mapIso e' ≪≫ pullbackUnitIso q.inv
-
 private def affineIntersectionChartOpen
     (D : Scheme.GlueData.{u}) (k : D.J) : D.glued.Opens :=
   @Scheme.Hom.opensRange _ _ (D.ι k) (D.ι_isOpenImmersion k)
@@ -3559,6 +3549,374 @@ private theorem affineIntersectionChart_iSup_opensRange
   simp only [affineIntersectionChartOpen, Set.mem_iUnion,
     TopologicalSpace.Opens.coe_top, Set.mem_univ, iff_true]
   exact D.ι_jointly_surjective x
+
+section DescentEffectivity
+
+variable {A J : Type u} [CommRing A]
+  {F : Functor (Finset J) (CommAlgCat.{u} A)}
+  (c : AffineIntersectionUnitCocycle F)
+  (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+  (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+
+local notation "D" =>
+  Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+local notation "sq" => affineIntersectionChartChosenPullback hopen hpush
+local notation "sq₃" => affineIntersectionChartChosenPullback₃ hopen hpush
+
+private noncomputable def AffineIntersectionUnitCocycle.descentChartComponent
+    (M : (D).glued.Modules)
+    (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush)
+    (i : J) :
+    M ⟶ c.chartExtension hopen hpush i :=
+  (pullbackPushforwardAdjunction ((D).ι i)).homEquiv _ _ (e.hom.hom i)
+
+private noncomputable def AffineIntersectionUnitCocycle.descentChartSource
+    (M : (D).glued.Modules)
+    (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush) :
+    M ⟶ c.chartGlueSource hopen hpush :=
+  Pi.lift fun i ↦ c.descentChartComponent hopen hpush M e i
+
+@[reassoc]
+private theorem AffineIntersectionUnitCocycle.descentChartSource_π
+    (M : (D).glued.Modules)
+    (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush)
+    (i : J) :
+    c.descentChartSource hopen hpush M e ≫
+        Pi.π (fun j : J ↦ c.chartExtension hopen hpush j) i =
+      c.descentChartComponent hopen hpush M e i := by
+  exact Pi.lift_π _ i
+
+private theorem AffineIntersectionUnitCocycle.descentIso_transition
+    (M : (D).glued.Modules)
+    (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush)
+    (i j : J) :
+    (pullback (sq i j).p₁).map (e.hom.hom i) ≫
+        (c.chartTransitionIso hopen hpush i j).hom =
+      (((pullbackComp (sq i j).p₁ ((D).ι i)).app M) ≪≫
+          ((pullbackCongr (sq i j).hp₁).app M)).hom ≫
+        (((pullbackComp (sq i j).p₂ ((D).ι j)).app M) ≪≫
+          ((pullbackCongr (sq i j).hp₂).app M)).inv ≫
+        (pullback (sq i j).p₂).map (e.hom.hom j) := by
+  have h := e.hom.comm i j
+  rw [c.chartDescentData_hom hopen hpush i j] at h
+  rw [Pseudofunctor.DescentData'.ofDescentData_hom] at h
+  rw [pullbackPseudofunctor_toDescentData_hom] at h
+  change
+    (pullback (sq i j).p₁).map (e.hom.hom i) ≫
+        (c.chartTransitionIso hopen hpush i j).hom =
+      ((((pullbackComp (sq i j).p₁ ((D).ι i)).app M) ≪≫
+            ((pullbackCongr (sq i j).hp₁).app M)).hom ≫
+          (((pullbackComp (sq i j).p₂ ((D).ι j)).app M) ≪≫
+            ((pullbackCongr (sq i j).hp₂).app M)).inv) ≫
+        (pullback (sq i j).p₂).map (e.hom.hom j) at h
+  simpa only [Category.assoc] using h
+
+private theorem AffineIntersectionUnitCocycle.descentChartComponent_left_mate
+    (M : (D).glued.Modules)
+    (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush)
+    (i j : J) :
+    (pullbackPushforwardAdjunction (sq i j).p).homEquiv M
+        (unitObj (sq i j).pullback)
+        ((pullbackComp (sq i j).p₁ ((D).ι i)).inv.app M ≫
+          (pullback (sq i j).p₁).map (e.hom.hom i) ≫
+          (c.chartTransitionIso hopen hpush i j).hom ≫
+          (pullbackUnitIso (sq i j).p₂).hom) =
+      c.descentChartComponent hopen hpush M e i ≫
+        c.chartToOverlapLeft hopen hpush i j := by
+  have hmate := pullbackPushforwardAdjunction_homEquiv_comp_inv
+    ((D).f i j) ((D).ι i) M (unitObj ((D).U i))
+    (unitObj (sq i j).pullback) (e.hom.hom i)
+    ((c.chartTransitionIso hopen hpush i j).hom ≫
+      (pullbackUnitIso (sq i j).p₂).hom)
+  simp only [affineIntersectionChartChosenPullback,
+    AffineIntersectionUnitCocycle.descentChartComponent,
+    AffineIntersectionUnitCocycle.chartToOverlapLeft] at hmate ⊢
+  convert hmate using 1 <;> rfl
+
+private theorem AffineIntersectionUnitCocycle.descentChartComponent_right_mate
+    (M : (D).glued.Modules)
+    (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush)
+    (i j : J) :
+    let compIso := pullbackCompCongrIso (sq i j).p₂ ((D).ι j)
+      (sq i j).p ((D).glue_condition i j)
+    (pullbackPushforwardAdjunction (sq i j).p).homEquiv M
+        (unitObj (sq i j).pullback)
+        (compIso.inv.app M ≫
+          (pullback (sq i j).p₂).map (e.hom.hom j) ≫
+          (pullbackUnitIso (sq i j).p₂).hom) =
+      c.descentChartComponent hopen hpush M e j ≫
+        c.chartToOverlapRight hopen hpush i j := by
+  dsimp only
+  have hmate := pullbackPushforwardAdjunction_homEquiv_compCongr_inv
+    ((D).t i j ≫ (D).f j i) ((D).ι j)
+    ((D).f i j ≫ (D).ι i) ((D).glue_condition i j)
+    M (unitObj ((D).U j)) (unitObj (sq i j).pullback)
+    (e.hom.hom j) (pullbackUnitIso (sq i j).p₂).hom
+  simp only [affineIntersectionChartChosenPullback,
+    AffineIntersectionUnitCocycle.descentChartComponent,
+    pushforwardCompCongrIso, Iso.trans_hom, NatTrans.comp_app,
+    AffineIntersectionUnitCocycle.chartToOverlapRight] at hmate ⊢
+  convert hmate using 1 <;> rfl
+
+private theorem AffineIntersectionUnitCocycle.descentChartComponent_overlap
+    (M : (D).glued.Modules)
+    (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush)
+    (i j : J) :
+    c.descentChartComponent hopen hpush M e i ≫
+        c.chartToOverlapLeft hopen hpush i j =
+      c.descentChartComponent hopen hpush M e j ≫
+        c.chartToOverlapRight hopen hpush i j := by
+  rw [← c.descentChartComponent_left_mate hopen hpush M e i j,
+    ← c.descentChartComponent_right_mate hopen hpush M e i j]
+  apply congrArg ((pullbackPushforwardAdjunction (sq i j).p).homEquiv M
+    (unitObj (sq i j).pullback))
+  let leftComp := (pullbackComp (sq i j).p₁ ((D).ι i)).app M
+  let rightComp := pullbackCompCongrIso (sq i j).p₂ ((D).ι j)
+    (sq i j).p ((D).glue_condition i j) |>.app M
+  let q := (pullbackUnitIso (sq i j).p₂).hom
+  have htransition := c.descentIso_transition hopen hpush M e i j
+  rw [show (((pullbackComp (sq i j).p₁ ((D).ι i)).app M) ≪≫
+      ((pullbackCongr (sq i j).hp₁).app M)).hom = leftComp.hom from
+    pullbackCompCongrIso_hom_refl (sq i j).p₁ ((D).ι i) M] at htransition
+  rw [show (((pullbackComp (sq i j).p₂ ((D).ι j)).app M) ≪≫
+      ((pullbackCongr (sq i j).hp₂).app M)).inv = rightComp.inv from
+    pullbackCompCongrIso_inv_proof_irrel (sq i j).p₂ ((D).ι j)
+      (sq i j).p (sq i j).hp₂ ((D).glue_condition i j) M] at htransition
+  have h := congrArg (fun m ↦ leftComp.inv ≫ m ≫ q) htransition
+  change leftComp.inv ≫
+      (pullback (sq i j).p₁).map (e.hom.hom i) ≫
+      (c.chartTransitionIso hopen hpush i j).hom ≫ q =
+    rightComp.inv ≫ (pullback (sq i j).p₂).map (e.hom.hom j) ≫ q
+  calc
+    _ = leftComp.inv ≫
+        ((pullback (sq i j).p₁).map (e.hom.hom i) ≫
+          (c.chartTransitionIso hopen hpush i j).hom) ≫ q := by
+      simp only [Category.assoc]
+    _ = leftComp.inv ≫
+        (leftComp.hom ≫ rightComp.inv ≫
+          (pullback (sq i j).p₂).map (e.hom.hom j)) ≫ q := h
+    _ = _ := by
+      simp only [Category.assoc, Iso.inv_hom_id_assoc]
+      rfl
+
+private theorem AffineIntersectionUnitCocycle.descentChartSource_equalizes
+    (M : (D).glued.Modules)
+    (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush) :
+    c.descentChartSource hopen hpush M e ≫
+        c.chartGlueLeft hopen hpush =
+      c.descentChartSource hopen hpush M e ≫
+        c.chartGlueRight hopen hpush := by
+  dsimp only [AffineIntersectionUnitCocycle.chartGlueLeft,
+    AffineIntersectionUnitCocycle.chartGlueRight,
+    AffineIntersectionUnitCocycle.chartGlueTarget]
+  apply Pi.hom_ext
+  rintro ⟨i, j⟩
+  rw [Category.assoc, Category.assoc, Pi.lift_π, Pi.lift_π]
+  rw [c.descentChartSource_π_assoc, c.descentChartSource_π_assoc]
+  exact c.descentChartComponent_overlap hopen hpush M e i j
+
+private noncomputable def AffineIntersectionUnitCocycle.descentToGluedHom
+    (M : (D).glued.Modules)
+    (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush) :
+    M ⟶ c.gluedModule hopen hpush :=
+  equalizer.lift (c.descentChartSource hopen hpush M e)
+    (c.descentChartSource_equalizes hopen hpush M e)
+
+@[reassoc]
+private theorem AffineIntersectionUnitCocycle.descentToGluedHom_ι
+    (M : (D).glued.Modules)
+    (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush) :
+    c.descentToGluedHom hopen hpush M e ≫
+        equalizer.ι (c.chartGlueLeft hopen hpush)
+          (c.chartGlueRight hopen hpush) =
+      c.descentChartSource hopen hpush M e := by
+  exact equalizer.lift_ι _ _
+
+@[reassoc]
+private theorem AffineIntersectionUnitCocycle.descentToGluedHom_chartComponent
+    (M : (D).glued.Modules)
+    (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush)
+    (i : J) :
+    c.descentToGluedHom hopen hpush M e ≫
+        c.gluedModuleChartComponent hopen hpush i =
+      c.descentChartComponent hopen hpush M e i := by
+  let p : c.chartGlueSource hopen hpush ⟶
+      c.chartExtension hopen hpush i :=
+    Pi.π (fun j : J ↦ c.chartExtension hopen hpush j) i
+  have h := c.descentToGluedHom_ι_assoc hopen hpush M e p
+  calc
+    _ = c.descentChartSource hopen hpush M e ≫ p := by
+      simpa only [p, AffineIntersectionUnitCocycle.gluedModuleChartComponent,
+        AffineIntersectionUnitCocycle.gluedModule] using h
+    _ = _ := c.descentChartSource_π hopen hpush M e i
+
+private theorem AffineIntersectionUnitCocycle.descentIso_component_isIso
+    (M : (D).glued.Modules)
+    (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush)
+    (i : J) :
+    IsIso (e.hom.hom i) := by
+  refine ⟨⟨e.inv.hom i, ?_, ?_⟩⟩
+  · have h := congrArg (fun q => q.hom i) e.hom_inv_id
+    change e.hom.hom i ≫ e.inv.hom i = 𝟙 _ at h
+    exact h
+  · have h := congrArg (fun q => q.hom i) e.inv_hom_id
+    change e.inv.hom i ≫ e.hom.hom i = 𝟙 _ at h
+    exact h
+
+private theorem AffineIntersectionUnitCocycle.descentToGluedHom_pullback
+    (M : (D).glued.Modules)
+    (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush)
+    (i : J) :
+    (pullback ((D).ι i)).map (c.descentToGluedHom hopen hpush M e) ≫
+        (c.gluedModuleLocalIso hopen hpush i).hom =
+      e.hom.hom i := by
+  change
+    (pullback ((D).ι i)).map (c.descentToGluedHom hopen hpush M e) ≫
+      c.gluedModulePullbackHom hopen hpush i =
+      e.hom.hom i
+  rw [← c.gluedModuleChartComponent_adjunct hopen hpush i]
+  apply ((pullbackPushforwardAdjunction ((D).ι i)).homEquiv
+    M (unitObj ((D).U i))).injective
+  rw [Adjunction.homEquiv_naturality_left]
+  rw [Equiv.apply_symm_apply]
+  change c.descentToGluedHom hopen hpush M e ≫
+      c.gluedModuleChartComponent hopen hpush i =
+    c.descentChartComponent hopen hpush M e i
+  exact c.descentToGluedHom_chartComponent hopen hpush M e i
+
+private theorem AffineIntersectionUnitCocycle.descentToGluedHom_pullback_isIso
+    (M : (D).glued.Modules)
+    (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush)
+    (i : J) :
+    IsIso ((pullback ((D).ι i)).map
+      (c.descentToGluedHom hopen hpush M e)) := by
+  have h := c.descentToGluedHom_pullback hopen hpush M e i
+  haveI : IsIso
+      ((pullback ((D).ι i)).map (c.descentToGluedHom hopen hpush M e) ≫
+        (c.gluedModuleLocalIso hopen hpush i).hom) :=
+    h.symm ▸ c.descentIso_component_isIso hopen hpush M e i
+  exact IsIso.of_isIso_comp_right _
+    (c.gluedModuleLocalIso hopen hpush i).hom
+
+private theorem AffineIntersectionUnitCocycle.descentToGluedHom_restrict_isIso
+    (M : (D).glued.Modules)
+    (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush)
+    (i : J) :
+    IsIso ((@restrictFunctor _ _ ((D).ι i) ((D).ι_isOpenImmersion i)).map
+      (c.descentToGluedHom hopen hpush M e)) := by
+  letI : IsOpenImmersion ((D).ι i) := (D).ι_isOpenImmersion i
+  let R := restrictFunctor ((D).ι i)
+  let P := pullback ((D).ι i)
+  let E := restrictFunctorIsoPullback ((D).ι i)
+  letI : IsIso (P.map (c.descentToGluedHom hopen hpush M e)) :=
+    c.descentToGluedHom_pullback_isIso hopen hpush M e i
+  have h := E.hom.naturality (c.descentToGluedHom hopen hpush M e)
+  haveI : IsIso
+      (R.map (c.descentToGluedHom hopen hpush M e) ≫
+        E.hom.app (c.gluedModule hopen hpush)) := by
+    rw [h]
+    infer_instance
+  exact IsIso.of_isIso_comp_right _
+    (E.hom.app (c.gluedModule hopen hpush))
+
+private theorem AffineIntersectionUnitCocycle.descentToGluedHom_chartOpen_isIso
+    (M : (D).glued.Modules)
+    (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush)
+    (i : J) :
+    IsIso ((restrictFunctor (affineIntersectionChartOpen (D) i).ι).map
+      (c.descentToGluedHom hopen hpush M e)) := by
+  let f := (D).ι i
+  letI : IsOpenImmersion f := (D).ι_isOpenImmersion i
+  let q := f.isoOpensRange
+  let r := f.opensRange.ι
+  change IsIso ((restrictFunctor r).map
+    (c.descentToGluedHom hopen hpush M e))
+  letI : (restrictFunctor q.hom).IsEquivalence := by infer_instance
+  haveI : IsIso ((restrictFunctor f).map
+      (c.descentToGluedHom hopen hpush M e)) :=
+    c.descentToGluedHom_restrict_isIso hopen hpush M e i
+  let E : restrictFunctor f ≅ restrictFunctor r ⋙ restrictFunctor q.hom :=
+    restrictFunctorCongr f.isoOpensRange_hom_ι.symm ≪≫
+      restrictFunctorComp q.hom r
+  have h := E.hom.naturality (c.descentToGluedHom hopen hpush M e)
+  haveI hmapped : IsIso
+      ((restrictFunctor r ⋙ restrictFunctor q.hom).map
+        (c.descentToGluedHom hopen hpush M e)) := by
+    haveI : IsIso
+        (E.hom.app M ≫
+          (restrictFunctor r ⋙ restrictFunctor q.hom).map
+            (c.descentToGluedHom hopen hpush M e)) := by
+      rw [← h]
+      infer_instance
+    exact IsIso.of_isIso_comp_left (E.hom.app M) _
+  letI : IsIso ((restrictFunctor q.hom).map
+      ((restrictFunctor r).map
+        (c.descentToGluedHom hopen hpush M e))) := by
+    change IsIso ((restrictFunctor r ⋙ restrictFunctor q.hom).map
+      (c.descentToGluedHom hopen hpush M e))
+    exact hmapped
+  exact isIso_of_reflects_iso _ (restrictFunctor q.hom)
+
+/-- A module on an affine-intersection glued scheme whose induced descent datum
+is the datum of a unit cocycle is canonically isomorphic to the concrete Cech
+equalizer realizing that cocycle. -/
+noncomputable def AffineIntersectionUnitCocycle.gluedModuleIsoOfDescentIso
+    (M : (D).glued.Modules)
+    (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush) :
+    M ≅ c.gluedModule hopen hpush := by
+  let g := c.descentToGluedHom hopen hpush M e
+  letI : IsIso g := isIso_of_isIso_restrict g
+    (fun i => affineIntersectionChartOpen (D) i)
+    (affineIntersectionChart_iSup_opensRange hopen hpush)
+    (fun i => c.descentToGluedHom_chartOpen_isIso hopen hpush M e i)
+  exact asIso g
+
+end DescentEffectivity
+
+private noncomputable def trivializationOnOpensRange
+    {X Y : Scheme.{u}} (f : Y ⟶ X) [IsOpenImmersion f]
+    (M : X.Modules) (e : (restrictFunctor f).obj M ≅ unitObj Y) :
+    (pullback f.opensRange.ι).obj M ≅ unitObj (f.opensRange : Scheme.{u}) := by
+  let q := f.isoOpensRange
+  let e' : (pullback f).obj M ≅ unitObj Y :=
+    (restrictFunctorIsoPullback f).symm.app M ≪≫ e
+  exact (pullbackCongr f.isoOpensRange_inv_comp).symm.app M ≪≫
+    (pullbackComp q.inv f).symm.app M ≪≫
+    (pullback q.inv).mapIso e' ≪≫ pullbackUnitIso q.inv
 
 /-- The Cech equalizer attached to an affine-intersection unit cocycle is an
 invertible sheaf on the glued scheme. -/
