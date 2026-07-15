@@ -3,8 +3,8 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.Moduli.Representability
 import ModularCurves.Moduli.NaiveProblems
+import ModularCurves.Moduli.Representability
 
 /-!
 # The KM 4.7 bootstrap objects (T-E12–T-E15)
