@@ -268,8 +268,6 @@ private theorem degree_trace_lt_degree_norm {p q s n : Polynomial F}
   ⟨pos_degree_of_degree_eq_max hq hndeg,
     degree_lt_of_le_max_degree_eq_max hq (degree_trace_le_max hsle) hndeg⟩
 
-set_option synthInstance.maxHeartbeats 200000 in
-set_option maxHeartbeats 1600000 in
 -- Instance synthesis and unification at curve-indexed coordinate-ring types
 -- (`AdjoinRoot`-quotients) need a higher budget; same settings as
 -- `CurveMap.sum_ramificationIdx_mul_inertiaDeg_eq_degree`.
@@ -301,8 +299,6 @@ private theorem nondegenerate_smul_basis_of_injective
   exact Polynomial.X_ne_C _
     (FaithfulSMul.algebraMap_injective (Polynomial F) C₂.CoordinateRing hX)
 
-set_option synthInstance.maxHeartbeats 200000 in
-set_option maxHeartbeats 1600000 in
 -- Instance synthesis and unification at curve-indexed coordinate-ring types
 -- (`AdjoinRoot`-quotients) need a higher budget; same settings as
 -- `CurveMap.sum_ramificationIdx_mul_inertiaDeg_eq_degree`.
@@ -399,7 +395,6 @@ private theorem module_finite_of_adjoin_singleton_mul_span
   Module.finite_def.mpr (top_le_iff.mp hspan ▸
     Submodule.FG.mul hx.fg_adjoin_singleton (Submodule.fg_span hs))
 
-set_option synthInstance.maxHeartbeats 200000 in
 set_option maxHeartbeats 1600000 in
 -- Instance synthesis and unification at curve-indexed coordinate-ring types
 -- (`AdjoinRoot`-quotients) need a higher budget; same settings as
@@ -467,8 +462,6 @@ theorem toAlgHom_injective (cd : φ.CoordHom) : Function.Injective cd.toAlgHom :
   exact IsFractionRing.injective C₂.CoordinateRing C₂.FunctionField
     (φ.pullback_injective h)
 
-set_option synthInstance.maxHeartbeats 200000 in
-set_option maxHeartbeats 1600000 in
 -- Instance synthesis and unification at curve-indexed coordinate-ring types
 -- (`AdjoinRoot`-quotients) need a higher budget; same settings as
 -- `CurveMap.sum_ramificationIdx_mul_inertiaDeg_eq_degree`.
@@ -491,8 +484,6 @@ end CurveMap.CoordHom
 
 namespace CurveMap
 
-set_option synthInstance.maxHeartbeats 200000 in
-set_option maxHeartbeats 1600000 in
 -- Instance synthesis and unification at curve-indexed coordinate-ring types
 -- (`AdjoinRoot`-quotients) need a higher budget; same settings as
 -- `CurveMap.sum_ramificationIdx_mul_inertiaDeg_eq_degree`.
