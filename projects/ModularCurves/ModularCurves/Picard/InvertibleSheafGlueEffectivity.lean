@@ -90,6 +90,103 @@ noncomputable def restrictPushforwardUnitIsoOfIsPullback
     simp only [← CommRingCat.comp_apply]
     exact congr($(heq) x)
 
+private noncomputable def restrictPushforwardIsoOfIsPullbackApp
+    {X Y U V : Scheme.{u}}
+    (f : X ⟶ Y) (f' : U ⟶ V) (iU : U ⟶ X) (iV : V ⟶ Y)
+    [IsOpenImmersion iV] [IsOpenImmersion iU]
+    (H : IsPullback f' iU iV f) (M : X.Modules) :
+    (restrictFunctor iV).obj ((pushforward f).obj M) ≅
+      (pushforward f').obj ((restrictFunctor iU).obj M) := by
+  refine (fullyFaithfulToPresheafOfModules).preimageIso
+    (PresheafOfModules.isoMk (fun W ↦ ?_) ?_)
+  · let h := IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H W.unop
+    let e := M.presheaf.mapIso (eqToIso h).op
+    refine ModuleCat.isoMk e ?_
+    intro r
+    ext x
+    let eR : Γ(X, f ⁻¹ᵁ iV ''ᵁ W.unop) ≅ Γ(U, f' ⁻¹ᵁ W.unop) :=
+      X.presheaf.mapIso (eqToIso h).op ≪≫ iU.appIso _
+    have hring : (iV.appIso W.unop).inv ≫ f.app _ = f'.app W.unop ≫ eR.inv := by
+      rw [Iso.inv_comp_eq, ← Category.assoc, Iso.eq_comp_inv]
+      simp only [Scheme.Hom.app_eq_appLE, Iso.trans_hom, Functor.mapIso_hom,
+        Iso.op_hom, eqToIso.hom, eqToHom_op, Scheme.Hom.appIso_hom',
+        Scheme.Hom.map_appLE, eR, Scheme.Hom.appLE_comp_appLE, H.w]
+    have hring' : (iV.appIso W.unop).inv ≫ f.app _ ≫ eR.hom =
+        f'.app W.unop := by
+      rw [← Category.assoc, hring]
+      simp
+    have hring'' : f'.app W.unop ≫ (iU.appIso (f' ⁻¹ᵁ W.unop)).inv =
+        (iV.appIso W.unop).inv ≫ f.app _ ≫
+          (X.presheaf.mapIso (eqToIso h).op).hom := by
+      rw [← hring']
+      simp only [eR, Iso.trans_hom, Category.assoc]
+      rw [Iso.hom_inv_id, Category.comp_id]
+    have hring''' : f'.app W.unop ≫ (iU.appIso (f' ⁻¹ᵁ W.unop)).inv =
+        (iV.appIso W.unop).inv ≫ f.app _ ≫
+          X.presheaf.map (eqToHom h).op := by
+      simpa only [Functor.mapIso_hom, Iso.op_hom, eqToIso.hom] using hring''
+    have hr' : (iU.appIso _).inv ((f'.app _).hom r) =
+        (X.presheaf.map (eqToHom h).op).hom
+          ((f.app _).hom ((iV.appIso _).inv r)) := by
+      simpa only [CommRingCat.comp_apply] using
+        ConcreteCategory.congr_hom hring''' r
+    let x' : M.val.obj (.op (f ⁻¹ᵁ iV ''ᵁ W.unop)) := x
+    change (iU.appIso _).inv ((f'.app _).hom r) •
+        (show M.val.obj (.op (iU ''ᵁ (f' ⁻¹ᵁ W.unop))) from e.hom x') =
+      e.hom ((f.app _).hom ((iV.appIso _).inv r) • x')
+    rw [hr']
+    exact ((M.val.map (eqToHom h).op).hom.map_smul
+      ((f.app _).hom ((iV.appIso _).inv r)) x').symm
+  · intro W W' g
+    apply ModuleCat.hom_ext
+    ext x
+    change M.presheaf.map _ (M.presheaf.map _ x) =
+      M.presheaf.map _ (M.presheaf.map _ x)
+    rw [← Functor.map_comp_apply, ← Functor.map_comp_apply]
+    exact ConcreteCategory.congr_hom
+      (M.presheaf.congr_map (Subsingleton.elim _ _)) x
+
+private noncomputable def restrictPushforwardIsoOfIsPullback
+    {X Y U V : Scheme.{u}}
+    (f : X ⟶ Y) (f' : U ⟶ V) (iU : U ⟶ X) (iV : V ⟶ Y)
+    [IsOpenImmersion iV] [IsOpenImmersion iU]
+    (H : IsPullback f' iU iV f) :
+    pushforward f ⋙ restrictFunctor iV ≅
+      restrictFunctor iU ⋙ pushforward f' :=
+  NatIso.ofComponents
+    (fun M ↦ restrictPushforwardIsoOfIsPullbackApp f f' iU iV H M)
+    (by
+      intro M N q
+      apply (fullyFaithfulToPresheafOfModules).map_injective
+      apply PresheafOfModules.hom_ext
+      intro W
+      apply ModuleCat.hom_ext
+      apply LinearMap.ext
+      intro x
+      let h := IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H W.unop
+      change (N.val.map (eqToHom h).op).hom ((q.val.app _).hom x) =
+        (q.val.app _).hom
+          (show M.val.obj (.op (iU ''ᵁ (f' ⁻¹ᵁ W.unop))) from
+            (M.val.map (eqToHom h).op).hom x)
+      exact ConcreteCategory.congr_hom (q.val.naturality (eqToHom h).op).symm x)
+
+private theorem restrictPushforwardUnitIsoOfIsPullback_eq
+    {X Y U V : Scheme.{u}}
+    (f : X ⟶ Y) (f' : U ⟶ V) (iU : U ⟶ X) (iV : V ⟶ Y)
+    [IsOpenImmersion iV] [IsOpenImmersion iU]
+    (H : IsPullback f' iU iV f) :
+    restrictPushforwardUnitIsoOfIsPullback f f' iU iV H =
+      (restrictPushforwardIsoOfIsPullback f f' iU iV H).app (unitObj X) ≪≫
+        (pushforward f').mapIso (restrictUnitIso iU) := by
+  apply Iso.ext
+  apply (fullyFaithfulToPresheafOfModules).map_injective
+  apply PresheafOfModules.hom_ext
+  intro W
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro x
+  rfl
+
 private noncomputable def restrictProductIso
     {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f]
     {I : Type u} (P : I → Y.Modules) (Q : I → X.Modules)

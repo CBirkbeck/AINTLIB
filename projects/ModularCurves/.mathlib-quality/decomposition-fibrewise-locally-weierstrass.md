@@ -519,3 +519,9 @@ Cech source, and proved the inverse triple-overlap identity
 projection formula `chartGlueSourceRestrictIso_inv_π`. The construction is option-free, adds no
 hypotheses, and the new public projection formula depends only on `propext`, `Classical.choice`,
 and `Quot.sound`.
+
+Completed subdependency (2026-07-14): constructed the module-valued open-cartesian base-change
+isomorphism natural in the input module and proved that its structure-sheaf specialization agrees
+with `Scheme.Modules.restrictPushforwardUnitIsoOfIsPullback`. This supplies the naturality needed
+to normalize the two restricted Cech arrows without adding a second public base-change API; the
+new comparison layer is private, option-free, and introduces no new hypotheses.
