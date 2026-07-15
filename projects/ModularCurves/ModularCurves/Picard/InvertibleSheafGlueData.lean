@@ -63,6 +63,169 @@ theorem AffineIntersectionUnitCocycle.chartTransitionIso_self
     (diagonalFac
       (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush) i)).symm
 
+private theorem isoEntry
+    {C : Type u} [Category C] {O P N Q : C}
+    (u : P ≅ O) (e : N ≅ P) (b : Q ≅ O) (a : N ⟶ Q)
+    (h : e.hom ≫ u.hom = a ≫ b.hom) :
+    u.inv ≫ e.inv ≫ a = b.inv := by
+  rw [← cancel_mono b.hom]
+  rw [Category.assoc, Category.assoc, ← h]
+  simp only [Iso.inv_hom_id_assoc, Iso.inv_hom_id]
+
+private theorem unitCompEntry
+    {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
+    (pullbackUnitIso (f ≫ g)).inv ≫
+        ((pullbackComp f g).app (unitObj Z)).inv ≫
+        (pullback f).map (pullbackUnitIso g).hom =
+      (pullbackUnitIso f).inv := by
+  let u := pullbackUnitIso (f ≫ g)
+  let e := (pullbackComp f g).app (unitObj Z)
+  let b := pullbackUnitIso f
+  let a := (pullback f).map (pullbackUnitIso g).hom
+  exact isoEntry u e b a (ModularCurves.pullbackUnitIso_compLow f g)
+
+private theorem isoExit
+    {C : Type u} [Category C] {O P N Q K : C}
+    (a : N ≅ Q) (e : N ≅ P) (r : P ≅ K)
+    (u : P ≅ O) (v : K ≅ O) (b : Q ≅ O)
+    (hr : r.hom ≫ v.hom = u.hom)
+    (he : e.hom ≫ u.hom = a.hom ≫ b.hom) :
+    a.inv ≫ e.hom ≫ r.hom ≫ v.hom = b.hom := by
+  rw [hr, he]
+  simp only [Iso.inv_hom_id_assoc]
+
+private theorem unitCompExit
+    {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z)
+    {k : X ⟶ Z} (h : f ≫ g = k) :
+    (pullback f).map (pullbackUnitIso g).inv ≫
+        ((pullbackComp f g).app (unitObj Z)).hom ≫
+        ((pullbackCongr h).app (unitObj Z)).hom ≫
+        (pullbackUnitIso k).hom =
+      (pullbackUnitIso f).hom := by
+  let a := (pullback f).mapIso (pullbackUnitIso g)
+  let e := (pullbackComp f g).app (unitObj Z)
+  let r := (pullbackCongr h).app (unitObj Z)
+  let u := pullbackUnitIso (f ≫ g)
+  let v := pullbackUnitIso k
+  let b := pullbackUnitIso f
+  exact isoExit a e r u v b
+    (ModularCurves.pullbackUnitIso_congrLow h)
+    (ModularCurves.pullbackUnitIso_compLow f g)
+
+private theorem pairSwapFac
+    (D : Scheme.GlueData) (i j : D.J) :
+    D.t i j ≫ (D.t j i ≫ D.f i j) = D.f i j := by
+  rw [← Category.assoc, D.t_inv, Category.id_comp]
+
+private theorem leftFromCoordinates
+    {C : Type u} [Category C] {O A N B M : C}
+    (u : A ≅ O) (e : N ≅ A) (a : N ≅ B) (v : B ≅ O)
+    (b : M ≅ B) (p : N ⟶ M) (q : B ⟶ B)
+    (hentry : u.inv ≫ e.inv ≫ a.hom = v.inv)
+    (hcoord : a.inv ≫ p ≫ b.hom = q) :
+    u.inv ≫ e.inv ≫ p ≫ b.hom = v.inv ≫ q := by
+  calc
+    u.inv ≫ e.inv ≫ p ≫ b.hom =
+        (u.inv ≫ e.inv ≫ a.hom) ≫
+          (a.inv ≫ p ≫ b.hom) := by
+            simp only [Category.assoc, Iso.hom_inv_id_assoc]
+    _ = v.inv ≫ q := by rw [hentry, hcoord]
+
+/-- The inverse chart transition also recovers the inverse scalar automorphism after
+conjugation by the two pullback-unit isomorphisms. -/
+theorem AffineIntersectionUnitCocycle.chartTransitionIso_inv_toUnit
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (pullbackUnitIso (D.t i j ≫ D.f j i)).inv ≫
+        (c.chartTransitionIso hopen hpush i j).inv ≫
+        (pullbackUnitIso (D.f i j)).hom =
+      (c.overlapTransitionIso i j).inv := by
+  dsimp only
+  rw [AffineIntersectionUnitCocycle.chartTransitionIso_inv]
+  simp only [Category.assoc, Iso.inv_hom_id_assoc, Iso.inv_hom_id,
+    Category.comp_id]
+
+/-- Pulling a chart transition back along the pair-swap map preserves its scalar-coordinate
+description. -/
+theorem AffineIntersectionUnitCocycle.pullback_chartTransitionIso_toUnit
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (pullback (D.t i j)).map (pullbackUnitIso (D.f j i)).inv ≫
+        (pullback (D.t i j)).map
+          (c.chartTransitionIso hopen hpush j i).hom ≫
+        ((pullback (D.t i j)).mapIso
+          (pullbackUnitIso (D.t j i ≫ D.f i j))).hom =
+      (pullback (D.t i j)).map (c.overlapTransitionIso j i).hom := by
+  dsimp only
+  have h := congrArg (fun k => (pullback
+      ((Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).t i j)).map k)
+    (c.chartTransitionIso_toUnit hopen hpush j i)
+  simpa only [Functor.map_comp, Functor.mapIso_hom] using h
+
+private theorem chartTransitionIso_swap_left
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (pullbackUnitIso (D.t i j ≫ D.f j i)).inv ≫
+        ((pullbackComp (D.t i j) (D.f j i)).app
+          (unitObj (D.U j))).inv ≫
+        (pullback (D.t i j)).map
+          (c.chartTransitionIso hopen hpush j i).hom ≫
+        ((pullback (D.t i j)).mapIso
+          (pullbackUnitIso (D.t j i ≫ D.f i j))).hom =
+      (pullbackUnitIso (D.t i j)).inv ≫
+        (pullback (D.t i j)).map (c.overlapTransitionIso j i).hom := by
+  dsimp only
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  let u := pullbackUnitIso (D.t i j ≫ D.f j i)
+  let e := (pullbackComp (D.t i j) (D.f j i)).app (unitObj (D.U j))
+  let a := (pullback (D.t i j)).mapIso (pullbackUnitIso (D.f j i))
+  let v := pullbackUnitIso (D.t i j)
+  let b := (pullback (D.t i j)).mapIso
+    (pullbackUnitIso (D.t j i ≫ D.f i j))
+  let p := (pullback (D.t i j)).map
+    (c.chartTransitionIso hopen hpush j i).hom
+  let q := (pullback (D.t i j)).map (c.overlapTransitionIso j i).hom
+  have hcoord : a.inv ≫ p ≫ b.hom = q := by
+    simpa only [a, p, b, q, Functor.mapIso_hom,
+      Functor.mapIso_inv] using
+        (c.pullback_chartTransitionIso_toUnit hopen hpush i j)
+  exact leftFromCoordinates u e a v b p q
+    (unitCompEntry (D.t i j) (D.f j i)) hcoord
+
+private theorem chartTransitionIso_swap_right
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    let h := pairSwapFac D i j
+    ((pullback (D.t i j)).mapIso
+          (pullbackUnitIso (D.t j i ≫ D.f i j))).inv ≫
+        ((pullbackComp (D.t i j) (D.t j i ≫ D.f i j)).app
+          (unitObj (D.U i))).hom ≫
+        ((pullbackCongr h).app (unitObj (D.U i))).hom ≫
+        (pullbackUnitIso (D.f i j)).hom =
+      (pullbackUnitIso (D.t i j)).hom := by
+  dsimp only
+  simpa only [Functor.mapIso_inv] using unitCompExit
+    ((Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).t i j)
+    ((Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).t j i ≫
+      (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).f i j)
+    (pairSwapFac
+      (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush) i j)
+
 end
 
 

@@ -425,3 +425,9 @@ Completed subdependency (2026-07-14): introduced `InvertibleSheafGlueData.lean` 
 law `chartTransitionIso_self`. The latter identifies the diagonal transition with canonical
 `pullbackCongr` transport along `f i i = t i i ≫ f i i`; both declarations are option-free and
 axiom-clean.
+
+Completed subdependency (2026-07-14): proved
+`AffineIntersectionUnitCocycle.chartTransitionIso_inv_toUnit` and
+`pullback_chartTransitionIso_toUnit`, then isolated the entry and exit normalization halves of the
+pair-swap law using the existing `pullbackComp` and `pullbackCongr` coherence. The public coordinate
+laws are option-free and depend only on `propext`, `Classical.choice`, and `Quot.sound`.
