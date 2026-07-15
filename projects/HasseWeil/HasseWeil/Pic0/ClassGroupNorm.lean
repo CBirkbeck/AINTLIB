@@ -1,4 +1,9 @@
-import Mathlib
+import Mathlib.LinearAlgebra.FreeModule.Norm
+import Mathlib.NumberTheory.RamificationInertia.Basic
+import Mathlib.RingTheory.ClassGroup.Basic
+import Mathlib.RingTheory.Ideal.Norm.RelNorm
+import Mathlib.RingTheory.Localization.AtPrime.Extension
+import Mathlib.RingTheory.OrderOfVanishing.Basic
 
 /-!
 # The class-group relative norm
