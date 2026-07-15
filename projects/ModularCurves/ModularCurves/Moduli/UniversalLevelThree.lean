@@ -806,4 +806,122 @@ theorem universalE3_map_classifying {R : CommRingCat.{u}} (X : EllObj R)
       (e3ClassifyingRingHom X L hD h3) (universalE3 R).a₆ = _
     rw [show (universalE3 R).a₆ = 0 from rfl, map_zero, ha₆]
 
+/-- **(T-E15a stage 10)** A bundled `E3` witness. -/
+structure E3Witness {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 3) where
+  V : X.base.affineOpens
+  Pr : LocalPresentation X.curve.toEllipticCurveGeom V
+  β : Γ(X.base, V.1)
+  γ : Γ(X.base, V.1)
+  hF : IsE3Form Pr.W β γ
+  hP : Pr.MarksAt L.1.1.2 0 0
+  hQ : Pr.MarksAt L.1.2.2 γ (β + γ)
+
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E15a stage 10)** The per-witness classifying piece. -/
+noncomputable def e3Piece {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3} (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤))) (w : E3Witness X L) :
+    (pullback X.curve.toEllipticCurveGeom.π w.V.1.ι : Scheme.{u}) ⟶
+      projModel (universalE3 R) :=
+  w.Pr.e.hom ≫
+    eqToHom (congrArg projModel
+      (universalE3_map_classifying X L hD h3 w.V w.Pr w.β w.γ w.hF w.hP w.hQ).symm) ≫
+    projModelBaseChange
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3)) (universalE3 R)
+
+open LocalPresentation WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E15a stage 10)** Witnesses restrict. -/
+noncomputable def E3Witness.restrict {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3} (w : E3Witness X L)
+    {W : X.base.affineOpens} (h : W.1 ≤ w.V.1) : E3Witness X L where
+  V := W
+  Pr := w.Pr.restrict h
+  β := Scheme.resLE h w.β
+  γ := Scheme.resLE h w.γ
+  hF := restrict_W_e3form w.hF h
+  hP := by have := w.hP.restrict h; rwa [map_zero] at this
+  hQ := by have := w.hQ.restrict h; rwa [map_add] at this
+
+open LocalPresentation WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E15a stage 10)** The pieces are compatible with restriction (KM Ex. 2.2.2
+uniqueness). -/
+theorem e3Piece_restrict {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3} (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤))) (w w' : E3Witness X L) (h : w'.V.1 ≤ w.V.1) :
+    restrictTheta h ≫ e3Piece hD h3 w = e3Piece hD h3 w' := by
+  have hPres := w.hP.restrict h; rw [map_zero] at hPres
+  have hQres := w.hQ.restrict h; rw [map_add] at hQres
+  have hVC : w'.Pr.transVC (w.Pr.restrict h) = 1 :=
+    (e3_witness_transVC_eq_one w'.hF (restrict_W_e3form w.hF h)
+      w'.hP hPres w'.hQ hQres (isUnit_ofNat_res h3 w'.V.1)).1
+  have hWeq : (w.Pr.restrict h).W = w'.Pr.W := by
+    have := w'.Pr.transVC_smul (w.Pr.restrict h)
+    rwa [hVC, one_smul] at this
+  have hIso := pointedIso_hom_of_transVC_eq_one hVC
+  have hE : (w.Pr.restrict h).e.hom =
+      w'.Pr.e.hom ≫ eqToHom (congrArg projModel hWeq.symm) := by
+    have h1 : w'.Pr.e.inv ≫ (w.Pr.restrict h).e.hom =
+        eqToHom (congrArg projModel hWeq.symm) := by
+      have h0 := hIso
+      rw [show (w'.Pr.pointedIso (w.Pr.restrict h)).hom =
+        w'.Pr.e.inv ≫ (w.Pr.restrict h).e.hom from rfl] at h0
+      exact h0
+    rw [← h1, ← Category.assoc, Iso.hom_inv_id, Category.id_comp]
+  have hσ : ((X.base.presheaf.map (homOfLE (le_top : w'.V.1 ≤ ⊤)).op).hom).comp
+      (e3ClassifyingRingHom X L hD h3) =
+    (sectionsMapLE (𝟙 X.base) h).comp
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3)) := by
+    rw [sectionsMapLE_id]
+    show ((X.base.presheaf.map (homOfLE (le_top : w'.V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3) =
+      (((X.base.presheaf.map (homOfLE (le_top : w.V.1 ≤ ⊤)).op) ≫
+        (X.base.presheaf.map (homOfLE (show w'.V.1 ≤ w.V.1 by
+          simpa using h)).op)).hom).comp
+        (e3ClassifyingRingHom X L hD h3)
+    rw [← Functor.map_comp, ← op_comp]
+    rfl
+  rw [e3Piece, e3Piece, ← Category.assoc, ← restrict_e_baseChange, hE]
+  simp only [Category.assoc]
+  rw [cancel_epi (w'.Pr.e.hom)]
+  rw [projModelBaseChange_congr'' (sectionsMapLE (𝟙 X.base) h)
+      (universalE3_map_classifying X L hD h3 w.V w.Pr w.β w.γ
+        w.hF w.hP w.hQ).symm]
+  simp only [Category.assoc, eqToHom_trans_assoc, eqToHom_trans, eqToHom_refl,
+    Category.id_comp]
+  rw [← projModelBaseChange_comp',
+    projModelBaseChange_congr_hom hσ.symm (universalE3 R),
+    ← Category.assoc, eqToHom_trans]
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+/-- **(T-E15a stage 10)** The witness cover of the total space. -/
+noncomputable def e3WitnessCover {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3} (hD : IsE3Datum X L) :
+    X.curve.toEllipticCurveGeom.E.OpenCover :=
+  Scheme.Cover.mkOfCovers (E3Witness X L)
+    (fun w => pullback X.curve.toEllipticCurveGeom.π w.V.1.ι)
+    (fun w => pullback.fst X.curve.toEllipticCurveGeom.π w.V.1.ι)
+    (fun x => by
+      obtain ⟨V, hxV, Pr, β, γ, hF, hP, hQ⟩ := hD
+        (X.curve.toEllipticCurveGeom.π.base x)
+      have hx : x ∈ Set.range (pullback.fst X.curve.toEllipticCurveGeom.π
+          V.1.ι).base := by
+        rw [Scheme.Pullback.range_fst, Set.mem_preimage, Scheme.Opens.range_ι,
+          SetLike.mem_coe]
+        exact hxV
+      obtain ⟨y, hy⟩ := hx
+      exact ⟨⟨V, Pr, β, γ, hF, hP, hQ⟩, y, hy⟩)
+
+open CategoryTheory Limits in
+@[simp] theorem e3WitnessCover_f {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3} (hD : IsE3Datum X L) (w : E3Witness X L) :
+    (e3WitnessCover hD).f w =
+      pullback.fst X.curve.toEllipticCurveGeom.π w.V.1.ι := rfl
+
 end ModularCurves
