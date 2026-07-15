@@ -1,12 +1,14 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.Determinant
-import BernoulliRegular.LValueAtOne.Defs
-import BernoulliRegular.HMinus.KplusLocalCharacters
-import BernoulliRegular.HMinus.LValueReduction.LValues
-import BernoulliRegular.UnitQuotient.PermutationCharacters
-import BernoulliRegular.UnitQuotient.FreeCharacterProfile
-import BernoulliRegular.UnitQuotient.FreeLatticeComparison.ConjugationTrace
-import Mathlib.NumberTheory.LSeries.DirichletContinuation
-import Mathlib.RingTheory.RootsOfUnity.Lemmas
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.Determinant
+public import BernoulliRegular.LValueAtOne.Defs
+public import BernoulliRegular.HMinus.KplusLocalCharacters
+public import BernoulliRegular.HMinus.LValueReduction.LValues
+public import BernoulliRegular.UnitQuotient.PermutationCharacters
+public import BernoulliRegular.UnitQuotient.FreeCharacterProfile
+public import BernoulliRegular.UnitQuotient.FreeLatticeComparison.ConjugationTrace
+public import Mathlib.NumberTheory.LSeries.DirichletContinuation
+public import Mathlib.RingTheory.RootsOfUnity.Lemmas
 
 /-!
 # LV-SIN-C: `L'(0, χ)` formula via cyclotomic-unit logs

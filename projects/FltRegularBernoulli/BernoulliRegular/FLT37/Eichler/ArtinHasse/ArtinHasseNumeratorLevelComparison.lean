@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasseCoordPolyHomogeneity
+module
+
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasseCoordPolyHomogeneity
 
 /-!
 # Level comparison for the degree-`68` Artin-Hasse numerator
