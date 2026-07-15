@@ -977,7 +977,7 @@ theorem miyake_V_p_descend_identity_with_char
   have h_cop_iff : ∀ m : ℕ, Nat.Coprime (p * m) l' ↔ Nat.Coprime m l' := fun m ↦
     ⟨fun h ↦ (Nat.coprime_mul_iff_left.mp h).2,
       fun h ↦ Nat.coprime_mul_iff_left.mpr ⟨hpl', h⟩⟩
-  rcases miyake_4_6_4_dichotomy_strong χ_M p hp hpM g hg_χM hg_supp with
+  rcases cuspForm_dichotomy_strong χ_M p hp hpM g hg_χM hg_supp with
     hg_zero | ⟨h_fac, g_p, hg_p_char, hg_p_eq⟩
   · have h_g_zero : (⇑g : UpperHalfPlane → ℂ) = 0 := by rw [hg_zero]; rfl
     refine miyake_V_p_descend_with_char_of_vanishing f p l' hpl' (fun n hn_cop_l' ↦ ?_)

@@ -283,7 +283,7 @@ private theorem miyake_4_6_8_factor_dichotomy
     MulChar.equivToUnitHom.apply_symm_apply χ
   have hχM_unit : χ_M.toUnitHom = χ.comp (ZMod.unitsMap hNlN) := by
     rw [hχM, DirichletCharacter.changeLevel_toUnitHom, hχ_dir_unit]
-  rcases miyake_4_6_4_dichotomy_strong χ_M p hp hpM g
+  rcases cuspForm_dichotomy_strong χ_M p hp hpM g
     (by rw [hχM_unit]; exact hg_char) hg_supp with
     hg_zero | ⟨h_fac, _g_p, _hg_p_char, _hg_p_eq⟩
   · refine Or.inl fun n hn_cop ↦ ?_
