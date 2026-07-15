@@ -17,11 +17,12 @@ consequently the function field `F(C)` is a degree-`2` extension of
 `Frac(F[X]) = F(x)`.
 
 This is a partial step toward ticket `T-II-1-005` (Silverman II.1.4); the
-full statement additionally requires separability.
+full statement additionally requires separability, which is handled in
+`HasseWeil/Curves/Separable.lean`.
 
-Unlike the elliptic-curve specialization, this file assumes no
-`[W.toAffine.IsElliptic]` hypothesis, so every smooth plane curve —
-elliptic or otherwise — has the result.
+The existing file `HasseWeil/Basic.lean` proves essentially the same facts
+but under `[W.toAffine.IsElliptic]`; this file drops that hypothesis so
+that every smooth plane curve — elliptic or otherwise — has the result.
 
 ## References
 
@@ -80,9 +81,9 @@ noncomputable instance isIntegral_polynomialX_coordinateRing :
     Algebra.IsIntegral (Polynomial F) C.CoordinateRing :=
   Algebra.IsIntegral.of_finite (Polynomial F) C.CoordinateRing
 
-/-- `F[C]` is a Noetherian ring. `F[X]` is Noetherian, and `F[C]` is
-module-finite over `F[X]`, so `F[C]` is a finitely-generated algebra over a
-Noetherian ring, hence Noetherian. -/
+/-- **T-INFRA-IC-001**: `F[C]` is a Noetherian ring. `F[X]` is Noetherian, and
+`F[C]` is module-finite over `F[X]`, so `F[C]` is a finitely-generated algebra
+over a Noetherian ring, hence Noetherian. -/
 instance isNoetherianRing_coordinateRing :
     IsNoetherianRing C.CoordinateRing :=
   Algebra.FiniteType.isNoetherianRing (Polynomial F) C.CoordinateRing
@@ -158,8 +159,10 @@ theorem algebraMap_polynomialX_functionField_injective :
 /-- The coordinate function `x` is nonzero — it is the image of the formal
 indeterminate under an injective algebra map. -/
 theorem coordX_ne_zero : C.coordX ≠ 0 := by
-  rw [coordX, map_ne_zero_iff _ C.algebraMap_polynomialX_functionField_injective]
-  exact Polynomial.X_ne_zero
+  intro h
+  rw [coordX, show (0 : C.FunctionField) =
+    algebraMap (Polynomial F) C.FunctionField 0 from (map_zero _).symm] at h
+  exact Polynomial.X_ne_zero (C.algebraMap_polynomialX_functionField_injective h)
 
 /-- The coordinate function `y ∈ K(C)`, i.e., the image of the second
 coordinate basis vector under the chain
@@ -172,8 +175,13 @@ noncomputable def coordY : C.FunctionField :=
 
 /-- The coordinate function `y` is nonzero. -/
 theorem coordY_ne_zero : C.coordY ≠ 0 := by
-  rw [coordY, map_ne_zero_iff _ (IsFractionRing.injective C.CoordinateRing C.FunctionField)]
-  exact (Affine.CoordinateRing.basis C.toAffine).ne_zero 1
+  simp only [coordY]
+  have hinj : Function.Injective (algebraMap C.CoordinateRing C.FunctionField) :=
+    IsFractionRing.injective _ _
+  intro h
+  have h2 : (Affine.CoordinateRing.basis C.toAffine 1 : C.CoordinateRing) = 0 := by
+    apply hinj; rw [h, map_zero]
+  exact (Affine.CoordinateRing.basis C.toAffine).ne_zero 1 h2
 
 /-- The coordinate function `x` is transcendental over `F`.
 Reference: Silverman II.1 (implicit in II.1.4 proof). -/
