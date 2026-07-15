@@ -649,4 +649,64 @@ theorem e3Delta_glued_isUnit {R : CommRingCat.{u}} (X : EllObj R)
   obtain ⟨hu3, huD⟩ := e3form_units ⟨ha₁, ha₂, ha₃, ha₄, ha₆⟩ Pr.elliptic
   exact huD.mul hu3
 
+open LocalPresentation MvPolynomial in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E15a stage 9 ★)** The base ring map of an `E3` datum:
+`MvPolynomial (Fin 2) R → Γ(X.base, ⊤)`, `X 0 ↦ βGlued, X 1 ↦ γGlued`. -/
+noncomputable def e3BaseMap {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 3) (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    MvPolynomial (Fin 2) R →+* Γ(X.base, ⊤) :=
+  eval₂Hom X.baseRingHom ![(e3BetaGlued X L hD h3).1, (e3GammaGlued X L hD h3).1]
+
+open LocalPresentation MvPolynomial in
+/-- The base map kills the flex relation, so descends to the flex-locus ring. -/
+theorem e3BaseMap_e3Rel {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 3) (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    e3BaseMap X L hD h3 (e3Rel R) = 0 := by
+  rw [e3BaseMap,
+    show e3Rel R = MvPolynomial.X 0 ^ 3 - (MvPolynomial.X 0 + MvPolynomial.X 1) ^ 3
+      from rfl]
+  simp only [map_sub, map_pow, map_add, eval₂Hom_X', Matrix.cons_val_zero,
+    Matrix.cons_val_one, Matrix.head_cons]
+  linear_combination e3_glued_flex X L hD h3
+
+open LocalPresentation MvPolynomial in
+set_option backward.isDefEq.respectTransparency false in
+/-- The descended map on the flex-locus ring `R[β,γ]/(β³−(β+γ)³)`. -/
+noncomputable def e3QuotientMap {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 3) (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    E3Quotient R →+* Γ(X.base, ⊤) :=
+  Ideal.Quotient.lift _ (e3BaseMap X L hD h3) (by
+    intro a ha
+    rw [Ideal.mem_span_singleton] at ha
+    obtain ⟨c, rfl⟩ := ha
+    rw [map_mul, e3BaseMap_e3Rel, zero_mul])
+
+open LocalPresentation MvPolynomial in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E15a stage 9 ★)** The classifying ring map of an `E3` datum:
+`R[β,γ][δ⁻¹]/(β³−(β+γ)³) → Γ(X.base, ⊤)` (KM Ex. 2.2.2's map to `ℰ₃`). -/
+noncomputable def e3ClassifyingRingHom {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 3) (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    E3ModuliRing R →+* Γ(X.base, ⊤) := by
+  refine IsLocalization.Away.lift (e3Delta R) (g := e3QuotientMap X L hD h3) ?_
+  rw [show e3QuotientMap X L hD h3 (e3Delta R) =
+      (((3 * (e3GammaGlued X L hD h3).1 - 1) ^ 3 -
+        27 * (-3 * (e3GammaGlued X L hD h3).1 ^ 2 - (e3BetaGlued X L hD h3).1 -
+          3 * (e3BetaGlued X L hD h3).1 * (e3GammaGlued X L hD h3).1)) *
+      (-3 * (e3GammaGlued X L hD h3).1 ^ 2 - (e3BetaGlued X L hD h3).1 -
+        3 * (e3BetaGlued X L hD h3).1 * (e3GammaGlued X L hD h3).1)) from by
+    show (e3QuotientMap X L hD h3).comp (Ideal.Quotient.mk _)
+        ((e3A₁Poly R ^ 3 - 27 * e3A₃Poly R) * e3A₃Poly R) = _
+    show e3BaseMap X L hD h3 ((e3A₁Poly R ^ 3 - 27 * e3A₃Poly R) * e3A₃Poly R) = _
+    rw [e3BaseMap]
+    simp only [e3A₁Poly, e3A₃Poly, map_mul, map_sub, map_pow, map_neg,
+      map_ofNat, map_one, eval₂Hom_X', Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.head_cons]]
+  exact e3Delta_glued_isUnit X L hD h3
+
 end ModularCurves
