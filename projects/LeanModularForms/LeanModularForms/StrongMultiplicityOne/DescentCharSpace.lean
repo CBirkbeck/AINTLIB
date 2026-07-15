@@ -388,7 +388,7 @@ private lemma delta_slash_sum_coeff_zero
   by_cases hp_sq : p ^ 2 ∣ l' * N
   · exact delta_slash_sum_coeff_zero_sq_case p hp hp_dvd_lN hp_sq Δ_form m h_apm_zero
   ·
-    have h_M6_1_pt := miyake_4_6_6_level_commute (N := l' * N) (l := l' ^ 2) (k := k)
+    have h_M6_1_pt := level_commute (N := l' * N) (l := l' ^ 2) (k := k)
       p hp hp_dvd_lN (hpl'.pow_right 2) χ_M_unit Δ_form.toModularForm'
       ((cuspFormToModularForm_mem_modFormCharSpace_iff_mem_cuspFormCharSpace
         (k := k) χ_M_unit Δ_form).mpr hΔ_form_χ)
@@ -1086,7 +1086,7 @@ lemma Φ_qExp_coeff_eq_count_div_p_mul_g_low_coeff {N : ℕ} [NeZero N] {k : ℤ
         (⇑f.toModularForm' ∣[k] descendCosetList p (l' * N) hp v) z
   have hΦ_eq_Ψ : Φ_fun = Ψ_fun :=
     funext fun z ↦
-      miyake_4_6_6_level_commute p hp hpN hpl' χ f.toModularForm' hfχ_mod z
+      level_commute p hp hpN hpl' χ f.toModularForm' hfχ_mod z
   have h_Mp_eq : (l' * N) / p = l' * (N / p) := by
     rcases hpN with ⟨d, hd⟩
     rw [hd, show l' * (p * d) = p * (l' * d) by ring,

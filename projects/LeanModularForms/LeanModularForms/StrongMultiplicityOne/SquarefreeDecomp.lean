@@ -1157,7 +1157,7 @@ lemma per_q_slash_sum_at_deep_qexp_zero
   have hF_q_mod : F_q.toModularForm' ∈ modFormCharSpace k χ_F :=
     (cuspFormToModularForm_mem_modFormCharSpace_iff_mem_cuspFormCharSpace
       (k := k) χ_F F_q).mpr hF_q_char
-  have h_M6_2 := miyake_4_6_6_level_commute_delta (N := M_q) (l := q) (k := k)
+  have h_M6_2 := level_commute_delta (N := M_q) (l := q) (k := k)
     p hp hpM_q hpq hq_dvd_Mq_div_p χ_F χ_F_low h_χ_F_factor
     F_q.toModularForm' hF_q_mod
   let G_q : CuspForm ((Gamma1 (M_q / p)).map (mapGL ℝ)) k :=
