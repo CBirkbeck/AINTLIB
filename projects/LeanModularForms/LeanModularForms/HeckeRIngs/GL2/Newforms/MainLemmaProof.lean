@@ -1424,7 +1424,6 @@ private lemma charPiece_coeff_sum_eq_zero
   rw [hfilter_fib]
   simp only [hD_zero, mul_zero, Finset.sum_const_zero]
 
-set_option maxHeartbeats 1000000 in
 /-- **Per-character coefficient inheritance (route-B ingredient 1).**  If `f` is a cusp form
 all of whose canonical Fourier coefficients at indices coprime to `N` vanish, and `gd χ` is the
 `χ`-Nebentypus component of `f` in the character decomposition `f = ∑_χ gd χ` (so that

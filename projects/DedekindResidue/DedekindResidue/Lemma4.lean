@@ -1748,7 +1748,6 @@ theorem plateauSum_eq_sum {X : ℝ} (hX : 1 < X) (σ : ℝ) :
   rw [Set.Finite.mem_toFinset, Set.mem_setOf_eq] at hpk
   exact if_neg hpk
 
-set_option maxHeartbeats 800000 in
 /-- The plateau sum is continuous in `σ` (its support is finite and
 `σ`-independent, and each term is an exponential in `σ`). -/
 theorem tendsto_plateauSum {X : ℝ} (hX : 1 < X) :
