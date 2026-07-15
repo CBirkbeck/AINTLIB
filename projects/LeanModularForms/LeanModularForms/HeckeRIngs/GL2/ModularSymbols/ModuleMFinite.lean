@@ -22,7 +22,8 @@ exhibit a *finite* set whose `Γ₁(N)`-orbit spans the whole tensor module over
 
 The proof has two layers:
 
-* **Layer (i)** (`Div0` is orbit-spanned): a finite set `S_Div : Finset (Div0 ℤ)` whose `Γ₁(N)`-orbit
+* **Layer (i)** (`Div0` is orbit-spanned): a finite set `S_Div : Finset (Div0 ℤ)` whose
+  `Γ₁(N)`-orbit
   spans `Div0 ℤ`.  This is the crux — it uses the finitely-many-cusps fact
   (`instFiniteCuspsGamma1`) to pick orbit representatives, the augmentation-kernel-as-differences
   description of `Div0`, finite generation of `Γ₁(N)` (`SL2Generation.lean`), and a telescoping
