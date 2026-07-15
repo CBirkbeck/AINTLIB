@@ -306,7 +306,8 @@ private lemma lterm_ppow (p : ℕ) (hp : Nat.Prime p) (e : ℕ) :
   rw [lterm, LSeries.term_of_ne_zero hpe, lCoeff_eq_a, cpow_ppow, div_eq_mul_inv,
     Complex.cpow_neg]
 
-/-- Norm-summability of the local series `e ↦ a_{p^e} · X^e` (a subsequence of the global series). -/
+/-- Norm-summability of the local series `e ↦ a_{p^e} · X^e` (a subsequence of the global
+series). -/
 private lemma local_summable (p : ℕ) (hp : Nat.Prime p) (hs : (k : ℝ) / 2 + 1 < s.re) :
     Summable (fun e => a f (p ^ e) * ((p : ℂ) ^ (-s)) ^ e) := by
   have hinj : Function.Injective (fun e => p ^ e) := Nat.pow_right_injective hp.two_le
