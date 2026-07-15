@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.QuotientConvolutionFrobeniusDet
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.QuotientConvolutionFrobeniusDet
 
 @[expose] public section
 
