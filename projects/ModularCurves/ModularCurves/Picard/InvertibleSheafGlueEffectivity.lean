@@ -4017,6 +4017,28 @@ theorem affineIntersectionUnitCocycle_overlapTransitionSection
       (hpair.ge.trans hVi) (hpair.ge.trans hVj) : Γ(X, W))
   exact hr
 
+/-- Pulling the affine overlap transition to the geometric intersection gives the original
+change-of-basis scalar. -/
+theorem affineIntersectionUnitCocycle_pullback_overlapTransitionIso
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i j : J) :
+    let c := affineIntersectionUnitCocycle π U e
+    let q := π.affineIntersectionOverlapIso U hU i j
+    (pullback q.inv).map (c.overlapTransitionIso i j).hom ≫
+        (pullbackUnitIso q.inv).hom =
+      (pullbackUnitIso q.inv).hom ≫
+        ModularCurves.unitEndomorphismOfTopSection
+          (openTopSection (U i ⊓ U j)
+            (trivializingCoverTransitionUnitOn U e (U i ⊓ U j) i j
+              inf_le_left inf_le_right : Γ(X, U i ⊓ U j))) := by
+  dsimp only
+  rw [AffineIntersectionUnitCocycle.overlapTransitionIso,
+    ModularCurves.unitAutomorphismOfTopUnit_hom, pullbackUnitIso_scalar,
+    affineIntersectionUnitCocycle_overlapTransitionSection]
+
 /-- A chosen trivialization on an original open induces a trivialization on the corresponding
 chart of the affine-intersection glued model. -/
 noncomputable def affineIntersectionOriginalChartTrivialization

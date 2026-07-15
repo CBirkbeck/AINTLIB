@@ -608,3 +608,11 @@ second transports the inverse top-section comparison along an inclusion of opens
 duplicate local arguments from `affineIntersectionUnitCocycle_overlapTransitionSection` without
 introducing new constructions or hypotheses. The focused build is green, and both axiom audits
 are exactly `propext`, `Classical.choice`, and `Quot.sound`.
+
+Completed spawned dependency (2026-07-15): proved
+`affineIntersectionUnitCocycle_pullback_overlapTransitionIso`. Pulling the affine overlap
+automorphism back along the inverse overlap-coordinate isomorphism and then passing to unit
+coordinates is multiplication by the original change-of-basis unit on `U i ⊓ U j`. This is the
+scalar part of the active chart-transition square; it adds no hypotheses or proof-resource
+options. The focused build is green, and its axiom audit is exactly `propext`,
+`Classical.choice`, and `Quot.sound`.
