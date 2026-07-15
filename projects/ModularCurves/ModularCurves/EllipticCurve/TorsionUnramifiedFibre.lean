@@ -331,7 +331,8 @@ private theorem pointSharp_congr {U : (F.E).Opens} {w w' : Spec R ⟶ F.E} (h : 
 /-- Evaluation of the zero point: the chart comorphism of `t ≫ zero` is the augmentation
 followed by the structure map of `R`. -/
 private theorem pointSharp_zero_point {U : (F.E).Opens}
-    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U) (t : Spec R ⟶ Spec (CommRingCat.of k))
+    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U)
+    (t : Spec R ⟶ Spec (CommRingCat.of k))
     (hz : ∀ x : ↑(Spec R), ((0 : F.Point t) : Spec R ⟶ F.E).base x ∈ U)
     (f : Γ(F.E, U)) :
     pointSharp ((0 : F.Point t) : Spec R ⟶ F.E) hz f =
@@ -346,7 +347,8 @@ private theorem pointSharp_zero_point {U : (F.E).Opens}
   rfl
 
 /-- The chart comorphism of a point over `t` restricts along `π` to the `t`-comorphism. -/
-private theorem pointSharp_comp_π {U : (F.E).Opens} {t : Spec R ⟶ Spec (CommRingCat.of k)} (P : F.Point t)
+private theorem pointSharp_comp_π {U : (F.E).Opens}
+    {t : Spec R ⟶ Spec (CommRingCat.of k)} (P : F.Point t)
     (hp : ∀ x : ↑(Spec R), (P.1).base x ∈ U) (c : Γ(Spec (CommRingCat.of k), ⊤)) :
     pointSharp P.1 hp (F.π.appLE ⊤ U (fun _ _ ↦ trivial) c) =
       (t.appLE ⊤ ⊤ le_top ≫ (Scheme.ΓSpecIso R).hom) c := by
@@ -356,7 +358,8 @@ private theorem pointSharp_comp_π {U : (F.E).Opens} {t : Spec R ⟶ Spec (CommR
 
 /-- The augmentation retracts the structure map: `ζ ∘ π♯ = id` (`Γ`-dual of `zero ≫ π = 𝟙`). -/
 private theorem zero_appLE_π_appLE {U : (F.E).Opens}
-    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U) (c : Γ(Spec (CommRingCat.of k), ⊤)) :
+    (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U)
+    (c : Γ(Spec (CommRingCat.of k), ⊤)) :
     F.zero.appLE U ⊤ (fun x _ ↦ heU x) (F.π.appLE ⊤ U (fun _ _ ↦ trivial) c) = c := by
   show (F.π.appLE ⊤ U _ ≫ F.zero.appLE U ⊤ _) c = c
   rw [Scheme.Hom.appLE_comp_appLE F.zero F.π ⊤ U ⊤ _ _,
