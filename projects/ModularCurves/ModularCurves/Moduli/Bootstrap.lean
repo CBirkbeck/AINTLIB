@@ -9,6 +9,7 @@ import ModularCurves.Moduli.OmegaFunctor
 import ModularCurves.Moduli.UniversalAdapted
 import ModularCurves.Moduli.LegendreDelta
 import ModularCurves.Moduli.UniversalLegendre
+import ModularCurves.Moduli.UniversalLevelThree
 
 /-!
 # The KM 4.7 bootstrap objects (T-E12–T-E15)
@@ -74,7 +75,20 @@ plus `ForMathlib/TateNormalForm.lean` are the intended engines. -/
 theorem naiveLevelThree_representable_by_affine (hR : IsUnit (3 : R)) :
     ∃ X : EllObj R, IsAffine X.base ∧
       Nonempty ((gammaFullNaiveProblem R 3).RepresentableBy X) := by
-  sorry
+  -- TURNKEY (STREAM-OMEGA v10.262): the entire ℰ₃ representability machine is applied here;
+  -- the two remaining goals are EXACTLY the keystone (`hL`) + bridge (`hArb`) inputs, both
+  -- bottoming out at KM brick 6 → BB-DEG (torsion→coord bridges + E[3] generation). The
+  -- instant those land this becomes sorry-free.
+  refine naiveLevelThree_representable_by_affine_of_conditions R hR ?_ ?_
+  · -- `hL`: the universal marked pair `(P, Q) = ((0,0), (γ, β+γ))` is a naive full level-`3`
+    -- structure — section-level killing `[3]P = [3]Q = 0` + geometric `E[3]`-generation.
+    -- The E[3] keystone (brick 6 field anchor → G0 BB-DEG `mulByHom_finrank = 3²`).
+    sorry
+  · -- `hArb`: every naive level-`3` structure on every `E/S` IS an `ℰ₃`-datum — supplied by
+    -- `isE3Datum_of_flexCharts` + the torsion→coordinate bridges `3•P=0 ⟹ μ_P=0` &
+    -- `3•Q=0 ⟹ cubic(x(Q))=0` (KM brick 6 `MulByHomDegree` / G0 BB-DEG `Torsion`).
+    intro X L
+    sorry
 
 /-- **(T-E15b, KM engine axiom 2 for `δ = ` naive level 3)** For every elliptic curve `E/S`
 over a base in which `3` is invertible, the `S`-scheme `δ_{E/S}` relatively representing the
