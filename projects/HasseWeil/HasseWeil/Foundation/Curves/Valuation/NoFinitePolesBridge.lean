@@ -155,7 +155,7 @@ theorem pointValuation_le_one_of_ord_nonneg
     (⟨W⟩ : SmoothPlaneCurve F).pointValuation P f ≤ 1 := by
   -- Unfold ord_P: it's defined via -toAdd of the multiplicative valuation.
   -- ord_P f ≥ 0 ↔ pointValuation P f ≤ 1 (when f ≠ 0).
-  unfold SmoothPlaneCurve.ord_P at h_ord
+  simp only [SmoothPlaneCurve.ord_P] at h_ord
   by_cases h_zero : (⟨W⟩ : SmoothPlaneCurve F).pointValuation P f = 0
   · rw [h_zero]; exact zero_le_one' _
   · rw [dif_neg h_zero] at h_ord
