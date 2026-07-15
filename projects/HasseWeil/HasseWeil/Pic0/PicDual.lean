@@ -373,8 +373,6 @@ theorem comap_XYIdeal_mem_nonZeroDivisors (ch : α.CoordHom)
   exact mem_nonZeroDivisors_iff_ne_zero.mpr
     (Ideal.under_ne_bot (A := E.CoordinateRing) (B := E.CoordinateRing) hbot)
 
-set_option maxHeartbeats 1600000 in
--- The residue-field `finrank` bookkeeping + the twisted `R →[α*] R` instance chain need extra room.
 /-- **The `classNorm`/`comap` identity at a rational point (residue degree `1`) — UNCONDITIONAL.**
 
 For a rational point `P = (x, y)` and a coordinate-ring restriction `ch`, the relative-norm class
