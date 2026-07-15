@@ -1,5 +1,6 @@
 import ModularCurves.Picard.InvertibleSheafGlueDataDescent
 import ModularCurves.Picard.DualPullback.OpenAdjunction
+import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 
 /-!
 # Effectivity of affine-intersection line-bundle descent
@@ -687,12 +688,13 @@ private theorem restrictPushforwardIsoOfIsPullback_comp_of_eq
 
 private theorem restrictPushforwardUnitIso_inv_map_comp_of_eq
     {A B C A' B' C' : Scheme.{u}}
+    {P : C'.Modules}
     (f : A ⟶ B) (g : B ⟶ C) (f' : A' ⟶ B') (g' : B' ⟶ C')
     (h' : A' ⟶ C') (iA : A' ⟶ A) (iB : B' ⟶ B) (iC : C' ⟶ C)
     [IsOpenImmersion iA] [IsOpenImmersion iB] [IsOpenImmersion iC]
     (Hf : IsPullback f' iA iB f) (Hg : IsPullback g' iB iC g)
     (Hh : IsPullback h' iA iC (f ≫ g)) (h : f' ≫ g' = h')
-    (a : unitObj C' ⟶ (pushforward g').obj (unitObj B'))
+    (a : P ⟶ (pushforward g').obj (unitObj B'))
     (m : unitObj B ⟶ (pushforward f).obj (unitObj A)) :
     a ≫ (restrictPushforwardUnitIsoOfIsPullback g g' iB iC Hg).inv ≫
           (restrictFunctor iC).map
@@ -1790,6 +1792,165 @@ private theorem AffineIntersectionUnitCocycle.chartLocalComponent_left_baseChang
   exact (c.chartLocalComponent_left_toBefore hopen hpush k i j).trans
     (c.chartLocalComponent_left_before_after hopen hpush k i j)
 
+private noncomputable def AffineIntersectionUnitCocycle.chartLocalLeftMap
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    let t := affineIntersectionChartChosenPullback₃ hopen hpush i j k
+    (pushforward (D.t i k ≫ D.f k i)).obj (unitObj (D.V (i, k))) ⟶
+      (pushforward t.p₃).obj (unitObj t.pullback) := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  let R := @restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)
+  exact (c.chartExtensionRestrictIso hopen hpush k i).inv ≫
+    R.map (c.chartToOverlapLeft hopen hpush i j) ≫
+    (c.overlapExtensionRestrictIso hopen hpush k i j).hom
+
+private noncomputable def AffineIntersectionUnitCocycle.chartLocalRightMap
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    let t := affineIntersectionChartChosenPullback₃ hopen hpush i j k
+    (pushforward (D.t j k ≫ D.f k j)).obj (unitObj (D.V (j, k))) ⟶
+      (pushforward t.p₃).obj (unitObj t.pullback) := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  let R := @restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)
+  exact (c.chartExtensionRestrictIso hopen hpush k j).inv ≫
+    R.map (c.chartToOverlapRight hopen hpush i j) ≫
+    (c.overlapExtensionRestrictIso hopen hpush k i j).hom
+
+private theorem AffineIntersectionUnitCocycle.chartLocalLeftMap_eq
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    let t := affineIntersectionChartChosenPullback₃ hopen hpush i j k
+    let q := D.t i k ≫ D.f k i
+    c.chartLocalLeftMap hopen hpush k i j =
+      (pushforward q).map
+          (c.chartToTripleLeftRestricted hopen hpush k i j) ≫
+        (pushforwardComp t.p₁₃ q).hom.app _ ≫
+        (pushforwardCongr t.p₁₃_p₃).hom.app _ ≫
+        (pushforward t.p₃).map
+          (@restrictUnitIso _ _ t.p₁₂
+            (affineIntersectionChartTriple_p₁₂_open
+              hopen hpush i j k)).hom := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  let sq := affineIntersectionChartChosenPullback hopen hpush
+  let t := affineIntersectionChartChosenPullback₃ hopen hpush i j k
+  let q := D.t i k ≫ D.f k i
+  have Houter : IsPullback q (D.f i k) (D.ι k) (D.ι i) :=
+    (IsPullback.of_isLimit (D.vPullbackConeIsLimit i k)).flip
+  have Hinner : IsPullback t.p₁₃ t.p₁₂ (D.f i k) (D.f i j) :=
+    t.isPullback₁.flip
+  have Hdirect : IsPullback t.p₃ t.p₁₂ (D.ι k) (D.f i j ≫ D.ι i) := by
+    have H' := t.isPullback₂.paste_vert (sq j k).isPullback
+    rw [t.p₂₃_p₃] at H'
+    rw [(sq i j).hp₂] at H'
+    exact H'.flip
+  letI hιk : IsOpenImmersion (D.ι k) := D.ι_isOpenImmersion k
+  letI hfik : IsOpenImmersion (D.f i k) := D.f_open i k
+  letI hp₁₂ : IsOpenImmersion t.p₁₂ :=
+    affineIntersectionChartTriple_p₁₂_open hopen hpush i j k
+  dsimp only
+  rw [AffineIntersectionUnitCocycle.chartLocalLeftMap]
+  rw [c.chartToOverlapLeft_eq hopen hpush i j]
+  have hbase :=
+    (@restrictPushforwardUnitIso_inv_map_comp_of_eq
+      (D.V (i, j)) (D.U i) D.glued t.pullback (D.V (i, k))
+      (D.U (show D.J from k)) _
+      (D.f i j) (D.ι i) t.p₁₃ q t.p₃ t.p₁₂ (D.f i k) (D.ι k)
+      hp₁₂ hfik hιk Hinner Houter Hdirect t.p₁₃_p₃
+      (𝟙 ((pushforward q).obj (unitObj (D.V (i, k)))))
+      (c.chartToOverlapLeftInner hopen hpush i j))
+  exact hbase
+
+private theorem affineIntersectionChartTriple_p₁₃_right_self_isIso
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i k : J) :
+    IsIso (affineIntersectionChartChosenPullback₃ hopen hpush i k k).p₁₃ := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  let t := affineIntersectionChartChosenPullback₃ hopen hpush i k k
+  letI : IsOpenImmersion (D.f i k) := D.f_open i k
+  letI : Mono (D.f i k) := IsOpenImmersion.mono (D.f i k)
+  have H : IsPullback t.p₁₂ t.p₁₃ (D.f i k) (D.f i k) :=
+    t.isPullback₁
+  exact H.isIso_snd_iso_of_mono (inst := IsOpenImmersion.mono (D.f i k))
+
+private theorem
+    AffineIntersectionUnitCocycle.chartToTripleLeftRestricted_right_self_isIso
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k i : J) :
+    IsIso (c.chartToTripleLeftRestricted hopen hpush k i k) := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  let t := affineIntersectionChartChosenPullback₃ hopen hpush i k k
+  letI : IsIso t.p₁₃ :=
+    affineIntersectionChartTriple_p₁₃_right_self_isIso hopen hpush i k
+  letI : (pullback t.p₁₃).IsEquivalence :=
+    pullback_isEquivalence_of_iso (asIso t.p₁₃)
+  letI : (pullback t.p₁₃).Full := by infer_instance
+  letI : (pullback t.p₁₃).Faithful := by infer_instance
+  letI : IsIso (pullbackPushforwardAdjunction t.p₁₃).unit := by
+    infer_instance
+  letI : IsIso
+      (c.chartToTripleLeftPullback hopen hpush k i k) := by
+    dsimp only [AffineIntersectionUnitCocycle.chartToTripleLeftPullback]
+    infer_instance
+  rw [c.chartToTripleLeftRestricted_eq hopen hpush k i k]
+  rw [Adjunction.homEquiv_apply]
+  have hunit : IsIso ((pullbackPushforwardAdjunction t.p₁₃).unit.app
+      (unitObj (D.V (i, k)))) := by
+    infer_instance
+  have hmap : IsIso ((pushforward t.p₁₃).map
+      (c.chartToTripleLeftPullback hopen hpush k i k)) := by
+    infer_instance
+  exact IsIso.comp_isIso' hunit hmap
+
+private theorem AffineIntersectionUnitCocycle.chartLocalLeftMap_right_self_isIso
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k i : J) :
+    IsIso (c.chartLocalLeftMap hopen hpush k i k) := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  let t := affineIntersectionChartChosenPullback₃ hopen hpush i k k
+  let q := D.t i k ≫ D.f k i
+  letI : IsIso (c.chartToTripleLeftRestricted hopen hpush k i k) :=
+    c.chartToTripleLeftRestricted_right_self_isIso hopen hpush k i
+  rw [c.chartLocalLeftMap_eq hopen hpush k i k]
+  have hmap : IsIso ((pushforward q).map
+      (c.chartToTripleLeftRestricted hopen hpush k i k)) := by
+    infer_instance
+  have hcomp : IsIso ((pushforwardComp t.p₁₃ q).hom.app
+      ((@restrictFunctor _ _ t.p₁₂
+        (affineIntersectionChartTriple_p₁₂_open hopen hpush i k k)).obj
+          (unitObj (D.V (i, k))))) := by
+    infer_instance
+  have hcongr : IsIso ((pushforwardCongr t.p₁₃_p₃).hom.app
+      ((@restrictFunctor _ _ t.p₁₂
+        (affineIntersectionChartTriple_p₁₂_open hopen hpush i k k)).obj
+          (unitObj (D.V (i, k))))) := by
+    infer_instance
+  have hunit : IsIso ((pushforward t.p₃).map
+      (@restrictUnitIso _ _ t.p₁₂
+        (affineIntersectionChartTriple_p₁₂_open hopen hpush i k k)).hom) := by
+    infer_instance
+  exact IsIso.comp_isIso' hmap
+    (IsIso.comp_isIso' hcomp (IsIso.comp_isIso' hcongr hunit))
+
 private theorem AffineIntersectionUnitCocycle.chartLocalComponent_left
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
     (c : AffineIntersectionUnitCocycle F)
@@ -2431,6 +2592,94 @@ noncomputable def AffineIntersectionUnitCocycle.gluedModule
     D.glued.Modules :=
   equalizer (c.chartGlueLeft hopen hpush) (c.chartGlueRight hopen hpush)
 
+private noncomputable def
+    AffineIntersectionUnitCocycle.chartLocalEqualizerComponent
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k i : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    let R := @restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)
+    R.obj (c.gluedModule hopen hpush) ⟶
+      (pushforward (D.t i k ≫ D.f k i)).obj (unitObj (D.V (i, k))) := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  let R := @restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)
+  exact R.map (equalizer.ι
+        (c.chartGlueLeft hopen hpush) (c.chartGlueRight hopen hpush)) ≫
+      R.map (Pi.π (fun l : J ↦ c.chartExtension hopen hpush l) i) ≫
+    (c.chartExtensionRestrictIso hopen hpush k i).hom
+
+private theorem
+    AffineIntersectionUnitCocycle.chartLocalEqualizerComponent_equalizes
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k i j : J) :
+    c.chartLocalEqualizerComponent hopen hpush k i ≫
+        c.chartLocalLeftMap hopen hpush k i j =
+      c.chartLocalEqualizerComponent hopen hpush k j ≫
+        c.chartLocalRightMap hopen hpush k i j := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  let R := @restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)
+  let e := c.overlapExtensionRestrictIso hopen hpush k i j
+  let targetIso := c.chartGlueTargetRestrictIso hopen hpush k
+  let targetProjection := Pi.π (fun lm : J × J ↦
+    let t := affineIntersectionChartChosenPullback₃ hopen hpush lm.1 lm.2 k
+    (pushforward t.p₃).obj (unitObj t.pullback)) (i, j)
+  have hcondition := congrArg R.map (equalizer.condition
+    (c.chartGlueLeft hopen hpush) (c.chartGlueRight hopen hpush))
+  have hcondition' :
+      R.map (equalizer.ι
+            (c.chartGlueLeft hopen hpush) (c.chartGlueRight hopen hpush)) ≫
+          R.map (c.chartGlueLeft hopen hpush) =
+        R.map (equalizer.ι
+            (c.chartGlueLeft hopen hpush) (c.chartGlueRight hopen hpush)) ≫
+          R.map (c.chartGlueRight hopen hpush) := by
+    simpa only [R.map_comp] using hcondition
+  have hcomponent := congrArg
+    (fun m ↦ m ≫ targetIso.hom ≫ targetProjection) hcondition'
+  have hleft := c.restrictChartGlueLeft_target_π hopen hpush k i j
+  have hleft' := congrArg
+    (fun m ↦ R.map (equalizer.ι
+      (c.chartGlueLeft hopen hpush) (c.chartGlueRight hopen hpush)) ≫ m) hleft
+  have hright := c.restrictChartGlueRight_target_π hopen hpush k i j
+  have hright' := congrArg
+    (fun m ↦ R.map (equalizer.ι
+      (c.chartGlueLeft hopen hpush) (c.chartGlueRight hopen hpush)) ≫ m) hright
+  dsimp only [AffineIntersectionUnitCocycle.chartLocalEqualizerComponent,
+    AffineIntersectionUnitCocycle.gluedModule,
+    AffineIntersectionUnitCocycle.chartLocalLeftMap,
+    AffineIntersectionUnitCocycle.chartLocalRightMap]
+  simp only [Category.assoc, Iso.hom_inv_id_assoc]
+  change
+    R.map (equalizer.ι
+          (c.chartGlueLeft hopen hpush) (c.chartGlueRight hopen hpush)) ≫
+        R.map (Pi.π (fun l : J ↦ c.chartExtension hopen hpush l) i) ≫
+          R.map (c.chartToOverlapLeft hopen hpush i j) ≫ e.hom =
+      R.map (equalizer.ι
+          (c.chartGlueLeft hopen hpush) (c.chartGlueRight hopen hpush)) ≫
+        R.map (Pi.π (fun l : J ↦ c.chartExtension hopen hpush l) j) ≫
+          R.map (c.chartToOverlapRight hopen hpush i j) ≫ e.hom
+  have hchain := hleft'.symm.trans (hcomponent.trans hright')
+  convert hchain using 1
+  · rfl
+  · rfl
+
+private theorem
+    AffineIntersectionUnitCocycle.chartLocalTupleComponent_equalizes_maps
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k i j : J) :
+    c.chartLocalTupleComponent hopen hpush k i ≫
+        c.chartLocalLeftMap hopen hpush k i j =
+      c.chartLocalTupleComponent hopen hpush k j ≫
+        c.chartLocalRightMap hopen hpush k i j := by
+  exact c.chartLocalComponent_equalizes hopen hpush k i j
+
 private noncomputable def AffineIntersectionUnitCocycle.chartLocalLift
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
     (c : AffineIntersectionUnitCocycle F)
@@ -2471,6 +2720,71 @@ private theorem AffineIntersectionUnitCocycle.chartLocalLift_ι
   dsimp only [AffineIntersectionUnitCocycle.chartLocalLift,
     AffineIntersectionUnitCocycle.gluedModule]
   rw [Category.assoc, PreservesEqualizer.iso_inv_ι, equalizer.lift_ι]
+
+private theorem AffineIntersectionUnitCocycle.chartLocalTupleComponent_self_isIso
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k : J) :
+    IsIso (c.chartLocalTupleComponent hopen hpush k k) := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  let h := D.t k k ≫ D.f k k
+  letI : IsIso (D.t k k) := by
+    rw [D.t_id]
+    infer_instance
+  letI : IsIso (D.f k k) := D.f_id k
+  letI : IsIso h := inferInstance
+  letI : (pullback h).IsEquivalence :=
+    pullback_isEquivalence_of_iso (asIso h)
+  letI : (pullback h).Full := by infer_instance
+  letI : (pullback h).Faithful := by infer_instance
+  letI : IsIso (pullbackPushforwardAdjunction h).unit := by infer_instance
+  have hunit : IsIso ((pullbackPushforwardAdjunction h).unit.app
+      (unitObj (D.U k))) := by infer_instance
+  have hmap : IsIso ((pushforward h).map (pullbackUnitIso h).hom) := by
+    infer_instance
+  rw [c.chartLocalTupleComponent_eq hopen hpush k k]
+  rw [c.overlapTransitionIso_self]
+  simp only [Iso.refl_inv, Category.comp_id]
+  change IsIso ((pullbackPushforwardAdjunction h).homEquiv _ _
+    (pullbackUnitIso h).hom)
+  rw [Adjunction.homEquiv_apply]
+  exact IsIso.comp_isIso' hunit hmap
+
+private noncomputable def AffineIntersectionUnitCocycle.chartLocalProjection
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    let R := @restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)
+    R.obj (c.gluedModule hopen hpush) ⟶ unitObj (D.U k) := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  let R := @restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)
+  letI : IsIso (c.chartLocalTupleComponent hopen hpush k k) :=
+    c.chartLocalTupleComponent_self_isIso hopen hpush k
+  exact R.map (equalizer.ι
+        (c.chartGlueLeft hopen hpush) (c.chartGlueRight hopen hpush)) ≫
+      R.map (Pi.π (fun i : J ↦ c.chartExtension hopen hpush i) k) ≫
+      (c.chartExtensionRestrictIso hopen hpush k k).hom ≫
+    inv (c.chartLocalTupleComponent hopen hpush k k)
+
+private theorem AffineIntersectionUnitCocycle.chartLocalLift_projection
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k : J) :
+    c.chartLocalLift hopen hpush k ≫
+        c.chartLocalProjection hopen hpush k = 𝟙 _ := by
+  letI : IsIso (c.chartLocalTupleComponent hopen hpush k k) :=
+    c.chartLocalTupleComponent_self_isIso hopen hpush k
+  dsimp only [AffineIntersectionUnitCocycle.chartLocalProjection]
+  rw [c.chartLocalLift_ι_assoc]
+  rw [c.chartLocalSource_π_assoc]
+  simp
 
 end
 
