@@ -21057,3 +21057,24 @@ Bootstrap:74 sorry) needs the universal `L : FullLevelPt 3` = the section-level 
 Then the rt2/RepresentableBy transposition (Legendre CLS ladder — RT1 `pullSection_e3ClassifyingEllHom_P/Q`
 already done) closes the discharge. The keystone-free NORM core (6 lemmas) + the B2 fix + `universalE3_hcubic`
 are all axiom-clean and banked.
+
+### v10.258-GH — [GHA3 β2-L] LANDED axiom-clean; route-β is 3/5 done (STREAM-GH)
+Commit dfbecfa92 (pushed). `levelSpacePullbackIso` + `_hom_fst`/`_hom_snd_struct` triangles all
+{propext, Classical.choice, Quot.sound}: `U_Γ(N) ×_S T ≅ U_Γ(N) ×_{E[N]²_S} (E_T[N]²_T)` — the
+base-changed level space sits as a closed subscheme of the PRIMED ambient with the base-changed
+structure map, via pullbackRightPullbackFstIso-cancel + isoPullback leg-transport.
+**Route-β ledger: β1 ✓ (discovered-proven) · β4 ✓ (descent shell) · β2-ambient ✓ · β2-L ✓ ·
+REMAINING: β2-heart + β3.**
+**β2-heart design (next firing):** apply `exists_iso_of_factor_iff` to
+i := pullback.snd (levelSpaceΓι E N) (torsionPairBaseChangeHom E p N) (closed imm ✓ stable) vs
+i' := levelSpaceΓι (E.baseChange p) N, both into E_T[N]²_T. The iff at v : V ⟶ ambient':
+factor-through-pulled-back ⟺ (v ≫ pairHom) factors through ιL [pullback-UP one-liner] ⟺
+IsFullLevel over V→T→S [levelSpaceΓ_spec E, after decomposing v ≫ pairHom into the two
+E-point legs] ⟺ IsFullLevel over V→T [spec E_T] — the middle bridge via
+`fullLevel_divisor_iff_naive_gen` (T-D8 box, both curves) + geometric-point composition; the
+(B1) leaf = relating (E.baseChange p).baseChange v-geometric-pulls to E-geometric-pulls
+(scope InvariantDifferential.transportE_baseChange). Watch: point-dictionary
+pointToTorsion-vs-pairHom leg compatibility (pairHom legs are torsionBaseChangeHom).
+**β3 design:** under β1's trivialization Over-iso, levelSpaceΓ (E_T) ≅ a clopen of
+constScheme T ((Fin 2 → ZMod N) × (Fin 2 → ZMod N))-ish; clopen-in-finite-étale ⟹ étale;
+needs the constant-form full-level enumeration (combinatorial leg). (STREAM-GH)
