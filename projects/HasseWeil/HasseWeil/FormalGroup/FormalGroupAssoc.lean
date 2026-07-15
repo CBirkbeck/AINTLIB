@@ -121,7 +121,7 @@ theorem formalGroupLaw_coeff_right_unit (n : ℕ) :
       if n = 1 then 1 else 0 := by
   -- d 0 = n, d 1 = 0, so the definition enters the "j = 0" branch
   -- and returns "if i = 1 then 1 else 0" = "if n = 1 then 1 else 0".
-  unfold formalGroupLaw_coeff
+  simp only [formalGroupLaw_coeff]
   simp only [Finsupp.single_apply, if_true, if_false, show (0 : Fin 2) ≠ 1 from by decide]
   split_ifs <;> simp_all
 
@@ -129,7 +129,7 @@ theorem formalGroupLaw_coeff_right_unit (n : ℕ) :
 theorem formalGroupLaw_coeff_left_unit (n : ℕ) :
     formalGroupLaw_coeff W (Finsupp.single 1 n) =
       if n = 1 then 1 else 0 := by
-  unfold formalGroupLaw_coeff
+  simp only [formalGroupLaw_coeff]
   simp only [Finsupp.single_apply, if_true, if_false, show (1 : Fin 2) ≠ 0 from by decide]
 
 /-! ### The ring homomorphism property of the pullback coefficient (Silverman III.5.6) -/
