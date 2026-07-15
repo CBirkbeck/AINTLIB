@@ -67,7 +67,7 @@ variable {N : ℕ} [NeZero N] {k : ℤ}
 
 /-- The real-linear map `(s, t) ↦ s + t·i` packaged as `ℝ × ℝ →L[ℝ] ℂ` — the coordinate chart
 `(x, y) ↦ x + iy` whose `HasFDerivAt`-image lets a holomorphic function be differentiated in real
-coordinates. -/
+coordinates.  This is `Complex.equivRealProdCLM.symm` as a plain continuous linear map. -/
 def coordCLM : ℝ × ℝ →L[ℝ] ℂ :=
   Complex.ofRealCLM.comp (ContinuousLinearMap.fst ℝ ℝ ℝ) +
     (Complex.I • Complex.ofRealCLM).comp (ContinuousLinearMap.snd ℝ ℝ ℝ)
