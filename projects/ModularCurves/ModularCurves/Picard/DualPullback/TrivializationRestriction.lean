@@ -145,6 +145,142 @@ end ModularCurves.SheafOfModules
 
 namespace AlgebraicGeometry.Scheme.Modules
 
+/-- Transport a trivialization across a commutative square. -/
+noncomputable def pullbackSquareTrivialization
+    {A B C D : Scheme.{u}}
+    (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
+    (h : a ≫ b = c ≫ d) (M : D.Modules)
+    (t : (pullback d).obj M ≅ unitObj C) :
+    (pullback a).obj ((pullback b).obj M) ≅ unitObj A :=
+  (pullbackSquareIso a b c d h).app M ≪≫
+    (pullback c).mapIso t ≪≫ pullbackUnitIso c
+
+/-- Transporting a trivialization across two vertically composable squares agrees with
+transport across the outer square. -/
+theorem pullbackSquareTrivialization_vcomp
+    {A B C D E F : Scheme.{u}}
+    (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
+    (q : D ⟶ F) (e : C ⟶ E) (r : E ⟶ F)
+    (h₁ : a ≫ b = c ≫ d) (h₂ : d ≫ q = e ≫ r)
+    (M : F.Modules) (t : (pullback r).obj M ≅ unitObj E) :
+    let hOuter : a ≫ (b ≫ q) = (c ≫ e) ≫ r :=
+      (Category.assoc a b q).symm.trans
+        ((congrArg (· ≫ q) h₁).trans
+          ((Category.assoc c d q).trans
+            ((congrArg (c ≫ ·) h₂).trans (Category.assoc c e r).symm)))
+    (pullbackSquareTrivialization a b c d h₁ ((pullback q).obj M)
+        (pullbackSquareTrivialization d q e r h₂ M t)).hom =
+      (pullback a).map ((pullbackComp b q).hom.app M) ≫
+        (pullbackSquareTrivialization a (b ≫ q) (c ≫ e) r hOuter M t).hom := by
+  dsimp only
+  let hOuter : a ≫ (b ≫ q) = (c ≫ e) ≫ r :=
+    (Category.assoc a b q).symm.trans
+      ((congrArg (· ≫ q) h₁).trans
+        ((Category.assoc c d q).trans
+          ((congrArg (c ≫ ·) h₂).trans (Category.assoc c e r).symm)))
+  let s₁ := pullbackSquareIso a b c d h₁
+  let s₂ := pullbackSquareIso d q e r h₂
+  let sOuter := pullbackSquareIso a (b ≫ q) (c ≫ e) r hOuter
+  let pRight := (pullbackComp c e).app (unitObj E)
+  have hsquare := pullbackSquareIso_vcomp_app
+    a b c d q e r h₁ h₂ M
+  have hnat := (pullbackComp c e).inv.naturality t.hom
+  rw [Functor.comp_map] at hnat
+  have hunit := ModularCurves.pullbackComp_inv_unitPairLow c e
+  simp only [pullbackSquareTrivialization, Iso.trans_hom,
+    Functor.mapIso_hom]
+  rw [Functor.map_comp, Functor.map_comp]
+  change
+    s₁.hom.app ((pullback q).obj M) ≫
+          (pullback c).map (s₂.hom.app M) ≫
+        (pullback c).map ((pullback e).map t.hom) ≫
+      (pullback c).map (pullbackUnitIso e).hom ≫
+        (pullbackUnitIso c).hom =
+      (pullback a).map ((pullbackComp b q).hom.app M) ≫
+          sOuter.hom.app M ≫
+        (pullback (c ≫ e)).map t.hom ≫
+      (pullbackUnitIso (c ≫ e)).hom
+  change s₁.hom.app ((pullback q).obj M) ≫
+      (pullback c).map (s₂.hom.app M) =
+        (pullback a).map ((pullbackComp b q).hom.app M) ≫
+          sOuter.hom.app M ≫
+            (pullbackComp c e).inv.app ((pullback r).obj M) at hsquare
+  have hnat' : (pullbackComp c e).inv.app ((pullback r).obj M) ≫
+      (pullback c).map ((pullback e).map t.hom) =
+        (pullback (c ≫ e)).map t.hom ≫ pRight.inv := by
+    exact hnat.symm
+  change pRight.inv ≫ (pullback c).map (pullbackUnitIso e).hom ≫
+      (pullbackUnitIso c).hom = (pullbackUnitIso (c ≫ e)).hom at hunit
+  have htail :
+      (sOuter.hom.app M ≫
+            (pullbackComp c e).inv.app ((pullback r).obj M)) ≫
+          (pullback c).map ((pullback e).map t.hom) ≫
+        (pullback c).map (pullbackUnitIso e).hom ≫
+          (pullbackUnitIso c).hom =
+        sOuter.hom.app M ≫
+          (pullback (c ≫ e)).map t.hom ≫
+            (pullbackUnitIso (c ≫ e)).hom := by
+    calc
+      _ = sOuter.hom.app M ≫
+          ((pullbackComp c e).inv.app ((pullback r).obj M) ≫
+            (pullback c).map ((pullback e).map t.hom)) ≫
+          (pullback c).map (pullbackUnitIso e).hom ≫
+            (pullbackUnitIso c).hom := by
+              simp only [Category.assoc]
+      _ = sOuter.hom.app M ≫
+          ((pullback (c ≫ e)).map t.hom ≫ pRight.inv) ≫
+          (pullback c).map (pullbackUnitIso e).hom ≫
+            (pullbackUnitIso c).hom :=
+              congrArg
+                (fun z => sOuter.hom.app M ≫ z ≫
+                  (pullback c).map (pullbackUnitIso e).hom ≫
+                    (pullbackUnitIso c).hom) hnat'
+      _ = sOuter.hom.app M ≫
+          (pullback (c ≫ e)).map t.hom ≫
+            (pRight.inv ≫
+              (pullback c).map (pullbackUnitIso e).hom ≫
+                (pullbackUnitIso c).hom) := by
+                  simp only [Category.assoc]
+      _ = sOuter.hom.app M ≫
+          (pullback (c ≫ e)).map t.hom ≫
+            (pullbackUnitIso (c ≫ e)).hom :=
+              congrArg
+                (fun z => sOuter.hom.app M ≫
+                  (pullback (c ≫ e)).map t.hom ≫ z) hunit
+  conv_lhs =>
+    rw [← Category.assoc, hsquare]
+  calc
+    _ = (pullback a).map ((pullbackComp b q).hom.app M) ≫
+        ((sOuter.hom.app M ≫
+              (pullbackComp c e).inv.app ((pullback r).obj M)) ≫
+            (pullback c).map ((pullback e).map t.hom) ≫
+          (pullback c).map (pullbackUnitIso e).hom ≫
+            (pullbackUnitIso c).hom) := by
+              exact
+                (Category.assoc
+                    ((pullback a).map ((pullbackComp b q).hom.app M))
+                    (sOuter.hom.app M ≫
+                      (pullbackComp c e).inv.app ((pullback r).obj M))
+                    ((pullback c).map ((pullback e).map t.hom) ≫
+                      (pullback c).map (pullbackUnitIso e).hom ≫
+                        (pullbackUnitIso c).hom)).trans
+                  (congrArg
+                    (fun z =>
+                      (pullback a).map ((pullbackComp b q).hom.app M) ≫ z)
+                    (Category.assoc
+                      (sOuter.hom.app M)
+                      ((pullbackComp c e).inv.app ((pullback r).obj M))
+                      ((pullback c).map ((pullback e).map t.hom) ≫
+                        (pullback c).map (pullbackUnitIso e).hom ≫
+                          (pullbackUnitIso c).hom)))
+    _ = (pullback a).map ((pullbackComp b q).hom.app M) ≫
+        (sOuter.hom.app M ≫
+          (pullback (c ≫ e)).map t.hom ≫
+            (pullbackUnitIso (c ≫ e)).hom) :=
+      congrArg (fun z => (pullback a).map
+        ((pullbackComp b q).hom.app M) ≫ z) htail
+    _ = _ := rfl
+
 private theorem cancel_iso_inv_right
     {D : Type u₁} [Category.{v₁} D]
     {A B C : D} (e : A ≅ B) (p : C ⟶ B) (q : C ⟶ A)
