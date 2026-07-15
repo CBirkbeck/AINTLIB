@@ -212,7 +212,8 @@ private lemma g_norm_arc {t : ℝ} (ht1 : 1 < t) (ht3 : t < 3) :
   set δ := 3 - t with hδ_def
   have hδ : 0 < δ := by linarith
   rw [show Real.pi * (1 + t) / 6 = 2 * Real.pi / 3 - δ * Real.pi / 6 by
-      simp only [hδ_def]; ring, Complex.exp_ofReal_mul_I, rho_arc_factor δ, ← Complex.exp_ofReal_mul_I]
+      simp only [hδ_def]; ring, Complex.exp_ofReal_mul_I,
+      rho_arc_factor δ, ← Complex.exp_ofReal_mul_I]
   exact norm_two_sin_mul_exp hδ (by linarith)
 
 private lemma g_norm_ge_one_seg0 {t : ℝ} (_ht0 : 0 ≤ t) (ht1 : t ≤ 1) :
