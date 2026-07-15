@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.EllipticCurve.Basic
+import ModularCurves.EllipticCurve.Comparison
 import Mathlib.RingTheory.Localization.Away.Basic
 
 /-!
@@ -111,69 +112,11 @@ theorem isAffineOpen_top_isoSpec_hom_isoSpec_inv
     h.isoSpec.hom ≫ weierstrassAtlas.isoSpec.inv = (⊤ : (weierstrassAtlas).Opens).ι := by
   rw [← IsAffineOpen.fromSpec_top, ← IsAffineOpen.isoSpec_inv_ι, Iso.hom_inv_id_assoc]
 
-open Limits in
 /-- The universal Weierstrass curve is locally Weierstrass (it *is* a global Weierstrass
 model over the affine atlas — the whole space `⊤` witnesses it). -/
 theorem universalCurve_localModel :
-    LocallyWeierstrass universalCurveπ universalCurveZero universalCurveZero_π := by
-  intro s
-  letI : Algebra WeierstrassAtlasRing
-      ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens)) :=
-    (Scheme.ΓSpecIso (.of WeierstrassAtlasRing)).inv.hom.toAlgebra
-  haveI : IsIso (⊤ : (weierstrassAtlas).Opens).ι := by
-    rw [← Scheme.topIso_hom]; infer_instance
-  haveI : IsIso (Spec.map (CommRingCat.ofHom
-      (algebraMap WeierstrassAtlasRing ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens))))) := by
-    have : CommRingCat.ofHom (algebraMap WeierstrassAtlasRing
-        ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens))) =
-        (Scheme.ΓSpecIso (.of WeierstrassAtlasRing)).inv := rfl
-    rw [this]; infer_instance
-  have hφ_eq : Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRing
-      ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens)))) = weierstrassAtlas.isoSpec.inv :=
-    (Scheme.isoSpec_Spec_inv (.of WeierstrassAtlasRing)).symm
-  refine ⟨⟨⊤, isAffineOpen_top _⟩, trivial,
-    universalWeierstrassLoc.map (algebraMap WeierstrassAtlasRing _), inferInstance,
-    asIso (pullback.fst universalCurveπ (⊤ : (weierstrassAtlas).Opens).ι) ≪≫
-      (asIso (pullback.fst (projModelπ universalWeierstrassLoc) (Spec.map (CommRingCat.ofHom
-        (algebraMap WeierstrassAtlasRing
-          ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens))))))).symm ≪≫
-      (isPullback_projModelBaseChange universalWeierstrassLoc).isoPullback.symm,
-    ?c1, ?c2⟩
-  -- T-W5a chart compatibilities: the affine single-chart special case of
-  -- `LocallyWeierstrass.baseChange` (`EllipticCurve/Basic.lean`). Both sides are cancelled
-  -- against the affine comparison `φ`, whose crux identity is
-  -- `isAffineOpen_top_isoSpec_hom_isoSpec_inv`.
-  have hcrux : ∀ (h : (⊤ : (weierstrassAtlas).Opens) ∈ weierstrassAtlas.affineOpens),
-      (IsAffineOpen.isoSpec h).hom ≫ Spec.map (CommRingCat.ofHom
-        (algebraMap WeierstrassAtlasRing ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens))))
-      = (⊤ : (weierstrassAtlas).Opens).ι :=
-    fun h => hφ_eq ▸ isAffineOpen_top_isoSpec_hom_isoSpec_inv h
-  case c1 =>
-    rw [← cancel_mono (Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRing
-        ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens)))))]
-    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv, Category.assoc,
-      IsPullback.isoPullback_inv_snd]
-    conv_rhs => erw [hcrux]
-    erw [← pullback.condition, IsIso.inv_hom_id_assoc]
-    exact pullback.condition
-  case c2 =>
-    have hcrux2 : (isAffineOpen_top weierstrassAtlas).isoSpec.inv ≫
-        (⊤ : (weierstrassAtlas).Opens).ι = Spec.map (CommRingCat.ofHom (algebraMap
-          WeierstrassAtlasRing ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens)))) :=
-      hφ_eq ▸ (IsAffineOpen.isoSpec_inv_ι _).trans IsAffineOpen.fromSpec_top
-    have hcrux2' : ∀ {Z : Scheme.{0}} (g : weierstrassAtlas ⟶ Z),
-        (isAffineOpen_top weierstrassAtlas).isoSpec.inv ≫ (⊤ : (weierstrassAtlas).Opens).ι ≫ g
-          = Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRing
-            ↑Γ(weierstrassAtlas, (⊤ : (weierstrassAtlas).Opens)))) ≫ g :=
-      fun g => by rw [← Category.assoc]; exact congrArg (· ≫ g) hcrux2
-    simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, asIso_inv, Category.assoc]
-    rw [pullback.lift_fst_assoc]
-    simp only [Category.assoc]
-    conv_lhs => erw [hcrux2']
-    rw [show universalCurveZero = projModelZero universalWeierstrassLoc from rfl]
-    erw [← reassoc_of% projModelZero_baseChange universalWeierstrassLoc,
-      ← (isPullback_projModelBaseChange universalWeierstrassLoc).isoPullback_hom_fst_assoc,
-      IsIso.hom_inv_id_assoc, Iso.hom_inv_id, Category.comp_id]
+    LocallyWeierstrass universalCurveπ universalCurveZero universalCurveZero_π :=
+  locallyWeierstrass_projModel universalWeierstrassLoc
 
 /-- **The universal elliptic curve** `E_U → U` over the Weierstrass atlas, as an
 `EllipticCurveGeom`: the projective Weierstrass model of the tautological elliptic curve, proper,
