@@ -1,1 +1,21 @@
-FOCUS: KM v10.252 L4-iii — POINT-LEVEL IDENTITY DONE (bricks 1/2a/2b/4/5 all landed+pushed+boarded through d723e5e96; genericSpecPoint_comp_mulByHom = tau≫[n] factors through chartSpecPoint(mulByInt_x,mulByInt_y); AdditionChart* thread NOT needed — dictionary+Jacobian-smul route). REMAINING = BRICK 6: (i) section-level transfer — chart-hom of chartSpecPoint is the solution-hom BY CONSTRUCTION (chartHomEquiv_chartSpecPoint banked), so pullback-of-sections along tau≫[N] is KNOWN on chart-ring elements (x_Z ↦ mulByInt_x); connect to appTop [N] via the chartHomEquiv-vs-section-pullback compatibility through Proj.awayι (the Away-ring = Gamma(basicOpen) identification; find/build awayι-app lemmas + how chartHomEquiv reads Spec.preimage — WeierstrassModel chartPointOfHom internals) => the ring identity phi_tau(appTop-[N] s) = mulByInt_pullback(phi_tau s) on generators; (ii) K4b-2 assembly: both IsFractionRing legs banked (isFractionRing_zChartSection + isFractionRing_top_of_isOpenImmersion route verified-to-diamond), diamond closes via the ring identity + functionField_algHom_ext + finrank_of_isFractionRing => MulByHomDegree:346 sorry dies => BB-DEG => endDeg_mulBy box auto-cleans. Entry: read chartPointOfHom/awayι-app plumbing (WeierstrassModel:755-830) + Proj.awayToSection API.
+STREAM-KM TERMINAL (v10.259, 2026-07-16) — BRICK 6 reduced to 4 precise turnkey leaves (pushed).
+
+modelEllipticCurve_finrank_eq_mulByInt_degree :660 (= the sole sorryAx under G0's whole BB-DEG chain →
+endDeg_mulBy → OMEGA/GH) went from 1 OPAQUE sorry to 4 PRECISE documented leaves (MulByHomDegree.lean,
+all pushed; theorem closes from the 2 bricks; axiom-sound — filling the 4 auto-cleans BB-DEG fleet-wide):
+- brick6_intertwining DEEP-REDUCED (ringHom_ext + coordRingToZSection.surjective + AdjoinRoot/Polynomial
+  ext, helpers he_gtff/hxgen/hygen/hcgen ALL PROVEN) → FFM_X (:658) / FFM_Y (:662) / FFM_C (:667).
+- brick6_from_intertwining (:750) = A+B finrank-of-isFractionRing tower + pullbackRestrictIsoRestrict
+  transport + degree-via-hinter.
+
+THE remaining crux = the 3 FFM germ-evaluations: functionFieldMap[N](germ_Z coord) = germ_{[N]⁻¹Z}([N].app
+coord) [functionFieldMap_germToFunctionField], then projModelFunctionFieldEquiv of it = tau-evaluation =
+(BRICK 5 genericSpecPoint_comp_mulByHom: τ.1≫[N]=σ.1) = σ's coord = mulByInt_x/y. Needs a τStalkMap
+(localization-lift of the tautological-point evaluation, = projModelFunctionFieldEquiv by ringHom_ext) +
+point-eval-of-germ compat — the ONE unbuilt construction. FFM_C (K-const) needs functionFieldMap[N]
+K-linearity (via mulByHom_π). A+B = instance-heavy but routine (set f + explicit IsFinite/Flat/LFP transfer).
+
+Full turnkey spec: decomposition-keystone.md v10.256/258 appends + board v10.259-KM + memory
+aintlib-km-keystone-deep-leaves. Scratch interD.lean has the working D-reduction skeleton. A focused fresh
+KM pass (τStalkMap → FFM_X/Y/C, then A+B) LANDS brick 6 → BB-DEG axiom-clean fleet-wide. Register-box,
+zero-pressure (fleet consumes the tracked box). endDual_comp_self/T-DEG0 stay [FR-GEN]-gated.
