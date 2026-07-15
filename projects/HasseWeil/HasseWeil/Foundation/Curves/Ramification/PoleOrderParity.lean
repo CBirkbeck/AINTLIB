@@ -178,7 +178,7 @@ theorem point_minus_O_principal_eq_zero_of_coord
     rw [h_div]
     -- kappaDivisor W P at ∞ = (single P.toProj 1 - single ∞ 1) at ∞ = 0 - 1 = -1
     -- (since P.toProj ≠ ∞ for P ≠ 0)
-    unfold kappaDivisor
+    simp only [kappaDivisor]
     rw [Finsupp.sub_apply, Finsupp.single_apply, Finsupp.single_apply]
     have h_ne : P.toProjectiveSmoothPoint ≠
         (ProjectiveSmoothPoint.infinity :
