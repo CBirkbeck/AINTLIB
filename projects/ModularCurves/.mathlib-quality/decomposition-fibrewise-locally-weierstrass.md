@@ -616,3 +616,11 @@ coordinates is multiplication by the original change-of-basis unit on `U i ⊓ U
 scalar part of the active chart-transition square; it adds no hypotheses or proof-resource
 options. The focused build is green, and its axiom audit is exactly `propext`,
 `Classical.choice`, and `Quot.sound`.
+
+Completed spawned dependency (2026-07-15): proved
+`affineIntersectionOverlapIso_inv_comp_gluedToOriginal`. After transporting the chosen affine
+overlap back to the geometric intersection `U i ⊓ U j`, its common map through the glued scheme
+and `affineIntersectionGluedToOriginal` is exactly the canonical open immersion into `X`. This
+gives the left and right chart-trivialization calculations a shared geometric endpoint, without
+adding hypotheses or proof-resource options. The focused module build is green, and the axiom
+audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.
