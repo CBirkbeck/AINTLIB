@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.AlgebraicGeometry.EllipticCurve.DivisionPolynomial.Basic
 import Mathlib.Algebra.Polynomial.Derivation
 import HasseWeil.Foundation.WronskianAux.CNorm
@@ -75,7 +80,6 @@ private lemma b_relation_poly :
       ← Polynomial.C_mul, ← Polynomial.C_mul, ← Polynomial.C_pow, ← Polynomial.C_sub]
   exact congrArg Polynomial.C W.b_relation
 
-set_option maxRecDepth 4096 in
 /-- Wronskian auxiliary identity, `m = 3` case (Silverman III.3.7).
 `4·Ψ₃³ + 2·preΨ₄·Ψ₂Sq·Ψ₃' − (preΨ₄·Ψ₂Sq)'·Ψ₃ = 3·preΨ₄·Ψ₂Sq² − 3·preΨ₄²`.
 
@@ -104,7 +108,6 @@ lemma wronskian_aux_three :
     + 9 * Polynomial.X ^ 8) * b_relation_poly W
 
 set_option maxHeartbeats 400000 in
-set_option maxRecDepth 4096 in
 /-- Wronskian auxiliary identity, `m = 4` case (Silverman III.3.7).
 
 Multiplier `M(X)` is a degree-26 polynomial in `W.b₂, W.b₄, W.b₆, W.b₈` with

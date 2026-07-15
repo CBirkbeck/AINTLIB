@@ -40,7 +40,6 @@ open WeierstrassCurve HasseWeil.Curves
 
 namespace HasseWeil.WeilPairing
 
-set_option linter.style.longLine false
 
 variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
 variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
