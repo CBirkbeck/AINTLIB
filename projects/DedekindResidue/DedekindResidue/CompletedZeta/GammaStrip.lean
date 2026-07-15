@@ -224,7 +224,8 @@ private theorem norm_Gamma_sq_mul_sin_div_le_of_re_three_halves {w : ℂ}
     congr 1
     rw [show w - 1 = (1/2 : ℂ) + (w.im : ℂ) * Complex.I from hwm]
     have : ((1/2 : ℂ) + (w.im : ℂ) * Complex.I).im = w.im := by simp
-    rw [show ((1/2 : ℂ) + (w.im : ℂ) * Complex.I) = (1/2 : ℂ) + ((w.im : ℝ) : ℂ) * Complex.I from rfl]
+    rw [show ((1/2 : ℂ) + (w.im : ℂ) * Complex.I) =
+      (1/2 : ℂ) + ((w.im : ℝ) : ℂ) * Complex.I from rfl]
     exact norm_Gamma_half_add_mul_I_sq w.im
   have hsin : ‖Complex.sin (π * w)‖ = Real.cosh (π * w.im) := by
     refine norm_sin_pi_mul_eq_cosh_of_sin_sq_re ?_
@@ -235,7 +236,8 @@ private theorem norm_Gamma_sq_mul_sin_div_le_of_re_three_halves {w : ℂ}
   have hle : ‖w - 1‖^2 ≤ ‖w‖^2 := by
     have h1 : ‖w - 1‖^2 = (1/2)^2 + w.im^2 := by
       rw [hwm]
-      rw [show ((1/2 : ℂ) + (w.im : ℂ) * Complex.I) = ((1/2 : ℝ) : ℂ) + ((w.im : ℝ) : ℂ) * Complex.I by push_cast; ring]
+      rw [show ((1/2 : ℂ) + (w.im : ℂ) * Complex.I) =
+        ((1/2 : ℝ) : ℂ) + ((w.im : ℝ) : ℂ) * Complex.I by push_cast; ring]
       rw [Complex.norm_add_mul_I, Real.sq_sqrt (by positivity)]
     have h2 : ‖w‖^2 = (3/2)^2 + w.im^2 := by
       have hwe : w = ((3/2 : ℝ) : ℂ) + ((w.im : ℝ) : ℂ) * Complex.I := by
