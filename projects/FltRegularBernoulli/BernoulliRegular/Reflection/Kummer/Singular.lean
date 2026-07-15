@@ -96,7 +96,7 @@ namespace SingularKummer
 
 namespace SingularPair
 
-variable {R K : Type*} [CommRing R] [IsDomain R] [IsDedekindDomain R]
+variable {R K : Type*} [CommRing R] [IsDedekindDomain R]
 variable [Field K] [Algebra R K] [IsFractionRing R K]
 
 /-- For a singular pair `s = (I, α)`, `[s] = 1` in `SingularGroup` iff

@@ -99,7 +99,7 @@ theorem normalizedFactors_X_pow_sub_C_card_eq
 end PolynomialFactorCount
 
 variable {R S K L : Type*}
-variable [CommRing R] [IsDomain R] [IsDedekindDomain R] [IsIntegrallyClosed R]
+variable [CommRing R] [IsDedekindDomain R]
 variable [CommRing S] [IsDedekindDomain S] [Algebra R S]
 variable [Module.Finite R S] [Module.IsTorsionFree R S]
 variable [Field K] [Field L]

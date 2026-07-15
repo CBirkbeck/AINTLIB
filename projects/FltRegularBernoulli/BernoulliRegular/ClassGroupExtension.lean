@@ -74,6 +74,8 @@ end FractionalIdeal
 
 namespace ClassGroup
 
+section
+
 variable (A : Type*) [CommRing A] [IsDomain A]
 variable (B : Type*) [CommRing B] [IsDomain B]
 variable [Algebra A B] [Module.IsTorsionFree A B]
@@ -104,7 +106,11 @@ lemma extensionMap_quotientMk (α : (FractionalIdeal A⁰ (FractionRing A))ˣ) :
         (Units.map (FractionalIdeal.extensionMap A B).toMonoidHom α) :=
   rfl
 
-variable [IsDedekindDomain A] [IsDedekindDomain B]
+end
+
+variable (A : Type*) [CommRing A] [IsDedekindDomain A]
+variable (B : Type*) [CommRing B] [IsDedekindDomain B]
+variable [Algebra A B] [Module.IsTorsionFree A B]
 
 /-- Compatibility: the class-group map sends the class of a non-zero ideal
 `I ∈ (Ideal A)⁰` to the class of its image `I · B = I.map (algebraMap A B)`
