@@ -27,7 +27,8 @@ This is Shimura §3.1, Proposition 3.3.
 
 ## Proof strategy
 
-Multiplicativity `deg(f * g) = deg(f) * deg(g)` is proved using the module action on `HeckeModule P ℤ`.
+Multiplicativity `deg(f * g) = deg(f) * deg(g)` is proved using the module action on
+`HeckeModule P ℤ`.
 We show `deg(f) = coeffSum(f • 1)` where `coeffSum` sums all coefficients, and then use
 `IsScalarTower` (Shimura Prop 3.4) to get `(f * g) • 1 = g • (f • 1)`. The key intermediate
 result is `coeffSum(f • m) = deg(f) * coeffSum(m)`, which follows from the orbit cardinality
