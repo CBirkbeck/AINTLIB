@@ -1335,7 +1335,8 @@ theorem gammaOneNaive_representable_assembly [NeZero N] (hN : 4 ≤ N)
   ⟨⟨⟨yOneEllObj R N, yOne_representableBy R N hN hinv⟩⟩,
     fun X hX ↦ representableBy_smooth_isAffineHom R N hN hinv X hX⟩
 
-/-- **(T-E7 MASTER, relocated per v10.111/117 — Y1-CLOSER S6)** = Loeffler Thm 3.4.4 + Def 3.3.6; KM 5.x for the Drinfeld upgrade)** For
+/-- **(T-E7 MASTER, relocated per v10.111/117 — Y1-CLOSER S6)** = Loeffler Thm 3.4.4 + Def 3.3.6;
+KM 5.x for the Drinfeld upgrade)** For
 `N ≥ 4` and `N` invertible in `R`, the naive `Γ₁(N)` problem is representable, and the
 representing base scheme is smooth and affine over `Spec R`.
 Loeffler (verbatim, Thm 3.4.4): "`Y₁(N)_{ℤ[1/N]}` is smooth over `ℤ[1/N]`."
@@ -1350,7 +1351,8 @@ theorem gammaOneNaive_representable (N : ℕ) [NeZero N] (hN : 4 ≤ N)
     (hinv : IsUnit (N : R)) :
     (gammaOneNaiveProblem R N).Representable ∧
       ∀ X : EllObj R, Nonempty ((gammaOneNaiveProblem R N).RepresentableBy X) →
-        (Smooth X.structMap ∧ IsAffineHom X.structMap) := gammaOneNaive_representable_assembly R N hN hinv
+        (Smooth X.structMap ∧ IsAffineHom X.structMap) :=
+          gammaOneNaive_representable_assembly R N hN hinv
 
 /-- **Y₁(N), display form (names the scheme).** For `4 ≤ N` invertible in `R`, the explicit
 scheme `yOne R N` — an open subscheme of the `N`-torsion killed locus of the universal Tate
@@ -1371,7 +1373,8 @@ every representing scheme is smooth and affine over `Spec ℤ[1/N]`. The univers
 theorem gammaOneNaive_representable_zInv (N : ℕ) [NeZero N] (hN : 4 ≤ N) :
     (gammaOneNaiveProblem (CommRingCat.of (Localization.Away (N : ℤ))) N).Representable ∧
       ∀ X : EllObj (CommRingCat.of (Localization.Away (N : ℤ))),
-        Nonempty ((gammaOneNaiveProblem (CommRingCat.of (Localization.Away (N : ℤ))) N).RepresentableBy X) →
+        Nonempty ((gammaOneNaiveProblem
+            (CommRingCat.of (Localization.Away (N : ℤ))) N).RepresentableBy X) →
           (Smooth X.structMap ∧ IsAffineHom X.structMap) :=
   gammaOneNaive_representable (CommRingCat.of (Localization.Away (N : ℤ))) N hN <| by
     have h := IsLocalization.Away.algebraMap_isUnit
