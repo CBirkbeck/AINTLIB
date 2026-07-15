@@ -559,3 +559,11 @@ identity needed to transport an original invertible sheaf's chosen trivializatio
 model before comparing its descent datum with `AffineIntersectionUnitCocycle.chartDescentData`.
 The focused build is green, and the axiom audit is exactly `propext`, `Classical.choice`, and
 `Quot.sound`.
+
+Completed dependency claim (2026-07-15): proved
+`affineIntersectionOriginalChartTrivialization`. Given chosen trivializations of a module `N`
+on opens `U i`, this identifies the restriction to every affine chart of the pullback of `N` along
+`affineIntersectionGluedToOriginal` with the unit module. The construction uses the public
+chart-factorization equality and the existing pullback composition/unit isomorphisms, without
+adding cover, properness, finiteness, or proof-resource hypotheses. The focused module build is
+green, and the axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.

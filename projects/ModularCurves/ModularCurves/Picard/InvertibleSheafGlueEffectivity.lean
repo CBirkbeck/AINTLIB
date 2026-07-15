@@ -3907,6 +3907,30 @@ noncomputable def AffineIntersectionUnitCocycle.gluedModuleIsoOfDescentIso
 
 end DescentEffectivity
 
+/-- A chosen trivialization on an original open induces a trivialization on the corresponding
+chart of the affine-intersection glued model. -/
+noncomputable def affineIntersectionOriginalChartTrivialization
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i : J) :
+    (pullback ((π.affineIntersectionGlueData U hU).ι i)).obj
+        ((pullback (π.affineIntersectionGluedToOriginal U hU)).obj N) ≅
+      unitObj ((π.affineIntersectionGlueData U hU).U i) := by
+  let D := π.affineIntersectionGlueData U hU
+  let g := π.affineIntersectionGluedToOriginal U hU
+  let q := π.affineIntersectionChartIso U hU i
+  let e' : (pullback (U i).ι).obj N ≅ unitObj (U i).toScheme :=
+    (restrictFunctorIsoPullback (U i).ι).symm.app N ≪≫ e i
+  let h : D.ι i ≫ g = q.hom ≫ (U i).ι :=
+    π.affineIntersectionGlueData_ι_affineIntersectionGluedToOriginal_eq_chartIso U hU i
+  exact (pullbackComp (D.ι i) g).app N ≪≫
+    (pullbackCongr h).app N ≪≫
+    (pullbackComp q.hom (U i).ι).symm.app N ≪≫
+    (pullback q.hom).mapIso e' ≪≫
+    pullbackUnitIso q.hom
+
 private noncomputable def trivializationOnOpensRange
     {X Y : Scheme.{u}} (f : Y ⟶ X) [IsOpenImmersion f]
     (M : X.Modules) (e : (restrictFunctor f).obj M ≅ unitObj Y) :
