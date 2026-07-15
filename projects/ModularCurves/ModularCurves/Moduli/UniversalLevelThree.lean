@@ -1918,4 +1918,63 @@ noncomputable def e3DatumProblem (R : CommRingCat.{u}) : ModuliProblem R where
     ext x
     exact FunctorToTypes.map_comp_apply (gammaFullNaiveProblem R 3) φ ψ x.1
 
+section Rt2
+
+variable {R : CommRingCat.{u}} {X : EllObj R} (φ : X ⟶ universalE3Obj R)
+  (hL : (universalE3Obj R).curve.IsNaiveFullLevel 3
+    (universalE3P R) (universalE3Q R))
+
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **([T-E15-NORM] rt2 prerequisite ★)** The pulled-witness family: over each affine `V`
+of `X.base`, the tautological universal `ℰ₃`-chart transported along `φ` is an `E3Witness`
+for the pulled datum. Adapts Legendre's `pulledWitness` (drops the ω-basis `lam`/`hAd`,
+carries `β, γ` + `IsE3Form`; the `Q`-marking is at `(γ, β+γ)`). -/
+noncomputable def e3PulledWitness (V : X.base.affineOpens) :
+    E3Witness X ((gammaFullNaiveProblem R 3).map (Opposite.op φ)
+      ⟨⟨universalE3P R, universalE3Q R⟩, hL⟩) := by
+  refine
+    { V := V
+      Pr := (tautPresentation (universalE3 R)).transport
+        φ.baseHom φ.top φ.isPullback φ.zero_w
+        (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (E3ModuliRing R))).affineOpens).1 from fun x _ => trivial)
+      β := sectionsMapLE φ.baseHom
+        (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (E3ModuliRing R))).affineOpens).1 from fun x _ => trivial)
+        ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv.hom (e3Beta R))
+      γ := sectionsMapLE φ.baseHom
+        (show V.1 ≤ φ.baseHom ⁻¹ᵁ
+          (⟨⊤, isAffineOpen_top _⟩ : (Spec (CommRingCat.of
+            (E3ModuliRing R))).affineOpens).1 from fun x _ => trivial)
+        ((Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv.hom (e3Gamma R))
+      hF := ?_
+      hP := ?_
+      hQ := ?_ }
+  · rw [transport_W]; exact IsE3Form.map _ (IsE3Form.map _ (universalE3_isE3Form R))
+  · have hmark := tautPresentation_marksAt_e3P R
+    rw [map_zero] at hmark
+    have hcomm : (EllHom.pullSection R φ (universalE3P R)).1 ≫ φ.top =
+        φ.baseHom ≫ (universalE3P R).1 := φ.isPullback.lift_fst _ _ _
+    have htr := LocalPresentation.MarksAt.transport φ.baseHom φ.top
+      φ.isPullback φ.zero_w hmark
+      (EllHom.pullSection R φ (universalE3P R)).2 hcomm
+      (V' := V) (fun x _ => trivial)
+    rw [map_zero] at htr
+    exact htr
+  · have hmark := tautPresentation_marksAt_e3Q R
+    rw [map_add] at hmark
+    have hcomm : (EllHom.pullSection R φ (universalE3Q R)).1 ≫ φ.top =
+        φ.baseHom ≫ (universalE3Q R).1 := φ.isPullback.lift_fst _ _ _
+    have htr := LocalPresentation.MarksAt.transport φ.baseHom φ.top
+      φ.isPullback φ.zero_w hmark
+      (EllHom.pullSection R φ (universalE3Q R)).2 hcomm
+      (V' := V) (fun x _ => trivial)
+    rw [map_add] at htr
+    exact htr
+
+end Rt2
+
 end ModularCurves
