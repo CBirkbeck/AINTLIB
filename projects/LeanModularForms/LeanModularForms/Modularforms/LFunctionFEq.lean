@@ -194,7 +194,8 @@ private noncomputable def imAxisLift (t : ℝ) : ℍ := UpperHalfPlane.ofComplex
 
 private lemma imAxisLift_coe {t : ℝ} (ht : 0 < t) :
     ((imAxisLift t : ℍ) : ℂ) = Complex.I * (t : ℂ) := by
-  rw [imAxisLift, UpperHalfPlane.ofComplex_apply_of_im_pos (z := Complex.I * (t : ℂ)) (by simp [ht])]
+  rw [imAxisLift,
+    UpperHalfPlane.ofComplex_apply_of_im_pos (z := Complex.I * (t : ℂ)) (by simp [ht])]
 
 private lemma imAxisLift_im_of_pos {t : ℝ} (ht : 0 < t) : (imAxisLift t).im = t := by
   rw [← UpperHalfPlane.coe_im, imAxisLift_coe ht, Complex.mul_im, Complex.I_im, Complex.I_re,
@@ -357,7 +358,8 @@ theorem lcompleted_functional_equation (f : F) (hw : Γ.strictWidthInfty = 1) (h
   have hP := isStrongFEPair_feqPair f hw hk hS
   set P := feqPair f hw hk hS with hP_def
   have hfe := P.functional_equation s
-  -- `P.Λ (k - s) = ε • P.symm.Λ s`; here `P.symm.Λ = P.Λ = lcompleted f` (since `f = g`) and `ε = I^k`.
+  -- `P.Λ (k - s) = ε • P.symm.Λ s`; here `P.symm.Λ = P.Λ = lcompleted f` (since `f = g`)
+  -- and `ε = I^k`.
   rw [smul_eq_mul] at hfe
   have hΛ : ∀ t, lcompleted f t = P.Λ t := fun t ↦ (hP.hasMellin t).2
   have hΛsymm : ∀ t, lcompleted f t = P.symm.Λ t := fun t ↦ (hP.symm.hasMellin t).2
