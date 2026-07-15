@@ -94,7 +94,7 @@ theorem qf_nonneg_of_nonneg_on_coprime {q t : ℤ} (hq : 0 < q) {p : ℕ} (hp : 
   -- Step 2: positive semidefiniteness `4q·Q = (2qr − ts)² + (4q − t²)s² ≥ 0`.
   exact qf_nonneg_of_disc hq hdisc
 
-/-- **The discriminant lemma, coprime-in-BOTH-coordinates form** (reviewer round-23, Route B).
+/-- **The discriminant lemma, coprime-in-BOTH-coordinates form** (Route B).
 If the quadratic form `Q(r,s) = q·r² − t·rs + s²` (with `0 < q`) is non-negative on every `(r,s)`
 whose **both** coordinates are coprime to a prime `p` (`p ∤ r` and `p ∤ s`), then it is
 non-negative on **all** `(r,s)`.
@@ -103,7 +103,7 @@ This weakens the hypothesis of `qf_nonneg_of_nonneg_on_coprime` (which assumes `
 set `{p ∤ s}`) to the smaller set `{p ∤ r ∧ p ∤ s}` — exactly the locus on which the Weil-pairing
 pencil scaling is available **without** the inseparable `p ∣ r'` geometric input.
 
-Step 1 forces `t² ≤ 4q` by the reviewer's **explicit** negative witness — no density / CRT /
+Step 1 forces `t² ≤ 4q` by an **explicit** negative witness — no density / CRT /
 balanced-remainder argument: if `Δ := t² − 4q > 0`, set `C := q − t + 1`, `m := p·(|C| + 1)`,
 `r := m·t + 1`, `s := 2·m·q + 1`.  Then `p ∣ m` makes `r ≡ s ≡ 1 (mod p)`, so `p ∤ r, s`, while the
 `ring` identity `Q(m·t+1, 2·m·q+1) = (4q − t²)(q·m² + m) + (q − t + 1) = −Δ·(q·m² + m) + C` is
@@ -113,7 +113,7 @@ theorem qf_nonneg_of_nonneg_on_coprime_both {q t : ℤ} (hq : 0 < q) {p : ℕ} (
     (h : ∀ r s : ℤ, ¬ (p : ℤ) ∣ r → ¬ (p : ℤ) ∣ s →
       0 ≤ q * r ^ 2 - t * r * s + s ^ 2) :
     ∀ r s : ℤ, 0 ≤ q * r ^ 2 - t * r * s + s ^ 2 := by
-  -- Step 1: t² ≤ 4q, by the reviewer's explicit prime-to-`p` negative witness.
+  -- Step 1: t² ≤ 4q, by an explicit prime-to-`p` negative witness.
   have hdisc : t ^ 2 ≤ 4 * q := by
     by_contra hcon
     push Not at hcon                       -- 4 * q < t ^ 2
@@ -141,7 +141,7 @@ theorem qf_nonneg_of_nonneg_on_coprime_both {q t : ℤ} (hq : 0 < q) {p : ℕ} (
       rw [hsdef, add_sub_cancel_left] at hd1
       linarith [Int.le_of_dvd one_pos hd1]
     have hQ : 0 ≤ q * r ^ 2 - t * r * s + s ^ 2 := h r s hpr hps
-    -- The reviewer's `ring` identity at `(r,s) = (m·t+1, 2·m·q+1)`.
+    -- The `ring` identity at `(r,s) = (m·t+1, 2·m·q+1)`.
     have hkey : q * r ^ 2 - t * r * s + s ^ 2
         = (4 * q - t ^ 2) * (q * m ^ 2 + m) + (q - t + 1) := by
       rw [hrdef, hsdef]; ring
