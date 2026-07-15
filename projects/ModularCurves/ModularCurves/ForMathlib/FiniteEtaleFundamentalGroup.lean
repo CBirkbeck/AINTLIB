@@ -126,6 +126,25 @@ theorem nontrivial_of_isConnected (X : (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ)
     exact initialOpOfTerminal (isTerminalOfSubsingleton X.unop)
   · exact h
 
+/-- A nontrivial finite étale algebra's opposite object is not initial: an initial
+opposite would force the object to be terminal, hence isomorphic to the subsingleton
+`Fin 0 → k`, contradicting nontriviality. -/
+private lemma not_isInitial_op_of_nontrivial (Y : CommAlgCat.FiniteEtale.{u} k)
+    [Nontrivial (Y : Type u)] (hini : IsInitial (Opposite.op Y)) : False := by
+  have hterm : IsTerminal Y := terminalUnopOfInitial hini
+  haveI : Algebra.FinitePresentation k (Fin 0 → k) :=
+    Algebra.FinitePresentation.of_finiteType.mp inferInstance
+  haveI : Algebra.Etale k (Fin 0 → k) := ⟨inferInstance, inferInstance⟩
+  have hiso2 := hterm.uniqueUpToIso
+    (isTerminalOfSubsingleton (CommAlgCat.FiniteEtale.of k (Fin 0 → k)))
+  have hcarrier : (Y : Type u) ≃ (Fin 0 → k) :=
+    ⟨hiso2.hom.hom.hom, hiso2.inv.hom.hom,
+      fun a => congrArg (fun (t : Y ⟶ Y) => t.hom.hom a) hiso2.hom_inv_id,
+      fun a => congrArg (fun (t : CommAlgCat.FiniteEtale.of k (Fin 0 → k) ⟶
+        CommAlgCat.FiniteEtale.of k (Fin 0 → k)) => t.hom.hom a) hiso2.inv_hom_id⟩
+  haveI : Subsingleton (Y : Type u) := hcarrier.subsingleton
+  exact false_of_nontrivial_of_subsingleton (Y : Type u)
+
 /-- Connected finite étale algebras over a field are fields. -/
 theorem isField_of_isConnected (X : (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ)
     [PreGaloisCategory.IsConnected X] : IsField (X.unop : Type u) := by
@@ -144,26 +163,11 @@ theorem isField_of_isConnected (X : (CommAlgCat.FiniteEtale.{u} k)ᵒᵖ)
   haveI : Epi q := (ObjectProperty.ι (CommAlgCat.finiteEtale k)).epi_of_epi_map
     inferInstance
   haveI hmono : Mono q.op := inferInstance
-  have hiso : IsIso q.op := by
-    refine PreGaloisCategory.IsConnected.noTrivialComponent _ q.op ?_
-    intro hini
-    have hterm : IsTerminal (CommAlgCat.FiniteEtale.of k ((X.unop : Type u) ⧸ m₀)) :=
-      terminalUnopOfInitial hini
-    haveI : Algebra.FinitePresentation k (Fin 0 → k) :=
-      Algebra.FinitePresentation.of_finiteType.mp inferInstance
-    haveI : Algebra.Etale k (Fin 0 → k) := ⟨inferInstance, inferInstance⟩
-    have hiso2 := hterm.uniqueUpToIso
-      (isTerminalOfSubsingleton (CommAlgCat.FiniteEtale.of k (Fin 0 → k)))
-    have hcarrier : ((X.unop : Type u) ⧸ m₀) ≃ (Fin 0 → k) :=
-      ⟨hiso2.hom.hom.hom, hiso2.inv.hom.hom,
-        fun a => congrArg (fun (t : CommAlgCat.FiniteEtale.of k
-          ((X.unop : Type u) ⧸ m₀) ⟶ CommAlgCat.FiniteEtale.of k
-          ((X.unop : Type u) ⧸ m₀)) => t.hom.hom a) hiso2.hom_inv_id,
-        fun a => congrArg (fun (t : CommAlgCat.FiniteEtale.of k (Fin 0 → k) ⟶
-          CommAlgCat.FiniteEtale.of k (Fin 0 → k)) => t.hom.hom a)
-          hiso2.inv_hom_id⟩
-    haveI : Subsingleton ((X.unop : Type u) ⧸ m₀) := hcarrier.subsingleton
-    exact false_of_nontrivial_of_subsingleton ((X.unop : Type u) ⧸ m₀)
+  haveI : Nontrivial (CommAlgCat.FiniteEtale.of k ((X.unop : Type u) ⧸ m₀) : Type u) :=
+    inferInstanceAs (Nontrivial ((X.unop : Type u) ⧸ m₀))
+  have hiso : IsIso q.op :=
+    PreGaloisCategory.IsConnected.noTrivialComponent _ q.op
+      (not_isInitial_op_of_nontrivial _)
   haveI : IsIso q := (isIso_op_iff q).mp hiso
   haveI : IsIso ((ObjectProperty.ι (CommAlgCat.finiteEtale k)).map q) :=
     Functor.map_isIso _ q
