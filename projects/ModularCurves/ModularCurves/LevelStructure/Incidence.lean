@@ -409,18 +409,18 @@ noncomputable def vanishingLocus : S.IdealSheafData where
         (V := ⟨p ⁻¹ᵁ U.1, U.2.preimage p⟩)] at hglue
     exact hglue
 
-/-- Inside any affine open `U` and around any of its points there is a *basic* open of `U`
-over which the pushforward `p` trivialises (finite + flat + finitely presented ⇒ free after
-localising at `s`, then descending to a basic open). Keeping the ambient affine `U` fixed is
-what the arbitrary-affine reduction of `vanishingLocus_le_ker_iff` needs;
-`exists_affineOpen_mem_free` below is the corollary that forgets `U`. -/
-private theorem vanishingLocusAux_exists_basicOpen_free (U : S.affineOpens) {s : S}
-    (hs : s ∈ U.1) :
-    ∃ r : Γ(S, U.1), s ∈ S.basicOpen r ∧
-      (letI := ((p.app (S.basicOpen r)).hom).toAlgebra
-       Module.Free Γ(S, S.basicOpen r) Γ(W, p ⁻¹ᵁ S.basicOpen r)) := by
-  obtain ⟨U₀, hU₀⟩ := U
-  replace hs : s ∈ U₀ := hs
+/-- **Free localization near a point.** For a finite, flat, finitely-presented `p`, an
+affine open `U₀ ⊆ S` and a point `s ∈ U₀`, some `r` avoiding the prime ideal of `s` makes
+the localized pushforward `LocalizedModule (powers r) Γ(W, p⁻¹U₀)` free over
+`Localization (powers r)`. This is the scheme-section instance of
+`Module.FinitePresentation.exists_free_localizedModule_powers`, fed by
+`Module.free_of_flat_of_isLocalRing` at the local ring of `s`. -/
+private theorem exists_free_localizedModule_powers_of_mem
+    (U₀ : S.Opens) (hU₀ : IsAffineOpen U₀) {s : S} (hs : s ∈ U₀) :
+    ∃ r : Γ(S, U₀), r ∈ (hU₀.primeIdealOf ⟨s, hs⟩).asIdeal.primeCompl ∧
+      (letI := ((p.app U₀).hom).toAlgebra
+       Module.Free (Localization (Submonoid.powers r))
+         (LocalizedModule (Submonoid.powers r) Γ(W, p ⁻¹ᵁ U₀))) := by
   -- the sections over `U₀` are a finite flat finitely presented module
   letI := ((p.app U₀).hom).toAlgebra
   haveI hfin : Module.Finite Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) := p.finite_app U₀ hU₀
@@ -445,6 +445,88 @@ private theorem vanishingLocusAux_exists_basicOpen_free (U : S.affineOpens) {s :
     (LocalizedModule.mkLinearMap (hU₀.primeIdealOf ⟨s, hs⟩).asIdeal.primeCompl
       Γ(W, p ⁻¹ᵁ U₀))
     (Localization.AtPrime (hU₀.primeIdealOf ⟨s, hs⟩).asIdeal)
+  exact ⟨r, hr, hfree⟩
+
+omit [Flat p] [LocallyOfFinitePresentation p] in
+/-- **Freeness descends to a basic open.** If the pushforward `Γ(W, p⁻¹U₀)` becomes free
+after localizing at the powers of `r`, then `Γ(W, p⁻¹ D(r))` is free over `Γ(S, D(r))`.
+Transports the given freeness along the localization identifications `IsLocalization.algEquiv`
+(of the base ring) and `IsLocalizedModule.iso` (of the module). -/
+private theorem free_sections_basicOpen_of_free_localizedModule
+    (U₀ : S.Opens) (hU₀ : IsAffineOpen U₀) (r : Γ(S, U₀))
+    (hfree :
+      letI := ((p.app U₀).hom).toAlgebra
+      Module.Free (Localization (Submonoid.powers r))
+        (LocalizedModule (Submonoid.powers r) Γ(W, p ⁻¹ᵁ U₀))) :
+    letI := ((p.app (S.basicOpen r)).hom).toAlgebra
+    Module.Free Γ(S, S.basicOpen r) Γ(W, p ⁻¹ᵁ S.basicOpen r) := by
+  letI := ((p.app U₀).hom).toAlgebra
+  letI := ((p.app (S.basicOpen r)).hom).toAlgebra
+  letI := ((S.presheaf.map (homOfLE <| S.basicOpen_le r).op).hom).toAlgebra
+  letI := ((W.presheaf.map (homOfLE
+    (show p ⁻¹ᵁ S.basicOpen r ≤ p ⁻¹ᵁ U₀ from
+      fun _ hx ↦ S.basicOpen_le r hx)).op).hom).toAlgebra
+  letI := ((p.appLE U₀ (p ⁻¹ᵁ S.basicOpen r)
+    (show p ⁻¹ᵁ S.basicOpen r ≤ p ⁻¹ᵁ U₀ from
+      fun _ hx ↦ S.basicOpen_le r hx)).hom).toAlgebra
+  haveI : IsScalarTower Γ(S, U₀) Γ(S, S.basicOpen r) Γ(W, p ⁻¹ᵁ S.basicOpen r) :=
+    IsScalarTower.of_algebraMap_eq' (by
+      rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+        RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp]
+      simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.map_appLE])
+  haveI : IsScalarTower Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) Γ(W, p ⁻¹ᵁ S.basicOpen r) :=
+    IsScalarTower.of_algebraMap_eq' (by
+      rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
+        RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp]
+      simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.appLE_map])
+  haveI hSloc : IsLocalization.Away r Γ(S, S.basicOpen r) :=
+    hU₀.isLocalization_basicOpen r
+  haveI hWloc := (hU₀.preimage p).isLocalization_of_eq_basicOpen
+    (algebraMap Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) r)
+    (homOfLE (show p ⁻¹ᵁ S.basicOpen r ≤ p ⁻¹ᵁ U₀ from
+      fun _ hx ↦ S.basicOpen_le r hx))
+    (by rw [Scheme.preimage_basicOpen, RingHom.algebraMap_toAlgebra])
+  haveI : IsLocalizedModule (Submonoid.powers r)
+      (IsScalarTower.toAlgHom Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀)
+        Γ(W, p ⁻¹ᵁ S.basicOpen r)).toLinearMap := by
+    haveI : IsLocalization (Algebra.algebraMapSubmonoid (R := Γ(S, U₀))
+        Γ(W, p ⁻¹ᵁ U₀) (Submonoid.powers r)) Γ(W, p ⁻¹ᵁ S.basicOpen r) := by
+      rw [show Algebra.algebraMapSubmonoid (R := Γ(S, U₀)) Γ(W, p ⁻¹ᵁ U₀)
+          (Submonoid.powers r) = Submonoid.powers
+            (algebraMap Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) r) from
+        Submonoid.map_powers _ r]
+      exact hWloc
+    infer_instance
+  set e := (IsLocalization.algEquiv (Submonoid.powers r)
+    (Localization (Submonoid.powers r)) Γ(S, S.basicOpen r)).toRingEquiv
+  haveI := RingHomInvPair.of_ringEquiv e
+  haveI := RingHomInvPair.of_ringEquiv_symm e
+  refine (Module.Free.iff_of_equiv (σ := (e : Localization (Submonoid.powers r) →+*
+    Γ(S, S.basicOpen r))) ?_).mp hfree
+  have iso0 := IsLocalizedModule.iso (Submonoid.powers r)
+    (IsScalarTower.toAlgHom Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀)
+      Γ(W, p ⁻¹ᵁ S.basicOpen r)).toLinearMap
+  refine { __ := iso0, map_smul' := ?_ }
+  intro c x
+  obtain ⟨c, t, rfl⟩ := IsLocalization.exists_mk'_eq (Submonoid.powers r) c
+  apply ((Module.End.isUnit_iff _).mp (IsLocalizedModule.map_units
+    (IsScalarTower.toAlgHom Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀)
+      Γ(W, p ⁻¹ᵁ S.basicOpen r)).toLinearMap t)).1
+  simp [e, ← map_smul, ← smul_assoc]
+
+/-- Inside any affine open `U` and around any of its points there is a *basic* open of `U`
+over which the pushforward `p` trivialises (finite + flat + finitely presented ⇒ free after
+localising at `s`, then descending to a basic open). Keeping the ambient affine `U` fixed is
+what the arbitrary-affine reduction of `vanishingLocus_le_ker_iff` needs;
+`exists_affineOpen_mem_free` below is the corollary that forgets `U`. -/
+private theorem vanishingLocusAux_exists_basicOpen_free (U : S.affineOpens) {s : S}
+    (hs : s ∈ U.1) :
+    ∃ r : Γ(S, U.1), s ∈ S.basicOpen r ∧
+      (letI := ((p.app (S.basicOpen r)).hom).toAlgebra
+       Module.Free Γ(S, S.basicOpen r) Γ(W, p ⁻¹ᵁ S.basicOpen r)) := by
+  obtain ⟨U₀, hU₀⟩ := U
+  replace hs : s ∈ U₀ := hs
+  obtain ⟨r, hr, hfree⟩ := exists_free_localizedModule_powers_of_mem p U₀ hU₀ hs
   refine ⟨r, ?_, ?_⟩
   · -- membership: `r ∉ 𝔭ₛ` says exactly `s ∈ D(r)`
     show s ∈ S.basicOpen r
@@ -453,61 +535,8 @@ private theorem vanishingLocusAux_exists_basicOpen_free (U : S.affineOpens) {s :
       exact hr
     have h2 : hU₀.fromSpec (hU₀.primeIdealOf ⟨s, hs⟩) ∈ S.basicOpen r := h1
     rwa [hU₀.fromSpec_primeIdealOf ⟨s, hs⟩] at h2
-  · -- freeness: transport `hfree` along the canonical identifications of the localizations
-    show (letI := ((p.app (S.basicOpen r)).hom).toAlgebra
-      Module.Free Γ(S, S.basicOpen r) Γ(W, p ⁻¹ᵁ S.basicOpen r))
-    letI := ((p.app (S.basicOpen r)).hom).toAlgebra
-    letI := ((S.presheaf.map (homOfLE <| S.basicOpen_le r).op).hom).toAlgebra
-    letI := ((W.presheaf.map (homOfLE
-      (show p ⁻¹ᵁ S.basicOpen r ≤ p ⁻¹ᵁ U₀ from
-        fun _ hx ↦ S.basicOpen_le r hx)).op).hom).toAlgebra
-    letI := ((p.appLE U₀ (p ⁻¹ᵁ S.basicOpen r)
-      (show p ⁻¹ᵁ S.basicOpen r ≤ p ⁻¹ᵁ U₀ from
-        fun _ hx ↦ S.basicOpen_le r hx)).hom).toAlgebra
-    haveI : IsScalarTower Γ(S, U₀) Γ(S, S.basicOpen r) Γ(W, p ⁻¹ᵁ S.basicOpen r) :=
-      IsScalarTower.of_algebraMap_eq' (by
-        rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
-          RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp]
-        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.map_appLE])
-    haveI : IsScalarTower Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) Γ(W, p ⁻¹ᵁ S.basicOpen r) :=
-      IsScalarTower.of_algebraMap_eq' (by
-        rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra,
-          RingHom.algebraMap_toAlgebra, ← CommRingCat.hom_comp]
-        simp only [Scheme.Hom.app_eq_appLE, Scheme.Hom.appLE_map])
-    haveI hSloc : IsLocalization.Away r Γ(S, S.basicOpen r) :=
-      hU₀.isLocalization_basicOpen r
-    haveI hWloc := (hU₀.preimage p).isLocalization_of_eq_basicOpen
-      (algebraMap Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) r)
-      (homOfLE (show p ⁻¹ᵁ S.basicOpen r ≤ p ⁻¹ᵁ U₀ from
-        fun _ hx ↦ S.basicOpen_le r hx))
-      (by rw [Scheme.preimage_basicOpen, RingHom.algebraMap_toAlgebra])
-    haveI : IsLocalizedModule (Submonoid.powers r)
-        (IsScalarTower.toAlgHom Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀)
-          Γ(W, p ⁻¹ᵁ S.basicOpen r)).toLinearMap := by
-      haveI : IsLocalization (Algebra.algebraMapSubmonoid (R := Γ(S, U₀))
-          Γ(W, p ⁻¹ᵁ U₀) (Submonoid.powers r)) Γ(W, p ⁻¹ᵁ S.basicOpen r) := by
-        rw [show Algebra.algebraMapSubmonoid (R := Γ(S, U₀)) Γ(W, p ⁻¹ᵁ U₀)
-            (Submonoid.powers r) = Submonoid.powers
-              (algebraMap Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀) r) from
-          Submonoid.map_powers _ r]
-        exact hWloc
-      infer_instance
-    set e := (IsLocalization.algEquiv (Submonoid.powers r)
-      (Localization (Submonoid.powers r)) Γ(S, S.basicOpen r)).toRingEquiv
-    haveI := RingHomInvPair.of_ringEquiv e
-    haveI := RingHomInvPair.of_ringEquiv_symm e
-    refine (Module.Free.iff_of_equiv (σ := (e : Localization (Submonoid.powers r) →+*
-      Γ(S, S.basicOpen r))) ?_).mp hfree
-    have iso0 := IsLocalizedModule.iso (Submonoid.powers r)
-      (IsScalarTower.toAlgHom Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀)
-        Γ(W, p ⁻¹ᵁ S.basicOpen r)).toLinearMap
-    refine { __ := iso0, map_smul' := ?_ }
-    intro c x
-    obtain ⟨c, t, rfl⟩ := IsLocalization.exists_mk'_eq (Submonoid.powers r) c
-    apply ((Module.End.isUnit_iff _).mp (IsLocalizedModule.map_units
-      (IsScalarTower.toAlgHom Γ(S, U₀) Γ(W, p ⁻¹ᵁ U₀)
-        Γ(W, p ⁻¹ᵁ S.basicOpen r)).toLinearMap t)).1
-    simp [e, ← map_smul, ← smul_assoc]
+  · -- freeness: descend `hfree` from the localization to the basic open `D(r)`
+    exact free_sections_basicOpen_of_free_localizedModule p U₀ hU₀ r hfree
 
 /-- **(T-D14c-i, free cover)** A finite flat finitely-presented morphism has free
 sections over an affine neighbourhood of every point of the base: shrink any affine
