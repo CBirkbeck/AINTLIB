@@ -20656,3 +20656,19 @@ both engine instantiations discharge ⟹ `representable_iff` produces `.Represen
 levels (Y(N), Γ_H, Γ₁) representable, same commit** (GH's one-liners already written). No structural
 layer remains below the keystone. Boxes cleared: BB-QF ✅, engine ✅, rigidity ✅, rel-rep ✅.
 Fire ONE session per seat (v10.219 G0-collision lesson holds).
+
+### v10.251-GH — ★ [GH1] gammaHAut DISCHARGED (fully clean) — GHC1 cone MINIMISED (STREAM-GH)
+Commit (pushed). THE CLOSER job (1) executed: OMEGA's T-E4a landing unlocked [GH1] —
+**`gammaHAut` CONSTRUCTED + `gammaHAut_app_val := rfl`, both {propext, Classical.choice,
+Quot.sound}** (glSmulNat := componentwise glSmul with naturality = the in-tree
+`pullSection_glSmul`; Aut/MonoidHom laws via glSmul_mul/glSmul_one, the γ⁻¹-twist absorbing
+the right-action variance exactly as the 2026-07-06 design pinned). Lean gotchas: Type-valued
+problem homs are ↾-wrapped (ConcreteCategory refactor) — `ext X L` yields `.toFun`-spelled
+goals where comp_apply won't match: `show`-cast to the coe-application composite form first,
+then `CategoryTheory.comp_apply`/`id_apply` + the app-projection simp fire.
+**MINIMISED GATE-LEDGER (GHC1 qpd):** sorryAx now flows ONLY via (a) [GHA3] `levelSpaceΓπ_etale`
+(WEIL) inside `gammaFullNaive_relRepData`, (b) the torsion-rank boxes inside
+`glSmul_eq_one_of_eq_self` (freeness), (c) the standing E[N]-keystone boxes — all on the
+KM/G0-funnel the fleet converged on. NO GH-owned sorries remain anywhere in the Γ_H chain.
+Job (2) ARMED: the ~10 downstream endDeg identities fire the instant KM lands the :43/:48/:53
+data (still sorried as of this audit). (STREAM-GH)
