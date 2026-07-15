@@ -20536,3 +20536,34 @@ presentation uniqueness ✓ | datum + glued (β,γ) + glued flex + glued disc-un
 ring hom + map ✓ | **forward universal property (e3ClassifyingEllHom) ★★★** ✓ | rt1/rt2/
 RepresentableBy = boarded transposition | NORM = keystone gap. The mathematically-novel content
 (both uniqueness directions + the classifying construction) is DONE and axiom-clean.
+
+## v10.247-OMEGA (2026-07-15) — ★★★ T-E15a RT1 COMPLETE: pullSection_e3ClassifyingEllHom_P/Q
+
+`section_comp_e3Top` (hand-written for the e3BaseCover/e3WitnessCover interplay — the naive rename
+broke; the fix was to keep the Legendre proof's `hfac` factoring `w.V.1.ι ≫ σ` through
+`e3WitnessCover.f w` BEFORE `e3Top_piece`) + `pullSection_e3ClassifyingEllHom_P/Q` (commits
+48fb879e3 + 3e902f81c, axiom-clean). **E3 has NO ω-half** — rt1 is purely the level roundtrip.
+The Q-half's universal coords `(e3Gamma, e3Beta+e3Gamma)` (not constants) are matched to the
+witness coords via `e3ClassifyingRingHom_gamma/beta` + the glued specs.
+
+**REMAINING T-E15a (final packaging):**
+1. **rt2** — `e3PulledWitness` (transported tautological E3 chart of the pulled datum; markings via
+   `tautPresentation_marksAt_e3P/Q` [built stage 3] transported through φ) + `e3ClassifyingRingHom_
+   pulled` (baseHom: β,γ-generators via the pulled-witness family) + `e3ClassifyingMap_pulled` +
+   `e3Top_pulled` (via `e3Piece_congr` at the pulled witness) + `e3ClassifyingEllHom_pulled`
+   (EllHom.ext). DIRECT transposition of Legendre rt2 (`pulledWitness`/`legendreClassifyingRingHom_
+   pulled`/`legendreTop_pulled`/`legendreClassifyingEllHom_pulled`).
+2. **e3DatumProblem** (subfunctor of `gammaFullNaiveProblem R 3` carrying `IsE3Datum`, mirrors
+   `legendreDeltaProblem`) + **e3DatumRepresentableBy** (homEquiv = pulled level structure; inverse
+   = e3ClassifyingEllHom; left=rt2, right=rt1) — the CONDITIONAL machine (analog of
+   `legendreDeltaRepresentableBy`).
+3. **[T-E15-NORM]** discharge `naiveLevelThree_representable_by_affine` = `gammaFullNaiveProblem R 3
+   ≅ e3DatumProblem`, i.e. **every naive level-3 IS an IsE3Datum** = the flex-normalization
+   EXISTENCE (order-3 P ⟹ flex ⟹ E3-form; NOT `toTateNF`). E[3]/keystone-adjacent — the SOLE
+   genuine gap; everything else is transposition.
+
+**T-E15a SCORECARD (final for this session):** object ✓ | uniqueness certificate ★★★ ✓ |
+presentation uniqueness ✓ | datum + glued (β,γ)+flex+disc ✓ | classifying ring hom/map ✓ |
+**forward universal property (e3ClassifyingEllHom) ★★★** ✓ | **RT1 (roundtrip right_inv) ★★★** ✓ |
+rt2 + conditional RepresentableBy = boarded transposition | NORM = the one keystone gap. **All
+mathematically-novel content DONE axiom-clean.**
