@@ -70,4 +70,39 @@ theorem isDiscreteValuationRing_localizationAtPrime_of_isStandardSmooth
   exact ⟨hdom, IsDiscreteValuationRing.of_maximalIdeal_eq_span _ π
     (nonZeroDivisors.ne_zero hnzd) hmax⟩
 
+/-- **[FF-alg / BBF-A1 core] A finite* torsion-free algebra over a standard-smooth
+curve of relative dimension `1` over a field is flat.** (*No finiteness is even
+required — only torsion-freeness of `B` as an `A`-module, packaged here as `B` a domain
+with injective structure map.) Every maximal-ideal localization of the domain `A` is a
+DVR (`isDiscreteValuationRing_localizationAtPrime_of_isStandardSmooth`), hence a valuation
+ring, so `flat_iff_torsion_eq_bot_of_valuationRing_localization_isMaximal` reduces flatness
+to torsion-freeness, which is immediate from `B` a domain and `algebraMap A B` injective.
+This is the ring-level heart of the fibre case of BB-FLAT: on each affine chart of the
+projective model over a field, the pushforward coordinate ring is a finite torsion-free
+module, hence flat. -/
+theorem flat_of_isDomain_of_injective_of_isStandardSmooth
+    (k A B : Type u) [Field k] [CommRing A] [IsDomain A] [Algebra k A]
+    [Algebra.IsStandardSmoothOfRelativeDimension 1 k A]
+    [CommRing B] [IsDomain B] [Algebra A B]
+    (hinj : Function.Injective (algebraMap A B)) :
+    Module.Flat A B := by
+  have hval : ∀ (P : Ideal A), [P.IsMaximal] → ValuationRing (Localization P.primeCompl) := by
+    intro P hP
+    obtain ⟨hd, hdvr⟩ :=
+      isDiscreteValuationRing_localizationAtPrime_of_isStandardSmooth k A P
+    haveI := hd
+    haveI := hdvr
+    infer_instance
+  rw [Module.Flat.flat_iff_torsion_eq_bot_of_valuationRing_localization_isMaximal hval,
+    eq_bot_iff]
+  intro x hx
+  rw [Submodule.mem_torsion_iff] at hx
+  obtain ⟨a, ha⟩ := hx
+  have ha0 : (a : A) ≠ 0 := nonZeroDivisors.ne_zero a.2
+  have hab : algebraMap A B (a : A) * x = 0 := by
+    rw [← Algebra.smul_def]; exact ha
+  rcases mul_eq_zero.mp hab with h | h
+  · exact absurd ((map_eq_zero_iff _ hinj).mp h) ha0
+  · rw [Submodule.mem_bot]; exact h
+
 end ModularCurves
