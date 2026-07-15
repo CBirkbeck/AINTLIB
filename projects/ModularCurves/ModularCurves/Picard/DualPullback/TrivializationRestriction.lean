@@ -155,6 +155,38 @@ noncomputable def pullbackSquareTrivialization
   (pullbackSquareIso a b c d h).app M ≪≫
     (pullback c).mapIso t ≪≫ pullbackUnitIso c
 
+/-- A square-transported trivialization factors through the direct pullback along the
+composite map. -/
+theorem pullbackSquareTrivialization_factor
+    {A B C D : Scheme.{u}}
+    (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
+    (w : A ⟶ D) (h : a ≫ b = c ≫ d) (hw : c ≫ d = w)
+    (M : D.Modules) (t : (pullback d).obj M ≅ unitObj C) :
+    (pullbackSquareTrivialization a b c d h M t).hom =
+      ((((pullbackComp a b).app M) ≪≫
+          ((pullbackCongr (h.trans hw)).app M)).hom) ≫
+        (((pullbackCongr hw.symm).app M) ≪≫
+          ((pullbackComp c d).app M).symm ≪≫
+          (pullback c).mapIso t ≪≫ pullbackUnitIso c).hom := by
+  simp only [pullbackSquareTrivialization, pullbackSquareIso,
+    Iso.trans_hom, Iso.symm_hom, Functor.mapIso_hom]
+  let P := (pullbackComp a b).app M
+  let R := (pullbackComp c d).app M
+  let Q := (pullbackCongr h).app M
+  let Qw := (pullbackCongr (h.trans hw)).app M
+  let Qback := (pullbackCongr hw.symm).app M
+  let tail := R.inv ≫ (pullback c).map t.hom ≫
+    (pullbackUnitIso c).hom
+  change P.hom ≫ Q.hom ≫ tail =
+    (P.hom ≫ Qw.hom) ≫ Qback.hom ≫ tail
+  have htrans := pullbackCongr_trans (h.trans hw) hw.symm
+  have hp : (h.trans hw).trans hw.symm = h := Subsingleton.elim _ _
+  rw [hp] at htrans
+  have htransApp := congrArg (fun z => z.hom.app M) htrans
+  change Qw.hom ≫ Qback.hom = Q.hom at htransApp
+  rw [← htransApp]
+  simp only [Category.assoc]
+
 /-- Transporting a trivialization across two vertically composable squares agrees with
 transport across the outer square. -/
 theorem pullbackSquareTrivialization_vcomp
