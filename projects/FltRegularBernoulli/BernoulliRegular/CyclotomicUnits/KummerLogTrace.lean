@@ -112,7 +112,7 @@ theorem samePrimeFiniteLogFinsetProductCoord_cyclotomic_kummerLogColumn_eq_zero
         (fun σ ↦
           Conjugation.valuedIntegerCyclotomicEquiv (p := p) K σ
             (kummerLogColumnFiniteLogArg (p := p) (K := K) hp_three a)) = 0 := by
-  unfold Conjugation.samePrimeFiniteLogFinsetProductCoord
+  simp only [Conjugation.samePrimeFiniteLogFinsetProductCoord]
   rw [prod_one_add_cyclotomic_kummerLogColumnFiniteLogArg
     (p := p) (K := K) hp_three a]
   simp

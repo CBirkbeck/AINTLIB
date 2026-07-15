@@ -350,7 +350,7 @@ theorem completedLog_evalₐ
     AdicCompletion.evalₐ (lambdaIdeal p K) N
         (completedLog (p := p) (K := K) u) =
       completedLogCoord (p := p) (K := K) u N := by
-  unfold completedLog
+  simp only [completedLog]
   let hEq :
       ((lambdaIdeal p K) ^ N • ⊤ : Ideal (ValuedIntegerRing p K)) =
         (lambdaIdeal p K) ^ N := by
@@ -700,7 +700,7 @@ theorem completedLog_EPlus_CPlusExponentProduct_powPred_eq_sum
       ∑ a : Fin (kummerLogRank p),
         e a • kummerLogCompletedColumn (p := p) (K := K) hp_three a := by
   classical
-  unfold CPlusExponentProduct
+  simp only [CPlusExponentProduct]
   rw [EPlus_completedLogDomainPowPred_mul, completedLog_mul,
     EPlus_completedLogDomainPowPred_neg_one_zpow (p := p) (K := K) hp_odd,
     completedLog_one, zero_add]

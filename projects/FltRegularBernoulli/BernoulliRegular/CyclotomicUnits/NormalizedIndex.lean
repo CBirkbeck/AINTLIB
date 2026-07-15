@@ -53,7 +53,7 @@ theorem range_cyclotomicUnitFamilyKplusFinRank_eq
   ext x
   constructor
   · rintro ⟨i, rfl⟩
-    unfold FLT37.Sinnott.cyclotomicUnitFamilyKplusFinRank
+    simp only [FLT37.Sinnott.cyclotomicUnitFamilyKplusFinRank]
     exact ⟨i.cast ((NumberField.IsCMField.units_rank_eq_units_rank (K := K)).trans
       (units_rank_eq_prime_sub_three_div_two (p := p) (K := K))), rfl⟩
   · rintro ⟨i, rfl⟩
@@ -90,7 +90,7 @@ theorem CPlus_le_cyclotomicUnitIndexSubgroup
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) :
     CPlus (p := p) (K := K) hp_three ≤
       cyclotomicUnitIndexSubgroup (p := p) (K := K) hp_odd hp_three := by
-  unfold CPlus cyclotomicUnitIndexSubgroup
+  simp only [CPlus, cyclotomicUnitIndexSubgroup]
   rw [Subgroup.closure_le]
   rintro x (rfl | ⟨i, rfl⟩)
   · exact Subgroup.mem_sup_right <| neg_one_mem_torsion
@@ -105,7 +105,7 @@ theorem cyclotomicUnitIndexSubgroup_le_CPlus
     (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) :
     cyclotomicUnitIndexSubgroup (p := p) (K := K) hp_odd hp_three ≤
       CPlus (p := p) (K := K) hp_three := by
-  unfold cyclotomicUnitIndexSubgroup
+  simp only [cyclotomicUnitIndexSubgroup]
   exact sup_le
     (closure_cyclotomicUnitFamilyKplus_le_CPlus (p := p) (K := K) hp_odd hp_three)
     (torsionKplus_le_CPlus (p := p) (K := K) hp_three)

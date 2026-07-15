@@ -136,7 +136,7 @@ def geomPolynomial (j : Fin (kummerLogRank p)) : (ZMod p)[X] :=
 
 theorem geomPolynomial_natDegree (j : Fin (kummerLogRank p)) :
     (geomPolynomial (p := p) j).natDegree = (j : ℕ) := by
-  unfold geomPolynomial
+  simp only [geomPolynomial]
   apply Polynomial.natDegree_eq_of_le_of_coeff_ne_zero
   · refine Polynomial.natDegree_sum_le_of_forall_le
       (s := Finset.range ((j : ℕ) + 1))
@@ -147,7 +147,7 @@ theorem geomPolynomial_natDegree (j : Fin (kummerLogRank p)) :
   · simp
 
 theorem geomPolynomial_monic (j : Fin (kummerLogRank p)) : (geomPolynomial (p := p) j).Monic := by
-  unfold geomPolynomial
+  simp only [geomPolynomial]
   exact Polynomial.monic_geom_sum_X (R := ZMod p) (by omega)
 
 theorem geomPolynomial_eval (hp_three : 3 ≤ p) (a j : Fin (kummerLogRank p)) :
