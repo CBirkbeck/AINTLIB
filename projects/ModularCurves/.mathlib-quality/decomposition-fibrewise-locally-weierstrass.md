@@ -550,3 +550,12 @@ concrete Cech equalizer; its pullback to each chart is identified with the suppl
 isomorphism, and Zariski-local detection proves it is globally invertible. The proof adds no
 geometric hypotheses or proof-resource options. The focused module build is green, and the
 axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.
+
+Completed dependency claim (2026-07-15): proved
+`Scheme.Hom.affineIntersectionGlueData_ι_affineIntersectionGluedToOriginal_eq_chartIso`.
+This exposes the chartwise factorization of the canonical glued-to-original morphism as the affine
+chart-coordinate isomorphism followed by the original open immersion. This is the geometric
+identity needed to transport an original invertible sheaf's chosen trivializations to the glued
+model before comparing its descent datum with `AffineIntersectionUnitCocycle.chartDescentData`.
+The focused build is green, and the axiom audit is exactly `propext`, `Classical.choice`, and
+`Quot.sound`.

@@ -433,6 +433,19 @@ theorem Scheme.Hom.affineIntersectionGlueData_ι_affineIntersectionGluedToOrigin
     (π.affineIntersectionChartMap U hU)
     (π.affineIntersectionGlueData_chartMap_compat U hU) i
 
+/-- On each chart, the canonical glued-to-original morphism is the chart-coordinate
+isomorphism followed by the inclusion of the corresponding original open. -/
+@[reassoc]
+theorem Scheme.Hom.affineIntersectionGlueData_ι_affineIntersectionGluedToOriginal_eq_chartIso
+    (π : X ⟶ S) (U : J → X.Opens)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i : J) :
+    (π.affineIntersectionGlueData U hU).ι i ≫
+        π.affineIntersectionGluedToOriginal U hU =
+      (π.affineIntersectionChartIso U hU i).hom ≫ (U i).ι := by
+  rw [π.affineIntersectionGlueData_ι_affineIntersectionGluedToOriginal U hU i,
+    π.affineIntersectionChartIso_hom_ι U hU i]
+
 private theorem Scheme.Hom.affineIntersectionOriginalToGlued_restrict
     (π : X ⟶ S) (U : J → X.Opens) (hcover : IsOpenCover U)
     (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
