@@ -13,7 +13,7 @@ import ModularCurves.EllipticCurve.KernelDivisibilityGlue
 The proof is the infinitesimal-lifting translation (the (LIFT) core of the route-(G)
 audit): smoothness is checked on affine chart pairs `(U, V)` with `V ≤ [N]⁻¹ U` and both
 inside `π`-preimages of an affine `W ⊆ S`. The ring map `Γ(U) ⟶ Γ(V)` is of finite
-presentation (`mulByHom_locallyOfFinitePresentation`, the project's Stacks-01TX
+presentation (`MulByHom.locallyOfFinitePresentation`, the project's Stacks-01TX
 cancellation), so it remains to lift `Γ(U)`-algebra maps `Γ(V) →ₐ B ⧸ I` across a
 square-zero ideal `I`:
 
@@ -97,7 +97,7 @@ private theorem exists_corrected_lift (N : ℕ) (h : NIsInvertible S N) (B : Com
 
 /-- **(N6 core, the (LIFT) argument)** For `N` invertible, the chart ring map of `[N]`
 on a compatible affine chart triple `W, U, V` is formally smooth. -/
-theorem formallySmooth_mulByHom_appLE (N : ℕ) (h : NIsInvertible S N)
+theorem MulByHom.formallySmooth_appLE (N : ℕ) (h : NIsInvertible S N)
     {W : S.Opens} (hW : IsAffineOpen W) {U : E.E.Opens} (hU : IsAffineOpen U)
     {V : E.E.Opens} (hV : IsAffineOpen V) (hUW : U ≤ E.π ⁻¹ᵁ W)
     (hVU : V ≤ (E.mulByHom (N : ℤ)) ⁻¹ᵁ U) :
@@ -224,9 +224,9 @@ theorem formallySmooth_mulByHom_appLE (N : ℕ) (h : NIsInvertible S N)
 
 /-- **(N6)** `[N]` is smooth for `N` invertible on `S` — the (LIFT) translation of
 kernel `N`-divisibility (N5). -/
-theorem mulByHom_smooth_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :
+theorem MulByHom.smooth_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :
     Smooth (E.mulByHom (N : ℤ)) := by
-  have := E.mulByHom_locallyOfFinitePresentation N
+  have := MulByHom.locallyOfFinitePresentation E N
   refine IsZariskiLocalAtSource.iff_exists_resLE.mpr fun x ↦ ?_
   -- an affine chart `W` around the base point
   obtain ⟨_, ⟨W, hW, rfl⟩, hxW, -⟩ := S.isBasis_affineOpens.exists_subset_of_mem_open
@@ -248,14 +248,14 @@ theorem mulByHom_smooth_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :
   refine (RingHom.Smooth.propertyIsLocal.respectsIso.arrow_mk_iso_iff
     (arrowResLEAppIso (E.mulByHom (N : ℤ)) U V hVU)).mpr ?_
   rw [RingHom.smooth_def]
-  exact ⟨E.formallySmooth_mulByHom_appLE N h hW hU hV hUW hVU,
+  exact ⟨MulByHom.formallySmooth_appLE E N h hW hU hV hUW hVU,
     (E.mulByHom (N : ℤ)).finitePresentation_appLE hU hV hVU⟩
 
 /-- **(BB-FLAT, invertible case — route (G) closed)** `[N]` is flat for `N` invertible
 on `S`. -/
-theorem mulByHom_flat_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :
+theorem MulByHom.flat_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :
     Flat (E.mulByHom (N : ℤ)) := by
-  have := E.mulByHom_smooth_of_nIsInvertible N h
+  have := MulByHom.smooth_of_nIsInvertible E N h
   infer_instance
 
 end EllipticCurve

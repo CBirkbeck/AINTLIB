@@ -614,7 +614,7 @@ invertible, `U_{Γ(N)} → S` is étale. Loeffler (verbatim): "it is an open sub
 E[N] ×_S E[N] given by non-vanishing of Weil pairings" — i.e. `levelSpaceΓ` is the
 preimage under `weilPairing` (DS4) of the *primitive* locus `μ_N^× ⊆ μ_N` (for
 non-prime `N`, primitivity, not mere non-vanishing), which is clopen over `ℤ[1/N]`;
-a clopen subscheme of the finite étale `E[N] ×_S E[N]` (`torsionπ_etale`, T-B5′,
+a clopen subscheme of the finite étale `E[N] ×_S E[N]` (`Torsionπ.etale`, T-B5′,
 PROVEN) is finite étale over `S`. Unramifiedness is free (closed immersion into
 étale); openness/flatness is the genuine content — a closed subscheme of a finite
 étale scheme is NOT étale in general. Fallback route (KM 3.7.1's proof, verbatim):

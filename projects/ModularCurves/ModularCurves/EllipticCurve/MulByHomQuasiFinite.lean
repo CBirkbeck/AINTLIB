@@ -62,7 +62,7 @@ def torsionByCongr {A B : Type*} [AddCommGroup A] [AddCommGroup B] (φ : A ≃+ 
 /-- **(BB-QF core count)** The `N`-torsion of the point group of `E` at a geometric point
 is finite, for `N` nonzero in the (algebraically closed) residue field. Chart reduction to
 the projective model, then [T-B6′] + HasseWeil. -/
-theorem point_torsionBy_finite_of_geometric {k : Type u} [Field k] [IsAlgClosed k]
+theorem Point.torsionBy_finite_of_geometric {k : Type u} [Field k] [IsAlgClosed k]
     (t : Spec (CommRingCat.of k) ⟶ S) (N : ℕ) (hN : (N : k) ≠ 0) :
     Finite (Submodule.torsionBy ℤ (E.Point t) (N : ℤ)) := by
   classical
@@ -138,11 +138,11 @@ theorem point_torsionBy_finite_of_geometric {k : Type u} [Field k] [IsAlgClosed 
 
 /-- **(BB-QF, invertible case — KM 2.3.1 quasi-finiteness)** `[N] : E ⟶ E` is locally
 quasi-finite when `N` is invertible on the base. -/
-theorem mulByHom_locallyQuasiFinite_of_nIsInvertible (N : ℕ) [NeZero N]
+theorem MulByHom.locallyQuasiFinite_of_nIsInvertible (N : ℕ) [NeZero N]
     (h : NIsInvertible S N) : LocallyQuasiFinite (E.mulByHom N) := by
   classical
   haveI : Smooth E.π := SmoothOfRelativeDimension.smooth (n := 1) E.π
-  haveI := E.mulByHom_locallyOfFinitePresentation N
+  haveI := MulByHom.locallyOfFinitePresentation E N
   haveI hlft : LocallyOfFiniteType (E.mulByHom N) := inferInstance
   refine LocallyQuasiFinite.of_finite_preimage_singleton _ (fun y => ?_)
   -- the geometric point over `y`
@@ -202,7 +202,7 @@ theorem mulByHom_locallyQuasiFinite_of_nIsInvertible (N : ℕ) [NeZero N]
         apply Subtype.ext
         rw [E.point_smul_eq_comp_mulBy]
         exact hh.2
-      haveI := E.point_torsionBy_finite_of_geometric t N hNk
+      haveI := Point.torsionBy_finite_of_geometric E t N hNk
       refine Finite.of_injective (fun hh => (⟨(⟨hh.1, hpt hh⟩ : E.Point t) -
         (⟨h₀.1, hpt h₀⟩ : E.Point t), ?_⟩ :
           Submodule.torsionBy ℤ (E.Point t) (N : ℤ))) ?_
@@ -223,15 +223,15 @@ theorem mulByHom_locallyQuasiFinite_of_nIsInvertible (N : ℕ) [NeZero N]
 
 /-- **(KM 2.3.1 finiteness, invertible case)** `[N]` is finite when `N` is invertible:
 proper + quasi-finite via Zariski's Main Theorem. -/
-theorem mulByHom_isFinite_of_nIsInvertible (N : ℕ) [NeZero N] (h : NIsInvertible S N) :
+theorem MulByHom.isFinite_of_nIsInvertible (N : ℕ) [NeZero N] (h : NIsInvertible S N) :
     IsFinite (E.mulByHom N) := by
-  haveI := E.mulByHom_locallyQuasiFinite_of_nIsInvertible N h
+  haveI := MulByHom.locallyQuasiFinite_of_nIsInvertible E N h
   exact IsFinite.of_isProper_of_locallyQuasiFinite _
 
 /-- **(T-B4 finiteness, invertible case)** `E[N] ⟶ S` is finite when `N` is invertible. -/
-theorem torsionπ_isFinite_of_nIsInvertible (N : ℕ) [NeZero N] (h : NIsInvertible S N) :
+theorem Torsionπ.isFinite_of_nIsInvertible (N : ℕ) [NeZero N] (h : NIsInvertible S N) :
     IsFinite (E.torsionπ N) :=
-  MorphismProperty.pullback_snd _ _ (E.mulByHom_isFinite_of_nIsInvertible N h)
+  MorphismProperty.pullback_snd _ _ (MulByHom.isFinite_of_nIsInvertible E N h)
 
 end EllipticCurve
 

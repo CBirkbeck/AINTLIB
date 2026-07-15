@@ -16,8 +16,8 @@ funneled hypothesis. Its discharge is the `TorsionUnramifiedFibre` co-multiplica
 layer (`pointSharp_add`) generalized off the field base — the L3 campaign's remaining
 mathematical content.
 
-Once `mulByHom_flat_of_nIsInvertible` (`MulByHomSmooth.lean`, via the route-(G) smoothness)
-and the discharge land, `mulBy_etale'` (`MulByHomEtale.lean`) swaps its flat input and the
+Once `MulByHom.flat_of_nIsInvertible` (`MulByHomSmooth.lean`, via the route-(G) smoothness)
+and the discharge land, `MulByHom.etale'` (`MulByHomEtale.lean`) swaps its flat input and the
 `Y₁(N)` MASTER closes at `{propext, Classical.choice, Quot.sound}`.
 -/
 

@@ -44,8 +44,8 @@ attack blocks, gate register and LOC grounding — in
 This assembly is `sorry`-free; the results below are cited as proven inputs:
 * **[T-W7]** `pointedIso_exists_variableChange` + `projModelVCIso_injective`
   (`EllipticCurve/Comparison.lean`) — inside the atlas subtree (L-ATLAS).
-* **[BB-DIFF MASTER]** `mulByHom_formallyUnramified'` (`EllipticCurve/MulByHomUnramified.lean`)
-  ⟹ `torsionπ_etale` — feeds the clopen split (affineness) and the lifting (smoothness).
+* **[BB-DIFF MASTER]** `MulByHom.formallyUnramified'` (`EllipticCurve/MulByHomUnramified.lean`)
+  ⟹ `Torsionπ.etale` — feeds the clopen split (affineness) and the lifting (smoothness).
 * **[T-E4-family]** canonicity transport of level structures along `Ell/R`-morphisms
   (`EllHom.pullSection_add`) — the GME 2.2.5 canonicity chain also discharges
   `isNaiveGammaOne_pullSection_iff`.

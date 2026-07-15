@@ -16,7 +16,7 @@ This is the bridge that lets `AlgebraicGeometry.FormallyUnramified.hom_ext` — 
 hypothesis is `IsNilpotent i.ker` — be applied to the affine square-zero thickening `Spec.map φ`
 produced by `AlgebraicGeometry.FormallyUnramified.of_hom_ext`, which supplies only the ring-level
 `RingHom.ker φ ^ 2 = ⊥`. Used by
-`ModularCurves.EllipticCurve.formallyUnramified_mulByHom_of_torsionπ`.
+`ModularCurves.EllipticCurve.MulByHom.formallyUnramified_of_torsionπ`.
 
 ## Main results
 

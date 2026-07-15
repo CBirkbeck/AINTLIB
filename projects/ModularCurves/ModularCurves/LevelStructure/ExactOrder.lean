@@ -253,7 +253,7 @@ the (1)⟹(2) half is now DISCHARGEABLE by `Section.HasExactOrder.baseChange` (p
 today: exact order is base-change stable), reducing this box to the pure field-level
 (2)⟹(3). Crucially, (2)⟹(3) does NOT need Cartier's theorem in general: over the
 *algebraically closed* fibre `k̄` the argument is elementary given the project's
-already-proven `Torsion.torsionπ_etale` (T-B5′: `E[N] ⟶ S` finite étale when `N`
+already-proven `Torsionπ.etale` (T-B5′: `E[N] ⟶ S` finite étale when `N`
 invertible). Route: (a) the subgroup-divisor subscheme `G` is killed by `N`
 (`IsSubgroup.smul_eq_zero_of_factors`, proven) ⟹ `G` factors through `E[N]`; (b) `E[N]`
 finite étale over `k̄` ⟹ `E[N] ≅ Spec(k̄^{N²})`; (c) a closed subscheme of `Spec(k̄^n)`

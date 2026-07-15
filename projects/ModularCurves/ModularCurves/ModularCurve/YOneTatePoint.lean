@@ -29,8 +29,8 @@ Axiom trail (v10.152, CHARTER-Y1-CLOSER-2 close): the MASTER
 `gammaOneNaive_representable` and its full input chain in this file audit at
 `{propext, Classical.choice, Quot.sound}` — the [T-A6b]/[T-B6′] designed trails were
 retired by the K-series record primitives, and the last `sorryAx` consumptions (the
-unprimed `torsionπ_etale`/`torsionπ_isFinite` in the E5 core) were swapped to the proven
-invertible-case variants when BB-FLAT closed (`mulByHom_flat_of_nIsInvertible`,
+unprimed `Torsionπ.etale`/`torsionπ_isFinite` in the E5 core) were swapped to the proven
+invertible-case variants when BB-FLAT closed (`MulByHom.flat_of_nIsInvertible`,
 `MulByHomSmooth.lean`).
 -/
 
@@ -362,8 +362,8 @@ Hence `(E₀, P₀)` lifts to `(E, P)`, and we are done."*
 
 The étale input is Loeffler Lemma 3.4.2(2) (verbatim, p. 15): *"The morphism `[N]` multiplies
 a global differential by `N`, so it induces an isomorphism of tangent space. In other words,
-it is an étale morphism"* — in this repo that is exactly **[BB-DIFF]** (`torsionπ_etale`,
-gated on `mulByHom_formallyUnramified'`, in flight). The same étale input makes the removed
+it is an étale morphism"* — in this repo that is exactly **[BB-DIFF]** (`Torsionπ.etale`,
+gated on `MulByHom.formallyUnramified'`, in flight). The same étale input makes the removed
 loci **clopen** in `Y_N` (a section of an étale separated morphism is an open immersion), which
 is what makes `Y₁(N)` affine for general `N` — Loeffler's `Spec` display is verbatim only for
 `N = 5` (Def 3.3.6), so affineness is derived, not quoted (KM affine-over-`(Ell)` locator to be
@@ -391,7 +391,7 @@ private theorem isOpenImmersion_of_section {X Y : Scheme.{u}} (f : X ⟶ Y)
 /-- **(Y1-E1, the clopen split — gate [BB-DIFF])** Over a base where `N` is invertible, each
 sub-killed-locus `{d • P = 0}` with `d ∣ N` is **open** inside the killed locus `{N • P = 0}`
 (as well as closed): on `Y_N` the point `P` classifies into the finite étale `E[N]`
-(`torsionπ_etale`, T-B5′ — Loeffler Lemma 3.4.2(2)), the zero section of an étale separated
+(`Torsionπ.etale`, T-B5′ — Loeffler Lemma 3.4.2(2)), the zero section of an étale separated
 family is an open immersion (its diagonal is; mathlib `FormallyUnramified` +
 `IsOpenImmersion (pullback.diagonal _)`), and `{d • P = 0}` is the preimage of it under the
 `d`-multiple classifying section. -/
@@ -410,7 +410,7 @@ theorem killedLocus_preimage_isOpen {S : Scheme.{u}} (E : EllipticCurve S) (P : 
   have hz0 : ((0 : E.Point (𝟙 S)) : S ⟶ E.E) ≫ E.mulByHom N = 𝟙 S ≫ E.zero := by
     rw [← E.smul_eq_zero_iff_comp_mulByHom, smul_zero]
   set zT := E.pointToTorsion _ hz0 with hzT
-  have hEt : Etale (E.torsionπ N) := E.torsionπ_etale' N hN
+  have hEt : Etale (E.torsionπ N) := EllipticCurve.Torsionπ.etale' E N hN
   have hzTsec : zT ≫ E.torsionπ N = 𝟙 S := E.pointToTorsion_torsionπ _ _
   have hzTopen : IsOpenImmersion zT := isOpenImmersion_of_section (E.torsionπ N) zT hzTsec
   -- the two `ι`-composites
@@ -550,7 +550,7 @@ theorem yOneStructMap_isAffineHom [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : 
 atlas ring is a localized polynomial ring; the zero section of the (smooth, separated,
 finitely presented) universal curve is a finitely presented closed immersion
 (`FinitePresentationCancel`, Stacks 01TX — the T-B pattern of
-`mulByHom_locallyOfFinitePresentation`), so its pullback `Y_N ⟶ 𝒴` is; and `Y₁(N) ⟶ Y_N`
+`MulByHom.locallyOfFinitePresentation`), so its pullback `Y_N ⟶ 𝒴` is; and `Y₁(N) ⟶ Y_N`
 is an open immersion. Loeffler Prop 3.4.3 requires "of finite type … `R` noetherian" — over
 general `R` finite *presentation* is the right form, and it is what mathlib's
 `RingHom.Smooth` consumes. -/
@@ -712,8 +712,8 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (_hN : 4 ≤ N)
     show IsUnit ((N : ℕ) : Γ(Spec (CommRingCat.of A), ⊤))
     have h3 := hinvA.map (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom
     rwa [map_natCast] at h3
-  have hEt : Etale (FA.torsionπ N) := FA.torsionπ_etale' N hNinvA
-  have : IsFinite (FA.torsionπ N) := FA.torsionπ_isFinite_of_nIsInvertible N hNinvA
+  have hEt : Etale (FA.torsionπ N) := EllipticCurve.Torsionπ.etale' FA N hNinvA
+  have : IsFinite (FA.torsionπ N) := EllipticCurve.Torsionπ.isFinite_of_nIsInvertible FA N hNinvA
   have : IsAffine (FA.torsion N) := isAffine_of_isAffineHom (FA.torsionπ N)
   -- the killed point over A⧸I, into the universal torsion then lifted through the
   -- base-change square
@@ -982,7 +982,7 @@ Lift `(α₀, β₀)` arbitrarily to `(α, β)` ("Lift coefficients arbitrarily 
 is a unit since it is one mod the nilpotent `I` ("note that `∆(E) ∈ Aˣ`…"). Lift `P₀` through
 the **étale affine** `E(α,β)[N] ∩ {affine chart} ⟶ Spec A` (Loeffler: "Can we lift `P₀` to an
 `N`-torsion point of `E`, i.e. is `E[N]` smooth? Yes, since `[N] : E → E` is smooth" =
-`torsionπ_etale` [BB-DIFF]; the chart intersection keeps the lifting ring-level —
+`Torsionπ.etale` [BB-DIFF]; the chart intersection keeps the lifting ring-level —
 `Algebra.FormallySmooth.lift` against the nilpotent `I`). The lifted `(E, P)` need not be
 Tate-marked at `(0,0)`: re-normalise by **T-E1** `exists_unique_variableChange_isTateNormal`
 (orders on fibres of `A` equal those on fibres of `A₀`); by T-E1 *uniqueness* over `A₀` the
@@ -1012,7 +1012,7 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
      locus: `f₀` factors through `Y_N`; the lifting needed is against
      `κN := killedLocusπ (tatePoint R) N`, whose base change to `Spec A` along `t` is... —
      SIMPLER: lift through the étale `(E(α,β))[N] ⟶ Spec A` directly:
-     `haveI := torsionπ_etale` at the `modelEllipticCurve (tateCurve-of α β)`; étale =
+     `haveI := Torsionπ.etale` at the `modelEllipticCurve (tateCurve-of α β)`; étale =
      formally étale ⟹ the `A⧸I`-torsion-point `P₀` (from step 1 transported through the
      `t₀`-pullback dictionary) lifts uniquely to an `A`-torsion point `P`
      (`FormallyUnramified.hom_ext` gives uniqueness; existence via `Smooth`/`FormallySmooth`

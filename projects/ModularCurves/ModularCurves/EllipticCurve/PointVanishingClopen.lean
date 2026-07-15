@@ -10,7 +10,7 @@ import ModularCurves.EllipticCurve.TorsionFibre
 /-!
 # The vanishing locus of a killed torsion point is clopen (YFULL route γ)
 
-For `N` invertible on `S`, `E[N] ⟶ S` is finite étale (`torsionπ_etale'`) and separated
+For `N` invertible on `S`, `E[N] ⟶ S` is finite étale (`Torsionπ.etale'`) and separated
 (`torsionι` is a closed immersion and `E ⟶ S` is proper). Hence, for a point `R` of `E`
 over `T` killed by `N`, the locus in `T` where `R` agrees with the zero section — the
 range of the agreement-locus inclusion of the two `E[N]`-classifiers `pointToTorsion R`
@@ -59,7 +59,7 @@ noncomputable def pointVanishSet {T : Scheme.{u}} (t : T ⟶ S) (R : E.Point t)
 theorem isClopen_pointVanishSet (hN : NIsInvertible S N) {T : Scheme.{u}} (t : T ⟶ S)
     (R : E.Point t) (hR : R.1 ≫ E.mulByHom N = t ≫ E.zero) :
     IsClopen (E.pointVanishSet N t R hR) := by
-  haveI : Etale (E.torsionπ N) := E.torsionπ_etale' N hN
+  haveI : Etale (E.torsionπ N) := Torsionπ.etale' E N hN
   exact AlgebraicGeometry.isClopen_range_agreementι _ _ _ _
 
 end EllipticCurve

@@ -220,7 +220,7 @@ theorem _root_.ModularCurves.isEmpty_of_nIsInvertible_zero {X : Scheme.{u}}
 /-- `[N]` is locally of finite presentation — an `S`-endomorphism of the
 locally-finitely-presented `E/S`, by the cancellation
 `ForMathlib.FinitePresentationCancel` (Stacks 01TX). -/
-theorem mulByHom_locallyOfFinitePresentation (N : ℕ) :
+theorem MulByHom.locallyOfFinitePresentation (N : ℕ) :
     LocallyOfFinitePresentation (E.mulByHom N) := by
   have : Smooth E.π := SmoothOfRelativeDimension.smooth (n := 1) E.π
   have h : LocallyOfFinitePresentation (E.mulByHom N ≫ E.π) := by
@@ -228,8 +228,8 @@ theorem mulByHom_locallyOfFinitePresentation (N : ℕ) :
     infer_instance
   exact LocallyOfFinitePresentation.of_comp_of_locallyOfFiniteType h inferInstance
 
-/- **BB-DIFF DISCHARGED (Y1-CLOSER S2)**: `mulByHom_formallyUnramified` (was the sorried
-black box), `mulBy_etale`, and `torsionπ_etale` are RELOCATED byte-identically (statements
+/- **BB-DIFF DISCHARGED (Y1-CLOSER S2)**: `MulByHom.formallyUnramified` (was the sorried
+black box), `MulByHom.etale`, and `Torsionπ.etale` are RELOCATED byte-identically (statements
 unchanged) to `EllipticCurve/MulByHomUnramified.lean`, where they are now PROVEN — the
 discharge (L-A ∘ L-BC, with L-BC the augmentation-ideal fibre argument of
 `TorsionUnramifiedFibre.lean` funneled through T-DISC) lives in files that import this one,

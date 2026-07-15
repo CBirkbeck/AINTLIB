@@ -30,8 +30,8 @@ on a trivialising fppf cover together with its gluing (cocycle) datum. Concretel
   mathlib `EffectiveEpi` instance fires.
 
 **Labelled inputs (the gated content, isolated as hypotheses).** The cover `p` exists because
-`E[N]` is finite étale when `N` is invertible (`torsionπ_etale`, which rests on the T-B5 box
-`mulByHom_formallyUnramified`); the local pairing `ζ'` and its cocycle `hcocyc` come from
+`E[N]` is finite étale when `N` is invertible (`Torsionπ.etale`, which rests on the T-B5 box
+`MulByHom.formallyUnramified`); the local pairing `ζ'` and its cocycle `hcocyc` come from
 trivialising `E[N]` (and `μ_N`) on `p` and putting the standard symplectic determinant pairing
 there. Constructing those data from the trivialisation is the T-W7-scale step (the point-level
 `E[N] ≅ (ℤ/N)²` identification funnels into the group-law/atlas refactor); here they are the

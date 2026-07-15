@@ -360,7 +360,7 @@ def torsionByNsmulKerEquiv (G : Type u) [AddCommGroup G] (N d : ℕ)
   right_inv y := Subtype.ext rfl
 
 /- `torsion_geometricFibre_rank_two` RELOCATED byte-identically to
-`EllipticCurve/MulByHomUnramified.lean` (Y1-CLOSER S2): its proof consumes `torsionπ_etale`,
+`EllipticCurve/MulByHomUnramified.lean` (Y1-CLOSER S2): its proof consumes `Torsionπ.etale`,
 which moved there when BB-DIFF was discharged (pointer at `Torsion.lean`; v10.111/v10.117
 relocation doctrine). Its ingredients (`torsionPointsEquiv`, `sectionsEquivOverPoints`,
 `torsionByNsmulKerEquiv` — the latter two de-privatised for the relocation) stay here. -/
