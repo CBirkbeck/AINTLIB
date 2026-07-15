@@ -161,7 +161,8 @@ factors as `Δ(A, B) = B³·(A⁴ − A³ + 8A²B − 36AB + 16B² + 27B)` (Loef
 lemma tateB_cube_dvd_Δ :
     ((MvPolynomial.X 1 : MvPolynomial (Fin 2) R)) ^ 3 ∣ (tateCurveOver R).Δ := by
   refine ⟨-(MvPolynomial.X 0 ^ 2 + 4 * MvPolynomial.X 1) ^ 2 - 8 * MvPolynomial.X 0 ^ 3 +
-    9 * MvPolynomial.X 0 * (MvPolynomial.X 0 ^ 2 + 4 * MvPolynomial.X 1) - 27 * MvPolynomial.X 1, ?_⟩
+    9 * MvPolynomial.X 0 * (MvPolynomial.X 0 ^ 2 + 4 * MvPolynomial.X 1) -
+      27 * MvPolynomial.X 1, ?_⟩
   simp only [tateCurveOver, tateCurve, WeierstrassCurve.map, WeierstrassCurve.Δ,
     WeierstrassCurve.b₂, WeierstrassCurve.b₄, WeierstrassCurve.b₆, WeierstrassCurve.b₈,
     MvPolynomial.map_X, map_zero]
@@ -174,7 +175,8 @@ lemma isUnit_algebraMap_tateB :
     IsUnit (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) := by
   have hΔ : IsUnit (algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (tateCurveOver R).Δ) :=
     IsLocalization.Away.algebraMap_isUnit (tateCurveOver R).Δ
-  have h3 : IsUnit ((algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) ^ 3) := by
+  have h3 :
+      IsUnit ((algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1)) ^ 3) := by
     rw [← map_pow]
     exact isUnit_of_dvd_unit ((algebraMap _ (tateRingOver R)).map_dvd (tateB_cube_dvd_Δ R)) hΔ
   exact (isUnit_pow_iff (by norm_num)).mp h3
@@ -186,7 +188,8 @@ lemma isUnit_tateA₃ : IsUnit (tateCurveLocOver R).a₃ := by
     simp [tateCurveLocOver, tateCurveOver, WeierstrassCurve.map, tateCurve]
   rw [h]; exact isUnit_algebraMap_tateB R
 
-/-- `a₂` of the atlas curve is a unit (`= B`; Tate normal form `a₂ = a₃`, both the atlas marking). -/
+/-- `a₂` of the atlas curve is a unit (`= B`; Tate normal form `a₂ = a₃`, both the atlas
+marking). -/
 lemma isUnit_tateA₂ : IsUnit (tateCurveLocOver R).a₂ := by
   have h : (tateCurveLocOver R).a₂ =
       algebraMap (MvPolynomial (Fin 2) R) (tateRingOver R) (MvPolynomial.X 1) := by
@@ -457,13 +460,17 @@ in its own heartbeat budget (the chart machinery over the localization ring `tat
 `chartHomEquiv_symm_coe` is then chained as a *term* (`Eq.trans`), never `rw` (whose matching would
 `whnf`-explode the `ofBijective` equiv). -/
 private lemma tateP0mor_factor (R : CommRingCat.{u}) :
-    tateP0mor R = Spec.map (CommRingCat.ofHom ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1) ≫
+    tateP0mor R = Spec.map (CommRingCat.ofHom
+        ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1) ≫
       Proj.awayι (quotientGrading (projIdeal (tateCurveLocOver R)))
         ((quotientGradingHom (projIdeal (tateCurveLocOver R))) (MvPolynomial.X 2))
         (mk_X_mem_quotientGrading_one (tateCurveLocOver R) 2) one_pos := by
   have hdef : tateP0mor R
-      = ((chartHomEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R))).1.1 := rfl
-  exact hdef.trans (chartHomEquiv_symm_coe (tateCurveLocOver R) 2 ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)))
+      = ((chartHomEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm
+          ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm
+          (tateP0sol R))).1.1 := rfl
+  exact hdef.trans (chartHomEquiv_symm_coe (tateCurveLocOver R) 2
+    ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)))
 
 /-- **(Y1-vi setup)** The pulled marked point's underlying model morphism is `geomPoint ≫ tateP0mor`
 (the two `eqToHom` bridges of `pointSpecPointsEquiv`/`tateMarkedPoint` cancel). -/
@@ -497,7 +504,8 @@ private lemma spec_map_ofHom_comp_awayι {A B C : Type u} [CommRing A] [CommRing
 localization ring `tateRingOver R`. -/
 private lemma tateMarkedPoint_pull_factor (R : CommRingCat.{u}) (k : Type u) [Field k]
     [Algebra (tateRingOver R) k] :
-    Spec.map (CommRingCat.ofHom ((algebraMap (tateRingOver R) k).comp ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1)) ≫
+    Spec.map (CommRingCat.ofHom ((algebraMap (tateRingOver R) k).comp
+      ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1)) ≫
       Proj.awayι (quotientGrading (projIdeal (tateCurveLocOver R)))
         ((quotientGradingHom (projIdeal (tateCurveLocOver R))) (MvPolynomial.X 2))
         (mk_X_mem_quotientGrading_one (tateCurveLocOver R) 2) one_pos =
@@ -541,15 +549,18 @@ theorem projModelPointsEquiv_pull_tateMarkedPoint (k : Type u) [Field k]
       (tateUniversal_E_eq R) (tateUniversal_π_eq R) k
       (EllipticCurve.Point.pull (tateUniversal R) (EllipticCurve.geomPoint (tateRingOver R) k)
         (tateMarkedPoint R)) with hgdef
-  have hfac : Spec.map (CommRingCat.ofHom ((algebraMap (tateRingOver R) k).comp ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1)) ≫
+  have hfac : Spec.map (CommRingCat.ofHom ((algebraMap (tateRingOver R) k).comp
+      ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1)) ≫
       Proj.awayι (quotientGrading (projIdeal (tateCurveLocOver R)))
         ((quotientGradingHom (projIdeal (tateCurveLocOver R))) (MvPolynomial.X 2))
         (mk_X_mem_quotientGrading_one (tateCurveLocOver R) 2) one_pos = g.1 := by
     rw [hgdef]; exact tateMarkedPoint_pull_factor R k
   have hZ : InZChart (tateCurveLocOver R) g :=
-    ⟨Spec.map (CommRingCat.ofHom ((algebraMap (tateRingOver R) k).comp ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1)), hfac⟩
+    ⟨Spec.map (CommRingCat.ofHom ((algebraMap (tateRingOver R) k).comp
+      ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1)), hfac⟩
   have hφg : (chartHomEquiv (tateCurveLocOver R) 2 k ⟨g, hZ⟩).1
-      = (algebraMap (tateRingOver R) k).comp ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1 := by
+      = (algebraMap (tateRingOver R) k).comp
+        ((chartSolutionsEquiv (tateCurveLocOver R) 2 (tateRingOver R)).symm (tateP0sol R)).1 := by
     have h1 : Spec.map (CommRingCat.ofHom (chartHomEquiv (tateCurveLocOver R) 2 k ⟨g, hZ⟩).1) ≫
         Proj.awayι (quotientGrading (projIdeal (tateCurveLocOver R)))
         ((quotientGradingHom (projIdeal (tateCurveLocOver R))) (MvPolynomial.X 2))
@@ -569,11 +580,11 @@ theorem projModelPointsEquiv_pull_tateMarkedPoint (k : Type u) [Field k]
   exact projModelPointsEquiv_some (tateCurveLocOver R) k g hZ 0 0 hns
     (hcoord ⟨0, by decide⟩).symm (hcoord ⟨1, by decide⟩).symm
 
-/-- **[Y1-vi]** The marked point `P₀ = (0, 0)` of the universal Tate curve is nowhere of order
-`≤ 3` (Loeffler Prop 3.3.4 hypothesis / p. 13 display *"`P` does not have order 1, 2 or 3 in any
-fibre"*). This is the first conjunct of `exists_tatePoint` (the atlas leaf B2). Consumes the
-transfer pin `projModelPointsEquiv_pull_tateMarkedPoint` + `affine_origin_order_gt_three` through the
-`[T-B6′]` group iso `geomFibrePointAddEquiv` (whose `map_add'` carries the tracked T-B6 `sorry`). -/
+/-- **[Y1-vi]** The marked point `P₀ = (0, 0)` of the universal Tate curve is nowhere of order `≤ 3`
+(Loeffler Prop 3.3.4 hypothesis / p. 13 display *"`P` does not have order 1, 2 or 3 in any fibre"*).
+This is the first conjunct of `exists_tatePoint` (the atlas leaf B2). Consumes the transfer pin
+`projModelPointsEquiv_pull_tateMarkedPoint` + `affine_origin_order_gt_three` through the `[T-B6′]`
+group iso `geomFibrePointAddEquiv` (whose `map_add'` carries the tracked T-B6 `sorry`). -/
 theorem tateMarkedPoint_nowhereGeomOrderLEThree :
     (tateUniversal R).NowhereGeomOrderLEThree (tateMarkedPoint R) := by
   intro k _ _ t a ha0 ha3
