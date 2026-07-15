@@ -149,6 +149,29 @@ theorem e3Rel_map_eq_zero : e3Map R (e3Rel R) = 0 := by
   rw [Ideal.Quotient.eq_zero_iff_mem.mpr
     (Ideal.subset_span (Set.mem_singleton _)), map_zero]
 
+/-- **(B2-fix v10.256)** The universal `Q = (γ, β+γ)` is a `3`-torsion point at the
+coordinate level: `x(Q) = γ` roots the `3`-division cofactor `3x³ + a₁²x² + 3a₁a₃x + 3a₃²`.
+This is now provable — it was *false* pre-B2 on the (now-excluded) `γ = 0` component. The
+flex relation `γ(3β²+3βγ+γ²) = 0` (the moduli relation `β³=(β+γ)³`) together with `γ` a unit
+(`isUnit_e3Gamma`) forces `3β²+3βγ+γ² = 0`, and `hcubic = (3γ+1)²(3β²+3βγ+γ²) = 0`. This is
+the universal instance of the `hcubic` hypothesis of `isE3Datum_of_flexCharts`. -/
+theorem universalE3_hcubic :
+    3 * e3Gamma R ^ 3 + (universalE3 R).a₁ ^ 2 * e3Gamma R ^ 2
+      + 3 * (universalE3 R).a₁ * (universalE3 R).a₃ * e3Gamma R
+      + 3 * (universalE3 R).a₃ ^ 2 = 0 := by
+  have hrel : e3Map R (X 0 ^ 3 - (X 0 + X 1) ^ 3) = 0 := e3Rel_map_eq_zero R
+  rw [map_sub, map_pow, map_pow, map_add] at hrel
+  have hrel' : e3Beta R ^ 3 - (e3Beta R + e3Gamma R) ^ 3 = 0 := hrel
+  have hflex : e3Gamma R * (3 * e3Beta R ^ 2 + 3 * e3Beta R * e3Gamma R + e3Gamma R ^ 2)
+      = 0 := by linear_combination -hrel'
+  have hS : 3 * e3Beta R ^ 2 + 3 * e3Beta R * e3Gamma R + e3Gamma R ^ 2 = 0 :=
+    (isUnit_e3Gamma R).mul_right_eq_zero.mp hflex
+  show 3 * e3Gamma R ^ 3 + (3 * e3Gamma R - 1) ^ 2 * e3Gamma R ^ 2
+      + 3 * (3 * e3Gamma R - 1)
+        * (-3 * e3Gamma R ^ 2 - e3Beta R - 3 * e3Beta R * e3Gamma R) * e3Gamma R
+      + 3 * (-3 * e3Gamma R ^ 2 - e3Beta R - 3 * e3Beta R * e3Gamma R) ^ 2 = 0
+  linear_combination (3 * e3Gamma R + 1) ^ 2 * hS
+
 /-- **(T-E15a)** `(0, 0)` lies on the universal curve (`a₆ = 0`). -/
 theorem universalE3_equation_zero :
     (universalE3 R).toAffine.Equation 0 0 := by
