@@ -50,6 +50,7 @@ local notation "KE" => W.toAffine.FunctionField
 noncomputable def W_smooth : SmoothPlaneCurve F :=
   ⟨W.toAffine⟩
 
+/-- The affine curve underlying the `SmoothPlaneCurve` wrapper is `W`. -/
 @[simp] theorem W_smooth_toAffine : (W_smooth W).toAffine = W.toAffine := rfl
 
 /-- The function field of the SmoothPlaneCurve wrapper equals `KE`
@@ -77,7 +78,7 @@ level. Both are the image of `AdjoinRoot.root W.polynomial` under the
 algebraMap to `KE`. The `basis_one` lemma identifies
 `basis 1 = AdjoinRoot.mk _ X = AdjoinRoot.root _`. -/
 theorem coordY_W_smooth_eq_y_gen : (W_smooth W).coordY = y_gen W := by
-  unfold SmoothPlaneCurve.coordY y_gen
+  simp only [SmoothPlaneCurve.coordY, y_gen]
   rw [Affine.CoordinateRing.basis_one]
   rfl
 
@@ -194,6 +195,7 @@ theorem ordAtInfty_ΨSq_ff (n : ℤ) (hnF : (n : F) ≠ 0) :
   push_cast [Nat.cast_sub h_pos]
   ring_nf
 
+omit [DecidableEq F] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- The composition `algebraMap (Polynomial F) → CoordinateRing → FunctionField`
 is injective. Composes `Affine.CoordinateRing.algebraMap_poly_injective` with
 `IsFractionRing.injective`. -/
@@ -216,7 +218,7 @@ theorem Φ_ff_ne_zero (n : ℤ) : Φ_ff W n ≠ 0 := by
 /-- `mulByInt_x W n ≠ 0` for `n ≠ 0`. Direct from `Φ_ff_ne_zero` and
 `ΨSq_ff_ne_zero`. -/
 theorem mulByInt_x_ne_zero (n : ℤ) (hn : n ≠ 0) : mulByInt_x W n ≠ 0 := by
-  unfold mulByInt_x
+  simp only [mulByInt_x]
   exact div_ne_zero (Φ_ff_ne_zero W n) (ΨSq_ff_ne_zero W hn)
 
 /-- `ord_∞(mulByInt_x W n) = -2` for `n ≠ 0` and `(n : F) ≠ 0`.
@@ -225,7 +227,7 @@ Direct from `ordAtInfty_Φ_ff`, `ordAtInfty_ΨSq_ff`, and division: the
 `-2 · n.natAbs²` and `-2 · (n.natAbs² - 1)` cancel down to `-2`. -/
 theorem ordAtInfty_mulByInt_x (n : ℤ) (hn : n ≠ 0) (hnF : (n : F) ≠ 0) :
     (W_smooth W).ordAtInfty (mulByInt_x W n) = ((-2 : ℤ) : WithTop ℤ) := by
-  unfold mulByInt_x
+  simp only [mulByInt_x]
   have hΦ_ne := Φ_ff_ne_zero W n
   have hΨ_ne := ΨSq_ff_ne_zero W hn
   have h_inv_ne : (ΨSq_ff W n)⁻¹ ≠ 0 := inv_ne_zero hΨ_ne
@@ -274,7 +276,7 @@ theorem ordAtInfty_mulByInt_x_neg (n : ℤ) (hn : n ≠ 0) :
   have h_mul : (W_smooth W).ordAtInfty (Φ_ff W n * (ΨSq_ff W n)⁻¹) =
       (W_smooth W).ordAtInfty (Φ_ff W n) + (W_smooth W).ordAtInfty ((ΨSq_ff W n)⁻¹) :=
     (W_smooth W).ordAtInfty_mul hΦ_ne h_inv_ne
-  unfold mulByInt_x
+  simp only [mulByInt_x]
   rw [h_div_eq, h_mul, (W_smooth W).ordAtInfty_inv]
   -- `ord Φ_ff = -2·natAbs n²` (unconditional).
   rw [ordAtInfty_Φ_ff W n]
