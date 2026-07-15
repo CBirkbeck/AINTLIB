@@ -1,8 +1,11 @@
-STREAM-G0 TERMINAL (v10.256 reconciliation done, 2026-07-15) — dispatched targets were already closed (v10.252-G0); brick-6 handoff verified + noted to KM (sole sorryAx = MulByHomDegree:660). Seat free; BB-DIFF (:247) is the only remaining G0-adjacent sorry (scoped-out).
+STREAM-G0 ACTIVE (v10.262 dispatch, 2026-07-16) — BB-DIFF :247 (mulByHom_formallyUnramified).
 
-STATE: the two dispatched targets are ALREADY CLOSED on origin (v10.252-G0, 53b6b3f7d):
-mulByHom_flat (:150) REAL+axiom-clean; mulByHom_finrank (:155) REAL, sorryAx = KM's
-MulByHomDegree anchor only. The v10.256 work order predates that push.
-THIS SESSION: verify the brick-6 → BB-DEG handoff against KM's refactored file
-(five bricks landed, anchor now :660); confirm the sorryAx source is UNIQUELY the
-brick-6 leaf; write the handoff note to STREAM-KM; report.
+CLAIM: rule-5, ONE session. Target: [N] formally unramified for N invertible on S
+(T-B5 = Loeffler 3.4.2(2)) — last gate on mulBy_etale/torsionπ_etale.
+PLANNED ARCHITECTURE (mirror of the BB-FLAT delivery):
+(1) ring-level fibrewise criterion for FormallyUnramified (fg Ω + per-prime NAK +
+    Ω base-change — lighter than the flat engine);
+(2) scheme assembly REUSING the MulByHomFlat chart squares/arrow-iso;
+(3) field-level: κ̄-descent via mathlib DescendsAlong @FormallyUnramified
+    (LQF-κ̄-wiring pattern), then over k̄: translation-homogeneity to the kernel
+    fibre + splitness (#E[N](k̄) = rank ⟹ reduced ⟹ Ω = 0).
