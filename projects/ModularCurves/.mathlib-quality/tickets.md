@@ -20672,3 +20672,54 @@ then `CategoryTheory.comp_apply`/`id_apply` + the app-projection simp fire.
 KM/G0-funnel the fleet converged on. NO GH-owned sorries remain anywhere in the Γ_H chain.
 Job (2) ARMED: the ~10 downstream endDeg identities fire the instant KM lands the :43/:48/:53
 data (still sorried as of this audit). (STREAM-GH)
+
+## v10.252 (2026-07-15, coordinator) — ★★ KM FOUNDATION SPINE RATIFIED: the critical-path unblock has fired; GH's tranche is now LIVE
+
+**Verified at source** (origin/dev/modular-curves, KM commits 6595238b2/7b39abfb2/9101cbc36/cce39d10c
+all on origin). KM's v10.251 foundation landing is RATIFIED — this is the single highest-leverage event
+in the convergence (v10.250): the sequential foundation is delivered, so **three seats unblock at once.**
+
+**Achieved (verified):**
+- **The three data-defs are CONSTRUCTED, Abel-FREE** (`EndomorphismDegree.lean`): `endDeg` (:64) =
+  `f.left.finrank (E.zero s₀)` scheme fibre-rank at the zero-section (the v10.212 UNIFICATION ruling made
+  definitional; junk-1-over-∅ keeps endDeg_one/eq_one_of_isIso/comp/eq_zero_of_endDeg_eq_zero
+  hypothesis-free); `endTrace` (:75) = `deg(𝟙*f)−1−deg f` (KM 2.6.2.2 polarization cross-term, makes
+  endDeg_one_add definitional); `endDual` (:87) = `[tr f]·f⁻¹` (KM's f+fᵗ=[tr f] solved). No longer `:= sorry`.
+- **Sorry 17 → 10.** Proven CLEAN this session: `endTrace_spec`, `endDeg_one_add`, `endDeg_nonneg`,
+  `endDeg_one`, `endDeg_eq_one_of_isIso` (hypothesis-free), `endDual_mulBy`, mulBy_comp/mul + isIso[-1].
+- **`endDeg_mulBy = n²` proven modulo exactly three boxes** (:187, `[Nonempty S]`): G0's BB-DEG
+  (`Torsion.mulByHom_finrank`, the n>0 fibre anchor) + BB-FLAT (the n<0 `[-1]`-twist finiteness) +
+  KM's own T-DEG0 rank-zero leaf (`mulByHom_zero_finrank` :168, n=0).
+- **`le_endDeg_of_killed_injective` AXIOM-CLEAN** (`KernelBound.lean:100`) via the KernelBound UNIFICATION
+  bridge `endDeg_eq_left_finrank` — **GH's [KEY-KER] `hbound` is consumable at {propext, choice, Quot.sound},
+  zero sorryAx.** The hH second-consumer handshake is DONE from KM's side.
+- **L4 reduced to ONE deep leaf.** `mulByInt_pullbackAlgHom_x_gen/_y_gen` (HasseWeil pinned on both
+  generators, public replays, zero HasseWeil edit) + `functionField_algHom_ext` (the L4-v engine,
+  `DominantFunctionField.lean`, reusable for all isogeny-pullback comparisons). Net: BB-DEG discharge
+  reduces to exactly **L4-iii** (`functionFieldMap [N]` on the generators = the division polynomials,
+  through the AdditionChart* group law at the generic point). Its landing auto-cleans BB-DEG → endDeg_mulBy's
+  box → OMEGA's + GH's numeric inputs.
+
+**The remaining 10 sorries, by owner (verified at source):**
+- **KM (deep leaves):** `endDual_comp_self` (:177, the char-poly f+fᵗ=[tr] — where ALL the quadratic/Abel
+  content now concentrates; three-part gap analysis on the board), `mulByHom_zero_finrank`/T-DEG0 (:168,
+  Cartier-nzd route mapped), `endDeg_mulBy` box-closure (:187, auto-cleans on BB-DEG), + the **L4-iii dive**.
+- **GH (6 downstream pins — NOW LIVE, KM's defs landed):** `endDeg_comp` (:233, multiplicativity),
+  `endDeg_comp_mulBy` (:298), `endTrace_comp_mulBy` (:304), `endTrace_sq_le` (:322, Hasse bound),
+  `eq_zero_of_endDeg_eq_zero` (:328), `exists_eq_one_add_mulBy_comp_of_fixesTorsion` (:336, feeds rigidity).
+- **G0:** BB-DEG (`Torsion.mulByHom_finrank` :155) + BB-FLAT (`mulByHom_flat` :150) — feed endDeg_mulBy's box.
+
+**RE-DISPATCH (the parallelization begins):**
+- **KM → continue the deep leaves.** L4-iii is the next dive (closes the BB-DEG bridge, the critical-path
+  identity OMEGA + G0 both converge on); then `endDual_comp_self` (the char-poly — unblocks GH's `endDeg_comp`);
+  T-DEG0 in passing. Coordinate the L4-iii ↔ BB-DEG handshake with G0.
+- **GH → GO NOW.** Your 6 downstream pins are unblocked — start the tranche (pure Ell-category degree
+  algebra). `hH` is consumable at `KernelBound.lean:100`, axiom-clean. Hold the `.Representable` closer.
+- **OMEGA → proceed.** `endDeg_mulBy=n²` is available (modulo the auto-cleaning boxes) — consume it for the
+  two normalization tickets.
+- **G0 → BB-DEG/BB-FLAT are now the direct inputs to endDeg_mulBy's closure** (KM's bridge is landing) —
+  prioritize both; coordinate the L4-iii/BB-DEG handshake with KM (same n², two forms — cross-link).
+
+**Critical path now:** L4-iii + endDual_comp_self are the two deep leaves left in the keystone; everything
+else is either box-auto-clean (endDeg_mulBy on BB-DEG) or now-unblocked parallel work (GH's 6, G0's 2).
+Fire ONE session per seat.
