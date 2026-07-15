@@ -1053,6 +1053,38 @@ lemma projModelFunctionFieldEquiv_eq_stalkClosedPointTo :
 
 
 
+/-- **(KEY-EVAL — the function-field equivalence evaluates germs through the tautological
+point)** For any open `V` containing the generic point (equivalently, any nonempty open) and any
+section `t`, the `projModelFunctionFieldEquiv`-image of the germ of `t` is the `appLE`-pullback of
+`t` along the tautological point, read through `ΓSpecIso`. Corollary of the master lemma (M). -/
+lemma projModelFunctionFieldEquiv_germ_eval (V : (projModel W).Opens)
+    (hξ : genericPoint (projModel W) ∈ V)
+    (hτ : (genericSpecPoint W).1.base
+      (IsLocalRing.closedPoint (W.toAffine.FunctionField)) ∈ V)
+    (hle : ⊤ ≤ (genericSpecPoint W).1 ⁻¹ᵁ V) (t : Γ(projModel W, V)) :
+    projModelFunctionFieldEquiv W ((projModel W).presheaf.germ V _ hξ t)
+      = ((genericSpecPoint W).1.appLE V ⊤ hle
+          ≫ (Scheme.ΓSpecIso (CommRingCat.of (W.toAffine.FunctionField))).hom).hom t := by
+  have hM := DFunLike.congr_fun (projModelFunctionFieldEquiv_eq_stalkClosedPointTo W)
+    ((projModel W).presheaf.germ V _ hξ t)
+  rw [show ((projModelFunctionFieldEquiv W :
+      (projModel W).functionField →+* W.toAffine.FunctionField))
+      ((projModel W).presheaf.germ V _ hξ t)
+      = projModelFunctionFieldEquiv W ((projModel W).presheaf.germ V _ hξ t) from rfl] at hM
+  rw [hM]
+  simp only [RingHom.comp_apply]
+  have htransport : (eqToHom (congrArg (projModel W).presheaf.stalk
+        (genericSpecPoint_base_closedPoint W).symm) :
+      ((projModel W).functionField : CommRingCat) ⟶ _).hom
+        ((projModel W).presheaf.germ V _ hξ t)
+      = (projModel W).presheaf.germ V _ hτ t :=
+    germ_eqToHom_stalk_apply (projModel W) V
+      (genericSpecPoint_base_closedPoint W).symm hξ hτ t
+  rw [htransport]
+  exact DFunLike.congr_fun (congrArg CommRingCat.Hom.hom
+    (germ_stalkClosedPointTo_eq_appLE (genericSpecPoint W).1 V hτ hle)) t
+
+
 end TautologicalPoint
 
 /-- **(L4-v enabler: generator extensionality for `K(E)`)** Two `K`-algebra homomorphisms out of
