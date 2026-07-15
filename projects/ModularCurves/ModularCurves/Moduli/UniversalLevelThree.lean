@@ -349,6 +349,65 @@ theorem LocalPresentation.MarksAt.ofVC {S : Scheme.{u}} {G : EllipticCurveGeom S
     (Category.assoc _ _ _).symm, hMeq, Iso.comp_inv_eq]
   exact (projModelVCIso_affineSection C P.W p q hEq h').symm
 
+open LocalPresentation WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- **([T-E15-NORM] the local `ℰ₃`-datum ★★★, modulo the torsion→coordinate bridges)** From a
+**flex-normal-form chart** `P₀` (`a₂=a₄=a₆=0`) marking the order-`3` section `P` at the origin and
+the second generator `Q` at `(p, q)`, together with the `3`-torsion coordinate relation `hcubic`
+(the bridge output of `3 • Q = 0`) and the unit conditions, the twisted chart `P₀.ofVC ⟨u,0,0,0⟩`
+is a genuine `ℰ₃`-form presentation marking `P` at `(0,0)` and `Q` at `(γ, β+γ)`. This composes the
+whole `ℰ₃`-normalization at a single point: `isE3Form_of_threeTorsion` (the scaling `u`) with
+`MarksAt.ofVC` (the two markings) and `equation_smul` (the `Q`-equation). Everything is keystone-FREE
+— the only inputs from the group law are `hMP`/`hMQ` (the markings, from the section data) and
+`hcubic` (the `3`-torsion coordinate relation). Assembling these charts over a cover of the base
+(and producing the flex-NF chart from `3 • P = 0 ⟹ μ_P = 0`) yields `IsE3Datum`. -/
+theorem isE3Chart {S : Scheme.{u}} {G : EllipticCurveGeom S} {V : S.affineOpens}
+    (P₀ : LocalPresentation G V) (ha₂ : P₀.W.a₂ = 0) (ha₄ : P₀.W.a₄ = 0) (ha₆ : P₀.W.a₆ = 0)
+    {σP σQ : S ⟶ G.E} {hσP : σP ≫ G.π = 𝟙 S} {hσQ : σQ ≫ G.π = 𝟙 S}
+    (hMP : P₀.MarksAt hσP 0 0) {p q : Γ(S, V.1)} (hMQ : P₀.MarksAt hσQ p q)
+    (hcubic : 3 * p ^ 3 + P₀.W.a₁ ^ 2 * p ^ 2 + 3 * P₀.W.a₁ * P₀.W.a₃ * p + 3 * P₀.W.a₃ ^ 2 = 0)
+    (ha₃ : IsUnit P₀.W.a₃) (h3 : IsUnit (3 : Γ(S, V.1)))
+    (hB : IsUnit (P₀.W.a₁ ^ 3 * p + P₀.W.a₁ ^ 2 * P₀.W.a₃ + P₀.W.a₁ ^ 2 * q + 6 * P₀.W.a₁ * p ^ 2
+            + 3 * P₀.W.a₃ * p + 6 * p * q)) :
+    ∃ (Pr : LocalPresentation G V) (β γ : Γ(S, V.1)),
+      IsE3Form Pr.W β γ ∧ Pr.MarksAt hσP 0 0 ∧ Pr.MarksAt hσQ γ (β + γ) := by
+  obtain ⟨hcurveEq, -⟩ := id hMQ
+  have hcurve : q ^ 2 + P₀.W.a₁ * p * q + P₀.W.a₃ * q = p ^ 3 := by
+    have h := hcurveEq
+    rw [Affine.equation_iff, ha₂, ha₄, ha₆] at h; linear_combination h
+  obtain ⟨u, hE3⟩ := isE3Form_of_threeTorsion ha₂ ha₄ ha₆ p q hcurve hcubic ha₃ h3 hB
+  have hmul : (↑u : Γ(S, V.1)) * ↑u⁻¹ = 1 := u.mul_inv
+  set C : VariableChange Γ(S, V.1) := ⟨u, 0, 0, 0⟩ with hC
+  refine ⟨P₀.ofVC C, q * (↑u⁻¹) ^ 3 - p * (↑u⁻¹) ^ 2, p * (↑u⁻¹) ^ 2, ?_, ?_, ?_⟩
+  · show IsE3Form (C • P₀.W) _ _; exact hE3
+  · have hEqP : (C • P₀.W).toAffine.Equation 0 0 := by
+      rw [hC, Affine.equation_zero, variableChange_a₆]; simp [ha₆]
+    have hMP' : P₀.MarksAt hσP ((↑C.u : Γ(S, V.1)) ^ 2 * 0 + C.r)
+        ((↑C.u : Γ(S, V.1)) ^ 3 * 0 + C.s * (↑C.u : Γ(S, V.1)) ^ 2 * 0 + C.t) := by
+      rw [hC]; simpa using hMP
+    exact LocalPresentation.MarksAt.ofVC P₀ C hEqP hMP'
+  · have hEqQ : (C • P₀.W).toAffine.Equation
+        (p * (↑u⁻¹) ^ 2) ((q * (↑u⁻¹) ^ 3 - p * (↑u⁻¹) ^ 2) + p * (↑u⁻¹) ^ 2) := by
+      have hkey := C.equation_smul P₀.W hcurveEq
+      have h1 : C.vcX p = p * (↑u⁻¹) ^ 2 := by
+        rw [hC]; dsimp only [WeierstrassCurve.VariableChange.vcX]; ring
+      have h2 : C.vcY p q = (q * (↑u⁻¹) ^ 3 - p * (↑u⁻¹) ^ 2) + p * (↑u⁻¹) ^ 2 := by
+        rw [hC]; dsimp only [WeierstrassCurve.VariableChange.vcY]; ring
+      rw [h1, h2] at hkey; exact hkey
+    have hMQ' : P₀.MarksAt hσQ
+        ((↑C.u : Γ(S, V.1)) ^ 2 * (p * (↑u⁻¹) ^ 2) + C.r)
+        ((↑C.u : Γ(S, V.1)) ^ 3 * ((q * (↑u⁻¹) ^ 3 - p * (↑u⁻¹) ^ 2) + p * (↑u⁻¹) ^ 2)
+          + C.s * (↑C.u : Γ(S, V.1)) ^ 2 * (p * (↑u⁻¹) ^ 2) + C.t) := by
+      rw [hC]
+      rw [show (↑u : Γ(S, V.1)) ^ 2 * (p * (↑u⁻¹) ^ 2) + 0 = p by
+            linear_combination (p * ((↑u : Γ(S, V.1)) * ↑u⁻¹ + 1)) * hmul,
+        show (↑u : Γ(S, V.1)) ^ 3 * ((q * (↑u⁻¹) ^ 3 - p * (↑u⁻¹) ^ 2) + p * (↑u⁻¹) ^ 2)
+            + 0 * (↑u : Γ(S, V.1)) ^ 2 * (p * (↑u⁻¹) ^ 2) + 0 = q by
+          linear_combination (q * ((↑u : Γ(S, V.1)) * ↑u⁻¹) ^ 2 + q * ((↑u : Γ(S, V.1)) * ↑u⁻¹)
+            + q) * hmul]
+      exact hMQ
+    exact LocalPresentation.MarksAt.ofVC P₀ C hEqQ hMQ'
+
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
