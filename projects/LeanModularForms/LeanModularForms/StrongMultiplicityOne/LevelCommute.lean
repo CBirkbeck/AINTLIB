@@ -174,7 +174,7 @@ theorem descendCosetList_slash_sum_rep_invariance {N : ℕ} [NeZero N] {k : ℤ}
     SL2_diff_map_eq_one_aux γ₁ γ₂ (h₁_mod_Np.trans h₂_mod_Np.symm)
   have hδ_mod_N : (δ : Matrix (Fin 2) (Fin 2) ℤ).map (Int.cast : ℤ → ZMod N) = 1 :=
     SL2_diff_reduces_mod_level_of_mod_p_mod_div hp hpN hp_sq δ hδ_mod_p hδ_mod_Np
-  have hδ_Gamma1 : δ ∈ Gamma1 N := multipass_gamma1_conjugate_in_gamma1 δ hδ_mod_N
+  have hδ_Gamma1 : δ ∈ Gamma1 N := gamma1_conjugate_in_gamma1 δ hδ_mod_N
   have hδ_01_N : (N : ℤ) ∣ (δ : Matrix (Fin 2) (Fin 2) ℤ) 0 1 := by
     rw [← ZMod.intCast_zmod_eq_zero_iff_dvd]
     simpa [Matrix.map_apply, Matrix.one_apply_ne (show (0 : Fin 2) ≠ 1 by decide)] using
@@ -209,7 +209,7 @@ theorem descendCosetList_slash_sum_rep_invariance {N : ℕ} [NeZero N] {k : ℤ}
       ← mul_assoc, ← mul_assoc, hD_δ, mul_assoc]
   intro z
   rw [h_split, SlashAction.slash_mul,
-    multipass_modFormCharSpace_slash_apply χ hfχ α' hα'_mem]
+    modFormCharSpace_slash_apply χ hfχ α' hα'_mem]
   simp [h_chi_α']; rfl
 
 private lemma map_intCast_eq_one_of_dvd_aux {m₁ m₂ : ℕ} (hdvd : m₂ ∣ m₁)
@@ -375,7 +375,7 @@ private lemma m6_2_delta_diag_commute {N : ℕ} [NeZero N] {k : ℤ}
       HeckeRing.GL2.levelRaiseFun l k (⇑f ∣[k]
         (Matrix.GeneralLinearGroup.mkOfDetNeZero !![(1 : ℝ), 0; 0, (p : ℝ)]
           (by simp [Matrix.det_fin_two]; exact_mod_cast hp.ne_zero) : GL (Fin 2) ℝ)) := by
-  have hσ_D := multipass_sigma_eq_id_of_det_pos
+  have hσ_D := sigma_eq_id_of_det_pos
     (Matrix.GeneralLinearGroup.mkOfDetNeZero !![(1 : ℝ), 0; 0, (p : ℝ)]
       (by simp [Matrix.det_fin_two]; exact_mod_cast hp.ne_zero) : GL (Fin 2) ℝ)
     (by simp [Matrix.GeneralLinearGroup.det, Matrix.GeneralLinearGroup.mkOfDetNeZero,
@@ -474,7 +474,7 @@ private lemma delta_levelRaise_extra_term_commute {N : ℕ} [NeZero N] {k : ℤ}
     m6_2_delta_diag_commute p hp l f,
     HeckeRing.GL2.slash_mapGL_levelRaiseFun l k (descendExtraGamma p (l * N)) hdvd_lN,
     HeckeRing.GL2.levelRaiseFun_apply]
-  exact m6_2_extra_rep_levelRaise_bridge p hp hpN hp_sq l hpl hlNp
+  exact extra_rep_levelRaise_bridge p hp hpN hp_sq l hpl hlNp
     χ χ' hχ_eq f hfχ hpN_lN hp_sq_lN hdvd_lN _
 
 /-- **M6(2): Miyake Lemma 4.6.6 part (2)** — descent commutes with `δ_l = V_l`
@@ -516,7 +516,7 @@ theorem miyake_4_6_6_level_commute_delta {N : ℕ} [NeZero N] {k : ℤ}
           (HeckeRing.GL2.levelRaiseMatrix l • z)) := by
   haveI : NeZero (l * N) := ⟨Nat.mul_ne_zero (NeZero.ne l) (NeZero.ne N)⟩
   intro z
-  obtain ⟨σ_perm, hσ⟩ := multipass_mul_mod_p_perm_exists hp hpl
+  obtain ⟨σ_perm, hσ⟩ := mul_mod_p_perm_exists hp hpl
   by_cases hp_sq : p ^ 2 ∣ N
   · exact delta_levelRaise_sum_commute_of_p_sq_dvd p hp l f hp_sq σ_perm hσ z
   · have h_cnt_N : descendCosetCount p N = p + 1 := by simp [descendCosetCount, hp_sq]
