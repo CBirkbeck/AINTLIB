@@ -1,8 +1,10 @@
-import BernoulliRegular.IrregularPrimes.RatNumerator
-import Mathlib.Algebra.GCDMonoid.FinsetLemmas
-import Mathlib.NumberTheory.Bernoulli
-import Mathlib.RingTheory.Int.Basic
-import Mathlib.Tactic
+module
+
+public import BernoulliRegular.IrregularPrimes.RatNumerator
+public import Mathlib.Algebra.GCDMonoid.FinsetLemmas
+public import Mathlib.NumberTheory.Bernoulli
+public import Mathlib.RingTheory.Int.Basic
+public import Mathlib.Tactic
 
 /-!
 # Consequences of von Staudt-Clausen
@@ -11,6 +13,7 @@ This file extracts the local numerator-exclusion statements needed in the
 Diekmann/Jensen infinitude argument from mathlib's public
 `Bernoulli.vonStaudt_clausen` theorem.
 -/
+@[expose] public section
 
 namespace BernoulliRegular
 

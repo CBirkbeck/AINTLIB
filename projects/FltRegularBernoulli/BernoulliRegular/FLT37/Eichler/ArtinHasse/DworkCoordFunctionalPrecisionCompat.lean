@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DworkCoeffModCube
+module
+
+public import BernoulliRegular.FLT37.Eichler.SecondOrderDescent.DworkCoeffModCube
 
 /-!
 # Precision compatibility of the mod-`p³` and mod-`p²` Dwork-coordinate functionals

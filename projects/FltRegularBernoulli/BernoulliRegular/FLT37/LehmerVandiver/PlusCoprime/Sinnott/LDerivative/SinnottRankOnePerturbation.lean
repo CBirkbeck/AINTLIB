@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.EmbeddingIndexBijectivity
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative.EmbeddingIndexBijectivity
 
 /-!
 # Rank-one perturbation sums for Sinnott matrices

@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.Determinant
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative
-import BernoulliRegular.LValueAtOne.Defs
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.Determinant
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.LDerivative
+public import BernoulliRegular.LValueAtOne.Defs
 
 /-!
 # LV-SIN-D: Composition into `SinnottAnalyticIdentity`

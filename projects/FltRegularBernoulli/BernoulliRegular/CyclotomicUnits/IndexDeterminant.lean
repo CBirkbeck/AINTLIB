@@ -1,5 +1,7 @@
-import BernoulliRegular.CyclotomicUnits.DeletedFourierCyclotomic
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.DetBridge
+module
+
+public import BernoulliRegular.CyclotomicUnits.DeletedFourierCyclotomic
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.DetBridge
 
 /-!
 # Deleted Fourier determinant for Sinnott's cyclotomic-unit matrix

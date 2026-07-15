@@ -1,6 +1,8 @@
-import BernoulliRegular.CyclotomicUnits.NormalizedIndex
-import BernoulliRegular.CyclotomicUnits.Saturation
-import Mathlib.GroupTheory.Perm.Cycle.Type
+module
+
+public import BernoulliRegular.CyclotomicUnits.NormalizedIndex
+public import BernoulliRegular.CyclotomicUnits.Saturation
+public import Mathlib.GroupTheory.Perm.Cycle.Type
 
 /-!
 # From p-saturation to p-index nondivisibility

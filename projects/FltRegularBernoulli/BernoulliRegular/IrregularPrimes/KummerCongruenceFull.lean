@@ -1,6 +1,8 @@
-import BernoulliRegular.KummerCongruence.Bridge
-import BernoulliRegular.IrregularPrimes.VonStaudtConsequences
-import Mathlib.Data.Nat.Factorization.Basic
+module
+
+public import BernoulliRegular.KummerCongruence.Bridge
+public import BernoulliRegular.IrregularPrimes.VonStaudtConsequences
+public import Mathlib.Data.Nat.Factorization.Basic
 
 /-!
 # Kummer congruence interface for the Carlitz route
@@ -18,6 +20,7 @@ Staudt-Clausen integrality controls Bernoulli denominators, the strong
 Faulhaber power-sum congruence feeds a strong Voronoi congruence, and the
 primitive-root comparison removes the auxiliary side conditions.
 -/
+@[expose] public section
 
 noncomputable section
 

@@ -1,8 +1,10 @@
-import BernoulliRegular.CyclotomicUnits.IndexFormula
-import BernoulliRegular.CyclotomicUnits.IndexDeterminant
-import BernoulliRegular.CyclotomicUnits.NormalizedSubgroup
-import BernoulliRegular.HMinus.ClassNumberFormula
-import Mathlib.NumberTheory.NumberField.Cyclotomic.PID
+module
+
+public import BernoulliRegular.CyclotomicUnits.IndexFormula
+public import BernoulliRegular.CyclotomicUnits.IndexDeterminant
+public import BernoulliRegular.CyclotomicUnits.NormalizedSubgroup
+public import BernoulliRegular.HMinus.ClassNumberFormula
+public import Mathlib.NumberTheory.NumberField.Cyclotomic.PID
 
 /-!
 # Normalized cyclotomic-unit index theorem

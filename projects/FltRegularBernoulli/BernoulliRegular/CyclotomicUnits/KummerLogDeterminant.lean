@@ -1,6 +1,8 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogFormalEvaluator
-import BernoulliRegular.CyclotomicUnits.KummerLogLinearAlgebra
-import BernoulliRegular.CyclotomicUnits.Vandermonde
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogFormalEvaluator
+public import BernoulliRegular.CyclotomicUnits.KummerLogLinearAlgebra
+public import BernoulliRegular.CyclotomicUnits.Vandermonde
 
 /-!
 # Kummer logarithm determinant
