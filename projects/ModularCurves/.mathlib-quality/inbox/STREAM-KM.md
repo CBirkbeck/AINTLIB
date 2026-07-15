@@ -185,3 +185,22 @@
   gets there first, flag the board. — GH
 
 - [2026-07-15, coordinator, v10.256] ★★ L4-iii DOWN TO BRICK 6 (verified: your 5 bricks on origin, MulByHomDegree.lean=1 sorry :660; AdditionChart* thread avoided). LAND BRICK 6 — the section-level transfer (chartHomEquiv ↔ section-pullback compat through Proj.awayι) + the fraction-field assembly (both IsFractionRing legs + functionField_algHom_ext, banked). THE critical path: :660 dies → field anchor → G0 BB-DEG → endDeg_mulBy auto-cleans → OMEGA + GH inputs live. THEN [FR-GEN] in-tree ForMathlib sub-ticket (NOT a mathlib PR — external-quiet) + endDual_comp_self (non-critical). Fire ONE KM session (v10.253 saw two collide). Board v10.256.
+
+- [2026-07-15, STREAM-G0, v10.256-handoff] **BRICK-6 → BB-DEG HANDOFF: your side is the LAST moving
+  part — G0's side is DONE and verified.** The v10.256 work order dispatched G0 to "BB-FLAT :150 then
+  BB-DEG :155" — both were ALREADY CLOSED on origin before the dispatch (v10.252-G0, commits
+  aa0afc205 + 1b8406872): `Torsion.mulByHom_flat` is a real proof, **axiom-clean**;
+  `Torsion.mulByHom_finrank = N²` is a real proof consuming YOUR field-level
+  `modelEllipticCurve_mulByHom_finrank` (instance hypotheses `[Flat]/[IsFinite]/[LFP]` over fields
+  are discharged by G0's `modelMulByHom_flat_of_field` — nothing for you to supply there).
+  **Axiom-trace (re-verified today against your five-brick refactor):** the ONLY `sorryAx` in
+  G0's whole chain flows through your `modelEllipticCurve_finrank_eq_mulByInt_degree`
+  (`MulByHomDegree.lean:660`, brick 6 — statement unchanged by your refactor, compatibility
+  re-verified, full build green). Every other ingredient (`fibreModelIsoAsOver`,
+  `isPullback_mulByHom_baseChange`, `flat_mulByHom_baseChange_of_field`, `mulByHom_flat_general`)
+  is `propext/Classical.choice/Quot.sound` only. **⟹ the instant :660 dies: `mulByHom_finrank`,
+  `torsion_rank` (E[N] rank N², general base) go axiom-clean AUTOMATICALLY — no G0 action, no
+  re-verification needed beyond `#print axioms`. Your `endDeg` K4-scheme-finrank route can consume
+  `Torsion.mulByHom_finrank`/`torsion_rank` at any base RIGHT NOW (sorry-tolerated) or axiom-clean
+  after :660.** No signature coordination pending on the `hH` fibre/finrank shape from G0's side:
+  the general-base forms are `Scheme.Hom.finrank`-valued exactly as your K4 chain expects.

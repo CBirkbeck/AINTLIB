@@ -1,25 +1,8 @@
-STREAM-G0 TERMINAL (v10.250+v10.252, 2026-07-15) — BB-FLAT+BB-DEG DISCHARGED (board v10.252-G0); Torsion has 1 sorry left (BB-DIFF :247, relative-Ω¹ dev). — BB-FLAT WALL-BREAK banked; see board v10.251-G0. Next session: the two Torsion docstring recipes (:150 chart-assembly, then :155).
+STREAM-G0 TERMINAL (v10.256 reconciliation done, 2026-07-15) — dispatched targets were already closed (v10.252-G0); brick-6 handoff verified + noted to KM (sole sorryAx = MulByHomDegree:660). Seat free; BB-DIFF (:247) is the only remaining G0-adjacent sorry (scoped-out).
 
-CLAIM: rule-5, ONE G0 session. Targets (Torsion.lean):
-(1) BB-FLAT mulByHom_flat (:150) — assemble from banked fibre-leg substrate
-    (FF-2/FF-alg StandardSmoothMaximalDVR + modelMulByHom_surjective MulByHomFlatFibre);
-    first build modelMulByHom_flat_of_field per the v10.232 turnkey route
-    (IsZariskiLocalAtTarget.of_iSup_eq_top over std-smooth basic-open cover),
-    then the general-base assembly (re-scout mathlib for fibrewise criterion).
-(2) BB-DEG mulByHom_finrank=N² (:155) — scheme-level fibre-finrank form;
-    cross-link KM endDeg_mulBy (categorical form), do NOT re-derive.
-(3) mulByHom_formallyUnramified (:232) if in reach.
-
-PROGRESS (live):
-- a8b333bcf modelMulByHom_flat_of_field DONE axiom-clean (field-level BB-FLAT leg).
-- 5c20bc956 ENGINE free_of_flat_of_fibre_flat DONE axiom-clean (Nakayama/élimination des Tor;
-  NO B-E, NO Artin-Rees — WALL-BREAK: [N] finite+fp collapses the fibrewise criterion).
-- f2f50852c RING CRITERION flat_of_fibre_flat_of_finitePresentation DONE axiom-clean
-  (EGA IV 11.3.10 module-finite case, noetherian-free; ring-carrier trick kills
-  the cross-ring-tensor instance gap).
-REMAINING for BB-FLAT close: [F1] abstract mulByHom_flat_of_field (any E over Spec k,
-via unique-point + fibreModelIsoAsOver transport); [F2] the scheme assembly in Torsion
-(of_iSup cover over V ≤ π⁻¹U pairs; per-piece iff_of_isAffine + ring-criterion;
-per-q fibre via pullbackSpecIso squares from (E.baseChange gK).mulByHom + [F1]).
-THEN BB-DEG via finrank fibre-bridge + KM modelEllipticCurve_mulByHom_finrank (their
-:346 sorry = the intended single anchor).
+STATE: the two dispatched targets are ALREADY CLOSED on origin (v10.252-G0, 53b6b3f7d):
+mulByHom_flat (:150) REAL+axiom-clean; mulByHom_finrank (:155) REAL, sorryAx = KM's
+MulByHomDegree anchor only. The v10.256 work order predates that push.
+THIS SESSION: verify the brick-6 → BB-DEG handoff against KM's refactored file
+(five bricks landed, anchor now :660); confirm the sorryAx source is UNIQUELY the
+brick-6 leaf; write the handoff note to STREAM-KM; report.

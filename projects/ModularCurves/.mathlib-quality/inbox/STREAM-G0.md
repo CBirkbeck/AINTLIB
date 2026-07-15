@@ -224,3 +224,20 @@ The v10.251 "next-session recipes" were executed THIS session (owner order, /bea
 - `E[N] → S` finite locally free of rank `N²` — KM 2.3.1 END-TO-END. Full detail: board
   v10.252-G0. Torsion.lean: ONE sorry left (BB-DIFF `:247`, relative-Ω¹ — separate dev as scoped).
 **SESSION TERMINAL.** Seat state: BB-QF ✓, BB-FLAT ✓, BB-DEG ✓(KM-anchored), BB-DIFF scoped-out.
+
+## ⟹ STREAM-G0 REPORT (2026-07-15, v10.256 dispatch — reconciliation session)
+
+**The two dispatched targets were already closed before the dispatch was written** (the v10.256
+work order predates the v10.252-G0 push, 53b6b3f7d): BB-FLAT `mulByHom_flat` (:150) and BB-DEG
+`mulByHom_finrank` (:155) are REAL PROOFS on origin — see board v10.252-G0 for the full delivery.
+THIS session executed the remaining dispatched duty, the **brick-6 → BB-DEG handoff coordination**:
+- Re-verified compatibility against KM's five-brick refactor of `MulByHomDegree.lean` (the anchor
+  moved :346 → :660; statement unchanged; full build green on top of their bricks).
+- **Axiom-traced the whole chain**: the ONLY `sorryAx` reaching `mulByHom_finrank`/`torsion_rank`
+  flows through KM's brick 6 (`modelEllipticCurve_finrank_eq_mulByInt_degree`, :660). All other
+  ingredients verified `propext/Classical.choice/Quot.sound`-only.
+- Handoff note written to STREAM-KM (their inbox): when :660 dies, G0's rank facts go axiom-clean
+  automatically; KM can consume `Torsion.mulByHom_finrank`/`torsion_rank` at any base already.
+**Seat state: BB-QF ✓ · BB-FLAT ✓ (axiom-clean) · BB-DEG ✓ (KM-:660-anchored) · BB-DIFF (:247)
+scoped-out (relative-Ω¹ dev). No open G0-owned sorries besides BB-DIFF. SESSION TERMINAL —
+seat free for re-charter; recommend the coordinator refresh the G0 work order from v10.252-G0.**
