@@ -110,7 +110,7 @@ private theorem coordHom_evalAt_eq_toPointMap_coords
       (Curves.CurveMap.toPointMap cd P).x ∧
     (W_smooth W).evalAt P (cd.toAlgHom (AdjoinRoot.root W.toAffine.polynomial)) =
       (Curves.CurveMap.toPointMap cd P).y := by
-  haveI : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
+  have : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
   set Q := Curves.CurveMap.toPointMap cd P
   refine ⟨?_, ?_⟩
   · have h1 := (Curves.CurveMap.evalAt_toPointMap cd P
@@ -142,7 +142,7 @@ theorem PullbackEvaluation.stored_eq_toPointMap {β : Isogeny W.toAffine W.toAff
     haveI : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
     β.toAddMonoidHom P.toAffinePoint =
       (Curves.CurveMap.toPointMap cd P).toAffinePoint := by
-  haveI : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
+  have : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
   obtain ⟨x', y', h', heq, hx, hy⟩ := hw P hP
   obtain ⟨hvalx, hvaly⟩ := coordHom_evalAt_eq_toPointMap_coords W cd P
   set Q := Curves.CurveMap.toPointMap cd P with hQdef
@@ -252,8 +252,8 @@ theorem card_kernel_eq_degree_of_separable_coordHom [IsAlgClosed F]
     (hw : WeilPairing.PullbackEvaluation W β bad) :
     Nat.card β.kernel = β.degree := by
   classical
-  haveI hEll : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
-  haveI hIC : IsIntegrallyClosed (W_smooth W).CoordinateRing :=
+  have : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
+  have : IsIntegrallyClosed (W_smooth W).CoordinateRing :=
     ‹IsIntegrallyClosed W.toAffine.CoordinateRing›
   -- separability in the `Algebra.IsSeparable` form consumed by the layer-1 engine
   have hsepAlg : @Algebra.IsSeparable (W_smooth W).FunctionField (W_smooth W).FunctionField
