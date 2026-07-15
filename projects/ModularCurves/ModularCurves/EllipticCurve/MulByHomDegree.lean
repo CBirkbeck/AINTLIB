@@ -303,6 +303,26 @@ lemma isFractionRing_zChartSection {K : Type u} [Field K] (W : WeierstrassCurve 
       (zChartSectionCoordRingEquiv W).toRingHom).toAlgebra
   exact IsFractionRing.of_ringEquiv_left (zChartSectionCoordRingEquiv W) (fun _ => rfl)
 
+/-- **(L4-iv, public form — the HasseWeil side of the L4-iii identity on the generator)** The
+`[n]`-pullback of the generic x-coordinate is the division-polynomial quotient:
+`[n]* x_gen = mulByInt_x = Φₙ/Ψₙ²`. Public restatement of HasseWeil's private
+`mulByIntCompAlgHom_algebraMap_X` (ZERO HasseWeil edit), replayed from the public pieces:
+`mulByInt_pullbackRingHom` is the `IsLocalization.lift` of `mulByInt_coordHom`, which is the
+`AdjoinRoot.lift` of `mulByInt_xHom` — and that sends `X` to `mulByInt_x`. This is the anchor the
+L4-iii comparison (`functionFieldMap [N] = mulByInt_pullbackAlgHom` mod `projModelFunctionFieldEquiv`)
+must hit on the `x`-generator; its `functionFieldMap`-side counterpart is
+`functionFieldMap_germToFunctionField` on the chart coordinate. -/
+theorem mulByInt_pullbackAlgHom_x_gen {K : Type u} [Field K] (W : WeierstrassCurve K)
+    [W.toAffine.IsElliptic] {n : ℤ} (hn : n ≠ 0) :
+    HasseWeil.mulByInt_pullbackAlgHom W n hn (HasseWeil.x_gen W)
+      = HasseWeil.mulByInt_x W n := by
+  show HasseWeil.mulByInt_pullbackRingHom W n hn (HasseWeil.x_gen W) = _
+  rw [HasseWeil.x_gen, HasseWeil.mulByInt_pullbackRingHom, IsLocalization.lift_eq]
+  rw [show algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X
+      = WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine (Polynomial.C Polynomial.X) from rfl]
+  rw [HasseWeil.mulByInt_coordHom, AdjoinRoot.lift_mk]
+  simp [Polynomial.eval₂_C, HasseWeil.mulByInt_xHom, HasseWeil.mulByInt_x]
+
 /-- **(K4 crux — the HasseWeil coupling)** Over a field `K`, the scheme-theoretic fibre rank of the
 model `[N]` equals the degree of HasseWeil's multiplication-by-`N` isogeny `mulByInt W.toAffine N`
 (the function-field extension degree `[K(E) : [N]* K(E)]`).
