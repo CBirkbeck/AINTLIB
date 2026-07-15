@@ -1868,7 +1868,7 @@ theorem lemma3_pole_at_T_at_2tor (xT yT : K)
     (W_smooth W).ord_P (⟨xT, yT, h_ns⟩ : (W_smooth W).SmoothPoint)
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) =
       ((-2 : ℤ) : WithTop ℤ) := by
-  apply Conditional.Conditional.lemma3_pole_at_T_of_bridge_and_invariance
+  apply Conditional.lemma3_pole_at_T_of_bridge_and_invariance
     W xT yT h_ns hq
   · exact bridge_at_addPullback_x_negFrobenius_of_2_tor
       W xT yT h_ns h_2_tor hq

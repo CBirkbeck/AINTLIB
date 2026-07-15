@@ -639,7 +639,7 @@ theorem addSlope_negFrobeniusIsog_eq_secant
     addSlope W (negFrobeniusIsog W) =
       (y_gen W - (negFrobeniusIsog W).pullback (y_gen W)) /
         (x_gen W - (negFrobeniusIsog W).pullback (x_gen W)) := by
-  unfold addSlope
+  simp only [addSlope]
   exact (W_KE W).toAffine.slope_of_X_ne
     (x_gen_ne_negFrobeniusIsog_pullback_x_gen W hq)
 
@@ -1992,7 +1992,7 @@ theorem bridge_at_addPullbackNumerator_negFrobenius_of_non_2_tor
       (W_smooth W).ordAtInfty
         (addPullbackNumerator_negFrobenius W) := by
   rw [addPullbackNumerator_negFrobenius_eq_reduced]
-  unfold addPullbackNumerator_reduced_negFrobenius
+  simp only [addPullbackNumerator_reduced_negFrobenius]
   rw [reduced_form_eq_dom_plus_list W]
   have hq' : (2 : ℤ) ≤ (Fintype.card K : ℤ) := by exact_mod_cast hq
   apply ord_P_translateAlgEquivOfPoint_sum_dominant
@@ -2079,7 +2079,7 @@ x_gen = addPullback_x via shipped Helper 1) `= ordAtInfty(addPullback_x)
 This is **Lemma 3 conditional** — the bound's substantive content
 factored into upstream witnesses (bridge + invariance), each
 independently dischargeable via the framework. -/
-theorem Conditional.lemma3_pole_at_T_of_bridge_and_invariance
+theorem lemma3_pole_at_T_of_bridge_and_invariance
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic] (xT yT : K)
     (h_ns : W.toAffine.Nonsingular xT yT) (hq : 2 ≤ Fintype.card K)
     (h_bridge : (W_smooth W).ord_P
@@ -2203,7 +2203,7 @@ theorem lemma3_pole_at_T_unconditional
     (W_smooth W).ord_P (⟨xT, yT, h_ns⟩ : (W_smooth W).SmoothPoint)
         ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) =
       ((-2 : ℤ) : WithTop ℤ) := by
-  apply Conditional.lemma3_pole_at_T_of_bridge_and_invariance
+  apply lemma3_pole_at_T_of_bridge_and_invariance
     W xT yT h_ns hq
   · exact bridge_at_addPullback_x_negFrobenius_of_non_2_tor
       W xT yT h_ns h_not_2_tor hq
@@ -2383,7 +2383,7 @@ theorem pole_gamma_pullback_x_imp_kernel_closed_point
         P.comap (algebraMap (Polynomial K) data.carrier) :=
       h_x_max.eq_of_le h_comap_ne_top h_map_le
     exact ⟨h_eq⟩
-  unfold Curves.RamificationAtInfinity.Sinf.ordAt
+  simp only [Curves.RamificationAtInfinity.Sinf.ordAt]
   rw [h_rampidx_zero]
   norm_num
 
