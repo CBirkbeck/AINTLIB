@@ -21102,3 +21102,26 @@ survived) → `isUnit_e3Gamma` → `universalE3_hcubic` (B2-unblocked) → `IsE3
 direction) — **bridge-gated** (arbitrary structure → ℰ₃-form normalization needs `3•P=0→μ_P=0` &
 `3•Q=0→cubic`, the torsion→coord bridges = KM brick 6 / G0 BB-DEG). So the datum-problem RepresentableBy
 is hL-conditional (buildable), but the naive-functor discharge additionally needs the bridges.
+
+## v10.259 (2026-07-15, STREAM-OMEGA) — [T-E15-NORM] rt2/RepresentableBy machine STARTED: IsE3Datum.map + e3DatumProblem landed; 5 CLS-ladder rt2 pieces remain
+
+Continuing the post-B2-fix cascade toward `e3DatumRepresentableBy` (the hL-conditional datum-problem
+RepresentableBy). Landed (axiom-clean, committed):
+- **`IsE3Datum.map`** — ℰ₃-datum functoriality (pulls a datum back along φ: transported chart is ℰ₃-form
+  via `IsE3Form.map`, markings via `MarksAt.transport`, γ-unit via `IsUnit.map`). Adapts
+  `IsLegendreDatum.map` (drops ω-basis, adds the `IsUnit γ` clause). rt2 prerequisite.
+- **`e3DatumProblem`** — the ℰ₃ datum moduli problem (subfunctor of `gammaFullNaiveProblem R 3` carrying
+  `IsE3Datum`). Adapts `legendreDeltaProblem` (single component, no ω-basis).
+
+**Full post-B2 continuation (8 axiom-clean results):** B2 fix → `isUnit_e3Gamma` → `universalE3_hcubic`
+→ `IsE3Form.map` → **`universalE3_isE3Datum` ★★★** → `IsE3Datum.map` → `e3DatumProblem`.
+
+**REMAINING for `e3DatumRepresentableBy` (all hL-conditional, buildable):** the **5 rt2 CLS-ladder pieces**
+`e3ClassifyingRingHom_pulled`/`Map_pulled`/`Top_pulled`/`EllHom_pulled` + `e3DatumRepresentableBy` —
+each ~90–120 lines ADAPTING the Legendre rt2 ladder (@UniversalLegendre 2052–2360). NB **not a clean
+transposition** — E3 has no ω-basis, so `legendreLambda`/`omegaBasisMap` must be dropped and
+`e3GammaGlued`/`e3BetaGlued` rethreaded; the E3 classifying machinery (`e3ClassifyingRingHom`/`Map`/`Top`/
+`EllHom`) is already ω-free, so the adaptation follows it. RT1 (`pullSection_e3ClassifyingEllHom_P/Q`) done.
+Then `naiveLevelThree_representable_by_affine` (Bootstrap:74) = `e3DatumRepresentableBy` + the naive↔datum
+equivalence (arbitrary-datum, **bridge-gated** = KM brick 6 / G0 BB-DEG). Best approached as a focused
+rt2-ladder session.
