@@ -21078,3 +21078,27 @@ pointToTorsion-vs-pairHom leg compatibility (pairHom legs are torsionBaseChangeH
 **β3 design:** under β1's trivialization Over-iso, levelSpaceΓ (E_T) ≅ a clopen of
 constScheme T ((Fin 2 → ZMod N) × (Fin 2 → ZMod N))-ish; clopen-in-finite-étale ⟹ étale;
 needs the constant-form full-level enumeration (combinatorial leg). (STREAM-GH)
+
+## v10.258 (2026-07-15, STREAM-OMEGA) — ★★★ [T-E15-NORM] universalE3_isE3Datum LANDED — the discharge now funnels through ONE hL-conditional fact; B2-fix cascade complete
+
+Following the B2 fix (v10.257), the universal ℰ₃-datum is now built **conditional on `hL` only**:
+- **`universalE3_isE3Datum`** (★★★, axiom-clean) — the universal marked `(P,Q)` IS an ℰ₃-datum given
+  only the naive-full-level-3 clause `hL` (section-level killing `[3]P=[3]Q=0` + generation = the
+  E[3]/BB-DEG gate). Everything else is discharged: `IsE3Form` via **`IsE3Form.map`** (new — functoriality
+  of the ℰ₃-shape under ring homs) on `universalE3_isE3Form`; markings via `tautPresentation_marksAt_e3P/Q`;
+  and crucially **`IsUnit γ` via `isUnit_e3Gamma` — THE B2 FIX** (certifying `Q∉⟨P⟩`). This was FALSE
+  pre-B2 (the γ=0 component). The whole `naiveLevelThree_representable_by_affine` discharge funnels through
+  `universalE3_isE3Datum`, now hL-conditional-only.
+
+**This continuation delivered (all axiom-clean, committed):** B2 fix (e3Delta inverts γ; 3 ★★★ landmarks
+survived) → `isUnit_e3Gamma` → `universalE3_hcubic` (B2-unblocked) → `IsE3Form.map` → **`universalE3_isE3Datum`**.
+
+**Remaining path to `naiveLevelThree_representable_by_affine` (Bootstrap:74 sorry):**
+(a) `e3DatumProblem` + the 5 rt2 pieces (`e3ClassifyingRingHom_pulled`/`Map_pulled`/`Top_pulled`/
+`EllHom_pulled`) + `e3DatumRepresentableBy` — adaptation of the Legendre rt2/RepresentableBy ladder
+(@UniversalLegendre 2052–2360; NB E3 has NO ω-basis, so it's adaptation not pure transposition), all
+**conditional on `hL` only** — buildable now. RT1 (`pullSection_e3ClassifyingEllHom_P/Q`) already done.
+(b) The naive↔datum equivalence (every naive level-3 structure IS an ℰ₃-datum, the ARBITRARY-datum
+direction) — **bridge-gated** (arbitrary structure → ℰ₃-form normalization needs `3•P=0→μ_P=0` &
+`3•Q=0→cubic`, the torsion→coord bridges = KM brick 6 / G0 BB-DEG). So the datum-problem RepresentableBy
+is hL-conditional (buildable), but the naive-functor discharge additionally needs the bridges.
