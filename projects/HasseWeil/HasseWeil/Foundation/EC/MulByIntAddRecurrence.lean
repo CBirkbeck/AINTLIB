@@ -1,6 +1,11 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.AdditionPullback
-import HasseWeil.Foundation.OmegaPullbackCoeff
 import HasseWeil.Foundation.EC.GenericPointZsmul
+import HasseWeil.Foundation.OmegaPullbackCoeff
 
 /-!
 # The `[m] ⊞ [1] = [m+1]` addition recurrence on the generic point (Silverman III.5.3)
@@ -25,7 +30,6 @@ variable {F : Type*} [Field F] [DecidableEq F]
 local notation "KE" => W.toAffine.FunctionField
 local notation "R" => W.toAffine.CoordinateRing
 
-set_option maxHeartbeats 1000000 in
 /-- **RB-ID core** (Silverman III.5.3 addition recurrence): the addition-pullback of the generic
 point against `[m]` equals the `[m+1]`-coordinates. -/
 theorem addPullback_xy_mulByInt_eq_succ (m : ℤ) (hm : m ≠ 0) (hm1 : m + 1 ≠ 0)
@@ -76,7 +80,6 @@ theorem addNonInversePair_mulByInt_one (m : ℤ) (hm : m ≠ 0) (hm1 : m + 1 ≠
     exact mulByInt_x_ne_mulByInt_x W m 1 hm one_ne_zero hm_ne_one
       (fun h ↦ hm1 (by omega))
 
-set_option maxHeartbeats 1000000 in
 /-- **Pair-order RB-ID** (`[m] ⊞ [1] = [m+1]`, Silverman III.5.3): the pair
 addition-pullback of `([m], [1])` realises the `[m+1]`-coordinates. Pair-order mirror of
 `addPullback_xy_mulByInt_eq_succ` (which is the `(id, [m])` order), additionally covering
