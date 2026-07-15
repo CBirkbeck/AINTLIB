@@ -3,8 +3,10 @@ Copyright (c) 2026 Bernoulli-Regular project contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Bernoulli-Regular project contributors
 -/
-import BernoulliRegular.BernoulliFast.Computation
-import Mathlib.Data.List.GetD
+module
+
+public import BernoulliRegular.BernoulliFast.Computation
+public import Mathlib.Data.List.GetD
 
 /-!
 # Correctness of `bernoulliCompute`
@@ -36,6 +38,7 @@ computable definition to Mathlib's noncomputable `bernoulli`.
 * `bernoulliCompute_num_eq` — `(bernoulliCompute n).num = (bernoulli n).num`
 * `bernoulliCompute_den_eq` — `(bernoulliCompute n).den = (bernoulli n).den`
 -/
+@[expose] public section
 
 namespace BernoulliRegular.BernoulliFast
 
