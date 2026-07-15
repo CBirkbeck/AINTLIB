@@ -415,6 +415,88 @@ theorem zsmul_genericPoint {n : ℤ} (hn : n ≠ 0) :
 
 end GenericPointSmul
 
+section TautologicalPoint
+
+open WeierstrassCurve HasseWeil
+
+variable {K : Type u} [Field K] [DecidableEq K] (W : WeierstrassCurve K)
+  [W.IsElliptic]
+
+/-- The generic solution vector: `(x_gen, y_gen)` as a `Z`-chart solution of the
+dehomogenised cubic. -/
+noncomputable def genericSolution :
+    { v : {j : Fin 3 // j ≠ 2} → W.toAffine.FunctionField //
+      MvPolynomial.aeval v
+        (MvPolynomial.dehomogenizeAux K 2 W.toProjective.polynomial) = 0 } := by
+  refine ⟨fun j => if j.1 = 0 then x_gen W else y_gen W, ?_⟩
+  have heval : MvPolynomial.aeval (fun j : {j : Fin 3 // j ≠ 2} =>
+        if j.1 = 0 then x_gen W else y_gen W)
+      (MvPolynomial.dehomogenizeAux K 2 W.toProjective.polynomial)
+      = y_gen W ^ 2 + algebraMap K W.toAffine.FunctionField W.a₁ * x_gen W * y_gen W
+        + algebraMap K W.toAffine.FunctionField W.a₃ * y_gen W
+        - (x_gen W ^ 3 + algebraMap K W.toAffine.FunctionField W.a₂ * x_gen W ^ 2
+          + algebraMap K W.toAffine.FunctionField W.a₄ * x_gen W
+          + algebraMap K W.toAffine.FunctionField W.a₆) := by
+    rw [WeierstrassCurve.Projective.polynomial]
+    simp only [map_sub, map_add, map_mul, map_pow,
+      MvPolynomial.dehomogenizeAux_C, MvPolynomial.dehomogenizeAux_X_self,
+      MvPolynomial.dehomogenizeAux_X_ne _ _ (show (0 : Fin 3) ≠ 2 by decide),
+      MvPolynomial.dehomogenizeAux_X_ne _ _ (show (1 : Fin 3) ≠ 2 by decide),
+      MvPolynomial.aeval_C, MvPolynomial.aeval_X, mul_one, one_pow]
+    norm_num
+  rw [heval]
+  have heq := generic_equation W
+  rw [WeierstrassCurve.Affine.equation_iff] at heq
+  simp only [W_KE, WeierstrassCurve.baseChange, WeierstrassCurve.map_a₁,
+    WeierstrassCurve.map_a₂, WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄,
+    WeierstrassCurve.map_a₆] at heq
+  linear_combination heq
+
+/-- **(L4-iii brick 2a — the tautological `K(E)`-point of the model, chart-constructed)** The
+`K(E)`-point of `projModel W` given by the generic solution `(x_gen, y_gen)` through the `Z`-chart
+machinery. Because it is built by `chartHomEquiv.symm ∘ chartSolutionsEquiv.symm`, its dictionary
+readout is free (`apply_symm_apply`). -/
+noncomputable def genericSpecPointZ :
+    { g : SpecPoints (projModel W) (projModelπ W) W.toAffine.FunctionField //
+      InZChart W g } :=
+  (chartHomEquiv W 2 W.toAffine.FunctionField).symm
+    ((chartSolutionsEquiv W 2 W.toAffine.FunctionField).symm (genericSolution W))
+
+/-- The tautological `K(E)`-point of the model. -/
+noncomputable def genericSpecPoint :
+    SpecPoints (projModel W) (projModelπ W) W.toAffine.FunctionField :=
+  (genericSpecPointZ W).1
+
+theorem inZChart_genericSpecPoint : InZChart W (genericSpecPoint W) :=
+  (genericSpecPointZ W).2
+
+/-- The chart-hom readout of the tautological point is the generic-solution hom (free by
+`Subtype.coe_eta` + `apply_symm_apply`). -/
+lemma chartHomEquiv_genericSpecPoint (hZ : InZChart W (genericSpecPoint W)) :
+    chartHomEquiv W 2 W.toAffine.FunctionField ⟨genericSpecPoint W, hZ⟩
+      = (chartSolutionsEquiv W 2 W.toAffine.FunctionField).symm (genericSolution W) := by
+  rw [show (⟨genericSpecPoint W, hZ⟩ :
+      { g : SpecPoints (projModel W) (projModelπ W) W.toAffine.FunctionField //
+        InZChart W g }) = genericSpecPointZ W from Subtype.coe_eta _ _]
+  exact Equiv.apply_symm_apply _ _
+
+/-- **(L4-iii brick 2b — the dictionary reads the tautological point as the generic point)**
+Under the field-points dictionary, the chart-constructed tautological `K(E)`-point corresponds to
+`HasseWeil.genericPoint = some (x_gen, y_gen)`. Free by construction (`apply_symm_apply` twice). -/
+theorem projModelPointsEquiv_genericSpecPoint :
+    projModelPointsEquiv W W.toAffine.FunctionField (genericSpecPoint W)
+      = genericPoint W := by
+  refine (projModelPointsEquiv_some W W.toAffine.FunctionField (genericSpecPoint W)
+    (inZChart_genericSpecPoint W) (x_gen W) (y_gen W) (generic_nonsingular W) ?_ ?_).trans rfl
+  · rw [chartHomEquiv_genericSpecPoint W (inZChart_genericSpecPoint W),
+      Equiv.apply_symm_apply]
+    rfl
+  · rw [chartHomEquiv_genericSpecPoint W (inZChart_genericSpecPoint W),
+      Equiv.apply_symm_apply]
+    rfl
+
+end TautologicalPoint
+
 /-- **(L4-v enabler: generator extensionality for `K(E)`)** Two `K`-algebra homomorphisms out of
 the function field agree iff they agree on the generic coordinates `x_gen`, `y_gen`: `K(E)` is the
 fraction field of the coordinate ring (`IsLocalization.ringHom_ext`), which is
