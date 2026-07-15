@@ -1,4 +1,6 @@
-import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasse37CoefficientClosedForm
+module
+
+public import BernoulliRegular.FLT37.Eichler.ArtinHasse.ArtinHasse37CoefficientClosedForm
 
 /-!
 # The degree-`68` log-coefficient recurrence: `[Tᵐ] log((E₃₇−1)/T)` via the log ODE
