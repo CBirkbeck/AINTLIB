@@ -120,9 +120,9 @@ noncomputable def biChartRingAwayTensorEquiv :
 /-- **(β1)** The `(i,j)` chart-product piece of `E ×_R E` is `Spec` of the chart-product ring.
 
 This is the identification that lets `lawOneTriple`/`lawTwoTriple` — elements of
-`biChartRing W i j`, proven to satisfy the curve equation there (`equation_lawTwoTriple_of_isDomain`)
-— be read as regular functions on an open subscheme of `E ×_R E`, which is what the `addOnZ` /
-`addOnY` chart morphisms consume (β3). -/
+`biChartRing W i j`, proven to satisfy the curve equation there
+(`equation_lawTwoTriple_of_isDomain`) — be read as regular functions on an open subscheme of
+`E ×_R E`, which is what the `addOnZ` / `addOnY` chart morphisms consume (β3). -/
 noncomputable def chartPieceIso :
     pullback (chartι W i ≫ projModelπ W) (chartι W j ≫ projModelπ W) ≅
       Spec (CommRingCat.of (biChartRing W i j)) :=
