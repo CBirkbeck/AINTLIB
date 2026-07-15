@@ -68,10 +68,10 @@ private theorem kernel_card_le_degree_of_hcov
     (hcov : ∀ k : β.kernel, ∀ z : KE,
       translateAlgEquivOfPoint W k.val (β.pullback z) = β.pullback z) :
     Nat.card β.kernel ≤ β.degree := by
-  letI βAlg : Algebra KE KE := β.toAlgebra
-  haveI hfd : @FiniteDimensional KE KE _ _ β.toAlgebra.toModule :=
+  let βAlg : Algebra KE KE := β.toAlgebra
+  have hfd : @FiniteDimensional KE KE _ _ β.toAlgebra.toModule :=
     isogeny_finiteDimensional W β
-  haveI hAutFin : Finite (@AlgEquiv KE KE KE _ _ _ β.toAlgebra β.toAlgebra) :=
+  have hAutFin : Finite (@AlgEquiv KE KE KE _ _ _ β.toAlgebra β.toAlgebra) :=
     Finite.of_fintype _
   have hle1 : Nat.card β.kernel ≤
       Nat.card (@AlgEquiv KE KE KE _ _ _ β.toAlgebra β.toAlgebra) :=
@@ -79,7 +79,7 @@ private theorem kernel_card_le_degree_of_hcov
   have hle2 : Nat.card (@AlgEquiv KE KE KE _ _ _ β.toAlgebra β.toAlgebra) ≤ β.degree := by
     have h := @AlgEquiv.card_le KE KE _ _ β.toAlgebra hfd
     rwa [← Nat.card_eq_fintype_card] at h
-  exact le_trans hle1 hle2
+  exact hle1.trans hle2
 
 /-- **Finiteness of the target points to avoid.** The set of target smooth points `Q'`
 whose coordinates are evaluations of the two pulled-back generators along some `p` in the
@@ -145,8 +145,8 @@ theorem card_kernel_eq_degree_of_separable [IsAlgClosed F]
     (hw : WeilPairing.PullbackEvaluation W β bad) :
     Nat.card β.kernel = β.degree := by
   classical
-  haveI hEll : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
-  haveI hIC : IsIntegrallyClosed (W_smooth W).CoordinateRing :=
+  have hEll : (W_smooth W).toAffine.IsElliptic := ‹W.toAffine.IsElliptic›
+  have hIC : IsIntegrallyClosed (W_smooth W).CoordinateRing :=
     ‹IsIntegrallyClosed W.toAffine.CoordinateRing›
   -- ===== the `≤` direction: kernel ↪ Aut(K(E)/β^*K(E)), #Aut ≤ deg =====
   have hgcomm := WeilPairing.mapTranslateGenericPoint_of_pullbackEvaluation W β hbad hw
@@ -156,12 +156,12 @@ theorem card_kernel_eq_degree_of_separable [IsAlgClosed F]
   have hker_fin : Finite β.kernel := finite_kernel_of_hcov W β hcov
   have hle : Nat.card β.kernel ≤ β.degree := kernel_card_le_degree_of_hcov W β hcov
   -- ===== the `≥` direction: the localized fibre dictionary =====
-  letI βAlg : Algebra KE KE := β.toAlgebra
-  haveI hfd : @FiniteDimensional KE KE _ _ β.toAlgebra.toModule :=
+  let βAlg : Algebra KE KE := β.toAlgebra
+  have hfd : @FiniteDimensional KE KE _ _ β.toAlgebra.toModule :=
     isogeny_finiteDimensional W β
-  haveI hsepAlg : @Algebra.IsSeparable (W_smooth W).FunctionField (W_smooth W).FunctionField
+  have hsepAlg : @Algebra.IsSeparable (W_smooth W).FunctionField (W_smooth W).FunctionField
       _ _ β.toAlgebra := hsep
-  haveI twFKL : @IsScalarTower F KE KE _ β.toAlgebra.toSMul _ :=
+  have twFKL : @IsScalarTower F KE KE _ β.toAlgebra.toSMul _ :=
     @IsScalarTower.of_algebraMap_eq F KE KE _ _ _ _ β.toAlgebra _
       fun c ↦ (β.pullback.commutes c).symm
   -- the denominator of the minimal polynomials of `x, y` over `β^*K(E)`
@@ -169,14 +169,14 @@ theorem card_kernel_eq_degree_of_separable [IsAlgClosed F]
     (W_smooth W) (W_smooth W) β.toAlgebra
   -- the good affine localization
   set Af := Localization.Away f₀ with hAf_def
-  letI algAfK : Algebra Af (W_smooth W).FunctionField :=
+  let algAfK : Algebra Af (W_smooth W).FunctionField :=
     Curves.GoodAffineLocus.awayAlgebra (W_smooth W) f₀ hf₀
-  haveI twAfK : letI := algAfK
+  have twAfK : letI := algAfK
       IsScalarTower (W_smooth W).CoordinateRing Af (W_smooth W).FunctionField :=
     Curves.GoodAffineLocus.awayAlgebra_isScalarTower (W_smooth W) f₀ hf₀
-  letI algAfL : Algebra Af KE :=
+  let algAfL : Algebra Af KE :=
     ((β.pullback.toRingHom).comp (algebraMap Af (W_smooth W).FunctionField)).toAlgebra
-  haveI twAfKL : @IsScalarTower Af KE KE algAfK.toSMul β.toAlgebra.toSMul algAfL.toSMul :=
+  have twAfKL : @IsScalarTower Af KE KE algAfK.toSMul β.toAlgebra.toSMul algAfL.toSMul :=
     @IsScalarTower.of_algebraMap_eq Af KE KE _ _ _ algAfK β.toAlgebra algAfL fun _ ↦ rfl
   -- the finite set of target points to avoid: possible images of the coherence bad set
   set badT : Set (W_smooth W).SmoothPoint := {Q' | ∃ p ∈ bad,
@@ -199,7 +199,7 @@ theorem card_kernel_eq_degree_of_separable [IsAlgClosed F]
     rw [← Finset.card_pos, hScard]
     exact isogeny_degree_pos W β
   obtain ⟨pt₀, hpt₀⟩ := hSne
-  haveI hfib_fin : Finite {R : W.toAffine.Point //
+  have hfib_fin : Finite {R : W.toAffine.Point //
       β.toAddMonoidHom R = Q.toAffinePoint} :=
     Isogeny.fiber_finite_of_kernel_finite β hker_fin
   have hinj : Function.Injective (fun p : {x // x ∈ S} ↦
