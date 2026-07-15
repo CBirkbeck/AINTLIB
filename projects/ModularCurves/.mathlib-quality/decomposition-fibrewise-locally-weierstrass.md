@@ -456,3 +456,11 @@ the left-adjoint part of mathlib's existing scheme-module pseudofunctor, and def
 `affineIntersectionChartChosenPullback` from the actual geometric pullback square
 `V i j = U i ×_X U j` in the glued scheme. These axiom-clean constructors put the local unit
 modules in the exact input format of mathlib's `Pseudofunctor.DescentData'` API.
+
+Completed subdependency (2026-07-14): proved
+`affineIntersectionTripleIsPullbackMiddle` and defined
+`affineIntersectionChartTripleMiddleChosenPullback` and
+`affineIntersectionChartChosenPullback₃`. The canonical affine triple intersection is now the
+chosen pullback of adjacent pair overlaps over the middle chart, with all three legs definitionally
+given by the existing left, middle, and right restriction maps. The construction is option-free and
+all three public declarations depend only on `propext`, `Classical.choice`, and `Quot.sound`.
