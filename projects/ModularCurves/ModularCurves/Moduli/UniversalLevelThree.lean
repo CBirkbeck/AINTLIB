@@ -2087,6 +2087,38 @@ theorem e3ClassifyingRingHom_pulled (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
     · show e3ClassifyingRingHom X _ hD' h3 (e3Gamma R) = _
       rw [e3ClassifyingRingHom_gamma]; exact hnat_γ
 
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **([T-E15-NORM] rt2b ★)** BaseHom determination: the classifying morphism of the pulled
+datum IS `φ`'s base morphism. Adapts `legendreClassifyingMap_pulled` (uses rt2a
+`e3ClassifyingRingHom_pulled` + `Spec.map`/`toSpecΓ` naturality). -/
+theorem e3ClassifyingMap_pulled (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    e3ClassifyingMap X
+      ((gammaFullNaiveProblem R 3).map (Opposite.op φ)
+        ⟨⟨universalE3P R, universalE3Q R⟩, hL⟩)
+      (IsE3Datum.map φ (universalE3_isE3Datum R hL)
+        ((gammaFullNaiveProblem R 3).map (Opposite.op φ)
+          ⟨⟨universalE3P R, universalE3Q R⟩, hL⟩) rfl rfl) h3 = φ.baseHom := by
+  show X.base.toSpecΓ ≫ Spec.map (CommRingCat.ofHom
+    (e3ClassifyingRingHom X _ _ h3)) = φ.baseHom
+  rw [show CommRingCat.ofHom
+      (e3ClassifyingRingHom X
+        ((gammaFullNaiveProblem R 3).map (Opposite.op φ)
+          ⟨⟨universalE3P R, universalE3Q R⟩, hL⟩)
+        (IsE3Datum.map φ (universalE3_isE3Datum R hL)
+          ((gammaFullNaiveProblem R 3).map (Opposite.op φ)
+            ⟨⟨universalE3P R, universalE3Q R⟩, hL⟩) rfl rfl) h3) =
+    (Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv ≫
+      φ.baseHom.appTop from by
+    rw [e3ClassifyingRingHom_pulled φ hL h3]
+    rfl]
+  rw [Spec.map_comp, ← Scheme.toSpecΓ_naturality_assoc]
+  show φ.baseHom ≫ (Spec (CommRingCat.of (E3ModuliRing R))).toSpecΓ ≫
+    Spec.map (Scheme.ΓSpecIso (CommRingCat.of (E3ModuliRing R))).inv =
+    φ.baseHom
+  rw [← SpecMap_ΓSpecIso_hom, ← Spec.map_comp, Iso.inv_hom_id, Spec.map_id]
+  exact Category.comp_id _
+
 end Rt2
 
 end ModularCurves
