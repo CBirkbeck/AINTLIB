@@ -226,7 +226,6 @@ theorem evalPi_binomialSeries (a : ℤ_[p]) {n : ℕ} (hn : 1 ≤ n) :
 
 set_option synthInstance.maxHeartbeats 1000000 in
 -- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis (cf. Tower.lean)
-set_option maxHeartbeats 1000000 in
 -- the `adjoin.powerBasis`/`norm_eq_norm_adjoin` computation runs through the nested
 -- `IntermediateField (K p n) (extendScalars …)` layer; both instance synthesis and the
 -- power-basis term elaboration exceed the defaults (mirrors `minpoly_extendScalars_of_pow`)
