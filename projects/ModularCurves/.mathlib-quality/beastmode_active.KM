@@ -1,1 +1,21 @@
-FOCUS: STREAM-KM deep-leaf recon COMPLETE + boarded (v10.253). finrank-API wall [FR-GEN] blocks T-DEG0/endDual; L4-iii coordinate-reading bridge = next deep grind
+STREAM-KM TERMINAL (v10.253, 2026-07-15) — deep-leaf RECON complete; leaves are multi-session register-boxes.
+
+FOUNDATION SPINE remains landed (6595238b2): endDeg/endTrace/endDual Abel-free;
+le_endDeg_of_killed_injective axiom-clean. This session: precise recon of the 3 deep leaves, no landing
+(all genuine multi-session; register-box, zero-pressure — fleet proceeds via the tracked BB-DEG box).
+
+FINDINGS (board v10.253-KM + decomposition-keystone.md v10.252 append + memory aintlib-km-keystone-deep-leaves):
+- NEW SUB-BLOCKER [FR-GEN]: Scheme.Hom.finrank public API is ENTIRELY finite-flat-gated; the raw def
+  exposes only private IsAffine.finrank + Exists.choose. ⟹ T-DEG0 (mulByHom_zero_finrank :168) +
+  endDual_comp_self's arbitrary-endo fibre-rank (:178) are BLOCKED ([0]=π≫zero neither finite nor flat).
+  Claim TRUE (torsion pushforward Γ/I, I=rel-eff-Cartier via Section.orderDivisor ⟹ rankAtStalk 0).
+  Fix = public non-finite-flat finrank reduction (mathlib-PR-scale) + ~150-line pasting/oConn/Cartier.
+- L4-iii (MulByHomDegree:422) = the finite-flat leaf, everything around it DONE (zsmul_genericPoint,
+  functionField_algHom_ext, mulByInt_pullbackAlgHom_x/y_gen, finrank_of_isFractionRing diamond). SOLE
+  gap = functionFieldMap (mulByHom N) x_gen = mulByInt_x = the coordinate-reading bridge (germ of
+  [N].app(x) at generic pt = x-coord of N•τ_model, threading AdditionChart* group law). Multi-session.
+- COLLISION: EndomorphismDegree.lean GH-co-edited (6 pins); MulByHomFlatFibre.lean = sibling-G0. Build
+  KM content in MulByHomDegree/new ForMathlib, wire with 1-line edits.
+
+ROUTING: (1) [FR-GEN] = ForMathlib/mathlib-PR sub-ticket (unblocks T-DEG0 + endDual arbitrary-endo);
+(2) L4-iii coordinate-reading bridge = next deep grind (finite-flat, own multi-session). Seat free.
