@@ -1,5 +1,6 @@
 import ModularCurves.EllipticCurve.GroupLaw
 import ModularCurves.EllipticCurve.MulByHomFibresGlobal
+import ModularCurves.EllipticCurve.MulByHomFlat
 import ModularCurves.ForMathlib.FinitePresentationCancel
 import Mathlib.AlgebraicGeometry.Morphisms.Finite
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
@@ -143,31 +144,19 @@ theorem mulByHom_locallyQuasiFinite (N : ℕ) [NeZero N] :
     LocallyQuasiFinite (E.mulByHom N) :=
   LocallyQuasiFinite.of_finite_preimage_singleton _ fun x => E.mulByHom_finite_fibres N x
 
-/-- **Black box `BB-FLAT` (flatness input of KM 2.3.1)**: `[N]` is flat for `N ≥ 1`.
-
-**Status (v10.250 G0 session): the mathematical content is DELIVERED, axiom-clean; only
-the chart-assembly leaf remains.** The v10.232 "gated on the B–E/flat-locus chain"
-verdict is INVERTED: `[N]` is finite (BB-QF + ZMT) and locally of finite presentation
-(`mulByHom_locallyOfFinitePresentation`), and for module-finite finitely presented
-algebras the fibrewise criterion (EGA IV 11.3.10) collapses to elementary tensor
-algebra — no noetherian hypotheses, no Buchsbaum–Eisenbud. Delivered:
-* `ForMathlib/FiniteFibrewiseFlat.lean`: `free_of_flat_of_fibre_flat` (the local
-  Nakayama/élimination-des-Tor engine) and `flat_of_fibre_flat_of_finitePresentation`
-  (the ring-level criterion: `A → R → T` with `T` fp `R`-module, `A`-flat, all residue
-  fibres `κ(q)⊗R → κ(q)⊗T` flat ⟹ `T` flat over `R`).
-* `MulByHomFlatFibre.lean`: `modelMulByHom_flat_of_field` (model `[N]` flat over any
-  field) and `flat_mulByHom_baseChange_of_field` (`[N]` flat on `E ×_S Spec K` for
-  EVERY field-valued point `Spec K ⟶ S` — the geometric fibre input).
-
-**Remaining leaf (bounded chart plumbing)**: cover `E` by affine `V ≤ π⁻¹U` (`U ⊆ S`
-affine); per piece reduce `Flat (f ∣_ V)` to `RingHom.Flat (f.appLE V (f⁻¹V) _)` (the
-arrow-iso pattern of `flat_morphismRestrict_of_isDomain_of_isStandardSmooth`); apply the
-ring criterion with `A := Γ(S,U)`, the appLE tower, fp via `finite_appLE` + Stacks 0564;
-its fibre input at a prime `q` converts `flat_mulByHom_baseChange_of_field` at
-`gK := Spec.map (algebraMap A κ(q)) ≫ hU.fromSpec` through the chart iso
-`κ(q) ⊗[A] Γ(E,V) ≅ Γ(fst⁻¹ᵁV)` (tensor-lift of the two canonical legs; iso via the
-restricted pullback square + `pullbackSpecIso`; `[N]`-compat by tensor-ext). -/
-theorem mulByHom_flat (N : ℕ) [NeZero N] : Flat (E.mulByHom N) := by sorry
+/-- **Black box `BB-FLAT` (flatness input of KM 2.3.1) — DISCHARGED**: `[N]` is flat
+for `N ≥ 1`, over an arbitrary base. The v10.232 "gated on the B–E/flat-locus chain"
+verdict was INVERTED: `[N]` is finite (BB-QF + ZMT) and locally of finite presentation,
+and for module-finite finitely presented algebras the fibrewise criterion
+(EGA IV 11.3.10) collapses to elementary tensor algebra — no noetherian hypotheses, no
+Buchsbaum–Eisenbud. Chain: the local Nakayama/élimination-des-Tor engine
+`free_of_flat_of_fibre_flat` + the ring-level criterion
+`flat_of_fibre_flat_of_finitePresentation` (`ForMathlib/FiniteFibrewiseFlat`), fed by
+the field-level `modelMulByHom_flat_of_field` transported to every field-valued point
+(`flat_mulByHom_baseChange_of_field`), assembled over affine charts via the chart
+pullback squares (`MulByHomFlat`). -/
+theorem mulByHom_flat (N : ℕ) [NeZero N] : Flat (E.mulByHom N) :=
+  mulByHom_flat_general E N
 
 /-- **Black box `BB-DEG` (degree input of KM 2.3.1)**: `[N]` has rank `N²` at every
 point. KM 2.3.1 proof: the rank is computed at a single geometric point (`E^an ≅ ℂ/L`,
