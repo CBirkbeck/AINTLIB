@@ -39,7 +39,7 @@ The prime-localised form ("`M` finite `S`-module, `𝔮 ⊂ S` prime over `𝔭 
 `M_𝔮/𝔭M_𝔮` free over `S_𝔮/𝔭S_𝔮` ⟹ `M_𝔮` free over `S_𝔮`") is the special case obtained by
 applying this local theorem to `R_𝔭 → S_𝔮`; that reduction is pure localisation bookkeeping.
 -/
-import Mathlib
+import Mathlib.RingTheory.LocalRing.Module
 
 open TensorProduct IsLocalRing Function Module LinearMap
 
