@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.EC.MulByIntBaseCase
 
 /-!
@@ -153,7 +158,7 @@ omit [DecidableEq F] [WeierstrassCurve.IsElliptic W.toAffine] in
 /-- `mulByInt_x W (-n) = mulByInt_x W n`: the `[n]`-image of the x-coordinate
     is preserved under negation. Direct from `W.Φ_neg` and `W.ΨSq_neg`. -/
 @[simp] theorem mulByInt_x_neg (n : ℤ) : mulByInt_x W (-n) = mulByInt_x W n := by
-  unfold mulByInt_x Φ_ff ΨSq_ff
+  simp only [mulByInt_x, Φ_ff, ΨSq_ff]
   rw [Φ_neg, ΨSq_neg]
 
 /-! ### x-coordinate composition identity for `[-1]`
@@ -199,7 +204,7 @@ theorem mulByInt_comp_pullback_x_neg_one (n : ℤ) (hn : n ≠ 0) :
       Polynomial.aeval_algebraMap_apply]
     simp
   rw [h_eq, h_eq]
-  unfold mulByInt_x Φ_ff ΨSq_ff
+  simp only [mulByInt_x, Φ_ff, ΨSq_ff]
   rw [← IsScalarTower.algebraMap_apply (Polynomial F) W.toAffine.CoordinateRing
       W.toAffine.FunctionField,
     ← IsScalarTower.algebraMap_apply (Polynomial F) W.toAffine.CoordinateRing
