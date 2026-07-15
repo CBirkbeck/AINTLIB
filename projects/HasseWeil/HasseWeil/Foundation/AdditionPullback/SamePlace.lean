@@ -63,8 +63,6 @@ open WeierstrassCurve HasseWeil.Curves
 namespace HasseWeil
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.style.longLine false
 
 variable {F : Type*} [Field F] [DecidableEq F] {W : WeierstrassCurve F} [W.toAffine.IsElliptic]
 
@@ -266,7 +264,7 @@ private theorem resid_mul {P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoi
 /-- A scalar `algebraMap F KE c` residues to `c`. -/
 private theorem resid_const (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) (c : F) :
     resid P (algebraMap F KE c) c := by
-  unfold resid; rw [sub_self, map_zero]; exact zero_lt_one
+  simp only [resid]; rw [sub_self, map_zero]; exact zero_lt_one
 
 /-- A residue `u ≡ a` with `a ≠ 0` makes `u` a unit at `P` (`pV P u = 1`). -/
 private theorem resid_unit {P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint} {u : KE} {a : F}
@@ -293,7 +291,7 @@ private theorem resid_div {P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoi
   have hnum' : (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P
       (u * algebraMap F KE c - algebraMap F KE a * d) < 1 := by
     have := resid_sub (resid_mul hu (resid_const P c)) (resid_mul (resid_const P a) hd)
-    unfold resid at this
+    simp only [resid] at this
     rwa [show a * c - a * c = (0 : F) from by ring, map_zero, sub_zero] at this
   have hid : u / d - algebraMap F KE (a / c) =
       (u * algebraMap F KE c - algebraMap F KE a * d) * (d * algebraMap F KE c)⁻¹ := by
@@ -326,7 +324,7 @@ private theorem resid_pow {P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoi
 /-- The generic `x`-coordinate residues to `P.x`: `x_gen ≡ P.x` modulo `m_P`. -/
 private theorem resid_x_gen (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) :
     resid P (x_gen W) P.x := by
-  unfold resid
+  simp only [resid]
   rw [x_gen_sub_const_eq_algebraMap_XClass]
   exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
     (C := (⟨W.toAffine⟩ : SmoothPlaneCurve F)) _ P).mpr (XClass_mem_maximalIdealAt W P P.x rfl)
@@ -402,7 +400,7 @@ private theorem resid_addPullback_x_pair
   rw [show addPullback_x_pair α₁ α₂ =
       (addSlopePair α₁ α₂) ^ 2 + algebraMap F KE W.toAffine.a₁ * (addSlopePair α₁ α₂)
         - algebraMap F KE W.toAffine.a₂ - α₁.pullback (x_gen W) - α₂.pullback (x_gen W) from by
-    unfold addPullback_x_pair WeierstrassCurve.Affine.addX
+    simp only [addPullback_x_pair, WeierstrassCurve.Affine.addX]
     rw [ha₁, ha₂]]
   rw [show W.toAffine.addX x₁ x₂ (W.toAffine.slope x₁ x₂ y₁ y₂) =
       (W.toAffine.slope x₁ x₂ y₁ y₂) ^ 2 + W.toAffine.a₁ * (W.toAffine.slope x₁ x₂ y₁ y₂)
@@ -422,7 +420,7 @@ private lemma addPullback_y_pair_eq_negY_form :
       (W_KE W).toAffine.negY (addPullback_x_pair α₁ α₂)
         ((addSlopePair α₁ α₂) * (addPullback_x_pair α₁ α₂ - α₁.pullback (x_gen W))
           + α₁.pullback (y_gen W)) from rfl]
-  unfold WeierstrassCurve.Affine.negY
+  simp only [WeierstrassCurve.Affine.negY]
   have ha₁ : (W_KE W).toAffine.a₁ = algebraMap F KE W.toAffine.a₁ := rfl
   have ha₃ : (W_KE W).toAffine.a₃ = algebraMap F KE W.toAffine.a₃ := rfl
   rw [ha₁, ha₃]
@@ -485,7 +483,7 @@ private theorem resid_addPullback_x_pair_of_slope
   rw [show addPullback_x_pair α₁ α₂ =
       (addSlopePair α₁ α₂) ^ 2 + algebraMap F KE W.toAffine.a₁ * (addSlopePair α₁ α₂)
         - algebraMap F KE W.toAffine.a₂ - α₁.pullback (x_gen W) - α₂.pullback (x_gen W) from by
-    unfold addPullback_x_pair WeierstrassCurve.Affine.addX
+    simp only [addPullback_x_pair, WeierstrassCurve.Affine.addX]
     rw [ha₁, ha₂]]
   rw [show W.toAffine.addX x₁ x₂ ℓ =
       ℓ ^ 2 + W.toAffine.a₁ * ℓ - W.toAffine.a₂ - x₁ - x₂ from by
@@ -514,7 +512,7 @@ private theorem resid_addPullback_y_pair_of_slope
         (W_KE W).toAffine.negY (addPullback_x_pair α₁ α₂)
           ((addSlopePair α₁ α₂) * (addPullback_x_pair α₁ α₂ - α₁.pullback (x_gen W))
             + α₁.pullback (y_gen W)) from rfl]
-    unfold WeierstrassCurve.Affine.negY
+    simp only [WeierstrassCurve.Affine.negY]
     rw [ha₁, ha₃]]
   rw [show W.toAffine.addY x₁ x₂ y₁ ℓ =
       -(ℓ * (W.toAffine.addX x₁ x₂ ℓ - x₁) + y₁)
@@ -598,11 +596,11 @@ private theorem addIsog_pullback_algebraMap_mk_eq (p : Polynomial (Polynomial F)
       (p.map (Polynomial.mapRingHom (algebraMap F KE))).evalEval
         (addPullback_x_pair α₁ α₂) (addPullback_y_pair α₁ α₂) := by
   rw [addIsog_pullback]
-  unfold addPullbackAlgHomPair
+  simp only [addPullbackAlgHomPair]
   rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
   change (addCoordAlgHomPair hxy).toRingHom (Affine.CoordinateRing.mk W.toAffine p) = _
   change addCoordRingHomPair hxy (Affine.CoordinateRing.mk W.toAffine p) = _
-  unfold addCoordRingHomPair
+  simp only [addCoordRingHomPair]
   rw [AdjoinRoot.lift_mk]
   change p.eval₂ (Polynomial.eval₂RingHom (algebraMap F KE) (addPullback_x_pair α₁ α₂))
       (addPullback_y_pair α₁ α₂) = _
@@ -893,8 +891,8 @@ theorem isog_coords_at_affine_of_decomp {α₁ α₂ : Isogeny W.toAffine W.toAf
     (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) {x y : F}
     (h_ns : W.toAffine.Nonsingular x y)
     {x₁ y₁ x₂ y₂ : F} {h₁ : W.toAffine.Nonsingular x₁ y₁} {h₂ : W.toAffine.Nonsingular x₂ y₂}
-    (hα₁ : α₁.toAddMonoidHom P.toAffinePoint = Affine.Point.some x₁ y₁ h₁)
-    (hα₂ : α₂.toAddMonoidHom P.toAffinePoint = Affine.Point.some x₂ y₂ h₂)
+    (_hα₁ : α₁.toAddMonoidHom P.toAffinePoint = Affine.Point.some x₁ y₁ h₁)
+    (_hα₂ : α₂.toAddMonoidHom P.toAffinePoint = Affine.Point.some x₂ y₂ h₂)
     (hx₁ : resid P (α₁.pullback (x_gen W)) x₁) (hx₂ : resid P (α₂.pullback (x_gen W)) x₂)
     (hy₁ : resid P (α₁.pullback (y_gen W)) y₁) (hy₂ : resid P (α₂.pullback (y_gen W)) y₂)
     (hx_ne : x₁ ≠ x₂)
@@ -926,8 +924,8 @@ theorem isog_coords_at_affine_of_decomp_slope {α₁ α₂ : Isogeny W.toAffine 
     (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint) {x y : F}
     (h_ns : W.toAffine.Nonsingular x y)
     {x₁ y₁ x₂ y₂ : F} {h₁ : W.toAffine.Nonsingular x₁ y₁} {h₂ : W.toAffine.Nonsingular x₂ y₂}
-    (hα₁ : α₁.toAddMonoidHom P.toAffinePoint = Affine.Point.some x₁ y₁ h₁)
-    (hα₂ : α₂.toAddMonoidHom P.toAffinePoint = Affine.Point.some x₂ y₂ h₂)
+    (_hα₁ : α₁.toAddMonoidHom P.toAffinePoint = Affine.Point.some x₁ y₁ h₁)
+    (_hα₂ : α₂.toAddMonoidHom P.toAffinePoint = Affine.Point.some x₂ y₂ h₂)
     (hx₁ : resid P (α₁.pullback (x_gen W)) x₁) (hx₂ : resid P (α₂.pullback (x_gen W)) x₂)
     (hy₁ : resid P (α₁.pullback (y_gen W)) y₁)
     (hL : resid P (addSlopePair α₁ α₂) (W.toAffine.slope x₁ x₂ y₁ y₂))
