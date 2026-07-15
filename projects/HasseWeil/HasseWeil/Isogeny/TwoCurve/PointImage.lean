@@ -63,7 +63,6 @@ namespace HasseWeil.WeilPairing
 open HasseWeil
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 variable {F : Type*} [Field F] [DecidableEq F]
 
