@@ -431,3 +431,9 @@ Completed subdependency (2026-07-14): proved
 `pullback_chartTransitionIso_toUnit`, then isolated the entry and exit normalization halves of the
 pair-swap law using the existing `pullbackComp` and `pullbackCongr` coherence. The public coordinate
 laws are option-free and depend only on `propext`, `Classical.choice`, and `Quot.sound`.
+
+Completed dependency claim (2026-07-14): defined
+`AffineIntersectionUnitCocycle.chartTransitionIsoSwapHom`, the reverse chart transition transported
+along the glue-data pair swap in canonical pullback-unit normal form, and proved
+`chartTransitionIsoSwapHom_eq_inv`. Thus the chart transitions satisfy the full pair-swap inverse
+law without any added hypothesis or proof resource option; both declarations are axiom-clean.
