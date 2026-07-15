@@ -129,9 +129,8 @@ characterized by `f ∘ g = X` (compositional inverse). Defined
 coefficient-by-coefficient via `compInvCoeff`.
 
 The full compositional inverse identity `PowerSeries.subst (compInverse f) f = X`
-under the hypotheses `constantCoeff f = 0` and `coeff 1 f = 1` is stated as
-`subst_compInverse_eq_X` (future work; definition is sufficient for downstream
-use as the compositional inverse API).
+under the hypotheses `constantCoeff f = 0` and `coeff 1 f = 1` is
+`subst_compInverse_eq_X`.
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, IV.2, IV.5. -/
 noncomputable def compInverse (f : PowerSeries R) : PowerSeries R :=
@@ -299,11 +298,7 @@ theorem coeff_pow_eq_of_coeff_eq (g₁ g₂ : PowerSeries R)
     simp
   | succ d ih =>
     intro k hk
-    have hstep : ∀ g : PowerSeries R, g ^ (d + 1) = g * g ^ d := by
-      intro g
-      rw [pow_succ]
-      exact mul_comm _ _
-    rw [hstep g₁, hstep g₂, PowerSeries.coeff_mul, PowerSeries.coeff_mul]
+    rw [pow_succ' g₁, pow_succ' g₂, PowerSeries.coeff_mul, PowerSeries.coeff_mul]
     apply Finset.sum_congr rfl
     intro ⟨i, j⟩ hij
     have hij' : i + j = k := Finset.mem_antidiagonal.mp hij
@@ -374,13 +369,7 @@ open PowerSeries in
 theorem monomial_pow_eq (n : ℕ) (c : R) (j : ℕ) :
     (PowerSeries.C c * PowerSeries.X ^ (n + 1)) ^ j =
       PowerSeries.C (c ^ j) * PowerSeries.X ^ (j * (n + 1)) := by
-  have h1 : (PowerSeries.C c * PowerSeries.X ^ (n + 1)) ^ j =
-      (PowerSeries.C c) ^ j * ((PowerSeries.X : PowerSeries R) ^ (n + 1)) ^ j :=
-    mul_pow _ _ _
-  rw [h1]
-  rw [← map_pow]
-  rw [← pow_mul]
-  rw [mul_comm j (n + 1)]
+  rw [mul_pow, ← map_pow, ← pow_mul, mul_comm j (n + 1)]
 
 open PowerSeries in
 /-- For the monomial `h = C c * X^(n+1)`, any `i`-th power for `i ≥ 2` has
@@ -696,9 +685,7 @@ theorem subst_compInverse_eq_X (f : PowerSeries R)
     -- coeff 0 (subst (compInverse f) f) = constantCoeff f = 0 = coeff 0 X.
     have hmv : @PowerSeries.constantCoeff R _ (PowerSeries.subst (compInverse f) f) = 0 :=
       PowerSeries.constantCoeff_subst_eq_zero (compInverse_constantCoeff f) f h0
-    rw [PowerSeries.coeff_zero_eq_constantCoeff_apply]
-    rw [hmv]
-    rw [PowerSeries.coeff_zero_X]
+    rw [PowerSeries.coeff_zero_eq_constantCoeff_apply, hmv, PowerSeries.coeff_zero_X]
   · -- k ≥ 1.
     -- coeff k (subst (compInverse f) f) = coeff k (subst (compInvTrunc f k) f)
     -- since compInverse f and compInvTrunc f k agree up to degree k.
@@ -955,11 +942,8 @@ it shows `n · log_F.coeff n` lies in the image of `ω_F`, which is the
 theorem FormalGroup.log_coeff_succ_nsmul (F : FormalGroup R) [Module ℚ R] (n : ℕ) :
     (n + 1) • PowerSeries.coeff (n + 1) F.log =
       PowerSeries.coeff n F.normalizedDifferential.toSeries := by
-  rw [F.log_coeff_succ]
-  rw [← Nat.cast_smul_eq_nsmul ℚ, smul_smul]
-  rw [show ((n + 1 : ℕ) : ℚ) * ((n + 1 : ℚ)⁻¹) = 1 by
-    push_cast; field_simp]
-  rw [one_smul]
+  rw [F.log_coeff_succ, ← Nat.cast_smul_eq_nsmul ℚ, smul_smul,
+    show ((n + 1 : ℕ) : ℚ) * ((n + 1 : ℚ)⁻¹) = 1 by push_cast; field_simp, one_smul]
 
 /-! ### Silverman IV.5.2: `log_F` is a homomorphism `F → Ĝ_a`
 
@@ -988,14 +972,11 @@ series differ by a series in `Y` alone. Setting `X = 0` and using
 `log_F(F(0, Y)) = log_F(Y)` (from `F.runit`) plus `log_F(0) = 0` shows the
 difference vanishes.
 
-**Status**: this direction (LHS = RHS) requires the translation-invariance
-`ω_F(F(T, S)) · F_T(T, S) = ω_F(T)`, which has not yet been ported from
-Silverman IV.4.2. See the progress log in the ticket
-`T-IV-5-003-log-iso-Ga.md`.
-
-We record here the target statement as a `Prop` plus the achievable
-intermediate lemmas (constant coefficient, linear coefficients at `(1, 0)`
-and `(0, 1)`). The full statement is left as future work. -/
+This direction (LHS = RHS) uses the translation-invariance
+`ω_F(F(T, S)) · F_T(T, S) = ω_F(T)` (Silverman IV.4.2, available here as
+`FormalGroup.invariantDiff_translation`). The target identity is recorded as
+the `Prop`-valued `FormalGroup.LogPreservesAdd`; the full statement is proved
+in `FormalGroup.logPreservesAdd`. -/
 
 /-- The `preserves_add` identity for `log_F`, stated as a `Prop`:
 `log_F(F(X, Y)) = log_F(X) + log_F(Y)` in `MvPowerSeries (Fin 2) R`.
@@ -1034,9 +1015,8 @@ theorem FormalGroup.constantCoeff_log_subst_X_add (F : FormalGroup R) [Module �
     @MvPowerSeries.constantCoeff (Fin 2) R _
         (PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) F.log +
           PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) F.log) = 0 := by
-  rw [map_add]
-  rw [PowerSeries.constantCoeff_subst_eq_zero (by simp) F.log F.log_constantCoeff]
-  rw [PowerSeries.constantCoeff_subst_eq_zero (by simp) F.log F.log_constantCoeff]
+  rw [map_add, PowerSeries.constantCoeff_subst_eq_zero (by simp) F.log F.log_constantCoeff,
+    PowerSeries.constantCoeff_subst_eq_zero (by simp) F.log F.log_constantCoeff]
   simp
 
 /-- **Constant-coefficient case of `LogPreservesAdd`**: the constant coefficient
@@ -1232,7 +1212,7 @@ private theorem coeff_zero_of_pderiv_zero_fin2 [Module ℚ R]
     (h : MvPowerSeries (Fin 2) R) (hd : MvPowerSeries.pderiv 0 h = 0)
     (e : Fin 2 →₀ ℕ) (he : e 0 ≠ 0) :
     MvPowerSeries.coeff e h = 0 := by
-  haveI : IsAddTorsionFree R := IsAddTorsionFree.of_module_rat R
+  have : IsAddTorsionFree R := IsAddTorsionFree.of_module_rat R
   -- Obtain a : ℕ with e 0 = a + 1.
   obtain ⟨a, ha⟩ := Nat.exists_eq_succ_of_ne_zero he
   -- Let d = e - single 0 1, so that d + single 0 1 = e and d 0 = a.
@@ -1326,13 +1306,10 @@ private theorem pderiv_LogPreservesAdd_RHS (F : FormalGroup R) [Module ℚ R] :
     PowerSeries.HasSubst.of_constantCoeff_zero (by simp)
   have hX1 : PowerSeries.HasSubst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) :=
     PowerSeries.HasSubst.of_constantCoeff_zero (by simp)
-  rw [MvPowerSeries.pderiv_add]
-  rw [pderiv_PowerSeries_subst 0 hX0 F.log, pderiv_PowerSeries_subst 0 hX1 F.log]
-  rw [F.pderiv_log]
-  -- Simplify pderiv 0 (X 0) = 1 and pderiv 0 (X 1) = 0.
-  rw [MvPowerSeries.pderiv_X_self 0]
-  rw [MvPowerSeries.pderiv_X_of_ne (by decide : (0 : Fin 2) ≠ 1)]
-  rw [one_mul, zero_mul, add_zero]
+  -- Chain rule on each leg, then pderiv 0 (X 0) = 1 and pderiv 0 (X 1) = 0.
+  rw [MvPowerSeries.pderiv_add, pderiv_PowerSeries_subst 0 hX0 F.log,
+    pderiv_PowerSeries_subst 0 hX1 F.log, F.pderiv_log, MvPowerSeries.pderiv_X_self 0,
+    MvPowerSeries.pderiv_X_of_ne (by decide : (0 : Fin 2) ≠ 1), one_mul, zero_mul, add_zero]
 
 /-- Substituting `X 0 ↦ 0` in the LHS of `LogPreservesAdd`:
   `subst ![0, X 1] (subst F.toSeries F.log) = subst (X 1) F.log`. -/
