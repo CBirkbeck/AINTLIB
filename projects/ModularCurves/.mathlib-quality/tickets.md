@@ -21204,3 +21204,64 @@ keystone/bridge inputs ONLY:
 **To close `Bootstrap:74`:** import `UniversalLevelThree`, derive `hL` (keystone) + `hArb` (bridges),
 then `exact naiveLevelThree_representable_by_affine_of_conditions R hR hL hArb`. The whole NORM
 structural machine is done; the discharge is now literally `keystone + bridges` away.
+
+## v10.262 (2026-07-16, coordinator) — ★★★★ OMEGA MACHINE COMPLETE + G0 SUBSTRATE DONE: the WHOLE PROJECT funnels onto KM's BRICK 6 (4 turnkey leaves)
+
+**Verified at source** (origin/dev/modular-curves). Four-report batch (2× KM, OMEGA, G0, GH) processed.
+**Protective action taken:** OMEGA's final 10 commits (its entire T-E15-NORM completion tail — rt2 ladder,
+`naiveLevelThreeRepresentableBy`, boards v10.260/261) were UNPUSHED despite OMEGA's "all pushed" report
+(`git ls-remote` proved the remote tip was 3 behind at 100462fde; the machine was in the shared local HEAD
+only). Coordinator pushed them (clean FF 100462fde..fd72fe71e). **Lesson: verify pushes via `ls-remote`,
+not the worker's word; unpushed terminal-worker work = the standing data-loss risk — push it.**
+
+**RATIFIED (verified, not report-trusted):**
+- **★★★★ OMEGA's entire [T-E15-NORM] representability machine is COMPLETE** (on origin): the B2-fix cascade
+  (`isUnit_e3Gamma` UniversalLevelThree:140 → `universalE3_hcubic` → `universalE3_isE3Datum` :718 ★★★),
+  the 5-piece rt2 ladder (e3ClassifyingRingHom_pulled…e3ClassifyingEllHom_pulled), and BOTH RepresentableBy
+  discharges (`e3DatumRepresentableBy` + `naiveLevelThreeRepresentableBy`). **The whole ℰ₃ machine (KM 4.7.0
+  engine axiom 1 for (3,GL₂𝔽₃)) is conditional on hL + hArb ONLY** — and those are exactly the keystone +
+  bridges: hL = universal (P,Q) is a level-3 structure (E[3] keystone); hArb = every naive level-3 structure
+  is an ℰ₃-datum (isE3Datum_of_flexCharts ✓ + torsion→coord bridges = brick 6/BB-DEG). **KEY DISCOVERY
+  (ratified):** the ζ₃/Weil gate is VOID — NORM's sheet-pinning u=−A/B is Zariski-rational, so the 8-sorry
+  WeilPairing dependency was a phantom. Bootstrap.lean:74 (`naiveLevelThree_representable_by_affine`) is now
+  literally "machine + hL(keystone) + hArb(bridges)" away. **B2 FIX ✓ landed** (owner-approved e3Gamma inversion).
+- **G0's E[N]-scheme substrate is DONE** (verified: `mulByHom_flat` Torsion:158 + `mulByHom_finrank` Torsion:169
+  are REAL proofs via `_general` forms, NO sorry — BB-QF ✓ BB-FLAT ✓ BB-DEG ✓, all axiom-clean modulo KM's
+  :660 anchor). Commits aa0afc205 + 1b8406872. **Process note: the v10.256 G0 dispatch was STALE** —
+  BB-FLAT/BB-DEG were already closed (v10.252-G0) before that dispatch was written; G0 correctly reconciled
+  (re-verified against KM's brick refactor :346→:660, axiom-traced the whole chain, wrote the KM handoff).
+  Reinforces verify-target-at-source-before-dispatch.
+- **KM's BRICK 6 = exactly 4 turnkey leaves** (verified: `MulByHomDegree.lean` now 4 sorries — FFM_X :658,
+  FFM_Y :662, FFM_C :667 inside `brick6_intertwining`, + the A+B finrank tower). Staged from 1 opaque sorry;
+  the deep D-reduction PROVEN + integrated; complete playbook banked (τStalkMap → FFM_X/Y/C → A+B) in
+  decomposition-keystone.md + sentinel. NOT landed (genuine multi-hour instance-heavy assembly). The τStalkMap
+  (localization-lift of the tautological-point evaluation) is the one unbuilt construction.
+- **GH [GHA3] route-β 3/5** (verified: `LevelSpaceEtale.lean` on origin): β1 (discovered already-proven —
+  stale docstring, boarded correction) + β4 (etale_of_etale_pullback_snd_of_cover) + β2-ambient + β2-L done;
+  β2-heart (factor-iff via the T-D8 fibrewise-gen box, one leaf = double-base-change transport) + β3
+  (constant-form clopen enumeration) remain. Plus [E-INT] `isIntegral_of_field` (v10.256) landed.
+
+**⚠ PROCESS — TWO CONCURRENT KM SESSIONS AGAIN (v10.256-KM design + v10.259-KM execution; also v10.253).**
+Complementary, no clobber (single sentinel, tree green), but wasteful + now genuinely collision-risky:
+brick 6 is a single-file (MulByHomDegree.lean) holistic assembly — two sessions there WOULD conflict.
+**FIRE EXACTLY ONE KM SESSION.** (Owner flagged this directly; both current KM sessions are terminal, seat free.)
+
+**★ THE CRITICAL PATH IS NOW A SINGLE DOMINO — KM's BRICK 6.** On landing: MulByHomDegree :628-tower dies →
+G0's `mulByHom_finrank` goes axiom-clean → BB-DEG fleet-wide → `endDeg_mulBy=N²` auto-cleans → then OMEGA's
+hL/hArb assembly closes Bootstrap:74 (ℤ[1/3]) + the Legendre half (ℤ[1/6]) → `representable_iff` instantiations
+→ **all three levels representable.** Nothing structural remains below brick 6.
+
+**RE-DISPATCH:**
+- **KM → BRICK 6, the 4 leaves (fire ONE session).** The full playbook: τStalkMap → FFM_X/Y/C (brick6_intertwining)
+  → A+B finrank tower. Every anchor verified/banked (functionField_algHom_ext, finrank_of_isFractionRing,
+  functionFieldMap_comp_germToFunctionField, brick 5's τ.1≫[N]=σ.1, chartZRingEquiv_x/_y). THE single project
+  domino — held solo (not split) to avoid same-file collision; if it doesn't land next session, escalate to
+  splitting the A+B tower to a 2nd seat.
+- **OMEGA → prep the TURNKEY final assembly.** Both machines (ℰ₃ ℤ[1/3] + Legendre ℤ[1/6]) are done modulo
+  hL/hArb; make the Bootstrap:74 + Legendre closures turnkey (conditional on the keystone) so brick 6 → a
+  one-liner → representable. Then stand ready / support GH's β2-heart (scheme-transport, OMEGA-suited).
+- **G0 → BB-DIFF :247** (`mulByHom_formallyUnramified`, T-B5 = Loeffler 3.4.2(2)) — verified OPEN; INDEPENDENT
+  of brick 6, completes mulBy_etale/torsionπ_etale (feeds étaleness). Its own top re-charter pick. Draft from
+  board v10.252-G0. [Owner may redirect to the hL/hArb E[N]-bridges or support-OMEGA.]
+- **GH → [GHA3] β2-heart + β3** (the double-base-change geometric-pull transport via transportE_baseChange +
+  the constant-form clopen enumeration). HOLD the general-S degree pins for KM's endDual_comp_self.
