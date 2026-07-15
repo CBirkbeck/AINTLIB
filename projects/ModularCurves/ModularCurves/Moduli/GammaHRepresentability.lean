@@ -3333,19 +3333,83 @@ section GammaH
 
 variable (R : CommRingCat.{u})
 
-/-- **[GH1 = DS-GH1, DATA-SORRY] (Loeffler Fact 3.8.1; KM 7.1.1)** The `H`-action on
+/-- The `glSmul g`-translation of the naive full-level problem, as an endomorphism of
+the moduli functor: componentwise `glSmul g`, natural by `pullSection_glSmul`
+(KM's diagram 7.1.1.1, de-sorried with T-E4a). -/
+noncomputable def glSmulNat (N : ℕ) [NeZero N]
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) :
+    gammaFullNaiveProblem R N ⟶ gammaFullNaiveProblem R N where
+  app X := ↾fun L => X.unop.curve.glSmul g L
+  naturality X Y f := by
+    ext L
+    show Y.unop.curve.glSmul g ((gammaFullNaiveProblem R N).map f L)
+        = (gammaFullNaiveProblem R N).map f (X.unop.curve.glSmul g L)
+    exact EllHom.pullSection_glSmul R f.unop g L
+
+@[simp]
+theorem glSmulNat_app (N : ℕ) [NeZero N]
+    (g : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) (X : (EllObj R)ᵒᵖ)
+    (L : (gammaFullNaiveProblem R N).obj X) :
+    (glSmulNat R N g).app X L = X.unop.curve.glSmul g L := rfl
+
+/-- **[GH1, de-sorried 2026-07-15] (Loeffler Fact 3.8.1; KM 7.1.1)** The `H`-action on
 the naive full-level problem: `γ` acts on values by `glSmul (γ⁻¹)` (the inverse
 because `glSmul_mul` is a RIGHT action law — the 2026-07-06 adversarial fix in
 `Moduli/GammaH.lean` — while `Aut`-valued homomorphisms are left actions). Naturality
-of the components is KM's diagram 7.1.1.1 = compatibility of `glSmul` with
-`pullSection` = the same content as the T-H3 sorries inside `gammaHNaiveProblem.map`;
-gate [T-E4a] (`EllHom.pullSection_add`, parked behind T-W7.8; the locally-noetherian
-version is PROVEN in `Moduli/PullSectionAdd.lean`). Consumers use only this def and
-its spec `gammaHAut_app_val`. -/
+of the components is KM's diagram 7.1.1.1 = `pullSection_glSmul`, unlocked by T-E4a
+(`EllHom.pullSection_add`, de-sorried by STREAM-OMEGA). Consumers use only this def
+and its spec `gammaHAut_app_val`. -/
 noncomputable def gammaHAut (N : ℕ) [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N))) :
-    ↥H →* Aut (gammaFullNaiveProblem R N) :=
-  sorry
+    ↥H →* Aut (gammaFullNaiveProblem R N) where
+  toFun γ :=
+    { hom := glSmulNat R N ((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+      inv := glSmulNat R N ((γ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+      hom_inv_id := by
+        ext X L
+        show ((glSmulNat R N ((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))).app X ≫
+            (glSmulNat R N ((γ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))).app X) L
+          = (𝟙 ((gammaFullNaiveProblem R N).obj X)) L
+        rw [CategoryTheory.comp_apply, CategoryTheory.id_apply, glSmulNat_app, glSmulNat_app,
+          ← EllipticCurve.glSmul_mul]
+        have hcoe : (((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))) *
+            ((γ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) = 1 := by
+          rw [show (((γ⁻¹ : ↥H)) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+              = ((γ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))⁻¹ from rfl,
+            inv_mul_cancel]
+        rw [hcoe, EllipticCurve.glSmul_one]
+      inv_hom_id := by
+        ext X L
+        show ((glSmulNat R N ((γ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))).app X ≫
+            (glSmulNat R N ((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))).app X) L
+          = (𝟙 ((gammaFullNaiveProblem R N).obj X)) L
+        rw [CategoryTheory.comp_apply, CategoryTheory.id_apply, glSmulNat_app, glSmulNat_app,
+          ← EllipticCurve.glSmul_mul]
+        have hcoe : ((γ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) *
+            (((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))) = 1 := by
+          rw [show (((γ⁻¹ : ↥H)) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+              = ((γ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))⁻¹ from rfl,
+            mul_inv_cancel]
+        rw [hcoe, EllipticCurve.glSmul_one] }
+  map_one' := by
+    ext X L
+    show X.unop.curve.glSmul
+      (((1 : ↥H)⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) L = L
+    rw [show ((((1 : ↥H)⁻¹ : ↥H)) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+        = 1 by rw [inv_one]; rfl]
+    rw [EllipticCurve.glSmul_one]
+  map_mul' γ δ := by
+    ext X L
+    show (glSmulNat R N ((((γ * δ)⁻¹ : ↥H)) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))).app
+        X L
+      = ((glSmulNat R N (((δ⁻¹ : ↥H)) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))).app X ≫
+        (glSmulNat R N (((γ⁻¹ : ↥H)) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))).app X) L
+    rw [CategoryTheory.comp_apply, glSmulNat_app, glSmulNat_app, glSmulNat_app]
+    rw [show ((((γ * δ)⁻¹ : ↥H)) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N))
+        = (((δ⁻¹ : ↥H)) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) *
+          (((γ⁻¹ : ↥H)) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) by
+      rw [mul_inv_rev]; rfl]
+    rw [EllipticCurve.glSmul_mul]
 
 /-- **[GH1, specification]** The value pin of `gammaHAut`: `γ` acts by
 `glSmul (γ⁻¹ : GL₂(ℤ/N))`. (Both this and the def discharge together; the pin is what
@@ -3354,8 +3418,8 @@ theorem gammaHAut_app_val (N : ℕ) [NeZero N]
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N))) (γ : ↥H)
     (X : EllObj R) (L : (gammaFullNaiveProblem R N).obj (Opposite.op X)) :
     (gammaHAut R N H γ).hom.app (Opposite.op X) L =
-      X.curve.glSmul ((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) L := by
-  sorry
+      X.curve.glSmul ((γ⁻¹ : ↥H) : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)) L :=
+  rfl
 
 /-- **[GH2] (KM 7.1.3(2)'s hypothesis for `H ≤ GL₂(ℤ/N)`)** The `H`-action on naive
 full level structures is free over nonempty bases when `N` is invertible: a fixed
