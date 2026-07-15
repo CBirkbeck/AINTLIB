@@ -261,25 +261,29 @@ private lemma mv_subst_X_of_unit {τ : Type*}
   change MvPowerSeries.subst a (MvPowerSeries.X () : MvPowerSeries Unit R) = a ()
   exact MvPowerSeries.subst_X ha ()
 
+/-- The constant `Unit`-indexed family `fun _ ↦ g` admits substitution whenever
+`g` has vanishing constant coefficient. -/
+private lemma hasSubst_const_unit (g : MvPowerSeries (Fin 2) R)
+    (hg : MvPowerSeries.constantCoeff g = 0) :
+    MvPowerSeries.HasSubst (fun _ : Unit ↦ g) := by
+  apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro; exact hg
+
 private lemma hasSubst_const_F (F : FormalGroup.FormalGroup R) :
     MvPowerSeries.HasSubst
-      (fun _ : Unit ↦ F.toSeries : Unit → MvPowerSeries (Fin 2) R) := by
-  apply MvPowerSeries.hasSubst_of_constantCoeff_zero
-  intro; exact constantCoeff_FG_toSeries F
+      (fun _ : Unit ↦ F.toSeries : Unit → MvPowerSeries (Fin 2) R) :=
+  hasSubst_const_unit F.toSeries (constantCoeff_FG_toSeries F)
 
 private lemma hasSubst_const_Xi (i : Fin 2) :
     MvPowerSeries.HasSubst
-      (fun _ : Unit ↦ MvPowerSeries.X i : Unit → MvPowerSeries (Fin 2) R) := by
-  apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro; simp
+      (fun _ : Unit ↦ MvPowerSeries.X i : Unit → MvPowerSeries (Fin 2) R) :=
+  hasSubst_const_unit (MvPowerSeries.X i) (by simp)
 
 lemma constantCoeff_univariate_subst
     (g : MvPowerSeries (Fin 2) R) (hg : MvPowerSeries.constantCoeff g = 0)
     (f : PowerSeries R) (hf : PowerSeries.constantCoeff f = 0) :
     MvPowerSeries.constantCoeff (PowerSeries.subst g f) = 0 := by
   rw [PowerSeries.subst_def]
-  have h : MvPowerSeries.HasSubst (fun _ : Unit ↦ g) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro; exact hg
-  exact MvPowerSeries.constantCoeff_subst_eq_zero h (fun _ ↦ hg) hf
+  exact MvPowerSeries.constantCoeff_subst_eq_zero (hasSubst_const_unit g hg) (fun _ ↦ hg) hf
 
 private lemma subst_F_applied_to_X (F : FormalGroup.FormalGroup R) :
     PowerSeries.subst (F.toSeries : MvPowerSeries (Fin 2) R) (PowerSeries.X : PowerSeries R) =
@@ -297,9 +301,7 @@ private lemma subst_univariate_zero (g : MvPowerSeries (Fin 2) R)
     (hg : MvPowerSeries.constantCoeff g = 0) :
     PowerSeries.subst g (0 : PowerSeries R) = 0 := by
   rw [PowerSeries.subst_def]
-  have h : MvPowerSeries.HasSubst (fun _ : Unit ↦ g) := by
-    apply MvPowerSeries.hasSubst_of_constantCoeff_zero; intro; exact hg
-  exact subst_zero_eq h
+  exact subst_zero_eq (hasSubst_const_unit g hg)
 
 /-- `MvPowerSeries.subst ![0, 0] F.toSeries = 0` when `constantCoeff F.toSeries = 0`. -/
 private lemma subst_pair_zero_fin2 (F : FormalGroup.FormalGroup R) :
@@ -333,9 +335,9 @@ private lemma subst_pair_zero_fin2 (F : FormalGroup.FormalGroup R) :
 private lemma preservesAddCondition_zero (F : FormalGroup.FormalGroup R) :
     PreservesAddCondition F 0 := by
   unfold PreservesAddCondition
-  rw [subst_univariate_zero F.toSeries (constantCoeff_FG_toSeries F)]
-  rw [subst_univariate_zero (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) (by simp)]
-  rw [subst_univariate_zero (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) (by simp)]
+  rw [subst_univariate_zero F.toSeries (constantCoeff_FG_toSeries F),
+    subst_univariate_zero (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) (by simp),
+    subst_univariate_zero (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) (by simp)]
   exact (subst_pair_zero_fin2 F).symm
 
 /-- Substituting a bivariate series `g` (with `HasSubst (fun _ ↦ g)`) into the
@@ -381,9 +383,9 @@ private lemma preservesAddCondition_step (F : FormalGroup.FormalGroup R)
     PreservesAddCondition F (fAdd F f PowerSeries.X) := by
   unfold PreservesAddCondition at ih ⊢
   set fX : MvPowerSeries (Fin 2) R :=
-    PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) f with hfX_def
+    PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) f
   set fY : MvPowerSeries (Fin 2) R :=
-    PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) f with hfY_def
+    PowerSeries.subst (MvPowerSeries.X 1 : MvPowerSeries (Fin 2) R) f
   have hfX0 : MvPowerSeries.constantCoeff fX = 0 :=
     constantCoeff_univariate_subst _ (by simp) f hf
   have hfY0 : MvPowerSeries.constantCoeff fY = 0 :=
