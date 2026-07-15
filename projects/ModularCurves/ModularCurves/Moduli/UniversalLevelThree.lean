@@ -609,4 +609,44 @@ theorem e3_glued_flex {R : CommRingCat.{u}} (X : EllObj R)
   rw [map_zero, map_sub, map_pow, map_pow, map_add, hβ, hγ]
   linear_combination -hflex
 
+open LocalPresentation TopologicalSpace WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E15a stage 8 ★)** The discriminant factor `(a₁³−27a₃)·a₃` at the glued
+parameters is a global unit (germwise: chartwise the witness discriminant, a unit by
+ellipticity). -/
+theorem e3Delta_glued_isUnit {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 3) (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    IsUnit ((((3 * (e3GammaGlued X L hD h3).1 - 1) ^ 3 -
+        27 * (-3 * (e3GammaGlued X L hD h3).1 ^ 2 - (e3BetaGlued X L hD h3).1 -
+          3 * (e3BetaGlued X L hD h3).1 * (e3GammaGlued X L hD h3).1)) *
+      (-3 * (e3GammaGlued X L hD h3).1 ^ 2 - (e3BetaGlued X L hD h3).1 -
+        3 * (e3BetaGlued X L hD h3).1 * (e3GammaGlued X L hD h3).1))) := by
+  set gB := (e3BetaGlued X L hD h3).1 with hgB
+  set gG := (e3GammaGlued X L hD h3).1 with hgG
+  apply X.base.toRingedSpace.isUnit_of_isUnit_germ
+  intro x _
+  obtain ⟨V, hxV, Pr, β, γ, hF, hP, hQ⟩ := hD x
+  set D := ((3 * gG - 1) ^ 3 - 27 * (-3 * gG ^ 2 - gB - 3 * gB * gG)) *
+    (-3 * gG ^ 2 - gB - 3 * gB * gG) with hDdef
+  have hgerm : X.base.presheaf.germ ⊤ x trivial D =
+      X.base.presheaf.germ V.1 x hxV (Scheme.resLE (le_top : V.1 ≤ ⊤) D) := by
+    rw [show Scheme.resLE (le_top : V.1 ≤ ⊤) D =
+      (X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom D from rfl]
+    exact (X.base.presheaf.germ_res_apply (homOfLE le_top) x hxV _).symm
+  rw [hgerm]
+  refine IsUnit.map _ ?_
+  have hβ := (e3BetaGlued X L hD h3).2 V Pr β γ hF hP hQ
+  have hγ := (e3GammaGlued X L hD h3).2 V Pr β γ hF hP hQ
+  obtain ⟨ha₁, ha₂, ha₃, ha₄, ha₆⟩ := hF
+  have hres : Scheme.resLE (le_top : V.1 ≤ ⊤) D =
+      (Pr.W.a₁ ^ 3 - 27 * Pr.W.a₃) * Pr.W.a₃ := by
+    rw [hDdef]
+    simp only [map_mul, map_sub, map_pow, map_neg, map_ofNat, map_one]
+    rw [hgB, hgG, hβ, hγ, ha₁, ha₃]
+  rw [hres]
+  obtain ⟨hu3, huD⟩ := e3form_units ⟨ha₁, ha₂, ha₃, ha₄, ha₆⟩ Pr.elliptic
+  exact huD.mul hu3
+
 end ModularCurves
