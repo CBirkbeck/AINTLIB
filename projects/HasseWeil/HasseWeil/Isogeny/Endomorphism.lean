@@ -110,7 +110,7 @@ noncomputable def isogTrace (α : Isogeny E E) (one_sub_α : Isogeny E E) : ℤ 
 /-- The trace of `[n]` is `2n` (for `n ≠ 0` and `1-n ≠ 0`). -/
 theorem isogTrace_mulByInt (n : ℤ) (hn : n ≠ 0) (hn1 : 1 - n ≠ 0) :
     isogTrace (mulByInt E n) (mulByInt E (1 - n)) = 2 * n := by
-  unfold isogTrace
+  simp only [isogTrace]
   rw [mulByInt_degree _ _ hn, mulByInt_degree _ _ hn1]
   have h1 : 0 ≤ n ^ 2 := sq_nonneg n
   have h2 : 0 ≤ (1 - n) ^ 2 := sq_nonneg (1 - n)

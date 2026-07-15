@@ -84,8 +84,6 @@ variable (W : Affine K) [W.IsElliptic]
 -- `[DecidableEq K]` is genuinely required (the type contains the
 -- division-polynomial pullback `mulByInt_pullbackAlgHom`), but the linter only
 -- inspects the surface signature.
-set_option linter.unusedSectionVars false in
-set_option linter.unusedDecidableInType false in
 /-- **The range inclusion `Im([q]*) ⊆ Im(π*)`** (Silverman II.2.11–2.12 /
 III.6.2) for the `q`-power Frobenius on `E/K`, in the `EC` shapes — the deep
 field of the Frobenius dual witness, now a theorem. From the universal
@@ -171,8 +169,6 @@ theorem dualFrobenius_compose_frobenius :
 -- `[Fintype K]`/`[DecidableEq K]` are genuinely required: the inhabitant is the
 -- dual of the `q`-power Frobenius (which only exists over a finite field), but
 -- the linter only inspects the type `Nonempty (Isogeny W W)`.
-set_option linter.unusedDecidableInType false in
-set_option linter.unusedFintypeInType false in
 /-- **`exists_dual` for the `q`-power Frobenius** (Silverman III.6.1 Case 2):
 the Frobenius admits a reverse isogeny — the concrete inseparable-side instance
 of the `exists_dual` story, with all witnesses discharged. -/
@@ -181,7 +177,6 @@ theorem exists_dual_frobenius : Nonempty (Isogeny W W) :=
 
 -- `[DecidableEq K]` is genuinely required by `Isogeny.frobenius` in the type,
 -- but the linter only inspects the surface signature.
-set_option linter.unusedDecidableInType false in
 /-- **The universal dual witness holds for `φ = π`**: the Frobenius instance of
 the `universal_dual_witness` shape (`Dual.lean`), unconditionally. -/
 theorem nonempty_hasDualWitness_frobenius :
@@ -337,8 +332,6 @@ noncomputable def hasDualWitness_frobenius_compose_frobenius :
 
 -- `[Fintype K]`/`[DecidableEq K]` are genuinely required: the inhabitant is the
 -- dual of the iterated Frobenius, but the linter only inspects the type.
-set_option linter.unusedDecidableInType false in
-set_option linter.unusedFintypeInType false in
 /-- **`exists_dual` for `π ∘ π`**: the iterated Frobenius admits a reverse
 isogeny, via the composed witness. -/
 theorem exists_dual_frobenius_compose_frobenius : Nonempty (Isogeny W W) :=
