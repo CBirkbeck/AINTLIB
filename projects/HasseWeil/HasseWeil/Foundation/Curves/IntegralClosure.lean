@@ -303,7 +303,7 @@ theorem polynomialDiscriminant_natDegree [NeZero (2 : F)] :
   have h4 : (4 : F) ≠ 0 := by
     have h2 : (2 : F) ≠ 0 := NeZero.ne _
     simpa [show (4 : F) = 2 * 2 by ring] using mul_ne_zero h2 h2
-  unfold polynomialDiscriminant
+  simp only [polynomialDiscriminant]
   compute_degree!
 
 /-- The polynomial discriminant is nonzero in char ≠ 2. -/
@@ -510,7 +510,7 @@ theorem algebraMap_bFracPoly :
     algebraMap (FractionRing (Polynomial F)) C.FunctionField C.bFracPoly =
       algebraMap (Polynomial F) C.FunctionField
         (Polynomial.C C.toAffine.a₁ * Polynomial.X + Polynomial.C C.toAffine.a₃) := by
-  unfold bFracPoly
+  simp only [bFracPoly]
   rw [← IsScalarTower.algebraMap_apply]
 
 /-- The image of `cFracPoly` in `F(C)`. -/
@@ -520,7 +520,7 @@ theorem algebraMap_cFracPoly :
         (Polynomial.X ^ 3 + Polynomial.C C.toAffine.a₂ * Polynomial.X ^ 2 +
           Polynomial.C C.toAffine.a₄ * Polynomial.X +
           Polynomial.C C.toAffine.a₆) := by
-  unfold cFracPoly
+  simp only [cFracPoly]
   rw [← IsScalarTower.algebraMap_apply]
 
 /-- If `p • 1 + q • coordY = 0` in `F(C)` for `p, q ∈ F(X)`, then `p = q = 0`.
