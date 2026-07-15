@@ -1169,13 +1169,23 @@ lemma descended_lawTwo_smul_add (i j : Fin 3)
       simp only [WeierstrassCurve.Projective.dblAddXYZ_x, WeierstrassCurve.Projective.dblAddXYZ_y,
         WeierstrassCurve.Projective.addXYZ, Matrix.cons_val_zero, Matrix.cons_val_one]
       linear_combination -(WeierstrassCurve.Projective.addX_mul_dblAddY (W' := WK) hP hQ)
-    have h02 : (χ ∘ lawTwoTriple universalWeierstrassLocU.{u} i j) 0 * WK.addXYZ (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j) (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) 2 = (χ ∘ lawTwoTriple universalWeierstrassLocU.{u} i j) 2 * WK.addXYZ (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j) (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) 0 := by
+    have h02 : (χ ∘ lawTwoTriple universalWeierstrassLocU.{u} i j) 0 *
+        WK.addXYZ (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j)
+          (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) 2 =
+        (χ ∘ lawTwoTriple universalWeierstrassLocU.{u} i j) 2 *
+        WK.addXYZ (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j)
+          (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) 0 := by
       rw [hlaw2]
       simp only [WeierstrassCurve.Projective.dblAddXYZ_x, WeierstrassCurve.Projective.dblAddXYZ_z,
         WeierstrassCurve.Projective.addXYZ, Matrix.cons_val_zero, Matrix.cons_val_two,
         Matrix.tail_cons, Matrix.head_cons]
       linear_combination -(WeierstrassCurve.Projective.addX_mul_dblAddZ (W' := WK) hP hQ)
-    have h12 : (χ ∘ lawTwoTriple universalWeierstrassLocU.{u} i j) 1 * WK.addXYZ (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j) (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) 2 = (χ ∘ lawTwoTriple universalWeierstrassLocU.{u} i j) 2 * WK.addXYZ (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j) (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) 1 := by
+    have h12 : (χ ∘ lawTwoTriple universalWeierstrassLocU.{u} i j) 1 *
+        WK.addXYZ (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j)
+          (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) 2 =
+        (χ ∘ lawTwoTriple universalWeierstrassLocU.{u} i j) 2 *
+        WK.addXYZ (χ ∘ biChartPointFst universalWeierstrassLocU.{u} i j)
+          (χ ∘ biChartPointSnd universalWeierstrassLocU.{u} i j) 1 := by
       rw [hlaw2]
       simp only [WeierstrassCurve.Projective.dblAddXYZ_y, WeierstrassCurve.Projective.dblAddXYZ_z,
         WeierstrassCurve.Projective.addXYZ, Matrix.cons_val_zero, Matrix.cons_val_one,
@@ -1192,7 +1202,8 @@ lemma descended_lawTwo_smul_add (i j : Fin 3)
     rw [hc, hadd]
 
 /-- Shared prefix of `specPoints_arm_{Z,Y}` (the `hcurve` step): an `R`-compatible evaluation `χ`
-transports the projective model over the intermediate ring to the one over `K` (`map_map` + `hχ`). -/
+transports the projective model over the intermediate ring to the one over `K`
+(`map_map` + `hχ`). -/
 private lemma toProjective_map_comp_algebraMap {A : Type u} [CommRing A] (W : WeierstrassCurve A)
     {B : Type u} [CommRing B] {K : Type u} [CommRing K] [Algebra A K]
     (f : A →+* B) (χ : B →+* K) (hχ : χ.comp f = algebraMap A K) :
