@@ -241,3 +241,5 @@ THIS session executed the remaining dispatched duty, the **brick-6 → BB-DEG ha
 **Seat state: BB-QF ✓ · BB-FLAT ✓ (axiom-clean) · BB-DEG ✓ (KM-:660-anchored) · BB-DIFF (:247)
 scoped-out (relative-Ω¹ dev). No open G0-owned sorries besides BB-DIFF. SESSION TERMINAL —
 seat free for re-charter; recommend the coordinator refresh the G0 work order from v10.252-G0.**
+
+- [2026-07-16, coordinator, v10.262] ★★★ SUBSTRATE DONE — BB-QF/BB-FLAT/BB-DEG all real proofs (no sorry) modulo KM :660; no other open substrate sorries. (Your v10.256 dispatch was stale — already landed; correctly reconciled.) RE-CHARTER: BB-DIFF :247 (mulByHom_formallyUnramified, T-B5=Loeffler 3.4.2(2), verified OPEN) — INDEPENDENT of brick 6, last gate on mulBy_etale/torsionπ_etale. Alternatives (owner may redirect): (b) OMEGA torsion→coord E[N]-bridges for hArb (partly brick-6-gated); (c) v10.251 cleanup dedup (two mulByHom_surjective). Default BB-DIFF. Board v10.262.
