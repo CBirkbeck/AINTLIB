@@ -270,7 +270,6 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_prime_ex
       hAplus_le_A₀_perCovers hcanonicalMap_cont h_closed_nonOpen per_E_nonempty)
     hLaneA
 
-set_option linter.style.longLine false in
 /-- **Concrete Lane-A + Lane-B integrated Part-2 consumer via Cor 8.32
 prime-extension-closed**, allow-empty variant.
 
@@ -450,7 +449,6 @@ theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_separa
       separation_supplier)
     hLaneA
 
-set_option linter.style.longLine false in
 /-- **T194 concrete Lane-A + Lane-B integrated Part-2 consumer via Cor 8.32
 prime-extension-closed**, full form, from honest single-`t` structural-
 data provider.
@@ -524,7 +522,6 @@ theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_prime_
       hAplus_le_A₀_perCovers hcanonicalMap_cont h_closed_nonOpen per_E_nonempty)
     hLaneA
 
-set_option linter.style.longLine false in
 /-- **T194 concrete Lane-A + Lane-B integrated Part-2 consumer via Cor 8.32
 prime-extension-closed**, allow-empty variant, from honest single-`t`
 structural-data provider.
