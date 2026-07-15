@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import Mathlib.GroupTheory.FiniteAbelian.Basic
 import Mathlib.Data.ZMod.QuotientRing
 import Mathlib.GroupTheory.SpecificGroups.Cyclic
+import ModularCurves.ForMathlib.TorsionByEquiv
 
 /-!
 # Torsion-count characterisation of `(ℤ/N)²`
@@ -99,16 +100,11 @@ private lemma natCard_nsmul_ker_zmod_of_coprime (d n : ℕ) (hd : Nat.Coprime d 
 /-- Transport of `d`-torsion along an additive equivalence. -/
 private def nsmulKerCongr {G H : Type*} [AddCommGroup G] [AddCommGroup H] (e : G ≃+ H)
     (d : ℕ) : {x : G // d • x = 0} ≃ {y : H // d • y = 0} :=
-  Equiv.subtypeEquiv e.toEquiv fun x => by
-    show d • x = 0 ↔ d • e x = 0
-    constructor
-    · intro h
-      rw [← map_nsmul, h, map_zero]
-    · intro h
-      have h2 : e (d • x) = e 0 := by
-        rw [map_nsmul, map_zero]
-        exact h
-      exact e.injective h2
+  (Equiv.subtypeEquivRight fun _ => by
+      simp only [Submodule.mem_torsionBy_iff, natCast_zsmul]).trans <|
+    (Submodule.torsionByCongr e d).trans
+      (Equiv.subtypeEquivRight fun _ => by
+        simp only [Submodule.mem_torsionBy_iff, natCast_zsmul]).symm
 
 /-- The `d`-torsion of a finite product is the product of the `d`-torsions. -/
 private def nsmulKerPiEquiv {ι : Type} (M : ι → Type u) [∀ i, AddCommGroup (M i)]
