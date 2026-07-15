@@ -1,5 +1,7 @@
-import BernoulliRegular.Reflection.ClassGroupModP.GalAction
-import Mathlib.NumberTheory.NumberField.CMField
+module
+
+public import BernoulliRegular.Reflection.ClassGroupModP.GalAction
+public import Mathlib.NumberTheory.NumberField.CMField
 
 /-!
 # K-side ClassGroup minus eigenspace `Cl(K)⁻`
