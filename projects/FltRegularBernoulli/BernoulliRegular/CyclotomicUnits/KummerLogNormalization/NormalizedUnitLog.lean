@@ -1,6 +1,8 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogTrace
-import BernoulliRegular.CyclotomicUnits.DworkParameter
-import BernoulliRegular.CyclotomicUnits.NormalizedUnits
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogTrace
+public import BernoulliRegular.CyclotomicUnits.DworkParameter
+public import BernoulliRegular.CyclotomicUnits.NormalizedUnits
 
 /-!
 # Normalization of the Kummer logarithm columns

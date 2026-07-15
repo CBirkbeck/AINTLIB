@@ -1,7 +1,9 @@
-import BernoulliRegular.CyclotomicUnits.NormalizedUnits
-import BernoulliRegular.CyclotomicUnits.Subgroup
-import BernoulliRegular.CyclotomicUnits.IndexComparison
-import Mathlib.GroupTheory.Schreier
+module
+
+public import BernoulliRegular.CyclotomicUnits.NormalizedUnits
+public import BernoulliRegular.CyclotomicUnits.Subgroup
+public import BernoulliRegular.CyclotomicUnits.IndexComparison
+public import Mathlib.GroupTheory.Schreier
 
 /-!
 # The normalized real cyclotomic-unit subgroup
