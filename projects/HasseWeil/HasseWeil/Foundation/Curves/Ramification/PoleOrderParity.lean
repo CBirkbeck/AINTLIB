@@ -56,9 +56,10 @@ private theorem ordAtInfty_algebraMap_mul_coordY_ne_neg_one
     C.ordAtInfty
         (algebraMap (Polynomial F) C.FunctionField q * C.coordYInFunctionField) ≠
       ((-1 : ℤ) : WithTop ℤ) := by
-  have hq_alg_ne : algebraMap (Polynomial F) C.FunctionField q ≠ 0 :=
-    (map_ne_zero_iff _ (FaithfulSMul.algebraMap_injective (Polynomial F)
-      C.FunctionField)).mpr hq
+  have hq_alg_ne : algebraMap (Polynomial F) C.FunctionField q ≠ 0 := by
+    rw [Ne, ← map_zero (algebraMap (Polynomial F) C.FunctionField)]
+    exact fun h ↦ hq
+      (FaithfulSMul.algebraMap_injective (Polynomial F) C.FunctionField h)
   rw [C.ordAtInfty_mul hq_alg_ne C.coordYInFunctionField_ne_zero,
     ordAtInfty_coordYInFunctionField,
     C.ordAtInfty_algebraMap_polynomial_of_ne_zero hq]
@@ -95,8 +96,8 @@ exactly `-1`. The decomposition `u = p · 1 + q · y` gives
 or one of `{0, -2, -4, ...}` (q = 0) or `{-3, -5, -7, ...}` (p = 0).
 None of these can equal `-1`.
 
-This is the load-bearing parity lemma: ruling out `(P) − (O)` as a
-principal divisor for `P ≠ O`. -/
+This is the load-bearing parity lemma for the unified A-002/F-001
+package: ruling out `(P) − (O)` as a principal divisor for `P ≠ O`. -/
 theorem coordRingImage_ordAtInfty_ne_neg_one
     (u : C.CoordinateRing) (hu : u ≠ 0) :
     C.ordAtInfty (algebraMap C.CoordinateRing C.FunctionField u) ≠
@@ -143,14 +144,16 @@ This is Silverman III.3.3 specialized to `(Q) = (O)`: a function with
 divisor `(P) − (O)` would be regular on the affine part (no finite
 poles) hence in the coordinate-ring image, but its order at infinity
 must be `−1` from the divisor while parity forbids that. The full
-Silverman III.3.3 (`(P) ∼ (Q) ⟹ P = Q`) requires more, but this
-special case is sufficient for the parity package.
+Silverman III.3.3 (`(P) ∼ (Q) ⟹ P = Q`) requires more (worker-K's
+T-III-3-003), but this special case is sufficient for the unified
+A-002/F-001 package per reviewer guidance (Q3).
 
 The version below takes the "f lies in coordinate-ring image" as an
 explicit hypothesis. The unconditional version requires the
 no-finite-poles bridge `mem_coordinateRing_of_valuation_le_one` from
 `Curves/IntegralClosure.lean` plus the project's `ord_P` ↔
-`HeightOneSpectrum.valuation` bridge from `Curves/NormValuation.lean`. -/
+`HeightOneSpectrum.valuation` bridge from `Curves/NormValuation.lean`.
+That composition is its own ~80-150 LOC ticket. -/
 
 namespace HasseWeil.Curves
 
@@ -158,12 +161,14 @@ variable {F : Type*} [Field F] [DecidableEq F]
   (W : WeierstrassCurve.Affine F) [W.IsElliptic]
 
 omit [W.IsElliptic] in
-/-- **Specialized Silverman III.3.3**: if `(P) − (O)` is a
+/-- **Specialized Silverman III.3.3** (the version we need for the
+unified A-002/F-001 package, per reviewer Q3): if `(P) − (O)` is a
 principal divisor witnessed by `f` AND `f` lies in the coordinate-ring
 image, then `P = 0`.
 
-The CR-image hypothesis is the only bridge to the unconditional version:
-removing `h_coord` requires the no-finite-poles ⟹ CR-image bridge. -/
+The CR-image hypothesis is the only bridge to the unconditional version
+(removing `h_coord` requires the no-finite-poles ⟹ CR-image bridge,
+which is its own ticket). -/
 theorem point_minus_O_principal_eq_zero_of_coord
     (P : W.Point) (f : (⟨W⟩ : SmoothPlaneCurve F).FunctionField) (hf : f ≠ 0)
     (h_div : (⟨W⟩ : SmoothPlaneCurve F).projectiveDivisorOf f =
@@ -178,7 +183,7 @@ theorem point_minus_O_principal_eq_zero_of_coord
     rw [h_div]
     -- kappaDivisor W P at ∞ = (single P.toProj 1 - single ∞ 1) at ∞ = 0 - 1 = -1
     -- (since P.toProj ≠ ∞ for P ≠ 0)
-    unfold kappaDivisor
+    simp only [kappaDivisor]
     rw [Finsupp.sub_apply, Finsupp.single_apply, Finsupp.single_apply]
     have h_ne : P.toProjectiveSmoothPoint ≠
         (ProjectiveSmoothPoint.infinity :
