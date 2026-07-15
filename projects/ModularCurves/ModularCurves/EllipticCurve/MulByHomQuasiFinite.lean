@@ -117,13 +117,8 @@ theorem Point.torsionBy_finite_of_geometric {k : Type u} [Field k] [IsAlgClosed 
   haveI hfin : Finite (HasseWeil.torsionSubgroup ((A.W i).baseChange k).toAffine (N : ℤ)) :=
     Finite.of_equiv _ (HasseWeil.NTorsion.torsion_genN_addEquiv
       ((A.W i).baseChange k).toAffine N hN).symm.toEquiv
-  haveI hfin2 : Finite
-      (Submodule.torsionBy ℤ (((A.W i).baseChange k).toAffine.Point) (N : ℤ)) := by
-    refine Finite.of_injective
-      (fun x => (⟨x.1, (hker x.1).mp x.2⟩ :
-        HasseWeil.torsionSubgroup ((A.W i).baseChange k).toAffine (N : ℤ)))
-      (fun x y hxy => Subtype.ext (congrArg Subtype.val hxy))
-  exact Finite.of_equiv _ (Submodule.torsionByCongr eqchain (N : ℤ)).symm
+  exact Finite.of_equiv _
+    ((Submodule.torsionByCongr eqchain (N : ℤ)).trans (Equiv.subtypeEquivRight hker)).symm
 
 /-- **(BB-QF, invertible case — KM 2.3.1 quasi-finiteness)** `[N] : E ⟶ E` is locally
 quasi-finite when `N` is invertible on the base. -/
