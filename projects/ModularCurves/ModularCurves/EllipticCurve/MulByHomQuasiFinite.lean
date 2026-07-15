@@ -7,6 +7,7 @@ import ModularCurves.EllipticCurve.RecordGroupUnique
 import ModularCurves.LevelStructure.IsoTransport
 import ModularCurves.ForMathlib.GeometricFibreComparison
 import ModularCurves.ForMathlib.JacobsonPointCount
+import ModularCurves.ForMathlib.TorsionByEquiv
 import HasseWeil.NTorsion.TorsionGeneralN
 
 /-!
@@ -43,21 +44,9 @@ namespace EllipticCurve
 
 variable {S : Scheme.{u}} (E : EllipticCurve S)
 
-/-- Torsion subgroups transport along additive equivalences. -/
-def torsionByCongr {A B : Type*} [AddCommGroup A] [AddCommGroup B] (φ : A ≃+ B) (n : ℤ) :
-    Submodule.torsionBy ℤ A n ≃ Submodule.torsionBy ℤ B n where
-  toFun x := ⟨φ x.1, by
-    rw [Submodule.mem_torsionBy_iff]
-    have h0 : n • x.1 = 0 := (Submodule.mem_torsionBy_iff _ _).mp x.2
-    have h := congrArg φ h0
-    rwa [map_zsmul, map_zero] at h⟩
-  invFun y := ⟨φ.symm y.1, by
-    rw [Submodule.mem_torsionBy_iff]
-    have h0 : n • y.1 = 0 := (Submodule.mem_torsionBy_iff _ _).mp y.2
-    have h := congrArg φ.symm h0
-    rwa [map_zsmul, map_zero] at h⟩
-  left_inv x := Subtype.ext (φ.symm_apply_apply x.1)
-  right_inv y := Subtype.ext (φ.apply_symm_apply y.1)
+/- `torsionByCongr` RELOCATED to `ForMathlib/TorsionByEquiv.lean` as
+`Submodule.torsionByCongr` (#6996; statement byte-identical, proof golfed) — a general
+`AddCommGroup` fact with no elliptic-curve content. -/
 
 /-- **(BB-QF core count)** The `N`-torsion of the point group of `E` at a geometric point
 is finite, for `N` nonzero in the (algebraically closed) residue field. Chart reduction to
@@ -134,7 +123,7 @@ theorem Point.torsionBy_finite_of_geometric {k : Type u} [Field k] [IsAlgClosed 
       (fun x => (⟨x.1, (hker x.1).mp x.2⟩ :
         HasseWeil.torsionSubgroup ((A.W i).baseChange k).toAffine (N : ℤ)))
       (fun x y hxy => Subtype.ext (congrArg Subtype.val hxy))
-  exact Finite.of_equiv _ (torsionByCongr eqchain (N : ℤ)).symm
+  exact Finite.of_equiv _ (Submodule.torsionByCongr eqchain (N : ℤ)).symm
 
 /-- **(BB-QF, invertible case — KM 2.3.1 quasi-finiteness)** `[N] : E ⟶ E` is locally
 quasi-finite when `N` is invertible on the base. -/

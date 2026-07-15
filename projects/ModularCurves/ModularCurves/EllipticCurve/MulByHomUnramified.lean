@@ -8,6 +8,7 @@ import ModularCurves.EllipticCurve.TorsionFibre
 import ModularCurves.EllipticCurve.TorsionUnramifiedFibre
 import ModularCurves.ForMathlib.NilpotentKerSpecMap
 import ModularCurves.ForMathlib.FormallyUnramifiedFibre
+import ModularCurves.ForMathlib.TorsionByEquiv
 import Mathlib.AlgebraicGeometry.Morphisms.FormallyUnramified
 import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
 
@@ -255,7 +256,7 @@ theorem torsion_geometricFibre_rank_two (N : ℕ) [NeZero N] (k : Type u) [Field
       (E.baseChange t).torsionπ_isFinite d
     calc Nat.card {x : Submodule.torsionBy ℤ (E.Point t) (N : ℤ) // d • x = 0}
         = Nat.card (Submodule.torsionBy ℤ (E.Point t) (d : ℤ)) :=
-          Nat.card_congr (torsionByNsmulKerEquiv (E.Point t) N d hdN)
+          Nat.card_congr (Submodule.torsionByNsmulKerEquiv (E.Point t) N d hdN)
       _ = Nat.card {h : Spec (CommRingCat.of k) ⟶ E.torsion d //
             h ≫ E.torsionπ d = t} :=
           (Nat.card_congr (E.torsionPointsEquiv d t)).symm

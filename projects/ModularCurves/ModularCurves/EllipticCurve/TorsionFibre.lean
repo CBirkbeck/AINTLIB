@@ -331,39 +331,17 @@ noncomputable def sectionsEquivOverPoints (N : ℕ) {T : Scheme.{u}} (t : T ⟶ 
     (by rw [(E.torsion_baseChange_isPullback N t).lift_snd, s.2]))
   right_inv h := Subtype.ext ((E.torsion_baseChange_isPullback N t).lift_fst _ _ _)
 
-private lemma torsionByNsmulKer_mem (G : Type u) [AddCommGroup G] {N d : ℕ}
-    (hdN : d ∣ N) {y : G} (hy : (d : ℤ) • y = 0) :
-    y ∈ Submodule.torsionBy ℤ G (N : ℤ) := by
-  rw [Submodule.mem_torsionBy_iff]
-  obtain ⟨c, hc⟩ := hdN
-  rw [hc, Nat.cast_mul, mul_comm, mul_zsmul, hy, smul_zero]
-
-def torsionByNsmulKerEquiv (G : Type u) [AddCommGroup G] (N d : ℕ)
-    (hdN : d ∣ N) :
-    {x : Submodule.torsionBy ℤ G (N : ℤ) // d • x = 0} ≃
-      Submodule.torsionBy ℤ G (d : ℤ) where
-  toFun x := ⟨x.1.1, by
-    rw [Submodule.mem_torsionBy_iff, natCast_zsmul]
-    have h2 := congrArg (Submodule.torsionBy ℤ G (N : ℤ)).subtype x.2
-    rwa [map_nsmul, map_zero] at h2⟩
-  invFun y := ⟨⟨y.1, torsionByNsmulKer_mem G hdN
-      ((Submodule.mem_torsionBy_iff _ _).mp y.2)⟩, by
-    apply Subtype.ext
-    have h2 : ((d • (⟨y.1, torsionByNsmulKer_mem G hdN
-        ((Submodule.mem_torsionBy_iff _ _).mp y.2)⟩ :
-        Submodule.torsionBy ℤ G (N : ℤ)) : Submodule.torsionBy ℤ G (N : ℤ)) : G) =
-        d • (y.1 : G) :=
-      map_nsmul (Submodule.torsionBy ℤ G (N : ℤ)).subtype d _
-    rw [h2, ZeroMemClass.coe_zero, ← natCast_zsmul]
-    exact (Submodule.mem_torsionBy_iff _ _).mp y.2⟩
-  left_inv x := Subtype.ext (Subtype.ext rfl)
-  right_inv y := Subtype.ext rfl
+/- `torsionByNsmulKerEquiv` RELOCATED to `ForMathlib/TorsionByEquiv.lean` as
+`Submodule.torsionByNsmulKerEquiv` (#6996; statement byte-identical, proof golfed) — a
+general `AddCommGroup` fact with no elliptic-curve content. Its former helper
+`torsionByNsmulKer_mem` turned out to be mathlib's
+`Submodule.torsionBy_le_torsionBy_of_dvd` and was deleted. -/
 
 /- `torsion_geometricFibre_rank_two` RELOCATED byte-identically to
 `EllipticCurve/MulByHomUnramified.lean` (Y1-CLOSER S2): its proof consumes `Torsionπ.etale`,
 which moved there when BB-DIFF was discharged (pointer at `Torsion.lean`; v10.111/v10.117
-relocation doctrine). Its ingredients (`torsionPointsEquiv`, `sectionsEquivOverPoints`,
-`torsionByNsmulKerEquiv` — the latter two de-privatised for the relocation) stay here. -/
+relocation doctrine). Its ingredients (`torsionPointsEquiv`, and `sectionsEquivOverPoints`,
+de-privatised for the relocation) stay here; `torsionByNsmulKerEquiv`: pointer above. -/
 
 end EllipticCurve
 
