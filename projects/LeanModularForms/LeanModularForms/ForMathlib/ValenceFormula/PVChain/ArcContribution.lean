@@ -120,7 +120,8 @@ private lemma arc_indicator_symmetric_of_sArcOfS
     refine ⟨-(1:ℂ)/s₀, h_S_closed s₀ hs₀, ?_⟩
     have h_norm_s := h_S_unit s₀ hs₀
     calc ‖fdBoundary_H H t - (-(1:ℂ)/s₀)‖ = ‖-(1:ℂ)/fdBoundary_H H t - (-(1:ℂ)/(-(1:ℂ)/s₀))‖ :=
-          (S_isometry_unit_circle _ _ h_norm_t (by rw [norm_div, norm_neg, norm_one, h_norm_s, div_one])).symm
+          (S_isometry_unit_circle _ _ h_norm_t
+            (by rw [norm_div, norm_neg, norm_one, h_norm_s, div_one])).symm
       _ = ‖-(1:ℂ)/fdBoundary_H H t - s₀‖ := by
           have hne : s₀ ≠ 0 := fun h ↦ by simp [h] at h_norm_s
           congr 2
