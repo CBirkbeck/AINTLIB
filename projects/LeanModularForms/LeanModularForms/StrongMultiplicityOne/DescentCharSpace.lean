@@ -8,7 +8,7 @@ import LeanModularForms.StrongMultiplicityOne.SquarefreeDecomp
 /-!
 # Strong Multiplicity One via Miyake §4.6 — Lemma 4.6.14
 
-The `δ`-slash-sum coefficient vanishing (`miyake_4_6_14_delta_slash_sum_coeff_zero`)
+The `δ`-slash-sum coefficient vanishing (`delta_slash_sum_coeff_zero`)
 and the descent-witness apparatus for the `l' > 1` case. Part of a multi-file
 split of `StrongMultiplicityOne.lean`.
 
@@ -143,7 +143,7 @@ private lemma cuspForm_finsetSum_toModularForm' {α : Type*} [DecidableEq α]
   · intro q s hqs ih
     rw [Finset.sum_insert hqs, Finset.sum_insert hqs, ← ih]; rfl
 
-/-- Helper for `miyake_4_6_14_delta_slash_sum_coeff_zero`: if a cusp-form family
+/-- Helper for `delta_slash_sum_coeff_zero`: if a cusp-form family
 `Φ_q : α → CuspForm (Gamma1 M) k` identifies the family of functions
 `inner_fun : α → UpperHalfPlane → ℂ` pointwise, and the period-1 `q`-expansion of every
 `inner_fun q` has vanishing `m`-th coefficient, then so does the period-1 `q`-expansion
@@ -338,7 +338,7 @@ private lemma delta_slash_sum_per_q_inner_fun_coeff_zero {N : ℕ} [NeZero N] {k
     h_χ_F_factor (F_q_fam q.val q.property) (hF_q_char q.val q.property) m hq_not_m
     h_q_M_q_eq
 
-private lemma miyake_4_6_14_delta_slash_sum_coeff_zero
+private lemma delta_slash_sum_coeff_zero
     {N : ℕ} [NeZero N] {k : ℤ}
     (p : ℕ) [NeZero p] (hp : p.Prime) (hpN : p ∣ N)
     {l' : ℕ} (hl1_gt : 1 < l') (hl'_sqfree : Squarefree l')
@@ -598,7 +598,7 @@ private lemma slash_sum_Δ_form_qExp_coeff_zero {N : ℕ} [NeZero N] {k : ℤ} (
       χ_lifted_low.comp (ZMod.unitsMap (Nat.div_dvd_of_dvd hp_dvd_lN)) := by
     rw [hχ_M_unit_eq_chi, hχ_eq, MonoidHom.comp_assoc, MonoidHom.comp_assoc,
       ZMod.unitsMap_comp, ZMod.unitsMap_comp]
-  exact miyake_4_6_14_delta_slash_sum_coeff_zero p hp hpN hl1_gt hl'_sqfree hpl'
+  exact delta_slash_sum_coeff_zero p hp hpN hl1_gt hl'_sqfree hpl'
     hp_not_in χ_M_unit χ_lifted_low hχ_M_unit_eq Δ_form hΔ_form_χ
     hΔ_form_vanish m hm_cop
 
