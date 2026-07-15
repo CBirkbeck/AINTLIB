@@ -633,7 +633,99 @@ theorem brick6_intertwining {K : Type u} [Field K] [DecidableEq K] (W : Weierstr
     haveI : IrreducibleSpace (modelEllipticCurve W).E := inferInstance
     ∀ z : (projModel W).functionField,
       projModelFunctionFieldEquiv W (((modelEllipticCurve W).mulByHom N).functionFieldMap z)
-        = HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn (projModelFunctionFieldEquiv W z) := sorry
+        = HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn (projModelFunctionFieldEquiv W z) := by
+  haveI iInt : IsIntegral (modelEllipticCurve W).E := inferInstanceAs (IsIntegral (projModel W))
+  haveI iIrr : IrreducibleSpace (modelEllipticCurve W).E := inferInstance
+  haveI hZaff : IsAffineOpen (zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  haveI : IsAffine (zChart W).toScheme := hZaff
+  haveI : Nontrivial W.toAffine.CoordinateRing := inferInstance
+  haveI : Nontrivial Γ(projModel W, zChart W) := (coordRingToZSection W).toEquiv.symm.nontrivial
+  haveI hNe : Nonempty (zChart W).toScheme := ⟨hZaff.isoSpec.inv.base (Classical.arbitrary _)⟩
+  haveI hNe' : Nonempty ↥(zChart W) := hNe
+  haveI hFR : IsFractionRing Γ(projModel W, zChart W) (projModel W).functionField :=
+    functionField_isFractionRing_of_isAffineOpen (projModel W) (zChart W) hZaff
+  let fFMr : (projModel W).functionField →+* (projModel W).functionField :=
+    (((modelEllipticCurve W).mulByHom N).functionFieldMap).hom
+  set e := projModelFunctionFieldEquiv W with he
+  set cRTZ := coordRingToZSection W with hcRTZ
+  set ψ := HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn with hψ
+  -- the three generator leaves (FFM-X/Y/C: the germ-of-[N]-pullback of the coordinates, evaluated
+  -- through `projModelFunctionFieldEquiv`, are the division polynomials — via brick 5).
+  have FFM_X :
+      e (fFMr ((projModel W).germToFunctionField (zChart W) (cRTZ (coordX W))))
+        = HasseWeil.mulByInt_x W.toAffine (N : ℤ) := by
+    sorry
+  have FFM_Y :
+      e (fFMr ((projModel W).germToFunctionField (zChart W) (cRTZ (coordY W))))
+        = HasseWeil.mulByInt_y W.toAffine (N : ℤ) := by
+    sorry
+  have FFM_C : ∀ r : K,
+      e (fFMr ((projModel W).germToFunctionField (zChart W)
+          (cRTZ (algebraMap K W.toAffine.CoordinateRing r))))
+        = algebraMap K W.toAffine.FunctionField r := by
+    sorry
+  have he_gtff : ∀ c : W.toAffine.CoordinateRing,
+      e ((projModel W).germToFunctionField (zChart W) (cRTZ c))
+        = algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField c := by
+    intro c
+    rw [he, hcRTZ]
+    have h2 : projModelFunctionFieldEquiv W
+        (algebraMap Γ(projModel W, zChart W) (projModel W).functionField
+          (coordRingToZSection W c))
+        = algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+            ((coordRingToZSection W).symm (coordRingToZSection W c)) := by
+      unfold projModelFunctionFieldEquiv
+      rw [IsLocalization.ringEquivOfRingEquiv_eq]
+    rw [RingEquiv.symm_apply_apply] at h2
+    exact h2
+  have hxgen : algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField (coordX W)
+      = HasseWeil.x_gen W.toAffine := by
+    rw [HasseWeil.x_gen, coordX]; rfl
+  have hygen : algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField (coordY W)
+      = HasseWeil.y_gen W.toAffine := by
+    rw [HasseWeil.y_gen, coordY]; rfl
+  have hcgen : ∀ a : K, algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+      (algebraMap K W.toAffine.CoordinateRing a) = algebraMap K W.toAffine.FunctionField a := by
+    intro a; rw [← IsScalarTower.algebraMap_apply]
+  suffices h :
+      (e.toRingHom.comp fFMr).comp
+          (algebraMap Γ(projModel W, zChart W) (projModel W).functionField)
+        = (ψ.toRingHom.comp e.toRingHom).comp
+            (algebraMap Γ(projModel W, zChart W) (projModel W).functionField) by
+    have hAB : e.toRingHom.comp fFMr = ψ.toRingHom.comp e.toRingHom :=
+      IsLocalization.ringHom_ext (nonZeroDivisors Γ(projModel W, zChart W)) h
+    intro z
+    exact DFunLike.congr_fun hAB z
+  rw [← RingHom.cancel_right (g₁ := (e.toRingHom.comp fFMr).comp
+        (algebraMap Γ(projModel W, zChart W) (projModel W).functionField))
+      (g₂ := (ψ.toRingHom.comp e.toRingHom).comp
+        (algebraMap Γ(projModel W, zChart W) (projModel W).functionField))
+      (f := cRTZ.toRingHom) cRTZ.surjective]
+  apply AdjoinRoot.ringHom_ext
+  · apply Polynomial.ringHom_ext
+    · intro a
+      have hR : ψ (e ((projModel W).germToFunctionField (zChart W)
+          (cRTZ (algebraMap K W.toAffine.CoordinateRing a))))
+          = algebraMap K W.toAffine.FunctionField a := by
+        rw [he_gtff, hcgen, hψ, AlgHom.commutes]
+      show e (fFMr ((projModel W).germToFunctionField (zChart W)
+            (cRTZ (algebraMap K W.toAffine.CoordinateRing a))))
+          = ψ (e ((projModel W).germToFunctionField (zChart W)
+            (cRTZ (algebraMap K W.toAffine.CoordinateRing a))))
+      rw [FFM_C a, hR]
+    · have hR : ψ (e ((projModel W).germToFunctionField (zChart W) (cRTZ (coordX W))))
+          = HasseWeil.mulByInt_x W.toAffine (N : ℤ) := by
+        rw [he_gtff, hxgen, hψ, mulByInt_pullbackAlgHom_x_gen (W := W.toAffine) hn]
+      show e (fFMr ((projModel W).germToFunctionField (zChart W) (cRTZ (coordX W))))
+          = ψ (e ((projModel W).germToFunctionField (zChart W) (cRTZ (coordX W))))
+      rw [FFM_X, hR]
+  · have hR : ψ (e ((projModel W).germToFunctionField (zChart W) (cRTZ (coordY W))))
+        = HasseWeil.mulByInt_y W.toAffine (N : ℤ) := by
+      rw [he_gtff, hygen, hψ, mulByInt_pullbackAlgHom_y_gen (W := W.toAffine) hn]
+    show e (fFMr ((projModel W).germToFunctionField (zChart W) (cRTZ (coordY W))))
+        = ψ (e ((projModel W).germToFunctionField (zChart W) (cRTZ (coordY W))))
+    rw [FFM_Y, hR]
 
 /-- **(L4-iii brick 6, steps A+B — the fraction-field tower assembly)** Given the field intertwining,
 the module rank `Module.finrank Γ(Z) Γ([N]⁻¹Z)` equals `(mulByInt N).degree`. Transport the appTop
