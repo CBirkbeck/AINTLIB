@@ -2,15 +2,15 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
+import «Adic spaces».AuditCleanWrappers
 import «Adic spaces».CechCohomology
 import «Adic spaces».LaurentRefinementCore
 import «Adic spaces».Presheaf
+import «Adic spaces».RelativePieceKeystone
+import «Adic spaces».SpaCompactNoHArch
 import «Adic spaces».StructureSheaf
 import «Adic spaces».TateAcyclicityResiduals
-import «Adic spaces».AuditCleanWrappers
-import «Adic spaces».SpaCompactNoHArch
 import «Adic spaces».Wedhorn828
-import «Adic spaces».RelativePieceKeystone
 
 /-!
 # Wedhorn-Čech acyclicity: bridge to `IsSheafy`
@@ -2020,7 +2020,7 @@ private theorem datum_ker_le_span_of_unit_mod
         IsLocalization.mk' (Localization.Away D.s) ((D.T.equivFin.symm i : D.T) : A)
           (1 : Submonoid.powers D.s) from (IsLocalization.mk'_one _ _).symm]
       apply IsLocalization.mk'_eq_of_eq
-      simp [mul_comm]
+      simp
     have h1 : ψ (algebraMap A (Localization.Away D.s) D.s) *
         ψ (divByS ((D.T.equivFin.symm i : D.T) : A) D.s) =
         Ideal.Quotient.mk aI (algebraMap A ↥(restrictedMvPowerSeriesSubring D.T.card A)
@@ -3066,7 +3066,7 @@ private theorem unitCover_overlapEval_gen1 [IsTateRing A] [IsNoetherianRing A]
         (1 : Submonoid.powers (unitCover_overlapDatum_B D₀ f).s) from
       (IsLocalization.mk'_one _ _).symm]
     apply IsLocalization.mk'_eq_of_eq
-    simp only [Submonoid.coe_one, mul_one, unitCover_overlapDatum_s D₀ f]
+    simp only [Submonoid.coe_one, unitCover_overlapDatum_s D₀ f]
     ring
   rw [hdiv, sub_self, map_zero]
 
@@ -7834,8 +7834,7 @@ private theorem wca_completedLocSubring_eq_presheafValue_ringOfDef
     ((D.coeRingHom.comp (locSubring D.P D.T D.s).subtype).range :
       Set (presheafValue D)) := by
     ext y
-    simp only [Subring.coe_map, RingHom.coe_range, Set.mem_image,
-      RingHom.comp_apply, Set.mem_range]
+    simp only [Subring.coe_map, RingHom.coe_range, Set.mem_image, Set.mem_range]
     refine ⟨?_, ?_⟩
     · rintro ⟨x, hx, rfl⟩; exact ⟨⟨x, hx⟩, rfl⟩
     · rintro ⟨⟨x, hx⟩, rfl⟩; exact ⟨x, hx, rfl⟩
