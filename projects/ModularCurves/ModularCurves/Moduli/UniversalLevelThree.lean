@@ -584,4 +584,29 @@ noncomputable def e3BetaGlued {R : CommRingCat.{u}} (X : EllObj R)
     exact (e3_witness_param_agree h3 (hFx x) hF (hPx x) hP (hQx x) hQ
       (hWle.trans inf_le_right) (hWle.trans inf_le_left)).2
 
+open LocalPresentation TopologicalSpace in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E15a stage 8)** The glued parameters satisfy the flex relation `β³=(β+γ)³`. -/
+theorem e3_glued_flex {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 3) (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    (e3BetaGlued X L hD h3).1 ^ 3 -
+      ((e3BetaGlued X L hD h3).1 + (e3GammaGlued X L hD h3).1) ^ 3 = 0 := by
+  classical
+  have hDc := hD
+  choose Vx hxVx Prx βx γx hFx hPx hQx using hDc
+  have hcover : (⊤ : X.base.Opens) ≤ iSup (fun s : X.base => (Vx s).1) :=
+    fun s _ => Opens.mem_iSup.mpr ⟨s, hxVx s⟩
+  refine TopCat.Sheaf.eq_of_locally_eq' X.base.sheaf
+    (fun s : X.base => (Vx s).1) ⊤ (fun s => homOfLE le_top) hcover _ _ (fun s => ?_)
+  have hβ := (e3BetaGlued X L hD h3).2 (Vx s) (Prx s) (βx s) (γx s)
+    (hFx s) (hPx s) (hQx s)
+  have hγ := (e3GammaGlued X L hD h3).2 (Vx s) (Prx s) (βx s) (γx s)
+    (hFx s) (hPx s) (hQx s)
+  have hflex := e3form_flex (hFx s) (hQx s).choose
+  show Scheme.resLE (le_top : (Vx s).1 ≤ ⊤) _ = Scheme.resLE le_top 0
+  rw [map_zero, map_sub, map_pow, map_pow, map_add, hβ, hγ]
+  linear_combination -hflex
+
 end ModularCurves
