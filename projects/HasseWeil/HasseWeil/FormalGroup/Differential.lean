@@ -416,7 +416,8 @@ private lemma finsum_fin2_reduce_full (p : (Fin 2 →₀ ℕ) → R) :
   have hmem : ∀ e : Fin 2 →₀ ℕ, e ∈ Set.range ι ↔ e 0 = 1 := by
     intro e; constructor
     · rintro ⟨k, rfl⟩; exact hι0 k
-    · intro he0; exact ⟨e 1, Finsupp.ext fun i ↦ by fin_cases i <;> simp [ι, Finsupp.add_apply, he0]⟩
+    · intro he0
+      exact ⟨e 1, Finsupp.ext fun i ↦ by fin_cases i <;> simp [ι, Finsupp.add_apply, he0]⟩
   have key : ∀ d : Fin 2 →₀ ℕ, (if d 0 = 1 then p d else (0 : R)) =
       Set.indicator (Set.range ι) (fun d ↦ if d 0 = 1 then p d else 0) d := by
     intro d; classical rw [Set.indicator_apply]
@@ -1258,7 +1259,8 @@ private lemma coeff_single_one_pderiv0_smul_eq_dX_at_zero (F : FormalGroup R)
         MvPowerSeries.coeff e ((MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) ^ n) := by
   rw [Finsupp.single_eq_same, MvPowerSeries.coeff_pderiv]
   -- coeff at (single 1 n) of pderiv 0 F = (0 + 1) • coeff_{single 1 n + single 0 1} F
-  --                                     = coeff_{(1, n)}(F) [using (1, n) = single 0 1 + single 1 n].
+  --                                     = coeff_{(1, n)}(F)
+  --                                       [using (1, n) = single 0 1 + single 1 n].
   rw [show (Finsupp.single (1 : Fin 2) n : Fin 2 →₀ ℕ) 0 = 0 by
       rw [Finsupp.single_apply]; rfl,
     show Finsupp.single (1 : Fin 2) n + Finsupp.single 0 1 =
