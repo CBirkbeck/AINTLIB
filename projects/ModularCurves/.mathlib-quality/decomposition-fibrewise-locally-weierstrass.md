@@ -502,3 +502,12 @@ Completed subdependency (2026-07-14): defined
 with the product of all ordered-overlap pushforwards, compatibly with every product projection.
 Both declarations are option-free and their axiom audits are exactly `propext`,
 `Classical.choice`, and `Quot.sound`.
+
+Completed subdependency (2026-07-14): defined
+`AffineIntersectionUnitCocycle.overlapExtensionRestrictIso`,
+`chartGlueTargetRestrictIso`, and `chartGlueTargetRestrictIso_hom_π`. Restricting an overlap
+extension to `U_k` is the structure sheaf pushed forward from the canonical triple intersection,
+and the full restricted Cech target is the product of these factors, compatibly with projection.
+The proof pastes the existing chosen-pullback squares and introduces no new geometric hypotheses;
+all declarations are option-free and their axiom audits are exactly `propext`,
+`Classical.choice`, and `Quot.sound`.
