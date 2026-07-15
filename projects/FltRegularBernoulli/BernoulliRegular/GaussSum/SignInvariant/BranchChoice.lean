@@ -155,7 +155,7 @@ theorem evenNonselfdualCharacterFinset_eq_union_evenReps_image_inv (hp₂ : p �
   constructor
   · intro hχ
     rcases (mem_evenNonselfdualCharacterFinset_iff (p := p) χ).1 hχ with ⟨hχnon, hχeven⟩
-    rcases mem_reps_or_inv_mem_reps (p := p) (hp₂ := hp₂) hχnon with hχrep | hχinvrep
+    rcases mem_reps_or_inv_mem_reps (p := p) hp₂ hχnon with hχrep | hχinvrep
     · exact Finset.mem_union.mpr <| Or.inl <|
         (mem_evenNonselfdualCharacterReps_iff (p := p) χ).2 ⟨hχrep, hχeven⟩
     · have hχinv_even : (χ⁻¹ : DirichletCharacter ℂ p).Even :=
