@@ -63,7 +63,7 @@ theorem convolutionMatrixLogNormEven_apply_quotient_eq_full
         (BernoulliRegular.cyclotomicEvenDeltaQuotient p b) =
       convolutionMatrixLogNorm p a b := by
   rw [convolutionMatrixLogNormEven_apply_quotient]
-  unfold convolutionMatrixLogNorm convolutionMatrix
+  simp only [convolutionMatrixLogNorm, convolutionMatrix]
   rw [Matrix.of_apply]
 
 /-- **Squared Frobenius determinant in DirichletLogSum form**: combining the
@@ -430,11 +430,11 @@ theorem FrobeniusDetIdentity_of_named_hypotheses
     Fintype.ofFinite _
   letI : DecidableEq (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) :=
     Classical.decEq _
-  unfold FrobeniusDetIdentity
+  simp only [FrobeniusDetIdentity]
   have h_det_sq := det_convolutionMatrixLogNormEven_sq_eq_log_p_sq_mul_nontrivial_DLS_sq
       p hp_two
-  unfold MatrixRestrictionToSinnott at h_matrix
-  unfold QuotientCharBijectionToEvenNontriv at h_bij
+  simp only [MatrixRestrictionToSinnott] at h_matrix
+  simp only [QuotientCharBijectionToEvenNontriv] at h_bij
   have h_qe := quotientEigenvalue_trivial_eq_half_log_p p hp_two
   rw [h_qe] at h_matrix
   have h_card : Fintype.card (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) =
@@ -836,7 +836,7 @@ theorem convolutionLogNormDescended_apply_quotient
     convolutionLogNormDescended p
         (BernoulliRegular.cyclotomicEvenDeltaQuotient p a) =
       ((Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p) ((a : ZMod p))‖ : ℝ) : ℂ) := by
-  unfold convolutionLogNormDescended
+  simp only [convolutionLogNormDescended]
   rw [show BernoulliRegular.cyclotomicEvenDeltaQuotient p a = QuotientGroup.mk a from rfl]
   rw [BernoulliRegular.evenFunctionDescend_apply_mk]
 

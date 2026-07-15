@@ -328,7 +328,7 @@ theorem kplusEmbeddingIndexQuotientShifted_w₀
     [NumberField.IsCMField K] :
     kplusEmbeddingIndexQuotientShifted (p := p) K
         NumberField.Units.dirichletUnitTheorem.w₀ = 1 := by
-  unfold kplusEmbeddingIndexQuotientShifted
+  simp only [kplusEmbeddingIndexQuotientShifted]
   exact mul_inv_cancel _
 
 /-- **Shifted quotient is a bijection**: the shifted version of the K⁺-place
@@ -445,7 +445,7 @@ theorem sum_char_convolutionMatrixLogNormEven_col
         ξ c * convolutionMatrixLogNormEven p c b =
       ξ b⁻¹ * quotientEigenvalue p ξ := by
   classical
-  unfold quotientEigenvalue convolutionMatrixLogNormEven
+  simp only [quotientEigenvalue, convolutionMatrixLogNormEven]
   rw [Finset.mul_sum]
   rw [show (∑ c : BernoulliRegular.CyclotomicEvenDelta p,
         ξ c * (Matrix.of fun a b ↦ convolutionLogNormDescended p (a * b)) c b) =

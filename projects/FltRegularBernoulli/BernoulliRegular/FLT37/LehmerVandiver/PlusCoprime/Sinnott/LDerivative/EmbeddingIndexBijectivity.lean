@@ -99,8 +99,8 @@ theorem matrixRestrictionToSinnott_of_regOfFamily_sq_eq_prod_nontrivial_qe_sq
     Fintype.ofFinite _
   letI : DecidableEq (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) :=
     Classical.decEq _
-  unfold MatrixRestrictionToSinnott
-  unfold RegOfFamilySqEqProdNontrivialQeSq at h
+  simp only [MatrixRestrictionToSinnott]
+  simp only [RegOfFamilySqEqProdNontrivialQeSq] at h
   rw [det_convolutionMatrixLogNormEven_sq_eq_qe_one_sq_mul_prod_nontrivial_qe_sq p hp_two]
   -- Goal: 2^(p-3) · qe(1)² · (∏ qe)² = qe(1)² · regOfFamily²
   -- From h: regOfFamily² = 2^(p-3) · (∏ qe)², so substitute on RHS.
@@ -239,7 +239,7 @@ theorem sinnottMatrixA_apply_eq_log_stdAddChar
             ((NumberField.IsCMField.equivInfinitePlace K).symm w.val) : ZMod p) *
           (k_idx : ZMod p))‖ := by
   intro k_idx
-  unfold sinnottMatrixA
+  simp only [sinnottMatrixA]
   rw [Matrix.of_apply]
   -- The K-place corresponding to w.
   set w_K : NumberField.InfinitePlace K :=
@@ -269,7 +269,7 @@ theorem sinnottMatrixB_apply_eq_log_stdAddChar
       Real.log ‖(1 : ℂ) - ZMod.stdAddChar (N := p)
         ((embeddingIndex (p := p) K
             ((NumberField.IsCMField.equivInfinitePlace K).symm w.val) : ZMod p))‖ := by
-  unfold sinnottMatrixB
+  simp only [sinnottMatrixB]
   rw [Matrix.of_apply]
   set w_K : NumberField.InfinitePlace K :=
     (NumberField.IsCMField.equivInfinitePlace K).symm w.val
@@ -347,7 +347,7 @@ theorem familyIndexAsUnit_val
               (p := p) (K := K)))) + 2 : ℕ)
     ((familyIndexAsUnit p K hp_odd hp_three i) : ZMod p) = (k_idx : ZMod p) := by
   intro k_idx
-  unfold familyIndexAsUnit
+  simp only [familyIndexAsUnit]
   rw [ZMod.coe_unitOfCoprime]
 
 /-- **Matrix-level identification of `sinnottMatrixA`** with a convolution-matrix
@@ -411,7 +411,7 @@ theorem sinnottMatrixA_apply_eq_convolutionMatrixLogNormEven
         (BernoulliRegular.cyclotomicEvenDeltaQuotient p
           (familyIndexAsUnit p K hp_odd hp_three i)) := by
   rw [sinnottMatrixA_apply_eq_convolutionLogNormDescended p K hp_odd hp_three i w]
-  unfold convolutionMatrixLogNormEven kplusEmbeddingIndexQuotient
+  simp only [convolutionMatrixLogNormEven, kplusEmbeddingIndexQuotient]
   rw [Matrix.of_apply]
   -- q(a * b) = q(a) * q(b), where q is the quotient (a group hom).
   rw [(BernoulliRegular.cyclotomicEvenDeltaQuotient p).map_mul]
@@ -436,7 +436,7 @@ theorem sinnottMatrixB_apply_eq_convolutionMatrixLogNormEven
       convolutionMatrixLogNormEven p
         (kplusEmbeddingIndexQuotient (p := p) K w.val) 1 := by
   rw [sinnottMatrixB_apply_eq_log_stdAddChar p K i w]
-  unfold convolutionMatrixLogNormEven kplusEmbeddingIndexQuotient
+  simp only [convolutionMatrixLogNormEven, kplusEmbeddingIndexQuotient]
   rw [Matrix.of_apply, mul_one, convolutionLogNormDescended_apply_quotient]
 
 /-- **Sinnott (A - B)-matrix entries as differences of convolution-matrix
@@ -509,7 +509,7 @@ theorem sinnottMatrix_A_sub_B_matrix_eq
 theorem convolutionMatrixLogNormEven_col_one
     (a : BernoulliRegular.CyclotomicEvenDelta p) :
     convolutionMatrixLogNormEven p a 1 = convolutionLogNormDescended p a := by
-  unfold convolutionMatrixLogNormEven
+  simp only [convolutionMatrixLogNormEven]
   rw [Matrix.of_apply, mul_one]
 
 /-- **`convolutionMatrixLogNormEven` at row 1**: for any column index `b`,
@@ -520,7 +520,7 @@ theorem convolutionMatrixLogNormEven_col_one
 theorem convolutionMatrixLogNormEven_row_one
     (b : BernoulliRegular.CyclotomicEvenDelta p) :
     convolutionMatrixLogNormEven p 1 b = convolutionLogNormDescended p b := by
-  unfold convolutionMatrixLogNormEven
+  simp only [convolutionMatrixLogNormEven]
   rw [Matrix.of_apply, one_mul]
 
 /-- **Embedding-index uniquely determines the K-place embedding** (cyclotomic K):
@@ -736,7 +736,7 @@ theorem kplusEmbeddingIndexQuotient_injective
     [NumberField.IsCMField K] :
     Function.Injective (kplusEmbeddingIndexQuotient (p := p) K) := by
   intro v₁ v₂ h
-  unfold kplusEmbeddingIndexQuotient at h
+  simp only [kplusEmbeddingIndexQuotient] at h
   have h_K_eq : (NumberField.IsCMField.equivInfinitePlace K).symm v₁ =
       (NumberField.IsCMField.equivInfinitePlace K).symm v₂ :=
     embeddingIndex_quotient_eq_implies_place_eq (p := p) K _ _ h
