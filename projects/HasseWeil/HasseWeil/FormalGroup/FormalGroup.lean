@@ -189,7 +189,7 @@ theorem formalW_coeff_eq_step (n : ℕ) :
 theorem conv₂_truncate (n : ℕ) :
     conv₂ (fun m ↦ if m < n then formalW_coeff W m else 0) n =
       conv₂ (formalW_coeff W) n := by
-  unfold conv₂
+  simp only [conv₂]
   apply Finset.sum_congr rfl
   intro i hi
   simp only [Finset.mem_range, Nat.lt_succ_iff] at hi
@@ -215,7 +215,7 @@ theorem conv₂_truncate (n : ℕ) :
 theorem conv₂_truncate' (n : ℕ) (hn : 1 ≤ n) :
     conv₂ (fun m ↦ if m < n then formalW_coeff W m else 0) (n - 1) =
       conv₂ (formalW_coeff W) (n - 1) := by
-  unfold conv₂
+  simp only [conv₂]
   apply Finset.sum_congr rfl
   intro i hi
   simp only [Finset.mem_range] at hi
@@ -234,7 +234,7 @@ theorem coeff_formalW_sq (n : ℕ) :
   rw [Finset.Nat.sum_antidiagonal_eq_sum_range_succ
     (M := R) (fun i j ↦ @PowerSeries.coeff R _ i (formalW W) *
                 @PowerSeries.coeff R _ j (formalW W)) n]
-  unfold conv₂
+  simp only [conv₂]
   apply Finset.sum_congr rfl
   intro i _
   show @PowerSeries.coeff R _ i (PowerSeries.mk (formalW_coeff W)) *
@@ -255,14 +255,14 @@ theorem coeff_formalW_cube (n : ℕ) :
   rw [Finset.Nat.sum_antidiagonal_eq_sum_range_succ
     (M := R) (fun i j ↦ @PowerSeries.coeff R _ i (formalW W) *
                 @PowerSeries.coeff R _ j (formalW W * formalW W)) n]
-  unfold conv₃
+  simp only [conv₃]
   apply Finset.sum_congr rfl
   intro i _
   rw [coeff_formalW_sq]
   show @PowerSeries.coeff R _ i (PowerSeries.mk (formalW_coeff W)) *
        conv₂ (formalW_coeff W) (n - i) = _
   rw [PowerSeries.coeff_mk]
-  unfold conv₂
+  simp only [conv₂]
   rw [Finset.mul_sum]
   apply Finset.sum_congr rfl
   intro j _
@@ -322,7 +322,7 @@ private theorem conv₃_truncate_term {n i j : ℕ} (hi : i ≤ n) (hj : j ≤ n
 theorem conv₃_truncate (n : ℕ) :
     conv₃ (fun m ↦ if m < n then formalW_coeff W m else 0) n =
       conv₃ (formalW_coeff W) n := by
-  unfold conv₃
+  simp only [conv₃]
   apply Finset.sum_congr rfl
   intro i hi
   apply Finset.sum_congr rfl
