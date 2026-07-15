@@ -120,7 +120,7 @@ theorem phiOnClassGroup_mk0
     (I : (Ideal (𝓞 K))⁰) :
     phiOnClassGroup h_ref19 (ClassGroup.mk0 I) =
       pthSymbolAtIdeal_canonical (p := p) (K := K) η I.val := by
-  unfold phiOnClassGroup
+  simp only [phiOnClassGroup]
   apply pthSymbolAtIdeal_canonical_class_invariant h_ref19
     (I₁ := ⟨ClassGroup.integralRep _,
       ClassGroup.integralRep_mem_nonZeroDivisors

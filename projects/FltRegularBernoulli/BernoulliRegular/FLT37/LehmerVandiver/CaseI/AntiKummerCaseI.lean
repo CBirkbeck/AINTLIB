@@ -196,7 +196,7 @@ theorem caseI_antiRadical_ne_zero
     (hab : ¬ (a = 0 ∧ b = 0)) :
     BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
       K a b ζ hab ≠ 0 := by
-  unfold BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
+  simp only [BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical]
   exact div_ne_zero
     (caseI_factor_K_ne_zero (K := K) hp_odd hcaseI hζ)
     (caseI_antiRadical_denom_K_ne_zero (K := K) hp_odd hcaseI hζ)
@@ -240,7 +240,7 @@ theorem caseI_antiRadical_ne_one
     BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
       K a b ζ hab ≠ 1 := by
   intro h_eq_one
-  unfold BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical at h_eq_one
+  simp only [BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical] at h_eq_one
   have h_denom_ne : NumberField.IsCMField.complexConj K
       (algebraMap (𝓞 K) K ((a : 𝓞 K) + ζ * (b : 𝓞 K))) ≠ 0 :=
     caseI_antiRadical_denom_K_ne_zero (K := K) hp_odd hcaseI hζ
@@ -343,7 +343,7 @@ theorem caseI_antiRadical_ne_neg_one
     BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
       K a b ζ hab ≠ -1 := by
   intro h_eq_neg_one
-  unfold BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical at h_eq_neg_one
+  simp only [BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical] at h_eq_neg_one
   have h_denom_ne : NumberField.IsCMField.complexConj K
       (algebraMap (𝓞 K) K ((a : 𝓞 K) + ζ * (b : 𝓞 K))) ≠ 0 :=
     caseI_antiRadical_denom_K_ne_zero (K := K) hp_odd hcaseI hζ

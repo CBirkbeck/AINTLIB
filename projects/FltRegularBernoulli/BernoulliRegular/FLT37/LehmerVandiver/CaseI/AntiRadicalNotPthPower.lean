@@ -68,7 +68,7 @@ theorem antiRadical_sub_one_eq
     BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical K a b ζ hab - 1 =
       algebraMap (𝓞 K) K ((b : 𝓞 K) * (ζ - 1) * (ζ + 1)) /
         algebraMap (𝓞 K) K (ζ * (a : 𝓞 K) + (b : 𝓞 K)) := by
-  unfold BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
+  simp only [BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical]
   set ζK : K := algebraMap (𝓞 K) K ζ with hζK_def
   have h_conj : NumberField.IsCMField.complexConj K
       (algebraMap (𝓞 K) K ((a : 𝓞 K) + ζ * (b : 𝓞 K))) =
@@ -603,7 +603,7 @@ theorem caseI_antiRadical_not_pth_power
   intro h_pow_eq
   have h_α₀_ne : BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
       K a b ζ hab ≠ 0 := by
-    unfold BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
+    simp only [BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical]
     exact div_ne_zero h_α_ne h_denom_orig_nz
   have hγ_ne : γ ≠ 0 := by
     intro hγ
@@ -1184,7 +1184,7 @@ theorem normalized_antiRadical_ratio_eq_zeta_sq_mul
         (algebraMap (𝓞 K) K ζ) ^ k * algebraMap (𝓞 K) K A by
       rw [map_mul, map_pow]]
     rw [map_mul, map_pow, hconjζ]
-  unfold BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical
+  simp only [BernoulliRegular.FLT37.LehmerVandiver.CaseI.AntiKummer.antiRadical]
   change algebraMap (𝓞 K) K (ζ ^ k * A) /
       algebraMap (𝓞 K) K
         (NumberField.IsCMField.ringOfIntegersComplexConj K (ζ ^ k * A)) =

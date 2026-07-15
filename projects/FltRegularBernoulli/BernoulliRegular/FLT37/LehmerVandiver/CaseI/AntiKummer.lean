@@ -62,7 +62,7 @@ theorem antiRadical_sigma_inv
       (algebraMap (𝓞 K) K ((a : 𝓞 K) + ζ * (b : 𝓞 K))) ≠ 0) :
     NumberField.IsCMField.complexConj K (antiRadical K a b ζ hab) =
       (antiRadical K a b ζ hab)⁻¹ := by
-  unfold antiRadical
+  simp only [antiRadical]
   rw [map_div₀]
   rw [NumberField.IsCMField.complexConj_apply_apply K]
   rw [inv_div]
@@ -180,7 +180,7 @@ theorem sigmaTildeHom_restricts_K
         (algebraMap K (antiKummerLift (p := p) K α₀ hα₀) k) =
       algebraMap K (antiKummerLift (p := p) K α₀ hα₀)
         (NumberField.IsCMField.complexConj K k) := by
-  unfold sigmaTildeHom
+  simp only [sigmaTildeHom]
   exact AlgHom.liftNormal_commutes (NumberField.IsCMField.complexConj K).toAlgHom _ k
 
 /-- **`SigmaAntiKummerExtension` constructor from a chosen involutive
@@ -248,7 +248,7 @@ theorem antiKummerKplusPoly_monic
     (α₀ : K) (hα₀ : α₀ ≠ 0)
     (h_anti : NumberField.IsCMField.complexConj K α₀ = α₀⁻¹) :
     (antiKummerKplusPoly (p := p) K α₀ hα₀ h_anti).Monic := by
-  unfold antiKummerKplusPoly
+  simp only [antiKummerKplusPoly]
   have hp_pos : 0 < p := (Fact.out : Nat.Prime p).pos
   have h_p_lt : p < 2 * p := by omega
   set q : Polynomial (NumberField.maximalRealSubfield K) :=
@@ -294,7 +294,7 @@ theorem antiKummerKplusPoly_map_eq_factor_product
         (algebraMap (NumberField.maximalRealSubfield K) K) =
       (Polynomial.X ^ p - Polynomial.C α₀) *
         (Polynomial.X ^ p - Polynomial.C α₀⁻¹) := by
-  unfold antiKummerKplusPoly antiRadical_sum_inv_kplus
+  simp only [antiKummerKplusPoly, antiRadical_sum_inv_kplus]
   push_cast [Polynomial.map_add, Polynomial.map_sub, Polynomial.map_mul,
     Polynomial.map_pow, Polynomial.map_X, Polynomial.map_C, Polynomial.map_one]
   have h_lift : algebraMap (NumberField.maximalRealSubfield K) K
@@ -900,7 +900,7 @@ theorem antiKummerKplusPoly_natDegree
   have h_monic := antiKummerKplusPoly_monic (p := p) K α₀ hα₀ h_anti
   have hp_pos : 0 < p := (Fact.out : Nat.Prime p).pos
   have h_deg : (antiKummerKplusPoly (p := p) K α₀ hα₀ h_anti).degree = (2 * p : ℕ) := by
-    unfold antiKummerKplusPoly
+    simp only [antiKummerKplusPoly]
     rw [show (Polynomial.X ^ (2 * p) -
         Polynomial.C (antiRadical_sum_inv_kplus K α₀ hα₀ h_anti) *
           Polynomial.X ^ p + Polynomial.C 1 :
@@ -1078,7 +1078,7 @@ theorem antiKummerSigmaTildeInvolutive_apply_root
     antiKummerSigmaTildeInvolutive (p := p) K α₀ hα₀ h_anti h_irr h_irr_g
       (antiKummerLiftRoot (p := p) K α₀ hα₀) =
       (antiKummerLiftRoot (p := p) K α₀ hα₀)⁻¹ := by
-  unfold antiKummerSigmaTildeInvolutive
+  simp only [antiKummerSigmaTildeInvolutive]
   rw [show antiKummerLiftRoot (p := p) K α₀ hα₀ =
     (antiKummerLiftPowerBasis (p := p) K α₀ hα₀ h_anti h_irr h_irr_g).gen from
     (PowerBasis.ofAdjoinEqTop_gen _ _).symm]
@@ -1359,7 +1359,7 @@ theorem antiKummerLift_isUnramified_K_of_primary
 instance antiKummerLift_numberField
     {α₀ : K} {hα₀ : α₀ ≠ 0} :
     NumberField (antiKummerLift (p := p) K α₀ hα₀) := by
-  unfold antiKummerLift
+  simp only [antiKummerLift]
   exact NumberField.of_module_finite K (Polynomial.SplittingField
     (Polynomial.X ^ p - Polynomial.C α₀))
 

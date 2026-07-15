@@ -680,7 +680,7 @@ noncomputable def partialPowerSumPolynomial (p e : ℕ) : Polynomial (ZMod p) :=
 theorem partialPowerSumPolynomial_coeff (p : ℕ) [Fact p.Prime] (e m : ℕ) :
     (partialPowerSumPolynomial p e).coeff m =
       if m ∈ Finset.Ico 1 p then partialPowerSum p e m else 0 := by
-  unfold partialPowerSumPolynomial
+  simp only [partialPowerSumPolynomial]
   rw [Polynomial.finsetSum_coeff]
   by_cases hm : m ∈ Finset.Ico 1 p
   · rw [if_pos hm, Finset.sum_eq_single m]
