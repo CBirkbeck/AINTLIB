@@ -233,7 +233,8 @@ lemma circleIntegral_logDeriv_cuspFunction_of_radius (hf : f ≠ 0)
       field_simp
       ring
   have hci_inv : CircleIntegrable (fun q ↦ (↑m : ℂ) * q⁻¹) 0 R := by
-    refine (continuousOn_const.mul (ContinuousOn.inv₀ continuousOn_id fun z hz ↦ ?_)).circleIntegrable
+    refine (continuousOn_const.mul
+      (ContinuousOn.inv₀ continuousOn_id fun z hz ↦ ?_)).circleIntegrable
       hR_pos.le
     simp only [Metric.mem_sphere, dist_zero_right] at hz
     exact norm_ne_zero_iff.mp (show ‖z‖ ≠ 0 by linarith)
