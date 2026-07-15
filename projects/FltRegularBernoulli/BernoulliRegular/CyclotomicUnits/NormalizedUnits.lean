@@ -1,7 +1,9 @@
-import BernoulliRegular.CyclotomicUnits.Basic
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.CharacterIdentification
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.SigmaPreservation
-import Mathlib.Data.ZMod.Units
+module
+
+public import BernoulliRegular.CyclotomicUnits.Basic
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.KummerLift.CharacterIdentification
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.SigmaPreservation
+public import Mathlib.Data.ZMod.Units
 
 /-!
 # Normalized cyclotomic units

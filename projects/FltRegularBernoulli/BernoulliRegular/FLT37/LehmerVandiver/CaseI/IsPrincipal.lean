@@ -1,6 +1,8 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealFactorisation
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IsPrincipalUnderHPlus
-import BernoulliRegular.FLT37.CaseI
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealFactorisation
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IsPrincipalUnderHPlus
+public import BernoulliRegular.FLT37.CaseI
 
 /-!
 # LV010-C: caseI `is_principal` analogue under `¬ p ∣ h⁺`

@@ -1,7 +1,9 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealFactorisation
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.B0Principalization
-import BernoulliRegular.FLT37.Hilbert90
-import BernoulliRegular.FLT37.PrimaryConj
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.IdealFactorisation
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.B0Principalization
+public import BernoulliRegular.FLT37.Hilbert90
+public import BernoulliRegular.FLT37.PrimaryConj
 
 /-!
 # LV008-CTOR-b: Vandiver descent step 1 — `I · σ(I)` is principal under `p ∤ h⁺`
