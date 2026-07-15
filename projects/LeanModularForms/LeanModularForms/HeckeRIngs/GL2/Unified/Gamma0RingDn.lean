@@ -495,7 +495,8 @@ Instantiates the formal Chebyshev identity in the commutative ring `𝕋 (Gamma0
 For `p ∣ N` both sides collapse to `D_p^{r+s}`. -/
 theorem heckeRingDppow_mul (p : ℕ) (hp : Nat.Prime p) (r s : ℕ) (hrs : r ≤ s) :
     heckeRingDppow (N := N) p hp r * heckeRingDppow p hp s =
-      ∑ i ∈ Finset.range (r + 1), ((p : ℤ) • heckeRingSpp p hp) ^ i * heckeRingDppow p hp (r + s - 2 * i) := by
+      ∑ i ∈ Finset.range (r + 1),
+        ((p : ℤ) • heckeRingSpp p hp) ^ i * heckeRingDppow p hp (r + s - 2 * i) := by
   letI : CommRing (𝕋 (Gamma0_pair N) ℤ) := instCommRing_Gamma0 N
   exact formal_ppow_mul (heckeRingDp p hp.pos) ((p : ℤ) • heckeRingSpp p hp)
     (heckeRingDppow p hp) rfl rfl (heckeRingDppow_succ_succ p hp) r s hrs
@@ -587,7 +588,8 @@ theorem heckeRingSn_ppow (p : ℕ) (hp : Nat.Prime p) (v : ℕ) :
     heckeRingSn (N := N) (p ^ v) = heckeRingSpp p hp ^ v := by
   cases v <;> simp_all [heckeRingSn, peelProd_ppow _ hp _ (Nat.succ_pos _)]
 
-/-- The per-prime product formula in `D_n`/`S_n` form: `D_{p^r} * D_{p^s} = ∑_{i=0}^{r} p^i • (S_{p^i} * D_{p^{r+s−2i}})` for `r ≤ s` (Shimura 3.24(3)). -/
+/-- The per-prime product formula in `D_n`/`S_n` form:
+`D_{p^r} * D_{p^s} = ∑_{i=0}^{r} p^i • (S_{p^i} * D_{p^{r+s−2i}})` for `r ≤ s` (Shimura 3.24(3)). -/
 theorem heckeRingDn_ppow_mul (p : ℕ) (hp : Nat.Prime p) (r s : ℕ) (hrs : r ≤ s) :
     heckeRingDn (N := N) (p ^ r) * heckeRingDn (p ^ s) = ∑ i ∈ Finset.range (r + 1),
         (p : ℤ) ^ i • (heckeRingSn (p ^ i) * heckeRingDn (p ^ (r + s - 2 * i))) := by
