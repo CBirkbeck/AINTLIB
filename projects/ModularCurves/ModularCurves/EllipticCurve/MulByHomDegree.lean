@@ -323,6 +323,19 @@ theorem mulByInt_pullbackAlgHom_x_gen {K : Type u} [Field K] (W : WeierstrassCur
   rw [HasseWeil.mulByInt_coordHom, AdjoinRoot.lift_mk]
   simp [Polynomial.eval₂_C, HasseWeil.mulByInt_xHom, HasseWeil.mulByInt_x]
 
+/-- **(L4-iv, public form, `y`-side)** The `[n]`-pullback of the generic y-coordinate is the
+division-polynomial quotient `mulByInt_y = ωₙ/ψₙ³`: the coordinate hom is the `AdjoinRoot.lift`
+sending the adjoined root — which is `y_gen` — to `mulByInt_y` (`AdjoinRoot.lift_root`). Companion
+of `mulByInt_pullbackAlgHom_x_gen`; together they pin `mulByInt_pullbackAlgHom` on both generators
+(for `functionField_algHom_ext`). -/
+theorem mulByInt_pullbackAlgHom_y_gen {K : Type u} [Field K] (W : WeierstrassCurve K)
+    [W.toAffine.IsElliptic] {n : ℤ} (hn : n ≠ 0) :
+    HasseWeil.mulByInt_pullbackAlgHom W n hn (HasseWeil.y_gen W)
+      = HasseWeil.mulByInt_y W n := by
+  show HasseWeil.mulByInt_pullbackRingHom W n hn (HasseWeil.y_gen W) = _
+  rw [HasseWeil.y_gen, HasseWeil.mulByInt_pullbackRingHom, IsLocalization.lift_eq]
+  rw [HasseWeil.mulByInt_coordHom, AdjoinRoot.lift_root]
+
 /-- **(L4-v enabler: generator extensionality for `K(E)`)** Two `K`-algebra homomorphisms out of
 the function field agree iff they agree on the generic coordinates `x_gen`, `y_gen`: `K(E)` is the
 fraction field of the coordinate ring (`IsLocalization.ringHom_ext`), which is
