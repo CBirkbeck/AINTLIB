@@ -212,6 +212,81 @@ theorem fixedPointsBaseChange_bijective_of_flat [Finite G] [Module.Flat R R'] :
           (AlgHom.id R R')) w from rfl, map_val_id_eq_rTensor]
     exact hw
 
+/-- **Injectivity of ∗ reduces to injectivity of the tensored inclusion** (KM A7.1.3):
+the comparison map `fixedPointsBaseChange` is injective as soon as the base change
+`rTensor R'` of the inclusion `A^G ↪ A` is injective. Common to every sufficient
+condition on `R'` (flatness, `#G` invertible, …). -/
+private theorem fixedPointsBaseChange_injective_of_rTensor_subtype_injective
+    (hval : Function.Injective
+      ⇑(LinearMap.rTensor R' (FixedPoints.subalgebra R A G).toSubmodule.subtype)) :
+    Function.Injective
+      (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R')) := by
+  intro x₁ x₂ h12
+  have h13 := congrArg Subtype.val h12
+  rw [show (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R') x₁ : A ⊗[R] R') =
+        (Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val
+          (AlgHom.id R R')) x₁ from rfl,
+      show (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R') x₂ : A ⊗[R] R') =
+        (Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val
+          (AlgHom.id R R')) x₂ from rfl,
+      map_val_id_eq_rTensor, map_val_id_eq_rTensor] at h13
+  exact hval h13
+
+/-- The **divided trace** `c · Σ_{g ∈ G} g` on `A`, an `R`-linear endomorphism.
+For `c = 1/#G` (available when `#G` is invertible in `R`) this is the averaging
+operator of KM A7.1.3 (4), which retracts the inclusion `A^G ↪ A`. -/
+private noncomputable def dividedTrace [Fintype G] (c : R) : A →ₗ[R] A :=
+  c • ∑ g : G, DistribSMul.toLinearMap R A g
+
+omit [SMulCommClass R G A] in
+private theorem dividedTrace_apply [Fintype G] (c : R) (x : A) :
+    dividedTrace (G := G) (R := R) (A := A) c x = c • ∑ g : G, g • x := by
+  simp [dividedTrace, DistribSMul.toLinearMap]
+
+omit [SMulCommClass R G A] in
+/-- The divided trace lands in the invariants: `c · Σ_g g·x` is `G`-fixed. -/
+private theorem dividedTrace_mem_fixedPoints [Fintype G] (c : R) (x : A) :
+    dividedTrace (G := G) (R := R) (A := A) c x ∈ FixedPoints.subalgebra R A G := by
+  intro g₀
+  show g₀ • dividedTrace (G := G) c x = dividedTrace (G := G) c x
+  rw [dividedTrace_apply, smul_comm g₀, Finset.smul_sum]
+  congr 1
+  exact Fintype.sum_equiv (Equiv.mulLeft g₀) _ _ fun g => by simp [mul_smul]
+
+omit [SMulCommClass R G A] in
+/-- When `c · #G = 1`, the divided trace fixes the invariants: it is a retraction of
+the inclusion `A^G ↪ A` (KM A7.1.3 (4), exhibiting `A^G` as a direct `R`-factor). -/
+private theorem dividedTrace_apply_coe [Fintype G] (c : R)
+    (hc : c * ((Fintype.card G : ℕ) : R) = 1) (s : FixedPoints.subalgebra R A G) :
+    dividedTrace (G := G) (R := R) (A := A) c (s : A) = (s : A) := by
+  rw [dividedTrace_apply, Finset.sum_congr rfl fun g _ => s.2 g, Finset.sum_const,
+    Finset.card_univ, ← Nat.cast_smul_eq_nsmul R, smul_smul, hc, one_smul]
+
+/-- The base change (`rTensor R'`) of the divided trace averages the tensor action:
+`(T ⊗ id) x = c · Σ_g g·x` for the left-factor `G`-action on `A ⊗ R'`. -/
+private theorem rTensor_dividedTrace [Fintype G] (c : R) (x : A ⊗[R] R') :
+    LinearMap.rTensor R' (dividedTrace (G := G) (R := R) (A := A) c) x
+      = c • ∑ g : G, g • x := by
+  induction x with
+  | zero => simp
+  | add x₁ x₂ h₁ h₂ =>
+    rw [map_add, h₁, h₂, ← smul_add, ← Finset.sum_add_distrib]
+    congr 1
+    exact Finset.sum_congr rfl fun g _ => (smul_add g x₁ x₂).symm
+  | tmul a r =>
+    rw [LinearMap.rTensor_tmul, dividedTrace_apply, ← TensorProduct.smul_tmul',
+      TensorProduct.sum_tmul]
+    congr 1
+
+/-- On a `G`-fixed element of `A ⊗ R'`, the base-changed divided trace (with
+`c · #G = 1`) acts as the identity — the source of surjectivity of ∗ (KM A7.1.3 (4)). -/
+private theorem rTensor_dividedTrace_apply_of_forall_smul_eq [Fintype G] (c : R)
+    (hc : c * ((Fintype.card G : ℕ) : R) = 1) (z : A ⊗[R] R')
+    (hz : ∀ g : G, g • z = z) :
+    LinearMap.rTensor R' (dividedTrace (G := G) (R := R) (A := A) c) z = z := by
+  rw [rTensor_dividedTrace, Finset.sum_congr rfl fun g _ => hz g, Finset.sum_const,
+    Finset.card_univ, ← Nat.cast_smul_eq_nsmul R, smul_smul, hc, one_smul]
+
 /-- **∗(A, G, R, R') holds when `#G` is invertible in `R`** (KM A7.1.3 (4)): the
 comparison map is bijective — via the divided trace `T = (1/#G)·Σ_g g`, which
 exhibits `A^G` as a direct `R`-module factor of `A`. -/
@@ -222,85 +297,34 @@ theorem fixedPointsBaseChange_bijective_of_isUnit [Finite G]
   classical
   cases nonempty_fintype G
   obtain ⟨u, hu⟩ := h
+  set c : R := ((u⁻¹ : Rˣ) : R) with hc_def
   have hcard : ((Fintype.card G : ℕ) : R) = (u : R) := by
     rw [hu, Nat.card_eq_fintype_card]
-  -- the divided trace
-  set Tfull : A →ₗ[R] A :=
-    ((u⁻¹ : Rˣ) : R) • ∑ g : G, DistribSMul.toLinearMap R A g with hTfull
-  have hTapp : ∀ x : A, Tfull x = ((u⁻¹ : Rˣ) : R) • ∑ g : G, g • x := by
-    intro x
-    rw [hTfull]
-    simp [DistribSMul.toLinearMap]
-  have hTmem : ∀ x : A, Tfull x ∈ FixedPoints.subalgebra R A G := by
-    intro x g₀
-    show g₀ • Tfull x = Tfull x
-    rw [hTapp, smul_comm g₀, Finset.smul_sum]
-    congr 1
-    exact Fintype.sum_equiv (Equiv.mulLeft g₀) _ _ (fun g => by
-      simp [mul_smul])
-  have hTr : ∀ s : FixedPoints.subalgebra R A G, Tfull (s : A) = (s : A) := by
-    intro s
-    rw [hTapp, Finset.sum_congr rfl (fun g _ => s.2 g), Finset.sum_const,
-      Finset.card_univ, ← Nat.cast_smul_eq_nsmul R, smul_smul, hcard]
-    simp
-  -- the tensored trace averages the tensor action
-  have htensor : ∀ x : A ⊗[R] R',
-      LinearMap.rTensor R' Tfull x = ((u⁻¹ : Rˣ) : R) • ∑ g : G, g • x := by
-    intro x
-    induction x with
-    | zero => simp
-    | add x₁ x₂ h₁ h₂ =>
-      rw [map_add, h₁, h₂, ← smul_add, ← Finset.sum_add_distrib]
-      congr 1
-      exact Finset.sum_congr rfl fun g _ => (smul_add g x₁ x₂).symm
-    | tmul a r =>
-      rw [LinearMap.rTensor_tmul, hTapp, ← TensorProduct.smul_tmul',
-        TensorProduct.sum_tmul]
-      congr 1
-  have hproj : ∀ z : A ⊗[R] R', (∀ g : G, g • z = z) →
-      LinearMap.rTensor R' Tfull z = z := by
-    intro z hz
-    rw [htensor, Finset.sum_congr rfl (fun g _ => hz g), Finset.sum_const,
-      Finset.card_univ, ← Nat.cast_smul_eq_nsmul R, smul_smul, hcard]
-    simp
-  -- the corestricted trace is a retraction of the inclusion
+  have hc : c * ((Fintype.card G : ℕ) : R) = 1 := by
+    rw [hc_def, hcard]; exact u.inv_mul
+  -- the corestricted divided trace `T` is an `R`-linear retraction of `A^G ↪ A`
   set T : A →ₗ[R] (FixedPoints.subalgebra R A G).toSubmodule :=
-    LinearMap.codRestrict (FixedPoints.subalgebra R A G).toSubmodule Tfull hTmem
-    with hT
+    LinearMap.codRestrict (FixedPoints.subalgebra R A G).toSubmodule
+      (dividedTrace (G := G) c) (dividedTrace_mem_fixedPoints c)
   have hcompleft : (FixedPoints.subalgebra R A G).toSubmodule.subtype ∘ₗ T
-      = Tfull := by
+      = dividedTrace (G := G) c := by
     ext x
     rfl
   have hTsub : T ∘ₗ (FixedPoints.subalgebra R A G).toSubmodule.subtype
       = LinearMap.id := by
     ext s
-    show Tfull (s : A) = (s : A)
-    exact hTr s
-  have hval : Function.Injective
-      ⇑(LinearMap.rTensor R' (FixedPoints.subalgebra R A G).toSubmodule.subtype) := by
-    have hLI : (LinearMap.rTensor R' T).comp
-        (LinearMap.rTensor R' (FixedPoints.subalgebra R A G).toSubmodule.subtype) =
-        LinearMap.id := by
-      rw [← LinearMap.rTensor_comp, hTsub, LinearMap.rTensor_id]
-    intro x y hxy
-    have h2 := congrArg (LinearMap.rTensor R' T) hxy
-    rwa [← LinearMap.comp_apply, ← LinearMap.comp_apply, hLI, LinearMap.id_apply,
-      LinearMap.id_apply] at h2
+    show dividedTrace (G := G) c (s : A) = (s : A)
+    exact dividedTrace_apply_coe c hc s
   constructor
-  · -- injectivity
-    intro x₁ x₂ h12
-    have h13 := congrArg Subtype.val h12
-    rw [show (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R') x₁ :
-          A ⊗[R] R') =
-        (Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val
-          (AlgHom.id R R')) x₁ from rfl,
-      show (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R') x₂ :
-          A ⊗[R] R') =
-        (Algebra.TensorProduct.map (FixedPoints.subalgebra R A G).val
-          (AlgHom.id R R')) x₂ from rfl,
-      map_val_id_eq_rTensor, map_val_id_eq_rTensor] at h13
-    exact hval h13
-  · -- surjectivity: the tensored trace provides a preimage of any fixed element
+  · -- injectivity: `A^G ↪ A` is a split mono, so it stays injective after base change
+    refine fixedPointsBaseChange_injective_of_rTensor_subtype_injective ?_
+    have hLinv : Function.LeftInverse (LinearMap.rTensor R' T)
+        (LinearMap.rTensor R' (FixedPoints.subalgebra R A G).toSubmodule.subtype) := by
+      intro x
+      rw [← LinearMap.comp_apply, ← LinearMap.rTensor_comp, hTsub, LinearMap.rTensor_id,
+        LinearMap.id_apply]
+    exact hLinv.injective
+  · -- surjectivity: the base-changed trace `T ⊗ id` gives a preimage of any fixed element
     rintro ⟨z, hz⟩
     refine ⟨LinearMap.rTensor R' T z, Subtype.ext ?_⟩
     rw [show (fixedPointsBaseChange (G := G) (R := R) (A := A) (R' := R')
@@ -309,4 +333,4 @@ theorem fixedPointsBaseChange_bijective_of_isUnit [Finite G]
           (AlgHom.id R R')) (LinearMap.rTensor R' T z) from rfl,
       map_val_id_eq_rTensor, ← LinearMap.comp_apply, ← LinearMap.rTensor_comp,
       hcompleft]
-    exact hproj z (fun g => hz g)
+    exact rTensor_dividedTrace_apply_of_forall_smul_eq c hc z fun g => hz g
