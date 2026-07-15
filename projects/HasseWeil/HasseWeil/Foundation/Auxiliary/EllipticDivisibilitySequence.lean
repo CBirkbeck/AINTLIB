@@ -644,7 +644,7 @@ noncomputable def universalNormEDS : ℤ → MvPolynomial Param ℤ := normEDS (
 lemma normEDS_eq_aeval :
     normEDS b c d = (MvPolynomial.aeval (Param.rec b c d) <| universalNormEDS ·) := by
   funext n
-  unfold universalNormEDS
+  simp only [universalNormEDS]
   simp [MvPolynomial.aeval]
 
 lemma complEDS₂_eq_aeval :
