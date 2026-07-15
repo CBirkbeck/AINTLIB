@@ -462,4 +462,126 @@ theorem e3_witness_param_agree {R : CommRingCat.{u}} {X : EllObj R}
     hP₁' hP₂' hQ₁' hQ₂' (isUnit_ofNat_res h3 W.1)
   exact ⟨key.2.1, key.2.2⟩
 
+open LocalPresentation TopologicalSpace in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(T-E15a stage 7)** The glued γ parameter of an `E3` datum. -/
+noncomputable def e3GammaGlued {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 3) (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    { g : Γ(X.base, ⊤) //
+      ∀ (V : X.base.affineOpens)
+        (Pr : LocalPresentation X.curve.toEllipticCurveGeom V)
+        (β γ : Γ(X.base, V.1)), IsE3Form Pr.W β γ →
+        Pr.MarksAt L.1.1.2 0 0 → Pr.MarksAt L.1.2.2 γ (β + γ) →
+        Scheme.resLE (le_top : V.1 ≤ ⊤) g = γ } := by
+  classical
+  choose Vx hxVx Prx βx γx hFx hPx hQx using hD
+  have hcover : (⊤ : X.base.Opens) ≤ iSup (fun x : X.base => (Vx x).1) :=
+    fun x _ => Opens.mem_iSup.mpr ⟨x, hxVx x⟩
+  have hcoverInf : ∀ (V V' : X.base.Opens), V ⊓ V' ≤
+      iSup (fun r : {W : X.base.affineOpens // W.1 ≤ V ⊓ V'} => r.1.1) := by
+    intro V V' x hx
+    obtain ⟨W₀, hWaff, hxW, hWle⟩ := exists_isAffineOpen_mem_and_subset hx
+    exact Opens.mem_iSup.mpr ⟨⟨⟨W₀, hWaff⟩, hWle⟩, hxW⟩
+  have hpair : TopCat.Presheaf.IsCompatible X.base.sheaf.1
+      (fun x : X.base => (Vx x).1) (fun x => γx x) := by
+    intro x y
+    refine TopCat.Sheaf.eq_of_locally_eq' X.base.sheaf
+      (fun r : {W : X.base.affineOpens // W.1 ≤ (Vx x).1 ⊓ (Vx y).1} => r.1.1)
+      ((Vx x).1 ⊓ (Vx y).1) (fun r => homOfLE r.2) (hcoverInf _ _) _ _ (fun r => ?_)
+    show Scheme.resLE r.2 (Scheme.resLE inf_le_left (γx x)) =
+      Scheme.resLE r.2 (Scheme.resLE inf_le_right (γx y))
+    rw [Scheme.resLE_resLE, Scheme.resLE_resLE]
+    exact (e3_witness_param_agree h3 (hFx x) (hFx y) (hPx x) (hPx y) (hQx x) (hQx y)
+      (r.2.trans inf_le_left) (r.2.trans inf_le_right)).1
+  have hglue := TopCat.Sheaf.existsUnique_gluing' X.base.sheaf
+    (fun x : X.base => (Vx x).1) ⊤ (fun x => homOfLE le_top) hcover
+    (fun x => γx x) hpair
+  refine ⟨hglue.choose, fun V Pr β γ hF hP hQ => ?_⟩
+  refine TopCat.Sheaf.eq_of_locally_eq' X.base.sheaf
+    (fun w : {w : X.base.affineOpens × X.base // w.1.1 ≤ V.1 ⊓ (Vx w.2).1} =>
+      w.1.1.1) V.1 (fun w => homOfLE (w.2.trans inf_le_left)) ?_ _ _ (fun w => ?_)
+  · intro x hxV
+    have hx : x ∈ V.1 ⊓ (Vx x).1 := ⟨hxV, hxVx x⟩
+    obtain ⟨W₀, hWaff, hxW, hWle⟩ := exists_isAffineOpen_mem_and_subset hx
+    exact Opens.mem_iSup.mpr ⟨⟨⟨⟨W₀, hWaff⟩, x⟩, hWle⟩, hxW⟩
+  · obtain ⟨⟨W, x⟩, hWle⟩ := w
+    show Scheme.resLE (hWle.trans inf_le_left)
+        (Scheme.resLE (le_top : V.1 ≤ ⊤) hglue.choose) =
+      Scheme.resLE (hWle.trans inf_le_left) γ
+    rw [Scheme.resLE_resLE]
+    have hg : Scheme.resLE ((hWle.trans inf_le_right).trans
+        (le_top : (Vx x).1 ≤ ⊤)) hglue.choose =
+        Scheme.resLE (hWle.trans inf_le_right) (γx x) := by
+      have h : Scheme.resLE (le_top : (Vx x).1 ≤ ⊤) hglue.choose = γx x :=
+        hglue.choose_spec.1 x
+      have h' := congrArg (Scheme.resLE (hWle.trans inf_le_right)) h
+      rwa [Scheme.resLE_resLE] at h'
+    rw [show (hWle.trans inf_le_left).trans (le_top : V.1 ≤ ⊤) =
+      ((hWle.trans inf_le_right).trans (le_top : (Vx x).1 ≤ ⊤)) from rfl, hg]
+    exact (e3_witness_param_agree h3 (hFx x) hF (hPx x) hP (hQx x) hQ
+      (hWle.trans inf_le_right) (hWle.trans inf_le_left)).1
+
+open LocalPresentation TopologicalSpace in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(T-E15a stage 7)** The glued β parameter of an `E3` datum. -/
+noncomputable def e3BetaGlued {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 3) (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    { g : Γ(X.base, ⊤) //
+      ∀ (V : X.base.affineOpens)
+        (Pr : LocalPresentation X.curve.toEllipticCurveGeom V)
+        (β γ : Γ(X.base, V.1)), IsE3Form Pr.W β γ →
+        Pr.MarksAt L.1.1.2 0 0 → Pr.MarksAt L.1.2.2 γ (β + γ) →
+        Scheme.resLE (le_top : V.1 ≤ ⊤) g = β } := by
+  classical
+  choose Vx hxVx Prx βx γx hFx hPx hQx using hD
+  have hcover : (⊤ : X.base.Opens) ≤ iSup (fun x : X.base => (Vx x).1) :=
+    fun x _ => Opens.mem_iSup.mpr ⟨x, hxVx x⟩
+  have hcoverInf : ∀ (V V' : X.base.Opens), V ⊓ V' ≤
+      iSup (fun r : {W : X.base.affineOpens // W.1 ≤ V ⊓ V'} => r.1.1) := by
+    intro V V' x hx
+    obtain ⟨W₀, hWaff, hxW, hWle⟩ := exists_isAffineOpen_mem_and_subset hx
+    exact Opens.mem_iSup.mpr ⟨⟨⟨W₀, hWaff⟩, hWle⟩, hxW⟩
+  have hpair : TopCat.Presheaf.IsCompatible X.base.sheaf.1
+      (fun x : X.base => (Vx x).1) (fun x => βx x) := by
+    intro x y
+    refine TopCat.Sheaf.eq_of_locally_eq' X.base.sheaf
+      (fun r : {W : X.base.affineOpens // W.1 ≤ (Vx x).1 ⊓ (Vx y).1} => r.1.1)
+      ((Vx x).1 ⊓ (Vx y).1) (fun r => homOfLE r.2) (hcoverInf _ _) _ _ (fun r => ?_)
+    show Scheme.resLE r.2 (Scheme.resLE inf_le_left (βx x)) =
+      Scheme.resLE r.2 (Scheme.resLE inf_le_right (βx y))
+    rw [Scheme.resLE_resLE, Scheme.resLE_resLE]
+    exact (e3_witness_param_agree h3 (hFx x) (hFx y) (hPx x) (hPx y) (hQx x) (hQx y)
+      (r.2.trans inf_le_left) (r.2.trans inf_le_right)).2
+  have hglue := TopCat.Sheaf.existsUnique_gluing' X.base.sheaf
+    (fun x : X.base => (Vx x).1) ⊤ (fun x => homOfLE le_top) hcover
+    (fun x => βx x) hpair
+  refine ⟨hglue.choose, fun V Pr β γ hF hP hQ => ?_⟩
+  refine TopCat.Sheaf.eq_of_locally_eq' X.base.sheaf
+    (fun w : {w : X.base.affineOpens × X.base // w.1.1 ≤ V.1 ⊓ (Vx w.2).1} =>
+      w.1.1.1) V.1 (fun w => homOfLE (w.2.trans inf_le_left)) ?_ _ _ (fun w => ?_)
+  · intro x hxV
+    have hx : x ∈ V.1 ⊓ (Vx x).1 := ⟨hxV, hxVx x⟩
+    obtain ⟨W₀, hWaff, hxW, hWle⟩ := exists_isAffineOpen_mem_and_subset hx
+    exact Opens.mem_iSup.mpr ⟨⟨⟨⟨W₀, hWaff⟩, x⟩, hWle⟩, hxW⟩
+  · obtain ⟨⟨W, x⟩, hWle⟩ := w
+    show Scheme.resLE (hWle.trans inf_le_left)
+        (Scheme.resLE (le_top : V.1 ≤ ⊤) hglue.choose) =
+      Scheme.resLE (hWle.trans inf_le_left) β
+    rw [Scheme.resLE_resLE]
+    have hg : Scheme.resLE ((hWle.trans inf_le_right).trans
+        (le_top : (Vx x).1 ≤ ⊤)) hglue.choose =
+        Scheme.resLE (hWle.trans inf_le_right) (βx x) := by
+      have h : Scheme.resLE (le_top : (Vx x).1 ≤ ⊤) hglue.choose = βx x :=
+        hglue.choose_spec.1 x
+      have h' := congrArg (Scheme.resLE (hWle.trans inf_le_right)) h
+      rwa [Scheme.resLE_resLE] at h'
+    rw [show (hWle.trans inf_le_left).trans (le_top : V.1 ≤ ⊤) =
+      ((hWle.trans inf_le_right).trans (le_top : (Vx x).1 ≤ ⊤)) from rfl, hg]
+    exact (e3_witness_param_agree h3 (hFx x) hF (hPx x) hP (hQx x) hQ
+      (hWle.trans inf_le_right) (hWle.trans inf_le_left)).2
+
 end ModularCurves
