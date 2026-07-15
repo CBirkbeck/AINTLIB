@@ -51,7 +51,6 @@ We therefore build the forward map landing in
 
 universe u
 
-set_option linter.style.openClassical false
 
 open Classical
 
