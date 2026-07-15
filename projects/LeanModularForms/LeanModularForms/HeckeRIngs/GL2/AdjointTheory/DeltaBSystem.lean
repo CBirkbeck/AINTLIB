@@ -700,7 +700,8 @@ private lemma toConjAct_GLPos_Gamma_p_α_T_p_lower_eq_Gamma1_inf_Gamma_up_map
     have hz_eq : z = SL2Z_to_PSL2R y := by rw [← hbridge]; group
     rw [hz_eq]
     exact Subgroup.mem_map_of_mem SL2Z_to_PSL2R (Subgroup.mem_inf.mpr ⟨hy_mem₁, hy_memU⟩)
-  · -- `(Γ₁ ∩ Γ⁰(p)).map ≤ K`: each `SL2Z_to_PSL2R(y)` with `y ∈ Γ₁ ∩ Γ⁰(p)` is `g·SL2Z_to_PSL2R(x)·g⁻¹`.
+  · -- `(Γ₁ ∩ Γ⁰(p)).map ≤ K`: each `SL2Z_to_PSL2R(y)` with `y ∈ Γ₁ ∩ Γ⁰(p)` is
+    -- `g·SL2Z_to_PSL2R(x)·g⁻¹`.
     intro z hz
     obtain ⟨y, hy_mem, hy_eq⟩ := Subgroup.mem_map.mp hz
     obtain ⟨hy₁, hyU⟩ := Subgroup.mem_inf.mp hy_mem
