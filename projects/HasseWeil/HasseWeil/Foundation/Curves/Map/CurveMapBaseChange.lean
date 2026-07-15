@@ -85,7 +85,7 @@ theorem functionFieldMap_injective (L : Type*) [Field L] [Algebra F L] :
     C.functionFieldMap L (algebraMap C.CoordinateRing C.FunctionField u) =
       algebraMap (C.baseChange L).CoordinateRing
         (C.baseChange L).FunctionField (C.coordRingMap L u) := by
-  unfold functionFieldMap
+  simp only [functionFieldMap]
   exact IsLocalization.map_eq _ _
 
 end SmoothPlaneCurve
@@ -180,7 +180,7 @@ theorem baseChange_inner_comp_mapRingHom_eq {φ : CurveMap C₁ C₂}
         (algebraMap (Polynomial F) C₂.CoordinateRing (Polynomial.C a)))
     rw [Polynomial.map_C]
     change (cd.baseChangeInnerAlgHom L) (Polynomial.C (algebraMap F L a)) = _
-    unfold baseChangeInnerAlgHom
+    simp only [baseChangeInnerAlgHom]
     rw [Polynomial.aeval_C, show (algebraMap (Polynomial F) C₂.CoordinateRing) (Polynomial.C a) =
           algebraMap F C₂.CoordinateRing a from
         (IsScalarTower.algebraMap_apply F (Polynomial F) C₂.CoordinateRing a),
