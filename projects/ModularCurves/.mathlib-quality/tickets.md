@@ -20759,3 +20759,41 @@ E[3]/division-polynomial substrate = **G0's BB-DEG (E[N]=V(div-poly)) / KM's end
 v10.250 CONVERGENCE ruling — OMEGA CONSUMES it. IsE3Datum = assemble `isE3Chart` over a ∀s∃V cover +
 supply the flex-NF chart from the P-bridge. [T-E14-LVL-b] is symmetric (killing done; generation = #E[2]=4
 = BB-DEG). Both OMEGA tickets bottom out at the not-yet-landed E[N]/keystone substrate.
+
+## Board v10.253-KM (2026-07-15, STREAM-KM) — deep-leaf recon: finrank-API wall + exact L4-core gap
+
+Re-entered the keystone's two deep leaves (L4-iii, endDual_comp_self) + T-DEG0. Ground-truth traced
+(reads + one reverted probe; ZERO regression; full detail in `decomposition-keystone.md` v10.252 append).
+
+**NEW SUB-BLOCKER [FR-GEN] (ForMathlib / possible mathlib PR):** `Scheme.Hom.finrank`'s ENTIRE public
+API is finite-flat-gated (`finrank_SpecMap_eq_finrank`/`_algebraMap`, `finrank_of_isPullback`,
+`one_le_finrank_*`, `finrank_of_isAffine`, `finrank_eq_module_finrank_of_affineOpen` — all need
+`[Flat f] [IsFinite f]`). The raw def exposes only the PRIVATE `IsAffine.finrank` via
+`affineOpenCover.f (idx s)` + `Exists.choose`. ⟹ **T-DEG0** (`mulByHom_zero_finrank`, EndomorphismDegree:168)
+and the arbitrary-endo fibre-rank in **endDual_comp_self** (:178) are BLOCKED: `[0] = π ≫ zero` is
+neither finite nor flat, so no public lemma computes its finrank. The claim is TRUE (collapse
+pushforward = `Γ(chart)/I`, `I` a rel-eff-Cartier ideal via `Section.orderDivisor` ⟹ torsion ⟹
+`rankAtStalk = 0` by `finrank_eq_zero_iff_isTorsion`; the `≥1⟺in-support` lemma needs `[Flat]`, absent,
+so no contradiction). Needs a public non-finite-flat finrank reduction (`finrank f s = rankAtStalk of
+the pushforward over the canonical/any affine chart`) THEN ~150-line pasting/universallyOConnected/
+Cartier-torsion plumbing. Not bounded in-session.
+
+**L4-iii (MulByHomDegree:422) — the RIGHT deep grind (finite-flat), remaining bridge UNBUILT.**
+Everything around it landed (`zsmul_genericPoint` HasseWeil side DONE; `functionField_algHom_ext`,
+`mulByInt_pullbackAlgHom_x_gen/_y_gen`, `functionFieldMap_germToFunctionField`,
+`projModelFunctionFieldEquiv`, the `finrank_of_isFractionRing` diamond — all DONE). SOLE remaining
+identity: **`functionFieldMap (mulByHom N) x_gen = mulByInt_x`** (mod `projModelFunctionFieldEquiv`).
+LHS = germ of `(mulByHom N).app(x-section)` at the generic point (via `functionFieldMap_germToFunctionField`);
+gap = the **coordinate-reading bridge** connecting this SCHEME stalk-pullback to the POINT-group `N • τ`
+(x-coord = `mulByInt_x` by `zsmul_genericPoint`). Sub-pieces unbuilt: (a) model tautological generic
+point `τ_model`; (b) germ of `[N].app(x)` = x-coord of `N • τ_model` (the multi-session crux threading
+AdditionChart*); (c) `τ_model ↔ genericPoint W` transport. Register-box.
+
+**COLLISION NOTE:** `EndomorphismDegree.lean` is GH-co-edited (their 6 downstream pins); KM edits there
+(T-DEG0 :168, endDual :178) risk collision — build content in `MulByHomDegree`/new ForMathlib files,
+wire with a 1-line edit. `endDeg_comp` (GH's :234) consumes `endDual_comp_self`.
+
+**ROUTING RECOMMENDATION:** (1) [FR-GEN] as a ForMathlib/mathlib-PR sub-ticket — unblocks BOTH T-DEG0
+and endDual's arbitrary-endo fibre-rank; (2) L4-iii's coordinate-reading bridge (b) = the honest next
+deep grind (own multi-session, finite-flat). All keystone consumers proceed via the tracked BB-DEG box
+(register-box, zero-pressure — unchanged).

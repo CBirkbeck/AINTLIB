@@ -377,3 +377,56 @@ include translations; note the identity IS true for translations: dual(τ_P) = �
 (iii) a fibre-to-morphism globalisation (rigidity/T-W7.8-class). This is the honest single big sorry —
 NOT closable by assembly; the L4-core (`functionFieldMap [N] = mulByInt_pullbackAlgHom`) remains the
 other deep leaf, and its landing discharges BB-DEG (K4b-2) which feeds `endDeg_mulBy`'s box.
+
+## SESSION APPEND (v10.252, KM) — DEEP-LEAF RECON: the finrank-API wall + exact L4-core gap
+
+Re-entered the two deep leaves (L4-iii, endDual_comp_self) + T-DEG0 "in passing". Ground-truth
+traced through the code + mathlib this session (reads + one reverted probe; ZERO regression):
+
+**① T-DEG0 (`mulByHom_zero_finrank`, EndomorphismDegree:168) is BLOCKED by a mathlib finrank-API
+wall — NEW sub-ticket [FR-GEN].** The claim `(mulByHom 0).finrank x = 0` is TRUE (verified:
+`mulByHom 0 = π ≫ zero` collapses to the zero section; the pushforward is `Γ(chart)/I` with `I` a
+relative-effective-Cartier ideal (`Section.orderDivisor`, a `RelEffCartierDiv`), hence a TORSION
+module; `rankAtStalk` of a torsion module is `0` via `Module.finrank_eq_zero_iff_isTorsion` — the
+`rankAtStalk ≥ 1 ⟺ in-support` lemma requires `[Flat]`, which the collapse lacks, so no
+contradiction). BUT: `Scheme.Hom.finrank`'s ENTIRE public API is finite-flat-gated
+(`finrank_SpecMap_eq_finrank`, `_algebraMap`, `finrank_of_isPullback`, `one_le_finrank_*`,
+`finrank_of_isAffine`/`finrank_eq_module_finrank_of_affineOpen` — all need `[Flat f] [IsFinite f]`).
+`[0] = π ≫ zero` is NEITHER finite NOR flat (fibre over `0` is the whole curve). The raw def exposes
+only the PRIVATE `IsAffine.finrank` via `S.affineOpenCover.f (idx s)` + `Exists.choose` (unfold
+confirmed: goal becomes `IsAffine.finrank✝ (pullback.snd (π≫zero) (canonical chart)) (choose) = 0`,
+un-manipulable). ⟹ **[FR-GEN]** = a public non-finite-flat finrank reduction
+`finrank f s = rankAtStalk (pushforward over the canonical/any affine chart)` (or expose
+`IsAffine.finrank`) is a PREREQUISITE — likely a mathlib PR (or a `rfl`-unfold ForMathlib wrapper +
+the ~150-line pasting/universallyOConnected/Cartier-torsion plumbing). NOT bounded in-session.
+
+**② endDual_comp_self (:178) — the deepest, ALSO hits the finrank wall for ARBITRARY endos.** Per
+the v10.250 append it needs (i) fibre-rank = fibre-degree for arbitrary (non-`[N]`, non-finite-flat)
+endos — same [FR-GEN] wall, (ii) postcomp-distributivity for non-pointed Over-endos, (iii)
+rigidity/T-W7.8-class fibre→morphism globalisation. "Not closable by assembly" stands. Also note:
+`endDeg_comp` (:234, GH's pin) CONSUMES `endDual_comp_self`, and EndomorphismDegree.lean is
+**GH-co-edited** (their 6 downstream pins) — KM edits there risk collision; prefer MulByHomDegree /
+new ForMathlib files.
+
+**③ L4-iii (MulByHomDegree:422 L4-core) — the RIGHT grind (finite-flat, full API applies), but the
+remaining bridge is genuinely UNBUILT + multi-session.** Confirmed: everything AROUND it is landed
+(`zsmul_genericPoint` = HasseWeil side `n • genericPoint W = (mulByInt_x, mulByInt_y)` DONE;
+`functionField_algHom_ext`, `mulByInt_pullbackAlgHom_x_gen/_y_gen`, `functionFieldMap_germToFunctionField`,
+`projModelFunctionFieldEquiv`, both `IsFractionRing`s, the `finrank_of_isFractionRing` diamond — all
+DONE). The SOLE remaining identity: **`functionFieldMap (mulByHom N) (x_gen) = mulByInt_x`** (mod
+`projModelFunctionFieldEquiv`). Via `functionFieldMap_germToFunctionField` the LHS = germ of
+`(mulByHom N).app(x-section)` at the generic point. The gap = connecting this SCHEME stalk-pullback to
+the POINT-group `N • τ` (whose x-coord is `mulByInt_x` by ②'s `zsmul_genericPoint`). Sub-pieces NOT
+built: (a) the model tautological generic point `τ_model` = `projModelPointsEquiv` of the generic
+`Affine.Point` over `K(E)`; (b) **the fundamental "coordinate-reading" lemma**: germ of
+`(mulByHom N).app(x-section)` at the generic point = x-coordinate function of the point `N • τ_model`
+(via `point_smul_eq_comp_mulBy` + how a point's coord relates to a coordinate-section germ) — THIS is
+the genuine multi-session crux threading the AdditionChart* group law; (c) `τ_model ↔ genericPoint W`
+transport. Register-box (owner-tracked BB-DEG); NOT the fleet blocker (fleet consumes the sorried
+`endDeg_mulBy`/`mulByHom_finrank` box).
+
+**VERDICT:** all three keystone leaves are genuine multi-session deep grinds. T-DEG0/endDual are
+gated on [FR-GEN] (a mathlib-API-scale finrank prerequisite); L4-iii is gated on the unbuilt
+coordinate-reading bridge (b). None is closable in a bounded pass with the current API. Recommend:
+route [FR-GEN] as a ForMathlib/mathlib-PR sub-ticket (unblocks BOTH T-DEG0 and endDual's arbitrary-endo
+fibre-rank); L4-iii's coordinate-reading bridge (b) is the honest next deep grind (own multi-session).
