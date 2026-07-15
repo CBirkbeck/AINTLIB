@@ -924,4 +924,190 @@ open CategoryTheory Limits in
     (e3WitnessCover hD).f w =
       pullback.fst X.curve.toEllipticCurveGeom.π w.V.1.ι := rfl
 
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E15a stage 10)** The piece is witness-independent at a fixed affine. -/
+theorem e3Piece_congr {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3} (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤)))
+    (w₁ w₂ : E3Witness X L) (hV : w₁.V = w₂.V) :
+    e3Piece hD h3 w₁ = eqToHom (by rw [hV]) ≫ e3Piece hD h3 w₂ := by
+  obtain ⟨V₁, Pr₁, β₁, γ₁, hF₁, hP₁, hQ₁⟩ := w₁
+  obtain ⟨V₂, Pr₂, β₂, γ₂, hF₂, hP₂, hQ₂⟩ := w₂
+  obtain rfl : V₁ = V₂ := hV
+  rw [eqToHom_refl, Category.id_comp]
+  have hVC : Pr₂.transVC Pr₁ = 1 :=
+    (e3_witness_transVC_eq_one hF₂ hF₁ hP₂ hP₁ hQ₂ hQ₁
+      (isUnit_ofNat_res h3 V₁.1)).1
+  have hWeq : Pr₁.W = Pr₂.W := by
+    have := Pr₂.transVC_smul Pr₁
+    rwa [hVC, one_smul] at this
+  have hIso := pointedIso_hom_of_transVC_eq_one hVC
+  have hE : Pr₁.e.hom = Pr₂.e.hom ≫ eqToHom (congrArg projModel hWeq.symm) := by
+    have h1 : Pr₂.e.inv ≫ Pr₁.e.hom = eqToHom (congrArg projModel hWeq.symm) := by
+      have h0 := hIso
+      rw [show (Pr₂.pointedIso Pr₁).hom = Pr₂.e.inv ≫ Pr₁.e.hom from rfl] at h0
+      exact h0
+    rw [← h1, ← Category.assoc, Iso.hom_inv_id, Category.id_comp]
+  show Pr₁.e.hom ≫ _ ≫ _ = Pr₂.e.hom ≫ _ ≫ _
+  rw [hE]
+  simp only [Category.assoc, eqToHom_trans_assoc]
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+private theorem e3Piece_agree {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3}
+    (hD : IsE3Datum X L) (h3 : IsUnit (3 : Γ(X.base, ⊤)))
+    (p q : E3Witness X L) :
+    pullback.fst ((e3WitnessCover hD).f p) ((e3WitnessCover hD).f q) ≫
+        e3Piece hD h3 p =
+      pullback.snd ((e3WitnessCover hD).f p) ((e3WitnessCover hD).f q) ≫
+        e3Piece hD h3 q := by
+  haveI hOIp : IsOpenImmersion ((e3WitnessCover hD).f p) := by
+    rw [e3WitnessCover_f]; infer_instance
+  haveI hOIq : IsOpenImmersion ((e3WitnessCover hD).f q) := by
+    rw [e3WitnessCover_f]; infer_instance
+  have hchoice : ∀ z : (pullback ((e3WitnessCover hD).f p)
+      ((e3WitnessCover hD).f q) : Scheme.{u}),
+      ∃ (W : X.base.affineOpens), W.1 ≤ p.V.1 ⊓ q.V.1 ∧
+        X.curve.toEllipticCurveGeom.π.base
+          ((pullback.fst ((e3WitnessCover hD).f p)
+            ((e3WitnessCover hD).f q) ≫
+            (e3WitnessCover hD).f p).base z) ∈ W.1 := by
+    intro z
+    have hsp : X.curve.toEllipticCurveGeom.π.base
+        ((pullback.fst ((e3WitnessCover hD).f p)
+          ((e3WitnessCover hD).f q) ≫
+          (e3WitnessCover hD).f p).base z) ∈ p.V.1 := by
+      have hr : ((pullback.fst ((e3WitnessCover hD).f p)
+          ((e3WitnessCover hD).f q) ≫ (e3WitnessCover hD).f p).base z) ∈
+          Set.range (pullback.fst X.curve.toEllipticCurveGeom.π p.V.1.ι).base :=
+        ⟨(pullback.fst ((e3WitnessCover hD).f p)
+          ((e3WitnessCover hD).f q)).base z, rfl⟩
+      rw [Scheme.Pullback.range_fst] at hr
+      simpa [Scheme.Opens.range_ι] using hr
+    have hcond : (pullback.fst ((e3WitnessCover hD).f p)
+        ((e3WitnessCover hD).f q) ≫ (e3WitnessCover hD).f p).base z =
+      (pullback.snd ((e3WitnessCover hD).f p)
+        ((e3WitnessCover hD).f q) ≫ (e3WitnessCover hD).f q).base z := by
+      have := congrArg (fun t => t.base z) (pullback.condition
+        (f := (e3WitnessCover hD).f p) (g := (e3WitnessCover hD).f q))
+      simpa using this
+    have hsq : X.curve.toEllipticCurveGeom.π.base
+        ((pullback.fst ((e3WitnessCover hD).f p)
+          ((e3WitnessCover hD).f q) ≫
+          (e3WitnessCover hD).f p).base z) ∈ q.V.1 := by
+      have hr : ((pullback.fst ((e3WitnessCover hD).f p)
+          ((e3WitnessCover hD).f q) ≫ (e3WitnessCover hD).f p).base z) ∈
+          Set.range (pullback.fst X.curve.toEllipticCurveGeom.π q.V.1.ι).base := by
+        rw [hcond]
+        exact ⟨(pullback.snd ((e3WitnessCover hD).f p)
+          ((e3WitnessCover hD).f q)).base z, rfl⟩
+      rw [Scheme.Pullback.range_fst] at hr
+      simpa [Scheme.Opens.range_ι] using hr
+    obtain ⟨W₀, hWaff, hxW, hWle⟩ := exists_isAffineOpen_mem_and_subset
+      (show X.curve.toEllipticCurveGeom.π.base
+        ((pullback.fst ((e3WitnessCover hD).f p)
+          ((e3WitnessCover hD).f q) ≫
+          (e3WitnessCover hD).f p).base z) ∈ p.V.1 ⊓ q.V.1 from ⟨hsp, hsq⟩)
+    exact ⟨⟨W₀, hWaff⟩, hWle, hxW⟩
+  choose W hWle hmem using hchoice
+  have hfsteq : ∀ z, (restrictTheta (G := X.curve.toEllipticCurveGeom)
+      ((hWle z).trans inf_le_left) ≫ (e3WitnessCover hD).f p) =
+    restrictTheta ((hWle z).trans inf_le_right) ≫ (e3WitnessCover hD).f q := by
+    intro z
+    rw [e3WitnessCover_f, e3WitnessCover_f, restrictTheta_fst,
+      restrictTheta_fst]
+  let hω : ∀ z, (pullback X.curve.toEllipticCurveGeom.π (W z).1.ι : Scheme.{u}) ⟶
+      pullback ((e3WitnessCover hD).f p) ((e3WitnessCover hD).f q) :=
+    fun z => pullback.lift (restrictTheta ((hWle z).trans inf_le_left))
+      (restrictTheta ((hWle z).trans inf_le_right)) (hfsteq z)
+  have hcomp : ∀ z, hω z ≫ pullback.fst ((e3WitnessCover hD).f p)
+      ((e3WitnessCover hD).f q) ≫ (e3WitnessCover hD).f p =
+    pullback.fst X.curve.toEllipticCurveGeom.π (W z).1.ι := by
+    intro z
+    rw [← Category.assoc, show hω z ≫ pullback.fst ((e3WitnessCover hD).f p)
+        ((e3WitnessCover hD).f q) =
+      restrictTheta ((hWle z).trans inf_le_left) from pullback.lift_fst _ _ _,
+      e3WitnessCover_f, restrictTheta_fst]
+  have hmapOI : ∀ z, IsOpenImmersion (hω z) := by
+    intro z
+    haveI : IsOpenImmersion (pullback.fst ((e3WitnessCover hD).f p)
+        ((e3WitnessCover hD).f q) ≫ (e3WitnessCover hD).f p) :=
+      inferInstance
+    haveI : IsOpenImmersion (hω z ≫ pullback.fst ((e3WitnessCover hD).f p)
+        ((e3WitnessCover hD).f q) ≫ (e3WitnessCover hD).f p) := by
+      rw [hcomp z]; infer_instance
+    exact IsOpenImmersion.of_comp _ (pullback.fst ((e3WitnessCover hD).f p)
+      ((e3WitnessCover hD).f q) ≫ (e3WitnessCover hD).f p)
+  refine (Scheme.Cover.mkOfCovers
+    (X := (pullback ((e3WitnessCover hD).f p)
+      ((e3WitnessCover hD).f q) : Scheme.{u}))
+    (pullback ((e3WitnessCover hD).f p) ((e3WitnessCover hD).f q) :
+      Scheme.{u})
+    (fun z => pullback X.curve.toEllipticCurveGeom.π (W z).1.ι)
+    (fun z => hω z) ?_ (fun z => hmapOI z)).hom_ext _ _ (fun z => ?_)
+  · intro z
+    have hz : (pullback.fst ((e3WitnessCover hD).f p)
+        ((e3WitnessCover hD).f q) ≫ (e3WitnessCover hD).f p).base z ∈
+      Set.range (pullback.fst X.curve.toEllipticCurveGeom.π (W z).1.ι).base := by
+      rw [Scheme.Pullback.range_fst]
+      simpa [Scheme.Opens.range_ι] using hmem z
+    obtain ⟨w, hw⟩ := hz
+    refine ⟨z, w, ?_⟩
+    have hinj : Function.Injective
+        ((pullback.fst ((e3WitnessCover hD).f p)
+          ((e3WitnessCover hD).f q) ≫ (e3WitnessCover hD).f p).base) :=
+      (pullback.fst ((e3WitnessCover hD).f p)
+        ((e3WitnessCover hD).f q) ≫
+        (e3WitnessCover hD).f p).isOpenEmbedding.injective
+    apply hinj
+    calc (pullback.fst ((e3WitnessCover hD).f p)
+          ((e3WitnessCover hD).f q) ≫
+          (e3WitnessCover hD).f p).base ((hω z).base w)
+        = (hω z ≫ pullback.fst ((e3WitnessCover hD).f p)
+            ((e3WitnessCover hD).f q) ≫
+            (e3WitnessCover hD).f p).base w := rfl
+      _ = (pullback.fst X.curve.toEllipticCurveGeom.π (W z).1.ι).base w := by
+          rw [hcomp z]
+      _ = _ := hw
+  · show hω z ≫ pullback.fst _ _ ≫ e3Piece hD h3 p =
+      hω z ≫ pullback.snd _ _ ≫ e3Piece hD h3 q
+    rw [← Category.assoc, show hω z ≫ pullback.fst ((e3WitnessCover hD).f p)
+        ((e3WitnessCover hD).f q) =
+      restrictTheta ((hWle z).trans inf_le_left) from pullback.lift_fst _ _ _,
+      ← Category.assoc, show hω z ≫ pullback.snd ((e3WitnessCover hD).f p)
+        ((e3WitnessCover hD).f q) =
+      restrictTheta ((hWle z).trans inf_le_right) from pullback.lift_snd _ _ _,
+      e3Piece_restrict hD h3 p (p.restrict ((hWle z).trans inf_le_left))
+        ((hWle z).trans inf_le_left),
+      e3Piece_restrict hD h3 q (q.restrict ((hWle z).trans inf_le_right))
+        ((hWle z).trans inf_le_right)]
+    rw [e3Piece_congr hD h3 (p.restrict ((hWle z).trans inf_le_left))
+      (q.restrict ((hWle z).trans inf_le_right)) rfl, eqToHom_refl,
+      Category.id_comp]
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+/-- **(T-E14-CLS-5 ★★, ≈E4)** The classifying morphism upstairs: the witness-glued
+map from the total space to the universal Legendre model (mirrors `classifyingTop`). -/
+noncomputable def e3Top {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3}
+    (hD : IsE3Datum X L) (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    X.curve.toEllipticCurveGeom.E ⟶ projModel (universalE3 R) :=
+  (e3WitnessCover hD).glueMorphisms
+    (fun w => e3Piece hD h3 w)
+    (e3Piece_agree hD h3)
+
+open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
+@[reassoc]
+theorem e3Top_piece {R : CommRingCat.{u}} {X : EllObj R}
+    {L : X.curve.FullLevelPt 3}
+    (hD : IsE3Datum X L) (h3 : IsUnit (3 : Γ(X.base, ⊤)))
+    (w : E3Witness X L) :
+    (e3WitnessCover hD).f w ≫ e3Top hD h3 =
+      e3Piece hD h3 w :=
+  (e3WitnessCover hD).ι_glueMorphisms _ _ w
+
 end ModularCurves
