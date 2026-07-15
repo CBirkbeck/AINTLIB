@@ -115,7 +115,7 @@ theorem finiteLogTermNumerator_spec {n : ℕ} (hn : n ≠ 0)
         F.finiteLogTermNumerator n x hx =
       (F.finiteLogTermDenom n x hx : 𝓞 R') * x ^ n ∧
     F.finiteLogTermNumerator n x hx ∈ F.Q ^ finiteLogTermOrder (ℓ := ℓ) n := by
-  unfold finiteLogTermNumerator finiteLogTermDenom
+  simp only [finiteLogTermNumerator, finiteLogTermDenom]
   rw [dif_neg hn, dif_neg hn]
   exact Classical.choose_spec
     (Classical.choose_spec (finiteLogTermData_exists (F := F) hn hx))
@@ -350,7 +350,7 @@ theorem finiteLog_eq_of_sub_mem {N : ℕ}
     (hxy : x - y ∈ F.Q ^ (N + 1)) :
     F.finiteLog N x hx = F.finiteLog N y hy := by
   classical
-  unfold finiteLog
+  simp only [finiteLog]
   refine Finset.sum_congr rfl ?_
   intro n _hn
   exact F.finiteLogTerm_eq_of_sub_mem hx hy hxy
