@@ -735,6 +735,38 @@ theorem universalE3_isE3Datum
     exact h
   · exact (isUnit_e3Gamma R).map _
 
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **([T-E15-NORM] `ℰ₃`-datum functoriality ★)** An `ℰ₃`-datum pulls back along a morphism
+`φ : X' ⟶ X` of `Ell/R`-objects: the transported chart is of `ℰ₃`-form (`IsE3Form.map`),
+transports the markings (`MarksAt.transport`), and the `γ`-unit persists (`IsUnit.map`).
+Adapts `IsLegendreDatum.map`, dropping the ω-basis and adding the `IsUnit γ` clause. -/
+theorem IsE3Datum.map {R : CommRingCat.{u}} {X' X : EllObj R} (φ : X' ⟶ X)
+    {L : X.curve.FullLevelPt 3} (hD : IsE3Datum X L) (L' : X'.curve.FullLevelPt 3)
+    (hL'P : L'.1.1.1 = (EllHom.pullSection R φ L.1.1).1)
+    (hL'Q : L'.1.2.1 = (EllHom.pullSection R φ L.1.2).1) :
+    IsE3Datum X' L' := by
+  intro s'
+  obtain ⟨V, hsV, Pr, β, γ, hF, hP, hQ, hγu⟩ := hD (φ.baseHom.base s')
+  obtain ⟨V'₀, hV'aff, hs'V', hV'sub⟩ := exists_isAffineOpen_mem_and_subset
+    (show s' ∈ (φ.baseHom ⁻¹ᵁ V.1 : X'.base.Opens) from hsV)
+  have hle : (⟨V'₀, hV'aff⟩ : X'.base.affineOpens).1 ≤ φ.baseHom ⁻¹ᵁ V.1 := hV'sub
+  refine ⟨⟨V'₀, hV'aff⟩, hs'V',
+    Pr.transport φ.baseHom φ.top φ.isPullback φ.zero_w hle,
+    sectionsMapLE φ.baseHom hle β, sectionsMapLE φ.baseHom hle γ, ?_, ?_, ?_, ?_⟩
+  · rw [transport_W]; exact IsE3Form.map _ hF
+  · have h0 := MarksAt.transport φ.baseHom φ.top φ.isPullback φ.zero_w hP
+      (EllHom.pullSection R φ L.1.1).2
+      (φ.isPullback.lift_fst _ _ _) hle
+    rw [map_zero] at h0
+    exact MarksAt.congr_section hL'P.symm L'.1.1.2 h0
+  · have h1 := MarksAt.transport φ.baseHom φ.top φ.isPullback φ.zero_w hQ
+      (EllHom.pullSection R φ L.1.2).2
+      (φ.isPullback.lift_fst _ _ _) hle
+    rw [map_add] at h1
+    exact MarksAt.congr_section hL'Q.symm L'.1.2.2 h1
+  · exact hγu.map _
+
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
