@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import ModularCurves.EllipticCurve.AdditionChartRing
 
 /-!
@@ -64,14 +69,12 @@ private noncomputable def toTensor : biChartRing W i j →ₐ[R] A ⊗[R] B :=
     refine Submodule.span_induction ?_ (by simp) (fun x y _ _ hx hy => by simp [hx, hy])
       (fun c x _ hx => by simp [hx]) ha
     rintro x (rfl | rfl)
-    · rw [toTensorAux_rename_inl]
-      rw [show (Ideal.Quotient.mk _ (dehomogenizeAux R i W.toProjective.polynomial) : A) = 0 from
-        (Ideal.Quotient.eq_zero_iff_mem).mpr (Ideal.mem_span_singleton_self _)]
-      rw [zero_tmul]
-    · rw [toTensorAux_rename_inr]
-      rw [show (Ideal.Quotient.mk _ (dehomogenizeAux R j W.toProjective.polynomial) : B) = 0 from
-        (Ideal.Quotient.eq_zero_iff_mem).mpr (Ideal.mem_span_singleton_self _)]
-      rw [tmul_zero]
+    · rw [toTensorAux_rename_inl,
+        show (Ideal.Quotient.mk _ (dehomogenizeAux R i W.toProjective.polynomial) : A) = 0 from
+          (Ideal.Quotient.eq_zero_iff_mem).mpr (Ideal.mem_span_singleton_self _), zero_tmul]
+    · rw [toTensorAux_rename_inr,
+        show (Ideal.Quotient.mk _ (dehomogenizeAux R j W.toProjective.polynomial) : B) = 0 from
+          (Ideal.Quotient.eq_zero_iff_mem).mpr (Ideal.mem_span_singleton_self _), tmul_zero]
 
 /-- The left chart ring, into the chart-product ring. -/
 private noncomputable def fromLeft : A →ₐ[R] biChartRing W i j :=
@@ -81,8 +84,7 @@ private noncomputable def fromLeft : A →ₐ[R] biChartRing W i j :=
       rw [Ideal.mem_span_singleton] at ha
       obtain ⟨c, rfl⟩ := ha
       simp only [AlgHom.coe_comp, Function.comp_apply, map_mul, Ideal.Quotient.mkₐ_eq_mk]
-      refine mul_eq_zero_of_left ?_ _
-      exact Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.subset_span (by simp))
+      exact mul_eq_zero_of_left (Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.subset_span (by simp))) _
 
 /-- The right chart ring, into the chart-product ring. -/
 private noncomputable def fromRight : B →ₐ[R] biChartRing W i j :=
@@ -92,8 +94,7 @@ private noncomputable def fromRight : B →ₐ[R] biChartRing W i j :=
       rw [Ideal.mem_span_singleton] at ha
       obtain ⟨c, rfl⟩ := ha
       simp only [AlgHom.coe_comp, Function.comp_apply, map_mul, Ideal.Quotient.mkₐ_eq_mk]
-      refine mul_eq_zero_of_left ?_ _
-      exact Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.subset_span (by simp))
+      exact mul_eq_zero_of_left (Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.subset_span (by simp))) _
 
 private lemma toTensor_mk (x : MvPolynomial ({k : Fin 3 // k ≠ i} ⊕ {k : Fin 3 // k ≠ j}) R) :
     toTensor W i j (Ideal.Quotient.mk _ x) = toTensorAux W i j x := rfl
