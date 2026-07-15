@@ -510,7 +510,6 @@ theorem dworkParameterPowerLinearMap_mem_parameterIdeal_pow_mul_pred_of_mem_prim
     (fun i ↦ pi_apply_mem_of_mem_ideal_smul_top
       ((rationalPadicPrimeIdeal p) ^ q) ha i)
 
-set_option maxHeartbeats 1200000 in
 -- This packages the correction step extracted from the quotient-spanning
 -- induction; the kernel otherwise spends most of the default budget reducing
 -- the completed Dwork algebra maps in the returned correction data.
@@ -803,7 +802,6 @@ theorem dworkParameterPowerApproxBlockSeq_sub_mem_primeIdeal_pow_smul_top
     (hMN := Nat.mul_le_mul_right (p - 1) hmn)
     (hM := le_rfl)
 
-set_option maxHeartbeats 1200000 in
 -- This is the formal limit step for CU-09e2.  It is conditional only on the
 -- coefficient module's `p`-adic precompleteness; the coherent approximation
 -- and Dwork-continuity estimates are proved above.

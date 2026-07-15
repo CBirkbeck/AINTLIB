@@ -787,7 +787,6 @@ set_option synthInstance.maxHeartbeats 80000 in
 -- The proof repeatedly forms quotient rings of the completed Dwork ring; the
 -- local aliases keep the statement readable but make quotient-ring instance
 -- search slightly deeper than the default budget.
-set_option maxHeartbeats 400000 in
 -- The proof normalizes the basis expansion through quotient maps and ideal
 -- membership before applying the existing scalar-prime-ideal criterion.
 omit [NumberField.IsCMField K] in

@@ -258,7 +258,6 @@ theorem quotientMap_valuedIntegerCyclotomicEquiv_factorPow
   intro x
   rfl
 
-set_option maxHeartbeats 2000000 in
 -- The statement contains the p-level lambda quotient and two finite-log
 -- approximants; elaborating the quotient type needs a local heartbeat bump.
 /-- Coordinate form of

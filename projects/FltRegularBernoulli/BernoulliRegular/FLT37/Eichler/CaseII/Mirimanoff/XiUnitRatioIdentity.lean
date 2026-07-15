@@ -213,7 +213,6 @@ theorem halfExp_shift (hp_odd : p ≠ 2) {j : ℤ} {s d : ℕ}
   -- (1-d)c - ((1-s)c + j) - p(j + tc) = c·((s-d) - 2j - pt) + j·(2c - (p+1)) = 0.
   linear_combination ((p + 1) / 2 : ℕ) * hsd + j * h2
 
-set_option maxHeartbeats 800000 in
 -- The final `ring` over the many distinct `ζ`-power atoms is heartbeat-heavy; raise the limit.
 /-- **Washington's Lemma 8.1 ratio identity, cross-multiplied (general odd prime `p`).**
 

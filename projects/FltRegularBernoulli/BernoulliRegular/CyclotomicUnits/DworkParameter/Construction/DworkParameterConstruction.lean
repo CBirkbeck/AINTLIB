@@ -345,7 +345,6 @@ theorem quotient_pow_zero_eq_zero (I : Ideal (ValuedIntegerRing p K))
   intro r
   exact Ideal.Quotient.eq_zero_iff_mem.mpr (by simp)
 
-set_option maxHeartbeats 1000000 in
 -- The quotient-local power-series comparison unfolds several adic quotient aliases.
 theorem evalIntegralPowerSeriesMod_expMinusOne_neg_dworkParameter_eq_conjugateLambda
     (hp_two : 2 < p) (N : ℕ) :
@@ -597,7 +596,6 @@ private theorem powerSeries_trunc_eval₂_subst_eq_eval₂_of_eval₂_eq
     rw [hv]; exact hvNil
   rw [powerSeries_trunc_eval₂_subst_of_pow_succ_eq_zero a N ha hG0 hEvalNil F, hv]
 
-set_option maxHeartbeats 1000000 in
 -- The completed sign theorem reuses the same finite quotient comparison data.
 theorem dworkConjugateParameter_eq_neg_dworkParameter (hp_two : 2 < p) :
     dworkConjugateParameter p K = -dworkParameter p K := by

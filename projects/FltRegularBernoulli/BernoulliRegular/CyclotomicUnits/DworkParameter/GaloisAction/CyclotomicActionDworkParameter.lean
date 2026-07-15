@@ -634,7 +634,6 @@ theorem evalIntegralPowerSeries_expMinusOne_scaledDworkParameter_eq_zetaPowSubOn
   rw [AdicCompletion.evalₐ_of, AdicCompletion.evalₐ_of]
   simp [map_sub]
 
-set_option maxHeartbeats 800000 in
 -- The proof compares inverse formal series quotient-by-quotient through
 -- truncated substitutions, which pushes simplification and instance search past
 -- the default heartbeat budget.

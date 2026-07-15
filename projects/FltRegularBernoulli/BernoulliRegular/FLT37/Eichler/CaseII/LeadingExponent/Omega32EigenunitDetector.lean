@@ -166,7 +166,6 @@ theorem caseIICor823DetSqLog_kummerLogCompletedColumn
   unfold caseIICor823DetSqLog genericColumnCoordLHS37
   congr 1
 
-set_option maxHeartbeats 1600000 in
 open BernoulliRegular (CPlusGenerator) in
 /-- **The eigenunit detector is the `(a+2)^{36-i}`-weighted column sum** (proven, axiom-clean).
 
@@ -338,7 +337,6 @@ theorem caseII_eigenunit_columnSum_castHom (m : Fin 17) :
   push_cast
   ring
 
-set_option maxHeartbeats 800000 in
 open BernoulliRegular (CPlusGenerator) in
 /-- **The eigenunit detector value at an even index, from the shape** (proven, axiom-clean given
 `CaseIICor823Level72LeadingCoeff37`).

@@ -114,7 +114,6 @@ theorem caseII_pow37_eq_zero_iff_149 (a : ZMod 149) : a ^ 37 = 0 ↔ a = 0 :=
   haveI : Fact (Nat.Prime 149) := ⟨by decide⟩
   pow_eq_zero_iff (by decide : 37 ≠ 0)
 
-set_option maxHeartbeats 1000000 in
 -- The `4 × 4 × 4` residue `decide` over `ZMod 149` needs more than the default heartbeat budget.
 /-- **The Furtwängler residue form of Washington Lemma 9.7 for `(37, 149)`** (proven, axiom-clean).
 
@@ -166,7 +165,6 @@ From an integer Case-II solution `x³⁷ + y³⁷ = z³⁷` with `37 ∣ z` (the
 hence `(z : 𝓞 K) ∈ lv149`; peeling the `(ζ−1)`-multiplicity (`lv149` unramified) gives `D.z ∈ lv149`
 for the base datum `D` built by the producer. -/
 
-set_option maxHeartbeats 800000 in
 -- The `RealCaseIIData37` structure construction (the `equation` field, with the `(ζ-1)`-multiplicity
 -- extraction) is whnf-heavy and exceeds the default heartbeat budget, as in the parent producer
 -- `exists_realCaseIIData37_of_Int_solution`.

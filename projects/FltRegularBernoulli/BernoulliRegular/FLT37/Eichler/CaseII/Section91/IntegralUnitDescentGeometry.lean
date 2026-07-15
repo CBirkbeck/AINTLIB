@@ -595,7 +595,6 @@ def CaseIISection91PContentExtractionDataWithUnits37 : Prop :=
         z' ∈ lv149 ∧ ω ∉ lv149 ∧ θ ∉ lv149 ∧
         ∃ m'' : ℕ, 2 * (2 * e - 1) = 37 * (m'' + 1)
 
-set_option maxHeartbeats 1600000 in
 -- The bumped `maxHeartbeats` is needed because `intro` must unfold the very large
 -- `CaseIISection91PContentExtractionDataWithUnits37` def (a long `∀`/`→`/`∃` chain over the §9.1
 -- datum) and the final `refine` reassembles the equally large extraction conclusion (24 conjuncts);

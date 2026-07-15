@@ -40,7 +40,6 @@ namespace FLT37
 
 set_option maxRecDepth 4000000
 set_option linter.style.setOption false in
-set_option maxHeartbeats 4000000
 
 /-- **FLT37 real-form residue cyclic-criterion fact**: the quartic power
 of the numerical residue of `pollaczekUnitPlus 37 K 32` in `ZMod 149`

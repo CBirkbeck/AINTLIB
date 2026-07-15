@@ -20,7 +20,6 @@ variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
 namespace Conjugation
 
-set_option maxHeartbeats 800000 in
 -- Expanding the completion automorphism exposes two nested completion maps.
 theorem continuous_valuedCompletionCyclotomicEquiv
     (a : CyclotomicUnitDelta p) :
@@ -53,7 +52,6 @@ theorem continuous_valuedCompletionCyclotomicEquiv
     (hAux.comp (IsDedekindDomain.HeightOneSpectrum.adicCompletion.continuous_toCompletion K
       (lambdaHeightOneSpectrum p K)))
 
-set_option maxHeartbeats 800000 in
 -- The closed-set induction compares two continuous maps out of a completion.
 theorem valuedCompletionCyclotomicEquiv_rationalToLambdaCompletionRingHom
     (a : CyclotomicUnitDelta p)
@@ -169,7 +167,6 @@ def dworkSignedCoefficients
     Fin (p - 1) → RationalPadicIntegerRing p :=
   fun i ↦ (-1 : RationalPadicIntegerRing p) ^ (i : ℕ) * a i
 
-set_option maxHeartbeats 800000 in
 -- The proof normalizes nested algebra maps from the rational integer ring.
 theorem dworkCompleteComplexConj_powerLinearMap
     (hp_two : 2 < p)

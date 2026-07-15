@@ -21,7 +21,6 @@ open PadicLogSetup PadicLogSetup.DworkParameter
 variable (p : ℕ) [Fact p.Prime]
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
-set_option maxHeartbeats 800000 in
 -- The proof compares two full Dwork power-basis expansions through the
 -- completed ramification identity `(p) = (varpi)^(p - 1)`; elaborating the
 -- basis and scalar-action coercions is slower than the default budget.
@@ -508,7 +507,6 @@ theorem dworkParameterQuotientCoeffModP_mk_sum
       rw [Finset.sum_insert has, dworkParameterQuotientCoeffModP_mk_add,
         ih, Finset.sum_insert has]
 
-set_option maxHeartbeats 800000 in
 -- The quotient type in this additive extensionality lemma unfolds the completed
 -- Dwork ideal comparison enough that the default heartbeat limit is tight.
 theorem dworkParameterQuotientCoeffModP_add

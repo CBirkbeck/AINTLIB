@@ -72,7 +72,6 @@ degree-`68` evaluation into these named per-degree facts turns `factorial_mul_Lr
 one-line consequence of `lr_coeff_68`. -/
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 1`**, the degree-`1` Artin-Hasse log coefficient: the `1`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -82,7 +81,6 @@ private theorem lr_coeff_1 : ArtinHasse37.Lr 1 = (1 : ℚ)/2 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 2`**, the degree-`2` Artin-Hasse log coefficient: the `2`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -92,7 +90,6 @@ private theorem lr_coeff_2 : ArtinHasse37.Lr 2 = (1 : ℚ)/24 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 3`**, the degree-`3` Artin-Hasse log coefficient: the `3`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -102,7 +99,6 @@ private theorem lr_coeff_3 : ArtinHasse37.Lr 3 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 4`**, the degree-`4` Artin-Hasse log coefficient: the `4`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -112,7 +108,6 @@ private theorem lr_coeff_4 : ArtinHasse37.Lr 4 = (-1 : ℚ)/2880 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 5`**, the degree-`5` Artin-Hasse log coefficient: the `5`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -122,7 +117,6 @@ private theorem lr_coeff_5 : ArtinHasse37.Lr 5 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 6`**, the degree-`6` Artin-Hasse log coefficient: the `6`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -132,7 +126,6 @@ private theorem lr_coeff_6 : ArtinHasse37.Lr 6 = (1 : ℚ)/181440 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 7`**, the degree-`7` Artin-Hasse log coefficient: the `7`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -142,7 +135,6 @@ private theorem lr_coeff_7 : ArtinHasse37.Lr 7 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 8`**, the degree-`8` Artin-Hasse log coefficient: the `8`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -152,7 +144,6 @@ private theorem lr_coeff_8 : ArtinHasse37.Lr 8 = (-1 : ℚ)/9676800 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 9`**, the degree-`9` Artin-Hasse log coefficient: the `9`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -162,7 +153,6 @@ private theorem lr_coeff_9 : ArtinHasse37.Lr 9 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 10`**, the degree-`10` Artin-Hasse log coefficient: the `10`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -172,7 +162,6 @@ private theorem lr_coeff_10 : ArtinHasse37.Lr 10 = (1 : ℚ)/479001600 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 11`**, the degree-`11` Artin-Hasse log coefficient: the `11`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -182,7 +171,6 @@ private theorem lr_coeff_11 : ArtinHasse37.Lr 11 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 12`**, the degree-`12` Artin-Hasse log coefficient: the `12`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -192,7 +180,6 @@ private theorem lr_coeff_12 : ArtinHasse37.Lr 12 = (-691 : ℚ)/15692092416000 :
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 13`**, the degree-`13` Artin-Hasse log coefficient: the `13`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -202,7 +189,6 @@ private theorem lr_coeff_13 : ArtinHasse37.Lr 13 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 14`**, the degree-`14` Artin-Hasse log coefficient: the `14`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -212,7 +198,6 @@ private theorem lr_coeff_14 : ArtinHasse37.Lr 14 = (1 : ℚ)/1046139494400 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 15`**, the degree-`15` Artin-Hasse log coefficient: the `15`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -222,7 +207,6 @@ private theorem lr_coeff_15 : ArtinHasse37.Lr 15 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 16`**, the degree-`16` Artin-Hasse log coefficient: the `16`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -232,7 +216,6 @@ private theorem lr_coeff_16 : ArtinHasse37.Lr 16 = (-3617 : ℚ)/170729965486080
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 17`**, the degree-`17` Artin-Hasse log coefficient: the `17`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -242,7 +225,6 @@ private theorem lr_coeff_17 : ArtinHasse37.Lr 17 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 18`**, the degree-`18` Artin-Hasse log coefficient: the `18`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -252,7 +234,6 @@ private theorem lr_coeff_18 : ArtinHasse37.Lr 18 = (43867 : ℚ)/919636959090769
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 19`**, the degree-`19` Artin-Hasse log coefficient: the `19`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -262,7 +243,6 @@ private theorem lr_coeff_19 : ArtinHasse37.Lr 19 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 20`**, the degree-`20` Artin-Hasse log coefficient: the `20`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -272,7 +252,6 @@ private theorem lr_coeff_20 : ArtinHasse37.Lr 20 = (-174611 : ℚ)/1605715325396
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 21`**, the degree-`21` Artin-Hasse log coefficient: the `21`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -282,7 +261,6 @@ private theorem lr_coeff_21 : ArtinHasse37.Lr 21 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 22`**, the degree-`22` Artin-Hasse log coefficient: the `22`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -292,7 +270,6 @@ private theorem lr_coeff_22 : ArtinHasse37.Lr 22 = (77683 : ℚ)/310224200866619
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 23`**, the degree-`23` Artin-Hasse log coefficient: the `23`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -302,7 +279,6 @@ private theorem lr_coeff_23 : ArtinHasse37.Lr 23 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 24`**, the degree-`24` Artin-Hasse log coefficient: the `24`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -312,7 +288,6 @@ private theorem lr_coeff_24 : ArtinHasse37.Lr 24 = (-236364091 : ℚ)/4065177928
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 25`**, the degree-`25` Artin-Hasse log coefficient: the `25`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -322,7 +297,6 @@ private theorem lr_coeff_25 : ArtinHasse37.Lr 25 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 26`**, the degree-`26` Artin-Hasse log coefficient: the `26`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -332,7 +306,6 @@ private theorem lr_coeff_26 : ArtinHasse37.Lr 26 = (657931 : ℚ)/48394975335192
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 27`**, the degree-`27` Artin-Hasse log coefficient: the `27`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -342,7 +315,6 @@ private theorem lr_coeff_27 : ArtinHasse37.Lr 27 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 28`**, the degree-`28` Artin-Hasse log coefficient: the `28`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -352,7 +324,6 @@ private theorem lr_coeff_28 : ArtinHasse37.Lr 28 = (-3392780147 : ℚ)/106101143
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 29`**, the degree-`29` Artin-Hasse log coefficient: the `29`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -362,7 +333,6 @@ private theorem lr_coeff_29 : ArtinHasse37.Lr 29 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 30`**, the degree-`30` Artin-Hasse log coefficient: the `30`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -372,7 +342,6 @@ private theorem lr_coeff_30 : ArtinHasse37.Lr 30 = (1723168255201 : ℚ)/2279370
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 31`**, the degree-`31` Artin-Hasse log coefficient: the `31`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -382,7 +351,6 @@ private theorem lr_coeff_31 : ArtinHasse37.Lr 31 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 32`**, the degree-`32` Artin-Hasse log coefficient: the `32`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -392,7 +360,6 @@ private theorem lr_coeff_32 : ArtinHasse37.Lr 32 = (-7709321041217 : ℚ)/429429
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 33`**, the degree-`33` Artin-Hasse log coefficient: the `33`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -402,7 +369,6 @@ private theorem lr_coeff_33 : ArtinHasse37.Lr 33 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 34`**, the degree-`34` Artin-Hasse log coefficient: the `34`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -412,7 +378,6 @@ private theorem lr_coeff_34 : ArtinHasse37.Lr 34 = (151628697551 : ℚ)/35427935
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 35`**, the degree-`35` Artin-Hasse log coefficient: the `35`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -422,7 +387,6 @@ private theorem lr_coeff_35 : ArtinHasse37.Lr 35 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 36`**, the degree-`36` Artin-Hasse log coefficient: the `36`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -432,7 +396,6 @@ private theorem lr_coeff_36 : ArtinHasse37.Lr 36 = (1877379943192752274060391160
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 37`**, the degree-`37` Artin-Hasse log coefficient: the `37`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -442,7 +405,6 @@ private theorem lr_coeff_37 : ArtinHasse37.Lr 37 = (1 : ℚ)/74 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 38`**, the degree-`38` Artin-Hasse log coefficient: the `38`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -452,7 +414,6 @@ private theorem lr_coeff_38 : ArtinHasse37.Lr 38 = (3820472004869255746968642981
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 39`**, the degree-`39` Artin-Hasse log coefficient: the `39`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -462,7 +423,6 @@ private theorem lr_coeff_39 : ArtinHasse37.Lr 39 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 40`**, the degree-`40` Artin-Hasse log coefficient: the `40`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -472,7 +432,6 @@ private theorem lr_coeff_40 : ArtinHasse37.Lr 40 = (-447988547290968928889543075
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 41`**, the degree-`41` Artin-Hasse log coefficient: the `41`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -482,7 +441,6 @@ private theorem lr_coeff_41 : ArtinHasse37.Lr 41 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 42`**, the degree-`42` Artin-Hasse log coefficient: the `42`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -492,7 +450,6 @@ private theorem lr_coeff_42 : ArtinHasse37.Lr 42 = (2574305097660195090464365257
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 43`**, the degree-`43` Artin-Hasse log coefficient: the `43`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -502,7 +459,6 @@ private theorem lr_coeff_43 : ArtinHasse37.Lr 43 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 44`**, the degree-`44` Artin-Hasse log coefficient: the `44`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -512,7 +468,6 @@ private theorem lr_coeff_44 : ArtinHasse37.Lr 44 = (-443060673270768270671758102
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 45`**, the degree-`45` Artin-Hasse log coefficient: the `45`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -522,7 +477,6 @@ private theorem lr_coeff_45 : ArtinHasse37.Lr 45 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 46`**, the degree-`46` Artin-Hasse log coefficient: the `46`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -532,7 +486,6 @@ private theorem lr_coeff_46 : ArtinHasse37.Lr 46 = (4732693555392297436721052454
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 47`**, the degree-`47` Artin-Hasse log coefficient: the `47`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -542,7 +495,6 @@ private theorem lr_coeff_47 : ArtinHasse37.Lr 47 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 48`**, the degree-`48` Artin-Hasse log coefficient: the `48`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -552,7 +504,6 @@ private theorem lr_coeff_48 : ArtinHasse37.Lr 48 = (-106742306294771170539191430
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 49`**, the degree-`49` Artin-Hasse log coefficient: the `49`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -562,7 +513,6 @@ private theorem lr_coeff_49 : ArtinHasse37.Lr 49 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 50`**, the degree-`50` Artin-Hasse log coefficient: the `50`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -572,7 +522,6 @@ private theorem lr_coeff_50 : ArtinHasse37.Lr 50 = (3924495117471458951373303496
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 51`**, the degree-`51` Artin-Hasse log coefficient: the `51`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -582,7 +531,6 @@ private theorem lr_coeff_51 : ArtinHasse37.Lr 51 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 52`**, the degree-`52` Artin-Hasse log coefficient: the `52`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -592,7 +540,6 @@ private theorem lr_coeff_52 : ArtinHasse37.Lr 52 = (-127016692216716233528360746
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50, lr_coeff_51]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 53`**, the degree-`53` Artin-Hasse log coefficient: the `53`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -602,7 +549,6 @@ private theorem lr_coeff_53 : ArtinHasse37.Lr 53 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50, lr_coeff_51, lr_coeff_52]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 54`**, the degree-`54` Artin-Hasse log coefficient: the `54`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -612,7 +558,6 @@ private theorem lr_coeff_54 : ArtinHasse37.Lr 54 = (6238860108309731439193761003
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50, lr_coeff_51, lr_coeff_52, lr_coeff_53]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 55`**, the degree-`55` Artin-Hasse log coefficient: the `55`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -622,7 +567,6 @@ private theorem lr_coeff_55 : ArtinHasse37.Lr 55 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50, lr_coeff_51, lr_coeff_52, lr_coeff_53, lr_coeff_54]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 56`**, the degree-`56` Artin-Hasse log coefficient: the `56`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -632,7 +576,6 @@ private theorem lr_coeff_56 : ArtinHasse37.Lr 56 = (-786153898496497550796440457
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50, lr_coeff_51, lr_coeff_52, lr_coeff_53, lr_coeff_54, lr_coeff_55]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 57`**, the degree-`57` Artin-Hasse log coefficient: the `57`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -642,7 +585,6 @@ private theorem lr_coeff_57 : ArtinHasse37.Lr 57 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50, lr_coeff_51, lr_coeff_52, lr_coeff_53, lr_coeff_54, lr_coeff_55, lr_coeff_56]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 58`**, the degree-`58` Artin-Hasse log coefficient: the `58`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -652,7 +594,6 @@ private theorem lr_coeff_58 : ArtinHasse37.Lr 58 = (6696908917288727288692482488
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50, lr_coeff_51, lr_coeff_52, lr_coeff_53, lr_coeff_54, lr_coeff_55, lr_coeff_56, lr_coeff_57]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 59`**, the degree-`59` Artin-Hasse log coefficient: the `59`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -662,7 +603,6 @@ private theorem lr_coeff_59 : ArtinHasse37.Lr 59 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50, lr_coeff_51, lr_coeff_52, lr_coeff_53, lr_coeff_54, lr_coeff_55, lr_coeff_56, lr_coeff_57, lr_coeff_58]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 60`**, the degree-`60` Artin-Hasse log coefficient: the `60`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -672,7 +612,6 @@ private theorem lr_coeff_60 : ArtinHasse37.Lr 60 = (-288989919240661853433724448
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50, lr_coeff_51, lr_coeff_52, lr_coeff_53, lr_coeff_54, lr_coeff_55, lr_coeff_56, lr_coeff_57, lr_coeff_58, lr_coeff_59]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 61`**, the degree-`61` Artin-Hasse log coefficient: the `61`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -682,7 +621,6 @@ private theorem lr_coeff_61 : ArtinHasse37.Lr 61 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50, lr_coeff_51, lr_coeff_52, lr_coeff_53, lr_coeff_54, lr_coeff_55, lr_coeff_56, lr_coeff_57, lr_coeff_58, lr_coeff_59, lr_coeff_60]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 62`**, the degree-`62` Artin-Hasse log coefficient: the `62`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -692,7 +630,6 @@ private theorem lr_coeff_62 : ArtinHasse37.Lr 62 = (9750515940433397850555583611
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50, lr_coeff_51, lr_coeff_52, lr_coeff_53, lr_coeff_54, lr_coeff_55, lr_coeff_56, lr_coeff_57, lr_coeff_58, lr_coeff_59, lr_coeff_60, lr_coeff_61]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 63`**, the degree-`63` Artin-Hasse log coefficient: the `63`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -702,7 +639,6 @@ private theorem lr_coeff_63 : ArtinHasse37.Lr 63 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50, lr_coeff_51, lr_coeff_52, lr_coeff_53, lr_coeff_54, lr_coeff_55, lr_coeff_56, lr_coeff_57, lr_coeff_58, lr_coeff_59, lr_coeff_60, lr_coeff_61, lr_coeff_62]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 64`**, the degree-`64` Artin-Hasse log coefficient: the `64`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -712,7 +648,6 @@ private theorem lr_coeff_64 : ArtinHasse37.Lr 64 = (-270867738965420172807370829
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50, lr_coeff_51, lr_coeff_52, lr_coeff_53, lr_coeff_54, lr_coeff_55, lr_coeff_56, lr_coeff_57, lr_coeff_58, lr_coeff_59, lr_coeff_60, lr_coeff_61, lr_coeff_62, lr_coeff_63]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 65`**, the degree-`65` Artin-Hasse log coefficient: the `65`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -722,7 +657,6 @@ private theorem lr_coeff_65 : ArtinHasse37.Lr 65 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50, lr_coeff_51, lr_coeff_52, lr_coeff_53, lr_coeff_54, lr_coeff_55, lr_coeff_56, lr_coeff_57, lr_coeff_58, lr_coeff_59, lr_coeff_60, lr_coeff_61, lr_coeff_62, lr_coeff_63, lr_coeff_64]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 66`**, the degree-`66` Artin-Hasse log coefficient: the `66`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -732,7 +666,6 @@ private theorem lr_coeff_66 : ArtinHasse37.Lr 66 = (3501933269592778533676033518
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50, lr_coeff_51, lr_coeff_52, lr_coeff_53, lr_coeff_54, lr_coeff_55, lr_coeff_56, lr_coeff_57, lr_coeff_58, lr_coeff_59, lr_coeff_60, lr_coeff_61, lr_coeff_62, lr_coeff_63, lr_coeff_64, lr_coeff_65]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 67`**, the degree-`67` Artin-Hasse log coefficient: the `67`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -742,7 +675,6 @@ private theorem lr_coeff_67 : ArtinHasse37.Lr 67 = (0 : ℚ)/1 := by
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50, lr_coeff_51, lr_coeff_52, lr_coeff_53, lr_coeff_54, lr_coeff_55, lr_coeff_56, lr_coeff_57, lr_coeff_58, lr_coeff_59, lr_coeff_60, lr_coeff_61, lr_coeff_62, lr_coeff_63, lr_coeff_64, lr_coeff_65, lr_coeff_66]
 
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 800000 in
 /-- **`ArtinHasse37.Lr 68`**, the degree-`68` Artin-Hasse log coefficient: the `68`-th step of
 the `Lr_succ` recurrence, a bounded `norm_num` over the closed-form coefficients `gco`/`c` and
 the previously-computed coefficients. -/
@@ -751,7 +683,6 @@ private theorem lr_coeff_68 : ArtinHasse37.Lr 68 = (-124884894457231691505092966
   simp only [Finset.sum_range_succ, Finset.range_zero, Finset.sum_empty]
   norm_num [ArtinHasse37.gco, ArtinHasse37.c, lr_coeff_1, lr_coeff_2, lr_coeff_3, lr_coeff_4, lr_coeff_5, lr_coeff_6, lr_coeff_7, lr_coeff_8, lr_coeff_9, lr_coeff_10, lr_coeff_11, lr_coeff_12, lr_coeff_13, lr_coeff_14, lr_coeff_15, lr_coeff_16, lr_coeff_17, lr_coeff_18, lr_coeff_19, lr_coeff_20, lr_coeff_21, lr_coeff_22, lr_coeff_23, lr_coeff_24, lr_coeff_25, lr_coeff_26, lr_coeff_27, lr_coeff_28, lr_coeff_29, lr_coeff_30, lr_coeff_31, lr_coeff_32, lr_coeff_33, lr_coeff_34, lr_coeff_35, lr_coeff_36, lr_coeff_37, lr_coeff_38, lr_coeff_39, lr_coeff_40, lr_coeff_41, lr_coeff_42, lr_coeff_43, lr_coeff_44, lr_coeff_45, lr_coeff_46, lr_coeff_47, lr_coeff_48, lr_coeff_49, lr_coeff_50, lr_coeff_51, lr_coeff_52, lr_coeff_53, lr_coeff_54, lr_coeff_55, lr_coeff_56, lr_coeff_57, lr_coeff_58, lr_coeff_59, lr_coeff_60, lr_coeff_61, lr_coeff_62, lr_coeff_63, lr_coeff_64, lr_coeff_65, lr_coeff_66, lr_coeff_67]
 set_option maxRecDepth 20000 in
-set_option maxHeartbeats 4000000 in
 -- The proof is the explicit 68-step evaluation of the log-coefficient recurrence, each step a
 -- `norm_num` over rationals whose numerators/denominators grow to ~10^160; the accumulated
 -- `norm_num` certificates exceed the default heartbeat/recursion budgets.

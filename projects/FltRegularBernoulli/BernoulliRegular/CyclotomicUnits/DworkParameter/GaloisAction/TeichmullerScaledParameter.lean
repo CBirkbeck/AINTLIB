@@ -222,7 +222,6 @@ theorem scaledDworkParameter_evalₐ_one (a : ZMod p) :
         (scaledDworkParameter p K a) = 0 := by
   rw [scaledDworkParameter, map_mul, dworkParameter_evalₐ_one, mul_zero]
 
-set_option maxHeartbeats 800000 in
 -- This congruence transports ideals through the rational and Dwork completions;
 -- the higher limit keeps the nested completion abbreviations from timing out.
 theorem scaledDworkParameter_sub_natCast_mul_lambda_mem_sq

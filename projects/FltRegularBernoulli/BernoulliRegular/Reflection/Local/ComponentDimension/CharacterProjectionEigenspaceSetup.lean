@@ -107,7 +107,6 @@ noncomputable def completedPrincipalUnitModPCharacterProjectionRange (i : ℕ) :
 -- The submodule structure repeatedly synthesizes the quotient's `ZMod p`
 -- module instance through additive/multiplicative wrappers.
 set_option synthInstance.maxHeartbeats 80000 in
-set_option maxHeartbeats 800000 in
 /-- The eigenspace in `completed U_1 / completed U_1^p` for the `j`-th
 power character of `Delta`. -/
 def completedPrincipalUnitModPDeltaPowerEigenspace (j : ℕ) :

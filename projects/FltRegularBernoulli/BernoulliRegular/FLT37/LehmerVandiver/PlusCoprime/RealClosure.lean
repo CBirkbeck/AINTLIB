@@ -346,7 +346,6 @@ section FLT37Numerical
 
 set_option maxRecDepth 4000000
 set_option linter.style.setOption false in
-set_option maxHeartbeats 4000000
 
 /-- **Local Fermat exponent reduction for `ZMod p`.** Replicates
 `FLT37Closure`'s private helper. For `x : ZMod p` with `x ≠ 0` and `m`,

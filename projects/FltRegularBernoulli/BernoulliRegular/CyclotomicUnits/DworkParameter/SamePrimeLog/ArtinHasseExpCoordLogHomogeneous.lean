@@ -654,7 +654,6 @@ theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sum_
   rw [hsplit]
   exact I.add_mem hdiff hsumM
 
-set_option maxHeartbeats 800000 in
 /-- For degrees `p ^ r`, subtracting the surviving monomial gives the same high-power
 `lambdaIdeal` divisibility. -/
 theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_pow_mem_lambdaIdeal_pow

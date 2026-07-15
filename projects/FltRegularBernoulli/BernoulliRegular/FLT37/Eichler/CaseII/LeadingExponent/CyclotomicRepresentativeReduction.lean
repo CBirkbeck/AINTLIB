@@ -411,7 +411,6 @@ theorem leadingExponentEx811Core37_antecedent_inhabited
   refine ⟨0, fun N _hN ↦ ?_⟩
   simp
 
-set_option maxHeartbeats 1600000 in
 -- The same-prime completed-log calc over the heavy `DworkCompleteIntegerRing` exceeds the default
 -- heartbeat budget.
 open BernoulliRegular (CPlusExponentProduct) in
@@ -460,7 +459,6 @@ theorem caseIIEx811Bridge_kummerLogSum_evalₐ_eq_zero
         (caseIIEx811Bridge_completedLog_evalₐ_eq_of_div_mem_pPowerSubgroup hdiv hN).symm
     _ = 0 := hu N hN
 
-set_option maxHeartbeats 1600000 in
 -- The free-part class identification expands `realUnitToFreePartModP` over the heavy `𝓞 ℚ(ζ₃₇)`
 -- ring and its cyclotomic-unit free-part quotient, exceeding the default budget.
 open BernoulliRegular (CPlusGenerator CPlusExponentProduct) in
@@ -494,7 +492,6 @@ theorem caseIIEx811Bridge_freePartClass_eq
         (Additive.ofMul w)) hse)
   exact hv.trans (caseIIEx811Bridge_realUnitToFreePartModP_eq_of_div_mem_pPowerSubgroup hdiv).symm
 
-set_option maxHeartbeats 8000000 in
 -- The composition unifies two copies each of the heavy `DworkCompleteIntegerRing` log-sum and the
 -- free-part class-sum; this `isDefEq` work is expensive (well below the `adicCompletionIntegers`
 -- `whnf` wall, but above the default budget), hence the raised limit.

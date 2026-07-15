@@ -501,7 +501,6 @@ universal), and the **new** datum's coprimality is derived from §3 — the desc
 generates coprime ideals. -/
 
 set_option maxRecDepth 4000 in
-set_option maxHeartbeats 800000 in
 -- The bumped `maxHeartbeats` (and `maxRecDepth`, as in the parent
 -- `freeContentCaseIIDvdZData37_pContent_descend_withUnits`) is needed because destructuring the
 -- very large `CaseIISection91PContentExtractionDataWithUnits37` output (a 24-conjunct `∃`-chain)

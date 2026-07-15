@@ -696,7 +696,6 @@ Consequently the FLT37 Case-II endpoint no longer carries any clean-residual hyp
 Last Theorem for `37` follows from the threaded **coprimality**, Washington **Lemma 9.6**
 (`ℓ ∤ xy` at the rational seed), and the carried **Kellner** input only. -/
 
-set_option maxHeartbeats 1600000 in
 -- The bumped `maxHeartbeats` is needed because `intro` must unfold the very large
 -- `CaseIISection91PContentExtractionDataWithUnits37` def (a long `∀`/`→`/`∃` chain over the §9.1
 -- datum) and the final `refine` reassembles the equally large extraction conclusion (24

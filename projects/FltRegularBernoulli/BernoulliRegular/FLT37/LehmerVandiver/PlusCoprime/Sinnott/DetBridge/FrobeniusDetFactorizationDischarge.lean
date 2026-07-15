@@ -388,7 +388,6 @@ theorem det_D_nontriv_sq_sub_rank_one_apply
   exact det_D_nontriv_sq_sub_rank_one_via_matrix_det_lemma
     (p := p) K hp_odd hp_three hp_two hD
 
-set_option maxHeartbeats 4000000 in
 -- This composed determinant identity elaborates several matrix reductions at once.
 set_option backward.isDefEq.respectTransparency false in
 open Classical in
@@ -456,7 +455,6 @@ theorem _root_.BernoulliRegular.FLT37.Sinnott.cancel_disjunction_helper
     rw [show q * -c = c * -q from by ring] at h_chain
     exact mul_left_cancel₀ h_c_ne h_chain
 
-set_option maxHeartbeats 8000000 in
 -- The final determinant discharge unfolds named hypotheses and needs a larger heartbeat budget.
 set_option backward.isDefEq.respectTransparency false in
 open Classical in

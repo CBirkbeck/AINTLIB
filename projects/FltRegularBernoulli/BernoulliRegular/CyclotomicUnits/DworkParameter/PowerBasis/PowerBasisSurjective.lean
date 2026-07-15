@@ -758,7 +758,6 @@ theorem dworkComplete_residue_lift_of_valuedInteger_residue_lift
   simpa [S, pow_one, dworkCompleteLambdaIdeal_eq_dworkParameterIdeal
     (p := p) (K := K)] using hmem
 
-set_option maxHeartbeats 800000 in
 /-- This induction repeatedly rewrites through the completed Dwork algebra
 structure and the coefficient algebra map; the higher heartbeat limit keeps
 the final normalization steps stable. -/

@@ -582,7 +582,6 @@ private theorem samePrimeNatDivEval_attach_sum_target_eq_finiteArtinHasseLogTerm
             samePrimeNatDivEval_prime_pow_zero_eq_finiteArtinHasseLogTerm
               (p := p) (K := K) N r hx htarget0_d
 
-set_option maxHeartbeats 800000 in
 -- This is the same-prime port of the homogeneous `p^r` slice comparison; it
 -- expands three attached finite sums and transports finite-log additivity.
 theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm_of_factorial_weighted_sub_pow_mem

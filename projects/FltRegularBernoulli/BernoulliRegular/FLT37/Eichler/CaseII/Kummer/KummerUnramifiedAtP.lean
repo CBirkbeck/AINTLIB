@@ -244,7 +244,6 @@ variable {K : Type} {p : ℕ} [hpri : Fact p.Prime] [Field K] [NumberField K]
 
 omit [NumberField.IsCMField K] in
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 -- The `antiKummerLift` splitting-field whnf and the `IsUnramifiedAt`/different-ideal coercions make
 -- this assembly heavier than the default heartbeat budget.
 /-- **The per-prime "at-`p`" unramifiedness from a field-level primary witness.**  For a primary
@@ -369,7 +368,6 @@ namespace BernoulliRegular.FLT37.Eichler
 open FLT37.LehmerVandiver.CaseI.AntiKummer
 
 set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 1600000 in
 -- The `antiKummerLift` splitting-field whnf at `p = 37` makes elaboration heavier than the default.
 /-- **[FLT37-CASEII-LEMMA-9.1-AT37] The "at 37" half of Washington Lemma 9.1, proved.**
 
