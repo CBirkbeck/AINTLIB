@@ -388,6 +388,7 @@ private theorem isOpenImmersion_of_section {X Y : Scheme.{u}} (f : X ⟶ Y)
   rw [hdec]
   infer_instance
 
+open EllipticCurve in
 /-- **(Y1-E1, the clopen split — gate [BB-DIFF])** Over a base where `N` is invertible, each
 sub-killed-locus `{d • P = 0}` with `d ∣ N` is **open** inside the killed locus `{N • P = 0}`
 (as well as closed): on `Y_N` the point `P` classifies into the finite étale `E[N]`
@@ -410,7 +411,7 @@ theorem killedLocus_preimage_isOpen {S : Scheme.{u}} (E : EllipticCurve S) (P : 
   have hz0 : ((0 : E.Point (𝟙 S)) : S ⟶ E.E) ≫ E.mulByHom N = 𝟙 S ≫ E.zero := by
     rw [← E.smul_eq_zero_iff_comp_mulByHom, smul_zero]
   set zT := E.pointToTorsion _ hz0 with hzT
-  have hEt : Etale (E.torsionπ N) := EllipticCurve.Torsionπ.etale' E N hN
+  have hEt : Etale (E.torsionπ N) := Torsionπ.etale' E N hN
   have hzTsec : zT ≫ E.torsionπ N = 𝟙 S := E.pointToTorsion_torsionπ _ _
   have hzTopen : IsOpenImmersion zT := isOpenImmersion_of_section (E.torsionπ N) zT hzTsec
   -- the two `ι`-composites
@@ -683,6 +684,7 @@ private theorem nowhereGeomOrderLEThree_asSection_pull_tatePoint {T : Scheme.{u}
   rw [pullAsSection_dict R s τ] at h1
   exact h1
 
+open EllipticCurve in
 /-- **(Y1-E5 pure core)** The étale torsion-point lift against a nilpotent ideal, packaged
 through the marked-atlas classification: an atlas algebra map to `A⧸I` whose marked point is
 `N`-killed lifts, after T-E1-style renormalisation by the classifying morphism of the lifted
@@ -712,8 +714,8 @@ private theorem exists_tateAlgLift_core (N : ℕ) [NeZero N] (_hN : 4 ≤ N)
     show IsUnit ((N : ℕ) : Γ(Spec (CommRingCat.of A), ⊤))
     have h3 := hinvA.map (Scheme.ΓSpecIso (CommRingCat.of A)).inv.hom
     rwa [map_natCast] at h3
-  have hEt : Etale (FA.torsionπ N) := EllipticCurve.Torsionπ.etale' FA N hNinvA
-  have : IsFinite (FA.torsionπ N) := EllipticCurve.Torsionπ.isFinite_of_nIsInvertible FA N hNinvA
+  have hEt : Etale (FA.torsionπ N) := Torsionπ.etale' FA N hNinvA
+  have : IsFinite (FA.torsionπ N) := Torsionπ.isFinite_of_nIsInvertible FA N hNinvA
   have : IsAffine (FA.torsion N) := isAffine_of_isAffineHom (FA.torsionπ N)
   -- the killed point over A⧸I, into the universal torsion then lifted through the
   -- base-change square
