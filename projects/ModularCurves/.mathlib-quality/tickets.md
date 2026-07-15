@@ -20567,3 +20567,35 @@ presentation uniqueness ✓ | datum + glued (β,γ)+flex+disc ✓ | classifying 
 **forward universal property (e3ClassifyingEllHom) ★★★** ✓ | **RT1 (roundtrip right_inv) ★★★** ✓ |
 rt2 + conditional RepresentableBy = boarded transposition | NORM = the one keystone gap. **All
 mathematically-novel content DONE axiom-clean.**
+
+## v10.248-OMEGA (2026-07-15) — SESSION TERMINAL: OMEGA's NORM-free frontier is EXHAUSTED
+
+**Analysis of the T-E15a remainder:** every remaining piece funnels through the E3-flex-normalization
+existence [T-E15-NORM]:
+- rt2's foundation `universalE3_isE3Datum` needs the universal marked (P,Q) to BE a naive level-3
+  structure ([3]P=[3]Q=0 + generation) — the universal analog of NORM (order-3 flex generators).
+- The RepresentableBy invFun needs `IsE3Datum` for ARBITRARY level-3 structures = NORM directly.
+- The discharge `naiveLevelThree_representable_by_affine` = `gammaFullNaive₃ ≅ e3DatumProblem` = NORM.
+[T-E15-NORM] is E[3]-classification / **KM-keystone-adjacent** (order-3 P ⟹ flex, uses the
+`E[3]`-scheme structure) — the same de-confliction class as [T-E14-LVL-b]. **NOT OMEGA-dispatchable
+NORM-free.** (rt2 + e3DatumProblem + conditional-RepresentableBy could be built taking the level
+clause as a hypothesis — the analog of `legendreDeltaRepresentableBy`'s hL — but that CONDITIONAL
+result is diminishing-value packaging once the uniqueness+forward-UP+rt1 cores are done.)
+
+**SESSION-WIDE DELIVERY (STREAM-OMEGA, 2026-07-14/15, boards v10.223–248), all axiom-clean:**
+1. **T-E12 ★★ + T-E13 ★** SORRY-FREE (omegaProblem representable+rigid over ℤ[1/6]).
+2. **T-E14** corrected δ + AX1 representability machine + the ACT' adversarial finding
+   (no naive GL₂-functor-action on δ).
+3. **T-E4a/T-E4b + T-H3 DE-SORRIED** → all naive moduli functors (γ₁/Γ(N)/P_H) sorry-free → the
+   T-E14-AX1 machine fully axiom-clean.
+4. **T-E15a** (KM Ex. 2.2.2, the ℤ[1/3] engine instantiation): ℰ₃ object + marked pair +
+   **uniqueness certificate `e3_vc_marked` (★★★, via the CAS-cofactor pipeline)** + presentation
+   uniqueness + datum + glued (β,γ)+flex+disc-unit + classifying ring hom/map +
+   **forward universal property `e3ClassifyingEllHom` (★★★)** + **RT1 roundtrip (★★★)**. Remaining =
+   rt2/RepresentableBy transposition + [T-E15-NORM] keystone gap.
+
+**For the coordinator/keystone owner:** two clean E3-flex-normalization tickets would unblock
+T-E15a's discharge (and mirror what [T-E14-LVL-b] unblocks for the Legendre half). Both engine
+instantiations (2 and 3) now have their universal objects + uniqueness + forward-UP + rt1 built;
+only the two normalization-existence facts (both E[N]-keystone-adjacent) gate the final
+`representable_iff` engine over ℤ[1/6].
