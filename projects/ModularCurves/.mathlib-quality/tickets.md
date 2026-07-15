@@ -20723,3 +20723,39 @@ in the convergence (v10.250): the sequential foundation is delivered, so **three
 **Critical path now:** L4-iii + endDual_comp_self are the two deep leaves left in the keystone; everything
 else is either box-auto-clean (endDeg_mulBy on BB-DEG) or now-unblocked parallel work (GH's 6, G0's 2).
 Fire ONE session per seat.
+
+## v10.251 (2026-07-15, STREAM-OMEGA) — ★★ [T-E15-NORM] AFFINE + LOCAL-SCHEME CORE COMPLETE & KEYSTONE-FREE; the ζ₃/Weil-pairing gate is VOID (sheet-pinning is Zariski-rational); residual gate = the torsion→coordinate bridges (G0/KM E[N]-substrate)
+
+**Five axiom-clean lemmas delivered (commits on `dev/modular-curves`), the whole order-3⟹flex⟹ℰ₃-form
+normalization down to the local scheme datum:**
+- `EllipticCurve/E3NormalForm.lean` **`ofTwiceNeZero_isFlexNF`** — order-3 (`μ=0`, the mathlib TateNF
+  3-torsion quantity) ⟹ flex NF `y²+a₁xy+a₃y=x³` (via mathlib `ofTwiceNeZero`: a₂=μ, a₄=a₆=0; opposite
+  regime to `toTateNF` which needs 3P≠0).
+- `Moduli/UniversalLevelThree.lean`:
+  - **`isE3Form_of_scaling`** (★★) — the Q-normalization certificate: flex-NF + unit `u` with
+    `urel: u²+a₁u=3p` + `sheet: B·u+A=0` ⟹ `IsE3Form (⟨u,0,0,0⟩•W) β γ`, γ=p·u⁻², β=q·u⁻³−p·u⁻². Only
+    a₁'=3γ−1 (=urel) & a₃'=−3γ²−β−3βγ (=sheet) are non-trivial; a₂'/a₄'/a₆' vanish from the flex shape.
+  - **`isE3Form_of_threeTorsion`** (★★) — ∃u, IsE3Form from flex-NF + Q on curve + `hcubic` (3-torsion)
+    + a₃,3 units + the **B-unit locus**. `u = −A·B⁻¹` is a unit (p=x(Q) is a unit from cubic ⟹ 3p unit
+    ⟹ u(u+a₁)=3p forces u unit); `urel` = `A²−a₁AB−3pB²=0` (linear_combination of curve+cubic).
+  - **`LocalPresentation.MarksAt.ofVC`** (★) — marking transport under `ofVC`: sends a Q-marking (p₀,q₀)
+    to (p₀u⁻², q₀u⁻³)=(γ, β+γ). Built on `projModelVCIso_affineSection`.
+  - **`isE3Chart`** (★★★) — the LOCAL ℰ₃-datum: from a flex-NF chart marking P at origin + Q at (p,q) +
+    hcubic + units, the twisted chart `P₀.ofVC ⟨u,0,0,0⟩` is a genuine ℰ₃-form presentation marking P at
+    (0,0) & Q at (γ, β+γ). The reusable core of `IsE3Datum`.
+
+**★ KEY DISCOVERY — the ζ₃/Weil-pairing gate is VOID.** NORM's sheet-pinning scaling `u=−A/B` is a
+**rational function of the curve+Q coordinates** (A,B explicit); the √-3 that the discriminant
+`a₁²+12·x(Q)` demands is **implicit** in Q being a rational 3-torsion point (Weil-pairing ζ₃ auto-present).
+So the earlier belief that NORM waits on the 8-sorry `WeilPairing/Basic.lean` is WRONG — the normalization
+is Zariski-local and needs no ζ₃ datum. Verified: 1650/1650 numeric cases + u=1 on the universal +
+CAS-cofactor `linear_combination` certificates.
+
+**RESIDUAL NORM GATE (the true bottleneck):** the group-law **torsion→coordinate bridges**
+`3•P=0 ⟹ μ_P=0` and `3•Q=0 ⟹ cubic(x(Q))=0` (P/Q are flexes; x(Q) roots the 3-division cofactor).
+**No such bridge exists in mathlib or the repo** — mathlib's TateNF `μ`/`ThriceNeZero` DEFINES but never
+PROVES `3•P=0 ↔ μ=0`, and the Legendre-[2] route used a negation-fix special to 2-torsion. This is
+E[3]/division-polynomial substrate = **G0's BB-DEG (E[N]=V(div-poly)) / KM's endDeg territory** per the
+v10.250 CONVERGENCE ruling — OMEGA CONSUMES it. IsE3Datum = assemble `isE3Chart` over a ∀s∃V cover +
+supply the flex-NF chart from the P-bridge. [T-E14-LVL-b] is symmetric (killing done; generation = #E[2]=4
+= BB-DEG). Both OMEGA tickets bottom out at the not-yet-landed E[N]/keystone substrate.
