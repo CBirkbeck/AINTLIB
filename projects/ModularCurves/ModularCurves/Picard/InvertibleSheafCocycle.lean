@@ -203,6 +203,43 @@ noncomputable def openTrivializationTransitionUnit
     (overTrivializationOfRestrictIso M U e)
     (overTrivializationOfRestrictIso M U g)
 
+/-- The change between two open-subscheme trivializations is multiplication by their
+transition unit. -/
+theorem openTrivializationTransitionUnit_hom
+    {X : Scheme.{u}} {M : X.Modules} (U : X.Opens)
+    (e g : M.restrict U.ι ≅ unitObj U.toScheme) :
+    e.inv ≫ g.hom =
+      ModularCurves.unitEndomorphismOfTopSection
+        (openTopSection U (openTrivializationTransitionUnit M U e g : Γ(X, U))) := by
+  let C := U.sheafOfModulesEquivOverUnit X.ringCatSheaf
+  apply (cancel_epi C.hom).1
+  rw [← overEquiv_unitScalarEnd]
+  unfold openTrivializationTransitionUnit
+  rw [overUnitScalarEnd_transitionUnit]
+  simp only [overTrivializationOfRestrictIso,
+    Functor.FullyFaithful.preimageIso_inv,
+    Functor.FullyFaithful.preimageIso_hom,
+    Functor.FullyFaithful.map_preimage,
+    Functor.map_comp, Iso.trans_hom, Iso.trans_inv,
+    Iso.symm_hom, Iso.symm_inv, Category.assoc]
+  let F := (overFunctorEquiv U).app M
+  change C.hom ≫ e.inv ≫ g.hom =
+    C.hom ≫ e.inv ≫ F.inv ≫ F.hom ≫ g.hom ≫ C.inv ≫ C.hom
+  symm
+  calc
+    C.hom ≫ e.inv ≫ F.inv ≫ F.hom ≫ g.hom ≫ C.inv ≫ C.hom =
+        C.hom ≫ e.inv ≫ (F.inv ≫ F.hom ≫ g.hom) ≫
+          (C.inv ≫ C.hom) := by simp only [Category.assoc]
+    _ = C.hom ≫ e.inv ≫ g.hom ≫ (C.inv ≫ C.hom) := by
+      exact congrArg
+        (fun q => C.hom ≫ e.inv ≫ q ≫ (C.inv ≫ C.hom))
+        (F.inv_hom_id_assoc g.hom)
+    _ = C.hom ≫ e.inv ≫ g.hom ≫ 𝟙 _ :=
+      congrArg (fun q => C.hom ≫ e.inv ≫ g.hom ≫ q) C.inv_hom_id
+    _ = C.hom ≫ e.inv ≫ g.hom := by
+      simpa only [← Category.assoc] using
+        (Category.comp_id (C.hom ≫ e.inv ≫ g.hom))
+
 /-- Restricting open-subscheme trivializations restricts their transition unit along the
 structure-sheaf map. -/
 theorem openTrivializationTransitionUnit_restrict

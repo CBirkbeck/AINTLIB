@@ -583,3 +583,11 @@ ordered glue-map routes to charts with the affine overlap-coordinate isomorphism
 left and right inclusions of `U i ⊓ U j`. The active transition-square proof consumes these exact
 factorizations, with no duplicate comparison construction. The focused build is green, and both
 axiom audits are exactly `propext`, `Classical.choice`, and `Quot.sound`.
+
+Completed spawned dependency (2026-07-15): proved
+`openTrivializationTransitionUnit_hom`. For two trivializations `e` and `g` of a module on an
+open subscheme, identify the change of basis `e.inv ≫ g.hom` with the unit-sheaf endomorphism
+defined by the top-section image of `openTrivializationTransitionUnit M U e g`. This is the
+scheme-module translation of the existing over-site theorem
+`overUnitScalarEnd_transitionUnit`; it adds no hypotheses or proof-resource options. The focused
+build is green, and its axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.
