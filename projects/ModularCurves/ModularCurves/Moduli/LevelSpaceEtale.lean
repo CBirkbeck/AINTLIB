@@ -71,4 +71,70 @@ theorem etale_of_etale_pullback_snd_of_cover {X T : Scheme.{u}} (f : X ⟶ S) (p
     (Q := @Surjective ⊓ @Flat ⊓ @LocallyOfFinitePresentation)
     ⟨⟨‹Surjective p›, ‹Flat p›⟩, ‹LocallyOfFinitePresentation p›⟩ hpb
 
+section PairBaseChange
+
+variable (E : EllipticCurve S) {T : Scheme.{u}} (p : T ⟶ S) (N : ℕ) [NeZero N]
+
+/-- **(β2, ambient comparison)** The comparison map on torsion self-products
+`E_T[N] ×_T E_T[N] ⟶ E[N] ×_S E[N]` induced by the single-factor comparison
+`torsionBaseChangeHom` on each leg. -/
+noncomputable def torsionPairBaseChangeHom :
+    pullback ((E.baseChange p).torsionπ N) ((E.baseChange p).torsionπ N) ⟶
+      pullback (E.torsionπ N) (E.torsionπ N) :=
+  pullback.map _ _ _ _ (E.torsionBaseChangeHom N p) (E.torsionBaseChangeHom N p) p
+    (E.torsion_baseChange_isPullback N p).w.symm (E.torsion_baseChange_isPullback N p).w.symm
+
+/-- **(β2, ambient square)** The torsion self-product commutes with base change: the square
+`E_T[N] ×_T E_T[N] → E[N] ×_S E[N]`, `→ T`, `E[N] ×_S E[N] → S`, `T → S` is cartesian
+(both structure maps through the first projection). Proved by hand from the universal
+properties, threading each leg through the single-factor square
+`torsion_baseChange_isPullback`. -/
+theorem torsionPair_baseChange_isPullback :
+    IsPullback (torsionPairBaseChangeHom E p N)
+      (pullback.fst ((E.baseChange p).torsionπ N) ((E.baseChange p).torsionπ N) ≫
+        (E.baseChange p).torsionπ N)
+      (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) p := by
+  have hsq := E.torsion_baseChange_isPullback N p
+  have hw : torsionPairBaseChangeHom E p N ≫
+        pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N
+      = (pullback.fst ((E.baseChange p).torsionπ N) ((E.baseChange p).torsionπ N) ≫
+          (E.baseChange p).torsionπ N) ≫ p := by
+    rw [torsionPairBaseChangeHom, ← Category.assoc, pullback.lift_fst, Category.assoc,
+      hsq.w, ← Category.assoc, Category.assoc]
+  refine IsPullback.of_isLimit (PullbackCone.IsLimit.mk hw
+    (fun s => pullback.lift
+      (hsq.lift (s.fst ≫ pullback.fst (E.torsionπ N) (E.torsionπ N)) s.snd
+        (by rw [Category.assoc, s.condition]))
+      (hsq.lift (s.fst ≫ pullback.snd (E.torsionπ N) (E.torsionπ N)) s.snd
+        (by rw [Category.assoc, ← pullback.condition, s.condition]))
+      (by rw [IsPullback.lift_snd, IsPullback.lift_snd]))
+    (fun s => ?_) (fun s => ?_) (fun s m hm1 hm2 => ?_))
+  · -- fac (first projection of the cone = the comparison map)
+    apply pullback.hom_ext
+    · rw [Category.assoc, torsionPairBaseChangeHom, pullback.lift_fst,
+        ← Category.assoc, pullback.lift_fst, IsPullback.lift_fst]
+    · rw [Category.assoc, torsionPairBaseChangeHom, pullback.lift_snd,
+        ← Category.assoc, pullback.lift_snd, IsPullback.lift_fst]
+  · -- fac (second projection = the T-structure)
+    rw [← Category.assoc, pullback.lift_fst, IsPullback.lift_snd]
+  · -- uniqueness
+    apply pullback.hom_ext
+    · apply hsq.hom_ext
+      · have h1 := congrArg (· ≫ pullback.fst (E.torsionπ N) (E.torsionπ N)) hm1
+        simp only [Category.assoc, torsionPairBaseChangeHom, pullback.lift_fst] at h1
+        simpa only [Category.assoc, pullback.lift_fst_assoc, IsPullback.lift_fst] using h1
+      · simpa only [Category.assoc, pullback.lift_fst_assoc, IsPullback.lift_snd] using hm2
+    · apply hsq.hom_ext
+      · have h1 := congrArg (· ≫ pullback.snd (E.torsionπ N) (E.torsionπ N)) hm1
+        simp only [Category.assoc, torsionPairBaseChangeHom, pullback.lift_snd] at h1
+        simpa only [Category.assoc, pullback.lift_snd_assoc, IsPullback.lift_fst] using h1
+      · have hm2' : m ≫ pullback.snd ((E.baseChange p).torsionπ N)
+            ((E.baseChange p).torsionπ N) ≫ (E.baseChange p).torsionπ N = s.snd := by
+          rw [← pullback.condition, ← Category.assoc]
+          exact hm2
+        simpa only [Category.assoc, pullback.lift_fst_assoc, pullback.lift_snd_assoc,
+          IsPullback.lift_fst, IsPullback.lift_snd, ← pullback.condition] using hm2'
+
+end PairBaseChange
+
 end ModularCurves
