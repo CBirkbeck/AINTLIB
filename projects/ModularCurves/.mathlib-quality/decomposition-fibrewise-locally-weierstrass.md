@@ -511,3 +511,11 @@ and the full restricted Cech target is the product of these factors, compatibly 
 The proof pastes the existing chosen-pullback squares and introduces no new geometric hypotheses;
 all declarations are option-free and their axiom audits are exactly `propext`,
 `Classical.choice`, and `Quot.sound`.
+
+Completed subdependency (2026-07-14): constructed the chart-local tuple whose `i`th component is
+the adjoint of the inverse transition from `U_k` to `V(i,k)`, transported it into the restricted
+Cech source, and proved the inverse triple-overlap identity
+`g_ik⁻¹ ∘ g_ij = g_jk⁻¹` from the existing cocycle theorem. Also proved the inverse
+projection formula `chartGlueSourceRestrictIso_inv_π`. The construction is option-free, adds no
+hypotheses, and the new public projection formula depends only on `propext`, `Classical.choice`,
+and `Quot.sound`.
