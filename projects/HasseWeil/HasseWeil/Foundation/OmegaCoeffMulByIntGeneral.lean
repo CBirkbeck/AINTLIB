@@ -280,7 +280,7 @@ theorem kaehlerD_addPullback_x_general (α : Isogeny W.toAffine W.toAffine) :
         KaehlerDifferential.D F KE (addSlope W α) -
       KaehlerDifferential.D F KE (x_gen W) -
       KaehlerDifferential.D F KE (α.pullback (x_gen W)) := by
-  unfold addPullback_x W_KE
+  simp only [addPullback_x, W_KE]
   set D := KaehlerDifferential.D F KE
   set ℓ := addSlope W α
   change D ((ℓ) ^ 2 + (algebraMap F KE) W.a₁ * ℓ
@@ -321,7 +321,6 @@ theorem kaehlerD_addPullback_x_general_cleared (α : Isogeny W.toAffine W.toAffi
 
 -- `map_add`/`map_mul` in the multi-target `simp only … at hP hαP ⊢` below are used on the
 -- hypotheses but flagged unused on the goal; silence the (harmless) linter for this leaf.
-set_option linter.unusedSimpArgs false in
 /-- **RB-ω4 leaf (the III.5.2 ring collapse)**:
 `D(addPullback_x) = addPullback_u • (1 + a_α) • ω`. -/
 theorem kaehlerD_addPullback_x_eq_one_add_smul_omega (α : Isogeny W.toAffine W.toAffine)
@@ -354,8 +353,7 @@ theorem kaehlerD_addPullback_x_eq_one_add_smul_omega (α : Isogeny W.toAffine W.
   simp only [WeierstrassCurve.Affine.addX, WeierstrassCurve.Affine.addY,
     WeierstrassCurve.Affine.negAddY, WeierstrassCurve.Affine.negY,
     W_KE, WeierstrassCurve.toAffine, WeierstrassCurve.map_a₁, WeierstrassCurve.map_a₂,
-    WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆,
-    map_add, map_mul, map_ofNat, AlgHom.commutes] at hP hαP ⊢
+    WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆] at hP hαP ⊢
   field_simp [sub_ne_zero.mpr h_ne]
   set X := x_gen W
   set Y := y_gen W

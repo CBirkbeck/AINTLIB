@@ -72,7 +72,7 @@ theorem x_gen_sub_const_eq_algebraMap_XClass (xk : F) :
     x_gen W - algebraMap F KE xk =
       algebraMap W.toAffine.CoordinateRing KE
         (Affine.CoordinateRing.XClass W.toAffine xk) := by
-  unfold x_gen
+  simp only [x_gen]
   rw [show (algebraMap F KE xk : KE) =
     algebraMap W.toAffine.CoordinateRing KE
       (algebraMap F W.toAffine.CoordinateRing xk)
@@ -100,7 +100,7 @@ theorem XClass_mem_maximalIdealAt
   rw [← h_x]
   change Affine.CoordinateRing.XClass W.toAffine P.x ∈
     Affine.CoordinateRing.XYIdeal W.toAffine P.x (Polynomial.C P.y)
-  unfold Affine.CoordinateRing.XYIdeal
+  simp only [Affine.CoordinateRing.XYIdeal]
   exact Ideal.subset_span (Set.mem_insert _ _)
 
 /-! ### Generic order-positivity helpers (reused by both x- and y-sides) -/
@@ -116,7 +116,7 @@ private theorem ord_P_nonneg_of_pointValuation_le_one
     (0 : WithTop ℤ) ≤ C.ord_P P f := by
   have hv : C.pointValuation P f ≠ 0 :=
     (C.pointValuation P).ne_zero_iff.mpr hf
-  unfold SmoothPlaneCurve.ord_P
+  simp only [SmoothPlaneCurve.ord_P]
   rw [dif_neg hv]
   rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl,
       WithTop.coe_le_coe]
@@ -214,7 +214,7 @@ private theorem ord_P_le_one_of_pointValuation_eq_exp_neg_one
     C.ord_P P f ≤ ((1 : ℤ) : WithTop ℤ) := by
   have h_val_ne : C.pointValuation P f ≠ 0 := by
     rw [hf]; exact WithZero.exp_ne_zero
-  unfold SmoothPlaneCurve.ord_P
+  simp only [SmoothPlaneCurve.ord_P]
   rw [dif_neg h_val_ne]
   have h_unz : WithZero.unzero h_val_ne = Multiplicative.ofAdd (-1 : ℤ) := by
     rwa [← WithZero.coe_inj, WithZero.coe_unzero]
@@ -601,7 +601,7 @@ theorem y_gen_sub_const_eq_algebraMap_YClass (yk' : F) :
     y_gen W - algebraMap F KE yk' =
       algebraMap W.toAffine.CoordinateRing KE
         (Affine.CoordinateRing.YClass W.toAffine (Polynomial.C yk')) := by
-  unfold y_gen
+  simp only [y_gen]
   rw [show (algebraMap F KE yk' : KE) =
     algebraMap W.toAffine.CoordinateRing KE
       (algebraMap F W.toAffine.CoordinateRing yk')
@@ -619,7 +619,7 @@ theorem YClass_mem_maximalIdealAt
   rw [← h_y]
   change Affine.CoordinateRing.YClass W.toAffine (Polynomial.C P.y) ∈
     Affine.CoordinateRing.XYIdeal W.toAffine P.x (Polynomial.C P.y)
-  unfold Affine.CoordinateRing.XYIdeal
+  simp only [Affine.CoordinateRing.XYIdeal]
   exact Ideal.subset_span (Set.mem_insert_of_mem _ rfl)
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
@@ -1003,7 +1003,7 @@ theorem pointValuation_y_gen_sub_const_eq_one_at_negSmoothPoint
   have h_pv_ne : (W_smooth W).pointValuation (negSmoothPoint W xk yk h_ns)
       (y_gen W - algebraMap F KE yk) ≠ 0 :=
     ((W_smooth W).pointValuation _).ne_zero_iff.mpr h_ne
-  unfold SmoothPlaneCurve.ord_P at h_ord_eq
+  simp only [SmoothPlaneCurve.ord_P] at h_ord_eq
   rw [dif_neg h_pv_ne] at h_ord_eq
   have h_toAdd : (WithZero.unzero h_pv_ne).toAdd = 0 := by
     have h_neg : -((WithZero.unzero h_pv_ne).toAdd : ℤ) = 0 := by
@@ -1154,7 +1154,7 @@ private theorem translateX_xy_mul_sq_eq
           (x_gen W - algebraMap F KE xk) -
         (algebraMap F KE W.a₂ + x_gen W + algebraMap F KE xk) *
           (x_gen W - algebraMap F KE xk) ^ 2 := by
-  unfold translateX_xy
+  simp only [translateX_xy]
   rw [WeierstrassCurve.Affine.addX]
   rw [show translateSlope_xy W xk yk =
     (y_gen W - algebraMap F KE yk) / (x_gen W - algebraMap F KE xk)
@@ -1191,7 +1191,7 @@ theorem translateY_xy_mul_cube_eq
             (algebraMap F KE W.a₂ + x_gen W + algebraMap F KE xk) -
           algebraMap F KE W.a₃) *
           (x_gen W - algebraMap F KE xk) ^ 3 := by
-  unfold translateY_xy
+  simp only [translateY_xy]
   rw [WeierstrassCurve.Affine.addY]
   rw [WeierstrassCurve.Affine.negY]
   rw [WeierstrassCurve.Affine.negAddY]
@@ -1226,7 +1226,7 @@ private theorem ord_P_algebraMap_R_nonneg (P : (W_smooth W).SmoothPoint)
   · have hv : (W_smooth W).pointValuation P
         (algebraMap W.toAffine.CoordinateRing KE u) ≠ 0 :=
       ((W_smooth W).pointValuation P).ne_zero_iff.mpr hf
-    unfold SmoothPlaneCurve.ord_P
+    simp only [SmoothPlaneCurve.ord_P]
     rw [dif_neg hv]
     rw [show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl,
         WithTop.coe_le_coe]
@@ -1906,7 +1906,7 @@ omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- Helper: `negY xk (negY xk yk) = yk` (the negation involution). -/
 private theorem negY_negY_eq (xk yk : F) :
     W.toAffine.negY xk (W.toAffine.negY xk yk) = yk := by
-  unfold WeierstrassCurve.Affine.negY
+  simp only [WeierstrassCurve.Affine.negY]
   ring
 
 /-- The unconditional translation algebra hom for `−T = (xk, negY xk yk)`,
@@ -1935,8 +1935,8 @@ theorem translateAlgHom_apply_x_gen
       translateX_xy W xk yk := by
   let hxy : TranslateNonInverse W xk yk :=
     fun h ↦ x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h.1)
-  unfold translateAlgHom_of_nonTorsion translateAlgHom
-  unfold x_gen
+  simp only [translateAlgHom_of_nonTorsion, translateAlgHom]
+  simp only [x_gen]
   rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
   change (translateCoordAlgHom W xk yk h_ns.1 hxy).toRingHom
       (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X) =
@@ -1944,7 +1944,7 @@ theorem translateAlgHom_apply_x_gen
   change translateCoordRingHom W xk yk h_ns.1 hxy
       (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X) =
     translateX_xy W xk yk
-  unfold translateCoordRingHom
+  simp only [translateCoordRingHom]
   change AdjoinRoot.lift (translateBaseHom W xk yk) (translateY_xy W xk yk)
       (translate_poly_eval₂_zero W xk yk h_ns.1 hxy)
       (AdjoinRoot.of W.toAffine.polynomial Polynomial.X) =
@@ -1985,7 +1985,7 @@ omit [DecidableEq F] [W.toAffine.IsElliptic] in
 private theorem WKE_negY_algebraMap (xk yk' : F) :
     (W_KE W).toAffine.negY (algebraMap F KE xk) (algebraMap F KE yk') =
       algebraMap F KE (W.toAffine.negY xk yk') := by
-  unfold WeierstrassCurve.Affine.negY
+  simp only [WeierstrassCurve.Affine.negY]
   change -(algebraMap F KE yk') - (W_KE W).a₁ * (algebraMap F KE xk) -
     (W_KE W).a₃ = _
   change -(algebraMap F KE yk') - algebraMap F KE W.a₁ * (algebraMap F KE xk) -
@@ -1997,7 +1997,7 @@ theorem liftSomePoint_add_neg_eq_zero
     (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk) :
     liftSomePoint W xk yk h_ns +
         liftSomePoint_neg W xk yk h_ns = 0 := by
-  unfold liftSomePoint liftSomePoint_neg liftSomePoint
+  simp only [liftSomePoint, liftSomePoint_neg, liftSomePoint]
   apply Affine.Point.add_of_Y_eq
   · rfl
   · rw [WKE_negY_algebraMap, negY_negY_eq]
@@ -2022,7 +2022,7 @@ theorem genericPoint_add_liftSomePoint
             (RingHom.injective (algebraMap F KE)) xk yk).mpr h_ns)
           (fun hxy ↦ x_gen_sub_const_ne_zero W xk
             (sub_eq_zero.mpr hxy.left))) := by
-  unfold genericPoint liftSomePoint
+  simp only [genericPoint, liftSomePoint]
   exact Affine.Point.add_of_X_ne (fun h_eq ↦
     x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h_eq))
 
@@ -2085,7 +2085,7 @@ theorem translateAlgHom_neg_apply_x_gen
     (h_not_2_tor : yk ≠ W.toAffine.negY xk yk) :
     translateAlgHom_of_nonTorsion_neg W xk yk h_ns h_not_2_tor (x_gen W) =
       translateX_xy W xk (W.toAffine.negY xk yk) := by
-  unfold translateAlgHom_of_nonTorsion_neg
+  simp only [translateAlgHom_of_nonTorsion_neg]
   exact translateAlgHom_apply_x_gen W xk (W.toAffine.negY xk yk) _ _
 
 omit [W.toAffine.IsElliptic] in
@@ -2098,8 +2098,8 @@ theorem translateAlgHom_apply_y_gen
       translateY_xy W xk yk := by
   let hxy : TranslateNonInverse W xk yk :=
     fun h ↦ x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h.1)
-  unfold translateAlgHom_of_nonTorsion translateAlgHom
-  unfold y_gen
+  simp only [translateAlgHom_of_nonTorsion, translateAlgHom]
+  simp only [y_gen]
   rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
   change (translateCoordAlgHom W xk yk h_ns.1 hxy).toRingHom
       (AdjoinRoot.root W.toAffine.polynomial) =
@@ -2107,7 +2107,7 @@ theorem translateAlgHom_apply_y_gen
   change translateCoordRingHom W xk yk h_ns.1 hxy
       (AdjoinRoot.root W.toAffine.polynomial) =
     translateY_xy W xk yk
-  unfold translateCoordRingHom
+  simp only [translateCoordRingHom]
   exact AdjoinRoot.lift_root _
 
 omit [W.toAffine.IsElliptic] in
@@ -2117,7 +2117,7 @@ theorem translateAlgHom_neg_apply_y_gen
     (h_not_2_tor : yk ≠ W.toAffine.negY xk yk) :
     translateAlgHom_of_nonTorsion_neg W xk yk h_ns h_not_2_tor (y_gen W) =
       translateY_xy W xk (W.toAffine.negY xk yk) := by
-  unfold translateAlgHom_of_nonTorsion_neg
+  simp only [translateAlgHom_of_nonTorsion_neg]
   exact translateAlgHom_apply_y_gen W xk (W.toAffine.negY xk yk) _ _
 
 /-! ### Round-trip on `x_gen` — Silverman III.4.10(a) substantive content
@@ -2147,7 +2147,7 @@ private theorem σ_commutes_addX
     {σ : KE →ₐ[F] KE} (a b ℓ : KE) :
     σ ((W_KE W).toAffine.addX a b ℓ) =
       (W_KE W).toAffine.addX (σ a) (σ b) (σ ℓ) := by
-  unfold WeierstrassCurve.Affine.addX
+  simp only [WeierstrassCurve.Affine.addX]
   have h_a1 : σ ((W_KE W).a₁) = (W_KE W).a₁ := by
     change σ (algebraMap F KE W.a₁) = algebraMap F KE W.a₁
     exact σ.commutes _
@@ -2163,7 +2163,7 @@ private theorem σ_commutes_negY
     {σ : KE →ₐ[F] KE} (x y : KE) :
     σ ((W_KE W).toAffine.negY x y) =
       (W_KE W).toAffine.negY (σ x) (σ y) := by
-  unfold WeierstrassCurve.Affine.negY
+  simp only [WeierstrassCurve.Affine.negY]
   have h_a1 : σ ((W_KE W).a₁) = (W_KE W).a₁ := by
     change σ (algebraMap F KE W.a₁) = algebraMap F KE W.a₁
     exact σ.commutes _
@@ -2178,7 +2178,7 @@ private theorem σ_commutes_negAddY
     {σ : KE →ₐ[F] KE} (a b y₁ ℓ : KE) :
     σ ((W_KE W).toAffine.negAddY a b y₁ ℓ) =
       (W_KE W).toAffine.negAddY (σ a) (σ b) (σ y₁) (σ ℓ) := by
-  unfold WeierstrassCurve.Affine.negAddY
+  simp only [WeierstrassCurve.Affine.negAddY]
   rw [_root_.map_add, _root_.map_mul, _root_.map_sub, σ_commutes_addX]
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
@@ -2187,7 +2187,7 @@ private theorem σ_commutes_addY
     {σ : KE →ₐ[F] KE} (a b y₁ ℓ : KE) :
     σ ((W_KE W).toAffine.addY a b y₁ ℓ) =
       (W_KE W).toAffine.addY (σ a) (σ b) (σ y₁) (σ ℓ) := by
-  unfold WeierstrassCurve.Affine.addY
+  simp only [WeierstrassCurve.Affine.addY]
   rw [σ_commutes_negY, σ_commutes_addX, σ_commutes_negAddY]
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
@@ -2223,7 +2223,7 @@ theorem translateAlgHom_round_trip_x_gen
     translateAlgHom_neg_apply_x_gen W xk yk h_ns h_not_2_tor
   have hσy : σ (y_gen W) = translateY_xy W xk (W.toAffine.negY xk yk) :=
     translateAlgHom_neg_apply_y_gen W xk yk h_ns h_not_2_tor
-  unfold translateX_xy
+  simp only [translateX_xy]
   rw [σ_commutes_addX W (x_gen W) (algebraMap F KE xk)
         (translateSlope_xy W xk yk)]
   rw [σ.commutes xk, hσx]
@@ -2252,9 +2252,9 @@ theorem translateAlgHom_round_trip_x_gen
   have h_ne_2 : translateX_xy W xk (W.toAffine.negY xk yk) ≠ algebraMap F KE xk :=
     translateX_xy_neg_ne_algebraMap W xk yk h_ns h_not_2_tor
   rw [genericPoint_add_liftSomePoint_neg W xk yk h_ns] at h_gen_eq
-  unfold liftSomePoint at h_gen_eq
+  simp only [liftSomePoint] at h_gen_eq
   rw [Affine.Point.add_of_X_ne (h_ne_2)] at h_gen_eq
-  unfold genericPoint at h_gen_eq
+  simp only [genericPoint] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.1
 
 /-- **Forward round-trip at the `Affine.Point` level**:
@@ -2317,7 +2317,7 @@ theorem translateAlgHom_round_trip_y_gen
     translateAlgHom_neg_apply_x_gen W xk yk h_ns h_not_2_tor
   have hσy : σ (y_gen W) = translateY_xy W xk (W.toAffine.negY xk yk) :=
     translateAlgHom_neg_apply_y_gen W xk yk h_ns h_not_2_tor
-  unfold translateY_xy
+  simp only [translateY_xy]
   rw [σ_commutes_addY W (x_gen W) (algebraMap F KE xk) (y_gen W)
         (translateSlope_xy W xk yk)]
   rw [σ.commutes xk, hσx, hσy]
@@ -2326,9 +2326,9 @@ theorem translateAlgHom_round_trip_y_gen
   have h_ne_2 : translateX_xy W xk (W.toAffine.negY xk yk) ≠ algebraMap F KE xk :=
     translateX_xy_neg_ne_algebraMap W xk yk h_ns h_not_2_tor
   rw [genericPoint_add_liftSomePoint_neg W xk yk h_ns] at h_gen_eq
-  unfold liftSomePoint at h_gen_eq
+  simp only [liftSomePoint] at h_gen_eq
   rw [Affine.Point.add_of_X_ne (h_ne_2)] at h_gen_eq
-  unfold genericPoint at h_gen_eq
+  simp only [genericPoint] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.2
 
 /-! ### `AlgHom` extensionality from agreement on `x_gen, y_gen`.
@@ -2389,7 +2389,7 @@ theorem translateAlgHom_inv_round_trip_x_gen
     translateAlgHom_apply_x_gen W xk yk h_ns h_not_2_tor
   have hτy : τ (y_gen W) = translateY_xy W xk yk :=
     translateAlgHom_apply_y_gen W xk yk h_ns h_not_2_tor
-  unfold translateX_xy
+  simp only [translateX_xy]
   rw [σ_commutes_addX W (x_gen W) (algebraMap F KE xk)
         (translateSlope_xy W xk (W.toAffine.negY xk yk))]
   rw [τ.commutes xk, hτx]
@@ -2423,9 +2423,9 @@ theorem translateAlgHom_inv_round_trip_x_gen
       Polynomial.X_sub_C_ne_zero _, ?_⟩
     rw [_root_.map_sub, Polynomial.aeval_X, Polynomial.aeval_C, h_eq, sub_self]
   rw [genericPoint_add_liftSomePoint W xk yk h_ns] at h_gen_eq
-  unfold liftSomePoint_neg liftSomePoint at h_gen_eq
+  simp only [liftSomePoint_neg, liftSomePoint] at h_gen_eq
   rw [Affine.Point.add_of_X_ne (h_ne_2)] at h_gen_eq
-  unfold genericPoint at h_gen_eq
+  simp only [genericPoint] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.1
 
 omit [W.toAffine.IsElliptic] in
@@ -2487,7 +2487,7 @@ theorem translateAlgHom_inv_round_trip_y_gen
     translateAlgHom_apply_x_gen W xk yk h_ns h_not_2_tor
   have hτy : τ (y_gen W) = translateY_xy W xk yk :=
     translateAlgHom_apply_y_gen W xk yk h_ns h_not_2_tor
-  unfold translateY_xy
+  simp only [translateY_xy]
   rw [σ_commutes_addY W (x_gen W) (algebraMap F KE xk)
         (y_gen W) (translateSlope_xy W xk (W.toAffine.negY xk yk))]
   rw [τ.commutes xk, hτx, hτy]
@@ -2496,9 +2496,9 @@ theorem translateAlgHom_inv_round_trip_y_gen
   have h_ne_2 : translateX_xy W xk yk ≠ algebraMap F KE xk :=
     translateX_xy_ne_algebraMap_const W xk yk h_ns h_not_2_tor
   rw [genericPoint_add_liftSomePoint W xk yk h_ns] at h_gen_eq
-  unfold liftSomePoint_neg liftSomePoint at h_gen_eq
+  simp only [liftSomePoint_neg, liftSomePoint] at h_gen_eq
   rw [Affine.Point.add_of_X_ne (h_ne_2)] at h_gen_eq
-  unfold genericPoint at h_gen_eq
+  simp only [genericPoint] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.2
 
 /-! ### 2-torsion case — algebraic foundations
@@ -2940,7 +2940,7 @@ private theorem translateX_xy_eq_slope_sq_add_rest (xk yk : F) :
       translateSlope_xy W xk yk * translateSlope_xy W xk yk +
         ((W_KE W).a₁ * translateSlope_xy W xk yk +
           (-(W_KE W).a₂ + -x_gen W + -algebraMap F KE xk)) := by
-  unfold translateX_xy
+  simp only [translateX_xy]
   rw [WeierstrassCurve.Affine.addX]
   ring
 
@@ -3119,8 +3119,8 @@ theorem translateAlgHom_of_2tor_apply_x_gen
       translateX_xy W xk yk := by
   let hxy : TranslateNonInverse W xk yk :=
     fun h ↦ x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h.1)
-  unfold translateAlgHom_of_2tor translateAlgHom
-  unfold x_gen
+  simp only [translateAlgHom_of_2tor, translateAlgHom]
+  simp only [x_gen]
   rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
   change (translateCoordAlgHom W xk yk h_ns.1 hxy).toRingHom
       (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X) =
@@ -3128,7 +3128,7 @@ theorem translateAlgHom_of_2tor_apply_x_gen
   change translateCoordRingHom W xk yk h_ns.1 hxy
       (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X) =
     translateX_xy W xk yk
-  unfold translateCoordRingHom
+  simp only [translateCoordRingHom]
   change AdjoinRoot.lift (translateBaseHom W xk yk) (translateY_xy W xk yk)
       (translate_poly_eval₂_zero W xk yk h_ns.1 hxy)
       (AdjoinRoot.of W.toAffine.polynomial Polynomial.X) =
@@ -3198,7 +3198,7 @@ theorem liftSomePoint_add_self_eq_zero_of_2tor
     (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
     (h_2_tor : yk = W.toAffine.negY xk yk) :
     liftSomePoint W xk yk h_ns + liftSomePoint W xk yk h_ns = 0 := by
-  unfold liftSomePoint
+  simp only [liftSomePoint]
   apply Affine.Point.add_self_of_Y_eq
   change algebraMap F KE yk =
     (W.map (algebraMap F KE)).toAffine.negY
@@ -3215,8 +3215,8 @@ theorem translateAlgHom_of_2tor_apply_y_gen
       translateY_xy W xk yk := by
   let hxy : TranslateNonInverse W xk yk :=
     fun h ↦ x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h.1)
-  unfold translateAlgHom_of_2tor translateAlgHom
-  unfold y_gen
+  simp only [translateAlgHom_of_2tor, translateAlgHom]
+  simp only [y_gen]
   rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
   change (translateCoordAlgHom W xk yk h_ns.1 hxy).toRingHom
       (AdjoinRoot.root W.toAffine.polynomial) =
@@ -3224,7 +3224,7 @@ theorem translateAlgHom_of_2tor_apply_y_gen
   change translateCoordRingHom W xk yk h_ns.1 hxy
       (AdjoinRoot.root W.toAffine.polynomial) =
     translateY_xy W xk yk
-  unfold translateCoordRingHom
+  simp only [translateCoordRingHom]
   exact AdjoinRoot.lift_root _
 
 /-! ### Round-trip on `x_gen` for 2-torsion `T`: `τ²(x_gen) = x_gen`
@@ -3249,7 +3249,7 @@ theorem translateAlgHom_of_2tor_round_trip_x_gen
     translateAlgHom_of_2tor_apply_x_gen W xk yk h_ns h_2_tor
   have hσy : σ (y_gen W) = translateY_xy W xk yk :=
     translateAlgHom_of_2tor_apply_y_gen W xk yk h_ns h_2_tor
-  unfold translateX_xy
+  simp only [translateX_xy]
   rw [σ_commutes_addX W (x_gen W) (algebraMap F KE xk)
         (translateSlope_xy W xk yk)]
   rw [σ.commutes xk, hσx]
@@ -3276,9 +3276,9 @@ theorem translateAlgHom_of_2tor_round_trip_x_gen
   have h_ne_2 : translateX_xy W xk yk ≠ algebraMap F KE xk :=
     translateX_xy_ne_algebraMap_2tor W xk yk h_ns h_2_tor
   rw [genericPoint_add_liftSomePoint W xk yk h_ns] at h_gen_eq
-  unfold liftSomePoint at h_gen_eq
+  simp only [liftSomePoint] at h_gen_eq
   rw [Affine.Point.add_of_X_ne (h_ne_2)] at h_gen_eq
-  unfold genericPoint at h_gen_eq
+  simp only [genericPoint] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.1
 
 /-- **Round-trip on `y_gen` for 2-torsion `T`**: applying
@@ -3295,7 +3295,7 @@ theorem translateAlgHom_of_2tor_round_trip_y_gen
     translateAlgHom_of_2tor_apply_x_gen W xk yk h_ns h_2_tor
   have hσy : σ (y_gen W) = translateY_xy W xk yk :=
     translateAlgHom_of_2tor_apply_y_gen W xk yk h_ns h_2_tor
-  unfold translateY_xy
+  simp only [translateY_xy]
   rw [σ_commutes_addY W (x_gen W) (algebraMap F KE xk) (y_gen W)
         (translateSlope_xy W xk yk)]
   rw [σ.commutes xk, hσx, hσy]
@@ -3322,9 +3322,9 @@ theorem translateAlgHom_of_2tor_round_trip_y_gen
   have h_ne_2 : translateX_xy W xk yk ≠ algebraMap F KE xk :=
     translateX_xy_ne_algebraMap_2tor W xk yk h_ns h_2_tor
   rw [genericPoint_add_liftSomePoint W xk yk h_ns] at h_gen_eq
-  unfold liftSomePoint at h_gen_eq
+  simp only [liftSomePoint] at h_gen_eq
   rw [Affine.Point.add_of_X_ne (h_ne_2)] at h_gen_eq
-  unfold genericPoint at h_gen_eq
+  simp only [genericPoint] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.2
 
 /-! ### `translateAlgEquiv_of_2tor` — translation by 2-torsion as a self-inverse AlgEquiv
@@ -3417,7 +3417,7 @@ theorem translateAlgEquivOfPoint_some_2tor
     (h_2_tor : yk = W.toAffine.negY xk yk) :
     translateAlgEquivOfPoint W (.some xk yk h_ns) =
       translateAlgEquiv_of_2tor W xk yk h_ns h_2_tor := by
-  unfold translateAlgEquivOfPoint
+  simp only [translateAlgEquivOfPoint]
   exact dif_pos h_2_tor
 
 theorem translateAlgEquivOfPoint_some_nonTor
@@ -3425,7 +3425,7 @@ theorem translateAlgEquivOfPoint_some_nonTor
     (h_not_2_tor : yk ≠ W.toAffine.negY xk yk) :
     translateAlgEquivOfPoint W (.some xk yk h_ns) =
       translateAlgEquiv W xk yk h_ns h_not_2_tor := by
-  unfold translateAlgEquivOfPoint
+  simp only [translateAlgEquivOfPoint]
   exact dif_neg h_not_2_tor
 
 /-! ### Identity action: the zero point acts as `AlgEquiv.refl` -/
@@ -3749,7 +3749,7 @@ theorem translateAlgEquivOfPoint_add_nonTor_x_gen
   have hσy : σ (y_gen W) = translateY_xy W xk₂ yk₂ :=
     translateAlgHom_apply_y_gen W xk₂ yk₂ h_ns₂ h_not_2_tor₂
   rw [translateAlgHom_apply_x_gen W xk₁ yk₁ h_ns₁ h_not_2_tor₁]
-  unfold translateX_xy
+  simp only [translateX_xy]
   rw [σ_commutes_addX W (x_gen W) (algebraMap F KE xk₁)
         (translateSlope_xy W xk₁ yk₁)]
   rw [σ.commutes xk₁, hσx]
@@ -3781,7 +3781,7 @@ theorem translateAlgEquivOfPoint_add_nonTor_x_gen
         : W.toAffine.Point) = Affine.Point.some xk₃ yk₃ h_ns₃ from h_sum]
   rw [genericPoint_add_liftSomePoint W xk₂ yk₂ h_ns₂] at h_gen_eq
   rw [genericPoint_add_liftSomePoint W xk₃ yk₃ h_ns₃] at h_gen_eq
-  unfold liftSomePoint at h_gen_eq
+  simp only [liftSomePoint] at h_gen_eq
   rw [Affine.Point.add_of_X_ne (h_x₂_ne)] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.1
 
@@ -3868,7 +3868,7 @@ theorem translateAlgEquivOfPoint_add_nonTor_y_gen
   have hσy : σ (y_gen W) = translateY_xy W xk₂ yk₂ :=
     translateAlgHom_apply_y_gen W xk₂ yk₂ h_ns₂ h_not_2_tor₂
   rw [translateAlgHom_apply_y_gen W xk₁ yk₁ h_ns₁ h_not_2_tor₁]
-  unfold translateY_xy
+  simp only [translateY_xy]
   rw [σ_commutes_addY W (x_gen W) (algebraMap F KE xk₁) (y_gen W)
         (translateSlope_xy W xk₁ yk₁)]
   rw [σ.commutes xk₁, hσx, hσy]
@@ -3878,7 +3878,7 @@ theorem translateAlgEquivOfPoint_add_nonTor_y_gen
     xk₁ yk₁ h_ns₁ xk₂ yk₂ h_ns₂ xk₃ yk₃ h_ns₃ h_sum
   rw [genericPoint_add_liftSomePoint W xk₂ yk₂ h_ns₂] at h_gen_eq
   rw [genericPoint_add_liftSomePoint W xk₃ yk₃ h_ns₃] at h_gen_eq
-  unfold liftSomePoint at h_gen_eq
+  simp only [liftSomePoint] at h_gen_eq
   rw [Affine.Point.add_of_X_ne (h_x₂_ne)] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.2
 
@@ -3910,7 +3910,7 @@ theorem translateAlgEquivOfPoint_add_2tor_x_gen
   have hσy : σ (y_gen W) = translateY_xy W xk₂ yk₂ :=
     translateAlgHom_of_2tor_apply_y_gen W xk₂ yk₂ h_ns₂ h_2_tor₂
   rw [translateAlgHom_of_2tor_apply_x_gen W xk₁ yk₁ h_ns₁ h_2_tor₁]
-  unfold translateX_xy
+  simp only [translateX_xy]
   rw [σ_commutes_addX W (x_gen W) (algebraMap F KE xk₁)
         (translateSlope_xy W xk₁ yk₁)]
   rw [σ.commutes xk₁, hσx]
@@ -3942,7 +3942,7 @@ theorem translateAlgEquivOfPoint_add_2tor_x_gen
         : W.toAffine.Point) = Affine.Point.some xk₃ yk₃ h_ns₃ from h_sum]
   rw [genericPoint_add_liftSomePoint W xk₂ yk₂ h_ns₂] at h_gen_eq
   rw [genericPoint_add_liftSomePoint W xk₃ yk₃ h_ns₃] at h_gen_eq
-  unfold liftSomePoint at h_gen_eq
+  simp only [liftSomePoint] at h_gen_eq
   rw [Affine.Point.add_of_X_ne (h_x₂_ne)] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.1
 
@@ -3997,7 +3997,7 @@ theorem translateAlgEquivOfPoint_add_2tor_y_gen
   have hσy : σ (y_gen W) = translateY_xy W xk₂ yk₂ :=
     translateAlgHom_of_2tor_apply_y_gen W xk₂ yk₂ h_ns₂ h_2_tor₂
   rw [translateAlgHom_of_2tor_apply_y_gen W xk₁ yk₁ h_ns₁ h_2_tor₁]
-  unfold translateY_xy
+  simp only [translateY_xy]
   rw [σ_commutes_addY W (x_gen W) (algebraMap F KE xk₁) (y_gen W)
         (translateSlope_xy W xk₁ yk₁)]
   rw [σ.commutes xk₁, hσx, hσy]
@@ -4007,7 +4007,7 @@ theorem translateAlgEquivOfPoint_add_2tor_y_gen
     xk₁ yk₁ h_ns₁ xk₂ yk₂ h_ns₂ xk₃ yk₃ h_ns₃ h_sum
   rw [genericPoint_add_liftSomePoint W xk₂ yk₂ h_ns₂] at h_gen_eq
   rw [genericPoint_add_liftSomePoint W xk₃ yk₃ h_ns₃] at h_gen_eq
-  unfold liftSomePoint at h_gen_eq
+  simp only [liftSomePoint] at h_gen_eq
   rw [Affine.Point.add_of_X_ne (h_x₂_ne)] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.2
 
@@ -4039,7 +4039,7 @@ theorem translateAlgEquivOfPoint_add_2tor_nonTor_x_gen
   have hσy : σ (y_gen W) = translateY_xy W xk₂ yk₂ :=
     translateAlgHom_apply_y_gen W xk₂ yk₂ h_ns₂ h_not_2_tor₂
   rw [translateAlgHom_of_2tor_apply_x_gen W xk₁ yk₁ h_ns₁ h_2_tor₁]
-  unfold translateX_xy
+  simp only [translateX_xy]
   rw [σ_commutes_addX W (x_gen W) (algebraMap F KE xk₁)
         (translateSlope_xy W xk₁ yk₁)]
   rw [σ.commutes xk₁, hσx]
@@ -4071,7 +4071,7 @@ theorem translateAlgEquivOfPoint_add_2tor_nonTor_x_gen
         : W.toAffine.Point) = Affine.Point.some xk₃ yk₃ h_ns₃ from h_sum]
   rw [genericPoint_add_liftSomePoint W xk₂ yk₂ h_ns₂] at h_gen_eq
   rw [genericPoint_add_liftSomePoint W xk₃ yk₃ h_ns₃] at h_gen_eq
-  unfold liftSomePoint at h_gen_eq
+  simp only [liftSomePoint] at h_gen_eq
   rw [Affine.Point.add_of_X_ne (h_x₂_ne)] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.1
 
@@ -4095,7 +4095,7 @@ theorem translateAlgEquivOfPoint_add_2tor_nonTor_y_gen
   have hσy : σ (y_gen W) = translateY_xy W xk₂ yk₂ :=
     translateAlgHom_apply_y_gen W xk₂ yk₂ h_ns₂ h_not_2_tor₂
   rw [translateAlgHom_of_2tor_apply_y_gen W xk₁ yk₁ h_ns₁ h_2_tor₁]
-  unfold translateY_xy
+  simp only [translateY_xy]
   rw [σ_commutes_addY W (x_gen W) (algebraMap F KE xk₁) (y_gen W)
         (translateSlope_xy W xk₁ yk₁)]
   rw [σ.commutes xk₁, hσx, hσy]
@@ -4127,7 +4127,7 @@ theorem translateAlgEquivOfPoint_add_2tor_nonTor_y_gen
         : W.toAffine.Point) = Affine.Point.some xk₃ yk₃ h_ns₃ from h_sum]
   rw [genericPoint_add_liftSomePoint W xk₂ yk₂ h_ns₂] at h_gen_eq
   rw [genericPoint_add_liftSomePoint W xk₃ yk₃ h_ns₃] at h_gen_eq
-  unfold liftSomePoint at h_gen_eq
+  simp only [liftSomePoint] at h_gen_eq
   rw [Affine.Point.add_of_X_ne (h_x₂_ne)] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.2
 
@@ -4151,7 +4151,7 @@ theorem translateAlgEquivOfPoint_add_nonTor_2tor_x_gen
   have hσy : σ (y_gen W) = translateY_xy W xk₂ yk₂ :=
     translateAlgHom_of_2tor_apply_y_gen W xk₂ yk₂ h_ns₂ h_2_tor₂
   rw [translateAlgHom_apply_x_gen W xk₁ yk₁ h_ns₁ h_not_2_tor₁]
-  unfold translateX_xy
+  simp only [translateX_xy]
   rw [σ_commutes_addX W (x_gen W) (algebraMap F KE xk₁)
         (translateSlope_xy W xk₁ yk₁)]
   rw [σ.commutes xk₁, hσx]
@@ -4183,7 +4183,7 @@ theorem translateAlgEquivOfPoint_add_nonTor_2tor_x_gen
         : W.toAffine.Point) = Affine.Point.some xk₃ yk₃ h_ns₃ from h_sum]
   rw [genericPoint_add_liftSomePoint W xk₂ yk₂ h_ns₂] at h_gen_eq
   rw [genericPoint_add_liftSomePoint W xk₃ yk₃ h_ns₃] at h_gen_eq
-  unfold liftSomePoint at h_gen_eq
+  simp only [liftSomePoint] at h_gen_eq
   rw [Affine.Point.add_of_X_ne (h_x₂_ne)] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.1
 
@@ -4207,7 +4207,7 @@ theorem translateAlgEquivOfPoint_add_nonTor_2tor_y_gen
   have hσy : σ (y_gen W) = translateY_xy W xk₂ yk₂ :=
     translateAlgHom_of_2tor_apply_y_gen W xk₂ yk₂ h_ns₂ h_2_tor₂
   rw [translateAlgHom_apply_y_gen W xk₁ yk₁ h_ns₁ h_not_2_tor₁]
-  unfold translateY_xy
+  simp only [translateY_xy]
   rw [σ_commutes_addY W (x_gen W) (algebraMap F KE xk₁) (y_gen W)
         (translateSlope_xy W xk₁ yk₁)]
   rw [σ.commutes xk₁, hσx, hσy]
@@ -4239,7 +4239,7 @@ theorem translateAlgEquivOfPoint_add_nonTor_2tor_y_gen
         : W.toAffine.Point) = Affine.Point.some xk₃ yk₃ h_ns₃ from h_sum]
   rw [genericPoint_add_liftSomePoint W xk₂ yk₂ h_ns₂] at h_gen_eq
   rw [genericPoint_add_liftSomePoint W xk₃ yk₃ h_ns₃] at h_gen_eq
-  unfold liftSomePoint at h_gen_eq
+  simp only [liftSomePoint] at h_gen_eq
   rw [Affine.Point.add_of_X_ne (h_x₂_ne)] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.2
 
@@ -4946,7 +4946,7 @@ theorem isTranslateLocalRingCompatible_iff_localRingAt_image
         (∃ y : (W_smooth W).localRingAt (P.translate_of_finite k h),
           algebraMap ((W_smooth W).localRingAt (P.translate_of_finite k h))
               (W_smooth W).FunctionField y = f)) := by
-  unfold IsTranslateLocalRingCompatible
+  simp only [IsTranslateLocalRingCompatible]
   refine ⟨fun h_le f ↦ ?_, fun h_image f ↦ ?_⟩
   · rw [Curves.SmoothPlaneCurve.mem_localRingAt_image_iff_pointValuation_le_one,
         Curves.SmoothPlaneCurve.mem_localRingAt_image_iff_pointValuation_le_one]
@@ -5196,11 +5196,11 @@ private theorem pointValuation_eq_of_ord_P_eq
     (C.pointValuation Q).ne_zero_iff.mpr hg
   have h_def1 : C.ord_P P f =
       ((-(WithZero.unzero hv1).toAdd : ℤ) : WithTop ℤ) := by
-    unfold SmoothPlaneCurve.ord_P
+    simp only [SmoothPlaneCurve.ord_P]
     exact dif_neg hv1
   have h_def2 : C.ord_P Q g =
       ((-(WithZero.unzero hv2).toAdd : ℤ) : WithTop ℤ) := by
-    unfold SmoothPlaneCurve.ord_P
+    simp only [SmoothPlaneCurve.ord_P]
     exact dif_neg hv2
   rw [h_def1, h_def2] at h_ord
   have h_int_eq : (-(WithZero.unzero hv1).toAdd : ℤ) =

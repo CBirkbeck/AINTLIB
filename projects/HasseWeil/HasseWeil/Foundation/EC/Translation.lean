@@ -365,7 +365,7 @@ omit [DecidableEq F] [W.toAffine.IsElliptic] in
 theorem translateSlope_xy_eq (xk yk : F) :
     translateSlope_xy W xk yk =
       (y_gen W - algebraMap F KE yk) / (x_gen W - algebraMap F KE xk) := by
-  unfold translateSlope_xy
+  simp only [translateSlope_xy]
   rw [WeierstrassCurve.Affine.slope_of_X_ne]
   intro h_eq
   exact x_gen_sub_const_ne_zero W xk (sub_eq_zero.mpr h_eq)

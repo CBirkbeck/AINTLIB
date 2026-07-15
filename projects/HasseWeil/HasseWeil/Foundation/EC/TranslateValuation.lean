@@ -69,7 +69,7 @@ theorem XClass_notMem_maximalIdealAt (P : (W_smooth W).SmoothPoint) (xk : F) (h_
       (Affine.CoordinateRing.XClass W.toAffine xk) = P.x - xk := by
     change ((⟨W.toAffine⟩ : Curves.SmoothPlaneCurve F).evalAt P)
         (Affine.CoordinateRing.XClass W.toAffine xk) = P.x - xk
-    unfold Affine.CoordinateRing.XClass
+    simp only [Affine.CoordinateRing.XClass]
     rw [SmoothPlaneCurve.evalAt_mk]
     simp [Polynomial.evalEval_C]
   exact sub_eq_zero.mp (h_xk_eval ▸ h_eval)
@@ -111,7 +111,7 @@ theorem pointValuation_x_gen_sub_const_inv_eq_one_of_X_ne
 theorem pointValuation_translateSlope_xy_le_one_of_X_ne
     (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_x : P.x ≠ xk) :
     (W_smooth W).pointValuation P (translateSlope_xy W xk yk) ≤ 1 := by
-  unfold translateSlope_xy
+  simp only [translateSlope_xy]
   rw [Affine.slope_of_X_ne (hx := fun h_eq ↦ x_gen_sub_const_ne_zero W xk
     (sub_eq_zero.mpr h_eq))]
   rw [div_eq_mul_inv]
@@ -176,7 +176,7 @@ theorem pointValuation_algebraMap_F_eq_one_of_ne_zero
     Curves.SmoothPlaneCurve.ord_P_algebraMap_F_of_ne_zero (W_smooth W) hc P
   have h_alg_ne : (algebraMap F KE c : KE) ≠ 0 := fun h ↦ hc <|
     FaithfulSMul.algebraMap_injective F KE (h.trans (map_zero _).symm)
-  unfold Curves.SmoothPlaneCurve.ord_P at h_ord
+  simp only [Curves.SmoothPlaneCurve.ord_P] at h_ord
   by_cases hv : (W_smooth W).pointValuation P (algebraMap F KE c) = 0
   · exfalso
     exact h_alg_ne ((Curves.SmoothPlaneCurve.pointValuation_eq_zero_iff
@@ -212,7 +212,7 @@ theorem pointValuation_translateSlope_xy_sub_alg_slope_lt_one_of_X_ne
     x_gen_sub_const_ne_zero W xk
   have h_tslope : translateSlope_xy W xk yk =
       (y_gen W - algebraMap F KE yk) / (x_gen W - algebraMap F KE xk) := by
-    unfold translateSlope_xy
+    simp only [translateSlope_xy]
     rw [Affine.slope_of_X_ne (hx := fun h_eq ↦
       h_denom_xgen_ne (sub_eq_zero.mpr h_eq))]
   have h_alg_slope : W.toAffine.slope P.x xk P.y yk =
@@ -314,7 +314,7 @@ theorem pointValuation_translateX_xy_sub_alg_addX_lt_one_of_X_ne
           (W.toAffine.addX P.x xk (W.toAffine.slope P.x xk P.y yk))) < 1 := by
   set slope_K : KE := translateSlope_xy W xk yk with hslope_K
   set slope_F : F := W.toAffine.slope P.x xk P.y yk with hslope_F
-  unfold translateX_xy
+  simp only [translateX_xy]
   have h_alg_addX :
       algebraMap F KE (W.toAffine.addX P.x xk slope_F) =
         (W_KE W).toAffine.addX (algebraMap F KE P.x) (algebraMap F KE xk)
@@ -453,7 +453,7 @@ theorem pointValuation_translateY_xy_sub_alg_addY_lt_one_of_X_ne
           (W.toAffine.addY P.x xk P.y (W.toAffine.slope P.x xk P.y yk))) < 1 := by
   set slope_K : KE := translateSlope_xy W xk yk with hslope_K
   set slope_F : F := W.toAffine.slope P.x xk P.y yk with hslope_F
-  unfold translateY_xy
+  simp only [translateY_xy]
   rw [← Affine.map_addY (algebraMap F KE) P.x P.y xk slope_F]
   -- Normalize: use W.map (algebraMap F KE) form throughout (= W_KE W definitionally).
   change (W_smooth W).pointValuation P
@@ -913,7 +913,7 @@ theorem pointValuation_translateX_xy_sub_alg_addX_lt_one_of_doubling
           (W.toAffine.addX P.x xk (W.toAffine.slope P.x xk P.y yk))) < 1 := by
   set slope_K : KE := translateSlope_xy W xk yk with hslope_K
   set slope_F : F := W.toAffine.slope P.x xk P.y yk with hslope_F
-  unfold translateX_xy
+  simp only [translateX_xy]
   have h_alg_addX :
       algebraMap F KE (W.toAffine.addX P.x xk slope_F) =
         (W_KE W).toAffine.addX (algebraMap F KE P.x) (algebraMap F KE xk)
@@ -1024,7 +1024,7 @@ theorem pointValuation_translateY_xy_sub_alg_addY_lt_one_of_doubling
           (W.toAffine.addY P.x xk P.y (W.toAffine.slope P.x xk P.y yk))) < 1 := by
   set slope_K : KE := translateSlope_xy W xk yk with hslope_K
   set slope_F : F := W.toAffine.slope P.x xk P.y yk with hslope_F
-  unfold translateY_xy
+  simp only [translateY_xy]
   rw [← Affine.map_addY (algebraMap F KE) P.x P.y xk slope_F]
   change (W_smooth W).pointValuation P
       ((W.map (algebraMap F KE)).toAffine.addY (x_gen W) (algebraMap F KE xk) (y_gen W) slope_K -
@@ -1233,7 +1233,7 @@ theorem pointValuation_translateX_xy_le_one_of_isSome
     (h : (P.toAffinePoint +
         (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).IsSome) :
     (W_smooth W).pointValuation P (translateX_xy W xk yk) ≤ 1 := by
-  unfold translateX_xy
+  simp only [translateX_xy]
   change (W_smooth W).pointValuation P
     ((translateSlope_xy W xk yk) ^ 2 + (W_KE W).a₁ * translateSlope_xy W xk yk -
       (W_KE W).a₂ - x_gen W - algebraMap F KE xk) ≤ 1
@@ -1858,7 +1858,7 @@ theorem zero_le_ord_P_of_pointValuation_le_one {f : (W_smooth W).FunctionField}
       have h_not_one_le : ¬ (1 : WithTop ℤ) ≤ (W_smooth W).ord_P P f := fun h_le ↦
         h_not_lt_one ((Curves.SmoothPlaneCurve.one_le_ord_P_iff_pointValuation_lt_one
           (P := P) hzero).mp h_le)
-      unfold Curves.SmoothPlaneCurve.ord_P
+      simp only [Curves.SmoothPlaneCurve.ord_P]
       rw [dif_neg hv]
       change (0 : WithTop ℤ) ≤ ((-(WithZero.unzero hv).toAdd : ℤ) : WithTop ℤ)
       have h_unz_one : WithZero.unzero hv = 1 := by
