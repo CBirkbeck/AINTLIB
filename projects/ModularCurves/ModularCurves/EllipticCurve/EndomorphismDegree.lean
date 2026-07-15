@@ -1,6 +1,7 @@
 import ModularCurves.EllipticCurve.GroupLaw
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.Rigidity
+import ModularCurves.ForMathlib.FinrankComp
 
 /-!
 # The endomorphism ring, degree, and Hasse bound of `E/S` (KM Ch. 2, §§2.5–2.7)
@@ -227,9 +228,110 @@ theorem endDeg_nonneg (f : E.asOver ⟶ E.asOver) : 0 ≤ E.endDeg f := by
   · exact Int.natCast_nonneg _
   · exact zero_le_one
 
+/-- Any `Over S`-endomorphism of `E` is locally of finite presentation, by the cancellation
+`ForMathlib.FinitePresentationCancel` (Stacks 01TX) against the smooth structure morphism —
+the general-endomorphism form of `mulByHom_locallyOfFinitePresentation`. -/
+theorem endo_locallyOfFinitePresentation (f : E.asOver ⟶ E.asOver) :
+    LocallyOfFinitePresentation (show E.E ⟶ E.E from f.left) := by
+  haveI : Smooth E.π := SmoothOfRelativeDimension.smooth (n := 1) E.π
+  have h : LocallyOfFinitePresentation ((show E.E ⟶ E.E from f.left) ≫ E.π) := by
+    have hw : (show E.E ⟶ E.E from f.left) ≫ E.π = E.π := Over.w f
+    rw [hw]
+    infer_instance
+  exact LocallyOfFinitePresentation.of_comp_of_locallyOfFiniteType h inferInstance
+
+/-- A finite flat endomorphism of `E` with **integral** total space is surjective: its image is
+open (flat + locally of finite presentation ⟹ universally open, Stacks 01UA), closed (finite ⟹
+proper), and nonempty, hence everything in the preconnected space `E.E`. This discharges the
+surjectivity inputs of the composition formula without any degree computation. -/
+theorem endo_surjective [IsIntegral E.E] (f : E.asOver ⟶ E.asOver)
+    [Flat (show E.E ⟶ E.E from f.left)] [IsFinite (show E.E ⟶ E.E from f.left)] :
+    Surjective (show E.E ⟶ E.E from f.left) := by
+  set fl : E.E ⟶ E.E := f.left with hfl
+  haveI : LocallyOfFinitePresentation fl := E.endo_locallyOfFinitePresentation f
+  haveI : IrreducibleSpace E.E := inferInstance
+  haveI : Nonempty E.E := inferInstance
+  have hopen : IsOpen (Set.range fl.base) := fl.isOpenMap.isOpen_range
+  have hclosed : IsClosed (Set.range fl.base) := fl.isClosedMap.isClosed_range
+  have hne : (Set.range fl.base).Nonempty := Set.range_nonempty _
+  constructor
+  rw [← Set.range_eq_univ]
+  exact IsClopen.eq_univ ⟨hclosed, hopen⟩ hne
+
+/-- **(T-END0c pin, PROVEN integral form — KM 2.6.1, `deg` multiplicative)** The degree is
+multiplicative under composition of finite flat endomorphisms when the total space `E.E` is
+integral: `deg(f ≫ g) = deg f · deg g`. This is the honest isogeny form of the `endDeg_comp`
+pin (the `[Flat]`/`[IsFinite]` instances are the tracked isogeny fibre semantics, exactly as in
+`KernelBound.le_endDeg_of_killed_injective`): the fibre-rank composition multiplicativity
+`Scheme.Hom.finrank_comp` (`ForMathlib/FinrankComp.lean`) evaluated at the zero-section
+basepoint on both factors. Every geometric-fibre consumer (`S = Spec k`, `E` integral) lands
+here. -/
+theorem endDeg_comp_of_isIntegral [IsIntegral E.E] (f g : E.asOver ⟶ E.asOver)
+    [Flat (show E.E ⟶ E.E from f.left)] [IsFinite (show E.E ⟶ E.E from f.left)]
+    [Flat (show E.E ⟶ E.E from g.left)] [IsFinite (show E.E ⟶ E.E from g.left)] :
+    E.endDeg (f ≫ g) = E.endDeg f * E.endDeg g := by
+  haveI : IrreducibleSpace E.E := inferInstance
+  haveI : Nonempty E.E := inferInstance
+  haveI hne : Nonempty S := ⟨E.π.base ‹Nonempty E.E›.some⟩
+  set fl : E.E ⟶ E.E := f.left with hfl
+  set gl : E.E ⟶ E.E := g.left with hgl
+  haveI : LocallyOfFinitePresentation fl := E.endo_locallyOfFinitePresentation f
+  haveI : Surjective fl := E.endo_surjective f
+  haveI : Surjective gl := E.endo_surjective g
+  simp only [endDeg, dif_pos hne]
+  show (Scheme.Hom.finrank (X := E.E) (S := E.E) (fl ≫ gl) (E.zero hne.some) : ℤ)
+      = (Scheme.Hom.finrank (X := E.E) (S := E.E) fl (E.zero hne.some) : ℤ)
+        * (Scheme.Hom.finrank (X := E.E) (S := E.E) gl (E.zero hne.some) : ℤ)
+  rw [Scheme.Hom.finrank_comp fl gl (E.zero hne.some) (E.zero hne.some), Nat.cast_mul]
+
+/-- **(T-END0c pin, PROVEN integral form — KM 2.6.1.1 scaling)** `deg(g ∘ [n]) = n² · deg g` for
+a finite flat endomorphism `g` of `E` with integral total space (`[n]`'s finite-flatness is the
+BB-FLAT isogeny substrate, taken as instances): `endDeg_comp_of_isIntegral` against
+`endDeg_mulBy = n²`. -/
+theorem endDeg_comp_mulBy_of_isIntegral [IsIntegral E.E] (n : ℤ) (g : E.asOver ⟶ E.asOver)
+    [Flat (show E.E ⟶ E.E from g.left)] [IsFinite (show E.E ⟶ E.E from g.left)]
+    [Flat (show E.E ⟶ E.E from (E.mulBy n).left)]
+    [IsFinite (show E.E ⟶ E.E from (E.mulBy n).left)] :
+    E.endDeg (g ≫ E.mulBy n) = n ^ 2 * E.endDeg g := by
+  haveI : IrreducibleSpace E.E := inferInstance
+  haveI : Nonempty E.E := inferInstance
+  haveI : Nonempty S := ⟨E.π.base ‹Nonempty E.E›.some⟩
+  rw [E.endDeg_comp_of_isIntegral g (E.mulBy n), E.endDeg_mulBy n, mul_comm]
+
+/-- **(T-G3e positivity half, PROVEN)** A **pointed** finite flat endomorphism of `E` over a
+nonempty base has degree at least `1`: pointedness sends the zero point to the zero point, and a
+finite flat morphism has positive fibre rank at every point of its image
+(`Scheme.Hom.one_le_finrank_map`). This is the isogeny half of the positive-definiteness pin
+`eq_zero_of_endDeg_eq_zero` — under `deg g = 0` it forces `g` outside the finite-flat (isogeny)
+class, leaving only the zero-or-isogeny dichotomy to conclude `g = [0]`. -/
+theorem one_le_endDeg_of_pointed [Nonempty S] (f : E.asOver ⟶ E.asOver)
+    (hη : η[E.asOver] ≫ f = η[E.asOver])
+    [Flat (show E.E ⟶ E.E from f.left)] [IsFinite (show E.E ⟶ E.E from f.left)] :
+    1 ≤ E.endDeg f := by
+  haveI hne : Nonempty S := ‹_›
+  set fl : E.E ⟶ E.E := f.left with hfl
+  -- pointedness at the scheme level: `zero ≫ f.left = zero`
+  have hz : E.zero ≫ fl = E.zero := by
+    have h : (η[E.asOver]).left ≫ fl = (η[E.asOver]).left := congrArg CommaMorphism.left hη
+    rw [E.one_eq_zero] at h
+    have h2 : (𝟙 S ≫ E.zero) ≫ fl = 𝟙 S ≫ E.zero := h
+    rwa [Category.id_comp] at h2
+  -- hence the zero point is in the image of `f.left`
+  have hpt : fl.base (E.zero.base hne.some) = E.zero.base hne.some := by
+    have := congrArg (fun m : S ⟶ E.E => m.base hne.some) hz
+    simpa using this
+  have h1 : 1 ≤ Scheme.Hom.finrank (X := E.E) (S := E.E) fl (E.zero.base hne.some) := by
+    have := Scheme.Hom.one_le_finrank_map fl (E.zero.base hne.some)
+    rwa [hpt] at this
+  simp only [endDeg, dif_pos hne]
+  exact_mod_cast h1
+
 /-- **(T-END0c pin — KM 2.6.1, `deg` multiplicative)** The degree is multiplicative under
 composition: `deg(f ≫ g) = deg f · deg g`. KM (Thm 2.6.1 / Cor 2.6.1.1): the degree of a composite
-isogeny is the product of the degrees (`(f∘g)^t (f∘g) = g^t (f^t f) g = [deg f][deg g]`). -/
+isogeny is the product of the degrees (`(f∘g)^t (f∘g) = g^t (f^t f) g = [deg f][deg g]`).
+**Status**: the isogeny case is PROVEN as `endDeg_comp_of_isIntegral` (via
+`Scheme.Hom.finrank_comp`); this unrestricted form additionally needs the degenerate cases
+(non-finite-flat endomorphisms — the zero-or-isogeny dichotomy) and stays a pin. -/
 theorem endDeg_comp (f g : E.asOver ⟶ E.asOver) :
     E.endDeg (f ≫ g) = E.endDeg f * E.endDeg g := sorry
 
