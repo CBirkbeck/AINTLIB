@@ -184,4 +184,43 @@ theorem levelSpacePullbackIso_hom_snd_struct :
 
 end PairBaseChange
 
+section BridgeCompat
+
+variable (E : EllipticCurve S)
+
+/-- Transport of points along an equality of base morphisms (the `assoc`-alignment glue for
+double base changes). -/
+noncomputable def _root_.ModularCurves.EllipticCurve.Point.congrBase {T : Scheme.{u}}
+    {g₁ g₂ : T ⟶ S} (h : g₁ = g₂) : E.Point g₁ ≃+ E.Point g₂ :=
+  h ▸ AddEquiv.refl (E.Point g₁)
+
+@[simp]
+lemma _root_.ModularCurves.EllipticCurve.Point.congrBase_apply_coe {T : Scheme.{u}}
+    {g₁ g₂ : T ⟶ S} (h : g₁ = g₂) (x : E.Point g₁) :
+    ((EllipticCurve.Point.congrBase E h) x).1 = x.1 := by
+  subst h
+  rfl
+
+/-- The pull of a point along a further morphism: `⟨u ≫ P.1, _⟩`. The general-`g` form of
+`Point.pull` (which is the `g = 𝟙 S` case). -/
+noncomputable def _root_.ModularCurves.EllipticCurve.Point.pullAlong {T T' : Scheme.{u}}
+    {g : T ⟶ S} (u : T' ⟶ T) (P : E.Point g) : E.Point (u ≫ g) :=
+  ⟨u ≫ P.1, by rw [Category.assoc, P.2]⟩
+
+/-- **(β2-heart compat)** The base-change point dictionary carries the pull of the tautological
+section back to the pull of the underlying point: for `P : E.Point σ` and `t̄ : T' ⟶ T`,
+`baseChangeEquiv (pull t̄ (asSection P)) = pullAlong t̄ P`. Pure coe-chase. -/
+lemma baseChangeEquiv_pull_asSection {T T' : Scheme.{u}} (σ : T ⟶ S) (u : T' ⟶ T)
+    (P : E.Point σ) :
+    (EllipticCurve.Point.baseChangeEquiv E σ u)
+        (EllipticCurve.Point.pull (E.baseChange σ) u (EllipticCurve.Point.asSection E σ P))
+      = EllipticCurve.Point.pullAlong E u P := by
+  refine Subtype.ext ?_
+  show (u ≫ (EllipticCurve.Point.asSection E σ P).1) ≫ pullback.fst E.π σ = u ≫ P.1
+  rw [Category.assoc]
+  congr 1
+  exact pullback.lift_fst _ _ _
+
+end BridgeCompat
+
 end ModularCurves
