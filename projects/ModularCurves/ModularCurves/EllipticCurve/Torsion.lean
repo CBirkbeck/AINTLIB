@@ -144,14 +144,46 @@ theorem mulByHom_locallyQuasiFinite (N : ℕ) [NeZero N] :
   LocallyQuasiFinite.of_finite_preimage_singleton _ fun x => E.mulByHom_finite_fibres N x
 
 /-- **Black box `BB-FLAT` (flatness input of KM 2.3.1)**: `[N]` is flat for `N ≥ 1`.
-KM 2.3.1 proof: via miracle flatness over the universal (regular) Weierstrass base
-("any finite morphism between regular schemes of the same dimension is automatically
-flat [AK-1, V, 3.6]"); general fibrewise criterion: EGA IV 11.3.10. -/
+
+**Status (v10.250 G0 session): the mathematical content is DELIVERED, axiom-clean; only
+the chart-assembly leaf remains.** The v10.232 "gated on the B–E/flat-locus chain"
+verdict is INVERTED: `[N]` is finite (BB-QF + ZMT) and locally of finite presentation
+(`mulByHom_locallyOfFinitePresentation`), and for module-finite finitely presented
+algebras the fibrewise criterion (EGA IV 11.3.10) collapses to elementary tensor
+algebra — no noetherian hypotheses, no Buchsbaum–Eisenbud. Delivered:
+* `ForMathlib/FiniteFibrewiseFlat.lean`: `free_of_flat_of_fibre_flat` (the local
+  Nakayama/élimination-des-Tor engine) and `flat_of_fibre_flat_of_finitePresentation`
+  (the ring-level criterion: `A → R → T` with `T` fp `R`-module, `A`-flat, all residue
+  fibres `κ(q)⊗R → κ(q)⊗T` flat ⟹ `T` flat over `R`).
+* `MulByHomFlatFibre.lean`: `modelMulByHom_flat_of_field` (model `[N]` flat over any
+  field) and `flat_mulByHom_baseChange_of_field` (`[N]` flat on `E ×_S Spec K` for
+  EVERY field-valued point `Spec K ⟶ S` — the geometric fibre input).
+
+**Remaining leaf (bounded chart plumbing)**: cover `E` by affine `V ≤ π⁻¹U` (`U ⊆ S`
+affine); per piece reduce `Flat (f ∣_ V)` to `RingHom.Flat (f.appLE V (f⁻¹V) _)` (the
+arrow-iso pattern of `flat_morphismRestrict_of_isDomain_of_isStandardSmooth`); apply the
+ring criterion with `A := Γ(S,U)`, the appLE tower, fp via `finite_appLE` + Stacks 0564;
+its fibre input at a prime `q` converts `flat_mulByHom_baseChange_of_field` at
+`gK := Spec.map (algebraMap A κ(q)) ≫ hU.fromSpec` through the chart iso
+`κ(q) ⊗[A] Γ(E,V) ≅ Γ(fst⁻¹ᵁV)` (tensor-lift of the two canonical legs; iso via the
+restricted pullback square + `pullbackSpecIso`; `[N]`-compat by tensor-ext). -/
 theorem mulByHom_flat (N : ℕ) [NeZero N] : Flat (E.mulByHom N) := by sorry
 
 /-- **Black box `BB-DEG` (degree input of KM 2.3.1)**: `[N]` has rank `N²` at every
 point. KM 2.3.1 proof: the rank is computed at a single geometric point (`E^an ≅ ℂ/L`,
-`E[N] = (1/N)L/L ≅ (ℤ/N)²`); algebraic anchor: HasseWeil `mulByInt_degree` via T-B6. -/
+`E[N] = (1/N)L/L ≅ (ℤ/N)²`); algebraic anchor: HasseWeil `mulByInt_degree` via T-B6.
+
+**Status (v10.250 G0 session): fibre-reduction fully specified; blocked only on
+`mulByHom_flat` above + STREAM-KM's `modelEllipticCurve_finrank_eq_mulByInt_degree`
+(the single L4 anchor, `MulByHomDegree.lean`). Do NOT re-derive the degree.** Route:
+with `[Flat] [IsFinite]` on `[N]`, `Scheme.Hom.finrank_of_isPullback` applied to
+`isPullback_mulByHom_baseChange E (S.fromSpecResidueField (E.π x)) N` (flipped) reads
+the rank at `x` off the fibre curve `E ×_S Spec κ(s)` (a preimage of `x` exists since
+`range fst = π⁻¹(range gK) ∋ x`, `Scheme.Pullback.range_fst`); the fibre `[N]` is
+conjugate to the model `[N]` (`fibreModelIsoAsOver` + `finrank_comp_left_of_isIso`),
+whose rank is `N²` by KM's field-level `modelEllipticCurve_mulByHom_finrank` — its
+`[Flat]/[IsFinite]/[LocallyOfFinitePresentation]` instance hypotheses are discharged by
+`modelMulByHom_flat_of_field` + BB-QF + fp over the residue field. -/
 theorem mulByHom_finrank (N : ℕ) [NeZero N] (x : E.E) :
     (E.mulByHom N).finrank x = N ^ 2 := by sorry
 

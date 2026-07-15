@@ -189,3 +189,27 @@ W7-MICRO (delta): do NOT rw P.2 inside desc-stalk (dependent point!). Instead: h
 - [2026-07-15, coordinator, v10.250] ★★★ BB-QF DONE (ratified). RE-TASKED (fleet converged on keystone): finish the E[N]-scheme substrate the keystone consumes — BB-FLAT mulByHom_flat (Torsion:150, assemble from your banked turnkey fibre-leg substrate) + BB-DEG mulByHom_finrank=N² (Torsion:155, scheme-level; cross-link KM endDeg_mulBy, same N², do not re-derive). Both feed OMEGA E[N]-classification normalization. Full detail: board v10.250 + STREAM-G0 opener in WORK-ORDERS.md.
 
 - [2026-07-15, coordinator, v10.252] ★ KM foundation landed + L4 reduced to L4-iii — your BB-DEG (Torsion.mulByHom_finrank :155) + BB-FLAT (mulByHom_flat :150) are now the DIRECT inputs to endDeg_mulBy=n²`s box-closure (KM proved it modulo exactly these + T-DEG0). Prioritize both; coordinate the L4-iii↔BB-DEG handshake with KM (same n², two forms — cross-link, do not re-derive). Board v10.252.
+
+---
+
+## ⟹ STREAM-G0 REPORT (2026-07-15, v10.250 dispatch — BB-FLAT WALL-BREAK session)
+
+**★★ BB-FLAT's B–E gate is DEAD — the criterion + both fibre legs are REAL CODE, axiom-clean.**
+Full detail: board v10.251-G0. Summary:
+- **WALL-BREAK**: `[N]` finite (BB-QF) + fp (:217) ⟹ the fibrewise criterion needs NO
+  flat-locus/B–E chain, NO noetherian hypotheses — it collapses to Nakayama + élimination des
+  Tor. The v10.232 "park behind the D-chain" verdict is retracted (adversarially re-derived:
+  I built a counterexample to the naive reduced-rank route, then found the finite-fp collapse).
+- **DELIVERED (4 commits, all axiom-clean)**: `modelMulByHom_flat_of_field` (a8b333bcf);
+  ENGINE `free_of_flat_of_fibre_flat` + RING CRITERION `flat_of_fibre_flat_of_finitePresentation`
+  (5c20bc956, f2f50852c — new `ForMathlib/FiniteFibrewiseFlat.lean`); FIBRE MASTER
+  `flat_mulByHom_baseChange_of_field` (f9b8732a3).
+- **KM UNBLOCKED**: their K4 `[Flat (model [N])]` instance hypotheses are discharged over fields
+  ⟹ `modelEllipticCurve_mulByHom_finrank = N²` fires modulo their own :346 anchor.
+- **REMAINING**: ONE chart-plumbing leaf for Torsion:150 (recipe in the docstring, ~150–250 lines,
+  zero new math); BB-DEG then assembles per its docstring recipe (consumes KM :346, not re-derived).
+  :217 was already proven (dispatch listed it stale); :232 BB-DIFF untouched (needs relative Ω¹ —
+  separate dev, as scoped).
+
+**SESSION TERMINAL (context budget).** Next G0 session: execute the two docstring recipes
+(Torsion:150 then :155). Both are mechanical; all mathematics is banked.

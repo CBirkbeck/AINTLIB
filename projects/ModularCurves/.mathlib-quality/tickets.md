@@ -20797,3 +20797,49 @@ wire with a 1-line edit. `endDeg_comp` (GH's :234) consumes `endDual_comp_self`.
 and endDual's arbitrary-endo fibre-rank; (2) L4-iii's coordinate-reading bridge (b) = the honest next
 deep grind (own multi-session, finite-flat). All keystone consumers proceed via the tracked BB-DEG box
 (register-box, zero-pressure — unchanged).
+
+## Board v10.251-G0 (2026-07-15, STREAM-G0) — ★★ BB-FLAT WALL-BREAK: the B–E gate is DEAD; engine + ring criterion + both fibre legs DELIVERED axiom-clean
+
+**THE VERDICT INVERSION (supersedes v10.232 + decomposition-bb-flat.md §5).** The prior scoping
+treated the *finitely-presented* fibrewise criterion (EGA IV 11.3.10), whose general proof needs the
+flat-locus/Buchsbaum–Eisenbud program (~23 sorries) or mathlib-absent CM theory. But `[N]` is now
+**finite (BB-QF/ZMT) + locally of finite presentation (Torsion:217)** — and for MODULE-FINITE fp
+algebras the criterion collapses to elementary tensor algebra (Nakayama + élimination des Tor).
+**No noetherian hypotheses, no Artin–Rees, no B–E, no Tor modules anywhere.**
+
+**Delivered this session (all `propext, Classical.choice, Quot.sound` only):**
+1. `modelMulByHom_flat_of_field` (a8b333bcf, `MulByHomFlatFibre.lean`) — model `[N]` FLAT over ANY
+   field. Assembly over the `SmoothOfRelativeDimension` chart cover (the class field gives honest
+   standard-smooth affine charts — no `RingHom.Locally` unfolding); per chart [FF-alg] + injectivity
+   from `[N]`-surjectivity through the `fromSpec` square; `IsZariskiLocalAtTarget.of_iSup_eq_top`.
+   ⟹ **STREAM-KM's K4 chain (`MulByHomDegree.lean`) instance hypotheses `[Flat (model [N])]` are
+   now DISCHARGED over fields** — their `modelEllipticCurve_mulByHom_finrank = N²` fires modulo
+   their single :346 anchor.
+2. `free_of_flat_of_fibre_flat` (5c20bc956, `ForMathlib/FiniteFibrewiseFlat.lean`) — THE ENGINE:
+   `B` local, `M` fp `B`-module, `M` flat over `A`, fibre `(B/qB)⊗M` flat (`q·B ⊆ 𝔪`) ⟹ `M` FREE.
+   Élimination-des-Tor ladder onto mathlib's `free_of_maximalIdeal_rTensor_injective`.
+3. `flat_of_fibre_flat_of_finitePresentation` (f2f50852c, same file) — THE RING CRITERION:
+   `A → R → T`, `T` fp `R`-module + `A`-flat + all residue fibres `κ(q)⊗R → κ(q)⊗T` flat ⟹ `T`
+   flat over `R`. Localize at maximals; the RING-carrier `T_P = Localization (algebraMapSubmonoid)`
+   kills the cross-ring-tensor instance gap (`RingHom.Flat.comp`: A→T ∘ T→T_P); fibre transfer via
+   `residueFieldToQuotient` + `IsPushout.cancelBaseChangeAlg` + `Flat.baseChange`.
+4. `flat_mulByHom_baseChange_of_field` (f9b8732a3, `MulByHomFlatFibre.lean`) — THE FIBRE MASTER:
+   `[N]` flat on `E ×_S Spec K` for EVERY field-valued point `Spec K ⟶ S`. Pointed-iso Flat
+   transport (`flat_mulByHom_of_isMonHom_iso`) + `isPullback_mulByHom_baseChange` (the `[N]`
+   base-change square, general `g`) + pasting cancellation + `SpecToEquivOfField` residue
+   factorization.
+
+**REMAINING for the Torsion:150 close — ONE bounded chart-plumbing leaf** (full recipe in the
+`mulByHom_flat` docstring): per affine pair `V ≤ π⁻¹U` reduce `Flat (f ∣_ V)` to the appLE ring map
+(the arrow-iso pattern already used at field level), apply criterion (3) with `A := Γ(S,U)`; its
+fibre input at `q` = fibre master (4) at `gK := Spec.map (algebraMap A κ(q)) ≫ hU.fromSpec`
+through the chart iso `κ(q) ⊗[A] Γ(E,V) ≅ Γ(fst⁻¹ᵁV)` (tensor-lift legs; iso via restricted
+pullback square + `pullbackSpecIso`; `[N]`-compat by tensor-ext). Est. 150–250 lines of pullback
+token-pushing; ZERO new mathematics. **BB-DEG (Torsion:155) is then a direct consumer**: fibre
+reduction via `finrank_of_isPullback` + `fibreModelIsoAsOver` + KM's field-level `N²` (recipe in
+its docstring; KM's `:346` = the intended single remaining anchor — cross-link honoured, degree
+NOT re-derived).
+
+**De-confliction note:** `EllipticCurve.mulByHom_surjective` (KM's, field-level, instance-conditioned)
+vs `modelMulByHom_surjective` (G0's, unconditional) now coexist — flag to the cleanup fleet for a
+dedup pass once both streams land.
