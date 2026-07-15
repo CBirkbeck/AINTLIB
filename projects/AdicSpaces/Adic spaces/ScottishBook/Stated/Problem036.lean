@@ -54,8 +54,6 @@ More broadly, the problem asks for intrinsic conditions on `f` (or on
 * Kedlaya, *The Nonarchimedean Scottish Book*, Problem 36
 -/
 
-open ScottishBook
-
 namespace ScottishBook
 
 variable (p : ℕ) [hp : Fact (Nat.Prime p)]
