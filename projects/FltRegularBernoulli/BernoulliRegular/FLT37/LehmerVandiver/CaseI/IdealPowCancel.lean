@@ -42,7 +42,7 @@ By `Multiset` torsion-freeness (`IsAddTorsionFree.nsmul_right_injective`),
 `associated_iff_normalizedFactors_eq_normalizedFactors`, `A` and `B` are
 associated. For non-zero ideals in `Ideal R`, associated ⟺ equal. -/
 theorem Ideal.pow_left_inj_of_ne_zero
-    {R : Type*} [CommRing R] [IsDomain R] [IsDedekindDomain R]
+    {R : Type*} [CommRing R] [IsDedekindDomain R]
     {n : ℕ} (hn : n ≠ 0) {A B : Ideal R} (hA : A ≠ ⊥) (hB : B ≠ ⊥)
     (h : A ^ n = B ^ n) :
     A = B := by
