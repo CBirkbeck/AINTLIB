@@ -47,13 +47,17 @@ def e3Rel : MvPolynomial (Fin 2) R :=
 abbrev E3Quotient : Type u :=
   MvPolynomial (Fin 2) R ⧸ Ideal.span {e3Rel R}
 
-/-- **(T-E15a)** The discriminant-type element `(a₁³ − 27a₃) · a₃` in the flex-locus
-ring. -/
+/-- **(T-E15a; B2-fix v10.256)** The discriminant-type element `(a₁³ − 27a₃) · a₃ · γ`
+in the flex-locus ring. The **`γ` factor** (added 2026-07-15, owner-approved) inverts
+`γ = x(Q)`, excluding the degenerate locus `γ = 0` where `Q = (0, β) = −P ∈ ⟨P⟩` fails
+to be a full level-`3` basis (it generates only `ℤ/3`). Without it `E3ModuliRing`
+over-represented the naive level-`3` functor. -/
 def e3Delta : E3Quotient R :=
-  Ideal.Quotient.mk _ ((e3A₁Poly R ^ 3 - 27 * e3A₃Poly R) * e3A₃Poly R)
+  Ideal.Quotient.mk _ ((e3A₁Poly R ^ 3 - 27 * e3A₃Poly R) * e3A₃Poly R * X 1)
 
 /-- **(T-E15a)** The T-E15 moduli ring
-`R[β, γ][((a₁³−27a₃)a₃)⁻¹]/(β³−(β+γ)³)` — KM Ex. 2.2.2's `ℰ₃`-base. -/
+`R[β, γ][((a₁³−27a₃)a₃γ)⁻¹]/(β³−(β+γ)³)` — KM Ex. 2.2.2's `ℰ₃`-base (with `γ` inverted:
+`Q ∉ ⟨P⟩`). -/
 abbrev E3ModuliRing : Type u :=
   Localization.Away (e3Delta R)
 
@@ -100,18 +104,20 @@ theorem e3Map_a₃Poly : e3Map R (e3A₃Poly R) = (universalE3 R).a₃ := by
   rfl
 
 /-- The image of the defining element under the localization is the curve's
-`(a₁³ − 27a₃)·a₃`. -/
+`(a₁³ − 27a₃)·a₃·γ`. -/
 theorem e3Delta_map :
     algebraMap (E3Quotient R) (E3ModuliRing R) (e3Delta R) =
-      ((universalE3 R).a₁ ^ 3 - 27 * (universalE3 R).a₃) * (universalE3 R).a₃ := by
-  show e3Map R ((e3A₁Poly R ^ 3 - 27 * e3A₃Poly R) * e3A₃Poly R) = _
-  rw [map_mul, map_sub, map_pow, map_mul, map_ofNat, e3Map_a₁Poly, e3Map_a₃Poly]
+      ((universalE3 R).a₁ ^ 3 - 27 * (universalE3 R).a₃) * (universalE3 R).a₃ * e3Gamma R := by
+  show e3Map R ((e3A₁Poly R ^ 3 - 27 * e3A₃Poly R) * e3A₃Poly R * X 1) = _
+  rw [map_mul, map_mul, map_sub, map_pow, map_mul, map_ofNat, e3Map_a₁Poly, e3Map_a₃Poly]
+  rfl
 
 instance : (universalE3 R).IsElliptic := by
   rw [WeierstrassCurve.isElliptic_iff, universalE3_Δ]
   have h := IsLocalization.Away.algebraMap_isUnit
     (S := E3ModuliRing R) (e3Delta R)
   rw [e3Delta_map] at h
+  replace h := isUnit_of_mul_isUnit_left h
   have h3 : IsUnit ((universalE3 R).a₃ ^ 3 *
       ((universalE3 R).a₁ ^ 3 - 27 * (universalE3 R).a₃)) ↔
     IsUnit (((universalE3 R).a₃ *
@@ -128,6 +134,13 @@ instance : (universalE3 R).IsElliptic := by
   · have ha₃ : IsUnit (((universalE3 R).a₁ ^ 3 - 27 * (universalE3 R).a₃) *
         (universalE3 R).a₃) := h
     exact (isUnit_of_mul_isUnit_right ha₃).mul (isUnit_of_mul_isUnit_right ha₃)
+
+/-- **(B2-fix v10.256)** The universal `γ = x(Q)` is a unit — this is the whole point of
+inverting it in `e3Delta`: it certifies `Q ∉ ⟨P⟩` (the level-`3` basis condition). -/
+theorem isUnit_e3Gamma : IsUnit (e3Gamma R) := by
+  have h := IsLocalization.Away.algebraMap_isUnit (S := E3ModuliRing R) (e3Delta R)
+  rw [e3Delta_map] at h
+  exact isUnit_of_mul_isUnit_right h
 
 /-- The flex relation vanishes in the moduli ring. -/
 theorem e3Rel_map_eq_zero : e3Map R (e3Rel R) = 0 := by
@@ -370,15 +383,22 @@ theorem isE3Chart {S : Scheme.{u}} {G : EllipticCurveGeom S} {V : S.affineOpens}
     (hB : IsUnit (P₀.W.a₁ ^ 3 * p + P₀.W.a₁ ^ 2 * P₀.W.a₃ + P₀.W.a₁ ^ 2 * q + 6 * P₀.W.a₁ * p ^ 2
             + 3 * P₀.W.a₃ * p + 6 * p * q)) :
     ∃ (Pr : LocalPresentation G V) (β γ : Γ(S, V.1)),
-      IsE3Form Pr.W β γ ∧ Pr.MarksAt hσP 0 0 ∧ Pr.MarksAt hσQ γ (β + γ) := by
+      IsE3Form Pr.W β γ ∧ Pr.MarksAt hσP 0 0 ∧ Pr.MarksAt hσQ γ (β + γ) ∧ IsUnit γ := by
   obtain ⟨hcurveEq, -⟩ := id hMQ
   have hcurve : q ^ 2 + P₀.W.a₁ * p * q + P₀.W.a₃ * q = p ^ 3 := by
     have h := hcurveEq
     rw [Affine.equation_iff, ha₂, ha₄, ha₆] at h; linear_combination h
+  have hp : IsUnit p := by
+    apply isUnit_of_mul_isUnit_left
+      (y := 3 * p ^ 2 + P₀.W.a₁ ^ 2 * p + 3 * P₀.W.a₁ * P₀.W.a₃)
+    rw [show p * (3 * p ^ 2 + P₀.W.a₁ ^ 2 * p + 3 * P₀.W.a₁ * P₀.W.a₃)
+        = -(3 * P₀.W.a₃ ^ 2) by linear_combination hcubic]
+    exact (h3.mul (ha₃.pow 2)).neg
   obtain ⟨u, hE3⟩ := isE3Form_of_threeTorsion ha₂ ha₄ ha₆ p q hcurve hcubic ha₃ h3 hB
   have hmul : (↑u : Γ(S, V.1)) * ↑u⁻¹ = 1 := u.mul_inv
   set C : VariableChange Γ(S, V.1) := ⟨u, 0, 0, 0⟩ with hC
-  refine ⟨P₀.ofVC C, q * (↑u⁻¹) ^ 3 - p * (↑u⁻¹) ^ 2, p * (↑u⁻¹) ^ 2, ?_, ?_, ?_⟩
+  refine ⟨P₀.ofVC C, q * (↑u⁻¹) ^ 3 - p * (↑u⁻¹) ^ 2, p * (↑u⁻¹) ^ 2, ?_, ?_, ?_,
+    hp.mul (u⁻¹.isUnit.pow 2)⟩
   · show IsE3Form (C • P₀.W) _ _; exact hE3
   · have hEqP : (C • P₀.W).toAffine.Equation 0 0 := by
       rw [hC, Affine.equation_zero, variableChange_a₆]; simp [ha₆]
@@ -621,7 +641,7 @@ def IsE3Datum {R : CommRingCat.{u}} (X : EllObj R)
     (Pr : LocalPresentation X.curve.toEllipticCurveGeom V)
     (β γ : Γ(X.base, V.1)),
       IsE3Form Pr.W β γ ∧ Pr.MarksAt L.1.1.2 0 0 ∧
-      Pr.MarksAt L.1.2.2 γ (β + γ)
+      Pr.MarksAt L.1.2.2 γ (β + γ) ∧ IsUnit γ
 
 open LocalPresentation in
 /-- **([T-E15-NORM] the `ℰ₃`-datum from per-point flex-NF charts ★★, the cover assembly)** An
@@ -645,8 +665,8 @@ theorem isE3Datum_of_flexCharts {R : CommRingCat.{u}} (X : EllObj R)
     IsE3Datum X L := by
   intro s
   obtain ⟨V, hsV, P₀, p, q, ha₂, ha₄, ha₆, hMP, hMQ, hcubic, ha₃, h3, hB⟩ := h s
-  obtain ⟨Pr, β, γ, hE3, hMPr, hMQr⟩ := isE3Chart P₀ ha₂ ha₄ ha₆ hMP hMQ hcubic ha₃ h3 hB
-  exact ⟨V, hsV, Pr, β, γ, hE3, hMPr, hMQr⟩
+  obtain ⟨Pr, β, γ, hE3, hMPr, hMQr, hγu⟩ := isE3Chart P₀ ha₂ ha₄ ha₆ hMP hMQ hcubic ha₃ h3 hB
+  exact ⟨V, hsV, Pr, β, γ, hE3, hMPr, hMQr, hγu⟩
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
@@ -689,7 +709,7 @@ noncomputable def e3GammaGlued {R : CommRingCat.{u}} (X : EllObj R)
         Pr.MarksAt L.1.1.2 0 0 → Pr.MarksAt L.1.2.2 γ (β + γ) →
         Scheme.resLE (le_top : V.1 ≤ ⊤) g = γ } := by
   classical
-  choose Vx hxVx Prx βx γx hFx hPx hQx using hD
+  choose Vx hxVx Prx βx γx hFx hPx hQx _hγux using hD
   have hcover : (⊤ : X.base.Opens) ≤ iSup (fun x : X.base => (Vx x).1) :=
     fun x _ => Opens.mem_iSup.mpr ⟨x, hxVx x⟩
   have hcoverInf : ∀ (V V' : X.base.Opens), V ⊓ V' ≤
@@ -750,7 +770,7 @@ noncomputable def e3BetaGlued {R : CommRingCat.{u}} (X : EllObj R)
         Pr.MarksAt L.1.1.2 0 0 → Pr.MarksAt L.1.2.2 γ (β + γ) →
         Scheme.resLE (le_top : V.1 ≤ ⊤) g = β } := by
   classical
-  choose Vx hxVx Prx βx γx hFx hPx hQx using hD
+  choose Vx hxVx Prx βx γx hFx hPx hQx _hγux using hD
   have hcover : (⊤ : X.base.Opens) ≤ iSup (fun x : X.base => (Vx x).1) :=
     fun x _ => Opens.mem_iSup.mpr ⟨x, hxVx x⟩
   have hcoverInf : ∀ (V V' : X.base.Opens), V ⊓ V' ≤
@@ -808,7 +828,7 @@ theorem e3_glued_flex {R : CommRingCat.{u}} (X : EllObj R)
       ((e3BetaGlued X L hD h3).1 + (e3GammaGlued X L hD h3).1) ^ 3 = 0 := by
   classical
   have hDc := hD
-  choose Vx hxVx Prx βx γx hFx hPx hQx using hDc
+  choose Vx hxVx Prx βx γx hFx hPx hQx _hγux using hDc
   have hcover : (⊤ : X.base.Opens) ≤ iSup (fun s : X.base => (Vx s).1) :=
     fun s _ => Opens.mem_iSup.mpr ⟨s, hxVx s⟩
   refine TopCat.Sheaf.eq_of_locally_eq' X.base.sheaf
@@ -835,14 +855,15 @@ theorem e3Delta_glued_isUnit {R : CommRingCat.{u}} (X : EllObj R)
         27 * (-3 * (e3GammaGlued X L hD h3).1 ^ 2 - (e3BetaGlued X L hD h3).1 -
           3 * (e3BetaGlued X L hD h3).1 * (e3GammaGlued X L hD h3).1)) *
       (-3 * (e3GammaGlued X L hD h3).1 ^ 2 - (e3BetaGlued X L hD h3).1 -
-        3 * (e3BetaGlued X L hD h3).1 * (e3GammaGlued X L hD h3).1))) := by
+        3 * (e3BetaGlued X L hD h3).1 * (e3GammaGlued X L hD h3).1)) *
+      (e3GammaGlued X L hD h3).1) := by
   set gB := (e3BetaGlued X L hD h3).1 with hgB
   set gG := (e3GammaGlued X L hD h3).1 with hgG
   apply X.base.toRingedSpace.isUnit_of_isUnit_germ
   intro x _
-  obtain ⟨V, hxV, Pr, β, γ, hF, hP, hQ⟩ := hD x
-  set D := ((3 * gG - 1) ^ 3 - 27 * (-3 * gG ^ 2 - gB - 3 * gB * gG)) *
-    (-3 * gG ^ 2 - gB - 3 * gB * gG) with hDdef
+  obtain ⟨V, hxV, Pr, β, γ, hF, hP, hQ, hγu⟩ := hD x
+  set D := (((3 * gG - 1) ^ 3 - 27 * (-3 * gG ^ 2 - gB - 3 * gB * gG)) *
+    (-3 * gG ^ 2 - gB - 3 * gB * gG)) * gG with hDdef
   have hgerm : X.base.presheaf.germ ⊤ x trivial D =
       X.base.presheaf.germ V.1 x hxV (Scheme.resLE (le_top : V.1 ≤ ⊤) D) := by
     rw [show Scheme.resLE (le_top : V.1 ≤ ⊤) D =
@@ -854,13 +875,13 @@ theorem e3Delta_glued_isUnit {R : CommRingCat.{u}} (X : EllObj R)
   have hγ := (e3GammaGlued X L hD h3).2 V Pr β γ hF hP hQ
   obtain ⟨ha₁, ha₂, ha₃, ha₄, ha₆⟩ := hF
   have hres : Scheme.resLE (le_top : V.1 ≤ ⊤) D =
-      (Pr.W.a₁ ^ 3 - 27 * Pr.W.a₃) * Pr.W.a₃ := by
+      (Pr.W.a₁ ^ 3 - 27 * Pr.W.a₃) * Pr.W.a₃ * γ := by
     rw [hDdef]
     simp only [map_mul, map_sub, map_pow, map_neg, map_ofNat, map_one]
     rw [hgB, hgG, hβ, hγ, ha₁, ha₃]
   rw [hres]
   obtain ⟨hu3, huD⟩ := e3form_units ⟨ha₁, ha₂, ha₃, ha₄, ha₆⟩ Pr.elliptic
-  exact huD.mul hu3
+  exact (huD.mul hu3).mul hγu
 
 open LocalPresentation MvPolynomial in
 set_option backward.isDefEq.respectTransparency false in
@@ -912,10 +933,12 @@ noncomputable def e3ClassifyingRingHom {R : CommRingCat.{u}} (X : EllObj R)
         27 * (-3 * (e3GammaGlued X L hD h3).1 ^ 2 - (e3BetaGlued X L hD h3).1 -
           3 * (e3BetaGlued X L hD h3).1 * (e3GammaGlued X L hD h3).1)) *
       (-3 * (e3GammaGlued X L hD h3).1 ^ 2 - (e3BetaGlued X L hD h3).1 -
-        3 * (e3BetaGlued X L hD h3).1 * (e3GammaGlued X L hD h3).1)) from by
+        3 * (e3BetaGlued X L hD h3).1 * (e3GammaGlued X L hD h3).1)) *
+      (e3GammaGlued X L hD h3).1 from by
     show (e3QuotientMap X L hD h3).comp (Ideal.Quotient.mk _)
-        ((e3A₁Poly R ^ 3 - 27 * e3A₃Poly R) * e3A₃Poly R) = _
-    show e3BaseMap X L hD h3 ((e3A₁Poly R ^ 3 - 27 * e3A₃Poly R) * e3A₃Poly R) = _
+        ((e3A₁Poly R ^ 3 - 27 * e3A₃Poly R) * e3A₃Poly R * MvPolynomial.X 1) = _
+    show e3BaseMap X L hD h3
+        ((e3A₁Poly R ^ 3 - 27 * e3A₃Poly R) * e3A₃Poly R * MvPolynomial.X 1) = _
     rw [e3BaseMap]
     simp only [e3A₁Poly, e3A₃Poly, map_mul, map_sub, map_pow, map_neg,
       map_ofNat, map_one, eval₂Hom_X', Matrix.cons_val_zero, Matrix.cons_val_one,
@@ -1121,7 +1144,7 @@ noncomputable def e3WitnessCover {R : CommRingCat.{u}} {X : EllObj R}
     (fun w => pullback X.curve.toEllipticCurveGeom.π w.V.1.ι)
     (fun w => pullback.fst X.curve.toEllipticCurveGeom.π w.V.1.ι)
     (fun x => by
-      obtain ⟨V, hxV, Pr, β, γ, hF, hP, hQ⟩ := hD
+      obtain ⟨V, hxV, Pr, β, γ, hF, hP, hQ, _hγu⟩ := hD
         (X.curve.toEllipticCurveGeom.π.base x)
       have hx : x ∈ Set.range (pullback.fst X.curve.toEllipticCurveGeom.π
           V.1.ι).base := by
@@ -1399,7 +1422,7 @@ noncomputable def e3BaseCover {R : CommRingCat.{u}} {X : EllObj R}
     (fun w => w.V.1.toScheme)
     (fun w => w.V.1.ι)
     (fun x => by
-      obtain ⟨V, hxV, Pr, lam, hAd, hW, hMP, hMQ⟩ := hD x
+      obtain ⟨V, hxV, Pr, lam, hAd, hW, hMP, hMQ, _hγu⟩ := hD x
       exact ⟨⟨V, Pr, lam, hAd, hW, hMP, hMQ⟩, ⟨x, hxV⟩, rfl⟩)
 
 open AlgebraicGeometry CategoryTheory Limits Scheme LocalPresentation in
@@ -1597,7 +1620,7 @@ theorem isPullback_e3Top {R : CommRingCat.{u}} {X : EllObj R}
     (fun w => w.V.1) ?_ (fun w => ?_)).flip
   · rw [eq_top_iff]
     intro x _
-    obtain ⟨V, hxV, Pr, lam, hAd, hW, hMP, hMQ⟩ := hD x
+    obtain ⟨V, hxV, Pr, lam, hAd, hW, hMP, hMQ, _hγu⟩ := hD x
     exact TopologicalSpace.Opens.mem_iSup.mpr
       ⟨⟨V, Pr, lam, hAd, hW, hMP, hMQ⟩, hxV⟩
   · set fpre := (X.curve.toEllipticCurveGeom.π ⁻¹ᵁ w.V.1).ι with hfpre
