@@ -547,7 +547,7 @@ private lemma slash_sum_V_p_pointwise_eq_smul_g_low {N : ℕ} [NeZero N] {k : �
         (⇑(HeckeRing.GL2.modularFormLevelRaise (N / p) p k g_low) ∣[k]
           descendCosetList p N hp v) z) =
       (descendCosetCount p N : ℂ) / (p : ℂ) * g_low z := by
-  simp_rw [fun v ↦ multipass_V_p_slash_descendCoset p hp hpN g_low v z]
+  simp_rw [fun v ↦ V_p_slash_descendCoset p hp hpN g_low v z]
   rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
   ring
 
@@ -778,7 +778,7 @@ private lemma slash_sum_V_p_lifted_qExp_coeff_at_cast_eq
   set Dp_g_low : UpperHalfPlane → ℂ := fun z ↦
     (descendCosetCount p L : ℂ) / (p : ℂ) * g_low z
   have h_Vp_slash_lifted : ∀ z : UpperHalfPlane, Vp_slash_lifted_fun z = Dp_g_low z := fun z ↦ by
-    simp_rw [Vp_slash_lifted_fun, fun v ↦ multipass_V_p_slash_descendCoset p hp hpL
+    simp_rw [Vp_slash_lifted_fun, fun v ↦ V_p_slash_descendCoset p hp hpL
       g_low_cast.toModularForm' v z]
     rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul,
       show (g_low_cast.toModularForm' : UpperHalfPlane → ℂ) z = g_low z by
