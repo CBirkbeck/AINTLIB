@@ -187,6 +187,20 @@ theorem pullbackSquareTrivialization_factor
   rw [← htransApp]
   simp only [Category.assoc]
 
+/-- If the lower leg of a square is an inclusion of opens, the residual factor in a
+square-transported trivialization is the usual restricted trivialization. -/
+theorem pullbackSquareTrivialization_tail_restrict
+    {X : Scheme.{u}} {N : X.Modules} {U W : X.Opens}
+    (hWU : W ≤ U) (c : W.toScheme ⟶ U.toScheme)
+    (hc : c = X.homOfLE hWU) (hw : c ≫ U.ι = W.ι)
+    (t : (pullback U.ι).obj N ≅ unitObj U.toScheme) :
+    (((pullbackCongr hw.symm).app N) ≪≫
+          ((pullbackComp c U.ι).app N).symm ≪≫
+          (pullback c).mapIso t ≪≫ pullbackUnitIso c).hom =
+      (restrictTrivialization hWU t).hom := by
+  subst c
+  rfl
+
 /-- Transporting a trivialization across two vertically composable squares agrees with
 transport across the outer square. -/
 theorem pullbackSquareTrivialization_vcomp
