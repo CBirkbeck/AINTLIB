@@ -395,4 +395,44 @@ theorem e3_witness_transVC_eq_one {S : Scheme.{u}} {G : EllipticCurveGeom S}
   exact e3_vc_marked hPrW hQrW (Pr.transVC_smul Qr) hr ht hγ hβγ hflex₁ hflex₂
     ha₃₂ hD₁ h3
 
+open LocalPresentation WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E15a stage 6)** `IsE3Form` restricts (coefficient-wise) with the restricted
+parameters. -/
+theorem restrict_W_e3form {S : Scheme.{u}} {G : EllipticCurveGeom S}
+    {V : S.affineOpens} {Pr : LocalPresentation G V} {β γ : Γ(S, V.1)}
+    (hW : IsE3Form Pr.W β γ) {V' : S.affineOpens} (h : V'.1 ≤ V.1) :
+    IsE3Form (Pr.restrict h).W (Scheme.resLE h β) (Scheme.resLE h γ) := by
+  obtain ⟨ha₁, ha₂, ha₃, ha₄, ha₆⟩ := hW
+  have hmap : ∀ x : Γ(S, V.1),
+      (sectionsMapLE (𝟙 S) (show V'.1 ≤ (𝟙 S : S ⟶ S) ⁻¹ᵁ V.1 by simpa using h)) x =
+        Scheme.resLE h x :=
+    fun x => congrArg (fun (r : Γ(S, V.1) →+* Γ(S, V'.1)) => r x)
+      (sectionsMapLE_id (by simpa using h))
+  refine ⟨?_, ?_, ?_, ?_, ?_⟩
+  · show (Pr.W.map (sectionsMapLE (𝟙 S) _)).a₁ = _
+    rw [WeierstrassCurve.map_a₁, ha₁, map_sub, map_mul, map_ofNat, map_one, hmap]
+  · show (Pr.W.map (sectionsMapLE (𝟙 S) _)).a₂ = _
+    rw [WeierstrassCurve.map_a₂, ha₂, map_zero]
+  · show (Pr.W.map (sectionsMapLE (𝟙 S) _)).a₃ = _
+    rw [WeierstrassCurve.map_a₃, ha₃]
+    rw [map_sub, map_sub, map_mul, map_neg, map_ofNat, map_pow, map_mul, map_mul,
+      map_ofNat, hmap, hmap]
+  · show (Pr.W.map (sectionsMapLE (𝟙 S) _)).a₄ = _
+    rw [WeierstrassCurve.map_a₄, ha₄, map_zero]
+  · show (Pr.W.map (sectionsMapLE (𝟙 S) _)).a₆ = _
+    rw [WeierstrassCurve.map_a₆, ha₆, map_zero]
+
+open LocalPresentation in
+/-- **(T-E15a stage 6, the corrected KM Ex. 2.2.2 datum)** An `E3` datum on `E/S`: a
+naive full level-`3` structure `(P, Q)` such that, locally, there is a chart
+presentation of `E3`-form marking `P` at `(0,0)` and `Q` at `(γ, β+γ)`. -/
+def IsE3Datum {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 3) : Prop :=
+  ∀ s : X.base, ∃ (V : X.base.affineOpens) (_ : s ∈ V.1)
+    (Pr : LocalPresentation X.curve.toEllipticCurveGeom V)
+    (β γ : Γ(X.base, V.1)),
+      IsE3Form Pr.W β γ ∧ Pr.MarksAt L.1.1.2 0 0 ∧
+      Pr.MarksAt L.1.2.2 γ (β + γ)
+
 end ModularCurves
