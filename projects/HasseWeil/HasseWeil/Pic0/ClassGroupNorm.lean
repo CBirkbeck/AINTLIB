@@ -166,7 +166,6 @@ the prime; mathlib's `Localization.AtPrime` extension API
 transports `e`, `f` across the localisation, leaving only the relative-norm/localisation
 compatibility — see the residual note after `Ideal.relNorm_eq_under_of_inertiaDeg_one`.) -/
 
-set_option maxHeartbeats 800000 in
 -- The `S/R` fraction-field tower + residue-degree `finrank` bookkeeping need elaboration room.
 /-- **`relNorm 𝔪 = p ^ inertiaDeg' p 𝔪` over a local base extension, unconditionally** (no
 `PerfectField`).  For a **local** Dedekind domain `S` (a DVR) module-finite over a Dedekind domain
@@ -361,7 +360,6 @@ theorem map_eq_top_of_under_ne (P : Ideal S) (q : Ideal R) [hq : q.IsMaximal] [P
 
 -- The semilocal `Sₚ` Dedekind/finite/torsion-free instance bundle over the DVR `Rₚ` pushes instance
 -- synthesis (e.g. `IsDomain Sₚ`) past the default budget at statement elaboration.
-set_option synthInstance.maxHeartbeats 400000 in
 /-- **The relative norm localises (top + bottom) at a maximal prime `q` of `R`.**  Pushing
 `relNorm R P` along `R → Rₚ := Localization.AtPrime q` equals the relative norm over `Rₚ` of the
 extension of `P` to the semilocal `Sₚ = Localization (algebraMapSubmonoid S q.primeCompl)`.
@@ -380,7 +378,6 @@ theorem relNorm_map_localization (P : Ideal S) (q : Ideal R) [q.IsMaximal] [NeZe
       P q.primeCompl q.primeCompl_le_nonZeroDivisors]
 
 -- The semilocal `Sₚ` instance bundle (in `hlocal`'s type) needs synthesis room at elaboration.
-set_option synthInstance.maxHeartbeats 400000 in
 /-- **General-base `relNorm 𝔭 = 𝔭.under`, reduced to the semilocal per-prime formula** (no
 `PerfectField`).  For a maximal prime `P` of `S` (with `p := P.under R`), the identity
 `relNorm R P = p` holds **once** the per-prime relative norm over the DVR base is known:
@@ -490,7 +487,6 @@ theorem relNorm_length_eq_span
     rw [(Ideal.quotientEquivPiSpan (Ideal.span {π}) b hQ).length_eq, Module.length_pi_of_fintype]
   rw [← hord_relNorm, hord_eq, hord_prod, hlen_smith]
 
-set_option maxHeartbeats 800000 in
 -- The explicit residue-field algebra structure (built on the `Ideal.Quotient.field`-derived semiring
 -- via `algebraQuotientOfLEComap`) keeps the surjectivity/`finrank` bookkeeping in elaboration budget
 -- *without* the `algebraOfLiesOver` instance-diamond (which carries free metavariables).
@@ -538,7 +534,6 @@ theorem isSimpleModule_quot_of_inertiaDeg_one
   exact ⟨m, hm, ⟨(LinearMap.quotKerEquivOfSurjective _ hsurjRp).symm.trans
     (Submodule.quotEquivOfEq _ _ hker)⟩⟩
 
-set_option maxHeartbeats 800000 in
 -- The module-length chain over the DVR base (Smith + `Ring.ord` additivity + simplicity) needs room.
 /-- **The per-prime relative norm over a DVR base at residue degree one** (the `PerfectField`-free
 residual, **CLOSED**).  For a DVR `Rₚ` (a local PID), a Dedekind PID `Sₚ` free-finite torsion-free
@@ -576,7 +571,6 @@ theorem relNorm_eq_maximalIdeal_of_inertiaDeg_one
     rw [Ideal.isMaximal_def, ← isSimpleModule_iff_isCoatom]; exact hsimp2
   exact IsLocalRing.eq_maximalIdeal hmax
 
-set_option synthInstance.maxHeartbeats 400000 in
 -- The abstract `Rₚ`/`Sₚ` localisation instance bundle (in the binders) needs synthesis room.
 omit [IsIntegrallyClosed R] [IsDedekindDomain R] [IsDomain S] [IsIntegrallyClosed S]
   [IsDedekindDomain S] [Module.Finite R S] [Module.IsTorsionFree R S] in
@@ -616,9 +610,7 @@ theorem relNorm_map_eq_maximalIdeal_general
     rw [IsLocalization.AtPrime.inertiaDeg_map_eq_inertiaDeg p Rp Sp P]; exact hf
   exact relNorm_eq_maximalIdeal_of_inertiaDeg_one (P.map (algebraMap S Sp)) hQ0 hfQ
 
-set_option synthInstance.maxHeartbeats 1000000 in
 -- The concrete semilocal `Sₚ` / DVR `Rₚ` localisation instance bundle is expensive to synthesise.
-set_option maxHeartbeats 1600000 in
 /-- **`relNorm 𝔭 = comap 𝔭` for a maximal prime of residue degree one** (Silverman III.4.10(a),
 `f = 1`; ideal form). For a maximal ideal `P` of `S` with `inertiaDeg' (P.under R) P = 1`, the
 relative norm `Ideal.relNorm R P` equals the contraction `P.under R = comap (algebraMap R S) P`.
@@ -721,9 +713,7 @@ is hit by a *constant* `algebraMap F (R ⧸ M.under R) c`.  Positivity (`finrank
 `Isogeny.CoordHom` already carries. -/
 
 -- The twisted self-algebra `R →[g] R` pushes instance synthesis past the default budget.
-set_option synthInstance.maxHeartbeats 400000 in
 -- The residue-field `finrank` bookkeeping (surjectivity bound + tower) needs more elaboration room.
-set_option maxHeartbeats 1600000 in
 /-- **`inertiaDeg' = 1` at a rational point, for an `F`-algebra self-map** (Silverman III.4.10(a),
 `f = 1`). For an `F`-algebra `R`, an `F`-algebra hom `g : R →ₐ[F] R` that is module-finite over
 itself through `g`, and a maximal ideal `M` whose residue field is one-dimensional over `F`
