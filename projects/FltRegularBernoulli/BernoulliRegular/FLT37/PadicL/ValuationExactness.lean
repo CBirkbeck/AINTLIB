@@ -3,8 +3,10 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.NumberTheory.Padics.PadicIntegers
-import Mathlib.NumberTheory.Padics.PadicNumbers
+module
+
+public import Mathlib.NumberTheory.Padics.PadicIntegers
+public import Mathlib.NumberTheory.Padics.PadicNumbers
 
 /-!
 # B-C1.3 — `p`-adic valuation exactness micro-facts
@@ -30,6 +32,7 @@ for the abstract `samePrimeFiniteLog` route.
 ## References
 * Washington, *Introduction to Cyclotomic Fields*, 2nd ed., GTM 83, §5.4, §8.4.
 -/
+@[expose] public section
 
 namespace BernoulliRegular.FLT37.PadicL
 
