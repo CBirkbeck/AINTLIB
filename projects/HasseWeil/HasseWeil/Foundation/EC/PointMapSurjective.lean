@@ -34,10 +34,6 @@ open WeierstrassCurve
 
 namespace HasseWeil
 
-set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.style.longLine false
-
 /-! ### Surjectivity of mathlib's `Affine.Point.map` -/
 
 section MapSurjective
@@ -83,6 +79,7 @@ variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
 noncomputable local instance instDecEqACSurjFrob : DecidableEq (AlgebraicClosure K) :=
   Classical.decEq _
 
+omit [DecidableEq K] in
 /-- **The geometric Frobenius `K`-algebra hom of `K̄` is surjective.**  It is the underlying map of
 the automorphism `FiniteField.frobeniusAlgEquivOfAlgebraic K K̄` (`K̄/K` algebraic ⟹ the `q`-power is
 an automorphism), so it is bijective; here we record surjectivity. -/
@@ -96,6 +93,8 @@ theorem frobeniusAlgHom_surjective_algebraicClosure :
   rw [hcoe]
   exact (FiniteField.frobeniusAlgEquivOfAlgebraic K (AlgebraicClosure K)).surjective
 
+omit [W.toAffine.IsElliptic] [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic]
+  [DecidableEq K] in
 /-- **The geometric Frobenius point map over `K̄` is surjective** (Silverman III.4.10a, Frobenius
 factor).  `geomFrobeniusPoint W = Affine.Point.map (Frobenius)` and the Frobenius `K`-algebra hom of
 `K̄` is surjective (`frobeniusAlgHom_surjective_algebraicClosure`), so `affinePointMap_surjective`
@@ -106,6 +105,8 @@ theorem geomFrobeniusPoint_surjective :
     (FiniteField.frobeniusAlgHom K (AlgebraicClosure K)))
   exact affinePointMap_surjective (W' := W) frobeniusAlgHom_surjective_algebraicClosure
 
+omit [W.toAffine.IsElliptic] [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic]
+  [DecidableEq K] in
 /-- **The geometric Frobenius point map over `K̄` is bijective.**  Surjective by
 `geomFrobeniusPoint_surjective`; injective as `Affine.Point.map` of an injective field hom
 (`WeierstrassCurve.Affine.Point.map_injective`). -/
