@@ -120,7 +120,6 @@ private lemma hasSubst_X_FYZ_fin3 (F : FormalGroup.FormalGroup R) :
   · exact (constantCoeff_subst_vanishing hasSubst_YZ_fin3
       (fun s ↦ by fin_cases s <;> simp) F.toSeries).trans (constantCoeff_FG_toSeries F)
 
-set_option maxHeartbeats 800000 in
 -- Deeply nested `MvPowerSeries.subst` expressions; the default limit is exceeded
 -- while unifying the `Fin 3 → MvPowerSeries (Fin 2) R` specialization of `F.assoc`.
 /-- The left side `F(F(X, Y), Z)` of the associativity law, substituted along
@@ -147,7 +146,6 @@ private lemma subst_abc_FXY_Z (F : FormalGroup.FormalGroup R)
   · change MvPowerSeries.subst _ (MvPowerSeries.X 2) = _
     exact subst_fin3_X _ h_abc 2
 
-set_option maxHeartbeats 800000 in
 -- Deeply nested `MvPowerSeries.subst` expressions; the default limit is exceeded
 -- while unifying the `Fin 3 → MvPowerSeries (Fin 2) R` specialization of `F.assoc`.
 /-- The right side `F(X, F(Y, Z))` of the associativity law, substituted along
@@ -175,7 +173,6 @@ private lemma subst_abc_X_FYZ (F : FormalGroup.FormalGroup R)
     · exact subst_fin3_X _ h_abc 1
     · exact subst_fin3_X _ h_abc 2
 
-set_option maxHeartbeats 800000 in
 -- Deeply nested `MvPowerSeries.subst` expressions; the default limit is exceeded
 -- while unifying the `Fin 3 → MvPowerSeries (Fin 2) R` specialization of `F.assoc`.
 /-- Associativity of the bivariate `F`-addition: for `a, b, c` with vanishing

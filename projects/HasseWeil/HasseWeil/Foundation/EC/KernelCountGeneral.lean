@@ -132,7 +132,6 @@ set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 400000 in
 -- Typeclass search through the pinned `β.toAlgebra` structures is heartbeat-heavy,
 -- exactly as in `HasseWeil/Curves/GoodFiber.lean` (same bumps).
-set_option maxHeartbeats 1600000 in
 -- The instantiation of the localized dictionary needs the matching elaboration budget.
 /-- **III.4.10(c) for the general separable class — the W-3b headline**: a separable
 isogeny `β` over an algebraically closed field, with only the cofinite

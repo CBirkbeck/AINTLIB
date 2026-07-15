@@ -159,7 +159,6 @@ theorem gKbar_genericPoint_eq_map (_hq : 2 ≤ Fintype.card K) :
         (HasseWeil.genericPoint W - frobeniusW_KE W (HasseWeil.genericPoint W)) := by
   rw [gKbar_genericPoint]; rfl
 
-set_option maxHeartbeats 1600000 in
 /-- **Wall A closed for `1 − π` (CoordHom-free).**  The concrete base-changed pullback
 `pullback_L = oneSubFrobeniusPullback_L` is *genuine* with the translatable geometric action
 `gKbar = id − π̄` over `K̄`:
