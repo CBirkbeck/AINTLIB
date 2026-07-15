@@ -226,7 +226,7 @@ theorem gaussSumIntAtScale_eq_charUnit_mul_one
     S.gaussSumIntAtScale c a =
       (S.residueCharInt ^ a) ((c⁻¹ : kˣ) : k) * S.gaussSumIntAtScale 1 a := by
   classical
-  unfold gaussSumIntAtScale
+  simp only [gaussSumIntAtScale]
   have hχ : (S.residueCharInt ^ a) ((c⁻¹ : kˣ) : k) *
       (S.residueCharInt ^ a) ((c : k)) = 1 := by
     rw [show
@@ -291,9 +291,9 @@ with `gaussSumIntAtScale` evaluated at the bundle's `traceScale`. -/
 theorem gaussSumInt_eq_gaussSumIntAtScale_traceScale (a : ℕ) :
     S.gaussSumInt a =
       S.toConcreteStickelbergerSetup.gaussSumIntAtScale S.traceScale a := by
-  unfold ConcreteStickelbergerSetup.gaussSumIntAtScale
+  simp only [ConcreteStickelbergerSetup.gaussSumIntAtScale]
   change _root_.gaussSum (S.residueCharInt ^ a) S.psiInt = _
-  unfold _root_.gaussSum
+  simp only [_root_.gaussSum]
   refine Finset.sum_congr rfl fun x _ ↦ ?_
   rw [S.psiInt_eq_zeta_ell_int_pow_trace]
 

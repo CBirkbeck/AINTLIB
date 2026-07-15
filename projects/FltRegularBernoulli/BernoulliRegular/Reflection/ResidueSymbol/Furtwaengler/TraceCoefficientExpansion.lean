@@ -162,7 +162,7 @@ theorem traceCharacterChooseSumRec_mul_factorial_eq_descFactorialSum
       ∑ x : k, (S.residueCharInt ^ (p - a)) x *
         (Nat.descFactorial
           (Algebra.trace (ZMod ℓ) k ((S.traceScale : k) * x)).val n : 𝓞 R') := by
-  unfold traceCharacterChooseSumRec traceCharacterChooseSum
+  simp only [traceCharacterChooseSumRec, traceCharacterChooseSum]
   rw [Finset.sum_mul]
   refine Finset.sum_congr rfl fun x _ => ?_
   rw [mul_assoc]

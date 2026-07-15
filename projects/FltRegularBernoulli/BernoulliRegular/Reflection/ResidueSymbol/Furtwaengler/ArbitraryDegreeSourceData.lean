@@ -83,7 +83,7 @@ theorem normalizedFactors_stickelbergerIdeal_eq_sum_with_repetitions
           ({cyclotomicGaloisConjugate (p := p) (K := K) a⁻¹ P} :
             Multiset (Ideal (𝓞 K))) := by
   classical
-  unfold stickelbergerIdeal
+  simp only [stickelbergerIdeal]
   induction (Finset.univ : Finset (CyclotomicUnitDelta p)) using
     Finset.induction_on with
   | empty =>
@@ -119,7 +119,7 @@ theorem normalizedFactors_stickelbergerIdeal_count_eq_repeatedMultiplicity
   classical
   rw [normalizedFactors_stickelbergerIdeal_eq_sum_with_repetitions
     (p := p) (K := K) hP_ne]
-  unfold stickelbergerRepeatedMultiplicity
+  simp only [stickelbergerRepeatedMultiplicity]
   rw [Multiset.count_sum']
   refine Finset.sum_congr rfl ?_
   intro a _ha

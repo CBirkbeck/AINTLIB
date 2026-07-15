@@ -67,7 +67,7 @@ relevant `a.val` can be 1 (when a = 1). The factor at a = 1 is
 `(σ_1 α)^1.val = (σ_1 α)^1 = α`. So if α = 0, the product is 0. -/
 theorem stickelbergerPrincipalGen_zero :
     stickelbergerPrincipalGen (p := p) (K := K) (0 : 𝓞 K) = 0 := by
-  unfold stickelbergerPrincipalGen
+  simp only [stickelbergerPrincipalGen]
   -- Find the factor a = 1; (σ_1 0)^1 = 0; product with a zero factor is 0.
   refine Finset.prod_eq_zero (Finset.mem_univ (1 : CyclotomicUnitDelta p)) ?_
   -- Need: (cyclotomicRingOfIntegersEquiv K (1⁻¹) 0)^(1 : ZMod p).val = 0.
@@ -88,7 +88,7 @@ theorem stickelbergerPrincipalGen_mul (α β : 𝓞 K) :
     stickelbergerPrincipalGen (p := p) (K := K) (α * β) =
       stickelbergerPrincipalGen (p := p) (K := K) α *
       stickelbergerPrincipalGen (p := p) (K := K) β := by
-  unfold stickelbergerPrincipalGen
+  simp only [stickelbergerPrincipalGen]
   rw [← Finset.prod_mul_distrib]
   refine Finset.prod_congr rfl fun a _ ↦ ?_
   rw [show cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ (α * β) =
@@ -100,7 +100,7 @@ theorem stickelbergerPrincipalGen_mul (α β : 𝓞 K) :
 since σ is injective and the exponent `a.val ≥ 1` for `a ∈ (ZMod p)ˣ`. -/
 theorem stickelbergerPrincipalGen_ne_zero {α : 𝓞 K} (hα : α ≠ 0) :
     stickelbergerPrincipalGen (p := p) (K := K) α ≠ 0 := by
-  unfold stickelbergerPrincipalGen
+  simp only [stickelbergerPrincipalGen]
   refine Finset.prod_ne_zero_iff.mpr fun a _ ↦ ?_
   -- Need: (σ_{a^{-1}} α)^a.val ≠ 0.
   have hσα_ne : cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α ≠ 0 := by
@@ -120,7 +120,7 @@ theorem stickelbergerPrincipalGen_mem_of_mem
     {α : 𝓞 K} {I : Ideal (𝓞 K)} (hα : α ∈ I) :
     stickelbergerPrincipalGen (p := p) (K := K) α ∈ I := by
   classical
-  unfold stickelbergerPrincipalGen
+  simp only [stickelbergerPrincipalGen]
   rw [← Finset.mul_prod_erase Finset.univ
     (fun a : CyclotomicUnitDelta p ↦
       (cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α) ^ ((a : ZMod p).val))
@@ -141,7 +141,7 @@ theorem span_stickelbergerPrincipalGen (α : 𝓞 K) :
       ∏ a : CyclotomicUnitDelta p,
         Ideal.span ({cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α} :
           Set (𝓞 K)) ^ ((a : ZMod p).val) := by
-  unfold stickelbergerPrincipalGen
+  simp only [stickelbergerPrincipalGen]
   rw [show
       Ideal.span ({∏ a : CyclotomicUnitDelta p,
             (cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α) ^ ((a : ZMod p).val)}
@@ -169,7 +169,7 @@ theorem stickelbergerIdeal_span_singleton (α : 𝓞 K) :
       Ideal.span ({stickelbergerPrincipalGen (p := p) (K := K) α} :
         Set (𝓞 K)) := by
   rw [span_stickelbergerPrincipalGen]
-  unfold stickelbergerIdeal
+  simp only [stickelbergerIdeal]
   refine Finset.prod_congr rfl fun a _ ↦ ?_
   rw [cyclotomicGaloisConjugate_span_singleton]
 
@@ -177,7 +177,7 @@ theorem stickelbergerIdeal_span_singleton (α : 𝓞 K) :
 @[simp] theorem stickelbergerIdeal_top :
     stickelbergerIdeal (p := p) (K := K) (⊤ : Ideal (𝓞 K)) = ⊤ := by
   classical
-  unfold stickelbergerIdeal
+  simp only [stickelbergerIdeal]
   rw [← Ideal.one_eq_top]
   refine Finset.prod_eq_one
     (f := fun a : CyclotomicUnitDelta p ↦
@@ -192,7 +192,7 @@ theorem stickelbergerIdeal_mul (A B : Ideal (𝓞 K)) :
     stickelbergerIdeal (p := p) (K := K) (A * B) =
       stickelbergerIdeal (p := p) (K := K) A *
         stickelbergerIdeal (p := p) (K := K) B := by
-  unfold stickelbergerIdeal
+  simp only [stickelbergerIdeal]
   rw [← Finset.prod_mul_distrib]
   refine Finset.prod_congr rfl fun a _ ↦ ?_
   rw [cyclotomicGaloisConjugate_mul_ideal, mul_pow]
@@ -376,7 +376,7 @@ theorem pthSymbolAtPrincipal_canonical_principalGen_eq_galois_sum
           pthSymbolAtPrincipal_canonical (p := p) (K := K) α
             (cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ β) := by
   classical
-  unfold pthSymbolAtPrincipal_canonical
+  simp only [pthSymbolAtPrincipal_canonical]
   -- Step 1: rewrite (β^Θ) ideal as the product of (σ_{a^{-1}} β)^{a.val}.
   rw [span_stickelbergerPrincipalGen]
   -- Step 2: distribute pthSymbolAtIdeal_canonical α over the finset product.
@@ -478,7 +478,7 @@ theorem pthSymbolAtIdeal_canonical_principalGen_left_eq_galois_sum
           pthSymbolAtIdeal_canonical (p := p) (K := K)
             (cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α) B := by
   classical
-  unfold stickelbergerPrincipalGen
+  simp only [stickelbergerPrincipalGen]
   rw [pthSymbolAtIdeal_canonical_finset_prod_α (p := p) Finset.univ
     (fun a : CyclotomicUnitDelta p ↦
       (cyclotomicRingOfIntegersEquiv (p := p) K a⁻¹ α) ^ ((a : ZMod p).val))

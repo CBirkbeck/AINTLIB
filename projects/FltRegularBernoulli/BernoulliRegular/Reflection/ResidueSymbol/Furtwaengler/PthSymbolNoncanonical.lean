@@ -107,7 +107,7 @@ noncomputable def pthSymbolAtIdeal {K : Type*} [Field K] [NumberField K]
 @[simp] theorem pthSymbolAtIdeal_one {K : Type*} [Field K] [NumberField K]
     (α : 𝓞 K) :
     pthSymbolAtIdeal (p := p) α (1 : Ideal (𝓞 K)) = 0 := by
-  unfold pthSymbolAtIdeal
+  simp only [pthSymbolAtIdeal]
   rw [UniqueFactorizationMonoid.normalizedFactors_one]
   simp
 
@@ -122,7 +122,7 @@ noncomputable def pthSymbolAtIdeal {K : Type*} [Field K] [NumberField K]
 @[simp] theorem pthSymbolAtIdeal_bot {K : Type*} [Field K] [NumberField K]
     (α : 𝓞 K) :
     pthSymbolAtIdeal (p := p) α (⊥ : Ideal (𝓞 K)) = 0 := by
-  unfold pthSymbolAtIdeal
+  simp only [pthSymbolAtIdeal]
   rw [← Ideal.zero_eq_bot, UniqueFactorizationMonoid.normalizedFactors_zero]
   simp
 
@@ -131,7 +131,7 @@ theorem pthSymbolAtIdeal_mul_ideal {K : Type*} [Field K] [NumberField K]
     (α : 𝓞 K) {I J : Ideal (𝓞 K)} (hI : I ≠ ⊥) (hJ : J ≠ ⊥) :
     pthSymbolAtIdeal (p := p) α (I * J) =
       pthSymbolAtIdeal (p := p) α I + pthSymbolAtIdeal (p := p) α J := by
-  unfold pthSymbolAtIdeal
+  simp only [pthSymbolAtIdeal]
   have hI' : (I : Ideal (𝓞 K)) ≠ 0 := by rwa [Ne, Ideal.zero_eq_bot]
   have hJ' : (J : Ideal (𝓞 K)) ≠ 0 := by rwa [Ne, Ideal.zero_eq_bot]
   rw [UniqueFactorizationMonoid.normalizedFactors_mul hI' hJ',
@@ -142,7 +142,7 @@ theorem pthSymbolAtIdeal_pow_ideal {K : Type*} [Field K] [NumberField K]
     (α : 𝓞 K) (I : Ideal (𝓞 K)) (n : ℕ) :
     pthSymbolAtIdeal (p := p) α (I ^ n) =
       n * pthSymbolAtIdeal (p := p) α I := by
-  unfold pthSymbolAtIdeal
+  simp only [pthSymbolAtIdeal]
   rw [UniqueFactorizationMonoid.normalizedFactors_pow,
       Multiset.map_nsmul, Multiset.sum_nsmul, nsmul_eq_mul]
 
@@ -172,7 +172,7 @@ theorem pthSymbolAtIdeal_mul {K : Type*} [Field K] [NumberField K]
     (hβ : ∀ P ∈ UniqueFactorizationMonoid.normalizedFactors I, β ∉ P) :
     pthSymbolAtIdeal (p := p) (α * β) I =
       pthSymbolAtIdeal (p := p) α I + pthSymbolAtIdeal (p := p) β I := by
-  unfold pthSymbolAtIdeal
+  simp only [pthSymbolAtIdeal]
   rw [← Multiset.sum_map_add]
   refine congrArg Multiset.sum (Multiset.map_congr rfl fun P hP ↦ ?_)
   obtain ⟨_, hP_ne_bot, hP_max⟩ := isPrime_of_mem_normalizedFactors hP
@@ -183,7 +183,7 @@ theorem pthSymbolAtIdeal_eq_zero_of_mem_all_factors {K : Type*} [Field K] [Numbe
     {α : 𝓞 K} {I : Ideal (𝓞 K)}
     (hα : ∀ P ∈ UniqueFactorizationMonoid.normalizedFactors I, α ∈ P) :
     pthSymbolAtIdeal (p := p) α I = 0 := by
-  unfold pthSymbolAtIdeal
+  simp only [pthSymbolAtIdeal]
   have hmap :
       (UniqueFactorizationMonoid.normalizedFactors I).map
           (fun P ↦ pthSymbolAtPrime (p := p) α P) =
@@ -223,7 +223,7 @@ noncomputable def pthSymbolAtPrincipal {K : Type*} [Field K] [NumberField K]
 @[simp] theorem pthSymbolAtPrincipal_one_right {K : Type*}
     [Field K] [NumberField K] (α : 𝓞 K) :
     pthSymbolAtPrincipal (p := p) α 1 = 0 := by
-  unfold pthSymbolAtPrincipal
+  simp only [pthSymbolAtPrincipal]
   rw [Ideal.span_singleton_one]
   exact pthSymbolAtIdeal_top _
 
@@ -231,7 +231,7 @@ noncomputable def pthSymbolAtPrincipal {K : Type*} [Field K] [NumberField K]
 @[simp] theorem pthSymbolAtPrincipal_zero_right {K : Type*}
     [Field K] [NumberField K] (α : 𝓞 K) :
     pthSymbolAtPrincipal (p := p) α 0 = 0 := by
-  unfold pthSymbolAtPrincipal
+  simp only [pthSymbolAtPrincipal]
   simp
 
 /-- The self-symbol `(α/α)_p` is zero in this totalized encoding. -/
@@ -267,7 +267,7 @@ theorem pthSymbolAtPrincipal_mul_right {K : Type*}
     pthSymbolAtPrincipal (p := p) α (β * γ) =
       pthSymbolAtPrincipal (p := p) α β +
         pthSymbolAtPrincipal (p := p) α γ := by
-  unfold pthSymbolAtPrincipal
+  simp only [pthSymbolAtPrincipal]
   rw [← Ideal.span_singleton_mul_span_singleton]
   refine pthSymbolAtIdeal_mul_ideal _ ?_ ?_
   · exact (Ideal.span_singleton_eq_bot.not).mpr hβ

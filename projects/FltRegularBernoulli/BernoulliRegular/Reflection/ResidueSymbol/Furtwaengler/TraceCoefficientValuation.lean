@@ -55,7 +55,7 @@ Stickelberger range. -/
 theorem traceCharacterChooseSumRec_zero_eq_zero
     (a : ℕ) (ha₁ : 1 ≤ a) (ha₂ : a ≤ p - 1) :
     S.traceCharacterChooseSumRec a 0 = 0 := by
-  unfold traceCharacterChooseSumRec traceCharacterChooseSum
+  simp only [traceCharacterChooseSumRec, traceCharacterChooseSum]
   simp only [Nat.choose_zero_right, Nat.cast_one, mul_one]
   exact MulChar.sum_eq_zero_of_ne_one
     (S.residueCharInt_pow_ne_one (a := p - a) (by omega) (by omega))
@@ -101,7 +101,7 @@ theorem traceCharacterChooseSumRec_eq_zero_of_ell_le
     S.traceCharacterChooseSumRec a n = 0 := by
   classical
   have : NeZero ℓ := ⟨(Fact.out : Nat.Prime ℓ).ne_zero⟩
-  unfold traceCharacterChooseSumRec traceCharacterChooseSum
+  simp only [traceCharacterChooseSumRec, traceCharacterChooseSum]
   refine Finset.sum_eq_zero fun x _ ↦ ?_
   have hval :
       (Algebra.trace (ZMod ℓ) k ((S.traceScale : k) * x)).val < n :=

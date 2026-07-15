@@ -91,7 +91,7 @@ noncomputable def gaussSumIntRec (a : ℕ) : 𝓞 R' :=
 theorem binomialCoeffSum_eq_traceCharacterChooseSum (a n : ℕ) :
     S.toConcreteStickelbergerSetup.binomialCoeffSum a n =
       S.traceCharacterChooseSum a n := by
-  unfold ConcreteStickelbergerSetup.binomialCoeffSum traceCharacterChooseSum
+  simp only [ConcreteStickelbergerSetup.binomialCoeffSum, traceCharacterChooseSum]
   refine Finset.sum_congr rfl fun x _ ↦ ?_
   rw [S.psiExponent_trace]
 
@@ -99,7 +99,7 @@ theorem binomialCoeffSum_eq_traceCharacterChooseSum (a n : ℕ) :
 theorem binomialCoeffApprox_eq_traceBinomialApprox (a s : ℕ) :
     S.toConcreteStickelbergerSetup.binomialCoeffApprox a s =
       S.traceBinomialApprox a s := by
-  unfold ConcreteStickelbergerSetup.binomialCoeffApprox traceBinomialApprox
+  simp only [ConcreteStickelbergerSetup.binomialCoeffApprox, traceBinomialApprox]
   refine Finset.sum_congr rfl fun n _ ↦ ?_
   rw [S.binomialCoeffSum_eq_traceCharacterChooseSum]
 
