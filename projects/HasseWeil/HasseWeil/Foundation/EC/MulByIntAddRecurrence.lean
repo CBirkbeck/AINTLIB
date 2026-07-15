@@ -84,8 +84,8 @@ theorem addNonInversePair_mulByInt_one (m : ℤ) (hm : m ≠ 0) (hm1 : m + 1 ≠
 addition-pullback of `([m], [1])` realises the `[m+1]`-coordinates. Pair-order mirror of
 `addPullback_xy_mulByInt_eq_succ` (which is the `(id, [m])` order), additionally covering
 the tangent branch `m = 1` (via the explicit-slope doubling identities
-`addX_addY_mulByInt_one_self_eq_two`). Consumed by the BRIDGE-003 instance
-`formalIsogenySeries_FGL_additivity` (`GapQfKernel`). -/
+`addX_addY_mulByInt_one_self_eq_two`). Consumed by the
+`formalIsogenySeries_FGL_additivity` instance (`GapQfKernel`). -/
 theorem addPullback_xy_pair_mulByInt_one_eq_succ (m : ℤ) (hm : m ≠ 0) (hm1 : m + 1 ≠ 0) :
     addPullback_x_pair (mulByInt W.toAffine m) (mulByInt W.toAffine 1)
         = mulByInt_x W (m + 1) ∧
