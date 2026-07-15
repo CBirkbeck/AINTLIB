@@ -213,6 +213,30 @@ private lemma isLocalizedModule_mapExt_zero [IsNoetherianRing S] (X Y : ModuleCa
       ← Submonoid.smul_def, ← Submonoid.smul_def]
     exact hc
 
+/-- A pointwise-commuting square of `S`-linear maps `ρ' ∘ iP = iK ∘ ρ` localizes: the
+localized lifts of the verticals `iP, iK` (against `𝔪`-inverting units `hU_P, hU_K`)
+intertwine `ρ'` with the localized map of `ρ`. The naturality core shared by the two
+ladder squares of `isLocalizedModule_mapExt_succ`. -/
+private lemma localizedLift_comp_map_eq {M₁ M₂ N₁ N₂ : Type u}
+    [AddCommGroup M₁] [Module S M₁] [AddCommGroup M₂] [Module S M₂]
+    [AddCommGroup N₁] [Module S N₁] [AddCommGroup N₂] [Module S N₂]
+    (iP : M₁ →ₗ[S] N₁) (hU_P : ∀ x : 𝔪, IsUnit (algebraMap S (Module.End S N₁) x))
+    (iK : M₂ →ₗ[S] N₂) (hU_K : ∀ x : 𝔪, IsUnit (algebraMap S (Module.End S N₂) x))
+    (ρ : M₁ →ₗ[S] M₂) (ρ' : N₁ →ₗ[S] N₂) (hnat : ∀ e, ρ' (iP e) = iK (ρ e)) :
+    ρ'.comp (LocalizedModule.lift 𝔪 iP hU_P)
+      = (LocalizedModule.lift 𝔪 iK hU_K).comp
+          (IsLocalizedModule.map 𝔪 (LocalizedModule.mkLinearMap 𝔪 M₁)
+            (LocalizedModule.mkLinearMap 𝔪 M₂) ρ) := by
+  apply IsLocalizedModule.ext 𝔪 (LocalizedModule.mkLinearMap 𝔪 M₁) hU_K
+  ext e
+  show ρ' (LocalizedModule.lift 𝔪 iP hU_P (LocalizedModule.mkLinearMap 𝔪 M₁ e))
+    = LocalizedModule.lift 𝔪 iK hU_K
+        (IsLocalizedModule.map 𝔪 (LocalizedModule.mkLinearMap 𝔪 M₁)
+          (LocalizedModule.mkLinearMap 𝔪 M₂) ρ (LocalizedModule.mkLinearMap 𝔪 M₁ e))
+  rw [IsLocalizedModule.map_apply]
+  simp only [LocalizedModule.mkLinearMap_apply, LocalizedModule.lift_mk_one]
+  exact hnat e
+
 /-- **Inductive step of flat base change for Ext.** Assuming the statement at degree `n` for every
 finite module (hypothesis `ih`), it holds at degree `n + 1`. This is the five-lemma argument on the
 localized contravariant `Ext` long exact sequence of a finite projective presentation
@@ -276,22 +300,10 @@ private lemma isLocalizedModule_mapExt_succ [IsNoetherianRing S] (Y : ModuleCat.
   -- naturality of the localized ladder
   have hc₁ : ρ'.comp (LocalizedModule.lift 𝔪 iP hU_P)
       = (LocalizedModule.lift 𝔪 iK hU_K).comp Lρ := by
-    apply IsLocalizedModule.ext 𝔪 (LocalizedModule.mkLinearMap 𝔪 (Ext 𝒮.X₂ Y n)) hU_K
-    ext e
-    show ρ' (LocalizedModule.lift 𝔪 iP hU_P (LocalizedModule.mkLinearMap 𝔪 (Ext 𝒮.X₂ Y n) e))
-      = LocalizedModule.lift 𝔪 iK hU_K (Lρ (LocalizedModule.mkLinearMap 𝔪 (Ext 𝒮.X₂ Y n) e))
-    rw [hLρ, IsLocalizedModule.map_apply]
-    simp only [LocalizedModule.mkLinearMap_apply, LocalizedModule.lift_mk_one]
-    exact hnat1 e
+    rw [hLρ]; exact localizedLift_comp_map_eq 𝔪 iP hU_P iK hU_K ρ ρ' hnat1
   have hc₂ : δ'.comp (LocalizedModule.lift 𝔪 iK hU_K)
       = (LocalizedModule.lift 𝔪 iX hU_X).comp Lδ := by
-    apply IsLocalizedModule.ext 𝔪 (LocalizedModule.mkLinearMap 𝔪 (Ext 𝒮.X₁ Y n)) hU_X
-    ext e
-    show δ' (LocalizedModule.lift 𝔪 iK hU_K (LocalizedModule.mkLinearMap 𝔪 (Ext 𝒮.X₁ Y n) e))
-      = LocalizedModule.lift 𝔪 iX hU_X (Lδ (LocalizedModule.mkLinearMap 𝔪 (Ext 𝒮.X₁ Y n) e))
-    rw [hLδ, IsLocalizedModule.map_apply]
-    simp only [LocalizedModule.mkLinearMap_apply, LocalizedModule.lift_mk_one]
-    exact hnat2 e
+    rw [hLδ]; exact localizedLift_comp_map_eq 𝔪 iK hU_K iX hU_X δ δ' hnat2
   -- exactness (S-side localized, and L-side)
   have hExactρδ : Function.Exact ρ δ :=
     (ShortComplex.ab_exact_iff_function_exact _).1
