@@ -477,3 +477,8 @@ Active dependency claim (2026-07-14): in `InvertibleSheafGlueEffectivity.lean`, 
 `AffineIntersectionUnitCocycle.gluedModule` as the concrete Cech equalizer attached to
 `chartDescentData`, prove `AffineIntersectionUnitCocycle.gluedModuleRestrictIso` on every chart,
 and derive `AffineIntersectionUnitCocycle.gluedModule_isInvertible` without adding hypotheses.
+
+Completed subdependency (2026-07-14): proved `Scheme.Modules.restrictFunctor_preservesLimits`.
+Restriction along an open immersion therefore carries the chart Cech product and equalizer to
+their local counterparts; the proof is option-free and its axiom audit is exactly `propext`,
+`Classical.choice`, and `Quot.sound`.

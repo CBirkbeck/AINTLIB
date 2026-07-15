@@ -16,6 +16,18 @@ namespace AlgebraicGeometry.Scheme.Modules
 
 noncomputable section
 
+/-- Restriction of scheme modules along an open immersion preserves all limits. -/
+theorem restrictFunctor_preservesLimits
+    {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f] :
+    PreservesLimits (restrictFunctor f) := by
+  letI : PreservesLimits (restrictFunctor f ⋙ toPresheafOfModules X) := by
+    dsimp [restrictFunctor, toPresheafOfModules]
+    change PreservesLimits (SheafOfModules.forget _ ⋙
+      PresheafOfModules.pushforward _)
+    exact comp_preservesLimits _ _
+  exact preservesLimits_of_reflects_of_preserves
+    (restrictFunctor f) (toPresheafOfModules X)
+
 private noncomputable def AffineIntersectionUnitCocycle.chartExtension
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
     (_c : AffineIntersectionUnitCocycle F)
