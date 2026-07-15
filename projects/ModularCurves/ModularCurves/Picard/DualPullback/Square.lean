@@ -75,6 +75,84 @@ noncomputable def pullbackSquareIso
     pullback b ⋙ pullback a ≅ pullback d ⋙ pullback c :=
   pullbackComp a b ≪≫ pullbackCongr h ≪≫ (pullbackComp c d).symm
 
+theorem pullbackCongr_trans
+    {X Y : Scheme.{u}} {f g h : X ⟶ Y}
+    (p : f = g) (q : g = h) :
+    pullbackCongr p ≪≫ pullbackCongr q = pullbackCongr (p.trans q) := by
+  subst g
+  subst h
+  rfl
+
+theorem pullbackCongr_inv
+    {X Y : Scheme.{u}} {f g : X ⟶ Y} (p : f = g) :
+    (pullbackCongr p).inv = (pullbackCongr p.symm).hom := by
+  subst g
+  rfl
+
+theorem pullbackCompCongr_transition_app
+    {A B C D : Scheme.{u}}
+    (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
+    (p : A ⟶ D) (h₁ : a ≫ b = p) (h₂ : c ≫ d = p)
+    (M : D.Modules) :
+    (((pullbackComp a b).app M) ≪≫ ((pullbackCongr h₁).app M)).hom ≫
+        (((pullbackComp c d).app M) ≪≫
+          ((pullbackCongr h₂).app M)).inv =
+      (pullbackSquareIso a b c d (h₁.trans h₂.symm)).hom.app M := by
+  simp only [pullbackSquareIso, Iso.trans_hom, Iso.trans_inv,
+    NatTrans.comp_app]
+  let P₁ := (pullbackComp a b).app M
+  let P₂ := (pullbackComp c d).app M
+  let Q₁ := (pullbackCongr h₁).app M
+  let Q₂ := (pullbackCongr h₂).app M
+  let Q₁₂ := (pullbackCongr (h₁.trans h₂.symm)).app M
+  change (P₁.hom ≫ Q₁.hom) ≫ (Q₂.inv ≫ P₂.inv) =
+    P₁.hom ≫ Q₁₂.hom ≫ P₂.inv
+  have hQ₂ := congrArg (fun z => z.app M) (pullbackCongr_inv h₂)
+  change Q₂.inv = (pullbackCongr h₂.symm).hom.app M at hQ₂
+  have htrans := pullbackCongr_trans h₁ h₂.symm
+  have htransApp := congrArg (fun z => z.hom.app M) htrans
+  change Q₁.hom ≫ (pullbackCongr h₂.symm).hom.app M = Q₁₂.hom at htransApp
+  calc
+    (P₁.hom ≫ Q₁.hom) ≫ (Q₂.inv ≫ P₂.inv) =
+        P₁.hom ≫ (Q₁.hom ≫ Q₂.inv) ≫ P₂.inv := by
+      simp only [Category.assoc]
+    _ = P₁.hom ≫
+        (Q₁.hom ≫ (pullbackCongr h₂.symm).hom.app M) ≫ P₂.inv := by
+      rw [hQ₂]
+    _ = P₁.hom ≫ Q₁₂.hom ≫ P₂.inv := by rw [htransApp]
+
+theorem pullbackSquareIso_trans_app
+    {A B C E D : Scheme.{u}}
+    (a : A ⟶ B) (b : B ⟶ D)
+    (c : A ⟶ C) (d : C ⟶ D)
+    (e : A ⟶ E) (f : E ⟶ D)
+    (h₁ : a ≫ b = c ≫ d) (h₂ : c ≫ d = e ≫ f)
+    (h₃ : a ≫ b = e ≫ f) (M : D.Modules) :
+    (pullbackSquareIso a b c d h₁).hom.app M ≫
+        (pullbackSquareIso c d e f h₂).hom.app M =
+      (pullbackSquareIso a b e f h₃).hom.app M := by
+  simp only [pullbackSquareIso, Iso.trans_hom, NatTrans.comp_app]
+  let P₀ := (pullbackComp a b).app M
+  let P₁ := (pullbackComp c d).app M
+  let P₂ := (pullbackComp e f).app M
+  let Q₁ := (pullbackCongr h₁).app M
+  let Q₂ := (pullbackCongr h₂).app M
+  let Q₃ := (pullbackCongr h₃).app M
+  change P₀.hom ≫ Q₁.hom ≫ P₁.inv ≫
+      (P₁.hom ≫ Q₂.hom ≫ P₂.inv) =
+    P₀.hom ≫ Q₃.hom ≫ P₂.inv
+  simp only [Iso.inv_hom_id_assoc]
+  have hp : h₁.trans h₂ = h₃ := Subsingleton.elim _ _
+  have hQ := pullbackCongr_trans h₁ h₂
+  rw [hp] at hQ
+  have hQapp := congrArg (fun z => z.hom.app M) hQ
+  change Q₁.hom ≫ Q₂.hom = Q₃.hom at hQapp
+  calc
+    P₀.hom ≫ Q₁.hom ≫ Q₂.hom ≫ P₂.inv =
+        P₀.hom ≫ (Q₁.hom ≫ Q₂.hom) ≫ P₂.inv := by
+      simp only [Category.assoc]
+    _ = P₀.hom ≫ Q₃.hom ≫ P₂.inv := by rw [hQapp]
+
 noncomputable def pullbackSquareIsoP
     {A B C D : Scheme.{u}}
     (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
