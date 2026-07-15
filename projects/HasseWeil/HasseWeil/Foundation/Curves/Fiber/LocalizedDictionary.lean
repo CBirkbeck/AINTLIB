@@ -273,7 +273,6 @@ variable [algKL : Algebra C₂.FunctionField C₁.FunctionField]
 -- Instance resolution on the subalgebra `integralClosure Af C₁.FunctionField` needs to
 -- identify `Module`/`Algebra` structures along different projection paths, exactly as in
 -- `HasseWeil/Curves/GoodAffineLocus.lean` (same idiom).
-set_option backward.isDefEq.respectTransparency false
 
 include C₂ in
 omit finKL in
@@ -438,10 +437,8 @@ theorem algebraMap_quotient_residueAway (hPq : P.under Af = awayIdealAt Af Q) (c
   change Ideal.Quotient.mk P _ = Ideal.Quotient.mk P (scalarsToClosure C₂ Af c)
   rw [scalarsToClosure_eq_algebraMap C₂ Af c]
 
-set_option synthInstance.maxHeartbeats 400000 in
 -- Typeclass search through the quotient of the subalgebra `integralClosure Af K(C₁)` is
 -- heartbeat-heavy, exactly as in `HasseWeil/Curves/GoodFiber.lean` (same bumps).
-set_option maxHeartbeats 1600000 in
 -- The module-finiteness chain through the quotient needs the matching elaboration budget.
 /-- **Residue triviality for `D` over `K̄`**: for a prime `P` of `D` lying over the good
 maximal ideal `q = awayIdealAt f Q`, the residue map `F → D⧸P` is bijective.  `D⧸P` is a
@@ -534,7 +531,6 @@ theorem residueClosure_residueValue (hbij : Function.Bijective (residueClosure C
   (RingEquiv.ofBijective (residueClosure C₂ Af P) hbij).apply_symm_apply
     (Ideal.Quotient.mk P d)
 
-set_option synthInstance.maxHeartbeats 400000 in
 -- `map_sub` instance search through the subalgebra quotient exceeds the default
 -- typeclass budget (same situation as `HasseWeil/Curves/GoodFiber.lean`).
 /-- `d − residueValue d` lies in `P`. -/
