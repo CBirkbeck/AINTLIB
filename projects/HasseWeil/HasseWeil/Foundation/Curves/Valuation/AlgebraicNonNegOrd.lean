@@ -83,7 +83,7 @@ theorem ord_P_nonneg_of_isAlgebraic
   by_cases hf : f = 0
   · rw [hf, ord_P_zero]; exact le_top
   · have hv : C.pointValuation P f ≠ 0 := (C.pointValuation P).ne_zero_iff.mpr hf
-    unfold ord_P
+    simp only [ord_P]
     rw [dif_neg hv, show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl,
       WithTop.coe_le_coe]
     -- The order is `-toAdd (unzero hv)`, so `≤ 1` for the valuation becomes
