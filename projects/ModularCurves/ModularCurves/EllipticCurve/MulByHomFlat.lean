@@ -399,6 +399,76 @@ theorem mulByHom_flat_general (E : EllipticCurve S) (N : ℕ) [NeZero N] :
       exact Flat.SpecMap_iff.mp hflatSpec
     exact hcrit
 
+set_option maxHeartbeats 800000 in
+/-- **BB-DEG, general base**: `[N]` has fibre rank `N²` at every point of any elliptic
+curve over any base. The rank is read off the residue fibre through the `[N]`
+base-change square (`finrank_of_isPullback`), where the fibre curve is
+pointed-isomorphic to a projective Weierstrass model (`fibreModelIsoAsOver`) whose rank
+is `N²` by STREAM-KM's field-level `modelEllipticCurve_mulByHom_finrank` (the HasseWeil
+`deg [N] = N²` anchor — not re-derived here). -/
+theorem mulByHom_finrank_general (E : EllipticCurve S) (N : ℕ) [NeZero N] (x : E.E) :
+    (E.mulByHom (N : ℤ)).finrank x = N ^ 2 := by
+  -- global instances for `[N]`
+  haveI : LocallyQuasiFinite (E.mulByHom (N : ℤ)) :=
+    LocallyQuasiFinite.of_finite_preimage_singleton _
+      fun z => mulByHom_finite_preimage_singleton E N z
+  haveI hfin : IsFinite (E.mulByHom (N : ℤ)) :=
+    IsFinite.of_isProper_of_locallyQuasiFinite _
+  haveI hflat : Flat (E.mulByHom (N : ℤ)) := mulByHom_flat_general E N
+  -- the residue fibre at `s := π x` and a preimage of `x` in it
+  set s := E.π.base x with hs
+  set gK := S.fromSpecResidueField s with hgKdef
+  obtain ⟨y', hy'⟩ : x ∈ Set.range (pullback.fst E.π gK).base := by
+    rw [Scheme.Pullback.range_fst, Scheme.range_fromSpecResidueField]
+    exact Set.mem_preimage.mpr rfl
+  -- rank transfer along the `[N]` base-change square
+  have sq := isPullback_mulByHom_baseChange E gK (N : ℤ)
+  have h1 : Scheme.Hom.finrank ((E.baseChange gK).mulByHom (N : ℤ)) y'
+      = Scheme.Hom.finrank (E.mulByHom (N : ℤ)) ((pullback.fst E.π gK).base y') :=
+    Scheme.Hom.finrank_of_isPullback _ _ _ _ sq.flip y'
+  -- the fibre curve is pointed-isomorphic to a model over `κ(s)`
+  obtain ⟨W, hWell, e, heπ, hez⟩ := fibrewiseElliptic E s
+  haveI := hWell
+  obtain ⟨φ, hφ⟩ := fibreModelIsoAsOver E s W e heπ hez
+  haveI := hφ
+  -- instances for the field-level rank theorem
+  haveI : LocallyQuasiFinite ((modelEllipticCurve W).mulByHom (N : ℤ)) :=
+    modelMulByHom_locallyQuasiFinite_of_field W N
+  haveI : IsFinite ((modelEllipticCurve W).mulByHom (N : ℤ)) :=
+    IsFinite.of_isProper_of_locallyQuasiFinite _
+  haveI : Flat ((modelEllipticCurve W).mulByHom (N : ℤ)) :=
+    modelMulByHom_flat_of_field W N
+  haveI : Smooth (modelEllipticCurve W).π :=
+    SmoothOfRelativeDimension.smooth (n := 1) (modelEllipticCurve W).π
+  haveI : LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom (N : ℤ)) := by
+    have h : LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom (N : ℤ) ≫
+        (modelEllipticCurve W).π) := by
+      rw [mulByHom_π]; infer_instance
+    exact LocallyOfFinitePresentation.of_comp_of_locallyOfFiniteType h inferInstance
+  haveI : DecidableEq (S.residueField s) := Classical.decEq _
+  -- the conjugation square along the pointed group-object iso
+  let ψ : (E.baseChange gK).E ⟶ (modelEllipticCurve W).E := φ.hom.left
+  let ψ' : (modelEllipticCurve W).E ⟶ (E.baseChange gK).E := φ.inv.left
+  have hc : (E.baseChange gK).mulByHom (N : ℤ) ≫ ψ
+      = ψ ≫ (modelEllipticCurve W).mulByHom (N : ℤ) :=
+    mulByHom_comp_left_of_isMonHom _ _ φ.hom (N : ℤ)
+  have hinv : ψ ≫ ψ' = 𝟙 _ := by
+    show φ.hom.left ≫ φ.inv.left = 𝟙 _
+    rw [← Over.comp_left, φ.hom_inv_id, Over.id_left]
+  have hinv' : ψ' ≫ ψ = 𝟙 _ := by
+    show φ.inv.left ≫ φ.hom.left = 𝟙 _
+    rw [← Over.comp_left, φ.inv_hom_id, Over.id_left]
+  haveI : IsIso ψ := ⟨ψ', hinv, hinv'⟩
+  have sqψ : IsPullback ψ ((E.baseChange gK).mulByHom (N : ℤ))
+      ((modelEllipticCurve W).mulByHom (N : ℤ)) ψ :=
+    IsPullback.of_horiz_isIso ⟨hc.symm⟩
+  have h2 : Scheme.Hom.finrank ((E.baseChange gK).mulByHom (N : ℤ)) y'
+      = Scheme.Hom.finrank ((modelEllipticCurve W).mulByHom (N : ℤ)) (ψ.base y') :=
+    Scheme.Hom.finrank_of_isPullback _ _ _ _ sqψ y'
+  -- conclude via the field-level `N²`
+  have h3 := EllipticCurve.modelEllipticCurve_mulByHom_finrank W N (ψ.base y')
+  rw [← hy', ← h1, h2, h3]
+
 end Assembly
 
 end ModularCurves

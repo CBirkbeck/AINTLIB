@@ -158,23 +158,17 @@ pullback squares (`MulByHomFlat`). -/
 theorem mulByHom_flat (N : ℕ) [NeZero N] : Flat (E.mulByHom N) :=
   mulByHom_flat_general E N
 
-/-- **Black box `BB-DEG` (degree input of KM 2.3.1)**: `[N]` has rank `N²` at every
-point. KM 2.3.1 proof: the rank is computed at a single geometric point (`E^an ≅ ℂ/L`,
-`E[N] = (1/N)L/L ≅ (ℤ/N)²`); algebraic anchor: HasseWeil `mulByInt_degree` via T-B6.
-
-**Status (v10.250 G0 session): fibre-reduction fully specified; blocked only on
-`mulByHom_flat` above + STREAM-KM's `modelEllipticCurve_finrank_eq_mulByInt_degree`
-(the single L4 anchor, `MulByHomDegree.lean`). Do NOT re-derive the degree.** Route:
-with `[Flat] [IsFinite]` on `[N]`, `Scheme.Hom.finrank_of_isPullback` applied to
-`isPullback_mulByHom_baseChange E (S.fromSpecResidueField (E.π x)) N` (flipped) reads
-the rank at `x` off the fibre curve `E ×_S Spec κ(s)` (a preimage of `x` exists since
-`range fst = π⁻¹(range gK) ∋ x`, `Scheme.Pullback.range_fst`); the fibre `[N]` is
-conjugate to the model `[N]` (`fibreModelIsoAsOver` + `finrank_comp_left_of_isIso`),
-whose rank is `N²` by KM's field-level `modelEllipticCurve_mulByHom_finrank` — its
-`[Flat]/[IsFinite]/[LocallyOfFinitePresentation]` instance hypotheses are discharged by
-`modelMulByHom_flat_of_field` + BB-QF + fp over the residue field. -/
+/-- **Black box `BB-DEG` (degree input of KM 2.3.1) — DISCHARGED modulo the KM
+anchor**: `[N]` has rank `N²` at every point. The rank is read off the residue fibre
+through the `[N]` base-change square (`finrank_of_isPullback`, using BB-FLAT above);
+the fibre curve is pointed-isomorphic to a projective Weierstrass model
+(`fibreModelIsoAsOver`), whose rank is `N²` by STREAM-KM's field-level
+`modelEllipticCurve_mulByHom_finrank` — the HasseWeil `deg [N] = N²` coupling
+(`modelEllipticCurve_finrank_eq_mulByInt_degree`) is KM's single remaining anchor and
+is NOT re-derived here. -/
 theorem mulByHom_finrank (N : ℕ) [NeZero N] (x : E.E) :
-    (E.mulByHom N).finrank x = N ^ 2 := by sorry
+    (E.mulByHom N).finrank x = N ^ 2 :=
+  mulByHom_finrank_general E N x
 
 /-- **(KM 2.3.1, finiteness of `[N]`)** `[N]` is finite: proper + quasi-finite via
 Zariski's Main Theorem (`IsFinite.of_isProper_of_locallyQuasiFinite`). -/
