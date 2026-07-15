@@ -52,16 +52,19 @@ noncomputable def negSmoothPoint
   y := W.toAffine.negY xk yk
   nonsingular := (Affine.nonsingular_neg xk yk).mpr h_ns
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 @[simp] theorem negSmoothPoint_x (xk yk : F)
     (h_ns : W.toAffine.Nonsingular xk yk) :
     (negSmoothPoint W xk yk h_ns).x = xk := rfl
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 @[simp] theorem negSmoothPoint_y (xk yk : F)
     (h_ns : W.toAffine.Nonsingular xk yk) :
     (negSmoothPoint W xk yk h_ns).y = W.toAffine.negY xk yk := rfl
 
 /-! ### `x_gen − xk` as image of `XClass` -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The function `x_gen W − algebraMap F KE xk` is the image under
 `algebraMap CoordinateRing FunctionField` of `XClass W.toAffine xk`,
 the class of `X − xk` in the coordinate ring. -/
@@ -86,6 +89,7 @@ theorem x_gen_sub_const_eq_algebraMap_XClass (xk : F) :
 
 /-! ### `XClass W xk` is in the maximal ideal at any point with `x = xk` -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- For any smooth point `P` of `W_smooth W` whose x-coordinate is `xk`,
 the class of `X − xk` lies in the maximal ideal at `P`. Direct from the
 definition of `maximalIdealAt = XYIdeal` as a span containing `XClass`. -/
@@ -101,6 +105,7 @@ theorem XClass_mem_maximalIdealAt
 
 /-! ### Generic order-positivity helpers (reused by both x- and y-sides) -/
 
+omit [DecidableEq F] in
 /-- **`0 ≤ ord_P P f` from `pointValuation P f ≤ 1`**: generic
 order-nonnegativity on any smooth plane curve. For a nonzero `f`, a
 valuation bounded by `1` forces the (negated) `toAdd` of the value to be
@@ -126,6 +131,7 @@ private theorem ord_P_nonneg_of_pointValuation_le_one
     exact h2
   omega
 
+omit [DecidableEq F] in
 /-- **`1 ≤ ord_P P f` from `0 ≤ ord_P P f`, `ord_P P f ≠ 0` and
 `ord_P P f ≠ ⊤`**: generic order strict-positivity on any smooth plane
 curve. A nonnegative, nonzero, finite order is at least `1`. -/
@@ -147,6 +153,7 @@ private theorem one_le_ord_P_of_nonneg_of_ne_zero
 
 /-! ### Order at `−T` of `x_gen − xk` is positive -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Foundational ord-positivity at `−T`**: at the smooth point
 `−T = (xk, negY xk yk)`, the function `x_gen − xk` has order at least 1.
 
@@ -195,6 +202,7 @@ The proof leverages Mathlib's `IsDedekindDomain.HeightOneSpectrum.intValuation_s
 when the prime ideal equals `span{r}` for a generator `r`, `intValuation
 r = exp(-1)`. -/
 
+omit [DecidableEq F] in
 /-- **`ord_P P f ≤ 1` from `pointValuation P f = exp(-1)`**: generic
 valuation-to-order computation on any smooth plane curve. Since
 `ord_P P f = -(unzero hv).toAdd` for nonzero valuation, a valuation of
@@ -213,6 +221,7 @@ private theorem ord_P_le_one_of_pointValuation_eq_exp_neg_one
   rw [h_unz]
   rfl
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`algMap XClass ≠ 0` in the local ring at `P`**: the image of the
 nonzero coordinate-ring element `XClass W xk` under the localisation map
 `CoordinateRing → localRingAt P` is nonzero, since the localisation is
@@ -231,6 +240,7 @@ private theorem algMap_XClass_localRingAt_ne_zero
       ((W_smooth W).localRingAt P)
       ((W_smooth W).maximalIdealAt P).primeCompl_le_nonZeroDivisors)).mpr h_xc_ne
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`pointValuation P (algMap XClass) = exp(-1)` from the maxIdeal-span
 hypothesis**: when the maximal ideal of the local ring at `P` equals
 `span{algMap XClass}`, the generator has integer valuation `exp(-1)`
@@ -260,6 +270,7 @@ private theorem pointValuation_algMap_XClass_eq_exp_neg_one_of_maxIdeal_span
   rw [IsDedekindDomain.HeightOneSpectrum.valuation_of_algebraMap]
   exact h_int_val
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`ord_P (x_gen − xk) ≤ 1` at `−T`, witness-parametric on the
 maxIdeal-span hypothesis**: given that the maximal ideal of the local
 ring at `−T = (xk, negY xk yk)` equals `span{algMap XClass}`, we have
@@ -279,6 +290,7 @@ theorem ord_P_x_gen_sub_const_le_one_of_maxIdeal_span
   exact ord_P_le_one_of_pointValuation_eq_exp_neg_one
     (pointValuation_algMap_XClass_eq_exp_neg_one_of_maxIdeal_span W xk P h_max_eq)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`ord_P (x_gen − xk) = 1` at `−T`, witness-parametric on the
 maxIdeal-span hypothesis**: combines the `≥ 1` form
 (`one_le_ord_P_x_gen_sub_const`) with the `≤ 1` form
@@ -410,6 +422,7 @@ Reproduces the relevant content from `localRing_isDVR`'s second case
 - Direct mul-of-unit-implies-mem reasoning (avoiding the private
   `mem_of_mul_unit` helper). -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 open scoped Polynomial.Bivariate in
 /-- **Unconditional**: at the smooth point `(xk, negY xk yk)` arising from
 non-2-torsion `(xk, yk)`, the maximal ideal of the local ring is
@@ -458,6 +471,7 @@ theorem maximalIdeal_localRingAt_eq_span_XClass_of_non_2_tor
   rw [maximalIdeal_localRingAt_eq_map_maximalIdealAt W P_smooth]
   exact map_span_pair_eq_span_singleton_left f h_f_yc_mem
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`ord_P (x_gen − xk) = 1` at `−T` for non-2-torsion (UNCONDITIONAL)**:
 combines the witness-parametric `ord_P_x_gen_sub_const_eq_one_of_maxIdeal_span`
 with the unconditional `maximalIdeal_localRingAt_eq_span_XClass_of_non_2_tor`. -/
@@ -469,6 +483,7 @@ theorem ord_P_x_gen_sub_const_eq_one_of_non_2_tor
   ord_P_x_gen_sub_const_eq_one_of_maxIdeal_span W xk yk h_ns
     (maximalIdeal_localRingAt_eq_span_XClass_of_non_2_tor W xk yk h_ns h_not_2_tor)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Valuation form of `ord_P_x_gen_sub_const_eq_one_of_non_2_tor`**:
 `pointValuation` at `−T` of `x_gen − xk` is < 1 (i.e., the function
 vanishes at the smooth point `−T`). Direct via
@@ -488,6 +503,7 @@ theorem pointValuation_x_gen_sub_const_lt_one_at_negSmoothPoint
     rw [h_ord_eq]; rfl
   exact (Curves.SmoothPlaneCurve.one_le_ord_P_iff_pointValuation_lt_one h_ne).mp h_le
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Weakened ≤ 1 form**: at `−T` for non-2-torsion `T`, the function
 `x_gen − xk` has `pointValuation ≤ 1`. Direct weakening of
 `pointValuation_x_gen_sub_const_lt_one_at_negSmoothPoint` via `le_of_lt`.
@@ -501,6 +517,7 @@ theorem pointValuation_x_gen_sub_const_le_one_at_negSmoothPoint
   le_of_lt (pointValuation_x_gen_sub_const_lt_one_at_negSmoothPoint
     W xk yk h_ns h_not_2_tor)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`x_gen W` has pointValuation ≤ 1 at any smooth point**: x_gen is in the
 algMap-image of the CoordinateRing (specifically, the image of `algebraMap
 (Polynomial F) CoordinateRing X`), so its pointValuation at any P is ≤ 1.
@@ -512,6 +529,7 @@ theorem pointValuation_x_gen_le_one (P : (W_smooth W).SmoothPoint) :
       (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X)) ≤ 1
   exact (W_smooth W).pointValuation_algebraMap_le_one _ P
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`y_gen W` has pointValuation ≤ 1 at any smooth point**: y_gen is in the
 algMap-image of the CoordinateRing (specifically, the image of
 `AdjoinRoot.root W.toAffine.polynomial`), so its pointValuation at any P
@@ -523,6 +541,7 @@ theorem pointValuation_y_gen_le_one (P : (W_smooth W).SmoothPoint) :
       (AdjoinRoot.root W.toAffine.polynomial)) ≤ 1
   exact (W_smooth W).pointValuation_algebraMap_le_one _ P
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Conjunction: x_gen and y_gen both have pointValuation ≤ 1 at any
 smooth point.** Useful one-shot package for downstream consumers needing
 both witnesses. -/
@@ -531,6 +550,7 @@ theorem pointValuation_xy_gen_le_one (P : (W_smooth W).SmoothPoint) :
     (W_smooth W).pointValuation P (y_gen W) ≤ 1 :=
   ⟨pointValuation_x_gen_le_one W P, pointValuation_y_gen_le_one W P⟩
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`x_gen W` lifts to `localRingAt P`**: by the biconditional integer
 characterisation (commit a1aa4d7), x_gen comes from an element of
 `(W_smooth W).localRingAt P`. -/
@@ -541,6 +561,7 @@ theorem x_gen_mem_localRingAt_image (P : (W_smooth W).SmoothPoint) :
   Curves.SmoothPlaneCurve.mem_localRingAt_image_of_pointValuation_le_one
     (x_gen W) (pointValuation_x_gen_le_one W P)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`y_gen W` lifts to `localRingAt P`**: companion to
 `x_gen_mem_localRingAt_image`. -/
 theorem y_gen_mem_localRingAt_image (P : (W_smooth W).SmoothPoint) :
@@ -550,6 +571,7 @@ theorem y_gen_mem_localRingAt_image (P : (W_smooth W).SmoothPoint) :
   Curves.SmoothPlaneCurve.mem_localRingAt_image_of_pointValuation_le_one
     (y_gen W) (pointValuation_y_gen_le_one W P)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`algMap F→KE c` lifts to `localRingAt P` at any smooth point**: F-constants
 are integer-ring elements at every P. -/
 theorem algebraMap_F_mem_localRingAt_image
@@ -561,6 +583,7 @@ theorem algebraMap_F_mem_localRingAt_image
     (algebraMap F _ c)
     ((W_smooth W).pointValuation_algebraMap_F_le_one P c)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **algMap F→KE c is in the localRingAt-image: ≤ 1 form**: simple `≤ 1`
 restatement of `pointValuation_algebraMap_F_le_one`. -/
 theorem pointValuation_algebraMap_F_le_one_apply
@@ -570,6 +593,7 @@ theorem pointValuation_algebraMap_F_le_one_apply
 
 /-! ### `y_gen − yk'` at a smooth point with y-coord `yk'` -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The function `y_gen W − algebraMap F KE yk'` is the image under
 `algebraMap CoordinateRing FunctionField` of `YClass W.toAffine (C yk')`,
 the class of `Y − yk'` in the coordinate ring. -/
@@ -585,6 +609,7 @@ theorem y_gen_sub_const_eq_algebraMap_YClass (yk' : F) :
   rw [← _root_.map_sub]
   congr 1
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- For any smooth point `P` of `W_smooth W` whose y-coordinate is `yk'`,
 the class of `Y − yk'` lies in the maximal ideal at `P`. -/
 theorem YClass_mem_maximalIdealAt
@@ -597,6 +622,7 @@ theorem YClass_mem_maximalIdealAt
   unfold Affine.CoordinateRing.XYIdeal
   exact Ideal.subset_span (Set.mem_insert_of_mem _ rfl)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Foundational ord-positivity for the y-side**: at any smooth point
 `P` of `W_smooth W` with `P.y = yk'`, the function `y_gen − yk'` has order
 at least 1.
@@ -630,6 +656,7 @@ theorem one_le_ord_P_y_gen_sub_const_at_smoothPoint
     (SmoothPlaneCurve.ord_P_eq_top_iff _).not.mpr h_au_ne
   exact one_le_ord_P_of_nonneg_of_ne_zero h_ord_nonneg h_ord_ne_zero h_ne_top
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Specialisation to `−T`**: at the smooth point `−T = (xk, negY xk yk)`,
 the function `y_gen − negY xk yk` has order at least 1. -/
 theorem one_le_ord_P_y_gen_sub_negY_const
@@ -679,6 +706,7 @@ private theorem polynomialX_evalEval_ne_zero_at_negSmoothPoint_of_2_tor
   · exact hX'
   · exact absurd (evalEval_polynomialY_eq_zero_of_2_tor W xk yk h_2_tor) hY'
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 open scoped Polynomial.Bivariate in
 /-- **The image `f XClass` lies in `span {f YClass}` at a 2-torsion point**:
 the y-side mirror of the `f YClass ∈ span {f XClass}` step of the non-2-torsion
@@ -718,6 +746,7 @@ private theorem map_XClass_mem_span_YClass_of_2_tor
     (map_mul_mem_span_singleton_of_mul_mem f
       (xclass_mul_C_g_in_yclass_span W.toAffine h_eq_at))
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 open scoped Polynomial.Bivariate in
 /-- **Unconditional**: at the 2-torsion smooth point `(xk, negY xk yk = yk)`,
 the maximal ideal of the local ring is generated by `algMap (YClass)`.
@@ -747,6 +776,7 @@ theorem maximalIdeal_localRingAt_eq_span_YClass_of_2_tor
   exact map_span_pair_eq_span_singleton_right f
     (map_XClass_mem_span_YClass_of_2_tor W xk yk h_ns h_2_tor)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`algMap YClass ≠ 0` in the local ring at `P`**: y-side mirror of
 `algMap_XClass_localRingAt_ne_zero`. The image of the nonzero
 coordinate-ring element `YClass W (C yk')` under the localisation map
@@ -765,6 +795,7 @@ private theorem algMap_YClass_localRingAt_ne_zero
       ((W_smooth W).localRingAt P)
       ((W_smooth W).maximalIdealAt P).primeCompl_le_nonZeroDivisors)).mpr h_yc_ne
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`pointValuation P (algMap YClass) = exp(-1)` from the maxIdeal-span
 hypothesis**: y-side mirror of
 `pointValuation_algMap_XClass_eq_exp_neg_one_of_maxIdeal_span`. When the
@@ -795,6 +826,7 @@ private theorem pointValuation_algMap_YClass_eq_exp_neg_one_of_maxIdeal_span
   rw [IsDedekindDomain.HeightOneSpectrum.valuation_of_algebraMap]
   exact h_int_val
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`ord_P (y_gen - yk') ≤ 1` at `−T`, witness-parametric on the
 maxIdeal-span hypothesis (YClass form)**: y-side mirror of
 `ord_P_x_gen_sub_const_le_one_of_maxIdeal_span`. -/
@@ -815,6 +847,7 @@ theorem ord_P_y_gen_sub_negY_const_le_one_of_maxIdeal_span
     (pointValuation_algMap_YClass_eq_exp_neg_one_of_maxIdeal_span W
       (W.toAffine.negY xk yk) P h_max_eq)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`ord_P (y_gen - negY xk yk) = 1` at `−T` for 2-torsion (UNCONDITIONAL)**:
 y-side companion to `ord_P_x_gen_sub_const_eq_one_of_non_2_tor`.
 Combines the witness-parametric upper bound with the unconditional
@@ -830,6 +863,7 @@ theorem ord_P_y_gen_sub_negY_const_eq_one_of_2_tor
       (maximalIdeal_localRingAt_eq_span_YClass_of_2_tor W xk yk h_ns h_2_tor))
     (one_le_ord_P_y_gen_sub_negY_const W xk yk h_ns)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Valuation form of `one_le_ord_P_y_gen_sub_const_at_smoothPoint`**:
 at any smooth point P with `P.y = yk'`, `pointValuation P (y_gen − yk')`
 is < 1. The y-side companion to
@@ -848,6 +882,7 @@ theorem pointValuation_y_gen_sub_const_lt_one_at_smoothPoint
       (Affine.CoordinateRing.YClass_ne_zero (Polynomial.C yk'))
   exact (Curves.SmoothPlaneCurve.one_le_ord_P_iff_pointValuation_lt_one h_ne).mp h_le
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Valuation form of `one_le_ord_P_y_gen_sub_negY_const`**: at the
 smooth point `−T = (xk, negY xk yk)`, the function `y_gen − negY xk yk`
 has pointValuation < 1. Specialisation of
@@ -859,6 +894,7 @@ theorem pointValuation_y_gen_sub_negY_const_lt_one_at_negSmoothPoint
   pointValuation_y_gen_sub_const_lt_one_at_smoothPoint W _
     (W.toAffine.negY xk yk) rfl
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Weakened ≤ 1 form**: at any smooth point P with `P.y = yk'`,
 the function `y_gen − yk'` has `pointValuation ≤ 1`. Direct weakening of
 `pointValuation_y_gen_sub_const_lt_one_at_smoothPoint` via `le_of_lt`. -/
@@ -867,6 +903,7 @@ theorem pointValuation_y_gen_sub_const_le_one_at_smoothPoint
     (W_smooth W).pointValuation P (y_gen W - algebraMap F KE yk') ≤ 1 :=
   le_of_lt (pointValuation_y_gen_sub_const_lt_one_at_smoothPoint W P yk' h_y)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Weakened ≤ 1 form at `−T`**: at the smooth point `−T`, the function
 `y_gen − negY xk yk` has `pointValuation ≤ 1`. Direct weakening of
 `pointValuation_y_gen_sub_negY_const_lt_one_at_negSmoothPoint` via
@@ -878,6 +915,7 @@ theorem pointValuation_y_gen_sub_negY_const_le_one_at_negSmoothPoint
   le_of_lt (pointValuation_y_gen_sub_negY_const_lt_one_at_negSmoothPoint
     W xk yk h_ns)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Combined per-coordinate vanishing at `−T` for non-2-torsion `T`**:
 both the x-side and y-side vanishing witnesses bundled together.
 Conjunction of `pointValuation_x_gen_sub_const_lt_one_at_negSmoothPoint`
@@ -905,6 +943,7 @@ where the first term has ord ≥ 1 (vanishes at `−T`) and the second is a
 nonzero base-field constant (ord = 0). By strict non-arch, the constant
 dominates, giving ord = 0. -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`ord_P (y_gen − yk) = 0` at `−T` for non-2-torsion `T`** (key
 ord-vanishing for the slope computation). -/
 theorem ord_P_y_gen_sub_const_eq_zero
@@ -943,6 +982,7 @@ theorem ord_P_y_gen_sub_const_eq_zero
 
 /-! ### `ord_P (translateSlope_xy) ≤ -1` at `−T` for non-2-torsion `T` -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Valuation form of `ord_P_y_gen_sub_const_eq_zero`**: at `−T` for
 non-2-torsion `T`, `pointValuation` of `y_gen − yk` equals 1 (i.e., the
 function is a unit at `−T`, since at `−T` the value of `y_gen` is
@@ -973,6 +1013,7 @@ theorem pointValuation_y_gen_sub_const_eq_one_at_negSmoothPoint
     ext; exact h_toAdd
   rw [← WithZero.coe_unzero h_pv_ne, this]; rfl
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`pointValuation` of `y_gen − yk` is ≤ 1** at `−T` for non-2-torsion `T`.
 Direct `le_of_eq` weakening of
 `pointValuation_y_gen_sub_const_eq_one_at_negSmoothPoint`. -/
@@ -984,6 +1025,7 @@ theorem pointValuation_y_gen_sub_const_le_one_at_negSmoothPoint
   le_of_eq (pointValuation_y_gen_sub_const_eq_one_at_negSmoothPoint
     W xk yk h_ns h_not_2_tor)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Triple per-coordinate valuation witnesses at `−T` for non-2-torsion `T`**:
 bundles the three crucial valuation properties at `−T` into a single
 conjunctive theorem:
@@ -1009,6 +1051,7 @@ theorem pointValuation_triple_at_negSmoothPoint
    pointValuation_y_gen_sub_negY_const_lt_one_at_negSmoothPoint W xk yk h_ns,
    pointValuation_y_gen_sub_const_eq_one_at_negSmoothPoint W xk yk h_ns h_not_2_tor⟩
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`ord_P (translateSlope_xy) ≤ -1` at `−T` for non-2-torsion `T`**:
 combining the y-side ord = 0 with the x-side ord ≥ 1 via the secant
 formula. -/
@@ -1054,6 +1097,7 @@ theorem ord_P_translateSlope_xy_le_neg_one
       rw [show -((n : ℤ) : WithTop ℤ) = ((-n : ℤ) : WithTop ℤ) from rfl]
       exact_mod_cast (show -n ≤ -1 by omega)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`ord_P (translateSlope_xy) ≠ ⊤` at `−T` for non-2-torsion `T`**:
 the slope is nonzero at `−T`. Direct from `ord_P_translateSlope_xy_le_neg_one`
 + `(-1 : WithTop ℤ) ≠ ⊤`. -/
@@ -1069,6 +1113,7 @@ theorem ord_P_translateSlope_xy_ne_top
   rw [h_top] at h_le
   exact absurd h_le (by decide)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **translateSlope_xy ≠ 0 at `−T` for non-2-torsion `T`**: corollary of
 the ord_P_ne_top form above. -/
 theorem translateSlope_xy_ne_zero_at_negSmoothPoint
@@ -1098,6 +1143,7 @@ evaluates to `(negY xk yk − yk)² ≠ 0` for non-2-torsion `T`. Hence
 Combined with `ord_P (x_gen − xk) ≥ 1`, we get
 `ord_P (translateX_xy) = ord_P N − 2·ord_P (x_gen − xk) ≤ −2 < 0`. -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The algebraic identity `translateX_xy · (x_gen − xk)² = N`. -/
 private theorem translateX_xy_mul_sq_eq
     (xk yk : F) :
@@ -1121,6 +1167,7 @@ private theorem translateX_xy_mul_sq_eq
   field_simp
   ring
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The algebraic identity `translateY_xy · (x_gen − xk)³ = M_y` where `M_y`
 is a polynomial in `yd, xd, x_gen, y_gen, a₁, a₂, a₃, xk'`.  Companion to
 `translateX_xy_mul_sq_eq`.  Using `addY = negY (addX) (negAddY) =
@@ -1161,6 +1208,7 @@ theorem translateY_xy_mul_cube_eq
   field_simp
   ring
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- Helper: any element of `algebraMap R KE` image has nonneg ord at any
 smooth point. -/
 private theorem ord_P_algebraMap_R_nonneg (P : (W_smooth W).SmoothPoint)
@@ -1192,6 +1240,7 @@ private theorem ord_P_algebraMap_R_nonneg (P : (W_smooth W).SmoothPoint)
       rwa [h1] at h2
     omega
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- `x_gen` has nonneg ord at any smooth point (it's in the image of the
 coordinate ring). Public to support consumers in Worker B's
 `PoleDivisorFallback` stream (Action 3 γ-form: poles of `γ*x_gen` lie
@@ -1203,6 +1252,7 @@ theorem ord_P_x_gen_nonneg (P : (W_smooth W).SmoothPoint) :
       (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X))
   exact ord_P_algebraMap_R_nonneg W P _
 
+omit [W.toAffine.IsElliptic] in
 /-- Helper: `algebraMap F KE c` has nonneg ord at any smooth point. -/
 theorem ord_P_algebraMap_F_nonneg (P : (W_smooth W).SmoothPoint)
     (c : F) :
@@ -1214,6 +1264,7 @@ theorem ord_P_algebraMap_F_nonneg (P : (W_smooth W).SmoothPoint)
     exact le_top
   · exact le_of_eq ((W_smooth W).ord_P_algebraMap_F_of_ne_zero hc P).symm
 
+omit [DecidableEq F] in
 /-- **The `yd²` term has order `0`** when `ord_P yd = 0`. In the quadratic
 combination matching `translateX_xy_mul_sq_eq`, this is the dominant
 (smallest-order) summand against which all `xd`-bearing terms are compared.
@@ -1223,6 +1274,7 @@ private theorem ord_P_x_yd_sq_eq_zero {C : Curves.SmoothPlaneCurve F}
     C.ord_P P (yd ^ 2) = 0 := by
   rw [SmoothPlaneCurve.ord_P_pow (P := P) yd 2, hyd]; simp
 
+omit [DecidableEq F] in
 /-- **The `xd`-linear term `a₁·yd·xd` has order `≥ 1`.** Its order is
 `ord_P a₁ + ord_P yd + ord_P xd = (≥0) + 0 + (≥1)`, using `ord_P yd = 0` and
 `1 ≤ ord_P xd`. The first of the two `xd`-bearing bounds in the quadratic
@@ -1237,6 +1289,7 @@ private theorem one_le_ord_P_x_linear_term {C : Curves.SmoothPlaneCurve F}
   calc ((1 : ℤ) : WithTop ℤ) = 0 + ((1 : ℤ) : WithTop ℤ) := by rw [zero_add]
     _ ≤ C.ord_P P a1 + C.ord_P P xd := add_le_add ha1 hxd
 
+omit [DecidableEq F] in
 /-- **The `xd²` coefficient `a₂ + xg + xk'` has order `≥ 0`.** A sum of three
 nonneg-order pieces, combined by the non-archimedean inequality. -/
 private theorem ord_P_x_quadratic_coef_nonneg {C : Curves.SmoothPlaneCurve F}
@@ -1249,6 +1302,7 @@ private theorem ord_P_x_quadratic_coef_nonneg {C : Curves.SmoothPlaneCurve F}
   exact (le_min h12 hxk').trans
     (SmoothPlaneCurve.ord_P_add_le (P := P) (a2 + xg) xk')
 
+omit [DecidableEq F] in
 /-- **The `xd²` term `(a₂ + xg + xk')·xd²` has order `≥ 2`.** Combines the
 nonneg coefficient (`ord_P_x_quadratic_coef_nonneg`) with `2 ≤ ord_P (xd²)`
 (itself `2 • ord_P xd ≥ 2 • 1`). The second of the two `xd`-bearing bounds. -/
@@ -1265,6 +1319,7 @@ private theorem two_le_ord_P_x_quadratic_term {C : Curves.SmoothPlaneCurve F}
     _ ≤ _ := add_le_add
       (ord_P_x_quadratic_coef_nonneg ha2 hxg hxk') h_xd_sq
 
+omit [DecidableEq F] in
 /-- **The non-`yd²` remainder `a₁·yd·xd − (a₂+xg+xk')·xd²` has order `≥ 1`.**
 Both summands are `xd`-bearing: the linear term has order `≥ 1`
 (`one_le_ord_P_x_linear_term`) and the quadratic term order `≥ 2 ≥ 1`
@@ -1287,6 +1342,7 @@ private theorem one_le_ord_P_x_rest {C : Curves.SmoothPlaneCurve F}
   rw [SmoothPlaneCurve.ord_P_neg (P := P) ((a2 + xg + xk') * xd ^ 2)] at h_add
   exact (le_min h_B h_C).trans h_add
 
+omit [DecidableEq F] in
 /-- **Abstract `ord_P`-engine for the `translateX_xy` quadratic identity.**
 Given a smooth point `P`, an `xd` with `1 ≤ ord_P xd`, a `yd` with
 `ord_P yd = 0`, and nonneg-order `a1 a2 xk' xg`, the quadratic combination
@@ -1312,6 +1368,7 @@ private theorem ord_P_translateX_quadratic_combination_eq_zero
       (by exact_mod_cast (show (0 : ℤ) < 1 by norm_num)) h_rest
   exact (SmoothPlaneCurve.ord_P_add_eq_of_lt h_strict).trans h_yd_sq
 
+omit [DecidableEq F] in
 /-- **A factor of a square-multiple of order `0` has strictly negative order.**
 If `ord_P (f · g²) = 0` while `1 ≤ ord_P g` (so `g ≠ 0`), then writing
 `ord_P g = ↑n` with `n ≥ 1` forces `ord_P f = ↑k` finite with
@@ -1346,6 +1403,7 @@ private theorem ord_P_lt_zero_of_ord_P_mul_sq_eq_zero
           have h_eq : k + (n + n) = 0 := by exact_mod_cast hfg
           exact_mod_cast (show k < 0 by omega)
 
+omit [W.toAffine.IsElliptic] in
 /-- **`ord_P (translateX_xy) < 0` at `−T` for non-2-torsion `T`**: the key
 substantive step toward `translateX_xy_transcendental`.
 
@@ -1402,6 +1460,7 @@ using the now-unconditional `ord_P_x_gen_sub_const_eq_one_of_non_2_tor`
 2·ord_P (x_gen − xk) = 0`. With `ord_P (x_gen − xk) = 1` exact, the
 result is `ord_P (translateX_xy) = −2`. -/
 
+omit [DecidableEq F] in
 /-- **`ord_P (f ^ 2) = 2` from `ord_P f = 1`.** Specialises `ord_P_pow` to a
 square and the value `1`, turning the natural-number scalar `2 • (1 : WithTop ℤ)`
 into the integer `2`. The X-side analogue of `ord_P_cube_eq_three_of_ord_P_eq_one`,
@@ -1412,6 +1471,7 @@ private theorem ord_P_sq_eq_two_of_ord_P_eq_one
     C.ord_P P (f ^ 2) = ((2 : ℤ) : WithTop ℤ) := by
   rw [SmoothPlaneCurve.ord_P_pow (P := P) f 2, hf]; rfl
 
+omit [DecidableEq F] in
 /-- **A function whose ord is a finite integer `n` away from `0` has ord `-n`.**
 If `ord_P f + n = 0` in `WithTop ℤ`, then `ord_P f = -n`. This isolates the
 final integer-cancellation step shared by the exact pole-order computations
@@ -1436,6 +1496,7 @@ private theorem ord_P_eq_neg_of_add_coe_eq_zero
       have h_k_eq : k = -n := by omega
       exact_mod_cast h_k_eq
 
+omit [W.toAffine.IsElliptic] in
 /-- **`ord_P (translateX_xy) = -2` exact at `−T` for non-2-torsion `T`**:
 combines the algebraic identity with the now-unconditional
 `ord_P (x_gen − xk) = 1` to derive the exact pole order `-2`. This
@@ -1500,6 +1561,7 @@ the y-side analogue of Lemma 1's pole at infinity.
 
 Proof structure parallels `ord_P_translateX_xy_eq_neg_two_of_non_2_tor`. -/
 
+omit [DecidableEq F] in
 /-- **`ord_P (2) ≥ 0`.** The constant `2 = 1 + 1` has nonnegative order at any
 smooth point, since `ord_P 1 = 0` and `ord_P` is non-archimedean. Generic
 building block for bounding the orders of integer-scaled function-field
@@ -1510,6 +1572,7 @@ private theorem ord_P_two_nonneg {C : Curves.SmoothPlaneCurve F}
   calc (0 : WithTop ℤ) = min (C.ord_P P 1) (C.ord_P P 1) := by simp
     _ ≤ _ := SmoothPlaneCurve.ord_P_add_le (P := P) _ _
 
+omit [DecidableEq F] in
 /-- **A common lower bound on the orders of `a` and `b` bounds `ord_P (a + b)`.**
 From `n ≤ ord_P a` and `n ≤ ord_P b`, the non-archimedean inequality gives
 `n ≤ min (ord_P a) (ord_P b) ≤ ord_P (a + b)`. Generic building block for
@@ -1520,6 +1583,7 @@ private theorem ord_P_le_add_of_le_of_le {C : Curves.SmoothPlaneCurve F}
     n ≤ C.ord_P P (a + b) :=
   (le_min ha hb).trans (SmoothPlaneCurve.ord_P_add_le (P := P) a b)
 
+omit [DecidableEq F] in
 /-- **`ord_P` of a sum of nonneg-order terms is nonneg.** The `n = 0` case of
 `ord_P_le_add_of_le_of_le`. Generic building block reused throughout the
 cube-combination order bounds. -/
@@ -1529,6 +1593,7 @@ private theorem ord_P_add_nonneg {C : Curves.SmoothPlaneCurve F}
     (0 : WithTop ℤ) ≤ C.ord_P P (a + b) :=
   ord_P_le_add_of_le_of_le ha hb
 
+omit [DecidableEq F] in
 /-- **`ord_P` of a product of nonneg-order terms is nonneg.** Immediate from
 additivity `ord_P (a * b) = ord_P a + ord_P b`. Generic building block. -/
 private theorem ord_P_mul_nonneg {C : Curves.SmoothPlaneCurve F}
@@ -1537,6 +1602,7 @@ private theorem ord_P_mul_nonneg {C : Curves.SmoothPlaneCurve F}
     (0 : WithTop ℤ) ≤ C.ord_P P (a * b) := by
   rw [SmoothPlaneCurve.ord_P_mul (P := P)]; simpa using add_le_add ha hb
 
+omit [DecidableEq F] in
 /-- **`ord_P (2 * a) ≥ 0` when `ord_P a ≥ 0`.** Combines `ord_P_two_nonneg`
 with `ord_P_mul_nonneg`; used for the `2 * a₁` and `2 * xg` factors. -/
 private theorem ord_P_two_mul_nonneg {C : Curves.SmoothPlaneCurve F}
@@ -1545,6 +1611,7 @@ private theorem ord_P_two_mul_nonneg {C : Curves.SmoothPlaneCurve F}
     (0 : WithTop ℤ) ≤ C.ord_P P ((2 : C.FunctionField) * a) :=
   ord_P_mul_nonneg ord_P_two_nonneg ha
 
+omit [DecidableEq F] in
 /-- **The `-(yd³)` term has order `0`.** When `ord_P yd = 0`, the leading term
 `-(yd ^ 3)` of the cube combination has order exactly `0`; this is the dominant
 (smallest-order) term against which all `xd`-power terms are compared. -/
@@ -1553,6 +1620,7 @@ private theorem ord_P_neg_yd_cube_eq_zero {C : Curves.SmoothPlaneCurve F}
     C.ord_P P (-(yd ^ 3)) = 0 := by
   rw [SmoothPlaneCurve.ord_P_neg, SmoothPlaneCurve.ord_P_pow (P := P), hyd]; simp
 
+omit [DecidableEq F] in
 /-- **The `xd`-linear term `-(2·a₁·yd²·xd)` has order `≥ 1`.** Its order is
 `ord_P (2 * a₁) + ord_P (yd²) + ord_P xd = (≥0) + 0 + 1`, using `ord_P yd = 0`
 and `ord_P xd = 1`. The first of the three `xd`-power bounds. -/
@@ -1568,6 +1636,7 @@ private theorem one_le_ord_P_xd_linear_term {C : Curves.SmoothPlaneCurve F}
     SmoothPlaneCurve.ord_P_mul (P := P) _ (yd ^ 2), h_yd_sq, add_zero, hxd]
   simpa using add_le_add (ord_P_two_mul_nonneg ha1) (le_refl ((1 : ℤ) : WithTop ℤ))
 
+omit [DecidableEq F] in
 /-- **The `xd²` coefficient `yd·(a₂+2·xg+xk') - a₁²·yd` has order `≥ 0`.**
 A sum/product of nonneg-order pieces (using `ord_P yd = 0`): the factor
 `a₂ + 2·xg + xk'` is nonneg, `yd` times it is nonneg, and `a₁²·yd` is nonneg. -/
@@ -1592,6 +1661,7 @@ private theorem ord_P_xd_quadratic_coef_nonneg {C : Curves.SmoothPlaneCurve F}
       yd * (a2 + (2 : C.FunctionField) * xg + xk') + -(a1 ^ 2 * yd) by ring]
   exact ord_P_add_nonneg h_mul1' h_a1sq_yd_nn
 
+omit [DecidableEq F] in
 /-- **The `xd²` term `(yd·(a₂+2·xg+xk') - a₁²·yd)·xd²` has order `≥ 2`.**
 Combines the nonneg coefficient (`ord_P_xd_quadratic_coef_nonneg`) with
 `ord_P (xd²) = 2`. The second of the three `xd`-power bounds. -/
@@ -1610,6 +1680,7 @@ private theorem two_le_ord_P_xd_quadratic_term {C : Curves.SmoothPlaneCurve F}
     _ ≤ _ := add_le_add
       (ord_P_xd_quadratic_coef_nonneg hyd ha1 ha2 hxk' hxg) (le_refl _)
 
+omit [DecidableEq F] in
 /-- **The `xd³` coefficient `-yg + a₁·(a₂+xg+xk') - a₃` has order `≥ 0`.**
 A sum of nonneg-order pieces: `-yg`, the product `a₁·(a₂+xg+xk')`, and `-a₃`. -/
 private theorem ord_P_xd_cubic_coef_nonneg {C : Curves.SmoothPlaneCurve F}
@@ -1628,6 +1699,7 @@ private theorem ord_P_xd_cubic_coef_nonneg {C : Curves.SmoothPlaneCurve F}
     (ord_P_add_nonneg (by rwa [SmoothPlaneCurve.ord_P_neg]) h_a1mul_nn)
     (by rwa [SmoothPlaneCurve.ord_P_neg])
 
+omit [DecidableEq F] in
 /-- **The `xd³` term `(-yg + a₁·(a₂+xg+xk') - a₃)·xd³` has order `≥ 3`.**
 Combines the nonneg coefficient (`ord_P_xd_cubic_coef_nonneg`) with
 `ord_P (xd³) = 3`. The third of the three `xd`-power bounds. -/
@@ -1646,6 +1718,7 @@ private theorem three_le_ord_P_xd_cubic_term {C : Curves.SmoothPlaneCurve F}
     _ ≤ _ := add_le_add
       (ord_P_xd_cubic_coef_nonneg ha1 ha2 ha3 hxk' hxg hyg) (le_refl _)
 
+omit [DecidableEq F] in
 /-- **Abstract `ord_P`-engine for the `translateY_xy` cube identity.**
 Given a smooth point `P` of a smooth plane curve `C` and function-field
 elements `xd` (with `ord_P xd = 1`), `yd` (with `ord_P yd = 0`) and
@@ -1703,6 +1776,7 @@ private theorem ord_P_translateY_cube_combination_eq_zero
     exact lt_of_lt_of_le (by exact_mod_cast (show (0 : ℤ) < 1 by norm_num)) h_T234
   exact (SmoothPlaneCurve.ord_P_add_eq_of_lt h_strict).trans h_neg_yd_cube
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`y_gen W` has nonneg ord at any smooth point** (it is in the image of the
 coordinate ring, being `algebraMap R KE (AdjoinRoot.root …)`). The y-side
 companion to `ord_P_x_gen_nonneg`, used wherever `ord_P (y_gen) ≥ 0` is needed
@@ -1711,6 +1785,7 @@ private theorem ord_P_y_gen_nonneg (P : (W_smooth W).SmoothPoint) :
     (0 : WithTop ℤ) ≤ (W_smooth W).ord_P P (y_gen W) :=
   ord_P_algebraMap_R_nonneg W P _
 
+omit [DecidableEq F] in
 /-- **`ord_P (f ^ 3) = 3` from `ord_P f = 1`.** Specialises `ord_P_pow` to a
 cube and the value `1`, turning the natural-number scalar `3 • (1 : WithTop ℤ)`
 into the integer `3`. Used for `xd ^ 3` once `ord_P xd = 1` is known. -/
@@ -1720,6 +1795,7 @@ private theorem ord_P_cube_eq_three_of_ord_P_eq_one
     C.ord_P P (f ^ 3) = ((3 : ℤ) : WithTop ℤ) := by
   rw [SmoothPlaneCurve.ord_P_pow (P := P) f 3, hf]; rfl
 
+omit [W.toAffine.IsElliptic] in
 /-- **`ord_P (translateY_xy) = -3` exact at `−T` for non-2-torsion `T`**:
 combines the algebraic identity `translateY_xy_mul_cube_eq` with the
 ord-vanishing facts `ord_P (yd) = 0` and `ord_P (xd) = 1` to derive the
@@ -1786,6 +1862,7 @@ Combines `ord_P_translateX_xy_lt_zero` with `transcendental_of_neg_ord_P`
 to give the substantive transcendence statement for the translation x-coord
 over `F`. -/
 
+omit [W.toAffine.IsElliptic] in
 /-- **`translateX_xy` is transcendental over `F`** for non-2-torsion
 `T = (xk, yk)`. Direct from the negative ord at `−T` (substantive content
 in `ord_P_translateX_xy_lt_zero`) via the algebraic-Liouville
@@ -1825,6 +1902,7 @@ is `translateAlgHom_of_nonTorsion W (−T)`. The hypotheses for `−T`:
 * `−T` non-2-torsion (i.e., `negY xk yk ≠ negY xk (negY xk yk)`):
   reduces to `negY xk yk ≠ yk` since `negY ∘ negY = id`. -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- Helper: `negY xk (negY xk yk) = yk` (the negation involution). -/
 private theorem negY_negY_eq (xk yk : F) :
     W.toAffine.negY xk (W.toAffine.negY xk yk) = yk := by
@@ -1845,6 +1923,7 @@ noncomputable def translateAlgHom_of_nonTorsion_neg
 
 Compute `translateAlgHom_of_nonTorsion T (x_gen W)` and on `y_gen W`. -/
 
+omit [W.toAffine.IsElliptic] in
 /-- `translateAlgHom_of_nonTorsion T x_gen = translateX_xy T` (definitional).
 The lift via `IsFractionRing.liftAlgHom` of `translateCoordAlgHom`, which
 on `algebraMap (Polynomial F) R Polynomial.X` gives `translateBaseHom X =
@@ -1901,6 +1980,7 @@ Direct computation via `Affine.Point.add_of_Y_eq`: when `x_T = x_{-T}` and
 `y_T = negY x_{-T} y_{-T}` (which holds since `negY ∘ negY = id` on the
 y-coordinate), the sum is the zero point. -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- `negY` commutes with `algebraMap` for the `W_KE` base change. -/
 private theorem WKE_negY_algebraMap (xk yk' : F) :
     (W_KE W).toAffine.negY (algebraMap F KE xk) (algebraMap F KE yk') =
@@ -1912,6 +1992,7 @@ private theorem WKE_negY_algebraMap (xk yk' : F) :
     algebraMap F KE W.a₃ = _
   rw [← map_mul, ← map_neg, ← _root_.map_sub, ← _root_.map_sub]
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 theorem liftSomePoint_add_neg_eq_zero
     (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk) :
     liftSomePoint W xk yk h_ns +
@@ -1968,6 +2049,7 @@ theorem genericPoint_add_liftSomePoint_neg
 Required for the second addition (translation by T applied to `(translateX_xy(-T),
 translateY_xy(-T))`) to use `add_of_X_ne` rather than degenerate to zero. -/
 
+omit [W.toAffine.IsElliptic] in
 /-- For non-2-torsion `T = (xk, yk)`, `translateX_xy W xk (negY xk yk)` is
 transcendental over `F`. (`-T = (xk, negY xk yk)` is also non-2-torsion since
 `negY xk (negY xk yk) = yk ≠ negY xk yk`.) -/
@@ -1979,6 +2061,7 @@ theorem translateX_xy_neg_transcendental
     ((Affine.nonsingular_neg xk yk).mpr h_ns)
     (by rw [negY_negY_eq W xk yk]; exact h_not_2_tor.symm)
 
+omit [W.toAffine.IsElliptic] in
 /-- `translateX_xy(-T) ≠ algebraMap F KE xk` for non-2-torsion `T`.
 Direct from transcendence. -/
 theorem translateX_xy_neg_ne_algebraMap
@@ -1995,6 +2078,7 @@ theorem translateX_xy_neg_ne_algebraMap
 `σ(x_gen) = translateX_xy W xk (negY xk yk)` — used to identify σ-images
 with translation by −T at the K(E) level. -/
 
+omit [W.toAffine.IsElliptic] in
 /-- Evaluation of `translateAlgHom_of_nonTorsion_neg` on `x_gen`. -/
 theorem translateAlgHom_neg_apply_x_gen
     (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
@@ -2004,6 +2088,7 @@ theorem translateAlgHom_neg_apply_x_gen
   unfold translateAlgHom_of_nonTorsion_neg
   exact translateAlgHom_apply_x_gen W xk (W.toAffine.negY xk yk) _ _
 
+omit [W.toAffine.IsElliptic] in
 /-- Evaluation of `translateAlgHom_of_nonTorsion` on `y_gen`. The image is
 `translateY_xy W xk yk`. -/
 theorem translateAlgHom_apply_y_gen
@@ -2025,6 +2110,7 @@ theorem translateAlgHom_apply_y_gen
   unfold translateCoordRingHom
   exact AdjoinRoot.lift_root _
 
+omit [W.toAffine.IsElliptic] in
 /-- Evaluation of `translateAlgHom_of_nonTorsion_neg` on `y_gen`. -/
 theorem translateAlgHom_neg_apply_y_gen
     (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
@@ -2055,6 +2141,7 @@ So `σ(translateX_xy T) = (P_neg + T_lift).x`. By Mathlib's group law
 `(gen + neg_T_lift) + T_lift = gen` (i.e., `P_neg + T_lift = gen`),
 extracting the x-coord gives `(P_neg + T_lift).x = x_gen`. -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- σ commutes with `(W_KE).addX` after F-constant fixing. -/
 private theorem σ_commutes_addX
     {σ : KE →ₐ[F] KE} (a b ℓ : KE) :
@@ -2070,6 +2157,7 @@ private theorem σ_commutes_addX
   rw [_root_.map_sub, _root_.map_sub, _root_.map_sub, _root_.map_add,
       map_pow, map_mul, h_a1, h_a2]
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- σ commutes with `(W_KE).negY` after F-constant fixing. -/
 private theorem σ_commutes_negY
     {σ : KE →ₐ[F] KE} (x y : KE) :
@@ -2084,6 +2172,7 @@ private theorem σ_commutes_negY
     exact σ.commutes _
   rw [_root_.map_sub, _root_.map_sub, _root_.map_neg, map_mul, h_a1, h_a3]
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- σ commutes with `(W_KE).negAddY` after F-constant fixing. -/
 private theorem σ_commutes_negAddY
     {σ : KE →ₐ[F] KE} (a b y₁ ℓ : KE) :
@@ -2092,6 +2181,7 @@ private theorem σ_commutes_negAddY
   unfold WeierstrassCurve.Affine.negAddY
   rw [_root_.map_add, _root_.map_mul, _root_.map_sub, σ_commutes_addX]
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- σ commutes with `(W_KE).addY` after F-constant fixing. -/
 private theorem σ_commutes_addY
     {σ : KE →ₐ[F] KE} (a b y₁ ℓ : KE) :
@@ -2100,6 +2190,7 @@ private theorem σ_commutes_addY
   unfold WeierstrassCurve.Affine.addY
   rw [σ_commutes_negY, σ_commutes_addX, σ_commutes_negAddY]
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- σ commutes with `(W_KE).slope` when `x₁ ≠ x₂` (the secant case). -/
 private theorem σ_commutes_slope_of_X_ne
     {σ : KE →ₐ[F] KE} {a b y₁ y₂ : KE} (hx : a ≠ b) (hx_σ : σ a ≠ σ b) :
@@ -2177,6 +2268,7 @@ private theorem genericPoint_round_trip_neg
   rw [add_assoc, add_comm (liftSomePoint_neg W xk yk h_ns)
       (liftSomePoint W xk yk h_ns), liftSomePoint_add_neg_eq_zero, add_zero]
 
+omit [W.toAffine.IsElliptic] in
 /-- **Image of the secant slope under `σ = τ_{−T}`**: `σ` carries the slope
 `translateSlope_xy T` (the secant slope at the generic point used to define
 `τ_T`) to the secant slope at the negated coordinates `(translateX_xy(−T),
@@ -2245,6 +2337,7 @@ theorem translateAlgHom_round_trip_y_gen
 Two `F`-`AlgHom`s `K(E) →ₐ[F] K(E)` are equal iff they agree on the generators
 `x_gen` (image of `Polynomial.X`) and `y_gen` (image of `AdjoinRoot.root`). -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- Two `F`-AlgHoms `KE →ₐ[F] KE` are equal iff they agree on `x_gen` and
 `y_gen`. Reduction chain: `IsLocalization.algHom_ext` (peeling `Frac`),
 `AdjoinRoot.algHom_ext'` (peeling AdjoinRoot), `Polynomial.algHom_ext`
@@ -2264,6 +2357,7 @@ theorem algHom_ext_x_y_gen {ψ₁ ψ₂ : KE →ₐ[F] KE}
       ψ₂ (algebraMap _ KE (AdjoinRoot.root W.toAffine.polynomial))
     exact hy
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **AlgEquiv version of `algHom_ext_x_y_gen`**: two `F`-`AlgEquiv`s `KE ≃ₐ[F] KE` agreeing on
 `x_gen` and `y_gen` are equal. Reduces any `translateAlgEquivOfPoint` identity (composition,
 inverse, group action) to the proven action-on-generators lemmas. -/
@@ -2334,6 +2428,7 @@ theorem translateAlgHom_inv_round_trip_x_gen
   unfold genericPoint at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.1
 
+omit [W.toAffine.IsElliptic] in
 /-- `translateX_xy T ≠ algebraMap F KE xk` for non-2-torsion `T = (xk, yk)`.
 Forward (`τ`-direction) analogue of `translateX_xy_neg_ne_algebraMap`: direct
 from the transcendence of `translateX_xy T`. -/
@@ -2347,6 +2442,7 @@ private theorem translateX_xy_ne_algebraMap_const
     Polynomial.X_sub_C_ne_zero _, ?_⟩
   rw [_root_.map_sub, Polynomial.aeval_X, Polynomial.aeval_C, h_eq, sub_self]
 
+omit [W.toAffine.IsElliptic] in
 /-- **Image of the secant slope under `τ = τ_T`**: `τ` carries the slope
 `translateSlope_xy(−T)` (the secant slope at the generic point used to define
 `τ_{−T}`) to the secant slope at the translated coordinates `(translateX_xy(T),
@@ -2434,6 +2530,7 @@ Combining: `ord_T (slope) = ord_T (B − a₁ yk) − ord_T A ≤ −1`, hence
 `ord_T (translateX_xy) ≤ −2`, hence `translateX_xy` is transcendental.
 This avoids the `h_not_2_tor` hypothesis required by the existing chain. -/
 
+omit [W.toAffine.IsElliptic] in
 omit [DecidableEq F] in
 /-- **Curve identity in `K(E)`** (foundational for both 2-torsion and
 non-2-torsion analysis): for any `(xk, yk)` satisfying the Weierstrass
@@ -2516,7 +2613,7 @@ theorem A_factorization_at_2tor
 
 /-! ### Order at smooth 2-torsion `T` of `A` -/
 
-set_option linter.unusedDecidableInType false in
+omit [W.toAffine.IsElliptic] in
 /-- **`ord_T A ≥ 1` at smooth 2-torsion `T`**: combine the
 A-factorisation with the existing order bounds for `y_gen − yk` and
 `x_gen − xk` at the smooth point `−T = T`. -/
@@ -2609,6 +2706,7 @@ private theorem B_minus_a1_yk_decomposition (xk yk : F) :
   push_cast [map_add, map_sub, map_mul, map_pow, map_ofNat]
   ring
 
+omit [DecidableEq F] in
 /-- **`ord_P (a + b) = 0` from `ord_P b = 0` and `1 ≤ ord_P a`.** The summand
 `b` has the strictly smaller order (`0 < 1 ≤ ord_P a`), so by strict
 non-archimedeanity (`ord_P_add_eq_of_lt`) it dominates the sum:
@@ -2623,6 +2721,7 @@ private theorem ord_P_add_eq_zero_of_eq_zero_of_one_le
     lt_of_lt_of_le (by rw [hb]; exact_mod_cast (show (0 : ℤ) < 1 by norm_num)) ha
   rw [add_comm, SmoothPlaneCurve.ord_P_add_eq_of_lt h_lt, hb]
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **The constant `C = 3 xk² + 2 a₂ xk + a₄ − a₁ yk` is nonzero at smooth
 2-torsion.** This constant equals `−polynomialX.evalEval xk yk`, which is
 nonzero at a smooth 2-torsion point (`polynomialX_evalEval_ne_zero_at_2tor`);
@@ -2639,6 +2738,7 @@ private theorem C_const_ne_zero_at_2tor
   apply h_polX
   linear_combination -h
 
+omit [W.toAffine.IsElliptic] in
 /-- **`ord_T ((x_gen − xk) · (x_gen + 2 xk + a₂)) ≥ 1` at smooth 2-torsion.**
 The first factor `x_gen − xk` vanishes at `T` to order `≥ 1`
 (`one_le_ord_P_x_gen_sub_const`); the second factor `x_gen + (2 xk + a₂)` is a
@@ -2674,7 +2774,7 @@ private theorem one_le_ord_P_x_gen_sub_mul_factor_at_2tor
   have h := add_le_add h_x_sub h_R_nonneg
   rwa [add_zero] at h
 
-set_option linter.unusedDecidableInType false in
+omit [W.toAffine.IsElliptic] in
 /-- **`ord_T (B − a₁ yk) = 0` at smooth 2-torsion `T`**: stated in
 decomposed form `(x_gen − xk) · (x_gen + 2 xk + a₂) + C` where
 `C = 3 xk² + 2 a₂ xk + a₄ − a₁ yk = −polynomialX.evalEval xk yk`.
@@ -2701,7 +2801,7 @@ theorem ord_P_B_minus_a1_yk_decomposed_eq_zero_at_2tor
   exact ord_P_add_eq_zero_of_eq_zero_of_one_le h_C_ord
     (one_le_ord_P_x_gen_sub_mul_factor_at_2tor W xk yk h_ns)
 
-set_option linter.unusedDecidableInType false in
+omit [W.toAffine.IsElliptic] in
 /-- **`ord_T (B − a₁ yk) = 0` at smooth 2-torsion `T`**: bridge from the
 decomposed form to the original `B − a₁ yk` form via the algebraic
 identity `B_minus_a1_yk_decomposition`. -/
@@ -2719,6 +2819,7 @@ theorem ord_P_B_minus_a1_yk_eq_zero_at_2tor
     ord_P_B_minus_a1_yk_decomposed_eq_zero_at_2tor W xk yk h_ns h_2_tor
   exact h_eq ▸ h_decomposed
 
+omit [DecidableEq F] in
 /-- **A function whose order is `0` is nonzero.** If `ord_P P f = 0` then `f ≠ 0`,
 since the zero function has order `⊤ ≠ 0`. Generic building block (companion to
 `ne_zero_of_ord_P_le_neg_one`): an *exact* order value supplies the nonvanishing
@@ -2730,6 +2831,7 @@ private theorem ne_zero_of_ord_P_eq_zero {C : Curves.SmoothPlaneCurve F}
   rw [h_zero, C.ord_P_zero] at hf
   exact absurd hf (by simp)
 
+omit [DecidableEq F] in
 /-- **`ord_P P (b · a⁻¹) ≤ −1`** when `b` has order `0` and `a` has order `≥ 1`.
 The quotient `b / a` of an order-`0` numerator by an order-`≥ 1` denominator has
 strictly negative order: additivity and `ord_P_inv` give
@@ -2759,7 +2861,7 @@ directly via the curve identity, with `A ≠ 0` deduced from `RHS ≠ 0`
 (non-zero since `ord_T(B − a₁ yk) = 0`). Then
 `ord_T(slope) = ord_T(B − a₁ yk) − ord_T(A) = 0 − (≥1) = ≤ −1`. -/
 
-set_option linter.unusedDecidableInType false in
+omit [W.toAffine.IsElliptic] in
 /-- **`ord_T (translateSlope_xy) ≤ −1` at smooth 2-torsion `T`** via
 slope = (B − a₁ yk) / A. -/
 theorem ord_P_translateSlope_xy_le_neg_one_at_2tor
@@ -2816,6 +2918,7 @@ With `ord_T(slope) = n ≤ −1` (the slope bound, finite since `slope ≠ 0`):
 The `cases h_n : ord_T(s)` destructure to a finite `n` is the wall-break:
 all `WithTop ℤ` arithmetic happens via `ℤ` and `omega`. -/
 
+omit [DecidableEq F] in
 /-- **A function whose order is `≤ −1` is nonzero.** If `ord_P P f ≤ −1` then
 `f ≠ 0`, since the zero function has order `⊤`. Generic building block: lets a
 strict order bound supply the nonvanishing hypothesis needed for `cases` on
@@ -2826,6 +2929,7 @@ private theorem ne_zero_of_ord_P_le_neg_one {C : Curves.SmoothPlaneCurve F}
   rw [h_zero, C.ord_P_zero] at hf
   exact absurd hf (by simp)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`addX` decomposition of `translateX_xy` into slope² plus a remainder.**
 Unfolding `translateX_xy` and `WeierstrassCurve.Affine.addX` writes the
 translated x-coordinate as `s² + (a₁·s + (−a₂ − x_gen − xk))`, where
@@ -2840,7 +2944,7 @@ private theorem translateX_xy_eq_slope_sq_add_rest (xk yk : F) :
   rw [WeierstrassCurve.Affine.addX]
   ring
 
-set_option linter.unusedDecidableInType false in
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **`ord_P P s ≤ ord_P P (a₁·s)`.** The slope order is a lower bound for the
 order of the linear term `a₁·s`: when `a₁ = 0` the term is `0` (order `⊤`),
 otherwise `ord_P (a₁·s) = ord_P a₁ + ord_P s = 0 + ord_P s` since the constant
@@ -2868,6 +2972,7 @@ private theorem ord_P_slope_le_ord_P_a1_mul_slope (xk yk : F)
       SmoothPlaneCurve.ord_P_mul (P := P) _ _
     rw [h_mul_ord, h_a1_ord, zero_add]
 
+omit [W.toAffine.IsElliptic] in
 /-- **The remainder's constant part `−a₂ − x_gen − xk` has nonnegative order.**
 Each summand is (the negative of) either a constant `algebraMap F KE _` or the
 generic x-coordinate `x_gen`, all of nonnegative order at any smooth point;
@@ -2890,7 +2995,7 @@ private theorem ord_P_translate_const_part_nonneg (xk : F)
     rw [h_xk_neg]; exact ord_P_algebraMap_F_nonneg W P xk
   exact ord_P_le_add_of_le_of_le (ord_P_le_add_of_le_of_le h_a2 h_xgen) h_xk
 
-set_option linter.unusedDecidableInType false in
+omit [W.toAffine.IsElliptic] in
 /-- **`ord_P P s ≤ ord_P P rest`** for `rest = a₁·s + (−a₂ − x_gen − xk)`, when
 `ord_P P s ≤ 0`. The linear term `a₁·s` has order `≥ ord_P s`
 (`ord_P_slope_le_ord_P_a1_mul_slope`); the constant part has order `≥ 0 ≥ ord_P s`
@@ -2907,6 +3012,7 @@ private theorem ord_P_slope_le_ord_P_translate_rest (xk yk : F)
   ord_P_le_add_of_le_of_le (ord_P_slope_le_ord_P_a1_mul_slope W xk yk h_ns)
     (le_trans h_le (ord_P_translate_const_part_nonneg W xk _))
 
+omit [DecidableEq F] in
 /-- **A doubled strictly-negative order dominates a sum.** If `ord_P P a = n + n`
 with `n < 0`, and `n ≤ ord_P P b`, then `n + n < n ≤ ord_P P b`, so the `a`-term
 is the unique smallest-order summand: `ord_P_add_eq_of_lt` gives
@@ -2928,7 +3034,7 @@ private theorem ord_P_add_double_lt_zero {C : Curves.SmoothPlaneCurve F}
       (((n + n : ℤ) : ℤ) : WithTop ℤ) from rfl]
   exact_mod_cast (show n + n < 0 by omega)
 
-set_option linter.unusedDecidableInType false in
+omit [W.toAffine.IsElliptic] in
 /-- **`ord_T (translateX_xy) < 0` at smooth 2-torsion `T`**: from the
 slope bound + `addX` decomposition, with all WithTop arithmetic reduced to
 finite `ℤ` after destructuring `ord_T(slope) = ↑n`. -/
@@ -2970,7 +3076,7 @@ theorem ord_P_translateX_xy_lt_zero_at_2tor
 
 /-! ### `translateX_xy_transcendental` extended to 2-torsion `T` -/
 
-set_option linter.unusedDecidableInType false in
+omit [W.toAffine.IsElliptic] in
 /-- **`translateX_xy_transcendental_2tor`**: at 2-torsion `T = (xk, yk)`,
 `translateX_xy T` is transcendental over `F`. -/
 theorem translateX_xy_transcendental_2tor
@@ -3004,6 +3110,7 @@ Mechanical specialisation of `translateAlgHom_apply_x_gen` and
 generic `translateAlgHom_of_nonTorsion`; the proofs work for any
 `translateAlgHom W xk yk h_eq hxy hinj` regardless of 2-torsion). -/
 
+omit [W.toAffine.IsElliptic] in
 /-- `translateAlgHom_of_2tor T x_gen = translateX_xy T`. -/
 theorem translateAlgHom_of_2tor_apply_x_gen
     (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
@@ -3029,6 +3136,7 @@ theorem translateAlgHom_of_2tor_apply_x_gen
   rw [AdjoinRoot.lift_of]
   simp [translateBaseHom, Polynomial.eval₂_X]
 
+omit [W.toAffine.IsElliptic] in
 /-- `translateX_xy T ≠ algebraMap F KE xk` for 2-torsion `T`. Direct
 from transcendence of `translateX_xy`. -/
 theorem translateX_xy_ne_algebraMap_2tor
@@ -3040,6 +3148,7 @@ theorem translateX_xy_ne_algebraMap_2tor
   refine ⟨Polynomial.X - Polynomial.C xk, Polynomial.X_sub_C_ne_zero xk, ?_⟩
   rw [_root_.map_sub, Polynomial.aeval_X, Polynomial.aeval_C, h_eq, sub_self]
 
+omit [W.toAffine.IsElliptic] in
 /-- `translateX_xy T ≠ algebraMap F KE c` for ANY `c ∈ F` and 2-torsion `T`.
 Generalisation of `translateX_xy_ne_algebraMap_2tor` from the specific `xk`
 to an arbitrary base-field constant. -/
@@ -3052,6 +3161,7 @@ theorem translateX_xy_2tor_ne_algebraMap_any
   refine ⟨Polynomial.X - Polynomial.C c, Polynomial.X_sub_C_ne_zero c, ?_⟩
   rw [_root_.map_sub, Polynomial.aeval_X, Polynomial.aeval_C, h_eq, sub_self]
 
+omit [W.toAffine.IsElliptic] in
 /-- `translateX_xy T ≠ algebraMap F KE c` for ANY `c ∈ F` and non-2-torsion `T`.
 Generalisation of `translateX_xy_neg_ne_algebraMap` to arbitrary `c`. -/
 theorem translateX_xy_nonTor_ne_algebraMap_any
@@ -3063,6 +3173,7 @@ theorem translateX_xy_nonTor_ne_algebraMap_any
   refine ⟨Polynomial.X - Polynomial.C c, Polynomial.X_sub_C_ne_zero c, ?_⟩
   rw [_root_.map_sub, Polynomial.aeval_X, Polynomial.aeval_C, h_eq, sub_self]
 
+omit [W.toAffine.IsElliptic] in
 /-- **Unified `translateX_xy ≠ algebraMap F KE c`** for any base-field constant
 `c` and any non-zero point `T = (xk, yk)` (regardless of 2-torsion). -/
 theorem translateX_xy_ne_algebraMap_any
@@ -3080,6 +3191,7 @@ For 2-torsion `T = (xk, yk)` (i.e., `yk = negY xk yk`), the lifted point
 `Affine.map_negY`). Hence `T_lift + T_lift = 0` via Mathlib's
 `Affine.Point.add_self_of_Y_eq`. -/
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- For 2-torsion `T`, the lifted point is its own negation:
 `liftSomePoint W xk yk + liftSomePoint W xk yk = 0`. -/
 theorem liftSomePoint_add_self_eq_zero_of_2tor
@@ -3094,6 +3206,7 @@ theorem liftSomePoint_add_self_eq_zero_of_2tor
   rw [WeierstrassCurve.Affine.map_negY (W' := W) (f := algebraMap F KE),
       ← h_2_tor]
 
+omit [W.toAffine.IsElliptic] in
 /-- `translateAlgHom_of_2tor T y_gen = translateY_xy T`. -/
 theorem translateAlgHom_of_2tor_apply_y_gen
     (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
@@ -3375,15 +3488,18 @@ noncomputable def liftPointToKE :
     W.toAffine.Point →+ (W_KE W).toAffine.Point :=
   WeierstrassCurve.Affine.Point.map (W' := W) (Algebra.ofId F KE)
 
+omit [W.toAffine.IsElliptic] in
 /-- The lift sends `.zero` to `0`. -/
 @[simp] theorem liftPointToKE_zero : liftPointToKE W 0 = 0 :=
   AddMonoidHom.map_zero _
 
+omit [W.toAffine.IsElliptic] in
 /-- The lift is a group hom: `lift (T₁ + T₂) = lift T₁ + lift T₂`. -/
 theorem liftPointToKE_add (T₁ T₂ : W.toAffine.Point) :
     liftPointToKE W (T₁ + T₂) = liftPointToKE W T₁ + liftPointToKE W T₂ :=
   AddMonoidHom.map_add _ _ _
 
+omit [W.toAffine.IsElliptic] in
 /-- Identification of the abstract `liftPointToKE` with the explicit
 `liftSomePoint` for `.some xk yk h_ns`. Both produce the lift of
 `(xk, yk)` via `algebraMap`; the nonsingular witnesses are equal by
@@ -3393,6 +3509,7 @@ theorem liftPointToKE_some
     liftPointToKE W (Affine.Point.some xk yk h_ns) =
       liftSomePoint W xk yk h_ns := rfl
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- For non-zero T = `.some xk yk h_ns`, `(- T).some` decomposition:
 `-T = .some xk (negY xk yk) ((nonsingular_neg).mpr h_ns)`. -/
 theorem neg_some_eq_some
@@ -3401,6 +3518,7 @@ theorem neg_some_eq_some
       Affine.Point.some xk (W.toAffine.negY xk yk)
         ((Affine.nonsingular_neg xk yk).mpr h_ns) := rfl
 
+omit [W.toAffine.IsElliptic] in
 /-- **2-tor + 2-tor sum is 2-tor**: if T₁, T₂ are 2-torsion and T₁+T₂ = some
 xk₃ yk₃ h_ns₃ is non-zero, then yk₃ = negY xk₃ yk₃. -/
 theorem sum_2tor_of_2tor_2tor
@@ -3433,6 +3551,7 @@ theorem sum_2tor_of_2tor_2tor
   exact ((Affine.Point.some.injEq _ _ _ _ _ _).mp
     h_T₃_self_eq_zero).2
 
+omit [W.toAffine.IsElliptic] in
 /-- **Mixed 2-tor / non-2-tor sum is non-2-tor**. -/
 theorem sum_nonTor_of_2tor_nonTor
     (xk₁ yk₁ : F) (h_ns₁ : W.toAffine.Nonsingular xk₁ yk₁)
@@ -3466,6 +3585,7 @@ theorem sum_nonTor_of_2tor_nonTor
   rw [add_eq_zero_iff_eq_neg, neg_some_eq_some] at h_T₂_self_zero
   exact ((Affine.Point.some.injEq _ _ _ _ _ _).mp h_T₂_self_zero).2
 
+omit [W.toAffine.IsElliptic] in
 /-- **Mixed non-2-tor / 2-tor sum is non-2-tor**. -/
 theorem sum_nonTor_of_nonTor_2tor
     (xk₁ yk₁ : F) (h_ns₁ : W.toAffine.Nonsingular xk₁ yk₁)
@@ -3665,6 +3785,7 @@ theorem translateAlgEquivOfPoint_add_nonTor_x_gen
   rw [Affine.Point.add_of_X_ne (h_x₂_ne)] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.1
 
+omit [W.toAffine.IsElliptic] in
 /-- **Image of the secant slope under `σ = τ_{T₂}`** (non-torsion sum case):
 `σ = translateAlgHom_of_nonTorsion T₂` carries the secant slope
 `translateSlope_xy T₁` (the slope at the generic point used to define `τ_{T₁}`)
@@ -3825,6 +3946,7 @@ theorem translateAlgEquivOfPoint_add_2tor_x_gen
   rw [Affine.Point.add_of_X_ne (h_x₂_ne)] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.1
 
+omit [W.toAffine.IsElliptic] in
 /-- **2-torsion analogue of `translateAlgHom_nonTor_commutes_translateSlope_xy`**:
 the translate-by-`(xk₂, yk₂)` 2-torsion algebra hom sends the generic slope
 `translateSlope_xy W xk₁ yk₁` (the secant slope through `(x_gen, y_gen)` and the
@@ -4416,6 +4538,7 @@ For non-zero `T = (xk, yk)`: `translateAlgEquivOfPoint` acts on `x_gen` as
 (`ord_P_x_gen_nonneg`). Hence the action is non-trivial, contradicting
 `= AlgEquiv.refl`. -/
 
+omit [W.toAffine.IsElliptic] in
 /-- For non-2-torsion `T = (xk, yk)`, `translateX_xy ≠ x_gen` via ord-comparison
 at `−T`: ord_{-T}(translateX_xy) < 0 vs ord_{-T}(x_gen) ≥ 0. -/
 theorem translateX_xy_ne_x_gen_nonTor
@@ -4432,6 +4555,7 @@ theorem translateX_xy_ne_x_gen_nonTor
   rw [h_eq] at h_neg
   exact absurd h_nonneg (not_le.mpr h_neg)
 
+omit [W.toAffine.IsElliptic] in
 /-- For 2-torsion `T = (xk, yk)`, `translateX_xy ≠ x_gen` via the same
 ord-comparison argument using `ord_P_translateX_xy_lt_zero_at_2tor`. -/
 theorem translateX_xy_ne_x_gen_2tor
@@ -5052,6 +5176,7 @@ The bridge: given `ord_P P (τ_k f) = ord_{P+k} f` for all `f ≠ 0`,
 conclude pointwise pointValuation equality, hence
 `IsTranslateValuationCompatible`. -/
 
+omit [DecidableEq F] in
 /-- **`ord_P` equality ⇒ `pointValuation` equality** (generic, two
 (point, function) pairs on a single smooth plane curve). For nonzero `f`
 at `P` and nonzero `g` at `Q`, an equality of orders forces the
