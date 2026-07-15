@@ -533,3 +533,9 @@ overlap compatibility. The chart image opens cover the glued scheme by joint sur
 these local trivializations yield `AffineIntersectionUnitCocycle.gluedModule_isInvertible`.
 Both public declarations are option-free, add no hypotheses, and their axiom audits are exactly
 `propext`, `Classical.choice`, and `Quot.sound`.
+
+Active dependency claim (2026-07-14): in `InvertibleSheafGlueEffectivity.lean`, prove
+`AffineIntersectionUnitCocycle.gluedModuleDescentIso`, identifying the descent datum induced by
+`gluedModule` with the existing `chartDescentData`. The component isomorphisms must be the proved
+`gluedModuleRestrictIso` transported through `restrictFunctorIsoPullback`, and the overlap square
+must recover `chartDescentHom` without an added hypothesis or proof-resource option.
