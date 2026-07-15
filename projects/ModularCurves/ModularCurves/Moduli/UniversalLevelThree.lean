@@ -269,6 +269,63 @@ theorem isE3Form_of_scaling {A : Type u} [CommRing A] {W : WeierstrassCurve A}
   · rw [variableChange_a₆, ha₆]; ring
 
 open WeierstrassCurve in
+/-- **([T-E15-NORM] scaling existence on the `B`-unit locus ★★)** On the open where the
+`ℰ₃`-denominator `B` is a unit, a flex-NF curve `W` (`a₂=a₄=a₆=0`) with a marked
+`3`-torsion point `(p, q)` admits the `ℰ₃`-normalization. The scaling `u = −A·B⁻¹` is a
+unit — `p = x(Q)` is a unit from the `3`-division relation `hcubic`
+(`p·(3p²+a₁²p+3a₁a₃) = −3a₃²`), so `3p` is a unit and `u·(u+a₁)=3p` forces `u` a unit —
+and it satisfies both `hurel` (via `A²−a₁AB−3pB² = 0`, a `linear_combination` of `hcurve`
+and `hcubic`) and `hsheet` (by construction). No `√-3` / Weil pairing: `u` is rational
+in the coordinates. -/
+theorem isE3Form_of_threeTorsion {A : Type u} [CommRing A] {W : WeierstrassCurve A}
+    (ha₂ : W.a₂ = 0) (ha₄ : W.a₄ = 0) (ha₆ : W.a₆ = 0)
+    (p q : A)
+    (hcurve : q ^ 2 + W.a₁ * p * q + W.a₃ * q = p ^ 3)
+    (hcubic : 3 * p ^ 3 + W.a₁ ^ 2 * p ^ 2 + 3 * W.a₁ * W.a₃ * p + 3 * W.a₃ ^ 2 = 0)
+    (ha₃ : IsUnit W.a₃) (h3 : IsUnit (3 : A))
+    (hB : IsUnit (W.a₁ ^ 3 * p + W.a₁ ^ 2 * W.a₃ + W.a₁ ^ 2 * q + 6 * W.a₁ * p ^ 2
+            + 3 * W.a₃ * p + 6 * p * q)) :
+    ∃ u : Aˣ, IsE3Form ((⟨u, 0, 0, 0⟩ : VariableChange A) • W)
+      (q * ((u⁻¹ : Aˣ) : A) ^ 3 - p * ((u⁻¹ : Aˣ) : A) ^ 2)
+      (p * ((u⁻¹ : Aˣ) : A) ^ 2) := by
+  -- `p = x(Q)` is a unit
+  have hp : IsUnit p := by
+    apply isUnit_of_mul_isUnit_left (y := 3 * p ^ 2 + W.a₁ ^ 2 * p + 3 * W.a₁ * W.a₃)
+    have hpX : p * (3 * p ^ 2 + W.a₁ ^ 2 * p + 3 * W.a₁ * W.a₃) = -(3 * W.a₃ ^ 2) := by
+      linear_combination hcubic
+    rw [hpX]; exact (h3.mul (ha₃.pow 2)).neg
+  -- the ℰ₃ numerator/denominator and the scaling `w = −A·B⁻¹`
+  obtain ⟨Bu, hBu⟩ := hB
+  set Aex : A := -3 * W.a₁ ^ 2 * p ^ 2 - 3 * W.a₁ * W.a₃ * p - 3 * W.a₁ * p * q - 9 * p ^ 3
+    with hAex
+  set Bex : A := W.a₁ ^ 3 * p + W.a₁ ^ 2 * W.a₃ + W.a₁ ^ 2 * q + 6 * W.a₁ * p ^ 2
+    + 3 * W.a₃ * p + 6 * p * q with hBex
+  have hBinv : Bex * (↑Bu⁻¹ : A) = 1 := by rw [← hBu]; exact Bu.mul_inv
+  set w : A := -Aex * (↑Bu⁻¹ : A) with hw
+  -- `A² − a₁AB − 3pB² = 0`
+  have hAB : Aex ^ 2 - W.a₁ * Aex * Bex - 3 * p * Bex ^ 2 = 0 := by
+    rw [hAex, hBex]
+    linear_combination (-9 * p ^ 2 * (W.a₁ ^ 2 + 12 * p)) * hcurve + (-9 * p ^ 3) * hcubic
+  -- `hurel : w² + a₁w = 3p`
+  have hwurel : w ^ 2 + W.a₁ * w = 3 * p := by
+    have key : w ^ 2 + W.a₁ * w = (Aex ^ 2 - W.a₁ * Aex * Bex) * (↑Bu⁻¹ : A) ^ 2 := by
+      rw [hw]; linear_combination (W.a₁ * Aex * (↑Bu⁻¹ : A)) * hBinv
+    rw [key, show Aex ^ 2 - W.a₁ * Aex * Bex = 3 * p * Bex ^ 2 by linear_combination hAB]
+    linear_combination (3 * p * (Bex * (↑Bu⁻¹ : A) + 1)) * hBinv
+  -- `w` is a unit
+  have hwu : IsUnit w := by
+    apply isUnit_of_mul_isUnit_left (y := w + W.a₁)
+    rw [show w * (w + W.a₁) = 3 * p by linear_combination hwurel]; exact h3.mul hp
+  -- `hsheet : B·w + A = 0`
+  have hsheet : Bex * w + Aex = 0 := by rw [hw]; linear_combination (-Aex) * hBinv
+  -- assemble
+  refine ⟨hwu.unit, ?_⟩
+  have hunit : (↑hwu.unit : A) = w := hwu.unit_spec
+  exact isE3Form_of_scaling ha₂ ha₄ ha₆ p q hwu.unit
+    (by rw [hunit]; exact hwurel)
+    (by rw [hunit, ← hBex, ← hAex]; exact hsheet)
+
+open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 /-- **(T-E15a stage 4, the ring-level uniqueness certificate ★★)** A variable change
