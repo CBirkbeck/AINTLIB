@@ -106,8 +106,9 @@ lemma negInvolution_involutive : Function.Involutive W.negInvolution := by
     apply AdjoinRoot.ringHom_ext
     · apply RingHom.ext
       intro p
-      simp [RingHom.comp_apply]
-    · simp [RingHom.comp_apply, negInvolution_mk_negPolynomial]
+      simp only [RingHom.comp_apply, negInvolution_of, RingHomCompTriple.comp_eq]
+    · simp only [RingHom.comp_apply, negInvolution_root, negInvolution_mk_negPolynomial,
+        RingHom.id_apply]
   exact RingHom.congr_fun h x
 
 /-- The negation involution applied to a scalar-multiplied element. -/
