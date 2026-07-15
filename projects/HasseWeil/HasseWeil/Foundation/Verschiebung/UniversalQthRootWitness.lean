@@ -375,7 +375,7 @@ theorem mulByInt_pow_pullback_y_gen_mem_adjoin_pair_pow
   | zero =>
     change (mulByInt W.toAffine ((1 : ℕ) : ℤ)).pullback (y_gen W) ∈
       IntermediateField.adjoin K ({x_gen W ^ 1, y_gen W ^ 1} : Set KE)
-    rw [pow_one, pow_one, show ((1 : ℕ) : ℤ) = 1 from rfl, mulByInt_one_pullback_eq_id]
+    rw [pow_one, pow_one, Nat.cast_one, mulByInt_one_pullback_eq_id]
     exact IntermediateField.subset_adjoin K _ (by right; rfl)
   | succ k ih =>
     rw [mulByInt_pow_succ_comp W p k]

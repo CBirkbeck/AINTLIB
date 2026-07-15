@@ -806,7 +806,7 @@ theorem mulByInt_pow_zero_pullback_x_gen_mem_adjoin_pow
   rw [pow_zero]
   show (mulByInt W.toAffine ((1 : ℕ) : ℤ)).pullback (x_gen W) ∈
     IntermediateField.adjoin K ({x_gen W ^ 1} : Set _)
-  rw [pow_one, show ((1 : ℕ) : ℤ) = 1 from rfl, mulByInt_one_pullback_eq_id]
+  rw [pow_one, Nat.cast_one, mulByInt_one_pullback_eq_id]
   exact IntermediateField.subset_adjoin K _ (Set.mem_singleton _)
 
 /-- **Key technical lemma**: in a field `L` of characteristic `p`, the
