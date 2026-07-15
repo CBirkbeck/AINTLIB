@@ -52,15 +52,15 @@ parked/`sorry`'d transport gates. Every one bottoms out at the *single* primitiv
   memberships `gammaOneNaiveProblem.map` / `gammaFullNaiveProblem.map` (~L214/L229) then close: the
   `(N : ℤ) • P = 0` killing clause transports by `pullSection_add_of_finitePresentation` +
   `pullSection_zsmul_of_finitePresentation`; the fibrewise `Point.pull` clauses transport barehanded
-  (pull commutes with `pullSection`, no group data). `pullSection_zsmul` (GammaHRepresentability, and
-  hence `pullAlong_glSmul`/GH) can drop its `pullSection_add` hypothesis onto the FP version.
+  (pull commutes with `pullSection`, no group data). `pullSection_zsmul` (GammaHRepresentability,
+  and hence `pullAlong_glSmul`/GH) can drop its `pullSection_add` hypothesis onto the FP version.
 * **`ModularCurve/YOneAssembly.lean` ([Y1-D2], NEW-Y1)** — `isNaiveGammaOne_pullSection_iff` closes
   the same way: the killing clause via the two FP `pullSection` lemmas above; the fibrewise clauses
   (`(N:ℤ) • Point.pull … = 0`, exact-order-`N`) barehanded via pull/`pullSection` compatibility. Do
   **not** shared-edit — this note is the coordination; assemble in your own file/PR.
 * **Coordination (attack-1, no duplication):** the canonicity transport is proved *once* — here, in
-  `transportSection_add_of_isMonHom` (sorry-free) — and everything above consumes it. Do not re-derive
-  the group-iso transport in the holder files.
+  `transportSection_add_of_isMonHom` (sorry-free) — and everything above consumes it. Do not
+  re-derive the group-iso transport in the holder files.
 
 ## References
 
