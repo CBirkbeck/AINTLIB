@@ -1722,13 +1722,13 @@ theorem exists_generatorLocus (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
   --     • D side: `baseChange_baseChange_ideal` + `h ≫ π_B = t` (from `hcomp` + `P.1 ≫ E.π = t`).
   --     • OD side: `sectionsDivisor.ideal = ∏ ker` → `IdealSheafData.comap_prod` →
   -- `Finset.prod_congr`
-  --       → per-factor `exactOrderLocusAux_ker_comap_eq` with the sections matched by
-  --       `divisorTautPoint_restrict` — EXACTLY the proven twin `fullLevelLocusAux_P1/P2` pattern.
+  --       → per-factor `ExactOrderLocus.ker_comap_eq` with the sections matched by
+  --       `divisorTautPoint_restrict` — EXACTLY the proven twin `FullLevelLocus.P1/P2` pattern.
   --     • then `and_iff_right (hasExactOrder_of_orderDivisor_ideal_eq N D hD t (asSection E t P)
   -- ·)`.
-  --   BLOCKER: that engine (`exactOrderLocusAux_ker_comap_eq` L1583, `subgroupLocusAux_val` L985
+  --   BLOCKER: that engine (`ExactOrderLocus.ker_comap_eq` L1583, `SubgroupLocus.val` L985
   -- +snd,
-  --   `exactOrderLocusAux_val_isClosedImmersion` L1630, and a general `sectionsDivisor_ideal` — the
+  --   `ExactOrderLocus.val_isClosedImmersion` L1630, and a general `sectionsDivisor_ideal` — the
   --   fullLevel one at L2350 is specialised) is all `private` to Incidence.lean.  CLEAN PATH:
   -- expose the
   --   general ones (visibility-only; Incidence.lean is sorry-free/stable) + this ~25-line assembly.
@@ -1736,39 +1736,39 @@ theorem exists_generatorLocus (N : ℕ) [NeZero N] (D : RelEffCartierDiv E.π)
   --   cross-file API change worth flagging to the coordinator; not an inline close.
   have hct : h ≫ (D.ideal.subschemeι ≫ E.π) = t := by
     rw [← Category.assoc, hcomp]; exact P.2
-  refine Iff.trans (fullLevelLocusAux_comap_iff hct _ _) ?_
-  have hP2 : (D.baseChange (D.ideal.subschemeι ≫ E.π)).ideal.comap (fullLevelLocusAux_theta hct)
+  refine Iff.trans (FullLevelLocus.comap_iff hct _ _) ?_
+  have hP2 : (D.baseChange (D.ideal.subschemeι ≫ E.π)).ideal.comap (FullLevelLocus.theta hct)
       = (D.baseChange t).ideal := by
     rw [RelEffCartierDiv.baseChange_ideal, ← Scheme.IdealSheafData.comap_comp,
-      fullLevelLocusAux_theta_fst, ← RelEffCartierDiv.baseChange_ideal]
+      FullLevelLocus.theta_fst, ← RelEffCartierDiv.baseChange_ideal]
   have hP1 : (Section.orderDivisor (E.baseChange (D.ideal.subschemeι ≫ E.π))
         (Point.asSection E (D.ideal.subschemeι ≫ E.π) (E.divisorTautPoint D)) N).ideal.comap
-        (fullLevelLocusAux_theta hct)
+        (FullLevelLocus.theta hct)
       = (Section.orderDivisor (E.baseChange t) (Point.asSection E t P) N).ideal := by
     simp only [Section.orderDivisor]
-    rw [fullLevelLocusAux_sectionsDivisor_ideal, fullLevelLocusAux_sectionsDivisor_ideal,
+    rw [FullLevelLocus.sectionsDivisor_ideal, FullLevelLocus.sectionsDivisor_ideal,
       Scheme.IdealSheafData.comap_prod]
     refine Finset.prod_congr rfl fun a _ => ?_
-    have hm_a : h ≫ (subgroupLocusAux_val E (D.ideal.subschemeι ≫ E.π)
+    have hm_a : h ≫ (SubgroupLocus.val E (D.ideal.subschemeι ≫ E.π)
           ((((a : ℕ) : ℤ) + 1) • Point.asSection E (D.ideal.subschemeι ≫ E.π)
             (E.divisorTautPoint D)) ≫ pullback.fst E.π (D.ideal.subschemeι ≫ E.π))
-        = subgroupLocusAux_val E t ((((a : ℕ) : ℤ) + 1) • Point.asSection E t P)
+        = SubgroupLocus.val E t ((((a : ℕ) : ℤ) + 1) • Point.asSection E t P)
           ≫ pullback.fst E.π t := by
-      rw [exactOrderLocusAux_val_smul_asSection_fst, exactOrderLocusAux_val_smul_asSection_fst,
+      rw [ExactOrderLocus.val_smul_asSection_fst, ExactOrderLocus.val_smul_asSection_fst,
         ← Category.assoc]
       exact congrArg (· ≫ E.mulByHom (((a : ℕ) : ℤ) + 1)) hcomp
-    have key := exactOrderLocusAux_ker_comap_eq
-      (subgroupLocusAux_val E (D.ideal.subschemeι ≫ E.π)
+    have key := ExactOrderLocus.ker_comap_eq
+      (SubgroupLocus.val E (D.ideal.subschemeι ≫ E.π)
         ((((a : ℕ) : ℤ) + 1) • Point.asSection E (D.ideal.subschemeι ≫ E.π) (E.divisorTautPoint D)))
-      (subgroupLocusAux_val E t ((((a : ℕ) : ℤ) + 1) • Point.asSection E t P))
-      (exactOrderLocusAux_val_isClosedImmersion E _ _)
-      (exactOrderLocusAux_val_isClosedImmersion E t _)
-      (subgroupLocusAux_val_snd E _ _)
-      (subgroupLocusAux_val_snd E t _)
+      (SubgroupLocus.val E t ((((a : ℕ) : ℤ) + 1) • Point.asSection E t P))
+      (ExactOrderLocus.val_isClosedImmersion E _ _)
+      (ExactOrderLocus.val_isClosedImmersion E t _)
+      (SubgroupLocus.val_snd E _ _)
+      (SubgroupLocus.val_snd E t _)
       hm_a
-      (fullLevelLocusAux_theta hct) (𝟙 (pullback E.π t))
-      (fullLevelLocusAux_theta_snd hct) (Category.id_comp _)
-      (by rw [Category.id_comp, fullLevelLocusAux_theta_fst])
+      (FullLevelLocus.theta hct) (𝟙 (pullback E.π t))
+      (FullLevelLocus.theta_snd hct) (Category.id_comp _)
+      (by rw [Category.id_comp, FullLevelLocus.theta_fst])
     rw [Scheme.IdealSheafData.comap_id] at key
     exact key
   refine Iff.trans (Iff.of_eq (congrArg₂ Eq hP1 hP2)) ?_
@@ -1836,23 +1836,23 @@ whole equation elaborates at the raw iterated-pullback spelling). -/
 private theorem generatorSpace_baseChange_val_comp {T Q : Scheme.{u}} (t : T ⟶ S)
     (q : Q ⟶ T) (P : E.Point (q ≫ t)) (P' : (E.baseChange t).Point q)
     (hPP' : P'.1 ≫ pullback.fst E.π t = P.1) (m : ℤ) :
-    subgroupLocusAux_val E (q ≫ t) (m • EllipticCurve.Point.asSection E (q ≫ t) P) ≫
+    SubgroupLocus.val E (q ≫ t) (m • EllipticCurve.Point.asSection E (q ≫ t) P) ≫
         (pullbackLeftPullbackSndIso E.π t q).inv =
-      subgroupLocusAux_val (E.baseChange t) q
+      SubgroupLocus.val (E.baseChange t) q
         (m • EllipticCurve.Point.asSection (E.baseChange t) q P') := by
   have hsmul' : @CategoryStruct.comp Scheme _ Q (pullback (pullback.snd E.π t) q)
         (pullback E.π t)
-        (subgroupLocusAux_val (E.baseChange t) q
+        (SubgroupLocus.val (E.baseChange t) q
           (m • EllipticCurve.Point.asSection (E.baseChange t) q P'))
         (pullback.fst (pullback.snd E.π t) q) =
       (P'.1 : Q ⟶ pullback E.π t) ≫ (E.baseChange t).mulByHom m :=
-    exactOrderLocusAux_val_smul_asSection_fst (E.baseChange t) q m P'
+    ExactOrderLocus.val_smul_asSection_fst (E.baseChange t) q m P'
   have hval' : @CategoryStruct.comp Scheme _ Q (pullback (pullback.snd E.π t) q) Q
-        (subgroupLocusAux_val (E.baseChange t) q
+        (SubgroupLocus.val (E.baseChange t) q
           (m • EllipticCurve.Point.asSection (E.baseChange t) q P'))
         (pullback.snd (pullback.snd E.π t) q) =
       𝟙 Q :=
-    subgroupLocusAux_val_snd (E.baseChange t) q _
+    SubgroupLocus.val_snd (E.baseChange t) q _
   have hmul' : @CategoryStruct.comp Scheme _ (pullback E.π t) (pullback E.π t) E.E
       ((E.baseChange t).mulByHom m) (pullback.fst E.π t) =
       pullback.fst E.π t ≫ E.mulByHom m :=
@@ -1879,13 +1879,13 @@ private theorem generatorSpace_baseChange_val_comp {T Q : Scheme.{u}} (t : T ⟶
     rw [Category.assoc, hsmul']
     apply pullback.hom_ext
     · rw [Category.assoc, Category.assoc, pullbackLeftPullbackSndIso_inv_fst,
-        exactOrderLocusAux_val_smul_asSection_fst E (q ≫ t) m P]
+        ExactOrderLocus.val_smul_asSection_fst E (q ≫ t) m P]
       exact hkey₁.symm
     · rw [Category.assoc, Category.assoc, pullbackLeftPullbackSndIso_inv_fst_snd,
-        ← Category.assoc, subgroupLocusAux_val_snd, Category.id_comp]
+        ← Category.assoc, SubgroupLocus.val_snd, Category.id_comp]
       exact hkey₂.symm
   · rw [Category.assoc, pullbackLeftPullbackSndIso_inv_snd_snd, hval',
-      subgroupLocusAux_val_snd]
+      SubgroupLocus.val_snd]
 
 
 /-- Kernels of closed immersions transport along a precomposed inverse isomorphism, in
@@ -1913,7 +1913,7 @@ private theorem generatorSpace_baseChange_orderDivisor_ideal {T Q : Scheme.{u}} 
           (EllipticCurve.Point.asSection E (q ≫ t) P) N).ideal
         (pullbackLeftPullbackSndIso E.π t q).hom := by
   simp only [EllipticCurve.Section.orderDivisor]
-  rw [fullLevelLocusAux_sectionsDivisor_ideal, fullLevelLocusAux_sectionsDivisor_ideal]
+  rw [FullLevelLocus.sectionsDivisor_ideal, FullLevelLocus.sectionsDivisor_ideal]
   have hcp : @Scheme.IdealSheafData.comap (pullback (pullback.snd E.π t) q)
       (pullback E.π (q ≫ t))
       ((∏ i : Fin N, Scheme.Hom.ker
@@ -1927,12 +1927,12 @@ private theorem generatorSpace_baseChange_orderDivisor_ideal {T Q : Scheme.{u}} 
     Scheme.IdealSheafData.comap_prod _ _ _
   rw [hcp]
   refine Finset.prod_congr rfl fun a _ => ?_
-  haveI := exactOrderLocusAux_val_isClosedImmersion E (q ≫ t)
+  haveI := ExactOrderLocus.val_isClosedImmersion E (q ≫ t)
     ((((a : ℕ) : ℤ) + 1) • EllipticCurve.Point.asSection E (q ≫ t) P)
   have h1 := congrArg Scheme.Hom.ker
     (generatorSpace_baseChange_val_comp E t q P P' hPP' (((a : ℕ) : ℤ) + 1))
   have h2 := generatorSpace_baseChange_ker_inv
-    (subgroupLocusAux_val E (q ≫ t)
+    (SubgroupLocus.val E (q ≫ t)
       ((((a : ℕ) : ℤ) + 1) • EllipticCurve.Point.asSection E (q ≫ t) P))
     (pullbackLeftPullbackSndIso E.π t q)
   exact h1.symm.trans h2
@@ -2489,7 +2489,7 @@ theorem orderDivisor_ideal_eq_prod_primeOrderDivisor (N : ℕ) [NeZero N] (P₀ 
     Nat.mem_divisors.mpr ⟨Nat.div_dvd_of_dvd (Nat.gcd_dvd_right x.val N), hN.ne'⟩
   -- Step 1: the LHS is the product of `K` over all residues.
   have hLHS : (P₀.orderDivisor E N).ideal = ∏ x : ZMod N, K x := by
-    rw [Section.orderDivisor, fullLevelLocusAux_sectionsDivisor_ideal]
+    rw [Section.orderDivisor, FullLevelLocus.sectionsDivisor_ideal]
     refine Fintype.prod_bijective (fun a : Fin N => (((a : ℕ) + 1 : ℕ) : ZMod N)) ?_ _ _
       fun a => ?_
     · rw [Fintype.bijective_iff_injective_and_card]
@@ -2516,7 +2516,7 @@ theorem orderDivisor_ideal_eq_prod_primeOrderDivisor (N : ℕ) [NeZero N] (P₀ 
     · refine Finset.prod_congr rfl fun d _ => ?_
       letI : NeZero d.1 := ⟨(Nat.pos_of_mem_divisors d.2).ne'⟩
       show (E.primeOrderDivisor ((((N / d.1 : ℕ) : ℤ)) • P₀) d.1).ideal = _
-      rw [primeOrderDivisor, fullLevelLocusAux_sectionsDivisor_ideal,
+      rw [primeOrderDivisor, FullLevelLocus.sectionsDivisor_ideal,
         Equiv.prod_comp (Fintype.equivFinOfCardEq
           (ZMod.card_units_eq_totient d.1)).symm
           (fun u : (ZMod d.1)ˣ =>
