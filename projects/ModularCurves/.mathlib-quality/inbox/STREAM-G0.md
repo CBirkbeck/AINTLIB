@@ -185,3 +185,5 @@ W7-MICRO (delta): do NOT rw P.2 inside desc-stalk (dependent point!). Instead: h
 ```
 (Opus cleared the shared repo-root beastmode_active trigger to conclude the completed BETA lane;
  ALPHA/g5 continues — re-establish the trigger with the focus above on the next ALPHA turn.)
+
+- [2026-07-15, coordinator, v10.250] ★★★ BB-QF DONE (ratified). RE-TASKED (fleet converged on keystone): finish the E[N]-scheme substrate the keystone consumes — BB-FLAT mulByHom_flat (Torsion:150, assemble from your banked turnkey fibre-leg substrate) + BB-DEG mulByHom_finrank=N² (Torsion:155, scheme-level; cross-link KM endDeg_mulBy, same N², do not re-derive). Both feed OMEGA E[N]-classification normalization. Full detail: board v10.250 + STREAM-G0 opener in WORK-ORDERS.md.
