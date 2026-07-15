@@ -482,3 +482,10 @@ Completed subdependency (2026-07-14): proved `Scheme.Modules.restrictFunctor_pre
 Restriction along an open immersion therefore carries the chart Cech product and equalizer to
 their local counterparts; the proof is option-free and its axiom audit is exactly `propext`,
 `Classical.choice`, and `Quot.sound`.
+
+Completed subdependency (2026-07-14): defined
+`Scheme.Modules.restrictPushforwardUnitIsoOfIsPullback`. For a pullback square whose vertical
+maps are open immersions, restriction of the pushforward of the structure sheaf is canonically
+the pushforward of the pullback structure sheaf. This gives the chart-overlap factor
+identification needed by the local Cech equalizer; the construction is option-free and its axiom
+audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.
