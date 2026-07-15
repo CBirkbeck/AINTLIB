@@ -20843,3 +20843,36 @@ NOT re-derived).
 **De-confliction note:** `EllipticCurve.mulByHom_surjective` (KM's, field-level, instance-conditioned)
 vs `modelMulByHom_surjective` (G0's, unconditional) now coexist — flag to the cleanup fleet for a
 dedup pass once both streams land.
+
+### v10.253-GH — ★ endDeg_comp DISCHARGED (isogeny form, fully clean) + the finrank composition ENGINE (STREAM-GH)
+Commits 2073415bb/d723e5e96-4f1d48bf7/7b4bbaf8d (all pushed). Job-(2) tranche, first wave:
+- **`endDeg_eq_one_of_isIso` now FULLY AXIOM-CLEAN** — re-proven directly from
+  `Scheme.Hom.finrank_eq_one_of_isIso` (was riding the sorried `endDeg_comp` — the
+  deg-of-automorphism bridge no longer waits for multiplicativity).
+- **NEW ENGINE `ForMathlib/FinrankTower.lean` + `ForMathlib/FinrankComp.lean`, all axiom-clean:**
+  `finrank_tower_of_flat` (finrank R A = finrank R B · finrank B A, finite flat over domains — the
+  Frac-sandwich via `Algebra.IsAlgebraic.finrank_of_isFractionRing` + field tower law) +
+  `FaithfulSMul.of_flat_of_nontrivial`; scheme level: **`Scheme.Hom.finrank_comp`**
+  ((f≫g).finrank z = f.finrank y · g.finrank z, finite flat surjective lfp over INTEGRAL schemes;
+  morphismRestrict-to-chart + generic-point evaluation + Γ-tower), plus
+  `finrank_comp_right_of_isIso`, `finrank_morphismRestrict` (Y1-parity), 
+  `finrank_eq_module_finrank_of_isAffine`, `finrank_eq_finrank` (constancy). Mathlib-shaped.
+- **`endDeg_comp_of_isIntegral` FULLY AXIOM-CLEAN** (EndomorphismDegree.lean) — KM 2.6.1
+  multiplicativity in the honest isogeny form ([Flat/IsFinite δ.left] instance-args = the tracked
+  fibre semantics, KernelBound-style) + `endDeg_comp_mulBy_of_isIntegral` (deg(g∘[n]) = n²·deg g,
+  clean mod the endDeg_mulBy boxes) + `one_le_endDeg_of_pointed` (T-G3e positivity half, clean) +
+  `endo_locallyOfFinitePresentation`/`endo_surjective` (clean; any endo is lfp by cancellation;
+  finite flat endo of integral E is surjective by clopen-image).
+- **Gate-ledger for the 6 pins:** :endDeg_comp = isogeny case DONE, residual = the zero-or-isogeny
+  DICHOTOMY (pointed endo = [0] or finite-flat — KM 2.4.x; the SAME gap is the whole remainder of
+  eq_zero_of_endDeg_eq_zero, whose positive half is now proven). :endDeg_comp_mulBy = same shape.
+  :endTrace_comp_mulBy + :endTrace_sq_le = genuinely quadratic-form-gated (KM's endDual_comp_self
+  char-poly — correctly parked on KM's deep leaf per v10.252 timing note).
+  :exists_eq_one_add_mulBy_comp_of_fixesTorsion = next recon (G0 SubgroupQuotient seam).
+- **CROSS-SEAM FLAGS:** (1) KM — `FinrankComp.finrank_eq_module_finrank_of_isAffine` +
+  `finrank_comp` compose with your `finrank_SpecMap_eq_functionField_finrank`: the BB-DEG
+  scheme-level finrank [N] can now be read at ONE convenient point/chart of an integral model —
+  may shorten the L4-iii→BB-DEG landing. (2) The `_of_isIntegral` forms need **E/k ⟹
+  IsIntegral E.E** at the k̄-consumers (smooth+connected over field ⟹ integral; projModel-side
+  integrality EXISTS in GroupLawAxioms — the abstract-E transport is model-comparison-adjacent,
+  i.e. your/G0's substrate seam). Flagged, not grabbed. (STREAM-GH)
