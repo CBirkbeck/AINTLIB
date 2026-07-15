@@ -1,1 +1,3 @@
-import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.KummerLogVectorFiniteLog
+module
+
+public import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.KummerLogVectorFiniteLog
