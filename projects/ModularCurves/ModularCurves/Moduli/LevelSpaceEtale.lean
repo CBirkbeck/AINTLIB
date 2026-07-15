@@ -135,6 +135,53 @@ theorem torsionPair_baseChange_isPullback :
         simpa only [Category.assoc, pullback.lift_fst_assoc, pullback.lift_snd_assoc,
           IsPullback.lift_fst, IsPullback.lift_snd, ← pullback.condition] using hm2'
 
+/-- **(β2-L)** The base change of the level space along `p : T ⟶ S` is the pullback of its
+closed immersion along the ambient comparison map:
+`U_{Γ(N)} ×_S T ≅ U_{Γ(N)} ×_{E[N] ×_S E[N]} (E_T[N] ×_T E_T[N])`. Composite of the
+pasting cancellation `pullbackRightPullbackFstIso` with the leg-transport along
+`torsionPair_baseChange_isPullback.isoPullback`. -/
+noncomputable def levelSpacePullbackIso :
+    pullback (levelSpaceΓι E N ≫ pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) p
+      ≅ pullback (levelSpaceΓι E N) (torsionPairBaseChangeHom E p N) :=
+  (pullbackRightPullbackFstIso
+      (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) p (levelSpaceΓι E N)).symm
+    ≪≫ asIso (pullback.map _ _ _ _ (𝟙 _)
+        (torsionPair_baseChange_isPullback E p N).isoPullback.inv (𝟙 _)
+        (by simp)
+        (by
+          rw [Category.comp_id]
+          exact ((torsionPair_baseChange_isPullback E p N).isoPullback_inv_fst).symm))
+
+/-- The `L`-projection triangle of `levelSpacePullbackIso`. -/
+@[reassoc]
+theorem levelSpacePullbackIso_hom_fst :
+    (levelSpacePullbackIso E p N).hom ≫
+        pullback.fst (levelSpaceΓι E N) (torsionPairBaseChangeHom E p N)
+      = pullback.fst
+          (levelSpaceΓι E N ≫ pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) p := by
+  rw [levelSpacePullbackIso]
+  simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc]
+  rw [pullback.lift_fst, Category.comp_id, pullbackRightPullbackFstIso_inv_fst]
+
+/-- The `T`-structure triangle of `levelSpacePullbackIso`: the second projection of the
+pulled-back subscheme, followed by the primed ambient structure map, is the base-changed
+structure map. -/
+@[reassoc]
+theorem levelSpacePullbackIso_hom_snd_struct :
+    (levelSpacePullbackIso E p N).hom ≫
+        pullback.snd (levelSpaceΓι E N) (torsionPairBaseChangeHom E p N) ≫
+        pullback.fst ((E.baseChange p).torsionπ N) ((E.baseChange p).torsionπ N) ≫
+        (E.baseChange p).torsionπ N
+      = pullback.snd
+          (levelSpaceΓι E N ≫ pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) p := by
+  rw [levelSpacePullbackIso]
+  simp only [Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc]
+  rw [← Category.assoc (pullback.map _ _ _ _ _ _ _ _ _), pullback.lift_snd]
+  rw [Category.assoc, (torsionPair_baseChange_isPullback E p N).isoPullback_inv_snd]
+  rw [Iso.inv_comp_eq]
+  exact (pullbackRightPullbackFstIso_hom_snd
+    (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) p (levelSpaceΓι E N)).symm
+
 end PairBaseChange
 
 end ModularCurves
