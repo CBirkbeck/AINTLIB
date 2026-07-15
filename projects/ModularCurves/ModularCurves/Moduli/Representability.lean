@@ -126,8 +126,10 @@ claim (dischargeable for e.g. `A = ℂ` by counting); the equivalence is now PIN
 the canonical evaluation map `φ ↦ (φ A, φ B)` — naturality in `A` follows from the
 pin.
 
-Proven register item: no direct code consumer project-wide — the Y₁ atlas uses the
-concrete `TateAtlas.ringOverAlgLift` (`ModularCurve/YOneAtlasClassify.lean`) in practice. -/
+Proven register item: this is the **absolute (ℤ-base)** form of Loeffler Cor 3.3.5,
+kept as the register anchor, and has no direct code consumer project-wide. The Y₁ tower
+instead uses the `R`-relative analogue `TateAtlas.ringOverLift` (and its `→ₐ[R]` form
+`TateAtlas.ringOverAlgLift`) in `ModularCurve/YOneAtlasClassify.lean`. -/
 theorem tateRing_homEquiv (A : Type u) [CommRing A] :
     ∃ e : (tateRing →+* A) ≃
         { c : A × A //
