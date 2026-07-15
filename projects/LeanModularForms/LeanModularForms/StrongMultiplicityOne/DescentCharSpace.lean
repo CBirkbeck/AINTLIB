@@ -366,7 +366,7 @@ private lemma delta_slash_sum_coeff_zero
     hΔ_form_vanish (p * m) (Nat.coprime_mul_iff_left.mpr ⟨hpl', hm_cop⟩)
   obtain ⟨g_q_fam, F_q_fam, χ_F_fam, hg_q_char, hF_q_char, hF_eq_g,
       hχ_F_fam_rel, hg_q_qexp⟩ :=
-    miyake_4_6_7_squarefree_decomp_with_lower_level χ_M_unit Δ_form hΔ_form_χ l'
+    squarefree_decomp_with_lower_level χ_M_unit Δ_form hΔ_form_χ l'
       hl1_gt hl'_sqfree hΔ_form_vanish
   haveI hLl2_NeZero : NeZero ((l' * N) * l' ^ 2) :=
     ⟨Nat.mul_ne_zero (NeZero.ne (l' * N)) (pow_ne_zero 2 (NeZero.ne l'))⟩
