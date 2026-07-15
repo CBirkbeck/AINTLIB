@@ -323,6 +323,49 @@ theorem mulByInt_pullbackAlgHom_x_gen {K : Type u} [Field K] (W : WeierstrassCur
   rw [HasseWeil.mulByInt_coordHom, AdjoinRoot.lift_mk]
   simp [Polynomial.eval₂_C, HasseWeil.mulByInt_xHom, HasseWeil.mulByInt_x]
 
+/-- **(L4-v enabler: generator extensionality for `K(E)`)** Two `K`-algebra homomorphisms out of
+the function field agree iff they agree on the generic coordinates `x_gen`, `y_gen`: `K(E)` is the
+fraction field of the coordinate ring (`IsLocalization.ringHom_ext`), which is
+`AdjoinRoot W.polynomial` over `K[X]` (`AdjoinRoot.ringHom_ext` + `Polynomial.ringHom_ext`, with
+the `C`-scalars fixed by `K`-algebra-hood). This is the final L4-v step's engine: once the L4-iii
+comparison shows `functionFieldMap [N]` and `mulByInt_pullbackAlgHom` agree on `x_gen`/`y_gen`
+(anchors: `functionFieldMap_germToFunctionField` and `mulByInt_pullbackAlgHom_x_gen`), they are
+equal as field maps. Generally reusable: any two isogeny pullbacks are compared on `x, y` alone. -/
+theorem functionField_algHom_ext {K : Type u} [Field K] (W : WeierstrassCurve K)
+    [W.toAffine.IsElliptic] {L : Type u} [CommRing L] [Algebra K L]
+    (φ ψ : W.toAffine.FunctionField →ₐ[K] L)
+    (hx : φ (HasseWeil.x_gen W) = ψ (HasseWeil.x_gen W))
+    (hy : φ (HasseWeil.y_gen W) = ψ (HasseWeil.y_gen W)) : φ = ψ := by
+  apply AlgHom.coe_ringHom_injective
+  apply IsLocalization.ringHom_ext (nonZeroDivisors W.toAffine.CoordinateRing)
+  apply AdjoinRoot.ringHom_ext
+  · -- agreement on the `K[X]`-part: ring homs out of `K[X]` agree on `C`-scalars and `X`
+    apply Polynomial.ringHom_ext
+    · intro a
+      have hsc : (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField)
+          ((AdjoinRoot.of W.toAffine.polynomial) (Polynomial.C a))
+          = algebraMap K W.toAffine.FunctionField a := by
+        rw [← AdjoinRoot.algebraMap_eq, ← IsScalarTower.algebraMap_apply,
+          show (Polynomial.C a : Polynomial K) = algebraMap K (Polynomial K) a from rfl,
+          ← IsScalarTower.algebraMap_apply]
+      show φ ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField)
+          ((AdjoinRoot.of W.toAffine.polynomial) (Polynomial.C a)))
+        = ψ ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField)
+          ((AdjoinRoot.of W.toAffine.polynomial) (Polynomial.C a)))
+      rw [hsc, AlgHom.commutes, AlgHom.commutes]
+    · show φ ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField)
+          ((AdjoinRoot.of W.toAffine.polynomial) Polynomial.X))
+        = ψ ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField)
+          ((AdjoinRoot.of W.toAffine.polynomial) Polynomial.X))
+      rw [show (AdjoinRoot.of W.toAffine.polynomial) Polynomial.X
+          = algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X from rfl]
+      exact hx
+  · show φ ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField)
+        (AdjoinRoot.root W.toAffine.polynomial))
+      = ψ ((algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField)
+        (AdjoinRoot.root W.toAffine.polynomial))
+    exact hy
+
 /-- **(K4 crux — the HasseWeil coupling)** Over a field `K`, the scheme-theoretic fibre rank of the
 model `[N]` equals the degree of HasseWeil's multiplication-by-`N` isogeny `mulByInt W.toAffine N`
 (the function-field extension degree `[K(E) : [N]* K(E)]`).
