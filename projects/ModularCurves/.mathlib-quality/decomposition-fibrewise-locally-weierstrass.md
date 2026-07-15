@@ -489,3 +489,9 @@ maps are open immersions, restriction of the pushforward of the structure sheaf 
 the pushforward of the pullback structure sheaf. This gives the chart-overlap factor
 identification needed by the local Cech equalizer; the construction is option-free and its axiom
 audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.
+
+Completed subdependency (2026-07-14): defined
+`AffineIntersectionUnitCocycle.chartExtensionRestrictIso`. Restricting the `i`th chart-extension
+to `U_k` is now canonically identified with the pushforward of `O_{V(i,k)}` along the right-hand
+overlap leg. This is the factorwise local description of the Cech product; it is option-free and
+its axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.

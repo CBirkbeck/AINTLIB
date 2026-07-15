@@ -101,6 +101,25 @@ private noncomputable def AffineIntersectionUnitCocycle.chartExtension
   let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
   (pushforward (D.ι i)).obj (unitObj (D.U i))
 
+/-- On a chart, a chart-extension factor restricts to the pushforward of the
+structure sheaf from the corresponding ordered overlap. -/
+noncomputable def AffineIntersectionUnitCocycle.chartExtensionRestrictIso
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (k i : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    (@restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)).obj
+        (c.chartExtension hopen hpush i) ≅
+      (pushforward (D.t i k ≫ D.f k i)).obj (unitObj (D.V (i, k))) := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  letI : IsOpenImmersion (D.ι k) := D.ι_isOpenImmersion k
+  letI : IsOpenImmersion (D.f i k) := D.f_open i k
+  exact restrictPushforwardUnitIsoOfIsPullback
+    (D.ι i) (D.t i k ≫ D.f k i) (D.f i k) (D.ι k)
+    (IsPullback.of_isLimit (D.vPullbackConeIsLimit i k)).flip
+
 private noncomputable def AffineIntersectionUnitCocycle.overlapExtension
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
     (_c : AffineIntersectionUnitCocycle F)
