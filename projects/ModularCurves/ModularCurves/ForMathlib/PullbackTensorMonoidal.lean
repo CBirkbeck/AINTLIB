@@ -288,6 +288,37 @@ instance (f : Y ⟶ X) [IsOpenImmersion f] (U : (Y.Opens)ᵒᵖ) :
     IsIso ((restrictRingHom f).app U) :=
   inferInstanceAs (IsIso ((forget₂ CommRingCat RingCat).map ((f.appIso U.unop).inv)))
 
+/-- The `Y`-side sheafification inverts the restricted `X`-side sheafification unit of
+`M.val ⊗ N.val`: the unit is locally bijective, and restriction along the open immersion `f`
+preserves local injectivity/surjectivity (`isLocally…_whiskerLeft_opensFunctor`). -/
+theorem sheafificationW_pushforward_unit_tensor (f : Y ⟶ X) [IsOpenImmersion f]
+    (M N : X.Modules) :
+    PresheafOfModules.sheafificationW (𝟙 Y.ringCatSheaf.obj)
+      ((PresheafOfModules.pushforward (restrictRingHom f)).map
+        ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app
+          (M.val ⊗ N.val))) := by
+  rw [PresheafOfModules.sheafificationW_iff_isLocallyBijective]
+  haveI hi : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥X)
+      ((PresheafOfModules.toPresheaf _).map
+        ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app
+          (M.val ⊗ N.val))) := by
+    rw [PresheafOfModules.toPresheaf_map_sheafificationAdjunction_unit_app]
+    exact (GrothendieckTopology.W_toSheafify _ _).isLocallyInjective
+  haveI hs : Presheaf.IsLocallySurjective (Opens.grothendieckTopology ↥X)
+      ((PresheafOfModules.toPresheaf _).map
+        ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app
+          (M.val ⊗ N.val))) := by
+    rw [PresheafOfModules.toPresheaf_map_sheafificationAdjunction_unit_app]
+    exact (GrothendieckTopology.W_toSheafify _ _).isLocallySurjective
+  exact ⟨isLocallyInjective_whiskerLeft_opensFunctor f
+      ((PresheafOfModules.toPresheaf _).map
+        ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app
+          (M.val ⊗ N.val))),
+    isLocallySurjective_whiskerLeft_opensFunctor f
+      ((PresheafOfModules.toPresheaf _).map
+        ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app
+          (M.val ⊗ N.val)))⟩
+
 /-- **[PIC-P1b-MONO], leaf ι-MAIN.** Pullback along an *open immersion* commutes with the
 sheafified tensor: `f^*(M ⊗ N) ≅ f^*M ⊗ f^*N`. Route: identify `f^*` with sectionwise
 restriction (`restrictFunctorIsoPullback`), un-sheafify (`sheafifyValIso`), collapse the
@@ -299,31 +330,7 @@ theorem nonempty_pullback_tensorObj_of_isOpenImmersion (f : Y ⟶ X) [IsOpenImme
     (M N : X.Modules) :
     Nonempty ((Modules.pullback f).obj (tensorObj M N) ≅
       tensorObj ((Modules.pullback f).obj M) ((Modules.pullback f).obj N)) := by
-  have hmem : PresheafOfModules.sheafificationW (𝟙 Y.ringCatSheaf.obj)
-      ((PresheafOfModules.pushforward (restrictRingHom f)).map
-        ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app
-          (M.val ⊗ N.val))) := by
-    rw [PresheafOfModules.sheafificationW_iff_isLocallyBijective]
-    haveI hi : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥X)
-        ((PresheafOfModules.toPresheaf _).map
-          ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app
-            (M.val ⊗ N.val))) := by
-      rw [PresheafOfModules.toPresheaf_map_sheafificationAdjunction_unit_app]
-      exact (GrothendieckTopology.W_toSheafify _ _).isLocallyInjective
-    haveI hs : Presheaf.IsLocallySurjective (Opens.grothendieckTopology ↥X)
-        ((PresheafOfModules.toPresheaf _).map
-          ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app
-            (M.val ⊗ N.val))) := by
-      rw [PresheafOfModules.toPresheaf_map_sheafificationAdjunction_unit_app]
-      exact (GrothendieckTopology.W_toSheafify _ _).isLocallySurjective
-    exact ⟨isLocallyInjective_whiskerLeft_opensFunctor f
-        ((PresheafOfModules.toPresheaf _).map
-          ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app
-            (M.val ⊗ N.val))),
-      isLocallySurjective_whiskerLeft_opensFunctor f
-        ((PresheafOfModules.toPresheaf _).map
-          ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app
-            (M.val ⊗ N.val)))⟩
+  have hmem := sheafificationW_pushforward_unit_tensor f M N
   rw [PresheafOfModules.sheafificationW_iff] at hmem
   have e1 : (Modules.pullback f).obj (tensorObj M N) ≅
       (restrictFunctor f).obj (tensorObj M N) :=
