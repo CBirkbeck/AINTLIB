@@ -101,7 +101,7 @@ theorem algebraMap_X_sub_C_mem_maximalIdealAt (P : C.SmoothPoint) :
   have h_eq : algebraMap (Polynomial F) C.CoordinateRing
       (Polynomial.X - Polynomial.C P.x) =
     WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine P.x := by
-    unfold WeierstrassCurve.Affine.CoordinateRing.XClass
+    simp only [WeierstrassCurve.Affine.CoordinateRing.XClass]
     change (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine ∘
         Polynomial.C) (Polynomial.X - Polynomial.C P.x) = _
     simp [WeierstrassCurve.Affine.CoordinateRing.mk, Polynomial.C_sub,
@@ -323,7 +323,7 @@ private lemma mk_polynomial_expand_aux (W : WeierstrassCurve.Affine F) :
           Polynomial.C (Polynomial.C W.a₄) * Polynomial.C Polynomial.X +
           Polynomial.C (Polynomial.C W.a₆)) =
       W.polynomial := by
-  unfold WeierstrassCurve.Affine.polynomial
+  simp only [WeierstrassCurve.Affine.polynomial]
   simp only [Polynomial.C_add, Polynomial.C_mul, Polynomial.C_pow]
   ring1
 
@@ -423,7 +423,7 @@ theorem exists_smoothPoint_of_isMaximal_of_surjective [C.toAffine.IsElliptic]
   refine ⟨?_, ?_⟩
   · change WeierstrassCurve.Affine.CoordinateRing.XClass C.toAffine a ∈ M
     rw [← Ideal.Quotient.eq_zero_iff_mem]
-    unfold WeierstrassCurve.Affine.CoordinateRing.XClass
+    simp only [WeierstrassCurve.Affine.CoordinateRing.XClass]
     have h_sub_mk : WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
         (Polynomial.C (Polynomial.X - Polynomial.C a)) =
       WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
@@ -436,7 +436,7 @@ theorem exists_smoothPoint_of_isMaximal_of_surjective [C.toAffine.IsElliptic]
   · change WeierstrassCurve.Affine.CoordinateRing.YClass C.toAffine
       (Polynomial.C b) ∈ M
     rw [← Ideal.Quotient.eq_zero_iff_mem]
-    unfold WeierstrassCurve.Affine.CoordinateRing.YClass
+    simp only [WeierstrassCurve.Affine.CoordinateRing.YClass]
     have h_sub_mk : WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine
         (Y - Polynomial.C (Polynomial.C b)) =
       WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y -
@@ -469,7 +469,7 @@ theorem maximalIdealAt_injective :
       (Polynomial.X - Polynomial.C P.x) • (1 : C.CoordinateRing) +
       (0 : Polynomial F) •
         WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y := by
-    unfold WeierstrassCurve.Affine.CoordinateRing.XClass
+    simp only [WeierstrassCurve.Affine.CoordinateRing.XClass]
     rw [zero_smul, add_zero, Algebra.smul_def, mul_one]
     rfl
   rw [h_basis_x, C.mem_maximalIdealAt_iff_eval_zero Q
@@ -487,7 +487,7 @@ theorem maximalIdealAt_injective :
       (- Polynomial.C P.y) • (1 : C.CoordinateRing) +
       (1 : Polynomial F) •
         WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y := by
-    unfold WeierstrassCurve.Affine.CoordinateRing.YClass
+    simp only [WeierstrassCurve.Affine.CoordinateRing.YClass]
     rw [one_smul, Algebra.smul_def, mul_one,
       show (algebraMap (Polynomial F) C.CoordinateRing (-Polynomial.C P.y)) +
           WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine Y =
@@ -1415,7 +1415,7 @@ theorem count_preservation_localization
       Associates.factors_zero
     rw [h_top_loc, h_top_A]
     -- both sides are now `count _ ⊤`, which is `0` by the `Associates.count` definition
-    unfold Associates.count
+    simp only [Associates.count]
     split_ifs <;> rfl
   · have hI : Ideal.span {u} ≠ ⊥ :=
       mt Ideal.span_singleton_eq_bot.mp hu
@@ -1501,7 +1501,7 @@ theorem ord_P_algebraMap_eq_count
   have h_pv_ne :
       C.pointValuation P (algebraMap C.CoordinateRing C.FunctionField u) ≠ 0 :=
     (C.pointValuation P).ne_zero_iff.mpr hu_FC
-  unfold SmoothPlaneCurve.ord_P
+  simp only [SmoothPlaneCurve.ord_P]
   rw [dif_neg h_pv_ne]
   have h_pv_eq := C.pointValuation_algebraMap_eq_exp_count P hu
   have h_unz :
@@ -2086,7 +2086,7 @@ theorem normAsRatFunc_algebraMap_eq
     [IsIntegrallyClosed C.CoordinateRing] (u : C.CoordinateRing) :
     C.normAsRatFunc (algebraMap C.CoordinateRing C.FunctionField u) =
       algebraMap (Polynomial F) (RatFunc F) (Algebra.norm (Polynomial F) u) := by
-  unfold SmoothPlaneCurve.normAsRatFunc SmoothPlaneCurve.fieldNorm
+  simp only [SmoothPlaneCurve.normAsRatFunc, SmoothPlaneCurve.fieldNorm]
   rw [show Algebra.norm (FractionRing (Polynomial F))
       (algebraMap C.CoordinateRing C.FunctionField u) =
       algebraMap (Polynomial F) (FractionRing (Polynomial F))
