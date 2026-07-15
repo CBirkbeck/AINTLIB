@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Point
 import Mathlib.LinearAlgebra.Dimension.Finrank
 import Mathlib.LinearAlgebra.Basis.VectorSpace
@@ -79,7 +84,7 @@ set_option maxHeartbeats 800000 in
     Follows from the tower law for field extensions. -/
 theorem comp_degree (ψ : PullbackIsogeny F W₂ W₃) (φ : PullbackIsogeny F W₁ W₂) :
     (ψ.comp φ).degree = φ.degree * ψ.degree := by
-  unfold degree
+  simp only [degree]
   letI inst₁ : Algebra W₂.FunctionField W₁.FunctionField := φ.toAlgebra
   letI inst₂ : Algebra W₃.FunctionField W₂.FunctionField := ψ.toAlgebra
   letI inst₃ : Algebra W₃.FunctionField W₁.FunctionField := (ψ.comp φ).toAlgebra
