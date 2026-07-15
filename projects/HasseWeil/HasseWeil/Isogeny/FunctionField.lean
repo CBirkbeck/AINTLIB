@@ -66,8 +66,6 @@ noncomputable def toAlgebra (φ : PullbackIsogeny F W₁ W₂) :
 noncomputable def degree (φ : PullbackIsogeny F W₁ W₂) : ℕ :=
   @Module.finrank W₂.FunctionField W₁.FunctionField _ _ φ.toAlgebra.toModule
 
-set_option maxHeartbeats 400000 in
--- AlgHom.comp on FunctionField needs extra heartbeats for typeclass synthesis.
 /-- Composition of isogenies corresponds to composition of pullbacks. -/
 noncomputable def comp (ψ : PullbackIsogeny F W₂ W₃) (φ : PullbackIsogeny F W₁ W₂) :
     PullbackIsogeny F W₁ W₃ where
@@ -78,8 +76,6 @@ theorem comp_algebraMap_eq (ψ : PullbackIsogeny F W₂ W₃) (φ : PullbackIsog
     (x : W₃.FunctionField) :
     (ψ.comp φ).pullback x = φ.pullback (ψ.pullback x) := rfl
 
-set_option maxHeartbeats 800000 in
--- Degree multiplicativity needs extra heartbeats for the tower law with FunctionField.
 /-- **Degree multiplicativity**: `deg(ψ ∘ φ) = deg(φ) · deg(ψ)`.
     Follows from the tower law for field extensions. -/
 theorem comp_degree (ψ : PullbackIsogeny F W₂ W₃) (φ : PullbackIsogeny F W₁ W₂) :
