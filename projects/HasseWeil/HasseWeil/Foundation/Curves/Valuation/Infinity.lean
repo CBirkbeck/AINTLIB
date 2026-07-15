@@ -91,7 +91,7 @@ noncomputable def ordAtInfty (f : C.FunctionField) : WithTop ℤ :=
 
 theorem ordAtInfty_eq_top_iff (f : C.FunctionField) :
     C.ordAtInfty f = ⊤ ↔ f = 0 := by
-  unfold ordAtInfty
+  simp only [ordAtInfty]
   split_ifs with h
   · exact ⟨fun _ ↦ h, fun _ ↦ rfl⟩
   · simp [h]
@@ -282,7 +282,7 @@ private noncomputable def weierstrassCubic : Polynomial F :=
     Polynomial.C C.toAffine.a₄ * Polynomial.X + Polynomial.C C.toAffine.a₆
 
 private theorem weierstrassCubic_natDegree : C.weierstrassCubic.natDegree = 3 := by
-  unfold weierstrassCubic
+  simp only [weierstrassCubic]
   compute_degree!
 
 private theorem weierstrassCubic_ne_zero : C.weierstrassCubic ≠ 0 := by
@@ -300,7 +300,7 @@ private theorem algebraNorm_coordY_eq :
   rw [zero_smul, zero_add, one_smul,
     WeierstrassCurve.Affine.CoordinateRing.basis_one] at *
   rw [h]
-  unfold weierstrassCubic
+  simp only [weierstrassCubic]
   ring
 
 /-- The coordinate function `y` has order `-3` at the point at infinity.
@@ -678,7 +678,7 @@ theorem ordAtInfty_basis_fracPolyX_of_both_ne_zero
 Both are the image of `AdjoinRoot.root W.polynomial = mk W' Y` (mathlib's
 `basis_one`) under the algebraMap. -/
 theorem coordY_eq_coordYInFunctionField : C.coordY = C.coordYInFunctionField := by
-  unfold coordY coordYInFunctionField
+  simp only [coordY, coordYInFunctionField]
   congr 1
   exact WeierstrassCurve.Affine.CoordinateRing.basis_one (W' := C.toAffine)
 
@@ -1295,7 +1295,7 @@ private noncomputable def fiberQuadratic (a : F) : Polynomial F :=
     Polynomial.C (a ^ 3 + C.toAffine.a₂ * a ^ 2 + C.toAffine.a₄ * a + C.toAffine.a₆)
 
 private theorem fiberQuadratic_natDegree (a : F) : (C.fiberQuadratic a).natDegree = 2 := by
-  unfold fiberQuadratic
+  simp only [fiberQuadratic]
   compute_degree!
 
 private theorem fiberQuadratic_ne_zero (a : F) : C.fiberQuadratic a ≠ 0 := by
@@ -1308,7 +1308,7 @@ private theorem fiberQuadratic_isRoot_of_smoothPoint {a : F} {P : C.SmoothPoint}
     (hP : P.x = a) : (C.fiberQuadratic a).IsRoot P.y := by
   have heq := P.nonsingular.1
   rw [hP, WeierstrassCurve.Affine.equation_iff'] at heq
-  unfold fiberQuadratic
+  simp only [fiberQuadratic]
   simp only [Polynomial.IsRoot, Polynomial.eval_add, Polynomial.eval_sub,
     Polynomial.eval_pow, Polynomial.eval_X, Polynomial.eval_C, Polynomial.eval_mul]
   linear_combination heq
@@ -1348,7 +1348,7 @@ private theorem coordEval_mk (P : C.SmoothPoint) (g : Polynomial (Polynomial F))
     C.coordEval P
         (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine g) =
       g.evalEval P.x P.y := by
-  unfold coordEval
+  simp only [coordEval]
   rw [show (WeierstrassCurve.Affine.CoordinateRing.mk C.toAffine g :
       C.CoordinateRing) = AdjoinRoot.mk C.toAffine.polynomial g from rfl,
     AdjoinRoot.lift_mk, ← Polynomial.eval₂_evalRingHom]
@@ -1468,7 +1468,7 @@ domain with the maximal ideal as a HeightOneSpectrum element). -/
 theorem pointValuation_algebraMap_localRingAt_le_one
     (C : SmoothPlaneCurve F) (P : C.SmoothPoint) (x : C.localRingAt P) :
     C.pointValuation P (algebraMap (C.localRingAt P) C.FunctionField x) ≤ 1 := by
-  unfold pointValuation
+  simp only [pointValuation]
   exact IsDedekindDomain.HeightOneSpectrum.valuation_le_one
     (IsDiscreteValuationRing.maximalIdeal (C.localRingAt P)) x
 
@@ -1551,7 +1551,7 @@ theorem ord_P_eq_zero_iff_pointValuation_eq_one (C : SmoothPlaneCurve F)
     {P : C.SmoothPoint} {f : C.FunctionField} (hf : f ≠ 0) :
     C.ord_P P f = 0 ↔ C.pointValuation P f = 1 := by
   have hv : C.pointValuation P f ≠ 0 := (C.pointValuation P).ne_zero_iff.mpr hf
-  unfold ord_P
+  simp only [ord_P]
   rw [dif_neg hv]
   constructor
   · intro h
