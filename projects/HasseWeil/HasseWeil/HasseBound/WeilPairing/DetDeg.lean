@@ -142,12 +142,12 @@ noncomputable def omegaFun (S T : W.toAffine[((ℓ : ℕ) : ℤ)]) : ZMod ℓ :=
 
 theorem omegaFun_add_left (S₁ S₂ T : W.toAffine[((ℓ : ℕ) : ℤ)]) :
     omegaFun W ℓ hℓF (S₁ + S₂) T = omegaFun W ℓ hℓF S₁ T + omegaFun W ℓ hℓF S₂ T := by
-  unfold omegaFun
+  simp only [omegaFun]
   rw [pairingRou_mul_left, logRou_mul]
 
 theorem omegaFun_add_right (S T₁ T₂ : W.toAffine[((ℓ : ℕ) : ℤ)]) :
     omegaFun W ℓ hℓF S (T₁ + T₂) = omegaFun W ℓ hℓF S T₁ + omegaFun W ℓ hℓF S T₂ := by
-  unfold omegaFun
+  simp only [omegaFun]
   rw [pairingRou_mul_right, logRou_mul]
 
 /-- For fixed `S`, the additive map `T ↦ ω(S,T)`. -/
@@ -208,7 +208,7 @@ theorem pairingRou_self (T : W.toAffine[((ℓ : ℕ) : ℤ)]) :
 theorem omegaForm_self (T : W.toAffine[((ℓ : ℕ) : ℤ)]) :
     omegaForm W ℓ hℓF T T = 0 := by
   rw [omegaForm_apply]
-  unfold omegaFun
+  simp only [omegaFun]
   rw [pairingRou_self, ofMul_one, map_zero]
 
 /-- **`ω` is nondegenerate** in the second slot: if `ω(S,T) = 0` for all `S ∈ E[ℓ]`, then
@@ -258,7 +258,7 @@ theorem omegaForm_scaling (ψ : W.toAffine.Point →+ W.toAffine.Point) (d : ℕ
     omegaForm W ℓ hℓF (torsionRestrict W ℓ ψ S) (torsionRestrict W ℓ ψ T) =
       (d : ZMod ℓ) * omegaForm W ℓ hℓF S T := by
   rw [omegaForm_apply, omegaForm_apply]
-  unfold omegaFun
+  simp only [omegaFun]
   rw [pairingRou_scaling W ℓ hℓF ψ d S T hsc,
     show Additive.ofMul (pairingRou W ℓ hℓF S T ^ d)
       = d • Additive.ofMul (pairingRou W ℓ hℓF S T) from rfl, map_nsmul, nsmul_eq_mul]
@@ -268,7 +268,7 @@ theorem omegaForm_scaling (ψ : W.toAffine.Point →+ W.toAffine.Point) (d : ℕ
 theorem omegaForm_antisymm (S T : W.toAffine[((ℓ : ℕ) : ℤ)]) :
     omegaForm W ℓ hℓF S T + omegaForm W ℓ hℓF T S = 0 := by
   rw [omegaForm_apply, omegaForm_apply]
-  unfold omegaFun
+  simp only [omegaFun]
   rw [← logRou_mul]
   have hmul : pairingRou W ℓ hℓF S T * pairingRou W ℓ hℓF T S = 1 := by
     refine Subtype.ext (Units.ext ?_)
