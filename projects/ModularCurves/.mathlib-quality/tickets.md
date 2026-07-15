@@ -20503,3 +20503,36 @@ transposition):
    **E[3]-structure / keystone-adjacent** — board for the keystone owner or a dedicated flex-NF
    ticket. (Uniqueness — the HARD part — is DONE axiom-clean; only existence remains.)
 T-E15b (finite étale, Weil pairing) stays stream-C-gated.
+
+## v10.246-OMEGA (2026-07-15) — ★★★ T-E15a FORWARD UNIVERSAL PROPERTY COMPLETE: e3ClassifyingEllHom (X is the pullback of ℰ₃)
+
+The full classifyingTop ladder transposed and axiom-clean (commits 41c615ed0…564045b3f):
+- `universalE3_map_classifying` (E1 coefficient match — the load-bearing input; universalE3Obj
+  needs NO hR since ℰ₃ is unconditionally elliptic, cleaner than Legendre).
+- `E3Witness` bundle + `e3Piece` + `e3Piece_restrict` (via `e3_witness_transVC_eq_one`) +
+  `e3WitnessCover` + `e3Piece_congr` + `e3Piece_agree` + `e3Top` + `e3Top_piece`.
+- `e3Piece_π` → `e3Top_π_w` → `e3BaseCover` + `e3Top_zero` → `e3ClassifyingMap_structMap` →
+  `restrict_e3ClassifyingMap` → `e3Piece_isPullback` → **`isPullback_e3Top`** (X ≅ pullback of
+  universalE3 along the classifying map) → **`e3ClassifyingEllHom : X ⟶ universalE3Obj R`**.
+The sed+python transposition pipeline (v10.244 lesson) made the CLS-5/6 ladder fast; the residual
+fixes were purely (a) hR-removal (E3 object is hR-free) and (b) the two-parameter/two-marking field
+renames (w.lam/hAd/hW/hMP → w.β/γ/hF/hP/hQ).
+
+**REMAINING T-E15a** (all boarded precisely):
+1. **rt1** (`section_comp_e3Top` + `pullSection_e3ClassifyingEllHom_P/Q`) — the marking roundtrip;
+   E3 has NO ω so rt1 is PURELY the level-half (pull universal marked P,Q = given L). CAUTION:
+   section_comp mixes `e3BaseCover`(hom_ext) + `e3WitnessCover`(piece-factor) — the naive rename
+   breaks; hand-align the two covers. The Q-half's universal coords are `(e3Gamma, e3Beta+e3Gamma)`
+   (NOT constants like Legendre's (1,0)) — the hmark uses `e3ClassifyingRingHom_gamma/beta` + the
+   glued spec to match witness coords.
+2. **rt2** (uniqueness → determination) + `e3RepresentableBy` (homEquiv := pulled level structure;
+   inverse := e3ClassifyingEllHom; left=rt2, right=rt1) — mirrors Legendre rt2 + RepresentableBy.
+3. **[T-E15-NORM ⚠ genuine gap]** discharge `naiveLevelThree_representable_by_affine` needs "every
+   naive level-3 (E,P,Q) with 3 inv IS an IsE3Datum" = the flex-normalization EXISTENCE (order-3 P
+   ⟹ flex ⟹ E3-form). NOT `toTateNF` (needs 3P≠0). E[3]-structure/keystone-adjacent.
+
+**T-E15a SCORECARD:** object ✓ | marked pair ✓ | **uniqueness certificate ★★★ axiom-clean** ✓ |
+presentation uniqueness ✓ | datum + glued (β,γ) + glued flex + glued disc-unit ✓ | classifying
+ring hom + map ✓ | **forward universal property (e3ClassifyingEllHom) ★★★** ✓ | rt1/rt2/
+RepresentableBy = boarded transposition | NORM = keystone gap. The mathematically-novel content
+(both uniqueness directions + the classifying construction) is DONE and axiom-clean.
