@@ -24,6 +24,60 @@ open scoped Real Interval
 
 noncomputable section
 
+/-- The indicator of the measurable annulus `{ε₂ < ‖γ t - γ t₀‖ ≤ ε₁}`, weighted by
+`(t - t₀)⁻¹`, is interval integrable, provided that on the annulus the points stay bounded away
+from `t₀`, namely `ε₂ / (2‖L‖) < |t - t₀|`. The pointwise weight is then dominated by the
+constant `2‖L‖ / ε₂`. -/
+private lemma annulus_inv_indicator_intervalIntegrable {γ : ℝ → ℂ} {a b t₀ ε₁ ε₂ : ℝ} {L : ℂ}
+    (hab : a < b) (hγ_meas : Measurable γ) (hε₂_pos : 0 < ε₂) (hL_pos : 0 < ‖L‖)
+    (h_lower : ∀ t ∈ Set.Icc a b, ε₂ < ‖γ t - γ t₀‖ → ‖γ t - γ t₀‖ ≤ ε₁ →
+      ε₂ / (2 * ‖L‖) < |t - t₀|) :
+    IntervalIntegrable
+      (fun t ↦ if ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁ then (↑(t - t₀) : ℂ)⁻¹ else 0)
+      volume a b := by
+  rw [intervalIntegrable_iff]
+  have h_meas_cond : MeasurableSet
+      {t : ℝ | ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁} :=
+    (measurableSet_lt measurable_const (hγ_meas.sub_const (γ t₀)).norm).inter
+      (measurableSet_le (hγ_meas.sub_const (γ t₀)).norm measurable_const)
+  refine MeasureTheory.IntegrableOn.of_bound measure_Ioc_lt_top
+    (Measurable.ite h_meas_cond
+      (Complex.measurable_ofReal.comp
+        (measurable_id.sub measurable_const)).inv
+      measurable_const).aestronglyMeasurable
+    (2 * ‖L‖ / ε₂) ?_
+  filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with t ht
+  simp only [min_eq_left hab.le, max_eq_right hab.le] at ht
+  have ht_Icc : t ∈ Set.Icc a b := Set.Ioc_subset_Icc_self ht
+  by_cases hcond : ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁
+  · rw [if_pos hcond, norm_inv, Complex.norm_real, Real.norm_eq_abs]
+    have h_t_lower : ε₂ / (2 * ‖L‖) < |t - t₀| := h_lower t ht_Icc hcond.1 hcond.2
+    calc |t - t₀|⁻¹
+        ≤ (ε₂ / (2 * ‖L‖))⁻¹ := inv_anti₀ (by positivity) (le_of_lt h_t_lower)
+      _ = 2 * ‖L‖ / ε₂ := by rw [inv_div]
+  · rw [if_neg hcond, norm_zero]
+    positivity
+
+/-- If both one-sided cutoff integrands `1{ε < g} · f` are interval integrable, then so is the
+annulus cutoff integrand `1{ε₂ < g ≤ ε₁} · f`, since it is their difference. -/
+private lemma annulus_cutoff_intervalIntegrable {f : ℝ → ℂ} {g : ℝ → ℝ} {a b ε₁ ε₂ : ℝ}
+    (hε : ε₂ ≤ ε₁)
+    (h₂ : IntervalIntegrable (fun t ↦ if ε₂ < g t then f t else 0) volume a b)
+    (h₁ : IntervalIntegrable (fun t ↦ if ε₁ < g t then f t else 0) volume a b) :
+    IntervalIntegrable (fun t ↦ if ε₂ < g t ∧ g t ≤ ε₁ then f t else 0) volume a b := by
+  refine (h₂.sub h₁).congr fun t _ ↦ ?_
+  change (if ε₂ < g t then f t else 0) - (if ε₁ < g t then f t else 0) =
+      if ε₂ < g t ∧ g t ≤ ε₁ then f t else 0
+  by_cases h₂' : ε₂ < g t
+  · rw [if_pos h₂']
+    by_cases h₁' : ε₁ < g t
+    · rw [if_pos h₁', sub_self, if_neg fun h ↦ absurd h₁' (not_lt.mpr h.2)]
+    · rw [if_neg h₁', sub_zero, if_pos ⟨h₂', not_lt.mp h₁'⟩]
+  · rw [if_neg h₂', zero_sub]
+    by_cases h₁' : ε₁ < g t
+    · exact absurd (hε.trans_lt h₁') h₂'
+    · rw [if_neg h₁', neg_zero, if_neg fun h ↦ h₂' h.1]
+
 /-- Uniform step bound with epsilon-independent constant. -/
 lemma pv_step_bound_ratio_two_uniform {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : ℂ} (hab : a < b)
     (hat₀ : t₀ ∈ Set.Ioo a b) (hγ_C2 : ContDiffAt ℝ 2 γ t₀) (hγ_deriv : deriv γ t₀ = L)
@@ -80,63 +134,30 @@ lemma pv_step_bound_ratio_two_uniform {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : �
       simp only [r, f]
       ring
     · rw [if_neg hcond, if_neg hcond, if_neg hcond, add_zero]
-  have h_sing_int : IntervalIntegrable
-      (fun t ↦ if ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁ then (↑(t - t₀) : ℂ)⁻¹ else 0)
-      MeasureTheory.volume a b := by
-    rw [intervalIntegrable_iff]
-    have h_meas_cond : MeasurableSet
-        {t : ℝ | ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁} :=
-      (measurableSet_lt measurable_const (hγ_meas.sub_const (γ t₀)).norm).inter
-        (measurableSet_le (hγ_meas.sub_const (γ t₀)).norm measurable_const)
-    refine MeasureTheory.IntegrableOn.of_bound measure_Ioc_lt_top
-      (Measurable.ite h_meas_cond
-        (Complex.measurable_ofReal.comp
-          (measurable_id.sub measurable_const)).inv
-        measurable_const).aestronglyMeasurable
-      (2 * ‖L‖ / ε₂) ?_
-    filter_upwards [MeasureTheory.ae_restrict_mem measurableSet_Ioc] with t ht
-    simp only [min_eq_left hab.le, max_eq_right hab.le] at ht
-    have ht_Icc : t ∈ Set.Icc a b := Set.Ioc_subset_Icc_self ht
-    by_cases hcond : ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁
-    · rw [if_pos hcond, norm_inv, Complex.norm_real, Real.norm_eq_abs]
-      have h_t_ne : t ≠ t₀ := by
-        intro heq
-        subst heq
-        simp only [sub_self, norm_zero] at hcond
-        linarith [hcond.1]
-      have h_abs_pos : 0 < |t - t₀| := abs_pos.mpr (sub_ne_zero.mpr h_t_ne)
-      have h_lt_δ_up : |t - t₀| < δ_up :=
-        lt_of_lt_of_le (h_localize t ht_Icc hcond.2)
-          (le_trans (min_le_right _ _) (min_le_right _ _))
-      have h_up := h_upper t h_abs_pos h_lt_δ_up
-      have h_t_lower : ε₂ / (2 * ‖L‖) < |t - t₀| := by
-        rw [div_lt_iff₀ (by positivity : 0 < 2 * ‖L‖)]
-        linarith [hcond.1]
-      calc |t - t₀|⁻¹
-          ≤ (ε₂ / (2 * ‖L‖))⁻¹ := inv_anti₀ (by positivity) (le_of_lt h_t_lower)
-        _ = 2 * ‖L‖ / ε₂ := by rw [inv_div]
-    · rw [if_neg hcond, norm_zero]
-      positivity
+  have hL_pos : 0 < ‖L‖ := norm_pos_iff.mpr hL
+  have h_sing_lower : ∀ t ∈ Set.Icc a b, ε₂ < ‖γ t - γ t₀‖ → ‖γ t - γ t₀‖ ≤ ε₁ →
+      ε₂ / (2 * ‖L‖) < |t - t₀| := by
+    intro t ht_Icc hc₁ hc₂
+    have h_t_ne : t ≠ t₀ := by
+      intro heq
+      subst heq
+      simp only [sub_self, norm_zero] at hc₁
+      linarith
+    have h_abs_pos : 0 < |t - t₀| := abs_pos.mpr (sub_ne_zero.mpr h_t_ne)
+    have h_lt_δ_up : |t - t₀| < δ_up :=
+      lt_of_lt_of_le (h_localize t ht_Icc hc₂)
+        (le_trans (min_le_right _ _) (min_le_right _ _))
+    rw [div_lt_iff₀ (by positivity : (0 : ℝ) < 2 * ‖L‖)]
+    linarith [h_upper t h_abs_pos h_lt_δ_up]
+  have h_sing_int :=
+    annulus_inv_indicator_intervalIntegrable hab hγ_meas hε₂_pos hL_pos h_sing_lower
   have h_rem_int : IntervalIntegrable
       (fun t ↦ if ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁ then r t else 0)
       MeasureTheory.volume a b := by
     have hf_annulus_int : IntervalIntegrable
         (fun t ↦ if ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁ then f t else 0)
-        MeasureTheory.volume a b := by
-      refine (hI_int₂.sub hI_int₁).congr fun t _ ↦ ?_
-      change (if ε₂ < ‖γ t - γ t₀‖ then f t else 0) -
-          (if ε₁ < ‖γ t - γ t₀‖ then f t else 0) =
-        if ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁ then f t else 0
-      by_cases h₂ : ε₂ < ‖γ t - γ t₀‖
-      · rw [if_pos h₂]
-        by_cases h₁ : ε₁ < ‖γ t - γ t₀‖
-        · rw [if_pos h₁, sub_self, if_neg (fun h ↦ absurd h₁ (not_lt.mpr h.2))]
-        · push Not at h₁
-          rw [if_neg (not_lt.mpr h₁), sub_zero, if_pos ⟨h₂, h₁⟩]
-      · rw [if_neg h₂, zero_sub]
-        by_cases h₁ : ε₁ < ‖γ t - γ t₀‖
-        · exact absurd (hε₂_le.trans_lt h₁) h₂
-        · rw [if_neg h₁, neg_zero, if_neg (fun h ↦ h₂ h.1)]
+        MeasureTheory.volume a b :=
+      annulus_cutoff_intervalIntegrable hε₂_le hI_int₂ hI_int₁
     refine (hf_annulus_int.sub h_sing_int).congr (fun t _ ↦ ?_)
     change (if ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁ then f t else 0) -
         (if ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁ then (↑(t - t₀) : ℂ)⁻¹ else 0) =
