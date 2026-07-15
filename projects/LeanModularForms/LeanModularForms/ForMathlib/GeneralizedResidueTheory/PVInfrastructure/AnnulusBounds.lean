@@ -268,6 +268,68 @@ lemma shell_vol_le {t₀ ε Δ L_norm : ℝ} (hL_pos : 0 < L_norm) (hΔ_nonneg :
   · exact shell_vol_le_of_small_eps hL_pos hΔ_nonneg h
   · exact shell_vol_le_of_large_eps hL_pos hΔ_nonneg (not_le.mp h)
 
+/-- Near `t₀`, if the quadratic remainder coefficient times the displacement is dominated by
+`‖L‖ / 2`, then the linear term forces a lower bound `‖γ t - γ t₀‖ ≥ (‖L‖ / 2) * |t - t₀|`. -/
+private lemma norm_sub_ge_half_norm_mul {γ : ℝ → ℂ} {t₀ : ℝ} {L : ℂ} {K₀ δ₀ : ℝ}
+    (h_quad : ∀ t, |t - t₀| < δ₀ → ‖γ t - γ t₀ - (t - t₀) • L‖ ≤ K₀ * |t - t₀| ^ 2)
+    {t : ℝ} (ht_lt_δ₀ : |t - t₀| < δ₀) (hKt_lt : K₀ * |t - t₀| < ‖L‖ / 2) :
+    ‖γ t - γ t₀‖ ≥ ‖L‖ / 2 * |t - t₀| := by
+  have h_approx := h_quad t ht_lt_δ₀
+  have h_smul_norm : ‖(t - t₀) • L‖ = |t - t₀| * ‖L‖ := norm_smul (t - t₀) L
+  have h_tri := abs_le.mp (abs_norm_sub_norm_le (γ t - γ t₀) ((t - t₀) • L))
+  nlinarith [abs_nonneg (t - t₀), sq_abs (t - t₀), sq_nonneg (t - t₀)]
+
+/-- The symmetric difference between the true annulus `{ε₂ < ‖γ t - γ t₀‖ ≤ ε₁}` and the
+linear-model annulus `{ε₂ < ‖L‖ * |t - t₀| ≤ ε₁}` is contained in the two boundary shells around
+the thresholds `ε₁` and `ε₂` of half-width `Δ = K₀ * (2 * ε₁ / ‖L‖) ^ 2`. A point in the symmetric
+difference lies within `Δ` of one of the two thresholds because the linear approximation error is
+`≤ K₀ * |t - t₀| ^ 2 ≤ Δ` there. -/
+private lemma symmDiff_annulus_subset_shells {γ : ℝ → ℂ} {a b t₀ ρ : ℝ} {L : ℂ}
+    {K₀ δ₀ ε₁ ε₂ Δ : ℝ}
+    (h_quad : ∀ t, |t - t₀| < δ₀ → ‖γ t - γ t₀ - (t - t₀) • L‖ ≤ K₀ * |t - t₀| ^ 2)
+    (hL_norm_pos : 0 < ‖L‖) (hK₀_nonneg : 0 ≤ K₀) (hρ_le_δ₀ : ρ ≤ δ₀)
+    (h_lower_bound : ∀ t, |t - t₀| < ρ → ‖γ t - γ t₀‖ ≥ ‖L‖ / 2 * |t - t₀|)
+    (hΔ : Δ = K₀ * (2 * ε₁ / ‖L‖) ^ 2) :
+    symmDiff
+        {t : ℝ | t ∈ Set.Icc a b ∧ |t - t₀| < ρ ∧ ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁}
+        {t : ℝ | t ∈ Set.Icc a b ∧ |t - t₀| < ρ ∧ ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁} ⊆
+      {t : ℝ | |‖L‖ * |t - t₀| - ε₁| ≤ Δ} ∪ {t : ℝ | |‖L‖ * |t - t₀| - ε₂| ≤ Δ} := by
+  intro t ht
+  rw [Set.mem_symmDiff] at ht
+  have ht_localized : |t - t₀| < ρ := by
+    rcases ht with ⟨ht_γAnn, _⟩ | ⟨ht_tAnn, _⟩
+    · exact ht_γAnn.2.1
+    · exact ht_tAnn.2.1
+  have ht_lt_δ₀ : |t - t₀| < δ₀ := ht_localized.trans_le hρ_le_δ₀
+  have h_gx_bound : abs (‖γ t - γ t₀‖ - ‖L‖ * |t - t₀|) ≤ K₀ * |t - t₀| ^ 2 :=
+    norm_linear_approx_bound h_quad ht_lt_δ₀
+  have ht_Icc : t ∈ Set.Icc a b := by
+    rcases ht with ⟨⟨ht_Icc, _, _, _⟩, _⟩ | ⟨⟨ht_Icc, _, _, _⟩, _⟩ <;> exact ht_Icc
+  have hxor' : Xor (ε₂ < ‖γ t - γ t₀‖ ∧ ‖γ t - γ t₀‖ ≤ ε₁)
+      (ε₂ < ‖L‖ * |t - t₀| ∧ ‖L‖ * |t - t₀| ≤ ε₁) := by
+    rcases ht with ⟨⟨_, _, hγ_lo, hγ_hi⟩, hnotB⟩ | ⟨⟨_, _, ht_lo, ht_hi⟩, hnotA⟩
+    · exact Or.inl ⟨⟨hγ_lo, hγ_hi⟩,
+        fun ⟨h1, h2⟩ ↦ hnotB ⟨ht_Icc, ht_localized, h1, h2⟩⟩
+    · exact Or.inr ⟨⟨ht_lo, ht_hi⟩,
+        fun ⟨h1, h2⟩ ↦ hnotA ⟨ht_Icc, ht_localized, h1, h2⟩⟩
+  have hR_bound : |t - t₀| ≤ 2 * ε₁ / ‖L‖ := by
+    rcases ht with ⟨ht_γAnn, _⟩ | ⟨ht_tAnn, _⟩
+    · have h_lb := h_lower_bound t ht_localized
+      have ht_upper : ‖γ t - γ t₀‖ ≤ ε₁ := ht_γAnn.2.2.2
+      have h1 : ‖L‖ / 2 * |t - t₀| ≤ ε₁ := h_lb.trans ht_upper
+      rw [le_div_iff₀ hL_norm_pos]
+      nlinarith [abs_nonneg (t - t₀)]
+    · have ht_upper : ‖L‖ * |t - t₀| ≤ ε₁ := ht_tAnn.2.2.2
+      rw [le_div_iff₀ hL_norm_pos]
+      nlinarith [hL_norm_pos.le, abs_nonneg (t - t₀)]
+  have he_le_Δ : K₀ * |t - t₀| ^ 2 ≤ Δ := by
+    rw [hΔ]
+    exact mul_le_mul_of_nonneg_left
+      (sq_le_sq' (by linarith [abs_nonneg (t - t₀)]) hR_bound) hK₀_nonneg
+  rcases symmDiff_subset_boundaryLayers h_gx_bound hxor' with h_near₂ | h_near₁
+  · exact Or.inr (h_near₂.trans he_le_Δ)
+  · exact Or.inl (h_near₁.trans he_le_Δ)
+
 lemma annulus_symmDiff_measure_bound {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : ℂ} (_hab : a < b)
     (_ht₀ : t₀ ∈ Set.Ioo a b) (hγ_C2 : ContDiffAt ℝ 2 γ t₀) (hγ_deriv : deriv γ t₀ = L)
     (hL : L ≠ 0) :
@@ -295,62 +357,18 @@ lemma annulus_symmDiff_measure_bound {γ : ℝ → ℂ} {a b t₀ : ℝ} {L : �
   have hK₀_nonneg : 0 ≤ K₀ := hK₀_pos.le
   have h_lower_bound : ∀ t, |t - t₀| < δ₁ → ‖γ t - γ t₀‖ ≥ ‖L‖ / 2 * |t - t₀| := by
     intro t ht_lt
-    have h_approx := h_quad t (ht_lt.trans_le hδ₁_le_δ₀)
-    have h_smul_norm : ‖(t - t₀) • L‖ = |t - t₀| * ‖L‖ := norm_smul (t - t₀) L
-    have h_tri := abs_le.mp (abs_norm_sub_norm_le (γ t - γ t₀) ((t - t₀) • L))
-    have hKt_lt : K₀ * |t - t₀| < ‖L‖ / 2 := by
-      have h4b : K₀ * |t - t₀| < K₀ * (‖L‖ / (2 * K₀)) :=
-        mul_lt_mul_of_pos_left (ht_lt.trans_le hδ₁_le_L_over_2K) hK₀_pos
-      have h4c : K₀ * (‖L‖ / (2 * K₀)) = ‖L‖ / 2 := by field_simp
-      linarith
-    nlinarith [abs_nonneg (t - t₀), sq_abs (t - t₀), sq_nonneg (t - t₀)]
-  have h_localize_γAnn : ∀ t, t ∈ γAnn → |t - t₀| < δ₁ := fun _ ⟨_, h, _, _⟩ ↦ h
-  have h_localize_tAnnLin : ∀ t, t ∈ tAnnLin → |t - t₀| < δ₁ := fun _ ⟨_, h, _, _⟩ ↦ h
+    refine norm_sub_ge_half_norm_mul h_quad (ht_lt.trans_le hδ₁_le_δ₀) ?_
+    have h4b : K₀ * |t - t₀| < K₀ * (‖L‖ / (2 * K₀)) :=
+      mul_lt_mul_of_pos_left (ht_lt.trans_le hδ₁_le_L_over_2K) hK₀_pos
+    have h4c : K₀ * (‖L‖ / (2 * K₀)) = ‖L‖ / 2 := by field_simp
+    linarith
   let R_max := 2 * ε₁ / ‖L‖
   let Δ := K₀ * R_max^2
   have hΔ_nonneg : 0 ≤ Δ := mul_nonneg hK₀_nonneg (sq_nonneg _)
-  let g : ℝ → ℝ := fun t ↦ ‖γ t - γ t₀‖
-  let x : ℝ → ℝ := fun t ↦ ‖L‖ * |t - t₀|
-  let e : ℝ → ℝ := fun t ↦ K₀ * |t - t₀|^2
-  let shell₁ := {t : ℝ | |x t - ε₁| ≤ Δ}
-  let shell₂ := {t : ℝ | |x t - ε₂| ≤ Δ}
-  have h_subset : symmDiff γAnn tAnnLin ⊆ shell₁ ∪ shell₂ := by
-    intro t ht
-    rw [Set.mem_symmDiff] at ht
-    have hxor : Xor (t ∈ γAnn) (t ∈ tAnnLin) := ht
-    have ht_localized : |t - t₀| < δ₁ := by
-      rcases hxor with ⟨ht_γAnn, _⟩ | ⟨ht_tAnn, _⟩
-      · exact h_localize_γAnn t ht_γAnn
-      · exact h_localize_tAnnLin t ht_tAnn
-    have ht_lt_δ₀ : |t - t₀| < δ₀ := ht_localized.trans_le (min_le_left _ _)
-    have h_gx_bound : |g t - x t| ≤ e t := by
-      convert norm_linear_approx_bound h_quad ht_lt_δ₀ using 2
-    have ht_Icc : t ∈ Set.Icc a b := by
-      rcases hxor with ⟨⟨ht_Icc, _, _, _⟩, _⟩ | ⟨⟨ht_Icc, _, _, _⟩, _⟩ <;> exact ht_Icc
-    have hxor' : Xor (ε₂ < g t ∧ g t ≤ ε₁) (ε₂ < x t ∧ x t ≤ ε₁) := by
-      rcases hxor with ⟨⟨_, _, hγ_lo, hγ_hi⟩, hnotB⟩ | ⟨⟨_, _, ht_lo, ht_hi⟩, hnotA⟩
-      · exact Or.inl ⟨⟨hγ_lo, hγ_hi⟩,
-          fun ⟨h1, h2⟩ ↦ hnotB ⟨ht_Icc, ht_localized, h1, h2⟩⟩
-      · exact Or.inr ⟨⟨ht_lo, ht_hi⟩,
-          fun ⟨h1, h2⟩ ↦ hnotA ⟨ht_Icc, ht_localized, h1, h2⟩⟩
-    have hR_bound : |t - t₀| ≤ R_max := by
-      simp only [R_max]
-      rcases hxor with ⟨ht_γAnn, _⟩ | ⟨ht_tAnn, _⟩
-      · have h_lb := h_lower_bound t ht_localized
-        have ⟨_, _, _, ht_upper⟩ := ht_γAnn
-        have h1 : ‖L‖ / 2 * |t - t₀| ≤ ε₁ := h_lb.trans ht_upper
-        rw [le_div_iff₀ hL_norm_pos]
-        nlinarith [abs_nonneg (t - t₀)]
-      · have ⟨_, _, _, ht_upper⟩ := ht_tAnn
-        rw [le_div_iff₀ hL_norm_pos]
-        nlinarith [hL_norm_pos.le, abs_nonneg (t - t₀)]
-    have he_le_Δ : e t ≤ Δ := by
-      simp only [e, Δ, R_max]
-      exact mul_le_mul_of_nonneg_left
-        (sq_le_sq' (by linarith [abs_nonneg (t - t₀)]) hR_bound) hK₀_nonneg
-    rcases symmDiff_subset_boundaryLayers h_gx_bound hxor' with h_near₂ | h_near₁
-    · exact Or.inr (h_near₂.trans he_le_Δ)
-    · exact Or.inl (h_near₁.trans he_le_Δ)
+  let shell₁ := {t : ℝ | |‖L‖ * |t - t₀| - ε₁| ≤ Δ}
+  let shell₂ := {t : ℝ | |‖L‖ * |t - t₀| - ε₂| ≤ Δ}
+  have h_subset : symmDiff γAnn tAnnLin ⊆ shell₁ ∪ shell₂ :=
+    symmDiff_annulus_subset_shells h_quad hL_norm_pos hK₀_nonneg hδ₁_le_δ₀ h_lower_bound rfl
   have h_shell₁_vol : volume shell₁ ≤ ENNReal.ofReal (4 * Δ / ‖L‖) :=
     shell_vol_le hL_norm_pos hΔ_nonneg hε₁_pos
   have h_shell₂_vol : volume shell₂ ≤ ENNReal.ofReal (4 * Δ / ‖L‖) :=
