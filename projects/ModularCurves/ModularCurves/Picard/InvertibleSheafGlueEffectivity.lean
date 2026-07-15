@@ -13,7 +13,7 @@ the chart extensions, with one overlap map twisted by the transition isomorphism
 
 universe u u₁ u₂ v₁ v₂
 
-open CategoryTheory CategoryTheory.Limits
+open CategoryTheory CategoryTheory.Limits TopologicalSpace
 
 namespace AlgebraicGeometry.Scheme.Modules
 
@@ -3906,6 +3906,116 @@ noncomputable def AffineIntersectionUnitCocycle.gluedModuleIsoOfDescentIso
   exact asIso g
 
 end DescentEffectivity
+
+/-- The overlap section of the affine-intersection cocycle is the original change-of-basis
+unit after transport to the geometric intersection open. -/
+theorem affineIntersectionUnitCocycle_overlapTransitionSection
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i j : J) :
+    let c := affineIntersectionUnitCocycle π U e
+    let q := π.affineIntersectionOverlapIso U hU i j
+    q.inv.appTop.hom (c.overlapTransitionSection i j : _) =
+      openTopSection (U i ⊓ U j)
+        (trivializingCoverTransitionUnitOn U e (U i ⊓ U j) i j
+          inf_le_left inf_le_right : Γ(X, U i ⊓ U j)) := by
+  classical
+  have hpair :
+      X.finiteIntersectionOpen U
+          (Scheme.GlueData.affineIntersectionPairIndex i j) = U i ⊓ U j :=
+    X.finiteIntersectionOpen_affineIntersectionPairIndex U i j
+  let s := Scheme.GlueData.affineIntersectionPairIndex i j
+  have hs : s.Nonempty := by
+    simp [s, Scheme.GlueData.affineIntersectionPairIndex]
+  let q' := π.affineIntersectionSchemeIso U s hs (hU s hs) ≪≫
+    X.isoOfEq hpair
+  have hq : π.affineIntersectionOverlapIso U hU i j = q' := by
+    dsimp only [q', s]
+    unfold Scheme.Hom.affineIntersectionOverlapIso
+    congr
+  dsimp only
+  rw [hq]
+  let V := X.finiteIntersectionOpen U s
+  let hVi : V ≤ U i := iInf_le_of_le i (iInf_le_of_le (by simp
+    [s, Scheme.GlueData.affineIntersectionPairIndex]) le_rfl)
+  let hVj : V ≤ U j := iInf_le_of_le j (iInf_le_of_le (by simp
+    [s, Scheme.GlueData.affineIntersectionPairIndex]) le_rfl)
+  let r := trivializingCoverTransitionUnitOn U e V i j hVi hVj
+  let φ := π.finiteIntersectionRingIso U s hs
+  let A := (forget₂ (CommAlgCat Γ(S, (⊤ : S.Opens))) CommRingCat).obj
+    (π.finiteIntersectionRing U s)
+  let B := CommRingCat.of ((π.affineIntersectionFunctor U).obj s)
+  let E := π.affineIntersectionSchemeIso U s hs (hU s hs)
+  letI : IsAffine V.toScheme := hU s hs
+  have hsection :
+      ((affineIntersectionUnitCocycle π U e).overlapTransitionSection i j : _) =
+        (Scheme.ΓSpecIso B).inv.hom
+          (φ.hom.hom (V.topIso.inv.hom (r : Γ(X, V)))) := by
+    rfl
+  rw [hsection]
+  change ((E ≪≫ X.isoOfEq hpair).inv.appTop).hom
+      ((Scheme.ΓSpecIso B).inv.hom
+        (φ.hom.hom (V.topIso.inv.hom (r : Γ(X, V))))) = _
+  have hspec :
+      (Spec.map φ.inv).appTop.hom
+          ((Scheme.ΓSpecIso B).inv.hom
+            (φ.hom.hom (V.topIso.inv.hom (r : Γ(X, V))))) =
+        (Scheme.ΓSpecIso A).inv.hom (V.topIso.inv.hom (r : Γ(X, V))) := by
+    have hnat : φ.inv ≫ (Scheme.ΓSpecIso A).inv =
+        (Scheme.ΓSpecIso B).inv ≫ (Spec.map φ.inv).appTop :=
+      Scheme.ΓSpecIso_inv_naturality φ.inv
+    have h := ConcreteCategory.congr_hom hnat
+      (φ.hom.hom (V.topIso.inv.hom (r : Γ(X, V))))
+    simpa only [CommRingCat.comp_apply, ConcreteCategory.comp_apply,
+      Iso.hom_inv_id_apply] using h.symm
+  have hE :
+      E.inv.appTop.hom
+          ((Scheme.ΓSpecIso B).inv.hom
+            (φ.hom.hom (V.topIso.inv.hom (r : Γ(X, V))))) =
+        V.topIso.inv.hom (r : Γ(X, V)) := by
+    change V.toScheme.isoSpec.hom.appTop.hom
+        ((Spec.map φ.inv).appTop.hom
+          ((Scheme.ΓSpecIso B).inv.hom
+            (φ.hom.hom (V.topIso.inv.hom (r : Γ(X, V)))))) = _
+    rw [hspec]
+    change V.toScheme.toSpecΓ.appTop.hom
+        ((Scheme.ΓSpecIso A).inv.hom (V.topIso.inv.hom (r : Γ(X, V)))) = _
+    rw [Scheme.toSpecΓ_appTop]
+    exact Iso.inv_hom_id_apply _ _
+  rw [Iso.trans_inv, Scheme.Hom.comp_appTop]
+  change (X.isoOfEq hpair).inv.appTop.hom
+      (E.inv.appTop.hom
+        ((Scheme.ΓSpecIso B).inv.hom
+          (φ.hom.hom (V.topIso.inv.hom (r : Γ(X, V)))))) = _
+  rw [hE]
+  let W := U i ⊓ U j
+  have htop : V.topIso.inv ≫ (X.homOfLE hpair.ge).appTop =
+      X.presheaf.map (homOfLE hpair.ge).op ≫ W.topIso.inv :=
+    topIso_inv_naturality hpair.ge
+  rw [Scheme.isoOfEq_inv]
+  change (V.topIso.inv ≫ (X.homOfLE hpair.ge).appTop).hom (r : Γ(X, V)) = _
+  rw [htop]
+  change W.topIso.inv.hom
+    (X.presheaf.map (homOfLE hpair.ge).op (r : Γ(X, V))) = _
+  have hopen (a : Γ(X, W)) :
+      openTopSection W a = W.topIso.inv.hom a := by
+    unfold openTopSection
+    rw [Scheme.Opens.ι_appIso, Scheme.Opens.topIso_inv]
+    change X.presheaf.map _ a = X.presheaf.map _ a
+    congr 2
+  rw [hopen]
+  apply congrArg W.topIso.inv.hom
+  have hr := congrArg Units.val
+    (trivializingCoverTransitionUnitOn_restrict U e hpair.ge i j hVi hVj)
+  change X.presheaf.map (homOfLE hpair.ge).op (r : Γ(X, V)) =
+    (trivializingCoverTransitionUnitOn U e W i j
+      (hpair.ge.trans hVi) (hpair.ge.trans hVj) : Γ(X, W)) at hr
+  change X.presheaf.map (homOfLE hpair.ge).op (r : Γ(X, V)) =
+    (trivializingCoverTransitionUnitOn U e W i j
+      (hpair.ge.trans hVi) (hpair.ge.trans hVj) : Γ(X, W))
+  exact hr
 
 /-- A chosen trivialization on an original open induces a trivialization on the corresponding
 chart of the affine-intersection glued model. -/

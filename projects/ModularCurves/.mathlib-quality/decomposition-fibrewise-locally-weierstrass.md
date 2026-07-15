@@ -592,13 +592,14 @@ scheme-module translation of the existing over-site theorem
 `overUnitScalarEnd_transitionUnit`; it adds no hypotheses or proof-resource options. The focused
 build is green, and its axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.
 
-Active spawned dependency (2026-07-15): prove
+Completed spawned dependency (2026-07-15): proved
 `affineIntersectionUnitCocycle_overlapTransitionSection`. Under
 `affineIntersectionOverlapIso`, identify the overlap section of
 `affineIntersectionUnitCocycle π U e` with the top-section image of the original transition unit
 between the restrictions of `e i` and `e j` to `U i ⊓ U j`. This is the scalar-coordinate bridge
 needed by `affineIntersectionOriginalChartTrivialization_transition`; it adds no hypotheses or
-proof-resource options.
+proof-resource options. The focused build is green, and its axiom audit is exactly `propext`,
+`Classical.choice`, and `Quot.sound`.
 
 Completed spawned dependencies (2026-07-15): exposed the existing private proofs as
 `Scheme.finiteIntersectionOpen_affineIntersectionPairIndex` and `topIso_inv_naturality`. The
