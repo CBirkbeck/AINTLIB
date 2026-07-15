@@ -53,6 +53,7 @@ variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 
 local notation "KE" => W.toAffine.FunctionField
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- For `P.x ≠ xk`, the coord ring element `XClass W xk` is NOT in the
 maximal ideal at `P`. Companion to `XClass_mem_maximalIdealAt` (which
 handles the `P.x = xk` case). -/
@@ -124,7 +125,7 @@ theorem pointValuation_translateSlope_xy_le_one_of_X_ne
 `(y_gen − alg yk) · (P.x − xk) − (P.y − yk) · (x_gen − alg xk)` vanishes
 at `P`. This is the substantive content of "slope difference vanishes at P". -/
 theorem pointValuation_chord_numerator_lt_one_of_X_ne
-    (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_x : P.x ≠ xk) :
+    (P : (W_smooth W).SmoothPoint) (xk yk : F) (_h_x : P.x ≠ xk) :
     (W_smooth W).pointValuation P
       ((y_gen W - algebraMap F KE yk) * algebraMap F KE (P.x - xk) -
         algebraMap F KE (P.y - yk) * (x_gen W - algebraMap F KE xk)) < 1 := by
@@ -166,6 +167,7 @@ theorem pointValuation_chord_numerator_lt_one_of_X_ne
       exact h_lt
     exact pointValuation_mul_lt_one_of_le_and_lt W P h1 h2
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- A nonzero constant in F has `pointValuation = 1` at any smooth point. -/
 theorem pointValuation_algebraMap_F_eq_one_of_ne_zero
     (P : (W_smooth W).SmoothPoint) {c : F} (hc : c ≠ 0) :
@@ -188,6 +190,7 @@ theorem pointValuation_algebraMap_F_eq_one_of_ne_zero
     rw [← WithZero.coe_unzero hv, h_unz]
     rfl
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- If the denominator `b` is a unit at `P` (`pointValuation = 1`) and `a ∈ m_P`
 (`pointValuation < 1`), then `a / b ∈ m_P`. -/
 private theorem pointValuation_div_lt_one_of_denom_eq_one (P : (W_smooth W).SmoothPoint)
@@ -488,6 +491,7 @@ theorem pointValuation_translateY_xy_sub_alg_addY_lt_one_of_X_ne
     · exact pointValuation_slope_diff_mul_alg_addX_diff_lt_one_of_X_ne W P xk yk h_x
   · exact pointValuation_y_gen_sub_alg_y_self_lt_one W P
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- The base change to `K(E)` of the Weierstrass equation satisfied by `(xk, yk)`:
 the F-level relation `W.Equation xk yk` becomes the `equation_iff'`-normal-form
 identity `… = 0` for `W_KE` at `(algebraMap F KE xk, algebraMap F KE yk)`. -/
@@ -504,6 +508,7 @@ private theorem weierstrass_equation_image_eq_zero
     Affine.Equation.map (algebraMap F KE) h_eq
   rwa [WeierstrassCurve.Affine.equation_iff'] at h_map
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- **Weierstrass factorization** in K(E): from the curve equation at
 `(xk, yk)` and the generic-point equation, the K(E)-level identity
 `(y_gen − alg yk) · A = (x_gen − alg xk) · B`, where `A, B` are the
@@ -627,6 +632,7 @@ theorem pointValuation_A_eq_one_of_doubling
     exact h_diff_lt
   exact (Valuation.map_add_eq_of_lt_right _ h_lt_strict).trans h_alg_c_eq
 
+omit [W.toAffine.IsElliptic] in
 /-- **Tangent slope identity, lifted to K(E)**: in the doubling case
 `P = (xk, yk)` with `yk ≠ negY xk yk`, the tangent slope
 `slope_F = W.slope P.x xk P.y yk` satisfies
@@ -662,6 +668,7 @@ private theorem algebraMap_slope_mul_two_yk_add_eq_of_doubling
   simp only [map_sub, map_add, map_mul, map_pow, map_ofNat] at h_alg
   exact h_alg
 
+omit [W.toAffine.IsElliptic] in
 /-- **`B − A · slope_F` factorization** in the doubling case. With the explicit
 K(E) factors `A = y_gen + alg yk + a₁ x_gen + a₃` and
 `B = x_gen² + alg xk · x_gen + alg xk² + a₂(x_gen + alg xk) + a₄ − a₁ alg yk`
@@ -773,6 +780,7 @@ private theorem pointValuation_slope_factorization_rhs_lt_one_of_doubling
       ((W_smooth W).pointValuation_algebraMap_F_le_one P _)
       (pointValuation_y_gen_sub_alg_const_lt_one_of_eq W P yk h_eq_y)
 
+omit [W.toAffine.IsElliptic] in
 /-- **Slope-difference as a quotient** in the doubling case. With `A` the K(E)
 factor of `weierstrass_factorization` (which is nonzero at `P`, having
 `pointValuation = 1`), the slope difference rewrites as
@@ -1088,6 +1096,7 @@ theorem translateAlgEquivOfPoint_apply_y_gen
 instance W_smooth_toAffine_isElliptic : (W_smooth W).toAffine.IsElliptic :=
   inferInstanceAs W.toAffine.IsElliptic
 
+omit [W.toAffine.IsElliptic] in
 /-- If `P + (xk, yk)` is a finite point, then `P` is not the negation of `(xk, yk)`,
 i.e. `(P.x, P.y) ≠ (xk, negY xk yk)`. (If it were, the sum would be the point at
 infinity, contradicting `IsSome`.) -/
@@ -1104,6 +1113,7 @@ private theorem not_eq_negY_pair_of_add_isSome
     exact Affine.Point.add_of_Y_eq h_x_eq h_y_eq
   exact Affine.Point.zero_not_isSome (h_zero ▸ h)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- In the equal-`x` branch of an addition with `(P.x, P.y) ≠ (xk, negY xk yk)`,
 the point is genuinely being doubled: `P.y = yk` and `yk ≠ negY xk yk`. -/
 private theorem yk_ne_negY_and_eq_of_x_eq
@@ -1286,7 +1296,7 @@ is an `F`-algebra map it fixes `algebraMap F KE c`, whose valuation is `≤ 1` b
 `pointValuation_translateAlgEquivOfPoint_algebraMap_le_one_of_isSome`.) -/
 private theorem pointValuation_translateAlgEquivOfPoint_of_C_le_one
     (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
-    (h : (P.toAffinePoint +
+    (_h : (P.toAffinePoint +
         (Affine.Point.some xk yk h_ns : (W_smooth W).toAffine.Point)).IsSome)
     (c : F) :
     (W_smooth W).pointValuation P
@@ -1717,6 +1727,7 @@ theorem isTranslateMaxIdealCompatible_on_CoordinateRing_some
   exact pointValuation_translateAlgEquivOfPoint_XClass_add_YClass_lt_one_some
     W P xk yk h_ns h a b h_xy_x h_xy_y
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- If `r ∉ maximalIdealAt P'`, then its evaluation `evalAt P' r` is a nonzero
 constant. Immediate from `ker_evalAt`: the maximal ideal is exactly the kernel
 of evaluation, so an element outside it has nonzero value. -/
@@ -1729,6 +1740,7 @@ private theorem evalAt_ne_zero_of_notMem_maximalIdealAt
   rw [← (W_smooth W).ker_evalAt P', RingHom.mem_ker]
   exact h_c
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- Subtracting off its evaluation lands `r` in the maximal ideal: with
 `c = evalAt P' r`, the difference `r - algebraMap c` lies in `maximalIdealAt P'`.
 This is the "vanishing at `P'`" half of `ker_evalAt`, since `evalAt` is constant
@@ -1818,6 +1830,7 @@ theorem pointValuation_translateAlgEquivOfPoint_algebraMap_eq_one_of_notMem
     exact isTranslateMaxIdealCompatible_on_CoordinateRing_some W P xk yk h_ns h r' h_r'_mem
   exact (Valuation.map_add_eq_of_lt_right _ h_lt).trans h_alg_c_eq_one
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- For nonzero `f` with `pV P f ≤ 1`, `0 ≤ ord_P P f` — companion to
 `one_le_ord_P_iff_pointValuation_lt_one`. -/
 theorem zero_le_ord_P_of_pointValuation_le_one {f : (W_smooth W).FunctionField}
@@ -2051,6 +2064,7 @@ private theorem translateAlgEquivOfPoint_neg_apply_apply
   exact (congrArg (fun (e : (W_smooth W).FunctionField ≃ₐ[F]
     (W_smooth W).FunctionField) ↦ e g) h_group_hom).symm
 
+omit [W.toAffine.IsElliptic] in
 /-- The translate `P + k` translated back by `-k` returns to `P` at the level of the
 underlying affine point: `(P.translate_of_finite k h).toAffinePoint + (-k) = P.toAffinePoint`,
 where `-k` is `(xk, negY xk yk)`. -/
@@ -2071,6 +2085,7 @@ private theorem translate_of_finite_toAffinePoint_add_neg
     add_neg_cancel _
   rw [h_neg_pt, add_zero]
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- An element `f ∈ K(E)` with `pointValuation P f ≤ 1` lies in the local ring at `P`, hence
 is a fraction `u / q` of elements of the CoordinateRing with denominator `q ∉ maxIdealAt P`:
 there exist `u, q` in the CoordinateRing with `q ∉ maxIdealAt P` and `f * algMap q = algMap u`. -/
@@ -2093,6 +2108,7 @@ private theorem exists_coordinateRing_repr_of_pointValuation_le_one
     at h_apply
   exact h_apply
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- A CoordinateRing element outside `maxIdealAt P` is a unit at `P`: its image has `ord_P = 0`. -/
 private theorem ord_P_algebraMap_eq_zero_of_notMem
     (P : (W_smooth W).SmoothPoint) {q : (W_smooth W).CoordinateRing}
@@ -2104,6 +2120,7 @@ private theorem ord_P_algebraMap_eq_zero_of_notMem
   exact hq (((W_smooth W).ord_P_algebraMap_ne_zero_iff_mem_maximalIdealAt hq_ne_zero P).mp
     h_ord_ne)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- Multiplying by a CoordinateRing element that is a unit at `P` (i.e. `q ∉ maxIdealAt P`)
 does not change the order: `ord_P P (f * algMap q) = ord_P P f`. -/
 private theorem ord_P_mul_algebraMap_notMem (P : (W_smooth W).SmoothPoint)
@@ -2116,6 +2133,7 @@ private theorem ord_P_mul_algebraMap_notMem (P : (W_smooth W).SmoothPoint)
 -- `IsIntegrallyClosed CoordinateRing` (needed for `ord_P_algebraMap_eq_count`) is supplied
 -- unconditionally by `HasseWeil.Ramification.coordinateRing_isIntegrallyClosed`, so no
 -- `[NeZero 2/3]` (char ≠ 2, 3) hypotheses are required here.
+omit [DecidableEq F] in
 private theorem mem_pow_maxIdealAt_of_le_ord_P_algebraMap (P : (W_smooth W).SmoothPoint)
     {r : (W_smooth W).CoordinateRing} (hr : r ≠ 0) {n : ℕ}
     (h_le : (n : WithTop ℤ) ≤ (W_smooth W).ord_P P
@@ -2404,6 +2422,7 @@ theorem ord_P_translateAlgEquivOfPoint_algebraMap_eq_of_ne_zero
     (ord_P_translateAlgEquivOfPoint_algebraMap_ge_of_ne_zero W P xk yk h_ns h r hr)
     (ord_P_translateAlgEquivOfPoint_algebraMap_le_of_ne_zero W P xk yk h_ns h r hr)
 
+omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- A nonzero function-field element `g` is a quotient of two nonzero coordinate-ring
 elements (with nonzero algebraMap images): `g = algC a / algC b`. The `DecidableEq F`
 section instance is reported unused by the linter but is needed for `CoordinateRing`
