@@ -51,7 +51,8 @@ weight `k ≥ 2`, via the integral modular-symbol period map with injectivity su
 (`{propext, Classical.choice, Quot.sound}`; depends on neither the Stokes-route
 `interior_edges_cancel_sum` nor `exists_HeckeStableLattice`).  It is the `k ≥ 2` half of the live
 instance `heckeAlgℤ_finite`; its `k < 2` sibling is `heckeAlgℤ_finite_of_lattice`.  Naming it here
-(rather than inlining the period-route invocation) lets the `k ≥ 2` axiom-clean arithmetic corollaries
+(rather than inlining the period-route invocation) lets the `k ≥ 2` axiom-clean
+arithmetic corollaries
 downstream (e.g. `Newform.coeffField_numberField_of_two_le`) reuse it without re-pulling the `k < 2`
 lattice input through the weight-case-split of the instance. -/
 theorem heckeAlgℤ_finite_of_two_le (hk : 2 ≤ k) : Module.Finite ℤ (heckeAlgℤ N k) :=
