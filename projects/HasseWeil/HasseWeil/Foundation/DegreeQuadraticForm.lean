@@ -513,7 +513,7 @@ theorem trace_identity_of_dual_chain
   show (α.toAddMonoidHom + α_dual.toAddMonoidHom) P =
       (mulByInt E (isogTrace α one_sub_α)).toAddMonoidHom P
   rw [AddMonoidHom.add_apply, mulByInt_apply]
-  unfold isogTrace
+  simp only [isogTrace]
   have hsum :
       ((1 + (α.degree : ℤ) - (one_sub_α.degree : ℤ)) : ℤ) • P =
         P + (α.degree : ℤ) • P - (one_sub_α.degree : ℤ) • P := by
