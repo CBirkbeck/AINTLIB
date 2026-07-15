@@ -1906,7 +1906,8 @@ private theorem Slice.tmul_ann_subsingleton (R A : Type u) [CommRing R] [CommRin
       (TensorProduct.comm R A K).symm.injective
   have hπ : Function.Injective (LinearMap.lTensor K μ.rangeRestrict) := by
     have hfac : LinearMap.lTensor K μ =
-        (LinearMap.lTensor K (LinearMap.range μ).subtype) ∘ₗ (LinearMap.lTensor K μ.rangeRestrict) := by
+        (LinearMap.lTensor K (LinearMap.range μ).subtype) ∘ₗ
+          (LinearMap.lTensor K μ.rangeRestrict) := by
       conv_lhs => rw [show μ = (LinearMap.range μ).subtype ∘ₗ μ.rangeRestrict from rfl]
       rw [LinearMap.lTensor_comp]
     rw [hfac, LinearMap.coe_comp] at hlT
@@ -1917,7 +1918,8 @@ private theorem Slice.tmul_ann_subsingleton (R A : Type u) [CommRing R] [CommRin
     (LinearMap.surjective_rangeRestrict μ) K
   haveI : Subsingleton (LinearMap.ker (LinearMap.lTensor K μ.rangeRestrict)) := by
     rw [hker]; infer_instance
-  have hsub : Subsingleton (K ⊗[R] (LinearMap.ker μ.rangeRestrict)) := hequiv.symm.toEquiv.subsingleton
+  have hsub : Subsingleton (K ⊗[R] (LinearMap.ker μ.rangeRestrict)) :=
+    hequiv.symm.toEquiv.subsingleton
   rwa [LinearMap.ker_rangeRestrict] at hsub
 
 open TensorProduct in
@@ -1970,7 +1972,8 @@ private theorem Slice.ann_subsingleton (R A : Type u) [CommRing R] [CommRing A] 
   have hsub : Subsingleton ((A ⧸ 𝔪) ⊗[A] (Ann : Submodule A A)) :=
     (Slice.baseChange_surjective R A (A ⧸ 𝔪) (Ann : Submodule A A)).subsingleton
   have hquot : Subsingleton ((Ann : Submodule A A) ⧸ 𝔪 • (⊤ : Submodule A (Ann : Submodule A A))) :=
-    (TensorProduct.quotTensorEquivQuotSMul (Ann : Submodule A A) 𝔪).toEquiv.subsingleton_congr.mp hsub
+    (TensorProduct.quotTensorEquivQuotSMul (Ann : Submodule A A) 𝔪).toEquiv.subsingleton_congr.mp
+      hsub
   have hemp : Module.support A ((Ann : Submodule A A) ⧸ 𝔪 • ⊤) = ∅ :=
     Module.support_eq_empty_iff.mpr hquot
   rw [Module.support_quotient] at hemp
@@ -1991,7 +1994,8 @@ private theorem Slice.nzd_of_isNoetherianRing (R A : Type u) [CommRing R] [CommR
     f ∈ nonZeroDivisors A := by
   have hI := Slice.tmul_ann_subsingleton R A f hq hfib
   set Ann : Ideal A := LinearMap.ker (LinearMap.mulLeft A f) with hAnn
-  have hbridge : (Ann : Submodule A A).restrictScalars R = LinearMap.ker (LinearMap.mulLeft R f) := by
+  have hbridge : (Ann : Submodule A A).restrictScalars R
+      = LinearMap.ker (LinearMap.mulLeft R f) := by
     ext x; simp [hAnn, LinearMap.mulLeft_apply]
   have hI' : ∀ (K : Type u) [Field K] [Algebra R K],
       Subsingleton (K ⊗[R] (Ann : Submodule A A)) := by
