@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitGroup
-import BernoulliRegular.TotallyRealSubfield.ZetaPrime
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.CyclotomicUnitGroup
+public import BernoulliRegular.TotallyRealSubfield.ZetaPrime
 
 /-!
 # σ-preservation of `cyclotomicUnitsSubgroup`

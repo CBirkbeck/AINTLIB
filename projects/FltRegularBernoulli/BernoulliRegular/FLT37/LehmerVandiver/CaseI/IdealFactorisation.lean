@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Main
-import FltRegular.CaseI.Statement
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseI.Main
+public import FltRegular.CaseI.Statement
 
 /-!
 # LV008-CTOR-a: case I factor ideals are `p`-th powers

@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.Main
-import BernoulliRegular.TotallyRealSubfield.ClassGroup
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.Main
+public import BernoulliRegular.TotallyRealSubfield.ClassGroup
 
 
 /-!

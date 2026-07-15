@@ -1,5 +1,7 @@
-import BernoulliRegular.Thaine.AuxiliaryUnits
-import Mathlib.NumberTheory.LSeries.PrimesInAP
+module
+
+public import BernoulliRegular.Thaine.AuxiliaryUnits
+public import Mathlib.NumberTheory.LSeries.PrimesInAP
 
 /-!
 # T-THAINE-2: Auxiliary-prime universe (Chebotarev-style)
