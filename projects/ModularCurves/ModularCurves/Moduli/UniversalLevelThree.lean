@@ -709,4 +709,32 @@ noncomputable def e3ClassifyingRingHom {R : CommRingCat.{u}} (X : EllObj R)
       Matrix.head_cons]]
   exact e3Delta_glued_isUnit X L hD h3
 
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+/-- **(T-E15a stage 9)** The classifying morphism `X.base ⟶ ℰ₃ = Spec R[β,γ][δ⁻¹]/(rel)`. -/
+noncomputable def e3ClassifyingMap {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 3) (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    X.base ⟶ Spec (CommRingCat.of (E3ModuliRing R)) :=
+  X.base.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (e3ClassifyingRingHom X L hD h3))
+
+open AlgebraicGeometry CategoryTheory Scheme MvPolynomial in
+set_option backward.isDefEq.respectTransparency false in
+/-- **(T-E15a stage 9)** The classifying algebra restricts to the structure algebra
+on `R`-scalars. -/
+theorem e3ClassifyingRingHom_algebraMap {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 3) (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤))) (r : R) :
+    e3ClassifyingRingHom X L hD h3 (algebraMap R (E3ModuliRing R) r) =
+      X.baseRingHom r := by
+  have h1 : algebraMap R (E3ModuliRing R) r =
+      algebraMap (E3Quotient R) (E3ModuliRing R)
+        (Ideal.Quotient.mk _ (MvPolynomial.C r)) := by
+    rw [IsScalarTower.algebraMap_apply R (E3Quotient R) (E3ModuliRing R),
+      IsScalarTower.algebraMap_apply R (MvPolynomial (Fin 2) R) (E3Quotient R)]
+    rfl
+  rw [h1, e3ClassifyingRingHom, IsLocalization.Away.lift_eq]
+  show e3QuotientMap X L hD h3 (Ideal.Quotient.mk _ (MvPolynomial.C r)) = _
+  show e3BaseMap X L hD h3 (MvPolynomial.C r) = _
+  rw [e3BaseMap, eval₂Hom_C]
+
 end ModularCurves
