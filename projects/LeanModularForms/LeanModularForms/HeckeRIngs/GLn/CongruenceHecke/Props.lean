@@ -297,7 +297,8 @@ lemma shimura_prop_3_33_gen (N : ℕ) [NeZero N]
     Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
     Matrix.empty_val'] at hA_ij
   set D := diagMat 2 (![1, m] : Fin 2 → ℕ)
-  have hD_pos : ∀ i : Fin 2, 0 < (![1, m] : Fin 2 → ℕ) i := by intro i; fin_cases i <;> simp [hm_pos]
+  have hD_pos : ∀ i : Fin 2, 0 < (![1, m] : Fin 2 → ℕ) i := by
+    intro i; fin_cases i <;> simp [hm_pos]
   have hDv := diagMat_val 2 (![1, m] : Fin 2 → ℕ) hD_pos
   have hd00 : (D : GL (Fin 2) ℚ).val 0 0 = 1 := by rw [hDv]; simp [Matrix.diagonal]
   have hd01 : (D : GL (Fin 2) ℚ).val 0 1 = 0 := by rw [hDv]; simp [Matrix.diagonal]
@@ -536,7 +537,8 @@ lemma lunip_inject_injective (N : ℕ) [NeZero N]
     (ha₁k : Int.gcd (σ₁.1 0 0) ↑k_exp = 1)
     (hg_eq : (↑g : GL (Fin 2) ℚ) = γ₁ * ↑(diagMat 2 (![1, k_exp] : Fin 2 → ℕ)) * γ₂) :
     Function.Injective (lunip_inject N k_exp g) := by
-  have ha : ∀ i : Fin 2, 0 < (![1, k_exp] : Fin 2 → ℕ) i := by intro i; fin_cases i <;> simp [hk_pos]
+  have ha : ∀ i : Fin 2, 0 < (![1, k_exp] : Fin 2 → ℕ) i := by
+    intro i; fin_cases i <;> simp [hk_pos]
   intro r₁ r₂ h_eq
   simp only [lunip_inject] at h_eq
   rw [@Quotient.eq'', QuotientGroup.leftRel_apply] at h_eq
@@ -570,7 +572,8 @@ lemma decompQuot_Npow_natcard (N : ℕ) [NeZero N]
     (hg : (⟦g⟧ : HeckeCoset (Gamma0_pair N)) = T_diag_Gamma0 N (![1, k_exp])
         (by intro i; fin_cases i <;> simp [hk_pos]) (by simp)) :
     Nat.card (HeckeRing.decompQuot (Gamma0_pair N) g) = k_exp := by
-  have ha : ∀ i : Fin 2, 0 < (![1, k_exp] : Fin 2 → ℕ) i := by intro i; fin_cases i <;> simp [hk_pos]
+  have ha : ∀ i : Fin 2, 0 < (![1, k_exp] : Fin 2 → ℕ) i := by
+    intro i; fin_cases i <;> simp [hk_pos]
   have hgcd : Int.gcd (↑((![1, k_exp] : Fin 2 → ℕ) 0)) ↑N = 1 := by simp
   have h_dc : DoubleCoset.doubleCoset (g : GL (Fin 2) ℚ)
       ((Gamma0_pair N).H : Set _) ((Gamma0_pair N).H : Set _) =
@@ -607,7 +610,8 @@ lemma decompQuot_Npow_natcard (N : ℕ) [NeZero N]
           HeckeRing.decompQuot (Gamma0_pair N) g_diag :=
         (Equiv.cast (congrArg (HeckeRing.decompQuot (Gamma0_pair N))
           (Subtype.ext h_mid))).symm.trans
-          (HeckeRing.decompQuot_double_H_equiv (Gamma0_pair N) g_diag ⟨γ₁, hγ₁⟩ ⟨γ₂, hγ₂⟩ (hg_eq ▸ g.2))
+          (HeckeRing.decompQuot_double_H_equiv (Gamma0_pair N) g_diag ⟨γ₁, hγ₁⟩ ⟨γ₂, hγ₂⟩
+            (hg_eq ▸ g.2))
       exact Nat.card_congr e
     rw [h_card_eq]
     haveI : Fintype (HeckeRing.decompQuot (Gamma0_pair N) g_diag) :=
