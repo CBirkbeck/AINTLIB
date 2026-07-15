@@ -152,7 +152,7 @@ theorem samePrimeFiniteLog_eq_mk_of_mem_pow_high_level
     samePrimeFiniteLog (p := p) (K := K) N x hxI =
       Ideal.Quotient.mk ((lambdaIdeal p K) ^ (N + 1)) x := by
   classical
-  unfold samePrimeFiniteLog
+  simp only [samePrimeFiniteLog]
   rw [Finset.sum_eq_single 1]
   · exact samePrimeFiniteLogTerm_one_eq_mk (p := p) (K := K) N hxI
   · intro n _hn_range hn_ne_one
@@ -333,7 +333,7 @@ theorem caseIICor823SecondOrder_detector_descent_eq_zero
   have : Fact (Nat.Prime 37) := ⟨by decide⟩
   -- Unfold the named detector to its underlying coefficient (syntactic `unfold`, no `whnf` of the
   -- heavy `adicCompletionIntegers` `Ideal.pow`).
-  unfold caseIICor823DescentDetectorSq
+  simp only [caseIICor823DescentDetectorSq]
   set k : Fin (37 - 1) := ⟨32, by norm_num⟩ with hkdef
   have hk : (k : ℕ) = 32 := rfl
   -- The mod-37 congruence (from mod-37²), feeding the proven first-order high valuation.
@@ -355,7 +355,7 @@ theorem caseIICor823SecondOrder_detector_descent_eq_zero
     -- `CompletedLogArgHighValuation37 u` is `completedLogArg (…) ∈ λ^{36}`; transport keeping the
     -- element opaque (dodge the `Ideal.pow` `whnf` wall).
     revert hval
-    unfold CompletedLogArgHighValuation37
+    simp only [CompletedLogArgHighValuation37]
     rw [hW]
     generalize completedLogArg (p := 37) (K := CyclotomicField 37 ℚ)
       (EPlus_completedLogDomainPowPred (p := 37) (K := CyclotomicField 37 ℚ) u) = A

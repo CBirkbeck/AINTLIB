@@ -131,7 +131,7 @@ theorem caseIICor823DetSqLog_zsmul
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
     (n : ℤ) (X : DworkCompleteIntegerRing 37 (CyclotomicField 37 ℚ)) :
     caseIICor823DetSqLog (n • X) = ((n : ℤ) : ZMod (37 ^ 2)) * caseIICor823DetSqLog X := by
-  unfold caseIICor823DetSqLog
+  simp only [caseIICor823DetSqLog]
   rw [zsmul_eq_mul, map_mul, map_intCast, valuedLambdaQuotientDworkCoeffModSq_intCast_mul]
 
 open BernoulliRegular (CPlusGenerator) in
@@ -187,7 +187,7 @@ theorem caseII_eigenunitDetector_eq_column_sum
           genericColumnCoordLHS37 a := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   classical
-  unfold caseII_E32EigenunitDetector
+  simp only [caseII_E32EigenunitDetector]
   -- `E_i = CPlusExponentProduct 0 (e_a)`, `e_a = (a+2)^{36-i}`.
   rw [FLT37.pollaczekUnitPlusKplus_eq_CPlusExponentProduct i]
   -- `completedLog(E_i^36) = ∑_a e_a • kummerLogCompletedColumn a`.

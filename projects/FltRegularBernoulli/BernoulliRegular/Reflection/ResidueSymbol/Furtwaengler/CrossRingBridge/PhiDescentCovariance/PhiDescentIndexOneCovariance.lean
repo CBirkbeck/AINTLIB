@@ -420,7 +420,7 @@ theorem ideal_quotient_mk_gaussSumInt
           (Ideal.Quotient.mk 𝔭))
         ((Ideal.Quotient.mk 𝔭).toMonoidHom.compAddChar
           S.psiInt) := by
-  unfold ConcreteStickelbergerSetup.gaussSumInt
+  simp only [ConcreteStickelbergerSetup.gaussSumInt]
   exact gaussSum_ringHomComp _ _ (Ideal.Quotient.mk 𝔭)
 
 /-! ### K2-1 application in 𝓞 R' / 𝔭
@@ -661,7 +661,7 @@ theorem setupZetaCompatible_of_zeta_p_int_eq
         (algebraMap (𝓞 K) (𝓞 R'))
           (BernoulliRegular.cyclotomicZetaInteger (p := p) K)) :
     SetupZetaCompatible S (𝔭 := 𝔭) := by
-  unfold SetupZetaCompatible
+  simp only [SetupZetaCompatible]
   rw [h_zeta_p_int_eq]
 
 /-- **Identification under setup-zeta compatibility**: under
