@@ -11,8 +11,8 @@ import Mathlib.RingTheory.TensorProduct.Maps
 # Co-actions of a bialgebra (comodule algebras)
 
 Construction support for `T-G3d-infra` Piece 3: the algebraic structure underlying the affine-local
-quotient `Spec B → Spec B^{coρ}` (`.mathlib-quality/decomposition-g3d-piece3.md`). A **co-action** of
-an `R`-bialgebra `A` on an `R`-algebra `B` is an algebra map `ρ : B →ₐ[R] B ⊗[R] A` — the
+quotient `Spec B → Spec B^{coρ}` (`.mathlib-quality/decomposition-g3d-piece3.md`). A **co-action**
+of an `R`-bialgebra `A` on an `R`-algebra `B` is an algebra map `ρ : B →ₐ[R] B ⊗[R] A` — the
 structure-sheaf dual of a group-scheme action `G ×_S X → X` (`A = O_G`, `B = O_X`) — satisfying
 **counitality** and **coassociativity** (`IsCoaction`). This is the comodule-algebra structure;
 mathlib has `Coalgebra`/`Bialgebra`/`HopfAlgebra` but **no comodule class** (only
