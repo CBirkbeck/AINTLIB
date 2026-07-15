@@ -421,22 +421,28 @@ open WeierstrassCurve HasseWeil
 
 variable {K : Type u} [Field K] [DecidableEq K] (W : WeierstrassCurve K)
   [W.IsElliptic]
+variable {L : Type u} [Field L] [Algebra K L]
 
-/-- The generic solution vector: `(x_gen, y_gen)` as a `Z`-chart solution of the
-dehomogenised cubic. -/
-noncomputable def genericSolution :
-    { v : {j : Fin 3 // j ≠ 2} → W.toAffine.FunctionField //
+/-- Base change preserves ellipticity (the `W_KE_isElliptic` pattern: `baseChange = map`). -/
+instance : (W.baseChange L).IsElliptic :=
+  show (W.map (algebraMap K L)).IsElliptic from inferInstance
+
+instance : (W.baseChange L).toAffine.IsElliptic :=
+  inferInstanceAs ((W.baseChange L).IsElliptic)
+
+/-- **(L4-iii chart-point kit)** An affine Weierstrass point `(x, y)` over `L` as a `Z`-chart
+solution of the dehomogenised cubic. -/
+noncomputable def chartSolution (x y : L) (h : (W.baseChange L).toAffine.Equation x y) :
+    { v : {j : Fin 3 // j ≠ 2} → L //
       MvPolynomial.aeval v
         (MvPolynomial.dehomogenizeAux K 2 W.toProjective.polynomial) = 0 } := by
-  refine ⟨fun j => if j.1 = 0 then x_gen W else y_gen W, ?_⟩
+  refine ⟨fun j => if j.1 = 0 then x else y, ?_⟩
   have heval : MvPolynomial.aeval (fun j : {j : Fin 3 // j ≠ 2} =>
-        if j.1 = 0 then x_gen W else y_gen W)
+        if j.1 = 0 then x else y)
       (MvPolynomial.dehomogenizeAux K 2 W.toProjective.polynomial)
-      = y_gen W ^ 2 + algebraMap K W.toAffine.FunctionField W.a₁ * x_gen W * y_gen W
-        + algebraMap K W.toAffine.FunctionField W.a₃ * y_gen W
-        - (x_gen W ^ 3 + algebraMap K W.toAffine.FunctionField W.a₂ * x_gen W ^ 2
-          + algebraMap K W.toAffine.FunctionField W.a₄ * x_gen W
-          + algebraMap K W.toAffine.FunctionField W.a₆) := by
+      = y ^ 2 + algebraMap K L W.a₁ * x * y + algebraMap K L W.a₃ * y
+        - (x ^ 3 + algebraMap K L W.a₂ * x ^ 2 + algebraMap K L W.a₄ * x
+          + algebraMap K L W.a₆) := by
     rw [WeierstrassCurve.Projective.polynomial]
     simp only [map_sub, map_add, map_mul, map_pow,
       MvPolynomial.dehomogenizeAux_C, MvPolynomial.dehomogenizeAux_X_self,
@@ -445,55 +451,85 @@ noncomputable def genericSolution :
       MvPolynomial.aeval_C, MvPolynomial.aeval_X, mul_one, one_pow]
     norm_num
   rw [heval]
-  have heq := generic_equation W
+  have heq := h
   rw [WeierstrassCurve.Affine.equation_iff] at heq
-  simp only [W_KE, WeierstrassCurve.baseChange, WeierstrassCurve.map_a₁,
+  simp only [WeierstrassCurve.baseChange, WeierstrassCurve.map_a₁,
     WeierstrassCurve.map_a₂, WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄,
     WeierstrassCurve.map_a₆] at heq
   linear_combination heq
 
-/-- **(L4-iii brick 2a — the tautological `K(E)`-point of the model, chart-constructed)** The
-`K(E)`-point of `projModel W` given by the generic solution `(x_gen, y_gen)` through the `Z`-chart
-machinery. Because it is built by `chartHomEquiv.symm ∘ chartSolutionsEquiv.symm`, its dictionary
-readout is free (`apply_symm_apply`). -/
-noncomputable def genericSpecPointZ :
-    { g : SpecPoints (projModel W) (projModelπ W) W.toAffine.FunctionField //
-      InZChart W g } :=
-  (chartHomEquiv W 2 W.toAffine.FunctionField).symm
-    ((chartSolutionsEquiv W 2 W.toAffine.FunctionField).symm (genericSolution W))
+/-- **(L4-iii chart-point kit)** The `L`-point of the model attached to an affine Weierstrass
+point `(x, y)`, built through the `Z`-chart machinery so its dictionary readout is free
+(`apply_symm_apply`). -/
+noncomputable def chartSpecPointZ (x y : L) (h : (W.baseChange L).toAffine.Equation x y) :
+    { g : SpecPoints (projModel W) (projModelπ W) L // InZChart W g } :=
+  (chartHomEquiv W 2 L).symm
+    ((chartSolutionsEquiv W 2 L).symm (chartSolution W x y h))
 
-/-- The tautological `K(E)`-point of the model. -/
-noncomputable def genericSpecPoint :
-    SpecPoints (projModel W) (projModelπ W) W.toAffine.FunctionField :=
-  (genericSpecPointZ W).1
+/-- The underlying model point of `chartSpecPointZ`. -/
+noncomputable def chartSpecPoint (x y : L) (h : (W.baseChange L).toAffine.Equation x y) :
+    SpecPoints (projModel W) (projModelπ W) L :=
+  (chartSpecPointZ W x y h).1
 
-theorem inZChart_genericSpecPoint : InZChart W (genericSpecPoint W) :=
-  (genericSpecPointZ W).2
+theorem inZChart_chartSpecPoint (x y : L) (h : (W.baseChange L).toAffine.Equation x y) :
+    InZChart W (chartSpecPoint W x y h) :=
+  (chartSpecPointZ W x y h).2
 
-/-- The chart-hom readout of the tautological point is the generic-solution hom (free by
-`Subtype.coe_eta` + `apply_symm_apply`). -/
-lemma chartHomEquiv_genericSpecPoint (hZ : InZChart W (genericSpecPoint W)) :
-    chartHomEquiv W 2 W.toAffine.FunctionField ⟨genericSpecPoint W, hZ⟩
-      = (chartSolutionsEquiv W 2 W.toAffine.FunctionField).symm (genericSolution W) := by
-  rw [show (⟨genericSpecPoint W, hZ⟩ :
-      { g : SpecPoints (projModel W) (projModelπ W) W.toAffine.FunctionField //
-        InZChart W g }) = genericSpecPointZ W from Subtype.coe_eta _ _]
+/-- The chart-hom readout of `chartSpecPoint` is the solution hom (free by `Subtype.coe_eta` +
+`apply_symm_apply`). -/
+lemma chartHomEquiv_chartSpecPoint (x y : L) (h : (W.baseChange L).toAffine.Equation x y)
+    (hZ : InZChart W (chartSpecPoint W x y h)) :
+    chartHomEquiv W 2 L ⟨chartSpecPoint W x y h, hZ⟩
+      = (chartSolutionsEquiv W 2 L).symm (chartSolution W x y h) := by
+  rw [show (⟨chartSpecPoint W x y h, hZ⟩ :
+      { g : SpecPoints (projModel W) (projModelπ W) L // InZChart W g })
+      = chartSpecPointZ W x y h from Subtype.coe_eta _ _]
   exact Equiv.apply_symm_apply _ _
 
-/-- **(L4-iii brick 2b — the dictionary reads the tautological point as the generic point)**
-Under the field-points dictionary, the chart-constructed tautological `K(E)`-point corresponds to
-`HasseWeil.genericPoint = some (x_gen, y_gen)`. Free by construction (`apply_symm_apply` twice). -/
+/-- **(L4-iii chart-point kit, forward readout)** The dictionary reads `chartSpecPoint x y` as the
+affine point `some x y`. -/
+theorem projModelPointsEquiv_chartSpecPoint (x y : L)
+    (h : (W.baseChange L).toAffine.Equation x y) :
+    projModelPointsEquiv W L (chartSpecPoint W x y h)
+      = WeierstrassCurve.Affine.Point.some x y
+          (WeierstrassCurve.Affine.equation_iff_nonsingular.mp h) := by
+  refine projModelPointsEquiv_some W L (chartSpecPoint W x y h)
+    (inZChart_chartSpecPoint W x y h) x y
+    (WeierstrassCurve.Affine.equation_iff_nonsingular.mp h) ?_ ?_
+  · rw [chartHomEquiv_chartSpecPoint W x y h (inZChart_chartSpecPoint W x y h),
+      Equiv.apply_symm_apply]
+    rfl
+  · rw [chartHomEquiv_chartSpecPoint W x y h (inZChart_chartSpecPoint W x y h),
+      Equiv.apply_symm_apply]
+    rfl
+
+/-- **(L4-iii brick 4 — the readout-back)** A model point whose dictionary value is the affine
+point `some x y` IS the chart-constructed point `chartSpecPoint x y` — by injectivity of the
+dictionary. This turns a computed dictionary value into an explicit chart factorization (with a
+known chart-hom), the step that reads the division-polynomial coordinates of `[N]∘τ` back into
+the scheme world. -/
+theorem eq_chartSpecPoint_of_projModelPointsEquiv_some
+    {g : SpecPoints (projModel W) (projModelπ W) L} {x y : L}
+    {hxy : (W.baseChange L).toAffine.Nonsingular x y}
+    (hg : projModelPointsEquiv W L g = WeierstrassCurve.Affine.Point.some x y hxy) :
+    g = chartSpecPoint W x y (WeierstrassCurve.Affine.equation_iff_nonsingular.mpr hxy) := by
+  apply (projModelPointsEquiv W L).injective
+  rw [hg, projModelPointsEquiv_chartSpecPoint]
+
+/-- **(L4-iii brick 2a — the tautological `K(E)`-point of the model)** The chart-constructed
+point with the generic coordinates `(x_gen, y_gen)`. -/
+noncomputable def genericSpecPoint :
+    SpecPoints (projModel W) (projModelπ W) W.toAffine.FunctionField :=
+  chartSpecPoint W (x_gen W) (y_gen W) (generic_equation W)
+
+theorem inZChart_genericSpecPoint : InZChart W (genericSpecPoint W) :=
+  inZChart_chartSpecPoint W _ _ (generic_equation W)
+
+/-- **(L4-iii brick 2b — the dictionary reads the tautological point as the generic point)** -/
 theorem projModelPointsEquiv_genericSpecPoint :
     projModelPointsEquiv W W.toAffine.FunctionField (genericSpecPoint W)
-      = genericPoint W := by
-  refine (projModelPointsEquiv_some W W.toAffine.FunctionField (genericSpecPoint W)
-    (inZChart_genericSpecPoint W) (x_gen W) (y_gen W) (generic_nonsingular W) ?_ ?_).trans rfl
-  · rw [chartHomEquiv_genericSpecPoint W (inZChart_genericSpecPoint W),
-      Equiv.apply_symm_apply]
-    rfl
-  · rw [chartHomEquiv_genericSpecPoint W (inZChart_genericSpecPoint W),
-      Equiv.apply_symm_apply]
-    rfl
+      = genericPoint W :=
+  projModelPointsEquiv_chartSpecPoint W (x_gen W) (y_gen W) (generic_equation W)
 
 end TautologicalPoint
 
