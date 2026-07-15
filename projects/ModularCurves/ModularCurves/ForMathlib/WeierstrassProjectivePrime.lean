@@ -49,42 +49,24 @@ attribute [local instance] MvPolynomial.gradedAlgebra
 
 namespace WeierstrassCurve
 
-/-- **The projective Weierstrass cubic is prime.** For any Weierstrass curve `W` over a
-field `K`, the homogeneous Weierstrass polynomial `W.toProjective.polynomial` is a prime
-element of `MvPolynomial (Fin 3) K`. No ellipticity or discriminant hypothesis is needed. -/
-theorem projective_polynomial_prime {K : Type*} [Field K] (W : WeierstrassCurve K) :
-    Prime W.toProjective.polynomial := by
-  -- The lower coefficients of the monic cubic `Gm`, as elements of `S = MvPolynomial (Fin 2) K`.
-  set b2 : MvPolynomial (Fin 2) K := MvPolynomial.C W.a₂ * MvPolynomial.X 1 with hb2
-  set b1 : MvPolynomial (Fin 2) K := MvPolynomial.C W.a₄ * MvPolynomial.X 1 ^ 2
-      - MvPolynomial.C W.a₁ * MvPolynomial.X 0 * MvPolynomial.X 1 with hb1
-  set b0 : MvPolynomial (Fin 2) K := MvPolynomial.C W.a₆ * MvPolynomial.X 1 ^ 3
-      - MvPolynomial.C W.a₃ * MvPolynomial.X 0 * MvPolynomial.X 1 ^ 2
-      - MvPolynomial.X 0 ^ 2 * MvPolynomial.X 1 with hb0
-  -- The monic cubic obtained by extracting `X 0` (up to sign).
+/-- The monic cubic `X³ + C b₂·X² + C b₁·X + C b₀`, assembled from the lower Weierstrass
+coefficients `b₀, b₁, b₂ : MvPolynomial (Fin 2) K`, is prime. It is Eisenstein at the prime
+`span {X 1}` (each lower coefficient is divisible by `X 1`, and the constant one is not
+divisible by `(X 1)²` since `X 1 ∤ X 0`), hence irreducible, hence prime in the UFD
+`(MvPolynomial (Fin 2) K)[X]`. Extracted from `projective_polynomial_prime`. -/
+private theorem monicWeierstrassCubic_prime {K : Type*} [Field K] (W : WeierstrassCurve K)
+    (b0 b1 b2 : MvPolynomial (Fin 2) K)
+    (hb0 : b0 = MvPolynomial.C W.a₆ * MvPolynomial.X 1 ^ 3
+        - MvPolynomial.C W.a₃ * MvPolynomial.X 0 * MvPolynomial.X 1 ^ 2
+        - MvPolynomial.X 0 ^ 2 * MvPolynomial.X 1)
+    (hb1 : b1 = MvPolynomial.C W.a₄ * MvPolynomial.X 1 ^ 2
+        - MvPolynomial.C W.a₁ * MvPolynomial.X 0 * MvPolynomial.X 1)
+    (hb2 : b2 = MvPolynomial.C W.a₂ * MvPolynomial.X 1) :
+    Prime (Polynomial.X ^ 3 + Polynomial.C b2 * Polynomial.X ^ 2
+      + Polynomial.C b1 * Polynomial.X + Polynomial.C b0) := by
   set Gm : (MvPolynomial (Fin 2) K)[X] :=
     Polynomial.X ^ 3 + Polynomial.C b2 * Polynomial.X ^ 2
       + Polynomial.C b1 * Polynomial.X + Polynomial.C b0 with hGm
-  -- Action of `finSuccEquiv K 2` on the generators and on constants.
-  have hX0 : MvPolynomial.finSuccEquiv K 2 (MvPolynomial.X 0) = Polynomial.X :=
-    MvPolynomial.finSuccEquiv_X_zero
-  have hX1 : MvPolynomial.finSuccEquiv K 2 (MvPolynomial.X 1)
-      = Polynomial.C (MvPolynomial.X 0) := by
-    have h : (1 : Fin 3) = (0 : Fin 2).succ := by decide
-    rw [h]; exact MvPolynomial.finSuccEquiv_X_succ
-  have hX2 : MvPolynomial.finSuccEquiv K 2 (MvPolynomial.X 2)
-      = Polynomial.C (MvPolynomial.X 1) := by
-    have h : (2 : Fin 3) = (1 : Fin 2).succ := by decide
-    rw [h]; exact MvPolynomial.finSuccEquiv_X_succ
-  have hC : ∀ a : K, MvPolynomial.finSuccEquiv K 2 (MvPolynomial.C a)
-      = Polynomial.C (MvPolynomial.C a) := by
-    intro a
-    rw [MvPolynomial.finSuccEquiv_apply, MvPolynomial.eval₂Hom_C]; rfl
-  -- Extracting `X 0` sends the Weierstrass cubic to `-Gm`.
-  have hmap : MvPolynomial.finSuccEquiv K 2 W.toProjective.polynomial = -Gm := by
-    simp only [hGm, hb0, hb1, hb2, WeierstrassCurve.Projective.polynomial,
-      map_add, map_sub, map_mul, map_pow, hX0, hX1, hX2, hC]
-    ring
   -- `Gm` is monic of degree three with the advertised lower coefficients.
   have hmonic : Gm.Monic := by rw [hGm]; monicity!
   have hdeg : Gm.natDegree = 3 := by rw [hGm]; compute_degree!
@@ -133,10 +115,50 @@ theorem projective_polynomial_prime {K : Type*} [Field K] (W : WeierstrassCurve 
         hXprime.dvd_of_dvd_pow hdvd2
       rw [MvPolynomial.X_dvd_X] at hcontra
       exact absurd hcontra (by decide)
-  -- Eisenstein ⇒ irreducible ⇒ prime, then transport back through `finSuccEquiv`.
+  -- Eisenstein ⇒ irreducible ⇒ prime.
   have hGm_irred : Irreducible Gm :=
     hEis.irreducible hPprime hmonic.isPrimitive (by rw [hdeg]; norm_num)
-  have hGm_prime : Prime Gm := UniqueFactorizationMonoid.irreducible_iff_prime.mp hGm_irred
+  exact UniqueFactorizationMonoid.irreducible_iff_prime.mp hGm_irred
+
+/-- **The projective Weierstrass cubic is prime.** For any Weierstrass curve `W` over a
+field `K`, the homogeneous Weierstrass polynomial `W.toProjective.polynomial` is a prime
+element of `MvPolynomial (Fin 3) K`. No ellipticity or discriminant hypothesis is needed. -/
+theorem projective_polynomial_prime {K : Type*} [Field K] (W : WeierstrassCurve K) :
+    Prime W.toProjective.polynomial := by
+  -- The lower coefficients of the monic cubic `Gm`, as elements of `S = MvPolynomial (Fin 2) K`.
+  set b2 : MvPolynomial (Fin 2) K := MvPolynomial.C W.a₂ * MvPolynomial.X 1 with hb2
+  set b1 : MvPolynomial (Fin 2) K := MvPolynomial.C W.a₄ * MvPolynomial.X 1 ^ 2
+      - MvPolynomial.C W.a₁ * MvPolynomial.X 0 * MvPolynomial.X 1 with hb1
+  set b0 : MvPolynomial (Fin 2) K := MvPolynomial.C W.a₆ * MvPolynomial.X 1 ^ 3
+      - MvPolynomial.C W.a₃ * MvPolynomial.X 0 * MvPolynomial.X 1 ^ 2
+      - MvPolynomial.X 0 ^ 2 * MvPolynomial.X 1 with hb0
+  -- The monic cubic obtained by extracting `X 0` (up to sign).
+  set Gm : (MvPolynomial (Fin 2) K)[X] :=
+    Polynomial.X ^ 3 + Polynomial.C b2 * Polynomial.X ^ 2
+      + Polynomial.C b1 * Polynomial.X + Polynomial.C b0 with hGm
+  -- Action of `finSuccEquiv K 2` on the generators and on constants.
+  have hX0 : MvPolynomial.finSuccEquiv K 2 (MvPolynomial.X 0) = Polynomial.X :=
+    MvPolynomial.finSuccEquiv_X_zero
+  have hX1 : MvPolynomial.finSuccEquiv K 2 (MvPolynomial.X 1)
+      = Polynomial.C (MvPolynomial.X 0) := by
+    have h : (1 : Fin 3) = (0 : Fin 2).succ := by decide
+    rw [h]; exact MvPolynomial.finSuccEquiv_X_succ
+  have hX2 : MvPolynomial.finSuccEquiv K 2 (MvPolynomial.X 2)
+      = Polynomial.C (MvPolynomial.X 1) := by
+    have h : (2 : Fin 3) = (1 : Fin 2).succ := by decide
+    rw [h]; exact MvPolynomial.finSuccEquiv_X_succ
+  have hC : ∀ a : K, MvPolynomial.finSuccEquiv K 2 (MvPolynomial.C a)
+      = Polynomial.C (MvPolynomial.C a) := by
+    intro a
+    rw [MvPolynomial.finSuccEquiv_apply, MvPolynomial.eval₂Hom_C]; rfl
+  -- Extracting `X 0` sends the Weierstrass cubic to `-Gm`.
+  have hmap : MvPolynomial.finSuccEquiv K 2 W.toProjective.polynomial = -Gm := by
+    simp only [hGm, hb0, hb1, hb2, WeierstrassCurve.Projective.polynomial,
+      map_add, map_sub, map_mul, map_pow, hX0, hX1, hX2, hC]
+    ring
+  -- `Gm` is prime by Eisenstein at `span {Z}` (extracted helper); transport back below.
+  have hGm_prime : Prime Gm := by
+    rw [hGm]; exact monicWeierstrassCubic_prime W b0 b1 b2 hb0 hb1 hb2
   have hassoc : Associated (-Gm) Gm := ⟨-1, by rw [Units.val_neg, Units.val_one]; ring⟩
   have hnegGm_prime : Prime (-Gm) := hassoc.prime_iff.mpr hGm_prime
   rw [← hmap] at hnegGm_prime
