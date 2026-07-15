@@ -158,7 +158,7 @@ supports and sends each support element to a new support element with the
 same coefficient, the sum of coefficients is unchanged. -/
 theorem degree_toProjective (D : Divisor C) :
     (toProjective D).degree = D.degree := by
-  unfold toProjective ProjectiveDivisor.degree Divisor.degree
+  simp only [toProjective, ProjectiveDivisor.degree, Divisor.degree]
   exact Finsupp.sum_mapDomain_index (h := fun _ n ↦ n)
     (fun _ ↦ rfl) (fun _ _ _ ↦ rfl)
 
@@ -221,14 +221,14 @@ noncomputable def projectiveDivisorOf (C : SmoothPlaneCurve F) (f : C.FunctionFi
 
 @[simp] theorem projectiveDivisorOf_zero :
     C.projectiveDivisorOf (0 : C.FunctionField) = 0 := by
-  unfold projectiveDivisorOf
+  simp only [projectiveDivisorOf]
   rw [C.divisorOf_zero, Divisor.toProjective_zero, zero_add, C.ordAtInfty_zero,
     WithTop.untopD_top, Finsupp.single_zero]
 
 theorem projectiveDivisorOf_apply_affine (f : C.FunctionField) (P : C.SmoothPoint) :
     C.projectiveDivisorOf f (ProjectiveSmoothPoint.affine P) =
       (C.ord_P P f).untopD 0 := by
-  unfold projectiveDivisorOf Divisor.toProjective
+  simp only [projectiveDivisorOf, Divisor.toProjective]
   have h_ne : ProjectiveSmoothPoint.affine P ≠
       (ProjectiveSmoothPoint.infinity : ProjectiveSmoothPoint C) := by
     intro h; nomatch h
@@ -239,7 +239,7 @@ theorem projectiveDivisorOf_apply_affine (f : C.FunctionField) (P : C.SmoothPoin
 theorem projectiveDivisorOf_apply_infinity (f : C.FunctionField) :
     C.projectiveDivisorOf f ProjectiveSmoothPoint.infinity =
       (C.ordAtInfty f).untopD 0 := by
-  unfold projectiveDivisorOf Divisor.toProjective
+  simp only [projectiveDivisorOf, Divisor.toProjective]
   have hnot : (ProjectiveSmoothPoint.infinity : ProjectiveSmoothPoint C) ∉
       ((C.divisorOf f).mapDomain ProjectiveSmoothPoint.affine).support := by
     intro h
@@ -258,7 +258,7 @@ theorem projectiveDivisorOf_apply_infinity (f : C.FunctionField) :
 theorem projectiveDivisorOf_eq_toProjective_of_ordAtInfty_zero {f : C.FunctionField}
     (h : C.ordAtInfty f = ((0 : ℤ) : WithTop ℤ)) :
     C.projectiveDivisorOf f = (C.divisorOf f).toProjective := by
-  unfold projectiveDivisorOf
+  simp only [projectiveDivisorOf]
   rw [h, WithTop.untopD_coe, Finsupp.single_zero, add_zero]
 
 /-- **II.3.1(b) structural decomposition**: the degree of the projective divisor
@@ -271,10 +271,10 @@ theorem projectiveDivisorOf_eq_toProjective_of_ordAtInfty_zero {f : C.FunctionFi
 theorem projectiveDivisorOf_degree (f : C.FunctionField) :
     (C.projectiveDivisorOf f).degree =
       (C.divisorOf f).degree + (C.ordAtInfty f).untopD 0 := by
-  unfold projectiveDivisorOf
+  simp only [projectiveDivisorOf]
   rw [ProjectiveDivisor.degree_add, Divisor.degree_toProjective]
   congr 1
-  unfold ProjectiveDivisor.degree
+  simp only [ProjectiveDivisor.degree]
   exact Finsupp.sum_single_index rfl
 
 /-- **II.3.1(b) trivial case f = 0**: the degree of the projective divisor
@@ -301,7 +301,7 @@ theorem projectiveDivisorOf_mul {f g : C.FunctionField} (hf : f ≠ 0) (hg : g �
   have hv_g : C.ordAtInfty g ≠ ⊤ := (C.ordAtInfty_eq_top_iff g).not.mpr hg
   obtain ⟨a, ha⟩ := WithTop.ne_top_iff_exists.mp hv_f
   obtain ⟨b, hb⟩ := WithTop.ne_top_iff_exists.mp hv_g
-  unfold projectiveDivisorOf
+  simp only [projectiveDivisorOf]
   rw [C.divisorOf_mul hf hg, Divisor.toProjective_add, C.ordAtInfty_mul hf hg,
     ← ha, ← hb, ← WithTop.coe_add, WithTop.untopD_coe, WithTop.untopD_coe,
     WithTop.untopD_coe, Finsupp.single_add]
