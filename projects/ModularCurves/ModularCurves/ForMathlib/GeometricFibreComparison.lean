@@ -119,8 +119,8 @@ end EllipticCurve
 point `(0, 0)` is nowhere of order `1`, `2`, or `3`: every `a • (0, 0)` with `1 ≤ a ≤ 3` is a
 genuine affine point, never the identity. (`ψ₂(0,0) = a₃`, `ψ₃(0,0) = b₈ = a₂a₃²`; `(0,0)` fails to
 be 2-torsion since `0 ≠ negY(0,0) = -a₃`, and `3•(0,0)` has distinct `x`-coordinate `-a₂ ≠ 0`.) This
-is the affine core of the atlas leaf `NowhereGeomOrderLEThree (tateMarkedPoint)` (Y1-vi), transferred
-to fibres through `EllipticCurve.geomFibrePointAddEquiv`. -/
+is the affine core of the atlas leaf `NowhereGeomOrderLEThree (tateMarkedPoint)` (Y1-vi),
+transferred to fibres through `EllipticCurve.geomFibrePointAddEquiv`. -/
 lemma affine_origin_order_gt_three {k : Type u} [Field k] [DecidableEq k]
     (W : WeierstrassCurve k) [W.IsElliptic] (h4 : W.a₄ = 0)
     (hB2 : IsUnit W.a₂) (hB3 : IsUnit W.a₃)
