@@ -46,10 +46,12 @@ variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Po
 
 noncomputable local instance : DecidableEq (AlgebraicClosure K) := Classical.decEq _
 
-/-- **The unconditional Hasse bound** (Silverman V.1.1): for an elliptic curve `E` over a finite field
+/-- **The unconditional Hasse bound** (Silverman V.1.1): for an elliptic curve `E` over a
+finite field
 `𝔽_q`, `|#E(𝔽_q) − q − 1| ≤ 2√q`, with **no hypotheses** beyond `2 ≤ #K`.
 
-Assembled from `hasse_bound_unconditional_of_baseChange_scalings_coprime` (`FrobMatrixData.lean`) with
+Assembled from `hasse_bound_unconditional_of_baseChange_scalings_coprime`
+(`FrobMatrixData.lean`) with
 the kernel-cardinality degree function `pencilKerCard` and the three base-change scalings
 `frobeniusScaling_holds`, `oneSubFrobeniusScaling_holds`, `pencilScaling_holds_coprime`.
 
