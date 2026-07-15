@@ -226,6 +226,133 @@ theorem modelMulByHom_flat_of_field (W : WeierstrassCurve k) [W.IsElliptic]
       ((modelEllipticCurve W).mulByHom (N : ℤ)) (V y) (hV y) hpre
       (fun w _ => hsurj w)
 
+/-! ### Flat transport across pointed group-object isos + arbitrary field-valued points
+
+The `Flat` analogue of `finite_fibres_mulByHom_of_isMonHom_iso` /
+`locallyQuasiFinite_mulByHom_of_isMonHom_iso`, and the master fibre input for the
+general-base BB-FLAT: `[N]` on the base change of `E/S` along ANY field-valued point
+`Spec K ⟶ S` is flat. -/
+
 end FieldLevelFlat
+
+section FlatTransport
+
+open EllipticCurve
+
+variable {S : Scheme.{u}}
+
+/-- **(Flat transport across a group-object iso)** If `φ : E ≅ F` as group objects over `S`
+(`IsMonHom`), flatness of `[n]` transports from `F` to `E`: `[n]_E` is the conjugate
+`φ ≫ [n]_F ≫ φ⁻¹`. -/
+theorem flat_mulByHom_of_isMonHom_iso {E F : EllipticCurve S}
+    (φ : E.asOver ≅ F.asOver) [IsMonHom φ.hom] (n : ℤ)
+    (hF : Flat (F.mulByHom n)) : Flat (E.mulByHom n) := by
+  -- ascribe the underlying scheme morphisms to the `.E`-types (defeq)
+  let ψ : E.E ⟶ F.E := φ.hom.left
+  let ψ' : F.E ⟶ E.E := φ.inv.left
+  have hc : E.mulByHom n ≫ ψ = ψ ≫ F.mulByHom n :=
+    mulByHom_comp_left_of_isMonHom E F φ.hom n
+  have hinv : ψ ≫ ψ' = 𝟙 E.E := by
+    show φ.hom.left ≫ φ.inv.left = 𝟙 _
+    rw [← Over.comp_left, φ.hom_inv_id, Over.id_left]
+  have hinv' : ψ' ≫ ψ = 𝟙 F.E := by
+    show φ.inv.left ≫ φ.hom.left = 𝟙 _
+    rw [← Over.comp_left, φ.inv_hom_id, Over.id_left]
+  let eIso : E.E ≅ F.E := ⟨ψ, ψ', hinv, hinv'⟩
+  exact (MorphismProperty.arrow_mk_iso_iff (P := @Flat)
+    (Arrow.isoMk eIso eIso hc.symm)).mpr hF
+
+/-- **(fibre input at residue points)** `[N]` on the fibre curve `E ×_S Spec κ(s)` is flat:
+the fibre is pointed-isomorphic to a projective Weierstrass model over `κ(s)`
+(`fibreModelIsoAsOver`), whose `[N]` is flat by the field-level theorem. -/
+theorem flat_mulByHom_baseChange_residueField (E : EllipticCurve S) (N : ℕ) [NeZero N]
+    (s : S) :
+    Flat ((E.baseChange (S.fromSpecResidueField s)).mulByHom (N : ℤ)) := by
+  obtain ⟨W, hWell, e, heπ, hez⟩ := fibrewiseElliptic E s
+  haveI := hWell
+  obtain ⟨φ, hφ⟩ := fibreModelIsoAsOver E s W e heπ hez
+  haveI := hφ
+  exact flat_mulByHom_of_isMonHom_iso φ (N : ℤ) (modelMulByHom_flat_of_field W N)
+
+/-- **(the `[N]` base-change square)** For any `g : T ⟶ S`, the `[N]` of the base-changed
+curve is the pullback of the `[N]` of `E` along the projections — packaged as an
+`IsPullback` square (by cancelling the `π`-square off the base-change rectangle). -/
+theorem isPullback_mulByHom_baseChange (E : EllipticCurve S) {T : Scheme.{u}}
+    (g : T ⟶ S) (n : ℤ) :
+    IsPullback ((E.baseChange g).mulByHom n) (pullback.fst E.π g)
+      (pullback.fst E.π g) (E.mulByHom n) := by
+  refine IsPullback.of_right ?_ (mulByHom_baseChange_fst E g n)
+    ((IsPullback.of_hasPullback E.π g).flip)
+  have e1 : (E.baseChange g).mulByHom n ≫ pullback.snd E.π g = pullback.snd E.π g :=
+    mulByHom_π (E.baseChange g) n
+  have e2 : E.mulByHom n ≫ E.π = E.π := mulByHom_π E n
+  rw [e1, e2]
+  exact (IsPullback.of_hasPullback E.π g).flip
+
+/-- **(flat base-change stability of the fibre input)** If `[N]` of `E ×_S T` is flat
+then so is `[N]` of `E ×_S T'` for any `h : T' ⟶ T`: the two `[N]`-base-change squares
+paste, exhibiting the latter as a pullback of the former. -/
+theorem flat_mulByHom_baseChange_comp (E : EllipticCurve S) (N : ℤ)
+    {T T' : Scheme.{u}} (h : T' ⟶ T) (ι : T ⟶ S)
+    (hflat : Flat ((E.baseChange ι).mulByHom N)) :
+    Flat ((E.baseChange (h ≫ ι)).mulByHom N) := by
+  have sq₁ := isPullback_mulByHom_baseChange E ι N
+  have sq₂ := isPullback_mulByHom_baseChange E (h ≫ ι) N
+  -- the comparison morphism between the two pullbacks, ascribed to the record types
+  let β : (E.baseChange (h ≫ ι)).E ⟶ (E.baseChange ι).E :=
+    pullback.map E.π (h ≫ ι) E.π ι (𝟙 _) h (𝟙 _) (by simp) (by simp)
+  have hβfst : β ≫ pullback.fst E.π ι = pullback.fst E.π (h ≫ ι) := by
+    show pullback.lift _ _ _ ≫ pullback.fst E.π ι = _
+    rw [pullback.lift_fst, Category.comp_id]
+  have hβsnd : β ≫ pullback.snd E.π ι = pullback.snd E.π (h ≫ ι) ≫ h := by
+    show pullback.lift _ _ _ ≫ pullback.snd E.π ι = _
+    rw [pullback.lift_snd]
+  -- the comparison square commutes with `[N]`
+  have hcomm : (E.baseChange (h ≫ ι)).mulByHom N ≫ β
+      = β ≫ (E.baseChange ι).mulByHom N := by
+    apply pullback.hom_ext
+    · have l1 : (E.baseChange (h ≫ ι)).mulByHom N ≫ β ≫ pullback.fst E.π ι
+          = pullback.fst E.π (h ≫ ι) ≫ E.mulByHom N := by
+        rw [hβfst, mulByHom_baseChange_fst]
+      have l2 : β ≫ (E.baseChange ι).mulByHom N ≫ pullback.fst E.π ι
+          = pullback.fst E.π (h ≫ ι) ≫ E.mulByHom N := by
+        rw [mulByHom_baseChange_fst]
+        exact (Category.assoc _ _ _).symm.trans
+          (congrArg (· ≫ E.mulByHom N) hβfst)
+      exact (Category.assoc _ _ _).trans (l1.trans (l2.symm.trans
+        (Category.assoc _ _ _).symm))
+    · have l1 : (E.baseChange (h ≫ ι)).mulByHom N ≫ β ≫ pullback.snd E.π ι
+          = pullback.snd E.π (h ≫ ι) ≫ h := by
+        rw [hβsnd]
+        exact (Category.assoc _ _ _).symm.trans
+          (congrArg (· ≫ h) (mulByHom_baseChange_snd E (h ≫ ι) N))
+      have l2 : β ≫ (E.baseChange ι).mulByHom N ≫ pullback.snd E.π ι
+          = pullback.snd E.π (h ≫ ι) ≫ h := by
+        rw [mulByHom_baseChange_snd, hβsnd]
+      exact (Category.assoc _ _ _).trans (l1.trans (l2.symm.trans
+        (Category.assoc _ _ _).symm))
+  -- vertical pasting cancellation: `[N]_{h ≫ ι}` is the pullback of `[N]_ι` along `β`
+  have sqβ : IsPullback ((E.baseChange (h ≫ ι)).mulByHom N) β β
+      ((E.baseChange ι).mulByHom N) := by
+    refine IsPullback.of_bot ?_ hcomm sq₁
+    have hleg : β ≫ pullback.fst E.π ι = pullback.fst E.π (h ≫ ι) := hβfst
+    rw [hleg]
+    exact sq₂
+  exact MorphismProperty.of_isPullback sqβ.flip hflat
+
+/-- **(fibre input at arbitrary field-valued points — the BB-FLAT fibre master)**
+`[N]` on the base change of `E/S` along ANY morphism `Spec K ⟶ S` from the spectrum
+of a field is flat: the point factors through the residue field of the image of the
+closed point (`SpecToEquivOfField`), the residue-point case is
+`flat_mulByHom_baseChange_residueField`, and flatness passes to the further base
+change `Spec K ⟶ Spec κ(s)`. -/
+theorem flat_mulByHom_baseChange_of_field (E : EllipticCurve S) (N : ℕ) [NeZero N]
+    {K : Type u} [Field K] (g : Spec (CommRingCat.of K) ⟶ S) :
+    Flat ((E.baseChange g).mulByHom (N : ℤ)) := by
+  rw [← Scheme.descResidueField_stalkClosedPointTo_fromSpecResidueField K S g]
+  exact flat_mulByHom_baseChange_comp E (N : ℤ) _ _
+    (flat_mulByHom_baseChange_residueField E N _)
+
+end FlatTransport
 
 end ModularCurves
