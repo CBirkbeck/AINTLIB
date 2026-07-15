@@ -1164,19 +1164,113 @@ theorem brick6_intertwining {K : Type u} [Field K] [DecidableEq K] (W : Weierstr
   set ψ := HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn with hψ
   -- the three generator leaves (FFM-X/Y/C: the germ-of-[N]-pullback of the coordinates, evaluated
   -- through `projModelFunctionFieldEquiv`, are the division polynomials — via brick 5).
+  have hτV : (genericSpecPoint W).1.base (IsLocalRing.closedPoint (W.toAffine.FunctionField))
+      ∈ ((modelEllipticCurve W).mulByHom N) ⁻¹ᵁ (zChart W) := by
+    show ((modelEllipticCurve W).mulByHom N).base _ ∈ (zChart W)
+    rw [genericSpecPoint_base_closedPoint W]
+    show ((modelEllipticCurve W).mulByHom N).base
+        (genericPoint (modelEllipticCurve W).E) ∈ (zChart W)
+    rw [genericPoint_eq_of_isDominant ((modelEllipticCurve W).mulByHom N)]
+    exact genericPoint_mem_zChart W
+  have hMASTER : ∀ c : W.toAffine.CoordinateRing,
+      e (fFMr ((projModel W).germToFunctionField (zChart W) (cRTZ c)))
+        = chartSolutionHom W (HasseWeil.mulByInt_x W.toAffine (N : ℤ))
+            (HasseWeil.mulByInt_y W.toAffine (N : ℤ)) (mulByInt_equation W hn)
+            ((chartZRingEquiv W).symm c) := by
+    intro c
+    haveI hNe2 : Nonempty (zChart W : (projModel W).Opens) :=
+      ⟨hZaff.isoSpec.inv.base (Classical.arbitrary _)⟩
+    haveI hNe3 : Nonempty (↑(zChart W) : Set ↥(projModel W)) := hNe2
+    haveI hNeE : Nonempty (show ((modelEllipticCurve W).E).Opens from zChart W) := hNe2
+    have h1 : fFMr ((projModel W).germToFunctionField (zChart W) (cRTZ c))
+        = (projModel W).presheaf.germ
+            (((modelEllipticCurve W).mulByHom N) ⁻¹ᵁ (zChart W))
+            (genericPoint _)
+            (genericPoint_mem_preimage ((modelEllipticCurve W).mulByHom N)
+              (zChart W))
+            (((modelEllipticCurve W).mulByHom N).app (zChart W) (cRTZ c)) :=
+      functionFieldMap_germToFunctionField ((modelEllipticCurve W).mulByHom N)
+        (zChart W) (cRTZ c)
+    have h2 := projModelFunctionFieldEquiv_germ_eval W
+      (((modelEllipticCurve W).mulByHom N) ⁻¹ᵁ (zChart W))
+      (genericPoint_mem_preimage ((modelEllipticCurve W).mulByHom N)
+        (zChart W)) hτV
+      (Scheme.preimage_eq_top_of_closedPoint_mem _ hτV).ge
+      (((modelEllipticCurve W).mulByHom N).app (zChart W) (cRTZ c))
+    rw [he] at *
+    rw [show fFMr ((projModel W).germToFunctionField (zChart W) (cRTZ c))
+        = (projModel W).presheaf.germ _ _ _ _ from h1, h2]
+    have hfold : (((genericSpecPoint W).1.appLE
+          (((modelEllipticCurve W).mulByHom N) ⁻¹ᵁ (zChart W)) ⊤
+          (Scheme.preimage_eq_top_of_closedPoint_mem _ hτV).ge)
+        ≫ (Scheme.ΓSpecIso (CommRingCat.of (W.toAffine.FunctionField))).hom).hom
+        ((((modelEllipticCurve W).mulByHom N).app (zChart W)).hom (cRTZ c))
+        = ((((genericSpecPoint W).1 ≫ (modelEllipticCurve W).mulByHom N).appLE
+            (zChart W) ⊤
+            (le_trans (Scheme.preimage_eq_top_of_closedPoint_mem _ hτV).ge le_rfl))
+          ≫ (Scheme.ΓSpecIso (CommRingCat.of (W.toAffine.FunctionField))).hom).hom
+            (cRTZ c) := by
+      rw [Scheme.Hom.comp_appLE]
+      rfl
+    rw [hfold]
+    have hb5 : (genericSpecPoint W).1 ≫ (modelEllipticCurve W).mulByHom (N : ℤ)
+        = (chartSpecPoint W (HasseWeil.mulByInt_x W.toAffine (N : ℤ))
+            (HasseWeil.mulByInt_y W.toAffine (N : ℤ)) (mulByInt_equation W hn)).1 :=
+      genericSpecPoint_comp_mulByHom W hn
+    simp only [hb5]
+    have hT3 := chartSpecPoint_appLE_eval W (HasseWeil.mulByInt_x W.toAffine (N : ℤ))
+      (HasseWeil.mulByInt_y W.toAffine (N : ℤ)) (mulByInt_equation W hn)
+      (by
+        rw [← hb5]
+        exact le_trans (Scheme.preimage_eq_top_of_closedPoint_mem _ hτV).ge le_rfl)
+    refine (DFunLike.congr_fun (congrArg CommRingCat.Hom.hom hT3) (cRTZ c)).trans ?_
+    show chartSolutionHom W _ _ _
+        ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+            (mk_X_mem_quotientGrading_one W 2) one_pos).inv.hom (cRTZ c)) = _
+    congr 1
+    rw [hcRTZ]
+    show (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).inv.hom
+        ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+          (mk_X_mem_quotientGrading_one W 2) one_pos).hom.hom
+          ((chartZRingEquiv W).symm c)) = _
+    exact DFunLike.congr_fun (congrArg CommRingCat.Hom.hom
+      (Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).hom_inv_id)
+      ((chartZRingEquiv W).symm c)
   have FFM_X :
       e (fFMr ((projModel W).germToFunctionField (zChart W) (cRTZ (coordX W))))
         = HasseWeil.mulByInt_x W.toAffine (N : ℤ) := by
-    sorry
+    rw [hMASTER (coordX W), show (chartZRingEquiv W).symm (coordX W)
+        = HomogeneousLocalization.Away.isLocalizationElem
+            (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 0) from
+      (RingEquiv.symm_apply_eq _).mpr (chartZRingEquiv_x W).symm]
+    exact chartSolutionHom_x W _ _ _
   have FFM_Y :
       e (fFMr ((projModel W).germToFunctionField (zChart W) (cRTZ (coordY W))))
         = HasseWeil.mulByInt_y W.toAffine (N : ℤ) := by
-    sorry
+    rw [hMASTER (coordY W), show (chartZRingEquiv W).symm (coordY W)
+        = HomogeneousLocalization.Away.isLocalizationElem
+            (mk_X_mem_quotientGrading_one W 2) (mk_X_mem_quotientGrading_one W 1) from
+      (RingEquiv.symm_apply_eq _).mpr (chartZRingEquiv_y W).symm]
+    exact chartSolutionHom_y W _ _ _
   have FFM_C : ∀ r : K,
       e (fFMr ((projModel W).germToFunctionField (zChart W)
           (cRTZ (algebraMap K W.toAffine.CoordinateRing r))))
         = algebraMap K W.toAffine.FunctionField r := by
-    sorry
+    intro r
+    rw [hMASTER (algebraMap K W.toAffine.CoordinateRing r),
+      show (chartZRingEquiv W).symm (algebraMap K W.toAffine.CoordinateRing r)
+        = (HomogeneousLocalization.fromZeroRingHom
+            (quotientGrading (projIdeal W)) (Submonoid.powers
+              ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
+          ((algebraMapGradeZero (projIdeal W)) r) from
+      (RingEquiv.symm_apply_eq _).mpr (chartZRingEquiv_fromZero W r).symm]
+    exact chartSolutionHom_fromZero W _ _ _ r
   have he_gtff : ∀ c : W.toAffine.CoordinateRing,
       e ((projModel W).germToFunctionField (zChart W) (cRTZ c))
         = algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField c := by
