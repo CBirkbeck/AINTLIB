@@ -91,7 +91,9 @@ theorem glMap_mapGL_Q_eq_mapGL_R (γ : SL(2, ℤ)) :
 def shiftSL_loc (m : ℤ) : SL(2, ℤ) :=
   ⟨!![1, m; 0, 1], by simp [Matrix.det_fin_two]⟩
 
-private lemma shiftSL_loc_mem_Gamma1 (m : ℤ) : shiftSL_loc m ∈ Gamma1 N := by
+omit [NeZero N] in
+/-- `[1, m; 0, 1] ∈ Γ₁(N)`. -/
+lemma shiftSL_loc_mem_Gamma1 (m : ℤ) : shiftSL_loc m ∈ Gamma1 N := by
   rw [Gamma1_mem]
   refine ⟨?_, ?_, ?_⟩ <;> simp [shiftSL_loc]
 
@@ -684,6 +686,7 @@ lemma slash_peterssonAdj_glMap_M_infty_eq_slash_T_p_lower
     p hp hpN g]
   exact (slash_T_p_lower_eq_T_p_upper_zero_slash_gamma0 p hp hpN g).symm
 
+omit [NeZero N] in
 lemma slash_peterssonAdj_glMap_T_p_upper_eq_slash_T_p_lower
     (p : ℕ) (hp : 0 < p) (b : ℕ)
     (g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :

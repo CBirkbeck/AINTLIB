@@ -171,6 +171,7 @@ lemma mem_Gamma_p_α_T_p_upper_zero (p : ℕ) (hp : 0 < p)
   refine ⟨fun ⟨h, hγ₁⟩ ↦ ⟨hγ₁, mem_Gamma_p_α_T_p_upper_zero_mp p hp h⟩, fun ⟨hγ₁, hdvd⟩ ↦ ?_⟩
   exact ⟨mem_Gamma_p_α_T_p_upper_zero_mpr p hp hγ₁ hdvd, hγ₁⟩
 
+omit [NeZero N] in
 /-- **[T006-b-L4-FD-a]** For `p ∣ N`, `Γ_p(diag(1,p)) = Γ₁(N) ⊓ Γ⁰(p)` (Diamond–Shurman
 `Γ₁⁰(N,p)`, §5.2).  Unlike the coprime `Γ_p(diag(p,1)) = Γ₁(N)⊓Γ₀(p)`, this needs **no
 coprimality**: the conjugate's lower-left `p·γ₁₀ ≡ 0 (mod N)` is automatic. -/
@@ -194,15 +195,6 @@ which is INAPPLICABLE here.  We give a **direct** proof: the `p` det-`1` shears
   needed, unlike the coprime route — the bad obstruction `p ∣ a` is vacuous, DS Ex 5.2.1).
 
 The `p`-tile count is exactly `Nat.card (Fin p) = p`. -/
-
-omit [NeZero N] in
-omit [NeZero N] in
-/-- `[1, m; 0, 1] ∈ Γ₁(N)`.  (A local copy of `SummandAdjoint.shiftSL_loc_mem_Gamma1`, which
-carries a dead `[NeZero N]` instance binder that this file's proof contexts do not include.
-Once that binder is dropped upstream this copy should go — see the generalise ticket.) -/
-private lemma shiftSL_loc_mem_Gamma1' (m : ℤ) : shiftSL_loc m ∈ Gamma1 N := by
-  rw [Gamma1_mem]
-  refine ⟨?_, ?_, ?_⟩ <;> simp [shiftSL_loc]
 
 /-- **Distinctness of the `Fin p` shears.** For `b₁ ≠ b₂`, the `(0,1)`-entry of
 `shiftSL_loc(-b₁)·shiftSL_loc b₂ = [1,-b₁;0,1]·[1,b₂;0,1] = [1, b₂-b₁; 0,1]` is `b₂ - b₁`,
@@ -249,7 +241,7 @@ theorem Gamma_up_relIndex_Gamma1_of_dvd (p : ℕ) (hp : Nat.Prime p) (hpN : ¬ N
   rw [Subgroup.relIndex, Subgroup.index_eq_card]
   -- Forward transversal map `Fin p → Γ₁ ⧸ (Γ⁰(p).subgroupOf Γ₁)`, `j ↦ ⟦[1,j;0,1]⟧`.
   set e : Fin p → (Gamma1 N) ⧸ ((Gamma_up p).subgroupOf (Gamma1 N)) :=
-    fun j ↦ QuotientGroup.mk ⟨shiftSL_loc (j.val : ℤ), shiftSL_loc_mem_Gamma1' (j.val : ℤ)⟩
+    fun j ↦ QuotientGroup.mk ⟨shiftSL_loc (j.val : ℤ), shiftSL_loc_mem_Gamma1 (j.val : ℤ)⟩
     with he_def
   have hbij : Function.Bijective e := by
     constructor
@@ -579,7 +571,7 @@ private theorem shiftSL_loc_tile_transversal_bijective
       (fun i : Fin p ↦
         (QuotientGroup.mk
           ((⟨SL2Z_to_PSL2R (shiftSL_loc (i.val : ℤ)),
-              Subgroup.mem_map_of_mem SL2Z_to_PSL2R (shiftSL_loc_mem_Gamma1' (i.val : ℤ))⟩ :
+              Subgroup.mem_map_of_mem SL2Z_to_PSL2R (shiftSL_loc_mem_Gamma1 (i.val : ℤ))⟩ :
             ((Gamma1 N).map SL2Z_to_PSL2R))⁻¹) :
           ((Gamma1 N).map SL2Z_to_PSL2R) ⧸
             ((ConjAct.toConjAct g • ((Gamma_p_α (N := N) (T_p_lower p hp.pos)).map SL2Z_to_PSL2R)
@@ -590,7 +582,7 @@ private theorem shiftSL_loc_tile_transversal_bijective
     with hK_def
   set r : Fin p → G := fun i ↦
     ⟨SL2Z_to_PSL2R (shiftSL_loc (i.val : ℤ)),
-      Subgroup.mem_map_of_mem SL2Z_to_PSL2R (shiftSL_loc_mem_Gamma1' (i.val : ℤ))⟩
+      Subgroup.mem_map_of_mem SL2Z_to_PSL2R (shiftSL_loc_mem_Gamma1 (i.val : ℤ))⟩
     with hr_def
   have hcard : Nat.card (G ⧸ (K.subgroupOf G)) = p :=
     card_quotient_K_subgroupOf_G' p hp hpN g hg
@@ -610,8 +602,8 @@ private theorem shiftSL_loc_tile_transversal_bijective
       rwa [← this]
     rw [hK_def, toConjAct_GLPos_Gamma_p_α_T_p_lower_eq_Gamma1_inf_Gamma_up_map' p hp g hg,
       SL2Z_to_PSL2R_mem_Gamma1_inf_Gamma_up_map_iff p
-        ((Gamma1 N).mul_mem (shiftSL_loc_mem_Gamma1' (i.val : ℤ))
-          ((Gamma1 N).inv_mem (shiftSL_loc_mem_Gamma1' (j.val : ℤ))))] at hmem
+        ((Gamma1 N).mul_mem (shiftSL_loc_mem_Gamma1 (i.val : ℤ))
+          ((Gamma1 N).inv_mem (shiftSL_loc_mem_Gamma1 (j.val : ℤ))))] at hmem
     -- `shiftSL_loc i · shiftSL_loc j⁻¹ ∈ Γ⁰(p)` contradicts FD-b distinctness (with `b₁=j, b₂=i`).
     refine shiftSL_loc_inv_mul_notMem_Gamma_up p hp (fun h ↦ hne h.symm) ?_
     -- The shears commute, so `shiftSL_loc j⁻¹ · shiftSL_loc i = shiftSL_loc i · shiftSL_loc j⁻¹`.
@@ -678,7 +670,7 @@ private theorem iUnion_shiftSL_loc_isFundamentalDomain_conj
       (T_p_lower p hp.pos) (glMap_det_pos_of_rat_det_pos _ (T_p_lower_det_pos p hp.pos))
   set r : Fin p → G := fun i ↦
     ⟨SL2Z_to_PSL2R (shiftSL_loc (i.val : ℤ)),
-      Subgroup.mem_map_of_mem SL2Z_to_PSL2R (shiftSL_loc_mem_Gamma1' (i.val : ℤ))⟩
+      Subgroup.mem_map_of_mem SL2Z_to_PSL2R (shiftSL_loc_mem_Gamma1 (i.val : ℤ))⟩
     with hr_def
   set e : Fin p ≃ G ⧸ (K.subgroupOf G) :=
     Equiv.ofBijective _ (shiftSL_loc_tile_transversal_bijective p hp hpN g hg) with he_def
