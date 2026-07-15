@@ -938,6 +938,121 @@ theorem genericSpecPoint_comp_mulByHom {n : ℤ} (hn : n ≠ 0) :
     congrArg Subtype.val hchart
   exact hsm.symm.trans hval
 
+/-- **(G2 — germ-to-`appLE` converter at a field point)** For a morphism `q : Spec L ⟶ X` (`L` a
+field) and an open `U` containing the image of the closed point, the germ composed with the
+closed-point stalk evaluation is the `appLE`-pullback read through `ΓSpecIso`. -/
+lemma germ_stalkClosedPointTo_eq_appLE {X : Scheme.{u}} {L : Type u} [Field L]
+    (q : Spec (CommRingCat.of L) ⟶ X) (U : X.Opens)
+    (hU : q.base (IsLocalRing.closedPoint L) ∈ U)
+    (hle : ⊤ ≤ q ⁻¹ᵁ U) :
+    X.presheaf.germ U _ hU ≫ Scheme.stalkClosedPointTo q
+      = q.appLE U ⊤ hle ≫ (Scheme.ΓSpecIso (CommRingCat.of L)).hom := by
+  rw [Scheme.germ_stalkClosedPointTo]
+  rw [Scheme.Hom.appLE]
+  simp only [Iso.trans_hom, Functor.mapIso_hom, Iso.op_hom, Category.assoc]
+  congr 1
+
+variable {K : Type u} [Field K] [DecidableEq K] (W : WeierstrassCurve K)
+  [W.IsElliptic]
+
+/-- The generic point lies in the `Z`-chart. -/
+lemma genericPoint_mem_zChart : genericPoint (projModel W) ∈ (zChart W : (projModel W).Opens) := by
+  haveI hZaff : IsAffineOpen (zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  haveI : Nontrivial Γ(projModel W, zChart W) := (coordRingToZSection W).toEquiv.symm.nontrivial
+  haveI hNe : Nonempty (zChart W : (projModel W).Opens) :=
+    ⟨hZaff.isoSpec.inv.base (Classical.arbitrary _)⟩
+  haveI : IrreducibleSpace (projModel W) := inferInstanceAs (IrreducibleSpace (projModel W))
+  exact ((genericPoint_spec (projModel W)).mem_open_set_iff
+    (zChart W : (projModel W).Opens).isOpen).mpr (by simpa using hNe)
+
+/-- **(the germ value of the function-field equivalence)** `projModelFunctionFieldEquiv` sends the
+germ of a `Z`-section to the canonical fraction-field image of its coordinate-ring form. -/
+lemma projModelFunctionFieldEquiv_germ
+    [Nonempty (zChart W : (projModel W).Opens)]
+    [IsFractionRing Γ(projModel W, zChart W) (projModel W).functionField]
+    (s : Γ(projModel W, zChart W)) :
+    projModelFunctionFieldEquiv W
+        (algebraMap Γ(projModel W, zChart W) (projModel W).functionField s)
+      = algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+          ((coordRingToZSection W).symm s) := by
+  unfold projModelFunctionFieldEquiv
+  rw [IsLocalization.ringEquivOfRingEquiv_eq]
+
+/-- **(M — the function-field equivalence IS the tautological-point stalk evaluation)** -/
+lemma projModelFunctionFieldEquiv_eq_stalkClosedPointTo :
+    ((projModelFunctionFieldEquiv W :
+        (projModel W).functionField →+* W.toAffine.FunctionField))
+      = (Scheme.stalkClosedPointTo (genericSpecPoint W).1).hom.comp
+          ((eqToHom (congrArg (projModel W).presheaf.stalk
+              (genericSpecPoint_base_closedPoint W).symm) :
+            ((projModel W).functionField : CommRingCat)
+              ⟶ (projModel W).presheaf.stalk ((genericSpecPoint W).1.base
+                  (IsLocalRing.closedPoint (W.toAffine.FunctionField))))).hom := by
+  haveI hZaff : IsAffineOpen (zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  haveI : Nontrivial Γ(projModel W, zChart W) := (coordRingToZSection W).toEquiv.symm.nontrivial
+  haveI hNe : Nonempty (zChart W : (projModel W).Opens) :=
+    ⟨hZaff.isoSpec.inv.base (Classical.arbitrary _)⟩
+  haveI : IrreducibleSpace (projModel W) := inferInstanceAs (IrreducibleSpace (projModel W))
+  haveI hFR : IsFractionRing Γ(projModel W, zChart W) (projModel W).functionField :=
+    functionField_isFractionRing_of_isAffineOpen (projModel W) (zChart W) hZaff
+  apply IsLocalization.ringHom_ext (nonZeroDivisors Γ(projModel W, zChart W))
+  ext s
+  -- LHS: the germ value of the equivalence
+  show projModelFunctionFieldEquiv W
+      (algebraMap Γ(projModel W, zChart W) (projModel W).functionField s) = _
+  rw [projModelFunctionFieldEquiv_germ W s]
+  -- RHS: transport the germ along τ-hits, then evaluate via G2 + T3 + PHI
+  have hτZ : (genericSpecPoint W).1.base (IsLocalRing.closedPoint (W.toAffine.FunctionField))
+      ∈ (zChart W : (projModel W).Opens) := by
+    rw [genericSpecPoint_base_closedPoint W]
+    exact genericPoint_mem_zChart W
+  have hRHS : (Scheme.stalkClosedPointTo (genericSpecPoint W).1).hom
+      ((eqToHom (congrArg (projModel W).presheaf.stalk
+          (genericSpecPoint_base_closedPoint W).symm) :
+        ((projModel W).functionField : CommRingCat) ⟶ _).hom
+        (algebraMap Γ(projModel W, zChart W) (projModel W).functionField s))
+      = ((genericSpecPoint W).1.appLE (zChart W : (projModel W).Opens) ⊤
+          (Scheme.preimage_eq_top_of_closedPoint_mem (genericSpecPoint W).1 hτZ).ge
+        ≫ (Scheme.ΓSpecIso (CommRingCat.of (W.toAffine.FunctionField))).hom) s := by
+    have htransport : (eqToHom (congrArg (projModel W).presheaf.stalk
+          (genericSpecPoint_base_closedPoint W).symm) :
+        ((projModel W).functionField : CommRingCat) ⟶ _).hom
+          (algebraMap Γ(projModel W, zChart W) (projModel W).functionField s)
+        = (projModel W).presheaf.germ (zChart W : (projModel W).Opens) _ hτZ s :=
+      germ_eqToHom_stalk_apply (projModel W) (zChart W : (projModel W).Opens)
+        (genericSpecPoint_base_closedPoint W).symm (genericPoint_mem_zChart W) hτZ s
+    rw [htransport]
+    exact DFunLike.congr_fun (congrArg CommRingCat.Hom.hom
+      (germ_stalkClosedPointTo_eq_appLE (genericSpecPoint W).1
+        (zChart W : (projModel W).Opens) hτZ
+        (Scheme.preimage_eq_top_of_closedPoint_mem (genericSpecPoint W).1 hτZ).ge)) s
+  simp only [RingHom.comp_apply]
+  rw [hRHS]
+  -- evaluate through T3 at the generic datum, then PHI
+  have hT3 := chartSpecPoint_appLE_eval W (x_gen W.toAffine) (y_gen W.toAffine)
+    (generic_equation W.toAffine)
+    (Scheme.preimage_eq_top_of_closedPoint_mem (genericSpecPoint W).1 hτZ).ge
+  have hval := DFunLike.congr_fun (congrArg CommRingCat.Hom.hom hT3) s
+  rw [show ((genericSpecPoint W).1.appLE (zChart W : (projModel W).Opens) ⊤
+        (Scheme.preimage_eq_top_of_closedPoint_mem (genericSpecPoint W).1 hτZ).ge
+      ≫ (Scheme.ΓSpecIso (CommRingCat.of (W.toAffine.FunctionField))).hom) s
+      = chartSolutionHom W (x_gen W.toAffine) (y_gen W.toAffine)
+          (generic_equation W.toAffine)
+        ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+            ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+            (mk_X_mem_quotientGrading_one W 2) one_pos).inv.hom s) from hval]
+  have hPHI := DFunLike.congr_fun (chartSolutionHom_generic_comp W)
+    ((chartZRingEquiv W) ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos).inv.hom s))
+  simp only [RingHom.comp_apply, RingHom.coe_coe, RingEquiv.symm_apply_apply] at hPHI
+  rw [hPHI]
+  rfl
+
+
+
 end TautologicalPoint
 
 /-- **(L4-v enabler: generator extensionality for `K(E)`)** Two `K`-algebra homomorphisms out of
