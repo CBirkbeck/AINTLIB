@@ -57,7 +57,7 @@ theorem normalizedCPlusGenerator_sq_eq_CPlusGenerator
     (i : Fin ((p - 3) / 2)) :
     normalizedCPlusGenerator (p := p) (K := K) hp_odd hp_three i ^ 2 =
       CPlusGenerator (p := p) (K := K) hp_three i := by
-  unfold normalizedCPlusGenerator CPlusGenerator
+  simp only [normalizedCPlusGenerator, CPlusGenerator]
   exact normalizedCyclotomicUnitPlusUnit_sq_eq_realCyclotomicUnit
     (p := p) (K := K) hp_odd
     (CPlusGeneratorIndex (p := p) hp_three i)
@@ -78,7 +78,7 @@ subgroup. -/
 theorem CPlus_le_normalizedCPlus (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) :
     CPlus (p := p) (K := K) hp_three ≤
       normalizedCPlus (p := p) (K := K) hp_odd hp_three := by
-  unfold CPlus
+  simp only [CPlus]
   rw [Subgroup.closure_le]
   rintro x (rfl | ⟨i, rfl⟩)
   · exact neg_one_mem_normalizedCPlus (p := p) (K := K) hp_odd hp_three
@@ -96,7 +96,7 @@ theorem normalizedCPlus_sq_mem_CPlus (hp_odd : p ≠ 2) (hp_three : 3 ≤ p)
     {x : (𝓞 K⁺)ˣ}
     (hx : x ∈ normalizedCPlus (p := p) (K := K) hp_odd hp_three) :
     x ^ 2 ∈ CPlus (p := p) (K := K) hp_three := by
-  unfold normalizedCPlus at hx
+  simp only [normalizedCPlus] at hx
   induction hx using Subgroup.closure_induction with
   | mem x hx =>
       rcases hx with rfl | ⟨i, rfl⟩

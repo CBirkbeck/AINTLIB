@@ -529,7 +529,7 @@ theorem kummerLogCompletedColumn_evalₐ
     AdicCompletion.evalₐ (lambdaIdeal p K) N
         (kummerLogCompletedColumn (p := p) (K := K) hp_three a) =
       kummerLogColumnCoord (p := p) (K := K) hp_three a N := by
-  unfold kummerLogCompletedColumn
+  simp only [kummerLogCompletedColumn]
   let hEq :
       ((lambdaIdeal p K) ^ N • ⊤ : Ideal (ValuedIntegerRing p K)) =
         (lambdaIdeal p K) ^ N := by
@@ -725,7 +725,7 @@ theorem samePrimeFiniteLog_quotientMap_complexConj {N : ℕ}
         (valuedIntegerComplexConj (p := p) K x)
         (valuedIntegerComplexConj_mem_lambdaIdeal (p := p) (K := K) hx) := by
   classical
-  unfold samePrimeFiniteLog
+  simp only [samePrimeFiniteLog]
   rw [map_sum]
   exact Finset.sum_congr rfl fun n _hn ↦
     samePrimeFiniteLogTerm_quotientMap_complexConj (p := p) (K := K) hx
@@ -737,7 +737,7 @@ theorem samePrimeFiniteLog_level_zero
     {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteLog (p := p) (K := K) 0 x hx = 0 := by
   classical
-  unfold samePrimeFiniteLog
+  simp only [samePrimeFiniteLog]
   refine Finset.sum_eq_zero fun n _hn ↦ ?_
   by_cases hn : n = 0
   · subst n
@@ -876,7 +876,7 @@ theorem kummerLogColumnFiniteLogArg_complexConj
     Conjugation.valuedIntegerComplexConj (p := p) K
         (kummerLogColumnFiniteLogArg (p := p) (K := K) hp_three a) =
       kummerLogColumnFiniteLogArg (p := p) (K := K) hp_three a := by
-  unfold kummerLogColumnFiniteLogArg
+  simp only [kummerLogColumnFiniteLogArg]
   rw [map_sub, map_pow,
     kummerLogValuedCyclotomicUnit_complexConj (p := p) (K := K) hp_three a,
     map_one]

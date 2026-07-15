@@ -167,7 +167,7 @@ theorem logOf_expSeries_eq_logSeries :
       (PowerSeries.derivative ℚ) E =
         E * (PowerSeries.derivative ℚ) L := by
     simp only [E, L, expSeries]
-    unfold Furtwaengler.artinHasseExpSeries
+    simp only [Furtwaengler.artinHasseExpSeries]
     rw [PowerSeries.derivative_subst ℚ (logSeries_hasSubst p), PowerSeries.derivative_exp]
   have hgeom :
       PowerSeries.subst (E - 1) ((PowerSeries.derivative ℚ) (PowerSeries.log ℚ)) *
@@ -344,7 +344,7 @@ theorem expSeries_rescale_neg_mul_self (hp_two : 2 < p) :
         PowerSeries.subst (-(logSeries p)) (PowerSeries.exp ℚ) := by
     change PowerSeries.rescale (-1 : ℚ) (Furtwaengler.artinHasseExpSeries p) =
       PowerSeries.subst (-(logSeries p)) (PowerSeries.exp ℚ)
-    unfold Furtwaengler.artinHasseExpSeries
+    simp only [Furtwaengler.artinHasseExpSeries]
     rw [PowerSeries.rescale_eq_subst, PowerSeries.subst_comp_subst_apply]
     · have h := logSeries_rescale_neg p hp_two
       rw [PowerSeries.rescale_eq_subst] at h
@@ -723,7 +723,7 @@ omit [Fact p.Prime] in
 /-- The predicted valuation of the second tail term is `(p - 1)^2`. -/
 theorem artinHasseTailValuationIndex_two :
     artinHasseTailValuationIndex p 2 = ((p : ℤ) - 1) ^ 2 := by
-  unfold artinHasseTailValuationIndex
+  simp only [artinHasseTailValuationIndex]
   ring
 
 omit [Fact p.Prime] in
@@ -732,7 +732,7 @@ theorem artinHasseTailValuationIndex_succ_sub (n : ℕ) :
     artinHasseTailValuationIndex p (n + 1) -
         artinHasseTailValuationIndex p n =
       ((p : ℤ) - 1) * ((p : ℤ) ^ n - 1) := by
-  unfold artinHasseTailValuationIndex
+  simp only [artinHasseTailValuationIndex]
   push_cast
   ring
 

@@ -197,7 +197,7 @@ theorem detASubBSqEqProdNontrivialQeSq_of_deletedFourier
       w ≠ NumberField.Units.dirichletUnitTheorem.w₀)
   letI : DecidableEq {w : InfinitePlace K⁺ //
       w ≠ NumberField.Units.dirichletUnitTheorem.w₀} := fun a b ↦ a.instDecidableEq b
-  unfold FLT37.Sinnott.DetASubBSqEqProdNontrivialQeSq
+  simp only [FLT37.Sinnott.DetASubBSqEqProdNontrivialQeSq]
   rw [detASubB_sq_eq_deletedFourier_sq
     (p := p) (K := K) hp_odd hp_three hp_two hp_ge_five]
   exact det_cyclotomicEven_logNorm_deletedMulAtReindexed_sq_eq_prod_quotientEigenvalue_sq
