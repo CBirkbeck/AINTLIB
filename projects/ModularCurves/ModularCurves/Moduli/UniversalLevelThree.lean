@@ -2333,4 +2333,47 @@ theorem e3Datum_representable_by_affine_of_level (R : CommRingCat.{u}) (hR : IsU
     inferInstanceAs (IsAffine (Spec (CommRingCat.of (E3ModuliRing R)))),
     ⟨e3DatumRepresentableBy R hR hL⟩⟩
 
+open AlgebraicGeometry CategoryTheory Scheme LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+/-- **([T-E15-NORM] the RAW naive-functor RepresentableBy, conditional on `hL` + `hArb`)**
+Given `hL` (the universal marked pair is a level-`3` structure) and `hArb` (every naive
+level-`3` structure IS an `ℰ₃`-datum — the arbitrary-datum direction, bridge-gated on the
+E[3]/BB-DEG substrate), the raw naive level-`3` functor is representable by `universalE3Obj`.
+The inverse classifies via `hArb`; `IsE3Datum` is a `Prop`, so `hArb X x` is defeq to the
+pulled datum, making the roundtrips reduce to rt1/rt2. This is `naiveLevelThree_representable_by_affine`
+(Bootstrap:74) modulo `hL` (killing+generation) and `hArb` (the bridges). -/
+noncomputable def naiveLevelThreeRepresentableBy (R : CommRingCat.{u}) (hR : IsUnit (3 : R))
+    (hL : (universalE3Obj R).curve.IsNaiveFullLevel 3
+      (universalE3P R) (universalE3Q R))
+    (hArb : ∀ (X : EllObj R) (L : X.curve.FullLevelPt 3), IsE3Datum X L) :
+    (gammaFullNaiveProblem R 3).RepresentableBy (universalE3Obj R) where
+  homEquiv {X} :=
+    { toFun := fun φ => (gammaFullNaiveProblem R 3).map (Opposite.op φ)
+        ⟨⟨universalE3P R, universalE3Q R⟩, hL⟩
+      invFun := fun x => e3ClassifyingEllHom (hArb X x) (X.isUnit_three hR)
+      left_inv := fun φ => e3ClassifyingEllHom_pulled φ hL (X.isUnit_three hR)
+      right_inv := fun x => by
+        refine Subtype.ext (Prod.ext ?_ ?_)
+        · exact pullSection_e3ClassifyingEllHom_P (hArb X x) (X.isUnit_three hR)
+        · exact pullSection_e3ClassifyingEllHom_Q (hArb X x) (X.isUnit_three hR) }
+  homEquiv_comp {X X'} f g :=
+    FunctorToTypes.map_comp_apply (gammaFullNaiveProblem R 3)
+      (Opposite.op g) (Opposite.op f) _
+
+open AlgebraicGeometry CategoryTheory Scheme in
+/-- **([T-E15-NORM] `naiveLevelThree_representable_by_affine` reduced)** The raw naive
+level-`3` problem is representable by an object with **affine** base, given `hL` + `hArb`.
+This is exactly Bootstrap's `naiveLevelThree_representable_by_affine` modulo the two
+keystone/bridge inputs. -/
+theorem naiveLevelThree_representable_by_affine_of_conditions
+    (R : CommRingCat.{u}) (hR : IsUnit (3 : R))
+    (hL : (universalE3Obj R).curve.IsNaiveFullLevel 3
+      (universalE3P R) (universalE3Q R))
+    (hArb : ∀ (X : EllObj R) (L : X.curve.FullLevelPt 3), IsE3Datum X L) :
+    ∃ X : EllObj R, IsAffine X.base ∧
+      Nonempty ((gammaFullNaiveProblem R 3).RepresentableBy X) :=
+  ⟨universalE3Obj R,
+    inferInstanceAs (IsAffine (Spec (CommRingCat.of (E3ModuliRing R)))),
+    ⟨naiveLevelThreeRepresentableBy R hR hL hArb⟩⟩
+
 end ModularCurves
