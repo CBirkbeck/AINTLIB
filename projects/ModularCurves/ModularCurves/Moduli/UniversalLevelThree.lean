@@ -737,4 +737,73 @@ theorem e3ClassifyingRingHom_algebraMap {R : CommRingCat.{u}} (X : EllObj R)
   show e3BaseMap X L hD h3 (MvPolynomial.C r) = _
   rw [e3BaseMap, eval₂Hom_C]
 
+open LocalPresentation MvPolynomial in
+/-- The classifying map sends the universal `γ` to `γGlued`. -/
+theorem e3ClassifyingRingHom_gamma {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 3) (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    e3ClassifyingRingHom X L hD h3 (e3Gamma R) = (e3GammaGlued X L hD h3).1 := by
+  rw [e3Gamma, e3ClassifyingRingHom, IsLocalization.Away.lift_eq]
+  show e3QuotientMap X L hD h3 (Ideal.Quotient.mk _ (MvPolynomial.X 1)) = _
+  show e3BaseMap X L hD h3 (MvPolynomial.X 1) = _
+  rw [e3BaseMap, eval₂Hom_X']
+  rfl
+
+open LocalPresentation MvPolynomial in
+/-- The classifying map sends the universal `β` to `βGlued`. -/
+theorem e3ClassifyingRingHom_beta {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 3) (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤))) :
+    e3ClassifyingRingHom X L hD h3 (e3Beta R) = (e3BetaGlued X L hD h3).1 := by
+  rw [e3Beta, e3ClassifyingRingHom, IsLocalization.Away.lift_eq]
+  show e3QuotientMap X L hD h3 (Ideal.Quotient.mk _ (MvPolynomial.X 0)) = _
+  show e3BaseMap X L hD h3 (MvPolynomial.X 0) = _
+  rw [e3BaseMap, eval₂Hom_X']
+  rfl
+
+open LocalPresentation MvPolynomial WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(T-E15a stage 10 ★, the E1 coefficient match)** Specializing the universal `ℰ₃`
+curve along the classifying map, restricted to a witness affine, recovers the witness
+chart curve. -/
+theorem universalE3_map_classifying {R : CommRingCat.{u}} (X : EllObj R)
+    (L : X.curve.FullLevelPt 3) (hD : IsE3Datum X L)
+    (h3 : IsUnit (3 : Γ(X.base, ⊤))) (V : X.base.affineOpens)
+    (Pr : LocalPresentation X.curve.toEllipticCurveGeom V) (β γ : Γ(X.base, V.1))
+    (hF : IsE3Form Pr.W β γ) (hP : Pr.MarksAt L.1.1.2 0 0)
+    (hQ : Pr.MarksAt L.1.2.2 γ (β + γ)) :
+    (universalE3 R).map
+      (((X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+        (e3ClassifyingRingHom X L hD h3)) = Pr.W := by
+  obtain ⟨ha₁, ha₂, ha₃, ha₄, ha₆⟩ := hF
+  have hγ := (e3GammaGlued X L hD h3).2 V Pr β γ ⟨ha₁,ha₂,ha₃,ha₄,ha₆⟩ hP hQ
+  have hβ := (e3BetaGlued X L hD h3).2 V Pr β γ ⟨ha₁,ha₂,ha₃,ha₄,ha₆⟩ hP hQ
+  have hcγ : ((X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+      (e3ClassifyingRingHom X L hD h3) (e3Gamma R) = γ := by
+    rw [RingHom.comp_apply, e3ClassifyingRingHom_gamma]; exact hγ
+  have hcβ : ((X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+      (e3ClassifyingRingHom X L hD h3) (e3Beta R) = β := by
+    rw [RingHom.comp_apply, e3ClassifyingRingHom_beta]; exact hβ
+  ext
+  · show ((X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+      (e3ClassifyingRingHom X L hD h3) (universalE3 R).a₁ = _
+    rw [show (universalE3 R).a₁ = 3 * e3Gamma R - 1 from rfl, map_sub, map_mul,
+      map_ofNat, map_one, hcγ, ha₁]
+  · show ((X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+      (e3ClassifyingRingHom X L hD h3) (universalE3 R).a₂ = _
+    rw [show (universalE3 R).a₂ = 0 from rfl, map_zero, ha₂]
+  · show ((X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+      (e3ClassifyingRingHom X L hD h3) (universalE3 R).a₃ = _
+    rw [show (universalE3 R).a₃ =
+        -3 * e3Gamma R ^ 2 - e3Beta R - 3 * e3Beta R * e3Gamma R from rfl,
+      map_sub, map_sub, map_mul, map_neg, map_ofNat, map_pow, map_mul, map_mul,
+      map_ofNat, hcγ, hcβ, ha₃]
+  · show ((X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+      (e3ClassifyingRingHom X L hD h3) (universalE3 R).a₄ = _
+    rw [show (universalE3 R).a₄ = 0 from rfl, map_zero, ha₄]
+  · show ((X.base.presheaf.map (homOfLE (le_top : V.1 ≤ ⊤)).op).hom).comp
+      (e3ClassifyingRingHom X L hD h3) (universalE3 R).a₆ = _
+    rw [show (universalE3 R).a₆ = 0 from rfl, map_zero, ha₆]
+
 end ModularCurves
