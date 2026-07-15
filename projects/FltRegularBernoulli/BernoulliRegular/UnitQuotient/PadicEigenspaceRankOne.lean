@@ -214,7 +214,7 @@ theorem flt37_pollaczekUnit_padic_eigenspace_class_red
   rw [cyclotomicUnitFreePartPadicReduceModP_one_tmul]
   -- Goal: cyclotomicUnitFreePartModPDeltaCharacterProjector (padicToZMod ω³²)
   --   (cyclotomicUnitFreePartModPClass [PU]) = cyclotomicUnitFreePartModPClass [PU]
-  unfold cyclotomicUnitFreePartModPDeltaCharacterProjector
+  simp only [cyclotomicUnitFreePartModPDeltaCharacterProjector]
   rw [padicToZMod_cyclotomicOmegaPadicChar]
   exact characterProjector_apply_of_mem_eigenspace
     (cyclotomicUnitFreePartModPDeltaRepresentation (p := 37) (CyclotomicField 37 ℚ))

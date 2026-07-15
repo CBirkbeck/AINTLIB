@@ -43,7 +43,7 @@ theorem pollaczekUnitPlus_class_eq_two_smul_pollaczekUnit_class_in_modp_freepart
         (Additive.ofMul (pollaczekUnitPlus 37 K i)) =
       (2 : ℕ) • cyclotomicUnitToFreePartModPAdd (p := 37) K
         (Additive.ofMul (pollaczekUnit 37 K i)) := by
-  unfold pollaczekUnitPlus
+  simp only [pollaczekUnitPlus]
   rw [ofMul_mul, map_add]
   rw [show cyclotomicUnitToFreePartModPAdd (p := 37) K
         (Additive.ofMul (NumberField.IsCMField.unitsComplexConj K

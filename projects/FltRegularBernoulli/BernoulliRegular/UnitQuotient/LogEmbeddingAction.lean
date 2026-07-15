@@ -66,7 +66,7 @@ theorem cyclotomicFullLogEmbedding_apply
 /-- The multiplicity of an infinite place is unchanged by the Galois action. -/
 theorem infinitePlace_mult_smul (σ : Gal(K/ℚ)) (w : InfinitePlace K) :
     InfinitePlace.mult (σ • w) = InfinitePlace.mult w := by
-  unfold InfinitePlace.mult
+  simp only [InfinitePlace.mult]
   by_cases hw : InfinitePlace.IsReal w
   · rw [if_pos ((InfinitePlace.isReal_smul_iff (σ := σ) (w := w)).2 hw), if_pos hw]
   · rw [if_neg (by
