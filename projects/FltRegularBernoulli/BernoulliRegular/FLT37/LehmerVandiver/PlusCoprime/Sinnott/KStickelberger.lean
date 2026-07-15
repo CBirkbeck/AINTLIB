@@ -1,7 +1,9 @@
-import Mathlib.NumberTheory.NumberField.Basic
+module
 
-import BernoulliRegular.ClassGroupExtension
-import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.ClassGroupMinus
+public import Mathlib.NumberTheory.NumberField.Basic
+
+public import BernoulliRegular.ClassGroupExtension
+public import BernoulliRegular.FLT37.LehmerVandiver.PlusCoprime.Sinnott.ClassGroupMinus
 
 /-!
 # K-side Stickelberger annihilators

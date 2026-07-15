@@ -1,5 +1,7 @@
-import BernoulliRegular.FLT37.LehmerVandiver.CaseII.Main
-import FltRegular.CaseII.InductionStep
+module
+
+public import BernoulliRegular.FLT37.LehmerVandiver.CaseII.Main
+public import FltRegular.CaseII.InductionStep
 
 /-!
 # LV010-CTOR-a: case II auxiliary ideal `𝔠 η = (x+yη)/((ζ-1)·𝔪)` is a p-th power

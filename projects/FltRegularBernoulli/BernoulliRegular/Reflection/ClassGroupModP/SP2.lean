@@ -1,6 +1,8 @@
-import BernoulliRegular.Reflection.ClassGroupModP.AtomC
-import BernoulliRegular.Reflection.ClassGroupModP.Plus
-import BernoulliRegular.Reflection.ClassGroupModP.PlusMinusInstance
+module
+
+public import BernoulliRegular.Reflection.ClassGroupModP.AtomC
+public import BernoulliRegular.Reflection.ClassGroupModP.Plus
+public import BernoulliRegular.Reflection.ClassGroupModP.PlusMinusInstance
 
 /-!
 # SP-2: Plus-side identification (Cl(K⁺)/p nontrivial ⟹ even-eigenspace nontrivial)
