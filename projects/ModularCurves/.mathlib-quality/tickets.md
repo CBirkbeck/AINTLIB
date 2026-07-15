@@ -21154,3 +21154,28 @@ flagged since v10.252 — a focused fresh pass with the reduction + brick 5 both
 **Net:** the entire deep REDUCTION (ringHom_ext/AdjoinRoot/coordRingToZSection) is DONE; brick 6 is down to
 3 germ-evaluations (FFM_X/Y/C, τStalkMap) + the A+B finrank tower. Two subagents ground the reduction (D) +
 attempted A+B; the D-reduction landed, FFM leaves + A+B remain for a focused pass.
+
+## v10.260 (2026-07-15, STREAM-OMEGA) — ★★★ [T-E15-NORM] rt2 LADDER COMPLETE — the ℰ₃ datum problem IS REPRESENTABLE (conditional on hL only); KM 4.7.0 (3,GL₂𝔽₃) engine axiom 1 discharged for the datum problem
+
+The full post-B2-fix cascade is COMPLETE — the entire ℰ₃ representability machine is built,
+**conditional on `hL` (the naive-full-level-3 clause) ONLY**, all axiom-clean:
+- **B2 fix** → `isUnit_e3Gamma` → `universalE3_hcubic` → `IsE3Form.map` → **`universalE3_isE3Datum ★★★`**
+  → `IsE3Datum.map` → `e3DatumProblem` → `e3PulledWitness` → **the 5-piece rt2 ladder**:
+  `e3ClassifyingRingHom_pulled` (rt2a, the E3Quotient-ext-layer piece) + `sectionsMapLE_e3ClassifyingMap` +
+  `e3ClassifyingMap_pulled` (rt2b) + `e3Top_pulled` (rt2c, 118-line transport transposition) +
+  `e3ClassifyingEllHom_pulled` (rt2 ★★★ uniqueness) → **`e3DatumRepresentableBy ★★★`**
+  (`(e3DatumProblem R).RepresentableBy (universalE3Obj R)`) → **`e3Datum_representable_by_affine_of_level`**
+  (`∃ affine X, RepresentableBy (e3DatumProblem R) X` = **KM 4.7.0's (3,GL₂𝔽₃) engine axiom 1 for the
+  ℰ₃ datum, conditional on hL**).
+
+**~18 axiom-clean results this arc.** The rt2 ladder adapted the Legendre CLS ladder (@UniversalLegendre
+2044–2360), dropping the ω-basis; the sole structural novelty was rt2a's E3Quotient ext layer
+(`IsLocalization.ringHom_ext` → `Ideal.Quotient.mk_surjective` → `MvPolynomial.induction_on`, dual γ/β
+generators) — all else transposed cleanly.
+
+**ONLY REMAINING for `naiveLevelThree_representable_by_affine` (Bootstrap:74, the RAW naive functor):**
+the **naive↔datum equivalence** (every naive level-3 structure IS an ℰ₃-datum) — the arbitrary-datum
+direction = `isE3Datum_of_flexCharts` + the **torsion→coordinate bridges** (`3•P=0→μ_P=0`, `3•Q=0→cubic`),
+**bridge-gated** on KM brick 6 (`MulByHomDegree`:660, nearly landed — reduced to a few leaves) / G0 BB-DEG
+(`Torsion`:155). Bootstrap:74 also needs the import wiring (it doesn't yet import UniversalLevelThree).
+The datum-problem discharge (the KM-engine input) is DONE; the raw-naive headline is one bridge away.
