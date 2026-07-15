@@ -71,8 +71,6 @@ open scoped TensorProduct
 namespace HasseWeil.WeilPairing
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
-set_option linter.style.longLine false
 
 noncomputable section
 
@@ -154,7 +152,7 @@ theorem oneSub_pullback_y_gen_eq (hq : 2 ≤ Fintype.card K) :
 
 /-- `gKbar` at the generic point, typed via the `W' := W` base-change point map (the form fed to
 genuineness; `gKbar_genericPoint` with `ffBaseChangePoint` unfolded). -/
-theorem gKbar_genericPoint_eq_map (hq : 2 ≤ Fintype.card K) :
+theorem gKbar_genericPoint_eq_map (_hq : 2 ≤ Fintype.card K) :
     gKbar W (HasseWeil.genericPoint (W.baseChange (AlgebraicClosure K))) =
       WeierstrassCurve.Affine.Point.map (W' := W) (S := K)
         ((⟨W.toAffine⟩ : SmoothPlaneCurve K).functionField_baseChange (AlgebraicClosure K))

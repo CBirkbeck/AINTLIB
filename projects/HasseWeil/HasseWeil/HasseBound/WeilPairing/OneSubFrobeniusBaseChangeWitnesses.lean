@@ -82,7 +82,6 @@ namespace HasseWeil.WeilPairing
 
 open HasseWeil HasseWeil.WeilPairing.DivisorPullback
 
-set_option linter.style.longLine false
 
 /- `frobeniusIsog_baseChange_charP_pow` and `frobeniusIsog_relative_iterate` carry their codomain
 through a `cast` over a *propositional* curve equality.  Evaluating the point map of such a `cast`

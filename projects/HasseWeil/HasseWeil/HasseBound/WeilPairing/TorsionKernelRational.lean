@@ -102,7 +102,7 @@ theorem zsmul_affine_point_eq_gen {L : Type*} [Field L] [DecidableEq L] (V : Wei
       WeierstrassCurve.Jacobian.Point.toAffine V
         (smulEval V x₀ y₀ m) := by
     show _ = WeierstrassCurve.Jacobian.Point.toAffine V _
-    unfold WeierstrassCurve.Jacobian.Point.toAffineLift
+    simp only [WeierstrassCurve.Jacobian.Point.toAffineLift]
     rw [h_smulEval]
     rfl
   rw [h_eq_lift, WeierstrassCurve.Jacobian.Point.toAffine_of_Z_ne_zero h_ns_smulEval hZ]
@@ -252,7 +252,7 @@ theorem hdesc_mulByInt [IsAlgClosed F] (ℓ : ℤ) (hℓ : ℓ ≠ 0) :
   have hequiv : g (genericPointAct W (mulByInt W.toAffine ℓ) σ) =
       WeierstrassCurve.Affine.Point.map (W' := W) (σ.toAlgHom.restrictScalars F)
         (g (genericPoint W)) := by
-    unfold genericPointAct
+    simp only [genericPointAct]
     change ℓ • _ = WeierstrassCurve.Affine.Point.map (W' := W)
       (σ.toAlgHom.restrictScalars F) (ℓ • _)
     exact (map_zsmul (WeierstrassCurve.Affine.Point.map (W' := W)
