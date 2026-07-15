@@ -1,6 +1,11 @@
-import HasseWeil.Isogeny.Kernel
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Foundation.Curves.Differentials
 import HasseWeil.Foundation.EC.TranslationOrd
+import HasseWeil.Isogeny.Kernel
 
 /-!
 # Separable isogeny: `#ker φ = deg φ` over an algebraically closed field
