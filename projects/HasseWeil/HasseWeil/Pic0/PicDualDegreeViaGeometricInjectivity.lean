@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import HasseWeil.Pic0.PicDualDegreeViaIsDualOf
 import HasseWeil.Isogeny.BaseChange.Basic
 import HasseWeil.Pic0.ToClassFunctorial
@@ -742,7 +747,7 @@ theorem hgeom_of_infinite_point
       (∀ P : W.toAffine.Point,
         (mulByInt W.toAffine m).toAddMonoidHom P = (mulByInt W.toAffine n).toAddMonoidHom P) →
       m = n :=
-  fun {m n} h ↦ mulByInt_pointMap_injective_of_infinite_point W.toAffine htor h
+  fun {_m _n} h ↦ mulByInt_pointMap_injective_of_infinite_point W.toAffine htor h
 
 /-! ### Part (B) v3: discharge `hpicval` to the SINGLE precise III.6.2(c)/III.8 residual
 
