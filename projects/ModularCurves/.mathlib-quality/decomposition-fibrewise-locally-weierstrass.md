@@ -450,3 +450,9 @@ affine triple intersection, the three pulled chart transitions satisfy the Cech 
 reducing all three module maps to the existing scalar transition cocycle. This completes the
 diagonal, pair-swap inverse, and triple-overlap coherence layer without additional hypotheses or
 proof resource options.
+
+Completed subdependency (2026-07-14): defined `Scheme.Modules.pullbackPseudofunctor` by taking
+the left-adjoint part of mathlib's existing scheme-module pseudofunctor, and defined
+`affineIntersectionChartChosenPullback` from the actual geometric pullback square
+`V i j = U i ×_X U j` in the glued scheme. These axiom-clean constructors put the local unit
+modules in the exact input format of mathlib's `Pseudofunctor.DescentData'` API.

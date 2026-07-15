@@ -1,5 +1,6 @@
 import ModularCurves.Picard.InvertibleSheafFiniteStageModel
 import ModularCurves.Picard.DualPullback.UnitComp
+import Mathlib.CategoryTheory.Sites.Descent.DescentDataPrime
 
 /-!
 # Glue data from finite-stage invertible-sheaf cocycles
@@ -16,6 +17,28 @@ open CategoryTheory CategoryTheory.Limits
 namespace AlgebraicGeometry.Scheme.Modules
 
 noncomputable section
+
+/-- The contravariant, `Cat`-valued pseudofunctor of sheaves of modules on schemes. This is
+the left-adjoint part of `Scheme.Modules.pseudofunctor`. -/
+def pullbackPseudofunctor :=
+  pseudofunctor.comp Bicategory.Adj.forget₁
+
+/-- The ordered affine overlap in the glue datum, regarded as the chosen pullback of the two
+chart maps into the glued scheme. -/
+def affineIntersectionChartChosenPullback
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) :
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+    ChosenPullback (D.ι i) (D.ι j) := by
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  exact
+    { pullback := D.V (i, j)
+      p₁ := D.f i j
+      p₂ := D.t i j ≫ D.f j i
+      condition := (D.glue_condition i j).symm
+      isLimit := D.vPullbackConeIsLimit i j }
 
 private theorem diagonalFac
     (D : Scheme.GlueData) (i : D.J) :
