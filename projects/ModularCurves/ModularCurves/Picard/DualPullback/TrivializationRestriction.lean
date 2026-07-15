@@ -281,6 +281,141 @@ theorem pullbackSquareTrivialization_vcomp
         ((pullbackComp b q).hom.app M) ≫ z) htail
     _ = _ := rfl
 
+/-- After pulling a unit transition through an isomorphism, flattening the target pullback
+cancels the trailing inverse unit comparison. -/
+theorem pullback_unitTransition_comp_flattenRight
+    {X Y Z W : Scheme.{u}} (p₁ : X ⟶ Y) (p₂ : X ⟶ Z)
+    (q : X ≅ W) (τ : unitObj X ≅ unitObj X) :
+    (pullback q.inv).map
+          ((pullbackUnitIso p₁).hom ≫ τ.hom ≫ (pullbackUnitIso p₂).inv) ≫
+        (pullback q.inv).map (pullbackUnitIso p₂).hom ≫
+      (pullbackUnitIso q.inv).hom =
+    (pullback q.inv).map (pullbackUnitIso p₁).hom ≫
+        (pullback q.inv).map τ.hom ≫
+      (pullbackUnitIso q.inv).hom := by
+  rw [Functor.map_comp, Functor.map_comp]
+  let P := (pullback q.inv).mapIso (pullbackUnitIso p₂)
+  have hP := P.inv_hom_id_assoc (pullbackUnitIso q.inv).hom
+  exact congrArg
+    (fun z =>
+      (pullback q.inv).map (pullbackUnitIso p₁).hom ≫
+        (pullback q.inv).map τ.hom ≫ z) hP
+
+/-- Flattening two successive pullbacks of a trivializing morphism agrees with flattening
+the pullback along the composite. -/
+theorem pullbackTrivialization_comp_hom
+    {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z)
+    {M : Z.Modules} (t : M ⟶ unitObj Z) :
+    (pullback f).map ((pullback g).map t) ≫
+          (pullback f).map (pullbackUnitIso g).hom ≫
+        (pullbackUnitIso f).hom =
+      (pullbackComp f g).hom.app M ≫
+          (pullback (f ≫ g)).map t ≫
+        (pullbackUnitIso (f ≫ g)).hom := by
+  let P := (pullbackComp f g).app M
+  let Q := (pullbackComp f g).app (unitObj Z)
+  have hnat := (pullbackComp f g).hom.naturality t
+  have hunit := ModularCurves.pullbackUnitIso_compLow f g
+  change _ ≫ _ ≫ _ = P.hom ≫ _ ≫ _
+  change Q.hom ≫ _ = _ at hunit
+  calc
+    _ = (pullback f).map ((pullback g).map t) ≫
+        (Q.hom ≫ (pullbackUnitIso (f ≫ g)).hom) :=
+      congrArg (fun z => (pullback f).map ((pullback g).map t) ≫ z)
+        hunit.symm
+    _ = ((pullback f).map ((pullback g).map t) ≫ Q.hom) ≫
+        (pullbackUnitIso (f ≫ g)).hom := (Category.assoc _ _ _).symm
+    _ = (P.hom ≫ (pullback (f ≫ g)).map t) ≫
+        (pullbackUnitIso (f ≫ g)).hom :=
+      congrArg (fun z => z ≫ (pullbackUnitIso (f ≫ g)).hom) hnat
+    _ = _ := Category.assoc _ _ _
+
+/-- Transport across a reflexive square is ordinary pullback of the trivialization. -/
+theorem pullbackSquareTrivialization_refl_hom
+    {A B D : Scheme.{u}} (a : A ⟶ B) (b : B ⟶ D)
+    (M : D.Modules) (t : (pullback b).obj M ≅ unitObj B) :
+    (pullbackSquareTrivialization a b a b rfl M t).hom =
+      (pullback a).map t.hom ≫ (pullbackUnitIso a).hom := by
+  let P := (pullbackComp a b).app M
+  have hcongr : (pullbackCongr
+      (rfl : a ≫ b = a ≫ b)).hom.app M = 𝟙 _ := rfl
+  have hsquare :
+      ((pullbackSquareIso a b a b rfl).app M).hom = 𝟙 _ := by
+    change P.hom ≫ _ ≫ P.inv = 𝟙 _
+    calc
+      _ = P.hom ≫ 𝟙 _ ≫ P.inv :=
+        congrArg (fun z => P.hom ≫ z ≫ P.inv) hcongr
+      _ = P.hom ≫ (𝟙 _ ≫ P.inv) := Category.assoc _ _ _
+      _ = P.hom ≫ P.inv := congrArg (fun z => P.hom ≫ z)
+        (Category.id_comp P.inv)
+      _ = 𝟙 _ := P.hom_inv_id
+  let T := (pullback a).map t.hom ≫ (pullbackUnitIso a).hom
+  change ((pullbackSquareIso a b a b rfl).app M).hom ≫ T = T
+  exact (congrArg (fun z => z ≫ T) hsquare).trans (Category.id_comp T)
+
+/-- Pulling a square-transported trivialization back along a map is transport across the
+precomposed outer square. -/
+theorem pullbackSquareTrivialization_precomp_hom
+    {A' A B C D : Scheme.{u}} (r : A' ⟶ A)
+    (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
+    (h : a ≫ b = c ≫ d) (M : D.Modules)
+    (t : (pullback d).obj M ≅ unitObj C) :
+    let hOuter : r ≫ (a ≫ b) = (r ≫ c) ≫ d :=
+      (Category.assoc r a b).symm.trans
+        ((congrArg (r ≫ ·) h).trans (Category.assoc r c d))
+    (pullback r).map
+          (pullbackSquareTrivialization a b c d h M t).hom ≫
+        (pullbackUnitIso r).hom =
+      (pullback r).map ((pullbackComp a b).hom.app M) ≫
+        (pullbackSquareTrivialization r (a ≫ b) (r ≫ c) d
+          hOuter M t).hom := by
+  dsimp only
+  have hv := pullbackSquareTrivialization_vcomp
+    r a r a b c d rfl h M t
+  rw [pullbackSquareTrivialization_refl_hom] at hv
+  exact hv
+
+/-- The precomposition rule for a square-transported trivialization, with two successive
+pullbacks left unflattened on the source. -/
+theorem pullbackSquareTrivialization_comp_precomp_hom
+    {A'' A' A B C D : Scheme.{u}} (f : A'' ⟶ A') (r : A' ⟶ A)
+    (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
+    (h : a ≫ b = c ≫ d) (M : D.Modules)
+    (t : (pullback d).obj M ≅ unitObj C) :
+    let hOuter : (f ≫ r) ≫ (a ≫ b) = ((f ≫ r) ≫ c) ≫ d :=
+      (Category.assoc (f ≫ r) a b).symm.trans
+        ((congrArg ((f ≫ r) ≫ ·) h).trans
+          (Category.assoc (f ≫ r) c d))
+    (pullback f).map ((pullback r).map
+          (pullbackSquareTrivialization a b c d h M t).hom) ≫
+        (pullback f).map (pullbackUnitIso r).hom ≫
+      (pullbackUnitIso f).hom =
+    (pullbackComp f r).hom.app
+          ((pullback a).obj ((pullback b).obj M)) ≫
+      (pullback (f ≫ r)).map ((pullbackComp a b).hom.app M) ≫
+        (pullbackSquareTrivialization (f ≫ r) (a ≫ b)
+          ((f ≫ r) ≫ c) d hOuter M t).hom := by
+  dsimp only
+  have hcomp := pullbackTrivialization_comp_hom f r
+    (pullbackSquareTrivialization a b c d h M t).hom
+  have hpre := pullbackSquareTrivialization_precomp_hom
+    (f ≫ r) a b c d h M t
+  calc
+    _ = (pullbackComp f r).hom.app
+          ((pullback a).obj ((pullback b).obj M)) ≫
+        (pullback (f ≫ r)).map
+            (pullbackSquareTrivialization a b c d h M t).hom ≫
+          (pullbackUnitIso (f ≫ r)).hom := hcomp
+    _ = (pullbackComp f r).hom.app
+          ((pullback a).obj ((pullback b).obj M)) ≫
+        ((pullback (f ≫ r)).map ((pullbackComp a b).hom.app M) ≫
+          (pullbackSquareTrivialization (f ≫ r) (a ≫ b)
+            ((f ≫ r) ≫ c) d _ M t).hom) :=
+      congrArg
+        (fun z => (pullbackComp f r).hom.app
+          ((pullback a).obj ((pullback b).obj M)) ≫ z) hpre
+    _ = _ := Category.assoc _ _ _
+
 private theorem cancel_iso_inv_right
     {D : Type u₁} [Category.{v₁} D]
     {A B C : D} (e : A ≅ B) (p : C ⟶ B) (q : C ⟶ A)
