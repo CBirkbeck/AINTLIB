@@ -443,3 +443,10 @@ Completed subdependency (2026-07-14): defined
 ordered overlap and proved `chartTransitionIsoCoordinatePullback_eq`. Thus every further pullback of
 a chart transition is canonically multiplication by the pulled transition section on the unit
 sheaf; the construction is option-free and axiom-clean.
+
+Completed dependency claim (2026-07-14): proved
+`AffineIntersectionUnitCocycle.chartTransitionIsoCoordinatePullback_cocycle`. On the canonical
+affine triple intersection, the three pulled chart transitions satisfy the Cech equation, by
+reducing all three module maps to the existing scalar transition cocycle. This completes the
+diagonal, pair-swap inverse, and triple-overlap coherence layer without additional hypotheses or
+proof resource options.

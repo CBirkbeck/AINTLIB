@@ -401,6 +401,35 @@ theorem AffineIntersectionUnitCocycle.chartTransitionIsoCoordinatePullback_eq
   rw [chartTransitionIsoCoordinatePullback,
     chartTransitionIsoCoordinatePullbackMiddle_eq]
 
+/-- The chart transitions satisfy the Cech equation after pullback to the canonical affine
+triple intersection. The middle map is the `(j,k)` leg induced by the glue-data triple
+transition. -/
+theorem AffineIntersectionUnitCocycle.chartTransitionIsoCoordinatePullback_cocycle
+    {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j k : J) :
+    let T := Spec (CommRingCat.of
+      (F.obj (Scheme.GlueData.affineIntersectionTripleIndex i j k)))
+    let fLeft : T ⟶ Scheme.GlueData.affineIntersectionOverlap F i j :=
+      Spec.map (CommRingCat.ofHom ((F.map
+        (Scheme.GlueData.affineIntersectionPairToTripleLeft i j k)).hom.toRingHom))
+    let fMiddle : T ⟶ Scheme.GlueData.affineIntersectionOverlap F j k :=
+      Spec.map (CommRingCat.ofHom ((F.map
+        (Scheme.GlueData.affineIntersectionPairToTripleMiddle i j k)).hom.toRingHom))
+    let fRight : T ⟶ Scheme.GlueData.affineIntersectionOverlap F i k :=
+      Spec.map (CommRingCat.ofHom ((F.map
+        (Scheme.GlueData.affineIntersectionPairToTripleRight i j k)).hom.toRingHom))
+    c.chartTransitionIsoCoordinatePullback hopen hpush i j fLeft ≫
+        c.chartTransitionIsoCoordinatePullback hopen hpush j k fMiddle =
+      c.chartTransitionIsoCoordinatePullback hopen hpush i k fRight := by
+  dsimp only
+  rw [c.chartTransitionIsoCoordinatePullback_eq,
+    c.chartTransitionIsoCoordinatePullback_eq,
+    c.chartTransitionIsoCoordinatePullback_eq]
+  exact c.overlapTransitionIso_cocycle i j k
+
 end
 
 
