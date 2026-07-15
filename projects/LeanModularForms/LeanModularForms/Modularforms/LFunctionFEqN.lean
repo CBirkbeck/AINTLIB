@@ -494,7 +494,8 @@ private lemma differentiable_lSeriesExtensionN
 
 open ModularForm in
 /-- On the half-plane `k/2 + 1 < Re s`, the witness equals `L(s, f)`. -/
-private lemma lSeriesExtensionN_eq_of_re_gt [Γ.IsArithmetic] [CuspFormClass F Γ k] (f : F) (hw : Γ.strictWidthInfty = 1)
+private lemma lSeriesExtensionN_eq_of_re_gt [Γ.IsArithmetic] [CuspFormClass F Γ k] (f : F)
+    (hw : Γ.strictWidthInfty = 1)
     (hk : 0 < k) {s : ℂ} (hs : (k : ℝ) / 2 + 1 < s.re) :
     lSeriesExtensionN (N := N) f s = LSeries (lCoeff f) s := by
   have hs0re : 0 < s.re := lt_trans (by positivity) hs
