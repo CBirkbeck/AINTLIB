@@ -20599,3 +20599,60 @@ T-E15a's discharge (and mirror what [T-E14-LVL-b] unblocks for the Legendre half
 instantiations (2 and 3) now have their universal objects + uniqueness + forward-UP + rt1 built;
 only the two normalization-existence facts (both E[N]-keystone-adjacent) gate the final
 `representable_iff` engine over ℤ[1/6].
+
+## v10.250 (2026-07-15, coordinator) — ★ THE GATE HAS INVERTED: engine SORRY-FREE, whole project converges on the E[N] endomorphism-degree KEYSTONE
+
+**Verified at source (origin/dev/modular-curves, 182 commits past the v10.219 sweep).** The v10.219
+picture ("OMEGA's T-E14 is the single structural gate") is SUPERSEDED — OMEGA drove the shared engine
+to sorry-free and went terminal; the bottleneck is now the endomorphism-degree keystone, and the
+owner has ratified **converging the whole freed fleet onto it**.
+
+**Ground-truth sorry map (verified `git show origin:…`):**
+- `Moduli/EllCategory.lean` — **0 sorry.** `representable_iff` (:274) is PROVEN. The shared engine's
+  ⇐ is discharged (it carried the `:280` sorry a day ago). ✅
+- `EllipticCurve/EndomorphismDegree.lean` — **17 sorry** — THE KEYSTONE. Structure:
+  - **FOUNDATION (sequential, KM-owned):** `endDeg` (:43), `endDual` (:48), `endTrace` (:53) are
+    themselves `:= sorry` — the three core *definitions* are unbuilt. Nothing parallelizes until
+    these land. Route: `endDeg` via K4 scheme-finrank (the L4-iii bridge to HasseWeil `mulByInt_degree`,
+    Abel-FREE per the UNIFICATION ruling); `endDual` = dual isogeny; `endTrace` from endDeg+endDual.
+  - **KEYSTONE IDENTITY (KM):** `endDeg_mulBy = n²` (:107) — anchored to HasseWeil's PROVEN `deg[n]=n²`
+    through the L4-iii bridge (`mulByHom_isDominant` ✓ → `functionFieldMap` → finrank).
+  - **SPECS (KM, part of the construction):** `endDual_spec` (:103), `endTrace_spec` (:144).
+  - **DOWNSTREAM ALGEBRA (parallelizable once foundation lands — GH-owned):** `endDeg_nonneg` (:112),
+    `endDeg_comp` multiplicativity (:117), `endDual_mulBy` (:138), `endDeg_one_add` (:150),
+    `endDeg_comp_mulBy` (:158), `endTrace_comp_mulBy` (:164), `endDeg_one_add_mulBy_comp` (:171),
+    `endTrace_sq_le` Hasse bound (:183), `eq_zero_of_endDeg_eq_zero` (:188),
+    `exists_eq_one_add_mulBy_comp_of_fixesTorsion` (:196, RIG-adjacent).
+- `EllipticCurve/Torsion.lean` — **4 sorry.** BB-QF ✅ DONE (G0, axiom-clean). Remaining: BB-FLAT
+  `mulByHom_flat` (:150), BB-DEG `mulByHom_finrank=N²` (:155), + `FormallyUnramified` (:232), fibres.
+- `EllipticCurve/MulByHomDegree.lean` — **1 sorry** (the L4-core, KM's field-level anchor).
+- `Moduli/GammaHMaster.lean` — **1 sorry** (GH's GHC1 qpd sorryAx; hLN=T-W7.8 owner-parked).
+
+**Two engine-instantiation gates (both E[N]-keystone-adjacent, OMEGA-flagged v10.248):**
+- **[T-E14-LVL-b]** — E[2]-generation (Legendre/ℤ[1/6] half). The `legendreDelta` AX1 machine is
+  complete modulo this level clause.
+- **[T-E15-NORM]** — order-3 ⟹ flex (ℤ[1/3] half). T-E15a cores (object/uniqueness/forward-UP/RT1)
+  all axiom-clean; only NORM gates the discharge.
+
+**★ CONVERGENCE RULING (owner-ratified 2026-07-15) — all four seats onto the keystone cluster:**
+- **KM = the foundation spine (irreducible, sequential).** Build `endDeg`/`endDual`/`endTrace` (the
+  three data-sorries) + `endDeg_mulBy=n²` via the L4-iii bridge + the two specs. This is the load-
+  bearing core nobody can parallelize; KM stays on it at depth. Deliver the defs EARLY so GH's
+  downstream tranche unblocks.
+- **OMEGA = the two normalization tickets [T-E14-LVL-b] + [T-E15-NORM].** Its just-built E3 territory
+  (the flex relation IS Q's equation; the uniqueness certificate is done) — OMEGA is the natural owner.
+  Discharge order-3⟹flex (NORM) + E[2]-generation (LVL-b); both close the engine instantiations.
+- **G0 = the E[N]-scheme substrate.** Finish BB-FLAT (`mulByHom_flat` :150) + BB-DEG (`mulByHom_finrank`
+  :155) in Torsion — the E[N]-as-finite-flat-scheme facts that OMEGA's normalization tickets AND the
+  scheme-level degree both consume. Its finiteness machinery (BB-QF already delivered) is exactly right.
+- **GH = the downstream categorical identities (as KM's foundation lands) + the .Representable closer.**
+  First finish the GHC1 qpd pin + hold the `.Representable` one-liners (`gammaH_representable_of_orderOf`
+  / `gammaBot_representable` — written, close on keystone). Then take the ~10 downstream endDeg
+  identities (:112–:196, pure Ell-category degree algebra — GH's wheelhouse) the moment KM lands
+  the three defs.
+
+**Distance to headline:** keystone foundation + `endDeg_mulBy=n²` + the two normalization facts ⟹
+both engine instantiations discharge ⟹ `representable_iff` produces `.Representable` ⟹ **all three
+levels (Y(N), Γ_H, Γ₁) representable, same commit** (GH's one-liners already written). No structural
+layer remains below the keystone. Boxes cleared: BB-QF ✅, engine ✅, rigidity ✅, rel-rep ✅.
+Fire ONE session per seat (v10.219 G0-collision lesson holds).
