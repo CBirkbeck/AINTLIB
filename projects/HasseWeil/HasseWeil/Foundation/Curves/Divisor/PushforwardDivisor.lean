@@ -51,7 +51,6 @@ norm–conorm identity NEW-1(ii).
 open WeierstrassCurve
 
 set_option linter.unusedSectionVars false
-set_option linter.unusedDecidableInType false
 
 namespace HasseWeil.Curves.CurveMap
 
@@ -94,7 +93,7 @@ theorem degree_pushforwardDivisorVal (φ : CurveMap C₁ C₂) (cd : φ.CoordHom
     (D : ProjectiveDivisor C₁) :
     (pushforwardDivisorVal φ cd D).degree = D.degree := by
   rw [pushforwardDivisorVal_apply]
-  unfold ProjectiveDivisor.degree
+  simp only [ProjectiveDivisor.degree]
   rw [Finsupp.sum_mapDomain_index (h := fun _ n ↦ n) (fun _ ↦ rfl) (fun _ _ _ ↦ rfl)]
 
 /-! ### NEW-1(ii): the norm–conorm identity `div(N_φ f) = φ_∗(div f)`
@@ -1146,7 +1145,7 @@ theorem projDivisor_infinity_coeff_eq_of_affine_eq {C : SmoothPlaneCurve F}
   have hEinf : E ProjectiveSmoothPoint.infinity = 0 := by
     have : E.degree = E ProjectiveSmoothPoint.infinity := by
       conv_lhs => rw [hE_single]
-      unfold ProjectiveDivisor.degree
+      simp only [ProjectiveDivisor.degree]
       rw [Finsupp.sum_single_index rfl]
     rw [this] at hE_deg
     exact hE_deg
@@ -1441,7 +1440,6 @@ private theorem sum_image_section_eq_sum_primesOver
 
 -- The fibre bijection `{primes over m_Q} ≃ {P : φP = Q}` and the supporting
 -- `LiesOver`/`maximalIdealAt` defeq are heartbeat-heavy (pre-existing budget).
-set_option maxHeartbeats 400000 in
 include φ cd in
 /-- **The pushforward coefficient at an affine place is the fibre sum** (the heart of
 the affine matching in `II.3.6`): the `affine Q` coefficient of
@@ -1495,7 +1493,6 @@ private theorem pushforwardDivisorVal_projectiveDivisorOf_affine_eq_sum_fiber
 
 -- Synthesising the cross-algebra `Algebra C₂.CR C₁.FF` for the scalar towers (needed
 -- by `Algebra.algebraMap_intNorm`) is heartbeat-heavy (pre-existing budget).
-set_option maxHeartbeats 500000 in
 include φ cd in
 /-- **Affine coefficients of the `algebraMap` norm–conorm identity agree**: for a
 nonzero `w ∈ F[C₁]` and any smooth point `Q` of `C₂`, the `affine Q` coefficient of
