@@ -74,6 +74,13 @@ theorem map_mul_isUnit_inv_eq_mk' {L T : Type*} [CommRing L] [CommRing T]
   rw [IsLocalization.eq_mk'_iff_mul_eq, ← hds, map_mul, mul_assoc, ← map_mul,
     hd.val_inv_mul, map_one, mul_one, hx]
 
+/-- Cancellation transported along a divisor: if `a ∣ b` and `a * x = a * y`, then also
+`b * x = b * y`. (No cancellativity is needed — multiply the hypothesis through by the cofactor.) -/
+theorem mul_right_cancel_of_dvd {M : Type*} [CommMonoid M] {a b x y : M}
+    (hab : a ∣ b) (h : a * x = a * y) : b * x = b * y := by
+  obtain ⟨e, rfl⟩ := hab
+  rw [mul_right_comm, h, mul_right_comm]
+
 end Helpers
 
 /-! ## The `G`-action on the localization at a pointwise-invariant submonoid
@@ -300,6 +307,94 @@ theorem isLocalRing_fixedPoints_of_isLocalization [Finite G]
 
 end PrimeSetup
 
+/-! ## Base change of cocycle data along a compatible ring map
+
+The cocycle datum `(C, W₀)` on `R` transports along any `G`-equivariant ring map `f : R →+* L`
+(one with `g • f r = f (g • r)`): the mapped family `g ↦ (C g).map f` is again a cocycle, and the
+action-compatibility of `C` is preserved.  Applied to `f = algebraMap R (Localization S)` this
+base-changes the whole descent problem to the invariant localization. -/
+
+section BaseChange
+
+/-- Base change of a `VariableChange` cocycle along a `G`-equivariant ring map: if `C` is a cocycle
+on `R` and `f : R →+* L` intertwines the actions, then `g ↦ (C g).map f` is a cocycle on `L`. -/
+theorem isVCocycle_map {G : Type*} [Group G] {R : Type*} [CommRing R] [MulSemiringAction G R]
+    {L : Type*} [CommRing L] [MulSemiringAction G L] (f : R →+* L)
+    (hf : ∀ (g : G) (r : R), g • f r = f (g • r)) {C : G → VariableChange R} (hC : IsVCocycle C) :
+    IsVCocycle (fun g => (C g).map f) := by
+  have hequiv : ∀ g : G, (MulSemiringAction.toRingHom G L g).comp f
+      = f.comp (MulSemiringAction.toRingHom G R g) := fun g => RingHom.ext fun r => hf g r
+  intro g h
+  show (C (g * h)).map f = (C g).map f * g • ((C h).map f)
+  rw [vcSMul_smul_def, vcSMul_eq_map, VariableChange.map_map, hequiv g,
+    ← VariableChange.map_map, hC g h, ← vcSMul_eq_map, ← vcSMul_smul_def]
+  exact map_mul (VariableChange.mapHom _) _ _
+
+/-- Base change of the action-compatibility `C g • (g • W₀) = W₀` along a `G`-equivariant ring map
+`f`: the mapped curve `W₀.map f` is carried back to itself by `(C g).map f` after the `g`-twist. -/
+theorem map_variableChange_action {G : Type*} [Group G] {R : Type*} [CommRing R]
+    [MulSemiringAction G R] {L : Type*} [CommRing L] [MulSemiringAction G L] (f : R →+* L)
+    (hf : ∀ (g : G) (r : R), g • f r = f (g • r)) {W₀ : WeierstrassCurve R}
+    {C : G → VariableChange R}
+    (haction : ∀ g, C g • (W₀.map (MulSemiringAction.toRingHom G R g)) = W₀) (g : G) :
+    ((C g).map f) • ((W₀.map f).map (MulSemiringAction.toRingHom G L g)) = W₀.map f := by
+  have hequiv : (MulSemiringAction.toRingHom G L g).comp f
+      = f.comp (MulSemiringAction.toRingHom G R g) := RingHom.ext fun r => hf g r
+  rw [WeierstrassCurve.map_map, hequiv, ← WeierstrassCurve.map_map,
+    WeierstrassCurve.map_variableChange, haction g]
+
+/-- If a constant change of variables `D` turns the twisted cocycle into a coboundary
+(`D * C g = g • D`) and `C` carries `g • W` back to `W`, then `D • W` is `G`-invariant:
+`(D • W).map g = D • W` for every `g`. -/
+theorem map_smul_variableChange_eq_of_coboundary {G : Type*} [Group G] {L : Type*} [CommRing L]
+    [MulSemiringAction G L] {W : WeierstrassCurve L} {D : VariableChange L}
+    {C : G → VariableChange L}
+    (haction : ∀ g, C g • (W.map (MulSemiringAction.toRingHom G L g)) = W)
+    (hcob : ∀ g, D * C g = g • D) (g : G) :
+    (D • W).map (MulSemiringAction.toRingHom G L g) = D • W := by
+  rw [← WeierstrassCurve.map_variableChange, ← vcSMul_eq_map, ← vcSMul_smul_def,
+    ← hcob g, mul_smul, haction g]
+
+end BaseChange
+
+/-! ## Clearing denominators in an equality of variable changes -/
+
+section Clearing
+
+/-- Clear denominators in an equality of variable changes.  Given a ring map `φ` for which any
+equality `φ x = φ y` can be cleared against a submonoid `S` by a common multiplier `c : S`
+(`hclear`), an equality `A.map φ = B.map φ` of variable changes is cleared by a **single** `c : S`
+simultaneously in all four coordinates `(u, r, s, t)`. -/
+theorem exists_common_clear_variableChange {R T U : Type*} [CommRing R] [CommRing T] [CommRing U]
+    {S : Submonoid R} (alg : R →+* T) (φ : T →+* U)
+    (hclear : ∀ x y : T, φ x = φ y → ∃ c : S, alg (c : R) * x = alg (c : R) * y)
+    {A B : VariableChange T} (h : A.map φ = B.map φ) :
+    ∃ c : S, (alg (c : R) * (A.u : T) = alg (c : R) * (B.u : T)) ∧
+      (alg (c : R) * A.r = alg (c : R) * B.r) ∧
+      (alg (c : R) * A.s = alg (c : R) * B.s) ∧
+      (alg (c : R) * A.t = alg (c : R) * B.t) := by
+  have hu : φ (A.u : T) = φ (B.u : T) := by
+    have := congrArg (fun z : VariableChange U => (z.u : U)) h
+    simpa using this
+  have hr : φ A.r = φ B.r := by have := congrArg VariableChange.r h; simpa using this
+  have hs : φ A.s = φ B.s := by have := congrArg VariableChange.s h; simpa using this
+  have ht : φ A.t = φ B.t := by have := congrArg VariableChange.t h; simpa using this
+  obtain ⟨cu, hcu⟩ := hclear _ _ hu
+  obtain ⟨cr, hcr⟩ := hclear _ _ hr
+  obtain ⟨cs, hcs⟩ := hclear _ _ hs
+  obtain ⟨ct, hct⟩ := hclear _ _ ht
+  refine ⟨((cu * cr) * cs) * ct, ?_, ?_, ?_, ?_⟩
+  · exact mul_right_cancel_of_dvd (map_dvd _ (map_dvd (Submonoid.subtype S)
+      (((dvd_mul_right cu cr).mul_right cs).mul_right ct))) hcu
+  · exact mul_right_cancel_of_dvd (map_dvd _ (map_dvd (Submonoid.subtype S)
+      (((dvd_mul_left cr cu).mul_right cs).mul_right ct))) hcr
+  · exact mul_right_cancel_of_dvd (map_dvd _ (map_dvd (Submonoid.subtype S)
+      ((dvd_mul_left cs (cu * cr)).mul_right ct))) hcs
+  · exact mul_right_cancel_of_dvd (map_dvd _ (map_dvd (Submonoid.subtype S)
+      (dvd_mul_left ct ((cu * cr) * cs)))) hct
+
+end Clearing
+
 /-! ## The main theorem: localized descent + spread -/
 
 section Main
@@ -370,28 +465,17 @@ theorem exists_away_invariant_descent [Fintype G] [DecidableEq G]
   haveI := isLocalRing_fixedPoints_of_isLocalization p hcomp
   have hfreeL := isFreeAlgebraAction_of_isLocalization hcomp hfree
   -- ### base change of the cocycle data to `Localization S`
-  have hequiv : ∀ g : G,
-      (MulSemiringAction.toRingHom G (Localization S) g).comp (algebraMap R (Localization S))
-        = (algebraMap R (Localization S)).comp (MulSemiringAction.toRingHom G R g) :=
-    fun g => RingHom.ext fun r => hcomp g r
   set C' : G → VariableChange (Localization S) :=
     fun g => (C g).map (algebraMap R (Localization S)) with hC'def
   have hC' : IsVCocycle C' := by
-    intro g h
-    show (C (g * h)).map (algebraMap R (Localization S))
-      = (C g).map (algebraMap R (Localization S))
-        * g • ((C h).map (algebraMap R (Localization S)))
-    rw [vcSMul_smul_def, vcSMul_eq_map, VariableChange.map_map, hequiv g,
-      ← VariableChange.map_map, hC g h, ← vcSMul_eq_map, ← vcSMul_smul_def]
-    exact map_mul (VariableChange.mapHom _) _ _
+    rw [hC'def]; exact isVCocycle_map (algebraMap R (Localization S)) hcomp hC
   have haction' : ∀ g : G,
       C' g • ((W₀.map (algebraMap R (Localization S))).map
           (MulSemiringAction.toRingHom G (Localization S) g))
         = W₀.map (algebraMap R (Localization S)) := by
     intro g
-    show (C g).map (algebraMap R (Localization S)) • _ = _
-    rw [WeierstrassCurve.map_map, hequiv g, ← WeierstrassCurve.map_map,
-      WeierstrassCurve.map_variableChange, haction g]
+    rw [hC'def]
+    exact map_variableChange_action (algebraMap R (Localization S)) hcomp haction g
   -- ### the coboundary over `Localization S`
   obtain ⟨E', hE'⟩ := exists_coboundary hfreeL hC'
   set D' : VariableChange (Localization S) := E'⁻¹ with hD'def
@@ -401,10 +485,8 @@ theorem exists_away_invariant_descent [Fintype G] [DecidableEq G]
   have hinv : ∀ g : G,
       (D' • (W₀.map (algebraMap R (Localization S)))).map
           (MulSemiringAction.toRingHom G (Localization S) g)
-        = D' • (W₀.map (algebraMap R (Localization S))) := by
-    intro g
-    rw [← WeierstrassCurve.map_variableChange, ← vcSMul_eq_map, ← vcSMul_smul_def,
-      ← hDcob g, mul_smul, haction' g]
+        = D' • (W₀.map (algebraMap R (Localization S))) :=
+    map_smul_variableChange_eq_of_coboundary haction' hDcob
   -- ### fraction forms of all the data over `Localization S`
   have hcoef : ∀ x : Localization S, (∀ g : G, g • x = x) →
       ∃ (b : R) (s : S), (∀ g : G, g • b = b) ∧ IsLocalization.mk' (Localization S) b s = x :=
@@ -608,17 +690,8 @@ theorem exists_away_invariant_descent [Fintype G] [DecidableEq G]
         = algebraMap R (Localization.Away ((a₀ : R))) ((c : R)) * y →
       algebraMap R (Localization.Away ((a₀ : R))) ((c' : R)) * x
         = algebraMap R (Localization.Away ((a₀ : R))) ((c' : R)) * y := by
-    rintro c c' x y ⟨e, rfl⟩ h
-    have hcoe : (((c * e : S) : R)) = (c : R) * (e : R) := rfl
-    rw [hcoe, map_mul]
-    calc algebraMap R (Localization.Away ((a₀ : R))) ((c : R))
-          * algebraMap R (Localization.Away ((a₀ : R))) ((e : R)) * x
-        = algebraMap R (Localization.Away ((a₀ : R))) ((e : R))
-          * (algebraMap R (Localization.Away ((a₀ : R))) ((c : R)) * x) := by ring
-      _ = algebraMap R (Localization.Away ((a₀ : R))) ((e : R))
-          * (algebraMap R (Localization.Away ((a₀ : R))) ((c : R)) * y) := by rw [h]
-      _ = algebraMap R (Localization.Away ((a₀ : R))) ((c : R))
-          * algebraMap R (Localization.Away ((a₀ : R))) ((e : R)) * y := by ring
+    intro c c' x y hcc h
+    exact mul_right_cancel_of_dvd (map_dvd _ (map_dvd (Submonoid.subtype S) hcc)) h
   -- the five coefficient clearers
   have h1 := congrArg WeierstrassCurve.a₁ hXY
   have h2 := congrArg WeierstrassCurve.a₂ hXY
@@ -669,32 +742,9 @@ theorem exists_away_invariant_descent [Fintype G] [DecidableEq G]
       (algebraMap R (Localization.Away ((a₀ : R))) ((c : R)) * (Dₗ * Cgₗ g).s
         = algebraMap R (Localization.Away ((a₀ : R))) ((c : R)) * (Dgₗ g).s) ∧
       (algebraMap R (Localization.Away ((a₀ : R))) ((c : R)) * (Dₗ * Cgₗ g).t
-        = algebraMap R (Localization.Away ((a₀ : R))) ((c : R)) * (Dgₗ g).t) := by
-    intro g
-    have h4g := hDCg g
-    have hu : j₀ (((Dₗ * Cgₗ g).u : Localization.Away ((a₀ : R))))
-        = j₀ (((Dgₗ g).u : Localization.Away ((a₀ : R)))) := by
-      have := congrArg (fun z : VariableChange (Localization S) =>
-        ((z.u : Localization S))) h4g
-      simpa using this
-    have hr : j₀ ((Dₗ * Cgₗ g).r) = j₀ ((Dgₗ g).r) := by
-      have := congrArg VariableChange.r h4g
-      simpa using this
-    have hs : j₀ ((Dₗ * Cgₗ g).s) = j₀ ((Dgₗ g).s) := by
-      have := congrArg VariableChange.s h4g
-      simpa using this
-    have ht : j₀ ((Dₗ * Cgₗ g).t) = j₀ ((Dgₗ g).t) := by
-      have := congrArg VariableChange.t h4g
-      simpa using this
-    obtain ⟨cu, hcu⟩ := hclear _ _ hu
-    obtain ⟨cr, hcr⟩ := hclear _ _ hr
-    obtain ⟨cs, hcs⟩ := hclear _ _ hs
-    obtain ⟨ct, hct⟩ := hclear _ _ ht
-    refine ⟨((cu * cr) * cs) * ct, ?_, ?_, ?_, ?_⟩
-    · exact hclear_dvd (((dvd_mul_right cu cr).mul_right cs).mul_right ct) hcu
-    · exact hclear_dvd (((dvd_mul_left cr cu).mul_right cs).mul_right ct) hcr
-    · exact hclear_dvd ((dvd_mul_left cs (cu * cr)).mul_right ct) hcs
-    · exact hclear_dvd (dvd_mul_left ct ((cu * cr) * cs)) hct
+        = algebraMap R (Localization.Away ((a₀ : R))) ((c : R)) * (Dgₗ g).t) := fun g =>
+    exists_common_clear_variableChange (algebraMap R (Localization.Away ((a₀ : R)))) j₀ hclear
+      (hDCg g)
   choose cg hcgu hcgr hcgs hcgt using hcob4
   -- ### fold all clearers into a single element of `S` and enlarge `a₀`
   set cAll : S := ((((e₁ * e₂) * e₃) * e₄) * e₆) * ∏ g : G, cg g with hcAlldef
