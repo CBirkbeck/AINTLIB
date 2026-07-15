@@ -613,7 +613,7 @@ theorem divPoly_wronskian_identity_of_poly (n : ℤ) (hn : n ≠ 0)
     intro h
     exact ΨSq_ff_ne_zero' W hn ((ψ_ff_sq_eq W n).symm ▸
       show (ψ_ff W n) ^ 2 = 0 by
-        unfold ψ_ff
+        simp only [ψ_ff]
         rw [h]; ring)
   have h_preΨ_u : algebraMap (Polynomial F) KE (W.preΨ (2 * n)) * u_gen W = ψn * ψcn := by
     rw [hψn_def, hψcn_def, ψc_spec_ff W n, Affine.CoordinateRing.mk_ψ (W := W.toAffine) (2 * n)]
