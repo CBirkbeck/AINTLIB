@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.RingTheory.Kaehler.Basic
 
 /-!
@@ -145,8 +150,9 @@ noncomputable def pullbackKaehler (f : S →ₐ[R] S) :
   let lift : Ω[S⁄R] →ₗ[S] TwistedKaehler f := f.derivationCompHom.liftKaehlerDifferential
   { toFun := fun ω ↦ (lift ω).out
     map_zero' := by change (lift 0).out = 0; rw [map_zero]; rfl
-    map_add' := fun x y ↦ by change (lift (x + y)).out = (lift x).out + (lift y).out
-                             rw [map_add]; rfl }
+    map_add' := fun x y ↦ by
+      change (lift (x + y)).out = (lift x).out + (lift y).out
+      rw [map_add]; rfl }
 
 /-- The pullback of `D x` is `D (f x)`. -/
 @[simp]
