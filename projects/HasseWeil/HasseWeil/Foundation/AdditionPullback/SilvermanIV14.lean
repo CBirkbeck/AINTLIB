@@ -124,7 +124,7 @@ theorem ord_neg_addPullback_x_div_y_negFrobenius_unconditional
 theorem negFrobeniusIsog_pullback_localParam_eq_pow :
     (negFrobeniusIsog W).pullback (localParam W) =
       ((mulByInt W.toAffine (-1)).pullback (localParam W)) ^ Fintype.card K := by
-  unfold negFrobeniusIsog
+  simp only [negFrobeniusIsog]
   rw [Isogeny.comp_algebraMap_eq, frobeniusIsog_pullback_apply]
 
 /-- **Closed form for `(mulByInt(-1)).pullback localParam`** (axiom-clean).
@@ -136,7 +136,7 @@ theorem mulByInt_neg_one_pullback_localParam :
     (mulByInt W.toAffine (-1)).pullback (localParam W) =
       x_gen W / (y_gen W + algebraMap K KE W.a₁ * x_gen W +
         algebraMap K KE W.a₃) := by
-  unfold localParam
+  simp only [localParam]
   rw [map_div₀, map_neg, mulByInt_pullback_x_neg_one, mulByInt_pullback_y_neg_one]
   -- Goal: -x_gen / (-y_gen - a₁·x_gen - a₃) = x_gen / (y_gen + a₁·x_gen + a₃)
   rw [show -y_gen W - algebraMap K KE W.a₁ * x_gen W -
@@ -167,7 +167,7 @@ theorem ord_negFrobeniusIsog_pullback_localParam (hq : 2 ≤ Fintype.card K) :
   have h_eq : (negFrobeniusIsog W).pullback (localParam W) =
       -((negFrobeniusIsog W).pullback (x_gen W)) /
       (negFrobeniusIsog W).pullback (y_gen W) := by
-    unfold localParam
+    simp only [localParam]
     rw [map_div₀, map_neg]
   rw [h_eq]
   have hY_ne : (negFrobeniusIsog W).pullback (y_gen W) ≠ 0 := by
@@ -199,6 +199,7 @@ direct from `formalIsogenySeries_frobenius = X^q` for `q ≥ 1`. -/
     PowerSeries.coeff_X_pow]
   exact if_neg (by omega)
 
+omit [Fintype K] in
 /-- **Orderbound for denominator's lower terms**: the orderTop of
 `HahnSeries.C a₁ * formalX + HahnSeries.C a₃` is ≥ -2 in `LaurentSeries K`
 (since each term has orderTop ≥ -2). -/
@@ -1321,7 +1322,7 @@ private theorem addPullbackNumerator_reduced_negFrobenius_split_eq :
               algebraMap K W.toAffine.FunctionField W.a₂ * x_gen W *
               (negFrobeniusIsog W).pullback (x_gen W)) +
       (x_gen W * ((negFrobeniusIsog W).pullback (x_gen W)) ^ 2) := by
-  unfold addPullbackNumerator_reduced_negFrobenius
+  simp only [addPullbackNumerator_reduced_negFrobenius]
   ring
 
 /-- The dominant term `localExpand(x_gen · (negFrob.π·x)²)` has strictly smaller
@@ -1395,7 +1396,7 @@ private lemma addPullbackNumerator_reduced_negFrobenius_split :
               algebraMap K W.toAffine.FunctionField W.a₂ * x_gen W *
               (negFrobeniusIsog W).pullback (x_gen W)) +
       (x_gen W * ((negFrobeniusIsog W).pullback (x_gen W)) ^ 2) := by
-  unfold addPullbackNumerator_reduced_negFrobenius
+  simp only [addPullbackNumerator_reduced_negFrobenius]
   ring
 
 /-- The dominant term `x_gen · (negFrob.π·x)²` has strictly smaller `orderTop` than the
@@ -2091,7 +2092,7 @@ theorem addPullbackAlgHom_negFrobenius_x_gen_eq
     (hq : 2 ≤ Fintype.card K) :
     addPullbackAlgHom_negFrobenius W hq (x_gen W) =
       addPullback_x W (negFrobeniusIsog W) := by
-  unfold addPullbackAlgHom_negFrobenius addPullbackAlgHom_negFrobenius_of_inj addPullbackAlgHom
+  simp only [addPullbackAlgHom_negFrobenius, addPullbackAlgHom_negFrobenius_of_inj, addPullbackAlgHom]
   rw [IsFractionRing.liftAlgHom_apply]
   change IsFractionRing.lift _ (algebraMap _ _ _) = _
   rw [IsFractionRing.lift_algebraMap]
@@ -2099,7 +2100,7 @@ theorem addPullbackAlgHom_negFrobenius_x_gen_eq
     (algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X) =
     addPullback_x W (negFrobeniusIsog W)
   change addCoordRingHom (negFrobeniusIsog_addNonInverse W) _ = _
-  unfold addCoordRingHom
+  simp only [addCoordRingHom]
   rw [show algebraMap (Polynomial K) W.toAffine.CoordinateRing Polynomial.X =
       Affine.CoordinateRing.mk W.toAffine (Polynomial.C Polynomial.X) from rfl]
   rw [AdjoinRoot.lift_mk]
@@ -2110,7 +2111,7 @@ theorem addPullbackAlgHom_negFrobenius_y_gen_eq
     (hq : 2 ≤ Fintype.card K) :
     addPullbackAlgHom_negFrobenius W hq (y_gen W) =
       addPullback_y W (negFrobeniusIsog W) := by
-  unfold addPullbackAlgHom_negFrobenius addPullbackAlgHom_negFrobenius_of_inj addPullbackAlgHom
+  simp only [addPullbackAlgHom_negFrobenius, addPullbackAlgHom_negFrobenius_of_inj, addPullbackAlgHom]
   rw [IsFractionRing.liftAlgHom_apply]
   change IsFractionRing.lift _ (y_gen W) = _
   rw [show y_gen W = algebraMap _ _ (AdjoinRoot.root W.toAffine.polynomial)
@@ -2120,7 +2121,7 @@ theorem addPullbackAlgHom_negFrobenius_y_gen_eq
     (AdjoinRoot.root W.toAffine.polynomial) = addPullback_y W (negFrobeniusIsog W)
   change addCoordRingHom (negFrobeniusIsog_addNonInverse W)
     (AdjoinRoot.root W.toAffine.polynomial) = _
-  unfold addCoordRingHom
+  simp only [addCoordRingHom]
   rw [show AdjoinRoot.root W.toAffine.polynomial =
       AdjoinRoot.mk W.toAffine.polynomial Polynomial.X from AdjoinRoot.mk_X.symm]
   rw [AdjoinRoot.lift_mk]
@@ -2135,7 +2136,7 @@ theorem localExpand_isogOneSub_negFrobenius_pullback_localParam
       -(localExpand W (addPullback_x W (negFrobeniusIsog W))) /
         localExpand W (addPullback_y W (negFrobeniusIsog W)) := by
   rw [isogOneSub_negFrobenius_pullback]
-  unfold localParam
+  simp only [localParam]
   rw [map_div₀, map_neg, map_div₀, map_neg,
     addPullbackAlgHom_negFrobenius_x_gen_eq W hq,
     addPullbackAlgHom_negFrobenius_y_gen_eq W hq]
@@ -2419,7 +2420,7 @@ theorem kaehler_D_addPullback_x_via_slope_witness
       (2 * addSlope W α + algebraMap K KE W.a₁) •
         KaehlerDifferential.D K W.toAffine.FunctionField (addSlope W α) -
       KaehlerDifferential.D K W.toAffine.FunctionField (x_gen W) := by
-  unfold addPullback_x W_KE
+  simp only [addPullback_x, W_KE]
   set D := KaehlerDifferential.D K W.toAffine.FunctionField
   set ℓ := addSlope W α
   change D ((ℓ) ^ 2 + (algebraMap K KE) W.a₁ * ℓ
@@ -2468,7 +2469,7 @@ theorem kaehler_D_addPullback_x_general
         KaehlerDifferential.D K W.toAffine.FunctionField (addSlope W α) -
       KaehlerDifferential.D K W.toAffine.FunctionField (x_gen W) -
       KaehlerDifferential.D K W.toAffine.FunctionField (α.pullback (x_gen W)) := by
-  unfold addPullback_x W_KE
+  simp only [addPullback_x, W_KE]
   set D := KaehlerDifferential.D K W.toAffine.FunctionField
   set ℓ := addSlope W α
   change D ((ℓ) ^ 2 + (algebraMap K KE) W.a₁ * ℓ
@@ -2507,7 +2508,7 @@ theorem omegaPullbackCoeff_isogOneSub_negFrobenius_eq_one_via_kaehler_witness
     omegaPullbackCoeff W (isogOneSub_negFrobenius W hq) = 1 := by
   apply omegaPullbackCoeff_unique
   rw [omegaPullbackCoeff_spec, one_smul]
-  unfold x_gen at h_kaehler
+  simp only [x_gen] at h_kaehler
   exact h_kaehler
 
 /-- **Sub-helper 113** (Kähler ω(γ) = 1 via pullbackKaehler witness — closing-arc).
@@ -3188,7 +3189,7 @@ theorem alpha_star_u_isogOneSub_negFrobenius
         algebraMap K KE W.a₃ := by
   rw [alpha_star_u_eq]
   show (isogOneSub_negFrobenius W hq).pullback (u_gen W) = _
-  unfold u_gen
+  simp only [u_gen]
   rw [map_add, map_add, map_mul, map_mul, map_ofNat]
   rw [show (isogOneSub_negFrobenius W hq).pullback
         (algebraMap (Affine.CoordinateRing W.toAffine) KE
@@ -3226,7 +3227,7 @@ theorem alpha_star_u_plus_u_gen_negFrobenius
           algebraMap K KE W.a₁) *
         (addPullback_x W (negFrobeniusIsog W) - x_gen W)) := by
   rw [alpha_star_u_isogOneSub_negFrobenius W hq]
-  unfold u_gen addPullback_y addPullback_x x_gen y_gen
+  simp only [u_gen, addPullback_y, addPullback_x, x_gen, y_gen]
   simp only [WeierstrassCurve.Affine.addY, WeierstrassCurve.Affine.negY,
     WeierstrassCurve.Affine.negAddY, WeierstrassCurve.Affine.addX]
   -- Unfold W_KE coefficients to algebraMap-images of W coefficients.
@@ -3337,7 +3338,7 @@ theorem addPullback_x_sub_x_gen_mul_Den_sq_negFrobenius :
           (x_gen W - (negFrobeniusIsog W).pullback (x_gen W)) ^ 2 -
         ((2 : KE) * x_gen W + (negFrobeniusIsog W).pullback (x_gen W)) *
           (x_gen W - (negFrobeniusIsog W).pullback (x_gen W)) ^ 2 := by
-  unfold addPullback_x
+  simp only [addPullback_x]
   simp only [WeierstrassCurve.Affine.addX]
   have h_a1 : (W_KE W).toAffine.a₁ = algebraMap K KE W.a₁ := rfl
   have h_a2 : (W_KE W).toAffine.a₂ = algebraMap K KE W.a₂ := rfl
@@ -3449,7 +3450,7 @@ theorem omegaPullbackCoeff_isogOneSub_negFrobenius_eq_one
   have hu_eq : u = u_gen W := by
     change algebraMap K KE W.a₃ + (2 : KE) * y_gen W +
          algebraMap K KE W.a₁ * x_gen W = u_gen W
-    unfold u_gen y_gen x_gen
+    simp only [u_gen, y_gen, x_gen]
     ring
   have hu_ne : u ≠ 0 := hu_eq ▸ u_gen_ne_zero W
   have huDen_ne : u * Den ^ 2 ≠ 0 := mul_ne_zero hu_ne hDen_sq_ne
@@ -3556,7 +3557,7 @@ private theorem kaehler_D_addPullback_x_pair_via_slope
   set D := KaehlerDifferential.D K W.toAffine.FunctionField
   set X₁ := α₁.pullback (x_gen W)
   set X₂ := α₂.pullback (x_gen W)
-  unfold addPullback_x_pair WeierstrassCurve.Affine.addX
+  simp only [addPullback_x_pair, WeierstrassCurve.Affine.addX]
   set ℓ := addSlopePair α₁ α₂
   change D ((ℓ) ^ 2 + (W_KE W).toAffine.a₁ * ℓ
           - (W_KE W).toAffine.a₂ - X₁ - X₂) = _
