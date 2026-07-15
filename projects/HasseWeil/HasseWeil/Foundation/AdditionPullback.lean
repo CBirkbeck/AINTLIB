@@ -3,11 +3,11 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula
-import Mathlib.RingTheory.Algebraic.Integral
 import HasseWeil.Foundation.Basic
 import HasseWeil.Foundation.MulByIntPullback
 import HasseWeil.Foundation.OrdAtInftyBridge
+import Mathlib.AlgebraicGeometry.EllipticCurve.Affine.Formula
+import Mathlib.RingTheory.Algebraic.Integral
 
 /-!
 # Addition-Law Pullback on Function Fields
@@ -26,9 +26,8 @@ addition formulas from mathlib.
 ## References
 
 * Silverman, *The Arithmetic of Elliptic Curves*, III.2.3c (explicit addition
-  formulas) + III.3.6 (`+` is a morphism). Round-13 D-R13-A-04 fix: III.3.6 is
-  the morphism property; the explicit formula is III.2.3c (referenced inside
-  III.3.6's proof at book p. 64).
+  formulas) + III.3.6 (`+` is a morphism): III.3.6 is the morphism property; the
+  explicit formula is III.2.3c (referenced inside III.3.6's proof at book p. 64).
 * Mathlib: `WeierstrassCurve.Affine.equation_add`
 -/
 
@@ -119,7 +118,6 @@ noncomputable def addPullbackAlgHom (hxy : AddNonInverse W α)
     (hinj : Function.Injective (addCoordAlgHom hxy)) : KE →ₐ[F] KE :=
   IsFractionRing.liftAlgHom hinj
 
-set_option linter.unusedSectionVars false in
 /-- `addBaseHom` coincides with `Polynomial.aeval (addPullback_x W α)` as a ring hom. -/
 theorem addBaseHom_eq_aeval :
     (addBaseHom W α : Polynomial F →+* KE) =
@@ -753,7 +751,6 @@ theorem AddNonInversePair_of_y_ne {α₁ α₂ : Isogeny W.toAffine W.toAffine}
     AddNonInversePair α₁ α₂ :=
   fun ⟨_, h⟩ ↦ h_y h
 
-set_option linter.unusedSectionVars false in
 /-- `addBaseHomPair` coincides with `Polynomial.aeval (addPullback_x_pair α₁ α₂)`
 as a ring hom. -/
 theorem addBaseHomPair_eq_aeval (α₁ α₂ : Isogeny W.toAffine W.toAffine) :
