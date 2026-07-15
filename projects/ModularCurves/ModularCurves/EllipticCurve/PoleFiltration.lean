@@ -1356,8 +1356,8 @@ private lemma overlap_coordOf_eq (W : WeierstrassCurve R) [Nontrivial R]
     conv_lhs => rw [← (infChartBasis W).sum_repr b]
     rw [Fin.sum_univ_three]
     simp only [infChartBasis_apply, Algebra.smul_def,
-      show ((0 : Fin 3) : ℕ) = 0 from rfl, show ((1 : Fin 3) : ℕ) = 1 from rfl,
-      show ((2 : Fin 3) : ℕ) = 2 from rfl, pow_zero, pow_one, mul_one]
+      Fin.val_zero, Fin.val_one,
+      Fin.val_two, pow_zero, pow_one, mul_one]
   rw [hb] at key
   have hT : infChartTElem W ^ N =
       algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) (Polynomial.X ^ N) := by
@@ -1374,8 +1374,8 @@ private lemma overlap_coordOf_eq (W : WeierstrassCurve R) [Nontrivial R]
           Polynomial.X ^ N * ((infChartBasis W).repr b j)) • infChartBasis W j = 0 := by
       rw [Fin.sum_univ_three]
       simp only [infChartBasis_apply, Algebra.smul_def,
-        show ((0 : Fin 3) : ℕ) = 0 from rfl, show ((1 : Fin 3) : ℕ) = 1 from rfl,
-        show ((2 : Fin 3) : ℕ) = 2 from rfl, pow_zero, pow_one, mul_one,
+        Fin.val_zero, Fin.val_one,
+        Fin.val_two, pow_zero, pow_one, mul_one,
         map_sub, map_add, map_mul]
       linear_combination key
     exact hli hsum
@@ -1505,8 +1505,8 @@ theorem overlap_pair_eq_baseRing (W : WeierstrassCurve R)
       conv_lhs => rw [← (infChartBasis W).sum_repr b]
       rw [Fin.sum_univ_three]
       simp only [infChartBasis_apply, Algebra.smul_def,
-        show ((0 : Fin 3) : ℕ) = 0 from rfl, show ((1 : Fin 3) : ℕ) = 1 from rfl,
-        show ((2 : Fin 3) : ℕ) = 2 from rfl, pow_zero, pow_one, mul_one]
+        Fin.val_zero, Fin.val_one,
+        Fin.val_two, pow_zero, pow_one, mul_one]
     rw [hbexp, hb0, hb1, hb2, map_zero, zero_mul, add_zero, zero_mul, add_zero,
       IsScalarTower.algebraMap_apply R (Polynomial R) (AdjoinRoot (infChartCubic W)),
       Polynomial.algebraMap_eq]
@@ -3339,8 +3339,8 @@ private lemma overlap_coordOfShift_eq (W : WeierstrassCurve R) [Nontrivial R]
     conv_lhs => rw [← (infChartBasis W).sum_repr b]
     rw [Fin.sum_univ_three]
     simp only [infChartBasis_apply, Algebra.smul_def,
-      show ((0 : Fin 3) : ℕ) = 0 from rfl, show ((1 : Fin 3) : ℕ) = 1 from rfl,
-      show ((2 : Fin 3) : ℕ) = 2 from rfl, pow_zero, pow_one, mul_one]
+      Fin.val_zero, Fin.val_one,
+      Fin.val_two, pow_zero, pow_one, mul_one]
   rw [hb] at key
   have hTN : infChartTElem W ^ N =
       algebraMap (Polynomial R) (AdjoinRoot (infChartCubic W)) (Polynomial.X ^ N) := by
@@ -3357,8 +3357,8 @@ private lemma overlap_coordOfShift_eq (W : WeierstrassCurve R) [Nontrivial R]
           Polynomial.X ^ N * ((infChartBasis W).repr b j)) • infChartBasis W j = 0 := by
       rw [Fin.sum_univ_three]
       simp only [infChartBasis_apply, Algebra.smul_def,
-        show ((0 : Fin 3) : ℕ) = 0 from rfl, show ((1 : Fin 3) : ℕ) = 1 from rfl,
-        show ((2 : Fin 3) : ℕ) = 2 from rfl, pow_zero, pow_one, mul_one,
+        Fin.val_zero, Fin.val_one,
+        Fin.val_two, pow_zero, pow_one, mul_one,
         map_sub, map_add, map_mul]
       linear_combination key
     exact hli hsum
@@ -4101,8 +4101,8 @@ lemma ker_infChartAug (W : WeierstrassCurve R) :
     have hrepr := (infChartBasis W).sum_repr b
     rw [Fin.sum_univ_three] at hrepr
     simp only [infChartBasis_apply, Algebra.smul_def,
-      show ((0 : Fin 3) : ℕ) = 0 from rfl, show ((1 : Fin 3) : ℕ) = 1 from rfl,
-      show ((2 : Fin 3) : ℕ) = 2 from rfl, pow_zero, pow_one, mul_one] at hrepr
+      Fin.val_zero, Fin.val_one,
+      Fin.val_two, pow_zero, pow_one, mul_one] at hrepr
     have haug0 : ((infChartBasis W).repr b 0).eval 0 = 0 := by
       have h1 := congrArg (infChartAug W) hrepr
       rw [map_add, map_add, map_mul, map_mul, map_pow, infChartAug_root,
@@ -4480,8 +4480,8 @@ lemma exists_overlapMap_mul_tel_pow (W : WeierstrassCurve R)
   have hrepr := (infChartBasis W).sum_repr b
   rw [Fin.sum_univ_three] at hrepr
   simp only [infChartBasis_apply, Algebra.smul_def,
-    show ((0 : Fin 3) : ℕ) = 0 from rfl, show ((1 : Fin 3) : ℕ) = 1 from rfl,
-    show ((2 : Fin 3) : ℕ) = 2 from rfl, pow_zero, pow_one, mul_one] at hrepr
+    Fin.val_zero, Fin.val_one,
+    Fin.val_two, pow_zero, pow_one, mul_one] at hrepr
   rw [← hrepr]
   refine hadd _ _ (hadd _ _ ?_ ?_) ?_
   · have := hpoly ((infChartBasis W).repr b 0) 0
