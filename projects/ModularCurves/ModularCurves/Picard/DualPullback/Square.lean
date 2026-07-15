@@ -89,6 +89,7 @@ theorem pullbackCongr_inv
   subst g
   rfl
 
+@[reassoc]
 theorem pullbackComp_assoc_app
     {A B C D : Scheme.{u}} (f : A ⟶ B) (g : B ⟶ C)
     (h : C ⟶ D) (M : D.Modules) :
@@ -109,6 +110,64 @@ theorem pullbackComp_assoc_app
       (pullback f).map ((pullbackComp g h).hom.app M) ≫
         (pullbackComp f (g ≫ h)).hom.app M at H
   exact H.symm
+
+/-- The two canonical ways to flatten four successive pullbacks agree. -/
+theorem pullbackComp_four_assoc_app
+    {A B C D E : Scheme.{u}}
+    (q : A ⟶ B) (p : B ⟶ C) (d : C ⟶ D) (g : D ⟶ E)
+    (N : E.Modules) :
+    (pullbackComp q p).hom.app
+          ((pullback d).obj ((pullback g).obj N)) ≫
+        (pullback (q ≫ p)).map ((pullbackComp d g).hom.app N) ≫
+        (pullbackComp (q ≫ p) (d ≫ g)).hom.app N =
+      (pullback q).map ((pullbackComp p d).hom.app
+          ((pullback g).obj N)) ≫
+        (pullbackComp q (p ≫ d)).hom.app ((pullback g).obj N) ≫
+      (pullbackComp ((q ≫ p) ≫ d) g).hom.app N := by
+  let α :
+      (pullback q).obj ((pullback p).obj
+        ((pullback d).obj ((pullback g).obj N))) ⟶
+      (pullback (q ≫ p)).obj
+        ((pullback d).obj ((pullback g).obj N)) :=
+    (pullbackComp q p).hom.app ((pullback d).obj ((pullback g).obj N))
+  let β :
+      (pullback (q ≫ p)).obj
+          ((pullback d).obj ((pullback g).obj N)) ⟶
+        (pullback (q ≫ p)).obj ((pullback (d ≫ g)).obj N) :=
+    (pullback (q ≫ p)).map ((pullbackComp d g).hom.app N)
+  let γ :
+      (pullback (q ≫ p)).obj ((pullback (d ≫ g)).obj N) ⟶
+        (pullback ((q ≫ p) ≫ (d ≫ g))).obj N :=
+    (pullbackComp (q ≫ p) (d ≫ g)).hom.app N
+  let δ :
+      (pullback (q ≫ p)).obj
+          ((pullback d).obj ((pullback g).obj N)) ⟶
+        (pullback ((q ≫ p) ≫ d)).obj ((pullback g).obj N) :=
+    (pullbackComp (q ≫ p) d).hom.app ((pullback g).obj N)
+  let ε :
+      (pullback ((q ≫ p) ≫ d)).obj ((pullback g).obj N) ⟶
+        (pullback (((q ≫ p) ≫ d) ≫ g)).obj N :=
+    (pullbackComp ((q ≫ p) ≫ d) g).hom.app N
+  let ζ :
+      (pullback q).obj ((pullback p).obj
+          ((pullback d).obj ((pullback g).obj N))) ⟶
+        (pullback q).obj
+          ((pullback (p ≫ d)).obj ((pullback g).obj N)) :=
+    (pullback q).map ((pullbackComp p d).hom.app ((pullback g).obj N))
+  let η :
+      (pullback q).obj
+          ((pullback (p ≫ d)).obj ((pullback g).obj N)) ⟶
+        (pullback ((q ≫ p) ≫ d)).obj ((pullback g).obj N) :=
+    (pullbackComp q (p ≫ d)).hom.app ((pullback g).obj N)
+  change α ≫ (β ≫ γ) = ζ ≫ (η ≫ ε)
+  have hβγ : β ≫ γ = δ ≫ ε :=
+    pullbackComp_assoc_app (q ≫ p) d g N
+  have hζη : ζ ≫ η = α ≫ δ :=
+    pullbackComp_assoc_app q p d ((pullback g).obj N)
+  rw [hβγ]
+  have hcomp := congrArg (fun z => z ≫ ε) hζη.symm
+  exact (Category.assoc α δ ε).symm.trans
+    (hcomp.trans (Category.assoc ζ η ε))
 
 theorem pullbackCompCongr_transition_app
     {A B C D : Scheme.{u}}
