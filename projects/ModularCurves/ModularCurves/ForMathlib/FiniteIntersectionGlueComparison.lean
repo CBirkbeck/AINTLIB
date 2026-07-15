@@ -303,7 +303,9 @@ private theorem Scheme.Hom.affineIntersectionGlueData_t_overlapMap
   exact π.affineIntersectionSchemeIso_hom_ι U
     (comparisonPairSwap i j) hji hij (hU _ hji) (hU _ hij)
 
-private theorem Scheme.Hom.affineIntersectionGlueData_f_chartIso
+/-- The left map from an ordered glue overlap, followed by the chart-coordinate isomorphism,
+is the overlap-coordinate isomorphism followed by the left open inclusion. -/
+theorem Scheme.Hom.affineIntersectionGlueData_f_chartIso
     (π : X ⟶ S) (U : J → X.Opens)
     (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
     (i j : J) :
@@ -317,7 +319,9 @@ private theorem Scheme.Hom.affineIntersectionGlueData_f_chartIso
     π.affineIntersectionGlueData_f_chartMap U hU i j, Scheme.homOfLE_ι,
     π.affineIntersectionOverlapIso_hom_ι U hU i j]
 
-private theorem Scheme.Hom.affineIntersectionGlueData_t_f_chartIso
+/-- The right map from an ordered glue overlap, followed by the chart-coordinate isomorphism,
+is the overlap-coordinate isomorphism followed by the right open inclusion. -/
+theorem Scheme.Hom.affineIntersectionGlueData_t_f_chartIso
     (π : X ⟶ S) (U : J → X.Opens)
     (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
     (i j : J) :

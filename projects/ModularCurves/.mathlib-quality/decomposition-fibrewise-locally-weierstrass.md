@@ -567,3 +567,19 @@ on opens `U i`, this identifies the restriction to every affine chart of the pul
 chart-factorization equality and the existing pullback composition/unit isomorphisms, without
 adding cover, properness, finiteness, or proof-resource hypotheses. The focused module build is
 green, and the axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.
+
+Active dependency claim (2026-07-15): prove
+`affineIntersectionOriginalChartTrivialization_transition`. On every chosen pairwise pullback,
+show that the chartwise trivializations of the pulled-back original module intertwine its
+canonical pullback descent morphism with
+`(affineIntersectionUnitCocycle π U e).chartTransitionIso`. This is the sole compatibility
+needed to package the local comparisons into an isomorphism of descent data; no extra geometric
+hypotheses or proof-resource options may be introduced.
+
+Completed spawned dependency (2026-07-15): exposed the existing proofs
+`Scheme.Hom.affineIntersectionGlueData_f_chartIso` and
+`Scheme.Hom.affineIntersectionGlueData_t_f_chartIso` as public lemmas. They identify the two
+ordered glue-map routes to charts with the affine overlap-coordinate isomorphism followed by the
+left and right inclusions of `U i ⊓ U j`. The active transition-square proof consumes these exact
+factorizations, with no duplicate comparison construction. The focused build is green, and both
+axiom audits are exactly `propext`, `Classical.choice`, and `Quot.sound`.
