@@ -624,3 +624,12 @@ and `affineIntersectionGluedToOriginal` is exactly the canonical open immersion 
 gives the left and right chart-trivialization calculations a shared geometric endpoint, without
 adding hypotheses or proof-resource options. The focused module build is green, and the axiom
 audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.
+
+Completed spawned dependency (2026-07-15): proved
+`pullbackSquareTrivialization_four_restrict`. A fourfold pullback of a square-transported
+trivialization now normalizes to the common pullback followed by the ordinary restriction of the
+original trivialization whenever the lower map is an inclusion of opens. This single generic
+lemma applies to both affine-overlap legs and replaces the over-specialized factor theorem that
+exceeded the default elaboration budget. It introduces no options or additional geometric
+hypotheses. The focused build is green, and its axiom audit is exactly `propext`,
+`Classical.choice`, and `Quot.sound`.

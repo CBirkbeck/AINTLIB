@@ -201,6 +201,85 @@ theorem pullbackSquareTrivialization_tail_restrict
   subst c
   rfl
 
+private theorem pullbackSquareTrivialization_factor_with
+    {A B C D : Scheme.{u}}
+    (a : A ⟶ B) (b : B ⟶ D) (c : A ⟶ C) (d : C ⟶ D)
+    (w : A ⟶ D) (h : a ≫ b = c ≫ d) (hw : c ≫ d = w)
+    (hTo : a ≫ b = w) (M : D.Modules)
+    (t : (pullback d).obj M ≅ unitObj C) :
+    (pullbackSquareTrivialization a b c d h M t).hom =
+      ((((pullbackComp a b).app M) ≪≫
+          ((pullbackCongr hTo).app M)).hom) ≫
+        (((pullbackCongr hw.symm).app M) ≪≫
+          ((pullbackComp c d).app M).symm ≪≫
+          (pullback c).mapIso t ≪≫ pullbackUnitIso c).hom := by
+  have hfactor := pullbackSquareTrivialization_factor
+    a b c d w h hw M t
+  have hp : h.trans hw = hTo := Subsingleton.elim _ _
+  rw [hp] at hfactor
+  exact hfactor
+
+private theorem pullbackComp_four_congr_trans_app_with
+    {A B C D E : Scheme.{u}}
+    (q : A ⟶ B) (p : B ⟶ C) (d : C ⟶ D) (g : D ⟶ E)
+    (s : B ⟶ D) (hp : p ≫ d = s) (w : A ⟶ E)
+    (h₁ : (q ≫ p) ≫ (d ≫ g) = (q ≫ s) ≫ g)
+    (h₂ : (q ≫ s) ≫ g = w)
+    (hTo : (q ≫ p) ≫ (d ≫ g) = w) (N : E.Modules) :
+    (pullbackComp q p).hom.app
+          ((pullback d).obj ((pullback g).obj N)) ≫
+        (pullback (q ≫ p)).map ((pullbackComp d g).hom.app N) ≫
+        ((((pullbackComp (q ≫ p) (d ≫ g)).app N) ≪≫
+          ((pullbackCongr hTo).app N)).hom) =
+      (pullback q).map
+          ((((pullbackComp p d).app ((pullback g).obj N)) ≪≫
+            ((pullbackCongr hp).app ((pullback g).obj N))).hom) ≫
+        (pullbackComp q s).hom.app ((pullback g).obj N) ≫
+      (pullbackComp (q ≫ s) g).hom.app N ≫
+        ((pullbackCongr h₂).app N).hom := by
+  have hnorm := pullbackComp_four_congr_trans_app
+    q p d g s hp w h₁ h₂ N
+  have hproof : h₁.trans h₂ = hTo := Subsingleton.elim _ _
+  rw [hproof] at hnorm
+  exact hnorm
+
+/-- A fourfold pullback of a square-transported trivialization normalizes to the common
+pullback followed by the ordinary restriction of the original trivialization. -/
+theorem pullbackSquareTrivialization_four_restrict
+    {X A B D : Scheme.{u}} {N : X.Modules} {U W : X.Opens}
+    (hWU : W ≤ U) (q : W.toScheme ⟶ A) (p : A ⟶ B)
+    (d : B ⟶ D) (g : D ⟶ X) (s : A ⟶ D)
+    (c : W.toScheme ⟶ U.toScheme) (hp : p ≫ d = s)
+    (hSquare : (q ≫ p) ≫ (d ≫ g) = c ≫ U.ι)
+    (hc : c = X.homOfLE hWU)
+    (hSource : (q ≫ p) ≫ (d ≫ g) = (q ≫ s) ≫ g)
+    (hCommon : (q ≫ s) ≫ g = W.ι)
+    (t : (pullback U.ι).obj N ≅ unitObj U.toScheme) :
+    (pullbackComp q p).hom.app
+          ((pullback d).obj ((pullback g).obj N)) ≫
+      (pullback (q ≫ p)).map ((pullbackComp d g).hom.app N) ≫
+        (pullbackSquareTrivialization (q ≫ p) (d ≫ g)
+          c U.ι hSquare N t).hom =
+    (pullback q).map
+          ((((pullbackComp p d).app ((pullback g).obj N)) ≪≫
+            ((pullbackCongr hp).app ((pullback g).obj N))).hom) ≫
+      (pullbackComp q s).hom.app ((pullback g).obj N) ≫
+      (pullbackComp (q ≫ s) g).hom.app N ≫
+      ((pullbackCongr hCommon).app N).hom ≫
+      (restrictTrivialization hWU t).hom := by
+  let hw : c ≫ U.ι = W.ι :=
+    (congrArg (· ≫ U.ι) hc).trans (X.homOfLE_ι hWU)
+  let hTo := hSource.trans hCommon
+  have hfactor := pullbackSquareTrivialization_factor_with
+    (q ≫ p) (d ≫ g) c U.ι W.ι hSquare hw hTo N t
+  have htail := pullbackSquareTrivialization_tail_restrict
+    hWU c hc hw t
+  have hnorm := pullbackComp_four_congr_trans_app_with
+    q p d g s hp W.ι hSource hCommon hTo N
+  rw [hfactor]
+  rw [htail]
+  exact (reassoc_of% hnorm) (restrictTrivialization hWU t).hom
+
 /-- Transporting a trivialization across two vertically composable squares agrees with
 transport across the outer square. -/
 theorem pullbackSquareTrivialization_vcomp
