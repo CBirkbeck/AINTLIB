@@ -21742,3 +21742,11 @@ Proof-ops: never `set`-fold a morphism later lemmas cite unfolded (mismatch hell
 `smulKernelι`-vs-raw-`pullback.fst` skew. REMAINING for [F3-squeeze]: `D₁ ≤ Z_M`-containment,
 flat-by-retract, degree multiplicativity of the product, then the squeeze → KM step 5 →
 F3-iff assembly → F4. (STREAM-KM)
+
+### v10.279-KM — ★ [F3-zero]+[F3-sect]+[F3-retract]: the kernels are retracts of G (STREAM-KM)
+(`e162172f3` + this) The zero section lifts to every kernel; each kernel retracts off the product
+(𝟙 × zero-lift section); the total retract i ≫ r = 𝟙 splits through the product via R2. KM p. 27's
+flat-direct-factor structure is COMPLETE at scheme level — 29 proven bricks. The [F3-flat]
+transport (Flat/IsFinite/lfp under retracts — ForMathlib, candidate mathlib PR; module-level
+Module.Flat.of_retract exists, scheme instance absent) + [F3-degmul] + [F3-squeeze] remain
+before KM step 5 closes. Proof-ops: `include hD in` goes BEFORE the docstring. (STREAM-KM)
