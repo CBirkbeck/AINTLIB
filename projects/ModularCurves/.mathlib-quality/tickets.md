@@ -22306,3 +22306,15 @@ exact direction needed after the receipt.)
 **Still pending owner decision (third ask): hLN = T-W7.8 unpark.** After this window (:3497 dead +
 Bootstrap → ~2), hLN is the LAST owner-parked non-box pin on all three levels' rigidity. GH frees up
 first and is the natural scope-owner.
+
+## v10.296 (2026-07-16, coordinator) — ★ OWNER RULING: T-W7.8 (hLN) IS UNPARKED — GH scopes it
+
+**Owner decision (2026-07-16, third-ask resolution): UNPARK.** T-W7.8 — the `hLN` pin threading all
+three levels' rigidity theorems, owner-parked since the W7 era — is now ACTIVE work. **GH is the
+scope-owner** (it owns the rigidity theorems carrying the pin, and frees up first after the :3497
+plug-in). **First act is a SCOPE, not a grind:** source-faithful re-derivation of what T-W7.8 actually
+requires, checked against the NOW-COMPLETE substrate (E[N] four-box, degree keystone, étale trio,
+Ψ₃ bridge, B2 criterion — none of which existed when it was parked); quote the original parking
+rationale from the board archive; produce the leaf decomposition + provability check BEFORE any
+session grinds it. Sequencing: AFTER the :3497 plug-in + the closer audit (same GH window if it fits,
+else next). On T-W7.8's discharge, the last non-box pin on the headline dies.
