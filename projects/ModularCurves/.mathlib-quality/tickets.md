@@ -22377,3 +22377,46 @@ declaration, the original stays.
   from the existing engine at fibres, repoint the three headline consumers, document the literal form's
   L2-parked status); **(2) the CHEAP PATH** — rewire `aut_endo_eq_one`'s chain onto `_of_isIntegral` +
   E-INT field-forms (sheds 5 general pins, statement-preserving, pure proof-rewiring). Board both LOUDLY.
+
+---
+
+## v10.299-GH (2026-07-17, STREAM-GH) — ★★★ [T-W7.8-VARIANT] COMPLETE: `RigidNoeth` LANDED, THE HEADLINE SHEDS hLN (4d3317c61)
+
+**Owner ruling v10.298(a) EXECUTED IN FULL — checklist item (3) is DISCHARGED.** The variant is
+`RigidNoeth` (EllCategory): rigidity demanded only at test objects with **locally noetherian base** —
+exactly what the T-W7.7 detection engine honestly proves without EGA IV §8. Design + engine-honesty +
+repoint, all landed in one commit:
+
+1. **The declaration** — `ModuliProblem.RigidNoeth` + `Rigid.rigidNoeth` (restriction). The literal
+   KM 4.4 `Rigid` stays as the reference form; the unrestricted bridge `RigidNoeth → Rigid` is
+   documented as **[T-W7.8-L2-PARKED]** at the definition site.
+2. **ENGINE-HONESTY, PROVEN AXIOM-CLEAN (the load-bearing math)** — the KM 4.7.0 engine consumes
+   rigidity ONLY through freeness of the `G`-action on `𝕸(𝒫,δ)` (its single call is at
+   `XM.pullbackAlong t`, base = `t`'s source), and **emptiness of the fixed locus is detected on
+   field-valued points**: `simulSchemeAction_free_of_rigidNoeth` (QuotientProblem) — a fixed point of a
+   nonempty fixed locus specializes along `T.fromSpecResidueField x` to a fixed `Spec κ(x)`-point,
+   noetherian for free. Receipts: `simulSchemeAction_free_of_rigidNoeth{,_of_isLocallyNoetherian}`,
+   `simulSchemeActionTotal_free_of_rigidNoeth`, and the RE-DERIVED classical
+   `simulSchemeAction_free_of_rigid` — ALL `{propext, Classical.choice, Quot.sound}`. KM p. 113's "G
+   operates freely" is pointwise; `RigidNoeth` yields it on the nose. NO REGRESSION anywhere.
+3. **The interface** — `representable_iff_rigidNoeth` (EllCategory): `Representable ↔ RelRep ∧
+   RigidNoeth`. `⇒` proven (restriction of `rigid_of_representable`); `⇐` = the SAME T-Q6e+T-E14+T-E15
+   box as `representable_iff`'s (one shared gate — the eventual engine proof consumes the PROVEN
+   `_free_of_rigidNoeth`). No new mathematical claim.
+4. **The bridge, refactored per-object** — `rigid_at_of_geom_free` (body moved verbatim);
+   `rigid_of_geom_free` re-derived (statement byte-identical, still clean); NEW
+   `rigidNoeth_of_geom_free` (detection required only over loc-noeth bases = what
+   `exists_isoFibre_ne_refl` supplies with the instance FROM THE TEST OBJECT).
+5. **The rigidity chain, hLN-free** — `gammaH_rigidNoeth` (pin: hfree only), `gammaH_rigidNoeth_of_orderOf`
+   (pin: hH only), `gammaBot_rigidNoeth` (**PIN-FREE** — Γ(N) noetherian-locally rigid outright, N≥3 inv),
+   `gammaOneDrinfeld_rigidNoeth` (pin: hbound only). KM-literal forms all kept as one-line corollaries
+   (variant + hLN), marked headline-retired.
+6. **THE THREE HEADLINERS REPOINTED (hLN arg DELETED):** `gammaBot_representable` — gated on EXACTLY
+   the shared engine, **no other pin**; `gammaH_representable_of_orderOf` — hH + engine;
+   `gammaOneDrinfeld_representable_prep` — hbound + engine. Owner-sanctioned statement change;
+   no other consumers existed (verified by grep).
+
+Verify: full lib green (4234 jobs); receipts printed (freeness/bridge machinery clean; rigidity chain
+carries only the PRE-EXISTING detection boxes — aut_endo/degree pins — unchanged set; headliners =
+detection boxes + the one engine box). **Endgame checklist delta: item (3) GONE; item (5) next (the
+CHEAP PATH, second half of this dispatch — in flight this firing).**
