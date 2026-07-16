@@ -97,6 +97,17 @@ theorem equiv'_iff (F G : ℕ → ℂ) : Equiv' F G ↔ (badPrimes F G).Finite :
 
 theorem not_equiv'_iff (F G : ℕ → ℂ) : ¬ Equiv' F G ↔ (badPrimes F G).Infinite := Iff.rfl
 
+/-- Agreement at every prime power `p^a` (`a ≥ 1`) makes the bad-prime set empty, hence yields
+equivalence.  This is the constructor of `Equiv'` from prime-power agreement. -/
+theorem equiv'_of_eq_on_prime_powers {F G : ℕ → ℂ}
+    (h : ∀ p : ℕ, p.Prime → ∀ a : ℕ, 1 ≤ a → F (p ^ a) = G (p ^ a)) :
+    Equiv' F G := by
+  rw [equiv'_iff]
+  convert Set.finite_empty
+  rw [badPrimes, Set.eq_empty_iff_forall_notMem]
+  rintro q ⟨hq, a, ha1, hne_q⟩
+  exact hne_q (h q hq a ha1)
+
 /-- Distinct primes: no power of `q` is divisible by `p`. -/
 private theorem not_dvd_pow_of_prime_ne {p q : ℕ} (hp : p.Prime) (hq : q.Prime) (hqp : q ≠ p)
     (a : ℕ) : ¬ p ∣ q ^ a := fun h =>
@@ -334,14 +345,8 @@ theorem support_eq_empty_of_pairwise_not_equiv'
       · exact ⟨j, hj, fun h => hij h.symm⟩
       · exact ⟨i, hi, h⟩
     refine hne i his r hrs hir ?_
-    -- `F i` and `F r` agree on all prime powers ⟹ equal on positives ⟹ equivalent (bad set ∅).
-    have hagree : ∀ p : ℕ, p.Prime → ∀ a : ℕ, 1 ≤ a → F i (p ^ a) = F r (p ^ a) :=
-      fun p hp a ha => hkey p hp a ha i his
-    rw [equiv'_iff]
-    convert Set.finite_empty
-    rw [badPrimes, Set.eq_empty_iff_forall_notMem]
-    rintro q ⟨hq, a, ha1, hne_q⟩
-    exact hne_q (hagree q hq a ha1)
+    -- `F i` and `F r` agree on all prime powers, hence are equivalent (empty bad-prime set).
+    exact equiv'_of_eq_on_prime_powers fun p hp a ha => hkey p hp a ha i his
   · -- `s = {r}`: relation at `n = 1` gives `c r · F r 1 = c r = 0`, contradicting `c r ≠ 0`.
     have hcard_eq : s.card = 1 := le_antisymm (by omega) (Finset.card_pos.mpr ⟨r, hrs⟩)
     have hs_single : s = {r} := Finset.eq_singleton_iff_unique_mem.mpr
