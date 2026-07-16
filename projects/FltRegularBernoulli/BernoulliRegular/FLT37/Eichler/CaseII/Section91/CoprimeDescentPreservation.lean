@@ -500,11 +500,6 @@ universal), and the **new** datum's coprimality is derived from §3 — the desc
 `ω = v²·r_aσr_a`, `θ = −r_bσr_b` (integral identifications via the integral-closure witnesses)
 generates coprime ideals. -/
 
-set_option maxRecDepth 4000 in
--- The bumped `maxHeartbeats` (and `maxRecDepth`, as in the parent
--- `freeContentCaseIIDvdZData37_pContent_descend_withUnits`) is needed because destructuring the
--- very large `CaseIISection91PContentExtractionDataWithUnits37` output (a 24-conjunct `∃`-chain)
--- and re-checking the §3 coprimality derivation on top exceeds the default budgets.
 /-- **[F3 — the coprime-preserving descent step]** (proven, axiom-clean *given* the with-units
 extraction data): the combined `ℓ ∣ z` descent step at content `37·(m+1)` with `p`-content output,
 on the **coprime-restricted** domain — the old coprimality is consumed from the datum, the new
