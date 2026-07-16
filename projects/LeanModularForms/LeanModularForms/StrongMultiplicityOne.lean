@@ -19,7 +19,7 @@ the finale `strongMultiplicityOne` itself is assembled downstream in
 
 ## Main results
 
-* `miyake_4_6_8_main_lemma_cuspForm`: Miyake's Main Lemma (Theorem 4.6.8),
+* `coprimeSieve_admits_primeFactor_decomposition_in_charSpace`: Miyake's Main Lemma (Theorem 4.6.8),
   unconditional cusp-form form.
 * `coprimeSieve_admits_squarefree_decomposition_in_charSpace`: the squarefree
   divisor decomposition in a Nebentypus character space.
@@ -61,9 +61,10 @@ private theorem coprime_prod_primeFactors_iff_coprime {N : ℕ} [NeZero N] (n : 
     (hq_dvd.trans (Nat.gcd_dvd_left _ _))
 
 /-- **Miyake Theorem 4.6.8 (Main Lemma), unconditional CuspForm form.**  As
-`miyake_4_6_8_main_lemma_cuspForm`, but with the `h_chi_factor` hypothesis removed:
-the per-prime factorisation is produced internally by the 4.6.4 dichotomy. -/
-theorem miyake_4_6_8_main_lemma_cuspForm
+`coprimeSieve_admits_primeFactor_decomposition_in_charSpace`, but with the
+`h_chi_factor` hypothesis removed: the per-prime factorisation is produced
+internally by the 4.6.4 dichotomy. -/
+theorem coprimeSieve_admits_primeFactor_decomposition_in_charSpace
     {N : ℕ} [NeZero N] {k : ℤ}
     (χ : (ZMod N)ˣ →* ℂˣ)
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
@@ -114,7 +115,7 @@ private theorem extend_primeFactors_to_divisor_decomposition
 
 /-- Unconditional analogue of `coprimeSieve_admits_squarefree_decomposition_in_charSpace`:
 the `h_chi_factor` hypothesis is dropped, the decomposition coming from
-`miyake_4_6_8_main_lemma_cuspForm`. -/
+`coprimeSieve_admits_primeFactor_decomposition_in_charSpace`. -/
 theorem coprimeSieve_admits_squarefree_decomposition_in_charSpace
     (χ : (ZMod N)ˣ →* ℂˣ)
     (f : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
@@ -128,7 +129,7 @@ theorem coprimeSieve_admits_squarefree_decomposition_in_charSpace
       (∀ d ∈ N.divisors.filter (1 < ·),
         f_d d ∈ cuspFormCharSpace k χ) :=
   let ⟨f_p, h_sum, h_supp, h_char⟩ :=
-    miyake_4_6_8_main_lemma_cuspForm χ f hfχ h_vanish
+    coprimeSieve_admits_primeFactor_decomposition_in_charSpace χ f hfχ h_vanish
   extend_primeFactors_to_divisor_decomposition χ f f_p h_sum h_supp h_char
 
 theorem heckeT_n_prime_sq_eq_heckeT_p_sq_sub_diamond
