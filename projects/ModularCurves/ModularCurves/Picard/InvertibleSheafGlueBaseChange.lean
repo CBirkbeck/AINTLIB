@@ -52,6 +52,60 @@ noncomputable def AffineIntersectionUnitCocycle.mapToColimit
           ⟨M.stage, M.le_stage
             (Scheme.GlueData.affineIntersectionTripleIndex i j k)⟩).toMonoidHom) hc
 
+/-- The local affine base-change map sends a finite-stage overlap transition section
+to the overlap transition section of the colimit cocycle. -/
+theorem AffineIntersectionUnitCocycle.mapToColimit_overlapTransitionSection
+    {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+    {Sstage : ι → Type u} [∀ i, CommRing (Sstage i)] [∀ i, Algebra R (Sstage i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (Sstage i →ₐ[R] Sstage j)}
+    {A : Type u} [CommRing A] [Algebra R A] {uA : ∀ i, Sstage i →ₐ[R] A}
+    {J : Type u} {G : Functor (Finset J) (CommAlgCat.{u} A)}
+    {H : Algebra.IsFilteredAlgColimit R Sstage t A uA}
+    (M : Algebra.SpreadData.FunctorModel G H)
+    (cM : AffineIntersectionUnitCocycle M.toFunctor) (i j : J) :
+    letI : Algebra (Sstage M.stage) A := (uA M.stage).toRingHom.toAlgebra
+    let q :=
+      (M.baseChangeSpecIso
+          (Scheme.GlueData.affineIntersectionPairIndex i j)).inv ≫
+        pullback.snd
+          (Spec.map (CommRingCat.ofHom (algebraMap (Sstage M.stage) A)))
+          (Spec.map (CommRingCat.ofHom
+            (algebraMap (Sstage M.stage)
+              (M.toFunctor.obj
+                (Scheme.GlueData.affineIntersectionPairIndex i j)))))
+    Units.map q.appTop.hom.toMonoidHom (cM.overlapTransitionSection i j) =
+      (AffineIntersectionUnitCocycle.mapToColimit M cM).overlapTransitionSection i j := by
+  classical
+  letI : Algebra (Sstage M.stage) A := (uA M.stage).toRingHom.toAlgebra
+  let X := Scheme.GlueData.affineIntersectionPairIndex i j
+  let f := CommRingCat.ofHom
+    ((M.baseChangeIso.app X).hom.hom.toRingHom.comp
+      (Algebra.TensorProduct.includeRight
+        (R := Sstage M.stage) (A := A)
+        (B := M.toFunctor.obj X)).toRingHom)
+  rw [M.baseChangeSpecIso_inv_snd X]
+  apply Units.ext
+  have hnat := ConcreteCategory.congr_hom
+    (Scheme.ΓSpecIso_inv_naturality f) (cM.transition i j : M.toFunctor.obj X)
+  change
+    (Spec.map f).appTop.hom
+        ((Scheme.ΓSpecIso (CommRingCat.of (M.toFunctor.obj X))).inv.hom
+          (cM.transition i j : M.toFunctor.obj X)) =
+      (Scheme.ΓSpecIso (CommRingCat.of (G.obj X))).inv.hom
+        ((M.object X).stageToColimit H ⟨M.stage, M.le_stage X⟩
+          (cM.transition i j : M.toFunctor.obj X))
+  have hnat' :
+      (Spec.map f).appTop.hom
+          ((Scheme.ΓSpecIso (CommRingCat.of (M.toFunctor.obj X))).inv.hom
+            (cM.transition i j : M.toFunctor.obj X)) =
+        (Scheme.ΓSpecIso (CommRingCat.of (G.obj X))).inv.hom
+          (f.hom (cM.transition i j : M.toFunctor.obj X)) := by
+    simpa only [CommRingCat.comp_apply, ConcreteCategory.comp_apply] using hnat.symm
+  rw [hnat']
+  congr 1
+  exact (M.object X).baseChangeColimEquiv_tmul (M.le_stage X) H
+    (cM.transition i j : M.toFunctor.obj X)
+
 /-- The pullback of a finite-stage glued module has its canonical trivialization on every
 base-changed singleton chart. -/
 noncomputable def AffineIntersectionUnitCocycle.baseChangeGluedModuleChartTrivialization

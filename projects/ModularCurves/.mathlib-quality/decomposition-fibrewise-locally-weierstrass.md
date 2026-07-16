@@ -730,3 +730,17 @@ now identified with the spectrum map induced by tensor inclusion followed by the
 comparison. The focused build is green, no hypothesis or proof-resource option was added, and the
 axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`. The active compatibility
 claim can now transport finite-stage overlap units through `ΓSpecIso` naturality.
+
+Active subdependency claim (2026-07-16): prove
+`AffineIntersectionUnitCocycle.mapToColimit_overlapTransitionSection`. Pulling the finite-stage
+transition section along the canonical affine overlap map must give the transition section of
+`cM.mapToColimit M`. The proof must consume the affine projection formula and existing `ΓSpecIso`
+naturality, with no added abstraction, hypothesis, or proof-resource option.
+
+Completed subdependency claim (2026-07-16): proved
+`AffineIntersectionUnitCocycle.mapToColimit_overlapTransitionSection`. The canonical affine
+overlap map now carries each finite-stage transition section to the corresponding section of the
+colimit cocycle. The proof uses the affine projection formula, `ΓSpecIso_inv_naturality`, and the
+existing pure-tensor computation for `baseChangeColimEquiv`; it adds no abstraction, hypothesis, or
+proof-resource option. The focused build is green and the axiom audit is exactly `propext`,
+`Classical.choice`, and `Quot.sound`.
