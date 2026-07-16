@@ -861,3 +861,13 @@ finite-stage `gluedModule` is now identified with the pullback of the original s
 canonical affine-intersection gluing. The construction directly composes the two completed global
 isomorphisms. Its focused build is green, its axiom audit is exactly `propext`,
 `Classical.choice`, and `Quot.sound`, and it adds no hypothesis or proof-resource option.
+
+Completed dependency claim (2026-07-16): constructed
+`IsInvertible.exists_finiteStageGluedModuleModel_of_isProper`. An invertible sheaf on a proper,
+finitely presented family over an affine filtered colimit now admits a finite affine trivializing
+cover, a single finite-stage affine-intersection model satisfying the open-affine and pushout
+conditions, an invertible descended `gluedModule`, and a base-change comparison with the original
+sheaf on its canonical affine-intersection gluing. The proof consumes the synchronized cocycle
+model and completed original-sheaf comparison. Its focused build is green, its axiom audit is
+exactly `propext`, `Classical.choice`, and `Quot.sound`, and it adds no Noetherianity, geometric
+hypothesis, or proof-resource option.

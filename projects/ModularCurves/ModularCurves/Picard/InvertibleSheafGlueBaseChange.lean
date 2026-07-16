@@ -1386,6 +1386,51 @@ noncomputable def AffineIntersectionUnitCocycle.baseChangeGluedModuleIsoOriginal
       hopenG hpushG hopenM hpushM ≪≫
     (affineIntersectionOriginalGluedModuleIso π U e hU).symm
 
+/-- An invertible sheaf on a proper, locally finitely presented family descends together
+with an affine-intersection model to one finite stage of a filtered presentation. -/
+theorem IsInvertible.exists_finiteStageGluedModuleModel_of_isProper
+    {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+    {Sstage : ι → Type u} [∀ i, CommRing (Sstage i)] [∀ i, Algebra R (Sstage i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (Sstage i →ₐ[R] Sstage j)}
+    {X S : Scheme.{u}} {π : X ⟶ S} [IsProper π] [IsAffine S]
+    [LocallyOfFinitePresentation π] [Algebra R Γ(S, (⊤ : S.Opens))]
+    {uS : ∀ i, Sstage i →ₐ[R] Γ(S, (⊤ : S.Opens))}
+    {N : X.Modules} (hN : IsInvertible N)
+    (H : Algebra.IsFilteredAlgColimit R Sstage t Γ(S, (⊤ : S.Opens)) uS) :
+    ∃ (J : Type u) (_ : Finite J) (U : J → X.Opens)
+      (_ : IsOpenCover U)
+      (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+      (M : Algebra.SpreadData.FunctorModel (π.affineIntersectionFunctor U) H)
+      (hopenM : Scheme.GlueData.IsOpenAffineIntersectionFunctor M.toFunctor)
+      (hpushM : Scheme.GlueData.IsPushoutAffineIntersectionFunctor M.toFunctor)
+      (cM : AffineIntersectionUnitCocycle M.toFunctor),
+      IsInvertible (cM.gluedModule hopenM hpushM) ∧
+        Nonempty
+          (letI : Algebra (Sstage M.stage) Γ(S, (⊤ : S.Opens)) :=
+              (uS M.stage).toRingHom.toAlgebra
+            let hopenG := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+            let hpushG := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+            let g := M.affineIntersectionGluedBaseChange hopenG hpushG hopenM hpushM
+            (AlgebraicGeometry.Scheme.Modules.pullback g).obj
+                (cM.gluedModule hopenM hpushM) ≅
+              (AlgebraicGeometry.Scheme.Modules.pullback
+                (π.affineIntersectionGluedToOriginal U hU)).obj N) := by
+  classical
+  obtain ⟨J, hJ, U, hcover, _, htriv, hU, M₀, _, _, _⟩ :=
+    hN.exists_affineIntersectionModelBaseChangeIso_of_isProper (π := π) H
+  letI : Finite J := hJ
+  let e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme :=
+    fun i => Classical.choice (htriv i)
+  let c := affineIntersectionUnitCocycle π U e
+  let hopenG := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let hpushG := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  obtain ⟨M, hopenM, hpushM, cM, htransition⟩ :=
+    c.exists_modelWithAffineIntersectionConditions H M₀ hopenG hpushG
+  refine ⟨J, hJ, U, hcover, hU, M, hopenM, hpushM, cM,
+    cM.gluedModule_isInvertible hopenM hpushM, ?_⟩
+  exact ⟨AffineIntersectionUnitCocycle.baseChangeGluedModuleIsoOriginal
+    π U e hU M cM hopenM hpushM htransition⟩
+
 end
 
 end AlgebraicGeometry.Scheme.Modules
