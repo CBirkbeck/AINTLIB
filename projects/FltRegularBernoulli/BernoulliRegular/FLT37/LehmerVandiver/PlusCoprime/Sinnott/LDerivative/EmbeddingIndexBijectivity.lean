@@ -525,6 +525,86 @@ theorem convolutionMatrixLogNormEven_row_one
   simp only [convolutionMatrixLogNormEven]
   rw [Matrix.of_apply, one_mul]
 
+/-- **Forward direction of `embeddingIndex_eq_iff_embedding_eq`**: if two K-places
+`w₁ w₂ : InfinitePlace K` share the same embedding-index, then their underlying
+embeddings agree.
+
+Each `w.embedding : K →+* ℂ` lifts to a ℚ-algebra hom `φ` (any ring hom `K →+* ℂ`
+commutes with `ℚ`); both `φ₁ φ₂` send the primitive root `ζ_K` to
+`stdAddChar (embIdx w)` (via `embeddingIndex_spec`), and these agree by the index
+hypothesis, so `φ₁ = φ₂` by `PowerBasis.algHom_ext`, hence the underlying ring homs
+`w₁.embedding` and `w₂.embedding` agree. -/
+theorem embedding_eq_of_embeddingIndex_eq
+    (K : Type) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
+    (w₁ w₂ : NumberField.InfinitePlace K)
+    (h_eq : embeddingIndex (p := p) K w₁ = embeddingIndex (p := p) K w₂) :
+    w₁.embedding = w₂.embedding := by
+  classical
+  haveI hp_prime : Nat.Prime p := hp.out
+  haveI : NeZero p := ⟨hp_prime.ne_zero⟩
+  -- Use PowerBasis.algHom_ext: AlgHoms agree iff agree on ζ_K.
+  -- Both embeddings send ζ_K to stdAddChar(embIdx _), which are equal.
+  -- First, identify w.embedding as a ℚ-algebra hom (uniqueness of ℚ → ℂ).
+  have h_emb :
+      w₁.embedding
+        (((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K)) =
+      w₂.embedding (((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K)) := by
+    rw [embeddingIndex_spec, embeddingIndex_spec, h_eq]
+  -- Convert to AlgHom form using uniqueness ℚ →+* ℂ.
+  -- w.embedding : K →+* ℂ. Lift to K →ₐ[ℚ] ℂ.
+  -- For NumberField K, K is a ℚ-algebra, ℂ is a ℚ-algebra, and any ring hom is ℚ-algebra.
+  have h_pb : IsPrimitiveRoot
+      (((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K)) p :=
+    cyclotomicZetaInteger_K_isPrimitiveRoot (p := p) K
+  -- Lift each w.embedding to a ℚ-algebra hom.
+  let φ₁ : K →ₐ[ℚ] ℂ := { w₁.embedding with commutes' := fun r => by simp }
+  let φ₂ : K →ₐ[ℚ] ℂ := { w₂.embedding with commutes' := fun r => by simp }
+  -- φ₁ and φ₂ have the same underlying ring hom, so we'll show φ₁ = φ₂.
+  have h_phi_eq : φ₁ = φ₂ := by
+    apply (h_pb.powerBasis ℚ).algHom_ext
+    simp only [φ₁, φ₂]
+    change w₁.embedding (h_pb.powerBasis ℚ).gen = w₂.embedding (h_pb.powerBasis ℚ).gen
+    rw [IsPrimitiveRoot.powerBasis_gen]
+    exact h_emb
+  -- Extract the ring hom equality.
+  ext x
+  have := congrArg (fun (f : K →ₐ[ℚ] ℂ) => f x) h_phi_eq
+  simp only [φ₁, φ₂] at this
+  exact this
+
+/-- **Backward direction of `embeddingIndex_eq_iff_embedding_eq`**: if two K-places
+`w₁ w₂ : InfinitePlace K` have equal embeddings, then their embedding-indices agree.
+
+Both embeddings send `ζ_K` to `stdAddChar (embIdx w)` (`embeddingIndex_spec`); equal
+embeddings force these characters equal, and `stdAddChar` is injective, so the
+`ZMod p` indices agree, which lifts to the unit-valued indices via `Units.ext`. -/
+theorem embeddingIndex_eq_of_embedding_eq
+    (K : Type) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
+    (w₁ w₂ : NumberField.InfinitePlace K)
+    (h_eq : w₁.embedding = w₂.embedding) :
+    embeddingIndex (p := p) K w₁ = embeddingIndex (p := p) K w₂ := by
+  classical
+  haveI hp_prime : Nat.Prime p := hp.out
+  haveI : NeZero p := ⟨hp_prime.ne_zero⟩
+  -- Same embedding image on ζ_K gives the same embedding index.
+  have h_zeta_eq :
+      w₁.embedding
+        (((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K)) =
+      w₂.embedding (((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K)) := by
+    rw [h_eq]
+  -- Combine with embeddingIndex_spec to extract the equality.
+  have h_spec_one := embeddingIndex_spec (p := p) K w₁
+  have h_spec_two := embeddingIndex_spec (p := p) K w₂
+  rw [h_spec_one, h_spec_two] at h_zeta_eq
+  -- Now: stdAddChar (embIdx w₁) = stdAddChar (embIdx w₂)
+  -- stdAddChar is injective on (ZMod p) → ℂ.
+  have h_inj := ZMod.injective_stdAddChar (N := p)
+  have h_zmod_eq : ((embeddingIndex (p := p) K w₁ : ZMod p)) =
+      ((embeddingIndex (p := p) K w₂ : ZMod p)) :=
+    h_inj h_zeta_eq
+  -- Lift to units.
+  exact Units.ext h_zmod_eq
+
 /-- **Embedding-index uniquely determines the K-place embedding** (cyclotomic K):
 two K-places `w₁ w₂ : InfinitePlace K` have the same embedding-index iff their
 underlying embeddings agree.
@@ -537,59 +617,8 @@ theorem embeddingIndex_eq_iff_embedding_eq
     (w₁ w₂ : NumberField.InfinitePlace K) :
     embeddingIndex (p := p) K w₁ = embeddingIndex (p := p) K w₂ ↔
       w₁.embedding = w₂.embedding := by
-  classical
-  haveI hp_prime : Nat.Prime p := hp.out
-  haveI : NeZero p := ⟨hp_prime.ne_zero⟩
-  constructor
-  · intro h_eq
-    -- Use PowerBasis.algHom_ext: AlgHoms agree iff agree on ζ_K.
-    -- Both embeddings send ζ_K to stdAddChar(embIdx _), which are equal.
-    -- First, identify w.embedding as a ℚ-algebra hom (uniqueness of ℚ → ℂ).
-    have h_emb :
-        w₁.embedding
-          (((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K)) =
-        w₂.embedding (((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K)) := by
-      rw [embeddingIndex_spec, embeddingIndex_spec, h_eq]
-    -- Convert to AlgHom form using uniqueness ℚ →+* ℂ.
-    -- w.embedding : K →+* ℂ. Lift to K →ₐ[ℚ] ℂ.
-    -- For NumberField K, K is a ℚ-algebra, ℂ is a ℚ-algebra, and any ring hom is ℚ-algebra.
-    have h_pb : IsPrimitiveRoot
-        (((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K)) p :=
-      cyclotomicZetaInteger_K_isPrimitiveRoot (p := p) K
-    -- Lift each w.embedding to a ℚ-algebra hom.
-    let φ₁ : K →ₐ[ℚ] ℂ := { w₁.embedding with commutes' := fun r => by simp }
-    let φ₂ : K →ₐ[ℚ] ℂ := { w₂.embedding with commutes' := fun r => by simp }
-    -- φ₁ and φ₂ have the same underlying ring hom, so we'll show φ₁ = φ₂.
-    have h_phi_eq : φ₁ = φ₂ := by
-      apply (h_pb.powerBasis ℚ).algHom_ext
-      simp only [φ₁, φ₂]
-      change w₁.embedding (h_pb.powerBasis ℚ).gen = w₂.embedding (h_pb.powerBasis ℚ).gen
-      rw [IsPrimitiveRoot.powerBasis_gen]
-      exact h_emb
-    -- Extract the ring hom equality.
-    ext x
-    have := congrArg (fun (f : K →ₐ[ℚ] ℂ) => f x) h_phi_eq
-    simp only [φ₁, φ₂] at this
-    exact this
-  · intro h_eq
-    -- Same embedding image on ζ_K gives the same embedding index.
-    have h_zeta_eq :
-        w₁.embedding
-          (((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K)) =
-        w₂.embedding (((BernoulliRegular.cyclotomicZetaInteger (p := p) K : 𝓞 K) : K)) := by
-      rw [h_eq]
-    -- Combine with embeddingIndex_spec to extract the equality.
-    have h_spec_one := embeddingIndex_spec (p := p) K w₁
-    have h_spec_two := embeddingIndex_spec (p := p) K w₂
-    rw [h_spec_one, h_spec_two] at h_zeta_eq
-    -- Now: stdAddChar (embIdx w₁) = stdAddChar (embIdx w₂)
-    -- stdAddChar is injective on (ZMod p) → ℂ.
-    have h_inj := ZMod.injective_stdAddChar (N := p)
-    have h_zmod_eq : ((embeddingIndex (p := p) K w₁ : ZMod p)) =
-        ((embeddingIndex (p := p) K w₂ : ZMod p)) :=
-      h_inj h_zeta_eq
-    -- Lift to units.
-    exact Units.ext h_zmod_eq
+  exact ⟨embedding_eq_of_embeddingIndex_eq (p := p) K w₁ w₂,
+    embeddingIndex_eq_of_embedding_eq (p := p) K w₁ w₂⟩
 
 /-- **`embeddingIndex` is injective**: two K-places have the same embedding-index
 iff they are equal as places.
