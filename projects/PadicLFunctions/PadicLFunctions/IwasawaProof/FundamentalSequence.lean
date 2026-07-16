@@ -224,11 +224,6 @@ theorem evalPi_binomialSeries (a : ℤ_[p]) {n : ℕ} (hn : 1 ≤ n) :
   rw [evalPi, seriesEval_map_binomialSeries p a (norm_pi_lt_one p hn),
     show (1 : ℂ_[p]) + pi p n = zetaSys p n from by rw [pi]; ring]
 
-set_option synthInstance.maxHeartbeats 1000000 in
--- nested `IntermediateField (K p n) (extendScalars …)` instance synthesis (cf. Tower.lean)
--- the `adjoin.powerBasis`/`norm_eq_norm_adjoin` computation runs through the nested
--- `IntermediateField (K p n) (extendScalars …)` layer; both instance synthesis and the
--- power-basis term elaboration exceed the defaults (mirrors `minpoly_extendScalars_of_pow`)
 /-- **The cyclotomic norm of `ξ_{n+1}`** (RJW TeX 2581–2585, the `b = 1` un-translated
 analogue of `levelNorm_zetaSys_pow_sub_one`): for `n ≥ 1` and `p` odd,
 `N_{n+1,n}(ξ_{n+1}) = ξ_n`. The generator `ξ_{n+1}` is a primitive `p^{n+1}`-th root not in
@@ -838,7 +833,8 @@ theorem mem_ker_Col_iff_mem_ZpOne (hp2 : p ≠ 2) {u : NormCompatUnits p}
     have hg0u : IsUnit g₀ := by
       rw [show g₀ = 1 - (1 - g₀) by ring]
       refine IsLocalRing.isUnit_one_sub_self_of_mem_nonunits _ ?_
-      rw [mem_nonunits_iff, PadicInt.isUnit_iff, show (1 : ℤ_[p]) - g₀ = -(g₀ - 1) by ring, norm_neg]
+      rw [mem_nonunits_iff, PadicInt.isUnit_iff,
+        show (1 : ℤ_[p]) - g₀ = -(g₀ - 1) by ring, norm_neg]
       exact hg0unit.ne
     -- `𝒩`-fixedness forces `g₀^p = g₀`
     have hg0pow : g₀ ^ p = g₀ := by
