@@ -405,7 +405,8 @@ theorem dlog_mem_psiIdSeries {f : PowerSeries ℤ_[p]} (hf : IsUnit f) (hN : nor
   have hMN : M * N = 1 := by
     rw [hM, hN', ← digitMatrix_mul, Ring.mul_inverse_cancel _ hf, digitMatrix_one]
   have hfdet : f = M.det := by rw [hM, ← normOp_eq_det, hN]
-  have hdlog : dlog p f = PadicMeasure.del p f * Ring.inverse f := by rw [dlog, PadicMeasure.del_def]
+  have hdlog : dlog p f = PadicMeasure.del p f * Ring.inverse f := by
+    rw [dlog, PadicMeasure.del_def]
   have hdm : digitMatrix (dlog p f) = digitMatrix (PadicMeasure.del p f) * N := by
     rw [hdlog, digitMatrix_mul, hN']
   have htr := trace_digitMatrix (dlog p f)
