@@ -292,6 +292,22 @@ private theorem coprime_coeff_eq_zero_or_character_factorsThrough
     have := toUnitHom_loweredCharacter (χ := χ_dir) (l := p) hχ_dir_fac
     rwa [hχ_dir_unit] at this
 
+/-- If `a` lies in `M p` and `g q` lies in `M q` for every `q ∈ S.erase p`, then the family
+`fun q ↦ if q = p then a else g q` lies in `M q` for every `q ∈ S`. This packages the pointwise
+`by_cases q = p` membership check used to assemble a `Finset`-indexed decomposition of a module
+element into pieces supported at each `q ∈ S`. -/
+private theorem forall_mem_ite_mem_of_mem_erase {R : Type*} [Semiring R]
+    {V : Type*} [AddCommMonoid V] [Module R V] (M : ℕ → Submodule R V)
+    {S : Finset ℕ} {p : ℕ} {a : V} {g : ℕ → V} (ha : a ∈ M p)
+    (hg : ∀ q ∈ S.erase p, g q ∈ M q) :
+    ∀ q ∈ S, (if q = p then a else g q) ∈ M q := by
+  intro q hq
+  by_cases hqp : q = p
+  · subst hqp
+    simpa only [if_true] using ha
+  · simp only [hqp, if_false]
+    exact hg q (Finset.mem_erase.mpr ⟨hqp, hq⟩)
+
 /-- Decompose a cusp form whose coefficients vanish away from the primes in `S` into
 `p`-supported cusp forms in the same character space, indexed by `p ∈ S`. -/
 theorem exists_qSupportedOnDvdSubmodule_decomposition_of_coprime_coeff_eq_zero
@@ -337,18 +353,10 @@ theorem exists_qSupportedOnDvdSubmodule_decomposition_of_coprime_coeff_eq_zero
         ih (S.erase p) h_erase_sub f hfχ h_f_vanish h_erase_card
       refine ⟨fun q ↦ if q = p then 0 else f_q q, ?_, ?_, ?_⟩
       · rw [sum_ite_eq_add_sum_erase hp_in 0 f_q, zero_add, ← h_sum]
-      · intro q hq
-        by_cases hqp : q = p
-        · subst hqp
-          simpa only [if_true] using Submodule.zero_mem _
-        · simp only [hqp, if_false]
-          exact h_supp_q q (Finset.mem_erase.mpr ⟨hqp, hq⟩)
-      · intro q hq
-        by_cases hqp : q = p
-        · subst hqp
-          simpa only [if_true] using Submodule.zero_mem _
-        · simp only [hqp, if_false]
-          exact h_char_q q (Finset.mem_erase.mpr ⟨hqp, hq⟩)
+      · exact forall_mem_ite_mem_of_mem_erase
+          (HeckeRing.GL2.AtkinLehner.qSupportedOnDvdSubmodule N k) (Submodule.zero_mem _) h_supp_q
+      · exact forall_mem_ite_mem_of_mem_erase (fun _ ↦ cuspFormCharSpace k χ)
+          (Submodule.zero_mem _) h_char_q
     · obtain ⟨f_p, h_supp, h_char, h_diff_vanish⟩ :=
         exists_qSupportedOnDvdSubmodule_sub_coprime_coeff_eq_zero
           χ S hS f hfχ h_vanish hp_in χ' hχ_eq
@@ -358,17 +366,8 @@ theorem exists_qSupportedOnDvdSubmodule_decomposition_of_coprime_coeff_eq_zero
       refine ⟨fun q ↦ if q = p then f_p else f_q q, ?_, ?_, ?_⟩
       · rw [sum_ite_eq_add_sum_erase hp_in f_p f_q, ← h_sum]
         abel
-      · intro q hq
-        by_cases hqp : q = p
-        · subst hqp
-          simpa only [if_true] using h_supp
-        · simp only [hqp, if_false]
-          exact h_supp_q q (Finset.mem_erase.mpr ⟨hqp, hq⟩)
-      · intro q hq
-        by_cases hqp : q = p
-        · subst hqp
-          simpa only [if_true] using h_char
-        · simp only [hqp, if_false]
-          exact h_char_q q (Finset.mem_erase.mpr ⟨hqp, hq⟩)
+      · exact forall_mem_ite_mem_of_mem_erase
+          (HeckeRing.GL2.AtkinLehner.qSupportedOnDvdSubmodule N k) h_supp h_supp_q
+      · exact forall_mem_ite_mem_of_mem_erase (fun _ ↦ cuspFormCharSpace k χ) h_char h_char_q
 
 end HeckeRing.GL2
