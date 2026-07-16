@@ -264,6 +264,72 @@ theorem dedekindZeta_eq_tprod_localFactorRat_inv
   obtain ⟨d, hd, huni_q⟩ := huni (q : ℕ) q.2
   exact dedekindLocalFactorRat_identity_of_uniform L q.2 hd huni_q hs
 
+/-- Distinct rational primes have disjoint sets of primes lying over them: if
+`q ≠ q'` then no prime `Q` of `𝓞 L` lies over both `span {q}` and `span {q'}`. -/
+private lemma primesOverFinset_span_disjoint_of_ne (q q' : Nat.Primes) (hne : q ≠ q') :
+    Disjoint
+      (IsDedekindDomain.primesOverFinset (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) (𝓞 L))
+      (IsDedekindDomain.primesOverFinset (Ideal.span ({((q' : ℕ) : ℤ)} : Set ℤ)) (𝓞 L)) := by
+  rw [Finset.disjoint_left]
+  intro Q hQ_in_q_set hQ_in_q'_set
+  have hq_ne : (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) ≠ ⊥ := by
+    rw [Ne, Ideal.span_singleton_eq_bot]
+    exact_mod_cast q.2.ne_zero
+  have hq'_ne : (Ideal.span ({((q' : ℕ) : ℤ)} : Set ℤ)) ≠ ⊥ := by
+    rw [Ne, Ideal.span_singleton_eq_bot]
+    exact_mod_cast q'.2.ne_zero
+  have : Fact (q : ℕ).Prime := ⟨q.2⟩
+  have : Fact (q' : ℕ).Prime := ⟨q'.2⟩
+  have : (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)).IsMaximal :=
+    Int.ideal_span_isMaximal_of_prime (q : ℕ)
+  have : (Ideal.span ({((q' : ℕ) : ℤ)} : Set ℤ)).IsMaximal :=
+    Int.ideal_span_isMaximal_of_prime (q' : ℕ)
+  have hQ_lies_q : Q.LiesOver (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) :=
+    ((_root_.IsDedekindDomain.mem_primesOverFinset_iff hq_ne (𝓞 L)).mp hQ_in_q_set).2
+  have hQ_lies_q' : Q.LiesOver (Ideal.span ({((q' : ℕ) : ℤ)} : Set ℤ)) :=
+    ((_root_.IsDedekindDomain.mem_primesOverFinset_iff hq'_ne (𝓞 L)).mp hQ_in_q'_set).2
+  apply hne
+  apply Subtype.ext
+  have hspan_eq :
+      Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ) = Ideal.span ({((q' : ℕ) : ℤ)} : Set ℤ) :=
+    hQ_lies_q.over.trans hQ_lies_q'.over.symm
+  have h_dvd1 : ((q : ℕ) : ℤ) ∣ ((q' : ℕ) : ℤ) := by
+    rw [← Ideal.mem_span_singleton, hspan_eq]
+    exact Ideal.subset_span (Set.mem_singleton _)
+  have h_dvd2 : ((q' : ℕ) : ℤ) ∣ ((q : ℕ) : ℤ) := by
+    rw [← Ideal.mem_span_singleton, ← hspan_eq]
+    exact Ideal.subset_span (Set.mem_singleton _)
+  exact Nat.dvd_antisymm (by exact_mod_cast h_dvd1) (by exact_mod_cast h_dvd2)
+
+/-- A nonzero prime `Q` of `𝓞 L` lies in the primes over the rational prime `q`
+iff the absolute norm of its contraction to `ℤ` equals `q`. -/
+private lemma mem_primesOverFinset_span_iff (Q : Ideal (𝓞 L)) [Q.IsPrime] [NeZero Q]
+    (q : Nat.Primes) :
+    Q ∈ IsDedekindDomain.primesOverFinset (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) (𝓞 L) ↔
+      Ideal.absNorm (Ideal.under ℤ Q) = q := by
+  have hq_ne : (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) ≠ ⊥ := by
+    rw [Ne, Ideal.span_singleton_eq_bot]
+    exact_mod_cast q.2.ne_zero
+  have : Fact (q : ℕ).Prime := ⟨q.2⟩
+  have : (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)).IsMaximal :=
+    Int.ideal_span_isMaximal_of_prime (q : ℕ)
+  rw [_root_.IsDedekindDomain.mem_primesOverFinset_iff hq_ne (𝓞 L)]
+  constructor
+  · rintro ⟨-, hlies⟩
+    have hQ_under : Ideal.under ℤ Q = Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ) :=
+      hlies.over.symm
+    rw [hQ_under,
+      show Ideal.absNorm (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) =
+          Nat.card (ℤ ⧸ Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) from ?_]
+    · exact Int.card_ideal_quot _
+    · rw [← Submodule.cardQuot_apply]; rfl
+  · intro hnorm
+    refine ⟨‹Q.IsPrime›, ?_⟩
+    have hunder : Ideal.under ℤ Q = Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ) := by
+      rw [show ((q : ℕ) : ℤ) = ((Ideal.absNorm (Ideal.under ℤ Q) : ℕ) : ℤ) from by rw [hnorm]]
+      exact (Int.ideal_span_absNorm_eq_self (Ideal.under ℤ Q)).symm
+    exact ⟨hunder.symm⟩
+
 /--
 For a finite set `F` of nonzero prime ideals of `𝓞 L`, the product over
 `F` of the local factors equals the tprod (over `Nat.Primes`) of the
@@ -302,23 +368,8 @@ theorem prod_F_eq_tprod_intersect
     have ⟨hQ_prime, hQ_ne⟩ := hF Q hQ_F
     have : Q.IsPrime := hQ_prime
     have : NeZero Q := ⟨hQ_ne⟩
-    have hq_ne : (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) ≠ ⊥ := by
-      rw [Ne, Ideal.span_singleton_eq_bot]
-      exact_mod_cast q.2.ne_zero
-    have : Fact (q : ℕ).Prime := ⟨q.2⟩
-    have : (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)).IsMaximal :=
-      Int.ideal_span_isMaximal_of_prime (q : ℕ)
-    have hQ_lies : Q.LiesOver (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) :=
-      ((_root_.IsDedekindDomain.mem_primesOverFinset_iff hq_ne (𝓞 L)).mp
-        hQ_in_q).2
-    have hQ_under : Ideal.under ℤ Q = Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ) :=
-      hQ_lies.over.symm
-    have h_absNorm_eq : Ideal.absNorm (Ideal.under ℤ Q) = q := by
-      rw [hQ_under,
-        show Ideal.absNorm (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) =
-            Nat.card (ℤ ⧸ Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) from ?_]
-      · exact Int.card_ideal_quot _
-      · rw [← Submodule.cardQuot_apply]; rfl
+    have h_absNorm_eq : Ideal.absNorm (Ideal.under ℤ Q) = q :=
+      (mem_primesOverFinset_span_iff L Q q).mp hQ_in_q
     rw [h_ratPrimes]
     exact Finset.mem_image.mpr ⟨⟨Q, hQ_F⟩, Finset.mem_attach _ _, Subtype.ext h_absNorm_eq⟩
   rw [tprod_eq_prod h_finite_supp,
@@ -344,52 +395,11 @@ theorem prod_F_eq_tprod_intersect
       rw [h_ratPrimes]
       exact Finset.mem_image.mpr ⟨⟨Q, hQ_F⟩, Finset.mem_attach _ _, rfl⟩
     refine ⟨qPrime, hqPrime_in, hQ_F, ?_⟩
-    have hq_ne : (Ideal.span ({((qPrime : ℕ) : ℤ)} : Set ℤ)) ≠ ⊥ := by
-      rw [Ne, Ideal.span_singleton_eq_bot]
-      exact_mod_cast qPrime.2.ne_zero
-    have : Fact (qPrime : ℕ).Prime := ⟨qPrime.2⟩
-    have : (Ideal.span ({((qPrime : ℕ) : ℤ)} : Set ℤ)).IsMaximal :=
-      Int.ideal_span_isMaximal_of_prime (qPrime : ℕ)
-    refine (_root_.IsDedekindDomain.mem_primesOverFinset_iff hq_ne (𝓞 L)).mpr ⟨hQ_prime, ?_⟩
-    have hunder : Ideal.under ℤ Q = Ideal.span ({((qPrime : ℕ) : ℤ)} : Set ℤ) := by
-      rw [show ((qPrime : ℕ) : ℤ) = ((Ideal.absNorm (Ideal.under ℤ Q) : ℕ) : ℤ) from rfl]
-      exact (Int.ideal_span_absNorm_eq_self (Ideal.under ℤ Q)).symm
-    exact ⟨hunder.symm⟩
+    exact (mem_primesOverFinset_span_iff L Q qPrime).mpr rfl
   · refine (Finset.prod_biUnion ?_).symm
     intros q _ q' _ hne
     change Disjoint _ _
-    rw [Finset.disjoint_left]
-    intro Q hQ_in_q hQ_in_q'
-    have ⟨hQ_F, hQ_in_q_set⟩ := Finset.mem_inter.mp hQ_in_q
-    have ⟨_, hQ_in_q'_set⟩ := Finset.mem_inter.mp hQ_in_q'
-    have hq_ne : (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) ≠ ⊥ := by
-      rw [Ne, Ideal.span_singleton_eq_bot]
-      exact_mod_cast q.2.ne_zero
-    have hq'_ne : (Ideal.span ({((q' : ℕ) : ℤ)} : Set ℤ)) ≠ ⊥ := by
-      rw [Ne, Ideal.span_singleton_eq_bot]
-      exact_mod_cast q'.2.ne_zero
-    have : Fact (q : ℕ).Prime := ⟨q.2⟩
-    have : Fact (q' : ℕ).Prime := ⟨q'.2⟩
-    have : (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)).IsMaximal :=
-      Int.ideal_span_isMaximal_of_prime (q : ℕ)
-    have : (Ideal.span ({((q' : ℕ) : ℤ)} : Set ℤ)).IsMaximal :=
-      Int.ideal_span_isMaximal_of_prime (q' : ℕ)
-    have hQ_lies_q : Q.LiesOver (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) :=
-      ((_root_.IsDedekindDomain.mem_primesOverFinset_iff hq_ne (𝓞 L)).mp hQ_in_q_set).2
-    have hQ_lies_q' : Q.LiesOver (Ideal.span ({((q' : ℕ) : ℤ)} : Set ℤ)) :=
-      ((_root_.IsDedekindDomain.mem_primesOverFinset_iff hq'_ne (𝓞 L)).mp hQ_in_q'_set).2
-    apply hne
-    apply Subtype.ext
-    have hspan_eq :
-        Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ) = Ideal.span ({((q' : ℕ) : ℤ)} : Set ℤ) :=
-      hQ_lies_q.over.trans hQ_lies_q'.over.symm
-    have h_dvd1 : ((q : ℕ) : ℤ) ∣ ((q' : ℕ) : ℤ) := by
-      rw [← Ideal.mem_span_singleton, hspan_eq]
-      exact Ideal.subset_span (Set.mem_singleton _)
-    have h_dvd2 : ((q' : ℕ) : ℤ) ∣ ((q : ℕ) : ℤ) := by
-      rw [← Ideal.mem_span_singleton, ← hspan_eq]
-      exact Ideal.subset_span (Set.mem_singleton _)
-    exact Nat.dvd_antisymm (by exact_mod_cast h_dvd1) (by exact_mod_cast h_dvd2)
+    exact (primesOverFinset_span_disjoint_of_ne L q q' hne).mono inf_le_right inf_le_right
 
 /--
 The bridge: under uniformity at every rational prime for `L`, and assuming
