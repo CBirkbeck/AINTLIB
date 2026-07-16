@@ -230,3 +230,9 @@
   divisor identity). All axiom-clean. Remaining in F3: the two deep halves (translation-union
   forward, sum-immersion converse) — transcribed, sub-brickable, next session's grind. Commits:
   `87bdec647`/`0bfb949b0`/`85709f498`/`4620dbaec` + the ★★★★ `3ddc7ce90` (v10.268). (KM)
+- [2026-07-16c, KM, v10.278] **★★ MID-MARATHON — KM 1.7.2's product decomposition PROVEN.**
+  `G ≅ Ker[M] ×_S Ker[K]` (both roundtrips: R1 `f6d56429d`, R2 `c1d7274c0`) on the pointwise
+  IsSubgroup encoding — the universal-point trick + kernel-pullbacks + Bezout arithmetic; NO
+  De-Ga box (degree-squeeze dodge boarded v10.273, design-revision in the decomposition doc).
+  26 proven bricks on LevelStructure/Factorization.lean this marathon (v10.268 ★★★★ → here).
+  Remaining to KM step 5: flat-by-retract, degree multiplicativity, squeeze; then F3-iff/F4.
