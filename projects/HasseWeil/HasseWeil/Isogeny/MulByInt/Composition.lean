@@ -332,7 +332,8 @@ end FaithfulComposition
 Silverman III.6.1 for `φ = [ℓ]` with `φ̂ = [ℓ]`: the range inclusion
 `Im([ℓ·ℓ]*) ⊆ Im([ℓ]*)` is *free* from multiplicativity (`[ℓ·ℓ]* = [ℓ]* ∘ [ℓ]*`), and the
 basepoint condition is the `MulByIntBasepoint` theorem. No `[IsAlgClosed F]` (contrast
-`dualMulByInt`, `Isogeny/Dual/GaloisClosed.lean`, whose Galois route needs the rational `ℓ`-torsion of
+`dualMulByInt`, `Isogeny/Dual/GaloisClosed.lean`, whose Galois route needs the rational `ℓ`-torsion
+of
 `K̄`): the dual
 *witness* here is faithful by construction rather than recovered from the fixed field. -/
 
