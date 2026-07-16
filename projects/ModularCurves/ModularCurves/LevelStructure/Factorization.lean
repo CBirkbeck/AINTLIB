@@ -595,29 +595,31 @@ theorem RelEffCartierDiv.IsSubgroup.exists_toSmulKernel {D : RelEffCartierDiv E.
   rw [← Category.assoc, hφι, hw]
   exact E.point_smul_eq_comp_mulBy _ c ι₀
 
-/-- **[F3-sumMap] (KM (3.5.1.2)'s sum map at scheme level)** The two kernel inclusions
-of a subgroup divisor, read as points of `E` over the fibre product of the kernels, sum
-inside the subgroup `H` — and the sum's membership witness is the scheme morphism
-`Ker[c₁] ×_S Ker[c₂] ⟶ G` underlying KM's *"the sum map"* (p. 31; the closed-immersion
-clause is deferred to the squeeze). -/
-theorem RelEffCartierDiv.IsSubgroup.exists_sumMap {D : RelEffCartierDiv E.π}
-    (hD : D.IsSubgroup E) (c₁ c₂ : ℤ) :
+/-- **[F3-combMap] (KM (3.5.1.2)'s sum map, ℤ-weighted)** Any ℤ-combination of the two
+kernel-inclusion points over the fibre product of kernels lies in the subgroup `H`; its
+membership witness is a scheme morphism `Ker[c₁] ×_S Ker[c₂] ⟶ G`. At `(1,1)` this is
+KM's sum map (p. 31); at the Bezout weights `(v,u)` it inverts the (3.5.1.3) product
+map (KM: *"the second is `(A+B)` times the first"*). -/
+theorem RelEffCartierDiv.IsSubgroup.exists_combMap {D : RelEffCartierDiv E.π}
+    (hD : D.IsSubgroup E) (c₁ c₂ a b : ℤ) :
     ∃ σ : pullback (D.smulKernelπ E c₁) (D.smulKernelπ E c₂) ⟶ D.ideal.subscheme,
       σ ≫ D.ideal.subschemeι
-        = (((⟨pullback.fst (D.smulKernelπ E c₁) (D.smulKernelπ E c₂)
+        = ((a • (⟨pullback.fst (D.smulKernelπ E c₁) (D.smulKernelπ E c₂)
               ≫ D.smulKernelι E c₁ ≫ D.ideal.subschemeι, by
                 rw [Category.assoc, Category.assoc,
                   RelEffCartierDiv.smulKernelι_subschemeι_π]⟩ :
             E.Point (pullback.fst (D.smulKernelπ E c₁) (D.smulKernelπ E c₂)
               ≫ D.smulKernelπ E c₁))
-          + ⟨pullback.snd (D.smulKernelπ E c₁) (D.smulKernelπ E c₂)
+          + b • (⟨pullback.snd (D.smulKernelπ E c₁) (D.smulKernelπ E c₂)
               ≫ D.smulKernelι E c₂ ≫ D.ideal.subschemeι, by
                 rw [Category.assoc, Category.assoc,
-                  RelEffCartierDiv.smulKernelι_subschemeι_π, ← pullback.condition]⟩) :
+                  RelEffCartierDiv.smulKernelι_subschemeι_π, ← pullback.condition]⟩ :
+            E.Point (pullback.fst (D.smulKernelπ E c₁) (D.smulKernelπ E c₂)
+              ≫ D.smulKernelπ E c₁))) :
           E.Point _).1 := by
   obtain ⟨H, hH⟩ := hD (pullback.fst (D.smulKernelπ E c₁) (D.smulKernelπ E c₂)
     ≫ D.smulKernelπ E c₁)
-  refine (hH _).mp (H.add_mem ?_ ?_)
+  refine (hH _).mp (H.add_mem (H.zsmul_mem ?_ a) (H.zsmul_mem ?_ b))
   · exact (hH _).mpr ⟨pullback.fst _ _ ≫ D.smulKernelι E c₁, by
       rw [Category.assoc]⟩
   · exact (hH _).mpr ⟨pullback.snd _ _ ≫ D.smulKernelι E c₂, by
