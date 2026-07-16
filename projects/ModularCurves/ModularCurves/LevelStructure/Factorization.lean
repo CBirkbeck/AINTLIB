@@ -11,6 +11,7 @@ import ModularCurves.LevelStructure.IsoTransport
 import ModularCurves.EllipticCurve.EndomorphismDegree
 import ModularCurves.ForMathlib.FlatOfRetract
 import ModularCurves.ForMathlib.FinrankPullbackComp
+import ModularCurves.ForMathlib.EtaleSectionsCount
 
 /-!
 # Prime-power factorization of Drinfeld exact order (KM 1.7.2 / 3.5.1, Γ₁-instance)
@@ -1326,6 +1327,23 @@ theorem Section.HasExactOrder.smul_hasExactOrder {P : E.Section} (M K : ℕ)
     ((K : ℤ) • P).HasExactOrder E M := by sorry
 
 end ProductDecomposition
+
+/-- **[F3-count] (KM p. 28: "G(k) contains precisely N₁ distinct points killed by N₁",
+the counting half)** Over a separably closed field, the `c`-killed points of the divisor
+number exactly the kernel's degree: the kernel's functor of points
+(`smulKernelPointsEquiv`) + the étale section count. -/
+theorem RelEffCartierDiv.card_killed_points {k : Type u} [Field k] [IsSepClosed k]
+    {E : EllipticCurve (Spec (CommRingCat.of k))}
+    (D : RelEffCartierDiv E.π) (c : ℤ)
+    [IsFinite (D.smulKernelπ E c)] [Etale (D.smulKernelπ E c)]
+    (x₀ : ↑(Spec (CommRingCat.of k))) :
+    Nat.card { Q : E.Point (𝟙 (Spec (CommRingCat.of k))) // c • Q = 0 ∧
+        ∃ w : Spec (CommRingCat.of k) ⟶ D.ideal.subscheme,
+          w ≫ D.ideal.subschemeι = Q.1 }
+      = (D.smulKernelπ E c).finrank x₀ := by
+  rw [← ModularCurves.natCard_sections_eq_finrank (D.smulKernelπ E c) x₀]
+  exact Nat.card_congr (RelEffCartierDiv.smulKernelPointsEquiv E D c
+    (𝟙 (Spec (CommRingCat.of k)))).symm
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
