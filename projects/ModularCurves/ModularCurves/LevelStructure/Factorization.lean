@@ -398,6 +398,25 @@ theorem pointMapOfHom_translateBy (x : 𝟙_ (CategoryTheory.Over S) ⟶ E.asOve
   congr 1
   exact CategoryTheory.CartesianMonoidalCategory.toUnit_unique _ _
 
+/-- **[F3-univ] (the universal-point trick — KM p. 27's projector, scheme level)** For a
+subgroup divisor `D` and any `c : ℤ`, multiplication by `c` restricts to an endomorphism
+of the divisor subscheme: the inclusion `ι` is itself a `T`-point of `E` (`T` the
+subscheme) lying in the subgroup `H(T)`, hence so is `c • ι`, whose underlying morphism
+is `ι ≫ [c]` — and its membership witness IS the restriction. No descent or Yoneda
+machinery: the subgroup structure on points does all the work. -/
+theorem RelEffCartierDiv.IsSubgroup.exists_smul_restrict {D : RelEffCartierDiv E.π}
+    (hD : D.IsSubgroup E) (c : ℤ) :
+    ∃ w : D.ideal.subscheme ⟶ D.ideal.subscheme,
+      w ≫ D.ideal.subschemeι = D.ideal.subschemeι ≫ E.mulByHom c := by
+  obtain ⟨H, hH⟩ := hD (D.ideal.subschemeι ≫ E.π)
+  -- the universal point: the inclusion itself
+  set ι₀ : E.Point (D.ideal.subschemeι ≫ E.π) := ⟨D.ideal.subschemeι, rfl⟩ with hι₀
+  have hmem : ι₀ ∈ H := (hH ι₀).mpr ⟨𝟙 _, Category.id_comp _⟩
+  have hsmul : c • ι₀ ∈ H := AddSubgroup.zsmul_mem H hmem c
+  obtain ⟨w, hw⟩ := (hH (c • ι₀)).mp hsmul
+  refine ⟨w, hw.trans ?_⟩
+  exact E.point_smul_eq_comp_mulBy _ c ι₀
+
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
 order `M` and `M·P` has exact order `K`.
