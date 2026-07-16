@@ -925,3 +925,11 @@ invertible sheaf and its scheme/sheaf base-change comparisons are now packaged t
 assembly passes the spread model and both gluing witnesses explicitly to the two completed
 geometric theorems. Its focused build is green, its axiom audit is exactly `propext`,
 `Classical.choice`, and `Quot.sound`, and it adds no geometric hypothesis or proof-resource option.
+
+Active dependency claim (2026-07-16): prove
+`SpreadData.exists_surjective_mapAtLaterStage`. A compatible map between two finite-presentation
+spread models whose colimit map is surjective becomes surjective at one later stage. This is the
+finite-generator algebraic input for spreading affine closed immersions, hence for the separated
+part of the proper finite-stage model needed by the fibrewise-elliptic converse. The proof will use
+the existing filtered-colimit lifting and stage-agreement APIs and add no hypotheses or proof-resource
+options.
