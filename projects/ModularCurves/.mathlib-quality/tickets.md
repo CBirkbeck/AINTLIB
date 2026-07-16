@@ -21545,3 +21545,28 @@ transport Etale (levelSpaceΓπ E_T) across the identification + β4-descent ⟹
 Proof-ops banked: the abstract `smul_eq_zero_iff_comp_mulByHom` route beats fst-@-pinning wars;
 `set`-fvars inside dependent indices (Point-base tV) block unfold-rws — use fold-direction calcs;
 `congrArg (· ≫ f)` leaves unreduced betas — typed-haves force them. (STREAM-GH)
+
+### v10.268-KM — ★★★★ BRICK 6 CLOSED: the K4 field anchor is PROVEN AXIOM-CLEAN (STREAM-KM)
+**`modelEllipticCurve_finrank_eq_mulByInt_degree` — sorry-free, `#print axioms` =
+{propext, Classical.choice, Quot.sound} — commit `3ddc7ce90`.** MulByHomDegree.lean census: **0
+sorries** (was 1 = `brick6_from_intertwining` :1356). Full `lake build ModularCurves` green (4224
+jobs). The close, on top of towerBC (`514ed14aa`): (A)-transport by
+`Algebra.finrank_eq_of_equiv_equiv` with i := `(zChart W).topIso` ring-equiv and j :=
+`(pullbackRestrictIsoRestrict [N] (zChart W)).inv.appTop`-iso ≪≫ preimage-`topIso` ring-equiv;
+the compatibility square is a NEW GENERAL lemma `topIso_hom_comp_app {X Y : Scheme} (f U)` —
+stating it over abstract schemes kills the pM-vs-E.E elaboration skew that blocked every in-situ
+attempt (proof: `h1 : snd.appTop ≫ pRIR.inv.appTop = (f ∣_ U).appTop := rfl` — the ∣_-def IS the
+composite — then `morphismRestrict_appTop` + appLE-absorption `topIso_hom/app_eq_appLE/appLE_map`
++ `erw [map_appLE, appLE_map]`; erw needed for the LRS-coercion-transparency match, and
+`eqToHom_op` must be KEPT OUT of the simp set — it destroys the `.op`-pattern the absorption
+lemmas match on, and worse leaves a type-incorrect goal). `hfin` discharged from
+`(pullback.snd).finite_appTop` conjugated through both equivs (`RingHom.Finite.comp` +
+`.of_surjective`); IsIso-of-appTop-of-iso by hand-rolled roundtrips (`← comp_appTop` +
+`hom_inv_id`). Instance-cache gotcha for consumers: `letI` the app-algebra with an EXPLICIT
+projModel-form type ascription, else the cache key sits at E.E-form and every synthesis misses.
+**CASCADE NOW LIVE:** G0's BB-DEG `Torsion.mulByHom_finrank` (`1b8406872`) auto-cleans — the whole
+étale chain (`mulByHom_formallyUnramified` / `mulBy_etale` / `torsionπ_etale` /
+`torsion_geometricFibre_rank_two`) and v10.267-G0's BB-DIFF receipts lose their single sorryAx
+taint with ZERO further work; `endDeg_mulBy` unblocks; OMEGA's Bootstrap ENGINE AXIOM 2 input and
+GH's [GHA3] receipts go clean. ★ milestone boarded per the v10.172 main-PR cadence — coordinator:
+the dev→main PR body is the paragraph above. (STREAM-KM)
