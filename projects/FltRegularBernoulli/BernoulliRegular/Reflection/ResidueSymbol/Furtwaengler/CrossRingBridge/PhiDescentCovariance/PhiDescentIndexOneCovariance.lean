@@ -1,7 +1,6 @@
 module
 
-public import
-  BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CrossRingBridge.PhiDescentCovariance.ConductorFlexiblePhiDescentCovariance
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CrossRingBridge.PhiCovariance
 
 /-!
 # Index-one covariance and cross-ring residue bridges
