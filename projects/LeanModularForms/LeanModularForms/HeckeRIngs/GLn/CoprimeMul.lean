@@ -629,6 +629,40 @@ private lemma diagConj_scaling (a : Fin n → ℕ) (ha : ∀ i, 0 < a i)
   ring
 
 omit [NeZero n] in
+/-- Each entry of the diagonal conjugation `diag(b) * G * diag(b)⁻¹` of an integer
+special-linear matrix `G` by a positive-integer diagonal `diag(b)`, once scaled by the
+product `∏ b k`, clears its denominator to an integer: since the `(p, q)` entry equals
+`b p · G p q · (b q)⁻¹` and `b q ∣ ∏ b k`, the product is integral. -/
+private lemma diagConj_entry_scaling (b : Fin n → ℕ) (hb : ∀ i, 0 < b i)
+    (G : SpecialLinearGroup (Fin n) ℤ) (p q : Fin n) :
+    ∃ z : ℤ, (∏ k, (b k : ℚ)) *
+      ((↑(diagMat n b * (G : GL (Fin n) ℚ) * (diagMat n b)⁻¹) :
+        Matrix (Fin n) (Fin n) ℚ) p q) = z := by
+  set D := diagMat n b * (G : GL (Fin n) ℚ) * (diagMat n b)⁻¹
+  set D_mat := (↑D : Matrix (Fin n) (Fin n) ℚ)
+  have h_D_entry : D_mat p q = (b p : ℚ) * (↑(G.val p q) : ℚ) * ((b q : ℚ)⁻¹) := by
+    have h_Db : D * diagMat n b = diagMat n b * (G : GL (Fin n) ℚ) := by
+      simp only [D, mul_assoc, inv_mul_cancel, mul_one]
+    have h_entry := congr_arg
+      (fun g : GL (Fin n) ℚ ↦ (↑g : Matrix (Fin n) (Fin n) ℚ) p q) h_Db
+    simp only [Units.val_mul, diagMat_val _ _ hb, mapGL_coe_matrix, map_apply_coe,
+      RingHom.mapMatrix_apply, Int.coe_castRingHom, algebraMap_int_eq,
+      Matrix.mul_diagonal, Matrix.diagonal_mul, Matrix.map_apply] at h_entry
+    have hbq_ne : (b q : ℚ) ≠ 0 := Nat.cast_ne_zero.mpr (hb q).ne'
+    field_simp at h_entry ⊢
+    linarith
+  rw [h_D_entry]
+  have h_dvd : (b q : ℤ) ∣ ∏ k, (b k : ℤ) := Finset.dvd_prod_of_mem _ (Finset.mem_univ q)
+  refine ⟨(∏ k, (b k : ℤ)) / (b q : ℤ) * (b p : ℤ) * G.val p q, ?_⟩
+  have h_div_eq : (∏ k, (b k : ℚ)) * ((b p : ℚ) * ↑(G.val p q) * ((b q : ℚ)⁻¹)) =
+      (∏ k, (b k : ℚ)) / (b q : ℚ) * ((b p : ℚ) * ↑(G.val p q)) := by
+    rw [div_eq_mul_inv]
+    ring
+  rw [h_div_eq]
+  push_cast [Int.cast_div h_dvd (Int.cast_ne_zero.mpr (Int.natCast_ne_zero.mpr (hb q).ne'))]
+  ring
+
+omit [NeZero n] in
 private lemma diagSandwich_scaling (b : Fin n → ℕ) (hb : ∀ i, 0 < b i)
     (F G E : SpecialLinearGroup (Fin n) ℤ) (i j : Fin n) :
     ∃ z : ℤ, (∏ k, (b k : ℚ)) *
@@ -651,29 +685,8 @@ private lemma diagSandwich_scaling (b : Fin n → ℕ) (hb : ∀ i, 0 < b i)
     simp only [Finset.sum_mul, mul_assoc]
     rw [Finset.sum_comm]
   set D_mat := (↑D : Matrix (Fin n) (Fin n) ℚ)
-  have h_D_scale : ∀ p q, ∃ z : ℤ, (∏ k, (b k : ℚ)) * D_mat p q = z := by
-    intro p q
-    have h_D_entry : D_mat p q = (b p : ℚ) * (↑(G.val p q) : ℚ) * ((b q : ℚ)⁻¹) := by
-      have h_Db : D * diagMat n b = diagMat n b * (G : GL (Fin n) ℚ) := by
-        simp only [D, mul_assoc, inv_mul_cancel, mul_one]
-      have h_entry := congr_arg
-        (fun g : GL (Fin n) ℚ ↦ (↑g : Matrix (Fin n) (Fin n) ℚ) p q) h_Db
-      simp only [Units.val_mul, diagMat_val _ _ hb, mapGL_coe_matrix, map_apply_coe,
-        RingHom.mapMatrix_apply, Int.coe_castRingHom, algebraMap_int_eq,
-        Matrix.mul_diagonal, Matrix.diagonal_mul, Matrix.map_apply] at h_entry
-      have hbq_ne : (b q : ℚ) ≠ 0 := Nat.cast_ne_zero.mpr (hb q).ne'
-      field_simp at h_entry ⊢
-      linarith
-    rw [h_D_entry]
-    have h_dvd : (b q : ℤ) ∣ ∏ k, (b k : ℤ) := Finset.dvd_prod_of_mem _ (Finset.mem_univ q)
-    refine ⟨(∏ k, (b k : ℤ)) / (b q : ℤ) * (b p : ℤ) * G.val p q, ?_⟩
-    have h_div_eq : (∏ k, (b k : ℚ)) * ((b p : ℚ) * ↑(G.val p q) * ((b q : ℚ)⁻¹)) =
-        (∏ k, (b k : ℚ)) / (b q : ℚ) * ((b p : ℚ) * ↑(G.val p q)) := by
-      rw [div_eq_mul_inv]
-      ring
-    rw [h_div_eq]
-    push_cast [Int.cast_div h_dvd (Int.cast_ne_zero.mpr (Int.natCast_ne_zero.mpr (hb q).ne'))]
-    ring
+  have h_D_scale : ∀ p q, ∃ z : ℤ, (∏ k, (b k : ℚ)) * D_mat p q = z := fun p q ↦
+    diagConj_entry_scaling n b hb G p q
   rw [h_C_entry, Finset.mul_sum]
   simp_rw [Finset.mul_sum, mul_assoc]
   refine ⟨∑ p, ∑ q, (F.val i p) * (h_D_scale p q).choose * (E.val q j), ?_⟩
