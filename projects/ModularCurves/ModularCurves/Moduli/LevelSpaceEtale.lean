@@ -359,4 +359,132 @@ theorem isFullLevel_baseChange_comp_iff (N : ℕ) [NeZero N] (hNV : NIsInvertibl
 
 end BridgeU2
 
+section FactorAssembly
+
+open EllipticCurve
+
+variable (E : EllipticCurve S) {T : Scheme.{u}} (p : T ⟶ S) (N : ℕ) [NeZero N]
+
+/-- **(β2-heart U3, the factor-iff)** A `V`-point of the primed torsion ambient
+`E_T[N] ×_T E_T[N]` factors through the pulled-back level space iff it factors through the
+level space of the base-changed curve: both factorizations classify the same Drinfeld
+full-level condition, matched by `levelSpaceΓ_spec` on either curve and the U2 bridge
+`isFullLevel_baseChange_comp_iff`. This is the hypothesis of `exists_iso_of_factor_iff`. -/
+theorem factor_pulled_iff_factor_levelSpace (hinv : NIsInvertible S N) {V : Scheme.{u}}
+    (v : V ⟶ pullback ((E.baseChange p).torsionπ N) ((E.baseChange p).torsionπ N)) :
+    (∃ w : V ⟶ pullback (levelSpaceΓι E N) (torsionPairBaseChangeHom E p N),
+        w ≫ pullback.snd (levelSpaceΓι E N) (torsionPairBaseChangeHom E p N) = v)
+      ↔ ∃ w' : V ⟶ levelSpaceΓ (E.baseChange p) N,
+          w' ≫ levelSpaceΓι (E.baseChange p) N = v := by
+  set v1 := v ≫ pullback.fst ((E.baseChange p).torsionπ N) ((E.baseChange p).torsionπ N)
+    with hv1
+  set v2 := v ≫ pullback.snd ((E.baseChange p).torsionπ N) ((E.baseChange p).torsionπ N)
+    with hv2
+  set tV : V ⟶ T := v1 ≫ (E.baseChange p).torsionπ N with htV
+  have hv2π : v2 ≫ (E.baseChange p).torsionπ N = tV := by
+    rw [hv2, htV, hv1, Category.assoc, Category.assoc, ← pullback.condition]
+  -- the two tautological points of `E_T` over `tV`
+  have hP'over : (v1 ≫ (E.baseChange p).torsionι N) ≫ (E.baseChange p).π = tV := by
+    rw [Category.assoc, (E.baseChange p).torsionι_π N]
+  have hQ'over : (v2 ≫ (E.baseChange p).torsionι N) ≫ (E.baseChange p).π = tV := by
+    rw [Category.assoc, (E.baseChange p).torsionι_π N, hv2π]
+  set P' : (E.baseChange p).Point tV := ⟨v1 ≫ (E.baseChange p).torsionι N, hP'over⟩
+    with hP'def
+  set Q' : (E.baseChange p).Point tV := ⟨v2 ≫ (E.baseChange p).torsionι N, hQ'over⟩
+    with hQ'def
+  have hcondT : (E.baseChange p).torsionι N ≫ (E.baseChange p).mulByHom N
+      = (E.baseChange p).torsionπ N ≫ (E.baseChange p).zero := pullback.condition
+  have hP' : P'.1 ≫ (E.baseChange p).mulByHom N = tV ≫ (E.baseChange p).zero := by
+    show (v1 ≫ (E.baseChange p).torsionι N) ≫ _ = _
+    rw [Category.assoc, hcondT, ← Category.assoc]
+  have hQ' : Q'.1 ≫ (E.baseChange p).mulByHom N = tV ≫ (E.baseChange p).zero := by
+    show (v2 ≫ (E.baseChange p).torsionι N) ≫ _ = _
+    rw [Category.assoc, hcondT, ← Category.assoc, hv2π]
+  -- the corresponding points of `E` over `tV ≫ p`
+  have hzfst : (E.baseChange p).zero ≫ pullback.fst E.π p = p ≫ E.zero :=
+    pullback.lift_fst _ _ _
+  have hPE : ((Point.baseChangeEquiv E p tV) P').1 ≫ E.mulByHom N = (tV ≫ p) ≫ E.zero := by
+    have h0 := congrArg (· ≫ pullback.fst E.π p) hP'
+    simp only [Category.assoc] at h0
+    rw [mulByHom_baseChange_fst, hzfst] at h0
+    show (P'.1 ≫ pullback.fst E.π p) ≫ E.mulByHom N = _
+    rw [Category.assoc, h0, ← Category.assoc]
+  have hQE : ((Point.baseChangeEquiv E p tV) Q').1 ≫ E.mulByHom N = (tV ≫ p) ≫ E.zero := by
+    have h0 := congrArg (· ≫ pullback.fst E.π p) hQ'
+    simp only [Category.assoc] at h0
+    rw [mulByHom_baseChange_fst, hzfst] at h0
+    show (Q'.1 ≫ pullback.fst E.π p) ≫ E.mulByHom N = _
+    rw [Category.assoc, h0, ← Category.assoc]
+  -- reconstruction on the primed side: the classifying lift of `(P', Q')` IS `v`
+  have hptt1 : (E.baseChange p).pointToTorsion P' hP' = v1 := by
+    apply pullback.hom_ext
+    · rw [(E.baseChange p).pointToTorsion_torsionι P' hP']
+    · rw [(E.baseChange p).pointToTorsion_torsionπ P' hP']
+  have hptt2 : (E.baseChange p).pointToTorsion Q' hQ' = v2 := by
+    apply pullback.hom_ext
+    · rw [(E.baseChange p).pointToTorsion_torsionι Q' hQ']
+    · rw [(E.baseChange p).pointToTorsion_torsionπ Q' hQ', hv2π]
+  have hrecT : pullback.lift ((E.baseChange p).pointToTorsion P' hP')
+      ((E.baseChange p).pointToTorsion Q' hQ') (by simp) = v := by
+    apply pullback.hom_ext
+    · rw [pullback.lift_fst, hptt1]
+    · rw [pullback.lift_snd, hptt2]
+  -- reconstruction on the base side: the classifying lift of the transported pair is
+  -- `v ≫ torsionPairBaseChangeHom`
+  have hpttE1 : E.pointToTorsion ((Point.baseChangeEquiv E p tV) P') hPE
+      = v1 ≫ E.torsionBaseChangeHom N p := by
+    apply pullback.hom_ext
+    · rw [E.pointToTorsion_torsionι _ hPE, Category.assoc, E.torsionBaseChangeHom_torsionι,
+        ← Category.assoc]
+      rfl
+    · rw [E.pointToTorsion_torsionπ _ hPE, Category.assoc, E.torsionBaseChangeHom_torsionπ,
+        ← Category.assoc]
+  have hpttE2 : E.pointToTorsion ((Point.baseChangeEquiv E p tV) Q') hQE
+      = v2 ≫ E.torsionBaseChangeHom N p := by
+    apply pullback.hom_ext
+    · rw [E.pointToTorsion_torsionι _ hQE, Category.assoc, E.torsionBaseChangeHom_torsionι,
+        ← Category.assoc]
+      rfl
+    · rw [E.pointToTorsion_torsionπ _ hQE, Category.assoc, E.torsionBaseChangeHom_torsionπ,
+        ← Category.assoc, hv2π]
+  have hrecE : pullback.lift (E.pointToTorsion ((Point.baseChangeEquiv E p tV) P') hPE)
+      (E.pointToTorsion ((Point.baseChangeEquiv E p tV) Q') hQE) (by simp)
+      = v ≫ torsionPairBaseChangeHom E p N := by
+    apply pullback.hom_ext
+    · rw [pullback.lift_fst, Category.assoc, hpttE1, hv1]
+      rw [torsionPairBaseChangeHom, pullback.lift_fst, ← Category.assoc]
+    · rw [pullback.lift_snd, Category.assoc, hpttE2, hv2]
+      rw [torsionPairBaseChangeHom, pullback.lift_snd, ← Category.assoc]
+  -- assemble the chain
+  have hNV : NIsInvertible V N := NIsInvertible.of_hom (tV ≫ p) hinv
+  constructor
+  · rintro ⟨w, hw⟩
+    -- factor through the pulled-back subscheme ⟹ the composite factors through `U_Γ(E)`
+    have hu : ∃ u : V ⟶ levelSpaceΓ E N,
+        u ≫ levelSpaceΓι E N = v ≫ torsionPairBaseChangeHom E p N := by
+      refine ⟨w ≫ pullback.fst (levelSpaceΓι E N) (torsionPairBaseChangeHom E p N), ?_⟩
+      rw [Category.assoc, pullback.condition, ← Category.assoc, hw]
+    rw [← hrecE] at hu
+    have hfullE := (levelSpaceΓ_spec E N (tV ≫ p) ((Point.baseChangeEquiv E p tV) P')
+      ((Point.baseChangeEquiv E p tV) Q') hPE hQE).mp hu
+    have hfullT := (isFullLevel_baseChange_comp_iff E p tV N hNV P' Q').mp hfullE
+    have := (levelSpaceΓ_spec (E.baseChange p) N tV P' Q' hP' hQ').mpr hfullT
+    rwa [hrecT] at this
+  · rintro ⟨w', hw'⟩
+    have hv' : ∃ h : V ⟶ levelSpaceΓ (E.baseChange p) N,
+        h ≫ levelSpaceΓι (E.baseChange p) N = pullback.lift
+          ((E.baseChange p).pointToTorsion P' hP')
+          ((E.baseChange p).pointToTorsion Q' hQ') (by simp) := by
+      refine ⟨w', ?_⟩
+      rw [hrecT, hw']
+    have hfullT := (levelSpaceΓ_spec (E.baseChange p) N tV P' Q' hP' hQ').mp hv'
+    have hfullE := (isFullLevel_baseChange_comp_iff E p tV N hNV P' Q').mpr hfullT
+    have hu := (levelSpaceΓ_spec E N (tV ≫ p) ((Point.baseChangeEquiv E p tV) P')
+      ((Point.baseChangeEquiv E p tV) Q') hPE hQE).mpr hfullE
+    rw [hrecE] at hu
+    obtain ⟨u, hu⟩ := hu
+    exact ⟨pullback.lift u v hu, pullback.lift_snd _ _ _⟩
+
+end FactorAssembly
+
 end ModularCurves
