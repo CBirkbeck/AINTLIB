@@ -114,6 +114,28 @@ noncomputable def projGlueLift (k l : Fin 3) (hkl : l ≠ k) (t : Fin 3 → S) (
     (isUnit_chartAwayHomOfTriple_isLocalizationElem W k l hkl t u v hu hv ht)
 
 open HomogeneousLocalization in
+/-- **The lift factors the chart morphism.** `ψ ∘ awayMap = hom_k`, the defining property of the
+`IsLocalization.Away.lift` used to build `projGlueLift`: composing the overlap-chart lift with the
+transition map `awayMap` back to chart `k` recovers the chart morphism `chartAwayHomOfTriple` of the
+triple. This is `IsLocalization.Away.lift_comp` on the presentation supplied by
+`Away.isLocalization_mul`, packaged once and shared by both `specMap_projGlueLift_awayι` and
+`projGlueLift_eq`. -/
+lemma projGlueLift_comp_awayMap (k l : Fin 3) (hkl : l ≠ k) (t : Fin 3 → S) (u v : S)
+    (hu : t k * u = 1) (hv : t l * v = 1)
+    (ht : (W.map (algebraMap R S)).toProjective.Equation t)
+    (x : projCoordRing W)
+    (hx : x = (quotientGradingHom (projIdeal W)) (MvPolynomial.X k) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X l)) :
+    (projGlueLift W k l hkl t u v hu hv ht x hx).comp
+        (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l) hx) =
+      (chartAwayHomOfTriple W k t u hu ht).toRingHom := by
+  letI : Algebra (chartAway W k) (Away (quotientGrading (projIdeal W)) x) :=
+    (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l) hx).toAlgebra
+  haveI := Away.isLocalization_mul (𝒜 := quotientGrading (projIdeal W))
+    (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W l) hx one_ne_zero
+  exact IsLocalization.Away.lift_comp _ _
+
+open HomogeneousLocalization in
 /-- **The `k`-side factorization.** `ψ ∘ awayMap = hom_k` (`IsLocalization.Away.lift_comp`), so the
 `k`-chart composite equals `Spec ψ` followed by the overlap chart `awayι` at `X k * X l`. -/
 lemma specMap_projGlueLift_awayι (k l : Fin 3) (hkl : l ≠ k) (t : Fin 3 → S) (u v : S)
@@ -132,10 +154,7 @@ lemma specMap_projGlueLift_awayι (k l : Fin 3) (hkl : l ≠ k) (t : Fin 3 → S
   haveI := Away.isLocalization_mul (𝒜 := quotientGrading (projIdeal W))
     (mk_X_mem_quotientGrading_one W k) (mk_X_mem_quotientGrading_one W l)
     hx one_ne_zero
-  have hcomp : (projGlueLift W k l hkl t u v hu hv ht x hx).comp
-      (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l) hx) =
-      (chartAwayHomOfTriple W k t u hu ht).toRingHom :=
-    IsLocalization.Away.lift_comp _ _
+  have hcomp := projGlueLift_comp_awayMap W k l hkl t u v hu hv ht x hx
   have hsq := Proj.SpecMap_awayMap_awayι (𝒜 := quotientGrading (projIdeal W))
     (g_deg := mk_X_mem_quotientGrading_one W l) (hx := hx)
     (f_deg := mk_X_mem_quotientGrading_one W k) (hm := one_pos) (m' := 1)
@@ -185,6 +204,35 @@ lemma chartAwayHomOfTriple_awayMk (k : Fin 3) (t : Fin 3 → S) (u : S) (hu : t 
   rw [hfun, hstep, hscale, mul_comm]
 
 open HomogeneousLocalization in
+/-- **The change-of-chart ring identity in the overlap `Away 𝒜 (X k * X l)`.** The image of the
+chart-`k` fraction `c / (X k) ^ n` under the transition map to the overlap, times the `n`-th power of
+the transition element `X l / X k`, equals the image of the chart-`l` fraction `c / (X l) ^ n` under
+the transition map from the other side. Purely a graded-localization computation
+(`HomogeneousLocalization.val_injective` reducing to `Localization.mk` equality, then `ring`); it is
+the ring-level content behind the agreement of the two chart lifts in `projGlueLift_eq`. -/
+lemma awayMap_mk_mul_awayMap_isLocalizationElem_pow (k l : Fin 3) (x : projCoordRing W)
+    (hx : x = (quotientGradingHom (projIdeal W)) (MvPolynomial.X k) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X l))
+    (hx' : x = (quotientGradingHom (projIdeal W)) (MvPolynomial.X l) *
+      (quotientGradingHom (projIdeal W)) (MvPolynomial.X k))
+    (n : ℕ) (c : projCoordRing W) (hc : c ∈ quotientGrading (projIdeal W) (n • 1)) :
+    (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l) hx)
+          (Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W k) n c hc) *
+        ((awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W k) hx')
+          (Away.isLocalizationElem (mk_X_mem_quotientGrading_one W l)
+            (mk_X_mem_quotientGrading_one W k))) ^ n =
+      (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W k) hx')
+        (Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l) n c hc) := by
+  apply HomogeneousLocalization.val_injective
+  rw [val_mul, val_pow, awayMap_mk, awayMap_mk, awayMap_mk,
+    Away.val_mk, Away.val_mk, Away.val_mk, Localization.mk_pow, Localization.mk_mul,
+    Localization.mk_eq_mk_iff, Localization.r_iff_exists]
+  refine ⟨1, ?_⟩
+  subst hx
+  push_cast
+  ring
+
+open HomogeneousLocalization in
 /-- **The last ring-level step.** The two lifts — built from the `k`-chart and the `l`-chart of the
 same triple — coincide as ring maps out of the overlap chart `Away 𝒜 (X k * X l)`.
 
@@ -212,21 +260,7 @@ lemma projGlueLift_eq (k l : Fin 3) (hkl : l ≠ k) (t : Fin 3 → S) (u v : S)
   obtain ⟨b, hb, hbc⟩ := Submodule.mem_map.mp hc
   have hbc' : (quotientGradingHom (projIdeal W)) b = c := hbc
   -- the ring identity in `Away 𝒜 x` : (c / X k ^ n) * (X k ^ 2 / x) ^ n = c / X l ^ n
-  have hid : (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l) hx)
-        (Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W k) n _ hc) *
-      ((awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W k) hx')
-        (Away.isLocalizationElem (mk_X_mem_quotientGrading_one W l)
-          (mk_X_mem_quotientGrading_one W k))) ^ n =
-      (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W k) hx')
-        (Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l) n _ hc) := by
-    apply HomogeneousLocalization.val_injective
-    rw [val_mul, val_pow, awayMap_mk, awayMap_mk, awayMap_mk,
-      Away.val_mk, Away.val_mk, Away.val_mk, Localization.mk_pow, Localization.mk_mul,
-      Localization.mk_eq_mk_iff, Localization.r_iff_exists]
-    refine ⟨1, ?_⟩
-    subst hx
-    push_cast
-    ring
+  have hid := awayMap_mk_mul_awayMap_isLocalizationElem_pow W k l x hx hx' n c hc
   letI : Algebra (chartAway W l) (Away (quotientGrading (projIdeal W)) x) :=
     (awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W k) hx').toAlgebra
   haveI := Away.isLocalization_mul (𝒜 := quotientGrading (projIdeal W))
@@ -241,9 +275,7 @@ lemma projGlueLift_eq (k l : Fin 3) (hkl : l ≠ k) (t : Fin 3 → S) (u v : S)
   have hliftl : ∀ z, (projGlueLift W l k (Ne.symm hkl) t v u hv hu ht x hx')
       ((awayMap (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W k) hx') z) =
       chartAwayHomOfTriple W l t v hv ht z := fun z =>
-    RingHom.congr_fun (IsLocalization.Away.lift_comp
-      (S := Away (quotientGrading (projIdeal W)) x) _
-      (isUnit_chartAwayHomOfTriple_isLocalizationElem W l k (Ne.symm hkl) t v u hv hu ht)) z
+    RingHom.congr_fun (projGlueLift_comp_awayMap W l k (Ne.symm hkl) t v u hv hu ht x hx') z
   have hvalmk : chartAwayHomOfTriple W l t v hv ht
       (Away.mk (quotientGrading (projIdeal W)) (mk_X_mem_quotientGrading_one W l) n c hc) =
       MvPolynomial.aeval t b * v ^ n :=
