@@ -22342,3 +22342,38 @@ A = colim A₀ (EGA IV.8.8) — THE research-grade leaf (mathlib gap); (L3) asce
 trivial. SURGICAL ALTERNATIVE (owner call): all current headline consumers run the detection at
 geometric fibres (Spec k̄ noetherian ✓) — a fibre-detection variant of Rigid sheds hLN entirely
 at the cost of a statement variant. (STREAM-GH)
+
+## v10.298 (2026-07-16, coordinator) — ★★★ [GHA3] CLOSED RATIFIED (:3497 dead, verified); THE ENDGAME CHECKLIST adopted; ★ OWNER RULING: hLN → fibre-detection Rigid VARIANT now, L2 parked
+
+**Verified at source:** `levelSpaceΓπ_etale` (GammaHRepresentability:3498) is a real proof
+(`:= levelSpaceΓ_structure_etale E N h`, consumed :3525); `LevelSpaceEtaleClose.lean` 0-sorry (the
+CombinationLevel-imports-LevelSpaceEtale meeting-point, 56bf5891b ✓); the chain's SOLE sorryAx source is
+the T-D8 box (`fullLevel_divisor_iff_naive_gen`, Basic:115) — and GH's half-analysis confirms only the
+**⟸-half** is genuinely needed (KM's `fullLevel_divisor_forward` covers ⟹). **The Γ_H charter edge GH
+held since v10.192 is CLOSED.** [GHA3] complete.
+
+**THE ENDGAME CHECKLIST (GH's closer audit v10.297-GH, adopted as the tracking list of record):**
+the exact remaining pins on the three `.Representable` headlines — (1) T-H8/T-H9 themselves; (2) T-D8-⟸
+(KM, in-flight this window); (3) hLN → RESOLVED BY RULING below; (4) hH/hbound ([KEY-DEG]); (5) the
+EndomorphismDegree generals — with GH's flagged **CHEAP PATH: rewiring `aut_endo_eq_one`'s chain onto the
+clean `_of_isIntegral` + E-INT field-forms sheds FIVE general pins** without ever needing the dichotomy;
+(6) YN-side + legacy non-headline stragglers. Plus Bootstrap's remaining (hL/hArb/E[2]-gen — OMEGA,
+in-flight; :206 — G0's campaign).
+
+**★ OWNER RULING (2026-07-16): hLN = T-W7.8 goes the FIBRE-DETECTION VARIANT route — L2 is PARKED.**
+GH's scope (v10.297-GH): the pin = the Krull-intersection germ argument (noetherian bases); the literal
+lift needs EGA IV §8 spreading-out (L2 — filtered-colimit descent of Weierstrass data + morphisms), a
+research-scale leaf absent from mathlib ([KL-3] wall). BUT every current consumer detects rigidity at
+geometric fibres, where noetherianity is free. **Ruling: (a)** implement the **fibre-detection Rigid
+variant** — additive (a variant definition/theorem alongside, consumers repoint; the literal KM 4.7 form
+stays stated + documented); the headline sheds hLN entirely. **(b)** L2 is parked-with-honor as
+**[T-W7.8-L2-PARKED]** — an upstream-quality upgrade ticket (EGA IV §8 spreading-out = premier ForMathlib
+material) to later restore the literal statement; NOT on the headline path. **(c)** GH implements (it
+owns the rigidity chain); B2-protocol discipline: no silent statement edits — the variant is a new
+declaration, the original stays.
+
+**DISPATCH DELTA (GH only; OMEGA/G0/KM stand as v10.295 — mid-window):**
+- **GH → (1) the fibre-detection Rigid variant** per the ruling (design the variant statement, prove it
+  from the existing engine at fibres, repoint the three headline consumers, document the literal form's
+  L2-parked status); **(2) the CHEAP PATH** — rewire `aut_endo_eq_one`'s chain onto `_of_isIntegral` +
+  E-INT field-forms (sheds 5 general pins, statement-preserving, pure proof-rewiring). Board both LOUDLY.
