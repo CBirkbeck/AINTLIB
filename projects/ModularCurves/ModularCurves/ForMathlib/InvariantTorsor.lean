@@ -724,27 +724,66 @@ noncomputable def galoisInv [Fintype G] (S : Finset (A × A)) (x : G → A) :
     A ⊗[FixedPoints.subalgebra R A G] A :=
   ∑ p ∈ S, p.1 ⊗ₜ[FixedPoints.subalgebra R A G] (∑ g : G, g⁻¹ • (x g * p.2))
 
-/-- **(T-Q2-A711, step 5 — KM A7.1.1, torsor part; PROVEN)** For a free action of a finite
-group the multiplication comparison `A ⊗[Aᴳ] A ≅ ∏_G A` is bijective — `Spec A` is a
-`G`-torsor over `Spec Aᴳ`.
+omit [SMulCommClass R G A] [Finite G] in
+/-- The pure-tensor case of the left-inverse identity for `galoisInv`: on `u ⊗ₜ v` the
+Galois-coordinate inverse recovers the tensor (the trace/averaging collapse). Extracted so
+`torsorMul_injective`'s induction stays short. -/
+theorem galoisInv_torsorMul_tmul [Fintype G] [DecidableEq G] (S : Finset (A × A))
+    (hS : ∀ g : G, (∑ p ∈ S, p.1 * (g • p.2)) = if g = 1 then 1 else 0) (u v : A) :
+    galoisInv G R A S (MulSemiringAction.torsorMul G R A
+        (u ⊗ₜ[FixedPoints.subalgebra R A G] v)) = u ⊗ₜ[FixedPoints.subalgebra R A G] v := by
+  rw [galoisInv]
+  have hterm : ∀ p : A × A,
+      (∑ g : G, g⁻¹ • ((MulSemiringAction.torsorMul G R A
+          (u ⊗ₜ[FixedPoints.subalgebra R A G] v) : G → A) g * p.2))
+        = (traceInvariants G R A (u * p.2) : A) * v := by
+    intro p
+    have hinner : ∀ g : G, g⁻¹ • ((MulSemiringAction.torsorMul G R A
+        (u ⊗ₜ[FixedPoints.subalgebra R A G] v) : G → A) g * p.2)
+          = (g⁻¹ • (u * p.2)) * v := by
+      intro g
+      rw [MulSemiringAction.torsorMul_tmul,
+        show u * g • v * p.2 = (u * p.2) * (g • v) by ring, smul_mul', smul_smul,
+        inv_mul_cancel, one_smul]
+    simp only [hinner, ← Finset.sum_mul]
+    congr 1
+    show (∑ g : G, g⁻¹ • (u * p.2)) = ∑ g : G, g • (u * p.2)
+    exact Fintype.sum_bijective (·⁻¹) (Equiv.inv G).bijective _ _ (fun _ => rfl)
+  simp only [hterm]
+  have hmove : ∀ p : A × A,
+      p.1 ⊗ₜ[FixedPoints.subalgebra R A G] ((traceInvariants G R A (u * p.2) : A) * v)
+        = ((traceInvariants G R A (u * p.2) : A) * p.1)
+            ⊗ₜ[FixedPoints.subalgebra R A G] v := by
+    intro p
+    show p.1 ⊗ₜ[FixedPoints.subalgebra R A G]
+        ((traceInvariants G R A (u * p.2)) • v) = _
+    rw [TensorProduct.tmul_smul]
+    rfl
+  simp only [hmove]
+  rw [← TensorProduct.sum_tmul]
+  congr 1
+  show (∑ p ∈ S, (∑ g : G, g • (u * p.2)) * p.1) = u
+  have hswap : (∑ p ∈ S, (∑ g : G, g • (u * p.2)) * p.1)
+      = ∑ g : G, (g • u) * (∑ p ∈ S, p.1 * (g • p.2)) := by
+    simp only [Finset.sum_mul]
+    rw [Finset.sum_comm]
+    refine Finset.sum_congr rfl fun g _ => ?_
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun p _ => ?_
+    rw [smul_mul']
+    ring
+  rw [hswap, Finset.sum_eq_single (1 : G)]
+  · rw [hS (1 : G)]; simp
+  · intro g _ hg; rw [hS g, if_neg hg, mul_zero]
+  · intro hc; exact absurd (Finset.mem_univ (1 : G)) hc
 
-This is SGA III Exp. V Thm 4.1 (iv) — *"`X₁ ⟶ X₀ ×_Y X₀` est un isomorphisme"* — obtained
-by the Chase–Harrison–Rosenberg route: the Galois coordinates of `exists_galoisCoords`
-give an explicit two-sided inverse `galoisInv`, so neither SGA's semi-local reduction, nor
-its Lemme 4.2, nor its faithfully-flat residue-field enlargement is needed (none of the
-three has a mathlib substrate — there is no `IsSemilocalRing`). No finiteness of `A` over
-`Aᴳ` is used either.
-
-`galoisInv ∘ torsorMul = id` is where the trace enters: on a pure tensor `u ⊗ v` the inner
-sum is `tr(u · bᵢ) · v` with `tr(u · bᵢ)` invariant, so it crosses the tensor to give
-`(∑ᵢ tr(u · bᵢ) · aᵢ) ⊗ v = u ⊗ v` by the coordinate identity again. -/
-theorem torsorMul_bijective_of_isFreeAlgebraAction
-    (hfree : IsFreeAlgebraAction G R A) :
-    Function.Bijective (MulSemiringAction.torsorMul G R A) := by
+/-- Surjectivity half of `torsorMul_bijective_of_isFreeAlgebraAction`: `galoisInv S` is a
+right inverse of `torsorMul` (Galois coordinates from `exists_galoisCoords`). -/
+theorem torsorMul_surjective (hfree : IsFreeAlgebraAction G R A) :
+    Function.Surjective (MulSemiringAction.torsorMul G R A) := by
   classical
   haveI : Fintype G := Fintype.ofFinite G
   obtain ⟨S, hS⟩ := exists_galoisCoords G R A hfree
-  -- `galoisInv S` is a right inverse
   have hright : ∀ x : G → A,
       MulSemiringAction.torsorMul G R A (galoisInv G R A S x) = x := by
     intro x
@@ -768,7 +807,16 @@ theorem torsorMul_bijective_of_isFreeAlgebraAction
       simp [hne]
     · intro hc
       exact absurd (Finset.mem_univ h) hc
-  -- `galoisInv S` is additive, so it suffices to check the left inverse on pure tensors
+  exact fun x => ⟨galoisInv G R A S x, hright x⟩
+
+/-- Injectivity half of `torsorMul_bijective_of_isFreeAlgebraAction`: `galoisInv S` is a
+left inverse of `torsorMul` (additive, checked on pure tensors via
+`galoisInv_torsorMul_tmul`). -/
+theorem torsorMul_injective (hfree : IsFreeAlgebraAction G R A) :
+    Function.Injective (MulSemiringAction.torsorMul G R A) := by
+  classical
+  haveI : Fintype G := Fintype.ofFinite G
+  obtain ⟨S, hS⟩ := exists_galoisCoords G R A hfree
   have hadd : ∀ x y : G → A, galoisInv G R A S (x + y)
       = galoisInv G R A S x + galoisInv G R A S y := by
     intro x y
@@ -783,52 +831,27 @@ theorem torsorMul_bijective_of_isFreeAlgebraAction
     induction y using TensorProduct.induction_on with
     | zero => simp [galoisInv]
     | add y₁ y₂ h₁ h₂ => rw [map_add, hadd, h₁, h₂]
-    | tmul u v =>
-      rw [galoisInv]
-      have hterm : ∀ p : A × A,
-          (∑ g : G, g⁻¹ • ((MulSemiringAction.torsorMul G R A
-              (u ⊗ₜ[FixedPoints.subalgebra R A G] v) : G → A) g * p.2))
-            = (traceInvariants G R A (u * p.2) : A) * v := by
-        intro p
-        have hinner : ∀ g : G, g⁻¹ • ((MulSemiringAction.torsorMul G R A
-            (u ⊗ₜ[FixedPoints.subalgebra R A G] v) : G → A) g * p.2)
-              = (g⁻¹ • (u * p.2)) * v := by
-          intro g
-          rw [MulSemiringAction.torsorMul_tmul,
-            show u * g • v * p.2 = (u * p.2) * (g • v) by ring, smul_mul', smul_smul,
-            inv_mul_cancel, one_smul]
-        simp only [hinner, ← Finset.sum_mul]
-        congr 1
-        show (∑ g : G, g⁻¹ • (u * p.2)) = ∑ g : G, g • (u * p.2)
-        exact Fintype.sum_bijective (·⁻¹) (Equiv.inv G).bijective _ _ (fun _ => rfl)
-      simp only [hterm]
-      have hmove : ∀ p : A × A,
-          p.1 ⊗ₜ[FixedPoints.subalgebra R A G] ((traceInvariants G R A (u * p.2) : A) * v)
-            = ((traceInvariants G R A (u * p.2) : A) * p.1)
-                ⊗ₜ[FixedPoints.subalgebra R A G] v := by
-        intro p
-        show p.1 ⊗ₜ[FixedPoints.subalgebra R A G]
-            ((traceInvariants G R A (u * p.2)) • v) = _
-        rw [TensorProduct.tmul_smul]
-        rfl
-      simp only [hmove]
-      rw [← TensorProduct.sum_tmul]
-      congr 1
-      show (∑ p ∈ S, (∑ g : G, g • (u * p.2)) * p.1) = u
-      have hswap : (∑ p ∈ S, (∑ g : G, g • (u * p.2)) * p.1)
-          = ∑ g : G, (g • u) * (∑ p ∈ S, p.1 * (g • p.2)) := by
-        simp only [Finset.sum_mul]
-        rw [Finset.sum_comm]
-        refine Finset.sum_congr rfl fun g _ => ?_
-        rw [Finset.mul_sum]
-        refine Finset.sum_congr rfl fun p _ => ?_
-        rw [smul_mul']
-        ring
-      rw [hswap, Finset.sum_eq_single (1 : G)]
-      · rw [hS (1 : G)]; simp
-      · intro g _ hg; rw [hS g, if_neg hg, mul_zero]
-      · intro hc; exact absurd (Finset.mem_univ (1 : G)) hc
-  exact ⟨Function.LeftInverse.injective hleft, fun x => ⟨galoisInv G R A S x, hright x⟩⟩
+    | tmul u v => exact galoisInv_torsorMul_tmul G R A S hS u v
+  exact Function.LeftInverse.injective hleft
+
+/-- **(T-Q2-A711, step 5 — KM A7.1.1, torsor part; PROVEN)** For a free action of a finite
+group the multiplication comparison `A ⊗[Aᴳ] A ≅ ∏_G A` is bijective — `Spec A` is a
+`G`-torsor over `Spec Aᴳ`.
+
+This is SGA III Exp. V Thm 4.1 (iv) — *"`X₁ ⟶ X₀ ×_Y X₀` est un isomorphisme"* — obtained
+by the Chase–Harrison–Rosenberg route: the Galois coordinates of `exists_galoisCoords`
+give an explicit two-sided inverse `galoisInv`, so neither SGA's semi-local reduction, nor
+its Lemme 4.2, nor its faithfully-flat residue-field enlargement is needed (none of the
+three has a mathlib substrate — there is no `IsSemilocalRing`). No finiteness of `A` over
+`Aᴳ` is used either.
+
+`galoisInv ∘ torsorMul = id` is where the trace enters: on a pure tensor `u ⊗ v` the inner
+sum is `tr(u · bᵢ) · v` with `tr(u · bᵢ)` invariant, so it crosses the tensor to give
+`(∑ᵢ tr(u · bᵢ) · aᵢ) ⊗ v = u ⊗ v` by the coordinate identity again. -/
+theorem torsorMul_bijective_of_isFreeAlgebraAction
+    (hfree : IsFreeAlgebraAction G R A) :
+    Function.Bijective (MulSemiringAction.torsorMul G R A) :=
+  ⟨torsorMul_injective G R A hfree, torsorMul_surjective G R A hfree⟩
 
 /-- **(A711-BC = KM A7.1.2; PROVEN)** Free actions satisfy base change for rings of
 invariants — `∗(A, G, R, R')` for every `R'`: `Aᴳ ⊗_R R' ≅ (A ⊗_R R')ᴳ`.
