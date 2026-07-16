@@ -1963,6 +1963,34 @@ theorem Section.HasExactOrder.M_dvd_addOrderOf {k : Type u} [Field k] [IsSepClos
     AddSubgroup.card_dvd_of_le hsub
   rwa [hcardA, Nat.card_zmultiples] at hdvd
 
+/-- **[F3-distinct] (KM 1.5.3's condition (3) at the geometric points of `S[1/M]`)**
+Over a separably closed field with `M` invertible: if `P` has exact order `M·K`
+(coprime), the nonzero multiples `a·(K·P)`, `0 < a < M`, are all nonzero — i.e. `K·P`
+has honest point-order exactly `M` (census + cyclic arithmetic). -/
+theorem Section.HasExactOrder.smul_nsmul_ne_zero {k : Type u} [Field k] [IsSepClosed k]
+    {E : EllipticCurve (Spec (CommRingCat.of k))} {P : E.Section} (M K : ℕ)
+    [NeZero M] [NeZero K] (hMK : Nat.Coprime M K) [NeZero (M * K)]
+    [IsFinite (E.mulByHom (M : ℤ))] [IsFinite (E.mulByHom (K : ℤ))]
+    (hinvM : NIsInvertible (Spec (CommRingCat.of k)) M)
+    (h : P.HasExactOrder E (M * K)) :
+    ∀ a : ℕ, 0 < a → a < M → (a : ℤ) • ((K : ℤ) • P) ≠ 0 := by
+  have hdvdMK : addOrderOf P ∣ M * K := by
+    apply addOrderOf_dvd_of_nsmul_eq_zero
+    have := h.smul_eq_zero E
+    rwa [natCast_zsmul] at this
+  have hMdvd : M ∣ addOrderOf P :=
+    Section.HasExactOrder.M_dvd_addOrderOf M K hMK hinvM h
+  have hord : addOrderOf (K • P) = M :=
+    addOrderOf_nsmul_eq_of_coprime P M K hMK hMdvd hdvdMK
+  intro a ha0 haM hcon
+  have hzsmul : a • (K • P) = 0 := by
+    have h2 := hcon
+    rw [natCast_zsmul, natCast_zsmul] at h2
+    exact h2
+  have hdvda : addOrderOf (K • P) ∣ a := addOrderOf_dvd_of_nsmul_eq_zero hzsmul
+  rw [hord] at hdvda
+  exact absurd haM (Nat.not_lt.mpr (Nat.le_of_dvd ha0 hdvda))
+
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
