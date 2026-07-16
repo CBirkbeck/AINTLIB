@@ -234,6 +234,228 @@ theorem comp_combination_mem_zeroSection_iff (h : NIsInvertible S N)
       exact ((Category.assoc _ _ _).trans (by
         rw [E.torsionZero_torsionπ N, Category.comp_id])).symm
 
+/-! ### Closure-transport glue (step 2 of the four-step map) -/
+
+private theorem addMonoidHom_mem_closure_image {A B : Type u} [AddCommGroup A]
+    [AddCommGroup B] (f : A →+ B) {s : Set A} {x : A}
+    (hx : x ∈ AddSubgroup.closure s) : f x ∈ AddSubgroup.closure (f '' s) := by
+  rw [← AddMonoidHom.map_closure]
+  exact AddSubgroup.mem_map_of_mem f hx
+
+private theorem injective_mem_closure_image_iff {A B : Type u} [AddCommGroup A]
+    [AddCommGroup B] (f : A →+ B) (hf : Function.Injective f) (s : Set A) (x : A) :
+    f x ∈ AddSubgroup.closure (f '' s) ↔ x ∈ AddSubgroup.closure s := by
+  constructor
+  · intro h
+    rw [← AddMonoidHom.map_closure] at h
+    obtain ⟨y, hy, hyx⟩ := AddSubgroup.mem_map.mp h
+    rwa [← hf hyx]
+  · exact addMonoidHom_mem_closure_image f
+
+/-! ### The master identification (step 3): the full-level set classifies naive
+full level structures -/
+
+set_option synthInstance.maxHeartbeats 160000 in
+set_option maxHeartbeats 1600000 in
+/-- **The master iff.** For a pair `(a, b)` of `T`-points of `E[N]` over `g` (with `N`
+invertible on `S`), the lifted pair-point lands in the full-level set at every point
+of `T` **iff** the attached pair of sections of `E ×_S T` is a naive full level-`N`
+structure. Forward: at each geometric point the set condition rules out vanishing
+combinations (`comp_combination_mem_zeroSection_iff`), so the generation criterion
+`pair_generates_iff_combos_ne_zero` (with the `N²`-count
+`torsion_geometricFibre_rank_two`) yields the closure clause. Backward: a point of
+`T` outside the set gives a vanishing nontrivial combination at the algebraic closure
+of its residue field, contradicting the criterion. -/
+theorem forall_mem_fullLevelSet_iff_isNaiveFullLevel (h : NIsInvertible S N)
+    (a b : T ⟶ E.torsion N) (ha : a ≫ E.torsionπ N = g) (hb : b ≫ E.torsionπ N = g) :
+    (∀ t : ↥T, (pullback.lift a b (ha.trans hb.symm)).base t ∈ E.fullLevelSet N)
+      ↔ (E.baseChange g).IsNaiveFullLevel N (E.torsionMapSection N g a ha)
+          (E.torsionMapSection N g b hb) := by
+  classical
+  -- the pulled points at an arbitrary field-valued point, and their properties
+  have hpull : ∀ {k : Type u} [Field k] (τ : Spec (CommRingCat.of k) ⟶ T),
+      ∀ (c : T ⟶ E.torsion N) (hc : c ≫ E.torsionπ N = g),
+      (N : ℤ) • (⟨τ ≫ c ≫ E.torsionι N, by
+        rw [Category.assoc, Category.assoc, E.torsionι_π, hc]⟩ : E.Point (τ ≫ g)) = 0 := by
+    intro k _ τ c hc
+    rw [E.smul_eq_zero_iff_comp_mulByHom]
+    show (τ ≫ c ≫ E.torsionι N) ≫ E.mulByHom (N : ℤ) = (τ ≫ g) ≫ E.zero
+    rw [Category.assoc, Category.assoc,
+      show E.torsionι N ≫ E.mulByHom (N : ℤ) = E.torsionπ N ≫ E.zero from
+        pullback.condition, ← Category.assoc c, hc, ← Category.assoc]
+  -- the base-change dictionary identification for the two sections
+  have hdict : ∀ {k : Type u} [Field k] (τ : Spec (CommRingCat.of k) ⟶ T)
+      (c : T ⟶ E.torsion N) (hc : c ≫ E.torsionπ N = g),
+      Point.baseChangeEquiv E g τ
+          (Point.pull (E.baseChange g) τ (E.torsionMapSection N g c hc))
+        = (⟨τ ≫ c ≫ E.torsionι N, by
+            rw [Category.assoc, Category.assoc, E.torsionι_π, hc]⟩ : E.Point (τ ≫ g)) := by
+    intro k _ τ c hc
+    refine Subtype.ext ?_
+    show (τ ≫ ((E.torsionMapSection N g c hc :
+        (E.baseChange g).Point (𝟙 T)) : T ⟶ (E.baseChange g).E)) ≫ pullback.fst E.π g
+      = τ ≫ c ≫ E.torsionι N
+    rw [Category.assoc, E.torsionMapSection_fst N g c hc]
+  constructor
+  · -- forward: the set condition gives the naive structure
+    intro hset
+    refine ⟨⟨E.torsionMapSection_killed N g a ha, E.torsionMapSection_killed N g b hb⟩, ?_⟩
+    intro k _ _ τ x hx
+    obtain ⟨pt⟩ : Nonempty ↥(Spec (CommRingCat.of k)) := inferInstance
+    set pA : E.Point (τ ≫ g) := ⟨τ ≫ a ≫ E.torsionι N, by
+      rw [Category.assoc, Category.assoc, E.torsionι_π, ha]⟩ with hpAdef
+    set pB : E.Point (τ ≫ g) := ⟨τ ≫ b ≫ E.torsionι N, by
+      rw [Category.assoc, Category.assoc, E.torsionι_π, hb]⟩ with hpBdef
+    have hNk : (N : k) ≠ 0 :=
+      (nIsInvertible_spec_iff k N).mp (h.of_hom (τ ≫ g))
+    obtain ⟨e⟩ := E.torsion_geometricFibre_rank_two N k (τ ≫ g) hNk
+    have hcard : Nat.card ↥(Submodule.torsionBy ℤ (E.Point (τ ≫ g)) (N : ℤ)) = N ^ 2 := by
+      rw [Nat.card_congr e.toEquiv, Nat.card_fun, Nat.card_eq_fintype_card (α := Fin 2),
+        Nat.card_zmod, Fintype.card_fin]
+    have hkillG : ∀ z : ↥(Submodule.torsionBy ℤ (E.Point (τ ≫ g)) (N : ℤ)),
+        (N : ℤ) • z = 0 := fun z => Subtype.ext (by
+      simpa using (Submodule.mem_torsionBy_iff _ _).mp z.2)
+    set P' : ↥(Submodule.torsionBy ℤ (E.Point (τ ≫ g)) (N : ℤ)) :=
+      ⟨pA, (Submodule.mem_torsionBy_iff _ _).mpr (hpull τ a ha)⟩ with hP'def
+    set Q' : ↥(Submodule.torsionBy ℤ (E.Point (τ ≫ g)) (N : ℤ)) :=
+      ⟨pB, (Submodule.mem_torsionBy_iff _ _).mpr (hpull τ b hb)⟩ with hQ'def
+    have hcombos : ∀ ab : ZMod N × ZMod N, ab ≠ 0 →
+        (ab.1.val : ℤ) • P' + (ab.2.val : ℤ) • Q' ≠ 0 := by
+      intro v hv h0
+      have h0' : (v.1.val : ℤ) • pA + (v.2.val : ℤ) • pB = 0 := by
+        have := congrArg
+          (Submodule.subtype (Submodule.torsionBy ℤ (E.Point (τ ≫ g)) (N : ℤ))) h0
+        simpa using this
+      have hmem := (E.comp_combination_mem_zeroSection_iff N g h a b ha hb τ pt v).mpr h0'
+      have hin := hset (τ.base pt)
+      rw [fullLevelSet] at hin
+      have hnot := Set.mem_iInter₂.mp hin v hv
+      apply hnot
+      have hcomp : (τ ≫ pullback.lift a b (ha.trans hb.symm) ≫
+            E.combinationHom N v).base pt
+          = (E.combinationHom N v).base
+            ((pullback.lift a b (ha.trans hb.symm)).base (τ.base pt)) := by
+        simp
+      rwa [hcomp] at hmem
+    have hgen := (pair_generates_iff_combos_ne_zero (N := N) hcard hkillG P' Q').mp hcombos
+    -- transport the closure statement back to the base-changed curve
+    have hy : Point.baseChangeEquiv E g τ x ∈
+        Submodule.torsionBy ℤ (E.Point (τ ≫ g)) (N : ℤ) :=
+      (Submodule.mem_torsionBy_iff _ _).mpr
+        (by rw [← map_zsmul (Point.baseChangeEquiv E g τ), hx, map_zero])
+    have hzG := hgen ⟨Point.baseChangeEquiv E g τ x, hy⟩
+    -- down to the ambient group
+    have hamb : Point.baseChangeEquiv E g τ x ∈
+        AddSubgroup.closure ({pA, pB} : Set (E.Point (τ ≫ g))) := by
+      have := addMonoidHom_mem_closure_image
+        (Submodule.subtype (Submodule.torsionBy ℤ (E.Point (τ ≫ g)) (N : ℤ))).toAddMonoidHom
+        hzG
+      simpa [Set.image_pair] using this
+    -- back through the base-change equivalence
+    have hx' := addMonoidHom_mem_closure_image
+      (Point.baseChangeEquiv E g τ).symm.toAddMonoidHom hamb
+    rw [Set.image_pair] at hx'
+    have h1 : (Point.baseChangeEquiv E g τ).symm pA
+        = Point.pull (E.baseChange g) τ (E.torsionMapSection N g a ha) := by
+      rw [hpAdef, ← hdict τ a ha]
+      exact (Point.baseChangeEquiv E g τ).symm_apply_apply _
+    have h2 : (Point.baseChangeEquiv E g τ).symm pB
+        = Point.pull (E.baseChange g) τ (E.torsionMapSection N g b hb) := by
+      rw [hpBdef, ← hdict τ b hb]
+      exact (Point.baseChangeEquiv E g τ).symm_apply_apply _
+    simpa [h1, h2] using hx'
+  · -- backward: a naive structure forces the set condition at every point
+    intro hnaive t
+    rw [fullLevelSet]
+    refine Set.mem_iInter₂.mpr fun v hv => ?_
+    set τ : Spec (CommRingCat.of (AlgebraicClosure (T.residueField t))) ⟶ T :=
+      Spec.map (CommRingCat.ofHom (algebraMap (T.residueField t)
+        (AlgebraicClosure (T.residueField t)))) ≫
+        T.fromSpecResidueField t with hτ
+    obtain ⟨pt⟩ : Nonempty
+        ↥(Spec (CommRingCat.of (AlgebraicClosure (T.residueField t)))) := inferInstance
+    have hτpt : τ.base pt = t := by
+      have hmem2 : τ.base pt ∈ Set.range (T.fromSpecResidueField t).base := by
+        rw [hτ]
+        exact ⟨(Spec.map (CommRingCat.ofHom (algebraMap (T.residueField t)
+          (AlgebraicClosure (T.residueField t))))).base pt, rfl⟩
+      rwa [Scheme.range_fromSpecResidueField] at hmem2
+    rw [Set.mem_preimage, Set.mem_compl_iff]
+    intro hmem
+    have hmem' : (τ ≫ pullback.lift a b (ha.trans hb.symm) ≫
+        E.combinationHom N v).base pt ∈
+        Set.range (E.torsionZero N).base := by
+      have hcomp : (τ ≫ pullback.lift a b (ha.trans hb.symm) ≫
+            E.combinationHom N v).base pt
+          = (E.combinationHom N v).base
+            ((pullback.lift a b (ha.trans hb.symm)).base (τ.base pt)) := by
+        simp
+      rw [hcomp, hτpt]
+      exact hmem
+    have h0 := (E.comp_combination_mem_zeroSection_iff N g h a b ha hb τ pt v).mp hmem'
+    set pA : E.Point (τ ≫ g) := ⟨τ ≫ a ≫ E.torsionι N, by
+      simp only [Category.assoc]
+      rw [E.torsionι_π N, ha]⟩ with hpAdef
+    set pB : E.Point (τ ≫ g) := ⟨τ ≫ b ≫ E.torsionι N, by
+      simp only [Category.assoc]
+      rw [E.torsionι_π N, hb]⟩ with hpBdef
+    have hNk : (N : AlgebraicClosure (T.residueField t)) ≠ 0 :=
+      (nIsInvertible_spec_iff (AlgebraicClosure (T.residueField t)) N).mp
+        (h.of_hom (τ ≫ g))
+    obtain ⟨e⟩ := E.torsion_geometricFibre_rank_two N
+      (AlgebraicClosure (T.residueField t)) (τ ≫ g) hNk
+    have hcard : Nat.card ↥(Submodule.torsionBy ℤ (E.Point (τ ≫ g)) (N : ℤ)) = N ^ 2 := by
+      rw [Nat.card_congr e.toEquiv, Nat.card_fun, Nat.card_eq_fintype_card (α := Fin 2),
+        Nat.card_zmod, Fintype.card_fin]
+    have hkillG : ∀ z : ↥(Submodule.torsionBy ℤ (E.Point (τ ≫ g)) (N : ℤ)),
+        (N : ℤ) • z = 0 := fun z => Subtype.ext (by
+      simpa using (Submodule.mem_torsionBy_iff _ _).mp z.2)
+    set P' : ↥(Submodule.torsionBy ℤ (E.Point (τ ≫ g)) (N : ℤ)) :=
+      ⟨pA, (Submodule.mem_torsionBy_iff _ _).mpr (hpull τ a ha)⟩ with hP'def
+    set Q' : ↥(Submodule.torsionBy ℤ (E.Point (τ ≫ g)) (N : ℤ)) :=
+      ⟨pB, (Submodule.mem_torsionBy_iff _ _).mpr (hpull τ b hb)⟩ with hQ'def
+    have hclosureG : ∀ x : ↥(Submodule.torsionBy ℤ (E.Point (τ ≫ g)) (N : ℤ)),
+        x ∈ AddSubgroup.closure ({P', Q'} :
+          Set ↥(Submodule.torsionBy ℤ (E.Point (τ ≫ g)) (N : ℤ))) := by
+      intro z
+      have hzkill : (N : ℤ) • (z : E.Point (τ ≫ g)) = 0 :=
+        (Submodule.mem_torsionBy_iff _ _).mp z.2
+      have hxkill : (N : ℤ) • (Point.baseChangeEquiv E g τ).symm
+          (z : E.Point (τ ≫ g)) = 0 := by
+        rw [← map_zsmul ((Point.baseChangeEquiv E g τ).symm), hzkill, map_zero]
+      have hcl := hnaive.2 (AlgebraicClosure (T.residueField t)) τ
+        ((Point.baseChangeEquiv E g τ).symm (z : E.Point (τ ≫ g))) hxkill
+      have himg := addMonoidHom_mem_closure_image
+        (Point.baseChangeEquiv E g τ).toAddMonoidHom hcl
+      rw [Set.image_pair] at himg
+      have hz1 : (z : E.Point (τ ≫ g)) ∈
+          AddSubgroup.closure ({pA, pB} : Set (E.Point (τ ≫ g))) := by
+        have hthis := himg
+        rw [show ((Point.baseChangeEquiv E g τ).toAddMonoidHom : _ → _)
+            (Point.pull (E.baseChange g) τ (E.torsionMapSection N g a ha)) = pA from
+            hdict τ a ha,
+          show ((Point.baseChangeEquiv E g τ).toAddMonoidHom : _ → _)
+            (Point.pull (E.baseChange g) τ (E.torsionMapSection N g b hb)) = pB from
+            hdict τ b hb,
+          show ((Point.baseChangeEquiv E g τ).toAddMonoidHom : _ → _)
+            ((Point.baseChangeEquiv E g τ).symm (z : E.Point (τ ≫ g)))
+            = (z : E.Point (τ ≫ g)) from
+            (Point.baseChangeEquiv E g τ).apply_symm_apply _] at hthis
+        exact hthis
+      have hpairimg : ({pA, pB} : Set (E.Point (τ ≫ g)))
+          = (Submodule.subtype
+              (Submodule.torsionBy ℤ (E.Point (τ ≫ g)) (N : ℤ))).toAddMonoidHom ''
+            {P', Q'} := by
+        rw [Set.image_pair]
+        rfl
+      rw [hpairimg] at hz1
+      exact (injective_mem_closure_image_iff _ Subtype.val_injective _ _).mp hz1
+    have hcombos := (pair_generates_iff_combos_ne_zero (N := N) hcard hkillG P' Q').mpr
+      hclosureG v hv
+    apply hcombos
+    refine Subtype.ext ?_
+    simpa using h0
+
 end EllipticCurve
 
 end ModularCurves
