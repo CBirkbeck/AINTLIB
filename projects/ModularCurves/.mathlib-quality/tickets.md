@@ -22225,3 +22225,24 @@ T-D6c. Supporting bricks: `Point.castBase` (+coe), `isFinite_mulByHom_baseChange
 The UNCONDITIONAL `smul_hasExactOrder` contract stays as the integral frontier, gated on
 **[F3-disj]** (KM p. 30's ∐-translate clopen argument — at mixed characteristic the thick side
 cannot be counted). 64 bricks; commits ..2da409691.
+
+## v10.294-KM (2026-07-16, window continuation) — ★★ THE DISJOINTNESS LAYER LANDS
+
+Three more green bricks close the [F3-disj] INFRASTRUCTURE (all in Factorization.lean):
+- `RingHom.eq_of_comp_eq_id` — retraction rigidity of field characters (injectivity flips
+  the splitting; no surjectivity input).
+- ★ `sup_ker_eq_top_of_pull_ne` — sections geometrically distinct at every k̄-point have
+  COMAXIMAL graph ideals. Proof by pure subscheme geometry (support of the sup + the
+  IdealSheafData.inclusion lifts + graph isos via IsClosedImmersion.lift; the two base
+  points collapse through the section identities). The residue-field cast-dance the design
+  bank anticipated was never needed.
+- ★★ `exists_clopen_factor_of_mul_comaximal` + `le_ker_restrict_of_unit_side` — the CRT
+  clopen split: `I·J ≤ ker q`, `I ⊔ J = ⊤` ⟹ `T = T₁ ∐ T₂` clopen with `I ≤ ker(q|T₁)`,
+  `J ≤ ker(q|T₂)`. Per-point stalk-units + `TopCat.Presheaf.section_ext`; covering from
+  stalk-nontriviality; `ideal_sup`/`ideal_mul` are rfl in mathlib's IdealSheafData so
+  comaximality localizes for free. NO QuasiCompact hypotheses anywhere (le_ofIdeals_iff).
+**Remaining for the INTEGRAL smul_hasExactOrder:** iterate the pair-split over the
+K-translate family (∏-version by induction), identify `D_M = Z_M` through the ∐-translate
+decomposition (orderDivisor_mul_crt ✓ + translate engine ✓ + the new comaximality from
+`sup_ker_eq_top_of_pull_ne` fed by `geometric_input` roles-swapped), then glue over the
+coprime cover. The F3 CONVERSE consumes the same layer. 68 bricks; commits ..f956d229c.
