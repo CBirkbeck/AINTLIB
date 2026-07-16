@@ -100,7 +100,8 @@ theorem card_kernel_eq_degree_of_separable_of_witnesses
 `k`, promoted to a `φ*K(E)`-algebra automorphism of `K(E)` via the covariance hypothesis `hcov`
 (`τ_k` fixes the pullback range, the function-field shadow of `φ ∘ (·+k) = φ` for `k ∈ ker φ`).
 This supplies the `forward` argument of `card_kernel_eq_degree_of_separable_of_witnesses`, leaving
-only `hcov`, the `inverse` map, the mutual-inverse identities, and `h_normal` to discharge for `[ℓ]`.
+only `hcov`, the `inverse` map, the mutual-inverse identities, and `h_normal` to
+discharge for `[ℓ]`.
 (PointFix's version is `[Fintype]`-scoped; this is the K̄ version.) -/
 noncomputable def kernelTranslateForwardAut
     (φ : Isogeny W.toAffine W.toAffine)
