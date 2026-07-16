@@ -20,7 +20,8 @@ obtains `ProjOrdTransport φ` from a single sharp pair of local witnesses:
 
 These two identities are *exactly* the content the general DVR order-transport glue
 `comap_pointValuation_eq_of_isEquiv_of_ord_eq_one` (`EC/IsogenyOrdTransport.lean`) delivers from the
-two genuine local inputs **(SamePlace)** `((pointValuation P).comap φ.pullback).IsEquiv (place at φ(P))`
+two genuine local inputs **(SamePlace)**
+`((pointValuation P).comap φ.pullback).IsEquiv (place at φ(P))`
 and **(e = 1)** `ord_P(φ.pullback t) = 1` for a uniformizer `t` at `φ(P)`.  So this file reduces
 `ProjOrdTransport φ` — the divisor-pullback functoriality `div(φ^* h) = φ^*(div h)` that the
 divisor-pushforward dual (`OneSubDualDivisor.lean`) and the whole pairing scaling consume — to those
@@ -33,7 +34,8 @@ Frobenius pencil members `1 − π`, `rπ − s` the same two identities are the
 the generic-point covariance `hgcomm` (proved in `WallAGeometricRealization.lean`) plus a unit
 formal linear coefficient (`omegaPullbackCoeff ≠ 0`, proved) would, by the reviewer's route, supply
 them; those two steps (the closed-point comorphism realisation `φ^*(m_Q) ⊆ m_P` and the local
-`e = 1` from the cotangent action) are the precise remaining geometric inputs, *not* discharged here.
+`e = 1` from the cotangent action) are the precise remaining geometric inputs, *not*
+discharged here.
 
 ## What this file proves
 
@@ -75,14 +77,16 @@ structure ComapPointValuationWitness (φ : Isogeny W.toAffine W.toAffine) : Prop
     ((⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P).comap φ.pullback.toRingHom =
       (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation ⟨x, y, h_ns⟩
   /-- **Affine-image infinity comap identity**: when `φ(P) = O` for an affine smooth point `P`
-  (i.e. `P` is in the kernel-coset over `O`), `(pointValuation P).comap φ.pullback = ordAtInftyValuation`.
+  (i.e. `P` is in the kernel-coset over `O`),
+  `(pointValuation P).comap φ.pullback = ordAtInftyValuation`.
   This is the affine half of the transport for points whose image is `O`. -/
   affineToInfty : ∀ (P : (⟨W.toAffine⟩ : SmoothPlaneCurve F).SmoothPoint)
     (_hQ : φ.toAddMonoidHom P.toAffinePoint = (0 : W.toAffine.Point)),
     ((⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P).comap φ.pullback.toRingHom =
       (⟨W.toAffine⟩ : SmoothPlaneCurve F).ordAtInftyValuation
   /-- **Infinity-place transport** `ord_∞(φ.pullback h) = ord_∞ h` (`φ(O) = O`), the comap of the
-  infinity valuation along `φ.pullback`.  This is the `InftyOrdTransport φ` half — for `[ℓ]` it is the
+  infinity valuation along `φ.pullback`.  This is the `InftyOrdTransport φ` half — for
+  `[ℓ]` it is the
   *proved* `inftyOrdTransport_mulByInt`, derived from the master pinning lemma
   `eq_ordAtInftyValuation_of_x_y` and the values `ord_∞(φ.pullback x_gen) = -2`,
   `ord_∞(φ.pullback y_gen) = -3`. -/
@@ -90,7 +94,8 @@ structure ComapPointValuationWitness (φ : Isogeny W.toAffine W.toAffine) : Prop
 
 variable {W}
 
-/-- **The affine per-place order-transport for a general isogeny**, from the comap witnesses.  For an
+/-- **The affine per-place order-transport for a general isogeny**, from the comap
+witnesses.  For an
 isogeny `φ` and an affine smooth point `P`, the order of `φ.pullback f` at `P` equals the order of
 `f` at the image place `φ(P)` (finite or `∞`), with no ramification factor.  Verbatim generalisation
 of `ordTransport_affine_mulByInt`: read the additive order off the comap-valuation identity via the
@@ -106,12 +111,14 @@ theorem ordTransport_of_comap_pointValuation {φ : Isogeny W.toAffine W.toAffine
     rfl
   set τ := φ.pullback with hτ
   have hτh_ne : τ h ≠ 0 := fun h0 ↦ hh (φ.pullback_injective (h0.trans (map_zero _).symm))
-  obtain ⟨m, hm⟩ : ∃ m : ℤ, (⟨W.toAffine⟩ : SmoothPlaneCurve F).ord_P P (τ h) = (m : WithTop ℤ) := by
+  obtain ⟨m, hm⟩ : ∃ m : ℤ,
+    (⟨W.toAffine⟩ : SmoothPlaneCurve F).ord_P P (τ h) = (m : WithTop ℤ) := by
     obtain ⟨m, hm⟩ := WithTop.ne_top_iff_exists.mp
       (((⟨W.toAffine⟩ : SmoothPlaneCurve F).ord_P_eq_top_iff (τ h)).not.mpr hτh_ne)
     exact ⟨m, hm.symm⟩
   have hlhs_exp : (⟨W.toAffine⟩ : SmoothPlaneCurve F).pointValuation P (τ h) = WithZero.exp (-m) :=
-    pointValuation_eq_exp_neg_of_ord_P_eq (C := (⟨W.toAffine⟩ : SmoothPlaneCurve F)) (P := P) hτh_ne hm
+    pointValuation_eq_exp_neg_of_ord_P_eq (C := (⟨W.toAffine⟩ : SmoothPlaneCurve F))
+      (P := P) hτh_ne hm
   rcases hQcase : φ.toAddMonoidHom P.toAffinePoint with _ | ⟨x, y, h_ns⟩
   · -- image `O`
     have hval := hcomap.affineToInfty P hQcase
@@ -170,7 +177,8 @@ into a `ComapPointValuationWitness W (mulByInt W ℓ)`, so the general reduction
 `projOrdTransport_mulByInt`.  This confirms the abstraction is faithful (same statement, same proof
 content) for the one isogeny whose local witnesses are fully proved. -/
 
-/-- The `[ℓ]` comap-valuation witnesses, packaged from the proved affine/infinity comap identities. -/
+/-- The `[ℓ]` comap-valuation witnesses, packaged from the proved affine/infinity comap
+identities. -/
 theorem comapPointValuationWitness_mulByInt [IsAlgClosed F] (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0) :
     ComapPointValuationWitness W (mulByInt W.toAffine ℓ) where
   affine := fun P {x y} h_ns hQ ↦
