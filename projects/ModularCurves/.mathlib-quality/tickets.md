@@ -21800,3 +21800,68 @@ degmul: the connector — stage-1's Spec-reduced goal ⟶ the affine lemma (past
 `P|_R ≅ X|_R ×_SpecR Y|_R` + isoSpec-naturality conjugation of both restricted structure maps;
 ~100 lines, isoSpec-naturality API to verify at pickup). Then: Cauchy squeeze live → distinct →
 mp-locus → glue → F3.mp. (STREAM-KM)
+
+## v10.287 (2026-07-16, coordinator) — ★★★★★ THE KEYSTONE ARC IS COMPLETE: brick 6 DEAD, the E[N] substrate is 0-sorry, the cascade fired. New frontier = Bootstrap's five + β3 + hLN
+
+**Verified at source** (origin/dev/modular-curves; push state 0/0, all worker pushes verified). Four-report
+batch (OMEGA, G0, GH, KM) processed. **This is the arc-closing sweep: the endomorphism-degree keystone —
+the deep core the whole convergence (v10.250) aimed at — is DONE.**
+
+**THE CASCADE, RATIFIED (each receipt verified, not report-trusted):**
+- **`MulByHomDegree.lean` = 0 sorries** — brick6_from_intertwining (:1356) DIED via the (A)-transport; the
+  K4 field anchor `modelEllipticCurve_finrank_eq_mulByInt_degree` is proven {propext, Classical.choice,
+  Quot.sound}. KM's L4-iii — the leaf once feared as a 2000-line grind — is fully landed.
+- **`Torsion.lean` = 0 code-sorries** — BB-DEG `mulByHom_finrank = N²` is now a REAL, axiom-clean theorem.
+  With BB-QF ✓ BB-FLAT ✓ BB-DIFF ✓, **G0's four-box E[N] substrate is COMPLETE** — all real proofs.
+- **`MulByHomUnramifiedField.lean` = 0 sorries** — G0's leaf landed via the kernel-count route (sections of
+  E[N]/κ̄ ≅ torsion of the chord–tangent group ≅ (ℤ/N)² — **the first cross-project consumption of
+  HasseWeil's N-torsion structure theorem**), + the new `UnramifiedOfCardAlgHom.lean` character-counting
+  engines. The étale trio (`mulByHom_formallyUnramified`/`mulBy_etale`/`torsionπ_etale`) is axiom-clean.
+- **GH's β2 is COMPLETE** — `exists_levelSpace_baseChange_iso` (the level space commutes with base change)
+  + U3 `factor_pulled_iff_factor_levelSpace` on origin. [GHA3] ledger: β1 ✓ β2 ✓✓ β4 ✓; **only β3 remains**
+  (its core EtaleIsoLocus lemmas already landed).
+- **OMEGA's killing-halves Stages A+C + `isUnit_e3Den` + the AX2 de-Weil ruling** — the Weil-pairing cut is
+  AVOIDABLE (combination-clopen route, 8 avoid-zero clopen conditions, rank 12 ✓; fibrewise heart
+  `PairGeneratesOfCardSq.lean` PROVEN for a general prime, serving both AX2s). The ζ₃-void pattern repeats.
+- **[KM-W0] RATIFIED as the standing charter it is** (tickets:17344 — "Integral relative representability of
+  [Γ₁(N)], KM 1.4–1.11 + 3.5–3.7") — KM's post-keystone wave (39 bricks: G ≅ Ker[M] ×_S Ker[K] ★★, kernels
+  finite flat étale, `Flat.of_retract_over`, De-Ga via Cauchy) is the Γ₁-Drinfeld level's OWN headline path,
+  not drift. NB `Flat.of_retract_over` flagged mathlib-PR-candidate — flag ONLY; external-quiet v10.35b holds.
+
+**COORDINATOR TRACE FINDINGS (this sweep):**
+- **T-DEG0 contamination is CONTAINED, confirming non-critical:** `endDeg_mulBy` (:188) still consumes the
+  sorried `mulByHom_zero_finrank` (:169) in its n=0 branch, so EndomorphismDegree.lean's remaining 8 in-file
+  identities inherit that sorryAx — but **no file outside EndomorphismDegree.lean consumes `endDeg_mulBy`**
+  (grep-verified), so the HEADLINE path is untouched. Stays [FR-GEN]-gated, KM's non-critical queue.
+- **T-D8-bridge (`LevelStructure/Basic.lean:108`, KM 3.7/1.4.4 for Γ(N)) is IN [KM-W0]'s chapter range** —
+  KM's wave is already building its machinery (ExactOrder.lean:188 = KM 1.4.4 (1)⟹(2), boarded as unblocking
+  W0 (ii)). T-D8's discharge is expected to fall out of W0; it de-boxes GH's isFullLevel_iff_naive chain.
+
+**THE VERIFIED REMAINING MAP (headline paths only — it fits in one hand):**
+1. **Bootstrap's five**: hL (:86) + hArb (:91) + E[2]-gen (Legendre level clause) + AX2-E3 (:112) +
+   AX2-Legendre (:195). All now UNBLOCKED (BB-DEG + étale are clean); funnel = OMEGA's Stage-B fibre
+   evaluation + the boarded AX2 7-step route.
+2. **GH's β3** (constant-form clopen) → [GHA3] → GHC1's last GH edge (:3497) dies.
+3. **T-D8-bridge box** → expected from [KM-W0].
+4. **hLN = T-W7.8** — the OWNER-PARKED pin on all three levels' rigidity. ⚠ After 1–3 clear, THIS is the
+   last non-box pin on the headline. Owner decision requested: unpark + scope it now (the degree
+   theory/E[N] substrate that plausibly blocked it is complete), or hold parked.
+Non-critical: EndomorphismDegree's 8 ([FR-GEN]/T-DEG0/endDual_comp_self), boxes per ledger.
+
+**RE-DISPATCH (all four seats):**
+- **OMEGA → Stage B (the funnel) + the Bootstrap keystone inputs.** Stage-B fibre evaluation ("pulled
+  section at a field point = mathlib affine point, zsmul-compatibly" — the joints all verified to exist:
+  modelEllipticCurve_point_add_val, mulModelHom_specPoints general-base, chartHomEquiv_eq_of_specMap,
+  hom_ext_of_forall_specPoint + Stage C). Then hL-killing (Stages A+C ready), hL-generation (BB-DEG+étale
+  now clean + AX2-e), hArb's bridges — all reduce to Stage-A-style field computations. You own Bootstrap
+  :86/:91 + the E[2]-gen clause end-to-end.
+- **G0 → EXECUTE the AX2s** (:112 + :195) per OMEGA's boarded 7-step combination-clopen decomposition —
+  the route is YOUR OWN étale chain (E[3] finite étale rank 9 = torsionπ_etale, now axiom-clean) + OMEGA's
+  proven `PairGeneratesOfCardSq` heart + the Isom-scheme/clopen packaging; the sole keystone input (BB-DEG
+  rank) is now clean. De-conflicted: OMEGA owns Stage B/hL/hArb; you own the two AX2 theorems.
+- **KM → CONTINUE [KM-W0]** (ratified) — next target per your own banked state (the degmul connector via
+  the FlatRank rebuild → squeeze → distinct → mp-locus → glue → F3.mp). Surface T-D8-bridge
+  (LevelStructure/Basic:108) explicitly in the wave — GH's chain de-boxes on it. [FR-GEN]/T-DEG0 stay queued.
+- **GH → β3 + the receipts.** The #print axioms receipt for U3/iso (KM's churn has settled — tree is 0/0
+  clean), then β3 (constant-form clopen; EtaleIsoLocus cores landed; G0's étale trio now axiom-clean under
+  you) → [GHA3] complete → :3497 dies. Then stand as THE CLOSER.
