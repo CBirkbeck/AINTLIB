@@ -43,7 +43,8 @@ So the Abel half (`σ = O ⟹ principal`) is discharged **completely char-free**
 ## The carried residual is the *standard* III.6.2(a) dual relation — no new content
 
 The single hypothesis `picDualDivisorClass_of_picDualComp` consumes is the dual relation
-`hpdc : (picDual φ).comp φ.toAddMonoidHom = [Nat.card φ.ker]` — Silverman III.6.2(a) `φ̂ ∘ φ = [deg]`
+`hpdc : (picDual φ).comp φ.toAddMonoidHom = [Nat.card φ.ker]` — Silverman III.6.2(a)
+`φ̂ ∘ φ = [deg]`
 (with `#ker = deg` for separable `φ` over `K̄`).  This is **already shipped** as
 `Isogeny.picDual_comp_toAddMonoidHom_of_surjective` from the project's standard per-isogeny
 witnesses (the III.3.4 `Naturality` `hnat`, surjectivity of `φ̂`/`φ`, and the function-field tower),
@@ -127,7 +128,8 @@ Combining the geometric half (`σ = #ker · P₀`) with the **dual relation** `�
 (Silverman III.6.2(a)) evaluated at the preimage `P₀` (`φ P₀ = T`) gives the full σ-point-identity
 `σ(pullbackDivisor φ ((T) − (O))) = φ̂ T`. -/
 
-/-- **The σ-point-identity** `σ(pullbackDivisor φ ((T) − (O))) = φ̂ T` (Silverman III.6.1b/III.6.2(a)).
+/-- **The σ-point-identity** `σ(pullbackDivisor φ ((T) − (O))) = φ̂ T` (Silverman
+III.6.1b/III.6.2(a)).
 From the σ-bridge `σ = #ker(φ) · P₀` (`sigma_pullbackDivisor_kappaDivisor`) and the dual relation
 `hpdc : φ̂ ∘ φ = [#ker φ]` at `P₀` (`φ P₀ = T`): `φ̂ T = φ̂(φ P₀) = #ker(φ) · P₀`. -/
 theorem sigma_pullbackDivisor_kappaDivisor_eq_picDual
@@ -165,7 +167,8 @@ For an isogeny `φ` with `picDual` data `ch`/`hinj`/`hfin`, the dual relation
 Proof: for each `T`, pick a preimage `P₀` (`hsurj`); the difference
 `Δ_T = pullbackDivisor φ ((T) − (O)) − ((φ̂ T) − (O))` has degree `0`
 (`degree_pullbackDivisor_kappaDivisor` + `kappaDivisor_degree`) and `σ Δ_T = O`
-(σ-point-identity `sigma_pullbackDivisor_kappaDivisor_eq_picDual` + `projectiveDivisorSum_kappaDivisor`),
+(σ-point-identity `sigma_pullbackDivisor_kappaDivisor_eq_picDual` +
+`projectiveDivisorSum_kappaDivisor`),
 so it is principal by Abel (`projIsPrincipal_of_degZero_of_sigma_eq_zero`). **Char-free** (the Abel
 half needs only `[IsIntegrallyClosed CoordinateRing]`). -/
 theorem picDualDivisorClass_of_picDualComp
@@ -229,7 +232,8 @@ theorem picDualDivisorClass_of_naturality
 /-! ### Step 5 — the `[ℓ]` instance: `PicDualDivisorClass [ℓ]` (Silverman III.6.1b for `[ℓ]`)
 
 For `φ = [ℓ]` the kernel cardinality is the shipped `#ker[ℓ] = ℓ²` (`nat_card_mulByInt_ker`), so the
-kernel-rank match in `picDualDivisorClass_of_naturality` reduces to `ℓ² = finrank R R`. Combined with
+kernel-rank match in `picDualDivisorClass_of_naturality` reduces to `ℓ² = finrank R R`.
+Combined with
 the standard per-`[ℓ]` `picDual` witnesses (III.3.4 naturality `hnat`, surjectivity of `[ℓ]̂` and of
 the point map `[ℓ]`), `PicDualDivisorClass [ℓ]` is discharged outright.
 
@@ -279,12 +283,14 @@ variable [IsAlgClosed F]
 /-- **The separable Weil-pairing adjoint, `PicDualDivisorClass` discharged (Silverman III.8.2).**
 
 For a separable isogeny `φ` of `E`, the adjoint `e_ℓ(φS, T) = e_ℓ(S, φ̂T)` (`φ̂ = picDual φ`) holds
-from the geometric witnesses `hφ : ProjOrdTransport φ`, the commutation `hcommφ : [ℓ] ∘ φ = φ ∘ [ℓ]`,
+from the geometric witnesses `hφ : ProjOrdTransport φ`, the commutation
+`hcommφ : [ℓ] ∘ φ = φ ∘ [ℓ]`,
 the translation covariance `hcomm'`, **and the standard III.3.4/III.6.2(a) dual data** (the III.3.4
 naturality `hnat`, surjectivity of `φ̂` and of `φ`, and the separable kernel-rank match `hcard`).
 
 This is `weilPairing_adjoint_of_picDualDivisorClass` with its bare `hpd : PicDualDivisorClass φ`
-hypothesis *discharged* by `picDualDivisorClass_of_naturality` — so the adjoint no longer carries the
+hypothesis *discharged* by `picDualDivisorClass_of_naturality` — so the adjoint no
+longer carries the
 III.6.1b divisor-class identity as an axiom, only the standard per-isogeny witnesses. -/
 theorem weilPairing_adjoint_of_naturality (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
     (φ : Isogeny W.toAffine W.toAffine) [Finite φ.toAddMonoidHom.ker]
