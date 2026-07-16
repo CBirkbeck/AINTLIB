@@ -675,7 +675,7 @@ Depends on: {uses "prime-side-value"}[] {uses "log-euler-product"}[]
 {uses "aux-f"}[]
 :::
 
-:::theorem "belabas-friedman-thm1" (lean := "DedekindResidue.belabas_friedman_thm1")
+:::theorem "belabas-friedman-thm1" (lean := "DedekindResidue.belabas_friedman_bound")
 **Theorem 1 (Belabas–Friedman).** Let $`K` be a number field of degree $`n > 1`.
 Under GRH for $`\zeta_K` and RH for $`\zeta_\mathbb{Q}`, for $`X \ge 69`:
 $$`\bigl|\log \kappa_K - f_K(X)\bigr|
