@@ -744,3 +744,16 @@ colimit cocycle. The proof uses the affine projection formula, `ΓSpecIso_inv_na
 existing pure-tensor computation for `baseChangeColimEquiv`; it adds no abstraction, hypothesis, or
 proof-resource option. The focused build is green and the axiom audit is exactly `propext`,
 `Classical.choice`, and `Quot.sound`.
+
+Active subdependency claim (2026-07-16): prove
+`AffineIntersectionUnitCocycle.mapToColimit_overlapTransitionIso`. The section comparison must be
+lifted through the existing pullback formula for scalar unit-sheaf endomorphisms, identifying the
+pulled-back finite-stage overlap automorphism with the colimit overlap automorphism. This is the
+scalar categorical input to the active chart-compatibility claim and adds no hypothesis or option.
+
+Completed subdependency claim (2026-07-16): proved
+`AffineIntersectionUnitCocycle.mapToColimit_overlapTransitionIso`. Conjugating the pullback of the
+finite-stage overlap automorphism by the canonical pullback-unit isomorphism now gives the colimit
+overlap automorphism. The proof directly consumes the completed section comparison and the existing
+unit-endomorphism pullback formula. The focused build is green, no hypothesis or option was added,
+and the axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.
