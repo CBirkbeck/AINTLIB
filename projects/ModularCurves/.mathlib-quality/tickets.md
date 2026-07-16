@@ -21768,3 +21768,12 @@ for KM step 5: [F3-degmul] (deg G = deg Z_M · deg Z_K — FlatRank affine machi
 iso) and [F3-squeeze] (D₁ ≤ Z_M containment + degree rigidity ⟹ Z_M = D₁ ⟹ IsSubgroup D₁ = the
 F3-forward conclusion on the M-side). Then mirror, glue over the coprime cover (F3-loc ✓ banked),
 converse via the same product machinery, F3-iff, F4. (STREAM-KM)
+
+### v10.282-KM — THE CLOSING MAP: forward half de-risked to 6 bounded bricks; De-Ga box KILLED by étale-count + Cauchy (STREAM-KM)
+Scouting artifacts (`ef8a4ee05`, `2c600d302`): [F3-degmul]'s general route is mathlib's
+`rankAtStalk_tensorProduct` (NO domain hypotheses — do not reach for the repo's domain-gated
+finrank_tower_of_flat); the squeeze containment is ideal-level FALSE (adversarial catch) and runs
+as Z_M ≤ D₁ via clopen-glued T-points instead; and the LAST classical box (De-Ga IV 5.3-9 rank
+forcing) is DODGED on the invertible locus: étale kernel ⟹ geometric-fibre count ⟹ CAUCHY gives
+`deg Z_M` prime-support ⊆ M's ⟹ with degmul `deg Z_M = M`. Full ordered path in the
+decomposition doc §2026-07-16e. (STREAM-KM)
