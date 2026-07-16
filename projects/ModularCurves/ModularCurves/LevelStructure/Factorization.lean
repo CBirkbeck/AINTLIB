@@ -9,6 +9,7 @@ import ModularCurves.GroupScheme.CartierDivisorMapIso
 import ModularCurves.GroupScheme.TranslationBySection
 import ModularCurves.LevelStructure.IsoTransport
 import ModularCurves.EllipticCurve.EndomorphismDegree
+import ModularCurves.ForMathlib.FlatOfRetract
 
 /-!
 # Prime-power factorization of Drinfeld exact order (KM 1.7.2 / 3.5.1, Γ₁-instance)
@@ -1015,6 +1016,49 @@ theorem RelEffCartierDiv.IsSubgroup.exists_smulKernel_retract (M K : ℕ)
     RelEffCartierDiv.IsSubgroup.combMap_prodMap E hD M K hMK hdeg h₁ h₂,
     Category.id_comp]
   exact hs
+
+include hD in
+/-- **[F3-kerflat] (KM p. 27: "so flat over S")** The `M`-kernel of a coprime-degree
+subgroup divisor is flat over the base: it is a retract of the divisor subscheme
+(v10.279's chain), and flatness descends along retracts (`Flat.of_retract_over`). -/
+theorem RelEffCartierDiv.IsSubgroup.smulKernelπ_flat (M K : ℕ) [NeZero M] [NeZero K]
+    (hMK : Nat.Coprime M K) [NeZero (M * K)]
+    (hdeg : ∀ s : S, D.degree s = M * K)
+    (h₁ : ((M : ℤ) * K) % ((M * K : ℕ) : ℤ) = 0)
+    (h₂ : ((K : ℤ) * M) % ((M * K : ℕ) : ℤ) = 0) :
+    Flat (D.smulKernelπ E (M : ℤ)) := by
+  haveI hGflat : Flat (D.ideal.subschemeι ≫ E.π) := D.flat
+  obtain ⟨s, hs⟩ := RelEffCartierDiv.IsSubgroup.exists_smulKernel_section E hD
+    (M : ℤ) (K : ℤ)
+  obtain ⟨W, hW⟩ : ∃ W : E.Point (pullback.fst (D.smulKernelπ E (M : ℤ))
+      (D.smulKernelπ E (K : ℤ)) ≫ D.smulKernelπ E (M : ℤ)),
+      RelEffCartierDiv.IsSubgroup.combMap E hD (M : ℤ) (K : ℤ)
+        (Nat.gcdB M K) (Nat.gcdA M K) ≫ D.ideal.subschemeι = W.1 :=
+    ⟨_, RelEffCartierDiv.IsSubgroup.combMap_ι E hD (M : ℤ) (K : ℤ) _ _⟩
+  refine ModularCurves.Flat.of_retract_over
+    (f := D.smulKernelπ E (M : ℤ)) (g := D.ideal.subschemeι ≫ E.π)
+    (i := s ≫ RelEffCartierDiv.IsSubgroup.combMap E hD (M : ℤ) (K : ℤ)
+      (Nat.gcdB M K) (Nat.gcdA M K))
+    (r := RelEffCartierDiv.IsSubgroup.prodMap E hD hdeg h₁ h₂
+      ≫ pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ)))
+    ?_ ?_ ?_
+  · -- i ≫ r = 𝟙
+    rw [Category.assoc, ← Category.assoc
+      (RelEffCartierDiv.IsSubgroup.combMap E hD (M : ℤ) (K : ℤ) _ _),
+      RelEffCartierDiv.IsSubgroup.combMap_prodMap E hD M K hMK hdeg h₁ h₂,
+      Category.id_comp]
+    exact hs
+  · -- i ≫ (ι ≫ π) = smulKernelπ
+    rw [Category.assoc, ← Category.assoc
+      (RelEffCartierDiv.IsSubgroup.combMap E hD (M : ℤ) (K : ℤ) _ _), hW]
+    have hbase := W.2
+    rw [show (W : _ ⟶ E.E) ≫ E.π
+        = pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ))
+          ≫ D.smulKernelπ E (M : ℤ) from hbase]
+    rw [← Category.assoc, hs, Category.id_comp]
+  · -- r ≫ smulKernelπ = ι ≫ π
+    rw [RelEffCartierDiv.IsSubgroup.prodMap, pullback.lift_fst]
+    exact RelEffCartierDiv.IsSubgroup.toSmulKernel_π E hD hdeg h₁
 
 end ProductDecomposition
 
