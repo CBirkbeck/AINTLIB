@@ -250,6 +250,33 @@ theorem Section.orderDivisor_mul_crt (P : E.Section) (M K : ℕ) [NeZero M] [NeZ
   rw [sub_add_cancel] at h2
   exact h2.symm
 
+/-- **[W0-F3-pts] (KM 1.5.1.2's tautology)** Each constituent section factors through the
+sections divisor: `Pₐ` is a point *of* `Σᵢ [Pᵢ]`. The defining ideal `∏ᵢ ker (Pᵢ)` is
+contained in `ker (Pₐ)`, so the kernel-image factorization `toImage` composed with the
+ideal-monotone `inclusion` lands in the divisor subscheme. -/
+theorem RelEffCartierDiv.factors_sectionsDivisor {C : Scheme.{u}} {π : C ⟶ S} {n : ℕ}
+    (Ps : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S })
+    (hπ : IsSeparated π ∧ SmoothOfRelativeDimension 1 π) (a : Fin n) :
+    ∃ h : S ⟶ (RelEffCartierDiv.sectionsDivisor π Ps).ideal.subscheme,
+      h ≫ (RelEffCartierDiv.sectionsDivisor π Ps).ideal.subschemeι = (Ps a).1 := by
+  have hle : (RelEffCartierDiv.sectionsDivisor π Ps).ideal ≤ Scheme.Hom.ker (Ps a).1 := by
+    rw [RelEffCartierDiv.sectionsDivisor, dif_pos hπ]
+    intro V
+    have h1 : (∏ i, Scheme.Hom.ker (Ps i).1 : C.IdealSheafData).ideal
+        = ∏ i, (Scheme.IdealSheafData.idealMonoidHom C) (Scheme.Hom.ker (Ps i).1) :=
+      map_prod (Scheme.IdealSheafData.idealMonoidHom C) _ Finset.univ
+    have hprod : ((∏ i, Scheme.Hom.ker (Ps i).1 : C.IdealSheafData)).ideal V
+        = ∏ i, (Scheme.Hom.ker (Ps i).1).ideal V := by
+      rw [show ((∏ i, Scheme.Hom.ker (Ps i).1 : C.IdealSheafData)).ideal V
+          = ((∏ i, Scheme.Hom.ker (Ps i).1 : C.IdealSheafData).ideal) V from rfl, h1,
+        Finset.prod_apply]
+      rfl
+    rw [hprod]
+    exact le_trans Ideal.prod_le_inf (Finset.inf_le (Finset.mem_univ a))
+  exact ⟨(Ps a).1.toImage ≫ Scheme.IdealSheafData.inclusion hle, by
+    rw [Category.assoc, Scheme.IdealSheafData.inclusion_subschemeι,
+      Scheme.Hom.toImage_imageι]⟩
+
 /-- **[W0-F3-coprime-kill] (KM print p. 30)** A point killed by two coprime integers is
 zero — KM: *"As both `Pₖ` and `φ(a₂)ₖ` are killed by `N₂`, while `φ(a₁)` is killed by
 `N₁`, this is impossible unless `φ(a₁) = 0`."* Bezout in the point group. -/
