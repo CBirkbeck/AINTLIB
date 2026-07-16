@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.LevelStructure.ExactOrder
 import ModularCurves.GroupScheme.DeligneOrder
+import ModularCurves.GroupScheme.CartierDivisorMapIso
 
 /-!
 # Prime-power factorization of Drinfeld exact order (KM 1.7.2 / 3.5.1, Γ₁-instance)
@@ -301,6 +302,36 @@ theorem _root_.AlgebraicGeometry.Scheme.IdealSheafData.map_hom_mul
     exact (Ideal.map_symm φ).symm
   simp only [Scheme.IdealSheafData.map_hom_apply e, Scheme.IdealSheafData.ideal_mul,
     Pi.mul_apply, hco, Ideal.map_mul]
+
+/-- **[W0-F3-shift] (the `Trans(x)*` engine, KM print p. 30)** Translating a sections
+divisor along an `S`-automorphism of the curve gives the divisor of the translated
+sections: `Trans(φ)*(Σᵢ [Pᵢ]) = Σᵢ [φ(Pᵢ)]`. KM: *"G = Σ_{a₁} Trans(φ(a₁))*(D₂)"* —
+this is the lemma that turns that display into divisor arithmetic. -/
+theorem RelEffCartierDiv.mapIso_sectionsDivisor {C : Scheme.{u}} {π : C ⟶ S} {n : ℕ}
+    (Ps : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) (e : C ≅ C) (he : e.hom ≫ π = π) :
+    RelEffCartierDiv.mapIso e he (RelEffCartierDiv.sectionsDivisor π Ps)
+      = RelEffCartierDiv.sectionsDivisor π
+          (fun i => ⟨(Ps i).1 ≫ e.hom, by rw [Category.assoc, he, (Ps i).2]⟩) := by
+  apply RelEffCartierDiv.ext
+  rw [RelEffCartierDiv.mapIso_ideal, ← Scheme.IdealSheafData.map_hom_eq_comap_inv]
+  by_cases hπ : IsSeparated π ∧ SmoothOfRelativeDimension 1 π
+  · rw [RelEffCartierDiv.sectionsDivisor, RelEffCartierDiv.sectionsDivisor,
+      dif_pos hπ, dif_pos hπ]
+    have hmapHom : ∀ J : C.IdealSheafData × C.IdealSheafData,
+        (J.1 * J.2).map e.hom = J.1.map e.hom * J.2.map e.hom :=
+      fun J => Scheme.IdealSheafData.map_hom_mul e J.1 J.2
+    let μ : C.IdealSheafData →* C.IdealSheafData :=
+      { toFun := fun J => J.map e.hom
+        map_one' := by
+          rw [Scheme.IdealSheafData.one_eq_top, Scheme.IdealSheafData.map_top]
+        map_mul' := fun I J => Scheme.IdealSheafData.map_hom_mul e I J }
+    have := map_prod μ (fun i => Scheme.Hom.ker (Ps i).1) Finset.univ
+    simp only [μ, MonoidHom.coe_mk, OneHom.coe_mk] at this
+    rw [this]
+    exact Finset.prod_congr rfl fun i _ =>
+      (Scheme.Hom.ker_comp (Ps i).1 e.hom).symm
+  · rw [RelEffCartierDiv.sectionsDivisor, RelEffCartierDiv.sectionsDivisor,
+      dif_neg hπ, dif_neg hπ, Scheme.IdealSheafData.map_top]
 
 /-- **[W0-F3-pts] (KM 1.5.1.2's tautology)** Each constituent section factors through the
 sections divisor: `Pₐ` is a point *of* `Σᵢ [Pᵢ]`. The defining ideal `∏ᵢ ker (Pᵢ)` is
