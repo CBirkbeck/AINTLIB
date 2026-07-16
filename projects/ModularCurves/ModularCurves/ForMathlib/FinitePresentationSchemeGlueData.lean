@@ -529,6 +529,24 @@ theorem locallyOfFinitePresentation_affineIntersectionToSpec
     (F.obj (affineIntersectionSingletonIndex i))).FinitePresentation
   exact RingHom.finitePresentation_algebraMap.mpr (hfinite i)
 
+/-- If the chart index of an affine-intersection functor is finite, then the
+structural morphism of the glued scheme is quasi-compact. -/
+theorem quasiCompact_affineIntersectionToSpec [Finite J]
+    (F : Finset J ⥤ CommAlgCat.{u} S)
+    (hopen : IsOpenAffineIntersectionFunctor F)
+    (hpush : IsPushoutAffineIntersectionFunctor F) :
+    QuasiCompact (affineIntersectionToSpec F hopen hpush) := by
+  rw [quasiCompact_iff_compactSpace]
+  let D := ofAffineIntersectionFunctor F hopen hpush
+  haveI : Finite D.openCover.I₀ := by
+    change Finite J
+    infer_instance
+  haveI (i : D.openCover.I₀) : CompactSpace (D.openCover.X i) := by
+    change CompactSpace
+      (Spec (CommRingCat.of (F.obj (affineIntersectionSingletonIndex i))))
+    infer_instance
+  exact D.openCover.compactSpace
+
 end
 
 end AlgebraicGeometry.Scheme.GlueData
