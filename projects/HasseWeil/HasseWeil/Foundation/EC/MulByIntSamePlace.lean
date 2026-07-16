@@ -804,7 +804,8 @@ private theorem ordAtInfty_mulByInt_y_of_lhs_eq_neg_six_aux_lhs_eq_sq (ℓ : ℤ
     refine lt_of_lt_of_le ?_ (ord_algebraMap_mul_ge_aux' W.a₃ (le_of_eq hm.symm))
     exact_mod_cast (by lia : (2 * m : ℤ) < m)
   have h_inner_eq := (⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_add_eq_of_lt h_a1xy_gt
-  exact ((⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_add_eq_of_lt (h_inner_eq ▸ h_a3y_gt)).trans h_inner_eq
+  exact ((⟨W⟩ : SmoothPlaneCurve F).ordAtInfty_add_eq_of_lt (h_inner_eq ▸ h_a3y_gt)).trans
+    h_inner_eq
 
 omit [WeierstrassCurve.IsElliptic W] in
 /-- From `ord_∞(Y² + a₁XY + a₃Y) = -6` together with `ord_∞ X = -2` (`X = mulByInt_x ℓ`,
