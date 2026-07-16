@@ -21703,3 +21703,15 @@ and `IsSubgroup.exists_smul_restrict_idem` (w∘w = w for c² ≡ c mod N via mo
 mulBy_comp through Over.forget + zsmul_congr_of_kill). NEXT [F3-split]: the retract scheme
 G[c] of the idempotent w (affine-over-S algebra direct-factor ⟹ flat, KM p. 27's "S-direct
 factor … so flat"), then [F3-squeeze]. (STREAM-KM)
+
+### v10.275-KM — [F3-ker] + [F3-ker-to] LANDED: the c-kernel scheme with both point directions (STREAM-KM)
+Route (a′) bricks 1–2 (`d9098c7a0` + follow-up): `RelEffCartierDiv.smulKernel/π/ι` (the T-B6
+kernel-pullback pattern relativized to a divisor subscheme) + `smulKernel_point` (kernel points
+are killed factoring points) + `exists_smulKernel_lift` (converse via pullback.lift). Design
+ledger: the (b)-image route was adversarially KILLED before execution (fix-equation not H-forced;
+relative Spec absent from mathlib) — see the decomposition's [F3-split] REVISION note; route (a′)
+= ker-pullback + crt-pts + yoneda-product + retract-flatness + degree-mult + squeeze. REMAINING
+(a′)-bricks: [F3-crt-pts] (coprime torsion splitting of H(T), mathlib Submodule.torsionBy),
+[F3-yoneda] (G ≅ Z_M ×_S Z_K), [F3-flat], [F3-degmul], [F3-squeeze]. Session total: 16 proven
+bricks + 2 scheme-defs on Factorization.lean; 4 skeleton sorries mark the F3/F4 frontier.
+(STREAM-KM)
