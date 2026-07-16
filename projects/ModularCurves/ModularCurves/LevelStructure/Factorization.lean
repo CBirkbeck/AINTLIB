@@ -453,6 +453,47 @@ theorem RelEffCartierDiv.IsSubgroup.exists_smul_restrict_idem {D : RelEffCartier
     _ = w ≫ D.ideal.subschemeι := hw.symm
     _ = D.ideal.subschemeι ≫ E.mulByHom c := hbd
 
+/-- **[F3-ker] (route a′, brick 1)** The `c`-kernel of a divisor subscheme: the pullback
+of `[c]` restricted to the subscheme against the zero section — `Ker([c] : G → E)` as a
+scheme. Imitates the `E.torsion` kernel-pullback pattern (T-B6). -/
+noncomputable def RelEffCartierDiv.smulKernel (D : RelEffCartierDiv E.π) (c : ℤ) : Scheme :=
+  pullback (D.ideal.subschemeι ≫ E.mulByHom c) E.zero
+
+/-- The structure morphism of the `c`-kernel over the base. -/
+noncomputable def RelEffCartierDiv.smulKernelπ (D : RelEffCartierDiv E.π) (c : ℤ) :
+    D.smulKernel E c ⟶ S :=
+  pullback.snd _ _
+
+/-- The inclusion of the `c`-kernel into the divisor subscheme. -/
+noncomputable def RelEffCartierDiv.smulKernelι (D : RelEffCartierDiv E.π) (c : ℤ) :
+    D.smulKernel E c ⟶ D.ideal.subscheme :=
+  pullback.fst _ _
+
+/-- **[F3-ker-of]** A `T`-point of the `c`-kernel over `t` yields a `c`-killed point of
+`E` factoring through the divisor. -/
+theorem RelEffCartierDiv.smulKernel_point {D : RelEffCartierDiv E.π} {c : ℤ}
+    {T : Scheme.{u}} {t : T ⟶ S} (h : T ⟶ D.smulKernel E c)
+    (hh : h ≫ D.smulKernelπ E c = t) :
+    ∃ Q : E.Point t, (c • Q = 0) ∧
+      ∃ w : T ⟶ D.ideal.subscheme, w ≫ D.ideal.subschemeι = Q.1 := by
+  have hcond : D.smulKernelι E c ≫ D.ideal.subschemeι ≫ E.mulByHom c
+      = D.smulKernelπ E c ≫ E.zero := by
+    rw [RelEffCartierDiv.smulKernelι, RelEffCartierDiv.smulKernelπ, ← Category.assoc]
+    exact pullback.condition (f := D.ideal.subschemeι ≫ E.mulByHom c) (g := E.zero)
+  have hbase : D.smulKernelι E c ≫ D.ideal.subschemeι ≫ E.π = D.smulKernelπ E c := by
+    have h2 := congrArg (· ≫ E.π) hcond
+    simp only [Category.assoc, E.mulByHom_π, E.zero_π, Category.comp_id] at h2
+    exact h2
+  refine ⟨⟨h ≫ D.smulKernelι E c ≫ D.ideal.subschemeι, ?_⟩, ?_,
+    ⟨h ≫ D.smulKernelι E c, by rw [Category.assoc]⟩⟩
+  · rw [Category.assoc, Category.assoc, hbase, hh]
+  · apply Subtype.ext
+    rw [E.point_smul_eq_comp_mulBy, E.point_zero_val]
+    show (h ≫ D.smulKernelι E c ≫ D.ideal.subschemeι) ≫ E.mulByHom c = t ≫ E.zero
+    rw [Category.assoc, Category.assoc]
+    rw [show D.smulKernelι E c ≫ D.ideal.subschemeι ≫ E.mulByHom c
+        = D.smulKernelπ E c ≫ E.zero from hcond, ← Category.assoc, hh]
+
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
 order `M` and `M·P` has exact order `K`.
