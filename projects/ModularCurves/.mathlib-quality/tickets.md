@@ -21886,3 +21886,25 @@ is simpler than β2's closed-side). NOTE: this route needs NO β1-trivialization
 β2-transport for :3497 itself — β1/β2/β4 stand as ratified level-scheme functoriality
 (consumed by rel-rep naturality regardless). Mini-lemma pack first: (a) étale 2-out-of-3
 (f ≫ g étale, g étale ⟹ f étale); (b) clopen-image-under-finite-étale. (STREAM-GH)
+
+### v10.289-GH — [GHA3 β3] locus + generation criterion LANDED (both clean); B1 dictionary next (STREAM-GH)
+Commits 7ad29e1a0 (β3-1) + d90da7fcb (B2), pushed, ALL axiom-clean:
+- **β3-1 (the combination locus):** `tautFst/tautSnd` (tautological torsion pair over
+  E[N]×_S E[N] — the U3 P'/Q'-pattern), `combo/comboMap` (a•P+b•Q + classifying maps; killed by
+  smul_comm-algebra), `torsionZero` (the zero section, kill via point_zero_val +
+  smul_eq_zero_iff — η-free), **`isClopen_range_torsionZero`** (closed-imm by of_comp against
+  separated tπ + ÉTALE by Etale.of_comp against the CLEAN étale trio ⟹ range clopen),
+  `fullLevelLocusSet` + **`isClopen_fullLevelLocusSet`** (finite ⋂ of clopen-complement
+  preimages — continuity only).
+- **B2 (`pair_generates_iff_combos_ne_zero`):** general-N KM 1.6.7/AX2-e — N-killed order-N²
+  group: pair generates ⟺ all nonzero (ℤ/N)²-combos ≠ 0. ℤ-smul only (no ZMod-module
+  instance): `zsmul_val_cast_eq` representative-independence + Nat.bijective_iff_(in/sur)jective
+  _and_card + mem_closure_pair. NOTE for G0/OMEGA: this generalizes AX2-e beyond N=3 — consume
+  instead of re-deriving if useful.
+**Remaining β3:** B1 = the range-miss ⟺ point-zero dictionary at geometric points (x̄ ≫ comboMap
+lands in range-ζ ⟺ the pulled combo-point = 0): reduced-source factorization through the
+closed-immersion ζ (IsClosedImmersion.lift-criterion + Spec-k̄-reducedness) + torsionPointsEquiv;
+B3 = the factor-iff (v-range ⊆ locus ⟺ [B1 pointwise + B2 + T-D8-box] IsFullLevel ⟺ [spec]
+factors through levelSpaceΓ) with the topological-to-geometric-point bridge
+(fromSpecResidueField ≫ alg-closure-lift) + IsOpenImmersion.lift-classification of U-factoring;
+then the endgame chain (ιΓ = iso ≫ U.ι ⟹ levelSpaceΓπ étale = :3497). (STREAM-GH)
