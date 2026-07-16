@@ -21493,3 +21493,42 @@ killing (keystone-FREE, staged):** Stage B (fibre evaluation via `projModelPoint
 `point_killed_iff` ✓ + `mulByHom_baseChange` ✓), Stage C (collision: `hom_ext_of_forall_specPoint` ✓ +
 reducedness of `E3Quotient ℤ[1/3]` — squarefree `γS`), Stage D (ring-base-change transport to arbitrary R,
 via GH's fresh `Point.baseChangeEquiv` tools). Generation stays BB-DEG-gated as dispatched.
+
+### v10.266-G0 — ★★★ BB-DIFF LEAF FIRED: the étale trio is SORRY-FREE in its own files; unique sorryAx = KM's brick-6 anchor (auto-cleans on :1356) (STREAM-G0)
+Commits d2592f256 (engines) / 363c5136e (the leaf), pushed. Full ModularCurves build green (4224 jobs).
+The v10.265 G0 order ("fire the leaf now") is EXECUTED — via the **kernel-count route** (the
+docstring's separability/translation route was bypassed: no translation API exists, and the count
+argument closes with banked machinery only).
+
+**The argument** (`TorsionFibre.lean` [GeometricLeaf] + `ForMathlib/UnramifiedOfCardAlgHom.lean`):
+1. **Split criterion by counting characters** (`of_natCard_algHom_eq_finrank`, AXIOM-CLEAN): a
+   module-finite K-algebra with #(A →ₐ[K] K) = finrank K A is K^n via evaluation — Dedekind
+   linear independence (`linearIndependent_algHom_toLinearMap`) spans the dual, rank–nullity
+   gives bijectivity. + the scheme form `of_natCard_sections_eq_finrank` (the
+   `natCard_sections_eq_finrank` section↔AlgHom dictionary of EtaleSectionsCount, run in reverse).
+2. **The count** (`modelTorsion_sections_natCard`, AXIOM-CLEAN ✓ receipt): sections of E[N] over
+   κ̄ = N-torsion of the point group (`torsionPointsEquiv`) ≃ N-torsion of the chord–tangent group
+   (KM's `projModelPointsAddEquiv` — AXIOM-CLEAN ✓ receipt) ≃ (ℤ/N)² (HasseWeil
+   `torsion_genN_addEquiv` — AXIOM-CLEAN ✓ receipt; **first cross-project consumption of the
+   HasseWeil N-torsion structure theorem**) ⟹ N² sections.
+3. With rank N² (`torsion_rank`) the split criterion gives E[N] → Spec κ̄ unramified
+   (`modelTorsionπ_formallyUnramified_of_isAlgClosed`), and the L-A torsor reduction fires
+   **`modelMulByHom_formallyUnramified_of_isAlgClosed` — a REAL proof**.
+4. κ̄-descent + residue-master RELOCATED into TorsionFibre (they consume the leaf, which consumes
+   the torsion machinery — MulByHomUnramifiedField.lean shrinks to the pointed-iso transport
+   lemma; all public names/statements preserved). TorsionFibre gains imports: MulByHomDegree +
+   HasseWeil.NTorsion.TorsionGeneralN + ForMathlib/UnramifiedOfCardAlgHom.
+
+**AXIOM RECEIPTS (#print axioms at 363c5136e):** `modelTorsion_sections_natCard`,
+`projModelPointsAddEquiv`, `torsion_genN_addEquiv`, L-A: propext/Classical.choice/Quot.sound ONLY.
+`mulByHom_formallyUnramified` / `mulBy_etale` / `torsionπ_etale` / `torsion_geometricFibre_rank_two`:
++ sorryAx flowing **exclusively through `torsion_rank` → KM's brick-6 anchor
+(`modelEllipticCurve_finrank_eq_mulByInt_degree`, :1356 — KM live-closing it as this posts;
+their towerBC commit 514ed14aa is already in)**. The instant :1356 dies, THE WHOLE ÉTALE CHAIN
+GOES AXIOM-CLEAN with zero further work — the BB-DEG invariant, again. Sorry census of the
+BB-DIFF files: 0 / 0 / 0.
+
+**LIVE for consumers NOW (modulo the single KM-taint):** torsionπ_etale (GH [GHA3]/β3,
+TorsionEtaleTriv, GLSchemeAction, GammaHMaster), torsion_geometricFibre_rank_two's étale leg,
+and the E[3]-finite-étale input to ENGINE AXIOM 2 (Bootstrap:112 + Legendre twin — OMEGA's scope).
+G0's BB-substrate is COMPLETE: BB-QF ✓ BB-FLAT ✓ BB-DEG ✓(anchor) BB-DIFF ✓(same anchor).

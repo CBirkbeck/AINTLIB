@@ -1,10 +1,7 @@
-STREAM-G0 ACTIVE (v10.265 dispatch, 2026-07-16) — FIRING THE BB-DIFF LEAF.
+STREAM-G0 TERMINAL (v10.266-G0, 2026-07-16) — THE BB-DIFF LEAF IS FIRED.
 
-CLAIM: rule-5, ONE session. Target: modelMulByHom_formallyUnramified_of_isAlgClosed
-(MulByHomUnramifiedField.lean:45) — [N] unramified on the model over alg-closed κ̄.
-ROUTE (kernel-count, G0 fire-plan): L-A torsor reduction to E[N]-unramified-over-κ̄;
-E[N] = Spec T with dim T = N² (torsion_rank) and #AlgHom(T,κ̄) = #sections =
-#torsionBy(E.Point 𝟙) [torsionPointsEquiv] = N² [projModelPointsAddEquiv + HasseWeil
-TorsionGeneralN]; Dedekind eval-bijectivity ⟹ T ≅ κ̄^{N²} ⟹ étale. File-level: the
-leaf chain must sit downstream of TorsionFibre (L-A/torsionPointsEquiv) — relocating
-the κ̄-wiring accordingly. Then #print axioms receipt.
+modelMulByHom_formallyUnramified_of_isAlgClosed: REAL PROOF (kernel-count route).
+Étale trio sorry-free in its own files; unique sorryAx = torsion_rank → KM :1356
+anchor (auto-cleans). Axiom receipts boarded at v10.266-G0. Full build green
+(4224 jobs). Commits d2592f256 / 363c5136e pushed. No claims held. Seat free —
+G0's four-box substrate (QF/FLAT/DEG/DIFF) is COMPLETE.
