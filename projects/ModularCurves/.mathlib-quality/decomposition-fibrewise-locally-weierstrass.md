@@ -966,3 +966,11 @@ conditions simultaneously. The proof consumes
 base-change coherence helpers built from mathlib's `TensorProduct.assoc`, `cancelBaseChange`, and
 `congr`, and adds no hypothesis, duplicate monoidal API, or proof-resource option. Its focused
 build is green and its axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.
+
+Active dependency claim (2026-07-16): prove
+`Scheme.GlueData.isSeparated_affineIntersectionToSpec_iff`. For an affine-intersection
+functor satisfying the open and pushout conditions, characterize separatedness of its glued
+structural morphism by surjectivity of every canonical singleton-tensor-to-pair map. The reverse
+direction must use the existing pair-map comparison and mathlib's affine closed-immersion API,
+with explicit transport through `ΓSpecIso`; add no hypothesis, duplicate diagonal abstraction,
+or proof-resource option.
