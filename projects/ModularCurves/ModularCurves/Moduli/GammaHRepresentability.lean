@@ -9,6 +9,7 @@ STREAM-GH skeleton (T-H4 corrected + route to T-H6). Decomposition of record:
 import ModularCurves.Moduli.GammaH
 import ModularCurves.Moduli.QuotientProblem
 import ModularCurves.Moduli.LevelSpaces
+import ModularCurves.Moduli.LevelSpaceEtaleClose
 import ModularCurves.ModularCurve.YFullRoute
 import ModularCurves.GroupScheme.DeligneOrder
 import ModularCurves.ForMathlib.SchemeActionFree
@@ -3495,8 +3496,8 @@ PROVEN) is finite étale over `S`. Unramifiedness is free (closed immersion into
 immediately from 1.6.7" — étale-local trivialisation + clopen-ness of the condition
 on the constant form + descent. -/
 theorem levelSpaceΓπ_etale (N : ℕ) [NeZero N] (h : NIsInvertible S N) :
-    Etale (levelSpaceΓπ E N) := by
-  sorry
+    Etale (levelSpaceΓπ E N) :=
+  levelSpaceΓ_structure_etale E N h
 
 end PartA
 
@@ -3898,16 +3899,8 @@ theorem Point.asSection_add {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{
   rw [map_add, baseChangeEquiv_asSection, baseChangeEquiv_asSection, baseChangeEquiv_asSection,
     Point.restrict_add]
 
-open EllipticCurve in
-/-- `Point.asSection E g` is injective (compose with the first pullback projection). -/
-lemma asSection_injective {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}}
-    (g : T ⟶ S) : Function.Injective (Point.asSection E g) := by
-  intro P Q h
-  refine Subtype.ext ?_
-  have h1 : (Point.asSection E g P).1 ≫ pullback.fst E.π g
-      = (Point.asSection E g Q).1 ≫ pullback.fst E.π g :=
-    congrArg (· ≫ pullback.fst E.π g) (congrArg Subtype.val h)
-  rwa [Point.asSection_val_fst, Point.asSection_val_fst] at h1
+-- (`asSection_injective` now comes through the `LevelSpaceEtaleClose` import chain
+-- from `DrinfeldRepresentability`; the local copy was removed on the [GHA3] closing wire.)
 
 open EllipticCurve in
 /-- Restricting the coproduct-glued point to a `Bool`-summand recovers the summand's
