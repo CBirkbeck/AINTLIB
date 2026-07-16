@@ -3,6 +3,26 @@ module
 public import BernoulliRegular.CyclotomicUnits.DworkParameter.PowerBasis.ConjugationFixedBasis
 public import BernoulliRegular.Characters
 
+/-!
+# The Teichmüller-scaled Dwork parameter
+
+This file constructs the Teichmüller-scaled Dwork parameter attached to a residue class
+`a : ZMod p` and studies its finite Artin–Hasse logarithm.  It works in the rational `(p)`-adic
+integer model `RationalPadicIntegerRing p`, which is canonically equivalent to Mathlib's `ℤ_[p]`,
+lifts `a` to its Teichmüller representative there, scales the Dwork parameter by that
+representative, and records the coordinates of the resulting Artin–Hasse logarithm.
+
+## Main definitions
+
+* `padicIntToRationalPadicIntegerRingEquiv`: the canonical ring equivalence between Mathlib's
+  `ℤ_[p]` and the rational `(p)`-adic integer subring used on the Dwork side.
+* `rationalPadicTeichmuller`: the Teichmüller lift of `a : ZMod p` into the rational `(p)`-adic
+  integers.
+* `scaledDworkParameter`: the Dwork parameter scaled by the Teichmüller representative of `a`.
+* `scaledDworkParameterFiniteArtinHasseLog` and `scaledDworkParameterFiniteArtinHasseLogCoord`:
+  the finite Artin–Hasse logarithm of the scaled parameter and its Dwork-basis coordinates.
+-/
+
 @[expose] public section
 
 noncomputable section
