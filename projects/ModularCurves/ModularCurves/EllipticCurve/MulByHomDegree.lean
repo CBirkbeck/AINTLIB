@@ -1471,6 +1471,19 @@ lemma towerBC {K : Type u} [Field K] [DecidableEq K] (W : WeierstrassCurve K)
   exact (congrArg (fun m : Module W.toAffine.FunctionField W.toAffine.FunctionField
     => @Module.finrank _ _ _ _ m) hMod).symm
 
+/-- **(General transport square)** For `f : X ⟶ Y` and `U : Y.Opens`, the global sections of
+`pullback.snd f U.ι` and the sections `f.app U` agree through `topIso` and
+`pullbackRestrictIsoRestrict`. -/
+private lemma topIso_hom_comp_app {X Y : Scheme.{u}} (f : X ⟶ Y) (U : Y.Opens) :
+    U.topIso.hom ≫ f.app U
+      = (pullback.snd f U.ι).appTop ≫ (pullbackRestrictIsoRestrict f U).inv.appTop
+        ≫ (f ⁻¹ᵁ U).topIso.hom := by
+  have h1 : (pullback.snd f U.ι).appTop ≫ (pullbackRestrictIsoRestrict f U).inv.appTop
+      = (f ∣_ U).appTop := rfl
+  rw [← Category.assoc, h1, morphismRestrict_appTop]
+  simp only [Scheme.Opens.topIso_hom, Scheme.Hom.app_eq_appLE, Scheme.Hom.appLE_map]
+  erw [Scheme.Hom.map_appLE, Scheme.Hom.appLE_map]
+
 /-- **(L4-iii brick 6, steps A+B — the fraction-field tower assembly)** Given the field intertwining,
 the module rank `Module.finrank Γ(Z) Γ([N]⁻¹Z)` equals `(mulByInt N).degree`. Transport the appTop
 module to `Γ(E, [N]⁻¹ᵁZ)` (`pullbackRestrictIsoRestrict`); both localise to `K(pM)` via
@@ -1482,7 +1495,7 @@ theorem brick6_from_intertwining {K : Type u} [Field K] [DecidableEq K] (W : Wei
     [W.IsElliptic] (N : ℕ) [NeZero N]
     [Flat ((modelEllipticCurve W).mulByHom N)] [IsFinite ((modelEllipticCurve W).mulByHom N)]
     [LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom N)] (hn : (N : ℤ) ≠ 0)
-    (hinter :
+    (_hinter :
       haveI : IsIntegral (modelEllipticCurve W).E := inferInstanceAs (IsIntegral (projModel W))
       haveI : IrreducibleSpace (modelEllipticCurve W).E := inferInstance
       ∀ z : (projModel W).functionField,
@@ -1491,7 +1504,75 @@ theorem brick6_from_intertwining {K : Type u} [Field K] [DecidableEq K] (W : Wei
     letI := (pullback.snd ((modelEllipticCurve W).mulByHom N) (zChart W).ι).appTop.hom.toAlgebra
     Module.finrank Γ((zChart W).toScheme, ⊤)
         Γ(pullback ((modelEllipticCurve W).mulByHom N) (zChart W).ι, ⊤)
-      = (HasseWeil.mulByInt W.toAffine (N : ℤ)).degree := sorry
+      = (HasseWeil.mulByInt W.toAffine (N : ℤ)).degree := by
+  letI algTop := (pullback.snd ((modelEllipticCurve W).mulByHom N) (zChart W).ι).appTop.hom.toAlgebra
+  letI algApp : Algebra ↑Γ(projModel W, zChart W)
+      ↑Γ(projModel W, ((modelEllipticCurve W).mulByHom N) ⁻¹ᵁ (zChart W)) :=
+    ((((modelEllipticCurve W).mulByHom N).app (zChart W)).hom).toAlgebra
+  haveI hDom : IsDominant ((modelEllipticCurve W).mulByHom N) := mulByHom_isDominant W N
+  haveI hFin : IsFinite ((modelEllipticCurve W).mulByHom N) := inferInstance
+  -- the two ring equivalences
+  haveI hIsoInv : IsIso ((pullbackRestrictIsoRestrict ((modelEllipticCurve W).mulByHom N)
+      (zChart W)).inv.appTop) := by
+    refine ⟨(pullbackRestrictIsoRestrict ((modelEllipticCurve W).mulByHom N)
+      (zChart W)).hom.appTop, ?_, ?_⟩
+    · rw [← Scheme.Hom.comp_appTop, Iso.hom_inv_id, Scheme.Hom.id_appTop]
+    · rw [← Scheme.Hom.comp_appTop, Iso.inv_hom_id, Scheme.Hom.id_appTop]
+  set iEq : Γ((zChart W).toScheme, ⊤) ≃+* Γ(projModel W, zChart W) :=
+    (zChart W).topIso.commRingCatIsoToRingEquiv with hiEq
+  set jEq : (Γ(pullback ((modelEllipticCurve W).mulByHom N) (zChart W).ι, ⊤) : CommRingCat)
+      ≃+* Γ(projModel W, ((modelEllipticCurve W).mulByHom N) ⁻¹ᵁ (zChart W)) :=
+    ((asIso ((pullbackRestrictIsoRestrict ((modelEllipticCurve W).mulByHom N)
+        (zChart W)).inv.appTop)) ≪≫
+      (((modelEllipticCurve W).mulByHom N) ⁻¹ᵁ (zChart W)).topIso).commRingCatIsoToRingEquiv
+    with hjEq
+  -- the compatibility square (CommRingCat form)
+  have hcCat : (zChart W).topIso.hom ≫ ((modelEllipticCurve W).mulByHom N).app (zChart W)
+      = (pullback.snd ((modelEllipticCurve W).mulByHom N) (zChart W).ι).appTop
+        ≫ (pullbackRestrictIsoRestrict ((modelEllipticCurve W).mulByHom N)
+            (zChart W)).inv.appTop
+        ≫ (((modelEllipticCurve W).mulByHom N) ⁻¹ᵁ (zChart W)).topIso.hom := by
+    exact topIso_hom_comp_app ((modelEllipticCurve W).mulByHom N) (zChart W)
+  -- hc at the RingHom level
+  have hc : (@algebraMap ↑Γ(projModel W, zChart W)
+        ↑Γ(projModel W, ((modelEllipticCurve W).mulByHom N) ⁻¹ᵁ (zChart W)) _ _
+        ((((modelEllipticCurve W).mulByHom N).app (zChart W)).hom.toAlgebra)).comp
+        iEq.toRingHom
+      = jEq.toRingHom.comp (algebraMap Γ((zChart W).toScheme, ⊤)
+          Γ(pullback ((modelEllipticCurve W).mulByHom N) (zChart W).ι, ⊤)) := by
+    ext s
+    exact DFunLike.congr_fun (congrArg CommRingCat.Hom.hom hcCat) s
+  -- the finiteness hypothesis for towerBC, transported along the equivalences
+  have hfin : letI := (((modelEllipticCurve W).mulByHom N).app (zChart W)).hom.toAlgebra
+      Module.Finite Γ(projModel W, zChart W)
+        Γ(projModel W, ((modelEllipticCurve W).mulByHom N) ⁻¹ᵁ (zChart W)) := by
+    letI := (((modelEllipticCurve W).mulByHom N).app (zChart W)).hom.toAlgebra
+    haveI hZaff : IsAffineOpen (zChart W) :=
+      Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+    haveI : IsAffine (zChart W).toScheme := hZaff
+    haveI : IsAffine (pullback ((modelEllipticCurve W).mulByHom N) (zChart W).ι) :=
+      isAffine_of_isAffineHom (pullback.snd ((modelEllipticCurve W).mulByHom N) (zChart W).ι)
+    have hft : ((pullback.snd ((modelEllipticCurve W).mulByHom N) (zChart W).ι).appTop.hom).Finite :=
+      (pullback.snd ((modelEllipticCurve W).mulByHom N) (zChart W).ι).finite_appTop
+    have hcomp : (((modelEllipticCurve W).mulByHom N).app (zChart W)).hom
+        = (jEq.toRingHom.comp
+            ((pullback.snd ((modelEllipticCurve W).mulByHom N) (zChart W).ι).appTop.hom)).comp
+          iEq.symm.toRingHom := by
+      ext s
+      have h2 := DFunLike.congr_fun (congrArg CommRingCat.Hom.hom hcCat) (iEq.symm s)
+      calc (((modelEllipticCurve W).mulByHom N).app (zChart W)).hom s
+          = (((modelEllipticCurve W).mulByHom N).app (zChart W)).hom (iEq (iEq.symm s)) := by
+            rw [RingEquiv.apply_symm_apply]
+        _ = _ := h2
+    have hres : ((((modelEllipticCurve W).mulByHom N).app (zChart W)).hom).Finite := by
+      rw [hcomp]
+      exact (RingHom.Finite.comp
+        (RingHom.Finite.of_surjective _ jEq.surjective) hft).comp
+        (RingHom.Finite.of_surjective _ iEq.symm.surjective)
+    exact hres
+  -- transport + the proven tower
+  exact (Algebra.finrank_eq_of_equiv_equiv iEq jEq hc).trans
+    (towerBC W N hn ((modelEllipticCurve W).mulByHom N) rfl hDom hFin hfin)
 
 /-- **(K4 crux — the HasseWeil coupling)** Over a field `K`, the scheme-theoretic fibre rank of the
 model `[N]` equals the degree of HasseWeil's multiplication-by-`N` isogeny `mulByInt W.toAffine N`
