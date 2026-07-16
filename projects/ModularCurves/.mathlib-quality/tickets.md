@@ -22164,3 +22164,49 @@ The carrier = (N=2 fullLevelLocus, 3 combos) ×_S the ±ω scale-torsor, but the
 through the LocalPresentation/IsAdapted/MarksAt machinery (T-E12 layer, OMEGA's substrate).
 Template now proven at E3; the twin needs the coupled-datum dictionary — recommend
 coordination with OMEGA's T-E14' layer at next dispatch.
+
+## v10.292-KM (2026-07-16, STREAM-KM window) — ★★ T-D8 FORWARD DELIVERED + THE EXHAUSTION ENGINE COMPLETE
+
+**★★ T-D8 FORWARD SHIPPED (the promised cross-stream deliverable — GH DE-BOXES NOW):**
+`EllipticCurve.fullLevel_divisor_forward` (NEW FILE `LevelStructure/FullLevelBridge.lean`, GREEN,
+axiom-clean): divisor-equals-`E[N]` ⟹ every `N`-killed geometric point lies in
+`closure {pull P, pull Q}`. **Hypotheses STRICTLY WEAKER than the `T-D8-bridge` box** — NO
+`NIsInvertible`, NO killing of `P, Q` — consume it directly (import
+`ModularCurves.LevelStructure.FullLevelBridge`; it sits above `Basic` because it needs the
+exhaustion engine + `sectionsDivisor_baseChange`). The `Basic.lean` box `fullLevel_divisor_iff_naive_gen`
+stays sorried as the iff-shell; **its remaining content is EXACTLY the ⟸-half**:
+naive generation ⟹ divisor equality. Precise ⟸-scope (honest): needs a divisor↔norm dictionary —
+either (route A) `isFullSetOfSectionsAlg_iff_fields` (T-D2, PROVED, CartierDivisor.lean:2831,
+currently consumer-less) applied to the `N²`-section algebra with the reduced-base reduction, or
+(route B) étale-distinct-reduced fibres + flatness-fibrewise-equality (both divisors are then
+reduced closed subschemes with the same k̄-points inside the étale `E[N]`; equal-degree rigidity
+closes). Route A is the banked one; NOT a one-session brick — it is the next KM sub-campaign.
+
+**★★ THE EXHAUSTION ENGINE (KM p. 29) COMPLETE — `point_eq_section_of_factors`:** over ANY field,
+a point factoring through `sectionsDivisor π Ps` IS one of the `Ps j`. Chain (all green):
+exhaust-1 `ideal_le_ker_of_factors`; exhaust-2 `exists_section_ker_le` (prime avoidance at a chart);
+exhaust-3 `algHom_eq_of_ker_le` (character rigidity); exhaust-4a/b `pointEval`/`ker_pointEval`
+(cast-free appLE evaluation dictionary; ker via `ker_comp_of_injective` ×2 — NO topIso conjugation);
+4c `pointEval_injective` (lift through the chart, cancel the immersion app-iso, `map_appLE` slide,
+`ext_of_isAffine`); 4d `pointEval_structure` (section splits the π-algebra: `appLE_comp_appLE`
+folds `z ≫ π = 𝟙`); 4e the assembly. **This engine is the shared core of F3.mp AND T-D8** — it is
+what "the φ-values exhaust G(k)" means formally.
+
+**F3.mp status (the mp-locus campaign, 6 more green bricks):** `addOrderOf_nsmul_eq_of_coprime`
+(cyclic arithmetic), **BB-DEGA register box** (NEW box, KM p. 28's own citation De-Ga IV 5.3-9:
+K-kernel rank support ∣ K without étale — the non-étale factor genuinely needs the classical
+input; counterpart of BB-DELIGNE), `smulKernelπ_finrank_eq_of_M_invertible` (the M-only squeeze:
+étale count + Cauchy on M-side, box on K-side, coprime split), `M_dvd_addOrderOf` ([F3-census]:
+the M-killed factoring points = order-M subgroup, exhaust pins them in `⟨P⟩`, **Lagrange** — no
+cyclic-torsion counting needed), `smul_nsmul_ne_zero` ([F3-distinct]: `ord(K•P_t) = M` exactly at
+`S[1/M]`-geometric points). **Remaining for F3.mp glue:** per-piece transport (castBase mini-brick
++ fibre-distinctness transport through `baseChangeEquiv` — all term-mode per the baseChange-defeq
+trap), the coprime `basicOpen` cover (residue-field Bezout), and — for the `U_K`-side of the
+`K•P`-conjunct — **[F3-disj]** (translate-disjointness/clopen decomposition, KM p. 30): at
+mixed-characteristic points the M-divisor is THICK and point-counting cannot see it; the
+identification `D_M = Z_M` runs through the ∐-translate T-point argument. That is the last
+substantial mp brick; converse reuses it. Also DELETED the dead sorried in-file duplicate of the
+rank formula (the ForMathlib `finrank_pullback_comp_fst` is of record, flag-only for mathlib).
+
+Ledger: 59 bricks · boxes BB-DELIGNE + BB-DEGA + T-D6b/c + T-D7-bridge (H-lane) + T-D8-bridge
+(⟸-half only now) · Factorization.lean 5 frontier sorries + BB-DEGA · commits 15ebfbc1b..2d49c60de.
