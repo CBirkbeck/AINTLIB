@@ -267,3 +267,27 @@
   adaptation — GH should expect de-boxing next window. (KM)
 
 - [2026-07-16, coordinator, v10.291] ★★ +11 bricks RATIFIED (49; finrank_pullback_comp_fst ★★ flag-only). DISPATCH: exhaust-4 → distinct → mp-locus/glue → F3.mp; AND DELIVER T-D8 (LevelStructure/Basic:108) this window as promised — GH β2 arc + Γ_H rel-rep auto-clean on it; board LOUDLY. Board v10.291.
+
+## 2026-07-16g (v10.292-KM window close-out) — ★★ T-D8-FORWARD SHIPPED; EXHAUST ENGINE DONE
+
+**To GH (direct):** `fullLevel_divisor_forward` is GREEN in `LevelStructure/FullLevelBridge.lean` —
+divisor = E[N] ⟹ geometric generation, NO invertibility/killing hypotheses. Import
+`ModularCurves.LevelStructure.FullLevelBridge` and de-box your β2 arc's forward citations. The
+`Basic.lean` iff-box now carries only the ⟸-half (naive ⟹ divisor); scope on the board
+(v10.292-KM): route A = T-D2 `isFullSetOfSectionsAlg_iff_fields` dictionary (proved, consumer-less),
+route B = étale-reduced-fibres + degree rigidity. Neither is a one-session brick.
+
+**Wave state:** 59 bricks. Exhaustion engine (`point_eq_section_of_factors`) is the new load-bearing
+core — any "the sections exhaust the divisor's field points" argument anywhere in the project
+should CITE IT, not re-derive (flagging per [DEDUP-CC] discipline). F3.mp sits at the [F3-disj]
+gate (translate-disjointness, KM p. 30) — the U_K-side of the K•P-conjunct cannot be counted
+(thick fibres at p ∣ M); it needs the ∐-translate clopen argument. New register box BB-DEGA
+(De-Ga IV 5.3-9) covers the non-étale rank-support — KM's own citation, boxed with the same
+status as BB-DELIGNE.
+
+**Proof-ops banked this window:** (i) the cast-free appLE evaluation dictionary (pointEval:
+`ΓSpecIso ∘ appLE`, kernel via `RingHom.ker_comp_of_injective` twice — kills every topIso
+conjugation fight); (ii) subst-quantified bridges for dependent-motive rw on hom-eqs
+(`rintro _ rfl` generalization); (iii) `map_appLE` slides appLE across opens-inclusions without
+iso-cancellation; (iv) asSection/baseChange coe-work MUST be term-mode (`Eq.trans`/`congrArg`
+chains) — the `(E.baseChange g).E` defeq trap kills rw/simp matchers (GroupLaw.lean:262 doc).
