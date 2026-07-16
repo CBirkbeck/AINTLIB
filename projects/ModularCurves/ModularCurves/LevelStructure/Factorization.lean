@@ -494,6 +494,23 @@ theorem RelEffCartierDiv.smulKernel_point {D : RelEffCartierDiv E.π} {c : ℤ}
     rw [show D.smulKernelι E c ≫ D.ideal.subschemeι ≫ E.mulByHom c
         = D.smulKernelπ E c ≫ E.zero from hcond, ← Category.assoc, hh]
 
+/-- **[F3-ker-to]** Conversely, a `c`-killed point factoring through the divisor lifts
+to the `c`-kernel (pullback universal property). -/
+theorem RelEffCartierDiv.exists_smulKernel_lift {D : RelEffCartierDiv E.π} {c : ℤ}
+    {T : Scheme.{u}} {t : T ⟶ S} (Q : E.Point t) (hQ : c • Q = 0)
+    (w : T ⟶ D.ideal.subscheme) (hw : w ≫ D.ideal.subschemeι = Q.1) :
+    ∃ h : T ⟶ D.smulKernel E c,
+      h ≫ D.smulKernelι E c = w ∧ h ≫ D.smulKernelπ E c = t := by
+  have hkill : (Q : T ⟶ E.E) ≫ E.mulByHom c = t ≫ E.zero := by
+    have hval := congrArg Subtype.val hQ
+    rw [E.point_smul_eq_comp_mulBy] at hval
+    rw [hval]
+    exact E.point_zero_val t
+  have hagree : w ≫ (D.ideal.subschemeι ≫ E.mulByHom c) = t ≫ E.zero := by
+    rw [← Category.assoc, hw]
+    exact hkill
+  exact ⟨pullback.lift w t hagree, pullback.lift_fst _ _ _, pullback.lift_snd _ _ _⟩
+
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
 order `M` and `M·P` has exact order `K`.
