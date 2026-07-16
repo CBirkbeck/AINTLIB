@@ -42,6 +42,29 @@ variable (p : ℕ) [hp : Fact p.Prime] (hp_odd : p ≠ 2)
 variable (K : Type) [Field K] [NumberField K]
   [IsCyclotomicExtension {p} ℚ K] [NumberField.IsCMField K]
 
+/-- If the prime `p` divides the class number of a number field `F`, then the mod-`p`
+class group `ClassGroupModP F p` is non-trivial (it has an element of order `p`). -/
+private lemma nontrivial_classGroupModP_of_dvd_card (F : Type) [Field F] [NumberField F]
+    (hp_dvd : p ∣ Fintype.card (ClassGroup (𝓞 F))) :
+    Nontrivial (ClassGroupModP F p) := by
+  rw [nontrivial_iff_exists_ne (1 : ClassGroupModP F p)]
+  by_contra! h_triv
+  have h_subsing : Subsingleton (ClassGroupModP F p) :=
+    ⟨fun a b => by rw [h_triv a, h_triv b]⟩
+  have h_surj : Function.Surjective
+      (powMonoidHom p : ClassGroup (𝓞 F) →* ClassGroup (𝓞 F)) := by
+    rw [← MonoidHom.range_eq_top, Subgroup.eq_top_iff']
+    exact fun x => (QuotientGroup.eq_one_iff x).mp (Subsingleton.elim _ _)
+  have h_inj : Function.Injective
+      (powMonoidHom p : ClassGroup (𝓞 F) →* ClassGroup (𝓞 F)) :=
+    Finite.injective_iff_surjective.mpr h_surj
+  have h_no_p_tors : ∀ x : ClassGroup (𝓞 F), x ^ p = 1 → x = 1 := fun x hx =>
+    h_inj (by simpa [powMonoidHom] using hx)
+  obtain ⟨x, hx_ord⟩ := exists_prime_orderOf_dvd_card (G := ClassGroup (𝓞 F)) p hp_dvd
+  rw [h_no_p_tors x (orderOf_dvd_iff_pow_eq_one.mp (hx_ord ▸ dvd_refl p)), orderOf_one]
+    at hx_ord
+  exact (Fact.out : Nat.Prime p).one_lt.ne hx_ord
+
 include hp_odd in
 /-- **SP-2 (Plus-side identification, conditional on V₀ trivial)**: under
 `p ∣ h⁺(K)` and the trivial-character eigenspace `V₀ := (Cl(K)/p)^Δ`
@@ -59,24 +82,8 @@ theorem even_eigenspace_nontrivial_of_dvd_hPlus
       eigenspaceComponentNontrivial p K i := by
   classical
   set Kplus := NumberField.maximalRealSubfield K
-  have h_Kplus_modP_nontrivial : Nontrivial (ClassGroupModP Kplus p) := by
-    rw [nontrivial_iff_exists_ne (1 : ClassGroupModP Kplus p)]
-    by_contra! h_triv
-    have h_subsing : Subsingleton (ClassGroupModP Kplus p) :=
-      ⟨fun a b => by rw [h_triv a, h_triv b]⟩
-    have h_surj : Function.Surjective
-        (powMonoidHom p : ClassGroup (𝓞 Kplus) →* ClassGroup (𝓞 Kplus)) := by
-      rw [← MonoidHom.range_eq_top, Subgroup.eq_top_iff']
-      exact fun x => (QuotientGroup.eq_one_iff x).mp (Subsingleton.elim _ _)
-    have h_inj : Function.Injective
-        (powMonoidHom p : ClassGroup (𝓞 Kplus) →* ClassGroup (𝓞 Kplus)) :=
-      Finite.injective_iff_surjective.mpr h_surj
-    have h_no_p_tors : ∀ x : ClassGroup (𝓞 Kplus), x ^ p = 1 → x = 1 := fun x hx =>
-      h_inj (by simpa [powMonoidHom] using hx)
-    obtain ⟨x, hx_ord⟩ := exists_prime_orderOf_dvd_card (G := ClassGroup (𝓞 Kplus)) p h_dvd
-    rw [h_no_p_tors x (orderOf_dvd_iff_pow_eq_one.mp (hx_ord ▸ dvd_refl p)), orderOf_one]
-      at hx_ord
-    exact (Fact.out : Nat.Prime p).one_lt.ne hx_ord
+  have h_Kplus_modP_nontrivial : Nontrivial (ClassGroupModP Kplus p) :=
+    nontrivial_classGroupModP_of_dvd_card p Kplus h_dvd
   obtain ⟨cPlus, hcPlus_ne⟩ := exists_ne (1 : ClassGroupModP Kplus p)
   set v : Additive (ClassGroupModP K p) :=
     Additive.ofMul (FLT37.classGroupMap_modP p K cPlus)
