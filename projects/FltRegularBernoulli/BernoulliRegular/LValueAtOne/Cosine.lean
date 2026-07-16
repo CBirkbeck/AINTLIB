@@ -208,6 +208,86 @@ lemma norm_sum_range_shifted_cos_term_le {x s : ℝ} (hx₀ : 0 < x) (hx₁ : x 
             ring
           rw [hcoef]
 
+/-- The partial sums of the cosine kernel with its constant (`i = 0`) term zeroed out stay
+uniformly bounded away from the endpoints: on `(0, 1)` the sums
+`∑ i ∈ range n, if i = 0 then 0 else cos (2 * π * x * i)` are bounded by
+`4 / ‖1 - exp (2 * π * x * I)‖`. This is the coefficient sequence used in the Dirichlet-test
+argument for the endpoint cosine series. -/
+lemma norm_sum_range_ite_cos_le {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) (n : ℕ) :
+    ‖∑ i ∈ Finset.range n, if i = 0 then (0 : ℝ) else Real.cos (2 * Real.pi * x * i)‖ ≤
+      4 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ := by
+  let z : ℕ → ℝ := fun n ↦ if n = 0 then 0 else Real.cos (2 * Real.pi * x * n)
+  show ‖∑ i ∈ Finset.range n, z i‖ ≤
+    4 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖
+  rcases n.eq_zero_or_pos with rfl | hn
+  · have : 0 ≤ 4 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ := by positivity
+    simpa [z] using this
+  · let g : ℕ → ℝ := fun i ↦ Real.cos (2 * Real.pi * x * i)
+    have hz0 := Finset.sum_range_add z 1 (n - 1)
+    have hg0 := Finset.sum_range_add g 1 (n - 1)
+    have hsum :
+        ∑ i ∈ Finset.range n, z i = ∑ i ∈ Finset.range n, Real.cos (2 * Real.pi * x * i) - 1 := by
+      have hn' : 1 + (n - 1) = n := by omega
+      have hz0' :
+          ∑ x ∈ Finset.range n, z x =
+            ∑ x ∈ Finset.range 1, z x + ∑ x ∈ Finset.range (n - 1), z (1 + x) := by
+        simpa [hn', add_comm] using hz0
+      have hg0' :
+          ∑ x ∈ Finset.range n, g x =
+            ∑ x ∈ Finset.range 1, g x + ∑ x ∈ Finset.range (n - 1), g (1 + x) := by
+        simpa [hn', add_comm] using hg0
+      rw [Finset.sum_range_one] at hz0' hg0'
+      calc
+        ∑ i ∈ Finset.range n, z i = z 0 + ∑ i ∈ Finset.range (n - 1), z (1 + i) := by
+          simpa [add_comm, add_left_comm, add_assoc, Nat.add_comm] using hz0'
+        _ = ∑ i ∈ Finset.range (n - 1), g (1 + i) := by simp [z, g]
+        _ = ∑ i ∈ Finset.range n, g i - g 0 :=
+              eq_sub_iff_add_eq.mpr (by
+                simpa [add_comm, add_left_comm, add_assoc, Nat.add_comm] using hg0'.symm)
+        _ = ∑ i ∈ Finset.range n, Real.cos (2 * Real.pi * x * i) - 1 := by simp [g]
+    rw [hsum]
+    calc
+      |∑ i ∈ Finset.range n, Real.cos (2 * Real.pi * x * i) - 1|
+          ≤ |∑ i ∈ Finset.range n, Real.cos (2 * Real.pi * x * i) - 0| + |0 - (1 : ℝ)| := by
+              simpa using
+                abs_sub_le
+                  (∑ i ∈ Finset.range n, Real.cos (2 * Real.pi * x * i)) 0 1
+      _ ≤ |∑ i ∈ Finset.range n, Real.cos (2 * Real.pi * x * i)| + 1 := by simp
+      _ ≤ (2 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖) + 1 := by
+            have hcos :
+                |∑ i ∈ Finset.range n, Real.cos (2 * Real.pi * x * i)| ≤
+                  2 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ := by
+              simpa using norm_sum_range_cos_le hx₀ hx₁ n
+            exact add_le_add hcos le_rfl
+      _ ≤ 2 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ +
+            2 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ := by
+            have hnorm : ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ ≤ 2 := by
+              calc
+                ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖
+                    ≤ ‖(1 : ℂ)‖ + ‖Complex.exp ((2 * Real.pi * x) * Complex.I)‖ := norm_sub_le _ _
+                _ = 1 + 1 := by
+                      rw [norm_one]
+                      simpa [mul_assoc] using Complex.norm_exp_ofReal_mul_I (2 * Real.pi * x)
+                _ = 2 := by norm_num
+            have hzero : (1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I) ≠ 0 := by
+              intro hzero
+              have hexp : Complex.exp ((2 * Real.pi * x) * Complex.I) = 1 := by
+                simpa [eq_comm] using sub_eq_zero.mp hzero
+              obtain ⟨m, hm⟩ := Complex.exp_eq_one_iff.mp hexp
+              have him : 2 * Real.pi * x = (m : ℝ) * (2 * Real.pi) := by
+                simpa using congrArg Complex.im hm
+              have hm_pos : (0 : ℝ) < m := by nlinarith [Real.pi_pos, hx₀, him]
+              have hm_lt_one : (m : ℝ) < 1 := by nlinarith [Real.pi_pos, hx₁, him]
+              have hm_pos_int : 0 < m := by exact_mod_cast hm_pos
+              have hm_lt_one_int : m < 1 := by exact_mod_cast hm_lt_one
+              omega
+            have hden_pos : 0 < ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ :=
+              norm_pos_iff.mpr hzero
+            have hdenom : 1 ≤ 2 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ := by
+              simpa using (one_le_div hden_pos).2 hnorm
+            linarith
+      _ = 4 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ := by ring
+
 /-- The endpoint cosine series converges on `(0, 1)` by Dirichlet's test. -/
 lemma exists_tendsto_sum_range_cos_div_nat {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) :
     ∃ l : ℝ,
@@ -237,76 +317,8 @@ lemma exists_tendsto_sum_range_cos_div_nat {x : ℝ} (hx₀ : 0 < x) (hx₁ : x 
           Tendsto (fun n : ℕ ↦ 1 / (n + 1 : ℝ)) atTop (𝓝 0))
   have hbound :
       ∀ n, ‖∑ i ∈ Finset.range n, z i‖ ≤
-        4 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ := by
-    intro n
-    rcases n.eq_zero_or_pos with rfl | hn
-    · have : 0 ≤ 4 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ := by positivity
-      simpa [z] using this
-    · let g : ℕ → ℝ := fun i ↦ Real.cos (2 * Real.pi * x * i)
-      have hz0 := Finset.sum_range_add z 1 (n - 1)
-      have hg0 := Finset.sum_range_add g 1 (n - 1)
-      have hsum :
-          ∑ i ∈ Finset.range n, z i = ∑ i ∈ Finset.range n, Real.cos (2 * Real.pi * x * i) - 1 := by
-        have hn' : 1 + (n - 1) = n := by omega
-        have hz0' :
-            ∑ x ∈ Finset.range n, z x =
-              ∑ x ∈ Finset.range 1, z x + ∑ x ∈ Finset.range (n - 1), z (1 + x) := by
-          simpa [hn', add_comm] using hz0
-        have hg0' :
-            ∑ x ∈ Finset.range n, g x =
-              ∑ x ∈ Finset.range 1, g x + ∑ x ∈ Finset.range (n - 1), g (1 + x) := by
-          simpa [hn', add_comm] using hg0
-        rw [Finset.sum_range_one] at hz0' hg0'
-        calc
-          ∑ i ∈ Finset.range n, z i = z 0 + ∑ i ∈ Finset.range (n - 1), z (1 + i) := by
-            simpa [add_comm, add_left_comm, add_assoc, Nat.add_comm] using hz0'
-          _ = ∑ i ∈ Finset.range (n - 1), g (1 + i) := by simp [z, g]
-          _ = ∑ i ∈ Finset.range n, g i - g 0 :=
-                eq_sub_iff_add_eq.mpr (by
-                  simpa [add_comm, add_left_comm, add_assoc, Nat.add_comm] using hg0'.symm)
-          _ = ∑ i ∈ Finset.range n, Real.cos (2 * Real.pi * x * i) - 1 := by simp [g]
-      rw [hsum]
-      calc
-        |∑ i ∈ Finset.range n, Real.cos (2 * Real.pi * x * i) - 1|
-            ≤ |∑ i ∈ Finset.range n, Real.cos (2 * Real.pi * x * i) - 0| + |0 - (1 : ℝ)| := by
-                simpa using
-                  abs_sub_le
-                    (∑ i ∈ Finset.range n, Real.cos (2 * Real.pi * x * i)) 0 1
-        _ ≤ |∑ i ∈ Finset.range n, Real.cos (2 * Real.pi * x * i)| + 1 := by simp
-        _ ≤ (2 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖) + 1 := by
-              have hcos :
-                  |∑ i ∈ Finset.range n, Real.cos (2 * Real.pi * x * i)| ≤
-                    2 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ := by
-                simpa using norm_sum_range_cos_le hx₀ hx₁ n
-              exact add_le_add hcos le_rfl
-        _ ≤ 2 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ +
-              2 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ := by
-              have hnorm : ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ ≤ 2 := by
-                calc
-                  ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖
-                      ≤ ‖(1 : ℂ)‖ + ‖Complex.exp ((2 * Real.pi * x) * Complex.I)‖ := norm_sub_le _ _
-                  _ = 1 + 1 := by
-                        rw [norm_one]
-                        simpa [mul_assoc] using Complex.norm_exp_ofReal_mul_I (2 * Real.pi * x)
-                  _ = 2 := by norm_num
-              have hzero : (1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I) ≠ 0 := by
-                intro hzero
-                have hexp : Complex.exp ((2 * Real.pi * x) * Complex.I) = 1 := by
-                  simpa [eq_comm] using sub_eq_zero.mp hzero
-                obtain ⟨m, hm⟩ := Complex.exp_eq_one_iff.mp hexp
-                have him : 2 * Real.pi * x = (m : ℝ) * (2 * Real.pi) := by
-                  simpa using congrArg Complex.im hm
-                have hm_pos : (0 : ℝ) < m := by nlinarith [Real.pi_pos, hx₀, him]
-                have hm_lt_one : (m : ℝ) < 1 := by nlinarith [Real.pi_pos, hx₁, him]
-                have hm_pos_int : 0 < m := by exact_mod_cast hm_pos
-                have hm_lt_one_int : m < 1 := by exact_mod_cast hm_lt_one
-                omega
-              have hden_pos : 0 < ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ :=
-                norm_pos_iff.mpr hzero
-              have hdenom : 1 ≤ 2 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ := by
-                simpa using (one_le_div hden_pos).2 hnorm
-              linarith
-        _ = 4 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ := by ring
+        4 / ‖(1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)‖ :=
+    fun n ↦ norm_sum_range_ite_cos_le hx₀ hx₁ n
   have hcauchy := hf.cauchySeq_series_mul_of_tendsto_zero_of_bounded hf0 hbound
   obtain ⟨l, hl⟩ := cauchySeq_tendsto_of_complete hcauchy
   refine ⟨l, ?_⟩
