@@ -975,3 +975,10 @@ direction uses the existing pair-map comparison and mathlib's affine closed-imme
 with explicit transport through `ΓSpecIso`. Its focused build is green, its axiom audit is exactly
 `propext`, `Classical.choice`, and `Quot.sound`, and it adds no hypothesis, duplicate diagonal
 abstraction, or proof-resource option.
+
+Active dependency claim (2026-07-16): prove
+`Scheme.Hom.affineIntersectionGluedToOriginal_comp_toSpec`. For an affine base, identify
+the canonical affine-intersection structural morphism with the glued-to-original map followed by
+the original family morphism and `S.isoSpec.hom`. Prove the equality chartwise using the existing
+glue comparison and `Scheme.isoSpec_hom_naturality`; add no covering hypothesis, new comparison
+structure, or proof-resource option.
