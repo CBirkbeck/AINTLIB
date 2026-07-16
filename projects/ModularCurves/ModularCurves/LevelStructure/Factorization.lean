@@ -250,6 +250,29 @@ theorem Section.orderDivisor_mul_crt (P : E.Section) (M K : ℕ) [NeZero M] [NeZ
   rw [sub_add_cancel] at h2
   exact h2.symm
 
+/-- Pushforward along an isomorphism agrees with pullback along its inverse: for
+`e : C ≅ C`, `I.map e.hom = I.comap e.inv`. (The comap-map Galois connection restricts
+to an order isomorphism along an iso; both adjoints are then the same inverse image.) -/
+theorem _root_.AlgebraicGeometry.Scheme.IdealSheafData.map_hom_eq_comap_inv
+    {C : Scheme.{u}} (e : C ≅ C) (I : C.IdealSheafData) :
+    I.map e.hom = I.comap e.inv := by
+  have hid₁ : ∀ J : C.IdealSheafData, (J.comap e.inv).comap e.hom = J := by
+    intro J
+    rw [← Scheme.IdealSheafData.comap_comp, Iso.hom_inv_id,
+      Scheme.IdealSheafData.comap_id]
+  have hid₂ : ∀ J : C.IdealSheafData, (J.comap e.hom).comap e.inv = J := by
+    intro J
+    rw [← Scheme.IdealSheafData.comap_comp, Iso.inv_hom_id,
+      Scheme.IdealSheafData.comap_id]
+  refine le_antisymm ?_ ?_
+  · have h1 : (I.map e.hom).comap e.hom ≤ I :=
+      Scheme.IdealSheafData.comap_map_le I e.hom
+    have h2 : ((I.map e.hom).comap e.hom).comap e.inv ≤ I.comap e.inv :=
+      Scheme.IdealSheafData.comap_mono (f := e.inv) h1
+    rwa [hid₂] at h2
+  · have h1 : (I.comap e.inv).comap e.hom ≤ I := le_of_eq (hid₁ I)
+    exact Scheme.IdealSheafData.le_map_iff_comap_le.mpr h1
+
 /-- **[W0-F3-pts] (KM 1.5.1.2's tautology)** Each constituent section factors through the
 sections divisor: `Pₐ` is a point *of* `Σᵢ [Pᵢ]`. The defining ideal `∏ᵢ ker (Pᵢ)` is
 contained in `ker (Pₐ)`, so the kernel-image factorization `toImage` composed with the
