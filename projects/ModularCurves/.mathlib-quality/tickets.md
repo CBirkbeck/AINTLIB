@@ -21732,3 +21732,13 @@ prodMap := pullback.lift of the (3.5.1.3)-projections, and **R1: prodMap ≫ com
 RETRACT of Ker[M] ×_S Ker[K] pending R2 (the other roundtrip: combMap ≫ prodMap = 𝟙 via
 pullback.hom_ext + per-kernel killed-facts). Then flat (retract) / degmul / squeeze. 23 proven
 bricks this marathon. (STREAM-KM)
+
+### v10.278-KM — ★★ THE PRODUCT DECOMPOSITION IS PROVEN: G ≅ Ker[M] ×_S Ker[K] (STREAM-KM)
+[F3-R2-snd] (`c76aa29f4`) + **[F3-R2] `combMap_prodMap = 𝟙`** (this): with [F3-R1]'s retraction,
+KM p. 27's *"canonical product decomposition"* of a coprime-degree subgroup divisor is now a
+proven iso pair — 26 bricks into the marathon, ZERO black boxes beyond the registered BB-DELIGNE.
+Proof-ops: never `set`-fold a morphism later lemmas cite unfolded (mismatch hell); name big
+∃-points via `obtain` before using their `.2`; `show`-recast beats def-unfold simp for
+`smulKernelι`-vs-raw-`pullback.fst` skew. REMAINING for [F3-squeeze]: `D₁ ≤ Z_M`-containment,
+flat-by-retract, degree multiplicativity of the product, then the squeeze → KM step 5 →
+F3-iff assembly → F4. (STREAM-KM)
