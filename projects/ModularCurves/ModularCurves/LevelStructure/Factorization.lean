@@ -399,6 +399,48 @@ theorem pointMapOfHom_translateBy (x : 𝟙_ (CategoryTheory.Over S) ⟶ E.asOve
   congr 1
   exact CategoryTheory.CartesianMonoidalCategory.toUnit_unique _ _
 
+/-- **[F3-crt-pts] (KM 3.5.1.1–3.5.1.3)** An abelian group killed by coprime `M·K`
+splits into its `M`- and `K`-torsion parts via KM's second isomorphism `g ↦ (Kg, Mg)`,
+with Bezout inverse `(g₁, g₂) ↦ v•g₁ + u•g₂` (`uM + vK = 1`). KM (verbatim, p. 101):
+*"we have two distinct canonical isomorphisms (3.5.1.1) `G ⟶ G[A] × G[B]` … the second
+is `g ↦ (Bg, Ag)`."* -/
+noncomputable def killedCoprimeSplitEquiv {G : Type*} [AddCommGroup G] (M K : ℕ)
+    (hMK : Nat.Coprime M K) (hkill : ∀ g : G, ((M * K : ℕ) : ℤ) • g = 0) :
+    G ≃ { g : G // (M : ℤ) • g = 0 } × { g : G // (K : ℤ) • g = 0 } := by
+  set u : ℤ := Nat.gcdA M K with hu
+  set v : ℤ := Nat.gcdB M K with hv
+  have huv : u * M + v * K = 1 := by
+    have h := Nat.gcd_eq_gcd_ab M K
+    rw [hMK] at h
+    rw [hu, hv]
+    push_cast at h ⊢
+    linarith
+  refine
+    { toFun := fun g => (⟨(K : ℤ) • g, ?_⟩, ⟨(M : ℤ) • g, ?_⟩)
+      invFun := fun p => v • (p.1 : G) + u • (p.2 : G)
+      left_inv := fun g => ?_
+      right_inv := fun p => ?_ }
+  · rw [← mul_smul, show ((M : ℤ)) * K = ((M * K : ℕ) : ℤ) by push_cast; ring, hkill]
+  · rw [← mul_smul, show ((K : ℤ)) * M = ((M * K : ℕ) : ℤ) by push_cast; ring, hkill]
+  · -- v•(K•g) + u•(M•g) = (vK + uM)•g = g
+    show v • ((K : ℤ) • g) + u • ((M : ℤ) • g) = g
+    rw [← mul_smul, ← mul_smul, ← add_smul, show v * K + u * M = 1 by linarith, one_smul]
+  · -- roundtrip on pairs
+    obtain ⟨⟨g₁, hg₁⟩, ⟨g₂, hg₂⟩⟩ := p
+    refine Prod.ext (Subtype.ext ?_) (Subtype.ext ?_)
+    · show (K : ℤ) • (v • g₁ + u • g₂) = g₁
+      rw [smul_add, ← mul_smul, ← mul_smul,
+        show (K : ℤ) * v = 1 - u * M by linarith,
+        show (K : ℤ) * u = u * K by ring,
+        sub_smul, one_smul, mul_smul, mul_smul, hg₁, hg₂]
+      simp
+    · show (M : ℤ) • (v • g₁ + u • g₂) = g₂
+      rw [smul_add, ← mul_smul, ← mul_smul,
+        show (M : ℤ) * v = v * M by ring,
+        show (M : ℤ) * u = 1 - v * K by linarith,
+        sub_smul, one_smul, mul_smul, mul_smul, hg₁, hg₂]
+      simp
+
 /-- **[F3-univ] (the universal-point trick — KM p. 27's projector, scheme level)** For a
 subgroup divisor `D` and any `c : ℤ`, multiplication by `c` restricts to an endomorphism
 of the divisor subscheme: the inclusion `ι` is itself a `T`-point of `E` (`T` the
