@@ -395,3 +395,30 @@ Encodings weighed for `G[M]` (the projector's retract, KM p. 27):
   containment forces divisor equality — needs the containment-degree-rigidity lemma for finite
   flat closed subschemes, cf. KM p. 30's "Because both sides have the same degree, it suffices
   to show G[N₂] ≤ D₂").
+
+## [F3-split] design REVISION (KM worker, 2026-07-16b — SUPERSEDES the (b)-image route)
+
+Adversarial pass on (b) found the flaw: `imageι ≫ w = imageι` is NOT an H-group consequence
+(counter-analysis: `(c-1)•Q_s` has no forced vanishing — `M(c-1) ≢ 0 mod MK`); it is true only
+by the RING-side argument (`w(a) − a ∈ ker w` needs `w^#` multiplicative), which at scheme level
+wants relative Spec — ABSENT from mathlib. Also `r`-cancellation fails (dominant ≠ epi; `Z` not
+reduced). Route (b) is a trap. **REVISED ROUTE (a′): kernel-pullback + product-section.**
+1. **[F3-ker] `Z_M := pullback (ι ≫ [M]) E.zero`** — exists outright (closed in `G` via the
+   zero-section closed immersion); `T`-points = M-killed H-points (pullback universal property +
+   `smul_eq_zero_iff_comp_mulByHom`-style reading — repo has the analogous
+   `E.pointToTorsion`/`smul_eq_zero_iff_comp_mulByHom` machinery to imitate).
+2. **[F3-crt-pts] the natural group bijection** `H(T) ≅ H(T)[M] × H(T)[K]` — pure coprime torsion
+   splitting (mathlib `Submodule.torsionBy` machinery or the banked crt arithmetic; the (3.5.1.3)
+   maps `g ↦ (Kg, Mg)` with the Bezout inverse).
+3. **[F3-yoneda] `G ≅ Z_M ×_S Z_K`** — the pointwise bijections are natural in `T`, both sides
+   representable ⟹ iso (Yoneda). The maps are concrete: `(e_K-composite, e_M-composite)` via
+   [F3-univ]'s restrictions and sum via the H-group law; naturality from `Point.restrict`-
+   compatibility of everything in sight.
+4. **[F3-flat] `Z_M` flat + f.p. over `S`** — `Z_M` is a RETRACT of `G` as `S`-schemes
+   (`id ×_S zero-section` then project through the iso), so `𝒪(Z_M)`-modules split off flat
+   `𝒪(G)`-pushforwards: direct summand of flat is flat. NO relative Spec needed.
+5. **[F3-degmul] `deg G = deg Z_M · deg Z_K`** — finrank multiplicativity for a fibre product of
+   finite flat `S`-schemes (tensor-algebra rank; build on mathlib FlatRank's affine lemmas).
+Then [F3-squeeze] as boarded (`D₁ ≤ Z_M`, degrees `≥ M`/`≥ K`, product `= MK` ⟹ equalities ⟹
+`Z_M = D₁` = KM step 5's conclusion, subgroup-ness of `D₁` follows since `Z_M`'s points form
+`H[M]` — a subgroup).
