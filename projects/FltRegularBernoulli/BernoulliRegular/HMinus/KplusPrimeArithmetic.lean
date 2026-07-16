@@ -512,6 +512,32 @@ lemma primesOverFinsetContractionToPlus_fiber_card_eq_ncard_primesOver {ℓ : �
   simpa [fiber] using (show fiber.card = (Ideal.primesOver PPlus (𝓞 K)).ncard from by
     rw [← Set.ncard_coe_finset, hfiber])
 
+/-- **Galois fundamental identity for the CM extension `K / K⁺`.**
+For a prime `PPlus` of `𝓞 K⁺` and a prime `P` of `𝓞 K` lying over it whose relative
+ramification index is `1`, the number of primes of `𝓞 K` above `PPlus` times the relative
+inertia degree `f(P ∣ PPlus)` equals `2 = [K : K⁺]`. This is the degree-`2` Galois count
+`#{primes over PPlus} · e · f = [K : K⁺]` specialised to the unramified (`e = 1`) case. -/
+lemma ncard_primesOver_mul_inertiaDeg'_eq_two
+    (PPlus : Ideal (𝓞 (K⁺))) (P : Ideal (𝓞 K))
+    [PPlus.IsPrime] [PPlus.IsMaximal] [P.IsPrime] [P.IsMaximal] [P.LiesOver PPlus]
+    (hPPlus_ne_bot : PPlus ≠ ⊥) (hram_rel : PPlus.ramificationIdx' P = 1) :
+    (Ideal.primesOver PPlus (𝓞 K)).ncard * PPlus.inertiaDeg' P = 2 := by
+  have _ : IsGaloisGroup Gal(K/K⁺) (𝓞 (K⁺)) (𝓞 K) :=
+    IsGaloisGroup.of_isFractionRing (Gal(K/K⁺)) (𝓞 (K⁺)) (𝓞 K) (K⁺) K
+  have hfund := Ideal.ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn
+    (p := PPlus) (B := 𝓞 K) (G := Gal(K/K⁺))
+  have hcard_gal : Nat.card Gal(K/K⁺) = 2 :=
+    (IsGalois.card_aut_eq_finrank K⁺ K).trans (finrank_K_over_Kplus (K := K))
+  have hram_in : PPlus.ramificationIdxIn (𝓞 K) = 1 := by
+    rw [Ideal.ramificationIdxIn_eq_ramificationIdx (p := PPlus) (P := P) (G := Gal(K/K⁺))]
+    rw [← Ideal.ramificationIdx'_eq_ramificationIdx (q := P) (p := PPlus) (hp := hPPlus_ne_bot)]
+    exact hram_rel
+  have hinertia_in : PPlus.inertiaDegIn (𝓞 K) = PPlus.inertiaDeg' P := by
+    rw [Ideal.inertiaDegIn_eq_inertiaDeg (p := PPlus) (P := P) (G := Gal(K/K⁺))]
+    rw [← Ideal.inertiaDeg'_eq_inertiaDeg (p := PPlus) (q := P)]
+  rw [hcard_gal, hram_in, hinertia_in, one_mul] at hfund
+  exact hfund
+
 omit [IsCMField K] in
 lemma primesOver_inertiaDeg_eq_localResidueDegreePlus
     (hp_odd : p ≠ 2) {ℓ : ℕ} [Fact ℓ.Prime] (hℓp : ℓ ≠ p)
@@ -563,23 +589,8 @@ lemma primesOver_inertiaDeg_eq_localResidueDegreePlus
       rw [rationalPrimeIdeal, Ne, Ideal.span_singleton_eq_bot]
       exact_mod_cast (Fact.out : ℓ.Prime).ne_zero
     exact hneq (by simpa [Ideal.under_def, hbot, hcomap_bot] using hover)
-  have _ : IsGaloisGroup Gal(K/K⁺) (𝓞 (K⁺)) (𝓞 K) :=
-    IsGaloisGroup.of_isFractionRing (Gal(K/K⁺)) (𝓞 (K⁺)) (𝓞 K) (K⁺) K
-  have hquad : (Ideal.primesOver PPlus (𝓞 K)).ncard * PPlus.inertiaDeg' P = 2 := by
-    have hfund := Ideal.ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn
-      (p := PPlus)
-      (B := 𝓞 K) (G := Gal(K/K⁺))
-    have hcard_gal : Nat.card Gal(K/K⁺) = 2 :=
-      (IsGalois.card_aut_eq_finrank K⁺ K).trans (finrank_K_over_Kplus (K := K))
-    have hram_in : PPlus.ramificationIdxIn (𝓞 K) = 1 := by
-      rw [Ideal.ramificationIdxIn_eq_ramificationIdx (p := PPlus) (P := P) (G := Gal(K/K⁺))]
-      rw [← Ideal.ramificationIdx'_eq_ramificationIdx (q := P) (p := PPlus) (hp := hPPlus_ne_bot)]
-      exact hram_rel
-    have hinertia_in : PPlus.inertiaDegIn (𝓞 K) = PPlus.inertiaDeg' P := by
-      rw [Ideal.inertiaDegIn_eq_inertiaDeg (p := PPlus) (P := P) (G := Gal(K/K⁺))]
-      rw [← Ideal.inertiaDeg'_eq_inertiaDeg (p := PPlus) (q := P)]
-    rw [hcard_gal, hram_in, hinertia_in, one_mul] at hfund
-    exact hfund
+  have hquad : (Ideal.primesOver PPlus (𝓞 K)).ncard * PPlus.inertiaDeg' P = 2 :=
+    ncard_primesOver_mul_inertiaDeg'_eq_two (K := K) PPlus P hPPlus_ne_bot hram_rel
   have hinertia_tower :
       (rationalPrimeIdeal ℓ).inertiaDeg' P =
         (rationalPrimeIdeal ℓ).inertiaDeg' PPlus * PPlus.inertiaDeg' P := by
