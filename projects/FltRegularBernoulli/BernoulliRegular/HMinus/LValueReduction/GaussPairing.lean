@@ -283,6 +283,43 @@ theorem oddCharacterInvClassWithoutQuadratic_card
   rw [oddCharacterInvClassWithoutQuadratic_eq_pair (p := p) hχ]
   simp [oddCharacterInvPair, hχ_ne]
 
+open Classical in
+/-- When `p ≡ 3 [ZMOD 4]`, the odd characters other than the quadratic character split
+into `(p - 3) / 4` inversion classes: each class is an inversion pair `{χ, χ⁻¹}` of size
+`2`, so the `(p - 3) / 2` such characters index `(p - 3) / 4` classes. -/
+theorem card_image_quotient_oddCharactersWithoutQuadratic_of_mod_four_eq_three
+    (hp_odd' : p ≠ 2) (hp₄ : p % 4 = 3) :
+    ((oddCharactersWithoutQuadratic (p := p)).image
+        (Quotient.mk (oddCharacterInvSetoid (p := p)))).card = (p - 3) / 4 := by
+  let R := oddCharacterInvSetoid (p := p)
+  let q : Finset (Quotient R) :=
+    (oddCharactersWithoutQuadratic (p := p)).image (Quotient.mk R)
+  show q.card = (p - 3) / 4
+  have hcard :
+      (oddCharactersWithoutQuadratic (p := p)).card =
+        ∑ xbar ∈ q, (Finset.filter (fun ψ ↦ Quotient.mk R ψ = xbar)
+          (oddCharactersWithoutQuadratic (p := p))).card := by
+    simpa [q, R] using
+      (Finset.card_eq_sum_card_image
+        (f := Quotient.mk R) (s := oddCharactersWithoutQuadratic (p := p)))
+  have hcard' :
+      (oddCharactersWithoutQuadratic (p := p)).card = q.card * 2 := by
+    calc
+      (oddCharactersWithoutQuadratic (p := p)).card =
+          ∑ xbar ∈ q, (Finset.filter (fun ψ ↦ Quotient.mk R ψ = xbar)
+            (oddCharactersWithoutQuadratic (p := p))).card := hcard
+      _ = ∑ xbar ∈ q, (2 : ℕ) := by
+            refine Finset.sum_congr rfl ?_
+            intro xbar hxbar
+            rcases Finset.mem_image.mp hxbar with ⟨χ, hχ, rfl⟩
+            simpa [R, oddCharacterInvClassWithoutQuadratic] using
+              (oddCharacterInvClassWithoutQuadratic_card (p := p) hp_odd' hχ)
+      _ = q.card * 2 :=
+            Finset.sum_const_nat (s := q) (m := 2) (f := fun _ ↦ 2)
+              (by intro _ _; rfl)
+  rw [card_oddCharactersWithoutQuadratic_of_mod_four_eq_three (p := p) hp_odd' hp₄] at hcard'
+  omega
+
 theorem rawGaussProduct_withoutQuadratic_of_mod_four_eq_three
     (hp_odd' : p ≠ 2) (hp₄ : p % 4 = 3) :
     Finset.prod (oddCharactersWithoutQuadratic (p := p))
@@ -301,32 +338,8 @@ theorem rawGaussProduct_withoutQuadratic_of_mod_four_eq_three
     simpa [q, R] using
       (Finset.prod_partition (s := oddCharactersWithoutQuadratic (p := p)) (R := R)
         (f := fun χ ↦ gaussSum χ (ZMod.stdAddChar (N := p))))
-  have hqcard :
-      q.card = (p - 3) / 4 := by
-    have hcard :
-        (oddCharactersWithoutQuadratic (p := p)).card =
-          ∑ xbar ∈ q, (Finset.filter (fun ψ ↦ Quotient.mk R ψ = xbar)
-            (oddCharactersWithoutQuadratic (p := p))).card := by
-      simpa [q, R] using
-        (Finset.card_eq_sum_card_image
-          (f := Quotient.mk R) (s := oddCharactersWithoutQuadratic (p := p)))
-    have hcard' :
-        (oddCharactersWithoutQuadratic (p := p)).card = q.card * 2 := by
-      calc
-        (oddCharactersWithoutQuadratic (p := p)).card =
-            ∑ xbar ∈ q, (Finset.filter (fun ψ ↦ Quotient.mk R ψ = xbar)
-              (oddCharactersWithoutQuadratic (p := p))).card := hcard
-        _ = ∑ xbar ∈ q, (2 : ℕ) := by
-              refine Finset.sum_congr rfl ?_
-              intro xbar hxbar
-              rcases Finset.mem_image.mp hxbar with ⟨χ, hχ, rfl⟩
-              simpa [R, oddCharacterInvClassWithoutQuadratic] using
-                (oddCharacterInvClassWithoutQuadratic_card (p := p) hp_odd' hχ)
-        _ = q.card * 2 :=
-              Finset.sum_const_nat (s := q) (m := 2) (f := fun _ ↦ 2)
-                (by intro _ _; rfl)
-    rw [card_oddCharactersWithoutQuadratic_of_mod_four_eq_three (p := p) hp_odd' hp₄] at hcard'
-    omega
+  have hqcard : q.card = (p - 3) / 4 :=
+    card_image_quotient_oddCharactersWithoutQuadratic_of_mod_four_eq_three (p := p) hp_odd' hp₄
   rw [hpartition]
   calc
     ∏ xbar ∈ q,
