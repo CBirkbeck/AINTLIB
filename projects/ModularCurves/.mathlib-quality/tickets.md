@@ -22210,3 +22210,18 @@ rank formula (the ForMathlib `finrank_pullback_comp_fst` is of record, flag-only
 
 Ledger: 59 bricks · boxes BB-DELIGNE + BB-DEGA + T-D6b/c + T-D7-bridge (H-lane) + T-D8-bridge
 (⟸-half only now) · Factorization.lean 5 frontier sorries + BB-DEGA · commits 15ebfbc1b..2d49c60de.
+
+## v10.293-KM (2026-07-16, same window) — ★ F3.mp PROVEN OVER INVERTIBLE BASES
+
+`Section.HasExactOrder.smul_hasExactOrder_of_invertible` + `_both` (Factorization.lean, GREEN):
+**KM 1.7.2 forward holds over any base with `M` (resp. both) invertible** — P exact order M·K
+coprime ⟹ K•P exact order M ∧ M•P exact order K. This is the full `ℤ[1/N]`-base case — the
+Y₁(N)-tower consumers are UNBLOCKED for the factorization forward direction. Sorry-free modulo
+registered boxes (T-D6c geometric criterion, BB-DELIGNE, BB-DEGA). Chain: fibre census
+(exhaust+Lagrange) → cyclic arithmetic → distinctness → `geometric_input` (baseChangeEquiv/castBase
+term-mode transport; `set`-fvar-on-equiv instance explosion dodged by synthInstance bump) →
+T-D6c. Supporting bricks: `Point.castBase` (+coe), `isFinite_mulByHom_baseChange`
+(IsPullback.flip + base-change stability — imports MulByHomFlatFibre into Factorization's cone).
+The UNCONDITIONAL `smul_hasExactOrder` contract stays as the integral frontier, gated on
+**[F3-disj]** (KM p. 30's ∐-translate clopen argument — at mixed characteristic the thick side
+cannot be counted). 64 bricks; commits ..2da409691.
