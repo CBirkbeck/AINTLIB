@@ -328,27 +328,19 @@ theorem delta_plusIdempotent_eq_sum_even :
     plusIdempotent_eq_sum_even (G := CyclotomicUnitDelta p) (R := R)
       (-1 : CyclotomicUnitDelta p) hc
 
+omit [HasEnoughRootsOfUnity R (Monoid.exponent (CyclotomicUnitDelta p))] [Invertible (2 : R)] in
 open Classical in
-/-- Removing the trivial idempotent from the plus part leaves exactly the
-nontrivial even character idempotents. -/
-theorem delta_plusIdempotent_sub_trivial_eq_sum_nontrivial_even :
-    plusIdempotent (R := R) (-1 : CyclotomicUnitDelta p) -
-        charIdempotent (1 : MulChar (CyclotomicUnitDelta p) R) =
-      ∑ χ ∈ (Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
-          (fun χ ↦ IsEvenDeltaCharacter (p := p) χ ∧
-            χ ≠ (1 : MulChar (CyclotomicUnitDelta p) R)),
-        charIdempotent χ := by
-  classical
-  rw [delta_plusIdempotent_eq_sum_even (p := p) (R := R)]
-  have hsplit :
-      (∑ χ ∈ (Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
-          (fun χ ↦ IsEvenDeltaCharacter (p := p) χ),
-        charIdempotent χ) =
-        charIdempotent (1 : MulChar (CyclotomicUnitDelta p) R) +
-          ∑ χ ∈ (Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
-              (fun χ ↦ IsEvenDeltaCharacter (p := p) χ ∧
-                χ ≠ (1 : MulChar (CyclotomicUnitDelta p) R)),
-            charIdempotent χ := by
+/-- The sum of the even-character idempotents splits as the trivial idempotent
+plus the sum over the nontrivial even characters. -/
+private lemma sum_even_charIdempotent_eq_trivial_add_sum_nontrivial :
+    (∑ χ ∈ (Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
+        (fun χ ↦ IsEvenDeltaCharacter (p := p) χ),
+      charIdempotent χ) =
+      charIdempotent (1 : MulChar (CyclotomicUnitDelta p) R) +
+        ∑ χ ∈ (Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
+            (fun χ ↦ IsEvenDeltaCharacter (p := p) χ ∧
+              χ ≠ (1 : MulChar (CyclotomicUnitDelta p) R)),
+          charIdempotent χ := by
     calc
       (∑ χ ∈ (Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
           (fun χ ↦ IsEvenDeltaCharacter (p := p) χ),
@@ -388,7 +380,20 @@ theorem delta_plusIdempotent_sub_trivial_eq_sum_nontrivial_even :
               simp [ne_eq]
             rw [h_one_filter, h_ne_filter]
             simp
-  rw [hsplit]
+
+open Classical in
+/-- Removing the trivial idempotent from the plus part leaves exactly the
+nontrivial even character idempotents. -/
+theorem delta_plusIdempotent_sub_trivial_eq_sum_nontrivial_even :
+    plusIdempotent (R := R) (-1 : CyclotomicUnitDelta p) -
+        charIdempotent (1 : MulChar (CyclotomicUnitDelta p) R) =
+      ∑ χ ∈ (Finset.univ : Finset (MulChar (CyclotomicUnitDelta p) R)).filter
+          (fun χ ↦ IsEvenDeltaCharacter (p := p) χ ∧
+            χ ≠ (1 : MulChar (CyclotomicUnitDelta p) R)),
+        charIdempotent χ := by
+  classical
+  rw [delta_plusIdempotent_eq_sum_even (p := p) (R := R)]
+  rw [sum_even_charIdempotent_eq_trivial_add_sum_nontrivial (p := p) (R := R)]
   abel
 
 end DeltaIdempotents
