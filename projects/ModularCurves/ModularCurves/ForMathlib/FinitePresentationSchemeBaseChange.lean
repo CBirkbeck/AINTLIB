@@ -772,7 +772,9 @@ private theorem SpreadData.FunctorModel.affineIntersectionGluedBaseChange_preima
     simpa only [AlgebraicGeometry.Scheme.Hom.comp_apply] using
       (congrArg (fun q => q.base y) (hglobal i)).symm
 
-private theorem SpreadData.FunctorModel.affineIntersectionGluedBaseChange_chart_isPullback
+/-- Each singleton chart square of the affine-intersection glued base-change morphism is a
+pullback. -/
+theorem SpreadData.FunctorModel.affineIntersectionGluedBaseChange_chart_isPullback
     {K : Type u} {G : Finset K ⥤ CommAlgCat.{u} A}
     (M : SpreadData.FunctorModel G H)
     (hopenG : AlgebraicGeometry.Scheme.GlueData.IsOpenAffineIntersectionFunctor G)

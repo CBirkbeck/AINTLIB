@@ -659,3 +659,18 @@ Active dependency claim (2026-07-15): construct
 the sole overlap condition. Then apply `AffineIntersectionUnitCocycle.gluedModuleIsoOfDescentIso`
 to recover the pulled-back original invertible sheaf from the concrete Cech gluing, without new
 hypotheses or proof-resource options.
+
+Completed dependency claim (2026-07-16): proved
+`affineIntersectionOriginalGluedModuleIso`. The pullback of the original invertible sheaf to its
+affine-intersection glued model is now identified with the concrete Cech equalizer attached to
+its transition-unit cocycle. The proof packages the chosen chart trivializations through
+`AffineIntersectionUnitCocycle.IsCompatibleChartTrivialization` and effectivity, with no extra
+geometric hypotheses or proof-resource options. The focused build is green, and the axiom audit
+is exactly `propext`, `Classical.choice`, and `Quot.sound`.
+
+Active dependency claim (2026-07-16): expose
+`Algebra.SpreadData.FunctorModel.affineIntersectionGluedBaseChange_chart_isPullback`. This existing
+chartwise pullback result is the geometric input for transporting the canonical chart
+trivializations of a finite-stage `AffineIntersectionUnitCocycle.gluedModule` to the original
+glued family. It introduces no new construction, hypotheses, or proof-resource options and is the
+first dependency of the finite-stage line-bundle base-change comparison.
