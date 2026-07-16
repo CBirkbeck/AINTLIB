@@ -2,6 +2,7 @@ import ModularCurves.ForMathlib.FinitePresentationOpenImmersionFamily
 import ModularCurves.ForMathlib.FinitePresentationPushoutFamily
 import Mathlib.AlgebraicGeometry.AffineScheme
 import Mathlib.AlgebraicGeometry.Gluing
+import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
 
 /-!
 # Affine finite-intersection glue data
@@ -501,6 +502,32 @@ theorem ofAffineIntersectionFunctor_ι_affineIntersectionToSpec
     _root_.AlgebraicGeometry.Scheme.GlueData.instHasMulticoequalizerDiagram D
   change Multicoequalizer.π D.diagram i ≫ _ = _
   exact Multicoequalizer.π_desc _ _ _ _ _
+
+/-- If the singleton charts of an affine-intersection functor are finitely presented over
+the base, then the structural morphism of the glued scheme is locally of finite
+presentation. -/
+theorem locallyOfFinitePresentation_affineIntersectionToSpec
+    (F : Finset J ⥤ CommAlgCat.{u} S)
+    (hopen : IsOpenAffineIntersectionFunctor F)
+    (hpush : IsPushoutAffineIntersectionFunctor F)
+    (hfinite : ∀ i : J,
+      Algebra.FinitePresentation S
+        (F.obj (affineIntersectionSingletonIndex i))) :
+    LocallyOfFinitePresentation (affineIntersectionToSpec F hopen hpush) := by
+  apply IsZariskiLocalAtSource.of_openCover (P := @LocallyOfFinitePresentation)
+    (ofAffineIntersectionFunctor F hopen hpush).openCover
+  intro i
+  change LocallyOfFinitePresentation
+    ((ofAffineIntersectionFunctor F hopen hpush).ι i ≫
+      affineIntersectionToSpec F hopen hpush)
+  rw [ofAffineIntersectionFunctor_ι_affineIntersectionToSpec]
+  change LocallyOfFinitePresentation
+    (Spec.map (CommRingCat.ofHom
+      (algebraMap S (F.obj (affineIntersectionSingletonIndex i)))))
+  apply (LocallyOfFinitePresentation.SpecMap_iff _).mpr
+  change (algebraMap S
+    (F.obj (affineIntersectionSingletonIndex i))).FinitePresentation
+  exact RingHom.finitePresentation_algebraMap.mpr (hfinite i)
 
 end
 

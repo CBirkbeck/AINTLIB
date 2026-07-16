@@ -898,3 +898,13 @@ pulled-back line bundles on that literal fibre product. The proof consumes the s
 cocycle and `baseChangeGluedModuleIsoOnModelPullback`. Its focused build is green, its axiom audit
 is exactly `propext`, `Classical.choice`, and `Quot.sound`, and it adds no Noetherianity, geometric
 hypothesis, or proof-resource option.
+
+Completed dependency claim (2026-07-16): proved
+`Scheme.GlueData.locallyOfFinitePresentation_affineIntersectionToSpec` and its spread-model
+specialization
+`Algebra.SpreadData.FunctorModel.locallyOfFinitePresentation_affineIntersectionToSpec`. Finite
+presentation of the singleton chart algebras now gives a locally finitely presented structural
+morphism for the glued finite-stage scheme. The proof checks the property on the canonical source
+open cover and passes the stage and chart arguments explicitly. Both focused builds are green,
+both axiom audits are exactly `propext`, `Classical.choice`, and `Quot.sound`, and no
+Noetherianity, comparison hypothesis, or proof-resource option was added.

@@ -22,6 +22,26 @@ noncomputable section
 
 variable {X S : Scheme.{u}} {J : Type u}
 
+/-- The glued structural morphism attached to a spread affine-intersection functor is
+locally of finite presentation over its stage ring. -/
+theorem Algebra.SpreadData.FunctorModel.locallyOfFinitePresentation_affineIntersectionToSpec
+    {R A : Type u} [CommRing R] [CommRing A]
+    {ι : Type u} [Preorder ι]
+    {𝒮 : ι → Type u} [∀ i, CommRing (𝒮 i)] [∀ i, Algebra R (𝒮 i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (𝒮 i →ₐ[R] 𝒮 j)}
+    [Algebra R A] {uA : ∀ i, 𝒮 i →ₐ[R] A}
+    {H : Algebra.IsFilteredAlgColimit R 𝒮 t A uA}
+    {F : Finset J ⥤ CommAlgCat.{u} A}
+    (M : Algebra.SpreadData.FunctorModel F H)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor M.toFunctor)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor M.toFunctor) :
+    LocallyOfFinitePresentation
+      (Scheme.GlueData.affineIntersectionToSpec M.toFunctor hopen hpush) :=
+  Scheme.GlueData.locallyOfFinitePresentation_affineIntersectionToSpec
+    M.toFunctor hopen hpush fun i =>
+      M.toFunctor_obj_finitePresentation
+        (Scheme.GlueData.affineIntersectionSingletonIndex i)
+
 /-- Every nonempty finite intersection in an affine open cover of the source of a proper
 morphism to an affine scheme is affine. -/
 theorem Scheme.Hom.isAffineOpen_finiteIntersectionOpen_of_isProper
