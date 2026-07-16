@@ -674,3 +674,31 @@ chartwise pullback result is the geometric input for transporting the canonical 
 trivializations of a finite-stage `AffineIntersectionUnitCocycle.gluedModule` to the original
 glued family. It introduces no new construction, hypotheses, or proof-resource options and is the
 first dependency of the finite-stage line-bundle base-change comparison.
+
+Completed dependency claim (2026-07-16): exposed
+`Algebra.SpreadData.FunctorModel.affineIntersectionGluedBaseChange_chart_isPullback`. The existing
+proof that every singleton-chart square of the finite-stage glued base-change morphism is a
+pullback is now public. Its focused build is green, it adds no hypotheses or proof-resource
+options, and its axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.
+
+Active dependency claim (2026-07-16): construct
+`AffineIntersectionUnitCocycle.baseChangeGluedModuleChartTrivialization`. For a cocycle on a
+finite-stage affine-intersection model, transport the canonical chart trivialization of its
+`gluedModule` across the public chartwise pullback square. The result must trivialize the global
+pullback on each chart of the original glued scheme, without additional hypotheses or
+proof-resource options.
+
+Completed dependency claim (2026-07-16): proved
+`AffineIntersectionUnitCocycle.baseChangeGluedModuleChartTrivialization`. The pullback of a
+finite-stage Cech-glued line bundle now carries canonical trivializations on every chart of the
+original glued scheme, obtained by transport across the chartwise pullback squares. The proof
+was isolated in `InvertibleSheafGlueBaseChange.lean`, adds no hypotheses or proof-resource
+options, and its focused build is green. Its axiom audit is exactly `propext`,
+`Classical.choice`, and `Quot.sound`.
+
+Active dependency claim (2026-07-16): construct
+`AffineIntersectionUnitCocycle.mapToColimit`. Given a cocycle on a spread functor model, map each
+transition unit through the corresponding stage-to-colimit homomorphism and prove that the images
+form a cocycle on the original affine-intersection functor. This must use the existing
+`FunctorModel.map_unit_colimit` naturality theorem and add no hypotheses or proof-resource
+options.
