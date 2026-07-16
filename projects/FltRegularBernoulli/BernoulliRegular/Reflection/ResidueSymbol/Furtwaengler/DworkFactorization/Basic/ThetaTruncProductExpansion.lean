@@ -326,6 +326,48 @@ theorem finset_prod_one_add_sub_quadratic_mem_pow_three
         ring]
   exact hsum
 
+/-- Perturbing the linear parts `a` by quadratic parts `b ∈ I ^ 2` changes the
+lower-triangular bilinear sum `∑ᵢ aᵢ · ∑_{j<i} aⱼ` only within `I ^ 3`. -/
+theorem finset_sum_mul_lower_perturb_sub_mem_pow_three
+    {ι A : Type*} [LinearOrder ι] [CommRing A] (I : Ideal A) (s : Finset ι)
+    (a b : ι → A) (ha : ∀ i ∈ s, a i ∈ I) (hb : ∀ i ∈ s, b i ∈ I ^ 2) :
+    (∑ i ∈ s, (a i + b i) * ∑ j ∈ s.filter (fun j => j < i), (a j + b j)) -
+        (∑ i ∈ s, a i * ∑ j ∈ s.filter (fun j => j < i), a j) ∈ I ^ 3 := by
+  classical
+  rw [← Finset.sum_sub_distrib]
+  refine Ideal.sum_mem _ ?_
+  intro i hi
+  let T : A := ∑ j ∈ s.filter (fun j => j < i), a j
+  let U : A := ∑ j ∈ s.filter (fun j => j < i), b j
+  have hT : T ∈ I := by
+    refine Ideal.sum_mem _ ?_
+    intro j hj
+    exact ha j (Finset.mem_filter.mp hj).1
+  have hU : U ∈ I ^ 2 := by
+    refine Ideal.sum_mem _ ?_
+    intro j hj
+    exact hb j (Finset.mem_filter.mp hj).1
+  have h1 : a i * U ∈ I ^ 3 := by
+    have hmul : a i * U ∈ I ^ 1 * I ^ 2 :=
+      Ideal.mul_mem_mul (by simpa using ha i hi) hU
+    rw [← pow_add] at hmul
+    simpa using hmul
+  have h2 : b i * T ∈ I ^ 3 := by
+    have hmul : b i * T ∈ I ^ 2 * I ^ 1 :=
+      Ideal.mul_mem_mul (hb i hi) (by simpa using hT)
+    rw [← pow_add] at hmul
+    simpa [Nat.add_comm] using hmul
+  have h3 : b i * U ∈ I ^ 3 := by
+    have hmul : b i * U ∈ I ^ 2 * I ^ 2 :=
+      Ideal.mul_mem_mul (hb i hi) hU
+    rw [← pow_add] at hmul
+    exact Ideal.pow_le_pow_right (by decide : 3 ≤ 4) (by simpa using hmul)
+  have hsum : a i * U + b i * T + b i * U ∈ I ^ 3 :=
+    (I ^ 3).add_mem ((I ^ 3).add_mem h1 h2) h3
+  convert hsum using 1
+  · simp [T, U, Finset.sum_add_distrib]
+    ring
+
 /-- Second-order product truncation for factors already separated into linear
 and quadratic parts. -/
 theorem finset_prod_one_add_linear_quadratic_sub_mem_pow_three
@@ -348,40 +390,8 @@ theorem finset_prod_one_add_linear_quadratic_sub_mem_pow_three
     simp [c, Finset.sum_add_distrib]
   have hquad :
       (∑ i ∈ s, c i * ∑ j ∈ s.filter (fun j => j < i), c j) -
-          (∑ i ∈ s, a i * ∑ j ∈ s.filter (fun j => j < i), a j) ∈ I ^ 3 := by
-    rw [← Finset.sum_sub_distrib]
-    refine Ideal.sum_mem _ ?_
-    intro i hi
-    let T : A := ∑ j ∈ s.filter (fun j => j < i), a j
-    let U : A := ∑ j ∈ s.filter (fun j => j < i), b j
-    have hT : T ∈ I := by
-      refine Ideal.sum_mem _ ?_
-      intro j hj
-      exact ha j (Finset.mem_filter.mp hj).1
-    have hU : U ∈ I ^ 2 := by
-      refine Ideal.sum_mem _ ?_
-      intro j hj
-      exact hb j (Finset.mem_filter.mp hj).1
-    have h1 : a i * U ∈ I ^ 3 := by
-      have hmul : a i * U ∈ I ^ 1 * I ^ 2 :=
-        Ideal.mul_mem_mul (by simpa using ha i hi) hU
-      rw [← pow_add] at hmul
-      simpa using hmul
-    have h2 : b i * T ∈ I ^ 3 := by
-      have hmul : b i * T ∈ I ^ 2 * I ^ 1 :=
-        Ideal.mul_mem_mul (hb i hi) (by simpa using hT)
-      rw [← pow_add] at hmul
-      simpa [Nat.add_comm] using hmul
-    have h3 : b i * U ∈ I ^ 3 := by
-      have hmul : b i * U ∈ I ^ 2 * I ^ 2 :=
-        Ideal.mul_mem_mul (hb i hi) hU
-      rw [← pow_add] at hmul
-      exact Ideal.pow_le_pow_right (by decide : 3 ≤ 4) (by simpa using hmul)
-    have hsum : a i * U + b i * T + b i * U ∈ I ^ 3 :=
-      (I ^ 3).add_mem ((I ^ 3).add_mem h1 h2) h3
-    convert hsum using 1
-    · simp [c, T, U, Finset.sum_add_distrib]
-      ring
+          (∑ i ∈ s, a i * ∑ j ∈ s.filter (fun j => j < i), a j) ∈ I ^ 3 :=
+    finset_sum_mul_lower_perturb_sub_mem_pow_three I s a b ha hb
   have hprod' :
       (∏ i ∈ s, (1 + a i + b i)) -
           (1 + ∑ i ∈ s, c i +
