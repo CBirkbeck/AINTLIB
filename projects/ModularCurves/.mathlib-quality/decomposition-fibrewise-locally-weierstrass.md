@@ -908,3 +908,10 @@ morphism for the glued finite-stage scheme. The proof checks the property on the
 open cover and passes the stage and chart arguments explicitly. Both focused builds are green,
 both axiom audits are exactly `propext`, `Classical.choice`, and `Quot.sound`, and no
 Noetherianity, comparison hypothesis, or proof-resource option was added.
+
+Active dependency claim (2026-07-16): prove
+`Scheme.GlueData.quasiCompact_affineIntersectionToSpec` and its
+`Algebra.SpreadData.FunctorModel` specialization. For a finite chart index, the canonical affine
+open cover makes the glued source compact, so its structural morphism to the affine stage is
+quasi-compact. This supplies the quasi-compact half of finite presentation for the descended
+family without Noetherianity, an extra geometric hypothesis, or a proof-resource option.
