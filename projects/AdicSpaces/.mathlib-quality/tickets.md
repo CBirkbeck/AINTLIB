@@ -10,7 +10,7 @@ only). Priority spine: T1xx → T3xx → T4xx → T5xx → T6xx → T7xx (sheafi
 
 ## Summary
 - Total: 36 tickets (28 proof + 8 embedded cleanup/milestone controls listed inline)
-- Open: 30 | Done: 6 (T001, T101–T105) | Parallel capacity at peak: 4 workers
+- Open: 29 | Done: 7 (T001, T101–T106) | Parallel capacity at peak: 4 workers
   (T2xx ∥ T3xx ∥ T4xx-polynomial ∥ T1xx-tail)
 
 ## Milestone map
@@ -124,8 +124,12 @@ T704, by a fresh `/develop --continue`.
 
 ### [CLEANUP-3] /cleanup `JetDualNumberNorm.lean` (final) — **Depends**: T105. Folded into the T105 close-out (no outstanding lints beyond project-standard warnings).
 
-### [T106] `FiniteJetRings.lean` — square maps and sections
-- **Status**: open | **Depends**: T102, T105 | **Type**: proofs (L1.6 first half)
+### [T106] `FiniteJetRings.lean` — square maps and sections — **DONE 2026-07-17**
+- **Status**: done (beastmode). `rhoC` ring hom (2-jet truncation; multiplicativity by
+  antidiagonal-0/1 evaluation), `sectionD` + `qCoeff_sectionD`/`rhoC_sectionD`/
+  `sectionD_add`/`norm_sectionD` (two-sided via `le_gaussNorm` at indices 0, 1),
+  `norm_rhoC_le`, `norm_rhoB` (= `mapHom` of the isometric `ofRestricted`),
+  `rhoB_injective`, `rhoC_surjective`. | **Type**: proofs (L1.6 first half)
 - **Sorries**: `rhoC` hom fields, `sectionD` decay + `rhoC_sectionD` + `sectionD_add` +
   `norm_sectionD`, `norm_rhoC_le`, `norm_rhoB`, `rhoB_injective`, `rhoC_surjective`.
 - **Sketch**: `rhoC` multiplicativity: `PowerSeries.coeff_mul` at indices 0, 1 matches

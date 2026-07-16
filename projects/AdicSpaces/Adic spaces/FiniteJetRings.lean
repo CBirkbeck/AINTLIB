@@ -71,10 +71,42 @@ noncomputable def qCoeff (n : ℕ) (f : JetC F) : L F := PowerSeries.coeff n f.1
 reduction modulo `Q²`"). -/
 noncomputable def rhoC : JetC F →+* JetD F where
   toFun f := ⟨qCoeff F 0 f, qCoeff F 1 f⟩
-  map_one' := by sorry
-  map_mul' := by sorry
-  map_zero' := by sorry
-  map_add' := by sorry
+  map_one' := by
+    refine TrivSqZeroExt.ext ?_ ?_
+    · show PowerSeries.coeff 0 (1 : JetC F).1 = (1 : JetD F).fst
+      rw [show (1 : JetC F).1 = 1 from rfl, TrivSqZeroExt.fst_one, PowerSeries.coeff_zero_one]
+    · show PowerSeries.coeff 1 (1 : JetC F).1 = (1 : JetD F).snd
+      rw [show (1 : JetC F).1 = 1 from rfl, TrivSqZeroExt.snd_one, PowerSeries.coeff_one,
+        if_neg one_ne_zero]
+  map_mul' f g := by
+    refine TrivSqZeroExt.ext ?_ ?_
+    · show PowerSeries.coeff 0 (f * g : JetC F).1 = _
+      rw [show (f * g : JetC F).1 = f.1 * g.1 from rfl, TrivSqZeroExt.fst_mul]
+      show _ = qCoeff F 0 f * qCoeff F 0 g
+      rw [PowerSeries.coeff_mul]
+      simp [qCoeff]
+    · show PowerSeries.coeff 1 (f * g : JetC F).1 = _
+      rw [show (f * g : JetC F).1 = f.1 * g.1 from rfl, TrivSqZeroExt.snd_mul, smul_eq_mul,
+        op_smul_eq_mul]
+      show _ = qCoeff F 0 f * qCoeff F 1 g + qCoeff F 1 f * qCoeff F 0 g
+      rw [PowerSeries.coeff_mul]
+      rw [show Finset.antidiagonal (1 : ℕ) = {(0, 1), (1, 0)} from rfl]
+      rw [Finset.sum_insert (by simp), Finset.sum_singleton]
+      rfl
+  map_zero' := by
+    refine TrivSqZeroExt.ext ?_ ?_
+    · show PowerSeries.coeff 0 (0 : JetC F).1 = (0 : JetD F).fst
+      rw [show (0 : JetC F).1 = 0 from rfl, TrivSqZeroExt.fst_zero, map_zero]
+    · show PowerSeries.coeff 1 (0 : JetC F).1 = (0 : JetD F).snd
+      rw [show (0 : JetC F).1 = 0 from rfl, TrivSqZeroExt.snd_zero, map_zero]
+  map_add' f g := by
+    refine TrivSqZeroExt.ext ?_ ?_
+    · show PowerSeries.coeff 0 (f + g : JetC F).1 = ((⟨_, _⟩ + ⟨_, _⟩ : JetD F)).fst
+      rw [show (f + g : JetC F).1 = f.1 + g.1 from rfl, map_add, TrivSqZeroExt.fst_add]
+      rfl
+    · show PowerSeries.coeff 1 (f + g : JetC F).1 = ((⟨_, _⟩ + ⟨_, _⟩ : JetD F)).snd
+      rw [show (f + g : JetC F).1 = f.1 + g.1 from rfl, map_add, TrivSqZeroExt.snd_add]
+      rfl
 
 /-- `ρB : 𝓑 → 𝓓`, componentwise restriction from the disc to the annulus ([FJP] (1.5):
 "the first is restriction from the `W`-disc to its radius-one boundary"). -/
@@ -85,25 +117,100 @@ noncomputable def rhoB : JetB F →+* JetD F :=
 ([FJP] Prop 2.1: "Reduction modulo `Q²` has the norm-preserving linear section
 `f₀ + Qf₁ ↦ f₀ + Qf₁`"). -/
 noncomputable def sectionD (x : JetD F) : JetC F :=
-  ⟨PowerSeries.mk fun n => if n = 0 then x.fst else if n = 1 then x.snd else 0, by sorry⟩
+  ⟨PowerSeries.mk fun n => if n = 0 then x.fst else if n = 1 then x.snd else 0, by
+    show PowerSeries.IsRestricted (1 : ℝ) _
+    rw [Restricted.isRestricted_iff_cofinite]
+    simp only [PowerSeries.coeff_mk, one_pow, mul_one]
+    refine tendsto_nhds_of_eventually_eq ?_
+    rw [Filter.eventually_cofinite]
+    refine ((Set.finite_singleton 0).union (Set.finite_singleton 1)).subset fun n hn => ?_
+    rw [Set.mem_setOf_eq] at hn
+    by_contra hmem
+    simp only [Set.mem_union, Set.mem_singleton_iff, not_or] at hmem
+    exact hn (by rw [if_neg hmem.1, if_neg hmem.2, norm_zero])⟩
 
-@[simp] theorem rhoC_sectionD (x : JetD F) : rhoC F (sectionD F x) = x := by sorry
+theorem qCoeff_sectionD (x : JetD F) (n : ℕ) :
+    qCoeff F n (sectionD F x) = if n = 0 then x.fst else if n = 1 then x.snd else 0 := by
+  show PowerSeries.coeff n (PowerSeries.mk fun m =>
+    if m = 0 then x.fst else if m = 1 then x.snd else 0) = _
+  rw [PowerSeries.coeff_mk]
+
+@[simp] theorem rhoC_sectionD (x : JetD F) : rhoC F (sectionD F x) = x := by
+  refine TrivSqZeroExt.ext ?_ ?_
+  · show qCoeff F 0 (sectionD F x) = x.fst
+    rw [qCoeff_sectionD, if_pos rfl]
+  · show qCoeff F 1 (sectionD F x) = x.snd
+    rw [qCoeff_sectionD, if_neg one_ne_zero, if_pos rfl]
 
 theorem sectionD_add (x y : JetD F) : sectionD F (x + y) = sectionD F x + sectionD F y := by
-  sorry
+  apply Subtype.ext
+  ext n
+  rw [show PowerSeries.coeff n (sectionD F (x + y)).1 =
+      qCoeff F n (sectionD F (x + y)) from rfl, qCoeff_sectionD,
+    show (sectionD F x + sectionD F y).1 = (sectionD F x).1 + (sectionD F y).1 from rfl,
+    map_add,
+    show PowerSeries.coeff n (sectionD F x).1 = qCoeff F n (sectionD F x) from rfl,
+    show PowerSeries.coeff n (sectionD F y).1 = qCoeff F n (sectionD F y) from rfl,
+    qCoeff_sectionD, qCoeff_sectionD]
+  rcases eq_or_ne n 0 with rfl | h0
+  · simp [TrivSqZeroExt.fst_add]
+  · rw [if_neg h0, if_neg h0, if_neg h0]
+    rcases eq_or_ne n 1 with rfl | h1
+    · simp [TrivSqZeroExt.snd_add]
+    · rw [if_neg h1, if_neg h1, if_neg h1, add_zero]
 
-theorem norm_sectionD (x : JetD F) : ‖sectionD F x‖ = ‖x‖ := by sorry
+theorem norm_sectionD (x : JetD F) : ‖sectionD F x‖ = ‖x‖ := by
+  rw [Restricted.norm_eq, JetNorm.norm_def]
+  refine le_antisymm ?_ ?_
+  · rw [PowerSeries.gaussNorm_eq]
+    refine Real.iSup_le (fun n => ?_) (le_max_of_le_left (norm_nonneg _))
+    rw [one_pow, mul_one]
+    show ‖PowerSeries.coeff n (sectionD F x).1‖ ≤ _
+    rw [show PowerSeries.coeff n (sectionD F x).1 = qCoeff F n (sectionD F x) from rfl,
+      qCoeff_sectionD]
+    rcases eq_or_ne n 0 with rfl | h0
+    · rw [if_pos rfl]; exact le_max_left _ _
+    · rw [if_neg h0]
+      rcases eq_or_ne n 1 with rfl | h1
+      · rw [if_pos rfl]; exact le_max_right _ _
+      · rw [if_neg h1, norm_zero]
+        exact le_max_of_le_left (norm_nonneg _)
+  · refine max_le ?_ ?_
+    · have h := PowerSeries.le_gaussNorm norm 1 (sectionD F x).1
+        (Restricted.hasGaussNorm (R := L F) 1 (sectionD F x)) 0
+      rw [one_pow, mul_one, show PowerSeries.coeff 0 (sectionD F x).1 =
+        qCoeff F 0 (sectionD F x) from rfl, qCoeff_sectionD, if_pos rfl] at h
+      exact h
+    · have h := PowerSeries.le_gaussNorm norm 1 (sectionD F x).1
+        (Restricted.hasGaussNorm (R := L F) 1 (sectionD F x)) 1
+      rw [one_pow, mul_one, show PowerSeries.coeff 1 (sectionD F x).1 =
+        qCoeff F 1 (sectionD F x) from rfl, qCoeff_sectionD, if_neg one_ne_zero,
+        if_pos rfl] at h
+      exact h
 
 /-- `ρC` is norm-nonincreasing. -/
-theorem norm_rhoC_le (f : JetC F) : ‖rhoC F f‖ ≤ ‖f‖ := by sorry
+theorem norm_rhoC_le (f : JetC F) : ‖rhoC F f‖ ≤ ‖f‖ := by
+  rw [JetNorm.norm_def]
+  refine max_le ?_ ?_
+  · have h := PowerSeries.le_gaussNorm norm 1 f.1
+      (Restricted.hasGaussNorm (R := L F) 1 f) 0
+    rw [one_pow, mul_one] at h
+    exact h.trans (le_of_eq (Restricted.norm_eq 1 f).symm)
+  · have h := PowerSeries.le_gaussNorm norm 1 f.1
+      (Restricted.hasGaussNorm (R := L F) 1 f) 1
+    rw [one_pow, mul_one] at h
+    exact h.trans (le_of_eq (Restricted.norm_eq 1 f).symm)
 
 /-- `ρB` is an isometry (componentwise `ofRestricted` is norm-preserving). -/
-theorem norm_rhoB (b : JetB F) : ‖rhoB F b‖ = ‖b‖ := by sorry
+theorem norm_rhoB (b : JetB F) : ‖rhoB F b‖ = ‖b‖ :=
+  JetNorm.norm_mapHom _ (fun a => ofRestricted_norm a) b
 
-theorem rhoB_injective : Function.Injective (rhoB F) := by sorry
+theorem rhoB_injective : Function.Injective (rhoB F) :=
+  JetNorm.mapHom_injective _ (ofRestricted_injective (R := K))
 
 /-- `ρC` is surjective ([FJP] Prop 2.1: `𝒞 → 𝒟` is a strict surjection). -/
-theorem rhoC_surjective : Function.Surjective (rhoC F) := by sorry
+theorem rhoC_surjective : Function.Surjective (rhoC F) :=
+  fun x => ⟨sectionD F x, rhoC_sectionD F x⟩
 
 /-! ### The pinching algebra 𝓐 ([FJP] Definition 1.2 via Lemma 2.2 / (1.7) / (1.8)) -/
 
