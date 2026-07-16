@@ -456,6 +456,169 @@ theorem forall_mem_fullLevelSet_iff_isNaiveFullLevel (h : NIsInvertible S N)
     refine Subtype.ext ?_
     simpa using h0
 
+/-! ### The classifying equivalence (step 4): points of the locus = naive full level
+structures -/
+
+/-- The torsion map attached to a killed section of `E ×_S T` (the inverse dictionary
+to `torsionMapSection`). -/
+noncomputable def sectionTorsionMap (P : (E.baseChange g).Section)
+    (hP : (N : ℤ) • P = 0) : { c : T ⟶ E.torsion N // c ≫ E.torsionπ N = g } :=
+  (E.torsionPointsEquiv N g).symm
+    ⟨Point.congrBase E (Category.id_comp g) (Point.baseChangeEquiv E g (𝟙 T) P),
+      (Submodule.mem_torsionBy_iff _ _).mpr (by
+        rw [← map_zsmul, ← map_zsmul, hP, map_zero, map_zero])⟩
+
+/-- Roundtrip: the section of the torsion map of a killed section is the section. -/
+theorem torsionMapSection_sectionTorsionMap (P : (E.baseChange g).Section)
+    (hP : (N : ℤ) • P = 0) :
+    E.torsionMapSection N g (E.sectionTorsionMap N g P hP).1
+      (E.sectionTorsionMap N g P hP).2 = P := by
+  refine Subtype.ext ?_
+  apply pullback.hom_ext
+  · have h1 : (E.sectionTorsionMap N g P hP).1 ≫ E.torsionι N
+        = ((Point.congrBase E (Category.id_comp g)
+            (Point.baseChangeEquiv E g (𝟙 T) P) : E.Point g) : T ⟶ E.E) :=
+      E.pointToTorsion_torsionι _ _
+    exact (pullback.lift_fst _ _ _).trans (by rw [h1]; rfl)
+  · exact (pullback.lift_snd _ _ _).trans P.2.symm
+
+/-- Roundtrip: the torsion map of the section of a torsion map is the torsion map. -/
+theorem sectionTorsionMap_torsionMapSection (a : T ⟶ E.torsion N)
+    (ha : a ≫ E.torsionπ N = g) :
+    (E.sectionTorsionMap N g (E.torsionMapSection N g a ha)
+      (E.torsionMapSection_killed N g a ha)).1 = a := by
+  apply pullback.hom_ext
+  · have h1 : (E.sectionTorsionMap N g (E.torsionMapSection N g a ha)
+          (E.torsionMapSection_killed N g a ha)).1 ≫ E.torsionι N
+        = ((Point.congrBase E (Category.id_comp g) (Point.baseChangeEquiv E g (𝟙 T)
+            (E.torsionMapSection N g a ha)) : E.Point g) : T ⟶ E.E) :=
+      E.pointToTorsion_torsionι _ _
+    show (E.sectionTorsionMap N g (E.torsionMapSection N g a ha)
+        (E.torsionMapSection_killed N g a ha)).1 ≫ E.torsionι N
+      = a ≫ E.torsionι N
+    rw [h1]
+    show ((Point.baseChangeEquiv E g (𝟙 T) (E.torsionMapSection N g a ha)) :
+        E.Point (𝟙 T ≫ g)).1 = a ≫ E.torsionι N
+    rw [Point.baseChangeEquiv_apply_coe, E.torsionMapSection_fst]
+  · show (E.sectionTorsionMap N g (E.torsionMapSection N g a ha)
+        (E.torsionMapSection_killed N g a ha)).1 ≫ E.torsionπ N
+      = a ≫ E.torsionπ N
+    rw [(E.sectionTorsionMap N g (E.torsionMapSection N g a ha)
+      (E.torsionMapSection_killed N g a ha)).2, ha]
+
+/-- The over-`g` fact for the first projection of a pair point. -/
+theorem pairFstπ {T : Scheme.{u}} {g : T ⟶ S} (w : T ⟶ E.torsionPair N)
+    (hw : w ≫ E.torsionPairπ N = g) :
+    (w ≫ pullback.fst (E.torsionπ N) (E.torsionπ N)) ≫ E.torsionπ N = g := by
+  rw [Category.assoc]
+  exact hw
+
+/-- The over-`g` fact for the second projection of a pair point. -/
+theorem pairSndπ {T : Scheme.{u}} {g : T ⟶ S} (w : T ⟶ E.torsionPair N)
+    (hw : w ≫ E.torsionPairπ N = g) :
+    (w ≫ pullback.snd (E.torsionπ N) (E.torsionπ N)) ≫ E.torsionπ N = g := by
+  rw [Category.assoc, show pullback.snd (E.torsionπ N) (E.torsionπ N) ≫
+    E.torsionπ N = E.torsionPairπ N from (pullback.condition).symm]
+  exact hw
+
+omit [NeZero N] in
+/-- `torsionMapSection` depends only on the torsion map (proof-irrelevant
+congruence). -/
+theorem torsionMapSection_congr {T : Scheme.{u}} {g : T ⟶ S}
+    {c c' : T ⟶ E.torsion N} (hcc : c = c') (hc : c ≫ E.torsionπ N = g) :
+    E.torsionMapSection N g c hc = E.torsionMapSection N g c' (hcc ▸ hc) := by
+  subst hcc
+  rfl
+
+set_option synthInstance.maxHeartbeats 160000 in
+set_option maxHeartbeats 1600000 in
+/-- **The classifying equivalence (ENGINE AXIOM 2, points form).** `T`-points of the
+full-level locus over `g` are exactly the naive full level-`N` structures on
+`E ×_S T`. -/
+noncomputable def fullLevelLocusPointsEquiv (h : NIsInvertible S N) (g : T ⟶ S) :
+    { h' : T ⟶ E.fullLevelLocus N h // h' ≫ E.fullLevelLocusπ N h = g } ≃
+      { PQ : (E.baseChange g).Section × (E.baseChange g).Section //
+        (E.baseChange g).IsNaiveFullLevel N PQ.1 PQ.2 } :=
+  (E.fullLevelLocusSectionsEquiv N h g).trans
+    { toFun := fun w => ⟨⟨E.torsionMapSection N g (w.1 ≫ pullback.fst _ _)
+          (E.pairFstπ N w.1 w.2.1),
+        E.torsionMapSection N g (w.1 ≫ pullback.snd _ _)
+          (E.pairSndπ N w.1 w.2.1)⟩, by
+        have hlift : pullback.lift (w.1 ≫ pullback.fst _ _) (w.1 ≫ pullback.snd _ _)
+            ((E.pairFstπ N w.1 w.2.1).trans (E.pairSndπ N w.1 w.2.1).symm) = w.1 := by
+          apply pullback.hom_ext
+          · rw [pullback.lift_fst]
+          · rw [pullback.lift_snd]
+        refine (E.forall_mem_fullLevelSet_iff_isNaiveFullLevel N g h _ _
+          (E.pairFstπ N w.1 w.2.1) (E.pairSndπ N w.1 w.2.1)).mp ?_
+        intro t
+        rw [hlift]
+        exact w.2.2 t⟩
+      invFun := fun PQ => ⟨pullback.lift
+          (E.sectionTorsionMap N g PQ.1.1 PQ.2.1.1).1
+          (E.sectionTorsionMap N g PQ.1.2 PQ.2.1.2).1
+          ((E.sectionTorsionMap N g PQ.1.1 PQ.2.1.1).2.trans
+            (E.sectionTorsionMap N g PQ.1.2 PQ.2.1.2).2.symm),
+        by
+          show (pullback.lift _ _ _ ≫ pullback.fst _ _) ≫ E.torsionπ N = g
+          rw [pullback.lift_fst]
+          exact (E.sectionTorsionMap N g PQ.1.1 PQ.2.1.1).2,
+        by
+          have hmi := (E.forall_mem_fullLevelSet_iff_isNaiveFullLevel N g h
+            (E.sectionTorsionMap N g PQ.1.1 PQ.2.1.1).1
+            (E.sectionTorsionMap N g PQ.1.2 PQ.2.1.2).1
+            (E.sectionTorsionMap N g PQ.1.1 PQ.2.1.1).2
+            (E.sectionTorsionMap N g PQ.1.2 PQ.2.1.2).2).mpr
+          rw [E.torsionMapSection_sectionTorsionMap N g PQ.1.1 PQ.2.1.1,
+            E.torsionMapSection_sectionTorsionMap N g PQ.1.2 PQ.2.1.2] at hmi
+          exact hmi PQ.2⟩
+      left_inv := fun w => Subtype.ext (by
+        apply pullback.hom_ext
+        · rw [pullback.lift_fst,
+            E.sectionTorsionMap_torsionMapSection N g _ (E.pairFstπ N w.1 w.2.1)]
+        · rw [pullback.lift_snd,
+            E.sectionTorsionMap_torsionMapSection N g _ (E.pairSndπ N w.1 w.2.1)])
+      right_inv := fun PQ => Subtype.ext (by
+        have hfst : pullback.lift
+            (E.sectionTorsionMap N g PQ.1.1 PQ.2.1.1).1
+            (E.sectionTorsionMap N g PQ.1.2 PQ.2.1.2).1
+            ((E.sectionTorsionMap N g PQ.1.1 PQ.2.1.1).2.trans
+              (E.sectionTorsionMap N g PQ.1.2 PQ.2.1.2).2.symm) ≫
+              pullback.fst (E.torsionπ N) (E.torsionπ N)
+            = (E.sectionTorsionMap N g PQ.1.1 PQ.2.1.1).1 := pullback.lift_fst _ _ _
+        have hsnd : pullback.lift
+            (E.sectionTorsionMap N g PQ.1.1 PQ.2.1.1).1
+            (E.sectionTorsionMap N g PQ.1.2 PQ.2.1.2).1
+            ((E.sectionTorsionMap N g PQ.1.1 PQ.2.1.1).2.trans
+              (E.sectionTorsionMap N g PQ.1.2 PQ.2.1.2).2.symm) ≫
+              pullback.snd (E.torsionπ N) (E.torsionπ N)
+            = (E.sectionTorsionMap N g PQ.1.2 PQ.2.1.2).1 := pullback.lift_snd _ _ _
+        refine Prod.ext ?_ ?_
+        · refine Eq.trans ?_ (E.torsionMapSection_sectionTorsionMap N g PQ.1.1 PQ.2.1.1)
+          refine Subtype.ext ?_
+          apply pullback.hom_ext
+          · have hc1 : (pullback.lift _ _
+                ((E.sectionTorsionMap N g PQ.1.1 PQ.2.1.1).2.trans
+                  (E.sectionTorsionMap N g PQ.1.2 PQ.2.1.2).2.symm) ≫
+                pullback.fst (E.torsionπ N) (E.torsionπ N)) ≫ E.torsionι N
+              = (E.sectionTorsionMap N g PQ.1.1 PQ.2.1.1).1 ≫ E.torsionι N :=
+              congrArg (· ≫ E.torsionι N) hfst
+            exact (pullback.lift_fst _ _ _).trans
+              (hc1.trans (pullback.lift_fst _ _ _).symm)
+          · exact (pullback.lift_snd _ _ _).trans (pullback.lift_snd _ _ _).symm
+        · refine Eq.trans ?_ (E.torsionMapSection_sectionTorsionMap N g PQ.1.2 PQ.2.1.2)
+          refine Subtype.ext ?_
+          apply pullback.hom_ext
+          · have hc2 : (pullback.lift _ _
+                ((E.sectionTorsionMap N g PQ.1.1 PQ.2.1.1).2.trans
+                  (E.sectionTorsionMap N g PQ.1.2 PQ.2.1.2).2.symm) ≫
+                pullback.snd (E.torsionπ N) (E.torsionπ N)) ≫ E.torsionι N
+              = (E.sectionTorsionMap N g PQ.1.2 PQ.2.1.2).1 ≫ E.torsionι N :=
+              congrArg (· ≫ E.torsionι N) hsnd
+            exact (pullback.lift_fst _ _ _).trans
+              (hc2.trans (pullback.lift_fst _ _ _).symm)
+          · exact (pullback.lift_snd _ _ _).trans (pullback.lift_snd _ _ _).symm) }
+
 end EllipticCurve
 
 end ModularCurves

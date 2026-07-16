@@ -10,6 +10,7 @@ import ModularCurves.Moduli.UniversalAdapted
 import ModularCurves.Moduli.LegendreDelta
 import ModularCurves.Moduli.UniversalLegendre
 import ModularCurves.Moduli.UniversalLevelThree
+import ModularCurves.LevelStructure.CombinationLevel
 
 /-!
 # The KM 4.7 bootstrap objects (T-E12–T-E15)
@@ -109,7 +110,17 @@ theorem naiveLevelThree_relativelyRepresentable_finiteEtale (hR : IsUnit (3 : R)
       ∀ {T : Scheme.{u}} (g : T ⟶ X.base), Nonempty
         ({ h : T ⟶ Z // h ≫ f = g } ≃
           (gammaFullNaiveProblem R 3).obj (Opposite.op (X.pullbackAlong g))) := by
-  sorry
+  -- the combination-clopen carrier (board v10.266-OMEGA route; no Weil pairing):
+  -- `Z := {(P,Q) ∈ E[3] ×_S E[3] : all eight combinations avoid the zero section}`
+  have h3 : NIsInvertible X.base 3 := by
+    have h0 : NIsInvertible (Spec R) 3 := by
+      rw [NIsInvertible, Nat.cast_ofNat]
+      have := hR.map (Scheme.ΓSpecIso R).inv.hom
+      rwa [map_ofNat] at this
+    exact h0.of_hom X.structMap
+  exact ⟨X.curve.fullLevelLocus 3 h3, X.curve.fullLevelLocusπ 3 h3,
+    X.curve.fullLevelLocusπ_isFinite 3 h3, X.curve.fullLevelLocusπ_etale 3 h3,
+    fun {T} g => ⟨X.curve.fullLevelLocusPointsEquiv 3 h3 g⟩⟩
 
 /-! ### T-E12 / T-E13 — the `(E, ω)` problem over `ℤ[1/6]` (GME Thm 2.2.3 / Cor 2.2.4) -/
 
