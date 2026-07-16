@@ -836,3 +836,12 @@ the filtered colimit. The cocycle proof is split through explicitly typed transi
 unit-map lemma, avoiding implicit-instance drift. Both focused builds are green, both axiom audits
 are exactly `propext`, `Classical.choice`, and `Quot.sound`, and no hypothesis or proof-resource
 option was added.
+
+Completed dependency claim (2026-07-16): proved
+`AffineIntersectionUnitCocycle.exists_modelWithAffineIntersectionConditions`. Given a finite
+cocycle on the colimit affine-intersection functor, it now produces one spread functor model
+carrying both the open-affine/pushout gluing conditions and a finite-stage cocycle whose transition
+units map to the original transitions. The proof synchronizes the existing two eventual-stage
+results by one `mapToStage` transport. Its focused build is green, its axiom audit is exactly
+`propext`, `Classical.choice`, and `Quot.sound`, and it adds no geometric hypothesis or
+proof-resource option.

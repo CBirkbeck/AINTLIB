@@ -81,6 +81,39 @@ theorem AffineIntersectionUnitCocycle.mapToColimit_mapToStage_transition
   exact (M.object X).stageToColimit_stageTransition H
     (M.le_stage X) hMq (g : _)
 
+/-- A cocycle on a finite affine-intersection functor descends to one spread stage where
+the affine gluing conditions also hold. -/
+theorem AffineIntersectionUnitCocycle.exists_modelWithAffineIntersectionConditions
+    {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+    {Sstage : ι → Type u} [∀ i, CommRing (Sstage i)] [∀ i, Algebra R (Sstage i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (Sstage i →ₐ[R] Sstage j)}
+    {A : Type u} [CommRing A] [Algebra R A] {uA : ∀ i, Sstage i →ₐ[R] A}
+    {J : Type u} [Finite J] {G : Functor (Finset J) (CommAlgCat.{u} A)}
+    (c : AffineIntersectionUnitCocycle G)
+    (H : Algebra.IsFilteredAlgColimit R Sstage t A uA)
+    (M : Algebra.SpreadData.FunctorModel G H)
+    (hopenG : Scheme.GlueData.IsOpenAffineIntersectionFunctor G)
+    (hpushG : Scheme.GlueData.IsPushoutAffineIntersectionFunctor G) :
+    ∃ (M' : Algebra.SpreadData.FunctorModel G H)
+      (_ : Scheme.GlueData.IsOpenAffineIntersectionFunctor M'.toFunctor)
+      (_ : Scheme.GlueData.IsPushoutAffineIntersectionFunctor M'.toFunctor)
+      (cM' : AffineIntersectionUnitCocycle M'.toFunctor),
+      ∀ i j, (AffineIntersectionUnitCocycle.mapToColimit M' cM').transition i j =
+        c.transition i j := by
+  obtain ⟨q, hMq, r, hqr, cMr, hcMr⟩ := c.exists_modelAtLaterStage H M
+  let Mr := (M.mapToStage hMq).mapToStage hqr
+  obtain ⟨s, hrs, hopenMs, hpushMs⟩ :=
+    Mr.exists_affineIntersectionConditionsAtLaterStage hopenG hpushG
+  let Ms := Mr.mapToStage hrs
+  let cMs := AffineIntersectionUnitCocycle.mapToStage Mr cMr hrs
+  refine ⟨Ms, hopenMs, hpushMs, cMs, fun i j => ?_⟩
+  calc
+    (AffineIntersectionUnitCocycle.mapToColimit Ms cMs).transition i j =
+        (AffineIntersectionUnitCocycle.mapToColimit Mr cMr).transition i j :=
+      AffineIntersectionUnitCocycle.mapToColimit_mapToStage_transition
+        Mr cMr hrs i j
+    _ = c.transition i j := hcMr i j
+
 /-- The local affine base-change map sends a finite-stage overlap transition section
 to the overlap transition section of the colimit cocycle. -/
 theorem AffineIntersectionUnitCocycle.mapToColimit_overlapTransitionSection
