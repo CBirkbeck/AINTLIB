@@ -2272,7 +2272,8 @@ private theorem translateAlgEquivOfPoint_neg_algebraMap_numerator_eq
 
 /-- The `τ_{-k}`-image of `algMap q` is a unit at `P + k` whenever `q` is a nonzero CoordinateRing
 element that is a unit at `P` (`q ∉ maxIdealAt P`): `ord_(P+k) (τ_{-k}(algMap q)) = 0`. The point is
-that `(P + k) + (-k) = P`, so `q ∉ maxIdealAt P` transports to `q ∉ maxIdealAt` of the back-translate
+that `(P + k) + (-k) = P`, so `q ∉ maxIdealAt P` transports to `q ∉ maxIdealAt` of the
+back-translate
 of `P + k` by `-k`. Here `-k = (xk, negY xk yk)`. -/
 private theorem ord_P_translate_translateAlgEquivOfPoint_neg_algebraMap_eq_zero_of_notMem
     (P : (W_smooth W).SmoothPoint) (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
