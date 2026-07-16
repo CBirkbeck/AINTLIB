@@ -33,6 +33,22 @@ are morphisms over `S` with `i ≫ r = 𝟙 X`, and `g : Y ⟶ S` is flat, then
 theorem Flat.of_retract_over {X Y S : Scheme.{u}} {f : X ⟶ S} {g : Y ⟶ S}
     (i : X ⟶ Y) (r : Y ⟶ X) (hir : i ≫ r = 𝟙 X)
     (hi : i ≫ g = f) (hr : r ≫ f = g) [Flat g] : Flat f := by
+  /- EXECUTION RECIPE (verified against mathlib, 2026-07-16; all tools present):
+  1. `subst hi` (f := i ≫ g); `apply AlgebraicGeometry.Flat.of_stalkMap`; `intro x`;
+     `rw [Scheme.Hom.stalkMap_comp]` — goal `RingHom.Flat ((g.stalkMap (i x) ≫ i.stalkMap x).hom)`.
+  2. Flat input: `haveI := AlgebraicGeometry.Flat.stalkMap g (i x)`.
+  3. Retract equation, cast PACKAGED by mathlib (`Scheme.Hom.stalkMap_congr_hom` at
+     `(i ≫ r, 𝟙 X, hir)` + `stalkMap_comp` + `stalkMap_id`):
+     `r.stalkMap (i x) ≫ i.stalkMap x = (X.presheaf.stalkCongr (.of_eq …)).hom`.
+     Set `ρ := (X.presheaf.stalkCongr …).inv ≫ r.stalkMap (i x) : O_{X,x} ⟶ O_{Y,i x}`,
+     so `ρ ≫ i.stalkMap x = 𝟙` (iso-inv juggling).
+  4. R-linearity of ρ (needed for `Module.Flat.of_retract`): from `hr : r ≫ (i≫g) = g`,
+     `stalkMap_comp` at `(r, i≫g, i x)` + `stalkMap_congr_hom` — TWO more stalkCongr casts
+     (the S-point `(i≫g)(r(i x)) = g(i x)` and the X-point `r(i x) = x`); package as an
+     `AlgHom` over `O_{S, g(i x)}` via `RingHom.comp`-squares, then
+     `Module.Flat.of_retract (i := ρ-linear) (r := (i.stalkMap x)-linear)`.
+  5. Bridge `RingHom.Flat ↔ letI toAlgebra; Module.Flat` is definitional
+     (`RingHom.Flat`-def); close with the module retract. -/
   sorry
 
 end ModularCurves
