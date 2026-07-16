@@ -1,6 +1,6 @@
-STREAM-G0 TERMINAL (v10.288-G0, 2026-07-16) — AX2 session 1: CARRIER BUILT.
+STREAM-G0 ACTIVE (v10.291 dispatch, 2026-07-16) — EXECUTING THE FOUR-STEP MAP TO :112.
 
-fullLevelLocus finite étale (axiom-clean, de-Weiled) + spec layer + zero-detection
-banked (78cff24e0/dc659c014, pushed). Residual = MASTER-IFF + assemblies, fully
-mapped at board v10.288-G0 (lemma-by-lemma). No claims held. Next G0 session
-executes [L1]→[K4]→[MASTER-IFF]→[ASSEMBLY-:112]→[:195].
+CLAIM: rule-5, ONE session. (1) restrict-naturality [carrier-equations, explicit-base-
+ascription]; (2) closure-glue into GH's B2 pair_generates_iff_combos_ne_zero (criterion
+of record, general N — no primality); (3) MASTER-IFF via comp_torsion_mem_zeroSection_iff
++ torsion_geometricFibre_rank_two; (4) assembly ⟹ Bootstrap:112. Then :195.
