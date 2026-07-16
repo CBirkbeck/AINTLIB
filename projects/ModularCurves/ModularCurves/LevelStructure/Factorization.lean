@@ -1220,6 +1220,40 @@ theorem RelEffCartierDiv.IsSubgroup.finrank_prod_struct (M K : ℕ) [NeZero M] [
     _ = (D.ideal.subschemeι ≫ E.π).finrank s := by rw [hstruct]
     _ = M * K := hdeg s
 
+/-- **[F3-prodrank-spec] (affine case)** Over `Spec R`, the rank of the fibre product of
+two finite flat Specs is the product of the ranks — `pullbackSpecIso` + tensor rank. -/
+theorem finrank_pullback_comp_fst_spec (R A B : Type u) [CommRing R] [CommRing A]
+    [CommRing B] [Algebra R A] [Algebra R B] [Module.Finite R A] [Module.Flat R A]
+    [Module.Finite R B] [Module.Flat R B] (p : PrimeSpectrum R) :
+    (pullback.fst (Spec.map (CommRingCat.ofHom (algebraMap R A)))
+        (Spec.map (CommRingCat.ofHom (algebraMap R B)))
+      ≫ Spec.map (CommRingCat.ofHom (algebraMap R A))).finrank p
+    = Module.rankAtStalk A p * Module.rankAtStalk B p := by
+  have hcomp : pullback.fst (Spec.map (CommRingCat.ofHom (algebraMap R A)))
+        (Spec.map (CommRingCat.ofHom (algebraMap R B)))
+      ≫ Spec.map (CommRingCat.ofHom (algebraMap R A))
+      = (pullbackSpecIso R A B).hom
+        ≫ Spec.map (CommRingCat.ofHom (algebraMap R (TensorProduct R A B))) := by
+    rw [← pullbackSpecIso_hom_fst']
+    rw [Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+  rw [hcomp]
+  haveI hTfin : Module.Finite R (TensorProduct R A B) := inferInstance
+  haveI hTflat : Module.Flat R (TensorProduct R A B) := inferInstance
+  haveI : Flat (Spec.map (CommRingCat.ofHom (algebraMap R (TensorProduct R A B)))) := by
+    rw [Flat.SpecMap_iff]
+    exact RingHom.flat_algebraMap_iff.mpr hTflat
+  haveI : IsFinite (Spec.map (CommRingCat.ofHom (algebraMap R (TensorProduct R A B)))) := by
+    rw [IsFinite.SpecMap_iff]
+    exact RingHom.finite_algebraMap.mpr hTfin
+  rw [Scheme.Hom.finrank_comp_left_of_isIso]
+  rw [Scheme.Hom.finrank_SpecMap_eq_finrank
+    (RingHom.finite_algebraMap.mpr hTfin) (RingHom.flat_algebraMap_iff.mpr hTflat)]
+  have hfin := congrFun (RingHom.finrank_algebraMap (R := R) (S := TensorProduct R A B)) p
+  rw [show (CommRingCat.ofHom (algebraMap R (TensorProduct R A B))).hom
+      = algebraMap R (TensorProduct R A B) from rfl, hfin]
+  have := congrFun (Module.rankAtStalk_tensorProduct (R := R) (M := A) B) p
+  rw [this, Pi.mul_apply]
+
 /-- **[F3-prodrank] (the fibre-product rank formula — [FR-GEN]-grade, mathlib-PR shape)**
 The fibre rank of a fibre product of finite flat morphisms is the product of the fibre
 ranks: `deg (X ×_S Y → S) = deg X · deg Y` pointwise. Route (§16g): reduce to an affine
