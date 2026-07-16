@@ -584,3 +584,25 @@ Use-site (disj-2 points): the difference-sections' nonvanishing on the K-inverti
 Then disj-4: `exists_clopen_factor_of_prod_comaximal` (NEW general ideal-sheaf infrastructure:
 factoring through ∏ of pairwise-comaximal ideals ⟹ clopen decomposition of the source; CRT
 idempotents) — the real remaining infrastructure piece, next window's spine.
+
+## [F3-disj-4] the clopen split — COMPLETE VERIFIED DESIGN (KM worker, v10.293 close)
+
+`sup_ker_eq_top_of_pull_ne` ✓ PROVEN (85217bb98 — subscheme-intersection route, NO residue
+casts; the banked residue-retraction chain was never needed). Remaining: the PAIR-split
+**[F3-disj-pair]**: `q : T ⟶ C`, `hIJ : I ⊔ J = ⊤`, `hker : I * J ≤ q.ker` ⟹ clopen
+partition `T = T₁ ∐ T₂` with `I ≤ (T₁.ι ≫ q).ker`, `J ≤ (T₂.ι ≫ q).ker`; the ∏-version
+by induction. Verified toolkit:
+- `IdealSheafData.ideal_sup` is `rfl` (Basic.lean:182) ⟹ comaximal sheaf = comaximal at
+  every affine U. `support_mul : (I*J).support = supp I ⊔ supp J` is `rfl` (:423).
+- Support disjointness: `mem_support_iff_of_mem` (:343) + zeroLocus of `I_U ⊔ J_U = ⊤` is ∅.
+- The pieces: `T₁ := q ⁻¹(supp I)` etc.; cover since range q ⊆ supp(q.ker) ⊆ supp(I*J)
+  (`support_ker` + `support_antitone`); disjoint+clopen from the support disjointness.
+- Per-piece kernel bound (the only real work, ~40 lines): for `f ∈ I_U` and `x ∈ T₁ ∩ q⁻¹U`:
+  `q x ∉ supp J` gives `g ∈ J_U` with stalk-unit at `x`; `f·g ∈ I*J ≤ ker q` kills
+  `q♯f · q♯g`, so `q♯f` has zero stalk at every such `x`; germ-ext (sheaf sections with all
+  zero stalks vanish) gives `q♯f|_{T₁} = 0`, i.e. `I ≤ (T₁.ι ≫ q).ker`.
+- Factor per piece: `IsClosedImmersion.lift (subschemeι I) (T₁.ι ≫ q)` via `ker_subschemeι`.
+Use-site: the ∐-translate decomposition of `G = Σ_b T_b(D_M)` (orderDivisor_mul_crt +
+translate engine) with pairwise comaximality from `sup_ker_eq_top_of_pull_ne` + the
+difference-section nonvanishing (`geometric_input` roles-swapped) — this closes the
+integral `smul_hasExactOrder` and then the F3 converse. NEXT WINDOW'S SPINE.
