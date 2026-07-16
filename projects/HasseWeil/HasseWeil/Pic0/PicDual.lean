@@ -303,7 +303,8 @@ comap α* 𝔪_P` (for `f = 1`, `relNorm 𝔭 = (comap 𝔭)^f = comap 𝔭`).  
 computation is `Module.Free`-diamond-blocked, see `Curves/GenericFiber.lean` Piece 9), so this last
 step stays a per-isogeny obligation; the lemma below is the bridge that *reduces to it*. -/
 
-/-- **The `classNorm`/`κ` side of `Naturality`, evaluated at a rational point (axiom-clean bridge).**
+/-- **The `classNorm`/`κ` side of `Naturality`, evaluated at a rational point (axiom-clean
+bridge).**
 
 For a rational point `P = (x, y)` (a mathlib `Point.some`), the value of the relative-norm class map
 `classNorm` on `κ P = toClassEquiv' P` is the `mk0` class of the **relative ideal norm** of the
@@ -344,7 +345,8 @@ theorem classNorm_toClassEquiv'_some (ch : α.CoordHom) (hinj : Function.Injecti
 
 Combining the shipped `classNorm_toClassEquiv'_some` (the `relNorm0` form of the `Naturality` RHS)
 with the residue-degree bridge of `ClassGroupNorm` (`relNorm 𝔪 = comap 𝔪` at `inertiaDeg' = 1`, the
-`inertiaDeg' = 1` itself supplied **diamond-free** by `Ideal`.`inertiaDeg_under_eq_one_of_algHom_…`),
+`inertiaDeg' = 1` itself supplied **diamond-free** by
+`Ideal`.`inertiaDeg_under_eq_one_of_algHom_…`),
 we reduce the entire `hnat`/`Naturality` obligation to the **point-map ↔ `comap` agreement** — that
 the actual point map `α.toAddMonoidHom` sends `(x, y)` to a point whose `κ`-class is the contraction
 `comap α* 𝔪_{(x,y)}` (Silverman III.3.4, the `comap` form shipped as `toClass_toPointMap`).
@@ -390,7 +392,8 @@ the class of the **contraction** `comap α* (XYIdeal E x (C y))` — Silverman's
 `[PerfectField (FractionRing R)]` (its proof reduces to the Galois case, which fails for a function
 field over a finite base), but that hypothesis is *not* needed at `f = 1`: the shipped
 `ClassGroup.mk0_relNorm0_eq_mk0_comap_of_inertiaDeg_one` (`ClassGroupNorm.lean`) discharges
-`relNorm 𝔪 = comap 𝔪` from `inertiaDeg' = 1` alone via the module-length / DVR-base route, with **no**
+`relNorm 𝔪 = comap 𝔪` from `inertiaDeg' = 1` alone via the module-length / DVR-base route, with
+**no**
 `PerfectField`.  This removes the previous `[PerfectField E.FunctionField]` hypothesis.
 
 Proof: `XYIdeal` is maximal (`quotientXYIdealEquiv`) with residue field `F` (so `finrank F (R/𝔪) =
@@ -488,7 +491,8 @@ point map `α.toAddMonoidHom` sends `(x, y)` to a point whose `κ`-class is the 
 `comap α* 𝔪_{(x,y)}` (the `comap` form of Silverman III.3.4 — exactly what `toClass_toPointMap`
 supplies for a *geometric* isogeny whose point map is `toPointMap`).  This is the precise reduction
 of `hnat` to its remaining content: the `relNorm`-vs-`comap` gap is closed here by the residue
-identity `mk0_relNorm0_XYIdeal_eq_mk0_comap`, which is now **`PerfectField`-free** (it routes through
+identity `mk0_relNorm0_XYIdeal_eq_mk0_comap`, which is now **`PerfectField`-free** (it routes
+through
 the shipped `ClassGroup.mk0_relNorm0_eq_mk0_comap_of_inertiaDeg_one`, valid at `f = 1` with no
 `PerfectField`).  **No `PerfectField E.FunctionField` hypothesis** — the only residual is the
 point-map ↔ `comap` agreement `hpoint`, i.e. Silverman III.3.4 for the *actual* point map (supplied
@@ -885,7 +889,8 @@ theorem picDual_zsmul_eq_zsmul_of_comp_eq
   have hcomp : (r • δ).comp (α.zsmul r).toAddMonoidHom =
       (mulByInt E ((α.degree : ℤ) * r ^ 2)).toAddMonoidHom := by
     ext P
-    simp only [AddMonoidHom.comp_apply, AddMonoidHom.smul_apply, Isogeny.zsmul_apply, mulByInt_apply]
+    simp only [AddMonoidHom.comp_apply, AddMonoidHom.smul_apply,
+      Isogeny.zsmul_apply, mulByInt_apply]
     -- `r • δ (r • α P) = r • (r • δ (α P)) = r² • (deg α • P) = (deg α · r²) • P`.
     rw [map_zsmul, hδα P, smul_smul, smul_smul]
     congr 1
@@ -947,10 +952,12 @@ theorem picDual_eq_of_trace_relations (ch : α.CoordHom)
   -- `α P + α̂ P = tr • P = α P + δ P` ⟹ `α̂ P = δ P` (left-cancel `α P`).
   exact add_left_cancel (hd.trans he.symm)
 
-/-- **`[r·t − 2s] − (r·π − s) = r·V − s` from `π + V = [t]` (the candidate trace half, point maps).**
+/-- **`[r·t − 2s] − (r·π − s) = r·V − s` from `π + V = [t]` (the candidate trace half, point
+maps).**
 
 The point-map identity `(r·π − s) + (r·V − s) = [r·t − 2s]` for abstract endomorphisms `π, V` of
-`E.Point` satisfying `π + V = [t]` (the Frobenius trace relation).  This is the **non-circular** half
+`E.Point` satisfying `π + V = [t]` (the Frobenius trace relation).  This is the **non-circular**
+half
 of the Route-C dual-additivity output: pointwise
 `r·π P − s·P + r·V P − s·P = r·(π P + V P) − 2s·P = r·(t·P) − 2s·P = (r·t − 2s)·P`.
 
