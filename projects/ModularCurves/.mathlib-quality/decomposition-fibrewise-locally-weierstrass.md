@@ -956,3 +956,12 @@ immersion and the affine source-cover criterion gives a closed diagonal. The pro
 projection and pullback-isomorphism helpers, passes both morphisms explicitly to cancellation
 lemmas, and adds no hypothesis or proof-resource option. Its focused build is green, and all four
 new public declarations have axiom audit exactly `propext`, `Classical.choice`, and `Quot.sound`.
+
+Active dependency claim (2026-07-16): prove
+`Algebra.SpreadData.FunctorModel.exists_affineIntersectionConditionsAndSeparatedAtLaterStage`.
+For a finite affine-intersection functor whose open, pushout, and canonical pair-map surjectivity
+conditions hold over the filtered colimit, produce one later functor stage satisfying all three
+conditions simultaneously. The proof must consume
+`IsFilteredAlgColimit.exists_tensorProductMap_surjective`, use only private tensor
+base-change coherence helpers built from mathlib's `TensorProduct.assoc`, `cancelBaseChange`, and
+`congr`, and add no hypothesis, duplicate monoidal API, or proof-resource option.
