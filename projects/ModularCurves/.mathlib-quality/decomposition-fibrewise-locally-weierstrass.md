@@ -819,3 +819,11 @@ two postcomposition bridges, and cancellation of the pullback-unit isomorphism. 
 is green, and the theorem's axiom audit contains exactly `propext`, `Classical.choice`, and
 `Quot.sound`. This is the compatibility input needed to descend the finite-stage glued invertible
 module after base change; it adds no hypotheses and no new public abstraction beyond the target.
+
+Completed dependency claim (2026-07-16): constructed
+`AffineIntersectionUnitCocycle.baseChangeGluedModuleIso`. The pullback of the concrete
+finite-stage `gluedModule` along `FunctorModel.affineIntersectionGluedBaseChange` is now
+canonically isomorphic to the concrete `gluedModule` of `cM.mapToColimit M`, by direct application
+of `gluedModuleIsoOfCompatibleChartTrivialization` to the completed compatibility theorem. The
+focused build is green, the axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`,
+and no hypothesis, abstraction, or proof-resource option was added.

@@ -1218,6 +1218,38 @@ theorem AffineIntersectionUnitCocycle.baseChangeGluedModuleChartTrivialization_i
     AffineIntersectionUnitCocycle.baseChangeGluedModuleChartTrivialization_compatibleAt
       M cM hopenG hpushG hopenM hpushM i j
 
+/-- Pulling a finite-stage Cech-glued module back to the filtered colimit gives the
+Cech-glued module of the transported transition cocycle. -/
+noncomputable def AffineIntersectionUnitCocycle.baseChangeGluedModuleIso
+    {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+    {Sstage : ι → Type u} [∀ i, CommRing (Sstage i)] [∀ i, Algebra R (Sstage i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (Sstage i →ₐ[R] Sstage j)}
+    {A : Type u} [CommRing A] [Algebra R A] {uA : ∀ i, Sstage i →ₐ[R] A}
+    {J : Type u} {G : Functor (Finset J) (CommAlgCat.{u} A)}
+    {H : Algebra.IsFilteredAlgColimit R Sstage t A uA}
+    (M : Algebra.SpreadData.FunctorModel G H)
+    (cM : AffineIntersectionUnitCocycle M.toFunctor)
+    (hopenG : Scheme.GlueData.IsOpenAffineIntersectionFunctor G)
+    (hpushG : Scheme.GlueData.IsPushoutAffineIntersectionFunctor G)
+    (hopenM : Scheme.GlueData.IsOpenAffineIntersectionFunctor M.toFunctor)
+    (hpushM : Scheme.GlueData.IsPushoutAffineIntersectionFunctor M.toFunctor) :
+    letI : Algebra (Sstage M.stage) A := (uA M.stage).toRingHom.toAlgebra
+    let g := M.affineIntersectionGluedBaseChange hopenG hpushG hopenM hpushM
+    (pullback g).obj (cM.gluedModule hopenM hpushM) ≅
+      (AffineIntersectionUnitCocycle.mapToColimit M cM).gluedModule hopenG hpushG := by
+  classical
+  letI : Algebra (Sstage M.stage) A := (uA M.stage).toRingHom.toAlgebra
+  let g := M.affineIntersectionGluedBaseChange hopenG hpushG hopenM hpushM
+  exact
+    AffineIntersectionUnitCocycle.gluedModuleIsoOfCompatibleChartTrivialization
+      (c := AffineIntersectionUnitCocycle.mapToColimit M cM)
+      hopenG hpushG
+      ((pullback g).obj (cM.gluedModule hopenM hpushM))
+      (AffineIntersectionUnitCocycle.baseChangeGluedModuleChartTrivialization
+        M cM hopenG hpushG hopenM hpushM)
+      (AffineIntersectionUnitCocycle.baseChangeGluedModuleChartTrivialization_isCompatible
+        M cM hopenG hpushG hopenM hpushM)
+
 end
 
 end AlgebraicGeometry.Scheme.Modules
