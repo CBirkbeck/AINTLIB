@@ -1087,6 +1087,55 @@ theorem RelEffCartierDiv.smulKernelπ_isFinite (D : RelEffCartierDiv E.π) (c : 
   rw [RelEffCartierDiv.smulKernelπ]
   exact MorphismProperty.pullback_snd (P := @IsFinite) _ _ hfin
 
+/-- **[F3-etale] (KM p. 28: "G[N₁] is finite etale over S, of rank N₁" — étale part)**
+When `M` is invertible on `S`, the `M`-kernel of a divisor is étale over `S` given its
+flatness: it sits as a closed subscheme of the étale `E[M]` (pasting of kernel
+pullbacks), so it is formally unramified, and flat + finite presentation assemble
+étaleness. -/
+theorem RelEffCartierDiv.smulKernelπ_etale (D : RelEffCartierDiv E.π) (M : ℕ) [NeZero M]
+    (hinv : NIsInvertible S M) (hflat : Flat (D.smulKernelπ E (M : ℤ))) :
+    Etale (D.smulKernelπ E (M : ℤ)) := by
+  -- the two kernel pullback squares
+  have t : IsPullback (E.torsionπ M) (E.torsionι M) E.zero (E.mulByHom M) :=
+    (IsPullback.of_hasPullback (E.mulByHom (M : ℕ)) E.zero).flip
+  have sq : IsPullback (D.smulKernelπ E (M : ℤ)) (D.smulKernelι E (M : ℤ)) E.zero
+      (D.ideal.subschemeι ≫ E.mulByHom (M : ℤ)) :=
+    (IsPullback.of_hasPullback (D.ideal.subschemeι ≫ E.mulByHom (M : ℤ)) E.zero).flip
+  -- paste: the left square exhibits the kernel as a closed subscheme of E[M]
+  have hsq : IsPullback
+      (t.lift (D.smulKernelπ E (M : ℤ)) (D.smulKernelι E (M : ℤ) ≫ D.ideal.subschemeι)
+        (by rw [sq.w, Category.assoc]))
+      (D.smulKernelι E (M : ℤ)) (E.torsionι M) D.ideal.subschemeι :=
+    IsPullback.of_right' sq t
+  set j := t.lift (D.smulKernelπ E (M : ℤ))
+    (D.smulKernelι E (M : ℤ) ≫ D.ideal.subschemeι) (by rw [sq.w, Category.assoc]) with hj
+  haveI hjci : IsClosedImmersion j :=
+    MorphismProperty.of_isPullback (P := @IsClosedImmersion) hsq.flip inferInstance
+  -- the composite identity
+  have hcomp : j ≫ E.torsionπ M = D.smulKernelπ E (M : ℤ) := t.lift_fst _ _ _
+  -- assemble étaleness
+  haveI hτ : Etale (E.torsionπ M) := E.torsionπ_etale M hinv
+  rw [← hcomp]
+  haveI : LocallyOfFinitePresentation (j ≫ E.torsionπ M) := by
+    rw [hcomp]
+    haveI : LocallyOfFinitePresentation
+        (D.ideal.subschemeι ≫ E.mulByHom (M : ℤ)) := by
+      haveI h1 : LocallyOfFinitePresentation (E.mulByHom (M : ℤ)) := by
+        have := E.mulByHom_locallyOfFinitePresentation M
+        exact this
+      haveI h2 : LocallyOfFinitePresentation (D.ideal.subschemeι ≫ E.π) := D.lfp
+      haveI hι : LocallyOfFinitePresentation (D.ideal.subschemeι) :=
+        LocallyOfFinitePresentation.of_comp_of_locallyOfFiniteType h2 inferInstance
+      exact MorphismProperty.comp_mem _ _ _ hι h1
+    rw [RelEffCartierDiv.smulKernelπ]
+    exact MorphismProperty.pullback_snd (P := @LocallyOfFinitePresentation) _ _ this
+  haveI : FormallyUnramified (j ≫ E.torsionπ M) := by
+    haveI h1 : FormallyUnramified j := inferInstance
+    haveI h2 : FormallyUnramified (E.torsionπ M) := inferInstance
+    exact MorphismProperty.comp_mem _ j (E.torsionπ M) h1 h2
+  haveI : Flat (j ≫ E.torsionπ M) := by rw [hcomp]; exact hflat
+  exact Etale.of_formallyUnramified_of_flat (j ≫ E.torsionπ M)
+
 end ProductDecomposition
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
