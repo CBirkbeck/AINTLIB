@@ -400,6 +400,35 @@ lemma ideal_decomp_at_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 7)
   congr 2
   omega
 
+/-- For two distinct nonzero prime ideals `P₁ ≠ P₂` of `𝓞 (Kminus p)`, the exponent of `P₁`
+in a product `P₁ ^ a * P₂ ^ b` is determined by the product: if
+`P₁ ^ a₁ * P₂ ^ b₁ = P₁ ^ a₂ * P₂ ^ b₂` then `a₁ = a₂`. Proved by counting `P₁` in the
+normalized factorisation, where the `P₂`-part contributes nothing since `P₁ ≠ P₂`. -/
+lemma pow_mul_pow_left_exponent_eq {P₁ P₂ : Ideal (𝓞 (Kminus p))}
+    (hP₁_ne : P₁ ≠ ⊥) (hP₂_ne : P₂ ≠ ⊥) [P₁.IsPrime] [P₂.IsPrime] (hP₁₂_ne : P₁ ≠ P₂)
+    {a₁ a₂ b₁ b₂ : ℕ} (h_eq : P₁ ^ a₁ * P₂ ^ b₁ = P₁ ^ a₂ * P₂ ^ b₂) : a₁ = a₂ := by
+  classical
+  have h_prime_P₁ : Prime P₁ := Ideal.prime_of_isPrime hP₁_ne inferInstance
+  have h_prime_P₂ : Prime P₂ := Ideal.prime_of_isPrime hP₂_ne inferInstance
+  have h_count : Multiset.count P₁ (UniqueFactorizationMonoid.normalizedFactors
+      (P₁ ^ a₁ * P₂ ^ b₁)) =
+      Multiset.count P₁ (UniqueFactorizationMonoid.normalizedFactors
+      (P₁ ^ a₂ * P₂ ^ b₂)) := by rw [h_eq]
+  rw [UniqueFactorizationMonoid.normalizedFactors_mul (pow_ne_zero _ hP₁_ne)
+      (pow_ne_zero _ hP₂_ne),
+    UniqueFactorizationMonoid.normalizedFactors_mul (pow_ne_zero _ hP₁_ne)
+      (pow_ne_zero _ hP₂_ne),
+    UniqueFactorizationMonoid.normalizedFactors_pow,
+    UniqueFactorizationMonoid.normalizedFactors_pow,
+    UniqueFactorizationMonoid.normalizedFactors_pow,
+    UniqueFactorizationMonoid.normalizedFactors_pow,
+    UniqueFactorizationMonoid.normalizedFactors_irreducible h_prime_P₁.irreducible,
+    UniqueFactorizationMonoid.normalizedFactors_irreducible h_prime_P₂.irreducible,
+    normalize_eq, normalize_eq] at h_count
+  simp only [Multiset.count_add, Multiset.count_nsmul, Multiset.count_singleton_self,
+    Multiset.count_singleton, if_neg hP₁₂_ne, mul_zero, mul_one, add_zero] at h_count
+  exact h_count
+
 /-- **Split case counting for q = 2**: the number of ideals of norm 2^k is k+1. -/
 theorem idealNormMultiplicity_at_two_split_eq (hp3 : p % 4 = 3) (hp7 : p % 8 = 7) (k : ℕ) :
     idealNormMultiplicity (Kminus p) (2 ^ k) = k + 1 := by
@@ -428,29 +457,6 @@ theorem idealNormMultiplicity_at_two_split_eq (hp3 : p % 4 = 3) (hp7 : p % 8 = 7
     intro a ha
     rw [map_mul, map_pow, map_pow, habsNormP₁, habsNormP₂, ← pow_add]
     congr 1; omega
-  have h_uniqueness : ∀ (a₁ a₂ : ℕ), a₁ ≤ k → a₂ ≤ k →
-      P₁ ^ a₁ * P₂ ^ (k - a₁) = P₁ ^ a₂ * P₂ ^ (k - a₂) → a₁ = a₂ := by
-    intro a₁ a₂ ha₁ ha₂ h_eq
-    have h_prime_P₁ : Prime P₁ := Ideal.prime_of_isPrime hP₁_ne inferInstance
-    have h_prime_P₂ : Prime P₂ := Ideal.prime_of_isPrime hP₂_ne inferInstance
-    have h_count : Multiset.count P₁ (UniqueFactorizationMonoid.normalizedFactors
-        (P₁ ^ a₁ * P₂ ^ (k - a₁))) =
-        Multiset.count P₁ (UniqueFactorizationMonoid.normalizedFactors
-        (P₁ ^ a₂ * P₂ ^ (k - a₂))) := by rw [h_eq]
-    rw [UniqueFactorizationMonoid.normalizedFactors_mul (pow_ne_zero _ hP₁_ne)
-        (pow_ne_zero _ hP₂_ne),
-      UniqueFactorizationMonoid.normalizedFactors_mul (pow_ne_zero _ hP₁_ne)
-        (pow_ne_zero _ hP₂_ne),
-      UniqueFactorizationMonoid.normalizedFactors_pow,
-      UniqueFactorizationMonoid.normalizedFactors_pow,
-      UniqueFactorizationMonoid.normalizedFactors_pow,
-      UniqueFactorizationMonoid.normalizedFactors_pow,
-      UniqueFactorizationMonoid.normalizedFactors_irreducible h_prime_P₁.irreducible,
-      UniqueFactorizationMonoid.normalizedFactors_irreducible h_prime_P₂.irreducible,
-      normalize_eq, normalize_eq] at h_count
-    simp only [Multiset.count_add, Multiset.count_nsmul, Multiset.count_singleton_self,
-      Multiset.count_singleton, if_neg hP₁₂_ne, mul_zero, mul_one, add_zero] at h_count
-    exact h_count
   set S := {I : NonzeroIdeal (Kminus p) // Ideal.absNorm I.1 = 2 ^ k}
   let forward : S → Fin (k + 1) := fun ⟨⟨I, hI_ne⟩, hI_norm⟩ ↦
     ⟨(ideal_decomp_at_two_split p hp3 hp7 hP₁_mem hP₂_mem hP_eq hI_ne hI_norm).choose,
@@ -474,10 +480,9 @@ theorem idealNormMultiplicity_at_two_split_eq (hp3 : p % 4 = 3) (hp7 : p % 8 = 7
         have ha_le : a ≤ k := Nat.lt_succ_iff.mp ha
         set decomp := ideal_decomp_at_two_split p hp3 hp7 hP₁_mem hP₂_mem hP_eq
           (h_ideal_ne a) (h_ideal_norm a ha_le)
-        have ha'_le : decomp.choose ≤ k := decomp.choose_spec.1
         have h_eq : P₁ ^ decomp.choose * P₂ ^ (k - decomp.choose) = P₁ ^ a * P₂ ^ (k - a) :=
           decomp.choose_spec.2.symm
-        exact h_uniqueness _ _ ha'_le ha_le h_eq }
+        exact pow_mul_pow_left_exponent_eq p hP₁_ne hP₂_ne hP₁₂_ne h_eq }
   rw [Nat.card_congr h_equiv, Nat.card_fin]
 
 /-- **Inert case, odd k at q=2**: count = 0. -/
