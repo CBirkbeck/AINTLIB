@@ -271,7 +271,8 @@ theorem convexSubgroupOfPrime_bot (A : ValuationSubring K) :
       Ideal.mem_primeCompl_iff.mpr fun h => hx_ne (Subtype.ext_iff.mp (Ideal.mem_bot.mp h))
     exact (ofPrime_valuation_eq_one_iff_mem_primeCompl A ⊥ ⟨x, hxA⟩).mpr this
   · have : (⟨x⁻¹, hxA⟩ : A) ∈ (⊥ : Ideal A).primeCompl :=
-      Ideal.mem_primeCompl_iff.mpr fun h => inv_ne_zero hx_ne (Subtype.ext_iff.mp (Ideal.mem_bot.mp h))
+      Ideal.mem_primeCompl_iff.mpr fun h =>
+        inv_ne_zero hx_ne (Subtype.ext_iff.mp (Ideal.mem_bot.mp h))
     have h1 := (ofPrime_valuation_eq_one_iff_mem_primeCompl A ⊥ ⟨x⁻¹, hxA⟩).mpr this
     rw [map_inv₀] at h1; exact inv_eq_one.mp h1
 
