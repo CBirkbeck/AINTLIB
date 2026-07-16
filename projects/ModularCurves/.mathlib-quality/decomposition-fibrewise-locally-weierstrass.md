@@ -976,9 +976,11 @@ with explicit transport through `ΓSpecIso`. Its focused build is green, its axi
 `propext`, `Classical.choice`, and `Quot.sound`, and it adds no hypothesis, duplicate diagonal
 abstraction, or proof-resource option.
 
-Active dependency claim (2026-07-16): prove
+Completed dependency claim (2026-07-16): proved
 `Scheme.Hom.affineIntersectionGluedToOriginal_comp_toSpec`. For an affine base, identify
 the canonical affine-intersection structural morphism with the glued-to-original map followed by
-the original family morphism and `S.isoSpec.hom`. Prove the equality chartwise using the existing
-glue comparison and `Scheme.isoSpec_hom_naturality`; add no covering hypothesis, new comparison
-structure, or proof-resource option.
+the original family morphism and `S.isoSpec.hom`. The proof is chartwise: it first isolates the
+finite-intersection ring isomorphism's compatibility with the base algebra map, transports the
+geometric chart through `Scheme.isoSpec_hom_naturality`, and then uses glue-cover hom extensionality.
+Its focused build is green, its axiom audit is exactly `propext`, `Classical.choice`, and
+`Quot.sound`, and it adds no covering hypothesis, comparison structure, or proof-resource option.

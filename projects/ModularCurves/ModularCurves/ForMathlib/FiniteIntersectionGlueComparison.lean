@@ -88,6 +88,66 @@ noncomputable def Scheme.Hom.affineIntersectionSchemeIso
   exact Scheme.Spec.mapIso (π.finiteIntersectionRingIso U s hs).op ≪≫
     (X.finiteIntersectionOpen U s).toScheme.isoSpec.symm
 
+private theorem Scheme.isoSpec_inv_comp_comp_isoSpec_hom
+    {X Y : Scheme.{u}} [IsAffine X] [IsAffine Y] (f : X ⟶ Y) :
+    X.isoSpec.inv ≫ f ≫ Y.isoSpec.hom = Spec.map f.appTop := by
+  apply (cancel_epi X.isoSpec.hom).mp
+  rw [Iso.hom_inv_id_assoc]
+  exact (Scheme.isoSpec_hom_naturality f).symm
+
+private theorem Scheme.Hom.finiteIntersectionRingIso_comp_appTop
+    (π : X ⟶ S) (U : J → X.Opens) (s : Finset J) (hs : s.Nonempty) :
+    ((X.finiteIntersectionOpen U s).ι ≫ π).appTop ≫
+        (π.finiteIntersectionRingIso U s hs).hom =
+      CommRingCat.ofHom
+        (algebraMap Γ(S, (⊤ : S.Opens)) ((π.affineIntersectionFunctor U).obj s)) := by
+  ext x
+  change (π.finiteIntersectionRingIso U s hs).hom
+      (algebraMap Γ(S, (⊤ : S.Opens)) (π.finiteIntersectionRing U s) x) =
+    algebraMap Γ(S, (⊤ : S.Opens)) ((π.affineIntersectionFunctor U).obj s) x
+  exact (eqToHom (π.affineIntersectionFunctor_obj_nonempty U s hs).symm).hom.commutes x
+
+private theorem Scheme.Hom.specMap_finiteIntersectionRingIso_comp_appTop
+    (π : X ⟶ S) (U : J → X.Opens) (s : Finset J) (hs : s.Nonempty) :
+    Spec.map (π.finiteIntersectionRingIso U s hs).op.hom.unop ≫
+        Spec.map ((X.finiteIntersectionOpen U s).ι ≫ π).appTop =
+      Spec.map (CommRingCat.ofHom
+        (algebraMap Γ(S, (⊤ : S.Opens)) ((π.affineIntersectionFunctor U).obj s))) := by
+  exact (Spec.map_comp
+      ((X.finiteIntersectionOpen U s).ι ≫ π).appTop
+      (π.finiteIntersectionRingIso U s hs).hom).symm.trans
+    (congrArg Spec.map (π.finiteIntersectionRingIso_comp_appTop U s hs))
+
+private theorem Scheme.Hom.affineIntersectionSchemeIso_hom_comp_toSpec
+    (π : X ⟶ S) [IsAffine S] (U : J → X.Opens) (s : Finset J) (hs : s.Nonempty)
+    (hUs : IsAffineOpen (X.finiteIntersectionOpen U s)) :
+    (π.affineIntersectionSchemeIso U s hs hUs).hom ≫
+        ((X.finiteIntersectionOpen U s).ι ≫ π) ≫ S.isoSpec.hom =
+      Spec.map (CommRingCat.ofHom
+        (algebraMap Γ(S, (⊤ : S.Opens)) ((π.affineIntersectionFunctor U).obj s))) := by
+  letI : IsAffine (X.finiteIntersectionOpen U s).toScheme := hUs
+  let g := (X.finiteIntersectionOpen U s).ι ≫ π
+  have hiso :
+      (π.affineIntersectionSchemeIso U s hs hUs).hom =
+        Spec.map (π.finiteIntersectionRingIso U s hs).op.hom.unop ≫
+          (X.finiteIntersectionOpen U s).toScheme.isoSpec.inv :=
+    rfl
+  have hnat := Scheme.isoSpec_inv_comp_comp_isoSpec_hom g
+  calc
+    _ = (Spec.map (π.finiteIntersectionRingIso U s hs).op.hom.unop ≫
+          (X.finiteIntersectionOpen U s).toScheme.isoSpec.inv) ≫
+        g ≫ S.isoSpec.hom :=
+      congrArg (fun k => k ≫ g ≫ S.isoSpec.hom) hiso
+    _ = Spec.map (π.finiteIntersectionRingIso U s hs).op.hom.unop ≫
+        ((X.finiteIntersectionOpen U s).toScheme.isoSpec.inv ≫
+          g ≫ S.isoSpec.hom) :=
+      Category.assoc _ _ _
+    _ = Spec.map (π.finiteIntersectionRingIso U s hs).op.hom.unop ≫
+        Spec.map g.appTop :=
+      congrArg
+        (fun k => Spec.map (π.finiteIntersectionRingIso U s hs).op.hom.unop ≫ k) hnat
+    _ = _ := π.specMap_finiteIntersectionRingIso_comp_appTop U s hs
+
 private theorem Scheme.Hom.affineIntersectionSpecMap_ringIso
     (π : X ⟶ S) (U : J → X.Opens) {s t : Finset J} (f : s ⟶ t)
     (hs : s.Nonempty) (ht : t.Nonempty) :
@@ -275,6 +335,44 @@ private theorem Scheme.Hom.affineIntersectionChartIso_hom_ι
     (π.affineIntersectionSchemeIso U (comparisonSingletonIndex i) hi (hU _ hi)).hom ≫
       (X.finiteIntersectionOpen U (comparisonSingletonIndex i)).ι
   rw [Scheme.isoOfEq_hom, Scheme.homOfLE_ι]
+
+private theorem Scheme.Hom.affineIntersectionChartIso_hom_comp_toSpec
+    (π : X ⟶ S) [IsAffine S] (U : J → X.Opens)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (i : J) :
+    (π.affineIntersectionChartIso U hU i).hom ≫
+        (U i).ι ≫ π ≫ S.isoSpec.hom =
+      Scheme.GlueData.affineIntersectionChartToSpec (π.affineIntersectionFunctor U) i := by
+  classical
+  have hi : (comparisonSingletonIndex i).Nonempty := by
+    simp [comparisonSingletonIndex]
+  have hchart := π.affineIntersectionChartIso_hom_ι U hU i
+  calc
+    _ = ((π.affineIntersectionChartIso U hU i).hom ≫ (U i).ι) ≫
+        (π ≫ S.isoSpec.hom) :=
+      (Category.assoc _ _ _).symm
+    _ = π.affineIntersectionChartMap U hU i ≫ (π ≫ S.isoSpec.hom) :=
+      congrArg (fun k => k ≫ (π ≫ S.isoSpec.hom)) hchart
+    _ = ((π.affineIntersectionSchemeIso U (comparisonSingletonIndex i) hi
+          (hU _ hi)).hom ≫
+        (X.finiteIntersectionOpen U (comparisonSingletonIndex i)).ι) ≫
+          (π ≫ S.isoSpec.hom) :=
+      rfl
+    _ = (π.affineIntersectionSchemeIso U (comparisonSingletonIndex i) hi
+          (hU _ hi)).hom ≫
+        (((X.finiteIntersectionOpen U (comparisonSingletonIndex i)).ι ≫ π) ≫
+          S.isoSpec.hom) := by
+      exact (Category.assoc _ _ _).trans
+        (congrArg (fun k =>
+          (π.affineIntersectionSchemeIso U (comparisonSingletonIndex i) hi
+            (hU _ hi)).hom ≫ k)
+          (Category.assoc _ _ _).symm)
+    _ = Spec.map (CommRingCat.ofHom
+        (algebraMap Γ(S, (⊤ : S.Opens))
+          ((π.affineIntersectionFunctor U).obj (comparisonSingletonIndex i)))) :=
+      π.affineIntersectionSchemeIso_hom_comp_toSpec U
+        (comparisonSingletonIndex i) hi (hU _ hi)
+    _ = _ := rfl
 
 private theorem Scheme.Hom.affineIntersectionOverlapIso_hom_ι
     (π : X ⟶ S) (U : J → X.Opens)
@@ -479,6 +577,49 @@ theorem Scheme.Hom.affineIntersectionGlueData_ι_affineIntersectionGluedToOrigin
       (π.affineIntersectionChartIso U hU i).hom ≫ (U i).ι := by
   rw [π.affineIntersectionGlueData_ι_affineIntersectionGluedToOriginal U hU i,
     π.affineIntersectionChartIso_hom_ι U hU i]
+
+/-- Over an affine base, the canonical structural morphism of the affine-intersection
+glue is the glued-to-original map followed by the original structural morphism and
+the canonical map from the base to its spectrum of global sections. -/
+@[reassoc]
+theorem Scheme.Hom.affineIntersectionGluedToOriginal_comp_toSpec
+    (π : X ⟶ S) [IsAffine S] (U : J → X.Opens)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s)) :
+    π.affineIntersectionGluedToOriginal U hU ≫ π ≫ S.isoSpec.hom =
+      Scheme.GlueData.affineIntersectionToSpec
+        (π.affineIntersectionFunctor U)
+        (π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU)
+        (π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU) := by
+  apply (π.affineIntersectionGlueData U hU).openCover.hom_ext
+  intro i
+  change J at i
+  change (π.affineIntersectionGlueData U hU).ι i ≫
+      (π.affineIntersectionGluedToOriginal U hU ≫ π ≫ S.isoSpec.hom) =
+    (π.affineIntersectionGlueData U hU).ι i ≫
+      Scheme.GlueData.affineIntersectionToSpec
+        (π.affineIntersectionFunctor U)
+        (π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU)
+        (π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU)
+  calc
+    _ = ((π.affineIntersectionGlueData U hU).ι i ≫
+          π.affineIntersectionGluedToOriginal U hU) ≫
+        (π ≫ S.isoSpec.hom) :=
+      (Category.assoc _ _ _).symm
+    _ = ((π.affineIntersectionChartIso U hU i).hom ≫ (U i).ι) ≫
+        (π ≫ S.isoSpec.hom) :=
+      congrArg (fun k => k ≫ (π ≫ S.isoSpec.hom))
+        (π.affineIntersectionGlueData_ι_affineIntersectionGluedToOriginal_eq_chartIso
+          U hU i)
+    _ = (π.affineIntersectionChartIso U hU i).hom ≫
+        (U i).ι ≫ π ≫ S.isoSpec.hom :=
+      Category.assoc _ _ _
+    _ = Scheme.GlueData.affineIntersectionChartToSpec
+        (π.affineIntersectionFunctor U) i :=
+      π.affineIntersectionChartIso_hom_comp_toSpec U hU i
+    _ = _ := (Scheme.GlueData.ofAffineIntersectionFunctor_ι_affineIntersectionToSpec
+      (π.affineIntersectionFunctor U)
+      (π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU)
+      (π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU) i).symm
 
 private theorem Scheme.Hom.affineIntersectionOriginalToGlued_restrict
     (π : X ⟶ S) (U : J → X.Opens) (hcover : IsOpenCover U)
