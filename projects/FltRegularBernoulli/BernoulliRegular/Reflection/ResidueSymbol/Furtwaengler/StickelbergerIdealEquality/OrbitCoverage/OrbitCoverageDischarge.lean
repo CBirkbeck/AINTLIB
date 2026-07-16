@@ -95,6 +95,21 @@ theorem cyclotomicUnit_mul_frobeniusPower_val_eq_residueOrbit
   have h := congrArg ZMod.val hcast
   rwa [ZMod.val_natCast_of_lt hlt] at h
 
+/-- For a commutative group `G`, an element `a` and a subgroup `H`, the coset
+`{b | a * b⁻¹ ∈ H}` is in bijection with `H` via `h ↦ a * h`. -/
+private def cosetEquivSubgroup {G : Type*} [CommGroup G] (a : G) (H : Subgroup G) :
+    H ≃ {b : G // a * b⁻¹ ∈ H} where
+  toFun h := ⟨a * (h : G), by
+    have h_eq : a * (a * (h : G))⁻¹ = ((h : G))⁻¹ := by simp [mul_comm]
+    rw [h_eq]
+    exact H.inv_mem h.2⟩
+  invFun b := ⟨a⁻¹ * (b : G), by
+    have h_eq : a⁻¹ * (b : G) = (a * (b : G)⁻¹)⁻¹ := by simp [mul_comm]
+    rw [h_eq]
+    exact H.inv_mem b.2⟩
+  left_inv h := by apply Subtype.ext; simp [mul_comm]
+  right_inv b := by apply Subtype.ext; simp [mul_comm]
+
 /-- Enumerate a Frobenius coset by the distinct powers of the Frobenius unit.
 
 The left side sums over all cyclotomic units but only keeps the units in the
@@ -124,31 +139,7 @@ theorem frobeniusCosetWeightSum_eq_residueOrbitSum
     rw [← Finset.sum_subtype_eq_sum_filter
       (s := (Finset.univ : Finset (CyclotomicUnitDelta p))) (f := f)]
     simp
-  let eH : H ≃ {b : CyclotomicUnitDelta p // pred b} :=
-    { toFun := fun h ↦
-        ⟨a * (h : CyclotomicUnitDelta p), by
-          dsimp [pred, H]
-          have h_eq : a * (a * (h : CyclotomicUnitDelta p))⁻¹ =
-              ((h : CyclotomicUnitDelta p))⁻¹ := by
-            simp [mul_comm]
-          rw [h_eq]
-          exact (Subgroup.zpowers u).inv_mem h.2⟩
-      invFun := fun b ↦
-        ⟨a⁻¹ * (b : CyclotomicUnitDelta p), by
-          dsimp [pred, H] at b
-          have h_eq : a⁻¹ * (b : CyclotomicUnitDelta p) =
-              (a * (b : CyclotomicUnitDelta p)⁻¹)⁻¹ := by
-            simp [mul_comm]
-          rw [h_eq]
-          exact (Subgroup.zpowers u).inv_mem b.2⟩
-      left_inv := by
-        intro h
-        apply Subtype.ext
-        simp [mul_comm]
-      right_inv := by
-        intro b
-        apply Subtype.ext
-        simp [mul_comm] }
+  let eH : H ≃ {b : CyclotomicUnitDelta p // pred b} := cosetEquivSubgroup a H
   have hsub :
       (∑ x : {b : CyclotomicUnitDelta p // pred b}, f x) =
         ∑ h : H, f (a * (h : CyclotomicUnitDelta p)) := by
