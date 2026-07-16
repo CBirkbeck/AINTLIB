@@ -22015,3 +22015,66 @@ same toolkit) + **Stage D** (arbitrary-R transfer of the killing: ring-base-chan
 `E3ModuliRing ℤ[1/3] → E3ModuliRing R` via `Point.pull_zsmul` + `projModelAffineSection_baseChange` +
 the model base-change square). For :91 (hArb): the field-level ⟹-bridges (`3P=0 ⟹ μ=0` over a field —
 Stage-A-style) + `isE3Datum_of_flexCharts` ✓. G0 owns :112/:195.
+
+## v10.291 (2026-07-16, coordinator) — ★★★ THE KILLING IS PROVEN + the AX2 carrier is built + β3 upgraded + W0 at 49 bricks; ⚠ [DEDUP-CC] RULING (three seats converged on the same combination-clopen substrate)
+
+**Verified at source** (origin, 0/0, all cited commits present; all five new files 0-sorry). Four-report
+batch (OMEGA, G0, GH, KM) processed.
+
+**RATIFIED (each verified):**
+- **★★★ OMEGA — THE hL-KILLING IS PROVEN.** Stage B landed end-to-end (`AffineSectionSpecPoints.lean`,
+  8 axiom-clean lemmas B-1…B-8 — NB **B-7 `modelPointAddEquiv` generalizes the additive dictionary to ANY
+  ring base**, and B-8 is the collision principle). On top: `universalE3_section_killing` (:267) +
+  **`three_zsmul_universalE3P` (:680) + `three_zsmul_universalE3Q` (:706)** + `isReduced_spec_e3ModuliRing`
+  (Stage C unconditional over any UFD with 3 invertible). The hL killing-clause is DONE; hL waits only on
+  generation. Remainder mapped in the sentinel: hArb field⟹bridge, hL-generation, Stage-D arbitrary-R,
+  Legendre E[2]-gen.
+- **★★ G0 — the de-Weiled AX2 CARRIER is built, axiom-clean** (`TorsionCombination.lean` +
+  `TorsionCombinationSpec.lean` + `CombinationLevel.lean`, all 0-sorry): `torsionZero` clopen immersion,
+  the pair scheme, combination morphisms c_v via the universal-point trick (no group-scheme structure
+  needed), **`fullLevelLocus` = ⋂_{v≠0} c_v⁻¹(E[N]∖0) clopen ⟹ FINITE ÉTALE over S** — engine-axiom-2's
+  carrier with no Weil pairing, no levelSpaceΓ, no T-D8. Four-step residual map to Bootstrap:112 boarded;
+  :195 queued. Proof-ops banked (noncomputable abbrev for carriers; carrier-equations over Point-transports).
+- **★★ GH — β2 receipt CERTIFIED T-D8-only** (the keystone cascade scrubbed everything else under it) +
+  **β3 ROUTE UPGRADE**: the good locus = the avoid-zero locus; clopen preimages need only continuity ⟹
+  **β1/β2/β4 are NOT needed for :3497 itself** (they stand as ratified level-scheme functoriality). β3-1 +
+  **B2 `pair_generates_iff_combos_ne_zero`** (the GENERAL-N form of KM 1.6.7, pure ℤ-scalars) shipped clean.
+  Remaining: B1 (landing dictionary, route pinned) → B3 → :3497 dies.
+- **★★ KM — W0 at 49 bricks** (+11 this window): ★★ `finrank_pullback_comp_fst` (deg(X×_S Y→S)=degX·degY,
+  general base, `FinrankPullbackComp.lean` 0-sorry — the degmul connector; flag-only for mathlib),
+  [F3-degmul], [F3-count], ★★ [F3-squeeze] `smulKernelπ_finrank_eq` (deg Z_M = M, zero classical citations),
+  exhaustion engine 3/4. **T-D8 surfaced to GH** (inbox 2026-07-16e): "the exhaust engine IS the T-D8
+  engine" — de-boxing expected next window. F3.mp = exhaust-4 + two reduced steps from done.
+
+**⚠ [DEDUP-CC] RULING (coordinator, binding — reuse-not-duplicate is the cardinal rule):** three seats
+converged on the combination-clopen substrate in ONE window (G0's scheme carrier; GH's set locus + B2;
+OMEGA's earlier prime-p criterion). Canonical homes, effective immediately:
+1. **Scheme-side carrier of record = G0's `GroupScheme/TorsionCombination(Spec).lean`** (`fullLevelLocus`,
+   clopen + finite-étale endpoint + sections-equiv). Anyone needing the locus AS A SCHEME consumes it.
+2. **Generation criterion of record = GH's `pair_generates_iff_combos_ne_zero`** (general N ⊇ prime p).
+   G0's four-step map and OMEGA's hL-generation + Legendre E[2]-gen MUST consume it — do NOT re-derive
+   N=3/N=2 cases. OMEGA's `PairGeneratesOfCardSq` stays as substrate/special case (cleanup may merge later).
+3. **GH reconciles the set↔scheme seam**: identify `fullLevelLocusSet` (LevelSpaceEtale) with the underlying
+   set/opensRange of G0's `fullLevelLocusι` via ONE bridging lemma (GH owns it — its B1/B3 consume the seam;
+   cheapest available spelling wins). No second scheme structure, no second locus definition, anywhere.
+
+**Bootstrap census (verified): 5 sorries** — hL :86 (killing ✓, generation pending), hArb :91, E[2]-gen,
+AX2-E3 :112 (carrier ✓, four-step map pending), AX2-Legendre :195. Every remaining piece has its machinery
+BUILT; what's left is assembly + the generation endgame, now all routed through B2 + the carrier.
+
+**Still pending owner decision: hLN = T-W7.8 unpark** (asked v10.287; the last non-box headline pin once
+Bootstrap's five + :3497 + T-D8 clear).
+
+**RE-DISPATCH:**
+- **OMEGA → close hL + start hArb.** hL-generation via GH's B2 (per [DEDUP-CC]) + G0's carrier +
+  Stage-B evaluation + BB-DEG rank 9 + your AX2-e; assemble hL (:86) with the proven killing. Then the
+  hArb field⟹bridge (Stage-A-style doubling analysis, CAS-certifiable) + Stage-D arbitrary-R transfer.
+  Legendre E[2]-gen with the same toolkit at N=2 (again via B2, not a re-derivation).
+- **G0 → execute the four-step map to :112** (restrict-naturality of combinations → closure-glue into
+  GH's B2 [swap in for your own criterion plumbing per DEDUP-CC] → the master iff via your zero-detection
+  + fibre count → assembly against gammaFullNaiveProblem). Then :195 (Legendre twin unpacking).
+- **GH → B1 → B3 → :3497** (the landing dictionary route is pinned; then the factor-iff with the
+  topological-to-geometric bridge). PLUS the [DEDUP-CC] set↔scheme bridging lemma (one lemma, yours).
+  KM's T-D8 de-boxing lands next window — your β2 arc auto-cleans on it.
+- **KM → exhaust-4 → distinct → mp-locus/glue → F3.mp** + deliver the promised T-D8 de-boxing (GH's
+  chain waits on exactly it). W0 continues ratified.
