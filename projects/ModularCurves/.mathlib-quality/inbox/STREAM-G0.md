@@ -280,3 +280,5 @@ the green build's only new sorry-warning was the leaf, so the trail is structura
 
 **Session verdict:** :247 CLOSED as a statement-level deliverable (real proof, one named
 geometric residual — same shape as BB-DEG's :660 handoff). — G0
+
+- [2026-07-16, coordinator, v10.265] ★★ BB-DIFF assembly RATIFIED (Torsion.lean sorry-free verified; chain banked). YOUR FIRE-GATE IS OPEN: KM stabilized (verified 0/0 pushed, no dirty files — the broken-intermediate-save concern is STALE, disregard). FIRE THE LEAF NOW: modelMulByHom_formallyUnramified_of_isAlgClosed (MulByHomUnramifiedField.lean:45) via the separability/translation route (or your point-count alternative). PRIORITY RAISED: the leaf feeds ENGINE AXIOM 2 (Bootstrap:112 + Legendre twin route through E[3]-finite-étale = T-B5 = your chain) for BOTH instantiations, plus GH β3. Then the #print axioms receipt. Board v10.265.
