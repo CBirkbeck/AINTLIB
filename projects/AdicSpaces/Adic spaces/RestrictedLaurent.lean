@@ -117,6 +117,20 @@ instance : Add (RestrictedLaurent R) :=
 instance : Neg (RestrictedLaurent R) :=
   ⟨fun f => ⟨fun a => -f.coeff a, by simpa using f.tendsto_coeff⟩⟩
 
+omit [IsUltrametricDist R] in
+@[simp] theorem coeff_zero (a : ℤ) : (0 : RestrictedLaurent R).coeff a = 0 := rfl
+
+omit [IsUltrametricDist R] in
+@[simp] theorem coeff_one (a : ℤ) :
+    (1 : RestrictedLaurent R).coeff a = if a = 0 then 1 else 0 := rfl
+
+omit [IsUltrametricDist R] in
+@[simp] theorem coeff_add (f g : RestrictedLaurent R) (a : ℤ) :
+    (f + g).coeff a = f.coeff a + g.coeff a := rfl
+
+omit [IsUltrametricDist R] in
+@[simp] theorem coeff_neg (f : RestrictedLaurent R) (a : ℤ) : (-f).coeff a = -f.coeff a := rfl
+
 section Complete
 
 variable [CompleteSpace R]
@@ -222,16 +236,6 @@ theorem summable_conv_triple (f g h : RestrictedLaurent R) (m : ℤ) :
         (mul_le_mul_of_nonneg_left (hCh _) (by positivity))
     rw [Set.mem_setOf_eq, div_le_iff₀ (by positivity)]
     nlinarith [norm_nonneg (g.coeff (p.1 - p.2))]
-
-@[simp] theorem coeff_zero (a : ℤ) : (0 : RestrictedLaurent R).coeff a = 0 := rfl
-
-@[simp] theorem coeff_one (a : ℤ) :
-    (1 : RestrictedLaurent R).coeff a = if a = 0 then 1 else 0 := rfl
-
-@[simp] theorem coeff_add (f g : RestrictedLaurent R) (a : ℤ) :
-    (f + g).coeff a = f.coeff a + g.coeff a := rfl
-
-@[simp] theorem coeff_neg (f : RestrictedLaurent R) (a : ℤ) : (-f).coeff a = -f.coeff a := rfl
 
 theorem coeff_mul (f g : RestrictedLaurent R) (m : ℤ) :
     (f * g).coeff m = ∑' a : ℤ, f.coeff a * g.coeff (m - a) := rfl
@@ -369,23 +373,54 @@ is restricted. -/
 /-- The sup norm of a restricted Laurent series. -/
 noncomputable def gaussNorm (f : RestrictedLaurent R) : ℝ := ⨆ a : ℤ, ‖f.coeff a‖
 
+theorem norm_coeff_le_gaussNorm (f : RestrictedLaurent R) (a : ℤ) :
+    ‖f.coeff a‖ ≤ gaussNorm f :=
+  le_ciSup f.tendsto_coeff.bddAbove_range_of_cofinite a
+
+theorem gaussNorm_nonneg (f : RestrictedLaurent R) : 0 ≤ gaussNorm f :=
+  (norm_nonneg _).trans (norm_coeff_le_gaussNorm f 0)
+
 /-- The sup defining the Gauss norm is attained ([FJP] Prop 2.3: "the coefficient family of a
 restricted Laurent series tends to zero, so its nonzero coefficient supremum is attained"). -/
 theorem exists_gaussNorm_eq (f : RestrictedLaurent R) (hf : f ≠ 0) :
-    ∃ a : ℤ, gaussNorm f = ‖f.coeff a‖ ∧ f.coeff a ≠ 0 := by sorry
-
-theorem norm_coeff_le_gaussNorm (f : RestrictedLaurent R) (a : ℤ) :
-    ‖f.coeff a‖ ≤ gaussNorm f := by sorry
+    ∃ a : ℤ, gaussNorm f = ‖f.coeff a‖ ∧ f.coeff a ≠ 0 := by
+  have hne : ∃ a₀, f.coeff a₀ ≠ 0 := by
+    by_contra h
+    push_neg at h
+    exact hf (ext fun a => by rw [h a, coeff_zero])
+  obtain ⟨a₀, ha₀⟩ := hne
+  have hpos : 0 < ‖f.coeff a₀‖ := norm_pos_iff.mpr ha₀
+  have hS : {a : ℤ | ‖f.coeff a₀‖ ≤ ‖f.coeff a‖}.Finite := f.finite_setOf_le_norm_coeff hpos
+  obtain ⟨a, haS, hamax⟩ :=
+    Set.exists_max_image _ (fun a => ‖f.coeff a‖) hS
+      ⟨a₀, show ‖f.coeff a₀‖ ≤ ‖f.coeff a₀‖ from le_rfl⟩
+  refine ⟨a, le_antisymm (ciSup_le fun b => ?_) (norm_coeff_le_gaussNorm f a), ?_⟩
+  · by_cases hb : ‖f.coeff a₀‖ ≤ ‖f.coeff b‖
+    · exact hamax b hb
+    · exact (not_le.mp hb).le.trans haS
+  · exact norm_pos_iff.mp (lt_of_lt_of_le hpos haS)
 
 /-- The Gauss norm as a `RingNorm` (submultiplicative, ultrametric-compatible). -/
 noncomputable def isRingNorm [CompleteSpace R] [NormOneClass R] :
     RingNorm (RestrictedLaurent R) where
   toFun := gaussNorm
-  map_zero' := by sorry
-  add_le' := by sorry
-  neg' := by sorry
-  mul_le' := by sorry
-  eq_zero_of_map_eq_zero' := by sorry
+  map_zero' := by
+    have : ∀ a : ℤ, ‖(0 : RestrictedLaurent R).coeff a‖ = 0 := fun a => by simp
+    simp only [gaussNorm, this, ciSup_const]
+  add_le' f g := by
+    refine ciSup_le fun a => (norm_add_le _ _).trans ?_
+    exact add_le_add (norm_coeff_le_gaussNorm f a) (norm_coeff_le_gaussNorm g a)
+  neg' f := by simp only [gaussNorm, coeff_neg, norm_neg]
+  mul_le' f g := by
+    refine ciSup_le fun m => ?_
+    show ‖(f * g).coeff m‖ ≤ gaussNorm f * gaussNorm g
+    rw [coeff_mul]
+    refine IsUltrametricDist.norm_tsum_le_of_forall_le fun a => (norm_mul_le _ _).trans ?_
+    exact mul_le_mul (norm_coeff_le_gaussNorm f a) (norm_coeff_le_gaussNorm g _)
+      (norm_nonneg _) (gaussNorm_nonneg f)
+  eq_zero_of_map_eq_zero' f hf := by
+    refine ext fun a => norm_le_zero_iff.mp ?_
+    exact hf ▸ norm_coeff_le_gaussNorm f a
 
 /-- `RestrictedLaurent R` is a normed ring under the Gauss norm. -/
 noncomputable instance [CompleteSpace R] [NormOneClass R] :
@@ -397,26 +432,119 @@ theorem norm_def [CompleteSpace R] [NormOneClass R] (f : RestrictedLaurent R) :
     ‖f‖ = gaussNorm f := rfl
 
 @[simp] theorem norm_single [CompleteSpace R] [NormOneClass R] (a : ℤ) (c : R) :
-    ‖single a c‖ = ‖c‖ := by sorry
+    ‖single a c‖ = ‖c‖ := by
+  rw [norm_def]
+  refine le_antisymm (ciSup_le fun b => ?_) ?_
+  · rcases eq_or_ne b a with rfl | hb
+    · simp [coeff_single]
+    · simp only [coeff_single, if_neg hb, norm_zero]
+      exact norm_nonneg c
+  · have h := norm_coeff_le_gaussNorm (single a c) a
+    simpa using h
 
 @[simp] theorem norm_W [CompleteSpace R] [NormOneClass R] :
-    ‖(Wu (R := R)).val‖ = 1 := by sorry
+    ‖(Wu (R := R)).val‖ = 1 := by
+  show ‖single 1 (1 : R)‖ = 1
+  rw [norm_single, norm_one]
 
 @[simp] theorem norm_W_inv [CompleteSpace R] [NormOneClass R] :
-    ‖((Wu (R := R))⁻¹ : (RestrictedLaurent R)ˣ).val‖ = 1 := by sorry
+    ‖((Wu (R := R))⁻¹ : (RestrictedLaurent R)ˣ).val‖ = 1 := by
+  show ‖single (-1) (1 : R)‖ = 1
+  rw [norm_single, norm_one]
 
 /-- The Gauss norm is ultrametric. -/
 instance [CompleteSpace R] [NormOneClass R] : IsUltrametricDist (RestrictedLaurent R) := by
-  sorry
+  refine IsUltrametricDist.isUltrametricDist_of_isNonarchimedean_norm fun f g => ?_
+  refine ciSup_le fun a => (IsUltrametricDist.norm_add_le_max _ _).trans ?_
+  exact max_le_max (norm_coeff_le_gaussNorm f a) (norm_coeff_le_gaussNorm g a)
+
+theorem coeff_Wu_mul [CompleteSpace R] (f : RestrictedLaurent R) (m : ℤ) :
+    ((Wu (R := R)).val * f).coeff m = f.coeff (m - 1) := by
+  show (single 1 1 * f).coeff m = _
+  rw [coeff_mul, tsum_eq_single 1 (fun b hb => by simp [coeff_single, if_neg hb])]
+  simp [coeff_single]
 
 /-- Multiplication by `W` is an isometry (used in [FJP] Prop 3.1: `‖W^{-n} y‖ = ‖y‖`). -/
 theorem norm_W_mul [CompleteSpace R] [NormOneClass R] (f : RestrictedLaurent R) :
-    ‖(Wu (R := R)).val * f‖ = ‖f‖ := by sorry
+    ‖(Wu (R := R)).val * f‖ = ‖f‖ := by
+  rw [norm_def, norm_def]
+  refine le_antisymm (ciSup_le fun m => ?_) (ciSup_le fun a => ?_)
+  · rw [show ((Wu (R := R)).val * f).coeff m = f.coeff (m - 1) from coeff_Wu_mul f m]
+    exact norm_coeff_le_gaussNorm f _
+  · have h := norm_coeff_le_gaussNorm ((Wu (R := R)).val * f) (a + 1)
+    rw [coeff_Wu_mul] at h
+    simpa using h
 
 /-- Completeness of the restricted Laurent ring over a complete base ([FJP] §1: Banach
 direct sums / restricted series are complete). -/
 instance [CompleteSpace R] [NormOneClass R] : CompleteSpace (RestrictedLaurent R) := by
-  sorry
+  refine Metric.complete_of_cauchySeq_tendsto fun u hu => ?_
+  -- Step 1: the Gauss norm dominates each coefficient of a difference.
+  have coeff_le : ∀ (f g : RestrictedLaurent R) (n : ℤ),
+      ‖f.coeff n - g.coeff n‖ ≤ ‖f - g‖ := fun f g n => by
+    have heq : f.coeff n - g.coeff n = (f - g).coeff n := by
+      show _ = (f + -g).coeff n
+      rw [coeff_add, coeff_neg, sub_eq_add_neg]
+    rw [heq]
+    exact norm_coeff_le_gaussNorm (f - g) n
+  -- Step 2: coefficientwise Cauchy.
+  have coeff_cauchy : ∀ n : ℤ, CauchySeq fun i => (u i).coeff n := fun n => by
+    refine Metric.cauchySeq_iff.mpr fun ε hε => ?_
+    obtain ⟨N, hN⟩ := Metric.cauchySeq_iff.mp hu ε hε
+    refine ⟨N, fun i hi j hj => ?_⟩
+    rw [dist_eq_norm]
+    have h_uij : ‖u i - u j‖ < ε := by
+      have := hN i hi j hj; rwa [dist_eq_norm] at this
+    exact (coeff_le (u i) (u j) n).trans_lt h_uij
+  -- Step 3: pointwise limits.
+  choose a ha using fun n => cauchySeq_tendsto_of_complete (coeff_cauchy n)
+  -- Step 4: uniform-in-`n` convergence.
+  have unif_conv : ∀ ε > (0 : ℝ), ∃ N, ∀ i ≥ N, ∀ n, ‖(u i).coeff n - a n‖ ≤ ε := by
+    intro ε hε
+    obtain ⟨N, hN⟩ := Metric.cauchySeq_iff.mp hu ε hε
+    refine ⟨N, fun i hi n => ?_⟩
+    have h_lim : Tendsto (fun j => ‖(u i).coeff n - (u j).coeff n‖) atTop
+        (𝓝 ‖(u i).coeff n - a n‖) := (tendsto_const_nhds.sub (ha n)).norm
+    refine le_of_tendsto h_lim ?_
+    filter_upwards [Filter.eventually_ge_atTop N] with j hj
+    have h_dist := hN i hi j hj
+    rw [dist_eq_norm] at h_dist
+    exact ((coeff_le (u i) (u j) n).trans_lt h_dist).le
+  -- Step 5: the pointwise limit is restricted.
+  have hf : Tendsto (fun n => ‖a n‖) cofinite (𝓝 0) := by
+    rw [Metric.tendsto_nhds]
+    intro ε hε
+    obtain ⟨N₁, hN₁⟩ := unif_conv (ε / 3) (by linarith)
+    have h_uN1 := (u N₁).tendsto_coeff
+    rw [Metric.tendsto_nhds] at h_uN1
+    have h_uN1' := h_uN1 (ε / 3) (by linarith)
+    rw [Filter.eventually_cofinite] at h_uN1' ⊢
+    refine h_uN1'.subset fun n hn => ?_
+    simp only [Set.mem_setOf_eq, dist_zero_right, Real.norm_eq_abs, not_lt,
+      abs_of_nonneg (norm_nonneg _)] at hn ⊢
+    have h1 : ‖(u N₁).coeff n - a n‖ ≤ ε / 3 := hN₁ N₁ le_rfl n
+    have h2 : ‖a n‖ ≤ ‖(u N₁).coeff n - a n‖ + ‖(u N₁).coeff n‖ := by
+      calc ‖a n‖ = ‖a n - (u N₁).coeff n + (u N₁).coeff n‖ := by rw [sub_add_cancel]
+        _ ≤ ‖a n - (u N₁).coeff n‖ + ‖(u N₁).coeff n‖ := norm_add_le _ _
+        _ = ‖(u N₁).coeff n - a n‖ + ‖(u N₁).coeff n‖ := by rw [norm_sub_rev]
+    by_contra hcon
+    push_neg at hcon
+    have : ‖(u N₁).coeff n‖ < ε / 3 := hcon.trans_le (by linarith)
+    linarith [hn, this]
+  set F : RestrictedLaurent R := ⟨a, hf⟩ with hF
+  -- Step 6: `u → F` in the Gauss norm.
+  refine ⟨F, Metric.tendsto_atTop.mpr fun ε hε => ?_⟩
+  obtain ⟨N, hN⟩ := unif_conv (ε / 2) (by linarith)
+  refine ⟨N, fun i hi => ?_⟩
+  rw [dist_eq_norm]
+  have hcoeff : ∀ n, ‖(u i - F).coeff n‖ ≤ ε / 2 := fun n => by
+    have heq : (u i - F).coeff n = (u i).coeff n - a n := by
+      show (u i + -F).coeff n = _
+      rw [coeff_add, coeff_neg, sub_eq_add_neg]
+    rw [heq]
+    exact hN i hi n
+  calc ‖u i - F‖ ≤ ε / 2 := ciSup_le hcoeff
+    _ < ε := by linarith
 
 /-! ### Multiplicativity over a discretely valued field
 

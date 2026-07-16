@@ -10,7 +10,7 @@ only). Priority spine: T1xx → T3xx → T4xx → T5xx → T6xx → T7xx (sheafi
 
 ## Summary
 - Total: 36 tickets (28 proof + 8 embedded cleanup/milestone controls listed inline)
-- Open: 34 | Done: 2 (T001, T101) | Parallel capacity at peak: 4 workers
+- Open: 33 | Done: 3 (T001, T101, T102) | Parallel capacity at peak: 4 workers
   (T2xx ∥ T3xx ∥ T4xx-polynomial ∥ T1xx-tail)
 
 ## Milestone map
@@ -46,8 +46,13 @@ T704, by a fresh `/develop --continue`.
 - **Mathlib**: `tsum_add`, `Summable.tsum_comm`, `Summable.mul_of_nonneg`-analogues,
   `Filter.Tendsto.cofinite`. **Source**: [FJP] §1.4, (1.8) — quotes at L1.1.
 
-### [T102] `RestrictedLaurent.lean` — norm package
-- **Status**: open | **Depends**: T101 | **Parallel**: after T101 | **Type**: proofs (L1.2)
+### [T102] `RestrictedLaurent.lean` — norm package — **DONE 2026-07-16**
+- **Status**: done (beastmode). Attained sup via `Set.exists_max_image` over the finite
+  super-level set; `RingNorm` fields (mul_le' via `norm_tsum_le_of_forall_le`);
+  ultrametric via `isUltrametricDist_of_isNonarchimedean_norm`; `norm_single`, `norm_W`,
+  `norm_W_inv`, shift isometry `norm_W_mul` (+ helper `coeff_Wu_mul` via `tsum_eq_single`);
+  completeness adapted from the vendored radius-c proof (coefficientwise Cauchy + uniform
+  convergence + ultrametric decay transfer). Build green. | **Type**: proofs (L1.2)
 - **Sorries**: `exists_gaussNorm_eq`, `norm_coeff_le_gaussNorm`, `isRingNorm` fields,
   `norm_single`, `norm_W`, `norm_W_inv`, `IsUltrametricDist`, `norm_W_mul`, `CompleteSpace`.
 - **Sketch**: sup attained: decay ⟹ finitely many `‖coeff‖ ≥ ‖f‖/2` (mirror
