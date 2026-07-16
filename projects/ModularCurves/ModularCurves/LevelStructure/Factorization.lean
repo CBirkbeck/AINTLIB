@@ -250,6 +250,24 @@ theorem Section.orderDivisor_mul_crt (P : E.Section) (M K : ℕ) [NeZero M] [NeZ
   rw [sub_add_cancel] at h2
   exact h2.symm
 
+/-- **[W0-F3-coprime-kill] (KM print p. 30)** A point killed by two coprime integers is
+zero — KM: *"As both `Pₖ` and `φ(a₂)ₖ` are killed by `N₂`, while `φ(a₁)` is killed by
+`N₁`, this is impossible unless `φ(a₁) = 0`."* Bezout in the point group. -/
+theorem Point.eq_zero_of_killed_coprime {T : Scheme.{u}} {g : T ⟶ S} (Q : E.Point g)
+    (M K : ℕ) (hMK : Nat.Coprime M K) (hM : (M : ℤ) • Q = 0) (hK : (K : ℤ) • Q = 0) :
+    Q = 0 := by
+  obtain ⟨u, v, huv⟩ : ∃ u v : ℤ, u * M + v * K = 1 := by
+    refine ⟨Nat.gcdA M K, Nat.gcdB M K, ?_⟩
+    have := Nat.gcd_eq_gcd_ab M K
+    rw [hMK] at this
+    push_cast at this ⊢
+    linarith
+  calc Q = (1 : ℤ) • Q := (one_zsmul Q).symm
+    _ = (u * M + v * K : ℤ) • Q := by rw [huv]
+    _ = u • ((M : ℤ) • Q) + v • ((K : ℤ) • Q) := by
+        rw [add_zsmul, mul_smul, mul_smul]
+    _ = 0 := by rw [hM, hK, smul_zero, smul_zero, add_zero]
+
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
 order `M` and `M·P` has exact order `K`.
