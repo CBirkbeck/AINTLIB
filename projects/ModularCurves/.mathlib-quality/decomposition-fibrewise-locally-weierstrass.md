@@ -811,3 +811,11 @@ normalization from the final finite-stage compatibility theorem without adding a
 hypothesis or abstraction specific to modular curves. The focused trivialization-restriction build
 is green, and the theorem has exactly `propext`, `Classical.choice`, and `Quot.sound` in its axiom
 audit.
+
+Completed subdependency (2026-07-16): proved
+`AffineIntersectionUnitCocycle.baseChangeGluedModuleChartTrivialization_isCompatible` by
+factoring its option-free proof into chart normalization, an opaque uncancelled middle morphism,
+two postcomposition bridges, and cancellation of the pullback-unit isomorphism. The focused build
+is green, and the theorem's axiom audit contains exactly `propext`, `Classical.choice`, and
+`Quot.sound`. This is the compatibility input needed to descend the finite-stage glued invertible
+module after base change; it adds no hypotheses and no new public abstraction beyond the target.
