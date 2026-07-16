@@ -773,3 +773,13 @@ chart comparison can now normalize both transported trivializations through one 
 and reduce to their terminal scalar transition. The focused build is green, no hypothesis or
 proof-resource option was added, and every declaration has only `propext`, `Classical.choice`,
 and `Quot.sound` (or a subset) in its axiom audit.
+
+Completed subdependency claim (2026-07-16): exposed
+`pullbackPseudofunctor_toDescentData_hom` and
+`AffineIntersectionUnitCocycle.chartTransitionPullHom_toUnit`, and proved
+`AffineIntersectionUnitCocycle.chartDescent_pullHom_eq`. These existing descent formulas identify
+the two morphisms in the finite-stage compatibility equation with, respectively, canonical
+pullback coherence and the pulled chart transition. This is API exposure only and adds no new
+descent construction, hypothesis, or proof-resource option. The focused effectivity build is green,
+and all three declarations have exactly `propext`, `Classical.choice`, and `Quot.sound` in their
+axiom audits.

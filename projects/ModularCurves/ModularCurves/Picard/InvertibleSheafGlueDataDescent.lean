@@ -73,7 +73,9 @@ private noncomputable def AffineIntersectionUnitCocycle.chartTransitionPullHom
     (F := pullbackPseudofunctor)
     (c.chartTransitionIso hopen hpush i j).hom g gLeft gRight hLeft hRight
 
-private theorem AffineIntersectionUnitCocycle.chartTransitionPullHom_toUnit
+/-- An arbitrary pullback of a chart transition, expressed in unit coordinates, is its
+coordinate pullback. -/
+theorem AffineIntersectionUnitCocycle.chartTransitionPullHom_toUnit
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
     (c : AffineIntersectionUnitCocycle F)
     (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
@@ -396,6 +398,40 @@ noncomputable def AffineIntersectionUnitCocycle.chartDescentData
         (c.chartDescentHom_pullHom₂₃ hopen hpush i j k)
         (c.chartDescentHom_pullHom₁₃ hopen hpush i j k)
         (c.chartDescentPullHom_comp_raw hopen hpush i j k)
+
+/-- Pulling the chart descent morphism along a map through the chosen overlap is the
+corresponding pullback of the chart transition. -/
+theorem AffineIntersectionUnitCocycle.chartDescent_pullHom_eq
+    {A J : Type u} [CommRing A] {F : Functor (Finset J) (CommAlgCat.{u} A)}
+    (c : AffineIntersectionUnitCocycle F)
+    (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+    (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+    (i j : J) {T : Scheme.{u}}
+    (q : T ⟶ (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).glued)
+    (g : T ⟶ (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).V (i, j))
+    (gLeft : T ⟶ (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).U i)
+    (gRight : T ⟶ (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).U j)
+    (hqLeft : gLeft ≫
+      (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).ι i = q)
+    (hqRight : gRight ≫
+      (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).ι j = q)
+    (hLeft : g ≫
+      (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).f i j = gLeft)
+    (hRight : g ≫
+      ((Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).t i j ≫
+        (Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush).f j i) = gRight) :
+    Pseudofunctor.DescentData'.pullHom'
+        (c.chartDescentData hopen hpush).hom q gLeft gRight hqLeft hqRight =
+      Pseudofunctor.LocallyDiscreteOpToCat.pullHom
+        (F := pullbackPseudofunctor)
+        (c.chartTransitionIso hopen hpush i j).hom
+        g gLeft gRight hLeft hRight := by
+  change Pseudofunctor.DescentData'.pullHom'
+      (c.chartDescentHom hopen hpush) q gLeft gRight hqLeft hqRight = _
+  rw [Pseudofunctor.DescentData'.pullHom'_eq_pullHom
+    _ q gLeft gRight g hqLeft hqRight hLeft hRight]
+  rw [AffineIntersectionUnitCocycle.chartDescentHom_def]
+  congr 1
 
 end
 

@@ -3301,7 +3301,9 @@ private theorem pullbackCompCongrIso_inv_proof_irrel
   subst h₂
   rfl
 
-private theorem pullbackPseudofunctor_toDescentData_hom
+/-- The transition morphism in the pullback descent datum is the canonical comparison between
+the two iterated pullbacks. -/
+theorem pullbackPseudofunctor_toDescentData_hom
     {I : Type u} {S : Scheme.{u}} {X : I → Scheme.{u}}
     (f : ∀ i, X i ⟶ S) (M : S.Modules) {Y : Scheme.{u}}
     (q : Y ⟶ S) {i j : I} (f₁ : Y ⟶ X i) (f₂ : Y ⟶ X j)
