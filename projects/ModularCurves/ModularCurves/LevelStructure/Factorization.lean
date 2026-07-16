@@ -1882,6 +1882,88 @@ theorem RelEffCartierDiv.point_eq_section_of_factors
 
 end FieldExhaust
 
+/-- **[F3-census] (KM p. 29: "G(k) contains precisely N₁ points killed by N₁" meets
+the exhaustion)** Over a separably closed field with `M` invertible: if `P` has exact
+order `M·K` (coprime), then `M` divides the honest point-order of `P`. The `M`-killed
+factoring points form a group of order exactly `M` (locus squeeze + étale count); the
+exhaustion pins every one of them inside the cyclic group `⟨P⟩`; Lagrange concludes. -/
+theorem Section.HasExactOrder.M_dvd_addOrderOf {k : Type u} [Field k] [IsSepClosed k]
+    {E : EllipticCurve (Spec (CommRingCat.of k))} {P : E.Section} (M K : ℕ)
+    [NeZero M] [NeZero K] (hMK : Nat.Coprime M K) [NeZero (M * K)]
+    [IsFinite (E.mulByHom (M : ℤ))] [IsFinite (E.mulByHom (K : ℤ))]
+    (hinvM : NIsInvertible (Spec (CommRingCat.of k)) M)
+    (h : P.HasExactOrder E (M * K)) :
+    M ∣ addOrderOf P := by
+  classical
+  have hpos : IsSeparated E.π ∧ SmoothOfRelativeDimension 1 E.π :=
+    ⟨inferInstance, E.smooth⟩
+  have hdeg : ∀ s, (P.orderDivisor E (M * K)).degree s = M * K := fun s =>
+    RelEffCartierDiv.sectionsDivisor_degree E.π E.smooth _ s
+  have hkillP : ((M * K : ℕ) : ℤ) • P = 0 := h.smul_eq_zero E
+  have h₁ : ((M : ℤ) * K) % ((M * K : ℕ) : ℤ) = 0 := by
+    push_cast
+    exact Int.emod_self
+  have h₂ : ((K : ℤ) * M) % ((M * K : ℕ) : ℤ) = 0 := by
+    push_cast
+    rw [Int.mul_comm]
+    exact Int.emod_self
+  have hD : (P.orderDivisor E (M * K)).IsSubgroup E := h
+  -- the finite flat étale instance scaffold for the M-kernel
+  haveI hMflat : Flat ((P.orderDivisor E (M * K)).smulKernelπ E (M : ℤ)) :=
+    RelEffCartierDiv.IsSubgroup.smulKernelπ_flat E hD M K hMK hdeg h₁ h₂
+  haveI hMfin : IsFinite ((P.orderDivisor E (M * K)).smulKernelπ E (M : ℤ)) :=
+    RelEffCartierDiv.smulKernelπ_isFinite E _ (M : ℤ)
+  haveI hMet : Etale ((P.orderDivisor E (M * K)).smulKernelπ E (M : ℤ)) :=
+    RelEffCartierDiv.smulKernelπ_etale E _ M hinvM hMflat
+  -- the M-killed factoring points number exactly M
+  have hsq : ((P.orderDivisor E (M * K)).smulKernelπ E (M : ℤ)).finrank
+      (default : ↑(Spec (CommRingCat.of k))) = M :=
+    RelEffCartierDiv.IsSubgroup.smulKernelπ_finrank_eq_of_M_invertible hD M K hMK
+      hinvM hdeg h₁ h₂ _
+  have hcard : Nat.card { Q : E.Point (𝟙 (Spec (CommRingCat.of k))) //
+      (M : ℤ) • Q = 0 ∧ ∃ w : Spec (CommRingCat.of k)
+        ⟶ (P.orderDivisor E (M * K)).ideal.subscheme,
+          w ≫ (P.orderDivisor E (M * K)).ideal.subschemeι = Q.1 } = M := by
+    rw [RelEffCartierDiv.card_killed_points _ (M : ℤ) default, hsq]
+  -- the group structure on them
+  obtain ⟨H, hH⟩ := hD (𝟙 (Spec (CommRingCat.of k)))
+  let A : AddSubgroup (E.Point (𝟙 (Spec (CommRingCat.of k)))) :=
+    { carrier := { Q | (M : ℤ) • Q = 0 ∧ ∃ w : Spec (CommRingCat.of k)
+          ⟶ (P.orderDivisor E (M * K)).ideal.subscheme,
+            w ≫ (P.orderDivisor E (M * K)).ideal.subschemeι = Q.1 }
+      zero_mem' := ⟨smul_zero _, (hH 0).mp H.zero_mem⟩
+      add_mem' := fun {P₁ Q₁} hP hQ => ⟨by rw [smul_add, hP.1, hQ.1, add_zero],
+        (hH _).mp (H.add_mem ((hH P₁).mpr hP.2) ((hH Q₁).mpr hQ.2))⟩
+      neg_mem' := fun {P₁} hP => ⟨by rw [smul_neg, hP.1, neg_zero],
+        (hH _).mp (H.neg_mem ((hH P₁).mpr hP.2))⟩ }
+  have hcardA : Nat.card A = M := hcard
+  -- the exhaustion pins A inside ⟨P⟩
+  have hsub : A ≤ AddSubgroup.zmultiples P := by
+    rintro Q ⟨-, hfac⟩
+    obtain ⟨-, ⟨V, hV, rfl⟩, hxV, -⟩ :=
+      E.E.isBasis_affineOpens.exists_subset_of_mem_open
+        (Set.mem_univ (Q.1 (default : ↑(Spec (CommRingCat.of k))))) isOpen_univ
+    obtain ⟨j, hj⟩ := RelEffCartierDiv.point_eq_section_of_factors (π := E.π)
+      (fun a : Fin (M * K) => ((((a : ℕ) : ℤ) + 1) • P : E.Point (𝟙 _)))
+      hpos Q.1 Q.2
+      (by
+        rw [show (RelEffCartierDiv.sectionsDivisor E.π
+            (fun a : Fin (M * K) => ((((a : ℕ) : ℤ) + 1) • P : E.Point (𝟙 _))))
+          = P.orderDivisor E (M * K) from rfl]
+        exact hfac)
+      ⟨V, hV⟩ hxV
+    exact ⟨(((j : ℕ) : ℤ) + 1), (Subtype.ext hj).symm⟩
+  -- Lagrange in the finite cyclic group ⟨P⟩
+  have hford : IsOfFinAddOrder P := by
+    rw [isOfFinAddOrder_iff_nsmul_eq_zero]
+    exact ⟨M * K, Nat.pos_of_ne_zero (NeZero.ne _), by
+      rw [← natCast_zsmul]; exact hkillP⟩
+  haveI hfin : Finite (AddSubgroup.zmultiples P) := hford.finite_zmultiples
+  have hdvd : Nat.card A ∣ Nat.card (AddSubgroup.zmultiples P) :=
+    AddSubgroup.card_dvd_of_le hsub
+  rwa [hcardA, Nat.card_zmultiples] at hdvd
+
+
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
 order `M` and `M·P` has exact order `K`.
