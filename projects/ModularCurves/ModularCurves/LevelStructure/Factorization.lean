@@ -1479,6 +1479,54 @@ theorem RelEffCartierDiv.ideal_le_ker_of_factors {C : Scheme.{u}} {π : C ⟶ S}
     _ ≤ (w ≫ D.ideal.subschemeι).ker := Scheme.Hom.le_ker_comp w _
     _ = q.ker := by rw [hw]
 
+/-- **[F3-exhaust-2] (KM p. 29's prime avoidance)** Over a field, a point whose kernel
+bounds a sections-divisor ideal has its kernel above ONE section's kernel, at any affine
+open containing the point's image: the point's kernel ideal there is prime (the sections
+over the one-point base form a domain), and primes detect factors of products. -/
+theorem RelEffCartierDiv.exists_section_ker_le {k : Type u} [Field k]
+    {C : Scheme.{u}} {π : C ⟶ Spec (CommRingCat.of k)} {n : ℕ}
+    (Ps : Fin n → { z : Spec (CommRingCat.of k) ⟶ C // z ≫ π = 𝟙 _ })
+    (hπ : IsSeparated π ∧ SmoothOfRelativeDimension 1 π)
+    (q : Spec (CommRingCat.of k) ⟶ C)
+    (hker : (RelEffCartierDiv.sectionsDivisor π Ps).ideal ≤ q.ker)
+    (V : C.affineOpens) (hqV : q (default : ↑(Spec (CommRingCat.of k))) ∈ V.1) :
+    ∃ j, (Scheme.Hom.ker (Ps j).1).ideal V ≤ (q.ker).ideal V := by
+  -- the point's kernel ideal at V is prime
+  haveI hQC : QuasiCompact q := ⟨fun U _ _ => (Set.toFinite _).isCompact⟩
+  have hpre : q ⁻¹ᵁ V.1 = ⊤ := by
+    rw [eq_top_iff]
+    intro x _
+    have hx : x = default := Unique.eq_default x
+    rw [hx]
+    exact hqV
+  haveI hdom : IsDomain ↑Γ(Spec (CommRingCat.of k), q ⁻¹ᵁ V.1) := by
+    rw [hpre]
+    exact MulEquiv.isDomain k
+      (Scheme.ΓSpecIso (CommRingCat.of k)).commRingCatIsoToRingEquiv.toMulEquiv
+  have hkerV : (q.ker).ideal V = RingHom.ker ((q.app V.1).hom) := Scheme.Hom.ker_apply q V
+  haveI hprime : ((q.ker).ideal V).IsPrime := by
+    rw [hkerV]
+    exact RingHom.ker_isPrime _
+  -- the divisor ideal at V is the product of the section kernels
+  have hDV : (RelEffCartierDiv.sectionsDivisor π Ps).ideal.ideal V
+      = ∏ i, (Scheme.Hom.ker (Ps i).1).ideal V := by
+    rw [show (RelEffCartierDiv.sectionsDivisor π Ps).ideal
+        = ∏ i, Scheme.Hom.ker (Ps i).1 from by
+      rw [RelEffCartierDiv.sectionsDivisor, dif_pos hπ]]
+    have h1 : (∏ i, Scheme.Hom.ker (Ps i).1 : C.IdealSheafData).ideal
+        = ∏ i, (Scheme.IdealSheafData.idealMonoidHom C) (Scheme.Hom.ker (Ps i).1) :=
+      map_prod (Scheme.IdealSheafData.idealMonoidHom C) _ Finset.univ
+    rw [show ((∏ i, Scheme.Hom.ker (Ps i).1 : C.IdealSheafData)).ideal V
+        = ((∏ i, Scheme.Hom.ker (Ps i).1 : C.IdealSheafData).ideal) V from rfl, h1,
+      Finset.prod_apply]
+    rfl
+  -- prime avoidance
+  have hle : ∏ i, (Scheme.Hom.ker (Ps i).1).ideal V ≤ (q.ker).ideal V := by
+    rw [← hDV]
+    exact hker V
+  obtain ⟨j, _, hj⟩ := (Ideal.IsPrime.prod_le hprime).mp hle
+  exact ⟨j, hj⟩
+
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
 order `M` and `M·P` has exact order `K`.
