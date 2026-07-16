@@ -1527,6 +1527,28 @@ theorem RelEffCartierDiv.exists_section_ker_le {k : Type u} [Field k]
   obtain ⟨j, _, hj⟩ := (Ideal.IsPrime.prod_le hprime).mp hle
   exact ⟨j, hj⟩
 
+/-- **[F3-exhaust-3] (the field-point rigidity)** Two `k`-algebra maps to `k` with nested
+kernels are EQUAL: `a - φ(a)·1` lies in `ker φ ⊆ ker ψ`, so `ψ(a) = φ(a)`. The pure
+core of KM p. 29's "the point IS one of the sections". -/
+theorem algHom_eq_of_ker_le {k A : Type u} [Field k] [CommRing A] [Algebra k A]
+    (φ ψ : A →ₐ[k] k) (h : RingHom.ker (φ : A →+* k) ≤ RingHom.ker (ψ : A →+* k)) :
+    φ = ψ := by
+  ext a
+  have hmem : a - algebraMap k A (φ a) ∈ RingHom.ker (φ : A →+* k) := by
+    rw [RingHom.mem_ker, map_sub]
+    have hc : (φ : A →+* k) (algebraMap k A (φ a)) = φ a := by
+      have := φ.commutes (φ a)
+      simpa using this
+    rw [hc]
+    exact sub_self _
+  have hthis := h hmem
+  rw [RingHom.mem_ker, map_sub] at hthis
+  have hc2 : (ψ : A →+* k) (algebraMap k A (φ a)) = φ a := by
+    have := ψ.commutes (φ a)
+    simpa using this
+  rw [hc2] at hthis
+  exact (sub_eq_zero.mp hthis).symm
+
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
 order `M` and `M·P` has exact order `K`.
