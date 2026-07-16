@@ -8,6 +8,7 @@ import Mathlib.Algebra.MvPolynomial.Division
 import Mathlib.Data.Fin.VecNotation
 import Mathlib.RingTheory.Polynomial.UniqueFactorization
 import Mathlib.RingTheory.Ideal.Quotient.Nilpotent
+import Mathlib.RingTheory.LocalProperties.Reduced
 import Mathlib.RingTheory.Nilpotent.Lemmas
 import Mathlib.Algebra.Squarefree.Basic
 

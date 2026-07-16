@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.UniversalLegendre
 import ModularCurves.EllipticCurve.AffineSectionSpecPoints
+import ModularCurves.ForMathlib.E3RelSquarefree
 import ModularCurves.EllipticCurve.E3NormalForm
 
 /-!
@@ -640,6 +641,20 @@ theorem e3_vc_marked {A : Type u} [CommRing A] {C : VariableChange A}
 
 open LocalPresentation WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
+open WeierstrassCurve in
+/-- **([T-E15-NORM] Stage C applied)** Over a UFD coefficient ring with `3` invertible,
+the universal `ℰ₃` base is reduced — this discharges the reducedness hypothesis of the
+killing theorems (`three_zsmul_universalE3P/Q`): `E3Quotient` is reduced by the
+squarefreeness of the flex relation (`isReduced_e3RelQuotient`), localization preserves
+reducedness, and `Spec` of a reduced ring is reduced. -/
+theorem isReduced_spec_e3ModuliRing (R : CommRingCat.{u}) [IsDomain R]
+    [UniqueFactorizationMonoid R] (h3 : IsUnit (3 : R)) :
+    AlgebraicGeometry.IsReduced (Spec (CommRingCat.of (E3ModuliRing R))) := by
+  haveI : _root_.IsReduced (E3Quotient R) := isReduced_e3RelQuotient h3
+  haveI : _root_.IsReduced (E3ModuliRing R) :=
+    inferInstanceAs (_root_.IsReduced (Localization (Submonoid.powers (e3Delta R))))
+  infer_instance
+
 /-- **(T-E15a stage 5)** From `IsE3Form` + ellipticity: `a₃` and `a₁³−27a₃` are
 units (the two factors of the discriminant `Δ = a₃³(a₁³−27a₃)`). -/
 theorem e3form_units {A : Type u} [CommRing A] {W : WeierstrassCurve A} {β γ : A}
