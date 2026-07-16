@@ -926,10 +926,12 @@ assembly passes the spread model and both gluing witnesses explicitly to the two
 geometric theorems. Its focused build is green, its axiom audit is exactly `propext`,
 `Classical.choice`, and `Quot.sound`, and it adds no geometric hypothesis or proof-resource option.
 
-Active dependency claim (2026-07-16): prove
+Completed dependency claim (2026-07-16): proved
 `SpreadData.exists_surjective_mapAtLaterStage`. A compatible map between two finite-presentation
-spread models whose colimit map is surjective becomes surjective at one later stage. This is the
-finite-generator algebraic input for spreading affine closed immersions, hence for the separated
-part of the proper finite-stage model needed by the fibrewise-elliptic converse. The proof will use
-the existing filtered-colimit lifting and stage-agreement APIs and add no hypotheses or proof-resource
-options.
+spread models whose colimit map is surjective now becomes surjective at one later stage. The proof
+lifts preimages of the finitely many target presentation generators, synchronizes their equalities
+at one later stage, and reduces surjectivity to polynomial induction in a private helper. This is
+the algebraic input for spreading affine closed immersions, hence for the separated part of the
+proper finite-stage model needed by the fibrewise-elliptic converse. The focused build is green,
+the axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`, and no hypothesis or
+proof-resource option was added.

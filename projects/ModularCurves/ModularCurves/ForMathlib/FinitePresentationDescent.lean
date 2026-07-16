@@ -2011,6 +2011,120 @@ theorem SpreadData.mapAtLaterStage_trans
     _ = laterIK (Ideal.Quotient.mk _ (MvPolynomial.X v)) :=
       congrArg laterIK hvarIK
 
+private theorem SpreadData.surjective_of_generator_preimages
+    {B₁ B₂ : Type u} [CommRing B₁] [Algebra A B₁]
+    [CommRing B₂] [Algebra A B₂]
+    (D₁ : SpreadData 𝒮 u B₁) (D₂ : SpreadData 𝒮 u B₂)
+    {i : ι} (h₁ : D₁.i₀ ≤ i) (h₂ : D₂.i₀ ≤ i)
+    (f : D₁.spreadStage (t := t) h₁ →ₐ[𝒮 i]
+      D₂.spreadStage (t := t) h₂)
+    (hX : ∀ v : Fin D₂.m, ∃ x,
+      f x = Ideal.Quotient.mk _ (MvPolynomial.X v)) :
+    Function.Surjective f := by
+  intro y
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective y
+  induction p using MvPolynomial.induction_on with
+  | C s =>
+      refine ⟨algebraMap (𝒮 i) (D₁.spreadStage (t := t) h₁) s, ?_⟩
+      rw [f.commutes]
+      rfl
+  | add p q hp hq =>
+      obtain ⟨x, hx⟩ := hp
+      obtain ⟨y, hy⟩ := hq
+      refine ⟨x + y, ?_⟩
+      simpa only [map_add] using congrArg₂ (· + ·) hx hy
+  | mul_X p v hp =>
+      obtain ⟨x, hx⟩ := hp
+      obtain ⟨y, hy⟩ := hX v
+      refine ⟨x * y, ?_⟩
+      simpa only [map_mul] using congrArg₂ (· * ·) hx hy
+
+/-- A compatible map between two spread presentations whose colimit map is
+surjective becomes surjective after transport to one later stage. -/
+theorem SpreadData.exists_surjective_mapAtLaterStage
+    {B₁ B₂ : Type u} [CommRing B₁] [Algebra A B₁]
+    [CommRing B₂] [Algebra A B₂]
+    (D₁ : SpreadData 𝒮 u B₁) (D₂ : SpreadData 𝒮 u B₂)
+    (H : IsFilteredAlgColimit R 𝒮 t A u)
+    {i : ι} (h₁ : D₁.i₀ ≤ i) (h₂ : D₂.i₀ ≤ i)
+    (f : D₁.spreadStage (t := t) h₁ →ₐ[𝒮 i]
+      D₂.spreadStage (t := t) h₂)
+    (F : B₁ →ₐ[A] B₂)
+    (hf : ∀ x, D₂.stageToColimit H ⟨i, h₂⟩ (f x) =
+      F (D₁.stageToColimit H ⟨i, h₁⟩ x))
+    (hF : Function.Surjective F) :
+    ∃ (j : ι) (hij : i ≤ j), Function.Surjective
+      (D₁.mapAtLaterStage D₂ H h₁ h₂ hij f) := by
+  classical
+  let P₁ : {q : ι // D₁.i₀ ≤ q} := ⟨i, h₁⟩
+  let P₂ : {q : ι // D₂.i₀ ≤ q} := ⟨i, h₂⟩
+  choose b hb using fun v : Fin D₂.m =>
+    hF (D₂.stageToColimit H P₂
+      (Ideal.Quotient.mk _ (MvPolynomial.X v)))
+  letI : ∀ Q : {q : ι // D₁.i₀ ≤ q},
+      Algebra (𝒮 D₁.i₀) (D₁.spreadStage (t := t) Q.2) := fun Q =>
+    ((algebraMap (𝒮 Q.1) (D₁.spreadStage (t := t) Q.2)).comp
+      (t Q.2).toRingHom).toAlgebra
+  letI : Algebra (𝒮 D₁.i₀) B₁ :=
+    ((algebraMap A B₁).comp (u D₁.i₀).toRingHom).toAlgebra
+  let H₁ := D₁.isFilteredAlgColimit H
+  obtain ⟨L, x, hx⟩ := H₁.exists_common_lift b
+  letI : IsDirected {q : ι // D₁.i₀ ≤ q} (· ≤ ·) := H₁.directed
+  obtain ⟨Q, hLQ, hP₁Q⟩ := exists_ge_ge L P₁
+  let hij : i ≤ Q.1 := hP₁Q
+  let Q₁ : {q : ι // D₁.i₀ ≤ q} := ⟨Q.1, h₁.trans hij⟩
+  let Q₂ : {q : ι // D₂.i₀ ≤ q} := ⟨Q.1, h₂.trans hij⟩
+  let xQ : Fin D₂.m → D₁.spreadStage (t := t) (h₁.trans hij) := fun v =>
+    D₁.stageTransition H hLQ (x v)
+  let fQ := D₁.mapAtLaterStage D₂ H h₁ h₂ hij f
+  have hxQ (v : Fin D₂.m) : D₁.stageToColimit H Q₁ (xQ v) = b v := by
+    simpa only [xQ, Q₁] using
+      (D₁.stageToColimit_stageTransition H L.2 hLQ (x v)).trans (hx v)
+  have hcol (v : Fin D₂.m) :
+      D₂.stageToColimit H Q₂ (fQ (xQ v)) =
+        D₂.stageToColimit H Q₂
+          (Ideal.Quotient.mk _ (MvPolynomial.X v)) := by
+    calc
+      D₂.stageToColimit H Q₂ (fQ (xQ v)) =
+          F (D₁.stageToColimit H Q₁ (xQ v)) :=
+        D₁.mapAtLaterStage_colimit D₂ H h₁ h₂ hij f F hf (xQ v)
+      _ = F (b v) := congrArg F (hxQ v)
+      _ = D₂.stageToColimit H P₂
+          (Ideal.Quotient.mk _ (MvPolynomial.X v)) := hb v
+      _ = D₂.stageToColimit H Q₂
+          (D₂.stageTransition H hP₁Q
+            (Ideal.Quotient.mk _ (MvPolynomial.X v))) :=
+        (D₂.stageToColimit_stageTransition H h₂ hij
+          (Ideal.Quotient.mk _ (MvPolynomial.X v))).symm
+      _ = D₂.stageToColimit H Q₂
+          (Ideal.Quotient.mk _ (MvPolynomial.X v)) := by
+        congr 1
+        rw [D₂.stageTransition_apply, presentedT_mk, MvPolynomial.map_X]
+  obtain ⟨S, hQS, heq⟩ := D₂.exists_common_stage_eq H
+    (P := Q₂) (fun v => fQ (xQ v))
+    (fun v => Ideal.Quotient.mk _ (MvPolynomial.X v)) hcol
+  let hj : i ≤ S.1 := hij.trans hQS
+  refine ⟨S.1, hj,
+    D₁.surjective_of_generator_preimages D₂ (h₁.trans hj) (h₂.trans hj)
+      (D₁.mapAtLaterStage D₂ H h₁ h₂ hj f) ?_⟩
+  intro v
+  let y := D₁.stageTransition H
+    (show (Q₁ : {q : ι // D₁.i₀ ≤ q}) ≤
+      ⟨S.1, h₁.trans hj⟩ from hQS) (xQ v)
+  refine ⟨y, ?_⟩
+  have hmap := D₁.mapAtLaterStage_stageTransition D₂ H
+    (h₁.trans hij) (h₂.trans hij) hQS fQ (xQ v)
+  have htrans := D₁.mapAtLaterStage_trans D₂ H h₁ h₂ hij hQS f
+  calc
+    D₁.mapAtLaterStage D₂ H h₁ h₂ hj f y =
+        D₁.mapAtLaterStage D₂ H (h₁.trans hij) (h₂.trans hij) hQS fQ y := by
+      rw [htrans]
+    _ = D₂.stageTransition H hQS (fQ (xQ v)) := hmap
+    _ = D₂.stageTransition H hQS
+        (Ideal.Quotient.mk _ (MvPolynomial.X v)) := heq v
+    _ = Ideal.Quotient.mk _ (MvPolynomial.X v) := by
+      rw [D₂.stageTransition_apply, presentedT_mk, MvPolynomial.map_X]
+
 /-- A finite family of pairs of maps between varying spread models agree after
 transport to a fixed later stage. -/
 def SpreadData.mapsFamilyAgreeAtLaterStage
