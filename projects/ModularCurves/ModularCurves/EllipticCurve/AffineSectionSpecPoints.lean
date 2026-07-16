@@ -130,4 +130,48 @@ theorem chartHomEquiv_affineSectionSpecPoint (p q : R) (h : W.toAffine.Equation 
         affineChartHom_comp_compat W K p q h⟩ :=
   chartHomEquiv_eq_of_specMap W 2 _ _ (affineSectionSpecPoint_eq_spec W K p q h).symm
 
+set_option backward.isDefEq.respectTransparency false in
+/-- **(Stage B-4)** `affineChartHom` on the `Z`-chart coordinates reads the marked
+coordinates: `X_j/X_2 ↦ ![p, q, 1] j`. -/
+theorem affineChartHom_coord (p q : R) (h : W.toAffine.Equation p q)
+    (j : {j : Fin 3 // j ≠ 2}) :
+    affineChartHom W p q h (chartCoordEquiv W 2 (Ideal.Quotient.mk
+        (Ideal.span {MvPolynomial.dehomogenizeAux R 2 W.toProjective.polynomial})
+        (MvPolynomial.X j))) = ![p, q, 1] j.1 := by
+  rw [chartCoordEquiv_mk_X, HomogeneousLocalization.Away.isLocalizationElem,
+    affineChartHom_mk]
+  rw [show ((quotientGradingHom (projIdeal W)) (MvPolynomial.X j.1)) ^ 1 =
+      Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X j.1 ^ 1) from by
+    rw [pow_one, pow_one]; rfl]
+  rw [projModelAffineEval_mk]
+  simp
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(Stage B-5)** The `Z`-chart coordinates of the evaluated section are the evaluated
+marked coordinates. -/
+theorem affineSectionSpecPoint_coord {K : Type u} [Field K] [Algebra R K]
+    (p q : R) (h : W.toAffine.Equation p q)
+    (j : {j : Fin 3 // j ≠ 2}) :
+    (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨affineSectionSpecPoint W K p q h,
+        inZChart_affineSectionSpecPoint W K p q h⟩)).1 j =
+      algebraMap R K (![p, q, 1] j.1) := by
+  rw [coord_val, chartHomEquiv_affineSectionSpecPoint]
+  show ((algebraMap R K).comp (affineChartHom W p q h)) _ = _
+  rw [RingHom.comp_apply, affineChartHom_coord]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **(Stage B ★★, the fibre evaluation)** Under the field-points dictionary, the
+evaluated affine-point section is mathlib's affine point at the evaluated coordinates. -/
+theorem projModelPointsEquiv_affineSectionSpecPoint {K : Type u} [Field K] [Algebra R K]
+    [W.IsElliptic] (p q : R) (h : W.toAffine.Equation p q)
+    (hns : (W.baseChange K).toAffine.Nonsingular
+      (algebraMap R K p) (algebraMap R K q)) :
+    projModelPointsEquiv W K (affineSectionSpecPoint W K p q h) =
+      WeierstrassCurve.Affine.Point.some (algebraMap R K p) (algebraMap R K q) hns :=
+  projModelPointsEquiv_some W K (affineSectionSpecPoint W K p q h)
+    (inZChart_affineSectionSpecPoint W K p q h)
+    (algebraMap R K p) (algebraMap R K q) hns
+    (by rw [affineSectionSpecPoint_coord W p q h ⟨0, by decide⟩]; rfl)
+    (by rw [affineSectionSpecPoint_coord W p q h ⟨1, by decide⟩]; rfl)
+
 end ModularCurves
