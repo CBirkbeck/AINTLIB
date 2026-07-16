@@ -438,3 +438,22 @@ Needed: `Flat (D.smulKernelπ E M)` (+ IsFinite/lfp) from `Flat (subschemeι ≫
 - Then [F3-degmul]: `deg G = deg Z_M · deg Z_K` (finrank of a fibre product of finite flats —
   build on FlatRank's affine lemmas + tensor rank multiplicativity), and [F3-squeeze] closes
   KM step 5 (`D₁ ≤ Z_M` containment via factors_sectionsDivisor-style points + degree rigidity).
+
+## [F3-degmul] + [F3-squeeze] scouting (KM worker, 2026-07-16d)
+
+- **[F3-degmul] route FOUND, GENERAL (no domains!)**: mathlib
+  `Module.rankAtStalk_tensorProduct : rankAtStalk (M ⊗[R] N) = rankAtStalk M * rankAtStalk N`
+  (FreeLocus.lean:338, finite flat only) + `pullbackSpecIso` (affine fibre products are Spec of
+  tensors) + the finrank-def affine-locality reduction. NOTE: the repo's `finrank_tower_of_flat`
+  (FinrankTower.lean:77) is DOMAIN-gated — do not reach for it; the tensor route is the general
+  one. The affine-locality glue is exactly the [FR-GEN] public-reduction shape (T-DEG0 trace) —
+  building it here serves BOTH tickets.
+- **[F3-squeeze] containment analysis (adversarial)**: `D₁ ≤ Z_M` at the IDEAL level is FALSE in
+  general (∏-of-containing-ideals is only in `I^n`, not `I` — non-reduced fattening); KM's actual
+  p. 29–30 comparison is `Z_M ≤ D₁`(-analog) via T-POINTS + Yoneda-at-the-universal-point, where
+  the T-point factoring uses the ∐-translate decomposition: the preimages of the disjoint
+  translates are CLOPEN in T, so the argument runs per clopen piece and glues — NO connectivity
+  of T needed (KM's "T connected" is a simplification; the clopen-glue form is the Lean-ready
+  one). ⟹ [F3-disj] (translate-disjointness + the clopen decomposition of the divisor subscheme,
+  from `orderDivisor_mul_crt` + `mapIso_sectionsDivisor` + `Point.eq_zero_of_killed_coprime`) is
+  the LAST substantial brick of KM step 5; then squeeze = degree-count + Yoneda.
