@@ -219,7 +219,8 @@ private theorem overring_eq_top_of_idealOfLE_eq_bot {L : Type*} [Field L]
 
 /-- **Maximal-prime overring is `A` itself.** An overring `B ≥ A` whose cut-out prime
 is the maximal ideal of `A` (`idealOfLE A B = maximalIdeal A`) equals `A`: it cuts out
-the same prime as the self-inclusion (`ValuationSubring.idealOfLE_self : idealOfLE A A = maximalIdeal A`),
+the same prime as the self-inclusion
+(`ValuationSubring.idealOfLE_self : idealOfLE A A = maximalIdeal A`),
 so transport (`overring_eq_of_idealOfLE_eq`) identifies them. -/
 private theorem overring_eq_self_of_idealOfLE_eq_maximalIdeal {L : Type*} [Field L]
     (A B : ValuationSubring L) (hB : A ≤ B)
