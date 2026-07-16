@@ -84,6 +84,28 @@ noncomputable def Scheme.Hom.affineIntersectionModelBaseChangeIso
   exact M.affineIntersectionGluedBaseChangeIso hopenG hpushG hopenM hpushM ≪≫
     asIso (π.affineIntersectionGluedToOriginal U hU)
 
+@[reassoc]
+theorem Scheme.Hom.affineIntersectionModelBaseChangeIso_hom
+    {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+    {𝒮 : ι → Type u} [∀ i, CommRing (𝒮 i)] [∀ i, Algebra R (𝒮 i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (𝒮 i →ₐ[R] 𝒮 j)}
+    (π : X ⟶ S) [IsAffine S] [Algebra R Γ(S, (⊤ : S.Opens))]
+    {uS : ∀ i, 𝒮 i →ₐ[R] Γ(S, (⊤ : S.Opens))}
+    {H : Algebra.IsFilteredAlgColimit R 𝒮 t Γ(S, (⊤ : S.Opens)) uS}
+    (U : J → X.Opens) (hcover : IsOpenCover U)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    (M : Algebra.SpreadData.FunctorModel (π.affineIntersectionFunctor U) H)
+    (hopenM : Scheme.GlueData.IsOpenAffineIntersectionFunctor M.toFunctor)
+    (hpushM : Scheme.GlueData.IsPushoutAffineIntersectionFunctor M.toFunctor) :
+    letI : Algebra (𝒮 M.stage) Γ(S, (⊤ : S.Opens)) :=
+      (uS M.stage).toRingHom.toAlgebra
+    (π.affineIntersectionModelBaseChangeIso U hcover hU M hopenM hpushM).hom =
+      (M.affineIntersectionGluedBaseChangeIso
+          (π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU)
+          (π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU)
+          hopenM hpushM).hom ≫
+        π.affineIntersectionGluedToOriginal U hU := rfl
+
 /-- A chosen finite affine cover of a proper, locally finitely presented family spreads to
 an affine-intersection model at one stage of a filtered presentation of the base ring. -/
 theorem Scheme.Hom.exists_affineIntersectionModelAtLaterStage_of_isProper_of_cover

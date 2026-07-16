@@ -871,3 +871,11 @@ sheaf on its canonical affine-intersection gluing. The proof consumes the synchr
 model and completed original-sheaf comparison. Its focused build is green, its axiom audit is
 exactly `propext`, `Classical.choice`, and `Quot.sound`, and it adds no Noetherianity, geometric
 hypothesis, or proof-resource option.
+
+Completed dependency claim (2026-07-16): constructed
+`Scheme.Hom.affineIntersectionModelBaseChangeIso_hom`. The hom of the finite-stage scheme-model
+comparison is now exposed as the glued base-change hom followed by the canonical
+glued-to-original isomorphism. This coherence pin lets the descended line-bundle comparison be
+transported to the actual pullback scheme without forcing consumers to normalize a composite
+isomorphism definition. Its focused build is green, its axiom audit is exactly `propext`,
+`Classical.choice`, and `Quot.sound`, and it adds no hypothesis or proof-resource option.
