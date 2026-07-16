@@ -1220,6 +1220,27 @@ theorem RelEffCartierDiv.IsSubgroup.finrank_prod_struct (M K : ℕ) [NeZero M] [
     _ = (D.ideal.subschemeι ≫ E.π).finrank s := by rw [hstruct]
     _ = M * K := hdeg s
 
+/-- **[F3-prodrank] (the fibre-product rank formula — [FR-GEN]-grade, mathlib-PR shape)**
+The fibre rank of a fibre product of finite flat morphisms is the product of the fibre
+ranks: `deg (X ×_S Y → S) = deg X · deg Y` pointwise. Route (§16g): reduce to an affine
+chart through the point (`exists_Spec_apply_eq` + `finrank_pullback_snd` three times +
+the base-change-of-fibre-product pasting iso), then `pullbackSpecIso` +
+`rankAtStalk_tensorProduct`. -/
+theorem Scheme.Hom.finrank_pullback_comp_fst {X Y : Scheme.{u}} (f : X ⟶ S) (g : Y ⟶ S)
+    [Flat f] [IsFinite f] [Flat g] [IsFinite g] (s : S) :
+    (pullback.fst f g ≫ f).finrank s = f.finrank s * g.finrank s := by
+  haveI hc1 : Flat (pullback.fst f g ≫ f) :=
+    MorphismProperty.comp_mem _ _ _
+      (MorphismProperty.pullback_fst (P := @Flat) _ _ ‹_›) ‹_›
+  haveI hc2 : IsFinite (pullback.fst f g ≫ f) :=
+    MorphismProperty.comp_mem _ _ _
+      (MorphismProperty.pullback_fst (P := @IsFinite) _ _ ‹_›) ‹_›
+  obtain ⟨R, i, hi, s', rfl⟩ := S.exists_Spec_apply_eq s
+  rw [← Scheme.Hom.finrank_pullback_snd f i s', ← Scheme.Hom.finrank_pullback_snd g i s',
+    ← Scheme.Hom.finrank_pullback_snd (pullback.fst f g ≫ f) i s']
+  -- now everything is over Spec R; the base-changed product is the product of base changes
+  sorry
+
 /-- **[F3-degmul] (contract)** The degree of the divisor multiplies over the kernel
 product: `deg G = deg Z_M · deg Z_K` at every base point. Route (banked 2026-07-16d):
 the product iso (R1+R2) + affine-local `rankAtStalk_tensorProduct` through
