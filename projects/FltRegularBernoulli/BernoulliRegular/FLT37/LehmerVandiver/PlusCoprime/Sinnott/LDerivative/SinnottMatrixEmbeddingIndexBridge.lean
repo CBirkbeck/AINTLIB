@@ -335,6 +335,37 @@ def QuotientCharBijectionToEvenNontriv : Prop :=
     DirichletLogSum p (dirichletOfQuotientChar p ξ)) =
   ∏ χ ∈ BernoulliRegular.evenNontrivialCharacters p, DirichletLogSum p χ
 
+/-- **Cardinality of the even-delta character group**: for `p` prime with `p > 2`,
+the multiplicative-character group `MulChar (CyclotomicEvenDelta p) ℂ` has exactly
+`(p - 1) / 2` elements. Combines the shipped
+`nat_card_mulChar_cyclotomicEvenDelta_eq` (characters ↔ group, cardinality-wise)
+with `cyclotomicEvenDelta_card` (order of `Δ / {±1}` is `(p - 1) / 2`). -/
+theorem card_mulChar_cyclotomicEvenDelta_eq
+    [Fintype (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ)] (hp_two : 2 < p) :
+    Fintype.card (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) = (p - 1) / 2 := by
+  rw [← Nat.card_eq_fintype_card, nat_card_mulChar_cyclotomicEvenDelta_eq p,
+    Nat.card_eq_fintype_card]
+  exact BernoulliRegular.cyclotomicEvenDelta_card (p := p) hp_two
+
+/-- **Even-nontrivial membership of the Dirichlet extension**: for a nontrivial
+quotient character `ξ ≠ 1`, its Dirichlet extension `dirichletOfQuotientChar p ξ`
+lies in `evenNontrivialCharacters p`. It is even by `dirichletOfQuotientChar_even`,
+and it is nontrivial because `ξ ≠ 1` while `dirichletOfQuotientChar` is injective
+with `dirichletOfQuotientChar p 1 = 1`. -/
+theorem dirichletOfQuotientChar_mem_evenNontrivialCharacters
+    (ξ : MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) (hξ_ne : ξ ≠ 1) :
+    dirichletOfQuotientChar p ξ ∈ BernoulliRegular.evenNontrivialCharacters p := by
+  classical
+  rw [BernoulliRegular.evenNontrivialCharacters, Finset.mem_filter]
+  refine ⟨Finset.mem_univ _, ?_, ?_⟩
+  · exact dirichletOfQuotientChar_even p ξ
+  · intro h_one
+    apply hξ_ne
+    have h_eq : dirichletOfQuotientChar p ξ = dirichletOfQuotientChar p 1 := by
+      rw [dirichletOfQuotientChar_one]
+      exact h_one
+    exact dirichletOfQuotientChar_injective p h_eq
+
 /-- **Proof of `QuotientCharBijectionToEvenNontriv` via cardinality-and-injection**:
 for `p` prime with `p > 2` (so `p ≠ 2`), the product equality holds.
 
@@ -357,27 +388,12 @@ theorem quotientCharBijectionToEvenNontriv_proof (hp_two : 2 < p) :
       DirichletLogSum p (dirichletOfQuotientChar p ξ)) =
     ∏ χ ∈ BernoulliRegular.evenNontrivialCharacters p, DirichletLogSum p χ
   have h_card_mc : Fintype.card (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) =
-      (p - 1) / 2 := by
-    have h1 : Fintype.card (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) =
-        Nat.card (MulChar (BernoulliRegular.CyclotomicEvenDelta p) ℂ) :=
-      Nat.card_eq_fintype_card.symm
-    rw [h1, nat_card_mulChar_cyclotomicEvenDelta_eq p]
-    rw [Nat.card_eq_fintype_card]
-    exact BernoulliRegular.cyclotomicEvenDelta_card (p := p) hp_two
+      (p - 1) / 2 := card_mulChar_cyclotomicEvenDelta_eq p hp_two
   have h_p_odd : Odd p := hp.out.odd_of_ne_two (by lia)
   refine Finset.prod_bij (fun ξ _ ↦ dirichletOfQuotientChar p ξ) ?_ ?_ ?_ ?_
   · intro ξ hξ
     rw [Finset.mem_erase] at hξ
-    obtain ⟨hξ_ne, _⟩ := hξ
-    rw [BernoulliRegular.evenNontrivialCharacters, Finset.mem_filter]
-    refine ⟨Finset.mem_univ _, ?_, ?_⟩
-    · exact dirichletOfQuotientChar_even p ξ
-    · intro h_one
-      apply hξ_ne
-      have h_eq : dirichletOfQuotientChar p ξ = dirichletOfQuotientChar p 1 := by
-        rw [dirichletOfQuotientChar_one]
-        exact h_one
-      exact dirichletOfQuotientChar_injective p h_eq
+    exact dirichletOfQuotientChar_mem_evenNontrivialCharacters p ξ hξ.1
   · intro ξ₁ _ ξ₂ _ h
     exact dirichletOfQuotientChar_injective p h
   · intro χ hχ
@@ -395,16 +411,7 @@ theorem quotientCharBijectionToEvenNontriv_proof (hp_two : 2 < p) :
         dirichletOfQuotientChar p ξ ∈ BernoulliRegular.evenNontrivialCharacters p := by
       intro ξ hξ
       rw [Finset.mem_erase] at hξ
-      obtain ⟨hξ_ne, _⟩ := hξ
-      rw [BernoulliRegular.evenNontrivialCharacters, Finset.mem_filter]
-      refine ⟨Finset.mem_univ _, ?_, ?_⟩
-      · exact dirichletOfQuotientChar_even p ξ
-      · intro h_one
-        apply hξ_ne
-        have h_eq : dirichletOfQuotientChar p ξ = dirichletOfQuotientChar p 1 := by
-          rw [dirichletOfQuotientChar_one]
-          exact h_one
-        exact dirichletOfQuotientChar_injective p h_eq
+      exact dirichletOfQuotientChar_mem_evenNontrivialCharacters p ξ hξ.1
     have h_surj := Finset.surj_on_of_inj_on_of_card_le
       (fun ξ (_ : ξ ∈ _) ↦ dirichletOfQuotientChar p ξ)
       (fun ξ hξ ↦ h_in ξ hξ)
