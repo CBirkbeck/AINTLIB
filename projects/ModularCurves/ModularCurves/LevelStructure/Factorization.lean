@@ -1467,6 +1467,18 @@ theorem RelEffCartierDiv.IsSubgroup.smulKernelπ_finrank_eq {k : Type u} [Field 
   have ha1 : a = 1 := Nat.eq_one_of_mul_eq_one_left (m := b) (by rwa [Nat.mul_comm] at hab)
   rw [ha, ha1, Nat.mul_one]
 
+/-- **[F3-exhaust-1]** A point factoring through a divisor bounds the divisor's ideal
+by the point's kernel (step 1 of the exhaustion argument). -/
+theorem RelEffCartierDiv.ideal_le_ker_of_factors {C : Scheme.{u}} {π : C ⟶ S}
+    (D : RelEffCartierDiv π) {T : Scheme.{u}} {q : T ⟶ C}
+    (hfac : ∃ w : T ⟶ D.ideal.subscheme, w ≫ D.ideal.subschemeι = q) :
+    D.ideal ≤ q.ker := by
+  obtain ⟨w, hw⟩ := hfac
+  calc D.ideal = (D.ideal.subschemeι).ker :=
+        (Scheme.IdealSheafData.ker_subschemeι (I := D.ideal)).symm
+    _ ≤ (w ≫ D.ideal.subschemeι).ker := Scheme.Hom.le_ker_comp w _
+    _ = q.ker := by rw [hw]
+
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
 order `M` and `M·P` has exact order `K`.
