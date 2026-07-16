@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.Moduli.LevelSpaces
 import ModularCurves.Moduli.DrinfeldRepresentability
 import ModularCurves.GroupScheme.TorsionEtaleTriv
+import ModularCurves.GroupScheme.TorsionCombination
 import Mathlib.AlgebraicGeometry.Morphisms.LocalFlatDescent
 
 /-!
@@ -753,5 +754,163 @@ theorem pair_generates_iff_combos_ne_zero
     exact hab (hbij.1 (habs.trans h0.symm))
 
 end PairGeneration
+
+section LevelSpaceIdentification
+
+open EllipticCurve
+
+variable (E : EllipticCurve S) (N : ℕ) [NeZero N]
+
+/-- **([DEDUP-CC] bridge)** This file's zero section agrees with the carrier-of-record's
+(`GroupScheme/TorsionCombination.lean`): both are the lift of the zero point. -/
+theorem torsionZero_eq : torsionZero E N = E.torsionZero N := by
+  apply pullback.hom_ext
+  · show torsionZero E N ≫ E.torsionι N = E.torsionZero N ≫ E.torsionι N
+    rw [E.torsionZero_torsionι, E.point_zero_val, Category.id_comp]
+    exact pullback.lift_fst _ _ _
+  · show torsionZero E N ≫ E.torsionπ N = E.torsionZero N ≫ E.torsionπ N
+    rw [E.torsionZero_torsionπ]
+    exact torsionZero_torsionπ E N
+
+/-- **([DEDUP-CC] bridge)** This file's combination maps agree with the carrier-of-record's. -/
+theorem comboMap_eq (ab : ZMod N × ZMod N) :
+    comboMap E N (ab.1.val : ℤ) (ab.2.val : ℤ) = E.combinationHom N ab := by
+  apply pullback.hom_ext
+  · show comboMap E N _ _ ≫ E.torsionι N = E.combinationHom N ab ≫ E.torsionι N
+    rw [E.combinationHom_torsionι]
+    exact E.pointToTorsion_torsionι _ _
+  · show comboMap E N _ _ ≫ E.torsionπ N = E.combinationHom N ab ≫ E.torsionπ N
+    rw [E.combinationHom_torsionπ]
+    exact E.pointToTorsion_torsionπ _ _
+
+/-- **([DEDUP-CC] bridge — the dispatched lemma)** This file's full-level locus set is the
+carrier-of-record's `fullLevelSet`. -/
+theorem fullLevelLocusSet_eq_fullLevelSet :
+    fullLevelLocusSet E N = E.fullLevelSet N := by
+  ext x
+  simp only [fullLevelLocusSet, EllipticCurve.fullLevelSet, Set.mem_iInter,
+    Set.mem_setOf_eq, Set.mem_preimage, Set.mem_compl_iff]
+  constructor
+  · intro h v hv
+    have h' := h ⟨v, hv⟩
+    rwa [comboMap_eq, torsionZero_eq] at h'
+  · intro h ab
+    have h' := h ab.1 ab.2
+    rwa [← comboMap_eq, ← torsionZero_eq] at h'
+
+omit [NeZero N] in
+/-- The tautological pair pulled along a `V`-point of the pair scheme is killed
+(morphism-level form). -/
+lemma pullAlong_taut_killed {V : Scheme.{u}} (v : V ⟶ E.torsionPair N)
+    (P : E.Point (E.torsionPairπ N)) (hP : (N : ℤ) • P = 0) :
+    ((EllipticCurve.Point.pullAlong E v P : E.Point (v ≫ E.torsionPairπ N)) :
+        V ⟶ E.E) ≫ E.mulByHom N = (v ≫ E.torsionPairπ N) ≫ E.zero := by
+  have h0 := (E.smul_eq_zero_iff_comp_mulByHom _ N P).mp hP
+  show (v ≫ (P : _ ⟶ E.E)) ≫ E.mulByHom N = _
+  rw [Category.assoc, h0, ← Category.assoc]
+
+/-- **(the `E`-side classification)** A `V`-point of the pair scheme factors through the level
+space iff its tautological pair is a Drinfeld full level structure (`levelSpaceΓ_spec` plus the
+reconstruction of `v` from its two torsion legs). -/
+theorem factor_levelSpace_iff_isFullLevel {V : Scheme.{u}} (v : V ⟶ E.torsionPair N) :
+    (∃ w : V ⟶ levelSpaceΓ E N, w ≫ levelSpaceΓι E N = v)
+      ↔ (E.baseChange (v ≫ E.torsionPairπ N)).IsFullLevel N
+          (EllipticCurve.Point.asSection E _
+            (EllipticCurve.Point.pullAlong E v (E.torsionPairFst N)))
+          (EllipticCurve.Point.asSection E _
+            (EllipticCurve.Point.pullAlong E v (E.torsionPairSnd N))) := by
+  have hP := pullAlong_taut_killed E N v (E.torsionPairFst N) (E.torsionPairFst_killed N)
+  have hQ := pullAlong_taut_killed E N v (E.torsionPairSnd N) (E.torsionPairSnd_killed N)
+  have hspec := levelSpaceΓ_spec E N (v ≫ E.torsionPairπ N)
+    (EllipticCurve.Point.pullAlong E v (E.torsionPairFst N))
+    (EllipticCurve.Point.pullAlong E v (E.torsionPairSnd N)) hP hQ
+  rw [← hspec]
+  -- the classifying lift of the pulled pair IS `v`
+  have hrec : pullback.lift
+      (E.pointToTorsion (EllipticCurve.Point.pullAlong E v (E.torsionPairFst N)) hP)
+      (E.pointToTorsion (EllipticCurve.Point.pullAlong E v (E.torsionPairSnd N)) hQ)
+      (by simp) = v := by
+    apply pullback.hom_ext
+    · rw [pullback.lift_fst]
+      apply pullback.hom_ext
+      · show E.pointToTorsion _ hP ≫ E.torsionι N
+          = (v ≫ pullback.fst (E.torsionπ N) (E.torsionπ N)) ≫ E.torsionι N
+        rw [E.pointToTorsion_torsionι]
+        show v ≫ (E.torsionPairFst N : _ ⟶ E.E) = _
+        rw [Category.assoc]
+        rfl
+      · show E.pointToTorsion _ hP ≫ E.torsionπ N
+          = (v ≫ pullback.fst (E.torsionπ N) (E.torsionπ N)) ≫ E.torsionπ N
+        rw [E.pointToTorsion_torsionπ]
+        rfl
+    · rw [pullback.lift_snd]
+      apply pullback.hom_ext
+      · show E.pointToTorsion _ hQ ≫ E.torsionι N
+          = (v ≫ pullback.snd (E.torsionπ N) (E.torsionπ N)) ≫ E.torsionι N
+        rw [E.pointToTorsion_torsionι]
+        show v ≫ (E.torsionPairSnd N : _ ⟶ E.E) = _
+        rw [Category.assoc]
+        rfl
+      · show E.pointToTorsion _ hQ ≫ E.torsionπ N
+          = (v ≫ pullback.snd (E.torsionπ N) (E.torsionπ N)) ≫ E.torsionπ N
+        rw [E.pointToTorsion_torsionπ]
+        show v ≫ E.torsionPairπ N = v ≫ pullback.snd _ _ ≫ E.torsionπ N
+        rw [show pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N
+          = E.torsionPairπ N from pullback.condition.symm]
+  rw [hrec]
+
+/-- **(the endgame identification, master-iff-gated)** Given the pointwise master
+identification (the fibrewise generation dictionary — the [DEDUP-CC] seam to the
+combination-locus classification), the level space IS the full-level locus, compatibly with
+the inclusions into the pair scheme. -/
+theorem exists_levelSpaceΓ_iso_fullLevelLocus (h : NIsInvertible S N)
+    (hmaster : ∀ {V : Scheme.{u}} (v : V ⟶ E.torsionPair N),
+      (E.baseChange (v ≫ E.torsionPairπ N)).IsFullLevel N
+          (EllipticCurve.Point.asSection E _
+            (EllipticCurve.Point.pullAlong E v (E.torsionPairFst N)))
+          (EllipticCurve.Point.asSection E _
+            (EllipticCurve.Point.pullAlong E v (E.torsionPairSnd N)))
+        ↔ ∀ t : V, v.base t ∈ E.fullLevelSet N) :
+    ∃ e : levelSpaceΓ E N ≅ E.fullLevelLocus N h,
+      e.hom ≫ E.fullLevelLocusι N h = levelSpaceΓι E N := by
+  haveI : IsClosedImmersion (levelSpaceΓι E N) :=
+    inferInstanceAs (IsClosedImmersion (Scheme.IdealSheafData.subschemeι _))
+  haveI : IsOpenImmersion (E.fullLevelLocusι N h) :=
+    inferInstanceAs (IsOpenImmersion (Scheme.Opens.ι _))
+  refine exists_iso_of_factor_iff _ _ (fun V v => ?_)
+  rw [factor_levelSpace_iff_isFullLevel E N v, hmaster v]
+  constructor
+  · intro hall
+    refine ⟨IsOpenImmersion.lift (E.fullLevelLocusι N h) v ?_, IsOpenImmersion.lift_fac _ _ _⟩
+    rw [Scheme.Opens.range_ι]
+    rintro x ⟨t, rfl⟩
+    exact hall t
+  · rintro ⟨w, rfl⟩ t
+    have : (E.fullLevelLocusι N h).base (w.base t) ∈
+        Set.range (E.fullLevelLocusι N h).base := Set.mem_range_self _
+    rw [Scheme.Opens.range_ι] at this
+    exact this
+
+/-- **(:3497-shaped)** Given the master identification, the level-space structure morphism is
+étale: the identification composes it through the étale `fullLevelLocusπ`. -/
+theorem levelSpaceΓ_structure_etale_of_master (h : NIsInvertible S N)
+    (hmaster : ∀ {V : Scheme.{u}} (v : V ⟶ E.torsionPair N),
+      (E.baseChange (v ≫ E.torsionPairπ N)).IsFullLevel N
+          (EllipticCurve.Point.asSection E _
+            (EllipticCurve.Point.pullAlong E v (E.torsionPairFst N)))
+          (EllipticCurve.Point.asSection E _
+            (EllipticCurve.Point.pullAlong E v (E.torsionPairSnd N)))
+        ↔ ∀ t : V, v.base t ∈ E.fullLevelSet N) :
+    Etale (levelSpaceΓι E N ≫
+      pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) := by
+  obtain ⟨e, he⟩ := exists_levelSpaceΓ_iso_fullLevelLocus E N h hmaster
+  have hcomp : levelSpaceΓι E N ≫ pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N
+      = e.hom ≫ E.fullLevelLocusπ N h := by
+    rw [← he, Category.assoc]
+  rw [hcomp]
+  haveI := E.fullLevelLocusπ_etale N h
+  infer_instance
+
+end LevelSpaceIdentification
 
 end ModularCurves
