@@ -1056,7 +1056,8 @@ base. Via the range identification and `finrank_KE_over_frobeniusRange_p`. -/
 theorem relativeFrobenius_degree_one [PerfectField F] :
     (EC.Isogeny.relativeFrobenius p E 1).degree = p := by
   have h1 : ((iterateFrobenius (E.toAffine.FunctionField) p 1).fieldRange :
-      Subfield (E.toAffine.FunctionField)) = (frobenius (E.toAffine.FunctionField) p).fieldRange := by
+      Subfield (E.toAffine.FunctionField)) =
+        (frobenius (E.toAffine.FunctionField) p).fieldRange := by
     rw [iterateFrobenius_one]
   rw [EC.Isogeny.degree_eq_finrank_fieldRange,
     finrank_congr_toSubfield _ _ ((relativeFrobenius_fieldRange_toSubfield p E 1).trans h1)]
