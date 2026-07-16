@@ -16,7 +16,8 @@ applied to `h'`.
 The payoff is **the geometric Frobenius `geomFrobeniusPoint W = Affine.Point.map (Frobenius)` over
 `L = AlgebraicClosure K` is bijective** (`geomFrobeniusPoint_bijective` /
 `geomFrobeniusPoint_surjective`): the `q`-power Frobenius `K`-algebra hom of `K̄` is the underlying
-map of the automorphism `frobeniusAlgEquivOfAlgebraic K K̄` (`Gal(K̄/K)`, since `K̄/K` is algebraic),
+map of the automorphism `frobeniusAlgEquivOfAlgebraic K K̄` (`Gal(K̄/K)`, since `K̄/K`
+is algebraic),
 hence bijective; surjectivity transfers through `Point.map`.
 
 This is the elementary half of Silverman III.4.10a for the Frobenius factor.  (It does **not**
@@ -81,7 +82,8 @@ noncomputable local instance instDecEqACSurjFrob : DecidableEq (AlgebraicClosure
 
 omit [DecidableEq K] in
 /-- **The geometric Frobenius `K`-algebra hom of `K̄` is surjective.**  It is the underlying map of
-the automorphism `FiniteField.frobeniusAlgEquivOfAlgebraic K K̄` (`K̄/K` algebraic ⟹ the `q`-power is
+the automorphism `FiniteField.frobeniusAlgEquivOfAlgebraic K K̄` (`K̄/K` algebraic ⟹ the
+`q`-power is
 an automorphism), so it is bijective; here we record surjectivity. -/
 theorem frobeniusAlgHom_surjective_algebraicClosure :
     Function.Surjective
