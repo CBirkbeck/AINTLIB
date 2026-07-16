@@ -166,69 +166,8 @@ theorem dworkParameterPowerBasis_coeff_sub_mem_primeIdeal_cube_of_mem_parameterI
     (dworkParameterPowerBasis p K).repr x i -
         (dworkParameterPowerBasis p K).repr y i ∈
       (rationalPadicPrimeIdeal p) ^ 3 := by
-  classical
-  let R₀ : Type := RationalPadicIntegerRing p
-  let S : Type _ := DworkCompleteIntegerRing p K
-  have hspan : x - y ∈ Ideal.span ({(p : S) ^ 3} : Set S) := by
-    rw [← Ideal.span_singleton_pow,
-      span_natCast_prime_dworkComplete_eq_parameterIdeal_pow_pred (p := p) (K := K),
-      ← pow_mul, Nat.mul_comm]
-    exact hxy
-  rcases Ideal.mem_span_singleton'.mp hspan with ⟨z, hz⟩
-  let a : Fin (p - 1) → R₀ :=
-    (dworkParameterPowerBasis p K).repr x -
-      (dworkParameterPowerBasis p K).repr y
-  let b : Fin (p - 1) → R₀ :=
-    (dworkParameterPowerBasis p K).repr z
-  have hmap_a :
-      dworkParameterPowerLinearMap p K a = x - y := by
-    calc
-      dworkParameterPowerLinearMap p K a =
-          dworkParameterPowerLinearMap p K
-            ((dworkParameterPowerBasis p K).repr x -
-              (dworkParameterPowerBasis p K).repr y) := rfl
-      _ =
-          dworkParameterPowerLinearMap p K ((dworkParameterPowerBasis p K).repr x) -
-            dworkParameterPowerLinearMap p K ((dworkParameterPowerBasis p K).repr y) :=
-            (dworkParameterPowerLinearMap p K).map_sub
-              ((dworkParameterPowerBasis p K).repr x)
-              ((dworkParameterPowerBasis p K).repr y)
-      _ = x - y := by
-            rw [KummerLogTrace.dworkParameterPowerLinearMap_repr
-                (p := p) (K := K) x,
-              KummerLogTrace.dworkParameterPowerLinearMap_repr
-                (p := p) (K := K) y]
-  have hmap_b :
-      dworkParameterPowerLinearMap p K (((p : R₀) ^ 3) • b) = x - y := by
-    have hbmap : dworkParameterPowerLinearMap p K b = z := by
-      change dworkParameterPowerLinearMap p K
-        ((dworkParameterPowerBasis p K).repr z) = z
-      exact KummerLogTrace.dworkParameterPowerLinearMap_repr
-        (p := p) (K := K) z
-    calc
-      dworkParameterPowerLinearMap p K (((p : R₀) ^ 3) • b)
-          = ((p : R₀) ^ 3) • dworkParameterPowerLinearMap p K b :=
-            (dworkParameterPowerLinearMap p K).map_smul ((p : R₀) ^ 3) b
-      _ = ((p : R₀) ^ 3) • z := by rw [hbmap]
-      _ = (p : S) ^ 3 * z := by
-            change algebraMap R₀ S ((p : R₀) ^ 3) * z = (p : S) ^ 3 * z
-            simp [R₀, S]
-      _ = x - y := by simpa [S, mul_comm] using hz
-  have hcoeff : a = ((p : R₀) ^ 3) • b :=
-    dworkParameterPowerLinearMap_injective (p := p) (K := K)
-      (hmap_a.trans hmap_b.symm)
-  have hi := congrFun hcoeff i
-  change a i ∈ (rationalPadicPrimeIdeal p) ^ 3
-  rw [hi]
-  have hp3_mem : (p : R₀) ^ 3 ∈ (rationalPadicPrimeIdeal p) ^ 3 := by
-    rw [rationalPadicPrimeIdeal, Ideal.span_singleton_pow]
-    exact Ideal.mem_span_singleton_self ((p : R₀) ^ 3)
-  have hmul_mem : (p : R₀) ^ 3 * b i ∈ (rationalPadicPrimeIdeal p) ^ 3 :=
-    ((rationalPadicPrimeIdeal p) ^ 3).mul_mem_right (b i) hp3_mem
-  have hi' : (((p : R₀) ^ 3) • b) i = (p : R₀) ^ 3 * b i := by
-    simp [Pi.smul_apply, smul_eq_mul]
-  rw [hi']
-  exact hmul_mem
+  exact dworkParameterPowerBasis_coeff_sub_mem_primeIdeal_pow_of_mem_parameterIdeal_pow_mul
+    (p := p) (K := K) (k := 3) hxy i
 
 omit [NumberField.IsCMField K] in
 /-- **The mod-`p³` Dwork-coordinate congruence (residue form)** (proven): `x - y ∈
