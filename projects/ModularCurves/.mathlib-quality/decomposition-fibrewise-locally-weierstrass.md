@@ -918,9 +918,10 @@ raising elaboration limits. The focused build is green, both axiom audits are ex
 `Classical.choice`, and `Quot.sound`, and no Noetherianity, geometric hypothesis, or
 proof-resource option was added.
 
-Active dependency claim (2026-07-16): prove
-`IsInvertible.exists_finiteStageModelOfFinitePresentationBaseChangeIso_of_isProper`. The theorem
-will package the descended invertible sheaf and its scheme/sheaf base-change comparisons together
-with `LocallyOfFinitePresentation` and `QuasiCompact` for the finite-stage structural morphism.
-It is a direct consumer of the two completed spread-model properties and introduces no new
-geometric hypothesis or proof-resource option.
+Completed dependency claim (2026-07-16): proved
+`IsInvertible.exists_finiteStageModelOfFinitePresentationBaseChangeIso_of_isProper`. The descended
+invertible sheaf and its scheme/sheaf base-change comparisons are now packaged together with
+`LocallyOfFinitePresentation` and `QuasiCompact` for the finite-stage structural morphism. The
+assembly passes the spread model and both gluing witnesses explicitly to the two completed
+geometric theorems. Its focused build is green, its axiom audit is exactly `propext`,
+`Classical.choice`, and `Quot.sound`, and it adds no geometric hypothesis or proof-resource option.
