@@ -6,6 +6,8 @@ Authors: Chris Birkbeck
 import ModularCurves.LevelStructure.ExactOrder
 import ModularCurves.GroupScheme.DeligneOrder
 import ModularCurves.GroupScheme.CartierDivisorMapIso
+import ModularCurves.GroupScheme.TranslationBySection
+import ModularCurves.LevelStructure.IsoTransport
 
 /-!
 # Prime-power factorization of Drinfeld exact order (KM 1.7.2 / 3.5.1, Γ₁-instance)
@@ -28,7 +30,7 @@ KM 1.4.1): no `φ`-homomorphism vocabulary is introduced — for the cyclic grou
 `ℤ/N` a homomorphism *is* its value at `1` (KM 1.5.2).
 -/
 
-open AlgebraicGeometry CategoryTheory Limits
+open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
 
 universe u
 
@@ -251,29 +253,6 @@ theorem Section.orderDivisor_mul_crt (P : E.Section) (M K : ℕ) [NeZero M] [NeZ
   rw [sub_add_cancel] at h2
   exact h2.symm
 
-/-- Pushforward along an isomorphism agrees with pullback along its inverse: for
-`e : C ≅ C`, `I.map e.hom = I.comap e.inv`. (The comap-map Galois connection restricts
-to an order isomorphism along an iso; both adjoints are then the same inverse image.) -/
-theorem _root_.AlgebraicGeometry.Scheme.IdealSheafData.map_hom_eq_comap_inv
-    {C : Scheme.{u}} (e : C ≅ C) (I : C.IdealSheafData) :
-    I.map e.hom = I.comap e.inv := by
-  have hid₁ : ∀ J : C.IdealSheafData, (J.comap e.inv).comap e.hom = J := by
-    intro J
-    rw [← Scheme.IdealSheafData.comap_comp, Iso.hom_inv_id,
-      Scheme.IdealSheafData.comap_id]
-  have hid₂ : ∀ J : C.IdealSheafData, (J.comap e.hom).comap e.inv = J := by
-    intro J
-    rw [← Scheme.IdealSheafData.comap_comp, Iso.inv_hom_id,
-      Scheme.IdealSheafData.comap_id]
-  refine le_antisymm ?_ ?_
-  · have h1 : (I.map e.hom).comap e.hom ≤ I :=
-      Scheme.IdealSheafData.comap_map_le I e.hom
-    have h2 : ((I.map e.hom).comap e.hom).comap e.inv ≤ I.comap e.inv :=
-      Scheme.IdealSheafData.comap_mono (f := e.inv) h1
-    rwa [hid₂] at h2
-  · have h1 : (I.comap e.inv).comap e.hom ≤ I := le_of_eq (hid₁ I)
-    exact Scheme.IdealSheafData.le_map_iff_comap_le.mpr h1
-
 /-- Pointwise formula for pushforward along an isomorphism: sections of the moved ideal
 are the inverse images of sections over the preimage affine open. -/
 theorem _root_.AlgebraicGeometry.Scheme.IdealSheafData.map_hom_apply
@@ -395,6 +374,29 @@ theorem Point.eq_zero_of_killed_coprime {T : Scheme.{u}} {g : T ⟶ S} (Q : E.Po
     _ = u • ((M : ℤ) • Q) + v • ((K : ℤ) • Q) := by
         rw [add_zsmul, mul_smul, mul_smul]
     _ = 0 := by rw [hM, hK, smul_zero, smul_zero, add_zero]
+
+/-- **[W0-F3-transpt] (KM print p. 30's `Trans(φ(a₁))` on points)** Transporting a point
+through translation-by-`x` adds the pulled section: `Trans(x)(Q) = Q + x|_T`. With
+`mapIso_sectionsDivisor`/`sectionsDivisor_pointMap_ideal` this reads KM's translated
+divisor `Trans(φ(a₁))*(D₂)` on `T`-points. -/
+theorem pointMapOfHom_translateBy (x : 𝟙_ (CategoryTheory.Over S) ⟶ E.asOver)
+    {T : Scheme.{u}} {g : T ⟶ S} (Q : E.Point g) :
+    EllipticCurve.pointMapOfHom (E.translateBy x) Q
+      = Q + (E.pointEquivOverHom g).symm
+          (CategoryTheory.CartesianMonoidalCategory.toUnit (CategoryTheory.Over.mk g) ≫ x) := by
+  letI : CommGroup (CategoryTheory.Over.mk g ⟶ E.asOver) := CategoryTheory.Hom.commGroup
+  refine (E.pointEquivOverHom g).injective ?_
+  rw [EllipticCurve.pointEquivOverHom_add, Equiv.apply_symm_apply]
+  have hnat : (E.pointEquivOverHom g) (EllipticCurve.pointMapOfHom (E.translateBy x) Q)
+      = (E.pointEquivOverHom g) Q ≫ E.translateBy x := by
+    apply CategoryTheory.Over.OverMorphism.ext
+    rw [CategoryTheory.Over.comp_left]
+    rfl
+  rw [hnat, EllipticCurve.translateBy_def, MonObj.comp_mul, Category.comp_id]
+  congr 1
+  rw [EllipticCurve.constPt, ← Category.assoc]
+  congr 1
+  exact CategoryTheory.CartesianMonoidalCategory.toUnit_unique _ _
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
