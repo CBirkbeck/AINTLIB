@@ -191,6 +191,55 @@ theorem psi3_eval_eq_zero_of_three_zsmul {F : Type*} [Field F] [DecidableEq F]
     linear_combination (norm := ring_nf)
       (-(W.a₁ ^ 2) - 4 * W.a₂ - 12 * x) * hcurve - hx2
 
+open Polynomial in
+/-- **(the bridge, `μ`-form ★)** A `3`-torsion affine point over a field is nowhere
+`2`-torsion (`TwiceNeZero`) and has vanishing `μ` — the exact inputs of the flex
+normalization `ofTwiceNeZero_isFlexNF`. -/
+theorem mu_eq_zero_of_three_zsmul {F : Type*} [Field F] [DecidableEq F]
+    {W : WeierstrassCurve F} {x y : F} (h : W.toAffine.Nonsingular x y)
+    (h3 : (3 : ℤ) • (Affine.Point.some x y h : W.toAffine.Point) = 0)
+    [htw : (Affine.Point.some x y h : W.toAffine.Point).TwiceNeZero] :
+    (Affine.Point.some x y h : W.toAffine.Point).μ = 0 := by
+  haveI : (Affine.Point.some x y h : W.toAffine.Point).NeZero :=
+    ⟨Affine.Point.some_ne_zero h⟩
+  have hpsi := psi3_eval_eq_zero_of_three_zsmul h h3
+  have hpsiX : W.Ψ₃.eval (Affine.Point.some x y h : W.toAffine.Point).X = 0 := by
+    rwa [Affine.Point.X_some]
+  rw [Affine.Point.Ψ₃_eval_X] at hpsiX
+  set P : W.toAffine.Point := Affine.Point.some x y h with hP
+  have hkey : P.μ = ((W.a₂ + 3 * P.X) * P.pY ^ 2 + P.pX * W.a₁ * P.pY - P.pX ^ 2)
+      * (P.pY_inv : F) ^ 2 := by
+    have h1 : P.pY * (P.pY_inv : F) = 1 := P.pY_mul_inv
+    rw [Affine.Point.μ]
+    linear_combination (-(W.a₂ + 3 * P.X) * (1 + P.pY * (P.pY_inv : F))
+      - P.pX * W.a₁ * (P.pY_inv : F)) * h1
+  rw [hkey, hpsiX, zero_mul]
+
+/-- **(the bridge, `TwiceNeZero`-form)** Over a field, a `3`-torsion affine point is
+nowhere `2`-torsion. -/
+theorem twiceNeZero_of_three_zsmul {F : Type*} [Field F] [DecidableEq F]
+    {W : WeierstrassCurve F} {x y : F} (h : W.toAffine.Nonsingular x y)
+    (h3 : (3 : ℤ) • (Affine.Point.some x y h : W.toAffine.Point) = 0) :
+    (Affine.Point.some x y h : W.toAffine.Point).TwiceNeZero := by
+  refine { toNeZero := ⟨Affine.Point.some_ne_zero h⟩, twiceNeZero := ?_ }
+  rw [show (Affine.Point.some x y h : W.toAffine.Point).pY = 2 * y + W.a₁ * x + W.a₃
+    from by rw [Affine.Point.pY, Affine.Point.X_some, Affine.Point.Y_some]]
+  refine isUnit_iff_ne_zero.mpr ?_
+  intro hc
+  have hd : y = W.toAffine.negY x y := by
+    rw [WeierstrassCurve.Affine.negY]
+    show y = -y - W.a₁ * x - W.a₃
+    linear_combination hc
+  have h2 : (2 : ℤ) • (Affine.Point.some x y h : W.toAffine.Point) = 0 := by
+    rw [two_zsmul]
+    exact Affine.Point.add_of_Y_eq rfl hd
+  have hPz : (Affine.Point.some x y h : W.toAffine.Point) = 0 := by
+    have hsub : ((3 : ℤ) - 2) • (Affine.Point.some x y h : W.toAffine.Point) = 0 := by
+      rw [sub_smul, h3, h2, sub_zero]
+    simpa using hsub
+  exact Affine.Point.some_ne_zero h hPz
+
 end Affine.Point
 
 end WeierstrassCurve
+
