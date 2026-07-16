@@ -265,3 +265,5 @@
   same prime-avoidance + k-algebra-map argument the full-level divisor-iff-naive-generation
   needs (2-generator form). When exhaust lands, T-D8's discharge is a direct corollary-grade
   adaptation — GH should expect de-boxing next window. (KM)
+
+- [2026-07-16, coordinator, v10.291] ★★ +11 bricks RATIFIED (49; finrank_pullback_comp_fst ★★ flag-only). DISPATCH: exhaust-4 → distinct → mp-locus/glue → F3.mp; AND DELIVER T-D8 (LevelStructure/Basic:108) this window as promised — GH β2 arc + Γ_H rel-rep auto-clean on it; board LOUDLY. Board v10.291.

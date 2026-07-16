@@ -333,3 +333,5 @@ transport gotchas (carrier-equations-not-Point-transports; abbrev-not-def). Esti
 focused session for :112; :195 needs the legendreDeltaProblem-unpacking read first.
 
 **Session verdict:** carrier DONE, endgame mapped. — G0
+
+- [2026-07-16, coordinator, v10.291] ★★ AX2 carrier RATIFIED (fullLevelLocus finite étale, 0-sorry) — and per [DEDUP-CC] it is the SCHEME CARRIER OF RECORD (GH bridges to you; change nothing). DISPATCH: the four-step map to Bootstrap:112 — restrict-naturality → closure-glue into GH B2 (criterion of record, swap in, do NOT re-derive) → master iff (your zero-detection + fibre count) → assembly vs gammaFullNaiveProblem. THEN :195 (N=2 + μ₂/ω-torsor per OMEGA rank-12 scope). Board v10.291.
