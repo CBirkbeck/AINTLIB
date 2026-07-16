@@ -915,21 +915,204 @@ two-variable restricted ring (evaluating `W ↦ Wu`, `V ↦ Wu⁻¹`); surjectiv
 explicit norm-preserving monomial section, and noetherianity of the target follows from
 noetherianity of the source — no kernel identification is required. -/
 
-/-- Evaluation `R⟨W,V⟩ → R⟨W,W⁻¹⟩`, `W ↦ Wu, V ↦ Wu⁻¹`: a bounded ring homomorphism. -/
-noncomputable def evalHom [CompleteSpace R] [NormOneClass R] :
-    MvPowerSeries.Restricted R (fun _ : Fin 2 => (1 : ℝ)) →+* RestrictedLaurent R where
-  toFun := by sorry
-  map_one' := by sorry
-  map_mul' := by sorry
-  map_zero' := by sorry
-  map_add' := by sorry
+section Eval
 
-theorem evalHom_surjective [CompleteSpace R] [NormOneClass R] :
+variable [CompleteSpace R] [NormOneClass R]
+
+/-- Any normed ring with ultrametric distance is nonarchimedean (local copy of the
+`ExampleUnitDisc` instance, to keep this file's imports light). -/
+instance (priority := 90) nonarchOfUltra {S : Type*} [NormedRing S] [IsUltrametricDist S] :
+    NonarchimedeanRing S where
+  is_nonarchimedean := NonarchimedeanAddGroup.is_nonarchimedean
+
+instance : NormOneClass (RestrictedLaurent R) :=
+  ⟨by rw [← single_zero_one, norm_single, norm_one]⟩
+
+/-- The negation of the coefficient index, as a plain map. -/
+noncomputable def negateAux (f : RestrictedLaurent R) : RestrictedLaurent R :=
+  ⟨fun a => f.coeff (-a), f.tendsto_coeff.comp ((Equiv.neg ℤ).injective.tendsto_cofinite)⟩
+
+@[simp] theorem coeff_negateAux (f : RestrictedLaurent R) (a : ℤ) :
+    (negateAux f).coeff a = f.coeff (-a) := rfl
+
+theorem negateAux_mul (f g : RestrictedLaurent R) :
+    negateAux (f * g) = negateAux f * negateAux g := by
+  ext m
+  have h1 : (negateAux f * negateAux g).coeff m =
+      ∑' a : ℤ, f.coeff (-a) * g.coeff (-(m - a)) := coeff_mul _ _ m
+  rw [coeff_negateAux, coeff_mul, h1, ← (Equiv.neg ℤ).tsum_eq]
+  refine tsum_congr fun a => ?_
+  simp only [Equiv.neg_apply, coeff_negateAux, neg_neg]
+  rw [show -(m - a) = -m - -a by ring]
+
+/-- The index-negation automorphism `W ↦ W⁻¹` of the restricted Laurent ring. -/
+noncomputable def negate : RestrictedLaurent R ≃+* RestrictedLaurent R where
+  toFun := negateAux
+  invFun := negateAux
+  left_inv f := by ext a; simp
+  right_inv f := by ext a; simp
+  map_add' f g := by ext a; rfl
+  map_mul' := negateAux_mul
+
+@[simp] theorem coeff_negate (f : RestrictedLaurent R) (a : ℤ) :
+    (negate f).coeff a = f.coeff (-a) := rfl
+
+theorem norm_negate (f : RestrictedLaurent R) : ‖negate f‖ = ‖f‖ := by
+  rw [norm_def, norm_def]
+  refine le_antisymm (ciSup_le fun a => ?_) (ciSup_le fun a => ?_)
+  · exact norm_coeff_le_gaussNorm f (-a)
+  · have h := norm_coeff_le_gaussNorm (negate f) (-a)
+    simpa using h
+
+/-- Powers of a norm-`≤ 1` element stay in the unit ball. -/
+theorem norm_pow_le_one {s : RestrictedLaurent R} (hs : ‖s‖ ≤ 1) (i : ℕ) : ‖s ^ i‖ ≤ 1 := by
+  induction i with
+  | zero => rw [pow_zero, norm_one]
+  | succ n ih =>
+    rw [pow_succ]
+    exact (norm_mul_le _ _).trans (mul_le_one₀ ih (norm_nonneg _) hs)
+
+section EvalLE
+
+variable {A : Type*} [NormedCommRing A] [IsUltrametricDist A]
+variable (φ : A →+* RestrictedLaurent R) (s : RestrictedLaurent R)
+
+/-- Coefficient decay of an evaluation family. -/
+theorem tendsto_evalLE_term (hφ : ∀ x, ‖φ x‖ ≤ ‖x‖) (hs : ‖s‖ ≤ 1)
+    (G : PowerSeries.Restricted A (1 : ℝ)) :
+    Tendsto (fun i : ℕ => ‖φ (PowerSeries.coeff i G.1) * s ^ i‖) cofinite (𝓝 0) := by
+  have hG := (Restricted.isRestricted_iff_cofinite (R := A) 1).mp G.2
+  simp only [one_pow, mul_one] at hG
+  refine squeeze_zero (fun i => norm_nonneg _) (fun i => ?_) hG
+  refine (norm_mul_le _ _).trans ?_
+  calc ‖φ (PowerSeries.coeff i G.1)‖ * ‖s ^ i‖
+      ≤ ‖φ (PowerSeries.coeff i G.1)‖ * 1 :=
+        mul_le_mul_of_nonneg_left (norm_pow_le_one hs i) (norm_nonneg _)
+    _ = ‖φ (PowerSeries.coeff i G.1)‖ := mul_one _
+    _ ≤ ‖PowerSeries.coeff i G.1‖ := hφ _
+
+theorem summable_evalLE (hφ : ∀ x, ‖φ x‖ ≤ ‖x‖) (hs : ‖s‖ ≤ 1)
+    (G : PowerSeries.Restricted A (1 : ℝ)) :
+    Summable (fun i : ℕ => φ (PowerSeries.coeff i G.1) * s ^ i) := by
+  rw [NonarchimedeanAddGroup.summable_iff_tendsto_cofinite_zero]
+  exact tendsto_zero_iff_norm_tendsto_zero.mpr (tendsto_evalLE_term φ s hφ hs G)
+
+/-- Evaluation of a radius-one restricted power series at a point of the closed unit ball,
+with coefficients mapped by a norm-nonincreasing homomorphism — the elementary form of the
+universal property ([FJP] Lemma 1.1, one variable): `G ↦ ∑ φ(cᵢ) sⁱ`. -/
+noncomputable def evalLE (hφ : ∀ x, ‖φ x‖ ≤ ‖x‖) (hs : ‖s‖ ≤ 1) :
+    PowerSeries.Restricted A (1 : ℝ) →+* RestrictedLaurent R where
+  toFun G := ∑' i : ℕ, φ (PowerSeries.coeff i G.1) * s ^ i
+  map_one' := by
+    rw [tsum_eq_single 0 (fun i hi => by
+      rw [show (1 : PowerSeries.Restricted A (1 : ℝ)).1 = 1 from rfl,
+        PowerSeries.coeff_one, if_neg hi, map_zero, zero_mul])]
+    rw [show (1 : PowerSeries.Restricted A (1 : ℝ)).1 = 1 from rfl,
+      PowerSeries.coeff_one, if_pos rfl, map_one, pow_zero, mul_one]
+  map_zero' := by
+    have h0 : ∀ i : ℕ,
+        φ (PowerSeries.coeff i (0 : PowerSeries.Restricted A (1 : ℝ)).1) * s ^ i = 0 :=
+      fun i => by
+        rw [show (0 : PowerSeries.Restricted A (1 : ℝ)).1 = 0 from rfl, map_zero, map_zero,
+          zero_mul]
+    exact (tsum_congr h0).trans tsum_zero
+  map_add' G G' := by
+    have hterm : ∀ i : ℕ,
+        φ (PowerSeries.coeff i (G + G' : PowerSeries.Restricted A (1 : ℝ)).1) * s ^ i =
+        φ (PowerSeries.coeff i G.1) * s ^ i + φ (PowerSeries.coeff i G'.1) * s ^ i :=
+      fun i => by
+        rw [show (G + G' : PowerSeries.Restricted A (1 : ℝ)).1 = G.1 + G'.1 from rfl,
+          map_add, map_add, add_mul]
+    rw [tsum_congr hterm,
+      (summable_evalLE φ s hφ hs G).tsum_add (summable_evalLE φ s hφ hs G')]
+  map_mul' G G' := by
+    have hf := summable_evalLE φ s hφ hs G
+    have hg := summable_evalLE φ s hφ hs G'
+    have hfg := Summable.mul_of_nonarchimedean hf hg
+    have key : (∑' i : ℕ, φ (PowerSeries.coeff i G.1) * s ^ i) *
+        (∑' i : ℕ, φ (PowerSeries.coeff i G'.1) * s ^ i) =
+        ∑' i : ℕ,
+          φ (PowerSeries.coeff i (G * G' : PowerSeries.Restricted A (1 : ℝ)).1) * s ^ i := by
+      rw [hf.tsum_mul_tsum_eq_tsum_sum_antidiagonal hg hfg]
+      refine tsum_congr fun n => ?_
+      rw [show (G * G' : PowerSeries.Restricted A (1 : ℝ)).1 = G.1 * G'.1 from rfl,
+        PowerSeries.coeff_mul, map_sum, Finset.sum_mul]
+      refine Finset.sum_congr rfl fun kl hkl => ?_
+      rw [Finset.mem_antidiagonal] at hkl
+      rw [map_mul, ← hkl, pow_add]
+      ring
+    exact key.symm
+
+theorem norm_evalLE_le (hφ : ∀ x, ‖φ x‖ ≤ ‖x‖) (hs : ‖s‖ ≤ 1)
+    (G : PowerSeries.Restricted A (1 : ℝ)) :
+    ‖evalLE φ s hφ hs G‖ ≤ ‖G‖ := by
+  refine IsUltrametricDist.norm_tsum_le_of_forall_le fun i => ?_
+  have h := PowerSeries.le_gaussNorm norm 1 G.1 (Restricted.hasGaussNorm (R := A) 1 G) i
+  rw [one_pow, mul_one] at h
+  refine (norm_mul_le _ _).trans ?_
+  have h2 : ‖φ (PowerSeries.coeff i G.1)‖ * ‖s ^ i‖ ≤ ‖PowerSeries.coeff i G.1‖ * 1 :=
+    mul_le_mul (hφ _) (norm_pow_le_one hs i) (norm_nonneg _) (norm_nonneg _)
+  rw [mul_one] at h2
+  exact h2.trans h
+
+end EvalLE
+
+/-- Base change of univariate restricted series along a norm-preserving isomorphism. -/
+noncomputable def restrictedCongr {A B : Type*} [NormedCommRing A] [IsUltrametricDist A]
+    [NormedCommRing B] [IsUltrametricDist B]
+    (e : A ≃+* B) (he : ∀ x, ‖e x‖ = ‖x‖) :
+    PowerSeries.Restricted A (1 : ℝ) ≃+* PowerSeries.Restricted B (1 : ℝ) where
+  toFun G := ⟨PowerSeries.map (e : A →+* B) G.1, by
+    show PowerSeries.IsRestricted (1 : ℝ) _
+    rw [Restricted.isRestricted_iff_cofinite]
+    have hG := (Restricted.isRestricted_iff_cofinite (R := A) 1).mp G.2
+    simp only [one_pow, mul_one, PowerSeries.coeff_map] at hG ⊢
+    refine hG.congr fun i => ?_
+    exact (he _).symm⟩
+  invFun G := ⟨PowerSeries.map (e.symm : B →+* A) G.1, by
+    show PowerSeries.IsRestricted (1 : ℝ) _
+    rw [Restricted.isRestricted_iff_cofinite]
+    have hG := (Restricted.isRestricted_iff_cofinite (R := B) 1).mp G.2
+    have hsymm : ∀ y : B, ‖e.symm y‖ = ‖y‖ := fun y => by
+      conv_rhs => rw [← RingEquiv.apply_symm_apply e y]
+      exact (he _).symm
+    simp only [one_pow, mul_one, PowerSeries.coeff_map] at hG ⊢
+    refine hG.congr fun i => ?_
+    exact (hsymm _).symm⟩
+  left_inv G := by
+    apply Subtype.ext
+    show PowerSeries.map _ (PowerSeries.map _ G.1) = G.1
+    ext n
+    simp [PowerSeries.coeff_map]
+  right_inv G := by
+    apply Subtype.ext
+    show PowerSeries.map _ (PowerSeries.map _ G.1) = G.1
+    ext n
+    simp [PowerSeries.coeff_map]
+  map_mul' G G' := by
+    apply Subtype.ext
+    show PowerSeries.map _ (G * G' : PowerSeries.Restricted A (1 : ℝ)).1 = _
+    rw [show (G * G' : PowerSeries.Restricted A (1 : ℝ)).1 = G.1 * G'.1 from rfl, map_mul]
+    rfl
+  map_add' G G' := by
+    apply Subtype.ext
+    show PowerSeries.map _ (G + G' : PowerSeries.Restricted A (1 : ℝ)).1 = _
+    rw [show (G + G' : PowerSeries.Restricted A (1 : ℝ)).1 = G.1 + G'.1 from rfl, map_add]
+    rfl
+
+/-- Evaluation `R⟨W,V⟩ → R⟨W,W⁻¹⟩`, `W ↦ Wu, V ↦ Wu⁻¹`: a bounded ring homomorphism. -/
+noncomputable def evalHom :
+    MvPowerSeries.Restricted R (fun _ : Fin 2 => (1 : ℝ)) →+* RestrictedLaurent R := by
+  sorry
+
+theorem evalHom_surjective :
     Function.Surjective (evalHom (R := R)) := by sorry
 
-theorem evalHom_norm_le [CompleteSpace R] [NormOneClass R]
+theorem evalHom_norm_le
     (f : MvPowerSeries.Restricted R (fun _ : Fin 2 => (1 : ℝ))) :
     ‖evalHom (R := R) f‖ ≤ ‖f‖ := by sorry
+
+end Eval
 
 end RestrictedLaurent
 
