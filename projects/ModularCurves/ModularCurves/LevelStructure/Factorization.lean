@@ -511,6 +511,18 @@ noncomputable def RelEffCartierDiv.smulKernelι (D : RelEffCartierDiv E.π) (c :
     D.smulKernel E c ⟶ D.ideal.subscheme :=
   pullback.fst _ _
 
+/-- The kernel inclusion composed with the divisor inclusion lies over the kernel's
+structure morphism. -/
+theorem RelEffCartierDiv.smulKernelι_subschemeι_π (D : RelEffCartierDiv E.π) (c : ℤ) :
+    D.smulKernelι E c ≫ D.ideal.subschemeι ≫ E.π = D.smulKernelπ E c := by
+  have hcond : D.smulKernelι E c ≫ D.ideal.subschemeι ≫ E.mulByHom c
+      = D.smulKernelπ E c ≫ E.zero := by
+    rw [RelEffCartierDiv.smulKernelι, RelEffCartierDiv.smulKernelπ, ← Category.assoc]
+    exact pullback.condition (f := D.ideal.subschemeι ≫ E.mulByHom c) (g := E.zero)
+  have h2 := congrArg (· ≫ E.π) hcond
+  simp only [Category.assoc, E.mulByHom_π, E.zero_π, Category.comp_id] at h2
+  exact h2
+
 /-- **[F3-ker-of]** A `T`-point of the `c`-kernel over `t` yields a `c`-killed point of
 `E` factoring through the divisor. -/
 theorem RelEffCartierDiv.smulKernel_point {D : RelEffCartierDiv E.π} {c : ℤ}
@@ -582,6 +594,34 @@ theorem RelEffCartierDiv.IsSubgroup.exists_toSmulKernel {D : RelEffCartierDiv E.
   refine ⟨φ, hφπ, ?_⟩
   rw [← Category.assoc, hφι, hw]
   exact E.point_smul_eq_comp_mulBy _ c ι₀
+
+/-- **[F3-sumMap] (KM (3.5.1.2)'s sum map at scheme level)** The two kernel inclusions
+of a subgroup divisor, read as points of `E` over the fibre product of the kernels, sum
+inside the subgroup `H` — and the sum's membership witness is the scheme morphism
+`Ker[c₁] ×_S Ker[c₂] ⟶ G` underlying KM's *"the sum map"* (p. 31; the closed-immersion
+clause is deferred to the squeeze). -/
+theorem RelEffCartierDiv.IsSubgroup.exists_sumMap {D : RelEffCartierDiv E.π}
+    (hD : D.IsSubgroup E) (c₁ c₂ : ℤ) :
+    ∃ σ : pullback (D.smulKernelπ E c₁) (D.smulKernelπ E c₂) ⟶ D.ideal.subscheme,
+      σ ≫ D.ideal.subschemeι
+        = (((⟨pullback.fst (D.smulKernelπ E c₁) (D.smulKernelπ E c₂)
+              ≫ D.smulKernelι E c₁ ≫ D.ideal.subschemeι, by
+                rw [Category.assoc, Category.assoc,
+                  RelEffCartierDiv.smulKernelι_subschemeι_π]⟩ :
+            E.Point (pullback.fst (D.smulKernelπ E c₁) (D.smulKernelπ E c₂)
+              ≫ D.smulKernelπ E c₁))
+          + ⟨pullback.snd (D.smulKernelπ E c₁) (D.smulKernelπ E c₂)
+              ≫ D.smulKernelι E c₂ ≫ D.ideal.subschemeι, by
+                rw [Category.assoc, Category.assoc,
+                  RelEffCartierDiv.smulKernelι_subschemeι_π, ← pullback.condition]⟩) :
+          E.Point _).1 := by
+  obtain ⟨H, hH⟩ := hD (pullback.fst (D.smulKernelπ E c₁) (D.smulKernelπ E c₂)
+    ≫ D.smulKernelπ E c₁)
+  refine (hH _).mp (H.add_mem ?_ ?_)
+  · exact (hH _).mpr ⟨pullback.fst _ _ ≫ D.smulKernelι E c₁, by
+      rw [Category.assoc]⟩
+  · exact (hH _).mpr ⟨pullback.snd _ _ ≫ D.smulKernelι E c₂, by
+      rw [Category.assoc]⟩
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
