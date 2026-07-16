@@ -594,7 +594,8 @@ end PrimeFieldCorollary
 The single non-formal input of the relative Verschiebung witness is the **inseparability
 of `[p]`** (`a_{[p]} = p = 0`, Silverman III.5.3/III.5.6(b)). The project has it
 **axiom-clean over an arbitrary base**: the field-general Route-B chord induction
-`omegaCoeff_mulByInt` (`Foundation/OmegaCoeffMulByIntGeneral.lean`, no EDS Wronskian, no `Fintype`) feeds
+`omegaCoeff_mulByInt` (`Foundation/OmegaCoeffMulByIntGeneral.lean`, no EDS Wronskian, no `Fintype`)
+feeds
 `mulByInt_p_omega_pullback_eq_zero` (`HasseBound/Separability.lean`). The historical finite-base
 twin (`omegaPullbackCoeff_mulByInt_p_eq_zero_routeB`, the `[Fintype K]`-scoped chord
 recursion of `RouteBInduction.lean`) is retained for compatibility.
@@ -768,7 +769,8 @@ field-general Route-B `omegaCoeff_mulByInt` of `Foundation/OmegaCoeffMulByIntGen
 /-- **The relative Verschiebung over a general perfect base — axiom-clean** (deliverable
 d headline): `V̂_{p^e} : E^{(p^e)} → E` with `V̂ ∘ Frob = [p^e]`
 (`relativeVerschiebung_compose_relativeFrobenius`). The III.5.3 input is the axiom-clean
-`mulByInt_p_not_isSeparable` (field-general Route B, `Foundation/OmegaCoeffMulByIntGeneral.lean`). -/
+`mulByInt_p_not_isSeparable` (field-general Route B, `Foundation/OmegaCoeffMulByIntGeneral.lean`).
+-/
 noncomputable def relativeVerschiebung (e : ℕ) :
     Isogeny (E.iterateFrobeniusTwist p e).toAffine E.toAffine :=
   relativeVerschiebungOf p E (Isogeny.mulByInt_p_not_isSeparable p E) e
