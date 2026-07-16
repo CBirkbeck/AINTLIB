@@ -21674,3 +21674,23 @@ via the banked `hasExactOrder_iff_geometric` + 1.5.3 (3)⟹(1)) feeding [F3-disj
 product divisor with pairwise disjoint supports factors through a single factor when `T` is
 connected — clopen decomposition) and [F3-imm] (coprime-rank sum immersion, KM p. 31). These
 three are the remaining campaign; everything else in KM pp. 27–31 is banked. (STREAM-KM)
+
+### v10.273-KM — [F3-G-split] ROADMAP: the forward half DE-BLACK-BOXED (no De-Ga box needed) (STREAM-KM)
+Planning discovery (recorded before execution). KM p. 27–28's `G ≅ G[N₁] ×_S G[N₂]` block
+becomes executable on the repo's POINTWISE `IsSubgroup` encoding with three moves:
+1. **The universal-point trick [F3-univ]**: the subscheme inclusion `ι : V(I_G) → E` is itself a
+   `T`-point of `E` (`T := V(I_G)`) factoring through `G` — tautologically in `H(T)`. Since `H(T)`
+   is a subgroup, `c • ι ∈ H(T)` for any `c : ℤ`, and `c • ι = ι ≫ [c]` by
+   `point_smul_eq_comp_mulBy` — so `[c]` RESTRICTS to a scheme endomorphism of the divisor
+   subscheme, with NO Yoneda machinery. Idempotence: `c² ≡ c mod MK` + killed-points +
+   `subschemeι`-mono-cancel give `eₘ ∘ eₘ = eₘ` at scheme level.
+2. **Idempotent splitting**: `G[M] := the equalizer/retract of eₘ` (KM's projector `P₁+P₂ ↦ P₁`);
+   the pushforward algebra splits as a direct factor ⟹ flat + finite l.p. (KM p. 27's "S-direct
+   factor … so flat over S").
+3. **Degree squeeze [dodges De-Ga IV 5.3-9]**: `D₁ = orderDivisor M (K•P) ≤ G[M]` (its points are
+   M-killed G-points) gives `deg G[M] ≥ M`; symmetrically `deg G[K] ≥ K`; the splitting gives
+   `deg G[M] · deg G[K] = MK` ⟹ both EQUAL ⟹ `G[M] = D₁` by degree + containment — which is
+   simultaneously KM step 5's conclusion. The flagged second classical box is NOT needed.
+Then étale-distinctness on the coprime cover (1.5.3 (3)⟹(1), banked geometric machinery) closes
+the forward half; the converse (step 6) reuses 1–3's sum-side. EXECUTION ORDER: [F3-univ] →
+[F3-idem] → [F3-split] → [F3-squeeze] → assembly. (STREAM-KM)
