@@ -52,6 +52,36 @@ theorem CN05CoeffEq_at_prime_pow (hp3 : p % 4 = 3) (q : ℕ) (hq : q.Prime) (k :
     · rw [hq_two]; exact CN05CoeffEq_at_prime_pow_two p hp3 k
     · exact CN05CoeffEq_at_prime_pow_odd_ne_p p hp3 q hq_two hqp k
 
+/-- The constant-one arithmetic function (with the `0 ↦ 0` convention) is multiplicative. -/
+private lemma isMultiplicative_oneArithmeticFunction :
+    ArithmeticFunction.IsMultiplicative
+      (⟨fun n ↦ if n = 0 then 0 else 1, by simp⟩ : ArithmeticFunction ℂ) := by
+  refine ArithmeticFunction.IsMultiplicative.iff_ne_zero.mpr ⟨?_, ?_⟩
+  · change (if (1 : ℕ) = 0 then 0 else 1) = 1
+    simp
+  · intro x y hx hy _
+    change (if x * y = 0 then 0 else 1) =
+      (if x = 0 then 0 else 1) * (if y = 0 then 0 else 1)
+    simp [hx, hy, mul_ne_zero hx hy]
+
+/-- The Legendre Dirichlet symbol, packaged as an arithmetic function with the usual
+`0 ↦ 0` convention, is multiplicative. -/
+private lemma isMultiplicative_legendreDirichletNat_arithmeticFunction :
+    ArithmeticFunction.IsMultiplicative
+      (⟨fun n ↦ if n = 0 then 0 else legendreDirichletNat p n, by simp⟩ :
+        ArithmeticFunction ℂ) := by
+  refine ArithmeticFunction.IsMultiplicative.iff_ne_zero.mpr ⟨?_, ?_⟩
+  · change (if (1 : ℕ) = 0 then 0 else legendreDirichletNat p 1) = 1
+    simpa using legendreDirichletNat_one p
+  · intro x y hx hy _
+    change (if x * y = 0 then 0 else legendreDirichletNat p (x * y)) =
+      (if x = 0 then 0 else legendreDirichletNat p x) *
+        (if y = 0 then 0 else legendreDirichletNat p y)
+    rw [if_neg hx, if_neg hy, if_neg (mul_ne_zero hx hy)]
+    change legendreDirichlet p ((x * y : ℕ) : ZMod p) =
+      legendreDirichlet p ((x : ℕ) : ZMod p) * legendreDirichlet p ((y : ℕ) : ZMod p)
+    push_cast; exact map_mul _ _ _
+
 /-- Convolution multiplicativity at coprime arguments. -/
 lemma convolution_one_mul_coprime {m n : ℕ} (hcop : Nat.Coprime m n) :
     LSeries.convolution (fun _ : ℕ ↦ (1 : ℂ)) (legendreDirichletNat p) (m * n) =
@@ -77,26 +107,9 @@ lemma convolution_one_mul_coprime {m n : ℕ} (hcop : Nat.Coprime m n) :
   let fOne : ArithmeticFunction ℂ := ⟨fun n ↦ if n = 0 then 0 else 1, by simp⟩
   let fEta : ArithmeticFunction ℂ :=
     ⟨fun n ↦ if n = 0 then 0 else legendreDirichletNat p n, by simp⟩
-  have hfOne_mul : fOne.IsMultiplicative := by
-    refine ArithmeticFunction.IsMultiplicative.iff_ne_zero.mpr ⟨?_, ?_⟩
-    · change (if (1 : ℕ) = 0 then 0 else 1) = 1
-      simp
-    · intro x y hx hy _
-      change (if x * y = 0 then 0 else 1) =
-        (if x = 0 then 0 else 1) * (if y = 0 then 0 else 1)
-      simp [hx, hy, mul_ne_zero hx hy]
-  have hfEta_mul : fEta.IsMultiplicative := by
-    refine ArithmeticFunction.IsMultiplicative.iff_ne_zero.mpr ⟨?_, ?_⟩
-    · change (if (1 : ℕ) = 0 then 0 else legendreDirichletNat p 1) = 1
-      simpa using legendreDirichletNat_one p
-    · intro x y hx hy _
-      change (if x * y = 0 then 0 else legendreDirichletNat p (x * y)) =
-        (if x = 0 then 0 else legendreDirichletNat p x) *
-          (if y = 0 then 0 else legendreDirichletNat p y)
-      rw [if_neg hx, if_neg hy, if_neg (mul_ne_zero hx hy)]
-      change legendreDirichlet p ((x * y : ℕ) : ZMod p) =
-        legendreDirichlet p ((x : ℕ) : ZMod p) * legendreDirichlet p ((y : ℕ) : ZMod p)
-      push_cast; exact map_mul _ _ _
+  have hfOne_mul : fOne.IsMultiplicative := isMultiplicative_oneArithmeticFunction
+  have hfEta_mul : fEta.IsMultiplicative :=
+    isMultiplicative_legendreDirichletNat_arithmeticFunction p
   have hconv_eq : ∀ k, 0 < k → LSeries.convolution (fun _ : ℕ ↦ (1 : ℂ))
       (legendreDirichletNat p) k = (fOne * fEta) k := by
     intro k hk
