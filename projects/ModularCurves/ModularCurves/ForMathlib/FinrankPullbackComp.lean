@@ -133,4 +133,55 @@ lemma finrank_pullback_comp_fst_specMap {R A B : CommRingCat.{u}} (φ : R ⟶ A)
     show (CommRingCat.ofHom (algebraMap ↑R ↑B)).hom = algebraMap ↑R ↑B from rfl,
     RingHom.finrank_algebraMap, RingHom.finrank_algebraMap]
 
+/-- The product formula over an affine base, general affine sources: conjugate both
+legs to literal Spec morphisms through `isoSpec` and apply the Spec-level formula. -/
+lemma finrank_pullback_comp_fst_of_spec {R : CommRingCat.{u}} {X Y : Scheme.{u}}
+    (f : X ⟶ Spec R) (g : Y ⟶ Spec R) [Flat f] [IsFinite f] [Flat g] [IsFinite g]
+    (p : Spec R) :
+    (pullback.fst f g ≫ f).finrank p = f.finrank p * g.finrank p := by
+  haveI : IsAffine X := isAffine_of_isAffineHom f
+  haveI : IsAffine Y := isAffine_of_isAffineHom g
+  obtain ⟨φ, hφ⟩ := Spec.map_surjective (X.isoSpec.inv ≫ f)
+  obtain ⟨ψ, hψ⟩ := Spec.map_surjective (Y.isoSpec.inv ≫ g)
+  haveI hφf : Flat (Spec.map φ) := by
+    rw [hφ, MorphismProperty.cancel_left_of_respectsIso @Flat]; infer_instance
+  haveI hφi : IsFinite (Spec.map φ) := by
+    rw [hφ, MorphismProperty.cancel_left_of_respectsIso @IsFinite]; infer_instance
+  haveI hψf : Flat (Spec.map ψ) := by
+    rw [hψ, MorphismProperty.cancel_left_of_respectsIso @Flat]; infer_instance
+  haveI hψi : IsFinite (Spec.map ψ) := by
+    rw [hψ, MorphismProperty.cancel_left_of_respectsIso @IsFinite]; infer_instance
+  -- the finrank transports of the legs
+  have h1 : f.finrank p = (Spec.map φ).finrank p := by
+    rw [hφ]
+    exact (congrFun (Scheme.Hom.finrank_comp_left_of_isIso X.isoSpec.inv f) p).symm
+  have h2 : g.finrank p = (Spec.map ψ).finrank p := by
+    rw [hψ]
+    exact (congrFun (Scheme.Hom.finrank_comp_left_of_isIso Y.isoSpec.inv g) p).symm
+  -- the comparison map between the pullbacks
+  have hsq1 : Spec.map φ ≫ 𝟙 (Spec R) = X.isoSpec.inv ≫ f := by
+    rw [Category.comp_id, hφ]
+  have hsq2 : Spec.map ψ ≫ 𝟙 (Spec R) = Y.isoSpec.inv ≫ g := by
+    rw [Category.comp_id, hψ]
+  haveI : IsIso (pullback.map (Spec.map φ) (Spec.map ψ) f g X.isoSpec.inv Y.isoSpec.inv
+      (𝟙 (Spec R)) hsq1 hsq2) := by infer_instance
+  have hcomp : pullback.map (Spec.map φ) (Spec.map ψ) f g X.isoSpec.inv Y.isoSpec.inv
+        (𝟙 (Spec R)) hsq1 hsq2 ≫ (pullback.fst f g ≫ f)
+      = pullback.fst (Spec.map φ) (Spec.map ψ) ≫ Spec.map φ := by
+    rw [← Category.assoc, pullback.lift_fst, Category.assoc, ← hφ]
+  have h3 : (pullback.fst f g ≫ f).finrank p
+      = (pullback.fst (Spec.map φ) (Spec.map ψ) ≫ Spec.map φ).finrank p := by
+    haveI : Flat (pullback.fst f g ≫ f) :=
+      MorphismProperty.comp_mem _ _ _
+        (MorphismProperty.pullback_fst (P := @Flat) _ _ ‹_›) ‹_›
+    haveI : IsFinite (pullback.fst f g ≫ f) :=
+      MorphismProperty.comp_mem _ _ _
+        (MorphismProperty.pullback_fst (P := @IsFinite) _ _ ‹_›) ‹_›
+    rw [← hcomp]
+    exact (congrFun (Scheme.Hom.finrank_comp_left_of_isIso _ _) p).symm
+  rw [h1, h2, h3]
+  exact finrank_pullback_comp_fst_specMap φ ψ
+    (IsFinite.SpecMap_iff φ |>.mp hφi) (Flat.SpecMap_iff.mp hφf)
+    (IsFinite.SpecMap_iff ψ |>.mp hψi) (Flat.SpecMap_iff.mp hψf) p
+
 end ModularCurves
