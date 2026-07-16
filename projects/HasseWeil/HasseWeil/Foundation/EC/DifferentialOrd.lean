@@ -338,7 +338,8 @@ theorem one_le_ord_P_Dω_of_two_le {f : KE} (hf_ne : f ≠ 0)
   exact le_trans (le_min ht2 ht1) (SmoothPlaneCurve.ord_P_add_le (P := P) _ _)
 
 /-- **`Dω`-unit criterion for order `≤ 1`** (contrapositive of `one_le_ord_P_Dω_of_two_le`).  If
-`f ≠ 0` has a unit `ω`-derivative at `P` (`ord_P (Dω f) = 0`), then `f` cannot vanish to order `≥ 2`,
+`f ≠ 0` has a unit `ω`-derivative at `P` (`ord_P (Dω f) = 0`), then `f` cannot vanish to order
+`≥ 2`,
 i.e. `ord_P f ≤ 1`. -/
 theorem ord_P_le_one_of_Dω_unit {f : KE} (hf_ne : f ≠ 0)
     (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint)
