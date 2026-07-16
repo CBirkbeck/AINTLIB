@@ -67,7 +67,6 @@ discharging the full core from it together with this file's proven matrix-kernel
 
 noncomputable section
 
-set_option maxRecDepth 4000
 
 namespace BernoulliRegular.FLT37.Eichler
 
