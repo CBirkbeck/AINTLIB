@@ -17,6 +17,68 @@ open scoped BigOperators Topology
 
 namespace BernoulliRegular
 
+/-- Boundary term of the summation-by-parts inequality: a single weighted partial
+sum is bounded by `B` times the weight, when the weight is nonnegative. -/
+private lemma norm_smul_sum_range_le_of_nonneg_of_bounded
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {a : ℕ → ℝ} {z : ℕ → E} {B : ℝ}
+    (ha_nonneg : ∀ n, 0 ≤ a n)
+    (hbound : ∀ n, ‖∑ i ∈ Finset.range n, z i‖ ≤ B) (k m : ℕ) :
+    ‖a k • ∑ i ∈ Finset.range m, z i‖ ≤ B * a k := by
+  calc
+    ‖a k • ∑ i ∈ Finset.range m, z i‖ = |a k| * ‖∑ i ∈ Finset.range m, z i‖ := by
+      rw [norm_smul, Real.norm_eq_abs]
+    _ = a k * ‖∑ i ∈ Finset.range m, z i‖ := by
+      rw [abs_of_nonneg (ha_nonneg _)]
+    _ ≤ a k * B := by
+      gcongr
+      · exact ha_nonneg _
+      · exact hbound m
+    _ = B * a k := by ring
+
+/-- Difference term of the summation-by-parts inequality: the sum of the weight
+increments against the running partial sums is bounded by `B * (a 0 - a (n - 1))`. -/
+private lemma norm_sum_range_smul_diff_le_of_antitone_of_bounded
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    {a : ℕ → ℝ} {z : ℕ → E} {B : ℝ}
+    (ha : Antitone a)
+    (hbound : ∀ n, ‖∑ i ∈ Finset.range n, z i‖ ≤ B) (n : ℕ) :
+    ‖∑ i ∈ Finset.range (n - 1), (a (i + 1) - a i) • ∑ j ∈ Finset.range (i + 1), z j‖ ≤
+      B * (a 0 - a (n - 1)) := by
+  calc
+    ‖∑ i ∈ Finset.range (n - 1), (a (i + 1) - a i) • ∑ j ∈ Finset.range (i + 1), z j‖
+        ≤ ∑ i ∈ Finset.range (n - 1),
+            ‖(a (i + 1) - a i) • ∑ j ∈ Finset.range (i + 1), z j‖ := by
+          simpa using norm_sum_le (Finset.range (n - 1))
+            (fun i ↦ (a (i + 1) - a i) • ∑ j ∈ Finset.range (i + 1), z j)
+    _ ≤ ∑ i ∈ Finset.range (n - 1), B * (a i - a (i + 1)) := by
+          refine Finset.sum_le_sum fun i hi ↦ ?_
+          have hdiff_nonpos : a (i + 1) - a i ≤ 0 := sub_nonpos.mpr (ha (Nat.le_succ i))
+          calc
+            ‖(a (i + 1) - a i) • ∑ j ∈ Finset.range (i + 1), z j‖
+                = |a (i + 1) - a i| * ‖∑ j ∈ Finset.range (i + 1), z j‖ := by
+                    rw [norm_smul, Real.norm_eq_abs]
+            _ = (a i - a (i + 1)) * ‖∑ j ∈ Finset.range (i + 1), z j‖ := by
+                  rw [abs_of_nonpos hdiff_nonpos]
+                  ring
+            _ ≤ (a i - a (i + 1)) * B := by
+                  gcongr
+                  · exact sub_nonneg.mpr (ha (Nat.le_succ i))
+                  · exact hbound (i + 1)
+            _ = B * (a i - a (i + 1)) := by ring
+    _ = B * (a 0 - a (n - 1)) := by
+          rw [← Finset.mul_sum]
+          have htel' := Finset.sum_range_sub (f := a) (n := n - 1)
+          have htel : ∑ i ∈ Finset.range (n - 1), (a i - a (i + 1)) = a 0 - a (n - 1) := by
+            calc
+              ∑ i ∈ Finset.range (n - 1), (a i - a (i + 1))
+                  = ∑ i ∈ Finset.range (n - 1), -((a (i + 1) - a i)) := by
+                      refine Finset.sum_congr rfl fun i hi ↦ by ring
+              _ = -∑ i ∈ Finset.range (n - 1), (a (i + 1) - a i) := by
+                    rw [Finset.sum_neg_distrib]
+              _ = a 0 - a (n - 1) := by linarith
+          rw [htel]
+
 /-- Summation by parts bound for a weighted series with bounded partial sums. -/
 lemma norm_sum_range_smul_le_of_antitone_of_nonneg_of_bounded
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -32,51 +94,10 @@ lemma norm_sum_range_smul_le_of_antitone_of_nonneg_of_bounded
   · rw [Finset.sum_range_by_parts (f := a) (g := z) (n := n)]
     have hsum_le :
         ‖∑ i ∈ Finset.range (n - 1), (a (i + 1) - a i) • ∑ j ∈ Finset.range (i + 1), z j‖ ≤
-          B * (a 0 - a (n - 1)) := by
-      calc
-        ‖∑ i ∈ Finset.range (n - 1), (a (i + 1) - a i) • ∑ j ∈ Finset.range (i + 1), z j‖
-            ≤ ∑ i ∈ Finset.range (n - 1),
-                ‖(a (i + 1) - a i) • ∑ j ∈ Finset.range (i + 1), z j‖ := by
-              simpa using norm_sum_le (Finset.range (n - 1))
-                (fun i ↦ (a (i + 1) - a i) • ∑ j ∈ Finset.range (i + 1), z j)
-        _ ≤ ∑ i ∈ Finset.range (n - 1), B * (a i - a (i + 1)) := by
-              refine Finset.sum_le_sum fun i hi ↦ ?_
-              have hdiff_nonpos : a (i + 1) - a i ≤ 0 := sub_nonpos.mpr (ha (Nat.le_succ i))
-              calc
-                ‖(a (i + 1) - a i) • ∑ j ∈ Finset.range (i + 1), z j‖
-                    = |a (i + 1) - a i| * ‖∑ j ∈ Finset.range (i + 1), z j‖ := by
-                        rw [norm_smul, Real.norm_eq_abs]
-                _ = (a i - a (i + 1)) * ‖∑ j ∈ Finset.range (i + 1), z j‖ := by
-                      rw [abs_of_nonpos hdiff_nonpos]
-                      ring
-                _ ≤ (a i - a (i + 1)) * B := by
-                      gcongr
-                      · exact sub_nonneg.mpr (ha (Nat.le_succ i))
-                      · exact hbound (i + 1)
-                _ = B * (a i - a (i + 1)) := by ring
-        _ = B * (a 0 - a (n - 1)) := by
-              rw [← Finset.mul_sum]
-              have htel' := Finset.sum_range_sub (f := a) (n := n - 1)
-              have htel : ∑ i ∈ Finset.range (n - 1), (a i - a (i + 1)) = a 0 - a (n - 1) := by
-                calc
-                  ∑ i ∈ Finset.range (n - 1), (a i - a (i + 1))
-                      = ∑ i ∈ Finset.range (n - 1), -((a (i + 1) - a i)) := by
-                          refine Finset.sum_congr rfl fun i hi ↦ by ring
-                  _ = -∑ i ∈ Finset.range (n - 1), (a (i + 1) - a i) := by
-                        rw [Finset.sum_neg_distrib]
-                  _ = a 0 - a (n - 1) := by linarith
-              rw [htel]
-    have hfirst : ‖a (n - 1) • ∑ i ∈ Finset.range n, z i‖ ≤ B * a (n - 1) := by
-      calc
-        ‖a (n - 1) • ∑ i ∈ Finset.range n, z i‖ = |a (n - 1)| * ‖∑ i ∈ Finset.range n, z i‖ := by
-          rw [norm_smul, Real.norm_eq_abs]
-        _ = a (n - 1) * ‖∑ i ∈ Finset.range n, z i‖ := by
-          rw [abs_of_nonneg (ha_nonneg _)]
-        _ ≤ a (n - 1) * B := by
-          gcongr
-          · exact ha_nonneg _
-          · exact hbound n
-        _ = B * a (n - 1) := by ring
+          B * (a 0 - a (n - 1)) :=
+      norm_sum_range_smul_diff_le_of_antitone_of_bounded ha hbound n
+    have hfirst : ‖a (n - 1) • ∑ i ∈ Finset.range n, z i‖ ≤ B * a (n - 1) :=
+      norm_smul_sum_range_le_of_nonneg_of_bounded ha_nonneg hbound (n - 1) n
     calc
       ‖a (n - 1) • ∑ i ∈ Finset.range n, z i -
           ∑ i ∈ Finset.range (n - 1),
