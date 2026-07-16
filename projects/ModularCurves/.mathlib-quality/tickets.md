@@ -21694,3 +21694,12 @@ becomes executable on the repo's POINTWISE `IsSubgroup` encoding with three move
 Then étale-distinctness on the coprime cover (1.5.3 (3)⟹(1), banked geometric machinery) closes
 the forward half; the converse (step 6) reuses 1–3's sum-side. EXECUTION ORDER: [F3-univ] →
 [F3-idem] → [F3-split] → [F3-squeeze] → assembly. (STREAM-KM)
+
+### v10.274-KM — [F3-univ] + [F3-idem] PROVEN — the projector exists and is idempotent (STREAM-KM)
+Roadmap execution (`28ae3bfc1`, `cbd82966e`), both axiom-clean mod BB-DELIGNE (idem only):
+`IsSubgroup.exists_smul_restrict` (the universal-point trick worked FIRST TRY — the inclusion is
+a T-point of E in H(T), so c•ι's factoring witness restricts [c] with zero descent machinery)
+and `IsSubgroup.exists_smul_restrict_idem` (w∘w = w for c² ≡ c mod N via mono-boundary +
+mulBy_comp through Over.forget + zsmul_congr_of_kill). NEXT [F3-split]: the retract scheme
+G[c] of the idempotent w (affine-over-S algebra direct-factor ⟹ flat, KM p. 27's "S-direct
+factor … so flat"), then [F3-squeeze]. (STREAM-KM)
