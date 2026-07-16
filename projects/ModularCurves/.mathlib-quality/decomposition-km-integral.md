@@ -481,3 +481,17 @@ Ordered bricks for F3.mp (each bounded, no black box beyond BB-DELIGNE):
 The CONVERSE then reuses the product machinery (KM p. 30–31: the sum immersion is the
 combMap-image identification + disjointness of translates — [F3-disj] clopen-glue, needed only
 here). F4 assembles from F3 + `killedCoprimeSplitEquiv` (✓). This closes KM 1.7.2/3.5.1.
+
+## [F3-count] bridge note (KM worker, 2026-07-16f)
+
+Repo `ForMathlib/EtaleSectionsCount.lean` has the count engine READY:
+`natCard_sections_eq_finrank (f : X ⟶ Spec k)` (+ the `≤`-form and `natCard_algHom_eq_finrank`).
+Application shape: instantiate the whole kernel machinery at `S := Spec k̄` (the mp-locus brick
+works fibrewise anyway — geometric points of `S[1/M]` are Spec k̄-bases with M invertible), so NO
+base-change-of-smulKernel construction is needed: at a geometric fibre, `Z_M` is étale finite
+over Spec k̄ ([F3-etale] ✓ + [F3-kerfin] ✓), sections biject with its `deg` ([count]), the
+sections form an M-killed group (`smulKernel_point` ✓ / `exists_smulKernel_lift` ✓), Cauchy
+([F3-cauchy] ✓) bounds the prime support, degmul (tensor route) forces `deg = M`, and the M
+multiples `{a₁•(K•P)}` exhaust by the crt-divisor point count (KM p. 29). Alternative if the
+Spec-k̄ instantiation hits friction: the `Point.pull`-fibre machinery (LevelStructure/Basic's
+geometric quantifiers) already speaks this language.
