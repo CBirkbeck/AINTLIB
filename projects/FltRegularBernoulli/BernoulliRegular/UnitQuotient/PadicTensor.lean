@@ -508,7 +508,6 @@ theorem cyclotomicUnitFreePartPadicReduceModP_eigenspace_mem
   rw [hx a, cyclotomicUnitFreePartPadicReduceModP_smul_compat]
   rfl
 
-open MonoidAlgebra in
 /-- **Padic character projector image lies in the Padic eigenspace**.
 For `χ : MulChar Δ ℤ_[p]` and any `x` in the Padic free part, the
 projection `e_χ(x) := ρ.asAlgebraHom(charIdempotent χ) x` satisfies the
@@ -552,7 +551,6 @@ theorem cyclotomicUnitFreePartPadicCharacterProjector_mem_eigenspace
   rw [map_smul]
   rfl
 
-open MonoidAlgebra in
 /-- **Reduction commutes with `Representation.asAlgebraHom (single g 1)`**:
 on basis monomial elements of the group algebra, the Padic representation
 followed by reduction equals reduction followed by the mod-p representation.
