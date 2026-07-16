@@ -236,3 +236,17 @@
   De-Ga box (degree-squeeze dodge boarded v10.273, design-revision in the decomposition doc).
   26 proven bricks on LevelStructure/Factorization.lean this marathon (v10.268 ★★★★ → here).
   Remaining to KM step 5: flat-by-retract, degree multiplicativity, squeeze; then F3-iff/F4.
+- [2026-07-16d, KM, v10.283] **MARATHON CONSOLIDATION (for the v10.172 PR cadence).** One
+  continuous session, v10.265 dispatch → here: ★★★★ brick-6/K4 field anchor CLOSED axiom-clean
+  (`3ddc7ce90`, cascade receipts verified: BB-DEG + étale chain clean) → [KM-W0] first act
+  (decompose + skeleton `87bdec647`) → **34 proven bricks** on the (iv)-factorization
+  (`LevelStructure/Factorization.lean` + `ForMathlib/FlatOfRetract.lean`): the complete KM 1.7.2
+  product-decomposition machinery — subgroup-divisor locality, crt divisor identity, translate
+  arithmetic, universal-point projectors, kernel schemes with both point directions, R1+R2
+  product iso ★★, kernels finite flat ★ (incl. the axiom-clean ForMathlib
+  `Flat.of_retract_over`, mathlib-PR candidate), coprime point splitting, Cauchy De-Ga dodge.
+  Boards v10.268–282; design artifacts in decomposition-km-integral.md (§16a–e: route
+  revisions, adversarial catches, the fully de-risked 6-brick path to F3.mp). Remaining:
+  etale/count/degmul/distinct/mp-locus/glue (all bounded, tools verified), converse disjointness,
+  F3-iff + F4 assembly. File census: Factorization.lean 4 skeleton sorries (F3-iff, F4×3) —
+  everything else green. (KM)
