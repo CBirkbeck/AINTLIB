@@ -374,7 +374,8 @@ theorem zsmul_point_eq_smulX_smulY : n ≠ 0 →
     have X_eq : smulX (n2 + 1 : ℕ) = _U.addX (smulX n2) (smulX 1) L := by
       rw [Nat.cast_add, Nat.cast_one, smulX_add one_ne_zero (by omega) (by omega) (by omega),
         Affine.addX_eq_addX_negY_sub _ _ ne, sub_eq_add_neg (n2 : ℤ), ← eq1.1]; rfl
-    have hfact₁ := smulY_add_sub_negY (n := n2) (m := 1) one_ne_zero (by omega) (by omega) (by omega)
+    have hfact₁ :=
+      smulY_add_sub_negY (n := n2) (m := 1) one_ne_zero (by omega) (by omega) (by omega)
     have hfact₂ := _U.addY_sub_negY_addY (x₁ := smulX n2) (x₂ := smulX 1) (smulY n2) (smulY 1) ne
     have Y_eq : smulY (n2 + 1 : ℕ) = _U.addY (smulX n2) (smulX 1) (smulY n2) L :=
       eq_of_sub_negY_eq Field.two_ne_zero _U (x := _U.addX (smulX n2) (smulX 1) L) <| by
