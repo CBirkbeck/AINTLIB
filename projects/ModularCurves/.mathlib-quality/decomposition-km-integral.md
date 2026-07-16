@@ -526,3 +526,30 @@ Two candidate routes for closing the general formula from the proven affine core
   applying the PROVEN affine tensor core through the appTop algebra identifications
   (`finrank_eq_module_finrank_of_affineOpen`-style). Upstream both to mathlib afterwards —
   the product formula genuinely belongs next to `finrank_pullback_snd`.
+
+## [F3-exhaust] execution plan (KM worker, v10.289 window — the last scheme brick of F3.mp)
+
+Statement: over `Spec k` (field), a point `Q` factoring through `sectionsDivisor E.π Ps`
+EQUALS some `Ps j` (KM p. 29's "G(k) is exhausted by the φ-values"). 8 verified steps:
+1. `hker : D.ideal ≤ Q.1.ker` — from the factoring via `Scheme.Hom.le_ker_comp` + `ker_subschemeι`.
+2. Choose `V : E.E.affineOpens` containing `Q`'s image (`isBasis_affineOpens`).
+3–4. Pointwise at `V`: `ker_apply` (Q.1 is QC — Spec-field source has one point) gives
+   `(Q.1.ker).ideal V = RingHom.ker (Q.1.app V).hom`; the preimage open is ⊤ (unique point,
+   contains it), so the target is `Γ(Spec k, ⊤) ≅ k` — a domain ⟹ the kernel is PRIME
+   (`RingHom.ker_isPrime`, transported through the ΓSpecIso-composite).
+5. The divisor ideal at `V` is `∏ ker(Ps j).ideal V` (banked idealMonoidHom map_prod pattern).
+6. `Ideal.IsPrime.prod_le` ⟹ ∃ j with `ker(Ps j).ideal V ≤ ker-Q-prime`. NB: sections whose
+   image misses `V` have ideal ⊤ there (empty-preimage app into the 0-ring), so the j found
+   automatically has image in `V`.
+7. Both `Q` and `Ps j` factor through `V` (`IsOpenImmersion.lift`); `V` affine ⟹ they are
+   `Spec` of `k`-ALGEBRA maps `Γ(V) → k` (the k-algebra structure via `π.app` and the
+   section property; algebra maps to `k` over `k` are SURJECTIVE — image contains k — so
+   kernels are maximal with canonical residue `k`).
+8. `ker φⱼ ⊆ ker φ_Q` between two surjective k-algebra maps to k ⟹ φ_Q factors through
+   `Γ(V)/ker φⱼ ≅ k` by a k-algebra endomorphism of k = id ⟹ φ_Q = φⱼ ⟹ `Q = Ps j`
+   (Spec-faithfulness + `Subtype.ext`).
+Then **[F3-distinct]** is pure group theory (NO further schemes): A := M-killed H-points has
+`|A| = M` (squeeze ✓); exhaust ⟹ `A ⊆ ⟨P⟩`; `A = ⟨P⟩[M]` (cyclic M-torsion) has order
+`gcd(M, ord P) = M` ⟹ `M ∣ ord P`; with `ord P ∣ M·K` and coprimality, `ord(K•P) = M`
+exactly — the M multiples `{(a+1)•(K•P)}` are the M DISTINCT elements of `⟨K•P⟩` = A.
+[F3-mp-locus] then feeds `hasExactOrder_of_geometric` and [F3-loc] glues the cover.
