@@ -10,7 +10,7 @@ only). Priority spine: T1xx → T3xx → T4xx → T5xx → T6xx → T7xx (sheafi
 
 ## Summary
 - Total: 36 tickets (28 proof + 8 embedded cleanup/milestone controls listed inline)
-- Open: 32 | Done: 4 (T001, T101, T102, T103) | Parallel capacity at peak: 4 workers
+- Open: 31 | Done: 5 (T001, T101–T104) | Parallel capacity at peak: 4 workers
   (T2xx ∥ T3xx ∥ T4xx-polynomial ∥ T1xx-tail)
 
 ## Milestone map
@@ -81,21 +81,17 @@ T704, by a fresh `/develop --continue`.
 
 ### [CLEANUP-1] /cleanup `RestrictedLaurent.lean` — **Depends**: T103.
 
-### [T104] `RestrictedLaurent.lean` — nonneg subring, `nonnegEquiv`, `evalHom`
-- **Status**: in_progress (beastmode 2026-07-16). DONE: `nonnegSubring` (incl. convolution
-  support closure), `coeff_sub`, `continuous_coeff` (1-Lipschitz), `isClosed_nonnegSubring`,
-  `ofPowerSeries` + `nonnegEquiv` complete (multiplicativity via `tsum_eq_sum` on
-  `Finset.Icc 0 a` + `Finset.sum_nbij'` against the ℕ-antidiagonal), `nonnegEquiv_norm`
-  (via `PowerSeries.le_gaussNorm`/`gaussNorm_eq` + `Real.iSup_le`), `ofRestricted_norm`,
-  `ofRestricted_injective`. REMAINING: the `evalHom` cluster (9 sorries). Continuation
-  plan: (i) define the negation ring automorphism `negate : L ≃+* L` (coeff a ↦ coeff (−a);
-  multiplicativity by `Equiv.neg` reindexing of the convolution); (ii)
-  `negEval := (nonnegSubring R).subtype ∘ negate ∘ nonnegEquiv` sends `V ↦ W⁻¹`;
-  (iii) realise `K⟨W,V⟩ ≅ (K⟨V⟩)⟨W⟩` by the vendored `MvRestricted.finSuccEquiv`/`foo`
-  isometries and set `evalHom F := ∑' i, negEval (cᵢ) * Wu.val ^ i` (summable by decay);
-  hom fields via mathlib `tsum_mul_tsum_of_nonarchimedean`; surjectivity via the monomial
-  section (split a Laurent series into nonneg + neg parts); norm bound via
-  `norm_tsum_le_of_forall_le`. | **Depends**: CLEANUP-1 | **Type**: def-completion (L1.4)
+### [T104] `RestrictedLaurent.lean` — nonneg subring, `nonnegEquiv`, `evalHom` — **DONE 2026-07-17**
+- **Status**: done (beastmode). File is now **0-sorry**. Beyond part 1/2: `negate`
+  automorphism (+ involution, `norm_negate`), `evalLE` (evaluation at a unit-ball point —
+  multiplicativity via the mathlib nonarchimedean Cauchy-product
+  `Summable.tsum_mul_tsum_eq_tsum_sum_antidiagonal`), `restrictedCongr` +
+  `coeff_restrictedCongr`/`restrictedCongr_norm`, `innerToSeries` (Fin-1 ↔ univariate via
+  `finSuccOne` + `foo`), `negOfSeries` (isometric), `Wu_pow`, `evalHom` assembled with
+  `evalHom_norm_le`, and `evalHom_surjective` via the explicit section (`truncNonpos` +
+  constant-coefficient tail, coefficient/tsum interchange through `HasSum.map` along the
+  1-Lipschitz `coeffHom`). NOTE: file now imports `ExampleUnitDisc` (for `finSuccOne`) —
+  acceptable; flagged for the final cleanup pass. | **Type**: def-completion (L1.4)
 - **Sorries**: `nonnegSubring` closure fields, `isClosed_nonnegSubring`, `nonnegEquiv`
   (data + proofs), `nonnegEquiv_norm`, `ofRestricted_norm/injective`, `evalHom` (data +
   fields), `evalHom_surjective`, `evalHom_norm_le`.
@@ -106,7 +102,7 @@ T704, by a fresh `/develop --continue`.
   `∑'_{i−j=a} c_{ij}` (summable, decay); surjectivity via the monomial section (L1.4).
 - **Source**: [FJP] Lemma 2.2 (`k⟨W⟩` closed), Prop 2.1 (presentation) — quotes at L1.4.
 
-### [CLEANUP-2] /cleanup `RestrictedLaurent.lean` (final) — **Depends**: T104.
+### [CLEANUP-2] /cleanup `RestrictedLaurent.lean` (final) — **Depends**: T104. In progress with T104 close-out (lint scan; import-weight note carried to CLEANUP-FINAL).
 
 ### [T105] `JetDualNumberNorm.lean` — complete file
 - **Status**: open | **Depends**: none (parallel with T101) | **Type**: proofs (L1.5)

@@ -1177,8 +1177,148 @@ noncomputable def truncNonpos (h : RestrictedLaurent R) : RestrictedLaurent R :=
     · simp only [norm_zero]
       exact norm_nonneg _⟩
 
+@[simp] theorem negate_negate (f : RestrictedLaurent R) : negate (negate f) = f := by
+  ext a; simp
+
+theorem innerToSeries_symm_norm (g : PowerSeries.Restricted R (1 : ℝ)) :
+    ‖(innerToSeries (R := R)).symm g‖ = ‖g‖ := by
+  conv_rhs => rw [← RingEquiv.apply_symm_apply (innerToSeries (R := R)) g]
+  rw [innerToSeries_norm]
+
+theorem ofRestricted_nonnegEquiv_symm (F : nonnegSubring R) :
+    ofRestricted (R := R) ((nonnegEquiv (R := R)).symm F) = (F : RestrictedLaurent R) := by
+  show ((nonnegEquiv (R := R)) ((nonnegEquiv (R := R)).symm F) : RestrictedLaurent R) = _
+  rw [RingEquiv.apply_symm_apply]
+
+theorem ofRestricted_C (x : R) :
+    ofRestricted (R := R) (PowerSeries.Restricted.C (1 : ℝ) x) = single 0 x := by
+  ext a
+  show (ofPowerSeries _).coeff a = _
+  rw [coeff_ofPowerSeries, coeff_single]
+  by_cases h0 : 0 ≤ a
+  · rw [if_pos h0]
+    show PowerSeries.coeff a.toNat (PowerSeries.C x) = _
+    rw [PowerSeries.coeff_C]
+    by_cases ha : a = 0
+    · rw [if_pos (by omega), if_pos ha]
+    · rw [if_neg (by omega), if_neg ha]
+  · rw [if_neg h0, if_neg (by omega)]
+
+theorem negate_single_zero (x : R) : negate (single 0 x) = single 0 x := by
+  ext a
+  rw [coeff_negate, coeff_single, coeff_single]
+  by_cases ha : a = 0
+  · rw [if_pos (by omega), if_pos ha]
+  · rw [if_neg (by omega), if_neg ha]
+
+theorem norm_restrictedC (x : R) : ‖PowerSeries.Restricted.C (1 : ℝ) x‖ = ‖x‖ := by
+  rw [← ofRestricted_norm (R := R) (PowerSeries.Restricted.C (1 : ℝ) x), ofRestricted_C, norm_single]
+
+/-- The coefficient functional as an additive homomorphism. -/
+noncomputable def coeffHom (m : ℤ) : RestrictedLaurent R →+ R where
+  toFun f := f.coeff m
+  map_zero' := rfl
+  map_add' f g := rfl
+
 theorem evalHom_surjective :
-    Function.Surjective (evalHom (R := R)) := by sorry
+    Function.Surjective (evalHom (R := R)) := by
+  classical
+  intro h
+  -- the friendly preimage over the univariate coefficient ring
+  set c0 : PowerSeries.Restricted R (1 : ℝ) :=
+    (nonnegEquiv (R := R)).symm ⟨negate (truncNonpos h), fun a ha => by
+      show (truncNonpos h).coeff (-a) = 0
+      show (if -a ≤ 0 then h.coeff (-a) else 0) = 0
+      rw [if_neg (by omega)]⟩ with hc0
+  set G' : PowerSeries.Restricted (PowerSeries.Restricted R (1 : ℝ)) (1 : ℝ) :=
+    ⟨PowerSeries.mk fun i => if i = 0 then c0 else PowerSeries.Restricted.C (1 : ℝ) (h.coeff i), by
+      show PowerSeries.IsRestricted (1 : ℝ) _
+      rw [Restricted.isRestricted_iff_cofinite]
+      simp only [PowerSeries.coeff_mk, one_pow, mul_one]
+      refine tendsto_cofinite_zero_of_finite (fun i => norm_nonneg _) fun ε hε => ?_
+      have hfin : {a : ℤ | ε ≤ ‖h.coeff a‖}.Finite := h.finite_setOf_le_norm_coeff hε
+      refine ((hfin.image fun a : ℤ => a.toNat).union (Set.finite_singleton 0)).subset
+        fun i hi => ?_
+      rw [Set.mem_setOf_eq] at hi
+      rcases eq_or_ne i 0 with rfl | hi0
+      · exact Set.mem_union_right _ rfl
+      · rw [if_neg hi0, norm_restrictedC] at hi
+        exact Set.mem_union_left _ ⟨(i : ℤ), hi, Int.toNat_natCast i⟩⟩ with hG'
+  -- transport to the `Fin 1`-indexed coefficient ring
+  set G'' : PowerSeries.Restricted
+      (MvPowerSeries.Restricted R (fun _ : Fin 1 => (1 : ℝ))) (1 : ℝ) :=
+    restrictedCongr (innerToSeries (R := R)).symm (innerToSeries_symm_norm (R := R)) G'
+    with hG''
+  refine ⟨(UnitDiscExample.finSuccOne R 1).symm G'', ?_⟩
+  have happ : evalHom (R := R) ((UnitDiscExample.finSuccOne R 1).symm G'') =
+      evalLE (negOfSeries (R := R)) (Wu (R := R)).val
+        (fun x => (norm_negOfSeries x).le) norm_W.le G'' := by
+    have hrfl : evalHom (R := R) ((UnitDiscExample.finSuccOne R 1).symm G'') =
+        evalLE (negOfSeries (R := R)) (Wu (R := R)).val
+          (fun x => (norm_negOfSeries x).le) norm_W.le
+          (UnitDiscExample.finSuccOne R 1
+            ((UnitDiscExample.finSuccOne R 1).symm G'')) := rfl
+    rw [hrfl, RingEquiv.apply_symm_apply]
+  rw [happ]
+  -- the terms of the evaluation
+  have hterm : ∀ i : ℕ,
+      negOfSeries (R := R) (PowerSeries.coeff i G''.1) * (Wu (R := R)).val ^ i =
+      if i = 0 then truncNonpos h else single (i : ℤ) (h.coeff i) := by
+    intro i
+    have hcoeffG'' : PowerSeries.coeff i G''.1 =
+        (innerToSeries (R := R)).symm (PowerSeries.coeff i G'.1) :=
+      coeff_restrictedCongr _ _ _ _
+    have hφ : negOfSeries (R := R) (PowerSeries.coeff i G''.1) =
+        negate (ofRestricted (PowerSeries.coeff i G'.1)) := by
+      rw [hcoeffG'']
+      show negate (ofRestricted (innerToSeries (R := R)
+        ((innerToSeries (R := R)).symm _))) = _
+      rw [RingEquiv.apply_symm_apply]
+    have hcoeffG' : PowerSeries.coeff i G'.1 =
+        if i = 0 then c0 else PowerSeries.Restricted.C (1 : ℝ) (h.coeff i) := by
+      show PowerSeries.coeff i (PowerSeries.mk fun j =>
+        if j = 0 then c0 else PowerSeries.Restricted.C (1 : ℝ) (h.coeff j)) = _
+      rw [PowerSeries.coeff_mk]
+    rcases eq_or_ne i 0 with rfl | hi0
+    · rw [hφ, hcoeffG', if_pos rfl, if_pos rfl, hc0, ofRestricted_nonnegEquiv_symm]
+      show negate (negate (truncNonpos h)) * _ = _
+      rw [negate_negate, pow_zero, mul_one]
+    · rw [hφ, hcoeffG', if_neg hi0, if_neg hi0, ofRestricted_C, negate_single_zero, Wu_pow,
+        single_mul_single, zero_add, mul_one]
+  -- coefficientwise evaluation of the sum
+  ext m
+  have hsum := summable_evalLE (negOfSeries (R := R)) (Wu (R := R)).val
+    (fun x => (norm_negOfSeries x).le) norm_W.le G''
+  have hmap := (hsum.hasSum.map (coeffHom (R := R) m) (continuous_coeff m)).tsum_eq
+  have hunfold : (evalLE (negOfSeries (R := R)) (Wu (R := R)).val
+      (fun x => (norm_negOfSeries x).le) norm_W.le) G'' =
+      ∑' i : ℕ, negOfSeries (R := R) (PowerSeries.coeff i G''.1) *
+        (Wu (R := R)).val ^ i := rfl
+  rw [hunfold]
+  show coeffHom (R := R) m (∑' i : ℕ, negOfSeries (R := R) (PowerSeries.coeff i G''.1) *
+    (Wu (R := R)).val ^ i) = h.coeff m
+  rw [← hmap]
+  simp only [Function.comp_apply]
+  have hterm' : ∀ i : ℕ, coeffHom (R := R) m
+      (negOfSeries (R := R) (PowerSeries.coeff i G''.1) * (Wu (R := R)).val ^ i) =
+      if i = 0 then (if m ≤ 0 then h.coeff m else 0)
+      else (if m = (i : ℤ) then h.coeff i else 0) := by
+    intro i
+    show (negOfSeries (R := R) (PowerSeries.coeff i G''.1) *
+      (Wu (R := R)).val ^ i).coeff m = _
+    rw [hterm i]
+    rcases eq_or_ne i 0 with rfl | hi0
+    · rw [if_pos rfl]; rfl
+    · rw [if_neg hi0, coeff_single, if_neg hi0]
+  rw [tsum_congr hterm']
+  rcases le_or_gt m 0 with hm | hm
+  · rw [tsum_eq_single 0 (fun i hi => by
+      rw [if_neg hi, if_neg (by omega)]), if_pos rfl, if_pos hm]
+  · rw [tsum_eq_single m.toNat (fun i hi => by
+      rcases eq_or_ne i 0 with rfl | hi0
+      · rw [if_pos rfl, if_neg (by omega)]
+      · rw [if_neg hi0, if_neg (by omega)]),
+      if_neg (by omega), if_pos (by omega), show ((m.toNat : ℕ) : ℤ) = m by omega]
 
 end Eval
 
