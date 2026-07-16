@@ -545,7 +545,8 @@ lemma zero (m : ℤ) (mem : W (2 * m) ∈ R⁰) : W 0 = 0 := by
 
 lemma sub_add_neg_sub_mul_eq_zero (m n r : ℤ) :
     (W (m - n) + W (-(m - n))) * W (m + n) * W r ^ 2 = 0 := by
-  have := congr($((isEllipticSequence_iff_rel₃ W).mp ell m n r) + $((isEllipticSequence_iff_rel₃ W).mp ell n m r))
+  have := congr($((isEllipticSequence_iff_rel₃ W).mp ell m n r)
+    + $((isEllipticSequence_iff_rel₃ W).mp ell n m r))
   rw [add_comm n, ← right_distrib, ← left_distrib, mul_comm (W _)] at this
   rw [show (-(m - n) : ℤ) = n - m by ring]
   convert this using 1; ring
@@ -666,7 +667,8 @@ section NormEDSIsEll
 variable {R : Type*} [CommRing R] (b c d : R)
 open Param MvPolynomial
 
-private lemma IsEllipticSequence.map' {S : Type*} [CommRing S] {W : ℤ → R} (h : IsEllipticSequence W)
+private lemma IsEllipticSequence.map' {S : Type*} [CommRing S] {W : ℤ → R}
+    (h : IsEllipticSequence W)
     (f : R →+* S) : IsEllipticSequence (f ∘ W) :=
     (isEllipticSequence_iff_rel₃ (f ∘ W)).mpr fun m n r ↦ by
   simpa [Rel₃, Function.comp] using congr_arg f ((isEllipticSequence_iff_rel₃ W).mp h m n r)
