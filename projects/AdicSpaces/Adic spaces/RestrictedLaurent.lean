@@ -560,16 +560,136 @@ section Field
 
 variable {K : Type*} [NormedField K] [IsUltrametricDist K] [CompleteSpace K]
 
+/-- A nonarchimedean sum whose terms all lie strictly below a positive bound stays strictly
+below it (the sup of a restricted family is attained, so the strict bound survives). -/
+theorem norm_tsum_lt_of_forall_lt {F : ℤ → K}
+    (hF : Tendsto (fun a => ‖F a‖) cofinite (𝓝 0)) {B : ℝ} (hB : 0 < B)
+    (h : ∀ a, ‖F a‖ < B) : ‖∑' a : ℤ, F a‖ < B := by
+  classical
+  have hfin : {a : ℤ | B / 2 ≤ ‖F a‖}.Finite := by
+    have hev := hF.eventually (eventually_lt_nhds (show (0 : ℝ) < B / 2 by positivity))
+    rw [Filter.eventually_cofinite] at hev
+    exact hev.subset fun a ha => by simpa using not_lt.mpr ha
+  rcases hfin.toFinset.eq_empty_or_nonempty with hemp | hne
+  · -- all terms < B/2
+    have hall : ∀ a, ‖F a‖ ≤ B / 2 := fun a => by
+      by_contra hcon
+      exact (Finset.eq_empty_iff_forall_notMem.mp hemp a)
+        (hfin.mem_toFinset.mpr (not_lt.mp fun hlt => hcon hlt.le))
+    exact (IsUltrametricDist.norm_tsum_le_of_forall_le hall).trans_lt (by linarith)
+  · obtain ⟨a₀, ha₀S, ha₀max⟩ := Finset.exists_max_image _ (fun a => ‖F a‖) hne
+    have hbound : ∀ a, ‖F a‖ ≤ max ‖F a₀‖ (B / 2) := fun a => by
+      by_cases haS : a ∈ hfin.toFinset
+      · exact le_max_of_le_left (ha₀max a haS)
+      · refine le_max_of_le_right ?_
+        have hnot : ¬ B / 2 ≤ ‖F a‖ := fun hle => haS (hfin.mem_toFinset.mpr hle)
+        exact (not_le.mp hnot).le
+    refine (IsUltrametricDist.norm_tsum_le_of_forall_le hbound).trans_lt ?_
+    exact max_lt (h a₀) (by linarith)
+
 /-- Norm multiplicativity for restricted Laurent series over a complete nonarchimedean field
-with discrete value group ([FJP] Prop 2.3; hypothesis `hd` is the discreteness used to scale
-to norm one and to separate `< 1` from `≤ |ϖ|`). -/
+with discrete value group ([FJP] Prop 2.3; the hypothesis `hd` records the discreteness of
+the [FJP] setting — the minimal-achiever proof below in fact works for any complete
+nonarchimedean field). -/
 theorem norm_mul_eq (hd : ∀ x : K, x ≠ 0 → ∃ n : ℤ, ‖x‖ = (2 : ℝ) ^ n)
-    (f g : RestrictedLaurent K) : ‖f * g‖ = ‖f‖ * ‖g‖ := by sorry
+    (f g : RestrictedLaurent K) : ‖f * g‖ = ‖f‖ * ‖g‖ := by
+  classical
+  rcases eq_or_ne f 0 with rfl | hf
+  · simp
+  rcases eq_or_ne g 0 with rfl | hg
+  · simp
+  -- attained norms and their minimal achievers
+  obtain ⟨af, hafeq, hafne⟩ := exists_gaussNorm_eq f hf
+  obtain ⟨ag, hageq, hagne⟩ := exists_gaussNorm_eq g hg
+  have hNf : (0 : ℝ) < ‖f‖ := by
+    rw [norm_def, hafeq]; exact norm_pos_iff.mpr hafne
+  have hNg : (0 : ℝ) < ‖g‖ := by
+    rw [norm_def, hageq]; exact norm_pos_iff.mpr hagne
+  have hAf : {a : ℤ | ‖f.coeff a‖ = ‖f‖}.Finite :=
+    (f.finite_setOf_le_norm_coeff hNf).subset fun a ha => by
+      rw [Set.mem_setOf_eq] at ha ⊢; rw [ha]
+  have hAg : {a : ℤ | ‖g.coeff a‖ = ‖g‖}.Finite :=
+    (g.finite_setOf_le_norm_coeff hNg).subset fun a ha => by
+      rw [Set.mem_setOf_eq] at ha ⊢; rw [ha]
+  obtain ⟨a₁, ha₁A, ha₁min⟩ := Set.exists_min_image _ (fun a : ℤ => a) hAf
+    ⟨af, by rw [Set.mem_setOf_eq, ← hafeq, norm_def]⟩
+  obtain ⟨b₁, hb₁A, hb₁min⟩ := Set.exists_min_image _ (fun a : ℤ => a) hAg
+    ⟨ag, by rw [Set.mem_setOf_eq, ← hageq, norm_def]⟩
+  rw [Set.mem_setOf_eq] at ha₁A hb₁A
+  -- the coefficient at `a₁ + b₁` has norm exactly `‖f‖·‖g‖`
+  have hkey : ‖(f * g).coeff (a₁ + b₁)‖ = ‖f‖ * ‖g‖ := by
+    have hsplit := (summable_mul_coeff f g (a₁ + b₁)).tsum_eq_add_tsum_ite a₁
+    rw [coeff_mul, hsplit, show a₁ + b₁ - a₁ = b₁ by ring]
+    have hmain : ‖f.coeff a₁ * g.coeff b₁‖ = ‖f‖ * ‖g‖ := by
+      rw [norm_mul, ha₁A, hb₁A]
+    -- all remaining terms are strictly smaller
+    have hrest : ‖∑' a : ℤ, (if a = a₁ then 0 else f.coeff a * g.coeff (a₁ + b₁ - a))‖ <
+        ‖f‖ * ‖g‖ := by
+      refine norm_tsum_lt_of_forall_lt ?_ (by positivity) fun a => ?_
+      · refine squeeze_zero (fun a => norm_nonneg _) (fun a => ?_)
+          (tendsto_conv_term f g (a₁ + b₁))
+        split
+        · simp only [norm_zero]
+          exact norm_nonneg _
+        · exact le_rfl
+      · rcases eq_or_ne a a₁ with rfl | ha
+        · rw [if_pos rfl, norm_zero]; positivity
+        · rw [if_neg ha, norm_mul]
+          rcases lt_or_gt_of_ne ha with hlt | hgt
+          · -- `a < a₁`: the `f`-coefficient is strictly submaximal
+            have hfa : ‖f.coeff a‖ < ‖f‖ := by
+              rcases lt_or_eq_of_le (norm_coeff_le_gaussNorm f a) with h | h
+              · exact h
+              · have := ha₁min a h
+                omega
+            calc ‖f.coeff a‖ * ‖g.coeff (a₁ + b₁ - a)‖
+                ≤ ‖f.coeff a‖ * ‖g‖ :=
+                  mul_le_mul_of_nonneg_left (norm_coeff_le_gaussNorm g _) (norm_nonneg _)
+              _ < ‖f‖ * ‖g‖ := mul_lt_mul_of_pos_right hfa hNg
+          · -- `a > a₁`: the `g`-coefficient is strictly submaximal
+            have hgb : ‖g.coeff (a₁ + b₁ - a)‖ < ‖g‖ := by
+              rcases lt_or_eq_of_le (norm_coeff_le_gaussNorm g (a₁ + b₁ - a)) with h | h
+              · exact h
+              · have := hb₁min _ h
+                omega
+            calc ‖f.coeff a‖ * ‖g.coeff (a₁ + b₁ - a)‖
+                ≤ ‖f‖ * ‖g.coeff (a₁ + b₁ - a)‖ :=
+                  mul_le_mul_of_nonneg_right (norm_coeff_le_gaussNorm f a) (norm_nonneg _)
+              _ < ‖f‖ * ‖g‖ := mul_lt_mul_of_pos_left hgb hNf
+    -- ultrametric: adding a strictly smaller tail does not change the norm
+    set x := f.coeff a₁ * g.coeff b₁ with hxdef
+    set y := ∑' a : ℤ, (if a = a₁ then 0 else f.coeff a * g.coeff (a₁ + b₁ - a)) with hydef
+    have hyx : ‖y‖ < ‖x‖ := by rw [hmain]; exact hrest
+    rw [← hmain]
+    refine le_antisymm ((IsUltrametricDist.norm_add_le_max x y).trans
+      (max_le le_rfl hyx.le)) ?_
+    by_contra hcon
+    push_neg at hcon
+    have hle : ‖x‖ ≤ max ‖x + y‖ ‖y‖ := by
+      have h1 : ‖x + y + -y‖ ≤ max ‖x + y‖ ‖-y‖ := IsUltrametricDist.norm_add_le_max _ _
+      rw [add_neg_cancel_right, norm_neg] at h1
+      exact h1
+    rcases max_cases ‖x + y‖ ‖y‖ with ⟨heq, -⟩ | ⟨heq, -⟩
+    · rw [heq] at hle
+      exact absurd (hle.trans_lt hcon) (lt_irrefl _)
+    · rw [heq] at hle
+      exact absurd (hle.trans_lt hyx) (lt_irrefl _)
+  refine le_antisymm (norm_mul_le f g) ?_
+  rw [← hkey]
+  exact norm_coeff_le_gaussNorm (f * g) (a₁ + b₁)
 
 /-- `RestrictedLaurent K` is a domain when the base is a complete nonarchimedean field with
 discrete value group ([FJP] Prop 2.3: "also that 𝒞 is a domain"; univariate case). -/
 theorem mul_ne_zero_of_ne_zero (hd : ∀ x : K, x ≠ 0 → ∃ n : ℤ, ‖x‖ = (2 : ℝ) ^ n)
-    {f g : RestrictedLaurent K} (hf : f ≠ 0) (hg : g ≠ 0) : f * g ≠ 0 := by sorry
+    {f g : RestrictedLaurent K} (hf : f ≠ 0) (hg : g ≠ 0) : f * g ≠ 0 := by
+  intro hcon
+  have h := norm_mul_eq hd f g
+  rw [hcon] at h
+  have h0 : ‖(0 : RestrictedLaurent K)‖ = 0 := norm_zero
+  rw [h0] at h
+  have hNf : (0 : ℝ) < ‖f‖ := norm_pos_iff.mpr hf
+  have hNg : (0 : ℝ) < ‖g‖ := norm_pos_iff.mpr hg
+  nlinarith
 
 end Field
 

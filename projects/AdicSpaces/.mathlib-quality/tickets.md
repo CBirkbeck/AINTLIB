@@ -10,7 +10,7 @@ only). Priority spine: T1xx → T3xx → T4xx → T5xx → T6xx → T7xx (sheafi
 
 ## Summary
 - Total: 36 tickets (28 proof + 8 embedded cleanup/milestone controls listed inline)
-- Open: 33 | Done: 3 (T001, T101, T102) | Parallel capacity at peak: 4 workers
+- Open: 32 | Done: 4 (T001, T101, T102, T103) | Parallel capacity at peak: 4 workers
   (T2xx ∥ T3xx ∥ T4xx-polynomial ∥ T1xx-tail)
 
 ## Milestone map
@@ -61,8 +61,14 @@ T704, by a fresh `/develop --continue`.
   + uniform decay (mirror `Restricted.isCompleteSpace`, CoramRestrictedNorm:257).
 - **Source**: [FJP] Prop 2.3 attained-sup sentence (quote at L1.2).
 
-### [T103] `RestrictedLaurent.lean` — multiplicativity & domain
-- **Status**: open | **Depends**: T102 | **Type**: proofs (L1.3)
+### [T103] `RestrictedLaurent.lean` — multiplicativity & domain — **DONE 2026-07-16**
+- **Status**: done (beastmode). Route (b) of the leaf plan (minimal-achiever), which
+  needs NO discreteness: minimal achievers `a₁, b₁` via `Set.exists_min_image` on the
+  finite achiever sets; the `(a₁+b₁)`-coefficient splits off its `a₁`-term
+  (`tsum_eq_add_tsum_ite`); every other term is strictly submaximal; new helper
+  `norm_tsum_lt_of_forall_lt` (attained-sup strict bound) + the ultrametric isosceles
+  argument give equality. `mul_ne_zero_of_ne_zero` from positivity of the norm.
+  The unused `hd` hypothesis is retained for statement stability. | **Type**: proofs (L1.3)
 - **Sorries**: `norm_mul_eq`, `mul_ne_zero_of_ne_zero`.
 - **Sketch**: route (a) residue reduction: scale to norm 1 by an attained coefficient
   (T102); reduce `{‖·‖ ≤ 1} → AddMonoidAlgebra F ℤ` (kill `< 1` = `≤ |ϖ|` coefficients —
