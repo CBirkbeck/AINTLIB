@@ -889,3 +889,12 @@ composition of `pullbackComp`, `pullbackCongr`, functorial transport of the comp
 comparison, and the scheme-model hom coherence pin. Its focused build is green, its axiom audit is
 exactly `propext`, `Classical.choice`, and `Quot.sound`, and it adds no hypothesis or proof-resource
 option.
+
+Completed dependency claim (2026-07-16): constructed
+`IsInvertible.exists_finiteStageModelBaseChangeIso_of_isProper`. The completed descent is now
+packaged as a finite-stage scheme model with an invertible `gluedModule`, the canonical isomorphism
+from its base change to the original proper family, and an isomorphism between the corresponding
+pulled-back line bundles on that literal fibre product. The proof consumes the synchronized
+cocycle and `baseChangeGluedModuleIsoOnModelPullback`. Its focused build is green, its axiom audit
+is exactly `propext`, `Classical.choice`, and `Quot.sound`, and it adds no Noetherianity, geometric
+hypothesis, or proof-resource option.
