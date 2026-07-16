@@ -1060,6 +1060,14 @@ theorem RelEffCartierDiv.IsSubgroup.smulKernelπ_flat (M K : ℕ) [NeZero M] [Ne
     rw [RelEffCartierDiv.IsSubgroup.prodMap, pullback.lift_fst]
     exact RelEffCartierDiv.IsSubgroup.toSmulKernel_π E hD hdeg h₁
 
+/-- **[F3-kerfin]** The `c`-kernel is finite over `S`: it is the base change of the
+finite `ι ≫ [c]` (closed immersion into the finite `[c]`) along the zero section. -/
+theorem RelEffCartierDiv.smulKernelπ_isFinite (D : RelEffCartierDiv E.π) (c : ℤ)
+    [IsFinite (E.mulByHom c)] : IsFinite (D.smulKernelπ E c) := by
+  haveI hfin : IsFinite (D.ideal.subschemeι ≫ E.mulByHom c) := inferInstance
+  rw [RelEffCartierDiv.smulKernelπ]
+  exact MorphismProperty.pullback_snd (P := @IsFinite) _ _ hfin
+
 end ProductDecomposition
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
