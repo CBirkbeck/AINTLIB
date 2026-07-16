@@ -1549,6 +1549,37 @@ theorem algHom_eq_of_ker_le {k A : Type u} [Field k] [CommRing A] [Algebra k A]
   rw [hc2] at hthis
   exact (sub_eq_zero.mp hthis).symm
 
+section FieldExhaust
+
+variable {k : Type u} [Field k] {C : Scheme.{u}}
+
+/-- **[F3-exhaust-4a]** Evaluation of a `Spec k`-point at an affine open containing its
+image, as a ring map to `k` (cast-free: `appLE` into the global sections of the point,
+then the `ΓSpec` isomorphism). -/
+noncomputable def pointEval (z : Spec (CommRingCat.of k) ⟶ C) (V : C.affineOpens)
+    (he : ⊤ ≤ z ⁻¹ᵁ V.1) : ↑Γ(C, V.1) →+* k :=
+  ((Scheme.ΓSpecIso (CommRingCat.of k)).hom.hom).comp ((z.appLE V.1 ⊤ he).hom)
+
+/-- **[F3-exhaust-4b]** The kernel of the evaluation is the point's kernel ideal at `V`. -/
+theorem ker_pointEval (z : Spec (CommRingCat.of k) ⟶ C) (V : C.affineOpens)
+    (he : ⊤ ≤ z ⁻¹ᵁ V.1) [QuasiCompact z] :
+    RingHom.ker (pointEval z V he) = (z.ker).ideal V := by
+  rw [pointEval, RingHom.ker_comp_of_injective _
+    (ConcreteCategory.bijective_of_isIso (Scheme.ΓSpecIso (CommRingCat.of k)).hom).injective]
+  have hIso : IsIso (homOfLE he) :=
+    ⟨homOfLE le_top, rfl, rfl⟩
+  have hinj : Function.Injective
+      (((Spec (CommRingCat.of k)).presheaf.map (homOfLE he).op).hom) := by
+    haveI : IsIso ((Spec (CommRingCat.of k)).presheaf.map (homOfLE he).op) :=
+      inferInstance
+    exact (ConcreteCategory.bijective_of_isIso _).injective
+  rw [show z.appLE V.1 ⊤ he
+      = z.app V.1 ≫ (Spec (CommRingCat.of k)).presheaf.map (homOfLE he).op from rfl]
+  rw [CommRingCat.hom_comp, RingHom.ker_comp_of_injective _ hinj]
+  exact (Scheme.Hom.ker_apply z V).symm
+
+end FieldExhaust
+
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
 order `M` and `M·P` has exact order `K`.
