@@ -80,6 +80,79 @@ theorem RingHom.eq_of_comp_eq_id {K L : Type u} [Field K] [Field L]
   rw [hpq l] at h2l
   exact h2l.symm
 
+/-- **[F3-disj-criterion] (KM p. 30's translate disjointness, the graph form)** Two
+sections of a separated morphism whose pulls differ at EVERY algebraically closed
+geometric point have comaximal graph ideals. A common point of the two graphs yields a
+geometric point of the intersection subscheme; lifting it through the two graph
+isomorphisms gives base points `t₁, t₂` with `t₁ ≫ Q₁ = t₂ ≫ Q₂` as `C`-points, and
+the section identities force `t₁ = t₂` — contradicting the pointwise distinctness. -/
+theorem sup_ker_eq_top_of_pull_ne {C : Scheme.{u}} {π : C ⟶ S} [IsSeparated π]
+    (Q₁ Q₂ : S ⟶ C) (hQ₁ : Q₁ ≫ π = 𝟙 S) (hQ₂ : Q₂ ≫ π = 𝟙 S)
+    (hne : ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S),
+      t ≫ Q₁ ≠ t ≫ Q₂) :
+    Scheme.Hom.ker Q₁ ⊔ Scheme.Hom.ker Q₂ = ⊤ := by
+  haveI hci₁ : IsClosedImmersion Q₁ := by
+    have hcomp : IsClosedImmersion (Q₁ ≫ π) := by rw [hQ₁]; infer_instance
+    exact IsClosedImmersion.of_comp Q₁ π
+  haveI hci₂ : IsClosedImmersion Q₂ := by
+    have hcomp : IsClosedImmersion (Q₂ ≫ π) := by rw [hQ₂]; infer_instance
+    exact IsClosedImmersion.of_comp Q₂ π
+  by_contra hsup
+  -- the intersection subscheme has a point
+  have hne_bot : (Scheme.Hom.ker Q₁ ⊔ Scheme.Hom.ker Q₂).support ≠ ⊥ := by
+    rw [Ne, Scheme.IdealSheafData.support_eq_bot_iff]
+    exact hsup
+  have hnonempty : ∃ c, c ∈ (Scheme.Hom.ker Q₁ ⊔ Scheme.Hom.ker Q₂).support := by
+    by_contra hemp
+    push_neg at hemp
+    refine hne_bot (SetLike.ext' ?_)
+    rw [TopologicalSpace.Closeds.coe_bot]
+    exact Set.eq_empty_iff_forall_notMem.mpr hemp
+  obtain ⟨c, hc⟩ := hnonempty
+  have hrange : c ∈ Set.range
+      ((Scheme.Hom.ker Q₁ ⊔ Scheme.Hom.ker Q₂).subschemeι).base := by
+    have := Scheme.IdealSheafData.range_subschemeι
+      (I := Scheme.Hom.ker Q₁ ⊔ Scheme.Hom.ker Q₂)
+    rw [show Set.range ((Scheme.Hom.ker Q₁ ⊔ Scheme.Hom.ker Q₂).subschemeι).base
+      = Set.range ((Scheme.Hom.ker Q₁ ⊔ Scheme.Hom.ker Q₂).subschemeι) from rfl, this]
+    exact hc
+  obtain ⟨x₀, hx₀⟩ := hrange
+  -- the geometric point of the intersection
+  have hσ₁ : IsClosedImmersion.lift Q₁ (Scheme.Hom.ker Q₁).subschemeι
+      (le_of_eq (Scheme.IdealSheafData.ker_subschemeι _).symm) ≫ Q₁
+      = (Scheme.Hom.ker Q₁).subschemeι := IsClosedImmersion.lift_fac _ _ _
+  have hσ₂ : IsClosedImmersion.lift Q₂ (Scheme.Hom.ker Q₂).subschemeι
+      (le_of_eq (Scheme.IdealSheafData.ker_subschemeι _).symm) ≫ Q₂
+      = (Scheme.Hom.ker Q₂).subschemeι := IsClosedImmersion.lift_fac _ _ _
+  set W := (Scheme.Hom.ker Q₁ ⊔ Scheme.Hom.ker Q₂).subscheme with hWdef
+  set w : Spec (CommRingCat.of (AlgebraicClosure ↑(W.residueField x₀))) ⟶ W :=
+    Spec.map (CommRingCat.ofHom
+      (algebraMap ↑(W.residueField x₀) (AlgebraicClosure ↑(W.residueField x₀))))
+      ≫ W.fromSpecResidueField x₀ with hwdef
+  set t₁ := w ≫ Scheme.IdealSheafData.inclusion le_sup_left
+    ≫ IsClosedImmersion.lift Q₁ (Scheme.Hom.ker Q₁).subschemeι
+      (le_of_eq (Scheme.IdealSheafData.ker_subschemeι _).symm) with ht₁def
+  set t₂ := w ≫ Scheme.IdealSheafData.inclusion le_sup_right
+    ≫ IsClosedImmersion.lift Q₂ (Scheme.Hom.ker Q₂).subschemeι
+      (le_of_eq (Scheme.IdealSheafData.ker_subschemeι _).symm) with ht₂def
+  -- both composite points equal the intersection point of C
+  have hγ₁ : t₁ ≫ Q₁ = w ≫ (Scheme.Hom.ker Q₁ ⊔ Scheme.Hom.ker Q₂).subschemeι := by
+    rw [ht₁def]
+    simp only [Category.assoc]
+    rw [hσ₁, Scheme.IdealSheafData.inclusion_subschemeι]
+  have hγ₂ : t₂ ≫ Q₂ = w ≫ (Scheme.Hom.ker Q₁ ⊔ Scheme.Hom.ker Q₂).subschemeι := by
+    rw [ht₂def]
+    simp only [Category.assoc]
+    rw [hσ₂, Scheme.IdealSheafData.inclusion_subschemeι]
+  -- the base points agree
+  have ht : t₁ = t₂ := by
+    have h1 : t₁ = (t₁ ≫ Q₁) ≫ π := by
+      rw [Category.assoc, hQ₁, Category.comp_id]
+    have h2 : t₂ = (t₂ ≫ Q₂) ≫ π := by
+      rw [Category.assoc, hQ₂, Category.comp_id]
+    rw [h1, h2, hγ₁, hγ₂]
+  exact hne _ t₁ (by rw [hγ₁, ht, hγ₂])
+
 /-- **[F3-castBase]** Transport of the point group along an equality of base
 morphisms (the `𝟙 ≫ g = g` bookkeeping equiv for base-change round-trips). -/
 noncomputable def _root_.ModularCurves.EllipticCurve.Point.castBase
