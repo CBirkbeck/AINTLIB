@@ -18,9 +18,9 @@ cyclotomic unit (`kummerLogNormalizedUnitFiniteLog_eq_denUnitPowPredFiniteLog`, 
 file decomposes the second-order part through the proven `N`-generic machinery into exactly two
 contributions to the `varpi^{32}` coordinate:
 
-* the **degree-`32`** homogeneous slice (the *first-order* slice carrying the `varpi^{32}` Teichmüller
-  factor `(a+2)^{32} − 1 = V̄(a)` and the Bernoulli factor `B₃₂`), whose mod-`37²` value carries the
-  proven Kellner `α₀`-datum `β₃₂ = B₃₂.num/37 ≡ 3` (`kellnerLeadingCoeff37`);
+* the **degree-`32`** homogeneous slice (the *first-order* slice carrying the `varpi^{32}`
+  Teichmüller factor `(a+2)^{32} − 1 = V̄(a)` and the Bernoulli factor `B₃₂`), whose mod-`37²` value
+  carries the proven Kellner `α₀`-datum `β₃₂ = B₃₂.num/37 ≡ 3` (`kellnerLeadingCoeff37`);
 * the **degree-`68`** homogeneous slice, folded onto `varpi^{32}` through the ramification
   `varpi^{36} = -37·(tailUnit)` — whose mod-`37` coordinate is **`0`** (proven
   `deg68_slice_coordMod37_eq_zero`, the Frobenius / `B₆₈/68` content), so it does not contribute to
@@ -48,16 +48,16 @@ This file proves:
 * the `N`-generic identification `W(a) = coord(samePrimeFiniteLog 71 (c^{p-1} − 1))`
   (`normalizedUnitCoeff37_eq_finiteLog_denUnit`);
 * the explicit second-order Fermat datum for the column index (`column_pow_pred_modSq_eq`,
-  `columnFermatQuotient37`), the genuine Fermat-quotient content the second-order bridge replaces the
-  mod-`p` congruence with;
+  `columnFermatQuotient37`), the genuine Fermat-quotient content the second-order bridge replaces
+  the mod-`p` congruence with;
 * the degree-`68` slice's mod-`37` `varpi^{32}` coordinate vanishes (re-export of the proven
-  `deg68_slice_coordMod37_eq_zero`), so the second-order part is carried by the **single** degree-`32`
-  homogeneous slice.
+  `deg68_slice_coordMod37_eq_zero`), so the second-order part is carried by the **single**
+  degree-`32` homogeneous slice.
 
 The single remaining piece is the value of the **degree-`32` homogeneous slice** of the level-`71`
 normalized-unit log at the `varpi^{32}` coordinate mod-`37²` — strictly one homogeneous slice of the
-coordinate (the deg-`68` slice is settled, the higher slices do not reach `varpi^{32}`), carrying the
-proven `β₃₂ = 3` `α₀`-datum and the column factor `V̄(a)`.  We isolate it as
+coordinate (the deg-`68` slice is settled, the higher slices do not reach `varpi^{32}`), carrying
+the proven `β₃₂ = 3` `α₀`-datum and the column factor `V̄(a)`.  We isolate it as
 `CaseIICor823Level71Deg32SliceValue37`, a `def … : Prop` (**not** an axiom), prove it **discharges**
 `CaseIICor823Level71SecondOrderPartValue37` (hence R4 and the FLT37 endpoint), and certify it is
 sound, non-circular, and non-vacuous with the explicit `ρ = kellnerLeadingCoeff37 = 3 ≠ 0`.  It is
@@ -76,7 +76,6 @@ slice-fold structure proven here.
 
 noncomputable section
 
-set_option maxRecDepth 4000
 
 namespace BernoulliRegular.FLT37.Eichler
 
@@ -122,8 +121,8 @@ Fermat quotient `k^p − k = p·F(k)`; we record `F(k)` and the resulting value 
 
 /-- **The column-index Fermat quotient mod `37²`** `F(k) := ((k^{37} − k)/37 : ZMod 37²)` for the
 column index `k = a + 2`.  The explicit second-order Fermat datum: `k^{37} = k + 37·F(k)` in `ℤ`, so
-mod `37²` the unit `k` satisfies `k^{37} ≡ k + 37·F(k)`.  This is the genuine Fermat-quotient content
-the second-order bridge substitutes for the mod-`p` congruence `k^{37} ≡ k`. -/
+mod `37²` the unit `k` satisfies `k^{37} ≡ k + 37·F(k)`.  This is the genuine Fermat-quotient
+content the second-order bridge substitutes for the mod-`p` congruence `k^{37} ≡ k`. -/
 def columnFermatQuotient37 (a : Fin (kummerLogRank 37)) : ZMod (37 ^ 2) :=
   ((((((a : ℕ) + 2 : ℕ) ^ 37 - ((a : ℕ) + 2 : ℕ)) / 37 : ℕ)) : ZMod (37 ^ 2))
 
@@ -156,14 +155,14 @@ the second-order part
 By `deg68_slice_coordMod37_eq_zero` (proven) the degree-`68` homogeneous slice of the level-`71`
 finite-log at the `varpi^{32}` coordinate vanishes mod `37`.  The only homogeneous slices that reach
 `varpi^{32}` are `d = 32` (direct) and `d = 68` (folded through `varpi^{36} = -37·tailUnit`); higher
-degrees `d ∈ {104, …}` exceed the level-`72` precision.  So the mod-`37` second-order part is carried
-entirely by the **single degree-`32` homogeneous slice**. -/
+degrees `d ∈ {104, …}` exceed the level-`72` precision.  So the mod-`37` second-order part is
+carried entirely by the **single degree-`32` homogeneous slice**. -/
 
 /-- **Re-export: the degree-`68` homogeneous slice has zero `varpi^{32}` coordinate mod `37`**
-(proven, axiom-clean), specialised to the level-`71` Dwork-parameter approximant `dworkParameterApprox
-72` and the even index `i = 32`.  This is `deg68_slice_coordMod37_eq_zero` with the column index `i`
-fixed to the irregular even row `varpi^{32}`.  It certifies the degree-`68` slice does not contribute
-to `secondOrderPart37` at the mod-`37` order. -/
+(proven, axiom-clean), specialised to the level-`71` Dwork-parameter approximant
+`dworkParameterApprox 72` and the even index `i = 32`.  This is `deg68_slice_coordMod37_eq_zero`
+with the column index `i` fixed to the irregular even row `varpi^{32}`.  It certifies the
+degree-`68` slice does not contribute to `secondOrderPart37` at the mod-`37` order. -/
 theorem deg68_slice_varpi32_coordMod37_eq_zero
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)] :
@@ -185,8 +184,8 @@ theorem deg68_slice_varpi32_coordMod37_eq_zero
 /-! ## 4. The degree-`32` Dwork-slice value (the `α₀`-carrying half), proven
 
 The genuine `p`-adic-`L` value carried by the surviving degree-`32` homogeneous slice.  Unlike the
-degree-`68` slice (factorial `68! = 37·u` not a unit, folded through `varpi^{36} = -37·tailUnit`), the
-degree-`32` slice has `32!` a `37`-**unit** (`padicValNat 37 (32!) = 0`, since `32 < 37`) and
+degree-`68` slice (factorial `68! = 37·u` not a unit, folded through `varpi^{36} = -37·tailUnit`),
+the degree-`32` slice has `32!` a `37`-**unit** (`padicValNat 37 (32!) = 0`, since `32 < 37`) and
 `varpi^{32}` lands directly on the Dwork basis vector (`repr(dworkParameter^{32}) 32 = 1`, no fold).
 So the all-degrees factorial identity at `d = 32` gives the slice value directly mod `37²`:
 
@@ -194,15 +193,16 @@ So the all-degrees factorial identity at `d = 32` gives the slice value directly
 
 with `formalSum32 = ∑_n rationalArtinHasseNormalizedFactorialWeightedLogCoeff 32 n` the formal
 Bernoulli source `B₃₂/32` (`rIntegralToZMod 37 (formalSum32) = bernoulliFactor 37 16 = B₃₂ mod 37 =
-0` first order; mod-`37²` its residue is `37·(β₃₂·32⁻¹)`).  The mod-`37²` deg-`32` slice value carries
-the proven Kellner `α₀`-datum `β₃₂ = 3`. -/
+0` first order; mod-`37²` its residue is `37·(β₃₂·32⁻¹)`).  The mod-`37²` deg-`32` slice value
+carries the proven Kellner `α₀`-datum `β₃₂ = 3`. -/
 
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
 variable [NumberField.IsCMField K]
 
 /-- **The formal degree-`32` Artin-Hasse log coefficient sum** (a `37`-integral rational): the
-`d = 32` row of `rationalArtinHasseNormalizedFactorialWeightedLogCoeff`, whose mod-`37²` residue is the
-formal Bernoulli source `B₃₂/32` of the degree-`32` slice.  Companion of the degree-`68` `formalSum68`. -/
+`d = 32` row of `rationalArtinHasseNormalizedFactorialWeightedLogCoeff`, whose mod-`37²` residue is
+the formal Bernoulli source `B₃₂/32` of the degree-`32` slice.  Companion of the degree-`68`
+`formalSum68`. -/
 noncomputable def formalSum32 : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37 :=
   ∑ n ∈ Finset.Icc 1 32, rationalArtinHasseNormalizedFactorialWeightedLogCoeff 37 32 n
 
@@ -217,8 +217,8 @@ theorem padicValNat_thirtyseven_factorial_thirtytwo :
   intro hdvd
   exact absurd ((Nat.Prime.dvd_factorial (by norm_num)).mp hdvd) (by norm_num)
 
-/-- **`32!` is a unit mod `37²`** (proven): `IsUnit ((32! : ℕ) : ZMod 37²)`, since `32!` is coprime to
-`37` (`padicValNat 37 (32!) = 0`), hence to `37²`. -/
+/-- **`32!` is a unit mod `37²`** (proven): `IsUnit ((32! : ℕ) : ZMod 37²)`, since `32!` is coprime
+to `37` (`padicValNat 37 (32!) = 0`), hence to `37²`. -/
 theorem factorial_thirtytwo_isUnit_modSq : IsUnit ((Nat.factorial 32 : ℕ) : ZMod (37 ^ 2)) := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   refine (ZMod.isUnit_iff_coprime _ _).mpr ?_
@@ -231,7 +231,8 @@ theorem factorial_thirtytwo_isUnit_modSq : IsUnit ((Nat.factorial 32 : ℕ) : ZM
 omit [NumberField.IsCMField K] in
 /-- **The quotient image of `x^{32}` is the completed evaluation of `dworkParameter^{32}`** (proven,
 `N`-generic precision): `mk(dworkParameterApprox 72 ^ 32) = evalₐ 72 (dworkParameter^{32})`, via
-`map_pow` and `dworkParameter_evalₐ`.  Degree-`32` analog of `mk_dworkParameterApprox_pow_sixtyeight_eq`. -/
+`map_pow` and `dworkParameter_evalₐ`.  Degree-`32` analog of
+`mk_dworkParameterApprox_pow_sixtyeight_eq`. -/
 theorem mk_dworkParameterApprox_pow_thirtytwo_eq :
     Ideal.Quotient.mk ((lambdaIdeal 37 K) ^ (2 * (37 - 1)))
         (dworkParameterApprox 37 K (2 * (37 - 1)) ^ 32) =
@@ -283,7 +284,8 @@ theorem formalSum32_rIntegralToZMod_eq_zero :
         (formalSum32 : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37) = 0 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   have hbf : Furtwaengler.DieudonneDwork.rIntegralToZMod 37
-      (formalSum32 : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37) = bernoulliFactor 37 16 := by
+      (formalSum32 : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37) =
+        bernoulliFactor 37 16 := by
     rw [formalSum32]
     exact rIntegralToZMod_sum_rationalArtinHasseNormalizedFactorialWeightedLogCoeff_even
       (p := 37) (j := 16) (by norm_num) (by norm_num)
@@ -299,7 +301,8 @@ theorem formalSum32_rIntegralToZMod_eq_zero :
     have hd : (2 * ((16 : ℕ) : ℚ)) = (32 : ℚ) := by norm_num
     rw [hb, hd]; ring
   -- Cross-multiply: `s.num · (B₃₂.den·32) = B₃₂.num · s.den` in `ℤ`.
-  have hcross : s.num * ((_root_.bernoulli 32).den * 32 : ℤ) = (_root_.bernoulli 32).num * s.den := by
+  have hcross : s.num * ((_root_.bernoulli 32).den * 32 : ℤ) =
+      (_root_.bernoulli 32).num * s.den := by
     have hsden : (s.den : ℚ) ≠ 0 := by exact_mod_cast s.den_nz
     have hbden : ((_root_.bernoulli 32).den : ℚ) ≠ 0 := by
       have := (_root_.bernoulli 32).den_nz; exact_mod_cast this
@@ -418,8 +421,8 @@ omit [NumberField.IsCMField K] in
 
   `castHom (coordModSq(deg-32 slice)) = 0`   (in `ZMod 37`),
 
-i.e. the deg-`32` slice coordinate is `37·(second digit)` mod `37²`.  Solving the factorial extraction
-`(32! : ZMod 37²)·coordModSq = formalSum32 residue` for the `37`-unit `32!`
+i.e. the deg-`32` slice coordinate is `37·(second digit)` mod `37²`.  Solving the factorial
+extraction `(32! : ZMod 37²)·coordModSq = formalSum32 residue` for the `37`-unit `32!`
 (`factorial_thirtytwo_isUnit_modSq`) and reducing mod `37`: `castHom(coordModSq) = (32!⁻¹ mod
 37)·castHom(formalSum32 residue) = (32!⁻¹)·rIntegralToZMod 37 (formalSum32)`
 (`castHom_num_den_eq_rIntegralToZMod`) `= (32!⁻¹)·0 = 0` (`formalSum32_rIntegralToZMod_eq_zero`,
@@ -480,7 +483,8 @@ theorem formalSum32_residue_modSq_eq_thirtyseven :
         ((((formalSum32 : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37) : ℚ).den : ℕ) :
             ZMod (37 ^ 2))⁻¹ =
       (37 : ZMod (37 ^ 2)) := by
-  -- `formalSum32 residue = (B₃₂/32 evaluated mod 37²)`; cross-multiply by `B₃₂.den·32` (a `37²`-unit).
+  -- `formalSum32 residue = (B₃₂/32 evaluated mod 37²)`; cross-multiply by
+  -- `B₃₂.den·32` (a `37²`-unit).
   set s : ℚ := ((formalSum32 : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37) : ℚ) with hs
   have hsval : s = (_root_.bernoulli 32 : ℚ) / 32 := by
     have hcoe := coe_sum_rationalArtinHasseNormalizedFactorialWeightedLogCoeff (p := 37) 32
@@ -522,7 +526,8 @@ theorem formalSum32_residue_modSq_eq_thirtyseven :
     decide
   have hunit_sden : IsUnit (((s.den : ℕ)) : ZMod (37 ^ 2)) := by
     refine (ZMod.isUnit_iff_coprime _ _).mpr ?_
-    have hcop : (s.den).Coprime 37 := (formalSum32 : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37).property
+    have hcop : (s.den).Coprime 37 :=
+      (formalSum32 : Furtwaengler.DieudonneDwork.rIntegralRatSubring 37).property
     exact hcop.pow_right 2
   -- Cast `hcross` to `ZMod 37²`.
   have hcrossZ : ((s.num : ℤ) : ZMod (37 ^ 2)) * ((16320 : ℕ) : ZMod (37 ^ 2)) =
@@ -535,7 +540,8 @@ theorem formalSum32_residue_modSq_eq_thirtyseven :
   have hconst : ((16320 : ℕ) : ZMod (37 ^ 2)) * (37 : ZMod (37 ^ 2)) =
       ((-7709321041217 : ℤ) : ZMod (37 ^ 2)) := by decide
   -- `s.num·s.den⁻¹ = 37`: cancel the unit `16320`; LHS·16320 = (s.num·16320)·s.den⁻¹
-  -- = (-...·s.den)·s.den⁻¹ = -... = 16320·37.  Goal numerator/denominator are `s.num`/`s.den` (defeq).
+  -- = (-...·s.den)·s.den⁻¹ = -... = 16320·37.
+  -- Goal numerator/denominator are `s.num`/`s.den` (defeq).
   change ((s.num : ℤ) : ZMod (37 ^ 2)) * (((s.den : ℕ)) : ZMod (37 ^ 2))⁻¹ = (37 : ZMod (37 ^ 2))
   apply hunit16320.mul_left_cancel
   rw [show ((16320 : ℕ) : ZMod (37 ^ 2)) *
@@ -558,9 +564,9 @@ omit [NumberField.IsCMField K] in
 so `coordModSq(deg-32 slice) = 37·(32!⁻¹)`, a *nonzero* `37·(unit)`.  Combines the slice extraction
 `factorial32_deg32_slice_value` (`(32!)·coordModSq = formalSum32 residue`) with the exact value
 `formalSum32_residue_modSq_eq_thirtyseven` (`formalSum32 residue = 37`).  This is the proven `M ≤ 1`
-non-degeneracy of the surviving degree-`32` slice — the genuine Kellner `α₀`-content `β₃₂ = 3` carried
-into the mod-`37²` coordinate (the `32!⁻¹` and the `B₃₂.den·32` unit twist account for the difference
-between the slice's second digit `1` and the bare Bernoulli factor `β₃₂ = 3`). -/
+non-degeneracy of the surviving degree-`32` slice — the genuine Kellner `α₀`-content `β₃₂ = 3`
+carried into the mod-`37²` coordinate (the `32!⁻¹` and the `B₃₂.den·32` unit twist account for the
+difference between the slice's second digit `1` and the bare Bernoulli factor `β₃₂ = 3`). -/
 theorem factorial32_deg32_slice_value_eq_thirtyseven
     (i : Fin (37 - 1)) (hi : (i : ℕ) = 32)
     {x : ValuedIntegerRing 37 K}
@@ -586,8 +592,8 @@ proven:
   `column_pow_pred_modSq_eq`), and the mod-`37` column factor `castHom(k^{32} − 1) = V̄(a)` (§2,
   `column_pow_thirtytwo_castHom`);
 * the deg-`68` Dwork slice's `varpi^{32}` mod-`37` coordinate is `0` (§3,
-  `deg68_slice_varpi32_coordMod37_eq_zero`), and the deg-`32` Dwork slice's mod-`37` coordinate is `0`
-  too (§4, `deg32_slice_castHom_eq_zero`) — both slices are `37·(second digit)`, so the whole
+  `deg68_slice_varpi32_coordMod37_eq_zero`), and the deg-`32` Dwork slice's mod-`37` coordinate is
+  `0` too (§4, `deg32_slice_castHom_eq_zero`) — both slices are `37·(second digit)`, so the whole
   `varpi^{32}` coordinate is `37·(...)`, the proven `37·` structure
   (`normalizedUnitCoeff37_eq_thirtyseven_mul`);
 * the deg-`32` Dwork slice value mod-`37²` is `(32!)⁻¹·(formalSum32 residue)` (§4,
@@ -595,10 +601,12 @@ proven:
   proven Kellner `α₀`-datum `β₃₂ = 3 ≠ 0` (`kellnerLeadingCoeff37`).
 
 The single piece **not** proven here is the level-`71` lift of the proven first-order unit↔Dwork
-coordinate bridge `valuedLambdaQuotientDworkCoeffModP_specializedFiniteLog_eq_one_sub_pow_mul_unscaled`
+coordinate bridge
+`valuedLambdaQuotientDworkCoeffModP_specializedFiniteLog_eq_one_sub_pow_mul_unscaled`
 (the *unscaled* Dwork coordinate times the cyclotomic-action column factor `1 − k^{i}`,
 `valuedLambdaQuotientDworkCoeffModP_scaledNormalizedFiniteLog_eq_smul`) together with the level-`71`
-unit↔quotient second-order Fermat bridge (`kummerLogDenUnitPowPredFiniteLog_eq_normalizedQuotientFiniteLog_modP`
+unit↔quotient second-order Fermat bridge
+(`kummerLogDenUnitPowPredFiniteLog_eq_normalizedQuotientFiniteLog_modP`
 holds only mod `p`; the level-`71` lift replaces the Fermat congruence `k^p ≡ k` by the explicit
 Fermat quotient `k^p = k + p·F(k)`, §2).  Both are precision-generic mechanisms whose level-`36`
 versions are proven; their level-`71` assembly is the genuine `p`-adic-`L` kernel.
@@ -618,25 +626,25 @@ unconstrained coefficient).  The deg-`68` half is `0` (§3), the `37·` shape is
 column factor reduces to `V̄(a)` (§2).
 
 It is **sound** (a mod-`37` value identity), **non-circular** (its conclusion is the explicit `ρ·V̄`
-value), and **non-vacuous** (`caseIICor823Level71UnscaledDworkCoeff37_consequent_inhabited`, witnessed
-by the nonzero `kellnerLeadingCoeff37`). -/
+value), and **non-vacuous** (`caseIICor823Level71UnscaledDworkCoeff37_consequent_inhabited`,
+witnessed by the nonzero `kellnerLeadingCoeff37`). -/
 
 open BernoulliRegular (CPlusGenerator) in
-/-- **The level-`71` unscaled-Dwork-coordinate bridge residual** (a `def … : Prop`, **not** an axiom —
-the single coordinate-bridge `p`-adic-`L` kernel remaining after the slice structure of §1–§4 is
+/-- **The level-`71` unscaled-Dwork-coordinate bridge residual** (a `def … : Prop`, **not** an axiom
+— the single coordinate-bridge `p`-adic-`L` kernel remaining after the slice structure of §1–§4 is
 proven), stated **with the column-independent scalar `ρ` pinned to the deg-`32` Dwork-slice second
 digit**.
 
-There is a mod-`37` scalar `ρ : ZMod 37`, **nonzero**, that is the mod-`37` reduction of the deg-`32`
-Dwork-slice value `(32!)⁻¹·(formalSum32 second digit)` (the proven Kellner `α₀`-datum
-`kellnerLeadingCoeff37 = β₃₂ = 3`, factored by the proven `factorial32_deg32_slice_value`), such that
-for every cyclotomic column `a`:
+There is a mod-`37` scalar `ρ : ZMod 37`, **nonzero**, that is the mod-`37` reduction of the
+deg-`32` Dwork-slice value `(32!)⁻¹·(formalSum32 second digit)` (the proven Kellner `α₀`-datum
+`kellnerLeadingCoeff37 = β₃₂ = 3`, factored by the proven `factorial32_deg32_slice_value`),
+such that for every cyclotomic column `a`:
 
   `secondOrderPart37 a = ρ · vandermondeFactorModP37 a`  (in `ZMod 37`).
 
-This is **strictly smaller** than `CaseIICor823Level71SecondOrderPartValue37`: there the scalar `ρ` is
-*unconstrained*; here it is **pinned** to the proven column-independent deg-`32` Dwork-slice value,
-and the deg-`68` half (`deg68_slice_varpi32_coordMod37_eq_zero`), the `37·` shape
+This is **strictly smaller** than `CaseIICor823Level71SecondOrderPartValue37`: there the scalar `ρ`
+is *unconstrained*; here it is **pinned** to the proven column-independent deg-`32` Dwork-slice
+value, and the deg-`68` half (`deg68_slice_varpi32_coordMod37_eq_zero`), the `37·` shape
 (`normalizedUnitCoeff37_eq_thirtyseven_mul`), the deg-`32` first-order vanishing
 (`deg32_slice_castHom_eq_zero`), the slice value (`factorial32_deg32_slice_value`), and the column
 factor (`column_pow_thirtytwo_castHom`) are all **proven**.  The only undischarged content is the
@@ -654,8 +662,8 @@ def CaseIICor823Level71UnscaledDworkCoeff37
 open BernoulliRegular (CPlusGenerator) in
 /-- **The unscaled-Dwork-coordinate bridge residual is non-vacuous** (proven): the witness scalar is
 the proven nonzero Kellner `α₀`-datum `kellnerLeadingCoeff37 = β₃₂ = 3`, paired with the genuine
-per-column identity over the nonempty index type.  So the residual is a real statement, not vacuously
-true. -/
+per-column identity over the nonempty index type.  So the residual is a real statement, not
+vacuously true. -/
 theorem caseIICor823Level71UnscaledDworkCoeff37_consequent_inhabited
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)] :
@@ -666,8 +674,8 @@ theorem caseIICor823Level71UnscaledDworkCoeff37_consequent_inhabited
   ⟨⟨0, by norm_num [kummerLogRank]⟩, kellnerLeadingCoeff37_ne_zero, rfl⟩
 
 open BernoulliRegular (CPlusGenerator) in
-/-- **`CaseIICor823Level71SecondOrderPartValue37` from the unscaled-Dwork-coordinate bridge residual**
-(proven, axiom-clean given `CaseIICor823Level71UnscaledDworkCoeff37`).
+/-- **`CaseIICor823Level71SecondOrderPartValue37` from the unscaled-Dwork-coordinate bridge
+residual** (proven, axiom-clean given `CaseIICor823Level71UnscaledDworkCoeff37`).
 
 Destructure the residual's pinned scalar `ρ = kellnerLeadingCoeff37 = 3 ≠ 0` and supply it as the
 target's witness with `kellnerLeadingCoeff37_ne_zero`. -/
