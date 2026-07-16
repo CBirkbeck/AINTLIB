@@ -274,7 +274,6 @@ theorem dworkEvenParameterAdjoin_eq_fixed (hp_two : 2 < p) :
     (dworkEvenParameterAdjoin_le_fixed (p := p) (K := K) hp_two)
     (dworkFixedSubalgebra_le_evenParameterAdjoin (p := p) (K := K) hp_two)
 
-set_option synthInstance.maxHeartbeats 80000 in
 -- Register the fixed subalgebra instances once so later linear maps do not
 -- repeatedly unfold the conjugation predicate during typeclass search.
 instance instAddCommMonoidDworkFixedSubalgebra :
@@ -314,7 +313,6 @@ theorem dworkSignedCoefficients_evenCoeffExtend
   · simp [dworkSignedCoefficients, hi, hi.neg_one_pow]
   · simp [dworkSignedCoefficients, hi]
 
-set_option synthInstance.maxHeartbeats 80000 in
 -- The codomain is a predicate subtype, so instance search needs the local
 -- fixed-subalgebra instance above.
 /-- The even-power expansion map into the fixed subalgebra. -/
