@@ -346,6 +346,67 @@ lemma zetaInteger_adjoin_eq_top_maximalRealSubfield (hp_odd' : p ≠ 2) :
   exact Algebra.adjoin_eq_top_of_primitive_element hzeta_alg hL
 
 set_option linter.unusedSectionVars false in
+/-- For an odd prime `p`, `2 * p` is never a prime power. -/
+private lemma not_prime_pow_two_mul (hp_odd' : p ≠ 2) {q : ℕ} (hq : q.Prime) (k : ℕ) :
+    q ^ k ≠ 2 * p := by
+  cases k with
+  | zero =>
+      intro hk
+      simp at hk
+      have hp2 : 2 ≤ p := hp.out.two_le
+      omega
+  | succ k =>
+      intro hk
+      have hpow : IsPrimePow (2 * p) := ⟨q, k + 1, by simpa [Nat.prime_iff] using hq,
+        Nat.succ_pos _, hk⟩
+      have hcop : Nat.Coprime 2 p := by
+        simpa using (hp.out.odd_of_ne_two hp_odd').coprime_two_left
+      rcases (Nat.Coprime.isPrimePow_dvd_mul (a := 2) (b := p) hcop hpow).1 dvd_rfl with h | h
+      · have hp2 : 2 ≤ p := hp.out.two_le
+        have hle : 2 * p ≤ 2 := Nat.le_of_dvd (by positivity) h
+        omega
+      · have hp2 : 2 ≤ p := hp.out.two_le
+        have hle : 2 * p ≤ p := Nat.le_of_dvd hp.out.pos h
+        omega
+
+set_option linter.unusedSectionVars false in
+/-- The `p`-th cyclotomic field is also the `2 * p`-th cyclotomic field, for odd prime `p`. -/
+private lemma isCyclotomicExtension_two_mul (hp_odd' : p ≠ 2) :
+    IsCyclotomicExtension {2 * p} ℚ K := by
+  let ζ : K := IsCyclotomicExtension.zeta p ℚ K
+  let η : K := -ζ
+  have hζ : IsPrimitiveRoot ζ p := IsCyclotomicExtension.zeta_spec p ℚ K
+  have hη : IsPrimitiveRoot η (2 * p) := by
+    convert IsPrimitiveRoot.orderOf η
+    rw [show η = -ζ by rfl, neg_eq_neg_one_mul,
+      (Commute.all (-1 : K) ζ).orderOf_mul_eq_mul_orderOf_of_coprime]
+    · simp [hζ.eq_orderOf]
+    · simp [← hζ.eq_orderOf, hp.out.odd_of_ne_two hp_odd']
+  let S : Set K := {x | ∃ n ∈ ({2 * p} : Set ℕ), n ≠ 0 ∧ x ^ n = 1}
+  exact (IsCyclotomicExtension.iff_adjoin_eq_top {2 * p} ℚ K).2
+    ⟨fun n hn hn0 => by
+        rw [Set.mem_singleton_iff] at hn
+        subst hn
+        exact ⟨η, hη⟩,
+      by
+        refine le_antisymm le_top ?_
+        have hzeta_mem : ζ ∈ Algebra.adjoin ℚ S := by
+          have hη_mem : η ∈ Algebra.adjoin ℚ S :=
+            Algebra.subset_adjoin
+              ⟨2 * p, by simp, Nat.mul_ne_zero two_ne_zero hp.out.ne_zero, hη.pow_eq_one⟩
+          simpa [η, S] using Subalgebra.neg_mem (Algebra.adjoin ℚ S) hη_mem
+        have hle : Algebra.adjoin ℚ ({ζ} : Set K) ≤ Algebra.adjoin ℚ S :=
+          Algebra.adjoin_le fun x hx => by
+            rw [Set.mem_singleton_iff] at hx
+            subst x
+            exact hzeta_mem
+        have htopζ : Algebra.adjoin ℚ ({ζ} : Set K) = ⊤ :=
+          IsCyclotomicExtension.adjoin_primitive_root_eq_top hζ
+        change ⊤ ≤ Algebra.adjoin ℚ S
+        rw [← htopζ]
+        exact hle⟩
+
+set_option linter.unusedSectionVars false in
 lemma one_add_zetaInteger_isUnit (hp_odd' : p ≠ 2) :
     IsUnit (1 + ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K)) := by
   let ζ : K := IsCyclotomicExtension.zeta p ℚ K
@@ -357,51 +418,9 @@ lemma one_add_zetaInteger_isUnit (hp_odd' : p ≠ 2) :
       (Commute.all (-1 : K) ζ).orderOf_mul_eq_mul_orderOf_of_coprime]
     · simp [hζ.eq_orderOf]
     · simp [← hζ.eq_orderOf, hp.out.odd_of_ne_two hp_odd']
-  let S : Set K := {x | ∃ n ∈ ({2 * p} : Set ℕ), n ≠ 0 ∧ x ^ n = 1}
-  letI : IsCyclotomicExtension {2 * p} ℚ K :=
-    (IsCyclotomicExtension.iff_adjoin_eq_top {2 * p} ℚ K).2
-      ⟨fun n hn hn0 => by
-          rw [Set.mem_singleton_iff] at hn
-          subst hn
-          exact ⟨η, hη⟩,
-        by
-          refine le_antisymm le_top ?_
-          have hzeta_mem : ζ ∈ Algebra.adjoin ℚ S := by
-            have hη_mem : η ∈ Algebra.adjoin ℚ S :=
-              Algebra.subset_adjoin
-                ⟨2 * p, by simp, Nat.mul_ne_zero two_ne_zero hp.out.ne_zero, hη.pow_eq_one⟩
-            simpa [η, S] using Subalgebra.neg_mem (Algebra.adjoin ℚ S) hη_mem
-          have hle : Algebra.adjoin ℚ ({ζ} : Set K) ≤ Algebra.adjoin ℚ S :=
-            Algebra.adjoin_le fun x hx => by
-              rw [Set.mem_singleton_iff] at hx
-              subst x
-              exact hzeta_mem
-          have htopζ : Algebra.adjoin ℚ ({ζ} : Set K) = ⊤ :=
-            IsCyclotomicExtension.adjoin_primitive_root_eq_top hζ
-          change ⊤ ≤ Algebra.adjoin ℚ S
-          rw [← htopζ]
-          exact hle⟩
-  have hnotPrimePow : ∀ {q : ℕ}, q.Prime → ∀ k : ℕ, q ^ k ≠ 2 * p := by
-    intro q hq k
-    cases k with
-    | zero =>
-        intro hk
-        simp at hk
-        have hp2 : 2 ≤ p := hp.out.two_le
-        omega
-    | succ k =>
-        intro hk
-        have hpow : IsPrimePow (2 * p) := ⟨q, k + 1, by simpa [Nat.prime_iff] using hq,
-          Nat.succ_pos _, hk⟩
-        have hcop : Nat.Coprime 2 p := by
-          simpa using (hp.out.odd_of_ne_two hp_odd').coprime_two_left
-        rcases (Nat.Coprime.isPrimePow_dvd_mul (a := 2) (b := p) hcop hpow).1 dvd_rfl with h | h
-        · have hp2 : 2 ≤ p := hp.out.two_le
-          have hle : 2 * p ≤ 2 := Nat.le_of_dvd (by positivity) h
-          omega
-        · have hp2 : 2 ≤ p := hp.out.two_le
-          have hle : 2 * p ≤ p := Nat.le_of_dvd hp.out.pos h
-          omega
+  letI : IsCyclotomicExtension {2 * p} ℚ K := isCyclotomicExtension_two_mul p K hp_odd'
+  have hnotPrimePow : ∀ {q : ℕ}, q.Prime → ∀ k : ℕ, q ^ k ≠ 2 * p :=
+    fun {q} hq k => not_prime_pow_two_mul p hp_odd' hq k
   have hnorm : Algebra.norm ℤ ((hη.toInteger : 𝓞 K) - 1) = 1 := by
     apply IsPrimitiveRoot.norm_toInteger_sub_one_eq_one (K := K) hη
     · have hp2 : 2 ≤ p := hp.out.two_le
