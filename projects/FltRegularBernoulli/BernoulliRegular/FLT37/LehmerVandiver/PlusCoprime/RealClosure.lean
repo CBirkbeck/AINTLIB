@@ -344,7 +344,7 @@ theorem lehmerVandiverPrime_double_squared_bridge_zmod
 
 section FLT37Numerical
 
-set_option maxRecDepth 4000000
+set_option maxRecDepth 4000
 
 /-- **Local Fermat exponent reduction for `ZMod p`.** Replicates
 `FLT37Closure`'s private helper. For `x : ZMod p` with `x ≠ 0` and `m`,
