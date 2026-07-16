@@ -41,8 +41,7 @@ theorem cyclotomicUnitFamilyKplus_mem_CPlus
     (hp_three : 3 ≤ p) (i : Fin ((p - 3) / 2)) :
     FLT37.Sinnott.cyclotomicUnitFamilyKplus p K hp_three i ∈
       CPlus (p := p) (K := K) hp_three := by
-  rw [← CPlusGenerator_eq_cyclotomicUnitFamilyKplus
-    (p := p) (K := K) hp_three i]
+  rw [← CPlusGenerator_eq_cyclotomicUnitFamilyKplus (p := p) (K := K) hp_three i]
   exact CPlusGenerator_mem (p := p) (K := K) hp_three i
 
 /-- The rank-indexed and the `Fin ((p - 3) / 2)`-indexed Sinnott cyclotomic-unit
@@ -161,14 +160,10 @@ theorem hPlus_eq_one_of_eq_three (hp_odd : p ≠ 2) (hp_eq : p = 3) :
     hPlus K = 1 := by
   subst p
   letI : IsPrincipalIdealRing (𝓞 K) := IsCyclotomicExtension.Rat.three_pid K
-  have h_dvd : hPlus K ∣ h K :=
-    hPlus_dvd_h (p := 3) (hp_odd := by norm_num) (K := K)
+  have h_dvd : hPlus K ∣ h K := hPlus_dvd_h (p := 3) (hp_odd := by norm_num) (K := K)
   have h_one : h K = 1 := by
-    have h_class : NumberField.classNumber K = 1 :=
-      NumberField.classNumber_eq_one_iff.mpr inferInstance
-    simpa [h, NumberField.classNumber] using h_class
-  rw [h_one] at h_dvd
-  exact Nat.eq_one_of_dvd_one h_dvd
+    simpa [h, NumberField.classNumber] using NumberField.classNumber_eq_one_iff.mpr inferInstance
+  exact Nat.eq_one_of_dvd_one (h_one ▸ h_dvd)
 
 /-- For `p = 3`, the subgroup `C⁺` is the whole unit group. -/
 theorem CPlus_eq_top_of_eq_three
