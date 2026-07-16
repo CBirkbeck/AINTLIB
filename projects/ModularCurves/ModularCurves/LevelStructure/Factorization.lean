@@ -61,6 +61,25 @@ private lemma exists_factor_of_openCover {T W Y : Scheme.{u}} (𝒱 : T.OpenCove
 
 namespace RelEffCartierDiv
 
+/-- **[F3-disj-core] (the retraction-rigidity of field characters)** Two ring maps out
+of a field that both split the same map are EQUAL: injectivity of `q₁` upgrades the
+splitting `q₁ ∘ p = id` to `p ∘ q₁ = id`, and then `q₂ = q₂ ∘ (p ∘ q₁) = q₁`. This is
+why two sections of `π` through the same point have the same residue characters — the
+algebraic heart of KM p. 30's translate-disjointness. -/
+theorem RingHom.eq_of_comp_eq_id {K L : Type u} [Field K] [Field L]
+    (p : K →+* L) (q₁ q₂ : L →+* K)
+    (h₁ : q₁.comp p = RingHom.id K) (h₂ : q₂.comp p = RingHom.id K) : q₁ = q₂ := by
+  have hpq : ∀ l : L, p (q₁ l) = l := by
+    intro l
+    apply q₁.injective
+    have := DFunLike.congr_fun h₁ (q₁ l)
+    simpa using this
+  ext l
+  have h2l := DFunLike.congr_fun h₂ (q₁ l)
+  simp only [RingHom.coe_comp, Function.comp_apply, RingHom.id_apply] at h2l
+  rw [hpq l] at h2l
+  exact h2l.symm
+
 /-- **[F3-castBase]** Transport of the point group along an equality of base
 morphisms (the `𝟙 ≫ g = g` bookkeeping equiv for base-change round-trips). -/
 noncomputable def _root_.ModularCurves.EllipticCurve.Point.castBase

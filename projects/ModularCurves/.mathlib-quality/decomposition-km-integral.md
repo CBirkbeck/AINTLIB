@@ -553,3 +553,34 @@ Then **[F3-distinct]** is pure group theory (NO further schemes): A := M-killed 
 `gcd(M, ord P) = M` ⟹ `M ∣ ord P`; with `ord P ∣ M·K` and coprimality, `ord(K•P) = M`
 exactly — the M multiples `{(a+1)•(K•P)}` are the M DISTINCT elements of `⟨K•P⟩` = A.
 [F3-mp-locus] then feeds `hasExactOrder_of_geometric` and [F3-loc] glues the cover.
+
+## [F3-disj] design bank (KM worker, v10.293 window — VERIFIED names, ready to build)
+
+Goal: `sup_ker_eq_top_of_pull_ne` — sections `Q₁ Q₂ : S ⟶ C` of separated `π` with
+`∀ k̄ t, t ≫ Q₁ ≠ t ≫ Q₂` have `Scheme.Hom.ker Q₁ ⊔ ker Q₂ = ⊤` (graph disjointness).
+Then disj-4 (clopen-glue) uses pairwise-comaximal translate-ideals.
+
+Verified chain (mathlib names all confirmed in-tree):
+1. byContra + `IdealSheafData.support_eq_bot_iff` (IdealSheaf/Basic.lean:392): sup ≠ ⊤ ⟹
+   support(sup) ≠ ⊥ ⟹ ∃ c in it (Closeds-nonempty).
+2. `IdealSheafData.support_antitone` (:385) at le_sup_left/right ⟹ c ∈ supp(ker Q₁) ∩ supp(ker Q₂).
+3. `Scheme.Hom.support_ker` (:843, needs [QuasiCompact]) ⟹ supp = closure(range) = range
+   (sections of separated π are CLOSED immersions — repo `isClosedImmersion_section`,
+   PoleSheaf.lean:1582; closed range + QC instance both from it).
+4. s := π c; section identity ⟹ Q₁ s = c = Q₂ s (comp-base-apply + h₁/h₂).
+5. Residue retraction: `residueFieldMap_comp` (ResidueField.lean:139) + `residueFieldMap_id`
+   (:134) on (Qᵢ ≫ π = 𝟙) at s ⟹ qᵢ := Qᵢ.residueFieldMap s splits p := π.residueFieldMap-at-c
+   (mod residueFieldCongr casts along Q₁ s = c, π c = s — use the proof-quantified generic
+   bridge for the cast-spelling collapse).
+6. **[F3-disj-core] ✓ PROVEN** (`RingHom.eq_of_comp_eq_id`, Factorization.lean): the two
+   splittings are EQUAL (field-hom injectivity flips the retraction; no surjectivity needed).
+7. Assemble the geometric point: k̄ := AlgebraicClosure (C.residueField c);
+   t := Spec.map(embedding) ≫ S.fromSpecResidueField s; then t ≫ Qᵢ computed by
+   `Hom.SpecMap_residueFieldMap_fromSpecResidueField` (ResidueField.lean:261 — the
+   fromSpec-naturality; AVOID SpecToEquivOfField/stalkClosedPointTo composites) — the two
+   composites differ only by the equal residue maps ⟹ EQUAL ⟹ contradicts hne.
+Use-site (disj-2 points): the difference-sections' nonvanishing on the K-invertible locus is
+`geometric_input` with roles swapped (already proven) + the pull-sub arithmetic.
+Then disj-4: `exists_clopen_factor_of_prod_comaximal` (NEW general ideal-sheaf infrastructure:
+factoring through ∏ of pairwise-comaximal ideals ⟹ clopen decomposition of the source; CRT
+idempotents) — the real remaining infrastructure piece, next window's spine.
