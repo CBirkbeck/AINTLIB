@@ -1350,6 +1350,42 @@ noncomputable def AffineIntersectionUnitCocycle.baseChangeGluedModuleIsoOfTransi
   exact AffineIntersectionUnitCocycle.baseChangeGluedModuleIso
     M cM hopenG hpushG hopenM hpushM
 
+/-- A finite-stage glued module whose transition units recover the transition units of
+chosen trivializations base-changes to the pullback of the original module. -/
+noncomputable def AffineIntersectionUnitCocycle.baseChangeGluedModuleIsoOriginal
+    {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+    {Sstage : ι → Type u} [∀ i, CommRing (Sstage i)] [∀ i, Algebra R (Sstage i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (Sstage i →ₐ[R] Sstage j)}
+    {X S : Scheme.{u}} (π : X ⟶ S) [Algebra R Γ(S, (⊤ : S.Opens))]
+    {uS : ∀ i, Sstage i →ₐ[R] Γ(S, (⊤ : S.Opens))}
+    {J : Type u} {N : X.Modules} (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    {H : Algebra.IsFilteredAlgColimit R Sstage t Γ(S, (⊤ : S.Opens)) uS}
+    (M : Algebra.SpreadData.FunctorModel (π.affineIntersectionFunctor U) H)
+    (cM : AffineIntersectionUnitCocycle M.toFunctor)
+    (hopenM : Scheme.GlueData.IsOpenAffineIntersectionFunctor M.toFunctor)
+    (hpushM : Scheme.GlueData.IsPushoutAffineIntersectionFunctor M.toFunctor)
+    (htransition : ∀ i j,
+      (AffineIntersectionUnitCocycle.mapToColimit M cM).transition i j =
+        (affineIntersectionUnitCocycle π U e).transition i j) :
+    letI : Algebra (Sstage M.stage) Γ(S, (⊤ : S.Opens)) :=
+      (uS M.stage).toRingHom.toAlgebra
+    let hopenG := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let hpushG := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let g := M.affineIntersectionGluedBaseChange hopenG hpushG hopenM hpushM
+    (pullback g).obj (cM.gluedModule hopenM hpushM) ≅
+      (pullback (π.affineIntersectionGluedToOriginal U hU)).obj N := by
+  classical
+  letI : Algebra (Sstage M.stage) Γ(S, (⊤ : S.Opens)) :=
+    (uS M.stage).toRingHom.toAlgebra
+  let hopenG := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let hpushG := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  exact AffineIntersectionUnitCocycle.baseChangeGluedModuleIsoOfTransitionEq
+      M cM (affineIntersectionUnitCocycle π U e) htransition
+      hopenG hpushG hopenM hpushM ≪≫
+    (affineIntersectionOriginalGluedModuleIso π U e hU).symm
+
 end
 
 end AlgebraicGeometry.Scheme.Modules

@@ -853,3 +853,11 @@ base-changed finite-stage `gluedModule` is now isomorphic to that specified cocy
 `gluedModule`. The proof uses private structure extensionality plus the completed global
 base-change isomorphism. Its focused build is green, its axiom audit is exactly `propext`,
 `Classical.choice`, and `Quot.sound`, and it adds no hypothesis or proof-resource option.
+
+Completed dependency claim (2026-07-16): constructed
+`AffineIntersectionUnitCocycle.baseChangeGluedModuleIsoOriginal`. For a finite-stage cocycle whose
+transitions recover those of an invertible sheaf's chosen affine trivializations, the base-changed
+finite-stage `gluedModule` is now identified with the pullback of the original sheaf to its
+canonical affine-intersection gluing. The construction directly composes the two completed global
+isomorphisms. Its focused build is green, its axiom audit is exactly `propext`,
+`Classical.choice`, and `Quot.sound`, and it adds no hypothesis or proof-resource option.
