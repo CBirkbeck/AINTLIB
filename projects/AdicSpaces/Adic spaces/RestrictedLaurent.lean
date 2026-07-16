@@ -325,6 +325,11 @@ noncomputable instance : CommRing (RestrictedLaurent R) where
   nsmul := nsmulRec
   zsmul := zsmulRec
 
+@[simp] theorem coeff_sub (f g : RestrictedLaurent R) (a : ℤ) :
+    (f - g).coeff a = f.coeff a - g.coeff a := by
+  show (f + -g).coeff a = _
+  rw [coeff_add, coeff_neg, sub_eq_add_neg]
+
 /-! ### Monomials and the algebra structure -/
 
 theorem single_mul_single (a b : ℤ) (c d : R) :
@@ -549,6 +554,13 @@ instance [CompleteSpace R] [NormOneClass R] : CompleteSpace (RestrictedLaurent R
   calc ‖u i - F‖ ≤ ε / 2 := ciSup_le hcoeff
     _ < ε := by linarith
 
+/-- Coefficient functionals are `1`-Lipschitz, hence continuous. -/
+theorem continuous_coeff [CompleteSpace R] [NormOneClass R] (a : ℤ) :
+    Continuous fun f : RestrictedLaurent R => f.coeff a := by
+  refine (LipschitzWith.of_dist_le_mul (K := 1) fun f g => ?_).continuous
+  rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm, ← coeff_sub]
+  exact norm_coeff_le_gaussNorm (f - g) a
+
 /-! ### Multiplicativity over a discretely valued field
 
 [FJP] Prop 2.3 (verbatim): "The Laurent Gauss norm on 𝒞 = L⟨Q⟩ is multiplicative. Indeed, the
@@ -712,16 +724,32 @@ variable (R) in
 continuous negative-coefficient maps"). -/
 noncomputable def nonnegSubring [CompleteSpace R] : Subring (RestrictedLaurent R) where
   carrier := {f | ∀ a : ℤ, a < 0 → f.coeff a = 0}
-  zero_mem' := by sorry
-  one_mem' := by sorry
-  add_mem' := by sorry
-  neg_mem' := by sorry
-  mul_mem' := by sorry
+  zero_mem' := fun a _ => rfl
+  one_mem' := fun a ha => by
+    simp only [coeff_one, if_neg (by omega : ¬ a = 0)]
+  add_mem' := fun {f g} hf hg a ha => by
+    rw [coeff_add, hf a ha, hg a ha, add_zero]
+  neg_mem' := fun {f} hf a ha => by rw [coeff_neg, hf a ha, neg_zero]
+  mul_mem' := fun {f g} hf hg m hm => by
+    rw [coeff_mul]
+    have hz : ∀ a : ℤ, f.coeff a * g.coeff (m - a) = 0 := fun a => by
+      rcases lt_or_ge a 0 with ha | ha
+      · rw [hf a ha, zero_mul]
+      · rw [hg (m - a) (by omega), mul_zero]
+    exact (tsum_congr hz).trans tsum_zero
 
 /-- The nonnegative-support subring is closed (kernels of the continuous coefficient
 functionals; [FJP] Lemma 2.2). -/
 theorem isClosed_nonnegSubring [CompleteSpace R] [NormOneClass R] :
-    IsClosed (nonnegSubring R : Set (RestrictedLaurent R)) := by sorry
+    IsClosed (nonnegSubring R : Set (RestrictedLaurent R)) := by
+  have heq : (nonnegSubring R : Set (RestrictedLaurent R)) =
+      ⋂ (a : ℤ) (_ : a < 0), {f : RestrictedLaurent R | f.coeff a = 0} := by
+    ext f
+    simp only [SetLike.mem_coe, Set.mem_iInter, Set.mem_setOf_eq]
+    rfl
+  rw [heq]
+  exact isClosed_iInter fun a => isClosed_iInter fun _ =>
+    isClosed_eq (continuous_coeff a) continuous_const
 
 /-- The norm-preserving identification of `PowerSeries.Restricted R 1` (the vendored `R⟨W⟩`)
 with the nonnegative-support subring of `R⟨W, W⁻¹⟩`. -/
