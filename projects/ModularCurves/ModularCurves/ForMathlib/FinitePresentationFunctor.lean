@@ -184,14 +184,19 @@ private theorem SpreadData.functorRelation_colimit_eq
         (SpreadData.functorRelationLeft (fun X => F.obj X) D h map r x) =
       (D r.dst).stageToColimit H ⟨i, h r.dst⟩
         (SpreadData.functorRelationRight (fun X => F.obj X) D h map r x) := by
+  revert x
   rcases r with X | c
-  · change (D X).stageToColimit H ⟨i, h X⟩
+  · intro x
+    change (D X).spreadStage (t := t) (h X) at x
+    change (D X).stageToColimit H ⟨i, h X⟩
         (map ⟨(X, X), 𝟙 X⟩ x) =
       (D X).stageToColimit H ⟨i, h X⟩
         (AlgHom.id (𝒮 i) ((D X).spreadStage (t := t) (h X)) x)
     rw [AlgHom.id_apply, map_colimit ⟨(X, X), 𝟙 X⟩ x]
     simp
-  · change (D c.1.2.2).stageToColimit H ⟨i, h c.1.2.2⟩
+  · intro x
+    change (D c.1.1).spreadStage (t := t) (h c.1.1) at x
+    change (D c.1.2.2).stageToColimit H ⟨i, h c.1.2.2⟩
         (map ⟨(c.1.1, c.1.2.2), c.2.1 ≫ c.2.2⟩ x) =
       (D c.1.2.2).stageToColimit H ⟨i, h c.1.2.2⟩
         (((map ⟨(c.1.2.1, c.1.2.2), c.2.2⟩).comp
