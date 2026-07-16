@@ -971,6 +971,18 @@ theorem RelEffCartierDiv.IsSubgroup.combMap_prodMap (M K : ℕ) [NeZero M] [NeZe
       rw [hσπ]
       exact pullback.condition
 
+include hD in
+/-- **[F3-zero]** The zero section lifts to every kernel of a subgroup divisor: `0` is
+in `H` and killed by everything, so `exists_smulKernel_lift` applies. Provides the
+section making each kernel a retract of the product (the flat-by-retract chain). -/
+theorem RelEffCartierDiv.IsSubgroup.exists_zero_smulKernel (c : ℤ) :
+    ∃ z₀ : S ⟶ D.smulKernel E c, z₀ ≫ D.smulKernelπ E c = 𝟙 S := by
+  obtain ⟨H, hH⟩ := hD (𝟙 S)
+  obtain ⟨w, hw⟩ := (hH 0).mp H.zero_mem
+  obtain ⟨z₀, _, hπ⟩ := RelEffCartierDiv.exists_smulKernel_lift E (0 : E.Point (𝟙 S))
+    (smul_zero c) w hw
+  exact ⟨z₀, hπ⟩
+
 end ProductDecomposition
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
