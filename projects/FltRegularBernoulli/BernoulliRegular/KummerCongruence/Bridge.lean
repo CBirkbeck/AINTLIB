@@ -34,6 +34,56 @@ namespace BernoulliRegular
 
 /-! ### T012 — Bridge `B_{1, ω^n} ≡ B_{n+1}/(n+1) (mod p)` -/
 
+/-- Pointwise sharpened Teichmüller bound: `ω(a)^n · a.val - a.val^(p·n+1)` lies in
+`𝔪²` of `ℤ_[p]`, for each `a : ZMod p`. -/
+private lemma teichmuller_pow_mul_val_sub_val_pow_mem_maximalIdeal_sq {p : ℕ} [hp : Fact p.Prime]
+    (n : ℕ) (a : ZMod p) :
+    (teichmuller p a) ^ n * (a.val : ℤ_[p]) - (a.val : ℤ_[p]) ^ (p * n + 1) ∈
+      (IsLocalRing.maximalIdeal ℤ_[p]) ^ 2 := by
+  have h_mod : teichmuller p a ≡ (a.val : ℤ_[p]) ^ p
+      [SMOD (IsLocalRing.maximalIdeal ℤ_[p]) ^ 2] :=
+    SModEq.sub_mem.mpr (teichmuller_sub_pow_val_mem_pow_two (p := p) a)
+  have h_pow := h_mod.pow n
+  have h_mul := h_pow.mul (SModEq.refl (a.val : ℤ_[p]))
+  rw [SModEq.sub_mem] at h_mul
+  have h_simp : ((a.val : ℤ_[p]) ^ p) ^ n * (a.val : ℤ_[p]) =
+      (a.val : ℤ_[p]) ^ (p * n + 1) := by
+    rw [← pow_mul, ← pow_succ]
+  rw [h_simp] at h_mul
+  exact h_mul
+
+/-- Lifting the Teichmüller power sum from `ℤ_[p]` to `ℚ_[p]` matches the character
+sum `∑ (ω^n)(a) · a.val`. -/
+private lemma coe_sum_teichmuller_pow_mul_val {p : ℕ} [hp : Fact p.Prime] {n : ℕ} (hn : n ≠ 0) :
+    ((∑ a : ZMod p, (teichmuller p a) ^ n * (a.val : ℤ_[p]) : ℤ_[p]) : ℚ_[p]) =
+      ∑ a : ZMod p, ((teichmullerCharQp p) ^ n) a * (a.val : ℚ_[p]) := by
+  rw [PadicInt.coe_sum]
+  refine Finset.sum_congr rfl fun a _ ↦ ?_
+  rw [PadicInt.coe_mul, PadicInt.coe_pow, PadicInt.coe_natCast]
+  congr 1
+  rw [teichmullerCharQp_pow_eq_ringHomComp (p := p) (n := n),
+    MulChar.ringHomComp_apply, MulChar.pow_apply' _ hn,
+    map_pow, teichmullerChar_apply]
+  rfl
+
+/-- Lifting the power sum `∑ a.val^t` from `ℤ_[p]` to `ℚ_[p]` matches the range sum
+`∑_{k<p} k^t`, via the bijection `a ↦ a.val`. -/
+private lemma coe_sum_val_pow {p : ℕ} [hp : Fact p.Prime] (t : ℕ) :
+    ((∑ a : ZMod p, (a.val : ℤ_[p]) ^ t : ℤ_[p]) : ℚ_[p]) =
+      ∑ k ∈ Finset.range p, (k : ℚ_[p]) ^ t := by
+  rw [PadicInt.coe_sum]
+  simp_rw [show ∀ a : ZMod p,
+      (((a.val : ℤ_[p]) ^ t : ℤ_[p]) : ℚ_[p]) = ((a.val : ℚ_[p]) ^ t) from
+    fun a ↦ by rw [PadicInt.coe_pow, PadicInt.coe_natCast]]
+  refine Finset.sum_nbij (fun a ↦ a.val) ?_ ?_ ?_ ?_
+  · intro a _; simp only [Finset.mem_range]; exact ZMod.val_lt a
+  · intros a _ b _ hab; exact ZMod.val_injective _ hab
+  · intros k hk
+    simp only [Finset.coe_univ, Set.image_univ, Set.mem_range]
+    simp only [Finset.mem_coe, Finset.mem_range] at hk
+    exact ⟨(k : ZMod p), ZMod.val_natCast_of_lt hk⟩
+  · intros a _; rfl
+
 /-- **Ingredient 1 of T012** (Step 1 + T006). With `t := p·n + 1`, the sharper
 Teichmüller congruence `ω(a) ≡ (a.val)^p (mod p²)` gives, after summing over `ZMod p`
 and lifting to `ℚ_[p]`,
@@ -64,19 +114,8 @@ private lemma bernoulliGen_mul_p_sub_sum_pow_mem {p : ℕ} [hp : Fact p.Prime]
   -- Pointwise ℤ_[p] bound.
   have hterm_mem : ∀ a : ZMod p,
       (teichmuller p a) ^ n * (a.val : ℤ_[p]) - (a.val : ℤ_[p]) ^ (p * n + 1) ∈
-      (IsLocalRing.maximalIdeal ℤ_[p]) ^ 2 := by
-    intro a
-    have h_mod : teichmuller p a ≡ (a.val : ℤ_[p]) ^ p
-        [SMOD (IsLocalRing.maximalIdeal ℤ_[p]) ^ 2] :=
-      SModEq.sub_mem.mpr (teichmuller_sub_pow_val_mem_pow_two (p := p) a)
-    have h_pow := h_mod.pow n
-    have h_mul := h_pow.mul (SModEq.refl (a.val : ℤ_[p]))
-    rw [SModEq.sub_mem] at h_mul
-    have h_simp : ((a.val : ℤ_[p]) ^ p) ^ n * (a.val : ℤ_[p]) =
-        (a.val : ℤ_[p]) ^ (p * n + 1) := by
-      rw [← pow_mul, ← pow_succ]
-    rw [h_simp] at h_mul
-    exact h_mul
+      (IsLocalRing.maximalIdeal ℤ_[p]) ^ 2 :=
+    fun a ↦ teichmuller_pow_mul_val_sub_val_pow_mem_maximalIdeal_sq n a
   -- Sum the bounds: S - T ∈ (𝔪)².
   let S : ℤ_[p] := ∑ a : ZMod p, (teichmuller p a) ^ n * (a.val : ℤ_[p])
   let T : ℤ_[p] := ∑ a : ZMod p, (a.val : ℤ_[p]) ^ (p * n + 1)
@@ -91,32 +130,12 @@ private lemma bernoulliGen_mul_p_sub_sum_pow_mem {p : ℕ} [hp : Fact p.Prime]
   refine ⟨w, ?_⟩
   -- Lift S to ℚ_[p] and match with p · B_{1, ωQ^n}.
   have hS_coe : ((S : ℤ_[p]) : ℚ_[p]) =
-      ∑ a : ZMod p, ((teichmullerCharQp p) ^ n) a * (a.val : ℚ_[p]) := by
-    change ((∑ a : ZMod p, (teichmuller p a) ^ n * (a.val : ℤ_[p]) : ℤ_[p]) : ℚ_[p]) = _
-    rw [PadicInt.coe_sum]
-    refine Finset.sum_congr rfl fun a _ ↦ ?_
-    rw [PadicInt.coe_mul, PadicInt.coe_pow, PadicInt.coe_natCast]
-    congr 1
-    rw [teichmullerCharQp_pow_eq_ringHomComp (p := p) (n := n),
-      MulChar.ringHomComp_apply, MulChar.pow_apply' _ hn_ne_zero,
-      map_pow, teichmullerChar_apply]
-    rfl
+      ∑ a : ZMod p, ((teichmullerCharQp p) ^ n) a * (a.val : ℚ_[p]) :=
+    coe_sum_teichmuller_pow_mul_val hn_ne_zero
   -- Lift T to ℚ_[p] and match with ∑ k^t.
   have hT_coe : ((T : ℤ_[p]) : ℚ_[p]) =
-      ∑ k ∈ Finset.range p, (k : ℚ_[p]) ^ (p * n + 1) := by
-    change ((∑ a : ZMod p, (a.val : ℤ_[p]) ^ (p * n + 1) : ℤ_[p]) : ℚ_[p]) = _
-    rw [PadicInt.coe_sum]
-    simp_rw [show ∀ a : ZMod p,
-        (((a.val : ℤ_[p]) ^ (p * n + 1) : ℤ_[p]) : ℚ_[p]) = ((a.val : ℚ_[p]) ^ (p * n + 1)) from
-      fun a ↦ by rw [PadicInt.coe_pow, PadicInt.coe_natCast]]
-    refine Finset.sum_nbij (fun a ↦ a.val) ?_ ?_ ?_ ?_
-    · intro a _; simp only [Finset.mem_range]; exact ZMod.val_lt a
-    · intros a _ b _ hab; exact ZMod.val_injective _ hab
-    · intros k hk
-      simp only [Finset.coe_univ, Set.image_univ, Set.mem_range]
-      simp only [Finset.mem_coe, Finset.mem_range] at hk
-      exact ⟨(k : ZMod p), ZMod.val_natCast_of_lt hk⟩
-    · intros a _; rfl
+      ∑ k ∈ Finset.range p, (k : ℚ_[p]) ^ (p * n + 1) :=
+    coe_sum_val_pow (p * n + 1)
   -- Combine.
   calc (p : ℚ_[p]) * BernoulliGen ((teichmullerCharQp p) ^ n) 1 -
         (∑ k ∈ Finset.range p, (k : ℚ_[p]) ^ (p * n + 1))
