@@ -172,6 +172,36 @@ theorem universalE3_hcubic :
       + 3 * (-3 * e3Gamma R ^ 2 - e3Beta R - 3 * e3Beta R * e3Gamma R) ^ 2 = 0
   linear_combination (3 * e3Gamma R + 1) ^ 2 * hS
 
+/-- **([T-E15-NORM] the non-`2`-torsion certificate ★)** `den := β + γ − 3βγ` is a unit in
+the `ℰ₃` moduli ring — the universal marked `Q = (γ, β+γ)` is nowhere `2`-torsion
+(`y(Q) ≠ negY(Q)` on every fibre), which is what the Stage-A doubling computation
+(`three_zsmul_some_e3Q`) consumes. Certificate (CAS-cofactor):
+`D·γ³ = A·den + B·(γ·S)` with `D = a₁³−27a₃` (a unit), `γ·S = 0` (the flex relation),
+`A = 27βγ³+36βγ²+3βγ+27γ⁴+18γ³`, `B = 27γ³+27γ²−9γ−1` — so `A·den = D·γ³` is a unit. -/
+theorem isUnit_e3Den :
+    IsUnit (e3Beta R + e3Gamma R - 3 * e3Beta R * e3Gamma R) := by
+  have hrel : e3Map R (X 0 ^ 3 - (X 0 + X 1) ^ 3) = 0 := e3Rel_map_eq_zero R
+  rw [map_sub, map_pow, map_pow, map_add] at hrel
+  have hrel' : e3Beta R ^ 3 - (e3Beta R + e3Gamma R) ^ 3 = 0 := hrel
+  have hflex : e3Gamma R * (3 * e3Beta R ^ 2 + 3 * e3Beta R * e3Gamma R
+      + e3Gamma R ^ 2) = 0 := by
+    linear_combination -hrel'
+  have hDunit : IsUnit ((universalE3 R).a₁ ^ 3 - 27 * (universalE3 R).a₃) := by
+    have h := IsLocalization.Away.algebraMap_isUnit (S := E3ModuliRing R) (e3Delta R)
+    rw [e3Delta_map] at h
+    exact isUnit_of_mul_isUnit_left (isUnit_of_mul_isUnit_left h)
+  have hkey : ((universalE3 R).a₁ ^ 3 - 27 * (universalE3 R).a₃) * e3Gamma R ^ 3
+      = (27 * e3Beta R * e3Gamma R ^ 3 + 36 * e3Beta R * e3Gamma R ^ 2
+          + 3 * e3Beta R * e3Gamma R + 27 * e3Gamma R ^ 4 + 18 * e3Gamma R ^ 3)
+        * (e3Beta R + e3Gamma R - 3 * e3Beta R * e3Gamma R) := by
+    show ((3 * e3Gamma R - 1) ^ 3
+        - 27 * (-3 * e3Gamma R ^ 2 - e3Beta R - 3 * e3Beta R * e3Gamma R))
+        * e3Gamma R ^ 3 = _
+    linear_combination (27 * e3Gamma R ^ 3 + 27 * e3Gamma R ^ 2 - 9 * e3Gamma R - 1)
+      * hflex
+  exact isUnit_of_mul_isUnit_right
+    (hkey ▸ hDunit.mul ((isUnit_e3Gamma R).pow 3))
+
 /-- **(T-E15a)** `(0, 0)` lies on the universal curve (`a₆ = 0`). -/
 theorem universalE3_equation_zero :
     (universalE3 R).toAffine.Equation 0 0 := by
