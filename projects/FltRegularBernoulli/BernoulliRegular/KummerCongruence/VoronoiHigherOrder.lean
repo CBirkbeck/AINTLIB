@@ -157,6 +157,44 @@ lemma voronoi_sum_mod_p_cubed
 
 /-! ## Per-Faulhaber-term order-2 bound -/
 
+/-- **Faulhaber-term reduction from a Bernoulli integrality witness.**
+
+If `B_i · p^e` is a `p`-adic integer `d` and `i + e + 2 ≤ t`, then the `i`-th
+Faulhaber term `B_i · C(t+1, i) · p^{t+1-i}` lies in `p³ · ℤ_[p]`.
+
+The exponent `e` unifies the two integrality forms used in the case analysis:
+`e = 0` for `B_i ∈ ℤ_[p]` (from `bernoulli_mem_padicInt_of_lt_sub_one` or a
+parametric input) and `e = 1` for `p · B_i ∈ ℤ_[p]` (the vSC boundary case,
+from `p_mul_bernoulli_mem_padicInt_restricted`). -/
+lemma faulhaber_term_mem_p_cubed_of_witness
+    {p : ℕ} [Fact p.Prime] {t i e : ℕ} (hit : i + e + 2 ≤ t) {d : ℤ_[p]}
+    (hd : ((bernoulli i : ℚ) : ℚ_[p]) * (p : ℚ_[p]) ^ e = (d : ℚ_[p])) :
+    ∃ z : ℤ_[p],
+      ((bernoulli i : ℚ) : ℚ_[p]) * ((Nat.choose (t + 1) i : ℕ) : ℚ_[p]) *
+          ((p : ℚ_[p]) ^ (t + 1 - i)) =
+        ((p : ℚ_[p]) ^ 3) * (z : ℚ_[p]) := by
+  refine ⟨d * (Nat.choose (t + 1) i : ℤ_[p]) * (p : ℤ_[p]) ^ (t - i - e - 2), ?_⟩
+  have h_pow_split : (p : ℚ_[p]) ^ (t + 1 - i) =
+      (p : ℚ_[p]) ^ 3 * (p : ℚ_[p]) ^ e * (p : ℚ_[p]) ^ (t - i - e - 2) := by
+    rw [← pow_add, ← pow_add]; congr 1; omega
+  rw [h_pow_split]
+  push_cast
+  linear_combination
+    (((Nat.choose (t + 1) i : ℕ) : ℚ_[p]) * (p : ℚ_[p]) ^ 3 *
+      (p : ℚ_[p]) ^ (t - i - e - 2)) * hd
+
+/-- No multiple of `n` lies strictly between `n` and `2 * n`: if `n < i` and
+`i < 2 * n` then `n ∤ i`. Used to rule out `(p - 1) ∣ i` for `i` in the open
+range `(p - 1, 2 (p - 1))`. -/
+lemma not_dvd_of_lt_of_lt_two_mul {n i : ℕ} (h_lo : n < i) (h_hi : i < 2 * n) :
+    ¬ n ∣ i := by
+  rintro ⟨m, rfl⟩
+  rcases m with _ | _ | k
+  · omega
+  · omega
+  · have h_le : n * 2 ≤ n * (k + 1 + 1) := by apply Nat.mul_le_mul_left; omega
+    omega
+
 /-- **Per-Faulhaber-term mod-p³ bound**, restricted form `t ≤ p − 1`.
 
 For `t ≤ p − 1` even, `t ≥ 4`, and `i < t − 1`:
@@ -209,15 +247,10 @@ lemma faulhaber_term_mem_p_cubed
   have hi_ge : 2 ≤ i := by omega
   rcases Nat.even_or_odd i with hi_even | hi_odd
   · -- Case 4: i even ∈ [2, t-2]. Use B_i ∈ ℤ_p (vSC generic, since i < p-1).
-    have hi_le : i ≤ t - 2 := by omega
     have hi_lt_psub : i < p - 1 := by omega
     obtain ⟨b, hb⟩ := bernoulli_mem_padicInt_of_lt_sub_one hp_odd i hi_lt_psub
-    refine ⟨b * (Nat.choose (t + 1) i : ℤ_[p]) * (p : ℤ_[p]) ^ (t - i - 2), ?_⟩
-    rw [show t + 1 - i = 3 + (t - i - 2) from by omega,
-      show (p : ℚ_[p]) ^ (3 + (t - i - 2)) =
-        (p : ℚ_[p]) ^ 3 * (p : ℚ_[p]) ^ (t - i - 2) from by rw [pow_add]]
-    rw [hb]
-    push_cast; ring
+    exact faulhaber_term_mem_p_cubed_of_witness (e := 0) (by omega)
+      (by rw [pow_zero, mul_one]; exact hb)
   · -- Case 3: i odd, i ≥ 3 ⟹ B_i = 0.
     refine ⟨0, ?_⟩
     have hi_gt : 1 < i := by omega
@@ -274,11 +307,8 @@ lemma faulhaber_term_mem_p_cubed_extended
     by_cases hi_lt_psub : i < p - 1
     · -- vSC generic via restricted Adams.
       obtain ⟨b, hb⟩ := bernoulli_mem_padicInt_of_lt_sub_one hp_odd i hi_lt_psub
-      refine ⟨b * (Nat.choose (t + 1) i : ℤ_[p]) * (p : ℤ_[p]) ^ (t - i - 2), ?_⟩
-      rw [show t + 1 - i = 3 + (t - i - 2) from by omega,
-        show (p : ℚ_[p]) ^ (3 + (t - i - 2)) =
-          (p : ℚ_[p]) ^ 3 * (p : ℚ_[p]) ^ (t - i - 2) from by rw [pow_add]]
-      rw [hb]; push_cast; ring
+      exact faulhaber_term_mem_p_cubed_of_witness (e := 0) (by omega)
+        (by rw [pow_zero, mul_one]; exact hb)
     · push Not at hi_lt_psub
       -- i ≥ p - 1. Two further subcases: i = p - 1 (boundary) or i ≥ p (use ih_B).
       by_cases hi_eq_psub : i = p - 1
@@ -304,40 +334,16 @@ lemma faulhaber_term_mem_p_cubed_extended
         have hi_even' : Even i := hi_eq_psub ▸ h_pm1_even
         obtain ⟨c, hc⟩ := p_mul_bernoulli_mem_padicInt_restricted (p := p) hp_odd
           hi_ge hi_even' h_below
-        refine ⟨c * (Nat.choose (t + 1) i : ℤ_[p]) * (p : ℤ_[p]) ^ (t - i - 3), ?_⟩
-        have hbc : ((bernoulli i : ℚ) : ℚ_[p]) * ((p : ℚ_[p])) =
-            ((c : ℤ_[p]) : ℚ_[p]) := by rw [← hc]; ring
-        have h_pow_split : (p : ℚ_[p]) ^ (t + 1 - i) =
-            (p : ℚ_[p]) ^ (t - i - 3) * (p : ℚ_[p]) ^ 4 := by
-          rw [← pow_add]; congr 1; omega
-        rw [h_pow_split]
-        push_cast
-        linear_combination
-          (((Nat.choose (t + 1) i : ℕ) : ℚ_[p]) * ((p : ℚ_[p]) ^ (t - i - 3))
-            * ((p : ℚ_[p]) ^ 3)) * hbc
+        exact faulhaber_term_mem_p_cubed_of_witness (e := 1) (by omega)
+          (by rw [pow_one]; linear_combination hc)
       · -- i ≥ p (since i ≥ p-1 and i ≠ p-1). And (p-1) ∤ i.
         have hi_ge_p : p ≤ i := by omega
-        have hi_not_dvd : ¬ (p - 1) ∣ i := by
-          -- i ∈ [p, t-2]. (p-1)·m for m ≥ 1: smallest is p-1 (excluded since i ≥ p > p-1),
-          -- next is 2(p-1) = 2p-2 > 2p-5 ≥ t-2 ≥ i.
-          intro h_dvd
-          obtain ⟨m, hm⟩ := h_dvd
-          rcases m with _ | _ | k
-          · -- m = 0 ⟹ i = 0
-            omega
-          · -- m = 1 ⟹ i = p-1
-            exact hi_eq_psub (by omega)
-          · -- m = k + 2 ⟹ i ≥ 2(p-1)
-            have h_le : (p - 1) * 2 ≤ (p - 1) * (k + 1 + 1) := by
-              apply Nat.mul_le_mul_left; omega
-            have h_eq : (p - 1) * 2 = 2 * (p - 1) := by ring
-            omega
+        -- i ∈ [p, t-2] ⊆ (p-1, 2(p-1)): p-1 < p ≤ i, and i ≤ t-2 ≤ 2p-5 < 2p-2.
+        have hi_not_dvd : ¬ (p - 1) ∣ i :=
+          not_dvd_of_lt_of_lt_two_mul (by omega) (by omega)
         obtain ⟨b, hb⟩ := ih_B i hi_ge_p hi_le hi_even hi_not_dvd
-        refine ⟨b * (Nat.choose (t + 1) i : ℤ_[p]) * (p : ℤ_[p]) ^ (t - i - 2), ?_⟩
-        rw [show t + 1 - i = 3 + (t - i - 2) from by omega,
-          show (p : ℚ_[p]) ^ (3 + (t - i - 2)) =
-            (p : ℚ_[p]) ^ 3 * (p : ℚ_[p]) ^ (t - i - 2) from by rw [pow_add]]
-        rw [hb]; push_cast; ring
+        exact faulhaber_term_mem_p_cubed_of_witness (e := 0) (by omega)
+          (by rw [pow_zero, mul_one]; exact hb)
   · -- Case 3: i odd, i ≥ 3.
     refine ⟨0, ?_⟩
     have hi_gt : 1 < i := by omega
