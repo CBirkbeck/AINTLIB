@@ -515,3 +515,31 @@ does NOT auto-transfer the `[IsFinite/Flat/LFP …]` variables (they abstract to
 concrete form breaks); resolve by explicit `haveI : IsFinite f := by rw [hf]; infer_instance` OR work with
 the concrete form and grab `IsAffineHom` via `IsFinite.toIsAffineHom` (works in clean context). This is
 the tedium that stalled the A+B grind — a fresh focused pass with these notes lands it.
+
+## SESSION APPEND (v10.256/2026-07-16, KM) — L4-iii PROVEN; tower (B+C) WIP state + exact blockers
+
+★★★ `brick6_intertwining` LANDED AXIOM-CLEAN (`4a398c3eb`): the intertwining is proven; ONE sorry
+remains (`brick6_from_intertwining` :1356, the tower). The towerBC assembly (~150 lines) reached
+green-through-the-instance-stack (fraction legs, affine preimage via `hZaffE.preimage` E-form idiom +
+`.toIsAffineHom` explicit, `Nonempty` via `genericPoint_mem_preimage`), with the φN-standardization
+(`(φN : projModel W ⟶ projModel W) (hφN : φN = mulByHom N)` hypothesis-pair kills ALL E-vs-pM form
+skew; transport instances via `hφN.symm ▸ (inferInstance : P (mulByHom N))`).
+
+**Two remaining blockers (exact fixes known):**
+1. `towRR'S'` (`IsScalarTower R K(pM) K(pM)`): the haveI-statement elaborates the MIDDLE SMul via the
+   ambient id-`Algebra K(pM) K(pM)` (`instSMulOfMul`) instead of the `letI algR'S' := fFM.toAlgebra`.
+   Fix: state the tower and the final `finrank_of_isFractionRing` invocation with EXPLICIT
+   `@`-instance-args pinning `algR'S'.toModule` (or restructure: `letI` the Module FIRST and shadow
+   the id-instance before any haveI mentions K(pM)-over-K(pM)).
+2. Small: `IsFractionRing.injective`-vs-`germToFunctionField`-coercion mismatch in hFaith (h4's
+   ConcreteCategory.hom-form vs algebraMap-form — defeq; use `exact ... h4`-with-show or
+   `IsFractionRing.injective _ _ (by exact h4)`); the hFRZ-instance not found at the use-site
+   (declare `letI` not `haveI`, or reorder after the algebra-letIs).
+
+Then (C) is written (finrank_eq_of_equiv_equiv i=j=projModelFunctionFieldEquiv, hc := ext z ↦
+brick6_intertwining) + the degree-match tail (degree-def unfold + pullback = ψ via the `dif_neg hn`
+replay, HasseWeil Basic:735 `hpb`-pattern). WIP file preserved at the session scratchpad
+(`towerBC_wip.lean`); resume by pasting it back and executing the two fixes. After towerBC: the
+(A)-transport (finrank_eq_of_equiv_equiv, i := topIso-equiv, j := (pullbackRestrictIsoRestrict [N]
+zChart).inv.appTop-asIso ≪≫ V-topIso, hc via pullbackRestrictIsoRestrict_hom_morphismRestrict +
+morphismRestrict_appTop) closes `brick6_from_intertwining`, and the K4-crux wires through.
