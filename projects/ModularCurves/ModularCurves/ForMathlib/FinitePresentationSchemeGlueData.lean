@@ -1503,6 +1503,57 @@ theorem isSeparated_affineIntersectionToSpec
   rw [Category.assoc, affineIntersectionPairMap_spec F hopen hpush i j]
   exact IsClosedImmersion.spec_of_surjective _ (hsep i j)
 
+/-- The structural morphism of an affine-intersection glue is separated exactly when
+all canonical maps from tensor products of singleton-chart rings to pair rings are
+surjective. -/
+theorem isSeparated_affineIntersectionToSpec_iff
+    (F : Finset J ⥤ CommAlgCat.{u} S)
+    (hopen : IsOpenAffineIntersectionFunctor F)
+    (hpush : IsPushoutAffineIntersectionFunctor F) :
+    IsSeparated (affineIntersectionToSpec F hopen hpush) ↔
+      IsSeparatedAffineIntersectionFunctor F := by
+  constructor
+  · intro hsep i j
+    letI : IsSeparated (affineIntersectionToSpec F hopen hpush) := hsep
+    let φ := CommRingCat.ofHom (affineIntersectionPairMap F i j).toRingHom
+    have hclosed : IsClosedImmersion (Spec.map φ) := by
+      rw [← affineIntersectionPairMap_spec F hopen hpush i j]
+      infer_instance
+    letI : IsClosedImmersion (Spec.map φ) := hclosed
+    have happ : Function.Surjective (Spec.map φ).appTop :=
+      (IsClosedImmersion.isAffine_surjective_of_isAffine (f := Spec.map φ)).2
+    intro y
+    obtain ⟨x, hx⟩ := happ
+      ((Scheme.ΓSpecIso (CommRingCat.of
+        (F.obj (affineIntersectionPairIndex i j) : Type u))).inv y)
+    refine ⟨(Scheme.ΓSpecIso (CommRingCat.of
+      (TensorProduct S
+        (F.obj (affineIntersectionSingletonIndex i) : Type u)
+        (F.obj (affineIntersectionSingletonIndex j) : Type u)))).hom x, ?_⟩
+    change φ ((Scheme.ΓSpecIso (CommRingCat.of
+      (TensorProduct S
+        (F.obj (affineIntersectionSingletonIndex i) : Type u)
+        (F.obj (affineIntersectionSingletonIndex j) : Type u)))).hom x) = y
+    calc
+      φ ((Scheme.ΓSpecIso (CommRingCat.of
+          (TensorProduct S
+            (F.obj (affineIntersectionSingletonIndex i) : Type u)
+            (F.obj (affineIntersectionSingletonIndex j) : Type u)))).hom x) =
+          (Scheme.ΓSpecIso (CommRingCat.of
+            (F.obj (affineIntersectionPairIndex i j) : Type u))).hom
+            ((Spec.map φ).appTop x) := by
+              exact (ConcreteCategory.congr_hom
+                (Scheme.ΓSpecIso_naturality φ) x).symm
+      _ = (Scheme.ΓSpecIso (CommRingCat.of
+            (F.obj (affineIntersectionPairIndex i j) : Type u))).hom
+          ((Scheme.ΓSpecIso (CommRingCat.of
+            (F.obj (affineIntersectionPairIndex i j) : Type u))).inv y) :=
+        congrArg _ hx
+      _ = y := Iso.inv_hom_id_apply
+        (Scheme.ΓSpecIso (CommRingCat.of
+          (F.obj (affineIntersectionPairIndex i j) : Type u))) y
+  · exact isSeparated_affineIntersectionToSpec F hopen hpush
+
 /-- If the singleton charts of an affine-intersection functor are finitely presented over
 the base, then the structural morphism of the glued scheme is locally of finite
 presentation. -/
