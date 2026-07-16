@@ -119,6 +119,32 @@ private theorem Scheme.Hom.finiteIntersectionRingIso_isoSpec_inv_naturality
   apply (cancel_epi (Spec.map (π.finiteIntersectionRingIso U t ht).op.hom.unop)).mpr
   exact Scheme.isoSpec_inv_naturality g
 
+private theorem Scheme.Hom.affineIntersectionSpecMap_ringIso_postcomp
+    (π : X ⟶ S) (U : J → X.Opens) {s t : Finset J} (f : s ⟶ t)
+    (hs : s.Nonempty) (ht : t.Nonempty)
+    [IsAffine (X.finiteIntersectionOpen U s).toScheme] :
+    Spec.map (CommRingCat.ofHom ((π.affineIntersectionFunctor U).map f).hom.toRingHom) ≫
+        Spec.map (π.finiteIntersectionRingIso U s hs).op.hom.unop ≫
+          (X.finiteIntersectionOpen U s).toScheme.isoSpec.symm.hom =
+      Spec.map (π.finiteIntersectionRingIso U t ht).op.hom.unop ≫
+        Spec.map (CommRingCat.ofHom
+          (π.finiteIntersectionRestriction U (leOfHom f)).hom.toRingHom) ≫
+          (X.finiteIntersectionOpen U s).toScheme.isoSpec.symm.hom := by
+  have h := π.affineIntersectionSpecMap_ringIso U f hs ht
+  calc
+    _ = (Spec.map (CommRingCat.ofHom
+          ((π.affineIntersectionFunctor U).map f).hom.toRingHom) ≫
+        Spec.map (π.finiteIntersectionRingIso U s hs).op.hom.unop) ≫
+          (X.finiteIntersectionOpen U s).toScheme.isoSpec.symm.hom :=
+      (Category.assoc _ _ _).symm
+    _ = (Spec.map (π.finiteIntersectionRingIso U t ht).op.hom.unop ≫
+        Spec.map (CommRingCat.ofHom
+          (π.finiteIntersectionRestriction U (leOfHom f)).hom.toRingHom)) ≫
+          (X.finiteIntersectionOpen U s).toScheme.isoSpec.symm.hom :=
+      congrArg
+        (fun k => k ≫ (X.finiteIntersectionOpen U s).toScheme.isoSpec.symm.hom) h
+    _ = _ := Category.assoc _ _ _
+
 private theorem Scheme.Hom.affineIntersectionSchemeMap_naturality
     (π : X ⟶ S) (U : J → X.Opens) {s t : Finset J} (f : s ⟶ t)
     (hs : s.Nonempty) (ht : t.Nonempty)
@@ -135,9 +161,8 @@ private theorem Scheme.Hom.affineIntersectionSchemeMap_naturality
     _ = Spec.map (π.finiteIntersectionRingIso U t ht).op.hom.unop ≫
         Spec.map (CommRingCat.ofHom
           (π.finiteIntersectionRestriction U (leOfHom f)).hom.toRingHom) ≫
-          (X.finiteIntersectionOpen U s).toScheme.isoSpec.symm.hom := by
-        rw [← Category.assoc, π.affineIntersectionSpecMap_ringIso U f hs ht,
-          Category.assoc]
+          (X.finiteIntersectionOpen U s).toScheme.isoSpec.symm.hom :=
+      π.affineIntersectionSpecMap_ringIso_postcomp U f hs ht
     _ = _ := by
       rw [π.finiteIntersectionRestriction_forget U f]
       exact π.finiteIntersectionRingIso_isoSpec_inv_naturality U t ht g
@@ -156,8 +181,8 @@ theorem Scheme.Hom.affineIntersectionSchemeIso_hom_homOfLE
   letI : IsAffine (X.finiteIntersectionOpen U s).toScheme := hUs
   letI : IsAffine (X.finiteIntersectionOpen U t).toScheme := hUt
   change Spec.map _ ≫ (Spec.map _ ≫ _) = (Spec.map _ ≫ _) ≫ _
-  simpa only [Category.assoc] using
-    π.affineIntersectionSchemeMap_naturality U f hs ht
+  have h := π.affineIntersectionSchemeMap_naturality U f hs ht
+  exact h.trans (Category.assoc _ _ _).symm
 
 /-- After inclusion into `X`, the comparison maps are natural for every inclusion
 of nonempty finite index sets. -/
