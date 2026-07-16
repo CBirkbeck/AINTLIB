@@ -483,6 +483,123 @@ theorem map_surjective_of_surjective {R : Type*} [CommRing R] (I : Ideal R)
   exact haf k
 
 set_option backward.isDefEq.respectTransparency false in
+/-- **Step 1 of the noeth-free Stacks 05GG kernel identity** (`ker_evalₐ_eq_of_fg`).
+The kernel of the level-`n` adic-completion evaluation map is contained in the range of the
+completed inclusion of the submodule `Iⁿ • ⊤` of `R`. **No finiteness hypothesis on `I`.**
+Proof (Cauchy-shift): for `x = mk c ∈ ker`, `c n ∈ Iⁿ•⊤`, hence `c k ∈ Iⁿ•⊤` for all `k ≥ n`,
+so the shifted sequence `d k = c (k + n)` is `IsAdicCauchy` in `↥(Iⁿ•⊤)` and
+`map subtype (mk d) = mk c = x`. -/
+theorem ker_evalₐ_le_range_map_subtype {R : Type*} [CommRing R] (I : Ideal R) (n : ℕ)
+    {x : AdicCompletion I R} (hx : x ∈ RingHom.ker (AdicCompletion.evalₐ I n)) :
+    x ∈ LinearMap.range
+      (AdicCompletion.map I (Submodule.subtype (I ^ n • ⊤ : Submodule R R))) := by
+  classical
+  obtain ⟨c, rfl⟩ := AdicCompletion.mk_surjective I R x
+  set p : Submodule R R := I ^ n • ⊤ with hp
+  -- `c.val n ∈ Iⁿ•⊤` from `mk c ∈ ker(evalₐ n)`.
+  have hcn : c.val n ∈ p := by
+    have h0 : AdicCompletion.evalₐ I n (AdicCompletion.mk I R c) = 0 := RingHom.mem_ker.mp hx
+    rw [AdicCompletion.evalₐ_mk] at h0
+    simpa [hp] using Ideal.Quotient.eq_zero_iff_mem.mp h0
+  -- hence `c.val k ∈ Iⁿ•⊤` for all `k ≥ n` (Cauchy).
+  have hck : ∀ k, n ≤ k → c.val k ∈ p := by
+    intro k hk
+    have h1 : c.val k - c.val n ∈ p := SModEq.sub_mem.mp (c.2 hk).symm
+    have he : c.val k = (c.val k - c.val n) + c.val n := by abel
+    rw [he]; exact Submodule.add_mem _ h1 hcn
+  -- the shifted sequence `d k = c.val (k+n)`, Cauchy in the submodule `Iⁿ•⊤`.
+  let d : ℕ → ↥p := fun k => ⟨c.val (k + n), hck (k + n) (Nat.le_add_left n k)⟩
+  have hd : AdicCompletion.IsAdicCauchy I ↥p d := by
+    intro m m' hmm
+    rw [SModEq.sub_mem, Submodule.mem_smul_top_iff]
+    have hsmul : (I ^ m • p : Submodule R R) = I ^ (m + n) • ⊤ := by
+      rw [hp, ← mul_smul, ← pow_add]
+    have hco : ((d m - d m' : ↥p) : R) = c.val (m + n) - c.val (m' + n) := rfl
+    rw [hco, hsmul]
+    exact SModEq.sub_mem.mp (c.2 (by omega : m + n ≤ m' + n))
+  -- `map subtype (mk d) = mk c` by shift-invariance.
+  refine ⟨AdicCompletion.mk I ↥p ⟨d, hd⟩, ?_⟩
+  rw [AdicCompletion.map_mk]
+  refine AdicCompletion.ext fun k => ?_
+  rw [AdicCompletion.mk_apply_coe, AdicCompletion.mk_apply_coe]
+  simp only [AdicCompletion.AdicCauchySequence.map_apply_coe, Submodule.coe_subtype]
+  rw [Submodule.mkQ_apply, Submodule.mkQ_apply, Submodule.Quotient.eq]
+  exact SModEq.sub_mem.mp (c.2 (Nat.le_add_right k n)).symm
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **Step 2 of the noeth-free Stacks 05GG kernel identity** (`ker_evalₐ_eq_of_fg`).
+For a **finitely generated** ideal `I` (so `Iⁿ • ⊤` is f.g.), the range of the completed inclusion
+of `Iⁿ • ⊤` lands in `(Iⁿ)·Â = Ideal.map (algebraMap R Â) (Iⁿ)`.
+Proof: pick a finite generating family of `Iⁿ`, corestrict the surjection `Rʳ ↠ Iⁿ•⊤`, apply
+`map_surjective_of_surjective`, and expand `map I φ = ∑ wᵢ • map I (proj i)` as an `R`-combination
+of elements of the image of `algebraMap`. -/
+theorem range_map_subtype_le_map_pow_of_fg {R : Type*} [CommRing R] (I : Ideal R) (hI : I.FG)
+    (n : ℕ) (z : AdicCompletion I R)
+    (hz : z ∈ LinearMap.range
+      (AdicCompletion.map I (Submodule.subtype (I ^ n • ⊤ : Submodule R R)))) :
+    z ∈ Ideal.map (algebraMap R (AdicCompletion I R)) (I ^ n) := by
+  classical
+  have hpfg : (I ^ n • ⊤ : Submodule R R).FG := by
+    have he : (I ^ n • ⊤ : Submodule R R) = (I ^ n : Ideal R) := by simp
+    rw [he]; exact Submodule.FG.pow hI n
+  obtain ⟨r, w, hw⟩ := Submodule.fg_iff_exists_fin_generating_family.mp hpfg
+  have hwmem : ∀ i, w i ∈ (I ^ n : Ideal R) := fun i => by
+    have hmem : w i ∈ (I ^ n • ⊤ : Submodule R R) := hw ▸ Submodule.subset_span ⟨i, rfl⟩
+    simpa using hmem
+  set φ : (Fin r → R) →ₗ[R] R := ∑ i, w i • LinearMap.proj i with hφdef
+  have hφrange : ∀ c, φ c ∈ (I ^ n • ⊤ : Submodule R R) := by
+    intro c
+    rw [← hw, hφdef]
+    simp only [LinearMap.coe_sum, Finset.sum_apply, LinearMap.smul_apply,
+      LinearMap.proj_apply, smul_eq_mul]
+    refine Submodule.sum_mem _ fun i _ => ?_
+    rw [mul_comm]
+    exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩)
+  have hφsingle : ∀ i, φ (Pi.single i 1) = w i := by
+    intro i
+    simp only [hφdef, LinearMap.coe_sum, Finset.sum_apply, LinearMap.smul_apply,
+      LinearMap.proj_apply, smul_eq_mul, Pi.single_apply, mul_ite, mul_one, mul_zero]
+    rw [Finset.sum_ite_eq' Finset.univ i]
+    simp
+  have hσsurj : Function.Surjective (LinearMap.codRestrict _ φ hφrange) := by
+    rintro ⟨y, hy⟩
+    rw [← hw] at hy
+    have hsub : Submodule.span R (Set.range w) ≤ LinearMap.range φ := by
+      rw [Submodule.span_le]
+      rintro _ ⟨i, rfl⟩
+      exact ⟨Pi.single i 1, hφsingle i⟩
+    obtain ⟨c, hc⟩ := hsub hy
+    exact ⟨c, Subtype.ext (by rw [LinearMap.codRestrict_apply]; exact hc)⟩
+  have hdecomp : ∀ η : AdicCompletion I (Fin r → R),
+      AdicCompletion.map I φ η
+        = ∑ i, w i • AdicCompletion.map I (LinearMap.proj i) η := by
+    intro η
+    obtain ⟨e, rfl⟩ := AdicCompletion.mk_surjective I _ η
+    simp only [AdicCompletion.map_mk, ← map_smul, ← map_sum]
+    congr 1
+    apply Subtype.ext
+    funext m
+    simp only [AdicCompletion.AdicCauchySequence.map_apply_coe, hφdef, LinearMap.coe_sum,
+      Finset.sum_apply, LinearMap.smul_apply, LinearMap.proj_apply, smul_eq_mul]
+    rw [show (∑ x, (AdicCompletion.AdicCauchySequence.map I (LinearMap.proj x)) (w x • e)) m
+          = ∑ x, ((AdicCompletion.AdicCauchySequence.map I (LinearMap.proj x)) (w x • e)) m
+        from ?_]
+    · refine Finset.sum_congr rfl fun i _ => ?_
+      rw [AdicCompletion.AdicCauchySequence.map_apply_coe, LinearMap.proj_apply,
+        AdicCompletion.AdicCauchySequence.smul_apply, Pi.smul_apply, smul_eq_mul]
+    · exact map_sum (AddMonoidHom.mk' (fun g : AdicCompletion.AdicCauchySequence I R => g m)
+          (fun a b => AdicCompletion.AdicCauchySequence.add_apply m a b))
+        (fun x => (AdicCompletion.AdicCauchySequence.map I (LinearMap.proj x)) (w x • e))
+        Finset.univ
+  obtain ⟨xt, rfl⟩ := hz
+  obtain ⟨η, rfl⟩ :=
+    map_surjective_of_surjective I (LinearMap.codRestrict _ φ hφrange) hσsurj xt
+  rw [AdicCompletion.map_comp_apply, LinearMap.subtype_comp_codRestrict, hdecomp η]
+  refine Ideal.sum_mem _ fun i _ => ?_
+  rw [Algebra.smul_def]
+  exact Ideal.mul_mem_right _ _ (Ideal.mem_map_of_mem _ (hwmem i))
+
+set_option backward.isDefEq.respectTransparency false in
 /-- **Noeth-free, finitely-generated version of `ker_evalₐ_eq`**
 (Wedhorn Prop 5.37(2), wedhorn.txt:1903 / Bourbaki [BouAC] III §2.12).
 
@@ -522,105 +639,8 @@ theorem ker_evalₐ_eq_of_fg {R : Type*} [CommRing R] (I : Ideal R) (hI : I.FG) 
   apply le_antisymm
   · -- HARD inclusion, Stacks 05GG (noeth-free). `p := Iⁿ•⊤` as a submodule of `R`.
     intro x hx
-    classical
-    -- Step 1: `x` is in the image of the completed inclusion of `Iⁿ•⊤`.
-    have hstep1 : x ∈ LinearMap.range
-        (AdicCompletion.map I (Submodule.subtype (I ^ n • ⊤ : Submodule R R))) := by
-      obtain ⟨c, rfl⟩ := AdicCompletion.mk_surjective I R x
-      set p : Submodule R R := I ^ n • ⊤ with hp
-      -- `c.val n ∈ Iⁿ•⊤` from `mk c ∈ ker(evalₐ n)`.
-      have hcn : c.val n ∈ p := by
-        have h0 : AdicCompletion.evalₐ I n (AdicCompletion.mk I R c) = 0 := RingHom.mem_ker.mp hx
-        rw [AdicCompletion.evalₐ_mk] at h0
-        simpa [hp] using Ideal.Quotient.eq_zero_iff_mem.mp h0
-      -- hence `c.val k ∈ Iⁿ•⊤` for all `k ≥ n` (Cauchy).
-      have hck : ∀ k, n ≤ k → c.val k ∈ p := by
-        intro k hk
-        have h1 : c.val k - c.val n ∈ p := SModEq.sub_mem.mp (c.2 hk).symm
-        have he : c.val k = (c.val k - c.val n) + c.val n := by abel
-        rw [he]; exact Submodule.add_mem _ h1 hcn
-      -- the shifted sequence `d k = c.val (k+n)`, Cauchy in the submodule `Iⁿ•⊤`.
-      let d : ℕ → ↥p := fun k => ⟨c.val (k + n), hck (k + n) (Nat.le_add_left n k)⟩
-      have hd : AdicCompletion.IsAdicCauchy I ↥p d := by
-        intro m m' hmm
-        rw [SModEq.sub_mem, Submodule.mem_smul_top_iff]
-        have hsmul : (I ^ m • p : Submodule R R) = I ^ (m + n) • ⊤ := by
-          rw [hp, ← mul_smul, ← pow_add]
-        have hco : ((d m - d m' : ↥p) : R) = c.val (m + n) - c.val (m' + n) := rfl
-        rw [hco, hsmul]
-        exact SModEq.sub_mem.mp (c.2 (by omega : m + n ≤ m' + n))
-      -- `map subtype (mk d) = mk c` by shift-invariance.
-      refine ⟨AdicCompletion.mk I ↥p ⟨d, hd⟩, ?_⟩
-      rw [AdicCompletion.map_mk]
-      refine AdicCompletion.ext fun k => ?_
-      rw [AdicCompletion.mk_apply_coe, AdicCompletion.mk_apply_coe]
-      simp only [AdicCompletion.AdicCauchySequence.map_apply_coe, Submodule.coe_subtype]
-      rw [Submodule.mkQ_apply, Submodule.mkQ_apply, Submodule.Quotient.eq]
-      exact SModEq.sub_mem.mp (c.2 (Nat.le_add_right k n)).symm
-    -- Step 2: that image lands in `Iⁿ·Â`.
-    have hstep2 : ∀ z : AdicCompletion I R,
-        z ∈ LinearMap.range (AdicCompletion.map I (Submodule.subtype (I ^ n • ⊤ : Submodule R R))) →
-        z ∈ Ideal.map (algebraMap R (AdicCompletion I R)) (I ^ n) := by
-      have hpfg : (I ^ n • ⊤ : Submodule R R).FG := by
-        have he : (I ^ n • ⊤ : Submodule R R) = (I ^ n : Ideal R) := by simp
-        rw [he]; exact Submodule.FG.pow hI n
-      obtain ⟨r, w, hw⟩ := Submodule.fg_iff_exists_fin_generating_family.mp hpfg
-      have hwmem : ∀ i, w i ∈ (I ^ n : Ideal R) := fun i => by
-        have hmem : w i ∈ (I ^ n • ⊤ : Submodule R R) := hw ▸ Submodule.subset_span ⟨i, rfl⟩
-        simpa using hmem
-      set φ : (Fin r → R) →ₗ[R] R := ∑ i, w i • LinearMap.proj i with hφdef
-      have hφrange : ∀ c, φ c ∈ (I ^ n • ⊤ : Submodule R R) := by
-        intro c
-        rw [← hw, hφdef]
-        simp only [LinearMap.coe_sum, Finset.sum_apply, LinearMap.smul_apply,
-          LinearMap.proj_apply, smul_eq_mul]
-        refine Submodule.sum_mem _ fun i _ => ?_
-        rw [mul_comm]
-        exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩)
-      have hφsingle : ∀ i, φ (Pi.single i 1) = w i := by
-        intro i
-        simp only [hφdef, LinearMap.coe_sum, Finset.sum_apply, LinearMap.smul_apply,
-          LinearMap.proj_apply, smul_eq_mul, Pi.single_apply, mul_ite, mul_one, mul_zero]
-        rw [Finset.sum_ite_eq' Finset.univ i]
-        simp
-      have hσsurj : Function.Surjective (LinearMap.codRestrict _ φ hφrange) := by
-        rintro ⟨y, hy⟩
-        rw [← hw] at hy
-        have hsub : Submodule.span R (Set.range w) ≤ LinearMap.range φ := by
-          rw [Submodule.span_le]
-          rintro _ ⟨i, rfl⟩
-          exact ⟨Pi.single i 1, hφsingle i⟩
-        obtain ⟨c, hc⟩ := hsub hy
-        exact ⟨c, Subtype.ext (by rw [LinearMap.codRestrict_apply]; exact hc)⟩
-      have hdecomp : ∀ η : AdicCompletion I (Fin r → R),
-          AdicCompletion.map I φ η
-            = ∑ i, w i • AdicCompletion.map I (LinearMap.proj i) η := by
-        intro η
-        obtain ⟨e, rfl⟩ := AdicCompletion.mk_surjective I _ η
-        simp only [AdicCompletion.map_mk, ← map_smul, ← map_sum]
-        congr 1
-        apply Subtype.ext
-        funext m
-        simp only [AdicCompletion.AdicCauchySequence.map_apply_coe, hφdef, LinearMap.coe_sum,
-          Finset.sum_apply, LinearMap.smul_apply, LinearMap.proj_apply, smul_eq_mul]
-        rw [show (∑ x, (AdicCompletion.AdicCauchySequence.map I (LinearMap.proj x)) (w x • e)) m
-              = ∑ x, ((AdicCompletion.AdicCauchySequence.map I (LinearMap.proj x)) (w x • e)) m
-            from ?_]
-        · refine Finset.sum_congr rfl fun i _ => ?_
-          rw [AdicCompletion.AdicCauchySequence.map_apply_coe, LinearMap.proj_apply,
-            AdicCompletion.AdicCauchySequence.smul_apply, Pi.smul_apply, smul_eq_mul]
-        · exact map_sum (AddMonoidHom.mk' (fun g : AdicCompletion.AdicCauchySequence I R => g m)
-              (fun a b => AdicCompletion.AdicCauchySequence.add_apply m a b))
-            (fun x => (AdicCompletion.AdicCauchySequence.map I (LinearMap.proj x)) (w x • e))
-            Finset.univ
-      rintro z ⟨xt, rfl⟩
-      obtain ⟨η, rfl⟩ :=
-        map_surjective_of_surjective I (LinearMap.codRestrict _ φ hφrange) hσsurj xt
-      rw [AdicCompletion.map_comp_apply, LinearMap.subtype_comp_codRestrict, hdecomp η]
-      refine Ideal.sum_mem _ fun i _ => ?_
-      rw [Algebra.smul_def]
-      exact Ideal.mul_mem_right _ _ (Ideal.mem_map_of_mem _ (hwmem i))
-    exact hstep2 x hstep1
+    exact range_map_subtype_le_map_pow_of_fg I hI n x
+      (ker_evalₐ_le_range_map_subtype I n hx)
   · rw [Ideal.map_le_iff_le_comap]; intro a ha
     simp only [Ideal.mem_comap, RingHom.mem_ker]
     change (AdicCompletion.evalₐ I n) (AdicCompletion.of I R a) = 0
