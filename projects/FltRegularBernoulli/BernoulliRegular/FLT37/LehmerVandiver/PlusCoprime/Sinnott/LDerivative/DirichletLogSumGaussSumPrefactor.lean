@@ -177,13 +177,56 @@ private theorem prod_one_sub_stdAddChar_eq_p :
     _ = ((p - 1 : ℕ) : ℂ) + 1 := h_prod_pow
     _ = (p : ℂ) := h_p_cast
 
+/-- **Positivity of the sin factors on the full range**: for a prime `p` and
+`a ∈ Finset.Ico 1 p`, `0 < 2·|sin(πa/p)|`. Since `1 ≤ a < p` we have
+`πa/p ∈ (0, π)`, where `sin` is strictly positive
+(`Real.sin_pos_of_pos_of_lt_pi`). -/
+private theorem two_abs_sin_pos_of_mem_Ico :
+    ∀ a ∈ Finset.Ico 1 p, (0 : ℝ) < 2 * |Real.sin (Real.pi * a / p)| := by
+  have hp_pos : 0 < p := hp.out.pos
+  intro a ha
+  rw [Finset.mem_Ico] at ha
+  have hp_real : (0 : ℝ) < p := by positivity
+  have h_arg_pos : 0 < Real.pi * a / p := by
+    have : (0 : ℝ) < (a : ℝ) := by exact_mod_cast ha.1
+    positivity
+  have h_arg_lt : Real.pi * a / p < Real.pi := by
+    have h_a_lt : (a : ℝ) < p := by exact_mod_cast ha.2
+    have h_div_lt : (a : ℝ) / p < 1 := (div_lt_one hp_real).mpr h_a_lt
+    have hπ : Real.pi * ((a : ℝ) / p) < Real.pi * 1 :=
+      mul_lt_mul_of_pos_left h_div_lt Real.pi_pos
+    rw [mul_one] at hπ
+    rw [mul_div_assoc]
+    exact hπ
+  have h_sin_pos : 0 < Real.sin (Real.pi * a / p) :=
+    Real.sin_pos_of_pos_of_lt_pi h_arg_pos h_arg_lt
+  rw [abs_of_pos h_sin_pos]
+  positivity
+
+/-- **Cyclotomic sin-product norm identity** (full range): for a prime `p`,
+`∏_{a=1}^{p-1} 2·|sin(πa/p)| = p`. This is the real-number shadow of the
+cyclotomic product `∏ (1 - stdAddChar a) = p` (`prod_one_sub_stdAddChar_eq_p`)
+under the pointwise norm `‖1 - stdAddChar a‖ = 2·|sin(πa/p)|`
+(`norm_one_sub_stdAddChar`). A full-range cousin of
+`halfRangeDoubleSinProduct_eq_sqrt_order`. -/
+private theorem prod_two_abs_sin_Ico_eq_p :
+    (∏ a ∈ Finset.Ico 1 p, (2 * |Real.sin (Real.pi * a / p)| : ℝ)) = (p : ℝ) := by
+  have h_complex := prod_one_sub_stdAddChar_eq_p (p := p)
+  have h_norm := congrArg (‖·‖) h_complex
+  simp only [Complex.norm_prod] at h_norm
+  rw [Complex.norm_natCast p] at h_norm
+  have h_eq_each : ∀ a ∈ Finset.Ico 1 p,
+      (2 * |Real.sin (Real.pi * a / p)| : ℝ) =
+      ‖(1 : ℂ) - ZMod.stdAddChar (N := p) ((a : ℕ) : ZMod p)‖ :=
+    fun a _ => (norm_one_sub_stdAddChar p a).symm
+  rw [Finset.prod_congr rfl h_eq_each]
+  exact h_norm
+
 /-- **DirichletLogSum at the principal character** `χ = 1`: the sum collapses
 to `-log p` via the classical cyclotomic-product identity
 `∏_{a=1}^{p-1} 2|sin(πa/p)| = p`. -/
 theorem DirichletLogSum_principal_eq_neg_log :
     DirichletLogSum p (1 : DirichletCharacter ℂ p) = -((Real.log p : ℝ) : ℂ) := by
-  have : NeZero p := ⟨hp.out.ne_zero⟩
-  have hp_pos : 0 < p := hp.out.pos
   simp only [DirichletLogSum]
   -- Step 1: replace (1 : DirichletCharacter) a with 1 for a ∈ Ico 1 p.
   have h_eval : ∑ a ∈ Finset.Ico 1 p,
@@ -201,29 +244,9 @@ theorem DirichletLogSum_principal_eq_neg_log :
       exact absurd (Nat.le_of_dvd ha.1 h) (by omega)
     rw [MulChar.one_apply h_unit, one_mul]
   rw [h_eval]
-  -- Step 2: each sin factor is positive on Ico 1 p.
-  have h_pos : ∀ a ∈ Finset.Ico 1 p,
-      (0 : ℝ) < 2 * |Real.sin (Real.pi * a / p)| := by
-    intro a ha
-    rw [Finset.mem_Ico] at ha
-    have hp_real : (0 : ℝ) < p := by positivity
-    have h_arg_pos : 0 < Real.pi * a / p := by
-      have : (0 : ℝ) < (a : ℝ) := by exact_mod_cast ha.1
-      positivity
-    have h_arg_lt : Real.pi * a / p < Real.pi := by
-      have h_a_lt : (a : ℝ) < p := by exact_mod_cast ha.2
-      have h_div_lt : (a : ℝ) / p < 1 := (div_lt_one hp_real).mpr h_a_lt
-      have hπ : Real.pi * ((a : ℝ) / p) < Real.pi * 1 :=
-        mul_lt_mul_of_pos_left h_div_lt Real.pi_pos
-      rw [mul_one] at hπ
-      rw [mul_div_assoc]
-      exact hπ
-    have h_sin_pos : 0 < Real.sin (Real.pi * a / p) :=
-      Real.sin_pos_of_pos_of_lt_pi h_arg_pos h_arg_lt
-    rw [abs_of_pos h_sin_pos]
-    positivity
-  -- Step 3: cast the ℂ sum to a cast of an ℝ sum, then convert sum-of-logs
-  -- to log-of-product.
+  -- Step 2: cast the ℂ sum to a cast of an ℝ sum, then convert sum-of-logs
+  -- to log-of-product (each factor is positive on `Ico 1 p`, via
+  -- `two_abs_sin_pos_of_mem_Ico`).
   have h_real_sum : ∑ a ∈ Finset.Ico 1 p,
         ((Real.log (2 * |Real.sin (Real.pi * a / p)|) : ℝ) : ℂ) =
       ((∑ a ∈ Finset.Ico 1 p,
@@ -237,22 +260,10 @@ theorem DirichletLogSum_principal_eq_neg_log :
         (2 * |Real.sin (Real.pi * a / p)| : ℝ)) :=
     (Real.log_prod (s := Finset.Ico 1 p)
       (f := fun a => 2 * |Real.sin (Real.pi * a / p)|)
-      (fun a ha => (h_pos a ha).ne')).symm
+      (fun a ha => (two_abs_sin_pos_of_mem_Ico p a ha).ne')).symm
   rw [h_sum_log]
-  -- Step 4: the product equals p via the cyclotomic norm identity.
-  have h_prod_eq : (∏ a ∈ Finset.Ico 1 p,
-        (2 * |Real.sin (Real.pi * a / p)| : ℝ)) = (p : ℝ) := by
-    have h_complex := prod_one_sub_stdAddChar_eq_p (p := p)
-    have h_norm := congrArg (‖·‖) h_complex
-    simp only [Complex.norm_prod] at h_norm
-    rw [Complex.norm_natCast p] at h_norm
-    have h_eq_each : ∀ a ∈ Finset.Ico 1 p,
-        (2 * |Real.sin (Real.pi * a / p)| : ℝ) =
-        ‖(1 : ℂ) - ZMod.stdAddChar (N := p) ((a : ℕ) : ZMod p)‖ :=
-      fun a _ => (norm_one_sub_stdAddChar p a).symm
-    rw [Finset.prod_congr rfl h_eq_each]
-    exact h_norm
-  rw [h_prod_eq]
+  -- Step 3: the product equals p via the cyclotomic norm identity.
+  rw [prod_two_abs_sin_Ico_eq_p p]
 
 /-- **`evenLValueRhs` in `DirichletLogSum` form**: composing the definition
 `evenLValueRhs p χ = -(gaussSum χ⁻¹)⁻¹ · evenLValueLogSum p χ` with the
