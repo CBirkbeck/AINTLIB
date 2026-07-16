@@ -8,6 +8,7 @@ import ModularCurves.GroupScheme.DeligneOrder
 import ModularCurves.GroupScheme.CartierDivisorMapIso
 import ModularCurves.GroupScheme.TranslationBySection
 import ModularCurves.LevelStructure.IsoTransport
+import ModularCurves.EllipticCurve.EndomorphismDegree
 
 /-!
 # Prime-power factorization of Drinfeld exact order (KM 1.7.2 / 3.5.1, Γ₁-instance)
@@ -416,6 +417,41 @@ theorem RelEffCartierDiv.IsSubgroup.exists_smul_restrict {D : RelEffCartierDiv E
   obtain ⟨w, hw⟩ := (hH (c • ι₀)).mp hsmul
   refine ⟨w, hw.trans ?_⟩
   exact E.point_smul_eq_comp_mulBy _ c ι₀
+
+/-- **[F3-idem] (KM p. 27's projector is idempotent)** On a subgroup divisor of constant
+degree `N`, the restriction of `[c]` for `c² ≡ c (mod N)` is an idempotent endomorphism
+of the divisor subscheme: the boundary square identifies `w ∘ w` and `w` against the
+monomorphism `ι` through `[c] ∘ [c] = [c²]` and the killed-point congruence. KM (p. 27,
+verbatim): *"G[N₁] is a direct factor of G, corresponding to the S-projector on G,
+P₁ + P₂ ↦ P₁."* -/
+theorem RelEffCartierDiv.IsSubgroup.exists_smul_restrict_idem {D : RelEffCartierDiv E.π}
+    (hD : D.IsSubgroup E) {N : ℕ} [NeZero N] (hdeg : ∀ s : S, D.degree s = N)
+    {c : ℤ} (hc : (c * c) % (N : ℤ) = c % (N : ℤ)) :
+    ∃ w : D.ideal.subscheme ⟶ D.ideal.subscheme,
+      (w ≫ D.ideal.subschemeι = D.ideal.subschemeι ≫ E.mulByHom c) ∧ w ≫ w = w := by
+  obtain ⟨H, hH⟩ := hD (D.ideal.subschemeι ≫ E.π)
+  set ι₀ : E.Point (D.ideal.subschemeι ≫ E.π) := ⟨D.ideal.subschemeι, rfl⟩ with hι₀
+  have hmem : ι₀ ∈ H := (hH ι₀).mpr ⟨𝟙 _, Category.id_comp _⟩
+  obtain ⟨w, hw⟩ := (hH (c • ι₀)).mp (AddSubgroup.zsmul_mem H hmem c)
+  have hkill : ((N : ℕ) : ℤ) • ι₀ = 0 :=
+    RelEffCartierDiv.IsSubgroup.smul_eq_zero_of_factors E hD hdeg _ ι₀
+      ⟨𝟙 _, Category.id_comp _⟩
+  have hcsq : (c * c) • ι₀ = c • ι₀ := zsmul_congr_of_kill hkill hc
+  have hbd : w ≫ D.ideal.subschemeι = D.ideal.subschemeι ≫ E.mulByHom c :=
+    hw.trans (E.point_smul_eq_comp_mulBy _ c ι₀)
+  refine ⟨w, hbd, ?_⟩
+  have hmbh : E.mulByHom c ≫ E.mulByHom c = E.mulByHom (c * c) := by
+    show (CategoryTheory.Over.forget S).map (E.mulBy c)
+          ≫ (CategoryTheory.Over.forget S).map (E.mulBy c)
+        = (CategoryTheory.Over.forget S).map (E.mulBy (c * c))
+    rw [← Functor.map_comp, E.mulBy_comp]
+  rw [← cancel_mono D.ideal.subschemeι, Category.assoc, hbd, ← Category.assoc, hbd,
+    Category.assoc, hmbh]
+  calc D.ideal.subschemeι ≫ E.mulByHom (c * c)
+      = ((c * c) • ι₀).1 := (E.point_smul_eq_comp_mulBy _ (c * c) ι₀).symm
+    _ = (c • ι₀).1 := congrArg Subtype.val hcsq
+    _ = w ≫ D.ideal.subschemeι := hw.symm
+    _ = D.ideal.subschemeι ≫ E.mulByHom c := hbd
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
