@@ -553,6 +553,36 @@ theorem RelEffCartierDiv.exists_smulKernel_lift {D : RelEffCartierDiv E.π} {c :
     exact hkill
   exact ⟨pullback.lift w t hagree, pullback.lift_fst _ _ _, pullback.lift_snd _ _ _⟩
 
+/-- **[F3-toKer] (KM (3.5.1.3)'s components at scheme level)** On a degree-`N` subgroup
+divisor with `N` killing the multiplier product, scaling the universal point by `c`
+lands in the `c'`-kernel whenever `c' * c ≡ 0 (mod N)`: this produces the projection
+`G ⟶ Ker([c'] : G → E)` over `S`. Instantiated at `(c, c') = (K, M)` and `(M, K)` these
+are the two components of KM's product decomposition. -/
+theorem RelEffCartierDiv.IsSubgroup.exists_toSmulKernel {D : RelEffCartierDiv E.π}
+    (hD : D.IsSubgroup E) {N : ℕ} [NeZero N] (hdeg : ∀ s : S, D.degree s = N)
+    {c c' : ℤ} (hcc : (c' * c) % (N : ℤ) = 0) :
+    ∃ φ : D.ideal.subscheme ⟶ D.smulKernel E c',
+      φ ≫ D.smulKernelπ E c' = D.ideal.subschemeι ≫ E.π ∧
+      φ ≫ D.smulKernelι E c' ≫ D.ideal.subschemeι
+        = D.ideal.subschemeι ≫ E.mulByHom c := by
+  obtain ⟨H, hH⟩ := hD (D.ideal.subschemeι ≫ E.π)
+  set ι₀ : E.Point (D.ideal.subschemeι ≫ E.π) := ⟨D.ideal.subschemeι, rfl⟩ with hι₀
+  have hmem : ι₀ ∈ H := (hH ι₀).mpr ⟨𝟙 _, Category.id_comp _⟩
+  have hkill : ((N : ℕ) : ℤ) • ι₀ = 0 :=
+    RelEffCartierDiv.IsSubgroup.smul_eq_zero_of_factors E hD hdeg _ ι₀
+      ⟨𝟙 _, Category.id_comp _⟩
+  -- the scaled universal point is c'-killed
+  have hckill : c' • (c • ι₀) = 0 := by
+    rw [← mul_smul]
+    calc (c' * c) • ι₀ = (0 : ℤ) • ι₀ := zsmul_congr_of_kill hkill (by
+        rw [hcc, Int.zero_emod])
+      _ = 0 := zero_zsmul ι₀
+  obtain ⟨w, hw⟩ := (hH (c • ι₀)).mp (AddSubgroup.zsmul_mem H hmem c)
+  obtain ⟨φ, hφι, hφπ⟩ := RelEffCartierDiv.exists_smulKernel_lift E (c • ι₀) hckill w hw
+  refine ⟨φ, hφπ, ?_⟩
+  rw [← Category.assoc, hφι, hw]
+  exact E.point_smul_eq_comp_mulBy _ c ι₀
+
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
 order `M` and `M·P` has exact order `K`.
