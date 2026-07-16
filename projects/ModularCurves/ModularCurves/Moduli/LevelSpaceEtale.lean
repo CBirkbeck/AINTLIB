@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.LevelSpaces
+import ModularCurves.Moduli.DrinfeldRepresentability
 import ModularCurves.GroupScheme.TorsionEtaleTriv
 import Mathlib.AlgebraicGeometry.Morphisms.LocalFlatDescent
 
@@ -221,6 +222,141 @@ lemma baseChangeEquiv_pull_asSection {T T' : Scheme.{u}} (σ : T ⟶ S) (u : T' 
   congr 1
   exact pullback.lift_fst _ _ _
 
+/-- Kill-transport across `asSection`: `n • asSection g P = 0 ↔ n • P = 0`
+(`asSection` is an injective additive map). -/
+lemma zsmul_asSection_eq_zero_iff {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ) (P : E.Point g) :
+    n • EllipticCurve.Point.asSection E g P = 0 ↔ n • P = 0 := by
+  rw [← EllipticCurve.Point.asSection_zsmul]
+  constructor
+  · intro h
+    exact asSection_injective E g (h.trans (asSection_zero E g).symm)
+  · intro h
+    rw [h, asSection_zero]
+
 end BridgeCompat
+
+section BridgeU2
+
+open EllipticCurve
+
+variable (E : EllipticCurve S) {T V : Scheme.{u}} (p : T ⟶ S) (t' : V ⟶ T)
+
+/-- The geometric-point transport chain of the bridge: points of the doubly base-changed curve
+over `tb` are points of the once base-changed curve at the composite, matched to the
+composite-base-changed curve through associativity. -/
+noncomputable def bridgeEquiv {W : Scheme.{u}} (tb : W ⟶ V) :
+    ((E.baseChange p).baseChange t').Point tb ≃+ (E.baseChange (t' ≫ p)).Point tb :=
+  ((Point.baseChangeEquiv (E.baseChange p) t' tb).trans
+    ((Point.baseChangeEquiv E p (tb ≫ t')).trans
+      (Point.congrBase E (Category.assoc tb t' p)))).trans
+    (Point.baseChangeEquiv E (t' ≫ p) tb).symm
+
+/-- **(β2-heart U2, generator transport)** The bridge equivalence carries the pulled tautological
+section of the double base change to the pulled tautological section of the composite base
+change. Pure coe-chase through `baseChangeEquiv_pull_asSection` on both levels. -/
+lemma bridgeEquiv_pull_asSection {W : Scheme.{u}} (tb : W ⟶ V)
+    (R : (E.baseChange p).Point t') :
+    bridgeEquiv E p t' tb
+        (Point.pull ((E.baseChange p).baseChange t') tb (Point.asSection (E.baseChange p) t' R))
+      = Point.pull (E.baseChange (t' ≫ p)) tb
+          (Point.asSection E (t' ≫ p) ((Point.baseChangeEquiv E p t') R)) := by
+  rw [bridgeEquiv]
+  simp only [AddEquiv.trans_apply]
+  rw [baseChangeEquiv_pull_asSection]
+  rw [AddEquiv.symm_apply_eq]
+  rw [baseChangeEquiv_pull_asSection]
+  refine Subtype.ext ?_
+  rw [EllipticCurve.Point.congrBase_apply_coe]
+  show ((Point.baseChangeEquiv E p (tb ≫ t')) (Point.pullAlong (E.baseChange p) tb R)).1
+      = (Point.pullAlong E tb ((Point.baseChangeEquiv E p t') R)).1
+  show (tb ≫ R.1) ≫ pullback.fst E.π p = tb ≫ (R.1 ≫ pullback.fst E.π p)
+  rw [Category.assoc]
+
+/-- **(β2-heart U2, THE BRIDGE)** Drinfeld full-levelness transports across double base change:
+the pair `(P', Q')` of points of `E_T` over `t' : V ⟶ T` gives a full level structure on
+`(E_T)_V` iff its composite-transport gives one on `E_V` (base change along `t' ≫ p`). Route:
+`isFullLevel_iff_naive` on both sides (T-D8), then the naive form — killing plus
+geometric-fibre generation — transports along the additive dictionaries: killing via
+`zsmul_asSection_eq_zero_iff` + `map_zsmul`, generation per geometric point via `bridgeEquiv`
+(whose action on the generators is `bridgeEquiv_pull_asSection`) and `map_closure`. -/
+theorem isFullLevel_baseChange_comp_iff (N : ℕ) [NeZero N] (hNV : NIsInvertible V N)
+    (P' Q' : (E.baseChange p).Point t') :
+    (E.baseChange (t' ≫ p)).IsFullLevel N
+        (Point.asSection E (t' ≫ p) ((Point.baseChangeEquiv E p t') P'))
+        (Point.asSection E (t' ≫ p) ((Point.baseChangeEquiv E p t') Q'))
+      ↔ ((E.baseChange p).baseChange t').IsFullLevel N
+          (Point.asSection (E.baseChange p) t' P')
+          (Point.asSection (E.baseChange p) t' Q') := by
+  have hzkill : ∀ R : (E.baseChange p).Point t',
+      ((N : ℤ) • (Point.baseChangeEquiv E p t') R = 0 ↔ (N : ℤ) • R = 0) := by
+    intro R
+    constructor
+    · intro h0
+      have h1 : (Point.baseChangeEquiv E p t') ((N : ℤ) • R) = 0 :=
+        ((Point.baseChangeEquiv E p t').toAddMonoidHom.map_zsmul ((N : ℤ)) R).trans h0
+      exact (Point.baseChangeEquiv E p t').injective
+        (h1.trans ((Point.baseChangeEquiv E p t').toAddMonoidHom.map_zero).symm)
+    · intro h0
+      calc (N : ℤ) • (Point.baseChangeEquiv E p t') R
+          = (Point.baseChangeEquiv E p t') ((N : ℤ) • R) :=
+            ((Point.baseChangeEquiv E p t').toAddMonoidHom.map_zsmul ((N : ℤ)) R).symm
+        _ = 0 := by rw [h0]; exact (Point.baseChangeEquiv E p t').toAddMonoidHom.map_zero
+  rw [isFullLevel_iff_naive _ N hNV, isFullLevel_iff_naive _ N hNV]
+  unfold EllipticCurve.IsNaiveFullLevel
+  refine and_congr (and_congr ?_ ?_) ?_
+  · rw [zsmul_asSection_eq_zero_iff, zsmul_asSection_eq_zero_iff]
+    exact hzkill P'
+  · rw [zsmul_asSection_eq_zero_iff, zsmul_asSection_eq_zero_iff]
+    exact hzkill Q'
+  · constructor
+    · intro h k _ _ tb x' hx'
+      have hkill : (N : ℤ) • ((bridgeEquiv E p t' tb) x') = 0 := by
+        calc (N : ℤ) • (bridgeEquiv E p t' tb) x'
+            = (bridgeEquiv E p t' tb) ((N : ℤ) • x') :=
+              ((bridgeEquiv E p t' tb).toAddMonoidHom.map_zsmul ((N : ℤ)) x').symm
+          _ = 0 := by rw [hx']; exact (bridgeEquiv E p t' tb).toAddMonoidHom.map_zero
+      have hx := h k tb ((bridgeEquiv E p t' tb) x') hkill
+      have hset : ({Point.pull (E.baseChange (t' ≫ p)) tb
+            (Point.asSection E (t' ≫ p) ((Point.baseChangeEquiv E p t') P')),
+          Point.pull (E.baseChange (t' ≫ p)) tb
+            (Point.asSection E (t' ≫ p) ((Point.baseChangeEquiv E p t') Q'))} :
+            Set ((E.baseChange (t' ≫ p)).Point tb))
+          = ⇑(bridgeEquiv E p t' tb).toAddMonoidHom ''
+              {Point.pull ((E.baseChange p).baseChange t') tb
+                  (Point.asSection (E.baseChange p) t' P'),
+                Point.pull ((E.baseChange p).baseChange t') tb
+                  (Point.asSection (E.baseChange p) t' Q')} := by
+        rw [Set.image_insert_eq, Set.image_singleton]
+        show _ = ({(bridgeEquiv E p t' tb) _, (bridgeEquiv E p t' tb) _} : Set _)
+        rw [bridgeEquiv_pull_asSection, bridgeEquiv_pull_asSection]
+      rw [hset, ← AddMonoidHom.map_closure] at hx
+      have hmem := (AddSubgroup.mem_map_equiv (f := bridgeEquiv E p t' tb)).mp hx
+      rwa [AddEquiv.symm_apply_apply] at hmem
+    · intro h k _ _ tb x hx
+      have hkill : (N : ℤ) • ((bridgeEquiv E p t' tb).symm x) = 0 := by
+        calc (N : ℤ) • (bridgeEquiv E p t' tb).symm x
+            = (bridgeEquiv E p t' tb).symm ((N : ℤ) • x) :=
+              ((bridgeEquiv E p t' tb).symm.toAddMonoidHom.map_zsmul ((N : ℤ)) x).symm
+          _ = 0 := by rw [hx]; exact (bridgeEquiv E p t' tb).symm.toAddMonoidHom.map_zero
+      have hx' := h k tb ((bridgeEquiv E p t' tb).symm x) hkill
+      have hset : ({Point.pull ((E.baseChange p).baseChange t') tb
+            (Point.asSection (E.baseChange p) t' P'),
+          Point.pull ((E.baseChange p).baseChange t') tb
+            (Point.asSection (E.baseChange p) t' Q')} :
+            Set (((E.baseChange p).baseChange t').Point tb))
+          = ⇑(bridgeEquiv E p t' tb).symm.toAddMonoidHom ''
+              {Point.pull (E.baseChange (t' ≫ p)) tb
+                  (Point.asSection E (t' ≫ p) ((Point.baseChangeEquiv E p t') P')),
+                Point.pull (E.baseChange (t' ≫ p)) tb
+                  (Point.asSection E (t' ≫ p) ((Point.baseChangeEquiv E p t') Q'))} := by
+        rw [Set.image_insert_eq, Set.image_singleton]
+        show _ = ({(bridgeEquiv E p t' tb).symm _, (bridgeEquiv E p t' tb).symm _} : Set _)
+        rw [← bridgeEquiv_pull_asSection, ← bridgeEquiv_pull_asSection,
+          AddEquiv.symm_apply_apply, AddEquiv.symm_apply_apply]
+      rw [hset, ← AddMonoidHom.map_closure] at hx'
+      have hmem := (AddSubgroup.mem_map_equiv (f := (bridgeEquiv E p t' tb).symm)).mp hx'
+      rwa [AddEquiv.symm_symm, AddEquiv.apply_symm_apply] at hmem
+
+end BridgeU2
 
 end ModularCurves
