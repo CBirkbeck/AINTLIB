@@ -422,3 +422,19 @@ reduced). Route (b) is a trap. **REVISED ROUTE (a′): kernel-pullback + product
 Then [F3-squeeze] as boarded (`D₁ ≤ Z_M`, degrees `≥ M`/`≥ K`, product `= MK` ⟹ equalities ⟹
 `Z_M = D₁` = KM step 5's conclusion, subgroup-ness of `D₁` follows since `Z_M`'s points form
 `H[M]` — a subgroup).
+
+## [F3-flat] scope note (KM worker, 2026-07-16c)
+
+Needed: `Flat (D.smulKernelπ E M)` (+ IsFinite/lfp) from `Flat (subschemeι ≫ π)` via retracts.
+- **Retract chain (all scheme-level, constructible NOW)**: R2 gives `combMap ≫ prodMap = 𝟙`, so
+  the product `P := Ker[M] ×_S Ker[K]` is a retract of `G` over `S`. The factor: `Z_M` is a
+  retract of `P` via `pullback.lift (𝟙 Z_M) (smulKernelπ ≫ z₀)` where `z₀ : S ⟶ Z_K` is the
+  zero-point lift (`exists_smulKernel_lift` at `Q := 0`, killed trivially) — `fst`-roundtrip `𝟙`.
+  Compose retracts.
+- **ForMathlib gap**: `Flat` (and `IsFinite`, `LocallyOfFinitePresentation`) stable under
+  retracts of `S`-morphisms — mathlib has `MorphismProperty.IsStableUnderRetracts` (class) and
+  `Module.Flat.of_retract` (module level) but NO scheme instance. Route: the stalkwise/affine
+  criterion + Module.Flat.of_retract; or the RingHom-property machinery. Candidate mathlib PR.
+- Then [F3-degmul]: `deg G = deg Z_M · deg Z_K` (finrank of a fibre product of finite flats —
+  build on FlatRank's affine lemmas + tensor rank multiplicativity), and [F3-squeeze] closes
+  KM step 5 (`D₁ ≤ Z_M` containment via factors_sectionsDivisor-style points + degree rigidity).
