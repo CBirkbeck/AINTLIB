@@ -9,6 +9,7 @@ import ModularCurves.GroupScheme.CartierDivisorMapIso
 import ModularCurves.GroupScheme.TranslationBySection
 import ModularCurves.LevelStructure.IsoTransport
 import ModularCurves.EllipticCurve.EndomorphismDegree
+import ModularCurves.EllipticCurve.MulByHomFlatFibre
 import ModularCurves.ForMathlib.FlatOfRetract
 import ModularCurves.ForMathlib.FinrankPullbackComp
 import ModularCurves.ForMathlib.EtaleSectionsCount
@@ -59,6 +60,31 @@ private lemma exists_factor_of_openCover {T W Y : Scheme.{u}} (𝒱 : T.OpenCove
     rw [← Category.assoc, Scheme.Cover.ι_glueMorphisms, hhi]⟩
 
 namespace RelEffCartierDiv
+
+/-- **[F3-castBase]** Transport of the point group along an equality of base
+morphisms (the `𝟙 ≫ g = g` bookkeeping equiv for base-change round-trips). -/
+noncomputable def _root_.ModularCurves.EllipticCurve.Point.castBase
+    {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}} {g₁ g₂ : T ⟶ S}
+    (h : g₁ = g₂) : E.Point g₁ ≃+ E.Point g₂ := by
+  subst h
+  exact AddEquiv.refl _
+
+@[simp]
+lemma _root_.ModularCurves.EllipticCurve.Point.castBase_coe
+    {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}} {g₁ g₂ : T ⟶ S}
+    (h : g₁ = g₂) (x : E.Point g₁) :
+    (EllipticCurve.Point.castBase E h x).1 = x.1 := by
+  subst h
+  rfl
+
+/-- **[F3-fibre-instance]** Finiteness of `[n]` descends to base-changed curves: the
+`[n]`-square is cartesian (`isPullback_mulByHom_baseChange`) and `IsFinite` is stable
+under base change. -/
+theorem _root_.ModularCurves.EllipticCurve.isFinite_mulByHom_baseChange
+    {S : Scheme.{u}} (E : EllipticCurve S) {T : Scheme.{u}} (g : T ⟶ S) (n : ℤ)
+    [hfin : IsFinite (E.mulByHom n)] : IsFinite ((E.baseChange g).mulByHom n) :=
+  MorphismProperty.IsStableUnderBaseChange.of_isPullback
+    (P := @IsFinite) (ModularCurves.isPullback_mulByHom_baseChange E g n).flip hfin
 
 /-- **[W0-F3-reindex]** `Σᵢ [Pᵢ]` is invariant under reindexing the family of sections:
 the defining ideal is a product over the index set (KM 1.2, the sum of the `[Pᵢ]` as
