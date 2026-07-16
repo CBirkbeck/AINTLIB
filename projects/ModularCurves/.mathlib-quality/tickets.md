@@ -21661,3 +21661,16 @@ where noted:
 `translateByIso`/`schemeIsoOfOverIso`: `Q.1 ≫ Trans(x).hom = (x+Q).1`), then the step-5
 disjointness + G[M]-identification, step-6 converse, F3-iff assembly, F4. Proof-ops banked in
 the file docstrings. (STREAM-KM)
+
+### v10.272-KM — [W0-F3-transpt] landed; translate-layer END-TO-END; F3-core convergence map (STREAM-KM)
+`pointMapOfHom_translateBy` PROVEN (`58df89bdf`): `Trans(x)(Q) = Q + x|_T` — with v10.271's
+divisor-side shift engine, KM p. 30's `G = Σ_{a₁} Trans(φ(a₁))*(D₂)` is now fully readable on
+both divisors and points. DISCOVERY: `IdealSheafData.map_hom_eq_comap_inv` already existed in
+`IsoTransport.lean:59` (general `X ≅ Y` form) — local duplicate dropped; also banked there:
+`sectionsDivisor_pointMap_ideal` (the pointMap-family shift). Gotcha: never `open MonObj` (steals
+`ι`/`μ`). **Convergence map for the two F3 halves**: both bottleneck on the SAME final machinery —
+[F3-geom] (fibrewise distinctness of the multiplier sections on the coprime-invertibility loci,
+via the banked `hasExactOrder_iff_geometric` + 1.5.3 (3)⟹(1)) feeding [F3-disj] (a `T`-point of a
+product divisor with pairwise disjoint supports factors through a single factor when `T` is
+connected — clopen decomposition) and [F3-imm] (coprime-rank sum immersion, KM p. 31). These
+three are the remaining campaign; everything else in KM pp. 27–31 is banked. (STREAM-KM)
