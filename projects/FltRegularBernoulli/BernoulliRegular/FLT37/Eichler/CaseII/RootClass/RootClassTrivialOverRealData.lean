@@ -129,12 +129,10 @@ theorem caseII_rootIdeal_mul_span_eq_of_pthPower {m : ℕ} (D : RealCaseIIData37
   have hpne : 𝔭 ≠ 0 := by rw [h𝔭, Ideal.zero_eq_bot]; exact p_ne_zero D.hζ
   have hcancel : (X * Ideal.span {b}) ^ 37 = (Y * Ideal.span {a}) ^ 37 :=
     mul_right_cancel₀ hpne (mul_left_cancel₀ hmne hreshape)
-  -- `p`-th-root uniqueness on integral ideals: `U^37 = V^37 ⟹ U = V`.
-  have hAB := (UniqueFactorizationMonoid.pow_dvd_pow_iff_dvd (n := 37) (by norm_num)).mp
-    hcancel.dvd
-  have hBA := (UniqueFactorizationMonoid.pow_dvd_pow_iff_dvd (n := 37) (by norm_num)).mp
-    hcancel.symm.dvd
-  exact le_antisymm (Ideal.dvd_iff_le.mp hBA) (Ideal.dvd_iff_le.mp hAB)
+  -- `p`-th-root uniqueness on integral ideals: `U^37 = V^37 ⟹ U = V`.  The ideal monoid of the
+  -- Dedekind domain `𝓞 K` is torsion-free (`IsMulTorsionFree (Ideal (𝓞 K))`), so `pow_left_inj`
+  -- gives the root uniqueness directly.
+  exact (pow_left_inj (by norm_num : (37 : ℕ) ≠ 0)).mp hcancel
 
 /-- **`[𝔞(η)] = [𝔞(η⁻¹)]` (conjugate-fixedness of the root class) from the `p`-th-power radical.**
 
