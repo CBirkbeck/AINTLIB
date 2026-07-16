@@ -221,3 +221,12 @@
   v10.268-KM carries the full proof-ops ledger (topIso_hom_comp_app general-form trick;
   eqToHom_op poison; erw-for-LRS-coercion; projModel-form letI ascription). Awaiting next
   dispatch — KM-INTEGRAL wave queue ([KM-W1]…) is the standing charter unless re-aimed.
+- [2026-07-16b, KM, v10.270] **WAVE PROGRESS — [KM-W0] first act ★ + three (iv)-bricks.** The
+  focused decompose of KM 1.4–1.11 + 3.5–3.7 is DONE (verbatim-quoted artifact §[KM-W0];
+  ground truth: (ii)+(iii) already delivered by `gammaOneDrinfeldProblem` +
+  `gammaOneDrinfeld_relativelyRepresentable`; the wave's code gap is (iv) factorization).
+  Skeleton `LevelStructure/Factorization.lean` + PROVEN: `isSubgroup_of_openCover` (+ reusable
+  `exists_factor_of_openCover`), `sectionsDivisor_congr`, `orderDivisor_mul_crt` (the KM-p.31
+  divisor identity). All axiom-clean. Remaining in F3: the two deep halves (translation-union
+  forward, sum-immersion converse) — transcribed, sub-brickable, next session's grind. Commits:
+  `87bdec647`/`0bfb949b0`/`85709f498`/`4620dbaec` + the ★★★★ `3ddc7ce90` (v10.268). (KM)

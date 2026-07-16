@@ -21617,3 +21617,27 @@ N₁" [De-Ga IV §3 5.3-9] with a cyclic-case degree-dodge candidate), [W0-F4/-f
 problem-level product iso + 3.6.3 E[N]-invariance deliberately deferred (vocabulary-before-need;
 Γ₀ seam). NEXT (wave order): work [W0-F3-loc] → [W0-F3] halves as sub-tickets per the
 transcription. (STREAM-KM)
+
+### v10.270-KM — [KM-W0] (iv)-wave: THREE SUPPORT BRICKS PROVEN (F3-loc, F3-reindex, F3-crt) (STREAM-KM)
+Same marathon session as v10.268/269 (post-★★★★). All axiom-clean {propext, Classical.choice,
+Quot.sound}, committed `0bfb949b0` / `85709f498` / `4620dbaec` on `LevelStructure/Factorization.lean`:
+- **[W0-F3-loc] `RelEffCartierDiv.isSubgroup_of_openCover`** — subgroup divisors are Zariski-local
+  on the base (KM 1.7.2's silent "localizing on S", legitimized). Includes the REUSABLE
+  `exists_factor_of_openCover`: factoring through a Mono is Zariski-local (cancel_mono overlaps +
+  Cover.glueMorphisms). Proof-ops for the fleet: keep ONE uniform cover variable — mixing `𝒰.I₀`
+  with `(𝒰.pullback₁ g).I₀` or let-bound cover projections poisons every rw-motive
+  (instances-transparency); build ad-hoc covers with `Cover.mkOfCovers` + index `𝒰.I₀` on the
+  nose; an `∃ h : T ⟶ W, …`-comma inside a structure-literal field kills the parse — use
+  newline-separated fields.
+- **[W0-F3-reindex] `sectionsDivisor_congr`** — divisor sums are invariant under index bijections
+  with pointwise matching (`Fintype.prod_equiv` on the defining ideal product).
+- **[W0-F3-crt] `Section.orderDivisor_mul_crt`** — the KM 1.7.1/3.5.1 divisor identity: for
+  killed `P` and coprime `M,K`, `[P]+⋯+[MK·P] = Σ_{(a₁,a₂)} [(a₁+1)K·P + (a₂+1)M·P]` (KM p. 31's
+  `G = Σ[φ(a₁)+φ(a₂)]`). Machinery: explicit multiplier bijection `crtIndex` (CRT-uniqueness
+  injectivity via Nat.ModEq mod-M/mod-K reduction + `cancel_right_of_coprime`;
+  `Finite.injective_iff_bijective`) + `zsmul_congr_of_kill` (congruent multipliers agree on a
+  killed point).
+**F3-core remaining** (the deep halves, per the [KM-W0] decomposition): forward = G-splitting +
+étale-distinctness + translation-union (KM pp. 27–30); converse = coprime-rank sum-immersion +
+disjoint-translates divisor identity (KM pp. 30–31). Both consume the substrate now banked. NEXT:
+scout Incidence.lean for divisor-point-factoring; first sub-brick of the converse. (STREAM-KM)
