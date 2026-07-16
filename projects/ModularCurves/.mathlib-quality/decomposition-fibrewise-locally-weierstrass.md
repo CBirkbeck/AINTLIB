@@ -947,11 +947,12 @@ separatedness of the finite-stage affine-intersection model. The focused build i
 audit is exactly `propext`, `Classical.choice`, and `Quot.sound`, and no hypothesis or
 proof-resource option was added.
 
-Active dependency claim (2026-07-16): define
+Completed dependency claim (2026-07-16): defined
 `Scheme.GlueData.affineIntersectionPairMap` and
-`Scheme.GlueData.IsSeparatedAffineIntersectionFunctor`, and prove
-`Scheme.GlueData.isSeparated_affineIntersectionToSpec`. The proof identifies each pairwise
-diagonal chart map with the spectrum of the canonical tensor-product map and derives closedness
-from its surjectivity. It must use the existing gluing pullback and `pullbackSpecIso` APIs, add no
-hypothesis or proof-resource option, and split all projection and isomorphism calculations into
-small helpers.
+`Scheme.GlueData.IsSeparatedAffineIntersectionFunctor`, and proved
+`Scheme.GlueData.isSeparated_affineIntersectionToSpec`. Each pairwise diagonal chart map is now
+identified with the spectrum of the canonical tensor-product map, so surjectivity gives a closed
+immersion and the affine source-cover criterion gives a closed diagonal. The proof uses private
+projection and pullback-isomorphism helpers, passes both morphisms explicitly to cancellation
+lemmas, and adds no hypothesis or proof-resource option. Its focused build is green, and all four
+new public declarations have axiom audit exactly `propext`, `Classical.choice`, and `Quot.sound`.
