@@ -22318,3 +22318,27 @@ requires, checked against the NOW-COMPLETE substrate (E[N] four-box, degree keys
 rationale from the board archive; produce the leaf decomposition + provability check BEFORE any
 session grinds it. Sequencing: AFTER the :3497 plug-in + the closer audit (same GH window if it fits,
 else next). On T-W7.8's discharge, the last non-box pin on the headline dies.
+
+### v10.297-GH — ★★★ [GHA3] CLOSED (:3497 DEAD) + THE CLOSER AUDIT + T-W7.8 SCOPE (STREAM-GH)
+**(1) [GHA3] CLOSED** (commit 56bf5891b): `Moduli/LevelSpaceEtaleClose.lean` — `master_iff` :=
+G0's `forall_mem_fullLevelSet_iff_isNaiveFullLevel` (**receipt: FULLY CLEAN**) ∘
+`isFullLevel_iff_naive` (T-D8) + the asSection/torsionMapSection glue;
+`levelSpaceΓ_structure_etale` := the staged `_of_master`; GammaHRep:3497 wired + the local
+asSection_injective dedup'd. **HALF-ANALYSIS (as dispatched):** the trace's ONLY sorryAx =
+isFullLevel_iff_naive (Basic:125); KM's fullLevel_divisor_forward covers ⟹ — **only the
+⟸-half (naive ⟹ divisor, KM W0) is genuinely open**; rewire Basic:115 on its landing.
+**(2) CLOSER AUDIT — remaining pins on the headlines:** T-H8/T-H9 statements (GammaH:1077/:1090);
+T-D8 ⟸ (KM W0); hLN (below); hH/hbound (KM [KEY-DEG]); EndomorphismDegree generals
+(endDual_comp_self :179 KM + T-DEG0 :169 + 5 generals :336-:446 — NOTE the k̄-consumers are
+coverable by my _of_isIntegral+E-INT forms: REWIRING aut_endo_eq_one's chain to field-forms sheds
+all 5 without the dichotomy — the cheap path, flagged); Representability:631/:646 (YN-side);
+GammaHRep:720; EllCategory:279; DrinfeldRep×1; GammaH:483/:496/:508 (legacy, non-headline).
+**(3) T-W7.8 (hLN) SCOPE — FEASIBLE, MULTI-SESSION, affine-first; NOT a grind.** Parking
+rationale: endMonHom's [IsLocallyNoetherian] = the T-W7.7 engine's Krull-intersection germ
+arguments (Rigidity:391-534); EGA's fix = IV§8 spreading-out, ABSENT from mathlib ([KL-3] is the
+same wall). Decomposition: (L1) E proper ⟹ qc ⟹ FINITE Weierstrass chart+gluing data ⟹
+descends to fg-ℤ-subalgebra A₀ (noetherian) — tractable; (L2) morphism/equation-spreading along
+A = colim A₀ (EGA IV.8.8) — THE research-grade leaf (mathlib gap); (L3) ascent by base change —
+trivial. SURGICAL ALTERNATIVE (owner call): all current headline consumers run the detection at
+geometric fibres (Spec k̄ noetherian ✓) — a fibre-detection variant of Rigid sheds hLN entirely
+at the cost of a statement variant. (STREAM-GH)
