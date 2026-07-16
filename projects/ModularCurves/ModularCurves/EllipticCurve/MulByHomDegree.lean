@@ -1333,6 +1333,144 @@ theorem brick6_intertwining {K : Type u} [Field K] [DecidableEq K] (W : Weierstr
         = ψ (e ((projModel W).germToFunctionField (zChart W) (cRTZ (coordY W))))
     rw [FFM_Y, hR]
 
+/-- **(brick 6, steps B+C — the opens-level tower, direct-`K(E)` form)** `finrank Γ(Z) Γ([N]⁻¹Z)`
+along the `[N]`-pullback of sections equals `(mulByInt N).degree`: localize both sides into
+`W.toAffine.FunctionField` through `projModelFunctionFieldEquiv` (the `R`-leg is the fraction-field
+structure of the `Z`-chart, the `S`-leg that of the preimage chart), take the `K(E)`-module
+structure to be the division-polynomial pullback `mulByInt_pullbackAlgHom`, and observe that the
+scalar-tower condition is exactly [banked square] + [PROVEN intertwining]. Then
+`finrank_of_isFractionRing` evaluates the left side to the isogeny degree. -/
+lemma towerBC {K : Type u} [Field K] [DecidableEq K] (W : WeierstrassCurve K)
+    [W.IsElliptic] (N : ℕ) [NeZero N]
+    [Flat ((modelEllipticCurve W).mulByHom N)] [IsFinite ((modelEllipticCurve W).mulByHom N)]
+    [LocallyOfFinitePresentation ((modelEllipticCurve W).mulByHom N)] (hn : (N : ℤ) ≠ 0)
+    (φN : projModel W ⟶ projModel W) (hφN : φN = (modelEllipticCurve W).mulByHom N)
+    (hDom : IsDominant φN) (hFin : IsFinite φN)
+    (hfin : letI := (φN.app (zChart W)).hom.toAlgebra
+      Module.Finite Γ(projModel W, zChart W) Γ(projModel W, φN ⁻¹ᵁ (zChart W))) :
+    letI := (φN.app (zChart W)).hom.toAlgebra
+    Module.finrank Γ(projModel W, zChart W) Γ(projModel W, φN ⁻¹ᵁ (zChart W))
+      = (HasseWeil.mulByInt W.toAffine (N : ℤ)).degree := by
+  haveI iInt : IsIntegral (projModel W) := inferInstance
+  haveI iIrr : IrreducibleSpace (projModel W) := inferInstance
+  haveI hφdom : IsDominant φN := hDom
+  haveI hφfin : IsFinite φN := hFin
+  haveI hZaff : IsAffineOpen (zChart W) :=
+    Proj.isAffineOpen_basicOpen _ _ (mk_X_mem_quotientGrading_one W 2) one_pos
+  haveI : Nontrivial Γ(projModel W, zChart W) := (coordRingToZSection W).toEquiv.symm.nontrivial
+  haveI hNe2 : Nonempty (zChart W : (projModel W).Opens) :=
+    ⟨hZaff.isoSpec.inv.base (Classical.arbitrary _)⟩
+  haveI hNeV : Nonempty (φN ⁻¹ᵁ (zChart W)) :=
+    ⟨⟨_, genericPoint_mem_preimage φN (zChart W)⟩⟩
+  haveI hFRZ : IsFractionRing Γ(projModel W, zChart W) (projModel W).functionField :=
+    functionField_isFractionRing_of_isAffineOpen (projModel W) (zChart W) hZaff
+  haveI hVaff : IsAffineOpen (φN ⁻¹ᵁ (zChart W)) := by
+    haveI hAff : IsAffineHom φN := hφfin.toIsAffineHom
+    exact hZaff.preimage φN
+  haveI hFRV : IsFractionRing Γ(projModel W, φN ⁻¹ᵁ (zChart W))
+      (projModel W).functionField :=
+    functionField_isFractionRing_of_isAffineOpen (projModel W) _ hVaff
+  -- named building blocks (no ambient-instance dependence)
+  set R := Γ(projModel W, zChart W)
+  set S := Γ(projModel W, φN ⁻¹ᵁ (zChart W))
+  set KE := W.toAffine.FunctionField with hKE
+  set e := projModelFunctionFieldEquiv W with he
+  -- the algebras: R' := K(pM) with the germ structure; S' := K(E) with the e-transported
+  -- V-germ structure; the R'-module on S' is the division-polynomial pullback composed with e.
+  letI algRS : Algebra ↑R ↑S := (φN.app (zChart W)).hom.toAlgebra
+  letI algSKE : Algebra ↑S KE :=
+    (e.toRingHom.comp (algebraMap ↑S (projModel W).functionField)).toAlgebra
+  letI algRKE : Algebra ↑R KE :=
+    ((e.toRingHom.comp (algebraMap ↑S (projModel W).functionField)).comp
+      (φN.app (zChart W)).hom).toAlgebra
+  letI algKpMKE : Algebra ↑(projModel W).functionField KE :=
+    ((HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn).toRingHom.comp
+      e.toRingHom).toAlgebra
+  letI algKEKE : Algebra KE KE :=
+    (HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn).toRingHom.toAlgebra
+  letI modKpMKE : Module ↑(projModel W).functionField KE := algKpMKE.toModule
+  -- the S-side fraction-ring structure transported along `e`
+  haveI hFRV' : @IsFractionRing ↑S _ KE _ algSKE := by
+    have := @IsLocalization.isLocalization_iff_of_ringEquiv ↑S _
+      (nonZeroDivisors ↑S) (projModel W).functionField _ _ KE _ e
+    exact this.mp hFRV
+  -- the two scalar towers
+  haveI towRSS' : IsScalarTower ↑R ↑S KE :=
+    IsScalarTower.of_algebraMap_eq (fun r => rfl)
+  have hkey : ∀ r : ↑R,
+      (HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn)
+        (e ((algebraMap ↑R (projModel W).functionField) r))
+      = e ((algebraMap ↑S (projModel W).functionField)
+          ((φN.app (zChart W)).hom r)) := by
+    intro r
+    have hsq : (algebraMap ↑S (projModel W).functionField)
+          ((φN.app (zChart W)).hom r)
+        = (φN.functionFieldMap).hom
+            ((algebraMap ↑R (projModel W).functionField) r) :=
+      (functionFieldMap_germToFunctionField φN (zChart W) r).symm
+    rw [hsq]
+    subst hφN
+    exact (brick6_intertwining W N hn
+      ((algebraMap ↑R (projModel W).functionField) r)).symm
+  haveI towRR'S' : @IsScalarTower ↑R ↑(projModel W).functionField KE
+      _ modKpMKE.toSMul _ := by
+    refine ⟨fun r a x => ?_⟩
+    show ((HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn).toRingHom.comp
+        e.toRingHom) ((algebraMap ↑R (projModel W).functionField r) * a) * x
+      = ((e.toRingHom.comp (algebraMap ↑S (projModel W).functionField)).comp
+          (φN.app (zChart W)).hom) r
+        * (((HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn).toRingHom.comp
+            e.toRingHom) a * x)
+    rw [map_mul, mul_assoc]
+    congr 1
+    exact hkey r
+  -- side instances
+  haveI hFaith : FaithfulSMul ↑R ↑S := by
+    rw [faithfulSMul_iff_algebraMap_injective]
+    intro a b hab
+    have hgm : ∀ c : ↑R, (algebraMap ↑R (projModel W).functionField) c
+        = (projModel W).germToFunctionField (zChart W) c := fun c => rfl
+    have h3 : (φN.functionFieldMap).hom
+        ((algebraMap ↑R (projModel W).functionField) a)
+        = (φN.functionFieldMap).hom
+          ((algebraMap ↑R (projModel W).functionField) b) := by
+      rw [hgm a, hgm b, functionFieldMap_germToFunctionField φN (zChart W) a,
+        functionFieldMap_germToFunctionField φN (zChart W) b]
+      exact congrArg (algebraMap ↑S (projModel W).functionField) hab
+    have h4 := functionFieldMap_injective φN h3
+    exact IsFractionRing.injective ↑R ((projModel W).functionField : CommRingCat) h4
+  haveI hNZD : NoZeroDivisors ↑S := by
+    have hinj : Function.Injective
+        ((projModel W).germToFunctionField (φN ⁻¹ᵁ (zChart W))) :=
+      Scheme.germToFunctionField_injective _ _
+    exact hinj.noZeroDivisors _ (map_zero _) (map_mul _)
+  haveI hfin' : Module.Finite ↑R ↑S := hfin
+  haveI hInt : Algebra.IsIntegral ↑R ↑S := Algebra.IsIntegral.of_finite _ _
+  haveI hAlgebraic : Algebra.IsAlgebraic ↑R ↑S := Algebra.IsIntegral.isAlgebraic
+  -- the core: finrank over the fraction fields = finrank over the opens
+  have hcore := Algebra.IsAlgebraic.finrank_of_isFractionRing
+    (R := ↑R) (R' := ((projModel W).functionField : CommRingCat)) (S := ↑S) (S' := KE)
+  rw [← hcore]
+  -- the degree: `modKpMKE`-finrank transports along `e` to the ψ-module finrank = degree
+  have hC := Algebra.finrank_eq_of_equiv_equiv
+    (R₀ := ((projModel W).functionField : CommRingCat)) (S₀ := KE)
+    (R₁ := KE) (S₁ := KE)
+    (i := e) (j := RingEquiv.refl KE)
+    (by
+      ext z
+      rfl)
+  rw [hC]
+  -- match the degree module (the isogeny pullback IS ψ for n ≠ 0)
+  rw [HasseWeil.Isogeny.degree]
+  have hpb : (HasseWeil.mulByInt W.toAffine (N : ℤ)).pullback
+      = HasseWeil.mulByInt_pullbackAlgHom W.toAffine (N : ℤ) hn := dif_neg hn
+  have hMod : (HasseWeil.mulByInt W.toAffine (N : ℤ)).toAlgebra.toModule
+      = algKEKE.toModule := by
+    show (HasseWeil.mulByInt W.toAffine (N : ℤ)).pullback.toRingHom.toAlgebra.toModule = _
+    rw [hpb]
+  exact (congrArg (fun m : Module W.toAffine.FunctionField W.toAffine.FunctionField
+    => @Module.finrank _ _ _ _ m) hMod).symm
+
 /-- **(L4-iii brick 6, steps A+B — the fraction-field tower assembly)** Given the field intertwining,
 the module rank `Module.finrank Γ(Z) Γ([N]⁻¹Z)` equals `(mulByInt N).degree`. Transport the appTop
 module to `Γ(E, [N]⁻¹ᵁZ)` (`pullbackRestrictIsoRestrict`); both localise to `K(pM)` via
