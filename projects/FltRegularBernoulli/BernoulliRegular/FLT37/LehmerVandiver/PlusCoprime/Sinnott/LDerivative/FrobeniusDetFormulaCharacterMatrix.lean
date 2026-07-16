@@ -59,6 +59,30 @@ def FrobeniusDetIdentity
     (∏ χ ∈ BernoulliRegular.evenNontrivialCharacters (p := p),
         DirichletLogSum p χ⁻¹) ^ 2
 
+/-- **The family regulator `regOfFamily (cyclotomicUnitFamilyKplusFinRank …)`
+is nonnegative**: it equals the absolute value `|det …|` of the log-embedding
+matrix (`regOfFamily_cyclotomicUnitFamilyKplus_eq_det`), hence `0 ≤ …`. -/
+theorem regOfFamily_cyclotomicUnitFamilyKplus_nonneg
+    (K : Type) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
+    [NumberField.IsCMField K]
+    (hp_odd : p ≠ 2) (hp_three : 3 ≤ p) :
+    (0 : ℝ) ≤ NumberField.Units.regOfFamily
+      (cyclotomicUnitFamilyKplusFinRank p K hp_odd hp_three) := by
+  rw [BernoulliRegular.FLT37.Sinnott.regOfFamily_cyclotomicUnitFamilyKplus_eq_det
+    (p := p) (K := K) hp_odd hp_three]
+  exact abs_nonneg _
+
+omit [Fact p.Prime] in
+/-- **`(2^((p-3)/2))² = 2^(p-3)` for odd `p`** (real base `2`, cast to `ℂ`):
+since `p` is odd, `p - 3` is even, so `((p - 3) / 2) * 2 = p - 3`. -/
+theorem two_pow_half_sq_eq (hp_odd : Odd p) :
+    (((2 : ℝ) ^ ((p - 3) / 2) : ℝ) : ℂ) ^ 2 = (2 : ℂ) ^ (p - 3) := by
+  push_cast
+  rw [← pow_mul]
+  congr 1
+  obtain ⟨k, hk⟩ := hp_odd
+  omega
+
 /-- **`KummerDirichletDeterminant` from `FrobeniusDetIdentity`**:
 under the algebraic-side Frobenius-determinant identity, the corrected
 Kummer-Dirichlet identity `regOfFamily = 2^((p-3)/2) · h⁺ · R(K⁺)` holds.
@@ -92,14 +116,7 @@ theorem KummerDirichletDeterminant_of_FrobeniusDetIdentity
       field_simp]
     rw [← h_analytic]
     -- Goal: 2^(p-3) · (hPlus · R)² = (2^((p-3)/2))² · (hPlus · R)²
-    have h_pow_eq : (((2 : ℝ) ^ ((p - 3) / 2) : ℝ) : ℂ) ^ 2 = (2 : ℂ) ^ (p - 3) := by
-      push_cast
-      rw [← pow_mul]
-      congr 1
-      have h_p_odd : Odd p := hp.out.odd_of_ne_two hp_odd
-      rcases h_p_odd with ⟨k, hk⟩
-      omega
-    rw [h_pow_eq]
+    rw [two_pow_half_sq_eq p (hp.out.odd_of_ne_two hp_odd)]
   -- Cast h_sq_eq_C to ℝ.
   have h_sq_eq_R : (NumberField.Units.regOfFamily
       (cyclotomicUnitFamilyKplusFinRank p K hp_odd hp_three)) ^ 2 =
@@ -114,11 +131,8 @@ theorem KummerDirichletDeterminant_of_FrobeniusDetIdentity
       linear_combination h_sq_eq_C
     exact_mod_cast h_cast
   -- Positivity: regOfFamily ≥ 0 and 2^((p-3)/2) · hPlus · regulator > 0.
-  have h_reg_nonneg : (0 : ℝ) ≤ NumberField.Units.regOfFamily
-      (cyclotomicUnitFamilyKplusFinRank p K hp_odd hp_three) := by
-    rw [BernoulliRegular.FLT37.Sinnott.regOfFamily_cyclotomicUnitFamilyKplus_eq_det
-      (p := p) (K := K) hp_odd hp_three]
-    exact abs_nonneg _
+  have h_reg_nonneg :=
+    regOfFamily_cyclotomicUnitFamilyKplus_nonneg p K hp_odd hp_three
   have h_rhs_nonneg : (0 : ℝ) ≤ (2 : ℝ) ^ ((p - 3) / 2) *
       ((BernoulliRegular.hPlus K : ℕ) : ℝ) *
       NumberField.Units.regulator (NumberField.maximalRealSubfield K) := by
