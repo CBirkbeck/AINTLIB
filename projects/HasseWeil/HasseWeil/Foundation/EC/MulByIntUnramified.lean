@@ -924,7 +924,8 @@ private theorem ord_P_algebraMap_F_mul_eq {c : F} (hc : c ≠ 0)
 
 /-- **The pulled-back `Ψ₂` rewritten on the difference coordinates has order `1`.** Combining the
 uniformizer fact `ord_P ([ℓ]^*Ψ₂) = 1` (`ord_P_psiTwo_pullback_eq_one`) with the `2`-torsion
-relation `2 y_Q + a₁ x_Q + a₃ = 0` (which lets `[ℓ]^*Ψ₂ = 2(mulByInt_y − y_Q) + a₁(mulByInt_x − x_Q)`
+relation `2 y_Q + a₁ x_Q + a₃ = 0` (which lets
+`[ℓ]^*Ψ₂ = 2(mulByInt_y − y_Q) + a₁(mulByInt_x − x_Q)`
 after cancelling `a₃`), the sum on the difference coordinates `mulByInt_y − y_Q`, `mulByInt_x − x_Q`
 itself has order `1`. -/
 private theorem ord_P_two_mul_y_sub_add_a₁_mul_x_sub_eq_one (ℓ : ℤ) (hℓ : ℓ ≠ 0)
@@ -984,7 +985,8 @@ private theorem ord_P_mulByInt_y_sub_const_eq_of_sum_ord_eq_one (ℓ : ℤ) (h2F
 (`ord_P_psiTwo_pullback_eq_one`, the `[2ℓ]`-torsion pole). Its `2(mulByInt_y − y_Q)` term has order
 `n := ord_P (mulByInt_y ℓ − y_Q)` (as `2` is a unit), strictly dominating the
 `a₁(mulByInt_x − x_Q)` term whenever `a₁ ≠ 0` (using the strict order gap
-`ord_P (mulByInt_y − y_Q) < ord_P (mulByInt_x − x_Q)`), so the sum has order `n`, forcing `n = 1`. -/
+`ord_P (mulByInt_y − y_Q) < ord_P (mulByInt_x − x_Q)`),
+so the sum has order `n`, forcing `n = 1`. -/
 private theorem ord_P_mulByInt_y_sub_const_eq_one_of_two_mul_ne_zero (ℓ : ℤ) (hℓ : ℓ ≠ 0)
     (h2ℓF : (2 * ℓ : F) ≠ 0) (P : (⟨W⟩ : SmoothPlaneCurve F).SmoothPoint) {x_Q y_Q : F}
     (h2torKE : (2 : KE) * algebraMap F KE y_Q + algebraMap F KE W.a₁ * algebraMap F KE x_Q +
