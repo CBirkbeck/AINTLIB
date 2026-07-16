@@ -683,6 +683,89 @@ theorem RelEffCartierDiv.IsSubgroup.combMap_ι (c₁ c₂ a b : ℤ) :
         E.Point _).1 :=
   (RelEffCartierDiv.IsSubgroup.exists_combMap E hD c₁ c₂ a b).choose_spec
 
+/-- **[F3-R1] (KM p. 27's roundtrip, easy direction)** The Bezout-weighted combination
+retracts the product decomposition: `prodMap ≫ combMap(v, u) ≫ ι = ι`. Pure point
+arithmetic at the uniform base `G`: the restricted kernel points are the `K`- and
+`M`-scalings of the universal point, and `vK + uM = 1`. -/
+theorem RelEffCartierDiv.IsSubgroup.prodMap_combMap_ι (M K : ℕ) [NeZero M] [NeZero K]
+    (hMK : Nat.Coprime M K) [NeZero (M * K)]
+    (hdeg : ∀ s : S, D.degree s = M * K)
+    (h₁ : ((M : ℤ) * K) % ((M * K : ℕ) : ℤ) = 0) (h₂ : ((K : ℤ) * M) % ((M * K : ℕ) : ℤ) = 0) :
+    RelEffCartierDiv.IsSubgroup.prodMap E hD hdeg h₁ h₂
+        ≫ RelEffCartierDiv.IsSubgroup.combMap E hD (M : ℤ) (K : ℤ)
+            (Nat.gcdB M K) (Nat.gcdA M K)
+        ≫ D.ideal.subschemeι
+      = D.ideal.subschemeι := by
+  set u : ℤ := Nat.gcdA M K with hu
+  set v : ℤ := Nat.gcdB M K with hv
+  have huv : u * M + v * K = 1 := by
+    have h := Nat.gcd_eq_gcd_ab M K
+    rw [hMK] at h
+    rw [hu, hv]
+    push_cast at h ⊢
+    linarith
+  set P := RelEffCartierDiv.IsSubgroup.prodMap E hD hdeg h₁ h₂ with hPdef
+  have hσ := RelEffCartierDiv.IsSubgroup.combMap_ι E hD (M : ℤ) (K : ℤ) v u
+  rw [hσ]
+  -- switch to point arithmetic at the base pulled along P
+  set Q₁ : E.Point (pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ))
+      ≫ D.smulKernelπ E (M : ℤ)) :=
+    ⟨pullback.fst _ _ ≫ D.smulKernelι E (M : ℤ) ≫ D.ideal.subschemeι, by
+      rw [Category.assoc, Category.assoc, RelEffCartierDiv.smulKernelι_subschemeι_π]⟩
+  set Q₂ : E.Point (pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ))
+      ≫ D.smulKernelπ E (M : ℤ)) :=
+    ⟨pullback.snd _ _ ≫ D.smulKernelι E (K : ℤ) ≫ D.ideal.subschemeι, by
+      rw [Category.assoc, Category.assoc, RelEffCartierDiv.smulKernelι_subschemeι_π,
+        ← pullback.condition]⟩
+  show P ≫ (v • Q₁ + u • Q₂).1 = D.ideal.subschemeι
+  -- the universal point at the pulled base
+  have hbase : D.ideal.subschemeι ≫ E.π
+      = P ≫ pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ))
+        ≫ D.smulKernelπ E (M : ℤ) := by
+    rw [← Category.assoc, hPdef, RelEffCartierDiv.IsSubgroup.prodMap, pullback.lift_fst,
+      RelEffCartierDiv.IsSubgroup.toSmulKernel_π]
+  set ι₀' : E.Point (P ≫ pullback.fst (D.smulKernelπ E (M : ℤ))
+      (D.smulKernelπ E (K : ℤ)) ≫ D.smulKernelπ E (M : ℤ)) :=
+    ⟨D.ideal.subschemeι, hbase⟩ with hι₀'
+  -- the restriction AddMonoidHom
+  have hrestr : ∀ (R₁ R₂ : E.Point (pullback.fst (D.smulKernelπ E (M : ℤ))
+      (D.smulKernelπ E (K : ℤ)) ≫ D.smulKernelπ E (M : ℤ))) (m n : ℤ),
+      EllipticCurve.Point.restrict E P (m • R₁ + n • R₂)
+        = m • EllipticCurve.Point.restrict E P R₁
+          + n • EllipticCurve.Point.restrict E P R₂ := by
+    intro R₁ R₂ m n
+    let ρ : E.Point (pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ))
+          ≫ D.smulKernelπ E (M : ℤ))
+        →+ E.Point (P ≫ pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ))
+          ≫ D.smulKernelπ E (M : ℤ)) :=
+      AddMonoidHom.mk' (EllipticCurve.Point.restrict E P)
+        (fun R R' => EllipticCurve.Point.restrict_add E P R R')
+    show ρ (m • R₁ + n • R₂) = m • ρ R₁ + n • ρ R₂
+    rw [map_add, map_zsmul, map_zsmul]
+  -- identify the restricted kernel points with scalings of the universal point
+  have hR₁ : EllipticCurve.Point.restrict E P Q₁ = (K : ℤ) • ι₀' := by
+    apply Subtype.ext
+    show P ≫ Q₁.1 = ((K : ℤ) • ι₀').1
+    rw [E.point_smul_eq_comp_mulBy]
+    show P ≫ pullback.fst _ _ ≫ D.smulKernelι E (M : ℤ) ≫ D.ideal.subschemeι
+      = D.ideal.subschemeι ≫ E.mulByHom (K : ℤ)
+    rw [← Category.assoc, hPdef, RelEffCartierDiv.IsSubgroup.prodMap, pullback.lift_fst,
+      ← RelEffCartierDiv.IsSubgroup.toSmulKernel_ι E hD hdeg h₁]
+  have hR₂ : EllipticCurve.Point.restrict E P Q₂ = (M : ℤ) • ι₀' := by
+    apply Subtype.ext
+    show P ≫ Q₂.1 = ((M : ℤ) • ι₀').1
+    rw [E.point_smul_eq_comp_mulBy]
+    show P ≫ pullback.snd _ _ ≫ D.smulKernelι E (K : ℤ) ≫ D.ideal.subschemeι
+      = D.ideal.subschemeι ≫ E.mulByHom (M : ℤ)
+    rw [← Category.assoc, hPdef, RelEffCartierDiv.IsSubgroup.prodMap, pullback.lift_snd,
+      ← RelEffCartierDiv.IsSubgroup.toSmulKernel_ι E hD hdeg h₂]
+  -- assemble
+  have hfinal : EllipticCurve.Point.restrict E P (v • Q₁ + u • Q₂) = ι₀' := by
+    rw [hrestr, hR₁, hR₂, ← mul_smul, ← mul_smul, ← add_smul,
+      show v * K + u * M = 1 by linarith, one_smul]
+  have hval := congrArg Subtype.val hfinal
+  exact hval
+
 end ProductDecomposition
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
