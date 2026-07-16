@@ -144,6 +144,25 @@ lemma prod_pow_primRoot_eq_pow_kplus {n : ℕ} (hn : 0 < n) (a : ℕ)
     _ = ∏ ζ ∈ Polynomial.nthRootsFinset d (1 : ℂ), (1 - ζ * T) := by rw [h_image]
     _ = 1 - T ^ d := prod_nthRootsFinset_one_sub_mul d hd_pos T
 
+/-- Even-indexed variant of `prod_pow_primRoot_eq_pow_kplus`: if `ω ^ 2` is a primitive
+`n₂`-th root of unity, the product of `1 - ω ^ (2 k a) * T` over `k < n₂` collapses to a single
+Euler factor. It is obtained by rewriting `ω ^ (2 k a) = (ω ^ 2) ^ (k a)` and applying
+`prod_pow_primRoot_eq_pow_kplus` to the primitive root `ω ^ 2`. -/
+lemma prod_pow_sq_primRoot_eq_pow_kplus {n2 : ℕ} (hn2 : 0 < n2) (a : ℕ)
+    {ω : ℂ} (hω2 : IsPrimitiveRoot (ω ^ 2) n2) (T : ℂ) :
+    ∏ k ∈ Finset.range n2, (1 - ω ^ ((2 * k) * a) * T) =
+      (1 - T ^ (n2 / n2.gcd a)) ^ n2.gcd a := by
+  calc
+    ∏ k ∈ Finset.range n2, (1 - ω ^ ((2 * k) * a) * T)
+        = ∏ k ∈ Finset.range n2, (1 - (ω ^ 2) ^ (k * a) * T) := by
+            refine Finset.prod_congr rfl (fun k _ ↦ ?_)
+            congr 1
+            have hexp : (2 * k) * a = 2 * (k * a) := by
+              simp [Nat.mul_assoc, Nat.mul_comm]
+            rw [hexp, pow_mul]
+    _ = (1 - T ^ (n2 / n2.gcd a)) ^ n2.gcd a :=
+          prod_pow_primRoot_eq_pow_kplus hn2 a hω2 T
+
 section KplusLocalCharacters
 
 variable (p : ℕ) [hp : Fact p.Prime]
@@ -440,6 +459,33 @@ lemma localPrimeCountPlus_mul_localResidueDegreePlus
       exact Nat.eq_of_mul_eq_mul_left (by decide : 0 < 2) hdouble'
     rw [hlhs, hhalf, hjk]
 
+/-- In `ZMod p` for a prime `p`, a generator `g` of the (cyclic, even-order) unit group with
+`orderOf g = 2 * n₂` has half-power `g ^ n₂ = -1`. Indeed `(g ^ n₂) ^ 2 = 1` in the domain
+`ZMod p`, so `g ^ n₂ = ±1`, and it cannot be `1` since that would force `orderOf g ∣ n₂`,
+impossible as `orderOf g = 2 * n₂ > n₂`. This is the classic "the unique element of order two is
+`-1`" fact for `(ZMod p)ˣ`. -/
+lemma generator_val_pow_half_eq_neg_one {n2 : ℕ} (hn2_pos : 0 < n2)
+    {g : (ZMod p)ˣ} (hg_order : orderOf g = 2 * n2) :
+    (((g : (ZMod p)ˣ) : ZMod p) ^ n2) = -1 := by
+  have hg_half_sq : ((((g : (ZMod p)ˣ) : ZMod p) ^ n2) ^ 2) = 1 := by
+    rw [← pow_mul]
+    have hmul : n2 * 2 = 2 * n2 := by ring
+    rw [hmul]
+    simpa [Units.val_pow_eq_pow_val, hg_order] using
+      congrArg (fun x : (ZMod p)ˣ ↦ ((x : ZMod p))) (pow_orderOf_eq_one g)
+  have hg_half_ne_one : (((g : (ZMod p)ˣ) : ZMod p) ^ n2) ≠ 1 := by
+    intro hpow
+    have hpow_units : g ^ n2 = 1 := by
+      apply Units.ext
+      simpa using hpow
+    have hdvd : orderOf g ∣ n2 := (orderOf_dvd_iff_pow_eq_one (x := g)).2 hpow_units
+    rw [hg_order] at hdvd
+    have hle : 2 * n2 ≤ n2 := Nat.le_of_dvd hn2_pos hdvd
+    omega
+  rcases sq_eq_one_iff.mp hg_half_sq with h1 | h1
+  · exact absurd h1 hg_half_ne_one
+  · exact h1
+
 /-- The product over all even characters at `ℓ ≠ p` is a single local factor of
 degree `localResidueDegreePlus`, repeated `localPrimeCountPlus` times. -/
 lemma prod_even_characters_eval_eq_pow_localResidueDegreePlus
@@ -518,28 +564,8 @@ lemma prod_even_characters_eval_eq_pow_localResidueDegreePlus
     rw [← h1, ← ha, Units.val_pow_eq_pow_val]
   have hχAt_ℓ : ∀ k : ℕ, χAt k (ℓ : ZMod p) = ω ^ (k * a) := fun k ↦ by
     rw [hℓ_eq, map_pow, hχAt_g, ← pow_mul]
-  have hg_half_sq : ((((g : (ZMod p)ˣ) : ZMod p) ^ n2) ^ 2) = 1 := by
-    rw [← pow_mul]
-    have : n2 * 2 = n := by
-      omega
-    rw [this]
-    simpa [Units.val_pow_eq_pow_val, hg_order] using
-      congrArg (fun x : (ZMod p)ˣ ↦ ((x : ZMod p))) (pow_orderOf_eq_one g)
-  have hg_half_ne_one : (((g : (ZMod p)ˣ) : ZMod p) ^ n2) ≠ 1 := by
-    intro hpow
-    have hpow_units : g ^ n2 = 1 := by
-      apply Units.ext
-      simpa using hpow
-    have hdvd : n ∣ n2 := by
-      rw [← hg_order]
-      exact (orderOf_dvd_iff_pow_eq_one (x := g)).2 hpow_units
-    have hle : n ≤ n2 := Nat.le_of_dvd hn2_pos hdvd
-    rw [hn2] at hle
-    omega
-  have hg_half_eq_neg_one : (((g : (ZMod p)ˣ) : ZMod p) ^ n2) = -1 := by
-    rcases sq_eq_one_iff.mp hg_half_sq with h1 | h1
-    · exact False.elim (hg_half_ne_one h1)
-    · exact h1
+  have hg_half_eq_neg_one : (((g : (ZMod p)ˣ) : ZMod p) ^ n2) = -1 :=
+    generator_val_pow_half_eq_neg_one (p := p) hn2_pos (hg_order.trans hn2')
   let χEvenAt : ℕ → DirichletCharacter ℂ p := fun k ↦ χAt (2 * k)
   have hχEven_mem : ∀ k ∈ Finset.range n2, χEvenAt k ∈ E := by
     intro k hk
@@ -593,17 +619,8 @@ lemma prod_even_characters_eval_eq_pow_localResidueDegreePlus
     simpa [hgcd2, hn2'] using hω_sq_prim'
   have hcollapse :
       ∏ k ∈ Finset.range n2, (1 - ω ^ ((2 * k) * a) * T) =
-        (1 - T ^ (n2 / n2.gcd a)) ^ n2.gcd a := by
-    calc
-      ∏ k ∈ Finset.range n2, (1 - ω ^ ((2 * k) * a) * T)
-          = ∏ k ∈ Finset.range n2, (1 - (ω ^ 2) ^ (k * a) * T) := by
-              refine Finset.prod_congr rfl (fun k _ ↦ ?_)
-              congr 1
-              have hexp : (2 * k) * a = 2 * (k * a) := by
-                simp [Nat.mul_assoc, Nat.mul_comm]
-              rw [hexp, pow_mul]
-      _ = (1 - T ^ (n2 / n2.gcd a)) ^ n2.gcd a :=
-            prod_pow_primRoot_eq_pow_kplus hn2_pos a hω_sq_prim T
+        (1 - T ^ (n2 / n2.gcd a)) ^ n2.gcd a :=
+    prod_pow_sq_primRoot_eq_pow_kplus hn2_pos a hω_sq_prim T
   have hfin_g2 : IsOfFinOrder (g ^ 2) := isOfFinOrder_iff_pow_eq_one.mpr
     ⟨n2, hn2_pos, by
       rw [← pow_mul]
