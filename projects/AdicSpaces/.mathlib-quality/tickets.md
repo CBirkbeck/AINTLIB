@@ -10,7 +10,7 @@ only). Priority spine: T1xx → T3xx → T4xx → T5xx → T6xx → T7xx (sheafi
 
 ## Summary
 - Total: 36 tickets (28 proof + 8 embedded cleanup/milestone controls listed inline)
-- Open: 28 | Done: 8 (T001, T101–T107) | Parallel capacity at peak: 4 workers
+- Open: 27 | Done: 9 (T001, T101–T108) | Parallel capacity at peak: 4 workers
   (T2xx ∥ T3xx ∥ T4xx-polynomial ∥ T1xx-tail)
 
 ## Milestone map
@@ -154,8 +154,18 @@ T704, by a fresh `/develop --continue`.
   `nonnegEquiv`; `max_norm_eq`: `‖jB a‖ = max(‖c₀‖,‖c₁‖) ≤ ‖a‖ = ‖ιC a‖`.
 - **Source**: [FJP] Prop 2.1 + Lemma 2.2 + (2.1b) — quotes at L1.6.
 
-### [T108] `FiniteJetRings.lean` — constants, Tate structure, `unitBall`
-- **Status**: open | **Depends**: T107 | **Type**: proofs (L1.7 first half)
+### [T108] `FiniteJetRings.lean` — constants, Tate structure, `unitBall` — **DONE 2026-07-17**
+- **Status**: done (beastmode). Constants (`constHomC`/`constC`/`constA`/`constHomPS`) with
+  norms and 𝓐-membership; `tA/tB/tC/tD` pseudouniformizers (norms via
+  `Valued.toNormedField.norm_lt_one_iff` + `valuation_t`; units via `IsUnit.map`); scalar
+  scaling lemmas (`norm_C_mul`/`norm_restrictedC_mul` in `RestrictedLaurent.lean` via
+  `Real.mul_iSup_of_nonneg`, per-ring `norm_t*_mul`); `unitBall` (with the recorded
+  `NormOneClass` signature fix) + openness; the **generic
+  `unitBallPod`/`isHuberRing_of_scale`/`isTateRing_of_scale`** (norm-scaling
+  pseudouniformizer ⟹ pair of definition, adapting `ExampleUnitDisc.podD`'s isAdic);
+  all eight `IsHuberRing`/`IsTateRing` instances are real terms. Also new
+  `NormOneClass (PowerSeries.Restricted R 1)` + `NormOneClass (JetA F)` instances.
+  | **Type**: proofs (L1.7 first half)
 - **Sorries**: `norm_K_discrete`, `constC` (data + norm), `constC_mem_jetSupport`, `constA`,
   `tA` norm/unit lemmas, `unitBall` fields + `isOpen_unitBall`, `IsHuberRing ×4`,
   `IsTateRing ×4`.

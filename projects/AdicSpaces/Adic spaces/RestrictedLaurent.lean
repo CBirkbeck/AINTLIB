@@ -8,6 +8,7 @@ import Mathlib.Analysis.Normed.Order.Lattice
 import Mathlib.Topology.Algebra.InfiniteSum.Ring
 import Mathlib.Topology.Algebra.InfiniteSum.Nonarchimedean
 import Mathlib.Analysis.SpecificLimits.Normed
+import Mathlib.Data.Real.Pointwise
 import «Adic spaces».Vendored.CoramRestrictedNorm
 import «Adic spaces».Vendored.CoramRestrictedIso
 import «Adic spaces».ExampleUnitDisc
@@ -698,6 +699,27 @@ theorem norm_mul_eq (_hd : ∀ x : K, x ≠ 0 → ∃ n : ℤ, ‖x‖ = (2 : �
 
 /-- `RestrictedLaurent K` is a domain when the base is a complete nonarchimedean field with
 discrete value group ([FJP] Prop 2.3: "also that 𝒞 is a domain"; univariate case). -/
+theorem coeff_C_mul (t : K) (f : RestrictedLaurent K) (m : ℤ) :
+    (C t * f).coeff m = t * f.coeff m := by
+  rw [show C t = single 0 t from rfl, coeff_mul,
+    tsum_eq_single 0 (fun b hb => by simp [coeff_single, if_neg hb])]
+  simp [coeff_single]
+
+/-- Multiplication by a scalar constant scales the Gauss norm (field base). -/
+theorem norm_C_mul (t : K) (f : RestrictedLaurent K) : ‖C t * f‖ = ‖t‖ * ‖f‖ := by
+  rw [norm_def, norm_def, gaussNorm, gaussNorm, Real.mul_iSup_of_nonneg (norm_nonneg t)]
+  exact iSup_congr fun a => by rw [coeff_C_mul, norm_mul]
+
+/-- Multiplication by a scalar constant scales the vendored univariate Gauss norm. -/
+theorem norm_restrictedC_mul (t : K) (f : PowerSeries.Restricted K (1 : ℝ)) :
+    ‖PowerSeries.Restricted.C (1 : ℝ) t * f‖ = ‖t‖ * ‖f‖ := by
+  rw [Restricted.norm_eq, Restricted.norm_eq, PowerSeries.gaussNorm_eq,
+    PowerSeries.gaussNorm_eq, Real.mul_iSup_of_nonneg (norm_nonneg t)]
+  refine iSup_congr fun i => ?_
+  rw [show (PowerSeries.Restricted.C (1 : ℝ) t * f).1 = PowerSeries.C t * f.1 from rfl,
+    PowerSeries.coeff_C_mul, norm_mul]
+  ring
+
 theorem mul_ne_zero_of_ne_zero (hd : ∀ x : K, x ≠ 0 → ∃ n : ℤ, ‖x‖ = (2 : ℝ) ^ n)
     {f g : RestrictedLaurent K} (hf : f ≠ 0) (hg : g ≠ 0) : f * g ≠ 0 := by
   intro hcon

@@ -583,17 +583,231 @@ theorem isOpen_unitBall : IsOpen ((unitBall E : Set E)) := by
     _ ≤ max ‖y - x‖ ‖x‖ := IsUltrametricDist.norm_add_le_max _ _
     _ ≤ 1 := max_le hy.le hx
 
+variable {E}
+
+/-- Powers of a scaling element scale norms. -/
+theorem norm_pow_mul_of_scale {t : E} (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) (n : ℕ)
+    (x : E) : ‖t ^ n * x‖ = ‖t‖ ^ n * ‖x‖ := by
+  induction n with
+  | zero => simp
+  | succ m ih =>
+    rw [pow_succ, pow_succ, mul_comm (t ^ m) t, mul_assoc, hscale, ih]
+    ring
+
+/-- Membership in powers of the principal `t`-ideal of the unit ball is a norm bound. -/
+theorem mem_span_unitBall_pow_iff {t : E} (htu : IsUnit t) (ht1 : ‖t‖ ≤ 1)
+    (ht0 : 0 < ‖t‖) (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖)
+    (x : unitBall E) (n : ℕ) :
+    x ∈ (Ideal.span {(⟨t, ht1⟩ : unitBall E)}) ^ n ↔ ‖(x : E)‖ ≤ ‖t‖ ^ n := by
+  rw [Ideal.span_singleton_pow, Ideal.mem_span_singleton']
+  constructor
+  · rintro ⟨c, hc⟩
+    have hcoe : (c : E) * t ^ n = (x : E) := congrArg Subtype.val hc
+    rw [← hcoe, mul_comm, norm_pow_mul_of_scale hscale]
+    calc ‖t‖ ^ n * ‖(c : E)‖ ≤ ‖t‖ ^ n * 1 :=
+          mul_le_mul_of_nonneg_left c.2 (by positivity)
+      _ = ‖t‖ ^ n := mul_one _
+  · intro hx
+    set y : E := ((htu.unit⁻¹ : Eˣ) : E) ^ n * (x : E) with hy
+    have hyx : t ^ n * y = (x : E) := by
+      rw [hy, ← mul_assoc, ← mul_pow]
+      have h1 : t * ((htu.unit⁻¹ : Eˣ) : E) = 1 := htu.mul_val_inv
+      rw [h1, one_pow, one_mul]
+    have hnorm : ‖(x : E)‖ = ‖t‖ ^ n * ‖y‖ := by
+      rw [← hyx, norm_pow_mul_of_scale hscale]
+    have hymem : ‖y‖ ≤ 1 := by
+      have hpos : (0 : ℝ) < ‖t‖ ^ n := by positivity
+      rw [hnorm] at hx
+      exact le_of_mul_le_mul_left (by linarith) hpos
+    refine ⟨⟨y, hymem⟩, ?_⟩
+    refine Subtype.ext ?_
+    show y * t ^ n = (x : E)
+    rw [mul_comm]
+    exact hyx
+
+/-- The unit-ball pair of definition attached to a norm-scaling pseudouniformizer
+(generic form of `ExampleUnitDisc.podD`; instantiated at all four jet rings). -/
+noncomputable def unitBallPod (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)
+    (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) : PairOfDefinition E where
+  A₀ := unitBall E
+  I := Ideal.span {⟨t, ht1.le⟩}
+  isOpen := isOpen_unitBall E
+  fg := ⟨{⟨t, ht1.le⟩}, by simp⟩
+  isAdic := by
+    rw [isAdic_iff]
+    refine ⟨fun n => ?_, fun s hs => ?_⟩
+    · rw [isOpen_iff_mem_nhds]
+      intro x hx
+      rw [SetLike.mem_coe, mem_span_unitBall_pow_iff htu ht1.le ht0 hscale] at hx
+      rw [mem_nhds_subtype]
+      refine ⟨Metric.ball (x : E) (‖t‖ ^ n),
+        Metric.ball_mem_nhds _ (by positivity), ?_⟩
+      intro y hy
+      rw [Set.mem_preimage, Metric.mem_ball, dist_eq_norm] at hy
+      rw [SetLike.mem_coe, mem_span_unitBall_pow_iff htu ht1.le ht0 hscale]
+      calc ‖(y : E)‖ = ‖((y : E) - (x : E)) + (x : E)‖ := by ring_nf
+        _ ≤ max ‖(y : E) - (x : E)‖ ‖(x : E)‖ := IsUltrametricDist.norm_add_le_max _ _
+        _ ≤ ‖t‖ ^ n := max_le hy.le hx
+    · rw [mem_nhds_subtype] at hs
+      obtain ⟨U, hU, hUs⟩ := hs
+      obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp (by simpa using hU)
+      obtain ⟨n, hn⟩ := exists_pow_lt_of_lt_one hε ht1
+      refine ⟨n, fun x hx => hUs ?_⟩
+      rw [SetLike.mem_coe, mem_span_unitBall_pow_iff htu ht1.le ht0 hscale] at hx
+      rw [Set.mem_preimage]
+      refine hball ?_
+      rw [Metric.mem_ball, dist_zero_right]
+      exact lt_of_le_of_lt hx hn
+
+/-- Generic Huber structure from a scaling pseudouniformizer. -/
+theorem isHuberRing_of_scale (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)
+    (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) : IsHuberRing E :=
+  ⟨⟨unitBallPod t htu ht1 ht0 hscale⟩⟩
+
+/-- Generic Tate structure from a scaling pseudouniformizer. -/
+theorem isTateRing_of_scale (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)
+    (hscale : ∀ x : E, ‖t * x‖ = ‖t‖ * ‖x‖) : IsTateRing E := by
+  have _ : IsHuberRing E := isHuberRing_of_scale t htu ht1 ht0 hscale
+  refine ⟨⟨htu.unit, ?_⟩⟩
+  show Tendsto (fun n : ℕ => ((htu.unit : Eˣ) : E) ^ n) atTop (𝓝 0)
+  simp only [IsUnit.unit_spec]
+  rw [tendsto_zero_iff_norm_tendsto_zero]
+  have hnorm : ∀ n : ℕ, ‖t ^ n‖ = ‖t‖ ^ n := fun n => by
+    have := norm_pow_mul_of_scale (E := E) hscale n 1
+    rwa [mul_one, norm_one, mul_one] at this
+  simp only [hnorm]
+  exact tendsto_pow_atTop_nhds_zero_of_lt_one ht0.le ht1
+
 end InstanceStack
 
-instance : IsHuberRing (JetA F) := by sorry
-instance : IsHuberRing (JetB F) := by sorry
-instance : IsHuberRing (JetC F) := by sorry
-instance : IsHuberRing (JetD F) := by sorry
+/-! ### Scaling pseudouniformizers for the four rings -/
 
-instance : IsTateRing (JetA F) := by sorry
-instance : IsTateRing (JetB F) := by sorry
-instance : IsTateRing (JetC F) := by sorry
-instance : IsTateRing (JetD F) := by sorry
+/-- Constants of the vendored `K⟨W⟩`, as a ring homomorphism. -/
+noncomputable def constHomPS : K →+* PowerSeries.Restricted K (1 : ℝ) where
+  toFun x := PowerSeries.Restricted.C (1 : ℝ) x
+  map_one' := Subtype.ext (map_one PowerSeries.C)
+  map_mul' x y := Subtype.ext (map_mul PowerSeries.C x y)
+  map_zero' := Subtype.ext (map_zero PowerSeries.C)
+  map_add' x y := Subtype.ext (map_add PowerSeries.C x y)
+
+/-- Scaling by a `K`-constant in `𝒞`. -/
+theorem norm_constC_mul (a : K) (f : JetC F) : ‖constC F a * f‖ = ‖a‖ * ‖f‖ := by
+  rw [Restricted.norm_eq, Restricted.norm_eq, PowerSeries.gaussNorm_eq,
+    PowerSeries.gaussNorm_eq, Real.mul_iSup_of_nonneg (norm_nonneg a)]
+  refine iSup_congr fun i => ?_
+  rw [show (constC F a * f).1 = PowerSeries.C (RestrictedLaurent.C a) * f.1 from rfl,
+    PowerSeries.coeff_C_mul, norm_C_mul]
+  ring
+
+instance : NormOneClass (JetA F) :=
+  ⟨by
+    show ‖((1 : JetA F) : JetC F)‖ = 1
+    rw [show ((1 : JetA F) : JetC F) = 1 from rfl, norm_one]⟩
+
+theorem norm_tA : ‖tA F‖ = ‖LaurentSeriesExample.t F‖ := norm_constA F _
+
+/-- Scaling by `tA` in `𝓐` (restriction of the `𝒞`-statement). -/
+theorem norm_tA_mul (x : JetA F) : ‖tA F * x‖ = ‖tA F‖ * ‖x‖ := by
+  show ‖(constC F (LaurentSeriesExample.t F) * (x : JetC F) : JetC F)‖ = _
+  rw [norm_constC_mul]
+  congr 1
+  exact (norm_tA F).symm
+
+/-- The pseudouniformizer of `𝓑`. -/
+noncomputable def tB : JetB F := TrivSqZeroExt.inl (constHomPS F (LaurentSeriesExample.t F))
+
+theorem norm_tB : ‖tB F‖ = ‖LaurentSeriesExample.t F‖ := by
+  rw [tB, JetNorm.norm_inl]
+  exact norm_restrictedC _
+
+theorem isUnit_tB : IsUnit (tB F) := by
+  refine IsUnit.map ((TrivSqZeroExt.inlHom _ _).comp (constHomPS F)) ?_
+  exact (LaurentSeriesExample.t_ne_zero F).isUnit
+
+theorem norm_tB_mul (x : JetB F) : ‖tB F * x‖ = ‖tB F‖ * ‖x‖ := by
+  have hsnd : (tB F * x).snd = constHomPS F (LaurentSeriesExample.t F) * x.snd := by
+    rw [TrivSqZeroExt.snd_mul, smul_eq_mul, op_smul_eq_mul]
+    show _ + (tB F).snd * x.fst = _
+    rw [show (tB F).snd = 0 from rfl, zero_mul, add_zero]
+    rfl
+  have hfst : (tB F * x).fst = constHomPS F (LaurentSeriesExample.t F) * x.fst := rfl
+  rw [norm_tB, JetNorm.norm_def, JetNorm.norm_def, hfst, hsnd]
+  show max ‖PowerSeries.Restricted.C (1 : ℝ) _ * x.fst‖
+    ‖PowerSeries.Restricted.C (1 : ℝ) _ * x.snd‖ = _
+  rw [norm_restrictedC_mul, norm_restrictedC_mul,
+    mul_max_of_nonneg _ _ (norm_nonneg (LaurentSeriesExample.t F))]
+
+/-- The pseudouniformizer of `𝓓`. -/
+noncomputable def tD : JetD F := TrivSqZeroExt.inl (RestrictedLaurent.C
+  (LaurentSeriesExample.t F))
+
+theorem norm_tD : ‖tD F‖ = ‖LaurentSeriesExample.t F‖ := by
+  rw [tD, JetNorm.norm_inl]
+  show ‖single 0 _‖ = _
+  rw [norm_single]
+
+theorem isUnit_tD : IsUnit (tD F) := by
+  refine IsUnit.map ((TrivSqZeroExt.inlHom _ _).comp (RestrictedLaurent.C (R := K))) ?_
+  exact (LaurentSeriesExample.t_ne_zero F).isUnit
+
+theorem norm_tD_mul (x : JetD F) : ‖tD F * x‖ = ‖tD F‖ * ‖x‖ := by
+  have hsnd : (tD F * x).snd =
+      RestrictedLaurent.C (LaurentSeriesExample.t F) * x.snd := by
+    rw [TrivSqZeroExt.snd_mul, smul_eq_mul, op_smul_eq_mul]
+    show _ + (tD F).snd * x.fst = _
+    rw [show (tD F).snd = 0 from rfl, zero_mul, add_zero]
+    rfl
+  have hfst : (tD F * x).fst =
+      RestrictedLaurent.C (LaurentSeriesExample.t F) * x.fst := rfl
+  rw [norm_tD, JetNorm.norm_def, JetNorm.norm_def, hfst, hsnd]
+  show max ‖RestrictedLaurent.C _ * x.fst‖ ‖RestrictedLaurent.C _ * x.snd‖ = _
+  rw [norm_C_mul, norm_C_mul,
+    mul_max_of_nonneg _ _ (norm_nonneg (LaurentSeriesExample.t F))]
+
+/-- The pseudouniformizer of `𝒞`. -/
+noncomputable def tC : JetC F := constC F (LaurentSeriesExample.t F)
+
+theorem norm_tC : ‖tC F‖ = ‖LaurentSeriesExample.t F‖ := norm_constC F _
+
+theorem isUnit_tC : IsUnit (tC F) :=
+  IsUnit.map (constC F) (LaurentSeriesExample.t_ne_zero F).isUnit
+
+theorem norm_tC_mul (x : JetC F) : ‖tC F * x‖ = ‖tC F‖ * ‖x‖ := by
+  rw [tC, norm_constC_mul, norm_constC]
+
+/-! ### The Huber/Tate instances -/
+
+instance : IsHuberRing (JetA F) :=
+  isHuberRing_of_scale (tA F) (isUnit_tA F) (norm_tA_lt_one F) (norm_tA_pos F)
+    (norm_tA_mul F)
+instance : IsHuberRing (JetB F) :=
+  isHuberRing_of_scale (tB F) (isUnit_tB F)
+    (by rw [norm_tB]; exact norm_t_lt_one F)
+    (by rw [norm_tB]; exact norm_t_pos F) (norm_tB_mul F)
+instance : IsHuberRing (JetC F) :=
+  isHuberRing_of_scale (tC F) (isUnit_tC F)
+    (by rw [norm_tC]; exact norm_t_lt_one F)
+    (by rw [norm_tC]; exact norm_t_pos F) (norm_tC_mul F)
+instance : IsHuberRing (JetD F) :=
+  isHuberRing_of_scale (tD F) (isUnit_tD F)
+    (by rw [norm_tD]; exact norm_t_lt_one F)
+    (by rw [norm_tD]; exact norm_t_pos F) (norm_tD_mul F)
+
+instance : IsTateRing (JetA F) :=
+  isTateRing_of_scale (tA F) (isUnit_tA F) (norm_tA_lt_one F) (norm_tA_pos F)
+    (norm_tA_mul F)
+instance : IsTateRing (JetB F) :=
+  isTateRing_of_scale (tB F) (isUnit_tB F)
+    (by rw [norm_tB]; exact norm_t_lt_one F)
+    (by rw [norm_tB]; exact norm_t_pos F) (norm_tB_mul F)
+instance : IsTateRing (JetC F) :=
+  isTateRing_of_scale (tC F) (isUnit_tC F)
+    (by rw [norm_tC]; exact norm_t_lt_one F)
+    (by rw [norm_tC]; exact norm_t_pos F) (norm_tC_mul F)
+instance : IsTateRing (JetD F) :=
+  isTateRing_of_scale (tD F) (isUnit_tD F)
+    (by rw [norm_tD]; exact norm_t_lt_one F)
+    (by rw [norm_tD]; exact norm_t_pos F) (norm_tD_mul F)
 
 noncomputable instance : ValuationSpectrum.PlusSubring (JetA F) :=
   ⟨TopologicalRing.powerBoundedSubring.toSubring (JetA F)⟩
