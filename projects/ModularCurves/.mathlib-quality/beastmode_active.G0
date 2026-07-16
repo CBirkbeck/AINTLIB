@@ -1,6 +1,7 @@
-STREAM-G0 ACTIVE (v10.291 dispatch, 2026-07-16) — EXECUTING THE FOUR-STEP MAP TO :112.
+STREAM-G0 TERMINAL (v10.292-G0, 2026-07-16) — ENGINE AXIOM 2 (E3) PROVEN.
 
-CLAIM: rule-5, ONE session. (1) restrict-naturality [carrier-equations, explicit-base-
-ascription]; (2) closure-glue into GH's B2 pair_generates_iff_combos_ne_zero (criterion
-of record, general N — no primality); (3) MASTER-IFF via comp_torsion_mem_zeroSection_iff
-+ torsion_geometricFibre_rank_two; (4) assembly ⟹ Bootstrap:112. Then :195.
+Bootstrap:112 naiveLevelThree_relativelyRepresentable_finiteEtale: AXIOM-CLEAN
+(receipt printed, no sorryAx). Four-step map executed end-to-end; B2 consumed per
+[DEDUP-CC]. Full build green (4224 jobs). Commits b4328afa0/f39df3e9c/1b8f7a1ad
+pushed; boards v10.292-G0. :195 scoped for next firing (coupled Legendre datum —
+T-E12 layer). No claims held.

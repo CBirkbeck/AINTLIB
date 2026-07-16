@@ -22125,3 +22125,42 @@ formalization (Finset root-plumbing) + the B2 assembly + IsNaiveFullLevel packag
 (arbitrary-R killing transfer) closes :86, and the hArb scheme-lift over arbitrary bases (the chart-level
 ring bridge — NB needs the E[3]-scheme structure over NON-REDUCED bases, boarded as the one open
 subtlety) + E[2]-gen close :91/Legendre.
+
+### v10.292-G0 — ★★★ ENGINE AXIOM 2 (E3) IS PROVEN AXIOM-CLEAN: Bootstrap:112 DEAD via the de-Weiled four-step map (STREAM-G0)
+Commits b4328afa0 / f39df3e9c / 1b8f7a1ad (pushed). The v10.291 order EXECUTED end-to-end:
+**`naiveLevelThree_relativelyRepresentable_finiteEtale` — #print axioms = {propext,
+Classical.choice, Quot.sound}. NO sorryAx, NO Weil pairing, NO levelSpaceΓ, NO T-D8.**
+Full build green (4224 jobs). Bootstrap census 5 → 3 (hL :86 / hArb :91 / E[2]-gen :179 —
+OMEGA's three; AX2-Legendre :200 — see below).
+
+**The four steps as landed (LevelStructure/CombinationLevel.lean, ~600 lines):**
+1. Restrict-naturality: restrict_add'/zsmul'/combinationPoint (MonObj.comp_mul +
+   point_smul_eq_comp_mulBy) + **the pulled-combination zero test**
+   (comp_combination_mem_zeroSection_iff): c_v hits the zero section at a field point ⟺ the
+   pulled combination vanishes — congrBase-transported restriction + carrier zero tests +
+   single-point zero-detection + hom_ext splits.
+2. Closure glue: subtype↔ambient closure transport (AddMonoidHom.map_closure/mem_map) — feeding
+   **GH's B2 `pair_generates_iff_combos_ne_zero` per [DEDUP-CC]** (general N: NO primality
+   hypothesis anywhere).
+3. **The master iff** (forall_mem_fullLevelSet_iff_isNaiveFullLevel): locus-membership at every
+   point of T ⟺ IsNaiveFullLevel. Forward: per-k̄-point B2 + the axiom-clean N²-count
+   (torsion_geometricFibre_rank_two) through Point.baseChangeEquiv. Backward: a bad point yields
+   a vanishing combination at Spec(AlgebraicClosure κ(t)) (GammaH-precedent construction),
+   contradicting B2.
+4. Assembly: sectionTorsionMap (killed section ⟿ torsion map) + roundtrips +
+   **fullLevelLocusPointsEquiv** ({T-points of fullLevelLocus over g} ≃ {naive full level
+   structures on E×_S T}); Bootstrap:112 = 12-line wiring ((X.pullbackAlong g).curve =
+   X.curve.baseChange g DEFINITIONALLY; NIsInvertible from IsUnit(3:R) via ΓSpecIso + of_hom).
+
+**PROOF-OPS (fleet):** set-fvars on equiv-VALUES and on TYPES explode instance search — inline
+them (3rd confirmation); concrete-τ subtype proofs need association-robust blocks
+(simp only [assoc] first); `rw [h]; rfl` beats coe-lemma rw-chains when the coes are rfl-lemmas;
+pin Category.assoc's explicit args when both sides re-associate; ↑-free residueField spelling
+(GammaH:901) is the one that elaborates.
+
+**:195 (AX2-Legendre) SCOPED, next firing:** legendreDeltaProblem is the COUPLED subfunctor
+{(L,b) // IsLegendreDatum} (adapted local models + MarksAt(0/1) + ω) — NOT the plain product.
+The carrier = (N=2 fullLevelLocus, 3 combos) ×_S the ±ω scale-torsor, but the points-spec runs
+through the LocalPresentation/IsAdapted/MarksAt machinery (T-E12 layer, OMEGA's substrate).
+Template now proven at E3; the twin needs the coupled-datum dictionary — recommend
+coordination with OMEGA's T-E14' layer at next dispatch.
