@@ -926,9 +926,6 @@ theorem completedPrincipalUnitGradedDeltaActionZMod_apply
       Additive.ofMul ((completedPrincipalUnitGradedDeltaAction (p := p) K n) a x.toMul) :=
   rfl
 
-set_option synthInstance.maxHeartbeats 80000 in
--- The `ZMod p` module instance is built from the quotient's `p`-torsion proof,
--- and synthesizing it for this displayed scalar action needs a larger budget.
 theorem completedPrincipalUnitGradedDeltaActionZMod_apply_eq_smul
     (n : ℕ) [Fact (1 ≤ n)] (a : CyclotomicUnitDelta p)
     (x : Additive (completedPrincipalUnitGradedQuotient p K n)) :
