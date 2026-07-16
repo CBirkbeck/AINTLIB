@@ -803,3 +803,11 @@ instantiates `gluedModuleCompositeTrivialization_transition`, then uses
 hypothesis, abstraction, or proof-resource option. The focused base-change build is green, and the
 changed public chart trivialization still audits to exactly `propext`, `Classical.choice`, and
 `Quot.sound`.
+
+Completed subdependency claim (2026-07-16): proved
+`pullbackSquareTrivialization_precomp_normalize`, the option-free composition of the existing
+precomposition and common-pullback normalization lemmas. This separates the repeated one-side
+normalization from the final finite-stage compatibility theorem without adding any geometric
+hypothesis or abstraction specific to modular curves. The focused trivialization-restriction build
+is green, and the theorem has exactly `propext`, `Classical.choice`, and `Quot.sound` in its axiom
+audit.

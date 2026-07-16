@@ -624,6 +624,34 @@ theorem pullbackSquareTrivialization_precomp_hom
   rw [pullbackSquareTrivialization_refl_hom] at hv
   exact hv
 
+/-- Pulling a square-transported trivialization back once and normalizing it through a common
+composite agrees with the corresponding composite-pullback trivialization. -/
+theorem pullbackSquareTrivialization_precomp_normalize
+    {A B C D E : Scheme.{u}}
+    (p : A ⟶ B) (d : B ⟶ D) (g : D ⟶ E)
+    (s : A ⟶ D) (hp : p ≫ d = s)
+    (c : B ⟶ C) (r : C ⟶ E) (w : A ⟶ E)
+    (hBase : d ≫ g = c ≫ r)
+    (hSource : p ≫ (d ≫ g) = s ≫ g)
+    (hCommon : s ≫ g = w) (hw : (p ≫ c) ≫ r = w)
+    (N : E.Modules) (t : (pullback r).obj N ≅ unitObj C) :
+    (pullback p).map
+          (pullbackSquareTrivialization d g c r hBase N t).hom ≫
+        (pullbackUnitIso p).hom =
+      ((((pullbackComp p d).app ((pullback g).obj N)) ≪≫
+          ((pullbackCongr hp).app ((pullback g).obj N))).hom) ≫
+        ((((pullbackComp s g).app N) ≪≫
+          ((pullbackCongr hCommon).app N)).hom) ≫
+        (pullbackCompositeTrivialization (p ≫ c) r w hw N t).hom := by
+  let hOuter : p ≫ (d ≫ g) = (p ≫ c) ≫ r :=
+    (Category.assoc p d g).symm.trans
+      ((congrArg (p ≫ ·) hBase).trans (Category.assoc p c r))
+  have hpre := pullbackSquareTrivialization_precomp_hom
+    p d g c r hBase N t
+  have hnorm := pullbackSquareTrivialization_normalize
+    p d g s hp (p ≫ c) r w hOuter hSource hCommon hw N t
+  exact hpre.trans hnorm
+
 /-- The precomposition rule for a square-transported trivialization, with two successive
 pullbacks left unflattened on the source. -/
 theorem pullbackSquareTrivialization_comp_precomp_hom
