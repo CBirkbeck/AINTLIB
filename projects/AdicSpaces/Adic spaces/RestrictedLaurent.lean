@@ -46,6 +46,7 @@ namespace RestrictedLaurent
 
 variable {R : Type*} [NormedCommRing R] [IsUltrametricDist R]
 
+omit [IsUltrametricDist R] in
 @[ext]
 theorem ext {f g : RestrictedLaurent R} (h : ∀ a, f.coeff a = g.coeff a) : f = g := by
   cases f; cases g; simp only [mk.injEq]; exact funext h
@@ -97,7 +98,7 @@ along cofinite ([FJP] §1 and Prop 2.3 use this implicitly via the support descr
 
 /-- The zero series. -/
 instance : Zero (RestrictedLaurent R) :=
-  ⟨⟨fun _ => 0, by simpa using tendsto_const_nhds⟩⟩
+  ⟨⟨fun _ => 0, by simp only [norm_zero]; exact tendsto_const_nhds⟩⟩
 
 /-- The one series (coefficient `1` at `0`). -/
 instance : One (RestrictedLaurent R) :=
@@ -131,11 +132,22 @@ omit [IsUltrametricDist R] in
 omit [IsUltrametricDist R] in
 @[simp] theorem coeff_neg (f : RestrictedLaurent R) (a : ℤ) : (-f).coeff a = -f.coeff a := rfl
 
+/-- The monomial `c · W^a`. -/
+def single (a : ℤ) (c : R) : RestrictedLaurent R :=
+  ⟨fun b => if b = a then c else 0, by
+    refine tendsto_nhds_of_eventually_eq
+      ((Filter.eventually_cofinite_ne a).mono fun b hb => ?_)
+    simp [if_neg hb]⟩
+
+omit [IsUltrametricDist R] in
+@[simp] theorem coeff_single (a b : ℤ) (c : R) :
+    (single a c).coeff b = if b = a then c else 0 := rfl
+
 section Complete
 
 variable [CompleteSpace R]
 
-omit [IsUltrametricDist R] in
+omit [IsUltrametricDist R] [CompleteSpace R] in
 /-- Termwise norm decay of the convolution family, for a fixed target index. -/
 theorem tendsto_conv_term (f g : RestrictedLaurent R) (m : ℤ) :
     Tendsto (fun a : ℤ => ‖f.coeff a * g.coeff (m - a)‖) cofinite (𝓝 0) := by
@@ -175,7 +187,7 @@ noncomputable instance : Mul (RestrictedLaurent R) :=
       · -- then `m - a` is not in `S₂`
         have hb : ¬ ε / 2 / Cf ≤ ‖g.coeff (m - a)‖ := fun hb =>
           hnot ⟨a, ha, m - a, hb, by ring⟩
-        push_neg at hb
+        push Not at hb
         calc ‖f.coeff a * g.coeff (m - a)‖ ≤ ‖f.coeff a‖ * ‖g.coeff (m - a)‖ :=
               norm_mul_le _ _
           _ ≤ Cf * ‖g.coeff (m - a)‖ :=
@@ -183,7 +195,7 @@ noncomputable instance : Mul (RestrictedLaurent R) :=
           _ ≤ Cf * (ε / 2 / Cf) :=
               mul_le_mul_of_nonneg_left hb.le (by positivity)
           _ = ε / 2 := by field_simp
-      · push_neg at ha
+      · push Not at ha
         calc ‖f.coeff a * g.coeff (m - a)‖ ≤ ‖f.coeff a‖ * ‖g.coeff (m - a)‖ :=
               norm_mul_le _ _
           _ ≤ ‖f.coeff a‖ * Cg :=
@@ -315,24 +327,14 @@ noncomputable instance : CommRing (RestrictedLaurent R) where
 
 /-! ### Monomials and the algebra structure -/
 
-/-- The monomial `c · W^a`. -/
-def single (a : ℤ) (c : R) : RestrictedLaurent R :=
-  ⟨fun b => if b = a then c else 0, by
-    refine tendsto_nhds_of_eventually_eq
-      ((Filter.eventually_cofinite_ne a).mono fun b hb => ?_)
-    simp [if_neg hb]⟩
-
-@[simp] theorem coeff_single (a b : ℤ) (c : R) :
-    (single a c).coeff b = if b = a then c else 0 := rfl
-
 theorem single_mul_single (a b : ℤ) (c d : R) :
     single a c * single b d = single (a + b) (c * d) := by
   ext m
   rw [coeff_mul, tsum_eq_single a (fun x hx => by simp [coeff_single, if_neg hx])]
-  simp only [coeff_single, if_pos rfl]
+  simp only [coeff_single]
   by_cases hm : m = a + b
   · have : m - a = b := by omega
-    simp [this, hm]
+    simp [hm]
   · have : ¬ m - a = b := fun h => hm (by omega)
     simp [if_neg this, if_neg hm]
 
@@ -373,6 +375,7 @@ is restricted. -/
 /-- The sup norm of a restricted Laurent series. -/
 noncomputable def gaussNorm (f : RestrictedLaurent R) : ℝ := ⨆ a : ℤ, ‖f.coeff a‖
 
+omit [IsUltrametricDist R] in
 theorem norm_coeff_le_gaussNorm (f : RestrictedLaurent R) (a : ℤ) :
     ‖f.coeff a‖ ≤ gaussNorm f :=
   le_ciSup f.tendsto_coeff.bddAbove_range_of_cofinite a
@@ -386,7 +389,7 @@ theorem exists_gaussNorm_eq (f : RestrictedLaurent R) (hf : f ≠ 0) :
     ∃ a : ℤ, gaussNorm f = ‖f.coeff a‖ ∧ f.coeff a ≠ 0 := by
   have hne : ∃ a₀, f.coeff a₀ ≠ 0 := by
     by_contra h
-    push_neg at h
+    push Not at h
     exact hf (ext fun a => by rw [h a, coeff_zero])
   obtain ⟨a₀, ha₀⟩ := hne
   have hpos : 0 < ‖f.coeff a₀‖ := norm_pos_iff.mpr ha₀
@@ -528,7 +531,7 @@ instance [CompleteSpace R] [NormOneClass R] : CompleteSpace (RestrictedLaurent R
         _ ≤ ‖a n - (u N₁).coeff n‖ + ‖(u N₁).coeff n‖ := norm_add_le _ _
         _ = ‖(u N₁).coeff n - a n‖ + ‖(u N₁).coeff n‖ := by rw [norm_sub_rev]
     by_contra hcon
-    push_neg at hcon
+    push Not at hcon
     have : ‖(u N₁).coeff n‖ < ε / 3 := hcon.trans_le (by linarith)
     linarith [hn, this]
   set F : RestrictedLaurent R := ⟨a, hf⟩ with hF
@@ -560,6 +563,7 @@ section Field
 
 variable {K : Type*} [NormedField K] [IsUltrametricDist K] [CompleteSpace K]
 
+omit [CompleteSpace K] in
 /-- A nonarchimedean sum whose terms all lie strictly below a positive bound stays strictly
 below it (the sup of a restricted family is attained, so the strict bound survives). -/
 theorem norm_tsum_lt_of_forall_lt {F : ℤ → K}
@@ -591,7 +595,7 @@ theorem norm_tsum_lt_of_forall_lt {F : ℤ → K}
 with discrete value group ([FJP] Prop 2.3; the hypothesis `hd` records the discreteness of
 the [FJP] setting — the minimal-achiever proof below in fact works for any complete
 nonarchimedean field). -/
-theorem norm_mul_eq (hd : ∀ x : K, x ≠ 0 → ∃ n : ℤ, ‖x‖ = (2 : ℝ) ^ n)
+theorem norm_mul_eq (_hd : ∀ x : K, x ≠ 0 → ∃ n : ℤ, ‖x‖ = (2 : ℝ) ^ n)
     (f g : RestrictedLaurent K) : ‖f * g‖ = ‖f‖ * ‖g‖ := by
   classical
   rcases eq_or_ne f 0 with rfl | hf
@@ -664,7 +668,7 @@ theorem norm_mul_eq (hd : ∀ x : K, x ≠ 0 → ∃ n : ℤ, ‖x‖ = (2 : ℝ
     refine le_antisymm ((IsUltrametricDist.norm_add_le_max x y).trans
       (max_le le_rfl hyx.le)) ?_
     by_contra hcon
-    push_neg at hcon
+    push Not at hcon
     have hle : ‖x‖ ≤ max ‖x + y‖ ‖y‖ := by
       have h1 : ‖x + y + -y‖ ≤ max ‖x + y‖ ‖-y‖ := IsUltrametricDist.norm_add_le_max _ _
       rw [add_neg_cancel_right, norm_neg] at h1
