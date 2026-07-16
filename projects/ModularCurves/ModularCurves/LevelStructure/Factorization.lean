@@ -625,6 +625,43 @@ theorem RelEffCartierDiv.IsSubgroup.exists_combMap {D : RelEffCartierDiv E.π}
   · exact (hH _).mpr ⟨pullback.snd _ _ ≫ D.smulKernelι E c₂, by
       rw [Category.assoc]⟩
 
+section ProductDecomposition
+
+variable {D : RelEffCartierDiv E.π} (hD : D.IsSubgroup E) {N : ℕ} [NeZero N]
+
+/-- **[F3-prod-toM]** The chosen `(3.5.1.3)`-projection `G ⟶ Ker[c']` (data form of
+`exists_toSmulKernel`). -/
+noncomputable def RelEffCartierDiv.IsSubgroup.toSmulKernel
+    (hdeg : ∀ s : S, D.degree s = N) {c c' : ℤ} (hcc : (c' * c) % (N : ℤ) = 0) :
+    D.ideal.subscheme ⟶ D.smulKernel E c' :=
+  (RelEffCartierDiv.IsSubgroup.exists_toSmulKernel E hD hdeg hcc).choose
+
+theorem RelEffCartierDiv.IsSubgroup.toSmulKernel_π
+    (hdeg : ∀ s : S, D.degree s = N) {c c' : ℤ} (hcc : (c' * c) % (N : ℤ) = 0) :
+    RelEffCartierDiv.IsSubgroup.toSmulKernel E hD hdeg hcc ≫ D.smulKernelπ E c'
+      = D.ideal.subschemeι ≫ E.π :=
+  (RelEffCartierDiv.IsSubgroup.exists_toSmulKernel E hD hdeg hcc).choose_spec.1
+
+theorem RelEffCartierDiv.IsSubgroup.toSmulKernel_ι
+    (hdeg : ∀ s : S, D.degree s = N) {c c' : ℤ} (hcc : (c' * c) % (N : ℤ) = 0) :
+    RelEffCartierDiv.IsSubgroup.toSmulKernel E hD hdeg hcc ≫ D.smulKernelι E c'
+        ≫ D.ideal.subschemeι
+      = D.ideal.subschemeι ≫ E.mulByHom c :=
+  (RelEffCartierDiv.IsSubgroup.exists_toSmulKernel E hD hdeg hcc).choose_spec.2
+
+/-- **[F3-prodMap]** KM's product decomposition map `G ⟶ Ker[M] ×_S Ker[K]`,
+components the `(3.5.1.3)`-projections `(K·, M·)`. -/
+noncomputable def RelEffCartierDiv.IsSubgroup.prodMap
+    (hdeg : ∀ s : S, D.degree s = N) {c₁ c₂ : ℤ}
+    (h₁ : (c₁ * c₂) % (N : ℤ) = 0) (h₂ : (c₂ * c₁) % (N : ℤ) = 0) :
+    D.ideal.subscheme ⟶ pullback (D.smulKernelπ E c₁) (D.smulKernelπ E c₂) :=
+  pullback.lift (RelEffCartierDiv.IsSubgroup.toSmulKernel E hD hdeg h₁)
+    (RelEffCartierDiv.IsSubgroup.toSmulKernel E hD hdeg h₂)
+    ((RelEffCartierDiv.IsSubgroup.toSmulKernel_π E hD hdeg h₁).trans
+      (RelEffCartierDiv.IsSubgroup.toSmulKernel_π E hD hdeg h₂).symm)
+
+end ProductDecomposition
+
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
 order `M` and `M·P` has exact order `K`.
