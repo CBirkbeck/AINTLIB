@@ -440,89 +440,70 @@ these are exactly the non-self-dual characters. -/
 def nonselfdualCharacterFinset : Finset (DirichletCharacter ℂ p) :=
   (Finset.univ.erase (1 : DirichletCharacter ℂ p)).erase (quadraticCharComplex p)
 
+/-- The `δ₀` scalar times the trivial-character scalar is `1`: the normalisation
+`(√p)⁻¹ · ((√p)⁻¹ · p) = 1`, using `√p ^ 2 = p`. -/
+theorem normalizedDftConstOneBasisScalar_none_mul_some_one :
+    normalizedDftConstOneBasisScalar (p := p) none *
+      normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p)) = 1 := by
+  have hp_nonneg : (0 : ℝ) ≤ p := Nat.cast_nonneg p
+  have hsqrt_ne : (Real.sqrt p : ℂ) ≠ 0 := by
+    exact_mod_cast Real.sqrt_ne_zero'.2 (by exact_mod_cast hp.out.pos)
+  have hsq : ((Real.sqrt p : ℂ) ^ 2) = (p : ℂ) := by
+    exact_mod_cast (Real.sq_sqrt hp_nonneg)
+  simp [normalizedDftConstOneBasisScalar]
+  field_simp [hsqrt_ne]
+  simpa [pow_two, mul_assoc] using hsq.symm
+
+/-- The product of the DFT scalars over all Dirichlet characters (in the `some`
+slot), split off the trivial character `1` and the quadratic character: it equals
+the scalar at `1`, times the scalar at the quadratic character, times the product
+over the non-self-dual characters. Peels `χ = 1` and `χ = quadraticChar` off the
+full character product via `Finset.mul_prod_erase`. -/
+theorem prod_someBasisScalars_eq_trivialScalar_mul_quadraticScalar_mul_prod_nonselfdualScalars
+    (hp₂ : p ≠ 2) :
+    ∏ χ : DirichletCharacter ℂ p, normalizedDftConstOneBasisScalar (p := p) (some χ) =
+      normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p)) *
+        (normalizedDftConstOneBasisScalar (p := p) (some (quadraticCharComplex p)) *
+          Finset.prod (nonselfdualCharacterFinset (p := p))
+            (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ))) := by
+  let q : DirichletCharacter ℂ p := quadraticCharComplex p
+  have hq_ne : q ≠ (1 : DirichletCharacter ℂ p) := quadraticCharComplex_ne_one (p := p) hp₂
+  let f : DirichletCharacter ℂ p → ℂ :=
+    fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ)
+  have h1 :
+      f 1 * Finset.prod (Finset.univ.erase (1 : DirichletCharacter ℂ p)) f = ∏ χ, f χ := by
+    simpa [f] using
+      (Finset.mul_prod_erase (Finset.univ : Finset (DirichletCharacter ℂ p)) f (by simp))
+  have hq :
+      f q * Finset.prod ((Finset.univ.erase (1 : DirichletCharacter ℂ p)).erase q) f =
+        Finset.prod (Finset.univ.erase (1 : DirichletCharacter ℂ p)) f := by
+    simpa [f] using
+      (Finset.mul_prod_erase
+        ((Finset.univ : Finset (DirichletCharacter ℂ p)).erase (1 : DirichletCharacter ℂ p))
+        f (by simp [hq_ne]))
+  calc
+    ∏ χ, f χ = f 1 * Finset.prod (Finset.univ.erase (1 : DirichletCharacter ℂ p)) f := by
+      symm
+      exact h1
+    _ = f 1 * (f q * Finset.prod (nonselfdualCharacterFinset (p := p)) f) := by
+      rw [← hq]
+      simp [nonselfdualCharacterFinset, q]
+    _ = normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p)) *
+          (normalizedDftConstOneBasisScalar (p := p) (some (quadraticCharComplex p)) *
+            Finset.prod (nonselfdualCharacterFinset (p := p))
+              (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ))) := by
+        simp [f, q]
+
 /-- Splitting the scalar product off the trivial and quadratic lines. -/
 theorem prod_basisScalars_eq_quadraticScalar_mul_prod_nonselfdualScalars (hp₂ : p ≠ 2) :
     ∏ i, normalizedDftConstOneBasisScalar (p := p) i =
       normalizedDftConstOneBasisScalar (p := p) (some (quadraticCharComplex p)) *
         Finset.prod (nonselfdualCharacterFinset (p := p))
           (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ)) := by
-  rw [Fintype.prod_option]
-  let q : DirichletCharacter ℂ p := quadraticCharComplex p
-  have hq_ne : q ≠ (1 : DirichletCharacter ℂ p) := quadraticCharComplex_ne_one (p := p) hp₂
-  have htriv :
-      normalizedDftConstOneBasisScalar (p := p) none *
-        normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p)) = 1 := by
-    have hp_nonneg : (0 : ℝ) ≤ p := Nat.cast_nonneg p
-    have hsqrt_ne : (Real.sqrt p : ℂ) ≠ 0 := by
-      exact_mod_cast Real.sqrt_ne_zero'.2 (by exact_mod_cast hp.out.pos)
-    have hsq : ((Real.sqrt p : ℂ) ^ 2) = (p : ℂ) := by
-      exact_mod_cast (Real.sq_sqrt hp_nonneg)
-    simp [normalizedDftConstOneBasisScalar]
-    field_simp [hsqrt_ne]
-    simpa [pow_two, mul_assoc] using hsq.symm
-  have hprod_chars :
-      ∏ χ : DirichletCharacter ℂ p, normalizedDftConstOneBasisScalar (p := p) (some χ) =
-        normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p)) *
-          (normalizedDftConstOneBasisScalar (p := p) (some q) *
-            Finset.prod (nonselfdualCharacterFinset (p := p))
-              (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ))) := by
-    let f : DirichletCharacter ℂ p → ℂ :=
-      fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ)
-    have h1 :
-        f 1 * Finset.prod (Finset.univ.erase (1 : DirichletCharacter ℂ p)) f = ∏ χ, f χ := by
-      simpa [f] using
-        (Finset.mul_prod_erase (Finset.univ : Finset (DirichletCharacter ℂ p)) f (by simp))
-    have hq :
-        f q * Finset.prod ((Finset.univ.erase (1 : DirichletCharacter ℂ p)).erase q) f =
-          Finset.prod (Finset.univ.erase (1 : DirichletCharacter ℂ p)) f := by
-      simpa [f] using
-        (Finset.mul_prod_erase
-          ((Finset.univ : Finset (DirichletCharacter ℂ p)).erase (1 : DirichletCharacter ℂ p))
-          f (by simp [hq_ne]))
-    calc
-      ∏ χ, f χ = f 1 * Finset.prod (Finset.univ.erase (1 : DirichletCharacter ℂ p)) f := by
-        symm
-        exact h1
-      _ = f 1 * (f q * Finset.prod (nonselfdualCharacterFinset (p := p)) f) := by
-        rw [← hq]
-        simp [nonselfdualCharacterFinset, q]
-      _ = normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p)) *
-            (normalizedDftConstOneBasisScalar (p := p) (some q) *
-              Finset.prod (nonselfdualCharacterFinset (p := p))
-                (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ))) := by
-          simp [f]
-  have hstep1 :
-      normalizedDftConstOneBasisScalar (p := p) none *
-          ∏ i, normalizedDftConstOneBasisScalar (p := p) (some i) =
-        normalizedDftConstOneBasisScalar (p := p) none *
-          (normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p)) *
-            (normalizedDftConstOneBasisScalar (p := p) (some q) *
-              Finset.prod (nonselfdualCharacterFinset (p := p))
-                (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ)))) :=
-    congrArg (fun z ↦ normalizedDftConstOneBasisScalar (p := p) none * z) hprod_chars
-  calc
-    normalizedDftConstOneBasisScalar (p := p) none *
-        ∏ i, normalizedDftConstOneBasisScalar (p := p) (some i)
-        = normalizedDftConstOneBasisScalar (p := p) none *
-            (normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p)) *
-              (normalizedDftConstOneBasisScalar (p := p) (some q) *
-                Finset.prod (nonselfdualCharacterFinset (p := p))
-                  (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ)))) := hstep1
-    _ = (normalizedDftConstOneBasisScalar (p := p) none *
-          normalizedDftConstOneBasisScalar (p := p) (some (1 : DirichletCharacter ℂ p))) *
-            (normalizedDftConstOneBasisScalar (p := p) (some q) *
-              Finset.prod (nonselfdualCharacterFinset (p := p))
-                (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ))) := by
-            ring_nf
-    _ = normalizedDftConstOneBasisScalar (p := p) (some q) *
-          Finset.prod (nonselfdualCharacterFinset (p := p))
-            (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ)) := by
-            rw [htriv]
-            simp
-    _ = normalizedDftConstOneBasisScalar (p := p) (some (quadraticCharComplex p)) *
-          Finset.prod (nonselfdualCharacterFinset (p := p))
-            (fun χ ↦ normalizedDftConstOneBasisScalar (p := p) (some χ)) := by
-            simp [q]
+  rw [Fintype.prod_option,
+    prod_someBasisScalars_eq_trivialScalar_mul_quadraticScalar_mul_prod_nonselfdualScalars
+      (p := p) hp₂,
+    ← mul_assoc, normalizedDftConstOneBasisScalar_none_mul_some_one (p := p), one_mul]
 
 /-- The determinant after that split. -/
 theorem det_normalizedDft_eq_quadraticScalar_mul_prod_nonselfdualScalars (hp₂ : p ≠ 2) :
