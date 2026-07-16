@@ -174,4 +174,35 @@ theorem projModelPointsEquiv_affineSectionSpecPoint {K : Type u} [Field K] [Alge
     (by rw [affineSectionSpecPoint_coord W p q h ⟨0, by decide⟩]; rfl)
     (by rw [affineSectionSpecPoint_coord W p q h ⟨1, by decide⟩]; rfl)
 
+/-! ## The general-base additive dictionary
+
+`projModelPointsEquiv` is additive on `K`-points of the model over **any ring base** —
+the field-base restriction of `projModelPointsEquiv_add`/`projModelPointsAddEquiv`
+(`MulByHomDegree.lean`) was incidental: both of its inputs
+(`modelEllipticCurve_point_add_val` and `mulModelHom_specPoints`) are general-base. -/
+
+section AddDict
+
+variable [W.IsElliptic] {K' : Type u} [Field K'] [DecidableEq K'] [Algebra R K']
+
+/-- **(Stage B-7)** The dictionary is additive over a general ring base. -/
+theorem projModelPointsEquiv_point_add
+    (P Q : (modelEllipticCurve W).Point
+      (Spec.map (CommRingCat.ofHom (algebraMap R K')))) :
+    projModelPointsEquiv W K' ⟨(P + Q).1, (P + Q).2⟩
+      = projModelPointsEquiv W K' ⟨P.1, P.2⟩ + projModelPointsEquiv W K' ⟨Q.1, Q.2⟩ := by
+  rw [← mulModelHom_specPoints W K' ⟨P.1, P.2⟩ ⟨Q.1, Q.2⟩]
+  exact congrArg (projModelPointsEquiv W K')
+    (Subtype.ext (modelEllipticCurve_point_add_val W P Q))
+
+/-- **(Stage B-7)** The point group of the model over a general ring base, at a field
+point, is additively equivalent to mathlib's affine point group of the fibre. -/
+noncomputable def modelPointAddEquiv :
+    (modelEllipticCurve W).Point (Spec.map (CommRingCat.ofHom (algebraMap R K')))
+      ≃+ (W.baseChange K').toAffine.Point :=
+  { Equiv.subtypeEquivProp rfl |>.trans (projModelPointsEquiv W K') with
+    map_add' := projModelPointsEquiv_point_add W }
+
+end AddDict
+
 end ModularCurves
