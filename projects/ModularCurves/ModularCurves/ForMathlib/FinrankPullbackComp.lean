@@ -184,4 +184,63 @@ lemma finrank_pullback_comp_fst_of_spec {R : CommRingCat.{u}} {X Y : Scheme.{u}}
     (IsFinite.SpecMap_iff φ |>.mp hφi) (Flat.SpecMap_iff.mp hφf)
     (IsFinite.SpecMap_iff ψ |>.mp hψi) (Flat.SpecMap_iff.mp hψf) p
 
+/-- **The fibre-product rank formula** (mathlib-PR shape — belongs next to
+`Scheme.Hom.finrank_pullback_snd`): for finite flat `f g` over any base,
+`deg (X ×_S Y → S) = deg X · deg Y` pointwise. -/
+theorem finrank_pullback_comp_fst {X Y : Scheme.{u}} (f : X ⟶ S) (g : Y ⟶ S)
+    [Flat f] [IsFinite f] [Flat g] [IsFinite g] (s : S) :
+    (pullback.fst f g ≫ f).finrank s = f.finrank s * g.finrank s := by
+  haveI : Flat (pullback.fst f g ≫ f) :=
+    MorphismProperty.comp_mem _ _ _
+      (MorphismProperty.pullback_fst (P := @Flat) _ _ ‹_›) ‹_›
+  haveI : IsFinite (pullback.fst f g ≫ f) :=
+    MorphismProperty.comp_mem _ _ _
+      (MorphismProperty.pullback_fst (P := @IsFinite) _ _ ‹_›) ‹_›
+  obtain ⟨R, i, hi, s', rfl⟩ := S.exists_Spec_apply_eq s
+  haveI hfRf : Flat (pullback.snd f i) :=
+    MorphismProperty.pullback_snd (P := @Flat) _ _ ‹_›
+  haveI hfRi : IsFinite (pullback.snd f i) :=
+    MorphismProperty.pullback_snd (P := @IsFinite) _ _ ‹_›
+  haveI hgRf : Flat (pullback.snd g i) :=
+    MorphismProperty.pullback_snd (P := @Flat) _ _ ‹_›
+  haveI hgRi : IsFinite (pullback.snd g i) :=
+    MorphismProperty.pullback_snd (P := @IsFinite) _ _ ‹_›
+  -- the comparison square: the product of restrictions is the restriction of the product
+  have hpb : IsPullback
+      (pullback.map (pullback.snd f i) (pullback.snd g i) f g
+        (pullback.fst f i) (pullback.fst g i) i
+        pullback.condition.symm pullback.condition.symm)
+      (pullback.fst (pullback.snd f i) (pullback.snd g i) ≫ pullback.snd f i)
+      (pullback.fst f g ≫ f) i := by
+    have weq : pullback.map (pullback.snd f i) (pullback.snd g i) f g
+          (pullback.fst f i) (pullback.fst g i) i
+          pullback.condition.symm pullback.condition.symm ≫ (pullback.fst f g ≫ f)
+        = (pullback.fst (pullback.snd f i) (pullback.snd g i) ≫ pullback.snd f i) ≫ i := by
+      rw [← Category.assoc, pullback.lift_fst, Category.assoc, Category.assoc,
+        pullback.condition (f := f) (g := i)]
+    refine IsPullback.of_isLimit (PullbackCone.IsLimit.mk weq
+      (fun s => pullback.lift
+        (pullback.lift (s.fst ≫ pullback.fst f g) s.snd
+          (by rw [Category.assoc]; exact s.condition))
+        (pullback.lift (s.fst ≫ pullback.snd f g) s.snd
+          (by rw [Category.assoc, ← pullback.condition (f := f) (g := g)]
+              exact s.condition))
+        (by rw [pullback.lift_snd, pullback.lift_snd]))
+      (fun s => ?_) (fun s => ?_) (fun s m hm₁ hm₂ => ?_))
+    · -- fac_left : lift ≫ map = s.fst
+      apply pullback.hom_ext <;>
+        simp only [Category.assoc, pullback.lift_fst, pullback.lift_snd,
+          pullback.lift_fst_assoc, pullback.lift_snd_assoc]
+    · -- fac_right : lift ≫ (fstQ ≫ fR) = s.snd
+      rw [← Category.assoc, pullback.lift_fst, pullback.lift_snd]
+    · -- uniqueness
+      apply pullback.hom_ext <;> [apply pullback.hom_ext; apply pullback.hom_ext] <;>
+        simp only [← hm₁, ← hm₂, Category.assoc, pullback.lift_fst, pullback.lift_snd]
+      exact congrArg (m ≫ ·)
+        (pullback.condition (f := pullback.snd f i) (g := pullback.snd g i)).symm
+
+  rw [← Scheme.Hom.finrank_pullback_snd f i s', ← Scheme.Hom.finrank_pullback_snd g i s',
+    ← Scheme.Hom.finrank_of_isPullback _ _ _ _ hpb s']
+  exact finrank_pullback_comp_fst_of_spec (pullback.snd f i) (pullback.snd g i) s'
+
 end ModularCurves
