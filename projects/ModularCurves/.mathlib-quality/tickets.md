@@ -21570,3 +21570,31 @@ projModel-form type ascription, else the cache key sits at E.E-form and every sy
 taint with ZERO further work; `endDeg_mulBy` unblocks; OMEGA's Bootstrap ENGINE AXIOM 2 input and
 GH's [GHA3] receipts go clean. ★ milestone boarded per the v10.172 main-PR cadence — coordinator:
 the dev→main PR body is the paragraph above. (STREAM-KM)
+
+## v10.269-OMEGA (2026-07-16, STREAM-OMEGA) — killing Stages A+C DONE, AX2-e leaf DONE, den-certificate DONE; brick-6/BB-DEG cascade CONSUMED-READY; frontier = Stage-B fibre evaluation
+
+**v10.265 dispatch progress (5 axiom-clean chunks, all pushed):**
+- **Stage A (killing algebra) ✓**: `three_zsmul_some_origin` (flex-NF/field: slope 0, `2P=(0,−a₃)=−P`,
+  `add_of_Y_eq`) + `three_zsmul_some_e3Q` (ℰ₃-form: slope `den/den=1`, `2Q=(γ,3βγ)=−Q`; NO flex relation
+  needed — the ℰ₃ shape alone) in `E3NormalForm.lean`.
+- **`isUnit_e3Den` ✓** (UniversalLevelThree): `den=β+γ−3βγ` is a unit (CAS cofactor `D·γ³=A·den+B·(γS)`)
+  — the universal `Q` is nowhere 2-torsion; feeds the Q-doubling at every fibre.
+- **Stage C (collision input) ✓ COMPLETE**: `squarefree_e3Rel` + `isReduced_e3RelQuotient`
+  (`ForMathlib/E3RelSquarefree.lean`) — derivative-based discriminant-free squarefreeness over any UFD
+  with 3 invertible; `A[β,γ]/(e3Rel)` reduced = the `hom_ext_of_forall_specPoint` input.
+- **AX2-e leaf ✓** (`ForMathlib/PairGeneratesOfCardSq.lean`): pair generates in a `p²`-torsion group ⟺
+  all `p²−1` combos avoid zero (general prime — serves BOTH AX2s). GOTCHA: `letI` Module (ZMod p) with
+  VARIABLE p jams `Top (Submodule …)` synth → registered-binder core + ℕ-multiples wrapper;
+  `Field (ZMod p)` lives in `Mathlib.Algebra.Field.ZMod`.
+- **AX2 scope boarded ✓** (v10.266-OMEGA): Weil-pairing cut avoidable via the combination-clopen route.
+
+**CASCADE CONSUMED-READY (verified at source):** KM brick 6 CLOSED (`MulByHomDegree` 0-sorry, K4 anchor
+axiom-clean) + G0 leaf LANDED (`MulByHomUnramifiedField` 0-sorry) + **BB-DEG PROVEN**
+(`mulByHom_finrank = N²`, `Torsion.lean` code-sorry-free). The E[N] substrate is COMPLETE.
+
+**FRONTIER (the single funnel): Stage-B fibre evaluation** — "the pulled universal section at a field
+point = the mathlib affine point, compatibly with `zsmul`" (chain: `mulByHom_baseChange` ✓ +
+model-of-fibre wiring + `projModelPointsEquiv_some/zsmul` ✓ + `point_killed_iff` ✓). Once built, ALL
+THREE remaining inputs reduce to Stage-A-style field computations: hL-killing (A ✓ + B + C ✓ + D
+ring-base-change), hL-generation (#E[3](k̄)=9 from BB-DEG+étale + AX2-e ✓ + B), and hArb's bridges
+(field ⟹-direction + B + `isE3Datum_of_flexCharts` ✓). Stage B is OMEGA's next chunk.
