@@ -246,6 +246,25 @@ lemma orbitRankKey_eq_of_isGaloisConj {χ ψ : DirichletCharacter ℂ N} (h : Is
   funext j
   exact orbitTraceAt_eq_of_isGaloisConj h j
 
+omit [NeZero N] in
+/-- **Artin–Dedekind linear independence of Dirichlet characters.**  Viewing each character
+`χ : DirichletCharacter ℂ N` as the monoid hom `(ZMod N)ˣ →* ℂ` it induces on units
+(`MulChar.equivToUnitHom` composed with `Units.coeHom`), the resulting family is `ℂ`-linearly
+independent.  Distinct characters induce distinct homs (a character is determined by its values on
+units, `MulChar.ext`), and distinct monoid homs into a domain are linearly independent
+(`linearIndependent_monoidHom`). -/
+private lemma linearIndependent_dirichletCharacter_units :
+    LinearIndependent ℂ
+      (fun χ : DirichletCharacter ℂ N => ⇑((Units.coeHom ℂ).comp (MulChar.equivToUnitHom χ))) := by
+  have hGinj : Function.Injective
+      (fun χ : DirichletCharacter ℂ N => (Units.coeHom ℂ).comp (MulChar.equivToUnitHom χ)) := by
+    intro χ ψ hχψ
+    refine MulChar.ext fun a => ?_
+    have := congrArg (fun (F : (ZMod N)ˣ →* ℂ) => F a) hχψ
+    simpa [MonoidHom.comp_apply, Units.coeHom_apply, MulChar.coe_equivToUnitHom] using this
+  exact (linearIndependent_monoidHom ((ZMod N)ˣ) ℂ).comp
+    (fun χ : DirichletCharacter ℂ N => (Units.coeHom ℂ).comp (MulChar.equivToUnitHom χ)) hGinj
+
 /-- **Orbit-separation.**  The orbit invariant `t([χ])` separates distinct Galois orbits: if two
 characters of modulus `N` have the same order *and* the same trace tuple, they are Galois-conjugate.
 Equivalently, the LMFDB lexicographic order on `t([χ])` is a *strict total order on orbits*.  This
@@ -269,15 +288,10 @@ lemma orbitRankKey_injOn_orbits {χ ψ : DirichletCharacter ℂ N}
     intro χ j
     simp only [G, MonoidHom.comp_apply, Units.coeHom_apply]
     exact MulChar.coe_equivToUnitHom χ j
-  -- `G` is injective: a Dirichlet character is determined by its values on units (`MulChar.ext`).
-  have hGinj : Function.Injective G := by
-    intro χ ψ hχψ
-    refine MulChar.ext fun a => ?_
-    have := congrArg (fun (F : (ZMod N)ˣ →* ℂ) => F a) hχψ
-    simpa [hGapp] using this
-  -- Artin–Dedekind: the induced monoid homs are linearly independent over `ℂ`.
+  -- Artin–Dedekind: the induced monoid homs are linearly independent over `ℂ`
+  -- (`linearIndependent_dirichletCharacter_units`, extracted above).
   have hLI : LinearIndependent ℂ (fun χ : DirichletCharacter ℂ N => ⇑(G χ)) :=
-    (linearIndependent_monoidHom ((ZMod N)ˣ) ℂ).comp G hGinj
+    linearIndependent_dirichletCharacter_units
   -- Indicator coefficient functions of the two orbits.
   set f : DirichletCharacter ℂ N → ℂ := fun ρ => if ρ ∈ galoisOrbit χ then 1 else 0 with hf
   set g : DirichletCharacter ℂ N → ℂ := fun ρ => if ρ ∈ galoisOrbit ψ then 1 else 0 with hg
