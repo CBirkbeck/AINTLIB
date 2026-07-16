@@ -22420,3 +22420,53 @@ Verify: full lib green (4234 jobs); receipts printed (freeness/bridge machinery 
 carries only the PRE-EXISTING detection boxes — aut_endo/degree pins — unchanged set; headliners =
 detection boxes + the one engine box). **Endgame checklist delta: item (3) GONE; item (5) next (the
 CHEAP PATH, second half of this dispatch — in flight this firing).**
+
+---
+
+## v10.300-GH (2026-07-17, STREAM-GH) — ★ CHEAP PATH (dispatch item 2): SCOPE CORRECTION, line-level — not a pure rewiring; corrected decomposition for owner ruling
+
+**HONEST FINDING (B2-discipline on my own v10.297 flag):** "rewire `aut_endo_eq_one`'s chain onto
+`_of_isIntegral` + E-INT field-forms, sheds FIVE general pins, statement-preserving" does NOT survive
+line-level contact. My audit line "the k̄-consumers are coverable" was WRONG about the consumption
+topology. Evidence (all verified this firing):
+
+1. **`aut_endo_eq_one` call sites** (complete grep): GammaHMaster:340 — inside
+   `eq_refl_of_forall_isoFibre_eq_refl`, applied to the curve over the GENERAL locally noetherian test
+   base `X.base`. This IS the headline route (gammaH_rigidNoeth → rigidNoeth_of_geom_free → hdetect :=
+   `exists_isoFibre_ne_refl` := contrapositive of :210). Groupoid:140 — `aut_hom_eq_id_of_fullLevel
+   [IsLocallyNoetherian S]`, general `S`. GammaHMaster:524 — the only true Spec-k site.
+2. **`_of_isIntegral` cannot serve the general-S sites**: `[IsIntegral E.E]` is FALSE over a general
+   base (E-INT is a field-base instance). The :210 endgame is: equalizer engine globalizes the
+   torsion-fix at general S (étale target — engine-legal), then KM 2.7.2 (`aut_endo_eq_one`) leverages
+   it into `ε = 𝟙` — the deg-algebra runs AT GENERAL S. Load-bearing; not movable to fibres (the
+   non-torsion/infinitesimal directions are exactly what deg-algebra covers — fibrewise-𝟙 ⟹ 𝟙 is
+   itself rigidity).
+3. **Even at k̄ the rewire is blocked**: the internal factorization endo `g` (`ε = 1 + g∘[M]`) carries
+   no `[Flat]`/`[IsFinite]` — my `_of_isIntegral` forms are isogeny-instance-gated. Consuming them for
+   `g` needs the **zero-or-isogeny dichotomy over fields** (miracle-flatness leaf, absent from
+   mathlib/tree).
+4. **Shape split of the five**: `:336 endDeg_comp`, `:405 endDeg_comp_mulBy`, `:411 endTrace_comp_mulBy`,
+   `:429 endTrace_sq_le` are INTEGER identities — fibre-reducible in principle; `:435
+   eq_zero_of_endDeg_eq_zero` (+ the adjacent `:446` factorization) conclude MORPHISM equalities — NOT
+   fibre-reducible (one-fibre data says nothing global; deg is finrank at the single point `E.zero s₀`).
+
+**CORRECTED DECOMPOSITION (owner to ratify):**
+- **ROUTE A (recommended, zero GH-work):** the five are DOWNSTREAM of KM Ch. 2's dual theory — once
+  KM's `endDual_comp_self` (:179, [KEY-DEG] ledger) lands, all five discharge by KM 2.6 ALGEBRA
+  (deg multiplicative via `f^t f = [deg f]`; trace via polarization; Hasse via positivity of the
+  quadratic form; pos-def likewise). Checklist item (5) COLLAPSES INTO item (4) — the five are not an
+  independent wall, they are the same KM-keystone wall already tracked. No dichotomy ever needed ✓
+  (that part of the flag survives).
+- **ROUTE B (insurance if :179 stalls):** the fibre-reduction program — CP-1 endo-baseChange +
+  `endDeg`-fibre-compat (mine, finrank wheelhouse); CP-2 `Hom.commGroup` baseChange-hom (additive
+  compat, feeds :411); CP-4 the field-dichotomy (miracle flatness — RESEARCH-FLAG). Discharges
+  :336/:405/:411 outright, reduces :429 to fibre-Hasse (= KM's `hbound` box); :435/:446 stay
+  morphism-level pins on either route.
+- Non-action this firing: no speculative CP-1 grind before the route ruling (route A moots it).
+
+**Endgame-checklist state after this window: item (3) DISCHARGED (v10.299); item (5) RECLASSIFIED as
+item-(4)-downstream (this entry). The headline pin-set is now: T-H8/T-H9 statements; T-D8-⟸ (KM, in
+flight); hH/hbound + the [KEY-DEG] dual keystone (KM); the shared T-E14 engine (OMEGA). GH holds no
+unblocked headline leaf — next-firing candidates: T-D8-⟸ landing rewire (Basic:115 → my
+isFullLevel_iff_naive chain de-boxes [GHA3] fully), route-B CP-1 if ruled, YN-side stragglers.**
+(STREAM-GH)
