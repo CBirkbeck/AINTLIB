@@ -191,6 +191,73 @@ theorem ramificationIdx_zetaPrimePlus_eq_two [IsCMField K] :
     multiplicity_pow_self_of_prime
       (Ideal.prime_of_isPrime (zetaPrime_ne_bot p K) (zetaPrime_isPrime p K))]
 
+/-- The `zetaPrime p K`-count in the factorisation of the principal ideal `(a)` equals the
+`(ζ - 1)`-adic multiplicity of the generator `a`. -/
+theorem count_zetaPrime_normalizedFactors_span_eq_multiplicity (a : 𝓞 K) (ha : a ≠ 0) :
+    Multiset.count (zetaPrime p K)
+        (UniqueFactorizationMonoid.normalizedFactors (Ideal.span {a})) =
+      multiplicity ((zeta_spec p ℚ K).toInteger - 1 : 𝓞 K) a := by
+  set π : 𝓞 K := (zeta_spec p ℚ K).toInteger - 1 with hπ_def
+  have hπPrime : Prime π := (zeta_spec p ℚ K).zeta_sub_one_prime'
+  have hπFin : FiniteMultiplicity π a := FiniteMultiplicity.of_prime_left hπPrime ha
+  have hπe_dvd : π ^ multiplicity π a ∣ a := hπFin.pow_dvd_iff_le_multiplicity.2 le_rfl
+  have hπe_not_dvd : ¬π ^ (multiplicity π a + 1) ∣ a := by
+    rw [hπFin.pow_dvd_iff_le_multiplicity]
+    exact Nat.not_succ_le_self _
+  apply Ideal.count_normalizedFactors_eq (p := zetaPrime p K) (x := Ideal.span {a})
+  · rw [zetaPrime, Ideal.span_singleton_pow, Ideal.span_singleton_le_iff_mem,
+      Ideal.mem_span_singleton]
+    exact hπe_dvd
+  · intro hle
+    exact hπe_not_dvd <| by
+      rw [zetaPrime, Ideal.span_singleton_pow, Ideal.span_singleton_le_iff_mem,
+        Ideal.mem_span_singleton] at hle
+      exact hle
+
+include hp_odd in
+/-- The `zetaPrime p K`-count in the factorisation of the extension `I · 𝓞 K` of a nonzero
+ideal `I` of `𝓞_{K⁺}` is even, because `zetaPrimePlus p K` ramifies over `zetaPrime p K` with
+index `2`. -/
+theorem count_zetaPrime_normalizedFactors_map_even [IsCMField K]
+    (I : Ideal (𝓞 (NumberField.maximalRealSubfield K))) (hI0 : I ≠ ⊥) :
+    Even (Multiset.count (zetaPrime p K)
+      (UniqueFactorizationMonoid.normalizedFactors
+        (I.map (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K))))) := by
+  have hmap0 : I.map (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)) ≠ ⊥ :=
+    fun h => hI0 ((Ideal.map_eq_bot_iff_of_injective
+      (FaithfulSMul.algebraMap_injective _ _)).mp h)
+  have hP0 : zetaPrime p K ≠ ⊥ := zetaPrime_ne_bot p K
+  have hPPlus0 : zetaPrimePlus p K ≠ ⊥ := by
+    intro hbot
+    have hmap := zetaPrimePlus_map_eq p hp_odd K
+    rw [hbot, Ideal.map_bot] at hmap
+    exact (pow_ne_zero 2 hP0) hmap.symm
+  have hPIrr : Irreducible (zetaPrime p K) :=
+    (Ideal.prime_of_isPrime hP0 (zetaPrime_isPrime p K)).irreducible
+  have hPPlusIrr : Irreducible (zetaPrimePlus p K) :=
+    (Ideal.prime_of_isPrime hPPlus0 inferInstance).irreducible
+  have hemul : emultiplicity (zetaPrime p K)
+        (I.map (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K))) =
+        (zetaPrimePlus p K).ramificationIdx' (zetaPrime p K) *
+          emultiplicity (zetaPrimePlus p K) I :=
+    Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx'_mul
+      (R := 𝓞 (NumberField.maximalRealSubfield K)) (S := 𝓞 K)
+      (v := zetaPrimePlus p K) (w := zetaPrime p K) (I := I) hI0 hPPlusIrr hPIrr hP0
+  rw [Even]
+  refine ⟨Multiset.count (zetaPrimePlus p K) (UniqueFactorizationMonoid.normalizedFactors I), ?_⟩
+  rw [ramificationIdx_zetaPrimePlus_eq_two (p := p) (hp_odd := hp_odd) (K := K),
+    UniqueFactorizationMonoid.emultiplicity_eq_count_normalizedFactors hPIrr hmap0,
+    UniqueFactorizationMonoid.emultiplicity_eq_count_normalizedFactors hPPlusIrr hI0,
+    normalize_eq (zetaPrime p K), normalize_eq (zetaPrimePlus p K)] at hemul
+  have hemul_nat :
+      Multiset.count (zetaPrime p K)
+          (UniqueFactorizationMonoid.normalizedFactors
+            (I.map (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)))) =
+        2 * Multiset.count (zetaPrimePlus p K)
+          (UniqueFactorizationMonoid.normalizedFactors I) := by
+    exact_mod_cast hemul
+  simpa [two_mul] using hemul_nat
+
 include hp_odd in
 /-- If `I · 𝒪_K = (a)` with `a ≠ 0`, then `v_(ζ-1)(a)` is even. -/
 theorem multiplicity_zetaPrime_even_of_map_eq_span [IsCMField K]
@@ -199,74 +266,17 @@ theorem multiplicity_zetaPrime_even_of_map_eq_span [IsCMField K]
     (hIa : I.map (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)) =
       Ideal.span {a}) :
     Even (multiplicity ((zeta_spec p ℚ K).toInteger - 1 : 𝓞 K) a) := by
-  have hζ := IsCyclotomicExtension.zeta_spec p ℚ K
-  let f : 𝓞 (NumberField.maximalRealSubfield K) →+* 𝓞 K :=
-    algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)
-  let P : Ideal (𝓞 K) := zetaPrime p K
-  let PPlus : Ideal (𝓞 (NumberField.maximalRealSubfield K)) := zetaPrimePlus p K
-  let π : 𝓞 K := (zeta_spec p ℚ K).toInteger - 1
   have hI0 : I ≠ ⊥ := by
     intro hbot
     rw [hbot, Ideal.map_bot] at hIa
     exact ha (by simpa [Ideal.span_singleton_eq_bot] using hIa.symm)
-  have hmap0 : I.map f ≠ ⊥ := by
-    rw [hIa]
-    simp [ha]
-  have hP0 : P ≠ ⊥ := zetaPrime_ne_bot p K
-  have hPprime : P.IsPrime := zetaPrime_isPrime p K
-  have hPPlus0 : PPlus ≠ ⊥ := by
-    intro hbot
-    have hmap : Ideal.map f PPlus = P ^ 2 := by
-      simpa [f, P, PPlus] using zetaPrimePlus_map_eq p hp_odd K
-    rw [hbot, Ideal.map_bot] at hmap
-    exact (pow_ne_zero 2 hP0) hmap.symm
-  have hPIrr : Irreducible P := (Ideal.prime_of_isPrime hP0 hPprime).irreducible
-  have hPPlusIrr : Irreducible PPlus :=
-    (Ideal.prime_of_isPrime hPPlus0 inferInstance).irreducible
-  have hemul : emultiplicity P (I.map f) = PPlus.ramificationIdx' P * emultiplicity PPlus I := by
-    simpa [P, PPlus, f] using
-      Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx'_mul
-        (R := 𝓞 (NumberField.maximalRealSubfield K)) (S := 𝓞 K)
-        (v := PPlus) (w := P) (I := I) hI0 hPPlusIrr hPIrr hP0
-  have hcount_even :
-      Even (Multiset.count P (UniqueFactorizationMonoid.normalizedFactors (I.map f))) := by
-    rw [Even]
-    refine ⟨Multiset.count PPlus (UniqueFactorizationMonoid.normalizedFactors I), ?_⟩
-    have hemul' := hemul
-    rw [ramificationIdx_zetaPrimePlus_eq_two (p := p) (hp_odd := hp_odd) (K := K),
-      UniqueFactorizationMonoid.emultiplicity_eq_count_normalizedFactors hPIrr hmap0,
-      UniqueFactorizationMonoid.emultiplicity_eq_count_normalizedFactors hPPlusIrr hI0,
-      normalize_eq P, normalize_eq PPlus] at hemul'
-    have hemul_nat :
-        Multiset.count P (UniqueFactorizationMonoid.normalizedFactors (I.map f)) =
-          2 * Multiset.count PPlus (UniqueFactorizationMonoid.normalizedFactors I) := by
-      exact_mod_cast hemul'
-    simpa [two_mul] using hemul_nat
-  have hπPrime : Prime π := by simpa [π] using hζ.zeta_sub_one_prime'
-  let e := multiplicity π a
-  have hπFin : FiniteMultiplicity π a := FiniteMultiplicity.of_prime_left hπPrime ha
-  have hπe_dvd : π ^ e ∣ a := (hπFin.pow_dvd_iff_le_multiplicity).2 le_rfl
-  have hπe_not_dvd : ¬π ^ (e + 1) ∣ a := by
-    rw [hπFin.pow_dvd_iff_le_multiplicity]
-    exact Nat.not_succ_le_self e
-  have hcount_span :
-      Multiset.count P (UniqueFactorizationMonoid.normalizedFactors (Ideal.span {a})) = e := by
-    apply Ideal.count_normalizedFactors_eq (p := P) (x := Ideal.span {a})
-    · dsimp [P]
-      rw [zetaPrime, Ideal.span_singleton_pow, Ideal.span_singleton_le_iff_mem,
-        Ideal.mem_span_singleton]
-      exact hπe_dvd
-    · intro hle
-      exact hπe_not_dvd <| by
-        dsimp [P] at hle
-        rw [zetaPrime, Ideal.span_singleton_pow, Ideal.span_singleton_le_iff_mem,
-          Ideal.mem_span_singleton] at hle
-        exact hle
-  have :
-      Even (Multiset.count P (UniqueFactorizationMonoid.normalizedFactors (Ideal.span {a}))) := by
-    rw [← hIa]
-    simpa [f] using hcount_even
-  simpa [e, hcount_span] using this
+  have hcount_even := count_zetaPrime_normalizedFactors_map_even p hp_odd K I hI0
+  have hcount_span := count_zetaPrime_normalizedFactors_span_eq_multiplicity p K a ha
+  have heven :
+      Even (Multiset.count (zetaPrime p K)
+        (UniqueFactorizationMonoid.normalizedFactors (Ideal.span {a}))) := by
+    rw [← hIa]; exact hcount_even
+  rwa [hcount_span] at heven
 
 end CyclotomicSetup
 
