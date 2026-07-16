@@ -21724,3 +21724,11 @@ an explicit Equiv (gotcha: `set` gcdA/gcdB, never `obtain` — Exists-elim can't
 exists_smulKernel_lift. NEXT: [F3-prodMap] (pullback.lift of the two projections), [F3-sumMap]
 (kernel-inclusion points summed in H, re-factored), then the roundtrip identities (mono-ι +
 crt-pts arithmetic), [F3-flat] (retract), [F3-degmul], [F3-squeeze]. (STREAM-KM)
+
+### v10.277-KM — [F3-combMap]+[F3-prodMap]+[F3-R1] — the retraction half of KM's product iso is PROVEN (STREAM-KM)
+(`10de08bef`…this) combMap ℤ-weighted (+choose-defs/specs for toSmulKernel & combMap),
+prodMap := pullback.lift of the (3.5.1.3)-projections, and **R1: prodMap ≫ combMap(v,u) ≫ ι = ι**
+— the Bezout retraction, base-uniform proof (restrict-hom + lift-specs + vK+uM=1). G is now a
+RETRACT of Ker[M] ×_S Ker[K] pending R2 (the other roundtrip: combMap ≫ prodMap = 𝟙 via
+pullback.hom_ext + per-kernel killed-facts). Then flat (retract) / degmul / squeeze. 23 proven
+bricks this marathon. (STREAM-KM)
