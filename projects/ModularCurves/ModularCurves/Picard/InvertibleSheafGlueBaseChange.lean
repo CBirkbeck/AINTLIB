@@ -1386,6 +1386,60 @@ noncomputable def AffineIntersectionUnitCocycle.baseChangeGluedModuleIsoOriginal
       hopenG hpushG hopenM hpushM ≪≫
     (affineIntersectionOriginalGluedModuleIso π U e hU).symm
 
+/-- The finite-stage glued module and the original invertible sheaf agree after pullback to
+the literal base-change scheme of the finite-stage affine-intersection model. -/
+noncomputable def AffineIntersectionUnitCocycle.baseChangeGluedModuleIsoOnModelPullback
+    {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+    {Sstage : ι → Type u} [∀ i, CommRing (Sstage i)] [∀ i, Algebra R (Sstage i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (Sstage i →ₐ[R] Sstage j)}
+    {X S : Scheme.{u}} (π : X ⟶ S) [IsAffine S]
+    [Algebra R Γ(S, (⊤ : S.Opens))]
+    {uS : ∀ i, Sstage i →ₐ[R] Γ(S, (⊤ : S.Opens))}
+    {J : Type u} {N : X.Modules} (U : J → X.Opens) (hcover : IsOpenCover U)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
+    {H : Algebra.IsFilteredAlgColimit R Sstage t Γ(S, (⊤ : S.Opens)) uS}
+    (M : Algebra.SpreadData.FunctorModel (π.affineIntersectionFunctor U) H)
+    (cM : AffineIntersectionUnitCocycle M.toFunctor)
+    (hopenM : Scheme.GlueData.IsOpenAffineIntersectionFunctor M.toFunctor)
+    (hpushM : Scheme.GlueData.IsPushoutAffineIntersectionFunctor M.toFunctor)
+    (htransition : ∀ i j,
+      (AffineIntersectionUnitCocycle.mapToColimit M cM).transition i j =
+        (affineIntersectionUnitCocycle π U e).transition i j) :
+    letI : Algebra (Sstage M.stage) Γ(S, (⊤ : S.Opens)) :=
+      (uS M.stage).toRingHom.toAlgebra
+    let stageToBase := Spec.map (CommRingCat.ofHom
+      (algebraMap (Sstage M.stage) Γ(S, (⊤ : S.Opens))))
+    let p := CategoryTheory.Limits.pullback.fst
+      (Scheme.GlueData.affineIntersectionToSpec M.toFunctor hopenM hpushM) stageToBase
+    let φ := π.affineIntersectionModelBaseChangeIso U hcover hU M hopenM hpushM
+    (pullback p).obj (cM.gluedModule hopenM hpushM) ≅
+      (pullback φ.hom).obj N := by
+  classical
+  letI : Algebra (Sstage M.stage) Γ(S, (⊤ : S.Opens)) :=
+    (uS M.stage).toRingHom.toAlgebra
+  let hopenG := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let hpushG := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let g := M.affineIntersectionGluedBaseChange hopenG hpushG hopenM hpushM
+  let q := π.affineIntersectionGluedToOriginal U hU
+  let ψ := M.affineIntersectionGluedBaseChangeIso hopenG hpushG hopenM hpushM
+  let stageToBase := Spec.map (CommRingCat.ofHom
+    (algebraMap (Sstage M.stage) Γ(S, (⊤ : S.Opens))))
+  let p := CategoryTheory.Limits.pullback.fst
+    (Scheme.GlueData.affineIntersectionToSpec M.toFunctor hopenM hpushM) stageToBase
+  let φ := π.affineIntersectionModelBaseChangeIso U hcover hU M hopenM hpushM
+  let E := AffineIntersectionUnitCocycle.baseChangeGluedModuleIsoOriginal
+    π U e hU M cM hopenM hpushM htransition
+  have hψ : ψ.hom ≫ g = p :=
+    M.affineIntersectionGluedBaseChangeIso_hom_fst hopenG hpushG hopenM hpushM
+  have hφ : φ.hom = ψ.hom ≫ q :=
+    π.affineIntersectionModelBaseChangeIso_hom U hcover hU M hopenM hpushM
+  exact ((pullbackCongr hψ).app (cM.gluedModule hopenM hpushM)).symm ≪≫
+    ((pullbackComp ψ.hom g).app (cM.gluedModule hopenM hpushM)).symm ≪≫
+    (pullback ψ.hom).mapIso E ≪≫
+    (pullbackComp ψ.hom q).app N ≪≫
+    (pullbackCongr hφ.symm).app N
+
 /-- An invertible sheaf on a proper, locally finitely presented family descends together
 with an affine-intersection model to one finite stage of a filtered presentation. -/
 theorem IsInvertible.exists_finiteStageGluedModuleModel_of_isProper

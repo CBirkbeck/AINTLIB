@@ -879,3 +879,13 @@ glued-to-original isomorphism. This coherence pin lets the descended line-bundle
 transported to the actual pullback scheme without forcing consumers to normalize a composite
 isomorphism definition. Its focused build is green, its axiom audit is exactly `propext`,
 `Classical.choice`, and `Quot.sound`, and it adds no hypothesis or proof-resource option.
+
+Completed dependency claim (2026-07-16): constructed
+`AffineIntersectionUnitCocycle.baseChangeGluedModuleIsoOnModelPullback`. Given a descended cocycle
+whose colimit transitions recover an original invertible sheaf, the pullback of its finite-stage
+`gluedModule` along the literal fibre-product projection is now identified with the pullback of
+the original sheaf along `affineIntersectionModelBaseChangeIso.hom`. The proof is a five-step
+composition of `pullbackComp`, `pullbackCongr`, functorial transport of the completed glued
+comparison, and the scheme-model hom coherence pin. Its focused build is green, its axiom audit is
+exactly `propext`, `Classical.choice`, and `Quot.sound`, and it adds no hypothesis or proof-resource
+option.
