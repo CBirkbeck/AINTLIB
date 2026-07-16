@@ -16,7 +16,8 @@ import LeanModularForms.Labels.HeckeFieldArithmetic
 This file is a `:= by sorry` skeleton accompanying
 `projects/LeanModularForms/.mathlib-quality/decomposition-IHR.md`. It exists only to *typecheck the
 architecture* of the Eichler–Shimura / modular-symbol route to `exists_HeckeStableLattice` against
-mathlib v4.31 foundations — it contains **no proofs** and is **not** imported by the library aggregator.
+mathlib v4.31 foundations — it contains **no proofs** and is **not** imported by the library
+aggregator.
 
 Leaves (see the decomposition doc):
 * ES-1  `𝕄 N k ℤ` finite free over ℤ   (`Representation.Coinvariants`)
@@ -38,7 +39,7 @@ universe u
 
 /-! ## Coefficient system `Sym^{k-2}` (ES-1 dependency / API-GAP #1) -/
 
-/-- `Sym^m(R²)` modelled as homogeneous degree-`m` polynomials in two variables `X, Y`. Finite free
+/-- `Sym^m(R²)` modeled as homogeneous degree-`m` polynomials in two variables `X, Y`. Finite free
 over `R` of rank `m + 1` (monomial basis `XᵃYᵇ`, `a + b = m`). -/
 abbrev SymPow (R : Type u) [CommRing R] (m : ℕ) : Submodule R (MvPolynomial (Fin 2) R) :=
   homogeneousSubmodule (Fin 2) R m
@@ -83,15 +84,16 @@ noncomputable def modSymRep (N : ℕ) [NeZero N] (k : ℤ) (R : Type u) [CommRin
 `(modSymRep N k R).Coinvariants` does **not** elaborate directly: `Representation.tprod` types its
 codomain with `TensorProduct.addCommMonoid`/`TensorProduct.instModule`, whereas
 `Representation.Coinvariants` requires `[AddCommGroup V]` and is stated against
-`AddCommGroup.toAddCommMonoid`. These are propositionally-equal-but-syntactically-distinct instances,
-so application fails with "Application type mismatch … `TensorProduct.addCommMonoid` vs
-`AddCommGroup.toAddCommMonoid`" and `letI` cannot repair it (the rep's type is already fixed).
+`AddCommGroup.toAddCommMonoid`. These are propositionally-equal-but-syntactically-distinct
+instances, so application fails with "Application type mismatch … `TensorProduct.addCommMonoid`
+vs `AddCommGroup.toAddCommMonoid`" and `letI` cannot repair it (the rep's type is already fixed).
 
-**Resolution for the real build:** use the bundled category `Rep R (Γ₁N)` and `Rep.coinvariantsTensor`
-(`Coinvariants.lean:32`) instead of the unbundled `Representation.tprod` + `Coinvariants`. The bundled
-objects carry coherent `AddCommGroup`/`Module` instances, and `coinvariantsTensorFreeLEquiv`
-(`Coinvariants.lean:462`) is *also* the Manin finite-generation engine (API-GAP #2). For this planning
-skeleton we therefore keep `𝕄` **opaque** with a stated `ℤ`-module structure, so ES-2/3/4/asm typecheck
+**Resolution for the real build:** use the bundled category `Rep R (Γ₁N)` and
+`Rep.coinvariantsTensor` (`Coinvariants.lean:32`) instead of the unbundled
+`Representation.tprod` + `Coinvariants`. The bundled objects carry coherent
+`AddCommGroup`/`Module` instances, and `coinvariantsTensorFreeLEquiv` (`Coinvariants.lean:462`)
+is *also* the Manin finite-generation engine (API-GAP #2). For this planning skeleton we
+therefore keep `𝕄` **opaque** with a stated `ℤ`-module structure, so ES-2/3/4/asm typecheck
 against a clean interface; the body above records the intended construction. -/
 
 /-- **ES-1.** The integral modular-symbol module `𝕄_k(Γ₁N; ℤ)` (opaque in the skeleton; the intended
