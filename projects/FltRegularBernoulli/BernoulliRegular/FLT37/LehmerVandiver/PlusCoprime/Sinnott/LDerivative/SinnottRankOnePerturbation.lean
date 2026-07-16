@@ -118,6 +118,51 @@ theorem familyIndexAsUnit_injective
   exact (NumberField.Units.equivFinRank
       (NumberField.maximalRealSubfield K)).symm.injective h_symm_eq
 
+/-- **`familyIndexAsUnit i₁ ≠ -familyIndexAsUnit i₂`**: no family index is the
+additive negation of another.
+
+Each `familyIndexAsUnit i` has `ZMod p`-value in `[2, (p-1)/2]`
+(`familyIndexAsUnit_val_in_range`), while `val(-a) = p - val(a)` lands in
+`[(p+1)/2, p-2]`. These two ranges are disjoint, so
+`familyIndexAsUnit i₁ = -familyIndexAsUnit i₂` would force
+`val(i₁) + val(i₂) = p` with both summands `≤ (p-1)/2`, i.e. `p ≤ p - 1`,
+a contradiction. -/
+theorem familyIndexAsUnit_ne_neg
+    (K : Type) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
+    [NumberField.IsCMField K] (hp_odd : p ≠ 2) (hp_three : 3 ≤ p)
+    (_hp_ge_five : 5 ≤ p)
+    (i₁ i₂ : {w : NumberField.InfinitePlace
+        (NumberField.maximalRealSubfield K) //
+        w ≠ NumberField.Units.dirichletUnitTheorem.w₀}) :
+    familyIndexAsUnit p K hp_odd hp_three i₁ ≠
+      -familyIndexAsUnit p K hp_odd hp_three i₂ := by
+  classical
+  intro h_neg
+  obtain ⟨h_ge_one, h_le_one⟩ := familyIndexAsUnit_val_in_range
+    (p := p) K hp_odd hp_three i₁
+  obtain ⟨h_ge_two, h_le_two⟩ := familyIndexAsUnit_val_in_range
+    (p := p) K hp_odd hp_three i₂
+  have h_p_prime : Nat.Prime p := hp.out
+  haveI : NeZero p := ⟨h_p_prime.ne_zero⟩
+  haveI : NeZero ((familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p) := by
+    refine ⟨?_⟩
+    intro h_zero
+    rw [show ((((familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p)).val) = 0 from
+      by
+        rw [h_zero]
+        exact ZMod.val_zero] at h_ge_two
+    omega
+  have h_v_eq : ((familyIndexAsUnit p K hp_odd hp_three i₁ : (ZMod p)ˣ) : ZMod p).val =
+      ((-familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p).val := by
+    rw [h_neg]
+  have h_v_neg : ((-familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p).val =
+      p - ((familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p).val := by
+    change ((-((familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p))).val =
+      p - ((familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p).val
+    exact ZMod.val_neg_of_ne_zero _
+  rw [h_v_neg] at h_v_eq
+  omega
+
 /-- **`q ∘ familyIndexAsUnit` is injective**: distinct family indices give
 distinct quotient elements in `CyclotomicEvenDelta p`.
 
@@ -150,10 +195,6 @@ theorem familyIndexAsUnit_quotient_injective
     rw [sq, neg_one_mul, neg_neg]
   rw [zpow_eq_zpow_emod' k h_sq] at hk
   have h_mod : k % ((2 : ℕ) : ℤ) = 0 ∨ k % ((2 : ℕ) : ℤ) = 1 := by omega
-  obtain ⟨h_ge_one, h_le_one⟩ := familyIndexAsUnit_val_in_range
-    (p := p) K hp_odd hp_three i₁
-  obtain ⟨h_ge_two, h_le_two⟩ := familyIndexAsUnit_val_in_range
-    (p := p) K hp_odd hp_three i₂
   rcases h_mod with h0 | h1
   ·
     rw [h0, zpow_zero] at hk
@@ -174,26 +215,7 @@ theorem familyIndexAsUnit_quotient_injective
             familyIndexAsUnit p K hp_odd hp_three i₂ =
           -1 * familyIndexAsUnit p K hp_odd hp_three i₂ := by rw [hk]
       rwa [inv_mul_cancel_right, neg_one_mul] at this
-    have h_p_prime : Nat.Prime p := hp.out
-    haveI : NeZero p := ⟨h_p_prime.ne_zero⟩
-    haveI : NeZero ((familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p) := by
-      refine ⟨?_⟩
-      intro h_zero
-      rw [show ((((familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p)).val) = 0 from
-        by
-          rw [h_zero]
-          exact ZMod.val_zero] at h_ge_two
-      omega
-    have h_v_eq : ((familyIndexAsUnit p K hp_odd hp_three i₁ : (ZMod p)ˣ) : ZMod p).val =
-        ((-familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p).val := by
-      rw [h_neg]
-    have h_v_neg : ((-familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p).val =
-        p - ((familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p).val := by
-      change ((-((familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p))).val =
-        p - ((familyIndexAsUnit p K hp_odd hp_three i₂ : (ZMod p)ˣ) : ZMod p).val
-      exact ZMod.val_neg_of_ne_zero _
-    rw [h_v_neg] at h_v_eq
-    omega
+    exact (familyIndexAsUnit_ne_neg (p := p) K hp_odd hp_three hp_ge_five i₁ i₂ h_neg).elim
 
 /-- **Row-side bijection** (cardinality form): the family-index set
 `{w_K⁺ // w ≠ w₀}` bijects to `{c : CyclotomicEvenDelta p // c ≠ 1}`.
