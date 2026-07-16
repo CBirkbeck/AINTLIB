@@ -277,61 +277,81 @@ theorem cyclotomicInfinitePlace_fix_iff_mem_evenSubgroup
   rw [← cyclotomicInfinitePlaceStabilizer_eq_evenSubgroup (p := p) (K := K) hp_gt_two w,
     mem_cyclotomicInfinitePlaceStabilizer_iff]
 
+private theorem cyclotomicFullLogSpaceDeltaAction_trace_of_quotient_eq_one
+    (hp_gt_two : 2 < p) (a : CyclotomicUnitDelta p)
+    (hq : cyclotomicEvenDeltaQuotient p a = 1) :
+    LinearMap.trace ℝ (CyclotomicFullLogSpace K)
+        ((cyclotomicFullLogSpaceDeltaAction (p := p) K a).toLinearMap) =
+      Fintype.card (InfinitePlace K) := by
+  classical
+  rw [LinearMap.trace_eq_matrix_trace (b := Pi.basisFun ℝ (InfinitePlace K))]
+  simp only [Matrix.trace, Matrix.diag, LinearMap.toMatrix_apply, Pi.basisFun_repr,
+    Pi.basisFun_apply]
+  calc
+    (∑ x : InfinitePlace K,
+        (cyclotomicFullLogSpaceDeltaAction (p := p) K a
+          ((Pi.single x (1 : ℝ) : InfinitePlace K → ℝ))) x)
+        = ∑ x : InfinitePlace K, (1 : ℝ) := by
+            apply Finset.sum_congr rfl
+            intro w _
+            have hw : cyclotomicSigmaOfUnit (p := p) K a • w = w :=
+              (cyclotomicInfinitePlace_fix_iff_mem_evenSubgroup
+                (p := p) (K := K) hp_gt_two a w).2 ((QuotientGroup.eq_one_iff a).1 hq)
+            have hwinv : (cyclotomicSigmaOfUnit (p := p) K a)⁻¹ • w = w := by
+              calc
+                (cyclotomicSigmaOfUnit (p := p) K a)⁻¹ • w =
+                    (cyclotomicSigmaOfUnit (p := p) K a)⁻¹ •
+                      (cyclotomicSigmaOfUnit (p := p) K a • w) := by rw [hw]
+                _ = w := by rw [inv_smul_smul]
+            rw [cyclotomicFullLogSpaceDeltaAction_apply, hwinv]
+            simp
+    _ = Fintype.card (InfinitePlace K) := by simp
+
+private theorem cyclotomicFullLogSpaceDeltaAction_trace_of_quotient_ne_one
+    (hp_gt_two : 2 < p) (a : CyclotomicUnitDelta p)
+    (hq : cyclotomicEvenDeltaQuotient p a ≠ 1) :
+    LinearMap.trace ℝ (CyclotomicFullLogSpace K)
+        ((cyclotomicFullLogSpaceDeltaAction (p := p) K a).toLinearMap) = ((0 : ℕ) : ℝ) := by
+  classical
+  rw [LinearMap.trace_eq_matrix_trace (b := Pi.basisFun ℝ (InfinitePlace K))]
+  simp only [Matrix.trace, Matrix.diag, LinearMap.toMatrix_apply, Pi.basisFun_repr,
+    Pi.basisFun_apply]
+  calc
+    (∑ x : InfinitePlace K,
+        (cyclotomicFullLogSpaceDeltaAction (p := p) K a
+          ((Pi.single x (1 : ℝ) : InfinitePlace K → ℝ))) x)
+        = ∑ x : InfinitePlace K, (0 : ℝ) := by
+            apply Finset.sum_congr rfl
+            intro w _
+            have hnot : (cyclotomicSigmaOfUnit (p := p) K a)⁻¹ • w ≠ w := by
+              intro hw
+              have hfix : cyclotomicSigmaOfUnit (p := p) K a • w = w := by
+                calc
+                  cyclotomicSigmaOfUnit (p := p) K a • w =
+                      cyclotomicSigmaOfUnit (p := p) K a •
+                        ((cyclotomicSigmaOfUnit (p := p) K a)⁻¹ • w) := by rw [hw]
+                  _ = w := by rw [smul_inv_smul]
+              have ha_mem : a ∈ CyclotomicEvenDeltaSubgroup p :=
+                (cyclotomicInfinitePlace_fix_iff_mem_evenSubgroup
+                  (p := p) (K := K) hp_gt_two a w).1 hfix
+              exact hq ((QuotientGroup.eq_one_iff a).2 ha_mem)
+            rw [cyclotomicFullLogSpaceDeltaAction_apply]
+            simp [hnot]
+    _ = ((0 : ℕ) : ℝ) := by simp
+
 theorem cyclotomicFullLogSpaceDeltaAction_trace
     (hp_gt_two : 2 < p) (a : CyclotomicUnitDelta p) :
     LinearMap.trace ℝ (CyclotomicFullLogSpace K)
         ((cyclotomicFullLogSpaceDeltaAction (p := p) K a).toLinearMap) =
       if cyclotomicEvenDeltaQuotient p a = 1 then Fintype.card (InfinitePlace K) else 0 := by
   classical
-  rw [LinearMap.trace_eq_matrix_trace (b := Pi.basisFun ℝ (InfinitePlace K))]
   by_cases hq : cyclotomicEvenDeltaQuotient p a = 1
   · rw [if_pos hq]
-    simp only [Matrix.trace, Matrix.diag, LinearMap.toMatrix_apply, Pi.basisFun_repr,
-      Pi.basisFun_apply]
-    calc
-      (∑ x : InfinitePlace K,
-          (cyclotomicFullLogSpaceDeltaAction (p := p) K a
-            ((Pi.single x (1 : ℝ) : InfinitePlace K → ℝ))) x)
-          = ∑ x : InfinitePlace K, (1 : ℝ) := by
-              apply Finset.sum_congr rfl
-              intro w _
-              have hw : cyclotomicSigmaOfUnit (p := p) K a • w = w :=
-                (cyclotomicInfinitePlace_fix_iff_mem_evenSubgroup
-                  (p := p) (K := K) hp_gt_two a w).2 ((QuotientGroup.eq_one_iff a).1 hq)
-              have hwinv : (cyclotomicSigmaOfUnit (p := p) K a)⁻¹ • w = w := by
-                calc
-                  (cyclotomicSigmaOfUnit (p := p) K a)⁻¹ • w =
-                      (cyclotomicSigmaOfUnit (p := p) K a)⁻¹ •
-                        (cyclotomicSigmaOfUnit (p := p) K a • w) := by rw [hw]
-                  _ = w := by rw [inv_smul_smul]
-              rw [cyclotomicFullLogSpaceDeltaAction_apply, hwinv]
-              simp
-      _ = Fintype.card (InfinitePlace K) := by simp
+    exact cyclotomicFullLogSpaceDeltaAction_trace_of_quotient_eq_one
+      (p := p) (K := K) hp_gt_two a hq
   · rw [if_neg hq]
-    simp only [Matrix.trace, Matrix.diag, LinearMap.toMatrix_apply, Pi.basisFun_repr,
-      Pi.basisFun_apply]
-    calc
-      (∑ x : InfinitePlace K,
-          (cyclotomicFullLogSpaceDeltaAction (p := p) K a
-            ((Pi.single x (1 : ℝ) : InfinitePlace K → ℝ))) x)
-          = ∑ x : InfinitePlace K, (0 : ℝ) := by
-              apply Finset.sum_congr rfl
-              intro w _
-              have hnot : (cyclotomicSigmaOfUnit (p := p) K a)⁻¹ • w ≠ w := by
-                intro hw
-                have hfix : cyclotomicSigmaOfUnit (p := p) K a • w = w := by
-                  calc
-                    cyclotomicSigmaOfUnit (p := p) K a • w =
-                        cyclotomicSigmaOfUnit (p := p) K a •
-                          ((cyclotomicSigmaOfUnit (p := p) K a)⁻¹ • w) := by rw [hw]
-                    _ = w := by rw [smul_inv_smul]
-                have ha_mem : a ∈ CyclotomicEvenDeltaSubgroup p :=
-                  (cyclotomicInfinitePlace_fix_iff_mem_evenSubgroup
-                    (p := p) (K := K) hp_gt_two a w).1 hfix
-                exact hq ((QuotientGroup.eq_one_iff a).2 ha_mem)
-              rw [cyclotomicFullLogSpaceDeltaAction_apply]
-              simp [hnot]
-      _ = ((0 : ℕ) : ℝ) := by simp
+    exact cyclotomicFullLogSpaceDeltaAction_trace_of_quotient_ne_one
+      (p := p) (K := K) hp_gt_two a hq
 
 theorem cyclotomicFullLogAugmentationLinearEquiv_trace_formula
     (hp_gt_two : 2 < p) (a : CyclotomicUnitDelta p) :
