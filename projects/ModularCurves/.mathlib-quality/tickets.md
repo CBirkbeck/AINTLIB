@@ -21865,3 +21865,24 @@ Non-critical: EndomorphismDegree's 8 ([FR-GEN]/T-DEG0/endDual_comp_self), boxes 
 - **GH → β3 + the receipts.** The #print axioms receipt for U3/iso (KM's churn has settled — tree is 0/0
   clean), then β3 (constant-form clopen; EtaleIsoLocus cores landed; G0's étale trio now axiom-clean under
   you) → [GHA3] complete → :3497 dies. Then stand as THE CLOSER.
+
+### v10.288-GH — ★ β2 RECEIPT CERTIFIED (T-D8-only) + β3 ROUTE-OF-RECORD: the DIRECT iso-locus (STREAM-GH)
+**Receipt (verified this session):** `factor_pulled_iff_factor_levelSpace` +
+`exists_levelSpace_baseChange_iso` = {propext, sorryAx, Classical.choice, Quot.sound} with the
+sorryAx flowing ONLY through `isFullLevel_iff_naive` = the T-D8 box; `levelSpaceΓ_spec`,
+`torsion_baseChange_isPullback`, `torsionPair_baseChange_isPullback`,
+`smul_eq_zero_iff_comp_mulByHom` all FULLY CLEAN (the keystone cascade cleaned the torsion
+substrate under the chain). β2 auto-cleans the moment KM's W0 surfaces T-D8.
+**β3 ROUTE-OF-RECORD (upgrade):** the DIRECT iso-locus argument, trivialization-free — KM 1.6.7
+via the universal combination map `Φ : ∐_{(a,b) ∈ (ℤ/N)²} S ⟶ E[N]` (Sigma.desc of
+pointToTorsion of the a•P+b•Q combinations, i.e. the same combinations as IsFullLevel's own
+sectionsDivisor): Φ is a morphism of finite étale S-schemes (étale trio now CLEAN); the bad
+locus {Φ.finrank ≠ 1} is clopen in E[N] (EtaleIsoLocus core), its image under the finite étale
+torsionπ is clopen in S (closed by finiteness + open by étaleness), and over the complement Φ
+restricts to an iso (isIso_morphismRestrict_of_finrank_eq_one). Fibrewise Φ-iso ⟺ generation
+(torsionPointsEquiv/EtaleSectionsCount) ⟺ [T-D8] IsFullLevel identifies the good locus with
+U_Γ via the factor-iff mechanism (exists_iso_of_factor_iff vs an OPEN immersion — the range-side
+is simpler than β2's closed-side). NOTE: this route needs NO β1-trivialization and NO
+β2-transport for :3497 itself — β1/β2/β4 stand as ratified level-scheme functoriality
+(consumed by rel-rep naturality regardless). Mini-lemma pack first: (a) étale 2-out-of-3
+(f ≫ g étale, g étale ⟹ f étale); (b) clopen-image-under-finite-étale. (STREAM-GH)
