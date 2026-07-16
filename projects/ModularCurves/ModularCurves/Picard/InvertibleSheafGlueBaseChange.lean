@@ -187,17 +187,103 @@ noncomputable def AffineIntersectionUnitCocycle.baseChangeGluedModuleChartTrivia
         (Scheme.GlueData.affineIntersectionChartToSpec M.toFunctor i)
   let h : DG.ι i ≫ g = chartMap ≫ DM.ι i :=
     M.affineIntersectionGluedBaseChange_ι hopenG hpushG hopenM hpushM i
-  let E := cM.gluedModuleDescentIso hopenM hpushM
-  let tM : (pullback (DM.ι i)).obj (cM.gluedModule hopenM hpushM) ≅
-      unitObj (DM.U i) :=
-    { hom := E.hom.hom i
-      inv := E.inv.hom i
-      hom_inv_id := by
-        exact congrArg (fun q ↦ q.hom i) E.hom_inv_id
-      inv_hom_id := by
-        exact congrArg (fun q ↦ q.hom i) E.inv_hom_id }
   exact pullbackSquareTrivialization (DG.ι i) g chartMap (DM.ι i) h
-    (cM.gluedModule hopenM hpushM) tM
+    (cM.gluedModule hopenM hpushM) (cM.gluedModuleLocalIso hopenM hpushM i)
+
+private theorem AffineIntersectionUnitCocycle.baseChangeGluedModuleTail_transition
+    {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+    {Sstage : ι → Type u} [∀ i, CommRing (Sstage i)] [∀ i, Algebra R (Sstage i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (Sstage i →ₐ[R] Sstage j)}
+    {A : Type u} [CommRing A] [Algebra R A] {uA : ∀ i, Sstage i →ₐ[R] A}
+    {J : Type u} {G : Functor (Finset J) (CommAlgCat.{u} A)}
+    {H : Algebra.IsFilteredAlgColimit R Sstage t A uA}
+    (M : Algebra.SpreadData.FunctorModel G H)
+    (cM : AffineIntersectionUnitCocycle M.toFunctor)
+    (hopenG : Scheme.GlueData.IsOpenAffineIntersectionFunctor G)
+    (hpushG : Scheme.GlueData.IsPushoutAffineIntersectionFunctor G)
+    (hopenM : Scheme.GlueData.IsOpenAffineIntersectionFunctor M.toFunctor)
+    (hpushM : Scheme.GlueData.IsPushoutAffineIntersectionFunctor M.toFunctor)
+    (i j : J) :
+    letI : Algebra (Sstage M.stage) A := (uA M.stage).toRingHom.toAlgebra
+    let DG := Scheme.GlueData.ofAffineIntersectionFunctor G hopenG hpushG
+    let DM := Scheme.GlueData.ofAffineIntersectionFunctor M.toFunctor hopenM hpushM
+    let base := Spec.map (CommRingCat.ofHom (algebraMap (Sstage M.stage) A))
+    let chartMap (k : J) : DG.U k ⟶ DM.U k :=
+      (M.baseChangeSpecIso
+          (Scheme.GlueData.affineIntersectionSingletonIndex k)).inv ≫
+        pullback.snd base
+          (Scheme.GlueData.affineIntersectionChartToSpec M.toFunctor k)
+    let leftMap : DG.V (i, j) ⟶ DM.U i := DG.f i j ≫ chartMap i
+    let rightMap : DG.V (i, j) ⟶ DM.U j :=
+      (DG.t i j ≫ DG.f j i) ≫ chartMap j
+    let q : DG.V (i, j) ⟶ DM.glued := leftMap ≫ DM.ι i
+    ∀ (hqRight : rightMap ≫ DM.ι j = q),
+    (pullbackCompositeTrivialization leftMap (DM.ι i) q rfl
+          (cM.gluedModule hopenM hpushM)
+          (cM.gluedModuleLocalIso hopenM hpushM i)).inv ≫
+        (pullbackCompositeTrivialization rightMap (DM.ι j) q hqRight
+          (cM.gluedModule hopenM hpushM)
+          (cM.gluedModuleLocalIso hopenM hpushM j)).hom =
+      ((AffineIntersectionUnitCocycle.mapToColimit M cM).overlapTransitionIso i j).hom := by
+  classical
+  letI : Algebra (Sstage M.stage) A := (uA M.stage).toRingHom.toAlgebra
+  dsimp only
+  intro hqRight
+  let DG := Scheme.GlueData.ofAffineIntersectionFunctor G hopenG hpushG
+  let DM := Scheme.GlueData.ofAffineIntersectionFunctor M.toFunctor hopenM hpushM
+  let base := Spec.map (CommRingCat.ofHom (algebraMap (Sstage M.stage) A))
+  let chartMap (k : J) : DG.U k ⟶ DM.U k :=
+    (M.baseChangeSpecIso
+        (Scheme.GlueData.affineIntersectionSingletonIndex k)).inv ≫
+      pullback.snd base
+        (Scheme.GlueData.affineIntersectionChartToSpec M.toFunctor k)
+  let overlapMap (k l : J) : DG.V (k, l) ⟶ DM.V (k, l) :=
+    (M.baseChangeSpecIso
+        (Scheme.GlueData.affineIntersectionPairIndex k l)).inv ≫
+      pullback.snd base
+        (Spec.map (CommRingCat.ofHom
+          (algebraMap (Sstage M.stage)
+            (M.toFunctor.obj
+              (Scheme.GlueData.affineIntersectionPairIndex k l)))))
+  let leftMap : DG.V (i, j) ⟶ DM.U i := DG.f i j ≫ chartMap i
+  let rightMap : DG.V (i, j) ⟶ DM.U j :=
+    (DG.t i j ≫ DG.f j i) ≫ chartMap j
+  have hleft : overlapMap i j ≫ DM.f i j = leftMap := by
+    exact (M.baseChangeSpecIso_inv_affineIntersectionOverlapι i j).symm
+  have hright : overlapMap i j ≫ (DM.t i j ≫ DM.f j i) = rightMap := by
+    have ht := M.baseChangeSpecIso_inv_affineIntersectionTransition
+      hopenG hpushG hopenM hpushM i j
+    have hj := M.baseChangeSpecIso_inv_affineIntersectionOverlapι j i
+    have ht' : overlapMap i j ≫ DM.t i j = DG.t i j ≫ overlapMap j i := by
+      dsimp only [overlapMap, DG, DM]
+      simpa only [Category.assoc] using ht
+    have hj' : overlapMap j i ≫ DM.f j i = DG.f j i ≫ chartMap j := by
+      dsimp only [overlapMap, chartMap, DG, DM]
+      simpa only [Category.assoc] using hj.symm
+    calc
+      overlapMap i j ≫ (DM.t i j ≫ DM.f j i) =
+          (overlapMap i j ≫ DM.t i j) ≫ DM.f j i :=
+        (Category.assoc _ _ _).symm
+      _ = (DG.t i j ≫ overlapMap j i) ≫ DM.f j i :=
+        congrArg (· ≫ DM.f j i) ht'
+      _ = DG.t i j ≫ (overlapMap j i ≫ DM.f j i) := Category.assoc _ _ _
+      _ = DG.t i j ≫ (DG.f j i ≫ chartMap j) :=
+        congrArg (DG.t i j ≫ ·) hj'
+      _ = rightMap := (Category.assoc _ _ _).symm
+  let q : DG.V (i, j) ⟶ DM.glued := leftMap ≫ DM.ι i
+  have hqLeft : leftMap ≫ DM.ι i = q := rfl
+  have htransition := cM.gluedModuleCompositeTrivialization_transition
+    hopenM hpushM i j q (overlapMap i j) leftMap rightMap
+    hqLeft hqRight hleft hright
+  calc
+    _ = cM.chartTransitionIsoCoordinatePullback hopenM hpushM i j
+          (overlapMap i j) := htransition
+    _ = (pullbackUnitIso (overlapMap i j)).inv ≫
+          (pullback (overlapMap i j)).map (cM.overlapTransitionIso i j).hom ≫
+          (pullbackUnitIso (overlapMap i j)).hom :=
+      cM.chartTransitionIsoCoordinatePullback_eq hopenM hpushM i j (overlapMap i j)
+    _ = ((AffineIntersectionUnitCocycle.mapToColimit M cM).overlapTransitionIso i j).hom :=
+      AffineIntersectionUnitCocycle.mapToColimit_overlapTransitionIso M cM i j
 
 end
 

@@ -793,3 +793,13 @@ overlap, so the finite-stage base-change calculation can consume the existing gl
 descent datum without duplicating it. The focused effectivity build is green, no hypothesis or
 proof-resource option was added, and all three declarations have exactly `propext`,
 `Classical.choice`, and `Quot.sound` in their axiom audits.
+
+Completed subdependency claim (2026-07-16): refactored
+`AffineIntersectionUnitCocycle.baseChangeGluedModuleChartTrivialization` to consume the canonical
+`gluedModuleLocalIso`, and proved the private finite-stage overlap scalar comparison used by
+`AffineIntersectionUnitCocycle.baseChangeGluedModuleChartTrivialization_isCompatible`. The proof
+instantiates `gluedModuleCompositeTrivialization_transition`, then uses
+`chartTransitionIsoCoordinatePullback_eq` and `mapToColimit_overlapTransitionIso`; it adds no
+hypothesis, abstraction, or proof-resource option. The focused base-change build is green, and the
+changed public chart trivialization still audits to exactly `propext`, `Classical.choice`, and
+`Quot.sound`.
