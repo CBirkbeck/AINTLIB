@@ -86,12 +86,15 @@ noncomputable def AffineIntersectionUnitCocycle.baseChangeGluedModuleChartTrivia
         (Scheme.GlueData.affineIntersectionChartToSpec M.toFunctor i)
   let h : DG.ι i ≫ g = chartMap ≫ DM.ι i :=
     M.affineIntersectionGluedBaseChange_ι hopenG hpushG hopenM hpushM i
-  letI : IsOpenImmersion (DM.ι i) := DM.ι_isOpenImmersion i
+  let E := cM.gluedModuleDescentIso hopenM hpushM
   let tM : (pullback (DM.ι i)).obj (cM.gluedModule hopenM hpushM) ≅
       unitObj (DM.U i) :=
-    (restrictFunctorIsoPullback (DM.ι i)).symm.app
-        (cM.gluedModule hopenM hpushM) ≪≫
-      cM.gluedModuleRestrictIso hopenM hpushM i
+    { hom := E.hom.hom i
+      inv := E.inv.hom i
+      hom_inv_id := by
+        exact congrArg (fun q ↦ q.hom i) E.hom_inv_id
+      inv_hom_id := by
+        exact congrArg (fun q ↦ q.hom i) E.inv_hom_id }
   exact pullbackSquareTrivialization (DG.ι i) g chartMap (DM.ι i) h
     (cM.gluedModule hopenM hpushM) tM
 
