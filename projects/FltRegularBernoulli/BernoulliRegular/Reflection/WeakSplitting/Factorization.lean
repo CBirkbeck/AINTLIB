@@ -44,7 +44,7 @@ namespace BernoulliRegular
 
 namespace WeakSplitting
 
-open NumberField Ideal Filter Topology
+open NumberField Filter Topology
 
 variable (L : Type*) [Field L] [NumberField L]
 
@@ -199,7 +199,6 @@ theorem dedekindLocalFactorRatPartial_eq_pow_of_splits {q : ℕ} (hq : q.Prime)
       have hover : Ideal.span ({(q : ℤ)} : Set ℤ) = Ideal.under ℤ P := P.over_def _
       rw [hP_bot, Ideal.under_bot, Ideal.span_singleton_eq_bot] at hover
       exact hq.ne_zero (by exact_mod_cast hover)
-    have := hP_in.1
     have : P.IsMaximal := hP_in.1.isMaximal hP_ne
     exact BernoulliRegular.Ideal.SplitsCompletely.prod_localFactor_eq_pow
       (𝓞 L) K L hP_ne (hsplits P hP) s
@@ -269,7 +268,8 @@ theorem dedekindZeta_eq_tprod_localFactorRat_inv
 private lemma primesOverFinset_span_disjoint_of_ne (q q' : Nat.Primes) (hne : q ≠ q') :
     Disjoint
       (IsDedekindDomain.primesOverFinset (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) (𝓞 L))
-      (IsDedekindDomain.primesOverFinset (Ideal.span ({((q' : ℕ) : ℤ)} : Set ℤ)) (𝓞 L)) := by
+      (IsDedekindDomain.primesOverFinset
+        (Ideal.span ({((q' : ℕ) : ℤ)} : Set ℤ)) (𝓞 L)) := by
   rw [Finset.disjoint_left]
   intro Q hQ_in_q_set hQ_in_q'_set
   have hq_ne : (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) ≠ ⊥ := by
@@ -305,7 +305,8 @@ private lemma primesOverFinset_span_disjoint_of_ne (q q' : Nat.Primes) (hne : q 
 iff the absolute norm of its contraction to `ℤ` equals `q`. -/
 private lemma mem_primesOverFinset_span_iff (Q : Ideal (𝓞 L)) [Q.IsPrime] [NeZero Q]
     (q : Nat.Primes) :
-    Q ∈ IsDedekindDomain.primesOverFinset (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) (𝓞 L) ↔
+    Q ∈ IsDedekindDomain.primesOverFinset
+        (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) (𝓞 L) ↔
       Ideal.absNorm (Ideal.under ℤ Q) = q := by
   have hq_ne : (Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ)) ≠ ⊥ := by
     rw [Ne, Ideal.span_singleton_eq_bot]
@@ -326,7 +327,8 @@ private lemma mem_primesOverFinset_span_iff (Q : Ideal (𝓞 L)) [Q.IsPrime] [Ne
   · intro hnorm
     refine ⟨‹Q.IsPrime›, ?_⟩
     have hunder : Ideal.under ℤ Q = Ideal.span ({((q : ℕ) : ℤ)} : Set ℤ) := by
-      rw [show ((q : ℕ) : ℤ) = ((Ideal.absNorm (Ideal.under ℤ Q) : ℕ) : ℤ) from by rw [hnorm]]
+      rw [show ((q : ℕ) : ℤ) = ((Ideal.absNorm (Ideal.under ℤ Q) : ℕ) : ℤ) from by
+        rw [hnorm]]
       exact (Int.ideal_span_absNorm_eq_self (Ideal.under ℤ Q)).symm
     exact ⟨hunder.symm⟩
 
