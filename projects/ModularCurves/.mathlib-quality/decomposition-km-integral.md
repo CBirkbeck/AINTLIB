@@ -495,3 +495,20 @@ sections form an M-killed group (`smulKernel_point` ✓ / `exists_smulKernel_lif
 multiples `{a₁•(K•P)}` exhaust by the crt-divisor point count (KM p. 29). Alternative if the
 Spec-k̄ instantiation hits friction: the `Point.pull`-fibre machinery (LevelStructure/Basic's
 geometric quantifiers) already speaks this language.
+
+## [F3-degmul] execution note (KM worker, 2026-07-16g — post-degtrans)
+
+DONE (`4579c718c`): prodIso + degtrans reduce the contract to the pure fibre-product formula
+`(pullback.fst πM πK ≫ πM).finrank s = πM.finrank s * πK.finrank s` (finite flat legs).
+- mathlib gives `finrank_pullback_fst/snd/of_isPullback` (leg ranks are base-changed ranks) but
+  NO composite/product formula; its own proofs use the PRIVATE `finrank_eq_finrank_snd_of_isAffine`
+  + `Y.exists_Spec_apply_eq` — not reusable outside the file. This is [FR-GEN] again.
+- PUBLIC path: at `s`, pick `V := S.affineOpenCover`-chart ∋ s; restrict the whole product to `V`
+  by `finrank_of_isPullback` along the chart map (three restriction squares: πM, πK, and the
+  product structure — pasting isos `pullbackLeftPullbackSndIso`-style); on affine `V` all schemes
+  are affine (finite over affine), so conjugate by `isoSpec` and use `finrank_SpecMap_eq_finrank`
+  to land in `RingHom.finrank` = `rankAtStalk` of the section algebras; identify the product's
+  sections with the TENSOR via `pullbackSpecIso`; finish with `rankAtStalk_tensorProduct`
+  (+ `Algebra.rankAtStalk_eq_of_isPushout` if the base-change alignment needs it).
+- Alternative worth 15 minutes at pickup: PR-shape the general product formula INTO mathlib style
+  (it belongs next to `finrank_pullback_snd`; upstream later, keep a ForMathlib copy now).
