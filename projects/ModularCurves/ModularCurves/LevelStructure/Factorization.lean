@@ -153,6 +153,195 @@ theorem sup_ker_eq_top_of_pull_ne {C : Scheme.{u}} {π : C ⟶ S} [IsSeparated �
     rw [h1, h2, hγ₁, hγ₂]
   exact hne _ t₁ (by rw [hγ₁, ht, hγ₂])
 
+/-- **[F3-disj-pair-aux] (the one-sided kernel bound)** If `I·J ≤ ker q` and the open
+`U₁ ⊆ T` avoids `supp J` under `q`, then `I` dies on `U₁`: at each point some `g ∈ J`
+is a stalk-unit, `f·g` maps to zero, so `q♯f` has zero germ — and sections with all
+zero germs vanish. -/
+theorem le_ker_restrict_of_unit_side {C T : Scheme.{u}} (q : T ⟶ C)
+    (I J : Scheme.IdealSheafData C) (hker : I * J ≤ Scheme.Hom.ker q)
+    (U₁ : T.Opens) (hU₁ : ∀ x : ↑T, x ∈ U₁ → q.base x ∉ (J.support : Set C)) :
+    I ≤ Scheme.Hom.ker (U₁.ι ≫ q) := by
+  refine Scheme.IdealSheafData.le_ofIdeals_iff.mpr fun V => ?_
+  intro f hf
+  rw [RingHom.mem_ker]
+  have hpt : ∀ (w : ↑(U₁.toScheme)) (hw : w ∈ (U₁.ι ≫ q) ⁻¹ᵁ V.1),
+      U₁.toScheme.presheaf.germ ((U₁.ι ≫ q) ⁻¹ᵁ V.1) w hw
+        (((U₁.ι ≫ q).app V.1) f)
+      = U₁.toScheme.presheaf.germ ((U₁.ι ≫ q) ⁻¹ᵁ V.1) w hw 0 := by
+    intro w hw
+    refine Eq.trans ?_ (map_zero (U₁.toScheme.presheaf.germ
+      ((U₁.ι ≫ q) ⁻¹ᵁ V.1) w hw).hom).symm
+    have hcomp := Scheme.Hom.germ_stalkMap_apply (U₁.ι ≫ q) V.1 w hw f
+    rw [← hcomp]
+    -- the image point misses `supp J`, giving a stalk-unit `g ∈ J`
+    have hι : U₁.ι.base w ∈ U₁ := by
+      have : U₁.ι.base w ∈ Set.range U₁.ι.base := ⟨w, rfl⟩
+      rwa [Scheme.Opens.range_ι] at this
+    have hqV : (U₁.ι ≫ q).base w ∈ V.1 := hw
+    have hqJ : q.base (U₁.ι.base w) ∉ (J.support : Set C) := hU₁ _ hι
+    have hexg : ∃ g ∈ J.ideal V,
+        IsUnit (C.presheaf.germ V.1 ((U₁.ι ≫ q).base w) hqV g) := by
+      by_contra hall
+      push_neg at hall
+      refine hqJ ?_
+      have hmem : (U₁.ι ≫ q).base w ∈ (J.support : Set C) := by
+        refine (Scheme.IdealSheafData.mem_support_iff_of_mem (I := J) (U := V) hqV).mpr ?_
+        rw [Scheme.mem_zeroLocus_iff]
+        intro g hg
+        rw [Scheme.mem_basicOpen C g ((U₁.ι ≫ q).base w) hqV]
+        exact hall g hg
+      exact hmem
+    obtain ⟨g, hg, hug⟩ := hexg
+    -- `f·g` dies under `q`, hence under the restriction
+    have hzero : ((U₁.ι ≫ q).app V.1).hom (f * g) = 0 := by
+      have h1 : (I * J).ideal V ≤ (Scheme.Hom.ker q).ideal V := hker V
+      have h2 : (q.app V.1).hom (f * g) = 0 :=
+        Scheme.Hom.ideal_ker_le q V (h1 (by
+          rw [show ((I * J).ideal) V = (I.ideal V) * (J.ideal V) from by
+            rw [Scheme.IdealSheafData.ideal_mul]; rfl]
+          exact Ideal.mul_mem_mul hf hg))
+      have hsplit : ((U₁.ι ≫ q).app V.1).hom (f * g)
+          = (U₁.ι.app (q ⁻¹ᵁ V.1)).hom ((q.app V.1).hom (f * g)) :=
+        congrArg (fun m => (CommRingCat.Hom.hom m) (f * g))
+          (Scheme.Hom.comp_app U₁.ι q V.1)
+      rw [hsplit, h2]
+      exact map_zero _
+    -- germ arithmetic: unit · target = 0 forces the target to vanish
+    have hgermmul : (U₁.ι ≫ q).stalkMap w
+          (C.presheaf.germ V.1 ((U₁.ι ≫ q).base w) hqV f)
+        * (U₁.ι ≫ q).stalkMap w
+          (C.presheaf.germ V.1 ((U₁.ι ≫ q).base w) hqV g) = 0 := by
+      rw [← map_mul, ← map_mul]
+      have happ := Scheme.Hom.germ_stalkMap_apply (U₁.ι ≫ q) V.1 w hw (f * g)
+      rw [happ, show (((U₁.ι ≫ q).app V.1) (f * g)) = 0 from hzero]
+      exact map_zero _
+    have hunit : IsUnit ((U₁.ι ≫ q).stalkMap w
+        (C.presheaf.germ V.1 ((U₁.ι ≫ q).base w) hqV g)) :=
+      hug.map _
+    exact (hunit.mul_left_eq_zero).mp hgermmul
+  exact TopCat.Presheaf.section_ext (U₁.toScheme.sheaf) ((U₁.ι ≫ q) ⁻¹ᵁ V.1) _ _ hpt
+
+/-- **[F3-disj-pair] (the CRT clopen split, KM p. 30's "run the argument per piece")**
+A morphism whose kernel contains a product of two COMAXIMAL ideal sheaves splits its
+source into two clopen pieces, each factoring through one ideal's subscheme condition:
+on the piece missing `supp J`, every `f ∈ I` is killed because some `g ∈ J` is a
+stalk-unit there while `f·g ∈ I·J ≤ ker q` — so `q♯f` has zero germs throughout. -/
+theorem exists_clopen_factor_of_mul_comaximal {C T : Scheme.{u}} (q : T ⟶ C)
+    (I J : Scheme.IdealSheafData C) (hIJ : I ⊔ J = ⊤) (hker : I * J ≤ Scheme.Hom.ker q) :
+    ∃ U₁ U₂ : T.Opens, (U₁ : Set T) ∪ (U₂ : Set T) = Set.univ ∧
+      (U₁ : Set T) ∩ (U₂ : Set T) = ∅ ∧
+      I ≤ Scheme.Hom.ker (U₁.ι ≫ q) ∧ J ≤ Scheme.Hom.ker (U₂.ι ≫ q) := by
+  classical
+  -- supports are disjoint: a common point sees `1 = f + g` with both germs non-units
+  have hdisj : (I.support : Set C) ∩ (J.support : Set C) = ∅ := by
+    rw [Set.eq_empty_iff_forall_notMem]
+    rintro c ⟨hcI, hcJ⟩
+    obtain ⟨-, ⟨V, hV, rfl⟩, hcV, -⟩ :=
+      C.isBasis_affineOpens.exists_subset_of_mem_open (Set.mem_univ c) isOpen_univ
+    have hcI' := (Scheme.IdealSheafData.mem_support_iff_of_mem
+      (I := I) (U := ⟨V, hV⟩) hcV).mp hcI
+    have hcJ' := (Scheme.IdealSheafData.mem_support_iff_of_mem
+      (I := J) (U := ⟨V, hV⟩) hcV).mp hcJ
+    have htop : I.ideal ⟨V, hV⟩ ⊔ J.ideal ⟨V, hV⟩ = ⊤ := by
+      have h1 : (I ⊔ J).ideal ⟨V, hV⟩ = (⊤ : Scheme.IdealSheafData C).ideal ⟨V, hV⟩ := by
+        rw [hIJ]
+      rw [Scheme.IdealSheafData.ideal_sup] at h1
+      simpa using h1
+    obtain ⟨f, hf, g, hg, hfg⟩ := Submodule.mem_sup.mp
+      (htop ▸ Submodule.mem_top : (1 : ↑Γ(C, V)) ∈ I.ideal ⟨V, hV⟩ ⊔ J.ideal ⟨V, hV⟩)
+    have hnf : ¬IsUnit (C.presheaf.germ V c hcV f) := by
+      have := (Scheme.mem_zeroLocus_iff (X := C) (↑(I.ideal ⟨V, hV⟩)) c).mp hcI' f hf
+      rwa [Scheme.mem_basicOpen C f c hcV] at this
+    have hng : ¬IsUnit (C.presheaf.germ V c hcV g) := by
+      have := (Scheme.mem_zeroLocus_iff (X := C) (↑(J.ideal ⟨V, hV⟩)) c).mp hcJ' g hg
+      rwa [Scheme.mem_basicOpen C g c hcV] at this
+    have hsum : IsUnit (C.presheaf.germ V c hcV f + C.presheaf.germ V c hcV g) := by
+      rw [← map_add, hfg]
+      simpa using isUnit_one.map (C.presheaf.germ V c hcV)
+    rcases IsLocalRing.isUnit_or_isUnit_of_isUnit_add hsum with h | h
+    · exact hnf h
+    · exact hng h
+  -- the image of `q` lies in `supp I ∪ supp J` (else a unit of `I·J` maps to `0`)
+  have hcover : ∀ x : ↑T, q.base x ∈ (I.support : Set C) ∪ (J.support : Set C) := by
+    intro x
+    by_contra hx
+    have hxI : q.base x ∉ (I.support : Set C) := fun h => hx (Or.inl h)
+    have hxJ : q.base x ∉ (J.support : Set C) := fun h => hx (Or.inr h)
+    obtain ⟨-, ⟨V, hV, rfl⟩, hcV, -⟩ :=
+      C.isBasis_affineOpens.exists_subset_of_mem_open
+        (Set.mem_univ (q.base x)) isOpen_univ
+    -- units of both ideals at the point
+    have hexf : ∃ f ∈ I.ideal ⟨V, hV⟩, IsUnit (C.presheaf.germ V (q.base x) hcV f) := by
+      by_contra hall
+      push_neg at hall
+      refine hxI ((Scheme.IdealSheafData.mem_support_iff_of_mem
+        (I := I) (U := ⟨V, hV⟩) hcV).mpr ?_)
+      rw [Scheme.mem_zeroLocus_iff]
+      intro f hf
+      rw [Scheme.mem_basicOpen C f (q.base x) hcV]
+      exact hall f hf
+    have hexg : ∃ g ∈ J.ideal ⟨V, hV⟩, IsUnit (C.presheaf.germ V (q.base x) hcV g) := by
+      by_contra hall
+      push_neg at hall
+      refine hxJ ((Scheme.IdealSheafData.mem_support_iff_of_mem
+        (I := J) (U := ⟨V, hV⟩) hcV).mpr ?_)
+      rw [Scheme.mem_zeroLocus_iff]
+      intro g hg
+      rw [Scheme.mem_basicOpen C g (q.base x) hcV]
+      exact hall g hg
+    obtain ⟨f, hf, huf⟩ := hexf
+    obtain ⟨g, hg, hug⟩ := hexg
+    -- f·g ∈ I·J dies under q, but its germ is a unit — the stalk would be trivial
+    have hmem : f * g ∈ (I * J).ideal ⟨V, hV⟩ := by
+      have := Scheme.IdealSheafData.ideal_mul I J
+      rw [show ((I * J).ideal) ⟨V, hV⟩ = (I.ideal ⟨V, hV⟩) * (J.ideal ⟨V, hV⟩) from by
+        rw [this]; rfl]
+      exact Ideal.mul_mem_mul hf hg
+    have hzero : (q.app V).hom (f * g) = 0 := by
+      have h1 : (I * J).ideal ⟨V, hV⟩ ≤ (Scheme.Hom.ker q).ideal ⟨V, hV⟩ := hker ⟨V, hV⟩
+      have h2 := Scheme.Hom.ideal_ker_le q ⟨V, hV⟩
+      exact h2 (h1 hmem)
+    have hgermz : T.presheaf.germ (q ⁻¹ᵁ V) x hcV ((q.app V) (f * g)) = 0 := by
+      rw [show ((q.app V) (f * g)) = (0 : ↑Γ(T, q ⁻¹ᵁ V)) from hzero]
+      exact map_zero _
+    have hgermu : IsUnit (T.presheaf.germ (q ⁻¹ᵁ V) x hcV ((q.app V) (f * g))) := by
+      rw [← Scheme.Hom.germ_stalkMap_apply q V x hcV (f * g)]
+      have hgm : C.presheaf.germ V (q.base x) hcV (f * g)
+          = C.presheaf.germ V (q.base x) hcV f * C.presheaf.germ V (q.base x) hcV g :=
+        map_mul _ _ _
+      rw [hgm, map_mul]
+      exact ((huf.map (q.stalkMap x).hom)).mul ((hug.map (q.stalkMap x).hom))
+    rw [hgermz] at hgermu
+    exact not_isUnit_zero hgermu
+  -- the pieces
+  refine ⟨⟨q.base ⁻¹' (J.support : Set C)ᶜ,
+      (J.support.2.isOpen_compl).preimage q.continuous⟩,
+    ⟨q.base ⁻¹' (I.support : Set C)ᶜ,
+      (I.support.2.isOpen_compl).preimage q.continuous⟩, ?_, ?_, ?_, ?_⟩
+  · -- cover
+    rw [Set.eq_univ_iff_forall]
+    intro x
+    by_contra hx
+    have hxJ : q.base x ∈ (J.support : Set C) := by
+      by_contra h
+      exact hx (Or.inl h)
+    have hxI : q.base x ∈ (I.support : Set C) := by
+      by_contra h
+      exact hx (Or.inr h)
+    have : q.base x ∈ (I.support : Set C) ∩ (J.support : Set C) := ⟨hxI, hxJ⟩
+    rw [hdisj] at this
+    exact this
+  · -- disjoint
+    rw [Set.eq_empty_iff_forall_notMem]
+    rintro x ⟨hx₁, hx₂⟩
+    rcases hcover x with h | h
+    · exact hx₂ h
+    · exact hx₁ h
+  · -- I ≤ ker (U₁.ι ≫ q)
+    exact le_ker_restrict_of_unit_side q I J hker _ fun x hx => hx
+  · -- J ≤ ker (U₂.ι ≫ q)
+    exact le_ker_restrict_of_unit_side q J I (by rwa [mul_comm]) _ fun x hx => hx
+
 /-- **[F3-castBase]** Transport of the point group along an equality of base
 morphisms (the `𝟙 ≫ g = g` bookkeeping equiv for base-change round-trips). -/
 noncomputable def _root_.ModularCurves.EllipticCurve.Point.castBase
