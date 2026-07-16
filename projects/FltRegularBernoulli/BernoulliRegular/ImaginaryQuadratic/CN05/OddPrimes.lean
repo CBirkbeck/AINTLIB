@@ -19,6 +19,53 @@ section CN05_statement
 
 variable (p : ℕ) [hp : Fact p.Prime]
 
+/-- If `P` is the unique prime of `𝒪 (Kminus p)` lying over `span {q}` (with `q` prime), then
+any nonzero ideal `Q` coprime to `P` (`P ⊔ Q = ⊤`) whose norm divides a power of `q` must be
+`⊤`. Indeed, any prime `R ∣ Q` lies over `q`, hence equals `P`, forcing `Q ≤ P`, which
+contradicts `P ⊔ Q = ⊤`. -/
+lemma eq_top_of_coprime_absNorm_dvd_prime_pow (q : ℕ) [Fact q.Prime]
+    {P Q : Ideal (𝓞 (Kminus p))} (hP_prime : P.IsPrime)
+    (hP_eq : Ideal.primesOver (Ideal.span {(q : ℤ)}) (𝓞 (Kminus p)) = {P})
+    (hPQ : P ⊔ Q = ⊤) (hQ_ne : Q ≠ ⊥) {k : ℕ}
+    (hQ_norm : Ideal.absNorm Q ∣ q ^ k) :
+    Q = ⊤ := by
+  classical
+  by_contra hQ_ne_top
+  have hnf_ne : UniqueFactorizationMonoid.normalizedFactors Q ≠ 0 := by
+    intro hnf
+    apply hQ_ne_top
+    rw [← Ideal.prod_normalizedFactors_eq_self hQ_ne, hnf]; simp
+  obtain ⟨R, hRmem⟩ := Multiset.exists_mem_of_ne_zero hnf_ne
+  have hRfac := (Ideal.mem_normalizedFactors_iff hQ_ne).1 hRmem
+  have hRprime : R.IsPrime := hRfac.1
+  have hQ_le_R : Q ≤ R := hRfac.2
+  haveI : R.IsPrime := hRprime
+  have hR_ne : R ≠ ⊥ :=
+    fun hR_bot ↦ hQ_ne (le_bot_iff.mp (hQ_le_R.trans_eq hR_bot))
+  haveI : NeZero R := ⟨hR_ne⟩
+  have hR_dvd : Ideal.absNorm R ∣ q ^ k :=
+    (Ideal.absNorm_dvd_absNorm_of_le hQ_le_R).trans hQ_norm
+  have hunder_dvd : Ideal.absNorm (Ideal.under ℤ R) ∣ q ^ k :=
+    dvd_trans (Int.absNorm_under_dvd_absNorm R) hR_dvd
+  have hunder_prime : (Ideal.absNorm (Ideal.under ℤ R)).Prime :=
+    Nat.absNorm_under_prime R
+  have hunder_dvd_q : Ideal.absNorm (Ideal.under ℤ R) ∣ q :=
+    hunder_prime.dvd_of_dvd_pow hunder_dvd
+  have hunder_eq_q : Ideal.absNorm (Ideal.under ℤ R) = q :=
+    (Nat.prime_dvd_prime_iff_eq hunder_prime (Fact.out : q.Prime)).1 hunder_dvd_q
+  have hunder_eq_span_q : Ideal.under ℤ R = Ideal.span {(q : ℤ)} := by
+    rw [← Int.ideal_span_absNorm_eq_self (Ideal.under ℤ R)]; simp [hunder_eq_q]
+  have hR_lies : R.LiesOver (Ideal.span {(q : ℤ)}) := by
+    rw [Ideal.liesOver_iff, hunder_eq_span_q]
+  have hR_mem_set : R ∈ Ideal.primesOver (Ideal.span {(q : ℤ)}) (𝓞 (Kminus p)) :=
+    ⟨hRprime, hR_lies⟩
+  have hR_eq_P : R = P := by rw [hP_eq] at hR_mem_set; exact hR_mem_set
+  have hQ_le_P : Q ≤ P := by simpa [hR_eq_P] using hQ_le_R
+  have htop_le_P : (⊤ : Ideal (𝓞 (Kminus p))) ≤ P :=
+    calc ⊤ = P ⊔ Q := hPQ.symm
+      _ ≤ P := sup_le le_rfl hQ_le_P
+  exact hP_prime.ne_top (top_le_iff.mp htop_le_P)
+
 /-- **Inert case, odd k**: `idealNormMultiplicity (Kminus p) (q^k) = 0` for odd k
 when `q` is inert. Reason: the unique prime has norm `q²`, so ideals of norm `q^k`
 only exist for even `k`. -/
@@ -59,48 +106,14 @@ theorem idealNormMultiplicity_at_q_inert_odd (hp3 : p % 4 = 3) (q : ℕ)
   -- Show any such I would give a contradiction to k being odd.
   -- I decomposes via eq_prime_pow_mul_coprime.
   obtain ⟨Q, hPQ, hIeq⟩ := Ideal.eq_prime_pow_mul_coprime hI_ne P
-  -- Let m = count P in factors of I. Show Q = ⊤ (similar to q = p case).
   let m : ℕ := Multiset.count P (UniqueFactorizationMonoid.normalizedFactors I)
-  have hQ_top : Q = ⊤ := by
-    by_contra hQ_ne_top
-    have hQ_ne : Q ≠ ⊥ := fun hQ_bot ↦ hI_ne (by rw [hIeq, hQ_bot, Ideal.mul_bot])
-    have hnf_ne : UniqueFactorizationMonoid.normalizedFactors Q ≠ 0 := by
-      intro hnf
-      apply hQ_ne_top
-      rw [← Ideal.prod_normalizedFactors_eq_self hQ_ne, hnf]; simp
-    obtain ⟨R, hRmem⟩ := Multiset.exists_mem_of_ne_zero hnf_ne
-    have hRfac := (Ideal.mem_normalizedFactors_iff hQ_ne).1 hRmem
-    have hRprime : R.IsPrime := hRfac.1
-    have hQ_le_R : Q ≤ R := hRfac.2
-    haveI : R.IsPrime := hRprime
-    have hR_ne : R ≠ ⊥ :=
-      fun hR_bot ↦ hQ_ne (le_bot_iff.mp (hQ_le_R.trans_eq hR_bot))
-    haveI : NeZero R := ⟨hR_ne⟩
-    have hI_le_Q : I ≤ Q := by rw [hIeq]; exact Ideal.mul_le_left
-    have hR_dvd_I : Ideal.absNorm R ∣ q ^ k := by
-      rw [← hI_norm]
-      exact dvd_trans (Ideal.absNorm_dvd_absNorm_of_le hQ_le_R)
-        (Ideal.absNorm_dvd_absNorm_of_le hI_le_Q)
-    have hunder_dvd : Ideal.absNorm (Ideal.under ℤ R) ∣ q ^ k :=
-      dvd_trans (Int.absNorm_under_dvd_absNorm R) hR_dvd_I
-    have hunder_prime : (Ideal.absNorm (Ideal.under ℤ R)).Prime :=
-      Nat.absNorm_under_prime R
-    have hunder_dvd_q : Ideal.absNorm (Ideal.under ℤ R) ∣ q :=
-      hunder_prime.dvd_of_dvd_pow hunder_dvd
-    have hunder_eq_q : Ideal.absNorm (Ideal.under ℤ R) = q :=
-      (Nat.prime_dvd_prime_iff_eq hunder_prime (Fact.out : q.Prime)).1 hunder_dvd_q
-    have hunder_eq_span_q : Ideal.under ℤ R = Ideal.span {(q : ℤ)} := by
-      rw [← Int.ideal_span_absNorm_eq_self (Ideal.under ℤ R)]; simp [hunder_eq_q]
-    have hR_lies : R.LiesOver (Ideal.span {(q : ℤ)}) := by
-      rw [Ideal.liesOver_iff, hunder_eq_span_q]
-    have hR_mem_set : R ∈ Ideal.primesOver (Ideal.span {(q : ℤ)}) (𝓞 (Kminus p)) :=
-      ⟨hRprime, hR_lies⟩
-    have hR_eq_P : R = P := by rw [hP_eq_set] at hR_mem_set; exact hR_mem_set
-    have hQ_le_P : Q ≤ P := by simpa [hR_eq_P] using hQ_le_R
-    have htop_le_P : (⊤ : Ideal (𝓞 (Kminus p))) ≤ P :=
-      calc ⊤ = P ⊔ Q := hPQ.symm
-        _ ≤ P := sup_le le_rfl hQ_le_P
-    exact hP_mem.1.ne_top (top_le_iff.mp htop_le_P)
+  -- The coprime cofactor `Q` is forced to be trivial, so `I = P ^ m`.
+  have hI_le_Q : I ≤ Q := by rw [hIeq]; exact Ideal.mul_le_left
+  have hQ_norm : Ideal.absNorm Q ∣ q ^ k := by
+    rw [← hI_norm]; exact Ideal.absNorm_dvd_absNorm_of_le hI_le_Q
+  have hQ_ne : Q ≠ ⊥ := fun hQ_bot ↦ hI_ne (by rw [hIeq, hQ_bot, Ideal.mul_bot])
+  have hQ_top : Q = ⊤ :=
+    eq_top_of_coprime_absNorm_dvd_prime_pow p q hP_mem.1 hP_eq_set hPQ hQ_ne hQ_norm
   -- Now I = P^m.
   have hI_pow : I = P ^ m := by simpa [m, hQ_top] using hIeq
   -- absNorm I = q^(2m) = q^k. Since q prime, k = 2m (even).
@@ -208,46 +221,12 @@ theorem idealNormMultiplicity_at_q_inert_even (hp3 : p % 4 = 3) (q : ℕ)
         rintro ⟨⟨I, hI_ne⟩, hI_norm⟩
         obtain ⟨Q, hPQ, hIeq⟩ := Ideal.eq_prime_pow_mul_coprime hI_ne P
         let mI : ℕ := Multiset.count P (UniqueFactorizationMonoid.normalizedFactors I)
-        have hQ_top : Q = ⊤ := by
-          by_contra hQ_ne_top
-          have hQ_ne : Q ≠ ⊥ := fun hQ_bot ↦ hI_ne (by rw [hIeq, hQ_bot, Ideal.mul_bot])
-          have hnf_ne : UniqueFactorizationMonoid.normalizedFactors Q ≠ 0 := by
-            intro hnf
-            apply hQ_ne_top
-            rw [← Ideal.prod_normalizedFactors_eq_self hQ_ne, hnf]; simp
-          obtain ⟨R, hRmem⟩ := Multiset.exists_mem_of_ne_zero hnf_ne
-          have hRfac := (Ideal.mem_normalizedFactors_iff hQ_ne).1 hRmem
-          have hRprime : R.IsPrime := hRfac.1
-          have hQ_le_R : Q ≤ R := hRfac.2
-          haveI : R.IsPrime := hRprime
-          have hR_ne : R ≠ ⊥ :=
-            fun hR_bot ↦ hQ_ne (le_bot_iff.mp (hQ_le_R.trans_eq hR_bot))
-          haveI : NeZero R := ⟨hR_ne⟩
-          have hI_le_Q : I ≤ Q := by rw [hIeq]; exact Ideal.mul_le_left
-          have hR_dvd_I : Ideal.absNorm R ∣ q ^ (2 * m) := by
-            rw [← hI_norm]
-            exact dvd_trans (Ideal.absNorm_dvd_absNorm_of_le hQ_le_R)
-              (Ideal.absNorm_dvd_absNorm_of_le hI_le_Q)
-          have hunder_dvd : Ideal.absNorm (Ideal.under ℤ R) ∣ q ^ (2 * m) :=
-            dvd_trans (Int.absNorm_under_dvd_absNorm R) hR_dvd_I
-          have hunder_prime : (Ideal.absNorm (Ideal.under ℤ R)).Prime :=
-            Nat.absNorm_under_prime R
-          have hunder_dvd_q : Ideal.absNorm (Ideal.under ℤ R) ∣ q :=
-            hunder_prime.dvd_of_dvd_pow hunder_dvd
-          have hunder_eq_q : Ideal.absNorm (Ideal.under ℤ R) = q :=
-            (Nat.prime_dvd_prime_iff_eq hunder_prime (Fact.out : q.Prime)).1 hunder_dvd_q
-          have hunder_eq_span_q : Ideal.under ℤ R = Ideal.span {(q : ℤ)} := by
-            rw [← Int.ideal_span_absNorm_eq_self (Ideal.under ℤ R)]; simp [hunder_eq_q]
-          have hR_lies : R.LiesOver (Ideal.span {(q : ℤ)}) := by
-            rw [Ideal.liesOver_iff, hunder_eq_span_q]
-          have hR_mem_set : R ∈ Ideal.primesOver (Ideal.span {(q : ℤ)}) (𝓞 (Kminus p)) :=
-            ⟨hRprime, hR_lies⟩
-          have hR_eq_P : R = P := by rw [hP_eq_set] at hR_mem_set; exact hR_mem_set
-          have hQ_le_P : Q ≤ P := by simpa [hR_eq_P] using hQ_le_R
-          have htop_le_P : (⊤ : Ideal (𝓞 (Kminus p))) ≤ P :=
-            calc ⊤ = P ⊔ Q := hPQ.symm
-              _ ≤ P := sup_le le_rfl hQ_le_P
-          exact hP_mem.1.ne_top (top_le_iff.mp htop_le_P)
+        have hI_le_Q : I ≤ Q := by rw [hIeq]; exact Ideal.mul_le_left
+        have hQ_norm : Ideal.absNorm Q ∣ q ^ (2 * m) := by
+          rw [← hI_norm]; exact Ideal.absNorm_dvd_absNorm_of_le hI_le_Q
+        have hQ_ne : Q ≠ ⊥ := fun hQ_bot ↦ hI_ne (by rw [hIeq, hQ_bot, Ideal.mul_bot])
+        have hQ_top : Q = ⊤ :=
+          eq_top_of_coprime_absNorm_dvd_prime_pow p q hP_mem.1 hP_eq_set hPQ hQ_ne hQ_norm
         have hI_pow : I = P ^ mI := by simpa [mI, hQ_top] using hIeq
         have hmI_eq : mI = m := by
           have hI_norm_val : Ideal.absNorm I = q ^ (2 * m) := hI_norm
