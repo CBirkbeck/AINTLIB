@@ -846,7 +846,8 @@ theorem summable_prod_of_norm_coeff_le_linear {G : PowerSeries K} {C : ℝ}
     NormedAddGroup.tendsto_nhds_zero]
   intro ε hε
   rw [Filter.eventually_cofinite]
-  have htend : Filter.Tendsto (fun n : ℕ => C * (((n : ℝ) + 1) * ‖z‖ ^ n)) Filter.atTop (nhds 0) := by
+  have htend : Filter.Tendsto (fun n : ℕ => C * (((n : ℝ) + 1) * ‖z‖ ^ n))
+      Filter.atTop (nhds 0) := by
     simpa using (tendsto_natCast_succ_mul_pow (norm_nonneg z) hz).const_mul C
   obtain ⟨N, hN⟩ := (htend.eventually_lt_const hε).exists_forall_of_atTop
   refine Set.Finite.subset (Set.Finite.prod (Set.finite_Iio (N + 1)) (Set.finite_Iio (N + 1)))
