@@ -445,6 +445,50 @@ private theorem P_pullbackAlongπ_inj {P : ModuliProblem R} (hPrr : P.Relatively
   rwa [← Functor.map_comp_apply, ← op_comp, Iso.hom_inv_id, op_id, Functor.map_id_apply,
     ← Functor.map_comp_apply, ← op_comp, Iso.hom_inv_id, op_id, Functor.map_id_apply] at hfin
 
+/-- The `.hom` form of `coreData_qinv_full`: the moduli automorphism `(A γ).hom` fixes `cd.q`
+(from the `.inv` form via `hom_inv_id`). -/
+private theorem coreData_qinv_full_hom {P Q : ModuliProblem R} {G : Type u} [Group G] [Finite G]
+    {φ : G →* Aut Q} (cd : CoreData P Q φ) (hrig : P.Rigid) (γ : G) :
+    (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom ≫ cd.q = cd.q := by
+  have hqi := coreData_qinv_full cd hrig γ
+  calc (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom ≫ cd.q
+      = (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom ≫
+          ((cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv ≫ cd.q) := by rw [hqi]
+    _ = ((cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom ≫
+          (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv) ≫ cd.q := by rw [Category.assoc]
+    _ = 𝟙 cd.XM ≫ cd.q := by rw [(cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom_inv_id]
+    _ = cd.q := Category.id_comp _
+
+/-- `G`-equivariance descends to `q`-invariance of the base classifying map: the deck
+transformation `σZ.hom γ` fixes `bijClassBase cd td α ≫ cd.q.baseHom` (equivariance of the
+classifying morphism composed with `cd.hqinv`). -/
+private theorem coreData_bijClassBase_qinv {P Q : ModuliProblem R} {G : Type u} [Group G]
+    [Finite G] {φ : G →* Aut Q} (cd : CoreData P Q φ) {Y : EllObj R} (td : TorsorData φ Y)
+    (α : P.obj (op Y)) (γ : G) :
+    td.σZ.hom γ ≫ (bijClassBase cd td α ≫ cd.q.baseHom)
+      = bijClassBase cd td α ≫ cd.q.baseHom := by
+  set fb : td.Z ⟶ cd.XM.base := bijClassBase cd td α with hfb
+  have hbase : td.σZ.hom γ ≫ fb =
+      fb ≫ (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom :=
+    congrArg EllHom.baseHom (homToPullbackAlong_classifying_comm cd td α γ)
+  have h1 : (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom ≫ cd.q.baseHom
+      = cd.q.baseHom := cd.hqinv γ
+  have hAinv : (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom ≫
+      (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom = 𝟙 cd.XM.base :=
+    congrArg EllHom.baseHom (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom_inv_id
+  have hq' : (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom ≫ cd.q.baseHom
+      = cd.q.baseHom := by
+    calc (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom ≫ cd.q.baseHom
+        = (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom ≫
+            ((cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom ≫ cd.q.baseHom) := by
+          rw [h1]
+      _ = ((cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom ≫
+            (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom) ≫ cd.q.baseHom := by
+          rw [Category.assoc]
+      _ = 𝟙 cd.XM.base ≫ cd.q.baseHom := by rw [hAinv]
+      _ = cd.q.baseHom := Category.id_comp _
+  rw [← Category.assoc, hbase, Category.assoc, hq']
+
 /-- [B3-bij existence a — KM p. 115] curve-iso descent along the δ-torsor (rigidity). -/
 theorem coreData_surjective (P Q : ModuliProblem R) {G : Type u} [Group G] [Finite G]
     (φ : G →* Aut Q) (htors : ∀ X : EllObj R, Nonempty (TorsorData φ X)) (hrig : P.Rigid)
@@ -460,28 +504,8 @@ theorem coreData_surjective (P Q : ModuliProblem R) {G : Type u} [Group G] [Fini
   -- (i)+(ii) descend `fb ≫ q.baseHom` (invariant) through `td.f` to `f₀ : Y.base ⟶ X₀.base`.
   -- Equivariance: `σZ.hom γ ≫ fb = fb ≫ (A γ).hom.baseHom` (ofAut inverts, so `(A γ).hom.baseHom`
   -- is the moduli action `σ.hom γ⁻¹`); then `q.baseHom`-invariance follows from `cd.hqinv`.
-  have hinv : ∀ γ, td.σZ.hom γ ≫ (fb ≫ cd.q.baseHom) = fb ≫ cd.q.baseHom := by
-    intro γ
-    have hbase : td.σZ.hom γ ≫ fb =
-        fb ≫ (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom :=
-      congrArg EllHom.baseHom (homToPullbackAlong_classifying_comm cd td α γ)
-    have h1 : (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom ≫ cd.q.baseHom
-        = cd.q.baseHom := cd.hqinv γ
-    have hAinv : (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom ≫
-        (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom = 𝟙 cd.XM.base :=
-      congrArg EllHom.baseHom (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom_inv_id
-    have hq' : (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom ≫ cd.q.baseHom
-        = cd.q.baseHom := by
-      calc (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom ≫ cd.q.baseHom
-          = (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom ≫
-              ((cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom ≫ cd.q.baseHom) := by
-            rw [h1]
-        _ = ((cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom.baseHom ≫
-              (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom) ≫ cd.q.baseHom := by
-            rw [Category.assoc]
-        _ = 𝟙 cd.XM.base ≫ cd.q.baseHom := by rw [hAinv]
-        _ = cd.q.baseHom := Category.id_comp _
-    rw [← Category.assoc, hbase, Category.assoc, hq']
+  have hinv : ∀ γ, td.σZ.hom γ ≫ (fb ≫ cd.q.baseHom) = fb ≫ cd.q.baseHom :=
+    fun γ => coreData_bijClassBase_qinv cd td α γ
   obtain ⟨f₀, hf₀, -⟩ :=
     existsUnique_descent_of_torsor td.σZ td.over_base htorsZ (fb ≫ cd.q.baseHom) hinv
   -- The classifying Ell/R-morphism `f_ell` (base map `fb`), and `g := f_ell ≫ q`.
@@ -490,16 +514,8 @@ theorem coreData_surjective (P Q : ModuliProblem R) {G : Type u} [Group G] [Fini
       td.eqv td.f ⟨𝟙 td.Z, Category.id_comp td.f⟩) with hf_ell
   -- Curve-level `q`-invariance: `(A γ).hom ≫ q = q` at the full Ell/R level (from
   -- `coreData_qinv_full`).
-  have hAq : ∀ γ, (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom ≫ cd.q = cd.q := by
-    intro γ
-    have hqi := coreData_qinv_full cd hrig γ
-    calc (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom ≫ cd.q
-        = (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom ≫
-            ((cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv ≫ cd.q) := by rw [hqi]
-      _ = ((cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom ≫
-            (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv) ≫ cd.q := by rw [Category.assoc]
-      _ = 𝟙 cd.XM ≫ cd.q := by rw [(cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom_inv_id]
-      _ = cd.q := Category.id_comp _
+  have hAq : ∀ γ, (cd.rM.autMulHom ((P.simulAutSnd Q) (φ γ))).hom ≫ cd.q = cd.q :=
+    fun γ => coreData_qinv_full_hom cd hrig γ
   -- `g := f_ell ≫ q` is `G`-deck-invariant at the full Ell/R level (`ρ γ ≫ g = g`), so it
   -- descends through the torsor projection `π_td` to the required `v : Y ⟶ X₀`.
   have hg_inv : ∀ γ,
