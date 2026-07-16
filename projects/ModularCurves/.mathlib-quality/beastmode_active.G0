@@ -1,8 +1,10 @@
-STREAM-G0 TERMINAL (v10.264-G0, 2026-07-16) — BB-DIFF ASSEMBLED.
+STREAM-G0 ACTIVE (v10.265 dispatch, 2026-07-16) — FIRING THE BB-DIFF LEAF.
 
-mulByHom_formallyUnramified / mulBy_etale / torsionπ_etale: REAL proofs, single
-residual sorry = modelMulByHom_formallyUnramified_of_isAlgClosed
-(MulByHomUnramifiedField.lean:45). Torsion.lean SORRY-FREE. Build green (4222 jobs).
-Commits c4ec6a839 / 79af85fc7 / 063064524 pushed. Boards: tickets.md v10.264-G0;
-stream report appended. Leaf fire-plan: R-count glue (~1 session) once KM's
-MulByHomDegree.lean stabilizes. No claims held.
+CLAIM: rule-5, ONE session. Target: modelMulByHom_formallyUnramified_of_isAlgClosed
+(MulByHomUnramifiedField.lean:45) — [N] unramified on the model over alg-closed κ̄.
+ROUTE (kernel-count, G0 fire-plan): L-A torsor reduction to E[N]-unramified-over-κ̄;
+E[N] = Spec T with dim T = N² (torsion_rank) and #AlgHom(T,κ̄) = #sections =
+#torsionBy(E.Point 𝟙) [torsionPointsEquiv] = N² [projModelPointsAddEquiv + HasseWeil
+TorsionGeneralN]; Dedekind eval-bijectivity ⟹ T ≅ κ̄^{N²} ⟹ étale. File-level: the
+leaf chain must sit downstream of TorsionFibre (L-A/torsionPointsEquiv) — relocating
+the κ̄-wiring accordingly. Then #print axioms receipt.
