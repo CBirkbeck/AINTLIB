@@ -21988,3 +21988,30 @@ IsOpenImmersion.lift through V + isoSpec conjugation + the section-property k-al
 + Spec-faithfulness ⟹ point_eq_section), then distinct (pure cyclic theory, banked), mp-locus
 (hasExactOrder_of_geometric), the coprime-cover glue ([F3-loc] ✓) = **F3.mp**. The T-D8 seam:
 exhaust-2+3 ARE the T-D8 engine (surfaced to GH, inbox 2026-07-16e). (STREAM-KM)
+
+## v10.288-OMEGA (2026-07-16, STREAM-OMEGA) — ★★★ THE KILLING IS PROVEN: [3]P=[3]Q=0 at the SECTION level (Stages A+B+C fully assembled); Stage B complete (8 lemmas)
+
+**Stage B (the funnel) EXECUTED — `EllipticCurve/AffineSectionSpecPoints.lean` (new, 8 axiom-clean):**
+B-1 `affineSectionSpecPoint_eq_spec` (the evaluated marked section = `Spec` of the composite evaluation
+hom ≫ Z-chart immersion — the explicit `InZChart` witness) → B-2 `affineChartHom_gradeZero`+compat →
+B-3 `chartHomEquiv_affineSectionSpecPoint` (`eq_of_specMap` read) → B-4/5 coordinate values
+(`chartCoordEquiv_mk_X` + `isLocalizationElem`-as-`Away.mk` + `affineChartHom_mk`) →
+**B-6 `projModelPointsEquiv_affineSectionSpecPoint`** (the fibre evaluation: dictionary ↦ `some(p̄,q̄)`) →
+**B-7 `projModelPointsEquiv_point_add` + `modelPointAddEquiv`** (the additive dictionary over ANY ring
+base — the field-base restriction in MulByHomDegree was incidental; the model's Point-addition is
+definitionally the `mulModelHom` composite) → **B-8 `nsmul_section_eq_zero_of_forall_specPoint`**
+(the collision principle: `Section = Point(𝟙)` abbrev + mathlib `IsSeparated (Proj 𝒜)` + reducedness +
+`hom_ext_of_forall_specPoint`).
+
+**THE KILLING (UniversalLevelThree):** `universalE3_section_killing` (the engine: per-fibre
+`Spec.preimage`/`toAlgebra` + `modelPointAddEquiv`-injectivity + B-6 ⟹ reduces to the field
+hypothesis) ⟹ **`three_zsmul_universalE3P`** (Stage-A origin-doubling) + **`three_zsmul_universalE3Q`**
+(Stage-A slope-1 doubling + `isUnit_e3Den`) — `[3]P = [3]Q = 0` conditional only on
+`IsReduced (Spec (E3ModuliRing R))`, and **`isReduced_spec_e3ModuliRing`** discharges that over any UFD
+with 3 invertible (Stage C + `instIsReducedLocalization` + Spec-reduced). All axiom-clean, pushed.
+
+**REMAINING for Bootstrap :86 (hL):** generation (BB-DEG rank + étale + AX2-e ✓ + Stage-B evaluation —
+same toolkit) + **Stage D** (arbitrary-R transfer of the killing: ring-base-change of sections along
+`E3ModuliRing ℤ[1/3] → E3ModuliRing R` via `Point.pull_zsmul` + `projModelAffineSection_baseChange` +
+the model base-change square). For :91 (hArb): the field-level ⟹-bridges (`3P=0 ⟹ μ=0` over a field —
+Stage-A-style) + `isE3Datum_of_flexCharts` ✓. G0 owns :112/:195.
