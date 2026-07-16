@@ -716,7 +716,8 @@ private theorem discrete_gluing_partition_of_unity {A : Type*} [CommRing A]
     -- From hcompat_r'': algebraMap A R (r'' D * D'.s^N) = algebraMap A R (r'' D' * D.s^N)
     -- Apply φ D' to both sides, using hφ_alg.
     rw [mul_comm]
-    -- Apply φ D' to hcompat_r'': algebraMap(r'' D) * algebraMap(D'.s)^N = algebraMap(r'' D') * algebraMap(D.s)^N
+    -- Apply φ D' to hcompat_r'':
+    -- algebraMap(r'' D) * algebraMap(D'.s)^N = algebraMap(r'' D') * algebraMap(D.s)^N
     simpa only [map_mul, map_pow, hφ_alg] using congr_arg (φ D') (hcompat_r'' D D')
   simp_rw [key]
   -- Goal: ∑ D, φ D' (c D) * (algebraMap(r'' D') * (algebraMap D.s)^N) = algebraMap(r'' D')
