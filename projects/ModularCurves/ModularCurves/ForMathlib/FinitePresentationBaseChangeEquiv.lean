@@ -285,6 +285,42 @@ private theorem Presentation.spreadTensorMap_bijective_iff
     have hleft : Function.Bijective (E₂.toAlgHom.comp F) := hcomm.symm ▸ hright
     exact (E₂.bijective.of_comp_iff' F).mp hleft
 
+private theorem Presentation.spreadTensorMap_surjective_iff
+    {i j : ι} (hij : i ≤ j)
+    {C₁ C₂ : Type u} [CommRing C₁] [CommRing C₂]
+    [Algebra (𝒮 i) C₁] [Algebra (𝒮 i) C₂]
+    {m₁ k₁ m₂ k₂ : ℕ}
+    (P₁ : Presentation (𝒮 i) C₁ (Fin m₁) (Fin k₁))
+    (P₂ : Presentation (𝒮 i) C₂ (Fin m₂) (Fin k₂))
+    (f : C₁ →ₐ[𝒮 i] C₂) :
+    letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+    letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+    Function.Surjective
+        (P₁.spreadTensorMap (𝒮 := 𝒮) (t := t) (A := A) (uA := uA)
+          hij P₂ f) ↔
+      Function.Surjective (tensorProductMapOverLeft (T := 𝒮 j) f) := by
+  letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+  letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+  let E₁ := P₁.spreadStageEquiv (𝒮 := 𝒮) (t := t) (A := A) (uA := uA) hij
+  let E₂ := P₂.spreadStageEquiv (𝒮 := 𝒮) (t := t) (A := A) (uA := uA) hij
+  let F := P₁.spreadTensorMap (𝒮 := 𝒮) (t := t) (A := A) (uA := uA)
+    hij P₂ f
+  let G := tensorProductMapOverLeft (T := 𝒮 j) f
+  have hcomm : E₂.toAlgHom.comp F = G.comp E₁.toAlgHom := by
+    ext x
+    exact P₁.spreadStageEquiv_spreadTensorMap hij P₂ f x
+  constructor
+  · intro hF
+    have hleft : Function.Surjective (E₂.toAlgHom.comp F) :=
+      E₂.surjective.comp hF
+    have hright : Function.Surjective (G.comp E₁.toAlgHom) := hcomm ▸ hleft
+    exact (Function.Surjective.of_comp_iff G E₁.surjective).mp hright
+  · intro hG
+    have hright : Function.Surjective (G.comp E₁.toAlgHom) :=
+      hG.comp E₁.surjective
+    have hleft : Function.Surjective (E₂.toAlgHom.comp F) := hcomm.symm ▸ hright
+    exact (Function.Surjective.of_comp_iff' E₂.bijective F).mp hleft
+
 private theorem Presentation.spreadBaseChangeEquiv_map
     (H : IsFilteredAlgColimit R 𝒮 t A uA)
     {i j : ι} (hij : i ≤ j)
@@ -354,6 +390,37 @@ private theorem Presentation.baseChange_spreadTensorMap_bijective
     exact hf.comp E₁.bijective
   exact (E₂.bijective.of_comp_iff' F).mp hcomp
 
+private theorem Presentation.baseChange_spreadTensorMap_surjective
+    (H : IsFilteredAlgColimit R 𝒮 t A uA)
+    {i j : ι} (hij : i ≤ j)
+    {C₁ C₂ : Type u} [CommRing C₁] [CommRing C₂]
+    [Algebra (𝒮 i) C₁] [Algebra (𝒮 i) C₂]
+    {m₁ k₁ m₂ k₂ : ℕ}
+    (P₁ : Presentation (𝒮 i) C₁ (Fin m₁) (Fin k₁))
+    (P₂ : Presentation (𝒮 i) C₂ (Fin m₂) (Fin k₂))
+    (f : C₁ →ₐ[𝒮 i] C₂)
+    (hf :
+      letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+      Function.Surjective (tensorProductMapOverLeft (T := A) f)) :
+    letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+    letI : Algebra (𝒮 j) A := (uA j).toRingHom.toAlgebra
+    letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+    Function.Surjective
+      (Algebra.TensorProduct.map (AlgHom.id A A)
+        (P₁.spreadTensorMap (𝒮 := 𝒮) (t := t) (A := A) (uA := uA)
+          hij P₂ f)) := by
+  letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+  letI : Algebra (𝒮 j) A := (uA j).toRingHom.toAlgebra
+  letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+  let E₁ := P₁.spreadBaseChangeEquiv H hij
+  let E₂ := P₂.spreadBaseChangeEquiv H hij
+  let F := Algebra.TensorProduct.map (AlgHom.id A A)
+    (P₁.spreadTensorMap (𝒮 := 𝒮) (t := t) (A := A) (uA := uA) hij P₂ f)
+  have hcomp : Function.Surjective (E₂.toAlgHom.comp F) := by
+    rw [P₁.spreadBaseChangeEquiv_map H hij P₂ f]
+    exact hf.comp E₁.surjective
+  exact (Function.Surjective.of_comp_iff' E₂.bijective F).mp hcomp
+
 private noncomputable def Presentation.spreadTensorMapColimitEquiv
     (H : IsFilteredAlgColimit R 𝒮 t A uA)
     {i j : ι} (hij : i ≤ j)
@@ -416,6 +483,104 @@ private theorem Presentation.spreadTensorMapColimitEquiv_compat
     hij P₂ f
   let F := Algebra.TensorProduct.map (AlgHom.id A A) f_j
   let e := P₁.spreadTensorMapColimitEquiv H hij P₂ f hf
+  calc
+    D₂.stageToColimit H ⟨j, hij⟩ (f_j x) =
+        D₂.baseChangeColimEquiv hij H (1 ⊗ₜ[𝒮 j] f_j x) :=
+      (D₂.baseChangeColimEquiv_tmul hij H (f_j x)).symm
+    _ = D₂.baseChangeColimEquiv hij H (F (1 ⊗ₜ[𝒮 j] x)) := by
+      rw [Algebra.TensorProduct.map_tmul, AlgHom.id_apply]
+    _ = e (D₁.baseChangeColimEquiv hij H (1 ⊗ₜ[𝒮 j] x)) := by
+      change D₂.baseChangeColimEquiv hij H (F (1 ⊗ₜ[𝒮 j] x)) =
+        D₂.baseChangeColimEquiv hij H
+          (F ((D₁.baseChangeColimEquiv hij H).symm
+            (D₁.baseChangeColimEquiv hij H (1 ⊗ₜ[𝒮 j] x))))
+      rw [AlgEquiv.symm_apply_apply]
+    _ = e (D₁.stageToColimit H ⟨j, hij⟩ x) := by
+      rw [D₁.baseChangeColimEquiv_tmul hij H x]
+
+private noncomputable def Presentation.spreadTensorMapColimitHom
+    (H : IsFilteredAlgColimit R 𝒮 t A uA)
+    {i j : ι} (hij : i ≤ j)
+    {C₁ C₂ : Type u} [CommRing C₁] [CommRing C₂]
+    [Algebra (𝒮 i) C₁] [Algebra (𝒮 i) C₂]
+    {m₁ k₁ m₂ k₂ : ℕ}
+    (P₁ : Presentation (𝒮 i) C₁ (Fin m₁) (Fin k₁))
+    (P₂ : Presentation (𝒮 i) C₂ (Fin m₂) (Fin k₂))
+    (f : C₁ →ₐ[𝒮 i] C₂) :
+    letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+    letI : Algebra (𝒮 j) A := (uA j).toRingHom.toAlgebra
+    letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+    A ⊗[𝒮 i] C₁ →ₐ[A] A ⊗[𝒮 i] C₂ := by
+  letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+  letI : Algebra (𝒮 j) A := (uA j).toRingHom.toAlgebra
+  letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+  let D₁ := P₁.toSpreadData (𝒮 := 𝒮) (A := A) (uA := uA)
+  let D₂ := P₂.toSpreadData (𝒮 := 𝒮) (A := A) (uA := uA)
+  let f_j := P₁.spreadTensorMap (𝒮 := 𝒮) (t := t) (A := A) (uA := uA)
+    hij P₂ f
+  exact (D₂.baseChangeColimEquiv hij H).toAlgHom.comp
+    ((Algebra.TensorProduct.map (AlgHom.id A A) f_j).comp
+      (D₁.baseChangeColimEquiv hij H).symm.toAlgHom)
+
+private theorem Presentation.spreadTensorMapColimitHom_surjective
+    (H : IsFilteredAlgColimit R 𝒮 t A uA)
+    {i j : ι} (hij : i ≤ j)
+    {C₁ C₂ : Type u} [CommRing C₁] [CommRing C₂]
+    [Algebra (𝒮 i) C₁] [Algebra (𝒮 i) C₂]
+    {m₁ k₁ m₂ k₂ : ℕ}
+    (P₁ : Presentation (𝒮 i) C₁ (Fin m₁) (Fin k₁))
+    (P₂ : Presentation (𝒮 i) C₂ (Fin m₂) (Fin k₂))
+    (f : C₁ →ₐ[𝒮 i] C₂)
+    (hf :
+      letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+      Function.Surjective (tensorProductMapOverLeft (T := A) f)) :
+    letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+    letI : Algebra (𝒮 j) A := (uA j).toRingHom.toAlgebra
+    letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+    Function.Surjective (P₁.spreadTensorMapColimitHom H hij P₂ f) := by
+  letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+  letI : Algebra (𝒮 j) A := (uA j).toRingHom.toAlgebra
+  letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+  let D₁ := P₁.toSpreadData (𝒮 := 𝒮) (A := A) (uA := uA)
+  let D₂ := P₂.toSpreadData (𝒮 := 𝒮) (A := A) (uA := uA)
+  let f_j := P₁.spreadTensorMap (𝒮 := 𝒮) (t := t) (A := A) (uA := uA)
+    hij P₂ f
+  have hbase : Function.Surjective
+      (Algebra.TensorProduct.map (AlgHom.id A A) f_j) :=
+    P₁.baseChange_spreadTensorMap_surjective H hij P₂ f hf
+  exact (D₂.baseChangeColimEquiv hij H).surjective.comp
+    (hbase.comp (D₁.baseChangeColimEquiv hij H).symm.surjective)
+
+private theorem Presentation.spreadTensorMapColimitHom_compat
+    (H : IsFilteredAlgColimit R 𝒮 t A uA)
+    {i j : ι} (hij : i ≤ j)
+    {C₁ C₂ : Type u} [CommRing C₁] [CommRing C₂]
+    [Algebra (𝒮 i) C₁] [Algebra (𝒮 i) C₂]
+    {m₁ k₁ m₂ k₂ : ℕ}
+    (P₁ : Presentation (𝒮 i) C₁ (Fin m₁) (Fin k₁))
+    (P₂ : Presentation (𝒮 i) C₂ (Fin m₂) (Fin k₂))
+    (f : C₁ →ₐ[𝒮 i] C₂)
+    (x : (P₁.toSpreadData (𝒮 := 𝒮) (A := A) (uA := uA)).spreadStage
+      (t := t) hij) :
+    letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+    letI : Algebra (𝒮 j) A := (uA j).toRingHom.toAlgebra
+    letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+    let D₁ := P₁.toSpreadData (𝒮 := 𝒮) (A := A) (uA := uA)
+    let D₂ := P₂.toSpreadData (𝒮 := 𝒮) (A := A) (uA := uA)
+    D₂.stageToColimit H ⟨j, hij⟩
+        (P₁.spreadTensorMap (𝒮 := 𝒮) (t := t) (A := A) (uA := uA)
+          hij P₂ f x) =
+      P₁.spreadTensorMapColimitHom H hij P₂ f
+        (D₁.stageToColimit H ⟨j, hij⟩ x) := by
+  letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+  letI : Algebra (𝒮 j) A := (uA j).toRingHom.toAlgebra
+  letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+  let D₁ := P₁.toSpreadData (𝒮 := 𝒮) (A := A) (uA := uA)
+  let D₂ := P₂.toSpreadData (𝒮 := 𝒮) (A := A) (uA := uA)
+  let f_j := P₁.spreadTensorMap (𝒮 := 𝒮) (t := t) (A := A) (uA := uA)
+    hij P₂ f
+  let F := Algebra.TensorProduct.map (AlgHom.id A A) f_j
+  let e := P₁.spreadTensorMapColimitHom H hij P₂ f
   calc
     D₂.stageToColimit H ⟨j, hij⟩ (f_j x) =
         D₂.baseChangeColimEquiv hij H (1 ⊗ₜ[𝒮 j] f_j x) :=
@@ -595,6 +760,54 @@ private theorem Presentation.mapAtLaterStage_spreadTensorMap
       (hij.trans hjk) P₂ f)
   intro v
   exact P₁.stageTransition_spreadTensorMap_mk_X H hij hjk P₂ f v
+
+/-- A map between finitely presented algebras whose scalar extension to a
+filtered colimit is surjective is already surjective after a later scalar
+extension in the system. -/
+theorem IsFilteredAlgColimit.exists_tensorProductMap_surjective
+    (H : IsFilteredAlgColimit R 𝒮 t A uA)
+    {i : ι} {C₁ C₂ : Type u} [CommRing C₁] [CommRing C₂]
+    [Algebra (𝒮 i) C₁] [Algebra (𝒮 i) C₂]
+    [FinitePresentation (𝒮 i) C₁] [FinitePresentation (𝒮 i) C₂]
+    (f : C₁ →ₐ[𝒮 i] C₂)
+    (hf :
+      letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+      Function.Surjective
+        (Algebra.TensorProduct.map (AlgHom.id (𝒮 i) A) f)) :
+    ∃ (j : ι) (hij : i ≤ j),
+      letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+      Function.Surjective
+        (Algebra.TensorProduct.map (AlgHom.id (𝒮 i) (𝒮 j)) f) := by
+  letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
+  haveI := H.directed
+  obtain ⟨j, hij, _⟩ := directed_of (· ≤ ·) i i
+  letI : Algebra (𝒮 j) A := (uA j).toRingHom.toAlgebra
+  letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
+  let P₁ := Presentation.ofFinitePresentation (𝒮 i) C₁
+  let P₂ := Presentation.ofFinitePresentation (𝒮 i) C₂
+  let D₁ := P₁.toSpreadData (𝒮 := 𝒮) (A := A) (uA := uA)
+  let D₂ := P₂.toSpreadData (𝒮 := 𝒮) (A := A) (uA := uA)
+  let f_j := P₁.spreadTensorMap (𝒮 := 𝒮) (t := t) (A := A) (uA := uA)
+    hij P₂ f
+  have hf' : Function.Surjective (tensorProductMapOverLeft (T := A) f) := hf
+  let F := P₁.spreadTensorMapColimitHom H hij P₂ f
+  have hcompat : ∀ x, D₂.stageToColimit H ⟨j, hij⟩ (f_j x) =
+      F (D₁.stageToColimit H ⟨j, hij⟩ x) :=
+    P₁.spreadTensorMapColimitHom_compat H hij P₂ f
+  have hF : Function.Surjective F :=
+    P₁.spreadTensorMapColimitHom_surjective H hij P₂ f hf'
+  obtain ⟨k, hjk, hsurj⟩ :=
+    D₁.exists_surjective_mapAtLaterStage D₂ H hij hij f_j F hcompat hF
+  letI : Algebra (𝒮 i) (𝒮 k) :=
+    (t (hij.trans hjk)).toRingHom.toAlgebra
+  have hspread : Function.Surjective
+      (P₁.spreadTensorMap (𝒮 := 𝒮) (t := t) (A := A) (uA := uA)
+        (hij.trans hjk) P₂ f) := by
+    rw [← P₁.mapAtLaterStage_spreadTensorMap H hij hjk P₂ f]
+    exact hsurj
+  refine ⟨k, hij.trans hjk, ?_⟩
+  exact (P₁.spreadTensorMap_surjective_iff
+    (𝒮 := 𝒮) (t := t) (A := A) (uA := uA) (hij.trans hjk) P₂ f).mp hspread
 
 /-- A map between finitely presented algebras whose scalar extension to a
 filtered colimit is bijective is already bijective after a later scalar
