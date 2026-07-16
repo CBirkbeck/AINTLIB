@@ -21358,3 +21358,74 @@ sibling in-flight work:
   cotangent-at-identity + translation-homogeneity (NO translation API banked — bigger build).
 G0 recommends R-count at KM-stabilization; the brick-6 taint on the finrank input auto-cleans
 exactly like BB-DEG.
+
+## v10.265 (2026-07-16, coordinator) — ★★★ BATCH RATIFIED: brick 6 = ONE sorry (:1356, exact fixes banked); both Bootstrap assemblies TURNKEY; BB-DIFF assembled to one leaf; G0's fire-gate is OPEN (KM stabilized)
+
+**Verified at source** (origin/dev/modular-curves, tip 61e8dd25f). Four-report batch (OMEGA, G0, GH, KM)
+processed. **Push hygiene: PERFECT this round** — 0 ahead / 0 behind, no dirty .lean files, all cited
+commits on origin (25cb8dbf3, d85ebca57, cdfa9f8a3, 4a398c3eb, 0f20fa4e4…). OMEGA verified `ls-remote`
+per the v10.262 lesson — the protocol stuck. No protective pushes needed.
+
+**RATIFIED (each verified, not report-trusted):**
+- **★★★ KM — brick6_intertwining is PROVEN axiom-clean; brick 6 = ONE sorry.** The whole
+  T1/T2/T3/PHI/τ-hits/(M)/KEY-EVAL/FFM_X/Y/C chain landed sorry-free (8 commits, ~600 lines; highlight:
+  `projModelFunctionFieldEquiv_eq_stalkClosedPointTo` via mathlib's stalkClosedPointTo kit).
+  `MulByHomDegree.lean` = exactly 1 sorry: **`brick6_from_intertwining` (:1356, the A+B finrank-tower
+  assembly)**. The ~150-line towerBC draft reached green-through-the-instance-stack; **TWO exact fixes
+  boarded** (decomposition-keystone.md + the KM sentinel carries the verbatim resume plan): (1) pin the
+  middle Module/SMul instance (letI algR'S' before any K(pM)-over-K(pM) mention, shadow the id-algebra),
+  (2) the ConcreteCategory.hom/algebraMap coercion-defeq nit + hFRZ letI-reorder. Then the degree-tail +
+  the (A)-transport (`finrank_eq_of_equiv_equiv` with the verified mathlib tools) closes :1356 → the K4
+  crux wires → FIELD ANCHOR DONE → G0's BB-DEG auto-cleans → `endDeg_mulBy` → OMEGA/GH inputs LIVE.
+- **★★ OMEGA — both final assemblies TURNKEY** (Bootstrap.lean verified): :75
+  `naiveLevelThree_representable_by_affine` = `refine …_of_conditions R hR ?_ ?_` with exactly **hL (:86)
+  + hArb (:91)** as the remaining sorries; :168 `legendreDelta_representable_by_affine` = `refine
+  …_of_level R hR ⟨killing ✓ two_zsmul, ?_⟩` with **E[2]-generation** the sole sorry. `transportE_baseChange`
+  exposed for GH (already consumed). ~22 axiom-clean results across the NORM arc. OMEGA's dispatchable
+  NORM work is DONE.
+- **★★ G0 — BB-DIFF assembled to ONE leaf; Torsion.lean SORRY-FREE** (verified — the 1 grep hit is a
+  docstring word). `mulByHom_formallyUnramified`/`mulBy_etale`/`torsionπ_etale` are real proofs whose sole
+  input is **`modelMulByHom_formallyUnramified_of_isAlgClosed`** (`MulByHomUnramifiedField.lean:45`, `:= by
+  sorry`, route-of-record in the docstring: HasseWeil `mulByInt_isSeparable` → generic-point unramified →
+  open locus + translation-transitivity). Decisive find: the July-10 orphan skeleton already held the L-A
+  torsor reduction — migrated to TorsionFibre.lean, skeleton deleted. FibrewiseUnramified.lean engine banked.
+- **★ GH — β2-heart Unit 1 landed** (d85ebca57, cdfa9f8a3): the feared transport leaf DISSOLVED —
+  `Point.baseChangeEquiv` (GroupLaw.lean, T-H2b) already does it. `Point.congrBase`/`Point.pullAlong`/
+  `baseChangeEquiv_pull_asSection` axiom-clean; **U2 (`isFullLevel_baseChange_comp_iff`) fully pinned** with
+  its complete recipe in the sentinel; U3 + β3 follow.
+
+**★ STRUCTURAL DISCOVERY (coordinator, this sweep): Bootstrap:112 = ENGINE AXIOM 2, and it consumes G0's
+BB-DIFF.** `naiveLevelThree_relativelyRepresentable_finiteEtale` (:112, sorried) — the finite-étale
+rel-rep axiom (KM p.112) — routes through **E[3] finite étale of rank 9 = T-B5 = exactly G0's
+BB-DIFF/torsionπ_etale chain** (+ the Isom-scheme packaging; docstring names the Weil-pairing cut / stream C
+as the open-closed cut). Its Legendre twin (T-E14-AX2) sits below :185. **So G0's leaf is NOT an étale
+side-quest — it feeds the second engine axiom for BOTH instantiations.** Priority raised accordingly.
+
+**STALE-CONCERN CLEARANCE:** G0's report flagged "KM's broken intermediate save blocks oleans downstream" —
+**verified STALE**: KM committed + pushed everything (0/0, no dirty files, tree clean). G0's stated fire-gate
+("once KM stabilizes") is **OPEN NOW**. Nobody should act on the broken-save concern.
+
+**THE VERIFIED REMAINING-SORRY MAP (headline paths only):**
+1. `MulByHomDegree.lean:1356` — brick6_from_intertwining (KM; two exact fixes + (A)-transport banked). THE domino.
+2. `Bootstrap.lean:86/:91` — hL/hArb (OMEGA; one-liners the instant BB-DEG cleans; killing-halves may be pre-fillable).
+3. `Bootstrap.lean:~178` — Legendre E[2]-generation = [T-E14-LVL-b] (keystone-fed).
+4. `Bootstrap.lean:112` + Legendre twin — the two AX2s (finite-étale rel-rep; consume G0's BB-DIFF chain + Isom packaging).
+5. `MulByHomUnramifiedField.lean:45` — the BB-DIFF leaf (G0; fire-gate OPEN; feeds 4 + GH's β3).
+6. GammaHMaster qpd sorryAx — GH's [GHA3] U2→U3→β3 chain.
+Parked/non-critical: endDual_comp_self+[FR-GEN] (degree completeness), hLN=T-W7.8 (owner), L15.
+
+**RE-DISPATCH:**
+- **KM → CLOSE :1356** via the sentinel's verbatim resume plan (fix 1: instance-pin; fix 2: coercion-defeq;
+  degree-tail; (A)-transport; hfin). ONE session, ONE sorry, exact fixes known. The domino.
+- **G0 → FIRE the leaf glue session NOW** (`modelMulByHom_formallyUnramified_of_isAlgClosed`,
+  MulByHomUnramifiedField:45) — your gate (KM stabilized) is open; point-count/separability route per your
+  own fire-plan + the docstring. Then the #print axioms receipt. Your leaf feeds engine AX2 for both
+  instantiations (Bootstrap:112 + twin) — higher-leverage than boarded.
+- **OMEGA → Bootstrap owner-of-record:** (1) pre-fill the keystone-FREE parts of hL/hArb (the section-level
+  killing halves on the universal ℰ₃ — the flex-relation algebra is your territory; leave generation to the
+  keystone); (2) SCOPE AX2 (:112 + Legendre twin): route = E[3]-finite-étale (G0's chain) + Isom-scheme
+  packaging + the open-closed cut — assess whether the Weil-pairing cut is avoidable like NORM's was (your
+  ζ₃-void finding suggests an incidence/discriminant cut may work); board the decomposition, consume G0's
+  leaf as it lands. Stand ready for the hL/hArb one-liners on BB-DEG.
+- **GH → U2 per the pinned recipe** (`isFullLevel_baseChange_comp_iff`) → U3 (factor-iff assembly via
+  `exists_iso_of_factor_iff`) → β3 (constant-form clopen; strengthened by G0's leaf). HOLD general-S pins.
