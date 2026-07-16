@@ -111,6 +111,31 @@ theorem pullbackComp_assoc_app
         (pullbackComp f (g ≫ h)).hom.app M at H
   exact H.symm
 
+/-- Threefold pullback composition remains coherent after replacing the first composite and
+transporting the resulting total composite to a common morphism. -/
+theorem pullbackComp_three_congr_trans_app
+    {A B C D : Scheme.{u}}
+    (p : A ⟶ B) (d : B ⟶ C) (g : C ⟶ D)
+    (s : A ⟶ C) (hp : p ≫ d = s) (w : A ⟶ D)
+    (h₁ : p ≫ (d ≫ g) = s ≫ g)
+    (h₂ : s ≫ g = w) (N : D.Modules) :
+    (pullback p).map ((pullbackComp d g).hom.app N) ≫
+        ((((pullbackComp p (d ≫ g)).app N) ≪≫
+          ((pullbackCongr (h₁.trans h₂)).app N)).hom) =
+      ((((pullbackComp p d).app ((pullback g).obj N)) ≪≫
+          ((pullbackCongr hp).app ((pullback g).obj N))).hom) ≫
+        (pullbackComp s g).hom.app N ≫
+        ((pullbackCongr h₂).app N).hom := by
+  subst s
+  simp only [Iso.trans_hom]
+  have hcomp := pullbackComp_assoc_app p d g N
+  have hproof : h₁.trans h₂ = h₂ := Subsingleton.elim _ _
+  rw [hproof]
+  have hcongr : ((pullbackCongr
+      (rfl : p ≫ d = p ≫ d)).app ((pullback g).obj N)).hom = 𝟙 _ := rfl
+  rw [hcongr, Category.comp_id]
+  exact (reassoc_of% hcomp) ((pullbackCongr h₂).hom.app N)
+
 /-- The two canonical ways to flatten four successive pullbacks agree. -/
 theorem pullbackComp_four_assoc_app
     {A B C D E : Scheme.{u}}

@@ -757,3 +757,19 @@ finite-stage overlap automorphism by the canonical pullback-unit isomorphism now
 overlap automorphism. The proof directly consumes the completed section comparison and the existing
 unit-endomorphism pullback formula. The focused build is green, no hypothesis or option was added,
 and the axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.
+
+Active subdependency claim (2026-07-16): prove
+`pullbackComp_three_congr_trans_app`, `pullbackCompositeTrivialization`, and
+`pullbackSquareTrivialization_normalize`, and expose the existing
+`transition_of_normalized`. These coherence lemmas normalize a square-transported chart
+trivialization through a common threefold pullback and compare two such normal forms by their
+transition automorphism. They split the remaining chart-compatibility proof into bounded pieces
+and add no geometric hypotheses, new descent abstraction, or proof-resource options.
+
+Completed subdependency claim (2026-07-16): proved
+`pullbackComp_three_congr_trans_app`, `pullbackCompositeTrivialization`, and
+`pullbackSquareTrivialization_normalize`, and exposed `transition_of_normalized`. The remaining
+chart comparison can now normalize both transported trivializations through one common pullback
+and reduce to their terminal scalar transition. The focused build is green, no hypothesis or
+proof-resource option was added, and every declaration has only `propext`, `Classical.choice`,
+and `Quot.sound` (or a subset) in its axiom audit.

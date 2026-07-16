@@ -187,6 +187,43 @@ theorem pullbackSquareTrivialization_factor
   rw [← htransApp]
   simp only [Category.assoc]
 
+/-- Pull a trivialization along a factorization of a fixed morphism. -/
+noncomputable def pullbackCompositeTrivialization
+    {A C D : Scheme.{u}} (c : A ⟶ C) (r : C ⟶ D)
+    (w : A ⟶ D) (h : c ≫ r = w) (N : D.Modules)
+    (t : (pullback r).obj N ≅ unitObj C) :
+    (pullback w).obj N ≅ unitObj A :=
+  (pullbackCongr h.symm).app N ≪≫
+    (pullbackComp c r).symm.app N ≪≫
+    (pullback c).mapIso t ≪≫ pullbackUnitIso c
+
+/-- A square-transported trivialization normalizes through a common threefold pullback. -/
+theorem pullbackSquareTrivialization_normalize
+    {A B C D E : Scheme.{u}}
+    (p : A ⟶ B) (d : B ⟶ D) (g : D ⟶ E)
+    (s : A ⟶ D) (hp : p ≫ d = s)
+    (c : A ⟶ C) (r : C ⟶ E) (w : A ⟶ E)
+    (hSquare : p ≫ (d ≫ g) = c ≫ r)
+    (hSource : p ≫ (d ≫ g) = s ≫ g)
+    (hCommon : s ≫ g = w) (hw : c ≫ r = w)
+    (N : E.Modules) (t : (pullback r).obj N ≅ unitObj C) :
+    (pullback p).map ((pullbackComp d g).hom.app N) ≫
+        (pullbackSquareTrivialization p (d ≫ g) c r hSquare N t).hom =
+      ((((pullbackComp p d).app ((pullback g).obj N)) ≪≫
+          ((pullbackCongr hp).app ((pullback g).obj N))).hom) ≫
+        ((((pullbackComp s g).app N) ≪≫
+          ((pullbackCongr hCommon).app N)).hom) ≫
+        (pullbackCompositeTrivialization c r w hw N t).hom := by
+  have hfactor := pullbackSquareTrivialization_factor
+    p (d ≫ g) c r w hSquare hw N t
+  have hproof : hSquare.trans hw = hSource.trans hCommon := Subsingleton.elim _ _
+  rw [hproof] at hfactor
+  rw [hfactor]
+  have hprefix := pullbackComp_three_congr_trans_app
+    p d g s hp w hSource hCommon N
+  exact (reassoc_of% hprefix)
+    (pullbackCompositeTrivialization c r w hw N t).hom
+
 /-- If the lower leg of a square is an inclusion of opens, the residual factor in a
 square-transported trivialization is the usual restricted trivialization. -/
 theorem pullbackSquareTrivialization_tail_restrict
@@ -280,7 +317,9 @@ theorem pullbackSquareTrivialization_four_restrict
   rw [htail]
   exact (reassoc_of% hnorm) (restrictTrivialization hWU t).hom
 
-private theorem transition_of_normalized
+/-- Two normalized trivializations differ by the transition between their terminal
+trivializations. -/
+theorem transition_of_normalized
     {C : Type u} [Category C] {A B C' D E : C}
     (L₁ : A ≅ B) (L₂ : C' ≅ B) (K : B ⟶ D)
     (T₁ T₂ : D ≅ E) (scalar : E ⟶ E)
