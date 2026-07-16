@@ -21715,3 +21715,12 @@ relative Spec absent from mathlib) — see the decomposition's [F3-split] REVISI
 [F3-yoneda] (G ≅ Z_M ×_S Z_K), [F3-flat], [F3-degmul], [F3-squeeze]. Session total: 16 proven
 bricks + 2 scheme-defs on Factorization.lean; 4 skeleton sorries mark the F3/F4 frontier.
 (STREAM-KM)
+
+### v10.276-KM — [F3-crt-pts] + [F3-toKer] PROVEN — the (3.5.1.3) engine at both levels (STREAM-KM)
+`killedCoprimeSplitEquiv` (`74240919d`): the KM second iso `g ↦ (Kg, Mg)` with Bezout inverse as
+an explicit Equiv (gotcha: `set` gcdA/gcdB, never `obtain` — Exists-elim can't build data).
+`IsSubgroup.exists_toSmulKernel` (`666e8c3c4`): the component projections `G ⟶ Ker[c']` for
+`c'c ≡ 0 (mod N)` — universal point scaled, killed via zsmul_congr_of_kill, lifted through
+exists_smulKernel_lift. NEXT: [F3-prodMap] (pullback.lift of the two projections), [F3-sumMap]
+(kernel-inclusion points summed in H, re-factored), then the roundtrip identities (mono-ι +
+crt-pts arithmetic), [F3-flat] (retract), [F3-degmul], [F3-squeeze]. (STREAM-KM)
