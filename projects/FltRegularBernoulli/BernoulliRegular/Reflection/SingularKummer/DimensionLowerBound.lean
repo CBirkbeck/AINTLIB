@@ -44,6 +44,28 @@ variable [AddCommGroup U] [Module F U]
 variable [AddCommGroup S] [Module F S]
 variable [AddCommGroup A] [Module F A]
 
+/-- Two submodule elements are linearly independent when a linear map kills the first
+(`π uS = 0`) but sends the second to a nonzero value (`π sS = a ≠ 0`), given `uS ≠ 0`. -/
+private lemma linearIndependent_pair_of_map_eq_zero_of_map_ne_zero
+    (π : S →ₗ[F] A) {Si : Submodule F S} (uS sS : Si) (a : A)
+    (huS_ne_zero : uS ≠ 0) (hπ_uS : π (uS : S) = 0)
+    (ha_ne_zero : a ≠ 0) (hπ_sS : π (sS : S) = a) :
+    LinearIndependent F ![uS, sS] := by
+  refine (LinearIndependent.pair_iff' (K := F) huS_ne_zero).2 ?_
+  intro c hc
+  have hmap : π ((c • uS : Si) : S) = π (sS : S) :=
+    congrArg (fun x : Si ↦ π (x : S)) hc
+  have hleft : π ((c • uS : Si) : S) = 0 := by
+    calc
+      π ((c • uS : Si) : S) = π (c • (uS : S)) := rfl
+      _ = c • π (uS : S) := map_smul π c (uS : S)
+      _ = c • 0 := by rw [hπ_uS]
+      _ = 0 := smul_zero c
+  have hright : π (sS : S) = 0 := hmap.symm.trans hleft
+  have ha_zero : a = 0 := by
+    simpa [hπ_sS] using hright
+  exact ha_ne_zero ha_zero
+
 /-- A two-dimensional lower bound from a kernel line and a nonzero quotient
 component. -/
 theorem finrank_ge_two_of_kernel_line_of_target_ne_bot
@@ -90,21 +112,9 @@ theorem finrank_ge_two_of_kernel_line_of_target_ne_bot
     have hval : ι u.1 = 0 := by
       simpa [uS] using congrArg Subtype.val huS_zero
     simpa using hval
-  have hli : LinearIndependent F ![uS, sS] := by
-    refine (LinearIndependent.pair_iff' (K := F) huS_ne_zero).2 ?_
-    intro c hc
-    have hmap : π ((c • uS : Si) : S) = π (sS : S) :=
-      congrArg (fun x : Si ↦ π (x : S)) hc
-    have hleft : π ((c • uS : Si) : S) = 0 := by
-      calc
-        π ((c • uS : Si) : S) = π (c • (uS : S)) := rfl
-        _ = c • π (uS : S) := map_smul π c (uS : S)
-        _ = c • 0 := by rw [hπ_uS]
-        _ = 0 := smul_zero c
-    have hright : π (sS : S) = 0 := hmap.symm.trans hleft
-    have ha_zero : a = 0 := by
-      simpa [hπ_sS] using hright
-    exact ha_ne_zero ha_zero
+  have hli : LinearIndependent F ![uS, sS] :=
+    linearIndependent_pair_of_map_eq_zero_of_map_ne_zero π uS sS a
+      huS_ne_zero hπ_uS ha_ne_zero hπ_sS
   have hcard : Fintype.card (Fin 2) ≤ Module.finrank F Si :=
     hli.fintype_card_le_finrank
   simpa using hcard
