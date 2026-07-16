@@ -492,6 +492,42 @@ theorem gaussSum_legendreDirichlet_eq_I_mul_sqrt_of_dedekindFE
   gaussSum_legendreDirichlet_eq_I_mul_sqrt p hp_three_mod_four
     (prod_rootNumber_eq_one_of_dedekindFE p s hZ hL h_FE)
 
+/-- **Gauss-sum inversion pairing for odd characters**: for an odd Dirichlet
+character `χ` modulo a prime `p`, the product of the Gauss sums of `χ` and `χ⁻¹`
+against the standard additive character equals `-p`. An odd character is
+non-trivial, so the general identity `τ(χ)·τ(χ⁻¹) = χ(-1)·p` applies, and
+`χ(-1) = -1` supplies the sign. -/
+lemma gaussSum_mul_gaussSum_inv_stdAddChar_of_odd
+    {χ : DirichletCharacter ℂ p} (h_odd : χ.Odd) :
+    gaussSum χ (ZMod.stdAddChar : AddChar (ZMod p) ℂ) *
+        gaussSum χ⁻¹ (ZMod.stdAddChar : AddChar (ZMod p) ℂ) = -(p : ℂ) := by
+  have hχ_ne_one : χ ≠ 1 := fun h ↦ by
+    rw [h] at h_odd
+    have h1 : (1 : DirichletCharacter ℂ p).Even := MulChar.one_apply isUnit_one.neg
+    exact absurd h_odd h1.not_odd
+  rw [gaussSum_mul_gaussSum_inv_stdAddChar p hχ_ne_one, show χ (-1) = -1 from h_odd]
+  ring
+
+/-- **No non-trivial self-inverse odd character besides `η`**: for `p` an odd
+prime, an odd Dirichlet character `χ` modulo `p` other than the Legendre
+character `η = legendreDirichlet p` is not its own inverse. Indeed `χ⁻¹ = χ`
+would give `χ² = 1`, and `η` is the unique non-trivial character with that
+property (`legendreDirichlet_eq_of_sq_eq_one`). This is the "no fixed points"
+input to the involution `χ ↦ χ⁻¹` used to pair up the odd characters. -/
+lemma inv_ne_self_of_odd_ne_legendre (hp_odd : p ≠ 2)
+    {χ : DirichletCharacter ℂ p} (h_odd : χ.Odd)
+    (h_ne_legendre : χ ≠ legendreDirichlet p) : χ⁻¹ ≠ χ := by
+  intro h_inv
+  have hχ_ne_one : χ ≠ 1 := fun h ↦ by
+    rw [h] at h_odd
+    have h1 : (1 : DirichletCharacter ℂ p).Even := MulChar.one_apply isUnit_one.neg
+    exact absurd h_odd h1.not_odd
+  have hχ_sq : χ ^ 2 = 1 := by
+    have h : χ * χ⁻¹ = 1 := mul_inv_cancel _
+    rw [h_inv] at h
+    rw [← sq] at h; exact h
+  exact h_ne_legendre (legendreDirichlet_eq_of_sq_eq_one p hp_odd hχ_sq hχ_ne_one)
+
 open scoped Classical in
 /-- **Signed product of Gauss sums over odd characters excluding `η`**: for
 `p ≡ 3 mod 4` prime,
@@ -542,13 +578,7 @@ theorem gaussSum_oddCharacters_erase_legendre_prod
     have hχ_odd : χ.Odd := by
       simp only [oddCharacters, Finset.mem_filter, Finset.mem_univ, true_and] at hχ_odd_set
       exact hχ_odd_set
-    have hχ_ne_one : χ ≠ 1 := fun h ↦ by
-      rw [h] at hχ_odd
-      have h1 : (1 : DirichletCharacter ℂ p).Even := MulChar.one_apply isUnit_one.neg
-      exact absurd hχ_odd h1.not_odd
-    have hχ_neg : χ (-1) = -1 := hχ_odd
-    rw [gaussSum_mul_gaussSum_inv_stdAddChar p hχ_ne_one, hχ_neg]
-    ring
+    exact gaussSum_mul_gaussSum_inv_stdAddChar_of_odd p hχ_odd
   -- Apply prod_involution with f(χ) := gaussSum(χ) / c.
   have h_prod_f : ∏ χ ∈ S,
       (gaussSum χ (ZMod.stdAddChar : AddChar (ZMod p) ℂ) / c) = 1 := by
@@ -562,20 +592,12 @@ theorem gaussSum_oddCharacters_erase_legendre_prod
         _ = -(p : ℂ) / -(p : ℂ) := by rw [h_pair_χ, hc_sq]
         _ = 1 := div_self (neg_ne_zero.mpr (Nat.cast_ne_zero.mpr hp.out.ne_zero))
     · -- f(χ) ≠ 1 → χ⁻¹ ≠ χ: on S (excluding η), χ⁻¹ ≠ χ by uniqueness.
-      intro χ hχ _ h_inv_eq
+      intro χ hχ _
       have hχ_odd_set : χ ∈ oddCharacters p := (Finset.mem_erase.mp hχ).2
-      have hχ_ne_one : χ ≠ 1 := fun h ↦ by
-        simp only [oddCharacters, Finset.mem_filter, Finset.mem_univ, true_and, h] at hχ_odd_set
-        have : (1 : DirichletCharacter ℂ p) (-1) = -1 := hχ_odd_set
-        rw [MulChar.one_apply (isUnit_one.neg)] at this
-        exact (by norm_num : (1 : ℂ) ≠ -1) this
-      have hχ_ne_η : χ ≠ η := (Finset.mem_erase.mp hχ).1
-      have h_inv : χ⁻¹ = χ := h_inv_eq
-      have hχ_sq : χ ^ 2 = 1 := by
-        have : χ * χ⁻¹ = 1 := mul_inv_cancel _
-        rw [h_inv] at this
-        rw [← sq] at this; exact this
-      exact hχ_ne_η (legendreDirichlet_eq_of_sq_eq_one p hp_odd hχ_sq hχ_ne_one)
+      have hχ_odd : χ.Odd := by
+        simp only [oddCharacters, Finset.mem_filter, Finset.mem_univ, true_and] at hχ_odd_set
+        exact hχ_odd_set
+      exact inv_ne_self_of_odd_ne_legendre p hp_odd hχ_odd (Finset.mem_erase.mp hχ).1
     · -- χ⁻¹ ∈ S (closed under inversion).
       intro χ hχ
       have hχ_odd_set : χ ∈ oddCharacters p := (Finset.mem_erase.mp hχ).2
