@@ -131,6 +131,125 @@ theorem isSubgroup_of_openCover (D : RelEffCartierDiv E.π)
 
 end RelEffCartierDiv
 
+/-- Multiplication respects congruence on a killed point: if `N • P = 0` and
+`a ≡ b (mod N)` then `a • P = b • P`. (KM 1.4.2's consequence used throughout 1.7.2's
+multiplier bookkeeping.) -/
+private theorem zsmul_congr_of_kill {G : Type*} [AddCommGroup G] {N : ℤ} {P : G}
+    (hkill : N • P = 0) {a b : ℤ} (hab : a % N = b % N) : a • P = b • P := by
+  obtain ⟨t, ht⟩ := Int.ModEq.dvd (show Int.ModEq N a b from hab)
+  have hb : b = a + N * t := by linarith
+  rw [hb, add_zsmul, mul_comm, mul_smul, hkill, smul_zero, add_zero]
+
+/-- **[W0-F3-crt-map]** The KM (3.5.1.3) index map on `Fin (M·K)`: the pair `(a₁, a₂)`
+(read off through `finProdFinEquiv`) goes to the residue of the combined multiplier
+`(a₁+1)·K + (a₂+1)·M`, shifted to the `1..MK` window of `orderDivisor`. -/
+private def crtIndex (M K : ℕ) [NeZero M] [NeZero K] (j : Fin (M * K)) : Fin (M * K) :=
+  ⟨((((finProdFinEquiv.symm j).1 : ℕ) + 1) * K + (((finProdFinEquiv.symm j).2 : ℕ) + 1) * M - 1)
+      % (M * K),
+    Nat.mod_lt _ (Nat.pos_of_ne_zero (Nat.mul_ne_zero (NeZero.ne M) (NeZero.ne K)))⟩
+
+/-- **[W0-F3-crt-inj]** The KM index map is injective — CRT uniqueness: congruence of the
+combined multipliers mod `M·K` forces componentwise equality (cancel the coprime unit,
+then compare in the fundamental window). -/
+private theorem crtIndex_injective (M K : ℕ) [NeZero M] [NeZero K]
+    (hMK : Nat.Coprime M K) : Function.Injective (crtIndex M K) := by
+  intro j j' hjj
+  set a₁ := ((finProdFinEquiv.symm j).1 : ℕ) with ha₁
+  set a₂ := ((finProdFinEquiv.symm j).2 : ℕ) with ha₂
+  set b₁ := ((finProdFinEquiv.symm j').1 : ℕ) with hb₁
+  set b₂ := ((finProdFinEquiv.symm j').2 : ℕ) with hb₂
+  have hm1 : 1 ≤ (a₁ + 1) * K + (a₂ + 1) * M :=
+    le_trans (Nat.one_le_iff_ne_zero.mpr
+      (Nat.mul_ne_zero (Nat.succ_ne_zero a₁) (NeZero.ne K))) (Nat.le_add_right _ _)
+  have hm1' : 1 ≤ (b₁ + 1) * K + (b₂ + 1) * M :=
+    le_trans (Nat.one_le_iff_ne_zero.mpr
+      (Nat.mul_ne_zero (Nat.succ_ne_zero b₁) (NeZero.ne K))) (Nat.le_add_right _ _)
+  -- the combined multipliers agree mod `M·K`
+  have hmod : ((a₁ + 1) * K + (a₂ + 1) * M - 1) % (M * K)
+      = ((b₁ + 1) * K + (b₂ + 1) * M - 1) % (M * K) := congrArg Fin.val hjj
+  have hMEq : (a₁ + 1) * K + (a₂ + 1) * M ≡ (b₁ + 1) * K + (b₂ + 1) * M [MOD M * K] := by
+    have h := Nat.ModEq.add_right 1
+      (hmod : (a₁ + 1) * K + (a₂ + 1) * M - 1 ≡ (b₁ + 1) * K + (b₂ + 1) * M - 1 [MOD M * K])
+    rwa [Nat.sub_add_cancel hm1, Nat.sub_add_cancel hm1'] at h
+  -- first component: reduce mod `M`, cancel the coprime `K`
+  have hcomp₁ : a₁ = b₁ := by
+    have hdM : (a₁ + 1) * K ≡ (b₁ + 1) * K [MOD M] := by
+      have h0 := hMEq.of_dvd (dvd_mul_right M K)
+      have e₁ : (a₁ + 1) * K + (a₂ + 1) * M ≡ (a₁ + 1) * K + 0 [MOD M] :=
+        (Nat.ModEq.refl _).add (Nat.modEq_zero_iff_dvd.mpr (dvd_mul_left M (a₂ + 1)))
+      have e₂ : (b₁ + 1) * K + (b₂ + 1) * M ≡ (b₁ + 1) * K + 0 [MOD M] :=
+        (Nat.ModEq.refl _).add (Nat.modEq_zero_iff_dvd.mpr (dvd_mul_left M (b₂ + 1)))
+      simpa using (e₁.symm.trans h0).trans e₂
+    have h2 : a₁ + 1 ≡ b₁ + 1 [MOD M] :=
+      Nat.ModEq.cancel_right_of_coprime (hMK : Nat.gcd M K = 1) hdM
+    have h3 : a₁ ≡ b₁ [MOD M] := Nat.ModEq.add_right_cancel' 1 h2
+    rw [Nat.ModEq, Nat.mod_eq_of_lt (finProdFinEquiv.symm j).1.isLt,
+      Nat.mod_eq_of_lt (finProdFinEquiv.symm j').1.isLt] at h3
+    exact h3
+  -- second component: reduce mod `K`, cancel the coprime `M`
+  have hcomp₂ : a₂ = b₂ := by
+    have hdK : (a₂ + 1) * M ≡ (b₂ + 1) * M [MOD K] := by
+      have h0 := hMEq.of_dvd (dvd_mul_left K M)
+      have e₁ : (a₁ + 1) * K + (a₂ + 1) * M ≡ 0 + (a₂ + 1) * M [MOD K] :=
+        Nat.ModEq.add (Nat.modEq_zero_iff_dvd.mpr (dvd_mul_left K (a₁ + 1)))
+          (Nat.ModEq.refl _)
+      have e₂ : (b₁ + 1) * K + (b₂ + 1) * M ≡ 0 + (b₂ + 1) * M [MOD K] :=
+        Nat.ModEq.add (Nat.modEq_zero_iff_dvd.mpr (dvd_mul_left K (b₁ + 1)))
+          (Nat.ModEq.refl _)
+      simpa using (e₁.symm.trans h0).trans e₂
+    have h2 : a₂ + 1 ≡ b₂ + 1 [MOD K] :=
+      Nat.ModEq.cancel_right_of_coprime (hMK.symm : Nat.gcd K M = 1) hdK
+    have h3 : a₂ ≡ b₂ [MOD K] := Nat.ModEq.add_right_cancel' 1 h2
+    rw [Nat.ModEq, Nat.mod_eq_of_lt (finProdFinEquiv.symm j).2.isLt,
+      Nat.mod_eq_of_lt (finProdFinEquiv.symm j').2.isLt] at h3
+    exact h3
+  -- reassemble
+  have : finProdFinEquiv.symm j = finProdFinEquiv.symm j' :=
+    Prod.ext (Fin.ext hcomp₁) (Fin.ext hcomp₂)
+  exact finProdFinEquiv.symm.injective this
+
+/-- **[W0-F3-crt]** KM 1.7.1/3.5.1's decomposition of the order divisor: for a killed
+point `P` and coprime `M, K`, the degree-`MK` divisor `[P] + [2P] + ⋯ + [MK·P]` is the
+sum over pairs of the combined multiples — the Cartier-divisor form of
+*"G = Σ_{a₁,a₂} [φ(a₁) + φ(a₂)]"* (KM print p. 31), with `φ(a₁) = a₁·(KP)`,
+`φ(a₂) = a₂·(MP)` per (3.5.1.3). -/
+theorem Section.orderDivisor_mul_crt (P : E.Section) (M K : ℕ) [NeZero M] [NeZero K]
+    (hMK : Nat.Coprime M K)
+    (hkill : ((M * K : ℕ) : ℤ) • P = (0 : E.Point (𝟙 S))) :
+    RelEffCartierDiv.sectionsDivisor E.π (fun j : Fin (M * K) =>
+        ((((((finProdFinEquiv.symm j).1 : ℕ) + 1) * K
+          + (((finProdFinEquiv.symm j).2 : ℕ) + 1) * M : ℕ) : ℤ) • P : E.Point (𝟙 S)))
+      = P.orderDivisor E (M * K) := by
+  haveI : NeZero (M * K) := ⟨Nat.mul_ne_zero (NeZero.ne M) (NeZero.ne K)⟩
+  refine RelEffCartierDiv.sectionsDivisor_congr _ _
+    (Equiv.ofBijective _ ((Finite.injective_iff_bijective).mp (crtIndex_injective M K hMK)))
+    fun j => ?_
+  -- pointwise: the multipliers agree mod `M·K` on the killed point
+  set a₁ := ((finProdFinEquiv.symm j).1 : ℕ) with ha₁
+  set a₂ := ((finProdFinEquiv.symm j).2 : ℕ) with ha₂
+  have hm1 : 1 ≤ (a₁ + 1) * K + (a₂ + 1) * M :=
+    le_trans (Nat.one_le_iff_ne_zero.mpr
+      (Nat.mul_ne_zero (Nat.succ_ne_zero a₁) (NeZero.ne K))) (Nat.le_add_right _ _)
+  show _ • P = ((((crtIndex M K j : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S))
+  refine zsmul_congr_of_kill hkill ?_
+  have hval : ((crtIndex M K j : ℕ) : ℤ)
+      = (((a₁ + 1) * K + (a₂ + 1) * M - 1 : ℕ) : ℤ) % ((M : ℤ) * K) := by
+    simp only [crtIndex, ← ha₁, ← ha₂]
+    push_cast
+    rfl
+  rw [hval]
+  have hcast : (((a₁ + 1) * K + (a₂ + 1) * M - 1 : ℕ) : ℤ)
+      = ((a₁ + 1) * K + (a₂ + 1) * M : ℕ) - 1 := by
+    push_cast [Nat.cast_sub hm1]
+    ring
+  rw [hcast]
+  have h1 : (((((a₁ + 1) * K + (a₂ + 1) * M : ℕ) : ℤ) - 1) % ((M : ℤ) * K))
+      ≡ (((a₁ + 1) * K + (a₂ + 1) * M : ℕ) : ℤ) - 1 [ZMOD ((M : ℤ) * K)] :=
+    Int.emod_emod_of_dvd _ dvd_rfl
+  have h2 := h1.add_right 1
+  rw [sub_add_cancel] at h2
+  exact h2.symm
+
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
 order `M` and `M·P` has exact order `K`.
