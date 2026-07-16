@@ -103,6 +103,20 @@ theorem legendreDirichlet_L1_rootNumber_relation (hp_three_mod_four : p % 4 = 3)
     field_simp
   linear_combination key
 
+/-- For a positive natural number `n`, the principal square root `(n : ℂ) ^ (1 / 2 : ℂ)`
+is the positive real number `√n`: its imaginary part vanishes and its real part is positive. -/
+theorem natCast_cpow_half_im_zero_and_re_pos {n : ℕ} (hn : 0 < n) :
+    ((n : ℂ) ^ (1 / 2 : ℂ)).im = 0 ∧ 0 < ((n : ℂ) ^ (1 / 2 : ℂ)).re := by
+  have hn' : (0 : ℝ) < (n : ℝ) := by exact_mod_cast hn
+  have hcast : ((n : ℂ) ^ (1 / 2 : ℂ)) = (((n : ℝ) ^ (1 / 2 : ℝ) : ℝ) : ℂ) := by
+    rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) from by push_cast; ring,
+      ← Complex.ofReal_natCast n]
+    exact (Complex.ofReal_cpow hn'.le _).symm
+  rw [hcast]
+  refine ⟨Complex.ofReal_im _, ?_⟩
+  simp only [Complex.ofReal_re]
+  exact Real.rpow_pos_of_pos hn' _
+
 /-- The product `rootNumber η · B_{1, η}` is a negative real number,
 derived from the bridge identity combined with `L(η, 1) > 0`.
 
@@ -121,19 +135,9 @@ theorem rootNumber_B1_product_neg (hp_three_mod_four : p % 4 = 3) :
   have h_quad : (legendreDirichlet p).IsQuadratic := legendreDirichlet_isQuadratic p
   have h_L_pos := LFunction_one_pos_of_real_quadratic h_quad h_ne_one
   have h_bridge := legendreDirichlet_L1_rootNumber_relation p hp_three_mod_four
-  have hp_pos : (0 : ℝ) < (p : ℝ) := by exact_mod_cast hp.out.pos
   have h_pi_pos : (0 : ℝ) < Real.pi := Real.pi_pos
   -- Cast (p : ℂ)^(1/2 : ℂ) to a positive real.
-  have h_sqrtp_real : ((p : ℂ) ^ (1 / 2 : ℂ)).im = 0 ∧
-      0 < ((p : ℂ) ^ (1 / 2 : ℂ)).re := by
-    have hcast : ((p : ℂ) ^ (1 / 2 : ℂ)) = (((p : ℝ) ^ (1 / 2 : ℝ) : ℝ) : ℂ) := by
-      rw [show (1 / 2 : ℂ) = ((1 / 2 : ℝ) : ℂ) from by push_cast; ring,
-        ← Complex.ofReal_natCast p]
-      exact (Complex.ofReal_cpow hp_pos.le _).symm
-    rw [hcast]
-    refine ⟨Complex.ofReal_im _, ?_⟩
-    simp only [Complex.ofReal_re]
-    exact Real.rpow_pos_of_pos hp_pos _
+  have h_sqrtp_real := natCast_cpow_half_im_zero_and_re_pos (n := p) hp.out.pos
   -- The bridge is a complex equation. Take real and imaginary parts.
   have h_L_im : (DirichletCharacter.LFunction (legendreDirichlet p) 1).im = 0 := h_L_pos.1
   have h_L_re : 0 < (DirichletCharacter.LFunction (legendreDirichlet p) 1).re := h_L_pos.2
