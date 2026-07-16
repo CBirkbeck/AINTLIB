@@ -67,6 +67,52 @@ abbrev JetD : Type _ := DualNumber (L F)
 /-- The `Q`-coefficient of index `n` of an element of `𝓒`. -/
 noncomputable def qCoeff (n : ℕ) (f : JetC F) : L F := PowerSeries.coeff n f.1
 
+theorem qCoeff_zero_mul (f g : JetC F) :
+    qCoeff F 0 (f * g) = qCoeff F 0 f * qCoeff F 0 g := by
+  show PowerSeries.coeff 0 (f * g : JetC F).1 = _
+  rw [show (f * g : JetC F).1 = f.1 * g.1 from rfl, PowerSeries.coeff_mul]
+  simp [qCoeff]
+
+theorem qCoeff_one_mul (f g : JetC F) :
+    qCoeff F 1 (f * g) = qCoeff F 0 f * qCoeff F 1 g + qCoeff F 1 f * qCoeff F 0 g := by
+  show PowerSeries.coeff 1 (f * g : JetC F).1 = _
+  rw [show (f * g : JetC F).1 = f.1 * g.1 from rfl, PowerSeries.coeff_mul,
+    show Finset.antidiagonal (1 : ℕ) = {(0, 1), (1, 0)} from rfl,
+    Finset.sum_insert (by simp), Finset.sum_singleton]
+  rfl
+
+theorem qCoeff_add (f g : JetC F) (n : ℕ) :
+    qCoeff F n (f + g) = qCoeff F n f + qCoeff F n g := by
+  show PowerSeries.coeff n (f + g : JetC F).1 = _
+  rw [show (f + g : JetC F).1 = f.1 + g.1 from rfl, map_add]
+  rfl
+
+theorem qCoeff_neg (f : JetC F) (n : ℕ) : qCoeff F n (-f) = -qCoeff F n f := by
+  show PowerSeries.coeff n (-f : JetC F).1 = _
+  rw [show (-f : JetC F).1 = -f.1 from rfl, map_neg]
+  rfl
+
+theorem qCoeff_one (n : ℕ) : qCoeff F n 1 = if n = 0 then 1 else 0 := by
+  show PowerSeries.coeff n (1 : JetC F).1 = _
+  rw [show (1 : JetC F).1 = 1 from rfl, PowerSeries.coeff_one]
+
+theorem qCoeff_zero (n : ℕ) : qCoeff F n 0 = 0 := by
+  show PowerSeries.coeff n (0 : JetC F).1 = _
+  rw [show (0 : JetC F).1 = 0 from rfl, map_zero]
+
+/-- Coefficient functionals of `𝒞` are `1`-Lipschitz, hence continuous. -/
+theorem continuous_qCoeff (n : ℕ) : Continuous (qCoeff F n) := by
+  have hlip : LipschitzWith 1 (qCoeff F n) := LipschitzWith.of_dist_le_mul fun f g => by
+    rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm]
+    have hsub : qCoeff F n f - qCoeff F n g = qCoeff F n (f - g) := by
+      rw [show f - g = f + -g from sub_eq_add_neg f g, qCoeff_add, qCoeff_neg,
+        sub_eq_add_neg]
+    rw [hsub]
+    have h := PowerSeries.le_gaussNorm norm 1 (f - g).1
+      (Restricted.hasGaussNorm (R := L F) 1 (f - g)) n
+    rwa [one_pow, mul_one] at h
+  exact hlip.continuous
+
 /-- `ρC : 𝓒 → 𝓓`, reduction modulo `Q²` = 2-jet truncation ([FJP] (1.5): "the second is
 reduction modulo `Q²`"). -/
 noncomputable def rhoC : JetC F →+* JetD F where
@@ -219,11 +265,26 @@ nonnegative-support subring `K⟨W⟩ ⊂ L` — [FJP] (1.7):
 `𝒜 = {f₀(W) + Qf₁(W) + Q²h : f₀, f₁ ∈ k⟨W⟩, h ∈ L⟨Q⟩}`. -/
 noncomputable def jetSupport : Subring (JetC F) where
   carrier := {f | qCoeff F 0 f ∈ nonnegSubring K ∧ qCoeff F 1 f ∈ nonnegSubring K}
-  zero_mem' := by sorry
-  one_mem' := by sorry
-  add_mem' := by sorry
-  neg_mem' := by sorry
-  mul_mem' := by sorry
+  zero_mem' := by
+    constructor <;> rw [qCoeff_zero] <;> exact zero_mem _
+  one_mem' := by
+    constructor <;> rw [qCoeff_one]
+    · rw [if_pos rfl]; exact one_mem _
+    · rw [if_neg one_ne_zero]; exact zero_mem _
+  add_mem' := fun {f g} hf hg => by
+    constructor <;> rw [qCoeff_add]
+    · exact add_mem hf.1 hg.1
+    · exact add_mem hf.2 hg.2
+  neg_mem' := fun {f} hf => by
+    constructor <;> rw [qCoeff_neg]
+    · exact neg_mem hf.1
+    · exact neg_mem hf.2
+  mul_mem' := fun {f g} hf hg => by
+    constructor
+    · rw [qCoeff_zero_mul]
+      exact mul_mem hf.1 hg.1
+    · rw [qCoeff_one_mul]
+      exact add_mem (mul_mem hf.1 hg.2) (mul_mem hf.2 hg.1)
 
 /-- `𝓐`, the finite-jet pinching algebra ([FJP] Definition 1.2), realised as the support
 subring of `𝒞` with the restricted norm ([FJP] Lemma 2.2). -/
@@ -231,12 +292,18 @@ abbrev JetA : Type _ := ↥(jetSupport F)
 
 /-- The support subring is closed in `𝒞` ([FJP] Lemma 2.2: "Imposing the preceding closed
 condition on the `Q⁰`- and `Q¹`-coefficients therefore cuts out a closed subspace of 𝒞"). -/
-theorem isClosed_jetSupport : IsClosed ((jetSupport F : Set (JetC F))) := by sorry
+theorem isClosed_jetSupport : IsClosed ((jetSupport F : Set (JetC F))) := by
+  have heq : (jetSupport F : Set (JetC F)) =
+      (qCoeff F 0) ⁻¹' (nonnegSubring K : Set (L F)) ∩
+      (qCoeff F 1) ⁻¹' (nonnegSubring K : Set (L F)) := rfl
+  rw [heq]
+  exact ((isClosed_nonnegSubring (R := K)).preimage (continuous_qCoeff F 0)).inter
+    ((isClosed_nonnegSubring (R := K)).preimage (continuous_qCoeff F 1))
 
 /-- `𝓐` inherits `NormedCommRing` and `IsUltrametricDist` from `𝒞` through the mathlib
 `SubringClass` instances (the norm is the restriction — [FJP] Lemma 2.2's isometry is
 definitional). Completeness holds because the subring is closed. -/
-instance : CompleteSpace (JetA F) := by sorry
+instance : CompleteSpace (JetA F) := (isClosed_jetSupport F).completeSpace_coe
 
 /-- The inclusion `ιC : 𝓐 → 𝓒` (an isometry by construction; [FJP] Lemma 2.2). -/
 noncomputable def iotaC : JetA F →+* JetC F := (jetSupport F).subtype
@@ -249,12 +316,77 @@ noncomputable def jB : JetA F →+* JetB F where
   toFun a :=
     ⟨(nonnegEquiv (R := K)).symm ⟨qCoeff F 0 (a : JetC F), a.2.1⟩,
      (nonnegEquiv (R := K)).symm ⟨qCoeff F 1 (a : JetC F), a.2.2⟩⟩
-  map_one' := by sorry
-  map_mul' := by sorry
-  map_zero' := by sorry
-  map_add' := by sorry
+  map_one' := by
+    refine TrivSqZeroExt.ext ?_ ?_
+    · exact (congrArg (nonnegEquiv (R := K)).symm (Subtype.ext (by
+        show qCoeff F 0 ((1 : JetA F) : JetC F) = ((1 : nonnegSubring K) : L F)
+        rw [show ((1 : JetA F) : JetC F) = 1 from rfl, qCoeff_one, if_pos rfl]
+        rfl))).trans (map_one _)
+    · exact (congrArg (nonnegEquiv (R := K)).symm (Subtype.ext (by
+        show qCoeff F 1 ((1 : JetA F) : JetC F) = ((0 : nonnegSubring K) : L F)
+        rw [show ((1 : JetA F) : JetC F) = 1 from rfl, qCoeff_one, if_neg one_ne_zero]
+        rfl))).trans (map_zero _)
+  map_mul' a b := by
+    refine TrivSqZeroExt.ext ?_ ?_
+    · exact (congrArg (nonnegEquiv (R := K)).symm (Subtype.ext (by
+        show qCoeff F 0 ((a * b : JetA F) : JetC F) = _
+        rw [show ((a * b : JetA F) : JetC F) = (a : JetC F) * (b : JetC F) from rfl,
+          qCoeff_zero_mul]
+        rfl))).trans (map_mul _ _ _)
+    · have hval : (⟨qCoeff F 1 ((a * b : JetA F) : JetC F), (a * b).2.2⟩ :
+          nonnegSubring K) =
+          ⟨qCoeff F 0 (a : JetC F), a.2.1⟩ * ⟨qCoeff F 1 (b : JetC F), b.2.2⟩ +
+          ⟨qCoeff F 1 (a : JetC F), a.2.2⟩ * ⟨qCoeff F 0 (b : JetC F), b.2.1⟩ := by
+        refine Subtype.ext ?_
+        show qCoeff F 1 ((a * b : JetA F) : JetC F) = _
+        rw [show ((a * b : JetA F) : JetC F) = (a : JetC F) * (b : JetC F) from rfl,
+          qCoeff_one_mul]
+        rfl
+      exact (congrArg (nonnegEquiv (R := K)).symm hval).trans (by
+        rw [map_add (nonnegEquiv (R := K)).symm, map_mul (nonnegEquiv (R := K)).symm,
+          map_mul (nonnegEquiv (R := K)).symm]
+        rfl)
+  map_zero' := by
+    refine TrivSqZeroExt.ext ?_ ?_
+    · exact (congrArg (nonnegEquiv (R := K)).symm (Subtype.ext (by
+        show qCoeff F 0 ((0 : JetA F) : JetC F) = ((0 : nonnegSubring K) : L F)
+        rw [show ((0 : JetA F) : JetC F) = 0 from rfl, qCoeff_zero]
+        rfl))).trans (map_zero _)
+    · exact (congrArg (nonnegEquiv (R := K)).symm (Subtype.ext (by
+        show qCoeff F 1 ((0 : JetA F) : JetC F) = ((0 : nonnegSubring K) : L F)
+        rw [show ((0 : JetA F) : JetC F) = 0 from rfl, qCoeff_zero]
+        rfl))).trans (map_zero _)
+  map_add' a b := by
+    refine TrivSqZeroExt.ext ?_ ?_
+    · exact (congrArg (nonnegEquiv (R := K)).symm (Subtype.ext (by
+        show qCoeff F 0 ((a + b : JetA F) : JetC F) = _
+        rw [show ((a + b : JetA F) : JetC F) = (a : JetC F) + (b : JetC F) from rfl,
+          qCoeff_add]
+        rfl))).trans (map_add _ _ _)
+    · exact (congrArg (nonnegEquiv (R := K)).symm (Subtype.ext (by
+        show qCoeff F 1 ((a + b : JetA F) : JetC F) = _
+        rw [show ((a + b : JetA F) : JetC F) = (a : JetC F) + (b : JetC F) from rfl,
+          qCoeff_add]
+        rfl))).trans (map_add _ _ _)
 
-theorem norm_jB_le (a : JetA F) : ‖jB F a‖ ≤ ‖a‖ := by sorry
+theorem norm_nonnegEquiv_symm (x : nonnegSubring K) :
+    ‖(nonnegEquiv (R := K)).symm x‖ = ‖(x : L F)‖ := by
+  conv_rhs => rw [← RingEquiv.apply_symm_apply (nonnegEquiv (R := K)) x]
+  exact (nonnegEquiv_norm _).symm
+
+theorem norm_qCoeff_le (f : JetC F) (n : ℕ) : ‖qCoeff F n f‖ ≤ ‖f‖ := by
+  have h := PowerSeries.le_gaussNorm norm 1 f.1 (Restricted.hasGaussNorm (R := L F) 1 f) n
+  rwa [one_pow, mul_one] at h
+
+theorem norm_jB_le (a : JetA F) : ‖jB F a‖ ≤ ‖a‖ := by
+  rw [JetNorm.norm_def]
+  refine max_le ?_ ?_
+  · show ‖(nonnegEquiv (R := K)).symm _‖ ≤ _
+    rw [norm_nonnegEquiv_symm]
+    exact norm_qCoeff_le F _ 0
+  · show ‖(nonnegEquiv (R := K)).symm _‖ ≤ _
+    rw [norm_nonnegEquiv_symm]
+    exact norm_qCoeff_le F _ 1
 
 /-! ### The strict Milnor row ([FJP] Prop 2.1, Lemma 2.2, (2.1b))
 
@@ -265,25 +397,82 @@ theorem norm_jB_le (a : JetA F) : ‖jB F a‖ ≤ ‖a‖ := by sorry
 * the pullback (max) norm of `(jB a, ιC a)` equals `‖a‖` ([FJP] Lemma 2.2:
   "the maximum pullback norm of `(b, c)` equals `‖c‖_𝒞`"). -/
 
-theorem square_commutes (a : JetA F) : rhoB F (jB F a) = rhoC F (iotaC F a) := by sorry
+theorem square_commutes (a : JetA F) : rhoB F (jB F a) = rhoC F (iotaC F a) := by
+  refine TrivSqZeroExt.ext ?_ ?_
+  · show ofRestricted ((nonnegEquiv (R := K)).symm ⟨qCoeff F 0 (a : JetC F), a.2.1⟩) = _
+    rw [ofRestricted_nonnegEquiv_symm]
+    rfl
+  · show ofRestricted ((nonnegEquiv (R := K)).symm ⟨qCoeff F 1 (a : JetC F), a.2.2⟩) = _
+    rw [ofRestricted_nonnegEquiv_symm]
+    rfl
+
+theorem mem_range_ofRestricted_iff (x : L F) :
+    x ∈ Set.range (ofRestricted (R := K)) ↔ x ∈ nonnegSubring K := by
+  constructor
+  · rintro ⟨y, rfl⟩
+    exact ((nonnegEquiv (R := K)) y).2
+  · intro hx
+    exact ⟨(nonnegEquiv (R := K)).symm ⟨x, hx⟩, by
+      rw [ofRestricted_nonnegEquiv_symm]⟩
 
 /-- Cartesianness, membership form: `c ∈ 𝓐 ↔ ρC c ∈ range ρB` ([FJP] (1.6)/(1.7)). -/
 theorem mem_jetSupport_iff_jet_in_range (c : JetC F) :
-    c ∈ jetSupport F ↔ rhoC F c ∈ Set.range (rhoB F) := by sorry
+    c ∈ jetSupport F ↔ rhoC F c ∈ Set.range (rhoB F) := by
+  constructor
+  · intro hc
+    refine ⟨⟨(nonnegEquiv (R := K)).symm ⟨qCoeff F 0 c, hc.1⟩,
+      (nonnegEquiv (R := K)).symm ⟨qCoeff F 1 c, hc.2⟩⟩, ?_⟩
+    refine TrivSqZeroExt.ext ?_ ?_
+    · show ofRestricted ((nonnegEquiv (R := K)).symm ⟨qCoeff F 0 c, hc.1⟩) = _
+      rw [ofRestricted_nonnegEquiv_symm]
+      rfl
+    · show ofRestricted ((nonnegEquiv (R := K)).symm ⟨qCoeff F 1 c, hc.2⟩) = _
+      rw [ofRestricted_nonnegEquiv_symm]
+      rfl
+  · rintro ⟨b, hb⟩
+    constructor
+    · rw [← mem_range_ofRestricted_iff]
+      refine ⟨b.fst, ?_⟩
+      have := congrArg TrivSqZeroExt.fst hb
+      exact this
+    · rw [← mem_range_ofRestricted_iff]
+      refine ⟨b.snd, ?_⟩
+      have := congrArg TrivSqZeroExt.snd hb
+      exact this
 
 /-- Exactness in the middle with uniqueness: a compatible pair `(b, c)` comes from a unique
 element of 𝓐 ([FJP] Prop 2.1: "Its kernel is the algebraic pullback (1.6)"). -/
 theorem milnorRow_exact (b : JetB F) (c : JetC F) (h : rhoB F b = rhoC F c) :
-    ∃! a : JetA F, jB F a = b ∧ iotaC F a = c := by sorry
+    ∃! a : JetA F, jB F a = b ∧ iotaC F a = c := by
+  have hmem : c ∈ jetSupport F :=
+    (mem_jetSupport_iff_jet_in_range F c).mpr ⟨b, h⟩
+  refine ⟨⟨c, hmem⟩, ⟨?_, rfl⟩, ?_⟩
+  · -- `jB ⟨c, _⟩ = b`, componentwise via injectivity of `ofRestricted`
+    refine TrivSqZeroExt.ext ?_ ?_
+    · refine ofRestricted_injective (R := K) ?_
+      show ofRestricted ((nonnegEquiv (R := K)).symm ⟨qCoeff F 0 c, hmem.1⟩) =
+        ofRestricted b.fst
+      rw [ofRestricted_nonnegEquiv_symm]
+      exact (congrArg TrivSqZeroExt.fst h).symm
+    · refine ofRestricted_injective (R := K) ?_
+      show ofRestricted ((nonnegEquiv (R := K)).symm ⟨qCoeff F 1 c, hmem.2⟩) =
+        ofRestricted b.snd
+      rw [ofRestricted_nonnegEquiv_symm]
+      exact (congrArg TrivSqZeroExt.snd h).symm
+  · rintro a ⟨-, rfl⟩
+    rfl
 
 /-- The pullback norm identity ([FJP] Lemma 2.2): for `a ∈ 𝓐`,
 `max ‖jB a‖ ‖ιC a‖ = ‖a‖`. -/
-theorem max_norm_eq (a : JetA F) : max ‖jB F a‖ ‖iotaC F a‖ = ‖a‖ := by sorry
+theorem max_norm_eq (a : JetA F) : max ‖jB F a‖ ‖iotaC F a‖ = ‖a‖ := by
+  rw [norm_iotaC]
+  exact max_eq_right (norm_jB_le F a)
 
 /-- Strict surjectivity of the difference map with constant 1 ([FJP] Prop 2.1 and (2.1b):
 "the two denominator losses in the defining square are zero"). -/
 theorem difference_strict_surjective (d : JetD F) :
-    ∃ c : JetC F, rhoC F c = d ∧ ‖c‖ = ‖d‖ := by sorry
+    ∃ c : JetC F, rhoC F c = d ∧ ‖c‖ = ‖d‖ :=
+  ⟨sectionD F d, rhoC_sectionD F d, norm_sectionD F d⟩
 
 /-! ### Pseudouniformizers and scalar embeddings -/
 

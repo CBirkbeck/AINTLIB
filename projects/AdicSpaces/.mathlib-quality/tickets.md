@@ -10,7 +10,7 @@ only). Priority spine: T1xx → T3xx → T4xx → T5xx → T6xx → T7xx (sheafi
 
 ## Summary
 - Total: 36 tickets (28 proof + 8 embedded cleanup/milestone controls listed inline)
-- Open: 29 | Done: 7 (T001, T101–T106) | Parallel capacity at peak: 4 workers
+- Open: 28 | Done: 8 (T001, T101–T107) | Parallel capacity at peak: 4 workers
   (T2xx ∥ T3xx ∥ T4xx-polynomial ∥ T1xx-tail)
 
 ## Milestone map
@@ -137,8 +137,15 @@ T704, by a fresh `/develop --continue`.
   norms by coefficient inspection. Do NOT claim `sectionD` multiplicative (L1.6 attack 2).
 - **Source**: [FJP] Prop 2.1 section sentence — quote at L1.6.
 
-### [T107] `FiniteJetRings.lean` — 𝓐 and the strict row
-- **Status**: open | **Depends**: T104, T106 | **Type**: proofs (L1.6 second half)
+### [T107] `FiniteJetRings.lean` — 𝓐 and the strict row — **DONE 2026-07-17**
+- **Status**: done (beastmode). `qCoeff` algebra helpers (`qCoeff_zero_mul`/`one_mul`/…,
+  `continuous_qCoeff` 1-Lipschitz), `jetSupport` closure incl. the jet-multiplication
+  argument, `isClosed_jetSupport` (preimage form), `CompleteSpace (JetA F)` via
+  `IsClosed.completeSpace_coe`, `jB` (term-style `congrArg`/`trans` proofs through
+  `nonnegEquiv.symm`), `norm_jB_le`, `square_commutes`, `mem_jetSupport_iff_jet_in_range`
+  (via `mem_range_ofRestricted_iff`), `milnorRow_exact` (existence + uniqueness through
+  `ofRestricted_injective`), `max_norm_eq`, `difference_strict_surjective` (constants 1 —
+  [FJP] (2.1b)). | **Type**: proofs (L1.6 second half)
 - **Sorries**: `jetSupport` closure fields, `isClosed_jetSupport`, `CompleteSpace (JetA F)`,
   `jB` hom fields, `norm_jB_le`, `square_commutes`, `mem_jetSupport_iff_jet_in_range`,
   `milnorRow_exact`, `max_norm_eq`, `difference_strict_surjective`.
