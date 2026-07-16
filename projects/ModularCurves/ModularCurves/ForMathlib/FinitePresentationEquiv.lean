@@ -93,15 +93,19 @@ theorem IsFilteredAlgColimit.exists_spreadAlgEquivFamily
   have hrel : ∀ r x,
       (D (relationObj r)).stageToColimit H ⟨j, h (relationObj r)⟩ (left r x) =
         (D (relationObj r)).stageToColimit H ⟨j, h (relationObj r)⟩ (right r x) := by
-    intro r x
+    intro r
     cases r with
     | inl a =>
+        intro x
+        change (D (src a)).spreadStage (t := t) (h (src a)) at x
         change (D (src a)).stageToColimit H ⟨j, h (src a)⟩
             (backward a (forward a x)) =
           (D (src a)).stageToColimit H ⟨j, h (src a)⟩ x
         rw [hbackward, hforward]
         exact (e a).symm_apply_apply _
     | inr a =>
+        intro x
+        change (D (dst a)).spreadStage (t := t) (h (dst a)) at x
         change (D (dst a)).stageToColimit H ⟨j, h (dst a)⟩
             (forward a (backward a x)) =
           (D (dst a)).stageToColimit H ⟨j, h (dst a)⟩ x
