@@ -197,6 +197,24 @@ noncomputable def pullbackCompositeTrivialization
     (pullbackComp c r).symm.app N ≪≫
     (pullback c).mapIso t ≪≫ pullbackUnitIso c
 
+/-- Pulling a trivialization along a composite can be expressed using the inverse of the
+canonical comparison from the iterated pullback to the direct pullback. -/
+theorem pullbackCompositeTrivialization_eq
+    {A C D : Scheme.{u}} (c : A ⟶ C) (r : C ⟶ D)
+    (w : A ⟶ D) (h : c ≫ r = w) (N : D.Modules)
+    (t : (pullback r).obj N ≅ unitObj C) :
+    pullbackCompositeTrivialization c r w h N t =
+      ((((pullbackComp c r).app N) ≪≫ ((pullbackCongr h).app N)).symm ≪≫
+        (pullback c).mapIso t ≪≫ pullbackUnitIso c) := by
+  apply Iso.ext
+  dsimp only [pullbackCompositeTrivialization]
+  simp only [Iso.trans_hom, Iso.trans_inv, Iso.symm_hom]
+  have hcongr : ((pullbackCongr h).app N).inv =
+      ((pullbackCongr h.symm).app N).hom := by
+    simpa using congrArg (fun z => z.app N) (pullbackCongr_inv h)
+  rw [hcongr]
+  rfl
+
 /-- A square-transported trivialization normalizes through a common threefold pullback. -/
 theorem pullbackSquareTrivialization_normalize
     {A B C D E : Scheme.{u}}

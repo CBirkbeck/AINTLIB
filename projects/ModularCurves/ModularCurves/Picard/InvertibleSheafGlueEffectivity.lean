@@ -3421,7 +3421,8 @@ noncomputable def AffineIntersectionUnitCocycle.gluedModuleRestrictIso
   hom_inv_id := c.chartLocalProjection_lift hopen hpush k
   inv_hom_id := c.chartLocalLift_projection hopen hpush k
 
-private noncomputable def AffineIntersectionUnitCocycle.gluedModuleLocalIso
+/-- The canonical pullback trivialization of the Cech-glued module on a gluing chart. -/
+noncomputable def AffineIntersectionUnitCocycle.gluedModuleLocalIso
     {A J : Type u} [CommRing A]
     {F : Functor (Finset J) (CommAlgCat.{u} A)}
     (c : AffineIntersectionUnitCocycle F)
@@ -3533,6 +3534,103 @@ noncomputable def AffineIntersectionUnitCocycle.gluedModuleDescentIso
             (c.gluedModuleLocalIso hopen hpush j).hom
     simpa only [Category.assoc] using
         c.gluedModuleLocalIso_transition hopen hpush i j
+
+section
+
+variable {A J : Type u} [CommRing A]
+  {F : Functor (Finset J) (CommAlgCat.{u} A)}
+  (c : AffineIntersectionUnitCocycle F)
+  (hopen : Scheme.GlueData.IsOpenAffineIntersectionFunctor F)
+  (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
+
+local notation "D" => Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+
+/-- On any test scheme mapping through an ordered overlap, the two composite pullbacks of the
+canonical chart trivializations of the glued module differ by the pulled-back chart transition. -/
+theorem AffineIntersectionUnitCocycle.gluedModuleCompositeTrivialization_transition
+    (i j : J) {T : Scheme.{u}}
+    (q : T ⟶ (D).glued) (g : T ⟶ (D).V (i, j))
+    (gLeft : T ⟶ (D).U i) (gRight : T ⟶ (D).U j)
+    (hqLeft : gLeft ≫ (D).ι i = q) (hqRight : gRight ≫ (D).ι j = q)
+    (hLeft : g ≫ (D).f i j = gLeft)
+    (hRight : g ≫ ((D).t i j ≫ (D).f j i) = gRight) :
+    (pullbackCompositeTrivialization gLeft ((D).ι i) q hqLeft
+          (c.gluedModule hopen hpush) (c.gluedModuleLocalIso hopen hpush i)).inv ≫
+        (pullbackCompositeTrivialization gRight ((D).ι j) q hqRight
+          (c.gluedModule hopen hpush) (c.gluedModuleLocalIso hopen hpush j)).hom =
+      c.chartTransitionIsoCoordinatePullback hopen hpush i j g := by
+  let E := c.gluedModuleDescentIso hopen hpush
+  let tLeft := c.gluedModuleLocalIso hopen hpush i
+  let tRight := c.gluedModuleLocalIso hopen hpush j
+  have hE := Pseudofunctor.DescentData'.comm
+    E.hom q gLeft gRight hqLeft hqRight
+  let eLeft : (pullback gLeft).obj
+        ((pullback ((D).ι i)).obj (c.gluedModule hopen hpush)) ≅
+      (pullback q).obj (c.gluedModule hopen hpush) :=
+    ((pullbackComp gLeft ((D).ι i)).app (c.gluedModule hopen hpush)) ≪≫
+      ((pullbackCongr hqLeft).app (c.gluedModule hopen hpush))
+  let eRight : (pullback gRight).obj
+        ((pullback ((D).ι j)).obj (c.gluedModule hopen hpush)) ≅
+      (pullback q).obj (c.gluedModule hopen hpush) :=
+    ((pullbackComp gRight ((D).ι j)).app (c.gluedModule hopen hpush)) ≪≫
+      ((pullbackCongr hqRight).app (c.gluedModule hopen hpush))
+  let a := (pullback gLeft).mapIso tLeft
+  let b := (pullback gRight).mapIso tRight
+  let stageTransition :
+      (pullback gLeft).obj (unitObj ((D).U i)) ⟶
+        (pullback gRight).obj (unitObj ((D).U j)) :=
+    Pseudofunctor.LocallyDiscreteOpToCat.pullHom
+      (F := pullbackPseudofunctor)
+      (c.chartTransitionIso hopen hpush i j).hom
+      g gLeft gRight hLeft hRight
+  have hE' : a.hom ≫ stageTransition =
+      eLeft.hom ≫ eRight.inv ≫ b.hom := by
+    rw [Pseudofunctor.DescentData'.pullHom'_ofDescentData_hom] at hE
+    rw [pullbackPseudofunctor_toDescentData_hom] at hE
+    rw [c.chartDescent_pullHom_eq hopen hpush i j q g gLeft gRight
+      hqLeft hqRight hLeft hRight] at hE
+    change a.hom ≫ stageTransition = eLeft.hom ≫ eRight.inv ≫ b.hom at hE
+    exact hE
+  let tailLeft := pullbackCompositeTrivialization gLeft ((D).ι i) q hqLeft
+    (c.gluedModule hopen hpush) tLeft
+  let tailRight := pullbackCompositeTrivialization gRight ((D).ι j) q hqRight
+    (c.gluedModule hopen hpush) tRight
+  let manualLeft : (pullback q).obj (c.gluedModule hopen hpush) ≅ unitObj T :=
+    eLeft.symm ≪≫ a ≪≫ pullbackUnitIso gLeft
+  let manualRight : (pullback q).obj (c.gluedModule hopen hpush) ≅ unitObj T :=
+    eRight.symm ≪≫ b ≪≫ pullbackUnitIso gRight
+  have tailLeft_eq : tailLeft = manualLeft := by
+    dsimp only [tailLeft, manualLeft, eLeft, a]
+    exact pullbackCompositeTrivialization_eq gLeft ((D).ι i) q hqLeft
+      (c.gluedModule hopen hpush) tLeft
+  have tailRight_eq : tailRight = manualRight := by
+    dsimp only [tailRight, manualRight, eRight, b]
+    exact pullbackCompositeTrivialization_eq gRight ((D).ι j) q hqRight
+      (c.gluedModule hopen hpush) tRight
+  have hcore : a.inv ≫ eLeft.hom ≫ eRight.inv ≫ b.hom = stageTransition := by
+    apply (cancel_epi a.hom).1
+    simp only [Iso.hom_inv_id_assoc]
+    rw [hE']
+  have hmanual : manualLeft.inv ≫ manualRight.hom =
+      (pullbackUnitIso gLeft).inv ≫ stageTransition ≫
+        (pullbackUnitIso gRight).hom := by
+    apply (cancel_epi (pullbackUnitIso gLeft).hom).1
+    apply (cancel_mono (pullbackUnitIso gRight).inv).1
+    dsimp only [manualLeft, manualRight]
+    simp only [Iso.trans_hom, Iso.trans_inv, Iso.symm_hom, Iso.symm_inv]
+    simp only [Category.assoc, Iso.hom_inv_id_assoc, Iso.hom_inv_id,
+      Category.comp_id]
+    rw [hcore]
+  change tailLeft.inv ≫ tailRight.hom = _
+  calc
+    tailLeft.inv ≫ tailRight.hom =
+        manualLeft.inv ≫ manualRight.hom := by rw [tailLeft_eq, tailRight_eq]
+    _ = (pullbackUnitIso gLeft).inv ≫ stageTransition ≫
+          (pullbackUnitIso gRight).hom := hmanual
+    _ = c.chartTransitionIsoCoordinatePullback hopen hpush i j g :=
+      c.chartTransitionPullHom_toUnit hopen hpush i j g gLeft gRight hLeft hRight
+
+end
 
 private def affineIntersectionChartOpen
     (D : Scheme.GlueData.{u}) (k : D.J) : D.glued.Opens :=

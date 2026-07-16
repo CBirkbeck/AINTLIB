@@ -783,3 +783,13 @@ pullback coherence and the pulled chart transition. This is API exposure only an
 descent construction, hypothesis, or proof-resource option. The focused effectivity build is green,
 and all three declarations have exactly `propext`, `Classical.choice`, and `Quot.sound` in their
 axiom audits.
+
+Completed subdependency claim (2026-07-16): exposed the existing
+`AffineIntersectionUnitCocycle.gluedModuleLocalIso`, proved
+`pullbackCompositeTrivialization_eq`, and proved
+`AffineIntersectionUnitCocycle.gluedModuleCompositeTrivialization_transition`. This extends the
+already-proved canonical overlap transition to an arbitrary test scheme mapping through that
+overlap, so the finite-stage base-change calculation can consume the existing glued-module
+descent datum without duplicating it. The focused effectivity build is green, no hypothesis or
+proof-resource option was added, and all three declarations have exactly `propext`,
+`Classical.choice`, and `Quot.sound` in their axiom audits.
