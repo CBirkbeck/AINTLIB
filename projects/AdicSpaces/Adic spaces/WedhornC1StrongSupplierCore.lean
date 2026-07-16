@@ -225,7 +225,8 @@ theorem exists_single_f_refinement_at_t_strong_via_dominating_unit
    from `σ_A` being a unit times a unit power and `¬ v.vle D.s 0`.
 5. Verify `v ∈ R(insert f C.base.T, C.base.s)` and
    `R(insert f C.base.T, C.base.s) ⊆ R(D.T, D.s)` via
-   `rationalOpen_transfer_via_localization` (`Adic spaces/WedhornLocalizationTransferConsumer.lean`).
+   `rationalOpen_transfer_via_localization`
+   (`Adic spaces/WedhornLocalizationTransferConsumer.lean`).
 
 ### Smallest single missing Lean lemma toward this
 
