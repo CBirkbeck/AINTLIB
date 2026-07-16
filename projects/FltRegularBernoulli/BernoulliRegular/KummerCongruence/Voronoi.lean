@@ -124,6 +124,41 @@ lemma voronoi_permutation
     rw [(ZMod.natCast_eq_natCast_iff _ _ _).mp h_zmod, Nat.mod_eq_of_lt hj]
   · intros i _; dsimp only
 
+/-- **Voronoi div/mod cast** (helper): in `ℤ_[p]`, every natural number `n`
+splits along division by `p` as
+  `(n : ℤ_[p]) = ⌊n/p⌋ · p + (n mod p)`.
+This is the `ℤ_[p]` image of `Nat.div_add_mod`. -/
+lemma voronoi_natCast_div_add_mod {p : ℕ} [Fact p.Prime] (n : ℕ) :
+    ((n : ℕ) : ℤ_[p]) =
+      ((n / p : ℕ) : ℤ_[p]) * (p : ℤ_[p]) + ((n % p : ℕ) : ℤ_[p]) := by
+  rw [show ((n : ℕ) : ℤ_[p]) = (((n / p) * p + n % p : ℕ) : ℤ_[p]) from by
+    rw [← (Nat.div_add_mod' _ _).symm]]
+  push_cast; ring
+
+/-- **Voronoi per-term approximation** (helper): in `ℤ_[p]`, for `k ≥ 1` and any
+`j : ℕ`, the `k`-th power of the residue `(j * a) mod p` agrees with `(j·a)^k`
+up to a first-order `p`-correction and a `p²` remainder:
+  `((j·a) mod p)^k = (j·a)^k - k·(j·a)^{k-1}·p·⌊ja/p⌋ + p²·w`
+for some `w : ℤ_[p]`. Obtained from the binomial expansion
+`voronoi_sub_pow_linear_approx` applied to `x = j·a`, `y = ⌊ja/p⌋`, after
+rewriting `(j·a) mod p = j·a - p·⌊ja/p⌋` via `voronoi_natCast_div_add_mod`. -/
+lemma voronoi_residue_pow_approx {p : ℕ} [Fact p.Prime] {a k : ℕ}
+    (hk_pos : 0 < k) (j : ℕ) :
+    ∃ w : ℤ_[p],
+      (((j * a) % p : ℕ) : ℤ_[p]) ^ k =
+        ((j * a : ℕ) : ℤ_[p]) ^ k -
+          (k : ℤ_[p]) * ((j * a : ℕ) : ℤ_[p]) ^ (k - 1) * (p : ℤ_[p]) *
+            (((j * a / p : ℕ)) : ℤ_[p]) +
+        (p : ℤ_[p]) ^ 2 * w := by
+  obtain ⟨z, hz⟩ := voronoi_sub_pow_linear_approx (R := ℤ_[p])
+    (p := (p : ℤ_[p])) (k := k) hk_pos ((j * a : ℕ) : ℤ_[p])
+    (((j * a / p : ℕ)) : ℤ_[p])
+  refine ⟨z, ?_⟩
+  have h_rj : (((j * a) % p : ℕ) : ℤ_[p]) =
+      ((j * a : ℕ) : ℤ_[p]) - (p : ℤ_[p]) * (((j * a / p : ℕ)) : ℤ_[p]) := by
+    linear_combination -voronoi_natCast_div_add_mod (p := p) (j * a)
+  rw [h_rj]; exact hz
+
 /-- **Voronoi sum identity mod p²** (helper): in `ℤ_[p]`, for `k ≥ 1`,
 `a` coprime to `p`,
   `(a^k - 1) · ∑_{j<p} j^k - k · a^{k-1} · p · ∑_{j<p} j^{k-1} · ⌊ja/p⌋ ∈ p²·ℤ_p`.
@@ -140,49 +175,11 @@ lemma voronoi_sum_mod_p_sq
           (k : ℤ_[p]) * ((a : ℤ_[p]) ^ (k - 1)) * (p : ℤ_[p]) *
             ((∑ j ∈ Finset.range p, j ^ (k - 1) * (j * a / p) : ℕ) : ℤ_[p])) =
         (p : ℤ_[p]) ^ 2 * W := by
-  -- Per-term bound from voronoi_sub_pow_linear_approx.
-  -- For each j < p: define r_j := (j*a) % p, q_j := (j*a) / p, so j*a = p*q_j + r_j
-  -- in ℕ, hence (r_j : ℤ_p) = (j*a : ℤ_p) - p · q_j.
-  -- Then r_j^k = (j*a - p*q_j)^k = (j*a)^k - k · (j*a)^(k-1) · p · q_j + p² · z_j.
-  -- Summing, using permutation, gives the identity.
-  -- Choose per-term z_j: a function of j.
-  have hp_prime : Nat.Prime p := hp.out
-  -- Helper: `(j * a : ℤ_[p]) = p · q_j + r_j` where r_j = (j*a) % p, q_j = (j*a) / p.
-  have h_div_mod : ∀ j : ℕ,
-      ((j * a : ℕ) : ℤ_[p]) = ((j * a / p : ℕ) : ℤ_[p]) * (p : ℤ_[p]) +
-        ((((j * a) % p : ℕ)) : ℤ_[p]) := fun j ↦ by
-    rw [show ((j * a : ℕ) : ℤ_[p]) = (((j * a / p) * p + (j * a) % p : ℕ) : ℤ_[p]) from by
-      rw [← (Nat.div_add_mod' _ _).symm]]
-    push_cast; ring
-  -- Per-j witness: apply voronoi_sub_pow_linear_approx to
-  -- x = (j*a : ℤ_p), y = (j*a/p : ℤ_p), p = (p : ℤ_p).
-  choose wj hwj using (fun (j : ℕ) (_hj : j ∈ Finset.range p) ↦
-    voronoi_sub_pow_linear_approx (R := ℤ_[p])
-      (p := (p : ℤ_[p])) (k := k) hk_pos ((j * a : ℕ) : ℤ_[p])
-      (((j * a / p : ℕ)) : ℤ_[p]))
-  -- Now: (r_j : ℤ_p)^k = ((j*a) - p * (j*a/p))^k = (j*a)^k - k*(j*a)^(k-1)*p*(j*a/p) + p²*wj.
-  -- For this we need to show (((j*a) % p : ℕ) : ℤ_p) = (j*a : ℤ_p) - p*(j*a/p : ℤ_p).
-  have h_rj_eq : ∀ j : ℕ, (((((j * a) % p : ℕ)) : ℤ_[p])) =
-      ((j * a : ℕ) : ℤ_[p]) - (p : ℤ_[p]) * (((j * a / p : ℕ)) : ℤ_[p]) := fun j ↦ by
-    linear_combination -h_div_mod j
-  -- Per-j binomial identity:
-  have h_per_j : ∀ (j : ℕ) (hj : j ∈ Finset.range p),
-      (((((j * a) % p : ℕ)) : ℤ_[p])) ^ k =
-        ((j * a : ℕ) : ℤ_[p]) ^ k -
-          (k : ℤ_[p]) * ((j * a : ℕ) : ℤ_[p]) ^ (k - 1) * (p : ℤ_[p]) *
-            (((j * a / p : ℕ)) : ℤ_[p]) +
-        (p : ℤ_[p]) ^ 2 * wj j hj := fun j hj ↦ by rw [h_rj_eq j]; exact hwj j hj
-  -- Sum over j ∈ range p.
-  -- Let S₁ := ∑ j^k (ℕ form → ℤ_p)
-  -- Let S₁' := ∑ ((j*a) % p)^k
-  -- By permutation (voronoi_permutation), S₁ = S₁' (as ℤ_p elements).
-  -- ∑ (j*a)^k = a^k · ∑ j^k = a^k · S₁.
-  -- ∑ (j*a)^(k-1) · (j*a/p) = a^(k-1) · ∑ j^(k-1) · (j*a/p) = a^(k-1) · S₂.
-  -- ∑ (LHS of h_per_j) = S₁'
-  -- ∑ (RHS of h_per_j) = a^k·S₁ - k·a^(k-1)·p·S₂ + p²·∑wj.
-  -- So: S₁ = a^k·S₁ - k·a^(k-1)·p·S₂ + p²·W.
-  -- Rearranging: (a^k - 1)·S₁ - k·a^(k-1)·p·S₂ = -p²·W + (0 - 0) = -p²·W.
-  -- Final witness assembled below, after `w` is defined.
+  -- Per-term binomial witnesses (`voronoi_residue_pow_approx`), one per `j < p`:
+  --   `((j*a) % p)^k = (j*a)^k - k·(j*a)^(k-1)·p·⌊ja/p⌋ + p²·(wj j)`.
+  choose wj hwj using fun (j : ℕ) (_hj : j ∈ Finset.range p) ↦
+    voronoi_residue_pow_approx (p := p) (a := a) (k := k) hk_pos j
+  -- Sum over j ∈ range p, combining the permutation with the per-term identity.
   -- Step A: cast the permutation from ∑ ((j*a) % p)^k to ∑ j^k as ℤ_p element.
   have h_perm : ((∑ j ∈ Finset.range p, ((j * a) % p) ^ k : ℕ) : ℤ_[p]) =
       ((∑ j ∈ Finset.range p, j ^ k : ℕ) : ℤ_[p]) := by
@@ -204,7 +201,7 @@ lemma voronoi_sum_mod_p_sq
     rw [Nat.cast_sum]
     refine Finset.sum_congr rfl fun j hj ↦ ?_
     rw [hw_eq j hj, Nat.cast_pow]
-    exact h_per_j j hj
+    exact hwj j hj
   -- Combine Step A and Step B: the sum form using (j*a) ℤ_p terms.
   have h_sum_ℤp : ((∑ j ∈ Finset.range p, j ^ k : ℕ) : ℤ_[p]) =
       ∑ j ∈ Finset.range p,
