@@ -10,7 +10,7 @@ only). Priority spine: T1xx → T3xx → T4xx → T5xx → T6xx → T7xx (sheafi
 
 ## Summary
 - Total: 36 tickets (28 proof + 8 embedded cleanup/milestone controls listed inline)
-- Open: 35 | Done: 1 (T001) | Parallel capacity at peak: 4 workers
+- Open: 34 | Done: 2 (T001, T101) | Parallel capacity at peak: 4 workers
   (T2xx ∥ T3xx ∥ T4xx-polynomial ∥ T1xx-tail)
 
 ## Milestone map
@@ -24,8 +24,15 @@ T704, by a fresh `/develop --continue`.
 - **Status**: done. `lean_verify ValuationSpectrum.isSheafy_of_stronglyNoetherian_828b`
   → `[propext, Classical.choice, Quot.sound]`, axiom-clean. Recorded in decomposition §0.
 
-### [T101] `RestrictedLaurent.lean` — ring core
-- **Status**: open | **Depends**: none | **Parallel**: yes | **Type**: proofs (leaf L1.1)
+### [T101] `RestrictedLaurent.lean` — ring core — **DONE 2026-07-16**
+- **Status**: done (beastmode). All ring-core sorries discharged: decay closures via
+  `eventually_cofinite_ne`/squeeze; coefficient bound via `ℝ≥0`-`Finset.sup`; convolution
+  summability via `NonarchimedeanAddGroup.summable_iff_tendsto_cofinite_zero`; the `Mul`
+  decay via the sumset/`image2` estimate + `IsUltrametricDist.norm_tsum_le_of_forall_le`;
+  `mul_assoc` via `summable_conv_triple` (ℤ² nonarch summability) + `Summable.tsum_prod'`
+  + the shear equivalence `(a,c) ↦ (a+c,a)`; `mul_comm` via `Equiv.subLeft`; distrib via
+  `Summable.tsum_add`; `one_mul`/`mul_one`/`single_mul_single` via `tsum_eq_single`;
+  `C`/`Wu` closed. Build green (3084 jobs). | **Type**: proofs (leaf L1.1)
 - **Sorries**: `instOne/instAdd/instNeg` decay fields, `instMul` decay, `summable_mul_coeff`,
   `CommRing` proof fields, `single` decay, `single_mul_single`, `C` hom fields, `Wu`
   val_inv/inv_val.
