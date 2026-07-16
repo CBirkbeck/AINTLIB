@@ -28,7 +28,7 @@ noncomputable section
 
 namespace BernoulliRegular
 
-open Finset MonoidAlgebra
+open Finset
 
 
 attribute [local instance] Fintype.ofFinite
