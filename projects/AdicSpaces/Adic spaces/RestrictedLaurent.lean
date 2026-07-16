@@ -1214,6 +1214,12 @@ theorem negate_single_zero (x : R) : negate (single 0 x) = single 0 x := by
 theorem norm_restrictedC (x : R) : ‖PowerSeries.Restricted.C (1 : ℝ) x‖ = ‖x‖ := by
   rw [← ofRestricted_norm (R := R) (PowerSeries.Restricted.C (1 : ℝ) x), ofRestricted_C, norm_single]
 
+/-- The vendored univariate restricted ring has norm-one unit. -/
+instance : NormOneClass (PowerSeries.Restricted R (1 : ℝ)) :=
+  ⟨by
+    rw [show (1 : PowerSeries.Restricted R (1 : ℝ)) = PowerSeries.Restricted.C (1 : ℝ) 1 from
+      Subtype.ext (map_one PowerSeries.C).symm, norm_restrictedC, norm_one]⟩
+
 /-- The coefficient functional as an additive homomorphism. -/
 noncomputable def coeffHom (m : ℤ) : RestrictedLaurent R →+ R where
   toFun f := f.coeff m
