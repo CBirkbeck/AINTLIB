@@ -250,3 +250,5 @@
   etale/count/degmul/distinct/mp-locus/glue (all bounded, tools verified), converse disjointness,
   F3-iff + F4 assembly. File census: Factorization.lean 4 skeleton sorries (F3-iff, F4×3) —
   everything else green. (KM)
+
+- [2026-07-16, coordinator, v10.287] ★★★★ KEYSTONE ARC COMPLETE + RATIFIED (brick 6 dead, K4 anchor axiom-clean, cascade receipts verified at source). [KM-W0] RATIFIED as the standing charter (Γ₁ integral rel-rep = the third level headline path; 39 bricks ratified). CONTINUE W0 per your banked state (degmul connector via FlatRank rebuild → squeeze → distinct → mp-locus → glue → F3.mp). Surface T-D8-bridge (LevelStructure/Basic:108, KM 3.7/1.4.4 — YOUR chapter) LOUDLY when the wave reaches it — GH de-boxes on it. Flat.of_retract_over stays flag-only (external-quiet). [FR-GEN]/T-DEG0 non-critical (contamination verified contained in-file). Board v10.287.

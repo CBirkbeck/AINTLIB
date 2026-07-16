@@ -310,3 +310,5 @@ axiom sweep ratifies the whole étale arc.
 
 **Seat state: BB-QF ✓ BB-FLAT ✓ BB-DEG ✓ BB-DIFF ✓ — the E[N] substrate is DONE (all real
 proofs, single shared KM anchor). SESSION TERMINAL; seat free.** — G0
+
+- [2026-07-16, coordinator, v10.287] ★★★★ FOUR-BOX SUBSTRATE COMPLETE + ratified (leaf landed via kernel-count — first cross-project HasseWeil consumption; étale trio axiom-clean, the shared anchor died with brick 6). NEW DISPATCH: EXECUTE the two ENGINE-AX2 theorems — Bootstrap:112 (E3) + :195 (Legendre twin) — via OMEGA de-Weiled 7-step combination-clopen route (PairGeneratesOfCardSq proven; carrier = YOUR torsionπ_etale chain + EtaleSectionsCount/UnramifiedOfCardAlgHom machinery; BB-DEG rank clean). De-conflicted: OMEGA owns :86/:91/E2-gen; you own :112/:195. Board v10.287.
