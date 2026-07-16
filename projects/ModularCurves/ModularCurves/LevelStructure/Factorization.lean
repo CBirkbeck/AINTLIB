@@ -1345,6 +1345,128 @@ theorem RelEffCartierDiv.card_killed_points {k : Type u} [Field k] [IsSepClosed 
   exact Nat.card_congr (RelEffCartierDiv.smulKernelPointsEquiv E D c
     (𝟙 (Spec (CommRingCat.of k)))).symm
 
+/-- **[F3-squeeze] (KM p. 28: "the product formula for ranks forces rank(G[N₁]) = N₁")**
+Over a separably closed field with `M` and `K` invertible, the `M`-kernel of a
+coprime-degree-`M·K` subgroup divisor has degree exactly `M`: the killed-point count
+is an `M`-killed abelian group (Cauchy bounds its prime support), the degrees multiply
+to `M·K`, and coprimality forces the split. -/
+theorem RelEffCartierDiv.IsSubgroup.smulKernelπ_finrank_eq {k : Type u} [Field k]
+    [IsSepClosed k] {E : EllipticCurve (Spec (CommRingCat.of k))}
+    {D : RelEffCartierDiv E.π} (hD : D.IsSubgroup E) (M K : ℕ)
+    [NeZero M] [NeZero K] (hMK : Nat.Coprime M K) [NeZero (M * K)]
+    [IsFinite (E.mulByHom (M : ℤ))] [IsFinite (E.mulByHom (K : ℤ))]
+    (hinvM : NIsInvertible (Spec (CommRingCat.of k)) M)
+    (hinvK : NIsInvertible (Spec (CommRingCat.of k)) K)
+    (hdeg : ∀ s, D.degree s = M * K)
+    (h₁ : ((M : ℤ) * K) % ((M * K : ℕ) : ℤ) = 0)
+    (h₂ : ((K : ℤ) * M) % ((M * K : ℕ) : ℤ) = 0)
+    (x₀ : ↑(Spec (CommRingCat.of k))) :
+    (D.smulKernelπ E (M : ℤ)).finrank x₀ = M := by
+  -- the finite flat étale instances
+  haveI hMflat : Flat (D.smulKernelπ E (M : ℤ)) :=
+    RelEffCartierDiv.IsSubgroup.smulKernelπ_flat E hD M K hMK hdeg h₁ h₂
+  haveI hKflat : Flat (D.smulKernelπ E (K : ℤ)) :=
+    RelEffCartierDiv.IsSubgroup.smulKernelπ_flat E hD K M hMK.symm
+      (fun s => by rw [hdeg s, Nat.mul_comm])
+      (by rwa [Nat.mul_comm M K] at h₂) (by rwa [Nat.mul_comm M K] at h₁)
+  haveI hMfin : IsFinite (D.smulKernelπ E (M : ℤ)) :=
+    RelEffCartierDiv.smulKernelπ_isFinite E D (M : ℤ)
+  haveI hKfin : IsFinite (D.smulKernelπ E (K : ℤ)) :=
+    RelEffCartierDiv.smulKernelπ_isFinite E D (K : ℤ)
+  haveI hMet : Etale (D.smulKernelπ E (M : ℤ)) :=
+    RelEffCartierDiv.smulKernelπ_etale E D M hinvM hMflat
+  haveI hKet : Etale (D.smulKernelπ E (K : ℤ)) :=
+    RelEffCartierDiv.smulKernelπ_etale E D K hinvK hKflat
+  -- notation
+  set nM := (D.smulKernelπ E (M : ℤ)).finrank x₀ with hnM
+  set nK := (D.smulKernelπ E (K : ℤ)).finrank x₀ with hnK
+  have hprod : nM * nK = M * K :=
+    RelEffCartierDiv.IsSubgroup.degree_eq_smulKernel_mul E hD M K hMK hdeg h₁ h₂ x₀
+  have hMpos : 0 < nM := by
+    rcases Nat.eq_zero_or_pos nM with h0 | h
+    · exfalso
+      rw [h0, Nat.zero_mul] at hprod
+      exact (Nat.mul_ne_zero (NeZero.ne M) (NeZero.ne K)) hprod.symm
+    · exact h
+  have hKpos : 0 < nK := by
+    rcases Nat.eq_zero_or_pos nK with h0 | h
+    · exfalso
+      rw [h0, Nat.mul_zero] at hprod
+      exact (Nat.mul_ne_zero (NeZero.ne M) (NeZero.ne K)) hprod.symm
+    · exact h
+  -- the killed points as a group; Cauchy bounds the prime support of nM
+  obtain ⟨H, hH⟩ := hD (𝟙 (Spec (CommRingCat.of k)))
+  have hcardM : Nat.card { Q : E.Point (𝟙 (Spec (CommRingCat.of k))) //
+      (M : ℤ) • Q = 0 ∧ ∃ w : Spec (CommRingCat.of k) ⟶ D.ideal.subscheme,
+        w ≫ D.ideal.subschemeι = Q.1 } = nM :=
+    RelEffCartierDiv.card_killed_points D (M : ℤ) x₀
+  have hdvdM : ∀ p : ℕ, p.Prime → p ∣ nM → p ∣ M := by
+    intro p hp hpn
+    let A : AddSubgroup (E.Point (𝟙 (Spec (CommRingCat.of k)))) :=
+      { carrier := { Q | (M : ℤ) • Q = 0 ∧ ∃ w : Spec (CommRingCat.of k)
+            ⟶ D.ideal.subscheme, w ≫ D.ideal.subschemeι = Q.1 }
+        zero_mem' := ⟨smul_zero _, (hH 0).mp H.zero_mem⟩
+        add_mem' := fun {P Q} hP hQ => ⟨by rw [smul_add, hP.1, hQ.1, add_zero],
+          (hH _).mp (H.add_mem ((hH P).mpr hP.2) ((hH Q).mpr hQ.2))⟩
+        neg_mem' := fun {P} hP => ⟨by rw [smul_neg, hP.1, neg_zero],
+          (hH _).mp (H.neg_mem ((hH P).mpr hP.2))⟩ }
+    have hcardA : Nat.card A = nM := hcardM
+    haveI hFin : Finite A := by
+      have hpos : 0 < Nat.card A := by rw [hcardA]; exact hMpos
+      exact (Nat.card_pos_iff.mp hpos).2
+    refine prime_dvd_of_killed M (fun g => ?_) hp (by rw [hcardA]; exact hpn)
+    have hg : (M : ℤ) • (g : E.Point (𝟙 (Spec (CommRingCat.of k)))) = 0 := g.2.1
+    exact Subtype.ext hg
+  have hcardK : Nat.card { Q : E.Point (𝟙 (Spec (CommRingCat.of k))) //
+      (K : ℤ) • Q = 0 ∧ ∃ w : Spec (CommRingCat.of k) ⟶ D.ideal.subscheme,
+        w ≫ D.ideal.subschemeι = Q.1 } = nK :=
+    RelEffCartierDiv.card_killed_points D (K : ℤ) x₀
+  have hdvdK : ∀ p : ℕ, p.Prime → p ∣ nK → p ∣ K := by
+    intro p hp hpn
+    let A : AddSubgroup (E.Point (𝟙 (Spec (CommRingCat.of k)))) :=
+      { carrier := { Q | (K : ℤ) • Q = 0 ∧ ∃ w : Spec (CommRingCat.of k)
+            ⟶ D.ideal.subscheme, w ≫ D.ideal.subschemeι = Q.1 }
+        zero_mem' := ⟨smul_zero _, (hH 0).mp H.zero_mem⟩
+        add_mem' := fun {P Q} hP hQ => ⟨by rw [smul_add, hP.1, hQ.1, add_zero],
+          (hH _).mp (H.add_mem ((hH P).mpr hP.2) ((hH Q).mpr hQ.2))⟩
+        neg_mem' := fun {P} hP => ⟨by rw [smul_neg, hP.1, neg_zero],
+          (hH _).mp (H.neg_mem ((hH P).mpr hP.2))⟩ }
+    have hcardA : Nat.card A = nK := hcardK
+    haveI hFin : Finite A := by
+      have hpos : 0 < Nat.card A := by rw [hcardA]; exact hKpos
+      exact (Nat.card_pos_iff.mp hpos).2
+    refine prime_dvd_of_killed K (fun g => ?_) hp (by rw [hcardA]; exact hpn)
+    have hg : (K : ℤ) • (g : E.Point (𝟙 (Spec (CommRingCat.of k)))) = 0 := g.2.1
+    exact Subtype.ext hg
+  -- coprimality forces the split
+  have hcopMK : Nat.Coprime nM K := by
+    by_contra hcon
+    obtain ⟨p, hp, hpM, hpK⟩ := Nat.Prime.not_coprime_iff_dvd.mp hcon
+    exact Nat.Prime.one_lt hp |>.ne'
+      (Nat.eq_one_of_dvd_coprimes hMK (hdvdM p hp hpM) hpK)
+  have hdvdMM : nM ∣ M :=
+    hcopMK.dvd_of_dvd_mul_right ⟨nK, hprod.symm⟩
+  have hcopKM : Nat.Coprime nK M := by
+    by_contra hcon
+    obtain ⟨p, hp, hpK, hpM⟩ := Nat.Prime.not_coprime_iff_dvd.mp hcon
+    exact Nat.Prime.one_lt hp |>.ne'
+      (Nat.eq_one_of_dvd_coprimes hMK.symm (hdvdK p hp hpK) hpM)
+  have hdvdKK : nK ∣ K :=
+    hcopKM.dvd_of_dvd_mul_right ⟨nM, by
+      rw [Nat.mul_comm K M, Nat.mul_comm nK nM]; exact hprod.symm⟩
+  -- the divisor product forces equality
+  obtain ⟨a, ha⟩ := hdvdMM
+  obtain ⟨b, hb⟩ := hdvdKK
+  have hab : a * b = 1 := by
+    have h1 : (nM * nK) * (a * b) = (nM * nK) * 1 := by
+      rw [Nat.mul_one]
+      calc nM * nK * (a * b) = (nM * a) * (nK * b) := by ring
+        _ = M * K := by rw [← ha, ← hb]
+        _ = nM * nK := hprod.symm
+    exact Nat.eq_of_mul_eq_mul_left (Nat.mul_pos hMpos hKpos) h1
+  have ha1 : a = 1 := Nat.eq_one_of_mul_eq_one_left (m := b) (by rwa [Nat.mul_comm] at hab)
+  rw [ha, ha1, Nat.mul_one]
+
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
 order `M` and `M·P` has exact order `K`.
