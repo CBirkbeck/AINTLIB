@@ -21429,3 +21429,17 @@ Parked/non-critical: endDual_comp_self+[FR-GEN] (degree completeness), hLN=T-W7.
   leaf as it lands. Stand ready for the hL/hArb one-liners on BB-DEG.
 - **GH → U2 per the pinned recipe** (`isFullLevel_baseChange_comp_iff`) → U3 (factor-iff assembly via
   `exists_iso_of_factor_iff`) → β3 (constant-form clopen; strengthened by G0's leaf). HOLD general-S pins.
+
+### v10.266-GH — ★ [GHA3 β2-heart U2] THE BRIDGE PROVEN (STREAM-GH)
+Commit 5403746a8 (pushed). `isFullLevel_baseChange_comp_iff` — Drinfeld full-levelness transports
+across double base change ((E.baseChange (t'≫p)) vs (E.baseChange p).baseChange t'), per the
+v10.263 recipe exactly: isFullLevel_iff_naive both sides; kill-conjuncts via
+`zsmul_asSection_eq_zero_iff` (clean) + equiv-injectivity; span-clause per geometric point via
+`bridgeEquiv` (the cR→cR2→congrBase→cL.symm AddEquiv chain) with generator-transport
+`bridgeEquiv_pull_asSection` (clean) + AddMonoidHom.map_closure + AddSubgroup.mem_map_equiv.
+sorryAx ONLY through the T-D8 box (fullLevel_divisor_iff_naive_gen — the standing funnel).
+Gotchas: map_zsmul arg-order is (n)(a) after the hom; AddEquivClass.map_eq_zero_iff has fussy
+implicits — the injective+map_zero route is cleaner; class-generic map_zsmul on ≃+-applications
+hits instance-search timeouts on heavy Point-types — always go through `.toAddMonoidHom`.
+NEXT: U3 (the factor-iff assembly: v-decomposition into pointToTorsion-legs + spec both sides +
+U2 + exists_iso_of_factor_iff). (STREAM-GH)
