@@ -10,7 +10,7 @@ only). Priority spine: T1xx → T3xx → T4xx → T5xx → T6xx → T7xx (sheafi
 
 ## Summary
 - Total: 36 tickets (28 proof + 8 embedded cleanup/milestone controls listed inline)
-- Open: 26 | Done: 10 (T001, T101–T109 = all of M0+M1) | Parallel capacity at peak: 4 workers
+- Open: 25 | Done: 11 (T001, T101–T109, T201) | Parallel capacity at peak: 4 workers
   (T2xx ∥ T3xx ∥ T4xx-polynomial ∥ T1xx-tail)
 
 ## Milestone map
@@ -197,8 +197,13 @@ T704, by a fresh `/develop --continue`.
 
 ### [CLEANUP-5] /cleanup `FiniteJetRings.lean` (final) — **Depends**: T109. Light pass folded into T109 close-out; full lint sweep deferred to CLEANUP-ALL-1.
 
-### [T201] `FiniteJetUniformDomain.lean` — multiplicativity, domains ∥parallel track∥
-- **Status**: open | **Depends**: T103, T107 | **Type**: proofs (R2 leaves)
+### [T201] `FiniteJetUniformDomain.lean` — multiplicativity, domains — **DONE 2026-07-17**
+- **Status**: done (beastmode). `norm_L_mul` (one-liner from T103), `norm_JetC_mul` via the
+  vendored `PowerSeries.gaussNorm_mul_eq_mul` with the minimal-achiever dominance witness
+  (`finite_setOf_le_norm_qCoeff` + `exists_norm_qCoeff_eq` + `Set.exists_min_image`;
+  `achievesGaussNorm_iff` bridging), `Nontrivial`/`NoZeroDivisors`/`IsDomain` for 𝒞 and 𝓐
+  (norm positivity route; subring transfer). **The `finiteJet_isDomain` headline ingredient
+  is proven.** | **Type**: proofs (R2 leaves)
 - **Sorries**: `norm_L_mul`, `norm_JetC_mul`, `IsDomain (JetC F)`, `IsDomain (JetA F)`.
 - **Sketch**: `norm_L_mul` = `RestrictedLaurent.norm_mul_eq` at `norm_K_discrete`;
   `norm_JetC_mul` via vendored univariate mult lemma over base `L` (check its exact
