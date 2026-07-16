@@ -80,6 +80,44 @@ lemma sigmaOfCharacterUnit_smul_gaussSumIdeal
     (sigmaOfCharacterUnit_smul_gaussSumIntegers (p := p) (L := L) b χ)
 
 /-- Under the distinguished complex embedding, the additive-side Galois lift
+`σ_a` sends the character-lift root of `L` to the complex character root
+`stickelbergerComplexCharacterRoot p`. -/
+lemma stickelbergerEmbedding_sigmaOfUnit_smul_gaussSumLiftCharacterRoot
+    (a : (ZMod p)ˣ) :
+    stickelbergerEmbedding p L
+        ((sigmaOfUnit (p := p) L a) (((gaussSumLiftCharacterRoot (p := p) L : 𝓞 L) : L))) =
+      stickelbergerComplexCharacterRoot (p := p) := by
+  change stickelbergerEmbedding p L
+      (((sigmaOfUnit (p := p) L a • gaussSumLiftCharacterRoot (p := p) L : 𝓞 L) : L)) =
+    stickelbergerComplexCharacterRoot (p := p)
+  rw [sigmaOfUnit_smul_gaussSumLiftCharacterRoot,
+    stickelbergerEmbedding_gaussSumLiftCharacterRoot]
+
+/-- Under the distinguished complex embedding, the additive-side Galois lift
+`σ_a` sends the additive-lift root of `L` to the `(a : ZMod p).val`-th power of
+`stickelbergerComplexRoot p ^ (p - 1)`. -/
+lemma stickelbergerEmbedding_sigmaOfUnit_smul_gaussSumLiftAdditiveRoot
+    (a : (ZMod p)ˣ) :
+    stickelbergerEmbedding p L
+        ((sigmaOfUnit (p := p) L a) (((gaussSumLiftAdditiveRoot (p := p) L : 𝓞 L) : L))) =
+      (stickelbergerComplexRoot p ^ (p - 1)) ^ (a : ZMod p).val := by
+  change stickelbergerEmbedding p L
+      (((sigmaOfUnit (p := p) L a • gaussSumLiftAdditiveRoot (p := p) L : 𝓞 L) : L)) =
+    (stickelbergerComplexRoot p ^ (p - 1)) ^ (a : ZMod p).val
+  rw [sigmaOfUnit_smul_gaussSumLiftAdditiveRoot]
+  calc
+    stickelbergerEmbedding p L
+        (((gaussSumLiftAdditiveRoot (p := p) L ^ (a : ZMod p).val : 𝓞 L) : L))
+        =
+        (stickelbergerEmbedding p L
+          (((gaussSumLiftAdditiveRoot (p := p) L : 𝓞 L) : L))) ^ (a : ZMod p).val :=
+            map_pow (stickelbergerEmbedding p L)
+              (((gaussSumLiftAdditiveRoot (p := p) L : 𝓞 L) : L))
+              ((a : ZMod p).val)
+    _ = (stickelbergerComplexRoot p ^ (p - 1)) ^ (a : ZMod p).val := by
+          rw [stickelbergerEmbedding_gaussSumLiftAdditiveRoot]
+
+/-- Under the distinguished complex embedding, the additive-side Galois lift
 of the explicit root-sum model realizes the additive-character shift
 `stdAddChar.mulShift a`. -/
 lemma stickelbergerEmbedding_sigmaOfUnit_smul_gaussSumLiftRootSum
@@ -91,30 +129,12 @@ lemma stickelbergerEmbedding_sigmaOfUnit_smul_gaussSumLiftRootSum
   let ζadd : L := ((gaussSumLiftAdditiveRoot (p := p) L : 𝓞 L) : L)
   have hcharroot :
       stickelbergerEmbedding p L ((sigmaOfUnit (p := p) L a) ζchar) =
-        stickelbergerComplexCharacterRoot (p := p) := by
-    change stickelbergerEmbedding p L
-        (((sigmaOfUnit (p := p) L a • gaussSumLiftCharacterRoot (p := p) L : 𝓞 L) : L)) =
-      stickelbergerComplexCharacterRoot (p := p)
-    rw [sigmaOfUnit_smul_gaussSumLiftCharacterRoot,
-      stickelbergerEmbedding_gaussSumLiftCharacterRoot]
+        stickelbergerComplexCharacterRoot (p := p) :=
+    stickelbergerEmbedding_sigmaOfUnit_smul_gaussSumLiftCharacterRoot (p := p) (L := L) a
   have haddroot :
       stickelbergerEmbedding p L ((sigmaOfUnit (p := p) L a) ζadd) =
-        (stickelbergerComplexRoot p ^ (p - 1)) ^ (a : ZMod p).val := by
-    change stickelbergerEmbedding p L
-        (((sigmaOfUnit (p := p) L a • gaussSumLiftAdditiveRoot (p := p) L : 𝓞 L) : L)) =
-      (stickelbergerComplexRoot p ^ (p - 1)) ^ (a : ZMod p).val
-    rw [sigmaOfUnit_smul_gaussSumLiftAdditiveRoot]
-    calc
-      stickelbergerEmbedding p L
-          (((gaussSumLiftAdditiveRoot (p := p) L ^ (a : ZMod p).val : 𝓞 L) : L))
-          =
-          (stickelbergerEmbedding p L
-            (((gaussSumLiftAdditiveRoot (p := p) L : 𝓞 L) : L))) ^ (a : ZMod p).val :=
-              map_pow (stickelbergerEmbedding p L)
-                (((gaussSumLiftAdditiveRoot (p := p) L : 𝓞 L) : L))
-                ((a : ZMod p).val)
-      _ = (stickelbergerComplexRoot p ^ (p - 1)) ^ (a : ZMod p).val := by
-            rw [stickelbergerEmbedding_gaussSumLiftAdditiveRoot]
+        (stickelbergerComplexRoot p ^ (p - 1)) ^ (a : ZMod p).val :=
+    stickelbergerEmbedding_sigmaOfUnit_smul_gaussSumLiftAdditiveRoot (p := p) (L := L) a
   have hF0 :
       (fun x : ZMod p =>
         χ x * ((ZMod.stdAddChar : AddChar (ZMod p) ℂ).mulShift a) x) 0 = 0 := by
