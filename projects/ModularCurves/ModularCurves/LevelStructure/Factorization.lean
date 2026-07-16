@@ -10,6 +10,7 @@ import ModularCurves.GroupScheme.TranslationBySection
 import ModularCurves.LevelStructure.IsoTransport
 import ModularCurves.EllipticCurve.EndomorphismDegree
 import ModularCurves.ForMathlib.FlatOfRetract
+import ModularCurves.ForMathlib.FinrankPullbackComp
 
 /-!
 # Prime-power factorization of Drinfeld exact order (KM 1.7.2 / 3.5.1, Γ₁-instance)
@@ -1241,17 +1242,32 @@ theorem Scheme.Hom.finrank_pullback_comp_fst {X Y : Scheme.{u}} (f : X ⟶ S) (g
   -- now everything is over Spec R; the base-changed product is the product of base changes
   sorry
 
-/-- **[F3-degmul] (contract)** The degree of the divisor multiplies over the kernel
-product: `deg G = deg Z_M · deg Z_K` at every base point. Route (banked 2026-07-16d):
-the product iso (R1+R2) + affine-local `rankAtStalk_tensorProduct` through
-`pullbackSpecIso`. -/
+include hD in
+/-- **[F3-degmul] (KM p. 28: "rank(G[N₁])·rank(G[N₂]) = rank(G) = N₁N₂")** The degree
+of the divisor multiplies over the kernel product: `deg Z_M · deg Z_K = M·K` at every
+base point — the product iso transports the divisor degree ([F3-degtrans]) and the
+fibre-product rank formula splits it (`finrank_pullback_comp_fst`). -/
 theorem RelEffCartierDiv.IsSubgroup.degree_eq_smulKernel_mul (M K : ℕ)
     [NeZero M] [NeZero K] (hMK : Nat.Coprime M K) [NeZero (M * K)]
+    [IsFinite (E.mulByHom (M : ℤ))] [IsFinite (E.mulByHom (K : ℤ))]
     (hdeg : ∀ s : S, D.degree s = M * K)
     (h₁ : ((M : ℤ) * K) % ((M * K : ℕ) : ℤ) = 0)
     (h₂ : ((K : ℤ) * M) % ((M * K : ℕ) : ℤ) = 0) (s : S) :
     (D.smulKernelπ E (M : ℤ)).finrank s * (D.smulKernelπ E (K : ℤ)).finrank s
-      = M * K := by sorry
+      = M * K := by
+  haveI hMflat : Flat (D.smulKernelπ E (M : ℤ)) :=
+    RelEffCartierDiv.IsSubgroup.smulKernelπ_flat E hD M K hMK hdeg h₁ h₂
+  haveI hKflat : Flat (D.smulKernelπ E (K : ℤ)) :=
+    RelEffCartierDiv.IsSubgroup.smulKernelπ_flat E hD K M hMK.symm
+      (fun s => by rw [hdeg s, Nat.mul_comm])
+      (by rwa [Nat.mul_comm M K] at h₂) (by rwa [Nat.mul_comm M K] at h₁)
+  haveI hMfin : IsFinite (D.smulKernelπ E (M : ℤ)) :=
+    RelEffCartierDiv.smulKernelπ_isFinite E D (M : ℤ)
+  haveI hKfin : IsFinite (D.smulKernelπ E (K : ℤ)) :=
+    RelEffCartierDiv.smulKernelπ_isFinite E D (K : ℤ)
+  rw [← ModularCurves.finrank_pullback_comp_fst (D.smulKernelπ E (M : ℤ))
+    (D.smulKernelπ E (K : ℤ)) s]
+  exact RelEffCartierDiv.IsSubgroup.finrank_prod_struct E hD M K hMK hdeg h₁ h₂ s
 
 /-- **[F3-mp] (contract — KM 1.7.2 forward, first conjunct)** If `P` has exact order
 `M·K` with `M, K` coprime, then `K•P` has exact order `M`. Route (v10.282 map):
