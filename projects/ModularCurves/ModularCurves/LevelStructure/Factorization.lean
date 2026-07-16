@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.LevelStructure.ExactOrder
+import ModularCurves.GroupScheme.DeligneOrder
 
 /-!
 # Prime-power factorization of Drinfeld exact order (KM 1.7.2 / 3.5.1, Γ₁-instance)
@@ -26,13 +27,29 @@ KM 1.4.1): no `φ`-homomorphism vocabulary is introduced — for the cyclic grou
 `ℤ/N` a homomorphism *is* its value at `1` (KM 1.5.2).
 -/
 
-open AlgebraicGeometry CategoryTheory
+open AlgebraicGeometry CategoryTheory Limits
 
 universe u
 
 namespace ModularCurves
 
 variable {S : Scheme.{u}} (E : EllipticCurve S)
+
+/-- Factoring through a monomorphism is Zariski-local on the source: a morphism `q : T ⟶ Y`
+factors through `ι : W ⟶ Y` as soon as its restrictions to the members of an open cover of
+`T` do. (The local factorizations agree on overlaps by `cancel_mono`, hence glue.) -/
+private lemma exists_factor_of_openCover {T W Y : Scheme.{u}} (𝒱 : T.OpenCover)
+    (ι : W ⟶ Y) [Mono ι] (q : T ⟶ Y)
+    (hloc : ∀ i : 𝒱.I₀, ∃ hi : 𝒱.X i ⟶ W, hi ≫ ι = 𝒱.f i ≫ q) :
+    ∃ h : T ⟶ W, h ≫ ι = q := by
+  choose hi hhi using hloc
+  have hcomp : ∀ i j : 𝒱.I₀,
+      pullback.fst (𝒱.f i) (𝒱.f j) ≫ hi i = pullback.snd (𝒱.f i) (𝒱.f j) ≫ hi j := by
+    intro i j
+    rw [← cancel_mono ι, Category.assoc, Category.assoc, hhi, hhi, ← Category.assoc,
+      ← Category.assoc, pullback.condition]
+  exact ⟨𝒱.glueMorphisms hi hcomp, 𝒱.hom_ext _ _ fun i => by
+    rw [← Category.assoc, Scheme.Cover.ι_glueMorphisms, hhi]⟩
 
 namespace RelEffCartierDiv
 
@@ -49,7 +66,55 @@ theorem isSubgroup_of_openCover (D : RelEffCartierDiv E.π)
         ∃ H : AddSubgroup (E.Point g),
           ∀ P : E.Point g, P ∈ H ↔ ∃ h : T ⟶ D.ideal.subscheme,
             h ≫ D.ideal.subschemeι = P.1) :
-    D.IsSubgroup E := by sorry
+    D.IsSubgroup E := by
+  intro T g
+  -- the pulled-back cover of `T`, indexed by `𝒰.I₀`
+  let 𝒱 : T.OpenCover := Scheme.Cover.mkOfCovers 𝒰.I₀
+    (fun i => pullback g (𝒰.f i)) (fun i => pullback.fst g (𝒰.f i))
+    (fun t => by
+      obtain ⟨y, hy⟩ := 𝒰.covers (g t)
+      obtain ⟨z, hz1, _⟩ := Scheme.Pullback.exists_preimage_pullback t y hy.symm
+      exact ⟨𝒰.idx (g t), z, hz1⟩)
+    (fun i => inferInstance)
+  -- the local subgroup structures over the cover
+  have hloc := fun i : 𝒰.I₀ => h i (pullback.fst g (𝒰.f i) ≫ g)
+    ⟨pullback.snd g (𝒰.f i), pullback.condition.symm⟩
+  choose Hloc hHloc using hloc
+  -- gluing engine: a point factoring locally on the cover factors globally
+  have key : ∀ P : E.Point g,
+      (∀ i : 𝒰.I₀, ∃ hi : pullback g (𝒰.f i) ⟶ D.ideal.subscheme,
+        hi ≫ D.ideal.subschemeι = pullback.fst g (𝒰.f i) ≫ P.1) →
+      ∃ hh : T ⟶ D.ideal.subscheme, hh ≫ D.ideal.subschemeι = P.1 :=
+    fun P hP => exists_factor_of_openCover 𝒱 D.ideal.subschemeι P.1 hP
+  -- local membership of a restricted point, from a global factoring
+  have hmem : ∀ (i : 𝒰.I₀) (P : E.Point g),
+      (∃ hh : T ⟶ D.ideal.subscheme, hh ≫ D.ideal.subschemeι = P.1) →
+      EllipticCurve.Point.restrict E (pullback.fst g (𝒰.f i)) P ∈ Hloc i := by
+    intro i P hhP
+    obtain ⟨hh, hhh⟩ := hhP
+    exact (hHloc i _).mpr ⟨pullback.fst g (𝒰.f i) ≫ hh, by
+      rw [Category.assoc, hhh]; rfl⟩
+  -- restriction of a negative
+  have hneg : ∀ (i : 𝒰.I₀) (P : E.Point g),
+      EllipticCurve.Point.restrict E (pullback.fst g (𝒰.f i)) (-P)
+        = -EllipticCurve.Point.restrict E (pullback.fst g (𝒰.f i)) P := by
+    intro i P
+    refine eq_neg_of_add_eq_zero_left ?_
+    rw [← EllipticCurve.Point.restrict_add, neg_add_cancel,
+      EllipticCurve.Point.restrict_zero]
+  refine ⟨{ carrier := setOf fun P : E.Point g =>
+              ∃ hh : T ⟶ D.ideal.subscheme, hh ≫ D.ideal.subschemeι = P.1
+            zero_mem' := key 0 fun i =>
+              (hHloc i (EllipticCurve.Point.restrict E (pullback.fst g (𝒰.f i)) 0)).mp
+                (by rw [EllipticCurve.Point.restrict_zero]; exact (Hloc i).zero_mem)
+            add_mem' := fun {P Q} hP hQ => key (P + Q) fun i =>
+              (hHloc i (EllipticCurve.Point.restrict E (pullback.fst g (𝒰.f i)) (P + Q))).mp
+                (by rw [EllipticCurve.Point.restrict_add]
+                    exact (Hloc i).add_mem (hmem i P hP) (hmem i Q hQ))
+            neg_mem' := fun {P} hP => key (-P) fun i =>
+              (hHloc i (EllipticCurve.Point.restrict E (pullback.fst g (𝒰.f i)) (-P))).mp
+                (by rw [hneg]; exact (Hloc i).neg_mem (hmem i P hP)) },
+    fun P => Iff.rfl⟩
 
 end RelEffCartierDiv
 
