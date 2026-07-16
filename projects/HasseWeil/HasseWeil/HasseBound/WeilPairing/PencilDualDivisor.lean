@@ -19,7 +19,8 @@ any `Isogeny.CoordHom` and **without** the characteristic-polynomial / trace rel
 
 It is the exact mirror of the leaf-2 file `OneSubDualDivisor.lean`: the *general*
 divisor-pushforward dual machinery `divisorPushforwardDual` / `divisorPushforwardDual_comp` (built
-there for **any** genuine isogeny `φ` with `ProjOrdTransport φ` and surjective point map over `K̄`) and
+there for **any** genuine isogeny `φ` with `ProjOrdTransport φ` and surjective point map
+over `K̄`) and
 the
 CoordHom-free `WeilScales` bridge `weilScales_of_dualComp` (`SeparableScaling.lean`) are reused
 verbatim; only the realising isogeny changes from `1 − π` to `rπ − s`.
@@ -90,10 +91,12 @@ variable (L : Type*) [Field L] [DecidableEq L] [Algebra K L] [ExpChar L p]
   [(W.baseChange L).toAffine.IsElliptic]
 
 /-- **The concrete base-changed pencil `(rπ − s)_{K̄}`**.  Built from a base-changed pullback
-`pullback_L` and the **concrete** point map `r·π̄ − s·id`, where `π̄ = frobeniusHomBaseChange W p r L`
+`pullback_L` and the **concrete** point map `r·π̄ − s·id`, where
+`π̄ = frobeniusHomBaseChange W p r L`
 is the `q`-power Frobenius point map on `E_{K̄}`, via `Isogeny.mkBaseChange`.
 
-Its `toAddMonoidHom` is **definitionally** `r • frobeniusHomBaseChange W p r L - s • AddMonoidHom.id`,
+Its `toAddMonoidHom` is **definitionally**
+`r • frobeniusHomBaseChange W p r L - s • AddMonoidHom.id`,
 i.e. exactly the bare hom named in `PencilScaling`. -/
 noncomputable def pencilIsogBaseChange (r' s' : ℤ)
     (pullback_L : (W.baseChange L).toAffine.FunctionField →ₐ[L]
@@ -116,7 +119,8 @@ noncomputable def pencilIsogBaseChange (r' s' : ℤ)
   Isogeny.mkBaseChange_pullback L _ _
 
 /-- **`[ℓ] ∘ φ_L = φ_L ∘ [ℓ]`** for `φ_L = (rπ − s)_{K̄}` (any base-changed pullback), at the
-`AddMonoidHom` level.  Pure `map_zsmul`: both sides send `P ↦ ℓ • (rπ̄ − s·id)(P) = (rπ̄ − s·id)(ℓ • P)`,
+`AddMonoidHom` level.  Pure `map_zsmul`: both sides send
+`P ↦ ℓ • (rπ̄ − s·id)(P) = (rπ̄ − s·id)(ℓ • P)`,
 because the point map is a group hom. -/
 theorem pencilIsogBaseChange_commute_mulByInt (ℓ : ℤ) (r' s' : ℤ)
     (pullback_L : (W.baseChange L).toAffine.FunctionField →ₐ[L]
@@ -147,7 +151,8 @@ variable (L : Type*) [Field L] [DecidableEq L] [Algebra K L] [IsAlgClosed L] [Ex
   [(W.baseChange L).toAffine.IsElliptic]
 
 /-- **The base-changed `rπ − s` geometric data** (Silverman III.6.1/III.6.2/III.8.2 content),
-CoordHom-free.  Bundles, for the base-changed separable isogeny `φ_L = (rπ − s)_{K̄}` whose point map
+CoordHom-free.  Bundles, for the base-changed separable isogeny `φ_L = (rπ − s)_{K̄}`
+whose point map
 is the concrete `r·π̄ − s·id`:
 
 * `pullback_L` — the base-changed pullback `AlgHom`;
@@ -178,7 +183,8 @@ structure PencilScalingData (r' s' : ℤ) where
   /-- **Surjectivity** of `φ_L` on `E_{K̄}`-points (Silverman III.4.10a).  No longer consumed by the
   scaling itself (the image-restricted adjoint removed that dependency, reviewer round-20 Q2); it is
   retained because the divisor-pushforward dual `δ = divisorPushforwardDual` is built from it inline
-  in `pencilScaling_of_data` (the `degree(φ^*D) = #ker · degree D` formula needs every place to have a
+  in `pencilScaling_of_data` (the `degree(φ^*D) = #ker · degree D` formula needs every
+  place to have a
   preimage). -/
   hsurj :
     Function.Surjective (pencilIsogBaseChange W p r L r' s' pullback_L).toAddMonoidHom
@@ -259,7 +265,8 @@ variable {K : Type*} [Field K] [Fintype K] [DecidableEq K]
 variable (W : WeierstrassCurve K) [W.toAffine.IsElliptic] [Fintype W.toAffine.Point]
 variable (p r : ℕ) [Fact p.Prime] [CharP K p] [Fact (Fintype.card K = p ^ r)]
 
-noncomputable local instance instDecEqACPencil : DecidableEq (AlgebraicClosure K) := Classical.decEq _
+noncomputable local instance instDecEqACPencil : DecidableEq (AlgebraicClosure K) :=
+  Classical.decEq _
 
 open IsogenyBaseChangeConcrete
 
@@ -284,7 +291,8 @@ carried per `(r, s)` in `PencilScalingData`:
 * `hcomm'` — the translation covariance (Silverman III.8.2).
 
 The exponent function is `deg r s := ((pencilData r s).degK : ℤ)` (the carried isogeny degree, =
-the K-level genuine `rπ − s` degree); `(deg r s).toNat = (pencilData r s).degK` is then immediate and
+the K-level genuine `rπ − s` degree); `(deg r s).toNat = (pencilData r s).degK` is then
+immediate and
 non-negativity is free.  This routes the leaf-3 scaling through the **divisor pushforward** dual the
 reviewer prescribed (round 19 Q3), eliminating any char-poly / dual-additivity input. -/
 theorem pencilScaling_of_divisorDual
@@ -298,8 +306,10 @@ theorem pencilScaling_of_divisorDual
     Int.toNat_natCast _]
   exact pencilScaling_of_data W p r (AlgebraicClosure K) r' s' ℓ hℓF (pencilData r' s')
 
-/-- **`PencilScaling` for an arbitrary non-negative exponent function `deg`**, given that the carried
-isogeny degrees realise it.  This is the form a top-level caller uses to obtain `PencilScaling` for a
+/-- **`PencilScaling` for an arbitrary non-negative exponent function `deg`**, given
+that the carried
+isogeny degrees realise it.  This is the form a top-level caller uses to obtain
+`PencilScaling` for a
 fixed `deg` (e.g. `deg r s := (genuineIsogSmulSub W r s …).degree`): supply the per-`(r, s)`
 `PencilScalingData` and the per-`(r, s)` degree identification `hdeg`. -/
 theorem pencilScaling_of_divisorDual_of_deg
