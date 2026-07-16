@@ -990,14 +990,16 @@ noncomputable def RationalCovering.plus_section_of_plus_hV_glue
         (h₃₂ : rationalOpen D₃.T D₃.s ⊆ rationalOpen D₂'.1.T D₂'.1.s),
         restrictionMap D₁'.1 D₃ h₃₁
             (let h_exists :=
-               ((C.plusLaurentCovering_of_standardCoverVCovers S f₀ hS_cover).mem_standardCoverVCovers
+               ((C.plusLaurentCovering_of_standardCoverVCovers S f₀
+                 hS_cover).mem_standardCoverVCovers
                  (S.erase f₀)).mp D₁'.2
              let g := Classical.choose h_exists
              let hg_spec := Classical.choose_spec h_exists
              hg_spec.2 ▸ C.plusHalf_fV_transport_at_g S f₀ g hg_spec.1 fV) =
           restrictionMap D₂'.1 D₃ h₃₂
             (let h_exists :=
-               ((C.plusLaurentCovering_of_standardCoverVCovers S f₀ hS_cover).mem_standardCoverVCovers
+               ((C.plusLaurentCovering_of_standardCoverVCovers S f₀
+                 hS_cover).mem_standardCoverVCovers
                  (S.erase f₀)).mp D₂'.2
              let g := Classical.choose h_exists
              let hg_spec := Classical.choose_spec h_exists
@@ -1013,7 +1015,8 @@ noncomputable def RationalCovering.plus_section_of_plus_hV_glue
                          (laurentPlusDatum C.base f₀).s),
           restrictionMap (laurentPlusDatum C.base f₀) D'.1 hD' u_plus =
             (let h_exists :=
-               ((C.plusLaurentCovering_of_standardCoverVCovers S f₀ hS_cover).mem_standardCoverVCovers
+               ((C.plusLaurentCovering_of_standardCoverVCovers S f₀
+                 hS_cover).mem_standardCoverVCovers
                  (S.erase f₀)).mp D'.2
              let g := Classical.choose h_exists
              let hg_spec := Classical.choose_spec h_exists
@@ -1104,9 +1107,11 @@ theorem RationalCovering.plus_compat_fn_from_outer_hV_compat
   subst hg₁_eq
   subst hg₂_eq
   -- Extract Classical.choose-derived witnesses g₁', g₂' (may differ from g₁, g₂).
-  set h_ex_1 := ((C.plusLaurentCovering_of_standardCoverVCovers S f₀ hS_cover).mem_standardCoverVCovers
+  set h_ex_1 := ((C.plusLaurentCovering_of_standardCoverVCovers S f₀
+      hS_cover).mem_standardCoverVCovers
       (S.erase f₀)).mp D₁'_prop with hE1
-  set h_ex_2 := ((C.plusLaurentCovering_of_standardCoverVCovers S f₀ hS_cover).mem_standardCoverVCovers
+  set h_ex_2 := ((C.plusLaurentCovering_of_standardCoverVCovers S f₀
+      hS_cover).mem_standardCoverVCovers
       (S.erase f₀)).mp D₂'_prop with hE2
   obtain ⟨hg₁'_mem, hg₁'_eq⟩ := Classical.choose_spec h_ex_1
   obtain ⟨hg₂'_mem, hg₂'_eq⟩ := Classical.choose_spec h_ex_2
@@ -1167,7 +1172,8 @@ noncomputable def RationalCovering.plus_section_of_plus_hV_glue_auto
                          (laurentPlusDatum C.base f₀).s),
           restrictionMap (laurentPlusDatum C.base f₀) D'.1 hD' u_plus =
             (let h_exists :=
-               ((C.plusLaurentCovering_of_standardCoverVCovers S f₀ hS_cover).mem_standardCoverVCovers
+               ((C.plusLaurentCovering_of_standardCoverVCovers S f₀
+                 hS_cover).mem_standardCoverVCovers
                  (S.erase f₀)).mp D'.2
              let g := Classical.choose h_exists
              let hg_spec := Classical.choose_spec h_exists
@@ -3776,7 +3782,8 @@ theorem RationalCovering.tateAcyclicity_Part2_end_to_end
                          (laurentPlusDatum C.base f₀).s),
           restrictionMap (laurentPlusDatum C.base f₀) D'.1 hD' u_plus =
             (let h_exists :=
-               ((C.plusLaurentCovering_of_standardCoverVCovers S f₀ hS_cover).mem_standardCoverVCovers
+               ((C.plusLaurentCovering_of_standardCoverVCovers S f₀
+                 hS_cover).mem_standardCoverVCovers
                  (S.erase f₀)).mp D'.2
              let g := Classical.choose h_exists
              let hg_spec := Classical.choose_spec h_exists
@@ -5014,7 +5021,7 @@ tateAcyclicity Part 2 (LaurentRefinement.lean:3737)
   ← tateAcyclicity_Part2_assembly                                ◆ this
        ← tateAcyclicity_Part2_via_refined_geometric_reduction    ◆ axiom-clean
             ← gluing_of_finer_rational                           ◆ Mathlib-style
-            + hV_glue_refined                                    ← hV_glue_refined_from_laurent_halves
+            + hV_glue_refined                                  ← hV_glue_refined_from_laurent_halves
                 ← refinedVCovers_plusMinus_dichotomy             ◆ axiom-clean
                 + plus_section_refined  (S-GEOM-IND step on plus half)
                 + minus_section_refined (S-GEOM-IND step on minus half)
@@ -5803,7 +5810,8 @@ theorem RationalCovering.tateAcyclicity_Part2_direct_per_E
   rw [hLHS_step]
   -- Apply hx at ⟨D, D_in_refined⟩ to replace restrictionMap C.base D x with fV.
   have hxD := hx ⟨D, D_in_refined⟩
-  -- Proof irrelevance: two subset proofs of `rationalOpen D.T D.s ⊆ rationalOpen C.base.T C.base.s`.
+  -- Proof irrelevance: two subset proofs of
+  -- `rationalOpen D.T D.s ⊆ rationalOpen C.base.T C.base.s`.
   rw [show ((C.per_E_local_covering S f₀ E hS_per_E).hsubset D hD).trans
         (C.hsubset E.1 E.2) =
       C.refinedVCovers_subset_base S f₀ D D_in_refined from
