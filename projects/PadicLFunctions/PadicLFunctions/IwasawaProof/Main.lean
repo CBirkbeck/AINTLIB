@@ -414,7 +414,8 @@ arbitrary scalars exist; the latter is equivalent to the absent `Continuous (Col
 power-series side `Col '' 𝒞_{∞,1} = colemanPipe2 '' colemanPairSet`, the density of the
 cyclotomic pairs in `colemanPairSet` (whose level-`n` constraints `f(π_n) ∈ val '' 𝒞_{n,1}` are
 the closures `clos(𝒟_{n,1})`, tied across levels only by that module structure). -/
--- `col_image_cycloTower1_eq_zetaIdeal` is stated+proved below `col_mem_zetaIdeal_of_mem_cycloTower1`
+-- `col_image_cycloTower1_eq_zetaIdeal` is stated+proved below
+-- `col_mem_zetaIdeal_of_mem_cycloTower1`
 -- (its `⊆` is exactly `col_mem`; the old `_of_density` route was unsound at the free level-0
 -- coordinate, so the faithful plus/minus `col_mem` supersedes it). -/
 
