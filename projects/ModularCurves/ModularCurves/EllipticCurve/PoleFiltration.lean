@@ -3825,6 +3825,59 @@ lemma zeroChart_val_chartYSection (W : WeierstrassCurve R)
     exact this
   rw [hinv, ← infChartAug_chartYRingEquiv, RingEquiv.apply_symm_apply]
 
+/-- Evaluating the `appLE` of `hU.fromSpec` along `U ≤ ⊤` on a section `x : Γ(X, U)` gives the
+inverse `ΓSpecIso` identification of `x`: `fromSpec.app` composed with the (trivial) restriction to
+`⊤` collapses to `(ΓSpecIso _).inv`. -/
+private lemma fromSpec_appLE_top_apply {X : Scheme.{u}} {U : X.Opens}
+    (hU : IsAffineOpen U) (x : Γ(X, U)) :
+    ((hU.fromSpec.appLE U ⊤ (le_of_eq hU.fromSpec_preimage_self.symm)).hom) x =
+      ((Scheme.ΓSpecIso Γ(X, U)).inv).hom x := by
+  have happ := congrArg (fun φ : Γ(X, U) ⟶
+      Γ(Spec Γ(X, U), hU.fromSpec ⁻¹ᵁ U) =>
+      (CommRingCat.Hom.hom ((Spec Γ(X, U)).presheaf.map (homOfLE
+        (le_of_eq hU.fromSpec_preimage_self.symm)).op))
+        ((CommRingCat.Hom.hom φ) x))
+    hU.fromSpec_app_self
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at happ
+  refine happ.trans ?_
+  have h1 := congrArg (fun φ : (Spec Γ(X, U)).presheaf.obj (Opposite.op ⊤) ⟶
+      (Spec Γ(X, U)).presheaf.obj (Opposite.op ⊤) => CommRingCat.Hom.hom φ
+      (((Scheme.ΓSpecIso Γ(X, U)).inv).hom x))
+    (((Spec Γ(X, U)).presheaf.map_comp (eqToHom hU.fromSpec_preimage_self).op
+      (homOfLE (le_of_eq hU.fromSpec_preimage_self.symm)).op).symm)
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h1
+  refine h1.trans ?_
+  have h2 : ((eqToHom hU.fromSpec_preimage_self).op ≫
+      (homOfLE (le_of_eq hU.fromSpec_preimage_self.symm)).op) =
+      𝟙 (Opposite.op (⊤ : (Spec Γ(X, U)).Opens)) :=
+    Subsingleton.elim _ _
+  have h3 := congrArg (fun ψ => (CommRingCat.Hom.hom
+    ((Spec Γ(X, U)).presheaf.map ψ)) (((Scheme.ΓSpecIso Γ(X, U)).inv).hom x)) h2
+  refine h3.trans ?_
+  have h4 := congrArg (fun φ => CommRingCat.Hom.hom φ
+    (((Scheme.ΓSpecIso Γ(X, U)).inv).hom x))
+    ((Spec Γ(X, U)).presheaf.map_id (Opposite.op (⊤ : (Spec Γ(X, U)).Opens)))
+  exact h4
+
+/-- Evaluating `f.appLE ⊤ ⊤ le_top` on a global section agrees with evaluating `f.appTop`: the
+restriction bundled into `appLE` at the top open is trivial. -/
+private lemma appLE_top_top_apply {X Y : Scheme.{u}} (f : X ⟶ Y) (y : Γ(Y, ⊤)) :
+    ((f.appLE ⊤ ⊤ le_top).hom) y = ((f.appTop).hom) y := by
+  have h2 : (homOfLE (show (⊤ : X.Opens) ≤ f ⁻¹ᵁ ⊤ from le_top)).op =
+      𝟙 (Opposite.op (⊤ : X.Opens)) := Subsingleton.elim _ _
+  have h3 := congrArg (fun ψ => (CommRingCat.Hom.hom (X.presheaf.map ψ))
+    ((f.appTop).hom y)) h2
+  refine h3.trans ?_
+  have h4 := congrArg (fun φ => CommRingCat.Hom.hom φ ((f.appTop).hom y))
+    (X.presheaf.map_id (Opposite.op (⊤ : X.Opens)))
+  exact h4
+
+/-- `appLE` evaluated on a section is unchanged when the morphism is replaced by an equal one. -/
+private lemma appLE_hom_congr {X Y : Scheme.{u}} {U : Y.Opens} {V : X.Opens}
+    {f g : X ⟶ Y} (h : f = g) (ef : V ≤ f ⁻¹ᵁ U) (eg : V ≤ g ⁻¹ᵁ U) (x : Γ(Y, U)) :
+    (f.appLE U V ef).hom x = (g.appLE U V eg).hom x := by
+  subst h; rfl
+
 /-- **The zero-section pullback of a `Y`-chart section is its augmentation**, as a global
 section of `Spec R`. -/
 lemma projModelZero_appLE_chartYSection (W : WeierstrassCurve R)
@@ -3834,20 +3887,6 @@ lemma projModelZero_appLE_chartYSection (W : WeierstrassCurve R)
         (le_of_eq (projModelZero_preimage_yChart W).symm)).hom)
       ((chartYSectionsRingEquiv W).symm b) =
     ((Scheme.ΓSpecIso (CommRingCat.of R)).inv).hom (infChartAug W b) := by
-  -- replace the zero section by its fromSpec factorisation (subst under the appLE proof)
-  have hz : ∀ (f : Spec (CommRingCat.of R) ⟶ projModel W)
-      (hf : projModelZero W = f) (h' : ⊤ ≤ f ⁻¹ᵁ (Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))),
-      (((projModelZero W).appLE (Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) ⊤
-        (le_of_eq (projModelZero_preimage_yChart W).symm)).hom)
-        ((chartYSectionsRingEquiv W).symm b) =
-      ((f.appLE (Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) ⊤ h').hom)
-          ((chartYSectionsRingEquiv W).symm b) := by
-    intro f hf h'
-    subst hf
-    rfl
   -- split the composite appLE
   have hsplit := congrArg (fun φ => CommRingCat.Hom.hom φ
       ((chartYSectionsRingEquiv W).symm b))
@@ -3866,81 +3905,11 @@ lemma projModelZero_appLE_chartYSection (W : WeierstrassCurve R)
       (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec_preimage_self).symm) le_top)
   simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hsplit
   -- the fromSpec leg is the ΓSpec identification
-  have hfs : (((Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
+  have hfs := fromSpec_appLE_top_apply
+    (Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
       ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec.appLE (Proj.basicOpen (quotientGrading
-        (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) ⊤
-      (le_of_eq ((Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
-      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec_preimage_self).symm)).hom)
-      ((chartYSectionsRingEquiv W).symm b) =
-      ((Scheme.ΓSpecIso Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).inv).hom
-        ((chartYSectionsRingEquiv W).symm b) := by
-    have happ := congrArg (fun φ : Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) ⟶
-        Γ(Spec Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))), (Proj.isAffineOpen_basicOpen
-          (quotientGrading (projIdeal W))
-      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec ⁻¹ᵁ (Proj.basicOpen (quotientGrading
-        (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))) =>
-        (CommRingCat.Hom.hom ((Spec Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).presheaf.map (homOfLE
-          (le_of_eq ((Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
-      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec_preimage_self).symm)).op))
-        ((CommRingCat.Hom.hom φ) ((chartYSectionsRingEquiv W).symm b)))
-      ((Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
-      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec_app_self)
-    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at happ
-    refine happ.trans ?_
-    have h1 := congrArg (fun φ : (Spec Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).presheaf.obj
-        (Opposite.op ⊤) ⟶ (Spec Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).presheaf.obj
-        (Opposite.op ⊤) => CommRingCat.Hom.hom φ
-      (((Scheme.ΓSpecIso Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).inv).hom
-        ((chartYSectionsRingEquiv W).symm b)))
-      (((Spec Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).presheaf.map_comp
-        (eqToHom ((Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
-      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec_preimage_self)).op
-        (homOfLE (le_of_eq ((Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
-      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec_preimage_self).symm)).op).symm)
-    simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h1
-    refine h1.trans ?_
-    have h2 : ((eqToHom ((Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
-      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec_preimage_self)).op ≫
-        (homOfLE (le_of_eq ((Proj.isAffineOpen_basicOpen (quotientGrading (projIdeal W))
-      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec_preimage_self).symm)).op) =
-        𝟙 (Opposite.op (⊤ : (Spec Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).Opens)) :=
-      Subsingleton.elim _ _
-    have h3 := congrArg (fun ψ => (CommRingCat.Hom.hom
-      ((Spec Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).presheaf.map ψ))
-      (((Scheme.ΓSpecIso Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).inv).hom
-        ((chartYSectionsRingEquiv W).symm b))) h2
-    refine h3.trans ?_
-    have h4 := congrArg (fun φ => CommRingCat.Hom.hom φ
-      (((Scheme.ΓSpecIso Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).inv).hom
-        ((chartYSectionsRingEquiv W).symm b)))
-      ((Spec Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).presheaf.map_id
-        (Opposite.op (⊤ : (Spec Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).Opens)))
-    exact h4
+      (mk_X_mem_quotientGrading_one W 1) one_pos)
+    ((chartYSectionsRingEquiv W).symm b)
   -- the Spec.map leg is naturality of ΓSpecIso
   have hnat := congrArg (fun φ => CommRingCat.Hom.hom φ
     ((chartYSectionsRingEquiv W).symm b))
@@ -3949,57 +3918,20 @@ lemma projModelZero_appLE_chartYSection (W : WeierstrassCurve R)
         (mk_X_mem_quotientGrading_one W 1) one_pos).inv ≫
       CommRingCat.ofHom (zeroChartHom W)))
   simp only [CommRingCat.hom_comp, RingHom.comp_apply] at hnat
-  have happtop : (((Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
+  -- the appLE `⊤ ⊤` leg collapses to the appTop leg
+  have happtop := appLE_top_top_apply
+    (Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
         (mk_X_mem_quotientGrading_one W 1) one_pos).inv ≫
-      CommRingCat.ofHom (zeroChartHom W))).appLE ⊤ ⊤ le_top).hom)
-      (((Scheme.ΓSpecIso Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+      CommRingCat.ofHom (zeroChartHom W)))
+    (((Scheme.ΓSpecIso Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).inv).hom
-        ((chartYSectionsRingEquiv W).symm b)) =
-      (((Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-        (mk_X_mem_quotientGrading_one W 1) one_pos).inv ≫
-      CommRingCat.ofHom (zeroChartHom W))).appTop).hom)
-        (((Scheme.ΓSpecIso Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).inv).hom
-          ((chartYSectionsRingEquiv W).symm b)) := by
-    have h2 : (homOfLE (show (⊤ : (Spec (CommRingCat.of R)).Opens) ≤
-        (Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-        (mk_X_mem_quotientGrading_one W 1) one_pos).inv ≫
-      CommRingCat.ofHom (zeroChartHom W))) ⁻¹ᵁ ⊤ from le_top)).op =
-        𝟙 (Opposite.op (⊤ : (Spec (CommRingCat.of R)).Opens)) :=
-      Subsingleton.elim _ _
-    have h3 := congrArg (fun ψ => (CommRingCat.Hom.hom
-      ((Spec (CommRingCat.of R)).presheaf.map ψ))
-      (((Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-        (mk_X_mem_quotientGrading_one W 1) one_pos).inv ≫
-      CommRingCat.ofHom (zeroChartHom W))).app ⊤).hom
-        (((Scheme.ΓSpecIso Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).inv).hom
-          ((chartYSectionsRingEquiv W).symm b)))) h2
-    refine h3.trans ?_
-    have h4 := congrArg (fun φ => CommRingCat.Hom.hom φ
-      (((Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-        (mk_X_mem_quotientGrading_one W 1) one_pos).inv ≫
-      CommRingCat.ofHom (zeroChartHom W))).app ⊤).hom
-        (((Scheme.ΓSpecIso Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1)))).inv).hom
-          ((chartYSectionsRingEquiv W).symm b))))
-      ((Spec (CommRingCat.of R)).presheaf.map_id
-        (Opposite.op (⊤ : (Spec (CommRingCat.of R)).Opens)))
-    exact h4
-  exact (hz (Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W))
-        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-        (mk_X_mem_quotientGrading_one W 1) one_pos).inv ≫
-      CommRingCat.ofHom (zeroChartHom W)) ≫ (Proj.isAffineOpen_basicOpen (quotientGrading
-        (projIdeal W))
-      ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
-      (mk_X_mem_quotientGrading_one W 1) one_pos).fromSpec) (projModelZero_eq_fromSpec W)
+        ((chartYSectionsRingEquiv W).symm b))
+  exact (appLE_hom_congr (projModelZero_eq_fromSpec W)
+      (le_of_eq (projModelZero_preimage_yChart W).symm)
       (by rw [← projModelZero_eq_fromSpec W]
-          exact le_of_eq (projModelZero_preimage_yChart W).symm)).trans
+          exact le_of_eq (projModelZero_preimage_yChart W).symm)
+      ((chartYSectionsRingEquiv W).symm b)).trans
     (hsplit.symm.trans ((congrArg (((Spec.map ((Proj.basicOpenIsoAway (quotientGrading
       (projIdeal W))
         ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))
