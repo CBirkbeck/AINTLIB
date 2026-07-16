@@ -398,7 +398,6 @@ private theorem locIdeal_pow_toAddSubgroup_isOpen (D₀ : RationalLocData A) (n 
   exact AddSubgroup.isOpen_of_mem_nhds _
     (J.hasBasis_nhds_zero_adic.mem_of_mem (i := n) trivial)
 
-set_option maxHeartbeats 4000000 in
 -- The AdicCompletion bridge proof has deep elaboration chains through ring equivs.
 omit [PlusSubring A] in
 set_option backward.isDefEq.respectTransparency false in
@@ -621,7 +620,6 @@ private theorem idealOfDef_pow_isClosed_aux (D₀ : RationalLocData A) (n : ℕ)
     ext x; exact ⟨id, id⟩]
   exact isClosed_singleton.preimage hπ_cont
 
-set_option maxHeartbeats 4000000 in
 -- The AdicCompletion bridge proof has deep elaboration chains through ring equivs.
 omit [PlusSubring A] in
 /-- `val '' idealOfDef^n` is closed in `presheafValue D₀`.
