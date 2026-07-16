@@ -317,7 +317,8 @@ omit [DecidableEq F] [W.toAffine.IsElliptic] in
 /-- A function vanishing-to-value at `Q` (its `g - c` has `pointValuation < 1`) is a good
 fraction over the local ring at `Q`: there are coordinate-ring elements `a`, `b` with
 `b ∉ maximalIdealAt Q`, `(g - c) * b = a`, and so `b(Q) ≠ 0` while `a(Q) = 0`.  Packages
-`Curves.SmoothPlaneCurve.exists_mul_algebraMap_eq_of_pointValuation_le_one` with the resulting `evalAt` facts:
+`Curves.SmoothPlaneCurve.exists_mul_algebraMap_eq_of_pointValuation_le_one` with the resulting
+`evalAt` facts:
 multiplying by the unit `b` preserves the `< 1` valuation, forcing `a ∈ maximalIdealAt Q`. -/
 private theorem exists_good_fraction_of_evaluatesTo {Q : (W_smooth W).SmoothPoint} {g : KE}
     {c : F} (hg : EvaluatesTo W Q g c) :
