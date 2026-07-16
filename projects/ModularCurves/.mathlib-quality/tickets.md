@@ -21443,3 +21443,53 @@ implicits — the injective+map_zero route is cleaner; class-generic map_zsmul o
 hits instance-search timeouts on heavy Point-types — always go through `.toAddMonoidHom`.
 NEXT: U3 (the factor-iff assembly: v-decomposition into pointToTorsion-legs + spec both sides +
 U2 + exists_iso_of_factor_iff). (STREAM-GH)
+
+### v10.266b-GH — [GHA3 β3 DESIGN] the clopen content is an ISO-LOCUS lemma (STREAM-GH)
+- **β3-core (ForMathlib-able):** for a `T`-morphism between finite étale `T`-schemes, the
+  fibrewise-iso locus is CLOPEN and the restriction over it is an iso — via
+  `isLocallyConstant_finrank` + `one_le_finrank_iff_surjective` + `isIso_iff_finrank_eq`
+  (mathlib FlatRank; same toolkit as the v10.253 engine). KM 1.6.7's "clopen condition on the
+  constant form" IS this: full-level = the induced `∐_{(ℤ/N)²} T ⟶ E_T[N]` map is an iso.
+- **β3-wiring:** levelSpaceΓ-as-iso-locus through T-D2 (`isFullSetOfSectionsAlg_iff_fields`,
+  PROVED per T-D8 docstring). NOTE: closed-imm-into-étale is NOT automatically open (V(x) ⊆ 𝔸¹)
+  — the locus argument is the honest route. The β1 trivialization is NOT group-compatible — the
+  iso-locus route deliberately needs only rank conditions. (STREAM-GH)
+
+## v10.266-OMEGA (2026-07-16, STREAM-OMEGA) — ★ AX2 SCOPE: the Weil-pairing cut is AVOIDABLE (like ζ₃); the combination-clopen route; Stage-A killing algebra LANDED
+
+**Dispatch (v10.265) part 2 — the two AX2s scoped. HEADLINE: NO Weil pairing / stream C needed.**
+Bootstrap:112's docstring routes the Isom-scheme cut through "non-vanishing of the Weil pairing (Loe
+3.8.2 — consumes stream C)". SCOPE FINDING: replace it by the **combination-clopen cut** —
+`(P,Q)` generates `E[3]` fibrewise ⟺ all 8 combinations `iP+jQ` (`(i,j) ∈ (ℤ/3)² ∖ 0`) avoid the zero
+section. Fibrewise this is pure 𝔽₃ linear algebra (an order-9 3-killed abelian group is `(ℤ/3)²`; a pair
+generates ⟺ the combination map is injective ⟺ all 8 combos ≠ 0); scheme-side each `c_{ij}⁻¹(E[3]∖0)`
+is CLOPEN. Decomposition (all inputs = G0's chain; **no Weil pairing**):
+- **AX2-a** zero section clopen in `E[3]` (section of étale+separated: open immersion by unramifiedness,
+  closed by separatedness) — consumes G0's `modelMulByHom_formallyUnramified` leaf (firing now) → `Etale (torsionπ 3)`.
+- **AX2-b** the 8 combination morphisms `c_{ij} : E[3]×_S E[3] → E[3]` (group-scheme algebra: `mulByHom` +
+  the abstract addition; `[i]P+[j]Q` of 3-torsion is 3-torsion via `mulByHom_comp`-additivity — keystone-free).
+- **AX2-c** `Z := ⋂_{(i,j)≠0} c_{ij}⁻¹(E[3]∖0)` clopen in the finite-étale `E[3]×_S E[3]` ⟹ `Z → S`
+  finite étale (clopen immersion is finite étale; composite of finite étale).
+- **AX2-d** T-points spec: `{h : T ⟶ Z // h≫f = g}` ≃ pairs of 3-killed sections of `E_T`
+  (`smul_eq_zero_iff_comp_mulByHom` + the torsion-kernel pullback spec) with all combos avoiding zero.
+- **AX2-e** the 𝔽₃ fact (mathlib group theory): `#G = 9 ∧ 3•G = 0 ⟹ G ≅ (ℤ/3)²`; generation ⟺ 8 combos ≠ 0.
+  Rank 9 = **BB-DEG** (`mulByHom_finrank`) + étale ⟹ 9 geometric points — the ONLY keystone input.
+- **AX2-f** fibrewise ⟺ scheme-level avoid-zero (clopen ⟹ set-theoretic miss = scheme miss).
+- **AX2-g** assembly ⟹ `naiveLevelThree_relativelyRepresentable_finiteEtale` (Bootstrap:112).
+
+**Legendre AX2 twin (Bootstrap:189):** same route with 3 combos (`P≠0, Q≠0, P+Q≠0` — rank-6 Isom-scheme
+of `E[2]`-bases) **×_S the ±ω μ₂-torsor** `Spec(𝒪[u]/(u²−(x(Q)−x(P))))` (the scale-pin `u²=x(Q)−x(P)`;
+`x(Q)−x(P)` is a unit on the basis locus since 2-torsion abscissae are fibrewise distinct; 2 invertible ⟹
+finite étale rank 2). Total 6×2 = 12 = |GL₂(𝔽₂)×{±1}| ✓.
+
+**Dispatch part 1 (killing halves) — Stage A LANDED (axiom-clean, pushed):** `three_zsmul_some_origin`
+(flex-NF/field, a₃≠0 ⟹ origin 3-torsion: slope 0, `2P=(0,−a₃)=−P`, `add_of_Y_eq`) +
+`three_zsmul_some_e3Q` (ℰ₃-form, `den=β+γ−3βγ≠0` ⟹ `(γ,β+γ)` 3-torsion: slope `den/den=1`,
+`2Q=(γ,3βγ)=−Q`) in `E3NormalForm.lean`. NB the Q-killing needs NO flex relation — the ℰ₃ shape alone.
++ **`isUnit_e3Den`** (the non-2-torsion certificate on the universal ℰ₃: CAS cofactor
+`D·γ³ = A·den + B·(γS)`, γS=0, D·γ³ unit) — staged in UniversalLevelThree (build currently serialized
+behind KM's live MulByHomDegree edit; commits when the tree unblocks). **Remaining for the section-level
+killing (keystone-FREE, staged):** Stage B (fibre evaluation via `projModelPointsEquiv_zsmul` ✓ proven +
+`point_killed_iff` ✓ + `mulByHom_baseChange` ✓), Stage C (collision: `hom_ext_of_forall_specPoint` ✓ +
+reducedness of `E3Quotient ℤ[1/3]` — squarefree `γS`), Stage D (ring-base-change transport to arbitrary R,
+via GH's fresh `Point.baseChangeEquiv` tools). Generation stays BB-DEG-gated as dispatched.
