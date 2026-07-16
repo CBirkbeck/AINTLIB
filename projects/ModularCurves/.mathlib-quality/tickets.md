@@ -21641,3 +21641,23 @@ Quot.sound}, committed `0bfb949b0` / `85709f498` / `4620dbaec` on `LevelStructur
 étale-distinctness + translation-union (KM pp. 27–30); converse = coprime-rank sum-immersion +
 disjoint-translates divisor identity (KM pp. 30–31). Both consume the substrate now banked. NEXT:
 scout Incidence.lean for divisor-point-factoring; first sub-brick of the converse. (STREAM-KM)
+
+### v10.271-KM — [KM-W0] (iv)-wave continued: SEVEN more bricks — the translate-arithmetic layer is COMPLETE (STREAM-KM)
+Same marathon (post-v10.270). All green, all pushed (`14695cb52`…`bb31aca8f`), axiom-clean except
+where noted:
+- **[W0-F3-coprime-kill] `Point.eq_zero_of_killed_coprime`** — Bezout in the point group (KM p. 30).
+- **[W0-F3-pts] `factors_sectionsDivisor`** — each constituent section is a point of the divisor
+  (∏ ker ≤ ker + `toImage ≫ inclusion`).
+- **[W0-1.4.2] `HasExactOrder.smul_eq_zero`** — KM Lemma 1.4.2 (`NP = 0`), assembled from the
+  REGISTERED BB-DELIGNE box + F3-pts + the degree spec (sorryAx: BB-DELIGNE only).
+- **[W0-F3-iso] `IdealSheafData.map_hom_eq_comap_inv`** — pushforward along an iso = pullback along
+  its inverse (the comap/map GC collapses on isos).
+- **[W0-F3-move] `map_hom_apply` + `map_hom_mul`** — pointwise formula and multiplicativity for
+  pushforward along an iso (ker_apply + comap_ker + ker_subschemeι_app; Ideal.map_symm/map_mul).
+- **[W0-F3-shift] `mapIso_sectionsDivisor`** — `Trans(φ)*(Σᵢ[Pᵢ]) = Σᵢ[φ(Pᵢ)]` (the KM-p.30
+  display as divisor arithmetic; map-along-iso as a MonoidHom through the kernel product).
+**Campaign state:** the crt-divisor (v10.270) + translate engine (this) fully express KM's
+`G = Σ_{a₁} Trans(φ(a₁))*(D₂)` frame. NEXT BRICKS: [F3-transpt] (sections translate through
+`translateByIso`/`schemeIsoOfOverIso`: `Q.1 ≫ Trans(x).hom = (x+Q).1`), then the step-5
+disjointness + G[M]-identification, step-6 converse, F3-iff assembly, F4. Proof-ops banked in
+the file docstrings. (STREAM-KM)
