@@ -867,7 +867,8 @@ private theorem count_maximalIdealAt_relNorm_pow_of_not_liesOver (Q : C₂.Smoot
     rw [hrel]
     intro hpe
     exact hQ'not (hpe ▸ hlies')
-  haveI hP'max2 : (Ideal.relNorm C₂.CoordinateRing Q').IsMaximal := hrel ▸ C₂.maximalIdealAt_isMaximal _
+  haveI hP'max2 : (Ideal.relNorm C₂.CoordinateRing Q').IsMaximal :=
+    hrel ▸ C₂.maximalIdealAt_isMaximal _
   have hP'_ne_bot2 : Ideal.relNorm C₂.CoordinateRing Q' ≠ ⊥ := hrel ▸ C₂.maximalIdealAt_ne_bot _
   have h_vP'_irr : Irreducible (Associates.mk (Ideal.relNorm C₂.CoordinateRing Q')) :=
     (⟨_, hP'max2.isPrime, hP'_ne_bot2⟩ :
@@ -1078,7 +1079,8 @@ theorem count_relNorm_eq_sum_fiber :
     ⟨Q', ((IsDedekindDomain.mem_primesOverFinset_iff (B := C₁.CoordinateRing) hp_ne).mp hQ').1,
       h_prime_ne_bot Q' hQ'⟩
   let sH : Finset (IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing) :=
-    (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing).attach.image (fun ⟨Q', hQ'⟩ ↦ toHOS Q' hQ')
+    (IsDedekindDomain.primesOverFinset p C₁.CoordinateRing).attach.image
+      (fun ⟨Q', hQ'⟩ ↦ toHOS Q' hQ')
   set S : Finset (IsDedekindDomain.HeightOneSpectrum C₁.CoordinateRing) :=
     h_supp.toFinset ∪ sH with hS_def
   have hS_supp : Function.mulSupport
@@ -1355,7 +1357,8 @@ private theorem sum_filter_support_eq_sum_image_section
         (C₂.maximalIdealAt Q) C₁.CoordinateRing), toPointMap cd (g Q' hQ') = Q),
       (∑ x ∈ D.support.filter
           (fun x ↦ placeImage φ cd x = ProjectiveSmoothPoint.affine Q), D x) =
-        ∑ x ∈ (IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing).attach.image
+        ∑ x ∈ (IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q)
+          C₁.CoordinateRing).attach.image
           (fun Q' ↦ ProjectiveSmoothPoint.affine (g Q'.1 Q'.2)), D x := by
   letI algCR : Algebra C₂.CoordinateRing C₁.CoordinateRing := cd.toAlgebra
   letI modCR : Module C₂.CoordinateRing C₁.CoordinateRing := algCR.toModule
@@ -1417,7 +1420,8 @@ private theorem sum_image_section_eq_sum_primesOver
         C₁.SmoothPoint)
       (_ : ∀ Q' (hQ' : Q' ∈ IsDedekindDomain.primesOverFinset
         (C₂.maximalIdealAt Q) C₁.CoordinateRing), C₁.maximalIdealAt (g Q' hQ') = Q'),
-      (∑ x ∈ (IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing).attach.image
+      (∑ x ∈ (IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q)
+        C₁.CoordinateRing).attach.image
           (fun Q' ↦ ProjectiveSmoothPoint.affine (g Q'.1 Q'.2)),
           (C₁.projectiveDivisorOf (algebraMap C₁.CoordinateRing C₁.FunctionField w)) x) =
         ∑ Q' ∈ IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing,
@@ -1430,7 +1434,8 @@ private theorem sum_image_section_eq_sum_primesOver
     isTorsionFree_coordHom φ cd
   intro g hg_ideal
   rw [Finset.sum_image (affine_section_injOn_attach φ cd Q g hg_ideal)]
-  rw [← Finset.sum_attach (IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing)
+  rw [← Finset.sum_attach
+      (IsDedekindDomain.primesOverFinset (C₂.maximalIdealAt Q) C₁.CoordinateRing)
     (fun Q' ↦ ((Associates.mk Q').count
       (Associates.mk (Ideal.span ({w} : Set _))).factors : ℤ))]
   apply Finset.sum_congr rfl
