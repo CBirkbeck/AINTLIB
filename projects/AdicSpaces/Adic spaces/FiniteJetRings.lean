@@ -33,6 +33,7 @@ uniformity) in the pattern of `ExampleUnitDisc.lean`.
 -/
 
 open Filter Topology
+open scoped NNReal
 
 namespace FiniteJet
 
@@ -49,7 +50,22 @@ abbrev L : Type _ := RestrictedLaurent K
 
 /-- The discrete value group of `K`: every nonzero norm is an integer power of `2`
 (the `RankOne` normalisation of `ExampleUnitDisc.lean`). -/
-theorem norm_K_discrete : ∀ x : K, x ≠ 0 → ∃ n : ℤ, ‖x‖ = (2 : ℝ) ^ n := by sorry
+theorem norm_K_discrete : ∀ x : K, x ≠ 0 → ∃ n : ℤ, ‖x‖ = (2 : ℝ) ^ n := by
+  intro x hx
+  have hvx : Valued.v.restrict x ≠ 0 := by
+    rw [ne_eq, Valuation.restrict_eq_zero_iff]
+    exact fun h => hx ((Valuation.zero_iff _).mp h)
+  have hne : (MonoidWithZeroHom.ValueGroup₀.embedding (Valued.v.restrict x) :
+      WithZero (Multiplicative ℤ)) ≠ 0 :=
+    fun h => hvx (MonoidWithZeroHom.ValueGroup₀.embedding_strictMono.injective
+      (h.trans (map_zero _).symm))
+  refine ⟨Multiplicative.toAdd (WithZero.unzero hne), ?_⟩
+  rw [Valued.toNormedField.norm_def]
+  show ((WithZeroMulInt.toNNReal (by norm_num : (2 : ℝ≥0) ≠ 0))
+    ((MonoidWithZeroHom.ValueGroup₀.embedding) (Valued.v.restrict x)) : ℝ) = _
+  rw [WithZeroMulInt.toNNReal_neg_apply _ hne]
+  push_cast
+  norm_num
 
 /-- `𝓒 = L⟨Q⟩` ([FJP] (1.4)). -/
 abbrev JetC : Type _ := PowerSeries.Restricted (L F) (1 : ℝ)
@@ -818,18 +834,75 @@ noncomputable instance : ValuationSpectrum.PlusSubring (JetC F) :=
 noncomputable instance : ValuationSpectrum.PlusSubring (JetD F) :=
   ⟨TopologicalRing.powerBoundedSubring.toSubring (JetD F)⟩
 
+section MaximalPlus
+
+variable {E : Type*} [NormedCommRing E] [IsUltrametricDist E] [NormOneClass E]
+
+/-- The unit ball is bounded (Huber sense) in any nonarchimedean normed ring. -/
+theorem isBounded_unitBall : TopologicalRing.IsBounded ((unitBall E : Subring E) : Set E) := by
+  intro U hU
+  obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp hU
+  refine ⟨Metric.ball 0 ε, Metric.ball_mem_nhds 0 hε, ?_⟩
+  rintro z ⟨s, hs, y, hy, rfl⟩
+  rw [Metric.mem_ball, dist_zero_right] at hy
+  refine hball ?_
+  rw [Metric.mem_ball, dist_zero_right]
+  calc ‖s * y‖ ≤ ‖s‖ * ‖y‖ := norm_mul_le s y
+    _ ≤ 1 * ‖y‖ := by
+        gcongr
+        exact hs
+    _ = ‖y‖ := one_mul _
+    _ < ε := hy
+
+/-- Elements of the unit ball are power-bounded. -/
+theorem unitBall_subset_powerBounded :
+    ((unitBall E : Subring E) : Set E) ⊆ TopologicalRing.powerBoundedSubring E := by
+  intro x hx
+  refine (isBounded_unitBall (E := E)).subset ?_
+  rintro - ⟨k, rfl⟩
+  show ‖x ^ k‖ ≤ 1
+  induction k with
+  | zero => rw [pow_zero, norm_one]
+  | succ n ih =>
+    rw [pow_succ]
+    exact (norm_mul_le _ _).trans (mul_le_one₀ ih (norm_nonneg _) hx)
+
+/-- The maximal plus ring (the full power-bounded subring) is a valid ring of integral
+elements in any nonarchimedean normed ring with the standing instances ([FJP] §5:
+boundedness is not required). -/
+theorem isRingOfIntegralElements_powerBounded :
+    ValuationSpectrum.IsRingOfIntegralElements
+      (TopologicalRing.powerBoundedSubring.toSubring E) where
+  isOpen := by
+    have hmem : (TopologicalRing.powerBoundedSubring.toSubring E : Set E) ∈ 𝓝 (0 : E) := by
+      refine Filter.mem_of_superset (Metric.ball_mem_nhds 0 one_pos) ?_
+      intro y hy
+      rw [Metric.mem_ball, dist_zero_right] at hy
+      exact unitBall_subset_powerBounded (E := E) hy.le
+    exact (TopologicalRing.powerBoundedSubring.toSubring E).toAddSubgroup.isOpen_of_mem_nhds
+      hmem
+  isIntegrallyClosed := fun a ha =>
+    TopologicalRing.isPowerBounded_of_isIntegral_of_subset_powerBounded
+      (fun x hx => hx) ha
+  subset_powerBounded := fun x hx => hx
+
+end MaximalPlus
+
 /-- The maximal plus ring is a ring of integral elements ([FJP] §5, the integral-closedness
 argument after (5.2): `E°` is open, integrally closed, and power-bounded — boundedness is
-not required). Stated once per ring; the integral-closedness core is the [FJP] monic-equation
-argument. -/
+not required). -/
 instance : ValuationSpectrum.IsRingOfIntegralElements
-    ((ValuationSpectrum.ringPlus (JetA F) : Subring (JetA F))) := by sorry
+    ((ValuationSpectrum.ringPlus (JetA F) : Subring (JetA F))) :=
+  isRingOfIntegralElements_powerBounded
 instance : ValuationSpectrum.IsRingOfIntegralElements
-    ((ValuationSpectrum.ringPlus (JetB F) : Subring (JetB F))) := by sorry
+    ((ValuationSpectrum.ringPlus (JetB F) : Subring (JetB F))) :=
+  isRingOfIntegralElements_powerBounded
 instance : ValuationSpectrum.IsRingOfIntegralElements
-    ((ValuationSpectrum.ringPlus (JetC F) : Subring (JetC F))) := by sorry
+    ((ValuationSpectrum.ringPlus (JetC F) : Subring (JetC F))) :=
+  isRingOfIntegralElements_powerBounded
 instance : ValuationSpectrum.IsRingOfIntegralElements
-    ((ValuationSpectrum.ringPlus (JetD F) : Subring (JetD F))) := by sorry
+    ((ValuationSpectrum.ringPlus (JetD F) : Subring (JetD F))) :=
+  isRingOfIntegralElements_powerBounded
 
 instance : IsUniformAddGroup (JetA F) := SeminormedAddCommGroup.to_isUniformAddGroup
 instance : IsUniformAddGroup (JetB F) := SeminormedAddCommGroup.to_isUniformAddGroup
@@ -837,12 +910,16 @@ instance : IsUniformAddGroup (JetC F) := SeminormedAddCommGroup.to_isUniformAddG
 instance : IsUniformAddGroup (JetD F) := SeminormedAddCommGroup.to_isUniformAddGroup
 
 instance : @CompleteSpace (JetA F) (IsTopologicalAddGroup.rightUniformSpace (JetA F)) := by
-  sorry
+  rw [IsUniformAddGroup.rightUniformSpace_eq]
+  infer_instance
 instance : @CompleteSpace (JetB F) (IsTopologicalAddGroup.rightUniformSpace (JetB F)) := by
-  sorry
+  rw [IsUniformAddGroup.rightUniformSpace_eq]
+  infer_instance
 instance : @CompleteSpace (JetC F) (IsTopologicalAddGroup.rightUniformSpace (JetC F)) := by
-  sorry
+  rw [IsUniformAddGroup.rightUniformSpace_eq]
+  infer_instance
 instance : @CompleteSpace (JetD F) (IsTopologicalAddGroup.rightUniformSpace (JetD F)) := by
-  sorry
+  rw [IsUniformAddGroup.rightUniformSpace_eq]
+  infer_instance
 
 end FiniteJet

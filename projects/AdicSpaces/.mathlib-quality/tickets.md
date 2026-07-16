@@ -10,7 +10,7 @@ only). Priority spine: T1xx → T3xx → T4xx → T5xx → T6xx → T7xx (sheafi
 
 ## Summary
 - Total: 36 tickets (28 proof + 8 embedded cleanup/milestone controls listed inline)
-- Open: 27 | Done: 9 (T001, T101–T108) | Parallel capacity at peak: 4 workers
+- Open: 26 | Done: 10 (T001, T101–T109 = all of M0+M1) | Parallel capacity at peak: 4 workers
   (T2xx ∥ T3xx ∥ T4xx-polynomial ∥ T1xx-tail)
 
 ## Milestone map
@@ -177,8 +177,16 @@ T704, by a fresh `/develop --continue`.
 
 ### [CLEANUP-4] /cleanup `FiniteJetRings.lean` — **Depends**: T108.
 
-### [T109] `FiniteJetRings.lean` — plus rings and right-uniformity completeness
-- **Status**: open | **Depends**: CLEANUP-4 | **Type**: proofs (L1.7 second half)
+### [T109] `FiniteJetRings.lean` — plus rings and right-uniformity completeness — **DONE 2026-07-17**
+- **Status**: done (beastmode). `norm_K_discrete` (via `Valued.toNormedField.norm_def` +
+  `WithZeroMulInt.toNNReal_neg_apply`); right-uniformity `CompleteSpace ×4`
+  (`IsUniformAddGroup.rightUniformSpace_eq`); the generic
+  `isRingOfIntegralElements_powerBounded` (openness via ball-membership +
+  `AddSubgroup.isOpen_of_mem_nhds`; integral closedness via the project's
+  `isPowerBounded_of_isIntegral_of_subset_powerBounded`; plus `isBounded_unitBall` and
+  `unitBall_subset_powerBounded` generics) instantiated ×4.
+  **M1 (construction layer) COMPLETE: RestrictedLaurent, JetDualNumberNorm, and
+  FiniteJetRings are all 0-sorry.** | **Type**: proofs (L1.7 second half)
 - **Sorries**: `IsRingOfIntegralElements ×4`, right-uniformity `CompleteSpace ×4`.
 - **Sketch**: `E°` open (⊇ ball), integrally closed ([FJP] §5 monic-`M`-module argument —
   quote at L1.7), `subset_powerBounded` refl; completeness: `SeminormedAddCommGroup.to_isUniformAddGroup`
@@ -187,7 +195,7 @@ T704, by a fresh `/develop --continue`.
   attempt the unit ball for 𝓑/𝓓.
 - **Source**: [FJP] p. 17 (5.2) block — quotes at L1.7.
 
-### [CLEANUP-5] /cleanup `FiniteJetRings.lean` (final) — **Depends**: T109.
+### [CLEANUP-5] /cleanup `FiniteJetRings.lean` (final) — **Depends**: T109. Light pass folded into T109 close-out; full lint sweep deferred to CLEANUP-ALL-1.
 
 ### [T201] `FiniteJetUniformDomain.lean` — multiplicativity, domains ∥parallel track∥
 - **Status**: open | **Depends**: T103, T107 | **Type**: proofs (R2 leaves)
