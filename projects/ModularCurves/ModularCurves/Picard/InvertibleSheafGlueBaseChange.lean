@@ -52,6 +52,16 @@ noncomputable def AffineIntersectionUnitCocycle.mapToColimit
           ⟨M.stage, M.le_stage
             (Scheme.GlueData.affineIntersectionTripleIndex i j k)⟩).toMonoidHom) hc
 
+private theorem AffineIntersectionUnitCocycle.eq_of_transition_eq
+    {A J : Type u} [CommRing A] {G : Functor (Finset J) (CommAlgCat.{u} A)}
+    (c d : AffineIntersectionUnitCocycle G)
+    (h : ∀ i j, c.transition i j = d.transition i j) : c = d := by
+  cases c
+  cases d
+  congr
+  funext i j
+  exact h i j
+
 /-- Moving a finite-stage cocycle to a later stage does not change the colimit image of
 any transition unit. -/
 theorem AffineIntersectionUnitCocycle.mapToColimit_mapToStage_transition
@@ -1311,6 +1321,34 @@ noncomputable def AffineIntersectionUnitCocycle.baseChangeGluedModuleIso
         M cM hopenG hpushG hopenM hpushM)
       (AffineIntersectionUnitCocycle.baseChangeGluedModuleChartTrivialization_isCompatible
         M cM hopenG hpushG hopenM hpushM)
+
+/-- A finite-stage glued module whose transition units recover a specified colimit cocycle
+base-changes to the glued module of that cocycle. -/
+noncomputable def AffineIntersectionUnitCocycle.baseChangeGluedModuleIsoOfTransitionEq
+    {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+    {Sstage : ι → Type u} [∀ i, CommRing (Sstage i)] [∀ i, Algebra R (Sstage i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (Sstage i →ₐ[R] Sstage j)}
+    {A : Type u} [CommRing A] [Algebra R A] {uA : ∀ i, Sstage i →ₐ[R] A}
+    {J : Type u} {G : Functor (Finset J) (CommAlgCat.{u} A)}
+    {H : Algebra.IsFilteredAlgColimit R Sstage t A uA}
+    (M : Algebra.SpreadData.FunctorModel G H)
+    (cM : AffineIntersectionUnitCocycle M.toFunctor)
+    (c : AffineIntersectionUnitCocycle G)
+    (htransition : ∀ i j,
+      (AffineIntersectionUnitCocycle.mapToColimit M cM).transition i j =
+        c.transition i j)
+    (hopenG : Scheme.GlueData.IsOpenAffineIntersectionFunctor G)
+    (hpushG : Scheme.GlueData.IsPushoutAffineIntersectionFunctor G)
+    (hopenM : Scheme.GlueData.IsOpenAffineIntersectionFunctor M.toFunctor)
+    (hpushM : Scheme.GlueData.IsPushoutAffineIntersectionFunctor M.toFunctor) :
+    letI : Algebra (Sstage M.stage) A := (uA M.stage).toRingHom.toAlgebra
+    let g := M.affineIntersectionGluedBaseChange hopenG hpushG hopenM hpushM
+    (pullback g).obj (cM.gluedModule hopenM hpushM) ≅ c.gluedModule hopenG hpushG := by
+  have hc : AffineIntersectionUnitCocycle.mapToColimit M cM = c :=
+    AffineIntersectionUnitCocycle.eq_of_transition_eq _ _ htransition
+  subst c
+  exact AffineIntersectionUnitCocycle.baseChangeGluedModuleIso
+    M cM hopenG hpushG hopenM hpushM
 
 end
 

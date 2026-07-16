@@ -845,3 +845,11 @@ units map to the original transitions. The proof synchronizes the existing two e
 results by one `mapToStage` transport. Its focused build is green, its axiom audit is exactly
 `propext`, `Classical.choice`, and `Quot.sound`, and it adds no geometric hypothesis or
 proof-resource option.
+
+Completed dependency claim (2026-07-16): constructed
+`AffineIntersectionUnitCocycle.baseChangeGluedModuleIsoOfTransitionEq`. If every transition of a
+finite-stage cocycle maps to the corresponding transition of a specified colimit cocycle, the
+base-changed finite-stage `gluedModule` is now isomorphic to that specified cocycle's
+`gluedModule`. The proof uses private structure extensionality plus the completed global
+base-change isomorphism. Its focused build is green, its axiom audit is exactly `propext`,
+`Classical.choice`, and `Quot.sound`, and it adds no hypothesis or proof-resource option.
