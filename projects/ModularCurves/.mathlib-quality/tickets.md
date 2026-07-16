@@ -21750,3 +21750,12 @@ flat-direct-factor structure is COMPLETE at scheme level — 29 proven bricks. T
 transport (Flat/IsFinite/lfp under retracts — ForMathlib, candidate mathlib PR; module-level
 Module.Flat.of_retract exists, scheme instance absent) + [F3-degmul] + [F3-squeeze] remain
 before KM step 5 closes. Proof-ops: `include hD in` goes BEFORE the docstring. (STREAM-KM)
+
+### v10.280-KM — ★ [F3-flat] Flat.of_retract_over PROVEN AXIOM-CLEAN (ForMathlib, mathlib-PR candidate) (STREAM-KM)
+`ForMathlib/FlatOfRetract.lean` (0 sorries): **flatness descends along retracts of schemes over a
+base** — `RingHom.Flat.of_retract` (pure algebra) + the stalkwise scheme reduction. The stalk-cast
+choreography is fully worked (see commit message for the recipe: congr_hom/congr_point transports,
+Iso.eq_comp_inv cast-inheritance, proof-quantified generic bridges/cancels, final defeq recast).
+With v10.279's retract chain this makes `Flat (smulKernelπ)` one composition away. 31 proven
+bricks. NEXT: wire Flat-of-the-kernels; IsFinite/lfp analogs (or dodge: IsFinite via
+closed-immersion-into-finite composite directly); [F3-degmul]; [F3-squeeze]. (STREAM-KM)
