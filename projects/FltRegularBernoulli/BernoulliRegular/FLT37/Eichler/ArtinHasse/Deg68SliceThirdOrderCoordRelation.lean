@@ -6,10 +6,10 @@ import BernoulliRegular.FLT37.Eichler.DworkCoordinate.UnscaledCoordDeg32SliceDec
 # the single precision-bridge residual; and the deg-`68` second digit `c₆₈ = 4` GROUNDED
 
 This file completes the mod-`37³` degree-`68` Dwork-slice extraction.  Combining the **proven**
-mod-`37³` relation `deg68_coordModCube_castHom_modSq_eq` (`u₆₈'·(X₁₀₇ mod 37²) = 391·(−37)`, with the
-source the proven exact rational `formalSum68 = N/120`) with the single **precision-bridge** residual
-`CaseIICor823Level71Deg68ModCubePrecisionBridge37` — that the mod-`37²` reduction of the level-`107`
-deg-`68` coordinate `X₁₀₇` equals the level-`71` `unscaled32SliceCoord 68` — yields
+mod-`37³` relation `deg68_coordModCube_castHom_modSq_eq` (`u₆₈'·(X₁₀₇ mod 37²) = 391·(−37)`, with
+the source the proven exact rational `formalSum68 = N/120`) with the single **precision-bridge**
+residual `CaseIICor823Level71Deg68ModCubePrecisionBridge37` — that the mod-`37²` reduction of the
+level-`107` deg-`68` coordinate `X₁₀₇` equals the level-`71` `unscaled32SliceCoord 68` — yields
 
   `unscaled32SliceCoord 68 = (37 : ZMod 37²)·4`,
 
@@ -21,8 +21,9 @@ It imports only; it does **not** modify any existing file.  No `sorry`, no `axio
 
 * `caseII_deg68SliceValue_of_precisionBridge`: from the precision bridge, `unscaled32SliceCoord 68 =
   37·4` (the second `37`-cancellation, `u₆₈'` a unit in `ZMod 37²`, mod-`37` arithmetic
-  `u₆₈'⁻¹·(−391) ≡ 4`).  The relation is the **proven** mod-`37³` `deg68_coordModCube_castHom_modSq_eq`
-  (source = proven `formalSum68 = N/120`); only the precision bridge is the residual.
+  `u₆₈'⁻¹·(−391) ≡ 4`).  The relation is the **proven** mod-`37³`
+  `deg68_coordModCube_castHom_modSq_eq` (source = proven `formalSum68 = N/120`); only the precision
+  bridge is the residual.
 
 ## The single precision-bridge residual (the only mod-`37³` content not proven)
 
@@ -34,10 +35,11 @@ It imports only; it does **not** modify any existing file.  No `sorry`, no `axio
 This is the precision-stability of the deg-`68` slice coordinate: the mod-`37²` reduction of the
 level-`107` (mod-`37³`) coordinate is the level-`71` (mod-`37²`) coordinate.  It is the **one**
 genuinely new connective tissue beyond the mod-`37²` ↔ mod-`37³` Dwork-coordinate parallel (which is
-proven in full: the mod-`37³` coordinate functional `CaseIICor823ThirdOrderCoeff.lean`, the mod-`37³`
-factorial extraction and ramification fold `CaseIICor823Level107Deg68ModCubeExtraction.lean`, the
-mod-`37³` value relation and the two-step `37`-cancellation `CaseIICor823Level107Deg68ModCubeValue.lean`,
-and the source value `formalSum68ResidueCube = 37·391` PROVEN from the exact rational in
+proven in full: the mod-`37³` coordinate functional `CaseIICor823ThirdOrderCoeff.lean`, the
+mod-`37³` factorial extraction and ramification fold
+`CaseIICor823Level107Deg68ModCubeExtraction.lean`, the mod-`37³` value relation and the two-step
+`37`-cancellation `CaseIICor823Level107Deg68ModCubeValue.lean`, and the source value
+`formalSum68ResidueCube = 37·391` PROVEN from the exact rational in
 `CaseIICor823Level71Deg68ModCubeResidue.lean`).
 
 ## References
@@ -49,7 +51,6 @@ and the source value `formalSum68ResidueCube = 37·391` PROVEN from the exact ra
 
 noncomputable section
 
-set_option maxRecDepth 100000
 
 open NumberField
 
@@ -83,8 +84,8 @@ omit [NumberField.IsCMField K] in
 
   `u₆₈'·(castHom (37²∣37³) (unscaled32SliceCoordCube)) = 391·(−37)`   (in `ZMod 37²`).
 
-Re-statement of the proven `deg68_coordModCube_castHom_modSq_eq` (the mod-`37³` factorial relation with
-both `37`'s cancelled once) at the index `(kummerLogEvenPowerIndex 15).1` (value `32`,
+Re-statement of the proven `deg68_coordModCube_castHom_modSq_eq` (the mod-`37³` factorial relation
+with both `37`'s cancelled once) at the index `(kummerLogEvenPowerIndex 15).1` (value `32`,
 `kummerLogEvenPowerIndex_val`).  The source `391` is the proven mod-`37³` residue second-digit datum
 `formalSum68ResidueCube = 37·391` (from the exact rational `N/120`). -/
 theorem unscaled32SliceCoordCube_castHom_modSq_relation :
@@ -118,8 +119,8 @@ def CaseIICor823Level71Deg68ModCubePrecisionBridge37
       (unscaled32SliceCoordCube (CyclotomicField 37 ℚ)) =
     unscaled32SliceCoord (K := CyclotomicField 37 ℚ) 68
 
-/-- **`u₆₈' = 68!/37` is a unit in `ZMod 37²`** (proven): `u₆₈' mod 37 = 4 ≠ 0`, so `u₆₈'` is coprime
-to `37` hence to `37²`.  The unit needed for the second `37`-cancellation. -/
+/-- **`u₆₈' = 68!/37` is a unit in `ZMod 37²`** (proven): `u₆₈' mod 37 = 4 ≠ 0`, so `u₆₈'` is
+coprime to `37` hence to `37²`.  The unit needed for the second `37`-cancellation. -/
 theorem uSixtyeight_isUnit_modSq :
     IsUnit (((Nat.factorial 68 / 37 : ℕ) : ZMod (37 ^ 2))) := by
   rw [ZMod.isUnit_iff_coprime]
@@ -143,8 +144,8 @@ theorem deg68_slice_value_of_relation {Y : ZMod (37 ^ 2)}
   native_decide
 
 omit [NumberField.IsCMField K] in
-/-- **The deg-`68` slice value `unscaled32SliceCoord 68 = 37·4`, from the precision bridge** (proven,
-axiom-clean given the bridge): `CaseIICor823Level71Deg68ModCubePrecisionBridge37 →
+/-- **The deg-`68` slice value `unscaled32SliceCoord 68 = 37·4`, from the precision bridge**
+(proven, axiom-clean given the bridge): `CaseIICor823Level71Deg68ModCubePrecisionBridge37 →
 unscaled32SliceCoord 68 = 37·4`.
 
 Substitute the bridge `castHom(unscaled32SliceCoordCube) = unscaled32SliceCoord 68` into the proven
@@ -167,26 +168,28 @@ theorem caseII_deg68SliceValue_of_precisionBridge
 /-! ## 3. Soundness: the bridge-forced value `37·4` is consistent with the proven first digit `0`
 
 The deg-`68` slice value `37·4` that the precision bridge forces (via the proven mod-`37³` relation)
-has mod-`37` reduction `castHom(37·4) = 0`, exactly the **independently proven** first-digit vanishing
-`unscaled32SliceCoord_sixtyeight_castHom_eq_zero`.  So the residual forces a value consistent with all
-proven facts (not a false universal): it pins the genuine second digit `c₆₈ = 4` on top of the proven
+has mod-`37` reduction `castHom(37·4) = 0`, exactly the **independently proven** first-digit
+vanishing `unscaled32SliceCoord_sixtyeight_castHom_eq_zero`.  So the residual forces a value
+consistent with all proven facts (not a false universal): it pins the genuine second digit `c₆₈ = 4`
+on top of the proven
 `37·c₆₈` shape. -/
 
-/-- **The bridge-forced value `37·4` has first `37`-digit `0`** (proven by `decide`): `castHom (37∣37²)
-(37·4) = 0` in `ZMod 37`.  Matches the **independently proven** first-digit vanishing
-`unscaled32SliceCoord_sixtyeight_castHom_eq_zero`, certifying the precision bridge forces a value
-consistent with the proven `37·c₆₈` shape — the residual is sound, not a false universal. -/
+/-- **The bridge-forced value `37·4` has first `37`-digit `0`** (proven by `decide`):
+`castHom (37∣37²) (37·4) = 0` in `ZMod 37`.  Matches the **independently proven** first-digit
+vanishing `unscaled32SliceCoord_sixtyeight_castHom_eq_zero`, certifying the precision bridge forces
+a value consistent with the proven `37·c₆₈` shape — the residual is sound, not a false universal. -/
 theorem deg68_slice_value_castHom_eq_zero :
     (ZMod.castHom (by norm_num : (37 : ℕ) ∣ 37 ^ 2) (ZMod 37))
         ((37 : ZMod (37 ^ 2)) * (4 : ZMod (37 ^ 2))) = 0 := by decide
 
 open BernoulliRegular (CPlusGenerator) in
-/-- **The bridge value is consistent with the proven first-digit vanishing** (proven, axiom-clean given
-the bridge): `CaseIICor823Level71Deg68ModCubePrecisionBridge37 → castHom (unscaled32SliceCoord 68) =
-0`, derived through the bridge-forced value `37·4` (`caseII_deg68SliceValue_of_precisionBridge`,
+/-- **The bridge value is consistent with the proven first-digit vanishing** (proven, axiom-clean
+given the bridge):
+`CaseIICor823Level71Deg68ModCubePrecisionBridge37 → castHom (unscaled32SliceCoord 68) = 0`, derived
+through the bridge-forced value `37·4` (`caseII_deg68SliceValue_of_precisionBridge`,
 `deg68_slice_value_castHom_eq_zero`), and matching the **independently proven**
-`unscaled32SliceCoord_sixtyeight_castHom_eq_zero`.  This certifies the precision-bridge residual does
-not contradict any proven fact about `unscaled32SliceCoord 68`. -/
+`unscaled32SliceCoord_sixtyeight_castHom_eq_zero`.  This certifies the precision-bridge residual
+does not contradict any proven fact about `unscaled32SliceCoord 68`. -/
 theorem caseII_deg68_castHom_consistent_of_precisionBridge
     [IsCyclotomicExtension {37} ℚ (CyclotomicField 37 ℚ)]
     [NumberField.IsCMField (CyclotomicField 37 ℚ)]
