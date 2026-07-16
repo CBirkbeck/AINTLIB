@@ -252,6 +252,20 @@ theorem dft_maps_characterPairSubmodule {χ : DirichletCharacter ℂ p}
   · intro c g hg hgmem
     simpa using (characterPairSubmodule (p := p) χ).smul_mem c hgmem
 
+/-- An endomorphism acting off-diagonally on a two-element basis has trace `0`.
+If `b : Basis (Fin 2) R M` and `f : M →ₗ[R] M` satisfies `f (b 0) = a • b 1` and
+`f (b 1) = c • b 0`, then both diagonal matrix entries of `f` in the basis `b`
+vanish, so `LinearMap.trace R M f = 0`. -/
+theorem trace_eq_zero_of_offDiagonal_fin_two {R : Type*} [CommRing R]
+    {M : Type*} [AddCommGroup M] [Module R M]
+    (b : Module.Basis (Fin 2) R M) (f : M →ₗ[R] M) {a c : R}
+    (h0 : f (b 0) = a • b 1) (h1 : f (b 1) = c • b 0) :
+    LinearMap.trace R M f = 0 := by
+  classical
+  rw [LinearMap.trace_eq_matrix_trace (R := R) (b := b) (f := f), Matrix.trace,
+    Fin.sum_univ_two]
+  simp [Matrix.diag_apply, LinearMap.toMatrix_apply, h0, h1]
+
 set_option backward.isDefEq.respectTransparency false in
 /-- On a non-self-dual character pair, the restricted DFT block has trace `0`. -/
 theorem trace_restrict_characterPairSubmodule_eq_zero {χ : DirichletCharacter ℂ p}
@@ -300,23 +314,7 @@ theorem trace_restrict_characterPairSubmodule_eq_zero {χ : DirichletCharacter �
         b * ((pairBasis (0 : Fin 2) : characterPairSubmodule (p := p) χ) : ZMod p → ℂ) x
     rw [hpair0, hpair1]
     exact congrFun hb x
-  calc
-    LinearMap.trace ℂ (characterPairSubmodule (p := p) χ) dftPair =
-        Matrix.trace (LinearMap.toMatrix pairBasis pairBasis dftPair) := by
-          rw [LinearMap.trace_eq_matrix_trace (R := ℂ) (b := pairBasis) (f := dftPair)]
-    _ = Matrix.diag (LinearMap.toMatrix pairBasis pairBasis dftPair) (0 : Fin 2) +
-          Matrix.diag (LinearMap.toMatrix pairBasis pairBasis dftPair) (1 : Fin 2) := by
-          rw [Matrix.trace, Fin.sum_univ_two]
-    _ = (LinearMap.toMatrix pairBasis pairBasis dftPair) (0 : Fin 2) (0 : Fin 2) +
-          (LinearMap.toMatrix pairBasis pairBasis dftPair) (1 : Fin 2) (1 : Fin 2) := by
-          simp [Matrix.diag_apply]
-    _ = 0 + 0 := by
-          congr 1
-          · rw [LinearMap.toMatrix_apply, hB0]
-            simp [pairBasis]
-          · rw [LinearMap.toMatrix_apply, hB1]
-            simp [pairBasis]
-    _ = 0 := by simp
+  exact trace_eq_zero_of_offDiagonal_fin_two pairBasis dftPair hB0 hB1
 
 /-- A chosen multiplicative equivalence between complex-valued Dirichlet
 characters mod `p` and the unit group `(ZMod p)ˣ`. -/
