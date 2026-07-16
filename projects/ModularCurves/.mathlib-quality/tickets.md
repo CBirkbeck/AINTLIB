@@ -21759,3 +21759,12 @@ Iso.eq_comp_inv cast-inheritance, proof-quantified generic bridges/cancels, fina
 With v10.279's retract chain this makes `Flat (smulKernelπ)` one composition away. 31 proven
 bricks. NEXT: wire Flat-of-the-kernels; IsFinite/lfp analogs (or dodge: IsFinite via
 closed-immersion-into-finite composite directly); [F3-degmul]; [F3-squeeze]. (STREAM-KM)
+
+### v10.281-KM — [F3-kerflat]+[F3-kerfin]: the kernels are FINITE FLAT over S (STREAM-KM)
+(`b216aa2c3` + this) `smulKernelπ_flat` (retract chain through the new axiom-clean
+`Flat.of_retract_over`) and `smulKernelπ_isFinite` (base change of ι ≫ [c] along the zero
+section). KM p. 27's *"Therefore G[N₁] is finite flat over S"* is PROVEN — 33 bricks. Remaining
+for KM step 5: [F3-degmul] (deg G = deg Z_M · deg Z_K — FlatRank affine machinery over the product
+iso) and [F3-squeeze] (D₁ ≤ Z_M containment + degree rigidity ⟹ Z_M = D₁ ⟹ IsSubgroup D₁ = the
+F3-forward conclusion on the M-side). Then mirror, glue over the coprime cover (F3-loc ✓ banked),
+converse via the same product machinery, F3-iff, F4. (STREAM-KM)
