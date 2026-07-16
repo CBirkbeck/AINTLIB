@@ -946,3 +946,12 @@ tensor-colimit abstraction. This is the affine closed-immersion criterion needed
 separatedness of the finite-stage affine-intersection model. The focused build is green, the axiom
 audit is exactly `propext`, `Classical.choice`, and `Quot.sound`, and no hypothesis or
 proof-resource option was added.
+
+Active dependency claim (2026-07-16): define
+`Scheme.GlueData.affineIntersectionPairMap` and
+`Scheme.GlueData.IsSeparatedAffineIntersectionFunctor`, and prove
+`Scheme.GlueData.isSeparated_affineIntersectionToSpec`. The proof identifies each pairwise
+diagonal chart map with the spectrum of the canonical tensor-product map and derives closedness
+from its surjectivity. It must use the existing gluing pullback and `pullbackSpecIso` APIs, add no
+hypothesis or proof-resource option, and split all projection and isomorphism calculations into
+small helpers.
