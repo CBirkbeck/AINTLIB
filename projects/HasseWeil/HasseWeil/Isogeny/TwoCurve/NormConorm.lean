@@ -224,7 +224,6 @@ generic surjective `ℤᵐ⁰`-valued valuation with prescribed affine center. -
 `Foundation/Curves/Valuation/RankOneDomination.lean` (#7620); uses below resolve to it via
 `open HasseWeil.Curves`. -/
 
-set_option synthInstance.maxHeartbeats 400000 in
 omit [DecidableEq F] [IsAlgClosed F] in
 /-- **`O_Q ⊆ O_w` for a valuation with affine center `m_Q`** (the DVR-domination containment,
 downward
@@ -267,7 +266,6 @@ private theorem pointValuationSubring_le_valuationSubring_of_center
   rw [hf_eq, map_div₀ w, hws, div_one]
   exact hle a
 
-set_option synthInstance.maxHeartbeats 400000 in
 omit [DecidableEq F] [IsAlgClosed F] in
 /-- **A surjective valuation on `K(C)` with affine center `m_Q` is `pointValuation Q`** (the place
 dictionary for a smooth curve, general form).  If `w : K(C) → ℤᵐ⁰` is surjective, is `≤ 1` on the
@@ -373,7 +371,6 @@ private theorem pullback_algebraMap_mk_C_le_one
     exact mul_le_one' (pullback_algebraMap_const_le_one φ P d)
       (by rw [hXgen]; exact pow_le_one₀ zero_le hx)
 
-set_option synthInstance.maxHeartbeats 400000 in
 omit [IsAlgClosed F] in
 /-- **The pulled-back coordinate ring of `E₂` is `≤ 1` at a regular point `P`** (value bound, the
 generator induction).  If `φ^*(x_gen₂)`, `φ^*(y_gen₂)` are `≤ 1` at `P`, then `φ^*(algebraMap c)` is
@@ -407,7 +404,6 @@ theorem pointValuation_le_one_pullback_coordinateRing
     exact mul_le_one' (pullback_algebraMap_mk_C_le_one φ P hx a)
       (by rw [hXeq]; exact pow_le_one₀ zero_le hy)
 
-set_option synthInstance.maxHeartbeats 400000 in
 omit [IsAlgClosed F] in
 /-- **The integral closure `B` is `≤ 1` at a regular point `P`** (the regularity bound, `B`-level).
 At a point `P` where both pulled-back generators are regular (`φ^*(x_gen₂), φ^*(y_gen₂) ≤ 1`), the
@@ -467,7 +463,6 @@ private theorem pointValuation_le_one_of_mem_B
       W₁.toAffine.FunctionField b) := hbint.tower_top
   exact (Valuation.integer.integers pv).isIntegral_iff_v_le_one.mp hbint_int
 
-set_option synthInstance.maxHeartbeats 400000 in
 omit [IsAlgClosed F] in
 omit [DecidableEq F] [W₂.toAffine.IsElliptic] in
 /-- **A `B`-prime whose center is the place of `P` has adic valuation `pointValuation P`** (the
@@ -738,7 +733,6 @@ For a `B`-prime `v` lying over the affine place `m_Q` of `E₂`, the point `P` o
 in `v.asIdeal`), *not* the exact comap-valuation equality (and hence not the ramification index
 `e = 1`).  The image is then read off by `placeRestrictionPointMap_residue_agreement`. -/
 
-set_option synthInstance.maxHeartbeats 400000 in
 /-- **The place-restriction image of a `B`-prime over `m_Q` is `Q`** (the fibre matching).  Given a
 `B`-prime `v` whose point `P` (place dictionary: `v.valuation = pointValuation P`) lies over the
 affine place `m_Q` of `E₂` (`v.asIdeal.under = m_Q`), the place-restriction point map sends `P` to
@@ -904,7 +898,6 @@ matched, term by term, to the `mapDomain` fibre sum of `placeRestrictionPushforw
   integralClosure F[E₂] K(E₁)` re-derivation of the place-identification, or a denominator chosen to
   also avoid the fixed target `Q` (possible iff `Q` is not below a pole of `x_gen₁/y_gen₁`). -/
 
-set_option synthInstance.maxHeartbeats 800000 in
 /-- **Fibre point of a `B`-prime over an affine place (the point-assignment leaf).**  Each prime
 `vP` of `B` lying over the maximal ideal `m_Q` of `F[E₂]` cuts out a smooth point `P` of `E₁`
 whose point valuation is `vP.valuation` and whose place-restriction image is the affine place `Q`.
@@ -969,7 +962,6 @@ private theorem bPrime_exists_point_image_of_mem_primesOver
       (⟨W₂⟩ : SmoothPlaneCurve F).maximalIdealAt Q := hvP.2.over.symm
   exact ⟨P, hP, placeRestrictionPlaceImage_affine_eq_of_bPrime φ halg vP P Q hP hunder⟩
 
-set_option synthInstance.maxHeartbeats 800000 in
 omit [DecidableEq F] [W₂.toAffine.IsElliptic] [IsAlgClosed F] in
 set_option backward.isDefEq.respectTransparency false in
 /-- **Count of a `B`-prime matches the divisor coefficient (the count-match leaf).**  If a prime
@@ -1042,7 +1034,6 @@ private theorem bPrime_count_eq_projectiveDivisorOf_of_valuation_eq
   rw [hcounts, (⟨W₁⟩ : SmoothPlaneCurve F).projectiveDivisorOf_apply_affine,
     (⟨W₁⟩ : SmoothPlaneCurve F).ord_P_algebraMap_eq_count P hw, WithTop.untopD_coe]
 
-set_option synthInstance.maxHeartbeats 800000 in
 set_option backward.isDefEq.respectTransparency false in
 /-- **The affine count identity — Silverman II.3.6, per-place, CoordHom-free (THE DEEP LEAF).**
 For `w ∈ F[E₁]` nonzero and an affine place `Q` of `E₂`, the order of the conorm `N_φ(algebraMap w)`
