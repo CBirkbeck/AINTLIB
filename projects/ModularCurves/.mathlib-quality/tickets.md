@@ -21598,3 +21598,22 @@ model-of-fibre wiring + `projModelPointsEquiv_some/zsmul` ✓ + `point_killed_if
 THREE remaining inputs reduce to Stage-A-style field computations: hL-killing (A ✓ + B + C ✓ + D
 ring-base-change), hL-generation (#E[3](k̄)=9 from BB-DEG+étale + AX2-e ✓ + B), and hArb's bridges
 (field ⟹-direction + B + `isE3Datum_of_flexCharts` ✓). Stage B is OMEGA's next chunk.
+
+### v10.269-KM — [KM-W0] FIRST ACT DONE: focused decompose of KM 1.4–1.11 + 3.5–3.7; (ii)/(iii) ground-truthed DELIVERED; (iv) skeletonized (STREAM-KM)
+The wave's charter first act executed: KM §§1.4/1.5/1.6/1.7 (print pp. 17–31), 1.8-head, 3.5/3.6/3.7
+(print pp. 101–104) read at the page images; the [KM-W0] section appended to
+`decomposition-km-integral.md` with verbatim quotes per leaf + adversarial dispositions. GROUND
+TRUTH: deliverable (ii) `gammaOneProblem` = `gammaOneDrinfeldProblem` (GammaH.lean:1049, ratified
+v10.174) and (iii) KM 3.6.0-Γ₁ rel-rep + finiteness = `gammaOneDrinfeld_affineOverEll`/:209
+(DrinfeldRepresentability.lean; the exact-order locus Z ⊆ E[N] IS KM 1.6.2's closed subscheme,
+finite by KM 1.6.3 = torsionπ_isFinite, BB-QF-discharged) are ALREADY DELIVERED — the wave's
+remaining code gap is **(iv) factorization** (KM 1.7.2 → 3.5.1 Γ₁-line). NEW SKELETON
+`LevelStructure/Factorization.lean` (builds green, 4 sorries): [W0-F3-loc]
+`RelEffCartierDiv.isSubgroup_of_openCover` (KM's silent localization), [W0-F3]
+`Section.hasExactOrder_mul_iff` (the 1.7.2 core; proof fully transcribed pp. 27–31 — consumes
+BB-DELIGNE ✓registered; FLAGS the second classical box "rank of killed-by-N₁ divides a power of
+N₁" [De-Ga IV §3 5.3-9] with a cyclic-case degree-dodge candidate), [W0-F4/-fst/-snd]
+`gammaOneStrFactorEquiv` + component specs (KM 3.5.1's explicit P ↦ (BP, AP)). KM 3.6.2
+problem-level product iso + 3.6.3 E[N]-invariance deliberately deferred (vocabulary-before-need;
+Γ₀ seam). NEXT (wave order): work [W0-F3-loc] → [W0-F3] halves as sub-tickets per the
+transcription. (STREAM-KM)
