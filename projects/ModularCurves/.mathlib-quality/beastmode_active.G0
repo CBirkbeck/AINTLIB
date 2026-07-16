@@ -1,7 +1,7 @@
-STREAM-G0 TERMINAL (v10.266-G0, 2026-07-16) — THE BB-DIFF LEAF IS FIRED.
+STREAM-G0 ACTIVE (v10.287 dispatch, 2026-07-16) — EXECUTING THE TWO ENGINE-AX2s.
 
-modelMulByHom_formallyUnramified_of_isAlgClosed: REAL PROOF (kernel-count route).
-Étale trio sorry-free in its own files; unique sorryAx = torsion_rank → KM :1356
-anchor (auto-cleans). Axiom receipts boarded at v10.266-G0. Full build green
-(4224 jobs). Commits d2592f256 / 363c5136e pushed. No claims held. Seat free —
-G0's four-box substrate (QF/FLAT/DEG/DIFF) is COMPLETE.
+CLAIM: rule-5, ONE session. Targets: Bootstrap:112 (naiveLevelThree_relativelyRepresentable_finiteEtale)
++ Bootstrap:195 (legendreDelta_relativelyRepresentable_finiteEtale), via OMEGA's de-Weiled
+combination-clopen route (v10.266-OMEGA): Z = ⋂ c_{ij}⁻¹(E[N]∖0) ⊆ E[N]×_S E[N], clopen in
+finite-étale (my torsionπ_etale chain, now axiom-clean), points-spec via torsionPointsEquiv +
+PairGeneratesOfCardSq (OMEGA ✓). De-conflicted: OMEGA owns :86/:91/E[2]-gen; GH owns :3497.
