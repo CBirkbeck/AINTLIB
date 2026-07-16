@@ -442,6 +442,7 @@ theorem card_dirichletCharacterQp :
 noncomputable def qpadicGeneratorRoot : ℚ_[p] :=
   (((teichmuller p (((unitGroupGenerator p : (ZMod p)ˣ) : ZMod p)) : ℤ_[p])) : ℚ_[p])
 
+set_option backward.isDefEq.respectTransparency false in
 theorem qpadicGeneratorRoot_isPrimitiveRoot :
     IsPrimitiveRoot (qpadicGeneratorRoot p) (p - 1) := by
   simpa [qpadicGeneratorRoot] using

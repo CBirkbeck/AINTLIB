@@ -257,9 +257,8 @@ omit [NeZero n] in
 private lemma slTransvec_mul (i j : Fin n) (hij : i ≠ j) (a b : ℤ) :
     slTransvec n i j hij a * slTransvec n i j hij b =
       slTransvec n i j hij (a + b) := by
-  apply Subtype.ext
-  simpa only [slTransvec, Matrix.TransvectionStruct.toMatrix, SpecialLinearGroup.coe_mul] using
-    Matrix.transvection_mul_transvection_same (n := Fin n) (i := i) (j := j) hij a b
+  exact Subtype.ext
+    (Matrix.transvection_mul_transvection_same (n := Fin n) (i := i) (j := j) hij a b)
 
 omit [NeZero n] in
 private lemma slTransvec_congMod (d : ℕ) (i j : Fin n) (hij : i ≠ j) (c : ℤ)
@@ -426,15 +425,17 @@ private lemma conjugate_congruent_mem_SLnZ (a : Fin n → ℕ) (ha : ∀ i, 0 < 
     have h := congr_arg Matrix.det h_int_eq
     rw [Matrix.det_mul, Matrix.det_mul, τ.prop, mul_one] at h
     exact (mul_left_cancel₀ h_det_ne (by rwa [mul_one, mul_comm])).symm
-  refine ⟨⟨M, hM_det⟩, ?_⟩
+  let σM : SpecialLinearGroup (Fin n) ℤ := ⟨M, hM_det⟩
+  refine ⟨σM, ?_⟩
   have h_Q_eq : (diagMat n a : GL (Fin n) ℚ) * (τ : GL (Fin n) ℚ) =
-      mapGL ℚ ⟨M, hM_det⟩ * diagMat n a := by
+      mapGL ℚ σM * diagMat n a := by
     apply Units.ext
     have hτ_val : (↑(mapGL ℚ τ) : Matrix _ _ ℚ) = τ.val.map (Int.cast) := by
       simp [mapGL_coe_matrix, algebraMap_int_eq, RingHom.mapMatrix_apply]
-    have hM_val : (↑(mapGL ℚ (⟨M, hM_det⟩ : SpecialLinearGroup (Fin n) ℤ)) : Matrix _ _ ℚ) =
+    have hM_val : (↑(mapGL ℚ σM) : Matrix _ _ ℚ) =
         M.map (Int.cast) := by
-      simp [mapGL_coe_matrix, algebraMap_int_eq, RingHom.mapMatrix_apply]
+      simp only [mapGL_coe_matrix, algebraMap_int_eq]
+      rfl
     simp only [Units.val_mul, hτ_val, hM_val, diagMat_val _ _ ha]
     have h_diag_map : (Matrix.diagonal fun i ↦ (a i : ℤ)).map (Int.cast : ℤ → ℚ) =
         Matrix.diagonal fun i ↦ (a i : ℚ) := Matrix.diagonal_map (by simp)
@@ -471,15 +472,17 @@ private lemma inv_conjugate_congruent_mem_SLnZ (b : Fin n → ℕ) (hb : ∀ i, 
     have h := congr_arg Matrix.det h_int_eq
     rw [Matrix.det_mul, Matrix.det_mul, τ.prop, one_mul] at h
     exact (mul_left_cancel₀ h_det_ne (by rwa [mul_one])).symm
-  refine ⟨⟨N, hN_det⟩, ?_⟩
-  have h_Q_eq : (diagMat n b : GL (Fin n) ℚ) * mapGL ℚ ⟨N, hN_det⟩ =
+  let σN : SpecialLinearGroup (Fin n) ℤ := ⟨N, hN_det⟩
+  refine ⟨σN, ?_⟩
+  have h_Q_eq : (diagMat n b : GL (Fin n) ℚ) * mapGL ℚ σN =
       (τ : GL (Fin n) ℚ) * diagMat n b := by
     apply Units.ext
     have hτ_val : (↑(mapGL ℚ τ) : Matrix _ _ ℚ) = τ.val.map (Int.cast) := by
       simp [mapGL_coe_matrix, algebraMap_int_eq, RingHom.mapMatrix_apply]
-    have hN_val : (↑(mapGL ℚ (⟨N, hN_det⟩ : SpecialLinearGroup (Fin n) ℤ)) : Matrix _ _ ℚ) =
+    have hN_val : (↑(mapGL ℚ σN) : Matrix _ _ ℚ) =
         N.map (Int.cast) := by
-      simp [mapGL_coe_matrix, algebraMap_int_eq, RingHom.mapMatrix_apply]
+      simp only [mapGL_coe_matrix, algebraMap_int_eq]
+      rfl
     simp only [Units.val_mul, hτ_val, hN_val, diagMat_val _ _ hb]
     have h_diag_map : (Matrix.diagonal fun i ↦ (b i : ℤ)).map (Int.cast : ℤ → ℚ) =
         Matrix.diagonal fun i ↦ (b i : ℚ) := Matrix.diagonal_map (by simp)
@@ -594,7 +597,8 @@ private lemma GLnQ_mem_SLnZ_of_coprime_scaling (C : GL (Fin n) ℚ)
       simpa only [N, Matrix.of_apply, Matrix.map_apply] using hN_eq i j
     exact_mod_cast show (N.det : ℚ) = 1 by rw [Int.cast_det N, ← hN_cast, h_det]
   rw [MonoidHom.mem_range]
-  refine ⟨⟨N, hN_det⟩, ?_⟩
+  let σN : SpecialLinearGroup (Fin n) ℤ := ⟨N, hN_det⟩
+  refine ⟨σN, ?_⟩
   apply Units.ext
   simp only [mapGL_coe_matrix, map_apply_coe, RingHom.mapMatrix_apply]
   ext i j

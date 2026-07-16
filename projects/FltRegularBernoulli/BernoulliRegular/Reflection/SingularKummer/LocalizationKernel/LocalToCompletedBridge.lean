@@ -340,6 +340,7 @@ theorem localCyclotomicRingToField_localCyclotomicRingEquiv
         ((cyclotomicSigmaOfUnit (p := p) K a).toRingEquiv) r).symm
   exact RingHom.congr_fun hhom x
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The image of the lambda-local ring in `K` lies in the valuation subring at
 the lambda prime. -/
 theorem localCyclotomicRingToField_mem_valuationSubring

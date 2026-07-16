@@ -1418,6 +1418,7 @@ The mechanism is the reviewer's *transport-to-`O`*:
 order-transport + `x_gen − x ∈ m_R`).  Here `R = φ P = some x y`. -/
 
 omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [Fintype W.toAffine.Point] in
+set_option backward.isDefEq.respectTransparency false in
 /-- **The ∞-source order transport** `ord_∞(τ_R f) = ord_R f` for `R = some xR yR` finite and `f ≠ 0`.
 The `infinity`-place case of `ordProj_translate_infinity` (`τ_R` carries the order at `∞` to the order
 at `O + R = R`). -/

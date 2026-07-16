@@ -25,6 +25,8 @@ open scoped MatrixGroups
 
 namespace HeckeRing.GL2
 
+private lemma shiftSL_loc_val' (m : ℤ) : (shiftSL_loc m).val = !![1, m; 0, 1] := rfl
+
 variable {N : ℕ} [NeZero N]
 
 /-! ## FD-a — `Γ_p(diag(1,p)) = Γ₁(N) ⊓ Γ⁰(p)` (no coprimality)
@@ -152,10 +154,11 @@ private lemma mem_Gamma_p_α_T_p_upper_zero_mpr
   apply Units.ext
   rw [Matrix.GeneralLinearGroup.coe_mul, Matrix.GeneralLinearGroup.coe_mul,
     conj_T_p_upper_zero_real_val p hp γ]
+  have hyval : Subtype.val y = !![γ.val 0 0, k; (p : ℤ) * γ.val 1 0, γ.val 1 1] := rfl
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [hy_def, Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply,
-      Matrix.map_apply, hk]
+    simp [Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply,
+      Matrix.map_apply, hyval, hk]
   field_simp
 
 open Pointwise ConjAct in
@@ -209,9 +212,9 @@ private lemma shiftSL_loc_inv_mul_notMem_Gamma_up
     simp only [ne_eq, Nat.cast_inj]; exact fun h ↦ hb (by rw [Fin.ext_iff.mpr h.symm])
   have hentry : (((shiftSL_loc (b₁.val : ℤ))⁻¹ * shiftSL_loc (b₂.val : ℤ)).val 0 1 : ℤ) =
       (b₂.val : ℤ) - (b₁.val : ℤ) := by
-    simp [shiftSL_loc, Matrix.SpecialLinearGroup.coe_mul,
-      Matrix.SpecialLinearGroup.coe_inv, Matrix.adjugate_fin_two_of, Matrix.mul_apply,
-      Fin.sum_univ_two]
+    simp [Matrix.SpecialLinearGroup.coe_mul,
+      Matrix.SpecialLinearGroup.coe_inv, shiftSL_loc_val', Matrix.adjugate_fin_two_of,
+      Matrix.mul_apply, Fin.sum_univ_two]
     ring
   rw [hentry, ZMod.intCast_zmod_eq_zero_iff_dvd]
   intro hdvd
@@ -264,9 +267,9 @@ theorem Gamma_up_relIndex_Gamma1_of_dvd (p : ℕ) (hp : Nat.Prime p) (hpN : ¬ N
       -- `(0,1)`-entry of `[1,j;0,1]⁻¹·γ = [1,-j;0,1]·γ` is `γ₀₁ - j·γ₁₁ ≡ γ₀₁ - j (mod p)`.
       have hentry : (((shiftSL_loc ((jval : ℤ)))⁻¹ * (γ : SL(2, ℤ))).val 0 1 : ℤ) =
           (γ : SL(2, ℤ)).val 0 1 - (jval : ℤ) * (γ : SL(2, ℤ)).val 1 1 := by
-        simp [shiftSL_loc, Matrix.SpecialLinearGroup.coe_mul,
-          Matrix.SpecialLinearGroup.coe_inv, Matrix.adjugate_fin_two_of, Matrix.mul_apply,
-          Fin.sum_univ_two]
+        simp [Matrix.SpecialLinearGroup.coe_mul,
+          Matrix.SpecialLinearGroup.coe_inv, shiftSL_loc_val', Matrix.adjugate_fin_two_of,
+          Matrix.mul_apply, Fin.sum_univ_two]
         ring
       rw [hentry]; push_cast
       rw [hred _ hd, mul_one]
@@ -311,12 +314,15 @@ private lemma T_p_lower_mul_T_p_upper_smul_set_eq_shift'
       rw [mapGL_SL_det_val_eq_one]; exact one_pos
     refine UpperHalfPlane_smul_eq_of_matrix_smul_eq _ _ h_det_LHS h_det_RHS
       (p : ℝ) (by exact_mod_cast hp.ne') ?_ τ
+    have hsh : (((mapGL ℝ : SL(2, ℤ) →* GL (Fin 2) ℝ) (shiftSL_loc (b : ℤ))) :
+        Matrix (Fin 2) (Fin 2) ℝ) = (!![1, (b : ℤ); 0, 1]).map Int.cast :=
+      (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)
     ext i j
     fin_cases i <;> fin_cases j <;>
-      simp [glMap, T_p_lower, T_p_upper, Matrix.SpecialLinearGroup.mapGL_coe_matrix, shiftSL_loc,
+      simp [glMap, T_p_lower, T_p_upper, hsh, Matrix.map_apply,
         Matrix.GeneralLinearGroup.mkOfDetNeZero, Matrix.GeneralLinearGroup.map,
         Matrix.mul_apply, Fin.sum_univ_two, Matrix.of_apply, Units.val_mul,
-        algebraMap_int_eq, Matrix.smul_apply]
+        Matrix.smul_apply]
   ext τ
   refine ⟨?_, ?_⟩ <;> rintro ⟨σ, hσ, rfl⟩
   · exact ⟨σ, hσ, (hsmul σ).symm⟩
@@ -612,8 +618,8 @@ private theorem shiftSL_loc_tile_transversal_bijective
         shiftSL_loc (i.val : ℤ) * (shiftSL_loc (j.val : ℤ))⁻¹ := by
       apply Subtype.ext; ext u v
       fin_cases u <;> fin_cases v <;>
-        simp [shiftSL_loc, Matrix.SpecialLinearGroup.coe_mul, Matrix.SpecialLinearGroup.coe_inv,
-          Matrix.adjugate_fin_two_of, Matrix.mul_apply, Fin.sum_univ_two]
+        simp [Matrix.SpecialLinearGroup.coe_mul, Matrix.SpecialLinearGroup.coe_inv,
+          shiftSL_loc_val', Matrix.adjugate_fin_two_of, Matrix.mul_apply, Fin.sum_univ_two]
       ring
     rwa [hcomm]
   · rw [hcard, Nat.card_eq_fintype_card, Fintype.card_fin]

@@ -165,6 +165,7 @@ theorem CN05_of_CN05CoeffEq (h_coeff : CN05CoeffEq p) : CN05Hypothesis p := by
     (DirichletCharacter.LFunction_eq_LSeries _ hs).symm
   rw [h_zeta, h_Leta]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Convolution of the constant `1` function with any `g` at `p^k` equals
 `∑_{j=0}^k g(p^j)`. -/
 lemma convolution_one_at_prime_pow {q : ℕ} (hq : q.Prime) (k : ℕ) (g : ℕ → ℂ) :

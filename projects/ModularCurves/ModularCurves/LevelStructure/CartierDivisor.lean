@@ -802,6 +802,7 @@ private lemma KerPrincipal.stdSmooth_res {U : S.Opens} {V : C.Opens}
   have h4 := RingHom.IsStandardSmoothOfRelativeDimension.comp h2 hstd
   simpa using h4
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Off the section: at a point `c` outside the support of `ker z`, some affine neighbourhood
 carries the *unit* ideal `(1)`, so the kernel is principal there on the nonzerodivisor `1`.
 (The support avoids a basic affine `W ∋ c`, so the zero locus of `ker z` meets `W` emptily,
@@ -1006,6 +1007,7 @@ Over a small affine base the divisor subscheme is then the disjoint union of clo
 subschemes of affine opens, hence affine, and its coordinate ring is a product of
 quotients `A/(∏ᵢ fᵢ)`, each free by the KM 1.1.2 filtration. -/
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- An ideal sheaf is the unit ideal on any affine open disjoint from its support. -/
 private lemma SectionsIdeal.ideal_eq_top_of_disjoint (I : C.IdealSheafData)
     (W : C.affineOpens) (h : Disjoint (I.support : Set C) (W.1 : Set C)) :
@@ -1323,6 +1325,7 @@ private theorem ringHom_finite_flat_fp_finrank_of_linearEquiv_pi {R B : Type u}
       Module.rankAtStalk_eq_finrank_of_free]
     simp
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Master chart** (the local model of KM 1.2.2/1.2.3 for `Σᵢ [Pᵢ]`): every point of the
 base has an affine neighbourhood `U` over which the subscheme cut out by `∏ᵢ ker (Pᵢ)` is
 an affine open of the subscheme whose coordinate ring is a free `Γ(S, U)`-module of rank
@@ -1581,6 +1584,7 @@ private lemma SectionsIdeal.zariski_local (π : C ⟶ S) {n : ℕ}
   · intro s
     exact MorphismProperty.of_isPullback (SectionsIdeal.isPullback _ (U s) (haff s)) (hQ s)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Register box (T-D3/T-D1, finiteness; KM 1.2.2 + 1.2.3)**: over a separated smooth
 relative curve the product of the section ideals cuts out a subscheme finite over the
 base. KM 1.2.3 (verbatim quote banked on T-D3): *"Let `D ⊆ C` be a closed sub-scheme
@@ -1599,6 +1603,7 @@ theorem sectionsIdeal_isFinite (π : C ⟶ S) [IsSeparated π]
   exact SectionsIdeal.zariski_local π P @IsFinite U hsU haff
     (fun s ↦ (IsFinite.SpecMap_iff _).mpr (hFin s))
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Register box (T-D3/T-D1, flatness; KM 1.2.2 + 1.2.3)** — see
 `sectionsIdeal_isFinite`. -/
 theorem sectionsIdeal_flat (π : C ⟶ S) [IsSeparated π]
@@ -1609,6 +1614,7 @@ theorem sectionsIdeal_flat (π : C ⟶ S) [IsSeparated π]
   exact SectionsIdeal.zariski_local π P @Flat U hsU haff
     (fun s ↦ Flat.SpecMap_iff.mpr (hFlat s))
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Register box (T-D3/T-D1, finite presentation; KM 1.2.2 + 1.2.3)** — see
 `sectionsIdeal_isFinite`. -/
 theorem sectionsIdeal_lfp (π : C ⟶ S) [IsSeparated π]
@@ -1694,6 +1700,7 @@ theorem sectionsDivisor_degree (π : C ⟶ S) [IsSeparated π]
   rw [sectionsDivisor_ideal π hsm P]
   exact sectionsIdeal_finrank π hsm P s
 
+set_option backward.isDefEq.respectTransparency.types false in
 private lemma baseChange_prop (P : MorphismProperty Scheme.{u})
     [P.IsStableUnderBaseChange] [P.RespectsIso] (D : RelEffCartierDiv π)
     {T : Scheme.{u}} (t : T ⟶ S) (hD : P (D.ideal.subschemeι ≫ π)) :
@@ -1713,6 +1720,7 @@ private lemma baseChange_prop (P : MorphismProperty Scheme.{u})
   rw [hι, Category.assoc]
   exact (MorphismProperty.cancel_left_of_respectsIso P _ _).mpr hP
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Base change of a relative effective Cartier divisor along `t : T ⟶ S`: the ideal
 sheaf of the base-changed closed subscheme `D ×_S T ↪ C ×_S T` (kernel ideal of the
 pulled-back closed immersion), as a divisor in the base-changed curve (structure
@@ -1747,6 +1755,7 @@ equal. -/
   obtain rfl : i₁ = i₂ := h
   rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 private lemma flatPullback_prop (P : MorphismProperty Scheme.{u})
     [P.IsStableUnderBaseChange] [P.IsStableUnderComposition] [P.RespectsIso]
     (D : RelEffCartierDiv π) {C' : Scheme.{u}} {π' : C' ⟶ S} (f : C' ⟶ C)
@@ -1764,6 +1773,7 @@ private lemma flatPullback_prop (P : MorphismProperty Scheme.{u})
   rw [hι, Category.assoc]
   exact (MorphismProperty.cancel_left_of_respectsIso P _ _).mpr hP
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Flat pullback of a relative effective Cartier divisor** (KM 1.1.4, p. 6: "any
 effective Cartier divisor `D` in `X/S` gives rise to an effective Cartier divisor
 `f*(D)` in `Y/S`"): the preimage `f⁻¹(D) = D ×_C C'` of `D` along an `S`-morphism
@@ -2668,6 +2678,7 @@ private theorem officialAux_exists_finite_chart (π : C ⟶ S) [IsSeparated π]
       Module.Finite Γ(S, U₀) (Γ(C, V₀) ⧸ D.ideal.ideal ⟨V₀, hV₀⟩) := by
   sorry
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **KM 1.2.3 (⇐), noetherian-free route**: a relative effective Cartier divisor in the
 working (finite locally free) sense on a smooth separated relative curve is an official
 effective Cartier divisor (KM 1.1.1): its ideal sheaf is affine-locally generated by a

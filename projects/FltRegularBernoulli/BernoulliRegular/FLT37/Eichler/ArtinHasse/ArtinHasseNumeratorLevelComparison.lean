@@ -24,7 +24,7 @@ namespace CyclotomicUnits
 
 open PadicLogSetup PadicLogSetup.DworkParameter
 
-private instance instFact37Deg68NLD : Fact (Nat.Prime 37) := ⟨by norm_num⟩
+instance instFact37Deg68NLD : Fact (Nat.Prime 37) := ⟨by norm_num⟩
 
 variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
 

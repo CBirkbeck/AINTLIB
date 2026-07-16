@@ -100,6 +100,7 @@ defined as the limit of finite truncation evaluations. -/
 def dworkParameterExp : DworkCompleteIntegerRing p K :=
   AdicCompletion.mkₐ (lambdaIdeal p K) (dworkParameterExpCauchySeq p K)
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 theorem dworkParameterExp_evalₐ (N : ℕ) :
     AdicCompletion.evalₐ (lambdaIdeal p K) N (dworkParameterExp p K) =

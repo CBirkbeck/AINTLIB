@@ -560,6 +560,7 @@ theorem pairTensorCompare_tmul :
   intro a b
   exact Algebra.TensorProduct.lift_tmul _ _ _ _ _
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(Layer B, reusable comparison.)** The pair comparison `Γ(X) ⊗_R Γ(Y) → Γ(X ×ₛ Y)` is
 bijective:
 it becomes an iso after `Spec`, via `pullbackSpecIso` and `isoSpec`, reflected back through the
@@ -650,6 +651,7 @@ noncomputable def biproductAlgebra :
     Algebra R Γ(pullback (D.ideal.subschemeι ≫ E.π) (D.ideal.subschemeι ≫ E.π), ⊤) :=
   ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ (E.bimulBase (D := D)).appTop).hom.toAlgebra
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(Layer B, κ-bijectivity foundation.)** `D ×_{Spec R} D` is affine: `D.subscheme` is finite —
 hence affine — over `Spec R`, so both projections are affine morphisms and the fibre product of
 affines over an affine base is affine. This is what makes `Γ(D ×_R D)` a genuine coordinate ring and
@@ -1198,6 +1200,7 @@ an isomorphism, so injective — the tool that turns `subgroupMul_assoc` into `C
   ((Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫
     (pairBase (E.subgroupStructMap D) (E.bimulBase (D := D))).appTop).hom.toAlgebra
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- `P₃ = D ×ₛ (D ×ₛ D)` is affine: `pullback.snd` is a base change of the finite (hence affine)
 `subgroupStructMap D`, and `D ×ₛ D` is affine. -/
 theorem subgroupTriple_isAffine :
@@ -2089,6 +2092,7 @@ theorem smul_eq_zero_of_factors_section {D : RelEffCartierDiv E.π} (hD : D.IsSu
     (N : ℤ) • Q = 0 := by
   sorry
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(Layer B, L1 — the relative degree is base-change invariant.)** BOARDED `[T-D5h-degBC]`.
 The degree (fibre `finrank` of the finite flat structure map `D.subscheme ⟶ S`) is stable under
 base change: constant degree `N` on `S` gives constant degree `N` on any `T`. This is the

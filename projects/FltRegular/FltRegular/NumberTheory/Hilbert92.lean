@@ -554,6 +554,7 @@ def unitlifts (S : systemOfUnits p G (NumberField.Units.rank k + 1)) :
     Fin (NumberField.Units.rank k + 1) → Additive (𝓞 K)ˣ :=
   fun i ↦ Additive.ofMul (Additive.toMul (S.units i).out).out
 
+set_option backward.isDefEq.respectTransparency false in
 lemma unitlifts_spec (S : systemOfUnits p G (NumberField.Units.rank k + 1)) (i) :
     mkG (Additive.toMul <| unitlifts p hp hKL σ hσ S i) = S.units i := by
   delta unitToU unitlifts

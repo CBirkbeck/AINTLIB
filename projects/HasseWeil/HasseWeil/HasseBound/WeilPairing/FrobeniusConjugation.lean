@@ -242,6 +242,7 @@ theorem sigmaConjugation_tau_mapW (S : (W.baseChange (AlgebraicClosure K)).toAff
         P := by
   cases P <;> rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The action induced by `σ` sends the lift of a point to the lift of its Frobenius image. -/
 theorem sigmaConjugation_lift_twist (S : (W.baseChange (AlgebraicClosure K)).toAffine.Point) :
     sigmaFunctionFieldPointKbar W (HasseWeil.liftPointToKE (W.baseChange (AlgebraicClosure K)) S) =
@@ -260,6 +261,7 @@ theorem sigmaConjugation_lift_twist (S : (W.baseChange (AlgebraicClosure K)).toA
       · simp only [frobeniusFunctionFieldEquivK_apply, FiniteField.coe_frobeniusAlgHom]
         rw [frobeniusFunctionFieldEquiv_algebraMap]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The point map induced by `σ` fixes the generic point. -/
 theorem sigmaConjugation_fix_genericPoint :
     sigmaFunctionFieldPointKbar W (HasseWeil.genericPoint (W.baseChange (AlgebraicClosure K))) =
@@ -271,6 +273,7 @@ theorem sigmaConjugation_fix_genericPoint :
   exact (WeierstrassCurve.Affine.Point.some.injEq _ _ _ _ _ _).mpr
     ⟨frobeniusFunctionFieldEquiv_x_gen W, frobeniusFunctionFieldEquiv_y_gen W⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The arithmetic Frobenius conjugation identity at the generic point. -/
 theorem sigmaConjugation_point (S : (W.baseChange (AlgebraicClosure K)).toAffine.Point) :
     WeierstrassCurve.Affine.Point.map (W' := W) (frobeniusFunctionFieldEquivK W)

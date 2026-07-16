@@ -189,12 +189,14 @@ variable {S : Scheme.{u}} (E : EllipticCurve S)
 noncomputable def torsionSqπ (N : ℕ) : pullback (E.torsionπ N) (E.torsionπ N) ⟶ S :=
   pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The pullback of a surjective cover along the Weil-pairing source is surjective. Registered
 as an instance so the descent proofs below need not re-derive it. -/
 private instance surjective_pullback_fst_torsionSqπ (N : ℕ) {S' : Scheme.{u}} (p : S' ⟶ S)
     [Surjective p] : Surjective (pullback.fst (E.torsionSqπ N) p) :=
   MorphismProperty.pullback_fst _ _ ‹Surjective p›
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The pullback of a locally-finitely-presented cover along the Weil-pairing source is again
 locally of finite presentation. Registered as an instance, as above. -/
 private instance lfp_pullback_fst_torsionSqπ (N : ℕ) {S' : Scheme.{u}} (p : S' ⟶ S)

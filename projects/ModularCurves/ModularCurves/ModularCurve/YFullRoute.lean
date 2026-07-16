@@ -151,6 +151,7 @@ noncomputable def fullLevelSpaceStruct : fullLevelSpace X N ⟶ X.base :=
   levelSpaceΓι X.curve N ≫
     pullback.fst (X.curve.torsionπ N) (X.curve.torsionπ N) ≫ X.curve.torsionπ N
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **([YF-AFF], KM 4.7.0's standing hypothesis for `[Γ(N)]`)** The Γ(N)-presentation is
 an affine morphism: closed immersion (affine) into `E[N] ×_S E[N]`, which is finite
 (hence affine) over `S` by `torsionπ_isFinite` (PROVEN) and base-change/composition
@@ -167,6 +168,7 @@ theorem isAffineHom_fullLevelSpaceStruct (hinv : NIsInvertible X.base N) :
     MorphismProperty.pullback_fst _ _ hπ
   infer_instance
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **([YF-FIN] = the finiteness half of KM 3.6.0 / 5.1.1 for `[Γ(N)]`)** The
 Γ(N)-presentation is finite over the base: KM 3.6.0 (p. 102) *"Each of these functors is
 represented by a finite S-scheme"*; KM 5.1.1 (p. 129) *"Each is finite and flat over
@@ -206,6 +208,7 @@ theorem isOpenImmersion_levelSpaceΓι {S : Scheme.{u}} (E : EllipticCurve S) (N
     IsOpenImmersion (levelSpaceΓι E N) := by
   sorry
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **([YF-ETALE] = the étale half of KM 3.7.1 / [Loe] 3.8.2 for `[Γ(N)]`)** For `N`
 invertible in `R`, the Γ(N)-presentation is étale over the base: open immersion
 ([YF-CLOPEN]) ≫ pullback of finite étale ≫ finite étale, with `E[N] → S` étale from
@@ -730,6 +733,7 @@ theorem gammaFullNaive_representable_of_engine (N : ℕ) [NeZero N] (hN : 3 ≤ 
     (gammaFullNaive_affineOverEll R N hinv)).mpr
     ⟨gammaFullNaive_relativelyRepresentable R N hinv, gammaFullNaive_rigid R N hN hinv⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **([YF-TRANS], smooth-affineness transports across representing objects)** Any two
 objects representing the same moduli problem are canonically isomorphic in `Ell/R`
 (Yoneda: `Functor.RepresentableBy.uniqueUpToIso`), the isomorphism's `baseHom` is an

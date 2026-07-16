@@ -188,6 +188,7 @@ lemma addOnZOnImage_piece (i j : Fin 3) [IsDomain (biChartRing W i j)] (k : Fin 
   exact congrArg (_ ≫ ·) (ι_addOnZOnSup W i j hΔ k)
 
 omit [IsDomain R] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **([C4-HF-ASSEMBLY] L1)** On any open `P` inside the k-th image piece,
 `homOfLE ≫ addOnYOnImage ij` factors as `σ ≫ addOnYPieceMor ij k`, where the prefactor `σ` is the
 `isoImage / morphismRestrict / specBasicOpenIsoAway.inv` chain landing in `Spec(Away(lawTwoTriple ij
@@ -214,6 +215,7 @@ lemma homOfLE_addOnYOnImage_eq (i j : Fin 3) [IsDomain (biChartRing W i j)] (hΔ
   simp only [Category.assoc]
 
 omit [IsDomain R] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **([C4-HF-ASSEMBLY] L1, law 1)** -/
 lemma homOfLE_addOnZOnImage_eq (i j : Fin 3) [IsDomain (biChartRing W i j)] (hΔ : IsUnit W.Δ)
     (k : Fin 3) (P : (pullback (projModelπ W) (projModelπ W)).Opens)
@@ -498,6 +500,7 @@ noncomputable def pieceAwayι (k : Fin 3) :
     (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawTwoTriple W i j k)).ι ≫
     (chartPieceIso W i j).inv ≫ pieceι W i j
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **([C4-HF-ASSEMBLY] L3, the σ-immersion identity)** The `isoImage/morphismRestrict/
 specBasicOpenIsoAway.inv` chain out of `A_k` (the `σ` of L1), followed by `pieceAwayι`, is exactly
 `A_k.ι`. So `σ` is the section identifying `A_k` with `Spec(Away(lawTwoTriple ij k))`, and
@@ -887,6 +890,7 @@ instance instIsOpenImmersionPieceAwayι (k : Fin 3) : IsOpenImmersion (pieceAway
   rw [pieceAwayι]; infer_instance
 
 omit [IsJacobsonRing R] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **([C4-HF-ASSEMBLY] L5, σ-cancel, (i,j) side)** `w.hom` followed by the `(i,j)` L1 prefactor `σ`
 (the `homOfLE / isoImage.inv / morphismRestrict / specBasicOpenIsoAway.inv` chain landing in
 `Spec(Away(lawTwoTriple ij k))`) equals `Spec(ψ_ij)`. Cancelled against the `pieceAwayι` mono: both
@@ -915,6 +919,7 @@ lemma w_homOfLE_sigma_psiFst (k k' : Fin 3) :
   rw [Scheme.homOfLE_ι]; exact overlapPieceIso_hom_ι_eq_specMap_psiFst W i j i' j' k k'
 
 omit [IsJacobsonRing R] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **([C4-HF-ASSEMBLY] L5, σ-cancel, (i',j') side)** The psiSnd mirror of `w_homOfLE_sigma_psiFst`.
 -/
 @[reassoc]
@@ -1086,6 +1091,7 @@ noncomputable def pieceAwayZι (k : Fin 3) :
     (specBasicOpen (CommRingCat.of (biChartRing W i j)) (lawOneTriple W i j k)).ι ≫
     (chartPieceIso W i j).inv ≫ pieceι W i j
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **([C4-HF-ASSEMBLY] L3, the σ-immersion identity)** The `isoImage/morphismRestrict/
 specBasicOpenIsoAway.inv` chain out of `A_k` (the `σ` of L1), followed by `pieceAwayZι`, is exactly
 `A_k.ι`. So `σ` is the section identifying `A_k` with `Spec(Away(lawOneTriple ij k))`, and
@@ -1442,6 +1448,7 @@ instance instIsOpenImmersionPieceAwayZι (k : Fin 3) : IsOpenImmersion (pieceAwa
   rw [pieceAwayZι]; infer_instance
 
 omit [IsJacobsonRing R] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **([C4-HF-ASSEMBLY] L5, σ-cancel, (i,j) side)** `w.hom` followed by the `(i,j)` L1 prefactor `σ`
 (the `homOfLE / isoImage.inv / morphismRestrict / specBasicOpenIsoAway.inv` chain landing in
 `Spec(Away(lawOneTriple ij k))`) equals `Spec(ψ_ij)`. Cancelled against the `pieceAwayZι` mono: both
@@ -1470,6 +1477,7 @@ lemma w_homOfLE_sigma_psiFstZ (k k' : Fin 3) :
   rw [Scheme.homOfLE_ι]; exact overlapPieceZIso_hom_ι_eq_specMap_psiFstZ W i j i' j' k k'
 
 omit [IsJacobsonRing R] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **([C4-HF-ASSEMBLY] L5, σ-cancel, (i',j') side)** The psiSndZ mirror of
 `w_homOfLE_sigma_psiFstZ`. -/
 @[reassoc]
@@ -1686,6 +1694,7 @@ lemma crossPiece_le_blOpenZPieceImage (k : Fin 3) :
   show pieceι W i j ''ᵁ _ ≤ pieceι W i j ''ᵁ blOpenZPieceFamily W i j k
   rw [blOpenZPieceFamily]; gcongr; exact specBasicOpen_mul_le_right _ _ _
 
+set_option backward.isDefEq.respectTransparency.types false in
 @[reassoc]
 lemma crossHom_sigma_awayPairRight (k : Fin 3) :
     (crossPieceIso W i j k).hom ≫
@@ -1705,6 +1714,7 @@ lemma crossHom_sigma_awayPairRight (k : Fin 3) :
   rw [← cancel_mono (pieceAwayι W i j k)]; simp only [Category.assoc, h6]
   rw [Scheme.homOfLE_ι]; exact crossPieceIso_hom_ι_awayPairRight W i j k
 
+set_option backward.isDefEq.respectTransparency.types false in
 @[reassoc]
 lemma crossHom_sigma_awayPairLeft (k : Fin 3) :
     (crossPieceIso W i j k).hom ≫
@@ -2088,6 +2098,7 @@ lemma crossOverlapPieceIso_hom_ι_eq_specMap_psiSndCross (k k' : Fin 3) :
     (specMap_psiSndCross_pieceGenι W i j i' j' k k').symm
 
 
+set_option backward.isDefEq.respectTransparency.types false in
 @[reassoc]
 lemma crossW_homOfLE_sigma_psiFstCross (k k' : Fin 3) :
     (crossOverlapPieceIso W i j i' j' k k').hom ≫
@@ -2109,6 +2120,7 @@ lemma crossW_homOfLE_sigma_psiFstCross (k k' : Fin 3) :
   rw [← cancel_mono (pieceGenι W i j (lawOneTriple W i j k))]; simp only [Category.assoc, h6]
   rw [Scheme.homOfLE_ι]; exact crossOverlapPieceIso_hom_ι_eq_specMap_psiFstCross W i j i' j' k k'
 
+set_option backward.isDefEq.respectTransparency.types false in
 @[reassoc]
 lemma crossW_homOfLE_sigma_psiSndCross (k k' : Fin 3) :
     (crossOverlapPieceIso W i j i' j' k k').hom ≫
@@ -2240,6 +2252,7 @@ lemma addOnZFamily_eq_addOnYFamily (p q : Fin 2 × Fin 2) :
     exact addOnZOnImage_eq_addOnYOnImage_cross W _ _ _ _ hΔ _ inf_le_left inf_le_right
       (blOpenZImage_inf_blOpenYImage_eq_iSup_cross W _ _ _ _)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(c3, addOn_agree — THE two-law agreement)** The two Bosma–Lenstra addition morphisms — law 1
 (`addOnZ`, regular on `blOpenZ`) and law 2 (`addOnY`, regular on `blOpenY`) — agree on the overlap
 `blOpenZ ⊓ blOpenY` of their regularity opens. `Scheme.Cover.hom_ext` over the `(p,q)` family
@@ -2406,6 +2419,7 @@ noncomputable def mulModelHom (hΔ : IsUnit W.Δ) :
     (Scheme.Opens.iSupOpenCover (blCoverFam W)).glueMorphisms (blCoverMor W hΔ)
       (glueMorphisms_hf_of_agree (blCoverFam W) (blCoverMor W hΔ) (blCoverMor_agree W hΔ))
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- `blOpenZ.ι ≫ topIso.inv ≫ homOfLE` collapses to the cover inclusion of the `blOpenZ` piece. -/
 @[reassoc]
 lemma ι_topIso_inv_homOfLE_true (hΔ : IsUnit W.Δ) :
@@ -2418,6 +2432,7 @@ lemma ι_topIso_inv_homOfLE_true (hΔ : IsUnit W.Δ) :
     Scheme.toIso_inv_ι, Category.comp_id]
   exact h2.symm
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- `blOpenY.ι ≫ topIso.inv ≫ homOfLE` collapses to the cover inclusion of the `blOpenY` piece. -/
 @[reassoc]
 lemma ι_topIso_inv_homOfLE_false (hΔ : IsUnit W.Δ) :
@@ -2451,6 +2466,7 @@ section
 variable (i j : Fin 3)
 variable [IsJacobsonRing R] [IsDomain (biChartRing W i j)]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Per-piece: the k-th image piece of addOnYOnImage is over R, matching the piece's fst-structure.
 -/
 lemma addOnYOnImage_piece_projModelπ (hΔ : IsUnit W.Δ) (k : Fin 3) :
@@ -2496,6 +2512,7 @@ section
 variable (i j : Fin 3)
 variable [IsJacobsonRing R] [IsDomain (biChartRing W i j)]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Z-side per-piece π-compat. -/
 lemma addOnZOnImage_piece_projModelπ (hΔ : IsUnit W.Δ) (k : Fin 3) :
     (pullback (projModelπ W) (projModelπ W)).homOfLE

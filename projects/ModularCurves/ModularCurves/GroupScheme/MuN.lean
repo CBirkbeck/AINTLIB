@@ -120,6 +120,7 @@ private lemma muNRingLift_gen {N : ℕ} {R : CommRingCat.{u}} (a : R) (ha : a ^ 
   rw [Ideal.Quotient.lift_mk]
   simp [Polynomial.coe_eval₂RingHom]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Morphisms into an affine scheme are determined by their action on global sections. -/
 private lemma specHom_ext {R : CommRingCat.{u}} {X : Scheme.{u}} {f₁ f₂ : X ⟶ Spec R}
     (h : f₁.appTop = f₂.appTop) : f₁ = f₂ := by
@@ -179,6 +180,7 @@ private lemma muNPointsEquivAux_coe (S : Scheme.{u}) (N : ℕ) {T : Scheme.{u}} 
       (h.1 ≫ pullback.snd (terminal.from S) (terminal.from (muNAbs N))).appTop
         ((Scheme.ΓSpecIso (muNRing N)).inv (muNRingGen N)) := rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 private lemma muNPointsEquivAux_natural (S : Scheme.{u}) (N : ℕ) {T T' : Scheme.{u}}
     (g : T ⟶ S) (k : T' ⟶ T) (h : { h : T ⟶ muN S N // h ≫ muNπ S N = g }) :
     (muNPointsEquivAux S N (k ≫ g) ⟨k ≫ h.1, by rw [Category.assoc, h.2]⟩ : Γ(T', ⊤)) =
@@ -213,6 +215,7 @@ private lemma nthRootsMap_coe {R R' : Type*} [CommMonoid R] [CommMonoid R'] {N :
     [NeZero N] (f : R →* R') (a : { a : R // a ^ N = 1 }) :
     (nthRootsMap f a : R') = f a.1 := rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The presheaf of groups on `Over S` represented by `μ_{N,S}`: `N`-th roots of unity
 of the global sections, with pointwise multiplication. -/
 private def muNGrpFunctor (S : Scheme.{u}) (N : ℕ) [NeZero N] : (Over S)ᵒᵖ ⥤ GrpCat.{u} where
@@ -225,6 +228,7 @@ private def muNGrpFunctor (S : Scheme.{u}) (N : ℕ) [NeZero N] : (Over S)ᵒᵖ
     refine GrpCat.hom_ext (MonoidHom.ext fun a ↦ Subtype.ext ?_)
     simp
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- `μ_{N,S}` represents its points presheaf. -/
 private def muNRepresentableBy (S : Scheme.{u}) (N : ℕ) [NeZero N] :
     (muNGrpFunctor S N ⋙ forget _).RepresentableBy (Over.mk (muNπ S N)) where
@@ -346,6 +350,7 @@ private lemma constDesc_π {T : Scheme.{u}} (g : T ⟶ S) (c : LocallyConstant T
     rw [← Category.assoc, constFiber_ι_constDesc, Category.assoc, Category.assoc,
       Sigma.ι_desc, Category.comp_id]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(DS3b pin, ticket T-B2)** `S`-morphisms into the constant scheme `∐_A S` over
 `g : T ⟶ S` are the locally constant `A`-valued functions on `T`.
 Source: KM 1.4.4(5) ("the constant `S`-scheme `ℤ/Nℤ`"); consumed by the
@@ -481,6 +486,7 @@ private lemma muNRingMap_flat (N : ℕ) [NeZero N] : (muNRingMap N).hom.Flat := 
     (RingHom.Flat.comp (RingHom.flat_algebraMap_iff.mpr inferInstance)
       (RingHom.Flat.of_bijective ULift.ringEquiv.symm.bijective))
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The defining square of `μ_{N,S}`, with the cospan corner moved from the abstract
 terminal scheme to `Spec (ULift ℤ)`. -/
 private lemma isPullback_muN (S : Scheme.{u}) (N : ℕ) :
@@ -601,6 +607,7 @@ private lemma pushout_inr_gen_pow (A : Type u) [CommRing A] (N : ℕ)
     (s.inr (muNRingGen N)) ^ N = 1 := by
   rw [← map_pow, muNRingGen_pow, map_one]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The model over `A` is the pushout (base change) of `μ_N`'s coordinate ring. -/
 private lemma muNModel_isPushout (A : Type u) [CommRing A] (N : ℕ) :
     IsPushout (muNBaseMap A) (muNRingMap N) (muNModelStruct A N) (muNModelCompare A N) := by
@@ -691,6 +698,7 @@ private lemma muNModelStruct_etale (N : ℕ) [NeZero N] :
   rw [AdjoinRoot.algebraMap_eq] at h5
   exact h5
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-B7, étale criterion — iff form per the T-B7 spec)** `μ_{N,S} ⟶ S` is étale
 iff `N` is invertible on `S` (`Tᴺ − 1` separable ⟺ `N` a unit; both sides vacuous
 for `S = ∅`). -/
@@ -738,6 +746,7 @@ lemma isPullback_muN_baseChange (S T : Scheme.{u}) (N : ℕ) (g : T ⟶ S) :
   rw [← hθ1] at big
   exact ⟨θ, IsPullback.of_right big hθ2 t⟩
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- If `μ_N` is étale over an affine base `Spec A`, then the model structure map
 `A → A[T]/(Tᴺ − 1)` is étale. Obtained by transferring étaleness of `μ_N → Spec A` across the
 defining pushout/pullback square (the LEFT square has the identity factor). -/

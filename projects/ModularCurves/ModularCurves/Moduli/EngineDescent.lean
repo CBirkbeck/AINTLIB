@@ -589,6 +589,7 @@ theorem isProper_of_locallyWeierstrass {S E' : Scheme.{u}} {p : E' ⟶ S} {z : S
       MorphismProperty.cancel_right_of_respectsIso (P := @IsProper)]
     exact projModelπ_isProper (W s)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **([a4]/[a5], smoothness from the local model — LEAF, waits on T-A3)** A morphism admitting a
 Zariski-local Weierstrass model is **smooth of relative dimension 1**.
 
@@ -1245,6 +1246,7 @@ private theorem isElliptic_of_map_fixedAwayMap {A : Type u} [CommRing A]
     exact u.mul_inv
   exact IsUnit.of_mul_eq_one _ hone
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **([a5-W6], the per-point chart — ABSTRACT)** The `LocallyWeierstrass` chart package at a
 point `s` of `Spec Aᴳ`, over an abstract ring `A` (all instances opaque — no `whnf` grind).
 The geometry (the quotient cover `qE`, the model `φA`, the action family, the restricted

@@ -366,6 +366,7 @@ theorem trivialTorsorLeft_one (S : Scheme.{u}) :
   rw [ι_trivialTorsorLeft, one_mul, Category.comp_id]
 
 omit [Group G] [Finite G] in
+set_option backward.isDefEq.respectTransparency false in
 /-- The trivial-torsor projection is étale (a coproduct of identities;
 `Etale` is Zariski-local at the source). -/
 theorem trivialTorsorπ_etale (S : Scheme.{u}) :
@@ -922,6 +923,7 @@ theorem TorsorPair.pullback_shear_isIso (A : TorsorPair σ S) :
   exact MorphismProperty.of_isPullback (P := MorphismProperty.isomorphisms Scheme)
     hLeft.flip A.torsor
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Base change of a torsor pair** (T-W3c-i): pull `A : TorsorPair σ S` back along
 `q : S' ⟶ S`. Total space `P ×_S S'`, projection `pullback.snd`, action by
 functoriality (`pullbackAction`); the property fields are base-change stability and

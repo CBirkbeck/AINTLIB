@@ -65,6 +65,7 @@ Decomposes into three cases:
    the current lemma3 closure (covered by the
    `h_two_torsion_witness` hypothesis). -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **UNCONDITIONAL: T6 — Every kernel point of `γ = 1 − π` has pole order `-2`
 of `γ.pullback x_gen`** (Silverman V.1.1).
 
@@ -357,6 +358,7 @@ lemma ord_finset_sum_strict_gt
           lt_min h_i h_s
       _ ≤ C.ordAtInfty (φ i + ∑ j ∈ s, φ j) := C.ordAtInfty_add_ge_min _ _
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **DECOMP — Obstacle 1, L3**: Strict-dominance for `ord_∞` on integral elements.
 If `g : K(E)` is integral over `Polynomial K` (via `polyToFieldOfInv f`) and
 `ord_∞(1/f) ≥ 0`, then `ord_∞(g) ≥ 0`.
@@ -567,6 +569,7 @@ theorem Sinf_ordAtInfty_nonneg_at_infinity_kernel_point
   exact sinf_carrier_ordAtInfty_nonneg_of_inv_nonneg
     ((isogOneSub_negFrobenius W hq).pullback (x_gen W)) h_inv_nonneg data a
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **UNCONDITIONAL: Sinf carrier elements have nonneg ord at every kernel point**.
 
 The downstream-located counterpart of the upstream `OpenLemmaPrimitives` stub
@@ -619,6 +622,7 @@ integral closure subring is integral. The correct statement would be restricted 
 Zero consumers (verified by grep before deletion); leaf was stranded. B2 logged
 at `.mathlib-quality/b2_log.jsonl` (entry `AUDIT-2a-E.6`, 2026-05-25). -/
 
+set_option backward.isDefEq.respectTransparency false in
 theorem ord_kernel_pullback_x_eq_neg_two_of_two_torsion_witness
     (W : WeierstrassCurve K) [W.toAffine.IsElliptic]
     (hq : 2 ≤ Fintype.card K)
@@ -1017,6 +1021,7 @@ P = ∞ (uses `ordAtInfty_isogOneSub_negFrobenius_pullback_x_gen`), P = affine n
 These three closures together reduce L3 + L4 to the single substantive 2-torsion-witness
 sub-leaf (the addition-formula degeneracy at 2-torsion). -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Pointwise: divisor value = -2 at every K-rational projective point** given the
 2-torsion witness. Combines the shipped non-2-torsion `lemma3_pole_at_T_unconditional` +
 ∞ value `ordAtInfty_isogOneSub_negFrobenius_pullback_x_gen` with the 2-torsion witness.
@@ -1812,6 +1817,7 @@ theorem Sinf_ordAtPoint_nonneg_of_valuation_le_one
   rw [hord]
   exact hn_nonneg
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **F.1 wiring helper — the valuation-subring INCLUSION `A ≤ B`.**
 
 The underlying-subring (SetLike) inclusion of the carrier `P_T`-adic valuation subring
@@ -2010,6 +2016,7 @@ theorem Sinf_kernelPrime_valuation_isEquiv_pointValuation_at_affine
     (Sinf_kernelPrime_valuationSubring_le_pointValuation_at_affine
       W hq data T xT yT h_ns hTval)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **F.1 RESIDUAL (infinity branch) — value identity at the point at infinity.**
 
 The `T.val = .zero` (= `O`, point at infinity) case of
@@ -2103,6 +2110,7 @@ theorem Sinf_intValuation_eq_exp_neg_ordAtInfty_at_zero
   rw [← v.valuation_of_algebraMap (K := L) a, h_eq]
   exact C.ordAtInftyValuation_eq_exp_neg_of_ordAtInfty_eq h_img_ne had
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **F.1 RESIDUAL SUB-LEAF — the irreducible valuation identification (value identity).**
 
 This is the **single, sharply-isolated mathematical gap** for the entire V.1.3
@@ -2199,6 +2207,7 @@ theorem Sinf_intValuation_eq_exp_neg_ordAtPoint_at_kernel
     -- `w (algebraMap a) = pointValuation P (algebraMap a) = exp(-ord_P) = exp(-d)`.
     exact Curves.SmoothPlaneCurve.pointValuation_eq_exp_neg_of_ord_P_eq h_img_ne had
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **F.1: the consumed valuation inequality.**
 
 For the height-one prime `v := Sinf_kernelPrime_heightOne …` (whose `asIdeal` is
@@ -2489,6 +2498,7 @@ theorem bridge_Bii_kernelToPrime_mem_primesOverFinset_v2
   rw [IsDedekindDomain.mem_primesOverFinset_iff Curves.RamificationAtInfinity.xIdeal_ne_bot]
   exact ⟨bridge_Bi_isPrime_v2 W hq data T, bridge_Bi_liesOver_v2 W hq data T⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **F.1 injectivity — the kernel-to-prime map is injective** (CLOSED, deep pass
 2026-05-27, `T-SINF-CLOSED-POINT-PRIME-BRIDGE`, injectivity half).
 

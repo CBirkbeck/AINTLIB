@@ -261,6 +261,7 @@ private lemma mulModelHom_assoc_specPoints {K : Type u} [Field K]
   exact congrArg Subtype.val
     ((projModelPointsEquiv 𝕌 K).injective (ebigL.trans ((add_assoc _ _ _).trans ebigR.symm)))
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-G3-assoc)** Associativity of the two-law multiplication at the universe-`u` atlas,
 at the `Over (Spec 𝕌)` level: evaluate on a field point of the fibre cube, reduce both
 sides to spec-shaped lifts, and apply `add_assoc` on `Affine.Point`. -/
@@ -407,6 +408,7 @@ theorem mulOver_assoc_atlas :
       (congrArg (· ≫ mulModelHom 𝕌) hR0)
   exact hL.trans (keyval.trans hR.symm)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-G3-mul-one)** Right unit law at the atlas. -/
 theorem mulOver_oneOver_atlas :
     (modelOver universalWeierstrassLocU.{u} ◁ oneOver universalWeierstrassLocU.{u}) ≫
@@ -480,6 +482,7 @@ theorem mulOver_oneOver_atlas :
           (hZeval.trans (pullback.lift_snd _ _ _).symm))
   exact hL.trans hkey
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-G3-inv)** Left inverse law at the atlas. -/
 theorem invOver_mulOver_atlas :
     lift (invOver universalWeierstrassLocU.{u}) (𝟙 (modelOver universalWeierstrassLocU.{u})) ≫

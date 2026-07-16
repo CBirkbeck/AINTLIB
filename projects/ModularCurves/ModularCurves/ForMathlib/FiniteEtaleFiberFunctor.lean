@@ -95,6 +95,7 @@ lemma map_eval_eq_piRight_apply {ι : Type} [Fintype ι] [DecidableEq ι]
   | tmul ω f => simp [Algebra.TensorProduct.piRight_tmul]
   | add a b ha hb => simp [map_add, ha, hb]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Two maps into a base-changed product agreeing on all coordinate projections are
 equal. -/
 lemma baseChangePi_hom_ext {ι : Type} [Fintype ι] [DecidableEq ι]
@@ -108,6 +109,7 @@ lemma baseChangePi_hom_ext {ι : Type} [Fintype ι] [DecidableEq ι]
   rw [← map_eval_eq_piRight_apply A i, ← map_eval_eq_piRight_apply A i]
   exact congrArg (fun q => q.hom.hom x) (h i)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The base change of the product fan is a limit fan: `Ω ⊗[k] ∏ᵢ Aᵢ` is the product
 of the `Ω ⊗[k] Aᵢ`, via `piRight`. -/
 noncomputable def isLimitMapConeProductFan {ι : Type} [Finite ι]

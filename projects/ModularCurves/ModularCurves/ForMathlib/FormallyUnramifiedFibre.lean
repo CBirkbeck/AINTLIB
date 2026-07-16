@@ -70,6 +70,7 @@ universe u
 
 variable {X Y : Scheme.{u}} (f : X ⟶ Y)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- A finite morphism of schemes all of whose fibres (over residue fields of points of the base) are
 formally unramified is itself formally unramified.
 

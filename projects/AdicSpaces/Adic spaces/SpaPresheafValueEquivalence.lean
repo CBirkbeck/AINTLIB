@@ -462,6 +462,7 @@ theorem comap_coeRingHom_extensionHom_ofValuation_eq {R : Type*} [CommRing R] [U
       Valuation.ext (fun a => (Valuation.comap_apply _ _ _).trans (hval a))]
   exact ofValuation_valuation w
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Completion step (Wedhorn Lemma 8.2, completion half).** A Spa-point `w`
 of the rational localization `Localization.Away D.s` extends to a Spa-point `w'`
 of its completion `presheafValue D`, pulling back along `D.coeRingHom`.

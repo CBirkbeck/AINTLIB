@@ -340,6 +340,7 @@ theorem geomFrobeniusPointFun_injective :
 open HasseWeil
 
 omit [W.toAffine.IsElliptic] in
+set_option backward.isDefEq.respectTransparency false in
 /-- **The fibre-divisor place comparison** (the combinatorial heart of σ-naturality). The
 coefficient of the fibre divisor `[ℓ]^*(π̄T)` at an affine place `P` equals the coefficient of
 `[ℓ]^*(T)` at the inverse-Frobenius place `geomFrobSmoothPointInv P`, because
@@ -380,6 +381,7 @@ theorem pullbackDiv_geomFrobInv_eq (ℓ : ℤ) (hℓ : (ℓ : AlgebraicClosure K
         (geomFrobSmoothPointInv W P).toAffinePoint from hPrec.symm, ← hzsmul, h]
 
 omit [W.toAffine.IsElliptic] in
+set_option backward.isDefEq.respectTransparency false in
 /-- **The fibre-divisor place comparison at infinity**:
 `pullbackDiv [ℓ] (π̄T) ∞ = pullbackDiv [ℓ] T ∞` (both equal `if 0 = Q`, and `0 = π̄T ⟺ 0 = T` since
 π̄ is injective with `π̄ 0 = 0`). -/

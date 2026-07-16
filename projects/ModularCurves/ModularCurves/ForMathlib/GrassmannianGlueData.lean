@@ -682,6 +682,7 @@ theorem tPrimeRing_cocycle :
     simp only [RingHom.comp_apply] at this
     exact this
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The Spec-level cocycle: the triple `tPrimeScheme` composite telescopes to the
 identity through `Spec.map`-functoriality over the ring cocycle. -/
 lemma tPrimeScheme_cocycle :

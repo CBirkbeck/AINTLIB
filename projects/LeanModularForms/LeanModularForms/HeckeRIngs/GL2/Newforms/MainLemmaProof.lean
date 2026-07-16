@@ -463,7 +463,7 @@ private lemma evCusp_heckeT_ppow_smul
     (heckeT_ppow k p hp r) H.toModularForm' = ev ⟨p ^ r, pow_pos hp.pos r⟩ • H.toModularForm' := by
   haveI : NeZero (p ^ r) := ⟨(pow_pos hp.pos r).ne'⟩
   rw [← heckeT_n_prime_pow k hp r hr, ← heckeT_n_cusp_toModularForm']
-  exact congrArg _ (hev ⟨p ^ r, pow_pos hp.pos r⟩ inferInstance (hpN.pow_left r))
+  exact congrArg _ (hev ⟨p ^ r, pow_pos hp.pos r⟩ ⟨(pow_pos hp.pos r).ne'⟩ (hpN.pow_left r))
 
 /-- **Eigenvalue prime-power recurrence.**  For a nonzero common Hecke eigenfunction `H` in the
 Nebentypus space `χ` (eigenvalues `ev`), a prime `p ∤ N`, and any `r`,
@@ -517,7 +517,7 @@ private lemma evCusp_ppow_rec
   have h_Tp : heckeT_p_all k p hp F = a1 • F := by
     rw [heckeT_p_all_coprime k hp hpN, ← heckeT_n_prime_coprime k hp hpN,
       ← heckeT_n_cusp_toModularForm']
-    exact congrArg _ (hev ⟨p, hp.pos⟩ inferInstance hpN)
+    exact congrArg _ (hev ⟨p, hp.pos⟩ ⟨hp.pos.ne'⟩ hpN)
   -- evaluate the operator recurrence on `F`
   have hrec := congr_arg (fun T : Module.End ℂ (ModularForm ((Gamma1 N).map (mapGL ℝ)) k) ↦ T F)
     (heckeT_ppow_succ_succ (N := N) k p hp r)

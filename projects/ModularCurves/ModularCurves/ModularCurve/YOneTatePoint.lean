@@ -168,6 +168,7 @@ theorem factors_yOne_iff_exists_range {T : Scheme.{u}} (t : T ⟶ tateBase R) :
       ((yOneOpens R N).ι ≫ (tateUniversal R).killedLocusπ (tatePoint R) N) = t
     rw [← Category.assoc, IsOpenImmersion.lift_fac]; exact hg
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(Y1-D1 forward)** If `t : T ⟶ 𝒴` factors through the closed `Y_N` by a map whose image
 lands in the open `yOneSet`, then the pulled-back marked point is a naive `Γ₁(N)` structure:
 the global kill comes from `killedLocus_spec`; fibrewise, any proper multiple `d • P = 0` with
@@ -227,6 +228,7 @@ private theorem factors_yOne_iff_forward [NeZero N] {T : Scheme.{u}} (t : T ⟶ 
       rw [Set.mem_preimage, hgt]
       exact hxmem
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(Y1-D1 backward)** If the pulled-back marked point is a naive `Γ₁(N)` structure, then
 `t` factors through `Y_N` with image in `yOneSet`: the global kill gives the factoring `g`
 (`killedLocus_spec`); and if any fibre landed in a removed `Y_d`, the geometric point (over an
@@ -265,7 +267,8 @@ private theorem factors_yOne_iff_backward [NeZero N] {T : Scheme.{u}} (t : T ⟶
   have himg : (τ ≫ t).base (IsLocalRing.closedPoint k) = t.base x := by
     rw [Scheme.Hom.comp_apply]
     congr 1
-    rw [hτ, Scheme.Hom.comp_apply, Scheme.fromSpecResidueField_apply]
+    rw [hτ, Scheme.Hom.comp_apply]
+    exact Scheme.fromSpecResidueField_apply x _
   have hτkill : (d : ℤ) • EllipticCurve.Point.pull (tateUniversal R) (τ ≫ t) (tatePoint R) = 0 := by
     rw [(tateUniversal R).pull_smul_eq_zero_iff_residue (tatePoint R) (d : ℤ) (τ ≫ t)
       ((τ ≫ t).base (IsLocalRing.closedPoint k)) ⟨IsLocalRing.closedPoint k, rfl⟩, himg]
@@ -294,6 +297,7 @@ theorem factors_yOne_iff [NeZero N] (_hN : 4 ≤ N) (_hinv : IsUnit (N : R))
   rw [factors_yOne_iff_exists_range]
   exact ⟨factors_yOne_iff_forward R N t, factors_yOne_iff_backward R N t⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(Y1-D3 — Loeffler Def 3.3.6, representability half of T-E7)** `(Y₁(N), universal curve,
 (0,0))` represents the naive `Γ₁(N)` moduli problem: for every `Y : Ell/R`,
 `Ell/R`-morphisms `Y ⟶ Y₁(N)-object` correspond to naive `Γ₁(N)` structures on `Y.curve`,
@@ -540,6 +544,7 @@ theorem yOne_isAffine [NeZero N] (_hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
   -- transport to the spectrum: a clopen of an affine scheme is an idempotent basic open
   exact isAffineOpen_of_isClopen (yOneOpens R N) hclopen
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(Y1-E3)** The structure morphism of `Y₁(N)` is an affine morphism — source affine
 (Y1-E2) and target `Spec R` affine (`HasAffineProperty @IsAffineHom`). -/
 theorem yOneStructMap_isAffineHom [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R)) :
@@ -547,6 +552,7 @@ theorem yOneStructMap_isAffineHom [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : 
   have := yOne_isAffine R N hN hinv
   exact (HasAffineProperty.iff_of_isAffine (P := @IsAffineHom)).mpr inferInstance
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(Y1-E4 — finite presentation)** `Y₁(N) ⟶ Spec R` is locally of finite presentation: the
 atlas ring is a localized polynomial ring; the zero section of the (smooth, separated,
 finitely presented) universal curve is a finitely presented closed immersion
@@ -581,6 +587,7 @@ theorem yOneStructMap_locallyOfFinitePresentation [NeZero N] (_hN : 4 ≤ N)
   exact MorphismProperty.comp_mem _ _ _
     (MorphismProperty.comp_mem _ _ _ hι hkl) hstr
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The `baseChangeEquiv` dictionary at any base point: the pull of the tautological
 section is the pull of the marked point along the composite (the `pull∘asSection` bridge). -/
 private theorem pullAsSection_dict {T T' : Scheme.{u}} (s : T' ⟶ tateBase R) (τ : T ⟶ T') :
@@ -685,6 +692,7 @@ private theorem nowhereGeomOrderLEThree_asSection_pull_tatePoint {T : Scheme.{u}
   exact h1
 
 open EllipticCurve in
+set_option backward.isDefEq.respectTransparency false in
 /-- **(Y1-E5 pure core)** The étale torsion-point lift against a nilpotent ideal, packaged
 through the marked-atlas classification: an atlas algebra map to `A⧸I` whose marked point is
 `N`-killed lifts, after T-E1-style renormalisation by the classifying morphism of the lifted
@@ -1236,6 +1244,7 @@ theorem yOne_infinitesimal_lifting [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N :
   · rw [show yOneStructMap R N = yOneBase R N ≫ tateStructMap R from rfl, ← Category.assoc,
       hf, hover]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(Y1-E6 = Loeffler Thm 3.4.4, smoothness half of T-E7)** `Y₁(N) ⟶ Spec R` is smooth.
 Loeffler (verbatim, p. 15): *"`Y₁(N)_{ℤ[1/N]}` is smooth over `ℤ[1/N]`."* Assembly: `Y₁(N)`
 is affine (Y1-E2) with finitely presented coordinate ring over `R` (Y1-E4); the lifting

@@ -67,6 +67,7 @@ theorem lambdaRationalValuation_le_one_iff_den (x : ℚ) :
     (Rat.valuation_le_one_iff_den
       (R := ℤ) (𝔭 := lambdaRationalHeightOneSpectrum p) (x := x))
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The rational height-one place at `p` is the one `Rat.HeightOneSpectrum.primesEquiv`
 assigns to `p`. -/
 theorem lambdaRationalHeightOneSpectrum_eq_primesEquiv_symm :

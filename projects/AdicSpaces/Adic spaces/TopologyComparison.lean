@@ -1018,6 +1018,7 @@ private theorem scaleIncl_truncTate_eq (g : ↥(TateAlgebra A)) (N : ℕ) (s : A
     TateAlgebraWedhorn.scaleIncl s g idx := by
   simp only [TateAlgebraWedhorn.scaleIncl_apply, truncTate_coeff_low g N idx h]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Polynomials (elements with finitely many nonzero coefficients) are dense
 in the Tate algebra for the T-topology. The T-topology is induced from the
 product `∏ A` via `scaleIncl`, and in the product topology a sequence of
@@ -1427,6 +1428,7 @@ which is topologically nilpotent. The caller discharges `hJ_eval` from this stru
 Then `IsQuotientMap.continuous_iff` descends continuity to the quotient. -/
 
 omit [PlusSubring A] [IsHuberRing A] [T2Space A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- The reverse map `A⟨X⟩/(1-sX) → presheafValue D` is continuous.
 
 **Proof (Wedhorn Example 6.38):** `tateQuotientToPresheafHom = Quotient.lift tateEvalPresheafHom`.
@@ -2647,6 +2649,7 @@ theorem tateEvalPresheafHom_continuous_canonical
   exact W.toAddSubgroup.sum_mem (fun k _ ↦ hterm_mem k)
 
 omit [PlusSubring A] [IsHuberRing A] [T2Space A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Canonical-topology continuity of `tateQuotientToPresheafHom`
 (Wedhorn Prop 6.18 + Example 6.38).**
 

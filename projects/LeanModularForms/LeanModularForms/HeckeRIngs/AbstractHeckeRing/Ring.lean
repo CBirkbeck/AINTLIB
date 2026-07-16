@@ -53,8 +53,9 @@ noncomputable instance instNonAssocSemiring : NonAssocSemiring (𝕋 P ℤ) :=
     natCast_succ := fun _ ↦ by
       simp only [Nat.cast_add, Nat.cast_one, single_add]; rfl
     one_mul := fun f ↦ by
-      simp only [one_def, mul_def, T_single]
-      simp
+      rw [mul_def, show (1 : 𝕋 P ℤ) = Finsupp.single (HeckeCoset.one P) 1 from rfl,
+        Finsupp.sum_single_index (by simp only [zero_smul]; exact Finsupp.sum_fun_zero f)]
+      simp only [one_smul]
       nth_rw 2 [← Finsupp.sum_single f]
       congr
       ext D z v
@@ -122,6 +123,7 @@ lemma T_single_mul_T_single (D₁ D₂ : HeckeCoset P) (a b : ℤ) :
     T_single P ℤ D₁ 1 * T_single P ℤ D₂ 1 =
       m P (HeckeCoset.rep D₁) (HeckeCoset.rep D₂) := by
   simp [T_single_mul_T_single]
+  rfl
 
 /-- Right multiplication by 1 is the identity. -/
 @[simp] lemma T_single_mul_one (D : HeckeCoset P) (a : ℤ) :

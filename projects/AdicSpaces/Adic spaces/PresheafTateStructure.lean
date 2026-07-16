@@ -401,6 +401,7 @@ private theorem locIdeal_pow_toAddSubgroup_isOpen (D₀ : RationalLocData A) (n 
 set_option maxHeartbeats 4000000 in
 -- The AdicCompletion bridge proof has deep elaboration chains through ring equivs.
 omit [PlusSubring A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- Helper for `idealOfDef_pow_val_isClosed` (⊇ direction): `idealOfDef^n` is closed in the
 subspace topology on `ringOfDef`.
 
@@ -1128,6 +1129,7 @@ private noncomputable def locLift
     Localization.Away D₀.s →+* Localization.Away D.s :=
   IsLocalization.Away.lift D₀.s (isUnit_algebraMap_s_of_rational_subset D₀ D h)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The algebraic restriction map factors as `D.coeRingHom ∘ locLift D₀ D h`. -/
 private theorem restrictionMapAlg_eq_comp_locLift
     (D₀ D : RationalLocData A) (h : rationalOpen D.T D.s ⊆ rationalOpen D₀.T D₀.s) :

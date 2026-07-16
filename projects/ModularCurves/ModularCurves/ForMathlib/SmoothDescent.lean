@@ -151,6 +151,7 @@ private lemma lfp_of_precomp_of_isAffine {W Y Z : Scheme.{u}} [IsAffine W] [IsAf
   rw [Scheme.Hom.comp_appTop, CommRingCat.hom_comp] at h
   exact RingHom.FinitePresentation.of_comp_of_faithfullyFlat hff hfp h
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Engine for Stacks 02KL, with the surjectivity hypothesis as an instance. The wlog
 cascade (mirroring `LocallyOfFinitePresentation.of_comp_of_locallyOfFiniteType`,
 `ForMathlib/FinitePresentationCancel.lean`) reduces to affine `Z` then affine `Y`; there,

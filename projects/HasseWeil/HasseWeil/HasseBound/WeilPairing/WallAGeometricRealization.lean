@@ -81,6 +81,7 @@ noncomputable local instance instDecEqACGeom : DecidableEq (AlgebraicClosure K) 
 
 variable [(W.baseChange (AlgebraicClosure K)).toAffine.IsElliptic]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **The `q`-power geometric Frobenius commutes with the function-field base-change point map**
 (Silverman III.4, base change).  For the function-field base-change point map `ffBaseChangePoint`
 and the geometric `q`-power Frobenius `frobeniusW_KE` (over `K`) / `frobFunctionFieldPointKbar`

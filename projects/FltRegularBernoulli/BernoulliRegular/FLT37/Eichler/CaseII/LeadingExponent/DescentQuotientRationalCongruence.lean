@@ -1,6 +1,7 @@
 module
 
 public import FltRegular.CaseII.InductionStep
+import FltRegular.NumberTheory.Cyclotomic.MoreLemmas
 
 /-!
 # Case-II descent quotient is congruent to a rational integer mod `37`
@@ -67,6 +68,7 @@ open scoped NumberField
 
 namespace BernoulliRegular.FLT37.Eichler
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **The Case-II descent quotient is congruent to a rational integer mod `37`.**
 
 In the Case-II Fermat configuration `ε₁ x'^37 + ε₂ y'^37 = ε₃ ((ζ-1)^m z')^37` with

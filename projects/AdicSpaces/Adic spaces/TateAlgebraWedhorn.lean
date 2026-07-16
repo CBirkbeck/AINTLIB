@@ -174,6 +174,7 @@ end RingTopology
 
 /-! ### Nonarchimedean property -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The T-topology is nonarchimedean (Proposition 5.49(2) of Wedhorn).
 For any neighborhood of `0`, there exists an open additive subgroup inside it.
 This follows because the T-topology is induced from the product topology on

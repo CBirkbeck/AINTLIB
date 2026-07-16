@@ -235,6 +235,7 @@ theorem addPullback_x_negFrobenius_isAlgebraic_range
   addPullback_x_negFrobenius_isAlgebraic_range_of_witness W hq hxy
     (addPullback_x_negFrobenius_mem_range W hq)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Algebraicity over the type-synonym wrapper (UNCONDITIONAL, axiom-clean,
 Path (a) step 8)**: `K(E)` is algebraic over `IsogenyAlgebraSource W
 (isogOneSub_negFrobenius W hq)`.

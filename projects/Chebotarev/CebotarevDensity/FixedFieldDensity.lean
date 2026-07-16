@@ -84,6 +84,7 @@ theorem frobeniusFibre_card_eq_of_isConj
     have hconj := hfrob.conj c⁻¹
     rwa [hsmul, ← hc, show c⁻¹ * (c * σ * c⁻¹) * c⁻¹⁻¹ = σ by group] at hconj
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Balanced fibre count.** If every prime above `𝔭` has Frobenius in the class `C = [σ]`
 and conjugate Frobenius values occur equally often (`hequi`), the total number of primes
 above `𝔭` is `|C|` times the number with `Frob_𝔓 = σ`: partition by the (class-`C`-valued)
@@ -743,6 +744,7 @@ private theorem card_fibre_T1_over_prime
   rw [card_fibre_E_eq_card_fibre_L σ σE hσE horderE 𝔭 hunr𝔭 hfrob𝔭, mul_comm, ← mul_assoc]
   exact count_primes_above_with_frobenius_eq_sigma K L σ (ConjClasses.mk σ) rfl 𝔭 hunr𝔭 hfrob𝔭
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **LEAF A: the degree-one part of `T` carries the main term** (Sharifi 7.2.2 p. 143). For
 `1 < s`, the partial Dirichlet sum over the set `T₁` of degree-one (over `K`) primes `P` of
 `𝓞 E` above an unramified-in-`L` prime, with `Frob^E_P = [σ_E]`, equals `|G|/(f·|C|)` times the

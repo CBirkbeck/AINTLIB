@@ -73,7 +73,8 @@ private lemma denom_at_I (g : SL(2, ℤ)) :
       ((Matrix.SpecialLinearGroup.map (Int.castRingHom ℝ)) g)) (Complex.I) =
     ↑((g : Matrix (Fin 2) (Fin 2) ℤ) 1 0 : ℤ) * Complex.I +
     ↑((g : Matrix (Fin 2) (Fin 2) ℤ) 1 1 : ℤ) := by
-  simp [UpperHalfPlane.denom, Matrix.SpecialLinearGroup.toGL, Matrix.SpecialLinearGroup.map]
+  simp [UpperHalfPlane.denom, Matrix.SpecialLinearGroup.toGL,
+    Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply, Matrix.map_apply]
 
 omit f hf in
 private lemma normSq_denom_at_I (g : SL(2, ℤ)) :
@@ -150,7 +151,8 @@ private lemma denom_at_rho (g : SL(2, ℤ)) :
       (-1/2 + (Real.sqrt 3 / 2) * I) +
     ↑((g : Matrix (Fin 2) (Fin 2) ℤ) 1 1 : ℤ) := by
   simp [UpperHalfPlane.denom, Matrix.SpecialLinearGroup.toGL,
-    Matrix.SpecialLinearGroup.map, ellipticPointRho']
+    Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply, Matrix.map_apply,
+    ellipticPointRho']
 
 omit f hf in
 private lemma normSq_denom_at_rho (g : SL(2, ℤ)) :

@@ -31,6 +31,7 @@ def dworkParameterCauchySeq :
 def dworkParameter : DworkCompleteIntegerRing p K :=
   AdicCompletion.mkₐ (lambdaIdeal p K) (dworkParameterCauchySeq p K)
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 theorem dworkParameter_evalₐ (N : ℕ) :
     AdicCompletion.evalₐ (lambdaIdeal p K) N (dworkParameter p K) =

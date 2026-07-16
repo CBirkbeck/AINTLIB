@@ -653,7 +653,6 @@ theorem heckeSymb_p_all_commute_diamondSymb [NeZero N] (k : ℤ) {p : ℕ} (hp :
   show heckeSymb_p_all N k p hp * diamondSymbAux k γ = diamondSymbAux k γ * heckeSymb_p_all N k p hp
   rw [Module.End.mul_eq_comp, Module.End.mul_eq_comp]
   refine Coinvariants.hom_ext (LinearMap.ext fun x => ?_)
-  simp only [LinearMap.comp_apply]
   show heckeSymb_p_all N k p hp (diamondSymbAux k γ (𝕄.mk N k x))
     = diamondSymbAux k γ (heckeSymb_p_all N k p hp (𝕄.mk N k x))
   rw [diamondSymbAux_mk]
@@ -781,7 +780,6 @@ theorem upperSymb_commute [NeZero N] (k : ℤ) {p q : ℕ} (hp : Nat.Prime p) (h
   show upperSymb hp hpN k * upperSymb hq hqN k = upperSymb hq hqN k * upperSymb hp hpN k
   rw [Module.End.mul_eq_comp, Module.End.mul_eq_comp]
   refine Coinvariants.hom_ext (LinearMap.ext fun x => ?_)
-  simp only [LinearMap.comp_apply]
   show upperSymb hp hpN k (upperSymb hq hqN k (𝕄.mk N k x))
     = upperSymb hq hqN k (upperSymb hp hpN k (𝕄.mk N k x))
   rw [upperSymb_mk, upperSymb_mk, upperSymb_mk, upperSymb_mk,
@@ -1090,7 +1088,6 @@ theorem tpSymb_commute [NeZero N] (k : ℤ) {p q : ℕ} (hp : Nat.Prime p) (hq :
     show tpSymb hp hpN k * tpSymb hq hqN k = tpSymb hq hqN k * tpSymb hp hpN k
     rw [Module.End.mul_eq_comp, Module.End.mul_eq_comp]
     refine Coinvariants.hom_ext (LinearMap.ext fun x => ?_)
-    simp only [LinearMap.comp_apply]
     show tpSymb hp hpN k (tpSymb hq hqN k (𝕄.mk N k x))
       = tpSymb hq hqN k (tpSymb hp hpN k (𝕄.mk N k x))
     rw [tpSymb_mk, tpSymb_mk, tpSymb_mk, tpSymb_mk,
@@ -1114,7 +1111,6 @@ theorem tpSymb_upperSymb_commute [NeZero N] (k : ℤ) {p q : ℕ} (hp : Nat.Prim
   show tpSymb hp hpN k * upperSymb hq hqN k = upperSymb hq hqN k * tpSymb hp hpN k
   rw [Module.End.mul_eq_comp, Module.End.mul_eq_comp]
   refine Coinvariants.hom_ext (LinearMap.ext fun x => ?_)
-  simp only [LinearMap.comp_apply]
   show tpSymb hp hpN k (upperSymb hq hqN k (𝕄.mk N k x))
     = upperSymb hq hqN k (tpSymb hp hpN k (𝕄.mk N k x))
   rw [tpSymb_mk, upperSymb_mk, upperSymb_mk, tpSymb_mk]

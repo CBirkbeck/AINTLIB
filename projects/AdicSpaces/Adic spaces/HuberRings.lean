@@ -819,6 +819,7 @@ private theorem nilpotentUnit_principalData {C : Type*} [CommRing C] [Topologica
     Subtype.ext (Units.val_pow_eq_pow_val u K)] at hm
   exact ⟨K, N, hK_pos, Nat.succ_pos N₀, hu_K, hN_mem, m, hm⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Proposition 6.25 of Wedhorn**: a continuous ring homomorphism
 from a Tate ring is adic. -/
 theorem IsTateRing.isAdicHom_of_continuous_with_pairs [IsTateRing A] [IsHuberRing B]

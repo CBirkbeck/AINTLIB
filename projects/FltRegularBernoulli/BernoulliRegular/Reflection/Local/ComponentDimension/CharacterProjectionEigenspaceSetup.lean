@@ -175,6 +175,7 @@ theorem localMaximalIdealGradedQuotient_card (n : ℕ) :
     (localMaximalIdealGradedQuotientEquivResidue (p := p) (K := K) n)).symm.trans
       (localCyclotomicResidueCard (p := p) (K := K))
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem factor_evalₐ_pow_le
     {R : Type*} [CommRing R] (I : Ideal R) {m n : ℕ} (hmn : m ≤ n)
     (x : AdicCompletion I R) :

@@ -20,6 +20,7 @@ namespace AlgebraicGeometry.Scheme.Modules
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- A trivialization on an open identifies its sections with the sections of
 the ambient structure sheaf on that open. -/
 noncomputable def sectionsIsoUnitSectionsOfRestrictIso

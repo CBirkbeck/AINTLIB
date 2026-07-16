@@ -341,6 +341,7 @@ noncomputable def sqStruct :
       (fgSys.specDiagram R).obj (wStageOp W) :=
   Limits.pullback.fst _ _ ≫ projModelπ (wZero W)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The structural transformation of the base-changed square system. -/
 noncomputable def sqT : (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
     Over.pullback (sqStruct W) ⋙ Over.forget _) ⟶
@@ -387,7 +388,7 @@ theorem bcSq_transition_isPullback {T T' : Over (wStageOp W)} (φ : T ⟶ T') :
     rw [hsnd']
     convert (IsPullback.of_hasPullback ((Over.post (X := wStageOp W)
       (fgSys.specDiagram R)).obj T).hom (sqStruct W)).flip using 2
-    all_goals first | rfl | exact hw
+    all_goals first | rfl | exact hw | exact iff_of_eq (congrArg _ hw)
   · exact Limits.pullback.lift_fst _ _ _
 
 /-- Generic transition square for the base-changed system along any `g`. -/
@@ -412,7 +413,7 @@ theorem bc_transition_isPullback (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp 
     rw [hsnd']
     convert (IsPullback.of_hasPullback ((Over.post (X := wStageOp W)
       (fgSys.specDiagram R)).obj T).hom g).flip using 2
-    all_goals first | rfl | exact hw
+    all_goals first | rfl | exact hw | exact iff_of_eq (congrArg _ hw)
   · exact Limits.pullback.lift_fst _ _ _
 
 instance bc_transition_affine (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W))
@@ -436,6 +437,7 @@ instance bc_obj_compact (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W))
   exact inferInstanceAs (CompactSpace ↑(Limits.pullback ((Over.post (X := wStageOp W)
     (fgSys.specDiagram R)).obj T).hom g))
 
+set_option backward.isDefEq.respectTransparency false in
 instance bc_obj_qsep (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W))
     [QuasiSeparated g] (T : Over (wStageOp W)) :
     QuasiSeparatedSpace ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
@@ -446,7 +448,7 @@ instance bc_obj_qsep (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W))
   exact @quasiSeparatedSpace_of_quasiSeparated _ _
     (Limits.pullback.fst ((Over.post (X := wStageOp W)
       (fgSys.specDiagram R)).obj T).hom g)
-    inferInstance (MorphismProperty.pullback_fst _ _ inferInstance)
+    inferInstance inferInstance
 
 instance bcSq_transition_affine {T T' : Over (wStageOp W)} (φ : T ⟶ T') :
     IsAffineHom ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
@@ -460,8 +462,9 @@ instance bcSq_transition_affine {T T' : Over (wStageOp W)} (φ : T ⟶ T') :
     (isAffineHom_of_isAffine _)
 
 instance sqStruct_proper : IsProper (sqStruct W) := by
+  haveI : IsProper (projModelπ (wZero W)) := projModelπ_isProper (wZero W)
   haveI : IsProper (Limits.pullback.fst (projModelπ (wZero W)) (projModelπ (wZero W))) :=
-    MorphismProperty.pullback_fst _ _ (projModelπ_isProper (wZero W))
+    inferInstance
   exact MorphismProperty.comp_mem _ _ _ inferInstance (projModelπ_isProper (wZero W))
 
 instance bcSq_obj_compact (T : Over (wStageOp W)) :
@@ -475,6 +478,7 @@ instance bcSq_obj_compact (T : Over (wStageOp W)) :
   exact inferInstanceAs (CompactSpace ↑(Limits.pullback ((Over.post (X := wStageOp W)
     (fgSys.specDiagram R)).obj T).hom (sqStruct W)))
 
+set_option backward.isDefEq.respectTransparency false in
 instance bcSq_obj_qsep (T : Over (wStageOp W)) :
     QuasiSeparatedSpace ((Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
       Over.pullback (sqStruct W) ⋙ Over.forget _).obj T) := by
@@ -486,9 +490,10 @@ instance bcSq_obj_qsep (T : Over (wStageOp W)) :
   exact @quasiSeparatedSpace_of_quasiSeparated _ _
     (Limits.pullback.fst ((Over.post (X := wStageOp W)
       (fgSys.specDiagram R)).obj T).hom (sqStruct W))
-    inferInstance (MorphismProperty.pullback_fst _ _ inferInstance)
+    inferInstance inferInstance
 
 set_option maxSynthPendingDepth 3 in
+set_option backward.isDefEq.respectTransparency false in
 /-- **(K2 step 5, μ-descent)** Any multiplication-shaped morphism on the `R`-square
 descends to a finitely generated stage, compatibly over the first stage. -/
 theorem mu_descends (μl : Limits.pullback (projModelπ W) (projModelπ W) ⟶ projModel W)
@@ -524,7 +529,6 @@ theorem mu_descends (μl : Limits.pullback (projModelπ W) (projModelπ W) ⟶ p
       Limits.pullback.snd ((slicedCone W).pt).hom (sqStruct W) ≫ sqStruct W := by
     show (bcCone W (sqStruct W)).π.app T ≫ (_ ≫ sqStruct W) = _
     rw [← Category.assoc, hw]
-    rfl
   rw [hLHS]
   -- the right side collapses along the comparison and the two structure squares
   have hisoinv : (sqComparison W).inv ≫
@@ -596,6 +600,7 @@ theorem eq_descends (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W))
     (fun T => bc_obj_compact W g T) hlft inferInstance
     (fun {i j} φ => bc_transition_affine W g φ) T u v hu hv huv
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The structural transformation of any base-changed stage system. -/
 noncomputable def bcT (g : X ⟶ (fgSys.specDiagram R).obj (wStageOp W)) :
     (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
@@ -695,6 +700,7 @@ noncomputable def modelComparison :
     projModel W ≅ (bcCone W (projModelπ (wZero W))).pt :=
   (wPB (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)).flip.isoPullback
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(K2, ι-descent)** Any endomorphism-shaped morphism of the model over `R` descends to
 a finitely generated stage. -/
 theorem iota_descends (il : projModel W ⟶ projModel W)
@@ -743,7 +749,6 @@ theorem iota_descends (il : projModel W ⟶ projModel W)
     exact congrArg (· ≫ Spec.map (CommRingCat.ofHom (wStage W).1.val.toRingHom))
       ((wPB (wStage W).1.val.toRingHom (wZero W) W (wZero_map W)).flip.isoPullback_inv_fst)
   rw [hLHS, hRHS, Limits.pullback.condition]
-  rfl
 
 end IotaDescent
 
@@ -822,6 +827,7 @@ theorem axL₀_sqStruct : axL₀ W ≫ sqStruct W = projModelπ (wZero W) := by
       (projModelπ (wZero W))).symm.trans
     (congrArg (· ≫ projModelπ (wZero W)) h1)).trans h2
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The axis map between the base-changed systems, at a stage. -/
 noncomputable def axBC (T : Over (wStageOp W)) :
     (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
@@ -832,6 +838,7 @@ noncomputable def axBC (T : Over (wStageOp W)) :
     (by rw [Category.comp_id, Category.id_comp])
     (by rw [Category.comp_id, axL₀_sqStruct])
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The apex-level axis map. -/
 noncomputable def axApex :
     (bcCone W (projModelπ (wZero W))).pt ⟶ (bcCone W (sqStruct W)).pt :=
@@ -1173,6 +1180,7 @@ theorem axR₀_sqStruct : axR₀ W ≫ sqStruct W = projModelπ (wZero W) := by
       (projModelπ (wZero W))).symm.trans
     (congrArg (· ≫ projModelπ (wZero W)) h1)).trans (Category.id_comp _)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The right-axis map between the base-changed systems, at a stage. -/
 noncomputable def axBCR (T : Over (wStageOp W)) :
     (Over.post (X := wStageOp W) (fgSys.specDiagram R) ⋙
@@ -1183,6 +1191,7 @@ noncomputable def axBCR (T : Over (wStageOp W)) :
     (by rw [Category.comp_id, Category.id_comp])
     (by rw [Category.comp_id, axR₀_sqStruct])
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The apex-level right-axis map. -/
 noncomputable def axApexR :
     (bcCone W (projModelπ (wZero W))).pt ⟶ (bcCone W (sqStruct W)).pt :=

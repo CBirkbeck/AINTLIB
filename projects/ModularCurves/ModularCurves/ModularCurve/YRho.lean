@@ -293,6 +293,7 @@ noncomputable def vRhoPointsEquiv {N : ℕ} [NeZero N] (D : GaloisRepData N) :
     (AlgEquiv.arrowCongr AlgEquiv.refl sepClosureQAlgEquiv.symm)).trans
     (FiniteEtaleGalois.pointsEquivOfContAction ℚ (rhoContAction D))
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(T-F1b, companion specification)** The points bijection is Galois-equivariant:
 translating a `ℚ̄`-point of `V_ρ` by `σ : Gal(ℚ̄/ℚ)` corresponds to acting by `ρ σ`
 on `(ℤ/N)²`. -/

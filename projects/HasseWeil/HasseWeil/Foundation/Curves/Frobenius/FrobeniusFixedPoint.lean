@@ -162,6 +162,7 @@ omit [Fintype K] [DecidableEq K] in
           (FaithfulSMul.algebraMap_injective K (AlgebraicClosure K)) x y).mpr h) := rfl
 
 omit [Fintype K] [DecidableEq K] in
+set_option backward.isDefEq.respectTransparency false in
 /-- `includePointBC` is injective: it is `HasseWeil.Affine.Point.map` of the injective ring
 hom `algebraMap K L`, and the constructor `some` is injective in its coordinates. -/
 theorem includePointBC_injective : Function.Injective (includePointBC W) := by
@@ -192,6 +193,7 @@ reduces, via `HasseWeil.Affine.Point.map_some` and `some.injEq`, to the conjunct
 membership of both coordinates in `range (algebraMap K L)`. -/
 
 omit [DecidableEq K] in
+set_option backward.isDefEq.respectTransparency false in
 /-- **S2 (point fixed-locus)**: a point `P` over the algebraic closure is fixed by the
 geometric Frobenius iff it is the base-change inclusion of a `K`-rational point.
 

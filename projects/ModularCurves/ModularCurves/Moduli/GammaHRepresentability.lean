@@ -593,6 +593,7 @@ variable {S : Scheme.{u}} (E : EllipticCurve S)
 noncomputable def levelSpaceΓπ (N : ℕ) [NeZero N] : levelSpaceΓ E N ⟶ S :=
   levelSpaceΓι E N ≫ pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **[GHA2] (finiteness half of KM 3.7.1's conclusion)** `U_{Γ(N)} → S` is finite:
 closed immersion (`subschemeι`) into `E[N] ×_S E[N]`, which is finite over `S`
 (`torsionπ_isFinite`, T-B4 registered box, + base-change/composition stability).
@@ -874,6 +875,7 @@ private theorem pullSection_asSection_aux {R : CommRingCat.{u}} (X : EllObj R)
       (Point.asSection_val_snd X.curve (k ≫ g) (Point.restrict X.curve k P)).symm
 
 open EllipticCurve in
+set_option backward.isDefEq.respectTransparency false in
 /-- **[GHC4, the glue]** Glue a `Bool`-family of naive full level structures on
 `X.curve` into a full level structure on the base change `X.curve.baseChange g`, where
 `g` restricts to `𝟙` on each `Bool`-summand. This is the constructor of the "second
@@ -1098,6 +1100,7 @@ lemma coprodFullLevel_restrict {R : CommRingCat.{u}} (N : ℕ) [NeZero N]
       (coprodFullLevel_restrict_snd N X g hg Lf i)))
 
 open EllipticCurve in
+set_option backward.isDefEq.respectTransparency false in
 /-- **[GHC4] (THE REFUTATION OF RECORD — adversarial finding F1, B2 statement event)**
 For `H ≠ ⊥`, the naive global-orbit problem `gammaHNaiveProblem R N H` is NOT
 relatively representable, given any witness object with a nonempty base and a naive

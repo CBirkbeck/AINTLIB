@@ -127,13 +127,18 @@ private lemma lowerTriRep_mem_Gamma0 (k : ℕ) (c : Fin p) :
 private lemma lowerTriRep_diff_entry (k : ℕ) (c₁ c₂ : Fin p) :
     ((lowerTriRep p k c₁)⁻¹ * lowerTriRep p k c₂).1 1 0 =
     ((c₂ : ℤ) - (c₁ : ℤ)) * (p : ℤ) ^ k := by
-  simp [lowerTriRep, Matrix.SpecialLinearGroup.coe_inv, adjugate_fin_two_of, sub_mul,
+  rw [show (((lowerTriRep p k c₁)⁻¹ * lowerTriRep p k c₂).1 : Matrix (Fin 2) (Fin 2) ℤ)
+      = adjugate (lowerTriRep p k c₁) * (lowerTriRep p k c₂).1 from by
+    rw [Matrix.SpecialLinearGroup.coe_mul, Matrix.SpecialLinearGroup.coe_inv]]
+  simp [lowerTriRep, adjugate_fin_two_of, Matrix.mul_apply, Fin.sum_univ_two, sub_mul,
     neg_add_eq_sub]
 
 private lemma lowerTriRep_inv_mul_10 (k : ℕ) (c : Fin p) (σ : SL(2, ℤ)) :
     ((lowerTriRep p k c)⁻¹ * σ).1 1 0 = σ.1 1 0 - (c : ℤ) * (p : ℤ) ^ k * σ.1 0 0 := by
-  simp [SL2_entry_mul, lowerTriRep, Matrix.SpecialLinearGroup.coe_inv, adjugate_fin_two_of,
-    neg_add_eq_sub]
+  rw [SL2_entry_mul,
+    show (((lowerTriRep p k c)⁻¹).1 : Matrix (Fin 2) (Fin 2) ℤ)
+      = adjugate (lowerTriRep p k c) from Matrix.SpecialLinearGroup.coe_inv _]
+  simp [lowerTriRep, adjugate_fin_two_of, neg_add_eq_sub]
 
 private def relindexRep (k : ℕ) (c : Fin p) : ↥(Gamma0 (p ^ k)) :=
   ⟨lowerTriRep p k c, lowerTriRep_mem_Gamma0 p k c⟩

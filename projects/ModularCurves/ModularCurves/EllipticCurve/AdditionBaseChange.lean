@@ -111,6 +111,21 @@ noncomputable def pullbackMapBaseChangeOf (f : U →+* R) (W₀ : WeierstrassCur
     (isPullback_projModelBaseChangeOf f W₀ W h).w.symm
     (isPullback_projModelBaseChangeOf f W₀ W h).w.symm
 
+/-- The `fst`-leg of the base-change fibre-square map. Stated for a generic transport proof `h`,
+so it can be instantiated at `h := rfl` (where direct `rw`-unfolding of the definition fails). -/
+private lemma pullbackMapBaseChangeOf_fst (f : U →+* R) (W₀ : WeierstrassCurve U)
+    (W : WeierstrassCurve R) (h : W₀.map f = W) :
+    pullbackMapBaseChangeOf f W₀ W h ≫ pullback.fst (projModelπ W₀) (projModelπ W₀) =
+      pullback.fst (projModelπ W) (projModelπ W) ≫ projModelBaseChangeOf f W₀ W h := by
+  simp only [pullbackMapBaseChangeOf, pullback.lift_fst]
+
+/-- The `snd`-leg of the base-change fibre-square map. -/
+private lemma pullbackMapBaseChangeOf_snd (f : U →+* R) (W₀ : WeierstrassCurve U)
+    (W : WeierstrassCurve R) (h : W₀.map f = W) :
+    pullbackMapBaseChangeOf f W₀ W h ≫ pullback.snd (projModelπ W₀) (projModelπ W₀) =
+      pullback.snd (projModelπ W) (projModelπ W) ≫ projModelBaseChangeOf f W₀ W h := by
+  simp only [pullbackMapBaseChangeOf, pullback.lift_snd]
+
 /-- The lift agreement: the base-changed multiplication and the structure map agree over
 `Spec U`. -/
 lemma pullbackMap_mulModelHom_agree (f : U →+* R) (W₀ : WeierstrassCurve U)
@@ -366,17 +381,16 @@ theorem classifyRingHomU_universalWeierstrassLocU :
         universalWeierstrass, map_a₁, map_a₂, map_a₃, map_a₄, map_a₆]
 
 theorem projModelBaseChangeOf_id (W : WeierstrassCurve R) :
-    projModelBaseChangeOf (RingHom.id R) W W rfl = 𝟙 (projModel W) := by
-  rw [projModelBaseChangeOf]
-  exact (Category.id_comp _).trans (projModelBaseChange_id W)
+    projModelBaseChangeOf (RingHom.id R) W W rfl = 𝟙 (projModel W) :=
+  (projModelBaseChangeOf_rfl (RingHom.id R) W).trans (projModelBaseChange_id W)
 
 /-- The fibre-square base-change map at the identity is the identity. -/
 theorem pullbackMapBaseChangeOf_id (W : WeierstrassCurve R) :
     pullbackMapBaseChangeOf (RingHom.id R) W W rfl = 𝟙 _ := by
   apply pullback.hom_ext
-  · rw [pullbackMapBaseChangeOf, pullback.lift_fst, Category.id_comp,
+  · rw [pullbackMapBaseChangeOf_fst (RingHom.id R) W W rfl, Category.id_comp,
       projModelBaseChangeOf_id, Category.comp_id]
-  · rw [pullbackMapBaseChangeOf, pullback.lift_snd, Category.id_comp,
+  · rw [pullbackMapBaseChangeOf_snd (RingHom.id R) W W rfl, Category.id_comp,
       projModelBaseChangeOf_id, Category.comp_id]
 
 /-- At the identity, the base-change lift IS the two-law multiplication (lift uniqueness). -/
@@ -384,9 +398,9 @@ theorem mulModelHomBC_id (W : WeierstrassCurve R) [IsDomain R] [IsJacobsonRing R
     (hΔ : IsUnit W.Δ) :
     mulModelHomBC (RingHom.id R) W hΔ W rfl = WeierstrassCurve.Projective.mulModelHom W hΔ := by
   apply (isPullback_projModelBaseChangeOf (RingHom.id R) W W rfl).hom_ext
-  · rw [mulModelHomBC_baseChange, pullbackMapBaseChangeOf_id, Category.id_comp,
-      projModelBaseChangeOf_id, Category.comp_id]
-  · rw [mulModelHomBC_projModelπ]
+  · rw [mulModelHomBC_baseChange (RingHom.id R) W hΔ W rfl, pullbackMapBaseChangeOf_id,
+      Category.id_comp, projModelBaseChangeOf_id, Category.comp_id]
+  · rw [mulModelHomBC_projModelπ (RingHom.id R) W hΔ W rfl]
     exact (WeierstrassCurve.Projective.mulModelHom_projModelπ W hΔ).symm
 
 end IdCollapse

@@ -265,6 +265,7 @@ def phiP : P R M →ₗ[Polynomial R] P R M :=
 
 /-! ### Exactness -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `ε ∘ φ = 0`. -/
 lemma epsP_phiP (q : P R M) : epsP R M (phiP R M q) = 0 := by
   induction q using PolynomialModule.induction_linear with
@@ -273,6 +274,7 @@ lemma epsP_phiP (q : P R M) : epsP R M (phiP R M q) = 0 := by
   | single i m =>
     rw [phiP_single, map_sub, epsP_single, epsP_single, smul_smul, ← pow_succ, sub_self]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `ε` is surjective. -/
 lemma epsP_surjective : Function.Surjective (epsP R M) :=
   fun m => ⟨PolynomialModule.single R 0 m, by rw [epsP_single, pow_zero, one_smul]⟩

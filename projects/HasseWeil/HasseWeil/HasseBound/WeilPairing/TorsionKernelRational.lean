@@ -140,6 +140,7 @@ private theorem yCoord_descends_of_equation {F : Type*} [Field F] [IsAlgClosed F
     hq_monic.ne_zero (i := algebraMap F L) (x := yv) hYroot
   exact ⟨y₀, hy₀.symm⟩
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Kernel-rationality over a general extension** (Silverman III.4.10c, the engine): over `K̄`,
 every point `Q` of `W` with coordinates in an extension `L` that is killed by `[ℓ]` descends to a
 `K̄`-rational `ℓ`-torsion point `k : E(K̄)` with `Point.map (Algebra.ofId F L) k = Q`.
@@ -325,6 +326,7 @@ theorem adjoin_x_gen_y_gen_eq_top :
   rw [← hrs]
   exact S.div_mem (hRmem r) (hRmem s)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **The geometric heart** (Silverman III.4.10c): an `F`-embedding `g : K(E) → Ω` that agrees
 with a reference embedding `ι` on the pullback range `[ℓ]*K(E)` sends the generic-point coordinates
 `x_gen, y_gen` into the range of `ι`. Reason: `g` and `ι` give two points `g(P_gen), ι(P_gen)` of

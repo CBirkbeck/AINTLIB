@@ -276,9 +276,9 @@ noncomputable def adjointGamma0Rep (p N : ℕ) (hpN : Nat.Coprime p N) : ↥(Gam
   ⟨⟨!![(p : ℤ), n; (N : ℤ), m], by
       have hbez := coprime_bezout_aux hpN
       simp only [Matrix.det_fin_two_of]
-      linarith⟩, by
-      rw [Gamma0_mem]
-      simp⟩
+      linarith⟩, Gamma0_mem.mpr (by
+      show (((N : ℤ) : ℤ) : ZMod N) = 0
+      simp)⟩
 
 /-- The mod-`N` unit attached to `adjointGamma0Rep` is `(unitOfCoprime p)⁻¹`. -/
 lemma adjointGamma0Rep_units (p N : ℕ) (hpN : Nat.Coprime p N) [NeZero N] :

@@ -321,8 +321,8 @@ private lemma slot_nonEll_two (a : ℂ) (q₁ q₂ : NonEllOrbitFM) (hne : q₁ 
     (h1 : 1 ≤ ordOrbitFM (gForm a) q₁.val) (h2 : 1 ≤ ordOrbitFM (gForm a) q₂.val) :
     2 ≤ gFormOrbitSumℤ a := by
   classical
-  have hfin : Function.HasFiniteSupport
-      (fun q : NonEllOrbitFM => ordOrbitFM (gForm a) q.val) :=
+  have hfin : (Function.support
+      (fun q : NonEllOrbitFM => ordOrbitFM (gForm a) q.val)).Finite :=
     (finite_support_ordOrbit_nonEllFM (gForm a) (gForm_ne_zero a)).subset fun _ h => h
   have hsum : gFormOrbitSumℤ a =
       ∑ q ∈ hfin.toFinset, ordOrbitFM (gForm a) q.val := by

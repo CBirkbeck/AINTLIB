@@ -53,6 +53,7 @@ theorem modelYChart_zero_mem (x : ↑(Spec (CommRingCat.of B))) :
   exact h2
 
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(MODEL-DIV)** Kernel divisibility for the projective model record. -/
 theorem modelKernel_div {R S' : CommRingCat.{u}} {φ : R ⟶ S'}
     (hφ : Function.Surjective φ.hom) (hφ2 : RingHom.ker φ.hom ^ 2 = ⊥)
@@ -79,6 +80,7 @@ theorem modelKernel_div {R S' : CommRingCat.{u}} {φ : R ⟶ S'}
     exact heU _
   exact exists_kernel_div hU heU htaut hz hφ hφ2 N hN P hP
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(MODEL-INJ)** Kernel `N`-injectivity for the projective model record. -/
 theorem modelKernel_inj {R S' : CommRingCat.{u}} {φ : R ⟶ S'}
     (hφ : Function.Surjective φ.hom) (hφ2 : RingHom.ker φ.hom ^ 2 = ⊥)

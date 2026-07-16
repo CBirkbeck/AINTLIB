@@ -185,6 +185,7 @@ def mapFunctor (f : B →+* C) : MellWGroupoid B ⥤ MellWGroupoid C where
     (eqToHom h).1 = 1 := by
   subst h; rfl
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem mapFunctor_id :
     mapFunctor (RingHom.id B) = 𝟭 (MellWGroupoid B) := by
   refine CategoryTheory.Functor.ext (fun W => congrArg mk (ellipticW.map_id W.pt)) ?_
@@ -192,6 +193,7 @@ private theorem mapFunctor_id :
   apply Subtype.ext
   simp [VariableChange.map_id]
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem mapFunctor_comp {D : Type*} [CommRing D] (f : B →+* C) (g : C →+* D) :
     mapFunctor (g.comp f) = mapFunctor f ⋙ mapFunctor g := by
   refine CategoryTheory.Functor.ext
@@ -262,11 +264,9 @@ noncomputable def curveOf {S : Scheme.{0}} (W : ellipticW Γ(S, ⊤)) :
   zero := pullback.lift (classify W ≫ universalCurveZero) (𝟙 S)
     (by rw [Category.assoc, universalCurveZero_π, Category.comp_id, Category.id_comp])
   zero_π := pullback.lift_snd _ _ _
-  smooth := by
-    have : MorphismProperty.IsStableUnderBaseChange (@SmoothOfRelativeDimension 1) :=
-      AlgebraicGeometry.smoothOfRelativeDimension_isStableUnderBaseChange 1
-    exact MorphismProperty.pullback_snd _ _ universalCurve_smooth
-  proper := MorphismProperty.pullback_snd _ _ inferInstance
+  smooth := (AlgebraicGeometry.smoothOfRelativeDimension_isStableUnderBaseChange 1).of_isPullback
+    (IsPullback.of_hasPullback universalCurveπ (classify W)) universalCurve_smooth
+  proper := inferInstance
   localModel := universalEllipticCurve.localModel.baseChange (classify W)
 
 section CurveOfPasting
@@ -328,6 +328,7 @@ noncomputable def curveOfPasting :
     infer_instance
   exact @asIso _ _ _ _ _ hmapiso
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The pasting identification is a morphism over `S`. -/
 theorem curveOfPasting_snd :
     (curveOfPasting W).hom ≫ pullback.snd (projModelπ W.1) S.toSpecΓ = (curveOf W).π := by
@@ -353,6 +354,7 @@ private theorem zliftComm :
       S.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (ringHomOfEllipticW W)) := by
   rw [Category.assoc, universalCurveZero_π, Category.comp_id]; rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The middle-fibre identification matches zero sections: the universal zero section,
 pulled back to `S`'s fibre, is `W`'s own `projModelZero`. -/
 private theorem curveOfMiddle_zero :
@@ -371,6 +373,7 @@ private theorem curveOfMiddle_zero :
     rw [Category.assoc, projModelZero_projModelπ]
     exact (Category.comp_id _).symm
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The pasting identification matches the zero sections.
 
 ROUTE (decomposed per v10.24(a), board v10.40): `pullback.hom_ext`; the `snd`-leg is
@@ -622,6 +625,7 @@ noncomputable def presentationFunctor :
     rw [vcMiddleMap_mul f.1 g.1 f.2 g.2]
     simp only [Category.assoc]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(T-W6c-iii, essential surjectivity — the "almost definitional" half of the v8
 equivalence)**: every Weierstrass-presented curve is isomorphic, in the groupoid of
 presented curves, to the self-presentation of its own atlas point. -/

@@ -113,6 +113,7 @@ variable [Finite G] [IsAffineHom (Limits.pullback.diagonal (Limits.terminal.from
     t ≫ σ.hom γ = t → IsEmpty T)
 
 include hfree in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-Q2, geometric)** For a **free** action, the quotient projection `X ⟶ X/G` is a **finite**
 morphism.
 
@@ -133,6 +134,7 @@ theorem isFinite_quotientπ : IsFinite (σ.quotientπ V hVs hVa hVmem) := by
   exact RingHom.finite_algebraMap.mpr inferInstance
 
 include hfree in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-Q2, geometric)** For a **free** action, the quotient projection `X ⟶ X/G` is **étale**.
 
 Same local-to-global argument, with `Algebra.Etale.of_isFreeAlgebraAction` (KM A7.1.1, general

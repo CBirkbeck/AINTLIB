@@ -3,6 +3,8 @@ module
 public import FltRegular.NumberTheory.KummersLemma.Field
 public import FltRegular.NumberTheory.Unramified
 public import Mathlib.FieldTheory.KummerExtension
+import FltRegular.NumberTheory.Cyclotomic.MoreLemmas
+import Mathlib.RingTheory.RootsOfUnity.CyclotomicUnits
 
 /-!
 # [FLT37-CASEII-NONUNIT-POLY] flt-regular's Kummer `poly` for a non-unit primary radical
@@ -98,6 +100,7 @@ lemma natDegree_poly : natDegree (poly hp hζ a hcong) = p := by
   rwa [natDegree_C_mul, natDegree_poly_aux hζ] at this
   exact pow_ne_zero _ (hζ.toInteger_isPrimitiveRoot.sub_one_ne_zero hpri.out.one_lt)
 
+set_option backward.isDefEq.respectTransparency false in
 lemma map_poly : (poly hp hζ a hcong).map (algebraMap (𝓞 K) K) =
     (X - C (1 / (ζ - 1))) ^ p + C (algebraMap (𝓞 K) K a / (ζ - 1) ^ p : K) := by
   ext i
@@ -205,6 +208,7 @@ theorem splits_poly {L : Type*} [Field L] [Algebra K L] (ha : a ≠ 0) (α : L)
     (monic_poly hp hζ a hcong).natDegree_map, natDegree_poly hp hζ,
     Finset.range_val, Multiset.card_map, Multiset.card_range]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem map_poly_eq_prod {L : Type*} [Field L] [Algebra K L] (ha : a ≠ 0) (α : L)
     (e : α ^ p = algebraMap K L (algebraMap (𝓞 K) K a)) :
     (poly hp hζ a hcong).map (algebraMap (𝓞 K) (𝓞 L)) =
@@ -237,6 +241,7 @@ lemma minpoly_polyRoot' {L : Type*} [Field L] [Algebra K L] (α : L)
   · exact minpoly_polyRoot'' hp hζ a hcong hu α e i
   · exact IsIntegral.tower_top (polyRoot hp hζ a hcong α e i).prop
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **The root-difference is `(unit)·(radical)`** (the unit-free core of `separable_poly_aux`).  For
 `m ≠ n`, `polyRoot m - polyRoot n = (algebraMap v)·αO` in `𝓞 L`, where `v` is the unit witnessing
 `Associated (ζ-1) (ζ^n - ζ^m)` and `αO ∈ 𝓞 L` is the radical (`αO.val = α`).  No unit-ness of `a` is

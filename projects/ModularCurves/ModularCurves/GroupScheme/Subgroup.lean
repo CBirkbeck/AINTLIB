@@ -243,6 +243,7 @@ private theorem ker_prop (P : MorphismProperty Scheme.{u}) [P.RespectsIso]
 -- retraction, not an equivalence of types: `ofRelEffCartierDiv ∘ toRelEffCartierDiv`
 -- rebuilds the subscheme-of-the-kernel, an isomorphic but distinct total space; only
 -- the ideal-level roundtrip (`toRelEffCartierDiv_ofRelEffCartierDiv`) is an identity.
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The relative effective Cartier divisor underlying a finite locally free subgroup:
 the closed subscheme cut out by `ι.ker` (KM 1.3.6 packages subgroups as divisors).
 Properties transport along the canonical iso `G.G ≅ (ι.ker).subscheme`. -/
@@ -355,6 +356,7 @@ private theorem baseChange_prop (P : MorphismProperty Scheme.{u})
 -- (3) iterated base change agrees with base change along the composite only up to
 -- canonical isomorphism (as for divisors, `baseChange_baseChange_ideal`) — no
 -- `baseChange_baseChange` identity is stated.
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Base change of a finite locally free subgroup scheme along `g : T ⟶ S`: the total
 space is `G ×_E (E ×_S T) = G ×_S T`, included in `(E.baseChange g).E = E ×_S T` by the
 second projection. Finiteness, flatness and finite presentation descend through the
@@ -415,6 +417,7 @@ characteristic `p`) will follow the same recipe once their sources exist; the
 
 variable (E : EllipticCurve S)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- `E[N] ⟶ S` is locally of finite presentation: base change of
 `MulByHom.locallyOfFinitePresentation` (the `lfp` sibling of `torsionπ_isFinite` /
 `torsionπ_flat`, T-B4). -/

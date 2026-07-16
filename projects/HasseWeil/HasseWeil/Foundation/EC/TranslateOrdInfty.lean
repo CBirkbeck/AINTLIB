@@ -277,6 +277,7 @@ theorem ordAtInftyValuation_basis_summands_distinct {r₁ r₂ : FractionRing (P
       intro h_eq
       omega
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Value on the coordinate function `y`.** A valuation `w` with `w y_gen = exp 3`
 agrees with `ordAtInftyValuation` on `coordYInFunctionField` (which is `y_gen`):
 both equal `exp (-3)`. -/
@@ -433,6 +434,7 @@ theorem pointValuation_comap_translateAlgEquivOfPoint_some_eq_ordAtInftyValuatio
       (ne_zero_of_ord_P_eq_coe W h_ord) h_ord]
     norm_num
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Pointwise order transport at infinity** (`T = some xk yk h_ns`, the
 substantive nonzero-`f` core): `ord_P (-T) (τ_T f) = ordAtInfty f`. -/
 theorem ord_P_negSmoothPoint_translateAlgEquivOfPoint_eq_ordAtInfty_some

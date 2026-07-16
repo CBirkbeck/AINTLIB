@@ -155,6 +155,7 @@ theorem frobeniusGenericCovariance_lift_twist
       simp only [FiniteField.coe_frobeniusAlgHom] <;> rw [← map_pow]
 
 omit [DecidableEq K] [W.toAffine.IsElliptic] in
+set_option backward.isDefEq.respectTransparency false in
 /-- **The `q`-power Frobenius commutes with translation on function-field points of `E_{K̄}`**
 (point-level form; the `K̄` analogue of `frobeniusIsog_pullback_universal_commute`).  For the
 `q`-power action `frobₗ` and the `𝔽_q`-restricted translation `τ_S` (both typed via `W' := W`):

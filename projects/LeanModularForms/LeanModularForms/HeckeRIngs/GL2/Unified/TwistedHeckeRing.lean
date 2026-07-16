@@ -821,8 +821,9 @@ private lemma twistedHeckeSlashExtGen_zsmul (k : ℤ) (χ : (ZMod N)ˣ →* ℂ�
   have hsmi : (n • T).sum (fun D c ↦ c • twistedHeckeSlashGen k χ D f) =
       T.sum (fun D a ↦ (n * a) • twistedHeckeSlashGen k χ D f) :=
     Finsupp.sum_smul_index (fun _ ↦ zero_smul ℤ _)
-  rw [hsmi, Finsupp.smul_sum]
-  exact Finsupp.sum_congr fun D _ ↦ SemigroupAction.mul_smul _ _ _
+  rw [hsmi]
+  exact (Finsupp.sum_congr fun D _ ↦ SemigroupAction.mul_smul _ _ _).trans
+    Finsupp.smul_sum.symm
 
 /-- The endomorphism of the `Γ₀(N),χ`-invariant function submodule
 attached to a single `Γ₀(N)` Hecke double coset. -/

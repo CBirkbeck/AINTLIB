@@ -70,6 +70,7 @@ noncomputable def cyclotomicComplexConjGal
         exact map_ratCast
           ((NumberField.IsCMField.complexConj K).toRingEquiv.toRingHom) q }
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Under the standard cyclotomic Galois identification, complex conjugation
 is the element `-1` of `(ZMod p)^*`. -/
 theorem cyclotomicGalEquivZMod_complexConjGal_eq_neg_one

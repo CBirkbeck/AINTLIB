@@ -106,7 +106,6 @@ theorem squareMul_π : P.squareMul ≫ G.π
   rw [show ((Over.mk G.π ⊗ Over.mk G.π).hom)
       = (fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.π from rfl]
   rw [P.groupSquareToSquare_fst_assoc, Scheme.Hom.resLE_comp_ι]
-  exact Category.assoc _ _ _
 
 /-- The restricted multiplication lands in the group patch. -/
 theorem top_le_preimage_groupOpen_squareMul :
@@ -249,6 +248,7 @@ noncomputable def comulAlg :
 noncomputable def unitSection : P.V.toScheme ⟶ P.groupOpen.toScheme :=
   G.unitHom.resLE P.groupOpen P.V P.le_preimage_groupOpen_unitHom
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The restricted unit section is a section of the restricted structure map. -/
 @[reassoc (attr := simp)]
 theorem unitSection_comp_groupToBase :
@@ -325,7 +325,6 @@ theorem leftUnitSection_comp_squareMul :
   -- the second restricted point is the inclusion
   show k ≫ ((snd (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι) = _
   rw [← Category.assoc k, hk2]
-  rfl
 
 /-! ### The counit law, `Γ`-side -/
 
@@ -352,6 +351,7 @@ noncomputable def counitLiftΓ :
     CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing) ⟶ P.groupRing :=
   inv P.squareΓ ≫ P.leftUnitSection.appTop ≫ P.groupOpen.topIso.hom
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **The counit law, `Γ`-side, in transported form**: `Δ` followed by the dual of the
 left unit section is the identity. -/
 theorem groupPatchComul_comp_counitLiftΓ :
@@ -505,13 +505,13 @@ theorem rightUnitSection_comp_squareMul :
   rw [hsnd, add_zero]
   show k ≫ ((fst (Over.mk G.π) (Over.mk G.π)).left ≫ G.ι) = _
   rw [← Category.assoc k, hk1]
-  rfl
 
 /-- The `Γ`-dual of the right unit section. -/
 noncomputable def counitLiftΓ' :
     CommRingCat.of (P.groupRing ⊗[P.baseRing] P.groupRing) ⟶ P.groupRing :=
   inv P.squareΓ ≫ P.rightUnitSection.appTop ≫ P.groupOpen.topIso.hom
 
+set_option backward.isDefEq.respectTransparency.types false in
 theorem groupPatchComul_comp_counitLiftΓ' :
     P.groupPatchComul ≫ P.counitLiftΓ' = 𝟙 P.groupRing := by
   rw [groupPatchComul_eq, counitLiftΓ', Category.assoc,

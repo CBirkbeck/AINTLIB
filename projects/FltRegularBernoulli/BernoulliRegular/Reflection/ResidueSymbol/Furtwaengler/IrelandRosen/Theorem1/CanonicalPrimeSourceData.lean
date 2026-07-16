@@ -351,6 +351,7 @@ theorem teichUnitFullOfRootsOfUnityBijective_residue
       (x : k)
   rw [ht_val, hxQ]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The same Teichmüller section satisfies the power convention used by
 `ConductorFlexibleFullTeichStickelbergerSetup`. -/
 theorem residueCharInt_eq_teichUnitFullOfRootsOfUnityBijective_pow_d

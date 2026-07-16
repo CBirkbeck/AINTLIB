@@ -231,7 +231,10 @@ theorem ordAtInfty_mulByInt_x (n : ℤ) (hn : n ≠ 0) (hnF : (n : F) ≠ 0) :
   have h_mul : (W_smooth W).ordAtInfty (Φ_ff W n * (ΨSq_ff W n)⁻¹) =
       (W_smooth W).ordAtInfty (Φ_ff W n) + (W_smooth W).ordAtInfty ((ΨSq_ff W n)⁻¹) :=
     (W_smooth W).ordAtInfty_mul hΦ_ne h_inv_ne
-  rw [h_div_eq, h_mul, (W_smooth W).ordAtInfty_inv,
+  have h_inv_ord : (W_smooth W).ordAtInfty ((ΨSq_ff W n)⁻¹) =
+      -(W_smooth W).ordAtInfty (ΨSq_ff W n) :=
+    (W_smooth W).ordAtInfty_inv (ΨSq_ff W n)
+  rw [h_div_eq, h_mul, h_inv_ord,
       ordAtInfty_Φ_ff W n, ordAtInfty_ΨSq_ff W n hnF]
   rw [show ((-2 * (n.natAbs : ℤ) ^ 2 : ℤ) : WithTop ℤ) +
           -(((-2 * ((n.natAbs : ℤ) ^ 2 - 1) : ℤ) : WithTop ℤ)) =
@@ -272,8 +275,11 @@ theorem ordAtInfty_mulByInt_x_neg (n : ℤ) (hn : n ≠ 0) :
   have h_mul : (W_smooth W).ordAtInfty (Φ_ff W n * (ΨSq_ff W n)⁻¹) =
       (W_smooth W).ordAtInfty (Φ_ff W n) + (W_smooth W).ordAtInfty ((ΨSq_ff W n)⁻¹) :=
     (W_smooth W).ordAtInfty_mul hΦ_ne h_inv_ne
+  have h_inv_ord : (W_smooth W).ordAtInfty ((ΨSq_ff W n)⁻¹) =
+      -(W_smooth W).ordAtInfty (ΨSq_ff W n) :=
+    (W_smooth W).ordAtInfty_inv (ΨSq_ff W n)
   simp only [mulByInt_x]
-  rw [h_div_eq, h_mul, (W_smooth W).ordAtInfty_inv]
+  rw [h_div_eq, h_mul, h_inv_ord]
   -- `ord Φ_ff = -2·natAbs n²` (unconditional).
   rw [ordAtInfty_Φ_ff W n]
   -- `ord ΨSq_ff = -2·natDegree (ΨSq n)` (unconditional polynomial-ord lemma).
@@ -325,9 +331,12 @@ theorem exists_ordAtInfty_mulByInt_x_eq_even_le_neg_two (n : ℤ) (hn : n ≠ 0)
       ((-2 * (W.ΨSq n).natDegree : ℤ) : WithTop ℤ) := by
     rw [ΨSq_ff_eq_algebraMap_polynomial]
     exact (W_smooth W).ordAtInfty_algebraMap_polynomial_of_ne_zero (ΨSq_poly_ne_zero W hn)
+  have h_inv_ord : (W_smooth W).ordAtInfty ((ΨSq_ff W n)⁻¹) =
+      -(W_smooth W).ordAtInfty (ΨSq_ff W n) :=
+    (W_smooth W).ordAtInfty_inv (ΨSq_ff W n)
   refine ⟨-2 * ((n.natAbs : ℤ) ^ 2 - (W.ΨSq n).natDegree), ?_, ?_, ?_⟩
   · unfold mulByInt_x
-    rw [h_div_eq, h_mul, (W_smooth W).ordAtInfty_inv, ordAtInfty_Φ_ff W n, h_ΨSq_ord]
+    rw [h_div_eq, h_mul, h_inv_ord, ordAtInfty_Φ_ff W n, h_ΨSq_ord]
     rw [show -(((-2 * ((W.ΨSq n).natDegree : ℤ)) : ℤ) : WithTop ℤ) =
           (((-(-2 * ((W.ΨSq n).natDegree : ℤ))) : ℤ) : WithTop ℤ) from by push_cast; rfl]
     rw [show ((-2 * (n.natAbs : ℤ) ^ 2 : ℤ) : WithTop ℤ) +

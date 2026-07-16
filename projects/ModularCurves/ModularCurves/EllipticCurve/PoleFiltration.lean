@@ -578,6 +578,7 @@ lemma infChart_t_nonZeroDivisor (W : WeierstrassCurve R) :
     rw [ht]
     exact infChart_t_mem_nonZeroDivisors W
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The chart opens of the model are the `basicOpen`s of the coordinate classes. -/
 lemma chartOpensRange_eq_basicOpen (W : WeierstrassCurve R) (j : Fin 3) :
     ((modelChartCover W).openCover.f j).opensRange =
@@ -648,6 +649,7 @@ theorem basicOpen_X1_sup_basicOpen_X2_eq_top (W : WeierstrassCurve R) :
   · exact h1
   · exact h2
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-W7.0i-b3-1)** The `Y`-chart and `Z`-chart opens cover the model: the complement of
 the `Z`-chart is the zero section, which lies in the `Y`-chart. (Two charts suffice for the
 global-sections equalizer — single overlap.) Source: audit A3. -/
@@ -731,6 +733,7 @@ lemma structure_section_square (W : WeierstrassCurve R) {m : ℕ}
     _ = _ := by
         rw [Scheme.ΓSpecIso_naturality, ← Category.assoc, Iso.inv_hom_id, Category.id_comp]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Sections over a chart open are the chart's degree-zero localization: open-immersion
 `Γ`-comparison (`appIso` at `⊤`) composed with `ΓSpecIso`. -/
 private noncomputable def chartSectionsIso (W : WeierstrassCurve R) (j : Fin 3) :
@@ -741,6 +744,7 @@ private noncomputable def chartSectionsIso (W : WeierstrassCurve R) (j : Fin 3) 
     (((modelChartCover W).openCover.f j).appIso ⊤)).trans
     (Scheme.ΓSpecIso ((modelChartCover W).X j))
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-W7.0i-b3-2)** Sections over the `Y`-chart open are the chart ring (open-immersion
 `Γ`-comparison composed with the repo's `chartCoordEquiv`). -/
 noncomputable def chartYSectionsEquiv (W : WeierstrassCurve R) :
@@ -749,6 +753,7 @@ noncomputable def chartYSectionsEquiv (W : WeierstrassCurve R) :
         Ideal.span {MvPolynomial.dehomogenizeAux R 1 W.toProjective.polynomial}) :=
   (chartSectionsIso W 1).commRingCatIsoToRingEquiv.trans (chartCoordEquiv W 1).symm
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-W7.0i-b3-3)** Sections over the `Z`-chart open are the chart ring. -/
 noncomputable def chartZSectionsEquiv (W : WeierstrassCurve R) :
     Γ(projModel W, ((modelChartCover W).openCover.f (2 : Fin 3)).opensRange) ≃+*
@@ -1274,6 +1279,7 @@ private lemma infChartBasis_apply (W : WeierstrassCurve R) [Nontrivial R] (j : F
     infChartBasis W j = AdjoinRoot.root (infChartCubic W) ^ (j : ℕ) := by
   simp [infChartBasis, Module.Basis.reindex_apply, PowerBasis.coe_basis,
     AdjoinRoot.powerBasis'_gen]
+  rfl
 
 /-- Absorb one `t` of `t^N` into `1/t`: `t^N·(z/t) = t^(N−1)·z` for `N ≥ 1`. -/
 private lemma pow_mul_mul_overlapInvT (W : WeierstrassCurve R) {N : ℕ} (hN : 1 ≤ N)

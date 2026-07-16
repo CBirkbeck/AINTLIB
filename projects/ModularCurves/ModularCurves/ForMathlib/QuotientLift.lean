@@ -27,6 +27,7 @@ universe u
 namespace AlgebraicGeometry.SchemeAction
 variable {G : Type u} [Group G] {X : Scheme.{u}} (σ : SchemeAction G X)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(W2, uniqueness half)** For a free action, the pullback of the quotient projection
 `X ⟶ X/G` along an open immersion `j : Q' ⟶ X/G` is an epimorphism: the restricted quotient
 cover is still an fppf cover (surjective + flat), and flat surjections of schemes are epic. -/

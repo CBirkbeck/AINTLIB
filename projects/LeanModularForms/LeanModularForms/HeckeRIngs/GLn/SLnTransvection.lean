@@ -40,7 +40,9 @@ private lemma slTransvecG_mul_entry {m : ℕ} [NeZero m] (i j : Fin m) (hij : i 
     (σ : Matrix.SpecialLinearGroup (Fin m) ℤ) (a b : Fin m) :
     (slTransvecG i j hij c * σ).1 a b =
     if a = i then σ.1 i b + c * σ.1 j b else σ.1 a b := by
-  simp only [Matrix.SpecialLinearGroup.coe_mul, slTransvecG]
+  rw [show ((slTransvecG i j hij c * σ).1 : Matrix (Fin m) (Fin m) ℤ)
+      = Matrix.transvection i j c * σ.1 from by
+    rw [Matrix.SpecialLinearGroup.coe_mul]; rfl]
   split_ifs with hai
   · subst hai; simp [Matrix.transvection, Matrix.add_mul]
   · simp [Matrix.transvection, Matrix.add_mul, hai]
@@ -49,7 +51,9 @@ private lemma slTransvecG_mul_right_entry {m : ℕ} [NeZero m] (i j : Fin m) (hi
     (σ : Matrix.SpecialLinearGroup (Fin m) ℤ) (a b : Fin m) :
     (σ * slTransvecG i j hij c).1 a b =
     if b = j then σ.1 a j + c * σ.1 a i else σ.1 a b := by
-  simp only [Matrix.SpecialLinearGroup.coe_mul, slTransvecG]
+  rw [show ((σ * slTransvecG i j hij c).1 : Matrix (Fin m) (Fin m) ℤ)
+      = σ.1 * Matrix.transvection i j c from by
+    rw [Matrix.SpecialLinearGroup.coe_mul]; rfl]
   split_ifs with hbj
   · subst hbj; simp [Matrix.transvection, Matrix.mul_add, mul_comm]
   · simp [Matrix.transvection, Matrix.mul_add, hbj]

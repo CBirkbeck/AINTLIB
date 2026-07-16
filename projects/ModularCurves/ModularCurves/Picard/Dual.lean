@@ -79,6 +79,7 @@ theorem overUnitScalarEnd_app_apply (U : C) (r : R.obj.obj (op U))
 
 variable [∀ U, IsMulCommutative (R.obj.obj U)]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The central action of `O(U)` on the unit module over the over-site of `U`. -/
 noncomputable def overUnitScalarEndRingHom (U : C) :
     R.obj.obj (op U) →+* End (SheafOfModules.unit (R.over U)) where
@@ -97,7 +98,6 @@ noncomputable def overUnitScalarEndRingHom (U : C) :
     ext V
     repeat' erw [overUnitScalarEnd_app_apply]
     simp
-    rfl
   map_zero' := by
     apply (SheafOfModules.forget _).map_injective
     ext V
@@ -116,7 +116,6 @@ noncomputable def overUnitScalarEndRingHom (U : C) :
       (overUnitScalarEnd R U s).val.app V
         (show (R.over U).obj.obj V from 1)
     rw [overUnitScalarEnd_app_apply, overUnitScalarEnd_app_apply, one_mul, one_mul]
-    rfl
 
 /-- The module structure on local linear functionals, induced by postcomposition with
 scalar multiplication on the unit module. -/
@@ -267,6 +266,7 @@ noncomputable def dualSubfunctor (M : _root_.SheafOfModules R) :
     exact ⟨dualRestrict R M f α, ambientDual_map_dualToAmbient R M f α⟩
 
 omit [∀ U, IsMulCommutative (R.obj.obj U)] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Module-linearity of a local functional descends along covering sieves. -/
 theorem dualSubfunctor_isSheaf (M : _root_.SheafOfModules R) :
     Presieve.IsSheaf J (dualSubfunctor R M).toFunctor := by
@@ -516,6 +516,7 @@ noncomputable def dualUnitEndModule (U : C) :
       (End (_root_.SheafOfModules.unit (R.over U))) :=
   Module.compHom _ (overUnitScalarEndRingHom R U)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The identification of unit endomorphisms with scalars is linear for the
 postcomposition action used on the dual. -/
 noncomputable def dualUnitLinearEquiv (U : C) :
@@ -550,6 +551,7 @@ noncomputable def dualUnitLinearEquiv (U : C) :
     rw [op_id, R.obj.map_id]
     exact mul_comm' _ _
 
+set_option backward.isDefEq.respectTransparency.types false in
 @[simp]
 theorem dualUnitLinearEquiv_dualRestrict {U V : Cᵒᵖ} (f : U ⟶ V)
     (α : (_root_.SheafOfModules.unit R).over U.unop ⟶
@@ -682,6 +684,7 @@ noncomputable def dualMap {M N : _root_.SheafOfModules R} (f : M ⟶ N) :
     dual R N ⟶ dual R M :=
   ⟨dualMapVal R f⟩
 
+set_option backward.isDefEq.respectTransparency.types false in
 @[simp]
 theorem dualMap_id (M : _root_.SheafOfModules R) :
     dualMap R (𝟙 M) = 𝟙 (dual R M) := by
@@ -690,6 +693,7 @@ theorem dualMap_id (M : _root_.SheafOfModules R) :
   change dualPrecomp R (𝟙 M) U.unop α = α
   simp [dualPrecomp]
 
+set_option backward.isDefEq.respectTransparency.types false in
 @[simp]
 theorem dualMap_comp {M N P : _root_.SheafOfModules R} (f : M ⟶ N) (g : N ⟶ P) :
     dualMap R (f ≫ g) = dualMap R g ≫ dualMap R f := by
@@ -785,6 +789,7 @@ theorem restrictOverTrivialization_inv_app_apply
       e.inv.val.app (op ((Over.map V.hom).obj Z.unop)) x :=
   rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 @[simp]
 theorem dualTrivializationLinearEquiv_dualRestrict
     (M : _root_.SheafOfModules R) (U : C)

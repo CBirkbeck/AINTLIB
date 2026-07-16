@@ -208,6 +208,7 @@ theorem weilFunction_translate_prod_ne_zero (ℓ : ℤ) (hℓ : (ℓ : F) ≠ 0)
     (map_ne_zero_iff _ (translateAlgEquivOfPoint W ((i : ℕ) • P₀)).injective).mpr
       (weilFunction_ne_zero W ℓ hℓ T hT)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **The divisor of a translated Weil function** (`g_T`-translation law). For any point `S`,
 `div(τ_S g_T) = [ℓ]^*(T − ℓ•S) − [ℓ]^*(−ℓ•S)`: translating the fibre-difference divisor of `g_T` by
 `S` shifts both fibres by `−ℓ•S` (`equivMapDomain_placeTranslate_pullbackDiv`, the general law). -/

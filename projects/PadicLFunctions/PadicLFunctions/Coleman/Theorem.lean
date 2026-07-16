@@ -61,6 +61,7 @@ at `π_n` pushes a `ℤ_p`-series forward along `toCp` before summing in `ℂ_p`
 noncomputable def toCp : ℤ_[p] →+* ℂ_[p] :=
   (algebraMap ℚ_[p] ℂ_[p]).comp (PadicInt.Coe.ringHom)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `toCp` is isometric on the unit ball: `‖toCp x‖ = ‖x‖` (the `ℚ_p ↪ ℂ_p`
 extension is isometric, `PadicComplex.norm_extends'`, and `ℤ_p ↪ ℚ_p` preserves
 the norm by definition). -/
@@ -369,6 +370,7 @@ since `‖q_i‖ ∈ p^ℤ` and `‖π_n‖^{φ(p^n)} = p⁻¹` pin the exponent
 `‖x‖ ≤ 1` then forces the constant coefficient `q_0 ∈ ℤ_p` and the tail
 `Σ_{i≥1} q_i π_n^i` to have norm `≤ ‖π_n‖`. -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The remainder of the greedy step stays in `𝒪_n`: if `r ∈ 𝒪_n` and `a : ℤ_p`
 satisfies `‖r − a‖ ≤ ‖π_n‖`, then `(r − a)/π_n ∈ 𝒪_n` (`K_n`-membership since `K_n`
 is a field and `π_n ≠ 0`; `‖·‖ ≤ 1` since `‖r − a‖ ≤ ‖π_n‖`). -/
@@ -459,6 +461,7 @@ set_option synthInstance.maxHeartbeats 1000000 in
 -- the `adjoin.powerBasis`/`Basis.sum_repr` computation runs through the
 -- `IntermediateField.adjoin ℚ_[p] {π_n}` power-basis layer; instance synthesis and the
 -- power-basis term elaboration exceed the defaults
+set_option backward.isDefEq.respectTransparency false in
 /-- **The residue step** (RJW TeX 2542–2547): every `x ∈ 𝒪_n` is `≡ a mod π_n·𝒪_n`
 for some `a : ℤ_p` — i.e. `‖x − a‖ ≤ ‖π_n‖`. Total ramification gives `𝒪_n/(π_n) ≅ 𝔽_p`
 and `ℤ_p ↠ 𝔽_p`; we realise this through the orthogonal `ℚ_p`-power expansion at the

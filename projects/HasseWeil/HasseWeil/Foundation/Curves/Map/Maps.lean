@@ -398,6 +398,7 @@ noncomputable def frobeniusRelativePointFun :
           (RingHom.injective (frobenius k p)) x y).mpr h)
 
 omit [E.toAffine.IsElliptic] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **`frobeniusRelativePointFun` preserves addition**. Pattern parallel to
 Mathlib's `Affine.Point.map.map_add'`: case analysis on the curve group
 law (`add_of_Y_eq` / `add_some`) + `simpa` with `map_addX`, `map_addY`,
@@ -645,14 +646,23 @@ Direct from `frobeniusRelative_compose_eq_pow` + the fact that
 theorem algebraMap_CR_KE_pow_p_mem_fieldRange (r : E.toAffine.CoordinateRing) :
     (algebraMap E.toAffine.CoordinateRing KE r) ^ p ∈
       (frobeniusIsog_relative p E).pullback.fieldRange := by
+  -- Compute `pullback ∘ algebraMap` on a *variable* of the twist coordinate ring first,
+  -- so the `rw`s below match a uniformly-typed target; then instantiate at the
+  -- (`map`-curve-typed) image of `r`.
+  have key : ∀ s : (E.frobeniusTwist p).toAffine.CoordinateRing,
+      frobeniusRelativePullback p E
+          (algebraMap (E.frobeniusTwist p).toAffine.CoordinateRing
+            (E.frobeniusTwist p).toAffine.FunctionField s) =
+        frobeniusRelativeCoordRingHom p E s := by
+    intro s
+    simp only [frobeniusRelativePullback]
+    rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
+    rfl
   refine ⟨algebraMap (E.frobeniusTwist p).toAffine.CoordinateRing
     (E.frobeniusTwist p).toAffine.FunctionField
     (WeierstrassCurve.Affine.CoordinateRing.map E.toAffine (frobenius k p) r), ?_⟩
   change frobeniusRelativePullback p E _ = _
-  simp only [frobeniusRelativePullback]
-  rw [IsFractionRing.liftAlgHom_apply, IsFractionRing.lift_algebraMap]
-  change frobeniusRelativeCoordRingHom p E _ = _
-  exact frobeniusRelative_compose_eq_pow p E r
+  exact (key _).trans (frobeniusRelative_compose_eq_pow p E r)
 
 /-- **Purely-inseparable witness (power-membership form)**: every element of
 K(E) has its p-th power

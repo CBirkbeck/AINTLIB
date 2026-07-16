@@ -223,6 +223,7 @@ theorem isAffineOpen_top_isoSpec_hom_scheme_isoSpec_inv {X : Scheme.{u}} [IsAffi
     h.isoSpec.hom ≫ X.isoSpec.inv = (⊤ : X.Opens).ι := by
   rw [← IsAffineOpen.fromSpec_top, ← IsAffineOpen.isoSpec_inv_ι, Iso.hom_inv_id_assoc]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(Y1-B1, generalising the proven `universalCurve_localModel`)** The projective model of any
 elliptic Weierstrass curve over a ring is locally Weierstrass — the whole affine base, on the
 single chart `⊤`, witnesses it. The T-W5a proof in `Moduli/WeierstrassAtlas.lean` is this
@@ -647,6 +648,7 @@ noncomputable def killedLocus (d : ℕ) : Scheme.{u} :=
 noncomputable def killedLocusπ (d : ℕ) : E.killedLocus P d ⟶ S :=
   pullback.fst _ _
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(Y1-C1)** `Y_d ⟶ S` is a closed immersion ("`Y_N` … the *closed* subscheme of `Y`",
 Def 3.3.6): the zero section of the separated `E/S` is a closed immersion (as in
 `torsionι_isClosedImmersion`, T-B3), and closed immersions pull back. -/
@@ -732,6 +734,7 @@ theorem pull_smul_eq_zero_iff_residue (a : ℤ) {k : Type u} [Field k]
     simp only [Category.assoc] at h ⊢
     rw [h]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(Y1-C3, the range/residue dictionary)** A point `x` of the base lies in the killed locus
 iff the section dies on the residue-field fibre at `x`. Loeffler removes the `Y_d` as *loci*
 (sets), while the naive functor speaks of fibres; this is the bridge's first half.
@@ -759,6 +762,7 @@ theorem mem_killedLocus_range_iff (d : ℕ) (x : S) :
     show (E.killedLocusπ P d) (hlift (IsLocalRing.closedPoint _)) = x
     rw [← Scheme.Hom.comp_apply, hh, Scheme.fromSpecResidueField_apply]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(Y1-D1 bridge, fibrewise)** Pulling the base-changed marked section `asSection E t (pull t P)`
 back along a geometric point `τ : Spec k ⟶ T` is, under the `baseChange` point iso, pulling `P`
 along `τ ≫ t`; so its `a`-torsion is detected on the fibre over `τ ≫ t`. -/

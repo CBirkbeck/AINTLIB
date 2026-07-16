@@ -33,6 +33,7 @@ theorem appLE_id {X : Scheme.{u}} {U : X.Opens} (e : U ≤ (𝟙 X) ⁻¹ᵁ U) 
 theorem appLE_top_top {X Y : Scheme.{u}} (f : X ⟶ Y) :
     Scheme.Hom.appLE f ⊤ ⊤ le_top = f.appTop := by
   simp [Scheme.Hom.appLE, Scheme.Hom.appTop]
+  exact Category.comp_id _
 
 /-- The `⊤`-restriction of an open immersion's sections is the section iso. -/
 theorem ι_appLE_top {X : Scheme.{u}} (U : X.Opens) :

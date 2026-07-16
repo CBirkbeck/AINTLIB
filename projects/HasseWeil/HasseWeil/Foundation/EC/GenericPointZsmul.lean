@@ -508,7 +508,12 @@ theorem zsmul_genericPoint_eq (n : ℤ) (hn : n ≠ 0) :
     change _ = Φ_ff W n / ΨSq_ff W n
     rw [ψ_ff_sq_eq_ΨSq_ff]
   rw [h_x_eq] at h_ns_affine
-  refine ⟨h_ns_affine, ?_⟩
+  -- Re-type the nonsingularity proof at the *folded* `mulByInt_y W n` (defeq to
+  -- `ω_ff W n / ψ_ff W n ^ 3`), so the `Point.some` ascriptions in the goal below
+  -- stay type-correct at implicit transparency and `some.injEq` can match.
+  have h_ns_affine' :
+      (W_KE W).toAffine.Nonsingular (mulByInt_x W n) (mulByInt_y W n) := h_ns_affine
+  refine ⟨h_ns_affine', ?_⟩
   -- Transport `n • genericPoint` across the affine ↔ Jacobian equivalence and unfold to
   -- the explicit `smulEval` coordinate vector, then read off both coordinates.
   change n • Affine.Point.some (x_gen W) (y_gen W) hns = _

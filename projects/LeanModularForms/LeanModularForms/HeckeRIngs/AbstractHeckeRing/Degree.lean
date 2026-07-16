@@ -88,11 +88,9 @@ private lemma smulOrbit_map_inj (g : P.Δ) (β : P.Δ) :
 /-- The cardinality of a smul orbit equals the degree of the acting double coset. -/
 lemma smulOrbit_card (g : P.Δ) (β : P.Δ) :
     (smulOrbit P g β).card = Fintype.card (decompQuot P g) := by
-  show (Finset.image _ ⊤).card = _
-  rw [Finset.top_eq_univ]
-  convert (Finset.card_image_of_injective Finset.univ
-    (smulOrbit_map_inj P g β)).trans Finset.card_univ
-  rfl
+  have hinj : Function.Injective (smulOrbitElt P g β) := smulOrbit_map_inj P g β
+  rw [smulOrbit, Finset.top_eq_univ, Finset.card_image_of_injective Finset.univ hinj,
+    Finset.card_univ]
 
 /-- The cardinality of a smul orbit cast to `ℤ` equals `HeckeCoset_deg`. -/
 lemma smulOrbit_card_intCast (D : HeckeCoset P) (β : P.Δ) :

@@ -263,6 +263,7 @@ private theorem pointSharp_zero_point {U : (F.E).Opens}
   rw [← Scheme.Hom.appLE_comp_appLE t F.zero U ⊤ ⊤ (fun x _ => heU x) le_top]
   rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The chart comorphism of a point over `t` restricts along `π` to the `t`-comorphism. -/
 private theorem pointSharp_comp_π {U : (F.E).Opens} {t : Spec R ⟶ Spec B} (P : F.Point t)
     (hp : ∀ x : ↑(Spec R), (P.1).base x ∈ U) (c : Γ(Spec B, ⊤)) :
@@ -272,6 +273,7 @@ private theorem pointSharp_comp_π {U : (F.E).Opens} {t : Spec R ⟶ Spec B} (P 
   rw [Scheme.Hom.appLE_comp_appLE P.1 F.π ⊤ U ⊤ _ _,
     appLE_congr_hom P.2 ⊤ ⊤]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The augmentation retracts the structure map: `ζ ∘ π♯ = id` (`Γ`-dual of `zero ≫ π = 𝟙`). -/
 private theorem zero_appLE_π_appLE {U : (F.E).Opens}
     (heU : ∀ x : ↑(Spec B), (F.zero).base x ∈ U) (c : Γ(Spec B, ⊤)) :
@@ -346,6 +348,7 @@ private theorem liftU_toSpecΓ (hU : IsAffineOpen U) {w : Spec R ⟶ F.E}
   rw [Scheme.isoSpec_Spec_hom, ← Spec.map_comp]
   rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The pairing of two points through the box. -/
 private noncomputable def pairBox {t : Spec R ⟶ Spec B} (P Q : F.Point t)
     (hp : ∀ x : ↑(Spec R), (P.1).base x ∈ U) (hq : ∀ x : ↑(Spec R), (Q.1).base x ∈ U) :
@@ -385,6 +388,7 @@ private theorem pairing_eq_pairBox {t : Spec R ⟶ Spec B} (P Q : F.Point t)
         ← Category.assoc, pairBox_snd, liftU_ι]
     exact (point_pair_left_snd F P Q).trans hR.symm
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The left leg of the Künneth identification of the pairing. -/
 private theorem pairBox_boxIso_includeLeft (hU : IsAffineOpen U)
     {t : Spec R ⟶ Spec B} (P Q : F.Point t)
@@ -396,6 +400,7 @@ private theorem pairBox_boxIso_includeLeft (hU : IsAffineOpen U)
   rw [boxIso, patchKunneth_hom_comp_includeLeft, ← Category.assoc, pairBox_fst,
     liftU_toSpecΓ hU]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The right leg of the Künneth identification of the pairing. -/
 private theorem pairBox_boxIso_includeRight (hU : IsAffineOpen U)
     {t : Spec R ⟶ Spec B} (P Q : F.Point t)
@@ -408,6 +413,7 @@ private theorem pairBox_boxIso_includeRight (hU : IsAffineOpen U)
   rw [boxIso, patchKunneth_hom_comp_includeRight, ← Category.assoc, pairBox_snd,
     liftU_toSpecΓ hU]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(TAUT-SHARP)** The chart comorphism of `fromSpec` is the identity. -/
 private theorem pointSharp_fromSpec (hU : IsAffineOpen U)
     (htaut : ∀ x : ↑(Spec Γ(F.E, U)), (hU.fromSpec).base x ∈ U) :
@@ -494,6 +500,7 @@ private noncomputable def chartAug
   { toRingHom := (F.zero.appLE U ⊤ (fun x _ => heU x)).hom
     commutes' := fun c => zero_appLE_π_appLE heU c }
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **The left axis law, `Spec` form**: `Spec` of the left axis restriction, through the
 Künneth box and the multiplication, is the tautological chart inclusion (the geometric
 content of `0 + X = X`). -/
@@ -523,6 +530,7 @@ private theorem axisL_spec_law (hU : IsAffineOpen U)
   rw [← Category.assoc, ← pairing_eq_pairBox]
   exact zero_pairing_mul hU
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **The right axis law, `Spec` form** (the geometric content of `X + 0 = X`). -/
 private theorem axisR_spec_law (hU : IsAffineOpen U)
     (heU : ∀ x : ↑(Spec B), (F.zero).base x ∈ U)
@@ -550,6 +558,7 @@ private theorem axisR_spec_law (hU : IsAffineOpen U)
   rw [← Category.assoc, ← pairing_eq_pairBox]
   exact pairing_zero_mul hU
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Chart evaluation of a `Spec`-precomposition: `(Spec.map g ≫ v)♯ = v♯ ≫ g`. -/
 private theorem pointSharp_specMap_comp {R' R'' : CommRingCat.{u}} (g : R'' ⟶ R')
     {v : Spec R'' ⟶ F.E} (hv : ∀ x : ↑(Spec R''), v.base x ∈ U)
@@ -571,6 +580,7 @@ private noncomputable def boxMul (hU : IsAffineOpen U) :
     Spec (.of (↑Γ(F.E, U) ⊗[↑Γ(Spec B, ⊤)] ↑Γ(F.E, U))) ⟶ F.E :=
   (boxIso hU).inv ≫ boxι ≫ (μ[F.asOver]).left
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **The separating section**: a tensor `y₀` with both axis values `1` whose basic open
 maps into the chart under the box multiplication. Comaximality of the vanishing ideal of
 the non-chart locus with the two axis kernels (the axis laws land the axis primes inside

@@ -161,6 +161,7 @@ noncomputable def finiteLog (N : ℕ) (x : 𝓞 R') (hx : x ∈ F.Q) :
     𝓞 R' ⧸ F.Q ^ (N + 1) :=
   ∑ n ∈ Finset.range (finiteLogCutoff (ℓ := ℓ) N), F.finiteLogTerm N n x hx
 
+set_option backward.isDefEq.respectTransparency false in
 /-- A local fraction with numerator in `Q^s` lands in `Q^s / Q^(N+1)`. -/
 theorem quotientFractionEvalPrimeCompl_mem_map_Q_pow_of_mem
     (N s : ℕ) {y : 𝓞 R'} (d : F.Q.primeCompl) (hy : y ∈ F.Q ^ s) :

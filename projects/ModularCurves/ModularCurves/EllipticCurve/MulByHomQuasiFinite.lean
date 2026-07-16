@@ -156,6 +156,7 @@ private lemma finite_sections_mulByHom {K : Type u} [Field K] [IsAlgClosed K]
   · haveI := not_nonempty_iff.mp hne
     infer_instance
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(BB-QF, invertible case — KM 2.3.1 quasi-finiteness)** `[N] : E ⟶ E` is locally
 quasi-finite when `N` is invertible on the base. -/
 theorem MulByHom.locallyQuasiFinite_of_nIsInvertible (N : ℕ) [NeZero N]
@@ -222,6 +223,7 @@ theorem MulByHom.isFinite_of_nIsInvertible (N : ℕ) [NeZero N] (h : NIsInvertib
   haveI := MulByHom.locallyQuasiFinite_of_nIsInvertible E N h
   exact IsFinite.of_isProper_of_locallyQuasiFinite _
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(T-B4 finiteness, invertible case)** `E[N] ⟶ S` is finite when `N` is invertible. -/
 theorem Torsionπ.isFinite_of_nIsInvertible (N : ℕ) [NeZero N] (h : NIsInvertible S N) :
     IsFinite (E.torsionπ N) :=

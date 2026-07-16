@@ -38,6 +38,7 @@ namespace ScottishBook
 
 universe u
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Scottish Book Problem 21** (Kedlaya, 28 Apr 2016):
 *If every completed residue field of `Spa(A, A⁺)` is perfectoid, then `A` is perfectoid.*
 

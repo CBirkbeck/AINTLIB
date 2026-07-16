@@ -468,9 +468,10 @@ private lemma det_rep_T_gen_zero_pow_mul (q : {p : ℕ // p.Prime}) (a₀ b₀ :
             (HeckeCoset.rep (T_diag (![1, q.1]))) (HeckeCoset.rep D₂)) D' from by
           show (Finsupp.sum (Finsupp.single _ 1) (fun D₁' b₁ ↦ g'.sum (fun D₂ b₂ ↦
               b₁ • b₂ • HeckeRing.m (GL_pair 2) (HeckeCoset.rep D₁') (HeckeCoset.rep D₂)))) D' = _
-          rw [Finsupp.sum_single_index (by simp [Finsupp.sum]), Finsupp.sum]
-          simp only [one_smul, Finsupp.finsetSum_apply, Finsupp.smul_apply, smul_eq_mul]
-          rfl] at hD'
+          rw [Finsupp.sum_single_index (by simp [Finsupp.sum])]
+          change (∑ D₂ ∈ g'.support, (1 : ℤ) • g' D₂ • HeckeRing.m (GL_pair 2)
+            (HeckeCoset.rep (T_diag (![1, q.1]))) (HeckeCoset.rep D₂)) D' = _
+          simp only [one_smul, Finsupp.finsetSum_apply, Finsupp.smul_apply, smul_eq_mul]] at hD'
       exact hD')
     have hm_ne : (HeckeRing.m (GL_pair 2) (HeckeCoset.rep (T_diag (![1, q.1])))
         (HeckeCoset.rep D₂)) D' ≠ 0 := fun h ↦ hD₂_ne (by rw [h, mul_zero])
@@ -782,7 +783,9 @@ lemma T_ad_one_p_pow_eval_leading (p : ℕ) (hp : p.Prime) (a : ℕ) :
           (T_diag (![1, p] : Fin 2 → ℕ)).rep D2.rep) D_target =
         g.sum (fun D2 b₂ ↦ (b₂ • HeckeRing.m (GL_pair 2)
           (T_diag (![1, p] : Fin 2 → ℕ)).rep D2.rep) D_target) from
-      Finsupp.sum_apply, Finsupp.sum]
+      Finsupp.sum_apply]
+    change ∑ D2 ∈ g.support, (g D2 • HeckeRing.m (GL_pair 2)
+      (T_diag (![1, p] : Fin 2 → ℕ)).rep D2.rep) D_target = 1
     have h_leading_in_supp : D_leading ∈ g.support :=
       Finsupp.mem_support_iff.mpr (ih ▸ one_ne_zero)
     rw [← Finset.sum_erase_add _ _ h_leading_in_supp]

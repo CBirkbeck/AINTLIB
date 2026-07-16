@@ -40,6 +40,7 @@ noncomputable instance (X : Scheme.{u}) : MonoidalCategory
   inferInstanceAs (MonoidalCategory
     (_root_.PresheafOfModules.{u} (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)))
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The pullback of a sheaf of modules is the sheafification of the presheaf pullback of
 its underlying presheaf (`sheafificationCompPullback`, precomposed with the counit
 identification `sh(M.val) ≅ M`). -/
@@ -50,6 +51,7 @@ noncomputable def pullbackIsoSheafifyPresheafPullback (f : Y ⟶ X) (M : X.Modul
   (Modules.pullback f).mapIso (sheafifyValIso M).symm ≪≫
     (SheafOfModules.sheafificationCompPullback.{u} f.toRingCatSheafHom).app M.val
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(GAP-1 downstream core, general `f`, closed.)** Pullback commutes with the
 sheafified tensor: `f^*(M ⊗ N) ≅ f^*M ⊗ f^*N`. Relocated from
 `Picard/InvertibleSheaf.lean` and proved: express both sides through the sheafification

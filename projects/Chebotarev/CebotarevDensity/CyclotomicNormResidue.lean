@@ -92,6 +92,7 @@ private theorem pow_natModEq_of_pow_eq {S : Type*} [CommRing S] [IsDomain S] {μ
     [NeZero n] (hμ : IsPrimitiveRoot μ n) {a b : ℕ} (h : μ ^ a = μ ^ b) : a ≡ b [MOD n] :=
   hμ.eq_orderOf ▸ (hμ.isOfFinOrder (NeZero.ne n)).pow_eq_pow_iff_modEq.mp h
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **The cyclotomic Frobenius is the norm residue** (multiplicative form). For `L = K(μ_m)`,
 a primitive `m`-th root `ζ` of unity in `L`, and a prime `𝔭` of `K` unramified in `L` with
 `N𝔭` coprime to `m`, the cyclotomic character `IsPrimitiveRoot.autToPow` sends the Frobenius
@@ -201,6 +202,7 @@ private theorem unramifiedIn_intermediateField
     hunr.2 𝔓 (h𝔓prime.isMaximal (Ideal.ne_bot_of_liesOver_of_ne_bot hunr.1 𝔓)) inferInstance
   exact Algebra.IsUnramifiedAt.of_liesOver (𝓞 K) 𝔮 𝔓
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Step (A): a Frobenius-trivial prime splits completely.** For `F = fixedField H` with `H`
 abelian (hence normal) and a nonzero prime `𝔭` of `𝓞 K` unramified in `L` whose Frobenius
 representative lies in `H`, the `F`-Frobenius class of `𝔭` is trivial: `frobeniusClass K F 𝔭 = [1]`.

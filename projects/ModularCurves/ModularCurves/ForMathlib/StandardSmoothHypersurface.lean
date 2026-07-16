@@ -59,6 +59,7 @@ lemma pderiv_none_rename_some (p : MvPolynomial σ R) :
     obtain ⟨j, -, hj⟩ := mem_vars_rename _ _ h
     exact Option.some_ne_none j hj
 
+set_option backward.isDefEq.respectTransparency.types false in
 omit [Fintype σ] [DecidableEq σ] in
 lemma hypersurfacePresentation_jacobian_isUnit :
     IsUnit (hypersurfacePresentation f i).jacobian := by

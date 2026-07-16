@@ -99,6 +99,7 @@ lemma mR_isoAway_pieceAwayZι (k : Fin 3) :
   simp only [Category.assoc, Iso.hom_inv_id_assoc]
   rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- [C6-d3, Z] The strengthened within-chart descent: the factoring ψ ALSO satisfies the
 immersion equation — `Spec.map ψ ≫ pieceAwayZι` is the original point's total immersion. -/
 theorem SpecPoint.factors_addOnZImage (hΔ : IsUnit W.Δ) {K : Type u} [Field K]
@@ -159,6 +160,7 @@ lemma mR_isoAway_pieceAwayι (k : Fin 3) :
   simp only [Category.assoc, Iso.hom_inv_id_assoc]
   rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- [C6-d3, Y] The strengthened within-chart descent: the factoring ψ ALSO satisfies the
 immersion equation — `Spec.map ψ ≫ pieceAwayι` is the original point's total immersion. -/
 theorem SpecPoint.factors_addOnYImage (hΔ : IsUnit W.Δ) {K : Type u} [Field K]
@@ -1540,6 +1542,7 @@ lemma isLocalizationElem_congr_right {σ : Type*} {A : Type u} [CommRing A] [Set
   subst h
   rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **[D-NAT] Dictionary naturality along base change**: the dictionary of a point over the
 base-changed curve equals the dictionary of its push to the base (the affine target curves are
 definitionally equal through `map_map` and the composite algebra). -/
@@ -1654,6 +1657,7 @@ lemma mulModelHom_map_eq_BC (f : WeierstrassAtlasRingU.{u} →+* R)
   rw [classifyRingHomU_map f universalWeierstrassLocU.{u},
     classifyRingHomU_universalWeierstrassLocU, RingHom.comp_id]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The c6 spec at a mapped curve: transported from the atlas by D-NAT + the f-form push. -/
 theorem mulModelHom_specPoints_of_map (f : WeierstrassAtlasRingU.{u} →+* R)
     [(universalWeierstrassLocU.{u}.map f).IsElliptic]

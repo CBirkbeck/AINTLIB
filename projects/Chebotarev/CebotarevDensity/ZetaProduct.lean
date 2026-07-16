@@ -349,6 +349,7 @@ private theorem cpow_neg_absNorm_eq_pow {a b : ℕ} (f : ℕ) (s : ℂ)
     (h : b = a ^ f) : ((b : ℂ)) ^ (-s) = ((a : ℂ) ^ (-s)) ^ f := by
   rw [h, Nat.cast_pow, ← Complex.natCast_cpow_natCast_mul, Complex.cpow_nat_mul]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Sharifi 7.1.16 (p. 141) local step: the local Euler factor at an
 unramified prime `𝔭` of `K` factors as a product over characters.
 Source quote (paraphrased identity): the local factor
@@ -2630,6 +2631,7 @@ private def ramifiedFlattenEquiv
   left_inv _ := rfl
   right_inv _ := rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The unramified part of the prime-ideal Euler product equals `∏_χ L_χ`. Regroup the unramified
 `L`-primes fibrewise over the `K`-prime below them (`Equiv.sigmaFiberEquiv` +
 `Multipliable.tprod_sigma`); each fibre product is `∏_χ (1 - χ(σ_𝔭) N𝔭^{-s})^{-1}`

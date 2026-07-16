@@ -96,6 +96,7 @@ end Algebra
 section UniversalProperty
 
 variable (G B) in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Uniqueness of descent along the invariants morphism, in restriction-stable form:
 for an open immersion `j : W ⟶ Spec Bᴳ`, two morphisms out of `W` agreeing after
 precomposition with the pullback of `invariantsπ` along `j` are equal.
@@ -668,6 +669,7 @@ private theorem relative_chart_descent_comparison {Y Q' J'' : Scheme.{u}}
           rw [Category.assoc]
 
 variable (G B) in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Per-point local descent for the relative quotient.** For an open immersion
 `j : Q' ⟶ Spec Bᴳ` and a relatively-`G`-invariant morphism `f` out of `pullback π j`,
 around every point of `Q'` there is an invariant basic open `D(a) ⊆ range j` together

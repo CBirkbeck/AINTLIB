@@ -591,6 +591,7 @@ noncomputable def canonicalSplittingIso
     ⟨Ideal.quotientMap_injective' (le_of_eq h_lies), h_surj⟩).symm
 
 omit [NumberField K₀] in
+set_option backward.isDefEq.respectTransparency false in
 /-- The canonical splitting iso satisfies `IsKAlgebraCompatibleSplittingIso`. -/
 theorem canonicalSplittingIso_isKAlgebraCompatible
     {R' : Type w} [Field R'] [NumberField R'] [Algebra K₀ R']

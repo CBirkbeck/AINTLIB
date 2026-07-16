@@ -479,6 +479,7 @@ theorem coarsenByUnits_lt_one_of_not_mem
 /-! ### Restriction of a valuation to a convex subgroup (Wedhorn's retraction 7.1.2) -/
 
 open Classical in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Restriction of a valuation to a convex subgroup** (Wedhorn 7.1.2).
 The restricted valuation keeps values whose unit part is in `H` and zeros out the rest.
 Requires `∀ r, v r ≤ 1` for multiplicativity. -/
@@ -573,6 +574,7 @@ noncomputable def restrictToConvex
     · simp only [f, dif_neg hxy, dif_neg hmxy]; exact bot_le
 
 open Classical in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Restriction of a valuation to a convex subgroup, generalized.**
 Like `restrictToConvex` but requires only that `H` contains every value
 `v(a) ≥ 1` (the "ge-one" elements), not that `v ≤ 1` globally.

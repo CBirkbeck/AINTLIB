@@ -278,6 +278,7 @@ def IsGalDescentTo_OK (a : ℕ) : Prop :=
   ∃ γ : 𝓞 K, algebraMap (𝓞 K) (𝓞 R') γ = S.gaussSumInt a ^ p
 
 omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
+set_option backward.isDefEq.respectTransparency false in
 /-- Sufficient condition for the Galois descent: at the field level, if
 `(algebraMap (𝓞 R') R') (S.gaussSumInt a ^ p)` is in the range of
 `algebraMap K R'`, we obtain the integral descent. The hypothesis is

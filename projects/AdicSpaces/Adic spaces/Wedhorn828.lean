@@ -1202,6 +1202,7 @@ theorem example638_evalHom_X [IsTateRing A] [IsNoetherianRing A]
 
 omit [CompatiblePlusSubring A] in
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Density helper (faithful):** every `D.coeRingHom`-image of an element of the ring of
 definition `locSubring D.P D.T D.s = A₀[t/s]` lies in the range of `example638_evalHom D`.
 

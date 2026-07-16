@@ -250,6 +250,7 @@ private theorem locallyFreeRankLocusAux_exists_presentation {R : Type u} [CommRi
       (fun i => (1 : Localization.Away g) ⊗ₜ[R] x i), hπ', ?_⟩
   rw [LinearMap.exact_iff, Fintype.range_linearCombination, hk]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **[L1-b, the affine core]** For `M = coker (α : R^m → R^n)` and any `R`-algebra `A`:
 the base change `A ⊗ M` is finite locally free of rank `n` (flat with all stalk ranks `n`)
 iff every matrix entry of `α` dies in `A`. Forward: flat + finite ⟹ free stalks; the
@@ -1260,6 +1261,7 @@ private theorem locallyFreeRankLocus_sections_subsingleton {X : Scheme.{u}} [IsA
   exact ⟨fun p => hE.false (eP.inv.base p)⟩
 
 omit [LocallyOfFinitePresentation f] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **[L1-e0, the affine chart bridge]** For an affine test scheme `X` mapping into an
 affine chart `U` of `S`, the geometric rank-`n` local-freeness of the pulled-back `f` is
 the module-theoretic condition for the pushforward sections, base-changed to `Γ(X)`. This
@@ -1375,6 +1377,7 @@ private theorem locallyFreeRankLocus_chart_iff {X : Scheme.{u}} [IsAffine X]
     rw [congrFun hrk q]
     exact h2 q
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **[L1-e3, the per-chart condition]** For an affine chart `V ⊆ T` mapped into an affine
 chart `U ⊆ S` by `t`, the geometric rank-`n` local-freeness of `f` pulled back over `V` is
 exactly the vanishing in `Γ(T, V)` of the flattening ideal of `U` (composing the chart
@@ -1424,6 +1427,7 @@ private theorem locallyFreeRankLocus_chart_cond {T : Scheme.{u}} (t : T ⟶ S) (
 end LocallyFreeRankLocusBridge
 
 open scoped TensorProduct in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(KM 6.4.3, dichotomy form — the flattening-locus leaf)** Let `f : W ⟶ S` be finite and
 locally of finite presentation, whose field-valued fibres are all either empty or finite
 locally free of rank `n`. Then there is a closed subscheme `Z ⊆ S`, universal for "the base
@@ -1685,6 +1689,7 @@ theorem hasExactOrder_of_orderDivisor_ideal_eq (N : ℕ) [NeZero N] (D : RelEffC
   rw [← h] at hsub
   exact hsub
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(KM 6.1, the scheme of generators `G^×` — divisor register)** For a rank-`N` subgroup
 divisor `D ⊆ E`, there is a closed subscheme `Z ⊆ D` universal for "the point is a
 generator of `D`": for a `T`-point `P` of `E` lying on `D` (witnessed by the factorisation
@@ -1829,6 +1834,7 @@ private theorem generatorSpace_baseChange_le_ker_iff (D : RelEffCartierDiv E.π)
         Scheme.IdealSheafData.map_comp],
     Scheme.IdealSheafData.le_map_iff_comap_le]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The value of an integer multiple of the original point, pulled back through the
 pasting isomorphism, is the value of the multiple of the transported point (sealed; the
 morphism-level input to the order-divisor pasting naturality — stated with `ψ.inv` so the
@@ -1937,6 +1943,7 @@ private theorem generatorSpace_baseChange_orderDivisor_ideal {T Q : Scheme.{u}} 
     (pullbackLeftPullbackSndIso E.π t q)
   exact h1.symm.trans h2
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **The `IsDivisorGenerator` composite-vs-iterated base-change bridge** (sealed): a point
 of `E` over `q ≫ t` generates `D` iff the corresponding point of `E ×_S T` over `q`
 generates `D ×_S T`. Both sides reduce to their order-divisor–ideal equalities
@@ -1976,6 +1983,7 @@ private theorem generatorSpace_baseChange_isDivisorGenerator_iff (N : ℕ) [NeZe
     exact h'
   · exact fun h => by rw [h]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(KM 6.1, "formation commutes with arbitrary change of base")** The generator scheme
 of the base-changed divisor is the base change of the generator scheme. Dischargeable from
 the universal property (`generatorSpace_spec` on both sides + Yoneda); no new gates. -/

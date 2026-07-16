@@ -1,6 +1,7 @@
 module
 
 public import FltRegular.NumberTheory.Unramified
+import Mathlib.NumberTheory.RamificationInertia.Galois
 
 /-!
 # Localized Galois descent of ideals (away from the ramified primes)

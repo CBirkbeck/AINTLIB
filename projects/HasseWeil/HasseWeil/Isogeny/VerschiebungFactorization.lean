@@ -291,6 +291,7 @@ theorem moduleFinite_linfAt_gamma_pullback_x (hq : 2 ≤ Fintype.card K)
   exact Module.finite_of_finrank_pos hpos
 
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **L3 pointwise witness** (Silverman V.1.1 proof, pole-order per K-rational projective
 smooth point): given a 2-torsion witness, every K-rational `P : ProjectiveSmoothPoint`
 satisfies `(projectiveDivisorOf((1−π)*x_gen)) P = -2` (as an integer). Three branches:
@@ -967,6 +968,7 @@ theorem geomFrobOmega_some [DecidableEq Ω]
     (Affine.Point.some x y h) = _
   exact WeierstrassCurve.Affine.Point.map_some (f := FiniteField.frobeniusAlgHom K Ω) h
 
+set_option backward.isDefEq.respectTransparency false in
 theorem geomFrobOmega_fixed_iff_mem_range [DecidableEq Ω]
     (P : (W.baseChange Ω).toAffine.Point) :
     geomFrobOmega W P = P ↔ P ∈ Set.range (includePtOmega W) := by

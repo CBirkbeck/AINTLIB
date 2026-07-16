@@ -23,6 +23,7 @@ universe u
 
 namespace AlgebraicGeometry
 
+set_option backward.isDefEq.respectTransparency.types false in
 theorem LocallyOfFinitePresentation.of_comp_of_locallyOfFiniteType
     {X Y Z : Scheme.{u}} {f : X ⟶ Y} {g : Y ⟶ Z}
     (h : LocallyOfFinitePresentation (f ≫ g)) (hg : LocallyOfFiniteType g) :

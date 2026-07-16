@@ -849,6 +849,7 @@ private theorem relativeFrobenius_coordRingHom_comp_map (e : ℕ) :
   · exact RingHom.ext fun q => relativeFrobenius_coordRingHom_eq_on_C p E e q
   · exact relativeFrobenius_coordRingHom_eq_on_root p E e
 
+set_option backward.isDefEq.respectTransparency false in
 theorem relativeFrobenius_pullback_coordRingMap (e : ℕ) (r : E.toAffine.CoordinateRing) :
     (EC.Isogeny.relativeFrobenius p E e).toCurveMap.pullback
       (algebraMap (E.iterateFrobeniusTwist p e).toAffine.CoordinateRing

@@ -346,6 +346,7 @@ private theorem pointSharp_zero_point {U : (F.E).Opens}
   rw [← Scheme.Hom.appLE_comp_appLE t F.zero U ⊤ ⊤ (fun x _ ↦ heU x) le_top]
   rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The chart comorphism of a point over `t` restricts along `π` to the `t`-comorphism. -/
 private theorem pointSharp_comp_π {U : (F.E).Opens}
     {t : Spec R ⟶ Spec (CommRingCat.of k)} (P : F.Point t)
@@ -356,6 +357,7 @@ private theorem pointSharp_comp_π {U : (F.E).Opens}
   rw [Scheme.Hom.appLE_comp_appLE P.1 F.π ⊤ U ⊤ _ _,
     appLE_congr_hom P.2 ⊤ ⊤]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The augmentation retracts the structure map: `ζ ∘ π♯ = id` (`Γ`-dual of `zero ≫ π = 𝟙`). -/
 private theorem zero_appLE_π_appLE {U : (F.E).Opens}
     (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U)
@@ -431,6 +433,7 @@ private theorem liftU_toSpecΓ (hU : IsAffineOpen U) {w : Spec R ⟶ F.E}
   rw [Scheme.isoSpec_Spec_hom, ← Spec.map_comp]
   rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The pairing of two points through the box. -/
 private noncomputable def pairBox {t : Spec R ⟶ Spec (CommRingCat.of k)} (P Q : F.Point t)
     (hp : ∀ x : ↑(Spec R), (P.1).base x ∈ U) (hq : ∀ x : ↑(Spec R), (Q.1).base x ∈ U) :
@@ -470,6 +473,7 @@ private theorem pairing_eq_pairBox {t : Spec R ⟶ Spec (CommRingCat.of k)} (P Q
         ← Category.assoc, pairBox_snd, liftU_ι]
     exact (point_pair_left_snd F P Q).trans hR.symm
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The left leg of the Künneth identification of the pairing. -/
 private theorem pairBox_boxIso_includeLeft (hU : IsAffineOpen U)
     {t : Spec R ⟶ Spec (CommRingCat.of k)} (P Q : F.Point t)
@@ -481,6 +485,7 @@ private theorem pairBox_boxIso_includeLeft (hU : IsAffineOpen U)
   rw [boxIso, patchKunneth_hom_comp_includeLeft, ← Category.assoc, pairBox_fst,
     liftU_toSpecΓ hU]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The right leg of the Künneth identification of the pairing. -/
 private theorem pairBox_boxIso_includeRight (hU : IsAffineOpen U)
     {t : Spec R ⟶ Spec (CommRingCat.of k)} (P Q : F.Point t)
@@ -493,6 +498,7 @@ private theorem pairBox_boxIso_includeRight (hU : IsAffineOpen U)
   rw [boxIso, patchKunneth_hom_comp_includeRight, ← Category.assoc, pairBox_snd,
     liftU_toSpecΓ hU]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(TAUT-SHARP)** The chart comorphism of `fromSpec` is the identity. -/
 private theorem pointSharp_fromSpec (hU : IsAffineOpen U)
     (htaut : ∀ x : ↑(Spec Γ(F.E, U)), (hU.fromSpec).base x ∈ U) :
@@ -579,6 +585,7 @@ private noncomputable def chartAug
   { toRingHom := (F.zero.appLE U ⊤ (fun x _ ↦ heU x)).hom
     commutes' := fun c ↦ zero_appLE_π_appLE heU c }
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **The left axis law, `Spec` form**: `Spec` of the left axis restriction, through the
 Künneth box and the multiplication, is the tautological chart inclusion (the geometric
 content of `0 + X = X`). -/
@@ -608,6 +615,7 @@ private theorem axisL_spec_law (hU : IsAffineOpen U)
   rw [← Category.assoc, ← pairing_eq_pairBox]
   exact zero_pairing_mul hU
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **The right axis law, `Spec` form** (the geometric content of `X + 0 = X`). -/
 private theorem axisR_spec_law (hU : IsAffineOpen U)
     (heU : ∀ x : ↑(Spec (CommRingCat.of k)), (F.zero).base x ∈ U)
@@ -635,6 +643,7 @@ private theorem axisR_spec_law (hU : IsAffineOpen U)
   rw [← Category.assoc, ← pairing_eq_pairBox]
   exact pairing_zero_mul hU
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Chart evaluation of a `Spec`-precomposition: `(Spec.map g ≫ v)♯ = v♯ ≫ g`. -/
 private theorem pointSharp_specMap_comp {R' R'' : CommRingCat.{u}} (g : R'' ⟶ R')
     {v : Spec R'' ⟶ F.E} (hv : ∀ x : ↑(Spec R''), v.base x ∈ U)
@@ -1070,6 +1079,7 @@ private theorem pointSharp_add_tail {U : (F.E).Opens} (hU : IsAffineOpen U)
        `sharp-sum f = φL (ψ f) = pT (f⊗1) + pT (1⊗f) = sharp P₁ f + sharp P₂ f`. 
 -/
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(H-φ)** The square-zero reduction collapses chart evaluations: if two chart-supported
 morphisms `w, w'` into `E` land in the chart `U` and agree after restriction along `φ`, then
 `φ` identifies their chart comorphisms on every chart element. Uses the `ΓSpecIso`-naturality
@@ -1424,6 +1434,7 @@ theorem nIsInvertible_residueField {X : Scheme.{u}} {N : ℕ} (h : NIsInvertible
   have h1 := (X.presheaf.germ ⊤ x trivial ≫ X.residue x).hom.isUnit_map h0
   rwa [map_natCast] at h1
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(L-BC = `Torsionπ.formallyUnramified`, the arithmetic input of BB-DIFF)** If `N` is
 invertible on `S`, the `N`-torsion `E[N] ⟶ S` is formally unramified: by T-DISC
 (`FormallyUnramified.of_finite_fiberToSpecResidueField`, using `torsionπ_isFinite`) it

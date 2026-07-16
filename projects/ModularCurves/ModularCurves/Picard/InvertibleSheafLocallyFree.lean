@@ -125,6 +125,7 @@ theorem IsInvertible.isLocallyFree {M : X.Modules} (hM : IsInvertible M) :
     M.IsLocallyFree :=
   (invertibleLocalGeneratorsData hM).isLocallyFree
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- An invertible scheme module is quasicoherent. -/
 theorem IsInvertible.isQuasicoherent {M : X.Modules} (hM : IsInvertible M) :
     M.IsQuasicoherent := by

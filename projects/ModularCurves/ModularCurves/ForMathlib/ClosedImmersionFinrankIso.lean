@@ -44,6 +44,7 @@ lemma Scheme.Hom.finrank_comp_right_of_isIso {X Y Z : Scheme.{u}} (φ : X ⟶ Y)
     IsPullback.of_horiz_isIso ⟨by simp⟩
   exact Scheme.Hom.finrank_of_isPullback (𝟙 X) φ (φ ≫ e) e h y
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Over an affine base, the scheme-`finrank` of a finite flat morphism equals the stalkwise
 rank of its global sections as an algebra over the base. -/
 lemma Scheme.Hom.finrank_eq_rankAtStalk_isAffineBase {Y S : Scheme.{u}} [IsAffine S]
@@ -81,6 +82,7 @@ end AlgebraicGeometry
 
 namespace ModularCurves
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- A closed immersion `j : X ⟶ Y` of schemes finite flat locally-of-finite-presentation over
 an **affine** base `S`, whose `Γ(S)`-modules `Γ(Y)` and `Γ(X)` have equal rank at every prime,
 is an isomorphism. -/
@@ -133,6 +135,7 @@ theorem isIso_of_isClosedImmersion_of_finrank_eq_isAffineBase
     ← Scheme.Hom.finrank_eq_rankAtStalk_isAffineBase (j ≫ g) p]
   exact (h (S.isoSpec.inv.base p)).symm
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Same-degree closed immersion is an isomorphism (general base).** A closed immersion
 `j : X ⟶ Y` between schemes finite, flat, and locally of finite presentation over `S`, whose
 scheme-ranks over `S` agree everywhere, is an isomorphism. Reduces to the affine-base case on

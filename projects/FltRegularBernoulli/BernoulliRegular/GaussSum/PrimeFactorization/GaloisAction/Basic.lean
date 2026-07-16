@@ -669,12 +669,14 @@ lemma stickelbergerComplexCharacter_apply_unit
     (stickelbergerComplexCharacter_apply_characterUnitGeneratorPow (p := p) χ
       (characterUnitGeneratorExponent (p := p) a : ℕ))
 
+set_option backward.isDefEq.respectTransparency false in
 lemma stickelbergerEmbedding_gaussSumLiftAdditiveRoot :
     stickelbergerEmbedding p L (((gaussSumLiftAdditiveRoot (p := p) L : 𝓞 L) : L)) =
       stickelbergerComplexRoot p ^ (p - 1) := by
   simp [gaussSumLiftAdditiveRoot, stickelbergerZetaInteger, map_pow,
     stickelbergerEmbedding_apply_zeta]
 
+set_option backward.isDefEq.respectTransparency false in
 lemma stickelbergerEmbedding_gaussSumLiftCharacterRoot :
     stickelbergerEmbedding p L (((gaussSumLiftCharacterRoot (p := p) L : 𝓞 L) : L)) =
       stickelbergerComplexCharacterRoot (p := p) := by

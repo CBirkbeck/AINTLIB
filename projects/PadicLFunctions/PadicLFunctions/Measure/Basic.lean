@@ -101,6 +101,7 @@ section compact
 
 variable [CompactSpace X]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Every `ℤ_[p]`-linear functional on `C(X, ℤ_[p])` is bounded with norm at most `1`:
 if `‖f‖ ≤ p^{-m}` then `f = p^m • g` for a continuous `g`, so `‖μ f‖ ≤ p^{-m}`.
 

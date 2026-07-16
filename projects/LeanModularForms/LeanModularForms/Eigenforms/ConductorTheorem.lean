@@ -577,13 +577,15 @@ noncomputable def gamma0LiftLowerLeftN (N : ℕ) [NeZero N] (u : (ZMod N)ˣ) :
         push_cast; ring, h_ae]
     ring
   let b : ℤ := (a * e - 1) / (N : ℤ)
-  refine ⟨⟨!![a, b; (N : ℤ), e], ?det⟩, ?gamma0⟩
-  · rw [Matrix.det_fin_two_of]
+  have hdet0 : (!![a, b; (N : ℤ), e]).det = 1 := by
+    rw [Matrix.det_fin_two_of]
     show a * e - b * (N : ℤ) = 1
     linarith [Int.ediv_mul_cancel h_dvd]
-  · rw [Gamma0_mem]
-    show (((N : ℤ) : ℤ) : ZMod N) = 0
-    simp
+  let γ₀ : SL(2, ℤ) := ⟨!![a, b; (N : ℤ), e], hdet0⟩
+  refine ⟨γ₀, ?gamma0⟩
+  rw [Gamma0_mem]
+  show (((N : ℤ) : ℤ) : ZMod N) = 0
+  simp
 
 /-- The `(1, 0)` entry of `gamma0LiftLowerLeftN N u` equals `N`. -/
 @[simp]
@@ -735,9 +737,10 @@ private lemma levelRaiseConjOfDvd_gamma0LiftLowerLeftN_val (l N : ℕ) [NeZero l
       Int.mul_ediv_cancel_left _ (Nat.cast_ne_zero.mpr (NeZero.ne l))]
   ext p q
   fin_cases p <;> fin_cases q <;>
-    simp only [Matrix.of_apply, Matrix.cons_val', Matrix.empty_val', Matrix.cons_val_fin_one,
+    (simp only [Matrix.of_apply, Matrix.cons_val', Matrix.empty_val', Matrix.cons_val_fin_one,
       gamma0LiftLowerLeftN_upper_left, gamma0LiftLowerLeftN_upper_right,
       gamma0LiftLowerLeftN_lower_left, gamma0LiftLowerLeftN_lower_right, h_div_eq]
+     rfl)
 
 /-- Explicit T-factor with character separation: under `¬ χ.FactorsThrough (N/l)`
 and given a unit `u`, there are integers `(i, j)` and a separating unit `u'`

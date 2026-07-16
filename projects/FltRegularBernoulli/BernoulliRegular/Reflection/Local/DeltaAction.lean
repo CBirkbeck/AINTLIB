@@ -30,6 +30,7 @@ section CompletionLift
 
 variable {R : Type*} [CommRing R] (I : Ideal R)
 
+set_option backward.isDefEq.respectTransparency false in
 theorem evalₐ_factor_pow_le {m n : ℕ} (hmn : m ≤ n)
     (x : AdicCompletion I R) :
     Ideal.Quotient.factor (Ideal.pow_le_pow_right hmn) (AdicCompletion.evalₐ I n x) =

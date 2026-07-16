@@ -42,6 +42,7 @@ private abbrev ringSheafId (X : Scheme.{u}) :=
   𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat, X.ringCatSheaf.property⟩ :
     Sheaf _ RingCat.{u}).obj
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **[CMP-T]** The hand-rolled sheafified tensor of `Picard/InvertibleSheaf.lean` agrees
 with the localized monoidal tensor: `tensorObj M N ≅ M ⊗ N` — both are the sheafification
 of the presheaf tensor of the underlying presheaves (`μIso` of the monoidal localization

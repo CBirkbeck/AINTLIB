@@ -49,6 +49,7 @@ noncomputable def finrankLocus (n : ℕ) : S.Opens :=
 @[simp] theorem mem_finrankLocus {n : ℕ} {s : S} :
     s ∈ finrankLocus ψ n ↔ ψ.finrank s = n := Iff.rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **[YF-ISOLOC], iso half.** Over the rank-`1` locus, a finite locally free morphism
 restricts (by base change along the open immersion of the locus) to an isomorphism. -/
 theorem isIso_pullbackSnd_finrankLocus_one :

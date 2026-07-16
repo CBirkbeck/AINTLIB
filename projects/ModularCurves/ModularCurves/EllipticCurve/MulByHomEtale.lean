@@ -31,6 +31,7 @@ namespace EllipticCurve
 
 variable {S : Scheme.{u}} (E : EllipticCurve S)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(L-BC, proven-finiteness variant — Y1-CLOSER L3)** `Torsionπ.formallyUnramified` with
 the finiteness input supplied by `Torsionπ.isFinite_of_nIsInvertible`. Proof body as in
 `TorsionUnramifiedFibre.lean`. -/
@@ -79,6 +80,7 @@ theorem MulByHom.etale' (N : ℕ) (h : NIsInvertible S N) :
     have := MulByHom.locallyOfFinitePresentation E N
     exact Etale.of_formallyUnramified_of_flat (E.mulByHom N)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(T-B5′, proven-finiteness variant)** `E[N] ⟶ S` étale when `N` is invertible. -/
 theorem Torsionπ.etale' (N : ℕ) (h : NIsInvertible S N) :
     Etale (E.torsionπ N) := by

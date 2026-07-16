@@ -289,6 +289,7 @@ theorem toAffinePoint_injective :
   cases P; cases Q
   simp_all
 
+set_option backward.isDefEq.respectTransparency false in
 /-- All fibres of the stored point map over arbitrary points are finite. -/
 theorem PullbackEvaluation.finite_fiber {β : Isogeny W.toAffine W.toAffine}
     {bad : Set (W_smooth W).SmoothPoint} (hw : PullbackEvaluation W β bad)
@@ -657,6 +658,7 @@ variable {W}
 
 variable (W)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- A `CoordHom` gives the pullback-evaluation witness with no bad set. -/
 theorem pullbackEvaluation_of_coordHom
     (φE : EC.Isogeny W.toAffine W.toAffine) (cd : φE.toCurveMap.CoordHom)

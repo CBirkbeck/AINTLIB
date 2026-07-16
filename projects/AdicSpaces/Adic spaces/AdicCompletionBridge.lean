@@ -431,6 +431,7 @@ theorem ker_evalₐ_eq {R : Type*} [CommRing R] (I : Ideal R)
     change (AdicCompletion.evalₐ I n) (AdicCompletion.of I R a) = 0
     rw [AdicCompletion.evalₐ_of]; exact Ideal.Quotient.eq_zero_iff_mem.mpr ha
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **[T-KS1-A]** The `I`-adic completion of a surjection is a surjection (Stacks 10.96.1(2),
 tag 0315 — **noeth-free**, no finiteness on `M`/`N`). Linchpin of the noeth-free
 `ker_evalₐ_eq_of_fg` (Stacks 05GG): the genuine content is that the kernel tower
@@ -481,6 +482,7 @@ theorem map_surjective_of_surjective {R : Type*} [CommRing R] (I : Ideal R)
   simp only [AdicCompletion.AdicCauchySequence.map_apply_coe]
   exact haf k
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Noeth-free, finitely-generated version of `ker_evalₐ_eq`**
 (Wedhorn Prop 5.37(2), wedhorn.txt:1903 / Bourbaki [BouAC] III §2.12).
 

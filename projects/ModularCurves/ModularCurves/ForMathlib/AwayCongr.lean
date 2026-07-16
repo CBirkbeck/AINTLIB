@@ -71,6 +71,7 @@ lemma awayMap_congr {g₁ g₂ : GradedRingHom 𝒜 ℬ} (h : g₁ = g₂) (s : 
   subst h
   exact (awayCongr_self _ _).symm
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The graded `Away.map` commutes with the degree-zero inclusion `fromZeroRingHom`:
 `Away.map g s` sends `a/1` (for `a : 𝒜 0`) to `(g a)/1` in `Away ℬ (g s)`. This is the
 ring-hom heart of the naturality of `Proj.toSpecZero` under `Proj.map` — when `g` fixes the

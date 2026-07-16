@@ -1075,6 +1075,7 @@ noncomputable def pZpExp (x : ℤ_[p]) : ℤ_[p] :=
   if h : ‖padicExp p ((x : ℚ_[p]))‖ ≤ 1 then ⟨padicExp p ((x : ℚ_[p])), h⟩ else 1
 
 omit [NormedAlgebra ℚ_[p] L] [IsUltrametricDist L] [CompleteSpace L] in
+set_option backward.isDefEq.respectTransparency false in
 /-- E5: on `pℤ_p` (odd `p`) the analytic exponential is integral, so `pZpExp`
 takes its true branch: `(pZpExp x : ℚ_[p]) = exp x`. -/
 theorem pZpExp_coe (hp2 : p ≠ 2) {x : ℤ_[p]} (hx : x ∈ Ideal.span {(p : ℤ_[p])}) :
@@ -1110,6 +1111,7 @@ noncomputable def pZpLog (x : ℤ_[p]) : ℤ_[p] :=
   if h : ‖padicLog p ((x : ℚ_[p]))‖ ≤ 1 then ⟨padicLog p ((x : ℚ_[p])), h⟩ else 0
 
 omit [NormedAlgebra ℚ_[p] L] [IsUltrametricDist L] [CompleteSpace L] in
+set_option backward.isDefEq.respectTransparency false in
 /-- E5: on `1 + pℤ_p` (odd `p`) the analytic logarithm is integral, so `pZpLog`
 takes its true branch: `(pZpLog x : ℚ_[p]) = log x`. -/
 theorem pZpLog_coe (hp2 : p ≠ 2) {x : ℤ_[p]}

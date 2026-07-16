@@ -691,6 +691,7 @@ theorem ord_P_functionFieldEquiv (hW : W.map σ.toRingHom = W)
   rw [pointValuation_functionFieldEquiv W σ hW P (smoothPointInv W σ hW P)
     (σ.apply_symm_apply P.x).symm (σ.apply_symm_apply P.y).symm g]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Fibre-divisor place comparison** at an affine place: the coefficient of
 `[ℓ]^*(σ•T)` at `P` equals the coefficient of `[ℓ]^*(T)` at `σ⁻¹•P`, because
 `[ℓ](σ⁻¹•P) = T ⟺ [ℓ]P = σ•T` (the action is additive and injective). Mirror of
@@ -723,6 +724,7 @@ theorem pullbackDiv_smoothPointInv_eq (hW : W.map σ.toRingHom = W)
         (smoothPointInv W σ hW P).toAffinePoint from hPrec.symm, ← hzsmul, h]
 
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Fibre-divisor place comparison at infinity**: `[ℓ]^*(σ•T) ∞ = [ℓ]^*(T) ∞`
 (`0 = σ•T ⟺ 0 = T`). Mirror of `pullbackDiv_geomFrob_infinity`. -/
 theorem pullbackDiv_pointHom_infinity (hW : W.map σ.toRingHom = W)

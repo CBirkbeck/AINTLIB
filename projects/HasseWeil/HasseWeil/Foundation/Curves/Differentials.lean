@@ -598,8 +598,9 @@ theorem isogeny_mapBaseChange_one_tmul_D
       ((1 : W.toAffine.FunctionField) ⊗ₜ
         KaehlerDifferential.D F (IsogenyAlgebraSource W α) x) =
       KaehlerDifferential.D F W.toAffine.FunctionField (α.pullback x) := by
-  rw [KaehlerDifferential.mapBaseChange_tmul, one_smul,
-    KaehlerDifferential.map_D]
+  have h_map_D := KaehlerDifferential.map_D F F (IsogenyAlgebraSource W α)
+    W.toAffine.FunctionField x
+  rw [KaehlerDifferential.mapBaseChange_tmul, one_smul, h_map_D]
   rfl
 
 /-- **Bridge: image of mapBaseChange contains the invariant differential** when
@@ -620,7 +621,11 @@ theorem isogeny_mapBaseChange_surjective_of_omegaCoeff_ne_zero
     KaehlerDifferential.D F (IsogenyAlgebraSource W α)
       (algebraMap (W.toAffine.CoordinateRing) W.toAffine.FunctionField
         (algebraMap (Polynomial F) (W.toAffine.CoordinateRing) Polynomial.X))), ?_⟩
-  rw [map_smul, KaehlerDifferential.mapBaseChange_tmul, KaehlerDifferential.map_D]
+  have h_map_D := KaehlerDifferential.map_D F F (IsogenyAlgebraSource W α)
+    W.toAffine.FunctionField
+    (algebraMap (W.toAffine.CoordinateRing) W.toAffine.FunctionField
+      (algebraMap (Polynomial F) (W.toAffine.CoordinateRing) Polynomial.X))
+  rw [map_smul, KaehlerDifferential.mapBaseChange_tmul, h_map_D]
   have hu_ne : alpha_star_u W α ≠ 0 := by
     rw [alpha_star_u_eq]
     exact (map_ne_zero_iff α.pullback α.pullback_injective).mpr
@@ -709,7 +714,9 @@ private theorem kaehlerMap_eq_zero_of_pullbackKaehler_eq_zero
       W.toAffine.FunctionField (KaehlerDifferential.D F (IsogenyAlgebraSource W α)
         (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
           (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X))) = 0 := by
-    rw [KaehlerDifferential.map_D]
+    rw [KaehlerDifferential.map_D F F (IsogenyAlgebraSource W α) W.toAffine.FunctionField
+      (algebraMap W.toAffine.CoordinateRing W.toAffine.FunctionField
+        (algebraMap (Polynomial F) W.toAffine.CoordinateRing Polynomial.X))]
     exact (Isogeny.pullbackKaehler_D α _).symm.trans (h_pK_zero _)
   have h_map_ω : KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
       W.toAffine.FunctionField (invariantDifferential W.toAffine) = 0 := by
@@ -719,7 +726,7 @@ private theorem kaehlerMap_eq_zero_of_pullbackKaehler_eq_zero
     rw [LinearMap.map_smul, h_map_D, smul_zero]
   exact (LinearMap.map_smul (KaehlerDifferential.map F F (IsogenyAlgebraSource W α)
     W.toAffine.FunctionField) a (invariantDifferential W.toAffine)).trans
-    (by rw [h_map_ω, smul_zero])
+    (by rw [h_map_ω]; exact smul_zero _)
 
 /-- Helper for `isogeny_omegaCoeff_ne_zero_of_isSeparable`: if the cotangent map
 `KaehlerDifferential.map` is zero, then so is `KaehlerDifferential.mapBaseChange`,

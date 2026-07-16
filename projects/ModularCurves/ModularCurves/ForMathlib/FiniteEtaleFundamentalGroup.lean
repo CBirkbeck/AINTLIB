@@ -398,6 +398,7 @@ noncomputable def pointsEquivOfContAction
         (SeparableClosure k ≃ₐ[k] SeparableClosure k)) FintypeCat.{u}).mapIso
       ((finiteEtaleEquivContAction k).counitIso.app X))
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The counit points-equivalence is Galois-equivariant: the fiber action (by
 post-composition) corresponds to the action of the continuous Galois set. -/
 lemma pointsEquivOfContAction_smul

@@ -51,9 +51,10 @@ private def lowerUniSL (m : ℤ) : SL(2, ℤ) :=
 @[simp] private lemma lowerUniSL_mapQ_coe (m : ℤ) :
     ((mapGL ℚ (lowerUniSL m) : GL (Fin 2) ℚ) : Matrix (Fin 2) (Fin 2) ℚ) =
       !![1, 0; (m : ℚ), 1] := by
-  ext i j; fin_cases i <;> fin_cases j <;>
-    simp [lowerUniSL, mapGL_coe_matrix, Matrix.SpecialLinearGroup.map_apply_coe,
-      RingHom.mapMatrix_apply, Matrix.map_apply]
+  rw [show ((mapGL ℚ (lowerUniSL m) : GL (Fin 2) ℚ) : Matrix (Fin 2) (Fin 2) ℚ) =
+      (!![1, 0; m, 1]).map Int.cast from
+    (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)]
+  ext i j; fin_cases i <;> fin_cases j <;> simp [Matrix.map_apply, Matrix.of_apply]
 
 omit [NeZero N] in
 private lemma lowerUniSL_mem_Gamma1 (m : ℤ) (hm : (N : ℤ) ∣ m) :
@@ -161,10 +162,11 @@ private lemma mem_Gamma_p_α_T_p_lower_pN_mpr (p : ℕ) (hp : 0 < p)
   apply Units.ext
   rw [Matrix.GeneralLinearGroup.coe_mul, Matrix.GeneralLinearGroup.coe_mul,
     conj_T_p_lower_real_val p hp γ]
+  have hyval : Subtype.val y = !![γ.val 0 0, (p : ℤ) * γ.val 0 1; N * c, γ.val 1 1] := rfl
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [hy_def, Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply,
-      Matrix.map_apply, hk]
+    simp [Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply,
+      Matrix.map_apply, hyval, hk]
   try field_simp
 
 /-! ### The bad-prime relative index `[Γ₁(N) : Γ_p(diag(p,1))] = p`

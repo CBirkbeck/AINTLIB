@@ -445,6 +445,7 @@ lemma inZChart_iff_opensRange (W : WeierstrassCurve R) (K : Type u) [Field K] [A
     subst hy
     exact hmem
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(L1 — T-W7.0b-points leaf)** Negation preserves the `Z`-chart: a field point is in the
 `Z`-chart iff its `negModelHom`-image is. Via `inZChart_iff_opensRange` both sides reduce to
 base-point membership in `D₊(X₂)` (`Proj.opensRange_awayι`), then
@@ -606,6 +607,7 @@ lemma negChartMap_coord0 (W : WeierstrassCurve R) :
   refine (away_mk_num_congr W _ ?_).trans rfl
   rw [map_pow, negGradedQuot_mk_X0]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(V1)** `negChartMap` sends the `X₁/X₂` chart coordinate to `(−X₁−a₁X₀−a₃X₂)/X₂`, i.e. the
 dehomogenised `negY` substitution. -/
 lemma negChartMap_coord1 (W : WeierstrassCurve R) :
@@ -668,6 +670,7 @@ private lemma negModelHom_zEquation (W : WeierstrassCurve R) (K : Type u) [Field
     WeierstrassCurve.map_a₃, WeierstrassCurve.map_a₄, WeierstrassCurve.map_a₆]
   linear_combination h2
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The composite's `Z`-chart `X₀`-coordinate equals the original's (negation fixes `X₀`).
 `simp only` (not `rw`): the goal mixes `chartSolutionsEquiv`- and `chartHomEquiv`-headed terms, and
 `rw`'s kabstract has no discrimination-tree pre-filter — it would `isDefEq` the `chartHomEquiv`
@@ -682,6 +685,7 @@ private lemma negModelHom_zCoord0 (W : WeierstrassCurve R) (K : Type u) [Field K
       (chartSolutionsEquiv W 2 K (chartHomEquiv W 2 K ⟨P, hZ⟩)).1 ⟨0, by decide⟩ := by
   simp only [coord_val, chartHom_negModelHom W K P hZ hZ', RingHom.comp_apply, negChartMap_coord0]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The composite's `Z`-chart `X₁`-coordinate is `negY` of the original coordinates. `simp only`
 front (see `negModelHom_zCoord0`): it rewrites both the composite's coordinate and the two `negY`
 arguments into `φ_P`-of-chart-coordinate form, so no `chartSolutionsEquiv`-vs-`chartHomEquiv`

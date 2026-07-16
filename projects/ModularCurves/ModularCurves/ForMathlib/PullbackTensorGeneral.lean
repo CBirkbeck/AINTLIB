@@ -484,6 +484,7 @@ lemma unitDesc_app_freeMk {V : (X.Opens)ᵒᵖ} (h : V.unop ⟶ (⊤ : X.Opens))
   erw [ModuleCat.freeDesc_apply]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 instance : IsIso (unitDesc (X := X)) := by
   haveI : ∀ V : (X.Opens)ᵒᵖ, IsIso ((unitDesc (X := X)).app V) := by
     intro V
@@ -682,6 +683,7 @@ lemma freeYonedaEquiv_apply {M : PresheafOfModules.{u} S} {X : C}
   obtain ⟨x, rfl⟩ := freeYonedaEquiv.symm.surjective g
   rw [Equiv.apply_symm_apply, freeYonedaEquiv_symm_app]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Generator evaluation of the corepresentability equivalence: the transposed morphism,
 evaluated on the upstairs generator, is the generator image of the original morphism. -/
 lemma corepresentableBy_homEquiv_app_generator {X : C} {N : PresheafOfModules.{u} R}
@@ -716,6 +718,7 @@ lemma freeObj_map_freeMk' {R' : Cᵒᵖ ⥤ RingCat.{u}} {H : Cᵒᵖ ⥤ Type u
   erw [ModuleCat.freeDesc_apply]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Evaluation of a morphism out of a free-yoneda module on an arbitrary generator
 `freeMk h`: the restriction of its generator image along `h`. The one compute rule for
 both sides of the [G3-pre] δ-chase. -/
@@ -749,6 +752,7 @@ variable {C D : Type u} [SmallCategory C] [SmallCategory D]
   (φ : S ⋙ forget₂ CommRingCat RingCat ⟶
     F.op ⋙ (R ⋙ forget₂ CommRingCat RingCat))
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Full evaluation of the transported adjunction unit at a free-yoneda module on an
 arbitrary generator: the restriction along `h` of the corepresentability comparison's
 generator image. -/
@@ -896,6 +900,7 @@ lemma freeYonedaTensorIso_inv_app_generator (U₁ U₂ : X.Opens) :
   erw [freeTensorμ_inv_freeMk]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **[D-PresPB′-general], leaf G3-η.** The unit comparison
 `η : f^*ᵖ(𝒪_X) ⟶ 𝒪_Y` of the doctrinal oplax structure on the presheaf pullback of a
 scheme morphism is an isomorphism *before sheafification*: the presheaf unit is the
@@ -948,6 +953,7 @@ theorem isIso_pullback_η :
   rw [key]
   infer_instance
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **[D-PresPB′-general], leaf G3-pre (δ on free-yoneda pairs).** The tensor comparison
 `δ : f^*ᵖ(P ⊗ Q) ⟶ f^*ᵖP ⊗ f^*ᵖQ` of the doctrinal oplax structure on the presheaf
 pullback of a scheme morphism is an isomorphism on free-yoneda pairs, *before

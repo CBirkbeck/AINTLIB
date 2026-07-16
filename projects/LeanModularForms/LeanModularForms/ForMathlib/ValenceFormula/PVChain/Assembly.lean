@@ -380,6 +380,7 @@ private lemma integrableOn_logDeriv_mul_deriv_farSet
       isClosed_iInter fun s ↦ isClosed_iInter fun _ ↦
         isClosed_le continuous_const (by fun_prop)
     convert this using 1
+    refine iff_of_eq (congrArg IsClosed ?_)
     ext t
     simp only [mem_iInter, mem_setOf_eq]
     exact Iff.rfl
@@ -461,6 +462,7 @@ private lemma pvIntegrand_intervalIntegrable
     apply MeasurableSet.compl
     suffices h : IsClosed (⋃ s ∈ (S₀ : Set ℂ), {t : ℝ | ‖γ t - s‖ ≤ ε}) by
       convert h.measurableSet using 1
+      refine iff_of_eq (congrArg MeasurableSet ?_)
       ext t
       simp only [mem_iUnion, mem_setOf_eq, Finset.mem_coe, exists_prop]
       exact Iff.rfl

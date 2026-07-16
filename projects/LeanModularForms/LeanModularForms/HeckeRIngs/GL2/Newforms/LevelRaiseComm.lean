@@ -62,8 +62,11 @@ open Matrix in
 lemma T_p_upper_mod (p : ℕ) (hp : 0 < p) (a : ℕ) :
     T_p_upper p hp a = mapGL ℚ (shiftSL (↑(a / p : ℕ) : ℤ)) * T_p_upper p hp (a % p) := by
   apply Units.ext
+  have hsh : (↑(mapGL ℚ (shiftSL (↑(a / p : ℕ) : ℤ))) : Matrix (Fin 2) (Fin 2) ℚ) =
+      (!![1, (↑(a / p : ℕ) : ℤ); 0, 1]).map Int.cast :=
+    (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)
   ext i j
-  simp only [T_p_upper, shiftSL, mapGL_coe_matrix, Matrix.GeneralLinearGroup.mkOfDetNeZero,
+  simp only [T_p_upper, hsh, Matrix.map_apply, Matrix.GeneralLinearGroup.mkOfDetNeZero,
     Matrix.mul_apply, Fin.sum_univ_two, Units.val_mul]
   fin_cases i <;> fin_cases j <;> simp [Matrix.cons_val_zero, Matrix.cons_val_one]
   rw [← Int.natCast_ediv]

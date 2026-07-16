@@ -29,6 +29,7 @@ variable (p : ℕ) [hp : Fact p.Prime]
 
 attribute [local instance] Classical.decEq Classical.propDecidable
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The even complex Dirichlet characters modulo `p` have cardinality
 `(p - 1) / 2`. -/
 theorem card_even_characters (hp₂ : p ≠ 2) :

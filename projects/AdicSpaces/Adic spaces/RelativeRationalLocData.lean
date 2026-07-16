@@ -868,6 +868,7 @@ theorem relativeLaurentNormalized_backwardLocHom_divByS
         (⟨D.s, ⟨1, pow_one _⟩⟩ : Submonoid.powers D.s)]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- backwardLocHom is continuous (D_at_E.topology → presheafValue D topology). -/
 theorem relativeLaurentNormalized_backwardLocHom_continuous
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
@@ -1174,6 +1175,7 @@ theorem relativeLaurentNormalized_forwardHom_restrictionMapHom
     exact relativeLaurentNormalized_forwardHom_canonicalMap E D hsub a
   exact DFunLike.congr_fun heq y
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Forward round-trip identity: `forwardHom ∘ backwardHom = id` on
 `presheafValue D_at_E`. Proved by reducing via `Completion.ext'` to the
 locHom-level identity that combines the full intertwining (for algebraMap-image)

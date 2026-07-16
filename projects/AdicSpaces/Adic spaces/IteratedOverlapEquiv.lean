@@ -667,6 +667,7 @@ private theorem f_sq_mem_laurentOverlap_T
   · change f ∈ ({D₀.s, f} : Finset A)
     exact Finset.mem_insert_of_mem (Finset.mem_singleton_self _)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Backward loc hom power-boundedness, overlap case.**
 
 For each `t ∈ (iteratedOverlapDatum_B P D₀ f hLocLift_B).T = {1, canonicalMap f,

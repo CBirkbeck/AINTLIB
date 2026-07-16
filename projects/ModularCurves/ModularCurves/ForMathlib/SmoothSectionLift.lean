@@ -34,6 +34,7 @@ theorem toSpecΓ_appTop_triangle {X : Scheme.{u}} {B : CommRingCat.{u}} (f : X �
     rw [Iso.inv_hom_id, Spec.map_id], Category.comp_id] at h2
   exact h2
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Sections of a smooth morphism from an affine scheme to an affine base lift along
 nilpotent thickenings of the base: the Γ–Spec transport of `Algebra.FormallySmooth.lift`. -/
 theorem exists_section_lift_of_smooth {X : Scheme.{u}} {B : CommRingCat.{u}}

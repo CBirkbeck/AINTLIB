@@ -219,6 +219,7 @@ theorem MulByHom.etale (N : ℕ) (h : NIsInvertible S N) :
     haveI := MulByHom.locallyOfFinitePresentation E N
     exact Etale.of_formallyUnramified_of_flat (E.mulByHom N)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-B5′)** If `N` is invertible on `S`, then `E[N] ⟶ S` is (finite) étale.
 Source: Loeffler §3.4; KM 2.3.5. -/
 theorem Torsionπ.etale (N : ℕ) (h : NIsInvertible S N) :

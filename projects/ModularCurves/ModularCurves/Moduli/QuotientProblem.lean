@@ -177,6 +177,7 @@ noncomputable def homPullbackAlongEquiv (X : EllObj R) {T : Scheme.{u}}
     · exact homToPullbackAlong_pullbackAlongπ p.1.1 p.1.2 p.2
     · rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Decomposing a morphism into the tautological square over a composite base
 map: `v : Y ⟶ X ×_{X.base} T` factors as the comparison of `v ≫ π` followed by
 the base-change functoriality map. -/
@@ -205,6 +206,7 @@ theorem toPullbackAlong_pullbackAlongMap {Y X : EllObj R} {T : Scheme.{u}}
       erw [(v ≫ X.pullbackAlongπ g).isPullback.isoPullback_hom_snd_assoc]
       exact v.isPullback.w.symm
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Every `Ell/R`-morphism is cartesian**: the comparison isomorphism
 `Y ≅ X.pullbackAlong u.baseHom` induced by `u : Y ⟶ X`. Loeffler Def 3.7.1's
 "morphisms are squares where `E ≅ E' ×_T S`", packaged as an iso onto the chosen
@@ -657,6 +659,7 @@ structure TorsorData {Q : ModuliProblem R} {G : Type u} [Group G] [Finite G]
       (by rw [Category.id_comp]; exact over_base γ)) :
     (∐ fun _ : G => Z) ⟶ Limits.pullback f f)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Freeness of the KM action** (KM p. 113: "By axiom 2) and the rigidity of
 `𝒫`, `G` operates freely on `𝕸(𝒫,δ)`"): if `𝒫` is rigid and the auxiliary
 problem is a rigidifier, no `g ≠ 1` fixes a point of the representing object of

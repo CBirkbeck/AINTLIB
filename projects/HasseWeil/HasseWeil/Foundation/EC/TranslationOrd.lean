@@ -241,6 +241,7 @@ private theorem algMap_XClass_localRingAt_ne_zero
       ((W_smooth W).maximalIdealAt P).primeCompl_le_nonZeroDivisors)).mpr h_xc_ne
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **`pointValuation P (algMap XClass) = exp(-1)` from the maxIdeal-span
 hypothesis**: when the maximal ideal of the local ring at `P` equals
 `span{algMap XClass}`, the generator has integer valuation `exp(-1)`
@@ -796,6 +797,7 @@ private theorem algMap_YClass_localRingAt_ne_zero
       ((W_smooth W).maximalIdealAt P).primeCompl_le_nonZeroDivisors)).mpr h_yc_ne
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **`pointValuation P (algMap YClass) = exp(-1)` from the maxIdeal-span
 hypothesis**: y-side mirror of
 `pointValuation_algMap_XClass_eq_exp_neg_one_of_maxIdeal_span`. When the
@@ -2200,6 +2202,7 @@ private theorem σ_commutes_slope_of_X_ne
       WeierstrassCurve.Affine.slope_of_X_ne hx_σ,
       _root_.map_div₀, _root_.map_sub, _root_.map_sub]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Round-trip on `x_gen`** — Silverman III.4.10(a) at the algebra-hom level.
 `σ(τ(x_gen)) = x_gen` where τ = translation by T, σ = translation by −T.
 
@@ -2300,6 +2303,7 @@ private theorem translateAlgHom_neg_commutes_translateSlope_xy
   rw [σ_commutes_slope_of_X_ne W hx_ne hx_σ_ne_full]
   rw [σ.commutes xk, σ.commutes yk, hσx, hσy]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Round-trip on `y_gen`** — Silverman III.4.10(a) at the algebra-hom level.
 `σ(τ(y_gen)) = y_gen` where τ = translation by T, σ = translation by −T.
 
@@ -2376,6 +2380,7 @@ theorem algEquiv_ext_x_y_gen {ψ₁ ψ₂ : KE ≃ₐ[F] KE}
 Group-law identity: `(gen + T_lift) + (−T_lift) = gen`. The proof structure
 mirrors the forward round-trip, with `T_lift` and `−T_lift` swapped. -/
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Inverse round-trip on `x_gen`**: `τ(σ(x_gen)) = x_gen`. -/
 theorem translateAlgHom_inv_round_trip_x_gen
     (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
@@ -2474,6 +2479,7 @@ private theorem translateAlgHom_commutes_translateSlope_xy
   rw [σ_commutes_slope_of_X_ne W hx_ne hx_τ_ne_full]
   rw [τ.commutes xk, τ.commutes (W.toAffine.negY xk yk), hτx, hτy]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Inverse round-trip on `y_gen`**: `τ(σ(y_gen)) = y_gen`. -/
 theorem translateAlgHom_inv_round_trip_y_gen
     (xk yk : F) (h_ns : W.toAffine.Nonsingular xk yk)
@@ -3235,6 +3241,7 @@ Mirrors `translateAlgHom_round_trip_x_gen` but with σ = τ (since
 replaces the `gen + T_lift + (−T)_lift = gen` used in the non-2-torsion
 version. -/
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Round-trip on `x_gen` for 2-torsion `T`**: applying
 `translateAlgHom_of_2tor T` twice returns `x_gen`. -/
 theorem translateAlgHom_of_2tor_round_trip_x_gen
@@ -3281,6 +3288,7 @@ theorem translateAlgHom_of_2tor_round_trip_x_gen
   simp only [genericPoint] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.1
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Round-trip on `y_gen` for 2-torsion `T`**: applying
 `translateAlgHom_of_2tor T` twice returns `y_gen`. -/
 theorem translateAlgHom_of_2tor_round_trip_y_gen
@@ -3728,6 +3736,7 @@ key change: the curve group law fact becomes
 `liftPointToKE_add` + `liftPointToKE_some`), replacing the round-trip's
 `gen + lift T₁ + lift(-T₁) = gen`. -/
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Substantive group-hom on x_gen** for non-2-torsion T₁, T₂ with non-2-torsion
 non-zero sum `T₁ + T₂ = some xk₃ yk₃ h_ns₃`. -/
 theorem translateAlgEquivOfPoint_add_nonTor_x_gen
@@ -3846,6 +3855,7 @@ private theorem genericPoint_add_liftSomePoint_add_eq_of_sum
   rw [show (Affine.Point.some xk₁ yk₁ h_ns₁ + Affine.Point.some xk₂ yk₂ h_ns₂
       : W.toAffine.Point) = Affine.Point.some xk₃ yk₃ h_ns₃ from h_sum]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Substantive group-hom on y_gen** for non-2-torsion T₁, T₂ with non-2-torsion
 non-zero sum `T₁ + T₂ = some xk₃ yk₃ h_ns₃`. Parallel of the x_gen case
 with translateY_xy / addY in place of translateX_xy / addX. -/
@@ -3889,6 +3899,7 @@ is also 2-torsion (since 2T₃ = 2T₁ + 2T₂ = 0). Proof mirrors the non-2-tor
 substantive case with translateAlgHom_of_2tor in place of
 translateAlgHom_of_nonTorsion. -/
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Substantive group-hom on x_gen for 2-tor T₁, T₂, sum non-zero**: parallel
 of the non-2-tor case using translateAlgHom_of_2tor. -/
 theorem translateAlgEquivOfPoint_add_2tor_x_gen
@@ -3977,6 +3988,7 @@ private theorem translateAlgHom_2tor_commutes_translateSlope_xy
   rw [σ_commutes_slope_of_X_ne W hx_ne hx_σ_ne_full]
   rw [σ.commutes xk₁, σ.commutes yk₁, hσx, hσy]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Substantive group-hom on y_gen for 2-tor T₁, T₂, sum non-zero**. -/
 theorem translateAlgEquivOfPoint_add_2tor_y_gen
     (xk₁ yk₁ : F) (h_ns₁ : W.toAffine.Nonsingular xk₁ yk₁)
@@ -4019,6 +4031,7 @@ symmetric `T₁ non-2-tor + T₂ 2-tor`). The sum `T₁ + T₂` is non-2-torsion
 template is the same as the pure-non-2-tor case but with translateAlgHom_of_2tor
 applied for T₁ in the σ-commutation chain. -/
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Mixed: 2-tor T₁ + non-2-tor T₂, sum non-2-tor non-zero, x_gen**. -/
 theorem translateAlgEquivOfPoint_add_2tor_nonTor_x_gen
     (xk₁ yk₁ : F) (h_ns₁ : W.toAffine.Nonsingular xk₁ yk₁)
@@ -4075,6 +4088,7 @@ theorem translateAlgEquivOfPoint_add_2tor_nonTor_x_gen
   rw [Affine.Point.add_of_X_ne (h_x₂_ne)] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.1
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Mixed: 2-tor T₁ + non-2-tor T₂, sum non-2-tor non-zero, y_gen**. -/
 theorem translateAlgEquivOfPoint_add_2tor_nonTor_y_gen
     (xk₁ yk₁ : F) (h_ns₁ : W.toAffine.Nonsingular xk₁ yk₁)
@@ -4131,6 +4145,7 @@ theorem translateAlgEquivOfPoint_add_2tor_nonTor_y_gen
   rw [Affine.Point.add_of_X_ne (h_x₂_ne)] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.2
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Mixed: non-2-tor T₁ + 2-tor T₂, sum non-2-tor non-zero, x_gen**. -/
 theorem translateAlgEquivOfPoint_add_nonTor_2tor_x_gen
     (xk₁ yk₁ : F) (h_ns₁ : W.toAffine.Nonsingular xk₁ yk₁)
@@ -4187,6 +4202,7 @@ theorem translateAlgEquivOfPoint_add_nonTor_2tor_x_gen
   rw [Affine.Point.add_of_X_ne (h_x₂_ne)] at h_gen_eq
   exact (Affine.Point.some.injEq _ _ _ _ _ _).mp h_gen_eq |>.1
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Mixed: non-2-tor T₁ + 2-tor T₂, sum non-2-tor non-zero, y_gen**. -/
 theorem translateAlgEquivOfPoint_add_nonTor_2tor_y_gen
     (xk₁ yk₁ : F) (h_ns₁ : W.toAffine.Nonsingular xk₁ yk₁)
@@ -4864,6 +4880,7 @@ def IsTranslateLocalRingCompatible
     (W_smooth W).pointValuation P (translateAlgEquivOfPoint W k x) ≤ 1 ↔
       (W_smooth W).pointValuation (P.translate_of_finite k h) x ≤ 1
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Piece 1 reduction**: `IsTranslateLocalRingCompatible` is equivalent
 to `Valuation.IsEquiv` between the comap and the target pointValuation.
 Direct via Mathlib's `isEquiv_iff_val_le_one`. -/
@@ -4911,6 +4928,7 @@ def IsTranslateMaxIdealCompatible
     (W_smooth W).pointValuation P (translateAlgEquivOfPoint W k x) < 1 ↔
       (W_smooth W).pointValuation (P.translate_of_finite k h) x < 1
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Piece 2 reduction**: `IsTranslateMaxIdealCompatible` is equivalent
 to `Valuation.IsEquiv`. Direct via Mathlib's `isEquiv_iff_val_lt_one`. -/
 theorem isTranslateMaxIdealCompatible_iff_isEquiv
@@ -4924,6 +4942,7 @@ theorem isTranslateMaxIdealCompatible_iff_isEquiv
   rw [Valuation.isEquiv_iff_val_lt_one]
   rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Piece 1 ⟺ localRingAt-image transport**: `IsTranslateLocalRingCompatible`
 is equivalent to the localRingAt-image preservation form: for every `f`,
 `τ_k f` is in the algMap-image of `localRingAt P` iff `f` is in the
@@ -5007,6 +5026,7 @@ theorem isTranslateMaxIdealCompatible_on_CoordinateRing_of_full
       (C := W_smooth W) (u := r) (P := P.translate_of_finite k h)).mpr h_mem
   exact (h_full _).mpr h_lt
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Step (B'') CoordinateRing k=0 base case**: the CoordinateRing-restricted
 maxIdeal-preservation holds trivially at `k = 0`. Direct via
 `translateAlgEquivOfPoint_zero_apply` (τ_0 = identity) +

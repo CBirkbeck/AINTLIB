@@ -407,6 +407,7 @@ private lemma isCyclotomicExtension_two_mul (hp_odd' : p ≠ 2) :
         exact hle⟩
 
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 lemma one_add_zetaInteger_isUnit (hp_odd' : p ≠ 2) :
     IsUnit (1 + ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K)) := by
   let ζ : K := IsCyclotomicExtension.zeta p ℚ K

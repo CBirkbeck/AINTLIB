@@ -364,6 +364,7 @@ private theorem discreteUniformity_presheafValue {A : Type*} [CommRing A]
   · intro h ⟨a, b⟩ (hab : a = b); exact h (show b - a = 0 by rw [hab, sub_self])
   · intro h ⟨a, b⟩ (hab : b - a = 0); exact h (sub_eq_zero.mp hab).symm
 
+set_option backward.isDefEq.respectTransparency false in
 private theorem discreteTopology_presheafValue {A : Type*} [CommRing A]
     [TopologicalSpace A] [IsTopologicalRing A] [DiscreteTopology A]
     [PlusSubring A] (D : RationalLocData A) :
@@ -472,6 +473,7 @@ private theorem discrete_gluing_span_top {A : Type*} [CommRing A]
   exact (fun hDs ↦ hv_D.2.2 ((v.mem_supp_iff D.s).mp (hv_supp ▸ hDs)))
     (hDs_in D hD)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Numerator compatibility** for the discrete gluing core. Given local fractions
 `g D = algebraMap (r' D) / D.s^N₀` realizing `f` (via `hg : f D = D.coeRingHom (g D)`),
 for each pair `(D₁, D₂)` the numerators agree up to a power of `D₁.s * D₂.s`:
@@ -731,6 +733,7 @@ private theorem discrete_gluing_partition_of_unity {A : Type*} [CommRing A]
     intro D; rw [map_mul, map_pow, hφ_alg]
   simp_rw [this, ← map_sum, hc, map_one]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Discrete gluing lemma**: given compatible sections in presheafValues of cover
 pieces, there exists a global section in the base presheafValue that restricts to
 each given section.

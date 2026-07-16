@@ -140,7 +140,9 @@ theorem map_toRingHom_mul (W : WeierstrassCurve A) (g h : G) :
       = (W.map (MulSemiringAction.toRingHom G A h)).map (MulSemiringAction.toRingHom G A g) := by
   rw [map_map]
   congr 1
-  ext a; simp [MulSemiringAction.toRingHom, mul_smul]
+  ext a
+  show (g * h) • a = g • h • a
+  exact mul_smul g h a
 
 /-- **([a5-iii], step 1 — the `u`-part trivializes)** For a free action with `Aᴳ` local, the
 `u`-component of a `VariableChange` cocycle is a coboundary: there is a unit `d : Aˣ` with

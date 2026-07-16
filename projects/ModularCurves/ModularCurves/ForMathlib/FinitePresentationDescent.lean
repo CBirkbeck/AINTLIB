@@ -1683,6 +1683,7 @@ theorem exists_algHom_factor_algebraMap {R A' W B' : Type u} [CommRing R] [CommR
 
 
 open TensorProduct in
+set_option backward.isDefEq.respectTransparency false in
 /-- The colimit-level left square: the transported equivalence intertwines the left
 doubling with `includeLeft`. -/
 theorem eC_comp_doubleInl {B : Type u} [CommRing B] [Algebra A B] [Algebra R B]
@@ -1722,6 +1723,7 @@ theorem eC_comp_doubleInl {B : Type u} [CommRing B] [Algebra A B] [Algebra R B]
   rfl
 
 open TensorProduct in
+set_option backward.isDefEq.respectTransparency false in
 /-- The colimit-level right square. -/
 theorem eC_comp_doubleInr {B : Type u} [CommRing B] [Algebra A B] [Algebra R B]
     [IsScalarTower R A B] (gen : κ → MvPolynomial σ (𝒮 i₀))

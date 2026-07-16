@@ -228,6 +228,7 @@ theorem RealCaseIIData37.map_rootIdeal_mul_conj {m : ℕ} (D : RealCaseIIData37 
     caseII_etaInv_etaInv, mul_comm]
 
 omit [IsCyclotomicExtension {37} ℚ K] in
+set_option backward.isDefEq.respectTransparency false in
 /-- The fraction-field conjugation `ringEquivOfRingEquiv σ` sends the coe of an ideal `𝔞` to the coe
 of the conjugated ideal `𝔞.map σ`. (Gap lemma for the ClassGroup-σ naturality.) -/
 theorem caseII_ringEquivOfRingEquiv_coeIdeal (𝔞 : Ideal (𝓞 K)) :
@@ -253,6 +254,7 @@ theorem caseII_ringEquivOfRingEquiv_coeIdeal (𝔞 : Ideal (𝓞 K)) :
       by simp only [IsFractionRing.semilinearEquivOfRingEquiv_algebraMap]⟩
 
 omit [IsCyclotomicExtension {37} ℚ K] in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Naturality of `ClassGroup.mk0` under complex conjugation.** `ClassGroup.mulEquiv σ` sends the
 class `[𝔞]` to `[σ𝔞]`. Lets the integral `classGroup_mul_complexConj_eq_one_of_pow_of_VC` act on the
 class `[𝔞(η)/𝔞₀]` via any integral representative — the bridge for the σ-stable real-generator

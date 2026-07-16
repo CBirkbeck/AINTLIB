@@ -2387,6 +2387,7 @@ theorem pole_gamma_pullback_x_imp_kernel_closed_point
   rw [h_rampidx_zero]
   norm_num
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **Bridge A (Tier-2.5 #3 prep, field-identification finrank equality)**.
 
 Identifies the consumer-side `Module.finrank (IntermediateField.adjoin K {f})
@@ -2680,6 +2681,7 @@ theorem finrank_adjoin_eq_finrank_LinfAt
       exact hL.trans hR.symm
   exact (Algebra.finrank_eq_of_equiv_equiv e₁.toRingEquiv e₂ hc).symm
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **`Algebra.IsSeparable` transfer to the `LinfAt` structure**: given separability of
 `K(E)` over `K⟮f⟯` (the `IntermediateField.adjoin` form), `K(E)` is separable over
 `FractionRing K[X]` in its `LinfAt f` framing, for `f = γ.pullback x_gen`. -/

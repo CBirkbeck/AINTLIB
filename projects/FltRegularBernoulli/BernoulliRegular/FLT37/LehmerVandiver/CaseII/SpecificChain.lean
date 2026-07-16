@@ -1565,6 +1565,7 @@ theorem washington_real_expression_fixed_of_conj_pair
   field_simp [hden, hden_zeta, hden_inv, hζ_ne_zero]
   ring
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Primitive-root wrapper for
 `washington_real_expression_fixed_of_conj_pair`.
 

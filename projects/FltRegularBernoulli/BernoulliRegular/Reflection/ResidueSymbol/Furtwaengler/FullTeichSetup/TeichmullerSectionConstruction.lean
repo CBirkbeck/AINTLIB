@@ -182,6 +182,7 @@ theorem teichUnitFullOfRootsOfUnityBijective_residue
       (x : k)
   rw [ht_val, hxQ]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The same Teichmüller section also satisfies the power convention used by
 `FullTeichStickelbergerSetup`: the integral residue character is its
 `(#k - 1) / p` power. -/

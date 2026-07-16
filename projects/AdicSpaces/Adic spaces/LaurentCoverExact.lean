@@ -117,6 +117,7 @@ noncomputable def deltaMap (f : A) : B₁ f × B₂ f →+ Localization.Away f w
     ring
 
 omit [IsNoetherianRing A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- The composition `delta circ epsilon = 0`: the image of `epsilon` lands in the
 kernel of `delta`. -/
 theorem deltaMap_comp_epsilonHom (f : A) :
@@ -155,6 +156,7 @@ theorem quotientOneSubfXToLoc_injective (f : A) :
   (TateAlgebra.quotientOneSubfXEquiv f).injective
 
 omit [IsNoetherianRing A] in
+set_option backward.isDefEq.respectTransparency false in
 /-- Reverse inclusion: if `delta(b_1, b_2) = 0` then `(b_1, b_2)` is in the range
 of `epsilon`. This uses that both equivalences allow us to recover the element
 `a` in `A`. -/
@@ -1585,6 +1587,7 @@ theorem deltaMap_gen_surjective [UniformSpace A] [IsUniformAddGroup A] [T2Space 
   simp only [posLift, negLift, Ideal.Quotient.lift_mk, RingHom.comp_apply, ← map_sub]
   exact congrArg (quotLaurent f) hgh
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Row 3 exactness: `ker(δ) ⊆ im(ε)` (general case, 3×3 diagram chase).**
 
 If `δ(b₁, b₂) = 0`, lift `(b₁, b₂)` to `(g, h) ∈ A⟨X⟩ × A⟨X⟩`.

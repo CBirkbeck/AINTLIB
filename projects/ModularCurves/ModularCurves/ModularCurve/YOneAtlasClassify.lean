@@ -1389,6 +1389,7 @@ the two atlas algebra maps — to coincide. -/
 
 variable {A : Type u} [CommRing A]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The `Z`-chart ring morphism (in `CommRingCat`) induced by a pointed isomorphism of
 projective models: `pointedIsoΓ` conjugated by the two `basicOpenIsoAway`
 identifications. -/
@@ -1437,6 +1438,7 @@ theorem ZChart.PointedIso.spec_map_awayι {W₁ W₂ : WeierstrassCurve A}
         (mk_X_mem_quotientGrading_one W 2) one_pos).hom := fun _ ↦ rfl
   rw [hats, hats] at h1
   -- re-ascribe `h1` so every proof argument is spelled as in the goal
+  set_option backward.isDefEq.respectTransparency false in
   have h2 : Spec.map (CommRingCat.ofHom (pointedIsoΓ ε hez).toRingHom) ≫
       Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W₂))
         ((quotientGradingHom (projIdeal W₂)) (MvPolynomial.X 2))
@@ -1450,6 +1452,7 @@ theorem ZChart.PointedIso.spec_map_awayι {W₁ W₂ : WeierstrassCurve A}
       Proj.awayι (quotientGrading (projIdeal W₁))
         ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
         (mk_X_mem_quotientGrading_one W₁ 2) one_pos) ≫ ε.hom := h1
+  set_option backward.isDefEq.respectTransparency false in
   have hexp : Spec.map (pointedIsoAwayHom ε hez) =
       Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W₁))
         ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
@@ -1466,11 +1469,13 @@ theorem ZChart.PointedIso.spec_map_awayι {W₁ W₂ : WeierstrassCurve A}
         ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
         (mk_X_mem_quotientGrading_one W₁ 2) one_pos).inv) = _
     rw [Spec.map_comp, Spec.map_comp, Category.assoc]
-    rfl
+  set_option backward.isDefEq.respectTransparency false in
   rw [hexp, Category.assoc, Category.assoc]
+  set_option backward.isDefEq.respectTransparency false in
   have h3 := congrArg (fun m ↦ Spec.map ((Proj.basicOpenIsoAway
     (quotientGrading (projIdeal W₁)) ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
     (mk_X_mem_quotientGrading_one W₁ 2) one_pos).inv) ≫ m) h2
+  set_option backward.isDefEq.respectTransparency false in
   have h4 : Spec.map ((Proj.basicOpenIsoAway (quotientGrading (projIdeal W₁))
       ((quotientGradingHom (projIdeal W₁)) (MvPolynomial.X 2))
       (mk_X_mem_quotientGrading_one W₁ 2) one_pos).inv) ≫
@@ -1485,10 +1490,12 @@ theorem ZChart.PointedIso.spec_map_awayι {W₁ W₂ : WeierstrassCurve A}
         (mk_X_mem_quotientGrading_one W₁ 2) one_pos ≫ ε.hom := by
     rw [← Category.assoc, ← Category.assoc, ← Spec.map_comp, Iso.hom_inv_id, Spec.map_id,
       Category.id_comp]
+  set_option backward.isDefEq.respectTransparency false in
   exact h3.trans h4
 
 variable {K : Type u} [CommRing K] [Algebra A K]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Transport of the chart evaluation along a pointed isomorphism of models carrying one
 `Z`-chart point to another: evaluation on the target is evaluation on the source after the
 induced coordinate-ring isomorphism. -/
@@ -2960,6 +2967,7 @@ theorem Fibre.section_coe (P : Y.curve.Section) :
   · rw [pullback.lift_snd]
     exact (Fibre.section D k P).2
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **The value chase**: the fibre section, read through the fibre chart and the base-change
 morphism, is the chart point composed at the geometric point. -/
 theorem Fibre.section_comp_bc (P : Y.curve.Section) :
@@ -3142,18 +3150,21 @@ noncomputable def Fibre.curveIso :
     (Y.curve.baseChange (D.geomPt (D.specPt k))).E ≅ (Fibre.curve D k).E :=
   Fibre.chartIso D k ≪≫ eqToIso (Fibre.curve_E_eq D k).symm
 
+set_option backward.isDefEq.respectTransparency false in
 theorem Fibre.curveIso_π : (Fibre.curveIso D k).hom ≫ (Fibre.curve D k).π =
     (Y.curve.baseChange (D.geomPt (D.specPt k))).π := by
   rw [Fibre.curveIso, Iso.trans_hom, eqToIso.hom, Fibre.curve_π_eq D k]
   simp only [Category.assoc, eqToHom_trans_assoc, eqToHom_refl, Category.id_comp]
   exact pullbackChartIso_hom_π D.W (Fibre.top_isPullback D k)
 
+set_option backward.isDefEq.respectTransparency false in
 theorem Fibre.curveIso_zero :
     (Y.curve.baseChange (D.geomPt (D.specPt k))).zero ≫ (Fibre.curveIso D k).hom =
       (Fibre.curve D k).zero := by
   rw [Fibre.curveIso, Iso.trans_hom, eqToIso.hom, Fibre.curve_zero_eq D k, ← Category.assoc]
   exact congrArg (· ≫ eqToHom (Fibre.curve_E_eq D k).symm) (Fibre.zero_comp D k)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(B2-ii fibre bridge, [T-A6b] + [T-B6′])** A nowhere-small-order section satisfies the
 T-E1 order hypothesis in every marked chart: a dying small multiple of the chart coordinates
 at a geometric point would transport, through the fibre record and the geometric-fibre group
@@ -3492,6 +3503,7 @@ variable {R : CommRingCat.{u}} {Y : EllObj R} (D : MarkedChartData R Y)
 noncomputable def chartAlgebra : Algebra ↑R ↑Γ(Y.base, D.U.1) :=
   (((Scheme.ΓSpecIso R).inv ≫ Y.structMap.appLE ⊤ D.U.1 (by simp)).hom).toAlgebra
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The defining compatibility of `chartAlgebra` with the structure morphism. -/
 theorem chartAlgebra_compatible :
     letI := D.chartAlgebra
@@ -3543,6 +3555,7 @@ namespace MarkedChartData
 variable {R : CommRingCat.{u}} {Y : EllObj R} (D : MarkedChartData R Y)
   (k : Type u) [CommRing k] [Algebra ↑Γ(Y.base, D.U.1) k]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The restricted section as a point of the fibre model. -/
 noncomputable def Fibre.pt (P : Y.curve.Section) :
     SpecPoints (projModel (D.W.map (algebraMap ↑Γ(Y.base, D.U.1) k)))
@@ -3559,6 +3572,7 @@ noncomputable def Fibre.pt (P : Y.curve.Section) :
     rw [Category.assoc, h2]
     exact h1.trans (Fibre.section D k P).2⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The fibre point maps to the chart point at the algebra point (the value chase in
 `SpecPoints` form). -/
 theorem Fibre.pt_comp_bc (P : Y.curve.Section) :
@@ -3679,6 +3693,7 @@ theorem Fibre.modelIso_π :
   refine Eq.trans (congrArg (fun m ↦ (Fibre.chartIso D₁ k).inv ≫ m) ?_) h3
   exact Eq.trans (congrArg (fun m ↦ (pullback.congrHom rfl hgeom).hom ≫ m) h1) h2
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The fibre-model comparison is pointed. -/
 theorem Fibre.modelIso_zero :
     projModelZero (D₁.W.map (algebraMap ↑Γ(Y.base, D₁.U.1) k)) ≫
@@ -4107,6 +4122,7 @@ section BaseChangeComp
 doubly-mapped curve.  Together with `projModelVCIso_map` (T-W7.0h) this yields the
 naturality of the local classifying top maps in the chart ring. -/
 
+set_option backward.isDefEq.respectTransparency false in
 private lemma projMapTransportHeq {A R' : Type u} [CommRing A] [CommRing R']
     (W : WeierstrassCurve A)
     {V V' : WeierstrassCurve R'} (e : V' = V)
@@ -4135,6 +4151,7 @@ private lemma mkHeq {R' : Type u} [CommRing R'] {V V' : WeierstrassCurve R'} (e 
       (Ideal.Quotient.mk (projIdeal V').toIdeal q) := by
   subst e; rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Model base changes compose** along ring maps. -/
 theorem ProjModelBaseChange.comp_eqToHom {A B C : Type u} [CommRing A] [CommRing B] [CommRing C]
     (φ : A →+* B) (ψ : B →+* C) (W : WeierstrassCurve A) :
@@ -5145,6 +5162,7 @@ noncomputable def coverTopMap (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrd
   letI := (chartAt Y s).chartAlgebra
   (chartAt Y s).topMap P hP
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Overlap compatibility** of the local classifying top maps. -/
 theorem coverTopMap_compat (P : Y.curve.Section) (hP : Y.curve.NowhereGeomOrderLEThree P)
     (i j : ↥Y.base) :

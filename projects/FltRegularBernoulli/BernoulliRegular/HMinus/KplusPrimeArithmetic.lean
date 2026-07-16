@@ -314,6 +314,7 @@ lemma pointwise_smul_complexConjRat_eq_map (hp_odd : p ≠ 2) (P : Ideal (𝓞 K
     (p := p) (K := K) hp_odd]
 
 omit [IsCMField K] in
+set_option backward.isDefEq.respectTransparency false in
 lemma galEquivZMod_complexConj_eq_neg_one (hp_odd : p ≠ 2) :
     IsCyclotomicExtension.Rat.galEquivZMod p K
         (complexConjRat (p := p) (K := K) hp_odd) = -1 := by

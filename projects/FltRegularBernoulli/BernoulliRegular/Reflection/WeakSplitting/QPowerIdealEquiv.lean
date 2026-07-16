@@ -366,6 +366,7 @@ private lemma summable_cpow_neg_qPowerNormIdeal {q : ℕ} (hq : q.Prime) {s : �
   rw [cpow_neg_absNorm_eq_comp L hq s]
   exact (qPowerNormIdealEquiv L hq).summable_iff.mpr h_pi_sum
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Summability over the sigma decomposition `Σ k, {I // absNorm I.1 = q^k}`. -/
 private lemma summable_cpow_neg_sigma {q : ℕ} (hq : q.Prime) {s : ℂ} (hs : 1 < s.re) :
     Summable

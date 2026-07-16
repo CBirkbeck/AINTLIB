@@ -995,9 +995,8 @@ private lemma T_sum_mul_peel_prime_summand_rhs (q : ℕ) (hq : q.Prime) (a b : �
   rw [show (⟨q ^ (r + s - 2 * i), pow_pos hq.pos _⟩ : ℕ+).val = q ^ (r + s - 2 * i) by rfl,
     show T_sum_nat (q ^ (r + s - 2 * i)) * T_sum_nat (↑m' * ↑n' / (d' * d')) =
     T_sum_nat (q ^ (r + s - 2 * i) * (↑m' * ↑n' / (d' * d'))) by
-      change T_sum ⟨_, pow_pos hq.pos _⟩ * T_sum ⟨_, h_quot_pos⟩ = _
-      rw [T_sum_mul_coprime _ _ ((Nat.Prime.coprime_pow_of_not_dvd hq hq_ndvd_quot).symm)]
-      rfl]
+      exact (T_sum_mul_coprime ⟨_, pow_pos hq.pos _⟩ ⟨_, h_quot_pos⟩
+        ((Nat.Prime.coprime_pow_of_not_dvd hq hq_ndvd_quot).symm)).trans rfl]
   congr 1
   have hrs_eq : r + s = a + b := by omega
   rw [hrs_eq, show q ^ i * d' * (q ^ i * d') = q ^ (2 * i) * (d' * d') by ring,

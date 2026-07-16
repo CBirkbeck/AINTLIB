@@ -971,6 +971,7 @@ private theorem bPrime_exists_point_image_of_mem_primesOver
 
 set_option synthInstance.maxHeartbeats 800000 in
 omit [DecidableEq F] [W₂.toAffine.IsElliptic] [IsAlgClosed F] in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Count of a `B`-prime matches the divisor coefficient (the count-match leaf).**  If a prime
 `vP` of `B` has the same valuation as a smooth point `P` of `E₁` (`vP.valuation = pointValuation
 P`),
@@ -1042,6 +1043,7 @@ private theorem bPrime_count_eq_projectiveDivisorOf_of_valuation_eq
     (⟨W₁⟩ : SmoothPlaneCurve F).ord_P_algebraMap_eq_count P hw, WithTop.untopD_coe]
 
 set_option synthInstance.maxHeartbeats 800000 in
+set_option backward.isDefEq.respectTransparency false in
 /-- **The affine count identity — Silverman II.3.6, per-place, CoordHom-free (THE DEEP LEAF).**
 For `w ∈ F[E₁]` nonzero and an affine place `Q` of `E₂`, the order of the conorm `N_φ(algebraMap w)`
 at `Q` equals the sum, over the points `P` of `E₁` with `placeRestrictionPointMap φ P = Q`, of the

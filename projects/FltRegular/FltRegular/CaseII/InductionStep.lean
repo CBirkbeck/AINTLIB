@@ -112,6 +112,7 @@ lemma one_sub_zeta_dvd_zeta_pow_sub : π ∣ x + y * η := by
   exact hζ.zeta_sub_one_prime'.dvd_of_dvd_pow h
 
 include hp hζ e in
+set_option backward.isDefEq.respectTransparency false in
 lemma div_one_sub_zeta_mem : IsIntegral ℤ ((x + y * η : 𝓞 K) / (ζ - 1)) := by
   obtain ⟨⟨a, ha⟩, e⟩ := one_sub_zeta_dvd_zeta_pow_sub hp hζ e η
   rw [e, mul_comm]
@@ -122,6 +123,7 @@ lemma div_one_sub_zeta_mem : IsIntegral ℤ ((x + y * η : 𝓞 K) / (ζ - 1)) :
 def divZetaSubOne : nthRootsFinset p (1 : 𝓞 K) → 𝓞 K :=
 fun η ↦ ⟨(x + y * η.1) / (ζ - 1), div_one_sub_zeta_mem hp hζ e η⟩
 
+set_option backward.isDefEq.respectTransparency false in
 lemma div_zeta_sub_one_mul_zeta_sub_one (η) :
     divZetaSubOne hp hζ e η * (π) = x + y * η := by
   ext

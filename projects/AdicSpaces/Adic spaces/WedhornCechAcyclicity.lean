@@ -979,6 +979,7 @@ theorem restrictionMap_sub [HasLocLiftPowerBounded A] (D D' : RationalLocData A)
       restrictionMap D D' h a - restrictionMap D D' h b :=
   map_sub (restrictionMapHom D D' h) a b
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Explicit Wedhorn A.3(3) in degree 0** for `RationalCovering`/`IsOXAcyclic`:
 the product cover `Uf × V` is `O_X`-acyclic given `Uf` is and `V` restricted to
 the `Uf`-pieces (`hV0`) and `Uf`-pairwise-intersections (`hV1`) is acyclic. This
@@ -1330,6 +1331,7 @@ theorem isLaurentProdCover_nil_iff [DecidableEq A] (C : RationalCovering A) :
     C.IsLaurentProdCover ([] : List A) ↔ C.covers = {C.base} := by
   rw [RationalCovering.IsLaurentProdCover, laurentProdLeaves_nil]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Restriction-commutation (Wedhorn 4233)** for the base-independent Laurent
 cover: for `P ⊆ D₀`, the rational subsets `{R(P) ∩ R(Q) : Q ∈ laurentProdLeaves D₀ fs}`
 and `{R(Q') : Q' ∈ laurentProdLeaves P fs}` coincide (both directions). This is
@@ -1507,6 +1509,7 @@ private theorem unitDatum_span_le_ker
   exact sub_self _
 
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- `⊇` of (8.2.1)-minus: the generator `1 − algebraMap b · η` is killed by the
 evaluation (`η ↦ 1/b`, and `b · (1/b) = 1` in the localization). -/
 private theorem coUnitDatum_span_le_ker
@@ -1535,6 +1538,7 @@ private theorem coUnitDatum_span_le_ker
 
 set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- `⊆` of (8.2.1)-plus — the completion comparison. The quotient
 `A⟨ζ⟩ ⧸ (b − ζ)` is complete Hausdorff (the principal ideal is closed by Prop 6.17
 over the strongly noetherian base); the localization `A[1/s] = A[1/1]` lifts to it
@@ -1682,6 +1686,7 @@ private theorem unitDatum_ker_le_span
 
 set_option maxHeartbeats 1000000 in
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- `⊆` of (8.2.1)-minus — the completion comparison, mirror of
 `unitDatum_ker_le_span`. Here `s = b` and the lift exists because `b` is a unit
 modulo `(1 − bη)` (with inverse `η`). -/
@@ -1863,6 +1868,7 @@ private theorem coUnitDatum_ker_eq_span
   le_antisymm (coUnitDatum_ker_le_span P b) (coUnitDatum_span_le_ker P b)
 
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Wedhorn Example 6.38, plus form (any strongly noetherian Tate base)**:
 `O_X(R(b/1)) ≃+* A⟨ζ⟩/(b − ζ)` — surjectivity (`example638_evalHom_surjective`)
 plus the explicit kernel (`unitDatum_ker_eq_span`). -/
@@ -1879,6 +1885,7 @@ private noncomputable def unitDatum_quotEquiv
     (Ideal.quotEquivOfEq (unitDatum_ker_eq_span P b))
 
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Wedhorn Example 6.39, minus form (any strongly noetherian Tate base)**:
 `O_X(R(1/b)) ≃+* A⟨η⟩/(1 − bη)`. -/
 private noncomputable def coUnitDatum_quotEquiv
@@ -1894,6 +1901,7 @@ private noncomputable def coUnitDatum_quotEquiv
     (Ideal.quotEquivOfEq (coUnitDatum_ker_eq_span P b))
 
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- The plus equivalence sends `canonicalMap x` to the constant class
 `mk (algebraMap x)`. -/
 private theorem unitDatum_quotEquiv_canonicalMap
@@ -1924,6 +1932,7 @@ private theorem unitDatum_quotEquiv_canonicalMap
   erw [Ideal.quotEquivOfEq_mk]
 
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- The minus equivalence sends `canonicalMap x` to the constant class
 `mk (algebraMap x)`. -/
 private theorem coUnitDatum_quotEquiv_canonicalMap
@@ -2300,6 +2309,7 @@ private theorem map_span_bSubX_eq_laurentFSubZeta (b : A) :
   rfl
 
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- **The pure-algebra Laurent step of Wedhorn (8.2.1)**:
 `A⟨X,Y⟩/(b − X, 1 − bY) ≃+* A⟨ζ,ζ⁻¹⟩/(b − ζ) = B₁₂_gen b`. Double-quotient
 bookkeeping: the LHS ideal equals `(XY−1) ⊔ (b−X)` (`bivariateSpan_eq_laurentSup`),
@@ -3349,6 +3359,7 @@ private theorem unitCover_overlapQuotEquiv_canonicalMap
         e.apply_symm_apply _
 
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- The Laurent step sends constant classes to constant classes:
 `mk_span (algebraMap x) ↦ mk_(b−ζ) (algebraMap_Laurent x)`. -/
 private theorem bivariateSpan_equiv_B₁₂gen_algebraMap (b x : A) :
@@ -5918,6 +5929,7 @@ private theorem unitCover_relOverlap_forward_backward
   exact RingHom.congr_fun hloc w
 
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- The Example-6.38 quotient iso's inverse on `mk`-classes is the evaluation map
 (S1): `(unitDatum_quotEquiv P b).symm (mk z) = evalHom z`. -/
 private theorem unitDatum_quotEquiv_symm_mk
@@ -6617,6 +6629,7 @@ private theorem unitCover_overlapQuotEquiv_symm_continuous
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- **SQ1 (plus, dense side)**: precomposed with `mk : B⟨X⟩ → B₁_gen b`, the two
 backward-composites agree (continuous ring homs out of `B⟨X⟩` agreeing on the dense
 polynomials; `C`-case = restriction functoriality, `X`-case = the `ζ ↦ b`-chase). -/
@@ -6843,6 +6856,7 @@ private theorem unitCover_sq_plus_dense
   intro z
   exact congrFun hfun z
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Plus column square** (Wedhorn (8.2.1), commuting square `O_X(U₁) → O_X(U₁∩U₂)`
 over `B₁_gen b → B₁₂_gen b`): restricting a section of `U₁` into the overlap and
 bridging via `unitCover_bridgeOverlap` equals bridging via `unitCover_bridgePlus` and
@@ -6941,6 +6955,7 @@ private theorem unitCover_negIncl_X {B : Type*} [CommRing B] [TopologicalSpace B
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- **SQ1 (minus, dense side)**: precomposed with `mk : B⟨X⟩ → B₂_gen b`, the two
 backward-composites agree (`C`-case = restriction functoriality; `X`-case = both sides
 are the inverse of `canMap_{U₁∩U₂} f`, by `invS`-cancellation resp. the annulus
@@ -7178,6 +7193,7 @@ private theorem unitCover_sq_minus_dense
   intro z
   exact congrFun hfun z
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Minus column square** (Wedhorn (8.2.1), commuting square `O_X(U₂) → O_X(U₁∩U₂)`
 over `B₂_gen b → B₁₂_gen b`): restricting a section of `U₂` into the overlap and
 bridging via `unitCover_bridgeOverlap` equals bridging via `unitCover_bridgeMinus` and
@@ -7353,6 +7369,7 @@ theorem unitCover_isOXAcyclic
       apply (unitCover_bridgeMinus D₀ f).injective
       exact (unitCover_bridgeMinus_restrictionMap D₀ f a).trans ha₂
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Lemma 8.34(i) — the base-independent Laurent cover is `O_X`-acyclic** (the
 faithful Wedhorn A.3(3) induction). By induction on `fs`: the empty cover is the
 trivial cover `{D₀}`; the cons cover `R`-equals the product
@@ -7574,6 +7591,7 @@ theorem exists_mem_rationalOpen_of_spanTop [DecidableEq A] (T : Finset A)
     fun h0 ↦ ht₀0 (v.vle_trans (hmax t₀ ht₀) h0)⟩
 
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **The A-level restricted gen-cover (G3c-0)**: base `D₀`, pieces `D₀ ∩ R(T/t)`
 (the A-side of Wedhorn 8.34's `U|D₀`). -/
 noncomputable def genRestrictedCover
@@ -7667,6 +7685,7 @@ theorem laurent_cover_from_dominating_unit [DecidableEq A]
 
 /-! ##### Sub-lemmas for `unit_gen_restriction_of_dominating_laurent` -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Sign dichotomy**: every leaf of the base-independent Laurent-product cover
 decides each generator's sign — on the leaf, either `v(f) ≤ 1` throughout or
 `v(f) ≥ 1` throughout (the leaf accumulated the `R(f/1)`- resp. `R(1/f)`-condition
@@ -7699,6 +7718,7 @@ theorem laurentProdLeaves_sign_dichotomy [DecidableEq A] (fs : List A) :
       · exact ih _ hVj f hf'
       · exact ih _ hVj f hf'
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Sign-selecting leaf choice** (refines `laurentProdLeaves_cover`): a point
 `v` of the base lies in a Laurent leaf that piece-wide satisfies `w(f) ≤ 1`
 for every listed `f` marked by `P` — provided `v` itself satisfies `v(f) ≤ 1`
@@ -7821,6 +7841,7 @@ theorem index_selection_on_laurent_piece [DecidableEq A]
     exact hstrict (hall t ht)
 
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- `D.completedLocSubring` and `presheafValue_ringOfDef D` coincide as sets (both are
 closures of the same `locSubring`-image; local copy of the Cor832 private lemma). -/
 private theorem wca_completedLocSubring_eq_presheafValue_ringOfDef
@@ -7901,6 +7922,7 @@ theorem restricted_cover_construction
        rw [Finset.mem_singleton] at hD; subst hD; exact subset_rfl,
      hcover := fun v hv ↦ ⟨Vj, Finset.mem_singleton.mpr rfl, hv⟩ }, rfl⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Part (ii) sub-lemma 4**: when the dominating-unit property holds,
 the restriction of an ideal-generating cover `C` to each Laurent piece
 `V_j` is unit-generated (the canonical images of the original T-elements
@@ -10768,6 +10790,7 @@ private theorem genPiece_relative_overlap_square₁
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- **G3b square (right)**: the `t₂`-side square. The B-side restriction is from the
 `t₂`-piece into the SAME double piece (`interSamePair` of the pair in the `t₁,t₂`-order,
 via the right-inclusion). -/
@@ -11073,6 +11096,7 @@ private theorem imageGenCover_piece_exists_gen
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- **G3c-gluing, B-compatibility step**: for `t₁ t₂ ∈ T`, the transported image-piece
 sections `equiv·gᵢ` agree after restriction into any common target `E₃` (contained in
 both image pieces), given A-side compatibility of `g₁, g₂`. Factor `E₃` through the
@@ -11149,6 +11173,7 @@ private theorem genPiece_imageFamily_pair_restr
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- **G3c-gluing (assembly)**: given the B-side gluing of the image cover, every
 A-compatible family on the restricted gen-cover glues — per the cast-free chase:
 transport the family through the G1-equivs (B-compat via W′ + `E₁₂`-factoring),
@@ -12171,6 +12196,7 @@ private theorem genRestrictedCover_isOXAcyclic_of_all_traces_empty
     exact Subsingleton.elim _ _
 
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- **σ₋-emptiness transported to `B := 𝒪_X(D₀)`**: a Spa-`B`-point `w`
 dominated by a σ₋-index `t` (one whose `A`-trace is empty) cannot exist —
 its `A`-shadow `comap D₀.canonicalMap w` would land in the empty piece-trace.
@@ -13657,6 +13683,7 @@ private theorem restrictionMap_eqRec {B : Type*} [CommRing B] [TopologicalSpace 
 
 set_option maxHeartbeats 1600000 in
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Keystone compatibility on overlaps** (Wedhorn Prop 8.16 + Prop 7.31(2)):
 for two pieces of a Def-7.29 rational covering and ANY `B`-side rational datum
 `G` inside both image pieces, the keystone images of a compatible family agree

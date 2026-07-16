@@ -313,6 +313,7 @@ variable [HasEnoughRootsOfUnity R (Monoid.exponent (CyclotomicUnitDelta p))]
 variable [Invertible (2 : R)]
 
 open Classical in
+set_option backward.isDefEq.respectTransparency false in
 /-- The plus idempotent for complex conjugation is the sum of the even
 character idempotents of `Delta`. -/
 theorem delta_plusIdempotent_eq_sum_even :

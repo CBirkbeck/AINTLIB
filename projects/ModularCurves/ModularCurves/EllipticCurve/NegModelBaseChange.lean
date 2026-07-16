@@ -81,6 +81,7 @@ lemma negGradedQuot_comp_baseChangeGradedHom (f : R →+* R') (W : WeierstrassCu
   rw [hbc, hneg', hneg, hbc]
   exact congrArg (Ideal.Quotient.mk _) (aeval_negVec_map f W a)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-W7.0b-BC)** Negation on the projective Weierstrass model commutes with base change:
 `negModelHom` is natural in the base ring. Mirrors `projModelZero_baseChange`; consumed by the
 `invOver` Over-level group-axiom transport (c5β's T-G4). -/

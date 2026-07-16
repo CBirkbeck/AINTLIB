@@ -108,8 +108,9 @@ theorem mk_quot_not_mem {x₀ y₀ : F}
     Affine.CoordinateRing.mk W (W.polynomial /ₘ (Y - C (C y₀ : F[X]))) ∉
       Affine.CoordinateRing.XYIdeal W x₀ (Polynomial.C y₀) := by
   intro hmem
+  have h' : W.polynomial.evalEval x₀ y₀ = 0 := h
   have hker : Affine.CoordinateRing.XYIdeal W x₀ (Polynomial.C y₀) ≤
-      RingHom.ker (AdjoinRoot.evalEval h) := by
+      RingHom.ker (AdjoinRoot.evalEval h') := by
     rw [Affine.CoordinateRing.XYIdeal]
     apply span_le.mpr
     intro z hz
@@ -186,8 +187,9 @@ theorem mk_C_g_not_mem {x₀ y₀ : F}
       Affine.CoordinateRing.XYIdeal W x₀ (Polynomial.C y₀) := by
   set g := W.polynomial.eval (C y₀) /ₘ (X - C x₀)
   intro hmem
+  have h' : W.polynomial.evalEval x₀ y₀ = 0 := h
   have hker : Affine.CoordinateRing.XYIdeal W x₀ (Polynomial.C y₀) ≤
-      RingHom.ker (AdjoinRoot.evalEval h) := by
+      RingHom.ker (AdjoinRoot.evalEval h') := by
     rw [Affine.CoordinateRing.XYIdeal]
     apply Ideal.span_le.mpr
     intro z hz

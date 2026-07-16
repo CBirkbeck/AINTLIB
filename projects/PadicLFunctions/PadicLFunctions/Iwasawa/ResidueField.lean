@@ -153,6 +153,7 @@ private theorem residueZp_spec (u : NormCompatUnits p) (n : ℕ) (hn : 1 ≤ n) 
 
 -- the `levelNorm`/`norm_levelNorm_sub_one_lt_one` chain elaborates through the nested
 -- `IntermediateField (K p n) (extendScalars …)` Galois-product layer, exceeding the default
+set_option backward.isDefEq.respectTransparency false in
 private theorem toZMod_residueZp_succ (u : NormCompatUnits p) {n : ℕ} (hn : 1 ≤ n)
     (hn1 : 1 ≤ n + 1) :
     PadicInt.toZMod (residueZp p u (n + 1) hn1) = PadicInt.toZMod (residueZp p u n hn) := by

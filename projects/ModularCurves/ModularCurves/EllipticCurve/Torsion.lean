@@ -85,6 +85,7 @@ theorem pointToTorsion_torsionι {N : ℕ} {T : Scheme.{u}} {g : T ⟶ S} (x : E
     E.pointToTorsion x hx ≫ E.torsionι N = x.1 :=
   pullback.lift_fst _ _ _
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-B3)** `E[N] ⟶ E` is a closed immersion (kernels of group-scheme morphisms against
 proper separated bases; the zero section of a separated morphism is a closed immersion). -/
 theorem torsionι_isClosedImmersion (N : ℕ) :
@@ -167,6 +168,7 @@ theorem mulByHom_isFinite (N : ℕ) [NeZero N] : IsFinite (E.mulByHom N) := by
   have := E.mulByHom_locallyQuasiFinite N
   exact IsFinite.of_isProper_of_locallyQuasiFinite _
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-B4 = KM 2.3.1)** `E[N] ⟶ S` is finite and flat (finite locally free) — of rank
 `N²` by `torsion_rank`. Black-box inputs: `[N]` finite flat of degree `N²` (KM 2.3.1; via
 fibrewise `deg [N] = N²`, Silverman III.6.2(d), + the fibrewise flatness criterion,
@@ -175,6 +177,7 @@ theorem torsionπ_isFinite (N : ℕ) [NeZero N] : IsFinite (E.torsionπ N) := by
   have h := E.mulByHom_isFinite N
   exact MorphismProperty.pullback_snd _ _ h
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-B4, flatness half of KM 2.3.1; BB-FLAT/stream FLAT consumer)** `E[N] ⟶ S` is
 flat. For `N = 0` the kernel of `[0] = π ≫ 0` is all of `E` (pulling back along the
 mono zero section), which is flat over `S` since `π` is smooth; for `N ≥ 1` this is

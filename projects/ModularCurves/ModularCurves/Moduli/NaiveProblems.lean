@@ -125,6 +125,7 @@ theorem isNaiveGammaOne_pullSection_iff (N : ℕ) [NeZero N] {X Y : EllObj R} (f
     exact ⟨(hbridge (N : ℤ) t).mpr (hfib k t).1,
       fun a ha haN ↦ (not_congr (hbridge (a : ℤ) t)).mpr ((hfib k t).2 a ha haN)⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The base-changed pull of `asSection` is the pull along the composite: the
 `baseChangeEquiv`-dictionary at geometric points. -/
 private lemma baseChangeEquiv_pull_asSection {X Y : EllObj R} (f : X ⟶ Y)

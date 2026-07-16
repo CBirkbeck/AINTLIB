@@ -130,6 +130,7 @@ noncomputable def chartPieceIso :
     (Scheme.Spec.mapIso
       ((biChartRingAwayTensorEquiv W i j).toRingEquiv.toCommRingCatIso).op)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- `chartPieceIso`'s inverse, in the two-step form its legs are computed from. -/
 lemma chartPieceIso_inv :
     (chartPieceIso W i j).inv =

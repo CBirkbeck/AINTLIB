@@ -363,6 +363,7 @@ theorem not_mem_maxAvoid_of_le {δ : Γ} {hδ : δ ≠ 1} {γ : Γ}
 
 /-! ### Properties of `maxAvoid` -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Every nontrivial convex subgroup of `Γ ⧸ (maxAvoid hγ)` contains `[γ]`. -/
 theorem maxAvoid_mem_of_nontrivial {γ : Γ} (hγ : γ ≠ 1)
     (K : ConvexSubgroup (Γ ⧸ (maxAvoid hγ).toSubgroup))

@@ -107,7 +107,8 @@ instance geometricallyIntegral_universalCurveπ : GeometricallyIntegral universa
   have hy : y = Spec.map (CommRingCat.ofHom (algebraMap WeierstrassAtlasRing K)) := by
     have h1 : CommRingCat.ofHom (algebraMap WeierstrassAtlasRing K) = Spec.preimage y :=
       CommRingCat.ofHom_hom _
-    rw [h1, Spec.map_preimage]
+    rw [h1]
+    exact (Spec.map_preimage y).symm
   have hpb := isPullback_projModelBaseChange (R := WeierstrassAtlasRing) (R' := K)
     universalWeierstrassLoc
   rw [← hy] at hpb

@@ -54,6 +54,7 @@ checks that `p_*(o_X) ≅ o_S`", case 1) + audit A4/R1. -/
 def UniversallyOConnected {X S : Scheme.{u}} (p : X ⟶ S) : Prop :=
   ∀ ⦃T : Scheme.{u}⦄ (g : T ⟶ S) (U : T.Opens), IsIso ((pullback.snd p g).app U)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-W7.7a-hyp-supply, PROVEN)** Locally-Weierstrass families are universally
 `O`-connected: base changes are again locally Weierstrass (`LocallyWeierstrass.baseChange`
 and the base-change stability of the geometry fields), so the uniform global-sections
@@ -84,6 +85,7 @@ theorem hom_ext_of_isAffine {W Z : Scheme.{u}} [IsAffine Z] {f g : W ⟶ Z}
   rw [← cancel_mono Z.isoSpec.hom, Scheme.isoSpec, asIso_hom,
     Scheme.toSpecΓ_naturality, Scheme.toSpecΓ_naturality, h]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-W7.7a-R1, the affine core)** Every `S`-morphism from `X ×_S Y` to an affine scheme
 factors uniquely through the projection to `Y`, when `p : X ⟶ S` is universally
 `O`-connected: morphisms to an affine are ring maps out of global sections, and
@@ -473,6 +475,7 @@ theorem germ_ideal_eq_zero_of_exists_affine {X : Scheme.{u}}
   have h3 := h2 ▸ Ideal.mem_map_of_mem (X.presheaf.germ (X.affineBasicOpen r).1 w hwr).hom h1
   exact Ideal.mem_bot.mp h3
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-W7.r2·c, generic stalk-evaluation)** If a section dies under the `Spec`-point of
 the stalk twisted by any ring map `φ` out of the stalk, then its germ dies under `φ`:
 `(Spec.map φ ≫ fromSpecStalk).app` is `germ` followed by `φ` up to isomorphisms — the
@@ -524,6 +527,7 @@ theorem germ_eq_zero_of_fromSpecStalk_app {X : Scheme.{u}} {U : X.Opens} {x : X}
   | (rw [map_zero]; simpa using h)
   | (rw [map_zero]; simp only [CommRingCat.hom_comp, RingHom.comp_apply] at h ⊢; exact h)
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-W7.r2·c·i — SORRIED SUB-LEAF, the one remaining gap of `rigidity`)** Sections of
 the equalizer ideal die in every infinitesimal neighbourhood of a collapsed fibre: if the
 fibre over `t := p x` lies set-theoretically in the agreement locus, then the germ at `x`
@@ -807,6 +811,7 @@ theorem exists_open_factor_of_fibre_subset [IsLocallyNoetherian S] [IsProper p]
   obtain ⟨U₀, htU₀, hker⟩ := hW
   exact ⟨U₀, htU₀, IsClosedImmersion.lift _ _ hker, IsClosedImmersion.lift_fac _ _ hker⟩
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-W7.r2·d, clopen assembly — SORRIED LEAF)** On a connected base, if the agreement
 locus contains one fibre set-theoretically and every set-theoretic fibre containment
 upgrades to an open scheme-theoretic one (the Krull leaf), then the identity of `X`

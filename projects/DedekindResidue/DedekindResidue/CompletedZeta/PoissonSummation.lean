@@ -230,7 +230,7 @@ theorem norm_mFourier_apply (n : ι → ℤ) (q : UnitAddTorus ι) :
     ‖UnitAddTorus.mFourier n q‖ = 1 := by
   simp only [UnitAddTorus.mFourier, ContinuousMap.coe_mk, norm_prod]
   refine Finset.prod_eq_one (fun i _ => ?_)
-  simp [fourier_apply]
+  simp [fourier_apply, Circle.norm_coe]
 
 /-- The half-open box `(0,1]^ι` has volume `1`. -/
 theorem volume_iocBox :

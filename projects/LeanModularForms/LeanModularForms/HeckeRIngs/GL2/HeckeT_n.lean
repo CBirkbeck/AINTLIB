@@ -266,13 +266,15 @@ lemma moebius_conj {p : ℕ} [Fact p.Prime] (hp : Nat.Prime p)
     have hAB : A * M 1 1 - B * M 1 0 = 1 := by
       simp only [hA_def, hB_def]; linear_combination hdet
     simpa only [τ_mat] using det_fin_two_moebius hAB hq_eq
-  refine ⟨⟨τ_mat, hτ_det⟩, ?_, ?_, ?_, ?_⟩
+  let τ : SL(2, ℤ) := ⟨τ_mat, hτ_det⟩
+  have hτval : Subtype.val τ = τ_mat := rfl
+  refine ⟨τ, ?_, ?_, ?_, ?_⟩
   · apply Units.ext; ext i j; fin_cases i <;> fin_cases j <;>
       simp only [GeneralLinearGroup.coe_mul, mul_apply, T_p_upper_coe, Fin.isValue,
         Matrix.SpecialLinearGroup.mapGL_coe_matrix, Fin.sum_univ_two,
-        algebraMap_int_eq, hτ_mat_def, hA_def, hmoeb] <;>
-      norm_num [mapGL_coe_matrix, RingHom.mapMatrix_apply, map_apply,
-        Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
+        algebraMap_int_eq, hmoeb] <;>
+      norm_num [mapGL_coe_matrix, RingHom.mapMatrix_apply, map_apply, hτval, hτ_mat_def,
+        hA_def, hmoeb, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
         Matrix.head_fin_const] <;>
       simp only [show (↑σ : Matrix (Fin 2) (Fin 2) ℤ) = M from rfl] <;>
       first | rfl | simp |
@@ -761,10 +763,12 @@ private lemma T_p_lower_upper_shift (p q : ℕ) (hp : 0 < p) (hq : 0 < q) (b : �
     mapGL ℚ (shiftSL' (↑(q * b / p : ℕ) : ℤ)) *
       ((T_p_upper p hp (q * b % p) : GL (Fin 2) ℚ) * T_p_lower q hq) := by
   apply Units.ext
+  have hshift : (↑(shiftSL' ((q : ℤ) * (b : ℤ) / (p : ℤ))) : Matrix (Fin 2) (Fin 2) ℤ) =
+      !![1, (q : ℤ) * (b : ℤ) / (p : ℤ); 0, 1] := rfl
   ext i j
   fin_cases i <;> fin_cases j <;>
-    simp [T_p_lower, T_p_upper, shiftSL', mapGL, GeneralLinearGroup.mkOfDetNeZero,
-      Matrix.mul_apply, Fin.sum_univ_two]
+    simp [T_p_lower, T_p_upper, hshift, Matrix.map_apply,
+      GeneralLinearGroup.mkOfDetNeZero, Matrix.mul_apply, Fin.sum_univ_two]
   have h1 : (↑q : ℚ) * ↑b = ((q * b : Nat) : ℚ) := by push_cast; ring
   have h2 : ((↑q * ↑b / ↑p : ℤ) : ℚ) = ((q * b / p : Nat) : ℚ) := by congr 1
   have h3 : q * b = q * b % p + q * b / p * p := by

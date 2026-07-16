@@ -274,6 +274,7 @@ theorem coactionRing_eq_appTop :
   rw [coactionRing, coactionToPullback, chartCoactionSpec]
   simp only [Scheme.Hom.comp_appTop, Category.assoc]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(L2)**: the Künneth identification carries the patch structure map to the
 second-projection-side structure map — compared after the mono `V.ι`, where everything
 is `pullback.condition` algebra. -/

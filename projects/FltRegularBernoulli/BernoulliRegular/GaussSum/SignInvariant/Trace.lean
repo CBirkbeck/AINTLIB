@@ -252,6 +252,7 @@ theorem dft_maps_characterPairSubmodule {χ : DirichletCharacter ℂ p}
   · intro c g hg hgmem
     simpa using (characterPairSubmodule (p := p) χ).smul_mem c hgmem
 
+set_option backward.isDefEq.respectTransparency false in
 /-- On a non-self-dual character pair, the restricted DFT block has trace `0`. -/
 theorem trace_restrict_characterPairSubmodule_eq_zero {χ : DirichletCharacter ℂ p}
     (hχ : χ ≠ 1) (hχself : χ ≠ χ⁻¹) :

@@ -143,6 +143,7 @@ lemma homOfLE_morphismRestrict_agree {X Y : Scheme} (A : CommRingCat) (f : X ⟶
   simp only [Category.assoc]
   rw [homOfLE_specBasicOpenIsoAway_inv_assoc, homOfLE_specBasicOpenIsoAway_inv'_assoc, h]
 
+set_option backward.isDefEq.respectTransparency.types false in
 open CategoryTheory.Limits in
 /-- **(gluing along an `iSup` cover)** The `hf` obligation of `Scheme.OpenCover.glueMorphisms` for
 the cover `Scheme.Opens.iSupOpenCover U` is exactly pairwise agreement on the intersections

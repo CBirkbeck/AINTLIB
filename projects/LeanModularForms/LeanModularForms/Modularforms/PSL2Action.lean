@@ -709,8 +709,10 @@ theorem GLPos_to_PSL_R_term_smul (g : GL(2, ℝ)⁺) (τ : ℍ) :
     (Real.sqrt ((g : GL (Fin 2) ℝ).det.val))⁻¹ •
       ((g : GL (Fin 2) ℝ) : Matrix (Fin 2) (Fin 2) ℝ)
   rw [Matrix.SpecialLinearGroup.mapGL_coe_matrix]
-  ext i j
-  simp [GLPos_to_SLR, Matrix.smul_apply]
+  rw [show ((GLPos_to_SLR g).map (algebraMap ℝ ℝ) : Matrix (Fin 2) (Fin 2) ℝ)
+      = (GLPos_to_SLR g : Matrix (Fin 2) (Fin 2) ℝ) from by
+    ext i j; simp]
+  simp [GLPos_to_SLR]
 
 /-- Set-level action compatibility: the set-level analogue of
 `GLPos_to_PSL_R_term_smul`, lifting pointwise action-equality on `ℍ` to set-image

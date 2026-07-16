@@ -215,6 +215,7 @@ noncomputable def localQuotientπ {V : X.Opens} (hV : σ.IsStableOpen V)
   letI := σ.gammaMulSemiringAction hV
   hVa.isoSpec.hom ≫ invariantsπ G ↑Γ(X, V) ℤ
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The affine identification intertwines the geometric action restricted to a
 stable affine open with the `Spec` of the section-ring action (the c3 bridge:
 `resLE`/`isoSpec` naturality). -/

@@ -217,6 +217,7 @@ noncomputable def bijClassBase {P Q : ModuliProblem R} {G : Type u} [Group G] [F
   (cd.rM.homEquiv.symm ⟨P.map (Y.pullbackAlongπ td.f).op α,
     td.eqv td.f ⟨𝟙 td.Z, Category.id_comp td.f⟩⟩).baseHom
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **G-equivariance of the classifying morphism** (the δ-classifying map is G-equivariant,
 KM p. 115). The deck transformation `σZ.hom γ` of the δ-torsor precomposes into the classifying
 morphism as postcomposition by `(A γ).hom` on `XM`, where `A γ = rM.autMulHom (simulAutSnd (φ γ))`.
@@ -294,6 +295,7 @@ private theorem coreData_qinv_full {P Q : ModuliProblem R} {G : Type u} [Group G
       (fun hrefl => hne (congrArg Iso.hom hrefl)) (cd.rM.homEquiv (𝟙 cd.XM)).1 hfix
   rw [← hξw, hξid, Category.id_comp]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Descent of a `G`-deck-invariant `Ell/R`-morphism along the δ-torsor** (KM p. 115). A morphism
 `g : Y.pullbackAlong td.f ⟶ X` invariant under the deck action `ρ γ` descends through the torsor
 projection `π_td = Y.pullbackAlongπ td.f`: the base map descends by
@@ -489,6 +491,7 @@ private theorem coreData_bijClassBase_qinv {P Q : ModuliProblem R} {G : Type u} 
       _ = cd.q.baseHom := Category.id_comp _
   rw [← Category.assoc, hbase, Category.assoc, hq']
 
+set_option backward.isDefEq.respectTransparency false in
 /-- [B3-bij existence a — KM p. 115] curve-iso descent along the δ-torsor (rigidity). -/
 theorem coreData_surjective (P Q : ModuliProblem R) {G : Type u} [Group G] [Finite G]
     (φ : G →* Aut Q) (htors : ∀ X : EllObj R, Nonempty (TorsorData φ X)) (hrig : P.Rigid)

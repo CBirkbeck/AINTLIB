@@ -697,6 +697,7 @@ private theorem mvPow_image_isClosed (P : PairOfDefinition A) (k : ℕ) :
     (AddSubgroup.map P.A₀.subtype.toAddMonoidHom (P.I ^ k).toAddSubgroup : Set A) from rfl]
   exact AddSubgroup.isClosed_of_isOpen _ (P.pow_image_isOpen k)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **T-MVT-3:** `A⟨X₁,…,Xₙ⟩` is complete with the canonical natural Tate topology, provided
 the ground ring `A` is complete and Hausdorff. Generalizes
 `TateAlgebra.tateAlgebraTopology'_completeSpace` from `Fin 1` to `Fin n`; Wedhorn Prop 6.21(2).

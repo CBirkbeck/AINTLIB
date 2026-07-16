@@ -651,6 +651,7 @@ theorem EllipticCurve.section_ext (k : Type u) [Field k] [IsAlgClosed k]
     (h : P.1 (IsLocalRing.closedPoint k) = Q.1 (IsLocalRing.closedPoint k)) : P = Q :=
   Subtype.ext (ext_of_apply_closedPoint_eq E.π P.2 Q.2 h)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(T-H7b-i)** Pulling sections back along any morphism of field-Specs is
 injective: the base spaces are single points, so the closed-point values are
 preserved, and `section_ext` separates. -/
@@ -672,6 +673,7 @@ theorem EllipticCurve.pull_injective (k k' : Type u) [Field k] [IsAlgClosed k]
   rw [h4 P, h4 Q] at h2
   exact E.section_ext k h2
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(T-H7b-i)** `Spec` of a field embedding is an epimorphism onto morphisms into any
 scheme: two morphisms from `Spec k` agree as soon as they agree after the extension
 `Spec k' ⟶ Spec k`. The point components agree since the source spaces are single

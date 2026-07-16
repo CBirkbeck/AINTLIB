@@ -155,9 +155,15 @@ inverse is `Spec` of `toRingHom G R γ⁻¹`), since `γ` is a group element. -/
 instance isIso_specMap_toRingHom {G : Type u} [Group G] [MulSemiringAction G R] (g : G) :
     IsIso (Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G R g))) := by
   have h1 : (MulSemiringAction.toRingHom G R g).comp (MulSemiringAction.toRingHom G R g⁻¹)
-      = RingHom.id R := by ext a; simp [MulSemiringAction.toRingHom, ← mul_smul]
+      = RingHom.id R := by
+    ext a
+    show g • g⁻¹ • a = a
+    exact smul_inv_smul g a
   have h2 : (MulSemiringAction.toRingHom G R g⁻¹).comp (MulSemiringAction.toRingHom G R g)
-      = RingHom.id R := by ext a; simp [MulSemiringAction.toRingHom, ← mul_smul]
+      = RingHom.id R := by
+    ext a
+    show g⁻¹ • g • a = a
+    exact inv_smul_smul g a
   refine ⟨Spec.map (CommRingCat.ofHom (MulSemiringAction.toRingHom G R g⁻¹)), ?_, ?_⟩ <;>
     rw [← Spec.map_comp, ← CommRingCat.ofHom_comp] <;>
     simp [h1, h2]
@@ -299,7 +305,9 @@ theorem isVCocycle_of_curveActionFamily' {G : Type u} [Group G] [MulSemiringActi
       = eqToHom (congrArg projModel (vc_mul_smul_eq W₀ hC g h)) ≫ act (g * h) := by
     have hτ : MulSemiringAction.toRingHom G R (g * h)
         = (MulSemiringAction.toRingHom G R g).comp (MulSemiringAction.toRingHom G R h) := by
-      ext a; simp [MulSemiringAction.toRingHom, mul_smul]
+      ext a
+      show (g * h) • a = g • h • a
+      exact mul_smul g h a
     have hbc : ∀ {f f' : R →+* R} (p : f = f'),
         projModelBaseChange f W₀ = eqToHom (by rw [p]) ≫ projModelBaseChange f' W₀ := by
       intro f f' p; subst p; simp

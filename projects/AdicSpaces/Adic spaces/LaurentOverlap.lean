@@ -522,6 +522,7 @@ noncomputable def example638Bivariate_forwardHom
     · exact example638Bivariate_evalHom_oneSubfY_eq_zero B P b
   exact h_le hy
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `example638Bivariate_forwardHom` on `mk(algebraMap a)` equals `canonicalMap a`
 (immediate from `Ideal.Quotient.lift_mk` + the evalHom action on `algebraMap`). -/
 theorem example638Bivariate_forwardHom_mk_algebraMap
@@ -534,6 +535,7 @@ theorem example638Bivariate_forwardHom_mk_algebraMap
   rw [Ideal.Quotient.lift_mk]
   exact example638Bivariate_evalHom_algebraMap B P b a
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `example638Bivariate_forwardHom` on `mk(X)` equals `canonicalMap b`. -/
 theorem example638Bivariate_forwardHom_mk_X
     (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B) :
@@ -545,6 +547,7 @@ theorem example638Bivariate_forwardHom_mk_X
   rw [Ideal.Quotient.lift_mk]
   exact example638Bivariate_evalHom_X B P b
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `example638Bivariate_forwardHom` on `mk(Y)` equals `invS`. -/
 theorem example638Bivariate_forwardHom_mk_Y
     (P : PairOfDefinition B) [IsNoetherianRing P.A₀] (b : B) :
@@ -625,6 +628,7 @@ theorem laurentIdeal_sup_bSubX (b : B) :
     ext x; simp [or_comm, XY_sub_one]
 
 open TateAlgebra₂ LaurentTateAlgebra in
+set_option backward.isDefEq.respectTransparency false in
 /-- **Step B of T-OV-1 (pure algebra)**: the bivariate Tate-algebra quotient
 `B⟨ζ, η⟩/(b - ζ, 1 - b·η)` is ring-isomorphic to
 `B₁₂_gen b = B⟨ζ, ζ⁻¹⟩/(b - ζ)`.
@@ -679,6 +683,7 @@ data needed by any consumer chaining through Step B to establish intertwining
 identities (e.g., `laurentOverlapBridge_exists_compatible`). -/
 
 open TateAlgebra₂ LaurentTateAlgebra in
+set_option backward.isDefEq.respectTransparency false in
 /-- **General action**: the Step B iso sends the class of `x ∈ TateAlgebra₂ B`
 to the class of `mkHom x` in `B₁₂_gen b`.
 
@@ -1187,6 +1192,7 @@ theorem example638Bivariate_backwardHom_canonicalMap
 `a : Localization.Away (overlapDatum B P b).s`, then reduces via
 `IsLocalization.ringHom_ext` to the case `algebraMap c` for `c : B`. -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `forward ∘ backward = id` on `presheafValue (overlapDatum B P b)`.
 
 **Strategy:** `Completion.ext'` reduces to agreement on the dense image
@@ -1329,6 +1335,7 @@ Uses `tateAlgebra₂_polynomial_decomp` (polynomial finite-support decomposition
 (`algebraMap`, `X`, `Y`) via `_canonicalMap`, `quotient_algebraMap_b_eq_X_bivariate`,
 and `_backwardHom_invS` implies agreement through the monomial decomposition. -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `backward ∘ forward = id` on `TateAlgebra₂ B ⧸ bivariateOverlapIdeal b`.
 
 **Strategy:** `Ideal.Quotient.ringHom_ext` reduces to `backward ∘ evalHom = mk`
@@ -1817,6 +1824,7 @@ theorem TateAlgebra_mapRingHom_val
     (f : R →+* S) (hf : Continuous f) (g : ↥(TateAlgebra R)) :
     (TateAlgebra_mapRingHom f hf g).val = MvPowerSeries.map f g.val := rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Ring equivalence `TA R ≃+* TA S` induced by a continuous ring equivalence
 `e : R ≃+* S` with continuous inverse.
 
@@ -2457,6 +2465,7 @@ noncomputable def baseHom_B₁_gen_to_bivariateOverlap
     exact TA_B_to_bivariateOverlap_evalHom_plusFSubX_eq_zero P b hA_complete hnoeth
   exact h_le hy
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `baseHom_B₁_gen_to_bivariateOverlap` on `mk(algebraMap a)` equals
 `mk(algebraMap a)`. -/
 theorem baseHom_B₁_gen_to_bivariateOverlap_mk_algebraMap
@@ -2475,6 +2484,7 @@ theorem baseHom_B₁_gen_to_bivariateOverlap_mk_algebraMap
   rw [Ideal.Quotient.lift_mk]
   exact TA_B_to_bivariateOverlap_evalHom_algebraMap P b hA_complete hnoeth a
 
+set_option backward.isDefEq.respectTransparency false in
 /-- `baseHom_B₁_gen_to_bivariateOverlap` on `mk(TateAlgebra.X)` equals
 `mk(TateAlgebra₂.X)` (which also equals `mk(algebraMap b)` via
 `TateAlgebra.quotient_algebraMap_b_eq_X_bivariate`). -/
@@ -2689,6 +2699,7 @@ theorem TA_B₁_gen_to_bivariateOverlap_outer_evalHom_X
 -- exercises iterated typeclass synthesis through nested completions +
 -- TateAlgebra quotients; default heartbeats insufficient.
 set_option synthInstance.maxHeartbeats 400000 in
+set_option backward.isDefEq.respectTransparency false in
 /-- The outer ideal's generator `1 - Ybar · X_out` maps to 0 under the outer
 evalHom, where `Ybar = mk(TateAlgebra.X) ∈ B₁_gen b` and `X_out = TateAlgebra.X`
 is the outer TA variable.
@@ -2786,6 +2797,7 @@ All three reduce to `Ideal.Quotient.lift_mk` plus the corresponding outer
 evalHom action lemma (`TA_B₁_gen_to_bivariateOverlap_outer_evalHom_algebraMap`
 or `_X`) — mirroring the `example638Bivariate_forwardHom_mk_algebraMap` pattern. -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Forward quotient hom action on `mk_outer (algebraMap (mk_inner (algebraMap a)))`:
 equals `mk (algebraMap a)` in `TA₂ B ⧸ bivariateOverlapIdeal b`. -/
 theorem TA_B₁_gen_quotient_to_bivariateOverlap_forwardHom_mk_algebraMap_mk_algebraMap
@@ -2812,6 +2824,7 @@ theorem TA_B₁_gen_quotient_to_bivariateOverlap_forwardHom_mk_algebraMap_mk_alg
       TA_B₁_gen_to_bivariateOverlap_outer_evalHom_algebraMap,
       baseHom_B₁_gen_to_bivariateOverlap_mk_algebraMap]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Forward quotient hom action on `mk_outer (algebraMap (mk_inner (TateAlgebra.X)))`:
 equals `mk TateAlgebra₂.X` in `TA₂ B ⧸ bivariateOverlapIdeal b`. -/
 theorem TA_B₁_gen_quotient_to_bivariateOverlap_forwardHom_mk_algebraMap_mk_X
@@ -2836,6 +2849,7 @@ theorem TA_B₁_gen_quotient_to_bivariateOverlap_forwardHom_mk_algebraMap_mk_X
       TA_B₁_gen_to_bivariateOverlap_outer_evalHom_algebraMap,
       baseHom_B₁_gen_to_bivariateOverlap_mk_X]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Forward quotient hom action on `mk_outer (TateAlgebra.X_{B₁_gen})`:
 equals `mk TateAlgebra₂.Y` in `TA₂ B ⧸ bivariateOverlapIdeal b`. -/
 theorem TA_B₁_gen_quotient_to_bivariateOverlap_forwardHom_mk_X
@@ -3114,6 +3128,7 @@ noncomputable def TA_B_bivariate_quotient_to_outerQuotient_backwardHom
 
 /-! #### Step 8: action lemmas for the backward quotient hom -/
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Backward quotient hom action on `mk(algMap a)`: equals `outerQuotient_baseHom a`. -/
 theorem TA_B_bivariate_quotient_to_outerQuotient_backwardHom_mk_algebraMap
     (b : B) (h : BackwardEvalHypotheses b) (a : B) :
@@ -3127,6 +3142,7 @@ theorem TA_B_bivariate_quotient_to_outerQuotient_backwardHom_mk_algebraMap
   rw [Ideal.Quotient.lift_mk,
       TA_B_bivariate_to_outerQuotient_evalHom₂_algebraMap]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Backward quotient hom action on `mk TA₂.X`: equals `Ybar`. -/
 theorem TA_B_bivariate_quotient_to_outerQuotient_backwardHom_mk_X
     (b : B) (h : BackwardEvalHypotheses b) :
@@ -3139,6 +3155,7 @@ theorem TA_B_bivariate_quotient_to_outerQuotient_backwardHom_mk_X
       (Ideal.Quotient.mk _ _) = _
   rw [Ideal.Quotient.lift_mk, TA_B_bivariate_to_outerQuotient_evalHom₂_X]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Backward quotient hom action on `mk TA₂.Y`: equals `X_out`. -/
 theorem TA_B_bivariate_quotient_to_outerQuotient_backwardHom_mk_Y
     (b : B) (h : BackwardEvalHypotheses b) :

@@ -2353,6 +2353,7 @@ theorem coeRingHom_bijective_of_discrete {A : Type*} [CommRing A]
       exact hdense.closure_range ▸ Set.mem_univ x
     exact this
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The algebraMap image of `z` in each cover piece is zero, lifted through the
 localization map (helper for `productRestriction_injective_discrete`). -/
 private theorem lift_map_zero_of_restrictionAlg_zero {A : Type*} [CommRing A]

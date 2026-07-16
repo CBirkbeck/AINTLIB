@@ -473,6 +473,7 @@ def topNilpIdeal : Ideal (powerBoundedSubring.toSubring A) where
     exact (c.2 : IsPowerBounded (c : A)).isTopologicallyNilpotent_mul hx
 
 open TopologicalRing in
+set_option backward.isDefEq.respectTransparency false in
 /-- `1 - det (1 - B)` is topologically nilpotent when every entry of `B` is. -/
 theorem IsTopologicallyNilpotent.one_sub_det_one_sub_matrix    {n : Type*} [Fintype n] [DecidableEq n] (B : Matrix n n A)
     (hB : ∀ i j, IsTopologicallyNilpotent (B i j)) :

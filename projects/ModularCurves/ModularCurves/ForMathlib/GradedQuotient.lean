@@ -79,7 +79,10 @@ private lemma quotientDecomposeAux_coe (x : ⨁ n, 𝒜 n) :
       Ideal.Quotient.mk I.toIdeal (DirectSum.coeAddMonoidHom 𝒜 x) := by
   induction x using DirectSum.induction_on with
   | zero => simp
-  | of n a => rw [quotientDecomposeAux_of]; simp
+  | of n a =>
+    rw [quotientDecomposeAux_of]
+    exact (DirectSum.coeAddMonoidHom_of (quotientGrading I) n _).trans
+      (congrArg (Ideal.Quotient.mk I.toIdeal) (DirectSum.coeAddMonoidHom_of 𝒜 n a)).symm
   | add x y hx hy => rw [map_add, map_add, hx, hy, map_add, map_add]
 
 /-- The decomposition of the quotient ring: descend the decomposition of `A`.

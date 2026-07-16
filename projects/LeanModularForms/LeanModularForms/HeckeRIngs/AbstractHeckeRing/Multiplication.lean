@@ -533,7 +533,7 @@ scoped notation:max "T⦃" D ", " a "⦄" => T_single _ ℤ D a
 lemma mul_singleton_𝕋 (D1 D2 : HeckeCoset P) (a b : ℤ) :
     T_single P ℤ D1 a * T_single P ℤ D2 b =
       a • b • m P (HeckeCoset.rep D1) (HeckeCoset.rep D2) := by
-  simp_rw [T_single, mul_def]
+  rw [mul_def]
   rw [Finsupp.sum_single_index, Finsupp.sum_single_index, m]
   · simp only [zero_smul, smul_zero]
   · ext a
@@ -593,7 +593,7 @@ lemma singleton_one_mul_𝕋 (D2 : HeckeCoset P) (b : ℤ) :
       T_single P ℤ D2 b := by
   revert D2
   exact HeckeCoset.ind fun g ↦ by
-    rw [mul_singleton_𝕋, m_mul_one_eq_single]
+    rw [mul_singleton_𝕋 P ⟦g⟧ (HeckeCoset.one P) b 1, m_mul_one_eq_single]
     simp only [T_single]
     rw [show (⟦HeckeCoset.rep ⟦g⟧⟧ : HeckeCoset P) = ⟦g⟧ from Quotient.out_eq _]
     show Finsupp.mapRange (b • ·) _ (Finsupp.mapRange ((1 : ℤ) • ·) _
@@ -631,7 +631,7 @@ lemma one_mul_singleton_𝕋 (D2 : HeckeCoset P) (b : ℤ) :
       T_single P ℤ D2 b := by
   revert D2
   exact HeckeCoset.ind fun g ↦ by
-    rw [mul_singleton_𝕋, m_one_mul_eq_single]
+    rw [mul_singleton_𝕋 P (HeckeCoset.one P) ⟦g⟧ 1 b, m_one_mul_eq_single]
     simp only [T_single]
     rw [show (⟦HeckeCoset.rep ⟦g⟧⟧ : HeckeCoset P) = ⟦g⟧ from Quotient.out_eq _]
     show Finsupp.mapRange ((1 : ℤ) • ·) _ (Finsupp.mapRange (b • ·) _
@@ -659,8 +659,8 @@ noncomputable instance instNonUnitalNonAssocSemiring :
       simp only [mul_def]
       refine Eq.trans (Finsupp.sum_add_index ?_ ?_) ?_
       · intros
-        simp only [zero_smul, Finsupp.sum_fun_zero]
-        rfl
+        simp only [zero_smul]
+        exact Finsupp.sum_fun_zero h
       · intro D1 _ a b
         refine Finsupp.ext fun t ↦ ?_
         change (Finsupp.sum h fun D2 b₂ ↦ (a + b) • b₂ • m P D1.rep D2.rep) t =

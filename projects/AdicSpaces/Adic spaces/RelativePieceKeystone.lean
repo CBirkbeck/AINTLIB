@@ -877,6 +877,7 @@ theorem imageGenCover_span
   exact span_image_canonicalMap_eq_top D₀ T hspan
 
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- **THE 8.16-KEYSTONE (Wedhorn Prop 8.16 / Prop 8.2, [Hu2] 1.4.4)**: for a
 rational piece `E` inside `D₀` (with the rational-subset span condition of
 Wedhorn Def 7.29), the section ring `𝒪_X(E)` is canonically isomorphic to the
@@ -912,6 +913,7 @@ noncomputable def relativePiece_equiv
     (genPiece_relative_equiv D₀ E.T E.s hspanE)
 
 set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
 /-- The 8.16-keystone intertwines the canonical maps: restricting `x : 𝒪_X(D₀)`
 to `E` and passing to the `B`-side equals the `B`-side canonical map of `x`
 (Wedhorn Prop 8.2 base-change naturality, general-piece form). -/

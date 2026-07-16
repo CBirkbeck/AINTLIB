@@ -140,6 +140,7 @@ lemma isLocallySurjective_tensorHom (f : M₁ ⟶ M₂) (g : N₁ ⟶ N₂)
       rfl
 
 omit [J.WEqualsLocallyBijective AddCommGrpCat] [HasWeakSheafify J AddCommGrpCat] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **([W-MONO-inj])** Precomposition with the tensor of locally surjective morphisms
 is injective on morphisms into a presheaf of modules whose underlying presheaf is a
 sheaf: two maps out of the tensor agreeing after `f ⊗ₘ g` agree on simple tensors

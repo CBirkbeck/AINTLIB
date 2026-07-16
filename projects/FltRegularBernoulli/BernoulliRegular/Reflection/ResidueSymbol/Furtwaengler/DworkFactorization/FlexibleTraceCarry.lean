@@ -199,6 +199,7 @@ theorem wittThetaModQPow_teichmuller
     have hunit := F.wittThetaModQPow_teichmuller_unit N xu
     simpa [teichFullVal, hx, xu] using hunit
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The flexible quotient Witt map sends the Witt-Frobenius trace of a
 Teichmuller unit to the corresponding Teichmuller Frobenius sum. -/
 theorem wittThetaModQPow_wittFrobeniusTrace_teichmuller_unit

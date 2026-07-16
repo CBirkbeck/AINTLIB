@@ -121,7 +121,9 @@ private lemma ker_entry_dvd (d : ℕ) [NeZero d] (γ : SpecialLinearGroup (Fin n
     (d : ℤ) ∣ (γ.val i j - (1 : Matrix (Fin n) (Fin n) ℤ) i j) := by
   rw [MonoidHom.mem_ker] at hγ
   have h := congr_fun₂ (congr_arg Subtype.val hγ) i j
-  simp [SpecialLinearGroup.map, RingHom.mapMatrix_apply, Matrix.map_apply] at h
+  rw [SpecialLinearGroup.map_apply_coe] at h
+  simp only [RingHom.mapMatrix_apply, Matrix.map_apply, SpecialLinearGroup.coe_one,
+    Int.coe_castRingHom] at h
   rw [Matrix.one_apply] at h ⊢
   split_ifs at h ⊢
   · exact (ZMod.intCast_zmod_eq_zero_iff_dvd _ _).mp (by simp [h])

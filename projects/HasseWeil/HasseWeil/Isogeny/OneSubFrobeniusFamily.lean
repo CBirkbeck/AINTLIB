@@ -296,6 +296,7 @@ theorem frobeniusAlgHom_comp_algebraMap :
     Algebra.ofId K W.toAffine.FunctionField :=
   Subsingleton.elim _ _
 
+set_option backward.isDefEq.respectTransparency.types false in
 omit [W.toAffine.IsElliptic] in
 /-- **Frobenius fixes lifted K-rational points at `W_KE`**: applying the
 `Affine.Point.map` of the Frobenius K-AlgHom to `liftPointToKE W k`

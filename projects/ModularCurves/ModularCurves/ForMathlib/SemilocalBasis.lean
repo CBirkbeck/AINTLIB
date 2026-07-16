@@ -65,6 +65,7 @@ noncomputable def basisOfSpanRangeEqTop [Nontrivial S] [Module.Free S M] [Module
     exact hinj (by simp [LinearMap.comp_apply, haa'])
   exact (Pi.basisFun S (Fin r)).map (LinearEquiv.ofBijective φ ⟨hφinj, hφsurj⟩)
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp]
 theorem basisOfSpanRangeEqTop_apply [Nontrivial S] [Module.Free S M] [Module.Finite S M]
     {r : ℕ} (hr : Module.finrank S M = r) {y : Fin r → M}

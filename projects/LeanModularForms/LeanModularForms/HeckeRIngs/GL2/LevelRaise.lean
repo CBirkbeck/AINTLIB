@@ -141,11 +141,16 @@ lemma levelRaiseMatrix_mul_mapGL (d : ℕ) [NeZero d] (γ : SL(2, ℤ))
   have hdvd_real : ((d : ℕ) : ℝ) * (((γ.val 1 0 / (d : ℤ)) : ℤ) : ℝ) =
       ((γ.val 1 0 : ℤ) : ℝ) := by
     rw [mul_comm, ← Int.cast_natCast (R := ℝ), ← Int.cast_mul, Int.ediv_mul_cancel hdvd]
+  have e00 : (levelRaiseConjOfDvd d γ hdvd).val 0 0 = γ.val 0 0 := rfl
+  have e01 : (levelRaiseConjOfDvd d γ hdvd).val 0 1 = (d : ℤ) * γ.val 0 1 := rfl
+  have e10 : (levelRaiseConjOfDvd d γ hdvd).val 1 0 = γ.val 1 0 / (d : ℤ) := rfl
+  have e11 : (levelRaiseConjOfDvd d γ hdvd).val 1 1 = γ.val 1 1 := rfl
   ext i j
   simp only [Matrix.GeneralLinearGroup.coe_mul, Matrix.SpecialLinearGroup.mapGL_coe_matrix,
     Matrix.mul_apply, Fin.sum_univ_two]
   fin_cases i <;> fin_cases j <;>
-    simp [levelRaiseMatrix, levelRaiseConjOfDvd, mul_comm, hdvd_real]
+    simp [levelRaiseMatrix, Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply,
+      Matrix.map_apply, Int.coe_castRingHom, e00, e01, e10, e11, mul_comm, hdvd_real]
 
 /-- The conjugated matrix is in `Γ₁(M)` (Miyake Lemma 4.6.1, conjugation step).
 
@@ -507,11 +512,12 @@ lemma exists_T_levelRaiseConj_T_factor (l N : ℕ) [NeZero l] [NeZero N] (h_dvd 
   set j := shiftJ α β (l : ℤ)
   obtain ⟨k, hk⟩ := shiftJ_spec (β := β) (Int.isCoprime_iff_gcd_eq_one.mp
     (exists_shift_isCoprime a c l ⟨d, -b, by linear_combination hdet⟩))
-  refine ⟨i, j, ⟨!![α, k; (l : ℤ) * c, d - c * j], ?det⟩,
-    ?gamma0_mem, ?eq, ?diag⟩
-  · rw [Matrix.det_fin_two_of]
+  have hdet0 : (!![α, k; (l : ℤ) * c, d - c * j]).det = 1 := by
+    rw [Matrix.det_fin_two_of]
     change α * (d - c * j) - k * ((l : ℤ) * c) = 1
     linear_combination hdet + c * hk
+  let γ₀ : SL(2, ℤ) := ⟨!![α, k; (l : ℤ) * c, d - c * j], hdet0⟩
+  refine ⟨i, j, γ₀, ?gamma0_mem, ?eq, ?diag⟩
   · rw [Gamma0_mem]
     change (((l : ℤ) * c : ℤ) : ZMod N) = 0
     rw [ZMod.intCast_zmod_eq_zero_iff_dvd]

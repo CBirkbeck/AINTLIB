@@ -1052,6 +1052,7 @@ private theorem pow_image_isClosed (P : PairOfDefinition A) (n : ℕ) :
       Subtype.val '' ((P.I ^ n : Ideal ↥P.A₀) : Set ↥P.A₀) from rfl]
     exact hopen)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The `CompleteSpace` instance for `TateAlgebra A` with the canonical natural Tate topology.
 
 This is the main result: if `A` is a complete Hausdorff Tate ring, then `A⟨X⟩` is complete
@@ -2340,6 +2341,7 @@ noncomputable def instT2SpaceTateAlgebra₂ [IsTateRing A] [T2Space A] :
   simp at hb_eq
   exact hl hb_eq.symm
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Bivariate CompleteSpace**: `TateAlgebra₂ A` is complete under the canonical
 bivariate Tate topology. Bivariate analog of `tateAlgebraTopology'_completeSpace`.
 

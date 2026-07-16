@@ -298,6 +298,7 @@ theorem localized'_restrictScalars_eq_restrictScalars_map
 
 end SubmoduleVanishing
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **([T-SG3-LFP-3], cover form)** For the inclusion of a closed subscheme to be locally
 of finite presentation it suffices that its ideal sheaf is finitely generated on the
 members of a single affine cover: lfp is Zariski-local on the target, and over each
@@ -648,6 +649,7 @@ private theorem vanishingLocusAux_appLE_snd_eq_zero {T : Scheme.{u}} (t : T ⟶ 
 
 open scoped TensorProduct in
 omit [Flat p] [LocallyOfFinitePresentation p] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The "geometry ⇒ algebra" half of the affine-local tensor dictionary: if the
 pullback of `a : Γ(W, p⁻¹U)` to the piece `fst⁻¹V` of `T ×ₛ W` vanishes, then `a`
 dies in the base change `Γ(T,V) ⊗ Γ(W,p⁻¹U)`. This is where the pullback square is
@@ -1239,6 +1241,7 @@ private theorem invD_prop (E : EllipticCurve S)
     MorphismProperty.cancel_left_of_respectsIso P]
   exact hD
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- KM 1.3.7's `inv*(D)`: the pullback of `D` along inversion. -/
 private noncomputable def invD (E : EllipticCurve S)
     (D : RelEffCartierDiv E.π) : RelEffCartierDiv E.π where
@@ -1310,16 +1313,19 @@ private theorem Z3W_spec (E : EllipticCurve S)
   (RelEffCartierDiv.exists_incidenceLocusLE
     (D.baseChange (SubgroupLocus.q E D)) (SubgroupLocus.sumDiv E D)).choose_spec w
 
+set_option backward.isDefEq.respectTransparency.types false in
 private theorem q_finite (E : EllipticCurve S)
     (D : RelEffCartierDiv E.π) : IsFinite (SubgroupLocus.q E D) :=
   MorphismProperty.comp_mem _ _ _
     (MorphismProperty.pullback_fst _ _ D.finite) D.finite
 
+set_option backward.isDefEq.respectTransparency.types false in
 private theorem q_flat (E : EllipticCurve S)
     (D : RelEffCartierDiv E.π) : Flat (SubgroupLocus.q E D) :=
   MorphismProperty.comp_mem _ _ _
     (MorphismProperty.pullback_fst _ _ D.flat) D.flat
 
+set_option backward.isDefEq.respectTransparency.types false in
 private theorem q_lfp (E : EllipticCurve S)
     (D : RelEffCartierDiv E.π) : LocallyOfFinitePresentation (SubgroupLocus.q E D) :=
   MorphismProperty.comp_mem _ _ _
@@ -1432,6 +1438,7 @@ private theorem Z3_comap_eq (E : EllipticCurve S)
   rw [← Scheme.IdealSheafData.comap_comp, pullback.lift_fst,
     ← Scheme.IdealSheafData.comap_comp, Category.assoc, SubgroupLocus.sigma_fst]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Condition (3): the descended locus `Z₃` kills `t` exactly when the tautological
 sum factors through `D` after base change to `T ×_S W`. -/
 private theorem Z3_le_ker_iff (E : EllipticCurve S)
@@ -1563,6 +1570,7 @@ private theorem isSubgroup_conditions (E : EllipticCurve S)
       rw [RelEffCartierDiv.baseChange_ideal, ← Scheme.IdealSheafData.comap_comp,
         hval] at hadd
       exact hadd
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Backward direction of `SubgroupLocus.isSubgroup_iff`: KM 1.3.7's three conditions
 (zero section factors through `D_T`, inversion stability, tautological sum factors
 through `D`) suffice for `D_T` to be a subgroup of `E_T`. -/
@@ -2164,6 +2172,7 @@ private theorem psi_add {T T' : Scheme.{u}} (E : EllipticCurve S)
   exact (ExactOrderLocus.toE_add_eq E N hct Q Q' _ _
     (ExactOrderLocus.psi_toE' E N hct Q) (ExactOrderLocus.psi_toE' E N hct Q')).symm
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **The factorization dictionary**: a point factors through the base-changed
 universal order divisor iff its matched companion factors through the `t`-level order
 divisor. -/
@@ -2318,6 +2327,7 @@ theorem exists_exactOrderLocus (E : EllipticCurve S) (N : ℕ) [NeZero N] :
 namespace FullLevelLocus
 
 open EllipticCurve in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- `E[N] ⟶ S` is locally of finite presentation (base change of
 `MulByHom.locallyOfFinitePresentation`). -/
 private theorem torsionπ_lfp {Y : Scheme.{u}} (F : EllipticCurve Y)
@@ -2333,6 +2343,7 @@ private theorem torsionDivisor_prop {Y : Scheme.{u}}
   rw [hι, MorphismProperty.cancel_left_of_respectsIso P]
   exact h
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- `E[N]` as a relative effective Cartier divisor in `E/S` — the ambient divisor of
 the full-level incidence condition (KM 2.3.1 consumers via the `T-B3a` dictionary). -/
 private noncomputable def torsionDivisor {Y : Scheme.{u}}
@@ -2674,6 +2685,7 @@ theorem comap_iff {C S' B T : Scheme.{u}} {π : C ⟶ S'}
   · intro h
     rw [← hΨΘ, Scheme.IdealSheafData.comap_comp, Scheme.IdealSheafData.comap_comp, h]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(P1)** The base-changed universal pair divisor pulls back along `θ` to the
 `t`-level pair divisor. -/
 private theorem P1 {T : Scheme.{u}} (E : EllipticCurve S) (N : ℕ)

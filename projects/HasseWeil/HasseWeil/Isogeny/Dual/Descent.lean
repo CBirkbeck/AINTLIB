@@ -1717,6 +1717,7 @@ theorem bcXgen_ne_zero : bcXgen W₁ W₂ φ L ≠ 0 := fun h0 =>
     ((⟨W₁.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap_injective L
       (h0.trans (map_zero _).symm))
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The two-curve generator images satisfy the Weierstrass equation of `E₂_L` over `L(E₁_L)`:
 apply `φ^*` to the generic equation of `W₂` (over `K(E₂)`), then push along
 `functionFieldMap : K(E₁) → L(E₁_L)`. -/

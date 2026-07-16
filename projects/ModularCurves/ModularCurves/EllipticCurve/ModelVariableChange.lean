@@ -533,6 +533,7 @@ lemma vcMvSubst_map {R' : Type u} [CommRing R'] (f : R →+* R') (C : VariableCh
     simp only [vcMvSubst, Fin.isValue,
       Matrix.cons_val, MvPolynomial.map_X]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- HEq-based transport: an `eqToHom` from a curve equality absorbs into `Proj.map`, bridged
 by an `HEq` of the graded homs. -/
 private lemma projMap_transport_heq {R' : Type u} [CommRing R'] (W : WeierstrassCurve R)
@@ -573,6 +574,7 @@ lemma map_aeval_vcMvSubst {R' : Type u} [CommRing R'] (f : R →+* R') (C : Vari
   | add p q hp hq => rw [map_add, map_add, hp, hq, map_add, map_add]
   | mul_X p i hp => simp only [map_mul, MvPolynomial.aeval_X, MvPolynomial.map_X, hp, vcMvSubst_map]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-W7.0h-i, base-change naturality — coordinator §2-P5)** `projModelVCIso` is natural
 under base change of the ground ring: base-changing then applying the base-changed variable
 change agrees with applying the variable change then base-changing (`map_variableChange`
@@ -615,6 +617,7 @@ lemma aeval_vcMvSubst_one (p : MvPolynomial (Fin 3) R) :
     MvPolynomial.aeval (vcMvSubst (1 : VariableChange R)) p = p := by
   rw [vcMvSubst_one, MvPolynomial.aeval_X_left, AlgHom.id_apply]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(map_id support, [REQ→A-lane])** The identity variable change induces the identity model
 isomorphism (the `_one` cocycle law, sibling of `projModelVCIso_mul`): `projModelVCIso 1 W` is
 `eqToHom` of `1 • W = W`. -/

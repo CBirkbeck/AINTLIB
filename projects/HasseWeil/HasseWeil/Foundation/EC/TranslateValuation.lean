@@ -54,6 +54,7 @@ variable (W : WeierstrassCurve F) [W.toAffine.IsElliptic]
 local notation "KE" => W.toAffine.FunctionField
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- For `P.x ≠ xk`, the coord ring element `XClass W xk` is NOT in the
 maximal ideal at `P`. Companion to `XClass_mem_maximalIdealAt` (which
 handles the `P.x = xk` case). -/
@@ -96,6 +97,7 @@ theorem pointValuation_x_gen_sub_const_eq_one_of_X_ne
   exact le_antisymm h_le (not_lt.mp h_not_lt)
 
 omit [DecidableEq F] [W.toAffine.IsElliptic] in
+set_option backward.isDefEq.respectTransparency.types false in
 /-- When `P.x ≠ xk`, `(x_gen − alg xk)` is a unit in K(E), and its inverse
 also has `pointValuation = 1` at `P`. -/
 theorem pointValuation_x_gen_sub_const_inv_eq_one_of_X_ne
@@ -1821,6 +1823,7 @@ private theorem translateAlgEquivOfPoint_algebraMap_eq_add_algebraMap_const
     algebraMap F W.toAffine.FunctionField c
   rw [(translateAlgEquivOfPoint W Q).commutes c]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- For `r ∈ CoordinateRing` with `r ∉ maxIdealAt(P+k)`,
 `pV P (τ_k(algMap r)) = 1`. -/
 theorem pointValuation_translateAlgEquivOfPoint_algebraMap_eq_one_of_notMem
@@ -2244,6 +2247,7 @@ theorem ord_P_translateAlgEquivOfPoint_algebraMap_le_of_ne_zero
   rw [h_ord_eq_count]
   exact h_step1
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- After translating the lift `f · algMap q = algMap u` by `-k` and using `τ_{-k} ∘ τ_k = id`
 (with `f = τ_k (algMap r)`), the numerator's `τ_{-k}`-image factors as
 `τ_{-k}(algMap u) = algMap r · τ_{-k}(algMap q)`. Here `-k = (xk, negY xk yk)`, and the maps are

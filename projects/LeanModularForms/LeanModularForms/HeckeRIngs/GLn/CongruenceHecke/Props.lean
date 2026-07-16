@@ -247,9 +247,9 @@ noncomputable def lunip_inject (N : ℕ) [NeZero N] (k_exp : ℕ)
   fun r ↦ ⟦⟨mapGL ℚ ⟨Matrix.of ![![(1 : ℤ), 0], ![↑N * (↑r : ℤ), 1]],
     by simp [Matrix.det_fin_two, Matrix.of_apply, Matrix.cons_val_zero,
       Matrix.cons_val_one]⟩,
-    Subgroup.mem_map_of_mem _ (by
-      rw [CongruenceSubgroup.Gamma0_mem]
-      simp [Matrix.of_apply, Matrix.cons_val_one])⟩⟧
+    Subgroup.mem_map_of_mem _ (CongruenceSubgroup.Gamma0_mem.mpr (by
+      show (((N : ℤ) * (↑r : ℤ) : ℤ) : ZMod N) = 0
+      simp))⟩⟧
 
 private lemma coprime_of_gcd_one_dvd_pow (a : ℤ) (N : ℕ) (k : ℕ) (hk : ℕ)
     (haN : Int.gcd a N = 1) (hk_dvd : k ∣ N ^ hk) : Int.gcd a k = 1 :=
@@ -304,10 +304,15 @@ lemma shimura_prop_3_33_gen (N : ℕ) [NeZero N]
   have hd01 : (D : GL (Fin 2) ℚ).val 0 1 = 0 := by rw [hDv]; simp [Matrix.diagonal]
   have hd10 : (D : GL (Fin 2) ℚ).val 1 0 = 0 := by rw [hDv]; simp [Matrix.diagonal]
   have hd11 : (D : GL (Fin 2) ℚ).val 1 1 = ↑m := by rw [hDv]; simp [Matrix.diagonal]
-  simp only [GeneralLinearGroup.coe_mul, mapGL_coe_matrix, RingHom.mapMatrix_apply,
-    algebraMap_int_eq, Int.coe_castRingHom, hA, Matrix.mul_apply, Fin.sum_univ_two,
-    Matrix.map_apply, SpecialLinearGroup.map, MonoidHom.coe_mk, OneHom.coe_mk,
-    L_sl, R_sl, SpecialLinearGroup.coe_mk, R, Matrix.of_apply, Fin.isValue,
+  have hLQ : (↑(mapGL ℚ (⟨L, hL_det⟩ : SpecialLinearGroup (Fin 2) ℤ)) :
+      Matrix (Fin 2) (Fin 2) ℚ) = L.map Int.cast := rfl
+  have hRQ : (↑(mapGL ℚ (⟨R, hR_det⟩ : SpecialLinearGroup (Fin 2) ℤ)) :
+      Matrix (Fin 2) (Fin 2) ℚ) = R.map Int.cast := rfl
+  have hLQ' : (↑(mapGL ℚ L_sl) : Matrix (Fin 2) (Fin 2) ℚ) = L.map Int.cast := hLQ
+  have hRQ' : (↑(mapGL ℚ R_sl) : Matrix (Fin 2) (Fin 2) ℚ) = R.map Int.cast := hRQ
+  simp only [GeneralLinearGroup.coe_mul, hLQ', hRQ',
+    hA, Matrix.mul_apply, Fin.sum_univ_two,
+    Matrix.map_apply, R, Matrix.of_apply, Fin.isValue,
     Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
     Matrix.empty_val', hd00, hd01, hd10, hd11]
   fin_cases i <;> fin_cases j <;> (
@@ -364,17 +369,26 @@ private lemma lunip_conj_diag_eq (N : ℕ) [NeZero N] (k_exp : ℕ)
           ![(N : ℤ) * c'', τ'.1 0 0]], hW⟩ =
       (mapGL ℚ τ')⁻¹ * mapGL ℚ ⟨!![1, 0; (N : ℤ) * ↑r_int.toNat, 1], hU⟩ *
         ↑(diagMat 2 (![1, k_exp] : Fin 2 → ℕ)) := by
-  rw [show ((mapGL ℚ τ')⁻¹ : GL (Fin 2) ℚ) = mapGL ℚ τ'⁻¹ from (map_inv (mapGL ℚ) τ').symm,
-    ← map_mul]
+  rw [show ((mapGL ℚ τ')⁻¹ : GL (Fin 2) ℚ) = mapGL ℚ τ'⁻¹ from (map_inv (mapGL ℚ) τ').symm]
+  refine Eq.trans ?_ (congrArg (· * (↑(diagMat 2 (![1, k_exp] : Fin 2 → ℕ)) : GL (Fin 2) ℚ))
+    (map_mul (mapGL ℚ) τ'⁻¹ _))
+  have hWQ : (↑(mapGL ℚ (⟨_, hW⟩ : SpecialLinearGroup (Fin 2) ℤ)) :
+      Matrix (Fin 2) (Fin 2) ℚ) =
+      (Matrix.of ![![τ'.1 1 1 - (N : ℤ) * r_int * τ'.1 0 1, -(τ'.1 0 1) * k_exp],
+        ![(N : ℤ) * c'', τ'.1 0 0]]).map Int.cast :=
+    (Matrix.SpecialLinearGroup.mapGL_coe_matrix _).trans (by rw [algebraMap_int_eq]; rfl)
+  have hUmul : (↑((τ'⁻¹ * ⟨_, hU⟩ : SpecialLinearGroup (Fin 2) ℤ)) :
+      Matrix (Fin 2) (Fin 2) ℤ) =
+      (↑(τ'⁻¹) : Matrix (Fin 2) (Fin 2) ℤ) * !![1, 0; (N : ℤ) * ↑r_int.toNat, 1] := rfl
   apply Units.ext; ext i j
-  simp only [diagMat_val 2 _ ha, mapGL_coe_matrix, GeneralLinearGroup.coe_mul,
+  simp only [diagMat_val 2 _ ha, hWQ, mapGL_coe_matrix, GeneralLinearGroup.coe_mul,
     algebraMap_int_eq, Int.coe_castRingHom, Matrix.map_apply,
-    SpecialLinearGroup.coe_matrix_coe,
-    SpecialLinearGroup.coe_inv, SpecialLinearGroup.coe_mul,
+    SpecialLinearGroup.coe_matrix_coe, hUmul,
+    SpecialLinearGroup.coe_inv,
     Matrix.adjugate_fin_two, Matrix.of_apply,
     Matrix.mul_apply, Fin.sum_univ_two, Fin.isValue, Matrix.diagonal_apply,
     Matrix.cons_val', Matrix.cons_val_zero, Matrix.cons_val_one,
-    Matrix.empty_val', mul_zero, mul_one, zero_add, neg_mul, Nat.cast_one]
+    Matrix.empty_val', mul_zero, mul_one, zero_add, Nat.cast_one]
   have hr_cast : ((r_int).toNat : ℤ) = r_int := Int.toNat_of_nonneg hr_nn
   fin_cases i <;> fin_cases j <;>
     simp only [hr_cast] <;>

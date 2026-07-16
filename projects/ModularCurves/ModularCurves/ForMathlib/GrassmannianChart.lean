@@ -58,6 +58,7 @@ lemma retraction_comp_coordMap (x : Fin k → M) {φ : M →ₗ[R] (Fin k → R)
   simp_rw [map_smul, hφ, ← Pi.single_smul, smul_eq_mul, mul_one]
   exact Finset.univ_sum_single c
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Forward direction of [GR-A1]: the retraction attached to a chart member,
 `φ = (chart iso)⁻¹ ∘ mkQ`. -/
 noncomputable def chartToRetraction (x : Fin k → M) (N : {N : G(k, M; R) // IsChartAt x N}) :
@@ -104,6 +105,7 @@ noncomputable def retractionToChart (x : Fin k → M)
        simp [rankAtStalk_eq_finrank_of_free] },
    bijective_mkQ_comp_coordMap x φ.2⟩
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **[GR-A1]** A chart member at `x` is the same data as a retraction of `x`: a linear
 `φ : M → (Fin k → R)` with `φ (x i) = eᵢ`, via `N = ker φ` (Stacks 089T step (3), the
 coordinate-free form). -/
@@ -644,6 +646,7 @@ lemma coordMap_apply {x : Fin k → M} (c : Fin k → R) :
     coordMap x c = ∑ i, c i • x i := by
   simp [coordMap, Fintype.linearCombination_apply]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **[GR-B2n-4]** Kernel-uniqueness for the chart coordinate: *any* retraction `ψ` of the
 coordinate sub-basis `Pi.single ∘ ι` whose kernel contains `N` reads off the chart matrix of `N`
 on the complementary coordinate vectors. This is the workhorse behind naturality (and wave-3
@@ -668,6 +671,7 @@ theorem chartMatrix_eq_of_retraction {A' : Type w''} [CommRing A'] (n : ℕ) (ι
   rw [← key]
   exact N.toSubmodule.liftQ_apply ψ (Pi.single j.1 1)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **[GR-B2n-4]** Naturality of the chart coordinate under `normMap`: the chart matrix of
 `normMap f N` is the entrywise-`f` image of the chart matrix of `N`. The retraction realising
 `normMap f N` is the base change of the one realising `N` (transported through `piScalarRight`),

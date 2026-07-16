@@ -222,6 +222,7 @@ theorem MulByHom.formallySmooth_appLE (N : ℕ) (h : NIsInvertible S N)
   · refine AlgHom.ext fun v ↦ ?_
     exact congrArg (fun m : Γ(E.E, V) ⟶ CommRingCat.of (B ⧸ I) ↦ m.hom v) hlift
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **(N6)** `[N]` is smooth for `N` invertible on `S` — the (LIFT) translation of
 kernel `N`-divisibility (N5). -/
 theorem MulByHom.smooth_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :

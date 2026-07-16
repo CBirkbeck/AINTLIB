@@ -150,6 +150,7 @@ def Point.restrict {T T' : Scheme.{u}} {g : T ⟶ S} (k : T' ⟶ T) (P : E.Point
     E.Point (k ≫ g) :=
   ⟨k ≫ P.1, by rw [Category.assoc, P.2]⟩
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-A5)** Base change of the working record along `g : T ⟶ S`: total space
 `E ×_S T`; the group structure is mathlib's group-object structure on the pullback
 (`Over.grpObjMkPullbackSnd`). Geometry Props are base-change stability (mathlib

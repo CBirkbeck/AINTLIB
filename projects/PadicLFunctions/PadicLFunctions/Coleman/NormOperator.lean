@@ -214,6 +214,7 @@ theorem toPS_apply (x : PhiAlg p) : toPS p x = x := rfl
 @[simp]
 theorem toPS_symm_apply (F : PowerSeries ℤ_[p]) : (toPS p).symm F = F := rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The image of the `φ`-algebra map: `toPS (algebraMap c) = φ(c)`. -/
 theorem toPS_algebraMap (c : PowerSeries ℤ_[p]) :
     toPS p (algebraMap (PowerSeries ℤ_[p]) (PhiAlg p) c) = phiSeries p c := by

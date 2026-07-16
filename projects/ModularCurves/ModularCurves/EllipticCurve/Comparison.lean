@@ -117,6 +117,7 @@ lemma appLE_zChart_eq_pointedIsoΓ {W W' : WeierstrassCurve R}
   simp only [CommRingCat.hom_comp, RingHom.comp_apply]
   congr 1
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **(T-W7.1b-faith, reconstruction)** Two pointed isomorphisms of projective models with the
 same induced `Γ`-level map on the `Z`-chart have equal underlying morphism. Reduces to agreement
 on the `Z`-chart cover via `projModel_hom_ext_of_affine`; the `Z`-chart restriction of a pointed
@@ -261,6 +262,7 @@ private lemma isoSpec_hom_comp_isoSpec_inv_top (S : Scheme.{u}) [IsAffine S]
   rw [← IsAffineOpen.fromSpec_top, ← IsAffineOpen.isoSpec_inv_ι,
     Iso.hom_inv_id_assoc]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The projective model of an elliptic Weierstrass curve is locally Weierstrass. The
 whole affine base is one chart; the only bookkeeping identifies the global sections of
 `Spec A` with `A` and compares the resulting base change of the projective model. -/
@@ -316,6 +318,7 @@ theorem locallyWeierstrass_projModel {A : Type u} [CommRing A] (W : WeierstrassC
       ← (isPullback_projModelBaseChange W).isoPullback_hom_fst_assoc,
       IsIso.hom_inv_id_assoc, Iso.hom_inv_id, Category.comp_id]
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The residue-field map `R → κ(p)` of `Spec R` — the structure-sheaf composite
 `toStalk ≫ residue` — sends every element of the prime `p` to zero. -/
 private lemma toStalk_residue_hom_apply_eq_zero (p : ↥(Spec (CommRingCat.of R))) {a : R}

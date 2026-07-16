@@ -336,8 +336,8 @@ private lemma gl_eq_of_intMat_eq (g h : GL (Fin 2) ℚ)
     (congr_arg (fun M : Matrix _ _ ℤ ↦ M.map (Int.cast : ℤ → ℚ)) hPQ) i j
   simp only [Matrix.mul_apply, Matrix.map_apply, Fin.sum_univ_two, Int.cast_add,
     Int.cast_mul] at hcast
-  simp only [SpecialLinearGroup.map, MonoidHom.coe_mk,
-    OneHom.coe_mk, RingHom.mapMatrix_apply, Int.coe_castRingHom, Matrix.map_apply]
+  simp only [Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply,
+    Int.coe_castRingHom, Matrix.map_apply]
   rw [hB] at *; simp only [Matrix.map_apply] at hcast ⊢
   linarith
 
@@ -577,8 +577,8 @@ private lemma mapGL_conj_val (g : GL (Fin 2) ℚ) (A : Matrix (Fin 2) (Fin 2) �
       ((P : Matrix (Fin 2) (Fin 2) ℤ) * A * (Q : Matrix _ _ ℤ)).map
         (Int.cast : ℤ → ℚ) := by
   rw [Units.val_mul, Units.val_mul, mapGL_coe_matrix, mapGL_coe_matrix, hA]
-  simp only [SpecialLinearGroup.map, MonoidHom.coe_mk, OneHom.coe_mk, RingHom.mapMatrix_apply,
-    algebraMap_int_eq, Int.coe_castRingHom, SpecialLinearGroup.coe_mk]
+  simp only [Matrix.SpecialLinearGroup.map_apply_coe, RingHom.mapMatrix_apply,
+    algebraMap_int_eq, Int.coe_castRingHom]
   ext i j
   simp only [Matrix.mul_apply, Fin.sum_univ_two, Matrix.map_apply, Int.cast_add, Int.cast_mul]
 

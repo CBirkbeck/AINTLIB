@@ -79,6 +79,7 @@ theorem specSMul_apply (g : G) (p : Spec (CommRingCat.of B)) :
     specSMul g p = PrimeSpectrum.comap (MulSemiringAction.toRingHom G B g) p :=
   rfl
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The scheme-theoretic action and the pointwise action on prime ideals: `specSMul g`
 sends a prime `p` to `g⁻¹ • p`. -/
 theorem specSMul_apply_asIdeal (g : G) (p : Spec (CommRingCat.of B)) :
@@ -129,6 +130,7 @@ theorem invariantsπ_surjective [Finite G] :
       (Algebra.IsInvariant.isIntegral (FixedPoints.subalgebra R B G) B G)
   exact hint.comap_surjective Subtype.val_injective
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The fibres of the invariants morphism are exactly the `G`-orbits: two primes of `B`
 lie over the same prime of `Bᴳ` iff they differ by the action of some `g : G`. -/
 theorem invariantsπ_apply_eq_iff [Finite G] (x y : Spec (CommRingCat.of B)) :

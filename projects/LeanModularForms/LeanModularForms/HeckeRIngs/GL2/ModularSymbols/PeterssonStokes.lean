@@ -2169,12 +2169,20 @@ theorem symmetrised_petersson_fundDomain_eq
     isFundamentalDomain_Gamma1_PSL.setIntegral_eq hD
         (petersson_imageGamma1_PSL_invariant g f)]
 
+/-- The underlying `SL(2, ℤ)` element `[[1, 0], [N, 1]]` of `maninSidePairing`. (Named so the
+subtype element elaborates at the folded type `SL(2, ℤ)`.) -/
+def maninSidePairingSL (N : ℕ) : SL(2, ℤ) :=
+  ⟨!![1, 0; (N : ℤ), 1], by simp [Matrix.det_fin_two_of]⟩
+
+@[simp] lemma maninSidePairingSL_apply (N : ℕ) (i j : Fin 2) :
+    maninSidePairingSL N i j = !![1, 0; (N : ℤ), 1] i j := rfl
+
 /-- A concrete nontrivial side-pairing transformation in `Γ₁(N)`: the lower-triangular unipotent
 `g₀ = [[1, 0], [N, 1]]` (`det = 1`, lower-left `≡ 0 mod N`).  This is the parabolic generator that
 identifies opposite cusp-edges of the standard `Γ₁(N)` fundamental domain; it *moves* the cusp `∞`
 (to `1/N`), so the resulting Manin edge is genuinely nondegenerate. -/
 def maninSidePairing (N : ℕ) [NeZero N] : Gamma1 N :=
-  ⟨⟨!![1, 0; (N : ℤ), 1], by simp [Matrix.det_fin_two_of]⟩, by simp [Gamma1_mem]⟩
+  ⟨maninSidePairingSL N, by simp [Gamma1_mem]⟩
 
 /-- The standard Manin base edge: the oriented cusp-geodesic from `0 = [(0 : ℚ) : 1]` to `∞ = [1 : 0]`
 (the imaginary axis), as an `OrientedCuspEdge`.  Its `Γ₁(N)`-translates tile the fundamental-domain

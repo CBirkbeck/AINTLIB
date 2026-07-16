@@ -77,6 +77,7 @@ def IsInvertible (M : X.Modules) : Prop :=
   ∃ (ι : Type u) (U : ι → X.Opens), iSup U = ⊤ ∧
     ∀ i, Nonempty ((Modules.pullback (U i).ι).obj M ≅ unitObj ↑(U i))
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- Pullback of the structure sheaf along any morphism of schemes is the structure
 sheaf (mathlib's `pullbackObjUnitToUnit` isomorphism, available because the
 opens-preimage site functor is final — `Opens.map_final`; repackaged across the

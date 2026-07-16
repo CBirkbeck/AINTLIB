@@ -710,6 +710,7 @@ theorem mem_Q_pow_of_natCast_ell_pow_mul_mem_Q_pow_add_mul_pred
       simp [hP, eq_comm]
   exact hJ_le (Ideal.mem_span_singleton_self x)
 
+set_option backward.isDefEq.respectTransparency false in
 /-- A fraction with numerator already divisible by its away-from-`Q`
 denominator evaluates to the expected quotient class. -/
 theorem quotientFractionEvalPrimeCompl_den_mul_eq_mk
@@ -841,6 +842,7 @@ theorem exists_primeCompl_natCast_ell_pow_denom_of_mem_Q_pow
   rw [show ((ℓ : 𝓞 R') ^ m) = e from rfl, hxy]
   exact Ideal.mul_mem_left (F.Q ^ (m * (ℓ - 1) + s)) (d : 𝓞 R') hx
 
+set_option backward.isDefEq.respectTransparency false in
 /-- Exact `Q`-adic order of `(ℓ)^m`: after cancelling the local denominator
 `ℓ^m`, a represented local fraction has the predicted `Q`-adic order in the
 finite quotient. -/

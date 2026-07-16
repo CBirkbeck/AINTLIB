@@ -99,6 +99,7 @@ theorem evaluatesTo_algebraMap_evalAt (P : (W_smooth W).SmoothPoint)
   exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
     (C := W_smooth W) _ P).mpr hmem
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The values at `P` of the coordinate functions pulled back through `cd` are the
 coordinates of `toPointMap cd P` (the `hvalx`/`hvaly` step of `stored_eq_toPointMap`). -/
 private theorem coordHom_evalAt_eq_toPointMap_coords

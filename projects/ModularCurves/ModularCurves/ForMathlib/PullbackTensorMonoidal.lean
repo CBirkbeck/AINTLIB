@@ -288,6 +288,7 @@ instance (f : Y ⟶ X) [IsOpenImmersion f] (U : (Y.Opens)ᵒᵖ) :
     IsIso ((restrictRingHom f).app U) :=
   inferInstanceAs (IsIso ((forget₂ CommRingCat RingCat).map ((f.appIso U.unop).inv)))
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- The `Y`-side sheafification inverts the restricted `X`-side sheafification unit of
 `M.val ⊗ N.val`: the unit is locally bijective, and restriction along the open immersion `f`
 preserves local injectivity/surjectivity (`isLocally…_whiskerLeft_opensFunctor`). -/
@@ -319,6 +320,7 @@ theorem sheafificationW_pushforward_unit_tensor (f : Y ⟶ X) [IsOpenImmersion f
         ((PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).unit.app
           (M.val ⊗ N.val)))⟩
 
+set_option backward.isDefEq.respectTransparency.types false in
 /-- **[PIC-P1b-MONO], leaf ι-MAIN.** Pullback along an *open immersion* commutes with the
 sheafified tensor: `f^*(M ⊗ N) ≅ f^*M ⊗ f^*N`. Route: identify `f^*` with sectionwise
 restriction (`restrictFunctorIsoPullback`), un-sheafify (`sheafifyValIso`), collapse the

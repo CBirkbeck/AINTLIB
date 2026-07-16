@@ -308,8 +308,8 @@ private lemma heckeSlashExt_zsmul (k : ℤ) (n : ℤ) (T : HeckeAlgebra 2) (f : 
   simp only [heckeSlashExt]
   rw [show ((n • T : HeckeAlgebra 2).sum fun D c ↦ c • heckeSlash k D f) =
       T.sum (fun D c ↦ (n * c) • heckeSlash k D f) from
-    Finsupp.sum_smul_index fun _ ↦ zero_smul .., Finsupp.smul_sum]
-  exact Finsupp.sum_congr fun D _ ↦ mul_smul ..
+    Finsupp.sum_smul_index fun _ ↦ zero_smul ..]
+  exact (Finsupp.sum_congr fun D _ ↦ mul_smul ..).trans Finsupp.smul_sum.symm
 
 private lemma heckeSum_mul_T_single (k : ℤ) (D₁ D₂ : HeckeCoset (GL_pair 2)) (a b : ℤ) :
     heckeSum k (T_single (GL_pair 2) ℤ D₁ a * T_single (GL_pair 2) ℤ D₂ b) =

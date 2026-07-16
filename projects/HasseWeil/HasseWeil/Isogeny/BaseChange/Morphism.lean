@@ -327,6 +327,7 @@ theorem functionFieldMap_comp_algebraMap :
     ((⟨W.toAffine⟩ : SmoothPlaneCurve K).baseChange L).FunctionField a
 
 omit [DecidableEq K] [DecidableEq L] [WeierstrassCurve.IsElliptic W.toAffine] in
+set_option backward.isDefEq.respectTransparency false in
 /-- **The base-change curve identity**: pushing `W_KE` along `functionFieldMap`
 gives the base change of `W.baseChange L` to its own function field. -/
 theorem baseChange_map_functionFieldMap :

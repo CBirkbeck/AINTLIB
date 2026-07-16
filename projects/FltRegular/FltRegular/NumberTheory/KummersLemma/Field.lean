@@ -81,6 +81,7 @@ lemma natDegree_poly : natDegree (poly hp hζ u hcong) = p := by
   rwa [natDegree_C_mul, natDegree_poly_aux hζ] at this
   exact pow_ne_zero _ (hζ.toInteger_isPrimitiveRoot.sub_one_ne_zero hpri.out.one_lt)
 
+set_option backward.isDefEq.respectTransparency false in
 lemma map_poly : (poly hp hζ u hcong).map (algebraMap (𝓞 K) K) =
     (X - C (1 / (ζ - 1))) ^ p + C (u / (ζ - 1) ^ p : K) := by
   ext i
@@ -182,6 +183,7 @@ theorem splits_poly {L : Type*} [Field L] [Algebra K L] (α : L)
     (monic_poly hp hζ u hcong).natDegree_map, natDegree_poly hp hζ,
     Finset.range_val, Multiset.card_map, Multiset.card_range]
 
+set_option backward.isDefEq.respectTransparency false in
 theorem map_poly_eq_prod {L : Type*} [Field L] [Algebra K L] (α : L)
     (e : α ^ p = algebraMap K L u) :
     (poly hp hζ u hcong).map (algebraMap (𝓞 K) (𝓞 L)) =
@@ -231,6 +233,7 @@ lemma minpoly_polyRoot' {L : Type*} [Field L] [Algebra K L] (α : L)
   · exact minpoly_polyRoot'' hp hζ u hcong hu α e i
   · exact IsIntegral.tower_top (polyRoot hp hζ u hcong α e i).prop
 
+set_option backward.isDefEq.respectTransparency false in
 lemma separable_poly_aux {L : Type*} [Field L] [Algebra K L] (α : L)
     (e : α ^ p = algebraMap K L u) : Separable ((poly hp hζ u hcong).map
     (algebraMap (𝓞 K) (𝓞 L))) := by

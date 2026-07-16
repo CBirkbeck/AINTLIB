@@ -218,6 +218,7 @@ def IsGalDescentTo_OK (a : ℕ) : Prop :=
   ∃ γ : 𝓞 K, algebraMap (𝓞 K) (𝓞 R') γ = S.gaussSumInt a ^ p
 
 omit [IsScalarTower ℤ (𝓞 K) (𝓞 R')] in
+set_option backward.isDefEq.respectTransparency false in
 /-- Field-level descent of `S.gaussSumInt a ^ p` gives integral descent to
 `𝓞 K`. -/
 theorem isGalDescentTo_OK_of_field_descent (a : ℕ) (h : ∃ y : K, algebraMap K R' y =
