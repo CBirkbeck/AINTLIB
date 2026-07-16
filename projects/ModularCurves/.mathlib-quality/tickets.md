@@ -22078,3 +22078,27 @@ Bootstrap's five + :3497 + T-D8 clear).
   KM's T-D8 de-boxing lands next window — your β2 arc auto-cleans on it.
 - **KM → exhaust-4 → distinct → mp-locus/glue → F3.mp** + deliver the promised T-D8 de-boxing (GH's
   chain waits on exactly it). W0 continues ratified.
+
+### v10.292-GH — ★★ [GHA3 ENDGAME STAGED]: :3497 is ONE lemma from death; the master-iff seam is pinned (STREAM-GH)
+Commit 68087b54d (pushed), ALL FOUR AXIOM-CLEAN (no T-D8, no boxes):
+- **[DEDUP-CC] bridges DONE** (dispatched item 1): `torsionZero_eq` + `comboMap_eq` +
+  `fullLevelLocusSet_eq_fullLevelSet` — my β3-1 locus = G0's carrier-of-record, per-component
+  hom_ext.
+- **`factor_levelSpace_iff_isFullLevel`** — the E-side classification: a V-point of
+  E[N]×_S E[N] factors through `levelSpaceΓ` ⟺ its tautological pair (as `Point.pullAlong`s of
+  G0's `torsionPairFst/Snd`) is Drinfeld full-level. `levelSpaceΓ_spec` + the v-reconstruction.
+- **`exists_levelSpaceΓ_iso_fullLevelLocus`** — levelSpaceΓ ≅ G0's `fullLevelLocus` compatibly
+  with the inclusions, and **`levelSpaceΓ_structure_etale_of_master`** — the :3497-shaped
+  étaleness through G0's `fullLevelLocusπ_etale` — both gated on ONE hypothesis:
+**THE MASTER-IFF SEAM (the last [GHA3] lemma; exact shape, pinned in both theorem signatures):**
+`∀ {V} (v : V ⟶ E.torsionPair N), (E.baseChange (v ≫ torsionPairπ)).IsFullLevel N
+(asSection (pullAlong v torsionPairFst)) (asSection (pullAlong v torsionPairSnd)) ↔
+∀ t : V, v.base t ∈ E.fullLevelSet N` — content: T-D8-naive-gen + B2
+(pair_generates_iff_combos_ne_zero, criterion of record) + the pointwise landing dictionary
+(B1: geometric combo-value in range-torsionZero ⟺ pulled combo point = 0; route pinned in my
+v10.289 sentinel) + the topological→geometric bridge + the fibre count N² (BB-DEG clean).
+**[DEDUP-CC] NOTE:** this is the SAME content as G0's four-step-(3) for Bootstrap:112 — whoever
+lands it first, the other consumes; my signatures take it verbatim as `hmaster`. On its landing:
+:3497 = `levelSpaceΓ_structure_etale_of_master` + a `show` (levelSpaceΓπ IS the spelled
+composite) ⟹ [GHA3] CLOSES ⟹ Γ_H rel-rep's cone = T-D8 (KM's W0, landing this window) + the
+standing keystone boxes only. (STREAM-GH)
