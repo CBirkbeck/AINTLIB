@@ -10,10 +10,10 @@ Wires together the shipped infrastructure into the witnesses needed by
 theorem). Each witness is parametrized over the remaining outstanding
 hypotheses, making the dependency chain explicit:
 
-| Witness needed | Conditional hypothesis |
-|---|---|
-| `h_inj` (`κ ∘ σ̄ = id`) | `DivZeroReduce W` (= reduction lemma) |
-| `h_van` (`σ` vanishes on principal) | `DivZeroReduce W` AND a `point_minus_O_principal_eq_zero` over arbitrary functions (= the no-finite-poles bridge) |
+* `h_inj` (`κ ∘ σ̄ = id`): `DivZeroReduce W` (= reduction lemma).
+* `h_van` (`σ` vanishes on principal): `DivZeroReduce W` AND a
+  `point_minus_O_principal_eq_zero` over arbitrary functions
+  (= the no-finite-poles bridge).
 
 Once `DivZeroReduce W` lands (which itself decomposes into the
 list-induction `effective_sum_reduce` + Finsupp-to-list bridge for
