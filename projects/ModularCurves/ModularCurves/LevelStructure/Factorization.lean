@@ -660,6 +660,29 @@ noncomputable def RelEffCartierDiv.IsSubgroup.prodMap
     ((RelEffCartierDiv.IsSubgroup.toSmulKernel_π E hD hdeg h₁).trans
       (RelEffCartierDiv.IsSubgroup.toSmulKernel_π E hD hdeg h₂).symm)
 
+/-- **[F3-combMap-def]** The chosen ℤ-weighted combination map
+`Ker[c₁] ×_S Ker[c₂] ⟶ G` (data form of `exists_combMap`). -/
+noncomputable def RelEffCartierDiv.IsSubgroup.combMap (c₁ c₂ a b : ℤ) :
+    pullback (D.smulKernelπ E c₁) (D.smulKernelπ E c₂) ⟶ D.ideal.subscheme :=
+  (RelEffCartierDiv.IsSubgroup.exists_combMap E hD c₁ c₂ a b).choose
+
+theorem RelEffCartierDiv.IsSubgroup.combMap_ι (c₁ c₂ a b : ℤ) :
+    RelEffCartierDiv.IsSubgroup.combMap E hD c₁ c₂ a b ≫ D.ideal.subschemeι
+      = ((a • (⟨pullback.fst (D.smulKernelπ E c₁) (D.smulKernelπ E c₂)
+            ≫ D.smulKernelι E c₁ ≫ D.ideal.subschemeι, by
+              rw [Category.assoc, Category.assoc,
+                RelEffCartierDiv.smulKernelι_subschemeι_π]⟩ :
+          E.Point (pullback.fst (D.smulKernelπ E c₁) (D.smulKernelπ E c₂)
+            ≫ D.smulKernelπ E c₁))
+        + b • (⟨pullback.snd (D.smulKernelπ E c₁) (D.smulKernelπ E c₂)
+            ≫ D.smulKernelι E c₂ ≫ D.ideal.subschemeι, by
+              rw [Category.assoc, Category.assoc,
+                RelEffCartierDiv.smulKernelι_subschemeι_π, ← pullback.condition]⟩ :
+          E.Point (pullback.fst (D.smulKernelπ E c₁) (D.smulKernelπ E c₂)
+            ≫ D.smulKernelπ E c₁))) :
+        E.Point _).1 :=
+  (RelEffCartierDiv.IsSubgroup.exists_combMap E hD c₁ c₂ a b).choose_spec
+
 end ProductDecomposition
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
