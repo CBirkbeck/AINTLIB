@@ -342,6 +342,37 @@ theorem pieceMorOfTriple_agree (t : Fin 3 → A)
   rw [hk, hl]
   exact chartι_comp_specMap_chartAwayHom_eq W k l hkl _ _ _ hTk hTl hTeq
 
+/-- Away-pair factorization of a piece morphism: precomposing `pieceMorOfTriple W r hr k` with
+`Spec.map` of an `R`-algebra map `pair : Away (r k) → B` that transports the triple coordinates
+(`hpair`) factors it through `chartι W k` via `chartAwayHomOfTriple` over `B`. Instantiated at
+`awayPairRight`/`awayPairLeft` to compare the two overlap charts. -/
+lemma pieceMor_awayPair_factor (r : Fin 3 → A)
+    (hr : (W.map (algebraMap R A)).toProjective.Equation r) (k : Fin 3)
+    {B : Type u} [CommRing B] [Algebra R B] [Algebra A B] [IsScalarTower R A B]
+    (pair : Localization.Away (r k) →ₐ[R] B)
+    (hpk : algebraMap A B (r k) * pair (IsLocalization.Away.invSelf (r k)) = 1)
+    (hTeqr : (W.map (algebraMap R B)).toProjective.Equation (fun m => algebraMap A B (r m)))
+    (hpair : ∀ m, pair (algebraMap A (Localization.Away (r k)) (r m)) = algebraMap A B (r m)) :
+    Spec.map (CommRingCat.ofHom pair.toRingHom) ≫ pieceMorOfTriple W r hr k =
+      Spec.map (CommRingCat.ofHom (chartAwayHomOfTriple W k (fun m => algebraMap A B (r m))
+        (pair (IsLocalization.Away.invSelf (r k))) hpk hTeqr).toRingHom) ≫ chartι W k := by
+  have halg : pair.comp
+        (chartAwayHomOfTriple W k (fun m => algebraMap A (Localization.Away (r k)) (r m))
+          (IsLocalization.Away.invSelf (r k)) (IsLocalization.Away.mul_invSelf _)
+          (equation_mapTriple W r hr)) =
+      chartAwayHomOfTriple W k (fun m => algebraMap A B (r m))
+        (pair (IsLocalization.Away.invSelf (r k))) hpk hTeqr := by
+    rw [← chartAwayHomOfTriple_naturality W pair k
+      (fun m => algebraMap A (Localization.Away (r k)) (r m))
+      (IsLocalization.Away.invSelf (r k)) (IsLocalization.Away.mul_invSelf _)
+      (equation_mapTriple W r hr)
+      (by rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one])
+      (by simpa only [hpair] using hTeqr)]
+    exact chartAwayHomOfTriple_congr W k _ _ _ (funext hpair) _ _ hpk hTeqr
+  rw [pieceMorOfTriple, ← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+  congr 2
+  exact congrArg CommRingCat.ofHom (congrArg AlgHom.toRingHom halg)
+
 /-- **(c3, general per-piece cross-triple agreement)** Two on-curve triples `t`, `s` in an
 `R`-algebra `A` with vanishing `2×2` minors (`s m * t k = s k * t m`) — their `k`-th piece
 morphisms agree over the common regular locus `D(t k · s k)`. SAME index `k` (`isUnit_of_minor`),
@@ -367,52 +398,10 @@ theorem pieceMorOfTriple_cross_agree (t s : Fin 3 → A)
       awayPairLeft R (t k) (s k) (IsLocalization.Away.invSelf (s k)) = 1 := by
     rw [← awayPairLeft_algebraMap R (t k) (s k) (s k), ← map_mul,
       IsLocalization.Away.mul_invSelf, map_one]
-  have halgt : (awayPairRight R (t k) (s k)).comp
-      (chartAwayHomOfTriple W k (fun m => algebraMap A (Localization.Away (t k)) (t m))
-        (IsLocalization.Away.invSelf (t k)) (IsLocalization.Away.mul_invSelf _)
-        (equation_mapTriple W t ht)) =
-      chartAwayHomOfTriple W k (fun m => algebraMap A (Localization.Away (t k * s k)) (t m))
-        (awayPairRight R (t k) (s k) (IsLocalization.Away.invSelf (t k))) hTk hTeqt := by
-    rw [← chartAwayHomOfTriple_naturality W (awayPairRight R (t k) (s k)) k
-      (fun m => algebraMap A (Localization.Away (t k)) (t m))
-      (IsLocalization.Away.invSelf (t k)) (IsLocalization.Away.mul_invSelf _)
-      (equation_mapTriple W t ht)
-      (by rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one])
-      (by simpa only [awayPairRight_algebraMap] using hTeqt)]
-    exact chartAwayHomOfTriple_congr W k _ _ _
-      (funext fun m => awayPairRight_algebraMap R (t k) (s k) (t m)) _ _ hTk hTeqt
-  have halgs : (awayPairLeft R (t k) (s k)).comp
-      (chartAwayHomOfTriple W k (fun m => algebraMap A (Localization.Away (s k)) (s m))
-        (IsLocalization.Away.invSelf (s k)) (IsLocalization.Away.mul_invSelf _)
-        (equation_mapTriple W s hs)) =
-      chartAwayHomOfTriple W k (fun m => algebraMap A (Localization.Away (t k * s k)) (s m))
-        (awayPairLeft R (t k) (s k) (IsLocalization.Away.invSelf (s k))) hSk hTeqs := by
-    rw [← chartAwayHomOfTriple_naturality W (awayPairLeft R (t k) (s k)) k
-      (fun m => algebraMap A (Localization.Away (s k)) (s m))
-      (IsLocalization.Away.invSelf (s k)) (IsLocalization.Away.mul_invSelf _)
-      (equation_mapTriple W s hs)
-      (by rw [← map_mul, IsLocalization.Away.mul_invSelf, map_one])
-      (by simpa only [awayPairLeft_algebraMap] using hTeqs)]
-    exact chartAwayHomOfTriple_congr W k _ _ _
-      (funext fun m => awayPairLeft_algebraMap R (t k) (s k) (s m)) _ _ hSk hTeqs
-  have hkt : Spec.map (CommRingCat.ofHom (awayPairRight R (t k) (s k)).toRingHom) ≫
-      pieceMorOfTriple W t ht k =
-      Spec.map (CommRingCat.ofHom
-        (chartAwayHomOfTriple W k (fun m => algebraMap A (Localization.Away (t k * s k)) (t m))
-          (awayPairRight R (t k) (s k) (IsLocalization.Away.invSelf (t k)))
-          hTk hTeqt).toRingHom) ≫ chartι W k := by
-    rw [pieceMorOfTriple, ← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
-    congr 2
-    exact congrArg CommRingCat.ofHom (congrArg AlgHom.toRingHom halgt)
-  have hks : Spec.map (CommRingCat.ofHom (awayPairLeft R (t k) (s k)).toRingHom) ≫
-      pieceMorOfTriple W s hs k =
-      Spec.map (CommRingCat.ofHom
-        (chartAwayHomOfTriple W k (fun m => algebraMap A (Localization.Away (t k * s k)) (s m))
-          (awayPairLeft R (t k) (s k) (IsLocalization.Away.invSelf (s k)))
-          hSk hTeqs).toRingHom) ≫ chartι W k := by
-    rw [pieceMorOfTriple, ← Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
-    congr 2
-    exact congrArg CommRingCat.ofHom (congrArg AlgHom.toRingHom halgs)
+  have hkt := pieceMor_awayPair_factor W t ht k (awayPairRight R (t k) (s k)) hTk hTeqt
+    (fun m => awayPairRight_algebraMap R (t k) (s k) (t m))
+  have hks := pieceMor_awayPair_factor W s hs k (awayPairLeft R (t k) (s k)) hSk hTeqs
+    (fun m => awayPairLeft_algebraMap R (t k) (s k) (s m))
   rw [hkt, hks]
   exact congrArg (fun f : chartAway W k →ₐ[R] _ => Spec.map
     (CommRingCat.ofHom f.toRingHom) ≫ chartι W k)
