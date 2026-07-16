@@ -801,7 +801,8 @@ lemma T_ad_one_p_pow_eval_leading (p : ℕ) (hp : p.Prime) (a : ℕ) :
     -- Goal: ∑ + (g D_leading • m ...) D_target = 1
     -- Strategy: prove the leading term equals 1, then linarith with h_sum_zero
     have h_leading_eq : (g D_leading • HeckeRing.m (GL_pair 2)
-          (HeckeCoset.rep (T_diag (![1, p] : Fin 2 → ℕ))) (HeckeCoset.rep D_leading)) D_target = 1 := by
+          (HeckeCoset.rep (T_diag (![1, p] : Fin 2 → ℕ))) (HeckeCoset.rep D_leading))
+          D_target = 1 := by
       rw [Finsupp.smul_apply, ih, ← HeckeRing.T_single_one_mul_T_single_one]
       show (1 : ℤ) • (T_elem (![1, p] : Fin 2 → ℕ) * T_elem (![1, p ^ n] : Fin 2 → ℕ)) D_target = 1
       rw [one_smul,
@@ -815,7 +816,8 @@ lemma T_ad_one_p_pow_eval_leading (p : ℕ) (hp : p.Prime) (a : ℕ) :
           (g D_leading • HeckeRing.m (GL_pair 2)
             (HeckeCoset.rep (T_diag (![1, p] : Fin 2 → ℕ))) (HeckeCoset.rep D_leading)) D_target
         = 0 + (g D_leading • HeckeRing.m (GL_pair 2)
-              (HeckeCoset.rep (T_diag (![1, p] : Fin 2 → ℕ))) (HeckeCoset.rep D_leading)) D_target :=
+              (HeckeCoset.rep (T_diag (![1, p] : Fin 2 → ℕ))) (HeckeCoset.rep D_leading))
+              D_target :=
           by rw [h_sum_zero]
       _ = (g D_leading • HeckeRing.m (GL_pair 2)
             (HeckeCoset.rep (T_diag (![1, p] : Fin 2 → ℕ))) (HeckeCoset.rep D_leading)) D_target :=
