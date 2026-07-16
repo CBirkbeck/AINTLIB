@@ -713,16 +713,13 @@ theorem isPthPowerModPrime_lehmerVandiverPrime_sq_iff
     apply Units.ext
     change (Ideal.Quotient.mk _ (x ^ k)) ^ 2 = 1
     exact hsq
-  have h_ord_p : orderOf yu ∣ p := orderOf_dvd_of_pow_eq_one hyu_p
-  have h_ord_2 : orderOf yu ∣ 2 := orderOf_dvd_of_pow_eq_one hyu_2
-  have h_ord_gcd : orderOf yu ∣ Nat.gcd p 2 := Nat.dvd_gcd h_ord_p h_ord_2
-  have h_gcd : Nat.gcd p 2 = 1 := by
+  have h_coprime : Nat.Coprime p 2 := by
     rcases Nat.coprime_or_dvd_of_prime hp.out 2 with h | h
     · exact h
-    · exfalso
-      exact hp_odd ((Nat.prime_dvd_prime_iff_eq hp.out Nat.prime_two).mp h)
-  rw [h_gcd] at h_ord_gcd
-  have hyu_eq : yu = 1 := orderOf_eq_one_iff.mp (Nat.dvd_one.mp h_ord_gcd)
+    · exact absurd ((Nat.prime_dvd_prime_iff_eq hp.out Nat.prime_two).mp h) hp_odd
+  -- `yu ^ p = 1` and `yu ^ 2 = 1` with `p, 2` coprime force `yu = 1`
+  -- (mathlib's `pow_eq_one_iff_of_coprime`).
+  have hyu_eq : yu = 1 := (pow_eq_one_iff_of_coprime h_coprime).mp ⟨hyu_p, hyu_2⟩
   exact congr_arg Units.val hyu_eq
 
 /-- **`x² = y² ↔ x = ±y` in `ZMod ℓ` for `ℓ` prime.** Standard field
