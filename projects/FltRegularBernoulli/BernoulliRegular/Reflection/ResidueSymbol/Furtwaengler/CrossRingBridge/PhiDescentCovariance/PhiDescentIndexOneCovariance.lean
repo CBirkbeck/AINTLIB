@@ -1,6 +1,20 @@
 module
 
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CrossRingBridge.PhiDescentCovariance.ConductorFlexiblePhiDescentCovariance
+public import
+  BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.CrossRingBridge.PhiDescentCovariance.ConductorFlexiblePhiDescentCovariance
+
+/-!
+# Index-one covariance and cross-ring residue bridges
+
+This file specializes the covariance of `phiPrimeGenDescent` to the indices `1` and `p - 1`.
+It constructs the covariance from ring homomorphisms, root actions, and the cyclotomic pair
+automorphism, then packages the reciprocal case as exact Stickelberger conjugate exponents.
+
+The second half supplies the residue-ring interfaces used downstream: reduction of descended
+generators and Gauss sums, the K2-1 identities, the embedded canonical primitive root,
+the cross-ring K2-2c identity, and compatibility of the setup's chosen root with the canonical
+cyclotomic root.
+-/
 
 @[expose] public section
 
@@ -36,40 +50,12 @@ theorem phiPrimeGenDescent_one_conjugate_covariance_of_ringHom_index
       (cyclotomicRingOfIntegersEquiv (p := p) K a
         (phiPrimeGenDescent S
           (le_refl 1)
-          (by
-            have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
-            omega)
+          (Nat.le_sub_one_of_lt ((Fact.out : Nat.Prime p).one_lt))
           h_ne_zero)) =
-      S.gaussSumInt b ^ p := by
-  set γ := phiPrimeGenDescent S
-    (le_refl 1)
-    (by
-      have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
-      omega)
-    h_ne_zero with hγ_def
-  apply NumberField.RingOfIntegers.coe_injective (K := R')
-  rw [← hτ_K γ, hγ_def, algebraMap_phiPrimeGenDescent S
-    (le_refl 1)
-    (by
-      have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
-      omega)
-    h_ne_zero]
-  have h_gauss :
-      τ (algebraMap (𝓞 R') R' (S.gaussSumInt 1)) =
-        algebraMap (𝓞 R') R' (S.gaussSumInt b) :=
-    S.toConcreteStickelbergerSetup
-      |>.ringHom_gaussSumInt_one_eq_of_residueChar_psi τ
-        (b := b) hτχ hτψ
-  calc
-    τ (algebraMap (𝓞 R') R' (S.gaussSumInt 1 ^ p))
-        = τ (algebraMap (𝓞 R') R' (S.gaussSumInt 1) ^ p) := by
-          rw [map_pow]
-    _ = τ (algebraMap (𝓞 R') R' (S.gaussSumInt 1)) ^ p := by
-          rw [map_pow]
-    _ = algebraMap (𝓞 R') R' (S.gaussSumInt b) ^ p := by
-          rw [h_gauss]
-    _ = algebraMap (𝓞 R') R' (S.gaussSumInt b ^ p) := by
-          rw [map_pow]
+      S.gaussSumInt b ^ p :=
+  phiPrimeGenDescent_conjugate_covariance_of_ringHom_index
+    S (le_refl 1) (Nat.le_sub_one_of_lt ((Fact.out : Nat.Prime p).one_lt))
+      h_ne_zero a b τ hτ_K (by simpa using hτχ) hτψ
 
 /-- A field-level automorphism extending the cyclotomic action on `K` and
 sending the residue character/additive character to the right conjugate
@@ -98,9 +84,7 @@ theorem phiPrimeGenDescent_one_conjugate_covariance_of_ringHom
       (cyclotomicRingOfIntegersEquiv (p := p) K a
         (phiPrimeGenDescent S
           (le_refl 1)
-          (by
-            have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
-            omega)
+          (Nat.le_sub_one_of_lt ((Fact.out : Nat.Prime p).one_lt))
           h_ne_zero)) =
       S.gaussSumInt (p - (a : ZMod p).val) ^ p :=
   phiPrimeGenDescent_one_conjugate_covariance_of_ringHom_index
@@ -132,9 +116,7 @@ theorem phiPrimeGenDescent_one_conjugate_covariance_of_ringHom_family
         (cyclotomicRingOfIntegersEquiv (p := p) K a
           (phiPrimeGenDescent S
             (le_refl 1)
-            (by
-              have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
-              omega)
+            (Nat.le_sub_one_of_lt ((Fact.out : Nat.Prime p).one_lt))
             h_ne_zero)) =
         S.gaussSumInt (p - (a : ZMod p).val) ^ p := fun a ↦
   phiPrimeGenDescent_one_conjugate_covariance_of_ringHom
@@ -165,9 +147,7 @@ theorem phiPrimeGenDescent_one_conjugate_covariance_of_ringHom_root_actions
       (cyclotomicRingOfIntegersEquiv (p := p) K a
         (phiPrimeGenDescent S
           (le_refl 1)
-          (by
-            have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
-            omega)
+          (Nat.le_sub_one_of_lt ((Fact.out : Nat.Prime p).one_lt))
           h_ne_zero)) =
       S.gaussSumInt (p - (a : ZMod p).val) ^ p :=
   phiPrimeGenDescent_one_conjugate_covariance_of_ringHom
@@ -202,9 +182,7 @@ theorem phiPrimeGenDescent_one_conjugate_covariance_of_ringHom_root_actions_fami
         (cyclotomicRingOfIntegersEquiv (p := p) K a
           (phiPrimeGenDescent S
             (le_refl 1)
-            (by
-              have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
-              omega)
+            (Nat.le_sub_one_of_lt ((Fact.out : Nat.Prime p).one_lt))
             h_ne_zero)) =
         S.gaussSumInt (p - (a : ZMod p).val) ^ p := fun a ↦
   phiPrimeGenDescent_one_conjugate_covariance_of_ringHom_root_actions
@@ -228,9 +206,7 @@ theorem phiPrimeGenDescent_one_conjugate_covariance_of_pairSigma
       (cyclotomicRingOfIntegersEquiv (p := p) K a
         (phiPrimeGenDescent S
           (le_refl 1)
-          (by
-            have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
-            omega)
+          (Nat.le_sub_one_of_lt ((Fact.out : Nat.Prime p).one_lt))
           h_ne_zero)) =
       S.gaussSumInt (a : ZMod p).val ^ p := by
   let τ := cyclotomicPairSigmaOfPAndOneFromPair (p := p) S.hℓ_ne_p R' a
@@ -272,18 +248,14 @@ theorem phiPrimeGenDescent_sub_one_conjugate_covariance_of_pairSigma
     algebraMap (𝓞 K) (𝓞 R')
       (cyclotomicRingOfIntegersEquiv (p := p) K a
         (phiPrimeGenDescent S
-          (by
-            have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
-            omega)
+          (Nat.le_sub_one_of_lt ((Fact.out : Nat.Prime p).one_lt))
           (le_refl (p - 1))
           h_ne_zero)) =
       S.gaussSumInt (p - (a : ZMod p).val) ^ p := by
   let τ := cyclotomicPairSigmaOfPAndOneFromPair (p := p) S.hℓ_ne_p R' a
   apply phiPrimeGenDescent_conjugate_covariance_of_ringHom_index
     S
-    (by
-      have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
-      omega)
+    (Nat.le_sub_one_of_lt ((Fact.out : Nat.Prime p).one_lt))
     (le_refl (p - 1))
     h_ne_zero a (p - (a : ZMod p).val) τ
   · intro x
@@ -332,10 +304,9 @@ theorem phiPrimeGenDescent_sub_one_conjugate_covariance_of_pairSigma
       |>.ringHom_compAddChar_eq_self_of_zeta_ell_fixed τ hτζℓ
 
 /-- REF-18 exact conjugate exponents for the reciprocal descended element
-`phiPrimeGenDescent S (p - 1)` in the split, unramified-base case. This is the
-no-sorry endpoint compatible with the stored ordinary-character convention:
-the honest pair-field automorphism sends the `(p - 1)`-indexed Gauss sum to
-the reciprocal index `p - a.val`, whose Dwork order normalizes to `a.val`. -/
+`phiPrimeGenDescent S (p - 1)` in the split, unramified-base case. The honest pair-field
+automorphism sends the `(p - 1)`-indexed Gauss sum to the reciprocal index `p - a.val`, whose
+Dwork order normalizes to `a.val`. -/
 theorem StickelbergerExactConjugateExponents_phiPrimeGenDescent_sub_one_of_pairSigma_split
     {ℓ p : ℕ} [Fact (Nat.Prime ℓ)] [Fact (Nat.Prime p)]
     {k : Type*} [Field k] [Fintype k] [Algebra (ZMod ℓ) k]
@@ -352,16 +323,12 @@ theorem StickelbergerExactConjugateExponents_phiPrimeGenDescent_sub_one_of_pairS
     (h_ne_zero : S.gaussSumInt (p - 1) ^ p ≠ 0) :
     S.StickelbergerExactConjugateExponents
       (phiPrimeGenDescent S
-        (by
-          have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
-          omega)
+        (Nat.le_sub_one_of_lt ((Fact.out : Nat.Prime p).one_lt))
         (le_refl (p - 1))
         h_ne_zero) :=
   StickelbergerExactConjugateExponents_phiPrimeGenDescent_of_sub_val_conjugates
     S
-    (by
-      have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
-      omega)
+    (Nat.le_sub_one_of_lt ((Fact.out : Nat.Prime p).one_lt))
     (le_refl (p - 1))
     h_ne_zero
     (fun a ↦ phiPrimeGenDescent_sub_one_conjugate_covariance_of_pairSigma S h_ne_zero a)
@@ -371,12 +338,6 @@ theorem StickelbergerExactConjugateExponents_phiPrimeGenDescent_sub_one_of_pairS
     (fun a ↦
       dworkExponent_sub_val_div_descentRamificationIdx_eq_val_of_f_eq_one_of_unramified_base
         S hf he a)
-
-/-! ### Embedding bridge: `phiPrimeGenDescent mod P'` ↔ `gaussSumInt^p mod 𝔭`
-
-The embedding `𝓞 K / P' → 𝓞 R' / 𝔭` sends `phiPrimeGenDescent S a mod P'`
-to `gaussSumInt a^p mod 𝔭`, since `algebraMap phiPrimeGenDescent S a =
-gaussSumInt a^p` (the constructive descent property). -/
 
 /-- **Embedding sends `phiPrimeGenDescent` to `gaussSumInt^p` mod `𝔭`**. -/
 theorem residueFieldEmbedding_phiPrimeGenDescent
@@ -394,14 +355,7 @@ theorem residueFieldEmbedding_phiPrimeGenDescent
       ((Ideal.Quotient.mk P' (phiPrimeGenDescent S ha₁ ha₂ h_ne_zero)) :
         𝓞 K ⧸ P') =
       ((Ideal.Quotient.mk 𝔭 (S.gaussSumInt a ^ p)) : 𝓞 R' ⧸ 𝔭) := by
-  rw [residueFieldEmbedding_mk h_over]
-  rw [algebraMap_phiPrimeGenDescent]
-
-/-! ### gaussSumInt reduction mod 𝔭
-
-The gaussSumInt (in `𝓞 R'`) reduces mod `𝔭` to a Gauss sum in `𝓞 R' / 𝔭`
-of the post-composed characters. This is the standard `gaussSum_ringHomComp`
-applied to the quotient map. -/
+  rw [residueFieldEmbedding_mk h_over, algebraMap_phiPrimeGenDescent]
 
 /-- **gaussSumInt reduced mod 𝔭 is a Gauss sum** of post-composed
 characters in `𝓞 R' / 𝔭`. -/
@@ -422,12 +376,6 @@ theorem ideal_quotient_mk_gaussSumInt
           S.psiInt) := by
   simp only [ConcreteStickelbergerSetup.gaussSumInt]
   exact gaussSum_ringHomComp _ _ (Ideal.Quotient.mk 𝔭)
-
-/-! ### K2-1 application in 𝓞 R' / 𝔭
-
-Combining the cross-ring atoms above: under appropriate hypotheses on
-`𝔭` (lying over `P'`), the K2-1 atom applies to `gaussSumInt a` in
-`𝓞 R' / 𝔭`. -/
 
 /-- **K2-1 in cross-ring `𝓞 R' / 𝔭`**: for `gaussSumInt a` reduced mod
 the prime `𝔭 ⊂ 𝓞 R'` (with `𝓞 R' / 𝔭` of `CharP ℓ_P'` and the right
@@ -495,12 +443,6 @@ theorem ideal_quotient_mk_gaussSumInt_pow_apply_smul_eq_self
   exact gaussSum_pow_eq_inv_apply_smul_of_charP hp _ h_χp_eq_one _
     f hN_mod_p unit_N h_unit_N
 
-/-! ### Cross-ring K2-2c bridge: residueMulChar values
-
-For the canonical residue character `residueMulChar zeta_q ... zeta_R`
-post-composed with the quotient `𝓞 R' → 𝓞 R' / 𝔭`, the value at `α mod P`
-relates to the canonical residue exponent at `P`. -/
-
 /-- **residueMulChar after ringHomComp through quotient**: applying the
 character to a quotient class. -/
 theorem residueMulChar_ringHomComp_apply_quotient
@@ -516,12 +458,6 @@ theorem residueMulChar_ringHomComp_apply_quotient
       σ ((residueMulChar zeta_q hzeta_q hdiv zeta_R hzeta_R) (a : k)) :=
   rfl
 
-/-! ### Embedding of `canonicalResidueZetaP P'` into `𝓞 R' / 𝔭`
-
-The canonical primitive `p`-th root in `(𝓞 K / P')ˣ` embeds into
-`(𝓞 R' / 𝔭)ˣ` via the residue field embedding, giving a primitive
-`p`-th root in the larger residue ring. -/
-
 /-- **Embedded canonical zeta in `𝓞 R' / 𝔭`**: the image of
 `canonicalResidueZetaP P'` under the residue field embedding (as an
 element of `(𝓞 R' / 𝔭)ˣ`). -/
@@ -533,9 +469,6 @@ def canonicalResidueZetaP_image
     {P' : Ideal (𝓞 K)} {𝔭 : Ideal (𝓞 R')}
     (h_over : 𝔭.comap (algebraMap (𝓞 K) (𝓞 R')) = P') : (𝓞 R' ⧸ 𝔭)ˣ :=
   have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  -- canonicalResidueZetaP P' ∈ (𝓞 K / P')ˣ. Its image under the embedding
-  -- 𝓞 K / P' →+* 𝓞 R' / 𝔭 is a unit (since the embedding is a ring hom
-  -- and respects units). We extract the unit form.
   have hu : IsUnit ((residueFieldEmbedding h_over)
       (canonicalResidueZetaP (p := p) (K := K) P' : 𝓞 K ⧸ P')) :=
     (canonicalResidueZetaP (p := p) (K := K) P').isUnit.map (residueFieldEmbedding h_over)
@@ -572,9 +505,6 @@ theorem canonicalResidueZetaP_image_val_isPrimitiveRoot
         h_over) : 𝓞 R' ⧸ 𝔭) p := by
   have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   rw [canonicalResidueZetaP_image_val h_over]
-  -- Goal: IsPrimitiveRoot (residueFieldEmbedding ((canonicalResidueZetaP P') : 𝓞 K ⧸ P')) p
-  -- The ring element is the image of an existing primitive root via the
-  -- embedding; primitivity descends through injective hom.
   have h_ring_prim :
       IsPrimitiveRoot (((canonicalResidueZetaP (p := p) (K := K) P') :
           𝓞 K ⧸ P')) p := by
@@ -585,12 +515,6 @@ theorem canonicalResidueZetaP_image_val_isPrimitiveRoot
       (Units.coeHom_injective)
   exact h_ring_prim.map_of_injective
     (residueFieldEmbedding_injective h_over)
-
-/-! ### K2-2c bridge in cross-ring (residueMulChar.ringHomComp value)
-
-The post-composed residue character at a quotient class equals the
-post-composed `zeta_R` raised to the canonical residue exponent.
-Direct from K2-2c (in `PhiPrimeSymbol.lean`) plus pow-preserved-by-ring-hom. -/
 
 /-- **K2-2c cross-ring**: residueMulChar after ringHomComp at α mod P
 equals the image of zeta_R raised to the canonical residue exponent. -/
@@ -613,18 +537,11 @@ theorem residueMulChar_ringHomComp_apply_quotient_canonical_eq_pow_pthSymbol
       σ ((zeta_R : R')) ^
         (BernoulliRegular.Furtwaengler.pthSymbolAtPrime_canonical
           (p := p) (K := K) α P).val := by
-  let : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
-  rw [MulChar.ringHomComp_apply]
-  rw [residueMulChar_apply_quotient_canonical_eq_pow_pthSymbol
-    P hbot hdiv hp_in zeta_R hzeta_R hα]
-  rw [map_pow]
-
-/-! ### Zeta-compatibility: connecting setup `zeta_p_int` to `canonicalResidueZetaP_image`
-
-The `FullTeichDworkSetup`'s chosen primitive `p`-th root `zeta_p_int : 𝓞 R'`
-needs to be compatible with the canonical primitive root `cyclotomicZetaInteger K`
-modulo `𝔭` for the K2-2 chain to close cleanly. We expose this compatibility
-as a named predicate. -/
+  letI : Field (𝓞 K ⧸ P) := Ideal.Quotient.field P
+  rw [MulChar.ringHomComp_apply,
+    residueMulChar_apply_quotient_canonical_eq_pow_pthSymbol
+      P hbot hdiv hp_in zeta_R hzeta_R hα,
+    map_pow]
 
 /-- **Setup-zeta compatibility predicate**: in the residue ring `𝓞 R' / 𝔭`,
 the setup's `zeta_p_int` reduces to the same element as the canonical
@@ -638,10 +555,9 @@ def SetupZetaCompatible
     (S : FullTeichDworkSetup ℓ p k K R')
     {𝔭 : Ideal (𝓞 R')} : Prop :=
   haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-  Ideal.Quotient.mk 𝔭
-      (S.zeta_p_int) =
+  Ideal.Quotient.mk 𝔭 S.zeta_p_int =
     Ideal.Quotient.mk 𝔭
-      ((algebraMap (𝓞 K) (𝓞 R'))
+      (algebraMap (𝓞 K) (𝓞 R')
         (BernoulliRegular.cyclotomicZetaInteger (p := p) K))
 
 /-- **Setup-zeta compatibility from equality of integral lifts**: if the
@@ -661,8 +577,7 @@ theorem setupZetaCompatible_of_zeta_p_int_eq
         (algebraMap (𝓞 K) (𝓞 R'))
           (BernoulliRegular.cyclotomicZetaInteger (p := p) K)) :
     SetupZetaCompatible S (𝔭 := 𝔭) := by
-  simp only [SetupZetaCompatible]
-  rw [h_zeta_p_int_eq]
+  exact congrArg (Ideal.Quotient.mk 𝔭) h_zeta_p_int_eq
 
 /-- **Identification under setup-zeta compatibility**: under
 `SetupZetaCompatible`, the setup's `zeta_p_int` reduced mod `𝔭` equals
@@ -678,19 +593,14 @@ theorem ideal_quotient_mk_zeta_p_int_eq_canonicalResidueZetaP_image
     (h_over : 𝔭.comap (algebraMap (𝓞 K) (𝓞 R')) = P')
     (h_compat : SetupZetaCompatible S (𝔭 := 𝔭)) :
     haveI : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
-    Ideal.Quotient.mk 𝔭
-      (S.zeta_p_int) =
+    Ideal.Quotient.mk 𝔭 S.zeta_p_int =
       ((canonicalResidueZetaP_image (p := p) (K := K) (R' := R')
         h_over) : 𝓞 R' ⧸ 𝔭) := by
   have : NeZero p := ⟨(Fact.out : p.Prime).ne_zero⟩
   rw [h_compat, canonicalResidueZetaP_image_val h_over,
       canonicalResidueZetaP_val P', residueFieldEmbedding_mk h_over]
 
-/-! ### Embedding respects pow
-
-A simple consequence of `residueFieldEmbedding` being a ring hom: it
-preserves `pow` operations. -/
-
+/-- The residue-field embedding preserves natural powers. -/
 theorem residueFieldEmbedding_pow
     {K : Type*} [Field K] [NumberField K]
     {R' : Type*} [Field R'] [NumberField R']
@@ -701,12 +611,6 @@ theorem residueFieldEmbedding_pow
     residueFieldEmbedding h_over (x ^ n) =
       (residueFieldEmbedding h_over x) ^ n :=
   map_pow _ x n
-
-/-! ### K2-1 cross-ring on embedded `phiPrimeGenDescent`
-
-Combining the embedding bridge `e (Quotient.mk P' phiPrimeGenDescent) =
-Quotient.mk 𝔭 (gaussSumInt^p)` with K2-1 in the cross-ring, we get the
-K2-1 cancellation form on the embedded descent generator. -/
 
 end Furtwaengler
 
