@@ -742,9 +742,6 @@ theorem digitMatrix_pow_p_modEq_diagonal (f : PowerSeries ℤ_[p]) (i j : Fin p)
   · intro b _ hbj; rw [if_neg hbj, phiSeries_zero, mul_zero]
   · intro hb; exact absurd (Finset.mem_univ _) hb
 
-set_option synthInstance.maxHeartbeats 400000 in
--- the `RingHom.map_det`/`Matrix.map` chain over `PowerSeries (ZMod p)` matrices drives
--- nested instance synthesis past the default budget
 /-- T908 (ii), RJW TeX 2731: `𝒩 f ≡ f mod p`. Determinant route over `𝔽_p`: reducing
 `𝒩 f = det (digitMatrix f)` mod `p`, the matrix `M̄` squares to the scalar
 `(p-th power) M̄^p = digitMatrix(f^p) ≡ diagonal f̄ mod p`
