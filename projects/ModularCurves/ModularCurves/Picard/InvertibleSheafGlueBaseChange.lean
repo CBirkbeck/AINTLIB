@@ -52,6 +52,35 @@ noncomputable def AffineIntersectionUnitCocycle.mapToColimit
           ⟨M.stage, M.le_stage
             (Scheme.GlueData.affineIntersectionTripleIndex i j k)⟩).toMonoidHom) hc
 
+/-- Moving a finite-stage cocycle to a later stage does not change the colimit image of
+any transition unit. -/
+theorem AffineIntersectionUnitCocycle.mapToColimit_mapToStage_transition
+    {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+    {Sstage : ι → Type u} [∀ i, CommRing (Sstage i)] [∀ i, Algebra R (Sstage i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (Sstage i →ₐ[R] Sstage j)}
+    {A : Type u} [CommRing A] [Algebra R A] {uA : ∀ i, Sstage i →ₐ[R] A}
+    {J : Type u} {G : Functor (Finset J) (CommAlgCat.{u} A)}
+    {H : Algebra.IsFilteredAlgColimit R Sstage t A uA}
+    (M : Algebra.SpreadData.FunctorModel G H)
+    (cM : AffineIntersectionUnitCocycle M.toFunctor)
+    {q : ι} (hMq : M.stage ≤ q) (i j : J) :
+    (AffineIntersectionUnitCocycle.mapToColimit (M.mapToStage hMq)
+        (AffineIntersectionUnitCocycle.mapToStage M cM hMq)).transition i j =
+      (AffineIntersectionUnitCocycle.mapToColimit M cM).transition i j := by
+  apply Units.ext
+  let X := Scheme.GlueData.affineIntersectionPairIndex i j
+  let g :
+      ((M.object X).spreadStage (t := t) (M.le_stage X))ˣ :=
+    cM.transition i j
+  change (M.object X).stageToColimit H
+      ⟨q, (M.le_stage X).trans hMq⟩
+        ((M.object X).stageTransition H
+          (P := ⟨M.stage, M.le_stage X⟩)
+          (Q := ⟨q, (M.le_stage X).trans hMq⟩) hMq (g : _)) =
+    (M.object X).stageToColimit H ⟨M.stage, M.le_stage X⟩ (g : _)
+  exact (M.object X).stageToColimit_stageTransition H
+    (M.le_stage X) hMq (g : _)
+
 /-- The local affine base-change map sends a finite-stage overlap transition section
 to the overlap transition section of the colimit cocycle. -/
 theorem AffineIntersectionUnitCocycle.mapToColimit_overlapTransitionSection

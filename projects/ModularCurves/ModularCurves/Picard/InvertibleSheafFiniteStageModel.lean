@@ -104,6 +104,93 @@ structure AffineIntersectionUnitCocycle
         (Scheme.GlueData.affineIntersectionPairToTripleRight i j k)).hom.toMonoidHom
       (transition i k)
 
+private theorem map_units_mul_eq_of_mul_eq
+    {B C : Type u} [Monoid B] [Monoid C] (f : B →* C)
+    {x y z : Bˣ} (h : x * y = z) :
+    Units.map f x * Units.map f y = Units.map f z := by
+  rw [← map_mul, h]
+
+/-- Transport a finite-stage affine-intersection unit cocycle to a later stage. -/
+noncomputable def AffineIntersectionUnitCocycle.mapToStage
+    {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+    {𝒮 : ι → Type u} [∀ i, CommRing (𝒮 i)] [∀ i, Algebra R (𝒮 i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (𝒮 i →ₐ[R] 𝒮 j)}
+    {A : Type u} [CommRing A] [Algebra R A]
+    {uA : ∀ i, 𝒮 i →ₐ[R] A} {J : Type u}
+    {F : Finset J ⥤ CommAlgCat.{u} A}
+    {H : Algebra.IsFilteredAlgColimit R 𝒮 t A uA}
+    (M : Algebra.SpreadData.FunctorModel F H)
+    (c : AffineIntersectionUnitCocycle M.toFunctor)
+    {j : ι} (hMj : M.stage ≤ j) :
+    AffineIntersectionUnitCocycle (M.mapToStage hMj).toFunctor := by
+  let g (i k : J) :
+      ((M.object
+        (Scheme.GlueData.affineIntersectionPairIndex i k)).spreadStage (t := t)
+          (M.le_stage (Scheme.GlueData.affineIntersectionPairIndex i k)))ˣ :=
+    c.transition i k
+  refine
+    { transition := fun i k =>
+        Units.map ((M.object
+          (Scheme.GlueData.affineIntersectionPairIndex i k)).stageTransition H
+            (P := ⟨M.stage, M.le_stage
+              (Scheme.GlueData.affineIntersectionPairIndex i k)⟩)
+            (Q := ⟨j, (M.le_stage
+              (Scheme.GlueData.affineIntersectionPairIndex i k)).trans hMj⟩)
+            hMj).toMonoidHom (g i k)
+      cocycle := ?_ }
+  intro i k l
+  have hc := c.cocycle i k l
+  change Units.map (M.map
+          (Scheme.GlueData.affineIntersectionPairToTripleLeft i k l)).toMonoidHom
+        (g i k) *
+      Units.map (M.map
+          (Scheme.GlueData.affineIntersectionPairToTripleMiddle i k l)).toMonoidHom
+        (g k l) =
+      Units.map (M.map
+          (Scheme.GlueData.affineIntersectionPairToTripleRight i k l)).toMonoidHom
+        (g i l) at hc
+  change Units.map ((M.mapToStage hMj).map
+          (Scheme.GlueData.affineIntersectionPairToTripleLeft i k l)).toMonoidHom
+        (Units.map ((M.object
+          (Scheme.GlueData.affineIntersectionPairIndex i k)).stageTransition H
+            (P := ⟨M.stage, M.le_stage
+              (Scheme.GlueData.affineIntersectionPairIndex i k)⟩)
+            (Q := ⟨j, (M.le_stage
+              (Scheme.GlueData.affineIntersectionPairIndex i k)).trans hMj⟩)
+            hMj).toMonoidHom (g i k)) *
+      Units.map ((M.mapToStage hMj).map
+          (Scheme.GlueData.affineIntersectionPairToTripleMiddle i k l)).toMonoidHom
+        (Units.map ((M.object
+          (Scheme.GlueData.affineIntersectionPairIndex k l)).stageTransition H
+            (P := ⟨M.stage, M.le_stage
+              (Scheme.GlueData.affineIntersectionPairIndex k l)⟩)
+            (Q := ⟨j, (M.le_stage
+              (Scheme.GlueData.affineIntersectionPairIndex k l)).trans hMj⟩)
+            hMj).toMonoidHom (g k l)) =
+      Units.map ((M.mapToStage hMj).map
+          (Scheme.GlueData.affineIntersectionPairToTripleRight i k l)).toMonoidHom
+        (Units.map ((M.object
+          (Scheme.GlueData.affineIntersectionPairIndex i l)).stageTransition H
+            (P := ⟨M.stage, M.le_stage
+              (Scheme.GlueData.affineIntersectionPairIndex i l)⟩)
+            (Q := ⟨j, (M.le_stage
+              (Scheme.GlueData.affineIntersectionPairIndex i l)).trans hMj⟩)
+            hMj).toMonoidHom (g i l))
+  rw [M.mapToStage_map_unitTransition hMj
+      (Scheme.GlueData.affineIntersectionPairToTripleLeft i k l),
+    M.mapToStage_map_unitTransition hMj
+      (Scheme.GlueData.affineIntersectionPairToTripleMiddle i k l),
+    M.mapToStage_map_unitTransition hMj
+      (Scheme.GlueData.affineIntersectionPairToTripleRight i k l)]
+  exact map_units_mul_eq_of_mul_eq
+    ((M.object
+      (Scheme.GlueData.affineIntersectionTripleIndex i k l)).stageTransition H
+        (P := ⟨M.stage, M.le_stage
+          (Scheme.GlueData.affineIntersectionTripleIndex i k l)⟩)
+        (Q := ⟨j, (M.le_stage
+          (Scheme.GlueData.affineIntersectionTripleIndex i k l)).trans hMj⟩)
+        hMj).toMonoidHom hc
+
 private theorem functorMapUnits_injective_of_retraction
     {A J : Type u} [CommRing A] (F : Finset J ⥤ CommAlgCat.{u} A)
     {s q : Finset J} (f : s ⟶ q) (g : q ⟶ s) :

@@ -827,3 +827,12 @@ canonically isomorphic to the concrete `gluedModule` of `cM.mapToColimit M`, by 
 of `gluedModuleIsoOfCompatibleChartTrivialization` to the completed compatibility theorem. The
 focused build is green, the axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`,
 and no hypothesis, abstraction, or proof-resource option was added.
+
+Completed dependency claim (2026-07-16): constructed
+`AffineIntersectionUnitCocycle.mapToStage` and proved
+`AffineIntersectionUnitCocycle.mapToColimit_mapToStage_transition`. A finite-stage cocycle now
+transports along `FunctorModel.mapToStage`, and every transported transition has the same image in
+the filtered colimit. The cocycle proof is split through explicitly typed transitions and a private
+unit-map lemma, avoiding implicit-instance drift. Both focused builds are green, both axiom audits
+are exactly `propext`, `Classical.choice`, and `Quot.sound`, and no hypothesis or proof-resource
+option was added.
