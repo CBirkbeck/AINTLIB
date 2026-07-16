@@ -1168,6 +1168,13 @@ noncomputable def affineIntersectionChartToSpec
   Spec.map (CommRingCat.ofHom
     (algebraMap S (F.obj (affineIntersectionSingletonIndex i))))
 
+private lemma affineIntersectionChartToSpec_eq_specMap
+    (F : Finset J ⥤ CommAlgCat.{u} S) (i : J) :
+    affineIntersectionChartToSpec F i =
+      Spec.map (CommRingCat.ofHom
+        (algebraMap S (F.obj (affineIntersectionSingletonIndex i)))) :=
+  rfl
+
 private theorem affineIntersectionChartToSpec_compatible
     (F : Finset J ⥤ CommAlgCat.{u} S) (i j : J) :
     affineIntersectionOverlapι F i j ≫ affineIntersectionChartToSpec F i =
@@ -1223,6 +1230,21 @@ private noncomputable def affineIntersectionOverlapPullbackIso
   ((ofAffineIntersectionFunctor F hopen hpush).vPullbackConeIsLimit i j).conePointUniqueUpToIso
     (limit.isLimit _)
 
+private noncomputable def affineIntersectionChartSpecProductIso
+    (F : Finset J ⥤ CommAlgCat.{u} S) (i j : J) :
+    pullback (affineIntersectionChartToSpec F i)
+        (affineIntersectionChartToSpec F j) ≅
+      Spec (CommRingCat.of
+        (TensorProduct S
+          (F.obj (affineIntersectionSingletonIndex i) : Type u)
+          (F.obj (affineIntersectionSingletonIndex j) : Type u))) :=
+  pullback.congrHom
+      (affineIntersectionChartToSpec_eq_specMap F i)
+      (affineIntersectionChartToSpec_eq_specMap F j) ≪≫
+    pullbackSpecIso S
+      (F.obj (affineIntersectionSingletonIndex i) : Type u)
+      (F.obj (affineIntersectionSingletonIndex j) : Type u)
+
 private noncomputable def affineIntersectionChartProductIso
     (F : Finset J ⥤ CommAlgCat.{u} S)
     (hopen : IsOpenAffineIntersectionFunctor F)
@@ -1239,9 +1261,7 @@ private noncomputable def affineIntersectionChartProductIso
   pullback.congrHom
       (ofAffineIntersectionFunctor_ι_affineIntersectionToSpec F hopen hpush i)
       (ofAffineIntersectionFunctor_ι_affineIntersectionToSpec F hopen hpush j) ≪≫
-    pullbackSpecIso S
-      (F.obj (affineIntersectionSingletonIndex i) : Type u)
-      (F.obj (affineIntersectionSingletonIndex j) : Type u)
+    affineIntersectionChartSpecProductIso F i j
 
 private lemma affineIntersectionOverlapPullbackIso_hom_fst
     (F : Finset J ⥤ CommAlgCat.{u} S)
@@ -1290,6 +1310,123 @@ private lemma affineIntersectionPairMap_includeRight
   ext x
   exact Algebra.TensorProduct.productMap_right_apply _ _ x
 
+private lemma affineIntersectionChartPullbackCongrHom_hom_fst
+    (F : Finset J ⥤ CommAlgCat.{u} S)
+    (hopen : IsOpenAffineIntersectionFunctor F)
+    (hpush : IsPushoutAffineIntersectionFunctor F) (i j : J) :
+    (pullback.congrHom
+        (ofAffineIntersectionFunctor_ι_affineIntersectionToSpec F hopen hpush i)
+        (ofAffineIntersectionFunctor_ι_affineIntersectionToSpec F hopen hpush j)).hom ≫
+        pullback.fst (affineIntersectionChartToSpec F i)
+          (affineIntersectionChartToSpec F j) =
+      pullback.fst
+        (((ofAffineIntersectionFunctor F hopen hpush).ι i) ≫
+          affineIntersectionToSpec F hopen hpush)
+        (((ofAffineIntersectionFunctor F hopen hpush).ι j) ≫
+          affineIntersectionToSpec F hopen hpush) := by
+  rw [pullback.congrHom_hom]
+  exact (pullback.lift_fst _ _ _).trans (Category.comp_id _)
+
+private lemma affineIntersectionChartPullbackCongrHom_hom_snd
+    (F : Finset J ⥤ CommAlgCat.{u} S)
+    (hopen : IsOpenAffineIntersectionFunctor F)
+    (hpush : IsPushoutAffineIntersectionFunctor F) (i j : J) :
+    (pullback.congrHom
+        (ofAffineIntersectionFunctor_ι_affineIntersectionToSpec F hopen hpush i)
+        (ofAffineIntersectionFunctor_ι_affineIntersectionToSpec F hopen hpush j)).hom ≫
+        pullback.snd (affineIntersectionChartToSpec F i)
+          (affineIntersectionChartToSpec F j) =
+      pullback.snd
+        (((ofAffineIntersectionFunctor F hopen hpush).ι i) ≫
+          affineIntersectionToSpec F hopen hpush)
+        (((ofAffineIntersectionFunctor F hopen hpush).ι j) ≫
+          affineIntersectionToSpec F hopen hpush) := by
+  rw [pullback.congrHom_hom]
+  exact (pullback.lift_snd _ _ _).trans (Category.comp_id _)
+
+private lemma affineIntersectionChartSpecProductIso_hom_includeLeft
+    (F : Finset J ⥤ CommAlgCat.{u} S) (i j : J) :
+    (affineIntersectionChartSpecProductIso F i j).hom ≫
+        Spec.map (CommRingCat.ofHom
+          (Algebra.TensorProduct.includeLeftRingHom
+            (R := S)
+            (A := (F.obj (affineIntersectionSingletonIndex i) : Type u))
+            (B := (F.obj (affineIntersectionSingletonIndex j) : Type u)))) =
+      pullback.fst (affineIntersectionChartToSpec F i)
+        (affineIntersectionChartToSpec F j) := by
+  rw [affineIntersectionChartSpecProductIso, Iso.trans_hom, Category.assoc,
+    pullbackSpecIso_hom_fst, pullback.congrHom_hom]
+  exact (pullback.lift_fst _ _ _).trans (Category.comp_id _)
+
+private lemma affineIntersectionChartSpecProductIso_hom_includeRight
+    (F : Finset J ⥤ CommAlgCat.{u} S) (i j : J) :
+    (affineIntersectionChartSpecProductIso F i j).hom ≫
+        Spec.map (CommRingCat.ofHom
+          (Algebra.TensorProduct.includeRight
+            (R := S)
+            (A := (F.obj (affineIntersectionSingletonIndex i) : Type u))
+            (B := (F.obj (affineIntersectionSingletonIndex j) : Type u))).toRingHom) =
+      pullback.snd (affineIntersectionChartToSpec F i)
+        (affineIntersectionChartToSpec F j) := by
+  have hspec :
+      (pullbackSpecIso S
+          (F.obj (affineIntersectionSingletonIndex i) : Type u)
+          (F.obj (affineIntersectionSingletonIndex j) : Type u)).hom ≫
+          Spec.map (CommRingCat.ofHom
+            (Algebra.TensorProduct.includeRight
+              (R := S)
+              (A := (F.obj (affineIntersectionSingletonIndex i) : Type u))
+              (B := (F.obj (affineIntersectionSingletonIndex j) : Type u))).toRingHom) =
+        pullback.snd
+          (Spec.map (CommRingCat.ofHom
+            (algebraMap S (F.obj (affineIntersectionSingletonIndex i)))))
+          (Spec.map (CommRingCat.ofHom
+            (algebraMap S (F.obj (affineIntersectionSingletonIndex j))))) := by
+    exact pullbackSpecIso_hom_snd S
+      (F.obj (affineIntersectionSingletonIndex i) : Type u)
+      (F.obj (affineIntersectionSingletonIndex j) : Type u)
+  rw [affineIntersectionChartSpecProductIso, Iso.trans_hom, Category.assoc,
+    hspec, pullback.congrHom_hom]
+  exact (pullback.lift_snd _ _ _).trans (Category.comp_id _)
+
+private lemma affineIntersectionChartProductIso_hom_includeLeft
+    (F : Finset J ⥤ CommAlgCat.{u} S)
+    (hopen : IsOpenAffineIntersectionFunctor F)
+    (hpush : IsPushoutAffineIntersectionFunctor F) (i j : J) :
+    (affineIntersectionChartProductIso F hopen hpush i j).hom ≫
+        Spec.map (CommRingCat.ofHom
+          (Algebra.TensorProduct.includeLeftRingHom
+            (R := S)
+            (A := (F.obj (affineIntersectionSingletonIndex i) : Type u))
+            (B := (F.obj (affineIntersectionSingletonIndex j) : Type u)))) =
+      pullback.fst
+        (((ofAffineIntersectionFunctor F hopen hpush).ι i) ≫
+          affineIntersectionToSpec F hopen hpush)
+        (((ofAffineIntersectionFunctor F hopen hpush).ι j) ≫
+          affineIntersectionToSpec F hopen hpush) := by
+  rw [affineIntersectionChartProductIso, Iso.trans_hom, Category.assoc,
+    affineIntersectionChartSpecProductIso_hom_includeLeft]
+  exact affineIntersectionChartPullbackCongrHom_hom_fst F hopen hpush i j
+
+private lemma affineIntersectionChartProductIso_hom_includeRight
+    (F : Finset J ⥤ CommAlgCat.{u} S)
+    (hopen : IsOpenAffineIntersectionFunctor F)
+    (hpush : IsPushoutAffineIntersectionFunctor F) (i j : J) :
+    (affineIntersectionChartProductIso F hopen hpush i j).hom ≫
+        Spec.map (CommRingCat.ofHom
+          (Algebra.TensorProduct.includeRight
+            (R := S)
+            (A := (F.obj (affineIntersectionSingletonIndex i) : Type u))
+            (B := (F.obj (affineIntersectionSingletonIndex j) : Type u))).toRingHom) =
+      pullback.snd
+        (((ofAffineIntersectionFunctor F hopen hpush).ι i) ≫
+          affineIntersectionToSpec F hopen hpush)
+        (((ofAffineIntersectionFunctor F hopen hpush).ι j) ≫
+          affineIntersectionToSpec F hopen hpush) := by
+  rw [affineIntersectionChartProductIso, Iso.trans_hom, Category.assoc,
+    affineIntersectionChartSpecProductIso_hom_includeRight]
+  exact affineIntersectionChartPullbackCongrHom_hom_snd F hopen hpush i j
+
 private lemma affineIntersectionChartProductIso_inv_fst
     (F : Finset J ⥤ CommAlgCat.{u} S)
     (hopen : IsOpenAffineIntersectionFunctor F)
@@ -1305,12 +1442,9 @@ private lemma affineIntersectionChartProductIso_inv_fst
           (R := S)
           (A := (F.obj (affineIntersectionSingletonIndex i) : Type u))
           (B := (F.obj (affineIntersectionSingletonIndex j) : Type u)))) := by
-  rw [affineIntersectionChartProductIso, Iso.trans_inv, Category.assoc,
-    pullback.congrHom_inv]
-  simp only [pullback.map, pullback.lift_fst, Category.comp_id]
-  exact pullbackSpecIso_inv_fst S
-    (F.obj (affineIntersectionSingletonIndex i) : Type u)
-    (F.obj (affineIntersectionSingletonIndex j) : Type u)
+  apply (cancel_epi (affineIntersectionChartProductIso F hopen hpush i j).hom).mp
+  rw [Iso.hom_inv_id_assoc]
+  exact (affineIntersectionChartProductIso_hom_includeLeft F hopen hpush i j).symm
 
 private lemma affineIntersectionChartProductIso_inv_snd
     (F : Finset J ⥤ CommAlgCat.{u} S)
@@ -1327,12 +1461,9 @@ private lemma affineIntersectionChartProductIso_inv_snd
           (R := S)
           (A := (F.obj (affineIntersectionSingletonIndex i) : Type u))
           (B := (F.obj (affineIntersectionSingletonIndex j) : Type u))).toRingHom) := by
-  rw [affineIntersectionChartProductIso, Iso.trans_inv, Category.assoc,
-    pullback.congrHom_inv]
-  simp only [pullback.map, pullback.lift_snd, Category.comp_id]
-  exact pullbackSpecIso_inv_snd S
-    (F.obj (affineIntersectionSingletonIndex i) : Type u)
-    (F.obj (affineIntersectionSingletonIndex j) : Type u)
+  apply (cancel_epi (affineIntersectionChartProductIso F hopen hpush i j).hom).mp
+  rw [Iso.hom_inv_id_assoc]
+  exact (affineIntersectionChartProductIso_hom_includeRight F hopen hpush i j).symm
 
 private lemma spec_affineIntersectionPairMap_comp_includeLeft
     (F : Finset J ⥤ CommAlgCat.{u} S) (i j : J) :
@@ -1474,6 +1605,8 @@ theorem isSeparated_affineIntersectionToSpec
   letI : HasAffineProperty @IsClosedImmersion
       (AffineTargetMorphismProperty.of @IsClosedImmersion) :=
     HasAffineProperty.of_isZariskiLocalAtTarget @IsClosedImmersion
+  letI : (AffineTargetMorphismProperty.of @IsClosedImmersion).IsLocal :=
+    HasAffineProperty.isLocal_affineProperty @IsClosedImmersion
   apply (HasAffineProperty.diagonal_iff
     (@IsClosedImmersion)
     (Q := AffineTargetMorphismProperty.of @IsClosedImmersion)).mp
@@ -1565,9 +1698,14 @@ theorem locallyOfFinitePresentation_affineIntersectionToSpec
       Algebra.FinitePresentation S
         (F.obj (affineIntersectionSingletonIndex i))) :
     LocallyOfFinitePresentation (affineIntersectionToSpec F hopen hpush) := by
-  apply IsZariskiLocalAtSource.of_openCover (P := @LocallyOfFinitePresentation)
+  letI : IsZariskiLocalAtSource
+      (@LocallyOfFinitePresentation : MorphismProperty Scheme.{u}) :=
+    HasRingHomProperty.instIsZariskiLocalAtSource
+  apply IsZariskiLocalAtSource.of_openCover
+    (P := (@LocallyOfFinitePresentation : MorphismProperty Scheme.{u}))
     (ofAffineIntersectionFunctor F hopen hpush).openCover
   intro i
+  change J at i
   change LocallyOfFinitePresentation
     ((ofAffineIntersectionFunctor F hopen hpush).ι i ≫
       affineIntersectionToSpec F hopen hpush)
