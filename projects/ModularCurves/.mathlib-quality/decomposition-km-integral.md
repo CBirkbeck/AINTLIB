@@ -367,3 +367,31 @@ D2-Ch-6 seam; A-Gen/full-level is the YFULL/GH lane).*
 one deep-but-fully-transcribed core [F3] (two classical boxes: BB-DELIGNE registered ✓,
 De-Ga rank-divides — flagged with a dodge candidate), and bounded [F4]-tail. No leaf without a
 verbatim source quote; no invented route. Skeleton builds green (4 sorries, no new axioms).
+
+## [F3-split] design note (KM worker, 2026-07-16, pre-execution — banked against compaction)
+
+Encodings weighed for `G[M]` (the projector's retract, KM p. 27):
+- **(a) Fibre-product kernel**: `G[M] := pullback (ι ≫ [M]) E.zero` — EXISTS trivially (closed
+  subscheme of `G` via the zero-section closed immersion), but flatness-over-`S` is exactly the
+  content KM gets FROM the projector; dead end alone.
+- **(b) Scheme-image retract**: `Z := V(ker w)` (`w` = the idempotent from [F3-idem]) with
+  `r := w.toImage : G-sub → Z`, `s := Z.imageι`. Splitting needs `s ≫ r = 𝟙 Z`, which reduces by
+  `cancel_mono s` to **`imageι ≫ w = imageι`** — "w fixes its image". SUBTLETY: this is NOT
+  formal from `w ∘ w = w` alone at scheme level (toImage is only dominant, not epi); route:
+  ker-level — `ker (imageι ≫ w) = ?` via `w.ker ≤ ker (w ≫ w-forms)` + the universal property
+  `isPullback_of_isClosedImmersion` / `IsClosedImmersion.isIso_of_ker_eq`, or POINTWISE via the
+  universal point of `Z` (the `Z`-point `s` of `G`… `w`-applied: `s ≫ w` is the `Z`-point
+  `c • (s-as-E-point-in-H)` — and on `Z = image`, `c•` acts as identity because `Z`-points are
+  `c•`-images and `c² ≡ c`: `c•(c•Q) = c•Q` ✓ — the universal-point trick AGAIN, now at `Z`;
+  needs `Z`-points-of-`G` ⊆ H-membership-transport through `s`).
+- **DECISION: (b) with the universal-point-fix**; then `Γ`-side: the retract algebra is an
+  `S`-direct factor (`𝒪(G) ≅ 𝒪(Z) × ker-part` via the idempotent `w^#`), giving flat + f.p.
+  (KM p. 27 verbatim: *"the sheaf of S-algebras defining G[N₁] is an S-direct factor of that
+  defining G, so flat over S. Therefore G[N₁] is finite flat over S of finite presentation."*).
+- **[F3-squeeze] input shapes**: `D₁ ≤ Z`-containment via points (D₁'s tautological sections are
+  `c•`-fixed H-points), degree-multiplicativity of the pair-splitting `G ≅ Z_M ×_S Z_K` (the
+  second projector `c' = 1 - c` mod-arithmetic; product-iso via the H-group law), then
+  `deg Z_M · deg Z_K = MK`, `deg Z_M ≥ M`, `deg Z_K ≥ K` ⟹ equality ⟹ `Z_M = D₁` (degree +
+  containment forces divisor equality — needs the containment-degree-rigidity lemma for finite
+  flat closed subschemes, cf. KM p. 30's "Because both sides have the same degree, it suffices
+  to show G[N₂] ≤ D₂").
