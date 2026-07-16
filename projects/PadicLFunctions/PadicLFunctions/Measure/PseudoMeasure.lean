@@ -609,7 +609,8 @@ lemma mem_span_of_sum_eq_zero {n : ℕ} {gbar : (ZMod (p ^ n))ˣ}
   classical
   have hdecomp : x = ∑ c : (ZMod (p ^ n))ˣ,
       (x.coeff c) • ((MonoidAlgebra.single c 1 - 1 : MonoidAlgebra ℤ_[p] (ZMod (p ^ n))ˣ)) := by
-    calc x = ∑ c : (ZMod (p ^ n))ˣ, MonoidAlgebra.single c (x.coeff c) := (sum_single_coeff p x).symm
+    calc x = ∑ c : (ZMod (p ^ n))ˣ, MonoidAlgebra.single c (x.coeff c) :=
+          (sum_single_coeff p x).symm
       _ = ∑ c : (ZMod (p ^ n))ˣ,
           ((x.coeff c) • (MonoidAlgebra.single c 1 - 1 : MonoidAlgebra ℤ_[p] (ZMod (p ^ n))ˣ)
             + (x.coeff c) • (1 : MonoidAlgebra ℤ_[p] (ZMod (p ^ n))ˣ)) := by
