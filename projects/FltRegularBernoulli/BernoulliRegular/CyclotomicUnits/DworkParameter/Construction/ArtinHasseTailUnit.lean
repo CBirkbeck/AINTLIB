@@ -2,6 +2,33 @@ module
 
 public import BernoulliRegular.CyclotomicUnits.DworkParameter.Construction.ArtinHasseLogVanishing
 
+/-!
+# The Artin--Hasse tail of the Dwork parameter and its principal unit
+
+This file isolates the *tail* of the corrected same-prime Artin--Hasse logarithm — the correction
+terms `x^(p^r - 1) / p^r` for `r ≥ 2` — and shows it is `lambda`-adically small. It bounds the
+forced `lambda`-adic order of each tail term, assembles the finite (mod `lambda^(N+1)`) tails and
+their `1 + tail` units into completed elements, evaluates them at the Dwork parameter, and
+concludes that the completed tail lies in a high power of the Dwork complete `lambda`-ideal, so
+the Artin--Hasse tail unit `1 + tail` is a genuine unit of the completed integer ring.
+
+## Main definitions
+
+* `samePrimeArtinHasseTailTermOrder`: the forced `lambda`-adic order `p^r - 1 - r*(p-1)` of the
+  `r`-th corrected Artin--Hasse tail term.
+* `samePrimeFiniteArtinHasseTail` / `samePrimeFiniteArtinHasseTailUnit`: the finite tail and its
+  `1 + tail` unit modulo `lambda^(N+1)`.
+* `artinHasseTail` / `artinHasseTailUnit`: the completed Artin--Hasse tail of the Dwork parameter
+  and its `1 + tail` unit.
+
+## Main results
+
+* `artinHasseTail_mem_dworkCompleteLambdaIdeal_pow`: the completed tail lies in the
+  `(p - 1) ^ 2`-th power of the Dwork complete `lambda`-ideal.
+* `artinHasseTailUnit_eq_one_add_artinHasseTail`: the tail unit equals `1 + tail`.
+* `artinHasseTailUnit_isUnit`: the Artin--Hasse tail unit is a unit.
+-/
+
 @[expose] public section
 
 noncomputable section
