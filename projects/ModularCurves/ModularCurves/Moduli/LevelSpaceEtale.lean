@@ -561,4 +561,108 @@ theorem exists_levelSpace_baseChange_iso (hinv : NIsInvertible S N) :
 
 end FactorAssembly
 
+section CombinationLocus
+
+open EllipticCurve
+
+variable (E : EllipticCurve S) (N : ℕ) [NeZero N]
+
+/-- The first tautological `N`-torsion point of `E` over the torsion self-product
+`E[N] ×_S E[N]`. -/
+noncomputable def tautFst :
+    E.Point (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) :=
+  ⟨pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N, by
+    rw [Category.assoc, E.torsionι_π N]⟩
+
+/-- The second tautological `N`-torsion point (over the same structure map, via the
+pullback condition of the self-product). -/
+noncomputable def tautSnd :
+    E.Point (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) :=
+  ⟨pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N, by
+    rw [Category.assoc, E.torsionι_π N, ← pullback.condition]⟩
+
+/-- The torsion-kernel condition, spelled at the `torsionι`/`torsionπ` names. -/
+lemma torsion_kernel_condition :
+    E.torsionι N ≫ E.mulByHom N = E.torsionπ N ≫ E.zero := pullback.condition
+
+lemma tautFst_killed : (N : ℤ) • tautFst E N = 0 := by
+  rw [E.smul_eq_zero_iff_comp_mulByHom]
+  show (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N) ≫ E.mulByHom N = _
+  rw [Category.assoc, torsion_kernel_condition, ← Category.assoc]
+
+lemma tautSnd_killed : (N : ℤ) • tautSnd E N = 0 := by
+  rw [E.smul_eq_zero_iff_comp_mulByHom]
+  show (pullback.snd (E.torsionπ N) (E.torsionπ N) ≫ E.torsionι N) ≫ E.mulByHom N = _
+  rw [Category.assoc, torsion_kernel_condition, ← Category.assoc, ← pullback.condition]
+
+/-- The `(a, b)` combination point `a•P + b•Q` of the tautological pair. -/
+noncomputable def combo (a b : ℤ) :
+    E.Point (pullback.fst (E.torsionπ N) (E.torsionπ N) ≫ E.torsionπ N) :=
+  a • tautFst E N + b • tautSnd E N
+
+lemma combo_killed (a b : ℤ) : (N : ℤ) • combo E N a b = 0 := by
+  rw [combo, smul_add, smul_comm (N : ℤ) a, smul_comm (N : ℤ) b,
+    tautFst_killed, tautSnd_killed, smul_zero, smul_zero, add_zero]
+
+/-- The classifying map of the `(a, b)` combination to the torsion scheme. -/
+noncomputable def comboMap (a b : ℤ) :
+    pullback (E.torsionπ N) (E.torsionπ N) ⟶ E.torsion N :=
+  E.pointToTorsion (combo E N a b)
+    ((E.smul_eq_zero_iff_comp_mulByHom _ N _).mp (combo_killed E N a b))
+
+/-- The zero section of the torsion scheme. -/
+noncomputable def torsionZero : S ⟶ E.torsion N :=
+  pullback.lift E.zero (𝟙 S) (by
+    have h0 : ((0 : E.Point (𝟙 S)) : S ⟶ E.E) ≫ E.mulByHom (N : ℤ) = 𝟙 S ≫ E.zero :=
+      (E.smul_eq_zero_iff_comp_mulByHom (𝟙 S) N 0).mp (smul_zero _)
+    rw [E.point_zero_val, Category.id_comp] at h0
+    rw [Category.id_comp]
+    exact h0)
+
+@[simp]
+lemma torsionZero_torsionπ : torsionZero E N ≫ E.torsionπ N = 𝟙 S :=
+  pullback.lift_snd _ _ _
+
+/-- **(β3, the zero locus is clopen)** For `N` invertible the range of the zero section of
+`E[N]` is clopen: the section is a closed immersion (cancellation against the separated
+`torsionπ`) and étale (cancellation of the identity against the étale `torsionπ`), so its
+range is closed and open. -/
+lemma isClopen_range_torsionZero (hinv : NIsInvertible S N) :
+    IsClopen (Set.range (torsionZero E N).base) := by
+  haveI hfin : IsFinite (E.torsionπ N) := E.torsionπ_isFinite N
+  haveI het : Etale (E.torsionπ N) := E.torsionπ_etale N hinv
+  haveI : IsClosedImmersion (torsionZero E N) := by
+    have h1 : IsClosedImmersion (torsionZero E N ≫ E.torsionπ N) := by
+      rw [torsionZero_torsionπ]
+      infer_instance
+    exact IsClosedImmersion.of_comp (f := torsionZero E N) (g := E.torsionπ N)
+  haveI : Etale (torsionZero E N) := by
+    have h1 : Etale (torsionZero E N ≫ E.torsionπ N) := by
+      rw [torsionZero_torsionπ]
+      infer_instance
+    exact Etale.of_comp (torsionZero E N) (E.torsionπ N)
+  constructor
+  · exact (torsionZero E N).isClosedMap.isClosed_range
+  · exact (torsionZero E N).isOpenMap.isOpen_range
+
+/-- **(β3, the good locus)** The set of points of `E[N] ×_S E[N]` where every nonzero
+`(ℤ/N)²`-combination of the tautological pair avoids the zero section. -/
+def fullLevelLocusSet : Set ↥(pullback (E.torsionπ N) (E.torsionπ N)) :=
+  ⋂ (ab : {ab : ZMod N × ZMod N // ab ≠ 0}),
+    (comboMap E N (ab.1.1.val : ℤ) (ab.1.2.val : ℤ)).base ⁻¹'
+      (Set.range (torsionZero E N).base)ᶜ
+
+/-- **(β3, the good locus is clopen)** A finite intersection of preimages of the clopen
+complement of the zero locus. -/
+lemma isClopen_fullLevelLocusSet (hinv : NIsInvertible S N) :
+    IsClopen (fullLevelLocusSet E N) := by
+  haveI : Finite {ab : ZMod N × ZMod N // ab ≠ 0} := by
+    haveI : NeZero N := ‹_›
+    infer_instance
+  refine isClopen_iInter_of_finite fun ab => ?_
+  exact ((isClopen_range_torsionZero E N hinv).compl.preimage
+    (Scheme.Hom.continuous _))
+
+end CombinationLocus
+
 end ModularCurves
