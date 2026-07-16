@@ -30,10 +30,13 @@ variable (p : ℕ) [hp : Fact p.Prime]
 attribute [local instance] Classical.decEq Classical.propDecidable
 
 set_option backward.isDefEq.respectTransparency false in
-/-- The even complex Dirichlet characters modulo `p` have cardinality
-`(p - 1) / 2`. -/
-theorem card_even_characters (hp₂ : p ≠ 2) :
-    (Finset.univ.filter fun χ : DirichletCharacter ℂ p => χ.Even).card = (p - 1) / 2 := by
+/-- There are as many even complex Dirichlet characters modulo `p` as odd ones:
+the two filtered finsets have equal cardinality. This is the orthogonality
+identity `∑_χ χ(-1) = 0` read as `#even - #odd = 0`, valid since `p ≠ 2` makes
+`-1 ≠ 1`. -/
+theorem card_even_eq_card_odd_characters (hp₂ : p ≠ 2) :
+    (Finset.univ.filter fun χ : DirichletCharacter ℂ p => χ.Even).card =
+      (Finset.univ.filter fun χ : DirichletCharacter ℂ p => χ.Odd).card := by
   let E : Finset (DirichletCharacter ℂ p) := Finset.univ.filter fun χ => χ.Even
   let O : Finset (DirichletCharacter ℂ p) := Finset.univ.filter fun χ => χ.Odd
   have hdisj : Disjoint E O := by
@@ -72,9 +75,27 @@ theorem card_even_characters (hp₂ : p ≠ 2) :
             rw [hsum_E, hsum_O]
             simp [sub_eq_add_neg]
   have hbalance : (E.card : ℂ) - O.card = 0 := hsum_split ▸ hsum_zero
-  have hsame : E.card = O.card := by
-    have hcast : (E.card : ℂ) = O.card := sub_eq_zero.mp hbalance
-    exact_mod_cast hcast
+  have hcast : (E.card : ℂ) = O.card := sub_eq_zero.mp hbalance
+  exact_mod_cast hcast
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The even complex Dirichlet characters modulo `p` have cardinality
+`(p - 1) / 2`. -/
+theorem card_even_characters (hp₂ : p ≠ 2) :
+    (Finset.univ.filter fun χ : DirichletCharacter ℂ p => χ.Even).card = (p - 1) / 2 := by
+  let E : Finset (DirichletCharacter ℂ p) := Finset.univ.filter fun χ => χ.Even
+  let O : Finset (DirichletCharacter ℂ p) := Finset.univ.filter fun χ => χ.Odd
+  have hdisj : Disjoint E O := by
+    refine Finset.disjoint_left.mpr ?_
+    intro χ hχE hχO
+    have hχ_even : χ.Even := by simpa [E] using hχE
+    have hχ_odd : χ.Odd := by simpa [O] using hχO
+    exact DirichletCharacter.Odd.not_even χ hχ_odd hχ_even
+  have hunion : E ∪ O = (Finset.univ : Finset (DirichletCharacter ℂ p)) := by
+    ext χ
+    simp only [E, O, Finset.mem_union, Finset.mem_filter, Finset.mem_univ, true_and, iff_true]
+    exact DirichletCharacter.even_or_odd χ
+  have hsame : E.card = O.card := card_even_eq_card_odd_characters (p := p) hp₂
   have hcard_total : E.card + O.card = p - 1 := by
     calc
       E.card + O.card = (E ∪ O).card := by
