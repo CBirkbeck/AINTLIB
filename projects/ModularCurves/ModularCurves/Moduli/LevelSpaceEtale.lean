@@ -665,4 +665,93 @@ lemma isClopen_fullLevelLocusSet (hinv : NIsInvertible S N) :
 
 end CombinationLocus
 
+section PairGeneration
+
+variable {G : Type*} [AddCommGroup G] (N : ℕ) [NeZero N]
+
+/-- Representative independence of `ℤ`-scalars on `N`-killed elements: the `val` of the
+mod-`N` reduction acts like the integer itself. -/
+private lemma zsmul_val_cast_eq {P : G} (hP : (N : ℤ) • P = 0) (k : ℤ) :
+    (((k : ZMod N).val : ℤ)) • P = k • P := by
+  obtain ⟨m, hm⟩ : (N : ℤ) ∣ (((k : ZMod N).val : ℤ) - k) := by
+    have h0 : ((((k : ZMod N).val : ℤ) - k : ℤ) : ZMod N) = 0 := by
+      push_cast
+      rw [ZMod.natCast_val, ZMod.cast_id, sub_self]
+    exact (ZMod.intCast_zmod_eq_zero_iff_dvd _ N).mp h0
+  have hdiff : (((k : ZMod N).val : ℤ)) • P - k • P = 0 := by
+    rw [← sub_smul, hm, mul_smul, smul_comm, hP, smul_zero]
+  rw [sub_eq_zero] at hdiff
+  exact hdiff
+
+/-- **(β3, the generation criterion — KM 1.6.7 / AX2-e at general `N`)** In an `N`-killed
+abelian group of order `N²`, a pair generates iff every nonzero `(ℤ/N)²`-combination of it is
+nonzero: the combination map `(ℤ/N)² → G` is injective iff it misses zero away from zero, and
+between finite sets of equal cardinality injective = surjective = bijective. -/
+theorem pair_generates_iff_combos_ne_zero
+    (hcard : Nat.card G = N ^ 2) (hkill : ∀ g : G, (N : ℤ) • g = 0) (P Q : G) :
+    (∀ ab : ZMod N × ZMod N, ab ≠ 0 →
+        ((ab.1.val : ℤ)) • P + ((ab.2.val : ℤ)) • Q ≠ 0)
+      ↔ ∀ x : G, x ∈ AddSubgroup.closure ({P, Q} : Set G) := by
+  haveI : Finite G := Nat.finite_of_card_ne_zero (by
+    rw [hcard]
+    exact (pow_pos (Nat.pos_of_ne_zero (NeZero.ne N)) 2).ne')
+  set φ : ZMod N × ZMod N → G :=
+    fun ab => ((ab.1.val : ℤ)) • P + ((ab.2.val : ℤ)) • Q with hφ
+  have hcards : Nat.card (ZMod N × ZMod N) = Nat.card G := by
+    rw [Nat.card_prod, Nat.card_zmod, hcard, sq]
+  constructor
+  · intro hcombo x
+    have hinj : Function.Injective φ := by
+      intro ab cd h
+      by_contra hne
+      have hd : ((ab.1 - cd.1, ab.2 - cd.2) : ZMod N × ZMod N) ≠ 0 := by
+        intro hzero
+        apply hne
+        have h1 : ab.1 - cd.1 = 0 := congrArg Prod.fst hzero
+        have h2 : ab.2 - cd.2 = 0 := congrArg Prod.snd hzero
+        exact Prod.ext (sub_eq_zero.mp h1) (sub_eq_zero.mp h2)
+      refine hcombo _ hd ?_
+      have e1 : (((ab.1 - cd.1).val : ℤ)) • P
+          = ((ab.1.val : ℤ) - (cd.1.val : ℤ)) • P := by
+        have hz := zsmul_val_cast_eq N (hkill P) ((ab.1.val : ℤ) - (cd.1.val : ℤ))
+        have hcast : (((((ab.1.val : ℤ) - (cd.1.val : ℤ)) : ℤ) : ZMod N))
+            = ab.1 - cd.1 := by
+          push_cast
+          rw [ZMod.natCast_val, ZMod.natCast_val, ZMod.cast_id, ZMod.cast_id]
+        rw [hcast] at hz
+        exact hz
+      have e2 : (((ab.2 - cd.2).val : ℤ)) • Q
+          = ((ab.2.val : ℤ) - (cd.2.val : ℤ)) • Q := by
+        have hz := zsmul_val_cast_eq N (hkill Q) ((ab.2.val : ℤ) - (cd.2.val : ℤ))
+        have hcast : (((((ab.2.val : ℤ) - (cd.2.val : ℤ)) : ℤ) : ZMod N))
+            = ab.2 - cd.2 := by
+          push_cast
+          rw [ZMod.natCast_val, ZMod.natCast_val, ZMod.cast_id, ZMod.cast_id]
+        rw [hcast] at hz
+        exact hz
+      show (((ab.1 - cd.1).val : ℤ)) • P + (((ab.2 - cd.2).val : ℤ)) • Q = 0
+      have h' : ((ab.1.val : ℤ)) • P + ((ab.2.val : ℤ)) • Q
+          = ((cd.1.val : ℤ)) • P + ((cd.2.val : ℤ)) • Q := h
+      rw [e1, e2, sub_smul, sub_smul, sub_add_sub_comm, h', sub_self]
+    have hbij : Function.Bijective φ :=
+      (Nat.bijective_iff_injective_and_card φ).mpr ⟨hinj, hcards⟩
+    obtain ⟨ab, rfl⟩ := hbij.2 x
+    exact AddSubgroup.mem_closure_pair.mpr ⟨_, _, rfl⟩
+  · intro hgen ab hab habs
+    have hsurj : Function.Surjective φ := by
+      intro x
+      obtain ⟨m, n, hmn⟩ := AddSubgroup.mem_closure_pair.mp (hgen x)
+      refine ⟨((m : ZMod N), (n : ZMod N)), ?_⟩
+      show (((m : ZMod N).val : ℤ)) • P + (((n : ZMod N).val : ℤ)) • Q = x
+      rw [zsmul_val_cast_eq N (hkill P) m, zsmul_val_cast_eq N (hkill Q) n]
+      exact hmn
+    have hbij : Function.Bijective φ :=
+      (Nat.bijective_iff_surjective_and_card φ).mpr ⟨hsurj, hcards⟩
+    have h0 : φ 0 = 0 := by
+      show (((0 : ZMod N).val : ℤ)) • P + (((0 : ZMod N).val : ℤ)) • Q = 0
+      simp [ZMod.val_zero]
+    exact hab (hbij.1 (habs.trans h0.symm))
+
+end PairGeneration
+
 end ModularCurves
