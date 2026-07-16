@@ -53,6 +53,19 @@ private lemma exists_factor_of_openCover {T W Y : Scheme.{u}} (𝒱 : T.OpenCove
 
 namespace RelEffCartierDiv
 
+/-- **[W0-F3-reindex]** `Σᵢ [Pᵢ]` is invariant under reindexing the family of sections:
+the defining ideal is a product over the index set (KM 1.2, the sum of the `[Pᵢ]` as
+Cartier divisors), and products are permutation-invariant. -/
+theorem sectionsDivisor_congr {C : Scheme.{u}} {π : C ⟶ S} {n : ℕ}
+    (P Q : Fin n → { z : S ⟶ C // z ≫ π = 𝟙 S }) (e : Fin n ≃ Fin n)
+    (h : ∀ i, P i = Q (e i)) :
+    sectionsDivisor π P = sectionsDivisor π Q := by
+  apply RelEffCartierDiv.ext
+  by_cases hπ : IsSeparated π ∧ SmoothOfRelativeDimension 1 π
+  · rw [sectionsDivisor, sectionsDivisor, dif_pos hπ, dif_pos hπ]
+    exact Fintype.prod_equiv e _ _ fun i => by rw [h i]
+  · rw [sectionsDivisor, sectionsDivisor, dif_neg hπ, dif_neg hπ]
+
 /-- **[W0-F3-loc] (KM 1.7.2's silent localization step)** Being a subgroup divisor is
 Zariski-local on the base: if the pullbacks of a relative effective Cartier divisor
 `D` in `E/S` to the members of an open cover of `S` are subgroups, `D` is a subgroup.
