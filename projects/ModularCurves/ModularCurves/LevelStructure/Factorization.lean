@@ -1037,6 +1037,53 @@ theorem RelEffCartierDiv.IsSubgroup.exists_smulKernel_retract (M K : ℕ)
     Category.id_comp]
   exact hs
 
+/-- **[F3-count-equiv]** Sections of the `c`-kernel over `t` are exactly the `c`-killed
+points of `E` over `t` factoring through the divisor (the functor of points of
+`Ker([c] : G → E)`). The inverse extracts the factoring witness by choice; the
+monomorphism `subschemeι` forces it back to the canonical one. -/
+noncomputable def RelEffCartierDiv.smulKernelPointsEquiv (D : RelEffCartierDiv E.π)
+    (c : ℤ) {T : Scheme.{u}} (t : T ⟶ S) :
+    { h : T ⟶ D.smulKernel E c // h ≫ D.smulKernelπ E c = t }
+      ≃ { Q : E.Point t // c • Q = 0 ∧
+          ∃ w : T ⟶ D.ideal.subscheme, w ≫ D.ideal.subschemeι = Q.1 } where
+  toFun h := ⟨⟨h.1 ≫ D.smulKernelι E c ≫ D.ideal.subschemeι, by
+      rw [Category.assoc, Category.assoc, RelEffCartierDiv.smulKernelι_subschemeι_π, h.2]⟩,
+    by
+      apply Subtype.ext
+      rw [E.point_smul_eq_comp_mulBy, E.point_zero_val]
+      show (h.1 ≫ D.smulKernelι E c ≫ D.ideal.subschemeι) ≫ E.mulByHom c = t ≫ E.zero
+      rw [Category.assoc, Category.assoc,
+        show D.smulKernelι E c ≫ D.ideal.subschemeι ≫ E.mulByHom c
+          = D.smulKernelπ E c ≫ E.zero from by
+            rw [RelEffCartierDiv.smulKernelι, RelEffCartierDiv.smulKernelπ, ← Category.assoc]
+            exact pullback.condition (f := D.ideal.subschemeι ≫ E.mulByHom c) (g := E.zero),
+        ← Category.assoc, h.2],
+    ⟨h.1 ≫ D.smulKernelι E c, by rw [Category.assoc]⟩⟩
+  invFun Q := ⟨pullback.lift Q.2.2.choose t (by
+      rw [← Category.assoc, Q.2.2.choose_spec]
+      have hval := congrArg Subtype.val Q.2.1
+      rw [E.point_smul_eq_comp_mulBy] at hval
+      rw [hval]
+      exact E.point_zero_val t), pullback.lift_snd _ _ _⟩
+  left_inv h := by
+    apply Subtype.ext
+    apply pullback.hom_ext
+    · show _ ≫ pullback.fst _ _ = _
+      rw [pullback.lift_fst]
+      rw [← cancel_mono (D.ideal.subschemeι)]
+      rw [Exists.choose_spec (p := fun w : _ ⟶ D.ideal.subscheme
+        => w ≫ D.ideal.subschemeι = _)]
+      rfl
+    · show _ ≫ pullback.snd _ _ = _
+      rw [pullback.lift_snd]
+      exact h.2.symm
+  right_inv Q := by
+    apply Subtype.ext
+    apply Subtype.ext
+    show (pullback.lift _ t _ ≫ D.smulKernelι E c) ≫ D.ideal.subschemeι = Q.1.1
+    rw [show pullback.lift _ t _ ≫ D.smulKernelι E c = _ from pullback.lift_fst _ _ _,
+      Q.2.2.choose_spec]
+
 include hD in
 /-- **[F3-kerflat] (KM p. 27: "so flat over S")** The `M`-kernel of a coprime-degree
 subgroup divisor is flat over the base: it is a retract of the divisor subscheme
