@@ -38,6 +38,21 @@ namespace WeakSplitting
 
 open NumberField Ideal Filter Topology
 
+/-- The unfolded partial-zeta residue `dedekindZeta_residue K · ∏ (1 - N(P)⁻¹)` is
+nonzero when every `P ∈ S` is a nonzero prime. -/
+theorem dedekindZeta_residue_mul_prod_one_sub_absNorm_inv_ne_zero
+    {K : Type*} [Field K] [NumberField K] (S : Finset (Ideal (𝓞 K)))
+    (hS : ∀ P ∈ S, P.IsPrime ∧ P ≠ ⊥) :
+    (dedekindZeta_residue K : ℂ) * ∏ P ∈ S, ((1 : ℂ) - (Ideal.absNorm P : ℂ)⁻¹) ≠ 0 := by
+  refine mul_ne_zero ?_ ?_
+  · exact_mod_cast (dedekindZeta_residue_pos K).ne'
+  · refine Finset.prod_ne_zero_iff.mpr fun P hP ↦ ?_
+    intro h_zero
+    have hN_eq_one : (Ideal.absNorm P : ℂ)⁻¹ = 1 := by linear_combination -h_zero
+    have hN_eq_one' : (Ideal.absNorm P : ℂ) = 1 := by
+      rw [← inv_inv ((Ideal.absNorm P : ℂ)), hN_eq_one, inv_one]
+    exact (hS P hP).1.ne_top (Ideal.absNorm_eq_one_iff.mp (by exact_mod_cast hN_eq_one'))
+
 variable (L : Type*) [Field L] [NumberField L]
 
 /--
@@ -74,6 +89,33 @@ theorem tendsto_sub_one_mul_unfolded_partial (F : Finset (Ideal (𝓞 L)))
   convert (tendsto_sub_one_mul_dedekindZeta_nhdsGT L).mul h₂ using 1
   ext s; ring
 
+/-- For a higher-order exponent `n ≥ 2`, `(s - 1) ^ n · (ζ_L · ∏ (1 - N(Q)^{-s}))`
+tends to `0` as `s → 1⁺`, since the unfolded partial zeta has only a simple pole. -/
+theorem tendsto_sub_one_pow_mul_unfolded_partial_nhds_zero
+    (F : Finset (Ideal (𝓞 L))) (hF : ∀ Q ∈ F, Q.IsPrime ∧ Q ≠ ⊥)
+    {n : ℕ} (hn_sub_pos : 0 < n - 1) :
+    Tendsto (fun s : ℝ ↦ ((s : ℂ) - 1) ^ n *
+        (dedekindZeta L (s : ℂ) * ∏ Q ∈ F,
+          ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-(s : ℂ)))))
+      (𝓝[>] 1) (𝓝 0) := by
+  have h_factor : (fun s : ℝ ↦ ((s : ℂ) - 1) ^ n *
+        (dedekindZeta L (s : ℂ) * ∏ Q ∈ F,
+          ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-(s : ℂ))))) =
+      (fun s : ℝ ↦ ((s : ℂ) - 1) ^ (n - 1) *
+        (((s : ℂ) - 1) * (dedekindZeta L (s : ℂ) * ∏ Q ∈ F,
+          ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-(s : ℂ)))))) := by
+    ext s
+    rw [show ((s : ℂ) - 1) ^ n = ((s : ℂ) - 1) ^ ((n - 1) + 1) by
+      congr 1; omega, pow_succ]
+    ring
+  rw [h_factor]
+  have h_first : Tendsto (fun s : ℝ ↦ ((s : ℂ) - 1) ^ (n - 1)) (𝓝[>] 1) (𝓝 0) := by
+    have h_real : Tendsto (fun s : ℝ ↦ ((s : ℂ) - 1)) (𝓝[>] 1) (𝓝 0) := by
+      simpa using ((Complex.continuous_ofReal.tendsto 1).mono_left
+        nhdsWithin_le_nhds).sub_const (1 : ℂ)
+    simpa [zero_pow hn_sub_pos.ne'] using h_real.pow (n - 1)
+  simpa using h_first.mul (tendsto_sub_one_mul_unfolded_partial L F hF)
+
 variable (K : Type*) [Field K] [NumberField K] [Algebra K L]
 
 /--
@@ -109,28 +151,8 @@ theorem finrank_eq_one_of_global_identity
   set n := Module.finrank K L
   have hn_ne : n ≠ 0 := by omega
   have hn_sub_pos : 0 < n - 1 := by omega
-  have hL_to_zero :
-      Tendsto (fun s : ℝ ↦ ((s : ℂ) - 1) ^ n *
-          (dedekindZeta L (s : ℂ) * ∏ Q ∈ F_L,
-            ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-(s : ℂ)))))
-        (𝓝[>] 1) (𝓝 0) := by
-    have h_factor : (fun s : ℝ ↦ ((s : ℂ) - 1) ^ n *
-          (dedekindZeta L (s : ℂ) * ∏ Q ∈ F_L,
-            ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-(s : ℂ))))) =
-        (fun s : ℝ ↦ ((s : ℂ) - 1) ^ (n - 1) *
-          (((s : ℂ) - 1) * (dedekindZeta L (s : ℂ) * ∏ Q ∈ F_L,
-            ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-(s : ℂ)))))) := by
-      ext s
-      rw [show ((s : ℂ) - 1) ^ n = ((s : ℂ) - 1) ^ ((n - 1) + 1) by
-        congr 1; omega, pow_succ]
-      ring
-    rw [h_factor]
-    have h_first : Tendsto (fun s : ℝ ↦ ((s : ℂ) - 1) ^ (n - 1)) (𝓝[>] 1) (𝓝 0) := by
-      have h_real : Tendsto (fun s : ℝ ↦ ((s : ℂ) - 1)) (𝓝[>] 1) (𝓝 0) := by
-        simpa using ((Complex.continuous_ofReal.tendsto 1).mono_left
-          nhdsWithin_le_nhds).sub_const (1 : ℂ)
-      simpa [zero_pow hn_sub_pos.ne'] using h_real.pow (n - 1)
-    simpa using h_first.mul (tendsto_sub_one_mul_unfolded_partial L F_L hF_L)
+  have hL_to_zero :=
+    tendsto_sub_one_pow_mul_unfolded_partial_nhds_zero L F_L hF_L hn_sub_pos
   have hK_to_pow :
       Tendsto (fun s : ℝ ↦ ((s : ℂ) - 1) ^ n *
           (dedekindZeta K (s : ℂ) * ∏ P ∈ S,
@@ -168,15 +190,8 @@ theorem finrank_eq_one_of_global_identity
         ∏ P ∈ S, ((1 : ℂ) - (Ideal.absNorm P : ℂ)⁻¹)) ^ n :=
     tendsto_nhds_unique hL_to_zero hL_to_pow
   have hcK_ne : ((dedekindZeta_residue K : ℂ) *
-      ∏ P ∈ S, ((1 : ℂ) - (Ideal.absNorm P : ℂ)⁻¹)) ≠ 0 := by
-    refine mul_ne_zero ?_ ?_
-    · exact_mod_cast (dedekindZeta_residue_pos K).ne'
-    · refine Finset.prod_ne_zero_iff.mpr fun P hP ↦ ?_
-      intro h_zero
-      have hN_eq_one : (Ideal.absNorm P : ℂ)⁻¹ = 1 := by linear_combination -h_zero
-      have hN_eq_one' : (Ideal.absNorm P : ℂ) = 1 := by
-        rw [← inv_inv ((Ideal.absNorm P : ℂ)), hN_eq_one, inv_one]
-      exact (hS P hP).1.ne_top (Ideal.absNorm_eq_one_iff.mp (by exact_mod_cast hN_eq_one'))
+      ∏ P ∈ S, ((1 : ℂ) - (Ideal.absNorm P : ℂ)⁻¹)) ≠ 0 :=
+    dedekindZeta_residue_mul_prod_one_sub_absNorm_inv_ne_zero S hS
   exact hcK_ne (pow_eq_zero_iff hn_ne |>.mp h_limits_eq.symm)
 
 end WeakSplitting
