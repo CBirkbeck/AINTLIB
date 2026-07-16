@@ -51,7 +51,8 @@ of `FundamentalDomainBoundary.lean`.
 
 ## References
 
-* Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §8.2, (8.2.17)/(8.2.22).
+* Shimura, *Introduction to the Arithmetic Theory of Automorphic Functions*, §8.2,
+  (8.2.17)/(8.2.22).
 * Diamond–Shurman, *A First Course in Modular Forms*, §5.4.
 -/
 
@@ -89,7 +90,8 @@ theorem hasFDerivAt_comp_coord {φ : ℂ → ℂ} {φ' z : ℂ} (hφ : HasDerivA
     rw [hp]; exact hφ.complexToReal_fderiv
   exact h1.comp p coordCLM.hasFDerivAt
 
-/-- The antiholomorphic composite `(x, y) ↦ conj(a(x + iy))` of a complex-differentiable `a` with the
+/-- The antiholomorphic composite `(x, y) ↦ conj(a(x + iy))` of a complex-differentiable `a` with
+the
 coordinate chart has `HasFDerivAt` given by postcomposing with complex conjugation.  This is the
 antiholomorphic factor of the Petersson `2`-form. -/
 theorem hasFDerivAt_conj_comp_coord {a : ℂ → ℂ} {a' z : ℂ} (ha : HasDerivAt a a' z)
@@ -110,11 +112,14 @@ Then the planar divergence is exactly the holomorphic-times-antiholomorphic area
 
   `F'(x,y)(1,0) + G'(x,y)(0,1) = -2i · h(x + iy) · conj(a(x + iy))`.
 
-This is Shimura's exact-form identity `d(H·conj(a) dz̄) = -2i·h·conj(a) dx∧dy`, packaged in the exact
-shape `MeasureTheory.integral2_divergence_prod_of_hasFDerivAt` consumes.  All four partial derivatives
+This is Shimura's exact-form identity `d(H·conj(a) dz̄) = -2i·h·conj(a) dx∧dy`, packaged in the
+exact
+shape `MeasureTheory.integral2_divergence_prod_of_hasFDerivAt` consumes.  All four partial
+derivatives
 come from `HasDerivAt.complexToReal_fderiv` (holomorphic factor) and `Complex.conjCLE`
 (antiholomorphic factor); the cross terms `H·conj(b)` in `∂ₓ` and `∂_y` cancel, leaving twice the
-diagonal `h·conj(a)`.  Note the surviving factor is `conj(a)` (the *undifferentiated* antiholomorphic
+diagonal `h·conj(a)`.  Note the surviving factor is `conj(a)` (the *undifferentiated*
+antiholomorphic
 factor), not `conj(b)` — only the holomorphic factor `H` is differentiated. -/
 theorem holAntihol_eq_divergence {H a : ℂ → ℂ} {h b z : ℂ}
     (hH : HasDerivAt H h z) (ha : HasDerivAt a b z) {p : ℝ × ℝ} (hp : coordCLM p = z) :
@@ -143,7 +148,8 @@ theorem holAntihol_eq_divergence {H a : ℂ → ℂ} {h b z : ℂ}
     mul_one, add_zero, zero_add, map_mul, Complex.conj_I]
   ring
 
-/-- **Rectangle Stokes for the exact period `2`-form.**  Let `H, a` be holomorphic on a neighbourhood
+/-- **Rectangle Stokes for the exact period `2`-form.**  Let `H, a` be holomorphic on a
+neighbourhood
 of the closed rectangle `[x₀, x₁] × [y₀, y₁]` (all of which lies in the open upper half-plane), with
 `H' = h` and `a' = a'der`.  Then the area integral of `-2i·h·conj(a)` over the rectangle equals the
 signed sum of the four boundary-edge integrals of the `1`-form `H·conj(a) dz̄` (= `B dy + A dx` with
@@ -152,7 +158,8 @@ signed sum of the four boundary-edge integrals of the `1`-form `H·conj(a) dz̄`
   `∫∫ -2i·h(x+iy)·conj(a(x+iy)) dy dx`
     `= [∫ₓ G(x,y₁) − ∫ₓ G(x,y₀)] + ∫_y F(x₁,y) − ∫_y F(x₀,y)`,
 
-where `F(x,y) = -i·H·conj(a)`, `G(x,y) = -(H·conj(a))`.  This is the direct application of the planar
+where `F(x,y) = -i·H·conj(a)`, `G(x,y) = -(H·conj(a))`.  This is the direct application of the
+planar
 divergence theorem with the divergence supplied by `holAntihol_eq_divergence`. -/
 theorem rectangle_stokes_holAntihol {H a : ℂ → ℂ} {h a'der : ℂ → ℂ}
     {x₀ x₁ y₀ y₁ : ℝ} (hx : x₀ ≤ x₁) (hy : y₀ ≤ y₁)
@@ -178,7 +185,8 @@ theorem rectangle_stokes_holAntihol {H a : ℂ → ℂ} {h a'der : ℂ → ℂ}
       ∫ y in y₀..y₁, -Complex.I * (H ((x₀ : ℂ) + (y : ℂ) * Complex.I) *
           starRingEnd ℂ (a ((x₀ : ℂ) + (y : ℂ) * Complex.I))) := by
   -- The two coordinate fields `F = -i·H·conj(a)`, `G = -(H·conj(a))`.
-  set F : ℝ × ℝ → ℂ := fun p ↦ -Complex.I * (H (coordCLM p) * starRingEnd ℂ (a (coordCLM p))) with hF
+  set F : ℝ × ℝ → ℂ := fun p ↦ -Complex.I *
+    (H (coordCLM p) * starRingEnd ℂ (a (coordCLM p))) with hF
   set G : ℝ × ℝ → ℂ := fun p ↦ -(H (coordCLM p) * starRingEnd ℂ (a (coordCLM p))) with hG
   -- Interior `=` closed-rectangle identification of `min/max` (using `hx`, `hy`).
   have hminx : min x₀ x₁ = x₀ := min_eq_left hx
@@ -225,7 +233,8 @@ theorem rectangle_stokes_holAntihol {H a : ℂ → ℂ} {h a'der : ℂ → ℂ}
     (by rw [hminx, hmaxx, hminy, hmaxy]; exact hF')
     (by rw [hminx, hmaxx, hminy, hmaxy]; exact hG')
     hHi
-  -- The iterated integral of `-2i·h·conj(a)` equals that of the chosen divergence (they agree on the
+  -- The iterated integral of `-2i·h·conj(a)` equals that of the chosen divergence (they agree on
+  -- the
   -- open box `Ioo×Ioo`, which is co-null in the closed box).  Use iterated `integral_congr_ae`.
   have hLHS_eq : (∫ x in x₀..x₁, ∫ y in y₀..y₁,
         -2 * Complex.I * h ((x : ℂ) + (y : ℂ) * Complex.I) *
@@ -253,7 +262,8 @@ theorem exists_primitive_periodForm {F : Type*} [FunLike F ℍ ℂ] {Γ : Subgro
 /-- **Rectangle Stokes for the period form** (sorry-free).  Let `g` be a modular form with period
 form `periodForm g P`, primitive `Fp` on `ℍ`, and `a` holomorphic on a neighbourhood of the closed
 rectangle `[x₀,x₁]×[y₀,y₁]` (inside `ℍ`, so all four edges have positive imaginary part), with
-`a' = a'der`.  Then the rectangle area integral of `-2i·periodForm g P·conj(a)` equals the signed sum
+`a' = a'der`.  Then the rectangle area integral of `-2i·periodForm g P·conj(a)` equals the signed
+sum
 of the four edge integrals of `Fp·conj(a) dz̄`.  This is the concrete Stokes identity per `fd`-tile
 rectangle; the `fd`-tile (with arc edges) version is the residual region-Stokes wall below. -/
 theorem rectangle_stokes_periodForm {F : Type*} [FunLike F ℍ ℂ] {Γ : Subgroup (GL (Fin 2) ℝ)}
@@ -353,7 +363,8 @@ theorem regionBetween_integral_eq_iterated {φ ψ : ℝ → ℝ} {s : Set ℝ}
 region between graphs `φ ≤ ψ` over `s` (`G` differentiable in `y` with derivative `g` on each fibre
 `[φx, ψx]`, with the fibre integrability), then the area integral of `g` over `regionBetween φ ψ s`
 equals the `s`-integral of the **boundary difference** `G(x,ψx) − G(x,φx)`.  This is the founded,
-mathlib-supported half of the curvilinear divergence theorem: no missing theorem, just FTC + Fubini. -/
+mathlib-supported half of the curvilinear divergence theorem: no missing theorem, just FTC + Fubini.
+-/
 theorem integral_regionBetween_partialY {G g : ℝ × ℝ → ℂ} {φ ψ : ℝ → ℝ} {s : Set ℝ}
     (hφ : Measurable φ) (hψ : Measurable ψ) (hs : MeasurableSet s)
     (hle : ∀ x ∈ s, φ x ≤ ψ x)
@@ -382,8 +393,10 @@ theorem integral_regionBetween_partialY {G g : ℝ × ℝ → ℂ} {φ ψ : ℝ 
       simp only [regionBetween, Set.mem_setOf_eq, hx, false_and, not_false_iff]
     simp only [hz, integral_zero]
 
-/-- The `x`-simple region in standard `(x, y)`-coordinates bounded on the left by `x = φ y` and on the
-right by `x = ψ y`, for `y ∈ t`.  It is the `Prod.swap`-image of the `y`-axis `regionBetween φ ψ t`. -/
+/-- The `x`-simple region in standard `(x, y)`-coordinates bounded on the left by `x = φ y` and on
+the
+right by `x = ψ y`, for `y ∈ t`.  It is the `Prod.swap`-image of the `y`-axis `regionBetween φ ψ t`.
+-/
 def regionBetweenX (φ ψ : ℝ → ℝ) (t : Set ℝ) : Set (ℝ × ℝ) :=
   Prod.swap '' regionBetween φ ψ t
 
@@ -555,11 +568,13 @@ theorem hasDerivAt_fdBoundaryFun_seg1 (H : ℝ) {t : ℝ} (ht : t < 1 / 5) :
 /-- `HasDerivAt` of the boundary parametrisation on the open first arc segment `(1/5, 2/5)`. -/
 theorem hasDerivAt_fdBoundaryFun_seg2 (H : ℝ) {t : ℝ} (ht1 : 1 / 5 < t) (ht2 : t < 2 / 5) :
     HasDerivAt (fdBoundaryFun H)
-      (Complex.exp ((↑Real.pi / 3 + (5 * (t : ℂ) - 1) * (↑Real.pi / 2 - ↑Real.pi / 3)) * Complex.I) *
+      (Complex.exp ((↑Real.pi / 3 + (5 * (t : ℂ) - 1) * (↑Real.pi / 2 - ↑Real.pi / 3)) *
+        Complex.I) *
         (5 * (↑Real.pi / 2 - ↑Real.pi / 3) * Complex.I)) t := by
   rw [(show fdBoundaryFun H =ᶠ[nhds t]
       (fun s : ℝ ↦
-        Complex.exp ((↑Real.pi / 3 + (5 * (s : ℂ) - 1) * (↑Real.pi / 2 - ↑Real.pi / 3)) * Complex.I))
+        Complex.exp ((↑Real.pi / 3 + (5 * (s : ℂ) - 1) * (↑Real.pi / 2 - ↑Real.pi / 3)) *
+          Complex.I))
       from ?_).hasDerivAt_iff]
   · have hlin : HasDerivAt
         (fun s : ℝ ↦ (↑Real.pi / 3 + (5 * (s : ℂ) - 1) * (↑Real.pi / 2 - ↑Real.pi / 3)) * Complex.I)
@@ -836,7 +851,8 @@ theorem contour_eq_five_segments {W : ℂ → ℂ}
     intervalIntegral.integral_add_adjacent_intervals S1.1 S2.1,
     intervalIntegral.integral_add_adjacent_intervals (S1.1.trans S2.1) S3.1,
     intervalIntegral.integral_add_adjacent_intervals ((S1.1.trans S2.1).trans S3.1) S4.1,
-    intervalIntegral.integral_add_adjacent_intervals (((S1.1.trans S2.1).trans S3.1).trans S4.1) S5.1]
+    intervalIntegral.integral_add_adjacent_intervals (((S1.1.trans S2.1).trans S3.1).trans S4.1)
+      S5.1]
 
 /-- The arc lower boundary `φ x = √(1 − x²)`. -/
 def fdArc : ℝ → ℝ := fun x ↦ Real.sqrt (1 - x ^ 2)
@@ -944,7 +960,8 @@ include k Γ in
 /-- **Continuity of the two divergence fields on the open upper half-plane.**  With `a'der`
 continuous on `ℍ` (the honest `C¹` hypothesis), both `gXField` and `gYField` are continuous on
 `{p | 0 < p.2}`: each is a polynomial in the four continuous factors `periodForm g P`, `Fp`,
-`conj(a)`, `conj(a'der)` (all in real coordinates).  This is the regularity that yields integrability
+`conj(a)`, `conj(a'der)` (all in real coordinates).  This is the regularity that yields
+integrability
 on the bounded region (`integrableOn_gField`). -/
 theorem continuousOn_gXField_gYField (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → ℂ)
     (hFp : ∀ z : ℂ, 0 < z.im → HasDerivAt Fp (periodForm g P z) z)
@@ -1038,7 +1055,8 @@ theorem integrable_PhiField_topEdge {Fp a : ℂ → ℂ}
   have hcont : ContinuousOn (fun x ↦ PhiField Fp a (x, H)) (Set.Icc (-(1 / 2 : ℝ)) (1 / 2)) := by
     apply ContinuousOn.mul
     · exact (hFpc.comp hcoord.continuousOn fun x _ ↦ him x)
-    · exact (Complex.continuous_conj.comp_continuousOn (hac.comp hcoord.continuousOn fun x _ ↦ him x))
+    · exact (Complex.continuous_conj.comp_continuousOn
+        (hac.comp hcoord.continuousOn fun x _ ↦ him x))
   exact (hcont.integrableOn_Icc).mono_set Set.Ioo_subset_Icc_self
 
 /-- The arc-boundary potential `x ↦ Φ(x+i·fdArc x)` is integrable on `Ioo (−½) ½`. -/
@@ -1054,15 +1072,18 @@ theorem integrable_PhiField_arc {Fp a : ℂ → ℂ}
     have hpos : 0 < fdArc x := by
       unfold fdArc; refine Real.sqrt_pos.mpr ?_; nlinarith [hx.1, hx.2]
     simpa using hpos
-  have hcont : ContinuousOn (fun x ↦ PhiField Fp a (x, fdArc x)) (Set.Icc (-(1 / 2 : ℝ)) (1 / 2)) := by
+  have hcont : ContinuousOn (fun x ↦ PhiField Fp a (x, fdArc x))
+      (Set.Icc (-(1 / 2 : ℝ)) (1 / 2)) := by
     apply ContinuousOn.mul
     · exact (hFpc.comp hcoord.continuousOn him)
     · exact (Complex.continuous_conj.comp_continuousOn (hac.comp hcoord.continuousOn him))
   exact (hcont.integrableOn_Icc).mono_set Set.Ioo_subset_Icc_self
 
 /-- **The `fd`-region splits at `x = 0` into two `x`-simple pieces** (up to the null `x = 0` slice).
-For any function integrable on the capped `fd`-region `R = regionBetween fdArc H (Ioo −½ ½)`, the area
-integral over `R` equals the sum over the right piece `regionBetweenX fdArc (½) (Ioo √3/2 H)` and the
+For any function integrable on the capped `fd`-region `R = regionBetween fdArc H (Ioo −½ ½)`, the
+area
+integral over `R` equals the sum over the right piece `regionBetweenX fdArc (½) (Ioo √3/2 H)` and
+the
 left piece `regionBetweenX (−½) (−fdArc) (Ioo √3/2 H)`.  The three regions differ only on
 `{0} ×ˢ univ` (null), so the set integrals agree; the two pieces are disjoint, giving the sum. -/
 theorem setIntegral_fdRegion_split_at_zero (H : ℝ) (f : ℝ × ℝ → ℂ)
@@ -1076,7 +1097,8 @@ theorem setIntegral_fdRegion_split_at_zero (H : ℝ) (f : ℝ × ℝ → ℂ)
         f p ∂(volume.prod volume) := by
   classical
   set R : Set (ℝ × ℝ) := regionBetween fdArc (fun _ ↦ H) (Set.Ioo (-(1 / 2)) (1 / 2)) with hR
-  set Rp : Set (ℝ × ℝ) := regionBetweenX fdArc (fun _ ↦ 1 / 2) (Set.Ioo (Real.sqrt 3 / 2) H) with hRp
+  set Rp : Set (ℝ × ℝ) := regionBetweenX fdArc (fun _ ↦ 1 / 2)
+    (Set.Ioo (Real.sqrt 3 / 2) H) with hRp
   set Rm : Set (ℝ × ℝ) := regionBetweenX (fun _ ↦ -(1 / 2)) (fun y ↦ -fdArc y)
     (Set.Ioo (Real.sqrt 3 / 2) H) with hRm
   -- Measurability of the three regions.
@@ -1158,11 +1180,14 @@ theorem setIntegral_fdRegion_split_at_zero (H : ℝ) (f : ℝ × ℝ → ℂ)
   have hintP : IntegrableOn f Rp (volume.prod volume) := hintOn.mono_set Set.subset_union_left
   have hintM : IntegrableOn f Rm (volume.prod volume) := hintOn.mono_set Set.subset_union_right
   -- Assemble: a.e.-set-eq gives `∫_R = ∫_{Rp∪Rm}`, disjoint union splits the sum.
-  rw [MeasureTheory.setIntegral_congr_set hae, MeasureTheory.setIntegral_union hdisj hmRm hintP hintM]
+  rw [MeasureTheory.setIntegral_congr_set hae,
+    MeasureTheory.setIntegral_union hdisj hmRm hintP hintM]
 
 include k Γ in
-/-- **`∂_xF` over one `x`-simple piece.**  For `φ ≤ ψ` over `t = Ioo (√3/2) H` (whose fibres `x + iy` lie in `ℍ` since `y > √3/2 > 0`), the area
-integral of `gXField` over the `x`-simple region `regionBetweenX φ ψ t` equals the `t`-integral of the
+/-- **`∂_xF` over one `x`-simple piece.**  For `φ ≤ ψ` over `t = Ioo (√3/2) H` (whose fibres
+`x + iy` lie in `ℍ` since `y > √3/2 > 0`), the area
+integral of `gXField` over the `x`-simple region `regionBetweenX φ ψ t` equals the `t`-integral of
+the
 boundary difference `F(ψy,y) − F(φy,y)` of the field `F(x,y) = −i·Φ(x+iy)`.  Wraps
 `integral_regionBetweenX_partialX`; the per-fibre `∂_xF`-derivative is `hasDerivAt_Phi_horizontal`
 (scaled by `−i`) and the fibre integrability comes from continuity of `gXField` on `ℍ`. -/
@@ -1241,7 +1266,8 @@ theorem region_xhalf_typeII (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → �
   -- Integrability of `gXField` indicators on each `x`-simple piece (continuity on compact box ⊂ ℍ).
   have hintGen : ∀ {φ ψ : ℝ → ℝ}, Measurable φ → Measurable ψ →
       (∀ y ∈ t, -(1 / 2 : ℝ) ≤ φ y) → (∀ y ∈ t, ψ y ≤ 1 / 2) →
-      Integrable ((regionBetweenX φ ψ t).indicator (gXField g P Fp a a'der)) (volume.prod volume) := by
+      Integrable ((regionBetweenX φ ψ t).indicator (gXField g P Fp a a'der))
+        (volume.prod volume) := by
     intro φ ψ hφ hψ hφlo hψhi
     have hmeas : MeasurableSet (regionBetweenX φ ψ t) :=
       measurableSet_regionBetweenX hφ hψ measurableSet_Ioo
@@ -1298,11 +1324,12 @@ theorem region_xhalf_typeII (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → �
     MeasureTheory.integral_sub hC hBb]
   ring
 
-include k Γ in
+omit [ModularFormClass F Γ k] in
 /-- **(B) The arc reparametrisation.**  The inner Type-II `dy`-difference plus the arc `dx`-term
 match the (negated) two arc-segment contour integrals, via `x = cos θ`, `y = sin θ`
 (`θ : π/3 → 2π/3`).  The `√((1−y²)⁺)` fibre vanishes for `y > 1`, restricting the `dy`-difference to
-`y ∈ (√3/2, 1)`; the substitution turns both LHS pieces and the arc segments into `∫_{π/3}^{2π/3}` of
+`y ∈ (√3/2, 1)`; the substitution turns both LHS pieces and the arc segments into `∫_{π/3}^{2π/3}`
+of
 `Φ(e^{iθ})·i·e^{−iθ} dθ` (algebraically `i·cos θ + sin θ = i·e^{−iθ}`). -/
 theorem arc_reparam_segments (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → ℂ)
     (hFp : ∀ z : ℂ, 0 < z.im → HasDerivAt Fp (periodForm g P z) z)
@@ -1368,7 +1395,8 @@ theorem arc_reparam_segments (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → 
     rw [map_mul, Complex.conj_ofReal, Complex.conj_I]
     ring
   -- A reusable per-arc-segment reduction: if on the open segment `(t₀,t₁)` the boundary equals
-  -- `exp((c·t+d)·I)` and the segment derivative is `exp((c·t+d)·I)·(c·I)`, then the segment integral
+  -- `exp((c·t+d)·I)` and the segment derivative is `exp((c·t+d)·I)·(c·I)`, then the segment
+  -- integral
   -- is the angle integral `∫_{c·t₀+d}^{c·t₁+d} parc θ dθ`.
   have hsegArc : ∀ {t₀ t₁ c d : ℝ} {sd : ℝ → ℂ}, t₀ ≤ t₁ →
       (∀ t ∈ Set.Ioo t₀ t₁, fdBoundaryFun H t = Complex.exp (((c * t + d : ℝ) : ℂ) * Complex.I)) →
@@ -1400,13 +1428,15 @@ theorem arc_reparam_segments (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → 
         show t ≤ 2 / 5 from le_of_lt ht.2, if_true, if_false]
       congr 1; push_cast; ring
     have hsd : ∀ t ∈ Set.Ioo (1 / 5 : ℝ) (2 / 5), starRingEnd ℂ (segDeriv2 t) =
-        (5 * (Real.pi / 2 - Real.pi / 3) : ℝ) • (Complex.exp (-((5 * (Real.pi / 2 - Real.pi / 3) * t +
+        (5 * (Real.pi / 2 - Real.pi / 3) : ℝ) •
+          (Complex.exp (-((5 * (Real.pi / 2 - Real.pi / 3) * t +
           (Real.pi / 3 - (Real.pi / 2 - Real.pi / 3)) : ℝ) : ℂ) * Complex.I) * (-Complex.I)) := by
       intro t _
       rw [segDeriv2, show ((Real.pi / 3 : ℂ) + (5 * (t : ℂ) - 1) * (Real.pi / 2 - Real.pi / 3)) =
           ((5 * (Real.pi / 2 - Real.pi / 3) * t + (Real.pi / 3 - (Real.pi / 2 - Real.pi / 3)) :
             ℝ) : ℂ) by push_cast; ring, map_mul,
-        hconj_exp (5 * (Real.pi / 2 - Real.pi / 3) * t + (Real.pi / 3 - (Real.pi / 2 - Real.pi / 3)))]
+        hconj_exp (5 * (Real.pi / 2 - Real.pi / 3) * t +
+          (Real.pi / 3 - (Real.pi / 2 - Real.pi / 3)))]
       simp only [map_mul, Complex.conj_I, Complex.conj_ofReal, map_sub, map_div₀, map_ofNat,
         Complex.real_smul]
       push_cast; ring
@@ -1433,9 +1463,11 @@ theorem arc_reparam_segments (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → 
           Real.pi / 2) * t + (Real.pi / 2 - 2 * (2 * Real.pi / 3 - Real.pi / 2)) : ℝ) : ℂ) *
             Complex.I) * (-Complex.I)) := by
       intro t _
-      rw [segDeriv3, show ((Real.pi / 2 : ℂ) + (5 * (t : ℂ) - 2) * (2 * Real.pi / 3 - Real.pi / 2)) =
+      rw [segDeriv3,
+        show ((Real.pi / 2 : ℂ) + (5 * (t : ℂ) - 2) * (2 * Real.pi / 3 - Real.pi / 2)) =
           ((5 * (2 * Real.pi / 3 - Real.pi / 2) * t +
-            (Real.pi / 2 - 2 * (2 * Real.pi / 3 - Real.pi / 2)) : ℝ) : ℂ) by push_cast; ring, map_mul,
+            (Real.pi / 2 - 2 * (2 * Real.pi / 3 - Real.pi / 2)) : ℝ) : ℂ) by push_cast; ring,
+        map_mul,
         hconj_exp (5 * (2 * Real.pi / 3 - Real.pi / 2) * t +
           (Real.pi / 2 - 2 * (2 * Real.pi / 3 - Real.pi / 2)))]
       simp only [map_mul, Complex.conj_I, Complex.conj_ofReal, map_sub, map_div₀, map_ofNat,
@@ -1453,9 +1485,11 @@ theorem arc_reparam_segments (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → 
   have hpi3 : Real.pi / 3 ≤ Real.pi / 2 := by nlinarith [Real.pi_pos]
   have hpi2 : Real.pi / 2 ≤ 2 * Real.pi / 3 := by nlinarith [Real.pi_pos]
   have hii2 : IntervalIntegrable parc volume (Real.pi / 3) (Real.pi / 2) :=
-    (hparc_cont.mono (by rw [Set.uIcc_of_le hpi3]; exact Set.Icc_subset_Icc le_rfl hpi2)).intervalIntegrable
+    (hparc_cont.mono
+      (by rw [Set.uIcc_of_le hpi3]; exact Set.Icc_subset_Icc le_rfl hpi2)).intervalIntegrable
   have hii3 : IntervalIntegrable parc volume (Real.pi / 2) (2 * Real.pi / 3) :=
-    (hparc_cont.mono (by rw [Set.uIcc_of_le hpi2]; exact Set.Icc_subset_Icc hpi3 le_rfl)).intervalIntegrable
+    (hparc_cont.mono
+      (by rw [Set.uIcc_of_le hpi2]; exact Set.Icc_subset_Icc hpi3 le_rfl)).intervalIntegrable
   -- **RHS half done**: rewrite the contour side to the angle integral; the goal becomes `LHS = K`.
   rw [hseg2, hseg3, intervalIntegral.integral_add_adjacent_intervals hii2 hii3,
     hparc_negK, neg_neg]
@@ -1464,12 +1498,14 @@ theorem arc_reparam_segments (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → 
   have hcoord_cos : ∀ θ : ℝ, ((Real.cos θ : ℂ) + (Real.sin θ : ℂ) * Complex.I) =
       Complex.exp ((θ : ℂ) * Complex.I) := fun θ ↦ (Complex.exp_ofReal_mul_I θ).symm
   -- The arc value on the unit circle: `√(1 − cos²θ) = sin θ` for `θ ∈ [0, π]`.
-  have harc_cos : ∀ θ ∈ Set.Icc (Real.pi / 3) (2 * Real.pi / 3), fdArc (Real.cos θ) = Real.sin θ := by
+  have harc_cos : ∀ θ ∈ Set.Icc (Real.pi / 3) (2 * Real.pi / 3),
+      fdArc (Real.cos θ) = Real.sin θ := by
     intro θ hθ
     rw [Set.mem_Icc] at hθ
     have hsin : 0 ≤ Real.sin θ :=
       Real.sin_nonneg_of_nonneg_of_le_pi (by nlinarith [Real.pi_pos]) (by nlinarith [Real.pi_pos])
-    rw [fdArc, show (1 : ℝ) - Real.cos θ ^ 2 = Real.sin θ ^ 2 by nlinarith [Real.sin_sq_add_cos_sq θ],
+    rw [fdArc,
+      show (1 : ℝ) - Real.cos θ ^ 2 = Real.sin θ ^ 2 by nlinarith [Real.sin_sq_add_cos_sq θ],
       Real.sqrt_sq hsin]
   -- `Φ(cos θ + i·sin θ) = Φc θ`.
   have hPhi_cos : ∀ θ ∈ Set.Icc (Real.pi / 3) (2 * Real.pi / 3),
@@ -1485,7 +1521,8 @@ theorem arc_reparam_segments (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → 
         ((x : ℂ) + (fdArc x : ℂ) * Complex.I) ∈ {z : ℂ | 0 < z.im} := by
       intro x hx
       rw [Set.mem_Icc] at hx
-      have hpos : 0 < fdArc x := by unfold fdArc; refine Real.sqrt_pos.mpr ?_; nlinarith [hx.1, hx.2]
+      have hpos : 0 < fdArc x := by
+        unfold fdArc; refine Real.sqrt_pos.mpr ?_; nlinarith [hx.1, hx.2]
       simpa using hpos
     refine ContinuousOn.mul (hFpc.comp hcoord.continuousOn him) ?_
     exact Complex.continuous_conj.comp_continuousOn (hac.comp hcoord.continuousOn him)
@@ -1528,14 +1565,16 @@ theorem arc_reparam_segments (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → 
   have hsin12 : Real.sin (Real.pi / 2) = 1 := Real.sin_pi_div_two
   have hsqrtH : Real.sqrt 3 / 2 ≤ H := le_of_lt (fdHeightValid_of_one_lt H hH)
   have hsqrt1 : Real.sqrt 3 / 2 ≤ 1 := by
-    rw [div_le_one (by norm_num)]; nlinarith [Real.sq_sqrt (by norm_num : (0:ℝ) ≤ 3), Real.sqrt_nonneg 3]
+    rw [div_le_one (by norm_num)];
+      nlinarith [Real.sq_sqrt (by norm_num : (0:ℝ) ≤ 3), Real.sqrt_nonneg 3]
   -- The arc value `√(1 − sin²θ) = cos θ` for `θ ∈ [π/3, π/2]` (where `cos ≥ 0`).
   have harc_sin : ∀ θ ∈ Set.Icc (Real.pi / 3) (Real.pi / 2), fdArc (Real.sin θ) = Real.cos θ := by
     intro θ hθ
     rw [Set.mem_Icc] at hθ
     have hcos : 0 ≤ Real.cos θ :=
       Real.cos_nonneg_of_mem_Icc ⟨by nlinarith [Real.pi_pos, hθ.1], hθ.2⟩
-    rw [fdArc, show (1 : ℝ) - Real.sin θ ^ 2 = Real.cos θ ^ 2 by nlinarith [Real.sin_sq_add_cos_sq θ],
+    rw [fdArc,
+      show (1 : ℝ) - Real.sin θ ^ 2 = Real.cos θ ^ 2 by nlinarith [Real.sin_sq_add_cos_sq θ],
       Real.sqrt_sq hcos]
   -- `Φ(cos θ + i·sin θ) = Φc θ` (for `θ ∈ [π/3, π/2] ⊆ [π/3, 2π/3]`).
   have hPhi_sin : ∀ θ ∈ Set.Icc (Real.pi / 3) (Real.pi / 2),
@@ -1620,10 +1659,12 @@ theorem arc_reparam_segments (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ → 
         (Set.Icc (Real.pi / 3) (2 * Real.pi / 3)) := hΦc_cont.mul (by fun_prop)
     have hii_G2lo : IntervalIntegrable (fun φ ↦ Φc φ * (Complex.I * (Real.cos φ : ℂ)))
         volume (Real.pi / 3) (Real.pi / 2) :=
-      (hG2cont.mono (by rw [Set.uIcc_of_le hpi3]; exact Set.Icc_subset_Icc le_rfl hpi2)).intervalIntegrable
+      (hG2cont.mono
+        (by rw [Set.uIcc_of_le hpi3]; exact Set.Icc_subset_Icc le_rfl hpi2)).intervalIntegrable
     have hii_G2hi : IntervalIntegrable (fun φ ↦ Φc φ * (Complex.I * (Real.cos φ : ℂ)))
         volume (Real.pi / 2) (2 * Real.pi / 3) :=
-      (hG2cont.mono (by rw [Set.uIcc_of_le hpi2]; exact Set.Icc_subset_Icc hpi3 le_rfl)).intervalIntegrable
+      (hG2cont.mono
+        (by rw [Set.uIcc_of_le hpi2]; exact Set.Icc_subset_Icc hpi3 le_rfl)).intervalIntegrable
     -- The reflected first-piece integrand `θ ↦ cos θ•(−i·Φc(π−θ))` is continuous on `[π/3, π/2]`.
     have hΦc_refl_cont : ContinuousOn (fun θ ↦ Φc (Real.pi - θ))
         (Set.Icc (Real.pi / 3) (Real.pi / 2)) := by
@@ -1791,12 +1832,15 @@ include k Γ in
 /-- **The geometric edge ↔ segment matching (the single isolated hard residual).**
 
 After splitting the area integral of the divergence into its `g_x` and `g_y` halves and reducing the
-`g_y` half by the proven Type-I FTC `region_yhalf` (top-cap − arc boundary difference), the remaining
-identity is: the `g_x` region integral (the Type-II `∂_xF` half, evaluated by splitting the region at
+`g_y` half by the proven Type-I FTC `region_yhalf` (top-cap − arc boundary difference), the
+remaining
+identity is: the `g_x` region integral (the Type-II `∂_xF` half, evaluated by splitting the region
+at
 `x = 0` into two `x`-simple pieces with the kinked inner boundary `x = ±√((1−y²)⁺)`) **plus** the
 arc `dx`-term `∫_x Φ(x, fdArc x)` of the `g_y` half equals the **negated** five-segment contour sum.
 
-This is the genuinely laborious geometric bookkeeping of curvilinear region-Stokes (no missing mathlib
+This is the genuinely laborious geometric bookkeeping of curvilinear region-Stokes (no missing
+mathlib
 theorem):
 
 * the three **straight** edges match the three straight segments by affine reparametrisation
@@ -1836,7 +1880,8 @@ theorem region_xhalf_arc_segments (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : ℂ
           ∫ t in (4 / 5)..1,
             Fp (fdBoundaryFun H t) * starRingEnd ℂ (a (fdBoundaryFun H t)) *
               starRingEnd ℂ (segDeriv5 t)) := by
-  -- Reduce the `g_y` top/arc difference to its two pieces, then plug in (A), the three straight-edge
+  -- Reduce the `g_y` top/arc difference to its two pieces, then plug in (A), the three
+  -- straight-edge
   -- matches (Seg 1/4/5) and the arc reparametrisation (B); the rest is linear bookkeeping.
   have htopArc : (∫ x in Set.Ioo (-(1 / 2 : ℝ)) (1 / 2),
         (-PhiField Fp a (x, H) - -PhiField Fp a (x, fdArc x))) =
@@ -1916,18 +1961,22 @@ theorem region_stokes_eq_neg_contour (g : F) {m : ℕ} (P : SymPow ℂ m) (Fp : 
   rw [hsplit, region_yhalf g P Fp hFp had H hH hintY hyintY]
   -- **Step 3 — the remaining geometric edge ↔ segment matching.**  The `g_x` region integral
   -- (Type-II `∂_xF`, split at `x = 0` into two `x`-simple pieces) plus the arc `dx`-term of the
-  -- `g_y` half equals the negated five-segment contour sum.  Isolated as `region_xhalf_arc_segments`.
+  -- `g_y` half equals the negated five-segment contour sum.  Isolated as
+  -- `region_xhalf_arc_segments`.
   exact region_xhalf_arc_segments g P Fp hFp had hadc H hH
 
 /-- **The residual region-Stokes interface for the `fd`-tile (L3/L4 — the isolated analytic wall).**
 
 For a modular form `g` with period form `periodForm g P` and primitive `Fp` on `ℍ`, an
-antiholomorphic factor `conj ∘ a`, and a cap height `H`, the area integral over the (capped) standard
+antiholomorphic factor `conj ∘ a`, and a cap height `H`, the area integral over the (capped)
+standard
 fundamental-domain tile `fdo` of the exact `2`-form `-2i·periodForm g P·conj(a)` equals the contour
-integral of the `1`-form `ω = Fp·conj(a) dz̄` over the `5`-segment geodesic boundary `fdBoundaryFun H`
+integral of the `1`-form `ω = Fp·conj(a) dz̄` over the `5`-segment geodesic boundary
+`fdBoundaryFun H`
 of `ForMathlib/FDBoundary.lean`.
 
-This is exactly the rectangle Stokes `rectangle_stokes_periodForm` with the rectangle replaced by the
+This is exactly the rectangle Stokes `rectangle_stokes_periodForm` with the rectangle replaced by
+the
 curvilinear `fd`-tile (whose boundary has the two unit-circle arcs).  Its `∂_yG` half is founded and
 proven above (`integral_regionBetween_partialY` et al.); the residual `sorry` is the remaining
 *founded* bookkeeping (the `∂_xF` Type-II half, the boundary-piece assembly with the arc
@@ -1938,8 +1987,10 @@ reparametrisation, and the orientation sign — see the section docstring).  Onc
 boundary contour integral to the paired-edge period sum `rawPairing f (B.boundaryDivisor ⊗ P)`,
 discharging `FundamentalDomainBoundary.exists_pairedBoundary_periodPairingA_eq`.
 
-The statement is phrased abstractly as an *existence of a complex value* `Ibdry` equal both to the area
-integral and to a (signed) contour integral of `ω` along `fdBoundaryFun H`, so that it is independent
+The statement is phrased abstractly as an *existence of a complex value* `Ibdry` equal both to the
+area
+integral and to a (signed) contour integral of `ω` along `fdBoundaryFun H`, so that it is
+independent
 of the (downstream) precise contour-integral API while pinning the two sides that must agree.
 
 **Hypotheses & sign (corrected here).**  Two corrections relative to the original aspirational
@@ -1948,16 +1999,20 @@ interface, both forced by the mathematics:
 * `a` must be **holomorphic** (an antiholomorphic factor `conj ∘ a`): the exact-form identity `L1`
   needs `HasDerivAt a (a'der z) z`, and without any regularity the integrals are not even defined.
   We add the hypothesis `had`.
-* The five-segment contour `fdBoundaryFun H` is traversed **clockwise** (its signed area is negative,
+* The five-segment contour `fdBoundaryFun H` is traversed **clockwise** (its signed area is
+  negative,
   Seg 1 goes *down* the right edge), whereas the planar divergence theorem
   (`integral2_divergence_prod_of_hasFDerivAt`, the engine behind `rectangle_stokes_holAntihol`)
-  produces the **counter-clockwise** boundary integral `∮_{∂R,CCW}(F dy − G dx) = ∮_{∂R,CCW} ω`.  Hence
+  produces the **counter-clockwise** boundary integral `∮_{∂R,CCW}(F dy − G dx) = ∮_{∂R,CCW} ω`. 
+  Hence
   `∮_{γ} ω = −∮_{∂R,CCW} ω = −(area integral)`.  We therefore equate the area integral to the
   **negated** contour integral.  (Sanity check: for `Fp z = z`, `a ≡ 1`, `ω = z dz̄`, a direct
   computation on the CCW unit square gives `∮ z dz̄ = −2i = ∫∫(−2i) dx dy`, fixing the sign.)
 
-NB: the area integral is against the **planar Lebesgue measure** on `ℂ` (`volume`), restricted to the
-capped image `fdImageCapped H := {z | z ∈ image of fdo} ∩ {z.im < H}`, matching the exact-form output
+NB: the area integral is against the **planar Lebesgue measure** on `ℂ` (`volume`), restricted to
+the
+capped image `fdImageCapped H := {z | z ∈ image of fdo} ∩ {z.im < H}`, matching the exact-form
+output
 of `rectangle_stokes_periodForm` (the exact `2`-form `-2i·periodForm·conj(a)` is the coefficient of
 `dx∧dy`).  The conversion to the hyperbolic-measure Petersson integral inserts the `Sym`-weight
 matching `periodForm g P·conj(a) ↔ conj(f)·g·y^{k-2}/(-2i)`, which is the further `Sym^{k-2}`
@@ -1995,8 +2050,10 @@ theorem tile_stokes_fd {F : Type*} [FunLike F ℍ ℂ] {Γ : Subgroup (GL (Fin 2
     ← gXField_add_gYField g P Fp a a'der]
   -- The remaining identity is the founded curvilinear region-Stokes-to-contour reduction, isolated
   -- as `region_stokes_eq_neg_contour` (its founded backbone — divergence split, the proven Type-I
-  -- `region_yhalf`, the `contour_eq_five_segments` split, and the half-lemmas — is all in place; the
-  -- residual is the Type-II `∂_xF` arc-strip split, the four-edge↔five-segment matching with the arc
+  -- `region_yhalf`, the `contour_eq_five_segments` split, and the half-lemmas — is all in place;
+  -- the
+  -- residual is the Type-II `∂_xF` arc-strip split, the four-edge↔five-segment matching with the
+  -- arc
   -- reparametrisation, and integrability).
   exact region_stokes_eq_neg_contour g P Fp hFp had hadc H hH
 
@@ -2012,7 +2069,8 @@ noncomputable def symMon (m j : ℕ) : SymPow ℂ m :=
     omega⟩
 
 /-- `evalSym1 m (symMon m j) z = zʲ` for `j ≤ m`: the monomial `X₀ʲ X₁^{m-j}` evaluated at `(z, 1)`
-is `zʲ`.  (The first exponent is clamped to `min j m` so the polynomial is degree-`m` homogeneous for
+is `zʲ`.  (The first exponent is clamped to `min j m` so the polynomial is degree-`m` homogeneous
+for
 all `j`; for the binomial range `j ≤ m` the clamp is inert.) -/
 @[simp]
 theorem evalSym1_symMon (m j : ℕ) (hj : j ≤ m) (z : ℂ) : evalSym1 m (symMon m j) z = z ^ j := by
@@ -2083,7 +2141,8 @@ theorem petersson_binomial_periodForm {F G : Type*} [FunLike F ℍ ℂ] [FunLike
     periodForm_symMon_apply f n (n - j) (by omega) hz]
 
 /-- **`had`/`hadc` for a holomorphic period form.**  For a modular form `f` and coefficient `Q`, the
-period form `a := periodForm f Q` is holomorphic on the open upper half-plane, hence has a derivative
+period form `a := periodForm f Q` is holomorphic on the open upper half-plane, hence has a
+derivative
 `deriv a` at every interior point (`had`) whose derivative function is continuous on `{0 < im}`
 (`hadc`).  This is exactly the antiholomorphic-factor hypothesis bundle `tile_stokes_fd` requires of
 its `a`. -/
@@ -2096,17 +2155,21 @@ theorem periodForm_hasDerivAt_and_continuousOn_deriv {F : Type*} [FunLike F ℍ 
   refine ⟨fun z hz ↦ (hdiff.differentiableAt (hopen.mem_nhds hz)).hasDerivAt, ?_⟩
   exact ((hdiff.analyticOnNhd hopen).deriv).continuousOn
 
-/-- **Per-binomial-term `tile_stokes_fd` (deliverable 3, step 2 — fully proven).**  For each binomial
+/-- **Per-binomial-term `tile_stokes_fd` (deliverable 3, step 2 — fully proven).**  For each
+binomial
 index `j`, the `j`-th term `periodForm g (symMon n j) · conj(periodForm f (symMon n (n−j)))` of the
-binomial decomposition (`petersson_binomial_periodForm`) is *exactly* of `tile_stokes_fd`'s integrand
+binomial decomposition (`petersson_binomial_periodForm`) is *exactly* of `tile_stokes_fd`'s
+integrand
 shape, so the region-Stokes lemma applies: its area integral over the capped standard `fd`-tile
 equals the negated `5`-segment boundary contour integral of the exact `1`-form
 `Fpⱼ·conj(periodForm f (symMon n (n−j))) dz̄`, where `Fpⱼ` is a holomorphic primitive of
 `periodForm g (symMon n j)`.
 
 The antiholomorphic factor `a := periodForm f (symMon n (n−j))` is holomorphic (cusp forms are C¹),
-discharging `tile_stokes_fd`'s `had`/`hadc` via `periodForm_hasDerivAt_and_continuousOn_deriv`.  This
-is the concrete demonstration that `tile_stokes_fd` plugs in **per binomial term** — the step a prior
+discharging `tile_stokes_fd`'s `had`/`hadc` via `periodForm_hasDerivAt_and_continuousOn_deriv`. 
+This
+is the concrete demonstration that `tile_stokes_fd` plugs in **per binomial term** — the step a
+prior
 analysis wrongly believed impossible. -/
 theorem exists_tile_boundary_periodForm_term {F G : Type*} [FunLike F ℍ ℂ] [FunLike G ℍ ℂ]
     {Γ Γ' : Subgroup (GL (Fin 2) ℝ)} [ModularFormClass F Γ k] [ModularFormClass G Γ' k]
@@ -2150,10 +2213,12 @@ the fresh "Manin fundamental domain" angle).  For *any* `imageGamma1_PSL N`-fund
 fundamental domain `Gamma1_fundDomain_PSL N` equals the same combination over `D`.
 
 This is the *free* half of the Eichler–Shimura model change: because the Petersson integrand is
-`imageGamma1_PSL N`-invariant (`petersson_imageGamma1_PSL_invariant`) and both `Gamma1_fundDomain_PSL
+`imageGamma1_PSL N`-invariant (`petersson_imageGamma1_PSL_invariant`) and both
+`Gamma1_fundDomain_PSL
 N` and `D` are fundamental domains for the *same* group, `IsFundamentalDomain.setIntegral_eq` makes
 the two area integrals literally equal — no boundary deformation, no Stokes.  Choosing `D` to be a
-Manin ideal-cusp-triangle domain (cusp-geodesic-edge boundary) is what reduces the boundary period to
+Manin ideal-cusp-triangle domain (cusp-geodesic-edge boundary) is what reduces the boundary period
+to
 the cusp-edge contour integrals; constructing such a `D` with `IsFundamentalDomain` is the residual
 modular-curve infrastructure isolated in `exists_manin_fundDomain_boundary_period`. -/
 theorem symmetrised_petersson_fundDomain_eq
@@ -2184,7 +2249,8 @@ identifies opposite cusp-edges of the standard `Γ₁(N)` fundamental domain; it
 def maninSidePairing (N : ℕ) [NeZero N] : Gamma1 N :=
   ⟨maninSidePairingSL N, by simp [Gamma1_mem]⟩
 
-/-- The standard Manin base edge: the oriented cusp-geodesic from `0 = [(0 : ℚ) : 1]` to `∞ = [1 : 0]`
+/-- The standard Manin base edge: the oriented cusp-geodesic from `0 = [(0 : ℚ) : 1]` to
+`∞ = [1 : 0]`
 (the imaginary axis), as an `OrientedCuspEdge`.  Its `Γ₁(N)`-translates tile the fundamental-domain
 boundary; the unique unimodular edge `{0, ∞}` is Manin's standard symbol. -/
 noncomputable def maninBaseEdge : OrientedCuspEdge where
@@ -2197,14 +2263,16 @@ Manin (modular-symbol) model.
 
 * index set `ι = Bool` (finite, with decidable equality);
 * `edge false = e₀` (the standard unimodular edge `{0, ∞}`) and
-  `edge true = g₀ · reverse(e₀)` (its side-pairing partner, the `g₀`-translate of the reversed edge);
+  `edge true = g₀ · reverse(e₀)` (its side-pairing partner, the `g₀`-translate of the reversed
+  edge);
 * the involution `pair = swap false true` is fixed-point-free;
 * the side-pairing transformations are `γ false = g₀`, `γ true = g₀⁻¹`, with `g₀` the concrete
   nontrivial `maninSidePairing N`;
 * the side-pairing relation `edge (pair i) = (edge i).reverse.smul (γ i)` holds for both `i`.
 
 Its total boundary divisor is the genuine Manin boundary symbol
-`∂e₀ − div0Rep g₀ (∂e₀) = (1 − g₀)·∂e₀`, which is nonzero (it is *not* a vacuous reverse-pairing with
+`∂e₀ − div0Rep g₀ (∂e₀) = (1 − g₀)·∂e₀`, which is nonzero (it is *not* a vacuous reverse-pairing
+with
 `γ = 1`), so the M0 area-period identity it feeds is faithful. -/
 noncomputable def maninPairedBoundary (N : ℕ) [NeZero N] : PairedBoundary N where
   ι := Bool
@@ -2226,7 +2294,8 @@ noncomputable def maninPairedBoundary (N : ℕ) [NeZero N] : PairedBoundary N wh
 /-- **(M0, step 1 — FOUNDED, sorry-free) Coset-tiling reduction of the symmetrised area integral.**
 The symmetrised Petersson *area* integral over the Siegel coset-tiling fundamental domain
 `Gamma1_fundDomain_PSL N = ⋃_q (q.out)⁻¹ • fdo` equals the symmetrised finite sum, over the PSL
-coset space `PSL(2,ℤ) ⧸ imageGamma1_PSL N`, of the Petersson area integrals over the individual coset
+coset space `PSL(2,ℤ) ⧸ imageGamma1_PSL N`, of the Petersson area integrals over the individual
+coset
 tiles `(q.out)⁻¹ • fdo`:
 ```
   ∫_{D_N} pet(f,g) dμ + (-1)ⁿ • ∫_{D_N} pet(g,f) dμ
@@ -2234,9 +2303,12 @@ tiles `(q.out)⁻¹ • fdo`:
 ```
 This is the purely geometric reduction (no analysis, no Stokes): the proven tiling decomposition
 `setIntegral_Gamma1_fundDomain_PSL_eq_sum` applied to each of the two area integrals (the Petersson
-integrand is integrable on the fundamental domain by `integrableOn_petersson_Gamma1_fundDomain_PSL`).
-Per coset tile `(q.out)⁻¹ • fdo`, a measure-preserving `SL₂(ℤ)`-change-of-variables (`setIntegral_smul
-_eq` + `petersson_slash_SL`) brings the integrand back to the *standard* `SL₂(ℤ)` domain `fdo`, where
+integrand is integrable on the fundamental domain by
+`integrableOn_petersson_Gamma1_fundDomain_PSL`).
+Per coset tile `(q.out)⁻¹ • fdo`, a measure-preserving `SL₂(ℤ)`-change-of-variables
+(`setIntegral_smul
+_eq` + `petersson_slash_SL`) brings the integrand back to the *standard* `SL₂(ℤ)` domain `fdo`,
+where
 the per-tile region-Stokes lemma `tile_stokes_fd` and the binomial bridge
 `petersson_binomial_periodForm` apply per binomial term; that per-tile change-of-variables is folded
 into the boundary-assembly wall `maninFD_interior_edges_cancel`. -/
@@ -2268,7 +2340,8 @@ area integral over the *standard* open domain `fdo` of the integrand of the **sl
 This is the first concrete analytic piece of the per-tile reduction: the measure-preserving
 `SL₂(ℤ)`-change-of-variables `setIntegral_smul_eq` (the `SL₂(ℤ)`-action preserves `μ_hyp`) composed
 with the slash transformation `petersson_slash_SL` (`petersson k f g (σ • τ) = petersson k (f∣σ)
-(g∣σ) τ`).  Lifting `p ∈ PSL(2, ℤ)` to an `SL₂(ℤ)` representative `σ` (`QuotientGroup.mk_surjective`)
+(g∣σ) τ`).  Lifting `p ∈ PSL(2,
+ℤ)` to an `SL₂(ℤ)` representative `σ` (`QuotientGroup.mk_surjective`)
 makes the `PSL`-tile `p⁻¹ • fdo` literally the `SL`-tile `σ⁻¹ • fdo` (`PSL`-action descends from the
 `SL`-action on `ℍ`).  Sorry-free and axiom-clean; this is the (a)-piece that brings every coset tile
 back to the *standard* tile where the binomial bridge `petersson_binomial_periodForm` and the
@@ -2290,8 +2363,10 @@ theorem tile_area_eq_slashed_stdfdo (f g : CuspForm ((Gamma1 N).map (mapGL ℝ))
     · rw [hset, setIntegral_smul_eq]
       simp_rw [← petersson_slash_SL]
 
-/-- **(M0, step (d) — FOUNDED, sorry-free) The boundary period as the telescoped edge-potential sum.**
-For the concrete Manin paired boundary `maninPairedBoundary N` and any coefficient `P ∈ Sym^{k-2}(ℤ)`,
+/-- **(M0, step (d) — FOUNDED, sorry-free) The boundary period as the telescoped edge-potential
+sum.**
+For the concrete Manin paired boundary `maninPairedBoundary N` and any coefficient
+`P ∈ Sym^{k-2}(ℤ)`,
 twice the total boundary period of `f` is the finite sum, over the two paired edges, of the
 *edge-potential differences* of `f`'s cusp potential `V(c) = cuspValue f (castSymPow … P) c`:
 ```
@@ -2299,12 +2374,14 @@ twice the total boundary period of `f` is the finite sum, over the two paired ed
     ∑_i [ (V(head eᵢ) − V(tail eᵢ)) − (V(γᵢ·head eᵢ) − V(γᵢ·tail eᵢ)) ].
 ```
 This is the FTC / telescoping assembly half of the Green identity, **already founded** on proven
-library lemmas: the paired-edge collapse `two_smul_rawPairing_boundaryDivisor` (each `2•⟨period⟩` is a
+library lemmas: the paired-edge collapse `two_smul_rawPairing_boundaryDivisor` (each `2•⟨period⟩` is
+a
 finite sum of an edge period and a side-pairing cocycle period) and the edge-period FTC identity
 `rawPairing_edgeDivisor_eq_sub` (the period of `f` along an edge is the difference of its endpoint
 `cuspValue`s, obtained from `hasDerivAt_periodForm_primitive_vertical`/`_horizontal`,
 `cuspValue_eq_top_sub_botVal`, and the cap-vanishing `tendsto_horizontal_cap`).  It exhibits the
-boundary period purely as endpoint-potential data, so the genuine wall (c) below only has to *produce*
+boundary period purely as endpoint-potential data, so the genuine wall (c) below only has to
+*produce*
 that endpoint-potential data from the per-tile contours — the assembly back into `rawPairing f (∂F ⊗
 P)` is this sorry-free lemma. -/
 theorem two_smul_rawPairing_maninBoundary_eq_edgePotential_sum
@@ -2312,8 +2389,10 @@ theorem two_smul_rawPairing_maninBoundary_eq_edgePotential_sum
     (2 : ℤ) • rawPairing f ((maninPairedBoundary N).boundaryDivisor ⊗ₜ P) =
       ∑ i, ((cuspValue f (castSymPow m P) ((maninPairedBoundary N).edge i).head -
               cuspValue f (castSymPow m P) ((maninPairedBoundary N).edge i).tail) -
-            (cuspValue f (castSymPow m P) ((maninPairedBoundary N).γ i • ((maninPairedBoundary N).edge i).head) -
-              cuspValue f (castSymPow m P) ((maninPairedBoundary N).γ i • ((maninPairedBoundary N).edge i).tail))) := by
+            (cuspValue f (castSymPow m P)
+              ((maninPairedBoundary N).γ i • ((maninPairedBoundary N).edge i).head) -
+              cuspValue f (castSymPow m P)
+                ((maninPairedBoundary N).γ i • ((maninPairedBoundary N).edge i).tail))) := by
   rw [(maninPairedBoundary N).two_smul_rawPairing_boundaryDivisor f P]
   exact Finset.sum_congr rfl fun i _ ↦
     (maninPairedBoundary N).rawPairing_cocycle_summand f P i
@@ -2328,11 +2407,13 @@ the symmetrised Petersson *area* integral over the concrete Siegel fundamental d
   (Σ_q ∫_fdo pet(f∣(σq)⁻¹, g∣(σq)⁻¹)) + (-1)ⁿ•(Σ_q ∫_fdo pet(g∣(σq)⁻¹, f∣(σq)⁻¹))
     = ∫_{D_N} pet(f, g) dμ_hyp + (-1)ⁿ•∫_{D_N} pet(g, f) dμ_hyp.
 ```
-This is the **backward** of the change-of-variables `tile_area_eq_slashed_stdfdo` (each standard-tile
+This is the **backward** of the change-of-variables `tile_area_eq_slashed_stdfdo` (each
+standard-tile
 slashed integral is, by `setIntegral_smul_eq` + `petersson_slash_SL` with the lift `σ q` of `q.out`,
 the coset-tile integral `∫_{(q.out)⁻¹ • fdo} pet(f, g)`) composed with the proven tiling reduction
 `symmArea_eq_symm_stdTile_sum`.  It is the *proof of faithfulness* of the isolated core: the core's
-left-hand side is not vacuous — it is exactly the nonzero symmetrised area integral (whose `g = iⁿ f`
+left-hand side is not vacuous — it is exactly the nonzero symmetrised area integral (whose
+`g = iⁿ f`
 twisted diagonal is `2·iⁿ·(f, f)/c_N ≠ 0`), so a `c = 0` witness is genuinely unavailable. -/
 theorem slashed_stdfdo_sum_eq_symmArea (f g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k)
     (σ : (PSL(2, ℤ) ⧸ imageGamma1_PSL N) → SL(2, ℤ))
@@ -2371,14 +2452,16 @@ This is the *one irreducible fact* of the `k ≥ 2` Eichler–Shimura substrate,
 `SL₂(ℤ)` domain `fdo`, with the integrand replaced by that of the **slashed** cusp forms
 `f∣(σ q)⁻¹`, `g∣(σ q)⁻¹` for the `SL₂(ℤ)`-lift `σ q` of `q.out`.  The claim is that the symmetrised
 sum over the PSL coset tiling of these *standard-tile* slashed Petersson area integrals equals the
-Manin paired-boundary period `c · rawPairing f ((maninPairedBoundary N).boundaryDivisor ⊗ P)` for some
+Manin paired-boundary period `c · rawPairing f ((maninPairedBoundary N).boundaryDivisor ⊗ P)` for
+some
 coefficient `P ∈ Sym^{k-2}(ℤ)` and scalar `c`.
 
 Everything *around* this core is now proven and bolted on:
 * step (a) `tile_area_eq_slashed_stdfdo` (sorry-free) is the per-tile change-of-variables that turns
   the LHS of `maninFD_interior_edges_cancel` into exactly the LHS of this lemma;
 * step (d) `two_smul_rawPairing_maninBoundary_eq_edgePotential_sum` (sorry-free) is the FTC /
-  telescoping assembly that turns the RHS endpoint-`cuspValue` data back into `rawPairing f (∂F ⊗ P)`;
+  telescoping assembly that turns the RHS endpoint-`cuspValue` data back into
+  `rawPairing f (∂F ⊗ P)`;
 * the binomial weight bridge `petersson_binomial_periodForm`, the per-term region-Stokes
   `exists_tile_boundary_periodForm_term` (on top of `tile_stokes_fd`), the cap-vanishing
   `tendsto_horizontal_cap` (with `periodForm_norm_le`), and the abstract cycle telescoping
@@ -2402,18 +2485,23 @@ modular symbols / Eichler–Shimura boundary map):
    periods are the endpoint-`cuspValue` differences `rawPairing f (edge ⊗ P)`
    (`rawPairing_edgeDivisor_eq_sub`), assembled by step (d).
 
-It is faithfully stated: the left-hand side is the genuine symmetrised standard-tile slashed area sum
-(equal, by `tile_area_eq_slashed_stdfdo` + `symmArea_eq_symm_stdTile_sum`, to the nonzero symmetrised
+It is faithfully stated: the left-hand side is the genuine symmetrised standard-tile slashed area
+sum
+(equal, by `tile_area_eq_slashed_stdfdo` + `symmArea_eq_symm_stdTile_sum`, to the nonzero
+symmetrised
 area integral — its `g = iⁿ f` twisted diagonal is `2·iⁿ·(f,f)/c_N ≠ 0`), and the right-hand side
 pairs against the *genuine nonzero* Manin boundary symbol `(1 − g₀)·∂e₀` of `maninPairedBoundary N`,
-so a `c = 0` / `boundaryDivisor = 0` witness is *not* available.  This is the single remaining `k ≥ 2`
+so a `c = 0` / `boundaryDivisor = 0` witness is *not* available.  This is the single remaining
+`k ≥ 2`
 gap; the whole substrate's `sorryAx` traces solely to it.
 
 The lift family `σ` is constrained to be a genuine `SL₂(ℤ)`-lift of the coset representatives
-(`hσ : ∀ q, (σ q : PSL(2, ℤ)) = q.out`).  This hypothesis is **essential for faithfulness**: it makes
+(`hσ : ∀ q, (σ q : PSL(2, ℤ)) = q.out`).  This hypothesis is **essential for faithfulness**: it
+makes
 the standard-tile slashed integrals `∫_fdo petersson (f∣(σ q)⁻¹) (g∣(σ q)⁻¹)` equal (by the founded
 change-of-variables `tile_area_eq_slashed_stdfdo`, run backwards) to the genuine coset-tile area
-integrals `∫_{(q.out)⁻¹ • fdo} petersson f g` over the *fundamental-domain tiling* `Gamma1_fundDomain
+integrals `∫_{(q.out)⁻¹ • fdo} petersson f g` over the *fundamental-domain tiling*
+`Gamma1_fundDomain
 _PSL N = ⋃_q (q.out)⁻¹ • fdo`.  Without it, an arbitrary `σ` would not tile a fundamental domain and
 the left-hand side would not be the nonzero symmetrised area integral — so the statement is *not*
 vacuously true for arbitrary `σ`; it is the genuine Eichler–Shimura content for the actual coset
@@ -2440,7 +2528,8 @@ theorem interior_edges_cancel_sum (hk : 2 ≤ k)
   rw [slashed_stdfdo_sum_eq_symmArea f g σ hσ]
   sorry
 
-/-- **(M0, step 4 — THE WALL: interior-edge cancellation / Manin↔Siegel model change) Assembly of the
+/-- **(M0, step 4 — THE WALL: interior-edge cancellation / Manin↔Siegel model change) Assembly of
+the
 per-tile boundary contours into the Manin paired-boundary period** (now reduced, via the founded
 change-of-variables `tile_area_eq_slashed_stdfdo`, to the single genuine core
 `interior_edges_cancel_sum`; faithfully stated against the *concrete* `maninPairedBoundary N`).
@@ -2449,7 +2538,8 @@ After the founded coset-tiling reduction (`symmArea_eq_symm_stdTile_sum`) and th
 region-Stokes machinery — applied per coset tile `(q.out)⁻¹ • fdo` after the measure-preserving
 change-of-variables to the standard `SL₂(ℤ)` domain `fdo`: the binomial bridge
 `petersson_binomial_periodForm`, the per-term Stokes `exists_tile_boundary_periodForm_term` over
-`tile_stokes_fd`, the cap-vanishing `tendsto_horizontal_cap` (with `periodForm_norm_le`), and the FTC
+`tile_stokes_fd`, the cap-vanishing `tendsto_horizontal_cap` (with `periodForm_norm_le`), and the
+FTC
 edge potentials `hasDerivAt_periodForm_primitive_vertical`/`_horizontal` with
 `cuspValue_eq_top_sub_botVal` — the symmetrised **coset-tile** Petersson area sum equals
 `c · rawPairing f ((maninPairedBoundary N).boundaryDivisor ⊗ P)` for some coefficient
@@ -2457,7 +2547,8 @@ edge potentials `hasDerivAt_periodForm_primitive_vertical`/`_horizontal` with
 
 This is the genuine **modular-symbols boundary map** (Shimura (8.2.22), Diamond–Shurman §5.4): the
 single irreducible fact that, when the per-tile boundary contours over the `5`-segment `SL₂(ℤ)`-tile
-boundaries are summed across the coset tiling, the **interior edges shared by adjacent tiles cancel**
+boundaries are summed across the coset tiling, the **interior edges shared by adjacent tiles
+cancel**
 (traversed in opposite orientations — the side-pairing telescoping, abstractly
 `edgePotentialSum_cycle_eq_zero`) and the surviving outer cusp edges assemble, via the paired-edge
 collapse `two_smul_rawPairing_boundaryDivisor` and the edge-period identity
@@ -2467,7 +2558,8 @@ rational-cusp-geodesic (Manin) boundary edges, and with the per-tile `μ_hyp ↔
 change-of-variables conversion onto the standard `fdo`.  It has **no mathlib foothold** (mathlib has
 no modular curves / modular symbols / Eichler–Shimura boundary map).
 
-It is faithfully stated: the left-hand side is the genuine symmetrised coset-tile area sum (equal, by
+It is faithfully stated: the left-hand side is the genuine symmetrised coset-tile area sum (equal,
+by
 `symmArea_eq_symm_stdTile_sum`, to the nonzero symmetrised area integral — its `g = iⁿ f` twisted
 diagonal is `2·iⁿ·(f,f)/c_N ≠ 0`), and the right-hand side pairs against the *genuine nonzero* Manin
 boundary symbol `(1 − g₀)·∂e₀` of `maninPairedBoundary N`, so a `c = 0` / `boundaryDivisor = 0`
@@ -2497,16 +2589,19 @@ theorem maninFD_interior_edges_cancel (hk : 2 ≤ k)
 /-- **(M0) The area-integral → Manin-boundary-period identity** (now reduced to the single genuine
 wall `maninFD_interior_edges_cancel`).  For `k ≥ 2` and cusp forms `f, g`, the symmetrised Petersson
 *area* integral over the concrete Siegel fundamental domain `Gamma1_fundDomain_PSL N` equals
-`c · rawPairing f ((maninPairedBoundary N).boundaryDivisor ⊗ P)` for a coefficient `P ∈ Sym^{k-2}(ℤ)`
+`c · rawPairing f ((maninPairedBoundary N).boundaryDivisor ⊗ P)` for a coefficient
+`P ∈ Sym^{k-2}(ℤ)`
 and scalar `c`.
 
 This is the genuine Shimura (8.2.22) content.  It is now assembled from the **founded tiling /
 change-of-variables reduction** `symmArea_eq_symm_stdTile_sum` (sorry-free) and the **lone genuine
-wall** `maninFD_interior_edges_cancel` (the modular-symbols boundary map: interior-edge / side-pairing
+wall** `maninFD_interior_edges_cancel` (the modular-symbols boundary map: interior-edge /
+side-pairing
 telescoping fused with the Manin↔Siegel model change).  The proven reusable region-Stokes
 infrastructure — `petersson_binomial_periodForm`, `exists_tile_boundary_periodForm_term` (on top of
 `tile_stokes_fd`), `tendsto_horizontal_cap`, the FTC edge potentials, and
-`two_smul_rawPairing_boundaryDivisor` — discharges the per-tile Stokes / cap / FTC steps that feed the
+`two_smul_rawPairing_boundaryDivisor` — discharges the per-tile Stokes / cap / FTC steps that feed
+the
 wall.
 
 It is faithfully stated: the left-hand side is the genuine symmetrised area integral (it is *not*
@@ -2532,13 +2627,15 @@ fundamental domain `D` whose boundary is a `Γ₁(N)`-paired cycle of cusp-geode
 `PairedBoundary N`), such that the symmetrised Petersson *area* integral over `D` equals
 `c · rawPairing f (B.boundaryDivisor ⊗ P)`.
 
-This is the genuine irreducible core of the Eichler–Shimura Green's identity (Shimura (8.2.22)) after
+This is the genuine irreducible core of the Eichler–Shimura Green's identity (Shimura (8.2.22))
+after
 the `setIntegral_eq` model change has reduced the *Siegel* coset-tiling domain to a *Manin* ideal-
 triangle domain (`symmetrised_petersson_fundDomain_eq`).  Over an ideal triangle the period 1-form
 `ω = Fp·conj(a) dz̄` integrates along each cusp-geodesic edge directly to a `cuspValue` difference —
 `rawPairing f (edge ⊗ P)` (`rawPairing_edgeDivisor_eq_sub`) — and the `Γ₁(N)`-paired edges assemble
 via `two_smul_rawPairing_boundaryDivisor` into the total boundary period, with the cusp-vertex limit
-killed by cusp decay.  Its two genuinely-missing ingredients have **no mathlib foothold** (mathlib has
+killed by cusp decay.  Its two genuinely-missing ingredients have **no mathlib foothold** (mathlib
+has
 no modular curves / modular symbols / Eichler–Shimura map):
 
 * the **construction of `D`** — an ideal-triangle (cusp-vertex geodesic) tessellation of a `Γ₁(N)`
@@ -2548,13 +2645,15 @@ no modular curves / modular symbols / Eichler–Shimura map):
   over the non-compact cusp-vertex triangle, whose cusp-vertex cap limit (`H → ∞`) is controlled by
   cusp decay (`periodForm_norm_le`).
 
-The everything-around-it is proven: the binomial weight bridge (`petersson_binomial_periodForm`), the
+The everything-around-it is proven: the binomial weight bridge (`petersson_binomial_periodForm`),
+the
 per-tile / per-term region-Stokes (`exists_tile_boundary_periodForm_term`, on top of
 `tile_stokes_fd`), the paired-edge collapse (`two_smul_rawPairing_boundaryDivisor`), and — supplied
 here — the `setIntegral_eq` Siegel↔Manin model change (`symmetrised_petersson_fundDomain_eq`).
 
 It is faithfully stated: the symmetrised area integral over `D` is *not* identically zero (its
-`g = iⁿ f` twisted diagonal is `2·iⁿ·(f,f)/c_N ≠ 0`), so a `c = 0` / `boundaryDivisor = 0` witness is
+`g = iⁿ f` twisted diagonal is `2·iⁿ·(f,f)/c_N ≠ 0`), so a `c = 0` / `boundaryDivisor = 0` witness
+is
 *not* available. -/
 theorem exists_manin_fundDomain_boundary_period (hk : 2 ≤ k)
     (f g : CuspForm ((Gamma1 N).map (mapGL ℝ)) k) :
@@ -2580,9 +2679,11 @@ Petersson *area* combination over the concrete fundamental domain `Gamma1_fundDo
 equals `c · rawPairing f (B.boundaryDivisor ⊗ P)` for some `Γ₁(N)`-paired boundary `B`, coefficient
 `P ∈ Sym^{k-2}(ℤ)` and scalar `c`.
 
-This is exactly the Green/Stokes identity (Shimura (8.2.22)) *after* the `petN`-to-fundamental-domain
+This is exactly the Green/Stokes identity (Shimura (8.2.22)) *after* the
+`petN`-to-fundamental-domain
 collapse has been carried out: the left-hand side is the genuine area integral of the symmetrised
-Petersson form over the single fundamental domain `D_N = Gamma1_fundDomain_PSL N`, and the right-hand
+Petersson form over the single fundamental domain `D_N = Gamma1_fundDomain_PSL N`, and the
+right-hand
 side is the paired-edge boundary period of `f`.  All the surrounding reductions — the
 `petN`-to-`D_N`-integral collapse (`petN_eq_setIntegral_Gamma1_fundDomain_PSL`), the binomial weight
 bridge (`petersson_binomial_periodForm`), the per-term region-Stokes lemma
@@ -2594,7 +2695,8 @@ assembled by `rawPairing f (B.boundaryDivisor ⊗ P)`, together with the `H → 
 `Γ₁(N)`-coset telescoping (`setIntegral_Gamma1_smul_eq`).
 
 This is the lone deep analytic input of ES-4 (`k ≥ 2`); it has no mathlib foothold (mathlib has no
-modular curves / modular symbols / Eichler–Shimura map).  It is faithfully stated: the left-hand side
+modular curves / modular symbols / Eichler–Shimura map).  It is faithfully stated: the left-hand
+side
 is the genuine symmetrised area integral (it is *not* identically zero — its `g = iⁿ f` twisted
 diagonal is `2·iⁿ·(f,f)/c_N ≠ 0`), so a `c = 0` / `boundaryDivisor = 0` witness is *not* available.
 -/
@@ -2606,11 +2708,14 @@ theorem exists_pairedBoundary_fundDomain_petersson_eq (hk : 2 ≤ k)
             ∫ τ in Gamma1_fundDomain_PSL N, petersson k ⇑g ⇑f τ ∂μ_hyp =
         c * rawPairing f (B.boundaryDivisor ⊗ₜ P) := by
   -- **Fresh "Manin fundamental domain" angle.**  Obtain the Manin ideal-triangle fundamental domain
-  -- `D` together with its cusp-edge boundary-period identity (`exists_manin_fundDomain_boundary_period`,
+  -- `D` together with its cusp-edge boundary-period identity
+  -- (`exists_manin_fundDomain_boundary_period`,
   -- the lone residual modular-curve core), then transport the symmetrised area integral from the
-  -- *Siegel* coset-tiling domain `Gamma1_fundDomain_PSL N` to `D` by the free `setIntegral_eq` model
+  -- *Siegel* coset-tiling domain `Gamma1_fundDomain_PSL N` to `D` by the free `setIntegral_eq`
+  -- model
   -- change (`symmetrised_petersson_fundDomain_eq`, proven above from `Γ₁(N)`-invariance of the
-  -- integrand).  No boundary deformation is needed: both are fundamental domains for the same group.
+  -- integrand).  No boundary deformation is needed: both are fundamental domains for the same
+  -- group.
   obtain ⟨D, hD, B, P, c, hDeq⟩ := exists_manin_fundDomain_boundary_period hk f g
   exact ⟨B, P, c, (symmetrised_petersson_fundDomain_eq f g hD).trans hDeq⟩
 
