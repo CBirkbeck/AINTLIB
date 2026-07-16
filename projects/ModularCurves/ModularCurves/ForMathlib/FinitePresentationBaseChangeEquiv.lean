@@ -633,7 +633,7 @@ private theorem Presentation.spreadTensorMap_mk_X
     letI : Algebra (𝒮 i) (𝒮 j) := (t hij).toRingHom.toAlgebra
     P₁.spreadTensorMap (𝒮 := 𝒮) (t := t) (A := A) (uA := uA) hij P₂ f
         (Ideal.Quotient.mk _ (MvPolynomial.X v)) =
-      Ideal.Quotient.mk _
+      (@Ideal.Quotient.mk _ _ _ (Ideal.instIsTwoSided _))
         (MvPolynomial.map (algebraMap (𝒮 i) (𝒮 j))
           (P₂.σ (f (P₁.val v)))) := by
   letI : Algebra (𝒮 i) A := (uA i).toRingHom.toAlgebra
