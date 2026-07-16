@@ -751,21 +751,145 @@ theorem isClosed_nonnegSubring [CompleteSpace R] [NormOneClass R] :
   exact isClosed_iInter fun a => isClosed_iInter fun _ =>
     isClosed_eq (continuous_coeff a) continuous_const
 
+section NonnegEquiv
+
+variable [CompleteSpace R] [NormOneClass R]
+
+/-- The ℤ-indexed extension-by-zero of a restricted power series. -/
+noncomputable def ofPowerSeries (f : PowerSeries.Restricted R (1 : ℝ)) :
+    RestrictedLaurent R :=
+  ⟨fun a => if 0 ≤ a then PowerSeries.coeff a.toNat f.1 else 0, by
+    refine tendsto_cofinite_zero_of_finite (fun a => norm_nonneg _) fun ε hε => ?_
+    have hfin : {n : ℕ | ε ≤ ‖PowerSeries.coeff n f.1‖}.Finite := by
+      have h := (Restricted.isRestricted_iff_cofinite (R := R) 1).mp f.2
+      simp only [one_pow, mul_one] at h
+      have hev := h.eventually (eventually_lt_nhds hε (a := (0 : ℝ)))
+      rw [Filter.eventually_cofinite] at hev
+      exact hev.subset fun n hn => by simpa using not_lt.mpr hn
+    refine (hfin.image fun n : ℕ => (n : ℤ)).subset fun a ha => ?_
+    rw [Set.mem_setOf_eq] at ha
+    by_cases h0 : 0 ≤ a
+    · rw [if_pos h0] at ha
+      exact ⟨a.toNat, ha, show ((a.toNat : ℕ) : ℤ) = a from Int.toNat_of_nonneg h0⟩
+    · rw [if_neg h0, norm_zero] at ha
+      linarith⟩
+
+@[simp] theorem coeff_ofPowerSeries (f : PowerSeries.Restricted R (1 : ℝ)) (a : ℤ) :
+    (ofPowerSeries f).coeff a = if 0 ≤ a then PowerSeries.coeff a.toNat f.1 else 0 := rfl
+
+theorem ofPowerSeries_mem (f : PowerSeries.Restricted R (1 : ℝ)) :
+    ofPowerSeries f ∈ nonnegSubring R := fun a ha => by
+  simp [if_neg (by omega : ¬ (0 : ℤ) ≤ a)]
+
+theorem ofPowerSeries_mul (f g : PowerSeries.Restricted R (1 : ℝ)) :
+    ofPowerSeries (f * g) = ofPowerSeries f * ofPowerSeries g := by
+  classical
+  ext a
+  rw [coeff_mul]
+  by_cases h0 : 0 ≤ a
+  · -- the ℤ-convolution collapses to the finite `ℕ`-antidiagonal
+    have hvanish : ∀ x : ℤ, x ∉ Finset.Icc (0 : ℤ) a →
+        (ofPowerSeries f).coeff x * (ofPowerSeries g).coeff (a - x) = 0 := by
+      intro x hx
+      rw [Finset.mem_Icc, not_and_or] at hx
+      rcases hx with hx | hx
+      · rw [coeff_ofPowerSeries, if_neg (by omega), zero_mul]
+      · rw [coeff_ofPowerSeries (a := a - x), if_neg (by omega), mul_zero]
+    rw [tsum_eq_sum hvanish, coeff_ofPowerSeries, if_pos h0]
+    have hcoe : (f * g : PowerSeries.Restricted R (1 : ℝ)).1 = f.1 * g.1 := rfl
+    rw [hcoe, PowerSeries.coeff_mul]
+    have hbij : ∑ p ∈ Finset.antidiagonal a.toNat,
+        (PowerSeries.coeff p.1 f.1 * PowerSeries.coeff p.2 g.1 : R) =
+        ∑ x ∈ Finset.Icc (0 : ℤ) a,
+          (ofPowerSeries f).coeff x * (ofPowerSeries g).coeff (a - x) := by
+      refine Finset.sum_nbij' (i := fun p : ℕ × ℕ => ((p.1 : ℕ) : ℤ))
+        (j := fun x : ℤ => (x.toNat, a.toNat - x.toNat)) ?_ ?_ ?_ ?_ ?_
+      · intro p hp
+        rw [Finset.mem_antidiagonal] at hp
+        rw [Finset.mem_Icc]
+        omega
+      · intro x hx
+        rw [Finset.mem_Icc] at hx
+        rw [Finset.mem_antidiagonal]
+        omega
+      · intro p hp
+        rw [Finset.mem_antidiagonal] at hp
+        simp only [Int.toNat_natCast]
+        ext <;> omega
+      · intro x hx
+        rw [Finset.mem_Icc] at hx
+        omega
+      · intro p hp
+        rw [Finset.mem_antidiagonal] at hp
+        rw [coeff_ofPowerSeries, coeff_ofPowerSeries,
+          if_pos (by omega : (0 : ℤ) ≤ ((p.1 : ℕ) : ℤ)),
+          if_pos (by omega : (0 : ℤ) ≤ a - ((p.1 : ℕ) : ℤ)), Int.toNat_natCast,
+          show (a - ((p.1 : ℕ) : ℤ)).toNat = p.2 by omega]
+    exact hbij
+  · -- negative index: both sides vanish
+    have hz : ∀ x : ℤ,
+        (ofPowerSeries f).coeff x * (ofPowerSeries g).coeff (a - x) = 0 := by
+      intro x
+      rcases lt_or_ge x 0 with hx | hx
+      · rw [coeff_ofPowerSeries, if_neg (by omega), zero_mul]
+      · rw [coeff_ofPowerSeries (a := a - x), if_neg (by omega), mul_zero]
+    rw [(tsum_congr hz).trans tsum_zero, coeff_ofPowerSeries, if_neg h0]
+
 /-- The norm-preserving identification of `PowerSeries.Restricted R 1` (the vendored `R⟨W⟩`)
 with the nonnegative-support subring of `R⟨W, W⁻¹⟩`. -/
-noncomputable def nonnegEquiv [CompleteSpace R] [NormOneClass R] :
+noncomputable def nonnegEquiv :
     PowerSeries.Restricted R (1 : ℝ) ≃+* nonnegSubring R where
-  toFun := by sorry
-  invFun := by sorry
-  left_inv := by sorry
-  right_inv := by sorry
-  map_mul' := by sorry
-  map_add' := by sorry
+  toFun f := ⟨ofPowerSeries f, ofPowerSeries_mem f⟩
+  invFun F := ⟨PowerSeries.mk fun n => (F : RestrictedLaurent R).coeff n, by
+    show PowerSeries.IsRestricted (1 : ℝ) _
+    rw [Restricted.isRestricted_iff_cofinite]
+    simp only [PowerSeries.coeff_mk, one_pow, mul_one]
+    exact (F : RestrictedLaurent R).tendsto_coeff.comp
+      (Function.Injective.tendsto_cofinite Nat.cast_injective)⟩
+  left_inv f := by
+    apply Subtype.ext
+    ext n
+    simp only [PowerSeries.coeff_mk, coeff_ofPowerSeries,
+      if_pos (by omega : (0 : ℤ) ≤ (n : ℤ)), Int.toNat_natCast]
+  right_inv F := by
+    apply Subtype.ext
+    ext a
+    show (ofPowerSeries _).coeff a = _
+    rw [coeff_ofPowerSeries]
+    by_cases h0 : 0 ≤ a
+    · rw [if_pos h0, PowerSeries.coeff_mk, Int.toNat_of_nonneg h0]
+    · rw [if_neg h0, F.2 a (by omega)]
+  map_mul' f g := Subtype.ext (ofPowerSeries_mul f g)
+  map_add' f g := by
+    apply Subtype.ext
+    ext a
+    show (ofPowerSeries _).coeff a = (ofPowerSeries f).coeff a + (ofPowerSeries g).coeff a
+    simp only [coeff_ofPowerSeries]
+    by_cases h0 : 0 ≤ a
+    · simp only [if_pos h0]
+      exact map_add (PowerSeries.coeff a.toNat) _ _
+    · simp [if_neg h0]
+
+end NonnegEquiv
 
 /-- `nonnegEquiv` preserves norms. -/
 theorem nonnegEquiv_norm [CompleteSpace R] [NormOneClass R]
     (f : PowerSeries.Restricted R (1 : ℝ)) :
-    ‖((nonnegEquiv (R := R) f : nonnegSubring R) : RestrictedLaurent R)‖ = ‖f‖ := by sorry
+    ‖((nonnegEquiv (R := R) f : nonnegSubring R) : RestrictedLaurent R)‖ = ‖f‖ := by
+  show ‖ofPowerSeries f‖ = ‖f‖
+  rw [norm_def, Restricted.norm_eq]
+  refine le_antisymm (ciSup_le fun a => ?_) ?_
+  · by_cases h0 : 0 ≤ a
+    · rw [coeff_ofPowerSeries, if_pos h0]
+      have h := PowerSeries.le_gaussNorm norm 1 f.1 (Restricted.hasGaussNorm (R := R) 1 f) a.toNat
+      rwa [one_pow, mul_one] at h
+    · rw [coeff_ofPowerSeries, if_neg h0, norm_zero]
+      exact PowerSeries.gaussNorm_nonneg norm 1 f.1 norm_nonneg
+  · rw [PowerSeries.gaussNorm_eq]
+    refine Real.iSup_le (fun n => ?_) (gaussNorm_nonneg (ofPowerSeries f))
+    rw [one_pow, mul_one]
+    have h := norm_coeff_le_gaussNorm (ofPowerSeries f) (n : ℤ)
+    rwa [coeff_ofPowerSeries, if_pos (by omega : (0 : ℤ) ≤ (n : ℤ)), Int.toNat_natCast] at h
 
 /-- The norm-preserving embedding `R⟨W⟩ → R⟨W,W⁻¹⟩` (composite of `nonnegEquiv` with the
 subring inclusion). -/
@@ -774,10 +898,12 @@ noncomputable def ofRestricted [CompleteSpace R] [NormOneClass R] :
   (nonnegSubring R).subtype.comp (nonnegEquiv (R := R)).toRingHom
 
 theorem ofRestricted_norm [CompleteSpace R] [NormOneClass R]
-    (f : PowerSeries.Restricted R (1 : ℝ)) : ‖ofRestricted (R := R) f‖ = ‖f‖ := by sorry
+    (f : PowerSeries.Restricted R (1 : ℝ)) : ‖ofRestricted (R := R) f‖ = ‖f‖ :=
+  nonnegEquiv_norm f
 
 theorem ofRestricted_injective [CompleteSpace R] [NormOneClass R] :
-    Function.Injective (ofRestricted (R := R)) := by sorry
+    Function.Injective (ofRestricted (R := R)) := fun f g h =>
+  (nonnegEquiv (R := R)).injective (Subtype.ext h)
 
 end Nonneg
 

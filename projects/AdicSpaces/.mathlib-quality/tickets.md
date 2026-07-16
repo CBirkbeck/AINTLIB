@@ -82,7 +82,20 @@ T704, by a fresh `/develop --continue`.
 ### [CLEANUP-1] /cleanup `RestrictedLaurent.lean` — **Depends**: T103.
 
 ### [T104] `RestrictedLaurent.lean` — nonneg subring, `nonnegEquiv`, `evalHom`
-- **Status**: open | **Depends**: CLEANUP-1 | **Type**: def-completion + proofs (L1.4)
+- **Status**: in_progress (beastmode 2026-07-16). DONE: `nonnegSubring` (incl. convolution
+  support closure), `coeff_sub`, `continuous_coeff` (1-Lipschitz), `isClosed_nonnegSubring`,
+  `ofPowerSeries` + `nonnegEquiv` complete (multiplicativity via `tsum_eq_sum` on
+  `Finset.Icc 0 a` + `Finset.sum_nbij'` against the ℕ-antidiagonal), `nonnegEquiv_norm`
+  (via `PowerSeries.le_gaussNorm`/`gaussNorm_eq` + `Real.iSup_le`), `ofRestricted_norm`,
+  `ofRestricted_injective`. REMAINING: the `evalHom` cluster (9 sorries). Continuation
+  plan: (i) define the negation ring automorphism `negate : L ≃+* L` (coeff a ↦ coeff (−a);
+  multiplicativity by `Equiv.neg` reindexing of the convolution); (ii)
+  `negEval := (nonnegSubring R).subtype ∘ negate ∘ nonnegEquiv` sends `V ↦ W⁻¹`;
+  (iii) realise `K⟨W,V⟩ ≅ (K⟨V⟩)⟨W⟩` by the vendored `MvRestricted.finSuccEquiv`/`foo`
+  isometries and set `evalHom F := ∑' i, negEval (cᵢ) * Wu.val ^ i` (summable by decay);
+  hom fields via mathlib `tsum_mul_tsum_of_nonarchimedean`; surjectivity via the monomial
+  section (split a Laurent series into nonneg + neg parts); norm bound via
+  `norm_tsum_le_of_forall_le`. | **Depends**: CLEANUP-1 | **Type**: def-completion (L1.4)
 - **Sorries**: `nonnegSubring` closure fields, `isClosed_nonnegSubring`, `nonnegEquiv`
   (data + proofs), `nonnegEquiv_norm`, `ofRestricted_norm/injective`, `evalHom` (data +
   fields), `evalHom_surjective`, `evalHom_norm_le`.
