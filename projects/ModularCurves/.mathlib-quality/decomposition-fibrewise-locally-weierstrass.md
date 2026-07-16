@@ -957,11 +957,12 @@ projection and pullback-isomorphism helpers, passes both morphisms explicitly to
 lemmas, and adds no hypothesis or proof-resource option. Its focused build is green, and all four
 new public declarations have axiom audit exactly `propext`, `Classical.choice`, and `Quot.sound`.
 
-Active dependency claim (2026-07-16): prove
+Completed dependency claim (2026-07-16): proved
 `Algebra.SpreadData.FunctorModel.exists_affineIntersectionConditionsAndSeparatedAtLaterStage`.
 For a finite affine-intersection functor whose open, pushout, and canonical pair-map surjectivity
-conditions hold over the filtered colimit, produce one later functor stage satisfying all three
-conditions simultaneously. The proof must consume
-`IsFilteredAlgColimit.exists_tensorProductMap_surjective`, use only private tensor
+conditions hold over the filtered colimit, one later functor stage now satisfies all three
+conditions simultaneously. The proof consumes
+`IsFilteredAlgColimit.exists_tensorProductMap_surjective`, uses only private tensor
 base-change coherence helpers built from mathlib's `TensorProduct.assoc`, `cancelBaseChange`, and
-`congr`, and add no hypothesis, duplicate monoidal API, or proof-resource option.
+`congr`, and adds no hypothesis, duplicate monoidal API, or proof-resource option. Its focused
+build is green and its axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`.

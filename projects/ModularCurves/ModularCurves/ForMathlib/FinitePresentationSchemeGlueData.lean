@@ -200,6 +200,615 @@ variable {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
   {F : Finset J ⥤ CommAlgCat.{u} S}
   {H : Algebra.IsFilteredAlgColimit R 𝒮 t S uS}
 
+section Separated
+
+open Algebra TensorProduct
+
+private noncomputable def pairTensorBaseChangeEquiv
+    {S₀ T C₁ C₂ : Type u}
+    [CommRing S₀] [CommRing T] [CommRing C₁] [CommRing C₂]
+    [Algebra S₀ T] [Algebra S₀ C₁] [Algebra S₀ C₂] :
+    (T ⊗[S₀] (C₁ ⊗[S₀] C₂)) ≃ₐ[T]
+      (T ⊗[S₀] C₁) ⊗[T] (T ⊗[S₀] C₂) :=
+  (Algebra.TensorProduct.assoc S₀ S₀ T T C₁ C₂).symm.trans
+    (Algebra.TensorProduct.cancelBaseChange S₀ T T (T ⊗[S₀] C₁) C₂).symm
+
+private theorem pairTensorBaseChangeEquiv_tmul
+    {S₀ T C₁ C₂ : Type u}
+    [CommRing S₀] [CommRing T] [CommRing C₁] [CommRing C₂]
+    [Algebra S₀ T] [Algebra S₀ C₁] [Algebra S₀ C₂]
+    (a : T) (x : C₁) (y : C₂) :
+    pairTensorBaseChangeEquiv (S₀ := S₀) (T := T) (C₁ := C₁) (C₂ := C₂)
+        (a ⊗ₜ[S₀] (x ⊗ₜ[S₀] y)) =
+      (a ⊗ₜ[S₀] x) ⊗ₜ[T] (1 ⊗ₜ[S₀] y) := by
+  rw [pairTensorBaseChangeEquiv, AlgEquiv.trans_apply,
+    Algebra.TensorProduct.assoc_symm_tmul,
+    Algebra.TensorProduct.cancelBaseChange_symm_tmul]
+
+private abbrev separatedStageSingleton
+    (M : SpreadData.FunctorModel F H) (i : J) : Type u :=
+  (M.object (affineIntersectionSingletonIndex i)).spreadStage
+    (t := t) (M.le_stage (affineIntersectionSingletonIndex i))
+
+private abbrev separatedStagePairTensor
+    (M : SpreadData.FunctorModel F H) (i j : J) : Type u :=
+  TensorProduct (𝒮 M.stage) (separatedStageSingleton M i) (separatedStageSingleton M j)
+
+private abbrev separatedStagePair
+    (M : SpreadData.FunctorModel F H) (i j : J) : Type u :=
+  (M.object (affineIntersectionPairIndex i j)).spreadStage
+    (t := t) (M.le_stage (affineIntersectionPairIndex i j))
+
+private abbrev separatedLaterStageSingleton
+    (M : SpreadData.FunctorModel F H) {k : ι} (hik : M.stage ≤ k) (i : J) : Type u :=
+  (M.object (affineIntersectionSingletonIndex i)).spreadStage
+    (t := t) ((M.le_stage (affineIntersectionSingletonIndex i)).trans hik)
+
+private abbrev separatedLaterStagePairTensor
+    (M : SpreadData.FunctorModel F H) {k : ι} (hik : M.stage ≤ k) (i j : J) : Type u :=
+  TensorProduct (𝒮 k) (separatedLaterStageSingleton M hik i)
+    (separatedLaterStageSingleton M hik j)
+
+private abbrev separatedLaterStagePair
+    (M : SpreadData.FunctorModel F H) {k : ι} (hik : M.stage ≤ k) (i j : J) : Type u :=
+  (M.object (affineIntersectionPairIndex i j)).spreadStage
+    (t := t) ((M.le_stage (affineIntersectionPairIndex i j)).trans hik)
+
+private noncomputable instance separatedScalarExtensionCommRing
+    (M : SpreadData.FunctorModel F H) (i j : J)
+    [hA : Algebra (𝒮 M.stage) S] :
+    CommRing (TensorProduct (𝒮 M.stage) S (separatedStagePairTensor M i j)) :=
+  @TensorProduct.instCommRing
+    (𝒮 M.stage) S (separatedStagePairTensor M i j)
+    (inferInstance) (inferInstance) hA (inferInstance) (inferInstance)
+
+private noncomputable instance separatedScalarExtensionAlgebra
+    (M : SpreadData.FunctorModel F H) (i j : J)
+    [hA : Algebra (𝒮 M.stage) S] :
+    Algebra S (TensorProduct (𝒮 M.stage) S (separatedStagePairTensor M i j)) :=
+  @Algebra.TensorProduct.leftAlgebra
+    (𝒮 M.stage) S S (separatedStagePairTensor M i j)
+    (inferInstance) (inferInstance) hA
+    (inferInstance) (inferInstance) (inferInstance) (inferInstance) (inferInstance)
+
+private abbrev separatedPairStageScalarExtension
+    (M : SpreadData.FunctorModel F H) (k : ι) (i j : J)
+    [Algebra (𝒮 M.stage) (𝒮 k)] : Type u :=
+  TensorProduct (𝒮 M.stage) (𝒮 k) (separatedStagePairTensor M i j)
+
+private noncomputable instance separatedPairStageScalarExtensionCommRing
+    (M : SpreadData.FunctorModel F H) (k : ι) (i j : J)
+    [h : Algebra (𝒮 M.stage) (𝒮 k)] :
+    CommRing (separatedPairStageScalarExtension M k i j) :=
+  @TensorProduct.instCommRing
+    (𝒮 M.stage) (𝒮 k) (separatedStagePairTensor M i j)
+    (inferInstance) (inferInstance) h (inferInstance) (inferInstance)
+
+private noncomputable instance separatedPairStageScalarExtensionAlgebra
+    (M : SpreadData.FunctorModel F H) (k : ι) (i j : J)
+    [h : Algebra (𝒮 M.stage) (𝒮 k)] :
+    Algebra (𝒮 k) (separatedPairStageScalarExtension M k i j) :=
+  @Algebra.TensorProduct.leftAlgebra
+    (𝒮 M.stage) (𝒮 k) (𝒮 k) (separatedStagePairTensor M i j)
+    (inferInstance) (inferInstance) h
+    (inferInstance) (inferInstance) (inferInstance) (inferInstance) (inferInstance)
+
+private noncomputable def separatedStagePairMap
+    (M : SpreadData.FunctorModel F H) (i j : J) :
+    (M.object (affineIntersectionSingletonIndex i)).spreadStage
+          (t := t) (M.le_stage (affineIntersectionSingletonIndex i)) ⊗[𝒮 M.stage]
+        (M.object (affineIntersectionSingletonIndex j)).spreadStage
+          (t := t) (M.le_stage (affineIntersectionSingletonIndex j)) →ₐ[𝒮 M.stage]
+      (M.object (affineIntersectionPairIndex i j)).spreadStage
+        (t := t) (M.le_stage (affineIntersectionPairIndex i j)) :=
+  Algebra.TensorProduct.productMap
+    (M.map (affineIntersectionSingletonToPair i j))
+    (M.map (affineIntersectionSingletonToPairRight i j))
+
+private noncomputable def separatedPairMapColimitSourceEquiv
+    (M : SpreadData.FunctorModel F H) (i j : J) :
+    letI : Algebra (𝒮 M.stage) S := (uS M.stage).toRingHom.toAlgebra
+    TensorProduct (𝒮 M.stage) S (separatedStagePairTensor M i j) ≃ₐ[S]
+      (F.obj (affineIntersectionSingletonIndex i) ⊗[S]
+        F.obj (affineIntersectionSingletonIndex j)) := by
+  letI : Algebra (𝒮 M.stage) S := (uS M.stage).toRingHom.toAlgebra
+  exact (pairTensorBaseChangeEquiv
+      (S₀ := 𝒮 M.stage) (T := S)
+      (C₁ := separatedStageSingleton M i)
+      (C₂ := separatedStageSingleton M j)).trans
+    (Algebra.TensorProduct.congr
+      ((M.object (affineIntersectionSingletonIndex i)).baseChangeColimEquiv
+        (M.le_stage (affineIntersectionSingletonIndex i)) H)
+      ((M.object (affineIntersectionSingletonIndex j)).baseChangeColimEquiv
+        (M.le_stage (affineIntersectionSingletonIndex j)) H))
+
+private noncomputable def separatedPairMapStageSourceEquiv
+    (M : SpreadData.FunctorModel F H) {k : ι} (hik : M.stage ≤ k) (i j : J) :
+    letI : Algebra (𝒮 M.stage) (𝒮 k) := (t hik).toRingHom.toAlgebra
+    separatedPairStageScalarExtension M k i j ≃ₐ[𝒮 k]
+      separatedLaterStagePairTensor M hik i j := by
+  letI : Algebra (𝒮 M.stage) (𝒮 k) := (t hik).toRingHom.toAlgebra
+  exact (pairTensorBaseChangeEquiv
+      (S₀ := 𝒮 M.stage) (T := 𝒮 k)
+      (C₁ := separatedStageSingleton M i)
+      (C₂ := separatedStageSingleton M j)).trans
+    (Algebra.TensorProduct.congr
+      ((M.object (affineIntersectionSingletonIndex i)).spreadStageBaseChangeEquiv
+        hik (M.le_stage (affineIntersectionSingletonIndex i)) H)
+      ((M.object (affineIntersectionSingletonIndex j)).spreadStageBaseChangeEquiv
+        hik (M.le_stage (affineIntersectionSingletonIndex j)) H))
+
+private theorem separatedPairMapStageSourceEquiv_tmul
+    (M : SpreadData.FunctorModel F H) {k : ι} (hik : M.stage ≤ k) (i j : J)
+    (x : separatedStageSingleton M i) (y : separatedStageSingleton M j) :
+    letI : Algebra (𝒮 M.stage) (𝒮 k) := (t hik).toRingHom.toAlgebra
+    separatedPairMapStageSourceEquiv M hik i j
+        (1 ⊗ₜ[𝒮 M.stage] (x ⊗ₜ[𝒮 M.stage] y)) =
+      (M.object (affineIntersectionSingletonIndex i)).spreadStageBaseChangeEquiv
+          hik (M.le_stage (affineIntersectionSingletonIndex i)) H
+          (1 ⊗ₜ[𝒮 M.stage] x) ⊗ₜ[𝒮 k]
+        (M.object (affineIntersectionSingletonIndex j)).spreadStageBaseChangeEquiv
+          hik (M.le_stage (affineIntersectionSingletonIndex j)) H
+          (1 ⊗ₜ[𝒮 M.stage] y) := by
+  letI : Algebra (𝒮 M.stage) (𝒮 k) := (t hik).toRingHom.toAlgebra
+  rw [separatedPairMapStageSourceEquiv, AlgEquiv.trans_apply,
+    pairTensorBaseChangeEquiv_tmul, Algebra.TensorProduct.congr_apply,
+    Algebra.TensorProduct.map_tmul]
+  rfl
+
+private noncomputable def separatedLaterStagePairMap
+    (M : SpreadData.FunctorModel F H) {k : ι} (hik : M.stage ≤ k) (i j : J) :
+    separatedLaterStagePairTensor M hik i j →ₐ[𝒮 k] separatedLaterStagePair M hik i j :=
+  Algebra.TensorProduct.productMap
+    ((M.object (affineIntersectionSingletonIndex i)).mapAtLaterStage
+      (M.object (affineIntersectionPairIndex i j)) H
+      (M.le_stage (affineIntersectionSingletonIndex i))
+      (M.le_stage (affineIntersectionPairIndex i j)) hik
+      (M.map (affineIntersectionSingletonToPair i j)))
+    ((M.object (affineIntersectionSingletonIndex j)).mapAtLaterStage
+      (M.object (affineIntersectionPairIndex i j)) H
+      (M.le_stage (affineIntersectionSingletonIndex j))
+      (M.le_stage (affineIntersectionPairIndex i j)) hik
+      (M.map (affineIntersectionSingletonToPairRight i j)))
+
+private theorem separatedLaterStagePairMap_baseChange_tmul
+    (M : SpreadData.FunctorModel F H) {k : ι} (hik : M.stage ≤ k) (i j : J)
+    (x : separatedStageSingleton M i) (y : separatedStageSingleton M j) :
+    letI : Algebra (𝒮 M.stage) (𝒮 k) := (t hik).toRingHom.toAlgebra
+    separatedLaterStagePairMap M hik i j
+        (separatedPairMapStageSourceEquiv M hik i j
+          (1 ⊗ₜ[𝒮 M.stage] (x ⊗ₜ[𝒮 M.stage] y))) =
+      (M.object (affineIntersectionPairIndex i j)).spreadStageBaseChangeEquiv
+        hik (M.le_stage (affineIntersectionPairIndex i j)) H
+        (Algebra.TensorProduct.map (AlgHom.id (𝒮 k) (𝒮 k))
+          (separatedStagePairMap M i j)
+          (1 ⊗ₜ[𝒮 M.stage] (x ⊗ₜ[𝒮 M.stage] y))) := by
+  letI : Algebra (𝒮 M.stage) (𝒮 k) := (t hik).toRingHom.toAlgebra
+  rw [separatedPairMapStageSourceEquiv_tmul,
+    (M.object (affineIntersectionSingletonIndex i)).spreadStageBaseChangeEquiv_tmul,
+    (M.object (affineIntersectionSingletonIndex j)).spreadStageBaseChangeEquiv_tmul,
+    separatedLaterStagePairMap, Algebra.TensorProduct.productMap_apply_tmul,
+    (M.object (affineIntersectionSingletonIndex i)).mapAtLaterStage_stageTransition,
+    (M.object (affineIntersectionSingletonIndex j)).mapAtLaterStage_stageTransition,
+    Algebra.TensorProduct.map_tmul, AlgHom.id_apply, separatedStagePairMap,
+    Algebra.TensorProduct.productMap_apply_tmul,
+    (M.object (affineIntersectionPairIndex i j)).spreadStageBaseChangeEquiv_tmul,
+    map_mul]
+
+private theorem separatedLaterStagePairMap_baseChange_one_tmul
+    (M : SpreadData.FunctorModel F H) {k : ι} (hik : M.stage ≤ k) (i j : J)
+    (z : separatedStagePairTensor M i j) :
+    letI : Algebra (𝒮 M.stage) (𝒮 k) := (t hik).toRingHom.toAlgebra
+    separatedLaterStagePairMap M hik i j
+        (separatedPairMapStageSourceEquiv M hik i j
+          (1 ⊗ₜ[𝒮 M.stage] z)) =
+      (M.object (affineIntersectionPairIndex i j)).spreadStageBaseChangeEquiv
+        hik (M.le_stage (affineIntersectionPairIndex i j)) H
+        (Algebra.TensorProduct.map (AlgHom.id (𝒮 k) (𝒮 k))
+          (separatedStagePairMap M i j) (1 ⊗ₜ[𝒮 M.stage] z)) := by
+  letI : Algebra (𝒮 M.stage) (𝒮 k) := (t hik).toRingHom.toAlgebra
+  induction z using TensorProduct.induction_on with
+  | zero => simp only [tmul_zero, map_zero]
+  | add x y hx hy =>
+      rw [tmul_add]
+      calc
+        _ = separatedLaterStagePairMap M hik i j
+            (separatedPairMapStageSourceEquiv M hik i j (1 ⊗ₜ[𝒮 M.stage] x) +
+              separatedPairMapStageSourceEquiv M hik i j (1 ⊗ₜ[𝒮 M.stage] y)) :=
+          congrArg _ ((separatedPairMapStageSourceEquiv M hik i j).map_add _ _)
+        _ = separatedLaterStagePairMap M hik i j
+                (separatedPairMapStageSourceEquiv M hik i j (1 ⊗ₜ[𝒮 M.stage] x)) +
+              separatedLaterStagePairMap M hik i j
+                (separatedPairMapStageSourceEquiv M hik i j (1 ⊗ₜ[𝒮 M.stage] y)) :=
+          (separatedLaterStagePairMap M hik i j).map_add _ _
+        _ = (M.object (affineIntersectionPairIndex i j)).spreadStageBaseChangeEquiv
+                hik (M.le_stage (affineIntersectionPairIndex i j)) H
+                (Algebra.TensorProduct.map (AlgHom.id (𝒮 k) (𝒮 k))
+                  (separatedStagePairMap M i j) (1 ⊗ₜ[𝒮 M.stage] x)) +
+              (M.object (affineIntersectionPairIndex i j)).spreadStageBaseChangeEquiv
+                hik (M.le_stage (affineIntersectionPairIndex i j)) H
+                (Algebra.TensorProduct.map (AlgHom.id (𝒮 k) (𝒮 k))
+                  (separatedStagePairMap M i j) (1 ⊗ₜ[𝒮 M.stage] y)) :=
+          congrArg₂ (· + ·) hx hy
+        _ = (M.object (affineIntersectionPairIndex i j)).spreadStageBaseChangeEquiv
+              hik (M.le_stage (affineIntersectionPairIndex i j)) H
+              (Algebra.TensorProduct.map (AlgHom.id (𝒮 k) (𝒮 k))
+                  (separatedStagePairMap M i j) (1 ⊗ₜ[𝒮 M.stage] x) +
+                Algebra.TensorProduct.map (AlgHom.id (𝒮 k) (𝒮 k))
+                  (separatedStagePairMap M i j) (1 ⊗ₜ[𝒮 M.stage] y)) :=
+          ((M.object (affineIntersectionPairIndex i j)).spreadStageBaseChangeEquiv
+            hik (M.le_stage (affineIntersectionPairIndex i j)) H).map_add _ _ |>.symm
+        _ = _ := congrArg _
+          ((Algebra.TensorProduct.map (AlgHom.id (𝒮 k) (𝒮 k))
+            (separatedStagePairMap M i j)).map_add _ _).symm
+  | tmul x y => exact separatedLaterStagePairMap_baseChange_tmul M hik i j x y
+
+private theorem separatedLaterStagePairMap_baseChange
+    (M : SpreadData.FunctorModel F H) {k : ι} (hik : M.stage ≤ k) (i j : J) :
+    letI : Algebra (𝒮 M.stage) (𝒮 k) := (t hik).toRingHom.toAlgebra
+    (separatedLaterStagePairMap M hik i j).comp
+        (separatedPairMapStageSourceEquiv M hik i j).toAlgHom =
+      ((M.object (affineIntersectionPairIndex i j)).spreadStageBaseChangeEquiv
+        hik (M.le_stage (affineIntersectionPairIndex i j)) H).toAlgHom.comp
+        (Algebra.TensorProduct.map (AlgHom.id (𝒮 k) (𝒮 k))
+          (separatedStagePairMap M i j)) := by
+  letI : Algebra (𝒮 M.stage) (𝒮 k) := (t hik).toRingHom.toAlgebra
+  apply AlgHom.ext
+  intro z
+  induction z using TensorProduct.induction_on with
+  | zero => simp only [map_zero]
+  | add x y hx hy =>
+      let lhs := (separatedLaterStagePairMap M hik i j).comp
+        (separatedPairMapStageSourceEquiv M hik i j).toAlgHom
+      let rhs :=
+        ((M.object (affineIntersectionPairIndex i j)).spreadStageBaseChangeEquiv
+          hik (M.le_stage (affineIntersectionPairIndex i j)) H).toAlgHom.comp
+          (Algebra.TensorProduct.map (AlgHom.id (𝒮 k) (𝒮 k))
+            (separatedStagePairMap M i j))
+      change lhs (x + y) = rhs (x + y)
+      calc
+        lhs (x + y) = lhs x + lhs y := lhs.map_add x y
+        _ = rhs x + rhs y := congrArg₂ (· + ·) hx hy
+        _ = rhs (x + y) := (rhs.map_add x y).symm
+  | tmul a x =>
+      rw [TensorProduct.tmul_eq_smul_one_tmul]
+      simp only [AlgHom.comp_apply, map_smul]
+      exact congrArg (a • ·) (separatedLaterStagePairMap_baseChange_one_tmul M hik i j x)
+
+private theorem separatedLaterStagePairMap_surjective_of_baseChange
+    (M : SpreadData.FunctorModel F H) {k : ι} (hik : M.stage ≤ k) (i j : J)
+    (hbase :
+      letI : Algebra (𝒮 M.stage) (𝒮 k) := (t hik).toRingHom.toAlgebra
+      Function.Surjective
+        (Algebra.TensorProduct.map (AlgHom.id (𝒮 M.stage) (𝒮 k))
+          (separatedStagePairMap M i j))) :
+    Function.Surjective (separatedLaterStagePairMap M hik i j) := by
+  letI : Algebra (𝒮 M.stage) (𝒮 k) := (t hik).toRingHom.toAlgebra
+  let sourceEquiv := separatedPairMapStageSourceEquiv M hik i j
+  let targetEquiv :=
+    (M.object (affineIntersectionPairIndex i j)).spreadStageBaseChangeEquiv
+      hik (M.le_stage (affineIntersectionPairIndex i j)) H
+  intro y
+  obtain ⟨yBase, hy⟩ := targetEquiv.surjective y
+  obtain ⟨zBase, hz⟩ := hbase yBase
+  refine ⟨sourceEquiv zBase, ?_⟩
+  calc
+    separatedLaterStagePairMap M hik i j (sourceEquiv zBase) =
+        targetEquiv
+          (Algebra.TensorProduct.map (AlgHom.id (𝒮 k) (𝒮 k))
+            (separatedStagePairMap M i j) zBase) :=
+      AlgHom.congr_fun (separatedLaterStagePairMap_baseChange M hik i j) zBase
+    _ = targetEquiv yBase := congrArg targetEquiv hz
+    _ = y := hy
+
+private theorem separatedLaterStagePairMap_trans
+    (M : SpreadData.FunctorModel F H) {k l : ι}
+    (hik : M.stage ≤ k) (hkl : k ≤ l) (i j : J) :
+    separatedLaterStagePairMap (M.mapToStage hik) hkl i j =
+      separatedLaterStagePairMap M (hik.trans hkl) i j := by
+  change Algebra.TensorProduct.productMap
+      ((M.object (affineIntersectionSingletonIndex i)).mapAtLaterStage
+        (M.object (affineIntersectionPairIndex i j)) H
+        ((M.le_stage (affineIntersectionSingletonIndex i)).trans hik)
+        ((M.le_stage (affineIntersectionPairIndex i j)).trans hik) hkl
+        ((M.object (affineIntersectionSingletonIndex i)).mapAtLaterStage
+          (M.object (affineIntersectionPairIndex i j)) H
+          (M.le_stage (affineIntersectionSingletonIndex i))
+          (M.le_stage (affineIntersectionPairIndex i j)) hik
+          (M.map (affineIntersectionSingletonToPair i j))))
+      ((M.object (affineIntersectionSingletonIndex j)).mapAtLaterStage
+        (M.object (affineIntersectionPairIndex i j)) H
+        ((M.le_stage (affineIntersectionSingletonIndex j)).trans hik)
+        ((M.le_stage (affineIntersectionPairIndex i j)).trans hik) hkl
+        ((M.object (affineIntersectionSingletonIndex j)).mapAtLaterStage
+          (M.object (affineIntersectionPairIndex i j)) H
+          (M.le_stage (affineIntersectionSingletonIndex j))
+          (M.le_stage (affineIntersectionPairIndex i j)) hik
+          (M.map (affineIntersectionSingletonToPairRight i j)))) =
+    Algebra.TensorProduct.productMap
+      ((M.object (affineIntersectionSingletonIndex i)).mapAtLaterStage
+        (M.object (affineIntersectionPairIndex i j)) H
+        (M.le_stage (affineIntersectionSingletonIndex i))
+        (M.le_stage (affineIntersectionPairIndex i j)) (hik.trans hkl)
+        (M.map (affineIntersectionSingletonToPair i j)))
+      ((M.object (affineIntersectionSingletonIndex j)).mapAtLaterStage
+        (M.object (affineIntersectionPairIndex i j)) H
+        (M.le_stage (affineIntersectionSingletonIndex j))
+        (M.le_stage (affineIntersectionPairIndex i j)) (hik.trans hkl)
+        (M.map (affineIntersectionSingletonToPairRight i j)))
+  rw [(M.object (affineIntersectionSingletonIndex i)).mapAtLaterStage_trans,
+    (M.object (affineIntersectionSingletonIndex j)).mapAtLaterStage_trans]
+
+private theorem separatedLaterStagePairMap_surjective_trans
+    (M : SpreadData.FunctorModel F H) {k l : ι}
+    (hik : M.stage ≤ k) (hkl : k ≤ l) (i j : J)
+    (hk : Function.Surjective (separatedLaterStagePairMap M hik i j)) :
+    Function.Surjective (separatedLaterStagePairMap M (hik.trans hkl) i j) := by
+  have hkl' : (M.mapToStage hik).stage ≤ l := by
+    change k ≤ l
+    exact hkl
+  have hbase :
+      letI : Algebra (𝒮 k) (𝒮 l) := (t hkl).toRingHom.toAlgebra
+      Function.Surjective
+        (Algebra.TensorProduct.map (AlgHom.id (𝒮 k) (𝒮 l))
+          (separatedLaterStagePairMap M hik i j)) := by
+    letI hklAlgebra : Algebra (𝒮 k) (𝒮 l) := (t hkl).toRingHom.toAlgebra
+    let hkkAlgebra : Algebra (𝒮 k) (𝒮 k) := inferInstance
+    let hSourceAlgebra : Algebra (𝒮 k) (separatedLaterStagePairTensor M hik i j) :=
+      inferInstance
+    let hTargetAlgebra : Algebra (𝒮 k) (separatedLaterStagePair M hik i j) :=
+      inferInstance
+    let hTower : IsScalarTower (𝒮 k) (𝒮 k) (𝒮 l) :=
+      IsScalarTower.of_algebraMap_eq'
+        (R := 𝒮 k) (S := 𝒮 k) (A := 𝒮 l) rfl
+    exact @Algebra.TensorProduct.map_surjective
+      (𝒮 k) (𝒮 k) (inferInstance) (inferInstance) hkkAlgebra
+      (𝒮 l) (𝒮 l) (separatedLaterStagePairTensor M hik i j)
+      (separatedLaterStagePair M hik i j)
+      (inferInstance) (inferInstance) (inferInstance) (inferInstance)
+      hklAlgebra hklAlgebra hSourceAlgebra hTargetAlgebra
+      hklAlgebra hklAlgebra hTower hTower
+      (AlgHom.id (𝒮 k) (𝒮 l)) (separatedLaterStagePairMap M hik i j)
+      Function.surjective_id hk
+  have hbase' :
+      letI : Algebra (𝒮 (M.mapToStage hik).stage) (𝒮 l) :=
+        (t hkl').toRingHom.toAlgebra
+      Function.Surjective
+        (Algebra.TensorProduct.map
+          (AlgHom.id (𝒮 (M.mapToStage hik).stage) (𝒮 l))
+          (separatedStagePairMap (M.mapToStage hik) i j)) := by
+    intro y
+    obtain ⟨x, hx⟩ := hbase y
+    refine ⟨x, ?_⟩
+    exact hx
+  have hN := separatedLaterStagePairMap_surjective_of_baseChange
+    (M.mapToStage hik) hkl' i j hbase'
+  rw [separatedLaterStagePairMap_trans M hik hkl i j] at hN
+  exact hN
+
+private theorem separatedPairMapColimitSourceEquiv_tmul
+    (M : SpreadData.FunctorModel F H) (i j : J)
+    (x : (M.object (affineIntersectionSingletonIndex i)).spreadStage
+      (t := t) (M.le_stage (affineIntersectionSingletonIndex i)))
+    (y : (M.object (affineIntersectionSingletonIndex j)).spreadStage
+      (t := t) (M.le_stage (affineIntersectionSingletonIndex j))) :
+    letI : Algebra (𝒮 M.stage) S := (uS M.stage).toRingHom.toAlgebra
+    separatedPairMapColimitSourceEquiv M i j
+        (1 ⊗ₜ[𝒮 M.stage] (x ⊗ₜ[𝒮 M.stage] y)) =
+      (M.object (affineIntersectionSingletonIndex i)).baseChangeColimEquiv
+          (M.le_stage (affineIntersectionSingletonIndex i)) H
+          (1 ⊗ₜ[𝒮 M.stage] x) ⊗ₜ[S]
+        (M.object (affineIntersectionSingletonIndex j)).baseChangeColimEquiv
+          (M.le_stage (affineIntersectionSingletonIndex j)) H
+          (1 ⊗ₜ[𝒮 M.stage] y) := by
+  letI : Algebra (𝒮 M.stage) S := (uS M.stage).toRingHom.toAlgebra
+  rw [separatedPairMapColimitSourceEquiv, AlgEquiv.trans_apply,
+    pairTensorBaseChangeEquiv_tmul, Algebra.TensorProduct.congr_apply,
+    Algebra.TensorProduct.map_tmul]
+  rfl
+
+private theorem separatedPairMap_baseChangeColimit_tmul
+    (M : SpreadData.FunctorModel F H) (i j : J)
+    (x : (M.object (affineIntersectionSingletonIndex i)).spreadStage
+      (t := t) (M.le_stage (affineIntersectionSingletonIndex i)))
+    (y : (M.object (affineIntersectionSingletonIndex j)).spreadStage
+      (t := t) (M.le_stage (affineIntersectionSingletonIndex j))) :
+    letI : Algebra (𝒮 M.stage) S := (uS M.stage).toRingHom.toAlgebra
+    (M.object (affineIntersectionPairIndex i j)).baseChangeColimEquiv
+          (M.le_stage (affineIntersectionPairIndex i j)) H
+          (Algebra.TensorProduct.map (AlgHom.id S S)
+            (separatedStagePairMap M i j)
+            (1 ⊗ₜ[𝒮 M.stage] (x ⊗ₜ[𝒮 M.stage] y))) =
+      affineIntersectionPairMap F i j
+        (separatedPairMapColimitSourceEquiv M i j
+          (1 ⊗ₜ[𝒮 M.stage] (x ⊗ₜ[𝒮 M.stage] y))) := by
+  letI : Algebra (𝒮 M.stage) S := (uS M.stage).toRingHom.toAlgebra
+  rw [Algebra.TensorProduct.map_tmul, AlgHom.id_apply,
+    (M.object (affineIntersectionPairIndex i j)).baseChangeColimEquiv_tmul,
+    separatedStagePairMap, Algebra.TensorProduct.productMap_apply_tmul, map_mul,
+    M.map_colimit (affineIntersectionSingletonToPair i j) x,
+    M.map_colimit (affineIntersectionSingletonToPairRight i j) y,
+    separatedPairMapColimitSourceEquiv_tmul,
+    (M.object (affineIntersectionSingletonIndex i)).baseChangeColimEquiv_tmul,
+    (M.object (affineIntersectionSingletonIndex j)).baseChangeColimEquiv_tmul,
+    affineIntersectionPairMap, Algebra.TensorProduct.productMap_apply_tmul]
+
+private theorem separatedPairMap_baseChangeColimit_one_tmul
+    (M : SpreadData.FunctorModel F H) (i j : J)
+    (z : (M.object (affineIntersectionSingletonIndex i)).spreadStage
+          (t := t) (M.le_stage (affineIntersectionSingletonIndex i)) ⊗[𝒮 M.stage]
+        (M.object (affineIntersectionSingletonIndex j)).spreadStage
+          (t := t) (M.le_stage (affineIntersectionSingletonIndex j))) :
+    letI : Algebra (𝒮 M.stage) S := (uS M.stage).toRingHom.toAlgebra
+    (M.object (affineIntersectionPairIndex i j)).baseChangeColimEquiv
+          (M.le_stage (affineIntersectionPairIndex i j)) H
+          (Algebra.TensorProduct.map (AlgHom.id S S)
+            (separatedStagePairMap M i j)
+            (1 ⊗ₜ[𝒮 M.stage] z)) =
+      affineIntersectionPairMap F i j
+        (separatedPairMapColimitSourceEquiv M i j
+          (1 ⊗ₜ[𝒮 M.stage] z)) := by
+  letI : Algebra (𝒮 M.stage) S := (uS M.stage).toRingHom.toAlgebra
+  induction z using TensorProduct.induction_on with
+  | zero => simp only [tmul_zero, map_zero]
+  | add x y hx hy => rw [tmul_add, map_add, map_add, map_add, map_add, hx, hy]
+  | tmul x y => exact separatedPairMap_baseChangeColimit_tmul M i j x y
+
+private theorem separatedPairMap_baseChangeColimit
+    (M : SpreadData.FunctorModel F H) (i j : J) :
+    letI : Algebra (𝒮 M.stage) S := (uS M.stage).toRingHom.toAlgebra
+    ((M.object (affineIntersectionPairIndex i j)).baseChangeColimEquiv
+        (M.le_stage (affineIntersectionPairIndex i j)) H).toAlgHom.comp
+        (Algebra.TensorProduct.map (AlgHom.id S S)
+          (separatedStagePairMap M i j)) =
+      (affineIntersectionPairMap F i j).comp
+        (separatedPairMapColimitSourceEquiv M i j).toAlgHom := by
+  letI : Algebra (𝒮 M.stage) S := (uS M.stage).toRingHom.toAlgebra
+  apply AlgHom.ext
+  intro z
+  induction z using TensorProduct.induction_on with
+  | zero => simp only [map_zero]
+  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | tmul a x =>
+      rw [TensorProduct.tmul_eq_smul_one_tmul]
+      simp only [AlgHom.comp_apply, map_smul]
+      exact congrArg (a • ·) (separatedPairMap_baseChangeColimit_one_tmul M i j x)
+
+private theorem separatedStagePairMap_baseChangeColimit_surjective
+    (M : SpreadData.FunctorModel F H)
+    (hsep : IsSeparatedAffineIntersectionFunctor F) (i j : J) :
+    letI : Algebra (𝒮 M.stage) S := (uS M.stage).toRingHom.toAlgebra
+    Function.Surjective
+      (Algebra.TensorProduct.map (AlgHom.id S S) (separatedStagePairMap M i j)) := by
+  letI : Algebra (𝒮 M.stage) S := (uS M.stage).toRingHom.toAlgebra
+  let sourceEquiv := separatedPairMapColimitSourceEquiv M i j
+  let targetEquiv :=
+    (M.object (affineIntersectionPairIndex i j)).baseChangeColimEquiv
+      (M.le_stage (affineIntersectionPairIndex i j)) H
+  intro y
+  obtain ⟨zF, hzF⟩ := hsep i j (targetEquiv y)
+  obtain ⟨z, hz⟩ := sourceEquiv.surjective zF
+  refine ⟨z, targetEquiv.injective ?_⟩
+  change (targetEquiv.toAlgHom.comp
+      (Algebra.TensorProduct.map (AlgHom.id S S) (separatedStagePairMap M i j))) z =
+    targetEquiv y
+  rw [separatedPairMap_baseChangeColimit M i j]
+  change affineIntersectionPairMap F i j
+      (separatedPairMapColimitSourceEquiv M i j z) = targetEquiv y
+  rw [show separatedPairMapColimitSourceEquiv M i j z = zF from hz]
+  exact hzF
+
+private theorem exists_separatedStagePairMap_baseChange_surjective
+    (M : SpreadData.FunctorModel F H)
+    (hsep : IsSeparatedAffineIntersectionFunctor F) (i j : J) :
+    ∃ (k : ι) (hik : M.stage ≤ k),
+      letI : Algebra (𝒮 M.stage) (𝒮 k) := (t hik).toRingHom.toAlgebra
+      Function.Surjective
+        (Algebra.TensorProduct.map (AlgHom.id (𝒮 M.stage) (𝒮 k))
+          (separatedStagePairMap M i j)) := by
+  letI : FinitePresentation (𝒮 M.stage) (separatedStageSingleton M i) :=
+    (M.object (affineIntersectionSingletonIndex i)).spreadStage_finitePresentation
+      (M.le_stage (affineIntersectionSingletonIndex i))
+  letI : FinitePresentation (𝒮 M.stage) (separatedStageSingleton M j) :=
+    (M.object (affineIntersectionSingletonIndex j)).spreadStage_finitePresentation
+      (M.le_stage (affineIntersectionSingletonIndex j))
+  letI : Algebra (separatedStageSingleton M i) (separatedStagePairTensor M i j) :=
+    @Algebra.TensorProduct.leftAlgebra
+      (𝒮 M.stage) (separatedStageSingleton M i)
+      (separatedStageSingleton M i) (separatedStageSingleton M j)
+      (inferInstance) (inferInstance) (inferInstance)
+      (inferInstance) (inferInstance) (inferInstance) (inferInstance) (inferInstance)
+  letI : IsScalarTower (𝒮 M.stage) (separatedStageSingleton M i)
+      (separatedStagePairTensor M i j) :=
+    IsScalarTower.of_algebraMap_eq'
+      (R := 𝒮 M.stage) (S := separatedStageSingleton M i)
+      (A := separatedStagePairTensor M i j) rfl
+  letI : FinitePresentation (separatedStageSingleton M i) (separatedStagePairTensor M i j) :=
+    Algebra.FinitePresentation.baseChange
+      (R := 𝒮 M.stage) (A := separatedStageSingleton M j) (separatedStageSingleton M i)
+  letI : FinitePresentation (𝒮 M.stage) (separatedStagePairTensor M i j) :=
+    Algebra.FinitePresentation.trans (𝒮 M.stage)
+      (separatedStageSingleton M i) (separatedStagePairTensor M i j)
+  letI : FinitePresentation (𝒮 M.stage) (separatedStagePair M i j) :=
+    (M.object (affineIntersectionPairIndex i j)).spreadStage_finitePresentation
+      (M.le_stage (affineIntersectionPairIndex i j))
+  let hC₁Ring : CommRing (separatedStagePairTensor M i j) := inferInstance
+  let hC₂Ring : CommRing (separatedStagePair M i j) := inferInstance
+  let hC₁Algebra : Algebra (𝒮 M.stage) (separatedStagePairTensor M i j) := inferInstance
+  let hC₂Algebra : Algebra (𝒮 M.stage) (separatedStagePair M i j) := inferInstance
+  let hC₁Finite : FinitePresentation (𝒮 M.stage) (separatedStagePairTensor M i j) :=
+    inferInstance
+  let hC₂Finite : FinitePresentation (𝒮 M.stage) (separatedStagePair M i j) :=
+    inferInstance
+  let hf := separatedStagePairMap_baseChangeColimit_surjective M hsep i j
+  exact @IsFilteredAlgColimit.exists_tensorProductMap_surjective
+    R (inferInstance) ι (inferInstance) 𝒮 (inferInstance) (inferInstance)
+    t S (inferInstance) (inferInstance) uS H M.stage
+    (separatedStagePairTensor M i j) (separatedStagePair M i j)
+    hC₁Ring hC₂Ring hC₁Algebra hC₂Algebra hC₁Finite hC₂Finite
+    (separatedStagePairMap M i j) hf
+
+private theorem exists_separatedLaterStagePairMap_surjective
+    (M : SpreadData.FunctorModel F H)
+    (hsep : IsSeparatedAffineIntersectionFunctor F) (i j : J) :
+    ∃ (k : ι) (hik : M.stage ≤ k),
+      Function.Surjective (separatedLaterStagePairMap M hik i j) := by
+  obtain ⟨k, hik, hk⟩ := exists_separatedStagePairMap_baseChange_surjective M hsep i j
+  exact ⟨k, hik, separatedLaterStagePairMap_surjective_of_baseChange M hik i j hk⟩
+
+private structure SeparatedPairStage
+    (M : SpreadData.FunctorModel F H) (i j : J) where
+  stage : ι
+  le_stage : M.stage ≤ stage
+  pairMap_surjective : Function.Surjective
+    (separatedLaterStagePairMap M le_stage i j)
+
+private theorem nonempty_separatedPairStage
+    (M : SpreadData.FunctorModel F H)
+    (hsep : IsSeparatedAffineIntersectionFunctor F) (i j : J) :
+    Nonempty (SeparatedPairStage M i j) := by
+  obtain ⟨k, hik, hk⟩ := exists_separatedLaterStagePairMap_surjective M hsep i j
+  exact ⟨⟨k, hik, hk⟩⟩
+
+private theorem exists_separatedAffineIntersectionFunctorAtLaterStage
+    [Finite J] (M : SpreadData.FunctorModel F H)
+    (hsep : IsSeparatedAffineIntersectionFunctor F) :
+    ∃ (k : ι) (hik : M.stage ≤ k),
+      IsSeparatedAffineIntersectionFunctor (M.mapToStage hik).toFunctor := by
+  classical
+  let C : ∀ r : J × J, SeparatedPairStage M r.1 r.2 := fun r =>
+    Classical.choice (nonempty_separatedPairStage M hsep r.1 r.2)
+  letI : Fintype (J × J) := Fintype.ofFinite (J × J)
+  haveI := H.directed
+  haveI := H.nonempty
+  obtain ⟨k, hkall⟩ :=
+    (insert M.stage (Finset.univ.image fun r : J × J => (C r).stage)).exists_le
+  have hMk : M.stage ≤ k := hkall M.stage (Finset.mem_insert_self M.stage _)
+  have hC : ∀ r : J × J, (C r).stage ≤ k := fun r => hkall (C r).stage
+    (Finset.mem_insert_of_mem
+      (Finset.mem_image_of_mem (fun q : J × J => (C q).stage)
+        (Finset.mem_univ r)))
+  refine ⟨k, hMk, fun i j => ?_⟩
+  change Function.Surjective (separatedLaterStagePairMap M hMk i j)
+  let Cij := C (i, j)
+  exact separatedLaterStagePairMap_surjective_trans M Cij.le_stage (hC (i, j)) i j
+    Cij.pairMap_surjective
+
+private theorem separatedAffineIntersectionFunctor_mapToStage_trans
+    (M : SpreadData.FunctorModel F H)
+    {i j : ι} (hMi : M.stage ≤ i) (hij : i ≤ j)
+    (hsep : IsSeparatedAffineIntersectionFunctor (M.mapToStage hMi).toFunctor) :
+    IsSeparatedAffineIntersectionFunctor (M.mapToStage (hMi.trans hij)).toFunctor := by
+  intro p q
+  have hpq := hsep p q
+  change Function.Surjective (separatedLaterStagePairMap M hMi p q) at hpq
+  change Function.Surjective (separatedLaterStagePairMap M (hMi.trans hij) p q)
+  exact separatedLaterStagePairMap_surjective_trans M hMi hij p q hpq
+
+
+end Separated
+
+
 private theorem exists_openAffineIntersectionFunctorAtLaterStage
     [Finite J] (M : Algebra.SpreadData.FunctorModel F H)
     (hopen : IsOpenAffineIntersectionFunctor F) :
@@ -305,6 +914,62 @@ private theorem pushoutAffineIntersectionFunctor_mapToStage_trans
       ((M.mapToStage (hMi.trans hij)).map (pairToTripleRight p q r)).toRingHom)
   exact h
 
+private theorem pushoutAffineIntersectionFunctor_mapToStage_reconcile
+    (M : Algebra.SpreadData.FunctorModel F H)
+    {i j : ι} (hMi : M.stage ≤ i) (hij : i ≤ j)
+    (hpush : IsPushoutAffineIntersectionFunctor
+      ((M.mapToStage hMi).mapToStage hij).toFunctor) :
+    IsPushoutAffineIntersectionFunctor (M.mapToStage (hMi.trans hij)).toFunctor := by
+  intro p q r
+  change IsPushout
+    (CommRingCat.ofHom
+      ((M.object (singletonIndex p)).mapAtLaterStage
+        (M.object (pairIndex p q)) H
+        (M.le_stage (singletonIndex p)) (M.le_stage (pairIndex p q))
+        (hMi.trans hij) (M.map (singletonToPair p q))).toRingHom)
+    (CommRingCat.ofHom
+      ((M.object (singletonIndex p)).mapAtLaterStage
+        (M.object (pairIndex p r)) H
+        (M.le_stage (singletonIndex p)) (M.le_stage (pairIndex p r))
+        (hMi.trans hij) (M.map (singletonToPair p r))).toRingHom)
+    (CommRingCat.ofHom
+      ((M.object (pairIndex p q)).mapAtLaterStage
+        (M.object (tripleIndex p q r)) H
+        (M.le_stage (pairIndex p q)) (M.le_stage (tripleIndex p q r))
+        (hMi.trans hij) (M.map (pairToTripleLeft p q r))).toRingHom)
+    (CommRingCat.ofHom
+      ((M.object (pairIndex p r)).mapAtLaterStage
+        (M.object (tripleIndex p q r)) H
+        (M.le_stage (pairIndex p r)) (M.le_stage (tripleIndex p q r))
+        (hMi.trans hij) (M.map (pairToTripleRight p q r))).toRingHom)
+  rw [← (M.object (singletonIndex p)).mapAtLaterStage_trans
+      (M.object (pairIndex p q)) H
+      (M.le_stage (singletonIndex p)) (M.le_stage (pairIndex p q))
+      hMi hij (M.map (singletonToPair p q)),
+    ← (M.object (singletonIndex p)).mapAtLaterStage_trans
+      (M.object (pairIndex p r)) H
+      (M.le_stage (singletonIndex p)) (M.le_stage (pairIndex p r))
+      hMi hij (M.map (singletonToPair p r)),
+    ← (M.object (pairIndex p q)).mapAtLaterStage_trans
+      (M.object (tripleIndex p q r)) H
+      (M.le_stage (pairIndex p q)) (M.le_stage (tripleIndex p q r))
+      hMi hij (M.map (pairToTripleLeft p q r)),
+    ← (M.object (pairIndex p r)).mapAtLaterStage_trans
+      (M.object (tripleIndex p q r)) H
+      (M.le_stage (pairIndex p r)) (M.le_stage (tripleIndex p q r))
+      hMi hij (M.map (pairToTripleRight p q r))]
+  have hpqr := hpush p q r
+  change IsPushout
+    (CommRingCat.ofHom
+      (((M.mapToStage hMi).mapToStage hij).map (singletonToPair p q)).toRingHom)
+    (CommRingCat.ofHom
+      (((M.mapToStage hMi).mapToStage hij).map (singletonToPair p r)).toRingHom)
+    (CommRingCat.ofHom
+      (((M.mapToStage hMi).mapToStage hij).map (pairToTripleLeft p q r)).toRingHom)
+    (CommRingCat.ofHom
+      (((M.mapToStage hMi).mapToStage hij).map (pairToTripleRight p q r)).toRingHom) at hpqr
+  exact hpqr
+
 /-- The open-immersion and pushout conditions of a finite affine-intersection
 functor hold simultaneously at one later spread stage. -/
 theorem _root_.Algebra.SpreadData.FunctorModel.exists_affineIntersectionConditionsAtLaterStage
@@ -321,6 +986,26 @@ theorem _root_.Algebra.SpreadData.FunctorModel.exists_affineIntersectionConditio
   exact ⟨j, hMi.trans hij,
     openAffineIntersectionFunctor_mapToStage_trans M hMi hij hopen_j,
     pushoutAffineIntersectionFunctor_mapToStage_trans M hMi hij hpush_i⟩
+
+/-- The open-immersion, pushout, and separatedness conditions of a finite
+affine-intersection functor hold simultaneously at one later spread stage. -/
+theorem _root_.Algebra.SpreadData.FunctorModel.exists_affineIntersectionConditionsAndSeparatedAtLaterStage
+    [Finite J] (M : Algebra.SpreadData.FunctorModel F H)
+    (hopen : IsOpenAffineIntersectionFunctor F)
+    (hpush : IsPushoutAffineIntersectionFunctor F)
+    (hsep : IsSeparatedAffineIntersectionFunctor F) :
+    ∃ (j : ι) (hij : M.stage ≤ j),
+      IsOpenAffineIntersectionFunctor (M.mapToStage hij).toFunctor ∧
+        IsPushoutAffineIntersectionFunctor (M.mapToStage hij).toFunctor ∧
+          IsSeparatedAffineIntersectionFunctor (M.mapToStage hij).toFunctor := by
+  obtain ⟨i, hMi, hsep_i⟩ :=
+    exists_separatedAffineIntersectionFunctorAtLaterStage M hsep
+  obtain ⟨j, hij, hopen_j, hpush_j⟩ :=
+    (M.mapToStage hMi).exists_affineIntersectionConditionsAtLaterStage hopen hpush
+  exact ⟨j, hMi.trans hij,
+    openAffineIntersectionFunctor_mapToStage_trans M hMi hij hopen_j,
+    pushoutAffineIntersectionFunctor_mapToStage_reconcile M hMi hij hpush_j,
+    separatedAffineIntersectionFunctor_mapToStage_trans M hMi hij hsep_i⟩
 
 end Spread
 
