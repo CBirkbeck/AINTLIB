@@ -27,7 +27,8 @@ field extension `L` that is killed by `[ℓ]` already descends to a `K̄`-ration
 The reason is the division-polynomial connection `[ℓ]Q = O ⟹ ψ_ℓ(x(Q), y(Q)) = 0 ⟹ Ψ²_ℓ(x(Q)) = 0`:
 the `x`-coordinate of `Q` is a root of the `ℓ`-division polynomial `Ψ²_ℓ`, whose coefficients lie
 in `K̄` (not just `L`); since `K̄` is algebraically closed, `Ψ²_ℓ` splits over `K̄`, so `x(Q)` is
-the image of a `K̄`-element. The `y`-coordinate then descends via the Weierstrass equation over `K̄`.
+the image of a `K̄`-element. The `y`-coordinate then descends via the Weierstrass
+equation over `K̄`.
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, III.4.10c.
 -/
@@ -110,8 +111,10 @@ theorem zsmul_affine_point_eq_gen {L : Type*} [Field L] [DecidableEq L] (V : Wei
 
 /-- The `y`-coordinate descent of `kernelDescends_general`: over an algebraically closed `F`, if the
 `x`-coordinate of a Weierstrass point already descends (`xv = algebraMap F L x₀`) and the equation
-holds at `(xv, yv)`, then `yv = algebraMap F L y₀` for some `y₀ : F`. The `y`-coordinate is a root of
-the monic Weierstrass quadratic specialised at `x₀`, which splits over the algebraically closed `F`. -/
+holds at `(xv, yv)`, then `yv = algebraMap F L y₀` for some `y₀ : F`. The `y`-coordinate
+is a root of
+the monic Weierstrass quadratic specialised at `x₀`, which splits over the algebraically
+closed `F`. -/
 private theorem yCoord_descends_of_equation {F : Type*} [Field F] [IsAlgClosed F]
     (W : WeierstrassCurve F) {L : Type*} [Field L] [Algebra F L] (x₀ : F) (yv : L)
     (heqn : (W.map (algebraMap F L)).toAffine.Equation (algebraMap F L x₀) yv) :
@@ -152,7 +155,8 @@ Jacobian `Z`-coordinate `ψ_ℓ(X, Y)` of `[ℓ]Q` vanishes (contrapositive of
 (`map_ΨSq`) is the image of a polynomial **over `F = K̄`**; since `K̄` is algebraically closed
 `Ψ²_{W,ℓ}` splits over `K̄`, so by `Splits.mem_range_of_isRoot` the root `X` is `algebraMap F L x₀`.
 The `y`-coordinate `Y` descends by `yCoord_descends_of_equation`. The pair `(x₀, y₀)` is nonsingular
-on `W` (`baseChange_nonsingular`), giving the curve point `k = some x₀ y₀` with `Point.map k = Q` and
+on `W` (`baseChange_nonsingular`), giving the curve point `k = some x₀ y₀` with
+`Point.map k = Q` and
 `ℓ • k = 0` (the latter by `Point.map` injectivity). -/
 theorem kernelDescends_general {F : Type*} [Field F] [DecidableEq F] (W : WeierstrassCurve F)
     [W.toAffine.IsElliptic] [IsAlgClosed F] {L : Type*} [Field L] [DecidableEq L]
