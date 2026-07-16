@@ -22246,3 +22246,63 @@ K-translate family (∏-version by induction), identify `D_M = Z_M` through the 
 decomposition (orderDivisor_mul_crt ✓ + translate engine ✓ + the new comaximality from
 `sup_ker_eq_top_of_pull_ne` fed by `geometric_input` roles-swapped), then glue over the
 coprime cover. The F3 CONVERSE consumes the same layer. 68 bricks; commits ..f956d229c.
+
+## v10.295 (2026-07-16, coordinator) — ★★★★ ENGINE AXIOM 2 (E3) IS PROVEN AXIOM-CLEAN (Bootstrap:112 dead); the Ψ₃ bridge landed; :3497 is one plug-in from death; T-D8 forward delivered
+
+**Verified at source** (origin, 0/0, all cited commits present). Four-report batch processed.
+
+**RATIFIED (each verified):**
+- **★★★★ G0 — Bootstrap:112 IS DEAD, AXIOM-CLEAN.** `naiveLevelThree_relativelyRepresentable_finiteEtale`
+  carries a real proof (receipt: {propext, Classical.choice, Quot.sound} — NO sorryAx, NO Weil pairing,
+  NO T-D8). The four-step map executed end-to-end, consuming GH's B2 per [DEDUP-CC] — the criterion is
+  general-N, so primality never enters. **Engine axiom 2 for the ℤ[1/3] instantiation is DONE.**
+  **Corrected census (verified): Bootstrap = 4 sorries** — hL :87, hArb :92, E[2]-gen :188 (OMEGA's three)
+  + AX2-Legendre :206 (NOT discharged — honestly re-scoped by G0 as its own campaign: `legendreDeltaProblem`
+  is the COUPLED subfunctor through IsLegendreDatum/T-E12, its points-spec runs through the ω-layer; the
+  E3 template is the proven pattern).
+- **★★ OMEGA — the torsion→coordinate BRIDGE is proven:** `psi3_eval_eq_zero_of_three_zsmul`
+  (E3NormalForm:154 — 3•P=0 ⟹ Ψ₃(x(P))=0, one CAS certificate: E + Ψ₃ = −(b₂+12x)·curve) + the μ-form
+  (`twiceNeZero_of_three_zsmul` + `mu_eq_zero_of_three_zsmul`) — **the hArb FIELD layer is COMPLETE**,
+  and hL-generation is DE-SCOPED to pure field level (#T₃ ≤ 9 by Ψ₃ root-counting, no scheme count).
+  Remaining (sentinel): ≤9 Finset plumbing → generation assembly (Stage-B dictionary + B2) → Stage-D
+  arbitrary-R → the hArb scheme-lift with ONE honest subtlety (chart-ring μ=0 over NON-REDUCED bases:
+  E[3]-scheme-ideal vs étale-local descent).
+- **★★ GH — exemplary [DEDUP-CC] compliance + the endgame staged BEYOND scope:** the 3 bridge lemmas
+  (set↔scheme seam done) + `factor_levelSpace_iff_isFullLevel` (:815) + `exists_levelSpaceΓ_iso_fullLevelLocus`
+  (:866) + `levelSpaceΓ_structure_etale_of_master` (:896) — all axiom-clean (not even T-D8), each taking
+  ONE hypothesis: the master-iff seam. GH explicitly refused to duplicate G0's step-3 — the ruling worked.
+- **★★ KM — T-D8 FORWARD DELIVERED** (`fullLevel_divisor_forward`, FullLevelBridge.lean:43, strictly weaker
+  hypotheses than the box) — the ⟸-half remains, scoped (T-D2 dictionary vs étale-reduced route). Plus
+  ★ F3.mp over invertible bases (both conjuncts — KM 1.7.2 forward for every ℤ[1/N]-base) modulo boxes
+  T-D6c/BB-DELIGNE/**BB-DEGA (NEW box: De-Ga IV 5.3-9, the non-étale factor)** + the CRT clopen split +
+  comaximal-graphs geometry. 68 bricks total; Factorization.lean = 5 frontier sorries + BB-DEGA.
+
+**★ THE :3497 PLUG-IN, MAPPED EXACTLY (coordinator trace):** G0's landed master-iff is
+**`forall_mem_fullLevelSet_iff_isNaiveFullLevel` (CombinationLevel.lean:269)** — the NAIVE form. GH's
+`hmaster` (:896) expects the DRINFELD `IsFullLevel` form. The converter is GH's own `isFullLevel_iff_naive`
+— which is exactly where the T-D8 box sits. So: plug :269 through `isFullLevel_iff_naive` into `hmaster`
+→ `levelSpaceΓ_structure_etale_of_master` fires → **:3497 dies**; the receipt will be **T-D8-only** and
+auto-cleans when KM lands the ⟸-half. (KM's forward half serves the ⟸-direction of the naive↔Drinfeld
+conversion where generation is CONSUMED; the box's残 remaining content is the other half — GH reports the
+exact direction needed after the receipt.)
+
+**RE-DISPATCH:**
+- **GH → EXECUTE THE PLUG-IN** (:269 → `isFullLevel_iff_naive` → `hmaster` → :3497 DIES = [GHA3] complete,
+  GHC1's last GH-owned edge). Print the receipt; report whether the T-D8 trace needs the ⟸-half or is
+  covered by KM's forward. Then: the CLOSER AUDIT — walk the full path from Bootstrap's discharge to the
+  three `.Representable` headline theorems and board the exact remaining pin-list (the endgame checklist).
+- **OMEGA → close hL (:87):** the ≤9 Finset count → the generation assembly (Stage-B dictionary: P̄=some(0,0),
+  Q̄=some(γ̄,·), γ̄≠0 ⟹ 9 distinct combos ⟹ B2.mp) → hL done. Then Stage-D + the E[2]-gen (:188) via B2 at
+  N=2. **The hArb (:92) scheme-lift subtlety (non-reduced bases): COORDINATE the route with KM before
+  building** — KM's T-D8 ⟸ scoping hit the SAME fork (T-D2 dictionary vs étale-reduced); pick ONE route
+  fleet-wide, don't solve it twice ([DEDUP-CC] spirit).
+- **G0 → the :206 Legendre-AX2 campaign** (your own scoping; the E3 four-step is the proven template; the
+  coupled IsLegendreDatum/ω-layer is the new content — coordinate T-E12-layer questions with OMEGA, who
+  built it). Secondary: stand ready on the E[3]-scheme-ideal side if the hArb route-ruling picks it.
+- **KM → W0 next arc** (∏-translate comaximality → D_M=Z_M → integral glue → F3 converse + F4) **+ the
+  T-D8 ⟸-half** (the box's remaining content — GH's receipt will name the needed direction; the T-D2
+  dictionary route pairs with the hArb fork ruling — coordinate with OMEGA).
+
+**Still pending owner decision (third ask): hLN = T-W7.8 unpark.** After this window (:3497 dead +
+Bootstrap → ~2), hLN is the LAST owner-parked non-box pin on all three levels' rigidity. GH frees up
+first and is the natural scope-owner.
