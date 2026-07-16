@@ -273,6 +273,35 @@ theorem _root_.AlgebraicGeometry.Scheme.IdealSheafData.map_hom_eq_comap_inv
   · have h1 : (I.comap e.inv).comap e.hom ≤ I := le_of_eq (hid₁ I)
     exact Scheme.IdealSheafData.le_map_iff_comap_le.mpr h1
 
+/-- Pointwise formula for pushforward along an isomorphism: sections of the moved ideal
+are the inverse images of sections over the preimage affine open. -/
+theorem _root_.AlgebraicGeometry.Scheme.IdealSheafData.map_hom_apply
+    {C : Scheme.{u}} (e : C ≅ C) (I : C.IdealSheafData) (U : C.affineOpens) :
+    (I.map e.hom).ideal U
+      = Ideal.comap (e.hom.app U.1).hom
+          (I.ideal ⟨e.hom ⁻¹ᵁ U.1, U.2.preimage e.hom⟩) := by
+  rw [Scheme.IdealSheafData.map, Scheme.Hom.ker_apply, Scheme.Hom.comp_app]
+  erw [CommRingCat.hom_comp]
+  rw [← RingHom.comap_ker]
+  exact congrArg (Ideal.comap (e.hom.app U.1).hom)
+    (Scheme.IdealSheafData.ker_subschemeι_app I
+      (⟨e.hom ⁻¹ᵁ U.1, U.2.preimage e.hom⟩ : C.affineOpens))
+
+/-- Pushforward along an isomorphism is multiplicative on ideal sheaves (pointwise it is
+inverse image along the section ring isomorphisms, i.e. direct image along the inverse). -/
+theorem _root_.AlgebraicGeometry.Scheme.IdealSheafData.map_hom_mul
+    {C : Scheme.{u}} (e : C ≅ C) (I J : C.IdealSheafData) :
+    (I * J).map e.hom = I.map e.hom * J.map e.hom := by
+  ext U
+  haveI : IsIso (e.hom.app U.1) := inferInstance
+  set φ := (asIso (e.hom.app U.1)).commRingCatIsoToRingEquiv with hφ
+  have hco : ∀ A : Ideal Γ(C, e.hom ⁻¹ᵁ U.1),
+      Ideal.comap (e.hom.app U.1).hom A = Ideal.map (φ.symm : _ →+* _) A := by
+    intro A
+    exact (Ideal.map_symm φ).symm
+  simp only [Scheme.IdealSheafData.map_hom_apply e, Scheme.IdealSheafData.ideal_mul,
+    Pi.mul_apply, hco, Ideal.map_mul]
+
 /-- **[W0-F3-pts] (KM 1.5.1.2's tautology)** Each constituent section factors through the
 sections divisor: `Pₐ` is a point *of* `Σᵢ [Pᵢ]`. The defining ideal `∏ᵢ ker (Pᵢ)` is
 contained in `ker (Pₐ)`, so the kernel-image factorization `toImage` composed with the
