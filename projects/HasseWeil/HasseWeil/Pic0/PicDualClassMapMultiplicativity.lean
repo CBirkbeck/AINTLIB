@@ -504,7 +504,8 @@ extension of the maximal ideal at a point factors over the fibre primes,
 
   `map α* 𝔪_Q  =  ∏_{P ∈ primesOver 𝔪_Q} P ^ e_P`,
 
-where `e_P = ramificationIdx' (α*) 𝔪_Q P` is the multiplicity Silverman writes `e_φ(P)`.  This is the
+where `e_P = ramificationIdx' (α*) 𝔪_Q P` is the multiplicity Silverman writes `e_φ(P)`.  This is
+the
 ideal incarnation of the pullback divisor `φ*((Q)) = ∑_{αP=Q} e_φ(P)(P)`: the primes `P` of `R` over
 `𝔪_Q` (via `α*`) are the fibre `α^{-1}(Q)`, and the exponents are the ramification/inseparability
 multiplicities.  It is `mathlib`'s `Ideal.map_algebraMap_eq_finsetProd_pow` applied to the
