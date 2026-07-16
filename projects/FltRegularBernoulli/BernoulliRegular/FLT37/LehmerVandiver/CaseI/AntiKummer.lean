@@ -1163,6 +1163,46 @@ theorem antiKummerSigmaTildeInvolutive_ne_refl
     exact h_mul
   exact h_alpha_sq_ne h_sq
 
+/-- **Degree-two generation**: in a finite field extension `L / B` with
+`Module.finrank B L = 2`, any element `α : L` not in the image of `B`
+(`α ∉ (algebraMap B L).range`) generates `L` as a `B`-algebra, i.e.
+`Algebra.adjoin B {α} = ⊤`. The minimal polynomial of `α` has degree `≥ 2`
+(degree `1` would place `α` in the base), hence `finrank B (adjoin B {α}) = 2`,
+forcing `adjoin B {α} = ⊤`. -/
+private lemma adjoin_eq_top_of_finrank_two_of_not_mem_range
+    {B L : Type*} [Field B] [Field L] [Algebra B L] [FiniteDimensional B L]
+    (h2 : Module.finrank B L = 2) {α : L}
+    (hα : α ∉ (algebraMap B L).range) :
+    Algebra.adjoin B ({α} : Set L) = ⊤ := by
+  have h_int : IsIntegral B α :=
+    (Algebra.IsIntegral.of_finite (R := B) (B := L)).isIntegral α
+  have h_minpoly_deg : 2 ≤ (minpoly B α).natDegree := by
+    by_contra h_lt
+    push Not at h_lt
+    have h_eq_one : (minpoly B α).natDegree = 1 := by
+      have h_pos : 0 < (minpoly B α).natDegree := minpoly.natDegree_pos h_int
+      omega
+    exact hα (minpoly.mem_range_of_degree_eq_one B α
+      (by rw [Polynomial.degree_eq_natDegree (minpoly.ne_zero h_int), h_eq_one]
+          exact_mod_cast rfl))
+  have h_pb_finrank : Module.finrank B (Algebra.adjoin B ({α} : Set L)) =
+      (minpoly B α).natDegree :=
+    (Algebra.adjoin.powerBasis h_int).finrank
+  have h_pb_le : Module.finrank B (Algebra.adjoin B ({α} : Set L)) ≤ 2 := by
+    rw [← h2]
+    exact Submodule.finrank_le
+      (Subalgebra.toSubmodule (Algebra.adjoin B ({α} : Set L)))
+  have h_pb_eq_two : Module.finrank B (Algebra.adjoin B ({α} : Set L)) = 2 := by
+    rw [h_pb_finrank]
+    omega
+  have h_top_finrank : Module.finrank B (⊤ : Subalgebra B L) = 2 := by
+    rw [(Subalgebra.topEquiv (R := B) (A := L)).toLinearEquiv.finrank_eq]
+    exact h2
+  have : FiniteDimensional B (⊤ : Subalgebra B L) :=
+    Module.finite_of_finrank_pos (by rw [h_top_finrank]; omega)
+  exact Subalgebra.eq_of_le_of_finrank_eq le_top
+    (h_pb_eq_two.trans h_top_finrank.symm)
+
 /-- **K⁺[α₀] = ⊤ in K** under `α₀² ≠ 1`: α₀ generates K as a K⁺-algebra. -/
 theorem K_adjoin_alpha_eq_top
     (α₀ : K) (hα₀ : α₀ ≠ 0)
@@ -1179,51 +1219,13 @@ theorem K_adjoin_alpha_eq_top
     rw [h_inv_eq] at h_mul
     rw [sq]
     exact h_mul
-  have h_int : IsIntegral (NumberField.maximalRealSubfield K) α₀ :=
-    (Algebra.IsIntegral.of_finite (R := NumberField.maximalRealSubfield K) (B := K)).isIntegral α₀
-  have h_minpoly_deg : 2 ≤ (minpoly (NumberField.maximalRealSubfield K) α₀).natDegree := by
-    by_contra h_lt
-    push Not at h_lt
-    have h_eq_one : (minpoly (NumberField.maximalRealSubfield K) α₀).natDegree = 1 := by
-      have h_pos : 0 < (minpoly (NumberField.maximalRealSubfield K) α₀).natDegree :=
-        minpoly.natDegree_pos h_int
-      omega
-    have : α₀ ∈ (algebraMap (NumberField.maximalRealSubfield K) K).range :=
-      (minpoly.mem_range_of_degree_eq_one (NumberField.maximalRealSubfield K) α₀
-        (by rw [Polynomial.degree_eq_natDegree (minpoly.ne_zero h_int), h_eq_one]
-            exact_mod_cast rfl))
-    obtain ⟨b, hb⟩ := this
-    apply h_α₀_not_in_Kplus
-    rw [← hb]
-    have h_alg_apply : algebraMap (NumberField.maximalRealSubfield K) K b = (b : K) := rfl
-    rw [h_alg_apply]
-    exact b.2
-  have h_pb_finrank : Module.finrank (NumberField.maximalRealSubfield K)
-      (Algebra.adjoin (NumberField.maximalRealSubfield K) ({α₀} : Set K)) =
-      (minpoly (NumberField.maximalRealSubfield K) α₀).natDegree :=
-    (Algebra.adjoin.powerBasis h_int).finrank
-  have h_K_finrank : Module.finrank (NumberField.maximalRealSubfield K) K = 2 :=
-    finrank_K_over_Kplus K
-  have h_pb_le : Module.finrank (NumberField.maximalRealSubfield K)
-      (Algebra.adjoin (NumberField.maximalRealSubfield K) ({α₀} : Set K)) ≤ 2 := by
-    rw [← h_K_finrank]
-    exact Submodule.finrank_le
-      (Subalgebra.toSubmodule
-        (Algebra.adjoin (NumberField.maximalRealSubfield K) ({α₀} : Set K)))
-  have h_pb_eq_two : Module.finrank (NumberField.maximalRealSubfield K)
-      (Algebra.adjoin (NumberField.maximalRealSubfield K) ({α₀} : Set K)) = 2 := by
-    rw [h_pb_finrank]
-    omega
-  have h_top_finrank : Module.finrank (NumberField.maximalRealSubfield K)
-      (⊤ : Subalgebra (NumberField.maximalRealSubfield K) K) = 2 := by
-    rw [(Subalgebra.topEquiv (R := NumberField.maximalRealSubfield K)
-      (A := K)).toLinearEquiv.finrank_eq]
-    exact h_K_finrank
-  have : FiniteDimensional (NumberField.maximalRealSubfield K)
-      (⊤ : Subalgebra (NumberField.maximalRealSubfield K) K) :=
-    Module.finite_of_finrank_pos (by rw [h_top_finrank]; omega)
-  exact Subalgebra.eq_of_le_of_finrank_eq le_top
-    (h_pb_eq_two.trans h_top_finrank.symm)
+  refine adjoin_eq_top_of_finrank_two_of_not_mem_range (finrank_K_over_Kplus K) ?_
+  rintro ⟨b, hb⟩
+  apply h_α₀_not_in_Kplus
+  rw [← hb]
+  have h_alg_apply : algebraMap (NumberField.maximalRealSubfield K) K b = (b : K) := rfl
+  rw [h_alg_apply]
+  exact b.2
 
 /-- **σ̃ restricts to complex conjugation on K**: for any K-element k, σ̃ sends
 algMap k to algMap (σ k). -/
