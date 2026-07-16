@@ -21908,3 +21908,13 @@ B3 = the factor-iff (v-range ⊆ locus ⟺ [B1 pointwise + B2 + T-D8-box] IsFull
 factors through levelSpaceΓ) with the topological-to-geometric-point bridge
 (fromSpecResidueField ≫ alg-closure-lift) + IsOpenImmersion.lift-classification of U-factoring;
 then the endgame chain (ιΓ = iso ≫ U.ι ⟹ levelSpaceΓπ étale = :3497). (STREAM-GH)
+
+### v10.288-KM — ★★ THE DEGMUL CHAIN IS COMPLETE: finrank_pullback_comp_fst (axiom-clean, general base) + degree_eq_smulKernel_mul (STREAM-KM)
+(`85a459225` + wiring) **The fibre-product rank formula** `deg (X ×_S Y → S) = deg X · deg Y`
+(finite flat, ANY base — mathlib-PR shape, flag-only per v10.35b): FlatRank's private layer
+rebuilt verbatim, the affine chain (isoSpec → Spec.map_surjective → algebraize → pullbackSpecIso →
+rankAtStalk_tensorProduct), and the comparison square hand-built by the universal property.
+Consequence wired: **[F3-degmul]** `deg Z_M · deg Z_K = M·K` (KM p. 28). With [F3-cauchy] ✓ +
+[F3-etale] ✓ the squeeze needs only [F3-count] (kernel sections over a geometric point =
+M-killed H-points, EtaleSectionsCount bridge) → distinct → mp-locus → glue. 43 proven bricks.
+(STREAM-KM)
