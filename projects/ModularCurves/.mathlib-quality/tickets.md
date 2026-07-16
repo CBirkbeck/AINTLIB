@@ -21969,3 +21969,11 @@ de-Weiled route) — session 1 of the build. ALL NEW CODE COMPILES CLEAN, genera
 **DE-CONFLICTION STANDING:** GH owns :3497 (β-route, general Γ_H); this carrier is INDEPENDENT
 (no levelSpaceΓ, no Weil pairing, no T-D8). If GH lands first, :112 could also be wired from
 gammaFullNaive_relRepData — but the combination route stays the box-free one.
+
+### v10.289-KM — ★★ THE SQUEEZE IS PROVEN: deg Z_M = M (KM p. 28 complete, zero classical boxes) (STREAM-KM)
+`smulKernelπ_finrank_eq` — over Spec k̄ with M, K invertible: count ([F3-count] ✓) + the
+M-killed group structure + Cauchy ([F3-cauchy] ✓) + degmul ([F3-degmul] ✓) + coprime extraction.
+KM's *"rank(G[N₁]) = N₁"* now a real theorem with NO De-Ga citation. 46 proven bricks.
+REMAINING for F3.mp: [F3-distinct] (the M candidate multiples exhaust Z_M(k̄) — counting
+argument, KM p. 29) → [F3-mp-locus] (1.5.3 (3)⟹(1) via hasExactOrder_of_geometric) → the
+coprime-cover glue ([F3-loc] ✓). Then the converse + F3-iff + F4. (STREAM-KM)
