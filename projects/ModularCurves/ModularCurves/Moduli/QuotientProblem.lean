@@ -789,12 +789,19 @@ over `𝟙 T` fixing the `𝒫`-value; rigidity forces `θ(γ) = 𝟙`, so the `
 is `γ`-fixed; the equivariance of the torsor datum turns this into a `γ`-fixed
 classifying map to `Z`, and the torsor comparison then factors the point through
 two distinct summands of `∐_G Z`, which are disjoint
-(`isEmpty_of_commSq_sigmaι_of_ne`). -/
-theorem simulSchemeAction_free_of_rigid (P Q : ModuliProblem R)
+(`isEmpty_of_commSq_sigmaι_of_ne`).
+
+Stated at the noetherian-local rigidity `RigidNoeth` ([T-W7.8] variant, owner ruling
+v10.298) over a locally noetherian `T`: the argument's single rigidity call is at
+`XM.pullbackAlong t`, whose base is `T`. The unrestricted-`T` form (and hence the classical
+`Rigid` form) follows by detecting emptiness on field-valued points —
+`simulSchemeAction_free_of_rigidNoeth` below. -/
+theorem simulSchemeAction_free_of_rigidNoeth_of_isLocallyNoetherian
+    (P Q : ModuliProblem R)
     {G : Type u} [Group G] [Finite G] (φ : G →* Aut Q) {XM : EllObj R}
     (rM : (P.simul Q).RepresentableBy XM)
-    (hrig : P.Rigid) (htors : ∀ X : EllObj R, Nonempty (TorsorData φ X))
-    (γ : G) (hγ : γ ≠ 1) (T : Scheme.{u}) (t : T ⟶ XM.base)
+    (hrig : P.RigidNoeth) (htors : ∀ X : EllObj R, Nonempty (TorsorData φ X))
+    (γ : G) (hγ : γ ≠ 1) (T : Scheme.{u}) [IsLocallyNoetherian T] (t : T ⟶ XM.base)
     (hfix : t ≫ (P.simulSchemeAction Q φ rM).hom γ = t) :
     IsEmpty T := by
   have hfix' : t ≫ (rM.autMulHom ((P.simulAutSnd Q) (φ γ))).inv.baseHom = t :=
@@ -862,6 +869,7 @@ theorem simulSchemeAction_free_of_rigid (P Q : ModuliProblem R)
   have hΘ : EllObj.connectHom _ _ hb = 𝟙 (XM.pullbackAlong t) := by
     by_contra hne
     exact hrig (XM.pullbackAlong t)
+      (show IsLocallyNoetherian (XM.pullbackAlong t).base from ‹IsLocallyNoetherian T›)
       ⟨EllObj.connectHom _ _ hb, EllObj.connectHom _ _ hb2, hii, hii'⟩
       (EllObj.connectHom_baseHom _ _ hb)
       (fun hEq => hne (congrArg Iso.hom hEq))
@@ -923,6 +931,40 @@ theorem simulSchemeAction_free_of_rigid (P Q : ModuliProblem R)
         Limits.pullback.lift_snd]
   exact isEmpty_of_commSq_sigmaι_of_ne ⟨hpt⟩ hγ
 
+/-- **Freeness of the KM action from noetherian-local rigidity, arbitrary `T`** — emptiness
+of the `γ`-fixed locus is detected on field-valued points: a point `x` of a nonempty fixed
+locus yields a `γ`-fixed `Spec κ(x)`-point by precomposition with
+`T.fromSpecResidueField x`, and `Spec` of a field is locally noetherian, so the
+locally-noetherian core applies. This is the precise sense in which the KM 4.7.0 engine
+consumes only `RigidNoeth` ([T-W7.8] variant): KM p. 113's "`G` operates freely on
+`𝕸(𝒫,δ)`" is a pointwise statement. -/
+theorem simulSchemeAction_free_of_rigidNoeth (P Q : ModuliProblem R)
+    {G : Type u} [Group G] [Finite G] (φ : G →* Aut Q) {XM : EllObj R}
+    (rM : (P.simul Q).RepresentableBy XM)
+    (hrig : P.RigidNoeth) (htors : ∀ X : EllObj R, Nonempty (TorsorData φ X))
+    (γ : G) (hγ : γ ≠ 1) (T : Scheme.{u}) (t : T ⟶ XM.base)
+    (hfix : t ≫ (P.simulSchemeAction Q φ rM).hom γ = t) :
+    IsEmpty T := by
+  rw [← not_nonempty_iff]
+  rintro ⟨x⟩
+  haveI : IsLocallyNoetherian (Spec (T.residueField x)) := by
+    haveI : IsNoetherianRing (T.residueField x) := inferInstance
+    infer_instance
+  exact (simulSchemeAction_free_of_rigidNoeth_of_isLocallyNoetherian P Q φ rM hrig htors
+    γ hγ (Spec (T.residueField x)) (T.fromSpecResidueField x ≫ t)
+    (by rw [Category.assoc, hfix])).false default
+
+/-- **Freeness of the KM action** (KM p. 113, the classical `Rigid` form) — immediate from
+the `RigidNoeth` form via `Rigid.rigidNoeth`. -/
+theorem simulSchemeAction_free_of_rigid (P Q : ModuliProblem R)
+    {G : Type u} [Group G] [Finite G] (φ : G →* Aut Q) {XM : EllObj R}
+    (rM : (P.simul Q).RepresentableBy XM)
+    (hrig : P.Rigid) (htors : ∀ X : EllObj R, Nonempty (TorsorData φ X))
+    (γ : G) (hγ : γ ≠ 1) (T : Scheme.{u}) (t : T ⟶ XM.base)
+    (hfix : t ≫ (P.simulSchemeAction Q φ rM).hom γ = t) :
+    IsEmpty T :=
+  simulSchemeAction_free_of_rigidNoeth P Q φ rM hrig.rigidNoeth htors γ hγ T t hfix
+
 /-- **([a1], the action on the universal curve is free)** If `𝒫` is rigid and `δ` is a
 finite étale `G`-torsor rigidifier, then `G` acts **freely on the total space of the
 universal curve** `E` over `𝕸(𝒫,δ)`: no `γ ≠ 1` fixes a `T`-point of `E` over a nonempty
@@ -939,6 +981,18 @@ theorem simulSchemeActionTotal_free_of_rigid (P Q : ModuliProblem R)
     (hfix : t ≫ (P.simulSchemeActionTotal Q φ rM).hom γ = t) :
     IsEmpty T := by
   refine simulSchemeAction_free_of_rigid P Q φ rM hrig htors γ hγ T (t ≫ XM.curve.π) ?_
+  rw [Category.assoc, ← simulSchemeActionTotal_π, ← Category.assoc, hfix]
+
+/-- `simulSchemeActionTotal_free_of_rigid` at noetherian-local rigidity ([T-W7.8]
+variant): freeness on the universal curve's total space from `RigidNoeth`. -/
+theorem simulSchemeActionTotal_free_of_rigidNoeth (P Q : ModuliProblem R)
+    {G : Type u} [Group G] [Finite G] (φ : G →* Aut Q) {XM : EllObj R}
+    (rM : (P.simul Q).RepresentableBy XM)
+    (hrig : P.RigidNoeth) (htors : ∀ X : EllObj R, Nonempty (TorsorData φ X))
+    (γ : G) (hγ : γ ≠ 1) (T : Scheme.{u}) (t : T ⟶ XM.curve.E)
+    (hfix : t ≫ (P.simulSchemeActionTotal Q φ rM).hom γ = t) :
+    IsEmpty T := by
+  refine simulSchemeAction_free_of_rigidNoeth P Q φ rM hrig htors γ hγ T (t ≫ XM.curve.π) ?_
   rw [Category.assoc, ← simulSchemeActionTotal_π, ← Category.assoc, hfix]
 
 /-- **The Katz–Mazur 4.7 engine** (SCHOLIE 4.7.0, axiomatized claim, KM p. 112:

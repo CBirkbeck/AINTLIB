@@ -883,19 +883,19 @@ theorem EllObj.iso_eq_refl_of_isEmpty {X : EllObj R} (h : IsEmpty X.base) (e : X
   · exact (isInitialOfIsEmpty (X := X.base)).hom_ext _ _
   · exact (isInitialOfIsEmpty (X := X.curve.E)).hom_ext _ _
 
-/-- **[RIG-3b] The rigidity bridge**: a quotient problem datum is rigid provided
-(1) nontriviality of base-identical isos is DETECTED on some geometric fibre
-(`hdetect` — [RIG-1], KM 2.7-adjacent), and (2) no nontrivial geometric iso fixes a
-`γ`-twisted value of `Q` (`hfree` — [RIG-2], the k̄ orbit-freeness; for `Γ_H` this is
-the `N ≥ 3` Serre argument + the `H`-condition).
+/-- **[RIG-3b core] The rigidity bridge at a fixed test object**: the per-object body of
+`rigid_of_geom_free`, with the geometric-fibre detection demanded only at `X` itself.
+Factored out so the bridge serves both the unrestricted form (`rigid_of_geom_free`) and
+the noetherian-local form (`rigidNoeth_of_geom_free`, the [T-W7.8] variant — detection is
+only available over locally noetherian bases until EGA IV §8 spreading-out exists).
 
 Route: a fixed `prob`-value transports to a geometric fibre where the iso stays
 nontrivial (`EllHom.fibre` machinery); `geom_surjective` lifts the fibre value to `Q`;
 `geom_orbits` converts fixedness into a `γ`-twisted `Q`-fixed point, killed by `hfree`. -/
-theorem ModuliProblem.QuotientProblemData.rigid_of_geom_free {Q : ModuliProblem R}
+theorem ModuliProblem.QuotientProblemData.rigid_at_of_geom_free {Q : ModuliProblem R}
     {G : Type*} [Group G] [Finite G] {φ : G →* Aut Q}
-    (qpd : ModuliProblem.QuotientProblemData φ)
-    (hdetect : ∀ (X : EllObj R) (e : X ≅ X) (he : e.hom.baseHom = 𝟙 X.base),
+    (qpd : ModuliProblem.QuotientProblemData φ) (X : EllObj R)
+    (hdetectX : ∀ (e : X ≅ X) (he : e.hom.baseHom = 𝟙 X.base),
       e ≠ Iso.refl X → Nonempty X.base →
       ∃ (k : Type u) (_ : Field k) (_ : IsAlgClosed k)
         (t : Spec (CommRingCat.of k) ⟶ X.base), EllObj.isoFibre e he t ≠ Iso.refl _)
@@ -908,11 +908,12 @@ theorem ModuliProblem.QuotientProblemData.rigid_of_geom_free {Q : ModuliProblem 
       ∀ (b : Q.obj (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))) (γ : G),
         (φ γ).hom.app (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
           (Q.map e.hom.op b) ≠ b) :
-    qpd.prob.Rigid := by
-  intro X e he hne a hfix
+    ∀ (e : X ≅ X), e.hom.baseHom = 𝟙 X.base → e ≠ Iso.refl X →
+      ∀ a : qpd.prob.obj (Opposite.op X), qpd.prob.map e.hom.op a ≠ a := by
+  intro e he hne a hfix
   by_cases hbase : Nonempty X.base
   · -- geometric fibre where `e` stays nontrivial
-    obtain ⟨k, _, _, t, hfib⟩ := hdetect X e he hne hbase
+    obtain ⟨k, _, _, t, hfib⟩ := hdetectX e he hne hbase
     set eT := EllObj.isoFibre e he t with heT
     have hcomp : eT.hom ≫ X.pullbackAlongπ t = X.pullbackAlongπ t ≫ e.hom :=
       EllHom.fibre_pullbackAlongπ e.hom he t
@@ -943,19 +944,94 @@ theorem ModuliProblem.QuotientProblemData.rigid_of_geom_free {Q : ModuliProblem 
     exact hfree k (t ≫ X.structMap) (X.curve.baseChange t) eT rfl hfib b γ hγ
   · exact hne (EllObj.iso_eq_refl_of_isEmpty (not_nonempty_iff.mp hbase) e)
 
+/-- **[RIG-3b] The rigidity bridge**: a quotient problem datum is rigid provided
+(1) nontriviality of base-identical isos is DETECTED on some geometric fibre
+(`hdetect` — [RIG-1], KM 2.7-adjacent), and (2) no nontrivial geometric iso fixes a
+`γ`-twisted value of `Q` (`hfree` — [RIG-2], the k̄ orbit-freeness; for `Γ_H` this is
+the `N ≥ 3` Serre argument + the `H`-condition). Body: `rigid_at_of_geom_free`. -/
+theorem ModuliProblem.QuotientProblemData.rigid_of_geom_free {Q : ModuliProblem R}
+    {G : Type*} [Group G] [Finite G] {φ : G →* Aut Q}
+    (qpd : ModuliProblem.QuotientProblemData φ)
+    (hdetect : ∀ (X : EllObj R) (e : X ≅ X) (he : e.hom.baseHom = 𝟙 X.base),
+      e ≠ Iso.refl X → Nonempty X.base →
+      ∃ (k : Type u) (_ : Field k) (_ : IsAlgClosed k)
+        (t : Spec (CommRingCat.of k) ⟶ X.base), EllObj.isoFibre e he t ≠ Iso.refl _)
+    (hfree : ∀ (k : Type u) [Field k] [IsAlgClosed k]
+      (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+      (E : EllipticCurve (Spec (CommRingCat.of k)))
+      (e : (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R) ≅
+        (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)),
+      e.hom.baseHom = 𝟙 _ → e ≠ Iso.refl _ →
+      ∀ (b : Q.obj (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))) (γ : G),
+        (φ γ).hom.app (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
+          (Q.map e.hom.op b) ≠ b) :
+    qpd.prob.Rigid :=
+  fun X => qpd.rigid_at_of_geom_free X (hdetect X) hfree
+
+/-- **[RIG-3b, noetherian-local] The rigidity bridge at `RigidNoeth`** ([T-W7.8] variant,
+owner ruling v10.298): same bridge, with the geometric-fibre detection required only over
+locally noetherian bases — which is all the T-W7.7 detection engine
+(`exists_isoFibre_ne_refl`) can honestly supply without EGA IV §8 spreading-out. The
+conclusion `RigidNoeth` is everything the KM 4.7.0 representability engine consumes
+(`simulSchemeAction_free_of_rigidNoeth`), so the `Γ_H` headline sheds the `hLN` pin. -/
+theorem ModuliProblem.QuotientProblemData.rigidNoeth_of_geom_free {Q : ModuliProblem R}
+    {G : Type*} [Group G] [Finite G] {φ : G →* Aut Q}
+    (qpd : ModuliProblem.QuotientProblemData φ)
+    (hdetect : ∀ (X : EllObj R), IsLocallyNoetherian X.base →
+      ∀ (e : X ≅ X) (he : e.hom.baseHom = 𝟙 X.base),
+      e ≠ Iso.refl X → Nonempty X.base →
+      ∃ (k : Type u) (_ : Field k) (_ : IsAlgClosed k)
+        (t : Spec (CommRingCat.of k) ⟶ X.base), EllObj.isoFibre e he t ≠ Iso.refl _)
+    (hfree : ∀ (k : Type u) [Field k] [IsAlgClosed k]
+      (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+      (E : EllipticCurve (Spec (CommRingCat.of k)))
+      (e : (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R) ≅
+        (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)),
+      e.hom.baseHom = 𝟙 _ → e ≠ Iso.refl _ →
+      ∀ (b : Q.obj (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))) (γ : G),
+        (φ γ).hom.app (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
+          (Q.map e.hom.op b) ≠ b) :
+    qpd.prob.RigidNoeth :=
+  fun X hX => qpd.rigid_at_of_geom_free X (hdetect X hX) hfree
+
 variable (R : CommRingCat.{u})
 
-/-- **[Γ_H rigidity, interface] (KM 4.7.2-shape)** — the quotient problem `P_H` is
-rigid, assembled from the PROVEN spine: the bridge `rigid_of_geom_free` fed by the
+/-- **[Γ_H rigidity, noetherian-local] (KM 4.7.2-shape at `RigidNoeth`, [T-W7.8]
+variant)** — the quotient problem `P_H` is noetherian-locally rigid, assembled from the
+PROVEN spine with **no `hLN` pin**: the bridge `rigidNoeth_of_geom_free` fed by the
 PROVEN detection `exists_isoFibre_ne_refl` (at the level `N ≥ 3` itself, invertible by
-`hinv` on every base through `nIsInvertible_over_spec`). The two remaining NAMED PINS:
+`hinv` on every base through `nIsInvertible_over_spec`; the detection engine's
+`IsLocallyNoetherian` instance now comes from the test object itself). The one remaining
+NAMED PIN is `hfree` — the k̄ `H`-orbit-freeness: no nontrivial base-identical iso fixes
+a `γ`-twisted full level structure. Its discharge is the [RIG-2] core
+(`aut_endo_eq_one_of_fixes_point`, PROVEN clean) through the `glSmul`-matrix
+translation + KM's keystone `hbound` (register-box until the K4 bridge lands). -/
+theorem gammaH_rigidNoeth (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
+    (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
+    (hinv : IsUnit (N : R))
+    (qpd : ModuliProblem.QuotientProblemData (gammaHAut R N H))
+    (hfree : ∀ (k : Type u) [Field k] [IsAlgClosed k]
+      (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+      (E : EllipticCurve (Spec (CommRingCat.of k)))
+      (e : (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R) ≅
+        (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)),
+      e.hom.baseHom = 𝟙 _ → e ≠ Iso.refl _ →
+      ∀ (b : (gammaFullNaiveProblem R N).obj
+          (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))) (γ : ↥H),
+        (gammaHAut R N H γ).hom.app
+          (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
+          ((gammaFullNaiveProblem R N).map e.hom.op b) ≠ b) :
+    qpd.prob.RigidNoeth := by
+  refine qpd.rigidNoeth_of_geom_free ?_ hfree
+  intro X hX e he hne hbase
+  haveI := hX
+  exact EllObj.exists_isoFibre_ne_refl N hN
+    (YFull.nIsInvertible_over_spec R X.structMap hinv) e he hne
 
-* `hLN` — local noetherianity of all `Ell/R`-bases, the T-W7.8 spreading-out gate
-  (`endMonHom`'s hypothesis; drops out when T-W7.8 lands — future-proofing pattern);
-* `hfree` — the k̄ `H`-orbit-freeness: no nontrivial base-identical iso fixes a
-  `γ`-twisted full level structure. Its discharge is the [RIG-2] core
-  (`aut_endo_eq_one_of_fixes_point`, PROVEN clean) through the `glSmul`-matrix
-  translation + KM's keystone `hbound` (register-box until the K4 bridge lands). -/
+/-- **[Γ_H rigidity, interface] (KM 4.7.2-shape)** — the literal KM 4.4 `Rigid` form,
+from `gammaH_rigidNoeth` plus the `hLN` pin (T-W7.8: local noetherianity of all
+`Ell/R`-bases — the unrestricted-detection gate, parked as [T-W7.8-L2-PARKED]; the
+`.Representable` headline no longer consumes this form). -/
 theorem gammaH_rigid (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
     (hinv : IsUnit (N : R))
@@ -972,18 +1048,35 @@ theorem gammaH_rigid (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
         (gammaHAut R N H γ).hom.app
           (Opposite.op (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R))
           ((gammaFullNaiveProblem R N).map e.hom.op b) ≠ b) :
-    qpd.prob.Rigid := by
-  refine qpd.rigid_of_geom_free ?_ hfree
-  intro X e he hne hbase
-  haveI := hLN X
-  exact EllObj.exists_isoFibre_ne_refl N hN
-    (YFull.nIsInvertible_over_spec R X.structMap hinv) e he hne
+    qpd.prob.Rigid :=
+  fun X => gammaH_rigidNoeth R N hN H hinv qpd hfree X (hLN X)
 
-/-- **[Γ_H rigidity, general `H`] (the charter goal, KM 4.7.x-shape)** — the quotient
-problem `P_H` is rigid for any `H`, given the two honest pins: `hLN` (T-W7.8) and the
-per-`H` finite-order arithmetic `hH` (no nontrivial base-identical iso has
-`e^(orderOf γ) = refl` for `γ ∈ H` — the CM-unit/`H` intersection condition, fed by
-KM's endomorphism-degree keystone). Subsumes `Γ₁`/`Γ₀` as special `H`. -/
+/-- **[Γ_H rigidity, general `H`, noetherian-local] (the charter goal at `RigidNoeth`,
+[T-W7.8] variant)** — the quotient problem `P_H` is noetherian-locally rigid for any `H`,
+given the ONE honest pin: the per-`H` finite-order arithmetic `hH` (no nontrivial
+base-identical iso has `e^(orderOf γ) = refl` for `γ ∈ H` — the CM-unit/`H` intersection
+condition, fed by KM's endomorphism-degree keystone). No `hLN`. Subsumes `Γ₁`/`Γ₀` as
+special `H`. -/
+theorem gammaH_rigidNoeth_of_orderOf (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
+    (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
+    (hinv : IsUnit (N : R))
+    (qpd : ModuliProblem.QuotientProblemData (gammaHAut R N H))
+    (hH : ∀ (k : Type u) [Field k] [IsAlgClosed k]
+      (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+      (E : EllipticCurve (Spec (CommRingCat.of k)))
+      (e : (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R) ≅
+        (⟨Spec (CommRingCat.of k), sm, E⟩ : EllObj R)),
+      e.hom.baseHom = 𝟙 _ → e ≠ Iso.refl _ → ∀ γ : ↥H,
+        isoPow e (orderOf ((γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))) =
+          Iso.refl _ → False) :
+    qpd.prob.RigidNoeth :=
+  gammaH_rigidNoeth R N hN H hinv qpd
+    (fun k _ _ sm E e he hne b γ =>
+      gammaH_hfree_of_orderOf_absurd N hN hinv H hH k sm E e he hne b γ)
+
+/-- **[Γ_H rigidity, general `H`] (KM 4.7.x-shape)** — the literal `Rigid` form, from
+`gammaH_rigidNoeth_of_orderOf` plus the `hLN` pin (T-W7.8; the `.Representable` headline
+no longer consumes this form). -/
 theorem gammaH_rigid_of_orderOf (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
     (hinv : IsUnit (N : R))
@@ -998,20 +1091,19 @@ theorem gammaH_rigid_of_orderOf (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
         isoPow e (orderOf ((γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))) =
           Iso.refl _ → False) :
     qpd.prob.Rigid :=
-  gammaH_rigid R N hN H hinv qpd hLN
-    (fun k _ _ sm E e he hne b γ =>
-      gammaH_hfree_of_orderOf_absurd N hN hinv H hH k sm E e he hne b γ)
+  fun X => gammaH_rigidNoeth_of_orderOf R N hN H hinv qpd hH X (hLN X)
 
 /-- **[Γ_H `.Representable`, PREPPED on the shared engine]** — the moment OMEGA's T-E14
-de-sorries `representable_iff`'s ⇐ (the KM 4.7.0 engine instantiated at level 3 +
-Legendre), `P_H` is representable: relative representability and affineness come from
-`qpd` itself, rigidity from `gammaH_rigid_of_orderOf`. Pins: `hLN` (T-W7.8) + `hH`
-(per-`H` finite-order, KM keystone) — nothing else. -/
+de-sorries the KM 4.7.0 engine (instantiated at level 3 + Legendre, consumed here through
+`representable_iff_rigidNoeth`), `P_H` is representable: relative representability and
+affineness come from `qpd` itself, rigidity from `gammaH_rigidNoeth_of_orderOf`. Pin:
+`hH` (per-`H` finite-order, KM keystone) — nothing else. The former `hLN` pin (T-W7.8) is
+GONE: the engine only ever consumes rigidity at locally noetherian bases
+(owner ruling v10.298). -/
 theorem gammaH_representable_of_orderOf (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
     (H : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))
     (hinv : IsUnit (N : R))
     (qpd : ModuliProblem.QuotientProblemData (gammaHAut R N H))
-    (hLN : ∀ X : EllObj R, IsLocallyNoetherian X.base)
     (hH : ∀ (k : Type u) [Field k] [IsAlgClosed k]
       (sm : Spec (CommRingCat.of k) ⟶ Spec R)
       (E : EllipticCurve (Spec (CommRingCat.of k)))
@@ -1021,9 +1113,9 @@ theorem gammaH_representable_of_orderOf (N : ℕ) [NeZero N] (hN : 3 ≤ (N : �
         isoPow e (orderOf ((γ : Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))) =
           Iso.refl _ → False) :
     qpd.prob.Representable :=
-  (ModuliProblem.representable_iff qpd.prob qpd.affineOverEll).mpr
+  (ModuliProblem.representable_iff_rigidNoeth qpd.prob qpd.affineOverEll).mpr
     ⟨qpd.affineOverEll.relativelyRepresentable,
-     gammaH_rigid_of_orderOf R N hN H hinv qpd hLN hH⟩
+     gammaH_rigidNoeth_of_orderOf R N hN H hinv qpd hH⟩
 
 open EllipticCurve in
 /-- **[Γ₁ k̄-core] (T-H9's rigidity content at a geometric point)** — over k̄, no
@@ -1115,16 +1207,16 @@ theorem gammaOneDrinfeld_fix_absurd (N : ℕ) [NeZero N] (hN : 4 ≤ N)
   exact hne (Iso.ext (EllHom.ext he hcid))
 
 open EllipticCurve in
-/-- **[Γ₁ rigidity] (T-H9's Rigid half; KM 5.x-shape)** — the Drinfeld `Γ₁(N)` problem
-is rigid for `N ≥ 4` invertible, at the pins `hLN` (T-W7.8) + `hbound` (the KM
-kernel-degree keystone, ∀-geometric-point form) + the T-D6b register box (in the
-statement of the k̄-core). Route: the PROVEN detection (`exists_isoFibre_ne_refl`, at
-level `N`) finds a geometric fibre where the iso stays nontrivial; the fixed structure
-transports along the fibre square; the k̄-core (`gammaOneDrinfeld_fix_absurd`) kills.
-Unblocks KM's Drinfeld `.Representable` wiring (with their
-`gammaOneDrinfeld_affineOverEll` + the shared T-E14 engine). -/
-theorem gammaOneDrinfeld_rigid (N : ℕ) [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R))
-    (hLN : ∀ X : EllObj R, IsLocallyNoetherian X.base)
+/-- **[Γ₁ rigidity, noetherian-local] (T-H9's Rigid half at `RigidNoeth`; [T-W7.8]
+variant)** — the Drinfeld `Γ₁(N)` problem is noetherian-locally rigid for `N ≥ 4`
+invertible, at the pins `hbound` (the KM kernel-degree keystone, ∀-geometric-point form)
++ the T-D6b register box (in the statement of the k̄-core) — **no `hLN`**: the detection
+engine's `IsLocallyNoetherian` instance comes from the test object. Route: the PROVEN
+detection (`exists_isoFibre_ne_refl`, at level `N`) finds a geometric fibre where the iso
+stays nontrivial; the fixed structure transports along the fibre square; the k̄-core
+(`gammaOneDrinfeld_fix_absurd`) kills. Unblocks KM's Drinfeld `.Representable` wiring
+(with their `gammaOneDrinfeld_affineOverEll` + the shared T-E14 engine). -/
+theorem gammaOneDrinfeld_rigidNoeth (N : ℕ) [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R))
     (hbound : ∀ (k : Type u) [Field k] [IsAlgClosed k]
       (sm : Spec (CommRingCat.of k) ⟶ Spec R)
       (E : EllipticCurve (Spec (CommRingCat.of k)))
@@ -1135,9 +1227,9 @@ theorem gammaOneDrinfeld_rigid (N : ℕ) [NeZero N] (hN : 4 ≤ N) (hinv : IsUni
       ∀ pts : Fin N → E.Point (𝟙 (Spec (CommRingCat.of k))), Function.Injective pts →
         (∀ i, (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) (pts i) ≫
           (ε * (𝟙 E.asOver)⁻¹) = 1) → False) :
-    (gammaOneDrinfeldProblem R N).Rigid := by
-  intro X e he hne a hfix
-  haveI := hLN X
+    (gammaOneDrinfeldProblem R N).RigidNoeth := by
+  intro X hX e he hne a hfix
+  haveI := hX
   have hN3 : 3 ≤ (N : ℤ) := by exact_mod_cast Nat.le_of_succ_le hN
   obtain ⟨k, _, _, t, hfib⟩ := EllObj.exists_isoFibre_ne_refl N hN3
     (YFull.nIsInvertible_over_spec R X.structMap hinv) e he hne
@@ -1158,12 +1250,11 @@ theorem gammaOneDrinfeld_rigid (N : ℕ) [NeZero N] (hN : 4 ≤ N) (hinv : IsUni
   exact gammaOneDrinfeld_fix_absurd R N hN hinv k (t ≫ X.structMap) (X.curve.baseChange t)
     eT rfl hfib aT (hbound k (t ≫ X.structMap) (X.curve.baseChange t)) hfixT
 
-/-- **[Γ₁ `.Representable`, PREPPED on the shared engine]** — the moment OMEGA's T-E14
-lands, the Drinfeld `Γ₁(N)` problem is representable: affineness is KM's
-`gammaOneDrinfeld_affineOverEll`, rigidity is `gammaOneDrinfeld_rigid`. Pins: `hLN` +
-`hbound` (+ the register boxes in the statements). -/
-theorem gammaOneDrinfeld_representable_prep (N : ℕ) [NeZero N] (hN : 4 ≤ N)
-    (hinv : IsUnit (N : R))
+open EllipticCurve in
+/-- **[Γ₁ rigidity] (T-H9's Rigid half; KM 5.x-shape)** — the literal `Rigid` form, from
+`gammaOneDrinfeld_rigidNoeth` plus the `hLN` pin (T-W7.8; the `.Representable` headline
+no longer consumes this form). -/
+theorem gammaOneDrinfeld_rigid (N : ℕ) [NeZero N] (hN : 4 ≤ N) (hinv : IsUnit (N : R))
     (hLN : ∀ X : EllObj R, IsLocallyNoetherian X.base)
     (hbound : ∀ (k : Type u) [Field k] [IsAlgClosed k]
       (sm : Spec (CommRingCat.of k) ⟶ Spec R)
@@ -1175,10 +1266,30 @@ theorem gammaOneDrinfeld_representable_prep (N : ℕ) [NeZero N] (hN : 4 ≤ N)
       ∀ pts : Fin N → E.Point (𝟙 (Spec (CommRingCat.of k))), Function.Injective pts →
         (∀ i, (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) (pts i) ≫
           (ε * (𝟙 E.asOver)⁻¹) = 1) → False) :
+    (gammaOneDrinfeldProblem R N).Rigid :=
+  fun X => gammaOneDrinfeld_rigidNoeth R N hN hinv hbound X (hLN X)
+
+/-- **[Γ₁ `.Representable`, PREPPED on the shared engine]** — the moment OMEGA's T-E14
+lands (consumed through `representable_iff_rigidNoeth`), the Drinfeld `Γ₁(N)` problem is
+representable: affineness is KM's `gammaOneDrinfeld_affineOverEll`, rigidity is
+`gammaOneDrinfeld_rigidNoeth`. Pin: `hbound` (+ the register boxes in the statements).
+The former `hLN` pin (T-W7.8) is GONE (owner ruling v10.298). -/
+theorem gammaOneDrinfeld_representable_prep (N : ℕ) [NeZero N] (hN : 4 ≤ N)
+    (hinv : IsUnit (N : R))
+    (hbound : ∀ (k : Type u) [Field k] [IsAlgClosed k]
+      (sm : Spec (CommRingCat.of k) ⟶ Spec R)
+      (E : EllipticCurve (Spec (CommRingCat.of k)))
+      (ε : E.asOver ⟶ E.asOver), η[E.asOver] ≫ ε = η[E.asOver] →
+      letI : CommGroup (E.asOver ⟶ E.asOver) := Hom.commGroup
+      letI : CommGroup (Over.mk (𝟙 (Spec (CommRingCat.of k))) ⟶ E.asOver) := Hom.commGroup
+      ε * (𝟙 E.asOver)⁻¹ ≠ 1 →
+      ∀ pts : Fin N → E.Point (𝟙 (Spec (CommRingCat.of k))), Function.Injective pts →
+        (∀ i, (E.pointEquivOverHom (𝟙 (Spec (CommRingCat.of k)))) (pts i) ≫
+          (ε * (𝟙 E.asOver)⁻¹) = 1) → False) :
     (gammaOneDrinfeldProblem R N).Representable :=
-  (ModuliProblem.representable_iff _ (gammaOneDrinfeld_affineOverEll N)).mpr
+  (ModuliProblem.representable_iff_rigidNoeth _ (gammaOneDrinfeld_affineOverEll N)).mpr
     ⟨(gammaOneDrinfeld_affineOverEll N).relativelyRepresentable,
-     gammaOneDrinfeld_rigid R N hN hinv hLN hbound⟩
+     gammaOneDrinfeld_rigidNoeth R N hN hinv hbound⟩
 
 /-- **[Γ(N) rigidity] (KM 2.7.2 upgraded to the quotient problem at `H = ⊥`)** — the
 quotient problem `P_⊥ = [Γ(N)]` is rigid for `N ≥ 3` invertible, with the k̄
@@ -1193,17 +1304,29 @@ theorem gammaBot_rigid (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ)) (hinv : IsUni
     (fun k _ _ sm E e he hne b γ =>
       gammaFullNaive_hfree_bot N hN hinv k sm E e he hne b γ)
 
-/-- **[Γ(N) = Y(N) `.Representable`, PREPPED]** — at `H = ⊥` the `hH` pin is free, so
-Y(N)'s representability is gated on exactly `hLN` + the shared T-E14 engine. -/
+/-- **[Γ(N) rigidity, noetherian-local]** — `gammaBot_rigid` at `RigidNoeth` ([T-W7.8]
+variant): PIN-FREE — the k̄ orbit-freeness is discharged outright
+(`gammaFullNaive_hfree_bot`) and no `hLN` is consumed. `P_⊥ = [Γ(N)]` is
+noetherian-locally rigid, unconditionally (for `N ≥ 3` invertible). -/
+theorem gammaBot_rigidNoeth (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ)) (hinv : IsUnit (N : R))
+    (qpd : ModuliProblem.QuotientProblemData
+      (gammaHAut R N (⊥ : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N))))) :
+    qpd.prob.RigidNoeth :=
+  gammaH_rigidNoeth R N hN ⊥ hinv qpd
+    (fun k _ _ sm E e he hne b γ =>
+      gammaFullNaive_hfree_bot N hN hinv k sm E e he hne b γ)
+
+/-- **[Γ(N) = Y(N) `.Representable`, PREPPED]** — at `H = ⊥` the `hH` pin is free and the
+former `hLN` pin is GONE (owner ruling v10.298), so Y(N)'s representability is gated on
+EXACTLY the shared T-E14 engine (`representable_iff_rigidNoeth`'s ⇐) — no other pin. -/
 theorem gammaBot_representable (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
     (hinv : IsUnit (N : R))
     (qpd : ModuliProblem.QuotientProblemData
-      (gammaHAut R N (⊥ : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N)))))
-    (hLN : ∀ X : EllObj R, IsLocallyNoetherian X.base) :
+      (gammaHAut R N (⊥ : Subgroup (Matrix.GeneralLinearGroup (Fin 2) (ZMod N))))) :
     qpd.prob.Representable :=
-  (ModuliProblem.representable_iff qpd.prob qpd.affineOverEll).mpr
+  (ModuliProblem.representable_iff_rigidNoeth qpd.prob qpd.affineOverEll).mpr
     ⟨qpd.affineOverEll.relativelyRepresentable,
-     gammaBot_rigid R N hN hinv qpd hLN⟩
+     gammaBot_rigidNoeth R N hN hinv qpd⟩
 
 
 /-- **[Γ_H MASTER, interface] (KM 4.7.0 for `P_H`; Loeffler 3.8.2 upgraded to a fine

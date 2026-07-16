@@ -169,6 +169,25 @@ def Rigid (P : ModuliProblem R) : Prop :=
   ∀ (X : EllObj R) (e : X ≅ X), e.hom.baseHom = 𝟙 X.base → e ≠ Iso.refl X →
     ∀ a : P.obj (Opposite.op X), P.map e.hom.op a ≠ a
 
+/-- **Noetherian-local rigidity** — the fibre-detection variant of `Rigid` ([T-W7.8],
+owner ruling v10.298): fixed-point-freeness demanded only at test objects with locally
+noetherian base. This is exactly what the T-W7.7 rigidity engine proves without the
+EGA IV §8 spreading-out gate (the `hLN` pin of the `Γ_H` chain), and it is all the
+KM 4.7.0 engine ever consumes: its single rigidity call is at `XM.pullbackAlong t`
+(`Moduli/QuotientProblem.lean`), and emptiness of the `γ`-fixed locus is detected on
+field-valued points, whose bases are locally noetherian
+(`simulSchemeAction_free_of_rigidNoeth`). The literal KM 4.4 form `Rigid` stays as the
+reference statement; the unrestricted detection bridge `RigidNoeth → Rigid` is EGA IV §8
+material, parked as [T-W7.8-L2-PARKED]. -/
+def RigidNoeth (P : ModuliProblem R) : Prop :=
+  ∀ (X : EllObj R), IsLocallyNoetherian X.base →
+    ∀ (e : X ≅ X), e.hom.baseHom = 𝟙 X.base → e ≠ Iso.refl X →
+      ∀ a : P.obj (Opposite.op X), P.map e.hom.op a ≠ a
+
+/-- Unrestricted rigidity restricts to noetherian-based test objects. -/
+theorem Rigid.rigidNoeth {P : ModuliProblem R} (h : P.Rigid) : P.RigidNoeth :=
+  fun X _ => h X
+
 /-- `P` is **affine over `Ell`**: relatively representable *by an affine morphism*. This is
 KM's standing hypothesis in SCHOLIE (4.7.0) — "relatively representable **and affine over**
 (Ell)" (book p. 111) — and it is what makes the free quotient `𝕸(𝒫, δ)/G` of the engine's
@@ -276,6 +295,25 @@ theorem representable_iff (P : ModuliProblem R) (hP : P.AffineOverEll) :
   refine ⟨fun h => ⟨hP.relativelyRepresentable, rigid_of_representable h⟩, fun h => ?_⟩
   -- ⇐ : KM's engine (p. 112) instantiated at δ = naive level 3 and δ = Legendre, then
   -- glued over ℤ[1/6]. Leaves T-E5c/d/e/f; gated on T-Q6e + T-E14 + T-E15.
+  sorry
+
+/-- **KM 4.7 at noetherian-local rigidity** ([T-W7.8] variant interface, owner ruling
+v10.298) — `representable_iff` with the rigidity input weakened to `RigidNoeth`.
+
+`⇒` is the restriction of `rigid_of_representable`. `⇐` is the *same* KM p. 112 engine as
+`representable_iff`'s: the engine consumes rigidity exactly once, through the freeness of
+the `G`-action on `𝕸(𝒫,δ)`, and freeness is emptiness of the `γ`-fixed locus, which is
+detected on field-valued points — locally noetherian bases, so `RigidNoeth` already yields
+it on the nose (`simulSchemeAction_free_of_rigidNoeth`, `Moduli/QuotientProblem.lean`,
+PROVEN). Same gate as `representable_iff`'s `⇐` (T-Q6e + T-E14 + T-E15); tracked as the
+same box, discharged by the same instantiation the moment it lands. -/
+theorem representable_iff_rigidNoeth (P : ModuliProblem R) (hP : P.AffineOverEll) :
+    P.Representable ↔ P.RelativelyRepresentable ∧ P.RigidNoeth := by
+  refine ⟨fun h => ⟨hP.relativelyRepresentable, (rigid_of_representable h).rigidNoeth⟩,
+    fun h => ?_⟩
+  -- ⇐ : the KM engine again, with its freeness input supplied by
+  -- `simulSchemeAction_free_of_rigidNoeth` instead of `simulSchemeAction_free_of_rigid`.
+  -- Gate: T-Q6e + T-E14 + T-E15 (shared with `representable_iff`).
   sorry
 
 end ModuliProblem
