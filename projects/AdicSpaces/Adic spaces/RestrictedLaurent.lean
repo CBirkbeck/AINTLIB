@@ -9,6 +9,8 @@ import Mathlib.Topology.Algebra.InfiniteSum.Ring
 import Mathlib.Topology.Algebra.InfiniteSum.Nonarchimedean
 import Mathlib.Analysis.SpecificLimits.Normed
 import «Adic spaces».Vendored.CoramRestrictedNorm
+import «Adic spaces».Vendored.CoramRestrictedIso
+import «Adic spaces».ExampleUnitDisc
 
 /-!
 # Restricted Laurent series `R⟨W, W⁻¹⟩` (finite-jet pinching, layer 𝓛)
@@ -1100,17 +1102,83 @@ noncomputable def restrictedCongr {A B : Type*} [NormedCommRing A] [IsUltrametri
     rw [show (G + G' : PowerSeries.Restricted A (1 : ℝ)).1 = G.1 + G'.1 from rfl, map_add]
     rfl
 
+@[simp] theorem coeff_restrictedCongr {A B : Type*} [NormedCommRing A] [IsUltrametricDist A]
+    [NormedCommRing B] [IsUltrametricDist B] (e : A ≃+* B) (he : ∀ x, ‖e x‖ = ‖x‖)
+    (G : PowerSeries.Restricted A (1 : ℝ)) (i : ℕ) :
+    PowerSeries.coeff i (restrictedCongr e he G).1 = e (PowerSeries.coeff i G.1) :=
+  PowerSeries.coeff_map _ _ _
+
+theorem restrictedCongr_norm {A B : Type*} [NormedCommRing A] [IsUltrametricDist A]
+    [NormedCommRing B] [IsUltrametricDist B] (e : A ≃+* B) (he : ∀ x, ‖e x‖ = ‖x‖)
+    (G : PowerSeries.Restricted A (1 : ℝ)) :
+    ‖restrictedCongr e he G‖ = ‖G‖ := by
+  rw [Restricted.norm_eq, Restricted.norm_eq, PowerSeries.gaussNorm_eq,
+    PowerSeries.gaussNorm_eq]
+  refine iSup_congr fun i => ?_
+  rw [coeff_restrictedCongr, he]
+
+/-- The one-variable restricted ring in `Fin 1`-indexed form, identified with the
+univariate form. -/
+noncomputable def innerToSeries :
+    MvPowerSeries.Restricted R (fun _ : Fin 1 => (1 : ℝ)) ≃+*
+      PowerSeries.Restricted R (1 : ℝ) :=
+  (UnitDiscExample.finSuccOne R 0).trans
+    (restrictedCongr (foo R (fun _ : Fin 0 => (1 : ℝ)))
+      (fun x => RingHomIsometric.norm_map (σ := (foo R (fun _ : Fin 0 => (1 : ℝ))).toRingHom)))
+
+theorem innerToSeries_norm (f : MvPowerSeries.Restricted R (fun _ : Fin 1 => (1 : ℝ))) :
+    ‖innerToSeries (R := R) f‖ = ‖f‖ := by
+  rw [innerToSeries, RingEquiv.trans_apply, restrictedCongr_norm,
+    UnitDiscExample.finSuccOne_norm]
+
+/-- The coefficient map for the evaluation: `V`-series map to nonpositively supported
+Laurent series through `negate ∘ ofRestricted ∘ innerToSeries`. -/
+noncomputable def negOfSeries :
+    MvPowerSeries.Restricted R (fun _ : Fin 1 => (1 : ℝ)) →+* RestrictedLaurent R :=
+  ((negate (R := R)).toRingHom.comp (ofRestricted (R := R))).comp
+    (innerToSeries (R := R)).toRingHom
+
+theorem norm_negOfSeries (f : MvPowerSeries.Restricted R (fun _ : Fin 1 => (1 : ℝ))) :
+    ‖negOfSeries (R := R) f‖ = ‖f‖ := by
+  show ‖negate (ofRestricted (innerToSeries f))‖ = ‖f‖
+  rw [norm_negate, ofRestricted_norm, innerToSeries_norm]
+
+/-- Powers of `W` are monomials. -/
+theorem Wu_pow (i : ℕ) : ((Wu (R := R)).val) ^ i = single (i : ℤ) 1 := by
+  induction i with
+  | zero => rw [pow_zero, ← single_zero_one]; norm_num
+  | succ n ih =>
+    rw [pow_succ, ih, show (Wu (R := R)).val = single 1 1 from rfl, single_mul_single,
+      one_mul]
+    norm_num
+
 /-- Evaluation `R⟨W,V⟩ → R⟨W,W⁻¹⟩`, `W ↦ Wu, V ↦ Wu⁻¹`: a bounded ring homomorphism. -/
 noncomputable def evalHom :
-    MvPowerSeries.Restricted R (fun _ : Fin 2 => (1 : ℝ)) →+* RestrictedLaurent R := by
-  sorry
-
-theorem evalHom_surjective :
-    Function.Surjective (evalHom (R := R)) := by sorry
+    MvPowerSeries.Restricted R (fun _ : Fin 2 => (1 : ℝ)) →+* RestrictedLaurent R :=
+  (evalLE (negOfSeries (R := R)) (Wu (R := R)).val
+      (fun x => (norm_negOfSeries x).le) norm_W.le).comp
+    (UnitDiscExample.finSuccOne R 1).toRingHom
 
 theorem evalHom_norm_le
     (f : MvPowerSeries.Restricted R (fun _ : Fin 2 => (1 : ℝ))) :
-    ‖evalHom (R := R) f‖ ≤ ‖f‖ := by sorry
+    ‖evalHom (R := R) f‖ ≤ ‖f‖ := by
+  have h : evalHom (R := R) f = evalLE (negOfSeries (R := R)) (Wu (R := R)).val
+      (fun x => (norm_negOfSeries x).le) norm_W.le (UnitDiscExample.finSuccOne R 1 f) := rfl
+  rw [h]
+  refine (norm_evalLE_le _ _ _ _ _).trans ?_
+  rw [UnitDiscExample.finSuccOne_norm]
+
+/-- The nonpositive-support truncation of a Laurent series. -/
+noncomputable def truncNonpos (h : RestrictedLaurent R) : RestrictedLaurent R :=
+  ⟨fun a => if a ≤ 0 then h.coeff a else 0, by
+    refine squeeze_zero (fun a => norm_nonneg _) (fun a => ?_) h.tendsto_coeff
+    split
+    · exact le_rfl
+    · simp only [norm_zero]
+      exact norm_nonneg _⟩
+
+theorem evalHom_surjective :
+    Function.Surjective (evalHom (R := R)) := by sorry
 
 end Eval
 
