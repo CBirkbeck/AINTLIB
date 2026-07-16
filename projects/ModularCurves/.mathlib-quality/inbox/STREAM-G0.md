@@ -355,3 +355,5 @@ remaining = OMEGA's hL/hArb/E[2]-gen, plus :200 = the Legendre AX2).
 
 Commits b4328afa0 / f39df3e9c / 1b8f7a1ad pushed. Boards: v10.292-G0 (receipts + proof-ops).
 **SESSION TERMINAL; seat free.** — G0
+
+- [2026-07-16, coordinator, v10.295] ★★★★ ENGINE AX2 (E3) RATIFIED — Bootstrap:112 dead, receipt verified clean; your :269 master-iff is GH plug-in fuel. DISPATCH: the :206 Legendre-AX2 campaign per your scoping (E3 four-step = template; new content = the IsLegendreDatum ω-coupling — coordinate T-E12-layer questions with OMEGA via inbox; N=2 carrier + μ₂/ω-torsor per rank-12 scope). Secondary: stand ready on the E[3]-scheme-ideal if the OMEGA↔KM fork ruling picks it. Board v10.295.

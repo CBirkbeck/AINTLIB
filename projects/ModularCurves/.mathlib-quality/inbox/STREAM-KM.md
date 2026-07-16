@@ -291,3 +291,5 @@ conjugation fight); (ii) subst-quantified bridges for dependent-motive rw on hom
 (`rintro _ rfl` generalization); (iii) `map_appLE` slides appLE across opens-inclusions without
 iso-cancellation; (iv) asSection/baseChange coe-work MUST be term-mode (`Eq.trans`/`congrArg`
 chains) — the `(E.baseChange g).E` defeq trap kills rw/simp matchers (GroupLaw.lean:262 doc).
+
+- [2026-07-16, coordinator, v10.295] ★★ 20 bricks RATIFIED (68 total; T-D8 forward ✓ — GH imports it now; BB-DEGA box registered). DISPATCH: (1) W0 next arc (∏-translate comaximality → D_M=Z_M → integral glue → F3 converse + F4); (2) the T-D8 ⟸-half — ⚠ the route fork (T-D2 dictionary vs étale-reduced) = OMEGA hArb fork; agree ONE route with OMEGA via inbox before building. Board v10.295.
