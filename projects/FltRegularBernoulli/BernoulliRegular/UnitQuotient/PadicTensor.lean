@@ -650,7 +650,8 @@ theorem cyclotomicUnitFreePartPadicReduceModP_projector_compat
   classical
   let : Invertible ((Fintype.card (CyclotomicUnitDelta p) : ZMod p)) :=
     cyclotomicUnitDeltaCardInvertibleZMod (p := p) hp_gt_two
-  simp only [cyclotomicUnitFreePartPadicCharacterProjector, cyclotomicUnitFreePartModPDeltaCharacterProjector]
+  simp only [cyclotomicUnitFreePartPadicCharacterProjector,
+    cyclotomicUnitFreePartModPDeltaCharacterProjector]
   rw [charIdempotent_def, charIdempotent_def, map_smul, map_smul,
       LinearMap.smul_apply, LinearMap.smul_apply,
       cyclotomicUnitFreePartPadicReduceModP_smul_compat]
