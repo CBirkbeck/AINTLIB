@@ -74,4 +74,63 @@ lemma finrank_eq_affineFinrank_snd (f : X ⟶ S) (g : T ⟶ S) [IsAffine T] (t :
   · simp_rw [← hyr]
     exact affineFinrank_snd (pullback.snd f g) (u ≫ pullback.snd _ _) z
 
+/-- **[F3-prodrank-spec] (affine case)** Over `Spec R`, the rank of the fibre product of
+two finite flat Specs is the product of the ranks — `pullbackSpecIso` + tensor rank. -/
+theorem finrank_pullback_comp_fst_spec (R A B : Type u) [CommRing R] [CommRing A]
+    [CommRing B] [Algebra R A] [Algebra R B] [Module.Finite R A] [Module.Flat R A]
+    [Module.Finite R B] [Module.Flat R B] (p : PrimeSpectrum R) :
+    (pullback.fst (Spec.map (CommRingCat.ofHom (algebraMap R A)))
+        (Spec.map (CommRingCat.ofHom (algebraMap R B)))
+      ≫ Spec.map (CommRingCat.ofHom (algebraMap R A))).finrank p
+    = Module.rankAtStalk A p * Module.rankAtStalk B p := by
+  have hcomp : pullback.fst (Spec.map (CommRingCat.ofHom (algebraMap R A)))
+        (Spec.map (CommRingCat.ofHom (algebraMap R B)))
+      ≫ Spec.map (CommRingCat.ofHom (algebraMap R A))
+      = (pullbackSpecIso R A B).hom
+        ≫ Spec.map (CommRingCat.ofHom (algebraMap R (TensorProduct R A B))) := by
+    rw [← pullbackSpecIso_hom_fst']
+    rw [Category.assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+  rw [hcomp]
+  haveI hTfin : Module.Finite R (TensorProduct R A B) := inferInstance
+  haveI hTflat : Module.Flat R (TensorProduct R A B) := inferInstance
+  haveI : Flat (Spec.map (CommRingCat.ofHom (algebraMap R (TensorProduct R A B)))) := by
+    rw [Flat.SpecMap_iff]
+    exact RingHom.flat_algebraMap_iff.mpr hTflat
+  haveI : IsFinite (Spec.map (CommRingCat.ofHom (algebraMap R (TensorProduct R A B)))) := by
+    rw [IsFinite.SpecMap_iff]
+    exact RingHom.finite_algebraMap.mpr hTfin
+  rw [Scheme.Hom.finrank_comp_left_of_isIso]
+  rw [Scheme.Hom.finrank_SpecMap_eq_finrank
+    (RingHom.finite_algebraMap.mpr hTfin) (RingHom.flat_algebraMap_iff.mpr hTflat)]
+  have hfin := congrFun (RingHom.finrank_algebraMap (R := R) (S := TensorProduct R A B)) p
+  rw [show (CommRingCat.ofHom (algebraMap R (TensorProduct R A B))).hom
+      = algebraMap R (TensorProduct R A B) from rfl, hfin]
+  have := congrFun (Module.rankAtStalk_tensorProduct (R := R) (M := A) B) p
+  rw [this, Pi.mul_apply]
+
+/-- The Spec-level product formula, transported from the algebraMap form: for
+`φ : R ⟶ A`, `ψ : R ⟶ B` finite flat, the rank of `Spec A ×_Spec R Spec B` over
+`Spec R` multiplies. -/
+lemma finrank_pullback_comp_fst_specMap {R A B : CommRingCat.{u}} (φ : R ⟶ A) (ψ : R ⟶ B)
+    (hφ₁ : φ.hom.Finite) (hφ₂ : φ.hom.Flat) (hψ₁ : ψ.hom.Finite) (hψ₂ : ψ.hom.Flat)
+    (p : Spec R) :
+    (pullback.fst (Spec.map φ) (Spec.map ψ) ≫ Spec.map φ).finrank p
+      = (Spec.map φ).finrank p * (Spec.map ψ).finrank p := by
+  algebraize [φ.hom, ψ.hom]
+  haveI hMA : Module.Finite ↑R ↑A := hφ₁
+  haveI hFA : Module.Flat ↑R ↑A := hφ₂
+  haveI hMB : Module.Finite ↑R ↑B := hψ₁
+  haveI hFB : Module.Flat ↑R ↑B := hψ₂
+  have hφ : φ = CommRingCat.ofHom (algebraMap R A) := rfl
+  have hψ : ψ = CommRingCat.ofHom (algebraMap R B) := rfl
+  rw [hφ, hψ]
+  rw [ModularCurves.finrank_pullback_comp_fst_spec R A B p]
+  rw [Scheme.Hom.finrank_SpecMap_eq_finrank
+      (by rw [← hφ]; exact hφ₁) (by rw [← hφ]; exact hφ₂),
+    Scheme.Hom.finrank_SpecMap_eq_finrank
+      (by rw [← hψ]; exact hψ₁) (by rw [← hψ]; exact hψ₂)]
+  rw [show (CommRingCat.ofHom (algebraMap ↑R ↑A)).hom = algebraMap ↑R ↑A from rfl,
+    show (CommRingCat.ofHom (algebraMap ↑R ↑B)).hom = algebraMap ↑R ↑B from rfl,
+    RingHom.finrank_algebraMap, RingHom.finrank_algebraMap]
+
 end ModularCurves
