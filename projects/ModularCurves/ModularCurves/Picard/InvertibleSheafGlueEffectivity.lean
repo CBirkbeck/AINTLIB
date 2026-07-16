@@ -3563,6 +3563,37 @@ local notation "D" =>
 local notation "sq" => affineIntersectionChartChosenPullback hopen hpush
 local notation "sq₃" => affineIntersectionChartChosenPullback₃ hopen hpush
 
+/-- A family of chart trivializations realizes the transition maps of an
+affine-intersection unit cocycle. -/
+def AffineIntersectionUnitCocycle.IsCompatibleChartTrivialization
+    (M : (D).glued.Modules)
+    (e : ∀ i, (pullback ((D).ι i)).obj M ≅ unitObj ((D).U i)) : Prop :=
+  ∀ i j,
+    (pullbackPseudofunctor.map (sq i j).p₁.op.toLoc).toFunctor.map (e i).hom ≫
+          (c.chartTransitionIso hopen hpush i j).hom =
+      ((((pullbackComp (sq i j).p₁ ((D).ι i)).app M) ≪≫
+            ((pullbackCongr (sq i j).hp₁).app M)).hom ≫
+          (((pullbackComp (sq i j).p₂ ((D).ι j)).app M) ≪≫
+          ((pullbackCongr (sq i j).hp₂).app M)).inv) ≫
+        (pullbackPseudofunctor.map (sq i j).p₂.op.toLoc).toFunctor.map (e j).hom
+
+/-- Compatible chart trivializations identify the pullback descent datum of a module
+with the descent datum defined by an affine-intersection unit cocycle. -/
+noncomputable def AffineIntersectionUnitCocycle.descentIsoOfCompatibleChartTrivialization
+    (M : (D).glued.Modules)
+    (e : ∀ i, (pullback ((D).ι i)).obj M ≅ unitObj ((D).U i))
+    (h : c.IsCompatibleChartTrivialization hopen hpush M e) :
+    Pseudofunctor.DescentData'.ofDescentData sq sq₃
+        ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
+      c.chartDescentData hopen hpush := by
+  refine Pseudofunctor.DescentData'.isoMk e ?_
+  intro i j
+  as_aux_lemma =>
+    rw [c.chartDescentData_hom hopen hpush i j]
+    rw [Pseudofunctor.DescentData'.ofDescentData_hom]
+    rw [pullbackPseudofunctor_toDescentData_hom]
+    exact h i j
+
 private noncomputable def AffineIntersectionUnitCocycle.descentChartComponent
     (M : (D).glued.Modules)
     (e : Pseudofunctor.DescentData'.ofDescentData sq sq₃
@@ -3905,6 +3936,16 @@ noncomputable def AffineIntersectionUnitCocycle.gluedModuleIsoOfDescentIso
     (fun i => c.descentToGluedHom_chartOpen_isIso hopen hpush M e i)
   exact asIso g
 
+/-- A module with chart trivializations compatible with an affine-intersection unit cocycle
+is isomorphic to the concrete Cech equalizer realizing that cocycle. -/
+noncomputable def AffineIntersectionUnitCocycle.gluedModuleIsoOfCompatibleChartTrivialization
+    (M : (D).glued.Modules)
+    (e : ∀ i, (pullback ((D).ι i)).obj M ≅ unitObj ((D).U i))
+    (h : c.IsCompatibleChartTrivialization hopen hpush M e) :
+    M ≅ c.gluedModule hopen hpush :=
+  c.gluedModuleIsoOfDescentIso hopen hpush M
+    (c.descentIsoOfCompatibleChartTrivialization hopen hpush M e h)
+
 end DescentEffectivity
 
 /-- The overlap section of the affine-intersection cocycle is the original change-of-basis
@@ -4141,11 +4182,17 @@ noncomputable def affineIntersectionOriginalChartTrivialization
     (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
     (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s))
     (i : J) :
-    (pullback ((π.affineIntersectionGlueData U hU).ι i)).obj
-        ((pullback (π.affineIntersectionGluedToOriginal U hU)).obj N) ≅
-      unitObj ((π.affineIntersectionGlueData U hU).U i) := by
-  let D := π.affineIntersectionGlueData U hU
-  let g := π.affineIntersectionGluedToOriginal U hU
+    let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor
+      (π.affineIntersectionFunctor U) hopen hpush
+    let g : D.glued ⟶ X := π.affineIntersectionGluedToOriginal U hU
+    (pullback (D.ι i)).obj ((pullback g).obj N) ≅ unitObj (D.U i) := by
+  let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let D := Scheme.GlueData.ofAffineIntersectionFunctor
+    (π.affineIntersectionFunctor U) hopen hpush
+  let g : D.glued ⟶ X := π.affineIntersectionGluedToOriginal U hU
   let q := π.affineIntersectionChartIso U hU i
   let e' : (pullback (U i).ι).obj N ≅ unitObj (U i).toScheme :=
     (restrictFunctorIsoPullback (U i).ι).symm.app N ≪≫ e i
@@ -4676,6 +4723,33 @@ private theorem affineIntersectionOriginalChartTrivialization_pulled_transition
   exact affineIntersectionOriginalChartTrivialization_scalar_transition
     π U e hU i j
 
+/-- The chart trivializations induced from an affine cover of the original scheme are
+compatible with the affine-intersection unit cocycle. -/
+theorem affineIntersectionOriginalChartTrivialization_isCompatible
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s)) :
+    let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor
+      (π.affineIntersectionFunctor U) hopen hpush
+    let g : D.glued ⟶ X := π.affineIntersectionGluedToOriginal U hU
+    let M := (pullback g).obj N
+    let c := affineIntersectionUnitCocycle π U e
+    c.IsCompatibleChartTrivialization hopen hpush M
+      (affineIntersectionOriginalChartTrivialization π U e hU) := by
+  classical
+  dsimp only [AffineIntersectionUnitCocycle.IsCompatibleChartTrivialization]
+  intro i j
+  let q := π.affineIntersectionOverlapIso U hU i j
+  letI : (pullback q.inv).IsEquivalence :=
+    pullback_isEquivalence_of_iso q.symm
+  letI : (pullback q.inv).Faithful := by infer_instance
+  apply eq_of_map_components (pullback q.inv)
+  exact affineIntersectionOriginalChartTrivialization_pulled_transition
+    π U e hU i j
+
 /-- The chart trivializations induced from an affine cover of the original scheme have the
 transition maps used by the affine-intersection gluing construction. -/
 theorem affineIntersectionOriginalChartTrivialization_transition
@@ -4686,19 +4760,20 @@ theorem affineIntersectionOriginalChartTrivialization_transition
     (i j : J) :
     let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
     let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
-    let D := π.affineIntersectionGlueData U hU
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor
+      (π.affineIntersectionFunctor U) hopen hpush
     let sq := affineIntersectionChartChosenPullback hopen hpush
-    let g := π.affineIntersectionGluedToOriginal U hU
+    let g : D.glued ⟶ X := π.affineIntersectionGluedToOriginal U hU
     let M := (pullback g).obj N
     let c := affineIntersectionUnitCocycle π U e
-    (pullback (sq i j).p₁).map
+    (pullbackPseudofunctor.map (sq i j).p₁.op.toLoc).toFunctor.map
           (affineIntersectionOriginalChartTrivialization π U e hU i).hom ≫
         (c.chartTransitionIso hopen hpush i j).hom =
       ((((pullbackComp (sq i j).p₁ (D.ι i)).app M) ≪≫
             ((pullbackCongr (sq i j).hp₁).app M)).hom ≫
           (((pullbackComp (sq i j).p₂ (D.ι j)).app M) ≪≫
             ((pullbackCongr (sq i j).hp₂).app M)).inv) ≫
-        (pullback (sq i j).p₂).map
+        (pullbackPseudofunctor.map (sq i j).p₂.op.toLoc).toFunctor.map
           (affineIntersectionOriginalChartTrivialization π U e hU j).hom := by
   classical
   dsimp only
@@ -4709,6 +4784,28 @@ theorem affineIntersectionOriginalChartTrivialization_transition
   apply eq_of_map_components (pullback q.inv)
   exact affineIntersectionOriginalChartTrivialization_pulled_transition
     π U e hU i j
+
+/-- Pulling an invertible sheaf to its affine-intersection glued model recovers the
+concrete Cech equalizer built from the transition units of a trivializing cover. -/
+noncomputable def affineIntersectionOriginalGluedModuleIso
+    {X S : Scheme.{u}} (π : X ⟶ S) {N : X.Modules} {J : Type u}
+    (U : J → X.Opens)
+    (e : ∀ i, N.restrict (U i).ι ≅ unitObj (U i).toScheme)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s)) :
+    let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+    let D := Scheme.GlueData.ofAffineIntersectionFunctor
+      (π.affineIntersectionFunctor U) hopen hpush
+    let g : D.glued ⟶ X := π.affineIntersectionGluedToOriginal U hU
+    let c := affineIntersectionUnitCocycle π U e
+    (pullback g).obj N ≅ c.gluedModule hopen hpush := by
+  dsimp only
+  exact (affineIntersectionUnitCocycle π U e).gluedModuleIsoOfCompatibleChartTrivialization
+    (π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU)
+    (π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU)
+    ((pullback (π.affineIntersectionGluedToOriginal U hU)).obj N)
+    (affineIntersectionOriginalChartTrivialization π U e hU)
+    (affineIntersectionOriginalChartTrivialization_isCompatible π U e hU)
 
 private noncomputable def trivializationOnOpensRange
     {X Y : Scheme.{u}} (f : Y ⟶ X) [IsOpenImmersion f]
