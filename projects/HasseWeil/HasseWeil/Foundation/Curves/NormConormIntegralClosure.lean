@@ -334,9 +334,11 @@ private theorem not_zero_le_coe_mul_neg_two {e : ℕ} (he : 1 ≤ e) :
 (`hreg`, the basepoint-regularity carried by an isogeny), *no* height-one prime `v` of `B` has
 `v.valuation = C₁.ordAtInftyValuation`.  This is the geometric content excluding the place at
 infinity of `C₁`, and it is *provable* (not residual): the coordinate generator `coordX C₂` is a
-base-ring element of `B`, so `v` is `≤ 1` on its image (`valuation_algebraMap_coordinateRing_le_one`);
+base-ring element of `B`, so `v` is `≤ 1` on its image
+(`valuation_algebraMap_coordinateRing_le_one`);
 were `v` the `∞`-place, this would force `ord_∞^{C₁}(φ^* coordX₂) ≥ 0`.  But the
-ramification-at-`∞` pullback formula (`exists_pos_ramificationIdx_ordAtInfty_ringHom_of_isAlgebraic`,
+ramification-at-`∞` pullback formula
+(`exists_pos_ramificationIdx_ordAtInfty_ringHom_of_isAlgebraic`,
 with `e ≥ 1` and `K(C₁)/K(C₂)` algebraic from finiteness) gives
 `ord_∞^{C₁}(φ^* coordX₂) = e · ord_∞^{C₂}(coordX₂) = e · (−2) < 0` — a contradiction. -/
 theorem bPrime_valuation_ne_ordAtInfty (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂))
@@ -350,7 +352,8 @@ theorem bPrime_valuation_ne_ordAtInfty (hreg : OrdAtInftyReg (C₁ := C₁) (C�
   have halg_ne : algebraMap C₂.FunctionField C₁.FunctionField C₂.coordX ≠ 0 := by
     rw [Ne, map_eq_zero_iff _ (FaithfulSMul.algebraMap_injective C₂.FunctionField C₁.FunctionField)]
     exact C₂.coordX_ne_zero
-  -- but the ramified pole `ord_∞^{C₁}(φ^* coordX₂) = e·(-2) < 0` (`e ≥ 1` from `hreg`) contradicts it
+  -- but the ramified pole `ord_∞^{C₁}(φ^* coordX₂) = e·(-2) < 0` (`e ≥ 1` from `hreg`) contradicts
+  -- it
   obtain ⟨e, he, hpole⟩ := exists_pos_ramificationIdx_pole_pullback_coordX₂ hreg
   rw [C₁.ordAtInftyValuation_le_one_iff_ordAtInfty_nonneg halg_ne, hpole] at hle
   exact not_zero_le_coe_mul_neg_two he hle
@@ -359,12 +362,14 @@ theorem bPrime_valuation_ne_ordAtInfty (hreg : OrdAtInftyReg (C₁ := C₁) (C�
 
 If a height-one prime `v` of `B` has `v`-valuation `≤ 1` on *both* coordinate generators
 `x₁ = coordXFun C₁`, `y₁ = coordYFun C₁` of `C₁`, then the whole coordinate ring `F[C₁] = F[x₁, y₁]`
-lands in the `v`-adic integers `O_v`, and `v` *is* the point valuation at a smooth point `P` of `C₁`.
+lands in the `v`-adic integers `O_v`, and `v` *is* the point valuation at a smooth point `P` of
+`C₁`.
 
 The point `P` is the center of `v` on `C₁`: the contraction `c := {a ∈ F[C₁] | v(a) < 1}` is a
 nonzero prime (nonzero because `v` is nontrivial on `K(C₁) = Frac F[C₁]`, prime because it is the
 preimage of the `v`-adic maximal ideal), hence — `F[C₁]` being a Dedekind domain — maximal, hence
-`maximalIdealAt P` for a smooth `F`-rational point `P` (`exists_smoothPoint_of_isMaximal`).  Then the
+`maximalIdealAt P` for a smooth `F`-rational point `P` (`exists_smoothPoint_of_isMaximal`).  Then
+the
 local ring `O_P = (F[C₁])_{m_P}` sits inside `O_v` (a fraction `a/s` with `s ∉ m_P = c` has
 `v(s) = 1`, so `v(a/s) = v(a) ≤ 1`), i.e. `O_{pointValuation P} ⊆ O_v`.  The point valuation subring
 `O_{pointValuation P}` is rank-one (a DVR), so the DVR-domination engine
@@ -402,7 +407,8 @@ theorem valuation_algebraMap_coordinateRing_C₁_le_one
         map_mul, map_mul, map_pow, map_pow, w.map_mul, map_pow w]
       refine mul_le_one' ?_ (pow_le_one₀ zero_le hx)
       -- the `F`-constant `c`: a base-ring element of `B`, hence `v`-integral.  Route the
-      -- `F`-constant through `C₂.CoordinateRing` (where `valuation_algebraMap_coordinateRing_le_one`
+      -- `F`-constant through `C₂.CoordinateRing` (where
+      -- `valuation_algebraMap_coordinateRing_le_one`
       -- applies): `(mk (C (C c)))_{C₁} = algMap_F c = algMap_{C₂.CR}(algMap_F c)` via the towers.
       have hc : algebraMap C₁.CoordinateRing C₁.FunctionField
           (AdjoinRoot.mk C₁.toAffine.polynomial (Polynomial.C (Polynomial.C c))) =
@@ -417,7 +423,8 @@ theorem valuation_algebraMap_coordinateRing_C₁_le_one
       exact valuation_algebraMap_coordinateRing_le_one v _
 
 /-- **The center ideal of a `B`-prime on `C₁`** (in the point case): the contraction
-`c_v := {a ∈ F[C₁] | v(a) < 1}` of the `v`-adic maximal ideal to `C₁.CoordinateRing`.  It is an ideal
+`c_v := {a ∈ F[C₁] | v(a) < 1}` of the `v`-adic maximal ideal to `C₁.CoordinateRing`.  It is an
+ideal
 (preimage of the maximal ideal of `O_v` under `F[C₁] → O_v ⊆ K(C₁)`): closed under addition by the
 non-archimedean inequality, and an ideal because `v ≤ 1` on the whole coordinate ring
 (`valuation_algebraMap_coordinateRing_C₁_le_one`). -/
@@ -433,7 +440,8 @@ noncomputable def centerIdealOnC₁
     exact lt_of_le_of_lt ((v.valuation C₁.FunctionField).map_add _ _) (max_lt ha hb)
   zero_mem' := by simp only [Set.mem_setOf_eq, map_zero, map_zero]; exact zero_lt_one' _
   smul_mem' r a ha := by
-    simp only [Set.mem_setOf_eq, smul_eq_mul, map_mul, (v.valuation C₁.FunctionField).map_mul] at ha ⊢
+    simp only [Set.mem_setOf_eq, smul_eq_mul, map_mul,
+      (v.valuation C₁.FunctionField).map_mul] at ha ⊢
     calc v.valuation C₁.FunctionField (algebraMap C₁.CoordinateRing C₁.FunctionField r) *
             v.valuation C₁.FunctionField (algebraMap C₁.CoordinateRing C₁.FunctionField a)
           ≤ 1 * v.valuation C₁.FunctionField
@@ -454,7 +462,8 @@ noncomputable def centerIdealOnC₁
 private general facts re-proved from `Valuation/RankOneDomination.lean`'s family — now PUBLIC
 there in `{F : Type*}` generality (#7620); this file consumes them via the parent namespace. -/
 
-/-- **The center ideal of a `B`-prime on `C₁` is prime** (point case): `centerIdealOnC₁ v hx hy` is a
+/-- **The center ideal of a `B`-prime on `C₁` is prime** (point case): `centerIdealOnC₁ v hx hy` is
+a
 prime ideal.  Properness is `w 1 = 1 ≮ 1`; primality is the non-archimedean factorisation
 `w(ab) = w a · w b < 1`, which forces one factor `< 1` since both are `≤ 1`
 (`valuation_algebraMap_coordinateRing_C₁_le_one`). -/
@@ -480,9 +489,11 @@ private theorem centerIdealOnC₁_isPrime
     rw [ha1, hb1, one_mul] at hab
     exact lt_irrefl 1 hab
 
-/-- **The center ideal of a `B`-prime on `C₁` is nonzero** (point case): `centerIdealOnC₁ v hx hy ≠ ⊥`.
+/-- **The center ideal of a `B`-prime on `C₁` is nonzero** (point case): `centerIdealOnC₁ v hx hy ≠
+⊥`.
 Otherwise `w (algMap a) = 1` for every nonzero `a ∈ F[C₁]` (such an `a` would lie in the center if
-`< 1`), hence `w f = 1` for every `f ∈ K(C₁) = Frac F[C₁]` (write `f = a/b`) — contradicting that the
+`< 1`), hence `w f = 1` for every `f ∈ K(C₁) = Frac F[C₁]` (write `f = a/b`) — contradicting that
+the
 surjective `w` takes the value `exp 1 ≠ 1`. -/
 private theorem centerIdealOnC₁_ne_bot
     (v : IsDedekindDomain.HeightOneSpectrum (B (C₁ := C₁) (C₂ := C₂)))
@@ -531,7 +542,8 @@ private theorem centerIdealOnC₁_isMaximal [IsIntegrallyClosed C₁.CoordinateR
     (centerIdealOnC₁ v hx hy).IsMaximal :=
   (centerIdealOnC₁_isPrime v hx hy).isMaximal (centerIdealOnC₁_ne_bot v hx hy)
 
-/-- **The point local ring of `C₁` sits inside the `v`-adic integers** (point case): if the center of
+/-- **The point local ring of `C₁` sits inside the `v`-adic integers** (point case): if the center
+of
 `v` on `C₁` is the maximal ideal at the smooth point `P` (`hP`), then
 `O_{pointValuation P} ⊆ O_v`.  A `pointValuation P`-integer is `algMap (localRingAt P) x` with
 `x = mk' a s`, `s ∉ m_P`; since `m_P = centerIdealOnC₁ v`, `s` is *not* in the center so
@@ -599,7 +611,8 @@ theorem bPrime_valuation_eq_pointValuation_of_coordGen_le_one
   classical
   set w := v.valuation C₁.FunctionField with hw
   have hwsurj : Function.Surjective w := v.valuation_surjective C₁.FunctionField
-  -- The center `c = centerIdealOnC₁ v` is a nonzero prime, hence maximal, hence `m_P` at a point `P`.
+  -- The center `c = centerIdealOnC₁ v` is a nonzero prime, hence maximal, hence `m_P` at a point
+  -- `P`.
   obtain ⟨P, hP⟩ := C₁.exists_smoothPoint_of_isMaximal (centerIdealOnC₁_isMaximal v hx hy)
   refine ⟨P, ?_⟩
   -- `O_{pointValuation P}` is a rank-one DVR sitting inside the `v`-adic integers `O_v`.
@@ -609,7 +622,8 @@ theorem bPrime_valuation_eq_pointValuation_of_coordGen_le_one
         C₁.FunctionField)
   have hBA : (C₁.pointValuation P).valuationSubring ≤ w.valuationSubring :=
     pointValuationSubring_le_valuationSubring v hx hy hP.symm
-  -- DVR-domination forces the subrings (`O_v ≠ ⊤` as `w` is nontrivial) and hence the valuations equal.
+  -- DVR-domination forces the subrings (`O_v ≠ ⊤` as `w` is nontrivial) and hence the valuations
+  -- equal.
   have hEq : (C₁.pointValuation P).valuationSubring = w.valuationSubring :=
     rankOne_valuationSubring_le_eq_of_ne_top _ _ hBA
       (valuationSubring_ne_top_of_surjective_withZeroInt w hwsurj)
@@ -626,13 +640,16 @@ at infinity `ordAtInftyValuation`.  The structural reduction below
 valuation it is and runs the same DVR-domination as the point case, *given* the valuation-subring
 inclusion `O_v ⊆ O_∞` — i.e. `v(g) ≤ 1 → 0 ≤ ord_∞ g` for all `g`.
 
-**That inclusion is the genuine remaining content** (the project's standing curve-completeness wall in
+**That inclusion is the genuine remaining content** (the project's standing curve-completeness wall
+in
 its sharpest, fully-isolated form).  It is the statement that a `v`-integral function is regular at
 `∞`, for a `B`-prime `v` whose center on `C₁` is at infinity (`1 < v(x₁)`).  Equivalently it is the
 *uniqueness of the place of `K(C₁)` over the `∞`-place of `F(x₁)`* — the fundamental identity
 `Σ e·f = [K(C₁) : F(x₁)] = 2` with the `∞`-place totally accounting for it (`e = 2`, `f = 1`, one
-point at infinity).  The `RamificationAtInfinity.Sinf` machinery (`finrank_eq_sum_ramificationIdx_…`)
-is the intended vehicle, but `ordAtInftyValuation` is *not* packaged as the adic valuation of a local
+point at infinity).  The `RamificationAtInfinity.Sinf` machinery
+(`finrank_eq_sum_ramificationIdx_…`)
+is the intended vehicle, but `ordAtInftyValuation` is *not* packaged as the adic valuation of a
+local
 ring at `∞` in the project (it is the degree-based `−intDegree ∘ N`), so the center-domination route
 that closes the point case has no `∞` analogue without first building that packaging.  This is
 isolated as the named hypothesis `hsub` below. -/
@@ -661,7 +678,8 @@ theorem bPrime_valuation_eq_ordAtInfty_of_subring_le
 
 /-- **The ∞ case of the place classification, structural reduction (natural direction)**: given the
 valuation-subring inclusion `O_∞ ⊆ O_v` (`hsup`), a height-one prime `v` of `B` *is* the place at
-infinity.  This is the direction an eventual proof produces naturally: the `∞`-chart integral closure
+infinity.  This is the direction an eventual proof produces naturally: the `∞`-chart integral
+closure
 `B_∞ = integralClosure F[1/x₁] K(C₁)` is `v`-integral (`O_v` is integrally closed and contains
 `1/x₁`), so `O_∞ = (B_∞)_{m_∞} ⊆ O_v`.  Here `O_∞` is the rank-one DVR, so
 `rankOne_valuationSubring_le_eq_of_ne_top` forces `O_∞ = O_v` and the two surjective `ℤᵐ⁰`-valued
@@ -686,7 +704,8 @@ theorem bPrime_valuation_eq_ordAtInfty_of_subring_ge
 
 /-- **The ∞-inclusion residual (the sharply-isolated curve-completeness wall)**: for every
 height-one prime `v` of `B` that is *not* `≤ 1` on both coordinate generators of `C₁` (so its center
-is at infinity), the `v`-adic valuation subring is contained in the `∞`-place subring.  Equivalently:
+is at infinity), the `v`-adic valuation subring is contained in the `∞`-place subring. 
+Equivalently:
 a `v`-integral function is regular at `∞`, for a `B`-prime `v` with a pole of `x₁` — i.e. there is a
 *unique* place of `K(C₁)` over the `∞`-place of `F(x₁)`.  This is the only remaining input of the
 place classification (the `∞` half); the point half is discharged unconditionally
@@ -700,11 +719,13 @@ def BPrimeInftyInclusion : Prop :=
 /-- **The place classification, reduced to the ∞-inclusion residual** (the affine half discharged):
 given `BPrimeInftyInclusion`, the full curve-completeness classification `BPrimePlaceClassification`
 holds.  Case split on whether `v` is `≤ 1` on both coordinate generators: if so, the *point* case
-`bPrime_valuation_eq_pointValuation_of_coordGen_le_one` (axiom-clean) gives the point alternative; if
+`bPrime_valuation_eq_pointValuation_of_coordGen_le_one` (axiom-clean) gives the point alternative;
+if
 not, the *infinity* case `bPrime_valuation_eq_ordAtInfty_of_subring_le` together with the residual
 inclusion gives the `∞` alternative.
 
-This isolates the entire remaining content of the classification into the single geometric hypothesis
+This isolates the entire remaining content of the classification into the single geometric
+hypothesis
 `BPrimeInftyInclusion` (uniqueness of the place over `∞` of `F(x₁)`). -/
 theorem bPrimePlaceClassification_of_inftyInclusion
     [IsIntegrallyClosed C₁.CoordinateRing]
@@ -723,7 +744,8 @@ theorem bPrimePlaceClassification_of_inftyInclusion
 /-- **The place-dictionary residual from the curve-completeness classification + regularity**
 (axiom-clean): given the sharp place classification `BPrimePlaceClassification` and the
 basepoint-regularity `OrdAtInftyReg` (`hreg`), the residual `BPrimeValuationCoordGenLeOne` follows
-— the `∞` alternative of the classification is excluded by `bPrime_valuation_ne_ordAtInfty`.  This is
+— the `∞` alternative of the classification is excluded by `bPrime_valuation_ne_ordAtInfty`.  This
+is
 the cleanest reduction: it removes the geometric `∞`-exclusion entirely, leaving the *single*
 genuine wall, the curve-completeness classification `BPrimePlaceClassification`. -/
 theorem bPrimeValuationCoordGenLeOne_of_classification_of_reg
@@ -733,13 +755,15 @@ theorem bPrimeValuationCoordGenLeOne_of_classification_of_reg
   bPrimeValuationCoordGenLeOne_of_classification hclass
     (bPrime_valuation_ne_ordAtInfty hreg)
 
-/-- **The place dictionary, reduced to the single ∞-inclusion residual** (the affine half discharged,
+/-- **The place dictionary, reduced to the single ∞-inclusion residual** (the affine half
+discharged,
 axiom-clean): composing the classification reduction `bPrimePlaceClassification_of_inftyInclusion`
 (point half done) with `bPrimeValuationCoordGenLeOne_of_classification_of_reg`, the place-dictionary
 residual `BPrimeValuationCoordGenLeOne` — and hence all of `coordXFun_mem_B`, `coordYFun_mem_B`,
 `coordRing_mem_B` — follows from the single geometric residual `BPrimeInftyInclusion` together with
 the basepoint-regularity `hreg`.  This is the sharpest statement of the remaining wall: the entire
-norm–conorm integral-closure chain is one curve-completeness fact (uniqueness of the place over `∞` of
+norm–conorm integral-closure chain is one curve-completeness fact (uniqueness of the place over `∞`
+of
 `F(x₁)`) away from unconditional. -/
 theorem bPrimeValuationCoordGenLeOne_of_inftyInclusion_of_reg
     [IsIntegrallyClosed C₁.CoordinateRing]
@@ -875,7 +899,8 @@ theorem valuation_a₁X_add_a₃_le
   exact le_trans (w.map_add _ _) (max_le ha₁x ha₃)
 
 /-- **Generic ultrametric monomial bound** (instance-light): if a valuation `w` on `K(C₁)` is `≤ 1`
-on the `F`-constant `algebraMap_F c` (`hc`) and `m ≤ X := w t`, then `w (algebraMap_F c * t^k) ≤ X^k`
+on the `F`-constant `algebraMap_F c` (`hc`) and `m ≤ X := w t`, then `w (algebraMap_F c * t^k) ≤
+X^k`
 ... specialised below.  Stated as a free lemma over an *arbitrary* valuation `w` and element `t` to
 keep the heavy `B`-instance `v.valuation` out of the unifier during the power arithmetic. -/
 theorem valuation_const_mul_pow_le {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
@@ -1066,8 +1091,10 @@ theorem valuation_algebraMap_fracPolyX_le_one_of_ordAtInfty_nonneg
     (map_ne_zero_iff _ (C₁.algebraMap_polynomialX_functionField_injective)).mpr hp_ne
   have hrPD : algebraMap (FractionRing (Polynomial F)) C₁.FunctionField r = P / D := by
     rw [eq_div_iff hD_ne, hPdef, hDdef,
-      IsScalarTower.algebraMap_apply (Polynomial F) (FractionRing (Polynomial F)) C₁.FunctionField p,
-      IsScalarTower.algebraMap_apply (Polynomial F) (FractionRing (Polynomial F)) C₁.FunctionField d,
+      IsScalarTower.algebraMap_apply (Polynomial F) (FractionRing (Polynomial F)) C₁.FunctionField
+          p,
+      IsScalarTower.algebraMap_apply (Polynomial F) (FractionRing (Polynomial F)) C₁.FunctionField
+          d,
       ← map_mul, ← hpd, map_mul]
   -- degree comparison from regularity at `∞`
   have hordP : C₁.ordAtInfty P = ((-2 * (p.natDegree : ℤ) : ℤ) : WithTop ℤ) := by
@@ -1151,7 +1178,8 @@ private theorem ordAtInfty_algebraMap_fracPolyX_mul_coordXFun_sq_nonneg
     show (0 : WithTop ℤ) = ((0 : ℤ) : WithTop ℤ) from rfl, WithTop.coe_le_coe]
   omega
 
-/-- **A regular `F(x₁)`-multiple of `y₁` has `w_v ≤ 1`** (sublemma (II) of the `∞`-domination): for a
+/-- **A regular `F(x₁)`-multiple of `y₁` has `w_v ≤ 1`** (sublemma (II) of the `∞`-domination): for
+a
 `B`-prime `v` with `1 < w_v(x₁)` and `b = algebraMap q` (`q ∈ F(x₁)`), if `b·y₁` is regular at `∞`
 then `w_v(b·y₁) ≤ 1`.  Write `b·y₁ = (b·x₁²)·(y₁/x₁²)`
 (`coordYInFunctionField_eq_coordXFun_sq_mul`); the factor `b·x₁²` is again the image of a polynomial
@@ -1184,7 +1212,8 @@ private theorem valuation_algebraMap_fracPolyX_mul_coordYInFunctionField_le_one
       ≤ 1 * 1 := mul_le_mul' hwbx2 (valuation_coordYFun_div_coordXFun_sq_le_one v hx)
     _ = 1 := mul_one 1
 
-/-- **`O_∞ ⊆ O_v` (the curve-completeness crux, value form)**: for a `B`-prime `v` with `1 < w_v(x₁)`
+/-- **`O_∞ ⊆ O_v` (the curve-completeness crux, value form)**: for a `B`-prime `v` with `1 <
+w_v(x₁)`
 and any `g` regular at `∞` of `C₁` (`0 ≤ ord_∞ g`), the value `w_v(g) ≤ 1`.  Decompose
 `g = a + b·y₁` with `a, b ∈ F(x₁)`; regularity at `∞` gives `0 ≤ ord_∞ a` and `0 ≤ ord_∞(b·y₁)`,
 the latter forcing (parity: `ord_∞` is even on `F(x₁)`) `0 ≤ ord_∞(b·x₁²)`.  Then `w_v(a) ≤ 1` and
@@ -1228,7 +1257,8 @@ theorem valuationSubring_ne_top
 
 /-- **No `B`-prime has an `x₁`-pole** (the `coordXFun` half of `BPrimeValuationCoordGenLeOne`,
 discharged via the `∞`-exclusion `hreg`): for a `B`-prime `v`, `w_v(x₁) ≤ 1`.  By contradiction: if
-`1 < w_v(x₁)`, then `O_∞ ⊆ O_v` (`valuation_le_one_of_ordAtInfty_nonneg`), so the rank-one domination
+`1 < w_v(x₁)`, then `O_∞ ⊆ O_v` (`valuation_le_one_of_ordAtInfty_nonneg`), so the rank-one
+domination
 `bPrime_valuation_eq_ordAtInfty_of_subring_ge` forces `v = ordAtInftyValuation` — which
 `bPrime_valuation_ne_ordAtInfty` (fed by `hreg`) forbids. -/
 theorem valuation_coordXFun_le_one (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂))
@@ -1302,10 +1332,12 @@ private theorem valuation_a₁X_add_a₃_le_one_generic {Γ₀ : Type*}
       _ = 1 := mul_one 1
   exact le_trans (w.map_add _ _) (max_le ha₁ (hc _))
 
-/-- **Generic `y₁`-integrality bound, `≤ 1` regime** (instance-light): for an arbitrary valuation `w`
+/-- **Generic `y₁`-integrality bound, `≤ 1` regime** (instance-light): for an arbitrary valuation
+`w`
 with `w x₁ ≤ 1` that is `≤ 1` on `F`-constants, `w y₁ ≤ 1`.  Proved by ultrametric on the rearranged
 Weierstrass relation `y₁² = c − b·y₁`: a pole `1 < w y₁` would give
-`(w y₁)² = w(c − b·y₁) ≤ max(w c, w b · w y₁) ≤ w y₁`, contradicting `w y₁ < (w y₁)²`.  The `w x₁ ≤ 1`
+`(w y₁)² = w(c − b·y₁) ≤ max(w c, w b · w y₁) ≤ w y₁`, contradicting `w y₁ < (w y₁)²`.  The `w x₁ ≤
+1`
 dual of `valuation_coordYFun_le_sq_generic`. -/
 private theorem valuation_coordYFun_le_one_generic {Γ₀ : Type*}
     [LinearOrderedCommGroupWithZero Γ₀]
@@ -1376,7 +1408,8 @@ polynomial of the coordinate generator over `K(C₂)`:
 
 Indeed, if the monic `minpoly K(C₂) z` has coefficients in (the image of) `C₂.CoordinateRing`,
 then it lifts to a monic polynomial over `C₂.CoordinateRing` annihilating `z`, so `z` is *integral*
-over `C₂.CoordinateRing`, i.e. `z ∈ B`.  This is exactly `LocalizedDictionary.isIntegral_of_denominator`
+over `C₂.CoordinateRing`, i.e. `z ∈ B`.  This is exactly
+`LocalizedDictionary.isIntegral_of_denominator`
 at the trivial localization `Af := C₂.CoordinateRing`, `f := 1` (where the denominator condition
 collapses to "coefficients are coordinate-ring elements").
 
@@ -1444,9 +1477,12 @@ theorem coordRing_mem_B_of_minpolyCoeffsRegular
 /-! #### Bridge to the place-classification chain
 
 The minpoly-coefficient reduction subsumes the place-classification chain: if both coordinate
-generators have minpoly coefficients in `C₂.CoordinateRing` (so `x₁, y₁ ∈ B`), then *every* `B`-prime
-is `≤ 1` on both generators (`BPrimeValuationCoordGenLeOne`), since `B`-elements are `v`-adic integers.
-Consequently no `B`-prime has an `x₁`-pole, so the residual `BPrimeInftyInclusion` holds *vacuously*.
+generators have minpoly coefficients in `C₂.CoordinateRing` (so `x₁, y₁ ∈ B`), then *every*
+`B`-prime
+is `≤ 1` on both generators (`BPrimeValuationCoordGenLeOne`), since `B`-elements are `v`-adic
+integers.
+Consequently no `B`-prime has an `x₁`-pole, so the residual `BPrimeInftyInclusion` holds
+*vacuously*.
 This shows the cleaner Prop `MinpolyCoeffsRegular` is strictly stronger than (and replaces) the
 awkward `∞`-inclusion residual `BPrimeInftyInclusion`. -/
 
@@ -1457,9 +1493,12 @@ theorem valuation_le_one_of_mem_B
     v.valuation C₁.FunctionField z ≤ 1 :=
   v.valuation_le_one (K := C₁.FunctionField) (⟨z, hz⟩ : B (C₁ := C₁) (C₂ := C₂))
 
-/-- **The place dictionary from minpoly-coefficient regularity** (place-classification-free): if both
-coordinate generators have minpoly coefficients in `C₂.CoordinateRing`, then every `B`-prime is `≤ 1`
-on both — the residual `BPrimeValuationCoordGenLeOne`, with *no* place classification and *no* `hreg`
+/-- **The place dictionary from minpoly-coefficient regularity** (place-classification-free): if
+both
+coordinate generators have minpoly coefficients in `C₂.CoordinateRing`, then every `B`-prime is `≤
+1`
+on both — the residual `BPrimeValuationCoordGenLeOne`, with *no* place classification and *no*
+`hreg`
 (those are absorbed into `MinpolyCoeffsRegular`). -/
 theorem bPrimeValuationCoordGenLeOne_of_minpolyCoeffsRegular
     (hx : MinpolyCoeffsRegular (C₁ := C₁) (C₂ := C₂) (coordXFun C₁))
@@ -1528,12 +1567,14 @@ theorem coordYFun_mem_B_of_reg (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C�
 
 /-- **The coordinate ring of `C₁` lands in `B`, UNCONDITIONAL** (Silverman II.2.6, modulo `hreg`):
 for every `r ∈ F[C₁]`, the image `algebraMap r ∈ K(C₁)` is integral over `C₂.CoordinateRing`. -/
-theorem coordRing_mem_B_of_reg (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂)) (r : C₁.CoordinateRing) :
+theorem coordRing_mem_B_of_reg (hreg : OrdAtInftyReg (C₁ := C₁) (C₂ := C₂)) (r : C₁.CoordinateRing)
+    :
     algebraMap C₁.CoordinateRing C₁.FunctionField r ∈ (B (C₁ := C₁) (C₂ := C₂)) :=
   coordRing_mem_B hreg (bPrimeValuationCoordGenLeOne_of_reg hreg) r
 
 /-- **`MinpolyCoeffsRegular` for any `z ∈ B`** (the integrally-closed minpoly fact): if `z` is
-integral over `C₂.CoordinateRing`, then every coefficient of `minpoly K(C₂) z` lies in (the image of)
+integral over `C₂.CoordinateRing`, then every coefficient of `minpoly K(C₂) z` lies in (the image
+of)
 `C₂.CoordinateRing`.  Direct from `minpoly.isIntegrallyClosed_eq_field_fractions'`
 (`minpoly K(C₂) z = (minpoly C₂.CoordinateRing z).map (algebraMap …)`), so each coefficient is the
 `algebraMap`-image of the corresponding coefficient over `C₂.CoordinateRing`. -/
@@ -1712,7 +1753,8 @@ private theorem one_le_ramificationIdx_of_mem_primesOver (Q : C₂.SmoothPoint)
 /-- **The fibre over `m_Q` as a `primesOver`-`toFinset`**: the explicit fibre finset
 `IsDedekindDomain.primesOverFinset m_Q B` equals `((m_Q).primesOver B).toFinset`.  Both name the
 finite set of primes of `B` lying over the nonzero ideal `m_Q`; coerced to a set they agree
-(`IsDedekindDomain.coe_primesOverFinset`, `Set.coe_toFinset`).  Established once with `m_Q.IsMaximal`
+(`IsDedekindDomain.coe_primesOverFinset`, `Set.coe_toFinset`).  Established once with
+`m_Q.IsMaximal`
 in scope so the `Fintype (primesOver)` instance behind `.toFinset` is available. -/
 private theorem primesOverFinset_eq_toFinset (Q : C₂.SmoothPoint) :
     haveI : (C₂.maximalIdealAt Q).IsMaximal := C₂.maximalIdealAt_isMaximal Q
@@ -1841,7 +1883,8 @@ theorem relNorm_eq_of_under (P : Ideal (B (C₁ := C₁) (C₂ := C₂)))
   obtain ⟨s, hs⟩ := Ideal.exists_relNorm_eq_pow_of_isPrime P p
   suffices hs1 : s = 1 by rw [hs, hs1, pow_one]
   have hge1 : 1 ≤ s := one_le_relNormExp_of_liesOver Q P s hs
-  -- A uniform exponent function `sfn` on the fibre over `p`: `relNorm(P') = p ^ sfn(P')`, `sfn ≥ 1`.
+  -- A uniform exponent function `sfn` on the fibre over `p`: `relNorm(P') = p ^ sfn(P')`, `sfn ≥
+  -- 1`.
   obtain ⟨sfn, hsfn_ge, hsfn_relNorm⟩ := exists_relNormExp_fn (C₁ := C₁) Q
   set ee : Ideal (B (C₁ := C₁) (C₂ := C₂)) → ℕ := fun P' => p.ramificationIdx' P' with hee_def
   -- Membership in the explicit fibre finset gives `IsPrime ∧ LiesOver`.
