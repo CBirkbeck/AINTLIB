@@ -7,6 +7,8 @@ import Mathlib.Algebra.MvPolynomial.PDeriv
 import Mathlib.Algebra.MvPolynomial.Division
 import Mathlib.Data.Fin.VecNotation
 import Mathlib.RingTheory.Polynomial.UniqueFactorization
+import Mathlib.RingTheory.Ideal.Quotient.Nilpotent
+import Mathlib.RingTheory.Nilpotent.Lemmas
 import Mathlib.Algebra.Squarefree.Basic
 
 /-!
@@ -168,5 +170,16 @@ theorem squarefree_e3Rel (h3 : IsUnit (3 : A)) :
     simp only [Units.val_neg, Units.val_one]
     ring
   exact hassoc.squarefree_iff.mp (squarefree_e3RelMul h3)
+
+/-- **(Stage C ★★, the collision-principle input)** The flex-locus ring
+`A[X₀,X₁]/(X₀³−(X₀+X₁)³)` is **reduced** over a UFD with `3` invertible — this is
+`IsReduced (E3Quotient A)` for `A = ℤ[1/3]`, which `hom_ext_of_forall_specPoint` needs
+(after localization, which preserves reducedness) to lift the fibrewise `3`-torsion
+killing of the universal `ℰ₃` sections to the section level. -/
+theorem isReduced_e3RelQuotient (h3 : IsUnit (3 : A)) :
+    IsReduced (MvPolynomial (Fin 2) A ⧸
+      Ideal.span {((X 0) ^ 3 - ((X 0) + (X 1)) ^ 3 : MvPolynomial (Fin 2) A)}) :=
+  (Ideal.isRadical_iff_quotient_reduced _).mp
+    (isRadical_iff_span_singleton.mp (squarefree_e3Rel h3).isRadical)
 
 end ModularCurves
