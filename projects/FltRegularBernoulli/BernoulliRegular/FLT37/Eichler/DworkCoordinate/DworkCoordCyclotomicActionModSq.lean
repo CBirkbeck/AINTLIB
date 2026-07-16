@@ -23,29 +23,29 @@ The proven first-order bridge
 Its two driving mechanisms are *both* `N`-generic:
 
 * the **unscaled-minus-scaled decomposition**
-  `kummerLogDworkArtinHasseSpecializedFiniteLog_eq_normalizedApprox_logs` (Part4) — but its proof goes
-  through `kummerLogDworkArtinHasseNormalizedQuotientArg_evalₐ_pow_pred`, the Teichmüller transport
-  `τ(k) − k ∈ (λ)^{p-1}`, which is **exactly** `p − 1`-precise (the Teichmüller difference vanishes to
-  order `p − 1`, *not* `2(p − 1)`);
+  `kummerLogDworkArtinHasseSpecializedFiniteLog_eq_normalizedApprox_logs` (Part4) — but its proof
+  goes through `kummerLogDworkArtinHasseNormalizedQuotientArg_evalₐ_pow_pred`, the Teichmüller
+  transport `τ(k) − k ∈ (λ)^{p-1}`, which is **exactly** `p − 1`-precise (the Teichmüller difference
+  vanishes to order `p − 1`, *not* `2(p − 1)`);
 * the **cyclotomic column factor**
   `valuedLambdaQuotientDworkCoeffModP_scaledNormalizedFiniteLog_eq_smul` (Folded) — `N`-generic via
   `samePrimeFiniteLog_quotientMap_cyclotomic` (`DworkParameter/Part18.lean`, any `N`).
 
 The **definition** `kummerLogDworkArtinHasseSpecializedFiniteLog` fixes `N = p − 2`; the genuine
 content at level `71 = 2(p − 1) − 1` is the **second-order Teichmüller/Fermat-quotient transport**
-that the proven `p − 1`-precise `_evalₐ_pow_pred` does not supply.  We make the `N`-generic definition
-explicit and re-express the level-`71` target's mod-`37²` coordinate identity `hCoord` so that the
-only undischarged content is the single level-`71` finite-log equality
+that the proven `p − 1`-precise `_evalₐ_pow_pred` does not supply.  We make the `N`-generic
+definition explicit and re-express the level-`71` target's mod-`37²` coordinate identity `hCoord` so
+that the only undischarged content is the single level-`71` finite-log equality
 
   `samePrimeFiniteLog 71 (c^{p-1} − 1) =`
     `samePrimeFiniteLog 71 (dworkParameterNormalizedCoordApprox 71)`
       `− samePrimeFiniteLog 71 (scaledDworkParameterNormalizedCoordApprox k 71)`,
 
 i.e. the level-`71` lift of `kummerLogDworkArtinHasseSpecializedFiniteLog_eq_normalizedApprox_logs`
-applied to the **unit** `c^{p-1} − 1` (combining the level-`71` unit ↔ quotient Fermat bridge with the
-level-`71` Dwork ↔ quotient Teichmüller transport).  This is **strictly smaller** than
-`CaseIICor823Level71UnitDworkCoordBridge37`: there the per-column mod-`37²`/mod-`37` coordinate value
-is the unknown; here the coordinate extraction (the slice decomposition giving the proven
+applied to the **unit** `c^{p-1} − 1` (combining the level-`71` unit ↔ quotient Fermat bridge with
+the level-`71` Dwork ↔ quotient Teichmüller transport).  This is **strictly smaller** than
+`CaseIICor823Level71UnitDworkCoordBridge37`: there the per-column mod-`37²`/mod-`37` coordinate
+value is the unknown; here the coordinate extraction (the slice decomposition giving the proven
 `37·(32!)⁻¹` and the cyclotomic column factor) is **discharged** from `N`-generic machinery, and the
 *only* unknown is the single level-`71` finite-log equality of the unit with the Dwork-specialized
 difference.
@@ -61,7 +61,6 @@ difference.
 
 noncomputable section
 
-set_option maxRecDepth 4000
 
 namespace BernoulliRegular.CyclotomicUnits
 
@@ -76,8 +75,9 @@ open PadicLogSetup PadicLogSetup.DworkParameter
 /-! ## 1. The `N`-generic specialized finite logarithm
 
 `kummerLogDworkArtinHasseSpecializedFiniteLogN N a := kummerLogNormalizedQuotientFiniteLog ... a N`,
-the precision-generic parallel of the proven `kummerLogDworkArtinHasseSpecializedFiniteLog` (which is
-the `N = p - 2` case).  Definitionally `kummerLogDworkArtinHasseSpecializedFiniteLog = ...N (p - 2)`
+the precision-generic parallel of the proven `kummerLogDworkArtinHasseSpecializedFiniteLog` (which
+is the `N = p - 2` case).  Definitionally
+`kummerLogDworkArtinHasseSpecializedFiniteLog = ...N (p - 2)`
 (`kummerLogDworkArtinHasseSpecializedFiniteLogN_pred_eq`). -/
 
 /-- **The `N`-generic specialized finite logarithm**: the normalized-quotient finite logarithm at an
@@ -130,10 +130,11 @@ noncomputable def scaledDworkParameterNormalizedCoordFiniteLogN (z : ZMod p) (N 
 
 omit [NumberField.IsCMField K] in
 /-- **At `N = p − 2` the `N`-generic specialized finite log is the unscaled-minus-scaled Dwork
-difference** (proven, re-export of `kummerLogDworkArtinHasseSpecializedFiniteLog_eq_normalizedApprox_logs`
-on the `N`-generic objects): a *witness* that the `N = p − 2` instance of the level-`N`
-unit ↔ Dwork-specialized identity holds, by the proven first-order chain.  The level-`71` instance is
-the single irreducible kernel isolated in `§3`. -/
+difference** (proven, re-export of
+`kummerLogDworkArtinHasseSpecializedFiniteLog_eq_normalizedApprox_logs` on the `N`-generic objects):
+a *witness* that the `N = p − 2` instance of the level-`N` unit ↔ Dwork-specialized identity holds,
+by the proven first-order chain.  The level-`71` instance is the single irreducible kernel isolated
+in `§3`. -/
 theorem kummerLogDworkArtinHasseSpecializedFiniteLogN_pred_eq_normalizedCoordFiniteLog_diff
     (hp_three : 3 ≤ p) (a : Fin (kummerLogRank p)) :
     kummerLogDworkArtinHasseSpecializedFiniteLogN (p := p) (K := K) hp_three a (p - 2) =
@@ -149,8 +150,9 @@ theorem kummerLogDworkArtinHasseSpecializedFiniteLogN_pred_eq_normalizedCoordFin
 `scaledDworkParameterNormalizedCoordFiniteLogN z N` is the cyclotomic image of
 `dworkParameterNormalizedCoordFiniteLogN N` — the level-`N` analog of the proven
 `samePrimeFiniteLog_scaledNormalizedCoordApprox_eq_quotientMap` (which is `N = p − 2`), via the
-**`N`-generic** transports `quotient_mk_valuedIntegerCyclotomicEquiv_dworkParameterNormalizedCoordApprox`
-and `Conjugation.samePrimeFiniteLog_quotientMap_cyclotomic`.  At the coordinate level this produces the
+**`N`-generic** transports
+`quotient_mk_valuedIntegerCyclotomicEquiv_dworkParameterNormalizedCoordApprox` and
+`Conjugation.samePrimeFiniteLog_quotientMap_cyclotomic`.  At the coordinate level this produces the
 cyclotomic column factor. -/
 
 omit [NumberField.IsCMField K] in
@@ -162,8 +164,8 @@ omit [NumberField.IsCMField K] in
 The level-`N` lift of the proven `samePrimeFiniteLog_scaledNormalizedCoordApprox_eq_quotientMap`
 (`N = p − 2`): the cyclotomic image of the unscaled coordinate approximant differs from the scaled
 approximant by an element of `(λ)^{N+1}`
-(`quotient_mk_valuedIntegerCyclotomicEquiv_dworkParameterNormalizedCoordApprox`, `N`-generic), and the
-finite log commutes with the cyclotomic action
+(`quotient_mk_valuedIntegerCyclotomicEquiv_dworkParameterNormalizedCoordApprox`, `N`-generic), and
+the finite log commutes with the cyclotomic action
 (`Conjugation.samePrimeFiniteLog_quotientMap_cyclotomic`, `N`-generic). -/
 theorem scaledDworkParameterNormalizedCoordFiniteLogN_eq_cyclotomic
     (a : CyclotomicUnitDelta p) (N : ℕ) :
@@ -208,9 +210,9 @@ theorem scaledDworkParameterNormalizedCoordFiniteLogN_eq_cyclotomic
 
 The mod-`p²` analog of `valuedLambdaQuotientDworkCoeffModP_quotientMap_cyclotomic`: the cyclotomic
 action multiplies the `i`-th level-`2(p−1)` Dwork coordinate by the **mod-`p²` Teichmüller power**
-`rationalPadicIntegerToZModSq (τ(a))^i`.  The factor is the genuine second-order Teichmüller datum; its
-mod-`p` reduction is the residue `a` (`teichmullerCoeffModSq_castHom`), which is all the downstream
-`37·`-collapse consumes. -/
+`rationalPadicIntegerToZModSq (τ(a))^i`.  The factor is the genuine second-order Teichmüller datum;
+its mod-`p` reduction is the residue `a` (`teichmullerCoeffModSq_castHom`), which is all the
+downstream `37·`-collapse consumes. -/
 
 /-- **The mod-`p²` Teichmüller coordinate factor** `rationalPadicIntegerToZModSq (τ(a))`, the
 second-order (mod-`p²`) image of the Teichmüller lift of the residue `a`.  Its `i`-th power is the
@@ -229,9 +231,9 @@ theorem teichmullerCoeffModSq_castHom (h : (p : ℕ) ∣ p ^ 2) (a : ZMod p) :
     rationalPadicIntegerToZMod_teichmuller]
 
 omit [NumberField.IsCMField K] in
-/-- **The mod-`p²` Dwork coordinate cyclotomic action** (proven, axiom-clean): the mod-`p²` analog of
-`dworkParameterPowerBasis_repr_dworkCompleteCyclotomicEquiv_toZMod`.  The cyclotomic action multiplies
-the `i`-th level-`2(p−1)` Dwork power-basis coordinate by `teichmullerCoeffModSq (a)^i`:
+/-- **The mod-`p²` Dwork coordinate cyclotomic action** (proven, axiom-clean): the mod-`p²` analog
+of `dworkParameterPowerBasis_repr_dworkCompleteCyclotomicEquiv_toZMod`.  The cyclotomic action
+multiplies the `i`-th level-`2(p−1)` Dwork power-basis coordinate by `teichmullerCoeffModSq (a)^i`:
 
   `ToZModSq (repr (cyclotomicEquiv a x) i) = teichmullerCoeffModSq (a)^i · ToZModSq (repr x i)`.
 
@@ -273,14 +275,15 @@ theorem dworkParameterPowerBasis_repr_dworkCompleteCyclotomicEquiv_toZModSq
 
 omit [NumberField.IsCMField K] in
 /-- **The mod-`p²` level-`2(p−1)` Dwork coordinate cyclotomic action** (proven, axiom-clean): the
-mod-`p²` analog of `valuedLambdaQuotientDworkCoeffModP_quotientMap_cyclotomic`.  For a representative
-in the level-`2(p−1)` quotient,
+mod-`p²` analog of `valuedLambdaQuotientDworkCoeffModP_quotientMap_cyclotomic`.  For a
+representative in the level-`2(p−1)` quotient,
 
   `coordModSq i (quotientMap (cyclotomicEquiv a) x) = teichmullerCoeffModSq (a)^i · coordModSq i x`.
 
-By `Quotient.inductionOn'` and `dworkParameterPowerBasis_repr_dworkCompleteCyclotomicEquiv_toZModSq`,
-with `dworkCompleteCyclotomicEquiv_algebraMap_valuedInteger` moving the action through the
-`algebraMap`. -/
+By `Quotient.inductionOn'` and
+`dworkParameterPowerBasis_repr_dworkCompleteCyclotomicEquiv_toZModSq`, with
+`dworkCompleteCyclotomicEquiv_algebraMap_valuedInteger` moving the action through the `algebraMap`.
+-/
 theorem valuedLambdaQuotientDworkCoeffModSq_quotientMap_cyclotomic
     (a : CyclotomicUnitDelta p) (i : Fin (p - 1))
     (x : ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (2 * (p - 1))) :
@@ -310,8 +313,8 @@ theorem valuedLambdaQuotientDworkCoeffModSq_quotientMap_cyclotomic
 /-! ## 5. The level-`71` coordinate column factor: scaled coordinate = Teichmüller factor × unscaled
 
 Combining `§3` (scaled finite log = cyclotomic image of unscaled) and `§4` (the mod-`p²` cyclotomic
-coordinate action), the degree-`i` mod-`p²` coordinate of the scaled finite log at level `2(p−1)−1` is
-`teichmullerCoeffModSq (z)^i` times the unscaled one.  Stated at `p = 37`, `N = 71` for the FLT37
+coordinate action), the degree-`i` mod-`p²` coordinate of the scaled finite log at level `2(p−1)−1`
+is `teichmullerCoeffModSq (z)^i` times the unscaled one.  Stated at `p = 37`, `N = 71` for the FLT37
 endpoint. -/
 
 omit [NumberField.IsCMField K] in
@@ -321,9 +324,9 @@ omit [NumberField.IsCMField K] in
   `coordModSq i (scaledDworkParameterNormalizedCoordFiniteLogN a 71)`
     `= teichmullerCoeffModSq (a)^i · coordModSq i (dworkParameterNormalizedCoordFiniteLogN 71)`.
 
-Rewrites the scaled finite log as the cyclotomic image of the unscaled (`§3`) and applies the mod-`37²`
-cyclotomic coordinate action (`§4`); at `p = 37` the quotient level `71 + 1 = 72 = 2·(37 − 1)` matches
-the coordinate functional's level definitionally. -/
+Rewrites the scaled finite log as the cyclotomic image of the unscaled (`§3`) and applies the
+mod-`37²` cyclotomic coordinate action (`§4`); at `p = 37` the quotient level
+`71 + 1 = 72 = 2·(37 − 1)` matches the coordinate functional's level definitionally. -/
 theorem valuedLambdaQuotientDworkCoeffModSq_scaledDworkParameterNormalizedCoordFiniteLogN71_eq_smul
     {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
     (a : CyclotomicUnitDelta 37) (i : Fin (37 - 1)) :
@@ -338,11 +341,13 @@ theorem valuedLambdaQuotientDworkCoeffModSq_scaledDworkParameterNormalizedCoordF
 
 /-! ## 6. The unscaled Dwork-parameter coordinate as a sum of homogeneous-degree slice coordinates
 
-The mod-`p²` analog of `valuedLambdaQuotientDworkCoeffModP_factorPow_samePrimeFiniteLog_normalizedCoord`:
-the degree-`i` mod-`p²` coordinate of `dworkParameterNormalizedCoordFiniteLogN N` is the sum over
-homogeneous degrees `d` of the coordinate of the degree-`d` slice.  Fully `N`-generic, via the
-`N`-generic full-log decomposition `samePrimeFiniteLog_normalizedArtinHasseCoord_eq_homogeneous_degree_sum_range`
-and the mod-`p²` coordinate additivity `valuedLambdaQuotientDworkCoeffModSq_sum`. -/
+The mod-`p²` analog of
+`valuedLambdaQuotientDworkCoeffModP_factorPow_samePrimeFiniteLog_normalizedCoord`: the degree-`i`
+mod-`p²` coordinate of `dworkParameterNormalizedCoordFiniteLogN N` is the sum over homogeneous
+degrees `d` of the coordinate of the degree-`d` slice.  Fully `N`-generic, via the `N`-generic
+full-log decomposition
+`samePrimeFiniteLog_normalizedArtinHasseCoord_eq_homogeneous_degree_sum_range` and the mod-`p²`
+coordinate additivity `valuedLambdaQuotientDworkCoeffModSq_sum`. -/
 
 omit [NumberField.IsCMField K] in
 /-- **The unscaled level-`71` coordinate is the sum of degree-slice coordinates, at `p = 37`**
@@ -351,12 +356,14 @@ omit [NumberField.IsCMField K] in
   `coordModSq i (dworkParameterNormalizedCoordFiniteLogN 71) =`
     `∑ d ∈ range (cutoff 71), coordModSq i (degree-d slice of dworkParameterApprox 72)`.
 
-The mod-`37²` analog of `valuedLambdaQuotientDworkCoeffModP_factorPow_samePrimeFiniteLog_normalizedCoord`:
-unfolds the finite log of the normalized Artin-Hasse coordinate to the homogeneous degree-sum range
+The mod-`37²` analog of
+`valuedLambdaQuotientDworkCoeffModP_factorPow_samePrimeFiniteLog_normalizedCoord`: unfolds the
+finite log of the normalized Artin-Hasse coordinate to the homogeneous degree-sum range
 (`samePrimeFiniteLog_normalizedArtinHasseCoord_eq_homogeneous_degree_sum_range`, `N`-generic) and
-distributes the mod-`37²` coordinate over the sum (`valuedLambdaQuotientDworkCoeffModSq_sum`).  Fixed
-at `N = 71` since `valuedLambdaQuotientDworkCoeffModSq` is the level-`2(37−1) = 72`-quotient functional
-and `71 + 1 = 72`. -/
+distributes the mod-`37²` coordinate over the sum
+(`valuedLambdaQuotientDworkCoeffModSq_sum`).  Fixed at `N = 71` since
+`valuedLambdaQuotientDworkCoeffModSq` is the level-`2(37−1) = 72`-quotient functional and
+`71 + 1 = 72`. -/
 theorem valuedLambdaQuotientDworkCoeffModSq_dworkParameterNormalizedCoordFiniteLogN71_eq_sum
     {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K]
     (i : Fin (37 - 1)) :
@@ -374,7 +381,8 @@ theorem valuedLambdaQuotientDworkCoeffModSq_dworkParameterNormalizedCoordFiniteL
   have hdecomp :=
     samePrimeFiniteLog_normalizedArtinHasseCoord_eq_homogeneous_degree_sum_range
       (p := 37) (K := K) 71 (dworkParameterApprox_mem_lambdaIdeal (p := 37) (K := K) (71 + 1))
-  -- `dworkParameterNormalizedCoordFiniteLogN 71 = samePrimeFiniteLog 71 (normalizedArtinHasseCoord ...)`.
+  -- `dworkParameterNormalizedCoordFiniteLogN 71 = samePrimeFiniteLog 71
+  -- (normalizedArtinHasseCoord ...)`.
   have hlog : dworkParameterNormalizedCoordFiniteLogN (p := 37) (K := K) 71 =
       ∑ d ∈ Finset.range (samePrimeFiniteLogCutoff (p := 37) 71),
         samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum
