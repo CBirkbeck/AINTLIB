@@ -32,7 +32,8 @@ point `P`:
 Items (2)–(3) are the genuine *closed-point geometric compatibility* of the opaque base-changed
 pullback `oneSubFrobeniusPullback_L` with the point map `id − π̄` — the closed-point analogue of the
 generic-point Wall A realisation `oneSub_isGenuineWith_Kbar`.  They are isolated here as the single
-named residual `OneSubAffineResidues` (the `1 − π` closed-point form of the `addIsog`-only centerpiece
+named residual `OneSubAffineResidues` (the `1 − π` closed-point form of the
+`addIsog`-only centerpiece
 `oneSub_coords_at_affine`), and `comap_pointValuation_oneSub_eq_affine` reduces the affine comap
 identity to it with item (1) discharged.
 
@@ -78,7 +79,8 @@ theorem omegaPullbackCoeff_oneSubFrobeniusIsogBaseChange_eq_one (hq : 2 ≤ Fint
 
 /-- **`omegaPullbackCoeff (1−π)_{K̄} ≠ 0`** (the separability input of the general comap lemma),
 discharged outright from the VALUE transport `omegaPullbackCoeff (1−π)_{K̄} = 1`
-(`omegaPullbackCoeff_oneSubFrobeniusIsogBaseChange_eq_one`) — *no carried `OmegaBaseChangeNeZero`*. -/
+(`omegaPullbackCoeff_oneSubFrobeniusIsogBaseChange_eq_one`) — *no carried
+`OmegaBaseChangeNeZero`*. -/
 theorem omegaPullbackCoeff_oneSubFrobeniusIsogBaseChange_ne_zero (hq : 2 ≤ Fintype.card K) :
     omegaPullbackCoeff (W.baseChange (AlgebraicClosure K))
       (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
@@ -86,7 +88,8 @@ theorem omegaPullbackCoeff_oneSubFrobeniusIsogBaseChange_ne_zero (hq : 2 ≤ Fin
   rw [omegaPullbackCoeff_oneSubFrobeniusIsogBaseChange_eq_one W p r hq]; exact one_ne_zero
 
 /-- **`omegaPullbackCoeff (1−π)_{K̄} ∈ algebraMap.range`** — discharged outright from the VALUE
-transport (`= 1 = algebraMap _ _ 1`), *`sorryAx`-free* (no longer via `omegaPullbackCoeff_mem_F`). -/
+transport (`= 1 = algebraMap _ _ 1`), *`sorryAx`-free* (no longer via
+`omegaPullbackCoeff_mem_F`). -/
 theorem omegaPullbackCoeff_oneSubFrobeniusIsogBaseChange_mem_range (hq : 2 ≤ Fintype.card K) :
     omegaPullbackCoeff (W.baseChange (AlgebraicClosure K))
       (oneSubFrobeniusIsogBaseChange W p r (AlgebraicClosure K)
@@ -99,14 +102,16 @@ theorem omegaPullbackCoeff_oneSubFrobeniusIsogBaseChange_mem_range (hq : 2 ≤ F
 /-! ### Step 2 — the isolated closed-point residue datum and the affine comap identity -/
 
 /-- **The closed-point residue datum for `(1 − π)_{K̄}`** (the `1 − π` form of the `addIsog`-only
-`oneSub_coords_at_affine`).  For every smooth point `P` of `E_{K̄}` whose image `(1−π)P = some x y` is
+`oneSub_coords_at_affine`).  For every smooth point `P` of `E_{K̄}` whose image
+`(1−π)P = some x y` is
 affine, this bundles:
 
 * the two **generator residues** `(1−π)^*x_gen ≡ x`, `(1−π)^*y_gen ≡ y` modulo `m_P` — the
   closed-point compatibility of the opaque pullback `oneSubFrobeniusPullback_L` with the point map
   `id − π̄`; and
 * the **non-2-torsion-image unit** `ord_P ((1−π)^*u) = 0` (`u = 2y_gen + a₁x_gen + a₃` the invariant
-  differential denominator, whose `α^*`-image is a unit at `P` exactly when `(1−π)P` is non-2-torsion).
+  differential denominator, whose `α^*`-image is a unit at `P` exactly when `(1−π)P` is
+  non-2-torsion).
 
 This is the genuine closed-point geometric residual the affine comap identity rests on (the
 generic-point version is the proved Wall A `oneSub_isGenuineWith_Kbar`); the `e = 1` it would
@@ -142,12 +147,14 @@ def OneSubAffineResidues (hq : 2 ≤ Fintype.card K) : Prop :=
 `ComapPointValuationWitness`), CoordHom-free, with `e = 1` derived (no `he1`).
 
 For every smooth point `P` whose image `(1−π)P = some x y h_ns` is affine,
-`(pointValuation P).comap (1−π)^* = pointValuation ⟨x, y, h_ns⟩` outright.  Discharged via the general
+`(pointValuation P).comap (1−π)^* = pointValuation ⟨x, y, h_ns⟩` outright.  Discharged
+via the general
 headline `comap_pointValuation_isog_eq_affine` (axiom-clean), with:
 
 * the separability coefficient `≠ 0` and the constancy `∈ range` — BOTH now *discharged* outright
   from the omega-coefficient VALUE base-change transport `omegaPullbackCoeff (1−π)_{K̄} = 1`
-  (`omegaPullbackCoeff_oneSubFrobeniusIsogBaseChange_eq_one`), so `OmegaBaseChangeNeZero`/`hcoeff_mem`
+  (`omegaPullbackCoeff_oneSubFrobeniusIsogBaseChange_eq_one`), so
+  `OmegaBaseChangeNeZero`/`hcoeff_mem`
   are NO LONGER carried; and
 * the two generator residues + the non-2-torsion-image unit supplied by the isolated closed-point
   residual `OneSubAffineResidues`.
@@ -155,7 +162,8 @@ headline `comap_pointValuation_isog_eq_affine` (axiom-clean), with:
 The unramifiedness `e = 1` is *proved* from the invariant differential, so it is not a hypothesis.
 
 (This is the *carried-residue* form; the fully unconditional `comap_pointValuation_oneSub_eq_affine`
-— with the closed-point residues `OneSubAffineResidues` *discharged* for ALL affine images, including
+— with the closed-point residues `OneSubAffineResidues` *discharged* for ALL affine
+images, including
 the doubling and 2-torsion-image cases — is in `OneSubAffineResidues.lean`.) -/
 theorem comap_pointValuation_oneSub_eq_affine_of_residues
     (hq : 2 ≤ Fintype.card K)
