@@ -277,6 +277,24 @@ theorem RelEffCartierDiv.factors_sectionsDivisor {C : Scheme.{u}} {π : C ⟶ S}
     rw [Category.assoc, Scheme.IdealSheafData.inclusion_subschemeι,
       Scheme.Hom.toImage_imageι]⟩
 
+/-- **[W0-1.4.2] (KM Lemma 1.4.2)** Verbatim: *"If `P ∈ C(S)` has 'exact order N', then
+`NP = 0`. Proof. Any finite locally free commutative group-scheme of rank `N` is known
+to be killed by `N` (cf. [Oort–Tate]). Therefore every section, in particular `P`, of
+the effective Cartier divisor `Σ [aP]` is killed by `N`."* — assembled from the register
+box BB-DELIGNE (`smul_eq_zero_of_factors`) at the first constituent section
+(`factors_sectionsDivisor`) and the degree spec (KM 1.2.2). -/
+theorem Section.HasExactOrder.smul_eq_zero {P : E.Section} {N : ℕ} [NeZero N]
+    (h : P.HasExactOrder E N) : (N : ℤ) • P = (0 : E.Point (𝟙 S)) := by
+  have hdeg : ∀ s : S, (P.orderDivisor E N).degree s = N := fun s =>
+    RelEffCartierDiv.sectionsDivisor_degree E.π E.smooth _ s
+  obtain ⟨w, hw⟩ := RelEffCartierDiv.factors_sectionsDivisor
+    (fun a : Fin N => ((((a : ℕ) : ℤ) + 1) • P : E.Point (𝟙 S)))
+    ⟨inferInstance, E.smooth⟩ ⟨0, Nat.pos_of_ne_zero (NeZero.ne N)⟩
+  have h1 : ((((⟨0, Nat.pos_of_ne_zero (NeZero.ne N)⟩ : Fin N) : ℕ) : ℤ) + 1) • P
+      = (P : E.Point (𝟙 S)) := by simp
+  exact RelEffCartierDiv.IsSubgroup.smul_eq_zero_of_factors E h hdeg (𝟙 S) P
+    ⟨w, hw.trans (congrArg Subtype.val h1)⟩
+
 /-- **[W0-F3-coprime-kill] (KM print p. 30)** A point killed by two coprime integers is
 zero — KM: *"As both `Pₖ` and `φ(a₂)ₖ` are killed by `N₂`, while `φ(a₁)` is killed by
 `N₁`, this is impossible unless `φ(a₁) = 0`."* Bezout in the point group. -/
