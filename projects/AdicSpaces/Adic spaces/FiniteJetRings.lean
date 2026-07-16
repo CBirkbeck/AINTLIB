@@ -476,24 +476,72 @@ theorem difference_strict_surjective (d : JetD F) :
 
 /-! ### Pseudouniformizers and scalar embeddings -/
 
+/-- Constants of `𝒞` over the base `L`, as a ring homomorphism. -/
+noncomputable def constHomC : L F →+* JetC F where
+  toFun x := PowerSeries.Restricted.C (1 : ℝ) x
+  map_one' := Subtype.ext (map_one PowerSeries.C)
+  map_mul' x y := Subtype.ext (map_mul PowerSeries.C x y)
+  map_zero' := Subtype.ext (map_zero PowerSeries.C)
+  map_add' x y := Subtype.ext (map_add PowerSeries.C x y)
+
+theorem norm_constHomC (x : L F) : ‖constHomC F x‖ = ‖x‖ := norm_restrictedC x
+
+theorem qCoeff_constHomC (x : L F) (n : ℕ) :
+    qCoeff F n (constHomC F x) = if n = 0 then x else 0 := by
+  show PowerSeries.coeff n (PowerSeries.C x) = _
+  rw [PowerSeries.coeff_C]
+
 /-- The constant embedding `K →+* 𝒞` (through `RestrictedLaurent.C` and the power-series
 constants). -/
-noncomputable def constC : K →+* JetC F := by sorry
+noncomputable def constC : K →+* JetC F :=
+  (constHomC F).comp (RestrictedLaurent.C (R := K))
 
-theorem norm_constC (a : K) : ‖constC F a‖ = ‖a‖ := by sorry
+theorem norm_constC (a : K) : ‖constC F a‖ = ‖a‖ := by
+  show ‖constHomC F (RestrictedLaurent.C a)‖ = ‖a‖
+  rw [norm_constHomC]
+  show ‖single 0 a‖ = ‖a‖
+  rw [norm_single]
 
 /-- The constants land in 𝓐 (support `(0,0)`). -/
-theorem constC_mem_jetSupport (a : K) : constC F a ∈ jetSupport F := by sorry
+theorem constC_mem_jetSupport (a : K) : constC F a ∈ jetSupport F := by
+  constructor
+  · show qCoeff F 0 (constHomC F (RestrictedLaurent.C a)) ∈ _
+    rw [qCoeff_constHomC, if_pos rfl]
+    intro b hb
+    show (if b = 0 then a else 0) = 0
+    rw [if_neg (by omega)]
+  · show qCoeff F 1 (constHomC F (RestrictedLaurent.C a)) ∈ _
+    rw [qCoeff_constHomC, if_neg one_ne_zero]
+    exact zero_mem _
 
 /-- The constant embedding `K →+* 𝓐`. -/
-noncomputable def constA : K →+* JetA F := by sorry
+noncomputable def constA : K →+* JetA F :=
+  (constC F).codRestrict (jetSupport F) (constC_mem_jetSupport F)
+
+theorem norm_constA (a : K) : ‖constA F a‖ = ‖a‖ := norm_constC F a
 
 /-- The pseudouniformizer `ϖ` of each jet ring: the image of `t ∈ K`. -/
 noncomputable def tA : JetA F := constA F (LaurentSeriesExample.t F)
 
-theorem norm_tA_lt_one : ‖tA F‖ < 1 := by sorry
+theorem norm_t_lt_one : ‖LaurentSeriesExample.t F‖ < 1 := by
+  rw [Valued.toNormedField.norm_lt_one_iff, LaurentSeriesExample.valuation_t,
+    ← WithZero.exp_zero, WithZero.exp_lt_exp]
+  omega
 
-theorem isUnit_tA : IsUnit (tA F) := by sorry
+theorem norm_t_pos : 0 < ‖LaurentSeriesExample.t F‖ :=
+  norm_pos_iff.mpr (LaurentSeriesExample.t_ne_zero F)
+
+theorem norm_tA_lt_one : ‖tA F‖ < 1 := by
+  rw [tA, norm_constA]
+  exact norm_t_lt_one F
+
+theorem norm_tA_pos : 0 < ‖tA F‖ := by
+  rw [tA, norm_constA]
+  exact norm_t_pos F
+
+theorem isUnit_tA : IsUnit (tA F) := by
+  refine IsUnit.map (constA F) ?_
+  exact (LaurentSeriesExample.t_ne_zero F).isUnit
 
 /-! ### Huber instance stacks (pattern of `ExampleUnitDisc.lean`)
 
@@ -505,20 +553,35 @@ plus rings"), which `IsRingOfIntegralElements` permits (no boundedness field). -
 
 section InstanceStack
 
-variable (E : Type*) [NormedCommRing E] [IsUltrametricDist E]
+variable (E : Type*) [NormedCommRing E] [IsUltrametricDist E] [NormOneClass E]
 
-/-- The closed unit ball of a nonarchimedean normed ring, as a subring. -/
+/-- The closed unit ball of a nonarchimedean normed ring, as a subring.
+(Signature fix during T108: `NormOneClass` added — `1` does not lie in the unit ball of an
+arbitrary normed ring; all four jet rings satisfy it.) -/
 noncomputable def unitBall : Subring E where
   carrier := {x | ‖x‖ ≤ 1}
-  zero_mem' := by sorry
-  one_mem' := by sorry
-  add_mem' := by sorry
-  neg_mem' := by sorry
-  mul_mem' := by sorry
+  zero_mem' := by simp
+  one_mem' := norm_one.le
+  add_mem' := fun {a b} ha hb =>
+    (IsUltrametricDist.norm_add_le_max a b).trans (max_le ha hb)
+  neg_mem' := fun {a} ha => by
+    show ‖-a‖ ≤ 1
+    rwa [norm_neg]
+  mul_mem' := fun {a b} ha hb =>
+    (norm_mul_le a b).trans (mul_le_one₀ ha (norm_nonneg b) hb)
 
 theorem mem_unitBall_iff (x : E) : x ∈ unitBall E ↔ ‖x‖ ≤ 1 := Iff.rfl
 
-theorem isOpen_unitBall : IsOpen ((unitBall E : Set E)) := by sorry
+theorem isOpen_unitBall : IsOpen ((unitBall E : Set E)) := by
+  rw [isOpen_iff_mem_nhds]
+  intro x hx
+  rw [Metric.mem_nhds_iff]
+  refine ⟨1, one_pos, fun y hy => ?_⟩
+  rw [Metric.mem_ball, dist_eq_norm] at hy
+  show ‖y‖ ≤ 1
+  calc ‖y‖ = ‖(y - x) + x‖ := by ring_nf
+    _ ≤ max ‖y - x‖ ‖x‖ := IsUltrametricDist.norm_add_le_max _ _
+    _ ≤ 1 := max_le hy.le hx
 
 end InstanceStack
 
