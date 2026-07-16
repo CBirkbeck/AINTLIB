@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.UniversalLegendre
+import ModularCurves.EllipticCurve.AffineSectionSpecPoints
+import ModularCurves.EllipticCurve.E3NormalForm
 
 /-!
 # The universal naive level-3 object `ℰ₃` over `ℤ[1/3]` (T-E15a)
@@ -249,6 +251,69 @@ def universalE3Q : (universalE3Obj R).curve.Section :=
   ⟨projModelAffineSection (universalE3 R) (e3Gamma R) (e3Beta R + e3Gamma R)
       (universalE3_equation_Q R),
     projModelAffineSection_projModelπ _ _ _ _⟩
+
+/-! ### The section-level killing ([T-E15-NORM] hL-killing): Stages A+B+C assemble -/
+
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **([T-E15-NORM] the killing engine ★★)** Over a reduced universal base, a marked
+affine-point section of the universal `ℰ₃` curve whose evaluation at every field point
+is `3`-torsion (in mathlib's affine point group) is killed by `3` at the section level:
+the Stage-B fibre evaluation + additive dictionary convert the fibre hypothesis to the
+morphism-level killing at each field point, and the Stage-B collision principle
+(separatedness + reducedness) glues. -/
+theorem universalE3_section_killing
+    [IsReduced (Spec (CommRingCat.of (E3ModuliRing R)))]
+    (p q : E3ModuliRing R) (hpq : (universalE3 R).toAffine.Equation p q)
+    (hfield : ∀ (K : Type u) [Field K] [DecidableEq K] [Algebra (E3ModuliRing R) K]
+      (hns : ((universalE3 R).baseChange K).toAffine.Nonsingular
+        (algebraMap (E3ModuliRing R) K p) (algebraMap (E3ModuliRing R) K q)),
+      (3 : ℤ) • (WeierstrassCurve.Affine.Point.some _ _ hns :
+        ((universalE3 R).baseChange K).toAffine.Point) = 0) :
+    (3 : ℤ) • (⟨projModelAffineSection (universalE3 R) p q hpq,
+        projModelAffineSection_projModelπ _ _ _ _⟩ :
+      (universalE3Obj R).curve.Section) = 0 := by
+  refine nsmul_section_eq_zero_of_forall_specPoint (universalE3 R) 3 _ ?_
+  intro K _ pt
+  letI : DecidableEq K := Classical.decEq K
+  letI : Algebra (E3ModuliRing R) K := (Spec.preimage pt).hom.toAlgebra
+  have halg : CommRingCat.ofHom (algebraMap (E3ModuliRing R) K) = Spec.preimage pt :=
+    rfl
+  have hpt : pt = Spec.map (CommRingCat.ofHom (algebraMap (E3ModuliRing R) K)) := by
+    rw [halg, Spec.map_preimage]
+  -- the evaluated point, as a `Point` of the model over the algebra map
+  set σK : (modelEllipticCurve (universalE3 R)).Point
+      (Spec.map (CommRingCat.ofHom (algebraMap (E3ModuliRing R) K))) :=
+    ⟨(affineSectionSpecPoint (universalE3 R) K p q hpq).1,
+      (affineSectionSpecPoint (universalE3 R) K p q hpq).2⟩ with hσK
+  -- nonsingularity of the evaluated coordinates
+  haveI : (((universalE3 R).baseChange K)).IsElliptic :=
+    inferInstanceAs (((universalE3 R).map (algebraMap (E3ModuliRing R) K)).IsElliptic)
+  have hns : ((universalE3 R).baseChange K).toAffine.Nonsingular
+      (algebraMap (E3ModuliRing R) K p) (algebraMap (E3ModuliRing R) K q) :=
+    WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+      (WeierstrassCurve.Affine.Equation.map _ hpq)
+  -- the point-level killing, via the additive dictionary + the field hypothesis
+  have hkill : (3 : ℤ) • σK = 0 := by
+    apply (modelPointAddEquiv (universalE3 R)).injective
+    rw [map_zsmul, map_zero]
+    have hval : modelPointAddEquiv (universalE3 R) σK =
+        WeierstrassCurve.Affine.Point.some _ _ hns := by
+      show projModelPointsEquiv (universalE3 R) K
+        (affineSectionSpecPoint (universalE3 R) K p q hpq) = _
+      exact projModelPointsEquiv_affineSectionSpecPoint (universalE3 R) p q hpq hns
+    rw [hval]
+    exact hfield K hns
+  -- back to the morphism level
+  have hmor := (EllipticCurve.smul_eq_zero_iff_comp_mulByHom
+    (modelEllipticCurve (universalE3 R))
+    (Spec.map (CommRingCat.ofHom (algebraMap (E3ModuliRing R) K))) 3 σK).mp hkill
+  rw [hpt]
+  rw [show σK.1 = Spec.map (CommRingCat.ofHom (algebraMap (E3ModuliRing R) K)) ≫
+      projModelAffineSection (universalE3 R) p q hpq from rfl] at hmor
+  rw [← Category.assoc]
+  exact hmor
 
 open LocalPresentation in
 set_option backward.isDefEq.respectTransparency false in
@@ -592,6 +657,74 @@ theorem e3form_units {A : Type u} [CommRing A] {W : WeierstrassCurve A} {β γ :
   exact (isUnit_pow_iff (n := 3) (by norm_num)).mp h3
 
 open LocalPresentation WeierstrassCurve in
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- **([T-E15-NORM] hL-killing, `P` ★★)** The universal marked `P = (0,0)` is killed by
+`3`, over any coefficient ring with reduced universal base (e.g. any UFD with `3`
+invertible, via `isReduced_e3RelQuotient`). -/
+theorem three_zsmul_universalE3P
+    [IsReduced (Spec (CommRingCat.of (E3ModuliRing R)))] :
+    (3 : ℤ) • universalE3P R = 0 := by
+  refine universalE3_section_killing R 0 0 (universalE3_equation_zero R) ?_
+  intro K _ _ _ hns
+  haveI : (((universalE3 R).baseChange K)).IsElliptic :=
+    inferInstanceAs (((universalE3 R).map (algebraMap (E3ModuliRing R) K)).IsElliptic)
+  simp only [map_zero] at hns ⊢
+  have hE3K := IsE3Form.map (algebraMap (E3ModuliRing R) K) (universalE3_isE3Form R)
+  have hflex : ((universalE3 R).baseChange K).IsFlexNF :=
+    ⟨hE3K.2.1, hE3K.2.2.2.1, hE3K.2.2.2.2⟩
+  have ha₃ : ((universalE3 R).baseChange K).a₃ ≠ 0 := by
+    have hu := (e3form_units (universalE3_isE3Form R) inferInstance).1
+    have huK : IsUnit (((universalE3 R).baseChange K).a₃) := by
+      rw [show ((universalE3 R).baseChange K).a₃
+          = algebraMap (E3ModuliRing R) K ((universalE3 R).a₃) from rfl]
+      exact hu.map _
+    exact huK.ne_zero
+  exact WeierstrassCurve.Affine.Point.three_zsmul_some_origin hflex ha₃ hns
+
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 800000 in
+/-- **([T-E15-NORM] hL-killing, `Q` ★★)** The universal marked `Q = (γ, β+γ)` is killed
+by `3`: the Stage-A doubling (`slope = den/den = 1`) with the `den`-unit certificate
+`isUnit_e3Den` supplying the nowhere-`2`-torsion input. -/
+theorem three_zsmul_universalE3Q
+    [IsReduced (Spec (CommRingCat.of (E3ModuliRing R)))] :
+    (3 : ℤ) • universalE3Q R = 0 := by
+  refine universalE3_section_killing R (e3Gamma R) (e3Beta R + e3Gamma R)
+    (universalE3_equation_Q R) ?_
+  intro K _ _ _ hns
+  haveI : (((universalE3 R).baseChange K)).IsElliptic :=
+    inferInstanceAs (((universalE3 R).map (algebraMap (E3ModuliRing R) K)).IsElliptic)
+  simp only [map_add] at hns ⊢
+  have hE3K := IsE3Form.map (algebraMap (E3ModuliRing R) K) (universalE3_isE3Form R)
+  have hden : algebraMap (E3ModuliRing R) K (e3Beta R)
+      + algebraMap (E3ModuliRing R) K (e3Gamma R)
+      - 3 * algebraMap (E3ModuliRing R) K (e3Beta R)
+        * algebraMap (E3ModuliRing R) K (e3Gamma R) ≠ 0 := by
+    have hu := (isUnit_e3Den R).map (algebraMap (E3ModuliRing R) K)
+    have hform : algebraMap (E3ModuliRing R) K
+        (e3Beta R + e3Gamma R - 3 * e3Beta R * e3Gamma R)
+        = algebraMap (E3ModuliRing R) K (e3Beta R)
+          + algebraMap (E3ModuliRing R) K (e3Gamma R)
+          - 3 * algebraMap (E3ModuliRing R) K (e3Beta R)
+            * algebraMap (E3ModuliRing R) K (e3Gamma R) := by
+      rw [map_sub, map_add, map_mul, map_mul, map_ofNat]
+    rw [hform] at hu
+    exact hu.ne_zero
+  refine WeierstrassCurve.Affine.Point.three_zsmul_some_e3Q ?_ ?_ ?_ ?_ hden hns
+  · rw [show ((universalE3 R).baseChange K).a₁
+        = algebraMap (E3ModuliRing R) K ((universalE3 R).a₁) from rfl]
+    show algebraMap (E3ModuliRing R) K (3 * e3Gamma R - 1) = _
+    rw [map_sub, map_mul, map_ofNat, map_one]
+  · exact hE3K.2.1
+  · rw [show ((universalE3 R).baseChange K).a₃
+        = algebraMap (E3ModuliRing R) K ((universalE3 R).a₃) from rfl]
+    show algebraMap (E3ModuliRing R) K
+      (-3 * e3Gamma R ^ 2 - e3Beta R - 3 * e3Beta R * e3Gamma R) = _
+    simp only [map_sub, map_mul, map_neg, map_ofNat, map_pow]
+  · exact hE3K.2.2.2.1
+
 /-- **(T-E15a stage 5)** `Q = (γ, β+γ)` on an `E3`-form curve is the flex relation
 `γ(3β²+3βγ+γ²) = 0`. -/
 theorem e3form_flex {A : Type u} [CommRing A] {W : WeierstrassCurve A} {β γ : A}
