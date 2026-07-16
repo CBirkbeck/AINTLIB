@@ -5,6 +5,8 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.EllipticCurve.AffinePointSection
 import ModularCurves.EllipticCurve.MulByHomDegree
+import ModularCurves.EllipticCurve.TorsionFibre
+import ModularCurves.LevelStructure.ExactOrder
 
 /-!
 # Affine-point sections at field points ([T-E15-NORM] Stage B — the fibre evaluation)
@@ -204,5 +206,32 @@ noncomputable def modelPointAddEquiv :
     map_add' := projModelPointsEquiv_point_add W }
 
 end AddDict
+
+/-! ## The killing collision principle -/
+
+section Collision
+
+variable [W.IsElliptic]
+
+/-- **(Stage B-8 ★★, the collision principle)** Over a reduced base, a section of the
+model killed by `N` at every field point is killed by `N`: the two morphisms
+`σ ≫ [N]` and the zero section agree on all field points, the model is separated
+(mathlib's `Proj` instance) and the base reduced, so `hom_ext_of_forall_specPoint`
+closes. The fibre hypothesis is the Stage-A/B computation. -/
+theorem nsmul_section_eq_zero_of_forall_specPoint
+    [IsReduced (Spec (CommRingCat.of R))] (N : ℕ)
+    (σ : (modelEllipticCurve W).Section)
+    (hfib : ∀ (K : Type u) [Field K]
+      (pt : Spec (CommRingCat.of K) ⟶ Spec (CommRingCat.of R)),
+      pt ≫ (σ.1 ≫ (modelEllipticCurve W).mulByHom (N : ℤ)) =
+        pt ≫ (modelEllipticCurve W).zero) :
+    (N : ℤ) • σ = 0 := by
+  rw [EllipticCurve.smul_eq_zero_iff_comp_mulByHom (modelEllipticCurve W) (𝟙 _) N σ]
+  rw [Category.id_comp]
+  haveI : ((modelEllipticCurve W).E).IsSeparated :=
+    inferInstanceAs ((projModel W).IsSeparated)
+  exact hom_ext_of_forall_specPoint (fun K _ pt => hfib K pt)
+
+end Collision
 
 end ModularCurves
