@@ -209,6 +209,86 @@ lemma exists_tendsto_sum_range_sin_div_nat {x : ℝ} (hx₀ : 0 < x) (hx₁ : x 
     · simp [f, z, hi.ne', smul_eq_mul, div_eq_mul_inv, mul_comm]
   exact hseries ▸ hl
 
+/-- The complex number `1 - exp(2πix)` lies in the slit plane for `x ∈ (0, 1)`, so
+`Complex.log` is continuous there. -/
+private lemma one_sub_exp_two_pi_mul_I_mem_slitPlane {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) :
+    ((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)) ∈ Complex.slitPlane := by
+  rw [Complex.mem_slitPlane_iff]
+  left
+  have hre :
+      (((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)).re : ℝ) =
+        2 * Real.sin (Real.pi * x) ^ 2 := by
+    have hExp :
+        (Complex.exp ((2 * Real.pi * x) * Complex.I)).re = Real.cos (2 * Real.pi * x) := by
+      simpa using (Complex.exp_ofReal_mul_I_re (2 * Real.pi * x))
+    rw [Complex.sub_re, Complex.one_re, hExp]
+    have hsq : 1 - Real.cos (2 * Real.pi * x) = 2 * Real.sin (Real.pi * x) ^ 2 := by
+      rw [show 2 * Real.pi * x = 2 * (Real.pi * x) by ring, Real.cos_two_mul]
+      nlinarith [Real.sin_sq_add_cos_sq (Real.pi * x)]
+    exact hsq
+  rw [hre]
+  have hxπ : Real.pi * x ∈ Set.Ioo 0 Real.pi := by
+    constructor <;> nlinarith [hx₀, hx₁, Real.pi_pos]
+  have hsin : 0 < Real.sin (Real.pi * x) := Real.sin_pos_of_mem_Ioo hxπ
+  positivity
+
+/-- The Abel-summation boundary limit: the imaginary part of
+`-log(1 - r·exp(2πix))` tends to the classical value `π * (1 / 2 - x)` as `r → 1⁻`. -/
+private lemma tendsto_neg_log_one_sub_mul_exp_two_pi_mul_I_im {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1)
+    (hslit : ((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)) ∈ Complex.slitPlane) :
+    Tendsto
+      (fun r : ℝ ↦
+        (-Complex.log ((1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I))).im)
+      (𝓝[<] 1) (𝓝 (Real.pi * (1 / 2 - x))) := by
+  have hz :
+      Tendsto
+        (fun r : ℝ ↦ (1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I))
+        (𝓝[<] 1)
+        (𝓝 ((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I))) := by
+    have hcont :
+        Continuous fun r : ℝ ↦
+          (1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I) := by
+      continuity
+    have hcont1 :
+        ContinuousAt
+          (fun r : ℝ ↦ (1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I)) 1 :=
+      hcont.continuousAt
+    convert tendsto_nhdsWithin_of_tendsto_nhds hcont1.tendsto using 1
+    · simp
+  have hlog :
+      Tendsto
+        (fun r : ℝ ↦
+          Complex.log ((1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I)))
+        (𝓝[<] 1)
+        (𝓝 (Complex.log ((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)))) :=
+    hz.clog hslit
+  have him0 :
+      Tendsto
+        (fun r : ℝ ↦
+          (Complex.log ((1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I))).im)
+        (𝓝[<] 1)
+        (𝓝 ((Complex.log (((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)))).im)) :=
+    Complex.continuous_im.continuousAt.tendsto.comp hlog
+  have hnegim :
+      Tendsto
+        (fun r : ℝ ↦
+          -((Complex.log ((1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I))).im))
+        (𝓝[<] 1)
+        (𝓝 (-((Complex.log (((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)))).im))) :=
+    him0.neg
+  have ht₀ : 0 < 2 * Real.pi * x := by nlinarith [hx₀, Real.pi_pos]
+  have ht₂π : 2 * Real.pi * x < 2 * Real.pi := by nlinarith [hx₁, Real.pi_pos]
+  have hvalue := neg_log_one_sub_exp_ofReal_mul_I_im ht₀ ht₂π
+  have hvalue' :
+      -((Complex.log (((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)))).im) =
+        Real.pi * (1 / 2 - x) := by
+    calc
+      -((Complex.log (((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)))).im) =
+          Real.pi / 2 - (2 * Real.pi * x) / 2 := by
+            simpa using hvalue
+      _ = Real.pi * (1 / 2 - x) := by ring
+  simpa [hvalue'] using hnegim
+
 /-- The endpoint sine series converges to the classical boundary value
 `π * (1 / 2 - x)` on `(0, 1)`. -/
 lemma tendsto_sum_range_sin_div_nat {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) :
@@ -245,79 +325,8 @@ lemma tendsto_sum_range_sin_div_nat {x : ℝ} (hx₀ : 0 < x) (hx₁ : x < 1) :
           (-Complex.log ((1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I))).im)
         (𝓝[<] 1) (𝓝 l) :=
     Tendsto.congr' (hcoeff.eventuallyEq_of_mem (Ioo_mem_nhdsLT zero_lt_one)) habel
-  have hslit :
-      ((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)) ∈ Complex.slitPlane := by
-    rw [Complex.mem_slitPlane_iff]
-    left
-    have hre :
-        (((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)).re : ℝ) =
-          2 * Real.sin (Real.pi * x) ^ 2 := by
-      have hExp :
-          (Complex.exp ((2 * Real.pi * x) * Complex.I)).re = Real.cos (2 * Real.pi * x) := by
-        simpa using (Complex.exp_ofReal_mul_I_re (2 * Real.pi * x))
-      rw [Complex.sub_re, Complex.one_re, hExp]
-      have hsq : 1 - Real.cos (2 * Real.pi * x) = 2 * Real.sin (Real.pi * x) ^ 2 := by
-        rw [show 2 * Real.pi * x = 2 * (Real.pi * x) by ring, Real.cos_two_mul]
-        nlinarith [Real.sin_sq_add_cos_sq (Real.pi * x)]
-      exact hsq
-    rw [hre]
-    have hxπ : Real.pi * x ∈ Set.Ioo 0 Real.pi := by
-      constructor <;> nlinarith [hx₀, hx₁, Real.pi_pos]
-    have hsin : 0 < Real.sin (Real.pi * x) := Real.sin_pos_of_mem_Ioo hxπ
-    positivity
-  have hcont :
-      Tendsto
-        (fun r : ℝ ↦
-          (-Complex.log ((1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I))).im)
-        (𝓝[<] 1) (𝓝 (Real.pi * (1 / 2 - x))) := by
-    have hz :
-        Tendsto
-          (fun r : ℝ ↦ (1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I))
-          (𝓝[<] 1)
-          (𝓝 ((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I))) := by
-      have hcont :
-          Continuous fun r : ℝ ↦
-            (1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I) := by
-        continuity
-      have hcont1 :
-          ContinuousAt
-            (fun r : ℝ ↦ (1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I)) 1 :=
-        hcont.continuousAt
-      convert tendsto_nhdsWithin_of_tendsto_nhds hcont1.tendsto using 1
-      · simp
-    have hlog :
-        Tendsto
-          (fun r : ℝ ↦
-            Complex.log ((1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I)))
-          (𝓝[<] 1)
-          (𝓝 (Complex.log ((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)))) :=
-      hz.clog hslit
-    have him0 :
-        Tendsto
-          (fun r : ℝ ↦
-            (Complex.log ((1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I))).im)
-          (𝓝[<] 1)
-          (𝓝 ((Complex.log (((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)))).im)) :=
-      Complex.continuous_im.continuousAt.tendsto.comp hlog
-    have hnegim :
-        Tendsto
-          (fun r : ℝ ↦
-            -((Complex.log ((1 : ℂ) - (r : ℂ) * Complex.exp ((2 * Real.pi * x) * Complex.I))).im))
-          (𝓝[<] 1)
-          (𝓝 (-((Complex.log (((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)))).im))) :=
-      him0.neg
-    have ht₀ : 0 < 2 * Real.pi * x := by nlinarith [hx₀, Real.pi_pos]
-    have ht₂π : 2 * Real.pi * x < 2 * Real.pi := by nlinarith [hx₁, Real.pi_pos]
-    have hvalue := neg_log_one_sub_exp_ofReal_mul_I_im ht₀ ht₂π
-    have hvalue' :
-        -((Complex.log (((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)))).im) =
-          Real.pi * (1 / 2 - x) := by
-      calc
-        -((Complex.log (((1 : ℂ) - Complex.exp ((2 * Real.pi * x) * Complex.I)))).im) =
-            Real.pi / 2 - (2 * Real.pi * x) / 2 := by
-              simpa using hvalue
-        _ = Real.pi * (1 / 2 - x) := by ring
-    simpa [hvalue'] using hnegim
+  have hslit := one_sub_exp_two_pi_mul_I_mem_slitPlane hx₀ hx₁
+  have hcont := tendsto_neg_log_one_sub_mul_exp_two_pi_mul_I_im hx₀ hx₁ hslit
   have hl_eq : l = Real.pi * (1 / 2 - x) := tendsto_nhds_unique habel' hcont
   simpa [hl_eq] using hl
 
