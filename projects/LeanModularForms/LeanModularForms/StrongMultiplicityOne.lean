@@ -62,8 +62,7 @@ private theorem coprime_prod_primeFactors_iff_coprime {N : ℕ} [NeZero N] (n : 
 
 /-- **Miyake Theorem 4.6.8 (Main Lemma), unconditional CuspForm form.**  As
 `miyake_4_6_8_main_lemma_cuspForm`, but with the `h_chi_factor` hypothesis removed:
-the per-prime factorisation is produced internally by the 4.6.4 dichotomy
-(`miyake_4_6_8_subset_helper`). -/
+the per-prime factorisation is produced internally by the 4.6.4 dichotomy. -/
 theorem miyake_4_6_8_main_lemma_cuspForm
     {N : ℕ} [NeZero N] {k : ℤ}
     (χ : (ZMod N)ˣ →* ℂˣ)
@@ -77,7 +76,8 @@ theorem miyake_4_6_8_main_lemma_cuspForm
         f_p p ∈ HeckeRing.GL2.AtkinLehner.qSupportedOnDvdSubmodule N k p) ∧
       (∀ p ∈ N.primeFactors,
         f_p p ∈ cuspFormCharSpace k χ) :=
-  miyake_4_6_8_subset_helper χ N.primeFactors subset_rfl f hfχ
+  exists_qSupportedOnDvdSubmodule_decomposition_of_coprime_coeff_eq_zero
+    χ N.primeFactors subset_rfl f hfχ
     fun n hn ↦ h_vanish n ((coprime_prod_primeFactors_iff_coprime n).mp hn)
 
 /-- Embed a per-prime decomposition into a per-nontrivial-divisor decomposition by
