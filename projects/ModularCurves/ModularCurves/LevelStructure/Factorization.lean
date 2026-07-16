@@ -983,6 +983,39 @@ theorem RelEffCartierDiv.IsSubgroup.exists_zero_smulKernel (c : ℤ) :
     (smul_zero c) w hw
   exact ⟨z₀, hπ⟩
 
+include hD in
+/-- **[F3-sect]** Each kernel is a retract of the product: the section pairs the
+identity with the zero-lift through the other kernel. -/
+theorem RelEffCartierDiv.IsSubgroup.exists_smulKernel_section (c₁ c₂ : ℤ) :
+    ∃ s : D.smulKernel E c₁ ⟶ pullback (D.smulKernelπ E c₁) (D.smulKernelπ E c₂),
+      s ≫ pullback.fst (D.smulKernelπ E c₁) (D.smulKernelπ E c₂) = 𝟙 _ := by
+  obtain ⟨z₀, hz₀⟩ := RelEffCartierDiv.IsSubgroup.exists_zero_smulKernel E hD c₂
+  refine ⟨pullback.lift (𝟙 _) (D.smulKernelπ E c₁ ≫ z₀) ?_, pullback.lift_fst _ _ _⟩
+  rw [Category.id_comp, Category.assoc, hz₀, Category.comp_id]
+
+include hD in
+/-- **[F3-retract] (KM p. 27's flatness input, scheme form)** Each kernel of a
+coprime-degree subgroup divisor is a retract of the divisor subscheme over `S`:
+`i := section ≫ combMap`, `r := prodMap ≫ fst`, split by [F3-R2] + [F3-sect]. The
+flat/finite/lfp transport along this retract is the remaining ForMathlib gap. -/
+theorem RelEffCartierDiv.IsSubgroup.exists_smulKernel_retract (M K : ℕ)
+    [NeZero M] [NeZero K] (hMK : Nat.Coprime M K) [NeZero (M * K)]
+    (hdeg : ∀ s : S, D.degree s = M * K)
+    (h₁ : ((M : ℤ) * K) % ((M * K : ℕ) : ℤ) = 0)
+    (h₂ : ((K : ℤ) * M) % ((M * K : ℕ) : ℤ) = 0) :
+    ∃ (i : D.smulKernel E (M : ℤ) ⟶ D.ideal.subscheme)
+      (r : D.ideal.subscheme ⟶ D.smulKernel E (M : ℤ)), i ≫ r = 𝟙 _ := by
+  obtain ⟨s, hs⟩ := RelEffCartierDiv.IsSubgroup.exists_smulKernel_section E hD
+    (M : ℤ) (K : ℤ)
+  refine ⟨s ≫ RelEffCartierDiv.IsSubgroup.combMap E hD (M : ℤ) (K : ℤ)
+      (Nat.gcdB M K) (Nat.gcdA M K),
+    RelEffCartierDiv.IsSubgroup.prodMap E hD hdeg h₁ h₂
+      ≫ pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ)), ?_⟩
+  rw [Category.assoc, ← Category.assoc (RelEffCartierDiv.IsSubgroup.combMap E hD _ _ _ _),
+    RelEffCartierDiv.IsSubgroup.combMap_prodMap E hD M K hMK hdeg h₁ h₂,
+    Category.id_comp]
+  exact hs
+
 end ProductDecomposition
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
