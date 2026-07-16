@@ -442,6 +442,25 @@ noncomputable def killedCoprimeSplitEquiv {G : Type*} [AddCommGroup G] (M K : �
         sub_smul, one_smul, mul_smul, mul_smul, hg₁, hg₂]
       simp
 
+/-- **[F3-cauchy] (the De-Ga IV 5.3-9 dodge)** Every prime dividing the order of a
+finite abelian group killed by `M` divides `M` — Cauchy's theorem. Replaces KM's
+citation *"the rank of `G[N₁]` divides a power of `N₁` (cf. [De-Ga IV, §3, 5.3-9])"*
+on the étale locus. -/
+theorem prime_dvd_of_killed {G : Type*} [AddCommGroup G] [Finite G] (M : ℕ)
+    (hkill : ∀ g : G, (M : ℤ) • g = 0) {p : ℕ} (hp : p.Prime)
+    (hdvd : p ∣ Nat.card G) : p ∣ M := by
+  haveI : Fact p.Prime := ⟨hp⟩
+  obtain ⟨x, hx⟩ := exists_prime_orderOf_dvd_card' (G := Multiplicative G) p
+    (show p ∣ Nat.card (Multiplicative G) from hdvd)
+  have h2 : addOrderOf (Multiplicative.toAdd x) ∣ M := by
+    rw [addOrderOf_dvd_iff_nsmul_eq_zero]
+    have := hkill (Multiplicative.toAdd x)
+    rwa [natCast_zsmul] at this
+  have h3 : addOrderOf (Multiplicative.toAdd x) = p := by
+    rw [← orderOf_ofAdd_eq_addOrderOf]
+    exact hx
+  rwa [h3] at h2
+
 /-- **[F3-univ] (the universal-point trick — KM p. 27's projector, scheme level)** For a
 subgroup divisor `D` and any `c : ℤ`, multiplication by `c` restricts to an endomorphism
 of the divisor subscheme: the inclusion `ι` is itself a `T`-point of `E` (`T` the
