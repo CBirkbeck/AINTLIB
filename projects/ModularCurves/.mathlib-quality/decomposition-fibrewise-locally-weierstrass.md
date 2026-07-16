@@ -716,3 +716,17 @@ transported singleton-chart trivializations of the pulled-back finite-stage `glu
 realize the chart transitions of `cM.mapToColimit M`. This is the sole overlap calculation needed
 before applying `gluedModuleIsoOfCompatibleChartTrivialization` to obtain the global line-bundle
 base-change isomorphism. No additional hypotheses or proof-resource options may be introduced.
+
+Active subdependency claim (2026-07-16): prove
+`Algebra.SpreadData.FunctorModel.baseChangeSpecIso_inv_snd`. The local affine map from an original
+chart or overlap to its finite-stage model must be identified with `Spec.map` of finite-stage
+inclusion into the tensor product followed by the existing colimit equivalence. This is the
+ring-level input for transporting transition units in the active chart-compatibility claim; it
+adds no construction, hypothesis, or proof-resource option.
+
+Completed subdependency claim (2026-07-16): proved
+`Algebra.SpreadData.FunctorModel.baseChangeSpecIso_inv_snd`. The local affine base-change map is
+now identified with the spectrum map induced by tensor inclusion followed by the existing colimit
+comparison. The focused build is green, no hypothesis or proof-resource option was added, and the
+axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`. The active compatibility
+claim can now transport finite-stage overlap units through `ΓSpecIso` naturality.

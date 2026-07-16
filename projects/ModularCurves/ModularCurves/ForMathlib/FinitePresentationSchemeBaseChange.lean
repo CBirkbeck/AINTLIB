@@ -67,6 +67,33 @@ theorem SpreadData.FunctorModel.baseChangeSpecIso_inv_fst
   ext a
   exact (M.baseChangeIso.hom.app X).hom.commutes a
 
+/-- The inverse affine base-change comparison followed by the second projection is
+the spectrum map induced by inclusion of the finite-stage algebra into its scalar
+extension, followed by the colimit comparison. -/
+theorem SpreadData.FunctorModel.baseChangeSpecIso_inv_snd
+    (M : SpreadData.FunctorModel F H) (X : J) :
+    letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+    (M.baseChangeSpecIso X).inv ≫
+        pullback.snd
+          (AlgebraicGeometry.Spec.map
+            (CommRingCat.ofHom (algebraMap (𝒮 M.stage) A)))
+          (AlgebraicGeometry.Spec.map
+            (CommRingCat.ofHom
+              (algebraMap (𝒮 M.stage) (M.toFunctor.obj X)))) =
+      AlgebraicGeometry.Spec.map
+        (CommRingCat.ofHom
+          ((M.baseChangeIso.app X).hom.hom.toRingHom.comp
+            (Algebra.TensorProduct.includeRight
+              (R := 𝒮 M.stage) (A := A)
+              (B := M.toFunctor.obj X)).toRingHom)) := by
+  letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+  simp only [SpreadData.FunctorModel.baseChangeSpecIso, Iso.trans_inv,
+    Category.assoc, Functor.mapIso_inv, Iso.symm_inv, Iso.op_inv,
+    AlgebraicGeometry.Scheme.Spec_map,
+    AlgebraicGeometry.pullbackSpecIso_inv_snd]
+  rw [← AlgebraicGeometry.Spec.map_comp]
+  congr 1
+
 /-- The inverse affine base-change comparison exhibits the original affine scheme as the
 base change of its modeled affine scheme. -/
 theorem SpreadData.FunctorModel.baseChangeSpecIso_inv_isPullback
