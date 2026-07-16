@@ -457,3 +457,27 @@ Needed: `Flat (D.smulKernelπ E M)` (+ IsFinite/lfp) from `Flat (subschemeι ≫
   one). ⟹ [F3-disj] (translate-disjointness + the clopen decomposition of the divisor subscheme,
   from `orderDivisor_mul_crt` + `mapIso_sectionsDivisor` + `Point.eq_zero_of_killed_coprime`) is
   the LAST substantial brick of KM step 5; then squeeze = degree-count + Yoneda.
+
+## FORWARD-HALF CRITICAL PATH, FULLY DE-RISKED (KM worker, 2026-07-16e — the marathon's closing map)
+
+Ordered bricks for F3.mp (each bounded, no black box beyond BB-DELIGNE):
+1. **[F3-etale]** On `S[1/M]`: `Z_M` is étale — closed immersion into the étale `E[M]`
+   (repo torsion machinery, N-invertible) gives unramified; + flat ([F3-kerflat] ✓) + lfp ⟹
+   étale by instances.
+2. **[F3-count]** Étale ⟹ geometric fibres of `Z_M` are `deg`-many k̄-points forming an
+   M-KILLED abelian group (`smulKernel_point` ✓ + repo `EtaleSectionsCount`).
+3. **[F3-cauchy]** ELEMENTARY De-Ga dodge: an M-killed finite abelian group has order divisible
+   only by primes dividing M (Cauchy), so `deg Z_M` shares no prime with `K`; with
+   [F3-degmul] `deg Z_M · deg Z_K = M·K` (tensor route) and coprimality: `deg Z_M = M`,
+   `deg Z_K = K` — KM's rank forcing WITHOUT De-Ga IV 5.3-9.
+4. **[F3-distinct]** `|Z_M(k̄)| = M` + the M candidate multiples `{a₁·(K•P)}` land in it and
+   exhaust (KM p. 29's counting: the crt-divisor exhausts `G(k̄)`, the M-killed ones are the
+   K-multiples by coprime arithmetic) ⟹ the multiples are DISTINCT at every geometric point of
+   `S[1/M]` — 1.5.3(3).
+5. **[F3-mp-locus]** 1.5.3 (3)⟹(1) (banked geometric machinery, N := M invertible on the locus):
+   `(K•P).HasExactOrder M` on `S[1/M]`; the K-side is symmetric on `S[1/K]`.
+6. **[F3-mp]** Glue over the coprime cover `S = S[1/M] ∪ S[1/K]` via `isSubgroup_of_openCover`
+   ([F3-loc] ✓) — both conjuncts of F3.mp on all of `S`.
+The CONVERSE then reuses the product machinery (KM p. 30–31: the sum immersion is the
+combMap-image identification + disjointness of translates — [F3-disj] clopen-glue, needed only
+here). F4 assembles from F3 + `killedCoprimeSplitEquiv` (✓). This closes KM 1.7.2/3.5.1.
