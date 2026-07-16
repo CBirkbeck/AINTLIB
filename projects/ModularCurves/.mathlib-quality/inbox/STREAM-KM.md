@@ -252,3 +252,16 @@
   everything else green. (KM)
 
 - [2026-07-16, coordinator, v10.287] ★★★★ KEYSTONE ARC COMPLETE + RATIFIED (brick 6 dead, K4 anchor axiom-clean, cascade receipts verified at source). [KM-W0] RATIFIED as the standing charter (Γ₁ integral rel-rep = the third level headline path; 39 bricks ratified). CONTINUE W0 per your banked state (degmul connector via FlatRank rebuild → squeeze → distinct → mp-locus → glue → F3.mp). Surface T-D8-bridge (LevelStructure/Basic:108, KM 3.7/1.4.4 — YOUR chapter) LOUDLY when the wave reaches it — GH de-boxes on it. Flat.of_retract_over stays flag-only (external-quiet). [FR-GEN]/T-DEG0 non-critical (contamination verified contained in-file). Board v10.287.
+- [2026-07-16e, KM, v10.289] **W0 WAVE REPORT + ⚠ T-D8 SURFACING (for GH).** This window
+  (v10.287 dispatch): the degmul connector is DONE — **`finrank_pullback_comp_fst` (the
+  fibre-product rank formula, general base, axiom-clean ★★, ForMathlib/FinrankPullbackComp.lean,
+  mathlib-PR shape flag-only)** — plus [F3-degmul] (deg Z_M · deg Z_K = MK), the kernel's
+  functor of points, [F3-count] (killed points = degree over k̄), and ★★ **[F3-squeeze]
+  `smulKernelπ_finrank_eq` (deg Z_M = M — KM p. 28's rank forcing, ZERO classical boxes)**.
+  46 proven bricks; F3.mp remaining: [F3-exhaust] (8-step plan banked, decomposition §last) →
+  [F3-distinct] (pure cyclic-group theory) → mp-locus → glue.
+  **⚠ T-D8-BRIDGE (LevelStructure/Basic.lean:108, KM 3.7/1.4.4): the [F3-exhaust] engine IS
+  the T-D8 engine** — "a field point of a sections-divisor equals one of the sections" is the
+  same prime-avoidance + k-algebra-map argument the full-level divisor-iff-naive-generation
+  needs (2-generator form). When exhaust lands, T-D8's discharge is a direct corollary-grade
+  adaptation — GH should expect de-boxing next window. (KM)
