@@ -2,6 +2,30 @@ module
 
 public import BernoulliRegular.CyclotomicUnits.DworkParameter.PowerBasis.PowerBasisSurjective
 
+/-!
+# Power-basis approximation and the adic structure of the rational `(p)`-adic integers
+
+This file develops the topological and adic structure of the rational `(p)`-adic integer ring
+`RationalPadicIntegerRing p` needed to approximate the Dwork parameter in its power basis.  It
+records that this ring is complete and precomplete, identifies powers of its prime ideal with the
+valuation closed balls, shows the resulting ideal-adic topology agrees with the valuation
+topology, and builds the block and step sequences used to expand the Dwork parameter to arbitrary
+precision.
+
+## Main definitions
+
+* `dworkParameterPowerBlock` and `dworkParameterPowerIndex`: the block size and index organising
+  the power expansion.
+* `dworkParameterPowerApproxSeq` and `dworkParameterPowerApproxBlockSeq`: the successive- and
+  block-approximation sequences for the Dwork parameter's power basis.
+
+## Main results
+
+* `rationalPadicPrimeIdeal_pow_eq_valuation_closedBall`: powers of the prime ideal are the
+  valuation closed balls.
+* `rationalPadicPrimeIdeal_isAdic`: the ideal-adic topology coincides with the valuation topology.
+-/
+
 @[expose] public section
 
 noncomputable section
@@ -79,7 +103,8 @@ theorem rationalPadicPrimeIdeal_pow_eq_valuation_closedBall (n : ℕ) :
   rw [rationalPadicPrimeIdeal, Ideal.span_singleton_pow]
   simpa using
     (IsDedekindDomain.HeightOneSpectrum.adicCompletionIntegers.integers
-      (K := ℚ) (v := lambdaRationalHeightOneSpectrum p)).coe_span_singleton_eq_setOf_le_v_algebraMap
+      (K := ℚ)
+        (v := lambdaRationalHeightOneSpectrum p)).coe_span_singleton_eq_setOf_le_v_algebraMap
       ((p : RationalPadicIntegerRing p) ^ n)
 
 theorem rationalPadicPrimeIdeal_pow_isOpen (n : ℕ) :
