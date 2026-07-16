@@ -10,7 +10,7 @@ only). Priority spine: T1xx → T3xx → T4xx → T5xx → T6xx → T7xx (sheafi
 
 ## Summary
 - Total: 36 tickets (28 proof + 8 embedded cleanup/milestone controls listed inline)
-- Open: 31 | Done: 5 (T001, T101–T104) | Parallel capacity at peak: 4 workers
+- Open: 30 | Done: 6 (T001, T101–T105) | Parallel capacity at peak: 4 workers
   (T2xx ∥ T3xx ∥ T4xx-polynomial ∥ T1xx-tail)
 
 ## Milestone map
@@ -104,8 +104,12 @@ T704, by a fresh `/develop --continue`.
 
 ### [CLEANUP-2] /cleanup `RestrictedLaurent.lean` (final) — **Depends**: T104. In progress with T104 close-out (lint scan; import-weight note carried to CLEANUP-FINAL).
 
-### [T105] `JetDualNumberNorm.lean` — complete file
-- **Status**: open | **Depends**: none (parallel with T101) | **Type**: proofs (L1.5)
+### [T105] `JetDualNumberNorm.lean` — complete file — **DONE 2026-07-17**
+- **Status**: done (beastmode). File is **0-sorry**: max-norm `RingNorm` (cross term via
+  ultrametric + `op_smul_eq_mul`), `norm_inl`/`norm_eps_smul`, ultrametric + `NormOneClass`
+  + componentwise `CompleteSpace`, jet-power formula via `TrivSqZeroExt.snd_pow`, `mapHom`
+  functoriality (+ norm, injectivity), `aeval_eps_surjective` and
+  `isNoetherianRing (DualNumber S)` via the `S[X] ↠ S[ε]` surjection. | **Type**: proofs (L1.5)
 - **Sorries**: all 20 (`isRingNorm` fields, `norm_inl`, `norm_eps_smul`, ultrametric,
   `NormOneClass`, `CompleteSpace`, `pow_eq`, `mapHom` fields + `norm_mapHom` +
   `mapHom_injective`, `aeval_eps_surjective`, `isNoetherianRing`).
@@ -118,7 +122,7 @@ T704, by a fresh `/develop --continue`.
   `isNoetherianRing_of_surjective`. **Source**: [FJP] (5.2) power display; Lemma 2.2 max
   norm — quotes at L1.5.
 
-### [CLEANUP-3] /cleanup `JetDualNumberNorm.lean` (final) — **Depends**: T105.
+### [CLEANUP-3] /cleanup `JetDualNumberNorm.lean` (final) — **Depends**: T105. Folded into the T105 close-out (no outstanding lints beyond project-standard warnings).
 
 ### [T106] `FiniteJetRings.lean` — square maps and sections
 - **Status**: open | **Depends**: T102, T105 | **Type**: proofs (L1.6 first half)
