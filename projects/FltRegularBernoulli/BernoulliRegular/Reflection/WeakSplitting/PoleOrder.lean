@@ -36,22 +36,21 @@ namespace BernoulliRegular
 
 namespace WeakSplitting
 
-open NumberField Ideal Filter Topology
+open NumberField Filter Topology
 
 /-- The unfolded partial-zeta residue `dedekindZeta_residue K · ∏ (1 - N(P)⁻¹)` is
 nonzero when every `P ∈ S` is a nonzero prime. -/
 theorem dedekindZeta_residue_mul_prod_one_sub_absNorm_inv_ne_zero
     {K : Type*} [Field K] [NumberField K] (S : Finset (Ideal (𝓞 K)))
     (hS : ∀ P ∈ S, P.IsPrime ∧ P ≠ ⊥) :
-    (dedekindZeta_residue K : ℂ) * ∏ P ∈ S, ((1 : ℂ) - (Ideal.absNorm P : ℂ)⁻¹) ≠ 0 := by
+    (dedekindZeta_residue K : ℂ) *
+      ∏ P ∈ S, ((1 : ℂ) - (Ideal.absNorm P : ℂ)⁻¹) ≠ 0 := by
   refine mul_ne_zero ?_ ?_
   · exact_mod_cast (dedekindZeta_residue_pos K).ne'
   · refine Finset.prod_ne_zero_iff.mpr fun P hP ↦ ?_
     intro h_zero
-    have hN_eq_one : (Ideal.absNorm P : ℂ)⁻¹ = 1 := by linear_combination -h_zero
-    have hN_eq_one' : (Ideal.absNorm P : ℂ) = 1 := by
-      rw [← inv_inv ((Ideal.absNorm P : ℂ)), hN_eq_one, inv_one]
-    exact (hS P hP).1.ne_top (Ideal.absNorm_eq_one_iff.mp (by exact_mod_cast hN_eq_one'))
+    have hN_eq_one : (Ideal.absNorm P : ℂ) = 1 := inv_eq_one.mp (by linear_combination -h_zero)
+    exact (hS P hP).1.ne_top (Ideal.absNorm_eq_one_iff.mp (by exact_mod_cast hN_eq_one))
 
 variable (L : Type*) [Field L] [NumberField L]
 
@@ -142,7 +141,8 @@ theorem finrank_eq_one_of_global_identity
     (hF_L : ∀ Q ∈ F_L, Q.IsPrime ∧ Q ≠ ⊥)
     (hS : ∀ P ∈ S, P.IsPrime ∧ P ≠ ⊥)
     (h_global : ∀ s : ℝ, 1 < s →
-      dedekindZeta L (s : ℂ) * ∏ Q ∈ F_L, ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-(s : ℂ))) =
+      dedekindZeta L (s : ℂ) *
+          ∏ Q ∈ F_L, ((1 : ℂ) - (Ideal.absNorm Q : ℂ) ^ (-(s : ℂ))) =
         (dedekindZeta K (s : ℂ) * ∏ P ∈ S,
           ((1 : ℂ) - (Ideal.absNorm P : ℂ) ^ (-(s : ℂ)))) ^ Module.finrank K L)
     [Module.Finite K L] [Module.Free K L] (h_finrank_pos : 0 < Module.finrank K L) :
