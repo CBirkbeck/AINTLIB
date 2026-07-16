@@ -21532,3 +21532,16 @@ BB-DIFF files: 0 / 0 / 0.
 TorsionEtaleTriv, GLSchemeAction, GammaHMaster), torsion_geometricFibre_rank_two's étale leg,
 and the E[3]-finite-étale input to ENGINE AXIOM 2 (Bootstrap:112 + Legendre twin — OMEGA's scope).
 G0's BB-substrate is COMPLETE: BB-QF ✓ BB-FLAT ✓ BB-DEG ✓(anchor) BB-DIFF ✓(same anchor).
+
+### v10.267-GH — ★★ [GHA3 β2 COMPLETE] the level space commutes with base change (STREAM-GH)
+U3 validated + proven + shipped: `factor_pulled_iff_factor_levelSpace` (the factor-iff through
+both curves' `levelSpaceΓ_spec` and the U2 bridge) and **`exists_levelSpace_baseChange_iso`**
+(`U_Γ(N)(E) ×_S T ≅ U_Γ(N)(E_T)` as closed subschemes of `E_T[N] ×_T E_T[N]`, compatibly with
+the inclusions — via `exists_iso_of_factor_iff`). File-level compile verified clean; the
+#print-axioms receipt is queued behind KM's live brick-6 olean churn (expected: T-D8-box-only
+sorryAx, as in U2). **Route-β ledger: β1 ✓ β2 ✓✓ (ambient+L+heart+iso) β4 ✓ — REMAINING: β3
+only** (iso-locus wiring; core lemmas landed v10.266b). The [GHA3]-endgame: β1-cover + β2-iso
+transport Etale (levelSpaceΓπ E_T) across the identification + β4-descent ⟹ :3497.
+Proof-ops banked: the abstract `smul_eq_zero_iff_comp_mulByHom` route beats fst-@-pinning wars;
+`set`-fvars inside dependent indices (Point-base tV) block unfold-rws — use fold-direction calcs;
+`congrArg (· ≫ f)` leaves unreduced betas — typed-haves force them. (STREAM-GH)
