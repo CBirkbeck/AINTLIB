@@ -21977,3 +21977,14 @@ KM's *"rank(G[N₁]) = N₁"* now a real theorem with NO De-Ga citation. 46 prov
 REMAINING for F3.mp: [F3-distinct] (the M candidate multiples exhaust Z_M(k̄) — counting
 argument, KM p. 29) → [F3-mp-locus] (1.5.3 (3)⟹(1) via hasExactOrder_of_geometric) → the
 coprime-cover glue ([F3-loc] ✓). Then the converse + F3-iff + F4. (STREAM-KM)
+
+### v10.290-KM — the exhaustion engine: steps 1–3 of 4 PROVEN (ker-bound, prime avoidance ★, field rigidity) (STREAM-KM)
+(`bcc5ac887`, `e63cc7742`, `57473ea51`) `ideal_le_ker_of_factors` + `exists_section_ker_le`
+(over a field: QC-by-one-point-finiteness, preimage-⊤ by Unique, domain via ΓSpecIso transport,
+ker prime, `Ideal.IsPrime.prod_le` finds the section — FIRST TRY green) +
+`algHom_eq_of_ker_le` (nested-kernel k-algebra maps to k are equal — the a − φ(a)·1 trick).
+**49 proven bricks this wave.** Remaining: [F3-exhaust-4] (affine-factoring glue:
+IsOpenImmersion.lift through V + isoSpec conjugation + the section-property k-algebra structure
++ Spec-faithfulness ⟹ point_eq_section), then distinct (pure cyclic theory, banked), mp-locus
+(hasExactOrder_of_geometric), the coprime-cover glue ([F3-loc] ✓) = **F3.mp**. The T-D8 seam:
+exhaust-2+3 ARE the T-D8 engine (surfaced to GH, inbox 2026-07-16e). (STREAM-KM)
