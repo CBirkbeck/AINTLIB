@@ -50,7 +50,7 @@ theorem conj_generator_associated [IsCMField K]
     (hIca : I.map (algebraMap (𝓞 (NumberField.maximalRealSubfield K)) (𝓞 K)) =
       Ideal.span {ringOfIntegersComplexConj K a}) :
     ∃ u : (𝓞 K)ˣ, ringOfIntegersComplexConj K a = u * a := by
-  let hspan : Ideal.span {a} = Ideal.span {ringOfIntegersComplexConj K a} := hIa.symm.trans hIca
+  have hspan : Ideal.span {a} = Ideal.span {ringOfIntegersComplexConj K a} := hIa.symm.trans hIca
   obtain ⟨u, hu⟩ := Ideal.span_singleton_eq_span_singleton.mp hspan
   refine ⟨u, ?_⟩
   simpa [mul_comm] using hu.symm
@@ -244,7 +244,8 @@ theorem count_zetaPrime_normalizedFactors_map_even [IsCMField K]
       (R := 𝓞 (NumberField.maximalRealSubfield K)) (S := 𝓞 K)
       (v := zetaPrimePlus p K) (w := zetaPrime p K) (I := I) hI0 hPPlusIrr hPIrr hP0
   rw [Even]
-  refine ⟨Multiset.count (zetaPrimePlus p K) (UniqueFactorizationMonoid.normalizedFactors I), ?_⟩
+  refine ⟨Multiset.count (zetaPrimePlus p K)
+    (UniqueFactorizationMonoid.normalizedFactors I), ?_⟩
   rw [ramificationIdx_zetaPrimePlus_eq_two (p := p) (hp_odd := hp_odd) (K := K),
     UniqueFactorizationMonoid.emultiplicity_eq_count_normalizedFactors hPIrr hmap0,
     UniqueFactorizationMonoid.emultiplicity_eq_count_normalizedFactors hPPlusIrr hI0,
