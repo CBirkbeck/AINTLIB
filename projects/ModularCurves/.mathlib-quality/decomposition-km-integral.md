@@ -512,3 +512,17 @@ DONE (`4579c718c`): prodIso + degtrans reduce the contract to the pure fibre-pro
   (+ `Algebra.rankAtStalk_eq_of_isPushout` if the base-change alignment needs it).
 - Alternative worth 15 minutes at pickup: PR-shape the general product formula INTO mathlib style
   (it belongs next to `finrank_pullback_snd`; upstream later, keep a ForMathlib copy now).
+
+## [F3-prodrank] connector — route refinement (KM worker, 2026-07-16h, FINAL for this window)
+
+Two candidate routes for closing the general formula from the proven affine core:
+- (i) the pasting dance (pullbackRightPullbackFstIso ×2 + pullbackAssoc + structure-compat
+  tracking) — heavy iso-compat bookkeeping;
+- (ii) **PREFERRED: mathlib-style rebuild** — locally reprove the 3 PRIVATE FlatRank lemmas
+  (`IsAffine.finrank_of_isPullback` / `IsAffine.finrank_snd` /
+  `finrank_eq_finrank_snd_of_isAffine`, FlatRank.lean:61–115 — proofs short and visible in
+  source) in a ForMathlib file, then write `finrank_pullback_comp_fst` exactly the way mathlib
+  proves `finrank_pullback_snd` (:156), reducing to `IsAffine.finrank` over the chart and
+  applying the PROVEN affine tensor core through the appTop algebra identifications
+  (`finrank_eq_module_finrank_of_affineOpen`-style). Upstream both to mathlib afterwards —
+  the product formula genuinely belongs next to `finrank_pullback_snd`.
