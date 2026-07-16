@@ -1,9 +1,12 @@
 import ModularCurves.EllipticCurve.Torsion
 import ModularCurves.EllipticCurve.MulByHomUnramifiedField
+import ModularCurves.EllipticCurve.MulByHomDegree
 import ModularCurves.ForMathlib.EtaleSectionsCount
 import ModularCurves.ForMathlib.FiniteAbelianRankTwo
 import ModularCurves.ForMathlib.FormallyUnramifiedFibre
 import ModularCurves.ForMathlib.NilpotentKerSpecMap
+import ModularCurves.ForMathlib.UnramifiedOfCardAlgHom
+import HasseWeil.NTorsion.TorsionGeneralN
 import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
 
 /-!
@@ -460,6 +463,181 @@ theorem formallyUnramified_torsionπ_of_fibres (N : ℕ) [NeZero N]
   haveI := E.torsionπ_isFinite N
   FormallyUnramified.of_finite_fiberToSpecResidueField (f := E.torsionπ N) hfib
 
+/-! #### The geometric leaf: `[N]` on the model over an algebraically closed field
+
+The kernel-count argument: `E[N] → Spec κ̄` has exactly `N²` sections
+(`torsionPointsEquiv` + the points dictionary `projModelPointsAddEquiv` + HasseWeil's
+`torsion_genN_addEquiv : E[N] ≃+ (ℤ/N)²`) and rank `N²` (`torsion_rank`), so it is
+formally unramified by the split criterion — and the torsor reduction L-A pushes this
+to `[N]` itself. The κ̄-descent then delivers every field, and `fibrewiseElliptic`
+every residue fibre of an arbitrary base. -/
+
+section GeometricLeaf
+
+/-- An additive equivalence restricts to the `n`-torsion submodules. -/
+private def addEquivTorsionBy {G H : Type u} [AddCommGroup G] [AddCommGroup H]
+    (e : G ≃+ H) (n : ℤ) :
+    Submodule.torsionBy ℤ G n ≃ Submodule.torsionBy ℤ H n where
+  toFun x := ⟨e x.1, by
+    rw [Submodule.mem_torsionBy_iff, ← map_zsmul e,
+      (Submodule.mem_torsionBy_iff _ _).mp x.2, map_zero]⟩
+  invFun y := ⟨e.symm y.1, by
+    rw [Submodule.mem_torsionBy_iff, ← map_zsmul e.symm,
+      (Submodule.mem_torsionBy_iff _ _).mp y.2, map_zero]⟩
+  left_inv x := Subtype.ext (e.symm_apply_apply x.1)
+  right_inv y := Subtype.ext (e.apply_symm_apply y.1)
+
+open WeierstrassCurve in
+/-- **(the kernel count)** Over an algebraically closed field `κ` in which `N ≠ 0`, the
+torsion scheme `E[N]` of the projective model has exactly `N ^ 2` sections: sections are
+the `N`-torsion of the point group (`torsionPointsEquiv`), which the points dictionary
+(`projModelPointsAddEquiv`) and HasseWeil's general-`N` structure theorem
+(`torsion_genN_addEquiv`) identify with `(ℤ/N)²`. -/
+theorem modelTorsion_sections_natCard {κ : Type u} [Field κ] [IsAlgClosed κ]
+    (W : WeierstrassCurve κ) [W.IsElliptic] (N : ℕ) [NeZero N] (hN : (N : κ) ≠ 0) :
+    Nat.card { s : Spec (CommRingCat.of κ) ⟶ (modelEllipticCurve W).torsion N //
+        s ≫ (modelEllipticCurve W).torsionπ N = 𝟙 (Spec (CommRingCat.of κ)) }
+      = N ^ 2 := by
+  classical
+  have hmor : Spec.map (CommRingCat.ofHom (algebraMap κ κ))
+      = 𝟙 (Spec (CommRingCat.of κ)) := by
+    rw [show algebraMap κ κ = RingHom.id κ from rfl]
+    rw [show CommRingCat.ofHom (RingHom.id κ) = 𝟙 (CommRingCat.of κ) from rfl]
+    exact Spec.map_id _
+  calc Nat.card { s : Spec (CommRingCat.of κ) ⟶ (modelEllipticCurve W).torsion N //
+        s ≫ (modelEllipticCurve W).torsionπ N = 𝟙 (Spec (CommRingCat.of κ)) }
+      = Nat.card { s : Spec (CommRingCat.of κ) ⟶ (modelEllipticCurve W).torsion N //
+          s ≫ (modelEllipticCurve W).torsionπ N
+            = Spec.map (CommRingCat.ofHom (algebraMap κ κ)) } :=
+        Nat.card_congr (Equiv.subtypeEquivRight fun s => by rw [hmor])
+    _ = Nat.card (Submodule.torsionBy ℤ
+          ((modelEllipticCurve W).Point (Spec.map (CommRingCat.ofHom (algebraMap κ κ))))
+          (N : ℤ)) :=
+        Nat.card_congr ((modelEllipticCurve W).torsionPointsEquiv N _)
+    _ = Nat.card (Submodule.torsionBy ℤ ((W.baseChange κ).toAffine.Point) (N : ℤ)) :=
+        Nat.card_congr (addEquivTorsionBy (projModelPointsAddEquiv W κ) (N : ℤ))
+    _ = Nat.card (HasseWeil.torsionSubgroup (W.baseChange κ).toAffine (N : ℤ)) :=
+        Nat.card_congr (Equiv.subtypeEquivRight fun P => by
+          rw [Submodule.mem_torsionBy_iff, ← HasseWeil.mem_torsionSubgroup])
+    _ = Nat.card (Fin 2 → ZMod N) :=
+        Nat.card_congr
+          (HasseWeil.NTorsion.torsion_genN_addEquiv (W.baseChange κ) N hN).toEquiv
+    _ = N ^ 2 := by
+        rw [Nat.card_fun, Nat.card_eq_fintype_card (α := Fin 2), Nat.card_zmod,
+          Fintype.card_fin]
+
+/-- **(the geometric torsion is unramified)** Over an algebraically closed field with
+`N ≠ 0`, `E[N] → Spec κ` is formally unramified: it is finite of rank `N ^ 2`
+(`torsion_rank`) with `N ^ 2` sections (`modelTorsion_sections_natCard`), so the split
+criterion applies. -/
+theorem modelTorsionπ_formallyUnramified_of_isAlgClosed {κ : Type u} [Field κ]
+    [IsAlgClosed κ] (W : WeierstrassCurve κ) [W.IsElliptic] (N : ℕ) [NeZero N]
+    (hN : (N : κ) ≠ 0) :
+    FormallyUnramified ((modelEllipticCurve W).torsionπ N) := by
+  haveI := (modelEllipticCurve W).torsionπ_isFinite N
+  obtain ⟨x₀⟩ : Nonempty ↑(Spec (CommRingCat.of κ)) := inferInstance
+  refine FormallyUnramified.of_natCard_sections_eq_finrank _ x₀ ?_
+  rw [modelTorsion_sections_natCard W N hN,
+    (modelEllipticCurve W).torsion_rank N x₀]
+
+/-- **(BB-DIFF geometric leaf — the T-B5 residual, now a REAL proof)** Over an
+algebraically closed field `κ` in which `N` is invertible, `[N]` on the projective model
+is formally unramified: the torsor reduction L-A applied to the unramified kernel. -/
+theorem modelMulByHom_formallyUnramified_of_isAlgClosed {κ : Type u} [Field κ]
+    [IsAlgClosed κ] (W : WeierstrassCurve κ) [W.IsElliptic] (N : ℕ) [NeZero N]
+    (hN : (N : κ) ≠ 0) :
+    FormallyUnramified ((modelEllipticCurve W).mulByHom (N : ℤ)) :=
+  (modelEllipticCurve W).formallyUnramified_mulByHom_of_torsionπ N
+    (modelTorsionπ_formallyUnramified_of_isAlgClosed W N hN)
+
+open WeierstrassCurve in
+/-- **(BB-DIFF field leaf, any field)** Over ANY field `k` in which `N` is invertible,
+`[N]` on the projective model is formally unramified: base-change to the algebraic
+closure (the geometric case above), transport across the pointed group-object iso
+`modelBaseChangeIsoAsOver`, and fppf-descend along `Spec κ̄ → Spec k` via mathlib's
+`DescendsAlong @FormallyUnramified` instance — the `@LocallyQuasiFinite` κ̄-wiring of
+`modelMulByHom_locallyQuasiFinite_of_field`, verbatim. -/
+theorem modelMulByHom_formallyUnramified_of_field {k : Type u} [Field k]
+    (W : WeierstrassCurve k) [W.IsElliptic] (N : ℕ) [NeZero N] (hN : (N : k) ≠ 0) :
+    FormallyUnramified ((modelEllipticCurve W).mulByHom (N : ℤ)) := by
+  set κ := AlgebraicClosure k
+  set fc : CommRingCat.of k ⟶ CommRingCat.of κ := CommRingCat.ofHom (algebraMap k κ)
+    with hfc
+  have hNκ : (N : κ) ≠ 0 := by
+    intro h0
+    apply hN
+    have : algebraMap k κ (N : k) = 0 := by rw [map_natCast, h0]
+    exact (map_eq_zero _).mp this
+  -- (1) the geometric case over the algebraic closure
+  haveI h1 : FormallyUnramified
+      ((modelEllipticCurve (W.map (algebraMap k κ))).mulByHom (N : ℤ)) :=
+    modelMulByHom_formallyUnramified_of_isAlgClosed (W.map (algebraMap k κ)) N hNκ
+  -- (2) transport across the pointed group-object iso to the base-changed record
+  obtain ⟨φ, hφ⟩ := modelBaseChangeIsoAsOver W κ
+  haveI := hφ
+  haveI h2 : FormallyUnramified
+      (((modelEllipticCurve W).baseChange (Spec.map fc)).mulByHom (N : ℤ)) :=
+    formallyUnramified_mulByHom_of_isMonHom_iso φ (N : ℤ) h1
+  -- (3) the `[N]` base-change square, by cancelling the π-square off the big rectangle
+  have hcomm : ((modelEllipticCurve W).baseChange (Spec.map fc)).mulByHom (N : ℤ) ≫
+        pullback.fst (modelEllipticCurve W).π (Spec.map fc)
+      = pullback.fst (modelEllipticCurve W).π (Spec.map fc) ≫
+        (modelEllipticCurve W).mulByHom (N : ℤ) :=
+    mulByHom_baseChange_fst (modelEllipticCurve W) (Spec.map fc) (N : ℤ)
+  have hsq : IsPullback
+      (((modelEllipticCurve W).baseChange (Spec.map fc)).mulByHom (N : ℤ))
+      (pullback.fst (modelEllipticCurve W).π (Spec.map fc))
+      (pullback.fst (modelEllipticCurve W).π (Spec.map fc))
+      ((modelEllipticCurve W).mulByHom (N : ℤ)) := by
+    refine IsPullback.of_right ?_ hcomm
+      ((IsPullback.of_hasPullback (modelEllipticCurve W).π (Spec.map fc)).flip)
+    have e1 : ((modelEllipticCurve W).baseChange (Spec.map fc)).mulByHom (N : ℤ) ≫
+          pullback.snd (modelEllipticCurve W).π (Spec.map fc)
+        = pullback.snd (modelEllipticCurve W).π (Spec.map fc) :=
+      mulByHom_π ((modelEllipticCurve W).baseChange (Spec.map fc)) (N : ℤ)
+    have e2 : (modelEllipticCurve W).mulByHom (N : ℤ) ≫ (modelEllipticCurve W).π
+        = (modelEllipticCurve W).π :=
+      mulByHom_π (modelEllipticCurve W) (N : ℤ)
+    rw [e1, e2]
+    exact (IsPullback.of_hasPullback (modelEllipticCurve W).π (Spec.map fc)).flip
+  -- (4) the descent leg `Spec κ̄ → Spec k` is fppf
+  haveI hSurjSpec : Surjective (Spec.map fc) := by
+    refine ⟨fun y => ?_⟩
+    haveI hsing : Subsingleton (↥(Spec (CommRingCat.of k))) :=
+      ⟨fun a b => PrimeSpectrum.ext ((Ideal.eq_bot_of_prime _).trans
+        (Ideal.eq_bot_of_prime _).symm)⟩
+    obtain ⟨x⟩ : Nonempty ↥(Spec (CommRingCat.of κ)) := inferInstance
+    exact ⟨x, Subsingleton.elim _ _⟩
+  haveI hFlatSpec : Flat (Spec.map fc) := by
+    rw [HasRingHomProperty.Spec_iff (P := @Flat)]
+    show (algebraMap k κ).Flat
+    rw [RingHom.flat_algebraMap_iff]
+    infer_instance
+  haveI hQCSpec : QuasiCompact (Spec.map fc) := inferInstance
+  -- (5) descend
+  exact MorphismProperty.of_isPullback_of_descendsAlong
+    (Q := @Surjective ⊓ @Flat ⊓ @QuasiCompact) hsq
+    ⟨⟨MorphismProperty.pullback_fst _ _ hSurjSpec,
+      MorphismProperty.pullback_fst _ _ hFlatSpec⟩,
+      MorphismProperty.pullback_fst _ _ hQCSpec⟩ h2
+
+open WeierstrassCurve in
+/-- **(BB-DIFF fibre input at residue points)** `[N]` on the fibre curve
+`E ×_S Spec κ(s)` is formally unramified when `N ≠ 0` in `κ(s)`: the fibre is
+pointed-isomorphic to a projective Weierstrass model over `κ(s)`
+(`fibreModelIsoAsOver`), whose `[N]` is formally unramified by the field-level leaf. -/
+theorem formallyUnramified_mulByHom_baseChange_residueField' (E : EllipticCurve S)
+    (N : ℕ) [NeZero N] (s : S) (hN : (N : S.residueField s) ≠ 0) :
+    FormallyUnramified ((E.baseChange (S.fromSpecResidueField s)).mulByHom (N : ℤ)) := by
+  obtain ⟨W, hWell, e, heπ, hez⟩ := fibrewiseElliptic E s
+  haveI := hWell
+  obtain ⟨φ, hφ⟩ := fibreModelIsoAsOver E s W e heπ hez
+  haveI := hφ
+  exact formallyUnramified_mulByHom_of_isMonHom_iso φ (N : ℤ)
+    (modelMulByHom_formallyUnramified_of_field W N hN)
+
+end GeometricLeaf
+
 /-- **(BB-DIFF, L-BC)** If `N` is invertible on `S`, the `N`-torsion `E[N] ⟶ S` is
 formally unramified: each residue fibre is the torsion of the fibre curve
 (`torsion_baseChange_isPullback`), which is a base change of the fibre curve's `[N]`
@@ -480,7 +658,7 @@ theorem formallyUnramified_torsionπ (N : ℕ) (h : NIsInvertible S N) :
     -- `[N]` on the fibre curve is formally unramified, hence so is its torsion
     haveI hNfib : FormallyUnramified
         ((E.baseChange (S.fromSpecResidueField y)).mulByHom (N : ℤ)) :=
-      formallyUnramified_mulByHom_baseChange_residueField E N y hy
+      formallyUnramified_mulByHom_baseChange_residueField' E N y hy
     haveI hTfib : FormallyUnramified
         ((E.baseChange (S.fromSpecResidueField y)).torsionπ N) :=
       MorphismProperty.pullback_snd _ _ hNfib
