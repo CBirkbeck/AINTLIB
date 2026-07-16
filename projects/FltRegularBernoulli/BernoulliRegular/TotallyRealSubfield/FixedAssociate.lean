@@ -23,6 +23,17 @@ section CyclotomicSetup
 variable (p : ℕ) [hp : Fact p.Prime] (hp_odd : p ≠ 2)
   (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 
+/-- Complex conjugation sends the distinguished uniformizer `ζ - 1` to
+`-ζ^{p-1} · (ζ - 1)`, where `ζ = IsCyclotomicExtension.zeta p ℚ K`. This records
+how `c` acts on the uniformizer of the prime above `p`, and follows from
+`complexConj_apply_zeta` together with `ζ^{p-1} · ζ = 1`. -/
+theorem complexConj_zeta_sub_one_eq [IsCMField K]
+    (hζ : IsPrimitiveRoot (IsCyclotomicExtension.zeta p ℚ K) p) :
+    ringOfIntegersComplexConj K (hζ.toInteger - 1) =
+      -hζ.toInteger ^ (p - 1) * (hζ.toInteger - 1) := by
+  rw [map_sub, map_one, complexConj_apply_zeta]
+  linear_combination zeta_toInteger_pow_pred_mul p K
+
 include hp_odd in
 /-- If `u` is classified as a pure `ζ`-power, the possible `-1` factor is absent. -/
 theorem generator_unit_eq_zeta_pow [IsCMField K]
@@ -68,9 +79,8 @@ theorem generator_unit_eq_zeta_pow [IsCMField K]
         _ = (-1 : (𝓞 K)ˣ) * η ^ n := by rw [hneg_odd]
     let γ : (𝓞 K)ˣ := (-1 : (𝓞 K)ˣ) * η ^ (p - 1)
     have hc_pi : ringOfIntegersComplexConj K π = (γ : (𝓞 K)ˣ) * π := by
-      have hc_pi' : ringOfIntegersComplexConj K π = -hζ.toInteger ^ (p - 1) * π := by
-        rw [show π = hζ.toInteger - 1 by rfl, map_sub, map_one, complexConj_apply_zeta]
-        linear_combination zeta_toInteger_pow_pred_mul p K
+      have hc_pi' : ringOfIntegersComplexConj K π = -hζ.toInteger ^ (p - 1) * π :=
+        complexConj_zeta_sub_one_eq p K hζ
       simpa [γ, π, hηcoe, mul_assoc, mul_left_comm, mul_comm] using hc_pi'
     have hγ_mul : γ ^ e * η ^ e = 1 := by
       have hγhu : γ * η = (-1 : (𝓞 K)ˣ) := by
