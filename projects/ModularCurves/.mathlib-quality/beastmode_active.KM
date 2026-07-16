@@ -1,1 +1,1 @@
-FOCUS: KM v10.291 — CLAIMED. Dispatch: exhaust-4 → distinct → mp-locus/glue → F3.mp; DELIVER T-D8 (Basic.lean:108) this window. Exhaust-4 design serves both.
+FOCUS: KM v10.291 — exhaust-4: pointEval+ker (4a/4b) + pointEval_injective (4c) GREEN (51 bricks). NOW: AlgHom property of pointEval (4d: appLE_comp_appLE + section identity) → exhaust assembly point_eq_section_of_factors (4e) → distinct → mp-locus/glue → F3.mp. T-D8 ⟹-half after. Do not touch sibling sentinels/E3RelSquarefree.

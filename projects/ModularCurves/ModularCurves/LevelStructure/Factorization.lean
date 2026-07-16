@@ -1578,6 +1578,76 @@ theorem ker_pointEval (z : Spec (CommRingCat.of k) ⟶ C) (V : C.affineOpens)
   rw [CommRingCat.hom_comp, RingHom.ker_comp_of_injective _ hinj]
   exact (Scheme.Hom.ker_apply z V).symm
 
+/-- **[F3-exhaust-4c]** Two `Spec k`-points with image in the same affine open and equal
+evaluations there are EQUAL: lift through the open, cancel the immersion's app-iso and
+the restriction iso, and conclude by affine hom-extensionality. -/
+theorem pointEval_injective (z₁ z₂ : Spec (CommRingCat.of k) ⟶ C) (V : C.affineOpens)
+    (he₁ : ⊤ ≤ z₁ ⁻¹ᵁ V.1) (he₂ : ⊤ ≤ z₂ ⁻¹ᵁ V.1)
+    (heval : pointEval z₁ V he₁ = pointEval z₂ V he₂) : z₁ = z₂ := by
+  -- the lifts through V
+  have hr₁ : Set.range z₁.base ⊆ Set.range V.1.ι.base := by
+    intro x hx
+    obtain ⟨y, rfl⟩ := hx
+    have : y ∈ z₁ ⁻¹ᵁ V.1 := he₁ trivial
+    rw [Scheme.Opens.range_ι]
+    exact this
+  have hr₂ : Set.range z₂.base ⊆ Set.range V.1.ι.base := by
+    intro x hx
+    obtain ⟨y, rfl⟩ := hx
+    have : y ∈ z₂ ⁻¹ᵁ V.1 := he₂ trivial
+    rw [Scheme.Opens.range_ι]
+    exact this
+  set q₁ := IsOpenImmersion.lift V.1.ι z₁ hr₁ with hq₁
+  set q₂ := IsOpenImmersion.lift V.1.ι z₂ hr₂ with hq₂
+  have hf₁ : q₁ ≫ V.1.ι = z₁ := IsOpenImmersion.lift_fac _ _ hr₁
+  have hf₂ : q₂ ≫ V.1.ι = z₂ := IsOpenImmersion.lift_fac _ _ hr₂
+  -- from evaluation equality to appLE equality
+  have hLE : z₁.appLE V.1 ⊤ he₁ = z₂.appLE V.1 ⊤ he₂ := by
+    have hinj : Function.Injective
+        ((Scheme.ΓSpecIso (CommRingCat.of k)).hom.hom) :=
+      (ConcreteCategory.bijective_of_isIso _).injective
+    ext a
+    exact hinj (DFunLike.congr_fun heval a)
+  -- decompose through the lifts and cancel the immersion's app-iso
+  haveI hVi : IsIso (V.1.ι.app V.1) :=
+    V.1.ι.isIso_app V.1 (by rw [Scheme.Opens.opensRange_ι])
+  have hLE' : q₁.appLE (V.1.ι ⁻¹ᵁ V.1) ⊤ (by simp [Scheme.Opens.ι_preimage_self])
+      = q₂.appLE (V.1.ι ⁻¹ᵁ V.1) ⊤ (by simp [Scheme.Opens.ι_preimage_self]) := by
+    have hgen : ∀ (q : Spec (CommRingCat.of k) ⟶ ↑V.1) (z : Spec (CommRingCat.of k) ⟶ C)
+        (hz : q ≫ V.1.ι = z) (he : ⊤ ≤ z ⁻¹ᵁ V.1),
+        z.appLE V.1 ⊤ he = V.1.ι.app V.1 ≫ q.appLE (V.1.ι ⁻¹ᵁ V.1) ⊤
+          (by simp [Scheme.Opens.ι_preimage_self]) := by
+      rintro q z rfl he
+      exact Scheme.Hom.comp_appLE q V.1.ι V.1 ⊤ he
+    have h₁ := hgen q₁ z₁ hf₁ he₁
+    have h₂ := hgen q₂ z₂ hf₂ he₂
+    have := h₁.symm.trans (hLE.trans h₂)
+    exact (cancel_epi (V.1.ι.app V.1)).mp this
+  -- recover the appTops
+  have hTop : q₁.appTop = q₂.appTop := by
+    have hmap : ∀ (q : Spec (CommRingCat.of k) ⟶ ↑V.1),
+        (↑V.1 : Scheme).presheaf.map
+            (homOfLE (le_top : V.1.ι ⁻¹ᵁ V.1 ≤ ⊤)).op
+          ≫ q.appLE (V.1.ι ⁻¹ᵁ V.1) ⊤ (by simp [Scheme.Opens.ι_preimage_self])
+        = q.appLE ⊤ ⊤ (by simp) := by
+      intro q
+      exact Scheme.Hom.map_appLE q _ _
+    have hcomb : q₁.appLE ⊤ ⊤ (by simp) = q₂.appLE ⊤ ⊤ (by simp) := by
+      rw [← hmap q₁, ← hmap q₂, hLE']
+    have hTT : ∀ (q : Spec (CommRingCat.of k) ⟶ ↑V.1)
+        (e : (⊤ : (Spec (CommRingCat.of k)).Opens) ≤ q ⁻¹ᵁ (⊤ : (↑V.1 : Scheme).Opens)),
+        q.appLE ⊤ ⊤ e = q.appTop := by
+      intro q e
+      rw [Scheme.Hom.appLE]
+      rw [show homOfLE e = 𝟙 (⊤ : (Spec (CommRingCat.of k)).Opens) from rfl]
+      simp [Scheme.Hom.appTop]
+    rw [← hTT q₁ (by simp), ← hTT q₂ (by simp)]
+    exact hcomb
+  -- affine extensionality and descent to C
+  haveI : IsAffine (↑V.1 : Scheme) := V.2
+  have hq : q₁ = q₂ := ext_of_isAffine hTop
+  rw [← hf₁, ← hf₂, hq]
+
 end FieldExhaust
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
