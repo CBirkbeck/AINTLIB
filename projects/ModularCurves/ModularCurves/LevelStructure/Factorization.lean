@@ -1648,6 +1648,123 @@ theorem pointEval_injective (z₁ z₂ : Spec (CommRingCat.of k) ⟶ C) (V : C.a
   have hq : q₁ = q₂ := ext_of_isAffine hTop
   rw [← hf₁, ← hf₂, hq]
 
+/-- **[F3-exhaust-4d]** For a SECTION `z` of `π : C ⟶ Spec k`, the evaluation `pointEval z`
+splits the `k`-algebra structure map `π` induces on `Γ(C, V)`: the composite
+`k → Γ(Spec k, ⊤) → Γ(C, V) → Γ(Spec k, ⊤) → k` is the identity (`appLE_comp_appLE`
+folds the middle to `(z ≫ π).appLE = (𝟙).appLE = 𝟙`). -/
+theorem pointEval_structure {π : C ⟶ Spec (CommRingCat.of k)}
+    (z : Spec (CommRingCat.of k) ⟶ C) (hz : z ≫ π = 𝟙 _) (V : C.affineOpens)
+    (he : ⊤ ≤ z ⁻¹ᵁ V.1) (hVle : V.1 ≤ π ⁻¹ᵁ ⊤) (c : k) :
+    pointEval z V he
+      ((π.appLE ⊤ V.1 hVle).hom ((Scheme.ΓSpecIso (CommRingCat.of k)).inv.hom c)) = c := by
+  have hfold : ∀ (w : Spec (CommRingCat.of k) ⟶ Spec (CommRingCat.of k))
+      (hw : w = z ≫ π) (e : ⊤ ≤ w ⁻¹ᵁ ⊤),
+      w.appLE ⊤ ⊤ e = π.appLE ⊤ V.1 hVle ≫ z.appLE V.1 ⊤ he := by
+    rintro w rfl e
+    exact (Scheme.Hom.appLE_comp_appLE z π ⊤ V.1 ⊤ hVle he).symm
+  have hid : Scheme.Hom.appLE (𝟙 (Spec (CommRingCat.of k))) ⊤ ⊤ (by simp)
+      = π.appLE ⊤ V.1 hVle ≫ z.appLE V.1 ⊤ he := hfold _ hz.symm _
+  have hone : Scheme.Hom.appLE (𝟙 (Spec (CommRingCat.of k))) ⊤ ⊤ (by simp)
+      = 𝟙 Γ(Spec (CommRingCat.of k), ⊤) := by
+    rw [Scheme.Hom.appLE, Scheme.Hom.id_app]
+    simp
+  have hcollapse := hone.symm.trans hid
+  have happ := congrArg (fun m => (Scheme.ΓSpecIso (CommRingCat.of k)).hom.hom
+    ((CommRingCat.Hom.hom m) ((Scheme.ΓSpecIso (CommRingCat.of k)).inv.hom c))) hcollapse
+  simp only [CommRingCat.hom_comp, RingHom.comp_apply, CommRingCat.hom_id,
+    RingHom.id_apply] at happ
+  have hio : (Scheme.ΓSpecIso (CommRingCat.of k)).hom.hom
+      ((Scheme.ΓSpecIso (CommRingCat.of k)).inv.hom c) = c := by
+    have := (Scheme.ΓSpecIso (CommRingCat.of k)).inv_hom_id
+    have h2 := congrArg (fun m => (CommRingCat.Hom.hom m) c) this
+    simpa using h2
+  rw [pointEval]
+  rw [RingHom.comp_apply]
+  rw [← happ, hio]
+
+/-- **[F3-exhaust-4e-aux]** A `Spec k`-point whose kernel ideal at `V` is proper has its
+(unique) image point inside `V` — otherwise the preimage is empty and the kernel is
+everything. -/
+theorem mem_of_ker_ideal_ne_top (z : Spec (CommRingCat.of k) ⟶ C) (V : C.affineOpens)
+    (h : (z.ker).ideal V ≠ ⊤) : z (default : ↑(Spec (CommRingCat.of k))) ∈ V.1 := by
+  by_contra hmem
+  apply h
+  haveI hQC : QuasiCompact z := ⟨fun U _ _ => (Set.toFinite _).isCompact⟩
+  have hpre : z ⁻¹ᵁ V.1 = ⊥ := by
+    rw [eq_bot_iff]
+    intro x hx
+    have := Unique.eq_default x
+    subst this
+    exact absurd hx hmem
+  rw [Scheme.Hom.ker_apply z V]
+  rw [Ideal.eq_top_iff_one, RingHom.mem_ker]
+  have hsub : Subsingleton ↑Γ(Spec (CommRingCat.of k), z ⁻¹ᵁ V.1) := by
+    rw [hpre]
+    infer_instance
+  exact Subsingleton.elim _ _
+
+/-- **[F3-exhaust] (KM p. 29, the exhaustion argument — ASSEMBLED)** Over a field, a
+point of `C` factoring through the sections-divisor `∏ ker(Pᵢ)` IS one of the sections:
+its kernel bounds the divisor ideal (exhaust-1), prime avoidance picks a section whose
+kernel it dominates at an affine chart (exhaust-2), field rigidity upgrades kernel
+domination of `k`-algebra characters to equality (exhaust-3), and the evaluation
+dictionary (exhaust-4a–d) transports this back to equality of morphisms. -/
+theorem RelEffCartierDiv.point_eq_section_of_factors
+    {π : C ⟶ Spec (CommRingCat.of k)} {n : ℕ}
+    (Ps : Fin n → { z : Spec (CommRingCat.of k) ⟶ C // z ≫ π = 𝟙 _ })
+    (hπ : IsSeparated π ∧ SmoothOfRelativeDimension 1 π)
+    (q : Spec (CommRingCat.of k) ⟶ C) (hq : q ≫ π = 𝟙 _)
+    (hfac : ∃ w, w ≫ (RelEffCartierDiv.sectionsDivisor π Ps).ideal.subschemeι = q)
+    (V : C.affineOpens) (hqV : q (default : ↑(Spec (CommRingCat.of k))) ∈ V.1) :
+    ∃ j, q = (Ps j).1 := by
+  haveI hQCq : QuasiCompact q := ⟨fun U _ _ => (Set.toFinite _).isCompact⟩
+  -- exhaust-1 + exhaust-2: a section whose kernel ideal at V the point's dominates
+  have hker : (RelEffCartierDiv.sectionsDivisor π Ps).ideal ≤ q.ker :=
+    RelEffCartierDiv.ideal_le_ker_of_factors _ hfac
+  obtain ⟨j, hj⟩ := RelEffCartierDiv.exists_section_ker_le Ps hπ q hker V hqV
+  -- evaluation characters
+  have heq : ⊤ ≤ q ⁻¹ᵁ V.1 := by
+    intro x _
+    have := Unique.eq_default x
+    subst this
+    exact hqV
+  -- the point's kernel ideal at V is proper (prime), so the section also lands in V
+  haveI hdom : IsDomain ↑Γ(Spec (CommRingCat.of k), q ⁻¹ᵁ V.1) := by
+    rw [top_le_iff.mp heq]
+    exact MulEquiv.isDomain k
+      (Scheme.ΓSpecIso (CommRingCat.of k)).commRingCatIsoToRingEquiv.toMulEquiv
+  have hprime : ((q.ker).ideal V).IsPrime := by
+    rw [Scheme.Hom.ker_apply q V]
+    exact RingHom.ker_isPrime _
+  have hPjV : (Ps j).1 (default : ↑(Spec (CommRingCat.of k))) ∈ V.1 :=
+    mem_of_ker_ideal_ne_top (Ps j).1 V
+      (fun htop => hprime.ne_top (top_le_iff.mp (htop ▸ hj)))
+  have heP : ⊤ ≤ (Ps j).1 ⁻¹ᵁ V.1 := by
+    intro x _
+    have := Unique.eq_default x
+    subst this
+    exact hPjV
+  haveI hQCP : QuasiCompact (Ps j).1 := ⟨fun U _ _ => (Set.toFinite _).isCompact⟩
+  -- the k-algebra structure via π
+  letI : Algebra k ↑Γ(C, V.1) :=
+    ((π.appLE ⊤ V.1 le_top).hom.comp
+      ((Scheme.ΓSpecIso (CommRingCat.of k)).inv.hom)).toAlgebra
+  let φP : ↑Γ(C, V.1) →ₐ[k] k :=
+    { toRingHom := pointEval (Ps j).1 V heP
+      commutes' := fun c => pointEval_structure (Ps j).1 (Ps j).2 V heP le_top c }
+  let φq : ↑Γ(C, V.1) →ₐ[k] k :=
+    { toRingHom := pointEval q V heq
+      commutes' := fun c => pointEval_structure q hq V heq le_top c }
+  -- kernel domination transports to the characters; rigidity closes
+  have hkerle : RingHom.ker (φP : ↑Γ(C, V.1) →+* k) ≤ RingHom.ker (φq : ↑Γ(C, V.1) →+* k) := by
+    show RingHom.ker (pointEval (Ps j).1 V heP) ≤ RingHom.ker (pointEval q V heq)
+    rw [ker_pointEval, ker_pointEval]
+    exact hj
+  have hφ : φP = φq := algHom_eq_of_ker_le φP φq hkerle
+  have hEval : pointEval (Ps j).1 V heP = pointEval q V heq :=
+    congrArg AlgHom.toRingHom hφ
+  exact ⟨j, (pointEval_injective (Ps j).1 q V heP heq hEval).symm⟩
+
 end FieldExhaust
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
