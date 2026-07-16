@@ -22,6 +22,25 @@ variable (p : ℕ) [hp : Fact p.Prime]
 local notation "𝔭" => (Ideal.span ({(p : ℤ)} : Set ℤ))
 local instance : NeZero (p - 1) := ⟨Nat.sub_ne_zero_of_lt hp.out.one_lt⟩
 
+/-- If `0 < m < 2 * (p - 1)` and `m ≠ p - 1`, then the `m`-th power of the Stickelberger
+complex character generator is nontrivial. The generator has order `p - 1`, so within the open
+interval `(0, 2 * (p - 1))` its only power equal to `1` occurs at `m = p - 1`; excluding that
+value forces the power to differ from `1`. -/
+private lemma stickelbergerComplexCharacterGenerator_pow_ne_one_of_pos_of_lt_two_mul_of_ne
+    {m : ℕ} (hm_pos : 0 < m) (hm_lt : m < 2 * (p - 1)) (hm_ne : m ≠ p - 1) :
+    stickelbergerComplexCharacterGenerator (p := p) ^ m ≠ 1 := by
+  intro htriv
+  have hroot :
+      stickelbergerComplexCharacterRoot (p := p) ^ m = 1 := by
+    have hEval := congrArg
+      (fun χ : DirichletCharacter ℂ p =>
+        χ (((characterUnitGenerator (p := p)) : (ZMod p)ˣ) : ZMod p)) htriv
+    simpa [MulChar.pow_apply_coe,
+      stickelbergerComplexCharacterGenerator_apply_characterUnitGenerator] using hEval
+  have hdvd : p - 1 ∣ m :=
+    (stickelbergerComplexCharacterRoot_isPrimitiveRoot (p := p)).dvd_of_pow_eq_one _ hroot
+  exact hm_ne (Nat.eq_of_dvd_of_lt_two_mul hm_pos.ne' hdvd hm_lt)
+
 private lemma distinguishedPrimeExponent_stickelbergerComplexCharacterGenerator_pow_add_eq
     (j k : Fin (p - 1)) :
     ∃ n,
@@ -65,25 +84,12 @@ private lemma distinguishedPrimeExponent_stickelbergerComplexCharacterGenerator_
         have hgk : g ^ (k : ℕ) ≠ 1 :=
           stickelbergerComplexCharacterGenerator_pow_ne_one_of_ne_zero (p := p) (j := k) hk
         have hgsum : g ^ ((j : ℕ) + (k : ℕ)) ≠ 1 := by
-          intro htriv
-          have hroot :
-              stickelbergerComplexCharacterRoot (p := p) ^ ((j : ℕ) + (k : ℕ)) = 1 := by
-            have hEval := congrArg
-              (fun χ : DirichletCharacter ℂ p =>
-                χ (((characterUnitGenerator (p := p)) : (ZMod p)ˣ) : ZMod p)) htriv
-            simpa [g, MulChar.pow_apply_coe,
-              stickelbergerComplexCharacterGenerator_apply_characterUnitGenerator] using hEval
-          have hdvd :
-              p - 1 ∣ (j : ℕ) + (k : ℕ) :=
-            (stickelbergerComplexCharacterRoot_isPrimitiveRoot (p := p)).dvd_of_pow_eq_one _ hroot
           have hj_pos : 0 < (j : ℕ) := Fin.pos_iff_ne_zero.mpr hj
           have hk_pos : 0 < (k : ℕ) := Fin.pos_iff_ne_zero.mpr hk
-          have hsum_pos : 0 < (j : ℕ) + (k : ℕ) := by omega
-          have hsum_lt : (j : ℕ) + (k : ℕ) < 2 * (p - 1) := by
-            have hj_lt : (j : ℕ) < p - 1 := j.2
-            have hk_lt : (k : ℕ) < p - 1 := k.2
-            omega
-          exact hsum (Nat.eq_of_dvd_of_lt_two_mul hsum_pos.ne' hdvd hsum_lt)
+          have hj_lt : (j : ℕ) < p - 1 := j.2
+          have hk_lt : (k : ℕ) < p - 1 := k.2
+          exact stickelbergerComplexCharacterGenerator_pow_ne_one_of_pos_of_lt_two_mul_of_ne
+            (p := p) (m := (j : ℕ) + (k : ℕ)) (by omega) (by omega) hsum
         have hprod : (g ^ (j : ℕ)) * (g ^ (k : ℕ)) ≠ 1 := by
           simpa [g, pow_add] using hgsum
         let JI : Ideal (𝓞 L) :=
