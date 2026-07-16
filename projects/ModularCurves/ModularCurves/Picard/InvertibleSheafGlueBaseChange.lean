@@ -15,6 +15,43 @@ namespace AlgebraicGeometry.Scheme.Modules
 
 noncomputable section
 
+/-- Mapping every transition unit through its stage-to-colimit homomorphism sends a
+finite-stage affine-intersection cocycle to the original affine-intersection functor. -/
+noncomputable def AffineIntersectionUnitCocycle.mapToColimit
+    {R : Type u} [CommRing R] {ι : Type u} [Preorder ι]
+    {Sstage : ι → Type u} [∀ i, CommRing (Sstage i)] [∀ i, Algebra R (Sstage i)]
+    {t : ∀ ⦃i j : ι⦄, i ≤ j → (Sstage i →ₐ[R] Sstage j)}
+    {A : Type u} [CommRing A] [Algebra R A] {uA : ∀ i, Sstage i →ₐ[R] A}
+    {J : Type u} {G : Functor (Finset J) (CommAlgCat.{u} A)}
+    {H : Algebra.IsFilteredAlgColimit R Sstage t A uA}
+    (M : Algebra.SpreadData.FunctorModel G H)
+    (cM : AffineIntersectionUnitCocycle M.toFunctor) :
+    AffineIntersectionUnitCocycle G where
+  transition i j :=
+    Units.map ((M.object
+      (Scheme.GlueData.affineIntersectionPairIndex i j)).stageToColimit H
+        ⟨M.stage, M.le_stage
+          (Scheme.GlueData.affineIntersectionPairIndex i j)⟩).toMonoidHom
+      (cM.transition i j)
+  cocycle i j k := by
+    have hc := cM.cocycle i j k
+    simp only [M.toFunctor_map_hom] at hc
+    rw [← M.map_unit_colimit
+      (Scheme.GlueData.affineIntersectionPairToTripleLeft i j k)
+      (cM.transition i j)]
+    rw [← M.map_unit_colimit
+      (Scheme.GlueData.affineIntersectionPairToTripleMiddle i j k)
+      (cM.transition j k)]
+    rw [← M.map_unit_colimit
+      (Scheme.GlueData.affineIntersectionPairToTripleRight i j k)
+      (cM.transition i k)]
+    rw [← map_mul]
+    exact congrArg
+      (Units.map ((M.object
+        (Scheme.GlueData.affineIntersectionTripleIndex i j k)).stageToColimit H
+          ⟨M.stage, M.le_stage
+            (Scheme.GlueData.affineIntersectionTripleIndex i j k)⟩).toMonoidHom) hc
+
 /-- The pullback of a finite-stage glued module has its canonical trivialization on every
 base-changed singleton chart. -/
 noncomputable def AffineIntersectionUnitCocycle.baseChangeGluedModuleChartTrivialization

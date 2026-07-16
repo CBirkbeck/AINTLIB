@@ -702,3 +702,17 @@ transition unit through the corresponding stage-to-colimit homomorphism and prov
 form a cocycle on the original affine-intersection functor. This must use the existing
 `FunctorModel.map_unit_colimit` naturality theorem and add no hypotheses or proof-resource
 options.
+
+Completed dependency claim (2026-07-16): proved
+`AffineIntersectionUnitCocycle.mapToColimit`. Every finite-stage transition unit is mapped through
+the corresponding stage-to-colimit homomorphism, and the existing `FunctorModel.map_unit_colimit`
+naturality theorem transports the multiplicative cocycle equation to the original functor. The
+focused build is green, no hypotheses or proof-resource options were added, and the axiom audit is
+exactly `propext`, `Classical.choice`, and `Quot.sound`.
+
+Active dependency claim (2026-07-16): prove
+`AffineIntersectionUnitCocycle.baseChangeGluedModuleChartTrivialization_isCompatible`. The
+transported singleton-chart trivializations of the pulled-back finite-stage `gluedModule` must
+realize the chart transitions of `cM.mapToColimit M`. This is the sole overlap calculation needed
+before applying `gluedModuleIsoOfCompatibleChartTrivialization` to obtain the global line-bundle
+base-change isomorphism. No additional hypotheses or proof-resource options may be introduced.
