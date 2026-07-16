@@ -130,6 +130,36 @@ theorem sum_zmod37_eq_sum_range (f : ZMod 37 → ZMod 37) :
   · intro x _; rw [ZMod.natCast_val, ZMod.cast_id]
 
 omit [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K] [NumberField.IsCMField K] in
+/-- **Reflection of the upper Pollaczek range onto the lower one.** The involution `b ↦ 37 - b`
+maps `{19,…,35}` bijectively onto `{2,…,18}`; since `(37 - b : ZMod 37) = -b`, for even `k` the
+power `b^k` is invariant, so the two `ZMod 37` power sums over `Ico 19 36` and `Ico 2 19`
+coincide. -/
+theorem sum_Ico_reflect_pow {k : ℕ} (hk_even : Even k) :
+    ∑ b ∈ Finset.Ico (19 : ℕ) 36, ((b : ZMod 37)) ^ k =
+      ∑ c ∈ Finset.Ico (2 : ℕ) 19, ((c : ZMod 37)) ^ k := by
+  refine Finset.sum_nbij' (fun b ↦ 37 - b) (fun c ↦ 37 - c) ?_ ?_ ?_ ?_ ?_
+  · intro b hb; simp only [Finset.mem_Ico] at hb ⊢; omega
+  · intro c hc; simp only [Finset.mem_Ico] at hc ⊢; omega
+  · intro b hb; simp only [Finset.mem_Ico] at hb ⊢; omega
+  · intro c hc; simp only [Finset.mem_Ico] at hc ⊢; omega
+  · intro b hb
+    simp only [Finset.mem_Ico] at hb
+    rw [show ((37 - b : ℕ) : ZMod 37) = -(b : ZMod 37) from by
+      rw [Nat.cast_sub (by omega), ZMod.natCast_self, zero_sub]]
+    rw [hk_even.neg_pow]
+
+omit [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K] [NumberField.IsCMField K] in
+/-- **Reindexing the Pollaczek `Fin`-sum as an `Ico`-sum.** The sum of `(a+2)^k` over
+`Fin ((37 - 3) / 2)` (`= Fin 17`) equals the sum of `b^k` over `Finset.Ico 2 19`, via the shift
+`a ↦ a + 2`. -/
+theorem sum_fin_add_two_pow_eq_sum_Ico_pow (k : ℕ) :
+    ∑ a : Fin ((37 - 3) / 2), (((a : ℕ) + 2 : ℕ) : ZMod 37) ^ k =
+      ∑ b ∈ Finset.Ico (2 : ℕ) 19, ((b : ZMod 37)) ^ k := by
+  rw [Fin.sum_univ_eq_sum_range (fun m ↦ (((m + 2 : ℕ)) : ZMod 37) ^ k) ((37 - 3) / 2),
+    Finset.sum_Ico_eq_sum_range]
+  exact Finset.sum_congr (by norm_num) (fun i _ ↦ by rw [Nat.add_comm 2 i])
+
+omit [Field K] [NumberField K] [IsCyclotomicExtension {37} ℚ K] [NumberField.IsCMField K] in
 /-- **The Pollaczek-range power sum `∑_a (a+2)^k ≡ -1 (mod 37)`** (even `0 < k < 36`).
 
 Write `S = ∑_{b=2}^{18} b^k` (`= ∑_{a:Fin 17} (a+2)^k`, the Pollaczek range). The full sum
@@ -148,18 +178,6 @@ theorem sum_fin_add_two_pow_eq_neg_one {k : ℕ} (hk_even : Even k) (hk_pos : 0 
   have hfull : ∑ b ∈ Finset.range 37, ((b : ZMod 37)) ^ k = 0 := by
     rw [← sum_zmod37_eq_sum_range (fun x ↦ x ^ k)]
     exact FiniteField.sum_pow_lt_card_sub_one (ZMod 37) k (by simpa using hk)
-  have hrefl : ∑ b ∈ Finset.Ico (19 : ℕ) 36, ((b : ZMod 37)) ^ k =
-      ∑ c ∈ Finset.Ico (2 : ℕ) 19, ((c : ZMod 37)) ^ k := by
-    refine Finset.sum_nbij' (fun b ↦ 37 - b) (fun c ↦ 37 - c) ?_ ?_ ?_ ?_ ?_
-    · intro b hb; simp only [Finset.mem_Ico] at hb ⊢; omega
-    · intro c hc; simp only [Finset.mem_Ico] at hc ⊢; omega
-    · intro b hb; simp only [Finset.mem_Ico] at hb ⊢; omega
-    · intro c hc; simp only [Finset.mem_Ico] at hc ⊢; omega
-    · intro b hb
-      simp only [Finset.mem_Ico] at hb
-      rw [show ((37 - b : ℕ) : ZMod 37) = -(b : ZMod 37) from by
-        rw [Nat.cast_sub (by omega), ZMod.natCast_self, zero_sub]]
-      rw [hk_even.neg_pow]
   have hIco02 : ∑ b ∈ Finset.Ico (0 : ℕ) 2, ((b : ZMod 37)) ^ k = 1 := by
     rw [← Finset.range_eq_Ico, Finset.sum_range_succ, Finset.sum_range_one,
       Nat.cast_zero, zero_pow hk_pos.ne', Nat.cast_one, one_pow, zero_add]
@@ -181,13 +199,8 @@ theorem sum_fin_add_two_pow_eq_neg_one {k : ℕ} (hk_even : Even k) (hk_pos : 0 
         (by omega : (2 : ℕ) ≤ 19) (by omega : (19 : ℕ) ≤ 37),
       ← Finset.sum_Ico_consecutive (fun b ↦ ((b : ZMod 37)) ^ k)
         (by omega : (19 : ℕ) ≤ 36) (by omega : (36 : ℕ) ≤ 37)]
-  rw [hsplit, hrefl, hIco02, hIco3637] at hfull
-  have hreindex : ∑ a : Fin ((37 - 3) / 2), (((a : ℕ) + 2 : ℕ) : ZMod 37) ^ k =
-      ∑ b ∈ Finset.Ico (2 : ℕ) 19, ((b : ZMod 37)) ^ k := by
-    rw [Fin.sum_univ_eq_sum_range (fun m ↦ (((m + 2 : ℕ)) : ZMod 37) ^ k) ((37 - 3) / 2),
-      Finset.sum_Ico_eq_sum_range]
-    exact Finset.sum_congr (by norm_num) (fun i _ ↦ by rw [Nat.add_comm 2 i])
-  rw [hreindex]
+  rw [hsplit, sum_Ico_reflect_pow hk_even, hIco02, hIco3637] at hfull
+  rw [sum_fin_add_two_pow_eq_sum_Ico_pow k]
   -- hfull : 1 + (S + (S + 1)) = 0  ⟹  2 * (S + 1) = 0
   have h2 : (2 : ZMod 37) ≠ 0 := by
     rw [show (2 : ZMod 37) = ((2 : ℕ) : ZMod 37) from by push_cast; ring,
