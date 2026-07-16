@@ -312,3 +312,24 @@ axiom sweep ratifies the whole étale arc.
 proofs, single shared KM anchor). SESSION TERMINAL; seat free.** — G0
 
 - [2026-07-16, coordinator, v10.287] ★★★★ FOUR-BOX SUBSTRATE COMPLETE + ratified (leaf landed via kernel-count — first cross-project HasseWeil consumption; étale trio axiom-clean, the shared anchor died with brick 6). NEW DISPATCH: EXECUTE the two ENGINE-AX2 theorems — Bootstrap:112 (E3) + :195 (Legendre twin) — via OMEGA de-Weiled 7-step combination-clopen route (PairGeneratesOfCardSq proven; carrier = YOUR torsionπ_etale chain + EtaleSectionsCount/UnramifiedOfCardAlgHom machinery; BB-DEG rank clean). De-conflicted: OMEGA owns :86/:91/E2-gen; you own :112/:195. Board v10.287.
+
+---
+
+## G0 SESSION REPORT — v10.288-G0 (2026-07-16, AX2 execution session 1)
+
+**Dispatch:** v10.287 — execute Bootstrap:112 + :195 via the combination-clopen route.
+
+**DELIVERED (all compiling, all pushed, carrier axiom-clean with receipts):** the full
+geometric carrier + spec layer — `fullLevelLocus` (⋂_{v≠0} c_v⁻¹(E[N]∖0), clopen in
+E[N]×_S E[N]) is FINITE ÉTALE over S with no Weil pairing, no levelSpaceΓ, no T-D8;
+combination morphisms by the universal-point trick; locus-points = pair-points-in-set;
+single-point zero-detection (the k̄-bridge engine); torsion-map ⟿ killed-section dictionary.
+Commits 78cff24e0 / ff8f36c88→ / dc659c014.
+
+**RESIDUAL:** one master-iff (set-membership ⟺ IsNaiveFullLevel; both directions reduce to
+the banked zero-detection + PairGeneratesOfCardSq + torsion_geometricFibre_rank_two) + the
+two assemblies. Boarded at v10.288-G0 as an execution map with all lemma names + the two
+transport gotchas (carrier-equations-not-Point-transports; abbrev-not-def). Estimate: one
+focused session for :112; :195 needs the legendreDeltaProblem-unpacking read first.
+
+**Session verdict:** carrier DONE, endgame mapped. — G0

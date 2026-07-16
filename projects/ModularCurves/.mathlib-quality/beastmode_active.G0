@@ -1,7 +1,6 @@
-STREAM-G0 ACTIVE (v10.287 dispatch, 2026-07-16) — EXECUTING THE TWO ENGINE-AX2s.
+STREAM-G0 TERMINAL (v10.288-G0, 2026-07-16) — AX2 session 1: CARRIER BUILT.
 
-CLAIM: rule-5, ONE session. Targets: Bootstrap:112 (naiveLevelThree_relativelyRepresentable_finiteEtale)
-+ Bootstrap:195 (legendreDelta_relativelyRepresentable_finiteEtale), via OMEGA's de-Weiled
-combination-clopen route (v10.266-OMEGA): Z = ⋂ c_{ij}⁻¹(E[N]∖0) ⊆ E[N]×_S E[N], clopen in
-finite-étale (my torsionπ_etale chain, now axiom-clean), points-spec via torsionPointsEquiv +
-PairGeneratesOfCardSq (OMEGA ✓). De-conflicted: OMEGA owns :86/:91/E[2]-gen; GH owns :3497.
+fullLevelLocus finite étale (axiom-clean, de-Weiled) + spec layer + zero-detection
+banked (78cff24e0/dc659c014, pushed). Residual = MASTER-IFF + assemblies, fully
+mapped at board v10.288-G0 (lemma-by-lemma). No claims held. Next G0 session
+executes [L1]→[K4]→[MASTER-IFF]→[ASSEMBLY-:112]→[:195].

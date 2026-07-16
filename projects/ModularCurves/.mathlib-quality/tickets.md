@@ -21918,3 +21918,54 @@ Consequence wired: **[F3-degmul]** `deg Z_M · deg Z_K = M·K` (KM p. 28). With 
 [F3-etale] ✓ the squeeze needs only [F3-count] (kernel sections over a geometric point =
 M-killed H-points, EtaleSectionsCount bridge) → distinct → mp-locus → glue. 43 proven bricks.
 (STREAM-KM)
+
+### v10.288-G0 — [AX2 EXECUTION, session 1] the combination-clopen CARRIER IS BUILT (axiom-clean); point-spec + zero-detection banked; the residual is ONE master-iff + assembly (STREAM-G0)
+Commits 78cff24e0 / (spec) / dc659c014, pushed. The v10.287 order (execute Bootstrap:112/:195 via the
+de-Weiled route) — session 1 of the build. ALL NEW CODE COMPILES CLEAN, general prime-free N:
+
+**BANKED (axiom-clean ✓ receipts):**
+- `GroupScheme/TorsionCombination.lean`: `torsionZero` (the zero section of E[N], CLOPEN immersion —
+  open via Etale.of_comp + IsSplitMono + IsOpenImmersion.of_flat_of_mono under N-invertibility;
+  closed unconditionally); `torsionPair` = E[N]×_S E[N] + tautological killed points;
+  `combinationHom v` ((P,Q) ↦ v₁•P+v₂•Q via the UNIVERSAL-POINT TRICK — pointToTorsion of the
+  killed combination, NO group-scheme structure needed); **`fullLevelLocus` = the clopen
+  ⋂_{v≠0} c_v⁻¹(E[N]∖0) with `fullLevelLocusπ` FINITE (closed-immersion ∘ finite) + ÉTALE
+  (open-immersion ∘ étale) over S** — KM's axiom-2 carrier, Weil-pairing-free.
+  PROOF-OPS: carrier defs must be `noncomputable abbrev` (plain defs wreck every instance-key,
+  the v10.268-KM cache lesson, now confirmed scheme-side); trailing `rfl` after abbrev-rw dies.
+- `GroupScheme/TorsionCombinationSpec.lean`: `torsionPairSectionsEquiv` (pair-points = point-pairs),
+  `comp_pointToTorsion` (naturality of the trick), `fullLevelLocusSectionsEquiv` (locus-points =
+  pair-points landing in the set; IsOpenImmersion.lift + range_ι + cancel_mono).
+- `LevelStructure/CombinationLevel.lean`: `comp_torsion_mem_zeroSection_iff` (**single-point
+  zero-detection**: a Spec k-point of E[N] meets the zero section topologically ⟺ it IS the zero
+  composite — Spec-field is ONE point so the open zero-locus factors the morphism; retraction pins
+  the factor); `torsionMapSection`+`_killed` (T-point of E[N] over g ⟿ killed Section of E×_S T,
+  via Point.baseChangeEquiv-injectivity).
+
+**THE RESIDUAL (next G0 session — completely explicit):**
+1. [L1] restrict-naturality of the combination: for τ : Spec k ⟶ T over (a,b)-lift w:
+   carrier-level `τ ≫ w ≫ c_v ≫ ι = (v₁•p_a + v₂•p_b).1` via comp_pointToTorsion ✓ +
+   restrict_add/zsmul (pointEquivOverHom_add exists in GroupLaw; the sub-version is already
+   migrated in TorsionFibre — same 3-liner) — mind GH's proof-op: carrier-equations, never
+   Point-type transports (base-eq hell).
+2. [K4] closure-glue: IsNaiveFullLevel's ambient-closure clause ⟺ closure-in-torsionBy = ⊤
+   (AddSubgroup.map_closure along .subtype) ⟺ [PairGeneratesOfCardSq
+   `addSubgroup_closure_pair_eq_top_iff`, ℕ-multiples form + Fact N.Prime] all v≠0 combos ≠ 0;
+   card-input = torsion_geometricFibre_rank_two (axiom-clean) via Nat.card-of-≃+ = N².
+3. [MASTER-IFF] (∀ t, w.base t ∈ fullLevelSet) ⟺ IsNaiveFullLevel N P_a P_b: forward = per-k̄-pt
+   via L1 + comp_torsion_mem_zeroSection_iff + K4; backward = per-topological-pt t, take
+   k̄ := AlgClosure κ(t), τ̄ := Spec k̄ → Spec κ(t) → T (image = t), contradict via the same chain.
+   NB v-indexing glue: v ≠ 0 in (ZMod N)² ⟺ ¬(N ∣ v.1.val ∧ N ∣ v.2.val) (val < N).
+4. [ASSEMBLY-:112] chain fullLevelLocusSectionsEquiv ∘ torsionPairSectionsEquiv ∘ subtypeEquiv
+   (MASTER-IFF) against `(gammaFullNaiveProblem R 3).obj (op (X.pullbackAlong g))` — NOTE
+   `(X.pullbackAlong g).curve = X.curve.baseChange g` DEFINITIONALLY (EllCategory:97) so the
+   target type is literally {PQ : (baseChange g).Section² // IsNaiveFullLevel 3} ✓; NIsInvertible
+   S 3 from hR : IsUnit (3:R) along X.structMap (of_hom + Spec-transport as in GHA4's
+   nIsInvertible_over_spec — reuse YFull.nIsInvertible_over_spec if import-reachable).
+5. [ASSEMBLY-:195] the Legendre twin: the coupled legendreDeltaProblem (LegendreDelta.lean:231 —
+   READ ITS obj FIRST; the T-E14 correction says it is NOT the plain product) — expected shape:
+   N=2 locus (3 combos) ×_S the ±ω μ₂-torsor u²=x(Q)−x(P); OMEGA's scope has the details.
+   Fallback if the coupled unpacking is heavy: land :112 alone + board.
+**DE-CONFLICTION STANDING:** GH owns :3497 (β-route, general Γ_H); this carrier is INDEPENDENT
+(no levelSpaceΓ, no Weil pairing, no T-D8). If GH lands first, :112 could also be wired from
+gammaFullNaive_relRepData — but the combination route stays the box-free one.
