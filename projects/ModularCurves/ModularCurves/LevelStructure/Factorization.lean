@@ -1136,6 +1136,27 @@ theorem RelEffCartierDiv.smulKernelπ_etale (D : RelEffCartierDiv E.π) (M : ℕ
   haveI : Flat (j ≫ E.torsionπ M) := by rw [hcomp]; exact hflat
   exact Etale.of_formallyUnramified_of_flat (j ≫ E.torsionπ M)
 
+/-- **[F3-degmul] (contract)** The degree of the divisor multiplies over the kernel
+product: `deg G = deg Z_M · deg Z_K` at every base point. Route (banked 2026-07-16d):
+the product iso (R1+R2) + affine-local `rankAtStalk_tensorProduct` through
+`pullbackSpecIso`. -/
+theorem RelEffCartierDiv.IsSubgroup.degree_eq_smulKernel_mul (M K : ℕ)
+    [NeZero M] [NeZero K] (hMK : Nat.Coprime M K) [NeZero (M * K)]
+    (hdeg : ∀ s : S, D.degree s = M * K)
+    (h₁ : ((M : ℤ) * K) % ((M * K : ℕ) : ℤ) = 0)
+    (h₂ : ((K : ℤ) * M) % ((M * K : ℕ) : ℤ) = 0) (s : S) :
+    (D.smulKernelπ E (M : ℤ)).finrank s * (D.smulKernelπ E (K : ℤ)).finrank s
+      = M * K := by sorry
+
+/-- **[F3-mp] (contract — KM 1.7.2 forward, first conjunct)** If `P` has exact order
+`M·K` with `M, K` coprime, then `K•P` has exact order `M`. Route (v10.282 map):
+étale + count + Cauchy + degmul + distinctness on `S[1/M]`, 1.5.3 (3)⟹(1), glue by
+`isSubgroup_of_openCover` over the coprime cover. -/
+theorem Section.HasExactOrder.smul_hasExactOrder {P : E.Section} (M K : ℕ)
+    [NeZero M] [NeZero K] (hMK : Nat.Coprime M K) [NeZero (M * K)]
+    (h : P.HasExactOrder E (M * K)) :
+    ((K : ℤ) • P).HasExactOrder E M := by sorry
+
 end ProductDecomposition
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
