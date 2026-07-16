@@ -155,6 +155,23 @@ def LocallyWeierstrass {E S : Scheme.{u}} (π : E ⟶ S) (z : S ⟶ E) (hz : z �
           (by rw [Category.assoc, hz, Category.comp_id, Category.id_comp])) ≫ e.hom =
         projModelZero W
 
+/-- **The `isoSpec`–`appLE` bridge.** For affine opens `V ⊆ g ⁻¹ᵁ U`, conjugating the
+ring-level restriction `g.appLE U V` by the two `isoSpec` isomorphisms recovers the induced
+scheme morphism `V ⟶ U` — namely `homOfLE` into `g ⁻¹ᵁ U` followed by the restriction
+`g ∣_ U`. This is the geometric content of `IsAffineOpen.SpecMap_appLE_fromSpec` transported
+across the `isoSpec` identifications. -/
+lemma isoSpec_appLE_bridge {S T : Scheme.{u}} (g : T ⟶ S) (U : S.affineOpens)
+    (V : T.affineOpens) (hVle : V.1 ≤ g ⁻¹ᵁ U.1) :
+    V.2.isoSpec.hom ≫ Spec.map (g.appLE U.1 V.1 hVle) =
+      (T.homOfLE hVle ≫ (g ∣_ U.1)) ≫ U.2.isoSpec.hom := by
+  have hgVfac : (T.homOfLE hVle ≫ (g ∣_ U.1)) ≫ U.1.ι = V.1.ι ≫ g := by
+    rw [Category.assoc, morphismRestrict_ι, ← Category.assoc, Scheme.homOfLE_ι]
+  have hsp := IsAffineOpen.SpecMap_appLE_fromSpec g U.2 V.2 hVle
+  rw [← IsAffineOpen.isoSpec_inv_ι U.2, ← IsAffineOpen.isoSpec_inv_ι V.2, ← Category.assoc,
+    Category.assoc V.2.isoSpec.inv, ← hgVfac, ← Category.assoc] at hsp
+  have hsp2 := (cancel_mono U.1.ι).mp hsp
+  rw [← Iso.comp_inv_eq, Category.assoc, hsp2, ← Category.assoc, Iso.hom_inv_id, Category.id_comp]
+
 /-- **(T-A8a)** The local-model condition is stable under base change: shrink the model's
 affine open `U ∋ g t` to an affine `V ∋ t` inside `g⁻¹ U`, transport the Weierstrass
 curve `W` along `Γ(S, U) → Γ(T, V)` (`g.appLE`), and paste the pullbacks. -/
@@ -172,7 +189,7 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
   letI : Algebra ↑Γ(S, U.1) ↑Γ(T, V) := ((g.appLE U.1 V hVle).hom).toAlgebra
   refine ⟨⟨V, hVaff⟩, htV, W.map (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)), inferInstance, ?_⟩
   -- `gV : V ⟶ U` factoring `V.ι ≫ g` through the open immersion `U.ι`
-  set Vι := (⟨V, hVaff⟩ : T.affineOpens).1.ι with hVι
+  set Vι := (⟨V, hVaff⟩ : T.affineOpens).1.ι
   set gV := T.homOfLE hVle ≫ (g ∣_ U.1) with hgV
   have hgVfac : gV ≫ U.1.ι = Vι ≫ g := by
     rw [hgV, Category.assoc, morphismRestrict_ι, ← Category.assoc, Scheme.homOfLE_ι]
@@ -191,14 +208,8 @@ lemma LocallyWeierstrass.baseChange {E S T : Scheme.{u}} {π : E ⟶ S} {z : S �
   have hP2 := hP1'.of_right' (IsPullback.of_hasPullback π U.1.ι)
   -- the isoSpec ↔ appLE bridge (comm₄): `Spec.map φ` conjugated by the two `isoSpec`s is `gV`
   have hbridge : hVaff.isoSpec.hom ≫
-      Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(T, V))) = gV ≫ U.2.isoSpec.hom := by
-    have hsp := IsAffineOpen.SpecMap_appLE_fromSpec g U.2 hVaff hVle
-    rw [← IsAffineOpen.isoSpec_inv_ι U.2, ← IsAffineOpen.isoSpec_inv_ι hVaff, ← Category.assoc,
-      Category.assoc hVaff.isoSpec.inv, ← hVι, ← hgVfac, ← Category.assoc] at hsp
-    have hsp2 := (cancel_mono U.1.ι).mp hsp
-    rw [show CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(T, V)) = g.appLE U.1 V hVle from rfl,
-      ← Iso.comp_inv_eq, Category.assoc, hsp2, ← Category.assoc, Iso.hom_inv_id,
-      Category.id_comp]
+      Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, U.1) ↑Γ(T, V))) = gV ≫ U.2.isoSpec.hom :=
+    isoSpec_appLE_bridge g U ⟨V, hVaff⟩ hVle
   -- `e' := restriction ≅ pullback(snd π U.1.ι, gV) ≅ pullback(projModelπ W, Spec.map φ)`
   -- `      ≅ projModel W'`
   refine ⟨hP2.isoPullback ≪≫ asIso (pullback.map (pullback.snd π U.1.ι) gV (projModelπ W)
