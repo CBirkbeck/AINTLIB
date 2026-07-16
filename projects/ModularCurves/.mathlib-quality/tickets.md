@@ -21777,3 +21777,9 @@ as Z_M ≤ D₁ via clopen-glued T-points instead; and the LAST classical box (D
 forcing) is DODGED on the invertible locus: étale kernel ⟹ geometric-fibre count ⟹ CAUCHY gives
 `deg Z_M` prime-support ⊆ M's ⟹ with degmul `deg Z_M = M`. Full ordered path in the
 decomposition doc §2026-07-16e. (STREAM-KM)
+
+### v10.284-KM — ★ [F3-etale] PROVEN: the kernels are étale on the invertible locus (STREAM-KM)
+`smulKernelπ_etale` — brick 1 of the de-risked path (v10.282 map): Z_M closed in E[M] by the
+of_right' pasting of kernel pullbacks, étale by unramified-comp + flat + lfp-cancellation. With
+[F3-cauchy] ✓ the path is now: count → degmul → distinct → mp-locus → glue. 35 proven bricks.
+(STREAM-KM)
