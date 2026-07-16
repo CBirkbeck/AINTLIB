@@ -136,3 +136,61 @@ theorem three_zsmul_some_e3Q {W : WeierstrassCurve F} {β γ : F}
 end Affine.Point
 
 end WeierstrassCurve
+
+/-! ## The torsion→coordinate bridge ([T-E15-NORM] hArb)
+
+The ⟹-direction completing Stage A's ⟸: a `3`-torsion affine point roots the
+`3`-division polynomial. The certificate (CAS-verified):
+`(3x²+2a₂x+a₄−a₁y)² + a₁(…)d − (a₂+3x)d² + Ψ₃(x) = −(b₂+12x)·(curve)` with
+`d = 2y+a₁x+a₃`, so `x(2P) = x(−P)` clears to `Ψ₃(x) = 0` on the curve. -/
+
+namespace WeierstrassCurve
+
+namespace Affine.Point
+
+open Polynomial in
+/-- **(the bridge ★★)** On any Weierstrass curve over a field, a `3`-torsion affine
+point roots the `3`-division polynomial: `3•P = 0 → Ψ₃(x(P)) = 0`. -/
+theorem psi3_eval_eq_zero_of_three_zsmul {F : Type*} [Field F] [DecidableEq F]
+    {W : WeierstrassCurve F} {x y : F} (h : W.toAffine.Nonsingular x y)
+    (h3 : (3 : ℤ) • (Affine.Point.some x y h : W.toAffine.Point) = 0) :
+    W.Ψ₃.eval x = 0 := by
+  have hcurve := (WeierstrassCurve.Affine.equation_iff x y).mp h.1
+  by_cases hd : y = W.toAffine.negY x y
+  · -- `P` would be `2`-torsion, hence `P = 3P − 2P = 0` — impossible
+    have h2 : (2 : ℤ) • (Affine.Point.some x y h : W.toAffine.Point) = 0 := by
+      rw [two_zsmul]
+      exact Affine.Point.add_of_Y_eq rfl hd
+    have hP : (Affine.Point.some x y h : W.toAffine.Point) = 0 := by
+      have hsub : ((3 : ℤ) - 2) • (Affine.Point.some x y h : W.toAffine.Point)
+          = 0 := by rw [sub_smul, h3, h2, sub_zero]
+      simpa using hsub
+    exact absurd hP (Affine.Point.some_ne_zero h)
+  · -- `2P = −P`, so the doubling abscissa equals `x`; clear denominators
+    have h2P : (2 : ℤ) • (Affine.Point.some x y h : W.toAffine.Point)
+        = -(Affine.Point.some x y h) := by
+      have h3' : (2 : ℤ) • (Affine.Point.some x y h : W.toAffine.Point)
+          + (Affine.Point.some x y h) = 0 := by
+        rw [show (2 : ℤ) • (Affine.Point.some x y h : W.toAffine.Point)
+            + (Affine.Point.some x y h)
+          = (3 : ℤ) • (Affine.Point.some x y h : W.toAffine.Point) by
+          rw [show (3 : ℤ) = 2 + 1 by norm_num, add_zsmul, one_zsmul]]
+        exact h3
+      exact eq_neg_of_add_eq_zero_left h3'
+    rw [two_zsmul, Affine.Point.add_some (fun hc => hd hc.2),
+      Affine.Point.neg_some] at h2P
+    have hx2 : W.toAffine.addX x x (W.toAffine.slope x x y y) = x := by
+      injection h2P
+    rw [Affine.slope_of_Y_ne rfl hd] at hx2
+    have hdne : y - W.toAffine.negY x y ≠ 0 := sub_ne_zero.mpr hd
+    rw [Affine.addX] at hx2
+    field_simp at hx2
+    simp only [WeierstrassCurve.Ψ₃, eval_add, eval_mul, eval_pow, eval_ofNat,
+      eval_C, eval_X, WeierstrassCurve.b₂, WeierstrassCurve.b₄, WeierstrassCurve.b₆,
+      WeierstrassCurve.b₈, WeierstrassCurve.Affine.negY] at hx2 ⊢
+    linear_combination (norm := ring_nf)
+      (-(W.a₁ ^ 2) - 4 * W.a₂ - 12 * x) * hcurve - hx2
+
+end Affine.Point
+
+end WeierstrassCurve
