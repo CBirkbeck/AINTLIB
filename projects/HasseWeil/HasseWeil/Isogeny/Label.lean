@@ -118,8 +118,8 @@ Over a characteristic-`0` field the universal dual witness is a theorem
 and the class-letter invariance hold unconditionally. These are the deliverables that make the LMFDB
 label layer over `ℚ` (or any char-`0` field) gate-free. -/
 
-/-- **Well-definedness of the label, char-0 (ungated)**: over a char-`0` field a curve is isogenous to
-at most one table representative — no `UniversalDualWitness` hypothesis needed
+/-- **Well-definedness of the label, char-0 (ungated)**: over a char-`0` field a curve is
+isogenous to at most one table representative — no `UniversalDualWitness` hypothesis needed
 (`universalDualWitness_of_charZero`). -/
 theorem index_unique_charZero [CharZero F] (T : IsogenyClassTable F)
     (E : EllipticCurveOver F) {i j : Fin T.card}
