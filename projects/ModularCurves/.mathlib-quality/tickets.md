@@ -21783,3 +21783,11 @@ decomposition doc §2026-07-16e. (STREAM-KM)
 of_right' pasting of kernel pullbacks, étale by unramified-comp + flat + lfp-cancellation. With
 [F3-cauchy] ✓ the path is now: count → degmul → distinct → mp-locus → glue. 35 proven bricks.
 (STREAM-KM)
+
+### v10.285-KM — ★ prodIso + degtrans: [F3-degmul] reduced to the pure fibre-product rank formula (STREAM-KM)
+(`4579c718c`) The product decomposition is now an `Iso` (R1-id by cancel_mono), and the degree
+transports: `deg(P-structure) = M·K` at every point with the full finite-flat instance chain
+(kerflat both orientations + kerfin + pullback_fst + comp_mem). Remaining degmul core:
+`(fst ≫ πM).finrank = πM.finrank * πK.finrank` — [FR-GEN]-shaped affine glue; public path +
+mathlib-private blocker banked (decomposition §16g). 38 proven bricks, 6 sorries (2 contracts +
+F3-iff + F4×3), full regression green. (STREAM-KM)
