@@ -22102,3 +22102,26 @@ lands it first, the other consumes; my signatures take it verbatim as `hmaster`.
 :3497 = `levelSpaceΓ_structure_etale_of_master` + a `show` (levelSpaceΓπ IS the spelled
 composite) ⟹ [GHA3] CLOSES ⟹ Γ_H rel-rep's cone = T-D8 (KM's W0, landing this window) + the
 standing keystone boxes only. (STREAM-GH)
+
+## v10.292-OMEGA (2026-07-16, STREAM-OMEGA) — ★★ THE TORSION→COORDINATE BRIDGE PROVEN (+ μ/TwiceNeZero package); generation route de-scoped to field level
+
+**v10.291 dispatch progress:**
+- **`psi3_eval_eq_zero_of_three_zsmul` ★★** (E3NormalForm): on ANY Weierstrass curve over a field,
+  `3•P = 0 ⟹ Ψ₃(x(P)) = 0` (mathlib's 3-division polynomial). Proof: 2-torsion case kills `P`
+  (`3P−2P = P = 0` contra `some_ne_zero`); else `2P = −P` (`eq_neg_of_add_eq_zero_left`),
+  `add_some`/`neg_some` + `injection` extract `x(2P) = x`, `slope_of_Y_ne` + `field_simp` clear, and the
+  CAS certificate **`E + Ψ₃ = −(b₂+12x)·curve`** (exact, r = 0) closes by `linear_combination`.
+- **`twiceNeZero_of_three_zsmul` + `mu_eq_zero_of_three_zsmul` ★**: the `μ`-form of the bridge —
+  exactly the fibrewise inputs of `ofTwiceNeZero_isFlexNF` (flex-chart production) and `isE3Chart`'s
+  `hcubic` (via `Ψ₃ = x·cubic` on flex forms). The hArb chain's field layer is COMPLETE.
+
+**hL-generation DE-SCOPED to field level (no scheme count needed):** at a geometric point, the count
+`#T₃ ≤ 9` follows from the BRIDGE (every nonzero 3-torsion point roots `Ψ₃`, `deg Ψ₃ = 4`,
+`Ψ₃ ≠ 0` by `Ψ₃_ne_zero` [3 ≠ 0 in k̄ ✓], ≤ 2 points per abscissa) — polynomial root-counting, keeping
+GH's B2 as the criterion of record for the closure step (`hcard = 9` from ≤9 + the 9 distinct combos of
+an independent pair; independence from the marked coordinates via the Stage-B dictionary:
+`P̄=some(0,0)≠0`, `Q̄=some(γ̄,·)∉{0,±P̄}` since `γ̄ ≠ 0`). Remaining generation work: the count
+formalization (Finset root-plumbing) + the B2 assembly + IsNaiveFullLevel packaging; then Stage-D
+(arbitrary-R killing transfer) closes :86, and the hArb scheme-lift over arbitrary bases (the chart-level
+ring bridge — NB needs the E[3]-scheme structure over NON-REDUCED bases, boarded as the one open
+subtlety) + E[2]-gen close :91/Legendre.
