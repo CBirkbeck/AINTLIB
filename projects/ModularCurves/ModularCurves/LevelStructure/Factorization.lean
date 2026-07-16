@@ -1136,6 +1136,90 @@ theorem RelEffCartierDiv.smulKernelπ_etale (D : RelEffCartierDiv E.π) (M : ℕ
   haveI : Flat (j ≫ E.torsionπ M) := by rw [hcomp]; exact hflat
   exact Etale.of_formallyUnramified_of_flat (j ≫ E.torsionπ M)
 
+include hD in
+/-- **[F3-R1-id]** The retraction in identity form: `prodMap ≫ combMap = 𝟙 G`
+(cancel the mono `ι` against [F3-R1]). -/
+theorem RelEffCartierDiv.IsSubgroup.prodMap_combMap (M K : ℕ) [NeZero M] [NeZero K]
+    (hMK : Nat.Coprime M K) [NeZero (M * K)]
+    (hdeg : ∀ s : S, D.degree s = M * K)
+    (h₁ : ((M : ℤ) * K) % ((M * K : ℕ) : ℤ) = 0)
+    (h₂ : ((K : ℤ) * M) % ((M * K : ℕ) : ℤ) = 0) :
+    RelEffCartierDiv.IsSubgroup.prodMap E hD hdeg h₁ h₂
+        ≫ RelEffCartierDiv.IsSubgroup.combMap E hD (M : ℤ) (K : ℤ)
+            (Nat.gcdB M K) (Nat.gcdA M K)
+      = 𝟙 _ := by
+  rw [← cancel_mono D.ideal.subschemeι, Category.assoc,
+    RelEffCartierDiv.IsSubgroup.prodMap_combMap_ι E hD M K hMK hdeg h₁ h₂,
+    Category.id_comp]
+
+/-- **[F3-prodIso]** KM's canonical product decomposition as an isomorphism:
+`G ≅ Ker[M] ×_S Ker[K]`. -/
+noncomputable def RelEffCartierDiv.IsSubgroup.prodIso (M K : ℕ) [NeZero M] [NeZero K]
+    (hMK : Nat.Coprime M K) [NeZero (M * K)]
+    (hdeg : ∀ s : S, D.degree s = M * K)
+    (h₁ : ((M : ℤ) * K) % ((M * K : ℕ) : ℤ) = 0)
+    (h₂ : ((K : ℤ) * M) % ((M * K : ℕ) : ℤ) = 0) :
+    D.ideal.subscheme ≅ pullback (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ)) where
+  hom := RelEffCartierDiv.IsSubgroup.prodMap E hD hdeg h₁ h₂
+  inv := RelEffCartierDiv.IsSubgroup.combMap E hD (M : ℤ) (K : ℤ)
+    (Nat.gcdB M K) (Nat.gcdA M K)
+  hom_inv_id := RelEffCartierDiv.IsSubgroup.prodMap_combMap E hD M K hMK hdeg h₁ h₂
+  inv_hom_id := RelEffCartierDiv.IsSubgroup.combMap_prodMap E hD M K hMK hdeg h₁ h₂
+
+include hD in
+/-- **[F3-degtrans]** The divisor degree transports to the product's structure
+morphism through the decomposition. -/
+theorem RelEffCartierDiv.IsSubgroup.finrank_prod_struct (M K : ℕ) [NeZero M] [NeZero K]
+    (hMK : Nat.Coprime M K) [NeZero (M * K)]
+    [IsFinite (E.mulByHom (M : ℤ))] [IsFinite (E.mulByHom (K : ℤ))]
+    (hdeg : ∀ s : S, D.degree s = M * K)
+    (h₁ : ((M : ℤ) * K) % ((M * K : ℕ) : ℤ) = 0)
+    (h₂ : ((K : ℤ) * M) % ((M * K : ℕ) : ℤ) = 0) (s : S) :
+    (pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ))
+        ≫ D.smulKernelπ E (M : ℤ)).finrank s = M * K := by
+  haveI : IsIso (RelEffCartierDiv.IsSubgroup.prodMap E hD hdeg h₁ h₂) :=
+    (RelEffCartierDiv.IsSubgroup.prodIso E hD M K hMK hdeg h₁ h₂).isIso_hom
+  -- finite flat structure of the product's structure morphism
+  haveI hMflat : Flat (D.smulKernelπ E (M : ℤ)) :=
+    RelEffCartierDiv.IsSubgroup.smulKernelπ_flat E hD M K hMK hdeg h₁ h₂
+  haveI hKflat : Flat (D.smulKernelπ E (K : ℤ)) :=
+    RelEffCartierDiv.IsSubgroup.smulKernelπ_flat E hD K M hMK.symm
+      (fun s => by rw [hdeg s, Nat.mul_comm])
+      (by rwa [Nat.mul_comm M K] at h₂) (by rwa [Nat.mul_comm M K] at h₁)
+  haveI hMfin : IsFinite (D.smulKernelπ E (M : ℤ)) :=
+    RelEffCartierDiv.smulKernelπ_isFinite E D (M : ℤ)
+  haveI hKfin : IsFinite (D.smulKernelπ E (K : ℤ)) :=
+    RelEffCartierDiv.smulKernelπ_isFinite E D (K : ℤ)
+  haveI hfstflat : Flat (pullback.fst (D.smulKernelπ E (M : ℤ))
+      (D.smulKernelπ E (K : ℤ))) :=
+    MorphismProperty.pullback_fst (P := @Flat) _ _ hKflat
+  haveI hfstfin : IsFinite (pullback.fst (D.smulKernelπ E (M : ℤ))
+      (D.smulKernelπ E (K : ℤ))) :=
+    MorphismProperty.pullback_fst (P := @IsFinite) _ _ hKfin
+  haveI hPflat : Flat (pullback.fst (D.smulKernelπ E (M : ℤ))
+      (D.smulKernelπ E (K : ℤ)) ≫ D.smulKernelπ E (M : ℤ)) :=
+    MorphismProperty.comp_mem _ _ _ hfstflat hMflat
+  haveI hPfin : IsFinite (pullback.fst (D.smulKernelπ E (M : ℤ))
+      (D.smulKernelπ E (K : ℤ)) ≫ D.smulKernelπ E (M : ℤ)) :=
+    MorphismProperty.comp_mem _ _ _ hfstfin hMfin
+  have htrans := Scheme.Hom.finrank_comp_left_of_isIso
+    (RelEffCartierDiv.IsSubgroup.prodMap E hD hdeg h₁ h₂)
+    (pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ))
+      ≫ D.smulKernelπ E (M : ℤ))
+  have hstruct : RelEffCartierDiv.IsSubgroup.prodMap E hD hdeg h₁ h₂
+      ≫ pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ))
+        ≫ D.smulKernelπ E (M : ℤ)
+      = D.ideal.subschemeι ≫ E.π := by
+    rw [← Category.assoc, RelEffCartierDiv.IsSubgroup.prodMap, pullback.lift_fst,
+      RelEffCartierDiv.IsSubgroup.toSmulKernel_π]
+  calc (pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ))
+        ≫ D.smulKernelπ E (M : ℤ)).finrank s
+      = (RelEffCartierDiv.IsSubgroup.prodMap E hD hdeg h₁ h₂
+          ≫ pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ))
+          ≫ D.smulKernelπ E (M : ℤ)).finrank s := by rw [htrans]
+    _ = (D.ideal.subschemeι ≫ E.π).finrank s := by rw [hstruct]
+    _ = M * K := hdeg s
+
 /-- **[F3-degmul] (contract)** The degree of the divisor multiplies over the kernel
 product: `deg G = deg Z_M · deg Z_K` at every base point. Route (banked 2026-07-16d):
 the product iso (R1+R2) + affine-local `rankAtStalk_tensorProduct` through
