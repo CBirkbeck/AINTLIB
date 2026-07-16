@@ -935,3 +935,11 @@ the algebraic input for spreading affine closed immersions, hence for the separa
 proper finite-stage model needed by the fibrewise-elliptic converse. The focused build is green,
 the axiom audit is exactly `propext`, `Classical.choice`, and `Quot.sound`, and no hypothesis or
 proof-resource option was added.
+
+Active dependency claim (2026-07-16): prove
+`IsFilteredAlgColimit.exists_tensorProductMap_surjective`. For a map between finitely presented
+algebras, surjectivity after scalar extension to the filtered colimit will be reflected at one
+later scalar-extension stage. The proof will reuse the existing presentation and tensor transport
+API together with `SpreadData.exists_surjective_mapAtLaterStage`; it will not introduce a second
+monoidal or tensor-colimit abstraction. This is the affine closed-immersion criterion needed to
+spread separatedness of the finite-stage affine-intersection model.
