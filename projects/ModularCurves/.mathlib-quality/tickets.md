@@ -21791,3 +21791,12 @@ transports: `deg(P-structure) = M·K` at every point with the full finite-flat i
 `(fst ≫ πM).finrank = πM.finrank * πK.finrank` — [FR-GEN]-shaped affine glue; public path +
 mathlib-private blocker banked (decomposition §16g). 38 proven bricks, 6 sorries (2 contracts +
 F3-iff + F4×3), full regression green. (STREAM-KM)
+
+### v10.286-KM — ★ [F3-prodrank-spec]: the affine tensor-rank core is PROVEN (STREAM-KM)
+(`9e4ce9bf4`) `finrank (fst ≫ Spec φ) p = rankAtStalk A p · rankAtStalk B p` — pullbackSpecIso
+folds the composite to `Spec.map (algebraMap R (A ⊗ B))` (tower-comp is DEFEQ; ofHom_comp closes
+by rfl), then SpecMap/algebraMap/tensorProduct rank lemmas. 39 proven bricks. REMAINING for
+degmul: the connector — stage-1's Spec-reduced goal ⟶ the affine lemma (pasting iso
+`P|_R ≅ X|_R ×_SpecR Y|_R` + isoSpec-naturality conjugation of both restricted structure maps;
+~100 lines, isoSpec-naturality API to verify at pickup). Then: Cauchy squeeze live → distinct →
+mp-locus → glue → F3.mp. (STREAM-KM)
