@@ -766,6 +766,81 @@ theorem RelEffCartierDiv.IsSubgroup.prodMap_combMap_ι (M K : ℕ) [NeZero M] [N
   have hval := congrArg Subtype.val hfinal
   exact hval
 
+/-- **[F3-R2] (KM p. 27's roundtrip, kernel direction)** The product decomposition
+splits the Bezout combination on each kernel factor: composing back into the `M`-kernel
+recovers the first projection, at the level of the underlying `G`-valued morphisms.
+(`combMap ≫ prodMap = 𝟙` then follows by `pullback.hom_ext` once both kernel legs are
+matched; this lemma is the `fst`-leg computation.) -/
+theorem RelEffCartierDiv.IsSubgroup.combMap_prodMap_fst_ι (M K : ℕ) [NeZero M] [NeZero K]
+    (hMK : Nat.Coprime M K) [NeZero (M * K)]
+    (hdeg : ∀ s : S, D.degree s = M * K)
+    (h₁ : ((M : ℤ) * K) % ((M * K : ℕ) : ℤ) = 0) (h₂ : ((K : ℤ) * M) % ((M * K : ℕ) : ℤ) = 0) :
+    RelEffCartierDiv.IsSubgroup.combMap E hD (M : ℤ) (K : ℤ) (Nat.gcdB M K) (Nat.gcdA M K)
+        ≫ RelEffCartierDiv.IsSubgroup.toSmulKernel E hD hdeg h₁
+        ≫ D.smulKernelι E (M : ℤ) ≫ D.ideal.subschemeι
+      = pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ))
+          ≫ D.smulKernelι E (M : ℤ) ≫ D.ideal.subschemeι := by
+  set u : ℤ := Nat.gcdA M K with hu
+  set v : ℤ := Nat.gcdB M K with hv
+  have huv : u * M + v * K = 1 := by
+    have h := Nat.gcd_eq_gcd_ab M K
+    rw [hMK] at h
+    rw [hu, hv]
+    push_cast at h ⊢
+    linarith
+  set σ := RelEffCartierDiv.IsSubgroup.combMap E hD (M : ℤ) (K : ℤ) v u with hσdef
+  -- the σ-point: σ ≫ ι = (v•Q₁ + u•Q₂).1
+  have hσι := RelEffCartierDiv.IsSubgroup.combMap_ι E hD (M : ℤ) (K : ℤ) v u
+  -- boundary of the K-scaling composite
+  rw [RelEffCartierDiv.IsSubgroup.toSmulKernel_ι E hD hdeg h₁, ← Category.assoc, hσι]
+  -- goal: (v•Q₁+u•Q₂).1 ≫ [K] = fst ≫ ι' ≫ ι  (up to assoc)
+  set Q₁ : E.Point (pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ))
+      ≫ D.smulKernelπ E (M : ℤ)) :=
+    ⟨pullback.fst _ _ ≫ D.smulKernelι E (M : ℤ) ≫ D.ideal.subschemeι, by
+      rw [Category.assoc, Category.assoc, RelEffCartierDiv.smulKernelι_subschemeι_π]⟩
+    with hQ₁
+  set Q₂ : E.Point (pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ))
+      ≫ D.smulKernelπ E (M : ℤ)) :=
+    ⟨pullback.snd _ _ ≫ D.smulKernelι E (K : ℤ) ≫ D.ideal.subschemeι, by
+      rw [Category.assoc, Category.assoc, RelEffCartierDiv.smulKernelι_subschemeι_π,
+        ← pullback.condition]⟩ with hQ₂
+  show ((v • Q₁ + u • Q₂ : E.Point _)).1 ≫ E.mulByHom (K : ℤ) = Q₁.1
+  -- point form of the boundary
+  rw [← E.point_smul_eq_comp_mulBy]
+  -- kernel killed-facts
+  have hkill₁ : (M : ℤ) • Q₁ = 0 := by
+    apply Subtype.ext
+    rw [E.point_smul_eq_comp_mulBy, E.point_zero_val]
+    show (pullback.fst _ _ ≫ D.smulKernelι E (M : ℤ) ≫ D.ideal.subschemeι)
+        ≫ E.mulByHom (M : ℤ) = _ ≫ E.zero
+    rw [Category.assoc, Category.assoc,
+      show D.smulKernelι E (M : ℤ) ≫ D.ideal.subschemeι ≫ E.mulByHom (M : ℤ)
+        = D.smulKernelπ E (M : ℤ) ≫ E.zero from by
+          rw [RelEffCartierDiv.smulKernelι, RelEffCartierDiv.smulKernelπ, ← Category.assoc]
+          exact pullback.condition (f := D.ideal.subschemeι ≫ E.mulByHom (M : ℤ))
+            (g := E.zero),
+      ← Category.assoc]
+  have hkill₂ : (K : ℤ) • Q₂ = 0 := by
+    apply Subtype.ext
+    rw [E.point_smul_eq_comp_mulBy, E.point_zero_val]
+    show (pullback.snd _ _ ≫ D.smulKernelι E (K : ℤ) ≫ D.ideal.subschemeι)
+        ≫ E.mulByHom (K : ℤ) = _ ≫ E.zero
+    rw [Category.assoc, Category.assoc,
+      show D.smulKernelι E (K : ℤ) ≫ D.ideal.subschemeι ≫ E.mulByHom (K : ℤ)
+        = D.smulKernelπ E (K : ℤ) ≫ E.zero from by
+          rw [RelEffCartierDiv.smulKernelι, RelEffCartierDiv.smulKernelπ, ← Category.assoc]
+          exact pullback.condition (f := D.ideal.subschemeι ≫ E.mulByHom (K : ℤ))
+            (g := E.zero),
+      ← Category.assoc, ← pullback.condition, Category.assoc]
+  -- the crt arithmetic: K•(v•Q₁ + u•Q₂) = Q₁
+  have harith : (K : ℤ) • (v • Q₁ + u • Q₂) = Q₁ := by
+    rw [smul_add, ← mul_smul, ← mul_smul,
+      show (K : ℤ) * v = 1 - u * M by linarith,
+      show (K : ℤ) * u = u * K by ring,
+      sub_smul, one_smul, mul_smul, mul_smul, hkill₁, hkill₂]
+    simp
+  rw [harith]
+
 end ProductDecomposition
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
