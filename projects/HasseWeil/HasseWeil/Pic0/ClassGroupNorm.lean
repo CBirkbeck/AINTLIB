@@ -335,14 +335,17 @@ theorem relNorm_eq_relNorm_localization
 
 This block discharges, **without `PerfectField`**, the global-to-semilocal half of the general-base
 identity `relNorm R 𝔭 = 𝔭.under` at residue degree one.  The localisation bridge
-`relNorm_map_localization` (an instance of mathlib's `Ideal.spanIntNorm_localization`, the same engine
+`relNorm_map_localization` (an instance of mathlib's `Ideal.spanIntNorm_localization`, the same
+engine
 behind `relNorm_eq_relNorm_localization`) transports `relNorm R 𝔭` to the **semilocal**
 `Sₚ = Localization (algebraMapSubmonoid S p.primeCompl)` over the DVR `Rₚ = Localization.AtPrime p`,
-and `relNorm_eq_under_of_localized` then assembles the whole identity by `eq_of_localization_maximal`:
+and `relNorm_eq_under_of_localized` then assembles the whole identity by
+`eq_of_localization_maximal`:
 at primes `q ≠ p` both sides localise to `⊤`, and at `q = p` the claim is exactly the **semilocal
 per-prime formula** `relNorm Rₚ (𝔭·Sₚ) = maximalIdeal Rₚ`.
 
-This reduces the `PerfectField` gate to the **single** residual stated in `relNorm_eq_under_of_localized`'s
+This reduces the `PerfectField` gate to the **single** residual stated in
+`relNorm_eq_under_of_localized`'s
 hypothesis `hlocal` — the per-prime relative norm over a DVR base (see the residual note after
 `Ideal.relNorm_eq_under_of_inertiaDeg_one`). -/
 
@@ -375,7 +378,8 @@ theorem map_eq_top_of_under_ne (P : Ideal S) (q : Ideal R) [hq : q.IsMaximal] [P
 extension of `P` to the semilocal `Sₚ = Localization (algebraMapSubmonoid S q.primeCompl)`.
 
 This is a direct instance of mathlib's `Ideal.spanIntNorm_localization` (with `M = q.primeCompl`,
-`Sₘ = Sₚ`), the same lemma powering `Ideal.relNorm_algebraMap` and `relNorm_eq_relNorm_localization`.
+`Sₘ = Sₚ`), the same lemma powering `Ideal.relNorm_algebraMap` and
+`relNorm_eq_relNorm_localization`.
 It is the genuine `relNorm`-vs-localisation compatibility needed to compute `relNorm R P` valuation
 by valuation. -/
 theorem relNorm_map_localization (P : Ideal S) (q : Ideal R) [q.IsMaximal] [NeZero q] :
@@ -428,8 +432,10 @@ theorem relNorm_eq_under_of_localized (P : Ideal S) [P.IsMaximal] (hP : P ≠ �
 /-! #### The per-prime relative norm over a DVR base — the `PerfectField`-free residual, **CLOSED**
 
 The single remaining input of `relNorm_eq_under_of_localized` — the per-prime relative norm
-`relNorm Rₚ 𝔮 = maximalIdeal Rₚ` over a **DVR** base `Rₚ` at residue degree one — is discharged here,
-**without `PerfectField`**, via the **module-length** route (no residue *field* structure on the base,
+`relNorm Rₚ 𝔮 = maximalIdeal Rₚ` over a **DVR** base `Rₚ` at residue degree one — is discharged
+here,
+**without `PerfectField`**, via the **module-length** route (no residue *field* structure on the
+base,
 so no `Field (Rₚ ⧸ m)` instance diamond).
 
 The engine is the `Rₚ`-module-length identity over a **PID** base (`Rₚ` is a DVR, hence a PID):
@@ -437,11 +443,13 @@ for a nonzero principal `Q = (π)` of a free-finite `Rₚ`-algebra `Sₚ`,
 
   `length_{Rₚ}(Sₚ ⧸ Q) = length_{Rₚ}(Rₚ ⧸ relNorm Rₚ Q)`        (`relNorm_length_eq_span`),
 
-proved by Smith normal form (`Ideal.quotientEquivPiSpan` is `Rₚ`-linear) + additivity of the order of
+proved by Smith normal form (`Ideal.quotientEquivPiSpan` is `Rₚ`-linear) + additivity of the order
+of
 vanishing (`Ring.ord_mul`, `Ideal.relNorm_singleton`, `Algebra.intNorm_eq_norm`,
 `associated_norm_prod_smith`).  When `f = inertiaDeg' = 1`, `Sₚ ⧸ Q` is a **simple** `Rₚ`-module
 (`isSimpleModule_quot_of_inertiaDeg_one`: the residue algebra map `Rₚ → Sₚ ⧸ Q` is onto, so
-`Sₚ ⧸ Q ≃ₗ[Rₚ] Rₚ ⧸ m`), hence `length = 1`; the identity then forces `Rₚ ⧸ relNorm Rₚ Q` to be simple,
+`Sₚ ⧸ Q ≃ₗ[Rₚ] Rₚ ⧸ m`), hence `length = 1`; the identity then forces `Rₚ ⧸ relNorm Rₚ Q` to be
+simple,
 i.e. `relNorm Rₚ Q` maximal, i.e. `= m` (`IsLocalRing.eq_maximalIdeal`).  **No Galois, no
 `PerfectField`.** -/
 
@@ -497,8 +505,10 @@ theorem relNorm_length_eq_span
     rw [(Ideal.quotientEquivPiSpan (Ideal.span {π}) b hQ).length_eq, Module.length_pi_of_fintype]
   rw [← hord_relNorm, hord_eq, hord_prod, hlen_smith]
 
--- The explicit residue-field algebra structure (built on the `Ideal.Quotient.field`-derived semiring
--- via `algebraQuotientOfLEComap`) keeps the surjectivity/`finrank` bookkeeping in elaboration budget
+-- The explicit residue-field algebra structure (built on the `Ideal.Quotient.field`-derived
+-- semiring
+-- via `algebraQuotientOfLEComap`) keeps the surjectivity/`finrank` bookkeeping in elaboration
+-- budget
 -- *without* the `algebraOfLiesOver` instance-diamond (which carries free metavariables).
 /-- **`Sₚ ⧸ Q` is a simple `Rₚ`-module at residue degree one** (the diamond-free `f = 1` input). For
 a maximal ideal `Q` of `Sₚ` lying over a maximal `m` of `Rₚ` with `inertiaDeg' m Q = 1`, the residue
@@ -544,7 +554,8 @@ theorem isSimpleModule_quot_of_inertiaDeg_one
   exact ⟨m, hm, ⟨(LinearMap.quotKerEquivOfSurjective _ hsurjRp).symm.trans
     (Submodule.quotEquivOfEq _ _ hker)⟩⟩
 
--- The module-length chain over the DVR base (Smith + `Ring.ord` additivity + simplicity) needs room.
+-- The module-length chain over the DVR base (Smith + `Ring.ord` additivity + simplicity) needs
+-- room.
 /-- **The per-prime relative norm over a DVR base at residue degree one** (the `PerfectField`-free
 residual, **CLOSED**).  For a DVR `Rₚ` (a local PID), a Dedekind PID `Sₚ` free-finite torsion-free
 over `Rₚ`, and a nonzero maximal ideal `Q` of `Sₚ` lying over `m = maximalIdeal Rₚ` with
