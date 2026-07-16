@@ -907,6 +907,70 @@ theorem RelEffCartierDiv.IsSubgroup.combMap_prodMap_snd_ι (M K : ℕ) [NeZero M
     simp
   rw [harith]
 
+/-- **[F3-R2] (KM p. 27: the product decomposition is split by the combination)**
+`combMap(v,u) ≫ prodMap = 𝟙` — assembled from the two leg computations by
+`pullback.hom_ext` (outer product, then each kernel), with the base legs given by the
+combination point's own over-`S` property. Together with [F3-R1] this makes
+`G ≅ Ker[M] ×_S Ker[K]` — KM's *"canonical product decomposition"*. -/
+theorem RelEffCartierDiv.IsSubgroup.combMap_prodMap (M K : ℕ) [NeZero M] [NeZero K]
+    (hMK : Nat.Coprime M K) [NeZero (M * K)]
+    (hdeg : ∀ s : S, D.degree s = M * K)
+    (h₁ : ((M : ℤ) * K) % ((M * K : ℕ) : ℤ) = 0) (h₂ : ((K : ℤ) * M) % ((M * K : ℕ) : ℤ) = 0) :
+    RelEffCartierDiv.IsSubgroup.combMap E hD (M : ℤ) (K : ℤ) (Nat.gcdB M K) (Nat.gcdA M K)
+        ≫ RelEffCartierDiv.IsSubgroup.prodMap E hD hdeg h₁ h₂
+      = 𝟙 _ := by
+  obtain ⟨W, hW⟩ : ∃ W : E.Point (pullback.fst (D.smulKernelπ E (M : ℤ))
+      (D.smulKernelπ E (K : ℤ)) ≫ D.smulKernelπ E (M : ℤ)),
+      RelEffCartierDiv.IsSubgroup.combMap E hD (M : ℤ) (K : ℤ)
+        (Nat.gcdB M K) (Nat.gcdA M K) ≫ D.ideal.subschemeι = W.1 :=
+    ⟨_, RelEffCartierDiv.IsSubgroup.combMap_ι E hD (M : ℤ) (K : ℤ) _ _⟩
+  have hσπ : RelEffCartierDiv.IsSubgroup.combMap E hD (M : ℤ) (K : ℤ)
+        (Nat.gcdB M K) (Nat.gcdA M K) ≫ D.ideal.subschemeι ≫ E.π
+      = pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ))
+        ≫ D.smulKernelπ E (M : ℤ) := by
+    rw [← Category.assoc, hW]
+    exact W.2
+  apply pullback.hom_ext
+  · rw [Category.assoc, RelEffCartierDiv.IsSubgroup.prodMap, pullback.lift_fst,
+      Category.id_comp]
+    apply pullback.hom_ext
+    · have hfst := RelEffCartierDiv.IsSubgroup.combMap_prodMap_fst_ι E hD M K hMK hdeg h₁ h₂
+      rw [← cancel_mono (D.ideal.subschemeι)]
+      show (RelEffCartierDiv.IsSubgroup.combMap E hD (M : ℤ) (K : ℤ)
+            (Nat.gcdB M K) (Nat.gcdA M K)
+          ≫ RelEffCartierDiv.IsSubgroup.toSmulKernel E hD hdeg h₁)
+          ≫ D.smulKernelι E (M : ℤ) ≫ D.ideal.subschemeι
+        = pullback.fst (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ))
+          ≫ D.smulKernelι E (M : ℤ) ≫ D.ideal.subschemeι
+      simpa only [Category.assoc] using hfst
+    · show (RelEffCartierDiv.IsSubgroup.combMap E hD (M : ℤ) (K : ℤ)
+            (Nat.gcdB M K) (Nat.gcdA M K)
+          ≫ RelEffCartierDiv.IsSubgroup.toSmulKernel E hD hdeg h₁)
+          ≫ D.smulKernelπ E (M : ℤ)
+        = pullback.fst _ _ ≫ D.smulKernelπ E (M : ℤ)
+      rw [Category.assoc, RelEffCartierDiv.IsSubgroup.toSmulKernel_π]
+      exact hσπ
+  · rw [Category.assoc, RelEffCartierDiv.IsSubgroup.prodMap, pullback.lift_snd,
+      Category.id_comp]
+    apply pullback.hom_ext
+    · have hsnd := RelEffCartierDiv.IsSubgroup.combMap_prodMap_snd_ι E hD M K hMK hdeg h₂
+      rw [← cancel_mono (D.ideal.subschemeι)]
+      show (RelEffCartierDiv.IsSubgroup.combMap E hD (M : ℤ) (K : ℤ)
+            (Nat.gcdB M K) (Nat.gcdA M K)
+          ≫ RelEffCartierDiv.IsSubgroup.toSmulKernel E hD hdeg h₂)
+          ≫ D.smulKernelι E (K : ℤ) ≫ D.ideal.subschemeι
+        = pullback.snd (D.smulKernelπ E (M : ℤ)) (D.smulKernelπ E (K : ℤ))
+          ≫ D.smulKernelι E (K : ℤ) ≫ D.ideal.subschemeι
+      simpa only [Category.assoc] using hsnd
+    · show (RelEffCartierDiv.IsSubgroup.combMap E hD (M : ℤ) (K : ℤ)
+            (Nat.gcdB M K) (Nat.gcdA M K)
+          ≫ RelEffCartierDiv.IsSubgroup.toSmulKernel E hD hdeg h₂)
+          ≫ D.smulKernelπ E (K : ℤ)
+        = pullback.snd _ _ ≫ D.smulKernelπ E (K : ℤ)
+      rw [Category.assoc, RelEffCartierDiv.IsSubgroup.toSmulKernel_π]
+      rw [hσπ]
+      exact pullback.condition
+
 end ProductDecomposition
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
