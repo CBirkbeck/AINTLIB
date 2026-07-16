@@ -2017,6 +2017,56 @@ theorem Section.HasExactOrder.smul_nsmul_ne_zero {k : Type u} [Field k] [IsSepCl
   rw [hord] at hdvda
   exact absurd haM (Nat.not_lt.mpr (Nat.le_of_dvd ha0 hdvda))
 
+open EllipticCurve in
+set_option synthInstance.maxHeartbeats 400000 in
+/-- **[F3-geom-input] (the geometric criterion input for `K·P` at order `M`)** Over any
+base with `M` invertible: at every algebraically closed geometric point, the multiples
+`a·(K·P)`, `0 < a < M`, are nonzero — the fibre distinctness transported through the
+base-change point dictionary (term-mode through the `baseChange` coercions). -/
+theorem Section.HasExactOrder.geometric_input {P : E.Section} (M K : ℕ)
+    [NeZero M] [NeZero K] (hMK : Nat.Coprime M K) [NeZero (M * K)]
+    [IsFinite (E.mulByHom (M : ℤ))] [IsFinite (E.mulByHom (K : ℤ))]
+    (hinvM : NIsInvertible S M) (h : P.HasExactOrder E (M * K)) :
+    ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S),
+      ∀ a : ℕ, 0 < a → a < M → (a : ℤ) • Point.pull E t ((K : ℤ) • P) ≠ 0 := by
+  intro k _ _ t a ha0 haM hcon
+  haveI : IsSepClosed k := IsSepClosed.of_isAlgClosed k
+  haveI : IsFinite ((E.baseChange t).mulByHom (M : ℤ)) :=
+    isFinite_mulByHom_baseChange E t (M : ℤ)
+  haveI : IsFinite ((E.baseChange t).mulByHom (K : ℤ)) :=
+    isFinite_mulByHom_baseChange E t (K : ℤ)
+  have h_t : Section.HasExactOrder (E.baseChange t)
+      (Point.asSection E t (Point.pull E t P)) (M * K) :=
+    Section.HasExactOrder.baseChange E h t
+  have hdist := Section.HasExactOrder.smul_nsmul_ne_zero (E := E.baseChange t)
+    M K hMK (hinvM.of_hom t) h_t a ha0 haM
+  -- the transport equiv and its effect on the section
+  apply hdist
+  set ψ := (Point.baseChangeEquiv E t (𝟙 (Spec (CommRingCat.of k)))).trans
+    (Point.castBase E (Category.id_comp t)) with hψ
+  have hgen : ψ (Point.asSection E t (Point.pull E t P)) = Point.pull E t P := by
+    refine Subtype.ext ?_
+    have h1 : (ψ (Point.asSection E t (Point.pull E t P))).1
+        = ((Point.baseChangeEquiv E t (𝟙 _)) (Point.asSection E t (Point.pull E t P))).1 :=
+      Point.castBase_coe E (Category.id_comp t)
+        ((Point.baseChangeEquiv E t (𝟙 _)) (Point.asSection E t (Point.pull E t P)))
+    have h2 : ((Point.baseChangeEquiv E t (𝟙 _)) (Point.asSection E t (Point.pull E t P))).1
+        = (Point.asSection E t (Point.pull E t P)).1 ≫ pullback.fst E.π t :=
+      Point.baseChangeEquiv_apply_coe E t _ _
+    have h3 : (Point.asSection E t (Point.pull E t P)).1 ≫ pullback.fst E.π t
+        = (Point.pull E t P).1 := Point.asSection_val_fst E t _
+    exact (h1.trans h2).trans h3
+  have hclaim : ψ ((a : ℤ) • ((K : ℤ) • Point.asSection E t (Point.pull E t P)))
+      = (a : ℤ) • Point.pull E t ((K : ℤ) • P) := by
+    have hz1 : ψ ((a : ℤ) • ((K : ℤ) • Point.asSection E t (Point.pull E t P)))
+        = (a : ℤ) • ((K : ℤ) • ψ (Point.asSection E t (Point.pull E t P))) := by
+      rw [map_zsmul, map_zsmul]
+    rw [hz1, hgen, ← Point.pull_zsmul]
+  have h0 : ψ ((a : ℤ) • ((K : ℤ) • Point.asSection E t (Point.pull E t P))) = 0 :=
+    hclaim.trans hcon
+  have := ψ.injective (h0.trans (map_zero ψ).symm)
+  exact this
+
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
