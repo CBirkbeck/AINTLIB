@@ -2067,6 +2067,44 @@ theorem Section.HasExactOrder.geometric_input {P : E.Section} (M K : ℕ)
   have := ψ.injective (h0.trans (map_zero ψ).symm)
   exact this
 
+open EllipticCurve in
+/-- **[F3-mp-invertible] (KM 1.7.2 forward, first conjunct, `M`-invertible base)** If
+`P` has exact order `M·K` (coprime) and `M` is invertible on `S`, then `K·P` has exact
+order `M`: the geometric criterion (`hasExactOrder_of_geometric`, T-D6c) fed by the
+transported fibre distinctness. The INTEGRAL version (no invertibility) additionally
+needs the translate-disjointness argument on the `S[1/K]`-side — see the board. -/
+theorem Section.HasExactOrder.smul_hasExactOrder_of_invertible {P : E.Section}
+    (M K : ℕ) [NeZero M] [NeZero K] (hMK : Nat.Coprime M K) [NeZero (M * K)]
+    [IsFinite (E.mulByHom (M : ℤ))] [IsFinite (E.mulByHom (K : ℤ))]
+    (hinvM : NIsInvertible S M) (h : P.HasExactOrder E (M * K)) :
+    ((K : ℤ) • P).HasExactOrder E M := by
+  refine Section.hasExactOrder_of_geometric E hinvM ?_ ?_
+  · have h1 : (M : ℤ) • ((K : ℤ) • P) = ((M : ℤ) * (K : ℤ)) • P := smul_smul _ _ _
+    have h2 : ((M : ℤ) * (K : ℤ)) = ((M * K : ℕ) : ℤ) := by push_cast; ring
+    rw [h1, h2]
+    exact h.smul_eq_zero E
+  · intro k _ _ t
+    exact Section.HasExactOrder.geometric_input E M K hMK hinvM h k t
+
+open EllipticCurve in
+/-- **[F3-mp of KM 1.7.2, invertible base — BOTH conjuncts]** With `M` and `K` both
+invertible on `S` (e.g. any `ℤ[1/(M·K)]`-base — the `Y₁(N)`-tower situation), a point
+of exact coprime order `M·K` splits: `K·P` has exact order `M` and `M·P` exact order
+`K`. -/
+theorem Section.HasExactOrder.smul_hasExactOrder_both {P : E.Section}
+    (M K : ℕ) [NeZero M] [NeZero K] (hMK : Nat.Coprime M K) [NeZero (M * K)]
+    [IsFinite (E.mulByHom (M : ℤ))] [IsFinite (E.mulByHom (K : ℤ))]
+    (hinvM : NIsInvertible S M) (hinvK : NIsInvertible S K)
+    (h : P.HasExactOrder E (M * K)) :
+    ((K : ℤ) • P).HasExactOrder E M ∧ ((M : ℤ) • P).HasExactOrder E K := by
+  haveI : NeZero (K * M) := ⟨by rw [Nat.mul_comm]; exact NeZero.ne (M * K)⟩
+  refine ⟨Section.HasExactOrder.smul_hasExactOrder_of_invertible E M K hMK hinvM h, ?_⟩
+  have hgen : ∀ (n : ℕ) [NeZero n], n = M * K → P.HasExactOrder E n := by
+    rintro n _ rfl
+    exact h
+  exact Section.HasExactOrder.smul_hasExactOrder_of_invertible E K M hMK.symm hinvK
+    (hgen (K * M) (Nat.mul_comm K M))
+
 
 /-- **[W0-F3] (KM 1.7.2, `ℤ/N`-instance — the factorization core)** For coprime
 `M, K ≥ 1`, a point `P ∈ E(S)` has Drinfeld exact order `M·K` iff `K·P` has exact
