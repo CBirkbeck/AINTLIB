@@ -1269,27 +1269,6 @@ theorem RelEffCartierDiv.IsSubgroup.finrank_prod_struct (M K : ℕ) [NeZero M] [
     _ = (D.ideal.subschemeι ≫ E.π).finrank s := by rw [hstruct]
     _ = M * K := hdeg s
 
-/-- **[F3-prodrank] (the fibre-product rank formula — [FR-GEN]-grade, mathlib-PR shape)**
-The fibre rank of a fibre product of finite flat morphisms is the product of the fibre
-ranks: `deg (X ×_S Y → S) = deg X · deg Y` pointwise. Route (§16g): reduce to an affine
-chart through the point (`exists_Spec_apply_eq` + `finrank_pullback_snd` three times +
-the base-change-of-fibre-product pasting iso), then `pullbackSpecIso` +
-`rankAtStalk_tensorProduct`. -/
-theorem Scheme.Hom.finrank_pullback_comp_fst {X Y : Scheme.{u}} (f : X ⟶ S) (g : Y ⟶ S)
-    [Flat f] [IsFinite f] [Flat g] [IsFinite g] (s : S) :
-    (pullback.fst f g ≫ f).finrank s = f.finrank s * g.finrank s := by
-  haveI hc1 : Flat (pullback.fst f g ≫ f) :=
-    MorphismProperty.comp_mem _ _ _
-      (MorphismProperty.pullback_fst (P := @Flat) _ _ ‹_›) ‹_›
-  haveI hc2 : IsFinite (pullback.fst f g ≫ f) :=
-    MorphismProperty.comp_mem _ _ _
-      (MorphismProperty.pullback_fst (P := @IsFinite) _ _ ‹_›) ‹_›
-  obtain ⟨R, i, hi, s', rfl⟩ := S.exists_Spec_apply_eq s
-  rw [← Scheme.Hom.finrank_pullback_snd f i s', ← Scheme.Hom.finrank_pullback_snd g i s',
-    ← Scheme.Hom.finrank_pullback_snd (pullback.fst f g ≫ f) i s']
-  -- now everything is over Spec R; the base-changed product is the product of base changes
-  sorry
-
 include hD in
 /-- **[F3-degmul] (KM p. 28: "rank(G[N₁])·rank(G[N₂]) = rank(G) = N₁N₂")** The degree
 of the divisor multiplies over the kernel product: `deg Z_M · deg Z_K = M·K` at every
@@ -1466,6 +1445,29 @@ theorem RelEffCartierDiv.IsSubgroup.smulKernelπ_finrank_eq {k : Type u} [Field 
     exact Nat.eq_of_mul_eq_mul_left (Nat.mul_pos hMpos hKpos) h1
   have ha1 : a = 1 := Nat.eq_one_of_mul_eq_one_left (m := b) (by rwa [Nat.mul_comm] at hab)
   rw [ha, ha1, Nat.mul_one]
+
+/-- **[F3-distinct-arith] (the cyclic arithmetic of KM p. 29's counting)** In any
+additive group: if `M ∣ ord x`, `ord x ∣ M·K`, and `M, K` are coprime, then `K·x` has
+order exactly `M`. (`ord x = M·e` with `e ∣ K`; `ord(K·x) = M·e / gcd(M·e, K)` and the
+coprime cancellation gives `gcd(M·e, K) = e`.) -/
+theorem addOrderOf_nsmul_eq_of_coprime {G : Type u} [AddGroup G] (x : G) (M K : ℕ)
+    [NeZero M] [NeZero K] (hMK : Nat.Coprime M K)
+    (hM : M ∣ addOrderOf x) (hdvd : addOrderOf x ∣ M * K) :
+    addOrderOf (K • x) = M := by
+  obtain ⟨e, he⟩ := hM
+  have heK : e ∣ K := by
+    have h1 : M * e ∣ M * K := he ▸ hdvd
+    exact (Nat.mul_dvd_mul_iff_left (Nat.pos_of_ne_zero (NeZero.ne M))).mp h1
+  have hgcd : Nat.gcd (addOrderOf x) K = e := by
+    rw [he, hMK.gcd_mul_left_cancel e]
+    exact Nat.gcd_eq_left heK
+  rw [addOrderOf_nsmul' x (NeZero.ne K), hgcd, he]
+  have he0 : e ≠ 0 := by
+    rintro rfl
+    have h0 : addOrderOf x = 0 := by rw [he, Nat.mul_zero]
+    rw [h0] at hdvd
+    exact NeZero.ne (M * K) (Nat.eq_zero_of_zero_dvd hdvd)
+  exact Nat.mul_div_cancel _ (Nat.pos_of_ne_zero he0)
 
 /-- **[F3-exhaust-1]** A point factoring through a divisor bounds the divisor's ideal
 by the point's kernel (step 1 of the exhaustion argument). -/
