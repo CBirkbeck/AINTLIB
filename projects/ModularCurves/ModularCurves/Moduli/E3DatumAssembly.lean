@@ -309,6 +309,42 @@ theorem isUnit_a₃_of_marked_origin {S : Scheme.{u}} {E : EllipticCurve S}
   exact hy0 this
 
 
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **([hArb-3a′] the general marking transport)** Twisting a chart moves a marking by
+the coordinate change: `(p, q) ↦ (vcX p, vcY p q)`. -/
+theorem marksAt_ofVC_vc {S : Scheme.{u}} {G : EllipticCurveGeom S}
+    {V : S.affineOpens} (Pr : LocalPresentation G V)
+    {σ : S ⟶ G.E} {hσ : σ ≫ G.π = 𝟙 S} {p q : Γ(S, V.1)}
+    (hM : Pr.MarksAt hσ p q) (C : VariableChange Γ(S, V.1)) :
+    (Pr.ofVC C).MarksAt hσ (C.vcX p) (C.vcY p q) := by
+  obtain ⟨heq, -⟩ := id hM
+  refine LocalPresentation.MarksAt.ofVC Pr C (C.equation_smul Pr.W heq) ?_
+  convert hM using 2
+  · show ((C.u : Γ(S, V.1))) ^ 2 * C.vcX p + C.r = p
+    rw [WeierstrassCurve.VariableChange.vcX,
+      show ((C.u : Γ(S, V.1))) ^ 2 * (((C.u⁻¹ : Γ(S, V.1)ˣ) : Γ(S, V.1)) ^ 2 *
+          (p - C.r)) + C.r
+        = (((C.u * C.u⁻¹ : Γ(S, V.1)ˣ) : Γ(S, V.1))) ^ 2 * (p - C.r) + C.r from by
+      push_cast
+      ring]
+    simp
+  · show ((C.u : Γ(S, V.1))) ^ 3 * C.vcY p q +
+      C.s * ((C.u : Γ(S, V.1))) ^ 2 * C.vcX p + C.t = q
+    rw [WeierstrassCurve.VariableChange.vcX, WeierstrassCurve.VariableChange.vcY,
+      show ((C.u : Γ(S, V.1))) ^ 3 * (((C.u⁻¹ : Γ(S, V.1)ˣ) : Γ(S, V.1)) ^ 3 *
+          (q - C.s * (p - C.r) - C.t)) +
+        C.s * ((C.u : Γ(S, V.1))) ^ 2 * (((C.u⁻¹ : Γ(S, V.1)ˣ) : Γ(S, V.1)) ^ 2 *
+          (p - C.r)) + C.t
+        = (((C.u * C.u⁻¹ : Γ(S, V.1)ˣ) : Γ(S, V.1))) ^ 3 * (q - C.s * (p - C.r) - C.t)
+          + C.s * (((C.u * C.u⁻¹ : Γ(S, V.1)ˣ) : Γ(S, V.1))) ^ 2 * (p - C.r) + C.t from by
+      push_cast
+      ring]
+    simp
+    ring
+
+
 end ChartRecord
 
 
