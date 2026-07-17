@@ -1219,14 +1219,101 @@ theorem chartEquiv_canonicalMap_W : True := by sorry
 
 /-! ### Roundtrip step 4: `chartRev ∘ θ = ρ` -/
 
-/-- `θ`'s jet components evaluate to canonical constant lifts. -/
+/-- `chartRev` on disc-only jets is the evaluation. -/
+theorem chartRev_inl (f : PowerSeries.Restricted K (1 : ℝ)) :
+    chartRev F (TrivSqZeroExt.inl f) = chartEval F f := by
+  show chartEval F (TrivSqZeroExt.inl f : JetB F).fst +
+    chartEval F (TrivSqZeroExt.inl f : JetB F).snd *
+      (chartDatum F).canonicalMap (Qa F) = chartEval F f
+  rw [TrivSqZeroExt.fst_inl, TrivSqZeroExt.snd_inl, map_zero, zero_mul, add_zero]
+
+/-- `chartRev` sends the square-zero generator to `Q̄`. -/
+theorem chartRev_inr_one :
+    chartRev F (TrivSqZeroExt.inr 1) = (chartDatum F).canonicalMap (Qa F) := by
+  show chartEval F (TrivSqZeroExt.inr 1 : JetB F).fst +
+    chartEval F (TrivSqZeroExt.inr 1 : JetB F).snd *
+      (chartDatum F).canonicalMap (Qa F) = _
+  rw [TrivSqZeroExt.fst_inr, TrivSqZeroExt.snd_inr, map_zero, map_one, one_mul, zero_add]
+
+/-- The 2-jet of a constant lift is the disc-only constant. -/
+theorem jB_constNN (b : L F) (hb : b ∈ nonnegSubring K) :
+    jB F (constNN F b hb) = TrivSqZeroExt.inl ((nonnegEquiv (R := K)).symm ⟨b, hb⟩) := by
+  refine TrivSqZeroExt.ext ?_ ?_
+  · refine ofRestricted_injective (R := K) ?_
+    rw [TrivSqZeroExt.fst_inl]
+    show ofRestricted ((nonnegEquiv (R := K)).symm
+      ⟨qCoeff F 0 ((constNN F b hb : JetA F) : JetC F), (constNN F b hb).2.1⟩) =
+      ofRestricted ((nonnegEquiv (R := K)).symm ⟨b, hb⟩)
+    rw [ofRestricted_nonnegEquiv_symm, ofRestricted_nonnegEquiv_symm]
+    show qCoeff F 0 (constHomC F b) = b
+    rw [qCoeff_constHomC, if_pos rfl]
+  · refine ofRestricted_injective (R := K) ?_
+    rw [TrivSqZeroExt.snd_inl, map_zero]
+    show ofRestricted ((nonnegEquiv (R := K)).symm
+      ⟨qCoeff F 1 ((constNN F b hb : JetA F) : JetC F), (constNN F b hb).2.2⟩) = 0
+    rw [ofRestricted_nonnegEquiv_symm]
+    show qCoeff F 1 (constHomC F b) = 0
+    rw [qCoeff_constHomC, if_neg one_ne_zero]
+
+/-- `θ` on constant lifts is the rescaled disc constant. -/
+theorem theta_constNN (b : L F) (hb : b ∈ nonnegSubring K) :
+    thetaChart F (constNN F b hb) = TrivSqZeroExt.inl
+      (rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le
+        ((nonnegEquiv (R := K)).symm ⟨b, hb⟩)) := by
+  show twistB F (jB F (constNN F b hb)) = _
+  rw [jB_constNN]
+  refine TrivSqZeroExt.ext ?_ ?_
+  · rfl
+  · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le 0 = 0
+    exact map_zero _
+
+/-- `constKW` inverts the nonnegative-shadow equivalence. -/
+theorem constKW_nonnegEquiv_symm (b : L F) (hb : b ∈ nonnegSubring K) :
+    constKW F ((nonnegEquiv (R := K)).symm ⟨b, hb⟩) = constNN F b hb := by
+  refine Subtype.ext ?_
+  show constHomC F (ofRestricted (R := K) ((nonnegEquiv (R := K)).symm ⟨b, hb⟩)) =
+    constHomC F b
+  rw [ofRestricted_nonnegEquiv_symm]
+
+/-- `chartRev ∘ θ = ρ` on constant lifts. -/
+theorem chartRev_theta_constNN (b : L F) (hb : b ∈ nonnegSubring K) :
+    chartRev F (thetaChart F (constNN F b hb)) =
+      (chartDatum F).canonicalMap (constNN F b hb) := by
+  rw [theta_constNN, chartRev_inl, evalRescale_eq, constKW_nonnegEquiv_symm]
+
+/-- `θ` fixes the square-zero generator. -/
+theorem theta_Qa : thetaChart F (Qa F) = TrivSqZeroExt.inr 1 := by
+  show twistB F (jB F (Qa F)) = _
+  have hjBQ : jB F (Qa F) = TrivSqZeroExt.inr 1 := by
+    refine TrivSqZeroExt.ext ?_ ?_
+    · refine ofRestricted_injective (R := K) ?_
+      rw [TrivSqZeroExt.fst_inr, map_zero]
+      show ofRestricted ((nonnegEquiv (R := K)).symm
+        ⟨qCoeff F 0 ((Qa F : JetA F) : JetC F), (Qa F).2.1⟩) = 0
+      rw [ofRestricted_nonnegEquiv_symm]
+      show qCoeff F 0 (sectionD F (TrivSqZeroExt.inr (1 : L F))) = 0
+      rw [qCoeff_sectionD]
+      norm_num
+    · refine ofRestricted_injective (R := K) ?_
+      rw [TrivSqZeroExt.snd_inr, map_one]
+      show ofRestricted ((nonnegEquiv (R := K)).symm
+        ⟨qCoeff F 1 ((Qa F : JetA F) : JetC F), (Qa F).2.2⟩) = 1
+      rw [ofRestricted_nonnegEquiv_symm]
+      show qCoeff F 1 (sectionD F (TrivSqZeroExt.inr (1 : L F))) = 1
+      rw [qCoeff_sectionD]
+      norm_num
+  rw [hjBQ]
+  refine TrivSqZeroExt.ext ?_ ?_
+  · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le 0 = 0
+    exact map_zero _
+  · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le 1 = 1
+    exact map_one _
+
+/-- **Roundtrip step 4**: `chartRev ∘ θ = ρ` ([FJP] Prop 3.1's coherence on 𝓐). -/
 theorem chartRev_theta (a : JetA F) :
     chartRev F (thetaChart F a) = (chartDatum F).canonicalMap a := by
-  -- decompose `a` into its 2-jet part and a `Q²`-part
   obtain ⟨y, ⟨hy0, hy1⟩, hdecomp⟩ := jet_decomposition F a
-  -- the collapse kills `y` on the ρ-side
   have hρy : (chartDatum F).canonicalMap y = 0 := canonicalMap_eq_zero_of_qSq F y hy0 hy1
-  -- and `θ` kills `y` outright (its 2-jet vanishes)
   have hjBy : jB F y = 0 := by
     refine TrivSqZeroExt.ext ?_ ?_
     · refine ofRestricted_injective (R := K) ?_
@@ -1244,8 +1331,16 @@ theorem chartRev_theta (a : JetA F) :
   have hθy : thetaChart F y = 0 := by
     show twistB F (jB F y) = 0
     rw [hjBy, map_zero]
-  -- reduce to the 2-jet part
-  sorry
+  conv_lhs => rw [hdecomp]
+  conv_rhs => rw [hdecomp]
+  rw [RingHom.map_add (thetaChart F), RingHom.map_add (chartRev F), hθy,
+    RingHom.map_zero (chartRev F), add_zero,
+    RingHom.map_add (thetaChart F), RingHom.map_add (chartRev F),
+    RingHom.map_mul (thetaChart F), RingHom.map_mul (chartRev F),
+    RingHom.map_add ((chartDatum F).canonicalMap), hρy, add_zero,
+    RingHom.map_add ((chartDatum F).canonicalMap),
+    RingHom.map_mul ((chartDatum F).canonicalMap),
+    chartRev_theta_constNN, chartRev_theta_constNN, theta_Qa, chartRev_inr_one]
 
 /-! ### Failure of stable uniformity ([FJP] Corollary 3.2) -/
 
