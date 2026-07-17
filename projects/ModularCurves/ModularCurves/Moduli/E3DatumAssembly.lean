@@ -24,7 +24,11 @@ noncomputable section
 
 namespace ModularCurves
 
-open AlgebraicGeometry CategoryTheory
+open AlgebraicGeometry CategoryTheory Limits MonoidalCategory CartesianMonoidalCategory
+  MonObj
+
+attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
+  CategoryTheory.Over.braidedCategory
 
 namespace LocalPresentation
 
@@ -50,6 +54,125 @@ theorem marksAt_origin_ofVC {S : Scheme.{u}} {G : EllipticCurveGeom S}
     exact h
   refine LocalPresentation.MarksAt.ofVC Pr C hEq' ?_
   convert hM using 2 <;> simp [hC]
+
+
+section ChartRecord
+
+variable {S : Scheme.{u}} {E : EllipticCurve S} {V : S.affineOpens}
+  (Pr : LocalPresentation E.toEllipticCurveGeom V)
+
+/-- The classifying morphism of the affine piece. -/
+noncomputable abbrev chartρ (V : S.affineOpens) : Spec Γ(S, V.1) ⟶ S :=
+  V.2.isoSpec.inv ≫ V.1.ι
+
+/-- **([hArb-3c-α] the pullback comparison)** Base change along `chartρ` agrees with
+the chart pullback. -/
+noncomputable def chartPullbackIso :
+    (pullback E.π (chartρ V) : Scheme.{u}) ≅ pullback E.toEllipticCurveGeom.π V.1.ι where
+  hom := pullback.lift (pullback.fst _ _) (pullback.snd _ _ ≫ V.2.isoSpec.inv)
+    (by rw [pullback.condition]; simp [chartρ])
+  inv := pullback.lift (pullback.fst _ _) (pullback.snd _ _ ≫ V.2.isoSpec.hom)
+    (by rw [pullback.condition, chartρ]
+        simp only [Category.assoc, Iso.hom_inv_id_assoc])
+  hom_inv_id := by
+    refine pullback.hom_ext ?_ ?_ <;>
+      simp [pullback.lift_fst, pullback.lift_snd, pullback.lift_fst_assoc,
+        pullback.lift_snd_assoc, Category.assoc]
+  inv_hom_id := by
+    refine pullback.hom_ext ?_ ?_ <;>
+      simp [pullback.lift_fst, pullback.lift_snd, pullback.lift_fst_assoc,
+        pullback.lift_snd_assoc, Category.assoc]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **([hArb-3c-α] the record comparison)** The base-changed record over `Spec Γ(V)`
+is pointed-isomorphic (as an `Over`-object) to the chart model. -/
+noncomputable def chartRecordIso :
+    letI := Pr.elliptic
+    (E.baseChange (chartρ V)).asOver ≅ (modelEllipticCurve Pr.W).asOver :=
+  letI := Pr.elliptic
+  Over.isoMk ((chartPullbackIso (E := E) (V := V)) ≪≫ Pr.e)
+    (by
+      show ((chartPullbackIso (E := E) (V := V)).hom ≫ Pr.e.hom) ≫ projModelπ Pr.W =
+        pullback.snd E.π (chartρ V)
+      rw [Category.assoc, Pr.compat_π]
+      rw [show (chartPullbackIso (E := E) (V := V)).hom ≫
+          pullback.snd E.toEllipticCurveGeom.π V.1.ι ≫ V.2.isoSpec.hom =
+        ((chartPullbackIso (E := E) (V := V)).hom ≫
+          pullback.snd E.toEllipticCurveGeom.π V.1.ι) ≫ V.2.isoSpec.hom from
+        (Category.assoc _ _ _).symm]
+      rw [show (chartPullbackIso (E := E) (V := V)).hom ≫
+          pullback.snd E.toEllipticCurveGeom.π V.1.ι =
+        pullback.snd E.π (chartρ V) ≫ V.2.isoSpec.inv from pullback.lift_snd _ _ _]
+      simp [Category.assoc])
+
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **([hArb-3c-β] pointedness)** The record comparison carries the base-changed zero
+section to the model zero section. -/
+theorem chartRecordIso_unit :
+    letI := Pr.elliptic
+    (η[(E.baseChange (chartρ V)).asOver] :
+        𝟙_ (Over (Spec Γ(S, V.1))) ⟶ (E.baseChange (chartρ V)).asOver) ≫
+      (chartRecordIso Pr).hom =
+    η[(modelEllipticCurve Pr.W).asOver] := by
+  letI := Pr.elliptic
+  ext1
+  rw [Over.comp_left, (E.baseChange (chartρ V)).one_eq_zero,
+    (modelEllipticCurve Pr.W).one_eq_zero]
+  rw [Category.assoc]
+  congr 1
+  -- `zero ≫ (pullback comparison ≫ e) = projModelZero`
+  show (E.baseChange (chartρ V)).zero ≫
+      ((chartPullbackIso (E := E) (V := V)).hom ≫ Pr.e.hom) = projModelZero Pr.W
+  rw [← Pr.compat_zero, ← Category.assoc]
+  congr 1
+  refine pullback.hom_ext ?_ ?_
+  · show ((E.baseChange (chartρ V)).zero ≫ (chartPullbackIso (E := E) (V := V)).hom) ≫
+      pullback.fst E.toEllipticCurveGeom.π V.1.ι = _
+    rw [Category.assoc,
+      show (chartPullbackIso (E := E) (V := V)).hom ≫
+          pullback.fst E.toEllipticCurveGeom.π V.1.ι = pullback.fst E.π (chartρ V) from
+        pullback.lift_fst _ _ _]
+    rw [show (E.baseChange (chartρ V)).zero ≫ pullback.fst E.π (chartρ V) =
+      chartρ V ≫ E.zero from pullback.lift_fst _ _ _]
+    rw [show (V.2.isoSpec.inv ≫ pullback.lift (V.1.ι ≫ E.toEllipticCurveGeom.zero)
+        (𝟙 _) _) ≫ pullback.fst E.toEllipticCurveGeom.π V.1.ι =
+      V.2.isoSpec.inv ≫ V.1.ι ≫ E.toEllipticCurveGeom.zero from by
+        rw [Category.assoc, pullback.lift_fst]]
+    rw [chartρ, Category.assoc]
+  · show ((E.baseChange (chartρ V)).zero ≫ (chartPullbackIso (E := E) (V := V)).hom) ≫
+      pullback.snd E.toEllipticCurveGeom.π V.1.ι = _
+    rw [Category.assoc,
+      show (chartPullbackIso (E := E) (V := V)).hom ≫
+          pullback.snd E.toEllipticCurveGeom.π V.1.ι =
+        pullback.snd E.π (chartρ V) ≫ V.2.isoSpec.inv from pullback.lift_snd _ _ _]
+    rw [show (E.baseChange (chartρ V)).zero ≫ pullback.snd E.π (chartρ V) ≫
+        V.2.isoSpec.inv = ((E.baseChange (chartρ V)).zero ≫
+          pullback.snd E.π (chartρ V)) ≫ V.2.isoSpec.inv from
+      (Category.assoc _ _ _).symm]
+    rw [show (E.baseChange (chartρ V)).zero ≫ pullback.snd E.π (chartρ V) = 𝟙 _ from
+      pullback.lift_snd _ _ _]
+    rw [show (V.2.isoSpec.inv ≫ pullback.lift (V.1.ι ≫ E.toEllipticCurveGeom.zero)
+        (𝟙 _) _) ≫ pullback.snd E.toEllipticCurveGeom.π V.1.ι =
+      V.2.isoSpec.inv ≫ 𝟙 _ from by rw [Category.assoc, pullback.lift_snd]]
+    simp
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **([hArb-3c-γ] the chart points equivalence)** Abstract points of `E` over a
+`Spec Γ(V)`-point correspond additively to model points of the chart — the
+base-change equivalence composed with the record-comparison transport
+(`pointAddEquiv` + `isMonHom_of_pointedIso_records`). -/
+noncomputable def chartPointsEquiv {T : Scheme.{u}} (tV : T ⟶ Spec Γ(S, V.1)) :
+    letI := Pr.elliptic
+    E.Point (tV ≫ chartρ V) ≃+ (modelEllipticCurve Pr.W).Point tV :=
+  letI := Pr.elliptic
+  (EllipticCurve.Point.baseChangeEquiv (E := E) (chartρ V) tV).symm.trans
+    (EllipticCurve.pointAddEquiv (chartRecordIso Pr)
+      (isMonHom_of_pointedIso_records _ _ (chartRecordIso Pr)
+        (chartRecordIso_unit Pr)) tV)
+
+
+end ChartRecord
 
 
 end LocalPresentation
