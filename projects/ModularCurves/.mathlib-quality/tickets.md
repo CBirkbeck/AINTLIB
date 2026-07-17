@@ -22895,3 +22895,26 @@ other layers are now either DONE or mechanical. (STREAM-OMEGA)
 now), assembly = mechanical wiring; the ONLY remaining mathematics = the two KM-split
 bridges. On their landing, hArb :95 closes and with it the ℤ[1/3] headline
 `naiveLevelThree_representable_by_affine`. (STREAM-OMEGA)
+
+---
+
+## v10.311-OMEGA (2026-07-17, window cont.⁴) — ★★★ [hArb-3c] COMPLETE: the abstract↔chart transport + the `a₃`-certificate; hArb is now EXACTLY {BRIDGE-P, BRIDGE-Q} + one wiring pass
+
+**Delivered (axiom-clean, `E3DatumAssembly.lean`):**
+- `chartPullbackIso` / `chartRecordIso` / `chartRecordIso_unit` — the base-changed
+  record `E.baseChange (chartρ V)` is pointed-`Over`-isomorphic to the chart model
+  `modelEllipticCurve Pr.W` (compat_π/compat_zero chases).
+- `chartPointsEquiv` — `E.Point (tV ≫ chartρ V) ≃+ (modelEllipticCurve Pr.W).Point tV`
+  (`Point.baseChangeEquiv` + `pointAddEquiv` with `isMonHom_of_pointedIso_records`):
+  the abstract level-structure group theory now computes in ANY chart.
+- `chartPointsEquiv_pull_marked` — the equiv's value on a marked section's pull is the
+  pulled affine-point section.
+- **`isUnit_a₃_of_marked_origin`** — on a chart marking a fibrewise-nonzero `3`-torsion
+  section at the origin, `a₃` is a UNIT (fibre value `some(0,0)` is `3`- but not
+  `2`-torsion; `negY 0 0 = −a₃`; residue criterion).
+
+**hArb remaining = BRIDGE-P + BRIDGE-Q (KM split, exact interface in their inbox) +
+the single `isE3Datum_of_bridges` wiring pass** (translation ✓ → s-shear with `a₃`-unit ✓
+→ BRIDGE-P kills `a₂` → flex chart; `hcubic` = BRIDGE-Q; `ha₃` ✓; `h3` ✓ from `hR`;
+`hB` ✓ redundant via `isUnit_e3B`; cover assembly = `isE3Datum_of_flexCharts`).
+(STREAM-OMEGA)
