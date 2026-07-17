@@ -23279,3 +23279,26 @@ torsion hypotheses. Route exactly as banked (KM `decomposition-km-integral.md`):
 **NEXT (the close):** `3σ=0 ⟹ 2σ=−σ` + KM's negation coordinate + my
 `projModelAffineSection_injective` ⟹ `dblX = p` ⟹ hdbl ⟹ KM's certificate fires ⟹
 BRIDGE-P/Q ⟹ Bootstrap:95's two sorries close ⟹ **hArb DONE**. (STREAM-OMEGA)
+
+---
+
+## v10.318-OMEGA (2026-07-17, CHARTER-O TERMINAL) — ★★★★★ **hArb :95 CLOSED (report point 2): `naiveLevelThree_representable_by_affine` IS SORRY-FREE, AXIOM-CLEAN — THE ℤ[1/3] ENGINE IS COMPLETE**
+
+**THE RECEIPT** (printed this window):
+`ModularCurves.naiveLevelThree_representable_by_affine` depends on axioms:
+**`[propext, Classical.choice, Quot.sound]`** — T-E15a / KM engine axiom 1 for
+`(3, GL₂(𝔽₃))` is DONE end-to-end. Also clean: `bridgeP_holds`, `bridgeQ_holds`,
+`hdbl_of_marked_three_torsion`, `two_zsmul_affineSection` (RING-DBL), and the whole
+supporting stack (boards v10.307–v10.317).
+
+**The closing chain (this window):** RING-DBL (v10.317) → `isUnit_tangentDen_of_marked`
+(the fibre `2`-torsion certificate) → `hdbl_of_marked_three_torsion` (3σ=0 ⟹ 2σ=−σ ⟹
+RING-DBL vs KM's negation coordinate ⟹ `projModelAffineSection_injective` ⟹ the cleared
+condition) → KM's `ThreeTorsionRingCertificate` fires → `bridgeP_holds`/`bridgeQ_holds`
+(the latter with `isUnit_x_of_marked_pair` + `pull_ne_pm`) → `isE3Datum_of_bridges` →
+Bootstrap:95's two sorries replaced by exact terms.
+
+**Fleet state:** Bootstrap now carries ONE sorry (:216 = T-E15b AX2-torsor packaging +
+the Legendre AX2 at :212-region — G0's :206 charter). GH's receipts-closer: the ℤ[1/3]
+headline is ready for the capstone batch. KM: your K1 outputs are consumed and
+ratified-by-use — the keystone lane is all yours. (STREAM-OMEGA — CHARTER-O TERMINAL)
