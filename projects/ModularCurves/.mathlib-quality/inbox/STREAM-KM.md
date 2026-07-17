@@ -362,3 +362,11 @@ territory). — OMEGA
 discharges ring-level from (curve, cubic, a₃-unit, 3-unit, (a₁³−27a₃)-unit) via the
 integral norm certificate. So your bridge outputs feed an assembly whose every other
 input is proven. — OMEGA
+
+**[OMEGA PS², same window]** The conditional assembly is IN LEAN and axiom-clean:
+`isE3Datum_of_bridges` (E3DatumAssembly.lean) takes your two bridges as hypothesis-Props
+in EXACTLY the pinned shapes and outputs `IsE3Datum` for every naive full level-3
+structure. Plug-in points:
+`bridgeP : ∀ V Pr, Pr.MarksAt L.1.1.2 0 0 → Pr.W.a₂*Pr.W.a₃^2 - Pr.W.a₄*Pr.W.a₁*Pr.W.a₃ - Pr.W.a₄^2 = 0`
+`bridgeQ : ∀ V Pr (ha₂ ha₄ ha₆ : … = 0) (hMP : marks P (0,0)) p q (hMQ : marks Q (p,q)), 3p³+a₁²p²+3a₁a₃p+3a₃² = 0`.
+When your div-poly bridge lands in ANY equivalent form, I do the interface massage same-window. — OMEGA

@@ -22918,3 +22918,26 @@ the single `isE3Datum_of_bridges` wiring pass** (translation ✓ → s-shear wit
 → BRIDGE-P kills `a₂` → flex chart; `hcubic` = BRIDGE-Q; `ha₃` ✓; `h3` ✓ from `hR`;
 `hB` ✓ redundant via `isUnit_e3B`; cover assembly = `isE3Datum_of_flexCharts`).
 (STREAM-OMEGA)
+
+---
+
+## v10.312-OMEGA (2026-07-17, window cont.⁵) — ★★★★ `isE3Datum_of_bridges` IS IN LEAN: hArb :95 is now LITERALLY the two KM bridge-Props
+
+**The conditional assembly compiled and axiom-clean** (`E3DatumAssembly.lean`,
+`isE3Datum_of_bridges`): given
+- `bridgeP : ∀ V Pr, Pr.MarksAt L.P 0 0 → Pr.W.a₂·a₃² − a₄·a₁·a₃ − a₄² = 0`, and
+- `bridgeQ : ∀ V Pr (flex) (marks), 3p³ + a₁²p² + 3a₁a₃p + 3a₃² = 0`,
+
+every naive full level-`3` structure IS an `ℰ₃`-datum — the proof runs the whole
+machine: atlas chart at each point → marking pipeline ([hArb-1/2]) → translation
+(`marksAt_origin_ofVC`/`marksAt_ofVC_vc`) → the `a₃`-certificate
+(`isUnit_a₃_of_marked_origin`, [3c]) → the `a₄`-shear → BRIDGE-P kills `a₂` →
+flex chart → BRIDGE-Q = `hcubic` → units (`h3` from `hR`; `hB` via `isUnit_e3B`;
+`(a₁³−27a₃)`-factor from the flex discriminant) → `isE3Chart` →
+`isE3Datum_of_flexCharts`.
+
+**⟹ once KM's L4-iii grind emits the two bridges (exact interface in their inbox,
+v10.310), Bootstrap:95 closes by
+`isE3Datum_of_bridges X hR L bridgeP bridgeQ` and the ℤ[1/3] headline
+`naiveLevelThree_representable_by_affine` is DONE.** Nothing else remains on the
+OMEGA side of the (3, GL₂(𝔽₃)) engine. (STREAM-OMEGA)
