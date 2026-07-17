@@ -81,35 +81,50 @@ theorem localPullbackUnitIso_hom_pulled_oneT
               (show U.toScheme.presheaf.obj (.op ⊤) from 1))
       have hone := pullbackUnitIso_hom_unit_oneT g
       rw [hs]
-      calc
-        _ = (unitObj VY.toScheme).presheaf.map (eqToHom htop).op
-            ((pullbackUnitIso g).hom.val.app
-              (.op (g ⁻¹ᵁ (⊤ : U.toScheme.Opens)))
-                (((pullbackPushforwardAdjunction g).unit.app
-                  (unitObj U.toScheme)).val.app (.op ⊤)
-                    (show U.toScheme.presheaf.obj (.op ⊤) from 1))) := hnat
-        _ = (unitObj VY.toScheme).presheaf.map (eqToHom htop).op
-            (show VY.toScheme.presheaf.obj
-              (.op (g ⁻¹ᵁ (⊤ : U.toScheme.Opens))) from 1) :=
-          congrArg (fun z ↦ (unitObj VY.toScheme).presheaf.map
-            (eqToHom htop).op z) hone
-        _ = _ := by
-          let oneV : (unitObj VY.toScheme).presheaf.obj (.op ZY) :=
-            show VY.toScheme.presheaf.obj (.op ZY) from 1
-          calc
+      have htransport :
+          (pullbackUnitIso g).hom.val.app (.op ZY)
+              (((pullback g).obj (unitObj U.toScheme)).presheaf.map
+                (eqToHom htop).op
+                  (((pullbackPushforwardAdjunction g).unit.app
+                    (unitObj U.toScheme)).val.app (.op ⊤)
+                      (show U.toScheme.presheaf.obj (.op ⊤) from 1))) =
             (unitObj VY.toScheme).presheaf.map (eqToHom htop).op
-                (show VY.toScheme.presheaf.obj
-                  (.op (g ⁻¹ᵁ (⊤ : U.toScheme.Opens))) from 1) =
-              oneV := by
-                exact PresheafOfModules.unit_map_one
-                  VY.toScheme.ringCatSheaf.obj (eqToHom htop).op
-            _ = (_root_.SheafOfModules.unit
-                  (Y.ringCatSheaf.over VY)).val.map kY.op
+              ((pullbackUnitIso g).hom.val.app
+                (.op (g ⁻¹ᵁ (⊤ : U.toScheme.Opens)))
+                  (((pullbackPushforwardAdjunction g).unit.app
+                    (unitObj U.toScheme)).val.app (.op ⊤)
+                      (show U.toScheme.presheaf.obj (.op ⊤) from 1))) := hnat
+      have honeTransport :
+          (unitObj VY.toScheme).presheaf.map (eqToHom htop).op
+              ((pullbackUnitIso g).hom.val.app
+                (.op (g ⁻¹ᵁ (⊤ : U.toScheme.Opens)))
+                  (((pullbackPushforwardAdjunction g).unit.app
+                    (unitObj U.toScheme)).val.app (.op ⊤)
+                      (show U.toScheme.presheaf.obj (.op ⊤) from 1))) =
+            (unitObj VY.toScheme).presheaf.map (eqToHom htop).op
+              (show VY.toScheme.presheaf.obj
+                (.op (g ⁻¹ᵁ (⊤ : U.toScheme.Opens))) from 1) :=
+        congrArg (fun z ↦ (unitObj VY.toScheme).presheaf.map
+          (eqToHom htop).op z) hone
+      let oneV : (unitObj VY.toScheme).presheaf.obj (.op ZY) :=
+        show VY.toScheme.presheaf.obj (.op ZY) from 1
+      have hrestrict :
+          (unitObj VY.toScheme).presheaf.map (eqToHom htop).op
+              (show VY.toScheme.presheaf.obj
+                (.op (g ⁻¹ᵁ (⊤ : U.toScheme.Opens))) from 1) =
+            oneV :=
+        PresheafOfModules.unit_map_one
+          VY.toScheme.ringCatSheaf.obj (eqToHom htop).op
+      have hterminal :
+          (_root_.SheafOfModules.unit
+              (Y.ringCatSheaf.over VY)).val.map kY.op
                 (show (Y.ringCatSheaf.over VY).obj.obj
-                  (.op (Over.mk (𝟙 VY))) from 1) := by
-              symm
-              exact PresheafOfModules.unit_map_one
-                (Y.ringCatSheaf.over VY).obj kY.op
+                  (.op (Over.mk (𝟙 VY))) from 1) =
+            oneV :=
+        PresheafOfModules.unit_map_one
+          (Y.ringCatSheaf.over VY).obj kY.op
+      exact Eq.trans htransport
+        (Eq.trans honeTransport (Eq.trans hrestrict hterminal.symm))
 
 end AlgebraicGeometry.Scheme.Modules
 
