@@ -229,12 +229,24 @@ private theorem baseCechFactorBaseChangeIso_naturality
           Q.map
             (eqToHom ((pullback.fst f t).preimage_cechIntersection
               U (n + 1) i).symm).op =
-        Q.map
+          Q.map
             (eqToHom ((pullback.fst f t).preimage_cechIntersection
               U n j).symm).op ≫
           Q.map targetFace.op := by
-    rw [← Q.map_comp, ← Q.map_comp]
-    exact Q.congr_map (Subsingleton.elim _ _)
+    let sourceRestriction :=
+      (homOfLE ((pullback.fst f t).preimage_mono hIntersection)).op
+    let sourceTransport :=
+      (eqToHom ((pullback.fst f t).preimage_cechIntersection
+        U (n + 1) i).symm).op
+    let targetTransport :=
+      (eqToHom ((pullback.fst f t).preimage_cechIntersection
+        U n j).symm).op
+    have hMaps :
+        Q.map (sourceRestriction ≫ sourceTransport) =
+          Q.map (targetTransport ≫ targetFace.op) :=
+      Q.congr_map (Subsingleton.elim _ _)
+    exact (Q.map_comp sourceRestriction sourceTransport).symm.trans <|
+      hMaps.trans (Q.map_comp targetTransport targetFace.op)
   rw [baseCechFactorBaseChangeIso_hom,
     baseCechFactorBaseChangeIso_hom]
   change
@@ -308,7 +320,22 @@ theorem baseCechXBaseChangeIso_hom_π
               (op (∏ᶜ fun k : Fin (n + 1) => U (j k)))) i) ≫
         (baseCechFactorBaseChangeIso f t M U hU n i).hom := by
   dsimp only [baseCechXBaseChangeIso]
-  rw [Iso.trans_hom, Category.assoc]
+  let productIso := extendScalarsProductIso t.appTop.hom
+    (fun j : Fin (n + 1) → ι =>
+      (baseModulePresheaf f M).obj
+        (op (∏ᶜ fun k : Fin (n + 1) => U (j k))))
+  let factorIso := Pi.mapIso (fun j : Fin (n + 1) → ι =>
+    baseCechFactorBaseChangeIso f t M U hU n j)
+  let targetProjection := Pi.π (fun j : Fin (n + 1) → ι =>
+    (baseModulePresheaf (pullback.snd f t)
+      ((pullback (pullback.fst f t)).obj M)).obj
+        (op (∏ᶜ fun k : Fin (n + 1) =>
+          pullback.fst f t ⁻¹ᵁ U (j k)))) i
+  have hTrans :
+      (productIso ≪≫ factorIso).hom ≫ targetProjection =
+        productIso.hom ≫ (factorIso.hom ≫ targetProjection) :=
+    (congrArg (fun q => q ≫ targetProjection)
+      (Iso.trans_hom productIso factorIso)).trans (Category.assoc _ _ _)
   have hPi := Pi.mapIso_hom_π
     (fun j : Fin (n + 1) → ι =>
       baseCechFactorBaseChangeIso f t M U hU n j) i
@@ -323,7 +350,7 @@ theorem baseCechXBaseChangeIso_hom_π
       (baseModulePresheaf f M).obj
         (op (∏ᶜ fun k : Fin (n + 1) => U (j k)))) i
     (baseCechFactorBaseChangeIso f t M U hU n i).hom
-  exact hPiLift.trans hProduct
+  exact hTrans.trans <| hPiLift.trans hProduct
 
 private theorem baseCechXBaseChangeIso_comm_δ
     {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
@@ -461,7 +488,8 @@ private theorem baseCechComplex_d_succ
   change ((FormalCoproduct.cochainComplexFunctor
     (FormalCoproduct.mk _ U).cech).obj
       (baseModulePresheaf f M)).d n (n + 1) = _
-  rw [FormalCoproduct.cochainComplexFunctor_obj_d, CochainComplex.of_d]
+  rw [FormalCoproduct.cochainComplexFunctor_obj_d]
+  exact (CochainComplex.of_d _ _ n).trans rfl
 
 private theorem baseCechXBaseChangeIso_comm_d
     {X S T : Scheme.{u}} (f : X ⟶ S) (t : T ⟶ S) (M : X.Modules)
@@ -499,9 +527,27 @@ private theorem baseCechXBaseChangeIso_comm_d
       E.map (AlternatingCofaceMapComplex.objD source n) ≫ degreeTarget =
         ∑ k : Fin (n + 2), (-1 : ℤ) ^ (k : ℕ) •
           (E.map (source.δ k) ≫ degreeTarget) := by
-    simp only [AlternatingCofaceMapComplex.objD, Functor.map_sum,
-      Functor.map_zsmul, Preadditive.sum_comp,
-      Preadditive.zsmul_comp]
+    have hMap :
+        E.map (AlternatingCofaceMapComplex.objD source n) =
+          ∑ k : Fin (n + 2), (-1 : ℤ) ^ (k : ℕ) •
+            E.map (source.δ k) := by
+      simp only [AlternatingCofaceMapComplex.objD, Functor.map_sum,
+        Functor.map_zsmul]
+    have hComp := Preadditive.sum_comp Finset.univ
+      (fun k : Fin (n + 2) =>
+        (-1 : ℤ) ^ (k : ℕ) • E.map (source.δ k)) degreeTarget
+    have hSummands :
+        (∑ k : Fin (n + 2),
+          ((-1 : ℤ) ^ (k : ℕ) • E.map (source.δ k)) ≫ degreeTarget) =
+            ∑ k : Fin (n + 2), (-1 : ℤ) ^ (k : ℕ) •
+              (E.map (source.δ k) ≫ degreeTarget) := by
+      apply Finset.sum_congr rfl
+      intro k _
+      exact Preadditive.zsmul_comp
+        (f := E.map (source.δ k)) (g := degreeTarget)
+          ((-1 : ℤ) ^ (k : ℕ))
+    exact (congrArg (fun q => q ≫ degreeTarget) hMap).trans <|
+      hComp.trans hSummands
   have hTerms :
       (∑ k : Fin (n + 2), (-1 : ℤ) ^ (k : ℕ) •
           (E.map (source.δ k) ≫ degreeTarget)) =
