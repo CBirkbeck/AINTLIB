@@ -22,7 +22,8 @@ noncomputable def cechHomologyOneIso_of_affine_openCover
     {ι : Type u} (U : ι → X.Opens) (hU : IsOpenCover U)
     (hUaff : ∀ i, IsAffineOpen (U i)) :
     ((cechComplexFunctor U).obj M.sheaf.obj).homology 1 ≅
-      AddCommGrpCat.of (CategoryTheory.Sheaf.H M.sheaf 1) := by
+      (CategoryTheory.Sheaf.functorH
+        (Opens.grothendieckTopology X) 1).obj M.sheaf := by
   apply cechHomologyOneIso_of_subsingleton_H U M.sheaf
   · simpa only [IsOpenCover] using hU
   · intro i
