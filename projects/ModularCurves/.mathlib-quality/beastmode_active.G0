@@ -2,9 +2,10 @@ STREAM-G0 CHARTER-G ACTIVE (v10.316; build-state 2026-07-17 late).
 
 TERMINAL: :206/:212 closes. BUILD-STATE (all pushed):
 [funnel ✓] [affine cover pkg ✓: pair/points-iff/finite/étale/over-Spec/sections/twist]
-[glue-1a ✓ sqrtPair_map] [glue-1b ✓ selfPresentation + baseChangeEquiv (B⊗P.Ring ≃ (P.map).Ring)]
+[glue-1a ✓ sqrtPair_map] [glue-1b ✓ selfPresentation + baseChangeEquiv]
+[glue-2a ✓ sqrtPairMapRingHom-via-tensor, includeRight-compat rfl]
 NEXT INCREMENTS (mapped):
-(2) the Spec-pullback square of sqrt-covers along a ring map: conjugate
+(2b) the Spec-pullback square: conjugate
     CommRingCat.isPushout_tensorProduct through baseChangeEquiv + sqrtPair_map-cast,
     then isPullback_SpecMap_of_isPushout (the BB-FLAT chart-square pattern).
 (3) the (V,i)-indexed RelativeGluingData over W := fullLevelLocus 2:
