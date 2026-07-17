@@ -44,6 +44,7 @@ theorem exists_section_lift_of_smooth {X : Scheme.{u}} {B : CommRingCat.{u}}
     ∃ s : Spec B ⟶ X, s ≫ f = 𝟙 (Spec B) ∧
       Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk I)) ≫ s = s₀ := by
   classical
+  have : IsIso X.toSpecΓ := IsAffine.affine
   letI : Algebra ↑B ↑Γ(X, ⊤) := ((Scheme.ΓSpecIso B).inv ≫ f.appTop).hom.toAlgebra
   letI : Algebra ↑B ↑(B ⧸ I) := (Ideal.Quotient.mk I).toAlgebra
   -- the factoring triangle of `f` through the affine identification
@@ -64,12 +65,10 @@ theorem exists_section_lift_of_smooth {X : Scheme.{u}} {B : CommRingCat.{u}}
   have hFS : Algebra.FormallySmooth ↑B ↑Γ(X, ⊤) := by
     have h : Smooth f := hf
     rw [hftri] at h
-    have : IsIso X.toSpecΓ := IsAffine.affine
     rw [MorphismProperty.cancel_left_of_respectsIso (P := @Smooth)] at h
     rw [HasRingHomProperty.Spec_iff (P := @Smooth)] at h
     exact h.1
   set ψB := Algebra.FormallySmooth.lift I hI q₀ with hψB
-  have : IsIso X.toSpecΓ := IsAffine.affine
   refine ⟨Spec.map (CommRingCat.ofHom ψB.toRingHom) ≫ CategoryTheory.inv X.toSpecΓ,
     ?_, ?_⟩
   · rw [Category.assoc, hftri, ← Category.assoc (CategoryTheory.inv X.toSpecΓ),
