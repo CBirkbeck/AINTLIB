@@ -648,6 +648,57 @@ theorem gaussSumIntRec_eq_sum_units [DecidableEq k] (a : ℕ) :
     exact ⟨Units.mk0 y hy.1, Finset.mem_univ _, rfl⟩
   · intro x _; rfl
 
+/-- The recursive Gauss sum expands as a sum over residue-field units of
+`ω(x) ^ ((p - a) * stickD) * ψ(x)`, via the residue-character/Teichmüller
+power identity. -/
+private theorem gaussSumIntRec_eq_sum_teichPow_mul_psi
+    [DecidableEq k] (a : ℕ) (ha₁ : 1 ≤ a) (ha₂ : a ≤ p - 1) :
+    S.gaussSumIntRec a =
+      ∑ x : kˣ,
+        S.teichUnitFullVal x ^ ((p - a) * S.stickD) * S.psiInt ((x : k)) := by
+  classical
+  rw [S.gaussSumIntRec_eq_sum_units a]
+  refine Finset.sum_congr rfl fun x _ => ?_
+  congr 1
+  have h := TraceFormStickelbergerSetup.residueCharInt_rec_eq_teichUnitFull_pow_stickD
+    S.toFullTeichStickelbergerSetup a ha₁ ha₂ x
+  -- h : S.residueCharInt ↑x ^ (p - a) = ↑(S.teichUnitFull x) ^ ((p - a) * S.stickD)
+  rw [MulChar.pow_apply_coe]
+  change S.residueCharInt ((x : k)) ^ (p - a) =
+    S.teichUnitFullVal x ^ ((p - a) * S.stickD)
+  exact h
+
+/-- Fubini swap for the Dwork sum: the unit-sum of `ω(x) ^ A` times the
+multi-index Dwork sum equals the multi-index sum of the paired unit sums. -/
+private theorem sum_teichPow_mul_dworkSum_swap [DecidableEq k] (a N : ℕ) :
+      (∑ x : kˣ,
+        S.teichUnitFullVal x ^ ((p - a) * S.stickD) *
+        (∑ m ∈ multiIndexLE S.f N,
+          (∏ i : Fin S.f, S.dworkCoeff N (m i)) *
+          ((S.teichUnitFull (S.traceScale * x) : 𝓞 R') ^
+            multiIndexValue ℓ m))) =
+      (∑ m ∈ multiIndexLE S.f N,
+        (∏ i : Fin S.f, S.dworkCoeff N (m i)) *
+        (∑ x : kˣ,
+          S.teichUnitFullVal x ^ ((p - a) * S.stickD) *
+          S.teichUnitFullVal (S.traceScale * x) ^ multiIndexValue ℓ m)) := by
+  classical
+  -- Distribute (left → ∑_m T·U; right → ∑_x (∏λ)·V).
+  simp_rw [Finset.mul_sum]
+  -- Now both sides are double sums. LHS: ∑_x ∑_m (...). RHS: ∑_m ∑_x (...).
+  -- Swap LHS via sum_comm.
+  rw [Finset.sum_comm]
+  -- Per-(m, x): both sides agree by ring (teichUnitFullVal y = ↑(teichUnitFull y)).
+  refine Finset.sum_congr rfl fun m _ => ?_
+  refine Finset.sum_congr rfl fun x _ => ?_
+  change S.teichUnitFullVal x ^ ((p - a) * S.stickD) *
+      ((∏ i : Fin S.f, S.dworkCoeff N (m i)) *
+        S.teichUnitFullVal (S.traceScale * x) ^ multiIndexValue ℓ m) =
+    (∏ i : Fin S.f, S.dworkCoeff N (m i)) *
+      (S.teichUnitFullVal x ^ ((p - a) * S.stickD) *
+        S.teichUnitFullVal (S.traceScale * x) ^ multiIndexValue ℓ m)
+  ring
+
 /-- **L2c3d-4b: Dwork digit expansion for the reciprocal Gauss sum.**
 The reciprocal Gauss sum equals the multi-index Dwork sum modulo
 `Q^{N+1}`, where the multi-indices range over **all**
@@ -662,20 +713,7 @@ theorem gaussSumIntRec_dwork_expansion [DecidableEq k]
             S.teichUnitFullVal (S.traceScale * x) ^ multiIndexValue ℓ m)) ∈
       S.Q ^ (N + 1) := by
   classical
-  -- Step 1: rewrite LHS as ∑ x : kˣ, ω(x)^A · psiInt x using L2c3d-2.
-  have h_lhs : S.gaussSumIntRec a =
-      ∑ x : kˣ,
-        S.teichUnitFullVal x ^ ((p - a) * S.stickD) * S.psiInt ((x : k)) := by
-    rw [S.gaussSumIntRec_eq_sum_units a]
-    refine Finset.sum_congr rfl fun x _ => ?_
-    congr 1
-    have h := TraceFormStickelbergerSetup.residueCharInt_rec_eq_teichUnitFull_pow_stickD
-      S.toFullTeichStickelbergerSetup a ha₁ ha₂ x
-    -- h : S.residueCharInt ↑x ^ (p - a) = ↑(S.teichUnitFull x) ^ ((p - a) * S.stickD)
-    rw [MulChar.pow_apply_coe]
-    change S.residueCharInt ((x : k)) ^ (p - a) =
-      S.teichUnitFullVal x ^ ((p - a) * S.stickD)
-    exact h
+  have h_lhs := S.gaussSumIntRec_eq_sum_teichPow_mul_psi a ha₁ ha₂
   rw [h_lhs]
   -- Step 2: per-x rewrite psiInt x = (Dwork sum at c·x) + r(x).
   have h_psi : ∀ x : kˣ,
@@ -714,33 +752,7 @@ theorem gaussSumIntRec_dwork_expansion [DecidableEq k]
     refine Ideal.sum_mem _ fun x _ => ?_
     exact Ideal.mul_mem_left _ _ (h_psi x)
   -- Step 5: swap sums on the "Dwork part" and identify with the target.
-  have h_swap :
-      (∑ x : kˣ,
-        S.teichUnitFullVal x ^ ((p - a) * S.stickD) *
-        (∑ m ∈ multiIndexLE S.f N,
-          (∏ i : Fin S.f, S.dworkCoeff N (m i)) *
-          ((S.teichUnitFull (S.traceScale * x) : 𝓞 R') ^
-            multiIndexValue ℓ m))) =
-      (∑ m ∈ multiIndexLE S.f N,
-        (∏ i : Fin S.f, S.dworkCoeff N (m i)) *
-        (∑ x : kˣ,
-          S.teichUnitFullVal x ^ ((p - a) * S.stickD) *
-          S.teichUnitFullVal (S.traceScale * x) ^ multiIndexValue ℓ m)) := by
-    -- Distribute (left → ∑_m T·U; right → ∑_x (∏λ)·V).
-    simp_rw [Finset.mul_sum]
-    -- Now both sides are double sums. LHS: ∑_x ∑_m (...). RHS: ∑_m ∑_x (...).
-    -- Swap LHS via sum_comm.
-    rw [Finset.sum_comm]
-    -- Per-(m, x): both sides agree by ring (teichUnitFullVal y = ↑(teichUnitFull y)).
-    refine Finset.sum_congr rfl fun m _ => ?_
-    refine Finset.sum_congr rfl fun x _ => ?_
-    change S.teichUnitFullVal x ^ ((p - a) * S.stickD) *
-        ((∏ i : Fin S.f, S.dworkCoeff N (m i)) *
-          S.teichUnitFullVal (S.traceScale * x) ^ multiIndexValue ℓ m) =
-      (∏ i : Fin S.f, S.dworkCoeff N (m i)) *
-        (S.teichUnitFullVal x ^ ((p - a) * S.stickD) *
-          S.teichUnitFullVal (S.traceScale * x) ^ multiIndexValue ℓ m)
-    ring
+  have h_swap := S.sum_teichPow_mul_dworkSum_swap a N
   rw [h_swap, add_sub_cancel_left]
   exact h_error_mem
 
