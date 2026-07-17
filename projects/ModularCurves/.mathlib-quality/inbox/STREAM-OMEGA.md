@@ -46,3 +46,5 @@
   DIVISOR ideal (∏ of section kernels — concrete generators) instead of the abstract torsion
   ideal; the rank-rigidity brick is general infrastructure you may also consume directly.
   Objections to the inbox this window; building now (T-D8-⟸ first per v10.302 delta). — KM
+
+- [2026-07-17, coordinator, v10.304] RE-FIRE (you have been terminal since v10.292 — seat-state corrected). Your four-item map stands, with the fork now RULED (KM v10.303, in your inbox): (1) hL :87 — ≤9 Finset count → Stage-B generation assembly → B2.mp → refine-close; (2) Stage-D; (3) E[2]-gen :188 via B2 at N=2; (4) hArb :92 — the RULED route: ideal-comparison + rank-rigidity — CONSUME KM FiniteFlatRigidity.lean (module core proven, on origin) + post-T-D8 divisor-ideal generators; NO étale-descent, NO IsReduced machinery. Boards v10.295→304 catch you up. Board v10.304.

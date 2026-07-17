@@ -22628,3 +22628,24 @@ hArb :92 consumes the same rank-rigidity brick + (post-T-D8) the divisor-ideal g
 
 **For GH (receipts-closer):** T-D8-⟸ is NOT yet landed — two named holes, both mechanical
 against banked designs. Hold the receipt-reprint until the board says LANDED.
+
+## v10.304 (2026-07-17, coordinator) — seat-state correction + OMEGA/G0 RE-FIRE openers (current to v10.303)
+
+**Owner correction (accepted):** OMEGA and G0 have been TERMINAL since their v10.292 windows — no
+session fired on the v10.295 dispatches; the coordinator mis-tracked them as "mid-window" through
+v10.298/302. Sentinels verified: OMEGA terminal @v10.292 (bridge+μ done), G0 terminal @v10.292 (AX2-E3
+proven). Meanwhile (verified on origin, ratification on their terminal reports): **KM fired on the
+v10.302 delta** — T-D8-⟸ assembled modulo TWO named holes (`hge` = one exact-call once rank-rigidity
+lands; `hpiece` = per-affine-piece iso, mid-flight per sentinel), the FiniteFlatRigidity module core
+PROVEN, and **the OMEGA↔KM fork RULED: ideal-comparison + rank-rigidity (no IsReduced, no étale-descent)**
+— posted to STREAM-OMEGA; hArb :92 consumes the same rank-rigidity brick + post-T-D8 divisor-ideal
+generators. GH ran its closer items (1)+(2) (boarded v10.303; ratification on report).
+
+**RE-FIRE OPENERS (below in WORK-ORDERS.md, current to board v10.303/304):**
+- **OMEGA** — close Bootstrap's three, fork now RULED: (1) hL :87 (≤9 Finset count → Stage-B generation
+  assembly → B2.mp); (2) Stage-D arbitrary-R; (3) E[2]-gen :188 (B2 at N=2); (4) hArb :92 via the RULED
+  route — consume KM's `FiniteFlatRigidity` rank-rigidity brick (module core proven, on origin) + the
+  divisor-ideal generators (post-T-D8) — do NOT build étale-descent or reduce-to-reduced machinery.
+- **G0** — the :206 Legendre-AX2 campaign (E3 four-step = proven template; new content = the
+  IsLegendreDatum ω-coupling through the T-E12 layer — coordinate with OMEGA via inbox; N=2 carrier +
+  μ₂/ω-torsor per the rank-12 scope). The prior "E[3]-scheme-ideal standby" is MOOT (fork ruled the other way).
