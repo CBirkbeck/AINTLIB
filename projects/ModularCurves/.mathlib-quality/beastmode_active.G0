@@ -1,5 +1,20 @@
-STREAM-G0 CHARTER-G ACTIVE (v10.316 re-allocation, 2026-07-17) — ASSEMBLING :206.
+STREAM-G0 CHARTER-G ACTIVE (v10.316; build-state 2026-07-17 late).
 
-UNBLOCKED: abscissaDiff on origin + SqrtUnitCover/sqrtPairCongr/funnel proven +
-IsLegendreDatum.neg/unit_sq_eq_one banked. BUILDING: the glued Z₂ over
-fullLevelLocus 2 → the b↔u spec → funnel → Bootstrap:212 = CHARTER-G TERMINAL.
+TERMINAL: :206/:212 closes. BUILD-STATE (all pushed):
+[funnel ✓] [affine cover pkg ✓: pair/points-iff/finite/étale/over-Spec/sections/twist]
+[glue-1a ✓ sqrtPair_map] [glue-1b ✓ selfPresentation + baseChangeEquiv (B⊗P.Ring ≃ (P.map).Ring)]
+NEXT INCREMENTS (mapped):
+(2) the Spec-pullback square of sqrt-covers along a ring map: conjugate
+    CommRingCat.isPushout_tensorProduct through baseChangeEquiv + sqrtPair_map-cast,
+    then isPullback_SpecMap_of_isPushout (the BB-FLAT chart-square pattern).
+(3) the (V,i)-indexed RelativeGluingData over W := fullLevelLocus 2:
+    index = affine-opens-with-atlas-chart-choice, transitions = restriction ∘
+    sqrtPairCongr(omegaCocycle-transition), map_comp = cocycle + algHom_ext;
+    equifibered = increment-(2)'s squares; Z₂ := .glued, toBase-composite;
+    FINITE+ÉTALE via toBase_preimage_eq_opensRange_ι + IsZariskiLocalAtTarget.
+(4) the sections-spec: per-chart sqrtCoverSectionsEquiv + sheaf-glue of square
+    roots + the b↔u dictionary — OMEGA's adapted-value refinement REQUESTED
+    (inbox 2026-07-17, "the word is said"; not yet landed — check before (4)).
+(5) funnel-assembly ⟹ Bootstrap:212 = CHARTER-G TERMINAL.
+d-data: abscissaDiff (Moduli/AbscissaDifference.lean, OMEGA O1) — components over
+G.atlas.U i with u²-covariant transitions (abscissaDiff_compatible).
