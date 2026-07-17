@@ -165,10 +165,48 @@ private theorem fromTildeΓ_pullback_Γ_naturality
   have h := (fromTildeΓNatTrans (R := R)).naturality f
   change (tilde.functor R).map (moduleSpecΓFunctor.map f) ≫ N.fromTildeΓ =
     M.fromTildeΓ ≫ f at h
-  rw [← Functor.map_comp, ← Functor.map_comp]
-  rw [← Functor.map_comp, ← Functor.map_comp]
-  exact congrArg moduleSpecΓFunctor.map
-    (congrArg (pullback (Spec.map φ)).map h)
+  have hPullback := congrArg (pullback (Spec.map φ)).map h
+  have hSections := congrArg moduleSpecΓFunctor.map hPullback
+  have hCombineSections :
+      moduleSpecΓFunctor.map
+          ((pullback (Spec.map φ)).map
+            ((tilde.functor R).map (moduleSpecΓFunctor.map f))) ≫
+        moduleSpecΓFunctor.map
+          ((pullback (Spec.map φ)).map N.fromTildeΓ) =
+      moduleSpecΓFunctor.map
+        ((pullback (Spec.map φ)).map
+            ((tilde.functor R).map (moduleSpecΓFunctor.map f)) ≫
+          (pullback (Spec.map φ)).map N.fromTildeΓ) :=
+    (moduleSpecΓFunctor.map_comp _ _).symm
+  have hCombinePullback :
+      moduleSpecΓFunctor.map
+        ((pullback (Spec.map φ)).map
+            ((tilde.functor R).map (moduleSpecΓFunctor.map f)) ≫
+          (pullback (Spec.map φ)).map N.fromTildeΓ) =
+      moduleSpecΓFunctor.map
+        ((pullback (Spec.map φ)).map
+          ((tilde.functor R).map (moduleSpecΓFunctor.map f) ≫
+            N.fromTildeΓ)) :=
+    congrArg moduleSpecΓFunctor.map
+      ((pullback (Spec.map φ)).map_comp _ _).symm
+  have hSplitPullback :
+      moduleSpecΓFunctor.map
+          ((pullback (Spec.map φ)).map (M.fromTildeΓ ≫ f)) =
+        moduleSpecΓFunctor.map
+          ((pullback (Spec.map φ)).map M.fromTildeΓ ≫
+            (pullback (Spec.map φ)).map f) :=
+    congrArg moduleSpecΓFunctor.map
+      ((pullback (Spec.map φ)).map_comp _ _)
+  have hSplitSections :
+      moduleSpecΓFunctor.map
+          ((pullback (Spec.map φ)).map M.fromTildeΓ ≫
+            (pullback (Spec.map φ)).map f) =
+        moduleSpecΓFunctor.map
+            ((pullback (Spec.map φ)).map M.fromTildeΓ) ≫
+          moduleSpecΓFunctor.map ((pullback (Spec.map φ)).map f) :=
+    moduleSpecΓFunctor.map_comp _ _
+  exact hCombineSections.trans <| hCombinePullback.trans <|
+    hSections.trans <| hSplitPullback.trans hSplitSections
 
 private noncomputable def extendScalarsTildeΓNatTrans
     {R S : CommRingCat.{u}} (φ : R ⟶ S) :
@@ -498,6 +536,7 @@ private noncomputable def affineΓLiteralIso (X : Scheme.{u}) (M : X.Modules) :
   rw [show (Limits.initialOpOfTerminal Limits.isTerminalTop).to
     (op (⊤ : X.Opens)) = 𝟙 _ from Subsingleton.elim _ _]
   simp
+  rfl
 
 /-- The map on top-level sections induced by a morphism of scheme modules,
 viewed as a linear map over the top-level ring of functions. -/
