@@ -897,7 +897,7 @@ interchangeable wherever a `PairOfDefinition (presheafValue D₀)` of this concr
 shape is required, but only this version is faithful (works for `ℂ_p`, which has no
 noetherian ring of definition `P.A₀`). -/
 noncomputable def presheafValue_concretePair
-    [IsTateRing A] [IsNoetherianRing A]
+    [IsTateRing A]
     (D₀ : RationalLocData A) :
     PairOfDefinition (presheafValue D₀) :=
   { A₀ := presheafValue_ringOfDef D₀
@@ -921,7 +921,7 @@ omit [PlusSubring A] in
 /-- `A₀` of the faithful concrete pair equals `presheafValue_ringOfDef D₀`
 (definitionally). -/
 theorem presheafValue_concretePair_A₀
-    [IsTateRing A] [IsNoetherianRing A]
+    [IsTateRing A]
     (D₀ : RationalLocData A) :
     (presheafValue_concretePair D₀).A₀ = presheafValue_ringOfDef D₀ :=
   rfl
@@ -934,7 +934,7 @@ the pair of definition is supplied by `presheafValue_concretePair D₀` (built f
 `D₀`-only sub-lemmas) and the topologically nilpotent unit by `presheafValue_topNilUnit`
 (`[IsTateRing A]`-only). Faithful — works for `ℂ_p`, which has no noetherian ring of
 definition. By proof irrelevance, defeq to `presheafValue_isTateRing P D₀` for any `P`. -/
-theorem presheafValue_isTateRing_concrete [IsTateRing A] [IsNoetherianRing A]
+theorem presheafValue_isTateRing_concrete [IsTateRing A]
     (D₀ : RationalLocData A) :
     IsTateRing (presheafValue D₀) :=
   { exists_pairOfDefinition := ⟨presheafValue_concretePair D₀⟩

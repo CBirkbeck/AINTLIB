@@ -1554,7 +1554,7 @@ This unblocks the application of `Lemma745.exists_mem_spa_supp_ge_of_nonOpen_pri
 to the pair `presheafValue_pairOfDefinition_concrete P C.base`, which is the
 foundation of the non-open prime case in `hSpa_points`. -/
 theorem presheafValue_isAdicComplete
-    [IsTateRing A] [IsNoetherianRing A] [T2Space A]
+    [IsTateRing A] [T2Space A]
     (D₀ : RationalLocData A) :
     IsAdicComplete (presheafValue_idealOfDef D₀) (presheafValue_ringOfDef D₀) := by
   have hadic : IsAdic (presheafValue_idealOfDef D₀) := presheafValue_isAdic D₀

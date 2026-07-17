@@ -56,7 +56,7 @@ leaf Prop 7.51(2)/7.49 (`exists_spa_point_supp_eq_maxIdeal_of_complete`) carried
 criterion. NO `IsDomain`, NO noeth-`A₀`, NO T001 algebraic route — this is the reviewer-recommended
 faithful replacement for `isUnit_canonicalMap_s_of_huber` (whose `spa_point_nonOpen` sorry is opaque). -/
 theorem isUnit_canonicalMap_s_faithful
-    [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     [IsRingOfIntegralElements (A⁺)]
     (D D' : RationalLocData A)
@@ -338,7 +338,7 @@ artifact of its FractionRing route, false for case-(b) non-domain `presheafValue
 7.22 continuity sorry, so it does NOT discharge this. Should a faithful in-repo discharge be wanted
 later, formalise Huber's hypothesis-free 3.3(i) proof directly (≈25 lines + his (3.1) continuity). -/
 theorem mem_plus_of_forall_spa_vle_one
-    [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     [IsRingOfIntegralElements (A⁺)]
     (D' : RationalLocData A) (x : presheafValue D')
@@ -548,7 +548,7 @@ valuation `w ∈ Spa(B, B⁺)` of `B = presheafValue D'` satisfies `w(x) ≤ 1`,
 Wedhorn 7.18(1)), `x ∈ B⁺`; and `B⁺ ⊆ B°` (`IsRingOfIntegralElements.subset_powerBounded`,
 Def 7.14(1)), so `x ∈ B° = {power-bounded}`. -/
 theorem isPowerBounded_of_forall_vle_one_spa_of_complete
-    [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     [IsRingOfIntegralElements (A⁺)]
     (D' : RationalLocData A) (x : presheafValue D')
@@ -570,7 +570,7 @@ is a unit, so `w(x) ≤ 1`. NO `IsDomain`, NO noeth-`A₀`. The sorry-free (modu
 [Hu2]-3.3 leaf) faithful replacement for `locLift_divByS_isPowerBounded_completion_of_tate`
 (Presheaf.lean, bare `sorry`). -/
 theorem locLift_divByS_isPowerBounded_faithful
-    [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     [IsRingOfIntegralElements (A⁺)]
     (D D' : RationalLocData A)
@@ -628,7 +628,7 @@ completions), so it APPLIES to `B = presheafValue D`: callers `haveI := hasLocLi
 sorry-bearing Presheaf instance. Kept a `theorem` (not `instance`): the `CompleteSpace`-w.r.t.-
 right-uniformity binder is not instance-synthesizable. -/
 theorem hasLocLiftPowerBounded_faithful
-    [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
+    [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
     [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     [IsRingOfIntegralElements (A⁺)] :
     HasLocLiftPowerBounded A where

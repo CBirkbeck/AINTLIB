@@ -603,11 +603,27 @@ T704, by a fresh `/develop --continue`.
 
 ### [CLEANUP-13] /cleanup `FiniteJetFunctoriality.lean` — **Depends**: T603.
 
-### [T604] loc-lift instances
-- **Status**: open | **Depends**: T603, T304 | **Type**: proofs (L5.5–L5.6)
-- **Sorries**: `HasLocLiftPowerBounded (JetB/C/D)` (via `hasLocLiftPowerBounded_faithful`),
-  `hasLocLiftPowerBounded_JetA` (componentwise through the bridge + `loc_row_exact` +
-  vertices' fields; unit gluing `(b⁻¹, c⁻¹)`; power-bounded componentwise in max norm).
+### [T604] loc-lift instances — **DONE 2026-07-17**
+- **Status**: done (beastmode). `HasLocLiftPowerBounded (JetB/C/D)` are one-line
+  `hasLocLiftPowerBounded_faithful` (all binders were already instances: noetherian
+  vertices, IRIE plus rings, right-uniformity completeness, ultra-nonarch, T2).
+  **`hasLocLiftPowerBounded_JetA`: the L5.6 componentwise-Milnor plan was NOT needed** —
+  the faithful chain's `[IsNoetherianRing A]` was pure threading (its own docstrings said
+  "NO noeth-A₀"; the concrete-pair sub-lemmas `presheafValue_ringOfDef/idealOfDef_fg/
+  isAdic/topNilUnit` never consume it). De-noetherianized (compiler-verified):
+  `presheafValue_concretePair`, `presheafValue_concretePair_A₀`,
+  `presheafValue_isTateRing_concrete` (PresheafTateStructure),
+  `presheafValue_isAdicComplete` (Cor832), `mem_plus_of_forall_spa_vle_one`,
+  `isPowerBounded_of_forall_vle_one_spa_of_complete`, `isUnit_canonicalMap_s_faithful`,
+  `locLift_divByS_isPowerBounded_faithful`, `hasLocLiftPowerBounded_faithful`
+  (FaithfulLocLift) — hypothesis-weakening only, all callers unaffected, full project
+  green (3079-job chain + full `lake build`). JetA (non-noetherian!) then satisfies the
+  faithful package directly: `instance hasLocLiftPowerBounded_JetA :=
+  hasLocLiftPowerBounded_faithful`. This also future-proofs the LL-package for ℂ_p-style
+  bases (the original faithful-design goal). NOTE: the componentwise route would anyway
+  have been blocked for non-rational `D'` (the class quantifies over ALL data; bridges
+  need span-⊤) — the Spa-route is rationality-free. | **Depends**: T603, T304 |
+  **Type**: proofs (L5.5–L5.6)
 
 ### [T605] restriction naturality + coverage
 - **Status**: open | **Depends**: T604 | **Type**: proofs (L5.3 rest + L5.7)

@@ -1100,11 +1100,11 @@ theorem graphBridge_natural_C (D : RationalLocData (JetA F)) (hD : D.IsRational)
 
 /-! ### Vertices: loc-lift instances (noetherian discharger applies) -/
 
-instance : HasLocLiftPowerBounded (JetB F) := by sorry
+instance : HasLocLiftPowerBounded (JetB F) := hasLocLiftPowerBounded_faithful
 
-instance : HasLocLiftPowerBounded (JetC F) := by sorry
+instance : HasLocLiftPowerBounded (JetC F) := hasLocLiftPowerBounded_faithful
 
-instance : HasLocLiftPowerBounded (JetD F) := by sorry
+instance : HasLocLiftPowerBounded (JetD F) := hasLocLiftPowerBounded_faithful
 
 /-! ### `HasLocLiftPowerBounded 𝓐`, componentwise
 
@@ -1113,7 +1113,8 @@ derived through the Milnor description of `𝒪_𝓐(D)` ([FJP] Lemma 5.1 + Prop
 both comparison localizations whose inverses match in 𝓓 is a unit in the fiber product, and
 power-boundedness in the max norm is componentwise. -/
 
-instance hasLocLiftPowerBounded_JetA : HasLocLiftPowerBounded (JetA F) := by sorry
+instance hasLocLiftPowerBounded_JetA : HasLocLiftPowerBounded (JetA F) :=
+  hasLocLiftPowerBounded_faithful
 
 /-! ### Naturality with restriction ([FJP] Lemma 4.6, Lemma 5.1)
 
