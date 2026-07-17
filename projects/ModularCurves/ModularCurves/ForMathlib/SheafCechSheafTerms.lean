@@ -73,12 +73,24 @@ private theorem cechTermForgetIso_hom_π (i : Fin (n + 1) → ι) :
             (cechTermFactor F U n i).obj) ⟨i⟩ =
         limit.π (Discrete.functor (cechTermFactor F U n) ⋙
           forget AddCommGrpCat X) ⟨i⟩ := by
-    calc
-      _ = limit.π (Discrete.functor (cechTermFactor F U n) ⋙
-            forget AddCommGrpCat X) ⟨i⟩ ≫
-          (cechTermForgetDiagramIso F U n).hom.app ⟨i⟩ :=
-        HasLimit.isoOfNatIso_hom_π (cechTermForgetDiagramIso F U n) ⟨i⟩
-      _ = _ := Category.comp_id _
+    have happ : (cechTermForgetDiagramIso F U n).hom.app ⟨i⟩ =
+        𝟙 ((cechTermFactor F U n i).obj) := rfl
+    have hbase :
+        (HasLimit.isoOfNatIso (cechTermForgetDiagramIso F U n)).hom ≫
+            limit.π (Discrete.functor fun i : Fin (n + 1) → ι ↦
+              (cechTermFactor F U n i).obj) ⟨i⟩ =
+          limit.π (Discrete.functor (cechTermFactor F U n) ⋙
+              forget AddCommGrpCat X) ⟨i⟩ ≫
+            (cechTermForgetDiagramIso F U n).hom.app ⟨i⟩ :=
+      HasLimit.isoOfNatIso_hom_π (cechTermForgetDiagramIso F U n) ⟨i⟩
+    have hcomp : limit.π (Discrete.functor (cechTermFactor F U n) ⋙
+          forget AddCommGrpCat X) ⟨i⟩ ≫
+          (cechTermForgetDiagramIso F U n).hom.app ⟨i⟩ =
+        limit.π (Discrete.functor (cechTermFactor F U n) ⋙
+          forget AddCommGrpCat X) ⟨i⟩ := by
+      rw [happ]
+      exact Category.comp_id _
+    exact hbase.trans hcomp
   have hpreserves :
       (preservesLimitIso (forget AddCommGrpCat X)
           (Discrete.functor (cechTermFactor F U n))).hom ≫
@@ -230,8 +242,9 @@ private theorem cechTermSectionsProductIso_hom_π (V : Opens X)
       (Pi.π (cechTermFactor F U n) i).hom.app (op V) ≫
         (cechTermFactorSectionsIso F U n V i).hom := by
   rw [cechTermSectionsProductIso, Iso.trans_hom, Category.assoc,
-    Pi.mapIso_hom_π, cechTermSectionsRawIso_hom_π_assoc]
-  rfl
+    Pi.mapIso_hom_π]
+  exact congrArg (fun k ↦ k ≫ (cechTermFactorSectionsIso F U n V i).hom)
+    (cechTermSectionsRawIso_hom_π F U n V i)
 
 /-- Sections of a sheaf-level Cech term are families of sections on tuple intersections. -/
 noncomputable def cechTermSectionsAddEquiv (V : Opens X) :
