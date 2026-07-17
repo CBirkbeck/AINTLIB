@@ -669,8 +669,23 @@ T704, by a fresh `/develop --continue`.
   `(pushCovering).base` vs `pushDatum` need `show`-retyping before rewrites (defeq,
   not syntactic); `RingHom.map_sub` only as a term-have. | **Type**: proofs (L6.1)
 
-### [T702] transfer: gluing — **the sheafiness workhorse**
-- **Status**: IN PROGRESS (beastmode 2026-07-17). DONE so far: `pushDatumB/C_interOpen`
+### [T702] transfer: gluing — **the sheafiness workhorse** — **DONE 2026-07-17**
+- **Status**: done (beastmode). `gluing_JetA` proven along the recorded architecture:
+  `restrictionMap_cast` (the ▸-elimination identity, `subst`-provable with free target),
+  choice-based `gB/gC` with `hgBres/hgCres` (cast-elimination + `restrictionMap_comp`),
+  `pushedCompatB/C` (arbitrary vertex `D₃` through the pushed intersection),
+  hoisted `hgBd/hgCd` piece-value identities (self-restriction + `restrictionMap_id` +
+  pushedCompat at the canonical element), vertex `IsSheafy.gluing`, 𝓓-matching by
+  `IsSheafy.separationSub (JetD)` + generic `presheafValueMapOfHom_restriction` at ρB/ρC +
+  `mapBD_mapB_eq_mapCD_mapC`, loc-transport (`locRhoB/C_bridgeFwdB/C` squares →
+  `loc_row_exact` → `x := (graphBridgeA).symm w`), `bridgeFwdB/C_injective` recover
+  `mapB x = bB`, `mapC x = bC`; piece-identification by `pairMapBC_injective` (L6.1 core
+  at one datum). `maxHeartbeats 6400000` on the theorem (one heavy naturality-rw; 53 s
+  file). Gotchas: inline `dI`-lets break rw-motives (dependent `hIrat`); congr_fun-results
+  must be ASCRIBED to their comp-applied-reduced forms (never `simp [RingHom.comp_apply]`
+  on completion-typed haves); `id_eq`-cleanup after `restrictionMap_id`-rewrites; beware
+  python-patch collisions when a hoisted block contains the replaced substring.
+- (prior progress note follows) DONE so far: `pushDatumB/C_interOpen`
   (pushed opens of `interDatum` = intersections, via the T605 iffs +
   `rationalOpen_interDatum`) — in FiniteJetSheafTransfer, green.
 - **ARCHITECTURE (verified by dependency-chase, follow this)**: (1) pushed families `gB/gC`
