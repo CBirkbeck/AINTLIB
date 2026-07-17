@@ -223,6 +223,16 @@ theorem isAffineOpen_top_isoSpec_hom_scheme_isoSpec_inv {X : Scheme.{u}} [IsAffi
     h.isoSpec.hom ≫ X.isoSpec.inv = (⊤ : X.Opens).ι := by
   rw [← IsAffineOpen.fromSpec_top, ← IsAffineOpen.isoSpec_inv_ι, Iso.hom_inv_id_assoc]
 
+/-- Companion to `isAffineOpen_top_isoSpec_hom_scheme_isoSpec_inv` (the `.inv` orientation):
+on an affine scheme the top-chart `isoSpec.inv` post-composed with the top inclusion is the
+scheme's own `isoSpec.inv`. This is exactly `IsAffineOpen.isoSpec_inv_ι ≫ IsAffineOpen.fromSpec_top`
+on the `⊤` chart; it is the `c2`-side crux of `projModel_locallyWeierstrass` (and of the parallel
+`LocallyWeierstrass` argument in `EllipticCurve/Comparison.lean`). -/
+theorem isAffineOpen_top_isoSpec_inv_top_ι {X : Scheme.{u}} [IsAffine X]
+    (h : IsAffineOpen (⊤ : X.Opens)) :
+    h.isoSpec.inv ≫ (⊤ : X.Opens).ι = X.isoSpec.inv :=
+  (IsAffineOpen.isoSpec_inv_ι _).trans IsAffineOpen.fromSpec_top
+
 set_option backward.isDefEq.respectTransparency false in
 /-- **(Y1-B1, generalising the proven `universalCurve_localModel`)** The projective model of any
 elliptic Weierstrass curve over a ring is locally Weierstrass — the whole affine base, on the
@@ -273,7 +283,7 @@ theorem projModel_locallyWeierstrass {A : Type u} [CommRing A] (W : WeierstrassC
     have hcrux2 : (isAffineOpen_top (Spec (CommRingCat.of A))).isoSpec.inv ≫
         (⊤ : (Spec (CommRingCat.of A)).Opens).ι = Spec.map (CommRingCat.ofHom (algebraMap
           A ↑Γ(Spec (CommRingCat.of A), (⊤ : (Spec (CommRingCat.of A)).Opens)))) :=
-      hφ_eq ▸ (IsAffineOpen.isoSpec_inv_ι _).trans IsAffineOpen.fromSpec_top
+      hφ_eq ▸ isAffineOpen_top_isoSpec_inv_top_ι _
     have hcrux2' : ∀ {Z : Scheme.{u}} (g : Spec (CommRingCat.of A) ⟶ Z),
         (isAffineOpen_top (Spec (CommRingCat.of A))).isoSpec.inv ≫
           (⊤ : (Spec (CommRingCat.of A)).Opens).ι ≫ g
