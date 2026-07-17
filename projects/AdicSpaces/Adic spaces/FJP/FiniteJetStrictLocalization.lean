@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».FiniteJetGraphKoszul
+import «Adic spaces».FJP.FiniteJetGraphKoszul
 
 /-!
 # Strict localization of the finite-jet Milnor square ([FJP] §4: Lemmas 4.1, 4.3, 4.4, Prop 4.5)

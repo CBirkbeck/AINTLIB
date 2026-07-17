@@ -2,8 +2,8 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».FiniteJetFunctoriality
-import «Adic spaces».FiniteJetUniformDomain
+import «Adic spaces».FJP.FiniteJetFunctoriality
+import «Adic spaces».FJP.FiniteJetUniformDomain
 
 /-!
 # The nonuniform chart: `𝓐⟨W/ϖ⟩ ≅ K⟨X,Q⟩/(Q²)` and failure of stable uniformity
@@ -1216,6 +1216,36 @@ theorem chartEquiv_symm_continuous : Continuous (chartEquiv F).symm := by sorry
 ([FJP] Prop 3.1: "`W ↦ ϖX`, `Q ↦ Q`"; pinned on the canonical image to make `chartEquiv`
 canonical). -/
 theorem chartEquiv_canonicalMap_W : True := by sorry
+
+/-! ### Roundtrip step 4: `chartRev ∘ θ = ρ` -/
+
+/-- `θ`'s jet components evaluate to canonical constant lifts. -/
+theorem chartRev_theta (a : JetA F) :
+    chartRev F (thetaChart F a) = (chartDatum F).canonicalMap a := by
+  -- decompose `a` into its 2-jet part and a `Q²`-part
+  obtain ⟨y, ⟨hy0, hy1⟩, hdecomp⟩ := jet_decomposition F a
+  -- the collapse kills `y` on the ρ-side
+  have hρy : (chartDatum F).canonicalMap y = 0 := canonicalMap_eq_zero_of_qSq F y hy0 hy1
+  -- and `θ` kills `y` outright (its 2-jet vanishes)
+  have hjBy : jB F y = 0 := by
+    refine TrivSqZeroExt.ext ?_ ?_
+    · refine ofRestricted_injective (R := K) ?_
+      rw [TrivSqZeroExt.fst_zero, map_zero]
+      show ofRestricted ((nonnegEquiv (R := K)).symm ⟨qCoeff F 0 ((y : JetA F) : JetC F),
+        y.2.1⟩) = 0
+      rw [ofRestricted_nonnegEquiv_symm]
+      exact hy0
+    · refine ofRestricted_injective (R := K) ?_
+      rw [TrivSqZeroExt.snd_zero, map_zero]
+      show ofRestricted ((nonnegEquiv (R := K)).symm ⟨qCoeff F 1 ((y : JetA F) : JetC F),
+        y.2.2⟩) = 0
+      rw [ofRestricted_nonnegEquiv_symm]
+      exact hy1
+  have hθy : thetaChart F y = 0 := by
+    show twistB F (jB F y) = 0
+    rw [hjBy, map_zero]
+  -- reduce to the 2-jet part
+  sorry
 
 /-! ### Failure of stable uniformity ([FJP] Corollary 3.2) -/
 

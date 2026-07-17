@@ -2,7 +2,7 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».FiniteJetFunctoriality
+import «Adic spaces».FJP.FiniteJetFunctoriality
 
 /-!
 # Sheafiness of 𝓐 by Milnor transfer ([FJP] Lemma 5.2 and Theorem 5.3)
@@ -701,13 +701,5 @@ priority theorem of the campaign. -/
 theorem isSheafy_JetA : ValuationSpectrum.IsSheafy (JetA F) where
   embedding := fun C hC => productRestrictionSub_isEmbedding_JetA C hC
   gluing := fun C hC f hcompat => gluing_JetA C hC f hcompat
-
-/-- **[FJP] Theorem 5.3** (campaign headline, T704): the finite-jet pinching algebra is
-sheafy. Together with `finiteJet_isUniform`, `not_isNoetherianRing_JetA`,
-`FiniteJet.instIsDomain`, and `not_isUniform_JetB` (𝓑 non-uniform ⇒ 𝓐 not stably
-uniform via the 𝓑-chart), this realises the paper's example: sheafy, uniform,
-integral, non-noetherian, not stably uniform. -/
-theorem finiteJet_isSheafy : ValuationSpectrum.IsSheafy (JetA F) :=
-  isSheafy_JetA F
 
 end FiniteJet

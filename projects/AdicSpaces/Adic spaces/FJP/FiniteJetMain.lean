@@ -2,8 +2,8 @@
 Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import «Adic spaces».FiniteJetSheafTransfer
-import «Adic spaces».FiniteJetChart
+import «Adic spaces».FJP.FiniteJetSheafTransfer
+import «Adic spaces».FJP.FiniteJetChart
 
 /-!
 # The finite-jet pinching algebra: headline theorems ([FJP] Theorem 1.3)
