@@ -106,8 +106,8 @@ theorem cechInjectiveResolutionBicomplex_row_exactAt_one
     (F : Sheaf AddCommGrpCat.{u} X) (hU : ⨆ i, U i = ⊤) (q : ℕ) :
     ((cechInjectiveResolutionBicomplex U F).X q).ExactAt 1 := by
   let I := injectiveResolution (toSiteSheaf F)
-  letI : Injective (I.cocomplex.X q) := I.injective q
-  letI : IsFlasque (I.cocomplex.X q) := IsFlasque.of_injective _
+  letI : IsFlasque (I.cocomplex.X q) :=
+    @IsFlasque.of_injective X (I.cocomplex.X q) (I.injective q)
   change ((cechComplexFunctor U).obj (I.cocomplex.X q).obj).ExactAt 1
   exact cechComplex_exactAt_one_of_isFlasque (I.cocomplex.X q) U hU
 
