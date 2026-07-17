@@ -68,13 +68,28 @@ noncomputable def mapRestrictedGauss (m : ℕ) (φ : B →+* C) (hφ : ∀ x, �
   map_zero' := Subtype.ext (map_zero (MvPowerSeries.map φ))
   map_add' x y := Subtype.ext (map_add (MvPowerSeries.map φ) x.1 y.1)
 
-/-- If `φ` admits a norm-nonincreasing set-theoretic section, the coefficientwise map on
-restricted extensions is surjective. -/
-theorem mapRestrictedGauss_surjective (m : ℕ) (φ : B →+* C) (hφ : ∀ x, ‖φ x‖ ≤ ‖x‖)
-    (hsec : ∀ v : C, ∃ u : B, φ u = v ∧ ‖u‖ ≤ ‖v‖) :
-    Function.Surjective (mapRestrictedGauss m φ hφ) := by
+/-- The coefficientwise map is norm-nonincreasing. -/
+theorem norm_mapRestrictedGauss_le (m : ℕ) (φ : B →+* C) (hφ : ∀ x, ‖φ x‖ ≤ ‖x‖)
+    (x : MvPowerSeries.Restricted B (fun _ : Fin m => (1 : ℝ))) :
+    ‖mapRestrictedGauss m φ hφ x‖ ≤ ‖x‖ := by
+  rw [MvRestricted.norm_eq, MvPowerSeries.gaussNorm]
+  refine Real.iSup_le (fun t => ?_) (norm_nonneg x)
+  show ‖MvPowerSeries.coeff t (MvPowerSeries.map φ x.1)‖ * _ ≤ _
+  rw [MvPowerSeries.coeff_map]
+  calc ‖φ (MvPowerSeries.coeff t x.1)‖ * (t.prod fun _ k => (1 : ℝ) ^ k)
+      ≤ ‖MvPowerSeries.coeff t x.1‖ * (t.prod fun _ k => (1 : ℝ) ^ k) :=
+        mul_le_mul_of_nonneg_right (hφ _) (by rw [finsupp_prod_one]; exact zero_le_one)
+    _ ≤ ‖x‖ := by
+        rw [MvRestricted.norm_eq]
+        exact MvPowerSeries.le_gaussNorm _ _ _ (MvRestricted.hasGaussNorm _ x) t
+
+/-- If `φ` admits a norm-nonincreasing set-theoretic section, so does the coefficientwise
+map on restricted extensions. -/
+theorem mapRestrictedGauss_exists_norm_le (m : ℕ) (φ : B →+* C) (hφ : ∀ x, ‖φ x‖ ≤ ‖x‖)
+    (hsec : ∀ v : C, ∃ u : B, φ u = v ∧ ‖u‖ ≤ ‖v‖)
+    (y : MvPowerSeries.Restricted C (fun _ : Fin m => (1 : ℝ))) :
+    ∃ x, mapRestrictedGauss m φ hφ x = y ∧ ‖x‖ ≤ ‖y‖ := by
   classical
-  intro y
   set x : MvPowerSeries (Fin m) B :=
     fun t => (hsec (MvPowerSeries.coeff t y.1)).choose with hxdef
   have hxc : ∀ t, MvPowerSeries.coeff t x = (hsec (MvPowerSeries.coeff t y.1)).choose :=
@@ -88,10 +103,52 @@ theorem mapRestrictedGauss_surjective (m : ℕ) (φ : B →+* C) (hφ : ∀ x, �
     · rw [hxc]
       exact mul_le_mul_of_nonneg_right (hsec _).choose_spec.2
         (by rw [finsupp_prod_one]; exact zero_le_one)
-  refine ⟨⟨x, hmem⟩, Subtype.ext ?_⟩
-  show MvPowerSeries.map φ x = y.1
-  ext t
-  rw [MvPowerSeries.coeff_map, hxc, (hsec _).choose_spec.1]
+  refine ⟨⟨x, hmem⟩, Subtype.ext ?_, ?_⟩
+  · show MvPowerSeries.map φ x = y.1
+    ext t
+    rw [MvPowerSeries.coeff_map, hxc, (hsec _).choose_spec.1]
+  · rw [MvRestricted.norm_eq, MvPowerSeries.gaussNorm]
+    refine Real.iSup_le (fun t => ?_) (norm_nonneg y)
+    show ‖MvPowerSeries.coeff t x‖ * _ ≤ _
+    calc ‖MvPowerSeries.coeff t x‖ * (t.prod fun _ k => (1 : ℝ) ^ k)
+        ≤ ‖MvPowerSeries.coeff t y.1‖ * (t.prod fun _ k => (1 : ℝ) ^ k) := by
+          rw [hxc]
+          exact mul_le_mul_of_nonneg_right (hsec _).choose_spec.2
+            (by rw [finsupp_prod_one]; exact zero_le_one)
+      _ ≤ ‖y‖ := by
+          rw [MvRestricted.norm_eq]
+          exact MvPowerSeries.le_gaussNorm _ _ _ (MvRestricted.hasGaussNorm _ y) t
+
+/-- If `φ` admits a norm-nonincreasing set-theoretic section, the coefficientwise map on
+restricted extensions is surjective. -/
+theorem mapRestrictedGauss_surjective (m : ℕ) (φ : B →+* C) (hφ : ∀ x, ‖φ x‖ ≤ ‖x‖)
+    (hsec : ∀ v : C, ∃ u : B, φ u = v ∧ ‖u‖ ≤ ‖v‖) :
+    Function.Surjective (mapRestrictedGauss m φ hφ) := fun y =>
+  let ⟨x, hx, _⟩ := mapRestrictedGauss_exists_norm_le m φ hφ hsec y
+  ⟨x, hx⟩
+
+/-- Radius-one restricted rings over a `NormOneClass` base have norm-one unit. -/
+noncomputable instance {R : Type*} [NormedCommRing R] [IsUltrametricDist R] [NormOneClass R]
+    {k : ℕ} : NormOneClass (MvPowerSeries.Restricted R (fun _ : Fin k => (1 : ℝ))) := by
+  refine ⟨?_⟩
+  rw [MvRestricted.norm_eq]
+  refine le_antisymm ?_ ?_
+  · rw [MvPowerSeries.gaussNorm]
+    refine Real.iSup_le (fun t => ?_) zero_le_one
+    rw [finsupp_prod_one, mul_one]
+    show ‖MvPowerSeries.coeff t (1 : MvPowerSeries (Fin k) R)‖ ≤ 1
+    rw [MvPowerSeries.coeff_one]
+    split
+    · rw [norm_one]
+    · rw [norm_zero]
+      exact zero_le_one
+  · have h := MvPowerSeries.le_gaussNorm _ _ _
+      (MvRestricted.hasGaussNorm _ (1 : MvPowerSeries.Restricted R (fun _ : Fin k => (1 : ℝ))))
+      (0 : Fin k →₀ ℕ)
+    rw [finsupp_prod_one, mul_one] at h
+    calc (1 : ℝ) = ‖MvPowerSeries.coeff (0 : Fin k →₀ ℕ) (1 : MvPowerSeries (Fin k) R)‖ := by
+          rw [MvPowerSeries.coeff_one, if_pos rfl, norm_one]
+      _ ≤ _ := h
 
 end MapRestricted
 
@@ -270,13 +327,169 @@ instance : IsNoetherianRing (JetD F) := IsStronglyNoetherian.isNoetherianRing (J
 [FJP] Lemma 4.2 constructs a noetherian ring of definition for each affinoid vertex; in our
 concrete models these are the unit balls: `DualNumber (k°⟨W⟩)`, `L₀⟨Q⟩`, `DualNumber L₀`. -/
 
-theorem isNoetherianRing_unitBall_L : IsNoetherianRing (unitBall (L F)) := by sorry
+section BallTransfer
 
-theorem isNoetherianRing_unitBall_JetB : IsNoetherianRing (unitBall (JetB F)) := by sorry
+variable {A B : Type*} [NormedCommRing A] [IsUltrametricDist A] [NormOneClass A]
+  [NormedCommRing B] [IsUltrametricDist B] [NormOneClass B]
 
-theorem isNoetherianRing_unitBall_JetC : IsNoetherianRing (unitBall (JetC F)) := by sorry
+/-- Noetherianity of unit balls transfers along norm-nonincreasing ring homomorphisms with
+norm-nonincreasing set-theoretic sections. -/
+theorem isNoetherianRing_unitBall_of_section (f : A →+* B) (hf : ∀ x, ‖f x‖ ≤ ‖x‖)
+    (hsec : ∀ y : B, ∃ x : A, f x = y ∧ ‖x‖ ≤ ‖y‖)
+    (h : IsNoetherianRing (unitBall A)) : IsNoetherianRing (unitBall B) := by
+  haveI := h
+  refine isNoetherianRing_of_surjective (unitBall A) _
+    (RingHom.codRestrict (f.comp (unitBall A).subtype) (unitBall B)
+      (fun x => (hf x.1).trans x.2)) ?_
+  rintro ⟨y, hy⟩
+  obtain ⟨x, hfx, hx⟩ := hsec y
+  exact ⟨⟨x, hx.trans hy⟩, Subtype.ext hfx⟩
 
-theorem isNoetherianRing_unitBall_JetD : IsNoetherianRing (unitBall (JetD F)) := by sorry
+/-- Noetherianity of unit balls transfers along isometric ring equivalences. -/
+theorem isNoetherianRing_unitBall_of_isometry (e : A ≃+* B) (he : ∀ x, ‖e x‖ = ‖x‖)
+    (h : IsNoetherianRing (unitBall A)) : IsNoetherianRing (unitBall B) :=
+  isNoetherianRing_unitBall_of_section e.toRingHom (fun x => (he x).le)
+    (fun y => ⟨e.symm y, e.apply_symm_apply y, by
+      have hs := he (e.symm y)
+      rw [RingEquiv.apply_symm_apply] at hs
+      exact hs.ge⟩) h
+
+end BallTransfer
+
+/-- **The Gauss unit ball of `K⟨T₁,…,Tₖ⟩` is noetherian**: the integral restricted series
+are exactly the transpose images of the noetherian `(MvPolynomial (Fin k) F)⟦X⟧`
+([FJP] Lemma 4.2: noetherian rings of definition). -/
+theorem isNoetherianRing_unitBall_gaussK (k : ℕ) :
+    IsNoetherianRing (unitBall (MvPowerSeries.Restricted K (fun _ : Fin k => (1 : ℝ)))) := by
+  classical
+  refine isNoetherianRing_of_surjective (PowerSeries (MvPolynomial (Fin k) F)) _
+    (RingHom.codRestrict
+      (((UnitDiscExample.restrictedGaussEquiv K k).symm.toRingHom).comp
+        (LaurentSeriesExample.psiR F k))
+      (unitBall _) (fun g => ?_)) ?_
+  · -- the transpose image is integral: every coefficient has valuation ≤ 1
+    show ‖(UnitDiscExample.restrictedGaussEquiv K k).symm (LaurentSeriesExample.psiR F k g)‖
+      ≤ 1
+    rw [MvRestricted.norm_eq]
+    show MvPowerSeries.gaussNorm _ _ (LaurentSeriesExample.Psi F k g) ≤ 1
+    rw [MvPowerSeries.gaussNorm]
+    refine Real.iSup_le (fun t => ?_) zero_le_one
+    rw [finsupp_prod_one, mul_one]
+    rw [Valued.toNormedField.norm_le_one_iff]
+    have hv := LaurentSeriesExample.psi_coeff_v_le F k g t 0
+      (fun m hm => absurd hm (Nat.not_lt_zero m))
+    rwa [show (-(0 : ℕ) : ℤ) = 0 by omega, WithZero.exp_zero] at hv
+  · -- surjectivity: integral restricted series are transpose images
+    rintro ⟨y, hy⟩
+    have hyres : MvPowerSeries.IsRestricted y.1 :=
+      (UnitDiscExample.isRestrictedGauss_one_iff K k y.1).mp y.2
+    have hyint : ∀ t, Valued.v (MvPowerSeries.coeff t y.1) ≤ 1 := fun t => by
+      rw [← Valued.toNormedField.norm_le_one_iff]
+      have h := MvPowerSeries.le_gaussNorm _ _ _ (MvRestricted.hasGaussNorm _ y) t
+      rw [finsupp_prod_one, mul_one] at h
+      refine h.trans ?_
+      rw [← MvRestricted.norm_eq]
+      exact hy
+    obtain ⟨g, hg⟩ := LaurentSeriesExample.exists_psi_eq F k y.1 hyres hyint
+    exact ⟨g, Subtype.ext (Subtype.ext hg)⟩
+
+/-- `L° = 𝒪_K⟨W,W⁻¹⟩` is noetherian: the `evalHom`-image of the integral `K⟨W,V⟩`
+([FJP] Lemma 4.2 for the annulus vertex). -/
+theorem isNoetherianRing_unitBall_L : IsNoetherianRing (unitBall (L F)) :=
+  isNoetherianRing_unitBall_of_section (evalHom (R := K)) (evalHom_norm_le (R := K))
+    (evalHom_exists_norm_le (R := K)) (isNoetherianRing_unitBall_gaussK F 2)
+
+/-- `k°⟨W⟩` (the unit ball of the disc coefficient ring) is noetherian. -/
+theorem isNoetherianRing_unitBall_KW :
+    IsNoetherianRing (unitBall (PowerSeries.Restricted K (1 : ℝ))) :=
+  isNoetherianRing_unitBall_of_isometry (innerToSeries (R := K))
+    (innerToSeries_norm (R := K)) (isNoetherianRing_unitBall_gaussK F 1)
+
+section DualBall
+
+variable (S : Type*) [NormedCommRing S] [IsUltrametricDist S] [NormOneClass S]
+
+/-- The unit ball of the dual numbers over `S` is noetherian whenever the unit ball of `S`
+is: it is the `ε`-polynomial image of the ball (`(f+Qg)` decomposition on balls). -/
+theorem isNoetherianRing_unitBall_dualNumber
+    (h : IsNoetherianRing (unitBall S)) : IsNoetherianRing (unitBall (DualNumber S)) := by
+  classical
+  haveI := h
+  have hEmem : (DualNumber.eps : DualNumber S) ∈ unitBall (DualNumber S) := by
+    show ‖(DualNumber.eps : DualNumber S)‖ ≤ 1
+    rw [JetNorm.norm_def]
+    refine max_le ?_ ?_
+    · show ‖(TrivSqZeroExt.inr (1 : S) : DualNumber S).fst‖ ≤ 1
+      rw [TrivSqZeroExt.fst_inr, norm_zero]
+      exact zero_le_one
+    · show ‖(TrivSqZeroExt.inr (1 : S) : DualNumber S).snd‖ ≤ 1
+      rw [TrivSqZeroExt.snd_inr, norm_one]
+  refine isNoetherianRing_of_surjective (Polynomial ↥(unitBall S)) _
+    (Polynomial.eval₂RingHom
+      (RingHom.codRestrict ((TrivSqZeroExt.inlHom S S).comp (unitBall S).subtype)
+        (unitBall (DualNumber S)) (fun x => by
+          show ‖(TrivSqZeroExt.inl (x : S) : DualNumber S)‖ ≤ 1
+          rw [JetNorm.norm_inl]
+          exact x.2))
+      ⟨DualNumber.eps, hEmem⟩) ?_
+  rintro ⟨y, hy⟩
+  have hymax : max ‖y.fst‖ ‖y.snd‖ ≤ 1 := (JetNorm.norm_def y).symm.trans_le hy
+  refine ⟨Polynomial.C ⟨y.fst, (le_max_left _ _).trans hymax⟩ +
+    Polynomial.C ⟨y.snd, (le_max_right _ _).trans hymax⟩ * Polynomial.X, ?_⟩
+  rw [map_add, map_mul]
+  simp only [Polynomial.coe_eval₂RingHom]
+  rw [Polynomial.eval₂_C, Polynomial.eval₂_C, Polynomial.eval₂_X]
+  refine Subtype.ext ?_
+  show TrivSqZeroExt.inl y.fst + TrivSqZeroExt.inl y.snd * DualNumber.eps = y
+  rw [show (DualNumber.eps : DualNumber S) = TrivSqZeroExt.inr 1 from rfl,
+    TrivSqZeroExt.inl_mul_inr, smul_eq_mul, mul_one, TrivSqZeroExt.inl_fst_add_inr_snd_eq]
+
+end DualBall
+
+theorem isNoetherianRing_unitBall_JetB : IsNoetherianRing (unitBall (JetB F)) :=
+  isNoetherianRing_unitBall_dualNumber (PowerSeries.Restricted K (1 : ℝ))
+    (isNoetherianRing_unitBall_KW F)
+
+/-- `𝒞° = L°⟨Q⟩` is noetherian: reached from the integral `K⟨W,V,Q⟩` by the flattening
+isometries and the coefficientwise `evalHom`. -/
+theorem isNoetherianRing_unitBall_JetC : IsNoetherianRing (unitBall (JetC F)) := by
+  obtain ⟨e1, he1⟩ := UnitDiscExample.exists_flatten' K
+    (MvPowerSeries.Restricted K (fun _ : Fin 1 => (1 : ℝ))) (RingEquiv.refl _)
+    (fun _ => rfl) 1
+  obtain ⟨e2, he2⟩ := UnitDiscExample.exists_flatten'
+    (MvPowerSeries.Restricted K (fun _ : Fin 1 => (1 : ℝ)))
+    (MvPowerSeries.Restricted K (fun _ : Fin 2 => (1 : ℝ)))
+    e1.symm
+    (fun x => by
+      have h := he1 (e1.symm x)
+      rw [RingEquiv.apply_symm_apply] at h
+      exact h.symm) 1
+  obtain ⟨e3, he3⟩ := UnitDiscExample.exists_flatten' K
+    (MvPowerSeries.Restricted K (fun _ : Fin 1 => (1 : ℝ))) (RingEquiv.refl _)
+    (fun _ => rfl) 2
+  -- ball of `(K⟨W⟩)⟨Z₀,Z₁⟩` from the integral `K⟨3 vars⟩`
+  have h23 := isNoetherianRing_unitBall_of_isometry e3.symm
+    (fun x => by
+      have h := he3 (e3.symm x)
+      rw [RingEquiv.apply_symm_apply] at h
+      exact h.symm) (isNoetherianRing_unitBall_gaussK F 3)
+  -- ball of `K⟨W,V⟩⟨Q⟩`
+  have h3 := isNoetherianRing_unitBall_of_isometry e2.symm
+    (fun x => by
+      have h := he2 (e2.symm x)
+      rw [RingEquiv.apply_symm_apply] at h
+      exact h.symm) h23
+  -- ball of `L⟨Q⟩` in `Fin 1` form
+  have h4 := isNoetherianRing_unitBall_of_section
+    (mapRestrictedGauss 1 (evalHom (R := K)) (evalHom_norm_le (R := K)))
+    (norm_mapRestrictedGauss_le 1 (evalHom (R := K)) (evalHom_norm_le (R := K)))
+    (mapRestrictedGauss_exists_norm_le 1 (evalHom (R := K)) (evalHom_norm_le (R := K))
+      (evalHom_exists_norm_le (R := K))) h3
+  exact isNoetherianRing_unitBall_of_isometry (innerToSeries (R := L F))
+    (innerToSeries_norm (R := L F)) h4
+
+theorem isNoetherianRing_unitBall_JetD : IsNoetherianRing (unitBall (JetD F)) :=
+  isNoetherianRing_unitBall_dualNumber (L F) (isNoetherianRing_unitBall_L F)
 
 /-! ### The payoff: the three comparison vertices are sheafy
 

@@ -286,7 +286,16 @@ T704, by a fresh `/develop --continue`.
   `JetNorm.isNoetherianRing`.
 
 ### [T303] unit-ball pods noetherian
-- **Status**: open | **Depends**: T301 | **Parallel**: with T302 | **Type**: proofs (L2.4)
+- **Status**: **DONE** (generic `isNoetherianRing_unitBall_of_section`/`_of_isometry`
+  transfer lemmas (ball codRestrict + section); anchor `isNoetherianRing_unitBall_gaussK`:
+  the integral `K⟨T₁..Tₖ⟩` is the `psiR`-image of `(MvPolynomial (Fin k) F)⟦X⟧`
+  (`exists_psi_eq` + `Valued.toNormedField.norm_le_one_iff` bridge, `psi_coeff_v_le` at 0);
+  `norm_mapRestrictedGauss_le` + `mapRestrictedGauss_exists_norm_le` (strengthened in place);
+  NormOneClass instance for radius-1 Gauss rings; `unitBall_L` (evalHom from k=2 anchor),
+  `unitBall_KW` (innerToSeries from k=1), `unitBall_JetC` (flatten ×2 + coefficientwise
+  evalHom + innerToSeries over L from k=3), `unitBall_JetB/JetD` via generic
+  `isNoetherianRing_unitBall_dualNumber` (ε-polynomial image of the ball, Hilbert basis).)
+  | **Parallel**: with T302 | **Type**: proofs (L2.4)
 - **Sorries**: `isNoetherianRing_unitBall_L/JetB/JetC/JetD`.
 - **Sketch**: `k° = F⟦X⟧` noetherian; integral restricted rings as ϖ-adic completions of
   polynomial rings (`AdicCompletionBridge` pattern / `Psi`-transpose as in
