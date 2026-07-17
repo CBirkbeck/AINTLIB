@@ -95,6 +95,22 @@ private theorem exists_corrected_lift (N : ℕ) (h : NIsInvertible S N) (B : Com
     abel
   · rw [E.restrict_add, hδres, add_zero]
 
+/-- A map of schemes `f : Z ⟶ Y` factors through an open immersion `j : X ⟶ Y` as soon as it
+does so after precomposition with a surjective-on-points map `g : W ⟶ Z`. Since square-zero
+thickenings are surjective on points, the corrected lift — which lands in the affine chart only
+after reduction — in fact lands in the chart itself. Extracted from the re-algebraize stage of
+the (LIFT) core. -/
+private theorem exists_lift_of_isOpenImmersion_of_surjective_comp {W X Y Z : Scheme.{u}}
+    {g : W ⟶ Z} (hg : Function.Surjective g.base) {f : Z ⟶ Y} {j : X ⟶ Y} [IsOpenImmersion j]
+    {k : W ⟶ X} (hcomm : g ≫ f = k ≫ j) : ∃ l : Z ⟶ X, l ≫ j = f := by
+  have hrange : Set.range f.base ⊆ Set.range j.base := by
+    rintro _ ⟨z, rfl⟩
+    obtain ⟨w, rfl⟩ := hg z
+    have h1 : f.base (g.base w) = (g ≫ f).base w := (Scheme.Hom.comp_apply _ _ _).symm
+    rw [h1, hcomm]
+    exact ⟨k.base w, Scheme.Hom.comp_apply _ _ _⟩
+  exact ⟨IsOpenImmersion.lift j f hrange, IsOpenImmersion.lift_fac _ _ hrange⟩
+
 /-- **(N6 core, the (LIFT) argument)** For `N` invertible, the chart ring map of `[N]`
 on a compatible affine chart triple `W, U, V` is formally smooth. -/
 theorem MulByHom.formallySmooth_appLE (N : ℕ) (h : NIsInvertible S N)
@@ -184,17 +200,8 @@ theorem MulByHom.formallySmooth_appLE (N : ℕ) (h : NIsInvertible S N)
     have h1 : (Point.restrict E (Spec.map φB) Px).1 =
         (Point.restrict E (Spec.map φB) Pxt).1 := congrArg Subtype.val hPxres
     exact h1.trans hxtres
-  have hxV : Set.range Px.1.base ⊆ Set.range hV.fromSpec.base := by
-    rintro _ ⟨p, rfl⟩
-    obtain ⟨q, rfl⟩ := hφBsurj p
-    have h1 : Px.1.base ((Spec.map φB).base q) = (Spec.map φB ≫ Px.1).base q :=
-      (Scheme.Hom.comp_apply _ _ _).symm
-    rw [h1, hresval]
-    exact ⟨(Spec.map (CommRingCat.ofHom ψq.toRingHom)).base q,
-      (Scheme.Hom.comp_apply _ _ _)⟩
-  set xV : Spec BC ⟶ Spec Γ(E.E, V) := IsOpenImmersion.lift hV.fromSpec Px.1 hxV
-    with hxV_def
-  have hxVfac : xV ≫ hV.fromSpec = Px.1 := IsOpenImmersion.lift_fac _ _ hxV
+  obtain ⟨xV, hxVfac⟩ :=
+    exists_lift_of_isOpenImmersion_of_surjective_comp hφBsurj hresval
   obtain ⟨σC, hσC⟩ := Spec.map_surjective xV
   -- the comorphism is `Γ(U)`-linear: `[N] ∘ x = y`
   have hUlin : (E.mulByHom (N : ℤ)).appLE U V hVU ≫ σC =
