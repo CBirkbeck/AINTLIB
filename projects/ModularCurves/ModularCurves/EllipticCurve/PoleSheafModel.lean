@@ -262,14 +262,18 @@ theorem projModelZChart_sup_sectionNeighborhood_eq_top (W : WeierstrassCurve R) 
             ((chartYSectionsRingEquiv W).symm (sectionUnitElem W)) := by
         change (chartYSectionsRingEquiv W).symm (sectionUnitElem W) ∉
             ((projModelYChart W).2.primeIdealOf ⟨x, hxY⟩).asIdeal ↔ _
-        rw [← PrimeSpectrum.mem_basicOpen, IsAffineOpen.primeIdealOf,
-          ← (projModelYChart W).2.fromSpec_preimage_basicOpen]
-        show (projModelYChart W).2.fromSpec.base
-            ((projModelYChart W).1.toSpecΓ.base ⟨x, hxY⟩) ∈
-              (projModel W).basicOpen
-                ((chartYSectionsRingEquiv W).symm (sectionUnitElem W)) ↔ _
-        rw [← Scheme.Hom.comp_apply, IsAffineOpen.toSpecΓ_fromSpec,
-          Scheme.Opens.ι_apply]
+        rw [← PrimeSpectrum.mem_basicOpen]
+        change (projModelYChart W).2.isoSpec.hom ⟨x, hxY⟩ ∈
+            PrimeSpectrum.basicOpen
+              ((chartYSectionsRingEquiv W).symm (sectionUnitElem W)) ↔ _
+        rw [← (projModelYChart W).2.fromSpec_preimage_basicOpen]
+        change (projModelYChart W).2.fromSpec
+              ((projModelYChart W).2.primeIdealOf ⟨x, hxY⟩) ∈
+            (projModel W).basicOpen
+              ((chartYSectionsRingEquiv W).symm (sectionUnitElem W)) ↔
+          x ∈ (projModel W).basicOpen
+            ((chartYSectionsRingEquiv W).symm (sectionUnitElem W))
+        rw [(projModelYChart W).2.fromSpec_primeIdealOf ⟨x, hxY⟩]
       exact hkey.mp huq
   · exact Or.inl hxZ
 
@@ -941,12 +945,15 @@ theorem projModelZeroIdealOverlap_transition (W : WeierstrassCurve R) :
           projModelZeroIdealOverlapTrivializationZ_inv_comp W]
     exact hone
   have hi : i = eZ.hom := by
-    calc
-      i = 𝟙 _ ≫ i := (Category.id_comp i).symm
-      _ = (eZ.hom ≫ eZ.inv) ≫ i := by rw [eZ.hom_inv_id]
-      _ = eZ.hom ≫ (eZ.inv ≫ i) := Category.assoc _ _ _
-      _ = eZ.hom ≫ 𝟙 _ := congrArg (fun q ↦ eZ.hom ≫ q) hZ
-      _ = eZ.hom := Category.comp_id _
+    have hUnit : i = 𝟙 _ ≫ i := (Category.id_comp i).symm
+    have hInsert : 𝟙 _ ≫ i = (eZ.hom ≫ eZ.inv) ≫ i :=
+      congrArg (fun q ↦ q ≫ i) eZ.hom_inv_id.symm
+    have hAssoc : (eZ.hom ≫ eZ.inv) ≫ i =
+        eZ.hom ≫ (eZ.inv ≫ i) := Category.assoc _ _ _
+    have hReplace : eZ.hom ≫ (eZ.inv ≫ i) = eZ.hom ≫ 𝟙 _ :=
+      congrArg (fun q ↦ eZ.hom ≫ q) hZ
+    exact hUnit.trans <| hInsert.trans <| hAssoc.trans <|
+      hReplace.trans (Category.comp_id _)
   apply (cancel_epi eU.inv).1
   rw [eU.inv_hom_id_assoc]
   rw [← hi]
@@ -1786,20 +1793,67 @@ theorem projModelPoleLocalSections_compatible
       M.presheaf.map (homOfLE (projModelPoleOverlap_le_ZChart W)).op
         (overTrivializationSection M (projModelZChart W)
           (projModelSectionPoleSheafPowerOverTrivializationZ W n) fZ) := by
-  dsimp only
-  rw [overTrivializationSection_restrict,
-    overTrivializationSection_restrict]
-  rw [projModelSectionPoleSheafPowerOverTrivialization_restrict,
-    projModelSectionPoleSheafPowerOverTrivializationZ_restrict]
-  apply overTrivializationSection_eq_of_transition
-    (sectionPoleSheafPower (projModelπ W) (projModelZero W)
-      (projModelZero_projModelπ W) n)
-    (projModelPoleOverlap W)
-    (projModelSectionPolePowerOverlapOverTrivialization W n)
-    (projModelSectionPolePowerOverlapOverTrivializationZ W n)
-    (projModelSectionRootOverlap W ^ n)
-  · exact projModelSectionPolePowerOverlapOver_transition W n
-  · exact projModelPoleCoefficients_compatible W n f b hb
+  let M := sectionPoleSheafPower (projModelπ W) (projModelZero W)
+    (projModelZero_projModelπ W) n
+  let bN := (projModel W).presheaf.map
+    (homOfLE ((projModel W).affineBasicOpen_le
+      (projModelSectionUnitSection W))).op
+    ((chartYSectionsRingEquiv W).symm b)
+  let fZ := (chartZSectionsRingEquiv W).symm f
+  let bP := (projModel W).presheaf.map
+    (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op bN
+  let fP := (projModel W).presheaf.map
+    (homOfLE (projModelPoleOverlap_le_ZChart W)).op fZ
+  change M.presheaf.map
+      (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op
+        (overTrivializationSection M (projModelSectionNeighborhood W)
+          (projModelSectionPoleSheafPowerOverTrivialization W n) bN) =
+    M.presheaf.map (homOfLE (projModelPoleOverlap_le_ZChart W)).op
+      (overTrivializationSection M (projModelZChart W)
+        (projModelSectionPoleSheafPowerOverTrivializationZ W n) fZ)
+  have hRestrictN := overTrivializationSection_restrict M
+    (projModelPoleOverlap_le_sectionNeighborhood W)
+      (projModelSectionPoleSheafPowerOverTrivialization W n) bN
+  have hRestrictZ := overTrivializationSection_restrict M
+    (projModelPoleOverlap_le_ZChart W)
+      (projModelSectionPoleSheafPowerOverTrivializationZ W n) fZ
+  have hNormalizeN :
+      overTrivializationSection M (projModelPoleOverlap W)
+          (SheafOfModules.restrictOverTrivialization
+            (projModel W).ringCatSheaf M (projModelSectionNeighborhood W)
+              (projModelSectionPoleSheafPowerOverTrivialization W n)
+                (Over.mk (homOfLE
+                  (projModelPoleOverlap_le_sectionNeighborhood W)))) bP =
+        overTrivializationSection M (projModelPoleOverlap W)
+          (projModelSectionPolePowerOverlapOverTrivialization W n) bP :=
+    congrArg
+      (fun e => overTrivializationSection M (projModelPoleOverlap W) e bP)
+      (projModelSectionPoleSheafPowerOverTrivialization_restrict W n)
+  have hNormalizeZ :
+      overTrivializationSection M (projModelPoleOverlap W)
+          (SheafOfModules.restrictOverTrivialization
+            (projModel W).ringCatSheaf M (projModelZChart W)
+              (projModelSectionPoleSheafPowerOverTrivializationZ W n)
+                (Over.mk (homOfLE (projModelPoleOverlap_le_ZChart W)))) fP =
+        overTrivializationSection M (projModelPoleOverlap W)
+          (projModelSectionPolePowerOverlapOverTrivializationZ W n) fP :=
+    congrArg
+      (fun e => overTrivializationSection M (projModelPoleOverlap W) e fP)
+      (projModelSectionPoleSheafPowerOverTrivializationZ_restrict W n)
+  have hTransition :
+      overTrivializationSection M (projModelPoleOverlap W)
+          (projModelSectionPolePowerOverlapOverTrivialization W n) bP =
+        overTrivializationSection M (projModelPoleOverlap W)
+          (projModelSectionPolePowerOverlapOverTrivializationZ W n) fP := by
+    apply overTrivializationSection_eq_of_transition M
+      (projModelPoleOverlap W)
+      (projModelSectionPolePowerOverlapOverTrivialization W n)
+      (projModelSectionPolePowerOverlapOverTrivializationZ W n)
+      (projModelSectionRootOverlap W ^ n)
+    · exact projModelSectionPolePowerOverlapOver_transition W n
+    · exact projModelPoleCoefficients_compatible W n f b hb
+  exact hRestrictN.trans <| hNormalizeN.trans <| hTransition.trans <|
+    hNormalizeZ.symm.trans hRestrictZ.symm
 
 /-- Every affine function of pole order at most `n` is the `Z`-coefficient of
 a global section of `O(n[0])`. -/
@@ -1848,8 +1902,17 @@ theorem exists_projModelSectionPoleCoefficientZ_eq_of_mem
         change (M.presheaf.map
             (homOfLE (projModelPoleOverlap_le_ZChart W)).op ≫
           M.presheaf.map (homOfLE hcomm).op) mZ = _
-        rw [← M.presheaf.map_comp]
-        congr 2
+        have hMapComp := M.presheaf.map_comp
+          (homOfLE (projModelPoleOverlap_le_ZChart W)).op
+            (homOfLE hcomm).op
+        have hArrows :
+            (homOfLE (projModelPoleOverlap_le_ZChart W)).op ≫
+                (homOfLE hcomm).op =
+              (TopologicalSpace.Opens.infLELeft Z N).op :=
+          Subsingleton.elim _ _
+        have hMorph := hMapComp.symm.trans
+          (M.presheaf.congr_map hArrows)
+        exact ConcreteCategory.congr_hom hMorph mZ
       have hright : M.presheaf.map (homOfLE hcomm).op
           (M.presheaf.map
             (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op mN) =
@@ -1857,8 +1920,17 @@ theorem exists_projModelSectionPoleCoefficientZ_eq_of_mem
         change (M.presheaf.map
             (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op ≫
           M.presheaf.map (homOfLE hcomm).op) mN = _
-        rw [← M.presheaf.map_comp]
-        congr 2
+        have hMapComp := M.presheaf.map_comp
+          (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op
+            (homOfLE hcomm).op
+        have hArrows :
+            (homOfLE (projModelPoleOverlap_le_sectionNeighborhood W)).op ≫
+                (homOfLE hcomm).op =
+              (TopologicalSpace.Opens.infLERight Z N).op :=
+          Subsingleton.elim _ _
+        have hMorph := hMapComp.symm.trans
+          (M.presheaf.congr_map hArrows)
+        exact ConcreteCategory.congr_hom hMorph mN
       exact hleft.symm.trans (hZN.trans hright)
     · dsimp only [U, sf]
       exact hNZ
