@@ -548,8 +548,44 @@ T704, by a fresh `/develop --continue`.
   `rw [pow_one]`); (iii) `IsLocalization.map_eq` as a term gets TC-stuck on metas — use
   `unfold locMapOfHom; rw [IsLocalization.map_eq]`.
 
-### [T603] **KEYSTONE**: the graph bridge for 𝓐
-- **Status**: open | **Depends**: T505, T602 | **Type**: def-completion + proofs (L5.4)
+### [T603] **KEYSTONE**: the graph bridge for 𝓐 — **DONE 2026-07-17**
+- **Status**: done (beastmode). `graphBridgeA : 𝒪_𝓐(D) ≃+* 𝓐_α` with continuity BOTH ways,
+  plus the real `graphBridge_natural_C` (True-stub replaced per L5.4 attack 3 — recorded
+  statement fix): `bridgeFwdC ∘ presheafValueMapC = locIotaC ∘ graphBridgeA`.
+  **Forward**: `bridgeBase = mk ∘ polyToP ∘ C`; graph relation `s̄·X̄ᵢ = f̄ᵢ` via
+  `Ideal.Quotient.eq`; `s̄` unit from the span decomposition (`mem_span_singleton'` +
+  `Ideal.mem_span_range_iff_exists_fun`, `Finset.mul_sum` calc); `IsLocalization.Away.lift`;
+  continuity via `locTopology_continuous_lift` (base 1-Lipschitz via
+  `AddMonoidHomClass.continuous_of_bound` + `gaussNorm_C_norm`; generators ↦ `X̄ᵢ` of norm
+  ≤ 1 (`gaussNorm_X_le_one`) hence power-bounded via new `isPowerBounded_of_norm_le_one`);
+  `Completion.extensionHom` into `locA` (complete+T2 from `isClosed_IA` +
+  `Submodule.Quotient.normedAddCommGroup`). **Reverse**: `bridgeToRestricted` (norm-decay ⇒
+  topological decay), `bridgeEval` on `mvEvalHomBounded` at the power-bounded `fᵢ/s` tuple
+  (`coeRingHom_image_locSubring_isBounded`); kills `I_𝓐` (term-mode `map_sub`/`congrArg₂`
+  chain + `mk'_spec`); `Ideal.Quotient.lift`. **Continuity of rev**: fresh Gauss-ball-basis
+  mirror of `mvEvalHomBounded_continuous` (coefficient norms ≤ series norm via
+  `norm_coeff_le_gauss`) + `QuotientRing.isOpenQuotientMap_mk`. **Round trips**:
+  `polyToP_denseRange` (new: truncation below any coefficient level via
+  `finite_setOf_le_norm_coeff`); rev∘fwd by `IsLocalization.ringHom_ext` + dense equalizer;
+  fwd∘rev by `MvPolynomial.ringHom_ext` (C/X agreement) + polynomial density + T2.
+  **Naturality**: C-side forward bridge re-instantiated at `locC` (same A-side `(D.s, e.f)`
+  parameters; `rC_eq` gives the C-graph polynomials; `span_pushed_C` for the unit;
+  `isClosed_graphIdeal` + `isNoetherianRing_PC` for closedness), then
+  `IsLocalization.ringHom_ext` + `denseRange_coe` equalizer through `locIotaC_mk` +
+  `mapRestricted_polyToP` + `MvPolynomial.map_C`.
+- **New reusable infra**: `instIsUltrametricDistIdealQuotient` (quotients of ultrametric
+  seminormed rings are ultrametric, via `norm_mk_lt` ε-representatives),
+  `instNonarchimedeanRingOfSeminormedUltra`, `isPowerBounded_of_norm_le_one`,
+  `gaussNorm_X_le_one`, `polyToP_denseRange`, `mkIA_continuous`, local copies of the
+  private Wedhorn828 helpers (`tsum_mem_of_isOpen_addSubgroup'`, range-product bounded).
+- **Gotchas**: instance-path storms at `JetA`/`PA` for `Sub`/`Mul`/`Module` — never rw with
+  generic `map_*` INTO applications (use term-mode `map_sub ... |>.trans (congrArg₂ ...)`
+  or `RingHom.map_*` with explicit hom); `AddMonoidHomClass.continuous_of_bound` avoids all
+  dist/sub rewriting for 1-Lipschitz homs; `haveI : NormedAddCommGroup (quotient)` SHADOWS
+  the seminormed norm — hoist metric lemmas (e.g. `mkIA_continuous`) OUTSIDE such scopes;
+  `open X in` goes BEFORE the docstring; `synthInstance.maxHeartbeats 400000` needed where
+  T2/metric instances synthesize through the quotient tower. | **Depends**: T505, T602 |
+  **Type**: def-completion + proofs (L5.4)
 - **Sorries**: `graphBridgeA` (data), `graphBridgeA_continuous`, `_symm_continuous`; ALSO
   replace the stub `graphBridge_natural_C : True` with the real statement (bridge ∘
   `presheafValueMapC` = `locIotaC`-side map ∘ bridge) — statement fixed in L5.4 attack 3.
