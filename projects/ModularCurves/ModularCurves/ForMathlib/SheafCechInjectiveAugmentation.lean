@@ -39,6 +39,18 @@ private noncomputable instance sectionsAt_preservesFiniteLimits (V : Opens X) :
         (evaluation (Opens X)ᵒᵖ AddCommGrpCat.{u}).obj (Opposite.op V))
   exact comp_preservesFiniteLimits _ _
 
+private theorem cechCochainAddEquiv_map_apply
+    {P Q : (Opens X)ᵒᵖ ⥤ AddCommGrpCat.{u}} (f : P ⟶ Q) (p : ℕ)
+    (x : ((cechComplexFunctor U).obj P).X p)
+    (i : Fin (p + 1) → ι) :
+    cechCochainAddEquiv Q U p (((cechComplexFunctor U).map f).f p x) i =
+      f.app (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (i k)))
+        (cechCochainAddEquiv P U p x i) := by
+  rw [cechCochainAddEquiv_apply, cechCochainAddEquiv_apply]
+  exact ConcreteCategory.congr_hom
+    (Limits.Pi.map_π (fun j : Fin (p + 1) → ι ↦
+      f.app (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (j k)))) i) x
+
 private theorem injectiveResolution_augmentation_app_comp_d
     (F : Sheaf AddCommGrpCat.{u} X) (V : Opens X) :
     ((injectiveResolution (toSiteSheaf F)).ι.f 0).hom.app (Opposite.op V) ≫
@@ -170,37 +182,24 @@ theorem cechInjectiveResolutionAugmentation_exact
   choose x hx using preimage
   let x' := (cechCochainAddEquiv F.obj U p).symm x
   refine ⟨x', ?_⟩
-  change Limits.Pi.map (fun i : Fin (p + 1) → ι ↦
-      (I.ι.f 0).hom.app
-        (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (i k)))) x' = y
   apply (cechCochainAddEquiv (I.cocomplex.X 0).obj U p).injective
   funext i
-  rw [cechCochainAddEquiv_apply, cechCochainAddEquiv_apply]
-  have hmap := ConcreteCategory.congr_hom
-    (Limits.Pi.map_π (fun j : Fin (p + 1) → ι ↦
-      (I.ι.f 0).hom.app
-        (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (j k)))) i) x'
-  have hx'i :
-      Limits.Pi.π (fun j : Fin (p + 1) → ι ↦
-        (((CochainComplex.single₀
-          (CategoryTheory.Sheaf (Opens.grothendieckTopology X)
-            AddCommGrpCat.{u})).obj (toSiteSheaf F)).X 0).obj.obj
-          (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (j k)))) i x' = x i := by
-    change cechCochainAddEquiv F.obj U p x' i = x i
+  have hx'i : cechCochainAddEquiv F.obj U p x' i = x i := by
     simp [x']
   calc
     _ = (I.ι.f 0).hom.app
           (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (i k)))
-          (Limits.Pi.π (fun j : Fin (p + 1) → ι ↦
-            (((CochainComplex.single₀
-              (CategoryTheory.Sheaf (Opens.grothendieckTopology X)
-                AddCommGrpCat.{u})).obj (toSiteSheaf F)).X 0).obj.obj
-              (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (j k)))) i x') := by
-        simpa only [ConcreteCategory.comp_apply] using hmap
+          (cechCochainAddEquiv F.obj U p x' i) := by
+      change cechCochainAddEquiv (I.cocomplex.X 0).obj U p
+          (((cechComplexFunctor U).map (I.ι.f 0).hom).f p x') i = _
+      exact cechCochainAddEquiv_map_apply U (I.ι.f 0).hom p x' i
     _ = (I.ι.f 0).hom.app
           (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (i k))) (x i) := by
-        rw [hx'i]
-    _ = _ := hx i
+      rw [hx'i]
+    _ = Limits.Pi.π (fun j : Fin (p + 1) → ι ↦
+        (I.cocomplex.X 0).obj.obj
+          (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (j k)))) i y := hx i
+    _ = _ := (cechCochainAddEquiv_apply (I.cocomplex.X 0).obj U p y i).symm
 
 private theorem injectiveResolution_d_app_comp_d
     (F : Sheaf AddCommGrpCat.{u} X) (V : Opens X) :
@@ -250,8 +249,8 @@ private theorem injectiveResolution_cokernel_app_surjective_of_subsingleton_H
     dsimp [R]
     infer_instance
   have hH : Subsingleton (SV.X₁.H 1) := by
-    simpa only [SV, ShortComplex.map_X₁, S,
-      CochainComplex.single₀_obj_zero] using hH0
+    change Subsingleton (CategoryTheory.Sheaf.H (R.obj F) 1)
+    exact hH0
   have htop := CategoryTheory.Sheaf.H.longSequence_surjective_of_subsingleton_H
     hSV isTerminalTop
   change Function.Surjective
@@ -291,7 +290,7 @@ private theorem injectiveResolutionAugmentationShortComplex_exact
 private noncomputable def injectiveResolutionCokernelToOne
     (F : Sheaf AddCommGrpCat.{u} X) :
     cokernel (injectiveResolutionAugmentationShortComplex F).f ⟶
-      (injectiveResolutionAugmentationShortComplex F).X₃ :=
+      (injectiveResolution (toSiteSheaf F)).cocomplex.X 1 :=
   cokernel.desc
     (injectiveResolutionAugmentationShortComplex F).f
     (injectiveResolutionAugmentationShortComplex F).g
@@ -318,10 +317,23 @@ private theorem injectiveResolutionCokernelToOne_comp_d
     (F : Sheaf AddCommGrpCat.{u} X) :
     injectiveResolutionCokernelToOne F ≫
       (injectiveResolution (toSiteSheaf F)).cocomplex.d 1 2 = 0 := by
-  apply (cancel_epi
-    (cokernel.π (injectiveResolutionAugmentationShortComplex F).f)).1
-  rw [← Category.assoc, injectiveResolution_cokernel_π_comp_toOne, comp_zero]
-  exact (injectiveResolution (toSiteSheaf F)).complex_d_comp 0
+  let I := injectiveResolution (toSiteSheaf F)
+  let πc := cokernel.π (injectiveResolutionAugmentationShortComplex F).f
+  apply (cancel_epi πc).1
+  calc
+    πc ≫ (injectiveResolutionCokernelToOne F ≫ I.cocomplex.d 1 2) =
+        (πc ≫ injectiveResolutionCokernelToOne F) ≫ I.cocomplex.d 1 2 :=
+      (Category.assoc _ _ _).symm
+    _ = (injectiveResolutionAugmentationShortComplex F).g ≫
+        I.cocomplex.d 1 2 := by
+      exact congrArg (fun k ↦ k ≫ I.cocomplex.d 1 2)
+        (injectiveResolution_cokernel_π_comp_toOne F)
+    _ = 0 := by
+      change I.cocomplex.d 0 1 ≫ I.cocomplex.d 1 2 = 0
+      exact I.complex_d_comp 0
+    _ = πc ≫ 0 := by
+      symm
+      exact comp_zero
 
 private noncomputable def injectiveResolutionCokernelTail
     (F : Sheaf AddCommGrpCat.{u} X) :
@@ -477,33 +489,24 @@ theorem cechInjectiveResolutionBicomplex_column_exactAt_one
   choose x hx using preimage
   let x' := (cechCochainAddEquiv (I.cocomplex.X 0).obj U p).symm x
   refine ⟨x', ?_⟩
-  change Limits.Pi.map (fun i : Fin (p + 1) → ι ↦
-      (I.cocomplex.d 0 1).hom.app
-        (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (i k)))) x' = y
   apply (cechCochainAddEquiv (I.cocomplex.X 1).obj U p).injective
   funext i
-  rw [cechCochainAddEquiv_apply, cechCochainAddEquiv_apply]
-  have hmap := ConcreteCategory.congr_hom
-    (Limits.Pi.map_π (fun j : Fin (p + 1) → ι ↦
-      (I.cocomplex.d 0 1).hom.app
-        (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (j k)))) i) x'
-  have hx'i :
-      Limits.Pi.π (fun j : Fin (p + 1) → ι ↦
-        (I.cocomplex.X 0).obj.obj
-          (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (j k)))) i x' = x i := by
-    change cechCochainAddEquiv (I.cocomplex.X 0).obj U p x' i = x i
+  have hx'i : cechCochainAddEquiv (I.cocomplex.X 0).obj U p x' i = x i := by
     simp [x']
   calc
     _ = (I.cocomplex.d 0 1).hom.app
           (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (i k)))
-          (Limits.Pi.π (fun j : Fin (p + 1) → ι ↦
-            (I.cocomplex.X 0).obj.obj
-              (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (j k)))) i x') := by
-        simpa only [ConcreteCategory.comp_apply] using hmap
+          (cechCochainAddEquiv (I.cocomplex.X 0).obj U p x' i) := by
+      change cechCochainAddEquiv (I.cocomplex.X 1).obj U p
+          (((cechComplexFunctor U).map (I.cocomplex.d 0 1).hom).f p x') i = _
+      exact cechCochainAddEquiv_map_apply U (I.cocomplex.d 0 1).hom p x' i
     _ = (I.cocomplex.d 0 1).hom.app
           (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (i k))) (x i) := by
-        rw [hx'i]
-    _ = _ := hx i
+      rw [hx'i]
+    _ = Limits.Pi.π (fun j : Fin (p + 1) → ι ↦
+        (I.cocomplex.X 1).obj.obj
+          (Opposite.op (∏ᶜ fun k : Fin (p + 1) ↦ U (j k)))) i y := hx i
+    _ = _ := (cechCochainAddEquiv_apply (I.cocomplex.X 1).obj U p y i).symm
 
 private theorem cechSingletonIntersection_eq (i : Fin 1 → ι) :
     (∏ᶜ fun k : Fin 1 ↦ U (i k)) = U (i 0) := by
