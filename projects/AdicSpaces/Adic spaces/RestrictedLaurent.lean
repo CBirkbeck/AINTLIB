@@ -1248,10 +1248,23 @@ noncomputable def coeffHom (m : ℤ) : RestrictedLaurent R →+ R where
   map_zero' := rfl
   map_add' f g := rfl
 
-theorem evalHom_surjective :
-    Function.Surjective (evalHom (R := R)) := by
+/-- The norm of the nonpositive truncation is bounded by the norm. -/
+theorem norm_truncNonpos_le (h : RestrictedLaurent R) : ‖truncNonpos h‖ ≤ ‖h‖ := by
+  rw [norm_def]
+  refine Real.iSup_le (fun a => ?_) (norm_nonneg h)
+  show ‖if a ≤ 0 then h.coeff a else 0‖ ≤ ‖h‖
+  split
+  · exact (norm_coeff_le_gaussNorm h a).trans_eq (norm_def h).symm
+  · rw [norm_zero]
+    exact norm_nonneg h
+
+/-- `evalHom` has a norm-nonincreasing set-theoretic section: the preimage places the
+nonpositive part on the `V`-axis and the positive coefficients on `W`-monomials
+([FJP] §1.4's "norm-preserving monomial section"). -/
+theorem evalHom_exists_norm_le (h : RestrictedLaurent R) :
+    ∃ g : MvPowerSeries.Restricted R (fun _ : Fin 2 => (1 : ℝ)),
+      evalHom (R := R) g = h ∧ ‖g‖ ≤ ‖h‖ := by
   classical
-  intro h
   -- the friendly preimage over the univariate coefficient ring
   set c0 : PowerSeries.Restricted R (1 : ℝ) :=
     (nonnegEquiv (R := R)).symm ⟨negate (truncNonpos h), fun a ha => by
@@ -1277,7 +1290,26 @@ theorem evalHom_surjective :
       (MvPowerSeries.Restricted R (fun _ : Fin 1 => (1 : ℝ))) (1 : ℝ) :=
     restrictedCongr (innerToSeries (R := R)).symm (innerToSeries_symm_norm (R := R)) G'
     with hG''
-  refine ⟨(UnitDiscExample.finSuccOne R 1).symm G'', ?_⟩
+  refine ⟨(UnitDiscExample.finSuccOne R 1).symm G'', ?_, ?_⟩
+  swap
+  · -- the norm bound: all coefficients of `G'` are coefficients of `h` (or its truncation)
+    rw [UnitDiscExample.finSuccOne_symm_norm, hG'', restrictedCongr_norm, hG',
+      Restricted.norm_eq, PowerSeries.gaussNorm_eq]
+    refine Real.iSup_le (fun i => ?_) (norm_nonneg h)
+    rw [one_pow, mul_one]
+    show ‖PowerSeries.coeff i (PowerSeries.mk fun j =>
+      if j = 0 then c0 else PowerSeries.Restricted.C (1 : ℝ) (h.coeff j))‖ ≤ ‖h‖
+    rw [PowerSeries.coeff_mk]
+    rcases eq_or_ne i 0 with rfl | hi0
+    · rw [if_pos rfl]
+      have h1 := nonnegEquiv_norm (R := R) c0
+      conv_rhs at h1 => rw [hc0]
+      rw [hc0, RingEquiv.apply_symm_apply] at h1
+      calc ‖c0‖ = ‖negate (truncNonpos h)‖ := by rw [← hc0] at h1; exact h1.symm ▸ h1.symm
+        _ = ‖truncNonpos h‖ := norm_negate _
+        _ ≤ ‖h‖ := norm_truncNonpos_le h
+    · rw [if_neg hi0, norm_restrictedC]
+      exact (norm_coeff_le_gaussNorm h (i : ℤ)).trans_eq (norm_def h).symm
   have happ : evalHom (R := R) ((UnitDiscExample.finSuccOne R 1).symm G'') =
       evalLE (negOfSeries (R := R)) (Wu (R := R)).val
         (fun x => (norm_negOfSeries x).le) norm_W.le G'' := by
@@ -1347,6 +1379,11 @@ theorem evalHom_surjective :
       · rw [if_pos rfl, if_neg (by omega)]
       · rw [if_neg hi0, if_neg (by omega)]),
       if_neg (by omega), if_pos (by omega), show ((m.toNat : ℕ) : ℤ) = m by omega]
+
+theorem evalHom_surjective :
+    Function.Surjective (evalHom (R := R)) := fun h =>
+  let ⟨g, hg, _⟩ := evalHom_exists_norm_le h
+  ⟨g, hg⟩
 
 end Eval
 

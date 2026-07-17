@@ -39,10 +39,98 @@ local notation "K" => LaurentSeries F
 
 /-! ### Strong noetherianity of the four coefficient rings -/
 
+section MapRestricted
+
+variable {B C : Type*} [NormedCommRing B] [NormedCommRing C]
+  [IsUltrametricDist B] [IsUltrametricDist C]
+
+theorem finsupp_prod_one {m : ℕ} (t : Fin m →₀ ℕ) :
+    (t.prod fun _ k => (1 : ℝ) ^ k) = 1 := by
+  simp
+
+/-- Coefficientwise application of a norm-nonincreasing ring homomorphism to radius-one
+restricted multivariate power series. -/
+noncomputable def mapRestrictedGauss (m : ℕ) (φ : B →+* C) (hφ : ∀ x, ‖φ x‖ ≤ ‖x‖) :
+    MvPowerSeries.Restricted B (fun _ : Fin m => (1 : ℝ)) →+*
+      MvPowerSeries.Restricted C (fun _ : Fin m => (1 : ℝ)) where
+  toFun x := ⟨MvPowerSeries.map φ x.1, by
+    show MvPowerSeries.IsRestrictedGauss _ _
+    have hx : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ)) x.1 := x.2
+    rw [MvPowerSeries.IsRestrictedGauss] at hx ⊢
+    refine squeeze_zero (fun t => mul_nonneg (norm_nonneg _) ?_) (fun t => ?_) hx
+    · rw [finsupp_prod_one]
+      exact zero_le_one
+    · rw [MvPowerSeries.coeff_map]
+      exact mul_le_mul_of_nonneg_right (hφ _)
+        (by rw [finsupp_prod_one]; exact zero_le_one)⟩
+  map_one' := Subtype.ext (map_one (MvPowerSeries.map φ))
+  map_mul' x y := Subtype.ext (map_mul (MvPowerSeries.map φ) x.1 y.1)
+  map_zero' := Subtype.ext (map_zero (MvPowerSeries.map φ))
+  map_add' x y := Subtype.ext (map_add (MvPowerSeries.map φ) x.1 y.1)
+
+/-- If `φ` admits a norm-nonincreasing set-theoretic section, the coefficientwise map on
+restricted extensions is surjective. -/
+theorem mapRestrictedGauss_surjective (m : ℕ) (φ : B →+* C) (hφ : ∀ x, ‖φ x‖ ≤ ‖x‖)
+    (hsec : ∀ v : C, ∃ u : B, φ u = v ∧ ‖u‖ ≤ ‖v‖) :
+    Function.Surjective (mapRestrictedGauss m φ hφ) := by
+  classical
+  intro y
+  set x : MvPowerSeries (Fin m) B :=
+    fun t => (hsec (MvPowerSeries.coeff t y.1)).choose with hxdef
+  have hxc : ∀ t, MvPowerSeries.coeff t x = (hsec (MvPowerSeries.coeff t y.1)).choose :=
+    fun t => rfl
+  have hmem : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ)) x := by
+    have hy : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ)) y.1 := y.2
+    rw [MvPowerSeries.IsRestrictedGauss] at hy ⊢
+    refine squeeze_zero (fun t => mul_nonneg (norm_nonneg _) ?_) (fun t => ?_) hy
+    · rw [finsupp_prod_one]
+      exact zero_le_one
+    · rw [hxc]
+      exact mul_le_mul_of_nonneg_right (hsec _).choose_spec.2
+        (by rw [finsupp_prod_one]; exact zero_le_one)
+  refine ⟨⟨x, hmem⟩, Subtype.ext ?_⟩
+  show MvPowerSeries.map φ x = y.1
+  ext t
+  rw [MvPowerSeries.coeff_map, hxc, (hsec _).choose_spec.1]
+
+end MapRestricted
+
 /-- Restricted extensions of the Laurent ring are noetherian: `L⟨Z₁,…,Zₘ⟩` is a quotient of
-the noetherian `K⟨W,V,Z₁,…,Zₘ⟩` ([FJP] Prop 2.1; the presentation `L = k⟨W,V⟩/(WV−1)`). -/
+the noetherian `K⟨W,V,Z₁,…,Zₘ⟩` ([FJP] Prop 2.1; the presentation `L = k⟨W,V⟩/(WV−1)`).
+The surjection is `evalHom` applied coefficientwise (with its norm-nonincreasing monomial
+section), and `K⟨W,V,Z₁,…,Zₘ⟩` is flattened onto `K⟨(m+2) variables⟩` by two applications of
+the unit-disc flattening isometry. -/
 theorem isNoetherianRing_restricted_L (m : ℕ) :
-    IsNoetherianRing (restrictedMvPowerSeriesSubring m (L F)) := by sorry
+    IsNoetherianRing (restrictedMvPowerSeriesSubring m (L F)) := by
+  classical
+  -- flattening: `(K⟨W⟩)⟨V⟩ ≅ K⟨W,V⟩`
+  obtain ⟨e1, he1⟩ := UnitDiscExample.exists_flatten' K
+    (MvPowerSeries.Restricted K (fun _ : Fin 1 => (1 : ℝ))) (RingEquiv.refl _)
+    (fun _ => rfl) 1
+  -- flattening: `K⟨W,V⟩⟨Z₁,…,Zₘ⟩ ≅ (K⟨W⟩)⟨Z₀,…,Zₘ⟩`
+  obtain ⟨e2, -⟩ := UnitDiscExample.exists_flatten'
+    (MvPowerSeries.Restricted K (fun _ : Fin 1 => (1 : ℝ)))
+    (MvPowerSeries.Restricted K (fun _ : Fin 2 => (1 : ℝ)))
+    e1.symm
+    (fun x => by
+      have h := he1 (e1.symm x)
+      rw [RingEquiv.apply_symm_apply] at h
+      exact h.symm) m
+  -- flattening: `(K⟨W⟩)⟨Z₀,…,Zₘ⟩ ≅ K⟨(m+2) variables⟩`
+  obtain ⟨e3, -⟩ := UnitDiscExample.exists_flatten' K
+    (MvPowerSeries.Restricted K (fun _ : Fin 1 => (1 : ℝ))) (RingEquiv.refl _)
+    (fun _ => rfl) (m + 1)
+  haveI hK : IsNoetherianRing (restrictedMvPowerSeriesSubring (m + 2) K) :=
+    IsStronglyNoetherian.isNoetherianRing_restricted (m + 2)
+  refine isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring (m + 2) K) _
+    (((UnitDiscExample.restrictedGaussEquiv (L F) m).toRingHom).comp
+      ((mapRestrictedGauss m (evalHom (R := K)) (evalHom_norm_le (R := K))).comp
+        (((UnitDiscExample.restrictedGaussEquiv K (m + 2)).symm.trans
+          (e3.symm.trans e2.symm)).toRingHom))) ?_
+  rw [RingHom.coe_comp, RingHom.coe_comp]
+  exact (RingEquiv.surjective _).comp
+    ((mapRestrictedGauss_surjective m (evalHom (R := K)) (evalHom_norm_le (R := K))
+      (evalHom_exists_norm_le (R := K))).comp (RingEquiv.surjective _))
 
 /-- `L = K⟨W,W⁻¹⟩` is strongly noetherian. -/
 instance : IsStronglyNoetherian (L F) :=

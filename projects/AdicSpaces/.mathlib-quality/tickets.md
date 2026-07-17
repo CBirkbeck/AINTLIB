@@ -254,7 +254,14 @@ T704, by a fresh `/develop --continue`.
 ### [CLEANUP-6] /cleanup `FiniteJetUniformDomain.lean` (final) — **Depends**: T202, T203.
 
 ### [T301] `FiniteJetNoetherianVertices.lean` — `L` strongly noetherian
-- **Status**: open | **Depends**: T104 | **Type**: proofs (L2.1)
+- **Status**: **DONE** (`evalHom_exists_norm_le` — evalHom_surjective strengthened in place
+  to a norm-nonincreasing section (norm_truncNonpos_le + coefficient sup bound), original
+  theorem re-derived; generic `mapRestrictedGauss` (coefficientwise φ on radius-1
+  MvRestricted, squeeze for restrictedness) + `mapRestrictedGauss_surjective` (choice on the
+  bounded section); `isNoetherianRing_restricted_L`: restrictedGaussEquiv(L) ∘
+  mapRestricted(evalHom) ∘ (exists_flatten' ×2: K⟨W,V⟩⟨Z⃗ₘ⟩ ≅ K⟨m+2 vars⟩) surjection from
+  `IsStronglyNoetherian K` anchor. Axiom-clean. `IsStronglyNoetherian (L F)` +
+  `IsNoetherianRing (L F)` instances live.) | **Type**: proofs (L2.1)
 - **Sorries**: `isNoetherianRing_restricted_L`.
 - **Sketch**: per-`m` surjection `K⟨W,V,Z₁..Zₘ⟩ ↠ L⟨Z₁..Zₘ⟩`: vendored
   `restrictedGaussEquiv` (both ends) + `exists_flatten'`-style regrouping +
