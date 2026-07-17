@@ -904,6 +904,51 @@ noncomputable def chartEval :
   (TateAlgebraWedhorn.evalHomBounded (chartConst F) (chartConst_continuous F)
     (gChart F) (gChart_isBounded F)).comp (kwToTate F)
 
+/-- Coefficients pass through the reindexing bridge. -/
+theorem coeff_kwToTate (f : PowerSeries.Restricted K (1 : ℝ)) (n : ℕ) :
+    TateAlgebra.coeff n (kwToTate F f) = PowerSeries.coeff n f.1 := by
+  show MvPowerSeries.coeff (TateAlgebra.toIndex n)
+    (MvPowerSeries.renameEquiv (R := K) unitFinOne f.1) = _
+  have hv : TateAlgebra.toIndex n = Finsupp.embDomain unitFinOne.toEmbedding
+      (Finsupp.single () n) := by
+    rw [Finsupp.embDomain_single]
+    refine Finsupp.ext fun i => ?_
+    rw [show i = (0 : Fin 1) from by omega, TateAlgebra.toIndex,
+      Finsupp.single_apply, Finsupp.single_apply,
+      if_pos (Subsingleton.elim _ _), if_pos (Subsingleton.elim _ _)]
+  have hemb := MvPowerSeries.coeff_embDomain_rename (R := K)
+    unitFinOne.toEmbedding f.1 (Finsupp.single () n)
+  rw [← hv] at hemb
+  exact hemb
+
+/-- The evaluation fixes constants: `chartEval (C r) = ρ(constA r)`. -/
+theorem chartEval_const (r : K) :
+    chartEval F (constHomPS F r) = chartConst F r := by
+  show ∑' n, TateAlgebraWedhorn.evalTerm (chartConst F) (gChart F)
+    (kwToTate F (constHomPS F r)) n = chartConst F r
+  rw [tsum_eq_single 0]
+  · rw [TateAlgebraWedhorn.evalTerm, coeff_kwToTate]
+    show chartConst F (PowerSeries.coeff 0 (PowerSeries.C r : PowerSeries K)) *
+      gChart F ^ 0 = chartConst F r
+    rw [PowerSeries.coeff_zero_C, pow_zero, mul_one]
+  · intro n hn
+    rw [TateAlgebraWedhorn.evalTerm, coeff_kwToTate]
+    show chartConst F (PowerSeries.coeff n (PowerSeries.C r : PowerSeries K)) *
+      gChart F ^ n = 0
+    rw [PowerSeries.coeff_C, if_neg hn, map_zero, zero_mul]
+
+/-- The evaluation sends the disc variable to the chart generator `W/ϖ`. -/
+theorem chartEval_jBWa_fst :
+    chartEval F ((jB F (Wa F)).fst) = gChart F := by
+  show ∑' n, TateAlgebraWedhorn.evalTerm (chartConst F) (gChart F)
+    (kwToTate F ((jB F (Wa F)).fst)) n = gChart F
+  rw [tsum_eq_single 1]
+  · rw [TateAlgebraWedhorn.evalTerm, coeff_kwToTate, coeff_jB_Wa_fst,
+      if_pos rfl, map_one, one_mul, pow_one]
+  · intro n hn
+    rw [TateAlgebraWedhorn.evalTerm, coeff_kwToTate, coeff_jB_Wa_fst,
+      if_neg hn, map_zero, zero_mul]
+
 /-- The reverse map `φ : 𝓑 → 𝒪_𝓐(chart)`, `(f, g) ↦ φ(f) + φ(g)·Q̄`
 (a ring homomorphism because `Q̄² = 0`). -/
 noncomputable def chartRev : JetB F →+* presheafValue (chartDatum F) where
