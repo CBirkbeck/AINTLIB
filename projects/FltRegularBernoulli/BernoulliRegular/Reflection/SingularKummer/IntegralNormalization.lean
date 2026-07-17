@@ -92,6 +92,37 @@ theorem exists_integral_normalization
   · simpa [ht_ideal] using
       (principal_eq_ideal_pow (R := R) (K := K) (s := t))
 
+/-- Absorbing an ideal-avoidance representative into a singular pair: if
+`ideal t₀ = mk0 K J₀` and `spanSingleton R⁰ delta · J₀ = J` (the fractional
+identity witnessing `[J₀] = [J]` in the class group), then multiplying `t₀` by
+the principal pair of `delta` moves its ideal exactly onto `mk0 K J`. -/
+private lemma ideal_mul_principalPair_eq_mk0 (t₀ : SingularPair R K p)
+    {J₀ J : (Ideal R)⁰} {delta : K} (hdelta_ne : delta ≠ 0)
+    (ht₀_ideal : ideal t₀ = FractionalIdeal.mk0 K J₀)
+    (hdelta : FractionalIdeal.spanSingleton R⁰ delta * (J₀ : FractionalIdeal R⁰ K) =
+      (J : FractionalIdeal R⁰ K)) :
+    ideal (t₀ * principalPair (R := R) (K := K) p (Units.mk0 delta hdelta_ne)) =
+      FractionalIdeal.mk0 K J := by
+  calc
+    ideal (t₀ * principalPair (R := R) (K := K) p (Units.mk0 delta hdelta_ne)) =
+        ideal t₀ * toPrincipalIdeal R K (Units.mk0 delta hdelta_ne) := by
+      simp [principalPair, ideal]
+    _ = FractionalIdeal.mk0 K J := by
+      apply Units.ext
+      rw [ht₀_ideal]
+      change
+        (FractionalIdeal.mk0 K J₀ : FractionalIdeal R⁰ K) *
+            ((toPrincipalIdeal R K (Units.mk0 delta hdelta_ne) : (FractionalIdeal R⁰ K)ˣ) :
+              FractionalIdeal R⁰ K) =
+          (FractionalIdeal.mk0 K J : FractionalIdeal R⁰ K)
+      rw [coe_toPrincipalIdeal]
+      change
+        (FractionalIdeal.mk0 K J₀ : FractionalIdeal R⁰ K) *
+            FractionalIdeal.spanSingleton R⁰ delta =
+          (FractionalIdeal.mk0 K J : FractionalIdeal R⁰ K)
+      rw [mul_comm]
+      simpa [FractionalIdeal.coe_mk0] using hdelta
+
 /-- Integral normalization with a prescribed coprime condition.
 
 After first clearing denominators, ideal avoidance replaces the integral ideal
@@ -117,25 +148,8 @@ theorem exists_integral_normalization_coprime
       (R := R) (K := K) (I := J₀) (J := J)).mp hJ_class.symm
   let deltaUnit : Kˣ := Units.mk0 delta hdelta_ne
   let t : SingularPair R K p := t₀ * principalPair (R := R) (K := K) p deltaUnit
-  have ht_ideal : ideal t = FractionalIdeal.mk0 K J := by
-    calc
-      ideal t = ideal t₀ * toPrincipalIdeal R K deltaUnit := by
-        simp [t, principalPair, ideal]
-      _ = FractionalIdeal.mk0 K J := by
-        apply Units.ext
-        rw [ht₀_ideal]
-        change
-          (FractionalIdeal.mk0 K J₀ : FractionalIdeal R⁰ K) *
-              ((toPrincipalIdeal R K deltaUnit : (FractionalIdeal R⁰ K)ˣ) :
-                FractionalIdeal R⁰ K) =
-            (FractionalIdeal.mk0 K J : FractionalIdeal R⁰ K)
-        rw [coe_toPrincipalIdeal]
-        change
-          (FractionalIdeal.mk0 K J₀ : FractionalIdeal R⁰ K) *
-              FractionalIdeal.spanSingleton R⁰ delta =
-            (FractionalIdeal.mk0 K J : FractionalIdeal R⁰ K)
-        rw [mul_comm]
-        simpa [FractionalIdeal.coe_mk0] using hdelta
+  have ht_ideal : ideal t = FractionalIdeal.mk0 K J :=
+    ideal_mul_principalPair_eq_mk0 t₀ hdelta_ne ht₀_ideal hdelta
   refine ⟨t, gamma₀ * deltaUnit, J, ht_ideal, hJ_coprime, ?_, ?_, ?_⟩
   · calc
       generator t = generator t₀ * deltaUnit ^ p := by
