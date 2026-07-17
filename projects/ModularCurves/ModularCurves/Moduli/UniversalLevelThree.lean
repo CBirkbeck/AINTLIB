@@ -831,6 +831,164 @@ theorem three_zsmul_universalE3Q
     simp only [map_sub, map_mul, map_neg, map_ofNat, map_pow]
   · exact hE3K.2.2.2.1
 
+/-! ### The unconditional killing: transport from `ℤ[1/3]` (Stage D instantiation)
+
+`ZInvThree := ULift ℤ[1/3]` is a UFD in universe `u`, so its universal base is reduced
+(`isReduced_spec_e3ModuliRing`) and the conditional killings fire there; the classifying
+map `ℤ[1/3] → R` (initiality of the localization) plus the Stage-D transport
+`nsmul_section_map_eq_zero_of_nsmul_eq_zero` then carry the killing to every coefficient
+ring with `3` invertible — no reducedness hypothesis on `R`. -/
+
+/-- `ℤ[1/3]` in universe `u` — the initial coefficient ring with `3` invertible. -/
+abbrev ZInvThree : Type u := ULift.{u} (Localization.Away (3 : ℤ))
+
+instance : IsDomain (Localization.Away (3 : ℤ)) :=
+  IsLocalization.isDomain_localization
+    (powers_le_nonZeroDivisors_of_noZeroDivisors (by norm_num))
+
+instance : IsDomain ZInvThree.{u} :=
+  Function.Injective.isDomain
+    (ULift.ringEquiv : ZInvThree.{u} ≃+* Localization.Away (3 : ℤ))
+    (ULift.ringEquiv : ZInvThree.{u} ≃+* Localization.Away (3 : ℤ)).injective
+
+instance : IsPrincipalIdealRing (Localization.Away (3 : ℤ)) := by
+  constructor
+  intro J
+  obtain ⟨⟨a, ha⟩⟩ := IsPrincipalIdealRing.principal
+    (J.comap (algebraMap ℤ (Localization.Away (3 : ℤ))))
+  rw [Ideal.submodule_span_eq] at ha
+  refine ⟨⟨algebraMap ℤ _ a, ?_⟩⟩
+  conv_lhs => rw [← IsLocalization.map_under (Submonoid.powers (3 : ℤ))
+    (Localization.Away (3 : ℤ)) J]
+  show Ideal.map _ (J.comap _) = _
+  rw [ha, Ideal.map_span, Set.image_singleton, Ideal.submodule_span_eq]
+
+instance : UniqueFactorizationMonoid ZInvThree.{u} :=
+  ((ULift.ringEquiv : ZInvThree.{u} ≃+* Localization.Away (3 : ℤ)).symm.toMulEquiv).uniqueFactorizationMonoid
+    inferInstance
+
+theorem isUnit_three_zInvThree : IsUnit (3 : ZInvThree.{u}) := by
+  have h := IsLocalization.Away.algebraMap_isUnit
+    (S := Localization.Away (3 : ℤ)) (3 : ℤ)
+  rw [map_ofNat] at h
+  have h2 := h.map
+    (ULift.ringEquiv : ZInvThree.{u} ≃+* Localization.Away (3 : ℤ)).symm.toRingHom
+  rwa [map_ofNat] at h2
+
+/-- **(Stage D)** The classifying map `ℤ[1/3] ⟶ R` for any `R` with `3` invertible. -/
+noncomputable def zInvThreeHom (R : CommRingCat.{u}) (hR : IsUnit (3 : R)) :
+    CommRingCat.of ZInvThree.{u} ⟶ R :=
+  CommRingCat.ofHom <|
+    (IsLocalization.Away.lift (S := Localization.Away (3 : ℤ)) (3 : ℤ)
+        (g := Int.castRingHom R) (by rw [map_ofNat]; exact hR)).comp
+      (ULift.ringEquiv : ZInvThree.{u} ≃+* Localization.Away (3 : ℤ)).toRingHom
+
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+/-- Transport a marked-section killing along an equality of Weierstrass curves
+(the `Equation` witnesses and the ellipticity instances are proof-irrelevant). -/
+theorem section_killing_congr {A : Type u} [CommRing A] {W₁ W₂ : WeierstrassCurve A}
+    (hW : W₁ = W₂) [W₁.IsElliptic] [W₂.IsElliptic] (n : ℤ) (p q : A)
+    (h₁ : W₁.toAffine.Equation p q) (h₂ : W₂.toAffine.Equation p q)
+    (hk : n • (⟨projModelAffineSection W₁ p q h₁,
+        projModelAffineSection_projModelπ _ _ _ _⟩ :
+      EllipticCurve.Section (modelEllipticCurve W₁)) = 0) :
+    n • (⟨projModelAffineSection W₂ p q h₂,
+        projModelAffineSection_projModelπ _ _ _ _⟩ :
+      EllipticCurve.Section (modelEllipticCurve W₂)) = 0 := by
+  subst hW
+  exact hk
+
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **(Stage D instantiation ★★)** Transport of a marked-section killing from `ℤ[1/3]`'s
+universal base to `R`'s along the classifying map: the D-1 functoriality identifies the
+mapped universal curve with `R`'s, and the Stage-D transport
+`nsmul_section_map_eq_zero_of_nsmul_eq_zero` carries the section-level killing. -/
+theorem three_zsmul_section_map (R₀ R : CommRingCat.{u}) (f : R₀ ⟶ R)
+    (p₀ q₀ : E3ModuliRing R₀)
+    (h₀ : (universalE3 R₀).toAffine.Equation p₀ q₀)
+    (hkill : (3 : ℤ) • (⟨projModelAffineSection _ p₀ q₀ h₀,
+        projModelAffineSection_projModelπ _ _ _ _⟩ :
+      (universalE3Obj R₀).curve.Section) = 0)
+    (p q : E3ModuliRing R)
+    (hp : e3ModuliRingMap f p₀ = p)
+    (hq : e3ModuliRingMap f q₀ = q)
+    (h : (universalE3 R).toAffine.Equation p q) :
+    (3 : ℤ) • (⟨projModelAffineSection (universalE3 R) p q h,
+        projModelAffineSection_projModelπ _ _ _ _⟩ :
+      (universalE3Obj R).curve.Section) = 0 := by
+  letI : Algebra (E3ModuliRing R₀) (E3ModuliRing R) :=
+    (e3ModuliRingMap (f)).toAlgebra
+  have halg : ∀ x, algebraMap (E3ModuliRing R₀)
+      (E3ModuliRing R) x = e3ModuliRingMap (f) x := fun _ => rfl
+  -- the mapped equation witness
+  have h' : ((universalE3 R₀).map
+      (algebraMap (E3ModuliRing R₀)
+        (E3ModuliRing R))).toAffine.Equation
+      (algebraMap _ (E3ModuliRing R) p₀) (algebraMap _ (E3ModuliRing R) q₀) :=
+    WeierstrassCurve.Affine.Equation.map _ h₀
+  -- the transported killing (ℕ-cast form)
+  have hkill' : ((3 : ℕ) : ℤ) •
+      (⟨projModelAffineSection (universalE3 R₀) p₀ q₀ h₀,
+        projModelAffineSection_projModelπ _ _ _ _⟩ :
+      EllipticCurve.Section (modelEllipticCurve
+        (universalE3 R₀))) = 0 := by
+    rw [show (((3 : ℕ) : ℤ)) = (3 : ℤ) from by norm_num]
+    exact hkill
+  have hT := nsmul_section_map_eq_zero_of_nsmul_eq_zero
+    (W := universalE3 R₀) 3 p₀ q₀ h₀ h' hkill'
+  have huniv : (universalE3 R₀).map (algebraMap (E3ModuliRing R₀) (E3ModuliRing R))
+      = universalE3 R := universalE3_ringMap f
+  -- convert the coordinates (simp's proof-irrelevant congruence handles the
+  -- `Equation`-witness dependence)
+  simp only [halg, hp, hq] at hT
+  rw [show (((3 : ℕ) : ℤ)) = (3 : ℤ) from by norm_num] at hT
+  exact section_killing_congr huniv _ p q _ h hT
+
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **([T-E15-NORM] hL-killing unconditional, `P` ★★★)** `[3]P = 0` on the universal
+`ℰ₃` over ANY coefficient ring with `3` invertible — Stage D transports the `ℤ[1/3]`
+(UFD ⟹ reduced-base) killing along the classifying map. -/
+theorem three_zsmul_universalE3P_of_isUnit (R : CommRingCat.{u})
+    (hR : IsUnit (3 : R)) :
+    (3 : ℤ) • universalE3P R = 0 := by
+  haveI : IsDomain (CommRingCat.of ZInvThree.{u}) :=
+    inferInstanceAs (IsDomain ZInvThree.{u})
+  haveI : UniqueFactorizationMonoid (CommRingCat.of ZInvThree.{u}) :=
+    inferInstanceAs (UniqueFactorizationMonoid ZInvThree.{u})
+  haveI := isReduced_spec_e3ModuliRing (CommRingCat.of ZInvThree.{u})
+    isUnit_three_zInvThree
+  exact three_zsmul_section_map (CommRingCat.of ZInvThree.{u}) R
+    (zInvThreeHom R hR) 0 0
+    (universalE3_equation_zero _) (three_zsmul_universalE3P _) 0 0
+    (map_zero _) (map_zero _) (universalE3_equation_zero R)
+
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **([T-E15-NORM] hL-killing unconditional, `Q` ★★★)** `[3]Q = 0` on the universal
+`ℰ₃` over ANY coefficient ring with `3` invertible — Stage D transports the `ℤ[1/3]`
+killing along the classifying map (`γ`, `β` are functorial by D-1). -/
+theorem three_zsmul_universalE3Q_of_isUnit (R : CommRingCat.{u})
+    (hR : IsUnit (3 : R)) :
+    (3 : ℤ) • universalE3Q R = 0 := by
+  haveI : IsDomain (CommRingCat.of ZInvThree.{u}) :=
+    inferInstanceAs (IsDomain ZInvThree.{u})
+  haveI : UniqueFactorizationMonoid (CommRingCat.of ZInvThree.{u}) :=
+    inferInstanceAs (UniqueFactorizationMonoid ZInvThree.{u})
+  haveI := isReduced_spec_e3ModuliRing (CommRingCat.of ZInvThree.{u})
+    isUnit_three_zInvThree
+  exact three_zsmul_section_map (CommRingCat.of ZInvThree.{u}) R
+    (zInvThreeHom R hR) (e3Gamma _)
+    (e3Beta _ + e3Gamma _) (universalE3_equation_Q _) (three_zsmul_universalE3Q _)
+    (e3Gamma R) (e3Beta R + e3Gamma R) (e3ModuliRingMap_gamma _)
+    (by rw [map_add, e3ModuliRingMap_beta, e3ModuliRingMap_gamma])
+    (universalE3_equation_Q R)
+
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
