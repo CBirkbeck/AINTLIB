@@ -43,7 +43,9 @@ topological space for all `n`, is `A` sheafy?
 Here `A⟨T₁,...,Tₙ⟩` is `restrictedMvPowerSeriesSubring n A`, the canonical concrete
 definition of the restricted power series ring. -/
 theorem problem31 (A : Type u) [CommRing A] [TopologicalSpace A] [NonarchimedeanRing A]
-    [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
+    [PlusSubring A] [IsHuberRing A] [T2Space A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
     (I : Ideal A) (hI : I.FG)
     (h : ∀ n : ℕ, NoetherianSpace
       ↥(PrimeSpectrum.zeroLocus

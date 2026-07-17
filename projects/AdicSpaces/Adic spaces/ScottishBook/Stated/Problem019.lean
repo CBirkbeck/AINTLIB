@@ -72,7 +72,9 @@ The placeholder `True` for higher vanishing will be refined once
 Mathlib has sheaf cohomology for topological spaces. -/
 class IsAcyclicStructureSheaf (A : Type u) [CommRing A]
     [TopologicalSpace A] [IsTopologicalRing A]
-    [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] : Prop where
+    [PlusSubring A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)] : Prop where
   /-- The structure presheaf is a sheaf (H^0 exactness). -/
   isSheafy : IsSheafy A
   /-- Higher Cech cohomology vanishes for every rational covering.
@@ -93,7 +95,9 @@ The field `isSheafy` ensures the class is meaningful only for sheafy
 pairs; `descent` is a placeholder for the full descent statement. -/
 class HasFiniteProjectiveDescent (A : Type u) [CommRing A]
     [TopologicalSpace A] [IsTopologicalRing A]
-    [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A] : Prop where
+    [PlusSubring A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)] : Prop where
   /-- The underlying sheaf condition. -/
   isSheafy : IsSheafy A
   /-- Compatible families of finite projective modules glue.
@@ -103,7 +107,9 @@ class HasFiniteProjectiveDescent (A : Type u) [CommRing A]
 /-! ### The open problem -/
 
 variable (A : Type u) [CommRing A] [TopologicalSpace A]
-  [PlusSubring A] [IsHuberRing A] [HasLocLiftPowerBounded A]
+  [PlusSubring A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+  [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+  [IsRingOfIntegralElements (A⁺)]
 
 /-- **Scottish Book Problem 19a** (Kedlaya, 3 Feb 2016, likely
 resolved by Gabber):

@@ -976,6 +976,25 @@ continuity engine + `restrictIdealSingle` in the [Hu2] 3.3(i) witness.
   general complete Huber `A` via the new instance. Re-verify the five `FiniteJetMain`
   theorems still axiom-clean (`lake build` root + sweep). Board banner + owner digest.
 
+### [T909] Drop `[HasLocLiftPowerBounded A]` from `IsSheafy`'s signature — **DONE 2026-07-17** (owner-directed)
+- **Status**: done (2026-07-17) — **Files**: HuberLocLift.lean (NEW), StructureSheaf.lean, FaithfulLocLift.lean, Cor832.lean, EmbeddingTopo.lean, TateAcyclicity.lean, PerfectoidRing.lean, ScottishBook/Stated/{004,007,008,019,031,032,033} — **Depends**: T908 — **Type**: definition refactor (owner-requested statement change)
+- **What changed**: `IsSheafy` now reads
+  `class IsSheafy (A) [CommRing][TopologicalSpace][IsTopologicalRing][PlusSubring][IsHuberRing][T2Space][NonarchimedeanRing][CompleteSpace(right)][IsRingOfIntegralElements (A⁺)]`
+  — i.e. quantified over exactly a **complete Hausdorff affinoid pair** (Wedhorn Def 9.31 /
+  BV / [FJP] setting); `HasLocLiftPowerBounded` is synthesized INSIDE the definition via the
+  M8 instance and no longer appears in any signature a user meets.
+- **How**: source-faithful relayering mirroring Wedhorn's own order (§7.52 before §8) — new
+  upstream module `HuberLocLift.lean` (imports PresheafTateStructure + SpvAITopology) hosts
+  the relocated [Hu2]-3.3(i) infrastructure (from FaithfulLocLift), the relocated
+  `presheafValue_isAdicComplete` + `comap_canonicalMap_mem_rationalOpen` (from Cor832), and
+  the full-Huber chain + priority-1150 instance; StructureSheaf imports it. `AffinoidAdicSpace`'s
+  `instHasLocLiftPowerBounded` field replaced by the four bundle fields. Consumer binder
+  fallout patched at 11 sites (bundle in place of the class; ScottishBook @-form stubs
+  restated with the bundle components — statement changes recorded here per protocol).
+- **Verification**: full `lake build «Adic spaces»` green (3237 jobs); `#check @IsSheafy`
+  shows no `HasLocLiftPowerBounded`; all five `FiniteJetMain` theorems re-verified
+  `[propext, Classical.choice, Quot.sound]`.
+
 ### [CLEANUP-M8-FINAL] /cleanup FaithfulLocLift.lean — **Depends**: T908. Also fix the
 stale docstrings recorded 2026-07-17: `hasLocLiftPowerBounded_JetA`'s "does not apply"
 note (FiniteJetFunctoriality.lean:2147) and FaithfulLocLift's "Status: sorry" relics.

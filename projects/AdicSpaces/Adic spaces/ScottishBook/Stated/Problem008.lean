@@ -49,12 +49,13 @@ Since `IsHuberRing` does not depend on `PlusSubring`, a single instance suffices
 
 Given two choices of rings of integral elements `A⁺₁` and `A⁺₂` for the same
 topological ring `A`, if `(A, A⁺₁)` is sheafy then so is `(A, A⁺₂)`. -/
-theorem problem8_sheafy [IsHuberRing A]
+theorem problem8_sheafy [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
     (inst₁ : PlusSubring A) (inst₂ : PlusSubring A)
-    [hNS₁ : @HasLocLiftPowerBounded A _ _ inst₁ _]
-    [hNS₂ : @HasLocLiftPowerBounded A _ _ inst₂ _]
-    (h : @IsSheafy A _ _ _ inst₁ _ hNS₁) :
-    @IsSheafy A _ _ _ inst₂ _ hNS₂ := by
+    (hIR₁ : IsRingOfIntegralElements (inst₁.toSubring))
+    (hIR₂ : IsRingOfIntegralElements (inst₂.toSubring))
+    (h : @IsSheafy A _ _ _ inst₁ _ _ _ _ hIR₁) :
+    @IsSheafy A _ _ _ inst₂ _ _ _ _ hIR₂ := by
   sorry
 
 /-- **Scottish Book Problem 8b** (Kedlaya, resolved by Hansen):

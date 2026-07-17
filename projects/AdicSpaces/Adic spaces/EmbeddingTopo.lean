@@ -2386,6 +2386,8 @@ not require it, and the no-disjointness inducing transfer
 (`productRestrictionSub_isInducing_via_tree_refinement_no_disj`) closes
 the topology side without it. -/
 theorem isSheafy_ofStronglyNoetherianTate_flat_of_wedhorn_tree_existence
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hSpa : ∀ (C : RationalCovering A) (p : Ideal A), p.IsPrime → C.base.s ∉ p →
       ∃ v ∈ rationalOpen C.base.T C.base.s, p ≤ v.supp)

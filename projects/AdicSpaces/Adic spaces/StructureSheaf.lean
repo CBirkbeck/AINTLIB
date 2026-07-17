@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».Presheaf
+import «Adic spaces».HuberLocLift
 import «Adic spaces».Prop752
 import «Adic spaces».CompleteTopCommRingCat
 import «Adic spaces».Lemma745
@@ -385,7 +386,9 @@ condition in the category of (complete) topological rings.
 See `docs/plans/2026-04-08-wedhorn-vs-zavyalov.md`. -/
 class IsSheafy (A : Type u) [CommRing A] [TopologicalSpace A]
     [IsTopologicalRing A] [inst₁ : PlusSubring A] [inst₂ : IsHuberRing A]
-    [HasLocLiftPowerBounded A] : Prop where
+    [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)] : Prop where
   embedding : ∀ (C : RationalCovering A), C.IsRational →
     Topology.IsEmbedding (productRestrictionSub A C)
   gluing : ∀ (C : RationalCovering A), C.IsRational →
@@ -402,14 +405,18 @@ class IsSheafy (A : Type u) [CommRing A] [TopologicalSpace A]
 /-- Sheafy implies separation (injectivity of `productRestrictionSub`),
 extracted from the embedding field. -/
 theorem IsSheafy.separationSub [IsTopologicalRing A] [PlusSubring A]
-    [IsHuberRing A] [HasLocLiftPowerBounded A] [IsSheafy A] (C : RationalCovering A)
+    [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)] [IsSheafy A] (C : RationalCovering A)
     (hC : C.IsRational) :
     Function.Injective (productRestrictionSub A C) :=
   (IsSheafy.embedding (A := A) C hC).injective
 
 /-- Sheafy implies separation (injectivity of `productRestriction`). -/
 theorem IsSheafy.separation_injective [IsTopologicalRing A] [PlusSubring A]
-    [IsHuberRing A] [HasLocLiftPowerBounded A] [IsSheafy A] (C : RationalCovering A)
+    [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)] [IsSheafy A] (C : RationalCovering A)
     (hC : C.IsRational) :
     Function.Injective (productRestriction A C) := by
   intro x y hxy
@@ -430,13 +437,20 @@ structure AffinoidAdicSpace where
   [instIsTopologicalRing : IsTopologicalRing Ring]
   [instPlusSubring : PlusSubring Ring]
   [instIsHuberRing : IsHuberRing Ring]
-  [instHasLocLiftPowerBounded : HasLocLiftPowerBounded Ring]
+  [instT2Space : T2Space Ring]
+  [instNonarchimedeanRing : NonarchimedeanRing Ring]
+  [instCompleteSpace :
+    letI : UniformSpace Ring := IsTopologicalAddGroup.rightUniformSpace Ring
+    CompleteSpace Ring]
+  [instIsRingOfIntegralElements : IsRingOfIntegralElements (Ring⁺)]
   [instIsSheafy : IsSheafy Ring]
 
 attribute [instance] AffinoidAdicSpace.instCommRing
   AffinoidAdicSpace.instTopologicalSpace AffinoidAdicSpace.instIsTopologicalRing
   AffinoidAdicSpace.instPlusSubring AffinoidAdicSpace.instIsHuberRing
-  AffinoidAdicSpace.instHasLocLiftPowerBounded AffinoidAdicSpace.instIsSheafy
+  AffinoidAdicSpace.instT2Space AffinoidAdicSpace.instNonarchimedeanRing
+  AffinoidAdicSpace.instCompleteSpace AffinoidAdicSpace.instIsRingOfIntegralElements
+  AffinoidAdicSpace.instIsSheafy
 
 namespace AffinoidAdicSpace
 
@@ -1646,6 +1660,8 @@ the Laurent refinement route. -/
 theorem isSheafy_ofStronglyNoetherianTate_flat_of_topo_inducing
     [IsTateRing A] [IsNoetherianRing A] [IsStronglyNoetherian A] [T2Space A]
     [NonarchimedeanRing A] [IsDomain A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
     (P : PairOfDefinition A) [IsNoetherianRing P.A₀]
     (hSpa : ∀ (C : RationalCovering A) (p : Ideal A), p.IsPrime → C.base.s ∉ p →
       ∃ v ∈ rationalOpen C.base.T C.base.s, p ≤ v.supp)

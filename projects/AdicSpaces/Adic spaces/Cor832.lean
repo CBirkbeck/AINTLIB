@@ -1540,39 +1540,7 @@ theorem tate_proper_ideal_not_open
   -- A unit lying in 𝔞 forces 𝔞 = ⊤.
   exact h𝔞 (Ideal.eq_top_of_isUnit_mem 𝔞 hn hu_n_unit)
 
-omit [HasLocLiftPowerBounded A] [PlusSubring A] in
-/-- **`IsAdicComplete` for the concrete pair of definition on `presheafValue C.base`.**
-
-Derived from `IsAdic.isAdicComplete_iff` applied to the subspace uniformity
-on `presheafValue_ringOfDef C.base` (the closed subring that is the topological
-closure of the image of `locSubring`). The required ingredients:
-- `IsAdic`: `presheafValue_isAdic` (`PresheafTateStructure.lean:804`).
-- `CompleteSpace`: closed subset of complete `presheafValue C.base`.
-- `T2Space`: subspace of T2 `presheafValue C.base`.
-
-This unblocks the application of `Lemma745.exists_mem_spa_supp_ge_of_nonOpen_prime`
-to the pair `presheafValue_pairOfDefinition_concrete P C.base`, which is the
-foundation of the non-open prime case in `hSpa_points`. -/
-theorem presheafValue_isAdicComplete
-    [T2Space A]
-    (D₀ : RationalLocData A) :
-    IsAdicComplete (presheafValue_idealOfDef D₀) (presheafValue_ringOfDef D₀) := by
-  have hadic : IsAdic (presheafValue_idealOfDef D₀) := presheafValue_isAdic D₀
-  -- Equip `presheafValue_ringOfDef D₀` with the subspace UniformSpace structure
-  -- inherited from `presheafValue D₀` (whose UniformSpace is the completion uniformity).
-  letI : UniformSpace (presheafValue_ringOfDef D₀) :=
-    UniformSpace.comap Subtype.val inferInstance
-  -- Inherit `IsUniformAddGroup` from the ambient `presheafValue D₀`.
-  haveI : IsUniformAddGroup (presheafValue_ringOfDef D₀) :=
-    AddSubgroup.isUniformAddGroup (presheafValue_ringOfDef D₀).toAddSubgroup
-  -- The ring of definition is closed, hence complete (subspace of complete space).
-  haveI : CompleteSpace (presheafValue_ringOfDef D₀) :=
-    (Subring.isClosed_topologicalClosure
-      (D₀.coeRingHom.comp (locSubring D₀.P D₀.T D₀.s).subtype).range).completeSpace_coe
-  -- T2 inherited from ambient T2.
-  haveI : T2Space (presheafValue_ringOfDef D₀) := inferInstance
-  -- Apply the iff: IsAdic ⇒ (IsAdicComplete ↔ CompleteSpace ∧ T2Space).
-  exact hadic.isAdicComplete_iff.mpr ⟨inferInstance, inferInstance⟩
+-- `presheafValue_isAdicComplete` moved to HuberLocLift.lean (M8/T909).
 
 omit [HasLocLiftPowerBounded A] [PlusSubring A] in
 /-- **Subset relation between `D.completedLocSubring` and `presheafValue_ringOfDef D`.**
@@ -1663,19 +1631,7 @@ The integrality of `restrictionMapHom` on the `A⁺`-based plus subrings is prov
 `v ∈ rationalOpen C.base` (no Nullstellensatz): both generator families (`A⁺` and the `t/s`
 fractions) are bounded by 1 at `w'`. -/
 
-omit [IsHuberRing A] [HasLocLiftPowerBounded A] in
-/-- The `A`-shadow `comap D.canonicalMap w` of a Spa point `w` of `O_X(D)` lies in
-`rationalOpen D.T D.s`. (The `supp`-free part of `exists_rationalOpen_of_completion_spa`.)
-Uses `comap_mem_spa` + `D.comap_canonicalMap_vle` (the `t/s` bounds) + `D.s` unit-ness. -/
-theorem comap_canonicalMap_mem_rationalOpen (D : RationalLocData A) [PlusSubring A]
-    (hcont : Continuous D.canonicalMap)
-    {w : Spv (presheafValue D)} (hw : w ∈ Spa (presheafValue D) (presheafValue D)⁺) :
-    comap D.canonicalMap w ∈ rationalOpen D.T D.s := by
-  refine ⟨comap_mem_spa hcont D.canonicalMap_integral hw, ?_, ?_⟩
-  · intro t ht
-    rw [comap_vle]
-    exact D.comap_canonicalMap_vle hw.2 ht
-  · exact @RationalLocData.comap_canonicalMap_not_vle_s_zero A _ _ _ D w.toValuativeRel
+-- `comap_canonicalMap_mem_rationalOpen` moved to HuberLocLift.lean (M8/T909).
 
 /-- **Spa-point extension along a rational-subset restriction** (Wedhorn Prop 7.46 + Prop 7.48 +
 Prop 8.2). A Spa point `w` of `O_X(C.base)` whose `A`-shadow `v = comap C.base.canonicalMap w`

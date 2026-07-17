@@ -59,8 +59,11 @@ theorem problem32
     -- The completed tensor product A ⊗̂_K B is sheafy
     ∃ (C : Type u) (_ : CommRing C) (τ : TopologicalSpace C) (ps : @PlusSubring C _)
       (h₁ : @IsTopologicalRing C τ _) (h₂ : @IsHuberRing C _ τ)
-      (h₃ : @HasLocLiftPowerBounded C _ τ ps h₂),
-    @IsSheafy C _ τ h₁ ps h₂ h₃ := by
+      (hT2 : @T2Space C τ) (hNA : @NonarchimedeanRing C _ τ)
+      (hCS : @CompleteSpace C
+        (@IsTopologicalAddGroup.rightUniformSpace C _ τ (letI := h₁; inferInstance)))
+      (hIR : @IsRingOfIntegralElements C _ τ (@PlusSubring.toSubring C _ ps)),
+    @IsSheafy C _ τ h₁ ps h₂ hT2 hNA hCS hIR := by
   sorry
 
 end ScottishBook

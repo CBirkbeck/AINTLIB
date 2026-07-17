@@ -51,7 +51,9 @@ theorem problem4
     (A : Type u) [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
     [UniformSpace A] [IsLinearTopology A A]
     [PlusSubring A] [IsHuberRing A]
-    [IsTateRing A] [HasLocLiftPowerBounded A] [IsSheafy A]
+    [IsTateRing A] [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)] [IsSheafy A]
     -- There exists an open dense subset that is perfectoid
     (U : TopologicalSpace.Opens (SpaTop A))
     (hU_dense : Dense (U : Set (SpaTop A)))

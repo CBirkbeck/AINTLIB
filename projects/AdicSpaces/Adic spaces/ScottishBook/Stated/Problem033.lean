@@ -59,8 +59,11 @@ theorem problem33
     ∃ (τ : TopologicalSpace W) (ps : @PlusSubring W _)
       (h₁ : @IsTopologicalRing W τ _)
       (h₂ : @IsHuberRing W _ τ)
-      (h₃ : @HasLocLiftPowerBounded W _ τ ps h₂),
-    @IsSheafy W _ τ h₁ ps h₂ h₃ := by
+      (hT2 : @T2Space W τ) (hNA : @NonarchimedeanRing W _ τ)
+      (hCS : @CompleteSpace W
+        (@IsTopologicalAddGroup.rightUniformSpace W _ τ (letI := h₁; inferInstance)))
+      (hIR : @IsRingOfIntegralElements W _ τ (@PlusSubring.toSubring W _ ps)),
+    @IsSheafy W _ τ h₁ ps h₂ hT2 hNA hCS hIR := by
   sorry
 
 end ScottishBook

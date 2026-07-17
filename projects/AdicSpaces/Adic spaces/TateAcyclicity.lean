@@ -965,7 +965,9 @@ The gluing condition (existence of a global section from compatible local data) 
 the Čech complex exactness for rational coverings. -/
 instance IsSheafy.ofStronglyNoetherianTate_discrete
     (A : Type*) [CommRing A] [TopologicalSpace A] [DiscreteTopology A]
-    [PlusSubring A] [IsHuberRing A] :
+    [PlusSubring A] [IsHuberRing A] [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)] :
     IsSheafy A where
   embedding C _hC := by
     -- For the discrete case both source and target are discrete: `presheafValue`
