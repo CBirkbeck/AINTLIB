@@ -2696,6 +2696,16 @@ private lemma equiv_fold_generic {A B : Type u} [CommRing A] [CommRing B]
     (φ r * φ rt) ^ m * (φ bΦs * (φ ss) ^ n * (φ v₀) ^ n * (φ r) ^ j) := by
   simpa only [map_mul, map_pow] using congrArg φ hm
 
+/-- Transport an "avoids every prime not containing `g`" property across a ring hom:
+if `v₀ ∉ Q` for every prime `Q` with `g ∉ Q`, and `φ g ∉ P` for a prime `P`, then `φ v₀ ∉ P`.
+Instantiate the hypothesis at the pullback prime `P.comap φ`. -/
+private lemma notMem_of_ringHom_forall_prime {S A : Type u} [CommRing S] [CommRing A]
+    (φ : S →+* A) (P : Ideal A) [P.IsPrime] {g v₀ : S}
+    (hv₀P : ∀ (Q : Ideal S), Q.IsPrime → g ∉ Q → v₀ ∉ Q)
+    (hgP : φ g ∉ P) : φ v₀ ∉ P :=
+  fun hbv => hv₀P (P.comap φ) (Ideal.IsPrime.comap φ)
+    (fun hg => hgP (Ideal.mem_comap.mp hg)) (Ideal.mem_comap.mpr hbv)
+
 private lemma witness_B_data {W W' : WeierstrassCurve R}
     (e : projModel W ≅ projModel W')
     (heπ : e.hom ≫ projModelπ W' = projModelπ W)
@@ -2814,14 +2824,11 @@ private lemma witness_B_data {W W' : WeierstrassCurve R}
   rw [RingEquiv.apply_symm_apply, RingEquiv.apply_symm_apply,
     RingEquiv.apply_symm_apply] at hBfold
   -- bv ∉ P
-  have hbvP : chartYSectionsRingEquiv W v₀ ∉ P := by
-    intro hbv
-    exact (hv₀P (Ideal.comap ((chartYSectionsRingEquiv W) :
-        ↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
-          ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) →+*
-        AdjoinRoot (infChartCubic W)) P)
-      (Ideal.IsPrime.comap _)
-      (fun hr' => hrP (Ideal.mem_comap.mp hr'))) (Ideal.mem_comap.mpr hbv)
+  have hbvP : chartYSectionsRingEquiv W v₀ ∉ P :=
+    notMem_of_ringHom_forall_prime
+      ((chartYSectionsRingEquiv W) : ↑Γ(projModel W, Proj.basicOpen (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 1))) →+* AdjoinRoot (infChartCubic W))
+      P hv₀P hrP
   exact ⟨chartYSectionsRingEquiv W r, chartYSectionsRingEquiv W u₀,
     chartYSectionsRingEquiv W v₀, bΦ, m, K, j, k, hrP, hbvP, hbΦ0, hBfold⟩
 
