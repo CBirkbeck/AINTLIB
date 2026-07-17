@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.EllipticCurve.SectionCoordinates
+import ModularCurves.EllipticCurve.ModelVariableChange
 import ModularCurves.Moduli.LegendreDelta
 
 /-!
@@ -71,6 +72,80 @@ theorem marksAt_of_forall_basicOpen {S : Scheme.{u}}
   obtain ⟨p, q, heq, hτ⟩ := eq_affineSection_of_zChart_factor Pr.W _ hπ
     (IsOpenImmersion.lift _ _ hrange) (IsOpenImmersion.lift_fac _ _ hrange)
   exact ⟨p, q, heq, hτ⟩
+
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **([hArb-2a] marking existence from zero-avoidance)** A section avoiding the zero
+section topologically over `V` is marked at honest coordinates: off the zero section is
+in the `Z`-chart (`mem_range_zero_of_not_mem_zChart`), so `marksAt_of_forall_basicOpen`
+applies. The zero-avoidance hypothesis is stated on the curve `G` itself, where the
+level structure supplies it fibrewise. -/
+theorem marksAt_of_forall_not_mem_range_zero {S : Scheme.{u}}
+    {G : EllipticCurveGeom S} {V : S.affineOpens} (Pr : LocalPresentation G V)
+    {σ : S ⟶ G.E} (hσ : σ ≫ G.π = 𝟙 S)
+    (hne : ∀ w, w ∈ V.1 → σ.base w ∉ Set.range G.zero.base) :
+    ∃ p q : Γ(S, V.1), Pr.MarksAt hσ p q := by
+  refine Pr.marksAt_of_forall_basicOpen hσ (fun x => ?_)
+  by_contra hmem
+  -- off the chart lands on the model zero section
+  have hz := mem_range_zero_of_not_mem_zChart (W := Pr.W) hmem
+  obtain ⟨y, hy⟩ := hz
+  -- transport the zero-image membership back through the chart iso
+  have hzc : projModelZero Pr.W =
+      (V.2.isoSpec.inv ≫ pullback.lift (V.1.ι ≫ G.zero) (𝟙 _)
+        (by rw [Category.assoc, G.zero_π, Category.comp_id, Category.id_comp])) ≫
+        Pr.e.hom := Pr.compat_zero.symm
+  rw [hzc] at hy
+  -- peel the (iso) chart map
+  have hy' : ((V.2.isoSpec.inv ≫ sectionLift G hσ V)).base x =
+      ((V.2.isoSpec.inv ≫ pullback.lift (V.1.ι ≫ G.zero) (𝟙 _)
+        (by rw [Category.assoc, G.zero_π, Category.comp_id, Category.id_comp]))).base y := by
+    have hinj : Function.Injective (Pr.e.hom.base) :=
+      (TopCat.homeoOfIso (Scheme.forgetToTop.mapIso Pr.e)).injective
+    apply hinj
+    have h1 : (((V.2.isoSpec.inv ≫ sectionLift G hσ V) ≫ Pr.e.hom)).base x =
+        Pr.e.hom.base (((V.2.isoSpec.inv ≫ sectionLift G hσ V)).base x) := rfl
+    have h2 : (((V.2.isoSpec.inv ≫ pullback.lift (V.1.ι ≫ G.zero) (𝟙 _)
+          (by rw [Category.assoc, G.zero_π, Category.comp_id, Category.id_comp])) ≫
+        Pr.e.hom)).base y =
+        Pr.e.hom.base (((V.2.isoSpec.inv ≫ pullback.lift (V.1.ι ≫ G.zero) (𝟙 _)
+          (by rw [Category.assoc, G.zero_π, Category.comp_id,
+            Category.id_comp]))).base y) := rfl
+    rw [← h1, ← h2]
+    exact hy.symm
+  -- push to `E` along the first pullback leg
+  have hfst := congrArg (pullback.fst G.π V.1.ι).base hy'
+  have hsl : sectionLift G hσ V ≫ pullback.fst G.π V.1.ι = V.1.ι ≫ σ :=
+    pullback.lift_fst _ _ _
+  have hzl : pullback.lift (V.1.ι ≫ G.zero) (𝟙 _)
+      (by rw [Category.assoc, G.zero_π, Category.comp_id, Category.id_comp]) ≫
+        pullback.fst G.π V.1.ι = V.1.ι ≫ G.zero :=
+    pullback.lift_fst _ _ _
+  have hEpoint : (V.1.ι ≫ σ).base (V.2.isoSpec.inv.base x) =
+      (V.1.ι ≫ G.zero).base (V.2.isoSpec.inv.base y) := by
+    have h1 : (V.1.ι ≫ σ).base (V.2.isoSpec.inv.base x) =
+        ((V.2.isoSpec.inv ≫ sectionLift G hσ V) ≫ pullback.fst G.π V.1.ι).base x := by
+      rw [Category.assoc, hsl]
+      rfl
+    have h2 : (V.1.ι ≫ G.zero).base (V.2.isoSpec.inv.base y) =
+        ((V.2.isoSpec.inv ≫ pullback.lift (V.1.ι ≫ G.zero) (𝟙 _)
+          (by rw [Category.assoc, G.zero_π, Category.comp_id, Category.id_comp])) ≫
+          pullback.fst G.π V.1.ι).base y := by
+      rw [Category.assoc, hzl]
+      rfl
+    rw [h1, h2]
+    exact hfst
+  -- contradict zero-avoidance at the underlying point of `V`
+  refine hne (V.1.ι.base (V.2.isoSpec.inv.base x)) ?_ ?_
+  · exact (V.2.isoSpec.inv.base x).2
+  · exact ⟨V.1.ι.base (V.2.isoSpec.inv.base y), by
+      have := hEpoint
+      rw [show (V.1.ι ≫ σ).base (V.2.isoSpec.inv.base x) =
+        σ.base (V.1.ι.base (V.2.isoSpec.inv.base x)) from rfl,
+        show (V.1.ι ≫ G.zero).base (V.2.isoSpec.inv.base y) =
+        G.zero.base (V.1.ι.base (V.2.isoSpec.inv.base y)) from rfl] at this
+      exact this.symm⟩
+
 
 end LocalPresentation
 
