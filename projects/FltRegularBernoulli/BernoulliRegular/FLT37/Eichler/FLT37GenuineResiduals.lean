@@ -49,7 +49,8 @@ plus `noSecondOrderIrregular : NoSecondOrderIrregularPair 37 32` — the carried
 Bernoulli input (Kellner Prop 2.7, `37³ ∤ B_{32·37}`), **not** a leaf to discharge.
 
 Residuals 3+4 produce **Assumption II** (`WashingtonCaseIIExactQuotientUnitPower37Source`) via
-`caseIIOmega32_assumptionII_of_membership_localPower ∘ descentUnit_omega32Membership_of_leadingExponent`;
+`caseIIOmega32_assumptionII_of_membership_localPower ∘
+descentUnit_omega32Membership_of_leadingExponent`;
 residuals 1+2 then drive the `c = 1` real-data descent to the Case-II contradiction.
 
 ## References
