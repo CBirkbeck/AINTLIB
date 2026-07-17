@@ -799,6 +799,17 @@ theorem unit_ext_of_res_cover (X : Scheme.{u}) {W : X.Opens} {g g' : Γ(X, W)ˣ}
   have := congrArg Units.val (h l)
   simpa using this
 
+/-- Section equality over an open can be checked on all affine subopens. -/
+theorem ext_of_affine_res (X : Scheme.{u}) {W : X.Opens} {g g' : Γ(X, W)}
+    (h : ∀ (V : X.affineOpens) (hV : V.1 ≤ W), resLE hV g = resLE hV g') : g = g' := by
+  have hcover : W ≤ iSup (fun p : {V : X.affineOpens // V.1 ≤ W} => p.1.1) := by
+    intro x hxW
+    obtain ⟨V, hVaff, hxV, hVW⟩ := exists_isAffineOpen_mem_and_subset hxW
+    exact TopologicalSpace.Opens.mem_iSup.mpr ⟨⟨⟨V, hVaff⟩, hVW⟩, hxV⟩
+  exact TopCat.Sheaf.eq_of_locally_eq' X.sheaf
+    (fun p : {V : X.affineOpens // V.1 ≤ W} => p.1.1) W (fun p => homOfLE p.2) hcover
+    g g' (fun p => h p.1 p.2)
+
 /-- **(T-OM-A6)** Units of the section ring agreeing on all affine opens below `W`
 are equal (separation over the affine basis). -/
 theorem unit_ext_of_affine_res (X : Scheme.{u}) {W : X.Opens} {g g' : Γ(X, W)ˣ}
