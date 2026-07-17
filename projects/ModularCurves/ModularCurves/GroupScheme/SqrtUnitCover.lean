@@ -100,6 +100,63 @@ theorem sqrtPair_finite (d : Aˣ) (h2 : IsUnit (2 : A)) :
     Module.Finite.of_basis (AdjoinRoot.powerBasis' (sqrtPair d).monic_f).basis
   exact Module.Finite.equiv (sqrtPairAdjoinRootEquiv d h2).symm.toLinearEquiv
 
+/-! ### The twist: the `d`-cover is the `c²d`-cover -/
+
+theorem sqrtPair_X_sq (d : Aˣ) :
+    (sqrtPair d).X ^ 2 = algebraMap A (sqrtPair d).Ring (d : A) := by
+  have h := (StandardEtalePair.hasMap_X (P := sqrtPair d)).1
+  rw [show (sqrtPair d).f = X ^ 2 - C (d : A) from rfl] at h
+  simpa [sub_eq_zero] using h
+
+/-- Two algebra maps out of a standard étale algebra agreeing on `X` are equal. -/
+theorem StandardEtalePair.algHom_ext {S : Type*} [CommRing S] [Algebra A S]
+    {P : StandardEtalePair A} {φ ψ : P.Ring →ₐ[A] S} (h : φ P.X = ψ P.X) : φ = ψ := by
+  have h1 := P.homEquiv.injective (a₁ := φ) (a₂ := ψ)
+  exact h1 (Subtype.ext h)
+
+/-- **The twist**: scaling the square root by `c` identifies the `c²d`-cover with the
+`d`-cover — the cocycle ingredient for gluing line-bundle-valued square roots. -/
+noncomputable def sqrtPairCongr (d : Aˣ) (c : Aˣ) (h2 : IsUnit (2 : A)) :
+    (sqrtPair (c ^ 2 * d)).Ring ≃ₐ[A] (sqrtPair d).Ring := by
+  have h2d : IsUnit (2 : (sqrtPair d).Ring) := by
+    have := h2.map (algebraMap A (sqrtPair d).Ring)
+    rwa [map_ofNat] at this
+  have h2cd : IsUnit (2 : (sqrtPair (c ^ 2 * d)).Ring) := by
+    have := h2.map (algebraMap A (sqrtPair (c ^ 2 * d)).Ring)
+    rwa [map_ofNat] at this
+  have hmapF : (sqrtPair (c ^ 2 * d)).HasMap
+      (algebraMap A (sqrtPair d).Ring (c : A) * (sqrtPair d).X) := by
+    rw [sqrtPair_hasMap_iff _ h2d]
+    rw [mul_pow, sqrtPair_X_sq, ← map_pow, ← map_mul]
+    rfl
+  have hmapB : (sqrtPair d).HasMap
+      (algebraMap A (sqrtPair (c ^ 2 * d)).Ring ((c⁻¹ : Aˣ) : A) *
+        (sqrtPair (c ^ 2 * d)).X) := by
+    rw [sqrtPair_hasMap_iff _ h2cd]
+    rw [mul_pow, sqrtPair_X_sq, ← map_pow, ← map_mul]
+    congr 1
+    rw [show ((c ^ 2 * d : Aˣ) : A) = (c : A) ^ 2 * (d : A) from rfl]
+    rw [show ((c⁻¹ : Aˣ) : A) ^ 2 = ((c ^ 2)⁻¹ : Aˣ) from by
+      rw [← Units.val_pow_eq_pow_val, inv_pow]]
+    rw [← mul_assoc]
+    rw [show ((( c ^ 2)⁻¹ : Aˣ) : A) * ((c : A) ^ 2) = 1 from by
+      rw [← Units.val_pow_eq_pow_val, ← Units.val_mul, inv_mul_cancel, Units.val_one]]
+    rw [one_mul]
+  refine AlgEquiv.ofAlgHom ((sqrtPair (c ^ 2 * d)).lift _ hmapF)
+    ((sqrtPair d).lift _ hmapB) ?_ ?_
+  · refine StandardEtalePair.algHom_ext ?_
+    rw [AlgHom.comp_apply, StandardEtalePair.lift_X, map_mul, AlgHom.commutes,
+      StandardEtalePair.lift_X, AlgHom.id_apply, ← mul_assoc, ← map_mul]
+    rw [show (((c⁻¹ : Aˣ) : A)) * (c : A) = 1 from by
+      rw [← Units.val_mul, inv_mul_cancel, Units.val_one]]
+    rw [map_one, one_mul]
+  · refine StandardEtalePair.algHom_ext ?_
+    rw [AlgHom.comp_apply, StandardEtalePair.lift_X, map_mul, AlgHom.commutes,
+      StandardEtalePair.lift_X, AlgHom.id_apply, ← mul_assoc, ← map_mul]
+    rw [show ((c : A)) * ((c⁻¹ : Aˣ) : A) = 1 from by
+      rw [← Units.val_mul, mul_inv_cancel, Units.val_one]]
+    rw [map_one, one_mul]
+
 /-! ### The scheme-level cover -/
 
 section SchemeLevel
