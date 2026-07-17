@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».FiniteJetNoetherianVertices
 import Mathlib.RingTheory.AdicCompletion.AsTensorProduct
+import Mathlib.RingTheory.Flat.EquationalCriterion
 import Mathlib.RingTheory.LocalProperties.Submodule
 
 /-!
@@ -148,6 +149,20 @@ theorem d2_add (r : Fin m → S) (v w : Pairs m → S) (j : Fin m) :
     by_cases hij : j < i
     · rw [dif_pos hij, dif_pos hij, dif_pos hij, add_mul]
     · rw [dif_neg hij, dif_neg hij, dif_neg hij, add_zero]
+
+theorem d2_sum {ι : Type*} (s : Finset ι) (r : Fin m → S) (c : ι → S)
+    (v : ι → Pairs m → S) (j : Fin m) :
+    d2 r (fun p => ∑ i ∈ s, c i * v i p) j = ∑ i ∈ s, c i * d2 r (v i) j := by
+  classical
+  induction s using Finset.induction_on with
+  | empty =>
+    simp only [Finset.sum_empty]
+    exact d2_zero r j
+  | insert a s ha ih =>
+    have hfun : (fun p => ∑ i ∈ insert a s, c i * v i p) =
+        fun p => (c a * v a p) + ∑ i ∈ s, c i * v i p :=
+      funext fun p => Finset.sum_insert ha
+    rw [hfun, d2_add, d2_smul, ih, Finset.sum_insert ha]
 
 /-- The contractibility case: multiplying a syzygy by any one `rᵢ` lands it in the Koszul
 image, explicitly ([FJP] Lemma 4.2: "At a prime not containing every `rᵢ`, one generator is
@@ -1328,7 +1343,42 @@ theorem syzygy_graph_restricted (hE₀ : IsNoetherianRing (unitBall E))
     (r : Fin m → P E m)
     (hr : ∀ i, r i = polyToP (MvPolynomial.C g * MvPolynomial.X i - MvPolynomial.C (f i)))
     (u : Fin m → P E m) (h : d1 r u = 0) :
-    ∃ v, d2 r v = u := by sorry
+    ∃ v, d2 r v = u := by
+  classical
+  letI : Algebra (MvPolynomial (Fin m) E) (P E m) := (polyToP (E := E) (m := m)).toAlgebra
+  haveI hflat : Module.Flat (MvPolynomial (Fin m) E) (P E m) :=
+    flat_polyToP hE₀ t htu ht1 ht0 hscale
+  set ρ : Fin m → MvPolynomial (Fin m) E :=
+    fun i => MvPolynomial.C g * MvPolynomial.X i - MvPolynomial.C (f i) with hρ
+  have hrel : ∑ i, ρ i • u i = 0 := by
+    rw [← h]
+    unfold d1
+    exact Finset.sum_congr rfl fun i _ => by
+      rw [Algebra.smul_def, RingHom.algebraMap_toAlgebra, hr i, mul_comm]
+  obtain ⟨k, a, y, hxy, haj⟩ := hflat.isTrivialRelation_of_sum_smul_eq_zero hrel
+  have hcol : ∀ j : Fin k, ∃ w, d2 ρ w = fun i => a i j := fun j => by
+    refine syzygy_graph_polynomial g f hunit (fun i => a i j) ?_
+    unfold d1
+    rw [show (∑ i, a i j * (MvPolynomial.C g * MvPolynomial.X i - MvPolynomial.C (f i))) =
+      ∑ i, ρ i * a i j from Finset.sum_congr rfl fun i _ => mul_comm _ _]
+    exact haj j
+  choose w hw using hcol
+  refine ⟨fun p => ∑ j, y j * polyToP (w j p), funext fun i => ?_⟩
+  have hrfun : (fun i' => polyToP (E := E) (m := m) (ρ i')) = r :=
+    funext fun i' => (hr i').symm
+  calc d2 r (fun p => ∑ j, y j * polyToP (w j p)) i
+      = ∑ j, y j * d2 r (fun p => polyToP (w j p)) i :=
+        d2_sum Finset.univ r y (fun j p => polyToP (w j p)) i
+    _ = ∑ j, y j * polyToP ((d2 ρ (w j)) i) := Finset.sum_congr rfl fun j _ => by
+        rw [show d2 r (fun p => polyToP (E := E) (m := m) (w j p)) i =
+          polyToP ((d2 ρ (w j)) i) from by
+            rw [← hrfun]
+            exact (d2_map polyToP ρ (w j) i).symm]
+    _ = ∑ j, y j * polyToP (a i j) := Finset.sum_congr rfl fun j _ => by
+        rw [congrFun (hw j) i]
+    _ = ∑ j, a i j • y j := Finset.sum_congr rfl fun j _ => by
+        rw [Algebra.smul_def, RingHom.algebraMap_toAlgebra, mul_comm]
+    _ = u i := (hxy i).symm
 
 /-- The graph ideal `I_E = im(d₁) ⊂ P_E` is **closed** ([FJP] Lemma 4.2: "every
 differential has closed image … In particular `I_D = im(d₁) ⊂ P_D` is closed"; via the

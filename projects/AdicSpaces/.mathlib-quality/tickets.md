@@ -399,7 +399,12 @@ T704, by a fresh `/develop --continue`.
 - **Source**: [FJP] (4.4) + Tag 00MB sentence — quote at L3.5.
 
 ### [T405] syzygy transport to `E⟨T⟩`
-- **Status**: open | **Depends**: T402, T404 | **Type**: proofs (L3.6)
+- **Status**: **DONE** — via mathlib's **equational criterion for flatness**
+  (`Module.Flat.isTrivialRelation_of_sum_smul_eq_zero`, Stacks 00HK) instead of
+  kernel-tensor identifications: the P-relation `∑ ρᵢ • uᵢ = 0` factors through a finite
+  matrix `a` with polynomial-syzygy columns; T402 Koszul-expresses each column; `d2_sum`
+  (new finite-sum linearity) + `d2_map` reassemble the wedge over `P`. Axiom-clean.
+  (TC quirk: pass the Flat instance by dot-notation.) | **Type**: proofs (L3.6)
 - **Sorries**: `syzygy_graph_restricted`.
 - **Sketch**: kernels of matrix maps commute with flat base change (`Module.Flat` +
   `LinearMap.ker` tensor lemmas); span of pushed Koszul generators; identification of
