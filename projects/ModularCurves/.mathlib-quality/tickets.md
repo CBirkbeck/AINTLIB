@@ -22470,3 +22470,42 @@ flight); hH/hbound + the [KEY-DEG] dual keystone (KM); the shared T-E14 engine (
 unblocked headline leaf — next-firing candidates: T-D8-⟸ landing rewire (Basic:115 → my
 isFullLevel_iff_naive chain de-boxes [GHA3] fully), route-B CP-1 if ruled, YN-side stragglers.**
 (STREAM-GH)
+
+---
+
+## v10.301-GH (2026-07-17, STREAM-GH) — ★★ [T-DEG0] PROVEN: `deg [0] = 0` — `endDeg_mulBy = n²` is now AXIOM-CLEAN end-to-end (13074ec39)
+
+**The T-DEG0 rank-zero leaf (EndomorphismDegree:169, the last sorry under `endDeg_mulBy`) is
+DISCHARGED**, via a new general-purpose ForMathlib engine:
+
+1. **`ForMathlib/FinrankDegenerate.lean` (NEW, all `{propext, Classical.choice, Quot.sound}`,
+   mathlib-shaped):** `Scheme.Hom.finrank_eq_zero_of_factors_of_nonZeroDivisor_mem` — a morphism
+   factoring through the subscheme of an ideal sheaf that contains a nonzerodivisor on an affine
+   open around `x` has fibre rank `0` at `x`, with **NO flatness/finiteness of the morphism**
+   (mathlib's comparison API is all `[Flat][IsFinite]`-gated; this works from the raw definition).
+   Mechanism: (i) `finrank_eq_rankAtStalk_chart` — public **defeq re-characterization** of
+   mathlib's chart-choice definition (privacy does not block defeq); (ii) the pushforward algebra
+   over the chart is killed by the pulled ideal (an `appLE`-level calc through the pullback square
+   + `ker_subschemeι_app`; morphism-swaps via a 2-line `appLE_eq_of_eq` transport — `appLE`'s type
+   is morphism-independent, so the rewrite is dependency-safe); (iii) quasi-coherence transports
+   the nonzerodivisor germ into the chart (`map_ideal` + `Submodule.span_induction` with explicit
+   motive + `germ_res_apply`); (iv) `Module.rankAtStalk_eq_zero_of_forall_smul_eq_zero` — torsion
+   has no free rank (`rank_eq_zero_iff`). Semantics verified against mathlib: `rankAtStalk` is
+   localized-free-rank, so the section-supported module has rank 0 both on and off the section —
+   no case split, no zero-or-isogeny dichotomy.
+2. **The discharge:** `mulByHom_zero_eq` (`[0] = π ≫ zero`, the `Hom.one_def`/`one_eq_zero` chain)
+   + the zero section as a relative effective Cartier divisor (KM 1.2.2:
+   `RelEffCartierDiv.exists_affineOpen_ker_principal_nonZeroDivisor` at `E.smooth`) feed the
+   engine. `EndomorphismDegree` now imports `LevelStructure/CartierDivisor` (no cycle — verified).
+3. **RECEIPTS (all clean):** `mulByHom_zero_finrank` (T-DEG0), **`endDeg_mulBy`** (the `n²`
+   scaling law — previously sorryAx via T-DEG0), `endDeg_comp_mulBy_of_isIntegral`,
+   `endDeg_eq_one_of_isIso`. Everything downstream of the scaling law sheds the T-DEG0 sorryAx:
+   the `_of_isIntegral` degree tranche, `endDeg_one`, `endDual_mulBy`, KM's KernelBound-hH chain
+   consumers. Full lib green (4235 jobs).
+
+**Endgame-checklist delta: the EndomorphismDegree pin-list (old item 5) shrinks again — T-DEG0
+GONE; remaining: `endDual_comp_self` :179 (KM [KEY-DEG] dual keystone) + the five generals
+(route-A: discharge by KM 2.6 algebra when :179 lands — v10.300 ruling pending) + :446
+factorization (T-G3d-Niso route in TorsionDivisibility). The new FinrankDegenerate engine is
+dual-use: any degenerate/section-supported fibre-rank computation (e.g. future `deg`-of-constant
+maps, kernel-divisor ranks at sections) lands on it.** (STREAM-GH)

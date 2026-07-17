@@ -1,1 +1,1 @@
-FOCUS: v10.298-GH — (1) RigidNoeth variant: EllCategory defs → QuotientProblem freeness restructure → GammaHMaster bridge+wrappers repoint; (2) cheap-path aut_endo_eq_one. Design settled: RigidNoeth = Rigid at loc-noeth bases; engine-honest via geometric-point specialization of freeness.
+FOCUS: v10.298 dispatch COMPLETE (item 1 = RigidNoeth landed v10.299; item 2 = scope-corrected v10.300) + BONUS T-DEG0 proven (v10.301). Next-firing candidates: T-D8-⟸ landing rewire (KM in flight); route-A/B ruling on the five generals; hH/hbound keystone watch.
