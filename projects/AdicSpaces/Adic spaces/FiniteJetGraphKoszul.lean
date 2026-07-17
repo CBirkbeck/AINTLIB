@@ -65,7 +65,14 @@ def d2 (r : Fin m → S) (v : Pairs m → S) : Fin m → S := fun j =>
     ∑ k, if h : j < k then v ⟨(j, k), h⟩ * r k else 0
 
 /-- `d₁ ∘ d₂ = 0` (the Koszul relations are syzygies). -/
-theorem d1_d2 (r : Fin m → S) (v : Pairs m → S) : d1 r (d2 r v) = 0 := by sorry
+theorem d1_d2 (r : Fin m → S) (v : Pairs m → S) : d1 r (d2 r v) = 0 := by
+  unfold d1 d2
+  simp only [sub_mul, Finset.sum_mul]
+  rw [Finset.sum_sub_distrib, sub_eq_zero, Finset.sum_comm]
+  refine Finset.sum_congr rfl fun a _ => Finset.sum_congr rfl fun b _ => ?_
+  by_cases hab : a < b
+  · rw [dif_pos hab, dif_pos hab, mul_right_comm]
+  · rw [dif_neg hab, dif_neg hab, zero_mul, zero_mul]
 
 end Differentials
 
@@ -91,17 +98,98 @@ multidegree induction; [FJP]: "The coordinate sequence is regular over an arbitr
 coefficient ring"). -/
 theorem syzygy_coordinate (u : Fin m → MvPolynomial (Fin m) D)
     (h : d1 (fun i => (X i : MvPolynomial (Fin m) D)) u = 0) :
-    ∃ v, d2 (fun i => (X i : MvPolynomial (Fin m) D)) v = u := by sorry
-
-open MvPolynomial in
-/-- Graph-sequence syzygies over the polynomial ring are Koszul-generated, given that
-`(g, f₁, …, f_m)` generate the unit ideal (the two-case localization argument). For `m = 1`
-this says `gT − f` is a nonzerodivisor (the pairs type is empty). -/
-theorem syzygy_graph_polynomial (g : D) (f : Fin m → D)
-    (hunit : Ideal.span ({g} ∪ Set.range f) = ⊤)
-    (u : Fin m → MvPolynomial (Fin m) D)
-    (h : d1 (fun i => C g * X i - C (f i)) u = 0) :
-    ∃ v, d2 (fun i => (C g * X i - C (f i) : MvPolynomial (Fin m) D)) v = u := by sorry
+    ∃ v, d2 (fun i => (X i : MvPolynomial (Fin m) D)) v = u := by
+  classical
+  induction m with
+  | zero => exact ⟨fun p => 0, funext fun i => i.elim0⟩
+  | succ m ih =>
+    set e := MvPolynomial.finSuccEquiv D m with he
+    set U : Fin (m + 1) → Polynomial (MvPolynomial (Fin m) D) := fun i => e (u i) with hUdef
+    -- the relation in `A[y]`, `y := X 0`
+    have hrel : U 0 * Polynomial.X +
+        ∑ i : Fin m, U i.succ * Polynomial.C (X i) = 0 := by
+      have h0 := congrArg e h
+      rw [map_zero] at h0
+      rw [← h0]
+      unfold d1
+      rw [map_sum, Fin.sum_univ_succ]
+      congr 1
+      · rw [map_mul, MvPolynomial.finSuccEquiv_X_zero]
+      · exact Finset.sum_congr rfl fun i _ => by
+          rw [map_mul, MvPolynomial.finSuccEquiv_X_succ]
+    -- reduction mod `y`: the constant coefficients form a coordinate syzygy over `Fin m`
+    set a : Fin m → MvPolynomial (Fin m) D := fun i => (U i.succ).coeff 0 with hadef
+    have hared : d1 (fun i => (X i : MvPolynomial (Fin m) D)) a = 0 := by
+      have hc := congrArg (fun p : Polynomial (MvPolynomial (Fin m) D) => p.coeff 0) hrel
+      simp only [Polynomial.coeff_add, Polynomial.coeff_zero, Polynomial.mul_coeff_zero,
+        Polynomial.coeff_X_zero, mul_zero, zero_add, Polynomial.finsetSum_coeff,
+        Polynomial.coeff_C_zero] at hc
+      unfold d1
+      exact hc
+    obtain ⟨w, hw⟩ := ih a hared
+    -- the `divX` decomposition of the positive part
+    set Q : Fin m → Polynomial (MvPolynomial (Fin m) D) := fun i => (U i.succ).divX with hQdef
+    have hdecomp : ∀ i : Fin m, U i.succ = Polynomial.X * Q i + Polynomial.C (a i) :=
+      fun i => (Polynomial.X_mul_divX_add (U i.succ)).symm
+    -- cancel `y`: the top coefficient is Koszul-expressed
+    have hU0 : U 0 = -∑ i : Fin m, Q i * Polynomial.C (X i) := by
+      have hXmul : Polynomial.X *
+          (U 0 + ∑ i : Fin m, Q i * Polynomial.C (X i)) = 0 := by
+        have hsplit : ∑ i : Fin m, U i.succ * Polynomial.C (X i) =
+            Polynomial.X * ∑ i : Fin m, Q i * Polynomial.C (X i) +
+              Polynomial.C (d1 (fun i => (X i : MvPolynomial (Fin m) D)) a) := by
+          unfold d1
+          rw [Finset.mul_sum, map_sum, ← Finset.sum_add_distrib]
+          refine Finset.sum_congr rfl fun i _ => ?_
+          rw [hdecomp i, add_mul, map_mul, mul_assoc]
+        rw [mul_add, mul_comm Polynomial.X (U 0)]
+        have h2 := hrel
+        rw [hsplit, hared, map_zero, add_zero] at h2
+        exact h2
+      have hcancel : U 0 + ∑ i : Fin m, Q i * Polynomial.C (X i) = 0 := by
+        refine Polynomial.ext fun n => ?_
+        have hcn := congrArg (fun q : Polynomial (MvPolynomial (Fin m) D) =>
+          q.coeff (n + 1)) hXmul
+        simpa [Polynomial.coeff_X_mul] using hcn
+      exact eq_neg_of_add_eq_zero_left hcancel
+    -- assemble the wedge
+    have hp2ne : ∀ p : Pairs (m + 1), p.1.2 ≠ 0 := fun p =>
+      Fin.pos_iff_ne_zero.mp (lt_of_le_of_lt (Fin.zero_le _) p.2)
+    refine ⟨fun p =>
+      if h0 : p.1.1 = 0 then e.symm (Q (p.1.2.pred (hp2ne p)))
+      else e.symm (Polynomial.C (w ⟨(p.1.1.pred h0, p.1.2.pred (hp2ne p)),
+        (Fin.pred_lt_pred_iff (ha := h0) (hb := hp2ne p)).mpr p.2⟩)), ?_⟩
+    funext j
+    refine Fin.cases ?_ ?_ j
+    · -- component 0: `-∑ₖ v₀ₖ Xₖ = u 0` is exactly the `y`-cofactor identity `hU0`
+      unfold d2
+      simp only [Fin.not_lt_zero, Fin.sum_univ_succ, lt_irrefl, Fin.succ_pos, dif_pos,
+        Fin.pred_succ]
+      simp only [dif_neg not_false, Finset.sum_const_zero, zero_add, zero_sub]
+      have hU0' : e (u 0) = -∑ i : Fin m, Q i * Polynomial.C (X i) := hU0
+      apply e.injective
+      rw [map_neg, map_sum, hU0', neg_inj]
+      exact Finset.sum_congr rfl fun i _ => by
+        rw [map_mul, AlgEquiv.apply_symm_apply, MvPolynomial.finSuccEquiv_X_succ]
+    · -- component `j.succ`: the `divX` decomposition plus the IH wedge
+      intro j
+      unfold d2
+      simp only [Fin.sum_univ_succ, Fin.succ_pos, dif_pos, Fin.not_lt_zero,
+        Fin.succ_lt_succ_iff, Fin.succ_ne_zero, Fin.pred_succ]
+      apply e.injective
+      have hUj : e (u j.succ) = Polynomial.X * Q j +
+          Polynomial.C (d2 (fun i => (X i : MvPolynomial (Fin m) D)) w j) := by
+        rw [hw]
+        exact hdecomp j
+      rw [hUj]
+      unfold d2
+      have heX0 : e (X 0) = Polynomial.X := MvPolynomial.finSuccEquiv_X_zero
+      have heXs : ∀ i : Fin m, e (X i.succ) = Polynomial.C (X i) := fun i =>
+        MvPolynomial.finSuccEquiv_X_succ
+      simp only [dif_neg not_false, zero_add, map_sub, map_add, map_sum, map_mul,
+        AlgEquiv.apply_symm_apply, apply_dite e, apply_dite Polynomial.C, map_zero, heX0,
+        heXs]
+      ring
 
 end Polynomial
 

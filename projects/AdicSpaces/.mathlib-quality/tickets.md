@@ -318,8 +318,13 @@ T704, by a fresh `/develop --continue`.
 ### [CLEANUP-8] /cleanup `FiniteJetNoetherianVertices.lean` (final) — **Depends**: T304.
 
 ### [T401] `FiniteJetGraphKoszul.lean` — polynomial syzygies, coordinate case
-- **Status**: open | **Depends**: none (pure algebra; parallel from day 1) | **Type**: proofs
-  (L3.1–L3.2)
+- **Status**: **DONE** (`d1_d2`: sum_comm + pairwise mul_right_comm; `syzygy_coordinate`:
+  the planned induction on m — strip variable 0 via `finSuccEquiv`, `hrel` in `A[y]`,
+  `coeff 0` gives the reduced syzygy `a` over `Fin m`, IH wedge `w`, `divX` decomposition
+  `U i.succ = y·Q i + C (a i)`, `y`-cancellation (`coeff_X_mul` shift) gives
+  `U 0 = -∑ Qᵢ C(Xᵢ)`, wedge assembled by dite on `p.1.1 = 0` (`e.symm (Q ·)` on the
+  0-row, `e.symm (C (w ·))` on succ-pairs); both components verified through
+  `e.injective` + dite-simp + `ring`. Axiom-clean.) | **Type**: proofs (L3.1–L3.2)
 - **Sorries**: `d1_d2`, `syzygy_coordinate`.
 - **Sketch**: `d1_d2`: `Finset.sum` reindexing, terms cancel in pairs; `syzygy_coordinate`:
   induction on `m` (L3.2 log has the full argument: reduce mod `T_m` via
