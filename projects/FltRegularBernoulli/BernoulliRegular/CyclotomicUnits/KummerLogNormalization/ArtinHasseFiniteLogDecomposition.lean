@@ -2,6 +2,29 @@ module
 
 public import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.ArtinHasseNormalizedSeries
 
+/-!
+# Decomposition of the finite Artin--Hasse normalized coordinate logarithm
+
+This file decomposes the finite (mod `lambda^(N+1)`) Artin--Hasse *normalized coordinate*
+logarithm into homogeneous pieces. It records `lambda`-adic membership of the normalized
+coordinate polynomial's coefficients, builds the homogeneous core/term/degree-sum of the
+logarithm, and proves the vanishing and factorial-weighted membership statements — the degree-sum
+inputs to the same-prime principal-unit argument.
+
+## Main definitions
+
+* `samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousTerm`: the homogeneous term of the
+  finite normalized coordinate logarithm.
+* `samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum`: its degree sum.
+
+## Main results
+
+* `samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_eval_sum`: the degree sum
+  equals the corresponding evaluation sum.
+* `samePrimeFiniteArtinHasseNormalizedCoordLogHomogeneousDegreeSum_eq_zero_of_coeff_log_eq_zero`:
+  the degree sum vanishes when the logarithm coefficient vanishes.
+-/
+
 @[expose] public section
 
 noncomputable section
