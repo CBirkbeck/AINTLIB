@@ -230,7 +230,15 @@ T704, by a fresh `/develop --continue`.
 - **Source**: [FJP] Prop 2.3 + (5.2) + (2.1d) — quotes at R2/L1.7/R4.
 
 ### [T203] `FiniteJetUniformDomain.lean` — non-noetherianity (R3 complete)
-- **Status**: open | **Depends**: T104, T107 | **Parallel**: with T202 | **Type**: proofs
+- **Status**: **DONE** (`winv_not_integral`: read off the `W^{-n}`-coefficient of the monic
+  relation — `coeff_mul_single_one` shift + `coeff_ofRestricted'` extension-by-zero, top term
+  `1`, lower terms at negative exponents vanish; `not_moduleFinite_L` via
+  `Algebra.IsIntegral.of_finite`; `moduleFinite_of_ker_jB_fg`: concrete `J/KJ ≅ L` transport —
+  `jB_eq_zero_iff` (ker jB = Q²𝒞), `q2elt` Q²-monomial witness, `qCoeff_two_mul` +
+  generator-jet vanishing reads the span decomposition off at Q², coefficients land in
+  `nonnegSubring` → `K⟨W⟩`-span; `ker_jB_not_fg`, `not_isNoetherianRing_JetA` chain. All three
+  axiom-clean (propext/Classical.choice/Quot.sound). **The `not_isNoetherianRing_JetA`
+  headline ingredient is proven; file sorry-free; M2′ complete.** | **Type**: proofs
 - **Sorries**: `winv_not_integral`, `not_moduleFinite_L`, `moduleFinite_of_ker_jB_fg`,
   `ker_jB_not_fg`, `not_isNoetherianRing_JetA`.
 - **Sketch**: R3 leaf (decomposition) — monic relation × `Wⁿ`, all terms in the

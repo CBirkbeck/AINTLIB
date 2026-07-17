@@ -437,29 +437,210 @@ theorem not_isUniform_JetB : ¬ TopologicalRing.IsUniform (JetB F) := by
 noncomputable instance : Algebra (PowerSeries.Restricted K (1 : ℝ)) (L F) :=
   (ofRestricted (R := K)).toAlgebra
 
+/-- The algebra map is the nonnegative-support embedding, definitionally. -/
+theorem algebraMap_L_eq :
+    algebraMap (PowerSeries.Restricted K (1 : ℝ)) (L F) = ofRestricted (R := K) := rfl
+
+/-- Multiplying by a norm-one monomial shifts coefficients. -/
+theorem coeff_mul_single_one (f : L F) (a m : ℤ) :
+    (f * single a (1 : K)).coeff m = f.coeff (m - a) := by
+  rw [mul_comm, coeff_mul, tsum_eq_single a (fun x hx => by
+    rw [coeff_single, if_neg hx, zero_mul])]
+  rw [coeff_single, if_pos rfl, one_mul]
+
+/-- Powers of `W⁻¹` are the monomials at negative exponents. -/
+theorem winv_pow_val (i : ℕ) :
+    (((Wu (R := K))⁻¹ : (L F)ˣ).val) ^ i = single (-(i : ℤ)) (1 : K) := by
+  induction i with
+  | zero => rw [pow_zero, Nat.cast_zero, neg_zero, single_zero_one]
+  | succ j ih =>
+    rw [pow_succ, ih, show (((Wu (R := K))⁻¹ : (L F)ˣ)).val = single (-1 : ℤ) (1 : K)
+      from rfl, single_mul_single, mul_one]
+    congr 1
+    push_cast
+    ring
+
+/-- The coefficient of `ofRestricted`, by definition: extension by zero. -/
+theorem coeff_ofRestricted' (f : PowerSeries.Restricted K (1 : ℝ)) (a : ℤ) :
+    (ofRestricted (R := K) f).coeff a =
+      if 0 ≤ a then PowerSeries.coeff a.toNat f.1 else 0 := rfl
+
 /-- `W⁻¹ ∈ L` is not integral over `K⟨W⟩` ([FJP] Prop 2.4: multiplying a monic equation
 `(W⁻¹)ⁿ + a_{n-1}(W)(W⁻¹)^{n-1} + ⋯ + a₀(W) = 0` by `Wⁿ` and evaluating at `W = 0`
-gives `1 = 0`). -/
+gives `1 = 0`; here realised as reading off the `W^{-n}`-coefficient). -/
 theorem winv_not_integral :
     ¬ IsIntegral (PowerSeries.Restricted K (1 : ℝ)) ((Wu (R := K))⁻¹ : (L F)ˣ).val := by
-  sorry
+  rintro ⟨p, hmonic, heval⟩
+  rw [← Polynomial.aeval_def] at heval
+  set n := p.natDegree with hn
+  have hsum : Polynomial.aeval (((Wu (R := K))⁻¹ : (L F)ˣ)).val p =
+      ∑ i ∈ Finset.range (n + 1),
+        ofRestricted (R := K) (p.coeff i) * single (-(i : ℤ)) (1 : K) := by
+    rw [Polynomial.aeval_eq_sum_range]
+    exact Finset.sum_congr rfl fun i _ => by
+      rw [Algebra.smul_def, algebraMap_L_eq, winv_pow_val]
+  have hc := congrArg (coeffHom (R := K) (-(n : ℤ))) (hsum.symm.trans heval)
+  rw [map_sum, map_zero] at hc
+  have hterm : ∀ i ∈ Finset.range (n + 1),
+      coeffHom (R := K) (-(n : ℤ))
+        (ofRestricted (R := K) (p.coeff i) * single (-(i : ℤ)) (1 : K)) =
+      if i = n then 1 else 0 := by
+    intro i hi
+    rw [Finset.mem_range] at hi
+    show (ofRestricted (R := K) (p.coeff i) * single (-(i : ℤ)) (1 : K)).coeff (-(n : ℤ)) = _
+    rw [coeff_mul_single_one, coeff_ofRestricted']
+    by_cases hin : i = n
+    · rw [if_pos (show (0 : ℤ) ≤ -(n : ℤ) - -(i : ℤ) by omega),
+        show (-(n : ℤ) - -(i : ℤ)).toNat = 0 by omega, hin,
+        show p.coeff n = 1 from hmonic.coeff_natDegree,
+        show ((1 : PowerSeries.Restricted K (1 : ℝ))).1 = 1 from rfl,
+        PowerSeries.coeff_zero_one, if_pos rfl]
+    · rw [if_neg hin, if_neg (show ¬ (0 : ℤ) ≤ -(n : ℤ) - -(i : ℤ) by omega)]
+  rw [Finset.sum_congr rfl hterm, Finset.sum_ite_eq' (Finset.range (n + 1)) n fun _ => (1 : K),
+    if_pos (Finset.self_mem_range_succ n)] at hc
+  exact one_ne_zero hc
 
 /-- `L` is not module-finite over `K⟨W⟩` ([FJP] Prop 2.4: "It would follow that `L` is a
 finite `R_W`-module. A module-finite algebra is integral, so `W⁻¹` would satisfy a monic
 equation"). -/
 theorem not_moduleFinite_L : ¬ Module.Finite (PowerSeries.Restricted K (1 : ℝ)) (L F) := by
-  sorry
+  intro h
+  exact winv_not_integral F
+    ((Algebra.IsIntegral.of_finite (PowerSeries.Restricted K (1 : ℝ)) (L F)).isIntegral _)
+
+/-- Second-order coefficient of a product in `𝒞`. -/
+theorem qCoeff_two_mul (f g : JetC F) :
+    qCoeff F 2 (f * g) = qCoeff F 0 f * qCoeff F 2 g +
+      (qCoeff F 1 f * qCoeff F 1 g + qCoeff F 2 f * qCoeff F 0 g) := by
+  show PowerSeries.coeff 2 (f * g : JetC F).1 = _
+  rw [show (f * g : JetC F).1 = f.1 * g.1 from rfl, PowerSeries.coeff_mul,
+    show Finset.antidiagonal (2 : ℕ) = {(0, 2), (1, 1), (2, 0)} from rfl,
+    Finset.sum_insert (by simp), Finset.sum_insert (by simp), Finset.sum_singleton]
+  rfl
+
+theorem qCoeff_sum {ι : Type*} (s : Finset ι) (f : ι → JetC F) (n : ℕ) :
+    qCoeff F n (∑ i ∈ s, f i) = ∑ i ∈ s, qCoeff F n (f i) := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp [qCoeff_zero]
+  | insert a s ha ih => rw [Finset.sum_insert ha, Finset.sum_insert ha, qCoeff_add, ih]
+
+/-- The kernel of the 2-jet map consists of the elements with vanishing `Q⁰`- and
+`Q¹`-coefficients, i.e. `ker(jB) = Q²𝒞` ([FJP] Prop 2.4: "Let `J = Q²𝒞`"). -/
+theorem jB_eq_zero_iff (a : JetA F) :
+    jB F a = 0 ↔ qCoeff F 0 (a : JetC F) = 0 ∧ qCoeff F 1 (a : JetC F) = 0 := by
+  constructor
+  · intro h
+    constructor
+    · have h0 : (nonnegEquiv (R := K)).symm ⟨qCoeff F 0 (a : JetC F), a.2.1⟩ =
+          (0 : PowerSeries.Restricted K (1 : ℝ)) := congrArg TrivSqZeroExt.fst h
+      have := congrArg (nonnegEquiv (R := K)) h0
+      rw [RingEquiv.apply_symm_apply, map_zero] at this
+      exact congrArg Subtype.val this
+    · have h1 : (nonnegEquiv (R := K)).symm ⟨qCoeff F 1 (a : JetC F), a.2.2⟩ =
+          (0 : PowerSeries.Restricted K (1 : ℝ)) := congrArg TrivSqZeroExt.snd h
+      have := congrArg (nonnegEquiv (R := K)) h1
+      rw [RingEquiv.apply_symm_apply, map_zero] at this
+      exact congrArg Subtype.val this
+  · rintro ⟨h0, h1⟩
+    refine TrivSqZeroExt.ext ?_ ?_
+    · show (nonnegEquiv (R := K)).symm ⟨qCoeff F 0 (a : JetC F), a.2.1⟩ =
+        (0 : JetB F).fst
+      rw [TrivSqZeroExt.fst_zero,
+        show (⟨qCoeff F 0 (a : JetC F), a.2.1⟩ : nonnegSubring K) = 0 from Subtype.ext h0,
+        map_zero]
+    · show (nonnegEquiv (R := K)).symm ⟨qCoeff F 1 (a : JetC F), a.2.2⟩ =
+        (0 : JetB F).snd
+      rw [TrivSqZeroExt.snd_zero,
+        show (⟨qCoeff F 1 (a : JetC F), a.2.2⟩ : nonnegSubring K) = 0 from Subtype.ext h1,
+        map_zero]
+
+/-- The `Q²`-monomial with coefficient `ℓ`: the witness that any `ℓ ∈ L` occurs as a
+`Q²`-coefficient of an element of `J = ker(jB)`. -/
+noncomputable def q2elt (ℓ : L F) : JetC F :=
+  ⟨PowerSeries.mk fun n => if n = 2 then ℓ else 0, by
+    show PowerSeries.IsRestricted (1 : ℝ) _
+    rw [Restricted.isRestricted_iff_cofinite]
+    simp only [PowerSeries.coeff_mk, one_pow, mul_one]
+    refine tendsto_nhds_of_eventually_eq ?_
+    rw [Filter.eventually_cofinite]
+    refine (Set.finite_singleton 2).subset fun n hn => ?_
+    rw [Set.mem_setOf_eq] at hn
+    by_contra hmem
+    rw [Set.mem_singleton_iff] at hmem
+    exact hn (by rw [if_neg hmem, norm_zero])⟩
+
+theorem qCoeff_q2elt (ℓ : L F) (n : ℕ) :
+    qCoeff F n (q2elt F ℓ) = if n = 2 then ℓ else 0 := by
+  show PowerSeries.coeff n (PowerSeries.mk fun m => if m = 2 then ℓ else 0) = _
+  rw [PowerSeries.coeff_mk]
+
+theorem q2elt_mem_jetSupport (ℓ : L F) : q2elt F ℓ ∈ jetSupport F := by
+  constructor
+  · rw [show qCoeff F 0 (q2elt F ℓ) = 0 from by
+      rw [qCoeff_q2elt, if_neg (by norm_num)]]
+    exact zero_mem _
+  · rw [show qCoeff F 1 (q2elt F ℓ) = 0 from by
+      rw [qCoeff_q2elt, if_neg (by norm_num)]]
+    exact zero_mem _
 
 /-- If the ideal `J = ker(jB) = Q²𝒞` of 𝓐 were finitely generated, `L` would be
 module-finite over `K⟨W⟩` ([FJP] Prop 2.4: `KJ = Q³𝒞`, `J/KJ ≅ 𝒞/Q𝒞 = L` as
 `𝒜/K ≅ R_W`-modules, and generators of `J` generate `J/KJ`). -/
 theorem moduleFinite_of_ker_jB_fg (h : (RingHom.ker (jB F)).FG) :
-    Module.Finite (PowerSeries.Restricted K (1 : ℝ)) (L F) := by sorry
+    Module.Finite (PowerSeries.Restricted K (1 : ℝ)) (L F) := by
+  classical
+  obtain ⟨T, hT⟩ := h
+  refine ⟨⟨T.image (fun x : JetA F => qCoeff F 2 (x : JetC F)), ?_⟩⟩
+  rw [Submodule.eq_top_iff']
+  intro ℓ
+  -- the `Q²ℓ` monomial lies in `J = ker(jB) = span T`
+  have hyk : (⟨q2elt F ℓ, q2elt_mem_jetSupport F ℓ⟩ : JetA F) ∈ RingHom.ker (jB F) := by
+    rw [RingHom.mem_ker, jB_eq_zero_iff]
+    exact ⟨by rw [show qCoeff F 0 (((⟨q2elt F ℓ, q2elt_mem_jetSupport F ℓ⟩ : JetA F)) :
+        JetC F) = qCoeff F 0 (q2elt F ℓ) from rfl, qCoeff_q2elt, if_neg (by norm_num)],
+      by rw [show qCoeff F 1 (((⟨q2elt F ℓ, q2elt_mem_jetSupport F ℓ⟩ : JetA F)) :
+        JetC F) = qCoeff F 1 (q2elt F ℓ) from rfl, qCoeff_q2elt, if_neg (by norm_num)]⟩
+  rw [← hT] at hyk
+  obtain ⟨coeffs, -, hsum⟩ := Submodule.mem_span_finset.mp hyk
+  -- vanishing jets of the generators
+  have hgen : ∀ x ∈ T, qCoeff F 0 (x : JetC F) = 0 ∧ qCoeff F 1 (x : JetC F) = 0 :=
+    fun x hx => (jB_eq_zero_iff F x).mp (RingHom.mem_ker.mp
+      (hT ▸ Ideal.subset_span (Finset.mem_coe.mpr hx)))
+  -- read off the `Q²`-coefficient of the span decomposition
+  have hcoe : ((∑ x ∈ T, coeffs x • x : JetA F) : JetC F) =
+      ∑ x ∈ T, ((coeffs x : JetA F) : JetC F) * (x : JetC F) := by
+    rw [show ((∑ x ∈ T, coeffs x • x : JetA F) : JetC F) =
+        iotaC F (∑ x ∈ T, coeffs x • x) from rfl, map_sum]
+    exact Finset.sum_congr rfl fun x hx => by
+      rw [smul_eq_mul]
+      exact map_mul (iotaC F) _ _
+  have h2 : ℓ = ∑ x ∈ T, qCoeff F 0 ((coeffs x : JetC F)) * qCoeff F 2 (x : JetC F) := by
+    have := congrArg (fun z : JetA F => qCoeff F 2 (z : JetC F)) hsum
+    simp only [hcoe, qCoeff_sum] at this
+    rw [show qCoeff F 2 (((⟨q2elt F ℓ, q2elt_mem_jetSupport F ℓ⟩ : JetA F)) : JetC F) =
+      qCoeff F 2 (q2elt F ℓ) from rfl, qCoeff_q2elt, if_pos rfl] at this
+    rw [← this]
+    exact Finset.sum_congr rfl fun x hx => by
+      rw [qCoeff_two_mul, (hgen x hx).1, (hgen x hx).2, mul_zero, mul_zero, add_zero,
+        add_zero]
+  rw [h2]
+  refine Submodule.sum_mem _ fun x hx => ?_
+  have hb : ofRestricted (R := K)
+      ((nonnegEquiv (R := K)).symm ⟨qCoeff F 0 ((coeffs x : JetC F)), (coeffs x).2.1⟩) =
+      qCoeff F 0 ((coeffs x : JetC F)) := by
+    show ((nonnegEquiv (R := K)) ((nonnegEquiv (R := K)).symm _) : L F) = _
+    rw [RingEquiv.apply_symm_apply]
+  rw [← hb, ← algebraMap_L_eq, ← Algebra.smul_def]
+  exact Submodule.smul_mem _ _ (Submodule.subset_span
+    (Finset.mem_coe.mpr (Finset.mem_image_of_mem _ hx)))
 
 /-- The ideal `Q²𝒞 ⊂ 𝓐` is not finitely generated ([FJP] Prop 2.4). -/
-theorem ker_jB_not_fg : ¬ (RingHom.ker (jB F)).FG := by sorry
+theorem ker_jB_not_fg : ¬ (RingHom.ker (jB F)).FG := fun h =>
+  not_moduleFinite_L F (moduleFinite_of_ker_jB_fg F h)
 
 /-- **𝓐 is not noetherian** ([FJP] Prop 2.4: "The underlying ring 𝒜 is not noetherian"). -/
-theorem not_isNoetherianRing_JetA : ¬ IsNoetherianRing (JetA F) := by sorry
+theorem not_isNoetherianRing_JetA : ¬ IsNoetherianRing (JetA F) := fun h =>
+  ker_jB_not_fg F (h.noetherian _)
 
 end FiniteJet
