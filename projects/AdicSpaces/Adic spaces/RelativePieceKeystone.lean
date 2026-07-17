@@ -1531,9 +1531,11 @@ theorem prop_8_30_flat_of_faithful_base
     @Module.Flat (presheafValue D) (presheafValue D') _ _
       (restrictionMapHom D D' h).toModule := by
   -- Step 1 (faithful): assemble the complete strongly-noetherian-Tate bundle on `B := presheafValue
-  -- D`. `IsTateRing`/`IsNoetherianRing` come in as `hTate`/`hNoeth`; `IsHuberRing` from `IsTateRing`;
+  -- D`. `IsTateRing`/`IsNoetherianRing` come in as `hTate`/`hNoeth`; `IsHuberRing` from
+  -- `IsTateRing`;
   -- `NonarchimedeanRing`/`T2Space` are derivable from the plain `presheafValue` (completion)
-  -- instances; `IsStronglyNoetherian` from `presheafValue_isStronglyNoetherian_faithful` (Ex. 6.38).
+  -- instances; `IsStronglyNoetherian` from `presheafValue_isStronglyNoetherian_faithful`
+  -- (Ex. 6.38).
   -- None of this uses any `PairOfDefinition` / noeth-`A₀`.
   haveI := hTate
   haveI := hNoeth
@@ -1555,13 +1557,15 @@ Faithful assembly of Wedhorn's four steps (see the section docstring above):
 * **Step 1 (Example 6.38, the base):** `presheafValue_isTateRing_faithful` +
   `presheafValue_isNoetherianRing_faithful` promote `B := presheafValue D` to a complete strongly
   noetherian Tate ring (the derived members `IsHuberRing`/`IsStronglyNoetherian` follow, the latter
-  via `presheafValue_isStronglyNoetherian_faithful` (Example 6.38, faithful); `NonarchimedeanRing`/`T2Space`/
+  via `presheafValue_isStronglyNoetherian_faithful` (Example 6.38, faithful);
+  `NonarchimedeanRing`/`T2Space`/
   `PlusSubring` are plain instances). NO `IsLinearTopology` member — that was REMOVED (false for a
   Tate ring; see the note above `presheafValue_isNoetherianRing_residual`).
 * **Steps 2–4 (Remark 7.55 + Example 6.38 over `B` + Lemma 8.31):**
   `prop_8_30_flat_of_faithful_base` → `prop_8_30_relative_laurent_flat` → the Remark-7.55 chain
   `prop_8_30_remark755_chain`, each step of which is the FAITHFUL per-step flatness
-  `prop_8_30_basic_laurent_step_flat` (relative Wedhorn-2.13 iso + the `omit`-cleaned faithful engine
+  `prop_8_30_basic_laurent_step_flat` (relative Wedhorn-2.13 iso + the `omit`-cleaned faithful
+  engine
   `presheafValue_flat_of_canonical_faithful` over `B`, NO `[CompatiblePlusSubring B]`/noeth-`A₀`).
 
 FAITHFUL: the `section Wedhorn828` `A`-bundle only — no `PairOfDefinition`, no noeth-`A₀`, no
@@ -1574,8 +1578,10 @@ sorry-free transport logic; the remaining `sorry`s are precise faithful-route re
 noeth-`A₀` smuggling), none adding a hypothesis to this signature:
 * `prop_8_30_remark755_chain` — the **geometric** Remark-7.55 chain-decomposition of an arbitrary
   `U ⊆ V` into basic-Laurent steps (the inductive `Xᵢ`-chain object; `cor_7_32_dominating_unit`
-  supplies `X₀`, but `laurent_cover_from_dominating_unit` and the inductive chain are not yet built).
-* `presheafValue_isStronglyNoetherian_faithful` — strong-noetherianity of `B = O_X(V)` (Example 6.38,
+  supplies `X₀`, but `laurent_cover_from_dominating_unit` and the inductive chain are not yet
+  built).
+* `presheafValue_isStronglyNoetherian_faithful` — strong-noetherianity of `B = O_X(V)`
+  (Example 6.38,
   faithful, replacing the retired-false `noeth + Tate ⟹ strongly-noeth`); its single residual is the
   relative surjection `presheafValue_mvRestricted_surjection` (`A⟨X₁..Xₙ₊ₘ⟩ ↠ B⟨Y₁..Yₘ⟩`). The
   *noetherian* half `presheafValue_isNoetherianRing_faithful` is sorry-free (the multivariate
