@@ -82,9 +82,12 @@ theorem naiveLevelThree_representable_by_affine (hR : IsUnit (3 : R)) :
   -- instant those land this becomes sorry-free.
   refine naiveLevelThree_representable_by_affine_of_conditions R hR ?_ ?_
   · -- `hL`: the universal marked pair `(P, Q) = ((0,0), (γ, β+γ))` is a naive full level-`3`
-    -- structure — section-level killing `[3]P = [3]Q = 0` + geometric `E[3]`-generation.
-    -- The E[3] keystone (brick 6 field anchor → G0 BB-DEG `mulByHom_finrank = 3²`).
-    sorry
+    -- structure — the unconditional Stage-D killing `[3]P = [3]Q = 0`
+    -- (`three_zsmul_universalE3P/Q_of_isUnit`) + the geometric `E[3]`-generation
+    -- (`universalE3_generation`: BB-DEG rank 9 + Stage-B dictionary + GH's B2 criterion).
+    exact ⟨⟨by exact_mod_cast three_zsmul_universalE3P_of_isUnit R hR,
+        by exact_mod_cast three_zsmul_universalE3Q_of_isUnit R hR⟩,
+      fun k _ _ t x hx => universalE3_generation R hR k t x hx⟩
   · -- `hArb`: every naive level-`3` structure on every `E/S` IS an `ℰ₃`-datum — supplied by
     -- `isE3Datum_of_flexCharts` + the torsion→coordinate bridges `3•P=0 ⟹ μ_P=0` &
     -- `3•Q=0 ⟹ cubic(x(Q))=0` (KM brick 6 `MulByHomDegree` / G0 BB-DEG `Torsion`).

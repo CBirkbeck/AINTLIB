@@ -1,1 +1,1 @@
-FOCUS: OMEGA v10.304 — Stage-D DONE (unconditional three_zsmul_universalE3P/Q_of_isUnit); now hL :87 refine-close in Bootstrap.lean
+FOCUS: OMEGA v10.304 — hL :87 CLOSED (killing+generation assembled); now E[2]-gen (:191) then hArb (:95)
