@@ -148,9 +148,8 @@ private lemma finite_sections_mulByHom {K : Type u} [Field K] [IsAlgClosed K]
     · rw [Submodule.mem_torsionBy_iff, smul_sub, hsmul hh, hsmul h₀, sub_self]
     · intro h₁ h₂ h12
       have h3 := congrArg Subtype.val h12
-      have h4 : (⟨h₁.1, hpt h₁⟩ : E.Point t) = ⟨h₂.1, hpt h₂⟩ := by
-        have := sub_left_injective (G := E.Point t) h3
-        exact this
+      have h4 : (⟨h₁.1, hpt h₁⟩ : E.Point t) = ⟨h₂.1, hpt h₂⟩ :=
+        sub_left_injective (G := E.Point t) h3
       have h5 : h₁.1 = h₂.1 := congrArg (fun P : E.Point t => P.1) h4
       exact Subtype.ext h5
   · haveI := not_nonempty_iff.mp hne
