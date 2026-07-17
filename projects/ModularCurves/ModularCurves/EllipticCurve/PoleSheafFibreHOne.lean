@@ -62,12 +62,16 @@ theorem FibrewiseElliptic.sectionPoleSheafPower_fiber_subsingleton_H_one
     (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) (h : FibrewiseElliptic π z hz)
     (s : S) {n : ℕ} (hn : 1 ≤ n) :
     letI : IsSeparated (π.fiberToSpecResidueField s) :=
-      MorphismProperty.pullback_snd π (S.fromSpecResidueField s) inferInstance
+      by
+        change IsSeparated (pullback.snd π (S.fromSpecResidueField s))
+        infer_instance
     Subsingleton (CategoryTheory.Sheaf.H
       (sectionPoleSheafPower (π.fiberToSpecResidueField s)
         (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _) n).sheaf 1) := by
   letI hsepFiber : IsSeparated (π.fiberToSpecResidueField s) :=
-    MorphismProperty.pullback_snd π (S.fromSpecResidueField s) inferInstance
+    by
+      change IsSeparated (pullback.snd π (S.fromSpecResidueField s))
+      infer_instance
   obtain ⟨W, hW, e, _, hez⟩ := h s
   letI : W.IsElliptic := hW
   letI : Subsingleton (CategoryTheory.Sheaf.H
