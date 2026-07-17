@@ -171,30 +171,22 @@ theorem localDualRestrictApp_naturality (M : Y.Modules) (j : X ⟶ Y) [IsOpenImm
       ((M.restrict j).over W).val.map f x =
         (M.over (j ''ᵁ W)).val.map
           ((imageOverFunctor j W).op.map f) x := rfl
-  have halpha := CategoryTheory.congr_fun
-    (alpha.val.naturality ((imageOverFunctor j W).op.map f)) x
+  have halpha :
+      alpha.val.app (op (imageOver j W Z'.unop))
+          ((M.over (j ''ᵁ W)).val.map
+            ((imageOverFunctor j W).op.map f) x) =
+        (_root_.SheafOfModules.unit
+          (Y.ringCatSheaf.over (j ''ᵁ W))).val.map
+            ((imageOverFunctor j W).op.map f)
+              (alpha.val.app (op (imageOver j W Z.unop)) x) :=
+    PresheafOfModules.naturality_apply alpha.val
+      ((imageOverFunctor j W).op.map f) x
   have happ := CategoryTheory.congr_fun
     (j.appIso_hom_naturality f.unop.left.op)
     (alpha.val.app (op (imageOver j W Z.unop)) x)
-  calc
-    (j.appIso Z'.unop.left).hom
-        (alpha.val.app (op (imageOver j W Z'.unop))
-          (((M.restrict j).over W).val.map f x)) =
-      (j.appIso Z'.unop.left).hom
-        (alpha.val.app (op (imageOver j W Z'.unop))
-          ((M.over (j ''ᵁ W)).val.map
-            ((imageOverFunctor j W).op.map f) x)) :=
-      congrArg (fun y ↦ (j.appIso Z'.unop.left).hom
-        (alpha.val.app (op (imageOver j W Z'.unop)) y)) hsource
-    _ = (j.appIso Z'.unop.left).hom
-        ((_root_.SheafOfModules.unit
-          (Y.ringCatSheaf.over (j ''ᵁ W))).val.map
-            ((imageOverFunctor j W).op.map f)
-              (alpha.val.app (op (imageOver j W Z.unop)) x)) := congrArg _ halpha
-    _ = ((_root_.SheafOfModules.unit
-        (X.ringCatSheaf.over W)).val.map f)
-          ((j.appIso Z.unop.left).hom
-            (alpha.val.app (op (imageOver j W Z.unop)) x)) := happ
+  rw [hsource]
+  rw [halpha]
+  exact happ
 
 theorem localDualRestrictApp_smul (M : Y.Modules) (j : X ⟶ Y) [IsOpenImmersion j]
     (W : X.Opens)
@@ -657,8 +649,17 @@ theorem localSchemeModuleCompU_app_apply (M : Y.Modules)
   have h := localSchemeModuleCompU_component M j W V a
   refine h.trans ?_
   dsimp only [a]
-  rw [← Functor.map_comp_apply, ← op_comp]
-  rfl
+  let p := (eqToHom (localSchemeModuleOpen_eq_one j W V.unop)).op
+  let q := (eqToHom (Scheme.Hom.comp_image
+    ((j.isoImage W).inv ≫ W.ι) j V.unop).symm).op
+  let r := (eqToHom (localSchemeModuleOpen_eq_two j W V.unop)).op
+  change M.presheaf.map q (M.presheaf.map p x) = M.presheaf.map r x
+  calc
+    M.presheaf.map q (M.presheaf.map p x) =
+        M.presheaf.map (p ≫ q) x :=
+      (M.presheaf.map_comp_apply p q x).symm
+    _ = M.presheaf.map r x := by
+      rw [Subsingleton.elim (p ≫ q) r]
 
 theorem localSchemeModuleOpen_eq_three_step (j : X ⟶ Y) [IsOpenImmersion j]
     (W : X.Opens)
@@ -736,7 +737,12 @@ theorem localSchemeModuleCompW_app_apply (M : Y.Modules)
   have hm := localSchemeModuleCompW_map_apply M j W V a
   refine hc.trans (hm.trans ?_)
   dsimp only [a, localSchemeModuleStageTwoValue]
-  rw [← Functor.map_comp_apply, ← op_comp]
+  let p := (eqToHom (localSchemeModuleOpen_eq_two j W V.unop)).op
+  let q := (eqToHom (localSchemeModuleOpen_eq_three_step j W V.unop)).op
+  let r := (localSchemeModuleOverIso j W V.unop).hom.left.op
+  change M.presheaf.map q (M.presheaf.map p x) = M.presheaf.map r x
+  rw [← M.presheaf.map_comp_apply p q x]
+  rw [Subsingleton.elim (p ≫ q) r]
   rfl
 
 noncomputable def localSchemeModuleTransition (M : Y.Modules)

@@ -22,8 +22,15 @@ noncomputable def moduleSectionsOfTop {X : Scheme.{u}} (M : X.Modules)
     (fun U ↦ M.val.map (homOfLE (le_top : U.unop ≤ (⊤ : X.Opens))).op x)
     (by
       intro U V g
-      rw [← M.val.map_comp_apply]
-      exact M.val.congr_map_apply (Subsingleton.elim _ _) x)
+      let iU := (homOfLE (le_top : U.unop ≤ (⊤ : X.Opens))).op
+      let iV := (homOfLE (le_top : V.unop ≤ (⊤ : X.Opens))).op
+      change M.presheaf.map g (M.presheaf.map iU x) = M.presheaf.map iV x
+      calc
+        M.presheaf.map g (M.presheaf.map iU x) =
+            M.presheaf.map (iU ≫ g) x :=
+          (M.presheaf.map_comp_apply iU g x).symm
+        _ = M.presheaf.map iV x := by
+          rw [Subsingleton.elim (iU ≫ g) iV])
 
 /-- Multiplication by a top-open section of the structure sheaf. -/
 noncomputable def unitEndomorphismOfTopSection {X : Scheme.{u}}

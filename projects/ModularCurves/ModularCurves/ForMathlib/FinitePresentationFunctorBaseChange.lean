@@ -73,6 +73,10 @@ theorem SpreadData.FunctorModel.baseChangeColimEquiv_naturality
       (F.map f).hom.comp
         ((M.object X).baseChangeColimEquiv (M.le_stage X) H).toAlgHom := by
   letI : Algebra (𝒮 M.stage) A := (uA M.stage).toRingHom.toAlgebra
+  change ((M.object Y).baseChangeColimEquiv (M.le_stage Y) H).toAlgHom.comp
+      (Algebra.TensorProduct.map (AlgHom.id A A) (M.map f)) =
+    (F.map f).hom.comp
+      ((M.object X).baseChangeColimEquiv (M.le_stage X) H).toAlgHom
   apply AlgHom.ext
   intro z
   induction z using TensorProduct.induction_on with
@@ -88,13 +92,13 @@ theorem SpreadData.FunctorModel.baseChangeColimEquiv_naturality
       apply congrArg (a • ·)
       calc
         (M.object Y).baseChangeColimEquiv (M.le_stage Y) H
-              (1 ⊗ₜ[(𝒮 M.stage)] (M.toFunctor.map f).hom x) =
+              (1 ⊗ₜ[(𝒮 M.stage)] M.map f x) =
             (M.object Y).stageToColimit H ⟨M.stage, M.le_stage Y⟩
-              ((M.toFunctor.map f).hom x) :=
+              (M.map f x) :=
           (M.object Y).baseChangeColimEquiv_tmul (M.le_stage Y) H _
         _ = (F.map f).hom
               ((M.object X).stageToColimit H ⟨M.stage, M.le_stage X⟩ x) :=
-          M.toFunctor_map_colimit f x
+          M.map_colimit f x
         _ = (F.map f).hom
               ((M.object X).baseChangeColimEquiv (M.le_stage X) H
                 (1 ⊗ₜ[(𝒮 M.stage)] x)) :=

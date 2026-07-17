@@ -53,7 +53,6 @@ theorem pullbackPseudofunctor_mapComp'_hom_app
   unfold pullbackPseudofunctor
   rw [Pseudofunctor.comp_mapComp,
     Bicategory.Adj.forget₁_mapComp]
-  simp only [Iso.trans_hom, Iso.refl_hom]
   rfl
 
 /-- The inverse of the flexible composition isomorphism for the pullback pseudofunctor,
@@ -75,7 +74,6 @@ theorem pullbackPseudofunctor_mapComp'_inv_app
   unfold pullbackPseudofunctor
   rw [Pseudofunctor.comp_mapComp,
     Bicategory.Adj.forget₁_mapComp]
-  simp only [Iso.trans_inv, Iso.refl_inv]
   rfl
 
 /-- Pulling a morphism to a further scheme using the descent API is ordinary pullback,
@@ -95,9 +93,8 @@ theorem pullbackPseudofunctor_pullHom
           ((pullbackCongr hgf₂).app M₂)).hom := by
   unfold Pseudofunctor.LocallyDiscreteOpToCat.pullHom
   rw [pullbackPseudofunctor_mapComp'_hom_app g f₁ hgf₁ M₁,
-    pullbackPseudofunctor_mapComp'_inv_app g f₂ hgf₂ M₂,
-    pullbackPseudofunctor_map_map]
-  exact Eq.refl _
+    pullbackPseudofunctor_mapComp'_inv_app g f₂ hgf₂ M₂]
+  rfl
 
 end
 

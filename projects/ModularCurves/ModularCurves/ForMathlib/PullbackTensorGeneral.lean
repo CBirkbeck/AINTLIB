@@ -66,8 +66,7 @@ theorem conjugateEquiv_symm_isMonoidal
     simp only [β, NatTrans.comp_app, Functor.leftUnitor_inv_app,
       Functor.whiskerRight_app, Functor.associator_hom_app,
       Functor.whiskerLeft_app, Functor.rightUnitor_hom_app]
-    erw [Category.id_comp, Category.id_comp, Category.comp_id]
-    rfl]
+    erw [Category.id_comp, Category.id_comp, Category.comp_id]]
   exact hβ
 
 variable {E : Type u₃} [Category.{v₃} E] [MonoidalCategory E]
