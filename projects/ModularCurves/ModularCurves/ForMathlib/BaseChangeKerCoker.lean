@@ -45,6 +45,8 @@ statement here is about such a map, in the maximal module-theoretic generality.
 * `kerBaseChangeComparison_bijective`: the `A`-linear fibre identification
   `A ⊗[R] ker d ≃ ker (d.baseChange A)` — the shape "(`f_*𝓛) ⊗ k(s) ≅ f_*(𝓛(s))`"
   consumed at GME (2.15) and (2.17).
+* `LinearMap.baseChange_exact_of_bounded_exact`: arbitrary algebra base change preserves a
+  bounded exact complex of flat modules (the algebraic content of Mumford §5, Lemma 2).
 * `LinearMap.exact_of_bounded_forall_field_baseChange_exact`: a bounded complex of
   finite projective modules that is exact over every field fibre is exact over the base.
 * `kerBaseChangeComparison_bijective_of_bounded_forall_field_baseChange_exact`: its
@@ -434,6 +436,21 @@ section Exactness
 
 variable {T : Type*} [AddCommGroup T] [Module R T]
 
+/-- An exact pair remains exact after arbitrary algebra base change when the target and
+the cokernel of the second map are flat. -/
+theorem LinearMap.baseChange_exact_of_exact_of_flat_coker
+    (A : Type*) [CommRing A] [Algebra R A]
+    (f : P →ₗ[R] Q) (g : Q →ₗ[R] T) (h : g ∘ₗ f = 0)
+    [Module.Flat R T] [Module.Flat R (T ⧸ LinearMap.range g)]
+    (hexact : Function.Exact f g) :
+    Function.Exact (f.baseChange A) (g.baseChange A) := by
+  apply (LinearMap.codRestrictToKer_surjective_iff_exact
+    (f.baseChange A) (g.baseChange A) _).mp
+  rw [← kerBaseChangeComparison_comp_codRestrictToKer_baseChange A f g h]
+  exact (kerBaseChangeComparison_bijective A g).2.comp
+    (LinearMap.baseChange_surjective A
+      ((LinearMap.codRestrictToKer_surjective_iff_exact f g h).mpr hexact))
+
 /-- Exactness of a complex can be checked on every field fibre when its homology is finite
 and formation of the second kernel commutes with base change. The flatness hypotheses are the
 module-theoretic criterion ensuring that kernel comparison. -/
@@ -465,6 +482,27 @@ theorem LinearMap.exact_of_forall_field_baseChange_exact_of_finite
   exact hcoker
 
 end Exactness
+
+section BoundedFlatBaseChange
+
+variable (M : ℕ → Type v) [∀ n, AddCommGroup (M n)] [∀ n, Module R (M n)]
+  (d : ∀ n, M n →ₗ[R] M (n + 1))
+
+/-- Arbitrary algebra base change preserves every exact pair in a bounded exact complex
+of flat modules. This is the tensor-stability statement in Mumford §5, Lemma 2. -/
+theorem LinearMap.baseChange_exact_of_bounded_exact
+    (A : Type*) [CommRing A] [Algebra R A] [∀ n, Module.Flat R (M n)]
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hexact : ∀ n, n < N → Function.Exact (d n) (d (n + 1)))
+    (n : ℕ) (hn : n < N) :
+    Function.Exact ((d n).baseChange A) ((d (n + 1)).baseChange A) := by
+  letI : Module.Flat R (M ((n + 1) + 1) ⧸ LinearMap.range (d (n + 1))) :=
+    Module.Flat.quotient_range_of_bounded_exact M d N hexact (n + 1)
+      (Nat.succ_le_iff.mpr hn)
+  exact LinearMap.baseChange_exact_of_exact_of_flat_coker
+    A (d n) (d (n + 1)) (hexact n hn).linearMap_comp_eq_zero (hexact n hn)
+
+end BoundedFlatBaseChange
 
 private theorem projective_range_of_projective_coker
     (f : P →ₗ[R] Q) [Module.Projective R Q]
