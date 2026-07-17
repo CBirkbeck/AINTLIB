@@ -617,36 +617,57 @@ private theorem affineModuleSectionsLocalTarget_hom_unit
               transportedLocalUnit := by
       rw [hsource]
       exact hpull
-    have hlocalNat := PresheafOfModules.naturality_apply
-      (localPullbackRestrictIso (pullback.fst f t) M U).hom.val
-        (eqToHom htop).op transportedLocalUnit
+    have hlocalNat :
+        (localPullbackRestrictIso (pullback.fst f t) M U).hom.val.app
+            (op (⊤ : (pullback.fst f t ⁻¹ᵁ U).toScheme.Opens))
+              (((pullback (pullback.fst f t ∣_ U)).obj
+                (M.restrict U.ι)).presheaf.map
+                  (eqToHom htop).op transportedLocalUnit) =
+          N.presheaf.map (eqToHom htop).op
+            ((localPullbackRestrictIso (pullback.fst f t) M U).hom.val.app
+              (op ((pullback.fst f t ⁻¹ᵁ U).ι ⁻¹ᵁ
+                (pullback.fst f t ⁻¹ᵁ U))) transportedLocalUnit) := by
+      exact PresheafOfModules.naturality_apply
+        (localPullbackRestrictIso (pullback.fst f t) M U).hom.val
+          (eqToHom htop).op transportedLocalUnit
+    have hLeftDef :
+        (affineModuleSectionsLocalIso f t M U).hom
+            (affinePullbackUnitTop (pullback.fst f t ∣_ U) (M.restrict U.ι)
+              ((baseModulePresheafRestrictIso f M U).hom m)) =
+          (localPullbackRestrictIso (pullback.fst f t) M U).hom.val.app
+            (op (⊤ : (pullback.fst f t ⁻¹ᵁ U).toScheme.Opens))
+              (affinePullbackUnitTop (pullback.fst f t ∣_ U)
+                (M.restrict U.ι)
+                  ((baseModulePresheafRestrictIso f M U).hom m)) := by
+      rfl
+    have hLeftPullback :
+        (localPullbackRestrictIso (pullback.fst f t) M U).hom.val.app
+            (op (⊤ : (pullback.fst f t ⁻¹ᵁ U).toScheme.Opens))
+              (affinePullbackUnitTop (pullback.fst f t ∣_ U)
+                (M.restrict U.ι)
+                  ((baseModulePresheafRestrictIso f M U).hom m)) =
+          (localPullbackRestrictIso (pullback.fst f t) M U).hom.val.app
+            (op (⊤ : (pullback.fst f t ⁻¹ᵁ U).toScheme.Opens))
+              (((pullback (pullback.fst f t ∣_ U)).obj
+                (M.restrict U.ι)).presheaf.map
+                  (eqToHom htop).op transportedLocalUnit) :=
+      congrArg
+        (fun q =>
+          (localPullbackRestrictIso (pullback.fst f t) M U).hom.val.app
+            (op (⊤ : (pullback.fst f t ⁻¹ᵁ U).toScheme.Opens)) q)
+        hpull'
+    have hLeftTransport :
+        N.presheaf.map (eqToHom htop).op
+            ((localPullbackRestrictIso (pullback.fst f t) M U).hom.val.app
+              (op ((pullback.fst f t ⁻¹ᵁ U).ι ⁻¹ᵁ
+                (pullback.fst f t ⁻¹ᵁ U))) transportedLocalUnit) =
+          tr lhsH := by
+      rfl
     have hLeft :
         (affineModuleSectionsLocalIso f t M U).hom
             (affinePullbackUnitTop (pullback.fst f t ∣_ U) (M.restrict U.ι)
-              ((baseModulePresheafRestrictIso f M U).hom m)) = tr lhsH := by
-      calc
-        _ = (localPullbackRestrictIso (pullback.fst f t) M U).hom.val.app
-              (op (⊤ : (pullback.fst f t ⁻¹ᵁ U).toScheme.Opens))
-                (affinePullbackUnitTop (pullback.fst f t ∣_ U)
-                  (M.restrict U.ι)
-                    ((baseModulePresheafRestrictIso f M U).hom m)) := by
-          rfl
-        _ = (localPullbackRestrictIso (pullback.fst f t) M U).hom.val.app
-              (op (⊤ : (pullback.fst f t ⁻¹ᵁ U).toScheme.Opens))
-                (((pullback (pullback.fst f t ∣_ U)).obj
-                  (M.restrict U.ι)).presheaf.map
-                    (eqToHom htop).op transportedLocalUnit) := congrArg
-          (fun q =>
-            (localPullbackRestrictIso (pullback.fst f t) M U).hom.val.app
-              (op (⊤ : (pullback.fst f t ⁻¹ᵁ U).toScheme.Opens)) q)
-          hpull'
-        _ = N.presheaf.map (eqToHom htop).op
-              ((localPullbackRestrictIso (pullback.fst f t) M U).hom.val.app
-                (op ((pullback.fst f t ⁻¹ᵁ U).ι ⁻¹ᵁ
-                  (pullback.fst f t ⁻¹ᵁ U))) transportedLocalUnit) :=
-          hlocalNat
-        _ = tr lhsH := by
-          rfl
+              ((baseModulePresheafRestrictIso f M U).hom m)) = tr lhsH :=
+      hLeftDef.trans <| hLeftPullback.trans <| hlocalNat.trans hLeftTransport
     have hRight : eTarget.hom
           ((((pullbackPushforwardAdjunction (pullback.fst f t)).unit.app M).val.app
             (op U)) m) = tr rhsH := by
@@ -737,7 +758,9 @@ theorem affineModuleSectionsBaseChangeIso_hom_one_tmul
           ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] m) =
       (((pullbackPushforwardAdjunction (pullback.fst f t)).unit.app M).val.app
         (op U)) m := by
-  rw [affineModuleSectionsBaseChangeIso_hom_apply]
-  exact affineModuleSectionsBaseChangeGeneratorChain f t M U hU m
+  exact (affineModuleSectionsBaseChangeIso_hom_apply f t M U hU
+      ((1 : Γ(T, (⊤ : T.Opens)))
+        ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] m)).trans
+    (affineModuleSectionsBaseChangeGeneratorChain f t M U hU m)
 
 end AlgebraicGeometry.Scheme.Modules
