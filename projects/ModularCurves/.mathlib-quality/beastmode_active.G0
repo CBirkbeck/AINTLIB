@@ -1,10 +1,5 @@
-STREAM-G0 CHARTER-G ACTIVE (v10.313 charter; session-state v10.314-G0, 2026-07-17).
+STREAM-G0 CHARTER-G ACTIVE (v10.316 re-allocation, 2026-07-17) — ASSEMBLING :206.
 
-CHARTER: terminal when :206 closes. STATE: [funnel ✓ 0eb053276] ∘ [torsor]:
-torsor's AFFINE CORE COMPLETE (SqrtUnitCover: pair/points-iff/finite/étale/
-over-Spec-dictionary/sections-spec/twist — all axiom-clean, 086f86fc8+381b5d0ae).
-REMAINING: the glued torsor over fullLevelLocus 2 = chart-d data + cocycle (OMEGA's
-adapted layer — asks v10.305 sharpened at board v10.314-G0: need ask-(1)/(3), the
-chart-local abscissa-differences + transitions; (2a)/(2b) already delivered) + the
-b↔u dictionary + glue + spec + assembly. Next session: consume OMEGA's d-data if
-landed, else prototype the glue-datum interface + the GlueData assembly.
+UNBLOCKED: abscissaDiff on origin + SqrtUnitCover/sqrtPairCongr/funnel proven +
+IsLegendreDatum.neg/unit_sq_eq_one banked. BUILDING: the glued Z₂ over
+fullLevelLocus 2 → the b↔u spec → funnel → Bootstrap:212 = CHARTER-G TERMINAL.
