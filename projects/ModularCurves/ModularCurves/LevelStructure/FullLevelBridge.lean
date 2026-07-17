@@ -160,6 +160,48 @@ theorem exists_combo_index {G : Type*} [AddCommGroup G] (N : ℕ) [NeZero N]
   rw [hmod, hdiv, Int.toNat_of_nonneg ha0, Int.toNat_of_nonneg hb0,
     ← zsmul_emod_of_killed hP a, ← zsmul_emod_of_killed hQ b]
 
+/-- Each `Fin (N²)`-combination of two `N`-killed elements is `N`-killed. -/
+theorem combo_killed {G : Type*} [AddCommGroup G] (N : ℕ) {P Q : G}
+    (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0) (a b : ℤ) :
+    (N : ℤ) • (a • P + b • Q) = 0 := by
+  rw [smul_add, smul_comm, hP, smul_zero, smul_comm, hQ, smul_zero, add_zero]
+
+/-- **[S1]** The torsion ideal bounds every combination graph kernel: an `N`-killed
+section factors through `E[N]`. -/
+theorem torsionIdeal_le_ker_of_killed {P₀ : E.Section} (N : ℕ)
+    (hkill : (N : ℤ) • P₀ = 0) :
+    E.torsionIdeal N ≤ Scheme.Hom.ker P₀.1 := by
+  have hxm : P₀.1 ≫ E.mulByHom N = 𝟙 S ≫ E.zero := by
+    have h1 : ((N : ℤ) • P₀ : E.Section).1 = P₀.1 ≫ E.mulByHom (N : ℤ) :=
+      point_smul_eq_comp_mulBy E (𝟙 S) (N : ℤ) P₀
+    have h2 : ((N : ℤ) • P₀ : E.Section).1 = (0 : E.Section).1 := by rw [hkill]
+    have h3 : (0 : E.Section).1 = 𝟙 S ≫ E.zero := point_zero_val E (𝟙 S)
+    exact (h1.symm.trans h2).trans h3
+  have hfac : P₀.1 = E.pointToTorsion P₀ hxm ≫ E.torsionι N :=
+    (E.pointToTorsion_torsionι P₀ hxm).symm
+  show (E.torsionι N).ker ≤ Scheme.Hom.ker P₀.1
+  rw [hfac]
+  exact Scheme.Hom.le_ker_comp _ _
+
+/-- **[CRT]** An ideal below each member of a pairwise-comaximal finite family is below
+the product. -/
+theorem _root_.Ideal.le_prod_of_pairwise_coprime {R : Type*} [CommRing R] {n : ℕ}
+    (I : Fin n → Ideal R) (J : Ideal R) (hle : ∀ i, J ≤ I i)
+    (hpair : Pairwise fun i j => I i ⊔ I j = ⊤) :
+    J ≤ ∏ i, I i := by
+  classical
+  induction n with
+  | zero => simp
+  | succ m ih =>
+    rw [Fin.prod_univ_succ]
+    have hcop : I 0 ⊔ ∏ i : Fin m, I i.succ = ⊤ :=
+      Ideal.sup_prod_eq_top fun i _ => hpair (Fin.succ_ne_zero i).symm
+    have hrest : J ≤ ∏ i : Fin m, I i.succ :=
+      ih (fun i => I i.succ) (fun i => hle i.succ)
+        (fun i j hij => hpair (fun h => hij (Fin.succ_injective _ h)))
+    calc J ≤ I 0 ⊓ ∏ i : Fin m, I i.succ := le_inf (hle 0) hrest
+      _ = I 0 * ∏ i : Fin m, I i.succ := (Ideal.mul_eq_inf_of_coprime hcop).symm
+
 end EllipticCurve
 
 end ModularCurves
