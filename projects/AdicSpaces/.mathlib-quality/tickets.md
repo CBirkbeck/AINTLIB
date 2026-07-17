@@ -365,7 +365,23 @@ T704, by a fresh `/develop --continue`.
 ### [CLEANUP-9] /cleanup `FiniteJetGraphKoszul.lean` — **Depends**: T401–T403.
 
 ### [T404] flatness of `E[T] → E⟨T⟩`
-- **Status**: open | **Depends**: T303, T403 | **Type**: proofs (L3.5)
+- **Status**: IN PROGRESS | **Depends**: T303, T403 | **Type**: proofs (L3.5)
+- **Plan of record (algebraic route, no uniform-space bridge)**: statement gets the
+  standard scaling-pseudouniformizer bundle `(t, htu, ht1, ht0, hscale)` (as in
+  `unitBallPod` — legitimate signature completion; instantiations 𝓑/𝓒/𝓓 have tB/tC/tD).
+  Sub-lemmas: (L1) `coeff_polyToP`; (L2) `norm_tP_mul` (C t-scaling on P via
+  `Real.mul_iSup_of_nonneg`); (L3) generic ball division `x = tⁿ·y, ‖y‖ ≤ 1` from
+  `‖x‖ ≤ ‖t‖ⁿ` (unit + `norm_pow_mul_of_scale`); (L4) = L3 at `(P E m, tP)`;
+  (L5) polynomial division: all-coeffs ≤ ‖t‖ⁿ ⟹ `∈ (C t₀)ⁿ`-span over `E₀ = unitBall E`;
+  (L6) `Φ : unitBall (P E m) ≃+* AdicCompletion (span {C t₀}) (MvPoly E₀)` built DIRECTLY:
+  truncations `trnc n F` over the finite super-level set, compatible classes; ring-hom by
+  the L5 division on `trnc(FG) − trnc F·trnc G` (tails bounded by ‖t‖ⁿ since ball);
+  injective by ‖F‖ ≤ ‖t‖ⁿ ∀n; surjective by coefficientwise Cauchy limits of reps
+  (`p_{n+1} − p_n ∈ I₀ⁿ` ⟹ coeff-Cauchy, complete E); (L7) flat transport:
+  `AdicCompletion.flat_of_isNoetherian` (Hilbert + T303) + AlgEquiv transport + two
+  `IsLocalization (powers ·)` instances (E = E₀[1/t] pattern, coefficientwise) +
+  `isLocalizedModule_iff_isLocalization` → `IsLocalizedModule.isBaseChange` →
+  `Module.Flat.baseChange` → `Module.Flat.of_linearEquiv`.
 - **Sorries**: `flat_polyToP`.
 - **Sketch**: (4.4): `E₀⟨T⟩ = AdicCompletion (t) (E₀[T])` (coefficientwise; the heaviest
   sub-leaf — mirror `AdicCompletionBridge`); `AdicCompletion.flat_of_isNoetherian`
