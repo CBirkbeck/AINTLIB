@@ -1021,6 +1021,24 @@ theorem representable_of_rigid_of_torsor (P Q : ModuliProblem R)
     P.Representable := by
   sorry
 
+/-- **The Katz–Mazur 4.7 engine at noetherian-local rigidity** ([T-W7.8] variant mouth,
+CHARTER-GH wire): `representable_of_rigid_of_torsor` with the rigidity input weakened to
+`RigidNoeth` — the form the `Γ_H` headline chain supplies (`representable_iff_rigidNoeth`'s
+`⇐` consumes THIS statement at the two bootstrap instantiations). Same banked proof route
+and the same T-Q6d.γ gate as the classical form; the freeness step is ALREADY PROVEN at
+this hypothesis (`simulSchemeAction_free_of_rigidNoeth` — emptiness of the fixed locus is
+detected on residue-field points), so the eventual de-sorry is the classical one verbatim
+with the freeness call swapped. -/
+theorem representable_of_rigidNoeth_of_torsor (P Q : ModuliProblem R)
+    {G : Type u} [Group G] [Finite G] (φ : G →* Aut Q)
+    (hQrep : Q.Representable)
+    (hQaff : ∀ {XQ : EllObj R}, Q.RepresentableBy XQ → IsAffine XQ.base)
+    (hPaff : ∀ X : EllObj R, ∃ d : RelRepData P X, IsAffineHom d.f)
+    (htors : ∀ X : EllObj R, Nonempty (TorsorData φ X))
+    (hrig : P.RigidNoeth) :
+    P.Representable := by
+  sorry
+
 /-! ### [B1] α_univ-descent (KM 4.7.0, p. 114) -/
 
 /-- The chart-comparison morphism composed with the chart projection is the chart

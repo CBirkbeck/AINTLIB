@@ -311,9 +311,16 @@ theorem representable_iff_rigidNoeth (P : ModuliProblem R) (hP : P.AffineOverEll
     P.Representable ↔ P.RelativelyRepresentable ∧ P.RigidNoeth := by
   refine ⟨fun h => ⟨hP.relativelyRepresentable, (rigid_of_representable h).rigidNoeth⟩,
     fun h => ?_⟩
-  -- ⇐ : the KM engine again, with its freeness input supplied by
-  -- `simulSchemeAction_free_of_rigidNoeth` instead of `simulSchemeAction_free_of_rigid`.
-  -- Gate: T-Q6e + T-E14 + T-E15 (shared with `representable_iff`).
+  -- ⇐ : CONSUMPTION MAP (CHARTER-GH wire, v10.316). The proof is
+  -- `representable_of_rigidNoeth_of_torsor` (`Moduli/QuotientProblem.lean` — the variant
+  -- engine mouth, same T-Q6d.γ gate, freeness step ALREADY PROVEN at `RigidNoeth`)
+  -- instantiated twice and glued:
+  --   (δ = naive level 3, G = GL₂(𝔽₃)): hQrep/hQaff = `naiveLevelThree_representable_by_affine`,
+  --     hPaff from `hP.relativelyRepresentable`-data (this iff's own `AffineOverEll` hypothesis),
+  --     htors = the T-E15b TorsorData package (`fullLevelLocus` + `gammaFullNaiveGlAction`
+  --     equivariance — CHARTER-O/G Bootstrap work), over the `IsUnit (3 : R)` locus;
+  --   (δ = Legendre, G = GL₂(ℤ/2) × {±1}): the T-E14 package, over the `IsUnit (2 : R)` locus;
+  --   then recollement over the cover D(2) ∪ D(3) = Spec ℤ (`Moduli/Recollement.lean`).
   sorry
 
 end ModuliProblem
