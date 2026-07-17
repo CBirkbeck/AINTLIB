@@ -34,7 +34,7 @@ local notation "K" => LaurentSeries F
 
 noncomputable section
 
-open scoped Classical
+open scoped Classical Pointwise
 
 /-- The element `W ∈ 𝓐` (support `(1,0)`; [FJP] §1.4). -/
 def Wa : JetA F :=
@@ -348,6 +348,132 @@ theorem norm_yQ_le (n : ℕ) : ‖yQ F n‖ ≤ ‖Qa F‖ * ‖Qa F‖ := by
           ring
   rw [hWinv, one_mul]
   exact le_refl _
+
+/-- **The (3.3) collapse**: `ρ(Q)² = 0` in the chart — the constant `ρ(Q²)` is a limit
+of the null products `ρ(ϖ)ⁿ · (gⁿ · ρ(W⁻ⁿQ²))` ([FJP] Prop 3.1 proof). -/
+theorem canonicalMap_Qa_sq :
+    (chartDatum F).canonicalMap (Qa F) * (chartDatum F).canonicalMap (Qa F) = 0 := by
+  classical
+  rw [← RingHom.map_mul (chartDatum F).canonicalMap]
+  set ρ := (chartDatum F).canonicalMap with hρ
+  set g := (chartDatum F).coeRingHom (divByS (Wa F) (chartDatum F).s) with hgdef
+  -- `ρ(W) = ρ(ϖ) · g` (clear denominators in the localization)
+  have hWsplit : ρ (Wa F) = ρ (tA F) * g := by
+    rw [hρ, hgdef]
+    show (chartDatum F).coeRingHom (algebraMap (JetA F)
+        (Localization.Away (chartDatum F).s) (Wa F)) =
+      (chartDatum F).coeRingHom (algebraMap (JetA F)
+        (Localization.Away (chartDatum F).s) (tA F)) *
+        (chartDatum F).coeRingHom (divByS (Wa F) (chartDatum F).s)
+    rw [← RingHom.map_mul (chartDatum F).coeRingHom]
+    congr 1
+    rw [mul_comm]
+    symm
+    show divByS (Wa F) (chartDatum F).s *
+      algebraMap (JetA F) (Localization.Away (chartDatum F).s) (chartDatum F).s =
+      algebraMap (JetA F) (Localization.Away (chartDatum F).s) (Wa F)
+    rw [divByS, IsLocalization.mk'_spec]
+  -- per-`n` factorisation of the constant `ρ(Q²)`
+  have hkey : ∀ n : ℕ, ρ (Qa F * Qa F) = ρ (tA F) ^ n * (g ^ n * ρ (yQ F n)) := by
+    intro n
+    rw [← Wa_pow_mul_yQ F n, RingHom.map_mul ρ, map_pow ρ, hWsplit, mul_pow]
+    ring
+  -- the second factors form a bounded set
+  have hbddY : TopologicalRing.IsBounded (Set.range fun n : ℕ => ρ (yQ F n)) := by
+    -- scale into the unit ball by a fixed `ϖ^k`, then unscale by the unit `ρ(ϖ)⁻¹`
+    obtain ⟨k, hk⟩ : ∃ k : ℕ, ‖tA F‖ ^ k * (‖Qa F‖ * ‖Qa F‖) ≤ 1 := by
+      obtain ⟨k, hk⟩ := exists_pow_lt_of_lt_one
+        (show (0:ℝ) < 1 / (1 + ‖Qa F‖ * ‖Qa F‖) by positivity) (norm_tA_lt_one F)
+      refine ⟨k, ?_⟩
+      have h1 : ‖tA F‖ ^ k * (‖Qa F‖ * ‖Qa F‖) ≤
+          (1 / (1 + ‖Qa F‖ * ‖Qa F‖)) * (‖Qa F‖ * ‖Qa F‖) := by
+        refine mul_le_mul_of_nonneg_right hk.le (by positivity)
+      refine h1.trans ?_
+      rw [div_mul_eq_mul_div, one_mul, div_le_one (by positivity)]
+      linarith [mul_nonneg (norm_nonneg (Qa F)) (norm_nonneg (Qa F))]
+    have hunit : IsUnit (ρ (tA F)) := by
+      rw [hρ]
+      show IsUnit ((chartDatum F).coeRingHom (algebraMap (JetA F)
+        (Localization.Away (chartDatum F).s) (chartDatum F).s))
+      refine IsUnit.map _ ?_
+      exact IsLocalization.map_units (Localization.Away (chartDatum F).s)
+        ⟨(chartDatum F).s, Submonoid.mem_powers _⟩
+    obtain ⟨u, hu⟩ := hunit
+    -- the scaled family lies in the bounded `coeRingHom`-image of `locSubring`
+    have hball : TopologicalRing.IsBounded
+        (Set.range fun n : ℕ => ρ (tA F ^ k * yQ F n)) := by
+      refine (CompletionLocalization.coeRingHom_image_locSubring_isBounded
+        (chartDatum F)).subset ?_
+      rintro _ ⟨n, rfl⟩
+      refine ⟨algebraMap (JetA F) (Localization.Away (chartDatum F).s)
+        (tA F ^ k * yQ F n), ?_, rfl⟩
+      refine algebraMap_mem_locSubring _ _ _ ?_
+      show tA F ^ k * yQ F n ∈ (podA F).A₀
+      show ‖tA F ^ k * yQ F n‖ ≤ 1
+      rw [norm_JetA_mul, norm_JetA_pow]
+      calc ‖tA F‖ ^ k * ‖yQ F n‖ ≤ ‖tA F‖ ^ k * (‖Qa F‖ * ‖Qa F‖) := by
+            refine mul_le_mul_of_nonneg_left (norm_yQ_le F n) (by positivity)
+        _ ≤ 1 := hk
+    -- unscale: `ρ(yQ n) = (u⁻¹)ᵏ · ρ(ϖᵏ yQ n)`
+    have hres : (Set.range fun n : ℕ => ρ (yQ F n)) ⊆
+        ({((u⁻¹ : (presheafValue (chartDatum F))ˣ) :
+          presheafValue (chartDatum F)) ^ k} : Set (presheafValue (chartDatum F))) *
+          Set.range fun n : ℕ => ρ (tA F ^ k * yQ F n) := by
+      rintro _ ⟨n, rfl⟩
+      refine ⟨((u⁻¹ : (presheafValue (chartDatum F))ˣ) :
+        presheafValue (chartDatum F)) ^ k, rfl, ρ (tA F ^ k * yQ F n), ⟨n, rfl⟩, ?_⟩
+      show ((u⁻¹ : (presheafValue (chartDatum F))ˣ) :
+        presheafValue (chartDatum F)) ^ k * ρ (tA F ^ k * yQ F n) = ρ (yQ F n)
+      rw [RingHom.map_mul ρ, map_pow ρ, ← hu, ← mul_assoc, ← mul_pow]
+      rw [show ((u⁻¹ : (presheafValue (chartDatum F))ˣ) :
+        presheafValue (chartDatum F)) * u = 1 from u.inv_mul]
+      rw [one_pow, one_mul]
+    exact ((TopologicalRing.isBounded_singleton _).mul hball).subset hres
+  have hbddG : TopologicalRing.IsBounded
+      (Set.range (g ^ · : ℕ → presheafValue (chartDatum F))) := by
+    have hmem : divByS (Wa F) (chartDatum F).s ∈
+        locSubring (chartDatum F).P (chartDatum F).T (chartDatum F).s :=
+      divByS_mem_locSubring _ _ _ (Finset.mem_insert_self _ _)
+    refine (CompletionLocalization.coeRingHom_image_locSubring_isBounded
+      (chartDatum F)).subset ?_
+    rintro _ ⟨n, rfl⟩
+    exact ⟨divByS (Wa F) (chartDatum F).s ^ n, pow_mem hmem n, by
+      rw [map_pow]⟩
+  have hbdd : TopologicalRing.IsBounded
+      (Set.range fun n : ℕ => g ^ n * ρ (yQ F n)) := by
+    refine (hbddG.mul hbddY).subset ?_
+    rintro _ ⟨n, rfl⟩
+    exact ⟨g ^ n, ⟨n, rfl⟩, ρ (yQ F n), ⟨n, rfl⟩, rfl⟩
+  -- the scalar powers are null
+  have hnull : Filter.Tendsto (fun n : ℕ => ρ (tA F) ^ n) Filter.atTop
+      (nhds (0 : presheafValue (chartDatum F))) := by
+    have htend : Filter.Tendsto (fun n : ℕ => tA F ^ n) Filter.atTop
+        (nhds (0 : JetA F)) := by
+      rw [tendsto_zero_iff_norm_tendsto_zero]
+      simp only [norm_JetA_pow]
+      exact tendsto_pow_atTop_nhds_zero_of_lt_one (norm_nonneg _) (norm_tA_lt_one F)
+    have hcont := (canonicalMap_continuous (chartDatum F)).continuousAt (x := (0 : JetA F))
+    have := hcont.tendsto.comp htend
+    rw [hρ]
+    simpa only [Function.comp_def, map_pow, map_zero] using this
+  -- absorption: the constant `ρ(Q²)` lies in every neighbourhood of `0`
+  have hmem0 : ∀ U ∈ nhds (0 : presheafValue (chartDatum F)), ρ (Qa F * Qa F) ∈ U := by
+    intro U hU
+    obtain ⟨V, hV, hVU⟩ := hbdd U hU
+    have hev := hnull hV
+    rw [Filter.mem_map] at hev
+    obtain ⟨n, hn⟩ := (Filter.eventually_atTop.mp hev)
+    have hnn := hn n (le_refl n)
+    rw [hkey n, mul_comm]
+    exact hVU (Set.mul_mem_mul ⟨n, rfl⟩ hnn)
+  -- T1 separation forces the constant to be `0`
+  haveI : RegularSpace (presheafValue (chartDatum F)) := UniformSpace.to_regularSpace
+  have h0mem : (0 : presheafValue (chartDatum F)) ∈ closure {ρ (Qa F * Qa F)} := by
+    rw [mem_closure_iff_nhds]
+    intro U hU
+    exact ⟨ρ (Qa F * Qa F), hmem0 U hU, rfl⟩
+  rw [closure_singleton] at h0mem
+  exact (Set.mem_singleton_iff.mp h0mem).symm
 
 /-! ### The forward map `𝒪_𝓐(chart) → 𝓑` (Prop 3.1's `ψ`-direction) -/
 
