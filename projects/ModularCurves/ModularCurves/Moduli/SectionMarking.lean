@@ -181,7 +181,7 @@ set_option maxHeartbeats 1600000 in
 geometric elliptic curve whose pull differs from zero at every algebraically closed
 geometric point of the base is marked at honest coordinates on every affine piece —
 the interface the level structure feeds directly. -/
-theorem LocalPresentation.marksAt_of_forall_pull_ne_zero {S : Scheme.{u}}
+theorem marksAt_of_forall_pull_ne_zero {S : Scheme.{u}}
     {G : EllipticCurveGeom S} {V : S.affineOpens} (Pr : LocalPresentation G V)
     {σ : S ⟶ G.E} (hσ : σ ≫ G.π = 𝟙 S)
     (hne : ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S),
