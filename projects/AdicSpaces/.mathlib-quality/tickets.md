@@ -411,7 +411,28 @@ T704, by a fresh `/develop --continue`.
   `Fin m → P` with the base-changed free module.
 
 ### [T406] closedness and strictness constants
-- **Status**: open | **Depends**: T405, T302 | **Type**: proofs (L3.7–L3.9)
+- **Status**: IN PROGRESS | **Depends**: T405, T302 | **Type**: proofs (L3.7–L3.9)
+- **Plan of record**:
+  (i) `isClosed_graphIdeal` := `Wedhorn.isClosed_ideal_of_noetherian` at the pod
+  `unitBallPod tP …` (tP := polyToP (C t); instances IsTateRing (P E m) via
+  `isTateRing_of_scale`, T2/Complete/UniformAddGroup present) — REQUIRES noetherian pod-A₀ =
+  `IsNoetherianRing (unitBall (P E m))`: add as hypothesis `hE₀P` (statement completion, like
+  the t-bundle; dischargeable at the vertices by the T303 arity-generic ball-transfer
+  machinery). Also add the t-bundle to the statement.
+  (ii) generic `exists_lift_norm_le_of_closed_range` (NEW, ultrametric Banach with
+  constants): for a continuous `t`-equivariant additive map `f : (ι → A) →+ (κ → A)` over
+  complete ultrametric `A` with closed range: Baire on the closed range (complete metric →
+  BaireSpace), cover by closures of images of `‖t‖⁻ᴺ`-balls (balls are subgroups
+  ultrametrically, so images/closures are subgroups; nonempty interior ⟹ open via
+  `AddSubgroup.isOpen_of_mem_nhds`), remove the closure by the geometric ultrametric
+  series correction (t-equivariance rescales the approximation), extract the constant by
+  the `exists_mem_Ico_zpow` window `δ‖t‖ ≤ ‖t‖^k‖y‖ < δ`.
+  (iii) `exists_d1_lift` := (ii) at `f := d1`-as-hom (range = span(range r) by
+  `mem_span_range_iff_exists_fun`, closed by (i));
+  `exists_d2_lift` := (ii) at `f := d2`-as-hom (range = ker d1 : closed since d1 continuous;
+  range ⊇ ker by `syzygy_graph_restricted`, ⊆ by `d1_d2`); `m = 1` degenerate case noted in
+  the statement handles itself (`Pairs 1` empty ⟹ ker d1 = 0 forced).
+  Both get the t-bundle + `hE₀P` as needed (statement completion, recorded).
 - **Sorries**: `isClosed_graphIdeal`, `exists_d1_lift`, `exists_d2_lift`.
 - **Sketch**: finite-module theory over noetherian `P` (`NoetherianTateModules.lean`:
   module topology = Banach on finite frees; submodules closed; surjections open) →
