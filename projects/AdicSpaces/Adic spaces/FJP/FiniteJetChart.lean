@@ -1204,19 +1204,6 @@ noncomputable def chartRev : JetB F →+* presheafValue (chartDatum F) where
     linear_combination
       (-(chartEval F x.snd * chartEval F y.snd)) * canonicalMap_Qa_sq F
 
-/-- **[FJP] Proposition 3.1**: the chart is the square-zero disc algebra,
-`𝒪_𝓐({|W| ≤ |ϖ|}) ≅ K⟨X⟩[Q]/(Q²) = 𝓑`, as topological rings. -/
-def chartEquiv : presheafValue (chartDatum F) ≃+* JetB F := by sorry
-
-theorem chartEquiv_continuous : Continuous (chartEquiv F) := by sorry
-
-theorem chartEquiv_symm_continuous : Continuous (chartEquiv F).symm := by sorry
-
-/-- The chart sends `canonicalMap W` to `ϖ · X` and `canonicalMap Q` to `ε`
-([FJP] Prop 3.1: "`W ↦ ϖX`, `Q ↦ Q`"; pinned on the canonical image to make `chartEquiv`
-canonical). -/
-theorem chartEquiv_canonicalMap_W : True := by sorry
-
 /-! ### Roundtrip step 4: `chartRev ∘ θ = ρ` -/
 
 /-- `chartRev` on disc-only jets is the evaluation. -/
@@ -1341,6 +1328,180 @@ theorem chartRev_theta (a : JetA F) :
     RingHom.map_add ((chartDatum F).canonicalMap),
     RingHom.map_mul ((chartDatum F).canonicalMap),
     chartRev_theta_constNN, chartRev_theta_constNN, theta_Qa, chartRev_inr_one]
+
+/-! ### Roundtrip step 5: the two inverses, and the equivalence ([FJP] Prop 3.1) -/
+
+/-- Continuity of the reverse map (componentwise: `fst`/`snd` are `1`-bounded for the
+jet sup-norm). -/
+theorem chartRev_continuous : Continuous (chartRev F) := by
+  have hfst : Continuous (fun x : JetB F => x.fst) :=
+    AddMonoidHomClass.continuous_of_bound
+      (AddMonoidHom.mk' (fun x : JetB F => x.fst)
+        (fun x y => TrivSqZeroExt.fst_add x y)) 1
+      (fun x => by
+        show ‖x.fst‖ ≤ 1 * ‖x‖
+        rw [one_mul, JetNorm.norm_def]
+        exact le_max_left _ _)
+  have hsnd : Continuous (fun x : JetB F => x.snd) :=
+    AddMonoidHomClass.continuous_of_bound
+      (AddMonoidHom.mk' (fun x : JetB F => x.snd)
+        (fun x y => TrivSqZeroExt.snd_add x y)) 1
+      (fun x => by
+        show ‖x.snd‖ ≤ 1 * ‖x‖
+        rw [one_mul, JetNorm.norm_def]
+        exact le_max_right _ _)
+  show Continuous (fun x : JetB F => chartEval F x.fst +
+    chartEval F x.snd * (chartDatum F).canonicalMap (Qa F))
+  exact ((chartEval_continuous F).comp hfst).add
+    (((chartEval_continuous F).comp hsnd).mul continuous_const)
+
+/-- `chartFwd` intertwines `ρ` and `θ`. -/
+theorem chartFwd_canonicalMap (a : JetA F) :
+    chartFwd F ((chartDatum F).canonicalMap a) = thetaChart F a := by
+  show chartFwd F ((chartDatum F).coeRingHom
+    (algebraMap (JetA F) (Localization.Away (chartDatum F).s) a)) = thetaChart F a
+  rw [chartFwd_coe, chartLocHom_algebraMap]
+
+set_option maxHeartbeats 800000 in
+/-- **Roundtrip I**: `chartRev ∘ chartFwd = id` (agreement on the dense localization via
+`chartRev_theta`, then density). -/
+theorem chartRev_chartFwd (x : presheafValue (chartDatum F)) :
+    chartRev F (chartFwd F x) = x := by
+  haveI : RegularSpace (presheafValue (chartDatum F)) := UniformSpace.to_regularSpace
+  have hloc : (chartRev F).comp (chartLocHom F) = (chartDatum F).coeRingHom := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers (chartDatum F).s)
+      (RingHom.ext fun a => ?_)
+    show chartRev F (chartLocHom F
+      (algebraMap (JetA F) (Localization.Away (chartDatum F).s) a)) =
+      (chartDatum F).coeRingHom
+        (algebraMap (JetA F) (Localization.Away (chartDatum F).s) a)
+    rw [chartLocHom_algebraMap, chartRev_theta]
+    rfl
+  letI : UniformSpace (Localization.Away (chartDatum F).s) := (chartDatum F).uniformSpace
+  have hdense : DenseRange ((chartDatum F).coeRingHom) :=
+    UniformSpace.Completion.denseRange_coe (α := Localization.Away (chartDatum F).s)
+  have h_eq : (fun y => chartRev F (chartFwd F y)) =
+      (fun y : presheafValue (chartDatum F) => y) := by
+    refine hdense.equalizer
+      ((chartRev_continuous F).comp (chartFwd_continuous F)) continuous_id ?_
+    funext a
+    show chartRev F (chartFwd F ((chartDatum F).coeRingHom a)) =
+      (chartDatum F).coeRingHom a
+    rw [chartFwd_coe]
+    exact DFunLike.congr_fun hloc a
+  exact congrFun h_eq x
+
+/-- The 2-jet of a disc constant lift is the disc-only jet. -/
+theorem jB_constKW (g : PowerSeries.Restricted K (1 : ℝ)) :
+    jB F (constKW F g) = TrivSqZeroExt.inl g := by
+  refine TrivSqZeroExt.ext ?_ ?_
+  · refine ofRestricted_injective (R := K) ?_
+    rw [TrivSqZeroExt.fst_inl]
+    show ofRestricted ((nonnegEquiv (R := K)).symm
+      ⟨qCoeff F 0 ((constKW F g : JetA F) : JetC F), (constKW F g).2.1⟩) =
+      ofRestricted (R := K) g
+    rw [ofRestricted_nonnegEquiv_symm]
+    show qCoeff F 0 (constHomC F (ofRestricted (R := K) g)) = ofRestricted (R := K) g
+    rw [qCoeff_constHomC, if_pos rfl]
+  · refine ofRestricted_injective (R := K) ?_
+    rw [TrivSqZeroExt.snd_inl, map_zero]
+    show ofRestricted ((nonnegEquiv (R := K)).symm
+      ⟨qCoeff F 1 ((constKW F g : JetA F) : JetC F), (constKW F g).2.2⟩) = 0
+    rw [ofRestricted_nonnegEquiv_symm]
+    show qCoeff F 1 (constHomC F (ofRestricted (R := K) g)) = 0
+    rw [qCoeff_constHomC, if_neg one_ne_zero]
+
+/-- `θ` on disc constant lifts is the rescaled disc-only jet. -/
+theorem theta_constKW (g : PowerSeries.Restricted K (1 : ℝ)) :
+    thetaChart F (constKW F g) = TrivSqZeroExt.inl
+      (rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le g) := by
+  show twistB F (jB F (constKW F g)) = _
+  rw [jB_constKW]
+  refine TrivSqZeroExt.ext ?_ ?_
+  · rfl
+  · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le 0 = 0
+    exact map_zero _
+
+set_option maxHeartbeats 800000 in
+/-- **Roundtrip II, disc component**: `chartFwd ∘ chartEval = inl` (polynomial density:
+constants via `θ`-on-constants, `X ↦ W/ϖ ↦ jB(W)`). -/
+theorem chartFwd_chartEval (f : PowerSeries.Restricted K (1 : ℝ)) :
+    chartFwd F (chartEval F f) = TrivSqZeroExt.inl f := by
+  have hinl : Continuous (fun g : PowerSeries.Restricted K (1 : ℝ) =>
+      (TrivSqZeroExt.inl g : JetB F)) :=
+    AddMonoidHomClass.continuous_of_bound
+      (AddMonoidHom.mk' (fun g : PowerSeries.Restricted K (1 : ℝ) =>
+          (TrivSqZeroExt.inl g : JetB F))
+        (fun a b => by
+          refine TrivSqZeroExt.ext ?_ ?_
+          · rw [TrivSqZeroExt.fst_add, TrivSqZeroExt.fst_inl, TrivSqZeroExt.fst_inl,
+              TrivSqZeroExt.fst_inl]
+          · rw [TrivSqZeroExt.snd_add, TrivSqZeroExt.snd_inl, TrivSqZeroExt.snd_inl,
+              TrivSqZeroExt.snd_inl, add_zero])) 1
+      (fun g => by
+        show ‖(TrivSqZeroExt.inl g : JetB F)‖ ≤ 1 * ‖g‖
+        rw [one_mul, JetNorm.norm_inl])
+  have hpoly : ((chartFwd F).comp ((chartEval F).comp (polyKW F))) =
+      ((TrivSqZeroExt.inlHom (PowerSeries.Restricted K (1 : ℝ))
+        (PowerSeries.Restricted K (1 : ℝ))).comp (polyKW F)) := by
+    refine Polynomial.ringHom_ext (fun r => ?_) ?_
+    · simp only [RingHom.comp_apply]
+      rw [polyKW_C, chartEval_const]
+      show chartFwd F ((chartDatum F).canonicalMap (constA F r)) =
+        TrivSqZeroExt.inl (constHomPS F r)
+      rw [chartFwd_canonicalMap, ← constKW_const, theta_constKW, rescaleRestricted_const]
+    · simp only [RingHom.comp_apply]
+      rw [polyKW_X, chartEval_jBWa_fst]
+      show chartFwd F ((chartDatum F).coeRingHom (divByS (Wa F) (chartDatum F).s)) =
+        TrivSqZeroExt.inl ((jB F (Wa F)).fst)
+      rw [chartFwd_coe, chartLocHom_divByS_Wa]
+      refine TrivSqZeroExt.ext ?_ ?_
+      · rw [TrivSqZeroExt.fst_inl]
+      · rw [TrivSqZeroExt.snd_inl, jB_Wa_snd]
+  have h_eq : (fun g => chartFwd F (chartEval F g)) =
+      (fun g : PowerSeries.Restricted K (1 : ℝ) => (TrivSqZeroExt.inl g : JetB F)) :=
+    (polyKW_denseRange F).equalizer
+      ((chartFwd_continuous F).comp (chartEval_continuous F)) hinl
+      (by funext p; exact DFunLike.congr_fun hpoly p)
+  exact congrFun h_eq f
+
+/-- **Roundtrip II**: `chartFwd ∘ chartRev = id`. -/
+theorem chartFwd_chartRev (x : JetB F) : chartFwd F (chartRev F x) = x := by
+  have hQ : chartFwd F ((chartDatum F).canonicalMap (Qa F)) = TrivSqZeroExt.inr 1 := by
+    rw [chartFwd_canonicalMap, theta_Qa]
+  show chartFwd F (chartEval F x.fst +
+    chartEval F x.snd * (chartDatum F).canonicalMap (Qa F)) = x
+  rw [RingHom.map_add (chartFwd F), RingHom.map_mul (chartFwd F),
+    chartFwd_chartEval, chartFwd_chartEval, hQ, TrivSqZeroExt.inl_mul_inr,
+    show (x.snd • (1 : PowerSeries.Restricted K (1 : ℝ))) = x.snd from by
+      rw [smul_eq_mul, mul_one],
+    TrivSqZeroExt.inl_fst_add_inr_snd_eq]
+
+/-- **[FJP] Proposition 3.1**: the chart is the square-zero disc algebra,
+`𝒪_𝓐({|W| ≤ |ϖ|}) ≅ K⟨X⟩[Q]/(Q²) = 𝓑`, as topological rings. -/
+noncomputable def chartEquiv : presheafValue (chartDatum F) ≃+* JetB F :=
+  RingEquiv.ofRingHom (chartFwd F) (chartRev F)
+    (RingHom.ext fun x => chartFwd_chartRev F x)
+    (RingHom.ext fun x => chartRev_chartFwd F x)
+
+theorem chartEquiv_continuous : Continuous (chartEquiv F) :=
+  chartFwd_continuous F
+
+theorem chartEquiv_symm_continuous : Continuous (chartEquiv F).symm :=
+  chartRev_continuous F
+
+/-- The chart equivalence is the canonical one of [FJP] Prop 3.1 ("`W ↦ ϖX`, `Q ↦ Q`"):
+it sends `ρ(W)` to `ϖ·jB(W)` (the `ϖ`-scaled disc variable) and `ρ(Q)` to the square-zero
+generator `ε`. -/
+theorem chartEquiv_canonicalMap_W :
+    chartEquiv F ((chartDatum F).canonicalMap (Wa F)) = tB F * jB F (Wa F) ∧
+    chartEquiv F ((chartDatum F).canonicalMap (Qa F)) = TrivSqZeroExt.inr 1 := by
+  constructor
+  · show chartFwd F ((chartDatum F).canonicalMap (Wa F)) = _
+    rw [chartFwd_canonicalMap, thetaChart_Wa]
+  · show chartFwd F ((chartDatum F).canonicalMap (Qa F)) = _
+    rw [chartFwd_canonicalMap, theta_Qa]
+
 
 /-! ### Failure of stable uniformity ([FJP] Corollary 3.2) -/
 

@@ -1,4 +1,8 @@
-# ★★★ CAMPAIGN HEADLINE COMPLETE (2026-07-17): `finiteJet_isSheafy` PROVEN, AXIOM-CLEAN ★★★
+# ★★★ CAMPAIGN COMPLETE (2026-07-17): ALL FIVE `FiniteJetMain` THEOREMS AXIOM-CLEAN ★★★
+# `finiteJet_isSheafy` + `finiteJet_isUniform` + `finiteJet_isDomain` +
+# `finiteJet_not_noetherian` + `finiteJet_not_stablyUniform` — every one
+# `[propext, Classical.choice, Quot.sound]`, no sorryAx; `lake build «Adic spaces»` green
+# (root imports `FJP.FiniteJetMain`; FJP files live in `Adic spaces/FJP/`).
 # 𝓐 sheafy + uniform + domain + non-noetherian all verified; 𝓑 non-uniform verified.
 # Remaining: T801–T804 (chart + not_stablyUniform packaging), M7 stretch, cleanup fleet.
 
@@ -740,7 +744,22 @@ T704, by a fresh `/develop --continue`.
   `Ideal.eq_top_of_isUnit_mem` at the `tA`-unit ∈ {Wa, tA}; `chartDatum_isRational`
   likewise (needs a `show`-unfold of the structure `.T` before `Finset.coe_insert`).
 
-### [T802] Prop 3.1: the chart is 𝓑
+### [T802] Prop 3.1: the chart is 𝓑 — **DONE 2026-07-17**
+- **Completed** steps 4–7 (2026-07-17): `chartRev_theta` (rev∘θ = ρ via `jet_decomposition` +
+  `canonicalMap_eq_zero_of_qSq` + `evalRescale_eq`; helpers `chartRev_inl`, `chartRev_inr_one`,
+  `jB_constNN`, `theta_constNN`, `constKW_nonnegEquiv_symm`, `theta_Qa`); Roundtrip I
+  `chartRev_chartFwd` (IsLocalization.ringHom_ext (powers ϖ) + completion-dense equalizer);
+  `jB_constKW`/`theta_constKW`; Roundtrip II `chartFwd_chartEval` (fwd∘ev = inl, polynomial
+  density, C-case via θ-on-constants + `rescaleRestricted_const`, X-case via
+  `chartLocHom_divByS_Wa`) and `chartFwd_chartRev` (inl/inr reassembly); `chartRev_continuous`
+  (fst/snd 1-bounded for the jet sup-norm + `chartEval_continuous`); `chartEquiv` via
+  `RingEquiv.ofRingHom`; both continuities definitial.
+- **Statement completions (recorded per protocol)**: `chartEquiv` skeleton `def` →
+  `noncomputable def` (chartFwd is a completion extension); `chartEquiv_canonicalMap_W`
+  `True`-stub → real pinning `chartEquiv (ρ W) = tB·jB(W) ∧ chartEquiv (ρ Q) = ε`.
+- Original ticket text follows.
+
+### [T802-orig] (historical)
 - **Status**: IN PROGRESS — DONE: twist (`rescaleRestricted` + `twistB` + `thetaChart`),
   `jB_tA/thetaChart_tA/thetaChart_Wa` jet computations, FULL forward (`chartLocHom` with
   generator identities + continuity + `chartFwd` extension), `Qa`, collapse data
@@ -797,7 +816,7 @@ T704, by a fresh `/develop --continue`.
   round-trips. The graph-bridge route is preferred (reuses T603); the direct route is the
   recorded fallback.
 
-### [T803] Cor 3.2: not stably uniform — **DONE modulo T802 (2026-07-17)**
+### [T803] Cor 3.2: not stably uniform — **DONE 2026-07-17** (T802 landed; `not_isUniform_chart` + `not_isStablyUniform_JetA` sorry-free)
 - **Status**: `isPowerBounded_map_of_ringEquiv` + `isUniform_of_ringEquiv` PROVEN
   (bi-continuous transport; beta-`show` before final rws); `not_isUniform_chart` and
   `not_isStablyUniform_JetA` fully wired — they compile and will be sorry-free the moment
@@ -806,7 +825,12 @@ T704, by a fresh `/develop --continue`.
 
 ### [CLEANUP-15] /cleanup `FiniteJetChart.lean` (final) — **Depends**: T803.
 
-### [T804] MILESTONE: headline assembly verification
+### [T804] MILESTONE: headline assembly verification — **DONE 2026-07-17**
+- All five `FiniteJetMain` theorems `#print axioms` = `[propext, Classical.choice, Quot.sound]`
+  (user directive: all of FiniteJetMain axiom-clean — SATISFIED). Root target builds green.
+- Original ticket text follows.
+
+### [T804-orig] (historical)
 - **Status**: open | **Depends**: T704, CLEANUP-6, CLEANUP-15
 - **Deliverable**: `lean_verify` all five `FiniteJet.finiteJet_*` theorems axiom-clean;
   update board banner; PR-readiness note for `dev/adic-spaces → main`.
