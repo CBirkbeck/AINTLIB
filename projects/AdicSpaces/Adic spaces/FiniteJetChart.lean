@@ -263,6 +263,119 @@ theorem thetaChart_Wa : thetaChart F (Wa F) = tB F * jB F (Wa F) := by
         MulOpposite.op ((jB F (Wa F)).fst) • (tB F).snd
     rw [smul_zero, show (tB F).snd = 0 from rfl, smul_zero, add_zero]
 
+/-! ### The forward map `𝒪_𝓐(chart) → 𝓑` (Prop 3.1's `ψ`-direction) -/
+
+theorem isUnit_thetaChart_s : IsUnit (thetaChart F (chartDatum F).s) := by
+  show IsUnit (thetaChart F (tA F))
+  rw [thetaChart_tA]
+  exact isUnit_tB F
+
+/-- The chart's localization lift into 𝓑 (`ϖ` is already a unit there). -/
+noncomputable def chartLocHom :
+    Localization.Away (chartDatum F).s →+* JetB F :=
+  IsLocalization.Away.lift (S := Localization.Away (chartDatum F).s)
+    (chartDatum F).s (isUnit_thetaChart_s F)
+
+theorem chartLocHom_algebraMap (a : JetA F) :
+    chartLocHom F (algebraMap (JetA F) (Localization.Away (chartDatum F).s) a) =
+      thetaChart F a :=
+  IsLocalization.Away.lift_eq _ _ a
+
+/-- The chart generator `W/ϖ` maps to the norm-one disc variable `jB(W)`
+(the rescaling at work: `θ(W)/θ(ϖ) = ϖ·jB(W)/ϖ`). -/
+theorem chartLocHom_divByS_Wa :
+    chartLocHom F (divByS (Wa F) (chartDatum F).s) = jB F (Wa F) := by
+  have hu := isUnit_thetaChart_s F
+  have hspec : divByS (Wa F) (chartDatum F).s *
+      algebraMap (JetA F) (Localization.Away (chartDatum F).s) (chartDatum F).s =
+      algebraMap (JetA F) (Localization.Away (chartDatum F).s) (Wa F) := by
+    rw [divByS, IsLocalization.mk'_spec]
+  have happ := congrArg (chartLocHom F) hspec
+  rw [RingHom.map_mul (chartLocHom F), chartLocHom_algebraMap,
+    chartLocHom_algebraMap] at happ
+  -- `chartLocHom (W/ϖ) · θ(ϖ) = θ(W) = ϖ_𝓑 · jB(W)`; cancel the unit `θ(ϖ) = ϖ_𝓑`.
+  rw [show thetaChart F (chartDatum F).s = tB F from thetaChart_tA F,
+    show thetaChart F (Wa F) = tB F * jB F (Wa F) from thetaChart_Wa F] at happ
+  refine (isUnit_tB F).mul_left_cancel ?_
+  rw [mul_comm (tB F) (chartLocHom F (divByS (Wa F) (chartDatum F).s))]
+  exact happ
+
+theorem chartLocHom_divByS_tA :
+    chartLocHom F (divByS (tA F) (chartDatum F).s) = 1 := by
+  have hu := isUnit_thetaChart_s F
+  have hspec : divByS (tA F) (chartDatum F).s *
+      algebraMap (JetA F) (Localization.Away (chartDatum F).s) (chartDatum F).s =
+      algebraMap (JetA F) (Localization.Away (chartDatum F).s) (tA F) := by
+    rw [divByS, IsLocalization.mk'_spec]
+  have happ := congrArg (chartLocHom F) hspec
+  rw [RingHom.map_mul (chartLocHom F), chartLocHom_algebraMap,
+    chartLocHom_algebraMap] at happ
+  rw [show thetaChart F (chartDatum F).s = tB F from thetaChart_tA F,
+    show thetaChart F (tA F) = tB F from thetaChart_tA F] at happ
+  refine (isUnit_tB F).mul_left_cancel ?_
+  rw [mul_comm (tB F) (chartLocHom F (divByS (tA F) (chartDatum F).s)), happ, mul_one]
+
+/-- `‖jB(W)‖ = 1`. -/
+theorem norm_jB_Wa : ‖jB F (Wa F)‖ = 1 := by
+  have h1 : ‖(jB F (Wa F)).fst‖ = 1 := by
+    rw [← ofRestricted_norm (R := K), ofRestricted_jB_Wa_fst, norm_single, norm_one]
+  calc ‖jB F (Wa F)‖ = max ‖(jB F (Wa F)).fst‖ ‖(jB F (Wa F)).snd‖ :=
+        JetNorm.norm_def _
+    _ = 1 := by
+        rw [h1, jB_Wa_snd, norm_zero]
+        exact max_eq_left zero_le_one
+
+set_option maxHeartbeats 800000 in
+/-- Continuity of the chart's localization lift (universal property; the generators map
+to norm-`≤ 1` elements of 𝓑). -/
+theorem chartLocHom_continuous :
+    @Continuous _ _ (chartDatum F).topology _ (chartLocHom F) := by
+  refine locTopology_continuous_lift (chartDatum F).P (chartDatum F).T
+    (chartDatum F).s (chartDatum F).hopen _ ?_ ?_
+  · have h_eq : (chartLocHom F).comp
+        (algebraMap (JetA F) (Localization.Away (chartDatum F).s)) =
+        thetaChart F :=
+      RingHom.ext fun a => chartLocHom_algebraMap F a
+    rw [show ⇑((chartLocHom F).comp
+        (algebraMap (JetA F) (Localization.Away (chartDatum F).s)))
+        = ⇑(thetaChart F) from congrArg _ h_eq]
+    exact continuous_thetaChart F
+  · intro t ht
+    have hmem : t = Wa F ∨ t = tA F := by
+      rcases Finset.mem_insert.mp ht with h | h
+      · exact Or.inl h
+      · exact Or.inr (Finset.mem_singleton.mp h)
+    rcases hmem with rfl | rfl
+    · rw [show divByS (Wa F) (chartDatum F).s = divByS (Wa F) (chartDatum F).s from rfl,
+        chartLocHom_divByS_Wa]
+      exact isPowerBounded_of_norm_le_one (le_of_eq (norm_jB_Wa F))
+    · rw [chartLocHom_divByS_tA]
+      exact isPowerBounded_of_norm_le_one (le_of_eq norm_one)
+
+/-- Forward: `𝒪_𝓐(chart) → 𝓑` (completion extension; 𝓑 is complete Hausdorff). -/
+noncomputable def chartFwd : presheafValue (chartDatum F) →+* JetB F := by
+  letI := (chartDatum F).uniformSpace
+  letI : IsTopologicalRing (Localization.Away (chartDatum F).s) :=
+    (chartDatum F).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away (chartDatum F).s) :=
+    (chartDatum F).isUniformAddGroup
+  exact UniformSpace.Completion.extensionHom (chartLocHom F)
+    (chartLocHom_continuous F)
+
+theorem chartFwd_coe (a : Localization.Away (chartDatum F).s) :
+    chartFwd F ((chartDatum F).coeRingHom a) = chartLocHom F a := by
+  letI := (chartDatum F).uniformSpace
+  letI : IsTopologicalRing (Localization.Away (chartDatum F).s) :=
+    (chartDatum F).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away (chartDatum F).s) :=
+    (chartDatum F).isUniformAddGroup
+  exact UniformSpace.Completion.extensionHom_coe (chartLocHom F)
+    (chartLocHom_continuous F) a
+
+theorem chartFwd_continuous : Continuous (chartFwd F) := by
+  letI := (chartDatum F).uniformSpace
+  exact UniformSpace.Completion.continuous_extension
+
 /-- **[FJP] Proposition 3.1**: the chart is the square-zero disc algebra,
 `𝒪_𝓐({|W| ≤ |ϖ|}) ≅ K⟨X⟩[Q]/(Q²) = 𝓑`, as topological rings. -/
 def chartEquiv : presheafValue (chartDatum F) ≃+* JetB F := by sorry
