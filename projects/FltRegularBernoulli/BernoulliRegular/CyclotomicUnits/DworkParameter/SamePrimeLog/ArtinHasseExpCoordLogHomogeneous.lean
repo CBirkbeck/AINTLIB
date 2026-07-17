@@ -575,7 +575,7 @@ theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_
 
 /-- If the degree is not a power of `p`, the factorial-weighted homogeneous numerator sum lies in
 the predicted high power of `lambdaIdeal`. -/
-theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sum_mem_lambdaIdeal_pow_of_not_pow
+theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_weighted_sum_mem_lambdaIdeal_pow_of_not_pow
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hd : ¬ ∃ r : ℕ, d = p ^ r) :
     (∑ n ∈ Finset.Icc 1 d,
@@ -656,7 +656,7 @@ theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sum_
 
 /-- For degrees `p ^ r`, subtracting the surviving monomial gives the same high-power
 `lambdaIdeal` divisibility. -/
-theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_pow_mem_lambdaIdeal_pow
+theorem samePrimeFiniteArtinHasseLogHomogeneousNumerator_weighted_sub_pow_mem_lambdaIdeal_pow
     (N r : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     (∑ n ∈ Finset.Icc 1 (p ^ r),
       (((p ^ r).factorial / n : ℕ) : ValuedIntegerRing p K) *
