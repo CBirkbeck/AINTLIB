@@ -1788,6 +1788,221 @@ theorem bridgeFwdC_injective (hD : D.IsRational) :
     Function.Injective (bridgeFwdC D e hD) :=
   Function.LeftInverse.injective (g := bridgeRevC D e hD) (bridgeRevC_bridgeFwdC D e hD)
 
+/-! #### Second-level covariant maps `𝒪_𝓑(D_B) → 𝒪_𝓓(D_D)`, `𝒪_𝓒(D_C) → 𝒪_𝓓(D_D)`
+and the coherence/naturality squares consumed by the 𝓓-matching step -/
+
+theorem continuous_rhoB : Continuous (rhoB F) :=
+  AddMonoidHomClass.continuous_of_bound (rhoB F) 1 fun a => by
+    rw [one_mul, norm_rhoB]
+
+/-- `ρ_B` pushes the 𝓑-datum to the 𝓓-datum (via the square identity). -/
+noncomputable def mapBD (hD : D.IsRational) :
+    presheafValue (pushDatumB D hD) →+* presheafValue (pushDatumD D hD) :=
+  presheafValueMapOfHom (rhoB F) (continuous_rhoB) (pushDatumB D hD) (pushDatumD D hD)
+    ((square_commutes F D.s).symm)
+    (by
+      intro t ht
+      obtain ⟨t₀, ht₀, rfl⟩ := Finset.mem_image.mp ht
+      rw [square_commutes F t₀]
+      exact Finset.mem_image_of_mem _ ht₀)
+
+/-- `ρ_C` pushes the 𝓒-datum to the 𝓓-datum. -/
+noncomputable def mapCD (hD : D.IsRational) :
+    presheafValue (pushDatumC D hD) →+* presheafValue (pushDatumD D hD) :=
+  presheafValueMapOfHom (rhoC F) (continuous_rhoC) (pushDatumC D hD) (pushDatumD D hD)
+    rfl
+    (by
+      intro t ht
+      obtain ⟨t₀, ht₀, rfl⟩ := Finset.mem_image.mp ht
+      exact Finset.mem_image_of_mem _ ht₀)
+
+theorem mapBD_continuous (hD : D.IsRational) : Continuous (mapBD D hD) := by
+  unfold mapBD
+  exact presheafValueMapOfHom_continuous _ _ _ _ _ _
+
+theorem mapCD_continuous (hD : D.IsRational) : Continuous (mapCD D hD) := by
+  unfold mapCD
+  exact presheafValueMapOfHom_continuous _ _ _ _ _ _
+
+/-- The 𝓓-coherence of the two composite pushes ([FJP] (4.9): the square commutes on
+sections). -/
+theorem mapBD_mapB_eq_mapCD_mapC (hD : D.IsRational) :
+    (mapBD D hD).comp (presheafValueMapB D hD) =
+      (mapCD D hD).comp (presheafValueMapC D hD) := by
+  letI := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  haveI : RegularSpace (presheafValue (pushDatumD D hD)) := UniformSpace.to_regularSpace
+  have hcomp : ((mapBD D hD).comp (presheafValueMapB D hD)).comp D.coeRingHom =
+      ((mapCD D hD).comp (presheafValueMapC D hD)).comp D.coeRingHom := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers D.s) ?_
+    refine RingHom.ext fun a => ?_
+    simp only [RingHom.comp_apply]
+    rw [show D.coeRingHom (algebraMap (JetA F) (Localization.Away D.s) a) =
+        D.canonicalMap a from rfl,
+      presheafValueMapB_canonicalMap, presheafValueMapC_canonicalMap,
+      show mapBD D hD ((pushDatumB D hD).canonicalMap (jB F a)) =
+        (pushDatumD D hD).canonicalMap (rhoB F (jB F a)) from
+        presheafValueMapOfHom_canonicalMap _ _ _ _ _ _ (jB F a),
+      show mapCD D hD ((pushDatumC D hD).canonicalMap (iotaC F a)) =
+        (pushDatumD D hD).canonicalMap (rhoC F (iotaC F a)) from
+        presheafValueMapOfHom_canonicalMap _ _ _ _ _ _ (iotaC F a),
+      square_commutes F a]
+  have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) :=
+    UniformSpace.Completion.denseRange_coe
+  have h_eq : ⇑((mapBD D hD).comp (presheafValueMapB D hD)) =
+      ⇑((mapCD D hD).comp (presheafValueMapC D hD)) :=
+    hdense.equalizer
+      ((mapBD_continuous D hD).comp (presheafValueMapB_continuous D hD))
+      ((mapCD_continuous D hD).comp (presheafValueMapC_continuous D hD))
+      (by funext a; exact DFunLike.congr_fun hcomp a)
+  exact DFunLike.ext _ _ fun x => congrFun h_eq x
+
+/-- The quotient projections are norm-nonincreasing along `ρ` (ε-representatives). -/
+theorem norm_locRhoB_le (x : locB F e.m D.s e.f) :
+    ‖locRhoB F e.m D.s e.f x‖ ≤ ‖x‖ := by
+  refine le_of_forall_pos_le_add fun ε hε => ?_
+  obtain ⟨p, hp, hpn⟩ := Ideal.Quotient.norm_mk_lt x hε
+  calc ‖locRhoB F e.m D.s e.f x‖
+      = ‖locRhoB F e.m D.s e.f (Ideal.Quotient.mk (IB F e.m D.s e.f) p)‖ := by rw [hp]
+    _ = ‖Ideal.Quotient.mk (ID F e.m D.s e.f) (extRhoB F e.m p)‖ := by
+        rw [locRhoB_mk]
+    _ ≤ ‖extRhoB F e.m p‖ := Ideal.Quotient.norm_mk_le _ _
+    _ ≤ ‖p‖ := norm_mapRestricted_le _ _ _ p
+    _ ≤ ‖x‖ + ε := hpn.le
+
+theorem norm_locRhoC_le (x : locC F e.m D.s e.f) :
+    ‖locRhoC F e.m D.s e.f x‖ ≤ ‖x‖ := by
+  refine le_of_forall_pos_le_add fun ε hε => ?_
+  obtain ⟨p, hp, hpn⟩ := Ideal.Quotient.norm_mk_lt x hε
+  calc ‖locRhoC F e.m D.s e.f x‖
+      = ‖locRhoC F e.m D.s e.f (Ideal.Quotient.mk (IC F e.m D.s e.f) p)‖ := by rw [hp]
+    _ = ‖Ideal.Quotient.mk (ID F e.m D.s e.f) (extRhoC F e.m p)‖ := by
+        rw [locRhoC_mk]
+    _ ≤ ‖extRhoC F e.m p‖ := Ideal.Quotient.norm_mk_le _ _
+    _ ≤ ‖p‖ := norm_mapRestricted_le _ _ _ p
+    _ ≤ ‖x‖ + ε := hpn.le
+
+theorem locRhoB_continuous : Continuous (locRhoB F e.m D.s e.f) :=
+  AddMonoidHomClass.continuous_of_bound (locRhoB F e.m D.s e.f) 1 fun x => by
+    rw [one_mul]; exact norm_locRhoB_le D e x
+
+theorem locRhoC_continuous : Continuous (locRhoC F e.m D.s e.f) :=
+  AddMonoidHomClass.continuous_of_bound (locRhoC F e.m D.s e.f) 1 fun x => by
+    rw [one_mul]; exact norm_locRhoC_le D e x
+
+open GraphKoszul in
+/-- `ρ`-naturality, 𝓑-side: `locRhoB ∘ fwdB = fwdD ∘ mapBD`. -/
+theorem locRhoB_bridgeFwdB (hD : D.IsRational) :
+    (locRhoB F e.m D.s e.f).comp (bridgeFwdB D e hD) =
+      (bridgeFwdD D e hD).comp (mapBD D hD) := by
+  letI := (pushDatumB D hD).uniformSpace
+  letI : IsTopologicalRing (Localization.Away (pushDatumB D hD).s) :=
+    (pushDatumB D hD).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away (pushDatumB D hD).s) :=
+    (pushDatumB D hD).isUniformAddGroup
+  haveI hcl : IsClosed ((ID F e.m D.s e.f : Set (PD F e.m))) := isClosed_ID' D e
+  haveI : NormedAddCommGroup (locD F e.m D.s e.f) :=
+    Submodule.Quotient.normedAddCommGroup _
+  have hdense : DenseRange ((pushDatumB D hD).coeRingHom :
+      Localization.Away (pushDatumB D hD).s → presheafValue (pushDatumB D hD)) :=
+    UniformSpace.Completion.denseRange_coe
+  have hcomp : ((locRhoB F e.m D.s e.f).comp (bridgeFwdB D e hD)).comp
+      (pushDatumB D hD).coeRingHom =
+      ((bridgeFwdD D e hD).comp (mapBD D hD)).comp (pushDatumB D hD).coeRingHom := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers (pushDatumB D hD).s) ?_
+    refine RingHom.ext fun b => ?_
+    simp only [RingHom.comp_apply]
+    rw [show (pushDatumB D hD).coeRingHom (algebraMap (JetB F)
+        (Localization.Away (pushDatumB D hD).s) b) =
+        (pushDatumB D hD).canonicalMap b from rfl,
+      show bridgeFwdB D e hD ((pushDatumB D hD).canonicalMap b) =
+        bridgeBaseB D e b from by
+        rw [show (pushDatumB D hD).canonicalMap b =
+          (pushDatumB D hD).coeRingHom (algebraMap (JetB F)
+            (Localization.Away (pushDatumB D hD).s) b) from rfl,
+          bridgeFwdB_coe, bridgeLocHomB_algebraMap],
+      show mapBD D hD ((pushDatumB D hD).canonicalMap b) =
+        (pushDatumD D hD).canonicalMap (rhoB F b) from
+        presheafValueMapOfHom_canonicalMap _ _ _ _ _ _ b,
+      show bridgeFwdD D e hD ((pushDatumD D hD).canonicalMap (rhoB F b)) =
+        bridgeBaseD D e (rhoB F b) from by
+        rw [show (pushDatumD D hD).canonicalMap (rhoB F b) =
+          (pushDatumD D hD).coeRingHom (algebraMap (JetD F)
+            (Localization.Away (pushDatumD D hD).s) (rhoB F b)) from rfl,
+          bridgeFwdD_coe, bridgeLocHomD_algebraMap]]
+    rw [show bridgeBaseB D e b =
+        Ideal.Quotient.mk (IB F e.m D.s e.f) (polyToP (MvPolynomial.C b)) from rfl,
+      locRhoB_mk,
+      show extRhoB F e.m (polyToP (MvPolynomial.C b)) =
+        polyToP (MvPolynomial.map (rhoB F) (MvPolynomial.C b)) from
+        mapRestricted_polyToP _ _ _ (MvPolynomial.C b),
+      MvPolynomial.map_C]
+    rfl
+  have h_eq : ⇑((locRhoB F e.m D.s e.f).comp (bridgeFwdB D e hD)) =
+      ⇑((bridgeFwdD D e hD).comp (mapBD D hD)) :=
+    hdense.equalizer
+      ((locRhoB_continuous D e).comp (bridgeFwdB_continuous D e hD))
+      ((bridgeFwdD_continuous D e hD).comp (mapBD_continuous D hD))
+      (by funext a; exact DFunLike.congr_fun hcomp a)
+  exact DFunLike.ext _ _ fun x => congrFun h_eq x
+
+open GraphKoszul in
+/-- `ρ`-naturality, 𝓒-side: `locRhoC ∘ fwdC = fwdD ∘ mapCD`. -/
+theorem locRhoC_bridgeFwdC (hD : D.IsRational) :
+    (locRhoC F e.m D.s e.f).comp (bridgeFwdC D e hD) =
+      (bridgeFwdD D e hD).comp (mapCD D hD) := by
+  letI := (pushDatumC D hD).uniformSpace
+  letI : IsTopologicalRing (Localization.Away (pushDatumC D hD).s) :=
+    (pushDatumC D hD).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away (pushDatumC D hD).s) :=
+    (pushDatumC D hD).isUniformAddGroup
+  haveI hcl : IsClosed ((ID F e.m D.s e.f : Set (PD F e.m))) := isClosed_ID' D e
+  haveI : NormedAddCommGroup (locD F e.m D.s e.f) :=
+    Submodule.Quotient.normedAddCommGroup _
+  have hdense : DenseRange ((pushDatumC D hD).coeRingHom :
+      Localization.Away (pushDatumC D hD).s → presheafValue (pushDatumC D hD)) :=
+    UniformSpace.Completion.denseRange_coe
+  have hcomp : ((locRhoC F e.m D.s e.f).comp (bridgeFwdC D e hD)).comp
+      (pushDatumC D hD).coeRingHom =
+      ((bridgeFwdD D e hD).comp (mapCD D hD)).comp (pushDatumC D hD).coeRingHom := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers (pushDatumC D hD).s) ?_
+    refine RingHom.ext fun b => ?_
+    simp only [RingHom.comp_apply]
+    rw [show (pushDatumC D hD).coeRingHom (algebraMap (JetC F)
+        (Localization.Away (pushDatumC D hD).s) b) =
+        (pushDatumC D hD).canonicalMap b from rfl,
+      show bridgeFwdC D e hD ((pushDatumC D hD).canonicalMap b) =
+        bridgeBaseC D e b from by
+        rw [show (pushDatumC D hD).canonicalMap b =
+          (pushDatumC D hD).coeRingHom (algebraMap (JetC F)
+            (Localization.Away (pushDatumC D hD).s) b) from rfl,
+          bridgeFwdC_coe, bridgeLocHomC_algebraMap],
+      show mapCD D hD ((pushDatumC D hD).canonicalMap b) =
+        (pushDatumD D hD).canonicalMap (rhoC F b) from
+        presheafValueMapOfHom_canonicalMap _ _ _ _ _ _ b,
+      show bridgeFwdD D e hD ((pushDatumD D hD).canonicalMap (rhoC F b)) =
+        bridgeBaseD D e (rhoC F b) from by
+        rw [show (pushDatumD D hD).canonicalMap (rhoC F b) =
+          (pushDatumD D hD).coeRingHom (algebraMap (JetD F)
+            (Localization.Away (pushDatumD D hD).s) (rhoC F b)) from rfl,
+          bridgeFwdD_coe, bridgeLocHomD_algebraMap]]
+    rw [show bridgeBaseC D e b =
+        Ideal.Quotient.mk (IC F e.m D.s e.f) (polyToP (MvPolynomial.C b)) from rfl,
+      locRhoC_mk,
+      show extRhoC F e.m (polyToP (MvPolynomial.C b)) =
+        polyToP (MvPolynomial.map (rhoC F) (MvPolynomial.C b)) from
+        mapRestricted_polyToP _ _ _ (MvPolynomial.C b),
+      MvPolynomial.map_C]
+    rfl
+  have h_eq : ⇑((locRhoC F e.m D.s e.f).comp (bridgeFwdC D e hD)) =
+      ⇑((bridgeFwdD D e hD).comp (mapCD D hD)) :=
+    hdense.equalizer
+      ((locRhoC_continuous D e).comp (bridgeFwdC_continuous D e hD))
+      ((bridgeFwdD_continuous D e hD).comp (mapCD_continuous D hD))
+      (by funext a; exact DFunLike.congr_fun hcomp a)
+  exact DFunLike.ext _ _ fun x => congrFun h_eq x
+
 end GraphBridgeInfra
 
 /-- The graph bridge for 𝓐 ([FJP] Lemma 1.1: the separated completion of the graph
