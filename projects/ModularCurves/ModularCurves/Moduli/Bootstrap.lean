@@ -188,7 +188,10 @@ theorem legendreDelta_representable_by_affine (hR : IsUnit (2 : R)) :
   -- geometric `E[2]`-generation = the KM-keystone deferral.
   refine legendreDelta_representable_by_affine_of_level R hR ⟨?_, ?_⟩
   · exact ⟨two_zsmul_universalLegendreP R hR, two_zsmul_universalLegendreQ R hR⟩
-  · sorry
+  · -- geometric `E[2]`-generation: `#T₂ = 4` (KM rank-two count) + the Stage-B
+    -- dictionary values `some(0,0)`, `some(1,0)` + `combos2_ne_zero` through the
+    -- criterion of record `pair_generates_iff_combos_ne_zero`.
+    exact fun k _ _ t x hx => universalLegendre_generation R hR k t x hx
 
 /-- **(T-E14-AX2, KM engine axiom 2 for the corrected Legendre `δ`)** For every
 elliptic curve `E/S` over a base in which `2` is invertible, the `S`-scheme relatively

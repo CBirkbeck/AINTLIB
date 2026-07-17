@@ -154,6 +154,28 @@ theorem addSubgroup_closure_pair_eq_top_iff (hcard : Nat.card G = p ^ 2)
 
 end ModularCurves
 
+/-- **(E[2]-generation reduction)** For `2`-torsion sections: the three nonzero
+`ZMod 2`-combinations of an independent pair are nonzero. Feeds
+`pair_generates_iff_combos_ne_zero` at `N = 2`. -/
+theorem combos2_ne_zero {G : Type*} [AddCommGroup G] {P Q : G}
+    (hP : P ≠ 0) (hQ : Q ≠ 0) (hPQ : P + Q ≠ 0) :
+    ∀ ab : ZMod 2 × ZMod 2, ab ≠ 0 →
+      ((ab.1.val : ℤ)) • P + ((ab.2.val : ℤ)) • Q ≠ 0 := by
+  rintro ⟨a, b⟩ hab
+  show ((a.val : ℤ)) • P + ((b.val : ℤ)) • Q ≠ 0
+  have hval : ∀ c : ZMod 2, (c.val : ℤ) = 0 ∨ (c.val : ℤ) = 1 := by
+    intro c
+    have h := ZMod.val_lt c
+    omega
+  have hzero : ∀ c : ZMod 2, (c.val : ℤ) = 0 → c = 0 := fun c hc =>
+    (ZMod.val_eq_zero c).mp (Int.natCast_eq_zero.mp hc)
+  rcases hval a with ha | ha <;> rcases hval b with hb | hb <;>
+    rw [ha, hb] <;> simp only [zero_zsmul, one_zsmul, zero_add, add_zero]
+  · exact absurd (Prod.ext (hzero a ha) (hzero b hb)) hab
+  · exact hQ
+  · exact hP
+  · exact hPQ
+
 /-- **(the independence → combos reduction at `p = 3`)** For `3`-torsion elements of any
 abelian group, the four independence conditions `P ≠ 0, Q ≠ 0, Q ≠ ±P` force all eight
 nontrivial `(ℤ/3)²`-combinations away from zero (`2•x = −x` collapses every case). -/

@@ -1167,6 +1167,135 @@ theorem universalE3_generation (hR : IsUnit (3 : R)) (k : Type u) [Field k]
   simpa [Set.image_insert_eq] using hx'
 
 
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **([T-E14-LVL-b] E[2]-generation ★★)** At every geometric point of the Legendre
+base, the pulled marked pair `(P̄, Q̄) = (some(0,0), some(1,0))` generates the
+`2`-torsion of the point group: KM's `torsion_geometricFibre_rank_two` supplies
+`#T₂ = 4`, the Stage-B dictionary evaluates the pulled sections, the `p = 2`
+reduction `combos2_ne_zero` feeds the criterion of record
+`pair_generates_iff_combos_ne_zero`, and the subtype closure transports down.
+(The Legendre analog of `universalE3_generation`; the fibre killing comes from the
+section-level `two_zsmul_universalLegendreP/Q` through `Point.pull_zsmul`.) -/
+theorem universalLegendre_generation (hR : IsUnit (2 : R)) (k : Type u) [Field k]
+    [IsAlgClosed k]
+    (t : Spec (CommRingCat.of k) ⟶ (universalLegendreObj R hR).base)
+    (x : (universalLegendreObj R hR).curve.Point t) (hx : ((2 : ℕ) : ℤ) • x = 0) :
+    x ∈ AddSubgroup.closure
+      {EllipticCurve.Point.pull (universalLegendreObj R hR).curve t
+        (universalLegendreP R hR),
+       EllipticCurve.Point.pull (universalLegendreObj R hR).curve t
+        (universalLegendreQ R hR)} := by
+  haveI := universalLegendre_isElliptic R hR
+  letI : DecidableEq k := Classical.decEq k
+  obtain ⟨φ, rfl⟩ : ∃ φ : CommRingCat.of (LegendreModuliRing R) ⟶ CommRingCat.of k,
+      Spec.map φ = t := ⟨Spec.preimage t, Spec.map_preimage t⟩
+  letI : Algebra (LegendreModuliRing R) k := φ.hom.toAlgebra
+  haveI : (((universalLegendre R).baseChange k)).IsElliptic :=
+    inferInstanceAs (((universalLegendre R).map
+      (algebraMap (LegendreModuliRing R) k)).IsElliptic)
+  -- the evaluated marked points and their dictionary values
+  set PP := EllipticCurve.Point.pull (universalLegendreObj R hR).curve (Spec.map φ)
+    (universalLegendreP R hR) with hPP
+  set QQ := EllipticCurve.Point.pull (universalLegendreObj R hR).curve (Spec.map φ)
+    (universalLegendreQ R hR) with hQQ
+  have hnsP : ((universalLegendre R).baseChange k).toAffine.Nonsingular
+      (algebraMap (LegendreModuliRing R) k 0) (algebraMap (LegendreModuliRing R) k 0) :=
+    WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+      (WeierstrassCurve.Affine.Equation.map _
+        (legendreCurve_equation_zero (universalLambda R)))
+  have hnsQ : ((universalLegendre R).baseChange k).toAffine.Nonsingular
+      (algebraMap (LegendreModuliRing R) k 1) (algebraMap (LegendreModuliRing R) k 0) :=
+    WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+      (WeierstrassCurve.Affine.Equation.map _
+        (legendreCurve_equation_one (universalLambda R)))
+  have hPval : modelPointAddEquiv (universalLegendre R) PP
+      = WeierstrassCurve.Affine.Point.some _ _ hnsP := by
+    show projModelPointsEquiv (universalLegendre R) k
+      (affineSectionSpecPoint (universalLegendre R) k 0 0
+        (legendreCurve_equation_zero (universalLambda R))) = _
+    exact projModelPointsEquiv_affineSectionSpecPoint (universalLegendre R) 0 0
+      (legendreCurve_equation_zero (universalLambda R)) hnsP
+  have hQval : modelPointAddEquiv (universalLegendre R) QQ
+      = WeierstrassCurve.Affine.Point.some _ _ hnsQ := by
+    show projModelPointsEquiv (universalLegendre R) k
+      (affineSectionSpecPoint (universalLegendre R) k 1 0
+        (legendreCurve_equation_one (universalLambda R))) = _
+    exact projModelPointsEquiv_affineSectionSpecPoint (universalLegendre R) 1 0
+      (legendreCurve_equation_one (universalLambda R)) hnsQ
+  -- fibre killing through the section-level killing
+  have h2P : (2 : ℤ) • PP = 0 := by
+    rw [hPP, ← EllipticCurve.Point.pull_zsmul, two_zsmul_universalLegendreP R hR,
+      EllipticCurve.Point.pull_zero]
+  have h2Q : (2 : ℤ) • QQ = 0 := by
+    rw [hQQ, ← EllipticCurve.Point.pull_zsmul, two_zsmul_universalLegendreQ R hR,
+      EllipticCurve.Point.pull_zero]
+  -- independence of the evaluated points
+  have hPne : PP ≠ 0 := by
+    intro hc
+    exact WeierstrassCurve.Affine.Point.some_ne_zero hnsP
+      (by rw [← hPval, hc, map_zero])
+  have hQne : QQ ≠ 0 := by
+    intro hc
+    exact WeierstrassCurve.Affine.Point.some_ne_zero hnsQ
+      (by rw [← hQval, hc, map_zero])
+  have hPQ : PP + QQ ≠ 0 := by
+    intro hc
+    have hQeq : QQ = -PP := by rwa [add_comm, add_eq_zero_iff_eq_neg] at hc
+    have h := hQval.symm.trans
+      ((congrArg (modelPointAddEquiv (universalLegendre R)) hQeq).trans
+        (by rw [map_neg, hPval, WeierstrassCurve.Affine.Point.neg_some]))
+    injection h with h1 h2
+    rw [map_one, map_zero] at h1
+    exact one_ne_zero h1
+  -- the torsion subgroup, its count, and the criterion of record
+  have h2k : ((2 : ℕ) : k) ≠ 0 := by
+    have hu := (hR.map ((algebraMap (LegendreModuliRing R) k).comp
+      (algebraMap R (LegendreModuliRing R)))).ne_zero
+    rw [map_ofNat] at hu
+    rwa [show ((2 : ℕ) : k) = (2 : k) by norm_num]
+  obtain ⟨e⟩ := (universalLegendreObj R hR).curve.torsion_geometricFibre_rank_two 2 k
+    (Spec.map φ) h2k
+  have hcard : Nat.card (Submodule.torsionBy ℤ
+      ((universalLegendreObj R hR).curve.Point (Spec.map φ)) ((2 : ℕ) : ℤ)) = 2 ^ 2 := by
+    rw [Nat.card_congr e.toEquiv]
+    simp [Nat.card_pi, Nat.card_zmod]
+  have hmemP : PP ∈ Submodule.torsionBy ℤ
+      ((universalLegendreObj R hR).curve.Point (Spec.map φ)) ((2 : ℕ) : ℤ) :=
+    (Submodule.mem_torsionBy_iff _ _).mpr (by exact_mod_cast h2P)
+  have hmemQ : QQ ∈ Submodule.torsionBy ℤ
+      ((universalLegendreObj R hR).curve.Point (Spec.map φ)) ((2 : ℕ) : ℤ) :=
+    (Submodule.mem_torsionBy_iff _ _).mpr (by exact_mod_cast h2Q)
+  have hmemX : x ∈ Submodule.torsionBy ℤ
+      ((universalLegendreObj R hR).curve.Point (Spec.map φ)) ((2 : ℕ) : ℤ) :=
+    (Submodule.mem_torsionBy_iff _ _).mpr (by exact_mod_cast hx)
+  have hkillT : ∀ g : Submodule.torsionBy ℤ
+      ((universalLegendreObj R hR).curve.Point (Spec.map φ)) ((2 : ℕ) : ℤ),
+      ((2 : ℕ) : ℤ) • g = 0 := fun g => Submodule.smul_torsionBy _ _
+  have hcombosT : ∀ ab : ZMod 2 × ZMod 2, ab ≠ 0 →
+      ((ab.1.val : ℤ)) • (⟨PP, hmemP⟩ : Submodule.torsionBy ℤ
+          ((universalLegendreObj R hR).curve.Point (Spec.map φ)) ((2 : ℕ) : ℤ))
+        + ((ab.2.val : ℤ)) • ⟨QQ, hmemQ⟩ ≠ 0 := by
+    intro ab hab hc
+    refine combos2_ne_zero hPne hQne hPQ ab hab ?_
+    have := congrArg (Subtype.val) hc
+    simpa using this
+  have hgen := (pair_generates_iff_combos_ne_zero 2 hcard hkillT
+    ⟨PP, hmemP⟩ ⟨QQ, hmemQ⟩).mp hcombosT ⟨x, hmemX⟩
+  -- transport the closure membership down the subtype
+  have hmap := AddMonoidHom.map_closure
+    ((Submodule.torsionBy ℤ ((universalLegendreObj R hR).curve.Point (Spec.map φ))
+      ((2 : ℕ) : ℤ)).subtype.toAddMonoidHom)
+    ({⟨PP, hmemP⟩, ⟨QQ, hmemQ⟩} : Set _)
+  have hx' : x ∈ AddSubgroup.map
+      ((Submodule.torsionBy ℤ ((universalLegendreObj R hR).curve.Point (Spec.map φ))
+        ((2 : ℕ) : ℤ)).subtype.toAddMonoidHom)
+      (AddSubgroup.closure {⟨PP, hmemP⟩, ⟨QQ, hmemQ⟩}) :=
+    ⟨⟨x, hmemX⟩, hgen, rfl⟩
+  rw [hmap] at hx'
+  simpa [Set.image_insert_eq] using hx'
+
 /-- **(T-E15a stage 5)** `Q = (γ, β+γ)` on an `E3`-form curve is the flex relation
 `γ(3β²+3βγ+γ²) = 0`. -/
 theorem e3form_flex {A : Type u} [CommRing A] {W : WeierstrassCurve A} {β γ : A}
