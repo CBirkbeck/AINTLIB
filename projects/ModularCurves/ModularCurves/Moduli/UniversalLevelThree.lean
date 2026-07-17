@@ -6,6 +6,8 @@ Authors: Chris Birkbeck
 import ModularCurves.Moduli.UniversalLegendre
 import ModularCurves.EllipticCurve.AffineSectionSpecPoints
 import ModularCurves.ForMathlib.E3RelSquarefree
+import ModularCurves.ForMathlib.PairGeneratesOfCardSq
+import ModularCurves.Moduli.LevelSpaceEtale
 import ModularCurves.EllipticCurve.E3NormalForm
 
 /-!
@@ -739,6 +741,184 @@ theorem three_zsmul_universalE3Q
       (-3 * e3Gamma R ^ 2 - e3Beta R - 3 * e3Beta R * e3Gamma R) = _
     simp only [map_sub, map_mul, map_neg, map_ofNat, map_pow]
   · exact hE3K.2.2.2.1
+
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **([T-E15-NORM] hL-generation ★★)** At every geometric point of the universal base,
+the pulled marked pair `(P̄, Q̄)` generates the `3`-torsion of the point group: KM's
+`torsion_geometricFibre_rank_two` supplies `#T₃ = 9`, the Stage-B dictionary evaluates the
+pulled sections to `some(0,0)` and `some(γ̄, β̄+γ̄)` with `γ̄ ≠ 0` (independence), the
+`p = 3` reduction `combos3_ne_zero` feeds GH's criterion of record
+`pair_generates_iff_combos_ne_zero`, and the subtype closure transports down. -/
+theorem universalE3_generation (hR : IsUnit (3 : R)) (k : Type u) [Field k]
+    [IsAlgClosed k]
+    (t : Spec (CommRingCat.of k) ⟶ Spec (CommRingCat.of (E3ModuliRing R)))
+    (x : (universalE3Obj R).curve.Point t) (hx : ((3 : ℕ) : ℤ) • x = 0) :
+    x ∈ AddSubgroup.closure
+      {EllipticCurve.Point.pull (universalE3Obj R).curve t (universalE3P R),
+       EllipticCurve.Point.pull (universalE3Obj R).curve t (universalE3Q R)} := by
+  letI : DecidableEq k := Classical.decEq k
+  obtain ⟨φ, rfl⟩ : ∃ φ : CommRingCat.of (E3ModuliRing R) ⟶ CommRingCat.of k,
+      Spec.map φ = t := ⟨Spec.preimage t, Spec.map_preimage t⟩
+  letI : Algebra (E3ModuliRing R) k := φ.hom.toAlgebra
+  haveI : (((universalE3 R).baseChange k)).IsElliptic :=
+    inferInstanceAs (((universalE3 R).map (algebraMap (E3ModuliRing R) k)).IsElliptic)
+  have hφ : CommRingCat.ofHom (algebraMap (E3ModuliRing R) k) = φ := rfl
+  -- the evaluated marked points and their dictionary values
+  set PP := EllipticCurve.Point.pull (universalE3Obj R).curve (Spec.map φ)
+    (universalE3P R) with hPP
+  set QQ := EllipticCurve.Point.pull (universalE3Obj R).curve (Spec.map φ)
+    (universalE3Q R) with hQQ
+  have hnsP : ((universalE3 R).baseChange k).toAffine.Nonsingular
+      (algebraMap (E3ModuliRing R) k 0) (algebraMap (E3ModuliRing R) k 0) :=
+    WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+      (WeierstrassCurve.Affine.Equation.map _ (universalE3_equation_zero R))
+  have hnsQ : ((universalE3 R).baseChange k).toAffine.Nonsingular
+      (algebraMap (E3ModuliRing R) k (e3Gamma R))
+      (algebraMap (E3ModuliRing R) k (e3Beta R + e3Gamma R)) :=
+    WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+      (WeierstrassCurve.Affine.Equation.map _ (universalE3_equation_Q R))
+  have hPval : modelPointAddEquiv (universalE3 R) PP
+      = WeierstrassCurve.Affine.Point.some _ _ hnsP := by
+    show projModelPointsEquiv (universalE3 R) k
+      (affineSectionSpecPoint (universalE3 R) k 0 0 (universalE3_equation_zero R)) = _
+    exact projModelPointsEquiv_affineSectionSpecPoint (universalE3 R) 0 0
+      (universalE3_equation_zero R) hnsP
+  have hQval : modelPointAddEquiv (universalE3 R) QQ
+      = WeierstrassCurve.Affine.Point.some _ _ hnsQ := by
+    show projModelPointsEquiv (universalE3 R) k
+      (affineSectionSpecPoint (universalE3 R) k (e3Gamma R) (e3Beta R + e3Gamma R)
+        (universalE3_equation_Q R)) = _
+    exact projModelPointsEquiv_affineSectionSpecPoint (universalE3 R) _ _
+      (universalE3_equation_Q R) hnsQ
+  -- torsionness of the evaluated points (Stage A through the dictionary)
+  have h3P : (3 : ℤ) • PP = 0 := by
+    apply (modelPointAddEquiv (universalE3 R)).injective
+    rw [map_zsmul, map_zero, hPval]
+    have hE3K := IsE3Form.map (algebraMap (E3ModuliRing R) k) (universalE3_isE3Form R)
+    have hflex : ((universalE3 R).baseChange k).IsFlexNF :=
+      ⟨hE3K.2.1, hE3K.2.2.2.1, hE3K.2.2.2.2⟩
+    have ha₃ : ((universalE3 R).baseChange k).a₃ ≠ 0 := by
+      have hu := (e3form_units (universalE3_isE3Form R) inferInstance).1
+      have huK : IsUnit (((universalE3 R).baseChange k).a₃) := by
+        rw [show ((universalE3 R).baseChange k).a₃
+            = algebraMap (E3ModuliRing R) k ((universalE3 R).a₃) from rfl]
+        exact hu.map _
+      exact huK.ne_zero
+    have h := WeierstrassCurve.Affine.Point.three_zsmul_some_origin hflex ha₃
+      (by simpa only [map_zero] using hnsP)
+    simpa only [map_zero] using h
+  have h3Q : (3 : ℤ) • QQ = 0 := by
+    apply (modelPointAddEquiv (universalE3 R)).injective
+    rw [map_zsmul, map_zero, hQval]
+    have hE3K := IsE3Form.map (algebraMap (E3ModuliRing R) k) (universalE3_isE3Form R)
+    have hden : algebraMap (E3ModuliRing R) k (e3Beta R)
+        + algebraMap (E3ModuliRing R) k (e3Gamma R)
+        - 3 * algebraMap (E3ModuliRing R) k (e3Beta R)
+          * algebraMap (E3ModuliRing R) k (e3Gamma R) ≠ 0 := by
+      have hu := (isUnit_e3Den R).map (algebraMap (E3ModuliRing R) k)
+      have hform : algebraMap (E3ModuliRing R) k
+          (e3Beta R + e3Gamma R - 3 * e3Beta R * e3Gamma R)
+          = algebraMap (E3ModuliRing R) k (e3Beta R)
+            + algebraMap (E3ModuliRing R) k (e3Gamma R)
+            - 3 * algebraMap (E3ModuliRing R) k (e3Beta R)
+              * algebraMap (E3ModuliRing R) k (e3Gamma R) := by
+        rw [map_sub, map_add, map_mul, map_mul, map_ofNat]
+      rw [hform] at hu
+      exact hu.ne_zero
+    have hnsQ' : ((universalE3 R).map
+        (algebraMap (E3ModuliRing R) k)).toAffine.Nonsingular
+        (algebraMap (E3ModuliRing R) k (e3Gamma R))
+        (algebraMap (E3ModuliRing R) k (e3Beta R)
+          + algebraMap (E3ModuliRing R) k (e3Gamma R)) := by
+      haveI : (((universalE3 R).map (algebraMap (E3ModuliRing R) k))).IsElliptic :=
+        inferInstanceAs (((universalE3 R).baseChange k)).IsElliptic
+      have heq := WeierstrassCurve.Affine.Equation.map
+        (algebraMap (E3ModuliRing R) k) (universalE3_equation_Q R)
+      rw [map_add] at heq
+      exact WeierstrassCurve.Affine.equation_iff_nonsingular.mp heq
+    have h := WeierstrassCurve.Affine.Point.three_zsmul_some_e3Q
+      (β := algebraMap (E3ModuliRing R) k (e3Beta R))
+      (γ := algebraMap (E3ModuliRing R) k (e3Gamma R))
+      (by show algebraMap (E3ModuliRing R) k (3 * e3Gamma R - 1) = _
+          rw [map_sub, map_mul, map_ofNat, map_one])
+      hE3K.2.1
+      (by show algebraMap (E3ModuliRing R) k
+            (-3 * e3Gamma R ^ 2 - e3Beta R - 3 * e3Beta R * e3Gamma R) = _
+          simp only [map_sub, map_mul, map_neg, map_ofNat, map_pow])
+      hE3K.2.2.2.1 hden hnsQ'
+    simpa only [map_add] using h
+  -- independence of the evaluated points
+  have hγne : algebraMap (E3ModuliRing R) k (e3Gamma R) ≠ 0 :=
+    ((isUnit_e3Gamma R).map (algebraMap (E3ModuliRing R) k)).ne_zero
+  have hPne : PP ≠ 0 := by
+    intro hc
+    exact WeierstrassCurve.Affine.Point.some_ne_zero hnsP
+      (by rw [← hPval, hc, map_zero])
+  have hQne : QQ ≠ 0 := by
+    intro hc
+    exact WeierstrassCurve.Affine.Point.some_ne_zero hnsQ
+      (by rw [← hQval, hc, map_zero])
+  have hQP : QQ ≠ PP := by
+    intro hc
+    have h := hQval.symm.trans ((congrArg (modelPointAddEquiv (universalE3 R)) hc).trans
+      hPval)
+    injection h with h1 h2
+    exact hγne (h1.trans (map_zero _))
+  have hQnP : QQ ≠ -PP := by
+    intro hc
+    have h := hQval.symm.trans ((congrArg (modelPointAddEquiv (universalE3 R)) hc).trans
+      (by rw [map_neg, hPval, WeierstrassCurve.Affine.Point.neg_some]))
+    injection h with h1 h2
+    exact hγne (h1.trans (map_zero _))
+  -- the torsion subgroup, its count, and the criterion of record
+  have h3k : ((3 : ℕ) : k) ≠ 0 := by
+    have hu := (hR.map ((algebraMap (E3ModuliRing R) k).comp
+      (algebraMap R (E3ModuliRing R)))).ne_zero
+    rw [map_ofNat] at hu
+    rwa [show ((3 : ℕ) : k) = (3 : k) by norm_num]
+  obtain ⟨e⟩ := (universalE3Obj R).curve.torsion_geometricFibre_rank_two 3 k
+    (Spec.map φ) h3k
+  have hcard : Nat.card (Submodule.torsionBy ℤ
+      ((universalE3Obj R).curve.Point (Spec.map φ)) ((3 : ℕ) : ℤ)) = 3 ^ 2 := by
+    rw [Nat.card_congr e.toEquiv]
+    simp [Nat.card_pi, Nat.card_zmod]
+  have hmemP : PP ∈ Submodule.torsionBy ℤ
+      ((universalE3Obj R).curve.Point (Spec.map φ)) ((3 : ℕ) : ℤ) :=
+    (Submodule.mem_torsionBy_iff _ _).mpr (by exact_mod_cast h3P)
+  have hmemQ : QQ ∈ Submodule.torsionBy ℤ
+      ((universalE3Obj R).curve.Point (Spec.map φ)) ((3 : ℕ) : ℤ) :=
+    (Submodule.mem_torsionBy_iff _ _).mpr (by exact_mod_cast h3Q)
+  have hmemX : x ∈ Submodule.torsionBy ℤ
+      ((universalE3Obj R).curve.Point (Spec.map φ)) ((3 : ℕ) : ℤ) :=
+    (Submodule.mem_torsionBy_iff _ _).mpr (by exact_mod_cast hx)
+  have hkillT : ∀ g : Submodule.torsionBy ℤ
+      ((universalE3Obj R).curve.Point (Spec.map φ)) ((3 : ℕ) : ℤ),
+      ((3 : ℕ) : ℤ) • g = 0 := fun g => Submodule.smul_torsionBy _ _
+  have hcombosT : ∀ ab : ZMod 3 × ZMod 3, ab ≠ 0 →
+      ((ab.1.val : ℤ)) • (⟨PP, hmemP⟩ : Submodule.torsionBy ℤ
+          ((universalE3Obj R).curve.Point (Spec.map φ)) ((3 : ℕ) : ℤ))
+        + ((ab.2.val : ℤ)) • ⟨QQ, hmemQ⟩ ≠ 0 := by
+    intro ab hab hc
+    refine combos3_ne_zero h3P h3Q hPne hQne hQP hQnP ab hab ?_
+    have := congrArg (Subtype.val) hc
+    simpa using this
+  have hgen := (pair_generates_iff_combos_ne_zero 3 hcard hkillT
+    ⟨PP, hmemP⟩ ⟨QQ, hmemQ⟩).mp hcombosT ⟨x, hmemX⟩
+  -- transport the closure membership down the subtype
+  have hmap := AddMonoidHom.map_closure
+    ((Submodule.torsionBy ℤ ((universalE3Obj R).curve.Point (Spec.map φ))
+      ((3 : ℕ) : ℤ)).subtype.toAddMonoidHom)
+    ({⟨PP, hmemP⟩, ⟨QQ, hmemQ⟩} : Set _)
+  have hx' : x ∈ AddSubgroup.map
+      ((Submodule.torsionBy ℤ ((universalE3Obj R).curve.Point (Spec.map φ))
+        ((3 : ℕ) : ℤ)).subtype.toAddMonoidHom)
+      (AddSubgroup.closure {⟨PP, hmemP⟩, ⟨QQ, hmemQ⟩}) :=
+    ⟨⟨x, hmemX⟩, hgen, rfl⟩
+  rw [hmap] at hx'
+  simpa [Set.image_insert_eq] using hx'
+
 
 /-- **(T-E15a stage 5)** `Q = (γ, β+γ)` on an `E3`-form curve is the flex relation
 `γ(3β²+3βγ+γ²) = 0`. -/
