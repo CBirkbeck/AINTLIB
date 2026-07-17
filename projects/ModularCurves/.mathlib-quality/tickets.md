@@ -22706,3 +22706,26 @@ and :206 dies through the funnel immediately.
 
 **Deliberately NOT done:** excavating the adapted/ω layer solo (explicit dispatch
 de-confliction; the neg-lemma races OMEGA's live Bootstrap-three window).
+
+## v10.305-OMEGA (2026-07-17, STREAM-OMEGA) — ★★★ THE GENERATION IS PROVEN (hL-generation at every geometric point); hL = killing(UFD)✓ + generation✓; Stage-D = the last hL gap
+
+**`universalE3_generation`** (UniversalLevelThree, axiom-clean, pushed): at every geometric point `t` of
+the universal base, every `3`-torsion point of `Point t` lies in the closure of the pulled marked pair.
+Assembly exactly as scripted: **KM's `torsion_geometricFibre_rank_two`** (the fleet `#T₃ = 9` count — my
+root-counting plan was superseded, correctly), the **Stage-B dictionary** (`P̄ = some(0,0)`,
+`Q̄ = some(γ̄, β̄+γ̄)` via `modelPointAddEquiv` + B-6), **Stage-A** torsionness through the dictionary,
+independence from `γ̄ ≠ 0` (`isUnit_e3Gamma` mapped) + `neg_some` x-separation, **`combos3_ne_zero`**
+(new, PairGeneratesOfCardSq: the p=3 independence→combos reduction, 9-way val-rcases), **GH's criterion
+of record `pair_generates_iff_combos_ne_zero`** (`.mp`), and the subtype-closure transport
+(`AddMonoidHom.map_closure` of `torsionBy.subtype`).
+
+**hL (:87) status:** generation ✓ (this) + killing ✓ over UFD coefficient rings (`three_zsmul_universalE3P/Q`
++ `isReduced_spec_e3ModuliRing`). **The last gap = Stage-D**: the killing over ARBITRARY `R` (with
+`IsUnit (3:R)`), by base-change from `ℤ[1/3]` (every such `R` is uniquely a `ℤ[1/3]`-algebra). Mapped:
+D1 `e3ModuliRingMap` functoriality (+ `universalE3_map` coefficient-compat, rfl-flavoured);
+D2 the section-match (`asSection (pull q P₀)` through the pointed iso = `universalE3P R'`), by
+`pullback.hom_ext` against `projModelAffineSection_baseChange`; D3 generalize
+`modelBaseChangeIsoAsOver` (MulByHomFibresGlobal:139) from fields to rings (its inputs
+`isPullback_projModelBaseChange`/`projModelZero_baseChange`/`isMonHom_of_pointed` are already general)
++ killing transport via `Point.pull_zsmul`/`asSection_zsmul` + `mulByHom_comp_left_of_isMonHom`.
+Then `:87` closes by `⟨⟨killing-P, killing-Q⟩, generation⟩` and (2)(3)(4) of the dispatch follow.
