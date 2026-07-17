@@ -1406,6 +1406,209 @@ theorem bridgeFwdB_injective (hD : D.IsRational) :
     Function.Injective (bridgeFwdB D e hD) :=
   Function.LeftInverse.injective (g := bridgeRevB D e hD) (bridgeRevB_bridgeFwdB D e hD)
 
+/-! #### 𝓒-side reverse (evaluation) — the injectivity half of the 𝓒-bridge -/
+
+/-- Norm-decay to topological decay at 𝓒. -/
+noncomputable def bridgeToRestrictedC (m : ℕ) :
+    PC F m →+* ↥(restrictedMvPowerSeriesSubring m (JetC F)) where
+  toFun p := ⟨p.1, by
+    have hp : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ)) p.1 := p.2
+    rw [MvPowerSeries.IsRestrictedGauss] at hp
+    have hprod : ∀ t : Fin m →₀ ℕ, (t.prod fun _ k => (1 : ℝ) ^ k) = 1 := fun t => by simp
+    simp only [hprod, mul_one] at hp
+    show Filter.Tendsto (fun t : Fin m →₀ ℕ => MvPowerSeries.coeff t p.1)
+      Filter.cofinite (nhds 0)
+    rwa [tendsto_zero_iff_norm_tendsto_zero]⟩
+  map_one' := Subtype.ext rfl
+  map_mul' _ _ := Subtype.ext rfl
+  map_zero' := Subtype.ext rfl
+  map_add' _ _ := Subtype.ext rfl
+
+/-- The pushed rational generators in `𝒪_𝓒(D_C)`. -/
+noncomputable def bridgeGenC (hD : D.IsRational) (i : Fin e.m) :
+    presheafValue (pushDatumC D hD) :=
+  (pushDatumC D hD).coeRingHom (divByS (iotaC F (e.f i)) (pushDatumC D hD).s)
+
+theorem bridgeGenC_isBounded (hD : D.IsRational) (i : Fin e.m) :
+    TopologicalRing.IsBounded
+      (Set.range (bridgeGenC D e hD i ^ · : ℕ → presheafValue (pushDatumC D hD))) := by
+  have hmem : divByS (iotaC F (e.f i)) (pushDatumC D hD).s ∈
+      locSubring (pushDatumC D hD).P (pushDatumC D hD).T (pushDatumC D hD).s :=
+    divByS_mem_locSubring _ _ _ (Finset.mem_image_of_mem _ (e.hf' i))
+  have hbdd := CompletionLocalization.coeRingHom_image_locSubring_isBounded
+    (pushDatumC D hD)
+  apply hbdd.subset
+  rintro _ ⟨n, rfl⟩
+  exact ⟨divByS (iotaC F (e.f i)) (pushDatumC D hD).s ^ n, pow_mem hmem n, by
+    rw [map_pow]; rfl⟩
+
+/-- The 𝓑-side evaluation `P_𝓒 →+* 𝒪_𝓒(D_C)`. -/
+noncomputable def bridgeEvalC (hD : D.IsRational) :
+    PC F e.m →+* presheafValue (pushDatumC D hD) :=
+  (mvEvalHomBounded (pushDatumC D hD).canonicalMap
+    (canonicalMap_continuous (pushDatumC D hD))
+    (bridgeGenC D e hD) (bridgeGenC_isBounded D e hD)).comp (bridgeToRestrictedC e.m)
+
+theorem bridgeEvalC_const (hD : D.IsRational) (a : JetC F) :
+    bridgeEvalC D e hD (polyToP (MvPolynomial.C a)) =
+      (pushDatumC D hD).canonicalMap a := by
+  have hcast : bridgeToRestrictedC (F := F) e.m (polyToP (MvPolynomial.C a)) =
+      algebraMap (JetC F) ↥(restrictedMvPowerSeriesSubring e.m (JetC F)) a := by
+    refine Subtype.ext ?_
+    show ((polyToP (E := JetC F) (m := e.m) (MvPolynomial.C a)).1 :
+      MvPowerSeries (Fin e.m) (JetC F)) = _
+    rw [show (polyToP (E := JetC F) (m := e.m) (MvPolynomial.C a)).1 =
+      MvPowerSeries.C (σ := Fin e.m) (R := JetC F) a from MvPolynomial.coe_C a]
+    rfl
+  rw [bridgeEvalC, RingHom.comp_apply, hcast]
+  exact mvEvalHomBounded_algebraMap _ _ _ _ a
+
+theorem bridgeEvalC_X (hD : D.IsRational) (i : Fin e.m) :
+    bridgeEvalC D e hD (polyToP (MvPolynomial.X i)) = bridgeGenC D e hD i := by
+  have hcast : bridgeToRestrictedC (F := F) e.m (polyToP (MvPolynomial.X i)) =
+      ⟨MvPowerSeries.X i, MvPowerSeries.X_isRestricted i⟩ := by
+    refine Subtype.ext ?_
+    show ((polyToP (E := JetC F) (m := e.m) (MvPolynomial.X i)).1 :
+      MvPowerSeries (Fin e.m) (JetC F)) = _
+    exact MvPolynomial.coe_X i
+  rw [bridgeEvalC, RingHom.comp_apply, hcast]
+  exact mvEvalHomBounded_X _ _ _ _ i
+
+theorem IC_le_ker_bridgeEvalC (hD : D.IsRational) :
+    IC F e.m D.s e.f ≤ RingHom.ker (bridgeEvalC D e hD) := by
+  rw [IC, Ideal.span_le]
+  rintro _ ⟨i, rfl⟩
+  rw [SetLike.mem_coe, RingHom.mem_ker, rC_eq]
+  have hval : bridgeEvalC D e hD (polyToP (MvPolynomial.C (iotaC F D.s) * MvPolynomial.X i -
+      MvPolynomial.C (iotaC F (e.f i)))) =
+      (pushDatumC D hD).canonicalMap (iotaC F D.s) * bridgeGenC D e hD i -
+        (pushDatumC D hD).canonicalMap (iotaC F (e.f i)) :=
+    (map_sub ((bridgeEvalC D e hD).comp polyToP)
+        (MvPolynomial.C (iotaC F D.s) * MvPolynomial.X i)
+        (MvPolynomial.C (iotaC F (e.f i)))).trans
+      (congrArg₂ (· - ·)
+        ((map_mul ((bridgeEvalC D e hD).comp polyToP)
+            (MvPolynomial.C (iotaC F D.s)) (MvPolynomial.X i)).trans
+          (congrArg₂ (· * ·) (bridgeEvalC_const D e hD (iotaC F D.s))
+            (bridgeEvalC_X D e hD i)))
+        (bridgeEvalC_const D e hD (iotaC F (e.f i))))
+  rw [hval, sub_eq_zero, bridgeGenC]
+  rw [show (pushDatumC D hD).canonicalMap (iotaC F D.s) =
+      (pushDatumC D hD).coeRingHom (algebraMap (JetC F)
+        (Localization.Away (pushDatumC D hD).s) (pushDatumC D hD).s) from rfl,
+    ← RingHom.map_mul (pushDatumC D hD).coeRingHom,
+    show algebraMap (JetC F) (Localization.Away (pushDatumC D hD).s) (pushDatumC D hD).s *
+      divByS (iotaC F (e.f i)) (pushDatumC D hD).s =
+      algebraMap (JetC F) (Localization.Away (pushDatumC D hD).s) (iotaC F (e.f i)) from by
+    rw [mul_comm, divByS, IsLocalization.mk'_spec]]
+  rfl
+
+/-- The 𝓑-side reverse `𝓒_α → 𝒪_𝓒(D_C)`. -/
+noncomputable def bridgeRevC (hD : D.IsRational) :
+    locC F e.m D.s e.f →+* presheafValue (pushDatumC D hD) :=
+  Ideal.Quotient.lift (IC F e.m D.s e.f) (bridgeEvalC D e hD)
+    (fun _ ha => RingHom.mem_ker.mp (IC_le_ker_bridgeEvalC D e hD ha))
+
+theorem bridgeRevC_bridgeBaseC (hD : D.IsRational) (a : JetC F) :
+    bridgeRevC D e hD (bridgeBaseC D e a) = (pushDatumC D hD).canonicalMap a :=
+  bridgeEvalC_const D e hD a
+
+private theorem bridgeRangeProdC_isBounded (hD : D.IsRational) :
+    TopologicalRing.IsBounded
+      (Set.range (fun v : Fin e.m →₀ ℕ => ∏ i, bridgeGenC D e hD i ^ (v i))) := by
+  classical
+  suffices h : ∀ s : Finset (Fin e.m), TopologicalRing.IsBounded
+      (Set.range (fun v : Fin e.m →₀ ℕ => ∏ i ∈ s, bridgeGenC D e hD i ^ (v i))) from
+    h Finset.univ
+  intro s
+  induction s using Finset.induction with
+  | empty =>
+      simpa using
+        TopologicalRing.isBounded_singleton (1 : presheafValue (pushDatumC D hD))
+  | insert a s ha ih =>
+      refine ((bridgeGenC_isBounded D e hD a).mul ih).subset ?_
+      rintro _ ⟨v, rfl⟩
+      change ∏ i ∈ insert a s, bridgeGenC D e hD i ^ (v i) ∈ _
+      rw [Finset.prod_insert ha]
+      exact Set.mul_mem_mul ⟨v a, rfl⟩ ⟨v, rfl⟩
+
+theorem bridgeEvalC_continuous (hD : D.IsRational) :
+    Continuous (bridgeEvalC D e hD) := by
+  classical
+  refine continuous_of_continuousAt_zero (bridgeEvalC D e hD).toAddMonoidHom ?_
+  rw [ContinuousAt, map_zero, Filter.tendsto_def]
+  intro U hU
+  obtain ⟨W, hWU⟩ := NonarchimedeanRing.is_nonarchimedean U hU
+  obtain ⟨V, hV, hVR⟩ := bridgeRangeProdC_isBounded D e hD
+    (W : Set (presheafValue (pushDatumC D hD)))
+    (W.isOpen.mem_nhds W.zero_mem)
+  have hpre : (pushDatumC D hD).canonicalMap ⁻¹' V ∈ nhds (0 : JetC F) :=
+    (canonicalMap_continuous (pushDatumC D hD)).continuousAt.preimage_mem_nhds
+      (by rwa [map_zero])
+  obtain ⟨δ, hδ, hball⟩ := Metric.mem_nhds_iff.mp hpre
+  refine Filter.mem_of_superset (Metric.ball_mem_nhds (0 : PC F e.m) hδ) ?_
+  intro p hp
+  rw [Metric.mem_ball, dist_zero_right] at hp
+  apply hWU
+  change (∑' v, mvEvalTerm (pushDatumC D hD).canonicalMap (bridgeGenC D e hD)
+    (bridgeToRestrictedC e.m p) v) ∈ (W : Set (presheafValue (pushDatumC D hD)))
+  refine tsum_mem_of_isOpen_addSubgroup'
+    (mvEvalTerm_summable (pushDatumC D hD).canonicalMap
+      (canonicalMap_continuous (pushDatumC D hD))
+      (bridgeGenC D e hD) (bridgeGenC_isBounded D e hD) (bridgeToRestrictedC e.m p))
+    W.isOpen fun v => ?_
+  have hcoeff : ‖MvPowerSeries.coeff v p.1‖ < δ :=
+    lt_of_le_of_lt (norm_coeff_le_gauss p v) hp
+  have hVmem : (pushDatumC D hD).canonicalMap (MvPowerSeries.coeff v p.1) ∈ V :=
+    hball (by rwa [Metric.mem_ball, dist_zero_right])
+  change mvEvalTerm (pushDatumC D hD).canonicalMap (bridgeGenC D e hD)
+    (bridgeToRestrictedC e.m p) v ∈ W
+  rw [show mvEvalTerm (pushDatumC D hD).canonicalMap (bridgeGenC D e hD)
+      (bridgeToRestrictedC e.m p) v =
+      (∏ i, bridgeGenC D e hD i ^ (v i)) *
+        (pushDatumC D hD).canonicalMap (MvPowerSeries.coeff v p.1) from by
+    rw [mvEvalTerm]; exact mul_comm _ _]
+  exact hVR (Set.mul_mem_mul ⟨v, rfl⟩ hVmem)
+
+theorem bridgeRevC_continuous (hD : D.IsRational) :
+    Continuous (bridgeRevC D e hD) := by
+  rw [(QuotientRing.isOpenQuotientMap_mk (IC F e.m D.s e.f)).isQuotientMap.continuous_iff]
+  exact bridgeEvalC_continuous D e hD
+
+/-- `revC ∘ fwdC = id` — the 𝓒-bridge is split-injective. -/
+theorem bridgeRevC_bridgeFwdC (hD : D.IsRational)
+    (x : presheafValue (pushDatumC D hD)) :
+    bridgeRevC D e hD (bridgeFwdC D e hD x) = x := by
+  letI := (pushDatumC D hD).uniformSpace
+  letI : IsTopologicalRing (Localization.Away (pushDatumC D hD).s) :=
+    (pushDatumC D hD).isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away (pushDatumC D hD).s) :=
+    (pushDatumC D hD).isUniformAddGroup
+  haveI : RegularSpace (presheafValue (pushDatumC D hD)) := UniformSpace.to_regularSpace
+  have hcomp : (bridgeRevC D e hD).comp (bridgeLocHomC D e hD) =
+      (pushDatumC D hD).coeRingHom := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers (pushDatumC D hD).s) ?_
+    refine RingHom.ext fun a => ?_
+    simp only [RingHom.comp_apply]
+    rw [bridgeLocHomC_algebraMap, bridgeRevC_bridgeBaseC]
+    rfl
+  have hdense : DenseRange ((pushDatumC D hD).coeRingHom :
+      Localization.Away (pushDatumC D hD).s → presheafValue (pushDatumC D hD)) :=
+    UniformSpace.Completion.denseRange_coe
+  have h_eq : (fun y => bridgeRevC D e hD (bridgeFwdC D e hD y)) = fun y => y :=
+    hdense.equalizer ((bridgeRevC_continuous D e hD).comp (bridgeFwdC_continuous D e hD))
+      continuous_id (by
+        funext a
+        show bridgeRevC D e hD (bridgeFwdC D e hD ((pushDatumC D hD).coeRingHom a)) =
+          (pushDatumC D hD).coeRingHom a
+        rw [bridgeFwdC_coe]
+        exact DFunLike.congr_fun hcomp a)
+  exact congrFun h_eq x
+
+theorem bridgeFwdC_injective (hD : D.IsRational) :
+    Function.Injective (bridgeFwdC D e hD) :=
+  Function.LeftInverse.injective (g := bridgeRevC D e hD) (bridgeRevC_bridgeFwdC D e hD)
+
 end GraphBridgeInfra
 
 /-- The graph bridge for 𝓐 ([FJP] Lemma 1.1: the separated completion of the graph
