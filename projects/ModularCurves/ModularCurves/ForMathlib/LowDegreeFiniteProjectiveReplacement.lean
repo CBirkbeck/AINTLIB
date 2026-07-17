@@ -3,6 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
 import ModularCurves.ForMathlib.BaseChangeKerCoker
 import ModularCurves.ForMathlib.FiniteFreeResolution
 
@@ -22,11 +23,59 @@ exposing their final statements.
 -/
 
 open Function
+open CategoryTheory
 open TensorProduct
 
 universe u v
 
 namespace ModularCurves
+
+variable {R : Type u} [CommRing R]
+variable {P Q T : Type v} [AddCommGroup P] [AddCommGroup Q] [AddCommGroup T]
+  [Module R P] [Module R Q] [Module R T]
+
+/-- If cycles commute with base change, then the base-changed cokernel into the old cycle
+module computes degree-one homology of the base-changed short complex. -/
+noncomputable def LinearMap.baseChangeHomologyOneEquiv
+    (f : P →ₗ[R] Q) (g : Q →ₗ[R] T) (h : g ∘ₗ f = 0)
+    (A : Type*) [CommRing A] [Algebra R A]
+    (hbij : Function.Bijective (kerBaseChangeComparison A g)) :
+    let hA := LinearMap.baseChange_comp_eq_zero f g h A
+    let S := ShortComplex.moduleCatMk (f.baseChange A) (g.baseChange A) hA
+    ((A ⊗[R] LinearMap.ker g) ⧸
+        LinearMap.range ((LinearMap.codRestrictToKer f g h).baseChange A)) ≃ₗ[A]
+      S.homology := by
+  dsimp only
+  let e := LinearEquiv.ofBijective (kerBaseChangeComparison A g) hbij
+  letI : HasQuotient (LinearMap.ker (g.baseChange A))
+      (Submodule A (LinearMap.ker (g.baseChange A))) :=
+    @Submodule.hasQuotient A (LinearMap.ker (g.baseChange A))
+      inferInstance (LinearMap.ker (g.baseChange A)).addCommGroup
+      (LinearMap.ker (g.baseChange A)).module
+  let hA := LinearMap.baseChange_comp_eq_zero f g h A
+  let fA : (A ⊗[R] P) →ₗ[A] LinearMap.ker (g.baseChange A) :=
+    LinearMap.codRestrictToKer (f.baseChange A) (g.baseChange A) hA
+  let p : Submodule A (A ⊗[R] LinearMap.ker g) :=
+    LinearMap.range ((LinearMap.codRestrictToKer f g h).baseChange A)
+  let q : Submodule A (LinearMap.ker (g.baseChange A)) :=
+    LinearMap.range fA
+  have hpq : p.map e.toLinearMap = q := by
+    dsimp only [p, q, fA, e]
+    rw [← LinearMap.range_comp]
+    exact congrArg LinearMap.range
+      (kerBaseChangeComparison_comp_codRestrictToKer_baseChange A f g h)
+  let eQuot : ((A ⊗[R] LinearMap.ker g) ⧸ p) ≃ₗ[A]
+      ((LinearMap.ker (g.baseChange A)) ⧸ q) :=
+    @Submodule.Quotient.equiv A (A ⊗[R] LinearMap.ker g)
+      inferInstance inferInstance inferInstance
+      (LinearMap.ker (g.baseChange A))
+      (LinearMap.ker (g.baseChange A)).addCommGroup
+      (LinearMap.ker (g.baseChange A)).module p q e hpq
+  exact eQuot.trans
+    (ShortComplex.moduleCatHomologyIso
+      (ShortComplex.moduleCatMk (f.baseChange A) (g.baseChange A)
+        (LinearMap.baseChange_comp_eq_zero f g h A))).toLinearEquiv.symm
+
 namespace LowDegreeFiniteReplacement
 
 variable {R : Type u} [CommRing R] [IsNoetherianRing R]
