@@ -132,6 +132,59 @@ theorem eq_of_le_of_finrank_eq {C S : Scheme.{u}} (π : C ⟶ S)
   have hpiece : ∀ (U : S.affineOpens),
       IsIso (Scheme.IdealSheafData.inclusion hle
         ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) := by
+    intro U
+    -- the affine pieces
+    haveI hWaff : IsAffineOpen ((J.subschemeι ≫ π) ⁻¹ᵁ U.1) :=
+      U.2.preimage (J.subschemeι ≫ π)
+    have hW' : Scheme.IdealSheafData.inclusion hle ⁻¹ᵁ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)
+        = (I.subschemeι ≫ π) ⁻¹ᵁ U.1 := by
+      rw [← hcomp]
+      rfl
+    haveI hW'aff : IsAffineOpen (Scheme.IdealSheafData.inclusion hle
+        ⁻¹ᵁ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) := by
+      rw [hW']
+      exact U.2.preimage (I.subschemeι ≫ π)
+    -- instances on the restricted morphisms (base change along the open pieces)
+    haveI hJfin : IsFinite ((J.subschemeι ≫ π) ∣_ U.1) :=
+      MorphismProperty.IsStableUnderBaseChange.of_isPullback
+        (isPullback_morphismRestrict (J.subschemeι ≫ π) U.1).flip inferInstance
+    haveI hJflat : Flat ((J.subschemeι ≫ π) ∣_ U.1) :=
+      MorphismProperty.IsStableUnderBaseChange.of_isPullback
+        (isPullback_morphismRestrict (J.subschemeι ≫ π) U.1).flip inferInstance
+    haveI hJlfp : LocallyOfFinitePresentation ((J.subschemeι ≫ π) ∣_ U.1) :=
+      MorphismProperty.IsStableUnderBaseChange.of_isPullback
+        (isPullback_morphismRestrict (J.subschemeι ≫ π) U.1).flip inferInstance
+    haveI hCIres : IsClosedImmersion (Scheme.IdealSheafData.inclusion hle
+        ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) :=
+      MorphismProperty.IsStableUnderBaseChange.of_isPullback
+        (isPullback_morphismRestrict (Scheme.IdealSheafData.inclusion hle)
+          ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)).flip inferInstance
+    -- the composite restricted morphism equals the I-side restriction
+    have hcompres : Scheme.IdealSheafData.inclusion hle ≫ (J.subschemeι ≫ π) =
+        I.subschemeι ≫ π := by
+      rw [← Category.assoc, hcomp]
+    -- the generic subst-bridge: transport a base-change-stable property through
+    -- `q = inclusion ≫ (J-composite)` into the restricted composite
+    have hbridge : ∀ (P : MorphismProperty Scheme.{u}) [P.IsStableUnderBaseChange]
+        (q : I.subscheme ⟶ S)
+        (hq : q = Scheme.IdealSheafData.inclusion hle ≫ (J.subschemeι ≫ π)),
+        P q → P ((Scheme.IdealSheafData.inclusion hle ≫ (J.subschemeι ≫ π)) ∣_ U.1) := by
+      rintro P _ q rfl hP
+      exact MorphismProperty.IsStableUnderBaseChange.of_isPullback
+        (isPullback_morphismRestrict
+          (Scheme.IdealSheafData.inclusion hle ≫ (J.subschemeι ≫ π)) U.1).flip hP
+    haveI hIfinC : IsFinite ((Scheme.IdealSheafData.inclusion hle
+        ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) ≫ ((J.subschemeι ≫ π) ∣_ U.1)) := by
+      rw [← morphismRestrict_comp]
+      exact hbridge @IsFinite _ hcompres.symm inferInstance
+    haveI hIflatC : Flat ((Scheme.IdealSheafData.inclusion hle
+        ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) ≫ ((J.subschemeι ≫ π) ∣_ U.1)) := by
+      rw [← morphismRestrict_comp]
+      exact hbridge @Flat _ hcompres.symm inferInstance
+    haveI hIlfpC : LocallyOfFinitePresentation ((Scheme.IdealSheafData.inclusion hle
+        ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) ≫ ((J.subschemeι ≫ π) ∣_ U.1)) := by
+      rw [← morphismRestrict_comp]
+      exact hbridge @LocallyOfFinitePresentation _ hcompres.symm inferInstance
     sorry
   -- glue: open immersion + full range ⟹ iso
   haveI hoi : IsOpenImmersion (Scheme.IdealSheafData.inclusion hle) := by
