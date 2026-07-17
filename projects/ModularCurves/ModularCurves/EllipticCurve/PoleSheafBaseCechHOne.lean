@@ -24,8 +24,9 @@ noncomputable def sectionPoleSheafPower_baseCechHomologyOneIso
     (Scheme.Modules.baseModuleForget S).obj
         ((Scheme.Modules.baseCechComplex π
           (sectionPoleSheafPower π z hz n) U).homology 1) ≅
-      AddCommGrpCat.of (CategoryTheory.Sheaf.H
-        (sectionPoleSheafPower π z hz n).sheaf 1) := by
+      (CategoryTheory.Sheaf.functorH
+        (Opens.grothendieckTopology E) 1).obj
+          (sectionPoleSheafPower π z hz n).sheaf := by
   letI : (sectionPoleSheafPower π z hz n).IsQuasicoherent :=
     sectionPoleSheafPower_isQuasicoherent hsm z hz n
   exact Scheme.Modules.baseCechHomologyOneIso_of_affine_openCover
@@ -43,8 +44,9 @@ theorem exists_sectionPoleSheafPower_finiteAffineBaseCechComparison
         Nonempty ((Scheme.Modules.baseModuleForget S).obj
             ((Scheme.Modules.baseCechComplex π
               (sectionPoleSheafPower π z hz n) U).homology 1) ≅
-          AddCommGrpCat.of (CategoryTheory.Sheaf.H
-            (sectionPoleSheafPower π z hz n).sheaf 1)) := by
+          (CategoryTheory.Sheaf.functorH
+            (Opens.grothendieckTopology E) 1).obj
+              (sectionPoleSheafPower π z hz n).sheaf) := by
   obtain ⟨ι, hι, U, hU, hUaff, _⟩ :=
     π.exists_finite_affine_openCover_of_isProper
   exact ⟨ι, hι, U, hU, hUaff,
