@@ -133,10 +133,9 @@ theorem IsIsogenous.refl (W : Affine F) [W.IsElliptic] : IsIsogenous W W :=
 is isogenous to `W₃`, then `W₁` is isogenous to `W₃`, via `EC.Isogeny.compose`. -/
 theorem IsIsogenous.trans {W₁ W₂ W₃ : Affine F}
     [W₁.IsElliptic] [W₂.IsElliptic] [W₃.IsElliptic]
-    (h₁₂ : IsIsogenous W₁ W₂) (h₂₃ : IsIsogenous W₂ W₃) : IsIsogenous W₁ W₃ := by
-  obtain ⟨φ⟩ := h₁₂
-  obtain ⟨ψ⟩ := h₂₃
-  exact ⟨ψ.compose φ⟩
+    (h₁₂ : IsIsogenous W₁ W₂) (h₂₃ : IsIsogenous W₂ W₃) :
+    IsIsogenous W₁ W₃ :=
+  h₁₂.elim fun φ ↦ h₂₃.map fun ψ ↦ ψ.compose φ
 
 /-! ### Symmetry via the dual isogeny (Silverman III.6.1) — witness-gated
 
@@ -198,9 +197,8 @@ isogenous to `W₂` and every isogeny `W₁ → W₂` carries a dual witness, th
 is isogenous to `W₁`, by taking the dual of a witnessing isogeny. -/
 theorem IsIsogenous.symm_of_witness {W₁ W₂ : Affine F} [W₁.IsElliptic] [W₂.IsElliptic]
     (h : IsIsogenous W₁ W₂)
-    (w : ∀ φ : EC.Isogeny W₁ W₂, Nonempty φ.HasDualWitness) : IsIsogenous W₂ W₁ := by
-  obtain ⟨φ⟩ := h
-  exact IsogenyDual.exists_dual φ (w φ)
+    (w : ∀ φ : EC.Isogeny W₁ W₂, Nonempty φ.HasDualWitness) : IsIsogenous W₂ W₁ :=
+  h.elim fun φ ↦ IsogenyDual.exists_dual φ (w φ)
 
 /-- **Symmetry under the universal dual-witness hypothesis** (Silverman
 III.6.1, gated form of the former `IsIsogenous.symm`). -/
