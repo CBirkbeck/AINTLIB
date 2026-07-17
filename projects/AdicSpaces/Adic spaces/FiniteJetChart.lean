@@ -1134,6 +1134,47 @@ theorem polyKW_X : polyKW F Polynomial.X = (jB F (Wa F)).fst := by
   rw [Polynomial.coeff_coe, coeff_jB_Wa_fst]
   simp [Polynomial.coeff_X, eq_comm]
 
+theorem polyKW_C (r : K) : polyKW F (Polynomial.C r) = constHomPS F r := by
+  refine Subtype.ext ?_
+  show ((Polynomial.C r : Polynomial K) : PowerSeries K) = PowerSeries.C r
+  exact Polynomial.coe_C r
+
+/-- **The key evaluation identity (roundtrip step 3)**: evaluating the `ϖ`-rescaled
+series recovers the canonical image of the constant lift ([FJP] Prop 3.1's
+`ψ ∘ φ`-coherence on the disc component). -/
+theorem evalRescale_eq (f : PowerSeries.Restricted K (1 : ℝ)) :
+    chartEval F (rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le f) =
+    (chartDatum F).canonicalMap (constKW F f) := by
+  haveI : RegularSpace (presheafValue (chartDatum F)) := UniformSpace.to_regularSpace
+  have hrescont : Continuous
+      (rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le) :=
+    AddMonoidHomClass.continuous_of_bound _ 1 fun g => by
+      rw [one_mul]
+      exact norm_rescaleRestricted_le _ _ g
+  have hpoly : ((chartEval F).comp
+      ((rescaleRestricted (LaurentSeriesExample.t F)
+        (norm_t_lt_one F).le).comp (polyKW F))) =
+      ((chartDatum F).canonicalMap.comp ((constKW F).comp (polyKW F))) := by
+    refine Polynomial.ringHom_ext (fun r => ?_) ?_
+    · simp only [RingHom.comp_apply]
+      rw [polyKW_C, rescaleRestricted_const, chartEval_const, constKW_const]
+      rfl
+    · simp only [RingHom.comp_apply]
+      rw [polyKW_X, rescale_jBWa_fst, map_mul, chartEval_const, chartEval_jBWa_fst,
+        constKW_X]
+      show chartConst F (LaurentSeriesExample.t F) * gChart F =
+        (chartDatum F).canonicalMap (Wa F)
+      rw [rho_Wa_split]
+      rfl
+  have h_eq : (fun g => chartEval F (rescaleRestricted (LaurentSeriesExample.t F)
+      (norm_t_lt_one F).le g)) =
+      fun g => (chartDatum F).canonicalMap (constKW F g) :=
+    (polyKW_denseRange F).equalizer
+      ((chartEval_continuous F).comp hrescont)
+      ((canonicalMap_continuous (chartDatum F)).comp (constKW_continuous F))
+      (by funext p; exact DFunLike.congr_fun hpoly p)
+  exact congrFun h_eq f
+
 /-- The reverse map `φ : 𝓑 → 𝒪_𝓐(chart)`, `(f, g) ↦ φ(f) + φ(g)·Q̄`
 (a ring homomorphism because `Q̄² = 0`). -/
 noncomputable def chartRev : JetB F →+* presheafValue (chartDatum F) where
