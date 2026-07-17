@@ -5,6 +5,7 @@ Authors: Chris Birkbeck
 -/
 import ModularCurves.LevelStructure.Factorization
 import ModularCurves.Moduli.PullSectionCanonicity
+import ModularCurves.ForMathlib.FiniteFlatRigidity
 
 /-!
 # The full-level bridge, forward half (T-D8 ⟹, KM 3.7 / 1.4.4 for Γ(N))
@@ -325,10 +326,61 @@ theorem fullLevel_divisor_backward (N : ℕ) [NeZero N] (hN : NIsInvertible S N)
         = (⊤ : Scheme.IdealSheafData E.E).ideal U := by rw [hpair hij]
     rw [Scheme.IdealSheafData.ideal_sup] at h3
     simpa using h3
-  -- the reverse containment: rank rigidity (both finite flat of rank N²)
+  -- the reverse containment: rank rigidity (both finite flat lfp of fibre rank N²)
   have hge : (RelEffCartierDiv.sectionsDivisor E.π fam).ideal ≤ E.torsionIdeal N := by
-    sorry
+    haveI hfinD := (RelEffCartierDiv.sectionsDivisor E.π fam).finite
+    haveI hflatD := (RelEffCartierDiv.sectionsDivisor E.π fam).flat
+    haveI hlfpD := (RelEffCartierDiv.sectionsDivisor E.π fam).lfp
+    obtain ⟨e, he⟩ := E.torsionIdeal_subscheme N
+    have hcompT : (E.torsionIdeal N).subschemeι ≫ E.π = e.hom ≫ E.torsionπ N := by
+      rw [← he, Category.assoc, E.torsionι_π]
+    have htransport : ∀ (P : MorphismProperty Scheme.{u}) [P.RespectsIso],
+        P (E.torsionπ N) → P ((E.torsionIdeal N).subschemeι ≫ E.π) := by
+      intro P _ hP
+      rw [hcompT, MorphismProperty.cancel_left_of_respectsIso P]
+      exact hP
+    haveI hfinT : IsFinite ((E.torsionIdeal N).subschemeι ≫ E.π) :=
+      htransport @IsFinite (E.torsionπ_isFinite N)
+    haveI hflatT : AlgebraicGeometry.Flat ((E.torsionIdeal N).subschemeι ≫ E.π) :=
+      htransport @AlgebraicGeometry.Flat (E.torsionπ_flat N)
+    haveI hlfpT : LocallyOfFinitePresentation ((E.torsionIdeal N).subschemeι ≫ E.π) :=
+      htransport @LocallyOfFinitePresentation
+        (MorphismProperty.pullback_snd _ _ (E.mulByHom_locallyOfFinitePresentation N))
+    have hrank : ∀ s : ↑S,
+        ((RelEffCartierDiv.sectionsDivisor E.π fam).ideal.subschemeι ≫ E.π).finrank s
+        = ((E.torsionIdeal N).subschemeι ≫ E.π).finrank s := by
+      intro s
+      have hD : ((RelEffCartierDiv.sectionsDivisor E.π fam).ideal.subschemeι
+            ≫ E.π).finrank s = N ^ 2 :=
+        RelEffCartierDiv.sectionsDivisor_degree E.π E.smooth fam s
+      have hT : ((E.torsionIdeal N).subschemeι ≫ E.π).finrank s = N ^ 2 := by
+        haveI := E.torsionπ_flat N
+        haveI := E.torsionπ_isFinite N
+        rw [show ((E.torsionIdeal N).subschemeι ≫ E.π).finrank s
+            = (e.hom ≫ E.torsionπ N).finrank s from by rw [hcompT],
+          Scheme.Hom.finrank_comp_left_of_isIso]
+        exact E.torsion_rank N s
+      rw [hD, hT]
+    exact le_of_eq (ModularCurves.eq_of_le_of_finrank_eq E.π _ _ hle hrank)
   exact le_antisymm hge hle
+
+/-- **[T-D8, the full bridge — KM 3.7 / 1.4.4 for Γ(N)] The Drinfeld full-level divisor
+condition is equivalent to naive geometric generation.** This is the content of the
+`T-D8-bridge` register box (`LevelStructure/Basic.lean:115`), proven here (above `Basic`
+in the import order): forward via the exhaustion engine, backward via counting
+distinctness → comaximal graphs → ideal-CRT → rank rigidity. Axiom-clean. -/
+theorem fullLevel_divisor_iff_naive_gen' (N : ℕ) [NeZero N] (hN : NIsInvertible S N)
+    (P Q : E.Section) (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0) :
+    (RelEffCartierDiv.sectionsDivisor E.π
+        (fun i : Fin (N ^ 2) =>
+          (((((i : ℕ) % N : ℕ) : ℤ) • P + ((((i : ℕ) / N : ℕ) : ℤ) • Q) :
+            E.Point (𝟙 S))))).ideal =
+      (E.torsionIdeal N) ↔
+      ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (.of k) ⟶ S),
+        ∀ x : E.Point t, (N : ℤ) • x = 0 →
+          x ∈ AddSubgroup.closure {Point.pull E t P, Point.pull E t Q} :=
+  ⟨fun h => fullLevel_divisor_forward E N P Q h,
+    fun h => fullLevel_divisor_backward E N hN P Q hP hQ h⟩
 
 end EllipticCurve
 
