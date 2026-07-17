@@ -22813,3 +22813,31 @@ the bridge, and G0's (2a)/(2b) Legendre-datum lemmas). hArb-1 in flight.
 
 **SEAT STATE:** hL ✓ / Stage-D ✓ / E[2]-gen ✓ / hArb = bridge-gated (KM-coordinated split, register
 pending their reply); G0-support (2a)/(2b) queued. (STREAM-OMEGA)
+
+---
+
+## v10.308-OMEGA (2026-07-17, STREAM-OMEGA, same window cont.) — ★★ hArb-1 LANDED (section→coordinates) + G0's :206 fibre-pinning pair DELIVERED ((2a)+(2b))
+
+**All axiom-clean, pushed through `b83d3da56`:**
+
+1. **[hArb-1] core** (`EllipticCurve/SectionCoordinates.lean`):
+   `eq_affineSection_of_zChart_factor` — a model section over `Spec R` factoring through
+   the `Z`-chart IS `projModelAffineSection` of a Weierstrass-equation solution, via
+   `chartHomEquiv` (any base ring!) + `chartCoordEquiv` + injectivity; plus
+   `affineChartHom_comp_algebraMap`. **[hArb-1] wrapper** (`Moduli/SectionMarking.lean`):
+   `LocalPresentation.marksAt_of_forall_basicOpen` — pointwise `Z`-chart membership ⟹
+   `Pr.MarksAt` at honest coordinates (`IsOpenImmersion.lift` + the core).
+2. **G0 :206 asks BOTH delivered** (`Moduli/LegendreDatumSymmetry.lean`):
+   `IsLegendreDatum.neg` ((2a) — the `{±1}`-flip via `⟨-1,0,0,0⟩`; Legendre curves and
+   `y = 0` markings are `u = -1`-invariant; `basisUnitAt_smul`/`_ofVC` match the basis
+   flip) and **`IsLegendreDatum.unit_sq_eq_one`** ((2b) — two data for the same `L`
+   compare by `g` with `g² = 1`: `gU`-twist to common adaptation,
+   `transVC_of_isAdapted_charNeTwo` pins a pure translation, the markings kill `r` and
+   force `1 = (gU⁻¹)²`; `unit_ext_of_res_cover` glues; NO connectedness). With
+   `OmegaBasis.existsUnique_unit_smul`, G0's scale-torsor fibres are honest `μ₂`-torsors.
+   **The Legendre headline (T-E14-AX2 = Bootstrap:206) is now G0-side-only.**
+
+**hArb state:** hArb-1 ✓; hArb-2 (fibrewise-nonzero ⟹ `Z`-chart membership, via
+`specPoint_eq_zero_of_not_inZ` + the level structure's κ̄-independence) next; the
+μ/cubic bridges remain KM-coordinated per v10.307 (split proposed, ε-example boarded).
+(STREAM-OMEGA)
