@@ -527,6 +527,22 @@ theorem isNoetherianRing_unitBall_restricted_L (m : ℕ) :
     (mapRestrictedGauss_exists_norm_le m (evalHom (R := K)) (evalHom_norm_le (R := K))
       (evalHom_exists_norm_le (R := K))) h3
 
+/-- The unit ball of `R⟨Q⟩⟨T₁,…,Tₘ⟩` is noetherian whenever the ball of `R⟨T₀,…,Tₘ⟩` is
+(one application of the flattening isometry). -/
+theorem isNoetherianRing_unitBall_restricted_univariate (R : Type*) [NormedCommRing R]
+    [IsUltrametricDist R] [CompleteSpace R] [NormOneClass R] (m : ℕ)
+    (hballs : IsNoetherianRing (unitBall
+      (MvPowerSeries.Restricted R (fun _ : Fin (m + 1) => (1 : ℝ))))) :
+    IsNoetherianRing (unitBall (MvPowerSeries.Restricted (PowerSeries.Restricted R (1 : ℝ))
+      (fun _ : Fin m => (1 : ℝ)))) := by
+  obtain ⟨e, he⟩ := UnitDiscExample.exists_flatten' R (PowerSeries.Restricted R (1 : ℝ))
+    (innerToSeries (R := R)).symm (innerToSeries_symm_norm (R := R)) m
+  exact isNoetherianRing_unitBall_of_isometry e.symm
+    (fun x => by
+      have h := he (e.symm x)
+      rw [RingEquiv.apply_symm_apply] at h
+      exact h.symm) hballs
+
 /-- Ball version of the dual-number flattening: the unit ball of `(DualNumber S)⟨T⃗⟩` is
 noetherian whenever the ball of `S⟨T⃗⟩` is (the `ε`-polynomial surjection restricts to
 balls). -/
