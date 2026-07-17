@@ -123,6 +123,43 @@ theorem pull_ne_zero_right_of_isNaiveFullLevel (N : ℕ) [NeZero N] (hN1 : 1 < N
     (Point.pull E t P) hPNkill hgen'
   omega
 
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **([O2b] the `±`-independence)** The second marked point of a naive full level-`N`
+structure (`N > 1`) differs from `±`(the first) at every geometric point: otherwise the
+pair is singly generated and `N² ≤ N`. -/
+theorem pull_ne_pm_of_isNaiveFullLevel (N : ℕ) [NeZero N] (hN1 : 1 < N)
+    (hN : NIsInvertible S N) {P Q : E.Section} (hL : E.IsNaiveFullLevel N P Q)
+    (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S) :
+    Point.pull E t Q ≠ Point.pull E t P ∧ Point.pull E t Q ≠ -Point.pull E t P := by
+  obtain ⟨⟨hPk, hQk⟩, hgen⟩ := hL
+  have hNk : (N : k) ≠ 0 := (nIsInvertible_spec_iff k N).mp (hN.of_hom t)
+  have hPN : (N : ℤ) • Point.pull E t P = 0 := by
+    rw [← Point.pull_zsmul, hPk, Point.pull_zero]
+  constructor
+  · intro hc
+    have hgen' : ∀ x : E.Point t, (N : ℤ) • x = 0 →
+        ∃ n : ℤ, n • Point.pull E t P = x := by
+      intro x hx
+      obtain ⟨m, n, hmn⟩ := AddSubgroup.mem_closure_pair.mp (hgen k t x hx)
+      refine ⟨m + n, ?_⟩
+      rw [← hmn, hc, add_smul]
+    have := E.le_one_of_torsion_generated_by_single N hNk
+      (Point.pull E t P) hPN hgen'
+    omega
+  · intro hc
+    have hgen' : ∀ x : E.Point t, (N : ℤ) • x = 0 →
+        ∃ n : ℤ, n • Point.pull E t P = x := by
+      intro x hx
+      obtain ⟨m, n, hmn⟩ := AddSubgroup.mem_closure_pair.mp (hgen k t x hx)
+      refine ⟨m - n, ?_⟩
+      rw [← hmn, hc, sub_smul, smul_neg]
+      abel
+    have := E.le_one_of_torsion_generated_by_single N hNk
+      (Point.pull E t P) hPN hgen'
+    omega
+
+
 end EllipticCurve
 
 end ModularCurves

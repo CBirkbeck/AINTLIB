@@ -559,4 +559,129 @@ theorem bridgeQ_of_psi3_eval {A : Type u} [CommRing A] {W : WeierstrassCurve A}
   exact hp.mul_right_eq_zero.mp hψ
 
 
+open WeierstrassCurve LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **([O2b] the abscissa-unit certificate ★★)** On a chart marking `P` at the origin
+and `Q` at `(p, q)`, if the pulled points satisfy `Q̄ ≠ ±P̄` at every geometric point,
+then `p = x(Q)` is a unit: a vanishing fibre abscissa forces `q̄(q̄ + a₃̄) = 0` (the
+`a₆ = 0` curve at `x = 0`), i.e. `Q̄ ∈ {P̄, −P̄}`. -/
+theorem isUnit_x_of_marked_pair {S : Scheme.{u}} {E : EllipticCurve S}
+    {V : S.affineOpens} (Pr : LocalPresentation E.toEllipticCurveGeom V)
+    {σP : S ⟶ E.toEllipticCurveGeom.E} {hσP : σP ≫ E.toEllipticCurveGeom.π = 𝟙 S}
+    {σQ : S ⟶ E.toEllipticCurveGeom.E} {hσQ : σQ ≫ E.toEllipticCurveGeom.π = 𝟙 S}
+    (heqP : Pr.W.toAffine.Equation 0 0)
+    (hMeqP : (V.2.isoSpec.inv ≫ sectionLift E.toEllipticCurveGeom hσP V) ≫ Pr.e.hom =
+      projModelAffineSection Pr.W 0 0 heqP)
+    {p q : Γ(S, V.1)} (heqQ : Pr.W.toAffine.Equation p q)
+    (hMeqQ : (V.2.isoSpec.inv ≫ sectionLift E.toEllipticCurveGeom hσQ V) ≫ Pr.e.hom =
+      projModelAffineSection Pr.W p q heqQ)
+    (hpm : ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S),
+      EllipticCurve.Point.pull E t ⟨σQ, hσQ⟩ ≠ EllipticCurve.Point.pull E t ⟨σP, hσP⟩ ∧
+      EllipticCurve.Point.pull E t ⟨σQ, hσQ⟩ ≠ -EllipticCurve.Point.pull E t ⟨σP, hσP⟩) :
+    IsUnit p := by
+  letI := Pr.elliptic
+  refine isUnit_of_forall_algebraMap_residueField_ne_zero (fun 𝔭 => ?_)
+  intro hp0
+  set K : Type u := 𝔭.asIdeal.ResidueField with hK
+  set Kb : Type u := AlgebraicClosure K with hKb
+  letI : DecidableEq Kb := Classical.decEq Kb
+  letI : Algebra ↑Γ(S, V.1) Kb :=
+    ((algebraMap K Kb).comp (algebraMap ↑Γ(S, V.1) K)).toAlgebra
+  have halgKb : ∀ z : ↑Γ(S, V.1), algebraMap ↑Γ(S, V.1) Kb z =
+      algebraMap K Kb (algebraMap ↑Γ(S, V.1) K z) := fun _ => rfl
+  set tVb : Spec (CommRingCat.of Kb) ⟶ Spec Γ(S, V.1) :=
+    Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, V.1) Kb)) with htVb
+  haveI : ((Pr.W.baseChange Kb)).IsElliptic :=
+    inferInstanceAs ((Pr.W.map (algebraMap ↑Γ(S, V.1) Kb)).IsElliptic)
+  have hnsP : (Pr.W.baseChange Kb).toAffine.Nonsingular
+      (algebraMap ↑Γ(S, V.1) Kb 0) (algebraMap ↑Γ(S, V.1) Kb 0) :=
+    WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+      (WeierstrassCurve.Affine.Equation.map _ heqP)
+  have hnsQ : (Pr.W.baseChange Kb).toAffine.Nonsingular
+      (algebraMap ↑Γ(S, V.1) Kb p) (algebraMap ↑Γ(S, V.1) Kb q) :=
+    WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+      (WeierstrassCurve.Affine.Equation.map _ heqQ)
+  have hvalP : modelPointAddEquiv Pr.W (K' := Kb)
+      (chartPointsEquiv Pr tVb
+        (EllipticCurve.Point.pull E (tVb ≫ chartρ V) ⟨σP, hσP⟩))
+      = WeierstrassCurve.Affine.Point.some _ _ hnsP := by
+    have hxpkg : chartPointsEquiv Pr tVb
+        (EllipticCurve.Point.pull E (tVb ≫ chartρ V) ⟨σP, hσP⟩)
+        = ⟨(affineSectionSpecPoint Pr.W Kb 0 0 heqP).1,
+          (affineSectionSpecPoint Pr.W Kb 0 0 heqP).2⟩ := by
+      refine Subtype.ext ?_
+      rw [chartPointsEquiv_pull_marked Pr tVb heqP hMeqP]
+      rfl
+    rw [hxpkg]
+    show projModelPointsEquiv Pr.W Kb (affineSectionSpecPoint Pr.W Kb 0 0 heqP) = _
+    exact projModelPointsEquiv_affineSectionSpecPoint Pr.W 0 0 heqP hnsP
+  have hvalQ : modelPointAddEquiv Pr.W (K' := Kb)
+      (chartPointsEquiv Pr tVb
+        (EllipticCurve.Point.pull E (tVb ≫ chartρ V) ⟨σQ, hσQ⟩))
+      = WeierstrassCurve.Affine.Point.some _ _ hnsQ := by
+    have hxpkg : chartPointsEquiv Pr tVb
+        (EllipticCurve.Point.pull E (tVb ≫ chartρ V) ⟨σQ, hσQ⟩)
+        = ⟨(affineSectionSpecPoint Pr.W Kb p q heqQ).1,
+          (affineSectionSpecPoint Pr.W Kb p q heqQ).2⟩ := by
+      refine Subtype.ext ?_
+      rw [chartPointsEquiv_pull_marked Pr tVb heqQ hMeqQ]
+      rfl
+    rw [hxpkg]
+    show projModelPointsEquiv Pr.W Kb (affineSectionSpecPoint Pr.W Kb p q heqQ) = _
+    exact projModelPointsEquiv_affineSectionSpecPoint Pr.W p q heqQ hnsQ
+  -- the vanishing abscissa and the `y`-quadratic
+  have hpb : algebraMap ↑Γ(S, V.1) Kb p = 0 := by
+    rw [halgKb, hp0, map_zero]
+  have ha₆ : Pr.W.a₆ = 0 := WeierstrassCurve.Affine.equation_zero.mp heqP
+  have hcurve := (WeierstrassCurve.Affine.equation_iff _ _).mp
+    (WeierstrassCurve.Affine.Equation.map (algebraMap ↑Γ(S, V.1) Kb) heqQ)
+  have hfactor : (algebraMap ↑Γ(S, V.1) Kb q) *
+      (algebraMap ↑Γ(S, V.1) Kb q + algebraMap ↑Γ(S, V.1) Kb Pr.W.a₃) = 0 := by
+    have h := hcurve
+    rw [show (Pr.W.toAffine.map (algebraMap ↑Γ(S, V.1) Kb)).a₁
+        = algebraMap ↑Γ(S, V.1) Kb Pr.W.a₁ from rfl,
+      show (Pr.W.toAffine.map (algebraMap ↑Γ(S, V.1) Kb)).a₂
+        = algebraMap ↑Γ(S, V.1) Kb Pr.W.a₂ from rfl,
+      show (Pr.W.toAffine.map (algebraMap ↑Γ(S, V.1) Kb)).a₃
+        = algebraMap ↑Γ(S, V.1) Kb Pr.W.a₃ from rfl,
+      show (Pr.W.toAffine.map (algebraMap ↑Γ(S, V.1) Kb)).a₄
+        = algebraMap ↑Γ(S, V.1) Kb Pr.W.a₄ from rfl,
+      show (Pr.W.toAffine.map (algebraMap ↑Γ(S, V.1) Kb)).a₆
+        = algebraMap ↑Γ(S, V.1) Kb Pr.W.a₆ from rfl,
+      ha₆, map_zero, hpb] at h
+    linear_combination h
+  obtain ⟨hne1, hne2⟩ := hpm Kb (tVb ≫ chartρ V)
+  rcases mul_eq_zero.mp hfactor with hq0 | hqneg
+  · -- `Q̄ = P̄`
+    refine hne1 ?_
+    refine (chartPointsEquiv Pr tVb).injective ?_
+    apply (modelPointAddEquiv Pr.W (K' := Kb)).injective
+    rw [hvalQ, hvalP]
+    congr 1
+    · exact hpb.trans (map_zero _).symm
+    · exact hq0.trans (map_zero _).symm
+  · -- `Q̄ = −P̄`
+    have hqval : algebraMap ↑Γ(S, V.1) Kb q =
+        -(algebraMap ↑Γ(S, V.1) Kb Pr.W.a₃) := by
+      linear_combination hqneg
+    refine hne2 ?_
+    refine (chartPointsEquiv Pr tVb).injective ?_
+    apply (modelPointAddEquiv Pr.W (K' := Kb)).injective
+    rw [hvalQ, map_neg, map_neg, hvalP, WeierstrassCurve.Affine.Point.neg_some]
+    congr 1
+    · exact hpb.trans (map_zero _).symm
+    · rw [hqval]
+      show -(algebraMap ↑Γ(S, V.1) Kb Pr.W.a₃)
+        = (Pr.W.baseChange Kb).toAffine.negY
+          (algebraMap ↑Γ(S, V.1) Kb 0) (algebraMap ↑Γ(S, V.1) Kb 0)
+      rw [WeierstrassCurve.Affine.negY]
+      rw [show ((Pr.W.baseChange Kb)).toAffine.a₁
+          = algebraMap ↑Γ(S, V.1) Kb Pr.W.a₁ from rfl,
+        show ((Pr.W.baseChange Kb)).toAffine.a₃
+          = algebraMap ↑Γ(S, V.1) Kb Pr.W.a₃ from rfl]
+      rw [map_zero]
+      ring
+
+
 end ModularCurves
