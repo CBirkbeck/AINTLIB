@@ -90,16 +90,12 @@ theorem baseCechXForgetIso_hom_apply
   have hmap := Pi.map_π_apply
     (fun j => (baseModulePresheafForgetIso π M).hom.app
       (op (V.unop.obj j))) i y
-  calc
-    _ = (baseModulePresheafForgetIso π M).hom.app
-        (op (V.unop.obj i))
-          (Pi.π (fun j => (baseModuleForget S).obj
-            ((baseModulePresheaf π M).obj
-              (op (V.unop.obj j)))) i y) := hmap
-    _ = Pi.π (fun j => (baseModuleForget S).obj
-          ((baseModulePresheaf π M).obj
-            (op (V.unop.obj j)))) i y := rfl
-    _ = _ := h
+  let yi := Pi.π (fun j => (baseModuleForget S).obj
+    ((baseModulePresheaf π M).obj (op (V.unop.obj j)))) i y
+  have hforget :
+      (baseModulePresheafForgetIso π M).hom.app
+          (op (V.unop.obj i)) yi = yi := rfl
+  exact hmap.trans (hforget.trans h)
 
 /-- The base-linear Cech augmentation becomes the native global-sections
 augmentation after forgetting the base action. -/
@@ -132,6 +128,7 @@ theorem baseCechAugmentation_forget
   have hcancel := ConcreteCategory.congr_hom eΓ.inv_hom_id x₀
   have hx₀ : x₀ = x := rfl
   have hsource := hcancel.trans hx₀
+  change _ = M.presheaf.map r (eΓ.hom (eΓ.inv x₀))
   calc
     _ = M.presheaf.map r x := by
       change (Pi.π (fun j : Fin 1 → ι =>
@@ -143,12 +140,8 @@ theorem baseCechAugmentation_forget
                 (∏ᶜ fun k : Fin 1 => U (j k)) ≤ ⊤ from le_top)).op)).hom x) =
         ((baseModulePresheaf π M).map r).hom x
       exact hleft
-    _ = M.sheaf.obj.map r x := rfl
-    _ = M.sheaf.obj.map r
-        (eΓ.hom (eΓ.inv x₀)) :=
-      (congrArg (M.sheaf.obj.map r) hsource).symm
-    _ = _ := by
-      rfl
+    _ = M.presheaf.map r (eΓ.hom (eΓ.inv x₀)) :=
+      (congrArg (M.presheaf.map r) hsource).symm
 
 /-- The base-linear Cech augmentation lands in the kernel of the first
 differential. -/
@@ -171,7 +164,11 @@ theorem baseCechAugmentation_comp_d
     _ = ((baseModuleForget S).map (baseCechAugmentation π M U) ≫
           (baseCechXForgetIso π M U 0).hom) ≫
         ((cechComplexFunctor U).obj M.sheaf.obj).d 0 1 := by
-      rw [baseCechXForgetIso_hom, Category.assoc]
+      rw [baseCechXForgetIso_hom]
+      exact (Category.assoc
+        ((baseModuleForget S).map (baseCechAugmentation π M U))
+        ((baseCechComplexForgetIso π M U).hom.f 0)
+        (((cechComplexFunctor U).obj M.sheaf.obj).d 0 1)).symm
     _ = ((baseSectionsForgetIso π M).hom ≫
           TopCat.Sheaf.cechGlobalSectionsAugmentation M.sheaf U) ≫
         ((cechComplexFunctor U).obj M.sheaf.obj).d 0 1 := by
