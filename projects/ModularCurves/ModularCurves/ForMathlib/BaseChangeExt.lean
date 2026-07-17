@@ -254,9 +254,7 @@ private lemma isLocalizedModule_mapExt_succ [IsNoetherianRing S] (Y : ModuleCat.
   obtain ⟨P, _, _, _, _, f, surjf⟩ := Module.exists_finite_presentation S X
   set 𝒮 : ShortComplex (ModuleCat.{u} S) := (f : P →ₗ[S] X).shortComplexKer with h𝒮def
   have h𝒮 : 𝒮.ShortExact := LinearMap.shortExact_shortComplexKer surjf
-  haveI : Module.Finite S 𝒮.X₁ := by
-    have : Module.Finite S ↥(LinearMap.ker f) := inferInstance
-    exact this
+  haveI : Module.Finite S 𝒮.X₁ := inferInstanceAs (Module.Finite S ↥(LinearMap.ker f))
   haveI : Module.Finite S 𝒮.X₂ := inferInstanceAs (Module.Finite S P)
   haveI : Projective 𝒮.X₂ := inferInstanceAs (Projective (ModuleCat.of S P))
   haveI : Projective (F.obj 𝒮.X₂) := inferInstance
