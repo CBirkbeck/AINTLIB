@@ -22598,3 +22598,33 @@ When KM lands T-D8-⟸: the iso + affineOverEll auto-clean ⟹ T-H8 = keystones 
 **Item (3) — receipts-closer ARMED**: KM claimed v10.302 (11cb26955) + posted the OMEGA fork ruling
 (e54129114); on their T-D8-⟸ landing I re-print [GHA3]/[GHA4]/qpd + the closure receipts and board the
 box-shed. (STREAM-GH)
+
+## v10.303-KM (2026-07-17, STREAM-KM window) — T-D8-⟸: fork RULED + the whole chain built; TWO named holes remain
+
+**Fork ruling (posted to inbox/STREAM-OMEGA, per the one-route-fleet-wide protocol):**
+ideal-comparison + rank-rigidity; NO [IsReduced], NO étale-local-descent machinery. OMEGA's
+hArb :92 consumes the same rank-rigidity brick + (post-T-D8) the divisor-ideal generators.
+
+**Built this window (all green, commits ..afe0f96b5):**
+- `fullLevel_divisor_backward` (FullLevelBridge.lean) — ASSEMBLED: mod-N combination arithmetic
+  (`zsmul_emod_of_killed`, `exists_combo_index`), the counting distinctness (`combo_pull_ne`:
+  generation + the N²-count `torsion_geometricFibre_rank_two` ⟹ the combination map is
+  bijective onto the N-torsion), comaximal graph kernels (via `sup_ker_eq_top_of_pull_ne`),
+  killing (`torsionIdeal_le_ker_of_killed`), the finite ideal-CRT
+  (`Ideal.le_prod_of_pairwise_coprime`) ⟹ **`torsionIdeal ≤ divisor.ideal` PROVEN**.
+  Hole 1: `hge` (the reverse) = one `exact`-call into the rigidity below once it lands.
+- `ForMathlib/FiniteFlatRigidity.lean` — **the module core PROVEN 0-sorry**
+  (`bijective_of_surjective_of_rankAtStalk_eq`: splitting equiv + rank-0 kernel subsingleton);
+  **G1 PROVEN** (`isIso_of_isIso_appTop`); **the ideal-form skeleton GREEN**
+  (`eq_of_le_of_finrank_eq`: inclusion closed-immersion, IsZariskiLocalAtTarget open-immersion
+  glue, pointwise range cover via `morphismRestrict_ι`, `ker_comp_of_isIso` ending).
+  Hole 2: `hpiece` (per-affine-piece iso). Fully designed (decomposition-km-integral.md):
+  restrict-instances → HasAffineProperty extractions (RingHom.Finite/Flat/FinitePresentation;
+  closed-immersion = appTop-surjective) → `Module.FinitePresentation.of_finite_of_finitePresentation`
+  → `projective_of_finitePresentation` → the module core; rank transport via
+  `finrank_SpecMap_algebraMap`/`finrank_SpecMap_eq_finrank` (mathlib FlatRank) after
+  `arrowIsoSpecΓOfIsAffine`-conjugation; the algebra-triangle via the composite-algebra trick
+  (define A's algebra as the composite appTop — R-linearity becomes rfl).
+
+**For GH (receipts-closer):** T-D8-⟸ is NOT yet landed — two named holes, both mechanical
+against banked designs. Hold the receipt-reprint until the board says LANDED.
