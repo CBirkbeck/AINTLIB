@@ -1062,6 +1062,78 @@ theorem polyKW_denseRange : DenseRange (polyKW F) := by
       rw [hbn] at hb
       exact hn (hfin.mem_toFinset.mp hb)
 
+/-- The `Q⁰`-constant lift `K⟨X⟩ → 𝓐` (nonnegative Laurent shadows). -/
+noncomputable def constKW : PowerSeries.Restricted K (1 : ℝ) →+* JetA F :=
+  ((constHomC F).comp (ofRestricted (R := K))).codRestrict (jetSupport F) (fun f => by
+    constructor
+    · show qCoeff F 0 (constHomC F (ofRestricted (R := K) f)) ∈ _
+      rw [qCoeff_constHomC, if_pos rfl]
+      exact (mem_range_ofRestricted_iff F _).mp ⟨f, rfl⟩
+    · show qCoeff F 1 (constHomC F (ofRestricted (R := K) f)) ∈ _
+      rw [qCoeff_constHomC, if_neg one_ne_zero]
+      exact zero_mem _)
+
+theorem constKW_continuous : Continuous (constKW F) :=
+  AddMonoidHomClass.continuous_of_bound (constKW F) 1 fun f => by
+    rw [one_mul]
+    show ‖constHomC F (ofRestricted (R := K) f)‖ ≤ ‖f‖
+    rw [norm_constHomC, ofRestricted_norm]
+
+theorem constKW_const (r : K) : constKW F (constHomPS F r) = constA F r := by
+  refine Subtype.ext ?_
+  show constHomC F (ofRestricted (R := K) (constHomPS F r)) = constC F r
+  rw [show ofRestricted (R := K) (constHomPS F r) = single 0 r from ofRestricted_C r]
+  rfl
+
+theorem constKW_X : constKW F ((jB F (Wa F)).fst) = Wa F := by
+  refine Subtype.ext ?_
+  show constHomC F (ofRestricted (R := K) ((jB F (Wa F)).fst)) = ((Wa F : JetA F) : JetC F)
+  rw [ofRestricted_jB_Wa_fst, Wa_val_eq]
+  rfl
+
+/-- `ρ(W) = ρ(ϖ)·(W/ϖ)` (denominator clearing, standalone form). -/
+theorem rho_Wa_split :
+    (chartDatum F).canonicalMap (Wa F) =
+      (chartDatum F).canonicalMap (tA F) * gChart F := by
+  show (chartDatum F).coeRingHom (algebraMap (JetA F)
+      (Localization.Away (chartDatum F).s) (Wa F)) =
+    (chartDatum F).coeRingHom (algebraMap (JetA F)
+      (Localization.Away (chartDatum F).s) (tA F)) *
+      (chartDatum F).coeRingHom (divByS (Wa F) (chartDatum F).s)
+  rw [← RingHom.map_mul (chartDatum F).coeRingHom]
+  congr 1
+  rw [mul_comm]
+  symm
+  show divByS (Wa F) (chartDatum F).s *
+    algebraMap (JetA F) (Localization.Away (chartDatum F).s) (chartDatum F).s =
+    algebraMap (JetA F) (Localization.Away (chartDatum F).s) (Wa F)
+  rw [divByS, IsLocalization.mk'_spec]
+
+/-- The rescaling scales the disc variable by `ϖ` (fst-component of `thetaChart_Wa`,
+standalone form). -/
+theorem rescale_jBWa_fst :
+    rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le
+      ((jB F (Wa F)).fst) = constHomPS F (LaurentSeriesExample.t F) * (jB F (Wa F)).fst := by
+  refine Subtype.ext ?_
+  refine PowerSeries.ext fun n => ?_
+  show PowerSeries.coeff n (PowerSeries.rescale (LaurentSeriesExample.t F)
+    ((jB F (Wa F)).fst).1) = PowerSeries.coeff n
+      ((PowerSeries.C (LaurentSeriesExample.t F) : PowerSeries K) *
+        ((jB F (Wa F)).fst).1)
+  rw [PowerSeries.coeff_rescale, PowerSeries.coeff_C_mul, coeff_jB_Wa_fst]
+  by_cases hn : n = 1
+  · subst hn
+    rw [if_pos rfl, pow_one]
+  · rw [if_neg hn, mul_zero, mul_zero]
+
+/-- `polyKW` sends `X` to the disc variable. -/
+theorem polyKW_X : polyKW F Polynomial.X = (jB F (Wa F)).fst := by
+  refine Subtype.ext ?_
+  refine PowerSeries.ext fun n => ?_
+  show PowerSeries.coeff n ((Polynomial.X : Polynomial K) : PowerSeries K) = _
+  rw [Polynomial.coeff_coe, coeff_jB_Wa_fst]
+  simp [Polynomial.coeff_X, eq_comm]
+
 /-- The reverse map `φ : 𝓑 → 𝒪_𝓐(chart)`, `(f, g) ↦ φ(f) + φ(g)·Q̄`
 (a ring homomorphism because `Q̄² = 0`). -/
 noncomputable def chartRev : JetB F →+* presheafValue (chartDatum F) where
