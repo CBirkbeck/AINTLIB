@@ -43,6 +43,14 @@ noncomputable def coordMap (x : Fin k → M) : (Fin k → R) →ₗ[R] M :=
     coordMap x (Pi.single i (1 : R)) = x i := by
   simp [coordMap]
 
+/-- The coordinate map is natural in the ambient module: post-composing the tuple with a
+linear map `e` is the same as post-composing `coordMap` with `e` (the `coordMap`/`Fintype`-
+linear-combination analogue of `Finsupp.linearCombination_linear_comp`). -/
+lemma coordMap_comp {M' : Type*} [AddCommGroup M'] [Module R M'] (e : M →ₗ[R] M')
+    (x : Fin k → M) : coordMap (⇑e ∘ x) = e ∘ₗ coordMap x := by
+  refine (Pi.basisFun R (Fin k)).ext fun i => ?_
+  simp only [Pi.basisFun_apply, coordMap_single, LinearMap.comp_apply, Function.comp_apply]
+
 /-- **[GR-A0]** The chart predicate: `N` lies in the chart at `x : Fin k → M` when the
 composite `(Fin k → R) → M → M ⧸ N` is bijective — the images of `x` form a basis of the
 quotient (mathlib TODO: *"the composition `R^k → M → M⧸N` is an isomorphism"*). -/
@@ -286,6 +294,13 @@ theorem bijective_of_surjective_of_rankAtStalk {Q : Type v} [AddCommGroup Q] [Mo
   refine ⟨?_, hsurj⟩
   rw [← LinearMap.ker_eq_bot, ← Submodule.subsingleton_iff_eq_bot]
   exact (Module.rankAtStalk_eq_zero_iff_subsingleton).mp hker0
+
+/-- The base-changed quotient map `baseChangeMkQ` on the canonical generator `1 ⊗ₜ m`:
+it sends `(1 : B) ⊗ₜ[R] m` to `(1 : B) ⊗ₜ[A] N.mkQ ((1 : A) ⊗ₜ[R] m)`. -/
+lemma baseChangeMkQ_one_tmul [Algebra A B] [IsScalarTower R A B]
+    (N : Submodule A (A ⊗[R] M)) (m : M) :
+    baseChangeMkQ B N ((1 : B) ⊗ₜ[R] m) = (1 : B) ⊗ₜ[A] N.mkQ ((1 : A) ⊗ₜ[R] m) := by
+  simp [baseChangeMkQ]
 
 section Covering
 
@@ -714,24 +729,18 @@ theorem chartMatrix_normMap (n : ℕ) (ι : Fin k ↪ Fin n) (f : A →ₐ[R] B)
     show (v l) • (1 : B) = f (v l)
     rw [Algebra.smul_def, mul_one]
     rfl
-  -- the value of `ψf` on a coordinate vector, through the base-change square
-  have hbcmkq : ∀ (m : Fin n → R), baseChangeMkQ B P.toSubmodule ((1 : B) ⊗ₜ[R] m)
-      = (1 : B) ⊗ₜ[A] P.toSubmodule.mkQ ((1 : A) ⊗ₜ[R] m) := by
-    intro m; simp [baseChangeMkQ]
   have hchain : ∀ (j : Fin n), ψf (Pi.single j 1)
       = sk ((1 : B) ⊗ₜ[A]
           E_At.symm (P.toSubmodule.mkQ ((1 : A) ⊗ₜ[R] (Pi.single j 1 : Fin n → R)))) := by
     intro j
     rw [hψf]
     simp only [LinearMap.comp_apply, LinearEquiv.coe_coe]
-    rw [TensorProduct.piScalarRight_symm_single, hbcmkq, LinearMap.baseChange_tmul]
+    rw [TensorProduct.piScalarRight_symm_single, baseChangeMkQ_one_tmul, LinearMap.baseChange_tmul]
     rfl
   -- the tensor chart tuple is the `qA.symm`-transport of the coordinate combination
   have hcoordP : coordMap (fun i => (1 : A) ⊗ₜ[R] (Pi.single (ι i) 1 : Fin n → R))
       = qA.symm.toLinearMap ∘ₗ coordMap (fun i => Pi.single (ι i) (1 : A)) := by
-    refine (Pi.basisFun A (Fin k)).ext fun i => ?_
-    rw [Pi.basisFun_apply, coordMap_single, LinearMap.comp_apply, coordMap_single]
-    exact (TensorProduct.piScalarRight_symm_single R A A (Fin n) 1 (ι i)).symm
+    rw [← htuple]; exact coordMap_comp qA.symm.toLinearMap _
   -- reading off a coordinate commutes with the `congr qA.symm` transport
   have hconn : ∀ (m : Fin n → A), E_At.symm (P.toSubmodule.mkQ (qA.symm m))
       = chartEA.symm (N.toSubmodule.mkQ m) := by
