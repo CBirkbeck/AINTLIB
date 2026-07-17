@@ -3,6 +3,7 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
+import Mathlib.LinearAlgebra.TensorProduct.Prod
 import Mathlib.LinearAlgebra.TensorProduct.RightExactness
 import Mathlib.LinearAlgebra.TensorProduct.Tower
 import Mathlib.RingTheory.Flat.EquationalCriterion
@@ -109,6 +110,33 @@ theorem Module.Flat.of_flat_quotient
   rw [← LinearMap.coe_comp, LinearMap.lTensor_comp_rTensor, ← LinearMap.rTensor_comp_lTensor]
   exact (Module.Flat.rTensor_preserves_injective_linearMap _ I.injective_subtype).comp
     (Module.Flat.lTensor_subtype_injective_of_flat_quotient I N)
+
+/-- A binary product of flat modules is flat. -/
+theorem Module.Flat.prod
+    {M : Type v} {N : Type*} [AddCommGroup M] [AddCommGroup N]
+    [Module R M] [Module R N] [Module.Flat R M] [Module.Flat R N] :
+    Module.Flat R (M × N) := by
+  rw [Module.Flat.iff_rTensor_preserves_injective_linearMap]
+  intro P Q _ _ _ _ f hf
+  apply Function.Injective.of_comp
+    (f := TensorProduct.prodRight R R Q M N)
+  change Function.Injective ⇑((TensorProduct.prodRight R R Q M N).toLinearMap ∘ₗ
+    f.rTensor (M × N))
+  have hcomp :
+      (TensorProduct.prodRight R R Q M N).toLinearMap ∘ₗ f.rTensor (M × N) =
+        (f.rTensor M).prodMap (f.rTensor N) ∘ₗ
+          (TensorProduct.prodRight R R P M N).toLinearMap := by
+    apply TensorProduct.ext
+    apply LinearMap.ext
+    intro p
+    apply LinearMap.ext
+    rintro ⟨m, n⟩
+    simp
+  rw [hcomp, LinearMap.coe_comp]
+  exact (Function.Injective.prodMap
+    (Module.Flat.rTensor_preserves_injective_linearMap f hf)
+    (Module.Flat.rTensor_preserves_injective_linearMap f hf)).comp
+      (TensorProduct.prodRight R R P M N).injective
 
 end Purity
 
