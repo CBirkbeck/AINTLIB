@@ -22649,3 +22649,34 @@ generators. GH ran its closer items (1)+(2) (boarded v10.303; ratification on re
 - **G0** — the :206 Legendre-AX2 campaign (E3 four-step = proven template; new content = the
   IsLegendreDatum ω-coupling through the T-E12 layer — coordinate with OMEGA via inbox; N=2 carrier +
   μ₂/ω-torsor per the rank-12 scope). The prior "E[3]-scheme-ideal standby" is MOOT (fork ruled the other way).
+
+## v10.304-KM (2026-07-17, same window) — ★★★ T-D8 LANDED: BOTH HALVES, AXIOM-CLEAN, END-TO-END
+
+**`fullLevel_divisor_iff_naive_gen'` (FullLevelBridge.lean) — the complete T-D8-bridge content,
+`#print axioms = {propext, Classical.choice, Quot.sound}` on backward, forward, AND the new
+rank-rigidity engine. ZERO sorryAx.** The v10.302 priority-delta item (1) is DONE.
+
+- **The backward half** (`fullLevel_divisor_backward`): naive generation ⟹ divisor = E[N].
+  Chain: mod-N combination arithmetic → counting distinctness (`combo_pull_ne`: the combination
+  map surjects onto the N-torsion by generation and both sides have N² elements, so it is
+  BIJECTIVE) → comaximal graph kernels (`sup_ker_eq_top_of_pull_ne`) → finite ideal-CRT
+  (`Ideal.le_prod_of_pairwise_coprime`) gives `torsionIdeal ≤ divisor.ideal` → **rank rigidity**
+  closes the reverse.
+- **★★ `eq_of_le_of_finrank_eq` (ForMathlib/FiniteFlatRigidity.lean, 0-sorry, KM 1.10.2 ideal
+  form, mathlib-PR shape flag-only)**: nested ideal sheaves whose subschemes are finite flat lfp
+  over S of equal fibre rank are EQUAL. Module core: a surjection of finite projective modules
+  of equal rankAtStalk is bijective (splitting equiv + rank-0 kernel). Scheme glue: isoSpec
+  pullback squares + finrank_SpecMap_eq_finrank carry scheme fibre-ranks into module
+  rankAtStalk; HasAffineProperty/HasRingHomProperty extractions + of_finite_of_finitePresentation
+  + projective_of_finitePresentation; per-piece isos glue by open-immersion Zariski-locality +
+  pointwise range cover. NO reducedness anywhere (the fork ruling executed as posted).
+- **Consumers**: GH — the [GHA3]/[GHA4]/qpd receipts-closer trigger is LIVE (the sole sorryAx of
+  the levelSpace chain was T-D8-⟸). Note the Basic.lean:115 box itself stays sorried as a
+  SHELL (import-order); repoint consumers to `fullLevel_divisor_iff_naive_gen'` /
+  `isFullLevel_iff_naive`-analogues via FullLevelBridge, or the coordinator relocates the box
+  statement at the next reorganization. OMEGA — the rank-rigidity brick + the divisor-ideal
+  generators are now available for hArb :92 per the fork ruling.
+- [DEDUP-flag for the cleanup fleet]: Incidence.lean:2540's private `fullLevelLocusAux_torsionDivisor`
+  duplicates the torsion-side transport rebuilt inline here; unify when convenient.
+
+Commits: ..38b7cad8b. Next per v10.302: item (2) `endDual_comp_self` (consume GH FinrankDegenerate).
