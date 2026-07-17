@@ -274,8 +274,7 @@ theorem smul_eq_zero_iff_comp_mulByHom {T : Scheme.{u}} (g : T ⟶ S) (N : ℕ)
   constructor
   · intro h
     have hval := congrArg (fun Q : E.Point g ↦ (Q : T ⟶ E.E)) h
-    rw [E.point_smul_eq_comp_mulBy, E.point_zero_val] at hval
-    exact hval
+    rwa [E.point_smul_eq_comp_mulBy, E.point_zero_val] at hval
   · intro h
     apply Subtype.ext
     rw [E.point_smul_eq_comp_mulBy, E.point_zero_val]
@@ -291,8 +290,7 @@ noncomputable def torsionPointsEquiv (N : ℕ) {T : Scheme.{u}} (t : T ⟶ S) :
       have hcond : E.torsionι N ≫ E.mulByHom (N : ℤ) = E.torsionπ N ≫ E.zero :=
         pullback.condition
       have hπ : E.torsionι N ≫ E.π = E.torsionπ N := by
-        have h2 := congrArg (fun m ↦ m ≫ E.π) hcond
-        simpa [E.mulByHom_π, E.zero_π] using h2
+        simpa [E.mulByHom_π, E.zero_π] using congrArg (fun m ↦ m ≫ E.π) hcond
       rw [Category.assoc, hπ, h.2]⟩, by
     have hcond : E.torsionι N ≫ E.mulByHom (N : ℤ) = E.torsionπ N ≫ E.zero :=
       pullback.condition
