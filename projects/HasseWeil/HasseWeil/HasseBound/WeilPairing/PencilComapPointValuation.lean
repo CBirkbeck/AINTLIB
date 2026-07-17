@@ -132,7 +132,8 @@ theorem genuineIsogSmulSub_pullback_y_gen (r s : ℤ) (hr : r ≠ 0) (hs : s ≠
 /-- **`ord_∞((rπ − s)^K.pullback x_gen) = -2`** (K-level). -/
 theorem ordAtInfty_genuineIsogSmulSub_pullback_x_gen (r s : ℤ) (hr : r ≠ 0) (hs : s ≠ 0)
     (hrK : (r : K) ≠ 0) (hsK : (s : K) ≠ 0) :
-    (W_smooth W).ordAtInfty ((genuineIsogSmulSub W r s hr hs hrK hsK).pullback (HasseWeil.x_gen W)) =
+    (W_smooth W).ordAtInfty
+      ((genuineIsogSmulSub W r s hr hs hrK hsK).pullback (HasseWeil.x_gen W)) =
       ((-2 : ℤ) : WithTop ℤ) := by
   rw [genuineIsogSmulSub_pullback_x_gen W r s hr hs hrK hsK]
   exact ord_addPullback_x_pair_zsmul_frobenius_mulByInt_neg W r s hr hs hrK hsK
@@ -140,7 +141,8 @@ theorem ordAtInfty_genuineIsogSmulSub_pullback_x_gen (r s : ℤ) (hr : r ≠ 0) 
 /-- **`ord_∞((rπ − s)^K.pullback y_gen) = -3`** (K-level). -/
 theorem ordAtInfty_genuineIsogSmulSub_pullback_y_gen (r s : ℤ) (hr : r ≠ 0) (hs : s ≠ 0)
     (hrK : (r : K) ≠ 0) (hsK : (s : K) ≠ 0) :
-    (W_smooth W).ordAtInfty ((genuineIsogSmulSub W r s hr hs hrK hsK).pullback (HasseWeil.y_gen W)) =
+    (W_smooth W).ordAtInfty
+      ((genuineIsogSmulSub W r s hr hs hrK hsK).pullback (HasseWeil.y_gen W)) =
       ((-3 : ℤ) : WithTop ℤ) := by
   rw [genuineIsogSmulSub_pullback_y_gen W r s hr hs hrK hsK]
   exact ord_addPullback_y_pair_zsmul_frobenius_mulByInt_neg W r s hr hs hrK hsK
@@ -309,7 +311,8 @@ theorem comap_pointValuation_pencil_eq_infty (r' s' : ℤ) (hr : r' ≠ 0) (hs :
     ((⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
         SmoothPlaneCurve (AlgebraicClosure K)).pointValuation P).comap
         (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s'
-          (pencilBaseChangePullback W (AlgebraicClosure K) r' s' hr hs hrK hsK)).pullback.toRingHom =
+          (pencilBaseChangePullback W (AlgebraicClosure K) r' s' hr hs hrK
+            hsK)).pullback.toRingHom =
       (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
         SmoothPlaneCurve (AlgebraicClosure K)).ordAtInftyValuation :=
   comap_pointValuation_eq_infty_of_ordAtInfty_x_y_of_kernelInvariant
@@ -358,7 +361,8 @@ theorem resid_x_gen_of_comap
   exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
     (C := (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K)))
     _ ⟨x, y, h_ns⟩).mpr
-    (HasseWeil.XClass_mem_maximalIdealAt (W := W.baseChange (AlgebraicClosure K)) ⟨x, y, h_ns⟩ x rfl)
+    (HasseWeil.XClass_mem_maximalIdealAt (W := W.baseChange (AlgebraicClosure K))
+      ⟨x, y, h_ns⟩ x rfl)
 
 omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [Fintype W.toAffine.Point] in
 /-- **Comap → `y`-generator residue.**  The `y`-analogue of `resid_x_gen_of_comap`. -/
@@ -444,7 +448,8 @@ omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [Fintype W.toAffine.Poi
 theorem coordRingMap_algebraMap_Φ (m : ℤ) :
     (⟨W.toAffine⟩ : SmoothPlaneCurve K).coordRingMap (AlgebraicClosure K)
         (algebraMap (Polynomial K) W.toAffine.CoordinateRing (W.Φ m)) =
-      algebraMap (Polynomial (AlgebraicClosure K)) (W.baseChange (AlgebraicClosure K)).toAffine.CoordinateRing
+      algebraMap (Polynomial (AlgebraicClosure K))
+        (W.baseChange (AlgebraicClosure K)).toAffine.CoordinateRing
         ((W.baseChange (AlgebraicClosure K)).Φ m) := by
   change WeierstrassCurve.Affine.CoordinateRing.map W.toAffine (algebraMap K (AlgebraicClosure K))
     (WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine (Polynomial.C (W.Φ m))) = _
@@ -464,7 +469,8 @@ omit [Fintype K] [DecidableEq K] [W.toAffine.IsElliptic] [Fintype W.toAffine.Poi
 theorem coordRingMap_algebraMap_ΨSq (m : ℤ) :
     (⟨W.toAffine⟩ : SmoothPlaneCurve K).coordRingMap (AlgebraicClosure K)
         (algebraMap (Polynomial K) W.toAffine.CoordinateRing (W.ΨSq m)) =
-      algebraMap (Polynomial (AlgebraicClosure K)) (W.baseChange (AlgebraicClosure K)).toAffine.CoordinateRing
+      algebraMap (Polynomial (AlgebraicClosure K))
+        (W.baseChange (AlgebraicClosure K)).toAffine.CoordinateRing
         ((W.baseChange (AlgebraicClosure K)).ΨSq m) := by
   change WeierstrassCurve.Affine.CoordinateRing.map W.toAffine (algebraMap K (AlgebraicClosure K))
     (WeierstrassCurve.Affine.CoordinateRing.mk W.toAffine (Polynomial.C (W.ΨSq m))) = _
@@ -658,7 +664,8 @@ omit [Fintype W.toAffine.Point] in
 `addSlopePair (rFrob) (mulByInt -s') = functionFieldMap(addSlopePair^K ((zsmul r')) (mulByInt -s'))`
 **. -/
 theorem addSlopePair_rFrob_mulByInt (r' s' : ℤ) (hs' : s' ≠ 0) :
-    addSlopePair (rFrobBaseChange W p r r') (mulByInt (W.baseChange (AlgebraicClosure K)).toAffine (-s')) =
+    addSlopePair (rFrobBaseChange W p r r')
+      (mulByInt (W.baseChange (AlgebraicClosure K)).toAffine (-s')) =
       (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K)
         (addSlopePair ((HasseWeil.frobeniusIsog W).zsmul r') (mulByInt W.toAffine (-s'))) := by
   have hs'' : (-s' : ℤ) ≠ 0 := neg_ne_zero.mpr hs'
@@ -679,9 +686,11 @@ theorem addSlopePair_rFrob_mulByInt (r' s' : ℤ) (hs' : s' ≠ 0) :
 omit [Fintype W.toAffine.Point] in
 /-- **`addPullback_x_pair (rFrob) (mulByInt -s') = functionFieldMap(addPullback_x_pair^K ...)`**. -/
 theorem addPullback_x_pair_rFrob_mulByInt (r' s' : ℤ) (hs' : s' ≠ 0) :
-    addPullback_x_pair (rFrobBaseChange W p r r') (mulByInt (W.baseChange (AlgebraicClosure K)).toAffine (-s')) =
+    addPullback_x_pair (rFrobBaseChange W p r r')
+      (mulByInt (W.baseChange (AlgebraicClosure K)).toAffine (-s')) =
       (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K)
-        (addPullback_x_pair ((HasseWeil.frobeniusIsog W).zsmul r') (mulByInt W.toAffine (-s'))) := by
+        (addPullback_x_pair ((HasseWeil.frobeniusIsog W).zsmul r')
+          (mulByInt W.toAffine (-s'))) := by
   rw [addPullback_x_pair, addPullback_x_pair, addSlopePair_rFrob_mulByInt W p r r' s' hs',
     mulByInt_baseChange_pullback_x_gen W (-s') (neg_ne_zero.mpr hs'),
     ← IsogenyBaseChangeConcrete.functionFieldMap_x_gen W (AlgebraicClosure K),
@@ -696,9 +705,11 @@ theorem addPullback_x_pair_rFrob_mulByInt (r' s' : ℤ) (hs' : s' ≠ 0) :
 omit [Fintype W.toAffine.Point] in
 /-- **`addPullback_y_pair (rFrob) (mulByInt -s') = functionFieldMap(addPullback_y_pair^K ...)`**. -/
 theorem addPullback_y_pair_rFrob_mulByInt (r' s' : ℤ) (hs' : s' ≠ 0) :
-    addPullback_y_pair (rFrobBaseChange W p r r') (mulByInt (W.baseChange (AlgebraicClosure K)).toAffine (-s')) =
+    addPullback_y_pair (rFrobBaseChange W p r r')
+      (mulByInt (W.baseChange (AlgebraicClosure K)).toAffine (-s')) =
       (⟨W.toAffine⟩ : SmoothPlaneCurve K).functionFieldMap (AlgebraicClosure K)
-        (addPullback_y_pair ((HasseWeil.frobeniusIsog W).zsmul r') (mulByInt W.toAffine (-s'))) := by
+        (addPullback_y_pair ((HasseWeil.frobeniusIsog W).zsmul r')
+          (mulByInt W.toAffine (-s'))) := by
   rw [addPullback_y_pair, addPullback_y_pair, addSlopePair_rFrob_mulByInt W p r r' s' hs',
     mulByInt_baseChange_pullback_x_gen W (-s') (neg_ne_zero.mpr hs'),
     ← IsogenyBaseChangeConcrete.functionFieldMap_x_gen W (AlgebraicClosure K),
@@ -827,7 +838,8 @@ theorem rFrobBaseChange_resid_xy (r' : ℤ) (hr' : r' ≠ 0) (hrK : (r' : K) ≠
         ((rFrobBaseChange W p r r').pullback
           (HasseWeil.y_gen (W.baseChange (AlgebraicClosure K))) -
           algebraMap (AlgebraicClosure K)
-            (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField (y₁ ^ Fintype.card K)) < 1 := by
+            (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField
+              (y₁ ^ Fintype.card K)) < 1 := by
   have hrK' : ((r' : ℤ) : AlgebraicClosure K) ≠ 0 := by
     rw [show ((r' : ℤ) : AlgebraicClosure K) =
         algebraMap K (AlgebraicClosure K) ((r' : ℤ) : K) from
@@ -865,7 +877,8 @@ theorem rFrobBaseChange_resid_xy_of_ne_zero (r' : ℤ) (hr' : r' ≠ 0)
         ((rFrobBaseChange W p r r').pullback
           (HasseWeil.y_gen (W.baseChange (AlgebraicClosure K))) -
           algebraMap (AlgebraicClosure K)
-            (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField (y₁ ^ Fintype.card K)) < 1 := by
+            (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField
+              (y₁ ^ Fintype.card K)) < 1 := by
   have hx : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
       SmoothPlaneCurve (AlgebraicClosure K)).pointValuation P
       ((mulByInt (W.baseChange (AlgebraicClosure K)).toAffine r').pullback
@@ -1098,17 +1111,32 @@ theorem alpha_star_polyX_ord_eq_zero_of_residues
           algebraMap (AlgebraicClosure K) (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField
               (W.baseChange (AlgebraicClosure K)).a₁ *
             (α.pullback (HasseWeil.y_gen (W.baseChange (AlgebraicClosure K))))) = 0 := by
-  have hνQ_ne : 3 * x ^ 2 + 2 * (W.baseChange (AlgebraicClosure K)).a₂ * x + (W.baseChange (AlgebraicClosure K)).a₄ - (W.baseChange (AlgebraicClosure K)).a₁ * y ≠ 0 := by
+  have hνQ_ne : 3 * x ^ 2 + 2 * (W.baseChange (AlgebraicClosure K)).a₂ * x +
+    (W.baseChange (AlgebraicClosure K)).a₄ - (W.baseChange (AlgebraicClosure K)).a₁ * y ≠ 0 := by
     intro h0
-    rcases ((WeierstrassCurve.Affine.nonsingular_iff' (W := (W.baseChange (AlgebraicClosure K)).toAffine) x y).mp h_ns).2 with hX | hY
+    rcases ((WeierstrassCurve.Affine.nonsingular_iff'
+          (W := (W.baseChange (AlgebraicClosure K)).toAffine) x y).mp h_ns).2 with hX | hY
     · exact hX (by linear_combination -h0)
     · exact hY h2tor
-  have hν_resid : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K)).pointValuation P
+  have hν_resid : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
+      SmoothPlaneCurve (AlgebraicClosure K)).pointValuation P
       ((3 * (α.pullback (HasseWeil.x_gen (W.baseChange (AlgebraicClosure K)))) ^ 2 +
-          2 * algebraMap (AlgebraicClosure K) (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField (W.baseChange (AlgebraicClosure K)).a₂ * (α.pullback (HasseWeil.x_gen (W.baseChange (AlgebraicClosure K)))) +
-          algebraMap (AlgebraicClosure K) (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField (W.baseChange (AlgebraicClosure K)).a₄ -
-          algebraMap (AlgebraicClosure K) (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField (W.baseChange (AlgebraicClosure K)).a₁ * (α.pullback (HasseWeil.y_gen (W.baseChange (AlgebraicClosure K))))) -
-        algebraMap (AlgebraicClosure K) (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField (3 * x ^ 2 + 2 * (W.baseChange (AlgebraicClosure K)).a₂ * x + (W.baseChange (AlgebraicClosure K)).a₄ - (W.baseChange (AlgebraicClosure K)).a₁ * y)) < 1 := by
+          2 * algebraMap (AlgebraicClosure K)
+              (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField
+              (W.baseChange (AlgebraicClosure K)).a₂ *
+            (α.pullback (HasseWeil.x_gen (W.baseChange (AlgebraicClosure K)))) +
+          algebraMap (AlgebraicClosure K)
+              (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField
+              (W.baseChange (AlgebraicClosure K)).a₄ -
+          algebraMap (AlgebraicClosure K)
+              (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField
+              (W.baseChange (AlgebraicClosure K)).a₁ *
+            (α.pullback (HasseWeil.y_gen (W.baseChange (AlgebraicClosure K))))) -
+        algebraMap (AlgebraicClosure K)
+            (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField
+            (3 * x ^ 2 + 2 * (W.baseChange (AlgebraicClosure K)).a₂ * x +
+              (W.baseChange (AlgebraicClosure K)).a₄ -
+              (W.baseChange (AlgebraicClosure K)).a₁ * y)) < 1 := by
     have r3 := residPV_const W P (3 : (AlgebraicClosure K))
     have ra2 := residPV_const W P (W.baseChange (AlgebraicClosure K)).a₂
     have ra4 := residPV_const W P (W.baseChange (AlgebraicClosure K)).a₄
@@ -1119,18 +1147,37 @@ theorem alpha_star_polyX_ord_eq_zero_of_residues
       (residPV_mul W ra1 hy)
     refine lt_of_eq_of_lt (congrArg _ ?_) hstep
     simp only [map_ofNat, map_add, map_mul, map_sub]
-  have hunit : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K)).pointValuation P
+  have hunit : (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
+      SmoothPlaneCurve (AlgebraicClosure K)).pointValuation P
       (3 * (α.pullback (HasseWeil.x_gen (W.baseChange (AlgebraicClosure K)))) ^ 2 +
-        2 * algebraMap (AlgebraicClosure K) (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField (W.baseChange (AlgebraicClosure K)).a₂ * (α.pullback (HasseWeil.x_gen (W.baseChange (AlgebraicClosure K)))) +
-        algebraMap (AlgebraicClosure K) (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField (W.baseChange (AlgebraicClosure K)).a₄ -
-        algebraMap (AlgebraicClosure K) (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField (W.baseChange (AlgebraicClosure K)).a₁ * (α.pullback (HasseWeil.y_gen (W.baseChange (AlgebraicClosure K))))) = 1 :=
+        2 * algebraMap (AlgebraicClosure K)
+            (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField
+            (W.baseChange (AlgebraicClosure K)).a₂ *
+          (α.pullback (HasseWeil.x_gen (W.baseChange (AlgebraicClosure K)))) +
+        algebraMap (AlgebraicClosure K)
+            (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField
+            (W.baseChange (AlgebraicClosure K)).a₄ -
+        algebraMap (AlgebraicClosure K)
+            (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField
+            (W.baseChange (AlgebraicClosure K)).a₁ *
+          (α.pullback (HasseWeil.y_gen (W.baseChange (AlgebraicClosure K))))) = 1 :=
     residPV_unit W hν_resid hνQ_ne
   have hν_ne : 3 * (α.pullback (HasseWeil.x_gen (W.baseChange (AlgebraicClosure K)))) ^ 2 +
-      2 * algebraMap (AlgebraicClosure K) (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField (W.baseChange (AlgebraicClosure K)).a₂ * (α.pullback (HasseWeil.x_gen (W.baseChange (AlgebraicClosure K)))) +
-      algebraMap (AlgebraicClosure K) (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField (W.baseChange (AlgebraicClosure K)).a₄ -
-      algebraMap (AlgebraicClosure K) (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField (W.baseChange (AlgebraicClosure K)).a₁ * (α.pullback (HasseWeil.y_gen (W.baseChange (AlgebraicClosure K)))) ≠ 0 := by
+      2 * algebraMap (AlgebraicClosure K)
+          (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField
+          (W.baseChange (AlgebraicClosure K)).a₂ *
+        (α.pullback (HasseWeil.x_gen (W.baseChange (AlgebraicClosure K)))) +
+      algebraMap (AlgebraicClosure K)
+          (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField
+          (W.baseChange (AlgebraicClosure K)).a₄ -
+      algebraMap (AlgebraicClosure K)
+          (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField
+          (W.baseChange (AlgebraicClosure K)).a₁ *
+        (α.pullback (HasseWeil.y_gen (W.baseChange (AlgebraicClosure K)))) ≠ 0 := by
     intro h0; rw [h0, Valuation.map_zero] at hunit; exact zero_ne_one hunit
-  exact (Curves.SmoothPlaneCurve.ord_P_eq_zero_iff_pointValuation_eq_one (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ : SmoothPlaneCurve (AlgebraicClosure K)) hν_ne).mpr hunit
+  exact (Curves.SmoothPlaneCurve.ord_P_eq_zero_iff_pointValuation_eq_one
+      (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
+        SmoothPlaneCurve (AlgebraicClosure K)) hν_ne).mpr hunit
 
 /-! ### Transport-to-`O` affine residue (genuineness + covariance + infinity transport)
 
@@ -1223,7 +1270,8 @@ private theorem isog_resid_single_gen_of_hgcomm_hinfty
     (gen : (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField) (c : AlgebraicClosure K)
     (hgc_ne : gen - algebraMap (AlgebraicClosure K)
       (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField c ≠ 0)
-    (hord_R : ((1 : ℤ) : WithTop ℤ) ≤ (W_smooth (W.baseChange (AlgebraicClosure K))).ord_P ⟨x, y, h_ns⟩
+    (hord_R : ((1 : ℤ) : WithTop ℤ) ≤
+      (W_smooth (W.baseChange (AlgebraicClosure K))).ord_P ⟨x, y, h_ns⟩
       (gen - algebraMap (AlgebraicClosure K)
         (W.baseChange (AlgebraicClosure K)).toAffine.FunctionField c)) :
     (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
@@ -1344,7 +1392,8 @@ theorem isog_resid_at_affine_of_hgcomm_hinfty
     exact (Curves.SmoothPlaneCurve.pointValuation_algebraMap_lt_one_iff_mem_maximalIdealAt
       (C := (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
         SmoothPlaneCurve (AlgebraicClosure K))) _ ⟨x, y, h_ns⟩).mpr
-      (HasseWeil.XClass_mem_maximalIdealAt (W := W.baseChange (AlgebraicClosure K)) ⟨x, y, h_ns⟩ x rfl)
+      (HasseWeil.XClass_mem_maximalIdealAt (W := W.baseChange (AlgebraicClosure K))
+        ⟨x, y, h_ns⟩ x rfl)
   · refine (Curves.SmoothPlaneCurve.one_le_ord_P_iff_pointValuation_lt_one
       (C := (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
         SmoothPlaneCurve (AlgebraicClosure K))) (y_gen_sub_const_ne_zero W y)).mpr ?_
@@ -1407,7 +1456,8 @@ theorem ord_P_translate_neg_eq_ordAtInfty
   have hpt : placeTranslate (W.baseChange (AlgebraicClosure K)) (-(Affine.Point.some xR yR hR))
       (ProjectiveSmoothPoint.affine ⟨xR, yR, hR⟩) = ProjectiveSmoothPoint.infinity := by
     rw [placeTranslate_affine,
-      show (⟨xR, yR, hR⟩ : (W_smooth (W.baseChange (AlgebraicClosure K))).SmoothPoint).toAffinePoint =
+      show (⟨xR, yR, hR⟩ :
+          (W_smooth (W.baseChange (AlgebraicClosure K))).SmoothPoint).toAffinePoint =
         Affine.Point.some xR yR hR from rfl, add_neg_cancel]
     rfl
   rwa [hpt, ordProj_infinity, ordProj_affine] at h
@@ -1442,7 +1492,8 @@ theorem ordAtInfty_isog_pullback_x_y_of_comap_at_point
     have htrans := ord_P_isog_pullback_eq_ordAtInfty_translate W φ hgcomm P hR hQ
       (HasseWeil.translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K)) (-R) gen)
     have hround : HasseWeil.translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K)) R
-        (HasseWeil.translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K)) (-R) gen) = gen := by
+        (HasseWeil.translateAlgEquivOfPoint (W.baseChange (AlgebraicClosure K)) (-R)
+          gen) = gen := by
       rw [← HasseWeil.translateAlgEquivOfPoint_add_apply (W.baseChange (AlgebraicClosure K))
         (-R) R gen, neg_add_cancel]
       rfl
@@ -1499,7 +1550,8 @@ theorem comap_pointValuation_pencil_eq_affine (r' s' : ℤ) (hr : r' ≠ 0) (hs 
     ((⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
         SmoothPlaneCurve (AlgebraicClosure K)).pointValuation P).comap
         (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s'
-          (pencilBaseChangePullback W (AlgebraicClosure K) r' s' hr hs hrK hsK)).pullback.toRingHom =
+          (pencilBaseChangePullback W (AlgebraicClosure K) r' s' hr hs hrK
+            hsK)).pullback.toRingHom =
       (⟨(W.baseChange (AlgebraicClosure K)).toAffine⟩ :
         SmoothPlaneCurve (AlgebraicClosure K)).pointValuation ⟨x, y, h_ns⟩ := by
   obtain ⟨hx, hy⟩ := pencil_two_residues W p r r' s' hr hs hrK hsK P h_ns hQ
@@ -1808,7 +1860,8 @@ theorem pencilScaling_holds_coprime :
     (pencilScalingComapDataCard_canonical W p r r' s' hr0 hs0 hrK hsK)
   rw [show (pencilKerCard W p r (pencilJunkPullback W) r' s').toNat =
       Nat.card (pencilIsogBaseChange W p r (AlgebraicClosure K) r' s'
-        (pencilScalingComapDataCard_canonical W p r r' s' hr0 hs0 hrK hsK).pullback_L).toAddMonoidHom.ker
+        (pencilScalingComapDataCard_canonical W p r r' s' hr0 hs0 hrK
+          hsK).pullback_L).toAddMonoidHom.ker
       by
     rw [pencilKerCard, Int.toNat_natCast]
     exact pencilKerCard_pullback_indep W p r r' s' _ _]
