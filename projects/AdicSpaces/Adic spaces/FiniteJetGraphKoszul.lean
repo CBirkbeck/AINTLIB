@@ -763,6 +763,82 @@ theorem exists_lift_norm_le_of_closed_range
     (hequiv : ∀ u, f (fun i => t * u i) = fun k => t * f u k)
     (hclosed : IsClosed (Set.range f)) :
     ∃ h : ℝ, 1 ≤ h ∧ ∀ y ∈ Set.range f, ∃ u, f u = y ∧ ‖u‖ ≤ h * ‖y‖ := by
+  classical
+  -- the closed range as a complete (hence Baire) subgroup
+  have hrangeset : (f.range : Set (κ → A)) = Set.range f := AddMonoidHom.coe_range f
+  haveI hYcomplete : CompleteSpace ↥(f.range) :=
+    (show IsClosed (f.range : Set (κ → A)) by
+      rw [hrangeset]; exact hclosed).completeSpace_coe
+  -- the closures of the ball images cover the range
+  set CN : ℕ → Set ↥(f.range) := fun N =>
+    Subtype.val ⁻¹' closure (⇑f '' Metric.closedBall 0 ((‖t‖ ^ N)⁻¹)) with hCN
+  have hCNclosed : ∀ N, IsClosed (CN N) := fun N =>
+    isClosed_closure.preimage continuous_subtype_val
+  have hCNcover : (⋃ N, CN N) = Set.univ := by
+    refine Set.eq_univ_of_forall fun y => ?_
+    obtain ⟨v, hv⟩ := AddMonoidHom.mem_range.mp y.2
+    have hex : ∃ N : ℕ, ‖t‖ ^ N * ‖v‖ ≤ 1 := by
+      rcases eq_or_ne ‖v‖ 0 with h0 | h0
+      · exact ⟨0, by rw [h0, mul_zero]; exact zero_le_one⟩
+      · have hpos : 0 < ‖v‖ := lt_of_le_of_ne (norm_nonneg v) (Ne.symm h0)
+        obtain ⟨N, hN⟩ := exists_pow_lt_of_lt_one (inv_pos.mpr hpos) ht1
+        exact ⟨N, by
+          calc ‖t‖ ^ N * ‖v‖ ≤ ‖v‖⁻¹ * ‖v‖ :=
+                mul_le_mul_of_nonneg_right hN.le (norm_nonneg _)
+            _ = 1 := inv_mul_cancel₀ (ne_of_gt hpos)⟩
+    obtain ⟨N, hN⟩ := hex
+    have hvball : v ∈ Metric.closedBall (0 : ι → A) ((‖t‖ ^ N)⁻¹) := by
+      rw [Metric.mem_closedBall, dist_zero_right]
+      have hpow : (0 : ℝ) < ‖t‖ ^ N := pow_pos ht0 N
+      calc ‖v‖ = (‖t‖ ^ N)⁻¹ * (‖t‖ ^ N * ‖v‖) := by
+            rw [← mul_assoc, inv_mul_cancel₀ (ne_of_gt hpow), one_mul]
+        _ ≤ (‖t‖ ^ N)⁻¹ * 1 :=
+            mul_le_mul_of_nonneg_left hN (inv_nonneg.mpr hpow.le)
+        _ = (‖t‖ ^ N)⁻¹ := mul_one _
+    exact Set.mem_iUnion.mpr ⟨N, subset_closure ⟨v, hvball, hv⟩⟩
+  -- Baire: some ball-image closure has interior
+  obtain ⟨N, hNne⟩ := nonempty_interior_of_iUnion_of_closed hCNclosed hCNcover
+  obtain ⟨y₀, hy₀⟩ := hNne
+  set R : ℝ := (‖t‖ ^ N)⁻¹ with hR
+  have hRpos : 0 < R := inv_pos.mpr (pow_pos ht0 N)
+  -- the closed ball is an additive subgroup (ultrametrically)
+  set ballGrp : AddSubgroup (ι → A) :=
+    { carrier := Metric.closedBall 0 R
+      zero_mem' := Metric.mem_closedBall_self hRpos.le
+      add_mem' := fun {u v} hu hv => by
+        rw [Metric.mem_closedBall, dist_zero_right] at hu hv ⊢
+        exact (pi_norm_add_le_max u v).trans (max_le hu hv)
+      neg_mem' := fun {u} hu => by
+        rw [Metric.mem_closedBall, dist_zero_right] at hu ⊢
+        rwa [norm_neg] } with hballGrp
+  set Gsub : AddSubgroup (κ → A) := (ballGrp.map f).topologicalClosure with hGsub
+  set G' : AddSubgroup ↥(f.range) := Gsub.comap f.range.subtype with hG'
+  have hG'eq : (G' : Set ↥(f.range)) = CN N := by
+    have hGset : (Gsub : Set (κ → A)) = closure (⇑f '' Metric.closedBall 0 R) := by
+      rw [hGsub]
+      show closure ((ballGrp.map f : AddSubgroup (κ → A)) : Set (κ → A)) = _
+      rw [AddSubgroup.coe_map]
+      rfl
+    show f.range.subtype ⁻¹' (Gsub : Set (κ → A)) = CN N
+    rw [hGset, hCN]
+    rfl
+  -- the subgroup is open, so it contains a δ-ball
+  have hG'open : IsOpen (G' : Set ↥(f.range)) := by
+    refine AddSubgroup.isOpen_of_mem_nhds G' (g := y₀) ?_
+    rw [hG'eq]
+    exact mem_interior_iff_mem_nhds.mp hy₀
+  obtain ⟨δ, hδpos, hδball⟩ := Metric.mem_nhds_iff.mp
+    (hG'open.mem_nhds (zero_mem G'))
+  have hδkey : ∀ z : κ → A, z ∈ Set.range f → ‖z‖ < δ →
+      z ∈ closure (⇑f '' Metric.closedBall 0 R) := by
+    intro z hzr hzn
+    have hzmem : z ∈ f.range := AddMonoidHom.mem_range.mpr hzr
+    have hz' : (⟨z, hzmem⟩ : ↥(f.range)) ∈ Metric.ball (0 : ↥(f.range)) δ := by
+      rw [Metric.mem_ball, dist_zero_right]
+      exact hzn
+    have hmem : (⟨z, hzmem⟩ : ↥(f.range)) ∈ (G' : Set ↥(f.range)) := hδball hz'
+    rw [hG'eq] at hmem
+    exact hmem
   sorry
 
 end UltrametricBanach
