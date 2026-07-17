@@ -116,8 +116,7 @@ lemma evalAt_column (h : IsChartAt (fun i => Pi.single (ι i) (1 : A)) N)
     rw [congrFun (Transition.column_mem ι i₀) i₁, Pi.single_apply, Pi.single_apply]
     split <;> simp [evalAt]
   · funext i₁
-    rw [congrFun (Transition.column_notMem ι hj) i₁]
-    rw [evalAt, eval₂Hom_X']
+    rw [congrFun (Transition.column_notMem ι hj) i₁, evalAt, eval₂Hom_X']
     rfl
 
 /-- `evalAt` carries the generic transition matrix to the pointwise one. -/
