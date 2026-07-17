@@ -64,9 +64,9 @@ theorem cechAugmentation_apply (V : Opens X) (x : F.obj.obj (op V))
             (∏ᶜ fun k : Fin 1 => U (i k))).app F) i)) x
   rw [hcomponent, toRestrict_app_hom_app]
   change (F.obj.map _ ≫ F.obj.map _) x = F.obj.map _ x
-  rw [← F.obj.map_comp]
   exact ConcreteCategory.congr_hom
-    (congrArg F.obj.map (Subsingleton.elim _ _)) x
+    ((F.obj.map_comp _ _).symm.trans
+      (congrArg F.obj.map (Subsingleton.elim _ _))) x
 
 private theorem cechAugmentation_comp_coface_eq :
     cechAugmentation F U ≫ cechCoface F U 0 0 =
@@ -91,9 +91,10 @@ private theorem cechAugmentation_comp_coface_eq :
     cechAugmentation_apply, cechAugmentation_apply]
   change (F.obj.map _ ≫ F.obj.map _) x =
     (F.obj.map _ ≫ F.obj.map _) x
-  rw [← F.obj.map_comp, ← F.obj.map_comp]
   exact ConcreteCategory.congr_hom
-    (congrArg F.obj.map (Subsingleton.elim _ _)) x
+    ((F.obj.map_comp _ _).symm.trans
+      ((congrArg F.obj.map (Subsingleton.elim _ _)).trans
+        (F.obj.map_comp _ _))) x
 
 /-- The Cech augmentation followed by the first differential is zero. -/
 theorem cechAugmentation_comp :
