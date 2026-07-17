@@ -6,6 +6,8 @@ Authors: Chris Birkbeck
 import HasseWeil.FormalGroup.Definition
 import HasseWeil.FormalGroup.PDeriv
 import Mathlib.RingTheory.PowerSeries.Derivative
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.Tactic.LinearCombination
 
 /-!
 # Invariant Differential for Formal Groups (Silverman IV.4)
@@ -902,7 +904,7 @@ theorem FormalGroup.invariantDiff_chain (f : FormalGroupHom F G) :
 We prove the **translation-invariance identity** for the invariant differential
 of a formal group `F/R`:
 `ω_F(F(T, S)) · F_X(T, S) = ω_F(T)` in `R⟦T, S⟧`,
-where `F_X(T, S) = pderiv 0 F.toSeries` and `ω_F(F(T,S))` is the substitution
+where `F_X(T, S) = pderiv' 0 F.toSeries` and `ω_F(F(T,S))` is the substitution
 `PowerSeries.subst F.toSeries F.invariantDiff` (viewing `F.toSeries` as a
 bivariate series).
 
@@ -990,61 +992,61 @@ private lemma hasSubst_shift3to2 :
 /-- The partial derivative of the LHS of associativity w.r.t. the first variable,
 simplified via the chain rule. -/
 private lemma pderiv_subst_assocL (F : FormalGroup R) :
-    MvPowerSeries.pderiv (0 : Fin 3)
+    MvPowerSeries.pderiv' (0 : Fin 3)
         (MvPowerSeries.subst (assocL F) F.toSeries) =
       MvPowerSeries.subst (pairXY R : Fin 2 → MvPowerSeries (Fin 3) R)
-          (MvPowerSeries.pderiv 0 F.toSeries) *
-        MvPowerSeries.subst (assocL F) (MvPowerSeries.pderiv 0 F.toSeries) := by
+          (MvPowerSeries.pderiv' 0 F.toSeries) *
+        MvPowerSeries.subst (assocL F) (MvPowerSeries.pderiv' 0 F.toSeries) := by
   rw [MvPowerSeries.pderiv_subst_fin2 0 (hasSubst_assocL F) F.toSeries]
-  have h1 : MvPowerSeries.pderiv (0 : Fin 3) ((assocL F) 1) = 0 := by
-    show MvPowerSeries.pderiv (0 : Fin 3)
+  have h1 : MvPowerSeries.pderiv' (0 : Fin 3) ((assocL F) 1) = 0 := by
+    show MvPowerSeries.pderiv' (0 : Fin 3)
       (MvPowerSeries.X (2 : Fin 3) : MvPowerSeries (Fin 3) R) = 0
-    exact MvPowerSeries.pderiv_X_of_ne (by decide)
-  have h0 : MvPowerSeries.pderiv (0 : Fin 3) ((assocL F) 0) =
+    exact MvPowerSeries.pderiv'_X_of_ne (by decide)
+  have h0 : MvPowerSeries.pderiv' (0 : Fin 3) ((assocL F) 0) =
       MvPowerSeries.subst (pairXY R : Fin 2 → MvPowerSeries (Fin 3) R)
-        (MvPowerSeries.pderiv 0 F.toSeries) := by
-    show MvPowerSeries.pderiv (0 : Fin 3)
+        (MvPowerSeries.pderiv' 0 F.toSeries) := by
+    show MvPowerSeries.pderiv' (0 : Fin 3)
       (MvPowerSeries.subst (pairXY R : Fin 2 → MvPowerSeries (Fin 3) R)
         F.toSeries) = _
     rw [MvPowerSeries.pderiv_subst_fin2 0 hasSubst_pairXY F.toSeries]
-    have hX0 : MvPowerSeries.pderiv (0 : Fin 3)
+    have hX0 : MvPowerSeries.pderiv' (0 : Fin 3)
         ((pairXY R : Fin 2 → MvPowerSeries (Fin 3) R) 0) = 1 := by
-      show MvPowerSeries.pderiv (0 : Fin 3)
+      show MvPowerSeries.pderiv' (0 : Fin 3)
         (MvPowerSeries.X (0 : Fin 3) : MvPowerSeries (Fin 3) R) = 1
-      exact MvPowerSeries.pderiv_X_self 0
-    have hX1 : MvPowerSeries.pderiv (0 : Fin 3)
+      exact MvPowerSeries.pderiv'_X_self 0
+    have hX1 : MvPowerSeries.pderiv' (0 : Fin 3)
         ((pairXY R : Fin 2 → MvPowerSeries (Fin 3) R) 1) = 0 := by
-      show MvPowerSeries.pderiv (0 : Fin 3)
+      show MvPowerSeries.pderiv' (0 : Fin 3)
         (MvPowerSeries.X (1 : Fin 3) : MvPowerSeries (Fin 3) R) = 0
-      exact MvPowerSeries.pderiv_X_of_ne (by decide)
+      exact MvPowerSeries.pderiv'_X_of_ne (by decide)
     rw [hX0, hX1, one_mul, zero_mul, add_zero]
   rw [h0, h1, zero_mul, add_zero]
 
 /-- The partial derivative of the RHS of associativity w.r.t. the first variable. -/
 private lemma pderiv_subst_assocR (F : FormalGroup R) :
-    MvPowerSeries.pderiv (0 : Fin 3)
+    MvPowerSeries.pderiv' (0 : Fin 3)
         (MvPowerSeries.subst (assocR F) F.toSeries) =
-      MvPowerSeries.subst (assocR F) (MvPowerSeries.pderiv 0 F.toSeries) := by
+      MvPowerSeries.subst (assocR F) (MvPowerSeries.pderiv' 0 F.toSeries) := by
   rw [MvPowerSeries.pderiv_subst_fin2 0 (hasSubst_assocR F) F.toSeries]
-  have h0 : MvPowerSeries.pderiv (0 : Fin 3) ((assocR F) 0) = 1 := by
-    show MvPowerSeries.pderiv (0 : Fin 3)
+  have h0 : MvPowerSeries.pderiv' (0 : Fin 3) ((assocR F) 0) = 1 := by
+    show MvPowerSeries.pderiv' (0 : Fin 3)
       (MvPowerSeries.X (0 : Fin 3) : MvPowerSeries (Fin 3) R) = 1
-    exact MvPowerSeries.pderiv_X_self 0
-  have h1 : MvPowerSeries.pderiv (0 : Fin 3) ((assocR F) 1) = 0 := by
-    show MvPowerSeries.pderiv (0 : Fin 3)
+    exact MvPowerSeries.pderiv'_X_self 0
+  have h1 : MvPowerSeries.pderiv' (0 : Fin 3) ((assocR F) 1) = 0 := by
+    show MvPowerSeries.pderiv' (0 : Fin 3)
       (MvPowerSeries.subst (pairYZ R : Fin 2 → MvPowerSeries (Fin 3) R)
         F.toSeries) = 0
     rw [MvPowerSeries.pderiv_subst_fin2 0 hasSubst_pairYZ F.toSeries]
-    have hX1 : MvPowerSeries.pderiv (0 : Fin 3)
+    have hX1 : MvPowerSeries.pderiv' (0 : Fin 3)
         ((pairYZ R : Fin 2 → MvPowerSeries (Fin 3) R) 0) = 0 := by
-      show MvPowerSeries.pderiv (0 : Fin 3)
+      show MvPowerSeries.pderiv' (0 : Fin 3)
         (MvPowerSeries.X (1 : Fin 3) : MvPowerSeries (Fin 3) R) = 0
-      exact MvPowerSeries.pderiv_X_of_ne (by decide)
-    have hX2 : MvPowerSeries.pderiv (0 : Fin 3)
+      exact MvPowerSeries.pderiv'_X_of_ne (by decide)
+    have hX2 : MvPowerSeries.pderiv' (0 : Fin 3)
         ((pairYZ R : Fin 2 → MvPowerSeries (Fin 3) R) 1) = 0 := by
-      show MvPowerSeries.pderiv (0 : Fin 3)
+      show MvPowerSeries.pderiv' (0 : Fin 3)
         (MvPowerSeries.X (2 : Fin 3) : MvPowerSeries (Fin 3) R) = 0
-      exact MvPowerSeries.pderiv_X_of_ne (by decide)
+      exact MvPowerSeries.pderiv'_X_of_ne (by decide)
     rw [hX1, hX2, zero_mul, zero_mul, add_zero]
   rw [h0, h1, one_mul, zero_mul, add_zero]
 
@@ -1052,10 +1054,10 @@ private lemma pderiv_subst_assocR (F : FormalGroup R) :
 variable. -/
 private lemma pderiv_assoc_identity (F : FormalGroup R) :
     MvPowerSeries.subst (pairXY R : Fin 2 → MvPowerSeries (Fin 3) R)
-        (MvPowerSeries.pderiv 0 F.toSeries) *
-      MvPowerSeries.subst (assocL F) (MvPowerSeries.pderiv 0 F.toSeries) =
-    MvPowerSeries.subst (assocR F) (MvPowerSeries.pderiv 0 F.toSeries) := by
-  have h := congr_arg (MvPowerSeries.pderiv (0 : Fin 3)) F.assoc
+        (MvPowerSeries.pderiv' 0 F.toSeries) *
+      MvPowerSeries.subst (assocL F) (MvPowerSeries.pderiv' 0 F.toSeries) =
+    MvPowerSeries.subst (assocR F) (MvPowerSeries.pderiv' 0 F.toSeries) := by
+  have h := congr_arg (MvPowerSeries.pderiv' (0 : Fin 3)) F.assoc
   -- Rewrite both sides of h using assocL, assocR (which unfold to the raw assoc).
   rw [show MvPowerSeries.subst
         (![MvPowerSeries.subst
@@ -1247,18 +1249,18 @@ private lemma finsum_ite_first_eq_zero_eq_finsum_single_one (g : (Fin 2 →₀ �
   rw [h1]
 
 /-- The per-term coefficient match for `subst_zero_X0_pderiv0`: at index
-`Finsupp.single 1 n`, the coefficient of `pderiv 0 F.toSeries` reproduces the
+`Finsupp.single 1 n`, the coefficient of `pderiv' 0 F.toSeries` reproduces the
 `n`-th coefficient of `F.dX_at_zero`, against the same `(X 0)^n` factor. -/
 private lemma coeff_single_one_pderiv0_smul_eq_dX_at_zero (F : FormalGroup R)
     (e : Fin 2 →₀ ℕ) (n : ℕ) :
     MvPowerSeries.coeff (Finsupp.single (1 : Fin 2) n)
-        (MvPowerSeries.pderiv 0 F.toSeries) •
+        (MvPowerSeries.pderiv' 0 F.toSeries) •
         MvPowerSeries.coeff e
           ((MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) ^ ((Finsupp.single (1 : Fin 2) n) 1)) =
       PowerSeries.coeff n F.dX_at_zero •
         MvPowerSeries.coeff e ((MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) ^ n) := by
-  rw [Finsupp.single_eq_same, MvPowerSeries.coeff_pderiv]
-  -- coeff at (single 1 n) of pderiv 0 F = (0 + 1) • coeff_{single 1 n + single 0 1} F
+  rw [Finsupp.single_eq_same, MvPowerSeries.coeff_pderiv']
+  -- coeff at (single 1 n) of pderiv' 0 F = (0 + 1) • coeff_{single 1 n + single 0 1} F
   --                                     = coeff_{(1, n)}(F)
   --                                       [using (1, n) = single 0 1 + single 1 n].
   rw [show (Finsupp.single (1 : Fin 2) n : Fin 2 →₀ ℕ) 0 = 0 by
@@ -1273,7 +1275,7 @@ private lemma coeff_single_one_pderiv0_smul_eq_dX_at_zero (F : FormalGroup R)
 private lemma subst_zero_X0_pderiv0 (F : FormalGroup R) :
     MvPowerSeries.subst
         (![0, MvPowerSeries.X 0] : Fin 2 → MvPowerSeries (Fin 2) R)
-        (MvPowerSeries.pderiv 0 F.toSeries) =
+        (MvPowerSeries.pderiv' 0 F.toSeries) =
       PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) F.dX_at_zero := by
   classical
   have hsubst : MvPowerSeries.HasSubst
@@ -1338,12 +1340,12 @@ private lemma subst_diagF_subst_X0_dX_at_zero (F : FormalGroup R) :
   funext _
   rw [MvPowerSeries.subst_X hb 0]; rfl
 
-/-- Auxiliary: `subst ![0, F.toSeries] (pderiv 0 F.toSeries) =
+/-- Auxiliary: `subst ![0, F.toSeries] (pderiv' 0 F.toSeries) =
 PowerSeries.subst F.toSeries F.dX_at_zero`. -/
 private lemma subst_zero_F_pderiv0_eq (F : FormalGroup R) :
     MvPowerSeries.subst
         (![0, F.toSeries] : Fin 2 → MvPowerSeries (Fin 2) R)
-        (MvPowerSeries.pderiv 0 F.toSeries) =
+        (MvPowerSeries.pderiv' 0 F.toSeries) =
       PowerSeries.subst (F.toSeries : MvPowerSeries (Fin 2) R) F.dX_at_zero := by
   have hshift0X0 : MvPowerSeries.HasSubst
       (![(0 : MvPowerSeries (Fin 2) R), MvPowerSeries.X 0] :
@@ -1363,7 +1365,7 @@ private lemma subst_zero_F_pderiv0_eq (F : FormalGroup R) :
 in `MvPowerSeries (Fin 2) R`. -/
 theorem dX_at_zero_translation (F : FormalGroup R) :
     PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) F.dX_at_zero *
-        MvPowerSeries.pderiv 0 F.toSeries =
+        MvPowerSeries.pderiv' 0 F.toSeries =
       PowerSeries.subst (F.toSeries : MvPowerSeries (Fin 2) R) F.dX_at_zero := by
   have key := congr_arg
     (MvPowerSeries.subst (shift3to2 R : Fin 3 → MvPowerSeries (Fin 2) R))
@@ -1377,7 +1379,7 @@ theorem dX_at_zero_translation (F : FormalGroup R) :
   have hid : (![MvPowerSeries.X 0, MvPowerSeries.X 1] :
       Fin 2 → MvPowerSeries (Fin 2) R) = MvPowerSeries.X := by
     funext s; fin_cases s <;> rfl
-  rw [hid, congr_fun MvPowerSeries.subst_self (MvPowerSeries.pderiv 0 F.toSeries),
+  rw [hid, congr_fun MvPowerSeries.subst_self (MvPowerSeries.pderiv' 0 F.toSeries),
     subst_zero_F_pderiv0_eq] at key
   exact key
 
@@ -1388,13 +1390,13 @@ theorem dX_at_zero_translation (F : FormalGroup R) :
 For a formal group `F/R`:
 `ω_F(F(T, S)) · F_X(T, S) = ω_F(T)`
 in `MvPowerSeries (Fin 2) R`, where `T = X 0`, `S = X 1`,
-`F_X = pderiv 0 F.toSeries`, and `ω_F` is viewed as a bivariate series via
+`F_X = pderiv' 0 F.toSeries`, and `ω_F` is viewed as a bivariate series via
 `PowerSeries.subst`.
 
 Reference: Silverman, *The Arithmetic of Elliptic Curves*, IV.4, Prop. 4.2. -/
 theorem invariantDiff_translation (F : FormalGroup R) :
     PowerSeries.subst (F.toSeries : MvPowerSeries (Fin 2) R) F.invariantDiff *
-        MvPowerSeries.pderiv 0 F.toSeries =
+        MvPowerSeries.pderiv' 0 F.toSeries =
       PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) F.invariantDiff := by
   have hX0 : PowerSeries.HasSubst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) :=
     PowerSeries.HasSubst.of_constantCoeff_zero (by simp)
@@ -1402,7 +1404,7 @@ theorem invariantDiff_translation (F : FormalGroup R) :
     PowerSeries.HasSubst.of_constantCoeff_zero (FG.constantCoeff_FG_toSeries F)
   set A : MvPowerSeries (Fin 2) R :=
     PowerSeries.subst (MvPowerSeries.X 0 : MvPowerSeries (Fin 2) R) F.dX_at_zero
-  set B : MvPowerSeries (Fin 2) R := MvPowerSeries.pderiv 0 F.toSeries
+  set B : MvPowerSeries (Fin 2) R := MvPowerSeries.pderiv' 0 F.toSeries
   set C : MvPowerSeries (Fin 2) R :=
     PowerSeries.subst (F.toSeries : MvPowerSeries (Fin 2) R) F.dX_at_zero
   set α : MvPowerSeries (Fin 2) R :=

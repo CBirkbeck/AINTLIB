@@ -1071,7 +1071,8 @@ private theorem one_add_X_mul_derivative_binomialSeries (r : ℤ_[p]) :
   ext n
   rw [add_mul, one_mul, map_add, PowerSeries.smul_eq_C_mul, PowerSeries.coeff_C_mul,
     coeff_binomialSeries']
-  rw [PowerSeries.coeff_derivativeFun, hB, coeff_binomialSeries']
+  rw [show B.derivativeFun = PowerSeries.derivative ℤ_[p] B from rfl,
+    PowerSeries.coeff_derivative, hB, coeff_binomialSeries']
   cases n with
   | zero =>
     rw [PowerSeries.coeff_zero_X_mul, add_zero, Ring.choose_one_right, Ring.choose_zero_right,
@@ -1079,7 +1080,7 @@ private theorem one_add_X_mul_derivative_binomialSeries (r : ℤ_[p]) :
     push_cast
     ring
   | succ m =>
-    rw [PowerSeries.coeff_succ_X_mul, PowerSeries.coeff_derivativeFun, coeff_binomialSeries']
+    rw [PowerSeries.coeff_succ_X_mul, PowerSeries.coeff_derivative, coeff_binomialSeries']
     have h : ((m : ℤ_[p]) + 1 + 1) * Ring.choose r (m + 1 + 1)
         = (r - ((m : ℤ_[p]) + 1)) * Ring.choose r (m + 1) := by
       have := succ_mul_ringChoose p r (m + 1)
@@ -1125,11 +1126,13 @@ private theorem dlog_galSeries (a : ℤ_[p]ˣ) {f : PowerSeries ℤ_[p]} (hf : I
             = PowerSeries.binomialSeries ℤ_[p] (a : ℤ_[p]) + (-1 : PowerSeries ℤ_[p]) by ring,
         PowerSeries.derivativeFun_add,
         show (-1 : PowerSeries ℤ_[p]) = PowerSeries.C (-1 : ℤ_[p]) by simp,
-        PowerSeries.derivativeFun_C, add_zero]
+        show PowerSeries.derivativeFun (PowerSeries.C (-1 : ℤ_[p])) = 0 from
+          PowerSeries.derivative_C,
+        add_zero]
     rw [hdG, one_add_X_mul_derivative_binomialSeries p (a : ℤ_[p])]
   have hchain : PowerSeries.derivativeFun (f.subst G)
       = (PowerSeries.derivativeFun f).subst G * PowerSeries.derivativeFun G :=
-    PowerSeries.derivative_subst ℤ_[p] hg
+    PowerSeries.derivative_subst hg
   have hsubstX : (1 + PowerSeries.X : PowerSeries ℤ_[p]).subst G = 1 + G := by
     rw [PowerSeries.subst_add hg, PowerSeries.subst_X hg,
       ← PowerSeries.coe_substAlgHom hg, map_one]

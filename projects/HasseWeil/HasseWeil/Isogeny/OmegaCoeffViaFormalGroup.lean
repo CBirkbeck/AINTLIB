@@ -1383,9 +1383,7 @@ theorem pullback_invariantDiff_core (f : PowerSeries F)
   have hkey := subst_derivative_formalW_key W f hfsub
   have hchain : d⁄dX F (PowerSeries.subst f (formalW W)) =
       PowerSeries.subst f (d⁄dX F (formalW W)) * d⁄dX F f :=
-    -- mathlib's `derivative_subst` takes the base ring `A` as an *explicit* argument
-    -- (it lives under `variable (A : Type*) [CommRing A]`); supply `A := F`.
-    PowerSeries.derivative_subst F hfsub
+    PowerSeries.derivative_subst hfsub
   have hstar := pullback_diff_rearrange (PowerSeries.C W.a₁) (PowerSeries.C W.a₂)
     (PowerSeries.C W.a₃) (PowerSeries.C W.a₄) (PowerSeries.C W.a₆) f
     (PowerSeries.subst f (formalW W)) (d⁄dX F f)

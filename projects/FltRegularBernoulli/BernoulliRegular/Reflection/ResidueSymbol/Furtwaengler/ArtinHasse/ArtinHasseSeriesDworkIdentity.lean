@@ -404,14 +404,14 @@ private theorem artinHasseExpSeries_derivative
     (PowerSeries.derivative ℚ) (artinHasseExpSeries r) =
       artinHasseExpSeries r * (PowerSeries.derivative ℚ) (artinHasseLogSeries r) := by
   simp only [artinHasseExpSeries]
-  rw [PowerSeries.derivative_subst ℚ (artinHasseLogSeries_hasSubst r),
+  rw [PowerSeries.derivative_subst (artinHasseLogSeries_hasSubst r),
     PowerSeries.derivative_exp]
 
 private theorem derivative_rescale_exp_rat (a : ℚ) :
     (PowerSeries.derivative ℚ) (PowerSeries.rescale a (PowerSeries.exp ℚ)) =
       a • PowerSeries.rescale a (PowerSeries.exp ℚ) := by
   rw [PowerSeries.rescale_eq_subst,
-    PowerSeries.derivative_subst ℚ (PowerSeries.HasSubst.smul_X' a),
+    PowerSeries.derivative_subst (PowerSeries.HasSubst.smul_X' a),
     PowerSeries.derivative_exp, ← PowerSeries.rescale_eq_subst]
   simp [PowerSeries.smul_eq_C_mul, smul_eq_mul]
   ring
@@ -482,7 +482,7 @@ theorem artinHasseExpSeries_dwork_quotient_eq_rescale_exp
       PowerSeries.subst_comp_subst_apply (artinHasseLogSeries_hasSubst r) hXr]
   have hSderiv :
       (PowerSeries.derivative ℚ) S = S * (PowerSeries.derivative ℚ) M := by
-    rw [hS_as_exp, PowerSeries.derivative_subst ℚ hMsubst, PowerSeries.derivative_exp]
+    rw [hS_as_exp, PowerSeries.derivative_subst hMsubst, PowerSeries.derivative_exp]
   have hlog_deriv :
       (r : ℚ) • (PowerSeries.derivative ℚ) L - (PowerSeries.derivative ℚ) M =
         (r : ℚ) • (1 : PowerSeries ℚ) := by

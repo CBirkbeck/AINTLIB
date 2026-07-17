@@ -673,7 +673,10 @@ private theorem X_deriv_eq_aw (H : PowerSeries (ZMod p)) :
   · rw [PowerSeries.coeff_zero_X_mul, PowerSeries.coeff_mul, Finset.Nat.antidiagonal_zero,
       Finset.sum_singleton, PowerSeries.coeff_mk, PowerSeries.coeff_mk, WfpCoe_zero, mul_zero]
   · obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn
-    rw [PowerSeries.coeff_succ_X_mul, PowerSeries.coeff_derivativeFun, PowerSeries.coeff_mk,
+    rw [PowerSeries.coeff_succ_X_mul,
+      show ∀ G : PowerSeries (ZMod p), G.derivativeFun = PowerSeries.derivative (ZMod p) G
+        from fun _ => rfl,
+      PowerSeries.coeff_derivative, PowerSeries.coeff_mk,
       coeff_afp_mul_wfp p H hn]
     by_cases hd : p ∣ (m + 1)
     · rw [AfpCoe_dvd p H hn hd, WfpCoe_dvd p H hn hd, zero_mul, neg_add_cancel]
@@ -835,7 +838,10 @@ private theorem theta_smul_eigen {E : PowerSeries (ZMod p)} (hE : derivativeFun 
       = PowerSeries.C c * ((i : PowerSeries (ZMod p)) * (1 + PowerSeries.X) ^ (i - 1) * E) := by
     rw [show PowerSeries.C c * ((1 + PowerSeries.X) ^ i * E)
         = (PowerSeries.C c * (1 + PowerSeries.X) ^ i) * E from by ring, derivativeFun_mul,
-      derivativeFun_mul, derivativeFun_C, hE, smul_zero, smul_zero, zero_add, add_zero,
+      derivativeFun_mul,
+      show ∀ r : ZMod p, PowerSeries.derivativeFun (PowerSeries.C r) = 0 from
+        fun _ => PowerSeries.derivative_C,
+      hE, smul_zero, smul_zero, zero_add, add_zero,
       smul_eq_mul, derivativeFun_one_add_X_pow_zmod]
     ring
   rw [hd, map_mul, show ((i : ℕ) : PowerSeries (ZMod p)) = PowerSeries.C ((i : ℕ) : ZMod p) from
@@ -1142,7 +1148,12 @@ private theorem map_toZMod_dlog {g : PowerSeries ℤ_[p]} (hg : IsUnit g) :
       PowerSeries.map (PadicInt.toZMod : ℤ_[p] →+* ZMod p) (derivativeFun f)
         = derivativeFun (PowerSeries.map (PadicInt.toZMod : ℤ_[p] →+* ZMod p) f) := fun f => by
     ext n
-    rw [PowerSeries.coeff_map, coeff_derivativeFun, coeff_derivativeFun, PowerSeries.coeff_map,
+    rw [PowerSeries.coeff_map,
+      show f.derivativeFun = PowerSeries.derivative ℤ_[p] f from rfl,
+      show (PowerSeries.map (PadicInt.toZMod : ℤ_[p] →+* ZMod p) f).derivativeFun
+          = PowerSeries.derivative (ZMod p)
+            (PowerSeries.map (PadicInt.toZMod : ℤ_[p] →+* ZMod p) f) from rfl,
+      PowerSeries.coeff_derivative, PowerSeries.coeff_derivative, PowerSeries.coeff_map,
       map_mul, map_add, map_natCast, map_one]
   have hmapinv : PowerSeries.map (PadicInt.toZMod : ℤ_[p] →+* ZMod p) (Ring.inverse g)
       = Ring.inverse (PowerSeries.map (PadicInt.toZMod : ℤ_[p] →+* ZMod p) g) := by
@@ -1496,7 +1507,9 @@ theorem dlog_surjective_onto_psiId {F : PowerSeries ℤ_[p]} (hF : F ∈ psiIdSe
           (nhds (derivativeFun h)) := by
         rw [PowerSeries.WithPiTopology.tendsto_iff_coeff_tendsto]
         intro m
-        simp_rw [coeff_derivativeFun]
+        simp_rw [show ∀ G : PowerSeries ℤ_[p], G.derivativeFun
+            = PowerSeries.derivative ℤ_[p] G from fun _ => rfl,
+          PowerSeries.coeff_derivative]
         exact (tendsto_coeff hconv (m + 1)).mul_const _
       exact Filter.Tendsto.const_mul _ hderiv
     have hWzero : Filter.Tendsto (fun j => (- PowerSeries.C (p : ℤ_[p])) ^ (φ j) * fseq (φ j))
@@ -1547,7 +1560,9 @@ private theorem eq_C_constantCoeff_of_derivativeFun_zero (g : PowerSeries ℤ_[p
   | succ m =>
     rw [PowerSeries.coeff_C, if_neg (Nat.succ_ne_zero m)]
     have hcoeff := congrArg (PowerSeries.coeff m) h
-    rw [PowerSeries.coeff_derivativeFun, map_zero] at hcoeff
+    rw [show ∀ G : PowerSeries ℤ_[p], G.derivativeFun
+          = PowerSeries.derivative ℤ_[p] G from fun _ => rfl,
+      PowerSeries.coeff_derivative, map_zero] at hcoeff
     exact (mul_eq_zero.mp hcoeff).resolve_right (Nat.cast_add_one_ne_zero m)
 
 /-- `𝒩(C c) = C (c^p)`: the digit matrix of a constant is the scalar `C c • 1`, so its
@@ -1599,7 +1614,10 @@ private theorem coeff_one_one_add_X_pow :
   rw [show (1 + PowerSeries.X : PowerSeries ℤ_[p]) * derivativeFun ((1 + PowerSeries.X) ^ p)
       = derivativeFun ((1 + PowerSeries.X) ^ p)
         + PowerSeries.X * derivativeFun ((1 + PowerSeries.X) ^ p) from by ring,
-    map_add, PowerSeries.coeff_zero_X_mul, add_zero, coeff_derivativeFun,
+    map_add, PowerSeries.coeff_zero_X_mul, add_zero,
+    show ∀ G : PowerSeries ℤ_[p], G.derivativeFun
+        = PowerSeries.derivative ℤ_[p] G from fun _ => rfl,
+    PowerSeries.coeff_derivative,
     show (p : PowerSeries ℤ_[p]) * (1 + PowerSeries.X) ^ p
       = PowerSeries.C (p : ℤ_[p]) * (1 + PowerSeries.X) ^ p from by rw [map_natCast],
     PowerSeries.coeff_C_mul] at h0

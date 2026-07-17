@@ -239,7 +239,9 @@ theorem one_add_mul_derivative_log_geomSum {a : ℕ} (ha : ¬ (p : ℕ) ∣ a) (
         rw [show ((1 + X : PowerSeries ℤ_[p]) ^ a - 1)
             = (1 + X) ^ a + (-1 : PowerSeries ℤ_[p]) by ring, derivativeFun_add,
           show (-1 : PowerSeries ℤ_[p]) = PowerSeries.C (-1 : ℤ_[p]) by simp,
-          derivativeFun_C, add_zero]] at h
+          show PowerSeries.derivativeFun (PowerSeries.C (-1 : ℤ_[p])) = 0 from
+            derivative_C,
+          add_zero]] at h
     rw [← h]; ring
   have hQ : (1 + X) * derivativeFun ((1 + X : PowerSeries ℤ_[p]) ^ a)
       = (a : PowerSeries ℤ_[p]) * (1 + X) ^ a :=

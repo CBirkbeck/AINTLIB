@@ -168,7 +168,7 @@ theorem logOf_expSeries_eq_logSeries :
         E * (PowerSeries.derivative ℚ) L := by
     simp only [E, L, expSeries]
     simp only [Furtwaengler.artinHasseExpSeries]
-    rw [PowerSeries.derivative_subst ℚ (logSeries_hasSubst p), PowerSeries.derivative_exp]
+    rw [PowerSeries.derivative_subst (logSeries_hasSubst p), PowerSeries.derivative_exp]
   have hgeom :
       PowerSeries.subst (E - 1) ((PowerSeries.derivative ℚ) (PowerSeries.log ℚ)) *
           E = 1 := by
@@ -201,7 +201,7 @@ theorem logOf_expSeries_eq_logSeries :
     rw [hsubst_one] at hsubst
     simpa [hE_sub_const, sub_eq_add_neg, add_comm, add_left_comm, add_assoc] using hsubst
   apply PowerSeries.derivative.ext
-  · rw [PowerSeries.logOf_eq, PowerSeries.derivative_subst ℚ hE_subst, map_sub,
+  · rw [PowerSeries.logOf_eq, PowerSeries.derivative_subst hE_subst, map_sub,
       Derivation.map_one_eq_zero, sub_zero, hE_deriv]
     calc
       PowerSeries.subst (E - 1) ((PowerSeries.derivative ℚ) (PowerSeries.log ℚ)) *

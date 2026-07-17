@@ -544,7 +544,8 @@ private theorem one_add_X_mul_derivative_binomialSeries (r : ℤ_[p]) :
   ext n
   rw [add_mul, one_mul, map_add, PowerSeries.smul_eq_C_mul, PowerSeries.coeff_C_mul,
     coeff_binomialSeries']
-  rw [PowerSeries.coeff_derivativeFun, hB, coeff_binomialSeries']
+  rw [show B.derivativeFun = PowerSeries.derivative ℤ_[p] B from rfl,
+    PowerSeries.coeff_derivative, hB, coeff_binomialSeries']
   cases n with
   | zero =>
     rw [PowerSeries.coeff_zero_X_mul, add_zero, Ring.choose_one_right, Ring.choose_zero_right,
@@ -552,7 +553,7 @@ private theorem one_add_X_mul_derivative_binomialSeries (r : ℤ_[p]) :
     push_cast
     ring
   | succ m =>
-    rw [PowerSeries.coeff_succ_X_mul, PowerSeries.coeff_derivativeFun, coeff_binomialSeries']
+    rw [PowerSeries.coeff_succ_X_mul, PowerSeries.coeff_derivative, coeff_binomialSeries']
     have h : ((m : ℤ_[p]) + 1 + 1) * Ring.choose r (m + 1 + 1)
         = (r - ((m : ℤ_[p]) + 1)) * Ring.choose r (m + 1) := by
       have := succ_mul_ringChoose p r (m + 1)
@@ -617,7 +618,8 @@ private theorem eq_C_constantCoeff_of_derivativeFun_zero {g : PowerSeries ℤ_[p
   | succ m =>
     rw [PowerSeries.coeff_C, if_neg (Nat.succ_ne_zero m)]
     have hcoeff := congrArg (PowerSeries.coeff m) h
-    rw [PowerSeries.coeff_derivativeFun, map_zero] at hcoeff
+    rw [show g.derivativeFun = PowerSeries.derivative ℤ_[p] g from rfl,
+      PowerSeries.coeff_derivative, map_zero] at hcoeff
     have hne : ((m : ℤ_[p]) + 1) ≠ 0 := by
       exact_mod_cast Nat.succ_ne_zero m
     exact (mul_eq_zero.1 hcoeff).resolve_right hne
