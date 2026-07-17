@@ -634,3 +634,21 @@ CRT-half); divisor-side rank N² = `sectionsDivisor_degree`; torsion-side = `tor
 (transport along `torsionIdeal_subscheme`'s iso e; instances via the
 `fullLevelLocusAux_torsionDivisor`-pattern, Incidence:2540 — private, rebuild the 8-line wrapper,
 flag [DEDUP] for the cleanup fleet).
+
+## [KEY-DEG / endDual_comp_self] recon (KM, v10.304 close — the next spine)
+
+EndomorphismDegree.lean census: 7 pins. PROVEN: endDeg/endTrace/endDual constructions,
+endDeg_mulBy = n² (axiom-clean, T-DEG0 done), endDeg_comp_of_isIntegral +
+endDeg_comp_mulBy_of_isIntegral (:292/:314, isogeny-instance forms), endTrace_spec (:406).
+SORRIED: :202 `endDual_comp_self` (f^t ∘ f = [deg f] — KM 2.6.1 Cayley–Hamilton of the degree
+form, THE keystone), :359 `endDeg_comp` general, :429/:435 comp_mulBy general forms,
+:453 `endTrace_sq_le`, :459 `eq_zero_of_endDeg_eq_zero`, :469 the ε-factorization.
+Route A (ruled v10.302): the five generals discharge from endDual_comp_self by KM 2.6 algebra.
+The Abel content of :202: the biquadratic identity deg(m + n·f) = m² + mn·tr f + n²·deg f
+(polarization of the degree quadratic form) + a kill-argument (pair the CH-element
+f² − [tr f]∘f + [deg f] against the form; eq_zero_of_endDeg_eq_zero-style nondegeneracy).
+[DEDUP]: GH's ForMathlib/FinrankDegenerate.lean is the fibre-rank-vanishing engine
+(rankAtStalk_eq_zero_of_forall_smul_eq_zero, finrank_eq_zero_of_factors_of_nonZeroDivisor_mem,
+finrank_eq_rankAtStalk_chart) — consume for any deg-vanishing/degenerate-locus step, do NOT
+rebuild. My new FiniteFlatRigidity module core may also serve the nondegeneracy pairing.
+KM source: read 2.6 in full before decomposing (the fork-discipline: transcribe, don't invent).
