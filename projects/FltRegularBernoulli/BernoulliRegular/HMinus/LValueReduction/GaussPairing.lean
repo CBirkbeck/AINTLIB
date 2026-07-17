@@ -20,8 +20,6 @@ branches.
 
 noncomputable section
 
-open scoped BigOperators
-
 namespace BernoulliRegular
 
 section PairingDefs
