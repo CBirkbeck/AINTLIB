@@ -2269,3 +2269,47 @@ theorem cont_isSpectralSpace [DecidableEq A]
     exact Subtype.t0Space
 
 end ValuationSpectrum
+
+/-! ### General-ideal restriction: value transfer and the characteristic (`I = ⊥`)
+restriction (Huber [Hu2] 3.3(i)'s `v = u|cΓ_u`, huber2.txt:647-651) -/
+
+namespace ValuationSpectrum
+
+variable {A : Type*} [CommRing A]
+variable {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
+
+/-- `restrictIdeal` preserves `≤ 1` (a value `≤ 1` maps to `≤ 1`, or to `0 ≤ 1`).
+General-`I` mirror of `restrictIdealSingle_le_one` (Huber (2.2)-(2.3) `v|H` mechanics,
+huber2.txt:393-414). -/
+theorem restrictIdeal_le_one {w : Valuation A Γ₀} (I : Ideal A) {a : A}
+    (h : w a ≤ 1) : w.restrictIdeal I a ≤ 1 := by sorry
+
+/-- `restrictIdeal` preserves `1 < ·` (a value `> 1` has its unit in `cGammaIdeal`
+via `vUnit_mem_cGammaIdeal`, so it is kept by the restriction). -/
+theorem restrictIdeal_one_lt {w : Valuation A Γ₀} (I : Ideal A) {a : A}
+    (h : 1 < w a) : 1 < w.restrictIdeal I a := by sorry
+
+/-- `restrictIdeal` preserves `< 1` (a value `< 1` maps to `< 1`, or to `0 < 1`). -/
+theorem restrictIdeal_lt_one {w : Valuation A Γ₀} (I : Ideal A) {a : A}
+    (h : w a < 1) : w.restrictIdeal I a < 1 := by sorry
+
+/-- **The characteristic restriction `w|cΓ_w = restrictIdeal w ⊥` is microbial**
+(Huber [Hu2] 3.3(i), huber2.txt:647-656: "Put `u = t|A ∈ Spv A` and `v = u|cΓ_u ∈ Spv A`
+… (d) `v ∈ Spv(A, A°°·A)` … By definition we have `v = u|cΓ_u` and hence
+`v ∈ Spv(A, A°°·A)`", via Lemma 2.5(ii)'s first disjunct `Γ_v = cΓ_v`). At `I = ⊥` the
+ideal branch of `cGammaIdealPos` is empty, so `cGammaIdeal w ⊥` is exactly the
+characteristic subgroup: every positive element of the restricted value group is bounded
+by some `w(a)^{±1}` with `w(a) ≥ 1`, and `w(a)` survives the restriction — precisely
+`IsMicrobial`. -/
+theorem restrictIdeal_bot_isMicrobial (w : Valuation A Γ₀) :
+    Valuation.IsMicrobial (w.restrictIdeal ⊥) := by sorry
+
+/-- **The characteristic restriction lies in `Spv(A, I)` for every ideal `I`**
+(Huber [Hu2] 3.3(i)(d) via the microbial disjunct). Unconditional in `w` — in
+particular no nonvanishing witness `w g ≠ 0` is needed, unlike
+`ofValuation_restrictIdealSingle_isInSpvAI` (this is what makes the general-Huber
+Lemma-3.3(i) witness work when the support may meet the ideal of definition). -/
+theorem ofValuation_restrictIdeal_bot_isInSpvAI (w : Valuation A Γ₀) (I : Ideal A) :
+    Spv.IsInSpvAI (ofValuation (w.restrictIdeal ⊥)) I := by sorry
+
+end ValuationSpectrum

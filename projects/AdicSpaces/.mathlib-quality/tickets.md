@@ -839,6 +839,119 @@ T704, by a fresh `/develop --continue`.
 
 ---
 
+## M8 — `HasLocLiftPowerBounded` at FULL HUBER generality (opened 2026-07-17)
+
+Owner directive: prove Wedhorn Prop 7.52's consequences (the two `HasLocLiftPowerBounded`
+fields) for general complete f-adic/Huber rings, removing `[IsTateRing A]` from the
+faithful LL chain. Plan artifact: `decomposition-m8-huber-loclift.md` (verbatim source
+quotes per leaf, adversarial logs, gate PASSED; skeleton compiled green 2026-07-17).
+Sources: `references/wedhorn.txt` (8.1/8.2 at 3660-3760, 7.51-7.52 at 3457-3495),
+`references/huber2.txt` ([Hu2] §2-§3: 2.4 at 432-438, 2.5 at 454-460, 3.1 at 585-604,
+3.3(i) at 624-658). Tate enters the current chain at EXACTLY two points (audit in the
+decomposition file): the `IsHuberRing (presheafValue D')` supply, and the principal-pair
+continuity engine + `restrictIdealSingle` in the [Hu2] 3.3(i) witness.
+
+### [T901] Support layer de-Tate (concretePair, isHuberRing, isAdicComplete)
+- **Status**: open — **File**: PresheafTateStructure.lean, Cor832.lean — **Depends**: none — **Type**: relax + lemma
+- (a) Drop `[IsTateRing A]` from `presheafValue_concretePair` (its five ingredients are
+  already Tate-free; binder is vestigial — compiler-verified relaxation, T604 pattern).
+- (b) Fill `presheafValue_isHuberRing_huber` (skeleton in PresheafTateStructure.lean tail):
+  `⟨⟨presheafValue_concretePair D₀⟩⟩` after (a); `IsHuberRing` = `Nonempty (PairOfDefinition ·)`
+  + `IsTopologicalRing` (instance available on the completion) per HuberRings.lean:71.
+- (c) Drop `[IsTateRing A]` from `presheafValue_isAdicComplete` (Cor832.lean:1556; proof
+  body greps clean of Tate/π — verify by compiler; keep `[T2Space A]` only if consumed).
+- **Sources**: Wedhorn 8.1 construction (wedhorn.txt:3673-3675: "The pair (D, I·D) is a
+  pair of definition of A(T/s)").
+- **Generality**: general `[IsHuberRing A]` base; no new hypotheses.
+
+### [T902] `restrictIdeal` value-transfer trio (general I)
+- **Status**: open — **File**: SpvAITopology.lean (skeleton at tail) — **Depends**: none — **Type**: lemma ×3
+- Fill `restrictIdeal_le_one`, `restrictIdeal_one_lt`, `restrictIdeal_lt_one`. Mirror the
+  `restrictIdealSingle` trio (SpvAITopology.lean:809-843) case-for-case using
+  `restrictIdeal_apply_of_mem`/`_of_not_mem`/`_apply_zero` (CharacteristicSubgroup.lean)
+  + `vUnit_mem_cGammaIdeal` (:187) for the `≥ 1` branch.
+- **Sources**: Huber (2.2)-(2.3) `v|H` mechanics (huber2.txt:393-414).
+- **Generality**: any ideal I (the trio is true generally; only microbiality needs ⊥).
+
+### [T903] Characteristic restriction: microbial + `IsInSpvAI`
+- **Status**: open — **File**: SpvAITopology.lean (skeleton at tail) — **Depends**: T902 (uses the trio's case mechanics) — **Type**: lemma ×2
+- Fill `restrictIdeal_bot_isMicrobial` (each positive γ of `cGammaIdeal w ⊥` carries a
+  bounding witness `a` with `1 ≤ w a` by definition of `cGammaIdealPos` — ideal branch
+  empty at ⊥ — and `w a ≥ 1` survives restriction) and
+  `ofValuation_restrictIdeal_bot_isInSpvAI` (`Or.inr` via `isMicrobial_canon_of_restricted`,
+  cf. its use at SpvAITopology.lean:804).
+- ⚠ Prior-B2 (2026-06-22, docstring-recorded): general-I `ofValuation_restrictIdeal_isInSpvAI`
+  is FALSE. These lemmas are at `I = ⊥` where the cGammaIdeal ideal-branch is empty — do
+  NOT generalize the microbial claim beyond ⊥.
+- **Sources**: [Hu2] 3.3(i)(d) (huber2.txt:647-656) via Lemma 2.5(ii) first disjunct.
+
+### [T904] A°°-form decay: `cofinalValue_ideal_pow_lt_of_le_one_on_ideal`
+- **Status**: open — **File**: SpvAI.lean (skeleton at tail) — **Depends**: none — **Type**: lemma
+- Coefficient-free route (decomposition L3.1): helper claim
+  `∀ a ∈ (span S)·J, v a ≤ (max_{c∈S} v c) · (bound J)` by `Submodule.mul_induction_on`
+  (no scalar case) + `∀ z ∈ J`-strengthened `span_induction` on the left factor whose
+  smul-case reassociates `(r • y)·z = y·(r • z)`; iterate from J := P.I (base h_le_one);
+  then `M := max_S v` is attained (S finite) and `CofinalValue v c*` gives `Mⁿ < γ`.
+  Edge: `S = ∅` → `I^n = ⊥` → `v 0 = 0 < γ`.
+- **Mathlib**: `Submodule.mul_induction_on`, `Submodule.span_induction`,
+  `Finset.exists_mem_eq_sup'` (max attained), `pow_lt` bookkeeping as in
+  `cofinalValue_ideal_pow_lt` (SpvAI.lean:100, the A₀-form analogue, ~165 lines).
+- **Sources**: Huber 3.1 decay (huber2.txt:598-604), Lemma 2.4 max-generator (432-438).
+- **Generality**: hypothesis only `≤ 1` on P.I (weaker than strict; decay from Mⁿ).
+
+### [T905] A°°-form engine: `Spv.isContinuous_of_isInSpvAI_of_lt_one_AOO`
+- **Status**: open — **File**: SpvAI.lean (skeleton at tail) — **Depends**: T904 — **Type**: lemma
+- Assembly mirrors `isContinuous_of_isInSpvAI_of_lt_one` (SpvAI.lean:332): reduce via
+  `Valuation.isContinuous_of_ideal_pow_lt` to the T904 decay; per-generator cofinality
+  from the `IsInSpvAI` disjuncts — cofinal branch direct, microbial branch = the existing
+  argument at SpvAI.lean:360-414 verbatim (consumes only `h_lt_one` +
+  `PairOfDefinition.exists_pow_mul_mem_A₀` — verified).
+- Note: `h_le_AOO` may be droppable (T904 needs only P.I-bounds); attempt without it and
+  record; keeping it is sound.
+- **Sources**: [Hu2] Thm 3.1 reverse (huber2.txt:586-604).
+
+### [CLEANUP-M8-1] /cleanup SpvAI.lean + SpvAITopology.lean — **Depends**: T905.
+
+### [T906] General witness: `mem_plus_of_forall_spa_vle_one_huber` (+ PB wrapper)
+- **Status**: open — **File**: FaithfulLocLift.lean (skeleton at tail) — **Depends**: T901, T903, T905, CLEANUP-M8-1 — **Type**: theorem ×2
+- De-Tate the [Hu2] 3.3(i) witness (decomposition L4): keep HU-a…d blocks verbatim (all
+  Tate-free); replace lines-454-530's Tate-pair machinery with:
+  `rs := (t.comap algB).restrictIdeal ⊥`; Spa-membership: continuity via T905 at
+  `P := presheafValue_concretePair D'` (`h_in` := T903's IsInSpvAI; `h_le_AOO` :=
+  `hW_lt_AOO ·.le` + T902 transfer; `h_lt_one` :=
+  `P.isTopologicallyNilpotent_of_mem` → `hW_lt_AOO` → `restrictIdeal_lt_one`), B⁺-bound
+  via `hW_le` + `restrictIdeal_le_one`; witness `¬ vle x 1` via `hW_x` +
+  `restrictIdeal_one_lt`; vle-bridge = same `Compatible.ofValuation` plumbing as now.
+  Then `isPowerBounded_of_forall_vle_one_spa_of_complete_huber` :=
+  `IsRingOfIntegralElements.subset_powerBounded ∘ mem_plus…`.
+- **Sources**: [Hu2] 3.3(i) (huber2.txt:633-658) — "Put u = t|A ∈ Spv A and v = u|cΓ_u".
+
+### [T907] General LL fields: `isUnit_canonicalMap_s_huber` + `locLift_divByS_isPowerBounded_huber`
+- **Status**: open — **File**: FaithfulLocLift.lean (skeleton at tail) — **Depends**: T901, T906 — **Type**: theorem ×2
+- Unit side: same body as `isUnit_canonicalMap_s_faithful` with
+  `haveI := presheafValue_isHuberRing_huber D'` in place of the Tate route; criterion
+  `isUnit_iff_forall_not_vle_zero_of_completePair` already Tate-free + axiom-clean
+  (verified 2026-07-17). Bdd side: same body as `locLift_divByS_isPowerBounded_faithful`
+  (comap-pullback + mk'_spec + unit-cancel), criterion := T906's wrapper.
+- **Sources**: Wedhorn Lemma 8.1 proof (wedhorn.txt:3701-3706), Prop 7.52 (3472-3477),
+  Prop 7.51 (3457-3470).
+
+### [CLEANUP-M8-ALL] /cleanup-all M8 files — **Depends**: T907. Before the milestone.
+
+### [T908] MILESTONE: `hasLocLiftPowerBounded_huber` + instance + axiom sweep
+- **Status**: open — **File**: FaithfulLocLift.lean — **Depends**: CLEANUP-M8-ALL — **Type**: assembly
+- Fill `hasLocLiftPowerBounded_huber where isUnit… := T907a; locLift… := T907b`; add
+  `instance (priority := 1150) hasLocLiftPowerBounded_huber_instance` with NO
+  `[IsNoetherianRing]`, NO `[IsTateRing]` (subsumes the faithful instance's vestigial
+  noetherian binder). `#print axioms hasLocLiftPowerBounded_huber` must be
+  `[propext, Classical.choice, Quot.sound]`. Smoke-test: `IsSheafy A` elaborates for a
+  general complete Huber `A` via the new instance. Re-verify the five `FiniteJetMain`
+  theorems still axiom-clean (`lake build` root + sweep). Board banner + owner digest.
+
+### [CLEANUP-M8-FINAL] /cleanup FaithfulLocLift.lean — **Depends**: T908. Also fix the
+stale docstrings recorded 2026-07-17: `hasLocLiftPowerBounded_JetA`'s "does not apply"
+note (FiniteJetFunctoriality.lean:2147) and FaithfulLocLift's "Status: sorry" relics.
+
 ## M7 (stretch, NOT opened): strong sheafiness ([FJP] Cor 5.5)
 Blocked on T704. Requires: `𝓐⟨Z₁..Zₙ⟩ ≅ 𝓑⟨Z⟩ ×_{𝓓⟨Z⟩} 𝓒⟨Z⟩` (Lemma 4.1 with `Z`-variables),
 instance stacks for `𝓐⟨Z⟩`, and re-running M5/M6 over the extended square. Open via

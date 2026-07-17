@@ -650,4 +650,84 @@ instance (priority := 1100) hasLocLiftPowerBounded_faithful_instance
     HasLocLiftPowerBounded A :=
   hasLocLiftPowerBounded_faithful
 
+/-! ### Full-Huber (non-Tate) LL chain — Wedhorn Prop 8.2 / Lemma 8.1 via Prop 7.52 at
+general complete f-adic base (M8 campaign). The Tate hypothesis entered the faithful
+chain at exactly two points: `IsHuberRing (presheafValue D')` via
+`presheafValue_isTateRing_concrete`, and the principal-pair continuity engine
+`isContinuous_of_isInSpvAI_of_lt_one_principal` + `restrictIdealSingle` (which needs the
+nonvanishing unit `π`). Both are replaced: `presheafValue_isHuberRing_huber` and the
+`A°°`-form general engine `isContinuous_of_isInSpvAI_of_lt_one_AOO` +
+the characteristic restriction `restrictIdeal · ⊥` (Huber's own `v = u|cΓ_u`). -/
+
+set_option linter.unusedSectionVars false in
+/-- **Huber [Hu2] Lemma 3.3(i), substantive direction — general complete Huber base**
+(huber2.txt:633-658; hypothesis-free in the source: NO Tate, NO noetherian, NO domain).
+If `x ∈ presheafValue D'` has `w(x) ≤ 1` at every Spa point `w`, then `x ∈ B⁺`.
+De-Tate'd `mem_plus_of_forall_spa_vle_one`: the witness valuation is
+`restrictIdeal (t.comap algB) ⊥` (Huber's `v = u|cΓ_u`), continuous by
+`isContinuous_of_isInSpvAI_of_lt_one_AOO` at `presheafValue_concretePair D'`. -/
+theorem mem_plus_of_forall_spa_vle_one_huber
+    [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
+    (D' : RationalLocData A) (x : presheafValue D')
+    (hx : ∀ w : Spv (presheafValue D'),
+      w ∈ Spa (presheafValue D') (presheafValue D')⁺ → w.vle x 1) :
+    x ∈ (presheafValue D')⁺ := by sorry
+
+set_option linter.unusedSectionVars false in
+/-- **Wedhorn 7.52(1) + Def 7.14(1) at general complete Huber base**: Spa-bounded
+elements of `presheafValue D'` are power-bounded. -/
+theorem isPowerBounded_of_forall_vle_one_spa_of_complete_huber
+    [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
+    (D' : RationalLocData A) (x : presheafValue D')
+    (hx : ∀ w : Spv (presheafValue D'),
+      w ∈ Spa (presheafValue D') (presheafValue D')⁺ → w.vle x 1) :
+    @TopologicalRing.IsPowerBounded (presheafValue D') _ inferInstance x := by sorry
+
+set_option linter.unusedSectionVars false in
+/-- **Wedhorn 7.52(2) / Prop 8.2 (LL-unit) at general complete Huber base**: for
+`R(D'.T/D'.s) ⊆ R(D.T/D.s)`, the image `D'.canonicalMap D.s` is a unit in
+`presheafValue D'`. Same route as `isUnit_canonicalMap_s_faithful` (the pair-complete
+unit criterion `isUnit_iff_forall_not_vle_zero_of_completePair` is already Tate-free);
+only the `IsHuberRing (presheafValue D')` supply changes
+(`presheafValue_isHuberRing_huber`). -/
+theorem isUnit_canonicalMap_s_huber
+    [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
+    (D D' : RationalLocData A)
+    (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s) :
+    IsUnit (D'.canonicalMap D.s) := by sorry
+
+set_option linter.unusedSectionVars false in
+/-- **Wedhorn 7.52(1)/7.18 + Prop 8.2 (LL-bdd) at general complete Huber base**: the
+localization lift of `t/D.s` is power-bounded in `presheafValue D'`. -/
+theorem locLift_divByS_isPowerBounded_huber
+    [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)]
+    (D D' : RationalLocData A)
+    (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
+    (t : A) (ht : t ∈ D.T) :
+    @TopologicalRing.IsPowerBounded (presheafValue D') _ inferInstance
+      (IsLocalization.Away.lift D.s (isUnit_canonicalMap_s_huber D D' h)
+        (divByS t D.s)) := by sorry
+
+set_option linter.unusedSectionVars false in
+/-- **`HasLocLiftPowerBounded` at full Huber generality** (Wedhorn Prop 8.2 / Lemma 8.1
+via Prop 7.52, [Hu2] Lemma 3.3(i) & Thm 3.1 — none of which assume Tate). Discharges
+`IsSheafy`'s class parameter for every complete Huber ring with `A⁺` a ring of integral
+elements: the class fields are the two facts Wedhorn's Lemma 8.1 derives from Prop 7.52
+("This implies `ϕ(s) ∈ B×` by Proposition 7.52. … This implies `ϕ(t)/ϕ(s) ∈ B⁺` by
+Proposition 7.52", wedhorn.txt:3701-3706). Subsumes `hasLocLiftPowerBounded_faithful`
+(drops `[IsTateRing A]`). -/
+theorem hasLocLiftPowerBounded_huber
+    [T2Space A] [NonarchimedeanRing A]
+    [letI : UniformSpace A := IsTopologicalAddGroup.rightUniformSpace A; CompleteSpace A]
+    [IsRingOfIntegralElements (A⁺)] :
+    HasLocLiftPowerBounded A := by sorry
+
 end ValuationSpectrum

@@ -3061,4 +3061,14 @@ theorem presheafValue_isNoetherianRing_of_ringEquiv
     D₀ hπ_unit hπ_nil
     (presheafValue_ringOfDef_isNoetherianRing_of_ringEquiv D₀ e)
 
+omit [PlusSubring A] [HasLocLiftPowerBounded A] in
+/-- **`presheafValue D₀` is a Huber ring — general (non-Tate) form** (Wedhorn 8.1's
+construction, wedhorn.txt:3673-3675: "The construction also shows that `A(T/s)` is again
+an f-adic ring. The pair `(D, I·D)` is a pair of definition of `A(T/s)`", completed).
+The pair of definition is `presheafValue_concretePair D₀` (whose five ingredients are
+already Tate-free); no topologically nilpotent unit is involved. Replaces the Tate-only
+route `presheafValue_isTateRing_concrete D₀ |>.toIsHuberRing` at general Huber base. -/
+theorem presheafValue_isHuberRing_huber (D₀ : RationalLocData A) :
+    IsHuberRing (presheafValue D₀) := by sorry
+
 end ValuationSpectrum

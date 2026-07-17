@@ -1,1 +1,0 @@
-FOCUS: T804 — lake build root, then #print axioms on ALL FIVE FiniteJetMain theorems (USER DIRECTIVE: all axiom-clean); then board banner + memory + commit + push.
