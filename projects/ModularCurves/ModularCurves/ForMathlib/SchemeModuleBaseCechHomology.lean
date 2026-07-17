@@ -62,7 +62,8 @@ noncomputable def baseCechHomologyOneIso_of_affine_openCover
     [M.IsQuasicoherent] {ι : Type u} (U : ι → X.Opens)
     (hU : IsOpenCover U) (hUaff : ∀ i, IsAffineOpen (U i)) :
     (baseModuleForget S).obj ((baseCechComplex π M U).homology 1) ≅
-      AddCommGrpCat.of (CategoryTheory.Sheaf.H M.sheaf 1) :=
+      (CategoryTheory.Sheaf.functorH
+        (Opens.grothendieckTopology X) 1).obj M.sheaf :=
   baseCechComplexHomologyForgetIso π M U 1 ≪≫
     cechHomologyOneIso_of_affine_openCover M U hU hUaff
 
@@ -79,15 +80,18 @@ theorem baseCechComplex_exactAt_one_iff_subsingleton_H
   let e := cechHomologyOneIso_of_affine_openCover M U hU hUaff
   constructor
   · intro h
-    have h' : IsZero (AddCommGrpCat.of
-        (CategoryTheory.Sheaf.H M.sheaf 1)) := IsZero.of_iso h e.symm
-    simpa using AddCommGrpCat.subsingleton_of_isZero
-      (G := AddCommGrpCat.of (CategoryTheory.Sheaf.H M.sheaf 1)) h'
+    have h' : IsZero ((CategoryTheory.Sheaf.functorH
+        (Opens.grothendieckTopology X) 1).obj M.sheaf) :=
+      IsZero.of_iso h e.symm
+    have hs : Subsingleton ((CategoryTheory.Sheaf.functorH
+        (Opens.grothendieckTopology X) 1).obj M.sheaf) :=
+      AddCommGrpCat.subsingleton_of_isZero h'
+    exact hs
   · intro h
-    letI : Subsingleton (AddCommGrpCat.of
-        (CategoryTheory.Sheaf.H M.sheaf 1)) := h
-    have h' : IsZero (AddCommGrpCat.of
-        (CategoryTheory.Sheaf.H M.sheaf 1)) :=
+    letI : Subsingleton ((CategoryTheory.Sheaf.functorH
+        (Opens.grothendieckTopology X) 1).obj M.sheaf) := h
+    have h' : IsZero ((CategoryTheory.Sheaf.functorH
+        (Opens.grothendieckTopology X) 1).obj M.sheaf) :=
       AddCommGrpCat.isZero_of_subsingleton _
     exact IsZero.of_iso h' e
 
