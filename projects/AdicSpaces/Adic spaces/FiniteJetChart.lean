@@ -38,7 +38,20 @@ open scoped Classical
 
 /-- The element `W ∈ 𝓐` (support `(1,0)`; [FJP] §1.4). -/
 def Wa : JetA F :=
-  ⟨sectionD F (TrivSqZeroExt.inl (Wu (R := K)).val), by sorry⟩
+  ⟨sectionD F (TrivSqZeroExt.inl (Wu (R := K)).val), by
+    rw [mem_jetSupport_iff_jet_in_range, rhoC_sectionD]
+    have hsupp : (Wu (R := K)).val ∈ nonnegSubring K := by
+      intro a ha
+      show (single (1 : ℤ) (1 : K) : RestrictedLaurent K).coeff a = 0
+      rw [coeff_single]
+      exact if_neg (by omega)
+    refine ⟨TrivSqZeroExt.inl ((nonnegEquiv (R := K)).symm ⟨(Wu (R := K)).val, hsupp⟩), ?_⟩
+    refine TrivSqZeroExt.ext ?_ ?_
+    · show ofRestricted ((nonnegEquiv (R := K)).symm ⟨(Wu (R := K)).val, hsupp⟩) =
+        (Wu (R := K)).val
+      rw [ofRestricted_nonnegEquiv_symm]
+    · show ofRestricted (R := K) 0 = 0
+      exact map_zero _⟩
 
 /-- The chart datum `(W; ϖ)`: `T = {W, ϖ}`, `s = ϖ` — presenting the rational subset
 `{|W| ≤ |ϖ| ≠ 0}` of `Spa(𝓐, 𝓐°)` ([FJP] (3.1)). -/
@@ -46,9 +59,21 @@ def chartDatum : RationalLocData (JetA F) where
   P := podA F
   T := {Wa F, tA F}
   s := tA F
-  hopen := by sorry
+  hopen := genPiece_hopen (podA F) {Wa F, tA F} (tA F)
+    (Ideal.eq_top_of_isUnit_mem _
+      (Ideal.subset_span (by
+        rw [Finset.coe_insert, Finset.coe_singleton]
+        exact Set.mem_insert_of_mem _ rfl))
+      (isUnit_tA F))
 
-theorem chartDatum_isRational : (chartDatum F).IsRational := by sorry
+theorem chartDatum_isRational : (chartDatum F).IsRational :=
+  RationalLocData.isRational_of_span_eq_top
+    (Ideal.eq_top_of_isUnit_mem _
+      (Ideal.subset_span (by
+        show tA F ∈ (({Wa F, tA F} : Finset (JetA F)) : Set (JetA F))
+        rw [Finset.coe_insert, Finset.coe_singleton]
+        exact Set.mem_insert_of_mem _ rfl))
+      (isUnit_tA F))
 
 /-- **[FJP] Proposition 3.1**: the chart is the square-zero disc algebra,
 `𝒪_𝓐({|W| ≤ |ϖ|}) ≅ K⟨X⟩[Q]/(Q²) = 𝓑`, as topological rings. -/
