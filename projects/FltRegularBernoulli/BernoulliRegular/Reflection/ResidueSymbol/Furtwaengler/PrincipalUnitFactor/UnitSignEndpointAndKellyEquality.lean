@@ -132,15 +132,11 @@ theorem unitUnit_conj_mul_self_eq_one_of_conj_gamma_mul_self_eq_conj_stick_mul_s
   apply mul_right_cancel₀ hprod_ne
   simpa [hu_val] using hprod
 
-/-- The signed-norm version of the concrete Φ conjugation product formula
-still forces the specific unit factor to be antisymmetric.
-
-The formal Stickelberger calculation naturally gives the signed integer norm
-`Algebra.norm ℤ α`, while the actual Φ product gives the absolute ideal norm.
-If those signs differed, the unit would satisfy `conj(u) * u = -1`, impossible
-after applying a complex embedding. -/
-theorem unitUnit_conj_mul_self_eq_one_of_conj_gamma_absNorm_pow
-    [IsCMField K] (hp_odd : p ≠ 2)
+/-- The `0 ≤ Algebra.norm ℤ α` case of
+`unitUnit_conj_mul_self_eq_one_of_conj_gamma_absNorm_pow`: the ideal norm equals
+the (nonnegative) integer norm, so the unit factor satisfies `conj(u) * u = 1`. -/
+private theorem unitUnit_conj_mul_self_eq_one_of_norm_nonneg
+    [IsCMField K]
     {α : 𝓞 K} (hα : α ≠ 0)
     {Φα : PhiPrimeElement.PhiIdealElement.PhiPrincipalElement
       (p := p) (K := K) α}
@@ -153,7 +149,8 @@ theorem unitUnit_conj_mul_self_eq_one_of_conj_gamma_absNorm_pow
       ringOfIntegersComplexConj K
           (stickelbergerPrincipalGen (p := p) (K := K) α) *
           stickelbergerPrincipalGen (p := p) (K := K) α =
-        (((Algebra.norm ℤ α : ℤ) : 𝓞 K)) ^ p) :
+        (((Algebra.norm ℤ α : ℤ) : 𝓞 K)) ^ p)
+    (hn_nonneg : 0 ≤ Algebra.norm ℤ α) :
     unitsComplexConj K U.unit_isUnit.unit * U.unit_isUnit.unit = 1 := by
   let u : (𝓞 K)ˣ := U.unit_isUnit.unit
   let v : (𝓞 K)ˣ := unitsComplexConj K u * u
@@ -177,52 +174,121 @@ theorem unitUnit_conj_mul_self_eq_one_of_conj_gamma_absNorm_pow
     have hfactor' := hfactor
     rw [h_phi_abs, h_stick_int] at hfactor'
     simpa [v, u, n, N] using hfactor'.symm
-  by_cases hn_nonneg : 0 ≤ n
-  · apply Units.ext
+  apply Units.ext
+  apply mul_right_cancel₀ hNpow_ne
+  have h_abs :
+      (((Ideal.absNorm (Ideal.span ({α} : Set (𝓞 K)) : Ideal (𝓞 K)) : ℤ) :
+        𝓞 K)) = N := by
+    rw [Ideal.absNorm_span_singleton]
+    have hnatAbs : (n.natAbs : ℤ) = n :=
+      Int.natAbs_of_nonneg hn_nonneg
+    change (((n.natAbs : ℕ) : ℤ) : 𝓞 K) = N
+    simpa [N] using congrArg (fun z : ℤ ↦ ((z : ℤ) : 𝓞 K)) hnatAbs
+  have hv_eq_one : (v : 𝓞 K) * N ^ p = 1 * N ^ p := by
+    calc
+      (v : 𝓞 K) * N ^ p =
+          (((Ideal.absNorm (Ideal.span ({α} : Set (𝓞 K)) : Ideal (𝓞 K)) : ℤ) :
+            𝓞 K)) ^ p := hv_eq_abs
+      _ = N ^ p := by rw [h_abs]
+      _ = 1 * N ^ p := by ring
+  simpa [v, u] using hv_eq_one
+
+/-- The `Algebra.norm ℤ α ≤ 0` case of
+`unitUnit_conj_mul_self_eq_one_of_conj_gamma_absNorm_pow` is impossible: it would
+force `conj(u) * u = -1`, excluded by `unitsComplexConj_mul_self_ne_neg_one`. -/
+private theorem unitUnit_conj_mul_self_eq_one_of_norm_nonpos
+    [IsCMField K] (hp_odd : p ≠ 2)
+    {α : 𝓞 K} (hα : α ≠ 0)
+    {Φα : PhiPrimeElement.PhiIdealElement.PhiPrincipalElement
+      (p := p) (K := K) α}
+    (U : PrincipalUnitFactorData (p := p) (K := K) α Φα)
+    (h_phi_abs :
+      ringOfIntegersComplexConj K Φα.gamma * Φα.gamma =
+        (((Ideal.absNorm (Ideal.span ({α} : Set (𝓞 K)) : Ideal (𝓞 K)) : ℤ) :
+          𝓞 K)) ^ p)
+    (h_stick_int :
+      ringOfIntegersComplexConj K
+          (stickelbergerPrincipalGen (p := p) (K := K) α) *
+          stickelbergerPrincipalGen (p := p) (K := K) α =
+        (((Algebra.norm ℤ α : ℤ) : 𝓞 K)) ^ p)
+    (hn_nonpos : Algebra.norm ℤ α ≤ 0) :
+    unitsComplexConj K U.unit_isUnit.unit * U.unit_isUnit.unit = 1 := by
+  let u : (𝓞 K)ˣ := U.unit_isUnit.unit
+  let v : (𝓞 K)ˣ := unitsComplexConj K u * u
+  let n : ℤ := Algebra.norm ℤ α
+  let N : 𝓞 K := ((n : ℤ) : 𝓞 K)
+  have hn_ne : n ≠ 0 := by
+    simpa [n] using (Algebra.norm_ne_zero_iff.mpr hα :
+      Algebra.norm ℤ α ≠ 0)
+  have hN_ne : N ≠ 0 := fun hzero ↦
+    hn_ne ((FaithfulSMul.algebraMap_injective ℤ (𝓞 K)) (by
+      simpa [N] using hzero))
+  have hNpow_ne : N ^ p ≠ 0 :=
+    pow_ne_zero p hN_ne
+  have hfactor :=
+    U.conj_gamma_mul_self_eq_unit_conj_mul_self_mul_conj_stick_mul_self
+      (p := p) (K := K)
+  have hv_eq_abs :
+      (v : 𝓞 K) * N ^ p =
+        (((Ideal.absNorm (Ideal.span ({α} : Set (𝓞 K)) : Ideal (𝓞 K)) : ℤ) :
+          𝓞 K)) ^ p := by
+    have hfactor' := hfactor
+    rw [h_phi_abs, h_stick_int] at hfactor'
+    simpa [v, u, n, N] using hfactor'.symm
+  exfalso
+  have h_abs :
+      (((Ideal.absNorm (Ideal.span ({α} : Set (𝓞 K)) : Ideal (𝓞 K)) : ℤ) :
+        𝓞 K)) = -N := by
+    rw [Ideal.absNorm_span_singleton]
+    have hnatAbs : (n.natAbs : ℤ) = -n := by
+      have hneg : ((-n).natAbs : ℤ) = -n :=
+        Int.natAbs_of_nonneg (neg_nonneg.mpr hn_nonpos)
+      simpa [Int.natAbs_neg] using hneg
+    change (((n.natAbs : ℕ) : ℤ) : 𝓞 K) = -N
+    simpa [N] using congrArg (fun z : ℤ ↦ ((z : ℤ) : 𝓞 K)) hnatAbs
+  have hp_odd' : Odd p := (Fact.out : Nat.Prime p).odd_of_ne_two hp_odd
+  have hv_eq_neg : (v : 𝓞 K) * N ^ p = -N ^ p := by
+    calc
+      (v : 𝓞 K) * N ^ p =
+          (((Ideal.absNorm (Ideal.span ({α} : Set (𝓞 K)) : Ideal (𝓞 K)) : ℤ) :
+            𝓞 K)) ^ p := hv_eq_abs
+      _ = (-N) ^ p := by rw [h_abs]
+      _ = -N ^ p := hp_odd'.neg_pow N
+  have hv_val_neg : (v : 𝓞 K) = -1 := by
     apply mul_right_cancel₀ hNpow_ne
-    have h_abs :
+    calc
+      (v : 𝓞 K) * N ^ p = -N ^ p := hv_eq_neg
+      _ = (-1 : 𝓞 K) * N ^ p := by ring
+  have hv_neg : v = -1 := Units.ext hv_val_neg
+  exact unitsComplexConj_mul_self_ne_neg_one (K := K) u hv_neg
+
+/-- The signed-norm version of the concrete Φ conjugation product formula
+still forces the specific unit factor to be antisymmetric.
+
+The formal Stickelberger calculation naturally gives the signed integer norm
+`Algebra.norm ℤ α`, while the actual Φ product gives the absolute ideal norm.
+If those signs differed, the unit would satisfy `conj(u) * u = -1`, impossible
+after applying a complex embedding. -/
+theorem unitUnit_conj_mul_self_eq_one_of_conj_gamma_absNorm_pow
+    [IsCMField K] (hp_odd : p ≠ 2)
+    {α : 𝓞 K} (hα : α ≠ 0)
+    {Φα : PhiPrimeElement.PhiIdealElement.PhiPrincipalElement
+      (p := p) (K := K) α}
+    (U : PrincipalUnitFactorData (p := p) (K := K) α Φα)
+    (h_phi_abs :
+      ringOfIntegersComplexConj K Φα.gamma * Φα.gamma =
         (((Ideal.absNorm (Ideal.span ({α} : Set (𝓞 K)) : Ideal (𝓞 K)) : ℤ) :
-          𝓞 K)) = N := by
-      rw [Ideal.absNorm_span_singleton]
-      have hnatAbs : (n.natAbs : ℤ) = n :=
-        Int.natAbs_of_nonneg hn_nonneg
-      change (((n.natAbs : ℕ) : ℤ) : 𝓞 K) = N
-      simpa [N] using congrArg (fun z : ℤ ↦ ((z : ℤ) : 𝓞 K)) hnatAbs
-    have hv_eq_one : (v : 𝓞 K) * N ^ p = 1 * N ^ p := by
-      calc
-        (v : 𝓞 K) * N ^ p =
-            (((Ideal.absNorm (Ideal.span ({α} : Set (𝓞 K)) : Ideal (𝓞 K)) : ℤ) :
-              𝓞 K)) ^ p := hv_eq_abs
-        _ = N ^ p := by rw [h_abs]
-        _ = 1 * N ^ p := by ring
-    simpa [v, u] using hv_eq_one
-  · exfalso
-    have hn_nonpos : n ≤ 0 := le_of_not_ge hn_nonneg
-    have h_abs :
-        (((Ideal.absNorm (Ideal.span ({α} : Set (𝓞 K)) : Ideal (𝓞 K)) : ℤ) :
-          𝓞 K)) = -N := by
-      rw [Ideal.absNorm_span_singleton]
-      have hnatAbs : (n.natAbs : ℤ) = -n := by
-        have hneg : ((-n).natAbs : ℤ) = -n :=
-          Int.natAbs_of_nonneg (neg_nonneg.mpr hn_nonpos)
-        simpa [Int.natAbs_neg] using hneg
-      change (((n.natAbs : ℕ) : ℤ) : 𝓞 K) = -N
-      simpa [N] using congrArg (fun z : ℤ ↦ ((z : ℤ) : 𝓞 K)) hnatAbs
-    have hp_odd' : Odd p := (Fact.out : Nat.Prime p).odd_of_ne_two hp_odd
-    have hv_eq_neg : (v : 𝓞 K) * N ^ p = -N ^ p := by
-      calc
-        (v : 𝓞 K) * N ^ p =
-            (((Ideal.absNorm (Ideal.span ({α} : Set (𝓞 K)) : Ideal (𝓞 K)) : ℤ) :
-              𝓞 K)) ^ p := hv_eq_abs
-        _ = (-N) ^ p := by rw [h_abs]
-        _ = -N ^ p := hp_odd'.neg_pow N
-    have hv_val_neg : (v : 𝓞 K) = -1 := by
-      apply mul_right_cancel₀ hNpow_ne
-      calc
-        (v : 𝓞 K) * N ^ p = -N ^ p := hv_eq_neg
-        _ = (-1 : 𝓞 K) * N ^ p := by ring
-    have hv_neg : v = -1 := Units.ext hv_val_neg
-    exact unitsComplexConj_mul_self_ne_neg_one (K := K) u hv_neg
+          𝓞 K)) ^ p)
+    (h_stick_int :
+      ringOfIntegersComplexConj K
+          (stickelbergerPrincipalGen (p := p) (K := K) α) *
+          stickelbergerPrincipalGen (p := p) (K := K) α =
+        (((Algebra.norm ℤ α : ℤ) : 𝓞 K)) ^ p) :
+    unitsComplexConj K U.unit_isUnit.unit * U.unit_isUnit.unit = 1 := by
+  by_cases hn_nonneg : 0 ≤ Algebra.norm ℤ α
+  · exact unitUnit_conj_mul_self_eq_one_of_norm_nonneg hα U h_phi_abs h_stick_int hn_nonneg
+  · exact unitUnit_conj_mul_self_eq_one_of_norm_nonpos hp_odd hα U h_phi_abs h_stick_int
+      (le_of_not_ge hn_nonneg)
 
 end PrincipalUnitFactorData
 
