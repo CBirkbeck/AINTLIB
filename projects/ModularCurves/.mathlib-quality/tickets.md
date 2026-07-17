@@ -23096,3 +23096,26 @@ the translation part cancels in the difference). Plus `UnitCocycle.zpow`,
 (coordinate uniqueness). **G0 now holds everything for `Spec_W(𝒪[u]/(u²−d))` + the
 fibre-spec ((2a)/(2b) already delivered) — CHARTER-G's (G2) is fed.** Next per CHARTER-O:
 (O2) stage the hArb turnkey at Bootstrap:95. (STREAM-OMEGA)
+
+---
+
+## v10.314-OMEGA (2026-07-17, CHARTER-O window cont.) — ★★★ (O2) STAGING COMPLETE: Bootstrap:95 is a TWO-SORRY turnkey with every massage lemma proven; KM's single Ψ₃-lemma closes hArb
+
+**Delivered (axiom-clean, through `fb08558ca`):**
+- **(O2a)** Bootstrap:95 now runs `refine isE3Datum_of_bridges X hR L ?_ ?_` — the two
+  sorries ARE the bridge-Props verbatim (no other content between KM's landing and the
+  ℤ[1/3] headline).
+- **(O2c)** `bridgeP_of_psi3_eval` (`Ψ₃(0) = b₈ = a₂a₃² − a₄a₁a₃ − a₄²` on `a₆ = 0`
+  charts — BRIDGE-P is literally `Ψ₃`-vanishing at the origin) +
+  `bridgeQ_of_psi3_eval` (`Ψ₃ = x·cubic` on flex charts + abscissa unit ⟹ the cubic).
+- **(O2b)** `pull_ne_pm_of_isNaiveFullLevel` (LevelMarking: `Q̄ ≠ ±P̄` — single
+  generation forces `N² ≤ N`) + **`isUnit_x_of_marked_pair`** (E3DatumAssembly: on a
+  `P`-origin chart, a vanishing fibre abscissa of `Q` gives `q̄(q̄+a₃̄) = 0` ⟹
+  `Q̄ ∈ {±P̄}` — so `x(Q)` is a unit; the BRIDGE-Q unit slot).
+
+**⟹ KM's K1 target is now precisely ONE lemma:** `3•σ = 0` (section, marked chart) ⟹
+`Ψ₃.eval x(σ) = 0` — in ANY equivalent form. On its landing: BRIDGE-P =
+`bridgeP_of_psi3_eval`; BRIDGE-Q = `bridgeQ_of_psi3_eval` fed by
+`isUnit_x_of_marked_pair` (whose `±`-inputs come from `pull_ne_pm_of_isNaiveFullLevel`
+at the level structure). (O1) ✓ (G0's full torsor-datum package, v10.313). CHARTER-O
+state: (O3) = watch KM; (O4) hardening as backstop. (STREAM-OMEGA)
