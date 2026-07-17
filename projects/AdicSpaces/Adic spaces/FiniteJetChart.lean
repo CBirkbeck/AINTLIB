@@ -123,9 +123,40 @@ theorem rescaleRestricted_const (a : K) (ha : ‖a‖ ≤ 1) (r : K) :
   | zero => simp
   | succ k => simp [PowerSeries.coeff_C]
 
+/-- `jB` sends the pseudouniformizer to the pseudouniformizer. -/
+theorem jB_tA : jB F (tA F) = tB F := by
+  refine TrivSqZeroExt.ext ?_ ?_
+  · refine ofRestricted_injective (R := K) ?_
+    show ofRestricted ((nonnegEquiv (R := K)).symm
+      ⟨qCoeff F 0 ((tA F : JetA F) : JetC F), (tA F).2.1⟩) =
+      ofRestricted (constHomPS F (LaurentSeriesExample.t F))
+    rw [ofRestricted_nonnegEquiv_symm]
+    show qCoeff F 0 (constHomC F (RestrictedLaurent.C (LaurentSeriesExample.t F))) =
+      ofRestricted (constHomPS F (LaurentSeriesExample.t F))
+    rw [qCoeff_constHomC, if_pos rfl]
+    show RestrictedLaurent.C (LaurentSeriesExample.t F) =
+      ofRestricted (PowerSeries.Restricted.C (1 : ℝ) (LaurentSeriesExample.t F))
+    rw [ofRestricted_C]
+    rfl
+  · refine ofRestricted_injective (R := K) ?_
+    show ofRestricted ((nonnegEquiv (R := K)).symm
+      ⟨qCoeff F 1 ((tA F : JetA F) : JetC F), (tA F).2.2⟩) =
+      ofRestricted (0 : PowerSeries.Restricted K (1 : ℝ))
+    rw [ofRestricted_nonnegEquiv_symm, map_zero]
+    show qCoeff F 1 (constHomC F (RestrictedLaurent.C (LaurentSeriesExample.t F))) = 0
+    rw [qCoeff_constHomC, if_neg one_ne_zero]
+
 /-- The twist fixes the pseudouniformizer: `θ(ϖ_𝓐) = ϖ_𝓑`. -/
 theorem thetaChart_tA : thetaChart F (tA F) = tB F := by
-  sorry
+  show twistB F (jB F (tA F)) = tB F
+  rw [jB_tA]
+  refine TrivSqZeroExt.ext ?_ ?_
+  · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le
+      (constHomPS F (LaurentSeriesExample.t F)) =
+      constHomPS F (LaurentSeriesExample.t F)
+    exact rescaleRestricted_const F _ _ _
+  · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le 0 = 0
+    exact map_zero _
 
 /-- **[FJP] Proposition 3.1**: the chart is the square-zero disc algebra,
 `𝒪_𝓐({|W| ≤ |ϖ|}) ≅ K⟨X⟩[Q]/(Q²) = 𝓑`, as topological rings. -/
