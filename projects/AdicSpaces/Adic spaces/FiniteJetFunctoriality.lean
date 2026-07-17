@@ -754,6 +754,110 @@ theorem bridgeRev_continuous : Continuous (bridgeRev D e) := by
   rw [(QuotientRing.isOpenQuotientMap_mk (IA F e.m D.s e.f)).isQuotientMap.continuous_iff]
   exact bridgeEval_continuous D e
 
+/-! #### Round trips (density + Hausdorff equalizers) -/
+
+/-- Polynomials are dense in `P_𝓐` (truncate below any coefficient-norm level). -/
+theorem polyToP_denseRange (m : ℕ) :
+    DenseRange (polyToP : MvPolynomial (Fin m) (JetA F) → PA F m) := by
+  classical
+  rw [Metric.denseRange_iff]
+  intro p ε hε
+  refine ⟨∑ s ∈ (finite_setOf_le_norm_coeff p (half_pos hε)).toFinset,
+    MvPolynomial.monomial s (MvPowerSeries.coeff s p.1), ?_⟩
+  rw [dist_eq_norm, MvRestricted.norm_eq, MvPowerSeries.gaussNorm]
+  refine lt_of_le_of_lt (Real.iSup_le (fun s => ?_) (half_pos hε).le) (half_lt_self hε)
+  rw [finsupp_prod_one, mul_one]
+  show ‖MvPowerSeries.coeff s ((p - polyToP _ : PA F m)).1‖ ≤ ε / 2
+  rw [show ((p - polyToP (∑ s ∈ (finite_setOf_le_norm_coeff p (half_pos hε)).toFinset,
+      MvPolynomial.monomial s (MvPowerSeries.coeff s p.1)) : PA F m)).1 =
+    p.1 - (polyToP (∑ s ∈ (finite_setOf_le_norm_coeff p (half_pos hε)).toFinset,
+      MvPolynomial.monomial s (MvPowerSeries.coeff s p.1) : MvPolynomial (Fin m)
+        (JetA F))).1 from rfl, map_sub, coeff_polyToP, MvPolynomial.coeff_sum]
+  by_cases hs : ε / 2 ≤ ‖MvPowerSeries.coeff s p.1‖
+  · rw [Finset.sum_eq_single s
+      (fun b _ hb => by rw [MvPolynomial.coeff_monomial, if_neg hb])
+      (fun hns => absurd ((finite_setOf_le_norm_coeff p (half_pos hε)).mem_toFinset.mpr hs)
+        hns), MvPolynomial.coeff_monomial, if_pos rfl, sub_self, norm_zero]
+    exact (half_pos hε).le
+  · rw [Finset.sum_eq_zero fun b hb => ?_, sub_zero]
+    · exact (not_le.mp hs).le
+    · rw [MvPolynomial.coeff_monomial, if_neg]
+      intro hbs
+      rw [hbs] at hb
+      exact hs ((finite_setOf_le_norm_coeff p (half_pos hε)).mem_toFinset.mp hb)
+
+/-- `rev ∘ fwd = id` on `𝒪_𝓐(D)` (agreement on the dense localization image; both
+composites with `algebraMap` are `canonicalMap`, so the localization universal property
+applies, then extend by density to the completion). -/
+theorem bridgeRev_bridgeFwd (hD : D.IsRational) (x : presheafValue D) :
+    bridgeRev D e (bridgeFwd D e hD x) = x := by
+  letI := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  haveI : RegularSpace (presheafValue D) := UniformSpace.to_regularSpace
+  have hcomp : (bridgeRev D e).comp (bridgeLocHom D e hD) = D.coeRingHom := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers D.s) ?_
+    ext a
+    simp only [RingHom.comp_apply]
+    rw [bridgeLocHom_algebraMap, bridgeRev_bridgeBase]
+    rfl
+  have hdense : DenseRange (D.coeRingHom :
+      Localization.Away D.s → presheafValue D) :=
+    UniformSpace.Completion.denseRange_coe
+  have hagree : (fun y => bridgeRev D e (bridgeFwd D e hD y)) ∘ D.coeRingHom =
+      (fun y => y) ∘ (D.coeRingHom : Localization.Away D.s → presheafValue D) := by
+    funext a
+    show bridgeRev D e (bridgeFwd D e hD (D.coeRingHom a)) = D.coeRingHom a
+    rw [bridgeFwd_coe]
+    exact DFunLike.congr_fun hcomp a
+  have h_eq : (fun y => bridgeRev D e (bridgeFwd D e hD y)) = fun y => y :=
+    hdense.equalizer ((bridgeRev_continuous D e).comp (bridgeFwd_continuous D e hD))
+      continuous_id hagree
+  exact congrFun h_eq x
+
+/-- The graph-quotient projection is continuous (`1`-Lipschitz for the quotient norm). -/
+theorem mkIA_continuous :
+    Continuous (Ideal.Quotient.mk (IA F e.m D.s e.f)) :=
+  AddMonoidHomClass.continuous_of_bound (Ideal.Quotient.mk (IA F e.m D.s e.f)) 1
+    fun a => by rw [one_mul]; exact Ideal.Quotient.norm_mk_le _ a
+
+/-- `fwd ∘ rev = id` on `𝓐_α` (agreement on constants and variables, hence on the dense
+polynomial image; extend by density to the Banach quotient). -/
+theorem bridgeFwd_bridgeRev (hD : D.IsRational) (y : locA F e.m D.s e.f) :
+    bridgeFwd D e hD (bridgeRev D e y) = y := by
+  haveI hcl : IsClosed ((IA F e.m D.s e.f : Set (PA F e.m))) :=
+    isClosed_IA F e.m D.s e.f (e.span_eq_top D hD)
+  haveI : NormedAddCommGroup (locA F e.m D.s e.f) :=
+    Submodule.Quotient.normedAddCommGroup _
+  haveI : T2Space (locA F e.m D.s e.f) := locA_t2 F e.m D.s e.f (e.span_eq_top D hD)
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective y
+  have hmkcont : Continuous (Ideal.Quotient.mk (IA F e.m D.s e.f)) :=
+    mkIA_continuous D e
+  have hpoly : ∀ q : MvPolynomial (Fin e.m) (JetA F),
+      bridgeFwd D e hD (bridgeEval D e (polyToP q)) =
+        Ideal.Quotient.mk (IA F e.m D.s e.f) (polyToP q) := by
+    have hhomeq : ((bridgeFwd D e hD).comp ((bridgeEval D e).comp polyToP)) =
+        (Ideal.Quotient.mk (IA F e.m D.s e.f)).comp
+          (polyToP : MvPolynomial (Fin e.m) (JetA F) →+* PA F e.m) := by
+      refine MvPolynomial.ringHom_ext (fun a => ?_) (fun i => ?_)
+      · show bridgeFwd D e hD (bridgeEval D e (polyToP (MvPolynomial.C a))) =
+          Ideal.Quotient.mk (IA F e.m D.s e.f) (polyToP (MvPolynomial.C a))
+        rw [bridgeEval_const, bridgeFwd_canonicalMap]
+        rfl
+      · show bridgeFwd D e hD (bridgeEval D e (polyToP (MvPolynomial.X i))) =
+          Ideal.Quotient.mk (IA F e.m D.s e.f) (polyToP (MvPolynomial.X i))
+        rw [bridgeEval_X, bridgeGen, bridgeFwd_coe, bridgeLocHom_divByS]
+        rfl
+    intro q
+    exact DFunLike.congr_fun hhomeq q
+  have h_eq : (fun z : PA F e.m => bridgeFwd D e hD (bridgeEval D e z)) =
+      fun z : PA F e.m => Ideal.Quotient.mk (IA F e.m D.s e.f) z := by
+    refine (polyToP_denseRange e.m).equalizer
+      ((bridgeFwd_continuous D e hD).comp (bridgeEval_continuous D e)) hmkcont ?_
+    funext q
+    exact hpoly q
+  exact congrFun h_eq p
+
 end GraphBridgeInfra
 
 /-- The graph bridge for 𝓐 ([FJP] Lemma 1.1: the separated completion of the graph
@@ -761,13 +865,21 @@ quotient "is therefore canonically the underlying Tate algebra of Huber's ration
 localization `E_α`"; by Lemma 4.3 the ideal is closed so no further completion is needed).
 Topological ring isomorphism `𝒪_𝓐(D) ≅ P_𝓐 ⧸ I_𝓐`. -/
 def graphBridgeA (D : RationalLocData (JetA F)) (hD : D.IsRational) (e : DatumEnum D) :
-    presheafValue D ≃+* locA (F := F) e.m D.s e.f := by sorry
+    presheafValue D ≃+* locA (F := F) e.m D.s e.f where
+  toFun := bridgeFwd D e hD
+  invFun := bridgeRev D e
+  left_inv := bridgeRev_bridgeFwd D e hD
+  right_inv := bridgeFwd_bridgeRev D e hD
+  map_mul' := map_mul (bridgeFwd D e hD)
+  map_add' := map_add (bridgeFwd D e hD)
 
 theorem graphBridgeA_continuous (D : RationalLocData (JetA F)) (hD : D.IsRational)
-    (e : DatumEnum D) : Continuous (graphBridgeA D hD e) := by sorry
+    (e : DatumEnum D) : Continuous (graphBridgeA D hD e) :=
+  bridgeFwd_continuous D e hD
 
 theorem graphBridgeA_symm_continuous (D : RationalLocData (JetA F)) (hD : D.IsRational)
-    (e : DatumEnum D) : Continuous (graphBridgeA D hD e).symm := by sorry
+    (e : DatumEnum D) : Continuous (graphBridgeA D hD e).symm :=
+  bridgeRev_continuous D e
 
 /-- The bridge intertwines the covariant maps with the coefficientwise localized square
 ([FJP] Lemma 4.6 / Lemma 5.1 naturality, 𝓒 side; analogous statements for 𝓑, 𝓓 are
