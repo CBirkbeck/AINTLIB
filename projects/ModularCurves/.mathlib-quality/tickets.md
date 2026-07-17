@@ -22841,3 +22841,29 @@ pending their reply); G0-support (2a)/(2b) queued. (STREAM-OMEGA)
 `specPoint_eq_zero_of_not_inZ` + the level structure's κ̄-independence) next; the
 μ/cubic bridges remain KM-coordinated per v10.307 (split proposed, ε-example boarded).
 (STREAM-OMEGA)
+
+---
+
+## v10.309-OMEGA (2026-07-17, STREAM-OMEGA, window cont.²) — ★★★ THE hArb MARKING PIPELINE IS COMPLETE (level structure ⟹ honest chart coordinates, any base)
+
+**Delivered (axiom-clean, pushed through `3105e6377`):** the full chain
+`naive full level-N structure (N invertible, N > 1) ⟹ both marked sections get honest
+affine chart coordinates on every affine piece of ANY base`:
+
+- **[hArb-2b]** `LocalPresentation.forall_not_mem_range_of_pull_ne` (SectionMarking.lean) —
+  fibrewise-distinct sections of a separated morphism have DISJOINT topological images
+  (KM's `sup_ker_eq_top_of_pull_ne` comaximality + `support_ker`/`support_sup`/`support_top`);
+  `marksAt_of_forall_pull_ne_zero` — fibrewise-nonzero ⟹ `MarksAt` (composing [hArb-2a]'s
+  zero-avoidance ⟹ `Z`-chart (`mem_range_zero_of_not_mem_zChart`) ⟹ [hArb-1] coordinates).
+- **[hArb-2c]** `EllipticCurve.pull_ne_zero_left/right_of_isNaiveFullLevel` +
+  `le_one_of_torsion_generated_by_single` (Moduli/LevelMarking.lean) — a marked level
+  section pulled to zero at a geometric point would make the `N²`-count torsion
+  (`torsion_geometricFibre_rank_two`) cyclic: surjection from `ZMod N` ⟹ `N² ≤ N` ⟹
+  `N ≤ 1`. Generic in `N` (serves both the `ℰ₃` and Legendre/Γ(2) sides).
+
+**hArb residual stack:** (i) translation-to-origin + flex normalization of the marked
+chart (`3•σP = 0 ⟹` flex — the μ-BRIDGE, KM-split per v10.307), (ii) the cubic bridge
+at `Q`, (iii) unit certificates (`a₃`, `3`, B-locus — fibrewise-unit ⟹ unit on shrunken
+affines), (iv) the `isE3Chart` cover assembly. (i)+(ii) are the ONLY
+mathematically-deep gaps and sit in the KM-coordinated division-polynomial split; all
+other layers are now either DONE or mechanical. (STREAM-OMEGA)
