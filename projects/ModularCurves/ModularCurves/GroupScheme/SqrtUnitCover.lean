@@ -179,6 +179,26 @@ theorem sqrtPair_map {B : Type*} [CommRing B] (φ : A →+* B) (d : Aˣ) :
     rfl
   exact hext _ _ hf hg
 
+/-- The identity presentation: a standard étale pair presents its own ring. -/
+def StandardEtalePair.selfPresentation (P : StandardEtalePair A) :
+    StandardEtalePresentation A P.Ring where
+  __ := P
+  x := P.X
+  hasMap := StandardEtalePair.hasMap_X
+  lift_bijective := by
+    have hid : P.lift P.X StandardEtalePair.hasMap_X = AlgHom.id A P.Ring :=
+      StandardEtalePair.algHom_ext (by rw [StandardEtalePair.lift_X, AlgHom.id_apply])
+    rw [hid]
+    exact Function.bijective_id
+
+open scoped TensorProduct in
+/-- Base change of a standard étale algebra along `A → B`: the tensor is the mapped
+pair's algebra. -/
+noncomputable def StandardEtalePair.baseChangeEquiv {B : Type*} [CommRing B]
+    [Algebra A B] (P : StandardEtalePair A) :
+    (B ⊗[A] P.Ring) ≃ₐ[B] (P.map (algebraMap A B)).Ring :=
+  ((StandardEtalePair.selfPresentation P).baseChange).equivRing
+
 /-! ### The scheme-level cover -/
 
 section SchemeLevel
