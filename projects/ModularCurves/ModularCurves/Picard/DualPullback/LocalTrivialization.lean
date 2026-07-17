@@ -235,15 +235,15 @@ theorem localTrivialization_overEquiv_pulledSectionT
       (show (Y.ringCatSheaf.over VY).obj.obj
         (.op (Over.mk (𝟙 VY))) from 1)
   have htail : c.val.app (.op ZY) t = w := by
-    calc
-      _ = c.val.app (.op ZY)
+    have htApplied : c.val.app (.op ZY) t =
+        c.val.app (.op ZY)
           (((pullback g).obj (unitObj U.toScheme)).presheaf.map
             (eqToHom hpre).op
               (((pullbackPushforwardAdjunction g).unit.app
                 (unitObj U.toScheme)).val.app (.op W)
                   (show U.toScheme.presheaf.obj (.op W) from 1))) :=
-        congrArg (fun z ↦ c.val.app (.op ZY) z) ht
-      _ = w := hunit
+      congrArg (fun z ↦ c.val.app (.op ZY) z) ht
+    exact Eq.trans htApplied hunit
   exact app_eq_of_eq_three_compT F a b c hp (.op ZY) x t w hmiddle htail
 
 end AlgebraicGeometry.Scheme.Modules
@@ -307,18 +307,24 @@ theorem dualOverIsoOfIso_hom_terminal_apply_trivializationT
       (show (X.ringCatSheaf.over U).obj.obj
         (.op (Over.mk (𝟙 U))) from 1)
   erw [sheafOfModules_comp_app_apply]
-  rw [ModularCurves.SheafOfModules.restrictOverTrivialization_inv_app_apply]
+  let oneU : (X.ringCatSheaf.over U).obj.obj
+      (.op (Over.mk (𝟙 U))) := 1
   change e.hom.val.app (.op (Over.mk (𝟙 U)))
-      (e.inv.val.app (.op (Over.mk (𝟙 U)))
-        (show (X.ringCatSheaf.over U).obj.obj
-          (.op (Over.mk (𝟙 U))) from 1)) =
-    (show (X.ringCatSheaf.over U).obj.obj
-      (.op (Over.mk (𝟙 U))) from 1)
+      (eR.inv.val.app (.op (Over.mk (𝟙 U))) oneU) = oneU
+  have hrestrict :
+      eR.inv.val.app (.op (Over.mk (𝟙 U))) oneU =
+        e.inv.val.app (.op (Over.mk (𝟙 U))) oneU := by
+    exact ModularCurves.SheafOfModules.restrictOverTrivialization_inv_app_apply
+      X.ringCatSheaf M U e (Over.mk (𝟙 U))
+        (.op (Over.mk (𝟙 U))) oneU
+  have hrestrictApplied := congrArg
+    (fun z ↦ e.hom.val.app (.op (Over.mk (𝟙 U))) z) hrestrict
   have hcomp := congrArg (fun q ↦ q.val.app (.op (Over.mk (𝟙 U))))
     e.inv_hom_id
-  exact ConcreteCategory.congr_hom hcomp
-    (show (X.ringCatSheaf.over U).obj.obj
-      (.op (Over.mk (𝟙 U))) from 1)
+  have hcancel : e.hom.val.app (.op (Over.mk (𝟙 U)))
+      (e.inv.val.app (.op (Over.mk (𝟙 U))) oneU) = oneU :=
+    ConcreteCategory.congr_hom hcomp oneU
+  exact Eq.trans hrestrictApplied hcancel
 
 theorem dualOverIsoOfIso_inv_terminal_apply_oneT
     (M : X.Modules) (U : X.Opens)
