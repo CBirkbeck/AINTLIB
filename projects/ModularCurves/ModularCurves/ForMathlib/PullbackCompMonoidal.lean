@@ -241,7 +241,7 @@ private abbrev presheafModulePushforward {X Y : Scheme.{u}} (f : X ⟶ Y) :=
   PresheafOfModules.pushforward.{u}
     (_root_.PresheafOfModules.schemeRingPresheafHom f)
 
-noncomputable local instance presheafPushforwardIsRightAdjoint
+noncomputable local instance compPresheafPushforwardIsRightAdjoint
     {X Y : Scheme.{u}} (f : X ⟶ Y) :
     (PresheafOfModules.pushforward.{u} f.toRingCatSheafHom.hom).IsRightAdjoint := by
   change (PresheafOfModules.pushforward.{u}
