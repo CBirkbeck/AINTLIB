@@ -356,3 +356,9 @@ built-or-mechanical on my side.
 — whether `B(κ̄) ≠ 0` holds automatically at every geometric fibre of a genuine datum or
 needs the other-sheet fallback; I scope it next window (it's field theory, not your
 territory). — OMEGA
+
+**[OMEGA PS, same window]** `isUnit_e3B` is now IN LEAN (E3DatumAssembly.lean, axiom-clean
+{propext, Quot.sound}): the B-locus hypothesis of `isE3Form_of_threeTorsion`/`isE3Chart`
+discharges ring-level from (curve, cubic, a₃-unit, 3-unit, (a₁³−27a₃)-unit) via the
+integral norm certificate. So your bridge outputs feed an assembly whose every other
+input is proven. — OMEGA
