@@ -158,6 +158,49 @@ theorem thetaChart_tA : thetaChart F (tA F) = tB F := by
   · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le 0 = 0
     exact map_zero _
 
+/-- The rescaling twist is norm-nonincreasing (Gauss-sup, coefficientwise bound). -/
+theorem norm_rescaleRestricted_le {R : Type*} [NormedCommRing R] [IsUltrametricDist R]
+    [NormOneClass R] (a : R) (ha : ‖a‖ ≤ 1) (f : PowerSeries.Restricted R (1 : ℝ)) :
+    ‖rescaleRestricted a ha f‖ ≤ ‖f‖ := by
+  rw [Restricted.norm_eq, Restricted.norm_eq, PowerSeries.gaussNorm_eq]
+  refine Real.iSup_le (fun n => ?_) ?_
+  · show ‖PowerSeries.coeff n (PowerSeries.rescale a f.1)‖ * (1 : ℝ) ^ n ≤ _
+    rw [PowerSeries.coeff_rescale]
+    calc ‖a ^ n * PowerSeries.coeff n f.1‖ * (1 : ℝ) ^ n
+        ≤ ‖PowerSeries.coeff n f.1‖ * (1 : ℝ) ^ n := by
+          refine mul_le_mul_of_nonneg_right ?_ (by positivity)
+          calc ‖a ^ n * PowerSeries.coeff n f.1‖
+              ≤ ‖a ^ n‖ * ‖PowerSeries.coeff n f.1‖ := norm_mul_le _ _
+            _ ≤ 1 * ‖PowerSeries.coeff n f.1‖ := by
+                refine mul_le_mul_of_nonneg_right ?_ (norm_nonneg _)
+                cases n with
+                | zero => rw [pow_zero, norm_one]
+                | succ k =>
+                    exact (norm_pow_le' a k.succ_pos).trans
+                      (pow_le_one₀ (norm_nonneg a) ha)
+            _ = ‖PowerSeries.coeff n f.1‖ := one_mul _
+      _ ≤ PowerSeries.gaussNorm (norm : R → ℝ) 1 f.1 :=
+          PowerSeries.le_gaussNorm (norm : R → ℝ) 1 f.1
+            (Restricted.hasGaussNorm 1 f) n
+  · exact PowerSeries.gaussNorm_nonneg (norm : R → ℝ) 1 f.1 (fun x => norm_nonneg x)
+
+/-- The twisted base map is norm-nonincreasing, hence continuous. -/
+theorem continuous_thetaChart : Continuous (thetaChart F) := by
+  refine AddMonoidHomClass.continuous_of_bound (thetaChart F) 1 fun x => ?_
+  rw [one_mul]
+  show ‖twistB F (jB F x)‖ ≤ ‖x‖
+  refine le_trans ?_ (norm_jB_le F x)
+  show ‖(⟨rescaleRestricted _ _ (jB F x).fst,
+    rescaleRestricted _ _ (jB F x).snd⟩ : JetB F)‖ ≤ ‖jB F x‖
+  calc ‖(⟨rescaleRestricted _ _ (jB F x).fst,
+        rescaleRestricted _ _ (jB F x).snd⟩ : JetB F)‖
+      = max ‖rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le
+          (jB F x).fst‖ ‖rescaleRestricted (LaurentSeriesExample.t F)
+          (norm_t_lt_one F).le (jB F x).snd‖ := JetNorm.norm_def _
+    _ ≤ max ‖(jB F x).fst‖ ‖(jB F x).snd‖ :=
+        max_le_max (norm_rescaleRestricted_le _ _ _) (norm_rescaleRestricted_le _ _ _)
+    _ = ‖jB F x‖ := (JetNorm.norm_def _).symm
+
 /-- The 𝓑-jet of `W` has vanishing `Q`-part. -/
 theorem jB_Wa_snd : (jB F (Wa F)).snd = 0 := by
   refine ofRestricted_injective (R := K) ?_
