@@ -1,1 +1,1 @@
-FOCUS: T901 — de-Tate support layer: (a) drop [IsTateRing A] from presheafValue_concretePair, (b) fill presheafValue_isHuberRing_huber, (c) drop [IsTateRing A] from presheafValue_isAdicComplete. PHASE 2 baseline build first.
+FOCUS: T902 — fill restrictIdeal_le_one/_one_lt/_lt_one in SpvAITopology.lean (general-I mirrors of restrictIdealSingle trio at :809-843; case analysis on restrictIdeal_apply_of_mem/_of_not_mem/_apply_zero + vUnit_mem_cGammaIdeal). Then T903.

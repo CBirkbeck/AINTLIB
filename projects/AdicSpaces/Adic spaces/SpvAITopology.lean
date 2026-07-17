@@ -2282,34 +2282,58 @@ variable {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
 General-`I` mirror of `restrictIdealSingle_le_one` (Huber (2.2)-(2.3) `v|H` mechanics,
 huber2.txt:393-414). -/
 theorem restrictIdeal_le_one {w : Valuation A Γ₀} (I : Ideal A) {a : A}
-    (h : w a ≤ 1) : w.restrictIdeal I a ≤ 1 := by sorry
+    (h : w a ≤ 1) : w.restrictIdeal I a ≤ 1 := by
+  by_cases hva : w a = 0
+  · rw [Valuation.restrictIdeal_apply_zero w I hva]; exact zero_le_one
+  · by_cases hm : Units.mk0 (w a) hva ∈ Valuation.cGammaIdeal w I
+    · rw [Valuation.restrictIdeal_apply_of_mem w I hva hm, ← WithZero.coe_one,
+        WithZero.coe_le_coe, ← Subtype.coe_le_coe]
+      exact_mod_cast Units.val_le_val.mp h
+    · rw [Valuation.restrictIdeal_apply_of_not_mem w I hva hm]; exact zero_le_one
 
 /-- `restrictIdeal` preserves `1 < ·` (a value `> 1` has its unit in `cGammaIdeal`
 via `vUnit_mem_cGammaIdeal`, so it is kept by the restriction). -/
 theorem restrictIdeal_one_lt {w : Valuation A Γ₀} (I : Ideal A) {a : A}
-    (h : 1 < w a) : 1 < w.restrictIdeal I a := by sorry
+    (h : 1 < w a) : 1 < w.restrictIdeal I a := by
+  have hva : w a ≠ 0 := ne_of_gt (lt_trans zero_lt_one h)
+  have hm : Units.mk0 (w a) hva ∈ Valuation.cGammaIdeal w I :=
+    Valuation.vUnit_mem_cGammaIdeal h.le hva
+  rw [Valuation.restrictIdeal_apply_of_mem w I hva hm, ← WithZero.coe_one,
+    WithZero.coe_lt_coe, ← Subtype.coe_lt_coe]
+  exact_mod_cast Units.val_lt_val.mp h
 
 /-- `restrictIdeal` preserves `< 1` (a value `< 1` maps to `< 1`, or to `0 < 1`). -/
 theorem restrictIdeal_lt_one {w : Valuation A Γ₀} (I : Ideal A) {a : A}
-    (h : w a < 1) : w.restrictIdeal I a < 1 := by sorry
+    (h : w a < 1) : w.restrictIdeal I a < 1 := by
+  by_cases hva : w a = 0
+  · rw [Valuation.restrictIdeal_apply_zero w I hva]; exact zero_lt_one
+  · by_cases hm : Units.mk0 (w a) hva ∈ Valuation.cGammaIdeal w I
+    · rw [Valuation.restrictIdeal_apply_of_mem w I hva hm, ← WithZero.coe_one,
+        WithZero.coe_lt_coe, ← Subtype.coe_lt_coe]
+      exact_mod_cast Units.val_lt_val.mp h
+    · rw [Valuation.restrictIdeal_apply_of_not_mem w I hva hm]; exact zero_lt_one
 
-/-- **The characteristic restriction `w|cΓ_w = restrictIdeal w ⊥` is microbial**
+/-- **The characteristic restriction `w|cΓ_w = restrictIdealSingle w 1` is microbial**
 (Huber [Hu2] 3.3(i), huber2.txt:647-656: "Put `u = t|A ∈ Spv A` and `v = u|cΓ_u ∈ Spv A`
-… (d) `v ∈ Spv(A, A°°·A)` … By definition we have `v = u|cΓ_u` and hence
-`v ∈ Spv(A, A°°·A)`", via Lemma 2.5(ii)'s first disjunct `Γ_v = cΓ_v`). At `I = ⊥` the
-ideal branch of `cGammaIdealPos` is empty, so `cGammaIdeal w ⊥` is exactly the
-characteristic subgroup: every positive element of the restricted value group is bounded
-by some `w(a)^{±1}` with `w(a) ≥ 1`, and `w(a)` survives the restriction — precisely
-`IsMicrobial`. -/
-theorem restrictIdeal_bot_isMicrobial (w : Valuation A Γ₀) :
-    Valuation.IsMicrobial (w.restrictIdeal ⊥) := by sorry
+… (d) `v ∈ Spv(A, A°°·A)`", via Lemma 2.5(ii)'s first disjunct `Γ_v = cΓ_v`). Since
+`(w 1)⁻¹ = 1 ∈ cΓ_w`, `cGammaSingle w 1 = cΓ_w` (`cGammaSingle_eq_cGamma_of_mem`), so
+`restrictIdealSingle w 1` is exactly the characteristic restriction — microbial by
+`restrictIdealSingle_isMicrobial_of_mem`. -/
+theorem restrictIdealSingle_one_isMicrobial (w : Valuation A Γ₀) (hg : w 1 ≠ 0) :
+    Valuation.IsMicrobial (w.restrictIdealSingle 1 hg) := by
+  refine restrictIdealSingle_isMicrobial_of_mem w 1 hg ?_
+  have h1 : Units.mk0 (w 1) hg = 1 := Units.ext (by rw [Units.val_mk0, map_one, Units.val_one])
+  rw [h1, inv_one]
+  exact one_mem _
 
 /-- **The characteristic restriction lies in `Spv(A, I)` for every ideal `I`**
-(Huber [Hu2] 3.3(i)(d) via the microbial disjunct). Unconditional in `w` — in
-particular no nonvanishing witness `w g ≠ 0` is needed, unlike
-`ofValuation_restrictIdealSingle_isInSpvAI` (this is what makes the general-Huber
-Lemma-3.3(i) witness work when the support may meet the ideal of definition). -/
-theorem ofValuation_restrictIdeal_bot_isInSpvAI (w : Valuation A Γ₀) (I : Ideal A) :
-    Spv.IsInSpvAI (ofValuation (w.restrictIdeal ⊥)) I := by sorry
+(Huber [Hu2] 3.3(i)(d) via the microbial disjunct). Since `restrictIdealSingle w 1` is
+microbial, `ofValuation` of it is `IsInSpvAI _ I` for ANY ideal `I` — the microbial
+disjunct is `I`-independent, so this holds regardless of where the ideal of definition
+sits relative to `supp`. -/
+theorem ofValuation_restrictIdealSingle_one_isInSpvAI (w : Valuation A Γ₀) (hg : w 1 ≠ 0)
+    (I : Ideal A) :
+    Spv.IsInSpvAI (ofValuation (w.restrictIdealSingle 1 hg)) I :=
+  Or.inr (isMicrobial_canon_of_restricted _ (restrictIdealSingle_one_isMicrobial w hg))
 
 end ValuationSpectrum

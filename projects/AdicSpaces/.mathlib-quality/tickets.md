@@ -866,25 +866,22 @@ continuity engine + `restrictIdealSingle` in the [Hu2] 3.3(i) witness.
 - **Generality**: general `[IsHuberRing A]` base; no new hypotheses.
 
 ### [T902] `restrictIdeal` value-transfer trio (general I)
-- **Status**: open — **File**: SpvAITopology.lean (skeleton at tail) — **Depends**: none — **Type**: lemma ×3
-- Fill `restrictIdeal_le_one`, `restrictIdeal_one_lt`, `restrictIdeal_lt_one`. Mirror the
-  `restrictIdealSingle` trio (SpvAITopology.lean:809-843) case-for-case using
-  `restrictIdeal_apply_of_mem`/`_of_not_mem`/`_apply_zero` (CharacteristicSubgroup.lean)
-  + `vUnit_mem_cGammaIdeal` (:187) for the `≥ 1` branch.
-- **Sources**: Huber (2.2)-(2.3) `v|H` mechanics (huber2.txt:393-414).
-- **Generality**: any ideal I (the trio is true generally; only microbiality needs ⊥).
+- **Status**: done (2026-07-17) — **File**: SpvAITopology.lean — **Depends**: none — **Type**: lemma ×3
+- **Progress**: `restrictIdeal_le_one`/`_one_lt`/`_lt_one` filled, mirroring the
+  `restrictIdealSingle` trio case-for-case via `restrictIdeal_apply_of_mem`/`_of_not_mem`/
+  `_apply_zero` + `vUnit_mem_cGammaIdeal`. All three axiom-clean. (General API; kept for
+  reuse though the critical-path witness in T906 uses `restrictIdealSingle 1` instead.)
 
-### [T903] Characteristic restriction: microbial + `IsInSpvAI`
-- **Status**: open — **File**: SpvAITopology.lean (skeleton at tail) — **Depends**: T902 (uses the trio's case mechanics) — **Type**: lemma ×2
-- Fill `restrictIdeal_bot_isMicrobial` (each positive γ of `cGammaIdeal w ⊥` carries a
-  bounding witness `a` with `1 ≤ w a` by definition of `cGammaIdealPos` — ideal branch
-  empty at ⊥ — and `w a ≥ 1` survives restriction) and
-  `ofValuation_restrictIdeal_bot_isInSpvAI` (`Or.inr` via `isMicrobial_canon_of_restricted`,
-  cf. its use at SpvAITopology.lean:804).
-- ⚠ Prior-B2 (2026-06-22, docstring-recorded): general-I `ofValuation_restrictIdeal_isInSpvAI`
-  is FALSE. These lemmas are at `I = ⊥` where the cGammaIdeal ideal-branch is empty — do
-  NOT generalize the microbial claim beyond ⊥.
-- **Sources**: [Hu2] 3.3(i)(d) (huber2.txt:647-656) via Lemma 2.5(ii) first disjunct.
+### [T903] Characteristic restriction: microbial + `IsInSpvAI` — **DONE 2026-07-17**
+- **Status**: done (2026-07-17) — **File**: SpvAITopology.lean — **Depends**: none — **Type**: lemma ×2
+- **Progress**: REFINED the encoding from `restrictIdeal ⊥` to `restrictIdealSingle w 1`
+  (= Huber's `u|cΓ_u`, since `(w 1)⁻¹ = 1 ∈ cΓ_w` gives `cGammaSingle w 1 = cΓ_w`). This
+  reuses the PROVEN `restrictIdealSingle_isMicrobial_of_mem` + the existing
+  `restrictIdealSingle_le_one/_lt_one/_one_lt` (no new trio needed on the critical path).
+  Filled `restrictIdealSingle_one_isMicrobial` (2-line: `mk0 (w 1) hg = 1`, `1 ∈ cΓ_w`) and
+  `ofValuation_restrictIdealSingle_one_isInSpvAI` (`Or.inr` microbial disjunct, I-independent).
+  Both axiom-clean. Prior-B2 (2026-06-22) respected: microbiality is at the characteristic
+  subgroup only, not a general-I restriction claim.
 
 ### [T904] A°°-form decay: `cofinalValue_ideal_pow_lt_of_le_one_on_ideal`
 - **Status**: open — **File**: SpvAI.lean (skeleton at tail) — **Depends**: none — **Type**: lemma
