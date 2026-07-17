@@ -345,6 +345,102 @@ structure DatumEnum (D : RationalLocData (JetA F)) where
   /-- Enumeration lands in `T`. -/
   hf' : ∀ i, f i ∈ D.T
 
+section GraphBridgeInfra
+
+open GraphKoszul
+
+/-- Quotients of ultrametric seminormed rings are ultrametric: the quotient norm
+inherits the max inequality up to `ε` via near-optimal representatives. -/
+instance instIsUltrametricDistIdealQuotient {R : Type*} [SeminormedCommRing R]
+    [IsUltrametricDist R] (I : Ideal R) : IsUltrametricDist (R ⧸ I) where
+  dist_triangle_max x y z := by
+    rw [dist_eq_norm, dist_eq_norm, dist_eq_norm]
+    refine le_of_forall_pos_le_add fun ε hε => ?_
+    obtain ⟨a, ha, han⟩ := Ideal.Quotient.norm_mk_lt (x - y) hε
+    obtain ⟨b, hb, hbn⟩ := Ideal.Quotient.norm_mk_lt (y - z) hε
+    have hxz : x - z = Ideal.Quotient.mk I (a + b) := by rw [map_add, ha, hb]; ring
+    calc ‖x - z‖ = ‖Ideal.Quotient.mk I (a + b)‖ := by rw [hxz]
+      _ ≤ ‖a + b‖ := Ideal.Quotient.norm_mk_le _ _
+      _ ≤ max ‖a‖ ‖b‖ := IsUltrametricDist.norm_add_le_max a b
+      _ ≤ max (‖x - y‖ + ε) (‖y - z‖ + ε) := max_le_max han.le hbn.le
+      _ = max ‖x - y‖ ‖y - z‖ + ε := max_add_add_right _ _ _
+
+variable (D : RationalLocData (JetA F)) (e : DatumEnum D)
+
+/-- The enumerated datum spans `({s} ∪ range f) = ⊤` (rationality + covering). -/
+theorem DatumEnum.span_eq_top (hD : D.IsRational) :
+    Ideal.span ({D.s} ∪ Set.range e.f) = ⊤ := by
+  rw [← top_le_iff, ← hD.span_eq_top]
+  refine Ideal.span_mono fun t ht => ?_
+  obtain ⟨i, rfl⟩ := e.hf t ht
+  exact Set.mem_union_right _ ⟨i, rfl⟩
+
+/-- Scalars into `P_𝓐` (constant restricted series). -/
+noncomputable def bridgeConst (m : ℕ) : JetA F →+* PA F m :=
+  polyToP.comp MvPolynomial.C
+
+/-- The base map `𝓐 → 𝓐_α = P_𝓐 ⧸ I_𝓐` (constants, then the graph quotient). -/
+noncomputable def bridgeBase : JetA F →+* locA F e.m D.s e.f :=
+  (Ideal.Quotient.mk (IA F e.m D.s e.f)).comp (bridgeConst e.m)
+
+/-- The variable images `X̄ᵢ ∈ 𝓐_α`. -/
+noncomputable def bridgeX (i : Fin e.m) : locA F e.m D.s e.f :=
+  Ideal.Quotient.mk (IA F e.m D.s e.f) (polyToP (MvPolynomial.X i))
+
+/-- The graph relation in the quotient: `s̄ · X̄ᵢ = f̄ᵢ` ([FJP] (4.6)). -/
+theorem bridgeBase_s_mul_X (i : Fin e.m) :
+    bridgeBase D e D.s * bridgeX D e i = bridgeBase D e (e.f i) := by
+  have hmem : polyToP (MvPolynomial.C D.s) * polyToP (MvPolynomial.X i) -
+      polyToP (MvPolynomial.C (e.f i)) ∈ IA F e.m D.s e.f := by
+    have hrw : rA F e.m D.s e.f i =
+        polyToP (MvPolynomial.C D.s) * polyToP (MvPolynomial.X i) -
+          polyToP (MvPolynomial.C (e.f i)) := by
+      rw [rA, map_sub, map_mul]
+    rw [← hrw]
+    exact Ideal.subset_span ⟨i, rfl⟩
+  show Ideal.Quotient.mk (IA F e.m D.s e.f) (polyToP (MvPolynomial.C D.s)) *
+      Ideal.Quotient.mk (IA F e.m D.s e.f) (polyToP (MvPolynomial.X i)) =
+    Ideal.Quotient.mk (IA F e.m D.s e.f) (polyToP (MvPolynomial.C (e.f i)))
+  rw [← RingHom.map_mul (Ideal.Quotient.mk (IA F e.m D.s e.f))]
+  exact Ideal.Quotient.eq.mpr hmem
+
+/-- `s̄` is a unit in `𝓐_α` ([FJP] (4.3): the span decomposition
+`1 = c·s + Σ dᵢ·fᵢ` becomes `1 = s̄·(c̄ + Σ d̄ᵢ X̄ᵢ)` after the graph relations). -/
+theorem isUnit_bridgeBase_s (hD : D.IsRational) : IsUnit (bridgeBase D e D.s) := by
+  have h1 : (1 : JetA F) ∈ Ideal.span ({D.s} ∪ Set.range e.f) := by
+    rw [e.span_eq_top D hD]; trivial
+  rw [Ideal.span_union, Submodule.mem_sup] at h1
+  obtain ⟨x, hx, y, hy, hxy⟩ := h1
+  obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp hx
+  rw [Ideal.mem_span_range_iff_exists_fun] at hy
+  obtain ⟨d, rfl⟩ := hy
+  have hterm : ∀ i, bridgeBase D e (d i * e.f i) =
+      bridgeBase D e (d i) * (bridgeBase D e D.s * bridgeX D e i) := fun i => by
+    rw [RingHom.map_mul (bridgeBase D e), bridgeBase_s_mul_X]
+  have happ : bridgeBase D e c * bridgeBase D e D.s +
+      ∑ i, bridgeBase D e (d i) * (bridgeBase D e D.s * bridgeX D e i) = 1 := by
+    have h0 := congrArg (bridgeBase D e) hxy
+    rw [RingHom.map_one (bridgeBase D e), RingHom.map_add (bridgeBase D e),
+      RingHom.map_mul (bridgeBase D e),
+      show (bridgeBase D e) (∑ i, d i * e.f i) = ∑ i, bridgeBase D e (d i * e.f i) from
+        map_sum (bridgeBase D e) _ _,
+      Finset.sum_congr rfl fun i _ => hterm i] at h0
+    exact h0
+  have hmul : bridgeBase D e D.s *
+      (bridgeBase D e c + ∑ i, bridgeBase D e (d i) * bridgeX D e i) = 1 := by
+    rw [mul_add, Finset.mul_sum]
+    calc bridgeBase D e D.s * bridgeBase D e c +
+        ∑ i, bridgeBase D e D.s * (bridgeBase D e (d i) * bridgeX D e i)
+        = bridgeBase D e c * bridgeBase D e D.s +
+          ∑ i, bridgeBase D e (d i) * (bridgeBase D e D.s * bridgeX D e i) := by
+          rw [mul_comm (bridgeBase D e D.s) (bridgeBase D e c)]
+          congr 1
+          exact Finset.sum_congr rfl fun i _ => by ring
+      _ = 1 := happ
+  exact IsUnit.of_mul_eq_one _ hmul
+
+end GraphBridgeInfra
+
 /-- The graph bridge for 𝓐 ([FJP] Lemma 1.1: the separated completion of the graph
 quotient "is therefore canonically the underlying Tate algebra of Huber's rational
 localization `E_α`"; by Lemma 4.3 the ideal is closed so no further completion is needed).
