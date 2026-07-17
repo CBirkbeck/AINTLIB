@@ -91,6 +91,22 @@ theorem Scheme.Hom.affineIntersectionFunctor_obj_finitePresentation
     rw [π.affineIntersectionFunctor_obj_empty U]
     exact Algebra.FinitePresentation.self _
 
+/-- The affine-intersection functor of a proper family has surjective canonical pair maps. -/
+theorem Scheme.Hom.isSeparatedAffineIntersectionFunctor_affineIntersectionFunctor_of_isProper
+    (π : X ⟶ S) [IsProper π] [IsAffine S]
+    (U : J → X.Opens) (hcover : IsOpenCover U)
+    (hU : ∀ s : Finset J, s.Nonempty → IsAffineOpen (X.finiteIntersectionOpen U s)) :
+    Scheme.GlueData.IsSeparatedAffineIntersectionFunctor
+      (π.affineIntersectionFunctor U) := by
+  let hopen := π.isOpenAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  let hpush := π.isPushoutAffineIntersectionFunctor_affineIntersectionFunctor U hU
+  apply (Scheme.GlueData.isSeparated_affineIntersectionToSpec_iff
+    (π.affineIntersectionFunctor U) hopen hpush).mp
+  letI : IsIso (π.affineIntersectionGluedToOriginal U hU) :=
+    π.isIso_affineIntersectionGluedToOriginal U hcover hU
+  rw [← π.affineIntersectionGluedToOriginal_comp_toSpec U hU]
+  infer_instance
+
 /-- A spread affine-intersection model recovers the original scheme after base change
 from its finite stage. -/
 noncomputable def Scheme.Hom.affineIntersectionModelBaseChangeIso
