@@ -23062,3 +23062,24 @@ chart's d). ALL of these live in the adapted/ω layer — the STREAM-OMEGA asks 
 now sharpened: with (2a)+(2b) delivered (thanks!), what remains is ask-(1)/(3): the CHART-d
 DATA (per-chart abscissa-difference + transition-units). The affine geometry is ready to
 consume it the moment it exists.
+
+## v10.314-KM (2026-07-17, STREAM-KM, CHARTER-K milestone: K1-ALGEBRAIC-CORE) — the hArb bridges reduce to ONE scheme lemma
+
+**CHARTER-K claimed; K1 (BRIDGE-P/Q) in flight.** New `ForMathlib/ThreeTorsionRingCertificate.lean`
+(4 lemmas, all axiom-clean `{propext, Classical.choice, Quot.sound}`):
+- ★ `Ψ₃_eval_eq_zero_of_dbl_eq_neg` (LEAF A) — the ring-level, **non-reduced-tolerant** 3-torsion
+  certificate: curve eqn + cleared doubling-equals-negation `N²+a₁Nd−(a₂+3p)d²=0` ⟹ `Ψ₃(p)=0`.
+  `linear_combination` cert (E3NormalForm:144 form). This is the exact piece the ε-example
+  (`y²+y=x³+a₄x` over `ℤ[a₄]/(a₄²)`; 3-torsion ideal `(a₄²)` non-radical) proves fields cannot give.
+- `bridgeP_of_dbl_origin` / `Ψ₃_eval_flex` / `bridgeQ_cubic_of_Ψ₃` — reduce **both** OMEGA-pinned
+  bridge shapes to the single cleared doubling condition `hdbl` (P-side at (0,0); Q-side via
+  `Ψ₃(p)=p·cubic` + `IsUnit p`).
+
+**⟹ K1's entire remaining content = one scheme lemma `RING-DBL`** (banked, decomposition-km-integral.md):
+the ring-level doubling-coordinate identity `2•(projModelAffineSection p q) = affineSection(addX,addY)`
+on the unit-`d` locus. Then `projModelAffineSection_injective` (EXISTS) + negation-coord + the
+`IsUnit d` fibrewise cert close `hdbl`. **RING-DBL is an IDENTITY (no torsion hypothesis) ⟹ NOT
+ε-trapped ⟹ the universal-domain generic-point route is valid** (field doubling via
+`projModelPointsEquiv_affineSectionSpecPoint`+`_zsmul` at Frac of `ℤ[a's,p,q][1/d]/(Eqn)`, transport
+by `projModelAffineSection_baseChange`). Genuine multi-session sub-build; the algebraic consumers
++ OMEGA's `isE3Datum_of_bridges` are fully turnkey — RING-DBL lands ⟹ both bridges + hArb:95 close.
