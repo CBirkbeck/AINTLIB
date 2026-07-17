@@ -231,6 +231,13 @@ theorem point_pair_left_snd (E : EllipticCurve S) {T : Scheme.{u}} {g : T ⟶ S}
 variable {k : Type u} [Field k] {F : EllipticCurve (Spec (CommRingCat.of k))}
   {R S' : CommRingCat.{u}} {φ : R ⟶ S'}
 
+/-- In a commutative ring, an ideal that squares to zero annihilates products of its members:
+if `I ^ 2 = ⊥` then `a * b = 0` for all `a b ∈ I`. -/
+private theorem mul_eq_zero_of_mem_of_sq_eq_bot {A : Type*} [CommRing A] {I : Ideal A}
+    (hI : I ^ 2 = ⊥) {a b : A} (ha : a ∈ I) (hb : b ∈ I) : a * b = 0 := by
+  have h1 : a * b ∈ I ^ 2 := by rw [sq]; exact Ideal.mul_mem_mul ha hb
+  simpa [hI] using h1
+
 /-- `Spec` of a surjection with nilpotent kernel is surjective on points. -/
 private theorem specMap_base_surjective (hφ : Function.Surjective φ.hom)
     (hφ2 : RingHom.ker φ.hom ^ 2 = ⊥) :
@@ -239,10 +246,7 @@ private theorem specMap_base_surjective (hφ : Function.Surjective φ.hom)
   have hker : RingHom.ker φ.hom ≤ p.asIdeal := by
     intro x hx
     have hx2 : x ^ 2 = 0 := by
-      have : x ^ 2 ∈ RingHom.ker φ.hom ^ 2 := by
-        rw [sq, sq]
-        exact Ideal.mul_mem_mul hx hx
-      simpa [hφ2] using this
+      rw [sq]; exact mul_eq_zero_of_mem_of_sq_eq_bot hφ2 hx hx
     exact p.isPrime.mem_of_pow_mem 2 (hx2 ▸ p.asIdeal.zero_mem)
   have hp : p ∈ Set.range (PrimeSpectrum.comap φ.hom) := by
     rw [range_comap_of_surjective _ _ hφ]
@@ -1135,12 +1139,8 @@ private theorem pointSharp_add {U : (F.E).Opens} (hU : IsAffineOpen U)
       commutes' := fun c ↦ pointSharp_comp_π P₂ hp₂ c } with hp₂'
   set pT := Algebra.TensorProduct.lift p₁ p₂ (fun _ _ ↦ Commute.all _ _) with hpT
   set I : Ideal ↑R := RingHom.ker φ.hom with hI
-  have hII : ∀ a ∈ I, ∀ b ∈ I, a * b = 0 := by
-    intro a ha b hb
-    have h2 : a * b ∈ RingHom.ker φ.hom ^ 2 := by
-      rw [sq]; exact Ideal.mul_mem_mul ha hb
-    rw [hφ2, Ideal.mem_bot] at h2
-    exact h2
+  have hII : ∀ a ∈ I, ∀ b ∈ I, a * b = 0 :=
+    fun a ha b hb => mul_eq_zero_of_mem_of_sq_eq_bot hφ2 ha hb
   have hclose : ∀ (P : F.Point t) (hp : ∀ x : ↑(Spec R), (P.1).base x ∈ U)
       (hres0 : Point.restrict F (Spec.map φ) P = 0) (c : ↑Γ(F.E, U)),
       (pointSharp P.1 hp).hom c - algebraMap _ ↑R (ε' c) ∈ I := by
