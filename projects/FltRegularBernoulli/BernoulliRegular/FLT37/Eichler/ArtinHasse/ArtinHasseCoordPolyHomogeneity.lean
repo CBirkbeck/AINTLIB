@@ -6,9 +6,12 @@ public import BernoulliRegular.CyclotomicUnits.KummerLogNormalization.ArtinHasse
 # Homogeneity of the Artin-Hasse normalized coordinate polynomial powers
 
 The bookkeeping polynomial `samePrimeFiniteArtinHasseNormalizedCoordPoly N x =
-∑_{n<N} monomial(n+1)(c_{n+1}·x^{n+1})` (where `c_{n+1}` is the `(n+1)`-th Artin-Hasse coefficient) is
-the substitution `T ↦ x·T` of the **unscaled** polynomial `samePrimeFiniteArtinHasseNormalizedCoordPoly
-N 1 = ∑_{n<N} monomial(n+1)(c_{n+1})`.  Consequently each coefficient of a power factors a clean `x^d`:
+∑_{n<N} monomial(n+1)(c_{n+1}·x^{n+1})`
+(where `c_{n+1}` is the `(n+1)`-th Artin-Hasse coefficient) is
+the substitution `T ↦ x·T` of the **unscaled** polynomial
+`samePrimeFiniteArtinHasseNormalizedCoordPoly
+N 1 = ∑_{n<N} monomial(n+1)(c_{n+1})`.
+Consequently each coefficient of a power factors a clean `x^d`:
 
   `coeff_d ((Poly N x)^a) = coeff_d ((Poly N 1)^a) · x^d`.
 
@@ -62,7 +65,8 @@ theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_eq_comp_C_mul_X
 omit [NumberField.IsCMField K] in
 /-- **Homogeneity of the coordinate-polynomial powers** (proven): `coeff_d ((Poly N x)^a) = coeff_d
 ((Poly N 1)^a) · x^d`.  Substitution `T ↦ x·T` (`…_eq_comp_C_mul_X`) commutes with taking the `a`-th
-power (`comp` is a ring hom in the first argument), and `Polynomial.comp_C_mul_X_coeff` reads off the
+power (`comp` is a ring hom in the first argument),
+and `Polynomial.comp_C_mul_X_coeff` reads off the
 `x^d` factor. -/
 theorem samePrimeFiniteArtinHasseNormalizedCoordPoly_pow_coeff_eq_mul_pow
     (N a d : ℕ) (x : ValuedIntegerRing p K) :
