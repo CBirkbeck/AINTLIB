@@ -343,7 +343,10 @@ T704, by a fresh `/develop --continue`.
 - **Source**: [FJP] Lemma 4.2 proof ¶1 — full quote in file docstring + L3.3.
 
 ### [T403] `mapRestricted` + `polyToP`
-- **Status**: open | **Depends**: T102 | **Type**: def-completion (L3.4 + `polyToP`)
+- **Status**: **DONE** (`mapRestricted` general-radius via `isRestrictedGauss_abs_iff`
+  squeeze; `norm_mapRestricted_le` via `le_gaussNorm` + StrongPos; `polyToP` via
+  `MvPolynomial.IsRestrictedGauss` + `coeToMvPowerSeries.ringHom` laws.)
+  | **Type**: def-completion (L3.4 + `polyToP`)
 - **Sorries**: `mapRestricted` membership + hom fields, `norm_mapRestricted_le`, `polyToP`.
 - **Sketch**: `MvPowerSeries.map` coefficient formula; decay via `‖φ x‖ ≤ ‖x‖`; `polyToP`
   via vendored `MvPolynomial.toMvRestricted` (or coefficient-finsupp embedding).

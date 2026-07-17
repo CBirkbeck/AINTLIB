@@ -205,15 +205,36 @@ multivariate power series ([FJP] Lemma 4.1's ambient maps). -/
 noncomputable def mapRestricted (φ : R →+* S) (hφ : ∀ x, ‖φ x‖ ≤ ‖x‖)
     (c : Fin n → ℝ) :
     MvPowerSeries.Restricted R c →+* MvPowerSeries.Restricted S c where
-  toFun f := ⟨MvPowerSeries.map φ f.1, by sorry⟩
-  map_one' := by sorry
-  map_mul' := by sorry
-  map_zero' := by sorry
-  map_add' := by sorry
+  toFun f := ⟨MvPowerSeries.map φ f.1, by
+    show MvPowerSeries.IsRestrictedGauss _ _
+    rw [← MvPowerSeries.isRestrictedGauss_abs_iff]
+    have hf : MvPowerSeries.IsRestrictedGauss c f.1 := f.2
+    rw [← MvPowerSeries.isRestrictedGauss_abs_iff, MvPowerSeries.IsRestrictedGauss] at hf
+    rw [MvPowerSeries.IsRestrictedGauss]
+    refine squeeze_zero (fun t => mul_nonneg (norm_nonneg _)
+      (Finset.prod_nonneg fun i _ => pow_nonneg (abs_nonneg _) _)) (fun t => ?_) hf
+    rw [MvPowerSeries.coeff_map]
+    exact mul_le_mul_of_nonneg_right (hφ _)
+      (Finset.prod_nonneg fun i _ => pow_nonneg (abs_nonneg _) _)⟩
+  map_one' := Subtype.ext (map_one (MvPowerSeries.map φ))
+  map_mul' f g := Subtype.ext (map_mul (MvPowerSeries.map φ) f.1 g.1)
+  map_zero' := Subtype.ext (map_zero (MvPowerSeries.map φ))
+  map_add' f g := Subtype.ext (map_add (MvPowerSeries.map φ) f.1 g.1)
 
 theorem norm_mapRestricted_le (φ : R →+* S) (hφ : ∀ x, ‖φ x‖ ≤ ‖x‖) (c : Fin n → ℝ)
     [StrongPos c] (f : MvPowerSeries.Restricted R c) :
-    ‖mapRestricted φ hφ c f‖ ≤ ‖f‖ := by sorry
+    ‖mapRestricted φ hφ c f‖ ≤ ‖f‖ := by
+  rw [MvRestricted.norm_eq, MvPowerSeries.gaussNorm]
+  refine Real.iSup_le (fun t => ?_) (norm_nonneg f)
+  show ‖MvPowerSeries.coeff t (MvPowerSeries.map φ f.1)‖ * _ ≤ _
+  rw [MvPowerSeries.coeff_map]
+  calc ‖φ (MvPowerSeries.coeff t f.1)‖ * t.prod (c · ^ ·)
+      ≤ ‖MvPowerSeries.coeff t f.1‖ * t.prod (c · ^ ·) :=
+        mul_le_mul_of_nonneg_right (hφ _)
+          (Finset.prod_nonneg fun i _ => pow_nonneg (StrongPos_pos c i).le _)
+    _ ≤ ‖f‖ := by
+        rw [MvRestricted.norm_eq]
+        exact MvPowerSeries.le_gaussNorm _ _ _ (MvRestricted.hasGaussNorm _ f) t
 
 end MapHom
 
@@ -234,7 +255,16 @@ variable {E : Type*} [NormedCommRing E] [IsUltrametricDist E] [NormOneClass E]
   [CompleteSpace E] {m : ℕ}
 
 /-- The scalar embedding `MvPolynomial → P_E` ([FJP] (4.4)'s dense polynomial subring). -/
-noncomputable def polyToP : MvPolynomial (Fin m) E →+* P E m := by sorry
+noncomputable def polyToP : MvPolynomial (Fin m) E →+* P E m where
+  toFun q := ⟨q.toMvPowerSeries, MvPolynomial.IsRestrictedGauss _ q⟩
+  map_one' := Subtype.ext (map_one (MvPolynomial.coeToMvPowerSeries.ringHom
+    (σ := Fin m) (R := E)))
+  map_mul' q r := Subtype.ext (map_mul (MvPolynomial.coeToMvPowerSeries.ringHom
+    (σ := Fin m) (R := E)) q r)
+  map_zero' := Subtype.ext (map_zero (MvPolynomial.coeToMvPowerSeries.ringHom
+    (σ := Fin m) (R := E)))
+  map_add' q r := Subtype.ext (map_add (MvPolynomial.coeToMvPowerSeries.ringHom
+    (σ := Fin m) (R := E)) q r)
 
 /-- The base change `E[T] → E⟨T⟩` is **flat** ([FJP] Lemma 4.2, proof: "Noetherian adic
 completion is flat [8, Lemma 10.97.2, Tag 00MB], and localization preserves flatness";
