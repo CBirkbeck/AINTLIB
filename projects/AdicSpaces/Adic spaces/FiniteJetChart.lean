@@ -90,20 +90,67 @@ theorem chartEquiv_canonicalMap_W : True := by sorry
 
 /-! ### Failure of stable uniformity ([FJP] Corollary 3.2) -/
 
+/-- Power-boundedness transports along a bi-continuous ring isomorphism. -/
+theorem isPowerBounded_map_of_ringEquiv {A B : Type*}
+    [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
+    [CommRing B] [TopologicalSpace B] [IsTopologicalRing B]
+    (e : A ≃+* B) (he : Continuous e) (he' : Continuous e.symm)
+    {x : A} (hx : TopologicalRing.IsPowerBounded x) :
+    TopologicalRing.IsPowerBounded (e x) := by
+  intro U hU
+  have hUA : ⇑e.symm ⁻¹' (⇑e ⁻¹' U) ∈ nhds (0 : B) := by
+    refine he'.continuousAt.preimage_mem_nhds ?_
+    rw [map_zero]
+    refine he.continuousAt.preimage_mem_nhds ?_
+    rw [map_zero]
+    exact hU
+  obtain ⟨V, hV, hSV⟩ := hx (⇑e ⁻¹' U)
+    (he.continuousAt.preimage_mem_nhds (by rw [map_zero]; exact hU))
+  refine ⟨⇑e.symm ⁻¹' V, he'.continuousAt.preimage_mem_nhds
+    (by rw [map_zero]; exact hV), ?_⟩
+  rintro _ ⟨s, ⟨n, rfl⟩, v, hv, rfl⟩
+  have hxv : x ^ n * e.symm v ∈ ⇑e ⁻¹' U :=
+    hSV ⟨x ^ n, ⟨n, rfl⟩, e.symm v, hv, rfl⟩
+  show e x ^ n * v ∈ U
+  have heq : e x ^ n * v = e (x ^ n * e.symm v) := by
+    rw [map_mul, map_pow, RingEquiv.apply_symm_apply]
+  rw [heq]
+  exact hxv
+
 /-- Uniformity is a topological-ring invariant: it transports along continuous ring
 isomorphisms with continuous inverse. -/
 theorem isUniform_of_ringEquiv {A B : Type*}
     [CommRing A] [TopologicalSpace A] [IsTopologicalRing A]
     [CommRing B] [TopologicalSpace B] [IsTopologicalRing B]
     (e : A ≃+* B) (he : Continuous e) (he' : Continuous e.symm)
-    (h : TopologicalRing.IsUniform A) : TopologicalRing.IsUniform B := by sorry
+    (h : TopologicalRing.IsUniform A) : TopologicalRing.IsUniform B := by
+  constructor
+  intro U hU
+  obtain ⟨V, hV, hSV⟩ := h.isBounded_powerBounded (⇑e ⁻¹' U)
+    (he.continuousAt.preimage_mem_nhds (by rw [map_zero]; exact hU))
+  refine ⟨⇑e.symm ⁻¹' V, he'.continuousAt.preimage_mem_nhds
+    (by rw [map_zero]; exact hV), ?_⟩
+  rintro _ ⟨s, hs, v, hv, rfl⟩
+  have hsA : TopologicalRing.IsPowerBounded (e.symm s) :=
+    isPowerBounded_map_of_ringEquiv e.symm he' (by simpa using he) hs
+  have hmem : e.symm s * e.symm v ∈ ⇑e ⁻¹' U :=
+    hSV ⟨e.symm s, hsA, e.symm v, hv, rfl⟩
+  show s * v ∈ U
+  have heq : s * v = e (e.symm s * e.symm v) := by
+    rw [map_mul, RingEquiv.apply_symm_apply, RingEquiv.apply_symm_apply]
+  rw [heq]
+  exact hmem
 
 /-- The chart is not uniform ([FJP] Cor 3.2, via `not_isUniform_JetB`). -/
 theorem not_isUniform_chart :
-    ¬ TopologicalRing.IsUniform (presheafValue (chartDatum F)) := by sorry
+    ¬ TopologicalRing.IsUniform (presheafValue (chartDatum F)) := fun h =>
+  not_isUniform_JetB F
+    (isUniform_of_ringEquiv (chartEquiv F) (chartEquiv_continuous F)
+      (chartEquiv_symm_continuous F) h)
 
 /-- **[FJP] Corollary 3.2**: 𝓐 is not stably uniform. -/
-theorem not_isStablyUniform_JetA : ¬ TopologicalRing.IsStablyUniform (JetA F) := by sorry
+theorem not_isStablyUniform_JetA : ¬ TopologicalRing.IsStablyUniform (JetA F) := fun h =>
+  not_isUniform_chart F ⟨h.presheafValue_isUniform (chartDatum F)⟩
 
 end
 
