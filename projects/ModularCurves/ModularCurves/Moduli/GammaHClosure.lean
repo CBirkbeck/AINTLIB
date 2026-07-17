@@ -106,6 +106,21 @@ theorem gammaFullNaive_affineOverEll (N : ℕ) [NeZero N] (hinv : IsUnit (N : R)
   haveI := hfin
   exact ⟨d.Z, d.f, inferInstance, @d.eqv, @d.nat⟩
 
+/-- **[T-E9 CONTENT, first half] (Loeffler Prop 3.8.2–3.8.3)** — the closure form of the
+`Rigid ∧ Representable` half of `gammaFullNaive_representable` (Representability:646,
+YN-side): for `N ≥ 3` invertible the naive full-level problem is rigid and representable,
+gated on exactly {KM 2.7.2 keystones, the shared engine}. The smooth-affine conjunct of
+T-E9 (an engine-output refinement) is NOT covered here. -/
+theorem gammaFullNaive_rigid_and_representable (N : ℕ) [NeZero N] (hN : 3 ≤ (N : ℤ))
+    (hinv : IsUnit (N : R)) :
+    (gammaFullNaiveProblem R N).Rigid ∧ (gammaFullNaiveProblem R N).Representable := by
+  have hrep : (gammaFullNaiveProblem R N).Representable :=
+    (ModuliProblem.representable_iff_rigidNoeth _
+      (gammaFullNaive_affineOverEll R N hinv)).mpr
+      ⟨(gammaFullNaive_affineOverEll R N hinv).relativelyRepresentable,
+       gammaFullNaive_rigidNoeth R N hN hinv⟩
+  exact ⟨ModuliProblem.rigid_of_representable hrep, hrep⟩
+
 /-- **[T-H8 CONTENT] (GME Thm 2.6.8 scope; KM 4.7.2/5.1)** — the closure form of
 `gammaFullDrinfeld_representable`: for `N ≥ 3` invertible, the Drinfeld full-level
 problem is rigid and representable, gated on EXACTLY the tracked boxes:
