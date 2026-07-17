@@ -210,7 +210,10 @@ noncomputable def cechHomologyOneIso_of_subsingleton_H
     (hH : ∀ i : ι, Subsingleton (CategoryTheory.Sheaf.H
       ((restrict AddCommGrpCat (U i).isOpenEmbedding).obj F) 1)) :
     ((cechComplexFunctor U).obj F.obj).homology 1 ≅
-      AddCommGrpCat.of (CategoryTheory.Sheaf.H F 1) := by
+      (CategoryTheory.Sheaf.functorH
+        (Opens.grothendieckTopology X) 1).obj F := by
+  letI : AddCommGroup (CategoryTheory.Sheaf.H F 1) :=
+    CategoryTheory.Abelian.Ext.instAddCommGroup
   let vertical := cechInjectiveResolutionVerticalEdge U F
   let horizontal := cechInjectiveResolutionHorizontalEdge U F
   letI : QuasiIsoAt vertical 1 :=
