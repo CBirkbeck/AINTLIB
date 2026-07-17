@@ -23190,3 +23190,42 @@ GH's capstone.** Two hard builds and one assembly stand between here and the thr
 
 **DISPATCH:** the four charters in WORK-ORDERS.md are updated (K narrowed to endDual; O takes RING-DBL then
 hArb; G assemble-now; GH finish-then-arm). Owner re-fires all four; OMEGA + G0 fire immediately.
+
+---
+
+## v10.317-GH (2026-07-17, STREAM-GH) — CHARTER-GH: independent work EXHAUSTED (sweep-to-archived + the RigidNoeth engine mouth + the one-command capstone)
+
+**(GH2) FULL-project sorry sweep (≈140 code sorries), classified to zero-or-archived:**
+- **THE CONE (headline-blocking, receipts-verified minimal):** EndomorphismDegree
+  {`:202 endDual_comp_self` + `:359/:429/:435/:453/:459` the five generals + `:469` fixesTorsion} =
+  CHARTER-K; Bootstrap {`:100/:103` BRIDGE-P/Q, `:220` legendreDelta-relRep} = CHARTER-O/G;
+  EllCategory {`:298/:317` the two engine-⇐s} + QuotientProblem {the engine theorems} = the shared
+  gate. NOTHING ELSE blocks the headliners (the closure receipts prove it).
+- **ARCHIVED (stream-WIP, non-headline, by owning stream):** NIsogeny ×20 + DeligneOrder ×2 +
+  Subgroup ×1 (KM-stream WIP); YOneAssembly ×22 + YRho ×4 + YFullRoute ×5 + IrreducibilityScoping ×3
+  (Y₁/YFULL streams); WeilPairing ×9 (stream-W paused); Factorization ×6 + ExactOrder ×4 +
+  CartierDivisor ×3 + Basic {`:125` T-D8 SHELL (superseded by FullLevelBridge, coordinator to
+  relocate), `:197`} (LevelStructure enrichment tier); ForMathlib parked ×15 (BuchsbaumEisenbud,
+  NoethApprox, SmoothDescent, …); Coarse ×3 / Stack ×1 / MellWStack ×2 / Groupoid ×1 / Recollement
+  `:445` (T-E5f — IN the ⇐-consumption map) / EngineDescent ×1 / DrinfeldRegularity ×1 /
+  GammaHRep `:720` ([GH-DESC-GAP] marker) / GammaH {483/496/508 archive per v10.303, 508 = the
+  T-H6 owner flag; 1077/1090 = the upstream ⧗KM shells superseded by the closure capstones};
+  Representability {631/646 = YN statements, first halves = closure content}; misc EllipticCurve ×6.
+
+**(⇐-wire, as far as the landed engine allows):** built `representable_of_rigidNoeth_of_torsor`
+(QuotientProblem) — **the RigidNoeth ENGINE MOUTH**: same statement as the classical engine with the
+rigidity input at `RigidNoeth`; same T-Q6d.γ gate; its freeness step is ALREADY PROVEN at this
+hypothesis (`simulSchemeAction_free_of_rigidNoeth`), so the eventual de-sorry is the classical proof
+verbatim with one call swapped. Without this mouth the O/G instantiations could not feed
+headline-shaped rigidity at all. The `representable_iff_rigidNoeth`-⇐ now carries the PRECISE
+consumption map in-source (two instantiations: level-3/GL₂(𝔽₃) with hPaff from the iff's own
+`AffineOverEll` hypothesis + T-E15b torsor package; Legendre/GL₂(ℤ/2)×{±1} + T-E14 package; then
+recollement over D(2) ∪ D(3) = Spec ℤ). The TorsorData equivariance packages are CHARTER-O/G
+Bootstrap work — the wire stops honestly at their boundary.
+
+**(GH4) the capstone is now ONE COMMAND, committed:**
+`bash projects/ModularCurves/.mathlib-quality/scripts/capstone-receipts.sh` — prints the seven
+headline receipts + the cone-residual census. Any seat can fire it.
+
+**INDEPENDENT WORK EXHAUSTED** (charter report point 1). Armed-and-waiting is now legitimate: the
+next GH action is the receipts fire on any of {K2-landed, hArb-CLOSED, :206-CLOSED}. (STREAM-GH)
