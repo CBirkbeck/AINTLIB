@@ -270,7 +270,14 @@ T704, by a fresh `/develop --continue`.
   noeth" (B2). **Source**: [FJP] Prop 2.1 quotient sentence — quote at L2.1.
 
 ### [T302] vertices strongly noetherian
-- **Status**: open | **Depends**: T301, T105 | **Type**: proofs (L2.2–L2.3)
+- **Status**: **DONE** (`isNoetherianRing_restricted_univariate` — generic disc pattern over
+  any complete NormOneClass strongly-noetherian base via `innerToSeries.symm` +
+  `exists_flatten'` → `IsStronglyNoetherian (JetC F)` over L; dual-number flattening WITHOUT
+  a pair-algebra RingEquiv: surjection `Polynomial(S⟨Z⃗⟩-Gauss) → (DualNumber S)⟨Z⃗⟩-Gauss` via
+  `Polynomial.eval₂RingHom (mapRestrictedGauss inlHom) epsRestricted` (Hilbert basis on the
+  source; decomposition `F = inl∘fst + inl∘snd·ε` per coefficient) →
+  `isNoetherianRing_restricted_dualNumber` → `IsStronglyNoetherian (JetB F)` (base K⟨W⟩) and
+  `(JetD F)` (base L). All axiom-clean.) | **Type**: proofs (L2.2–L2.3)
 - **Sorries**: `IsStronglyNoetherian (JetC F)`, `isNoetherianRing_restricted_dualNumber`,
   `IsStronglyNoetherian (JetB F)`, `(JetD F)`.
 - **Sketch**: JetC = disc-example flattening verbatim over base `L` (copy

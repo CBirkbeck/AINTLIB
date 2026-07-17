@@ -138,27 +138,130 @@ instance : IsStronglyNoetherian (L F) :=
 
 instance : IsNoetherianRing (L F) := IsStronglyNoetherian.isNoetherianRing (L F)
 
+/-- Univariate restricted extensions of a strongly noetherian base are noetherian:
+`R⟨Q⟩⟨Z₁,…,Zₘ⟩ ≅ R⟨Q,Z₁,…,Zₘ⟩` (the unit-disc flattening pattern over a generic base). -/
+theorem isNoetherianRing_restricted_univariate (R : Type*) [NormedCommRing R]
+    [IsUltrametricDist R] [CompleteSpace R] [NormOneClass R] [IsStronglyNoetherian R]
+    (m : ℕ) :
+    IsNoetherianRing (restrictedMvPowerSeriesSubring m (PowerSeries.Restricted R (1 : ℝ))) := by
+  obtain ⟨e₂, -⟩ := UnitDiscExample.exists_flatten' R (PowerSeries.Restricted R (1 : ℝ))
+    (innerToSeries (R := R)).symm (innerToSeries_symm_norm (R := R)) m
+  haveI h : IsNoetherianRing (restrictedMvPowerSeriesSubring (m + 1) R) :=
+    IsStronglyNoetherian.isNoetherianRing_restricted (m + 1)
+  exact isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring (m + 1) R) _
+    (((UnitDiscExample.restrictedGaussEquiv R (m + 1)).symm.trans e₂.symm).trans
+      (UnitDiscExample.restrictedGaussEquiv (PowerSeries.Restricted R (1 : ℝ)) m)).toRingHom
+    (RingEquiv.surjective _)
+
 /-- `𝒞 = L⟨Q⟩` is strongly noetherian (flattening `𝒞⟨Z₁,…,Zₘ⟩ ≅ L⟨Q,Z₁,…,Zₘ⟩`, exactly the
 unit-disc pattern over the base `L`). -/
-instance : IsStronglyNoetherian (JetC F) := by sorry
+instance : IsStronglyNoetherian (JetC F) :=
+  ⟨fun m => isNoetherianRing_restricted_univariate (L F) m⟩
 
 instance : IsNoetherianRing (JetC F) := IsStronglyNoetherian.isNoetherianRing (JetC F)
 
+section DualFlatten
+
+variable {S : Type*} [NormedCommRing S] [IsUltrametricDist S]
+
+/-- `ε` as a constant restricted series over the dual numbers. -/
+noncomputable def epsRestricted (m : ℕ) :
+    MvPowerSeries.Restricted (DualNumber S) (fun _ : Fin m => (1 : ℝ)) :=
+  ⟨MvPowerSeries.C (σ := Fin m) (R := DualNumber S) DualNumber.eps, by
+    show MvPowerSeries.IsRestrictedGauss _ _
+    rw [MvPowerSeries.IsRestrictedGauss]
+    refine tendsto_nhds_of_eventually_eq ?_
+    rw [Filter.eventually_cofinite]
+    refine (Set.finite_singleton (0 : Fin m →₀ ℕ)).subset fun t ht => ?_
+    rw [Set.mem_setOf_eq] at ht
+    by_contra hmem
+    rw [Set.mem_singleton_iff] at hmem
+    refine ht ?_
+    rw [MvPowerSeries.coeff_C, if_neg hmem, norm_zero, zero_mul]⟩
+
+/-- The constant-jet component series of a restricted series over dual numbers. -/
+noncomputable def fstRestricted (m : ℕ)
+    (y : MvPowerSeries.Restricted (DualNumber S) (fun _ : Fin m => (1 : ℝ))) :
+    MvPowerSeries.Restricted S (fun _ : Fin m => (1 : ℝ)) :=
+  ⟨fun t => (MvPowerSeries.coeff t y.1).fst, by
+    show MvPowerSeries.IsRestrictedGauss _ _
+    have hy : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ)) y.1 := y.2
+    rw [MvPowerSeries.IsRestrictedGauss] at hy ⊢
+    refine squeeze_zero (fun t => mul_nonneg (norm_nonneg _)
+      (by rw [finsupp_prod_one]; exact zero_le_one)) (fun t => ?_) hy
+    refine mul_le_mul_of_nonneg_right ?_ (by rw [finsupp_prod_one]; exact zero_le_one)
+    show ‖(MvPowerSeries.coeff t y.1).fst‖ ≤ ‖MvPowerSeries.coeff t y.1‖
+    rw [JetNorm.norm_def]
+    exact le_max_left _ _⟩
+
+/-- The `ε`-jet component series of a restricted series over dual numbers. -/
+noncomputable def sndRestricted (m : ℕ)
+    (y : MvPowerSeries.Restricted (DualNumber S) (fun _ : Fin m => (1 : ℝ))) :
+    MvPowerSeries.Restricted S (fun _ : Fin m => (1 : ℝ)) :=
+  ⟨fun t => (MvPowerSeries.coeff t y.1).snd, by
+    show MvPowerSeries.IsRestrictedGauss _ _
+    have hy : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ)) y.1 := y.2
+    rw [MvPowerSeries.IsRestrictedGauss] at hy ⊢
+    refine squeeze_zero (fun t => mul_nonneg (norm_nonneg _)
+      (by rw [finsupp_prod_one]; exact zero_le_one)) (fun t => ?_) hy
+    refine mul_le_mul_of_nonneg_right ?_ (by rw [finsupp_prod_one]; exact zero_le_one)
+    show ‖(MvPowerSeries.coeff t y.1).snd‖ ≤ ‖MvPowerSeries.coeff t y.1‖
+    rw [JetNorm.norm_def]
+    exact le_max_right _ _⟩
+
+end DualFlatten
+
 /-- Jet flattening: restricted extension commutes with dual numbers,
-`(DualNumber S)⟨Z₁,…,Zₘ⟩ ≅ DualNumber (S⟨Z₁,…,Zₘ⟩)` coefficientwise. Stated for the two
-bases we use. -/
+`(DualNumber S)⟨Z₁,…,Zₘ⟩ ≅ DualNumber (S⟨Z₁,…,Zₘ⟩)` coefficientwise. Realised as a
+surjection from the polynomial ring in `ε` over `S⟨Z₁,…,Zₘ⟩` (Hilbert basis), mirroring
+`JetNorm.isNoetherianRing`. -/
 theorem isNoetherianRing_restricted_dualNumber
     (S : Type*) [NormedCommRing S] [IsUltrametricDist S]
     (hS : ∀ m : ℕ, IsNoetherianRing (restrictedMvPowerSeriesSubring m S)) (m : ℕ) :
-    IsNoetherianRing (restrictedMvPowerSeriesSubring m (DualNumber S)) := by sorry
+    IsNoetherianRing (restrictedMvPowerSeriesSubring m (DualNumber S)) := by
+  classical
+  haveI hA : IsNoetherianRing (MvPowerSeries.Restricted S (fun _ : Fin m => (1 : ℝ))) := by
+    haveI := hS m
+    exact isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring m S) _
+      (UnitDiscExample.restrictedGaussEquiv S m).symm.toRingHom (RingEquiv.surjective _)
+  refine isNoetherianRing_of_surjective
+    (Polynomial (MvPowerSeries.Restricted S (fun _ : Fin m => (1 : ℝ)))) _
+    ((UnitDiscExample.restrictedGaussEquiv (DualNumber S) m).toRingHom.comp
+      (Polynomial.eval₂RingHom
+        (mapRestrictedGauss m (TrivSqZeroExt.inlHom S S)
+          (fun x => le_of_eq (JetNorm.norm_inl x)))
+        (epsRestricted m))) ?_
+  rw [RingHom.coe_comp]
+  refine (RingEquiv.surjective _).comp ?_
+  intro y
+  refine ⟨Polynomial.C (fstRestricted m y) + Polynomial.C (sndRestricted m y) * Polynomial.X,
+    ?_⟩
+  rw [map_add, map_mul]
+  simp only [Polynomial.coe_eval₂RingHom]
+  rw [Polynomial.eval₂_C, Polynomial.eval₂_C, Polynomial.eval₂_X]
+  refine Subtype.ext ?_
+  show MvPowerSeries.map (TrivSqZeroExt.inlHom S S) (fstRestricted m y).1 +
+      MvPowerSeries.map (TrivSqZeroExt.inlHom S S) (sndRestricted m y).1 *
+        MvPowerSeries.C (σ := Fin m) (R := DualNumber S) DualNumber.eps = y.1
+  refine MvPowerSeries.ext fun t => ?_
+  rw [map_add, MvPowerSeries.coeff_mul_C, MvPowerSeries.coeff_map, MvPowerSeries.coeff_map]
+  show TrivSqZeroExt.inl ((MvPowerSeries.coeff t y.1).fst) +
+      TrivSqZeroExt.inl ((MvPowerSeries.coeff t y.1).snd) * DualNumber.eps =
+      MvPowerSeries.coeff t y.1
+  rw [show (DualNumber.eps : DualNumber S) = TrivSqZeroExt.inr 1 from rfl,
+    TrivSqZeroExt.inl_mul_inr, smul_eq_mul, mul_one, TrivSqZeroExt.inl_fst_add_inr_snd_eq]
 
 /-- `𝓑 = K⟨W⟩[Q]/(Q²)` is strongly noetherian ([FJP] Prop 2.1). -/
-instance : IsStronglyNoetherian (JetB F) := by sorry
+instance : IsStronglyNoetherian (JetB F) :=
+  ⟨fun m => isNoetherianRing_restricted_dualNumber (PowerSeries.Restricted K (1 : ℝ))
+    (fun j => isNoetherianRing_restricted_univariate K j) m⟩
 
 instance : IsNoetherianRing (JetB F) := IsStronglyNoetherian.isNoetherianRing (JetB F)
 
 /-- `𝓓 = L[Q]/(Q²)` is strongly noetherian ([FJP] Prop 2.1). -/
-instance : IsStronglyNoetherian (JetD F) := by sorry
+instance : IsStronglyNoetherian (JetD F) :=
+  ⟨fun m => isNoetherianRing_restricted_dualNumber (L F)
+    (fun j => isNoetherianRing_restricted_L F j) m⟩
 
 instance : IsNoetherianRing (JetD F) := IsStronglyNoetherian.isNoetherianRing (JetD F)
 
