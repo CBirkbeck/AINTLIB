@@ -240,17 +240,26 @@ theorem Module.Flat.quotient_range_of_bounded_exact [∀ n, Module.Flat R (M n)]
             (LinearMap.exact_iff.mp (hexact k hk)).symm ≪≫ₗ
           LinearMap.quotKerEquivRange (d (k + 1)))
 
+/-- Every cycle module in a bounded exact sequence of flat modules is flat. -/
+theorem Module.Flat.ker_of_bounded_exact_at [∀ n, Module.Flat R (M n)]
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hexact : ∀ n, n < N → Function.Exact (d n) (d (n + 1)))
+    (n : ℕ) (hn : n ≤ N) :
+    Module.Flat R (LinearMap.ker (d n)) := by
+  letI : Module.Flat R (M (n + 1) ⧸ LinearMap.range (d n)) :=
+    Module.Flat.quotient_range_of_bounded_exact M d N hexact n hn
+  letI : Module.Flat R (LinearMap.range (d n)) :=
+    Module.Flat.of_flat_quotient _
+  letI : Module.Flat R (M n ⧸ LinearMap.ker (d n)) :=
+    Module.Flat.of_linearEquiv (LinearMap.quotKerEquivRange (d n))
+  exact Module.Flat.of_flat_quotient _
+
 /-- The degree-zero kernel of a bounded exact sequence of flat modules is flat. -/
 theorem Module.Flat.ker_of_bounded_exact [∀ n, Module.Flat R (M n)]
     (N : ℕ) [Subsingleton (M (N + 1))]
     (hexact : ∀ n, n < N → Function.Exact (d n) (d (n + 1))) :
-    Module.Flat R (LinearMap.ker (d 0)) := by
-  letI : Module.Flat R (M 1 ⧸ LinearMap.range (d 0)) :=
-    Module.Flat.quotient_range_of_bounded_exact M d N hexact 0 (Nat.zero_le N)
-  letI : Module.Flat R (LinearMap.range (d 0)) := Module.Flat.of_flat_quotient _
-  letI : Module.Flat R (M 0 ⧸ LinearMap.ker (d 0)) :=
-    Module.Flat.of_linearEquiv (LinearMap.quotKerEquivRange (d 0))
-  exact Module.Flat.of_flat_quotient _
+    Module.Flat R (LinearMap.ker (d 0)) :=
+  Module.Flat.ker_of_bounded_exact_at M d N hexact 0 (Nat.zero_le N)
 
 /-- Kernels in degree zero commute with arbitrary tensor products for a bounded exact
 sequence of flat modules. -/
