@@ -47,34 +47,21 @@ open scoped Classical
 
 /-! ### Pairs of definition -/
 
-/-- The unit-ball pair of definition of 𝓐 (pattern: `ExampleUnitDisc.podD`). -/
-def podA : PairOfDefinition (JetA F) where
-  A₀ := unitBall (JetA F)
-  I := Ideal.span {⟨tA F, by sorry⟩}
-  isOpen := by sorry
-  fg := ⟨{⟨tA F, by sorry⟩}, by sorry⟩
-  isAdic := by sorry
+/-- The unit-ball pair of definition of 𝓐 (the generic `unitBallPod` at `tA`). -/
+def podA : PairOfDefinition (JetA F) :=
+  unitBallPod (tA F) (isUnit_tA F) (norm_tA_lt_one F) (norm_tA_pos F) (norm_tA_mul F)
 
-def podB : PairOfDefinition (JetB F) where
-  A₀ := unitBall (JetB F)
-  I := Ideal.span {⟨constA F (LaurentSeriesExample.t F) |> jB F, by sorry⟩}
-  isOpen := by sorry
-  fg := by sorry
-  isAdic := by sorry
+def podB : PairOfDefinition (JetB F) :=
+  unitBallPod (tB F) (isUnit_tB F) (by rw [norm_tB]; exact norm_t_lt_one F)
+    (by rw [norm_tB]; exact norm_t_pos F) (norm_tB_mul F)
 
-def podC : PairOfDefinition (JetC F) where
-  A₀ := unitBall (JetC F)
-  I := Ideal.span {⟨iotaC F (tA F), by sorry⟩}
-  isOpen := by sorry
-  fg := by sorry
-  isAdic := by sorry
+def podC : PairOfDefinition (JetC F) :=
+  unitBallPod (tC F) (isUnit_tC F) (by rw [norm_tC]; exact norm_t_lt_one F)
+    (by rw [norm_tC]; exact norm_t_pos F) (norm_tC_mul F)
 
-def podD : PairOfDefinition (JetD F) where
-  A₀ := unitBall (JetD F)
-  I := Ideal.span {⟨rhoC F (iotaC F (tA F)), by sorry⟩}
-  isOpen := by sorry
-  fg := by sorry
-  isAdic := by sorry
+def podD : PairOfDefinition (JetD F) :=
+  unitBallPod (tD F) (isUnit_tD F) (by rw [norm_tD]; exact norm_t_lt_one F)
+    (by rw [norm_tD]; exact norm_t_pos F) (norm_tD_mul F)
 
 /-! ### Pushing rational localization data ([FJP] Lemma 5.1)
 
