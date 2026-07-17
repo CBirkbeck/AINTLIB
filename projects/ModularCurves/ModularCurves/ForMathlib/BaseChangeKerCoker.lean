@@ -261,6 +261,27 @@ theorem Module.Flat.ker_of_bounded_exact [∀ n, Module.Flat R (M n)]
     Module.Flat R (LinearMap.ker (d 0)) :=
   Module.Flat.ker_of_bounded_exact_at M d N hexact 0 (Nat.zero_le N)
 
+/-- The cycle module in degree `k` is flat when a bounded complex of flat modules is exact
+from degree `k` onward. No exactness in lower degrees is required. -/
+theorem Module.Flat.ker_of_bounded_exact_from [∀ n, Module.Flat R (M n)]
+    (N k : ℕ) (hk : k ≤ N) [Subsingleton (M (N + 1))]
+    (hexact : ∀ n, k ≤ n → n < N → Function.Exact (d n) (d (n + 1))) :
+    Module.Flat R (LinearMap.ker (d k)) := by
+  let M' : ℕ → Type v := fun n ↦ M (k + n)
+  let d' : ∀ n, M' n →ₗ[R] M' (n + 1) := fun n ↦ d (k + n)
+  have hterminal : Subsingleton (M' (N - k + 1)) := by
+    dsimp only [M']
+    have hindex : k + (N - k + 1) = N + 1 := by omega
+    rw [hindex]
+    infer_instance
+  letI : Subsingleton (M' (N - k + 1)) := hterminal
+  have hexact' : ∀ n, n < N - k → Function.Exact (d' n) (d' (n + 1)) := by
+    intro n hn
+    dsimp only [d']
+    exact hexact (k + n) (by omega) (by omega)
+  simpa only [M', d', Nat.add_zero] using
+    Module.Flat.ker_of_bounded_exact M' d' (N - k) hexact'
+
 /-- A finite degree-zero cycle module in a bounded exact sequence of flat modules over a
 Noetherian ring is projective. This is the finite-flat step in Mumford, *Abelian Varieties*,
 §5, Lemma 1. -/
