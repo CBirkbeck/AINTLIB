@@ -652,3 +652,41 @@ f² − [tr f]∘f + [deg f] against the form; eq_zero_of_endDeg_eq_zero-style n
 finrank_eq_rankAtStalk_chart) — consume for any deg-vanishing/degenerate-locus step, do NOT
 rebuild. My new FiniteFlatRigidity module core may also serve the nondegeneracy pairing.
 KM source: read 2.6 in full before decomposing (the fork-discipline: transcribe, don't invent).
+
+## [CHARTER-K / K1] hArb BRIDGES — algebraic core DONE; scheme-doubling bridge = the remaining pole (KM, v10.313 window)
+
+**DELIVERED (ForMathlib/ThreeTorsionRingCertificate.lean, axiom-clean):**
+- `Ψ₃_eval_eq_zero_of_dbl_eq_neg` (LEAF A ★): over ANY CommRing, curve eqn + cleared
+  doubling-equals-negation `N²+a₁Nd−(a₂+3p)d²=0` (N=tangentNum, d=tangentDen=ψ₂) ⟹ `Ψ₃(p)=0`.
+  linear_combination cert `(-1)·hdbl + (-(a₁²+4a₂+12p))·hcurve` (matches E3NormalForm:144). The
+  NON-reduced-tolerant piece the ε-example demands (3-torsion ideal (a₄²) non-radical).
+- `bridgeP_of_dbl_origin`: at (0,0), hdbl IS `a₂a₃²−a₄a₁a₃−a₄²=0` = BRIDGE-P (rearrange).
+- `Ψ₃_eval_flex` (Ψ₃(p)=p·cubic on flex) + `bridgeQ_cubic_of_Ψ₃` (Ψ₃(p)=0 + p unit ⟹ BRIDGE-Q cubic).
+
+**⟹ BOTH bridges now reduce to ONE scheme input** = **the cleared ring doubling condition
+`hdbl : N²+a₁Nd−(a₂+3p)d²=0`** for the marked 3-torsion section (P-side at (0,0); Q-side + p-unit).
+`hdbl` ⟺ `x(2σ)=x(σ)` cleared by d² ⟺ `2•σ = −σ` on the affine chart.
+
+**THE REMAINING POLE = the ring-level doubling-coordinate identity** (the true L4-iii crux):
+`RING-DBL`: for a marked section, `2 • (projModelAffineSection W p q h) =
+projModelAffineSection W (addX p q) (addY p q) h'` on the unit-`d` locus (`IsUnit (tangentDen p q)`).
+Then: `3•σ=0` ⟹ `2•σ = −σ`; `−σ = affineSection(p, negY p q)` (negation coord, easy); RING-DBL gives
+`2•σ = affineSection(addX,addY)`; `projModelAffineSection_injective` (SectionCoordinates:210, EXISTS)
+⟹ `addX = p` ⟹ hdbl. And `IsUnit d` for the 3-torsion section (2σ≠0 fibrewise: 3-torsion ∧ 3-unit
+∧ σ≠0 ⟹ not 2-torsion) — a bounded fibrewise-nonvanishing⟹unit lemma.
+
+**RING-DBL route (the identity is NOT ε-trapped — it holds with NO torsion hypothesis, so the
+universal-domain generic-point argument is valid, unlike the torsion CONDITION):**
+1. Field layer EXISTS: `projModelPointsEquiv_affineSectionSpecPoint` (AffineSectionSpecPoints:169) +
+   `projModelPointsEquiv_zsmul` (MulByHomDegree:72) + mathlib affine doubling `Affine.Point`
+   (addX/addY at (p,q) over a field) give RING-DBL at every FIELD point.
+2. Universal transport: RING-DBL is an IDENTITY of two natural sections; prove over the universal
+   domain `A_u = ℤ[a₁..a₆,p,q][1/d]/(Equation)` (a domain — the curve eqn is irreducible / it embeds
+   in Frac), where the field argument at Frac(A_u) + `projModelAffineSection_injective`-into-the-
+   generic-point closes it; then `projModelAffineSection_baseChange` (functoriality, used in
+   MarksAt.transport) transports to every A by the classifying map A_u → A. NO reducedness needed —
+   it's an identity, the ε-trap only bites the torsion-CONDITION not the doubling-FORMULA.
+   ALT (heavier): build the scheme doubling coordinate directly via mathlib Jacobian `dblXYZ`
+   (Formula.lean, ring-level) + the model-vs-Jacobian comparison.
+This is a genuine multi-session sub-build; the algebraic consumers (above) + OMEGA's
+`isE3Datum_of_bridges` are fully turnkey, so on RING-DBL landing the two bridges + hArb:95 close.
