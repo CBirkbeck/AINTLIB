@@ -1203,6 +1203,185 @@ theorem bridgeFwdB_continuous (hD : D.IsRational) :
   letI := (pushDatumB D hD).uniformSpace
   exact UniformSpace.Completion.continuous_extension
 
+/-! #### The 𝓓-side forward bridge (mirror, consumed by the transfer's 𝓓-matching) -/
+
+/-- The base map `𝓓 → 𝓓_α`. -/
+noncomputable def bridgeBaseD : JetD F →+* locD F e.m D.s e.f :=
+  (Ideal.Quotient.mk (ID F e.m D.s e.f)).comp
+    ((polyToP : MvPolynomial (Fin e.m) (JetD F) →+* PD F e.m).comp MvPolynomial.C)
+
+/-- The variable images `X̄ᵢ ∈ 𝓓_α`. -/
+noncomputable def bridgeXD (i : Fin e.m) : locD F e.m D.s e.f :=
+  Ideal.Quotient.mk (ID F e.m D.s e.f) (polyToP (MvPolynomial.X i))
+
+theorem bridgeBaseD_s_mul_X (i : Fin e.m) :
+    bridgeBaseD D e (rhoC F (iotaC F D.s)) * bridgeXD D e i =
+      bridgeBaseD D e (rhoC F (iotaC F (e.f i))) := by
+  have hmem : polyToP (MvPolynomial.C (rhoC F (iotaC F D.s))) * polyToP (MvPolynomial.X i) -
+      polyToP (MvPolynomial.C (rhoC F (iotaC F (e.f i)))) ∈ ID F e.m D.s e.f := by
+    have hrw : rD F e.m D.s e.f i = polyToP (MvPolynomial.C (rhoC F (iotaC F D.s))) *
+        polyToP (MvPolynomial.X i) - polyToP (MvPolynomial.C (rhoC F (iotaC F (e.f i)))) := by
+      rw [rD_eq, map_sub, map_mul]
+    rw [← hrw]
+    exact Ideal.subset_span ⟨i, rfl⟩
+  show Ideal.Quotient.mk (ID F e.m D.s e.f) (polyToP (MvPolynomial.C (rhoC F (iotaC F D.s)))) *
+      Ideal.Quotient.mk (ID F e.m D.s e.f) (polyToP (MvPolynomial.X i)) =
+    Ideal.Quotient.mk (ID F e.m D.s e.f) (polyToP (MvPolynomial.C (rhoC F (iotaC F (e.f i)))))
+  rw [← RingHom.map_mul (Ideal.Quotient.mk (ID F e.m D.s e.f))]
+  exact Ideal.Quotient.eq.mpr hmem
+
+theorem isUnit_bridgeBaseD_s (hD : D.IsRational) :
+    IsUnit (bridgeBaseD D e (rhoC F (iotaC F D.s))) := by
+  have h1 : (1 : JetD F) ∈
+      Ideal.span ({rhoC F (iotaC F D.s)} ∪ Set.range fun i => rhoC F (iotaC F (e.f i))) := by
+    rw [span_pushed_D F e.m D.s e.f (e.span_eq_top D hD)]; trivial
+  rw [Ideal.span_union, Submodule.mem_sup] at h1
+  obtain ⟨x, hx, y, hy, hxy⟩ := h1
+  obtain ⟨c, rfl⟩ := Ideal.mem_span_singleton'.mp hx
+  rw [Ideal.mem_span_range_iff_exists_fun] at hy
+  obtain ⟨d, rfl⟩ := hy
+  have hterm : ∀ i, bridgeBaseD D e (d i * rhoC F (iotaC F (e.f i))) =
+      bridgeBaseD D e (d i) * (bridgeBaseD D e (rhoC F (iotaC F D.s)) * bridgeXD D e i) :=
+    fun i => by rw [RingHom.map_mul (bridgeBaseD D e), bridgeBaseD_s_mul_X]
+  have happ : bridgeBaseD D e c * bridgeBaseD D e (rhoC F (iotaC F D.s)) +
+      ∑ i, bridgeBaseD D e (d i) * (bridgeBaseD D e (rhoC F (iotaC F D.s)) * bridgeXD D e i) = 1 := by
+    have h0 := congrArg (bridgeBaseD D e) hxy
+    rw [RingHom.map_one (bridgeBaseD D e), RingHom.map_add (bridgeBaseD D e),
+      RingHom.map_mul (bridgeBaseD D e),
+      show (bridgeBaseD D e) (∑ i, d i * rhoC F (iotaC F (e.f i))) =
+        ∑ i, bridgeBaseD D e (d i * rhoC F (iotaC F (e.f i))) from map_sum (bridgeBaseD D e) _ _,
+      Finset.sum_congr rfl fun i _ => hterm i] at h0
+    exact h0
+  have hmul : bridgeBaseD D e (rhoC F (iotaC F D.s)) *
+      (bridgeBaseD D e c + ∑ i, bridgeBaseD D e (d i) * bridgeXD D e i) = 1 := by
+    rw [mul_add, Finset.mul_sum]
+    calc bridgeBaseD D e (rhoC F (iotaC F D.s)) * bridgeBaseD D e c +
+        ∑ i, bridgeBaseD D e (rhoC F (iotaC F D.s)) * (bridgeBaseD D e (d i) * bridgeXD D e i)
+        = bridgeBaseD D e c * bridgeBaseD D e (rhoC F (iotaC F D.s)) +
+          ∑ i, bridgeBaseD D e (d i) * (bridgeBaseD D e (rhoC F (iotaC F D.s)) * bridgeXD D e i) := by
+          rw [mul_comm (bridgeBaseD D e (rhoC F (iotaC F D.s))) (bridgeBaseD D e c)]
+          congr 1
+          exact Finset.sum_congr rfl fun i _ => by ring
+      _ = 1 := happ
+  exact IsUnit.of_mul_eq_one _ hmul
+
+theorem norm_bridgeXD_le_one (i : Fin e.m) : ‖bridgeXD D e i‖ ≤ 1 := by
+  refine (Ideal.Quotient.norm_mk_le _ _).trans ?_
+  rw [MvRestricted.norm_eq]
+  exact gaussNorm_X_le_one (S := JetD F) i
+
+theorem norm_bridgeBaseD_le (a : JetD F) : ‖bridgeBaseD D e a‖ ≤ ‖a‖ := by
+  refine (Ideal.Quotient.norm_mk_le _ _).trans ?_
+  show ‖(polyToP (E := JetD F) (m := e.m) (MvPolynomial.C a) : PD F e.m)‖ ≤ ‖a‖
+  rw [MvRestricted.norm_eq,
+    show (polyToP (E := JetD F) (m := e.m) (MvPolynomial.C a)).1 =
+      MvPowerSeries.C (σ := Fin e.m) (R := JetD F) a from MvPolynomial.coe_C a]
+  exact le_of_eq (UnitDiscExample.gaussNorm_C_norm _ a)
+
+/-- The 𝓓-side localization lift. -/
+noncomputable def bridgeLocHomD (hD : D.IsRational) :
+    Localization.Away (pushDatumD D hD).s →+* locD F e.m D.s e.f :=
+  IsLocalization.Away.lift (S := Localization.Away (pushDatumD D hD).s)
+    (pushDatumD D hD).s (isUnit_bridgeBaseD_s D e hD)
+
+theorem bridgeLocHomD_algebraMap (hD : D.IsRational) (a : JetD F) :
+    bridgeLocHomD D e hD
+      (algebraMap (JetD F) (Localization.Away (pushDatumD D hD).s) a) =
+      bridgeBaseD D e a :=
+  IsLocalization.Away.lift_eq _ _ a
+
+theorem bridgeLocHomD_divByS (hD : D.IsRational) (i : Fin e.m) :
+    bridgeLocHomD D e hD (divByS (rhoC F (iotaC F (e.f i))) (pushDatumD D hD).s) =
+      bridgeXD D e i := by
+  have hu := isUnit_bridgeBaseD_s D e hD
+  have hspec : divByS (rhoC F (iotaC F (e.f i))) (pushDatumD D hD).s *
+      algebraMap (JetD F) (Localization.Away (pushDatumD D hD).s) (pushDatumD D hD).s =
+      algebraMap (JetD F) (Localization.Away (pushDatumD D hD).s) (rhoC F (iotaC F (e.f i))) := by
+    rw [divByS, IsLocalization.mk'_spec]
+  have happ := congrArg (bridgeLocHomD D e hD) hspec
+  rw [RingHom.map_mul (bridgeLocHomD D e hD), bridgeLocHomD_algebraMap,
+    bridgeLocHomD_algebraMap, ← bridgeBaseD_s_mul_X] at happ
+  refine hu.mul_left_cancel ?_
+  rw [mul_comm (bridgeBaseD D e (rhoC F (iotaC F D.s)))
+    (bridgeLocHomD D e hD (divByS (rhoC F (iotaC F (e.f i))) (pushDatumD D hD).s))]
+  exact happ
+
+set_option maxHeartbeats 800000 in
+theorem bridgeLocHomD_continuous (hD : D.IsRational) :
+    @Continuous _ _ (pushDatumD D hD).topology _ (bridgeLocHomD D e hD) := by
+  refine locTopology_continuous_lift (pushDatumD D hD).P (pushDatumD D hD).T
+    (pushDatumD D hD).s (pushDatumD D hD).hopen _ ?_ ?_
+  · have h_eq : (bridgeLocHomD D e hD).comp
+        (algebraMap (JetD F) (Localization.Away (pushDatumD D hD).s)) =
+        bridgeBaseD D e := by
+      refine RingHom.ext fun a => ?_
+      show bridgeLocHomD D e hD
+        (algebraMap (JetD F) (Localization.Away (pushDatumD D hD).s) a) =
+        bridgeBaseD D e a
+      exact bridgeLocHomD_algebraMap D e hD a
+    rw [show ⇑((bridgeLocHomD D e hD).comp
+        (algebraMap (JetD F) (Localization.Away (pushDatumD D hD).s)))
+        = ⇑(bridgeBaseD D e) from congrArg _ h_eq]
+    exact AddMonoidHomClass.continuous_of_bound (bridgeBaseD D e) 1 fun a => by
+      rw [one_mul]; exact norm_bridgeBaseD_le D e a
+  · intro t ht
+    obtain ⟨t₀, ht₀, rfl⟩ := Finset.mem_image.mp ht
+    obtain ⟨i, rfl⟩ := e.hf t₀ ht₀
+    show TopologicalRing.IsPowerBounded
+      (bridgeLocHomD D e hD (divByS (rhoC F (iotaC F (e.f i))) (pushDatumD D hD).s))
+    rw [bridgeLocHomD_divByS]
+    exact isPowerBounded_of_norm_le_one (norm_bridgeXD_le_one D e i)
+
+/-- `I_𝓓` is closed (noetherian-ball route). -/
+theorem isClosed_ID' : IsClosed ((ID F e.m D.s e.f : Set (PD F e.m))) := by
+  haveI := isNoetherianRing_PD F e.m
+  exact isClosed_graphIdeal (tD F) (isUnit_tD F)
+    (by rw [norm_tD]; exact norm_t_lt_one F) (by rw [norm_tD]; exact norm_t_pos F)
+    (norm_tD_mul F) (isNoetherianRing_unitBall_PD F e.m) (rD F e.m D.s e.f)
+
+set_option synthInstance.maxHeartbeats 800000 in
+/-- The 𝓓-side forward bridge `𝒪_𝓓(D_D) → 𝓓_α`. -/
+noncomputable def bridgeFwdD (hD : D.IsRational) :
+    presheafValue (pushDatumD D hD) →+* locD F e.m D.s e.f := by
+  haveI hcl : IsClosed ((ID F e.m D.s e.f : Set (PD F e.m))) := isClosed_ID' D e
+  haveI : NormedAddCommGroup (locD F e.m D.s e.f) :=
+    Submodule.Quotient.normedAddCommGroup _
+  letI := (pushDatumD D hD).uniformSpace
+  haveI : @IsTopologicalRing (Localization.Away (pushDatumD D hD).s)
+      ((pushDatumD D hD).topology) _ := (pushDatumD D hD).isTopologicalRing
+  haveI : @IsUniformAddGroup (Localization.Away (pushDatumD D hD).s)
+      ((pushDatumD D hD).uniformSpace) _ := (pushDatumD D hD).isUniformAddGroup
+  exact @UniformSpace.Completion.extensionHom
+    (Localization.Away (pushDatumD D hD).s) _
+    ((pushDatumD D hD).uniformSpace) ((pushDatumD D hD).isTopologicalRing)
+    ((pushDatumD D hD).isUniformAddGroup)
+    (locD F e.m D.s e.f) _ _ _ _
+    (bridgeLocHomD D e hD) (bridgeLocHomD_continuous D e hD) _ _
+
+set_option synthInstance.maxHeartbeats 800000 in
+theorem bridgeFwdD_coe (hD : D.IsRational) (a : Localization.Away (pushDatumD D hD).s) :
+    bridgeFwdD D e hD ((pushDatumD D hD).coeRingHom a) = bridgeLocHomD D e hD a := by
+  haveI hcl : IsClosed ((ID F e.m D.s e.f : Set (PD F e.m))) := isClosed_ID' D e
+  haveI : NormedAddCommGroup (locD F e.m D.s e.f) :=
+    Submodule.Quotient.normedAddCommGroup _
+  letI := (pushDatumD D hD).uniformSpace
+  haveI : @IsTopologicalRing (Localization.Away (pushDatumD D hD).s)
+      ((pushDatumD D hD).topology) _ := (pushDatumD D hD).isTopologicalRing
+  haveI : @IsUniformAddGroup (Localization.Away (pushDatumD D hD).s)
+      ((pushDatumD D hD).uniformSpace) _ := (pushDatumD D hD).isUniformAddGroup
+  exact @UniformSpace.Completion.extensionHom_coe
+    (Localization.Away (pushDatumD D hD).s) _
+    ((pushDatumD D hD).uniformSpace) ((pushDatumD D hD).isTopologicalRing)
+    ((pushDatumD D hD).isUniformAddGroup)
+    (locD F e.m D.s e.f) _ _ _ _
+    (bridgeLocHomD D e hD) (bridgeLocHomD_continuous D e hD) _ _ a
+
+set_option synthInstance.maxHeartbeats 800000 in
+theorem bridgeFwdD_continuous (hD : D.IsRational) :
+    Continuous (bridgeFwdD D e hD) := by
+  letI := (pushDatumD D hD).uniformSpace
+  exact UniformSpace.Completion.continuous_extension
+
 /-! #### 𝓑-side reverse (evaluation) — the injectivity half of the 𝓑-bridge -/
 
 /-- Norm-decay to topological decay at 𝓑. -/
