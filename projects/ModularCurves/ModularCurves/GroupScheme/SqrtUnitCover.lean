@@ -157,6 +157,28 @@ noncomputable def sqrtPairCongr (d : Aˣ) (c : Aˣ) (h2 : IsUnit (2 : A)) :
       rw [← Units.val_mul, mul_inv_cancel, Units.val_one]]
     rw [map_one, one_mul]
 
+/-! ### Base change of the square-root cover -/
+
+/-- The `sqrtPair` construction commutes with ring maps. -/
+theorem sqrtPair_map {B : Type*} [CommRing B] (φ : A →+* B) (d : Aˣ) :
+    (sqrtPair d).map φ = sqrtPair (Units.map φ d) := by
+  have hf : ((sqrtPair d).map φ).f = (sqrtPair (Units.map φ d)).f := by
+    show (X ^ 2 - C (d : A)).map φ = X ^ 2 - C ((Units.map φ d : Bˣ) : B)
+    rw [Polynomial.map_sub, Polynomial.map_pow, map_X, map_C]
+    rfl
+  have hg : ((sqrtPair d).map φ).g = (sqrtPair (Units.map φ d)).g := by
+    show (C ((2 : A) * d)).map φ = C ((2 : B) * (Units.map φ d : Bˣ))
+    rw [map_C]
+    congr 1
+    rw [map_mul, map_ofNat]
+    rfl
+  have hext : ∀ (P Q : StandardEtalePair B), P.f = Q.f → P.g = Q.g → P = Q := by
+    rintro ⟨f₁, m₁, g₁, c₁⟩ ⟨f₂, m₂, g₂, c₂⟩ h1 h2
+    cases h1
+    cases h2
+    rfl
+  exact hext _ _ hf hg
+
 /-! ### The scheme-level cover -/
 
 section SchemeLevel
