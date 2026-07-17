@@ -1,0 +1,1 @@
+FOCUS: T901 — de-Tate support layer: (a) drop [IsTateRing A] from presheafValue_concretePair, (b) fill presheafValue_isHuberRing_huber, (c) drop [IsTateRing A] from presheafValue_isAdicComplete. PHASE 2 baseline build first.

@@ -897,7 +897,6 @@ interchangeable wherever a `PairOfDefinition (presheafValue D₀)` of this concr
 shape is required, but only this version is faithful (works for `ℂ_p`, which has no
 noetherian ring of definition `P.A₀`). -/
 noncomputable def presheafValue_concretePair
-    [IsTateRing A]
     (D₀ : RationalLocData A) :
     PairOfDefinition (presheafValue D₀) :=
   { A₀ := presheafValue_ringOfDef D₀
@@ -3069,6 +3068,7 @@ The pair of definition is `presheafValue_concretePair D₀` (whose five ingredie
 already Tate-free); no topologically nilpotent unit is involved. Replaces the Tate-only
 route `presheafValue_isTateRing_concrete D₀ |>.toIsHuberRing` at general Huber base. -/
 theorem presheafValue_isHuberRing_huber (D₀ : RationalLocData A) :
-    IsHuberRing (presheafValue D₀) := by sorry
+    IsHuberRing (presheafValue D₀) where
+  exists_pairOfDefinition := ⟨presheafValue_concretePair D₀⟩
 
 end ValuationSpectrum

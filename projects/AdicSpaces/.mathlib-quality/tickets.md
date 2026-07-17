@@ -852,7 +852,8 @@ decomposition file): the `IsHuberRing (presheafValue D')` supply, and the princi
 continuity engine + `restrictIdealSingle` in the [Hu2] 3.3(i) witness.
 
 ### [T901] Support layer de-Tate (concretePair, isHuberRing, isAdicComplete)
-- **Status**: open — **File**: PresheafTateStructure.lean, Cor832.lean — **Depends**: none — **Type**: relax + lemma
+- **Status**: done (2026-07-17) — **File**: PresheafTateStructure.lean, Cor832.lean — **Depends**: none — **Type**: relax + lemma
+- **Progress**: (a) dropped `[IsTateRing A]` from `presheafValue_concretePair` — the five ingredients are Tate-free; `presheafValue_concretePair_eq`'s `rfl` still holds. (b) `presheafValue_isHuberRing_huber := ⟨⟨presheafValue_concretePair D₀⟩⟩` (IsHuberRing = Nonempty pair + IsTopologicalRing, instance-available). (c) dropped `[IsTateRing A]` from `presheafValue_isAdicComplete` (kept `[T2Space A]`; body used no Tate/π). All three `#print axioms` = `[propext, Classical.choice, Quot.sound]`; PresheafTateStructure + Cor832 + FaithfulLocLift build error-free.
 - (a) Drop `[IsTateRing A]` from `presheafValue_concretePair` (its five ingredients are
   already Tate-free; binder is vestigial — compiler-verified relaxation, T604 pattern).
 - (b) Fill `presheafValue_isHuberRing_huber` (skeleton in PresheafTateStructure.lean tail):
