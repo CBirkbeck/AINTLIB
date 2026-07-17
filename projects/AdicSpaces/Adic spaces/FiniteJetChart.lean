@@ -158,6 +158,68 @@ theorem thetaChart_tA : thetaChart F (tA F) = tB F := by
   · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le 0 = 0
     exact map_zero _
 
+/-- The 𝓑-jet of `W` has vanishing `Q`-part. -/
+theorem jB_Wa_snd : (jB F (Wa F)).snd = 0 := by
+  refine ofRestricted_injective (R := K) ?_
+  rw [map_zero]
+  show ofRestricted ((nonnegEquiv (R := K)).symm
+    ⟨qCoeff F 1 ((Wa F : JetA F) : JetC F), (Wa F).2.2⟩) = 0
+  rw [ofRestricted_nonnegEquiv_symm]
+  show qCoeff F 1 (sectionD F (TrivSqZeroExt.inl (Wu (R := K)).val)) = 0
+  rw [qCoeff_sectionD]
+  norm_num
+
+/-- The Laurent shadow of the 𝓑-jet of `W` is the degree-one monomial. -/
+theorem ofRestricted_jB_Wa_fst :
+    ofRestricted (R := K) (jB F (Wa F)).fst = single 1 1 := by
+  show ofRestricted ((nonnegEquiv (R := K)).symm
+    ⟨qCoeff F 0 ((Wa F : JetA F) : JetC F), (Wa F).2.1⟩) = single 1 1
+  rw [ofRestricted_nonnegEquiv_symm]
+  show qCoeff F 0 (sectionD F (TrivSqZeroExt.inl (Wu (R := K)).val)) = single 1 1
+  rw [qCoeff_sectionD]
+  norm_num
+  rfl
+
+/-- Power-series coefficients of the 𝓑-jet of `W`. -/
+theorem coeff_jB_Wa_fst (n : ℕ) :
+    PowerSeries.coeff n ((jB F (Wa F)).fst).1 = if n = 1 then 1 else 0 := by
+  have h : (ofPowerSeries ((jB F (Wa F)).fst)).coeff (n : ℤ) =
+      (single 1 1 : RestrictedLaurent K).coeff (n : ℤ) := by
+    rw [show ofPowerSeries ((jB F (Wa F)).fst) =
+      ofRestricted (R := K) (jB F (Wa F)).fst from rfl, ofRestricted_jB_Wa_fst F]
+  rw [coeff_ofPowerSeries, if_pos (by positivity), Int.toNat_natCast, coeff_single] at h
+  rw [h]
+  by_cases hn : n = 1
+  · rw [if_pos (by exact_mod_cast hn), if_pos hn]
+  · rw [if_neg (by exact_mod_cast hn), if_neg hn]
+
+/-- **The key jet computation** ([FJP] Prop 3.1's `W ↦ ϖX`): the twist scales the
+`W`-jet by the pseudouniformizer. -/
+theorem thetaChart_Wa : thetaChart F (Wa F) = tB F * jB F (Wa F) := by
+  refine TrivSqZeroExt.ext ?_ ?_
+  · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le
+      (jB F (Wa F)).fst = (tB F * jB F (Wa F)).fst
+    rw [TrivSqZeroExt.fst_mul]
+    refine Subtype.ext ?_
+    refine PowerSeries.ext fun n => ?_
+    show PowerSeries.coeff n (PowerSeries.rescale (LaurentSeriesExample.t F)
+      ((jB F (Wa F)).fst).1) = PowerSeries.coeff n
+        ((PowerSeries.C (LaurentSeriesExample.t F) : PowerSeries K) *
+          ((jB F (Wa F)).fst).1)
+    rw [PowerSeries.coeff_rescale, PowerSeries.coeff_C_mul, coeff_jB_Wa_fst]
+    by_cases hn : n = 1
+    · subst hn
+      rw [if_pos rfl, pow_one]
+    · rw [if_neg hn, mul_zero, mul_zero]
+  · show rescaleRestricted (LaurentSeriesExample.t F) (norm_t_lt_one F).le
+      (jB F (Wa F)).snd = (tB F * jB F (Wa F)).snd
+    rw [jB_Wa_snd, map_zero, TrivSqZeroExt.snd_mul]
+    rw [jB_Wa_snd]
+    show (0 : PowerSeries.Restricted K (1 : ℝ)) =
+      (tB F).fst • (0 : PowerSeries.Restricted K (1 : ℝ)) +
+        MulOpposite.op ((jB F (Wa F)).fst) • (tB F).snd
+    rw [smul_zero, show (tB F).snd = 0 from rfl, smul_zero, add_zero]
+
 /-- **[FJP] Proposition 3.1**: the chart is the square-zero disc algebra,
 `𝒪_𝓐({|W| ≤ |ϖ|}) ≅ K⟨X⟩[Q]/(Q²) = 𝓑`, as topological rings. -/
 def chartEquiv : presheafValue (chartDatum F) ≃+* JetB F := by sorry
