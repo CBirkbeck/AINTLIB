@@ -733,9 +733,12 @@ T704, by a fresh `/develop --continue`.
   headline trio (uniform, domain, non-noetherian at 𝓐; 𝓑 non-uniform). The CLEANUP-*
   dependency is process-only (cleanup fleet); the mathematics is done and verified.
 
-### [T801] chart datum
-- **Status**: open | **Depends**: T601 | **Parallel**: with T7xx | **Type**: proofs (R4)
-- **Sorries**: `Wa` membership, `chartDatum` `hopen`, `chartDatum_isRational`.
+### [T801] chart datum — **DONE 2026-07-17**
+- **Status**: done (beastmode). `Wa` membership via `mem_jetSupport_iff_jet_in_range` +
+  `rhoC_sectionD` + the nonneg-support witness `⟨nonnegEquiv.symm ⟨Wu.val, coeff_single⟩⟩`
+  (snd-component `ofRestricted 0 = 0`); `hopen := genPiece_hopen` +
+  `Ideal.eq_top_of_isUnit_mem` at the `tA`-unit ∈ {Wa, tA}; `chartDatum_isRational`
+  likewise (needs a `show`-unfold of the structure `.T` before `Finset.coe_insert`).
 
 ### [T802] Prop 3.1: the chart is 𝓑
 - **Status**: open | **Depends**: T801, T603 | **Type**: def-completion + proofs (R4)
