@@ -62,7 +62,7 @@ noncomputable def gammaFullDrinfeldNaiveIso (N : ℕ) [NeZero N] (hinv : IsUnit 
     gammaFullDrinfeldProblem R N ≅ gammaFullNaiveProblem R N :=
   NatIso.ofComponents
     (fun X => Equiv.toIso (Equiv.subtypeEquiv (Equiv.refl _) (fun PQ =>
-      X.unop.curve.isFullLevel_iff_naive N
+      X.unop.curve.isFullLevel_iff_naive' N
         (YFull.nIsInvertible_over_spec R X.unop.structMap hinv) PQ.1 PQ.2)))
     (fun {X Y} f => by
       ext PQ

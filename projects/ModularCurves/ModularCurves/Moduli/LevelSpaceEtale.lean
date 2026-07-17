@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.Moduli.LevelSpaces
+import ModularCurves.LevelStructure.FullLevelDictionary
 import ModularCurves.Moduli.DrinfeldRepresentability
 import ModularCurves.GroupScheme.TorsionEtaleTriv
 import ModularCurves.GroupScheme.TorsionCombination
@@ -302,7 +303,7 @@ theorem isFullLevel_baseChange_comp_iff (N : ℕ) [NeZero N] (hNV : NIsInvertibl
           = (Point.baseChangeEquiv E p t') ((N : ℤ) • R) :=
             ((Point.baseChangeEquiv E p t').toAddMonoidHom.map_zsmul ((N : ℤ)) R).symm
         _ = 0 := by rw [h0]; exact (Point.baseChangeEquiv E p t').toAddMonoidHom.map_zero
-  rw [isFullLevel_iff_naive _ N hNV, isFullLevel_iff_naive _ N hNV]
+  rw [isFullLevel_iff_naive' _ N hNV, isFullLevel_iff_naive' _ N hNV]
   unfold EllipticCurve.IsNaiveFullLevel
   refine and_congr (and_congr ?_ ?_) ?_
   · rw [zsmul_asSection_eq_zero_iff, zsmul_asSection_eq_zero_iff]

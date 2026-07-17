@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.ForMathlib.SmoothDescent
 import ModularCurves.Moduli.GammaH
 import ModularCurves.Moduli.LevelSpaces
+import ModularCurves.LevelStructure.FullLevelDictionary
 
 /-!
 # STREAM-YFULL: the Y(N) representability route (T-E9)
@@ -532,7 +533,7 @@ theorem exists_pointsEquiv_naive (X : EllObj R) (N : ℕ) [NeZero N]
           EllipticCurve.Point.asSection X.curve g Q) := by
   obtain ⟨e₀, hpin⟩ := exists_pointsEquiv_drinfeld R X N g
   refine ⟨e₀.trans (Equiv.subtypeEquivRight fun PQ =>
-    (X.pullbackAlong g).curve.isFullLevel_iff_naive N
+    (X.pullbackAlong g).curve.isFullLevel_iff_naive' N
       (nIsInvertible_over_spec R ((X.pullbackAlong g).structMap) hinv) PQ.1 PQ.2), ?_⟩
   intro P Q hP hQ h hlift
   exact hpin P Q hP hQ h hlift

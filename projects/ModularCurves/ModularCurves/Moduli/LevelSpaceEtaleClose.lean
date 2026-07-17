@@ -77,7 +77,7 @@ theorem master_iff (h : NIsInvertible S N) {V : Scheme.{u}} (v : V ⟶ E.torsion
           (EllipticCurve.Point.pullAlong E v (E.torsionPairSnd N)))
       ↔ ∀ t : V, v.base t ∈ E.fullLevelSet N := by
   have hNV : NIsInvertible V N := NIsInvertible.of_hom (v ≫ E.torsionPairπ N) h
-  rw [isFullLevel_iff_naive _ N hNV, asSection_pullAlong_fst_eq, asSection_pullAlong_snd_eq]
+  rw [isFullLevel_iff_naive' _ N hNV, asSection_pullAlong_fst_eq, asSection_pullAlong_snd_eq]
   rw [← E.forall_mem_fullLevelSet_iff_isNaiveFullLevel N (v ≫ E.torsionPairπ N) h
     (v ≫ pullback.fst (E.torsionπ N) (E.torsionπ N))
     (v ≫ pullback.snd (E.torsionπ N) (E.torsionπ N))
