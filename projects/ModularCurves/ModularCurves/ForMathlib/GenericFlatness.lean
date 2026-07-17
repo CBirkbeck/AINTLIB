@@ -164,6 +164,19 @@ private theorem dvd_trailingCoeff_of_eval {B : Type*} [CommRing B] [IsDomain B] 
   rw [hq1eval, zero_sub, dvd_neg] at hsub
   rw [hcoeff, Polynomial.coeff_zero_eq_eval_zero]; exact hsub
 
+/-- For an injective ring hom `φ` and a nonzero polynomial `p`, the trailing coefficient of the
+mapped polynomial `p.map φ` is `φ` applied to some nonzero coefficient of `p` — namely the one at
+`(p.map φ).natTrailingDegree`, which injectivity keeps nonzero. -/
+private theorem exists_coeff_ne_zero_map_trailingCoeff {A B : Type*} [Semiring A] [Semiring B]
+    {φ : A →+* B} (hφ : Function.Injective φ) {p : A[X]} (hp : p ≠ 0) :
+    ∃ m, p.coeff m ≠ 0 ∧ (p.map φ).trailingCoeff = φ (p.coeff m) := by
+  refine ⟨(p.map φ).natTrailingDegree, ?_, ?_⟩
+  · have h1 : (p.map φ).trailingCoeff ≠ 0 :=
+      Polynomial.trailingCoeff_nonzero_iff_nonzero.mpr ((Polynomial.map_ne_zero_iff hφ).mpr hp)
+    rw [Polynomial.trailingCoeff, Polynomial.coeff_map] at h1
+    exact fun h => h1 (by rw [h, map_zero])
+  · rw [Polynomial.trailingCoeff, Polynomial.coeff_map]
+
 /-- **Hypersurface transcendence drop.** For `d ≥ 1`, a prime `𝔮'` of `R[X₀,…,X_{d-1}]` containing a
 nonzero `g`, the quotient domain has transcendence degree strictly below that of the polynomial
 ring. Proof: were there `d` algebraically independent elements in the quotient, lifting them and
@@ -231,32 +244,18 @@ private theorem trdeg_quotient_prime_lt {R : Type*} [CommRing R] [IsDomain R] {d
         rw [hcompeq] at hfinj
         exact fun p1 p2 h12 => hfinj (by rw [AlgHom.comp_apply, AlgHom.comp_apply, h12])
       exact hFai
-    have hcoeffqB : ∀ m, qB.coeff m
-        = MvPolynomial.aeval F ((MvPolynomial.finSuccEquiv R d (a - b)).coeff m) := by
-      intro m
-      rw [hqB, show Polynomial.mapAlgHom (MvPolynomial.aeval F)
-          (MvPolynomial.finSuccEquiv R d (a - b))
-          = Polynomial.map (MvPolynomial.aeval F :
-            MvPolynomial (Fin d) R →ₐ[R] MvPolynomial (Fin d) R).toRingHom
-            (MvPolynomial.finSuccEquiv R d (a - b)) from rfl, Polynomial.coeff_map]
-      rfl
-    have hqB0 : qB ≠ 0 := by
-      rw [hqB, show Polynomial.mapAlgHom (MvPolynomial.aeval F)
-          (MvPolynomial.finSuccEquiv R d (a - b))
-          = Polynomial.map (MvPolynomial.aeval F :
-            MvPolynomial (Fin d) R →ₐ[R] MvPolynomial (Fin d) R).toRingHom
-            (MvPolynomial.finSuccEquiv R d (a - b)) from rfl]
-      intro h0
-      have h1 : MvPolynomial.finSuccEquiv R d (a - b) ≠ 0 := fun h =>
-        hPol0 ((MvPolynomial.finSuccEquiv R d).injective (by rw [h]; simp))
-      exact h1 (Polynomial.map_injective _ haevalFinj (by rw [h0]; simp))
-    have hc0 : qB.trailingCoeff ≠ 0 := Polynomial.trailingCoeff_nonzero_iff_nonzero.mpr hqB0
+    have hfSE0 : MvPolynomial.finSuccEquiv R d (a - b) ≠ 0 := fun h =>
+      hPol0 ((MvPolynomial.finSuccEquiv R d).injective (by rw [h]; simp))
+    have hqBeq : qB = Polynomial.map (MvPolynomial.aeval F :
+        MvPolynomial (Fin d) R →ₐ[R] MvPolynomial (Fin d) R).toRingHom
+        (MvPolynomial.finSuccEquiv R d (a - b)) := by rw [hqB]; rfl
     have hgc : g ∣ qB.trailingCoeff := dvd_trailingCoeff_of_eval hg hevalqB
-    set Q' := (MvPolynomial.finSuccEquiv R d (a - b)).coeff qB.natTrailingDegree with hQ'
-    have hcQ : MvPolynomial.aeval F Q' = qB.trailingCoeff := by
-      rw [Polynomial.trailingCoeff]; exact (hcoeffqB _).symm
-    have hQ'0 : Q' ≠ 0 := by
-      intro h0; rw [h0, map_zero] at hcQ; exact hc0 hcQ.symm
+    obtain ⟨m, hm0, hmtc⟩ :=
+      exists_coeff_ne_zero_map_trailingCoeff (φ := (MvPolynomial.aeval F :
+        MvPolynomial (Fin d) R →ₐ[R] MvPolynomial (Fin d) R).toRingHom) haevalFinj hfSE0
+    set Q' := (MvPolynomial.finSuccEquiv R d (a - b)).coeff m with hQ'
+    have hcQ : MvPolynomial.aeval F Q' = qB.trailingCoeff := by rw [hqBeq]; exact hmtc.symm
+    have hQ'0 : Q' ≠ 0 := hm0
     have hmem : MvPolynomial.aeval F Q' ∈ q' := by
       rw [hcQ]
       exact (Ideal.span_singleton_le_iff_mem q').mpr hgq (Ideal.mem_span_singleton.mpr hgc)
