@@ -581,6 +581,109 @@ theorem bridgeFwd_continuous (hD : D.IsRational) :
   letI := D.uniformSpace
   exact UniformSpace.Completion.continuous_extension
 
+/-! #### The reverse direction: evaluation `P_𝓐 → 𝒪_𝓐(D)` ([FJP] Lemma 1.1, bound (1.3)) -/
+
+/-- Norm-decay restricted series are topologically restricted (the two restricted power
+series notions agree over a normed base). -/
+noncomputable def bridgeToRestricted (m : ℕ) :
+    PA F m →+* ↥(restrictedMvPowerSeriesSubring m (JetA F)) where
+  toFun p := ⟨p.1, by
+    have hp : MvPowerSeries.IsRestrictedGauss (fun _ : Fin m => (1 : ℝ)) p.1 := p.2
+    rw [MvPowerSeries.IsRestrictedGauss] at hp
+    have hprod : ∀ t : Fin m →₀ ℕ, (t.prod fun _ k => (1 : ℝ) ^ k) = 1 := fun t => by simp
+    simp only [hprod, mul_one] at hp
+    show Filter.Tendsto (fun t : Fin m →₀ ℕ => MvPowerSeries.coeff t p.1)
+      Filter.cofinite (nhds 0)
+    rwa [tendsto_zero_iff_norm_tendsto_zero]⟩
+  map_one' := Subtype.ext rfl
+  map_mul' _ _ := Subtype.ext rfl
+  map_zero' := Subtype.ext rfl
+  map_add' _ _ := Subtype.ext rfl
+
+/-- The rational generators `fᵢ/s ∈ 𝒪_𝓐(D)`. -/
+noncomputable def bridgeGen (i : Fin e.m) : presheafValue D :=
+  D.coeRingHom (divByS (e.f i) D.s)
+
+/-- Each generator is power-bounded (its powers lie in the image of the bounded
+`locSubring`; mirrors `example638_genTuple_isBounded`). -/
+theorem bridgeGen_isBounded (i : Fin e.m) :
+    TopologicalRing.IsBounded (Set.range (bridgeGen D e i ^ · : ℕ → presheafValue D)) := by
+  have hmem : divByS (e.f i) D.s ∈ locSubring D.P D.T D.s :=
+    divByS_mem_locSubring D.P D.T D.s (e.hf' i)
+  have hbdd := CompletionLocalization.coeRingHom_image_locSubring_isBounded D
+  apply hbdd.subset
+  rintro _ ⟨n, rfl⟩
+  exact ⟨divByS (e.f i) D.s ^ n, pow_mem hmem n, by
+    rw [map_pow]; rfl⟩
+
+/-- The evaluation `P_𝓐 →+* 𝒪_𝓐(D)`: `Σ a_v X^v ↦ Σ ρ(a_v)·(f/s)^v`
+(convergent by [FJP] (1.3); built on the project's `mvEvalHomBounded`). -/
+noncomputable def bridgeEval : PA F e.m →+* presheafValue D :=
+  (mvEvalHomBounded D.canonicalMap (canonicalMap_continuous D)
+    (bridgeGen D e) (bridgeGen_isBounded D e)).comp (bridgeToRestricted e.m)
+
+theorem bridgeEval_const (a : JetA F) :
+    bridgeEval D e (polyToP (MvPolynomial.C a)) = D.canonicalMap a := by
+  have hcast : bridgeToRestricted (F := F) e.m (polyToP (MvPolynomial.C a)) =
+      algebraMap (JetA F) ↥(restrictedMvPowerSeriesSubring e.m (JetA F)) a := by
+    refine Subtype.ext ?_
+    show ((polyToP (E := JetA F) (m := e.m) (MvPolynomial.C a)).1 :
+      MvPowerSeries (Fin e.m) (JetA F)) = _
+    rw [show (polyToP (E := JetA F) (m := e.m) (MvPolynomial.C a)).1 =
+      MvPowerSeries.C (σ := Fin e.m) (R := JetA F) a from MvPolynomial.coe_C a]
+    rfl
+  rw [bridgeEval, RingHom.comp_apply, hcast]
+  exact mvEvalHomBounded_algebraMap _ _ _ _ a
+
+theorem bridgeEval_X (i : Fin e.m) :
+    bridgeEval D e (polyToP (MvPolynomial.X i)) = bridgeGen D e i := by
+  have hcast : bridgeToRestricted (F := F) e.m (polyToP (MvPolynomial.X i)) =
+      ⟨MvPowerSeries.X i, MvPowerSeries.X_isRestricted i⟩ := by
+    refine Subtype.ext ?_
+    show ((polyToP (E := JetA F) (m := e.m) (MvPolynomial.X i)).1 :
+      MvPowerSeries (Fin e.m) (JetA F)) = _
+    exact MvPolynomial.coe_X i
+  rw [bridgeEval, RingHom.comp_apply, hcast]
+  exact mvEvalHomBounded_X _ _ _ _ i
+
+/-- The evaluation kills the graph ideal (`s·(fᵢ/s) = fᵢ` in the localization). -/
+theorem IA_le_ker_bridgeEval : IA F e.m D.s e.f ≤ RingHom.ker (bridgeEval D e) := by
+  rw [IA, Ideal.span_le]
+  rintro _ ⟨i, rfl⟩
+  rw [SetLike.mem_coe, RingHom.mem_ker]
+  have hval : bridgeEval D e (rA F e.m D.s e.f i) =
+      D.canonicalMap D.s * bridgeGen D e i - D.canonicalMap (e.f i) :=
+    (map_sub ((bridgeEval D e).comp polyToP)
+        (MvPolynomial.C D.s * MvPolynomial.X i) (MvPolynomial.C (e.f i))).trans
+      (congrArg₂ (· - ·)
+        ((map_mul ((bridgeEval D e).comp polyToP)
+            (MvPolynomial.C D.s) (MvPolynomial.X i)).trans
+          (congrArg₂ (· * ·) (bridgeEval_const D e D.s) (bridgeEval_X D e i)))
+        (bridgeEval_const D e (e.f i)))
+  rw [hval, sub_eq_zero, bridgeGen]
+  rw [show D.canonicalMap D.s = D.coeRingHom (algebraMap (JetA F)
+      (Localization.Away D.s) D.s) from rfl, ← RingHom.map_mul D.coeRingHom,
+    show algebraMap (JetA F) (Localization.Away D.s) D.s * divByS (e.f i) D.s =
+      algebraMap (JetA F) (Localization.Away D.s) (e.f i) from by
+    rw [mul_comm, divByS, IsLocalization.mk'_spec]]
+  rfl
+
+/-- Reverse: `𝓐_α → 𝒪_𝓐(D)` (the evaluation factors through the graph quotient). -/
+noncomputable def bridgeRev : locA F e.m D.s e.f →+* presheafValue D :=
+  Ideal.Quotient.lift (IA F e.m D.s e.f) (bridgeEval D e)
+    (fun _ ha => RingHom.mem_ker.mp (IA_le_ker_bridgeEval D e ha))
+
+theorem bridgeRev_mk (p : PA F e.m) :
+    bridgeRev D e (Ideal.Quotient.mk (IA F e.m D.s e.f) p) = bridgeEval D e p := rfl
+
+theorem bridgeRev_bridgeBase (a : JetA F) :
+    bridgeRev D e (bridgeBase D e a) = D.canonicalMap a :=
+  bridgeEval_const D e a
+
+theorem bridgeRev_bridgeX (i : Fin e.m) :
+    bridgeRev D e (bridgeX D e i) = bridgeGen D e i :=
+  bridgeEval_X D e i
+
 end GraphBridgeInfra
 
 /-- The graph bridge for 𝓐 ([FJP] Lemma 1.1: the separated completion of the graph
