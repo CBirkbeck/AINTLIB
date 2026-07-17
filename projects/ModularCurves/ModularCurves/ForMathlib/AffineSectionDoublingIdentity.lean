@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
 import ModularCurves.ForMathlib.AffineSectionDoubling
+import ModularCurves.EllipticCurve.AffineSectionSpecPoints
 import ModularCurves.Moduli.SectionMarking
 
 /-!
@@ -112,5 +113,81 @@ instance : dblWu.IsElliptic := by
     rw [dblWu, WeierstrassCurve.map_Δ]
   rw [hΔ]
   exact isUnit_of_mul_isUnit_right h
+
+/-! ### [E] the additive section transport along a coefficient map -/
+
+section Transport
+
+attribute [local instance] CategoryTheory.Over.cartesianMonoidalCategory
+  CategoryTheory.Over.braidedCategory
+
+open Limits MonoidalCategory CartesianMonoidalCategory MonObj
+
+variable {A A' : Type u} [CommRing A] [CommRing A'] [Algebra A A']
+  (W : WeierstrassCurve A) [W.IsElliptic]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **([RING-DBL E] the section transport)** The additive map on model sections induced
+by a coefficient ring map: pull along `Spec`, cast the base identity, invert the
+base-change point equivalence, and push across the Stage-D pointed comparison. -/
+noncomputable def sectionMapHom :
+    letI : (W.map (algebraMap A A')).IsElliptic := inferInstance
+    (modelEllipticCurve W).Section →+
+      (modelEllipticCurve (W.map (algebraMap A A'))).Section :=
+  letI : (W.map (algebraMap A A')).IsElliptic := inferInstance
+  ((EllipticCurve.pointAddEquiv (modelBaseChangeIso (A' := A') W)
+      ((isMonHom_modelBaseChangeIso (A' := A') W).mul_hom)
+      (𝟙 (Spec (CommRingCat.of A')))).toAddMonoidHom).comp
+    (((EllipticCurve.Point.baseChangeEquiv (E := modelEllipticCurve W)
+        (Spec.map (CommRingCat.ofHom (algebraMap A A')))
+        (𝟙 (Spec (CommRingCat.of A')))).symm.toAddMonoidHom).comp
+      (((EllipticCurve.Point.castBase (modelEllipticCurve W)
+          (Category.id_comp (Spec.map (CommRingCat.ofHom
+            (algebraMap A A')))).symm).toAddMonoidHom).comp
+        (AddMonoidHom.mk' (EllipticCurve.Point.pull (modelEllipticCurve W)
+            (Spec.map (CommRingCat.ofHom (algebraMap A A'))))
+          (fun P Q => EllipticCurve.Point.pull_add (modelEllipticCurve W) _ P Q))))
+
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **([RING-DBL E] the transport value)** The section transport carries affine-point
+sections to the affine-point sections of the mapped coordinates (the Stage-D matched
+section, as a value of `sectionMapHom`). -/
+theorem sectionMapHom_affineSection {A A' : Type u} [CommRing A] [CommRing A']
+    [Algebra A A'] (W : WeierstrassCurve A) [W.IsElliptic] (p q : A)
+    (h : W.toAffine.Equation p q)
+    (h' : (W.map (algebraMap A A')).toAffine.Equation (algebraMap A A' p)
+      (algebraMap A A' q)) :
+    letI : (W.map (algebraMap A A')).IsElliptic := inferInstance
+    sectionMapHom (A' := A') W ⟨projModelAffineSection W p q h,
+        projModelAffineSection_projModelπ _ _ _ _⟩
+      = ⟨projModelAffineSection (W.map (algebraMap A A')) (algebraMap A A' p)
+          (algebraMap A A' q) h',
+        projModelAffineSection_projModelπ _ _ _ _⟩ := by
+  letI : (W.map (algebraMap A A')).IsElliptic := inferInstance
+  refine Subtype.ext ?_
+  show ((EllipticCurve.Point.asSection (modelEllipticCurve W)
+      (Spec.map (CommRingCat.ofHom (algebraMap A A')))
+      (EllipticCurve.Point.pull (modelEllipticCurve W)
+        (Spec.map (CommRingCat.ofHom (algebraMap A A')))
+        ⟨projModelAffineSection W p q h,
+          projModelAffineSection_projModelπ _ _ _ _⟩)).1 ≫
+      (modelBaseChangeIso (A' := A') W).hom.left) = _
+  rw [modelBaseChangeIso_hom_left, Iso.comp_inv_eq]
+  refine pullback.hom_ext ?_ ?_
+  · refine ((EllipticCurve.Point.asSection_val_fst _ _ _).trans
+      (projModelAffineSection_baseChange W p q h h').symm).trans ?_
+    exact congrArg (fun m => projModelAffineSection (W.map (algebraMap A A'))
+        (algebraMap A A' p) (algebraMap A A' q) h' ≫ m)
+      (isPullback_projModelBaseChange (R' := A') W).isoPullback_hom_fst.symm
+  · refine ((EllipticCurve.Point.asSection_val_snd _ _ _).trans
+      (projModelAffineSection_projModelπ _ _ _ h').symm).trans ?_
+    exact congrArg (fun m => projModelAffineSection (W.map (algebraMap A A'))
+        (algebraMap A A' p) (algebraMap A A' q) h' ≫ m)
+      (isPullback_projModelBaseChange (R' := A') W).isoPullback_hom_snd.symm
+
+
+end Transport
+
 
 end ModularCurves
