@@ -676,36 +676,146 @@ abbrev locB : Type _ := PB F m ⧸ IB F m g f
 abbrev locC : Type _ := PC F m ⧸ IC F m g f
 abbrev locD : Type _ := PD F m ⧸ ID F m g f
 
+/-- Graph ideals push forward along the square's maps. -/
+theorem extJB_mem_IB {y : PA F m} (hy : y ∈ IA F m g f) : extJB F m y ∈ IB F m g f := by
+  have hmap : Ideal.map (extJB F m) (IA F m g f) ≤ IB F m g f := by
+    rw [show IA F m g f = Ideal.span (Set.range (rA F m g f)) from rfl, Ideal.map_span]
+    refine Ideal.span_le.mpr ?_
+    rintro _ ⟨_, ⟨i, rfl⟩, rfl⟩
+    exact Ideal.subset_span ⟨i, rfl⟩
+  exact hmap (Ideal.mem_map_of_mem _ hy)
+
+theorem extIotaC_mem_IC {y : PA F m} (hy : y ∈ IA F m g f) :
+    extIotaC F m y ∈ IC F m g f := by
+  have hmap : Ideal.map (extIotaC F m) (IA F m g f) ≤ IC F m g f := by
+    rw [show IA F m g f = Ideal.span (Set.range (rA F m g f)) from rfl, Ideal.map_span]
+    refine Ideal.span_le.mpr ?_
+    rintro _ ⟨_, ⟨i, rfl⟩, rfl⟩
+    exact Ideal.subset_span ⟨i, rfl⟩
+  exact hmap (Ideal.mem_map_of_mem _ hy)
+
+theorem extRhoB_mem_ID {y : PB F m} (hy : y ∈ IB F m g f) :
+    extRhoB F m y ∈ ID F m g f := by
+  have hmap : Ideal.map (extRhoB F m) (IB F m g f) ≤ ID F m g f := by
+    rw [show IB F m g f = Ideal.span (Set.range (rB F m g f)) from rfl, Ideal.map_span]
+    refine Ideal.span_le.mpr ?_
+    rintro _ ⟨_, ⟨i, rfl⟩, rfl⟩
+    exact Ideal.subset_span ⟨i, (extRhoB_rB F m g f i).symm⟩
+  exact hmap (Ideal.mem_map_of_mem _ hy)
+
+theorem extRhoC_mem_ID {y : PC F m} (hy : y ∈ IC F m g f) :
+    extRhoC F m y ∈ ID F m g f := by
+  have hmap : Ideal.map (extRhoC F m) (IC F m g f) ≤ ID F m g f := by
+    rw [show IC F m g f = Ideal.span (Set.range (rC F m g f)) from rfl, Ideal.map_span]
+    refine Ideal.span_le.mpr ?_
+    rintro _ ⟨_, ⟨i, rfl⟩, rfl⟩
+    exact Ideal.subset_span ⟨i, rfl⟩
+  exact hmap (Ideal.mem_map_of_mem _ hy)
+
 /-- The induced maps of the localized square ([FJP] (4.19)). -/
-noncomputable def locJB : locA F m g f →+* locB F m g f := by sorry
+noncomputable def locJB : locA F m g f →+* locB F m g f :=
+  Ideal.Quotient.lift (IA F m g f)
+    ((Ideal.Quotient.mk (IB F m g f)).comp (extJB F m)) (fun a ha => by
+      rw [RingHom.comp_apply, Ideal.Quotient.eq_zero_iff_mem]
+      exact extJB_mem_IB F m g f ha)
 
-noncomputable def locIotaC : locA F m g f →+* locC F m g f := by sorry
+noncomputable def locIotaC : locA F m g f →+* locC F m g f :=
+  Ideal.Quotient.lift (IA F m g f)
+    ((Ideal.Quotient.mk (IC F m g f)).comp (extIotaC F m)) (fun a ha => by
+      rw [RingHom.comp_apply, Ideal.Quotient.eq_zero_iff_mem]
+      exact extIotaC_mem_IC F m g f ha)
 
-noncomputable def locRhoB : locB F m g f →+* locD F m g f := by sorry
+noncomputable def locRhoB : locB F m g f →+* locD F m g f :=
+  Ideal.Quotient.lift (IB F m g f)
+    ((Ideal.Quotient.mk (ID F m g f)).comp (extRhoB F m)) (fun a ha => by
+      rw [RingHom.comp_apply, Ideal.Quotient.eq_zero_iff_mem]
+      exact extRhoB_mem_ID F m g f ha)
 
-noncomputable def locRhoC : locC F m g f →+* locD F m g f := by sorry
+noncomputable def locRhoC : locC F m g f →+* locD F m g f :=
+  Ideal.Quotient.lift (IC F m g f)
+    ((Ideal.Quotient.mk (ID F m g f)).comp (extRhoC F m)) (fun a ha => by
+      rw [RingHom.comp_apply, Ideal.Quotient.eq_zero_iff_mem]
+      exact extRhoC_mem_ID F m g f ha)
 
 theorem locJB_mk (p : PA F m) :
     locJB F m g f (Ideal.Quotient.mk (IA F m g f) p) =
-      Ideal.Quotient.mk (IB F m g f) (extJB F m p) := by sorry
+      Ideal.Quotient.mk (IB F m g f) (extJB F m p) := rfl
 
 theorem locIotaC_mk (p : PA F m) :
     locIotaC F m g f (Ideal.Quotient.mk (IA F m g f) p) =
-      Ideal.Quotient.mk (IC F m g f) (extIotaC F m p) := by sorry
+      Ideal.Quotient.mk (IC F m g f) (extIotaC F m p) := rfl
+
+theorem locRhoB_mk (p : PB F m) :
+    locRhoB F m g f (Ideal.Quotient.mk (IB F m g f) p) =
+      Ideal.Quotient.mk (ID F m g f) (extRhoB F m p) := rfl
+
+theorem locRhoC_mk (p : PC F m) :
+    locRhoC F m g f (Ideal.Quotient.mk (IC F m g f) p) =
+      Ideal.Quotient.mk (ID F m g f) (extRhoC F m p) := rfl
 
 theorem loc_square_commutes (x : locA F m g f) :
-    locRhoB F m g f (locJB F m g f x) = locRhoC F m g f (locIotaC F m g f x) := by sorry
+    locRhoB F m g f (locJB F m g f x) = locRhoC F m g f (locIotaC F m g f x) := by
+  obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective x
+  rw [locJB_mk, locIotaC_mk, locRhoB_mk, locRhoC_mk, ext_square_commutes]
+
+/-- Algebraic exactness of the localized row: the pullback description of `𝓐_α`
+([FJP] (4.20)). -/
+theorem loc_pair_injective (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
+    Function.Injective
+      (fun x : locA F m g f => (locJB F m g f x, locIotaC F m g f x)) := by
+  obtain ⟨Cs, hCs1, hpull⟩ := ideal_pullback_controlled F m g f hspan
+  have hker : ∀ y : locA F m g f, locJB F m g f y = 0 → locIotaC F m g f y = 0 → y = 0 := by
+    intro y hyB hyC
+    obtain ⟨q, rfl⟩ := Ideal.Quotient.mk_surjective y
+    rw [locJB_mk, Ideal.Quotient.eq_zero_iff_mem] at hyB
+    rw [locIotaC_mk, Ideal.Quotient.eq_zero_iff_mem] at hyC
+    obtain ⟨qa, hqa, hJ, hI, -⟩ := hpull (extJB F m q) hyB (extIotaC F m q) hyC
+      (ext_square_commutes F m q)
+    have heq : qa = q := ext_pair_injective F m (Prod.ext hJ hI)
+    rw [Ideal.Quotient.eq_zero_iff_mem, ← heq]
+    exact hqa
+  intro x y hxy
+  have hxy' : (locJB F m g f x, locIotaC F m g f x) =
+      (locJB F m g f y, locIotaC F m g f y) := hxy
+  rw [Prod.mk.injEq] at hxy'
+  have hpair := hxy'
+  have h1 : locJB F m g f (x - y) = 0 := by
+    rw [map_sub, hpair.1, sub_self]
+  have h2 : locIotaC F m g f (x - y) = 0 := by
+    rw [map_sub, hpair.2, sub_self]
+  have := hker (x - y) h1 h2
+  rwa [sub_eq_zero] at this
 
 /-- Algebraic exactness of the localized row: the pullback description of `𝓐_α`
 ([FJP] (4.20)). -/
 theorem loc_row_exact (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤)
     (b : locB F m g f) (c : locC F m g f)
     (h : locRhoB F m g f b = locRhoC F m g f c) :
-    ∃! x : locA F m g f, locJB F m g f x = b ∧ locIotaC F m g f x = c := by sorry
-
-theorem loc_pair_injective (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
-    Function.Injective
-      (fun x : locA F m g f => (locJB F m g f x, locIotaC F m g f x)) := by sorry
+    ∃! x : locA F m g f, locJB F m g f x = b ∧ locIotaC F m g f x = c := by
+  obtain ⟨pb, rfl⟩ := Ideal.Quotient.mk_surjective b
+  obtain ⟨pc, rfl⟩ := Ideal.Quotient.mk_surjective c
+  rw [locRhoB_mk, locRhoC_mk, Ideal.Quotient.mk_eq_mk_iff_sub_mem] at h
+  obtain ⟨Cs, hCs1, hrow⟩ := ideal_row_surjective F m g f hspan
+  obtain ⟨xc, hxc, hxcρ, -⟩ := hrow (extRhoB F m pb - extRhoC F m pc) h
+  set pc' : PC F m := pc + xc with hpc'
+  have hcompat : extRhoB F m pb = extRhoC F m pc' := by
+    rw [hpc', map_add, hxcρ]
+    ring
+  obtain ⟨p, hpb, hpc⟩ := (ext_milnorRow_exact F m pb pc' hcompat).exists
+  refine ⟨Ideal.Quotient.mk _ p, ⟨?_, ?_⟩, ?_⟩
+  · rw [locJB_mk, hpb]
+  · rw [locIotaC_mk, hpc, hpc', Ideal.Quotient.mk_eq_mk_iff_sub_mem, add_sub_cancel_left]
+    exact hxc
+  · rintro x' ⟨hx'B, hx'C⟩
+    refine loc_pair_injective F m g f hspan ?_
+    rw [Prod.ext_iff]
+    constructor
+    · show locJB F m g f x' = locJB F m g f (Ideal.Quotient.mk _ p)
+      rw [hx'B, locJB_mk, hpb]
+    · show locIotaC F m g f x' = locIotaC F m g f (Ideal.Quotient.mk _ p)
+      rw [hx'C, locIotaC_mk, hpc, hpc', Ideal.Quotient.mk_eq_mk_iff_sub_mem,
+        sub_add_cancel_left]
+      exact (IC F m g f).neg_mem hxc
 
 /-- Topological strictness on the left ([FJP] (4.19)/(4.20)): `𝓐_α` carries the subspace
 topology of `𝓑_α × 𝓒_α`. -/
