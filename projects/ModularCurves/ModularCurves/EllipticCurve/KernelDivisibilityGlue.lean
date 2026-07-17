@@ -378,6 +378,19 @@ noncomputable def Point.castBase {T : Scheme.{u}} {g g' : T ⟶ S} (h : g = g') 
 @[simp] theorem Point.castBase_symm_coe {T : Scheme.{u}} {g g' : T ⟶ S} (h : g = g')
     (P : E.Point g') : ((Point.castBase E h).symm P).1 = P.1 := by subst h; rfl
 
+/-- Transport of "`N` is a unit" along a ring homomorphism. -/
+private theorem isUnit_natCast_of_ringHom {A B : Type*} [Semiring A] [Semiring B] {N : ℕ}
+    (h : IsUnit ((N : ℕ) : A)) (f : A →+* B) : IsUnit ((N : ℕ) : B) := by
+  have h2 := h.map f
+  rwa [map_natCast] at h2
+
+/-- The reduction of a square-zero ideal along a ring homomorphism is again square-zero:
+the kernel of the quotient by `I.map f` squares to `⊥`. -/
+private theorem ker_mk_map_sq_eq_bot {A B : Type*} [CommRing A] [CommRing B] {I : Ideal A}
+    (hI : I ^ 2 = ⊥) (f : A →+* B) :
+    RingHom.ker (Ideal.Quotient.mk (I.map f)) ^ 2 = ⊥ := by
+  rw [Ideal.mk_ker, ← Ideal.map_pow, hI, Ideal.map_bot]
+
 /-- **(N5, the KernelNDivisible discharge)** The square-zero point kernels of a working
 record are `N`-divisible when `N` is invertible on the base. -/
 theorem kernelNDivisible_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :
@@ -391,10 +404,9 @@ theorem kernelNDivisible_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :
     rw [Ideal.mk_ker]
     exact hI
   -- `N` is a unit on the test
-  have hNA' : IsUnit ((N : ℕ) : ↑A') := by
-    have h1 : IsUnit ((N : ℕ) : ↑Γ(S, ⊤)) := h
-    have h2 := h1.map (b'.appTop ≫ (Scheme.ΓSpecIso A').hom).hom
-    rwa [map_natCast] at h2
+  have hNA' : IsUnit ((N : ℕ) : ↑A') :=
+    isUnit_natCast_of_ringHom (h : IsUnit ((N : ℕ) : ↑Γ(S, ⊤)))
+      (b'.appTop ≫ (Scheme.ΓSpecIso A').hom).hom
   -- the atlas and the basic-open cover adapted to it
   set A : WeierstrassAtlasData E.toEllipticCurveGeom := E.toEllipticCurveGeom.atlas with hA
   have hcover : ∀ p : ↑(Spec A'), ∃ (a : ↑A') (i : A.ι),
@@ -439,16 +451,12 @@ theorem kernelNDivisible_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :
     fun p => Ideal.Quotient.mk_surjective
   have hφp2 : ∀ p : ↑(Spec A'), RingHom.ker (CommRingCat.ofHom
       (Ideal.Quotient.mk (I.map (algebraMap ↑A' (Localization.Away (aa p)))))).hom ^ 2 =
-      ⊥ := by
-    intro p
-    show RingHom.ker (Ideal.Quotient.mk _) ^ 2 = ⊥
-    rw [Ideal.mk_ker, ← Ideal.map_pow, hI, Ideal.map_bot]
+      ⊥ :=
+    fun p => ker_mk_map_sq_eq_bot hI (algebraMap ↑A' (Localization.Away (aa p)))
   -- `N` is a unit on each piece
   have hNp : ∀ p : ↑(Spec A'), IsUnit ((N : ℕ) :
-      Localization.Away (aa p)) := by
-    intro p
-    have h2 := hNA'.map (algebraMap ↑A' (Localization.Away (aa p)))
-    rwa [map_natCast] at h2
+      Localization.Away (aa p)) :=
+    fun p => isUnit_natCast_of_ringHom hNA' (algebraMap ↑A' (Localization.Away (aa p)))
   -- the per-piece kernel points
   have hεp : ∀ p : ↑(Spec A'),
       Point.restrict E (Spec.map (CommRingCat.ofHom
@@ -593,12 +601,10 @@ theorem kernelNDivisible_of_nIsInvertible (N : ℕ) (h : NIsInvertible S N) :
       exact IsOpenImmersion.lift_fac _ _ hrangeT
     -- square-zero data over the overlap
     have hφT2 : RingHom.ker (CommRingCat.ofHom (Ideal.Quotient.mk (I.map (algebraMap ↑A'
-        (OverlapRing (aa p) (aa q)))))).hom ^ 2 = ⊥ := by
-      show RingHom.ker (Ideal.Quotient.mk _) ^ 2 = ⊥
-      rw [Ideal.mk_ker, ← Ideal.map_pow, hI, Ideal.map_bot]
-    have hNT : IsUnit ((N : ℕ) : OverlapRing (aa p) (aa q)) := by
-      have h2 := hNA'.map (algebraMap ↑A' (OverlapRing (aa p) (aa q)))
-      rwa [map_natCast] at h2
+        (OverlapRing (aa p) (aa q)))))).hom ^ 2 = ⊥ :=
+      ker_mk_map_sq_eq_bot hI (algebraMap ↑A' (OverlapRing (aa p) (aa q)))
+    have hNT : IsUnit ((N : ℕ) : OverlapRing (aa p) (aa q)) :=
+      isUnit_natCast_of_ringHom hNA' (algebraMap ↑A' (OverlapRing (aa p) (aa q)))
     -- the kernel squares
     have hmapL : I.map (algebraMap ↑A' (OverlapRing (aa p) (aa q))) =
         (I.map (algebraMap ↑A' (Localization.Away (aa p)))).map
