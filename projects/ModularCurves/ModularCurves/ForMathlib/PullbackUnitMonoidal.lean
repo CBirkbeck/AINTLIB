@@ -37,15 +37,27 @@ noncomputable local instance rawPresheafMonoidalCategory (Z : Scheme.{u}) :
     (_root_.PresheafOfModules (Z.sheaf.obj ⋙ forget₂ CommRingCat RingCat))
   infer_instance
 
-private noncomputable abbrev schemePresheafPullback (f : Y ⟶ X) :
-    X.PresheafOfModules ⥤ Y.PresheafOfModules :=
-  PresheafOfModules.pullback
+private noncomputable abbrev schemePresheafPullback (f : Y ⟶ X) :=
+  PresheafOfModules.pullback.{u}
     (_root_.PresheafOfModules.schemeRingPresheafHom f)
 
-private noncomputable abbrev schemePresheafPushforward (f : Y ⟶ X) :
-    Y.PresheafOfModules ⥤ X.PresheafOfModules :=
-  PresheafOfModules.pushforward
+private noncomputable abbrev schemePresheafPushforward (f : Y ⟶ X) :=
+  PresheafOfModules.pushforward.{u}
     (_root_.PresheafOfModules.schemeRingPresheafHom f)
+
+noncomputable local instance presheafPushforwardIsRightAdjoint
+    (f : Y ⟶ X) :
+    (PresheafOfModules.pushforward.{u} f.toRingCatSheafHom.hom).IsRightAdjoint := by
+  change (PresheafOfModules.pushforward.{u}
+    (_root_.PresheafOfModules.schemeRingPresheafHom f)).IsRightAdjoint
+  exact PresheafOfModules.instIsRightAdjointPushforward
+    (_root_.PresheafOfModules.schemeRingPresheafHom f)
+
+noncomputable local instance sheafPushforwardIsRightAdjoint
+    (f : Y ⟶ X) :
+    (SheafOfModules.pushforward.{u} f.toRingCatSheafHom).IsRightAdjoint := by
+  change (Scheme.Modules.pushforward f).IsRightAdjoint
+  infer_instance
 
 private noncomputable def presheafPullbackUnitHom (f : Y ⟶ X) :
     (schemePresheafPullback f).obj
@@ -85,7 +97,9 @@ private theorem sheafification_homEquiv_pullbackUnit
     rw [← Adjunction.homEquiv_symm_id shAdj (unitObj Y)]
     exact Equiv.apply_symm_apply _ _
   dsimp only [sheafifiedPresheafPullbackUnitHom]
-  rw [Adjunction.homEquiv_naturality_left]
+  have hnatural := shAdj.homEquiv_naturality_left
+    (presheafPullbackUnitHom f) ((sheafifyValIso (unitObj Y)).hom)
+  refine hnatural.trans ?_
   rw [hcounit]
   exact Category.comp_id _
 
@@ -113,7 +127,18 @@ private theorem presheafPullback_homEquiv_unit
     (((PresheafOfModules.pullbackPushforwardAdjunction φ).homEquiv _ _).symm
       (Functor.LaxMonoidal.ε
         (_root_.PresheafOfModules.pushforwardFactored φ))) = _
-  rw [Equiv.apply_symm_apply]
+  let e := (PresheafOfModules.pullbackPushforwardAdjunction φ).homEquiv
+    (𝟙_ (_root_.PresheafOfModules
+      (X.sheaf.obj ⋙ forget₂ CommRingCat RingCat)))
+    (𝟙_ (_root_.PresheafOfModules
+      (Y.sheaf.obj ⋙ forget₂ CommRingCat RingCat)))
+  have hcancel : e (e.symm
+      (Functor.LaxMonoidal.ε
+        (_root_.PresheafOfModules.pushforwardFactored φ))) =
+      Functor.LaxMonoidal.ε
+        (_root_.PresheafOfModules.pushforwardFactored φ) :=
+    e.apply_symm_apply _
+  refine hcancel.trans ?_
   apply PresheafOfModules.hom_ext
   intro U
   apply ModuleCat.hom_ext
@@ -235,7 +260,14 @@ private theorem sheafificationCompPullback_unit (f : Y ⟶ X) :
     (sheafifiedPresheafPullbackUnitHom f ≫
       (sheafifyValIso (unitObj Y)).hom)).symm
   apply (adj₁.homEquiv _ _).injective
-  rw [Adjunction.homEquiv_naturality_right, huniq]
+  have hnatural := adj₁.homEquiv_naturality_right
+    ((SheafOfModules.sheafificationCompPullback
+      f.toRingCatSheafHom).hom.app
+        (PresheafOfModules.unit X.ringCatSheaf.obj))
+    (sheafifiedPresheafPullbackUnitHom f ≫
+      (sheafifyValIso (unitObj Y)).hom)
+  refine hnatural.trans ?_
+  rw [huniq]
   refine htranspose.trans ?_
   rw [compositePullback_homEquiv_unit f]
   exact (compositeSheafPullback_homEquiv_unit f).symm
@@ -245,20 +277,22 @@ noncomputable local instance unitPullbackModuleMonoidalCategory (Z : Scheme.{u})
   Scheme.Modules.monoidalCategory Z
 
 noncomputable local instance unitPullbackSheafificationLocalization (Z : Scheme.{u}) :
-    (PresheafOfModules.sheafification (𝟙 Z.ringCatSheaf.obj)).IsLocalization
-      (PresheafOfModules.sheafificationW (𝟙 Z.ringCatSheaf.obj)) := by
-  change (PresheafOfModules.sheafification
+    (PresheafOfModules.sheafification.{u} (𝟙 Z.ringCatSheaf.obj)).IsLocalization
+      (PresheafOfModules.sheafificationW.{u} (𝟙 Z.ringCatSheaf.obj)) := by
+  change (PresheafOfModules.sheafification.{u}
       (𝟙 (⟨Z.sheaf.obj ⋙ forget₂ CommRingCat RingCat,
         Z.ringCatSheaf.property⟩ : TopCat.Sheaf RingCat Z).obj)).IsLocalization
-    (PresheafOfModules.sheafificationW
+    (PresheafOfModules.sheafificationW.{u}
       (𝟙 (⟨Z.sheaf.obj ⋙ forget₂ CommRingCat RingCat,
         Z.ringCatSheaf.property⟩ : TopCat.Sheaf RingCat Z).obj))
-  infer_instance
+  exact PresheafOfModules.sheafificationW_isLocalization
+    (⟨Z.sheaf.obj ⋙ forget₂ CommRingCat RingCat,
+      Z.ringCatSheaf.property⟩ : TopCat.Sheaf RingCat Z)
 
 noncomputable local instance unitPullbackSheafificationWMonoidal (Z : Scheme.{u}) :
-    (PresheafOfModules.sheafificationW
+    (PresheafOfModules.sheafificationW.{u}
       (𝟙 Z.ringCatSheaf.obj)).IsMonoidal := by
-  change (PresheafOfModules.sheafificationW
+  change (PresheafOfModules.sheafificationW.{u}
     (𝟙 (⟨Z.sheaf.obj ⋙ forget₂ CommRingCat RingCat,
       Z.ringCatSheaf.property⟩ : TopCat.Sheaf RingCat Z).obj)).IsMonoidal
   infer_instance
@@ -273,17 +307,28 @@ noncomputable local instance unitPullbackExactModuleMonoidalCategory (Z : Scheme
   exact unitPullbackModuleMonoidalCategory Z
 
 private noncomputable abbrev unitPullbackSheafification (Z : Scheme.{u}) :=
-  PresheafOfModules.sheafification (𝟙 (unitPullbackRingSheaf Z).obj)
+  PresheafOfModules.sheafification.{u} (𝟙 (unitPullbackRingSheaf Z).obj)
 
 private noncomputable abbrev unitPullbackSheafificationW (Z : Scheme.{u}) :=
-  PresheafOfModules.sheafificationW (𝟙 (unitPullbackRingSheaf Z).obj)
+  PresheafOfModules.sheafificationW.{u} (𝟙 (unitPullbackRingSheaf Z).obj)
+
+noncomputable local instance unitPullbackExactSheafificationLocalization
+    (Z : Scheme.{u}) :
+    (unitPullbackSheafification Z).IsLocalization
+      (unitPullbackSheafificationW Z) :=
+  PresheafOfModules.sheafificationW_isLocalization (unitPullbackRingSheaf Z)
+
+noncomputable local instance unitPullbackExactSheafificationWMonoidal
+    (Z : Scheme.{u}) :
+    (unitPullbackSheafificationW Z).IsMonoidal :=
+  PresheafOfModules.sheafificationW_isMonoidal _
 
 private noncomputable abbrev unitPullbackLocalizedSheafification (Z : Scheme.{u}) :=
   Localization.Monoidal.toMonoidalCategory
     (L := unitPullbackSheafification Z) (W := unitPullbackSheafificationW Z) (Iso.refl _)
 
 private noncomputable abbrev unitPullbackPresheafPullback (f : Y ⟶ X) :=
-  PresheafOfModules.pullback
+  PresheafOfModules.pullback.{u}
     (_root_.PresheafOfModules.schemeRingPresheafHom f)
 
 private noncomputable abbrev unitPullbackSheafHom (f : Y ⟶ X) :=
@@ -292,7 +337,7 @@ private noncomputable abbrev unitPullbackSheafHom (f : Y ⟶ X) :=
       RingCat.{u} _ _).obj (unitPullbackRingSheaf Y))
 
 private noncomputable abbrev unitPullbackSheafPullback (f : Y ⟶ X) :=
-  SheafOfModules.pullback (unitPullbackSheafHom f)
+  SheafOfModules.pullback.{u} (unitPullbackSheafHom f)
 
 @[implicit_reducible]
 private noncomputable def unitPullbackSheafPullbackLifting (f : Y ⟶ X) :
@@ -354,8 +399,21 @@ private theorem pullback_monoidalUnitObjIso_hom (f : Y ⟶ X) :
         (Scheme.Modules.pullback f).map
           (sheafifyValIso (unitObj X)).hom ≫
       (pullbackUnitIso f).hom
-  slice_lhs 1 2 => rw [Functor.Monoidal.ε_η]
-  rw [Category.id_comp]
+  have hεη : Functor.LaxMonoidal.ε (Scheme.Modules.pullback f) ≫
+      Functor.OplaxMonoidal.η (Scheme.Modules.pullback f) = 𝟙 _ :=
+    Functor.Monoidal.ε_η (Scheme.Modules.pullback f)
+  have hcancel : Functor.LaxMonoidal.ε (Scheme.Modules.pullback f) ≫
+        Functor.OplaxMonoidal.η (Scheme.Modules.pullback f) ≫
+          (sheafifyValIso (unitObj Y)).hom =
+      (sheafifyValIso (unitObj Y)).hom := by
+    have hassoc := (Category.assoc
+      (Functor.LaxMonoidal.ε (Scheme.Modules.pullback f))
+      (Functor.OplaxMonoidal.η (Scheme.Modules.pullback f))
+      (sheafifyValIso (unitObj Y)).hom).symm
+    have hone := congrArg
+      (fun k => k ≫ (sheafifyValIso (unitObj Y)).hom) hεη
+    exact hassoc.trans (hone.trans (Category.id_comp _))
+  rw [hcancel]
   rw [hepsilon]
   let p := Functor.LaxMonoidal.ε
       (unitPullbackPresheafPullback f ⋙ unitPullbackLocalizedSheafification Y) ≫
@@ -382,8 +440,7 @@ private theorem pullback_monoidalUnitObjIso_hom (f : Y ⟶ X) :
   have hpq : p ≫ (Scheme.Modules.pullback f).map
           (sheafifyValIso (unitObj X)).hom ≫
         (pullbackUnitIso f).hom = p ≫ q := by
-    rw [Category.assoc, hq]
-    rfl
+    exact congrArg (fun k => p ≫ k) hq.symm
   rw [hpq]
   dsimp only [q]
   dsimp only [p]
@@ -396,7 +453,25 @@ private theorem pullback_monoidalUnitObjIso_hom (f : Y ⟶ X) :
     ((unitPullbackLocalizedSheafification X).obj
       (𝟙_ (_root_.PresheafOfModules (unitPullbackRingSheaf X).obj)))
   erw [hmapId]
-  erw [Category.id_comp]
+  let r :=
+    (SheafOfModules.sheafificationCompPullback
+      (unitPullbackSheafHom f)).hom.app
+        (𝟙_ (_root_.PresheafOfModules
+          (unitPullbackRingSheaf X).obj)) ≫
+      sheafifiedPresheafPullbackUnitHom f ≫
+      (sheafifyValIso (unitObj Y)).hom
+  have hid : (𝟙 _) ≫ r = r := Category.id_comp r
+  have hremove := congrArg
+    (fun k =>
+      (unitPullbackLocalizedSheafification Y).map
+          (Functor.LaxMonoidal.ε (unitPullbackPresheafPullback f)) ≫
+        (SheafOfModules.sheafificationCompPullback
+          (unitPullbackSheafHom f)).inv.app
+            (𝟙_ (_root_.PresheafOfModules
+              (unitPullbackRingSheaf X).obj)) ≫ k)
+    hid
+  dsimp only [r] at hremove
+  refine Eq.trans ?_ hremove.symm
   change (sheafifyValIso (unitObj Y)).hom =
     (unitPullbackLocalizedSheafification Y).map
         (Functor.LaxMonoidal.ε (unitPullbackPresheafPullback f)) ≫
@@ -417,16 +492,15 @@ private theorem pullback_monoidalUnitObjIso_hom (f : Y ⟶ X) :
     Functor.Monoidal.map_ε_η (unitPullbackPresheafPullback f)
       (unitPullbackLocalizedSheafification Y)
   symm
-  calc
-    _ = ((unitPullbackLocalizedSheafification Y).map
-          (Functor.LaxMonoidal.ε (unitPullbackPresheafPullback f)) ≫
-        (unitPullbackLocalizedSheafification Y).map
-          (Functor.OplaxMonoidal.η (unitPullbackPresheafPullback f))) ≫
-        (sheafifyValIso (unitObj Y)).hom :=
-      (Category.assoc _ _ _).symm
-    _ = (𝟙 _) ≫ (sheafifyValIso (unitObj Y)).hom :=
-      congrArg (fun k => k ≫ (sheafifyValIso (unitObj Y)).hom) hεη
-    _ = _ := Category.id_comp _
+  have hassoc := (Category.assoc
+    ((unitPullbackLocalizedSheafification Y).map
+      (Functor.LaxMonoidal.ε (unitPullbackPresheafPullback f)))
+    ((unitPullbackLocalizedSheafification Y).map
+      (Functor.OplaxMonoidal.η (unitPullbackPresheafPullback f)))
+    (sheafifyValIso (unitObj Y)).hom).symm
+  have hone := congrArg
+    (fun k => k ≫ (sheafifyValIso (unitObj Y)).hom) hεη
+  exact hassoc.trans (hone.trans (Category.id_comp _))
 
 /-- The monoidal unit comparison of sheaf pullback agrees with the canonical
 pullback isomorphism for the structure sheaf. -/
