@@ -7,7 +7,7 @@ module
 
 public import BernoulliRegular.CyclotomicUnits.DworkParameter
 public import BernoulliRegular.CyclotomicUnits.Vandermonde
-public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor.ConductorFlexiblePhiFacts
+public import BernoulliRegular.Reflection.ResidueSymbol.Furtwaengler.PrincipalUnitFactor
 
 /-!
 # The Kummer logarithm coefficient matrix
@@ -783,12 +783,6 @@ theorem dworkEvenPowerIndex_pos_of_ne_zero
   apply Fin.ext
   simpa [dworkEvenPowerIndexZero] using hnat
 
-set_option synthInstance.maxHeartbeats 80000 in
--- The proof repeatedly forms quotient rings of the completed Dwork ring; the
--- local aliases keep the statement readable but make quotient-ring instance
--- search slightly deeper than the default budget.
--- The proof normalizes the basis expansion through quotient maps and ideal
--- membership before applying the existing scalar-prime-ideal criterion.
 omit [NumberField.IsCMField K] in
 theorem dworkFixedEvenPower_constantCoeff_mem_primeIdeal_of_mem_parameterIdeal
     (hp_two : 2 < p) {x : dworkFixedSubalgebra p K}
