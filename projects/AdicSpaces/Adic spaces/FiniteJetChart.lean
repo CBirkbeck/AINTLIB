@@ -528,6 +528,175 @@ theorem canonicalMap_Qa_sq :
   rw [closure_singleton] at h0mem
   exact (Set.mem_singleton_iff.mp h0mem).symm
 
+/-! ### The generalized (3.3) collapse: `ρ` kills the whole `Q²𝓒`-part -/
+
+/-- The generalized `W⁻ⁿ`-family at any `Q²`-supported element. -/
+noncomputable def yGen (y : JetA F) (hy0 : qCoeff F 0 ((y : JetA F) : JetC F) = 0)
+    (hy1 : qCoeff F 1 ((y : JetA F) : JetC F) = 0) (n : ℕ) : JetA F :=
+  ⟨constHomC F (((Wu (R := K))⁻¹).val ^ n) * ((y : JetA F) : JetC F), by
+    constructor
+    · simp only [qCoeff_zero_mul, hy0, mul_zero]
+      exact zero_mem _
+    · simp only [qCoeff_one_mul, qCoeff_zero_mul, hy0, hy1, mul_zero, zero_mul,
+        add_zero, zero_add]
+      exact zero_mem _⟩
+
+theorem Wa_pow_mul_yGen (y : JetA F) (hy0 : qCoeff F 0 ((y : JetA F) : JetC F) = 0)
+    (hy1 : qCoeff F 1 ((y : JetA F) : JetC F) = 0) (n : ℕ) :
+    Wa F ^ n * yGen F y hy0 hy1 n = y := by
+  refine Subtype.ext ?_
+  show ((Wa F : JetA F) : JetC F) ^ n *
+    (constHomC F (((Wu (R := K))⁻¹).val ^ n) * ((y : JetA F) : JetC F)) =
+    ((y : JetA F) : JetC F)
+  rw [Wa_val_eq, ← map_pow, ← mul_assoc, ← map_mul,
+    show (Wu (R := K)).val ^ n * ((Wu (R := K))⁻¹).val ^ n = 1 from by
+      rw [← mul_pow]
+      rw [show (Wu (R := K)).val * ((Wu (R := K))⁻¹).val = 1 from (Wu (R := K)).val_inv]
+      rw [one_pow],
+    map_one, one_mul]
+
+theorem norm_yGen_le (y : JetA F) (hy0 : qCoeff F 0 ((y : JetA F) : JetC F) = 0)
+    (hy1 : qCoeff F 1 ((y : JetA F) : JetC F) = 0) (n : ℕ) :
+    ‖yGen F y hy0 hy1 n‖ ≤ ‖y‖ := by
+  show ‖constHomC F (((Wu (R := K))⁻¹).val ^ n) * ((y : JetA F) : JetC F)‖ ≤ _
+  rw [norm_JetC_mul, norm_constHomC]
+  have hWinv : ‖((Wu (R := K))⁻¹).val ^ n‖ = 1 := by
+    rw [show ((Wu (R := K))⁻¹).val = single (-1) 1 from rfl]
+    rw [show (single (-1) (1 : K) : RestrictedLaurent K) ^ n =
+      single (-n : ℤ) 1 from ?_]
+    · rw [norm_single, norm_one]
+    · induction n with
+      | zero =>
+          rw [pow_zero]
+          rw [show ((-(0 : ℕ) : ℤ)) = 0 from by norm_num]
+          exact single_zero_one.symm
+      | succ k ih =>
+          rw [pow_succ, ih, single_mul_single, one_mul]
+          congr 1
+          push_cast
+          ring
+  rw [hWinv, one_mul]
+  exact le_of_eq rfl
+
+/-- **The generalized (3.3) collapse**: `ρ` kills every `Q²`-supported element of 𝓐. -/
+theorem canonicalMap_eq_zero_of_qSq (y : JetA F)
+    (hy0 : qCoeff F 0 ((y : JetA F) : JetC F) = 0)
+    (hy1 : qCoeff F 1 ((y : JetA F) : JetC F) = 0) :
+    (chartDatum F).canonicalMap y = 0 := by
+  classical
+  set ρ := (chartDatum F).canonicalMap with hρ
+  set g := (chartDatum F).coeRingHom (divByS (Wa F) (chartDatum F).s) with hgdef
+  have hWsplit : ρ (Wa F) = ρ (tA F) * g := by
+    rw [hρ, hgdef]
+    show (chartDatum F).coeRingHom (algebraMap (JetA F)
+        (Localization.Away (chartDatum F).s) (Wa F)) =
+      (chartDatum F).coeRingHom (algebraMap (JetA F)
+        (Localization.Away (chartDatum F).s) (tA F)) *
+        (chartDatum F).coeRingHom (divByS (Wa F) (chartDatum F).s)
+    rw [← RingHom.map_mul (chartDatum F).coeRingHom]
+    congr 1
+    rw [mul_comm]
+    symm
+    show divByS (Wa F) (chartDatum F).s *
+      algebraMap (JetA F) (Localization.Away (chartDatum F).s) (chartDatum F).s =
+      algebraMap (JetA F) (Localization.Away (chartDatum F).s) (Wa F)
+    rw [divByS, IsLocalization.mk'_spec]
+  have hkey : ∀ n : ℕ, ρ y = ρ (tA F) ^ n * (g ^ n * ρ (yGen F y hy0 hy1 n)) := by
+    intro n
+    conv_lhs => rw [← Wa_pow_mul_yGen F y hy0 hy1 n]
+    rw [RingHom.map_mul ρ, map_pow ρ, hWsplit, mul_pow]
+    ring
+  have hbddY : TopologicalRing.IsBounded
+      (Set.range fun n : ℕ => ρ (yGen F y hy0 hy1 n)) := by
+    obtain ⟨k, hk⟩ : ∃ k : ℕ, ‖tA F‖ ^ k * ‖y‖ ≤ 1 := by
+      obtain ⟨k, hk⟩ := exists_pow_lt_of_lt_one
+        (show (0:ℝ) < 1 / (1 + ‖y‖) by positivity) (norm_tA_lt_one F)
+      refine ⟨k, ?_⟩
+      have h1 : ‖tA F‖ ^ k * ‖y‖ ≤ (1 / (1 + ‖y‖)) * ‖y‖ :=
+        mul_le_mul_of_nonneg_right hk.le (norm_nonneg _)
+      refine h1.trans ?_
+      rw [div_mul_eq_mul_div, one_mul, div_le_one (by positivity)]
+      linarith [norm_nonneg y]
+    have hunit : IsUnit (ρ (tA F)) := by
+      rw [hρ]
+      show IsUnit ((chartDatum F).coeRingHom (algebraMap (JetA F)
+        (Localization.Away (chartDatum F).s) (chartDatum F).s))
+      refine IsUnit.map _ ?_
+      exact IsLocalization.map_units (Localization.Away (chartDatum F).s)
+        ⟨(chartDatum F).s, Submonoid.mem_powers _⟩
+    obtain ⟨u, hu⟩ := hunit
+    have hball : TopologicalRing.IsBounded
+        (Set.range fun n : ℕ => ρ (tA F ^ k * yGen F y hy0 hy1 n)) := by
+      refine (CompletionLocalization.coeRingHom_image_locSubring_isBounded
+        (chartDatum F)).subset ?_
+      rintro _ ⟨n, rfl⟩
+      refine ⟨algebraMap (JetA F) (Localization.Away (chartDatum F).s)
+        (tA F ^ k * yGen F y hy0 hy1 n), ?_, rfl⟩
+      refine algebraMap_mem_locSubring _ _ _ ?_
+      show tA F ^ k * yGen F y hy0 hy1 n ∈ (podA F).A₀
+      show ‖tA F ^ k * yGen F y hy0 hy1 n‖ ≤ 1
+      rw [norm_JetA_mul, norm_JetA_pow]
+      calc ‖tA F‖ ^ k * ‖yGen F y hy0 hy1 n‖ ≤ ‖tA F‖ ^ k * ‖y‖ :=
+            mul_le_mul_of_nonneg_left (norm_yGen_le F y hy0 hy1 n) (by positivity)
+        _ ≤ 1 := hk
+    have hres : (Set.range fun n : ℕ => ρ (yGen F y hy0 hy1 n)) ⊆
+        ({((u⁻¹ : (presheafValue (chartDatum F))ˣ) :
+          presheafValue (chartDatum F)) ^ k} : Set (presheafValue (chartDatum F))) *
+          Set.range fun n : ℕ => ρ (tA F ^ k * yGen F y hy0 hy1 n) := by
+      rintro _ ⟨n, rfl⟩
+      refine ⟨((u⁻¹ : (presheafValue (chartDatum F))ˣ) :
+        presheafValue (chartDatum F)) ^ k, rfl,
+        ρ (tA F ^ k * yGen F y hy0 hy1 n), ⟨n, rfl⟩, ?_⟩
+      show ((u⁻¹ : (presheafValue (chartDatum F))ˣ) :
+        presheafValue (chartDatum F)) ^ k * ρ (tA F ^ k * yGen F y hy0 hy1 n) =
+        ρ (yGen F y hy0 hy1 n)
+      rw [RingHom.map_mul ρ, map_pow ρ, ← hu, ← mul_assoc, ← mul_pow]
+      rw [show ((u⁻¹ : (presheafValue (chartDatum F))ˣ) :
+        presheafValue (chartDatum F)) * u = 1 from u.inv_mul]
+      rw [one_pow, one_mul]
+    exact ((TopologicalRing.isBounded_singleton _).mul hball).subset hres
+  have hbddG : TopologicalRing.IsBounded
+      (Set.range (g ^ · : ℕ → presheafValue (chartDatum F))) := by
+    have hmem : divByS (Wa F) (chartDatum F).s ∈
+        locSubring (chartDatum F).P (chartDatum F).T (chartDatum F).s :=
+      divByS_mem_locSubring _ _ _ (Finset.mem_insert_self _ _)
+    refine (CompletionLocalization.coeRingHom_image_locSubring_isBounded
+      (chartDatum F)).subset ?_
+    rintro _ ⟨n, rfl⟩
+    exact ⟨divByS (Wa F) (chartDatum F).s ^ n, pow_mem hmem n, by rw [map_pow]⟩
+  have hbdd : TopologicalRing.IsBounded
+      (Set.range fun n : ℕ => g ^ n * ρ (yGen F y hy0 hy1 n)) := by
+    refine (hbddG.mul hbddY).subset ?_
+    rintro _ ⟨n, rfl⟩
+    exact ⟨g ^ n, ⟨n, rfl⟩, ρ (yGen F y hy0 hy1 n), ⟨n, rfl⟩, rfl⟩
+  have hnull : Filter.Tendsto (fun n : ℕ => ρ (tA F) ^ n) Filter.atTop
+      (nhds (0 : presheafValue (chartDatum F))) := by
+    have htend : Filter.Tendsto (fun n : ℕ => tA F ^ n) Filter.atTop
+        (nhds (0 : JetA F)) := by
+      rw [tendsto_zero_iff_norm_tendsto_zero]
+      simp only [norm_JetA_pow]
+      exact tendsto_pow_atTop_nhds_zero_of_lt_one (norm_nonneg _) (norm_tA_lt_one F)
+    have hcont := (canonicalMap_continuous (chartDatum F)).continuousAt (x := (0 : JetA F))
+    have := hcont.tendsto.comp htend
+    rw [hρ]
+    simpa only [Function.comp_def, map_pow, map_zero] using this
+  have hmem0 : ∀ U ∈ nhds (0 : presheafValue (chartDatum F)), ρ y ∈ U := by
+    intro U hU
+    obtain ⟨V, hV, hVU⟩ := hbdd U hU
+    have hev := hnull hV
+    rw [Filter.mem_map] at hev
+    obtain ⟨n, hn⟩ := (Filter.eventually_atTop.mp hev)
+    have hnn := hn n (le_refl n)
+    rw [hkey n, mul_comm]
+    exact hVU (Set.mul_mem_mul ⟨n, rfl⟩ hnn)
+  haveI : RegularSpace (presheafValue (chartDatum F)) := UniformSpace.to_regularSpace
+  have h0mem : (0 : presheafValue (chartDatum F)) ∈ closure {ρ y} := by
+    rw [mem_closure_iff_nhds]
+    intro U hU
+    exact ⟨ρ y, hmem0 U hU, rfl⟩
+  rw [closure_singleton] at h0mem
+  exact (Set.mem_singleton_iff.mp h0mem).symm
+
 /-! ### The forward map `𝒪_𝓐(chart) → 𝓑` (Prop 3.1's `ψ`-direction) -/
 
 theorem isUnit_thetaChart_s : IsUnit (thetaChart F (chartDatum F).s) := by
