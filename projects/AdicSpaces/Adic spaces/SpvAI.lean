@@ -499,28 +499,137 @@ theorem Spv.cofinalValue_of_isContinuous [TopologicalSpace A]
   rw [map_pow] at hn
   exact ⟨n, hn⟩
 
-/-- **Per-`v` uniform decay on `I^n` from per-generator cofinality — `A°°`-form**
-(Huber [Hu2] Thm 3.1's decay step, huber2.txt:598-604: "Let `U` be a subset of `A` and
-`T` a finite subset of `U` such that `{Uⁿ}` is a fundamental system of neighbourhoods of
-`0` and `T·U = U² ⊆ U`. … Since `U ⊆ A°°` we have `v(u) < 1` for every `u ∈ U`. By (1)
-there exists a `n` with `(max{v(t) | t ∈ T})ⁿ < γ`. Then `v(a) < γ` for every
-`a ∈ Tⁿ·U = U^{n+1}`").
+/-- **Pigeonhole decay on pure generator-products** (Huber [Hu2] Thm 3.1 step (1) +
+Lemma 2.4, huber2.txt:598-604 + 432-438). For a finite set `S` with `v ≤ 1` and
+`CofinalValue v` on each generator, some length `m` makes every product of `m` elements
+of `S` have `v < γ`: pigeonhole forces one generator to appear often enough that its
+cofinality drives the product below `γ` while the other factors stay `≤ 1`. -/
+private theorem pow_gen_prod_lt {R Γ₀ : Type*} [CommRing R]
+    [LinearOrderedCommGroupWithZero Γ₀] (v : Valuation R Γ₀) (S : Finset R)
+    (h_le_one : ∀ c ∈ S, v c ≤ 1) (h_cofinal : ∀ c ∈ S, Valuation.CofinalValue v c)
+    (γ : Γ₀) (hγ : 0 < γ) :
+    ∃ m : ℕ, ∀ f : Fin m → ↥S, v (∏ i, (↑(f i) : R)) < γ := by
+  classical
+  by_cases hS : S.Nonempty
+  · have h_per : ∀ c ∈ S, ∃ N : ℕ, v c ^ N < γ := fun c hc => h_cofinal c hc γ hγ
+    choose N_c hN_c using h_per
+    set N_max : ℕ := (S.attach.image (fun x => N_c x.1 x.2)).sup id + 1 with hN_max_def
+    refine ⟨(S.card + 1) * N_max, fun f => ?_⟩
+    rw [map_prod]
+    haveI : Nonempty ↥S := hS.coe_sort
+    have h_card_le : Fintype.card ↥S * N_max ≤
+        Fintype.card (Fin ((S.card + 1) * N_max)) := by
+      simp only [Fintype.card_fin, Fintype.card_coe]
+      calc S.card * N_max ≤ S.card * N_max + N_max := Nat.le_add_right _ _
+        _ = (S.card + 1) * N_max := by ring
+    obtain ⟨c_star, hc_count⟩ :=
+      Fintype.exists_le_card_fiber_of_mul_le_card (f := f) (n := N_max) h_card_le
+    rw [show (∏ i, v (↑(f i) : R)) =
+        ∏ c : ↥S, ∏ _i ∈ Finset.univ.filter (fun i => f i = c), v (↑c : R) by
+      rw [Finset.prod_fiberwise' (s := Finset.univ) (g := f)
+        (f := fun c : ↥S => v (↑c : R))]]
+    have h_inner : ∀ c : ↥S,
+        (∏ _i ∈ Finset.univ.filter (fun i => f i = c), v (↑c : R)) =
+        v (↑c : R) ^ (Finset.univ.filter
+          (fun i : Fin ((S.card + 1) * N_max) => f i = c)).card :=
+      fun c => Finset.prod_const _
+    rw [Finset.prod_congr rfl fun c _ => h_inner c,
+      ← Finset.prod_erase_mul (Finset.univ : Finset ↥S) _ (Finset.mem_univ c_star)]
+    have h_v_le_one : ∀ c : ↥S, v (↑c : R) ≤ 1 := fun c => h_le_one ↑c c.2
+    have h_others : (∏ c ∈ (Finset.univ : Finset ↥S).erase c_star, v (↑c : R) ^
+        (Finset.univ.filter
+          (fun i : Fin ((S.card + 1) * N_max) => f i = c)).card) ≤ 1 :=
+      Finset.prod_le_one' fun c _ => Left.pow_le_one_of_le (h_v_le_one c) _
+    have h_star_lt : v (↑c_star : R) ^ (Finset.univ.filter
+        (fun i : Fin ((S.card + 1) * N_max) => f i = c_star)).card < γ := by
+      set count := (Finset.univ.filter
+        (fun i : Fin ((S.card + 1) * N_max) => f i = c_star)).card
+      have h_N_max_ge : N_c (↑c_star : R) c_star.2 + 1 ≤ N_max := by
+        rw [hN_max_def]
+        apply Nat.add_le_add_right
+        exact Finset.le_sup (f := id) (Finset.mem_image.mpr
+          ⟨⟨(↑c_star : R), c_star.2⟩, Finset.mem_attach _ _, rfl⟩)
+      have h_count_ge : N_c (↑c_star : R) c_star.2 ≤ count :=
+        le_trans (Nat.le_succ _) (le_trans h_N_max_ge hc_count)
+      calc v (↑c_star : R) ^ count
+          ≤ v (↑c_star : R) ^ N_c (↑c_star : R) c_star.2 := by
+            obtain ⟨k, hk⟩ := Nat.exists_eq_add_of_le h_count_ge
+            rw [hk, pow_add]
+            conv_rhs => rw [← mul_one (v (↑c_star : R) ^ N_c (↑c_star : R) c_star.2)]
+            exact mul_le_mul_left' (Left.pow_le_one_of_le (h_v_le_one c_star) k) _
+        _ < γ := hN_c (↑c_star : R) c_star.2
+    calc (∏ c ∈ (Finset.univ : Finset ↥S).erase c_star, v (↑c : R) ^
+            (Finset.univ.filter
+              (fun i : Fin ((S.card + 1) * N_max) => f i = c)).card) *
+          v (↑c_star : R) ^ (Finset.univ.filter
+            (fun i : Fin ((S.card + 1) * N_max) => f i = c_star)).card
+        ≤ 1 * v (↑c_star : R) ^ (Finset.univ.filter
+            (fun i : Fin ((S.card + 1) * N_max) => f i = c_star)).card :=
+          mul_le_mul_right' h_others _
+      _ = _ := one_mul _
+      _ < γ := h_star_lt
+  · rw [Finset.not_nonempty_iff_eq_empty] at hS
+    subst hS
+    exact ⟨1, fun f => absurd (f 0).2 (Finset.notMem_empty _)⟩
 
-Unlike `cofinalValue_ideal_pow_lt`, the bound hypothesis is only on the **ideal of
-definition** (`v ≤ 1` on `P.I`), NOT on the full ring of definition `P.A₀` — Huber's
-actual 3.1 generality. The `A₀`-coefficient obstruction is avoided by reassociation:
-`I^{n+1} = (span S)·I^n` and `(r • y)·z = y·(r • z)` absorb every scalar into the
-`I^n`-factor, so the induction (`Submodule.mul_induction_on` + a `∀ z ∈ I^n`-strengthened
-`span_induction` on the `span S`-factor) never meets a bare coefficient. The final `n`
-comes from `CofinalValue` at the **max-value generator** (Huber Lemma 2.4,
-huber2.txt:432-438: the convex subgroup generated by `h := max{v(t) | t ∈ T}`). -/
+/-- **Ideal-power valuation decay from a bound on the ideal alone** (Huber [Hu2] Thm 3.1,
+general form). For a finitely generated ideal `I` with `v ≤ 1` and `CofinalValue v` on
+every element of `I`, some power `n` makes `v < γ` on all of `I^n` — with the bound
+required only on `I`, never on ambient coefficients. Coefficients are absorbed into the
+ideal: writing `a ∈ I^{m+1}` as a combination of pure `(m+1)`-fold generator products
+`p = s₀·(s₁⋯s_m)`, each `c_p·p = (c_p·s₀)·(s₁⋯s_m)` has `c_p·s₀ ∈ I` (so `v ≤ 1`) and
+the tail is an `m`-fold generator product (so `v < γ` by `pow_gen_prod_lt`). -/
+theorem exists_pow_lt_of_forall_le_one_cofinal {R Γ₀ : Type*} [CommRing R]
+    [LinearOrderedCommGroupWithZero Γ₀] (v : Valuation R Γ₀) {I : Ideal R} (hfg : I.FG)
+    (h_le_one : ∀ a ∈ I, v a ≤ 1) (h_cofinal : ∀ a ∈ I, Valuation.CofinalValue v a)
+    (γ : Γ₀) (hγ : 0 < γ) :
+    ∃ n : ℕ, ∀ a ∈ I ^ n, v a < γ := by
+  classical
+  obtain ⟨S, hS⟩ := hfg
+  have hSI : ∀ c ∈ S, c ∈ I := fun c hc => hS ▸ Ideal.subset_span hc
+  obtain ⟨m, hm⟩ := pow_gen_prod_lt v S (fun c hc => h_le_one c (hSI c hc))
+    (fun c hc => h_cofinal c (hSI c hc)) γ hγ
+  refine ⟨m + 1, fun a ha => ?_⟩
+  have ha' : a ∈ Ideal.span (↑(S ^ (m + 1)) : Set R) := by
+    rw [Finset.coe_pow]
+    rw [show (Ideal.span ((↑S : Set R) ^ (m + 1)) : Ideal R) =
+        (Ideal.span (↑S : Set R)) ^ (m + 1) from
+      (Submodule.span_pow (↑S : Set R) (m + 1)).symm]
+    rw [hS]
+    exact ha
+  rw [Submodule.mem_span_finset] at ha'
+  obtain ⟨cf, _hsupp, hsum⟩ := ha'
+  rw [← hsum]
+  refine Valuation.map_sum_lt v hγ.ne' fun p hp => ?_
+  rw [Finset.mem_pow] at hp
+  obtain ⟨g, hg⟩ := hp
+  have hg' : (∏ i, (↑(g i) : R)) = p := by rw [← List.prod_ofFn]; exact hg
+  have hp_eq : p = (↑(g 0) : R) * ∏ i : Fin m, (↑(g i.succ) : R) := by
+    rw [← hg', Fin.prod_univ_succ]
+  have hg0I : (↑(g 0) : R) ∈ I := hSI _ (g 0).2
+  have habs : cf p • p = (cf p * (↑(g 0) : R)) * ∏ i : Fin m, (↑(g i.succ) : R) := by
+    rw [smul_eq_mul, hp_eq, mul_assoc]
+  rw [habs, map_mul]
+  calc v (cf p * (↑(g 0) : R)) * v (∏ i : Fin m, (↑(g i.succ) : R))
+      ≤ 1 * v (∏ i : Fin m, (↑(g i.succ) : R)) :=
+        mul_le_mul_right' (h_le_one _ (I.mul_mem_left (cf p) hg0I)) _
+    _ = v (∏ i : Fin m, (↑(g i.succ) : R)) := one_mul _
+    _ < γ := hm fun i => g i.succ
+
+/-- **Per-`v` uniform decay on `I^n` from per-generator cofinality — `A°°`-form**
+(Huber [Hu2] Thm 3.1's decay step). De-`A₀`'d `cofinalValue_ideal_pow_lt`: the bound is
+required only on the ideal of definition `P.I`, not on `P.A₀`. Instantiates the general
+`exists_pow_lt_of_forall_le_one_cofinal` at `v.comap P.A₀.subtype` and `I := P.I`. -/
 theorem cofinalValue_ideal_pow_lt_of_le_one_on_ideal {A : Type*} [CommRing A]
     [TopologicalSpace A] {Γ₀ : Type*} [LinearOrderedCommGroupWithZero Γ₀]
     {v : Valuation A Γ₀} (P : PairOfDefinition A)
     (h_le_one : ∀ c : P.A₀, c ∈ P.I → v (P.A₀.subtype c) ≤ 1)
     (h_cofinal : ∀ c : P.A₀, c ∈ P.I → Valuation.CofinalValue v (P.A₀.subtype c))
     (γ : Γ₀) (hγ : 0 < γ) :
-    ∃ n : ℕ, ∀ a : P.A₀, a ∈ P.I ^ n → v (P.A₀.subtype a) < γ := by sorry
+    ∃ n : ℕ, ∀ a : P.A₀, a ∈ P.I ^ n → v (P.A₀.subtype a) < γ := by
+  obtain ⟨n, hn⟩ := exists_pow_lt_of_forall_le_one_cofinal (v.comap P.A₀.subtype) P.fg
+    (fun a ha => h_le_one a ha) (fun a ha => h_cofinal a ha) γ hγ
+  exact ⟨n, fun a ha => hn a ha⟩
 
 /-- **Huber [Hu2] Theorem 3.1, reverse direction — general f-adic ring, `A°°`-form**
 (huber2.txt:585-586: "Cont A = {v ∈ Spv(A, A°°·A) | v(a) < 1 for every a ∈ A°°}").
@@ -541,6 +650,67 @@ theorem Spv.isContinuous_of_isInSpvAI_of_lt_one_AOO [TopologicalSpace A]
       letI : ValuativeRel A := v.toValuativeRel
       (ValuativeRel.valuation A) (P.A₀.subtype a) < 1) :
     letI : ValuativeRel A := v.toValuativeRel
-    (ValuativeRel.valuation A).IsContinuous := by sorry
+    (ValuativeRel.valuation A).IsContinuous := by
+  letI : ValuativeRel A := v.toValuativeRel
+  set wv := ValuativeRel.valuation A with hwv_def
+  -- Reduce to per-generator cofinality via the A°°-form decay (T904): the bound
+  -- hypothesis is only `≤ 1` on `P.I`, supplied by `h_lt_one`. (`h_le_AOO` is not
+  -- consumed by this route — kept for statement-parity with Huber Thm 3.1.)
+  refine Valuation.isContinuous_of_ideal_pow_lt P wv ?_
+  intro γ hγ
+  apply cofinalValue_ideal_pow_lt_of_le_one_on_ideal P
+    (fun c hc => (h_lt_one c hc).le) ?_ γ hγ
+  intro c hc
+  rcases h_in with h_cof | h_micr
+  · -- Cofinality disjunct: P.A₀.subtype c is already in the I-image.
+    apply h_cof
+    exact Ideal.mem_map_of_mem _ hc
+  · -- Microbial disjunct: Wedhorn 7.10's microbial argument.
+    intro γ' hγ'
+    -- IsMicrobial: ∃ t ∈ A with wv(t) ≠ 0 and wv(t)⁻¹ ≤ γ'.
+    obtain ⟨t, h_vt_ne, h_vt_inv_le⟩ := h_micr.exists_inv_le hγ'
+    -- c is topologically nilpotent in A.
+    have hc_topnilp : IsTopologicallyNilpotent (P.A₀.subtype c) :=
+      P.isTopologicallyNilpotent_of_mem hc
+    -- ∃ n_0, (P.A₀.subtype c)^n_0 * t ∈ P.A₀.
+    obtain ⟨n_0, hn_0⟩ := PairOfDefinition.exists_pow_mul_mem_A₀ P hc_topnilp t
+    refine ⟨n_0 + 1, ?_⟩
+    -- Construct b := c * ⟨c^n_0 * t, hn_0⟩ ∈ P.I (as P.A₀-ideal).
+    let b : P.A₀ := c * ⟨(P.A₀.subtype c)^n_0 * t, hn_0⟩
+    have hb_mem_I : b ∈ P.I :=
+      Ideal.mul_mem_right _ _ hc
+    -- v(b) < 1 from h_lt_one.
+    have hb_lt_one : wv (P.A₀.subtype b) < 1 := h_lt_one b hb_mem_I
+    -- v(b) = v(c)^(n_0+1) * v(t).
+    have hb_eq : wv (P.A₀.subtype b) =
+        wv (P.A₀.subtype c) ^ (n_0 + 1) * wv t := by
+      change wv (P.A₀.subtype (c * ⟨(P.A₀.subtype c)^n_0 * t, hn_0⟩)) = _
+      rw [show (P.A₀.subtype (c * ⟨(P.A₀.subtype c)^n_0 * t, hn_0⟩) : A) =
+          P.A₀.subtype c * ((P.A₀.subtype c)^n_0 * t) from by
+        simp]
+      rw [map_mul, map_mul, map_pow]
+      -- wv(c) * (wv(c)^n_0 * wv(t)) = wv(c)^(n_0+1) * wv(t).
+      rw [show wv (P.A₀.subtype c) ^ (n_0 + 1) = wv (P.A₀.subtype c) * wv (P.A₀.subtype c) ^ n_0
+        from by rw [pow_succ']]
+      rw [mul_assoc]
+    rw [hb_eq] at hb_lt_one
+    -- v(c)^(n_0+1) * v(t) < 1 → v(c)^(n_0+1) < v(t)⁻¹.
+    -- Multiply both sides by v(t)⁻¹ > 0 (v(t) ≠ 0).
+    have h_pow_lt_inv : wv (P.A₀.subtype c) ^ (n_0 + 1) < (wv t)⁻¹ := by
+      have h_vt_pos : 0 < wv t := zero_lt_iff.mpr h_vt_ne
+      have h_inv_pos : 0 < (wv t)⁻¹ := inv_pos.mpr h_vt_pos
+      -- x * y < 1, y > 0 → x < y⁻¹.
+      -- Rewrite: x = (x * y) * y⁻¹ < 1 * y⁻¹ = y⁻¹.
+      have h_x_eq : wv (P.A₀.subtype c) ^ (n_0 + 1) =
+          (wv (P.A₀.subtype c) ^ (n_0 + 1) * wv t) * (wv t)⁻¹ := by
+        rw [mul_assoc, mul_inv_cancel₀ h_vt_ne, mul_one]
+      rw [h_x_eq]
+      calc (wv (P.A₀.subtype c) ^ (n_0 + 1) * wv t) * (wv t)⁻¹
+          < 1 * (wv t)⁻¹ := by
+            rw [mul_comm _ ((wv t)⁻¹), mul_comm 1 ((wv t)⁻¹)]
+            exact (mul_lt_mul_iff_right₀ h_inv_pos).mpr hb_lt_one
+        _ = (wv t)⁻¹ := one_mul _
+    -- v(c)^(n_0+1) < v(t)⁻¹ ≤ γ'.
+    exact lt_of_lt_of_le h_pow_lt_inv h_vt_inv_le
 
 end ValuationSpectrum

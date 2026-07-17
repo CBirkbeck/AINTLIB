@@ -1,1 +1,1 @@
-FOCUS: T902 — fill restrictIdeal_le_one/_one_lt/_lt_one in SpvAITopology.lean (general-I mirrors of restrictIdealSingle trio at :809-843; case analysis on restrictIdeal_apply_of_mem/_of_not_mem/_apply_zero + vUnit_mem_cGammaIdeal). Then T903.
+FOCUS: T904 — cofinalValue_ideal_pow_lt_of_le_one_on_ideal in SpvAI.lean: A°°-form decay, coefficient-free induction. Study the A₀-form analogue cofinalValue_ideal_pow_lt (SpvAI.lean:100) first, then adapt to bound only on P.I.

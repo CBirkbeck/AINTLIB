@@ -883,8 +883,15 @@ continuity engine + `restrictIdealSingle` in the [Hu2] 3.3(i) witness.
   Both axiom-clean. Prior-B2 (2026-06-22) respected: microbiality is at the characteristic
   subgroup only, not a general-I restriction claim.
 
-### [T904] A°°-form decay: `cofinalValue_ideal_pow_lt_of_le_one_on_ideal`
-- **Status**: open — **File**: SpvAI.lean (skeleton at tail) — **Depends**: none — **Type**: lemma
+### [T904] A°°-form decay: `cofinalValue_ideal_pow_lt_of_le_one_on_ideal` — **DONE 2026-07-17**
+- **Progress**: proven via TWO new general lemmas (better than planned — reusable at bare
+  `Valuation` level, no PairOfDefinition needed): `pow_gen_prod_lt` (pigeonhole decay on
+  pure generator-products, function-form `∀ f : Fin m → ↥S` avoiding Finset-pow in the
+  statement) + `exists_pow_lt_of_forall_le_one_cofinal` (head-absorption: `c_p·p =
+  (c_p·s₀)·(tail)`, `c_p·s₀ ∈ I`, tail bound by pigeonhole; `Valuation.map_sum_lt` closes).
+  `cofinalValue_ideal_pow_lt_of_le_one_on_ideal` is a 3-line instantiation at
+  `v.comap P.A₀.subtype`. All axiom-clean.
+- **Status**: done (2026-07-17) — **File**: SpvAI.lean (skeleton at tail) — **Depends**: none — **Type**: lemma
 - Coefficient-free route (decomposition L3.1): helper claim
   `∀ a ∈ (span S)·J, v a ≤ (max_{c∈S} v c) · (bound J)` by `Submodule.mul_induction_on`
   (no scalar case) + `∀ z ∈ J`-strengthened `span_induction` on the left factor whose
@@ -897,8 +904,13 @@ continuity engine + `restrictIdealSingle` in the [Hu2] 3.3(i) witness.
 - **Sources**: Huber 3.1 decay (huber2.txt:598-604), Lemma 2.4 max-generator (432-438).
 - **Generality**: hypothesis only `≤ 1` on P.I (weaker than strict; decay from Mⁿ).
 
-### [T905] A°°-form engine: `Spv.isContinuous_of_isInSpvAI_of_lt_one_AOO`
-- **Status**: open — **File**: SpvAI.lean (skeleton at tail) — **Depends**: T904 — **Type**: lemma
+### [T905] A°°-form engine: `Spv.isContinuous_of_isInSpvAI_of_lt_one_AOO` — **DONE 2026-07-17**
+- **Progress**: assembled exactly as planned — `Valuation.isContinuous_of_ideal_pow_lt` +
+  T904 decay (`h_le_one` on P.I from `h_lt_one·.le`) + cofinal/microbial dispatch with the
+  A₀-engine's microbial branch verbatim. CONFIRMED: `h_le_AOO` is NOT consumed by the
+  proof (kept in the signature for Huber-Thm-3.1 statement parity; droppable by the
+  cleanup fleet if desired). Axiom-clean.
+- **Status**: done (2026-07-17) — **File**: SpvAI.lean (skeleton at tail) — **Depends**: T904 — **Type**: lemma
 - Assembly mirrors `isContinuous_of_isInSpvAI_of_lt_one` (SpvAI.lean:332): reduce via
   `Valuation.isContinuous_of_ideal_pow_lt` to the T904 decay; per-generator cofinality
   from the `IsInSpvAI` disjuncts — cofinal branch direct, microbial branch = the existing
