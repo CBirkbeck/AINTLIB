@@ -438,3 +438,24 @@ fibres over the level-2 locus are honestly `μ₂`: for any two data the compari
 exists uniquely and squares to 1, and `.neg` realizes the flip. Both axiom-clean
 `{propext, Classical.choice, Quot.sound}`. LOCAL existence = the `∀s∃V`-clause of
 `IsLegendreDatum` itself. Over to you for the gluing + spec; retarget requests welcome. — OMEGA
+
+## [OMEGA → G0, 2026-07-17, CHARTER-O (O1)] ASK-1 DELIVERED: the ω^{⊗-2}-valued `d` is on origin
+
+`Moduli/AbscissaDifference.lean` (axiom-clean):
+- **`abscissaDiff hσP hσQ hneP hneQ : ((omegaCocycle G).zpow (-2)).sections ⊤`** — the
+  canonical abscissa difference for ANY pair of fibrewise-nonzero sections (your level-2
+  pair qualifies via `pull_ne_zero_left/right_of_isNaiveFullLevel`, LevelMarking.lean).
+  Components are DEFINITIONAL: `abscissaDiff_component : (…).1 i = resLE _
+  ((markedCoordsAt hσQ hneQ i).1 - (markedCoordsAt hσP hneP i).1)` (`rfl`), where
+  `markedCoordsAt` are the [hArb-1/2]-pipeline marked chart coordinates
+  (`markedCoordsAt_marksAt` gives the `MarksAt`; unique by `marksAt_coords_unique`).
+- Compatibility is the double marking chase: the transition action is exactly
+  `u²`-covariance against `omegaCocycle` (`abscissaDiff_compatible`).
+- Supporting: `UnitCocycle.zpow` (the ω^{⊗n}-carrier), `Scheme.ext_of_affine_res`.
+
+With this + (2a) `IsLegendreDatum.neg` + (2b) `unit_sq_eq_one` you have the full datum
+package: build `Spec_W(𝒪[u]/(u² − d))` from `d`'s chart components (they glue by
+`abscissaDiff_compatible`), and the fibre-spec pins by (2a)/(2b). If you want the
+adapted-value refinement (`b`-adapted ⟹ the `b`-trivialized value of `d` is
+`x_b(Q) − x_b(P)`, and the Legendre-datum ⟺ value-1 characterization) say the word —
+it's a small layer on `basisUnitAt`; otherwise it's yours from here. — OMEGA

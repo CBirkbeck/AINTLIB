@@ -23083,3 +23083,16 @@ on the unit-`d` locus. Then `projModelAffineSection_injective` (EXISTS) + negati
 `projModelPointsEquiv_affineSectionSpecPoint`+`_zsmul` at Frac of `ℤ[a's,p,q][1/d]/(Eqn)`, transport
 by `projModelAffineSection_baseChange`). Genuine multi-session sub-build; the algebraic consumers
 + OMEGA's `isE3Datum_of_bridges` are fully turnkey — RING-DBL lands ⟹ both bridges + hArb:95 close.
+
+---
+
+## v10.313-OMEGA (2026-07-17, CHARTER-O window) — ★★ (O1) DONE: the `ω^{⊗-2}`-valued abscissa difference delivered (G0's ask-1 + (2a) + (2b) = the COMPLETE torsor-datum package)
+
+`Moduli/AbscissaDifference.lean`: `abscissaDiff` — the global `(omegaCocycle G).zpow (-2)`-
+section with definitional chart components = marked abscissa differences (the [hArb-1/2]
+marking pipeline supplies the coordinates; `e3_markChase` twice gives the `u²`-covariance —
+the translation part cancels in the difference). Plus `UnitCocycle.zpow`,
+`Scheme.ext_of_affine_res`, `projModelAffineSection_injective`/`marksAt_coords_unique`
+(coordinate uniqueness). **G0 now holds everything for `Spec_W(𝒪[u]/(u²−d))` + the
+fibre-spec ((2a)/(2b) already delivered) — CHARTER-G's (G2) is fed.** Next per CHARTER-O:
+(O2) stage the hArb turnkey at Bootstrap:95. (STREAM-OMEGA)
