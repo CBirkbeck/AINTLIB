@@ -949,6 +949,57 @@ theorem chartEval_jBWa_fst :
     rw [TateAlgebraWedhorn.evalTerm, coeff_kwToTate, coeff_jB_Wa_fst,
       if_neg hn, map_zero, zero_mul]
 
+/-- Sums of open-subgroup members stay in the subgroup (local copy of the private
+helper from the functoriality file). -/
+private theorem tsum_mem_of_isOpen_addSubgroup'' {ι G₀ : Type*} [AddCommGroup G₀]
+    [TopologicalSpace G₀] [IsTopologicalAddGroup G₀] {f : ι → G₀}
+    (hf : Summable f) {G : AddSubgroup G₀} (hG : IsOpen (G : Set G₀))
+    (hmem : ∀ i, f i ∈ G) : ∑' i, f i ∈ G := by
+  have hclosed : IsClosed (G : Set G₀) := AddSubgroup.isClosed_of_isOpen G hG
+  refine hclosed.mem_of_tendsto hf.hasSum (Filter.Eventually.of_forall ?_)
+  intro s
+  exact G.sum_mem fun i _ => hmem i
+
+/-- Continuity of the chart evaluation from the norm topology on `K⟨X⟩`
+(Gauss-ball mirror of the functoriality-file evaluation continuity; the T-topology
+obstruction recorded in `TateAlgebraWedhorn` does not apply to the norm source). -/
+theorem chartEval_continuous : Continuous (chartEval F) := by
+  classical
+  refine continuous_of_continuousAt_zero (chartEval F).toAddMonoidHom ?_
+  rw [ContinuousAt, map_zero, Filter.tendsto_def]
+  intro U hU
+  obtain ⟨W, hWU⟩ := NonarchimedeanRing.is_nonarchimedean U hU
+  obtain ⟨V, hV, hVR⟩ := gChart_isBounded F (W : Set (presheafValue (chartDatum F)))
+    (W.isOpen.mem_nhds W.zero_mem)
+  have hpre : chartConst F ⁻¹' V ∈ nhds (0 : K) :=
+    (chartConst_continuous F).continuousAt.preimage_mem_nhds (by rwa [map_zero])
+  obtain ⟨δ, hδ, hball⟩ := Metric.mem_nhds_iff.mp hpre
+  refine Filter.mem_of_superset
+    (Metric.ball_mem_nhds (0 : PowerSeries.Restricted K (1 : ℝ)) hδ) ?_
+  intro f hf
+  rw [Metric.mem_ball, dist_zero_right] at hf
+  apply hWU
+  change (∑' n, TateAlgebraWedhorn.evalTerm (chartConst F) (gChart F)
+    (kwToTate F f) n) ∈ (W : Set (presheafValue (chartDatum F)))
+  refine tsum_mem_of_isOpen_addSubgroup''
+    (TateAlgebraWedhorn.evalTerm_summable (chartConst F) (chartConst_continuous F)
+      (gChart F) (gChart_isBounded F) (kwToTate F f)) W.isOpen fun n => ?_
+  have hcoeff : ‖PowerSeries.coeff n f.1‖ < δ := by
+    refine lt_of_le_of_lt ?_ hf
+    have h1 : ‖PowerSeries.coeff n f.1‖ * (1 : ℝ) ^ n ≤ ‖f‖ := by
+      rw [Restricted.norm_eq]
+      exact PowerSeries.le_gaussNorm (norm : K → ℝ) 1 f.1
+        (Restricted.hasGaussNorm 1 f) n
+    simpa using h1
+  have hVmem : chartConst F (PowerSeries.coeff n f.1) ∈ V :=
+    hball (by rwa [Metric.mem_ball, dist_zero_right])
+  change TateAlgebraWedhorn.evalTerm (chartConst F) (gChart F) (kwToTate F f) n ∈ W
+  rw [show TateAlgebraWedhorn.evalTerm (chartConst F) (gChart F) (kwToTate F f) n =
+      gChart F ^ n * chartConst F (PowerSeries.coeff n f.1) from by
+    rw [TateAlgebraWedhorn.evalTerm, coeff_kwToTate]
+    exact mul_comm _ _]
+  exact hVR (Set.mul_mem_mul ⟨n, rfl⟩ hVmem)
+
 /-- The reverse map `φ : 𝓑 → 𝒪_𝓐(chart)`, `(f, g) ↦ φ(f) + φ(g)·Q̄`
 (a ring homomorphism because `Q̄² = 0`). -/
 noncomputable def chartRev : JetB F →+* presheafValue (chartDatum F) where
