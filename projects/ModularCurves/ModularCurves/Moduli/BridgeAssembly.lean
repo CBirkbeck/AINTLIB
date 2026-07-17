@@ -122,4 +122,168 @@ theorem hdbl_of_dblX_eq {A' : Type*} [CommRing A'] (W : WeierstrassCurve A')
       - (W.tangentNum p q) ^ 2
       - (W.tangentNum p q) * W.a₁ * (W.tangentDen p q)) * he
 
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(the tangent-denominator certificate)** On a chart marking a fibrewise-nonzero
+`3`-torsion section at `(p, q)`, the tangent denominator is a unit (a vanishing fibre
+value would make the point `2`-torsion, but `3`- and `2`-torsion force zero). -/
+theorem isUnit_tangentDen_of_marked {S : Scheme.{u}} {E : EllipticCurve S}
+    {V : S.affineOpens} (Pr : LocalPresentation E.toEllipticCurveGeom V)
+    {σ : S ⟶ E.toEllipticCurveGeom.E} {hσ : σ ≫ E.toEllipticCurveGeom.π = 𝟙 S}
+    {p q : Γ(S, V.1)} (heq : Pr.W.toAffine.Equation p q)
+    (hMeq : (V.2.isoSpec.inv ≫ sectionLift E.toEllipticCurveGeom hσ V) ≫ Pr.e.hom =
+      projModelAffineSection Pr.W p q heq)
+    (hkill : (3 : ℤ) • (⟨σ, hσ⟩ : E.Section) = 0)
+    (hne : ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S),
+      t ≫ σ ≠ t ≫ E.zero) :
+    IsUnit (Pr.W.tangentDen p q) := by
+  letI := Pr.elliptic
+  refine isUnit_of_forall_algebraMap_residueField_ne_zero (fun 𝔭 => ?_)
+  intro hd0
+  set K : Type u := 𝔭.asIdeal.ResidueField with hK
+  set Kb : Type u := AlgebraicClosure K with hKb
+  letI : DecidableEq Kb := Classical.decEq Kb
+  letI : Algebra ↑Γ(S, V.1) Kb :=
+    ((algebraMap K Kb).comp (algebraMap ↑Γ(S, V.1) K)).toAlgebra
+  have halgKb : ∀ z : ↑Γ(S, V.1), algebraMap ↑Γ(S, V.1) Kb z =
+      algebraMap K Kb (algebraMap ↑Γ(S, V.1) K z) := fun _ => rfl
+  set tVb : Spec (CommRingCat.of Kb) ⟶ Spec Γ(S, V.1) :=
+    Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, V.1) Kb)) with htVb
+  set x := chartPointsEquiv Pr tVb
+    (EllipticCurve.Point.pull E (tVb ≫ chartρ V) ⟨σ, hσ⟩) with hx
+  have hkillE : (3 : ℤ) • EllipticCurve.Point.pull E (tVb ≫ chartρ V) ⟨σ, hσ⟩ = 0 := by
+    rw [← EllipticCurve.Point.pull_zsmul, hkill, EllipticCurve.Point.pull_zero]
+  have hkill3 : (3 : ℤ) • x = 0 := by
+    rw [hx, ← map_zsmul, hkillE, map_zero]
+  have hx0 : x ≠ 0 := by
+    intro hc
+    have h0 : EllipticCurve.Point.pull E (tVb ≫ chartρ V) ⟨σ, hσ⟩ = 0 := by
+      exact (chartPointsEquiv Pr tVb).map_eq_zero_iff.mp (hx ▸ hc)
+    refine hne Kb (tVb ≫ chartρ V) ?_
+    have hval := congrArg Subtype.val h0
+    rw [E.point_zero_val] at hval
+    exact hval
+  haveI : ((Pr.W.baseChange Kb)).IsElliptic :=
+    inferInstanceAs ((Pr.W.map (algebraMap ↑Γ(S, V.1) Kb)).IsElliptic)
+  have hns : (Pr.W.baseChange Kb).toAffine.Nonsingular
+      (algebraMap ↑Γ(S, V.1) Kb p) (algebraMap ↑Γ(S, V.1) Kb q) :=
+    WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+      (WeierstrassCurve.Affine.Equation.map _ heq)
+  have hxpkg : x = ⟨(affineSectionSpecPoint Pr.W Kb p q heq).1,
+      (affineSectionSpecPoint Pr.W Kb p q heq).2⟩ := by
+    refine Subtype.ext ?_
+    rw [hx, chartPointsEquiv_pull_marked Pr tVb heq hMeq]
+    rfl
+  set y := modelPointAddEquiv Pr.W (K' := Kb) x with hy
+  have hyval : y = WeierstrassCurve.Affine.Point.some _ _ hns := by
+    rw [hy, hxpkg]
+    show projModelPointsEquiv Pr.W Kb (affineSectionSpecPoint Pr.W Kb p q heq) = _
+    exact projModelPointsEquiv_affineSectionSpecPoint Pr.W p q heq hns
+  have hy3 : (3 : ℤ) • y = 0 := by
+    rw [hy, ← map_zsmul, hkill3, map_zero]
+  have hy0 : y ≠ 0 := by
+    rw [hy]
+    exact fun hc => hx0 ((modelPointAddEquiv Pr.W (K' := Kb)).map_eq_zero_iff.mp hc)
+  -- the vanishing denominator makes `y` two-torsion
+  have hdKb : algebraMap ↑Γ(S, V.1) Kb (Pr.W.tangentDen p q) = 0 := by
+    rw [halgKb, hd0, map_zero]
+  have hyeq : algebraMap ↑Γ(S, V.1) Kb q
+      = (Pr.W.baseChange Kb).toAffine.negY
+        (algebraMap ↑Γ(S, V.1) Kb p) (algebraMap ↑Γ(S, V.1) Kb q) := by
+    rw [WeierstrassCurve.Affine.negY]
+    rw [show ((Pr.W.baseChange Kb)).toAffine.a₁
+        = algebraMap ↑Γ(S, V.1) Kb Pr.W.a₁ from rfl,
+      show ((Pr.W.baseChange Kb)).toAffine.a₃
+        = algebraMap ↑Γ(S, V.1) Kb Pr.W.a₃ from rfl]
+    have hexp : algebraMap ↑Γ(S, V.1) Kb (2 * q + Pr.W.a₁ * p + Pr.W.a₃) = 0 := by
+      rw [show (2 * q + Pr.W.a₁ * p + Pr.W.a₃ : ↑Γ(S, V.1))
+        = Pr.W.tangentDen p q from rfl]
+      exact hdKb
+    rw [map_add, map_add, map_mul, map_mul, map_ofNat] at hexp
+    linear_combination hexp
+  have hy2 : (2 : ℤ) • y = 0 := by
+    rw [hyval, two_zsmul]
+    exact WeierstrassCurve.Affine.Point.add_of_Y_eq rfl hyeq
+  have : y = 0 := by
+    have h1 : ((3 : ℤ) - 2) • y = 0 := by
+      rw [sub_smul, hy3, hy2, sub_zero]
+    rwa [show ((3 : ℤ) - 2) = 1 by norm_num, one_smul] at h1
+  exact hy0 this
+
+
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(the master bridge input ★★★)** A chart-marked fibrewise-nonzero `3`-torsion
+section satisfies the cleared doubling condition `hdbl`: `RING-DBL` + the negation
+coordinate + coordinate injectivity. -/
+theorem hdbl_of_marked_three_torsion {S : Scheme.{u}} {E : EllipticCurve S}
+    {V : S.affineOpens} (Pr : LocalPresentation E.toEllipticCurveGeom V)
+    {σ : S ⟶ E.toEllipticCurveGeom.E} {hσ : σ ≫ E.toEllipticCurveGeom.π = 𝟙 S}
+    {p q : Γ(S, V.1)} (heq : Pr.W.toAffine.Equation p q)
+    (hMeq : (V.2.isoSpec.inv ≫ sectionLift E.toEllipticCurveGeom hσ V) ≫ Pr.e.hom =
+      projModelAffineSection Pr.W p q heq)
+    (hkill : (3 : ℤ) • (⟨σ, hσ⟩ : E.Section) = 0)
+    (hne : ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S),
+      t ≫ σ ≠ t ≫ E.zero) :
+    (Pr.W.tangentNum p q) ^ 2
+      + Pr.W.a₁ * (Pr.W.tangentNum p q) * (Pr.W.tangentDen p q)
+      - (Pr.W.a₂ + 3 * p) * (Pr.W.tangentDen p q) ^ 2 = 0 := by
+  letI := Pr.elliptic
+  -- the unit tangent denominator and its inverse witness
+  have hd := isUnit_tangentDen_of_marked Pr heq hMeq hkill hne
+  set e : ↑Γ(S, V.1) := ((hd.unit⁻¹ : _ˣ) : ↑Γ(S, V.1)) with he_def
+  have he : Pr.W.tangentDen p q * e = 1 := hd.mul_val_inv
+  -- the model section of the marked point
+  set σm := chartPointsEquiv Pr (𝟙 (Spec Γ(S, V.1)))
+    (EllipticCurve.Point.pull E (𝟙 (Spec Γ(S, V.1)) ≫ chartρ V) ⟨σ, hσ⟩) with hσm
+  have hσmval : σm = ⟨projModelAffineSection Pr.W p q heq,
+      projModelAffineSection_projModelπ _ _ _ _⟩ := by
+    refine Subtype.ext ?_
+    rw [hσm, chartPointsEquiv_pull_marked Pr (𝟙 _) heq hMeq]
+    exact Category.id_comp _
+  -- three-torsion of the model section
+  have hkillE : (3 : ℤ) • EllipticCurve.Point.pull E
+      (𝟙 (Spec Γ(S, V.1)) ≫ chartρ V) ⟨σ, hσ⟩ = 0 := by
+    rw [← EllipticCurve.Point.pull_zsmul, hkill, EllipticCurve.Point.pull_zero]
+  have h3 : (3 : ℤ) • σm = 0 := by
+    rw [hσm, ← map_zsmul, hkillE, map_zero]
+  have h2 : (2 : ℤ) • σm = -σm := by
+    have h1 : ((3 : ℤ) - 1) • σm = (3 : ℤ) • σm - (1 : ℤ) • σm := sub_smul _ _ _
+    rw [h3, one_smul, zero_sub] at h1
+    rw [show ((3 : ℤ) - 1) = 2 by norm_num] at h1
+    exact h1
+  -- RING-DBL: the double is the doubling-coordinate section
+  have hdblsec := two_zsmul_affineSection Pr.W p q e heq he
+    (equation_dblXY Pr.W p q e heq he)
+  -- the negation coordinate: `−σm` is the negY-section
+  have hnegval : -σm = (⟨projModelAffineSection Pr.W p (Pr.W.toAffine.negY p q)
+      ((Pr.W.toAffine.equation_neg p q).mpr heq),
+      projModelAffineSection_projModelπ _ _ _ _⟩ :
+    (modelEllipticCurve Pr.W).Section) := by
+    refine Subtype.ext ?_
+    have hv : (-σm).1 = σm.1 ≫ (modelEllipticCurve Pr.W).mulByHom (-1) := by
+      rw [show -σm = (-1 : ℤ) • σm from (neg_one_zsmul σm).symm]
+      exact (modelEllipticCurve Pr.W).point_smul_eq_comp_mulBy _ (-1) σm
+    rw [hv, modelEllipticCurve_mulByHom_neg_one, hσmval]
+    exact negModelHom_affineSection_general Pr.W p q heq
+  -- combine and read off the X-coordinate
+  have hchain : (⟨projModelAffineSection Pr.W (Pr.W.dblX p q e) (Pr.W.dblY p q e)
+      (equation_dblXY Pr.W p q e heq he),
+      projModelAffineSection_projModelπ _ _ _ _⟩ :
+    (modelEllipticCurve Pr.W).Section)
+      = ⟨projModelAffineSection Pr.W p (Pr.W.toAffine.negY p q)
+        ((Pr.W.toAffine.equation_neg p q).mpr heq),
+        projModelAffineSection_projModelπ _ _ _ _⟩ := by
+    rw [← hnegval, ← h2, ← hdblsec, hσmval]
+  have hvals : projModelAffineSection Pr.W (Pr.W.dblX p q e) (Pr.W.dblY p q e)
+      (equation_dblXY Pr.W p q e heq he)
+      = projModelAffineSection Pr.W p (Pr.W.toAffine.negY p q)
+        ((Pr.W.toAffine.equation_neg p q).mpr heq) :=
+    congrArg Subtype.val hchain
+  have hX := (projModelAffineSection_injective Pr.W (heq := hvals)).1
+  exact hdbl_of_dblX_eq Pr.W p q e he hX
+
+
 end ModularCurves
