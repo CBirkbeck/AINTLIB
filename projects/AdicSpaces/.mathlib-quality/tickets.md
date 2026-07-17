@@ -752,11 +752,12 @@ T704, by a fresh `/develop --continue`.
   round-trips. The graph-bridge route is preferred (reuses T603); the direct route is the
   recorded fallback.
 
-### [T803] Cor 3.2: not stably uniform
-- **Status**: open | **Depends**: T802, T202 | **Type**: proofs (R4)
-- **Sorries**: `isUniform_of_ringEquiv`, `not_isUniform_chart`, `not_isStablyUniform_JetA`.
-- **Sketch**: transport boundedness/power-boundedness through the bi-continuous iso;
-  negate `IsStablyUniform` at `chartDatum` (class field instantiation).
+### [T803] Cor 3.2: not stably uniform — **DONE modulo T802 (2026-07-17)**
+- **Status**: `isPowerBounded_map_of_ringEquiv` + `isUniform_of_ringEquiv` PROVEN
+  (bi-continuous transport; beta-`show` before final rws); `not_isUniform_chart` and
+  `not_isStablyUniform_JetA` fully wired — they compile and will be sorry-free the moment
+  T802's `chartEquiv` (+2 continuities) lands. Only T802 remains on the whole board's
+  mathematical spine.
 
 ### [CLEANUP-15] /cleanup `FiniteJetChart.lean` (final) — **Depends**: T803.
 
