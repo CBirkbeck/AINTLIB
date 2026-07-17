@@ -88,6 +88,23 @@ open RingTheory.Sequence PrimeSpectrum CategoryTheory Abelian
 def Ideal.gradeGE {S : Type*} [CommRing S] (I : Ideal S) (k : ℕ) : Prop :=
   ∃ rs : List S, rs.length = k ∧ RingTheory.Sequence.IsRegular S rs ∧ (∀ x ∈ rs, x ∈ I)
 
+/-- Grade-or-unit introduction rule for `Ideal.gradeGE`.  A **weakly** regular sequence `xs` all of
+whose entries lie in `J` witnesses `J.gradeGE xs.length` — **unless** it degenerates to the unit
+ideal, in which case `J = ⊤`.  (mathlib's `IsRegular` demands `L ⧸ (xs) ≠ 0`, i.e.
+`Ideal.ofList xs ≠ ⊤`; that properness is exactly what upgrades weak regularity to regularity, and
+its failure is the unit-ideal disjunct.)  This is the localisation-free core of the disjunction in
+`Ideal.gradeGE_localize`. -/
+lemma Ideal.gradeGE_length_or_eq_top_of_isWeaklyRegular {L : Type*} [CommRing L] {J : Ideal L}
+    {xs : List L} (hw : IsWeaklyRegular L xs) (hmem : ∀ x ∈ xs, x ∈ J) :
+    J.gradeGE xs.length ∨ J = ⊤ := by
+  by_cases hbot : Ideal.ofList xs = ⊤
+  · -- The sequence generates the unit ideal, so `J = ⊤` (it contains `ofList xs = ⊤`).
+    exact Or.inr (top_le_iff.mp (hbot ▸ Ideal.span_le.mpr fun x hx => hmem x hx))
+  · -- Properness upgrades weak regularity to regularity, giving a length-`xs.length` witness.
+    refine Or.inl ⟨xs, rfl, (isRegular_iff L xs).mpr ⟨hw, ?_⟩, hmem⟩
+    rw [Ideal.smul_eq_mul, Ideal.mul_top]
+    exact Ne.symm hbot
+
 /-- [T-GRADE.loc] grade survives localisation, up to the unit-ideal escape.
 
 If `I` contains an `S`-regular sequence of length `k`, then in `Localization T` either the extended
@@ -105,31 +122,18 @@ theorem Ideal.gradeGE_localize {S : Type*} [CommRing S] [IsNoetherianRing S]
   obtain ⟨rs, hlen, hreg, hmem⟩ := h
   set L := Localization T with hL
   set φ : S →+* L := algebraMap S L with hφ
-  -- The mapped list and the basic facts about it.
+  -- The mapped list lands in `I.map φ`.
   have hmem' : ∀ x ∈ rs.map φ, x ∈ I.map φ := by
     intro x hx
     obtain ⟨y, hy, rfl⟩ := List.mem_map.mp hx
     exact Ideal.mem_map_of_mem φ (hmem y hy)
-  -- `ofList rs ≤ I`, hence `ofList (rs.map φ) = (ofList rs).map φ ≤ I.map φ`.
-  have hsub : Ideal.ofList rs ≤ I := Ideal.span_le.mpr (fun r hr => hmem r hr)
-  have hmaple : Ideal.ofList (rs.map φ) ≤ I.map φ := by
-    rw [← Ideal.map_ofList]; exact Ideal.map_mono hsub
   -- Weak regularity survives localisation (flat base change).
   have hweak : IsWeaklyRegular L (rs.map φ) :=
     IsWeaklyRegular.of_isLocalization L T hreg.toIsWeaklyRegular
-  by_cases hbot : Ideal.ofList (rs.map φ) = ⊤
-  · -- The mapped sequence generates the unit ideal ⟹ `I.map φ = ⊤`.
-    right
-    exact top_le_iff.mp (hbot ▸ hmaple)
-  · -- The mapped sequence stays regular ⟹ grade `≥ k`.
-    left
-    refine ⟨rs.map φ, by simpa using hlen, ?_, hmem'⟩
-    -- Upgrade weak regularity to regularity using `ofList (rs.map φ) ≠ ⊤`.
-    refine (isRegular_iff L (rs.map φ)).mpr ⟨hweak, ?_⟩
-    have key : Ideal.ofList (rs.map φ) • (⊤ : Submodule L L) = Ideal.ofList (rs.map φ) := by
-      rw [Ideal.smul_eq_mul, Ideal.mul_top]
-    rw [key]
-    exact (Ne.symm hbot)
+  -- Grade-or-unit is now exactly the localisation-free introduction rule.
+  have hgrade := Ideal.gradeGE_length_or_eq_top_of_isWeaklyRegular hweak hmem'
+  have hk : (rs.map φ).length = k := by simpa using hlen
+  rwa [hk] at hgrade
 
 /-!
 ## The Rees theorem over a local ring — the `∨ = ⊤` grade/Ext characterisation, proved in full
