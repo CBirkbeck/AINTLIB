@@ -6,97 +6,14 @@ import «Adic spaces».WedhornPart2LaneAInternalizedConsumer
 import «Adic spaces».WedhornLaneBSeparationInterface
 
 /-!
-# Wedhorn 8.34(ii) — Part 2 consumer with Lane A and Lane B integrated (T071)
+# Integrated Lane A and Lane B consumers for Tate acyclicity
 
-T066 (commit `8d9bf5e`) lands the Part-2 consumer with Lane A
-internalized via `PrimaryLaneAInputs C f₀`, leaving only the abstract
-`lane_B_supplier` and the standard geometric / caller residuals.
-T068 (commit `123998a`) lands the Lane B per-E separation interface
-producing the `lane_B_supplier` shape from either a universal nonempty-
-cover separation supplier or the concrete Cor 8.32 prime-extension-
-closed hypothesis bundle.
+This file combines the Lane A consumers for Part 2 of Tate acyclicity with Lane B
+separation suppliers. It provides variants using either `C1SupplierStrong_local` or explicit
+single-`t` structural data, together with generic separation and prime-extension-closed forms.
 
-This file lands the **integration** of these two layers: theorem-level
-wrappers that remove the abstract `lane_B_supplier` argument from the
-Part-2 consumer boundary by routing through T068's interface. The
-result is a Part-2 consumer whose remaining residuals are explicit
-named intermediate inputs (C1 supplier, separation supplier, geometric
-hypotheses, caller's compatible section family), not abstract Lane B.
-
-## What this file provides
-
-* `tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_separation`
-  — generic full-form integration. Composes T066's main consumer with
-  T068's `laneB_supplier_via_perE_separation_interface`. Inputs:
-  T066's standard inputs minus `lane_B_supplier`, replaced by
-  (i) a universal nonempty-cover separation supplier, and (ii) a
-  per-`(S', E)` local-cover nonemptiness witness.
-
-* `tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_separation_allow_empty`
-  — generic allow-empty integration. Composes T066's allow-empty
-  variant with T068's
-  `laneB_supplier_via_perE_separation_interface_allow_empty`. The
-  per-E nonemptiness witness is structurally derived from
-  `(rationalOpen E.1.T E.1.s).Nonempty`, removed from the consumer
-  inputs entirely.
-
-* `tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_prime_extension_closed`
-  — concrete full-form integration. Routes Lane B through the Wedhorn
-  Cor 8.32 prime-extension-closed bundle (`hloc_noeth`,
-  `hAplus_le_A₀`, `hcanonicalMap_cont`, `h_closed_nonOpen` — all
-  universal over rational coverings). Inherits `sorryAx` transitively
-  from the upstream Cor 8.32 chain documented in
-  `TateAcyclicityFinalAssembly.lean`.
-
-* `..._laneA_laneB_via_prime_extension_closed_allow_empty` — concrete
-  allow-empty integration. Combines the concrete Cor 8.32 route with
-  the allow-empty per-E nonemptiness derivation.
-
-## Residuals at this layer
-
-After T071, the Part-2 consumer's named residuals are:
-
-| Input | Source / status |
-|-------|------|
-| `C1SupplierStrong_local C` | T061's per-call Lemma 8.33 reach |
-| `h_base_eq_Spa` | geometric Wedhorn cover-of-Spa hypothesis |
-| `h_covers_nonempty` | mild insertDenom-lift hypothesis |
-| `hLaneA : PrimaryLaneAInputs C f₀` | landed Lane A package |
-| separation_supplier / Cor 8.32 bundle | universal nonempty-cover separation |
-| `(fC, hC_compat)` | caller's compatible section data |
-
-In the full-form variants, a per-E local-cover nonemptiness witness
-is also required; in the allow-empty variants, this is structurally
-discharged from cover-piece `(rationalOpen E.1.T E.1.s).Nonempty`.
-
-**No abstract `lane_B_supplier` remains.** Stage-2 strengthening,
-`h_outside_rescue`, `h_nonzero_cover_supplier`, and Lane A are all
-internally absorbed.
-
-## Important: this does not change the final tate acyclicity theorem
-
-The cor 8.32, nonempty-cover separation, C1 supplier, base-Spa,
-geometric, and caller compatibility inputs are documented here as
-**intermediate supplier-boundary inputs** for the consumer wrappers
-in this file; they are NOT changes to
-`ValuationSpectrum.tateAcyclicity` (which retains its existing
-signature). T071 only integrates two existing supplier interfaces; it
-does not add hypotheses to the final root theorem.
-
-## Notes
-
-* No root import; leaf-level.
-* Imports T066's `WedhornPart2LaneAInternalizedConsumer` and T068's
-  `WedhornLaneBSeparationInterface`.
-* No edits to T031–T070 accepted leaves, root imports, or final
-  theorem signatures.
-* No revival of T001 / Jacobson / bivariate-overlap / Zavyalov /
-  global-universal-Spa / σ-power-decay / M-power-decay routes; only
-  mechanical composition of two accepted bridges.
-* The deliverable matches T071 acceptance: at least one wrapper
-  composes T066 with T068 so the Part-2 boundary no longer takes a
-  raw `lane_B_supplier`; remaining residuals are named intermediate
-  inputs.
+Each family includes a full form with an explicit local-cover nonemptiness hypothesis and an
+allow-empty form in which nonemptiness is derived from the rational-open cover piece.
 -/
 
 namespace ValuationSpectrum
@@ -104,16 +21,8 @@ namespace ValuationSpectrum
 variable {A : Type*} [CommRing A] [TopologicalSpace A] [PlusSubring A]
   [IsHuberRing A] [HasLocLiftPowerBounded A] [DecidableEq A]
 
-/-- **Generic Lane-A + Lane-B integrated Part-2 consumer**, full form
-(T071 main deliverable).
-
-Identical caller signature to T066's
-`tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA` modulo
-replacement of the abstract `lane_B_supplier` with a universal
-nonempty-cover separation supplier plus a per-`(S', E)` local-cover
-nonemptiness witness — the inputs consumed by T068's
-`laneB_supplier_via_perE_separation_interface`. Composes T066's main
-consumer with T068's generic interface mechanically. -/
+/-- Compatible sections glue when Lane A is supplied by `C1SupplierStrong_local` and Lane B by
+a separation supplier with local-cover nonemptiness. -/
 theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_separation
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     (P : PairOfDefinition A) (hA₀_le : P.A₀ ≤ A⁺)
@@ -158,17 +67,8 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_separati
       separation_supplier per_E_nonempty)
     hLaneA
 
-/-- **Generic Lane-A + Lane-B integrated Part-2 consumer**, allow-empty
-variant.
-
-Identical caller signature to T066's
-`tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_allow_empty`
-modulo replacement of the abstract `lane_B_supplier` with the universal
-nonempty-cover separation supplier alone — the per-E local-cover
-nonemptiness witness is structurally derived via
-`per_E_local_covering_nonempty_of_rationalOpen_nonempty` from
-`(rationalOpen E.1.T E.1.s).Nonempty`, embedded in the relaxed Lane B
-shape. -/
+/-- Compatible sections glue from `C1SupplierStrong_local` and a separation supplier without an
+explicit local-cover nonemptiness hypothesis. -/
 theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_separation_allow_empty
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     (P : PairOfDefinition A) (hA₀_le : P.A₀ ≤ A⁺)
@@ -208,17 +108,8 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_separati
       separation_supplier)
     hLaneA
 
-/-- **Concrete Lane-A + Lane-B integrated Part-2 consumer via Cor 8.32
-prime-extension-closed**, full form (T071 concrete deliverable).
-
-Routes Lane B through the four named Cor 8.32 prime-extension-closed
-hypotheses. Identical caller signature to T066's main consumer modulo
-replacement of `lane_B_supplier` with the four universal-over-rational-
-coverings hypotheses (`hloc_noeth`, `hAplus_le_A₀_perCovers`,
-`hcanonicalMap_cont`, `h_closed_nonOpen`) plus a per-`(S', E)`
-local-cover nonemptiness witness. **Inherits `sorryAx` transitively**
-from the upstream Cor 8.32 chain (`productRestriction_injective_tate_via_prime_extension_closed`),
-consistent with `TateAcyclicityFinalAssembly`'s documented status. -/
+/-- Compatible sections glue from `C1SupplierStrong_local`, prime-extension-closed separation
+hypotheses, and local-cover nonemptiness. -/
 theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_prime_extension_closed
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     (P : PairOfDefinition A) (hA₀_le : P.A₀ ≤ A⁺) [IsNoetherianRing P.A₀]
@@ -270,15 +161,10 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_prime_ex
       hAplus_le_A₀_perCovers hcanonicalMap_cont h_closed_nonOpen per_E_nonempty)
     hLaneA
 
-/-- **Concrete Lane-A + Lane-B integrated Part-2 consumer via Cor 8.32
-prime-extension-closed**, allow-empty variant.
-
-Identical caller signature to the full-form concrete consumer modulo
-the relaxed Lane B shape: per-E nonemptiness is structurally derived
-from `(rationalOpen E.1.T E.1.s).Nonempty` rather than supplied
-explicitly. **Inherits `sorryAx` transitively** from the upstream
-Cor 8.32 chain. -/
-theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_prime_extension_closed_allow_empty
+/-- Compatible sections glue from `C1SupplierStrong_local` and prime-extension-closed separation
+hypotheses without an explicit local-cover nonemptiness hypothesis. -/
+theorem
+tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_prime_extension_closed_allow_empty
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     (P : PairOfDefinition A) (hA₀_le : P.A₀ ≤ A⁺) [IsNoetherianRing P.A₀]
     [IsAdicComplete P.I P.A₀]
@@ -324,26 +210,8 @@ theorem tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_prime_ex
       hloc_noeth hAplus_le_A₀_perCovers hcanonicalMap_cont h_closed_nonOpen)
     hLaneA
 
-/-! ### T194: Single-`t` structural-data sibling wrappers
-
-These mirror the four T071 wrappers above, replacing the abstract
-residual `h_C1_strong : C1SupplierStrong_local C` with the explicit
-single-`t` σ/N structural per-call provider consumed by T191/T192/T193.
-The composition uses T193's
-`tateAcyclicity_Part2_via_single_t_structural_data_laneA`/`_allow_empty`
-in place of T066. All other inputs (Lane B separation supplier, Cor 8.32
-prime-extension-closed bundle, per-E nonemptiness, geometric/caller
-hypotheses, `hLaneA`) are preserved exactly. -/
-
-/-- **T194 generic Lane-A + Lane-B integrated Part-2 consumer**, full
-form, from honest single-`t` structural-data provider.
-
-Sibling of `tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_separation`
-(T071) with the abstract residual `h_C1_strong : C1SupplierStrong_local
-C` replaced by the explicit single-`t` σ/N structural per-call provider
-`h_struct` consumed by T191/T192/T193. Composes T193's
-`tateAcyclicity_Part2_via_single_t_structural_data_laneA` with T068's
-`laneB_supplier_via_perE_separation_interface` mechanically. -/
+/-- Compatible sections glue when Lane A is supplied by single-`t` structural data and Lane B by
+a separation supplier with local-cover nonemptiness. -/
 theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_separation
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     (P : PairOfDefinition A) (hA₀_le : P.A₀ ≤ A⁺)
@@ -395,14 +263,8 @@ theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_separa
       separation_supplier per_E_nonempty)
     hLaneA
 
-/-- **T194 generic Lane-A + Lane-B integrated Part-2 consumer**,
-allow-empty variant, from honest single-`t` structural-data provider.
-
-Sibling of
-`tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_separation_allow_empty`
-(T071 allow-empty) with `h_C1_strong` replaced by the single-`t` σ/N
-structural per-call provider `h_struct`. Per-E nonemptiness witness is
-structurally derived via the allow-empty interface. -/
+/-- Compatible sections glue from single-`t` structural data and a separation supplier without
+an explicit local-cover nonemptiness hypothesis. -/
 theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_separation_allow_empty
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     (P : PairOfDefinition A) (hA₀_le : P.A₀ ≤ A⁺)
@@ -449,21 +311,8 @@ theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_separa
       separation_supplier)
     hLaneA
 
-/-- **T194 concrete Lane-A + Lane-B integrated Part-2 consumer via Cor 8.32
-prime-extension-closed**, full form, from honest single-`t` structural-
-data provider.
-
-Sibling of
-`tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_prime_extension_closed`
-(T071 concrete) with `h_C1_strong` replaced by the single-`t` σ/N
-structural per-call provider `h_struct`. Routes Lane B through the four
-named Cor 8.32 prime-extension-closed hypotheses; preserves the same
-caller boundary modulo the C1-side residual replacement.
-
-**Inherits `sorryAx` transitively** from the upstream Cor 8.32 chain
-(`productRestriction_injective_tate_via_prime_extension_closed`),
-consistent with the existing T071 concrete deliverable's documented
-status. -/
+/-- Compatible sections glue from single-`t` structural data, prime-extension-closed separation
+hypotheses, and local-cover nonemptiness. -/
 theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_prime_extension_closed
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     (P : PairOfDefinition A) (hA₀_le : P.A₀ ≤ A⁺) [IsNoetherianRing P.A₀]
@@ -522,18 +371,10 @@ theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_prime_
       hAplus_le_A₀_perCovers hcanonicalMap_cont h_closed_nonOpen per_E_nonempty)
     hLaneA
 
-/-- **T194 concrete Lane-A + Lane-B integrated Part-2 consumer via Cor 8.32
-prime-extension-closed**, allow-empty variant, from honest single-`t`
-structural-data provider.
-
-Sibling of
-`tateAcyclicity_Part2_via_C1SupplierStrong_local_laneA_laneB_via_prime_extension_closed_allow_empty`
-(T071 concrete allow-empty) with `h_C1_strong` replaced by the
-single-`t` σ/N structural per-call provider `h_struct`. Per-E
-nonemptiness is structurally derived from
-`(rationalOpen E.1.T E.1.s).Nonempty`. **Inherits `sorryAx` transitively**
-from the upstream Cor 8.32 chain. -/
-theorem tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_prime_extension_closed_allow_empty
+/-- Compatible sections glue from single-`t` structural data and prime-extension-closed separation
+hypotheses without an explicit local-cover nonemptiness hypothesis. -/
+theorem
+tateAcyclicity_Part2_via_single_t_structural_data_laneA_laneB_via_prime_extension_closed_allow_empty
     [IsTateRing A] [IsNoetherianRing A] [T2Space A] [NonarchimedeanRing A]
     (P : PairOfDefinition A) (hA₀_le : P.A₀ ≤ A⁺) [IsNoetherianRing P.A₀]
     [IsAdicComplete P.I P.A₀]
