@@ -202,6 +202,134 @@ theorem _root_.Ideal.le_prod_of_pairwise_coprime {R : Type*} [CommRing R] {n : �
     calc J ≤ I 0 ⊓ ∏ i : Fin m, I i.succ := le_inf (hle 0) hrest
       _ = I 0 * ∏ i : Fin m, I i.succ := (Ideal.mul_eq_inf_of_coprime hcop).symm
 
+/-- **[S2 — the counting distinctness]** Under naive generation, the `N²` combination
+sections have pairwise distinct pulls at every algebraically closed geometric point:
+the combination map surjects onto the `N`-torsion (generation + mod-`N` reduction),
+which has exactly `N²` elements (`torsion_geometricFibre_rank_two`), so it is
+bijective. -/
+theorem combo_pull_ne (N : ℕ) [NeZero N] (hN : NIsInvertible S N) (P Q : E.Section)
+    (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0)
+    (hgen : ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (.of k) ⟶ S),
+      ∀ x : E.Point t, (N : ℤ) • x = 0 →
+        x ∈ AddSubgroup.closure {Point.pull E t P, Point.pull E t Q})
+    (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S)
+    {i j : Fin (N ^ 2)} (hij : i ≠ j) :
+    t ≫ ((((i : ℕ) % N : ℕ) : ℤ) • P + (((i : ℕ) / N : ℕ) : ℤ) • Q : E.Section).1
+      ≠ t ≫ ((((j : ℕ) % N : ℕ) : ℤ) • P + (((j : ℕ) / N : ℕ) : ℤ) • Q : E.Section).1 := by
+  -- the pulled generators are `N`-killed
+  have hPk : (N : ℤ) • Point.pull E t P = 0 := by
+    rw [← Point.pull_zsmul, hP, Point.pull_zero]
+  have hQk : (N : ℤ) • Point.pull E t Q = 0 := by
+    rw [← Point.pull_zsmul, hQ, Point.pull_zero]
+  -- the combination map into the N-torsion
+  set ψ : Fin (N ^ 2) → Submodule.torsionBy ℤ (E.Point t) (N : ℤ) := fun a =>
+    ⟨(((a : ℕ) % N : ℕ) : ℤ) • Point.pull E t P
+      + (((a : ℕ) / N : ℕ) : ℤ) • Point.pull E t Q,
+      (Submodule.mem_torsionBy_iff _ _).mpr (combo_killed N hPk hQk _ _)⟩ with hψ
+  -- surjectivity from generation
+  have hsurj : Function.Surjective ψ := by
+    rintro ⟨x, hx⟩
+    have hx' : (N : ℤ) • x = 0 := (Submodule.mem_torsionBy_iff _ _).mp hx
+    have hcl := hgen k t x hx'
+    rw [AddSubgroup.mem_closure_pair] at hcl
+    obtain ⟨a, b, hab⟩ := hcl
+    obtain ⟨i₀, hi₀⟩ := exists_combo_index N hPk hQk a b
+    exact ⟨i₀, Subtype.ext (hi₀.trans hab)⟩
+  -- the count: N-torsion has N² elements
+  have hNk : (N : k) ≠ 0 := (nIsInvertible_spec_iff k N).mp (hN.of_hom t)
+  obtain ⟨e⟩ := E.torsion_geometricFibre_rank_two N k t hNk
+  haveI hfin : Finite (Submodule.torsionBy ℤ (E.Point t) (N : ℤ)) :=
+    Finite.of_equiv _ e.symm.toEquiv
+  have hcard : Nat.card (Submodule.torsionBy ℤ (E.Point t) (N : ℤ)) = N ^ 2 := by
+    rw [Nat.card_congr e.toEquiv, Nat.card_fun, Nat.card_zmod]
+    simp [pow_two]
+  -- bijectivity
+  have hbij : Function.Bijective ψ :=
+    (Nat.bijective_iff_surjective_and_card ψ).mpr ⟨hsurj, by
+      rw [Nat.card_eq_fintype_card, Fintype.card_fin, hcard]⟩
+  -- distinct values, hence distinct underlying morphisms
+  intro hcon
+  apply hij
+  apply hbij.injective
+  refine Subtype.ext ?_
+  show (((i : ℕ) % N : ℕ) : ℤ) • Point.pull E t P
+      + (((i : ℕ) / N : ℕ) : ℤ) • Point.pull E t Q
+    = (((j : ℕ) % N : ℕ) : ℤ) • Point.pull E t P
+      + (((j : ℕ) / N : ℕ) : ℤ) • Point.pull E t Q
+  have hpull : ∀ a : Fin (N ^ 2),
+      (((a : ℕ) % N : ℕ) : ℤ) • Point.pull E t P
+        + (((a : ℕ) / N : ℕ) : ℤ) • Point.pull E t Q
+      = Point.pull E t
+          ((((a : ℕ) % N : ℕ) : ℤ) • P + (((a : ℕ) / N : ℕ) : ℤ) • Q) := by
+    intro a
+    rw [Point.pull_add, Point.pull_zsmul, Point.pull_zsmul]
+  rw [hpull i, hpull j]
+  exact Subtype.ext hcon
+
+/-- **[T-D8 ⟸, modulo rank rigidity] (KM 3.7, naive ⟹ Drinfeld)** If the pulled `P, Q`
+generate the `N`-torsion at every algebraically closed geometric point, the combination
+divisor `Σ_{(a,b)} [aP + bQ]` EQUALS `E[N]`. Containment `torsionIdeal ≤ divisor.ideal`
+is proven here (comaximal graphs + CRT); the reverse containment is the rank-rigidity
+step (both sides finite flat of rank `N²`), tracked as the `[RANK-RIGIDITY]` brick. -/
+theorem fullLevel_divisor_backward (N : ℕ) [NeZero N] (hN : NIsInvertible S N)
+    (P Q : E.Section) (hP : (N : ℤ) • P = 0) (hQ : (N : ℤ) • Q = 0)
+    (hgen : ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (.of k) ⟶ S),
+      ∀ x : E.Point t, (N : ℤ) • x = 0 →
+        x ∈ AddSubgroup.closure {Point.pull E t P, Point.pull E t Q}) :
+    (RelEffCartierDiv.sectionsDivisor E.π
+        (fun i : Fin (N ^ 2) =>
+          (((((i : ℕ) % N : ℕ) : ℤ) • P + ((((i : ℕ) / N : ℕ) : ℤ) • Q) :
+            E.Point (𝟙 S))))).ideal =
+      (E.torsionIdeal N) := by
+  set fam : Fin (N ^ 2) → E.Point (𝟙 S) := fun i =>
+    (((i : ℕ) % N : ℕ) : ℤ) • P + (((i : ℕ) / N : ℕ) : ℤ) • Q with hfam
+  have hpos : IsSeparated E.π ∧ SmoothOfRelativeDimension 1 E.π :=
+    ⟨inferInstance, E.smooth⟩
+  -- the graph kernels are pairwise comaximal
+  have hpair : Pairwise fun i j : Fin (N ^ 2) =>
+      Scheme.Hom.ker (fam i).1 ⊔ Scheme.Hom.ker (fam j).1 = ⊤ := by
+    intro i j hij
+    exact RelEffCartierDiv.sup_ker_eq_top_of_pull_ne (π := E.π) _ _
+      (fam i).2 (fam j).2
+      (fun k _ _ t => combo_pull_ne E N hN P Q hP hQ hgen k t hij)
+  -- each combination is N-killed, so its kernel dominates the torsion ideal
+  have hleker : ∀ i : Fin (N ^ 2),
+      E.torsionIdeal N ≤ Scheme.Hom.ker (fam i).1 := fun i =>
+    torsionIdeal_le_ker_of_killed E N (combo_killed N hP hQ _ _)
+  -- the divisor ideal is the product of the graph kernels
+  have hDideal : (RelEffCartierDiv.sectionsDivisor E.π fam).ideal
+      = ∏ i : Fin (N ^ 2), Scheme.Hom.ker (fam i).1 := by
+    rw [RelEffCartierDiv.sectionsDivisor, dif_pos hpos]
+  -- CRT: torsionIdeal ≤ the divisor ideal
+  have hle : E.torsionIdeal N ≤ (RelEffCartierDiv.sectionsDivisor E.π fam).ideal := by
+    rw [hDideal]
+    intro U
+    have hprodU : ((∏ i : Fin (N ^ 2), Scheme.Hom.ker (fam i).1 :
+          Scheme.IdealSheafData E.E)).ideal U
+        = ∏ i : Fin (N ^ 2), (Scheme.Hom.ker (fam i).1).ideal U := by
+      have h1 : ((∏ i : Fin (N ^ 2), Scheme.Hom.ker (fam i).1 :
+            Scheme.IdealSheafData E.E)).ideal
+          = ∏ i : Fin (N ^ 2), (Scheme.IdealSheafData.idealMonoidHom E.E)
+              (Scheme.Hom.ker (fam i).1) :=
+        map_prod (Scheme.IdealSheafData.idealMonoidHom E.E) _ Finset.univ
+      rw [show ((∏ i : Fin (N ^ 2), Scheme.Hom.ker (fam i).1 :
+            Scheme.IdealSheafData E.E)).ideal U
+          = (((∏ i : Fin (N ^ 2), Scheme.Hom.ker (fam i).1 :
+            Scheme.IdealSheafData E.E)).ideal) U from rfl, h1, Finset.prod_apply]
+      rfl
+    rw [hprodU]
+    refine Ideal.le_prod_of_pairwise_coprime _ _ (fun i => hleker i U) ?_
+    intro i j hij
+    have h3 : ((Scheme.Hom.ker (fam i).1 ⊔ Scheme.Hom.ker (fam j).1 :
+          Scheme.IdealSheafData E.E)).ideal U
+        = (⊤ : Scheme.IdealSheafData E.E).ideal U := by rw [hpair hij]
+    rw [Scheme.IdealSheafData.ideal_sup] at h3
+    simpa using h3
+  -- the reverse containment: rank rigidity (both finite flat of rank N²)
+  have hge : (RelEffCartierDiv.sectionsDivisor E.π fam).ideal ≤ E.torsionIdeal N := by
+    sorry
+  exact le_antisymm hge hle
+
 end EllipticCurve
 
 end ModularCurves
