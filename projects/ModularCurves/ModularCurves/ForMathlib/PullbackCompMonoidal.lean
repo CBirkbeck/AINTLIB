@@ -227,23 +227,46 @@ namespace AlgebraicGeometry.Scheme.Modules
 noncomputable section
 
 private abbrev moduleSheafification (X : Scheme.{u}) :=
-  PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
+  PresheafOfModules.sheafification.{u} (𝟙 X.ringCatSheaf.obj)
 
 private abbrev moduleSheafificationRight (X : Scheme.{u}) :=
   SheafOfModules.forget X.ringCatSheaf ⋙
     PresheafOfModules.restrictScalars (𝟙 X.ringCatSheaf.obj)
 
 private abbrev presheafModulePullback {X Y : Scheme.{u}} (f : X ⟶ Y) :=
-  PresheafOfModules.pullback f.toRingCatSheafHom.hom
+  PresheafOfModules.pullback.{u}
+    (_root_.PresheafOfModules.schemeRingPresheafHom f)
 
 private abbrev presheafModulePushforward {X Y : Scheme.{u}} (f : X ⟶ Y) :=
-  PresheafOfModules.pushforward f.toRingCatSheafHom.hom
+  PresheafOfModules.pushforward.{u}
+    (_root_.PresheafOfModules.schemeRingPresheafHom f)
+
+noncomputable local instance presheafPushforwardIsRightAdjoint
+    {X Y : Scheme.{u}} (f : X ⟶ Y) :
+    (PresheafOfModules.pushforward.{u} f.toRingCatSheafHom.hom).IsRightAdjoint := by
+  change (PresheafOfModules.pushforward.{u}
+    (_root_.PresheafOfModules.schemeRingPresheafHom f)).IsRightAdjoint
+  exact PresheafOfModules.instIsRightAdjointPushforward
+    (_root_.PresheafOfModules.schemeRingPresheafHom f)
 
 private abbrev moduleSheafificationAdjunction (X : Scheme.{u}) :=
-  PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)
+  PresheafOfModules.sheafificationAdjunction.{u} (𝟙 X.ringCatSheaf.obj)
 
 private abbrev presheafModulePullbackAdjunction {X Y : Scheme.{u}} (f : X ⟶ Y) :=
-  PresheafOfModules.pullbackPushforwardAdjunction f.toRingCatSheafHom.hom
+  PresheafOfModules.pullbackPushforwardAdjunction.{u}
+    (_root_.PresheafOfModules.schemeRingPresheafHom f)
+
+private abbrev presheafModulePullbackComp
+    {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :=
+  PresheafOfModules.pullbackComp.{u}
+    (_root_.PresheafOfModules.schemeRingPresheafHom g)
+    (_root_.PresheafOfModules.schemeRingPresheafHom f)
+
+private abbrev presheafModulePushforwardComp
+    {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :=
+  PresheafOfModules.pushforwardComp.{u}
+    (_root_.PresheafOfModules.schemeRingPresheafHom g)
+    (_root_.PresheafOfModules.schemeRingPresheafHom f)
 
 private abbrev modulePullbackAdjunction {X Y : Scheme.{u}} (f : X ⟶ Y) :=
   Scheme.Modules.pullbackPushforwardAdjunction f
@@ -268,83 +291,66 @@ private def sheafificationPullbackCompIso
 
 private theorem sheafificationCompPullback_whiskerRight_mate
     {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
-    let LZ := PresheafOfModules.sheafification (𝟙 Z.ringCatSheaf.obj)
-    let LY := PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)
-    let preG := PresheafOfModules.pullback g.toRingCatSheafHom.hom
+    let LZ := moduleSheafification Z
+    let LY := moduleSheafification Y
+    let preG := presheafModulePullback g
     let shG := Scheme.Modules.pullback g
     let shF := Scheme.Modules.pullback f
     let RY := SheafOfModules.forget Y.ringCatSheaf ⋙
       PresheafOfModules.restrictScalars (𝟙 Y.ringCatSheaf.obj)
-    let aZ := PresheafOfModules.sheafificationAdjunction
-      (𝟙 Z.ringCatSheaf.obj)
+    let aZ := moduleSheafificationAdjunction Z
     let ag := Scheme.Modules.pullbackPushforwardAdjunction g
     let af := Scheme.Modules.pullbackPushforwardAdjunction f
-    let aY := PresheafOfModules.sheafificationAdjunction
-      (𝟙 Y.ringCatSheaf.obj)
-    let pg := PresheafOfModules.pullbackPushforwardAdjunction
-      g.toRingCatSheafHom.hom
+    let aY := moduleSheafificationAdjunction Y
+    let pg := presheafModulePullbackAdjunction g
     let eG : LZ ⋙ shG ≅ preG ⋙ LY :=
       SheafOfModules.sheafificationCompPullback g.toRingCatSheafHom
     (conjugateEquiv ((pg.comp aY).comp af) ((aZ.comp ag).comp af))
         (Functor.whiskerRight eG.hom shF) =
       Functor.whiskerLeft (Scheme.Modules.pushforward f)
-        (𝟙 (RY ⋙ PresheafOfModules.pushforward
-          g.toRingCatSheafHom.hom)) := by
+        (𝟙 (RY ⋙ presheafModulePushforward g)) := by
   dsimp only
   exact CategoryTheory.conjugateEquiv_whiskerRight_leftAdjointUniq_hom'
-    ((PresheafOfModules.sheafificationAdjunction
-      (𝟙 Z.ringCatSheaf.obj)).comp
+    ((moduleSheafificationAdjunction Z).comp
         (Scheme.Modules.pullbackPushforwardAdjunction g))
-    ((PresheafOfModules.pullbackPushforwardAdjunction
-      g.toRingCatSheafHom.hom).comp
-        (PresheafOfModules.sheafificationAdjunction
-          (𝟙 Y.ringCatSheaf.obj)))
+    ((presheafModulePullbackAdjunction g).comp
+      (moduleSheafificationAdjunction Y))
     (Scheme.Modules.pullbackPushforwardAdjunction f)
 
 private theorem sheafificationCompPullback_whiskerLeft_mate
     {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
-    let LX := PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)
-    let LY := PresheafOfModules.sheafification (𝟙 Y.ringCatSheaf.obj)
-    let preG := PresheafOfModules.pullback g.toRingCatSheafHom.hom
-    let preF := PresheafOfModules.pullback f.toRingCatSheafHom.hom
+    let LX := moduleSheafification X
+    let LY := moduleSheafification Y
+    let preG := presheafModulePullback g
+    let preF := presheafModulePullback f
     let RX := SheafOfModules.forget X.ringCatSheaf ⋙
       PresheafOfModules.restrictScalars (𝟙 X.ringCatSheaf.obj)
     let af := Scheme.Modules.pullbackPushforwardAdjunction f
-    let aX := PresheafOfModules.sheafificationAdjunction
-      (𝟙 X.ringCatSheaf.obj)
-    let aY := PresheafOfModules.sheafificationAdjunction
-      (𝟙 Y.ringCatSheaf.obj)
-    let pg := PresheafOfModules.pullbackPushforwardAdjunction
-      g.toRingCatSheafHom.hom
-    let pf := PresheafOfModules.pullbackPushforwardAdjunction
-      f.toRingCatSheafHom.hom
+    let aX := moduleSheafificationAdjunction X
+    let aY := moduleSheafificationAdjunction Y
+    let pg := presheafModulePullbackAdjunction g
+    let pf := presheafModulePullbackAdjunction f
     let eF : LY ⋙ Scheme.Modules.pullback f ≅ preF ⋙ LX :=
       SheafOfModules.sheafificationCompPullback f.toRingCatSheafHom
     (conjugateEquiv (pg.comp (pf.comp aX)) (pg.comp (aY.comp af)))
         (Functor.whiskerLeft preG eF.hom) =
       Functor.whiskerRight
-        (𝟙 (RX ⋙ PresheafOfModules.pushforward
-          f.toRingCatSheafHom.hom))
-        (PresheafOfModules.pushforward g.toRingCatSheafHom.hom) := by
+        (𝟙 (RX ⋙ presheafModulePushforward f))
+        (presheafModulePushforward g) := by
   dsimp only
   exact CategoryTheory.conjugateEquiv_whiskerLeft_leftAdjointUniq_hom'
-    ((PresheafOfModules.sheafificationAdjunction
-      (𝟙 Y.ringCatSheaf.obj)).comp
+    ((moduleSheafificationAdjunction Y).comp
         (Scheme.Modules.pullbackPushforwardAdjunction f))
-    ((PresheafOfModules.pullbackPushforwardAdjunction
-      f.toRingCatSheafHom.hom).comp
-        (PresheafOfModules.sheafificationAdjunction
-          (𝟙 X.ringCatSheaf.obj)))
-    (PresheafOfModules.pullbackPushforwardAdjunction
-      g.toRingCatSheafHom.hom)
+    ((presheafModulePullbackAdjunction f).comp
+      (moduleSheafificationAdjunction X))
+    (presheafModulePullbackAdjunction g)
 
 private theorem pushforwardComp_forget_eq
     {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
     Functor.whiskerRight (Scheme.Modules.pushforwardComp f g).inv
         (moduleSheafificationRight Z) =
       Functor.whiskerLeft (moduleSheafificationRight X)
-        (PresheafOfModules.pushforwardComp
-          g.toRingCatSheafHom.hom f.toRingCatSheafHom.hom).inv := by
+        (presheafModulePushforwardComp f g).inv := by
   ext M U x
   rfl
 
@@ -355,8 +361,7 @@ private def pullbackCompLift
       moduleSheafification Z ⋙ Scheme.Modules.pullback (f ≫ g) :=
   (sheafificationPullbackCompIso f g).hom ≫
     Functor.whiskerRight
-      (PresheafOfModules.pullbackComp
-        g.toRingCatSheafHom.hom f.toRingCatSheafHom.hom).hom
+      (presheafModulePullbackComp f g).hom
       (moduleSheafification X) ≫
     (SheafOfModules.sheafificationCompPullback
       (f ≫ g).toRingCatSheafHom).inv
@@ -398,8 +403,7 @@ private def presheafPullbackCompMate
   (conjugateEquiv (presheafDirectPullbackAdjunction f g)
     (presheafCompositePullbackAdjunction f g))
       (Functor.whiskerRight
-        (PresheafOfModules.pullbackComp
-          g.toRingCatSheafHom.hom f.toRingCatSheafHom.hom).hom
+        (presheafModulePullbackComp f g).hom
         (moduleSheafification X))
 
 private def compositeSheafificationMate
@@ -413,8 +417,7 @@ private def directPresheafCompositeMate
   (conjugateEquiv (moduleDirectPullbackAdjunction f g)
     (presheafCompositePullbackAdjunction f g))
       (Functor.whiskerRight
-          (PresheafOfModules.pullbackComp
-            g.toRingCatSheafHom.hom f.toRingCatSheafHom.hom).hom
+          (presheafModulePullbackComp f g).hom
           (moduleSheafification X) ≫
         (SheafOfModules.sheafificationCompPullback
           (f ≫ g).toRingCatSheafHom).inv)
@@ -428,8 +431,7 @@ private theorem pullbackCompLiftMate_decomp_outer
   let d := moduleCompositePullbackAdjunction f g
   let eComp := sheafificationPullbackCompIso f g
   let σ := Functor.whiskerRight
-    (PresheafOfModules.pullbackComp
-      g.toRingCatSheafHom.hom f.toRingCatSheafHom.hom).hom
+    (presheafModulePullbackComp f g).hom
     (moduleSheafification X)
   let eFG := SheafOfModules.sheafificationCompPullback
     (f ≫ g).toRingCatSheafHom
@@ -446,8 +448,7 @@ private theorem directPresheafCompositeMate_decomp
   let b := presheafDirectPullbackAdjunction f g
   let c := presheafCompositePullbackAdjunction f g
   let σ := Functor.whiskerRight
-    (PresheafOfModules.pullbackComp
-      g.toRingCatSheafHom.hom f.toRingCatSheafHom.hom).hom
+    (presheafModulePullbackComp f g).hom
     (moduleSheafification X)
   let eFG := SheafOfModules.sheafificationCompPullback
     (f ≫ g).toRingCatSheafHom
@@ -479,24 +480,21 @@ private theorem presheafPullbackComp_whisker_mate
         (presheafModulePullbackAdjunction f)).comp
           (moduleSheafificationAdjunction X)))
       (Functor.whiskerRight
-        (PresheafOfModules.pullbackComp
-          g.toRingCatSheafHom.hom f.toRingCatSheafHom.hom).hom
+        (presheafModulePullbackComp f g).hom
         (moduleSheafification X)) =
       Functor.whiskerLeft (moduleSheafificationRight X)
-        (PresheafOfModules.pushforwardComp
-          g.toRingCatSheafHom.hom f.toRingCatSheafHom.hom).inv := by
+        (presheafModulePushforwardComp f g).inv := by
   let pfg := presheafModulePullbackAdjunction (f ≫ g)
   let pg := presheafModulePullbackAdjunction g
   let pf := presheafModulePullbackAdjunction f
   let aX := moduleSheafificationAdjunction X
-  let preComp := PresheafOfModules.pullbackComp
-    g.toRingCatSheafHom.hom f.toRingCatSheafHom.hom
+  let preComp := presheafModulePullbackComp f g
   have hpre : (conjugateEquiv pfg (pg.comp pf)) preComp.hom =
-      (PresheafOfModules.pushforwardComp
-        g.toRingCatSheafHom.hom f.toRingCatSheafHom.hom).inv := by
-    dsimp only [preComp]
-    rw [PresheafOfModules.pullbackComp,
-      Adjunction.leftAdjointCompIso_hom]
+      (presheafModulePushforwardComp f g).inv := by
+    change (conjugateEquiv pfg (pg.comp pf))
+      ((conjugateEquiv pfg (pg.comp pf)).symm
+        (presheafModulePushforwardComp f g).inv) =
+      (presheafModulePushforwardComp f g).inv
     exact (conjugateEquiv pfg (pg.comp pf)).apply_symm_apply _
   have hw := conjugateEquiv_whiskerRight pfg (pg.comp pf) aX preComp.hom
   change (conjugateEquiv (pfg.comp aX) ((pg.comp pf).comp aX))
@@ -510,8 +508,7 @@ private theorem directPresheafCompositeMate_app
     {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) (M : X.Modules) :
     (directPresheafCompositeMate f g).app M =
       (Functor.whiskerLeft (moduleSheafificationRight X)
-        (PresheafOfModules.pushforwardComp
-          g.toRingCatSheafHom.hom f.toRingCatSheafHom.hom).inv).app M := by
+        (presheafModulePushforwardComp f g).inv).app M := by
   have hinner := NatTrans.congr_app (directPresheafCompositeMate_decomp f g) M
   have heFG : directSheafificationInvMate f g =
       𝟙 (Scheme.Modules.pushforward (f ≫ g) ⋙
@@ -519,8 +516,7 @@ private theorem directPresheafCompositeMate_app
     sheafificationCompPullback_inv_mate (f ≫ g)
   have hσ : presheafPullbackCompMate f g =
       Functor.whiskerLeft (moduleSheafificationRight X)
-        (PresheafOfModules.pushforwardComp
-          g.toRingCatSheafHom.hom f.toRingCatSheafHom.hom).inv :=
+        (presheafModulePushforwardComp f g).inv :=
     presheafPullbackComp_whisker_mate f g
   have heFGM := NatTrans.congr_app heFG M
   have hσM := NatTrans.congr_app hσ M
@@ -531,14 +527,15 @@ private theorem directPresheafCompositeMate_app
     moduleSheafificationRight Z)
   let iM := iFG.app M
   have heFGM' : (directSheafificationInvMate f g).app M = iM := heFGM
-  calc
-    _ = iM ≫ (presheafPullbackCompMate f g).app M :=
-      congrArg (fun k => k ≫ (presheafPullbackCompMate f g).app M) heFGM'
-    _ = iM ≫ (Functor.whiskerLeft (moduleSheafificationRight X)
-        (PresheafOfModules.pushforwardComp
-          g.toRingCatSheafHom.hom f.toRingCatSheafHom.hom).inv).app M :=
-      congrArg (fun k => iM ≫ k) hσM
-    _ = _ := by rfl
+  let t := (Functor.whiskerLeft (moduleSheafificationRight X)
+    (presheafModulePushforwardComp f g).inv).app M
+  have hleft := congrArg
+    (fun k => k ≫ (presheafPullbackCompMate f g).app M) heFGM'
+  have hright := congrArg (fun k => iM ≫ k) hσM
+  have hiM : iM = 𝟙 _ := rfl
+  have hunit : iM ≫ t = t :=
+    (congrArg (fun k => k ≫ t) hiM).trans (Category.id_comp t)
+  exact hleft.trans (hright.trans hunit)
 
 private theorem sheafificationMate_r₁
     {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) (M : X.Modules) :
@@ -808,19 +805,14 @@ private theorem pullbackCompLift_mate_app
   change (directPresheafCompositeMate f g).app M ≫
     (compositeSheafificationMate f g).app M =
       (Functor.whiskerLeft (moduleSheafificationRight X)
-        (PresheafOfModules.pushforwardComp
-          g.toRingCatSheafHom.hom f.toRingCatSheafHom.hom).inv).app M
-  calc
-    _ = (Functor.whiskerLeft (moduleSheafificationRight X)
-          (PresheafOfModules.pushforwardComp
-            g.toRingCatSheafHom.hom f.toRingCatSheafHom.hom).inv).app M ≫
-        (compositeSheafificationMate f g).app M :=
-      congrArg (fun k => k ≫ (compositeSheafificationMate f g).app M) hdirect
-    _ = (Functor.whiskerLeft (moduleSheafificationRight X)
-          (PresheafOfModules.pushforwardComp
-            g.toRingCatSheafHom.hom f.toRingCatSheafHom.hom).inv).app M := by
-      rw [hcomp']
-      rfl
+        (presheafModulePushforwardComp f g).inv).app M
+  let t := (Functor.whiskerLeft (moduleSheafificationRight X)
+    (presheafModulePushforwardComp f g).inv).app M
+  have hleft := congrArg
+    (fun k => k ≫ (compositeSheafificationMate f g).app M) hdirect
+  have hunit : t ≫ (compositeSheafificationMate f g).app M = t :=
+    (congrArg (fun k => t ≫ k) hcomp').trans (Category.comp_id t)
+  exact hleft.trans hunit
 
 private theorem whiskerLeft_pullbackComp_hom_eq
     {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z) :
@@ -829,7 +821,12 @@ private theorem whiskerLeft_pullbackComp_hom_eq
       pullbackCompLift f g := by
   apply (conjugateEquiv (moduleDirectPullbackAdjunction f g)
     (moduleCompositePullbackAdjunction f g)).injective
-  rw [conjugateEquiv_whiskerLeft]
+  have hwhisker := conjugateEquiv_whiskerLeft
+    (modulePullbackAdjunction (f ≫ g))
+    ((modulePullbackAdjunction g).comp (modulePullbackAdjunction f))
+    (moduleSheafificationAdjunction Z)
+    (Scheme.Modules.pullbackComp f g).hom
+  refine hwhisker.trans ?_
   have hpull := Scheme.Modules.conjugateEquiv_pullbackComp_hom f g
   change (conjugateEquiv (modulePullbackAdjunction (f ≫ g))
     ((modulePullbackAdjunction g).comp (modulePullbackAdjunction f)))
@@ -841,20 +838,22 @@ private theorem whiskerLeft_pullbackComp_hom_eq
   exact (pullbackCompLift_mate_app f g M).symm
 
 private local instance (X : Scheme.{u}) :
-    (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).IsLocalization
-      (PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj)) := by
-  change (PresheafOfModules.sheafification
+    (PresheafOfModules.sheafification.{u} (𝟙 X.ringCatSheaf.obj)).IsLocalization
+      (PresheafOfModules.sheafificationW.{u} (𝟙 X.ringCatSheaf.obj)) := by
+  change (PresheafOfModules.sheafification.{u}
       (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat,
         X.ringCatSheaf.property⟩ : TopCat.Sheaf RingCat X).obj)).IsLocalization
-    (PresheafOfModules.sheafificationW
+    (PresheafOfModules.sheafificationW.{u}
       (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat,
         X.ringCatSheaf.property⟩ : TopCat.Sheaf RingCat X).obj))
-  infer_instance
+  exact PresheafOfModules.sheafificationW_isLocalization
+    (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat,
+      X.ringCatSheaf.property⟩ : TopCat.Sheaf RingCat X)
 
 private local instance (X : Scheme.{u}) :
-    (PresheafOfModules.sheafificationW
+    (PresheafOfModules.sheafificationW.{u}
       (𝟙 X.ringCatSheaf.obj)).IsMonoidal := by
-  change (PresheafOfModules.sheafificationW
+  change (PresheafOfModules.sheafificationW.{u}
     (𝟙 (⟨X.sheaf.obj ⋙ forget₂ CommRingCat RingCat,
       X.ringCatSheaf.property⟩ : TopCat.Sheaf RingCat X).obj)).IsMonoidal
   infer_instance
@@ -890,17 +889,25 @@ private abbrev exactSheafificationUnit (X : Scheme.{u}) :=
   𝟙 (exactRingSheaf X).obj
 
 private abbrev exactSheafification (X : Scheme.{u}) :=
-  PresheafOfModules.sheafification (exactSheafificationUnit X)
+  PresheafOfModules.sheafification.{u} (exactSheafificationUnit X)
 
 private abbrev exactSheafificationW (X : Scheme.{u}) :=
-  PresheafOfModules.sheafificationW (exactSheafificationUnit X)
+  PresheafOfModules.sheafificationW.{u} (exactSheafificationUnit X)
+
+private local instance exactSheafificationLocalization (X : Scheme.{u}) :
+    (exactSheafification X).IsLocalization (exactSheafificationW X) :=
+  PresheafOfModules.sheafificationW_isLocalization (exactRingSheaf X)
+
+private local instance exactSheafificationWMonoidal (X : Scheme.{u}) :
+    (exactSheafificationW X).IsMonoidal :=
+  PresheafOfModules.sheafificationW_isMonoidal _
 
 private abbrev exactLocalizedSheafification (X : Scheme.{u}) :=
   Localization.Monoidal.toMonoidalCategory
     (L := exactSheafification X) (W := exactSheafificationW X) (Iso.refl _)
 
 private abbrev exactPresheafPullback {X Y : Scheme.{u}} (f : X ⟶ Y) :=
-  PresheafOfModules.pullback (PresheafOfModules.schemeRingPresheafHom f)
+  PresheafOfModules.pullback.{u} (PresheafOfModules.schemeRingPresheafHom f)
 
 private abbrev exactSheafHom {X Y : Scheme.{u}} (f : X ⟶ Y) :=
   (⟨PresheafOfModules.schemeRingPresheafHom f⟩ : exactRingSheaf Y ⟶
@@ -908,7 +915,7 @@ private abbrev exactSheafHom {X Y : Scheme.{u}} (f : X ⟶ Y) :=
       RingCat.{u} _ _).obj (exactRingSheaf X))
 
 private abbrev exactSheafPullback {X Y : Scheme.{u}} (f : X ⟶ Y) :=
-  SheafOfModules.pullback (exactSheafHom f)
+  SheafOfModules.pullback.{u} (exactSheafHom f)
 
 @[implicit_reducible]
 private noncomputable def exactSheafPullbackMonoidal
