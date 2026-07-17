@@ -286,4 +286,72 @@ theorem hdbl_of_marked_three_torsion {S : Scheme.{u}} {E : EllipticCurve S}
   exact hdbl_of_dblX_eq Pr.W p q e he hX
 
 
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(BRIDGE-P ★★★)** The `a₂`-obstruction of an origin-marked chart of the first
+marked section vanishes. -/
+theorem bridgeP_holds {R : CommRingCat.{u}} (X : EllObj R) (hR : IsUnit (3 : R))
+    (L : X.curve.FullLevelPt 3) (V : X.base.affineOpens)
+    (Pr : LocalPresentation X.curve.toEllipticCurveGeom V)
+    (hM : Pr.MarksAt L.1.1.2 0 0) :
+    Pr.W.a₂ * Pr.W.a₃ ^ 2 - Pr.W.a₄ * Pr.W.a₁ * Pr.W.a₃ - Pr.W.a₄ ^ 2 = 0 := by
+  obtain ⟨heq, hMeq⟩ := id hM
+  have hN : NIsInvertible X.base 3 := by
+    have h0 : NIsInvertible (Spec R) 3 := by
+      rw [NIsInvertible, Nat.cast_ofNat]
+      have := hR.map (Scheme.ΓSpecIso R).inv.hom
+      rwa [map_ofNat] at this
+    exact h0.of_hom X.structMap
+  have hne := X.curve.pull_ne_zero_left_of_isNaiveFullLevel 3 (by norm_num) hN L.2
+  have hkill : (3 : ℤ) • (⟨(L.1.1 : _ ⟶ _), L.1.1.2⟩ : X.curve.Section) = 0 := by
+    have h := L.2.1.1
+    exact_mod_cast h
+  have ha₆ : Pr.W.a₆ = 0 := WeierstrassCurve.Affine.equation_zero.mp heq
+  have hdbl := hdbl_of_marked_three_torsion Pr heq hMeq hkill hne
+  exact bridgeP_of_dbl_origin Pr.W ha₆ hdbl
+
+open LocalPresentation in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **(BRIDGE-Q ★★★)** The flex-chart cubic at the second marked point vanishes. -/
+theorem bridgeQ_holds {R : CommRingCat.{u}} (X : EllObj R) (hR : IsUnit (3 : R))
+    (L : X.curve.FullLevelPt 3) (V : X.base.affineOpens)
+    (Pr : LocalPresentation X.curve.toEllipticCurveGeom V)
+    (ha₂ : Pr.W.a₂ = 0) (ha₄ : Pr.W.a₄ = 0) (ha₆ : Pr.W.a₆ = 0)
+    (hMP : Pr.MarksAt L.1.1.2 0 0) (p q : Γ(X.base, V.1))
+    (hMQ : Pr.MarksAt L.1.2.2 p q) :
+    3 * p ^ 3 + Pr.W.a₁ ^ 2 * p ^ 2 + 3 * Pr.W.a₁ * Pr.W.a₃ * p
+      + 3 * Pr.W.a₃ ^ 2 = 0 := by
+  obtain ⟨heqQ, hMeqQ⟩ := id hMQ
+  obtain ⟨heqP, hMeqP⟩ := id hMP
+  have hN : NIsInvertible X.base 3 := by
+    have h0 : NIsInvertible (Spec R) 3 := by
+      rw [NIsInvertible, Nat.cast_ofNat]
+      have := hR.map (Scheme.ΓSpecIso R).inv.hom
+      rwa [map_ofNat] at this
+    exact h0.of_hom X.structMap
+  have hneQ := X.curve.pull_ne_zero_right_of_isNaiveFullLevel 3 (by norm_num) hN L.2
+  have hkillQ : (3 : ℤ) • (⟨(L.1.2 : _ ⟶ _), L.1.2.2⟩ : X.curve.Section) = 0 := by
+    have h := L.2.1.2
+    exact_mod_cast h
+  have hdbl := hdbl_of_marked_three_torsion Pr heqQ hMeqQ hkillQ hneQ
+  have hcurve : q ^ 2 + Pr.W.a₁ * p * q + Pr.W.a₃ * q
+      = p ^ 3 + Pr.W.a₂ * p ^ 2 + Pr.W.a₄ * p + Pr.W.a₆ := by
+    have h := (WeierstrassCurve.Affine.equation_iff _ _).mp heqQ
+    linear_combination h
+  have hΨ := WeierstrassCurve.Ψ₃_eval_eq_zero_of_dbl_eq_neg Pr.W p q hcurve hdbl
+  have hpm : ∀ (k : Type u) [Field k] [IsAlgClosed k]
+      (t : Spec (CommRingCat.of k) ⟶ X.base),
+      EllipticCurve.Point.pull X.curve t ⟨(L.1.2 : _ ⟶ _), L.1.2.2⟩
+        ≠ EllipticCurve.Point.pull X.curve t ⟨(L.1.1 : _ ⟶ _), L.1.1.2⟩ ∧
+      EllipticCurve.Point.pull X.curve t ⟨(L.1.2 : _ ⟶ _), L.1.2.2⟩
+        ≠ -EllipticCurve.Point.pull X.curve t ⟨(L.1.1 : _ ⟶ _), L.1.1.2⟩ := by
+    intro k _ _ t
+    exact X.curve.pull_ne_pm_of_isNaiveFullLevel 3 (by norm_num) hN L.2 k t
+  have hp : IsUnit p :=
+    isUnit_x_of_marked_pair Pr heqP hMeqP heqQ hMeqQ hpm
+  exact WeierstrassCurve.bridgeQ_cubic_of_Ψ₃ Pr.W ha₂ ha₄ ha₆ p hp hΨ
+
+
 end ModularCurves

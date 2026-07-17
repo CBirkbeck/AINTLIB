@@ -11,6 +11,7 @@ import ModularCurves.Moduli.LegendreDelta
 import ModularCurves.Moduli.UniversalLegendre
 import ModularCurves.Moduli.UniversalLevelThree
 import ModularCurves.Moduli.E3DatumAssembly
+import ModularCurves.Moduli.BridgeAssembly
 import ModularCurves.LevelStructure.CombinationLevel
 
 /-!
@@ -95,12 +96,13 @@ theorem naiveLevelThree_representable_by_affine (hR : IsUnit (3 : R)) :
     -- them from the `Ψ₃`-form `3•σ = 0 ⟹ Ψ₃(x(σ)) = 0` when KM's K1 lands).
     intro X L
     refine isE3Datum_of_bridges X hR L ?_ ?_
-    · -- BRIDGE-P: the `a₂`-obstruction of an origin-marked chart of a `3`-torsion
-      -- section vanishes (`= Ψ₃(0) = 0` via `bridgeP_of_psi3_eval`).
-      sorry
-    · -- BRIDGE-Q: the flex-chart cubic at the second marked point
-      -- (`= Ψ₃(x(Q))/x(Q) = 0` via `bridgeQ_of_psi3_eval` + the abscissa unit).
-      sorry
+    · -- BRIDGE-P: RING-DBL + the negation coordinate + KM's certificate
+      -- (`BridgeAssembly.bridgeP_holds`).
+      exact fun V Pr hM => bridgeP_holds X hR L V Pr hM
+    · -- BRIDGE-Q: RING-DBL + the Ψ₃ certificate + the abscissa unit
+      -- (`BridgeAssembly.bridgeQ_holds`).
+      exact fun V Pr ha₂ ha₄ ha₆ hMP p q hMQ =>
+        bridgeQ_holds X hR L V Pr ha₂ ha₄ ha₆ hMP p q hMQ
 
 /-- **(T-E15b, KM engine axiom 2 for `δ = ` naive level 3)** For every elliptic curve `E/S`
 over a base in which `3` is invertible, the `S`-scheme `δ_{E/S}` relatively representing the
