@@ -1,1 +1,1 @@
-FOCUS: OMEGA v10.308 — hArb-2 COMPLETE (fibrewise-ne-zero => MarksAt end-to-end); next [hArb-2c] level=>fibrewise inputs + translation normalization; bridges KM-gated
+FOCUS: OMEGA v10.309 — hArb marking pipeline COMPLETE (2a+2b+2c); next: translation-to-origin VC + bridges (KM-gated per split)
