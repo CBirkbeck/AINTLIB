@@ -225,6 +225,77 @@ theorem span_pushed_D (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
   rw [Set.image_union, Set.image_singleton, ← Set.range_comp]
   rfl
 
+/-- Coefficientwise maps carry `polyToP`-images to `polyToP`-images. -/
+theorem mapRestricted_polyToP {E E' : Type*} [NormedCommRing E] [IsUltrametricDist E]
+    [NormOneClass E] [CompleteSpace E] [NormedCommRing E'] [IsUltrametricDist E']
+    [NormOneClass E'] [CompleteSpace E']
+    (φ : E →+* E') (hφ : ∀ x, ‖φ x‖ ≤ ‖x‖) (q : MvPolynomial (Fin m) E) :
+    mapRestricted φ hφ (fun _ : Fin m => (1 : ℝ)) (polyToP q) =
+      polyToP (MvPolynomial.map φ q) := by
+  refine Subtype.ext (MvPowerSeries.ext fun s => ?_)
+  show MvPowerSeries.coeff s (MvPowerSeries.map φ ((polyToP (E := E) (m := m) q)).1) = _
+  rw [MvPowerSeries.coeff_map, coeff_polyToP, coeff_polyToP, MvPolynomial.coeff_map]
+
+theorem rB_eq (i : Fin m) : rB F m g f i =
+    polyToP (MvPolynomial.C (jB F g) * MvPolynomial.X i -
+      MvPolynomial.C (jB F (f i))) := by
+  show mapRestricted (jB F) (norm_jB_le F) _ (polyToP _) = _
+  rw [mapRestricted_polyToP]
+  congr 1
+  rw [map_sub, map_mul, MvPolynomial.map_C, MvPolynomial.map_X, MvPolynomial.map_C]
+
+theorem rC_eq (i : Fin m) : rC F m g f i =
+    polyToP (MvPolynomial.C (iotaC F g) * MvPolynomial.X i -
+      MvPolynomial.C (iotaC F (f i))) := by
+  show mapRestricted (iotaC F) (fun a => le_of_eq (norm_iotaC F a)) _ (polyToP _) = _
+  rw [mapRestricted_polyToP]
+  congr 1
+  rw [map_sub, map_mul, MvPolynomial.map_C, MvPolynomial.map_X, MvPolynomial.map_C]
+
+theorem rD_eq (i : Fin m) : rD F m g f i =
+    polyToP (MvPolynomial.C (rhoC F (iotaC F g)) * MvPolynomial.X i -
+      MvPolynomial.C (rhoC F (iotaC F (f i)))) := by
+  show mapRestricted (rhoC F) (norm_rhoC_le F) _ (rC F m g f i) = _
+  rw [rC_eq, mapRestricted_polyToP]
+  congr 1
+  rw [map_sub, map_mul, MvPolynomial.map_C, MvPolynomial.map_X, MvPolynomial.map_C]
+
+/-- The pushed generators are compatible across the square. -/
+theorem extRhoB_rB (i : Fin m) : extRhoB F m (rB F m g f i) = rD F m g f i :=
+  ext_square_commutes F m (rA F m g f i)
+
+/-- The vertex Tate extensions are noetherian (transfer of strong noetherianity to the
+Gauss form). -/
+theorem isNoetherianRing_PB : IsNoetherianRing (PB F m) := by
+  haveI hsub := IsStronglyNoetherian.isNoetherianRing_restricted (A := JetB F) m
+  exact isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring m (JetB F)) _
+    (UnitDiscExample.restrictedGaussEquiv (JetB F) m).symm.toRingHom (RingEquiv.surjective _)
+
+theorem isNoetherianRing_PC : IsNoetherianRing (PC F m) := by
+  haveI hsub := IsStronglyNoetherian.isNoetherianRing_restricted (A := JetC F) m
+  exact isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring m (JetC F)) _
+    (UnitDiscExample.restrictedGaussEquiv (JetC F) m).symm.toRingHom (RingEquiv.surjective _)
+
+theorem isNoetherianRing_PD : IsNoetherianRing (PD F m) := by
+  haveI hsub := IsStronglyNoetherian.isNoetherianRing_restricted (A := JetD F) m
+  exact isNoetherianRing_of_surjective (restrictedMvPowerSeriesSubring m (JetD F)) _
+    (UnitDiscExample.restrictedGaussEquiv (JetD F) m).symm.toRingHom (RingEquiv.surjective _)
+
+/-- The vertex Tate-extension unit balls are noetherian. -/
+theorem isNoetherianRing_unitBall_PB : IsNoetherianRing (unitBall (PB F m)) :=
+  isNoetherianRing_unitBall_restricted_dualNumber
+    (PowerSeries.Restricted (LaurentSeries F) (1 : ℝ)) m
+    (isNoetherianRing_unitBall_restricted_univariate (LaurentSeries F) m
+      (isNoetherianRing_unitBall_gaussK F (m + 1)))
+
+theorem isNoetherianRing_unitBall_PC : IsNoetherianRing (unitBall (PC F m)) :=
+  isNoetherianRing_unitBall_restricted_univariate (L F) m
+    (isNoetherianRing_unitBall_restricted_L F (m + 1))
+
+theorem isNoetherianRing_unitBall_PD : IsNoetherianRing (unitBall (PD F m)) :=
+  isNoetherianRing_unitBall_restricted_dualNumber (L F) m
+    (isNoetherianRing_unitBall_restricted_L F m)
+
 /-! ### Lemma 4.3 — controlled graph-ideal pullback
 
 [FJP] Lemma 4.3 (verbatim): "The canonical algebraic map `I_R → I_B ×_{I_D} I_C` is a
