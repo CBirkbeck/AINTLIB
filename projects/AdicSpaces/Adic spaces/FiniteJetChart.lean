@@ -1000,6 +1000,68 @@ theorem chartEval_continuous : Continuous (chartEval F) := by
     exact mul_comm _ _]
   exact hVR (Set.mul_mem_mul ⟨n, rfl⟩ hVmem)
 
+/-! ### 1-variable polynomial density in `K⟨X⟩` (step 3 substrate) -/
+
+/-- Polynomials embed into the restricted disc algebra. -/
+noncomputable def polyKW : Polynomial K →+* PowerSeries.Restricted K (1 : ℝ) where
+  toFun p := ⟨(p : PowerSeries K), by
+    show PowerSeries.IsRestricted (1 : ℝ) _
+    rw [PowerSeries.IsRestricted]
+    refine tendsto_nhds_of_eventually_eq ?_
+    rw [Filter.eventually_atTop]
+    refine ⟨p.natDegree + 1, fun n hn => ?_⟩
+    rw [Polynomial.coeff_coe, Polynomial.coeff_eq_zero_of_natDegree_lt (by omega),
+      norm_zero, zero_mul]⟩
+  map_one' := Subtype.ext (map_one (Polynomial.coeToPowerSeries.ringHom (R := K)))
+  map_mul' p q := Subtype.ext
+    (map_mul (Polynomial.coeToPowerSeries.ringHom (R := K)) p q)
+  map_zero' := Subtype.ext (map_zero (Polynomial.coeToPowerSeries.ringHom (R := K)))
+  map_add' p q := Subtype.ext
+    (map_add (Polynomial.coeToPowerSeries.ringHom (R := K)) p q)
+
+/-- Polynomials are dense in `K⟨X⟩` (truncate below any coefficient level). -/
+theorem polyKW_denseRange : DenseRange (polyKW F) := by
+  classical
+  rw [Metric.denseRange_iff]
+  intro f ε hε
+  have hfin : {n : ℕ | ε / 2 ≤ ‖PowerSeries.coeff n f.1‖}.Finite := by
+    have hf : PowerSeries.IsRestricted (1 : ℝ) f.1 := f.2
+    rw [PowerSeries.IsRestricted] at hf
+    simp only [one_pow, mul_one] at hf
+    have hev := hf.eventually (eventually_lt_nhds (half_pos hε) (a := (0 : ℝ)))
+    rw [Filter.eventually_atTop] at hev
+    obtain ⟨N, hN⟩ := hev
+    refine Set.Finite.subset (Set.finite_Iio N) ?_
+    intro n hn
+    by_contra hlt
+    simp only [Set.mem_Iio, not_lt] at hlt
+    exact absurd (hN n hlt) (not_lt.mpr hn)
+  refine ⟨∑ n ∈ hfin.toFinset, Polynomial.monomial n (PowerSeries.coeff n f.1), ?_⟩
+  rw [dist_eq_norm, Restricted.norm_eq, PowerSeries.gaussNorm_eq]
+  refine lt_of_le_of_lt (Real.iSup_le (fun n => ?_) (half_pos hε).le) (half_lt_self hε)
+  show ‖PowerSeries.coeff n ((f - polyKW F _ :
+    PowerSeries.Restricted K (1 : ℝ))).1‖ * (1 : ℝ) ^ n ≤ ε / 2
+  rw [one_pow, mul_one,
+    show ((f - polyKW F (∑ n ∈ hfin.toFinset,
+      Polynomial.monomial n (PowerSeries.coeff n f.1)) :
+      PowerSeries.Restricted K (1 : ℝ))).1 =
+      f.1 - ((∑ n ∈ hfin.toFinset,
+        Polynomial.monomial n (PowerSeries.coeff n f.1) : Polynomial K) :
+        PowerSeries K) from rfl,
+    map_sub, Polynomial.coeff_coe, Polynomial.finset_sum_coeff]
+  by_cases hn : ε / 2 ≤ ‖PowerSeries.coeff n f.1‖
+  · rw [Finset.sum_eq_single n
+      (fun b _ hb => by rw [Polynomial.coeff_monomial, if_neg hb])
+      (fun hnn => absurd (hfin.mem_toFinset.mpr hn) hnn),
+      Polynomial.coeff_monomial, if_pos rfl, sub_self, norm_zero]
+    exact (half_pos hε).le
+  · rw [Finset.sum_eq_zero fun b hb => ?_, sub_zero]
+    · exact (not_le.mp hn).le
+    · rw [Polynomial.coeff_monomial, if_neg]
+      intro hbn
+      rw [hbn] at hb
+      exact hn (hfin.mem_toFinset.mp hb)
+
 /-- The reverse map `φ : 𝓑 → 𝒪_𝓐(chart)`, `(f, g) ↦ φ(f) + φ(g)·Q̄`
 (a ring homomorphism because `Q̄² = 0`). -/
 noncomputable def chartRev : JetB F →+* presheafValue (chartDatum F) where
