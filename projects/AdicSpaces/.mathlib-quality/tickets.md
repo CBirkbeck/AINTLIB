@@ -480,7 +480,7 @@ T704, by a fresh `/develop --continue`.
   constants recorded at L4.3).
 
 ### [T503] the controlled pullback and closedness of `I_𝓐`
-- **Status**: open | **Depends**: T502 | **Type**: proofs (L4.4–L4.5) — the §4 heart
+- **Status**: **DONE** (the (4.12)–(4.16) d₂-correction in full: controlled d1-lifts at B/C, the defect w ∈ ker d1(rD), exists_d2_lift at 𝓓, coefficientwise ρC-sections of the wedge, corrected generator v' = v + d2(rC)s', per-component ext_milnorRow_exact pullback, ultrametric norm bookkeeping with constant 1 + Bs·CrA; isClosed_IA from the controlled pullback + Wedhorn-closedness of IB/IC + Lipschitz continuity of the ext-maps + pair injectivity.) | OLD: | **Depends**: T502 | **Type**: proofs (L4.4–L4.5) — the §4 heart
 - **Sorries**: `ideal_pullback_controlled`, `isClosed_IA`.
 - **Sketch**: the (4.12)–(4.16) chase, exactly as in the paper (independently re-derived
   twice — L4.3/L4.4 logs): representatives via `exists_d1_lift` at 𝓑, 𝓒; mismatch is a
