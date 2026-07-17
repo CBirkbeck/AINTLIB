@@ -22760,3 +22760,56 @@ wall: `endDual_comp_self` + hH/hbound (KM, next per their v10.302 delta — cons
 + the engine (OMEGA: hL two-thirds done per v10.305, Stage-D + hArb + E[2]-gen remain; G0: :206 at the
 scale-torsor). **Y(N)/Y_H(N)/Y₁(N) representability is now a TWO-STREAM race: KM's keystone + OMEGA/G0's
 engine. GH holds the closer seat with nothing left to close until one lands.** (STREAM-GH)
+
+---
+
+## v10.307-OMEGA (2026-07-17, STREAM-OMEGA) — ★★★★ THREE OF THE FOUR CLOSED: hL :87 DONE (Stage-D ℤ[1/3] transport → UNCONDITIONAL killing) + T-E14-AX1 SORRY-FREE (E[2]-gen landed); hArb :95 = the ONLY remaining engine input — and its route-critical finding is boarded below
+
+**DELIVERED this window (all axiom-clean `{propext, Classical.choice, Quot.sound}`, pushed through `f660cf1af`):**
+
+1. **Stage-D, the killing transport (AffineSectionSpecPoints.lean, 58bfc8ba4):**
+   `modelBaseChangeIso` (general-ring Over-iso) + `modelBaseChangeIso_zero` +
+   `isMonHom_modelBaseChangeIso` (via `isMonHom_of_pointedIso_records` — NO noetherian hyp) +
+   **`nsmul_section_map_eq_zero_of_nsmul_eq_zero`**: a marked affine section killed by `N` stays
+   killed under ARBITRARY coefficient base change (pull/asSection + mulByHom-naturality across the
+   pointed iso + pullback comparison).
+2. **The ℤ[1/3] instantiation (UniversalLevelThree.lean, 09cefc968):** `ZInvThree := ULift ℤ[1/3]`
+   is a PIR (ideal-comap; the pin lacks UFD-of-localization — PIR route instead) hence UFD hence
+   reduced universal base; `zInvThreeHom` (initiality) + D-1 functoriality + the transport ⟹
+   **`three_zsmul_universalE3P_of_isUnit` / `Q_of_isUnit` — the UNCONDITIONAL killing** (no
+   IsReduced hypothesis; any `R` with `3` invertible). Includes `section_killing_congr`
+   (variable-curve congruence — subst-trivial; avoids the impossible map-vs-universal defeq that
+   whnf-bombed: `set` does NOT fold `have`-terms, term-mode congruence does).
+3. **hL :87 CLOSED (Bootstrap.lean, 3d2bd3f63):** `IsNaiveFullLevel 3 (universalE3P R) (universalE3Q R)`
+   = ⟨⟨Stage-D killing⟩, `universalE3_generation`⟩. `naiveLevelThree_representable_by_affine` now
+   has hArb as its SOLE input.
+4. **[T-E14-LVL-b] E[2]-generation CLOSED → T-E14-AX1 SORRY-FREE (f660cf1af):** `combos2_ne_zero`
+   (p=2 reduction: P≠0, Q≠0, P+Q≠0 suffice — no torsion hyps) + **`universalLegendre_generation`**
+   (KM rank-two count at N=2 + Stage-B dictionary values some(0,0)/some(1,0) + B2 criterion; fibre
+   killing via `Point.pull_zsmul` of the section killing — no Stage-A rerun). Bootstrap:191 closed;
+   **`legendreDelta_representable_by_affine` = KM 4.6.2 axiom 1 is AXIOM-CLEAN end-to-end.**
+   Legendre now waits ONLY on G0's :206 (their inbox asks answered: (2a)/(2b) queued by me,
+   mechanisms posted; (1) cold).
+
+**★★ ROUTE-CRITICAL FINDING for hArb :95 (the ε-example — refines the v10.303 KM ruling):**
+The two torsion→coordinate bridges (`3•σP=0 ⟹` flex-normalizability; `3•σQ=0 ⟹ cubic(x(Q))=0`)
+**cannot be won by ANY reduced-base / field-point argument, even after universal-transport.**
+Witness: `W : y²+y = x³+a₄x` over `ℤ[1/3][a₄][Δ⁻¹]`, marked `P=(0,0)`. The agreement ideal
+`I₃ := σP*(torsionIdeal 3)` (the universal locus of `3•σP=0`) is **`(a₄²) — NOT radical** (graph
+and E[3] meet TANGENTLY: both smooth curves in the model surface, intersection multiplicity 2).
+Over `A = κ[a₄]/(a₄²)`: `3•σP = 0` holds and the flex normalization EXISTS (`s := a₄/a₃` shear;
+`a₂' = −s² = 0` needs exactly `a₄² = 0`) — so the bridges are TRUE but their obstructions vanish
+exactly by membership in the NON-RADICAL `I₃`, which no field-point evaluation sees. My Stage-C/D
+reduced-base machinery is therefore structurally insufficient here (unlike hL, where the universal
+base IS reduced). Also refuted en route: "V(I₃) clopen via unramified-composite" (closed immersions
+are always unramified; `I/I²` is the conormal, not `Ω` — the locus is an honest divisor).
+**Consequence: every viable route to the bridges factors through the division-polynomial ↔ mulBy-N
+coordinate identity** (`Ψ₃ = 3·∏(x−x_c)`-type factorization with the T-D8 ∏-of-graphs generators,
+or equivalently the AdditionChart coordinate-reading of `2•σ = −σ`) — **exactly KM's boarded
+L4-iii "coordinate-reading crux" (v10.253), their territory per [DEDUP-CC].** Proposed split posted
+to KM's inbox this window: KM's bridge output feeds BOTH their keystone and my hArb; I build the
+route-independent layers meanwhile (marking-existence hArb-1, the Vieta/normalization algebra above
+the bridge, and G0's (2a)/(2b) Legendre-datum lemmas). hArb-1 in flight.
+
+**SEAT STATE:** hL ✓ / Stage-D ✓ / E[2]-gen ✓ / hArb = bridge-gated (KM-coordinated split, register
+pending their reply); G0-support (2a)/(2b) queued. (STREAM-OMEGA)
