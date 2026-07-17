@@ -22509,3 +22509,44 @@ GONE; remaining: `endDual_comp_self` :179 (KM [KEY-DEG] dual keystone) + the fiv
 factorization (T-G3d-Niso route in TorsionDivisibility). The new FinrankDegenerate engine is
 dual-use: any degenerate/section-supported fibre-rank computation (e.g. future `deg`-of-constant
 maps, kernel-divisor ranks at sections) lands on it.** (STREAM-GH)
+
+## v10.302 (2026-07-17, coordinator) — ★★★ hLN IS OFF THE HEADLINE (RigidNoeth executed, verified); cheap-path honestly scope-corrected → ROUTE A RULED; T-DEG0 bonus kill (endDeg_mulBy axiom-clean end-to-end)
+
+**Verified at source** (origin 0/0; 4d3317c61 + 13074ec39 ✓). GH's v10.299/300/301 window processed.
+
+**RATIFIED:**
+- **★★★ The fibre-detection Rigid variant is EXECUTED (v10.299).** `RigidNoeth` (EllCategory:182) +
+  `Rigid.rigidNoeth` + `representable_iff_rigidNoeth` (:310, sharing the one engine gate) +
+  `simulSchemeAction_free_of_rigidNoeth` (QuotientProblem:941 — freeness detected on residue-field points,
+  which is what T-W7.7 proves without EGA IV §8). **Verified: hLN appears in NEITHER headliner signature.**
+  The three `.Representable` headliners now gate on: Γ(N) = the engine alone; Γ_H = hH + engine; Γ₁ =
+  hbound + engine. Literal KM 4.4 forms stay as documented corollaries ([T-W7.8-L2-PARKED]). **The owner
+  ruling is fully implemented; the last owner-parked pin is OFF the headline.**
+- **★ The cheap path is honestly SCOPE-CORRECTED (v10.300)** — the v10.297 premise fails at line level:
+  `aut_endo_eq_one` is consumed at general locally-noetherian bases (GammaHMaster:340, Groupoid:140) where
+  [IsIntegral E.E] is false, and the factorization endomorphism lacks the isogeny instances at geometric
+  points (the zero-or-isogeny dichotomy is missing). Correct process: dispatched premise checked, found
+  false, corrected decomposition boarded instead of ground. **ROUTE RULING (coordinator): ROUTE A** — the
+  five EndomorphismDegree general pins discharge by KM 2.6 algebra once KM's `endDual_comp_self` lands;
+  checklist item (5) COLLAPSES INTO item (4) = the [KEY-DEG] dual keystone, KM-owned. Route B
+  (fibre-reduction) is INSURANCE ONLY — nobody builds it unless endDual stalls a full window.
+- **★★ T-DEG0 IS PROVEN (v10.301, bonus).** `mulByHom_zero_finrank` (EndomorphismDegree:184) is real via
+  the NEW general engine `ForMathlib/FinrankDegenerate.lean` (0-sorry: fibre rank vanishes for morphisms
+  factoring through Cartier-type subschemes, NO flatness/finiteness — the [FR-GEN] wall is BREACHED for
+  the degenerate case). **Consequence (verified): `endDeg_mulBy = n²` is AXIOM-CLEAN END-TO-END** (census
+  8→7); its consumer chain de-sorries (endDeg_comp_mulBy_of_isIntegral, KernelBound consumers).
+
+**THE ENDGAME CHECKLIST (updated):** (1) T-H8/T-H9 statements; (2) T-D8-⟸ (KM, in flight); (4)=(5)
+**hH/hbound + [KEY-DEG] = `endDual_comp_self`** (KM — now carries the five general pins via route A;
+NB GH's FinrankDegenerate may serve its fibre-rank needs — CROSS-LINK, don't rebuild); (engine) OMEGA's
+Bootstrap three (hL/hArb/E[2]-gen) + G0's :206. Nothing else. GH-owned items: NONE unblocked (correct).
+
+**DISPATCH DELTA:**
+- **KM (elevated):** T-D8-⟸ FIRST (GH's whole arc auto-cleans on it) → **then `endDual_comp_self` is
+  PROMOTED from the non-critical queue to checklist item (4)** (route A carries hH/hbound + the five
+  generals). Consume GH's `FinrankDegenerate` engine for the fibre-rank side ([DEDUP] — it breached the
+  [FR-GEN] wall). W0 integral arc continues third.
+- **GH → the CLOSER window:** (1) T-H8/T-H9 statement audit (checklist item 1 — what exactly remains in
+  them post-RigidNoeth; board it); (2) YN-side/legacy stragglers sweep (checklist item 6); (3) stand as
+  receipts-closer: the moment KM lands T-D8-⟸, re-print the [GHA3]/[GHA4]/qpd receipts and board the shed.
+- OMEGA/G0: unchanged (mid-window on Bootstrap's three / :206).

@@ -293,3 +293,5 @@ iso-cancellation; (iv) asSection/baseChange coe-work MUST be term-mode (`Eq.tran
 chains) — the `(E.baseChange g).E` defeq trap kills rw/simp matchers (GroupLaw.lean:262 doc).
 
 - [2026-07-16, coordinator, v10.295] ★★ 20 bricks RATIFIED (68 total; T-D8 forward ✓ — GH imports it now; BB-DEGA box registered). DISPATCH: (1) W0 next arc (∏-translate comaximality → D_M=Z_M → integral glue → F3 converse + F4); (2) the T-D8 ⟸-half — ⚠ the route fork (T-D2 dictionary vs étale-reduced) = OMEGA hArb fork; agree ONE route with OMEGA via inbox before building. Board v10.295.
+
+- [2026-07-17, coordinator, v10.302] ★ PRIORITY DELTA: (1) T-D8-⟸ FIRST (GH arc auto-cleans on it); (2) endDual_comp_self PROMOTED to endgame checklist item (4) — route A ruled: it now carries hH/hbound AND the five EndomorphismDegree generals (KM 2.6 algebra). [DEDUP] CROSS-LINK: GH FinrankDegenerate.lean (new, 0-sorry) breached the [FR-GEN] wall (fibre rank of non-finite-flat morphisms, Cartier-factoring case, T-DEG0 proven with it) — consume it for endDual fibre-rank needs, do NOT rebuild. (3) W0 integral arc third. Board v10.302.
