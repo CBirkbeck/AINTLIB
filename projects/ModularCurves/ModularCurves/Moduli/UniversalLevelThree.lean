@@ -154,6 +154,95 @@ theorem e3Rel_map_eq_zero : e3Map R (e3Rel R) = 0 := by
   rw [Ideal.Quotient.eq_zero_iff_mem.mpr
     (Ideal.subset_span (Set.mem_singleton _)), map_zero]
 
+/-! ### Stage-D: functoriality of the `ℰ₃` moduli ring in the coefficient ring -/
+
+section StageD
+
+open MvPolynomial in
+/-- **(Stage D-1)** Functoriality of the flex-locus quotient in the coefficient ring. -/
+noncomputable def e3QuotientMapRing {R R' : CommRingCat.{u}} (f : R ⟶ R') :
+    E3Quotient R →+* E3Quotient R' :=
+  Ideal.Quotient.lift _
+    ((Ideal.Quotient.mk (Ideal.span {e3Rel R'})).comp (MvPolynomial.map f.hom))
+    (by
+      intro a ha
+      rw [Ideal.mem_span_singleton] at ha
+      obtain ⟨c, rfl⟩ := ha
+      rw [RingHom.comp_apply, map_mul]
+      rw [show MvPolynomial.map f.hom (e3Rel R) = e3Rel R' from by
+        simp only [e3Rel, map_sub, map_pow, map_add, MvPolynomial.map_X]]
+      have hz : (Ideal.Quotient.mk (Ideal.span {e3Rel R'})) (e3Rel R') = 0 :=
+        Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.subset_span (Set.mem_singleton _))
+      rw [map_mul]
+      exact mul_eq_zero_of_left hz _)
+
+open MvPolynomial in
+theorem e3QuotientMapRing_mk {R R' : CommRingCat.{u}} (f : R ⟶ R')
+    (a : MvPolynomial (Fin 2) R) :
+    e3QuotientMapRing f (Ideal.Quotient.mk _ a) =
+      Ideal.Quotient.mk _ (MvPolynomial.map f.hom a) :=
+  Ideal.Quotient.lift_mk _ _ _
+
+open MvPolynomial in
+theorem e3QuotientMapRing_delta {R R' : CommRingCat.{u}} (f : R ⟶ R') :
+    e3QuotientMapRing f (e3Delta R) = e3Delta R' := by
+  rw [e3Delta, e3QuotientMapRing_mk]
+  congr 1
+  simp only [e3A₁Poly, e3A₃Poly, map_mul, map_sub, map_pow, map_add, map_neg,
+    map_ofNat, MvPolynomial.map_X, map_one]
+
+/-- **(Stage D-1)** Functoriality of the `ℰ₃` moduli ring in the coefficient ring. -/
+noncomputable def e3ModuliRingMap {R R' : CommRingCat.{u}} (f : R ⟶ R') :
+    E3ModuliRing R →+* E3ModuliRing R' :=
+  IsLocalization.Away.lift (e3Delta R)
+    (g := (algebraMap (E3Quotient R') (E3ModuliRing R')).comp (e3QuotientMapRing f))
+    (by
+      rw [RingHom.comp_apply, e3QuotientMapRing_delta]
+      exact IsLocalization.Away.algebraMap_isUnit (S := E3ModuliRing R') (e3Delta R'))
+
+open MvPolynomial in
+theorem e3ModuliRingMap_algebraMap {R R' : CommRingCat.{u}} (f : R ⟶ R')
+    (a : E3Quotient R) :
+    e3ModuliRingMap f (algebraMap (E3Quotient R) (E3ModuliRing R) a) =
+      algebraMap (E3Quotient R') (E3ModuliRing R') (e3QuotientMapRing f a) := by
+  rw [e3ModuliRingMap, IsLocalization.Away.lift_eq]
+  rfl
+
+open MvPolynomial in
+theorem e3ModuliRingMap_gamma {R R' : CommRingCat.{u}} (f : R ⟶ R') :
+    e3ModuliRingMap f (e3Gamma R) = e3Gamma R' := by
+  rw [e3Gamma, e3ModuliRingMap_algebraMap, e3QuotientMapRing_mk]
+  congr 2
+  exact MvPolynomial.map_X _ _
+
+open MvPolynomial in
+theorem e3ModuliRingMap_beta {R R' : CommRingCat.{u}} (f : R ⟶ R') :
+    e3ModuliRingMap f (e3Beta R) = e3Beta R' := by
+  rw [e3Beta, e3ModuliRingMap_algebraMap, e3QuotientMapRing_mk]
+  congr 2
+  exact MvPolynomial.map_X _ _
+
+/-- **(Stage D-1)** The universal curve is functorial: mapping the coefficients along
+`e3ModuliRingMap` recovers the primed universal curve. -/
+theorem universalE3_ringMap {R R' : CommRingCat.{u}} (f : R ⟶ R') :
+    (universalE3 R).map (e3ModuliRingMap f) = universalE3 R' := by
+  have hγ := e3ModuliRingMap_gamma f
+  have hβ := e3ModuliRingMap_beta f
+  ext
+  · show e3ModuliRingMap f (3 * e3Gamma R - 1) = 3 * e3Gamma R' - 1
+    rw [map_sub, map_mul, map_ofNat, map_one, hγ]
+  · show e3ModuliRingMap f 0 = 0
+    exact map_zero _
+  · show e3ModuliRingMap f (-3 * e3Gamma R ^ 2 - e3Beta R - 3 * e3Beta R * e3Gamma R)
+      = -3 * e3Gamma R' ^ 2 - e3Beta R' - 3 * e3Beta R' * e3Gamma R'
+    simp only [map_sub, map_mul, map_neg, map_ofNat, map_pow, hγ, hβ]
+  · show e3ModuliRingMap f 0 = 0
+    exact map_zero _
+  · show e3ModuliRingMap f 0 = 0
+    exact map_zero _
+
+end StageD
+
 /-- **(B2-fix v10.256)** The universal `Q = (γ, β+γ)` is a `3`-torsion point at the
 coordinate level: `x(Q) = γ` roots the `3`-division cofactor `3x³ + a₁²x² + 3a₁a₃x + 3a₃²`.
 This is now provable — it was *false* pre-B2 on the (now-excluded) `γ = 0` component. The
