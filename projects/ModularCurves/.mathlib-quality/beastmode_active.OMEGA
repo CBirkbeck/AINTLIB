@@ -1,1 +1,1 @@
-FOCUS: OMEGA v10.307 — hArb-1 core PROVEN (eq_affineSection_of_zChart_factor); next: MarksAt-existence wrapper (V-restriction + fibrewise-nonzero => in-chart)
+FOCUS: OMEGA v10.307 — hArb-1 DONE (marksAt_of_forall_basicOpen); next hArb-2: fibrewise-nonzero => Z-chart membership
