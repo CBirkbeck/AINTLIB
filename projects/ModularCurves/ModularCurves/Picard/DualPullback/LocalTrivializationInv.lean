@@ -72,12 +72,16 @@ theorem dualRestrictIso_inv_app_applyT
   have h := ConcreteCategory.congr_hom hcomp beta
   change ((dualRestrictIso M j).hom.val.app W)
       (((dualRestrictIso M j).inv.val.app W) beta) = beta at h
-  rw [dualRestrictIso_hom_app_applyT] at h
+  have hformula := dualRestrictIso_hom_app_applyT M j W
+    (((dualRestrictIso M j).inv.val.app W) beta)
+  have hlocalInv : localDualRestrict M j W.unop
+      (((dualRestrictIso M j).inv.val.app W) beta) = beta :=
+    Eq.trans hformula.symm h
   have hsections : localDualRestrict M j W.unop
       (localDualSectionsEquiv M j W.unop beta) = beta := by
     apply (localDualSectionsEquiv M j W.unop).injective
     rw [localDualSectionsEquiv_localDualRestrict]
-  exact h.trans hsections.symm
+  exact Eq.trans hlocalInv hsections.symm
 
 end AlgebraicGeometry.Scheme.Modules
 
