@@ -22550,3 +22550,51 @@ Bootstrap three (hL/hArb/E[2]-gen) + G0's :206. Nothing else. GH-owned items: NO
   them post-RigidNoeth; board it); (2) YN-side/legacy stragglers sweep (checklist item 6); (3) stand as
   receipts-closer: the moment KM lands T-D8-⟸, re-print the [GHA3]/[GHA4]/qpd receipts and board the shed.
 - OMEGA/G0: unchanged (mid-window on Bootstrap's three / :206).
+
+---
+
+## v10.303-GH (2026-07-17, STREAM-GH) — ★★ THE CLOSER AUDIT: T-H8/T-H9 reduced to EXACTLY the boxes ([T-H8-CLOSURE] BUILT, b9ad0e325) + stragglers classified
+
+**Item (1) — T-H8/T-H9 conjunct-by-conjunct (checklist item 1). THE STRUCTURAL FACT: both `Rigid`
+conjuncts are FREE RIDERS** — `rigid_of_representable` (PROVEN, EllCategory:206) derives them from the
+`Representable` conjuncts. **The [T-W7.8-L2-PARKED] unrestricted-rigidity wall does NOT touch T-H8/T-H9.**
+
+Rather than board prose, I BUILT the reduction — NEW `Moduli/GammaHClosure.lean` (downstream of
+GammaHMaster; the GammaH:1077/:1090 ⧗KM statements sit upstream and cannot import it — the closure
+theorems are the library forms of record):
+- `ModuliProblem.representable_of_iso` — **AXIOM-CLEAN** (mathlib `RepresentableBy.ofIso`).
+- `gammaFullDrinfeldNaiveIso : Drinfeld ≅ naive` — the T-D8 dictionary as a functor iso (naturality
+  DEFINITIONAL: both problems' maps are the same `pullSection` pairs; objectwise
+  `Equiv.subtypeEquiv` via `isFullLevel_iff_naive`). Trace: T-D8-⟸ box only.
+- `gammaFullNaive_rigidNoeth` — the naive problem is noetherian-locally rigid (detection +
+  `gammaFullNaive_fix_absurd`; no hLN). Trace: KM 2.7.2 keystone boxes only.
+- `gammaFullNaive_affineOverEll` — [GHA4]'s relRepData is affine (finite ⟹ affine). Trace: T-D8.
+- **`gammaFullDrinfeld_rigid_and_representable` = THE T-H8 CONTENT**, receipts-verified gated on
+  EXACTLY {T-D8-⟸ (KM, in flight), KM 2.7.2 keystones (item 4), the shared engine}. NOTHING else.
+- **`gammaOneDrinfeld_rigid_and_representable_of_hbound` = THE T-H9 CONTENT** at the register box:
+  {hbound ([KEY-DEG]), engine}. NOTHING else.
+When KM lands T-D8-⟸: the iso + affineOverEll auto-clean ⟹ T-H8 = keystones + engine only.
+
+**Item (2) — stragglers sweep (checklist item 6), classified:**
+- **Representability:646 (T-E9)**: the `Rigid ∧ Representable` half is NOW my closure-chain content
+  (free-rider + naive-representable); the smooth-affine conjunct = ENGINE-OUTPUT refinement (KM 4.7.0
+  `𝕸` affine + smooth) — YN/OMEGA-owned. HEADLINE-ADJACENT.
+- **Representability:631 (T-E8, Γ₁-naive)**: same shape — YN-owned. HEADLINE-ADJACENT.
+- **GammaH:483 (T-H4 general-H naive relRep)**: ⊥-case ALREADY DISCHARGED ([GHC2], GammaHRep:3592);
+  general H = stream-Q future. ARCHIVE-tier.
+- **GammaH:496 (T-H5 rigid-iff-torsion-free)**: two-directional characterization (elliptic points/CM
+  arithmetic) — post-headline enrichment. ARCHIVE-tier.
+- **GammaH:508 (T-H6) — ⚠ SUSPECT-B2 FLAG for owner review**: it asserts Rigid → Representable for
+  the naive ORBIT-PRESHEAF `gammaHNaiveProblem R N H`. Per [GHC3] the orbit presheaf is NOT iso to the
+  sheaf quotient for `H ≠ ⊥` (comparison bijective only over k̄) — and representable presheaves are
+  fppf-sheaves, so if the orbit presheaf fails the sheaf condition at some rigid `H`, T-H6 as stated is
+  FALSE there. Recommend: restate at `qpd.prob` (where `gammaH_representable` already lives) or add the
+  sheaf hypothesis. NOT B2-logged unilaterally (statement-protected; owner call).
+- **DrinfeldRepresentability: ZERO code sorries** — the v10.297 census "DrinfeldRep×1" counted the
+  docstring word "sorry-free". STALE ENTRY, corrected.
+- GammaHRep:720 = [GH-DESC-GAP] parked marker (consumed by nothing) ✓ archive. EllCategory:279 +
+  `representable_iff_rigidNoeth`-⇐ = THE ENGINE (OMEGA, tracked).
+
+**Item (3) — receipts-closer ARMED**: KM claimed v10.302 (11cb26955) + posted the OMEGA fork ruling
+(e54129114); on their T-D8-⟸ landing I re-print [GHA3]/[GHA4]/qpd + the closure receipts and board the
+box-shed. (STREAM-GH)
