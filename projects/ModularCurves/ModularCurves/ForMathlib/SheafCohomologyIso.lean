@@ -21,7 +21,7 @@ variable {C : Type u} [Category.{v} C] [Abelian C] [HasExt.{v} C]
 
 private noncomputable def congrIso {X X' Y Y' : C}
     (eX : X ≅ X') (eY : Y ≅ Y') (n : ℕ) :
-    Ext X Y n ≃+ Ext X' Y' n where
+    Ext X Y n ≃ Ext X' Y' n where
   toFun a := (mk₀ eX.inv).comp (a.comp (mk₀ eY.hom) (add_zero n)) (zero_add n)
   invFun a := (mk₀ eX.hom).comp (a.comp (mk₀ eY.inv) (add_zero n)) (zero_add n)
   left_inv a := by
@@ -34,7 +34,6 @@ private noncomputable def congrIso {X X' Y Y' : C}
     rw [comp_assoc_of_third_deg_zero, comp_assoc_of_second_deg_zero,
       mk₀_comp_mk₀, eY.inv_hom_id, comp_mk₀_id,
       mk₀_comp_mk₀_assoc, eX.inv_hom_id, mk₀_id_comp]
-  map_add' a b := by simp
 
 end CategoryTheory.Abelian.Ext
 
@@ -162,11 +161,16 @@ theorem subsingleton_H_of_iso {X Y : TopCat.{u}} (e : X ≅ Y)
     (AddCommGrpCat.of (ULift ℤ))
   let cY := (constantSheaf (Opens.grothendieckTopology Y) AddCommGrpCat).obj
     (AddCommGrpCat.of (ULift ℤ))
+  letI : AddCommGroup (CategoryTheory.Abelian.Ext cX F n) :=
+    CategoryTheory.Abelian.Ext.instAddCommGroup
+  letI : AddCommGroup (CategoryTheory.Abelian.Ext
+      (E.functor.obj cX) (E.functor.obj F) n) :=
+    CategoryTheory.Abelian.Ext.instAddCommGroup
   let mapExt : CategoryTheory.Abelian.Ext cX F n ≃+
       CategoryTheory.Abelian.Ext (E.functor.obj cX) (E.functor.obj F) n :=
     AddEquiv.ofBijective (E.functor.mapExtAddHom cX F n)
       (E.functor.mapExt_bijective_of_preservesInjectiveObjects cX F n)
-  let hExt := mapExt.trans (CategoryTheory.Abelian.Ext.congrIso
+  let hExt := mapExt.toEquiv.trans (CategoryTheory.Abelian.Ext.congrIso
     (X := E.functor.obj cX) (X' := cY) (Y := E.functor.obj F) (Y' := G)
     (equivOfIsoConstant e (AddCommGrpCat.of (ULift ℤ)))
     ((equivOfIsoIsoPushforward e).app F ≪≫ hFG) n)
