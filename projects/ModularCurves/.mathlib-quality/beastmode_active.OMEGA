@@ -1,1 +1,0 @@
-FOCUS: OMEGA RING-DBL — [A][B][C][D][E] DONE (universal identity axiom-clean!); NOW [F]: classifying transport (psi0 := eval2Hom![a1,a2,a3,a4,p,q]; Away.lift; sectionMapHom + sectionMapHom_affineSection + map_zsmul + section-congr) => two_zsmul_affineSection general; then hdbl-derivation (+ KM negation + injectivity) => bridgeP/Q => Bootstrap:95 close => hArb TERMINAL.
