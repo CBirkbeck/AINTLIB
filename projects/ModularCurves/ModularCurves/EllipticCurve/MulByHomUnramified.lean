@@ -90,8 +90,7 @@ theorem MulByHom.formallyUnramified_of_torsionπ (N : ℕ)
   intro R S' φ hφ hφ2 g₁ g₂ hthick hf
   -- both lifts share a base `s`
   have hbase : g₁ ≫ E.π = g₂ ≫ E.π := by
-    have h := congrArg (fun m => m ≫ E.π) hf
-    simpa only [Category.assoc, E.mulByHom_π] using h
+    simpa only [Category.assoc, E.mulByHom_π] using congrArg (fun m => m ≫ E.π) hf
   set s : Spec R ⟶ S := g₁ ≫ E.π with hs
   let P₁ : E.Point s := ⟨g₁, hs.symm⟩
   let P₂ : E.Point s := ⟨g₂, hbase.symm.trans hs.symm⟩
