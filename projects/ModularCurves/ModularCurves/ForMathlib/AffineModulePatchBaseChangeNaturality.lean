@@ -20,10 +20,6 @@ private theorem two_comp_apply {R : Type u} [CommRing R]
     (a ≫ b) x = b (a x) := by
   rfl
 
-private theorem eq_of_eq_same {A : Sort u} {a b c : A}
-    (ha : a = c) (hb : b = c) : a = b :=
-  ha.trans hb.symm
-
 private theorem extendScalars_hom_ext
     {R S : Type u} [CommRing R] [CommRing S] (f : R →+* S)
     {M : ModuleCat.{u} R} {N : ModuleCat.{u} S}
@@ -48,7 +44,32 @@ theorem affineModuleSectionsBaseChangeIso_naturality
             (homOfLE ((pullback.fst f t).preimage_mono hVU)).op := by
   apply extendScalars_hom_ext t.appTop.hom
   intro m
-  rw [two_comp_apply, two_comp_apply]
+  have hleftApply :
+      (((ModuleCat.extendScalars t.appTop.hom).map
+            ((baseModulePresheaf f M).map (homOfLE hVU).op) ≫
+          (affineModuleSectionsBaseChangeIso f t M V hV).hom)
+            ((1 : Γ(T, (⊤ : T.Opens)))
+              ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] m)) =
+        (affineModuleSectionsBaseChangeIso f t M V hV).hom
+          ((ModuleCat.extendScalars t.appTop.hom).map
+            ((baseModulePresheaf f M).map (homOfLE hVU).op)
+              ((1 : Γ(T, (⊤ : T.Opens)))
+                ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] m)) :=
+    two_comp_apply _ _ _
+  have hrightApply :
+      (((affineModuleSectionsBaseChangeIso f t M U hU).hom ≫
+          (baseModulePresheaf (pullback.snd f t)
+            ((pullback (pullback.fst f t)).obj M)).map
+              (homOfLE ((pullback.fst f t).preimage_mono hVU)).op)
+            ((1 : Γ(T, (⊤ : T.Opens)))
+              ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] m)) =
+        (baseModulePresheaf (pullback.snd f t)
+          ((pullback (pullback.fst f t)).obj M)).map
+            (homOfLE ((pullback.fst f t).preimage_mono hVU)).op
+          ((affineModuleSectionsBaseChangeIso f t M U hU).hom
+            ((1 : Γ(T, (⊤ : T.Opens)))
+              ⊗ₜ[Γ(S, (⊤ : S.Opens)), t.appTop.hom] m)) :=
+    two_comp_apply _ _ _
   have hmap :
       (ModuleCat.extendScalars t.appTop.hom).map
           ((baseModulePresheaf f M).map (homOfLE hVU).op)
@@ -101,6 +122,7 @@ theorem affineModuleSectionsBaseChangeIso_naturality
   have hleftGenerator := hmapLift.trans hgeneratorV
   have hleftNatural := hleftGenerator.trans hunitNaturality
   have hleftTarget := hleftNatural.trans htarget
-  exact eq_of_eq_same hleftTarget hgeneratorUMap
+  exact hleftApply.trans <| hleftTarget.trans <|
+    hgeneratorUMap.symm.trans hrightApply.symm
 
 end AlgebraicGeometry.Scheme.Modules
