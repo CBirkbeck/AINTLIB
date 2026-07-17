@@ -8,6 +8,7 @@ import Mathlib.LinearAlgebra.TensorProduct.Tower
 import Mathlib.RingTheory.Flat.EquationalCriterion
 import Mathlib.RingTheory.Flat.Equalizer
 import Mathlib.RingTheory.LocalRing.Module
+import Mathlib.RingTheory.Spectrum.Prime.FreeLocus
 import Mathlib.RingTheory.Support
 
 /-!
@@ -48,6 +49,9 @@ statement here is about such a map, in the maximal module-theoretic generality.
   finite projective modules that is exact over every field fibre is exact over the base.
 * `kerBaseChangeComparison_bijective_of_bounded_forall_field_baseChange_exact`: its
   degree-zero kernel is finite projective and commutes with arbitrary algebra base change.
+* `Module.rankAtStalk_ker_eq_of_bounded_forall_field_baseChange_exact`: if the degree-zero
+  kernels on residue fibres all have dimension `r`, then the degree-zero kernel over the base
+  has constant rank `r`.
 * `LinearMap.exists_away_finiteProjective_ker_of_residueField_surjective`: the local
   finite-projective kernel and arbitrary further-base-change endpoint obtained by
   combining the preceding principal-neighbourhood theorem with a two-term complex.
@@ -616,6 +620,33 @@ theorem kerBaseChangeComparison_bijective_of_bounded_forall_field_baseChange_exa
     Function.Bijective (kerBaseChangeComparison A (d 0)) :=
   kerBaseChangeComparison_bijective_of_bounded_exact A M d N
     (LinearMap.exact_of_bounded_forall_field_baseChange_exact M d N hcomp hfield)
+
+/-- The degree-zero kernel of a bounded finite-projective complex has constant rank `r`
+when its base change to every residue field has kernel dimension `r`. -/
+theorem Module.rankAtStalk_ker_eq_of_bounded_forall_field_baseChange_exact
+    (N : ℕ) [Subsingleton (M (N + 1))]
+    (hcomp : ∀ n, d (n + 1) ∘ₗ d n = 0)
+    (hfield : ∀ n, n < N → ∀ (K : Type u) [Field K] [Algebra R K],
+      Function.Exact ((d n).baseChange K) ((d (n + 1)).baseChange K))
+    (r : ℕ)
+    (hrank : ∀ p : PrimeSpectrum R,
+      Module.finrank p.asIdeal.ResidueField
+        (LinearMap.ker ((d 0).baseChange p.asIdeal.ResidueField)) = r) :
+    Module.rankAtStalk (R := R) (LinearMap.ker (d 0)) = fun _ ↦ r := by
+  letI : Module.Finite R (LinearMap.ker (d 0)) :=
+    Module.Finite.ker_of_bounded_forall_field_baseChange_exact M d N hcomp hfield
+  letI : Module.Projective R (LinearMap.ker (d 0)) :=
+    Module.Projective.ker_of_bounded_forall_field_baseChange_exact M d N hcomp hfield
+  letI : Module.Flat R (LinearMap.ker (d 0)) := inferInstance
+  funext p
+  rw [Module.rankAtStalk_eq]
+  let e : p.asIdeal.Fiber (LinearMap.ker (d 0)) ≃ₗ[p.asIdeal.ResidueField]
+      LinearMap.ker ((d 0).baseChange p.asIdeal.ResidueField) :=
+    LinearEquiv.ofBijective
+      (kerBaseChangeComparison p.asIdeal.ResidueField (d 0))
+      (kerBaseChangeComparison_bijective_of_bounded_forall_field_baseChange_exact
+        M d p.asIdeal.ResidueField N hcomp hfield)
+  exact e.finrank_eq.trans (hrank p)
 
 end BoundedFiniteProjectiveComplex
 
