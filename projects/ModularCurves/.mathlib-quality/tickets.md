@@ -23229,3 +23229,28 @@ headline receipts + the cone-residual census. Any seat can fire it.
 
 **INDEPENDENT WORK EXHAUSTED** (charter report point 1). Armed-and-waiting is now legitimate: the
 next GH action is the receipts fire on any of {K2-landed, hArb-CLOSED, :206-CLOSED}. (STREAM-GH)
+
+## v10.317-KM (2026-07-17, STREAM-KM, CHARTER-K/K2) — endDual_comp_self RIGOROUSLY DECOMPOSED + a structural finding for the coordinator
+
+**K1 handed off clean** (RING-DBL is OMEGA's; my `ThreeTorsionRingCertificate.lean` +
+`NegModelAffineSection.lean` stand axiom-clean for OMEGA to consume). **K2 = full focus.**
+
+**endDual_comp_self (`f² − [tr f]f + [deg f] = 0`, KM 2.6 Cayley–Hamilton) decomposed** (5-leaf
+fibre-CH + rigidity route, banked with exact anchors in decomposition-km-integral.md):
+- L1 fibre bridge (baseChange f → geometric-point endo; OMEGA Stage-B dictionary),
+- L2 fibre CH (HasseWeil `DualIsogeny` `α_dual∘α=[deg α]` — IMPORT),
+- L3 dual-match (`(endDual f)_κ = f̂_κ` fibrewise via `h_sum_trace` + trace-fibre bridge),
+- L4 degree-fibre (`endDeg f = deg f_κ`; `isLocallyConstant_finrank` + `finrank_eq_finrank`),
+- **L5 rigidity lift (THE crux)**: pointed S-endos of E/S fibrewise-equal ⟹ equal.
+
+**★ STRUCTURAL FINDING (owner-relevant):** L5's arbitrary-base rigidity is the SAME spreading-out
+flavor as the **owner-PARKED T-W7.8** — `RigiditySpreadingOut.isMonHom_of_one_comp_eq'_of_finitePresentation`
+is itself `sorry` (:94). So **endDual_comp_self's crux reintroduces the T-W7.8 dependency the owner
+parked for the headline** (RigidNoeth repointed the .Representable headliners OFF hLN/T-W7.8, but that
+does NOT cover endDual's L5). Over REDUCED bases L5 is tractable NOW (`hom_ext_of_forall_specPoint`,
+the `nsmul_section_eq_zero`-pattern, no T-W7.8); the NON-reduced case needs T-W7.8-flavor spreading-out.
+**OWNER DECISION NEEDED:** do K2's downstream consumers (hH/hbound + the T-H9 capstone) require endDual
+over NON-reduced bases, or does a reduced-base endDual suffice? If reduced suffices, K2 closes without
+un-parking T-W7.8 (I build L5-reduced + L1–L4). If non-reduced is required, T-W7.8 must be un-parked
+(coordinator/GH), and K2 gates on it. **NEXT (KM):** build L1–L4 + L5-reduced (the reduced-base endDual),
+which is the maximal correct K2 progress independent of the T-W7.8 ruling.
