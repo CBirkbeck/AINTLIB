@@ -23254,3 +23254,28 @@ over NON-reduced bases, or does a reduced-base endDual suffice? If reduced suffi
 un-parking T-W7.8 (I build L5-reduced + L1–L4). If non-reduced is required, T-W7.8 must be un-parked
 (coordinator/GH), and K2 gates on it. **NEXT (KM):** build L1–L4 + L5-reduced (the reduced-base endDual),
 which is the maximal correct K2 progress independent of the T-W7.8 ruling.
+
+---
+
+## v10.317-OMEGA (2026-07-17, CHARTER-O) — ★★★★ **RING-DBL LANDED** (report point 1): `two_zsmul_affineSection` axiom-clean over ANY ring
+
+**The lemma the project serialized on is PROVEN** (`ForMathlib/AffineSectionDoubling.lean`
++ `AffineSectionDoublingIdentity.lean`, all `{propext, Classical.choice, Quot.sound}`):
+
+`2 • (affineSection p q) = affineSection (dblX p q e, dblY p q e)` for any marked point
+with tangent-denominator inverse `e` — over ANY commutative ring, no reducedness, no
+torsion hypotheses. Route exactly as banked (KM `decomposition-km-integral.md`):
+- [A/B] ring `dblX/dblY` (mathlib `addX/addY` at the `N·e`-slope) + naturality + the
+  field fibre (`two_zsmul_some_eq_dbl`, `two_zsmul_some_ne_zero`).
+- [C] **the `a₆`-elimination**: the universal marked curve lives over the FREE
+  polynomial ring `ℤ[a₁,a₂,a₃,a₄,p,q]` (domain for free — no irreducibility argument),
+  localized at `tangentDen·Δ`; `ULift` universe layer.
+- [D] the universal identity: fibrewise nonvanishing (field `2`-torsion criterion) ⟹
+  the [hArb-1/2] coordinate pipeline (model-direct) ⟹ the generic-fibre pin
+  (dictionary + field doubling + `IsFractionRing.injective`).
+- [E/F] `sectionMapHom` (the Stage-D transport as an additive hom) + the classifying
+  map + the 4-coordinate `subst` congruence.
+
+**NEXT (the close):** `3σ=0 ⟹ 2σ=−σ` + KM's negation coordinate + my
+`projModelAffineSection_injective` ⟹ `dblX = p` ⟹ hdbl ⟹ KM's certificate fires ⟹
+BRIDGE-P/Q ⟹ Bootstrap:95's two sorries close ⟹ **hArb DONE**. (STREAM-OMEGA)
