@@ -1705,6 +1705,16 @@ section Unique
 
 variable {R} (W : WeierstrassCurve R) [W.IsElliptic]
 
+omit [W.IsElliptic] in
+/-- The structure map of the projective model followed by the underlying morphism of the
+unit section is `π ≫ zero`: the model's unit normalisation (`oneOver_left`) transported
+through the structure map `(modelOver W).hom = projModelπ W`. -/
+private theorem modelOver_hom_comp_oneOver_left :
+    (modelOver W).hom ≫ (oneOver W).left = projModelπ W ≫ projModelZero W := by
+  rw [oneOver_left]
+  show projModelπ W ≫ 𝟙 _ ≫ projModelZero W = _
+  rw [Category.id_comp]
+
 /-- **([U-MODEL], K2)** Any group structure on the projective model with the model zero
 section as unit has the T-G4 multiplication — over an ARBITRARY ring. -/
 theorem modelGrpObj_unique (G : GrpObj (modelOver W))
@@ -1760,11 +1770,8 @@ theorem modelGrpObj_unique (G : GrpObj (modelOver W))
     -- the model-side η evaluated
     have hη : (modelOver W).hom ≫
         (η[modelOver W] : 𝟙_ (Over (Spec (CommRingCat.of R))) ⟶ modelOver W).left =
-        projModelπ W ≫ projModelZero W := by
-      show (modelOver W).hom ≫ (oneOver W).left = _
-      rw [oneOver_left]
-      show projModelπ W ≫ 𝟙 _ ≫ projModelZero W = _
-      rw [Category.id_comp]
+        projModelπ W ≫ projModelZero W :=
+      modelOver_hom_comp_oneOver_left W
     -- the cone-leg structure facts
     have hw : (bcCone W (projModelπ (wZero W))).π.app T ≫
         ((Over.pullback (projModelπ (wZero W))).obj
@@ -1831,11 +1838,8 @@ theorem modelGrpObj_unique (G : GrpObj (modelOver W))
       (bcCone W (projModelπ (wZero W))).π.app T ≫ v := by
     have hη : (modelOver W).hom ≫
         (η[modelOver W] : 𝟙_ (Over (Spec (CommRingCat.of R))) ⟶ modelOver W).left =
-        projModelπ W ≫ projModelZero W := by
-      show (modelOver W).hom ≫ (oneOver W).left = _
-      rw [oneOver_left]
-      show projModelπ W ≫ 𝟙 _ ≫ projModelZero W = _
-      rw [Category.id_comp]
+        projModelπ W ≫ projModelZero W :=
+      modelOver_hom_comp_oneOver_left W
     have hw : (bcCone W (projModelπ (wZero W))).π.app T ≫
         ((Over.pullback (projModelπ (wZero W))).obj
           ((Over.post (X := wStageOp W) (fgSys.specDiagram R)).obj T)).hom =
