@@ -155,7 +155,8 @@ generates exactly that power: `(D'.z) = 𝔞₀ᵏ`.
 
 This is the **sharpened** form of `CaseIIRealAnchorDatumAssembly37`: the genuine content is the
 existence of a *real Fermat datum whose `z`-ideal is the anchor power*, with the spurious exact
-equality `D'.z = w` discharged by the unit-rescaling `caseII_realCaseIIData37_rescale_z`.  It carries
+equality `D'.z = w` discharged by the unit-rescaling `caseII_realCaseIIData37_rescale_z`.
+It carries
 the doubling obstruction (the producer's `ξ₁`-equation sits at the doubled measure `λ^{2m−p}`,
 incompatible with the linear `RealCaseIIData37` measure `37·(m'+1)`; see the file header).  A
 `def … : Prop` (**not** an axiom), certified non-vacuous below. -/
@@ -214,7 +215,8 @@ not an artefact of weak packaging. -/
 
 /-- **[FLT37-CASEII-LAMBDA-CONTENT-MOD-P] The `(ζ−1)`-content of a `RealCaseIIData37` equation is a
 multiple of `37`.**  For any real Case-II datum `D`, the Fermat sum `D.x³⁷ + D.y³⁷` is divisible by
-the `37`-fold power `(ζ−1)^{37·(m+1)}` (the `(ζ−1)`-content is *exactly* `37·(m+1)`, since `ε, z` are
+the `37`-fold power `(ζ−1)^{37·(m+1)}` (the `(ζ−1)`-content is *exactly* `37·(m+1)`,
+since `ε, z` are
 `𝔭`-units, but divisibility by the `37`-multiple suffices to expose the measure constraint).
 
 This is the soundness certificate for the doubling obstruction: any datum re-entering the descent
@@ -260,11 +262,13 @@ theorem caseIIRealAnchorDatumIdeal37_concl_nonvacuous
 /-- **FLT37 via the sharpened ideal residual `CaseIIRealAnchorDatumIdeal37`.**
 
 `FermatLastTheoremFor 37` from the **ideal-form** residual `CaseIIRealAnchorDatumIdeal37`
-(a real datum with `(D'.z) = 𝔞₀ᵏ`), Assumption II (`WashingtonCaseIIExactQuotientUnitPower37Source`),
+(a real datum with `(D'.z) = 𝔞₀ᵏ`),
+Assumption II (`WashingtonCaseIIExactQuotientUnitPower37Source`),
 and the carried second-order input `NoSecondOrderIrregularPair 37 32`.
 
 Composes the **proven** reduction `caseIIRealAnchorDatumAssembly37_of_ideal` (the unit-rescaling
-normalisation) with the existing `fermatLastTheoremFor_thirtyseven_of_realAnchorDatumAssembly`.  This
+normalisation) with the existing `fermatLastTheoremFor_thirtyseven_of_realAnchorDatumAssembly`.
+This
 is the cleanest sound statement of the FLT37 Case-II endpoint: everything else (II1, the terminal
 core, the support arithmetic, the conjugate-norm reality `caseII_anchorPow_conjNorm_real_span`, the
 anchor-square ideal, the unit-rescaling, and Case-I) is proven; the single residual is the
