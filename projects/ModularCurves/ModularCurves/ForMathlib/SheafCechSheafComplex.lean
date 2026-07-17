@@ -64,8 +64,9 @@ theorem cechComplex_d (n : ℕ) :
     (cechComplex F U).d n (n + 1) = cechDifferential F U n := by
   change ((FormalCoproduct.cochainComplexFunctor
     (FormalCoproduct.mk _ U).cech).obj (cechFactorPresheaf F)).d n (n + 1) = _
-  rw [FormalCoproduct.cochainComplexFunctor_obj_d, CochainComplex.of_d,
-    cechDifferential]
+  rw [FormalCoproduct.cochainComplexFunctor_obj_d]
+  refine (CochainComplex.of_d _ _ n).trans ?_
+  rw [AlgebraicTopology.AlternatingCofaceMapComplex.objD, cechDifferential]
   apply Finset.sum_congr rfl
   intro k _
   exact congrArg (fun f => (-1 : ℤ) ^ (k : ℕ) • f)
