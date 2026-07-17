@@ -239,7 +239,113 @@ theorem eq_of_le_of_finrank_eq {C S : Scheme.{u}} (π : C ⟶ S)
     haveI hMprojA : Module.Projective ↑Γ(U.1, ⊤)
         ↑Γ(Scheme.IdealSheafData.inclusion hle ⁻¹ᵁ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1), ⊤) :=
       Module.Flat.projective_of_finitePresentation
-    sorry
+    -- Spec-side instances for the isoSpec squares
+    haveI hSpFinB : IsFinite (Spec.map (((J.subschemeι ≫ π) ∣_ U.1)).appTop) :=
+      (IsFinite.SpecMap_iff _).mpr hfinB
+    haveI hSpFlatB : Flat (Spec.map (((J.subschemeι ≫ π) ∣_ U.1)).appTop) :=
+      Flat.SpecMap_iff.mpr hflatB
+    haveI hSpFinA : IsFinite (Spec.map (((Scheme.IdealSheafData.inclusion hle
+        ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) ≫ ((J.subschemeι ≫ π) ∣_ U.1))).appTop) :=
+      (IsFinite.SpecMap_iff _).mpr hfinA
+    haveI hSpFlatA : Flat (Spec.map (((Scheme.IdealSheafData.inclusion hle
+        ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) ≫ ((J.subschemeι ≫ π) ∣_ U.1))).appTop) :=
+      Flat.SpecMap_iff.mpr hflatA
+    -- instances on the unrestricted composite
+    haveI hIfinG : IsFinite (Scheme.IdealSheafData.inclusion hle ≫ (J.subschemeι ≫ π)) := by
+      rw [hcompres]
+      infer_instance
+    haveI hIflatG : Flat (Scheme.IdealSheafData.inclusion hle ≫ (J.subschemeι ≫ π)) := by
+      rw [hcompres]
+      infer_instance
+    -- the fibre-rank equality of the two Γ-modules
+    have hrkeq : Module.rankAtStalk (R := ↑Γ(U.1, ⊤))
+        ↑Γ(Scheme.IdealSheafData.inclusion hle ⁻¹ᵁ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1), ⊤)
+        = Module.rankAtStalk (R := ↑Γ(U.1, ⊤)) ↑Γ((J.subschemeι ≫ π) ⁻¹ᵁ U.1, ⊤) := by
+      funext p
+      set u := ((U.1 : Scheme).isoSpec.inv).base p with hu
+      have hup : ((U.1 : Scheme).isoSpec.hom).base u = p := by
+        rw [hu]
+        have h0 := Scheme.Hom.comp_apply ((U.1 : Scheme).isoSpec.inv)
+          ((U.1 : Scheme).isoSpec.hom) p
+        rw [Iso.inv_hom_id] at h0
+        exact h0.symm
+      -- B-side chain
+      have hsqB : IsPullback (((J.subschemeι ≫ π) ⁻¹ᵁ U.1 : Scheme.Opens _) :
+          Scheme).isoSpec.hom ((J.subschemeι ≫ π) ∣_ U.1)
+          (Spec.map (((J.subschemeι ≫ π) ∣_ U.1)).appTop) ((U.1 : Scheme)).isoSpec.hom :=
+        IsPullback.of_horiz_isIso ⟨Scheme.isoSpec_hom_naturality _⟩
+      have hB : Module.rankAtStalk (R := ↑Γ(U.1, ⊤))
+          ↑Γ((J.subschemeι ≫ π) ⁻¹ᵁ U.1, ⊤) p
+          = ((J.subschemeι ≫ π) ∣_ U.1).finrank u := by
+        have h1 : Module.rankAtStalk (R := ↑Γ(U.1, ⊤))
+            ↑Γ((J.subschemeι ≫ π) ⁻¹ᵁ U.1, ⊤) p
+            = ((((J.subschemeι ≫ π) ∣_ U.1)).appTop).hom.finrank p := rfl
+        have h2 := congrFun (Scheme.Hom.finrank_SpecMap_eq_finrank hfinB hflatB) p
+        have h3 := Scheme.Hom.finrank_of_isPullback _ _ _ _ hsqB u
+        rw [h1, ← h2, ← hup]
+        exact h3.symm
+      have hBres : ((J.subschemeι ≫ π) ∣_ U.1).finrank u
+          = (J.subschemeι ≫ π).finrank (U.1.ι.base u) :=
+        Scheme.Hom.finrank_of_isPullback _ _ _ _
+          (isPullback_morphismRestrict (J.subschemeι ≫ π) U.1).flip u
+      -- A-side chain
+      have hsqA : IsPullback ((Scheme.IdealSheafData.inclusion hle
+            ⁻¹ᵁ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1) : Scheme.Opens _) : Scheme).isoSpec.hom
+          ((Scheme.IdealSheafData.inclusion hle
+            ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) ≫ ((J.subschemeι ≫ π) ∣_ U.1))
+          (Spec.map (((Scheme.IdealSheafData.inclusion hle
+            ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) ≫ ((J.subschemeι ≫ π) ∣_ U.1))).appTop)
+          ((U.1 : Scheme)).isoSpec.hom :=
+        IsPullback.of_horiz_isIso ⟨Scheme.isoSpec_hom_naturality _⟩
+      have hA : Module.rankAtStalk (R := ↑Γ(U.1, ⊤))
+          ↑Γ(Scheme.IdealSheafData.inclusion hle ⁻¹ᵁ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1), ⊤) p
+          = ((Scheme.IdealSheafData.inclusion hle
+            ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) ≫ ((J.subschemeι ≫ π) ∣_ U.1)).finrank u := by
+        have h1 : Module.rankAtStalk (R := ↑Γ(U.1, ⊤))
+            ↑Γ(Scheme.IdealSheafData.inclusion hle ⁻¹ᵁ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1), ⊤) p
+            = (((Scheme.IdealSheafData.inclusion hle
+              ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) ≫ ((J.subschemeι ≫ π) ∣_ U.1)).appTop).hom.finrank
+                p := rfl
+        have h2 := congrFun (Scheme.Hom.finrank_SpecMap_eq_finrank hfinA hflatA) p
+        have h3 := Scheme.Hom.finrank_of_isPullback _ _ _ _ hsqA u
+        rw [h1, ← h2, ← hup]
+        exact h3.symm
+      have hAres : ((Scheme.IdealSheafData.inclusion hle
+            ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) ≫ ((J.subschemeι ≫ π) ∣_ U.1)).finrank u
+          = (I.subschemeι ≫ π).finrank (U.1.ι.base u) := by
+        have h4 : ((Scheme.IdealSheafData.inclusion hle
+              ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)) ≫ ((J.subschemeι ≫ π) ∣_ U.1)).finrank u
+            = ((Scheme.IdealSheafData.inclusion hle ≫ (J.subschemeι ≫ π)) ∣_ U.1).finrank u := by
+          conv_rhs => rw [morphismRestrict_comp]
+          rfl
+        have h5 : ((Scheme.IdealSheafData.inclusion hle ≫ (J.subschemeι ≫ π)) ∣_ U.1).finrank u
+            = (Scheme.IdealSheafData.inclusion hle ≫ (J.subschemeι ≫ π)).finrank
+                (U.1.ι.base u) :=
+          Scheme.Hom.finrank_of_isPullback _ _ _ _
+            (isPullback_morphismRestrict
+              (Scheme.IdealSheafData.inclusion hle ≫ (J.subschemeι ≫ π)) U.1).flip u
+        have h6 : (Scheme.IdealSheafData.inclusion hle ≫ (J.subschemeι ≫ π)).finrank
+              (U.1.ι.base u)
+            = (I.subschemeι ≫ π).finrank (U.1.ι.base u) :=
+          congrArg (fun m => Scheme.Hom.finrank m (U.1.ι.base u)) hcompres
+        exact (h4.trans h5).trans h6
+      rw [hA, hAres, hB, hBres]
+      exact hrank (U.1.ι.base u)
+    -- the module core closes the Γ-map
+    have hbij : Function.Bijective (((Scheme.IdealSheafData.inclusion hle
+        ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)).appTop).hom) := by
+      have := bijective_of_surjective_of_rankAtStalk_eq
+        (R := ↑Γ(U.1, ⊤))
+        (AlgHom.toLinearMap
+          { toRingHom := ((Scheme.IdealSheafData.inclusion hle
+              ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)).appTop).hom
+            commutes' := fun r => rfl })
+        hsurjTop hrkeq.symm
+      exact this
+    haveI : IsIso ((Scheme.IdealSheafData.inclusion hle
+        ∣_ ((J.subschemeι ≫ π) ⁻¹ᵁ U.1)).appTop) :=
+      (ConcreteCategory.isIso_iff_bijective _).mpr hbij
+    exact isIso_of_isIso_appTop _ inferInstance
   -- glue: open immersion + full range ⟹ iso
   haveI hoi : IsOpenImmersion (Scheme.IdealSheafData.inclusion hle) := by
     refine IsZariskiLocalAtTarget.of_iSup_eq_top
