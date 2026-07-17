@@ -31,6 +31,14 @@ noncomputable def addEquivPi {ι : Type u} [Finite ι]
       AddCommGrpCat.productIsoPi
         (fun i => (functorH J n).obj (F i))).addCommGroupIsoToAddEquiv
 
+/-- A finite product of sheaves has subsingleton cohomology when each factor does. -/
+theorem subsingleton_product_of_factors {ι : Type u} [Finite ι]
+    (F : ι → Sheaf J AddCommGrpCat.{u}) (n : ℕ)
+    (h : ∀ i, Subsingleton (H (F i) n)) : Subsingleton (H (∏ᶜ F) n) := by
+  letI (i : ι) : Subsingleton (H (F i) n) := h i
+  let e := addEquivPi F n
+  exact ⟨fun x y => e.injective (funext fun i => Subsingleton.elim (e x i) (e y i))⟩
+
 end CategoryTheory.Sheaf.H
 
 namespace TopCat.Sheaf
@@ -45,8 +53,7 @@ theorem cechTerm_subsingleton_H_of_factors [Finite ι] (n q : ℕ)
     (h : ∀ i : Fin (n + 1) → ι,
       Subsingleton (H (cechTermFactor F U n i) q)) :
     Subsingleton (H (cechTerm F U n) q) := by
-  letI (i : Fin (n + 1) → ι) : Subsingleton (H (cechTermFactor F U n i) q) := h i
-  let e := CategoryTheory.Sheaf.H.addEquivPi (cechTermFactor F U n) q
-  exact ⟨fun x y => e.injective (funext fun i => Subsingleton.elim (e x i) (e y i))⟩
+  exact CategoryTheory.Sheaf.H.subsingleton_product_of_factors
+    (cechTermFactor F U n) q h
 
 end TopCat.Sheaf
