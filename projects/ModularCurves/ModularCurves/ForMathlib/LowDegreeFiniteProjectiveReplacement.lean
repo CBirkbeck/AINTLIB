@@ -76,6 +76,23 @@ noncomputable def LinearMap.baseChangeHomologyOneEquiv
       (ShortComplex.moduleCatMk (f.baseChange A) (g.baseChange A)
         (LinearMap.baseChange_comp_eq_zero f g h A))).toLinearEquiv.symm
 
+/-- Finiteness of the kernel of the first map of a short complex implies finiteness of the
+kernel of its map to cycles. -/
+theorem Module.Finite.ker_moduleCatToCycles
+    (S : ShortComplex (ModuleCat.{v} R))
+    [Module.Finite R (LinearMap.ker S.f.hom)] :
+    Module.Finite R (LinearMap.ker S.moduleCatToCycles) := by
+  have hker : LinearMap.ker S.moduleCatToCycles = LinearMap.ker S.f.hom := by
+    exact LinearMap.ker_codRestrict _ _ _
+  exact Module.Finite.equiv (LinearEquiv.ofEq _ _ hker.symm)
+
+/-- Finiteness of categorical homology implies finiteness of its explicit cycle quotient. -/
+theorem Module.Finite.quotient_range_moduleCatToCycles
+    (S : ShortComplex (ModuleCat.{v} R)) [Module.Finite R S.homology] :
+    Module.Finite R
+      (LinearMap.ker S.g.hom ⧸ LinearMap.range S.moduleCatToCycles) :=
+  Module.Finite.equiv S.moduleCatHomologyIso.toLinearEquiv
+
 namespace LowDegreeFiniteReplacement
 
 variable {R : Type u} [CommRing R] [IsNoetherianRing R]
