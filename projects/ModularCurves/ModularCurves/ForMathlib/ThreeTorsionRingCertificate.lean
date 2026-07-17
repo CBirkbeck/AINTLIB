@@ -51,3 +51,31 @@ theorem Ψ₃_eval_eq_zero_of_dbl_eq_neg (p q : R)
     eval_ofNat, eval_C, eval_X] at hdbl ⊢
   linear_combination (norm := ring_nf) (-1 : R) * hdbl
     + (-(W.a₁ ^ 2 + 4 * W.a₂ + 12 * p)) * hcurve
+
+/-- **[BRIDGE-P algebraic form]** On an origin-marked chart (`a₆ = 0`), the cleared
+doubling-equals-negation condition at `(0, 0)` IS the `BRIDGE-P` identity
+`a₂a₃² − a₄a₁a₃ − a₄² = 0` (`N(0,0) = a₄`, `d(0,0) = a₃`). Provided directly for the
+assembly; the content is the scheme-level `3 • σ = 0 ⟹ x(2σ) = x(σ)` input. -/
+theorem bridgeP_of_dbl_origin (ha₆ : W.a₆ = 0)
+    (hdbl : (W.tangentNum 0 0) ^ 2 + W.a₁ * (W.tangentNum 0 0) * (W.tangentDen 0 0)
+      - (W.a₂ + 3 * 0) * (W.tangentDen 0 0) ^ 2 = 0) :
+    W.a₂ * W.a₃ ^ 2 - W.a₄ * W.a₁ * W.a₃ - W.a₄ ^ 2 = 0 := by
+  simp only [tangentNum, tangentDen] at hdbl
+  linear_combination (norm := ring_nf) (-1 : R) * hdbl
+
+/-- **[BRIDGE-Q flex factorization]** On a flex chart (`a₂ = a₄ = a₆ = 0`) the
+`3`-division polynomial factors as `Ψ₃(p) = p · (3p³ + a₁²p² + 3a₁a₃p + 3a₃²)`. -/
+theorem Ψ₃_eval_flex (ha₂ : W.a₂ = 0) (ha₄ : W.a₄ = 0) (ha₆ : W.a₆ = 0) (p : R) :
+    W.Ψ₃.eval p = p * (3 * p ^ 3 + W.a₁ ^ 2 * p ^ 2 + 3 * W.a₁ * W.a₃ * p
+      + 3 * W.a₃ ^ 2) := by
+  simp only [Ψ₃, b₂, b₄, b₆, b₈, ha₂, ha₄, ha₆, eval_add, eval_mul, eval_pow,
+    eval_ofNat, eval_C, eval_X]
+  ring
+
+/-- **[BRIDGE-Q algebraic form]** On a flex chart with `Q = (p, q)` roots of `Ψ₃` and `p`
+a unit, the `BRIDGE-Q` flex cubic vanishes: `3p³ + a₁²p² + 3a₁a₃p + 3a₃² = 0`. -/
+theorem bridgeQ_cubic_of_Ψ₃ (ha₂ : W.a₂ = 0) (ha₄ : W.a₄ = 0) (ha₆ : W.a₆ = 0)
+    (p : R) (hp : IsUnit p) (hΨ : W.Ψ₃.eval p = 0) :
+    3 * p ^ 3 + W.a₁ ^ 2 * p ^ 2 + 3 * W.a₁ * W.a₃ * p + 3 * W.a₃ ^ 2 = 0 := by
+  rw [Ψ₃_eval_flex W ha₂ ha₄ ha₆ p] at hΨ
+  exact hp.mul_right_eq_zero.mp hΨ
