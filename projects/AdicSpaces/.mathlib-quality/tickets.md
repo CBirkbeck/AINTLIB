@@ -507,11 +507,25 @@ T704, by a fresh `/develop --continue`.
 
 ### [CLEANUP-12] /cleanup `FiniteJetStrictLocalization.lean` (final) — **Depends**: T505.
 
-### [T601] `FiniteJetFunctoriality.lean` — pods and datum pushes
-- **Status**: open | **Depends**: T109 | **Type**: def-completion + proofs (L5.1–L5.2)
-- **Sorries**: `podA/B/C/D` fields, `pushDatumB/C/D` `hopen`, `*_isRational`.
-- **Sketch**: pod `isAdic` = disc `podD` metric argument; `hopen` generic span-⊤/principal
-  computation (worked out at L5.2; fallback per-vertex).
+### [T601] `FiniteJetFunctoriality.lean` — pods and datum pushes — **DONE 2026-07-17**
+- **Status**: done (beastmode). `podA/B/C/D := unitBallPod (tX) …` (generic pod from T109's
+  `unitBallPod`; no bespoke isAdic needed). `pushDatumB/C/D` `hopen` := `genPiece_hopen`
+  (T-image, s-image) fed by new helper `span_image_eq_top` (`Ideal.map_span` + `map_top`);
+  `pushDatum*_isRational` := `isRational_of_span_eq_top ∘ span_image_eq_top`. Also
+  discharged T606's data early: `interDatum` `hopen` via `span_mul_image_eq_top`
+  (`Finset.coe_image`/`coe_product` + `Set.image_mul_prod` + `Ideal.span_mul_span'`) and
+  `interDatum_isRational`. File compiles green (~11 s), remaining sorries are T602–T606.
+- **Signature completions (recorded)**: `pushDatumB/C/D` take `(hD : D.IsRational)` (needed
+  to discharge `hopen`); cascade threaded through `presheafValueMapB/C/D` (+continuity,
+  +canonicalMap-compat, +restriction), `mem_rationalOpen_pushDatum*_iff`,
+  `pushCoveringB/C/D (hC : C.IsRational)` (covers via `C.covers.attach.image` +
+  `IsRational.piece`), `interDatum (h₁ h₂)`.
+- **Gotcha (norm-tower defeq storm)**: at `JetA` the ambient `DecidableEq` for
+  `Finset.image` is `Subtype.instDecidableEq` (JetA is reducibly a subring-subtype), NOT
+  `Classical.decEq`; a generic image-lemma without a `[DecidableEq A]` binder bakes in
+  `Classical.decEq`, and unifying the two unfolds the whole jet/norm tower (>4M heartbeats,
+  diverges). Fix: put `[DecidableEq A]` binders on generic `Finset.image` span lemmas so
+  the use site synthesizes the ambient instance. Type: def-completion + proofs (L5.1–L5.2).
 
 ### [T602] covariant presheaf-value maps
 - **Status**: open | **Depends**: T601 | **Type**: def-completion + proofs (L5.3 part)
@@ -554,8 +568,10 @@ T704, by a fresh `/develop --continue`.
   preservation via norms — never bare continuity, B2).
 
 ### [T606] intersection data
-- **Status**: open | **Depends**: T601 | **Parallel**: with T602–T605 | **Type**: proofs (L5.8)
-- **Sorries**: `interDatum` `hopen`, `rationalOpen_interDatum`, `interDatum_isRational`.
+- **Status**: open (partial: `interDatum` data + `interDatum_isRational` DONE with T601;
+  only `rationalOpen_interDatum` remains) | **Depends**: T601 | **Parallel**: with
+  T602–T605 | **Type**: proofs (L5.8)
+- **Sorries**: `rationalOpen_interDatum`.
 - **Sketch**: product datum, both inclusions pointwise under span-⊤; fallback
   normalisation `insert s T` recorded at L5.8.
 

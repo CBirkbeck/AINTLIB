@@ -70,63 +70,88 @@ span-⊤ data over a principal pair of definition in a Tate ring (risk item 3 of
 
 variable {F}
 
-/-- Push a rational datum of 𝓐 to 𝓑 (image datum, [FJP] Lemma 5.1). -/
-def pushDatumB (D : RationalLocData (JetA F)) : RationalLocData (JetB F) where
+/-- Spans of finset images of spanning sets span (the `Ideal.map` argument). -/
+theorem span_image_eq_top {A B : Type*} [CommRing A] [CommRing B] (φ : A →+* B)
+    {T : Finset A} (h : Ideal.span (T : Set A) = ⊤) :
+    Ideal.span ((T.image φ : Finset B) : Set B) = ⊤ := by
+  have hmap := congrArg (Ideal.map φ) h
+  rw [Ideal.map_span, Ideal.map_top] at hmap
+  rw [Finset.coe_image, ← hmap]
+
+/-- Push a rational datum of 𝓐 to 𝓑 (image datum, [FJP] Lemma 5.1). Signature completion
+(recorded): rationality of `D` is required to discharge `hopen` via the generic span-⊤
+computation `genPiece_hopen`. -/
+def pushDatumB (D : RationalLocData (JetA F)) (hD : D.IsRational) :
+    RationalLocData (JetB F) where
   P := podB F
   T := D.T.image (jB F)
   s := jB F D.s
-  hopen := by sorry
+  hopen := genPiece_hopen (podB F) (D.T.image (jB F)) (jB F D.s)
+    (span_image_eq_top (jB F) hD.span_eq_top)
 
 /-- Push a rational datum of 𝓐 to 𝓒. -/
-def pushDatumC (D : RationalLocData (JetA F)) : RationalLocData (JetC F) where
+def pushDatumC (D : RationalLocData (JetA F)) (hD : D.IsRational) :
+    RationalLocData (JetC F) where
   P := podC F
   T := D.T.image (iotaC F)
   s := iotaC F D.s
-  hopen := by sorry
+  hopen := genPiece_hopen (podC F) (D.T.image (iotaC F)) (iotaC F D.s)
+    (span_image_eq_top (iotaC F) hD.span_eq_top)
 
 /-- Push a rational datum of 𝓐 to 𝓓. -/
-def pushDatumD (D : RationalLocData (JetA F)) : RationalLocData (JetD F) where
+def pushDatumD (D : RationalLocData (JetA F)) (hD : D.IsRational) :
+    RationalLocData (JetD F) where
   P := podD F
   T := D.T.image ((rhoC F).comp (iotaC F))
   s := rhoC F (iotaC F D.s)
-  hopen := by sorry
+  hopen := genPiece_hopen (podD F) (D.T.image ((rhoC F).comp (iotaC F)))
+    (rhoC F (iotaC F D.s))
+    (span_image_eq_top ((rhoC F).comp (iotaC F)) hD.span_eq_top)
 
 theorem pushDatumB_isRational {D : RationalLocData (JetA F)} (hD : D.IsRational) :
-    (pushDatumB D).IsRational := by sorry
+    (pushDatumB D hD).IsRational :=
+  RationalLocData.isRational_of_span_eq_top
+    (span_image_eq_top (jB F) hD.span_eq_top)
 
 theorem pushDatumC_isRational {D : RationalLocData (JetA F)} (hD : D.IsRational) :
-    (pushDatumC D).IsRational := by sorry
+    (pushDatumC D hD).IsRational :=
+  RationalLocData.isRational_of_span_eq_top
+    (span_image_eq_top (iotaC F) hD.span_eq_top)
 
 theorem pushDatumD_isRational {D : RationalLocData (JetA F)} (hD : D.IsRational) :
-    (pushDatumD D).IsRational := by sorry
+    (pushDatumD D hD).IsRational :=
+  RationalLocData.isRational_of_span_eq_top
+    (span_image_eq_top ((rhoC F).comp (iotaC F)) hD.span_eq_top)
 
 /-! ### Covariant maps on presheaf values -/
 
 /-- The induced map on completed rational localizations along `ιC` ([FJP] Lemma 5.1's
 `𝒪_X(U) → 𝒪_{Y_C}(U_C)`; built from `IsLocalization` functoriality, continuity for the
 localization topologies, and `UniformSpace.Completion` functoriality). -/
-def presheafValueMapC (D : RationalLocData (JetA F)) :
-    presheafValue D →+* presheafValue (pushDatumC D) := by sorry
+def presheafValueMapC (D : RationalLocData (JetA F)) (hD : D.IsRational) :
+    presheafValue D →+* presheafValue (pushDatumC D hD) := by sorry
 
-def presheafValueMapB (D : RationalLocData (JetA F)) :
-    presheafValue D →+* presheafValue (pushDatumB D) := by sorry
+def presheafValueMapB (D : RationalLocData (JetA F)) (hD : D.IsRational) :
+    presheafValue D →+* presheafValue (pushDatumB D hD) := by sorry
 
-def presheafValueMapD (D : RationalLocData (JetA F)) :
-    presheafValue D →+* presheafValue (pushDatumD D) := by sorry
+def presheafValueMapD (D : RationalLocData (JetA F)) (hD : D.IsRational) :
+    presheafValue D →+* presheafValue (pushDatumD D hD) := by sorry
 
-theorem presheafValueMapC_continuous (D : RationalLocData (JetA F)) :
-    Continuous (presheafValueMapC D) := by sorry
+theorem presheafValueMapC_continuous (D : RationalLocData (JetA F)) (hD : D.IsRational) :
+    Continuous (presheafValueMapC D hD) := by sorry
 
-theorem presheafValueMapB_continuous (D : RationalLocData (JetA F)) :
-    Continuous (presheafValueMapB D) := by sorry
+theorem presheafValueMapB_continuous (D : RationalLocData (JetA F)) (hD : D.IsRational) :
+    Continuous (presheafValueMapB D hD) := by sorry
 
-theorem presheafValueMapC_canonicalMap (D : RationalLocData (JetA F)) (a : JetA F) :
-    presheafValueMapC D (D.canonicalMap a) =
-      (pushDatumC D).canonicalMap (iotaC F a) := by sorry
+theorem presheafValueMapC_canonicalMap (D : RationalLocData (JetA F)) (hD : D.IsRational)
+    (a : JetA F) :
+    presheafValueMapC D hD (D.canonicalMap a) =
+      (pushDatumC D hD).canonicalMap (iotaC F a) := by sorry
 
-theorem presheafValueMapB_canonicalMap (D : RationalLocData (JetA F)) (a : JetA F) :
-    presheafValueMapB D (D.canonicalMap a) =
-      (pushDatumB D).canonicalMap (jB F a) := by sorry
+theorem presheafValueMapB_canonicalMap (D : RationalLocData (JetA F)) (hD : D.IsRational)
+    (a : JetA F) :
+    presheafValueMapB D hD (D.canonicalMap a) =
+      (pushDatumB D hD).canonicalMap (jB F a) := by sorry
 
 /-! ### The graph bridge ([FJP] Lemma 1.1 + (4.21))
 
@@ -186,19 +211,23 @@ With the loc-lift instances available, the project's `restrictionMap` vocabulary
 all four rings, and the covariant maps commute with it. -/
 
 theorem presheafValueMapC_restriction (D D' : RationalLocData (JetA F))
+    (hD : D.IsRational) (hD' : D'.IsRational)
     (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
-    (hpush : rationalOpen (pushDatumC D').T (pushDatumC D').s ⊆
-      rationalOpen (pushDatumC D).T (pushDatumC D).s) (x : presheafValue D) :
-    presheafValueMapC D' (restrictionMap D D' h x) =
-      restrictionMap (pushDatumC D) (pushDatumC D') hpush (presheafValueMapC D x) := by
+    (hpush : rationalOpen (pushDatumC D' hD').T (pushDatumC D' hD').s ⊆
+      rationalOpen (pushDatumC D hD).T (pushDatumC D hD).s) (x : presheafValue D) :
+    presheafValueMapC D' hD' (restrictionMap D D' h x) =
+      restrictionMap (pushDatumC D hD) (pushDatumC D' hD') hpush
+        (presheafValueMapC D hD x) := by
   sorry
 
 theorem presheafValueMapB_restriction (D D' : RationalLocData (JetA F))
+    (hD : D.IsRational) (hD' : D'.IsRational)
     (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
-    (hpush : rationalOpen (pushDatumB D').T (pushDatumB D').s ⊆
-      rationalOpen (pushDatumB D).T (pushDatumB D).s) (x : presheafValue D) :
-    presheafValueMapB D' (restrictionMap D D' h x) =
-      restrictionMap (pushDatumB D) (pushDatumB D') hpush (presheafValueMapB D x) := by
+    (hpush : rationalOpen (pushDatumB D' hD').T (pushDatumB D' hD').s ⊆
+      rationalOpen (pushDatumB D hD).T (pushDatumB D hD).s) (x : presheafValue D) :
+    presheafValueMapB D' hD' (restrictionMap D D' h x) =
+      restrictionMap (pushDatumB D hD) (pushDatumB D' hD') hpush
+        (presheafValueMapB D hD x) := by
   sorry
 
 /-! ### Coverage transfer ([FJP] Lemma 5.2, first display: `U_E = ⋃ᵢ (Uᵢ)_E`) -/
@@ -207,62 +236,91 @@ theorem presheafValueMapB_restriction (D D' : RationalLocData (JetA F))
 `spaComap`-preimages. (Pointwise: `v ∈ rationalOpen (T_E, s_E) ↔ v ∘ ι ∈ rationalOpen (T, s)`
 for `v` in the vertex spectrum.) -/
 theorem mem_rationalOpen_pushDatumC_iff (D : RationalLocData (JetA F))
-    (v : Spv (JetC F)) (hv : v ∈ Spa (JetC F) (ringPlus (JetC F))) :
-    v ∈ rationalOpen (pushDatumC D).T (pushDatumC D).s ↔
+    (hD : D.IsRational) (v : Spv (JetC F)) (hv : v ∈ Spa (JetC F) (ringPlus (JetC F))) :
+    v ∈ rationalOpen (pushDatumC D hD).T (pushDatumC D hD).s ↔
       ValuationSpectrum.comap (iotaC F) v ∈ rationalOpen D.T D.s := by sorry
 
 theorem mem_rationalOpen_pushDatumB_iff (D : RationalLocData (JetA F))
-    (v : Spv (JetB F)) (hv : v ∈ Spa (JetB F) (ringPlus (JetB F))) :
-    v ∈ rationalOpen (pushDatumB D).T (pushDatumB D).s ↔
+    (hD : D.IsRational) (v : Spv (JetB F)) (hv : v ∈ Spa (JetB F) (ringPlus (JetB F))) :
+    v ∈ rationalOpen (pushDatumB D hD).T (pushDatumB D hD).s ↔
       ValuationSpectrum.comap (jB F) v ∈ rationalOpen D.T D.s := by sorry
 
 /-- The pushed covering of a rational covering of 𝓐, at the 𝓒-vertex
 ([FJP] Lemma 5.2: "Inverse images preserve the defining valuation inequalities and unions.
 Hence, for `E = B, C, D`, `U_E = ⋃ᵢ (Uᵢ)_E` is a rational covering"). -/
-def pushCoveringC (C : RationalCovering (JetA F)) : RationalCovering (JetC F) where
-  base := pushDatumC C.base
-  covers := C.covers.image pushDatumC
+def pushCoveringC (C : RationalCovering (JetA F)) (hC : C.IsRational) :
+    RationalCovering (JetC F) where
+  base := pushDatumC C.base hC.base
+  covers := C.covers.attach.image fun d => pushDatumC d.1 (hC.piece d.2)
   hsubset := by sorry
   hcover := by sorry
 
-def pushCoveringB (C : RationalCovering (JetA F)) : RationalCovering (JetB F) where
-  base := pushDatumB C.base
-  covers := C.covers.image pushDatumB
+def pushCoveringB (C : RationalCovering (JetA F)) (hC : C.IsRational) :
+    RationalCovering (JetB F) where
+  base := pushDatumB C.base hC.base
+  covers := C.covers.attach.image fun d => pushDatumB d.1 (hC.piece d.2)
   hsubset := by sorry
   hcover := by sorry
 
-def pushCoveringD (C : RationalCovering (JetA F)) : RationalCovering (JetD F) where
-  base := pushDatumD C.base
-  covers := C.covers.image pushDatumD
+def pushCoveringD (C : RationalCovering (JetA F)) (hC : C.IsRational) :
+    RationalCovering (JetD F) where
+  base := pushDatumD C.base hC.base
+  covers := C.covers.attach.image fun d => pushDatumD d.1 (hC.piece d.2)
   hsubset := by sorry
   hcover := by sorry
 
 theorem pushCoveringB_isRational {C : RationalCovering (JetA F)} (hC : C.IsRational) :
-    (pushCoveringB C).IsRational := by sorry
+    (pushCoveringB C hC).IsRational := by sorry
 
 theorem pushCoveringC_isRational {C : RationalCovering (JetA F)} (hC : C.IsRational) :
-    (pushCoveringC C).IsRational := by sorry
+    (pushCoveringC C hC).IsRational := by sorry
 
 theorem pushCoveringD_isRational {C : RationalCovering (JetA F)} (hC : C.IsRational) :
-    (pushCoveringD C).IsRational := by sorry
+    (pushCoveringD C hC).IsRational := by sorry
 
 /-! ### Intersection data ([FJP] Lemma 5.2: `(U_{ij})_E = (U_i)_E ∩ (U_j)_E`) -/
 
+open scoped Pointwise in
+/-- Spans of pointwise-product finsets of two spanning sets span (`⊤ * ⊤ = ⊤`).
+The `DecidableEq` binder is deliberate: it makes the use site instantiate `Finset.image`
+with the ambient instance, so the conclusion matches syntactically (at `JetA` the ambient
+instance is `Subtype.instDecidableEq`, not `Classical.decEq`, and defeq-checking the two
+unfolds the whole jet tower). -/
+theorem span_mul_image_eq_top {A : Type*} [CommRing A] [DecidableEq A] {T₁ T₂ : Finset A}
+    (h₁ : Ideal.span (T₁ : Set A) = ⊤) (h₂ : Ideal.span (T₂ : Set A) = ⊤) :
+    Ideal.span ((((T₁ ×ˢ T₂).image fun p => p.1 * p.2 : Finset A)) : Set A) = ⊤ := by
+  have hcoe : ((((T₁ ×ˢ T₂).image fun p => p.1 * p.2 : Finset A)) : Set A)
+      = (T₁ : Set A) * (T₂ : Set A) := by
+    rw [Finset.coe_image, Finset.coe_product]
+    exact Set.image_mul_prod
+  rw [hcoe, ← Ideal.span_mul_span', h₁, h₂, Ideal.top_mul]
+
+/-- The product-datum span fact, stated at 𝓐. -/
+theorem interDatum_span_eq_top (D₁ D₂ : RationalLocData (JetA F))
+    (h₁ : D₁.IsRational) (h₂ : D₂.IsRational) :
+    Ideal.span ((((D₁.T ×ˢ D₂.T).image fun p => p.1 * p.2 : Finset (JetA F))) :
+      Set (JetA F)) = ⊤ :=
+  span_mul_image_eq_top h₁.span_eq_top h₂.span_eq_top
+
 /-- The product (intersection) datum of two rational data ([FJP] Lemma 5.2 uses
-`U_{ij} = U_i ∩ U_j`, "which is again rational"). -/
-def interDatum (D₁ D₂ : RationalLocData (JetA F)) : RationalLocData (JetA F) where
+`U_{ij} = U_i ∩ U_j`, "which is again rational"). Signature completion (recorded):
+rationality of both data discharges `hopen` via the product-span computation. -/
+def interDatum (D₁ D₂ : RationalLocData (JetA F))
+    (h₁ : D₁.IsRational) (h₂ : D₂.IsRational) : RationalLocData (JetA F) where
   P := podA F
   T := (D₁.T ×ˢ D₂.T).image fun p => p.1 * p.2
   s := D₁.s * D₂.s
-  hopen := by sorry
+  hopen := genPiece_hopen (podA F) ((D₁.T ×ˢ D₂.T).image fun p => p.1 * p.2)
+    (D₁.s * D₂.s) (interDatum_span_eq_top D₁ D₂ h₁ h₂)
 
 theorem rationalOpen_interDatum (D₁ D₂ : RationalLocData (JetA F))
     (h₁ : D₁.IsRational) (h₂ : D₂.IsRational) :
-    rationalOpen (interDatum D₁ D₂).T (interDatum D₁ D₂).s =
+    rationalOpen (interDatum D₁ D₂ h₁ h₂).T (interDatum D₁ D₂ h₁ h₂).s =
       rationalOpen D₁.T D₁.s ∩ rationalOpen D₂.T D₂.s := by sorry
 
 theorem interDatum_isRational {D₁ D₂ : RationalLocData (JetA F)}
-    (h₁ : D₁.IsRational) (h₂ : D₂.IsRational) : (interDatum D₁ D₂).IsRational := by sorry
+    (h₁ : D₁.IsRational) (h₂ : D₂.IsRational) : (interDatum D₁ D₂ h₁ h₂).IsRational :=
+  RationalLocData.isRational_of_span_eq_top (interDatum_span_eq_top D₁ D₂ h₁ h₂)
 
 end
 
