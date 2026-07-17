@@ -817,29 +817,227 @@ theorem loc_row_exact (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤)
         sub_add_cancel_left]
       exact (IC F m g f).neg_mem hxc
 
+/-- The quotient projections are 1-Lipschitz for the quotient seminorms. -/
+theorem locJB_lipschitz : LipschitzWith 1 (locJB F m g f) :=
+  LipschitzWith.of_dist_le_mul fun a b => by
+    rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm, ← map_sub]
+    obtain ⟨p, hp⟩ := Ideal.Quotient.mk_surjective (a - b)
+    rw [← hp, locJB_mk]
+    refine le_of_forall_pos_le_add fun ε hε => ?_
+    obtain ⟨q, hq, hqn⟩ := Ideal.Quotient.norm_mk_lt (Ideal.Quotient.mk (IA F m g f) p) hε
+    have hmkeq : Ideal.Quotient.mk (IB F m g f) (extJB F m p) =
+        Ideal.Quotient.mk (IB F m g f) (extJB F m q) := by
+      rw [Ideal.Quotient.mk_eq_mk_iff_sub_mem, ← map_sub]
+      exact extJB_mem_IB F m g f (by
+        have h := hq.symm
+        rwa [Ideal.Quotient.mk_eq_mk_iff_sub_mem] at h)
+    rw [hmkeq]
+    calc ‖Ideal.Quotient.mk (IB F m g f) (extJB F m q)‖
+        ≤ ‖extJB F m q‖ := Ideal.Quotient.norm_mk_le _ (extJB F m q)
+      _ ≤ ‖q‖ := norm_mapRestricted_le _ _ _ _
+      _ ≤ ‖Ideal.Quotient.mk (IA F m g f) p‖ + ε := hqn.le
+
+theorem locIotaC_lipschitz : LipschitzWith 1 (locIotaC F m g f) :=
+  LipschitzWith.of_dist_le_mul fun a b => by
+    rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm, ← map_sub]
+    obtain ⟨p, hp⟩ := Ideal.Quotient.mk_surjective (a - b)
+    rw [← hp, locIotaC_mk]
+    refine le_of_forall_pos_le_add fun ε hε => ?_
+    obtain ⟨q, hq, hqn⟩ := Ideal.Quotient.norm_mk_lt (Ideal.Quotient.mk (IA F m g f) p) hε
+    have hmkeq : Ideal.Quotient.mk (IC F m g f) (extIotaC F m p) =
+        Ideal.Quotient.mk (IC F m g f) (extIotaC F m q) := by
+      rw [Ideal.Quotient.mk_eq_mk_iff_sub_mem, ← map_sub]
+      exact extIotaC_mem_IC F m g f (by
+        have h := hq.symm
+        rwa [Ideal.Quotient.mk_eq_mk_iff_sub_mem] at h)
+    rw [hmkeq]
+    calc ‖Ideal.Quotient.mk (IC F m g f) (extIotaC F m q)‖
+        ≤ ‖extIotaC F m q‖ := Ideal.Quotient.norm_mk_le _ (extIotaC F m q)
+      _ ≤ ‖q‖ := norm_mapRestricted_le _ _ _ _
+      _ ≤ ‖Ideal.Quotient.mk (IA F m g f) p‖ + ε := hqn.le
+
+/-- The quantitative Lemma 4.4 estimate: the quotient pullback norm is controlled by the
+component norms. -/
+theorem loc_norm_le (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) (x : locA F m g f) :
+    ‖x‖ ≤ (1 + Classical.choose (ideal_row_surjective F m g f hspan)) *
+      max ‖locJB F m g f x‖ ‖locIotaC F m g f x‖ := by
+  classical
+  obtain ⟨hC₁1, hrow⟩ := Classical.choose_spec (ideal_row_surjective F m g f hspan)
+  set C₁ := Classical.choose (ideal_row_surjective F m g f hspan) with hC₁def
+  have hC₁0 : (0 : ℝ) ≤ C₁ := zero_le_one.trans hC₁1
+  set M : ℝ := max ‖locJB F m g f x‖ ‖locIotaC F m g f x‖ with hMdef
+  have hM0 : 0 ≤ M := le_max_of_le_left (norm_nonneg _)
+  refine le_of_forall_pos_le_add fun ε hε => ?_
+  set δ : ℝ := ε / (2 * (1 + C₁)) with hδdef
+  have hδ0 : 0 < δ := by positivity
+  obtain ⟨pb, hpb, hpbn⟩ := Ideal.Quotient.norm_mk_lt (locJB F m g f x) hδ0
+  obtain ⟨pc, hpc, hpcn⟩ := Ideal.Quotient.norm_mk_lt (locIotaC F m g f x) hδ0
+  have hpbM : ‖pb‖ < M + δ := by
+    refine hpbn.trans_le ?_
+    have h := le_max_left ‖locJB F m g f x‖ ‖locIotaC F m g f x‖
+    linarith
+  have hpcM : ‖pc‖ < M + δ := by
+    refine hpcn.trans_le ?_
+    have h := le_max_right ‖locJB F m g f x‖ ‖locIotaC F m g f x‖
+    linarith
+  -- the defect lies in the graph ideal at 𝓓
+  have hdefect : extRhoB F m pb - extRhoC F m pc ∈ ID F m g f := by
+    rw [← Ideal.Quotient.mk_eq_mk_iff_sub_mem, ← locRhoB_mk, ← locRhoC_mk, hpb, hpc]
+    exact loc_square_commutes F m g f x
+  obtain ⟨xc, hxcIC, hxcρ, hxcn⟩ := hrow _ hdefect
+  have hdn : ‖extRhoB F m pb - extRhoC F m pc‖ < M + δ := by
+    have hsub : ‖extRhoB F m pb - extRhoC F m pc‖ ≤
+        max ‖extRhoB F m pb‖ ‖extRhoC F m pc‖ := by
+      have h := IsUltrametricDist.norm_add_le_max (extRhoB F m pb) (-(extRhoC F m pc))
+      rwa [← sub_eq_add_neg, norm_neg] at h
+    refine lt_of_le_of_lt hsub (max_lt ?_ ?_)
+    · exact lt_of_le_of_lt (norm_mapRestricted_le _ _ _ _) hpbM
+    · exact lt_of_le_of_lt (norm_mapRestricted_le _ _ _ _) hpcM
+  have hxcn' : ‖xc‖ ≤ C₁ * (M + δ) :=
+    hxcn.trans (mul_le_mul_of_nonneg_left hdn.le hC₁0)
+  set pc' : PC F m := pc + xc with hpc'def
+  have hcompat : extRhoB F m pb = extRhoC F m pc' := by
+    rw [hpc'def, map_add, hxcρ]
+    ring
+  obtain ⟨p', hp'b, hp'c⟩ := (ext_milnorRow_exact F m pb pc' hcompat).exists
+  have hmkp' : Ideal.Quotient.mk (IA F m g f) p' = x := by
+    refine loc_pair_injective F m g f hspan ?_
+    show (locJB F m g f _, locIotaC F m g f _) = (locJB F m g f x, locIotaC F m g f x)
+    rw [Prod.mk.injEq]
+    constructor
+    · rw [locJB_mk, hp'b, hpb]
+    · rw [locIotaC_mk, hp'c, hpc'def, ← hpc]
+      rw [Ideal.Quotient.mk_eq_mk_iff_sub_mem, add_sub_cancel_left]
+      exact hxcIC
+  have hnormp' : ‖p'‖ ≤ (1 + C₁) * (M + δ) := by
+    have hmax := ext_max_norm_eq F m p'
+    rw [hp'b, hp'c] at hmax
+    rw [← hmax]
+    refine max_le ?_ ?_
+    · nlinarith [hpbM.le, hM0, hδ0.le, hC₁0]
+    · show ‖pc'‖ ≤ _
+      rw [hpc'def]
+      refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ?_ ?_)
+      · nlinarith [hpcM.le, hM0, hδ0.le, hC₁0]
+      · nlinarith [hxcn', hM0, hδ0.le, hC₁0]
+  calc ‖x‖ = ‖Ideal.Quotient.mk (IA F m g f) p'‖ := by rw [hmkp']
+    _ ≤ ‖p'‖ := Ideal.Quotient.norm_mk_le _ p'
+    _ ≤ (1 + C₁) * (M + δ) := hnormp'
+    _ = (1 + C₁) * M + (1 + C₁) * δ := by ring
+    _ ≤ (1 + C₁) * M + ε := by
+        have hδval : (1 + C₁) * δ ≤ ε := by
+          have h2 : (0 : ℝ) < 2 * (1 + C₁) := by linarith
+          calc (1 + C₁) * δ = (1 + C₁) * (ε / (2 * (1 + C₁))) := by rw [hδdef]
+            _ = ε / 2 := by
+                field_simp
+            _ ≤ ε := by linarith
+        linarith
+
 /-- Topological strictness on the left ([FJP] (4.19)/(4.20)): `𝓐_α` carries the subspace
 topology of `𝓑_α × 𝓒_α`. -/
 theorem loc_pair_isEmbedding (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     Topology.IsEmbedding
-      (fun x : locA F m g f => (locJB F m g f x, locIotaC F m g f x)) := by sorry
+      (fun x : locA F m g f => (locJB F m g f x, locIotaC F m g f x)) := by
+  classical
+  haveI hclA : IsClosed ((IA F m g f : Set (PA F m))) := isClosed_IA F m g f hspan
+  haveI : NormedAddCommGroup (PA F m ⧸ IA F m g f) :=
+    Submodule.Quotient.normedAddCommGroup _
+  set C₁ := Classical.choose (ideal_row_surjective F m g f hspan) with hC₁def
+  have hC₁1 := (Classical.choose_spec (ideal_row_surjective F m g f hspan)).1
+  have hK0 : (0 : ℝ) ≤ 1 + C₁ := by linarith
+  have hcont : Continuous (fun x : locA F m g f =>
+      (locJB F m g f x, locIotaC F m g f x)) :=
+    Continuous.prodMk (locJB_lipschitz F m g f).continuous
+      (locIotaC_lipschitz F m g f).continuous
+  have hanti : AntilipschitzWith ⟨1 + C₁, hK0⟩
+      (fun x : locA F m g f => (locJB F m g f x, locIotaC F m g f x)) := by
+    refine AntilipschitzWith.of_le_mul_dist fun x y => ?_
+    have hest := loc_norm_le F m g f hspan (x - y)
+    rw [map_sub, map_sub] at hest
+    rw [dist_eq_norm, Prod.dist_eq]
+    dsimp only
+    rw [dist_eq_norm, dist_eq_norm]
+    exact hest
+  exact hanti.isEmbedding hcont
 
 /-- `𝓒_α → 𝓓_α` is a continuous open surjection ([FJP] Prop 4.5: "`C_α → D_α` is a strict
 surjection"). -/
 theorem locRhoC_surjective (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
-    Function.Surjective (locRhoC F m g f) := by sorry
+    Function.Surjective (locRhoC F m g f) := by
+  intro d
+  obtain ⟨pd, rfl⟩ := Ideal.Quotient.mk_surjective d
+  obtain ⟨c, hc, -⟩ := extRhoC_strict_surjective F m pd
+  exact ⟨Ideal.Quotient.mk _ c, by rw [locRhoC_mk, hc]⟩
+
+/-- `extRhoC` is open (constant-1 sections). -/
+theorem extRhoC_isOpenMap : IsOpenMap (extRhoC F m) := by
+  intro U hU
+  rw [Metric.isOpen_iff] at hU ⊢
+  rintro _ ⟨x, hxU, rfl⟩
+  obtain ⟨ε, hε, hball⟩ := hU x hxU
+  refine ⟨ε, hε, fun d hd => ?_⟩
+  rw [Metric.mem_ball, dist_eq_norm] at hd
+  obtain ⟨c, hc, hcn⟩ := extRhoC_strict_surjective F m (d - extRhoC F m x)
+  refine ⟨x + c, hball ?_, ?_⟩
+  · rw [Metric.mem_ball, dist_eq_norm, add_sub_cancel_left, hcn]
+    exact hd
+  · rw [map_add, hc]
+    ring
 
 theorem locRhoC_isOpenMap (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
-    IsOpenMap (locRhoC F m g f) := by sorry
+    IsOpenMap (locRhoC F m g f) := by
+  intro U hU
+  have hmkC_cont : Continuous (Ideal.Quotient.mk (IC F m g f)) := by
+    have hlip : LipschitzWith 1 (Ideal.Quotient.mk (IC F m g f)) :=
+      LipschitzWith.of_dist_le_mul fun a b => by
+        rw [NNReal.coe_one, one_mul, dist_eq_norm, dist_eq_norm, ← map_sub]
+        exact Ideal.Quotient.norm_mk_le _ _
+    exact hlip.continuous
+  have hmkD_open : IsOpenMap (Ideal.Quotient.mk (ID F m g f)) := by
+    intro V hV
+    rw [Metric.isOpen_iff] at hV ⊢
+    rintro _ ⟨v, hvV, rfl⟩
+    obtain ⟨ε, hε, hball⟩ := hV v hvV
+    refine ⟨ε, hε, fun d hd => ?_⟩
+    rw [Metric.mem_ball, dist_eq_norm] at hd
+    have hpos : 0 < ε - ‖d - Ideal.Quotient.mk (ID F m g f) v‖ := by linarith
+    obtain ⟨y, hy, hyn⟩ := Ideal.Quotient.norm_mk_lt
+      (d - Ideal.Quotient.mk (ID F m g f) v) hpos
+    refine ⟨v + y, hball ?_, ?_⟩
+    · rw [Metric.mem_ball, dist_eq_norm, add_sub_cancel_left]
+      linarith
+    · have hadd := RingHom.map_add (Ideal.Quotient.mk (ID F m g f)) v y
+      rw [hadd, hy]
+      ring
+  have himg : locRhoC F m g f '' U =
+      Ideal.Quotient.mk (ID F m g f) ''
+        (extRhoC F m '' (Ideal.Quotient.mk (IC F m g f) ⁻¹' U)) := by
+    ext d
+    constructor
+    · rintro ⟨u, hu, rfl⟩
+      obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective u
+      exact ⟨extRhoC F m p, ⟨p, hu, rfl⟩, (locRhoC_mk F m g f p).symm⟩
+    · rintro ⟨_, ⟨p, hp, rfl⟩, rfl⟩
+      exact ⟨Ideal.Quotient.mk _ p, hp, locRhoC_mk F m g f p⟩
+  rw [himg]
+  exact hmkD_open _ (extRhoC_isOpenMap F m _ (hU.preimage hmkC_cont))
 
 /-- `𝓐_α` is Hausdorff (quotient by a closed ideal; [FJP] (4.21)). -/
 theorem locA_t2 (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
-    T2Space (locA F m g f) := by sorry
+    T2Space (locA F m g f) := by
+  haveI hclA : IsClosed ((IA F m g f : Set (PA F m))) := isClosed_IA F m g f hspan
+  haveI : NormedAddCommGroup (PA F m ⧸ IA F m g f) :=
+    Submodule.Quotient.normedAddCommGroup _
+  infer_instance
 
 /-- `𝓐_α` is complete (Banach quotient; [FJP] (4.21): "the completed graph quotient is
 already the Banach quotient"). -/
 theorem locA_completeSpace (hspan : Ideal.span ({g} ∪ Set.range f) = ⊤) :
     @CompleteSpace (locA F m g f)
-      (IsTopologicalAddGroup.rightUniformSpace (locA F m g f)) := by sorry
+      (IsTopologicalAddGroup.rightUniformSpace (locA F m g f)) := by
+  haveI : IsUniformAddGroup (locA F m g f) := SeminormedAddCommGroup.to_isUniformAddGroup
+  rw [IsUniformAddGroup.rightUniformSpace_eq]
+  infer_instance
 
 end StrictLoc
 

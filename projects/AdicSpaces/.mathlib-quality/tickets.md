@@ -491,7 +491,7 @@ T704, by a fresh `/develop --continue`.
 ### [CLEANUP-11] /cleanup `FiniteJetStrictLocalization.lean` — **Depends**: T503.
 
 ### [T504] quotient row, algebraic part
-- **Status**: open | **Depends**: T503 | **Type**: proofs (L4.6–L4.7)
+- **Status**: **DONE** (loc-maps as Ideal.Quotient.lift over the ideal pushforwards; mk-lemmas rfl; square/pair-injectivity/row-exactness via the controlled pullback and defect absorption) | OLD: | **Depends**: T503 | **Type**: proofs (L4.6–L4.7)
 - **Sorries**: `quotient_row_exact`, `locJB/locIotaC/locRhoB/locRhoC` (defs via
   `Ideal.Quotient.lift`), `_mk` lemmas, `loc_square_commutes`, `loc_row_exact`,
   `loc_pair_injective`, `locRhoC_surjective`.
@@ -499,7 +499,7 @@ T704, by a fresh `/develop --continue`.
   3×3 chase per L4.6 with `hHsurj` = T502.
 
 ### [T505] quotient row, topological part (Prop 4.5 complete)
-- **Status**: open | **Depends**: T504 | **Type**: proofs (L4.8)
+- **Status**: **DONE** (Lemma 4.4 executed: 1-Lipschitz quotient projections; `loc_norm_le` — the quantitative pullback estimate via norm_mk_lt representatives, defect absorption, ext_milnorRow_exact with constants 1, and pair injectivity; `loc_pair_isEmbedding` via AntilipschitzWith.isEmbedding; locRhoC continuous open surjection (constant-1 sections make extRhoC open; quotient mk-maps open via norm_mk_lt); locA_t2 (closed ideal ⟹ normed quotient); locA_completeSpace (Banach quotient, rightUniformSpace aligned). ALL of FiniteJetStrictLocalization sorry-free — milestone M4 COMPLETE, axiom-clean (verified via oleans).) | OLD: | **Depends**: T504 | **Type**: proofs (L4.8)
 - **Sorries**: `loc_pair_isEmbedding`, `locRhoC_isOpenMap`, `locA_t2`, `locA_completeSpace`.
 - **Sketch**: group-quotient maps open; embedding: inducing via the quotient-of-embedding
   diagram + closedness (T503); T2 from closed ideal; completeness of normed-group quotient
