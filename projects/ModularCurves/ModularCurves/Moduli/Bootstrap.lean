@@ -10,6 +10,7 @@ import ModularCurves.Moduli.UniversalAdapted
 import ModularCurves.Moduli.LegendreDelta
 import ModularCurves.Moduli.UniversalLegendre
 import ModularCurves.Moduli.UniversalLevelThree
+import ModularCurves.Moduli.E3DatumAssembly
 import ModularCurves.LevelStructure.CombinationLevel
 
 /-!
@@ -88,11 +89,18 @@ theorem naiveLevelThree_representable_by_affine (hR : IsUnit (3 : R)) :
     exact ⟨⟨by exact_mod_cast three_zsmul_universalE3P_of_isUnit R hR,
         by exact_mod_cast three_zsmul_universalE3Q_of_isUnit R hR⟩,
       fun k _ _ t x hx => universalE3_generation R hR k t x hx⟩
-  · -- `hArb`: every naive level-`3` structure on every `E/S` IS an `ℰ₃`-datum — supplied by
-    -- `isE3Datum_of_flexCharts` + the torsion→coordinate bridges `3•P=0 ⟹ μ_P=0` &
-    -- `3•Q=0 ⟹ cubic(x(Q))=0` (KM brick 6 `MulByHomDegree` / G0 BB-DEG `Torsion`).
+  · -- `hArb`: every naive level-`3` structure IS an `ℰ₃`-datum — TURNKEY (CHARTER-O (O2)):
+    -- the whole assembly is `isE3Datum_of_bridges`; the two remaining goals are EXACTLY
+    -- the KM-split bridge-Props (board v10.310/v10.312; `bridgeP/Q_of_psi3_eval` massage
+    -- them from the `Ψ₃`-form `3•σ = 0 ⟹ Ψ₃(x(σ)) = 0` when KM's K1 lands).
     intro X L
-    sorry
+    refine isE3Datum_of_bridges X hR L ?_ ?_
+    · -- BRIDGE-P: the `a₂`-obstruction of an origin-marked chart of a `3`-torsion
+      -- section vanishes (`= Ψ₃(0) = 0` via `bridgeP_of_psi3_eval`).
+      sorry
+    · -- BRIDGE-Q: the flex-chart cubic at the second marked point
+      -- (`= Ψ₃(x(Q))/x(Q) = 0` via `bridgeQ_of_psi3_eval` + the abscissa unit).
+      sorry
 
 /-- **(T-E15b, KM engine axiom 2 for `δ = ` naive level 3)** For every elliptic curve `E/S`
 over a base in which `3` is invertible, the `S`-scheme `δ_{E/S}` relatively representing the

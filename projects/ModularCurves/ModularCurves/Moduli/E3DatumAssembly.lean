@@ -530,4 +530,33 @@ theorem isE3Datum_of_bridges {R : CommRingCat.{u}} (X : EllObj R)
   have hB := isUnit_e3B (W := Pr₂.W) hcurveQ hcubic ha₃u h3V hfac
   exact ⟨_, hsi, Pr₂, _, _, ha₂₂, ha₄₂, ha₆₂, hMP₂, hMQ₂, hcubic, ha₃u, h3V, hB⟩
 
+open WeierstrassCurve Polynomial in
+/-- **([O2c] BRIDGE-P from `Ψ₃`)** On an `a₆ = 0` chart (P marked at the origin), the
+`Ψ₃`-vanishing at `x = 0` IS the BRIDGE-P obstruction: `Ψ₃(0) = b₈ = a₂a₃² − a₁a₃a₄ − a₄²`. -/
+theorem bridgeP_of_psi3_eval {A : Type u} [CommRing A] {W : WeierstrassCurve A}
+    (ha₆ : W.a₆ = 0) (hψ : W.Ψ₃.eval 0 = 0) :
+    W.a₂ * W.a₃ ^ 2 - W.a₄ * W.a₁ * W.a₃ - W.a₄ ^ 2 = 0 := by
+  have h := hψ
+  simp only [WeierstrassCurve.Ψ₃, eval_add, eval_mul, eval_pow, eval_ofNat, eval_C,
+    eval_X, WeierstrassCurve.b₂, WeierstrassCurve.b₄, WeierstrassCurve.b₆,
+    WeierstrassCurve.b₈, ha₆] at h
+  linear_combination h
+
+open WeierstrassCurve Polynomial in
+/-- **([O2c] BRIDGE-Q from `Ψ₃`)** On a flex chart, `Ψ₃ = x · (the cubic)`, so
+`Ψ₃`-vanishing at a UNIT abscissa gives the cubic. -/
+theorem bridgeQ_of_psi3_eval {A : Type u} [CommRing A] {W : WeierstrassCurve A}
+    (ha₂ : W.a₂ = 0) (ha₄ : W.a₄ = 0) (ha₆ : W.a₆ = 0) {p : A} (hp : IsUnit p)
+    (hψ : W.Ψ₃.eval p = 0) :
+    3 * p ^ 3 + W.a₁ ^ 2 * p ^ 2 + 3 * W.a₁ * W.a₃ * p + 3 * W.a₃ ^ 2 = 0 := by
+  have hfac : W.Ψ₃.eval p = p * (3 * p ^ 3 + W.a₁ ^ 2 * p ^ 2
+      + 3 * W.a₁ * W.a₃ * p + 3 * W.a₃ ^ 2) := by
+    simp only [WeierstrassCurve.Ψ₃, eval_add, eval_mul, eval_pow, eval_ofNat, eval_C,
+      eval_X, WeierstrassCurve.b₂, WeierstrassCurve.b₄, WeierstrassCurve.b₆,
+      WeierstrassCurve.b₈, ha₂, ha₄, ha₆]
+    ring
+  rw [hfac] at hψ
+  exact hp.mul_right_eq_zero.mp hψ
+
+
 end ModularCurves
