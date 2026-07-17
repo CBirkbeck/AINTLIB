@@ -1506,7 +1506,6 @@ theorem caseII_p_pow_m_pow_37_dvd_a_etaZero_pow_37 {m : ℕ} (D : RealCaseIIData
       (rootDivZetaSubOneDvdGcd hp D.hζ D.equation D.hy D.etaZero) ^ 37 :=
   pow_dvd_pow_of_dvd (caseII_p_pow_dvd_a_etaZero D hp) 37
 
-set_option maxRecDepth 2000 in
 /-- **Step 3-4 (combined):** `(𝔭^m)^37 ∣ 𝔠(D.etaZero)`. Bumping `maxRecDepth` for this
 specific theorem to handle the elaboration of `root_div_zeta_sub_one_dvd_gcd_spec` at the
 long argument list (Subtype operations from RealCaseIIData37 + D.etaZero noncomputable def). -/
@@ -2935,7 +2934,6 @@ theorem caseII_sigma_pair_anchored_cross_identity_exists {m : ℕ} (D : RealCase
   refine ⟨G.xPlus, G.yPlus, G.xPlus_ne_zero, G.yPlus_ne_zero, ?_⟩
   exact caseII_sigma_pair_anchored_fractional_ratio D hp η G
 
-set_option maxRecDepth 2000 in
 /-- **`span{P_K_η} = (𝔪·𝔭)² · (𝔞_pair_η)^37`.** The K⁺-pair-generator's principal ideal
 factors as the K-uniformizer/gcd part `(𝔪·𝔭)²` times the 37th power of the σ-stable
 pair-product `𝔞_pair_η = 𝔞(η)·𝔞(η⁻¹)`. Combines `caseII_data_pair_realGenerator_K_principal_eq`
@@ -4514,7 +4512,8 @@ theorem caseII_root_sub_one_associated {m : ℕ} (D : RealCaseIIData37 K m)
     Associated ((η : 𝓞 K) - 1) (D.hζ.toInteger - 1) := by
   have h1mem : (1 : 𝓞 K) ∈ nthRootsFinset 37 (1 : 𝓞 K) :=
     one_mem_nthRootsFinset (by norm_num)
-  have hpair := D.hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
+  have hpair :=
+    D.hζ.toInteger_isPrimitiveRoot.nthRootsFinset_pairwise_associated_sub_one_sub_of_prime
     (by decide : Nat.Prime 37) η.2 h1mem hη_ne
   exact hpair.symm
 
