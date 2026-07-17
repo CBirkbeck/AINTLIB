@@ -641,6 +641,67 @@ theorem chartFwd_continuous : Continuous (chartFwd F) := by
   letI := (chartDatum F).uniformSpace
   exact UniformSpace.Completion.continuous_extension
 
+/-! ### The reverse map `𝓑 → 𝒪_𝓐(chart)` (Prop 3.1's `φ`-direction) -/
+
+/-- The chart generator `W/ϖ`, in the completion. -/
+noncomputable def gChart : presheafValue (chartDatum F) :=
+  (chartDatum F).coeRingHom (divByS (Wa F) (chartDatum F).s)
+
+theorem gChart_isBounded :
+    TopologicalRing.IsBounded
+      (Set.range (gChart F ^ · : ℕ → presheafValue (chartDatum F))) := by
+  have hmem : divByS (Wa F) (chartDatum F).s ∈
+      locSubring (chartDatum F).P (chartDatum F).T (chartDatum F).s :=
+    divByS_mem_locSubring _ _ _ (Finset.mem_insert_self _ _)
+  refine (CompletionLocalization.coeRingHom_image_locSubring_isBounded
+    (chartDatum F)).subset ?_
+  rintro _ ⟨n, rfl⟩
+  exact ⟨divByS (Wa F) (chartDatum F).s ^ n, pow_mem hmem n, by rw [map_pow]; rfl⟩
+
+/-- Constants of `K` in the chart (continuous base for the evaluation). -/
+noncomputable def chartConst : K →+* presheafValue (chartDatum F) :=
+  (chartDatum F).canonicalMap.comp (constA F)
+
+theorem chartConst_continuous : Continuous (chartConst F) := by
+  refine (canonicalMap_continuous (chartDatum F)).comp ?_
+  exact AddMonoidHomClass.continuous_of_bound (constA F) 1 fun a => by
+    rw [one_mul, norm_constA]
+
+/-- Evaluation of `K⟨X⟩` in the chart: `X ↦ W/ϖ`. -/
+noncomputable def chartEval :
+    PowerSeries.Restricted K (1 : ℝ) →+* presheafValue (chartDatum F) :=
+  (TateAlgebraWedhorn.evalHomBounded (chartConst F) (chartConst_continuous F)
+    (gChart F) (gChart_isBounded F)).comp (kwToTate F)
+
+/-- The reverse map `φ : 𝓑 → 𝒪_𝓐(chart)`, `(f, g) ↦ φ(f) + φ(g)·Q̄`
+(a ring homomorphism because `Q̄² = 0`). -/
+noncomputable def chartRev : JetB F →+* presheafValue (chartDatum F) where
+  toFun x := chartEval F x.fst + chartEval F x.snd * (chartDatum F).canonicalMap (Qa F)
+  map_one' := by
+    rw [show (1 : JetB F).fst = 1 from TrivSqZeroExt.fst_one,
+      show (1 : JetB F).snd = 0 from TrivSqZeroExt.snd_one,
+      map_one, map_zero, zero_mul, add_zero]
+  map_zero' := by
+    rw [show (0 : JetB F).fst = 0 from TrivSqZeroExt.fst_zero,
+      show (0 : JetB F).snd = 0 from TrivSqZeroExt.snd_zero,
+      map_zero, zero_mul, add_zero]
+  map_add' x y := by
+    rw [show (x + y).fst = x.fst + y.fst from TrivSqZeroExt.fst_add x y,
+      show (x + y).snd = x.snd + y.snd from TrivSqZeroExt.snd_add x y,
+      map_add, map_add]
+    ring
+  map_mul' x y := by
+    rw [show (x * y).fst = x.fst * y.fst from TrivSqZeroExt.fst_mul x y,
+      show (x * y).snd = x.fst • y.snd + MulOpposite.op y.fst • x.snd from
+        TrivSqZeroExt.snd_mul x y]
+    rw [show x.fst • y.snd + MulOpposite.op y.fst • x.snd =
+      x.fst * y.snd + y.fst * x.snd from by
+        rw [smul_eq_mul, op_smul_eq_mul]
+        ring]
+    rw [map_mul, map_add, map_mul, map_mul]
+    linear_combination
+      (-(chartEval F x.snd * chartEval F y.snd)) * canonicalMap_Qa_sq F
+
 /-- **[FJP] Proposition 3.1**: the chart is the square-zero disc algebra,
 `𝒪_𝓐({|W| ≤ |ϖ|}) ≅ K⟨X⟩[Q]/(Q²) = 𝓑`, as topological rings. -/
 def chartEquiv : presheafValue (chartDatum F) ≃+* JetB F := by sorry
