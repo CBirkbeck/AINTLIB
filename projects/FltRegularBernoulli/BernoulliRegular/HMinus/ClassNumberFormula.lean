@@ -46,6 +46,38 @@ section ClassNumberFormula
 variable (p : ℕ) [hp : Fact p.Prime]
   (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K] [IsCMField K]
 
+private theorem classNumber_eq_residue_mul
+    (L : Type*) [Field L] [NumberField L] :
+    (NumberField.classNumber L : ℝ) =
+      NumberField.dedekindZeta_residue L *
+        (((Units.torsionOrder L : ℝ) * Real.sqrt |discr L|) /
+          (2 ^ InfinitePlace.nrRealPlaces L *
+            (2 * Real.pi) ^ InfinitePlace.nrComplexPlaces L * Units.regulator L)) := by
+  let A : ℝ :=
+    2 ^ InfinitePlace.nrRealPlaces L *
+      (2 * Real.pi) ^ InfinitePlace.nrComplexPlaces L * Units.regulator L
+  let B : ℝ := (Units.torsionOrder L : ℝ) * Real.sqrt |discr L|
+  have hA : A ≠ 0 := by
+    apply ne_of_gt
+    dsimp [A]
+    exact mul_pos
+      (mul_pos (pow_pos (by positivity) _) (pow_pos (by positivity) _))
+      (Units.regulator_pos L)
+  have hB : B ≠ 0 := by
+    apply ne_of_gt
+    dsimp [B]
+    exact mul_pos
+      (by exact_mod_cast Units.torsionOrder_pos L)
+      (Real.sqrt_pos_of_pos (abs_pos.mpr (Int.cast_ne_zero.mpr (discr_ne_zero L))))
+  calc
+    (NumberField.classNumber L : ℝ) =
+        ((A * (NumberField.classNumber L : ℝ)) / B) * (B / A) := by
+      field_simp [hA, hB]
+    _ = NumberField.dedekindZeta_residue L * (B / A) := by
+      dsimp [A, B]
+      rw [NumberField.dedekindZeta_residue_def]
+    _ = _ := by simp [A, B]
+
 /-- The class number formula for `K`, rearranged to solve for `h`. -/
 theorem h_formula :
     (h K : ℝ) =
@@ -53,32 +85,7 @@ theorem h_formula :
         (((Units.torsionOrder K : ℝ) * Real.sqrt |discr K|) /
           (2 ^ InfinitePlace.nrRealPlaces K *
             (2 * Real.pi) ^ InfinitePlace.nrComplexPlaces K * Units.regulator K)) := by
-  let A : ℝ :=
-    2 ^ InfinitePlace.nrRealPlaces K *
-      (2 * Real.pi) ^ InfinitePlace.nrComplexPlaces K * Units.regulator K
-  let B : ℝ := (Units.torsionOrder K : ℝ) * Real.sqrt |discr K|
-  have hA_pos : 0 < A := by
-    dsimp [A]
-    refine mul_pos ?_ (Units.regulator_pos K)
-    exact mul_pos (pow_pos (by positivity) _) (pow_pos (by positivity) _)
-  have hA : A ≠ 0 := hA_pos.ne'
-  have hB_pos : 0 < B := by
-    dsimp [B]
-    refine mul_pos ?_ ?_
-    · exact_mod_cast Units.torsionOrder_pos K
-    · exact Real.sqrt_pos_of_pos (abs_pos.mpr (Int.cast_ne_zero.mpr (discr_ne_zero K)))
-  have hB : B ≠ 0 := hB_pos.ne'
-  calc
-    (h K : ℝ) = ((A * (h K : ℝ)) / B) * (B / A) := by
-      field_simp [hA, hB]
-    _ = NumberField.dedekindZeta_residue K * (B / A) := by
-          dsimp [A, B]
-          rw [NumberField.dedekindZeta_residue_def, BernoulliRegular.h, NumberField.classNumber]
-    _ = NumberField.dedekindZeta_residue K *
-          (((Units.torsionOrder K : ℝ) * Real.sqrt |discr K|) /
-            (2 ^ InfinitePlace.nrRealPlaces K *
-              (2 * Real.pi) ^ InfinitePlace.nrComplexPlaces K * Units.regulator K)) := by
-          simp [A, B]
+  simpa [BernoulliRegular.h, NumberField.classNumber] using classNumber_eq_residue_mul K
 
 /-- The class number formula for the maximal real subfield `K⁺`, rearranged to
 solve for `h⁺`. -/
@@ -90,33 +97,8 @@ theorem hPlus_formula :
           (2 ^ InfinitePlace.nrRealPlaces (NumberField.maximalRealSubfield K) *
             (2 * Real.pi) ^ InfinitePlace.nrComplexPlaces (NumberField.maximalRealSubfield K) *
               Units.regulator (NumberField.maximalRealSubfield K))) := by
-  let L := NumberField.maximalRealSubfield K
-  let A : ℝ :=
-    2 ^ InfinitePlace.nrRealPlaces L *
-      (2 * Real.pi) ^ InfinitePlace.nrComplexPlaces L * Units.regulator L
-  let B : ℝ := (Units.torsionOrder L : ℝ) * Real.sqrt |discr L|
-  have hA_pos : 0 < A := by
-    dsimp [A]
-    refine mul_pos ?_ (Units.regulator_pos L)
-    exact mul_pos (pow_pos (by positivity) _) (pow_pos (by positivity) _)
-  have hA : A ≠ 0 := hA_pos.ne'
-  have hB_pos : 0 < B := by
-    dsimp [B]
-    refine mul_pos ?_ ?_
-    · exact_mod_cast Units.torsionOrder_pos L
-    · exact Real.sqrt_pos_of_pos (abs_pos.mpr (Int.cast_ne_zero.mpr (discr_ne_zero L)))
-  have hB : B ≠ 0 := hB_pos.ne'
-  calc
-    (hPlus K : ℝ) = ((A * (hPlus K : ℝ)) / B) * (B / A) := by
-      field_simp [hA, hB]
-    _ = NumberField.dedekindZeta_residue L * (B / A) := by
-          dsimp [A, B, L]
-          rw [NumberField.dedekindZeta_residue_def, BernoulliRegular.hPlus, NumberField.classNumber]
-    _ = NumberField.dedekindZeta_residue L *
-          (((Units.torsionOrder L : ℝ) * Real.sqrt |discr L|) /
-            (2 ^ InfinitePlace.nrRealPlaces L *
-              (2 * Real.pi) ^ InfinitePlace.nrComplexPlaces L * Units.regulator L)) := by
-          simp [A, B]
+  simpa [BernoulliRegular.hPlus, NumberField.classNumber] using
+    classNumber_eq_residue_mul (NumberField.maximalRealSubfield K)
 
 /-- The relative class number is the quotient `h / h⁺`, viewed in `ℝ`. -/
 theorem hMinus_eq_h_div_hPlus (hp_odd' : p ≠ 2) :
@@ -369,6 +351,17 @@ private lemma not_prime_pow_two_mul (hp_odd' : p ≠ 2) {q : ℕ} (hq : q.Prime)
         have hle : 2 * p ≤ p := Nat.le_of_dvd hp.out.pos h
         omega
 
+omit [IsCMField K] in
+private lemma neg_zeta_isPrimitiveRoot_two_mul (hp_odd' : p ≠ 2) :
+    IsPrimitiveRoot (-IsCyclotomicExtension.zeta p ℚ K) (2 * p) := by
+  let ζ : K := IsCyclotomicExtension.zeta p ℚ K
+  have hζ : IsPrimitiveRoot ζ p := IsCyclotomicExtension.zeta_spec p ℚ K
+  convert IsPrimitiveRoot.orderOf (-ζ)
+  rw [neg_eq_neg_one_mul,
+    (Commute.all (-1 : K) ζ).orderOf_mul_eq_mul_orderOf_of_coprime]
+  · simp [hζ.eq_orderOf]
+  · simp [← hζ.eq_orderOf, hp.out.odd_of_ne_two hp_odd']
+
 set_option linter.unusedSectionVars false in
 /-- The `p`-th cyclotomic field is also the `2 * p`-th cyclotomic field, for odd prime `p`. -/
 private lemma isCyclotomicExtension_two_mul (hp_odd' : p ≠ 2) :
@@ -377,11 +370,7 @@ private lemma isCyclotomicExtension_two_mul (hp_odd' : p ≠ 2) :
   let η : K := -ζ
   have hζ : IsPrimitiveRoot ζ p := IsCyclotomicExtension.zeta_spec p ℚ K
   have hη : IsPrimitiveRoot η (2 * p) := by
-    convert IsPrimitiveRoot.orderOf η
-    rw [show η = -ζ by rfl, neg_eq_neg_one_mul,
-      (Commute.all (-1 : K) ζ).orderOf_mul_eq_mul_orderOf_of_coprime]
-    · simp [hζ.eq_orderOf]
-    · simp [← hζ.eq_orderOf, hp.out.odd_of_ne_two hp_odd']
+    simpa [η, ζ] using neg_zeta_isPrimitiveRoot_two_mul (p := p) (K := K) hp_odd'
   let S : Set K := {x | ∃ n ∈ ({2 * p} : Set ℕ), n ≠ 0 ∧ x ^ n = 1}
   exact (IsCyclotomicExtension.iff_adjoin_eq_top {2 * p} ℚ K).2
     ⟨fun n hn hn0 => by
@@ -412,13 +401,8 @@ lemma one_add_zetaInteger_isUnit (hp_odd' : p ≠ 2) :
     IsUnit (1 + ((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K)) := by
   let ζ : K := IsCyclotomicExtension.zeta p ℚ K
   let η : K := -ζ
-  have hζ : IsPrimitiveRoot ζ p := IsCyclotomicExtension.zeta_spec p ℚ K
   have hη : IsPrimitiveRoot η (2 * p) := by
-    convert IsPrimitiveRoot.orderOf η
-    rw [show η = -ζ by rfl, neg_eq_neg_one_mul,
-      (Commute.all (-1 : K) ζ).orderOf_mul_eq_mul_orderOf_of_coprime]
-    · simp [hζ.eq_orderOf]
-    · simp [← hζ.eq_orderOf, hp.out.odd_of_ne_two hp_odd']
+    simpa [η, ζ] using neg_zeta_isPrimitiveRoot_two_mul (p := p) (K := K) hp_odd'
   letI : IsCyclotomicExtension {2 * p} ℚ K := isCyclotomicExtension_two_mul p K hp_odd'
   have hnotPrimePow : ∀ {q : ℕ}, q.Prime → ∀ k : ℕ, q ^ k ≠ 2 * p :=
     fun {q} hq k => not_prime_pow_two_mul p hp_odd' hq k
@@ -447,15 +431,8 @@ lemma zetaInteger_pow_eq_one :
 lemma zetaInteger_pow_pred_mul_eq_one :
     (((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - 1) *
         (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) = 1 := by
-  calc
-    (((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) ^ (p - 1) *
-        (IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K)
-    = (((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) ^ ((p - 1) + 1) :
-        𝓞 K) := by
-      rw [pow_succ]
-  _ = (((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) ^ p : 𝓞 K) := by
-      rw [Nat.sub_add_cancel hp.out.one_le]
-    _ = 1 := zetaInteger_pow_eq_one (p := p) (K := K)
+  rw [pow_sub_one_mul hp.out.ne_zero]
+  exact zetaInteger_pow_eq_one (p := p) (K := K)
 
 lemma zetaInteger_mul_pow_pred_eq_one :
     (((IsCyclotomicExtension.zeta_spec p ℚ K).toInteger : 𝓞 K) *
@@ -670,8 +647,7 @@ lemma natAbs_discr_maximalRealSubfield_eq_pow (hp_odd' : p ≠ 2) :
             omega
   have hsq' : (NumberField.discr L).natAbs ^ 2 = (p ^ ((p - 3) / 2)) ^ 2 := by
     rw [hpow, hsq]
-  have := congrArg Nat.sqrt hsq'
-  simpa [Nat.sqrt_eq'] using this
+  exact Nat.pow_left_injective two_ne_zero hsq'
 
 lemma abs_discr_maximalRealSubfield_eq_pow (hp_odd' : p ≠ 2) :
     |((NumberField.discr (NumberField.maximalRealSubfield K) : ℤ) : ℝ)| =
