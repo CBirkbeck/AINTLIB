@@ -1,7 +1,9 @@
 import ModularCurves.EllipticCurve.PoleSheafCechHOne
 import ModularCurves.EllipticCurve.PoleSheafFibreHOne
+import ModularCurves.EllipticCurve.PoleSheafFibreSections
 import ModularCurves.ForMathlib.AffineModuleCechBaseChange
 import ModularCurves.ForMathlib.SchemeModuleBaseCechHomology
+import ModularCurves.ForMathlib.SchemeModuleBaseCechZero
 
 /-!
 # Base-linear Cech comparison for pole sheaves
@@ -15,6 +17,14 @@ open AlgebraicGeometry CategoryTheory Limits TopologicalSpace
 universe u
 
 namespace ModularCurves
+
+private theorem isSeparated_fiberToSpecResidueField
+    {E S : Scheme.{u}} (π : E ⟶ S) [IsSeparated π] (s : S) :
+    IsSeparated (π.fiberToSpecResidueField s) := by
+  change IsSeparated (pullback.snd π (S.fromSpecResidueField s))
+  exact AlgebraicGeometry.IsSeparated.isStableUnderBaseChange.of_isPullback
+    (IsPullback.of_hasPullback π (S.fromSpecResidueField s))
+    (show IsSeparated π from inferInstance)
 
 /-- On an affine open cover, forgetting the base-module structure on degree-one
 Cech homology of `O(n[0])` recovers its genuine sheaf cohomology. -/
@@ -54,6 +64,133 @@ theorem exists_sectionPoleSheafPower_finiteAffineBaseCechComparison
   exact ⟨ι, hι, U, hU, hUaff,
     ⟨sectionPoleSheafPower_baseCechHomologyOneIso
       hsm z hz n U hU hUaff⟩⟩
+
+/-- Global sections of a residue-fibre pole sheaf are linearly equivalent to
+the degree-zero kernel of any base-linear Cech complex computing them. -/
+noncomputable def FibrewiseElliptic.sectionPoleSheafPower_fiberSectionsEquivBaseCechKernel
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsSeparated π]
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S)
+    (s : S) {n : ℕ} {ι : Type u}
+    (U : ι → (π.fiber s).Opens) (hU : IsOpenCover U) :
+    letI hsepFiber : IsSeparated (π.fiberToSpecResidueField s) :=
+      isSeparated_fiberToSpecResidueField π s
+    let M := @sectionPoleSheafPower _ _ (π.fiberToSpecResidueField s) hsepFiber
+      (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _) n
+    let C := Scheme.Modules.baseCechComplex
+      (π.fiberToSpecResidueField s) M U
+    letI : Module ↑(S.residueField s) Γ(M, (⊤ : (π.fiber s).Opens)) :=
+      Module.compHom _
+        (Scheme.Modules.baseScalarHom (π.fiberToSpecResidueField s))
+    letI : Module ↑(S.residueField s) (LinearMap.ker (C.d 0 1).hom) :=
+      Module.compHom _
+        (Scheme.ΓSpecIso (S.residueField s)).inv.hom
+    Γ(M, (⊤ : (π.fiber s).Opens)) ≃ₗ[↑(S.residueField s)]
+      LinearMap.ker (C.d 0 1).hom := by
+  letI hsepFiber : IsSeparated (π.fiberToSpecResidueField s) :=
+    isSeparated_fiberToSpecResidueField π s
+  let M := @sectionPoleSheafPower _ _ (π.fiberToSpecResidueField s) hsepFiber
+    (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _) n
+  let C := Scheme.Modules.baseCechComplex
+    (π.fiberToSpecResidueField s) M U
+  letI : Module ↑(S.residueField s) Γ(M, (⊤ : (π.fiber s).Opens)) :=
+    Module.compHom _
+      (Scheme.Modules.baseScalarHom (π.fiberToSpecResidueField s))
+  letI : Module ↑(S.residueField s) (LinearMap.ker (C.d 0 1).hom) :=
+    Module.compHom _
+      (Scheme.ΓSpecIso (S.residueField s)).inv.hom
+  let e := Scheme.Modules.baseSectionsIsoKernelBaseCechDifferential
+    (π.fiberToSpecResidueField s) M U hU
+  exact
+    { toFun := e.hom
+      invFun := e.inv
+      left_inv := fun x => by
+        change e.inv.hom (e.hom.hom x) = x
+        exact e.toLinearEquiv.left_inv x
+      right_inv := fun x => by
+        change e.hom.hom (e.inv.hom x) = x
+        exact e.toLinearEquiv.right_inv x
+      map_add' := fun x y => e.hom.hom.map_add x y
+      map_smul' := fun r x => by
+        have hx :
+            (show Scheme.Modules.baseSections
+                (π.fiberToSpecResidueField s) M from r • x) =
+              (Scheme.ΓSpecIso (S.residueField s)).inv.hom r •
+                (show Scheme.Modules.baseSections
+                  (π.fiberToSpecResidueField s) M from x) := by
+          let B :=
+            (PresheafOfModules.forgetToPresheafModuleCat
+              (Opposite.op (⊤ : (π.fiber s).Opens))
+              (initialOpOfTerminal isTerminalTop)).obj M.1
+          letI : Module ↑Γ(π.fiber s, (⊤ : (π.fiber s).Opens))
+              (B.obj (Opposite.op (⊤ : (π.fiber s).Opens))) :=
+            ModuleCat.isModule
+              (B.obj (Opposite.op (⊤ : (π.fiber s).Opens)))
+          let a := (π.fiberToSpecResidueField s).appTop.hom
+            ((Scheme.ΓSpecIso (S.residueField s)).inv.hom r)
+          have houter :
+              (Scheme.ΓSpecIso (S.residueField s)).inv.hom r •
+                  (show Scheme.Modules.baseSections
+                    (π.fiberToSpecResidueField s) M from x) =
+                a • (show B.obj
+                  (Opposite.op (⊤ : (π.fiber s).Opens)) from x) := by
+            rfl
+          have hinner :
+              a • (show B.obj
+                  (Opposite.op (⊤ : (π.fiber s).Opens)) from x) =
+                ((π.fiber s).presheaf.map
+                    ((initialOpOfTerminal isTerminalTop).to
+                      (Opposite.op (⊤ : (π.fiber s).Opens)))).hom a • x := by
+            rfl
+          have htop :
+              (initialOpOfTerminal isTerminalTop).to
+                  (Opposite.op (⊤ : (π.fiber s).Opens)) =
+                𝟙 (Opposite.op (⊤ : (π.fiber s).Opens)) :=
+            Subsingleton.elim _ _
+          rw [houter, hinner, htop]
+          simp [a]
+          rfl
+        have hinput := congrArg
+          (fun y : Scheme.Modules.baseSections
+            (π.fiberToSpecResidueField s) M => e.hom y) hx
+        have hlinear := e.hom.hom.map_smul
+          ((Scheme.ΓSpecIso (S.residueField s)).inv.hom r)
+          (show Scheme.Modules.baseSections
+            (π.fiberToSpecResidueField s) M from x)
+        exact hinput.trans hlinear }
+
+/-- The degree-zero kernel of a residue-fibre pole Cech complex has dimension
+`n` for `n ≥ 1`. -/
+theorem FibrewiseElliptic.sectionPoleSheafPower_fiber_baseCech_kernel_finrank
+    {E S : Scheme.{u}} {π : E ⟶ S} [IsSeparated π]
+    (z : S ⟶ E) (hz : z ≫ π = 𝟙 S) (h : FibrewiseElliptic π z hz)
+    (s : S) {n : ℕ} (hn : 1 ≤ n) {ι : Type u}
+    (U : ι → (π.fiber s).Opens) (hU : IsOpenCover U) :
+    letI hsepFiber : IsSeparated (π.fiberToSpecResidueField s) :=
+      isSeparated_fiberToSpecResidueField π s
+    let M := @sectionPoleSheafPower _ _ (π.fiberToSpecResidueField s) hsepFiber
+      (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _) n
+    let C := Scheme.Modules.baseCechComplex
+      (π.fiberToSpecResidueField s) M U
+    letI : Module ↑(S.residueField s) (LinearMap.ker (C.d 0 1).hom) :=
+      Module.compHom _
+        (Scheme.ΓSpecIso (S.residueField s)).inv.hom
+    Module.finrank ↑(S.residueField s) (LinearMap.ker (C.d 0 1).hom) = n := by
+  letI hsepFiber : IsSeparated (π.fiberToSpecResidueField s) :=
+    isSeparated_fiberToSpecResidueField π s
+  let M := @sectionPoleSheafPower _ _ (π.fiberToSpecResidueField s) hsepFiber
+    (sectionFiberPoint π z hz s) (pullback.lift_snd _ _ _) n
+  let C := Scheme.Modules.baseCechComplex
+    (π.fiberToSpecResidueField s) M U
+  letI : Module ↑(S.residueField s) Γ(M, (⊤ : (π.fiber s).Opens)) :=
+    Module.compHom _
+      (Scheme.Modules.baseScalarHom (π.fiberToSpecResidueField s))
+  letI : Module ↑(S.residueField s) (LinearMap.ker (C.d 0 1).hom) :=
+    Module.compHom _
+      (Scheme.ΓSpecIso (S.residueField s)).inv.hom
+  let e := FibrewiseElliptic.sectionPoleSheafPower_fiberSectionsEquivBaseCechKernel
+    (π := π) z hz s (n := n) U hU
+  exact e.finrank_eq.symm.trans
+    (h.sectionPoleSheafPower_fiber_finrank z hz s hn)
 
 /-- After extension to a residue field, the base-linear Cech complex of
 `O(n[0])` is exact in degree one for `n ≥ 1` on a fibrewise elliptic family. -/
