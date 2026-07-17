@@ -35,7 +35,7 @@ field, with the CM structure supplied by `p > 2`. -/
 noncomputable def cyclotomicRingOfIntegersComplexConj
     (hp_gt_two : 2 < p) :
     𝓞 K ≃+* 𝓞 K := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   exact (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv
 
@@ -44,7 +44,7 @@ structure supplied by `p > 2`. -/
 noncomputable def cyclotomicUnitsComplexConj
     (hp_gt_two : 2 < p) :
     CyclotomicUnitGroup K ≃* CyclotomicUnitGroup K := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   exact NumberField.IsCMField.unitsComplexConj K
 
@@ -62,7 +62,7 @@ theorem cyclotomicUnitsComplexConj_apply_coe
 field. -/
 noncomputable def cyclotomicComplexConjGal
     (hp_gt_two : 2 < p) : Gal(K / ℚ) := by
-  haveI : NumberField.IsCMField K :=
+  have : NumberField.IsCMField K :=
     IsCyclotomicExtension.Rat.isCMField (S := {p}) K ⟨p, rfl, hp_gt_two⟩
   exact
     { (NumberField.IsCMField.complexConj K).toRingEquiv with
@@ -212,11 +212,10 @@ theorem cyclotomicInfinitePlace_not_isUnramified
   refine ⟨?_, ?_⟩
   · rw [← InfinitePlace.not_isReal_iff_isComplex]
     intro hw
-    have hpos' : 0 < NumberField.InfinitePlace.nrRealPlaces K :=
-      by
-        classical
-        rw [NumberField.InfinitePlace.nrRealPlaces]
-        exact Fintype.card_pos_iff.mpr ⟨⟨w, hw⟩⟩
+    have hpos' : 0 < NumberField.InfinitePlace.nrRealPlaces K := by
+      classical
+      rw [NumberField.InfinitePlace.nrRealPlaces]
+      exact Fintype.card_pos_iff.mpr ⟨⟨w, hw⟩⟩
     simp [IsCyclotomicExtension.Rat.nrRealPlaces_eq_zero (n := p) K hp_gt_two] at hpos'
   · rw [Subsingleton.elim (w.comap (algebraMap ℚ K)) Rat.infinitePlace]
     exact Rat.isReal_infinitePlace
