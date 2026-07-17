@@ -305,7 +305,11 @@ T704, by a fresh `/develop --continue`.
 ### [CLEANUP-7] /cleanup `FiniteJetNoetherianVertices.lean` — **Depends**: T302, T303.
 
 ### [T304] vertices sheafy (828b application)
-- **Status**: open | **Depends**: CLEANUP-7, T109 | **Type**: proofs (L2.5)
+- **Status**: **DONE** (one-liner ×3: `ValuationSpectrum.isSheafy_of_stronglyNoetherian_828b`
+  — the T109 instance bundle + T302 strong noetherianity resolve by instance search, exactly
+  as `isSheafy_unitDisc`. `isSheafy_JetB/JetC/JetD` all axiom-clean.
+  **`FiniteJetNoetherianVertices.lean` is sorry-free; milestone M2 complete.**)
+  | **Type**: proofs (L2.5)
 - **Sorries**: `isSheafy_JetB/C/D`.
 - **Sketch**: `exact ValuationSpectrum.isSheafy_of_stronglyNoetherian_828b` with the letI
   plumbing of `ExampleUnitDisc.isSheafy_unitDisc`; if instance search balks, `haveI` the

@@ -501,10 +501,13 @@ structure presheaves."  In the project's vocabulary this is
 completeness) was assembled in `FiniteJetRings.lean` — with the maximal plus rings, which for
 𝓑 and 𝓓 are unbounded ([FJP] (2.1d)); no domain/reducedness hypothesis is needed. -/
 
-theorem isSheafy_JetB : ValuationSpectrum.IsSheafy (JetB F) := by sorry
+theorem isSheafy_JetB : ValuationSpectrum.IsSheafy (JetB F) :=
+  ValuationSpectrum.isSheafy_of_stronglyNoetherian_828b
 
-theorem isSheafy_JetC : ValuationSpectrum.IsSheafy (JetC F) := by sorry
+theorem isSheafy_JetC : ValuationSpectrum.IsSheafy (JetC F) :=
+  ValuationSpectrum.isSheafy_of_stronglyNoetherian_828b
 
-theorem isSheafy_JetD : ValuationSpectrum.IsSheafy (JetD F) := by sorry
+theorem isSheafy_JetD : ValuationSpectrum.IsSheafy (JetD F) :=
+  ValuationSpectrum.isSheafy_of_stronglyNoetherian_828b
 
 end FiniteJet
