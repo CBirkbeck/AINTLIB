@@ -36,103 +36,123 @@ theorem norm_L_mul (f g : L F) : ‖f * g‖ = ‖f‖ * ‖g‖ :=
 theorem norm_L_eq_zero {f : L F} (hf : ‖f‖ = 0) : f = 0 :=
   norm_eq_zero.mp hf
 
-/-- Coefficient decay of an element of `𝒞`, super-level-set form. -/
-theorem finite_setOf_le_norm_qCoeff (f : JetC F) {ε : ℝ} (hε : 0 < ε) :
-    {n : ℕ | ε ≤ ‖qCoeff F n f‖}.Finite := by
-  have h := (Restricted.isRestricted_iff_cofinite (R := L F) 1).mp f.2
+section GenericMult
+
+variable {R : Type*} [NormedCommRing R] [IsUltrametricDist R] [NormOneClass R]
+
+/-- Coefficient decay of a radius-one restricted series, super-level-set form. -/
+theorem finite_setOf_le_norm_psCoeff (f : PowerSeries.Restricted R (1 : ℝ)) {ε : ℝ}
+    (hε : 0 < ε) : {n : ℕ | ε ≤ ‖PowerSeries.coeff n f.1‖}.Finite := by
+  have h := (Restricted.isRestricted_iff_cofinite (R := R) 1).mp f.2
   simp only [one_pow, mul_one] at h
   have hev := h.eventually (eventually_lt_nhds hε (a := (0 : ℝ)))
   rw [Filter.eventually_cofinite] at hev
   exact hev.subset fun n hn => by simpa using not_lt.mpr hn
 
-/-- The Gauss norm of a nonzero element of `𝒞` is attained. -/
-theorem exists_norm_qCoeff_eq (f : JetC F) (hf : f ≠ 0) :
-    ∃ n : ℕ, ‖f‖ = ‖qCoeff F n f‖ ∧ qCoeff F n f ≠ 0 := by
-  have hne : ∃ n, qCoeff F n f ≠ 0 := by
+theorem norm_psCoeff_le (f : PowerSeries.Restricted R (1 : ℝ)) (n : ℕ) :
+    ‖PowerSeries.coeff n f.1‖ ≤ ‖f‖ := by
+  have h := PowerSeries.le_gaussNorm norm 1 f.1 (Restricted.hasGaussNorm (R := R) 1 f) n
+  rwa [one_pow, mul_one] at h
+
+/-- The Gauss norm of a nonzero radius-one restricted series is attained. -/
+theorem exists_norm_psCoeff_eq (f : PowerSeries.Restricted R (1 : ℝ)) (hf : f ≠ 0) :
+    ∃ n : ℕ, ‖f‖ = ‖PowerSeries.coeff n f.1‖ ∧ PowerSeries.coeff n f.1 ≠ 0 := by
+  have hne : ∃ n, PowerSeries.coeff n f.1 ≠ 0 := by
     by_contra h
     push Not at h
     refine hf (Subtype.ext (PowerSeries.ext fun n => ?_))
-    rw [show (0 : JetC F).1 = (0 : PowerSeries (L F)) from rfl, map_zero]
+    rw [show (0 : PowerSeries.Restricted R (1 : ℝ)).1 = (0 : PowerSeries R) from rfl,
+      map_zero]
     exact h n
   obtain ⟨n₀, hn₀⟩ := hne
-  have hpos : 0 < ‖qCoeff F n₀ f‖ := norm_pos_iff.mpr hn₀
-  obtain ⟨n, hnS, hnmax⟩ := Set.exists_max_image _ (fun n => ‖qCoeff F n f‖)
-    (finite_setOf_le_norm_qCoeff F f hpos)
-    ⟨n₀, show ‖qCoeff F n₀ f‖ ≤ ‖qCoeff F n₀ f‖ from le_rfl⟩
-  refine ⟨n, le_antisymm ?_ (norm_qCoeff_le F f n), ?_⟩
+  have hpos : 0 < ‖PowerSeries.coeff n₀ f.1‖ := norm_pos_iff.mpr hn₀
+  obtain ⟨n, hnS, hnmax⟩ := Set.exists_max_image _ (fun n => ‖PowerSeries.coeff n f.1‖)
+    (finite_setOf_le_norm_psCoeff f hpos)
+    ⟨n₀, show ‖PowerSeries.coeff n₀ f.1‖ ≤ ‖PowerSeries.coeff n₀ f.1‖ from le_rfl⟩
+  refine ⟨n, le_antisymm ?_ (norm_psCoeff_le f n), ?_⟩
   · rw [Restricted.norm_eq, PowerSeries.gaussNorm_eq]
     refine Real.iSup_le (fun m => ?_) (norm_nonneg _)
     rw [one_pow, mul_one]
-    by_cases hm : ‖qCoeff F n₀ f‖ ≤ ‖qCoeff F m f‖
+    by_cases hm : ‖PowerSeries.coeff n₀ f.1‖ ≤ ‖PowerSeries.coeff m f.1‖
     · exact hnmax m hm
     · exact ((not_le.mp hm).le.trans hnS)
   · exact norm_pos_iff.mp (lt_of_lt_of_le hpos hnS)
 
-/-- The Gauss norm on `𝒞 = L⟨Q⟩` is multiplicative ([FJP] Prop 2.3: "The Laurent Gauss norm
-on 𝒞 = L⟨Q⟩ is multiplicative"). Proved by the minimal-achiever argument through the
-vendored `PowerSeries.gaussNorm_mul_eq_mul`, with base-norm multiplicativity from
-`norm_L_mul`. -/
-theorem norm_JetC_mul (f g : JetC F) : ‖f * g‖ = ‖f‖ * ‖g‖ := by
+/-- Multiplicativity of the radius-one Gauss norm over a base with multiplicative,
+zero-faithful norm (the minimal-achiever argument through the vendored
+`PowerSeries.gaussNorm_mul_eq_mul`). -/
+theorem norm_restricted_mul (hmul : ∀ a b : R, ‖a * b‖ = ‖a‖ * ‖b‖)
+    (hzero : ∀ x : R, ‖x‖ = 0 → x = 0)
+    (f g : PowerSeries.Restricted R (1 : ℝ)) : ‖f * g‖ = ‖f‖ * ‖g‖ := by
   classical
   rcases eq_or_ne f 0 with rfl | hf
   · simp
   rcases eq_or_ne g 0 with rfl | hg
   · simp
-  -- minimal-degree achievers
-  obtain ⟨nf, hnf_eq, hnf_ne⟩ := exists_norm_qCoeff_eq F f hf
-  obtain ⟨ng, hng_eq, hng_ne⟩ := exists_norm_qCoeff_eq F g hg
+  obtain ⟨nf, hnf_eq, hnf_ne⟩ := exists_norm_psCoeff_eq f hf
+  obtain ⟨ng, hng_eq, hng_ne⟩ := exists_norm_psCoeff_eq g hg
   have hposf : 0 < ‖f‖ := hnf_eq ▸ norm_pos_iff.mpr hnf_ne
   have hposg : 0 < ‖g‖ := hng_eq ▸ norm_pos_iff.mpr hng_ne
-  have hAf : {n : ℕ | ‖qCoeff F n f‖ = ‖f‖}.Finite :=
-    (finite_setOf_le_norm_qCoeff F f hposf).subset fun n hn => by
+  have hAf : {n : ℕ | ‖PowerSeries.coeff n f.1‖ = ‖f‖}.Finite :=
+    (finite_setOf_le_norm_psCoeff f hposf).subset fun n hn => by
       rw [Set.mem_setOf_eq] at hn ⊢; rw [hn]
-  have hAg : {n : ℕ | ‖qCoeff F n g‖ = ‖g‖}.Finite :=
-    (finite_setOf_le_norm_qCoeff F g hposg).subset fun n hn => by
+  have hAg : {n : ℕ | ‖PowerSeries.coeff n g.1‖ = ‖g‖}.Finite :=
+    (finite_setOf_le_norm_psCoeff g hposg).subset fun n hn => by
       rw [Set.mem_setOf_eq] at hn ⊢; rw [hn]
   obtain ⟨i, hiA, himin⟩ := Set.exists_min_image _ (fun n : ℕ => n) hAf ⟨nf, hnf_eq.symm⟩
   obtain ⟨j, hjA, hjmin⟩ := Set.exists_min_image _ (fun n : ℕ => n) hAg ⟨ng, hng_eq.symm⟩
   rw [Set.mem_setOf_eq] at hiA hjA
-  rw [Restricted.norm_eq (R := L F) 1 (f * g), Restricted.norm_eq (R := L F) 1 f,
-    Restricted.norm_eq (R := L F) 1 g,
-    show (f * g : JetC F).1 = f.1 * g.1 from rfl]
-  refine PowerSeries.gaussNorm_mul_eq_mul (v := (norm : L F → ℝ)) (c := 1) f.1 g.1
+  rw [Restricted.norm_eq (R := R) 1 (f * g), Restricted.norm_eq (R := R) 1 f,
+    Restricted.norm_eq (R := R) 1 g,
+    show (f * g : PowerSeries.Restricted R (1 : ℝ)).1 = f.1 * g.1 from rfl]
+  refine PowerSeries.gaussNorm_mul_eq_mul (v := (norm : R → ℝ)) (c := 1) f.1 g.1
     (Restricted.hasGaussNorm 1 f) (Restricted.hasGaussNorm 1 g)
     (Restricted.hasGaussNorm 1 (f * g)) norm_nonneg norm_zero
-    (fun a b => IsUltrametricDist.norm_add_le_max a b) (norm_L_mul F)
-    norm_neg (fun x hx => norm_L_eq_zero F hx) one_pos ⟨i, j, ?_, ?_, ?_⟩
+    (fun a b => IsUltrametricDist.norm_add_le_max a b) hmul
+    norm_neg hzero one_pos ⟨i, j, ?_, ?_, ?_⟩
   · rw [PowerSeries.achievesGaussNorm_iff]
-    show ‖qCoeff F i f‖ * (1 : ℝ) ^ i = _
+    show ‖PowerSeries.coeff i f.1‖ * (1 : ℝ) ^ i = _
     rw [one_pow, mul_one, hiA, Restricted.norm_eq]
   · rw [PowerSeries.achievesGaussNorm_iff]
-    show ‖qCoeff F j g‖ * (1 : ℝ) ^ j = _
+    show ‖PowerSeries.coeff j g.1‖ * (1 : ℝ) ^ j = _
     rw [one_pow, mul_one, hjA, Restricted.norm_eq]
   · intro p hp hpne
     rw [Finset.mem_antidiagonal] at hp
-    show ‖qCoeff F p.1 f * qCoeff F p.2 g‖ < ‖qCoeff F i f‖ * ‖qCoeff F j g‖
-    rw [norm_L_mul, hiA, hjA]
+    show ‖PowerSeries.coeff p.1 f.1 * PowerSeries.coeff p.2 g.1‖ <
+      ‖PowerSeries.coeff i f.1‖ * ‖PowerSeries.coeff j g.1‖
+    rw [hmul, hiA, hjA]
     rcases lt_or_gt_of_ne (show p.1 ≠ i from fun h => hpne (by
       refine Prod.ext h ?_
       omega)) with hlt | hgt
-    · -- `p.1 < i`: the `f`-side is strictly submaximal
-      have hf1 : ‖qCoeff F p.1 f‖ < ‖f‖ := by
-        rcases lt_or_eq_of_le (norm_qCoeff_le F f p.1) with h | h
+    · have hf1 : ‖PowerSeries.coeff p.1 f.1‖ < ‖f‖ := by
+        rcases lt_or_eq_of_le (norm_psCoeff_le f p.1) with h | h
         · exact h
         · have := himin p.1 h
           omega
-      calc ‖qCoeff F p.1 f‖ * ‖qCoeff F p.2 g‖
-          ≤ ‖qCoeff F p.1 f‖ * ‖g‖ :=
-            mul_le_mul_of_nonneg_left (norm_qCoeff_le F g p.2) (norm_nonneg _)
+      calc ‖PowerSeries.coeff p.1 f.1‖ * ‖PowerSeries.coeff p.2 g.1‖
+          ≤ ‖PowerSeries.coeff p.1 f.1‖ * ‖g‖ :=
+            mul_le_mul_of_nonneg_left (norm_psCoeff_le g p.2) (norm_nonneg _)
         _ < ‖f‖ * ‖g‖ := mul_lt_mul_of_pos_right hf1 hposg
-    · -- `p.1 > i`, hence `p.2 < j`: the `g`-side is strictly submaximal
-      have hg1 : ‖qCoeff F p.2 g‖ < ‖g‖ := by
-        rcases lt_or_eq_of_le (norm_qCoeff_le F g p.2) with h | h
+    · have hg1 : ‖PowerSeries.coeff p.2 g.1‖ < ‖g‖ := by
+        rcases lt_or_eq_of_le (norm_psCoeff_le g p.2) with h | h
         · exact h
         · have := hjmin p.2 h
           omega
-      calc ‖qCoeff F p.1 f‖ * ‖qCoeff F p.2 g‖
-          ≤ ‖f‖ * ‖qCoeff F p.2 g‖ :=
-            mul_le_mul_of_nonneg_right (norm_qCoeff_le F f p.1) (norm_nonneg _)
+      calc ‖PowerSeries.coeff p.1 f.1‖ * ‖PowerSeries.coeff p.2 g.1‖
+          ≤ ‖f‖ * ‖PowerSeries.coeff p.2 g.1‖ :=
+            mul_le_mul_of_nonneg_right (norm_psCoeff_le f p.1) (norm_nonneg _)
         _ < ‖f‖ * ‖g‖ := mul_lt_mul_of_pos_left hg1 hposf
+
+end GenericMult
+
+/-- The Gauss norm on `𝒞 = L⟨Q⟩` is multiplicative ([FJP] Prop 2.3: "The Laurent Gauss norm
+on 𝒞 = L⟨Q⟩ is multiplicative"). -/
+theorem norm_JetC_mul (f g : JetC F) : ‖f * g‖ = ‖f‖ * ‖g‖ :=
+  norm_restricted_mul (norm_L_mul F) (fun x hx => norm_L_eq_zero F hx) f g
+
+/-- Multiplicativity of the `K⟨W⟩` Gauss norm (base of `𝓑`). -/
+theorem norm_KW_mul (f g : PowerSeries.Restricted K (1 : ℝ)) : ‖f * g‖ = ‖f‖ * ‖g‖ :=
+  norm_restricted_mul norm_mul (fun x hx => norm_eq_zero.mp hx) f g
 
 instance : Nontrivial (JetC F) := by
   refine ⟨⟨0, 1, fun h => ?_⟩⟩
@@ -175,15 +195,76 @@ instance : IsDomain (JetA F) := NoZeroDivisors.to_isDomain _
 
 /-! ### The power-bounded subring of 𝓐 is the unit ball ([FJP] Prop 2.3) -/
 
+theorem norm_JetA_mul (a b : JetA F) : ‖a * b‖ = ‖a‖ * ‖b‖ := by
+  show ‖((a * b : JetA F) : JetC F)‖ = _
+  rw [show ((a * b : JetA F) : JetC F) = (a : JetC F) * (b : JetC F) from rfl,
+    norm_JetC_mul]
+  rfl
+
+theorem norm_JetA_pow (a : JetA F) (n : ℕ) : ‖a ^ n‖ = ‖a‖ ^ n := by
+  induction n with
+  | zero => simp
+  | succ m ih => rw [pow_succ, pow_succ, norm_JetA_mul, ih]
+
+set_option maxHeartbeats 1000000 in
 /-- Power-boundedness in 𝓐 is having norm at most one ([FJP] Prop 2.3: "If `v(a) < 0` …
 `a` is not power-bounded. If `v(a) ≥ 0`, all powers of `a` lie in 𝒜₀. Thus the valuation
-formulation gives directly `𝒜° = 𝒜₀`"). -/
+formulation gives directly `𝒜° = 𝒜₀`"). (`maxHeartbeats`: subtype-instance whnf; cleanup
+candidate.) -/
 theorem isPowerBounded_JetA_iff (a : JetA F) :
-    TopologicalRing.IsPowerBounded a ↔ ‖a‖ ≤ 1 := by sorry
+    TopologicalRing.IsPowerBounded a ↔ ‖a‖ ≤ 1 := by
+  constructor
+  · intro h
+    by_contra hlt
+    push Not at hlt
+    obtain ⟨V, hV, hVsub⟩ := h (Metric.ball 0 1) (Metric.ball_mem_nhds 0 one_pos)
+    obtain ⟨δ, hδ, hball⟩ := Metric.mem_nhds_iff.mp hV
+    obtain ⟨m, hm⟩ := exists_pow_lt_of_lt_one hδ (norm_tA_lt_one F)
+    have hwV : (tA F) ^ m ∈ V := by
+      refine hball ?_
+      rw [Metric.mem_ball, dist_zero_right, norm_JetA_pow]
+      exact hm
+    obtain ⟨n, hn⟩ := pow_unbounded_of_one_lt (((‖tA F‖) ^ m)⁻¹) hlt
+    have hmem : a ^ n * (tA F) ^ m ∈ Metric.ball (0 : JetA F) 1 :=
+      hVsub ⟨a ^ n, ⟨n, rfl⟩, (tA F) ^ m, hwV, rfl⟩
+    rw [Metric.mem_ball, dist_zero_right, norm_JetA_mul, norm_JetA_pow, norm_JetA_pow]
+      at hmem
+    have hge : (1 : ℝ) ≤ ‖a‖ ^ n * ‖tA F‖ ^ m := by
+      have hpos : (0 : ℝ) < ‖tA F‖ ^ m := pow_pos (norm_tA_pos F) m
+      calc (1 : ℝ) = (‖tA F‖ ^ m)⁻¹ * ‖tA F‖ ^ m := (inv_mul_cancel₀ (ne_of_gt hpos)).symm
+        _ ≤ ‖a‖ ^ n * ‖tA F‖ ^ m := by gcongr
+    exact absurd hmem (not_lt.mpr hge)
+  · intro h
+    intro U hU
+    obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp hU
+    refine ⟨Metric.ball 0 ε, Metric.ball_mem_nhds 0 hε, ?_⟩
+    rintro z ⟨s, ⟨k, rfl⟩, y, hy, rfl⟩
+    rw [Metric.mem_ball, dist_zero_right] at hy
+    refine hball ?_
+    rw [Metric.mem_ball, dist_zero_right]
+    calc ‖a ^ k * y‖ ≤ ‖a ^ k‖ * ‖y‖ := norm_mul_le _ _
+      _ ≤ 1 * ‖y‖ := by
+          rw [norm_JetA_pow]
+          exact mul_le_mul_of_nonneg_right (pow_le_one₀ (norm_nonneg _) h) (norm_nonneg _)
+      _ = ‖y‖ := one_mul _
+      _ < ε := hy
 
+set_option maxHeartbeats 1000000 in
 /-- The power-bounded subring of 𝓐 is bounded — **𝓐 is uniform**
 ([FJP] Prop 2.3: "The ring 𝒜 is a complete uniform Tate k-algebra"). -/
-theorem isUniform_JetA : TopologicalRing.IsUniform (JetA F) := by sorry
+theorem isUniform_JetA : TopologicalRing.IsUniform (JetA F) := by
+  refine ⟨fun U hU => ?_⟩
+  obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp hU
+  refine ⟨Metric.ball 0 ε, Metric.ball_mem_nhds 0 hε, ?_⟩
+  rintro z ⟨s, hs, y, hy, rfl⟩
+  rw [Metric.mem_ball, dist_zero_right] at hy
+  refine hball ?_
+  rw [Metric.mem_ball, dist_zero_right]
+  have hs1 : ‖s‖ ≤ 1 := (isPowerBounded_JetA_iff F s).mp hs
+  calc ‖s * y‖ ≤ ‖s‖ * ‖y‖ := norm_mul_le _ _
+    _ ≤ 1 * ‖y‖ := mul_le_mul_of_nonneg_right hs1 (norm_nonneg _)
+    _ = ‖y‖ := one_mul _
+    _ < ε := hy
 
 /-! ### The plus rings of the jet vertices ([FJP] (5.2)) -/
 
