@@ -68,7 +68,8 @@ explicit cyclotomic-unit product.  This is the verbatim content of Washington §
 the explicit construction of `η_a = (ω_j + ζ^a ω_j)/(1-ζ^a)` and the resulting `(1-ζ^a)/(1-ζ)`-form
 of `η_a/η_b`.  That explicit construction (the `ω_j`, the `ζ^a`-numerators) is the one piece of the
 §9.1 descent not present in the repo's abstract `CaseIIData37` (whose `ε₁, ε₂, ε₃` are unconstrained
-units); everything *downstream* of it — the closure-membership of the `(1-ζ^a)`-form in `C⁺`, and the
+units); everything *downstream* of it — the closure-membership of the `(1-ζ^a)`-form in `C⁺`,
+and the
 wiring into piece (i) — is proved here.
 
 ## References
@@ -149,7 +150,8 @@ which is the *unconditional* `caseIISigmaAntiDescent_quotient_unitsMap` of §2 o
 This is the *only* cyclotomic-unit content of piece (i) not yet discharged: Washington §9.1's
 explicit `(1-ζ^a)`-form of the descent unit `η_a` (the construction
 `η_a = (ω_j + ζ^a ω_j)/(1-ζ^a)`, pp. 169-172, whose real `K⁺`-descent is a product of the cyclotomic
-units `ν_a`).  It is **sound** — it asserts an explicit cyclotomic-unit expression for the *specific*
+units `ν_a`).  It is **sound** —
+it asserts an explicit cyclotomic-unit expression for the *specific*
 descent unit, never for an arbitrary real unit (a generic real unit need not lie in `C⁺`, whose
 index in `(𝓞 K⁺)ˣ` is `h⁺`).  The realness in `Units.map` form is supplied by §2, so the assertion
 is stated only about the canonical `K⁺`-descent `u`. -/
@@ -176,7 +178,8 @@ def caseIICyclotomicIdentification_quotient_isCPlusExponentProduct
 
 /-! ## 3. Discharging `caseIISigmaAntiDescent_quotient_in_CPlus`
 
-The target `def : Prop` `caseIISigmaAntiDescent_quotient_in_CPlus` (of `CaseIISigmaAntiDescent.lean`)
+The target `def : Prop` `caseIISigmaAntiDescent_quotient_in_CPlus`
+(of `CaseIISigmaAntiDescent.lean`)
 asks, for each Case-II descent instance, for the canonical descent unit `u` to lie in
 `caseIICPlus37`.  Combining the §9.1 cyclotomic-form hypothesis (§2) with the proven
 closure-membership core (§1) discharges it directly. -/
