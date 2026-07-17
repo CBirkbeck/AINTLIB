@@ -420,8 +420,7 @@ lemma infChart_root_mem_nonZeroDivisors (W : WeierstrassCurve R) :
     simp only [Polynomial.coeff_sub, Polynomial.coeff_C_mul, Polynomial.coeff_X_pow,
       Polynomial.coeff_X_one]
     norm_num
-  rw [h1]
-  rw [mem_nonZeroDivisors_iff]
+  rw [h1, mem_nonZeroDivisors_iff]
   constructor <;> intro x hx <;>
     simpa [neg_eq_zero] using hx
 
@@ -548,8 +547,7 @@ lemma zChart_z_nonZeroDivisor (W : WeierstrassCurve R) :
     rfl
   rw [hz]
   refine adjoinRoot_root_mem_nonZeroDivisors ?_
-  rw [zChartCubic_coeff_zero]
-  rw [mem_nonZeroDivisors_iff]
+  rw [zChartCubic_coeff_zero, mem_nonZeroDivisors_iff]
   constructor <;> intro x hx <;> simpa [neg_eq_zero] using hx
 
 /-- **(chart-1 `t`-nonzerodivisor, quotient spelling)** The class of the `Z/Y`-coordinate
@@ -679,9 +677,7 @@ private lemma Proj_awayι_appTop_ΓSpecIso {R₀ A : Type u} [CommRing R₀] [Co
       (Proj.basicOpenToSpec 𝒜 f).app ⊤ from rfl]
     rw [Proj.basicOpenToSpec_app_top, Category.assoc, Category.assoc,
       Iso.inv_hom_id, Category.comp_id]
-  rw [← hhomTop]
-  rw [← Proj.basicOpenIsoSpec_inv_ι 𝒜 f f_deg hm]
-  rw [Scheme.Hom.comp_appTop, Category.assoc]
+  rw [← hhomTop, ← Proj.basicOpenIsoSpec_inv_ι 𝒜 f f_deg hm, Scheme.Hom.comp_appTop, Category.assoc]
   rw [show Proj.basicOpenToSpec 𝒜 f =
     (Proj.basicOpenIsoSpec 𝒜 f f_deg hm).hom from rfl]
   rw [← Category.assoc ((Proj.basicOpenIsoSpec 𝒜 f f_deg hm).inv.appTop)]
@@ -1207,8 +1203,7 @@ private lemma coordOf_coeff_lead (W : WeierstrassCurve R) {f : Polynomial R} {N 
     (hj : f.natDegree % 3 = (j : ℕ)) :
     (coordOf W f N j).coeff (N - f.natDegree + f.natDegree / 3) = f.leadingCoeff := by
   unfold coordOf
-  rw [Polynomial.finsetSum_coeff]
-  rw [Finset.sum_eq_single f.natDegree]
+  rw [Polynomial.finsetSum_coeff, Finset.sum_eq_single f.natDegree]
   · have hj3 := j.isLt
     rw [Polynomial.coeff_C_mul, Polynomial.coeff_mul_X_pow', if_pos (by omega),
       show N - f.natDegree + f.natDegree / 3 - (N - f.natDegree) = (f.natDegree - (j : ℕ)) / 3
@@ -1819,8 +1814,7 @@ private lemma overlapMap_chartZRingEquiv_gradeZero (W : WeierstrassCurve R) (r :
         (Submonoid.powers ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))))
         ((algebraMapGradeZero (projIdeal W)) r))) =
     algebraMap R (Localization.Away (infChartTElem W)) r := by
-  rw [chartZRingEquiv_fromZero]
-  rw [IsScalarTower.algebraMap_apply R (Polynomial R) W.toAffine.CoordinateRing r]
+  rw [chartZRingEquiv_fromZero, IsScalarTower.algebraMap_apply R (Polynomial R) W.toAffine.CoordinateRing r]
   rw [show algebraMap (Polynomial R) W.toAffine.CoordinateRing =
     AdjoinRoot.of W.toAffine.polynomial from rfl]
   unfold overlapMap
@@ -3209,8 +3203,7 @@ private lemma coordOfShift_coeff_lead (W : WeierstrassCurve R) {f : Polynomial R
     (coordOfShift W f N n j).coeff (N - f.natDegree + (f.natDegree + n) / 3) =
       f.leadingCoeff := by
   unfold coordOfShift
-  rw [Polynomial.finsetSum_coeff]
-  rw [Finset.sum_eq_single f.natDegree]
+  rw [Polynomial.finsetSum_coeff, Finset.sum_eq_single f.natDegree]
   · have hj3 := j.isLt
     rw [Polynomial.coeff_C_mul, Polynomial.coeff_mul_X_pow', if_pos (by omega),
       show N - f.natDegree + (f.natDegree + n) / 3 - (N - f.natDegree) =
@@ -3621,8 +3614,7 @@ theorem mem_range_algebraMap_of_forall_maximal (W : WeierstrassCurve R)
           Set.range (algebraMap (AdjoinRoot (infChartCubic W))
             (Localization.Away (infChartTElem W))) := by
         refine ⟨num, ?_⟩
-        rw [show (infChartTElem W ^ k : AdjoinRoot (infChartCubic W)) = den.1 from hk]
-        rw [mul_comm]
+        rw [show (infChartTElem W ^ k : AdjoinRoot (infChartCubic W)) = den.1 from hk, mul_comm]
         exact hnd.symm
       have hmem : infChartTElem W ^ k ∈ D := hden
       exact ht (hPmax.isPrime.mem_of_pow_mem k (hDP hmem))
@@ -4462,8 +4454,7 @@ lemma overlapY_isLocalization (W : WeierstrassCurve R) :
         (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ m =
         overlapMap W a * (algebraMap (AdjoinRoot (infChartCubic W))
           (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ j := by
-      rw [← haj, ← map_pow]
-      rw [show (infChartTElem W ^ m : AdjoinRoot (infChartCubic W)) = den.1 from hm]
+      rw [← haj, ← map_pow, show (infChartTElem W ^ m : AdjoinRoot (infChartCubic W)) = den.1 from hm]
       exact hbd
     have hu : ∀ K : ℕ, (algebraMap (AdjoinRoot (infChartCubic W))
         (Localization.Away (infChartTElem W)) (infChartTElem W)) ^ K *
