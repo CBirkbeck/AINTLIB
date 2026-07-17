@@ -365,7 +365,15 @@ T704, by a fresh `/develop --continue`.
 ### [CLEANUP-9] /cleanup `FiniteJetGraphKoszul.lean` — **Depends**: T401–T403.
 
 ### [T404] flatness of `E[T] → E⟨T⟩`
-- **Status**: IN PROGRESS | **Depends**: T303, T403 | **Type**: proofs (L3.5)
+- **Status**: **DONE** (plan of record executed in full: ballAdicEquiv — the direct
+  algebraic (4.4) identification `unitBall(E⟨T⃗⟩) ≃+* AdicCompletion (C t₀) (E₀[T⃗])` via
+  truncation classes/mk_trnc_eq/coefficientwise-Cauchy surjectivity; then
+  `AdicCompletion.flat_of_isNoetherian` + AlgEquiv transport (`Module.Flat.of_linearEquiv`)
+  gives the ball flat over `E₀[T⃗]`; hand-built `IsLocalization (powers (C t₀)) (E[T⃗])` and
+  `IsLocalization (algebraMapSubmonoid …) (E⟨T⃗⟩)` instances (coefficient-clearing +
+  norm-absorption); `isLocalizedModule_iff_isLocalization` →
+  `IsLocalizedModule.isBaseChange` → base-change flatness → transport. `flat_polyToP`
+  axiom-clean, with the t-bundle signature completion.) | **Type**: proofs (L3.5)
 - **Plan of record (algebraic route, no uniform-space bridge)**: statement gets the
   standard scaling-pseudouniformizer bundle `(t, htu, ht1, ht0, hscale)` (as in
   `unitBallPod` — legitimate signature completion; instantiations 𝓑/𝓒/𝓓 have tB/tC/tD).
