@@ -212,9 +212,8 @@ theorem isBaseChange_semilinearInvariants (hfree : IsFreeAlgebraAction G R A) :
       (((Algebra.linearMap A (Module.End A
         (↥(semilinearInvariants G R A M hsl) →ₗ[FixedPoints.subalgebra R A G] M))).flip
           (semilinearInvariants G R A M hsl).subtype).restrictScalars
-            (FixedPoints.subalgebra R A G))) = descentMul G R A M hsl := by
-    refine TensorProduct.ext' fun a m => ?_
-    rfl
+            (FixedPoints.subalgebra R A G))) = descentMul G R A M hsl :=
+    TensorProduct.ext' fun a m => rfl
   show Function.Bijective _
   rw [hmap]
   exact descentMul_bijective G R A M hsl hfree
