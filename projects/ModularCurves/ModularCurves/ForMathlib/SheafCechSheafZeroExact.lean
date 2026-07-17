@@ -105,9 +105,9 @@ private theorem cechZeroCycle_pair_restrictions_eq {V : Opens X} (i₀ : ι)
           (cechTermSectionsAddEquiv F U 0 V s i) := by
     rw [← cechTermSectionsAddEquiv_transport F U 0 V s (cechPairDeleteZero i₀ i)]
     change F.obj.map _ _ = (F.obj.map _ ≫ F.obj.map _) _
-    rw [← F.obj.map_comp]
     exact ConcreteCategory.congr_hom
-      (congrArg F.obj.map (Subsingleton.elim _ _)) _
+      ((congrArg F.obj.map (Subsingleton.elim _ _)).trans
+        (F.obj.map_comp _ _)) _
   have htermOne :
       F.obj.map (homOfLE (inf_le_inf_left V
           (leOfHom (((FormalCoproduct.mk _ U).mapPower
@@ -118,9 +118,9 @@ private theorem cechZeroCycle_pair_restrictions_eq {V : Opens X} (i₀ : ι)
           (cechTermSectionsAddEquiv F U 0 V s (cechConstIndex i₀)) := by
     rw [← cechTermSectionsAddEquiv_transport F U 0 V s (cechPairDeleteOne i₀ i)]
     change F.obj.map _ _ = (F.obj.map _ ≫ F.obj.map _) _
-    rw [← F.obj.map_comp]
     exact ConcreteCategory.congr_hom
-      (congrArg F.obj.map (Subsingleton.elim _ _)) _
+      ((congrArg F.obj.map (Subsingleton.elim _ _)).trans
+        (F.obj.map_comp _ _)) _
   let a := F.obj.map
     (homOfLE (inf_le_inf_left V (cechPairLEZero U i₀ i))).op
       (cechTermSectionsAddEquiv F U 0 V s i)
@@ -160,9 +160,10 @@ private theorem cechZeroCycle_component_eq {V : Opens X} (i₀ : ι)
             (cechTermSectionsAddEquiv F U 0 V s (cechConstIndex i₀))) := by
       change (F.obj.map _ ≫ F.obj.map _) _ =
         (F.obj.map _ ≫ F.obj.map _) _
-      rw [← F.obj.map_comp, ← F.obj.map_comp]
       exact ConcreteCategory.congr_hom
-        (congrArg F.obj.map (Subsingleton.elim _ _)) _
+        ((F.obj.map_comp _ _).symm.trans
+          ((congrArg F.obj.map (Subsingleton.elim _ _)).trans
+            (F.obj.map_comp _ _))) _
     _ = F.obj.map (homOfLE hBack).op
         (F.obj.map (homOfLE (inf_le_inf_left V (cechPairLEZero U i₀ i))).op
           (cechTermSectionsAddEquiv F U 0 V s i)) :=
@@ -170,9 +171,10 @@ private theorem cechZeroCycle_component_eq {V : Opens X} (i₀ : ι)
         (cechZeroCycle_pair_restrictions_eq F U i₀ s hs i).symm
     _ = _ := by
       change (F.obj.map _ ≫ F.obj.map _) _ = _
-      rw [← F.obj.map_comp]
       exact ConcreteCategory.congr_hom
-        ((congrArg F.obj.map (Subsingleton.elim _ _)).trans (F.obj.map_id _)) _
+        ((F.obj.map_comp _ _).symm.trans
+          ((congrArg F.obj.map (Subsingleton.elim _ _)).trans
+            (F.obj.map_id _))) _
 
 /-- A degree-zero Cech cycle on an open contained in one cover member is the
 augmentation of a section on that open. -/
@@ -230,9 +232,9 @@ private theorem exists_cechZeroCycle_restriction (hU : ⨆ i, U i = ⊤) (x : X)
         change (cechTerm F U 1).obj.map _ _ =
           ((cechTerm F U 1).obj.map _ ≫
             (cechTerm F U 1).obj.map _) _
-        rw [← (cechTerm F U 1).obj.map_comp]
         exact ConcreteCategory.congr_hom
-          (congrArg (cechTerm F U 1).obj.map (Subsingleton.elim _ _)) _
+          ((congrArg (cechTerm F U 1).obj.map (Subsingleton.elim _ _)).trans
+            ((cechTerm F U 1).obj.map_comp _ _)) _
       _ = 0 := by rw [hEqZero, map_zero]
   have hs' : (cechDifferential F U 0).hom.app (op W') s' = 0 := by
     calc
