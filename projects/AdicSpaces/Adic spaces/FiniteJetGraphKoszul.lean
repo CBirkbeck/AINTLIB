@@ -793,6 +793,13 @@ theorem mem_span_C_pow_of_coeff_norm_le {t : E} (htu : IsUnit t) (ht1 : ‖t‖ 
       MvPolynomial.monomial_mul, add_zero, MvPolynomial.coeff_monomial,
       if_neg (show ¬ b = s from fun hbs => hs (hbs ▸ hb))]
 
+/-- Completeness of `P_E` for every arity (the vendored instance covers `Fin (n+1)`;
+`Fin 0` is the isometric copy of `E`). -/
+noncomputable instance : CompleteSpace (P E m) := by
+  cases m with
+  | zero => exact IsometryEquiv.completeSpace (foo_isom (R := E) (fun _ : Fin 0 => (1 : ℝ)))
+  | succ k => infer_instance
+
 section AdicBridge
 
 variable (t : E) (htu : IsUnit t) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)
@@ -942,6 +949,175 @@ theorem mk_trnc_eq (n : ℕ) (F : ↥(unitBall (P E m)))
   refine htri.trans (max_le ?_ hq)
   rw [norm_sub_rev]
   exact norm_sub_polyBall_trnc_le t ht0 n F
+
+omit htu hscale
+
+/-- `I₀ = (C t₀) ⊂ E₀[T]`, the constant ideal at the pseudouniformizer. -/
+noncomputable abbrev I0 : Ideal (MvPolynomial (Fin m) ↥(unitBall E)) :=
+  Ideal.span {(MvPolynomial.C (⟨t, ht1.le⟩ : ↥(unitBall E)) :
+    MvPolynomial (Fin m) ↥(unitBall E))}
+
+theorem I0_pow_smul_top (n : ℕ) :
+    ((I0 (E := E) (m := m) t ht1) ^ n • ⊤ : Ideal (MvPolynomial (Fin m) ↥(unitBall E))) =
+      (I0 (E := E) (m := m) t ht1) ^ n := by
+  ext x
+  simp
+
+include htu hscale
+
+/-- The truncation-classes ring homomorphism into the adic completion. -/
+noncomputable def toAdic : ↥(unitBall (P E m)) →+*
+    AdicCompletion (I0 (E := E) (m := m) t ht1) (MvPolynomial (Fin m) ↥(unitBall E)) where
+  toFun F := ⟨fun n => Ideal.Quotient.mk _ (trnc t ht0 n F), by
+    intro a b hab
+    show AdicCompletion.transitionMap _ _ hab (Ideal.Quotient.mk _ (trnc t ht0 b F)) = _
+    rw [AdicCompletion.transitionMap_ideal_mk]
+    exact (mk_trnc_eq t htu ht1 ht0 hscale a F (trnc t ht0 b F)
+      ((norm_sub_polyBall_trnc_le t ht0 b F).trans
+        (pow_le_pow_of_le_one (norm_nonneg t) ht1.le hab))).symm⟩
+  map_one' := Subtype.ext (funext fun n => by
+    show Ideal.Quotient.mk _ (trnc t ht0 n 1) = 1
+    rw [← map_one (Ideal.Quotient.mk ((I0 (E := E) (m := m) t ht1) ^ n • ⊤ :
+      Ideal (MvPolynomial (Fin m) ↥(unitBall E))))]
+    exact mk_trnc_eq t htu ht1 ht0 hscale n 1 1 (by
+      rw [map_one]
+      show ‖(1 : P E m) - 1‖ ≤ _
+      rw [sub_self, norm_zero]
+      exact pow_nonneg (norm_nonneg t) n))
+  map_mul' F G := Subtype.ext (funext fun n => by
+    show Ideal.Quotient.mk _ (trnc t ht0 n (F * G)) = _
+    rw [AdicCompletion.val_mul]
+    show _ = Ideal.Quotient.mk _ (trnc t ht0 n F) * Ideal.Quotient.mk _ (trnc t ht0 n G)
+    rw [← map_mul (Ideal.Quotient.mk ((I0 (E := E) (m := m) t ht1) ^ n • ⊤ :
+      Ideal (MvPolynomial (Fin m) ↥(unitBall E))))]
+    refine mk_trnc_eq t htu ht1 ht0 hscale n (F * G) (trnc t ht0 n F * trnc t ht0 n G) ?_
+    rw [map_mul]
+    show ‖F.1 * G.1 - polyBall (trnc t ht0 n F) * polyBall (trnc t ht0 n G)‖ ≤ _
+    rw [show F.1 * G.1 - polyBall (trnc t ht0 n F) * polyBall (trnc t ht0 n G) =
+      F.1 * (G.1 - polyBall (trnc t ht0 n G)) +
+        (F.1 - polyBall (trnc t ht0 n F)) * polyBall (trnc t ht0 n G) from by ring]
+    refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ?_ ?_)
+    · calc ‖F.1 * (G.1 - polyBall (trnc t ht0 n G))‖
+          ≤ ‖F.1‖ * ‖G.1 - polyBall (trnc t ht0 n G)‖ := norm_mul_le _ _
+        _ ≤ 1 * ‖t‖ ^ n := mul_le_mul F.2 (norm_sub_polyBall_trnc_le t ht0 n G)
+            (norm_nonneg _) zero_le_one
+        _ = ‖t‖ ^ n := one_mul _
+    · calc ‖(F.1 - polyBall (trnc t ht0 n F)) * polyBall (trnc t ht0 n G)‖
+          ≤ ‖F.1 - polyBall (trnc t ht0 n F)‖ * ‖polyBall (trnc t ht0 n G)‖ :=
+            norm_mul_le _ _
+        _ ≤ ‖t‖ ^ n * 1 := mul_le_mul (norm_sub_polyBall_trnc_le t ht0 n F)
+            (norm_polyBall_le_one _) (norm_nonneg _) (pow_nonneg (norm_nonneg t) n)
+        _ = ‖t‖ ^ n := mul_one _)
+  map_zero' := Subtype.ext (funext fun n => by
+    show Ideal.Quotient.mk _ (trnc t ht0 n 0) = 0
+    rw [← map_zero (Ideal.Quotient.mk ((I0 (E := E) (m := m) t ht1) ^ n • ⊤ :
+      Ideal (MvPolynomial (Fin m) ↥(unitBall E))))]
+    exact mk_trnc_eq t htu ht1 ht0 hscale n 0 0 (by
+      rw [map_zero]
+      show ‖(0 : P E m) - 0‖ ≤ _
+      rw [sub_self, norm_zero]
+      exact pow_nonneg (norm_nonneg t) n))
+  map_add' F G := Subtype.ext (funext fun n => by
+    show Ideal.Quotient.mk _ (trnc t ht0 n (F + G)) = _
+    show _ = Ideal.Quotient.mk _ (trnc t ht0 n F) + Ideal.Quotient.mk _ (trnc t ht0 n G)
+    rw [← map_add (Ideal.Quotient.mk ((I0 (E := E) (m := m) t ht1) ^ n • ⊤ :
+      Ideal (MvPolynomial (Fin m) ↥(unitBall E))))]
+    refine mk_trnc_eq t htu ht1 ht0 hscale n (F + G) (trnc t ht0 n F + trnc t ht0 n G) ?_
+    rw [map_add]
+    show ‖F.1 + G.1 - (polyBall (trnc t ht0 n F) + polyBall (trnc t ht0 n G))‖ ≤ _
+    rw [show F.1 + G.1 - (polyBall (trnc t ht0 n F) + polyBall (trnc t ht0 n G)) =
+      (F.1 - polyBall (trnc t ht0 n F)) + (G.1 - polyBall (trnc t ht0 n G)) from by ring]
+    exact (IsUltrametricDist.norm_add_le_max _ _).trans
+      (max_le (norm_sub_polyBall_trnc_le t ht0 n F) (norm_sub_polyBall_trnc_le t ht0 n G)))
+
+theorem toAdic_injective :
+    Function.Injective (toAdic (E := E) (m := m) t htu ht1 ht0 hscale) := by
+  intro F G h
+  have hn : ∀ n : ℕ, ‖F.1 - G.1‖ ≤ ‖t‖ ^ n := fun n => by
+    have hcomp := congrFun (congrArg Subtype.val h) n
+    show ‖F.1 - G.1‖ ≤ ‖t‖ ^ n
+    have hmk : Ideal.Quotient.mk ((I0 (E := E) (m := m) t ht1) ^ n • ⊤ :
+        Ideal (MvPolynomial (Fin m) ↥(unitBall E))) (trnc t ht0 n F) =
+        Ideal.Quotient.mk ((I0 (E := E) (m := m) t ht1) ^ n • ⊤ :
+        Ideal (MvPolynomial (Fin m) ↥(unitBall E))) (trnc t ht0 n G) := hcomp
+    rw [Ideal.Quotient.mk_eq_mk_iff_sub_mem, I0_pow_smul_top] at hmk
+    have hb := norm_polyBall_le_of_mem_span_pow t ht1 hscale n _ hmk
+    rw [map_sub] at hb
+    have h1 : ‖F.1 - G.1‖ ≤ max ‖F.1 - polyBall (trnc t ht0 n F)‖
+        (max ‖polyBall (trnc t ht0 n F) - polyBall (trnc t ht0 n G)‖
+          ‖polyBall (trnc t ht0 n G) - G.1‖) := by
+      have hstep : F.1 - G.1 = (F.1 - polyBall (trnc t ht0 n F)) +
+          ((polyBall (trnc t ht0 n F) - polyBall (trnc t ht0 n G)) +
+            (polyBall (trnc t ht0 n G) - G.1)) := by ring
+      rw [hstep]
+      exact (IsUltrametricDist.norm_add_le_max _ _).trans
+        (max_le_max le_rfl (IsUltrametricDist.norm_add_le_max _ _))
+    refine h1.trans (max_le (norm_sub_polyBall_trnc_le t ht0 n F) (max_le hb ?_))
+    rw [norm_sub_rev]
+    exact norm_sub_polyBall_trnc_le t ht0 n G
+  have h0 : ‖F.1 - G.1‖ ≤ 0 :=
+    ge_of_tendsto (tendsto_pow_atTop_nhds_zero_of_lt_one (norm_nonneg t) ht1)
+      (Filter.Eventually.of_forall hn)
+  refine Subtype.ext ?_
+  rw [← sub_eq_zero]
+  exact norm_le_zero_iff.mp h0
+
+theorem toAdic_surjective :
+    Function.Surjective (toAdic (E := E) (m := m) t htu ht1 ht0 hscale) := by
+  intro x
+  have hrep : ∀ n, ∃ q : MvPolynomial (Fin m) ↥(unitBall E),
+      Ideal.Quotient.mk ((I0 (E := E) (m := m) t ht1) ^ n • ⊤ :
+        Ideal (MvPolynomial (Fin m) ↥(unitBall E))) q = x.val n := fun n =>
+    Ideal.Quotient.mk_surjective (x.val n)
+  choose q hq using hrep
+  have hcons : ∀ n, ‖polyBall (q (n + 1)) - polyBall (q n)‖ ≤ ‖t‖ ^ n := fun n => by
+    have htrans := x.property (Nat.le_succ n)
+    rw [← hq (n + 1), ← hq n, AdicCompletion.transitionMap_ideal_mk,
+      Ideal.Quotient.mk_eq_mk_iff_sub_mem, I0_pow_smul_top] at htrans
+    have hb := norm_polyBall_le_of_mem_span_pow t ht1 hscale n _ htrans
+    rwa [map_sub] at hb
+  set u : ℕ → P E m := fun n => polyBall (q n) with hu
+  have hcauchy : CauchySeq u := by
+    refine cauchySeq_of_le_geometric ‖t‖ 1 ht1 fun n => ?_
+    rw [dist_eq_norm, one_mul, norm_sub_rev]
+    exact hcons n
+  obtain ⟨F, hF⟩ := cauchySeq_tendsto_of_complete hcauchy
+  have hdist : ∀ n k, n ≤ k → ‖u k - u n‖ ≤ ‖t‖ ^ n := by
+    intro n k hnk
+    induction k with
+    | zero =>
+      have hn0 : n = 0 := Nat.le_zero.mp hnk
+      rw [hn0, sub_self, norm_zero]
+      exact pow_nonneg (norm_nonneg t) 0
+    | succ j ih =>
+      rcases Nat.lt_succ_iff_lt_or_eq.mp (Nat.lt_succ_of_le hnk) with hlt | rfl
+      · have hnj : n ≤ j := Nat.lt_succ_iff.mp hlt
+        have hstep : u (j + 1) - u n = (u (j + 1) - u j) + (u j - u n) := by ring
+        rw [hstep]
+        refine (IsUltrametricDist.norm_add_le_max _ _).trans (max_le ?_ (ih hnj))
+        exact (hcons j).trans (pow_le_pow_of_le_one (norm_nonneg t) ht1.le hnj)
+      · rw [sub_self, norm_zero]
+        exact pow_nonneg (norm_nonneg t) _
+  have hFn : ∀ n, ‖F - u n‖ ≤ ‖t‖ ^ n := fun n => by
+    have hten : Filter.Tendsto (fun k => ‖u k - u n‖) Filter.atTop (𝓝 ‖F - u n‖) :=
+      ((hF.sub tendsto_const_nhds).norm)
+    exact le_of_tendsto hten (Filter.eventually_atTop.mpr ⟨n, fun k hk => hdist n k hk⟩)
+  have hFball : ‖F‖ ≤ 1 := by
+    have h := IsUltrametricDist.norm_add_le_max (F - u 0) (u 0)
+    rw [sub_add_cancel] at h
+    refine h.trans (max_le ?_ (norm_polyBall_le_one (q 0)))
+    simpa using hFn 0
+  refine ⟨⟨F, hFball⟩, Subtype.ext (funext fun n => ?_)⟩
+  show Ideal.Quotient.mk _ (trnc t ht0 n ⟨F, hFball⟩) = x.val n
+  rw [← hq n]
+  exact mk_trnc_eq t htu ht1 ht0 hscale n ⟨F, hFball⟩ (q n) (hFn n)
+
+/-- **The (4.4) identification**: the unit ball of `E⟨T₁,…,T_m⟩` is the `(t)`-adic
+completion of `E₀[T₁,…,T_m]` ([FJP] (4.4)). -/
+noncomputable def ballAdicEquiv : ↥(unitBall (P E m)) ≃+*
+    AdicCompletion (I0 (E := E) (m := m) t ht1) (MvPolynomial (Fin m) ↥(unitBall E)) :=
+  RingEquiv.ofBijective (toAdic (E := E) (m := m) t htu ht1 ht0 hscale)
+    ⟨toAdic_injective t htu ht1 ht0 hscale, toAdic_surjective t htu ht1 ht0 hscale⟩
 
 end AdicBridge
 
