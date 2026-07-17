@@ -123,35 +123,211 @@ theorem pushDatumD_isRational {D : RationalLocData (JetA F)} (hD : D.IsRational)
   RationalLocData.isRational_of_span_eq_top
     (span_image_eq_top ((rhoC F).comp (iotaC F)) hD.span_eq_top)
 
-/-! ### Covariant maps on presheaf values -/
+/-! ### Covariant maps on presheaf values
+
+Generic layer: for a continuous ring homomorphism `φ : R →+* S` and rational data
+`D`/`D'` with `D'.s = φ D.s` and `φ(D.T) ⊆ D'.T`, the localization functor gives
+`Localization.Away D.s →+* Localization.Away D'.s`; it is continuous for the
+localization topologies by the universal property `locTopology_continuous_lift` (the
+generators land in `locSubring D'`, hence are power-bounded — no Nullstellensatz input
+needed, unlike the restriction maps); completing gives `𝒪(D) →+* 𝒪(D')`. -/
+
+section CovariantPush
+
+variable {R S : Type*} [CommRing R] [TopologicalSpace R] [IsTopologicalRing R]
+  [CommRing S] [TopologicalSpace S] [IsTopologicalRing S]
+
+/-- The localization-level covariant map of a pushed rational datum. -/
+noncomputable def locMapOfHom (φ : R →+* S) (D : RationalLocData R)
+    (D' : RationalLocData S) (hs : D'.s = φ D.s) :
+    Localization.Away D.s →+* Localization.Away D'.s :=
+  IsLocalization.map (Localization.Away D'.s) φ
+    (show Submonoid.powers D.s ≤ (Submonoid.powers D'.s).comap φ from
+      Submonoid.powers_le.mpr (show φ D.s ∈ Submonoid.powers D'.s from
+        ⟨1, by show D'.s ^ 1 = φ D.s; rw [pow_one, hs]⟩))
+
+theorem locMapOfHom_algebraMap (φ : R →+* S) (D : RationalLocData R)
+    (D' : RationalLocData S) (hs : D'.s = φ D.s) (a : R) :
+    locMapOfHom φ D D' hs (algebraMap R (Localization.Away D.s) a) =
+      algebraMap S (Localization.Away D'.s) (φ a) := by
+  unfold locMapOfHom
+  rw [IsLocalization.map_eq]
+
+theorem locMapOfHom_divByS (φ : R →+* S) (D : RationalLocData R)
+    (D' : RationalLocData S) (hs : D'.s = φ D.s) (t : R) :
+    locMapOfHom φ D D' hs (divByS t D.s) = divByS (φ t) D'.s := by
+  rw [divByS, divByS, locMapOfHom, IsLocalization.map_mk']
+  exact congrArg _ (Subtype.ext hs.symm)
+
+/-- Continuity of the localization-level covariant map (universal property of the
+localization topology; the pushed generators are in `locSubring D'`, hence
+power-bounded). -/
+theorem locMapOfHom_continuous (φ : R →+* S) (hφ : Continuous φ)
+    (D : RationalLocData R) (D' : RationalLocData S) (hs : D'.s = φ D.s)
+    (hT : ∀ t ∈ D.T, φ t ∈ D'.T) :
+    @Continuous _ _ D.topology D'.topology (locMapOfHom φ D D' hs) := by
+  letI := D'.topology
+  haveI : IsTopologicalRing (Localization.Away D'.s) := D'.isTopologicalRing
+  haveI : @NonarchimedeanRing _ _ D'.topology :=
+    (locBasis D'.P D'.T D'.s D'.hopen).nonarchimedean
+  have hf_alg : @Continuous _ _ _ D'.topology
+      ((locMapOfHom φ D D' hs).comp (algebraMap R (Localization.Away D.s))) := by
+    have h_eq : (locMapOfHom φ D D' hs).comp (algebraMap R (Localization.Away D.s)) =
+        (algebraMap S (Localization.Away D'.s)).comp φ := by
+      ext a; exact locMapOfHom_algebraMap φ D D' hs a
+    rw [show ⇑((locMapOfHom φ D D' hs).comp (algebraMap R (Localization.Away D.s)))
+        = ⇑((algebraMap S (Localization.Away D'.s)).comp φ) from congrArg _ h_eq,
+      RingHom.coe_comp]
+    refine Continuous.comp ?_ hφ
+    -- `algebraMap S (Localization.Away D'.s)` is continuous into `D'.topology`
+    -- (inlined from `algebraMap_continuous_loc`, avoiding its nonarchimedean variable).
+    apply continuous_of_continuousAt_zero
+      (algebraMap S (Localization.Away D'.s)).toAddMonoidHom
+    rw [ContinuousAt, map_zero, Filter.tendsto_def]
+    intro U hU
+    obtain ⟨n, -, hn⟩ :=
+      (locBasis D'.P D'.T D'.s D'.hopen).hasBasis_nhds_zero.mem_iff.mp hU
+    apply Filter.mem_of_superset (D'.P.hasBasis_nhds_zero.mem_of_mem (i := n) trivial)
+    intro a ha
+    obtain ⟨⟨b, hb⟩, hbn, hab⟩ := ha
+    rw [← hab]
+    exact hn ⟨algebraMapD D'.P D'.T D'.s ⟨b, hb⟩,
+      by rw [locIdeal, ← Ideal.map_pow]; exact Ideal.mem_map_of_mem _ hbn, rfl⟩
+  refine locTopology_continuous_lift D.P D.T D.s D.hopen _ hf_alg fun t ht => ?_
+  rw [locMapOfHom_divByS]
+  exact (locSubring_isBounded_of_pair D'.P D'.T D'.s D'.hopen).isPowerBounded_of_mem
+    (divByS_mem_locSubring D'.P D'.T D'.s (hT t ht))
+
+/-- The covariant map into the completion (algebraic side). -/
+noncomputable def pushMapAlg (φ : R →+* S) (D : RationalLocData R)
+    (D' : RationalLocData S) (hs : D'.s = φ D.s) :
+    Localization.Away D.s →+* presheafValue D' :=
+  D'.coeRingHom.comp (locMapOfHom φ D D' hs)
+
+theorem pushMapAlg_continuous (φ : R →+* S) (hφ : Continuous φ)
+    (D : RationalLocData R) (D' : RationalLocData S) (hs : D'.s = φ D.s)
+    (hT : ∀ t ∈ D.T, φ t ∈ D'.T) :
+    @Continuous _ _ D.topology
+      (@UniformSpace.toTopologicalSpace _
+        (@UniformSpace.Completion.uniformSpace _ D'.uniformSpace))
+      (pushMapAlg φ D D' hs) := by
+  letI := D.topology
+  letI := D'.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D'.s) := D'.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D'.s) := D'.isUniformAddGroup
+  have hcoe : @Continuous _ _ D'.topology
+      (@UniformSpace.toTopologicalSpace _
+        (@UniformSpace.Completion.uniformSpace _ D'.uniformSpace))
+      D'.coeRingHom :=
+    @UniformSpace.Completion.continuous_coe _ D'.uniformSpace
+  exact hcoe.comp (locMapOfHom_continuous φ hφ D D' hs hT)
+
+/-- The covariant presheaf-value map `𝒪(D) →+* 𝒪(D')` along `φ` ([FJP] Lemma 5.1). -/
+noncomputable def presheafValueMapOfHom (φ : R →+* S) (hφ : Continuous φ)
+    (D : RationalLocData R) (D' : RationalLocData S) (hs : D'.s = φ D.s)
+    (hT : ∀ t ∈ D.T, φ t ∈ D'.T) :
+    presheafValue D →+* presheafValue D' := by
+  letI := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  letI : UniformSpace (Localization.Away D'.s) := D'.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D'.s) := D'.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D'.s) := D'.isUniformAddGroup
+  exact UniformSpace.Completion.extensionHom (pushMapAlg φ D D' hs)
+    (pushMapAlg_continuous φ hφ D D' hs hT)
+
+theorem presheafValueMapOfHom_continuous (φ : R →+* S) (hφ : Continuous φ)
+    (D : RationalLocData R) (D' : RationalLocData S) (hs : D'.s = φ D.s)
+    (hT : ∀ t ∈ D.T, φ t ∈ D'.T) :
+    Continuous (presheafValueMapOfHom φ hφ D D' hs hT) := by
+  letI := D.uniformSpace
+  exact UniformSpace.Completion.continuous_extension
+
+/-- The covariant map agrees with the algebraic map on the dense image. -/
+theorem presheafValueMapOfHom_coe (φ : R →+* S) (hφ : Continuous φ)
+    (D : RationalLocData R) (D' : RationalLocData S) (hs : D'.s = φ D.s)
+    (hT : ∀ t ∈ D.T, φ t ∈ D'.T) (a : Localization.Away D.s) :
+    presheafValueMapOfHom φ hφ D D' hs hT
+      (@UniformSpace.Completion.coeRingHom _ _ D.uniformSpace
+        D.isTopologicalRing D.isUniformAddGroup a) =
+      pushMapAlg φ D D' hs a := by
+  letI := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  letI : UniformSpace (Localization.Away D'.s) := D'.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D'.s) := D'.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D'.s) := D'.isUniformAddGroup
+  exact UniformSpace.Completion.extensionHom_coe (pushMapAlg φ D D' hs)
+    (pushMapAlg_continuous φ hφ D D' hs hT) a
+
+/-- The covariant map intertwines the canonical maps ([FJP] Lemma 5.1 naturality on `A`). -/
+theorem presheafValueMapOfHom_canonicalMap (φ : R →+* S) (hφ : Continuous φ)
+    (D : RationalLocData R) (D' : RationalLocData S) (hs : D'.s = φ D.s)
+    (hT : ∀ t ∈ D.T, φ t ∈ D'.T) (a : R) :
+    presheafValueMapOfHom φ hφ D D' hs hT (D.canonicalMap a) =
+      D'.canonicalMap (φ a) := by
+  have h1 : presheafValueMapOfHom φ hφ D D' hs hT (D.canonicalMap a) =
+      pushMapAlg φ D D' hs (algebraMap R (Localization.Away D.s) a) :=
+    presheafValueMapOfHom_coe φ hφ D D' hs hT (algebraMap R (Localization.Away D.s) a)
+  rw [h1]
+  show D'.coeRingHom (locMapOfHom φ D D' hs (algebraMap R (Localization.Away D.s) a)) = _
+  rw [locMapOfHom_algebraMap]
+  rfl
+
+end CovariantPush
+
+/-! ### Continuity of the square's maps (norm bounds ⇒ 1-Lipschitz) -/
+
+theorem continuous_jB : Continuous (jB F) :=
+  AddMonoidHomClass.continuous_of_bound (jB F) 1 fun a => by
+    rw [one_mul]; exact norm_jB_le F a
+
+theorem continuous_iotaC : Continuous (iotaC F) :=
+  AddMonoidHomClass.continuous_of_bound (iotaC F) 1 fun a => by
+    rw [one_mul, norm_iotaC]
+
+theorem continuous_rhoC : Continuous (rhoC F) :=
+  AddMonoidHomClass.continuous_of_bound (rhoC F) 1 fun a => by
+    rw [one_mul]; exact norm_rhoC_le F a
 
 /-- The induced map on completed rational localizations along `ιC` ([FJP] Lemma 5.1's
 `𝒪_X(U) → 𝒪_{Y_C}(U_C)`; built from `IsLocalization` functoriality, continuity for the
 localization topologies, and `UniformSpace.Completion` functoriality). -/
-def presheafValueMapC (D : RationalLocData (JetA F)) (hD : D.IsRational) :
-    presheafValue D →+* presheafValue (pushDatumC D hD) := by sorry
+noncomputable def presheafValueMapC (D : RationalLocData (JetA F)) (hD : D.IsRational) :
+    presheafValue D →+* presheafValue (pushDatumC D hD) :=
+  presheafValueMapOfHom (iotaC F) (continuous_iotaC) D (pushDatumC D hD) rfl
+    (fun _ ht => Finset.mem_image_of_mem _ ht)
 
-def presheafValueMapB (D : RationalLocData (JetA F)) (hD : D.IsRational) :
-    presheafValue D →+* presheafValue (pushDatumB D hD) := by sorry
+noncomputable def presheafValueMapB (D : RationalLocData (JetA F)) (hD : D.IsRational) :
+    presheafValue D →+* presheafValue (pushDatumB D hD) :=
+  presheafValueMapOfHom (jB F) (continuous_jB) D (pushDatumB D hD) rfl
+    (fun _ ht => Finset.mem_image_of_mem _ ht)
 
-def presheafValueMapD (D : RationalLocData (JetA F)) (hD : D.IsRational) :
-    presheafValue D →+* presheafValue (pushDatumD D hD) := by sorry
+noncomputable def presheafValueMapD (D : RationalLocData (JetA F)) (hD : D.IsRational) :
+    presheafValue D →+* presheafValue (pushDatumD D hD) :=
+  presheafValueMapOfHom ((rhoC F).comp (iotaC F))
+    (by rw [RingHom.coe_comp]; exact (continuous_rhoC).comp (continuous_iotaC))
+    D (pushDatumD D hD) rfl (fun _ ht => Finset.mem_image_of_mem _ ht)
 
 theorem presheafValueMapC_continuous (D : RationalLocData (JetA F)) (hD : D.IsRational) :
-    Continuous (presheafValueMapC D hD) := by sorry
+    Continuous (presheafValueMapC D hD) :=
+  presheafValueMapOfHom_continuous _ _ _ _ _ _
 
 theorem presheafValueMapB_continuous (D : RationalLocData (JetA F)) (hD : D.IsRational) :
-    Continuous (presheafValueMapB D hD) := by sorry
+    Continuous (presheafValueMapB D hD) :=
+  presheafValueMapOfHom_continuous _ _ _ _ _ _
 
 theorem presheafValueMapC_canonicalMap (D : RationalLocData (JetA F)) (hD : D.IsRational)
     (a : JetA F) :
     presheafValueMapC D hD (D.canonicalMap a) =
-      (pushDatumC D hD).canonicalMap (iotaC F a) := by sorry
+      (pushDatumC D hD).canonicalMap (iotaC F a) :=
+  presheafValueMapOfHom_canonicalMap _ _ _ _ _ _ a
 
 theorem presheafValueMapB_canonicalMap (D : RationalLocData (JetA F)) (hD : D.IsRational)
     (a : JetA F) :
     presheafValueMapB D hD (D.canonicalMap a) =
-      (pushDatumB D hD).canonicalMap (jB F a) := by sorry
+      (pushDatumB D hD).canonicalMap (jB F a) :=
+  presheafValueMapOfHom_canonicalMap _ _ _ _ _ _ a
 
 /-! ### The graph bridge ([FJP] Lemma 1.1 + (4.21))
 

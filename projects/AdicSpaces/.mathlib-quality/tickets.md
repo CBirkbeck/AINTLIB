@@ -527,12 +527,26 @@ T704, by a fresh `/develop --continue`.
   diverges). Fix: put `[DecidableEq A]` binders on generic `Finset.image` span lemmas so
   the use site synthesizes the ambient instance. Type: def-completion + proofs (L5.1–L5.2).
 
-### [T602] covariant presheaf-value maps
-- **Status**: open | **Depends**: T601 | **Type**: def-completion + proofs (L5.3 part)
-- **Sorries**: `presheafValueMapB/C/D` (data), continuity ×2, `canonicalMap`-compat ×2.
-- **Sketch**: `IsLocalization.Away.map` on `Localization.Away D.s`; continuity via
-  `locTopology` lattice inclusion (generators ↦ generators over the pod pair);
-  `UniformSpace.Completion.extensionHom` (T0 + complete targets are project instances).
+### [T602] covariant presheaf-value maps — **DONE 2026-07-17**
+- **Status**: done (beastmode). Built a **generic covariant layer** (section
+  `CovariantPush`, no PlusSubring needed): `locMapOfHom φ D D' (hs : D'.s = φ D.s)` via
+  `IsLocalization.map` (powers-comap inclusion), `locMapOfHom_algebraMap`
+  (`IsLocalization.map_eq`), `locMapOfHom_divByS` (`map_mk'` + `Subtype.ext`),
+  `locMapOfHom_continuous` via `locTopology_continuous_lift` — hf_alg from naturality +
+  inlined `algebraMap`-continuity basis proof, hpow FREE since pushed generators land in
+  `locSubring D'` (`divByS_mem_locSubring` + `locSubring_isBounded_of_pair`; no
+  Nullstellensatz/`HasLocLiftPowerBounded` input, unlike restriction maps); `pushMapAlg` =
+  `coeRingHom ∘ locMapOfHom`; `presheafValueMapOfHom` via
+  `UniformSpace.Completion.extensionHom` (restrictionMapHom letI-plumbing mirrored);
+  `_continuous` (`Completion.continuous_extension`), `_coe` (`extensionHom_coe`),
+  `_canonicalMap`. Instantiated: `presheafValueMapB/C/D` (+`continuous_jB/iotaC/rhoC` via
+  `AddMonoidHomClass.continuous_of_bound` from the norm bounds), continuity ×2,
+  canonicalMap-compat ×2 — all one-liners. File green, 19 sorries remain (T603–T606).
+- **Gotchas**: (i) `algebraMap_continuous_loc` carries a `[NonarchimedeanRing A]` section
+  variable — inline its 10-line basis proof instead of adding the instance; (ii) anonymous
+  `Submonoid.powers` witness needs `by show D'.s ^ 1 = φ D.s` (unreduced beta blocks
+  `rw [pow_one]`); (iii) `IsLocalization.map_eq` as a term gets TC-stuck on metas — use
+  `unfold locMapOfHom; rw [IsLocalization.map_eq]`.
 
 ### [T603] **KEYSTONE**: the graph bridge for 𝓐
 - **Status**: open | **Depends**: T505, T602 | **Type**: def-completion + proofs (L5.4)
