@@ -199,6 +199,21 @@ noncomputable def StandardEtalePair.baseChangeEquiv {B : Type*} [CommRing B]
     (B ⊗[A] P.Ring) ≃ₐ[B] (P.map (algebraMap A B)).Ring :=
   ((StandardEtalePair.selfPresentation P).baseChange).equivRing
 
+open scoped TensorProduct in
+/-- The canonical map to the base-changed square-root algebra: the right tensor
+inclusion transported through the base-change equivalence. -/
+noncomputable def sqrtPairMapRingHom {B : Type*} [CommRing B] [Algebra A B]
+    (P : StandardEtalePair A) : P.Ring →+* (P.map (algebraMap A B)).Ring :=
+  (StandardEtalePair.baseChangeEquiv P).toRingEquiv.toRingHom.comp
+    (Algebra.TensorProduct.includeRight (R := A) (A := B) (B := P.Ring)).toRingHom
+
+open scoped TensorProduct in
+@[simp]
+theorem baseChangeEquiv_includeRight {B : Type*} [CommRing B] [Algebra A B]
+    (P : StandardEtalePair A) (y : P.Ring) :
+    StandardEtalePair.baseChangeEquiv P ((1 : B) ⊗ₜ[A] y) = sqrtPairMapRingHom P y :=
+  rfl
+
 /-! ### The scheme-level cover -/
 
 section SchemeLevel
