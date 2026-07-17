@@ -74,8 +74,9 @@ private theorem cechAugmentedComplex_exactAt_one (hU : ⨆ i, U i = ⊤) :
 private theorem cechAugmentedComplex_exactAt_add_two (hU : ⨆ i, U i = ⊤) (n : ℕ) :
     (cechAugmentedComplex F U).ExactAt (n + 2) := by
   rw [HomologicalComplex.exactAt_iff' _ (n + 1) (n + 2) (n + 3) (by simp) (by simp)]
-  simpa [HomologicalComplex.sc', HomologicalComplex.shortComplexFunctor',
-    cechAugmentedComplex, cechComplex_X, cechComplex_d] using
+  simpa only [HomologicalComplex.sc', HomologicalComplex.shortComplexFunctor',
+    cechAugmentedComplex, CochainComplex.augment, CochainComplex.augment_X_succ,
+    CochainComplex.augment_d_succ_succ, cechComplex_X, cechComplex_d] using
       cechShortComplex_exact F U hU n
 
 /-- The augmented sheaf-level Cech complex of an open cover is acyclic. -/
