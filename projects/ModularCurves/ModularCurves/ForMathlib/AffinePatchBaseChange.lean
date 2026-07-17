@@ -64,6 +64,8 @@ noncomputable def pullbackPreimageΓIsoTensor
     ((U.ι ≫ f).appTop.hom).toAlgebra
   letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) :=
     t.appTop.hom.toAlgebra
+  letI : IsIso (affineKunnethΓ (U.ι ≫ f) t rfl rfl) :=
+    isIso_affineKunnethΓ (U.ι ≫ f) t rfl rfl
   exact (pullback.fst f t ⁻¹ᵁ U).topIso.symm ≪≫
     (isoAppTop e).symm ≪≫
       asIso (affineKunnethΓ (U.ι ≫ f) t rfl rfl)
@@ -80,9 +82,20 @@ theorem pullbackPreimageΓIsoTensor_inv
       ((U.ι ≫ f).appTop.hom).toAlgebra
     letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) :=
       t.appTop.hom.toAlgebra
+    letI : IsIso (affineKunnethΓ (U.ι ≫ f) t rfl rfl) :=
+      isIso_affineKunnethΓ (U.ι ≫ f) t rfl rfl
     (pullbackPreimageΓIsoTensor f t U hU).inv =
       inv (affineKunnethΓ (U.ι ≫ f) t rfl rfl) ≫
         (pullbackPreimageIsoPullbackRestrict f t U).hom.appTop ≫
-          (pullback.fst f t ⁻¹ᵁ U).topIso.hom := rfl
+          (pullback.fst f t ⁻¹ᵁ U).topIso.hom := by
+  letI : IsAffine U.toScheme := hU
+  letI : Algebra Γ(S, (⊤ : S.Opens))
+      Γ(U.toScheme, (⊤ : U.toScheme.Opens)) :=
+    ((U.ι ≫ f).appTop.hom).toAlgebra
+  letI : Algebra Γ(S, (⊤ : S.Opens)) Γ(T, (⊤ : T.Opens)) :=
+    t.appTop.hom.toAlgebra
+  letI : IsIso (affineKunnethΓ (U.ι ≫ f) t rfl rfl) :=
+    isIso_affineKunnethΓ (U.ι ≫ f) t rfl rfl
+  rfl
 
 end AlgebraicGeometry
