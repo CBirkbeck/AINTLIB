@@ -484,8 +484,8 @@ theorem _root_.Matrix.charpoly_eq_of_conj {n : Type*} [Fintype n] [DecidableEq n
         (RingHom.mapMatrix_apply _ _).symm, ← map_mul, ← map_mul, hconj]
   have hdet2 : N₁.charmatrix.det
       = ((U.map Polynomial.C) * (N₂.charmatrix * (V.map Polynomial.C))).det := by
-    have h := congrArg (fun W => Matrix.det (W * (V.map Polynomial.C))) hcharm
-    simpa [Matrix.mul_assoc, hdet] using h
+    simpa [Matrix.mul_assoc, hdet] using
+      congrArg (fun W => Matrix.det (W * (V.map Polynomial.C))) hcharm
   calc N₁.charpoly
       = (U.map Polynomial.C).det * (N₂.charmatrix.det * (V.map Polynomial.C).det) := by
         rw [Matrix.charpoly, hdet2, Matrix.det_mul, Matrix.det_mul]
@@ -529,8 +529,8 @@ theorem map_coactionCharpoly (ρ : B →ₐ[R] B ⊗[R] A) (hρ : IsCoaction ρ)
 
 theorem coactionCharpoly_coeff_mem (ρ : B →ₐ[R] B ⊗[R] A) (hρ : IsCoaction ρ) (f : B)
     (k : ℕ) : (coactionCharpoly R A ρ f).coeff k ∈ coinvariants ρ := by
-  have h := congrArg (fun q => Polynomial.coeff q k) (map_coactionCharpoly R A ρ hρ f)
-  simpa [Polynomial.coeff_map, mem_coinvariants] using h
+  simpa [Polynomial.coeff_map, mem_coinvariants] using
+    congrArg (fun q => Polynomial.coeff q k) (map_coactionCharpoly R A ρ hρ f)
 
 /-- The multiplication-matrix map, packaged as a ring homomorphism — the (faithful) matrix
 representation of `B ⊗[R] A` acting on itself in the basis `1 ⊗ eⱼ`. -/
