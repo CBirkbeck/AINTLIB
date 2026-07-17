@@ -268,19 +268,168 @@ theorem isUniform_JetA : TopologicalRing.IsUniform (JetA F) := by
 
 /-! ### The plus rings of the jet vertices ([FJP] (5.2)) -/
 
+section JetIff
+
+/-- The jet-power norm bound: over a multiplicative base, `‖xⁿ‖ ≤ max 1 ‖x.snd‖` whenever
+`‖x.fst‖ ≤ 1` ([FJP] (5.2): "is bounded independently of `n`"). -/
+theorem norm_pow_le_of_fst_le {R : Type*} [NormedCommRing R] [IsUltrametricDist R]
+    [NormOneClass R] (hmul : ∀ a b : R, ‖a * b‖ = ‖a‖ * ‖b‖)
+    (x : DualNumber R) (hx : ‖x.fst‖ ≤ 1) (n : ℕ) :
+    ‖x ^ n‖ ≤ max 1 ‖x.snd‖ := by
+  have hxeq : x = TrivSqZeroExt.inl x.fst + TrivSqZeroExt.inr x.snd :=
+    (TrivSqZeroExt.inl_fst_add_inr_snd_eq x).symm
+  conv_lhs => rw [hxeq, JetNorm.pow_eq]
+  rw [JetNorm.norm_def]
+  have hfst : ((TrivSqZeroExt.inl (x.fst ^ n) +
+      TrivSqZeroExt.inr ((n : R) * x.fst ^ (n - 1) * x.snd) : DualNumber R)).fst =
+      x.fst ^ n := by
+    rw [TrivSqZeroExt.fst_add, TrivSqZeroExt.fst_inl, TrivSqZeroExt.fst_inr, add_zero]
+  have hsnd : ((TrivSqZeroExt.inl (x.fst ^ n) +
+      TrivSqZeroExt.inr ((n : R) * x.fst ^ (n - 1) * x.snd) : DualNumber R)).snd =
+      (n : R) * x.fst ^ (n - 1) * x.snd := by
+    rw [TrivSqZeroExt.snd_add, TrivSqZeroExt.snd_inl, TrivSqZeroExt.snd_inr, zero_add]
+  rw [hfst, hsnd]
+  have hpow : ∀ k : ℕ, ‖x.fst ^ k‖ ≤ 1 := fun k => by
+    induction k with
+    | zero => rw [pow_zero, norm_one]
+    | succ m ih =>
+      rw [pow_succ]
+      exact (norm_mul_le _ _).trans (mul_le_one₀ ih (norm_nonneg _) hx)
+  refine max_le (le_max_of_le_left (hpow n)) (le_max_of_le_right ?_)
+  calc ‖(n : R) * x.fst ^ (n - 1) * x.snd‖
+      ≤ ‖(n : R) * x.fst ^ (n - 1)‖ * ‖x.snd‖ := norm_mul_le _ _
+    _ ≤ ‖(n : R)‖ * ‖x.fst ^ (n - 1)‖ * ‖x.snd‖ :=
+        mul_le_mul_of_nonneg_right (norm_mul_le _ _) (norm_nonneg _)
+    _ ≤ 1 * 1 * ‖x.snd‖ := by
+        refine mul_le_mul_of_nonneg_right ?_ (norm_nonneg _)
+        exact mul_le_mul (IsUltrametricDist.norm_natCast_le_one R n) (hpow (n - 1))
+          (norm_nonneg _) zero_le_one
+    _ = ‖x.snd‖ := by ring
+
+/-- Generic (5.2): power-boundedness in dual numbers over a multiplicative base is a
+condition on the constant jet, given a scaling pseudouniformizer. -/
+theorem isPowerBounded_dualNumber_iff {R : Type*} [NormedCommRing R] [IsUltrametricDist R]
+    [NormOneClass R] (hmul : ∀ a b : R, ‖a * b‖ = ‖a‖ * ‖b‖)
+    (t : DualNumber R) (ht1 : ‖t‖ < 1) (ht0 : 0 < ‖t‖)
+    (hscale : ∀ z : DualNumber R, ‖t * z‖ = ‖t‖ * ‖z‖)
+    (x : DualNumber R) :
+    TopologicalRing.IsPowerBounded x ↔ ‖x.fst‖ ≤ 1 := by
+  constructor
+  · intro h
+    by_contra hlt
+    push Not at hlt
+    obtain ⟨V, hV, hVsub⟩ := h (Metric.ball 0 1) (Metric.ball_mem_nhds 0 one_pos)
+    obtain ⟨δ, hδ, hball⟩ := Metric.mem_nhds_iff.mp hV
+    obtain ⟨m, hm⟩ := exists_pow_lt_of_lt_one hδ ht1
+    have hwV : t ^ m ∈ V := by
+      refine hball ?_
+      rw [Metric.mem_ball, dist_zero_right]
+      have := norm_pow_mul_of_scale (E := DualNumber R) hscale m 1
+      rw [mul_one, norm_one, mul_one] at this
+      rw [this]
+      exact hm
+    obtain ⟨n, hn⟩ := pow_unbounded_of_one_lt ((‖t‖ ^ m)⁻¹) hlt
+    have hmem : x ^ n * t ^ m ∈ Metric.ball (0 : DualNumber R) 1 :=
+      hVsub ⟨x ^ n, ⟨n, rfl⟩, t ^ m, hwV, rfl⟩
+    rw [Metric.mem_ball, dist_zero_right, mul_comm,
+      norm_pow_mul_of_scale (E := DualNumber R) hscale m] at hmem
+    have hfstpow : ∀ k : ℕ, ‖x.fst ^ k‖ = ‖x.fst‖ ^ k := fun k => by
+      induction k with
+      | zero => simp
+      | succ j ih => rw [pow_succ, pow_succ, hmul, ih]
+    have hxn : ‖x.fst‖ ^ n ≤ ‖x ^ n‖ := by
+      rw [JetNorm.norm_def]
+      refine le_max_of_le_left ?_
+      rw [TrivSqZeroExt.fst_pow, hfstpow n]
+    have hge : (1 : ℝ) ≤ ‖t‖ ^ m * ‖x ^ n‖ := by
+      have hpos : (0 : ℝ) < ‖t‖ ^ m := by positivity
+      calc (1 : ℝ) = (‖t‖ ^ m)⁻¹ * ‖t‖ ^ m := (inv_mul_cancel₀ (ne_of_gt hpos)).symm
+        _ ≤ ‖x.fst‖ ^ n * ‖t‖ ^ m := by gcongr
+        _ = ‖t‖ ^ m * ‖x.fst‖ ^ n := by ring
+        _ ≤ ‖t‖ ^ m * ‖x ^ n‖ := mul_le_mul_of_nonneg_left hxn hpos.le
+    exact absurd hmem (not_lt.mpr hge)
+  · intro h
+    intro U hU
+    obtain ⟨ε, hε, hball⟩ := Metric.mem_nhds_iff.mp hU
+    have hC : (0 : ℝ) < max 1 ‖x.snd‖ + 1 := by positivity
+    refine ⟨Metric.ball 0 (ε / (max 1 ‖x.snd‖ + 1)),
+      Metric.ball_mem_nhds 0 (by positivity), ?_⟩
+    rintro z ⟨s, ⟨k, rfl⟩, y, hy, rfl⟩
+    rw [Metric.mem_ball, dist_zero_right] at hy
+    refine hball ?_
+    rw [Metric.mem_ball, dist_zero_right]
+    calc ‖x ^ k * y‖ ≤ ‖x ^ k‖ * ‖y‖ := norm_mul_le _ _
+      _ ≤ (max 1 ‖x.snd‖) * ‖y‖ :=
+          mul_le_mul_of_nonneg_right (norm_pow_le_of_fst_le hmul x h k) (norm_nonneg _)
+      _ < (max 1 ‖x.snd‖ + 1) * (ε / (max 1 ‖x.snd‖ + 1)) := by
+          refine mul_lt_mul' (by linarith) hy (norm_nonneg _) hC
+      _ = ε := by field_simp
+
+end JetIff
+
 /-- Power-boundedness in `𝓑` depends only on the constant-jet component
 ([FJP] (5.2): `ℬ° = k°⟨W⟩ ⊕ Qk⟨W⟩`, via `(f+Qg)ⁿ = fⁿ + nf^{n-1}Qg`). -/
 theorem isPowerBounded_JetB_iff (x : JetB F) :
-    TopologicalRing.IsPowerBounded x ↔ ‖x.fst‖ ≤ 1 := by sorry
+    TopologicalRing.IsPowerBounded x ↔ ‖x.fst‖ ≤ 1 :=
+  isPowerBounded_dualNumber_iff (norm_KW_mul F) (tB F)
+    (by rw [norm_tB]; exact norm_t_lt_one F)
+    (by rw [norm_tB]; exact norm_t_pos F) (norm_tB_mul F) x
 
 /-- Power-boundedness in `𝓓` depends only on the constant-jet component
 ([FJP] (5.2): `𝒟° = L° + QL`). -/
 theorem isPowerBounded_JetD_iff (x : JetD F) :
-    TopologicalRing.IsPowerBounded x ↔ ‖x.fst‖ ≤ 1 := by sorry
+    TopologicalRing.IsPowerBounded x ↔ ‖x.fst‖ ≤ 1 :=
+  isPowerBounded_dualNumber_iff (norm_L_mul F) (tD F)
+    (by rw [norm_tD]; exact norm_t_lt_one F)
+    (by rw [norm_tD]; exact norm_t_pos F) (norm_tD_mul F) x
 
 /-- `𝓑` is **not** uniform: the square-zero line `K·ε` is power-bounded and unbounded
 ([FJP] (2.1d): "the summand `kQ` is an unbounded line"). -/
-theorem not_isUniform_JetB : ¬ TopologicalRing.IsUniform (JetB F) := by sorry
+theorem not_isUniform_JetB : ¬ TopologicalRing.IsUniform (JetB F) := by
+  intro h
+  obtain ⟨V, hV, hVsub⟩ := h.isBounded_powerBounded (Metric.ball 0 1)
+    (Metric.ball_mem_nhds 0 one_pos)
+  obtain ⟨δ, hδ, hball⟩ := Metric.mem_nhds_iff.mp hV
+  obtain ⟨m, hm⟩ := exists_pow_lt_of_lt_one hδ
+    (show ‖tB F‖ < 1 by rw [norm_tB]; exact norm_t_lt_one F)
+  have hwV : (tB F) ^ m ∈ V := by
+    refine hball ?_
+    rw [Metric.mem_ball, dist_zero_right]
+    have := norm_pow_mul_of_scale (E := JetB F) (norm_tB_mul F) m 1
+    rw [mul_one, norm_one, mul_one] at this
+    rw [this]
+    exact hm
+  -- the square-zero element with huge norm
+  set w : K := (LaurentSeriesExample.t F) ^ (m + 1)
+  have hw : w ≠ 0 := pow_ne_zero _ (LaurentSeriesExample.t_ne_zero F)
+  set z : JetB F := TrivSqZeroExt.inr (constHomPS F w⁻¹)
+  have hzpb : TopologicalRing.IsPowerBounded z := by
+    rw [isPowerBounded_JetB_iff]
+    rw [show z.fst = 0 from rfl, norm_zero]
+    exact zero_le_one
+  have hmem : z * (tB F) ^ m ∈ Metric.ball (0 : JetB F) 1 :=
+    hVsub ⟨z, hzpb, (tB F) ^ m, hwV, rfl⟩
+  rw [Metric.mem_ball, dist_zero_right, mul_comm,
+    norm_pow_mul_of_scale (E := JetB F) (norm_tB_mul F) m] at hmem
+  have hznorm : ‖z‖ = ‖w⁻¹‖ := by
+    rw [show z = TrivSqZeroExt.inr (constHomPS F w⁻¹) from rfl, JetNorm.norm_eps_smul]
+    exact norm_restrictedC _
+  rw [norm_tB, hznorm] at hmem
+  have hwnorm : ‖w⁻¹‖ = ‖LaurentSeriesExample.t F‖ ^ (-(m + 1) : ℤ) := by
+    rw [norm_inv, show w = (LaurentSeriesExample.t F) ^ (m + 1) from rfl, norm_pow,
+      ← zpow_natCast, ← zpow_neg]
+    congr 1
+  rw [hwnorm] at hmem
+  have ht01 : 0 < ‖LaurentSeriesExample.t F‖ := norm_t_pos F
+  have hcalc : (1 : ℝ) ≤ ‖LaurentSeriesExample.t F‖ ^ m *
+      ‖LaurentSeriesExample.t F‖ ^ (-(m + 1) : ℤ) := by
+    rw [← zpow_natCast (‖LaurentSeriesExample.t F‖) m, ← zpow_add₀ (ne_of_gt ht01)]
+    have hexp : (m : ℤ) + (-(m + 1) : ℤ) = -1 := by omega
+    rw [hexp]
+    rw [zpow_neg, zpow_one]
+    rw [le_inv_comm₀ one_pos ht01]
+    simpa using (norm_t_lt_one F).le
+  exact absurd hmem (not_lt.mpr hcalc)
 
 /-! ### 𝓐 is not noetherian ([FJP] Prop 2.4) -/
 

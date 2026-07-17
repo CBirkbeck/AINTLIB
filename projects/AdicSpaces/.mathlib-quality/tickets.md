@@ -211,7 +211,15 @@ T704, by a fresh `/develop --continue`.
   `JetA` domain via `Subring` + `IsDomain` of `JetC` (`Function.Injective.isDomain`).
 
 ### [T202] `FiniteJetUniformDomain.lean` — uniformity and (5.2)
-- **Status**: open | **Depends**: T201, T109 | **Type**: proofs (R2 + R4 inputs)
+- **Status**: **DONE** (part 1: `norm_JetA_mul/pow`, `isPowerBounded_JetA_iff` via tA-escape +
+  inline Huber-power-boundedness, `isUniform_JetA`, both `maxHeartbeats 1000000` — cleanup
+  candidates; part 2: generic `norm_pow_le_of_fst_le` + `isPowerBounded_dualNumber_iff`
+  (dual numbers over any multiplicative base w/ scaling pseudouniformizer) instantiated to
+  `isPowerBounded_JetB_iff`/`isPowerBounded_JetD_iff`; `not_isUniform_JetB` via the
+  square-zero element `inr (constHomPS t^{-(m+1)})` — power-bounded by the iff (fst = 0),
+  kills the ball-1 boundedness of `powerBoundedSubring 𝓑` against `tB^m`-scaling). **The
+  `isUniform_JetA` and `not_isUniform_JetB` headline ingredients are proven.**
+  | **Type**: proofs (R2 + R4 inputs)
 - **Sorries**: `isPowerBounded_JetA_iff`, `isUniform_JetA`, `isPowerBounded_JetB_iff`,
   `isPowerBounded_JetD_iff`, `not_isUniform_JetB`.
 - **Sketch**: powers via `norm_JetC_mul` restricted (L: "powers computed in 𝒞"); ball
