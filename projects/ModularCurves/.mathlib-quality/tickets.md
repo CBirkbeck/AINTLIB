@@ -23038,3 +23038,27 @@ classification stands.
 
 **(GH3) watches armed** on the three landing signals (KM :179 / OMEGA-hArb / G0-:206); **(GH4) the
 final-capstone receipt script staged** (7 headline receipts, one command). (STREAM-GH)
+
+### v10.314-G0 — [CHARTER-G milestone] (G1) AFFINE LAYER COMPLETE: funnel + the u²=d cover package, all axiom-clean (STREAM-G0)
+Commits 0eb053276 (funnel) / 086f86fc8 / 381b5d0ae (SqrtUnitCover), pushed. CHARTER-G state:
+
+**MILESTONE — :206 is now [funnel] ∘ [glued torsor], and the torsor's affine core is DONE:**
+1. `Moduli/LegendreDeltaRelRep.lean`: the scale-torsor funnel — :206 follows from any finite
+   étale Z₂ over `fullLevelLocus 2` with the per-point ω-classification. Γ(2)-layer free
+   (E3 machinery N-generic).
+2. `GroupScheme/SqrtUnitCover.lean` (NEW, all #print-axioms-clean): the u²=d double cover via
+   mathlib's `StandardEtalePair` with pair `(X²−d, 2d)` — étale FREE from the pair-identity
+   `(2X)·X + (X²−d)·(−2) = 2d`; `sqrtPair_hasMap_iff` (points = square roots);
+   `sqrtPairAdjoinRootEquiv` + finiteness (trivial 2d-localization of the rank-2 free
+   AdjoinRoot); `overSpecEquivAlgHom` (reusable over-Spec dictionary);
+   `sqrtCoverπ_etale/isFinite` + `sqrtCoverSectionsEquiv` ({x // x² = d}); and the TWIST
+   `sqrtPairCongr : (c²d)-cover ≅ₐ d-cover` (X ↦ cX) — the cocycle ingredient.
+   Proof-op: `StandardEtalePair.algHom_ext` (homEquiv-injectivity as ext) is the workhorse.
+
+**REMAINING to :206 (the (G2)-seam):** the glued torsor over the locus = the chart-local d's
+(adapted abscissa-differences) + their c²-transition cocycle (my sqrtPairCongr glues them) +
+the b↔u dictionary (a Legendre-completing ω-basis over a chart ↔ a square root of that
+chart's d). ALL of these live in the adapted/ω layer — the STREAM-OMEGA asks (v10.305) stand,
+now sharpened: with (2a)+(2b) delivered (thanks!), what remains is ask-(1)/(3): the CHART-d
+DATA (per-chart abscissa-difference + transition-units). The affine geometry is ready to
+consume it the moment it exists.
