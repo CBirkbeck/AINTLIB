@@ -192,6 +192,16 @@ theorem marksAt_of_forall_pull_ne_zero {S : Scheme.{u}}
     (fun w _ => forall_not_mem_range_of_pull_ne σ G.zero hσ G.zero_π hne w)
 
 
+/-- **([hArb-1] companion)** A presentation marks a section at UNIQUE coordinates. -/
+theorem marksAt_coords_unique {S : Scheme.{u}} {G : EllipticCurveGeom S}
+    {V : S.affineOpens} (Pr : LocalPresentation G V)
+    {σ : S ⟶ G.E} {hσ : σ ≫ G.π = 𝟙 S} {p q p' q' : Γ(S, V.1)}
+    (h1 : Pr.MarksAt hσ p q) (h2 : Pr.MarksAt hσ p' q') : p = p' ∧ q = q' := by
+  obtain ⟨e1, hM1⟩ := h1
+  obtain ⟨e2, hM2⟩ := h2
+  exact projModelAffineSection_injective Pr.W (hM1.symm.trans hM2)
+
+
 end LocalPresentation
 
 end ModularCurves

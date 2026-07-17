@@ -168,6 +168,19 @@ namespace UnitCocycle
 
 variable (c : UnitCocycle X)
 
+/-- **(T-OM-A0′)** The `n`-th power of a unit cocycle (same cover, transition units
+raised to the `n`): the carrier of `ω^{⊗n}`-style twists. -/
+@[simps]
+noncomputable def zpow (n : ℤ) : UnitCocycle X where
+  ι := c.ι
+  U := c.U
+  covers := c.covers
+  u i j := (c.u i j) ^ n
+  u_self i := by rw [c.u_self, one_zpow]
+  u_cocycle i j k := by
+    rw [map_zpow, map_zpow, map_zpow, ← mul_zpow, c.u_cocycle]
+
+
 /-- The cover of a unit cocycle has supremum `⊤`. -/
 theorem iSup_eq_top : ⨆ i, c.U i = ⊤ := by
   rw [eq_top_iff]

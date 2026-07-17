@@ -202,4 +202,56 @@ theorem eq_affineSection_of_zChart_factor (W : WeierstrassCurve R)
   have := congrArg (fun z => z.1.1) hgceq
   simpa [hgc, hgaff] using this
 
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **([hArb-1] companion: coordinate uniqueness)** The affine-point section determines
+its coordinates: compose with the chart factorisation and read the two chart
+coordinates off the evaluation homs. -/
+theorem projModelAffineSection_injective (W : WeierstrassCurve R) {p q p' q' : R}
+    {h : W.toAffine.Equation p q} {h' : W.toAffine.Equation p' q'}
+    (heq : projModelAffineSection W p q h = projModelAffineSection W p' q' h') :
+    p = p' ∧ q = q' := by
+  -- the chart evaluations agree
+  have hch : affineChartHom W p q h = affineChartHom W p' q' h' := by
+    have h1 : Spec.map (CommRingCat.ofHom (affineChartHom W p q h)) =
+        Spec.map (CommRingCat.ofHom (affineChartHom W p' q' h')) := by
+      have := spec_affineChartHom_awayι W p q h
+      rw [heq, ← spec_affineChartHom_awayι W p' q' h'] at this
+      exact (cancel_mono (Proj.awayι (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2))
+        (mk_X_mem_quotientGrading_one W 2) one_pos)).mp this
+    exact congrArg CommRingCat.Hom.hom (Spec.map_injective h1)
+  -- read the coordinates
+  have hval : ∀ (j : {j : Fin 3 // j ≠ 2}) (a b : R) (ha : W.toAffine.Equation a b),
+      (affineChartHom W a b ha)
+        (chartCoordEquiv W 2 (Ideal.Quotient.mk _ (MvPolynomial.X j))) =
+        MvPolynomial.eval ![a, b, 1] (MvPolynomial.X j.1) := by
+    intro j a b ha
+    rw [chartCoordEquiv_mk_X]
+    rw [show Away.isLocalizationElem (mk_X_mem_quotientGrading_one W 2)
+        (mk_X_mem_quotientGrading_one W j.1) =
+      Away.mk (quotientGrading (projIdeal W))
+        (mk_X_mem_quotientGrading_one W 2) 1
+        (((quotientGradingHom (projIdeal W)) (MvPolynomial.X j.1)) ^ 1)
+        (by
+          simpa using SetLike.pow_mem_graded 1
+            (mk_X_mem_quotientGrading_one W j.1)) from rfl]
+    rw [affineChartHom_mk, map_pow, pow_one]
+    rw [show (quotientGradingHom (projIdeal W)) (MvPolynomial.X j.1) =
+      Ideal.Quotient.mk (projIdeal W).toIdeal (MvPolynomial.X j.1) from rfl]
+    rw [projModelAffineEval_mk]
+  constructor
+  · have h0 := congrArg (fun (ψ : Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) →+* R) =>
+      ψ (chartCoordEquiv W 2 (Ideal.Quotient.mk _
+        (MvPolynomial.X (⟨0, by decide⟩ : {j : Fin 3 // j ≠ 2}))))) hch
+    simp only [hval] at h0
+    simpa using h0
+  · have h0 := congrArg (fun (ψ : Away (quotientGrading (projIdeal W))
+        ((quotientGradingHom (projIdeal W)) (MvPolynomial.X 2)) →+* R) =>
+      ψ (chartCoordEquiv W 2 (Ideal.Quotient.mk _
+        (MvPolynomial.X (⟨1, by decide⟩ : {j : Fin 3 // j ≠ 2}))))) hch
+    simp only [hval] at h0
+    simpa using h0
+
 end ModularCurves
