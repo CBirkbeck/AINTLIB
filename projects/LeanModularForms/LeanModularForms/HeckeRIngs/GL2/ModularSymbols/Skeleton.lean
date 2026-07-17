@@ -97,14 +97,16 @@ therefore keep `𝕄` **opaque** with a stated `ℤ`-module structure, so ES-2/3
 against a clean interface; the body above records the intended construction. -/
 
 /-- **ES-1.** The integral modular-symbol module `𝕄_k(Γ₁N; ℤ)` (opaque in the skeleton; the intended
-body is `(modSymRep N k ℤ).Coinvariants` via the bundled `Rep`-category coinvariants — see API-NOTE). -/
+body is `(modSymRep N k ℤ).Coinvariants` via the bundled `Rep`-category coinvariants — see
+API-NOTE). -/
 def 𝕄 (N : ℕ) [NeZero N] (k : ℤ) : Type := sorry
 
 noncomputable instance instACG_𝕄 (N : ℕ) [NeZero N] (k : ℤ) : AddCommGroup (𝕄 N k) := sorry
 noncomputable instance instMod_𝕄 (N : ℕ) [NeZero N] (k : ℤ) : Module ℤ (𝕄 N k) := sorry
 
-/-- **ES-1 (finite generation).** Manin reduction: despite `Div⁰(ℙ¹ℚ)` being infinite, the coinvariants
-are finitely generated over `ℤ` (finitely many Manin symbols `Γ₁N\SL₂ℤ × monomial basis`). API-GAP #2:
+/-- **ES-1 (finite generation).** Manin reduction: despite `Div⁰(ℙ¹ℚ)` being infinite, the
+coinvariants are finitely generated over `ℤ` (finitely many Manin symbols
+`Γ₁N\SL₂ℤ × monomial basis`). API-GAP #2:
 the mathlib `Coinvariants.Module.Finite` instance does **not** apply (coefficient module infinite);
 `coinvariantsTensorFreeLEquiv` through `Γ₁N\SL₂ℤ` coset reps is the engine. -/
 instance instFinite_𝕄 (N : ℕ) [NeZero N] (k : ℤ) : Module.Finite ℤ (𝕄 N k) := sorry
@@ -115,8 +117,8 @@ instance instFree_𝕄 (N : ℕ) [NeZero N] (k : ℤ) : Module.Free ℤ (𝕄 N 
 
 /-! ## ES-2 — integer Hecke action (Heilbronn, combinatorial / API-GAP #3) -/
 
-/-- **ES-2.** The `n`-th Hecke operator `T_n` (`U_p` at `p ∣ N`) on `𝕄_k(ℤ)` by the Heilbronn matrices.
-Integer by construction. Shimura §8.3 (8.3.4)/(8.3.5). -/
+/-- **ES-2.** The `n`-th Hecke operator `T_n` (`U_p` at `p ∣ N`) on `𝕄_k(ℤ)` by the Heilbronn
+matrices. Integer by construction. Shimura §8.3 (8.3.4)/(8.3.5). -/
 def heckeSymb (N : ℕ) [NeZero N] (k : ℤ) (n : ℕ) : 𝕄 N k →ₗ[ℤ] 𝕄 N k := sorry
 
 /-- **ES-2.** The diamond operator `⟨d⟩` on `𝕄_k(ℤ)`. -/
@@ -151,7 +153,8 @@ project from the `sorry`'d `exists_HeckeStableLattice`; here we show the alterna
 open CongruenceSubgroup in
 /-- **ES-asm.** The integral Hecke algebra is module-finite over `ℤ`, via the faithful integral
 representation on the dual modular-symbol lattice `𝕄 N k ℤ`. (Re-derivation of
-`HeckeRing.GL2.heckeAlgℤ_finite` from the modular-symbol package instead of `exists_HeckeStableLattice`.) -/
+`HeckeRing.GL2.heckeAlgℤ_finite` from the modular-symbol package instead of
+`exists_HeckeStableLattice`.) -/
 theorem heckeAlgℤ_finite_via_modSym (N : ℕ) [NeZero N] (k : ℤ) :
     Module.Finite ℤ (HeckeRing.GL2.heckeAlgℤ N k) := sorry
 
