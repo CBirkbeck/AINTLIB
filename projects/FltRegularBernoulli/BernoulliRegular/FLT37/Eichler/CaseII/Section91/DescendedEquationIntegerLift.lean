@@ -116,7 +116,8 @@ theorem washington_section91_integer_descended_equation
       (δ : K) = algebraMap (𝓞 K) K (δ' : 𝓞 K)) :
     ω ^ 37 + θ ^ 37 =
       (δ' : 𝓞 K) *
-        ((1 - (zeta_spec 37 ℚ K).toInteger) * (1 - (zeta_spec 37 ℚ K).toInteger ^ 36)) ^ (2 * e - 1) *
+        ((1 - (zeta_spec 37 ℚ K).toInteger) * (1 - (zeta_spec 37 ℚ K).toInteger ^ 36)) ^
+          (2 * e - 1) *
         z' ^ 37 := by
   haveI : Fact (Nat.Prime 37) := ⟨by decide⟩
   -- Section §9.1: the field descended equation, with a σ-fixed field unit `δ`.
