@@ -1637,7 +1637,8 @@ theorem isPrincipal_end_to_end_chain
       ClassGroup.mk0
         (⟨I, mem_nonZeroDivisors_iff_ne_zero.mpr h𝔞_nz⟩ :
           nonZeroDivisors (Ideal (𝓞 K))) := by
-    have h_σI_eq : (⟨I.map (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom,
+    have h_σI_eq :
+      (⟨I.map (NumberField.IsCMField.ringOfIntegersComplexConj K).toRingEquiv.toRingHom,
         mem_nonZeroDivisors_iff_ne_zero.mpr
           ((map_ne_bot_iff_complexConj K I).mpr h𝔞_nz)⟩ : nonZeroDivisors (Ideal (𝓞 K))) =
         σI := Subtype.ext h_σI.symm
