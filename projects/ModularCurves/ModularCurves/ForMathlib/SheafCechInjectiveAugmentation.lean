@@ -402,7 +402,9 @@ private theorem injectiveResolutionCokernelTail_app_exact
       (injectiveResolutionCokernelTail_exact F).fIsKernel (sectionsAt V)) ?_
   apply Fork.ext (Iso.refl _)
 
-private theorem injectiveResolution_app_exactAt_one_of_subsingleton_H
+/-- If degree-one cohomology vanishes after restriction to an open, evaluating an
+injective resolution on that open is exact in resolution degree one. -/
+theorem injectiveResolution_app_exactAt_one_of_subsingleton_H
     (F : Sheaf AddCommGrpCat.{u} X) (V : Opens X)
     [Subsingleton (CategoryTheory.Sheaf.H
       ((restrict AddCommGrpCat V.isOpenEmbedding).obj F) 1)] :

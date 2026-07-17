@@ -143,6 +143,22 @@ private def freeAbSheafHomAddEquiv (T : Opens X) (F : siteSheaf X) :
   toEquiv := freeAbSheafHomSectionEquiv T F
   map_add' := freeAbSheafHomSectionEquiv_add T F
 
+/-- The sheaf representing the value of the cohomology presheaf at an open set. -/
+abbrev HPrimeRepresentingSheaf (T : Opens X) : siteSheaf X :=
+  freeAbSheaf T
+
+/-- Morphisms from the sheaf representing `H'` at `T` are sections over `T`. -/
+def HPrimeRepresentingSheafHomAddEquiv (T : Opens X) (F : siteSheaf X) :
+    (HPrimeRepresentingSheaf T ⟶ F) ≃+ ↑(F.obj.obj (op T)) :=
+  freeAbSheafHomAddEquiv T F
+
+@[simp]
+lemma HPrimeRepresentingSheafHomAddEquiv_naturality_right (T : Opens X)
+    {F G : siteSheaf X} (f : HPrimeRepresentingSheaf T ⟶ F) (g : F ⟶ G) :
+    HPrimeRepresentingSheafHomAddEquiv T G (f ≫ g) =
+      g.hom.app (op T) (HPrimeRepresentingSheafHomAddEquiv T F f) := by
+  rfl
+
 private lemma freeAbSheafHomAddEquiv_naturality_left {U V : Opens X}
     (i : U ⟶ V) (F : siteSheaf X) (f : freeAbSheaf V ⟶ F) :
     freeAbSheafHomAddEquiv U F (freeAbSheafMap i ≫ f) =
