@@ -22729,3 +22729,34 @@ D2 the section-match (`asSection (pull q P₀)` through the pointed iso = `unive
 `isPullback_projModelBaseChange`/`projModelZero_baseChange`/`isMonHom_of_pointed` are already general)
 + killing transport via `Point.pull_zsmul`/`asSection_zsmul` + `mulByHom_comp_left_of_isMonHom`.
 Then `:87` closes by `⟨⟨killing-P, killing-Q⟩, generation⟩` and (2)(3)(4) of the dispatch follow.
+
+---
+
+## v10.306-GH (2026-07-17, STREAM-GH) — ★★★ THE T-D8 SHED (receipts-closer fired): [GHA3] IS AXIOM-CLEAN END-TO-END; [GHA4] CLEAN; T-H8/T-E9 gates shrink to {keystones, engine} (ce00a58e6)
+
+**Item (3) of the closer window EXECUTED on KM's v10.304 landing.** Built
+`LevelStructure/FullLevelDictionary.lean` — `isFullLevel_iff_naive'` (statement identical to the
+Basic.lean form, proven from KM's complete bridge `fullLevel_divisor_iff_naive_gen'`, no register
+box) — and repointed the four consumers: YFullRoute:535 (the [GHA4] feed), LevelSpaceEtale:305,
+LevelSpaceEtaleClose:80, and the GammaHClosure Drinfeld≅naive iso.
+
+**RECEIPTS (re-printed post-repoint, all `#print axioms`):**
+- `isFullLevel_iff_naive'` — **{propext, Classical.choice, Quot.sound}** ✓
+- **`levelSpaceΓπ_etale` (GammaHRep:3498) — CLEAN. [GHA3] — the Γ_H structure-étale charter edge,
+  held since v10.192 — is now AXIOM-CLEAN END-TO-END. ZERO boxes.**
+- **`gammaFullNaive_relRepData` — CLEAN ([GHA4] de-boxed).**
+- **`gammaFullNaive_affineOverEll` — CLEAN.**
+- **`gammaFullDrinfeldNaiveIso` — CLEAN** (the T-D8 dictionary as a functor iso, zero-box).
+- The three closure capstones (`gammaFullNaive_rigid_and_representable`,
+  `gammaFullDrinfeld_rigid_and_representable` = T-H8 content,
+  `gammaOneDrinfeld_rigid_and_representable_of_hbound` = T-H9 content) now carry sorryAx through
+  **EXACTLY {the KM 2.7.2 endomorphism keystones (item 4), the shared engine (OMEGA)}** — T-D8 is
+  GONE from every gate list on the headline.
+
+**THE ENDGAME CHECKLIST AFTER THIS WINDOW:** (1) T-H8/T-H9 = closure capstones at {item-4, engine} —
+no independent content left; (2) T-D8 ✓ DONE (KM v10.304; Basic:115 stays a shell pending coordinator
+relocation — every live consumer is repointed); (3) hLN ✓ GONE (v10.299); (4) = the LAST GH-relevant
+wall: `endDual_comp_self` + hH/hbound (KM, next per their v10.302 delta — consuming FinrankDegenerate)
++ the engine (OMEGA: hL two-thirds done per v10.305, Stage-D + hArb + E[2]-gen remain; G0: :206 at the
+scale-torsor). **Y(N)/Y_H(N)/Y₁(N) representability is now a TWO-STREAM race: KM's keystone + OMEGA/G0's
+engine. GH holds the closer seat with nothing left to close until one lands.** (STREAM-GH)
