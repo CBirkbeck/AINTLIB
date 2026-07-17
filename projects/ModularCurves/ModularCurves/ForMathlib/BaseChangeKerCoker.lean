@@ -546,6 +546,13 @@ section Exactness
 
 variable {T : Type*} [AddCommGroup T] [Module R T]
 
+/-- Base change preserves the relation that two consecutive linear maps compose to zero. -/
+theorem LinearMap.baseChange_comp_eq_zero
+    (f : P →ₗ[R] Q) (g : Q →ₗ[R] T) (h : g ∘ₗ f = 0)
+    (A : Type*) [CommRing A] [Algebra R A] :
+    g.baseChange A ∘ₗ f.baseChange A = 0 := by
+  rw [← LinearMap.baseChange_comp, h, LinearMap.baseChange_zero]
+
 /-- Factoring a complex through its second kernel commutes with algebra base change. -/
 theorem kerBaseChangeComparison_comp_codRestrictToKer_baseChange
     (f : P →ₗ[R] Q) (g : Q →ₗ[R] T) (h : g ∘ₗ f = 0) :
@@ -560,6 +567,31 @@ theorem kerBaseChangeComparison_comp_codRestrictToKer_baseChange
     LinearMap.codRestrictToKer_coe]
   rw [← LinearMap.comp_apply, ← LinearMap.baseChange_comp]
   rfl
+
+/-- If formation of the second kernel commutes with base change, then the base-changed
+map into cycles has the same kernel as the base change of the original first map. -/
+theorem LinearMap.ker_baseChange_codRestrictToKer_eq
+    (f : P →ₗ[R] Q) (g : Q →ₗ[R] T) (h : g ∘ₗ f = 0)
+    (A : Type*) [CommRing A] [Algebra R A]
+    (hbij : Function.Bijective (kerBaseChangeComparison A g)) :
+    LinearMap.ker ((LinearMap.codRestrictToKer f g h).baseChange A) =
+      LinearMap.ker (f.baseChange A) := by
+  ext x
+  rw [LinearMap.mem_ker, LinearMap.mem_ker]
+  constructor
+  · intro hx
+    have hxcomp := LinearMap.congr_fun
+      (kerBaseChangeComparison_comp_codRestrictToKer_baseChange A f g h) x
+    rw [LinearMap.comp_apply, hx, map_zero] at hxcomp
+    exact (congrArg Subtype.val hxcomp).symm
+  · intro hx
+    apply hbij.injective
+    rw [map_zero]
+    have hxcomp := LinearMap.congr_fun
+      (kerBaseChangeComparison_comp_codRestrictToKer_baseChange A f g h) x
+    rw [LinearMap.comp_apply] at hxcomp
+    rw [hxcomp]
+    exact Subtype.ext hx
 
 end Exactness
 
