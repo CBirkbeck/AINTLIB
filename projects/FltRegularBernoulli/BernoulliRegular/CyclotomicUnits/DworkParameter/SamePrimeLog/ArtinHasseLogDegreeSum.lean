@@ -1,6 +1,12 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
-public import BernoulliRegular.CyclotomicUnits.DworkParameter.SamePrimeLog.ArtinHasseExpCoordLogHomogeneous
+public import
+  BernoulliRegular.CyclotomicUnits.DworkParameter.SamePrimeLog.ArtinHasseExpCoordLogHomogeneous
 
 /-!
 # The degree sum of the finite Artin--Hasse exp-coordinate homogeneous logarithm
@@ -47,12 +53,14 @@ variable (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {p} ℚ K]
 local instance : CharZero (ValuedCompletion p K) :=
   algebraRat.charZero (ValuedCompletion p K)
 
+/-- The sum over logarithmic indices contributing to homogeneous degree `d`. -/
 noncomputable def samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum
     (N d : ℕ) (x : ValuedIntegerRing p K) (hx : x ∈ lambdaIdeal p K) :
     ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1) :=
   ∑ a ∈ (Finset.Icc 1 d).attach,
     samePrimeFiniteArtinHasseExpCoordLogHomogeneousTerm (p := p) (K := K) N a.1 d x hx
 
+/-- The homogeneous degree sum is the corresponding sum of same-prime division evaluations. -/
 theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_eval_sum
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum (p := p) (K := K) N d x hx =
@@ -103,7 +111,7 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_eval_sum
       Ideal.Quotient.mk ((lambdaIdeal p K) ^ (N + 1))
           ((-1 : ValuedIntegerRing p K) ^ (a.1 + 1)) =
         ((-1 : ValuedIntegerRing p K ⧸ (lambdaIdeal p K) ^ (N + 1)) ^ (a.1 + 1)) := by
-    simp
+    rfl
   rw [samePrimeFiniteArtinHasseExpCoordLogHomogeneousTerm_eq_signed_eval
     (p := p) (K := K) N a.1 d hx han had]
   rw [← hmk]
@@ -114,7 +122,9 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_eval_sum
   exact samePrimeNatDivEval_eq_of_eq (p := p) (K := K) han
     (by simp [samePrimeFiniteArtinHasseExpCoordLogHomogeneousNumerator]) hnum0 _
 
-theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_zero_of_factorial_weighted_sum_mem
+/-- The homogeneous degree sum vanishes when its factorial-weighted numerator sum has sufficient
+`lambda`-adic order. -/
+theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_zero_of_weighted_sum_mem
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hclear :
       (∑ n ∈ Finset.Icc 1 d,
@@ -160,18 +170,20 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_zero_of_fact
             (p := p) (K := K) N d hx
     _ = 0 := htransport
 
+/-- The homogeneous degree sum vanishes in degrees that are not powers of `p`. -/
 theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_zero_of_not_pow
     (N d : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hd : ¬ ∃ r : ℕ, d = p ^ r) :
     samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum
         (p := p) (K := K) N d x hx = 0 :=
-  samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_zero_of_factorial_weighted_sum_mem
+  samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_zero_of_weighted_sum_mem
     (p := p) (K := K) N d hx
     (by
       simpa [samePrimeFiniteArtinHasseExpCoordLogHomogeneousNumerator] using
-        samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sum_mem_lambdaIdeal_pow_of_not_pow
+        samePrimeFiniteArtinHasseLogHomogeneousNumerator_weighted_sum_mem_lambdaIdeal_pow_of_not_pow
           (p := p) (K := K) N d hx hd)
 
+/-- The finite logarithm core of an Artin--Hasse coordinate is the sum over homogeneous support. -/
 theorem samePrimeFiniteLogTermCore_finiteArtinHasseExpCoord_eq_homogeneous_support_sum
     (N n : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) (hn : n ≠ 0) :
     samePrimeFiniteLogTermCore (p := p) (K := K) N n
@@ -221,13 +233,13 @@ theorem samePrimeFiniteLogTermCore_finiteArtinHasseExpCoord_eq_homogeneous_suppo
   have heval :
       (P ^ n).eval 1 = ∑ d ∈ (P ^ n).support, (P ^ n).coeff d := by
     rw [Polynomial.eval_eq_sum]
-    simp [Polynomial.sum]
+    simp only [Polynomial.sum, one_pow, mul_one]
   have hsum_eq : z ^ n = ∑ d ∈ (P ^ n).support, (P ^ n).coeff d := by
     calc
       z ^ n = ((samePrimeFiniteArtinHasseExpCoordPoly (p := p) (K := K) N x).eval 1) ^ n := by
         rw [samePrimeFiniteArtinHasseExpCoordPoly_eval_one]
       _ = (P ^ n).eval 1 := by
-        simp [P, Polynomial.eval_pow]
+        exact (Polynomial.eval_pow n).symm
       _ = ∑ d ∈ (P ^ n).support, (P ^ n).coeff d := heval
   have hsum_order :
       (∑ d ∈ (P ^ n).support, (P ^ n).coeff d) ∈
@@ -279,6 +291,8 @@ theorem samePrimeFiniteLogTermCore_finiteArtinHasseExpCoord_eq_homogeneous_suppo
         exact (samePrimeNatDivEvalAtDegree_eq_samePrimeNatDivEval
           (p := p) (K := K) hn hcoeff hden (hcoeff_order d)).symm
 
+/-- The finite logarithm term of an Artin--Hasse coordinate is the signed homogeneous-support
+sum. -/
 theorem samePrimeFiniteLogTerm_finiteArtinHasseExpCoord_eq_homogeneous_support_sum
     (N n : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) (hn : n ≠ 0) :
     samePrimeFiniteLogTerm (p := p) (K := K) N n
@@ -290,42 +304,32 @@ theorem samePrimeFiniteLogTerm_finiteArtinHasseExpCoord_eq_homogeneous_support_s
     samePrimeFiniteLogTermCore_finiteArtinHasseExpCoord_eq_homogeneous_support_sum
       (p := p) (K := K) N n hx hn,
     Finset.mul_sum]
-  simp [samePrimeFiniteArtinHasseExpCoordLogHomogeneousTerm]
+  rfl
 
 /-- Forced lambda-adic order of the `r`-th Artin--Hasse logarithm term
 `x^(p^r) / p^r` for `x` in the lambda ideal. -/
 def samePrimeArtinHasseLogTermOrder (r : ℕ) : ℕ :=
   p ^ r - r * (p - 1)
 
-private theorem nat_mul_le_pow_self_of_two_le {a r : ℕ} (ha : 2 ≤ a) :
-    r * a ≤ a ^ r := by
-  cases r with
-  | zero =>
-      simp
-  | succ r =>
-      have hs : r + 1 ≤ a ^ r := by
-        have htwo : r + 1 ≤ 2 ^ r := Nat.succ_le_of_lt r.lt_two_pow_self
-        exact htwo.trans (Nat.pow_le_pow_left ha r)
-      have hmul := Nat.mul_le_mul_right a hs
-      simpa [pow_succ, Nat.mul_comm, Nat.mul_left_comm, Nat.mul_assoc] using hmul
-
+/-- The denominator contribution `r * (p - 1)` is at most `p ^ r`. -/
 theorem samePrimeArtinHasseLog_den_le (r : ℕ) :
     r * (p - 1) ≤ p ^ r := by
-  have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
-  have hmul := nat_mul_le_pow_self_of_two_le (a := p) (r := r) hp_two
-  have hp_pos : 0 < p := (Fact.out : Nat.Prime p).pos
+  have hmul : r * p ≤ p ^ r := by
+    simpa [Nat.mul_comm] using Nat.mul_le_pow (Fact.out : Nat.Prime p).ne_one r
   have hpred : p - 1 ≤ p := Nat.sub_le p 1
   exact (Nat.mul_le_mul_left r hpred).trans hmul
 
+/-- The denominator contribution plus the forced order is exactly `p ^ r`. -/
 theorem samePrimeArtinHasseLog_den_add_order (r : ℕ) :
     r * (p - 1) + samePrimeArtinHasseLogTermOrder (p := p) r = p ^ r := by
   simp [samePrimeArtinHasseLogTermOrder,
     Nat.add_sub_cancel' (samePrimeArtinHasseLog_den_le (p := p) r)]
 
+/-- The index `r` is at most the forced order of the `r`-th logarithm term. -/
 theorem le_samePrimeArtinHasseLogTermOrder (r : ℕ) :
     r ≤ samePrimeArtinHasseLogTermOrder (p := p) r := by
-  have hp_two : 2 ≤ p := (Fact.out : Nat.Prime p).two_le
-  have hmul := nat_mul_le_pow_self_of_two_le (a := p) (r := r) hp_two
+  have hmul : r * p ≤ p ^ r := by
+    simpa [Nat.mul_comm] using Nat.mul_le_pow (Fact.out : Nat.Prime p).ne_one r
   have hp_one : 1 ≤ p := (Fact.out : Nat.Prime p).one_le
   have hadd : r + r * (p - 1) ≤ p ^ r := by
     calc
@@ -358,6 +362,7 @@ noncomputable def samePrimeArtinHasseLogTermNumerator (r : ℕ)
     ValuedIntegerRing p K :=
   Classical.choose (samePrimeArtinHasseLogTermData_exists (p := p) (K := K) r hx)
 
+/-- The chosen numerator has the required order and clears the factor `p ^ r`. -/
 theorem samePrimeArtinHasseLogTermNumerator_spec (r : ℕ)
     {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeArtinHasseLogTermNumerator (p := p) (K := K) r x hx ∈
@@ -375,11 +380,8 @@ noncomputable def samePrimeFiniteArtinHasseLogTerm (N r : ℕ)
   Ideal.Quotient.mk ((lambdaIdeal p K) ^ (N + 1))
     (samePrimeArtinHasseLogTermNumerator (p := p) (K := K) r x hx)
 
-private theorem quotientNatCastInv_one (N : ℕ) (h : Nat.Coprime 1 p) :
-    quotientNatCastInv (p := p) (K := K) N 1 h = 1 :=
-  quotientNatCastInv_eq_of_mul_right_eq_one
-    (p := p) (K := K) (N := N) (m := 1) h (by simp)
-
+/-- Same-prime division evaluation at `p ^ r` agrees with the finite Artin--Hasse logarithm
+term. -/
 theorem samePrimeNatDivEval_prime_pow_zero_eq_finiteArtinHasseLogTerm
     (N r : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hmem : x ^ (p ^ r) ∈
@@ -412,7 +414,7 @@ theorem samePrimeNatDivEval_prime_pow_zero_eq_finiteArtinHasseLogTerm
       (samePrimeFiniteLog_ordCompl_coprime (p := p)
         (pow_ne_zero r (Fact.out : Nat.Prime p).ne_zero)) ?_
     rw [hord]
-    simp
+    simp only [Nat.cast_one, map_one, mul_one]
   rw [hinv, mul_one]
 
 /-- Multiplying the same-prime Artin--Hasse term by `p^r` recovers
@@ -426,6 +428,7 @@ theorem samePrimeFiniteArtinHasseLogTerm_natCast_prime_pow_mul_eq_mk
   rw [samePrimeFiniteArtinHasseLogTerm, ← map_mul,
     (samePrimeArtinHasseLogTermNumerator_spec (p := p) (K := K) r hx).2]
 
+/-- The finite Artin--Hasse logarithm term lies in the image of its forced ideal power. -/
 theorem samePrimeFiniteArtinHasseLogTerm_mem_map_lambdaIdeal_pow
     (N r : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteArtinHasseLogTerm (p := p) (K := K) N r x hx ∈
@@ -434,6 +437,8 @@ theorem samePrimeFiniteArtinHasseLogTerm_mem_map_lambdaIdeal_pow
   Ideal.mem_map_of_mem (Ideal.Quotient.mk ((lambdaIdeal p K) ^ (N + 1)))
     (samePrimeArtinHasseLogTermNumerator_spec (p := p) (K := K) r hx).1
 
+/-- A finite Artin--Hasse logarithm term vanishes when its forced order exceeds the quotient
+precision. -/
 theorem samePrimeFiniteArtinHasseLogTerm_eq_zero_of_succ_le
     {N r : ℕ} {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (horder : N + 1 ≤ samePrimeArtinHasseLogTermOrder (p := p) r) :
@@ -443,6 +448,7 @@ theorem samePrimeFiniteArtinHasseLogTerm_eq_zero_of_succ_le
     (Ideal.pow_le_pow_right horder
       (samePrimeArtinHasseLogTermNumerator_spec (p := p) (K := K) r hx).1)
 
+/-- A finite Artin--Hasse logarithm term vanishes when its index exceeds the quotient precision. -/
 theorem samePrimeFiniteArtinHasseLogTerm_eq_zero_of_succ_le_index
     {N r : ℕ} {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hr : N + 1 ≤ r) :
@@ -450,10 +456,7 @@ theorem samePrimeFiniteArtinHasseLogTerm_eq_zero_of_succ_le_index
   samePrimeFiniteArtinHasseLogTerm_eq_zero_of_succ_le (p := p) (K := K) hx
     (hr.trans (le_samePrimeArtinHasseLogTermOrder (p := p) r))
 
-/-- The attached `samePrimeNatDivEval`-sum of a pointwise difference `num - target`
-splits as the difference of the two attached eval-sums, using additivity of
-`samePrimeNatDivEval` on the shared membership level. -/
-private theorem samePrimeNatDivEval_attach_sum_sub_eq
+private theorem samePrimeNatDivEval_attach_sum_sub_eq_aux
     (N d : ℕ) (num target : ℕ → ValuedIntegerRing p K)
     (hnum0 : ∀ a : {n // n ∈ Finset.Icc 1 d},
       num a.1 ∈ (lambdaIdeal p K) ^ (a.1.factorization p * (p - 1) + 0))
@@ -525,10 +528,7 @@ private theorem samePrimeNatDivEval_attach_sum_sub_eq
         rw [samePrimeNatDivEval_neg (p := p) (K := K) han (htarget0 a) hneg]
         ring
 
-/-- The attached `samePrimeNatDivEval`-sum of the indicator `target` supported at
-`n = p ^ r` (value `x ^ (p ^ r)`) collapses to the single nonzero term and equals
-the same-prime finite Artin--Hasse log term. -/
-private theorem samePrimeNatDivEval_attach_sum_target_eq_finiteArtinHasseLogTerm
+private theorem samePrimeNatDivEval_attach_sum_target_eq_finiteArtinHasseLogTerm_aux
     (N r : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (htarget0 : ∀ a : {n // n ∈ Finset.Icc 1 (p ^ r)},
       (if a.1 = p ^ r then x ^ (p ^ r) else 0) ∈
@@ -610,9 +610,9 @@ private theorem samePrimeNatDivEval_attach_sum_target_eq_finiteArtinHasseLogTerm
             samePrimeNatDivEval_prime_pow_zero_eq_finiteArtinHasseLogTerm
               (p := p) (K := K) N r hx htarget0_d
 
--- This is the same-prime port of the homogeneous `p^r` slice comparison; it
--- expands three attached finite sums and transports finite-log additivity.
-theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm_of_factorial_weighted_sub_pow_mem
+/-- The degree-`p ^ r` homogeneous sum equals the finite logarithm term when the
+factorial-weighted difference has sufficient `lambda`-adic order. -/
+theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm_of_weighted_sub_pow_mem
     (N r : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K)
     (hclear :
       (∑ n ∈ Finset.Icc 1 (p ^ r),
@@ -705,7 +705,7 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm_of_f
             have ha1 : 1 ≤ a.1 := (Finset.mem_Icc.mp a.2).1
             exact Nat.ne_zero_of_lt ha1)
           (target a.1) (htarget0 a)) :=
-    samePrimeNatDivEval_attach_sum_sub_eq (p := p) (K := K) N d num target
+    samePrimeNatDivEval_attach_sum_sub_eq_aux (p := p) (K := K) N d num target
       hnum0 htarget0 hz0
   have htarget_sum :
       (∑ a ∈ (Finset.Icc 1 d).attach,
@@ -715,7 +715,7 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm_of_f
             exact Nat.ne_zero_of_lt ha1)
           (target a.1) (htarget0 a)) =
         samePrimeFiniteArtinHasseLogTerm (p := p) (K := K) N r x hx :=
-    samePrimeNatDivEval_attach_sum_target_eq_finiteArtinHasseLogTerm
+    samePrimeNatDivEval_attach_sum_target_eq_finiteArtinHasseLogTerm_aux
       (p := p) (K := K) N r hx htarget0
   have hdegree :
       samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum
@@ -758,19 +758,18 @@ theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm_of_f
         rw [heval_sub]
     _ = 0 := htransport
 
+/-- The degree-`p ^ r` homogeneous sum is the `r`-th finite Artin--Hasse logarithm term. -/
 theorem samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm
     (N r : ℕ) {x : ValuedIntegerRing p K} (hx : x ∈ lambdaIdeal p K) :
     samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum
         (p := p) (K := K) N (p ^ r) x hx =
       samePrimeFiniteArtinHasseLogTerm (p := p) (K := K) N r x hx :=
-  samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm_of_factorial_weighted_sub_pow_mem
+  samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm_of_weighted_sub_pow_mem
     (p := p) (K := K) N r hx
     (by
       simpa [samePrimeFiniteArtinHasseExpCoordLogHomogeneousNumerator] using
-        samePrimeFiniteArtinHasseLogHomogeneousNumerator_factorial_weighted_sub_pow_mem_lambdaIdeal_pow
+        samePrimeFiniteArtinHasseLogHomogeneousNumerator_weighted_sub_pow_mem_lambdaIdeal_pow
           (p := p) (K := K) N r hx)
-
-
 end DworkParameter
 end PadicLogSetup
 end CyclotomicUnits
