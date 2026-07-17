@@ -229,6 +229,92 @@ theorem componentLocalizationKernel_finrank_ge_classComponent [NeZero p] {i : �
     exact Subtype.ext <|
       globalUnitPowerQuotientToSingularGroupLinear_injective K p <| congrArg Subtype.val huv
 
+/-- The one-dimensional even-character unit component maps linearly into the
+even-character singular component, via the global unit-to-singular map. -/
+private def deltaEigenToSingularComponent (i : ℕ) :
+    cyclotomicUnitPowerQuotientDeltaCharacterEigenspace (p := p) K
+        (cyclotomicUnitDeltaPowerCharacter (p := p) i) →ₗ[ZMod p]
+      singularGroupCharacterProjectionComponent (K := K) (p := p) i
+        (cyclotomicSingularGroupAction K p) := {
+  toFun := fun u ↦
+    ⟨globalUnitPowerQuotientToSingularGroupLinear K p u.1,
+      globalUnitPowerQuotientToSingularGroupLinear_mem_characterProjectionComponent
+        (K := K) (p := p) (i := i) u.2⟩
+  map_add' := by
+    intro u v
+    apply Subtype.ext
+    simp
+  map_smul' := by
+    intro c u
+    apply Subtype.ext
+    simp }
+
+/-- The even-character singular component's class-projection map into the
+matching `p`-torsion class component. -/
+private def singularComponentClassMap (i : ℕ) :=
+  singularGroupClassComponentMap K p i
+    (cyclotomicSingularGroupAction K p)
+    (cyclotomicClassGroupPTorsionAction K p)
+    (by
+      intro d x
+      exact (cyclotomicSingularGroupClassMapToPTorsion_equivariant K p d x).symm)
+
+/-- **Left-kernel of the component class map lies in the range of the unit map.**
+If the class projection of a singular-component element `v` vanishes, then `v`
+is the image of a unit eigenvector under `deltaEigenToSingularComponent`
+(supplied by the global-unit description of the class-map kernel). -/
+private lemma exists_eigen_preimage_of_classMap_eq_zero (i : ℕ)
+    (v : singularGroupCharacterProjectionComponent (K := K) (p := p) i
+          (cyclotomicSingularGroupAction K p))
+    (hv : singularComponentClassMap (K := K) (p := p) i v = 0) :
+    ∃ u : cyclotomicUnitPowerQuotientDeltaCharacterEigenspace (p := p) K
+            (cyclotomicUnitDeltaPowerCharacter (p := p) i),
+      deltaEigenToSingularComponent (K := K) (p := p) i u = v := by
+  have hglobal_zero :
+      singularGroupClassMapToPTorsionLinear (R := 𝓞 K) (K := K) p v.1 = 0 := by
+    have hval := congrArg Subtype.val hv
+    simpa [singularComponentClassMap, singularGroupClassComponentMap] using hval
+  have hmul_mem :
+      v.1.toMul ∈
+        (singularGroupClassMapToPTorsion (R := 𝓞 K) (K := K) p).ker := by
+    change singularGroupClassMapToPTorsion (R := 𝓞 K) (K := K) p v.1.toMul = 1
+    have htoMul := congrArg Additive.toMul hglobal_zero
+    simpa [singularGroupClassMapToPTorsionLinear_apply_toMul] using htoMul
+  rw [singularGroupClassMapToPTorsion_ker_eq_globalUnitPowerQuotientToSingularGroup_range
+    (K := K) (p := p)] at hmul_mem
+  obtain ⟨q, hq⟩ := hmul_mem
+  let qadd : Additive (CyclotomicUnitPowerQuotient (p := p) (N := 1) K) :=
+    Additive.ofMul q
+  have hqadd :
+      globalUnitPowerQuotientToSingularGroupLinear K p qadd = v.1 := by
+    apply Additive.ext
+    change globalUnitPowerQuotientToSingularGroup K p q = v.1.toMul
+    exact hq
+  have hq_eigen :
+      qadd ∈ cyclotomicUnitPowerQuotientDeltaCharacterEigenspace (p := p) K
+          (cyclotomicUnitDeltaPowerCharacter (p := p) i) := by
+    intro a
+    apply globalUnitPowerQuotientToSingularGroupLinear_injective (K := K) (p := p)
+    calc
+      globalUnitPowerQuotientToSingularGroupLinear K p
+          (cyclotomicUnitPowerQuotientDeltaActionZMod (p := p) K a qadd)
+          = SingularLinearAction.mulActionToAdditiveLinearAction (p := p)
+              (cyclotomicSingularGroupAction K p) a
+            (globalUnitPowerQuotientToSingularGroupLinear K p qadd) :=
+              globalUnitPowerQuotientToSingularGroupLinear_equivariant
+                (K := K) (p := p) a qadd
+      _ = SingularLinearAction.mulActionToAdditiveLinearAction (p := p)
+              (cyclotomicSingularGroupAction K p) a v.1 := by
+              rw [hqadd]
+      _ = ((a : ZMod p) ^ i) • v.1 :=
+              singularGroup_additive_apply_eq_smul_of_mem_characterProjection_range
+                  (R := 𝓞 K) (K := K) p i
+                  (cyclotomicSingularGroupAction K p) a v.2
+      _ = globalUnitPowerQuotientToSingularGroupLinear K p
+            ((cyclotomicUnitDeltaPowerCharacter (p := p) i a) • qadd) := by
+              rw [cyclotomicUnitDeltaPowerCharacter_apply, ← hqadd, map_smul]
+  exact ⟨⟨qadd, hq_eigen⟩, Subtype.ext hqadd⟩
+
 -- The component finite-dimensionality proof unfolds the projected singular
 -- exact sequence and the cyclotomic component maps.
 /-- The concrete even-character singular component is
@@ -243,96 +329,26 @@ theorem singularGroupCharacterProjectionComponent_finiteDimensional_of_even_powe
     FiniteDimensional (ZMod p)
       (singularGroupCharacterProjectionComponent (K := K) (p := p) i
         (cyclotomicSingularGroupAction K p)) := by
-  let Ucomp :=
-    cyclotomicUnitPowerQuotientDeltaCharacterEigenspace (p := p) K
-      (cyclotomicUnitDeltaPowerCharacter (p := p) i)
   have hU_finrank :
-      Module.finrank (ZMod p) Ucomp = 1 :=
+      Module.finrank (ZMod p)
+        (cyclotomicUnitPowerQuotientDeltaCharacterEigenspace (p := p) K
+          (cyclotomicUnitDeltaPowerCharacter (p := p) i)) = 1 :=
     cyclotomicUnitPowerQuotientDeltaPowerCharacterEigenspace_finrank
       (p := p) K hp_gt_two hi_even hi_low hi_high
-  have : FiniteDimensional (ZMod p) Ucomp :=
+  have : FiniteDimensional (ZMod p)
+      (cyclotomicUnitPowerQuotientDeltaCharacterEigenspace (p := p) K
+        (cyclotomicUnitDeltaPowerCharacter (p := p) i)) :=
     FiniteDimensional.of_finrank_eq_succ hU_finrank
-  let unitToSingularComponent :
-      Ucomp →ₗ[ZMod p]
-        singularGroupCharacterProjectionComponent (K := K) (p := p) i
-          (cyclotomicSingularGroupAction K p) := {
-    toFun := fun u ↦
-      ⟨globalUnitPowerQuotientToSingularGroupLinear K p u.1,
-        globalUnitPowerQuotientToSingularGroupLinear_mem_characterProjectionComponent
-          (K := K) (p := p) (i := i) u.2⟩
-    map_add' := by
-      intro u v
-      apply Subtype.ext
-      simp
-    map_smul' := by
-      intro c u
-      apply Subtype.ext
-      simp }
-  let classComponentMap :=
-    singularGroupClassComponentMap K p i
-      (cyclotomicSingularGroupAction K p)
-      (cyclotomicClassGroupPTorsionAction K p)
-      (by
-        intro d x
-        exact (cyclotomicSingularGroupClassMapToPTorsion_equivariant K p d x).symm)
-  have hker :
-      ∀ v :
-        singularGroupCharacterProjectionComponent (K := K) (p := p) i
-          (cyclotomicSingularGroupAction K p),
-        classComponentMap v = 0 → ∃ u : Ucomp, unitToSingularComponent u = v := by
-    intro v hv
-    have hglobal_zero :
-        singularGroupClassMapToPTorsionLinear (R := 𝓞 K) (K := K) p v.1 = 0 := by
-      have hval := congrArg Subtype.val hv
-      simpa [classComponentMap, singularGroupClassComponentMap] using hval
-    have hmul_mem :
-        v.1.toMul ∈
-          (singularGroupClassMapToPTorsion (R := 𝓞 K) (K := K) p).ker := by
-      change singularGroupClassMapToPTorsion (R := 𝓞 K) (K := K) p v.1.toMul = 1
-      have htoMul := congrArg Additive.toMul hglobal_zero
-      simpa [singularGroupClassMapToPTorsionLinear_apply_toMul] using htoMul
-    rw [singularGroupClassMapToPTorsion_ker_eq_globalUnitPowerQuotientToSingularGroup_range
-      (K := K) (p := p)] at hmul_mem
-    obtain ⟨q, hq⟩ := hmul_mem
-    let qadd : Additive (CyclotomicUnitPowerQuotient (p := p) (N := 1) K) :=
-      Additive.ofMul q
-    have hqadd :
-        globalUnitPowerQuotientToSingularGroupLinear K p qadd = v.1 := by
-      apply Additive.ext
-      change globalUnitPowerQuotientToSingularGroup K p q = v.1.toMul
-      exact hq
-    have hq_eigen : qadd ∈ Ucomp := by
-      intro a
-      apply globalUnitPowerQuotientToSingularGroupLinear_injective (K := K) (p := p)
-      calc
-        globalUnitPowerQuotientToSingularGroupLinear K p
-            (cyclotomicUnitPowerQuotientDeltaActionZMod (p := p) K a qadd)
-            = SingularLinearAction.mulActionToAdditiveLinearAction (p := p)
-                (cyclotomicSingularGroupAction K p) a
-              (globalUnitPowerQuotientToSingularGroupLinear K p qadd) :=
-                globalUnitPowerQuotientToSingularGroupLinear_equivariant
-                  (K := K) (p := p) a qadd
-        _ = SingularLinearAction.mulActionToAdditiveLinearAction (p := p)
-                (cyclotomicSingularGroupAction K p) a v.1 := by
-                rw [hqadd]
-        _ = ((a : ZMod p) ^ i) • v.1 :=
-                singularGroup_additive_apply_eq_smul_of_mem_characterProjection_range
-                    (R := 𝓞 K) (K := K) p i
-                    (cyclotomicSingularGroupAction K p) a v.2
-        _ = globalUnitPowerQuotientToSingularGroupLinear K p
-              ((cyclotomicUnitDeltaPowerCharacter (p := p) i a) • qadd) := by
-                rw [cyclotomicUnitDeltaPowerCharacter_apply, ← hqadd, map_smul]
-    refine ⟨⟨qadd, hq_eigen⟩, ?_⟩
-    exact Subtype.ext <| hqadd
   exact LinearDimensionKernel.finiteDimensional_of_surjective_of_leftKernel
-    unitToSingularComponent classComponentMap
+    (deltaEigenToSingularComponent (K := K) (p := p) i)
+    (singularComponentClassMap (K := K) (p := p) i)
     (singularGroupClassComponentMap_surjective K p i
       (cyclotomicSingularGroupAction K p)
       (cyclotomicClassGroupPTorsionAction K p)
       (by
         intro d x
         exact (cyclotomicSingularGroupClassMapToPTorsion_equivariant K p d x).symm))
-    hker
+    (exists_eigen_preimage_of_classMap_eq_zero (K := K) (p := p) i)
 
 /-- Concrete even-character form for the completed lambda-local
 localization component.  This is the formal dimension estimate
