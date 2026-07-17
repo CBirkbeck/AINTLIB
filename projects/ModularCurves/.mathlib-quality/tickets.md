@@ -22941,3 +22941,69 @@ v10.310), Bootstrap:95 closes by
 `isE3Datum_of_bridges X hR L bridgeP bridgeQ` and the ℤ[1/3] headline
 `naiveLevelThree_representable_by_affine` is DONE.** Nothing else remains on the
 OMEGA side of the (3, GL₂(𝔽₃)) engine. (STREAM-OMEGA)
+
+## v10.313 (2026-07-17, coordinator) — ★ TERMINAL-CHARTER MODE RE-ACTIVATED (owner: "stop micromanaging; longer tasks so at the end we are done") + batch ratification
+
+**Owner directive (2026-07-17):** sessions are running only 10–15 min because the endgame convergence
+pulled the coordinator back into per-item dispatch — each opener lists ~3 items, the seat completes them
+and PHASE-8-terminates on "residuals cross-seat-blocked." **RE-ACTIVATE v10.32 charter mode, now TERMINAL:**
+each seat gets ONE charter = its entire remaining contribution to the headline, worked to completion across
+as many sessions as it takes, reporting ONLY at named milestones.
+
+**THE BUILD-AHEAD PROTOCOL (binding, the anti-15-min rule — goes in every charter):** *A cross-seat block
+is NOT a PHASE-8 terminal condition.* Each charter has multiple independent sub-goals; when one blocks on a
+sibling, SWITCH to another. Build every consuming side TURNKEY (the interface exists — stage the assembly so
+the sibling's deliverable drops in as a one-liner). PHASE-8-terminate ONLY when every sub-goal is
+simultaneously done-or-blocked AND every consuming side is turnkey. Prefer building-ahead over stopping.
+Report at the charter's NAMED MILESTONES only (2–3 per charter), not per-item.
+
+**Batch ratified (verified at source, this sweep):** Bootstrap 4→2 (hL :87 CLOSED via Stage-D + ZInvThree-PIR;
+E[2]-gen + `legendreDelta_representable_by_affine` [AX1] SORRY-FREE axiom-clean); T-D8 BOTH HALVES landed
+axiom-clean (`fullLevel_divisor_backward` + `FiniteFlatRigidity.eq_of_le_of_finrank_eq` [KM 1.10.2, mathlib-PR
+shape, flag-only]); GH repointed all 4 consumers via `FullLevelDictionary.isFullLevel_iff_naive'` — **`levelSpaceΓπ_etale`
+axiom-clean end-to-end, ZERO boxes; T-D8 gone from every headline gate**; GH closer audit: **T-H8/T-H9 Rigid
+conjuncts are free-riders (`rigid_of_representable`) — the L2 wall never touches the headline** (`GammaHClosure.lean`
+capstones, 0-sorry); the hArb interface `isE3Datum_of_bridges` (E3DatumAssembly:413) is IN LEAN; G0's :206
+reduced to the scale-torsor (`legendreDelta_relRep_finiteEtale_of_scaleTorsor`, proven). Owner-flag: **T-H6
+SUSPECT-B2** (`gammaH_representable_of_rigid` GammaHRep:4128 — Rigid⟹Representable for the orbit presheaf at
+H≠⊥ plausibly false; boarded for owner review — GH scopes, does NOT force).
+
+**THE HEADLINE REDUCES TO EXACTLY FOUR TERMINAL CHARTERS (dependency spine: KM upstream of all):**
+
+**CHARTER-K (KM) — the keystone + bridges. TERMINAL when: endDual_comp_self proven AND hH+hbound+the 5
+EndomorphismDegree generals closed AND the two hArb bridge-Props delivered.** Ordered sub-goals:
+(K1) **BRIDGE-P + BRIDGE-Q FIRST** (they unblock OMEGA's hArb) — the a₂-obstruction-vanishes + flex-cubic
+ring identities (L4-iii division-polynomial content; ε-example proves they need the poly crux, not fields;
+exact ring-form pinned by OMEGA v10.307–312: a₂a₃²−a₄a₁a₃−a₄²=0 + the flex cubic). (K2) **endDual_comp_self**
+(KM 2.6 Cayley–Hamilton of the degree form — START by reading KM 2.6 per source-faithfulness; 7 pins mapped,
+biquadratic route sketched; CONSUME GH's `FinrankDegenerate` engine, do not rebuild). (K3) on endDual: the
+5 generals (route A, KM 2.6 algebra) + hH + hbound. (K4-backstop) W0 integral arc → T-H8 (the deep,
+never-run-dry background campaign). Report at: K1-delivered, K2-landed, K3-complete.
+
+**CHARTER-O (OMEGA) — close the engine's ℤ[1/3] side. TERMINAL when: hArb :95 CLOSED (Bootstrap ℤ[1/3]
+fully discharged).** Sub-goals (build-ahead — you're blocked on KM's K1 for the FINAL plug-in only):
+(O1) deliver ALL of G0's scale-torsor ω-datum (IsLegendreDatum.neg via u=−1 VC ✓ started, unit_sq_eq_one ✓,
+the ±ω uniqueness + any trivialization/universal-d data) — unblocks G0 fully. (O2) stage hArb TURNKEY —
+`isE3Datum_of_bridges` is in Lean; wire the marking pipeline so KM's BRIDGE-P/Q drop in as a one-liner.
+(O3) close hArb :95 the instant K1 lands. (O4-backstop) adapted-model/T-E12 hardening for G0's torsor +
+receipts. Report at: O1-delivered (G0-torsor-data), hArb-CLOSED.
+
+**CHARTER-G (G0) — close the engine's Legendre side. TERMINAL when: :206 CLOSED (Bootstrap Legendre-AX2
+discharged) ⟹ Bootstrap EMPTY.** Sub-goals (build-ahead — blocked on OMEGA's O1 for the datum-pinning only):
+(G1) **build the μ₂-torsor SCHEME geometry independently** — the square-roots of the ω^{⊗−2}-valued
+abscissa-difference; finite-étale Z₂→fullLevelLocus-2 (pure scheme geometry, YOUR domain; the datum-PINNING
+is OMEGA's O1, the SCHEME is yours). (G2) consume OMEGA's O1 ω-datum → the torsor classifies the ±ω pair →
+`legendreDelta_relRep_finiteEtale_of_scaleTorsor` fires → :206 dies. Report at: torsor-scheme-built, :206-CLOSED.
+
+**CHARTER-GH (GH) — the CLOSER: drive the three headline .Representable theorems to sorry-free. TERMINAL when:
+gammaBot / gammaH / gammaOneDrinfeld (+ T-H8 gammaFullDrinfeld) are sorry-free with printed axiom receipts.**
+Sub-goals (build-ahead — you re-arm on each sibling landing): (GH1) T-H6 SUSPECT-B2 — scope it against
+:4128, prepare the corrected wiring, FLAG for owner (do not force a statement change). (GH2) the YN-side/legacy
+straggler sweep to zero-or-archived. (GH3) stand as the receipts-closer: the instant KM's K2/K3 or Bootstrap
+empties, re-print receipts + board the box-shed. (GH4) THE FINAL CAPSTONE — when Bootstrap empties + KM's
+keystone lands, wire the `GammaHClosure` capstones + the three headliners to sorry-free and print the final
+`#print axioms`. Report at: T-H6-scoped, each-shed, THE-HEADLINE (final capstone).
+
+**DISPATCH:** the four charter-openers are in WORK-ORDERS.md (paste-ready, long-form). Owner re-fires a seat
+ONLY on its terminal report or a genuine all-fronts block — not per-item. OMEGA + G0 re-fire NOW (idle since
+v10.292/305); KM continues CHARTER-K (mid-flight on hpiece→K1); GH continues CHARTER-GH.
