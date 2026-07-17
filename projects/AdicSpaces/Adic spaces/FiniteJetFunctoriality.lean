@@ -1377,6 +1377,50 @@ private theorem restrictionMapHom_canonicalMap' {A : Type*} [CommRing A]
   refine hcoe.trans ?_
   rw [restrictionMapAlg, IsLocalization.Away.lift_eq]
 
+/-- **Generic** restriction-naturality of the covariant maps ([FJP] Lemma 4.6/5.1;
+subsumes the 𝓑/𝓒 instances below and serves the second-level `ρ`-maps in the transfer). -/
+theorem presheafValueMapOfHom_restriction {R S : Type*} [CommRing R] [TopologicalSpace R]
+    [PlusSubring R] [IsHuberRing R] [HasLocLiftPowerBounded R]
+    [CommRing S] [TopologicalSpace S] [PlusSubring S]
+    [IsHuberRing S] [HasLocLiftPowerBounded S]
+    (φ : R →+* S) (hφ : Continuous φ)
+    (D D' : RationalLocData R) (E E' : RationalLocData S)
+    (hs : E.s = φ D.s) (hT : ∀ t ∈ D.T, φ t ∈ E.T)
+    (hs' : E'.s = φ D'.s) (hT' : ∀ t ∈ D'.T, φ t ∈ E'.T)
+    (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
+    (hpush : rationalOpen E'.T E'.s ⊆ rationalOpen E.T E.s) (x : presheafValue D) :
+    presheafValueMapOfHom φ hφ D' E' hs' hT' (restrictionMap D D' h x) =
+      restrictionMap E E' hpush (presheafValueMapOfHom φ hφ D E hs hT x) := by
+  letI := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  haveI : RegularSpace (presheafValue E') := UniformSpace.to_regularSpace
+  have hcomp : ((presheafValueMapOfHom φ hφ D' E' hs' hT').comp
+      (restrictionMapHom D D' h)).comp D.coeRingHom =
+      ((restrictionMapHom E E' hpush).comp
+        (presheafValueMapOfHom φ hφ D E hs hT)).comp D.coeRingHom := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers D.s) ?_
+    ext a
+    simp only [RingHom.comp_apply]
+    rw [show D.coeRingHom (algebraMap R (Localization.Away D.s) a) =
+        D.canonicalMap a from rfl,
+      restrictionMapHom_canonicalMap' D D' h,
+      presheafValueMapOfHom_canonicalMap φ hφ D' E' hs' hT' a,
+      presheafValueMapOfHom_canonicalMap φ hφ D E hs hT a,
+      restrictionMapHom_canonicalMap' E E' hpush]
+  have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) :=
+    UniformSpace.Completion.denseRange_coe
+  have h_eq : (fun y => presheafValueMapOfHom φ hφ D' E' hs' hT'
+      (restrictionMapHom D D' h y)) =
+      fun y => restrictionMapHom E E' hpush (presheafValueMapOfHom φ hφ D E hs hT y) :=
+    hdense.equalizer
+      ((presheafValueMapOfHom_continuous φ hφ D' E' hs' hT').comp
+        (restrictionMapHom_continuous D D' h))
+      ((restrictionMapHom_continuous _ _ hpush).comp
+        (presheafValueMapOfHom_continuous φ hφ D E hs hT))
+      (by funext a; exact DFunLike.congr_fun hcomp a)
+  exact congrFun h_eq x
+
 theorem presheafValueMapC_restriction (D D' : RationalLocData (JetA F))
     (hD : D.IsRational) (hD' : D'.IsRational)
     (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
