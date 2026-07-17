@@ -690,3 +690,40 @@ universal-domain generic-point argument is valid, unlike the torsion CONDITION):
    (Formula.lean, ring-level) + the model-vs-Jacobian comparison.
 This is a genuine multi-session sub-build; the algebraic consumers (above) + OMEGA's
 `isE3Datum_of_bridges` are fully turnkey, so on RING-DBL landing the two bridges + hArb:95 close.
+
+## [CHARTER-K / K2] endDual_comp_self — RIGOROUS decomposition (KM, v10.316; corrects the v10.304 recon)
+
+**Goal (:202)**: `endDual f ≫ f = mulBy (endDeg f)` — i.e. (`endDual f = [tr f] − f` abel-free) the
+Cayley–Hamilton identity `f² − [tr f]·f + [deg f] = 0` in `End(E/S)`. THE Abel content.
+
+**Corrected finding (source-verified):** the repo's degree engine is SCHEME-NATIVE `Scheme.Hom.finrank`
+(not fibrewise-HasseWeil transfer): `endDeg_comp_of_isIntegral` (:292, PROVEN) uses `finrank_comp`;
+`endDeg_mulBy=n²` uses `Torsion.mulByHom_finrank`. HasseWeil is imported ONLY for the Hasse *inequality*
+(`endTrace_sq_le`, via `degree_quadratic_closed`). BUT `endDual_comp_self` is a **morphism identity**, which
+`finrank` cannot give — it genuinely needs the fibre Cayley–Hamilton + a rigidity lift. NOT circular with the
+sorried generals IF proven via the fibre route (route A discharges the generals AFTER, downstream).
+
+**The 5-leaf fibre-transfer + rigidity route (standard, source-faithful):**
+- **L1 (fibre bridge)**: base-change `f : E.asOver ⟶ E.asOver` to each geometric point `κ̄` (`Spec κ̄ → S`)
+  → a HasseWeil-comparable field endomorphism `f_κ` of `E_κ̄`. Anchor: `EllipticCurve.baseChange` +
+  `modelPointAddEquiv`/`projModelPointsEquiv` (the scheme↔affine fibre dictionary, OMEGA's Stage-B).
+- **L2 (fibre CH)**: `f̂_κ ∘ f_κ = [deg f_κ]` over the field. Anchor: HasseWeil `DualIsogeny.lean`
+  (`IsDualOf`/`exists_dual` + `α_dual ∘ α = [deg α]`) — IMPORT, never re-prove.
+- **L3 (dual match)**: the abel-free `(endDual f)_κ = f̂_κ` fibrewise, i.e. `[tr f]−f` restricts to HasseWeil's
+  dual. Via `f_κ + f̂_κ = [tr f_κ]` (HasseWeil `h_sum_trace`) + `endTrace f` fibre = `tr f_κ` (needs the
+  trace-fibre bridge, itself via `endDeg` fibre = `deg f_κ`).
+- **L4 (degree fibre = deg)**: `endDeg f` = fibre `deg f_κ` at every geometric point (the "K4 bridge").
+  For finite-flat f: `endDeg` is the finrank, LOCALLY CONSTANT (`Scheme.Hom.isLocallyConstant_finrank`,
+  mathlib FlatRank:230, USED already in FinrankComp) = fibre degree. Degenerate f=[0]: both sides [0].
+- **L5 (rigidity lift, THE crux + main RISK)**: two pointed S-endomorphisms of E/S agreeing on every
+  geometric fibre are EQUAL. For homs of an elliptic curve this is abelian-scheme rigidity; over an
+  ARBITRARY (non-reduced/disconnected) base this is the hard part — likely via the Mumford rigidity engine
+  (`RigiditySpreadingOut.isMonHom_of_one_comp_eq'_of_finitePresentation`) applied to the difference hom
+  `(endDual f ≫ f) − [deg f]` (a pointed hom that is fibrewise [0] ⟹ [0]). NEEDS: a "pointed hom, fibrewise
+  zero ⟹ zero" lemma over any base — check if the rigidity engine yields it, else it's the deepest sub-leaf.
+- **Assembly**: L5 applied to L1–L4 (fibre identity) closes `endDual_comp_self`.
+
+Each leaf is a substantial sub-ticket; L5 is the genuine research crux (abelian-scheme hom rigidity over
+arbitrary bases). GH's FinrankDegenerate serves L4's degenerate/rank-vanishing side. This is the deepest
+self-contained build on CHARTER-K — grind the leaves L1→L5. K3 (5 generals via route A + hH + hbound) is
+downstream and mechanical once endDual lands.
