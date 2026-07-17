@@ -23140,3 +23140,53 @@ deliver bridgeP/bridgeQ in your exact signatures"). G0 holds the complete torsor
 package (v10.313). OMEGA is in (O3)-watch: on KM's RING-DBL landing, the close is
 `exact bridgeP …` / `exact bridgeQ …` at Bootstrap:95 → the ℤ[1/3] headline → GH's
 receipts-closer. (STREAM-OMEGA)
+
+## v10.316 (2026-07-17, coordinator) — ★ FINISH-LINE RE-ALLOCATION: the project has serialized onto TWO deep builds — parallelize them; the other two seats ASSEMBLE, not watch
+
+**Owner directive (2026-07-17):** "they worked for even less time! we need to finish this project, get them
+working." **Root cause (verified at source, NOT a micromanaging relapse):** the build-ahead protocol WORKED
+— OMEGA/G0/GH each drove their independent work to completion and staged everything turnkey — so the project
+has correctly serialized onto exactly **two deep, self-contained multi-session builds**, and three seats are
+honestly blocked behind them (GH literally reduced to watch-cycles). The fix is force concentration, not
+charter-tuning.
+
+**VERIFIED STATE:**
+- **RING-DBL** (`2•(affineSection p q) = affineSection(addX,addY)`, ring-level, unit-d locus) — UNBUILT.
+  Gates hArb :95 (which is TURNKEY: `refine isE3Datum_of_bridges X hR L ?_ ?_`, the two sorries are the
+  bridge-Props, which KM's Ψ₃ certificate — ThreeTorsionRingCertificate.lean, on origin — already reduces
+  to RING-DBL). KM verified RING-DBL is an IDENTITY (no torsion hyp, NOT ε-trapped), generic-point route
+  **banked in decomposition-km-integral.md with exact anchors** (pushed).
+- **endDual_comp_self** (KM 2.6 Cayley–Hamilton of the degree form) — UNBUILT. Gates hH + hbound + the 5
+  EndomorphismDegree generals → the T-H9 capstone.
+- hArb :95 turnkey ✓; :206 turnkey ✓ (funnel + SqrtUnitCover + abscissaDiff all on origin — **G0 is
+  UNBLOCKED to assemble now**); GH idle-watching.
+
+**★ RE-ALLOCATION RULING (binding) — the two deep builds run IN PARALLEL, dependency-free:**
+
+1. **RING-DBL OWNERSHIP TRANSFERS: KM → OMEGA.** Rationale: RING-DBL is affineSection-doubling algebra =
+   OMEGA's Stage-B wheelhouse (it built AffineSectionSpecPoints / modelPointAddEquiv / the scheme↔coordinate
+   dictionary AND already did the 3-torsion doubling for `three_zsmul_universalE3P/Q`); OMEGA is idle-blocked
+   on EXACTLY this lemma; KM's generic-point route is already banked+pushed, so OMEGA consumes it with ZERO
+   KM wait. **This unblocks OMEGA's own hArb and parallelizes the two deep builds.** Low-risk: if OMEGA
+   stalls, KM (post-endDual) picks it up — same as the old serial plan, but with the parallel upside.
+   [DEDUP/collision guard: OMEGA owns RING-DBL in a ForMathlib/affineSection file; KM does NOT touch it.]
+2. **KM → endDual_comp_self, 100%** (hand off RING-DBL). Single deepest self-contained deliverable (read
+   KM 2.6). Then K3 (5 generals via route A + hH + hbound), then K4 (W0/T-H8) backstop. **KM no longer
+   splits attention** — one deep build, no cross-seat block.
+3. **G0 → ASSEMBLE :206 NOW** (CHARTER-G terminal). abscissaDiff is on origin; glue the per-chart
+   SqrtUnitCovers via `sqrtPairCongr` → the torsor → `legendreDelta_relRep_finiteEtale_of_scaleTorsor` →
+   :206 dies → **Bootstrap's Legendre side DONE.** Do NOT wait for further OMEGA input — the d-data
+   (abscissaDiff) is delivered.
+4. **GH → finish independent work, then arm (don't watch):** GH2 straggler sweep to zero-or-archived; the
+   `representable_iff_rigidNoeth`-⇐ wire in EllCategory (GH-owned — build as far as the engine allows);
+   SCRIPT the 7-receipt capstone as a literal one-command fire. When those exhaust, GH is legitimately
+   armed-and-waiting (the closer genuinely depends on the engine+keystone) — that idle is honest, not a
+   premature stop; owner re-fires GH on a sibling landing.
+
+**Why sessions will now be long:** both deep builds are DEPENDENCY-FREE (each seat has everything it needs —
+OMEGA has KM's banked route; KM reads KM 2.6). No more "do N items then block." KM and OMEGA each grind ONE
+self-contained deep build to completion. **The finish = RING-DBL (OMEGA) + :206 (G0, now) + endDual (KM) →
+GH's capstone.** Two hard builds and one assembly stand between here and the three-level headline.
+
+**DISPATCH:** the four charters in WORK-ORDERS.md are updated (K narrowed to endDual; O takes RING-DBL then
+hArb; G assemble-now; GH finish-then-arm). Owner re-fires all four; OMEGA + G0 fire immediately.
