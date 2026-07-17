@@ -625,21 +625,33 @@ T704, by a fresh `/develop --continue`.
   need span-⊤) — the Spa-route is rationality-free. | **Depends**: T603, T304 |
   **Type**: proofs (L5.5–L5.6)
 
-### [T605] restriction naturality + coverage
-- **Status**: open | **Depends**: T604 | **Type**: proofs (L5.3 rest + L5.7)
-- **Sorries**: `presheafValueMapB/C_restriction`, `mem_rationalOpen_pushDatum*_iff`,
-  `pushCoveringB/C/D` fields, `*_isRational`.
-- **Sketch**: naturality by `IsLocalization.ringHom_ext` + completion-extension uniqueness;
-  coverage pointwise via `ValuationSpectrum.comap`/`comap_mem_spa` (power-bounded
-  preservation via norms — never bare continuity, B2).
+### [T605] restriction naturality + coverage — **DONE 2026-07-17**
+- **Status**: done (beastmode). Coverage: `plus_le_comap_of_norm_le` (𝓐° = unit ball by
+  `isPowerBounded_JetA_iff` [new import: FiniteJetUniformDomain], then norm-noninc maps +
+  `isPowerBounded_of_norm_le_one` — norms, never bare continuity ✓);
+  `mem_rationalOpen_pushDatum B/C/D_iff` (D-side added as supporting lemma) via
+  `comap_mem_spa` + `comap_vle`-rfl pushing; `pushCoveringB/C/D` hsubset/hcover by the
+  iffs + the base covering's fields through `Finset.attach`; `*_isRational` via
+  `pushDatum*_isRational` + `IsRational.piece`. Naturality:
+  `restrictionMapHom_canonicalMap'` (local public form of the private coe-lemma via
+  `extensionHom_coe` + `Away.lift_eq`), then both squares by
+  `IsLocalization.ringHom_ext` on canonical images + `denseRange_coe` equalizer
+  (RegularSpace haveI for T2). Gotcha: the D-side hAB lambda needs explicit
+  `Subring.mem_comap.mpr` + `show IsPowerBounded` casts (composite-hom metas).
+  | **Depends**: T604 | **Type**: proofs (L5.3 rest + L5.7)
 
-### [T606] intersection data
-- **Status**: open (partial: `interDatum` data + `interDatum_isRational` DONE with T601;
-  only `rationalOpen_interDatum` remains) | **Depends**: T601 | **Parallel**: with
-  T602–T605 | **Type**: proofs (L5.8)
-- **Sorries**: `rationalOpen_interDatum`.
-- **Sketch**: product datum, both inclusions pointwise under span-⊤; fallback
-  normalisation `insert s T` recorded at L5.8.
+### [T606] intersection data — **DONE 2026-07-17**
+- **Status**: done (beastmode). **The L5.8 fallback normalisation was REQUIRED**: with the
+  bare product `T₁·T₂` the ⊆-direction of the intersection formula is false (nothing
+  isolates `v(t₁) ≤ v(s₁)` from products alone); `interDatum.T` redefined (recorded) as
+  `(insert s₁ T₁ ×ˢ insert s₂ T₂).image (·*·)` — `R(T/s) = R(T∪{s}/s)` on opens, so the
+  normalized datum cuts out exactly the intersection. `rationalOpen_interDatum` proved
+  pointwise with the `Spv` methods: `mul_vle_mul_left`, `vle_mul_cancel` (against the
+  `(t, s₂)`/`(s₁, t)` pairs), `vle_total` (reflexivity at inserted `s`), `vle_trans`
+  (product of inequalities), and `¬vle(s₁s₂)0 → ¬vle sᵢ 0` by `0 = 0·s₂` cancellation —
+  no supp-primality needed. `span_insert_eq_top` helper (with the `[DecidableEq]`-binder
+  lesson applied — `insert` also synthesizes it ambiently). `interDatum_isRational`
+  updated to the normalized span. | **Depends**: T601 | **Type**: proofs (L5.8)
 
 ### [CLEANUP-14] /cleanup `FiniteJetFunctoriality.lean` (final) — **Depends**: T605, T606.
 

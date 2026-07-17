@@ -1122,6 +1122,26 @@ instance hasLocLiftPowerBounded_JetA : HasLocLiftPowerBounded (JetA F) :=
 With the loc-lift instances available, the project's `restrictionMap` vocabulary applies to
 all four rings, and the covariant maps commute with it. -/
 
+/-- The restriction map fixes the canonical images (local public form of the private
+`restrictionMapHom_coe` fact, via `extensionHom_coe` + `Away.lift_eq`). -/
+private theorem restrictionMapHom_canonicalMap' {A : Type*} [CommRing A]
+    [TopologicalSpace A] [PlusSubring A] [IsHuberRing A]
+    [HasLocLiftPowerBounded A] (D D' : RationalLocData A)
+    (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s) (a : A) :
+    restrictionMapHom D D' h (D.canonicalMap a) = D'.canonicalMap a := by
+  letI : UniformSpace (Localization.Away D.s) := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  letI : UniformSpace (Localization.Away D'.s) := D'.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D'.s) := D'.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D'.s) := D'.isUniformAddGroup
+  have hcoe := UniformSpace.Completion.extensionHom_coe (restrictionMapAlg D D' h)
+    (restrictionMapAlg_continuous D D' h) (algebraMap A (Localization.Away D.s) a)
+  rw [show D.canonicalMap a =
+    D.coeRingHom (algebraMap A (Localization.Away D.s) a) from rfl]
+  refine hcoe.trans ?_
+  rw [restrictionMapAlg, IsLocalization.Away.lift_eq]
+
 theorem presheafValueMapC_restriction (D D' : RationalLocData (JetA F))
     (hD : D.IsRational) (hD' : D'.IsRational)
     (h : rationalOpen D'.T D'.s ⊆ rationalOpen D.T D.s)
@@ -1130,7 +1150,33 @@ theorem presheafValueMapC_restriction (D D' : RationalLocData (JetA F))
     presheafValueMapC D' hD' (restrictionMap D D' h x) =
       restrictionMap (pushDatumC D hD) (pushDatumC D' hD') hpush
         (presheafValueMapC D hD x) := by
-  sorry
+  letI := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  haveI : RegularSpace (presheafValue (pushDatumC D' hD')) :=
+    UniformSpace.to_regularSpace
+  have hcomp : ((presheafValueMapC D' hD').comp (restrictionMapHom D D' h)).comp
+      D.coeRingHom =
+      ((restrictionMapHom (pushDatumC D hD) (pushDatumC D' hD') hpush).comp
+        (presheafValueMapC D hD)).comp D.coeRingHom := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers D.s) ?_
+    ext a
+    simp only [RingHom.comp_apply]
+    rw [show D.coeRingHom (algebraMap (JetA F) (Localization.Away D.s) a) =
+        D.canonicalMap a from rfl,
+      restrictionMapHom_canonicalMap' D D' h, presheafValueMapC_canonicalMap,
+      presheafValueMapC_canonicalMap,
+      restrictionMapHom_canonicalMap' (pushDatumC D hD) (pushDatumC D' hD') hpush]
+  have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) :=
+    UniformSpace.Completion.denseRange_coe
+  have h_eq : (fun y => presheafValueMapC D' hD' (restrictionMapHom D D' h y)) =
+      fun y => restrictionMapHom (pushDatumC D hD) (pushDatumC D' hD') hpush
+        (presheafValueMapC D hD y) :=
+    hdense.equalizer
+      ((presheafValueMapC_continuous D' hD').comp (restrictionMapHom_continuous D D' h))
+      ((restrictionMapHom_continuous _ _ hpush).comp (presheafValueMapC_continuous D hD))
+      (by funext a; exact DFunLike.congr_fun hcomp a)
+  exact congrFun h_eq x
 
 theorem presheafValueMapB_restriction (D D' : RationalLocData (JetA F))
     (hD : D.IsRational) (hD' : D'.IsRational)
@@ -1140,7 +1186,33 @@ theorem presheafValueMapB_restriction (D D' : RationalLocData (JetA F))
     presheafValueMapB D' hD' (restrictionMap D D' h x) =
       restrictionMap (pushDatumB D hD) (pushDatumB D' hD') hpush
         (presheafValueMapB D hD x) := by
-  sorry
+  letI := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  haveI : RegularSpace (presheafValue (pushDatumB D' hD')) :=
+    UniformSpace.to_regularSpace
+  have hcomp : ((presheafValueMapB D' hD').comp (restrictionMapHom D D' h)).comp
+      D.coeRingHom =
+      ((restrictionMapHom (pushDatumB D hD) (pushDatumB D' hD') hpush).comp
+        (presheafValueMapB D hD)).comp D.coeRingHom := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers D.s) ?_
+    ext a
+    simp only [RingHom.comp_apply]
+    rw [show D.coeRingHom (algebraMap (JetA F) (Localization.Away D.s) a) =
+        D.canonicalMap a from rfl,
+      restrictionMapHom_canonicalMap' D D' h, presheafValueMapB_canonicalMap,
+      presheafValueMapB_canonicalMap,
+      restrictionMapHom_canonicalMap' (pushDatumB D hD) (pushDatumB D' hD') hpush]
+  have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) :=
+    UniformSpace.Completion.denseRange_coe
+  have h_eq : (fun y => presheafValueMapB D' hD' (restrictionMapHom D D' h y)) =
+      fun y => restrictionMapHom (pushDatumB D hD) (pushDatumB D' hD') hpush
+        (presheafValueMapB D hD y) :=
+    hdense.equalizer
+      ((presheafValueMapB_continuous D' hD').comp (restrictionMapHom_continuous D D' h))
+      ((restrictionMapHom_continuous _ _ hpush).comp (presheafValueMapB_continuous D hD))
+      (by funext a; exact DFunLike.congr_fun hcomp a)
+  exact congrFun h_eq x
 
 /-! ### Coverage transfer ([FJP] Lemma 5.2, first display: `U_E = ⋃ᵢ (Uᵢ)_E`) -/
 
@@ -1341,28 +1413,84 @@ theorem span_mul_image_eq_top {A : Type*} [CommRing A] [DecidableEq A] {T₁ T�
     exact Set.image_mul_prod
   rw [hcoe, ← Ideal.span_mul_span', h₁, h₂, Ideal.top_mul]
 
-/-- The product-datum span fact, stated at 𝓐. -/
+/-- Spans of `insert`-enlarged spanning sets span. The `DecidableEq` binder makes the
+use site instantiate `insert` with the ambient instance (see `span_mul_image_eq_top`). -/
+theorem span_insert_eq_top {A : Type*} [CommRing A] [DecidableEq A] {T : Finset A} (a : A)
+    (h : Ideal.span (T : Set A) = ⊤) :
+    Ideal.span ((insert a T : Finset A) : Set A) = ⊤ := by
+  rw [← top_le_iff, ← h]
+  exact Ideal.span_mono (by rw [Finset.coe_insert]; exact Set.subset_insert a _)
+
+/-- The product-datum span fact, stated at 𝓐 (`s`-normalized factors). -/
 theorem interDatum_span_eq_top (D₁ D₂ : RationalLocData (JetA F))
     (h₁ : D₁.IsRational) (h₂ : D₂.IsRational) :
-    Ideal.span ((((D₁.T ×ˢ D₂.T).image fun p => p.1 * p.2 : Finset (JetA F))) :
-      Set (JetA F)) = ⊤ :=
-  span_mul_image_eq_top h₁.span_eq_top h₂.span_eq_top
+    Ideal.span ((((insert D₁.s D₁.T ×ˢ insert D₂.s D₂.T).image
+      fun p => p.1 * p.2 : Finset (JetA F))) : Set (JetA F)) = ⊤ :=
+  span_mul_image_eq_top (span_insert_eq_top D₁.s h₁.span_eq_top)
+    (span_insert_eq_top D₂.s h₂.span_eq_top)
 
 /-- The product (intersection) datum of two rational data ([FJP] Lemma 5.2 uses
 `U_{ij} = U_i ∩ U_j`, "which is again rational"). Signature completion (recorded):
-rationality of both data discharges `hopen` via the product-span computation. -/
+rationality of both data discharges `hopen`. Definition normalization (recorded, the
+L5.8 fallback): the factors are `s`-normalized (`insert sᵢ Tᵢ`) so that the pointwise
+intersection formula `rationalOpen_interDatum` holds — `R(T/s) = R((T ∪ {s})/s)` on
+opens, but only the normalized product datum cuts out the intersection. -/
 def interDatum (D₁ D₂ : RationalLocData (JetA F))
     (h₁ : D₁.IsRational) (h₂ : D₂.IsRational) : RationalLocData (JetA F) where
   P := podA F
-  T := (D₁.T ×ˢ D₂.T).image fun p => p.1 * p.2
+  T := (insert D₁.s D₁.T ×ˢ insert D₂.s D₂.T).image fun p => p.1 * p.2
   s := D₁.s * D₂.s
-  hopen := genPiece_hopen (podA F) ((D₁.T ×ˢ D₂.T).image fun p => p.1 * p.2)
+  hopen := genPiece_hopen (podA F)
+    ((insert D₁.s D₁.T ×ˢ insert D₂.s D₂.T).image fun p => p.1 * p.2)
     (D₁.s * D₂.s) (interDatum_span_eq_top D₁ D₂ h₁ h₂)
 
 theorem rationalOpen_interDatum (D₁ D₂ : RationalLocData (JetA F))
     (h₁ : D₁.IsRational) (h₂ : D₂.IsRational) :
     rationalOpen (interDatum D₁ D₂ h₁ h₂).T (interDatum D₁ D₂ h₁ h₂).s =
-      rationalOpen D₁.T D₁.s ∩ rationalOpen D₂.T D₂.s := by sorry
+      rationalOpen D₁.T D₁.s ∩ rationalOpen D₂.T D₂.s := by
+  ext v
+  constructor
+  · rintro ⟨hspa, hvle, hs0⟩
+    have hs₁0 : ¬ v.vle D₁.s 0 := fun h0 => hs0 (by
+      have := v.mul_vle_mul_left h0 D₂.s
+      rwa [zero_mul] at this)
+    have hs₂0 : ¬ v.vle D₂.s 0 := fun h0 => hs0 (by
+      have := v.mul_vle_mul_left h0 D₁.s
+      rw [zero_mul, mul_comm D₂.s D₁.s] at this
+      exact this)
+    refine ⟨⟨hspa, fun t ht => ?_, hs₁0⟩, ⟨hspa, fun t ht => ?_, hs₂0⟩⟩
+    · have hpair : t * D₂.s ∈ (interDatum D₁ D₂ h₁ h₂).T :=
+        Finset.mem_image.mpr ⟨(t, D₂.s), Finset.mem_product.mpr
+          ⟨Finset.mem_insert_of_mem ht, Finset.mem_insert_self _ _⟩, rfl⟩
+      exact v.vle_mul_cancel hs₂0 (hvle _ hpair)
+    · have hpair : D₁.s * t ∈ (interDatum D₁ D₂ h₁ h₂).T :=
+        Finset.mem_image.mpr ⟨(D₁.s, t), Finset.mem_product.mpr
+          ⟨Finset.mem_insert_self _ _, Finset.mem_insert_of_mem ht⟩, rfl⟩
+      have h' := hvle _ hpair
+      rw [show D₁.s * t = t * D₁.s from mul_comm _ _,
+        show (interDatum D₁ D₂ h₁ h₂).s = D₂.s * D₁.s from mul_comm _ _] at h'
+      exact v.vle_mul_cancel hs₁0 h'
+  · rintro ⟨⟨hspa, hvle₁, hs₁0⟩, ⟨-, hvle₂, hs₂0⟩⟩
+    have hvle₁' : ∀ t₁ ∈ insert D₁.s D₁.T, v.vle t₁ D₁.s := by
+      intro t₁ ht₁
+      rcases Finset.mem_insert.mp ht₁ with h | h
+      · subst h; exact (v.vle_total _ _).elim id id
+      · exact hvle₁ t₁ h
+    have hvle₂' : ∀ t₂ ∈ insert D₂.s D₂.T, v.vle t₂ D₂.s := by
+      intro t₂ ht₂
+      rcases Finset.mem_insert.mp ht₂ with h | h
+      · subst h; exact (v.vle_total _ _).elim id id
+      · exact hvle₂ t₂ h
+    refine ⟨hspa, fun t' ht' => ?_, fun h0 => ?_⟩
+    · obtain ⟨⟨t₁, t₂⟩, hmem, rfl⟩ := Finset.mem_image.mp ht'
+      obtain ⟨ht₁, ht₂⟩ := Finset.mem_product.mp hmem
+      have ha := v.mul_vle_mul_left (hvle₁' t₁ ht₁) t₂
+      have hb := v.mul_vle_mul_left (hvle₂' t₂ ht₂) D₁.s
+      rw [mul_comm t₂ D₁.s, mul_comm D₂.s D₁.s] at hb
+      exact v.vle_trans ha hb
+    · rw [show (interDatum D₁ D₂ h₁ h₂).s = D₁.s * D₂.s from rfl,
+        show (0 : JetA F) = 0 * D₂.s from (zero_mul _).symm] at h0
+      exact hs₁0 (v.vle_mul_cancel hs₂0 h0)
 
 theorem interDatum_isRational {D₁ D₂ : RationalLocData (JetA F)}
     (h₁ : D₁.IsRational) (h₂ : D₂.IsRational) : (interDatum D₁ D₂ h₁ h₂).IsRational :=
