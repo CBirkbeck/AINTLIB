@@ -6,6 +6,7 @@ Authors: Chris Birkbeck
 import ModularCurves.Moduli.UniversalLevelThree
 import ModularCurves.Moduli.SectionMarking
 import ModularCurves.Moduli.LevelMarking
+import ModularCurves.ForMathlib.IsUnitOfResidue
 
 /-!
 # The `ℰ₃`-datum assembly layers ([hArb-3])
@@ -216,6 +217,96 @@ theorem chartPointsEquiv_pull_marked {T : Scheme.{u}} (tV : T ⟶ Spec Γ(S, V.1
           pullback.snd E.toEllipticCurveGeom.π V.1.ι = 𝟙 _ from
         pullback.lift_snd _ _ _]
     simp
+
+
+open WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1600000 in
+/-- **([hArb-3c-ε] the `a₃`-certificate ★★)** On a chart marking a fibrewise-nonzero
+`3`-torsion section at the origin, `a₃` is a unit: at every residue point the marked
+model point is `some(0,0)`, nonzero and `3`-torsion, hence not `2`-torsion — but
+`a₃ = 0` would make `(0,0)` its own negation (`negY 0 0 = -a₃`). -/
+theorem isUnit_a₃_of_marked_origin {S : Scheme.{u}} {E : EllipticCurve S}
+    {V : S.affineOpens} (Pr : LocalPresentation E.toEllipticCurveGeom V)
+    {σ : S ⟶ E.toEllipticCurveGeom.E} {hσ : σ ≫ E.toEllipticCurveGeom.π = 𝟙 S}
+    (heq : Pr.W.toAffine.Equation 0 0)
+    (hMeq : (V.2.isoSpec.inv ≫ sectionLift E.toEllipticCurveGeom hσ V) ≫ Pr.e.hom =
+      projModelAffineSection Pr.W 0 0 heq)
+    (hkill : (3 : ℤ) • (⟨σ, hσ⟩ : E.Section) = 0)
+    (hne : ∀ (k : Type u) [Field k] [IsAlgClosed k] (t : Spec (CommRingCat.of k) ⟶ S),
+      t ≫ σ ≠ t ≫ E.zero) :
+    IsUnit Pr.W.a₃ := by
+  letI := Pr.elliptic
+  refine isUnit_of_forall_algebraMap_residueField_ne_zero (fun 𝔭 => ?_)
+  intro ha₃
+  set K : Type u := 𝔭.asIdeal.ResidueField with hK
+  set Kb : Type u := AlgebraicClosure K with hKb
+  letI : DecidableEq Kb := Classical.decEq Kb
+  letI : Algebra ↑Γ(S, V.1) Kb :=
+    ((algebraMap K Kb).comp (algebraMap ↑Γ(S, V.1) K)).toAlgebra
+  have halgKb : ∀ z : ↑Γ(S, V.1), algebraMap ↑Γ(S, V.1) Kb z =
+      algebraMap K Kb (algebraMap ↑Γ(S, V.1) K z) := fun _ => rfl
+  set tVb : Spec (CommRingCat.of Kb) ⟶ Spec Γ(S, V.1) :=
+    Spec.map (CommRingCat.ofHom (algebraMap ↑Γ(S, V.1) Kb)) with htVb
+  -- the transported marked point
+  set x := chartPointsEquiv Pr tVb
+    (EllipticCurve.Point.pull E (tVb ≫ chartρ V) ⟨σ, hσ⟩) with hx
+  have hkillE : (3 : ℤ) • EllipticCurve.Point.pull E (tVb ≫ chartρ V) ⟨σ, hσ⟩ = 0 := by
+    rw [← EllipticCurve.Point.pull_zsmul, hkill, EllipticCurve.Point.pull_zero]
+  have hkill3 : (3 : ℤ) • x = 0 := by
+    rw [hx, ← map_zsmul, hkillE, map_zero]
+  have hx0 : x ≠ 0 := by
+    intro hc
+    have h0 : EllipticCurve.Point.pull E (tVb ≫ chartρ V) ⟨σ, hσ⟩ = 0 := by
+      have := (chartPointsEquiv Pr tVb).map_eq_zero_iff.mp (hx ▸ hc)
+      exact this
+    refine hne Kb (tVb ≫ chartρ V) ?_
+    have hval := congrArg Subtype.val h0
+    rw [E.point_zero_val] at hval
+    exact hval
+  -- its model value is `some (0, 0)`
+  haveI : ((Pr.W.baseChange Kb)).IsElliptic :=
+    inferInstanceAs ((Pr.W.map (algebraMap ↑Γ(S, V.1) Kb)).IsElliptic)
+  have hns : (Pr.W.baseChange Kb).toAffine.Nonsingular
+      (algebraMap ↑Γ(S, V.1) Kb 0) (algebraMap ↑Γ(S, V.1) Kb 0) :=
+    WeierstrassCurve.Affine.equation_iff_nonsingular.mp
+      (WeierstrassCurve.Affine.Equation.map _ heq)
+  have hxpkg : x = ⟨(affineSectionSpecPoint Pr.W Kb 0 0 heq).1,
+      (affineSectionSpecPoint Pr.W Kb 0 0 heq).2⟩ := by
+    refine Subtype.ext ?_
+    rw [hx, chartPointsEquiv_pull_marked Pr tVb heq hMeq]
+    rfl
+  set y := modelPointAddEquiv Pr.W (K' := Kb) x with hy
+  have hyval : y = WeierstrassCurve.Affine.Point.some _ _ hns := by
+    rw [hy, hxpkg]
+    show projModelPointsEquiv Pr.W Kb (affineSectionSpecPoint Pr.W Kb 0 0 heq) = _
+    exact projModelPointsEquiv_affineSectionSpecPoint Pr.W 0 0 heq hns
+  have hy3 : (3 : ℤ) • y = 0 := by
+    rw [hy, ← map_zsmul, hkill3, map_zero]
+  have hy0 : y ≠ 0 := by
+    rw [hy]
+    exact fun hc => hx0 ((modelPointAddEquiv Pr.W (K' := Kb)).map_eq_zero_iff.mp hc)
+  -- `a₃ = 0` makes the marked point `2`-torsion
+  have ha₃Kb : algebraMap ↑Γ(S, V.1) Kb Pr.W.a₃ = 0 := by
+    rw [halgKb, ha₃, map_zero]
+  have hy2 : (2 : ℤ) • y = 0 := by
+    rw [hyval, two_zsmul]
+    refine WeierstrassCurve.Affine.Point.add_of_Y_eq rfl ?_
+    show algebraMap ↑Γ(S, V.1) Kb 0 = (Pr.W.baseChange Kb).toAffine.negY
+      (algebraMap ↑Γ(S, V.1) Kb 0) (algebraMap ↑Γ(S, V.1) Kb 0)
+    rw [WeierstrassCurve.Affine.negY]
+    rw [show ((Pr.W.baseChange Kb)).toAffine.a₁ =
+      algebraMap ↑Γ(S, V.1) Kb Pr.W.a₁ from rfl,
+      show ((Pr.W.baseChange Kb)).toAffine.a₃ =
+      algebraMap ↑Γ(S, V.1) Kb Pr.W.a₃ from rfl]
+    rw [ha₃Kb, map_zero]
+    ring
+  -- `3`-torsion ∧ `2`-torsion ⟹ zero
+  have : y = 0 := by
+    have h1 : ((3 : ℤ) - 2) • y = 0 := by
+      rw [sub_smul, hy3, hy2, sub_zero]
+    rwa [show ((3 : ℤ) - 2) = 1 by norm_num, one_smul] at h1
+  exact hy0 this
 
 
 end ChartRecord
