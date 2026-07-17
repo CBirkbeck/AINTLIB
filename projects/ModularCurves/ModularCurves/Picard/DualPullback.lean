@@ -146,6 +146,28 @@ theorem overEquiv_map_add (U : X.Opens)
   intro x
   rfl
 
+private theorem endomorphism_comp_chain
+    {C : Type u} [Category C] {A B D E : C}
+    (a : A ⟶ A) (u : A ⟶ B) (b : B ⟶ B)
+    (e : B ⟶ D) (c : D ⟶ D) (v : D ⟶ E) (d : E ⟶ E)
+    (hu : a ≫ u = u ≫ b) (he : b ≫ e = e ≫ c)
+    (hv : c ≫ v = v ≫ d) :
+    a ≫ (u ≫ e ≫ v) = u ≫ e ≫ v ≫ d := by
+  calc
+    a ≫ (u ≫ e ≫ v) = (a ≫ u) ≫ e ≫ v := by
+      simp only [Category.assoc]
+    _ = (u ≫ b) ≫ e ≫ v :=
+      congrArg (fun q ↦ q ≫ e ≫ v) hu
+    _ = u ≫ ((b ≫ e) ≫ v) := by
+      simp only [Category.assoc]
+    _ = u ≫ ((e ≫ c) ≫ v) :=
+      congrArg (fun q ↦ u ≫ (q ≫ v)) he
+    _ = u ≫ (e ≫ (c ≫ v)) := by
+      simp only [Category.assoc]
+    _ = u ≫ (e ≫ (v ≫ d)) :=
+      congrArg (fun q ↦ u ≫ (e ≫ q)) hv
+    _ = u ≫ e ≫ v ≫ d := rfl
+
 /-- A section on an ambient open, transported to the top open of its open subscheme. -/
 noncomputable def openTopSection (U : X.Opens) (r : Γ(X, U)) :
     Γ(U.toScheme, (⊤ : U.toScheme.Opens)) :=
@@ -193,7 +215,9 @@ theorem overEquiv_unitScalarEnd (U : X.Opens) (r : Γ(X, U)) :
   intro x
   repeat' erw [sheafOfModules_comp_app_apply]
   rw [overEquiv_map_app_apply]
-  rw [ModularCurves.SheafOfModules.overUnitScalarEnd_app_apply]
+  erw [ModularCurves.SheafOfModules.overUnitScalarEnd_app_apply
+    X.ringCatSheaf U r
+    (op (U.overEquivalence.symm.functor.obj V.unop)) x]
   erw [ModularCurves.unitEndomorphismOfTopSection_app_apply]
   repeat' erw [sheafOfModulesEquivOverUnit_hom_app_apply (X := X) U V]
   congr 1
@@ -300,12 +324,21 @@ theorem localPullbackUnitIso_scalar (f : Y ⟶ X) (U : X.Opens) (r : Γ(X, U)) :
   let b := (overEquiv (f ⁻¹ᵁ U)).functor.map
     (ModularCurves.SheafOfModules.overUnitScalarEnd Y.ringCatSheaf
       (f ⁻¹ᵁ U) ((f.app U).hom r))
+  let o := ModularCurves.unitEndomorphismOfTopSection (openTopSection U r)
   have hU : (pullback g).map a ≫ (pullback g).map eU.hom =
-      (pullback g).map eU.hom ≫
-        (pullback g).map
-          (ModularCurves.unitEndomorphismOfTopSection (openTopSection U r)) := by
-    rw [← Functor.map_comp, ← Functor.map_comp]
-    exact congrArg (pullback g).map (overEquiv_unitScalarEnd U r)
+      (pullback g).map eU.hom ≫ (pullback g).map o := by
+    have hscalar : a ≫ eU.hom = eU.hom ≫ o :=
+      overEquiv_unitScalarEnd U r
+    have hleft : (pullback g).map a ≫ (pullback g).map eU.hom =
+        (pullback g).map (a ≫ eU.hom) :=
+      ((pullback g).map_comp a eU.hom).symm
+    have hmiddle : (pullback g).map (a ≫ eU.hom) =
+        (pullback g).map (eU.hom ≫ o) :=
+      congrArg (pullback g).map hscalar
+    have hright : (pullback g).map (eU.hom ≫ o) =
+        (pullback g).map eU.hom ≫ (pullback g).map o :=
+      (pullback g).map_comp eU.hom o
+    exact hleft.trans (hmiddle.trans hright)
   have hpb : (pullback g).map
         (ModularCurves.unitEndomorphismOfTopSection (openTopSection U r)) ≫
       (pullbackUnitIso g).hom =
@@ -317,28 +350,17 @@ theorem localPullbackUnitIso_scalar (f : Y ⟶ X) (U : X.Opens) (r : Γ(X, U)) :
         (openTopSection (f ⁻¹ᵁ U) ((f.app U).hom r)) ≫ eV.inv =
       eV.inv ≫ b :=
     overEquiv_unitScalarEnd_inv (f ⁻¹ᵁ U) ((f.app U).hom r)
-  change (pullback g).map a ≫
-      ((pullback g).map eU.hom ≫ (pullbackUnitIso g).hom ≫ eV.inv) =
-    (pullback g).map eU.hom ≫ (pullbackUnitIso g).hom ≫ eV.inv ≫ b
-  rw [← Category.assoc, hU]
+  let pA := (pullback g).map a
   let pU := (pullback g).map eU.hom
-  let pO := (pullback g).map
-    (ModularCurves.unitEndomorphismOfTopSection (openTopSection U r))
+  let pO := (pullback g).map o
   let e := (pullbackUnitIso g).hom
   let qO := ModularCurves.unitEndomorphismOfTopSection
     (openTopSection (f ⁻¹ᵁ U) ((f.app U).hom r))
-  change (pU ≫ pO) ≫ e ≫ eV.inv = pU ≫ e ≫ eV.inv ≫ b
-  calc
-    (pU ≫ pO) ≫ e ≫ eV.inv =
-        pU ≫ ((pO ≫ e) ≫ eV.inv) := by
-      simp only [Category.assoc]
-    _ = pU ≫ ((e ≫ qO) ≫ eV.inv) :=
-      congrArg (fun q ↦ pU ≫ (q ≫ eV.inv)) hpb
-    _ = pU ≫ (e ≫ (qO ≫ eV.inv)) := by
-      simp only [Category.assoc]
-    _ = pU ≫ (e ≫ (eV.inv ≫ b)) :=
-      congrArg (fun q ↦ pU ≫ (e ≫ q)) hV
-    _ = pU ≫ e ≫ eV.inv ≫ b := rfl
+  change pA ≫ (pU ≫ e ≫ eV.inv) = pU ≫ e ≫ eV.inv ≫ b
+  change pA ≫ pU = pU ≫ pO at hU
+  change pO ≫ e = e ≫ qO at hpb
+  change qO ≫ eV.inv = eV.inv ≫ b at hV
+  exact endomorphism_comp_chain pA pU pO e qO eV.inv b hU hpb hV
 
 /-- Pull a local functional back along the morphism restricted to its domain open. -/
 noncomputable def localDualPullback (f : Y ⟶ X) (M : X.Modules) (U : X.Opens)

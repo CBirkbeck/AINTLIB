@@ -1,6 +1,5 @@
 import ModularCurves.Picard.InvertibleSheafGlueDataDescent
 import ModularCurves.Picard.DualPullback.OpenAdjunction
-import ModularCurves.Picard.PicComparison
 import ModularCurves.ForMathlib.SchemeModuleQuasicoherent
 
 /-!
@@ -19,79 +18,45 @@ namespace AlgebraicGeometry.Scheme.Modules
 
 noncomputable section
 
+private theorem presheafPushforward_preservesLimits
+    {C D : Type u} [Category.{u} C] [Category.{u} D]
+    {F : C ⥤ D} {R : Dᵒᵖ ⥤ RingCat.{u}} {S : Cᵒᵖ ⥤ RingCat.{u}}
+    (φ : S ⟶ F.op ⋙ R) :
+    PreservesLimits (PresheafOfModules.pushforward.{u} φ) := by
+  constructor
+  intro J _
+  constructor
+  intro K
+  constructor
+  intro c hc
+  refine ⟨PresheafOfModules.evaluationJointlyReflectsLimits _ _ (fun X => ?_)⟩
+  let E := PresheafOfModules.evaluation R (F.op.obj X) ⋙
+    ModuleCat.restrictScalars (φ.app X).hom
+  exact isLimitOfPreserves E hc
+
+private theorem sheafPushforward_preservesLimits
+    {C D : Type u} [Category.{u} C] [Category.{u} D]
+    {J : GrothendieckTopology C} {K : GrothendieckTopology D}
+    {F : C ⥤ D} [Functor.IsContinuous F J K]
+    {S : Sheaf J RingCat.{u}} {R : Sheaf K RingCat.{u}}
+    (φ : S ⟶ (F.sheafPushforwardContinuous RingCat.{u} J K).obj R) :
+    PreservesLimits (SheafOfModules.pushforward.{u} φ) := by
+  letI : PreservesLimits
+      (SheafOfModules.pushforward.{u} φ ⋙ SheafOfModules.forget S) := by
+    change PreservesLimits (SheafOfModules.forget R ⋙
+      PresheafOfModules.pushforward φ.hom)
+    letI : PreservesLimits (PresheafOfModules.pushforward φ.hom) :=
+      presheafPushforward_preservesLimits φ.hom
+    exact comp_preservesLimits _ _
+  exact preservesLimits_of_reflects_of_preserves
+    (SheafOfModules.pushforward φ) (SheafOfModules.forget S)
+
 /-- Restriction of scheme modules along an open immersion preserves all limits. -/
 theorem restrictFunctor_preservesLimits
     {X Y : Scheme.{u}} (f : X ⟶ Y) [IsOpenImmersion f] :
     PreservesLimits (restrictFunctor f) := by
-  letI : PreservesLimits (restrictFunctor f ⋙ toPresheafOfModules X) := by
-    dsimp [restrictFunctor, toPresheafOfModules]
-    change PreservesLimits (SheafOfModules.forget _ ⋙
-      PresheafOfModules.pushforward _)
-    exact comp_preservesLimits _ _
-  exact preservesLimits_of_reflects_of_preserves
-    (restrictFunctor f) (toPresheafOfModules X)
-
-/-- In a pullback square whose vertical maps are open immersions, restricting
-the pushforward of the structure sheaf agrees with pushing forward the
-structure sheaf from the pullback. -/
-noncomputable def restrictPushforwardUnitIsoOfIsPullback
-    {X Y U V : Scheme.{u}}
-    (f : X ⟶ Y) (f' : U ⟶ V) (iU : U ⟶ X) (iV : V ⟶ Y)
-    [IsOpenImmersion iV] [IsOpenImmersion iU]
-    (H : IsPullback f' iU iV f) :
-    (restrictFunctor iV).obj ((pushforward f).obj (unitObj X)) ≅
-      (pushforward f').obj (unitObj U) := by
-  refine (fullyFaithfulToPresheafOfModules).preimageIso
-    (PresheafOfModules.isoMk (fun W ↦ ?_) ?_)
-  · let h := IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H W.unop
-    let e : Γ(X, f ⁻¹ᵁ iV ''ᵁ W.unop) ≅ Γ(U, f' ⁻¹ᵁ W.unop) :=
-      X.presheaf.mapIso (eqToIso h).op ≪≫ iU.appIso _
-    refine ModuleCat.isoMk
-      ((forget₂ CommRingCat RingCat ⋙ forget₂ RingCat Ab).mapIso e) ?_
-    intro r
-    ext x
-    dsimp [ModuleCat.smul]
-    change (f'.app _).hom r * e.hom
-        (show Γ(X, f ⁻¹ᵁ iV ''ᵁ W.unop) from x) =
-      e.hom ((f.app _).hom ((iV.appIso _).inv r) *
-        (show Γ(X, f ⁻¹ᵁ iV ''ᵁ W.unop) from x))
-    rw [map_mul]
-    congr 1
-    have hring : (iV.appIso W.unop).inv ≫ f.app _ = f'.app W.unop ≫ e.inv := by
-      rw [Iso.inv_comp_eq, ← Category.assoc, Iso.eq_comp_inv]
-      simp only [Scheme.Hom.app_eq_appLE, Iso.trans_hom, Functor.mapIso_hom,
-        Iso.op_hom, eqToIso.hom, eqToHom_op, Scheme.Hom.appIso_hom',
-        Scheme.Hom.map_appLE, e, Scheme.Hom.appLE_comp_appLE, H.w]
-    have hx := congr($(hring) r)
-    apply_fun e.hom at hx
-    simpa using hx.symm
-  · intro W W' g
-    let hW := IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H W.unop
-    let hW' := IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H W'.unop
-    have eW : f' ⁻¹ᵁ W.unop ≤ iU ⁻¹ᵁ (f ⁻¹ᵁ iV ''ᵁ W.unop) := by
-      rw [← hW, iU.preimage_image_eq]
-    have eW' : f' ⁻¹ᵁ W'.unop ≤ iU ⁻¹ᵁ (f ⁻¹ᵁ iV ''ᵁ W'.unop) := by
-      rw [← hW', iU.preimage_image_eq]
-    let gx := (TopologicalSpace.Opens.map f.base).op.map
-      ((iV.opensFunctor).op.map g)
-    let gu := (TopologicalSpace.Opens.map f'.base).op.map g
-    have heq : X.presheaf.map gx ≫
-          iU.appLE (f ⁻¹ᵁ iV ''ᵁ W'.unop) (f' ⁻¹ᵁ W'.unop) eW' =
-        iU.appLE (f ⁻¹ᵁ iV ''ᵁ W.unop) (f' ⁻¹ᵁ W.unop) eW ≫
-          U.presheaf.map gu := by
-      calc
-        _ = iU.appLE (f ⁻¹ᵁ iV ''ᵁ W.unop) (f' ⁻¹ᵁ W'.unop) _ :=
-          iU.map_appLE eW' gx
-        _ = _ := (iU.appLE_map eW gu).symm
-    ext x
-    dsimp
-    simp [Scheme.Hom.appIso_hom', Scheme.Hom.map_appLE]
-    change (iU.appLE _ _ _).hom
-        (X.presheaf.map _ (show Γ(X, f ⁻¹ᵁ iV ''ᵁ W.unop) from x)) =
-      U.presheaf.map _ ((iU.appLE _ _ _).hom
-        (show Γ(X, f ⁻¹ᵁ iV ''ᵁ W.unop) from x))
-    simp only [← CommRingCat.comp_apply]
-    exact congr($(heq) x)
+  dsimp only [restrictFunctor]
+  apply sheafPushforward_preservesLimits
 
 private noncomputable def restrictPushforwardPresheafIsoOfIsPullback
     {X Y U V : Scheme.{u}}
@@ -129,26 +94,33 @@ private noncomputable def restrictPushforwardPresheafIsoOfIsPullback
         (iV.appIso W.unop).inv ≫ f.app _ ≫
           X.presheaf.map (eqToHom h).op := by
       simpa only [Functor.mapIso_hom, Iso.op_hom, eqToIso.hom] using hring''
-    have hr' : (iU.appIso _).inv ((f'.app _).hom r) =
+    have hr' : (iU.appIso (f' ⁻¹ᵁ W.unop)).inv ((f'.app W.unop).hom r) =
         (X.presheaf.map (eqToHom h).op).hom
-          ((f.app _).hom ((iV.appIso _).inv r)) := by
-      simpa only [CommRingCat.comp_apply] using
-        ConcreteCategory.congr_hom hring''' r
+          ((f.app (iV ''ᵁ W.unop)).hom ((iV.appIso W.unop).inv r)) := by
+      have hr := ConcreteCategory.congr_hom hring''' r
+      change (iU.appIso (f' ⁻¹ᵁ W.unop)).inv ((f'.app W.unop).hom r) =
+        (X.presheaf.map (eqToHom h).op).hom
+          ((f.app (iV ''ᵁ W.unop)).hom ((iV.appIso W.unop).inv r)) at hr
+      exact hr
     let x' : M.val.obj (.op (f ⁻¹ᵁ iV ''ᵁ W.unop)) := x
-    change (iU.appIso _).inv ((f'.app _).hom r) •
-        (show M.val.obj (.op (iU ''ᵁ (f' ⁻¹ᵁ W.unop))) from e.hom x') =
-      e.hom ((f.app _).hom ((iV.appIso _).inv r) • x')
-    rw [hr']
-    exact ((M.val.map (eqToHom h).op).hom.map_smul
-      ((f.app _).hom ((iV.appIso _).inv r)) x').symm
+    let rU : Γ(X, iU ''ᵁ (f' ⁻¹ᵁ W.unop)) :=
+      (iU.appIso (f' ⁻¹ᵁ W.unop)).inv ((f'.app W.unop).hom r)
+    let rX : Γ(X, f ⁻¹ᵁ iV ''ᵁ W.unop) :=
+      (f.app (iV ''ᵁ W.unop)).hom ((iV.appIso W.unop).inv r)
+    change SMul.smul rU
+        (e.hom x' : M.val.obj (.op (iU ''ᵁ (f' ⁻¹ᵁ W.unop)))) =
+      e.hom (SMul.smul rX x')
+    rw [show rU = (X.presheaf.map (eqToHom h).op).hom rX from hr']
+    exact ((M.val.map (eqToHom h).op).hom.map_smul rX x').symm
   · intro W W' g
     apply ModuleCat.hom_ext
     ext x
-    change M.presheaf.map _ (M.presheaf.map _ x) =
-      M.presheaf.map _ (M.presheaf.map _ x)
+    let x' : Γ(M, f ⁻¹ᵁ iV ''ᵁ W.unop) := x
+    change M.presheaf.map _ (M.presheaf.map _ x') =
+      M.presheaf.map _ (M.presheaf.map _ x')
     rw [← Functor.map_comp_apply, ← Functor.map_comp_apply]
     exact ConcreteCategory.congr_hom
-      (M.presheaf.congr_map (Subsingleton.elim _ _)) x
+      (M.presheaf.congr_map (Subsingleton.elim _ _)) x'
 
 private noncomputable def restrictPushforwardIsoOfIsPullbackApp
     {X Y U V : Scheme.{u}}
@@ -224,6 +196,19 @@ private theorem restrictPushforwardIsoOfIsPullback_hom_app_apply
   rw [restrictPushforwardIsoOfIsPullback_hom_app]
   rfl
 
+/-- In a pullback square whose vertical maps are open immersions, restricting
+the pushforward of the structure sheaf agrees with pushing forward the
+structure sheaf from the pullback. -/
+noncomputable def restrictPushforwardUnitIsoOfIsPullback
+    {X Y U V : Scheme.{u}}
+    (f : X ⟶ Y) (f' : U ⟶ V) (iU : U ⟶ X) (iV : V ⟶ Y)
+    [IsOpenImmersion iV] [IsOpenImmersion iU]
+    (H : IsPullback f' iU iV f) :
+    (restrictFunctor iV).obj ((pushforward f).obj (unitObj X)) ≅
+      (pushforward f').obj (unitObj U) :=
+  (restrictPushforwardIsoOfIsPullback f f' iU iV H).app (unitObj X) ≪≫
+    (pushforward f').mapIso (restrictUnitIso iU)
+
 private theorem restrictPushforwardUnitIsoOfIsPullback_eq
     {X Y U V : Scheme.{u}}
     (f : X ⟶ Y) (f' : U ⟶ V) (iU : U ⟶ X) (iV : V ⟶ Y)
@@ -231,14 +216,7 @@ private theorem restrictPushforwardUnitIsoOfIsPullback_eq
     (H : IsPullback f' iU iV f) :
     restrictPushforwardUnitIsoOfIsPullback f f' iU iV H =
       (restrictPushforwardIsoOfIsPullback f f' iU iV H).app (unitObj X) ≪≫
-        (pushforward f').mapIso (restrictUnitIso iU) := by
-  apply Iso.ext
-  apply (fullyFaithfulToPresheafOfModules).map_injective
-  apply PresheafOfModules.hom_ext
-  intro W
-  apply ModuleCat.hom_ext
-  apply LinearMap.ext
-  intro x
+        (pushforward f').mapIso (restrictUnitIso iU) :=
   rfl
 
 private theorem restrictUnitIso_inv_unitToPushforward
@@ -263,14 +241,13 @@ private theorem restrictUnitIso_inv_unitToPushforward
       (SheafOfModules.unitToPushforwardObjUnit f'.toRingCatSheafHom ≫
           e.inv) ≫ e.hom =
         SheafOfModules.unitToPushforwardObjUnit f'.toRingCatSheafHom := by
-    calc
-      _ = SheafOfModules.unitToPushforwardObjUnit f'.toRingCatSheafHom ≫
-          (e.inv ≫ e.hom) := Category.assoc _ _ _
-      _ = SheafOfModules.unitToPushforwardObjUnit f'.toRingCatSheafHom ≫
-          𝟙 _ := congrArg
-            (fun q ↦ SheafOfModules.unitToPushforwardObjUnit
-              f'.toRingCatSheafHom ≫ q) e.inv_hom_id
-      _ = _ := Category.comp_id _
+    let p := SheafOfModules.unitToPushforwardObjUnit f'.toRingCatSheafHom
+    have hassoc : (p ≫ e.inv) ≫ e.hom = p ≫ (e.inv ≫ e.hom) :=
+      Category.assoc p e.inv e.hom
+    have hcancel : p ≫ (e.inv ≫ e.hom) = p ≫ 𝟙 _ :=
+      congrArg (fun q ↦ p ≫ q) e.inv_hom_id
+    have hid : p ≫ 𝟙 _ = p := Category.comp_id p
+    exact hassoc.trans (hcancel.trans hid)
   refine Eq.trans ?_ hright.symm
   apply (fullyFaithfulToPresheafOfModules).map_injective
   apply PresheafOfModules.hom_ext
@@ -317,34 +294,47 @@ private theorem restrictUnitIso_inv_unitToPushforward
   have hunitRight :=
     SheafOfModules.unitToPushforwardObjUnit_val_app_apply
       f'.toRingCatSheafHom (X := W) x
-  refine Eq.trans ?_ hunitRight.symm
-  calc
-    _ = (e.hom.val.app W).hom'
+  have hunitLeftMapped :
+      (e.hom.val.app W).hom'
+          (((SheafOfModules.unitToPushforwardObjUnit
+            f.toRingCatSheafHom).val.app
+              (iV.opensFunctor.op.obj W)).hom'
+            ((iV.appIso W.unop).inv x)) =
+        (e.hom.val.app W).hom'
         ((f.toRingCatSheafHom.hom.app
           (iV.opensFunctor.op.obj W)).hom
             ((iV.appIso W.unop).inv x)) :=
-      congrArg (fun y ↦ (e.hom.val.app W).hom' y) hunitLeft
-    _ = (f'.toRingCatSheafHom.hom.app W).hom x := by
-      let h := IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback
-        H W.unop
-      let eR : Γ(X, f ⁻¹ᵁ iV ''ᵁ W.unop) ≅
-          Γ(U, f' ⁻¹ᵁ W.unop) :=
-        X.presheaf.mapIso (eqToIso h).op ≪≫ iU.appIso _
-      change eR.hom
-          ((f.app (iV ''ᵁ W.unop)).hom
-            ((iV.appIso W.unop).inv x)) =
-        (f'.app W.unop).hom x
-      have hring : (iV.appIso W.unop).inv ≫
-          f.app (iV ''ᵁ W.unop) =
-        f'.app W.unop ≫ eR.inv := by
-        rw [Iso.inv_comp_eq, ← Category.assoc, Iso.eq_comp_inv]
-        simp only [Scheme.Hom.app_eq_appLE, Iso.trans_hom,
-          Functor.mapIso_hom, Iso.op_hom, eqToIso.hom, eqToHom_op,
-          Scheme.Hom.appIso_hom', Scheme.Hom.map_appLE, eR,
-          Scheme.Hom.appLE_comp_appLE, H.w]
-      have hx := ConcreteCategory.congr_hom hring x
-      apply_fun eR.hom at hx
-      simpa using hx
+    congrArg (fun y ↦ (e.hom.val.app W).hom' y) hunitLeft
+  have hbaseChange :
+      (e.hom.val.app W).hom'
+          ((f.toRingCatSheafHom.hom.app
+            (iV.opensFunctor.op.obj W)).hom
+              ((iV.appIso W.unop).inv x)) =
+        (f'.toRingCatSheafHom.hom.app W).hom x := by
+    let h := IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback
+      H W.unop
+    let eR : Γ(X, f ⁻¹ᵁ iV ''ᵁ W.unop) ≅
+        Γ(U, f' ⁻¹ᵁ W.unop) :=
+      X.presheaf.mapIso (eqToIso h).op ≪≫ iU.appIso _
+    change eR.hom
+        ((f.app (iV ''ᵁ W.unop)).hom
+          ((iV.appIso W.unop).inv x)) =
+      (f'.app W.unop).hom x
+    have hring : (iV.appIso W.unop).inv ≫
+        f.app (iV ''ᵁ W.unop) =
+      f'.app W.unop ≫ eR.inv := by
+      rw [Iso.inv_comp_eq, ← Category.assoc, Iso.eq_comp_inv]
+      simp only [Scheme.Hom.app_eq_appLE, Iso.trans_hom,
+        Functor.mapIso_hom, Iso.op_hom, eqToIso.hom, eqToHom_op,
+        Scheme.Hom.appIso_hom', Scheme.Hom.map_appLE, eR,
+        Scheme.Hom.appLE_comp_appLE, H.w]
+    have hx :
+        (f.app (iV ''ᵁ W.unop)).hom ((iV.appIso W.unop).inv x) =
+          eR.inv ((f'.app W.unop).hom x) :=
+      ConcreteCategory.congr_hom hring x
+    exact (congrArg eR.hom hx).trans
+      (Iso.inv_hom_id_apply eR ((f'.app W.unop).hom x))
+  exact hunitLeftMapped.trans (hbaseChange.trans hunitRight.symm)
 
 private theorem pullbackPushforwardAdjunction_comp_homEquiv
     {A B C : Scheme.{u}} (f : A ⟶ B) (g : B ⟶ C)
@@ -594,30 +584,48 @@ private theorem restrictPushforwardUnitIso_inv_map
       e.app (unitObj X) ≪≫ u :=
     restrictPushforwardUnitIsoOfIsPullback_eq f f' iU iV H
   rw [he]
-  change (e.app (unitObj X) ≪≫ u).inv ≫
-      (pushforward f ⋙ restrictFunctor iV).map q ≫ e.hom.app N =
+  let eU := e.app (unitObj X)
+  let eN := e.app N
+  let m := (pushforward f ⋙ restrictFunctor iV).map q
+  let n := (restrictFunctor iU ⋙ pushforward f').map q
+  change (eU ≪≫ u).inv ≫ m ≫ eN.hom =
     (pushforward f').map (r.inv ≫ (restrictFunctor iU).map q)
-  let hnat := e.hom.naturality q
-  calc
-    _ = u.inv ≫ ((e.app (unitObj X)).inv ≫
-        ((pushforward f ⋙ restrictFunctor iV).map q ≫ e.hom.app N)) := by
-          simp only [Iso.trans_inv, Category.assoc]
-          rfl
-    _ = u.inv ≫ ((e.app (unitObj X)).inv ≫
-        (e.hom.app (unitObj X) ≫
-          (restrictFunctor iU ⋙ pushforward f').map q)) := by rw [hnat]
-    _ = u.inv ≫ (restrictFunctor iU ⋙ pushforward f').map q := by
-      have ehom : (e.app (unitObj X)).hom = e.hom.app (unitObj X) := rfl
-      rw [← ehom]
-      let m := (restrictFunctor iU ⋙ pushforward f').map q
-      have hinner : (e.app (unitObj X)).inv ≫
-          (e.app (unitObj X)).hom ≫ m = m := by
-        rw [← Category.assoc, Iso.inv_hom_id, Category.id_comp]
-      exact congrArg (fun z ↦ u.inv ≫ z) hinner
-    _ = _ := by
-      change (pushforward f').map r.inv ≫
-        (pushforward f').map ((restrictFunctor iU).map q) = _
-      exact ((pushforward f').map_comp r.inv ((restrictFunctor iU).map q)).symm
+  have hnat : m ≫ eN.hom = eU.hom ≫ n :=
+    e.hom.naturality q
+  have hreassoc :
+      (eU ≪≫ u).inv ≫ m ≫ eN.hom =
+        u.inv ≫ (eU.inv ≫ (m ≫ eN.hom)) := by
+    change (u.inv ≫ eU.inv) ≫ m ≫ eN.hom =
+      u.inv ≫ (eU.inv ≫ (m ≫ eN.hom))
+    have houter :
+        (u.inv ≫ eU.inv) ≫ m ≫ eN.hom =
+          (u.inv ≫ eU.inv) ≫ (m ≫ eN.hom) :=
+      Category.assoc (u.inv ≫ eU.inv) m eN.hom
+    have hinner :
+        (u.inv ≫ eU.inv) ≫ (m ≫ eN.hom) =
+          u.inv ≫ (eU.inv ≫ (m ≫ eN.hom)) :=
+      Category.assoc u.inv eU.inv (m ≫ eN.hom)
+    exact houter.trans hinner
+  have hnaturality :
+      u.inv ≫ (eU.inv ≫ (m ≫ eN.hom)) =
+        u.inv ≫ (eU.inv ≫ (eU.hom ≫ n)) :=
+    congrArg (fun z ↦ u.inv ≫ (eU.inv ≫ z)) hnat
+  have hcancel :
+      u.inv ≫ (eU.inv ≫ (eU.hom ≫ n)) = u.inv ≫ n := by
+    have hinner : eU.inv ≫ (eU.hom ≫ n) = n := by
+      have hassoc :
+          eU.inv ≫ (eU.hom ≫ n) = (eU.inv ≫ eU.hom) ≫ n :=
+        (Category.assoc eU.inv eU.hom n).symm
+      have hpair : (eU.inv ≫ eU.hom) ≫ n = 𝟙 _ ≫ n :=
+        congrArg (fun z ↦ z ≫ n) eU.inv_hom_id
+      exact hassoc.trans (hpair.trans (Category.id_comp n))
+    exact congrArg (fun z ↦ u.inv ≫ z) hinner
+  have hmap : u.inv ≫ n =
+      (pushforward f').map (r.inv ≫ (restrictFunctor iU).map q) := by
+    change (pushforward f').map r.inv ≫
+      (pushforward f').map ((restrictFunctor iU).map q) = _
+    exact ((pushforward f').map_comp r.inv ((restrictFunctor iU).map q)).symm
+  exact hreassoc.trans (hnaturality.trans (hcancel.trans hmap))
 
 private theorem restrictUnitIso_inv_unitToPushforward_baseChange
     {X Y U V : Scheme.{u}}
@@ -698,19 +706,34 @@ private theorem restrictPushforwardIsoOfIsPullback_comp
     (f ≫ g) (f' ≫ g') iA iC (Hf.paste_horiz Hg) M W x]
   rw [restrictPushforwardIsoOfIsPullback_hom_app_apply
     g g' iB iC Hg ((pushforward f).obj M) W x]
+  let y : Γ((restrictFunctor iB).obj ((pushforward f).obj M), g' ⁻¹ᵁ W) :=
+    ((restrictPushforwardPresheafIsoOfIsPullback
+      g g' iB iC Hg ((pushforward f).obj M)).hom.app (.op W)).hom x
   change
     ((restrictPushforwardPresheafIsoOfIsPullback
       (f ≫ g) (f' ≫ g') iA iC (Hf.paste_horiz Hg) M).hom.app (.op W)).hom x =
       ((((restrictPushforwardIsoOfIsPullback f f' iA iB Hf).hom.app M).app
-        (g' ⁻¹ᵁ W)).hom
-          (((restrictPushforwardPresheafIsoOfIsPullback
-            g g' iB iC Hg ((pushforward f).obj M)).hom.app (.op W)).hom x))
-  rw [restrictPushforwardIsoOfIsPullback_hom_app_apply]
-  dsimp [restrictPushforwardPresheafIsoOfIsPullback]
-  change M.presheaf.map _ x = M.presheaf.map _ (M.presheaf.map _ x)
-  rw [← Functor.map_comp_apply]
-  exact ConcreteCategory.congr_hom
-    (M.presheaf.congr_map (Subsingleton.elim _ _)) x
+        (g' ⁻¹ᵁ W)).hom y)
+  rw [restrictPushforwardIsoOfIsPullback_hom_app_apply
+    f f' iA iB Hf M (g' ⁻¹ᵁ W) y]
+  dsimp [y, restrictPushforwardPresheafIsoOfIsPullback]
+  let x' : M.val.obj (.op ((f ≫ g) ⁻¹ᵁ iC ''ᵁ W)) := x
+  change M.presheaf.map _ x' = M.presheaf.map _ (M.presheaf.map _ x')
+  let hfg := IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback
+    (Hf.paste_horiz Hg) W
+  let hg := IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback Hg W
+  let hf := IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback Hf
+    (g' ⁻¹ᵁ W)
+  let a := (Opens.map f.base).op.map (eqToIso hg).op.hom
+  let b := (eqToIso hf).op.hom
+  let d := (eqToIso hfg).op.hom
+  have hd : d = a ≫ b := Subsingleton.elim _ _
+  have hdirect : M.presheaf.map d x' = M.presheaf.map (a ≫ b) x' :=
+    ConcreteCategory.congr_hom (M.presheaf.congr_map hd) x'
+  have hcomp : M.presheaf.map (a ≫ b) x' =
+      M.presheaf.map b (M.presheaf.map a x') :=
+    ConcreteCategory.congr_hom (M.presheaf.map_comp a b) x'
+  exact hdirect.trans hcomp
 
 private theorem restrictPushforwardIsoOfIsPullback_hom_congr
     {X Y U V : Scheme.{u}}
@@ -724,20 +747,35 @@ private theorem restrictPushforwardIsoOfIsPullback_hom_congr
   apply hom_ext
   intro W
   ext x
-  rw [restrictPushforwardIsoOfIsPullback_hom_app_apply]
+  let x' : Γ((restrictFunctor iV).obj ((pushforward f).obj M), W) := x
+  rw [restrictPushforwardIsoOfIsPullback_hom_app_apply
+    f f₂ iU iV H₂ M W x']
   change
     ((restrictPushforwardPresheafIsoOfIsPullback
-      f f₂ iU iV H₂ M).hom.app (.op W)).hom x =
+      f f₂ iU iV H₂ M).hom.app (.op W)).hom x' =
       (((pushforwardCongr h).hom.app ((restrictFunctor iU).obj M)).app W).hom
         ((((restrictPushforwardIsoOfIsPullback
-          f f₁ iU iV H₁).hom.app M).app W).hom x)
-  rw [restrictPushforwardIsoOfIsPullback_hom_app_apply]
+          f f₁ iU iV H₁).hom.app M).app W).hom x')
+  rw [restrictPushforwardIsoOfIsPullback_hom_app_apply
+    f f₁ iU iV H₁ M W x']
   rw [pushforwardCongr_hom_app_app]
-  dsimp [restrictPushforwardPresheafIsoOfIsPullback]
-  change M.presheaf.map _ x = M.presheaf.map _ (M.presheaf.map _ x)
-  rw [← Functor.map_comp_apply]
-  exact ConcreteCategory.congr_hom
-    (M.presheaf.congr_map (Subsingleton.elim _ _)) x
+  dsimp [x', restrictPushforwardPresheafIsoOfIsPullback]
+  let x'' : M.val.obj (.op (f ⁻¹ᵁ iV ''ᵁ W)) := x
+  change M.presheaf.map _ x'' = M.presheaf.map _ (M.presheaf.map _ x'')
+  let h₁' := IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H₁ W
+  let h₂' := IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H₂ W
+  let hpre : f₂ ⁻¹ᵁ W = f₁ ⁻¹ᵁ W :=
+    congrArg (fun q : U ⟶ V ↦ q ⁻¹ᵁ W) h.symm
+  let a := (eqToIso h₁').op.hom
+  let b := (Scheme.Hom.opensFunctor iU).op.map (eqToHom hpre).op
+  let d := (eqToIso h₂').op.hom
+  have hd : d = a ≫ b := Subsingleton.elim _ _
+  have hdirect : M.presheaf.map d x'' = M.presheaf.map (a ≫ b) x'' :=
+    ConcreteCategory.congr_hom (M.presheaf.congr_map hd) x''
+  have hcomp : M.presheaf.map (a ≫ b) x'' =
+      M.presheaf.map b (M.presheaf.map a x'') :=
+    ConcreteCategory.congr_hom (M.presheaf.map_comp a b) x''
+  exact hdirect.trans hcomp
 
 private theorem restrictPushforwardIsoOfIsPullback_comp_of_eq
     {A B C A' B' C' : Scheme.{u}}
@@ -1372,9 +1410,24 @@ private theorem AffineIntersectionUnitCocycle.chartTransitionCoordinate_inv_comp
   let eij := c.chartTransitionCoordinateIso hopen hpush i j t.p₁₂
   let ejk := c.chartTransitionCoordinateIso hopen hpush j k t.p₂₃
   let eik := c.chartTransitionCoordinateIso hopen hpush i k t.p₁₃
+  have hij : eij.hom =
+      c.chartTransitionIsoCoordinatePullback hopen hpush i j t.p₁₂ := by
+    dsimp only [eij]
+    exact c.chartTransitionCoordinateIso_hom hopen hpush i j t.p₁₂
+  have hjk : ejk.hom =
+      c.chartTransitionIsoCoordinatePullback hopen hpush j k t.p₂₃ := by
+    dsimp only [ejk]
+    exact c.chartTransitionCoordinateIso_hom hopen hpush j k t.p₂₃
+  have hik : eik.hom =
+      c.chartTransitionIsoCoordinatePullback hopen hpush i k t.p₁₃ := by
+    dsimp only [eik]
+    exact c.chartTransitionCoordinateIso_hom hopen hpush i k t.p₁₃
   have he : eij.hom ≫ ejk.hom = eik.hom := by
-    dsimp only [eij, ejk, eik]
-    simpa only [c.chartTransitionCoordinateIso_hom] using ht
+    have hleft : eij.hom ≫ ejk.hom =
+        c.chartTransitionIsoCoordinatePullback hopen hpush i j t.p₁₂ ≫
+          c.chartTransitionIsoCoordinatePullback hopen hpush j k t.p₂₃ :=
+      congrArg₂ (fun p q ↦ p ≫ q) hij hjk
+    exact hleft.trans (ht.trans hik.symm)
   rw [← cancel_mono ejk.hom, Category.assoc]
   rw [← c.chartTransitionCoordinateIso_hom hopen hpush i j t.p₁₂]
   change eik.inv ≫ eij.hom ≫ ejk.hom = ejk.inv ≫ ejk.hom
@@ -1982,16 +2035,46 @@ private theorem
     infer_instance
   letI : IsIso
       (c.chartToTripleLeftPullback hopen hpush k i k) := by
-    dsimp only [AffineIntersectionUnitCocycle.chartToTripleLeftPullback]
-    infer_instance
+    let p := (pullbackUnitIso t.p₁₃).hom
+    let r := (@restrictUnitIso _ _ t.p₁₂
+      (affineIntersectionChartTriple_p₁₂_open hopen hpush i k k)).inv
+    let m := (@restrictFunctor _ _ t.p₁₂
+      (affineIntersectionChartTriple_p₁₂_open hopen hpush i k k)).map
+        (c.overlapTransitionIso i k).hom
+    have hp : IsIso p := (pullbackUnitIso t.p₁₃).isIso_hom
+    have hr : IsIso r :=
+      (@restrictUnitIso _ _ t.p₁₂
+        (affineIntersectionChartTriple_p₁₂_open hopen hpush i k k)).isIso_inv
+    have hm : IsIso m := by
+      dsimp only [m]
+      exact ((@restrictFunctor _ _ t.p₁₂
+        (affineIntersectionChartTriple_p₁₂_open hopen hpush i k k)).mapIso
+          (c.overlapTransitionIso i k)).isIso_hom
+    change IsIso (p ≫ r ≫ m)
+    have hpr : IsIso (p ≫ r) := IsIso.comp_isIso' hp hr
+    have hprm : IsIso ((p ≫ r) ≫ m) := IsIso.comp_isIso' hpr hm
+    exact hprm
   rw [c.chartToTripleLeftRestricted_eq hopen hpush k i k]
-  rw [Adjunction.homEquiv_apply]
+  have heq := Adjunction.homEquiv_apply
+    (pullbackPushforwardAdjunction t.p₁₃)
+    (unitObj (D.V (i, k)))
+    ((@restrictFunctor _ _ t.p₁₂
+      (affineIntersectionChartTriple_p₁₂_open hopen hpush i k k)).obj
+        (unitObj (D.V (i, k))))
+    (c.chartToTripleLeftPullback hopen hpush k i k)
+  rw [heq]
+  let eunit := (asIso (pullbackPushforwardAdjunction t.p₁₃).unit).app
+    (unitObj (D.V (i, k)))
   have hunit : IsIso ((pullbackPushforwardAdjunction t.p₁₃).unit.app
       (unitObj (D.V (i, k)))) := by
-    infer_instance
+    change IsIso eunit.hom
+    exact eunit.isIso_hom
+  let emap := (pushforward t.p₁₃).mapIso
+    (asIso (c.chartToTripleLeftPullback hopen hpush k i k))
   have hmap : IsIso ((pushforward t.p₁₃).map
       (c.chartToTripleLeftPullback hopen hpush k i k)) := by
-    infer_instance
+    change IsIso emap.hom
+    exact emap.isIso_hom
   exact IsIso.comp_isIso' hunit hmap
 
 private theorem AffineIntersectionUnitCocycle.chartLocalLeftMap_right_self_isIso
@@ -2007,9 +2090,12 @@ private theorem AffineIntersectionUnitCocycle.chartLocalLeftMap_right_self_isIso
   letI : IsIso (c.chartToTripleLeftRestricted hopen hpush k i k) :=
     c.chartToTripleLeftRestricted_right_self_isIso hopen hpush k i
   rw [c.chartLocalLeftMap_eq hopen hpush k i k]
+  let emap := (pushforward q).mapIso
+    (asIso (c.chartToTripleLeftRestricted hopen hpush k i k))
   have hmap : IsIso ((pushforward q).map
       (c.chartToTripleLeftRestricted hopen hpush k i k)) := by
-    infer_instance
+    change IsIso emap.hom
+    exact emap.isIso_hom
   have hcomp : IsIso ((pushforwardComp t.p₁₃ q).hom.app
       ((@restrictFunctor _ _ t.p₁₂
         (affineIntersectionChartTriple_p₁₂_open hopen hpush i k k)).obj
@@ -2020,10 +2106,12 @@ private theorem AffineIntersectionUnitCocycle.chartLocalLeftMap_right_self_isIso
         (affineIntersectionChartTriple_p₁₂_open hopen hpush i k k)).obj
           (unitObj (D.V (i, k))))) := by
     infer_instance
-  have hunit : IsIso ((pushforward t.p₃).map
-      (@restrictUnitIso _ _ t.p₁₂
-        (affineIntersectionChartTriple_p₁₂_open hopen hpush i k k)).hom) := by
-    infer_instance
+  let r := @restrictUnitIso _ _ t.p₁₂
+    (affineIntersectionChartTriple_p₁₂_open hopen hpush i k k)
+  let er := (pushforward t.p₃).mapIso r
+  have hunit : IsIso ((pushforward t.p₃).map r.hom) := by
+    change IsIso er.hom
+    exact er.isIso_hom
   exact IsIso.comp_isIso' hmap
     (IsIso.comp_isIso' hcomp (IsIso.comp_isIso' hcongr hunit))
 
@@ -2150,13 +2238,19 @@ private theorem
   let beta := (pullbackUnitIso t.p₂₃).hom ≫ rU.inv
   have hbase := @restrictUnitIso_inv_unitToPushforward_baseChange _ _ _ _
     f t.p₂₃ t.p₁₂ (D.f j k) hfjk hp₁₂ t.isPullback₂.flip
+  let adj := pullbackPushforwardAdjunction t.p₂₃
+  let p := (pullbackUnitIso t.p₂₃).hom
+  let q := rU.inv
   have hmate : (pullbackPushforwardAdjunction t.p₂₃).homEquiv _ _ beta =
       SheafOfModules.unitToPushforwardObjUnit t.p₂₃.toRingCatSheafHom ≫
         (pushforward t.p₂₃).map rU.inv := by
-    dsimp only [beta]
-    rw [Adjunction.homEquiv_naturality_right]
-    rw [ModularCurves.pullbackUnitIso_homEquivLow]
-    rfl
+    have hnat : adj.homEquiv _ _ (p ≫ q) =
+        adj.homEquiv _ _ p ≫ (pushforward t.p₂₃).map q :=
+      adj.homEquiv_naturality_right p q
+    have hunit := ModularCurves.pullbackUnitIso_homEquivLow t.p₂₃
+    have hunit' := congrArg
+      (fun m ↦ m ≫ (pushforward t.p₂₃).map q) hunit
+    exact hnat.trans hunit'
   dsimp only [AffineIntersectionUnitCocycle.chartToTripleRightRestricted,
     AffineIntersectionUnitCocycle.chartToTripleRightPullback]
   exact hbase.trans hmate.symm
@@ -2557,22 +2651,33 @@ private theorem AffineIntersectionUnitCocycle.restrictChartGlueLeft_target_π
   let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
   let R := @restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)
   let e := c.overlapExtensionRestrictIso hopen hpush k i j
-  have htarget := c.chartGlueTargetRestrictIso_hom_π hopen hpush k (i, j)
-  have htarget' := congrArg
-    (fun m ↦ R.map (c.chartGlueLeft hopen hpush) ≫ m) htarget
-  have hleft := c.restrictChartGlueLeft_π hopen hpush k i j
-  have hleft' := congrArg (fun m ↦ m ≫ e.hom) hleft
-  calc
-    _ = R.map (c.chartGlueLeft hopen hpush) ≫
-        (R.map (Pi.π (fun lm : J × J ↦
-          c.overlapExtension hopen hpush lm.1 lm.2) (i, j)) ≫ e.hom) := htarget'
-    _ = (R.map (c.chartGlueLeft hopen hpush) ≫
-        R.map (Pi.π (fun lm : J × J ↦
-          c.overlapExtension hopen hpush lm.1 lm.2) (i, j))) ≫ e.hom :=
-      (Category.assoc _ _ _).symm
-    _ = (R.map (Pi.π (fun l : J ↦ c.chartExtension hopen hpush l) i) ≫
-        R.map (c.chartToOverlapLeft hopen hpush i j)) ≫ e.hom := hleft'
-    _ = _ := Category.assoc _ _ _
+  let sourceMap := R.map (c.chartGlueLeft hopen hpush)
+  let targetMap := (c.chartGlueTargetRestrictIso hopen hpush k).hom
+  let targetProjection := Pi.π (fun lm : J × J ↦
+    let s := affineIntersectionChartChosenPullback₃ hopen hpush lm.1 lm.2 k
+    (pushforward s.p₃).obj (unitObj s.pullback)) (i, j)
+  let overlapProjection := R.map (Pi.π (fun lm : J × J ↦
+    c.overlapExtension hopen hpush lm.1 lm.2) (i, j))
+  let chartProjection := R.map
+    (Pi.π (fun l : J ↦ c.chartExtension hopen hpush l) i)
+  let overlapMap := R.map (c.chartToOverlapLeft hopen hpush i j)
+  have htarget : targetMap ≫ targetProjection = overlapProjection ≫ e.hom :=
+    c.chartGlueTargetRestrictIso_hom_π hopen hpush k (i, j)
+  have hleft : sourceMap ≫ overlapProjection = chartProjection ≫ overlapMap :=
+    c.restrictChartGlueLeft_π hopen hpush k i j
+  have hassocStart : sourceMap ≫ targetMap ≫ targetProjection =
+      sourceMap ≫ (targetMap ≫ targetProjection) :=
+    Category.assoc sourceMap targetMap targetProjection
+  have htarget' : sourceMap ≫ (targetMap ≫ targetProjection) =
+      sourceMap ≫ (overlapProjection ≫ e.hom) :=
+    congrArg (fun m ↦ sourceMap ≫ m) htarget
+  have hassocMiddle : sourceMap ≫ (overlapProjection ≫ e.hom) =
+      (sourceMap ≫ overlapProjection) ≫ e.hom :=
+    (Category.assoc sourceMap overlapProjection e.hom).symm
+  have hleft' : (sourceMap ≫ overlapProjection) ≫ e.hom =
+      (chartProjection ≫ overlapMap) ≫ e.hom :=
+    congrArg (fun m ↦ m ≫ e.hom) hleft
+  exact hassocStart.trans (htarget'.trans (hassocMiddle.trans hleft'))
 
 @[reassoc]
 private theorem AffineIntersectionUnitCocycle.restrictChartGlueRight_target_π
@@ -2597,22 +2702,33 @@ private theorem AffineIntersectionUnitCocycle.restrictChartGlueRight_target_π
   let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
   let R := @restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)
   let e := c.overlapExtensionRestrictIso hopen hpush k i j
-  have htarget := c.chartGlueTargetRestrictIso_hom_π hopen hpush k (i, j)
-  have htarget' := congrArg
-    (fun m ↦ R.map (c.chartGlueRight hopen hpush) ≫ m) htarget
-  have hright := c.restrictChartGlueRight_π hopen hpush k i j
-  have hright' := congrArg (fun m ↦ m ≫ e.hom) hright
-  calc
-    _ = R.map (c.chartGlueRight hopen hpush) ≫
-        (R.map (Pi.π (fun lm : J × J ↦
-          c.overlapExtension hopen hpush lm.1 lm.2) (i, j)) ≫ e.hom) := htarget'
-    _ = (R.map (c.chartGlueRight hopen hpush) ≫
-        R.map (Pi.π (fun lm : J × J ↦
-          c.overlapExtension hopen hpush lm.1 lm.2) (i, j))) ≫ e.hom :=
-      (Category.assoc _ _ _).symm
-    _ = (R.map (Pi.π (fun l : J ↦ c.chartExtension hopen hpush l) j) ≫
-        R.map (c.chartToOverlapRight hopen hpush i j)) ≫ e.hom := hright'
-    _ = _ := Category.assoc _ _ _
+  let sourceMap := R.map (c.chartGlueRight hopen hpush)
+  let targetMap := (c.chartGlueTargetRestrictIso hopen hpush k).hom
+  let targetProjection := Pi.π (fun lm : J × J ↦
+    let s := affineIntersectionChartChosenPullback₃ hopen hpush lm.1 lm.2 k
+    (pushforward s.p₃).obj (unitObj s.pullback)) (i, j)
+  let overlapProjection := R.map (Pi.π (fun lm : J × J ↦
+    c.overlapExtension hopen hpush lm.1 lm.2) (i, j))
+  let chartProjection := R.map
+    (Pi.π (fun l : J ↦ c.chartExtension hopen hpush l) j)
+  let overlapMap := R.map (c.chartToOverlapRight hopen hpush i j)
+  have htarget : targetMap ≫ targetProjection = overlapProjection ≫ e.hom :=
+    c.chartGlueTargetRestrictIso_hom_π hopen hpush k (i, j)
+  have hright : sourceMap ≫ overlapProjection = chartProjection ≫ overlapMap :=
+    c.restrictChartGlueRight_π hopen hpush k i j
+  have hassocStart : sourceMap ≫ targetMap ≫ targetProjection =
+      sourceMap ≫ (targetMap ≫ targetProjection) :=
+    Category.assoc sourceMap targetMap targetProjection
+  have htarget' : sourceMap ≫ (targetMap ≫ targetProjection) =
+      sourceMap ≫ (overlapProjection ≫ e.hom) :=
+    congrArg (fun m ↦ sourceMap ≫ m) htarget
+  have hassocMiddle : sourceMap ≫ (overlapProjection ≫ e.hom) =
+      (sourceMap ≫ overlapProjection) ≫ e.hom :=
+    (Category.assoc sourceMap overlapProjection e.hom).symm
+  have hright' : (sourceMap ≫ overlapProjection) ≫ e.hom =
+      (chartProjection ≫ overlapMap) ≫ e.hom :=
+    congrArg (fun m ↦ m ≫ e.hom) hright
+  exact hassocStart.trans (htarget'.trans (hassocMiddle.trans hright'))
 
 private theorem AffineIntersectionUnitCocycle.chartLocalSource_equalizes
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
@@ -2954,14 +3070,15 @@ private theorem restrictAdjunction_counit_inv_unit
     IsIso.inv_hom_id _
   have hright : ((restrictUnitIso f).inv ≫ (restrictFunctor f).map q) ≫
       (restrictAdjunction f).counit.app (unitObj X) = 𝟙 _ := by
-    calc
-      _ = (restrictUnitIso f).inv ≫
-          ((restrictFunctor f).map q ≫
-            (restrictAdjunction f).counit.app (unitObj X)) :=
-        Category.assoc _ _ _
-      _ = (restrictUnitIso f).inv ≫ (restrictUnitIso f).hom :=
-        congrArg (fun m ↦ (restrictUnitIso f).inv ≫ m) hmate
-      _ = 𝟙 _ := (restrictUnitIso f).inv_hom_id
+    let r := restrictUnitIso f
+    let m := (restrictFunctor f).map q
+    let ε := (restrictAdjunction f).counit.app (unitObj X)
+    have hassoc : (r.inv ≫ m) ≫ ε = r.inv ≫ (m ≫ ε) :=
+      Category.assoc r.inv m ε
+    have hmate' : r.inv ≫ (m ≫ ε) = r.inv ≫ r.hom :=
+      congrArg (fun n ↦ r.inv ≫ n) hmate
+    have hcancel : r.inv ≫ r.hom = 𝟙 _ := r.inv_hom_id
+    exact hassoc.trans (hmate'.trans hcancel)
   exact hleft.trans hright.symm
 
 private theorem
@@ -2999,14 +3116,17 @@ private theorem
     simpa only [u, u', e] using hbase
   have hbase' : (restrictUnitIso f).inv ≫
         (restrictFunctor f).map u ≫ e.hom = u' := by
-    calc
-      _ = (u' ≫ e.inv) ≫ e.hom :=
-        congrArg (fun m ↦ m ≫ e.hom) hbase0
-      _ = u' := by
-        calc
-          _ = u' ≫ (e.inv ≫ e.hom) := Category.assoc _ _ _
-          _ = u' ≫ 𝟙 _ := congrArg (fun m ↦ u' ≫ m) e.inv_hom_id
-          _ = u' := Category.comp_id _
+    have hbaseWhiskered :
+        ((restrictUnitIso f).inv ≫ (restrictFunctor f).map u) ≫ e.hom =
+          (u' ≫ e.inv) ≫ e.hom :=
+      congrArg (fun m ↦ m ≫ e.hom) hbase0
+    have hassoc : (u' ≫ e.inv) ≫ e.hom =
+        u' ≫ (e.inv ≫ e.hom) :=
+      Category.assoc u' e.inv e.hom
+    have hcancel : u' ≫ (e.inv ≫ e.hom) = u' ≫ 𝟙 _ :=
+      congrArg (fun m ↦ u' ≫ m) e.inv_hom_id
+    have hid : u' ≫ 𝟙 _ = u' := Category.comp_id u'
+    exact hbaseWhiskered.trans (hassoc.trans (hcancel.trans hid))
   have htuple : c.chartLocalTupleComponent hopen hpush i i = u' := by
     rw [c.chartLocalTupleComponent_eq hopen hpush i i]
     rw [c.overlapTransitionIso_self]
@@ -3055,7 +3175,9 @@ private theorem
   let R := @restrictFunctor _ _ (D.ι k) (D.ι_isOpenImmersion k)
   dsimp only [AffineIntersectionUnitCocycle.chartLocalEqualizerComponent,
     AffineIntersectionUnitCocycle.chartLocalEqualizerInclusion,
-    AffineIntersectionUnitCocycle.gluedModuleChartComponent]
+    AffineIntersectionUnitCocycle.gluedModuleChartComponent,
+    AffineIntersectionUnitCocycle.gluedModule,
+    AffineIntersectionUnitCocycle.chartGlueSource]
   rw [R.map_comp]
   exact (Category.assoc _ _ _).symm
 
@@ -3070,18 +3192,55 @@ private theorem AffineIntersectionUnitCocycle.gluedModuleChartComponent_adjunct
         (c.gluedModuleChartComponent hopen hpush i) =
       c.gluedModulePullbackHom hopen hpush i := by
   let D := Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+  let f := D.ι i
+  let R := @restrictFunctor _ _ f (D.ι_isOpenImmersion i)
+  let P := pullback f
+  let M := c.gluedModule hopen hpush
+  let N := unitObj (D.U i)
+  let q : M ⟶ (pushforward f).obj N :=
+    c.gluedModuleChartComponent hopen hpush i
+  let tuple := c.chartLocalTupleComponent hopen hpush i i
+  let e := c.chartExtensionRestrictIso hopen hpush i i
+  let rIso := @restrictFunctorIsoPullback _ _ f (D.ι_isOpenImmersion i)
+  let adj := pullbackPushforwardAdjunction f
   letI : IsOpenImmersion (D.ι i) := D.ι_isOpenImmersion i
   letI : IsIso (c.chartLocalTupleComponent hopen hpush i i) :=
     c.chartLocalTupleComponent_self_isIso hopen hpush i
-  apply (cancel_mono (c.chartLocalTupleComponent hopen hpush i i)).1
+  apply (cancel_mono tuple).1
   dsimp only [AffineIntersectionUnitCocycle.gluedModulePullbackHom]
   rw [Category.assoc, c.chartLocalProjection_tupleComponent hopen hpush i i]
   rw [c.chartLocalEqualizerComponent_eq_chartComponent hopen hpush i i]
-  rw [Adjunction.homEquiv_symm_apply]
-  simp only [Category.assoc]
-  rw [← (restrictFunctorIsoPullback (D.ι i)).inv.naturality_assoc]
-  rw [c.chartExtensionRestrictIso_self_counit hopen hpush i]
-  rfl
+  change (adj.homEquiv M N).symm q ≫ tuple =
+    (rIso.inv.app M ≫ R.map q) ≫ e.hom
+  have hsymm : (adj.homEquiv M N).symm q =
+      P.map q ≫ adj.counit.app N :=
+    Adjunction.homEquiv_symm_apply adj M N q
+  have hsymm' : (adj.homEquiv M N).symm q ≫ tuple =
+      (P.map q ≫ adj.counit.app N) ≫ tuple :=
+    congrArg (fun m ↦ m ≫ tuple) hsymm
+  have hnat : P.map q ≫ rIso.inv.app ((pushforward f).obj N) =
+      rIso.inv.app M ≫ R.map q :=
+    rIso.inv.naturality q
+  have hnat' : (rIso.inv.app M ≫ R.map q) ≫ e.hom =
+      (P.map q ≫ rIso.inv.app ((pushforward f).obj N)) ≫ e.hom :=
+    congrArg (fun m ↦ m ≫ e.hom) hnat.symm
+  have hassoc₁ :
+      (P.map q ≫ rIso.inv.app ((pushforward f).obj N)) ≫ e.hom =
+        P.map q ≫
+          (rIso.inv.app ((pushforward f).obj N) ≫ e.hom) :=
+    Category.assoc (P.map q) (rIso.inv.app ((pushforward f).obj N)) e.hom
+  have hself : rIso.inv.app ((pushforward f).obj N) ≫ e.hom =
+      adj.counit.app N ≫ tuple :=
+    c.chartExtensionRestrictIso_self_counit hopen hpush i
+  have hself' : P.map q ≫
+      (rIso.inv.app ((pushforward f).obj N) ≫ e.hom) =
+        P.map q ≫ (adj.counit.app N ≫ tuple) :=
+    congrArg (fun m ↦ P.map q ≫ m) hself
+  have hassoc₂ : P.map q ≫ (adj.counit.app N ≫ tuple) =
+      (P.map q ≫ adj.counit.app N) ≫ tuple :=
+    (Category.assoc (P.map q) (adj.counit.app N) tuple).symm
+  have hright := hnat'.trans (hassoc₁.trans (hself'.trans hassoc₂))
+  exact hsymm'.trans hright.symm
 
 private theorem AffineIntersectionUnitCocycle.gluedModuleChartComponent_overlap
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
@@ -3171,11 +3330,16 @@ private theorem AffineIntersectionUnitCocycle.gluedModuleChartComponent_left_mat
   have hadj := congrArg
     ((pullbackPushforwardAdjunction (D.ι i)).homEquiv M (unitObj (D.U i)))
     (c.gluedModuleChartComponent_adjunct hopen hpush i)
-  rw [← hadj] at hmate
-  simp only [D, sq, M, affineIntersectionChartChosenPullback,
-    Equiv.apply_symm_apply,
-    AffineIntersectionUnitCocycle.chartToOverlapLeft] at hmate ⊢
-  convert hmate using 1 <;> rfl
+  have hround :
+      ((pullbackPushforwardAdjunction (D.ι i)).homEquiv M (unitObj (D.U i)))
+          (((pullbackPushforwardAdjunction (D.ι i)).homEquiv
+            M (unitObj (D.U i))).symm
+            (c.gluedModuleChartComponent hopen hpush i)) =
+        c.gluedModuleChartComponent hopen hpush i :=
+    ((pullbackPushforwardAdjunction (D.ι i)).homEquiv
+      M (unitObj (D.U i))).apply_symm_apply _
+  rw [← hadj, hround] at hmate
+  exact hmate
 
 private theorem AffineIntersectionUnitCocycle.gluedModuleChartComponent_right_mate
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
@@ -3209,12 +3373,16 @@ private theorem AffineIntersectionUnitCocycle.gluedModuleChartComponent_right_ma
   have hadj := congrArg
     ((pullbackPushforwardAdjunction (D.ι j)).homEquiv M (unitObj (D.U j)))
     (c.gluedModuleChartComponent_adjunct hopen hpush j)
-  rw [← hadj] at hmate
-  simp only [D, sq, M, affineIntersectionChartChosenPullback,
-    Equiv.apply_symm_apply, pushforwardCompCongrIso, Iso.trans_hom,
-    NatTrans.comp_app,
-    AffineIntersectionUnitCocycle.chartToOverlapRight] at hmate ⊢
-  convert hmate using 1 <;> rfl
+  have hround :
+      ((pullbackPushforwardAdjunction (D.ι j)).homEquiv M (unitObj (D.U j)))
+          (((pullbackPushforwardAdjunction (D.ι j)).homEquiv
+            M (unitObj (D.U j))).symm
+            (c.gluedModuleChartComponent hopen hpush j)) =
+        c.gluedModuleChartComponent hopen hpush j :=
+    ((pullbackPushforwardAdjunction (D.ι j)).homEquiv
+      M (unitObj (D.U j))).apply_symm_apply _
+  rw [← hadj, hround] at hmate
+  exact hmate
 
 private theorem AffineIntersectionUnitCocycle.gluedModulePullbackHom_overlap
     {A J : Type u} [CommRing A] {F : Finset J ⥤ CommAlgCat.{u} A}
@@ -3299,28 +3467,6 @@ private theorem pullbackCompCongrIso_inv_proof_irrel
       (pullbackCompCongrIso f g h' h₂).inv.app M := by
   have h : h₁ = h₂ := Subsingleton.elim _ _
   subst h₂
-  rfl
-
-/-- The transition morphism in the pullback descent datum is the canonical comparison between
-the two iterated pullbacks. -/
-theorem pullbackPseudofunctor_toDescentData_hom
-    {I : Type u} {S : Scheme.{u}} {X : I → Scheme.{u}}
-    (f : ∀ i, X i ⟶ S) (M : S.Modules) {Y : Scheme.{u}}
-    (q : Y ⟶ S) {i j : I} (f₁ : Y ⟶ X i) (f₂ : Y ⟶ X j)
-    (hf₁ : f₁ ≫ f i = q) (hf₂ : f₂ ≫ f j = q) :
-    ((pullbackPseudofunctor.toDescentData f).obj M).hom
-        q f₁ f₂ hf₁ hf₂ =
-      (((pullbackComp f₁ (f i)).app M) ≪≫
-          ((pullbackCongr hf₁).app M)).hom ≫
-        (((pullbackComp f₂ (f j)).app M) ≪≫
-          ((pullbackCongr hf₂).app M)).inv := by
-  change
-    ((pullbackPseudofunctor.mapComp' (f i).op.toLoc f₁.op.toLoc q.op.toLoc
-        (by rw [← Quiver.Hom.comp_toLoc, ← op_comp, hf₁])).inv.toNatTrans.app M) ≫
-      ((pullbackPseudofunctor.mapComp' (f j).op.toLoc f₂.op.toLoc q.op.toLoc
-        (by rw [← Quiver.Hom.comp_toLoc, ← op_comp, hf₂])).hom.toNatTrans.app M) = _
-  rw [pullbackPseudofunctor_mapComp'_inv_app f₁ (f i) hf₁ M,
-    pullbackPseudofunctor_mapComp'_hom_app f₂ (f j) hf₂ M]
   rfl
 
 private theorem AffineIntersectionUnitCocycle.chartLocalProjection_source
@@ -3535,6 +3681,25 @@ noncomputable def AffineIntersectionUnitCocycle.gluedModuleDescentIso
     simpa only [Category.assoc] using
         c.gluedModuleLocalIso_transition hopen hpush i j
 
+private theorem isoComposite_inv_hom_eq_of_stage
+    {C : Type u₁} [Category.{u₂} C] {A B M U V W : C}
+    (eLeft : A ≅ M) (eRight : B ≅ M) (a : A ≅ U) (b : B ≅ V)
+    (uLeft : U ≅ W) (uRight : V ≅ W) (stage : U ⟶ V)
+    (hstage : a.hom ≫ stage = eLeft.hom ≫ eRight.inv ≫ b.hom) :
+    (eLeft.symm ≪≫ a ≪≫ uLeft).inv ≫
+        (eRight.symm ≪≫ b ≪≫ uRight).hom =
+      uLeft.inv ≫ stage ≫ uRight.hom := by
+  have hcore : a.inv ≫ eLeft.hom ≫ eRight.inv ≫ b.hom = stage := by
+    apply (cancel_epi a.hom).1
+    simp only [Iso.hom_inv_id_assoc]
+    exact hstage.symm
+  apply (cancel_epi uLeft.hom).1
+  apply (cancel_mono uRight.inv).1
+  simp only [Iso.trans_hom, Iso.trans_inv, Iso.symm_hom, Iso.symm_inv]
+  simp only [Category.assoc, Iso.hom_inv_id_assoc, Iso.hom_inv_id,
+    Category.comp_id]
+  exact hcore
+
 section
 
 variable {A J : Type u} [CommRing A]
@@ -3544,6 +3709,35 @@ variable {A J : Type u} [CommRing A]
   (hpush : Scheme.GlueData.IsPushoutAffineIntersectionFunctor F)
 
 local notation "D" => Scheme.GlueData.ofAffineIntersectionFunctor F hopen hpush
+
+private theorem AffineIntersectionUnitCocycle.gluedModuleStageTransition
+    (i j : J) {T : Scheme.{u}}
+    (q : T ⟶ (D).glued) (g : T ⟶ (D).V (i, j))
+    (gLeft : T ⟶ (D).U i) (gRight : T ⟶ (D).U j)
+    (hqLeft : gLeft ≫ (D).ι i = q) (hqRight : gRight ≫ (D).ι j = q)
+    (hLeft : g ≫ (D).f i j = gLeft)
+    (hRight : g ≫ ((D).t i j ≫ (D).f j i) = gRight) :
+    (pullback gLeft).map (c.gluedModuleLocalIso hopen hpush i).hom ≫
+        Pseudofunctor.LocallyDiscreteOpToCat.pullHom
+          (F := pullbackPseudofunctor)
+          (c.chartTransitionIso hopen hpush i j).hom
+          g gLeft gRight hLeft hRight =
+      (((pullbackComp gLeft ((D).ι i)).app (c.gluedModule hopen hpush)) ≪≫
+          ((pullbackCongr hqLeft).app (c.gluedModule hopen hpush))).hom ≫
+        (((pullbackComp gRight ((D).ι j)).app (c.gluedModule hopen hpush)) ≪≫
+          ((pullbackCongr hqRight).app (c.gluedModule hopen hpush))).inv ≫
+            (pullback gRight).map
+              (c.gluedModuleLocalIso hopen hpush j).hom := by
+  let E := c.gluedModuleDescentIso hopen hpush
+  have hE := Pseudofunctor.DescentData'.comm
+    E.hom q gLeft gRight hqLeft hqRight
+  rw [Pseudofunctor.DescentData'.pullHom'_ofDescentData_hom] at hE
+  rw [pullbackPseudofunctor_toDescentData_hom
+    (f := (D).ι) (M := c.gluedModule hopen hpush) (q := q)
+    (f₁ := gLeft) (f₂ := gRight) (hf₁ := hqLeft) (hf₂ := hqRight)] at hE
+  rw [c.chartDescent_pullHom_eq hopen hpush i j q g gLeft gRight
+    hqLeft hqRight hLeft hRight] at hE
+  exact hE
 
 /-- On any test scheme mapping through an ordered overlap, the two composite pullbacks of the
 canonical chart trivializations of the glued module differ by the pulled-back chart transition. -/
@@ -3559,11 +3753,8 @@ theorem AffineIntersectionUnitCocycle.gluedModuleCompositeTrivialization_transit
         (pullbackCompositeTrivialization gRight ((D).ι j) q hqRight
           (c.gluedModule hopen hpush) (c.gluedModuleLocalIso hopen hpush j)).hom =
       c.chartTransitionIsoCoordinatePullback hopen hpush i j g := by
-  let E := c.gluedModuleDescentIso hopen hpush
   let tLeft := c.gluedModuleLocalIso hopen hpush i
   let tRight := c.gluedModuleLocalIso hopen hpush j
-  have hE := Pseudofunctor.DescentData'.comm
-    E.hom q gLeft gRight hqLeft hqRight
   let eLeft : (pullback gLeft).obj
         ((pullback ((D).ι i)).obj (c.gluedModule hopen hpush)) ≅
       (pullback q).obj (c.gluedModule hopen hpush) :=
@@ -3585,12 +3776,8 @@ theorem AffineIntersectionUnitCocycle.gluedModuleCompositeTrivialization_transit
       g gLeft gRight hLeft hRight
   have hE' : a.hom ≫ stageTransition =
       eLeft.hom ≫ eRight.inv ≫ b.hom := by
-    rw [Pseudofunctor.DescentData'.pullHom'_ofDescentData_hom] at hE
-    rw [pullbackPseudofunctor_toDescentData_hom] at hE
-    rw [c.chartDescent_pullHom_eq hopen hpush i j q g gLeft gRight
-      hqLeft hqRight hLeft hRight] at hE
-    change a.hom ≫ stageTransition = eLeft.hom ≫ eRight.inv ≫ b.hom at hE
-    exact hE
+    exact c.gluedModuleStageTransition hopen hpush i j q g gLeft gRight
+      hqLeft hqRight hLeft hRight
   let tailLeft := pullbackCompositeTrivialization gLeft ((D).ι i) q hqLeft
     (c.gluedModule hopen hpush) tLeft
   let tailRight := pullbackCompositeTrivialization gRight ((D).ι j) q hqRight
@@ -3607,20 +3794,11 @@ theorem AffineIntersectionUnitCocycle.gluedModuleCompositeTrivialization_transit
     dsimp only [tailRight, manualRight, eRight, b]
     exact pullbackCompositeTrivialization_eq gRight ((D).ι j) q hqRight
       (c.gluedModule hopen hpush) tRight
-  have hcore : a.inv ≫ eLeft.hom ≫ eRight.inv ≫ b.hom = stageTransition := by
-    apply (cancel_epi a.hom).1
-    simp only [Iso.hom_inv_id_assoc]
-    rw [hE']
   have hmanual : manualLeft.inv ≫ manualRight.hom =
       (pullbackUnitIso gLeft).inv ≫ stageTransition ≫
         (pullbackUnitIso gRight).hom := by
-    apply (cancel_epi (pullbackUnitIso gLeft).hom).1
-    apply (cancel_mono (pullbackUnitIso gRight).inv).1
-    dsimp only [manualLeft, manualRight]
-    simp only [Iso.trans_hom, Iso.trans_inv, Iso.symm_hom, Iso.symm_inv]
-    simp only [Category.assoc, Iso.hom_inv_id_assoc, Iso.hom_inv_id,
-      Category.comp_id]
-    rw [hcore]
+    exact isoComposite_inv_hom_eq_of_stage eLeft eRight a b
+      (pullbackUnitIso gLeft) (pullbackUnitIso gRight) stageTransition hE'
   change tailLeft.inv ≫ tailRight.hom = _
   calc
     tailLeft.inv ≫ tailRight.hom =
@@ -3663,19 +3841,36 @@ local notation "D" =>
 local notation "sq" => affineIntersectionChartChosenPullback hopen hpush
 local notation "sq₃" => affineIntersectionChartChosenPullback₃ hopen hpush
 
+/-- The canonical comparison between the two iterated pullbacks to a chosen chart overlap. -/
+noncomputable def affineIntersectionPullbackComparisonIso
+    (M : (D).glued.Modules) (i j : J) :
+    (pullback (sq i j).p₁).obj ((pullback ((D).ι i)).obj M) ≅
+      (pullback (sq i j).p₂).obj ((pullback ((D).ι j)).obj M) :=
+  pullbackDescentComparisonIso (D).ι M (sq i j).p
+    (sq i j).p₁ (sq i j).p₂ (sq i j).hp₁ (sq i j).hp₂
+
+theorem affineIntersectionPullbackComparisonIso_hom
+    (M : (D).glued.Modules) (i j : J) :
+    (affineIntersectionPullbackComparisonIso hopen hpush M i j).hom =
+      ((((pullbackComp (sq i j).p₁ ((D).ι i)).app M) ≪≫
+          ((pullbackCongr (sq i j).hp₁).app M)).hom ≫
+        (((pullbackComp (sq i j).p₂ ((D).ι j)).app M) ≪≫
+          ((pullbackCongr (sq i j).hp₂).app M)).inv) :=
+  rfl
+
 /-- A family of chart trivializations realizes the transition maps of an
 affine-intersection unit cocycle. -/
 def AffineIntersectionUnitCocycle.IsCompatibleChartTrivialization
     (M : (D).glued.Modules)
     (e : ∀ i, (pullback ((D).ι i)).obj M ≅ unitObj ((D).U i)) : Prop :=
   ∀ i j,
-    (pullbackPseudofunctor.map (sq i j).p₁.op.toLoc).toFunctor.map (e i).hom ≫
+    (pullback (sq i j).p₁).map (e i).hom ≫
           (c.chartTransitionIso hopen hpush i j).hom =
       ((((pullbackComp (sq i j).p₁ ((D).ι i)).app M) ≪≫
             ((pullbackCongr (sq i j).hp₁).app M)).hom ≫
           (((pullbackComp (sq i j).p₂ ((D).ι j)).app M) ≪≫
-          ((pullbackCongr (sq i j).hp₂).app M)).inv) ≫
-        (pullbackPseudofunctor.map (sq i j).p₂.op.toLoc).toFunctor.map (e j).hom
+            ((pullbackCongr (sq i j).hp₂).app M)).inv) ≫
+        (pullback (sq i j).p₂).map (e j).hom
 
 /-- Compatible chart trivializations identify the pullback descent datum of a module
 with the descent datum defined by an affine-intersection unit cocycle. -/
@@ -3685,14 +3880,14 @@ noncomputable def AffineIntersectionUnitCocycle.descentIsoOfCompatibleChartTrivi
     (h : c.IsCompatibleChartTrivialization hopen hpush M e) :
     Pseudofunctor.DescentData'.ofDescentData sq sq₃
         ((pullbackPseudofunctor.toDescentData (D).ι).obj M) ≅
-      c.chartDescentData hopen hpush := by
-  refine Pseudofunctor.DescentData'.isoMk e ?_
-  intro i j
-  as_aux_lemma =>
-    rw [c.chartDescentData_hom hopen hpush i j]
-    rw [Pseudofunctor.DescentData'.ofDescentData_hom]
-    rw [pullbackPseudofunctor_toDescentData_hom]
-    exact h i j
+      c.chartDescentData hopen hpush :=
+  pullbackPseudofunctorDescentIsoOfCompatible
+    (D).ι M (affineIntersectionChartChosenPullback hopen hpush)
+    (affineIntersectionChartChosenPullback₃ hopen hpush)
+    (c.chartDescentData hopen hpush) e fun i j ↦
+      (congrArg
+        (fun m ↦ (pullback (sq i j).p₁).map (e i).hom ≫ m)
+        (c.chartDescentData_hom hopen hpush i j)).trans (h i j)
 
 private noncomputable def AffineIntersectionUnitCocycle.descentChartComponent
     (M : (D).glued.Modules)
@@ -3731,24 +3926,13 @@ private theorem AffineIntersectionUnitCocycle.descentIso_transition
     (i j : J) :
     (pullback (sq i j).p₁).map (e.hom.hom i) ≫
         (c.chartTransitionIso hopen hpush i j).hom =
-      (((pullbackComp (sq i j).p₁ ((D).ι i)).app M) ≪≫
-          ((pullbackCongr (sq i j).hp₁).app M)).hom ≫
-        (((pullbackComp (sq i j).p₂ ((D).ι j)).app M) ≪≫
-          ((pullbackCongr (sq i j).hp₂).app M)).inv ≫
+      (affineIntersectionPullbackComparisonIso hopen hpush M i j).hom ≫
         (pullback (sq i j).p₂).map (e.hom.hom j) := by
-  have h := e.hom.comm i j
-  rw [c.chartDescentData_hom hopen hpush i j] at h
-  rw [Pseudofunctor.DescentData'.ofDescentData_hom] at h
-  rw [pullbackPseudofunctor_toDescentData_hom] at h
-  change
-    (pullback (sq i j).p₁).map (e.hom.hom i) ≫
-        (c.chartTransitionIso hopen hpush i j).hom =
-      ((((pullbackComp (sq i j).p₁ ((D).ι i)).app M) ≪≫
-            ((pullbackCongr (sq i j).hp₁).app M)).hom ≫
-          (((pullbackComp (sq i j).p₂ ((D).ι j)).app M) ≪≫
-            ((pullbackCongr (sq i j).hp₂).app M)).inv) ≫
-        (pullback (sq i j).p₂).map (e.hom.hom j) at h
-  simpa only [Category.assoc] using h
+  rw [← c.chartDescentData_hom hopen hpush i j]
+  exact pullbackPseudofunctorDescentIso_transition
+    (D).ι M (affineIntersectionChartChosenPullback hopen hpush)
+    (affineIntersectionChartChosenPullback₃ hopen hpush)
+    (c.chartDescentData hopen hpush) e i j
 
 private theorem AffineIntersectionUnitCocycle.descentChartComponent_left_mate
     (M : (D).glued.Modules)
@@ -3820,29 +4004,43 @@ private theorem AffineIntersectionUnitCocycle.descentChartComponent_overlap
     (sq i j).p ((D).glue_condition i j) |>.app M
   let q := (pullbackUnitIso (sq i j).p₂).hom
   have htransition := c.descentIso_transition hopen hpush M e i j
-  rw [show (((pullbackComp (sq i j).p₁ ((D).ι i)).app M) ≪≫
-      ((pullbackCongr (sq i j).hp₁).app M)).hom = leftComp.hom from
-    pullbackCompCongrIso_hom_refl (sq i j).p₁ ((D).ι i) M] at htransition
-  rw [show (((pullbackComp (sq i j).p₂ ((D).ι j)).app M) ≪≫
-      ((pullbackCongr (sq i j).hp₂).app M)).inv = rightComp.inv from
-    pullbackCompCongrIso_inv_proof_irrel (sq i j).p₂ ((D).ι j)
-      (sq i j).p (sq i j).hp₂ ((D).glue_condition i j) M] at htransition
-  have h := congrArg (fun m ↦ leftComp.inv ≫ m ≫ q) htransition
+  have hcomparison :
+      (affineIntersectionPullbackComparisonIso hopen hpush M i j).hom =
+        leftComp.hom ≫ rightComp.inv := by
+    change
+      (((pullbackComp (sq i j).p₁ ((D).ι i)).app M) ≪≫
+          ((pullbackCongr (sq i j).hp₁).app M)).hom ≫
+        (((pullbackComp (sq i j).p₂ ((D).ι j)).app M) ≪≫
+          ((pullbackCongr (sq i j).hp₂).app M)).inv = _
+    rw [show (((pullbackComp (sq i j).p₁ ((D).ι i)).app M) ≪≫
+        ((pullbackCongr (sq i j).hp₁).app M)).hom = leftComp.hom from
+      pullbackCompCongrIso_hom_refl (sq i j).p₁ ((D).ι i) M]
+    rw [show (((pullbackComp (sq i j).p₂ ((D).ι j)).app M) ≪≫
+        ((pullbackCongr (sq i j).hp₂).app M)).inv = rightComp.inv from
+      pullbackCompCongrIso_inv_proof_irrel (sq i j).p₂ ((D).ι j)
+        (sq i j).p (sq i j).hp₂ ((D).glue_condition i j) M]
+    rfl
+  rw [hcomparison] at htransition
+  let rightTail := rightComp.inv ≫
+    (pullback (sq i j).p₂).map (e.hom.hom j)
+  have hpre := congrArg (fun m ↦ leftComp.inv ≫ m) htransition
+  have hcancel : leftComp.inv ≫ (leftComp.hom ≫ rightTail) = rightTail := by
+    have hassoc : leftComp.inv ≫ (leftComp.hom ≫ rightTail) =
+        (leftComp.inv ≫ leftComp.hom) ≫ rightTail :=
+      (Category.assoc _ _ _).symm
+    have hunit := congrArg (fun m ↦ m ≫ rightTail) leftComp.inv_hom_id
+    exact hassoc.trans (hunit.trans (Category.id_comp rightTail))
+  have hcore := hpre.trans hcancel
+  have hpost := congrArg (fun m ↦ m ≫ q) hcore
+  have hassoc := congrArg (fun m ↦ m ≫ q)
+    (Category.assoc leftComp.inv
+      ((pullback (sq i j).p₁).map (e.hom.hom i))
+      (c.chartTransitionIso hopen hpush i j).hom)
   change leftComp.inv ≫
       (pullback (sq i j).p₁).map (e.hom.hom i) ≫
       (c.chartTransitionIso hopen hpush i j).hom ≫ q =
     rightComp.inv ≫ (pullback (sq i j).p₂).map (e.hom.hom j) ≫ q
-  calc
-    _ = leftComp.inv ≫
-        ((pullback (sq i j).p₁).map (e.hom.hom i) ≫
-          (c.chartTransitionIso hopen hpush i j).hom) ≫ q := by
-      simp only [Category.assoc]
-    _ = leftComp.inv ≫
-        (leftComp.hom ≫ rightComp.inv ≫
-          (pullback (sq i j).p₂).map (e.hom.hom j)) ≫ q := h
-    _ = _ := by
-      simp only [Category.assoc, Iso.inv_hom_id_assoc]
-      rfl
+  exact hassoc.trans hpost
 
 private theorem AffineIntersectionUnitCocycle.descentChartSource_equalizes
     (M : (D).glued.Modules)
@@ -3853,14 +4051,37 @@ private theorem AffineIntersectionUnitCocycle.descentChartSource_equalizes
         c.chartGlueLeft hopen hpush =
       c.descentChartSource hopen hpush M e ≫
         c.chartGlueRight hopen hpush := by
-  dsimp only [AffineIntersectionUnitCocycle.chartGlueLeft,
-    AffineIntersectionUnitCocycle.chartGlueRight,
-    AffineIntersectionUnitCocycle.chartGlueTarget]
   apply Pi.hom_ext
   rintro ⟨i, j⟩
-  rw [Category.assoc, Category.assoc, Pi.lift_π, Pi.lift_π]
-  rw [c.descentChartSource_π_assoc, c.descentChartSource_π_assoc]
-  exact c.descentChartComponent_overlap hopen hpush M e i j
+  let source := c.descentChartSource hopen hpush M e
+  let leftMap := c.chartGlueLeft hopen hpush
+  let rightMap := c.chartGlueRight hopen hpush
+  let overlapProjection := Pi.π (fun ij : J × J ↦
+    c.overlapExtension hopen hpush ij.1 ij.2) (i, j)
+  let chartProjection (k : J) := Pi.π (fun l : J ↦
+    c.chartExtension hopen hpush l) k
+  let toLeft := c.chartToOverlapLeft hopen hpush i j
+  let toRight := c.chartToOverlapRight hopen hpush i j
+  have hleftProjection := congrArg (fun m ↦ source ≫ m)
+    (c.chartGlueLeft_π hopen hpush i j)
+  have hleftSource := congrArg (fun m ↦ m ≫ toLeft)
+    (c.descentChartSource_π hopen hpush M e i)
+  have hleft : (source ≫ leftMap) ≫ overlapProjection =
+      c.descentChartComponent hopen hpush M e i ≫ toLeft :=
+    (Category.assoc source leftMap overlapProjection).trans
+      (hleftProjection.trans
+        ((Category.assoc source (chartProjection i) toLeft).symm.trans hleftSource))
+  have hrightProjection := congrArg (fun m ↦ source ≫ m)
+    (c.chartGlueRight_π hopen hpush i j)
+  have hrightSource := congrArg (fun m ↦ m ≫ toRight)
+    (c.descentChartSource_π hopen hpush M e j)
+  have hright : (source ≫ rightMap) ≫ overlapProjection =
+      c.descentChartComponent hopen hpush M e j ≫ toRight :=
+    (Category.assoc source rightMap overlapProjection).trans
+      (hrightProjection.trans
+        ((Category.assoc source (chartProjection j) toRight).symm.trans hrightSource))
+  exact hleft.trans
+    ((c.descentChartComponent_overlap hopen hpush M e i j).trans hright.symm)
 
 private noncomputable def AffineIntersectionUnitCocycle.descentToGluedHom
     (M : (D).glued.Modules)
@@ -3896,11 +4117,16 @@ private theorem AffineIntersectionUnitCocycle.descentToGluedHom_chartComponent
   let p : c.chartGlueSource hopen hpush ⟶
       c.chartExtension hopen hpush i :=
     Pi.π (fun j : J ↦ c.chartExtension hopen hpush j) i
-  have h := c.descentToGluedHom_ι_assoc hopen hpush M e p
+  let g := c.descentToGluedHom hopen hpush M e
+  let equalizerInclusion := equalizer.ι
+    (c.chartGlueLeft hopen hpush) (c.chartGlueRight hopen hpush)
+  have hι := c.descentToGluedHom_ι hopen hpush M e
+  have hιp := congrArg (fun m ↦ m ≫ p) hι
   calc
-    _ = c.descentChartSource hopen hpush M e ≫ p := by
-      simpa only [p, AffineIntersectionUnitCocycle.gluedModuleChartComponent,
-        AffineIntersectionUnitCocycle.gluedModule] using h
+    _ = g ≫ (equalizerInclusion ≫ p) := rfl
+    _ = (g ≫ equalizerInclusion) ≫ p :=
+      (Category.assoc g equalizerInclusion p).symm
+    _ = c.descentChartSource hopen hpush M e ≫ p := hιp
     _ = _ := c.descentChartSource_π hopen hpush M e i
 
 private theorem AffineIntersectionUnitCocycle.descentIso_component_isIso
@@ -3927,6 +4153,14 @@ private theorem AffineIntersectionUnitCocycle.descentToGluedHom_pullback
     (pullback ((D).ι i)).map (c.descentToGluedHom hopen hpush M e) ≫
         (c.gluedModuleLocalIso hopen hpush i).hom =
       e.hom.hom i := by
+  let adjG := (pullbackPushforwardAdjunction ((D).ι i)).homEquiv
+    (c.gluedModule hopen hpush) (unitObj ((D).U i))
+  let adjM := (pullbackPushforwardAdjunction ((D).ι i)).homEquiv
+    M (unitObj ((D).U i))
+  let chart : c.gluedModule hopen hpush ⟶
+      (pushforward ((D).ι i)).obj (unitObj ((D).U i)) :=
+    c.gluedModuleChartComponent hopen hpush i
+  have hround : adjG (adjG.symm chart) = chart := adjG.apply_symm_apply chart
   change
     (pullback ((D).ι i)).map (c.descentToGluedHom hopen hpush M e) ≫
       c.gluedModulePullbackHom hopen hpush i =
@@ -3935,7 +4169,9 @@ private theorem AffineIntersectionUnitCocycle.descentToGluedHom_pullback
   apply ((pullbackPushforwardAdjunction ((D).ι i)).homEquiv
     M (unitObj ((D).U i))).injective
   rw [Adjunction.homEquiv_naturality_left]
-  rw [Equiv.apply_symm_apply]
+  change c.descentToGluedHom hopen hpush M e ≫
+      adjG (adjG.symm chart) = adjM (e.hom.hom i)
+  rw [hround]
   change c.descentToGluedHom hopen hpush M e ≫
       c.gluedModuleChartComponent hopen hpush i =
     c.descentChartComponent hopen hpush M e i
@@ -4048,6 +4284,24 @@ noncomputable def AffineIntersectionUnitCocycle.gluedModuleIsoOfCompatibleChartT
 
 end DescentEffectivity
 
+private theorem specMap_ΓSpecIso_inv_map_iso_hom
+    {A B : CommRingCat.{u}} (φ : A ≅ B) (x : A) :
+    (Spec.map φ.inv).appTop.hom
+        ((Scheme.ΓSpecIso B).inv.hom (φ.hom.hom x)) =
+      (Scheme.ΓSpecIso A).inv.hom x := by
+  have hnat : φ.inv ≫ (Scheme.ΓSpecIso A).inv =
+      (Scheme.ΓSpecIso B).inv ≫ (Spec.map φ.inv).appTop :=
+    Scheme.ΓSpecIso_inv_naturality φ.inv
+  have h := ConcreteCategory.congr_hom hnat (φ.hom.hom x)
+  have h' := h.symm
+  change
+    (Spec.map φ.inv).appTop.hom
+        ((Scheme.ΓSpecIso B).inv.hom (φ.hom.hom x)) =
+      (Scheme.ΓSpecIso A).inv.hom (φ.inv.hom (φ.hom.hom x)) at h'
+  have hcancel : φ.inv.hom (φ.hom.hom x) = x :=
+    Iso.hom_inv_id_apply φ x
+  exact h'.trans (congrArg (Scheme.ΓSpecIso A).inv.hom hcancel)
+
 /-- The overlap section of the affine-intersection cocycle is the original change-of-basis
 unit after transport to the geometric intersection open. -/
 theorem affineIntersectionUnitCocycle_overlapTransitionSection
@@ -4104,13 +4358,8 @@ theorem affineIntersectionUnitCocycle_overlapTransitionSection
           ((Scheme.ΓSpecIso B).inv.hom
             (φ.hom.hom (V.topIso.inv.hom (r : Γ(X, V))))) =
         (Scheme.ΓSpecIso A).inv.hom (V.topIso.inv.hom (r : Γ(X, V))) := by
-    have hnat : φ.inv ≫ (Scheme.ΓSpecIso A).inv =
-        (Scheme.ΓSpecIso B).inv ≫ (Spec.map φ.inv).appTop :=
-      Scheme.ΓSpecIso_inv_naturality φ.inv
-    have h := ConcreteCategory.congr_hom hnat
-      (φ.hom.hom (V.topIso.inv.hom (r : Γ(X, V))))
-    simpa only [CommRingCat.comp_apply, ConcreteCategory.comp_apply,
-      Iso.hom_inv_id_apply] using h.symm
+    exact specMap_ΓSpecIso_inv_map_iso_hom φ
+      (V.topIso.inv.hom (r : Γ(X, V)))
   have hE :
       E.inv.appTop.hom
           ((Scheme.ΓSpecIso B).inv.hom
@@ -4808,8 +5057,9 @@ private theorem affineIntersectionOriginalChartTrivialization_pulled_transition
     ((pullbackCongr (sq i j).hp₂).app M)
   let tj := (pullback (sq i j).p₂).map
     (affineIntersectionOriginalChartTrivialization π U e hU j).hom
-  apply (cancel_mono
-    ((pullback q.inv).map (pullbackUnitIso (sq i j).p₂).hom)).1
+  let rightUnitMapped := (pullback q.inv).mapIso
+    (pullbackUnitIso (sq i j).p₂)
+  apply (cancel_mono rightUnitMapped.hom).1
   apply (cancel_mono (pullbackUnitIso q.inv).hom).1
   refine Eq.trans (comp_four_assoc _ _ _ _) ?_
   have htransition := affineIntersection_chartTransition_comp_flattenRight
@@ -4869,14 +5119,12 @@ theorem affineIntersectionOriginalChartTrivialization_transition
     (pullbackPseudofunctor.map (sq i j).p₁.op.toLoc).toFunctor.map
           (affineIntersectionOriginalChartTrivialization π U e hU i).hom ≫
         (c.chartTransitionIso hopen hpush i j).hom =
-      ((((pullbackComp (sq i j).p₁ (D.ι i)).app M) ≪≫
-            ((pullbackCongr (sq i j).hp₁).app M)).hom ≫
-          (((pullbackComp (sq i j).p₂ (D.ι j)).app M) ≪≫
-            ((pullbackCongr (sq i j).hp₂).app M)).inv) ≫
+      (affineIntersectionPullbackComparisonIso hopen hpush M i j).hom ≫
         (pullbackPseudofunctor.map (sq i j).p₂.op.toLoc).toFunctor.map
           (affineIntersectionOriginalChartTrivialization π U e hU j).hom := by
   classical
   dsimp only
+  rw [affineIntersectionPullbackComparisonIso_hom]
   let q := π.affineIntersectionOverlapIso U hU i j
   letI : (pullback q.inv).IsEquivalence :=
     pullback_isEquivalence_of_iso q.symm

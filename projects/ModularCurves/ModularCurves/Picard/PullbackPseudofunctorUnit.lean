@@ -76,7 +76,6 @@ private theorem pullbackUnitIso_compEntryCongr
   rw [Iso.trans_hom, Category.assoc,
     ModularCurves.pullbackUnitIso_congrLow h,
     ModularCurves.pullbackUnitIso_compLow f g]
-  rfl
 
 private theorem pullbackUnitIso_compExitCongr
     {X Y Z : Scheme.{u}} (f : X ⟶ Y) (g : Y ⟶ Z)

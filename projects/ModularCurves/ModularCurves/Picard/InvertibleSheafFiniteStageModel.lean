@@ -432,17 +432,24 @@ theorem affineIntersectionTransitionUnit_map
       (π.finiteIntersectionRestriction U (leOfHom f)).hom
           (V.topIso.inv.hom (gV : Γ(X, V))) =
         W.topIso.inv.hom (gW : Γ(X, W)) := by
-    calc
-      (π.finiteIntersectionRestriction U (leOfHom f)).hom
-          (V.topIso.inv.hom (gV : Γ(X, V))) =
-        (X.homOfLE hWV).appTop.hom (V.topIso.inv.hom (gV : Γ(X, V))) :=
-          ConcreteCategory.congr_hom
-            (π.finiteIntersectionRestriction_forget U f)
-              (V.topIso.inv.hom (gV : Γ(X, V)))
-      _ = W.topIso.inv.hom
-          ((X.presheaf.map (homOfLE hWV).op).hom (gV : Γ(X, V))) := htop
-      _ = W.topIso.inv.hom (gW : Γ(X, W)) := by
-        exact congrArg W.topIso.inv.hom (congrArg Units.val hg)
+    have hfirst :
+        (π.finiteIntersectionRestriction U (leOfHom f)).hom
+            (V.topIso.inv.hom (gV : Γ(X, V))) =
+          (X.homOfLE hWV).appTop.hom (V.topIso.inv.hom (gV : Γ(X, V))) :=
+      ConcreteCategory.congr_hom
+        (π.finiteIntersectionRestriction_forget U f)
+          (V.topIso.inv.hom (gV : Γ(X, V)))
+    have hmiddle :
+        (X.homOfLE hWV).appTop.hom (V.topIso.inv.hom (gV : Γ(X, V))) =
+          W.topIso.inv.hom
+            ((X.presheaf.map (homOfLE hWV).op).hom (gV : Γ(X, V))) :=
+      htop
+    have hlast :
+        W.topIso.inv.hom
+            ((X.presheaf.map (homOfLE hWV).op).hom (gV : Γ(X, V))) =
+          W.topIso.inv.hom (gW : Γ(X, W)) :=
+      congrArg W.topIso.inv.hom (congrArg Units.val hg)
+    exact hfirst.trans (hmiddle.trans hlast)
   apply Units.ext
   change ((π.affineIntersectionFunctor U).map f).hom
       ((π.finiteIntersectionRingIso U s hs).hom.hom

@@ -97,13 +97,17 @@ theorem pullbackComp_assoc_app
         (pullbackComp f (g ≫ h)).hom.app M =
       (pullbackComp f g).hom.app ((pullback h).obj M) ≫
         (pullbackComp (f ≫ g) h).hom.app M := by
+  letI : (SheafOfModules.pushforward h.toRingCatSheafHom).IsRightAdjoint :=
+    (pullbackPushforwardAdjunction h).isRightAdjoint
+  letI : (SheafOfModules.pushforward g.toRingCatSheafHom).IsRightAdjoint :=
+    (pullbackPushforwardAdjunction g).isRightAdjoint
+  letI : (SheafOfModules.pushforward f.toRingCatSheafHom).IsRightAdjoint :=
+    (pullbackPushforwardAdjunction f).isRightAdjoint
   have H := congrArg (fun z => z.hom.app M)
     (SheafOfModules.pullback_assoc.{u}
       h.toRingCatSheafHom g.toRingCatSheafHom f.toRingCatSheafHom)
-  simp only [Iso.trans_hom, NatTrans.comp_app,
-    Functor.isoWhiskerLeft_hom, Functor.isoWhiskerRight_hom,
-    Functor.whiskerLeft_app, Functor.whiskerRight_app,
-    Iso.symm_hom, Functor.associator_inv_app] at H
+  simp only [Iso.trans_hom, Functor.isoWhiskerLeft_hom,
+    Functor.isoWhiskerRight_hom, Iso.symm_hom] at H
   change
     (pullbackComp f g).hom.app ((pullback h).obj M) ≫
         (pullbackComp (f ≫ g) h).hom.app M =

@@ -58,8 +58,11 @@ theorem overFunctorEquiv_unitP (U : X.Opens) :
   change ((overFunctorEquiv U).hom.app (unitObj X)).val.app W x =
     ((restrictUnitIso U.ι).inv.val.app W).hom' x
   rw [overFunctorEquiv_hom_app_apply]
-  rw [restrictUnitIso_inv_app_applyP]
-  rw [Scheme.Opens.ι_appIso]
+  have hrestrict : ((restrictUnitIso U.ι).inv.val.app W).hom' x =
+      (U.ι.appIso W.unop).inv x :=
+    restrictUnitIso_inv_app_applyP
+      (A := U.toScheme) (B := X) U.ι W.unop x
+  rw [hrestrict, Scheme.Opens.ι_appIso]
   change x = x
   rfl
 
@@ -109,18 +112,16 @@ theorem restrictOpenCompMap_unit_app_applyP {U V : X.Opens}
     (restrictFunctorCongr_hom_app_app
       (U := Z.unop) hι (unitObj X)) x
   have hfirst := congrArg (fun y => b.val.app Z y) ha
-  calc
-    b.val.app Z (a.val.app Z x) = _ := hfirst
-    _ = ((X.homOfLE (leOfHom i)).appIso Z.unop).inv x := by
-      change ((restrictFunctorComp g U.ι).hom.app (unitObj X)).val.app Z _ = _
-      erw [ConcreteCategory.congr_hom
-        (restrictFunctorComp_hom_app_app
-          (U := Z.unop) g U.ι (unitObj X)) _]
-      change X.presheaf.map _ (X.presheaf.map _ x) = _
-      rw [← Functor.map_comp_apply]
-      rw [Scheme.Hom.appIso_homOfLE_inv]
-      exact ConcreteCategory.congr_hom
-        (X.presheaf.congr_map (Subsingleton.elim _ _)) x
+  refine Eq.trans hfirst ?_
+  change ((restrictFunctorComp g U.ι).hom.app (unitObj X)).val.app Z _ = _
+  erw [ConcreteCategory.congr_hom
+    (restrictFunctorComp_hom_app_app
+      (U := Z.unop) g U.ι (unitObj X)) _]
+  change X.presheaf.map _ (X.presheaf.map _ x) = _
+  erw [← X.presheaf.map_comp_apply]
+  rw [Scheme.Hom.appIso_homOfLE_inv]
+  exact ConcreteCategory.congr_hom
+    (X.presheaf.congr_map (Subsingleton.elim _ _)) x
 
 theorem overMapCompOverEquiv_unitP {U V : X.Opens} (i : V ⟶ U) :
     (overMapCompOverEquiv i).app
@@ -138,9 +139,19 @@ theorem overMapCompOverEquiv_unitP {U V : X.Opens} (i : V ⟶ U) :
     ((restrictUnitIso (X.homOfLE (leOfHom i))).inv.val.app Z).hom' x
   change (overRestrictionStage2 (unitObj X) i).val.app Z x =
     ((restrictUnitIso (X.homOfLE (leOfHom i))).inv.val.app Z).hom' x
-  rw [overRestrictionStage2_app_apply]
-  rw [restrictUnitIso_inv_app_applyP]
-  exact restrictOpenCompMap_unit_app_applyP i Z x
+  have hstage : (overRestrictionStage2 (unitObj X) i).val.app Z x =
+      (restrictOpenCompMap (unitObj X) i).val.app Z x :=
+    overRestrictionStage2_app_apply (X := X) (unitObj X) i Z x
+  have hopen : (restrictOpenCompMap (unitObj X) i).val.app Z x =
+      ((X.homOfLE (leOfHom i)).appIso Z.unop).inv x :=
+    restrictOpenCompMap_unit_app_applyP i Z x
+  have hrestrict :
+      ((restrictUnitIso (X.homOfLE (leOfHom i))).inv.val.app Z).hom' x =
+        ((X.homOfLE (leOfHom i)).appIso Z.unop).inv x :=
+    restrictUnitIso_inv_app_applyP
+      (A := V.toScheme) (B := U.toScheme)
+      (X.homOfLE (leOfHom i)) Z.unop x
+  exact hstage.trans (hopen.trans hrestrict.symm)
 
 theorem overRestrictUnitIso_eq_restrictUnitIsoP {U V : X.Opens}
     (i : V ⟶ U) :
@@ -193,7 +204,6 @@ theorem homEquiv_comp_of_homEquiv_eq_unit
     (p : L₂.obj X ⟶ Y) :
     (adj₁.homEquiv X Y) (e ≫ p) = (adj₂.homEquiv X Y) p := by
   rw [adj₁.homEquiv_naturality_right, he, Adjunction.homEquiv_unit]
-  rfl
 
 end CategoryTheory
 
@@ -296,8 +306,17 @@ theorem pullbackUnitIso_comp_rightLow {X Y Z : Scheme.{u}}
       ((Scheme.Modules.pullback f).map (Scheme.Modules.pullbackUnitIso g).hom ≫
         (Scheme.Modules.pullbackUnitIso f).hom)) = _
   rw [Adjunction.homEquiv_naturality_left, hf]
-  rw [Adjunction.homEquiv_naturality_right, hg]
-  rfl
+  let pg := (Scheme.Modules.pullbackUnitIso g).hom
+  let uf := SheafOfModules.unitToPushforwardObjUnit f.toRingCatSheafHom
+  let ug := SheafOfModules.unitToPushforwardObjUnit g.toRingCatSheafHom
+  change (adjg.homEquiv _ _) (pg ≫ uf) =
+    ug ≫ (Scheme.Modules.pushforward g).map uf
+  have hnat : (adjg.homEquiv _ _) (pg ≫ uf) =
+      (adjg.homEquiv _ _) pg ≫ (Scheme.Modules.pushforward g).map uf :=
+    adjg.homEquiv_naturality_right pg uf
+  have hg' : (adjg.homEquiv _ _) pg = ug := hg
+  exact hnat.trans
+    (congrArg (fun k => k ≫ (Scheme.Modules.pushforward g).map uf) hg')
 
 theorem pullbackUnitIso_compLow {X Y Z : Scheme.{u}}
     (f : X ⟶ Y) (g : Y ⟶ Z) :
@@ -353,7 +372,10 @@ theorem restrictAdjunction_homEquiv_restrictUnitIsoLow
     ((Scheme.Modules.restrictAdjunction f).homEquiv _ _)
         (Scheme.Modules.restrictUnitIso f).hom =
       SheafOfModules.unitToPushforwardObjUnit f.toRingCatSheafHom := by
-  rw [Adjunction.homEquiv_unit]
+  change (Scheme.Modules.restrictAdjunction f).unit.app
+      (Scheme.Modules.unitObj Y) ≫
+    (Scheme.Modules.pushforward f).map
+      (Scheme.Modules.restrictUnitIso f).hom = _
   apply SheafOfModules.hom_ext
   ext U
   change (((Scheme.Modules.restrictAdjunction f).unit.app
@@ -361,8 +383,16 @@ theorem restrictAdjunction_homEquiv_restrictUnitIsoLow
         (((Scheme.Modules.pushforward f).map
           (Scheme.Modules.restrictUnitIso f).hom).val.app U))
       (show Γ(Y, U.unop) from 1) = _
-  rw [ConcreteCategory.comp_apply]
-  dsimp only [Scheme.Modules.restrictAdjunction]
+  let a := ((Scheme.Modules.restrictAdjunction f).unit.app
+    (Scheme.Modules.unitObj Y)).val.app U
+  let b := ((Scheme.Modules.pushforward f).map
+    (Scheme.Modules.restrictUnitIso f).hom).val.app U
+  have hcomp : ConcreteCategory.hom (a ≫ b) (1 : Γ(Y, U.unop)) =
+      ConcreteCategory.hom b (ConcreteCategory.hom a (1 : Γ(Y, U.unop))) :=
+    ConcreteCategory.comp_apply a b (1 : Γ(Y, U.unop))
+  change ConcreteCategory.hom (a ≫ b) (1 : Γ(Y, U.unop)) = _
+  rw [hcomp]
+  dsimp only [a, b, Scheme.Modules.restrictAdjunction]
   erw [SheafOfModules.pushforwardPushforwardAdj_unit_app_val_app]
   change (f.appIso (f ⁻¹ᵁ U.unop)).hom
       (Y.presheaf.map _ (1 : Γ(Y, U.unop))) =

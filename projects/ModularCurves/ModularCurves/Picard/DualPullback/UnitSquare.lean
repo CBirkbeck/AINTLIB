@@ -228,17 +228,18 @@ theorem unitNat_sourceBefore_eq_afterG (f : Y ⟶ X)
   have hnat := e.inv.naturality (pullbackUnitIso fu).hom
   have hunit :=
     ModularCurves.restrictFunctorIsoPullback_inv_comp_restrictUnitIsoLow y
-  calc
-    e.inv.app ((pullback fu).obj (unitObj U)) ≫
-        (restrictFunctor y).map (pullbackUnitIso fu).hom ≫
-        (restrictUnitIso y).hom =
-      (pullback y).map (pullbackUnitIso fu).hom ≫
-        e.inv.app (unitObj (f ⁻¹ᵁ U)) ≫ (restrictUnitIso y).hom := by
-      exact CategoryTheory.two_eq_two_assoc hnat.symm
-        (restrictUnitIso y).hom
-    _ = (pullback y).map (pullbackUnitIso fu).hom ≫
-        (pullbackUnitIso y).hom :=
-      congrArg (fun k => (pullback y).map (pullbackUnitIso fu).hom ≫ k) hunit
+  have hfirst : e.inv.app ((pullback fu).obj (unitObj U)) ≫
+      (restrictFunctor y).map (pullbackUnitIso fu).hom ≫
+      (restrictUnitIso y).hom =
+    (pullback y).map (pullbackUnitIso fu).hom ≫
+      e.inv.app (unitObj (f ⁻¹ᵁ U)) ≫ (restrictUnitIso y).hom :=
+    CategoryTheory.two_eq_two_assoc hnat.symm (restrictUnitIso y).hom
+  have hsecond : (pullback y).map (pullbackUnitIso fu).hom ≫
+      e.inv.app (unitObj (f ⁻¹ᵁ U)) ≫ (restrictUnitIso y).hom =
+    (pullback y).map (pullbackUnitIso fu).hom ≫
+      (pullbackUnitIso y).hom :=
+    congrArg (fun k => (pullback y).map (pullbackUnitIso fu).hom ≫ k) hunit
+  exact hfirst.trans hsecond
 
 noncomputable def unitNatStage0G (f : Y ⟶ X)
     {U V : X.Opens} (i : V ⟶ U) :=
@@ -318,19 +319,17 @@ theorem unitNat_stage2_eq_targetG (f : Y ⟶ X)
       (unitSquareTopO i))
   have hmap : unitNatRhoG f i ≫ P.map b =
       P.map (restrictUnitIso (unitSquareTopO i)).hom := by
-    calc
-      unitNatRhoG f i ≫ P.map b = P.map a ≫ P.map b := rfl
-      _ = P.map (a ≫ b) := (P.map_comp a b).symm
-      _ = P.map (restrictUnitIso (unitSquareTopO i)).hom := hbase
+    have hfirst : unitNatRhoG f i ≫ P.map b = P.map a ≫ P.map b := rfl
+    have hsecond : P.map a ≫ P.map b = P.map (a ≫ b) :=
+      (P.map_comp a b).symm
+    exact hfirst.trans (hsecond.trans hbase)
   let z := (pullbackUnitIso (unitSquareLeftVerticalO f V)).hom
   change unitNatRhoG f i ≫ (P.map b ≫ z) =
     P.map (restrictUnitIso (unitSquareTopO i)).hom ≫ z
-  calc
-    unitNatRhoG f i ≫ (P.map b ≫ z) =
+  have hassoc : unitNatRhoG f i ≫ (P.map b ≫ z) =
       (unitNatRhoG f i ≫ P.map b) ≫ z :=
-        (Category.assoc _ _ _).symm
-    _ = P.map (restrictUnitIso (unitSquareTopO i)).hom ≫ z :=
-      congrArg (fun k => k ≫ z) hmap
+    (Category.assoc _ _ _).symm
+  exact hassoc.trans (congrArg (fun k => k ≫ z) hmap)
 
 end AlgebraicGeometry.Scheme.Modules
 

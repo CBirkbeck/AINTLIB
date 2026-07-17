@@ -72,7 +72,6 @@ theorem localPullbackNaturality_tail2_eq_groupedF (f : Y ⟶ X)
     localPullbackNaturalityTailGroupedF,
     localPullbackNaturalitySquareBeforeF,
     localPullbackNaturalityPostSquareF, Category.assoc]
-  congr 1
 
 noncomputable def localPullbackNaturalityHeadAfterF (f : Y ⟶ X)
     (M : X.Modules) {U V : X.Opens} (i : V ⟶ U) :=

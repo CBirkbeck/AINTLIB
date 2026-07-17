@@ -8,6 +8,7 @@ import Mathlib.Algebra.Category.ModuleCat.Sheaf.PullbackFree
 import Mathlib.AlgebraicGeometry.Modules.Sheaf
 
 import ModularCurves.ForMathlib.OpensMapFinal
+import ModularCurves.ForMathlib.SheafOfModulesMonoidal
 
 /-!
 # Invertible sheaves of modules on a scheme
@@ -105,6 +106,81 @@ The body is `asIso` of the *whole* counit, applied at `M` (mathlib's own idiom, 
 noncomputable def sheafifyValIso (M : SheafOfModules X.ringCatSheaf) :
     (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).obj M.val ≅ M :=
   (asIso (PresheafOfModules.sheafificationAdjunction (𝟙 X.ringCatSheaf.obj)).counit).app M
+
+/-- A presheaf-of-modules morphism that is bijective on every open inside a covering
+family is inverted by sheafification. -/
+theorem sheafificationW_of_bijective_on_cover {A B : X.PresheafOfModules}
+    (g : A ⟶ B) {ι : Type u} (U : ι → X.Opens) (hU : iSup U = ⊤)
+    (hbij : ∀ (i : ι) (W : X.Opens), W ≤ U i →
+      Function.Bijective (g.app (Opposite.op W))) :
+    PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj) g := by
+  have hsieve : ∀ (V : (TopologicalSpace.Opens ↥X)ᵒᵖ) (S : Sieve V.unop),
+      (∀ (i : ι) (W : X.Opens) (hWi : W ≤ U i) (hWV : W ≤ V.unop), S (homOfLE hWV)) →
+      S ∈ Opens.grothendieckTopology ↥X V.unop := by
+    intro V S hS
+    rw [Opens.mem_grothendieckTopology]
+    intro x hx
+    have hxT : x ∈ iSup U := by rw [hU]; trivial
+    obtain ⟨i, hi⟩ := TopologicalSpace.Opens.mem_iSup.mp hxT
+    exact ⟨V.unop ⊓ U i, homOfLE inf_le_left,
+      hS i (V.unop ⊓ U i) inf_le_right inf_le_left, ⟨hx, hi⟩⟩
+  haveI hinj : Presheaf.IsLocallyInjective (Opens.grothendieckTopology ↥X)
+      ((PresheafOfModules.toPresheaf _).map g) := by
+    constructor
+    intro V x y hxy
+    refine hsieve V _ (fun i W hWi hWV => ?_)
+    refine (hbij i W hWi).injective ?_
+    have hnx := PresheafOfModules.naturality_apply g (homOfLE hWV).op x
+    have hny := PresheafOfModules.naturality_apply g (homOfLE hWV).op y
+    exact hnx.trans ((congrArg (fun z => B.map (homOfLE hWV).op z) hxy).trans hny.symm)
+  haveI hsurj : Presheaf.IsLocallySurjective (Opens.grothendieckTopology ↥X)
+      ((PresheafOfModules.toPresheaf _).map g) := by
+    constructor
+    intro V s
+    refine hsieve (Opposite.op V) _ (fun i W hWi hWV => ?_)
+    obtain ⟨t, ht⟩ := (hbij i W hWi).surjective (B.map (homOfLE hWV).op s)
+    exact ⟨t, ht⟩
+  exact (PresheafOfModules.sheafificationW_iff_isLocallyBijective _ g).mpr ⟨hinj, hsurj⟩
+
+/-- Being an isomorphism of `𝒪ₓ`-modules is Zariski-local. -/
+theorem isIso_of_isIso_restrict {A B : X.Modules} (g : A ⟶ B) {ι : Type u}
+    (U : ι → X.Opens) (hU : iSup U = ⊤)
+    (h : ∀ i, IsIso ((restrictFunctor (U i).ι).map g)) : IsIso g := by
+  have happ : ∀ (i : ι) (W : X.Opens), W ≤ U i → IsIso (g.app W) := by
+    intro i W hW
+    have h1 := Hom.isIso_iff_isIso_app.mp (h i) ((U i).ι ⁻¹ᵁ W)
+    have h2 : (U i).ι ''ᵁ ((U i).ι ⁻¹ᵁ W) = W := by
+      rw [Scheme.Hom.image_preimage_eq_opensRange_inf, Scheme.Opens.opensRange_ι,
+        inf_eq_right.mpr hW]
+    rw [← h2]
+    exact h1
+  have hw : PresheafOfModules.sheafificationW (𝟙 X.ringCatSheaf.obj) g.val := by
+    refine sheafificationW_of_bijective_on_cover g.val U hU (fun i W hW => ?_)
+    haveI := happ i W hW
+    exact (ConcreteCategory.isIso_iff_bijective (g.app W)).mp inferInstance
+  rw [PresheafOfModules.sheafificationW_iff] at hw
+  have hnat := (PresheafOfModules.sheafificationAdjunction
+    (𝟙 X.ringCatSheaf.obj)).counit.naturality g
+  have hg : g = (sheafifyValIso A).inv ≫
+      (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).map g.val ≫
+      (sheafifyValIso B).hom := by
+    let shMap :=
+      (PresheafOfModules.sheafification (𝟙 X.ringCatSheaf.obj)).map g.val
+    have hnat' : (sheafifyValIso A).hom ≫ g =
+        shMap ≫ (sheafifyValIso B).hom := hnat.symm
+    have hleft := congrArg (fun m ↦ (sheafifyValIso A).inv ≫ m) hnat'
+    have hcancel : (sheafifyValIso A).inv ≫
+        ((sheafifyValIso A).hom ≫ g) = g := by
+      exact (congrArg (fun m ↦ m ≫ g)
+        (sheafifyValIso A).inv_hom_id).trans (Category.id_comp g)
+    change g = (sheafifyValIso A).inv ≫
+      (shMap ≫ (sheafifyValIso B).hom)
+    exact hcancel.symm.trans hleft
+  rw [hg]
+  haveI : IsIso ((PresheafOfModules.sheafification
+      (𝟙 X.ringCatSheaf.obj)).map g.val) := hw
+  exact IsIso.comp_isIso' (sheafifyValIso A).isIso_inv
+    (IsIso.comp_isIso' hw (sheafifyValIso B).isIso_hom)
 
 /-- Tensoring with the unit is trivial: `M ⊗ 𝒪ₓ ≅ M` (presheaf unitor + the
 sheafification of a sheaf being itself; no GAP-1 content). -/

@@ -74,7 +74,7 @@ theorem restrictFunctorComp_unit
       dsimp only [yfg', yg']
       change M.presheaf.map _ (M.presheaf.map _ x) =
         M.presheaf.map _ (M.presheaf.map _ x)
-      rw [← Functor.map_comp_apply, ← Functor.map_comp_apply]
+      erw [← M.presheaf.map_comp_apply, ← M.presheaf.map_comp_apply]
       exact ConcreteCategory.congr_hom
         (M.presheaf.congr_map (Subsingleton.elim _ _)) x)
   have htoR : q yfg' = r yg' := hmiddle.trans hf.symm

@@ -21,6 +21,12 @@ local instance (X : Scheme.{u}) :
     change IsMulCommutative (X.presheaf.obj U)
     exact IsMulCommutative.of_comm fun a b ↦ mul_comm a b
 
+private theorem cancelTwoIsoPairs
+    {C : Type*} [Category C] {A B D E F : C}
+    (p : A ⟶ B) (e : D ≅ B) (q : B ⟶ E) (f : F ≅ E) :
+    p ≫ e.inv ≫ e.hom ≫ q ≫ f.inv ≫ f.hom = p ≫ q := by
+  simp
+
 private noncomputable def trivializationTransitionEndUnit
     {X : Scheme.{u}} {M : X.Modules} (U : X.Opens)
     (e g : M.over U ≅ SheafOfModules.unit (X.ringCatSheaf.over U)) :
@@ -226,19 +232,17 @@ theorem openTrivializationTransitionUnit_hom
   change C.hom ≫ e.inv ≫ g.hom =
     C.hom ≫ e.inv ≫ F.inv ≫ F.hom ≫ g.hom ≫ C.inv ≫ C.hom
   symm
-  calc
-    C.hom ≫ e.inv ≫ F.inv ≫ F.hom ≫ g.hom ≫ C.inv ≫ C.hom =
-        C.hom ≫ e.inv ≫ (F.inv ≫ F.hom ≫ g.hom) ≫
-          (C.inv ≫ C.hom) := by simp only [Category.assoc]
-    _ = C.hom ≫ e.inv ≫ g.hom ≫ (C.inv ≫ C.hom) := by
-      exact congrArg
-        (fun q => C.hom ≫ e.inv ≫ q ≫ (C.inv ≫ C.hom))
-        (F.inv_hom_id_assoc g.hom)
-    _ = C.hom ≫ e.inv ≫ g.hom ≫ 𝟙 _ :=
-      congrArg (fun q => C.hom ≫ e.inv ≫ g.hom ≫ q) C.inv_hom_id
-    _ = C.hom ≫ e.inv ≫ g.hom := by
-      simpa only [← Category.assoc] using
-        (Category.comp_id (C.hom ≫ e.inv ≫ g.hom))
+  let r := F.inv ≫ F.hom ≫ g.hom ≫ C.inv ≫ C.hom
+  change C.hom ≫ e.inv ≫ r = C.hom ≫ e.inv ≫ g.hom
+  have hleft : C.hom ≫ e.inv ≫ r = (C.hom ≫ e.inv) ≫ r :=
+    (Category.assoc C.hom e.inv r).symm
+  have hcancel : (C.hom ≫ e.inv) ≫ r =
+      (C.hom ≫ e.inv) ≫ g.hom :=
+    cancelTwoIsoPairs (C.hom ≫ e.inv) F g.hom C
+  have hright : (C.hom ≫ e.inv) ≫ g.hom =
+      C.hom ≫ e.inv ≫ g.hom :=
+    Category.assoc C.hom e.inv g.hom
+  exact hleft.trans (hcancel.trans hright)
 
 /-- Restricting open-subscheme trivializations restricts their transition unit along the
 structure-sheaf map. -/

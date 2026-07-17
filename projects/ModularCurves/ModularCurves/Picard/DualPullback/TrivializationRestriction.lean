@@ -3,7 +3,6 @@ Copyright (c) 2026 Chris Birkbeck. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Chris Birkbeck
 -/
-import ModularCurves.ForMathlib.PullbackUnitMonoidal
 import ModularCurves.Picard.DualPullback.OverRestriction
 import ModularCurves.Picard.DualPullback.RestrictComp
 import ModularCurves.Picard.DualPullback.UnitComp
@@ -792,17 +791,25 @@ theorem restrictOpenTrivialization_hom_eq_pullback
   have hunit : JO ≫ t = d :=
     restrictFunctorIsoPullback_hom_comp_pullbackUnitIsoG
       (X.homOfLE hVU)
+  have hlast : a ≫ b ≫ c ≫ (JO ≫ t) = a ≫ b ≫ c ≫ d :=
+    congrArg (fun k => a ≫ b ≫ c ≫ k) hunit
   symm
-  calc
-    A ≫ P ≫ Q ≫ T ≫ s ≫ t = (A ≫ P ≫ Q ≫ T) ≫ (s ≫ t) := by
-      simp only [Category.assoc]
-    _ = (a ≫ b ≫ J) ≫ (s ≫ t) :=
-      congrArg (fun k => k ≫ (s ≫ t)) hprefix
-    _ = a ≫ b ≫ (J ≫ s) ≫ t := by simp only [Category.assoc]
-    _ = a ≫ b ≫ (c ≫ JO) ≫ t :=
-      congrArg (fun k => a ≫ b ≫ k ≫ t) hnat.symm
-    _ = a ≫ b ≫ c ≫ (JO ≫ t) := by simp only [Category.assoc]
-    _ = a ≫ b ≫ c ≫ d := congrArg (fun k => a ≫ b ≫ c ≫ k) hunit
+  have h₀ : A ≫ P ≫ Q ≫ T ≫ s ≫ t =
+      (A ≫ P ≫ Q ≫ T) ≫ (s ≫ t) := by
+    simp only [Category.assoc]
+  have h₁ : (A ≫ P ≫ Q ≫ T) ≫ (s ≫ t) =
+      (a ≫ b ≫ J) ≫ (s ≫ t) :=
+    congrArg (fun k => k ≫ (s ≫ t)) hprefix
+  have h₂ : (a ≫ b ≫ J) ≫ (s ≫ t) =
+      a ≫ b ≫ (J ≫ s) ≫ t := by
+    simp only [Category.assoc]
+  have h₃ : a ≫ b ≫ (J ≫ s) ≫ t =
+      a ≫ b ≫ (c ≫ JO) ≫ t :=
+    congrArg (fun k => a ≫ b ≫ k ≫ t) hnat.symm
+  have h₄ : a ≫ b ≫ (c ≫ JO) ≫ t =
+      a ≫ b ≫ c ≫ (JO ≫ t) := by
+    simp only [Category.assoc]
+  exact h₀.trans (h₁.trans (h₂.trans (h₃.trans (h₄.trans hlast))))
 
 theorem restrictOpenTrivialization_eq_pullback
     {X : Scheme.{u}} {M : X.Modules} {U V : X.Opens} (hVU : V ≤ U)
@@ -857,9 +864,11 @@ theorem overTrivializationOfRestrictIso_injective
     Functor.FullyFaithful.map_preimage, Iso.trans_hom] at hmap
   let F := overFunctorEquiv U
   let C := U.sheafOfModulesEquivOverUnit X.ringCatSheaf
-  change F.hom.app M ≫ e.hom ≫ C.inv =
-    F.hom.app M ≫ g.hom ≫ C.inv at hmap
-  apply (cancel_epi (F.hom.app M)).1
+  let eF := F.app M
+  change eF.hom ≫ e.hom ≫ C.inv =
+    eF.hom ≫ g.hom ≫ C.inv at hmap
+  letI : Epi eF.hom := by infer_instance
+  apply (cancel_epi eF.hom).1
   apply (cancel_mono C.inv).1
   exact hmap
 
@@ -922,8 +931,22 @@ theorem restrictOverTrivialization_hom_eq_comp_scalar
   have hx := ConcreteCategory.congr_hom happ x
   erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
     ModuleCat.comp_apply] at hx
-  rw [SheafOfModules.overUnitScalarEnd_app_apply] at hx
-  erw [SheafOfModules.overUnitScalarEnd_app_apply]
+  change g.hom.val.app (.op ((Over.map j.hom).obj Z.unop)) x =
+    (show (X.ringCatSheaf.over U).obj.obj
+        (.op ((Over.map j.hom).obj Z.unop)) from
+      e.hom.val.app (.op ((Over.map j.hom).obj Z.unop)) x) *
+    (show (X.ringCatSheaf.over U).obj.obj
+        (.op ((Over.map j.hom).obj Z.unop)) from
+      X.presheaf.map ((Over.map j.hom).obj Z.unop).hom.op s) at hx
+  erw [SheafOfModules.comp_val, PresheafOfModules.comp_app,
+    ModuleCat.comp_apply]
+  change g.hom.val.app (.op ((Over.map j.hom).obj Z.unop)) x =
+    (show (X.ringCatSheaf.over V).obj.obj Z from
+      (SheafOfModules.restrictOverTrivialization
+        X.ringCatSheaf M U e (Over.mk (homOfLE hVU))).hom.val.app Z x) *
+    (show (X.ringCatSheaf.over V).obj.obj Z from
+      X.presheaf.map Z.unop.hom.op
+        (X.presheaf.map (homOfLE hVU).op s))
   have hmap : X.presheaf.map Z.unop.hom.op
       (X.presheaf.map (homOfLE hVU).op s) =
     X.presheaf.map ((Over.map j.hom).obj Z.unop).hom.op s := by
@@ -938,7 +961,6 @@ theorem restrictOverTrivialization_hom_eq_comp_scalar
         X.ringCatSheaf M U e (Over.mk (homOfLE hVU))).hom.val.app Z x =
       e.hom.val.app (.op ((Over.map j.hom).obj Z.unop)) x := by
     rfl
-  convert hx using 1
-  all_goals first | exact congrArg₂ (fun a b ↦ a * b) he hmap | rfl
+  exact hx.trans (congrArg₂ (fun a b ↦ a * b) he.symm hmap.symm)
 
 end ModularCurves

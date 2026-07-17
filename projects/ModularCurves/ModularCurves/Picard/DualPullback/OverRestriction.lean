@@ -225,18 +225,15 @@ theorem overRestrictionStage2_app_apply
   have hcomp := ConcreteCategory.congr_hom
     (restrictFunctorComp_hom_app_app
       (U := W.unop) (X.homOfLE (leOfHom i)) U.ι M) y
-  calc
-    (M.over U).val.map ((overMapOpenIso i).hom.app W.unop).op x = q y := by
-      rw [hcomp]
-      change M.presheaf.map _ x =
-        M.presheaf.map _ (M.presheaf.map _ x)
-      rw [← Functor.map_comp_apply]
-      exact ConcreteCategory.congr_hom
-        (M.presheaf.congr_map (Subsingleton.elim _ _)) x
-    _ = q (ConcreteCategory.hom
-        (((restrictFunctorCongr
-          (X.homOfLE_ι (leOfHom i)).symm).hom.app M).app W.unop) x) := hq.symm
-    _ = _ := rfl
+  have hfirst :
+      (M.over U).val.map ((overMapOpenIso i).hom.app W.unop).op x = q y := by
+    rw [hcomp]
+    change M.presheaf.map _ x =
+      M.presheaf.map _ (M.presheaf.map _ x)
+    erw [← M.presheaf.map_comp_apply]
+    exact ConcreteCategory.congr_hom
+      (M.presheaf.congr_map (Subsingleton.elim _ _)) x
+  exact hfirst.trans hq.symm
 
 noncomputable def overRestrictionComparisonLeft (M : X.Modules)
     {U V : X.Opens} (i : V ⟶ U) :
@@ -309,10 +306,7 @@ theorem overRestrictionComparison_inv (M : X.Modules)
   have h : r ≫ eUh = eVh ≫ c :=
     overRestrictModuleIso_comp_overFunctorEquiv M i
   have hU : eUh ≫ eUi = 𝟙 _ := by
-    change R.map ((overFunctorEquiv U).hom.app M) ≫
-      R.map ((overFunctorEquiv U).inv.app M) = 𝟙 _
-    rw [← Functor.map_comp, Iso.hom_inv_id_app]
-    exact R.map_id _
+    exact (R.mapIso ((overFunctorEquiv U).app M)).hom_inv_id
   have hV : eVi ≫ eVh = 𝟙 _ :=
     (overFunctorEquiv V).inv_hom_id_app M
   change eVi ≫ r = c ≫ eUi

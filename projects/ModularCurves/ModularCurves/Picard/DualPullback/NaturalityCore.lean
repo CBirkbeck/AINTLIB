@@ -88,21 +88,20 @@ theorem localPullbackNaturality_left_eq_middle1F (f : Y ⟶ X)
   let ryi' := (restrictFunctorIsoPullback y).inv.app
     ((restrictFunctor (f ⁻¹ᵁ U).ι).obj ((pullback f).obj M))
   have hmove := (restrictFunctorIsoPullback y).inv.naturality q
-  have htail : (a ≫ s ≫ ryi) ≫ (restrictFunctor y).map q =
-      a ≫ s ≫ ((pullback y).map q ≫ ryi') := by
-    calc
-      (a ≫ s ≫ ryi) ≫ (restrictFunctor y).map q =
-          a ≫ s ≫ (ryi ≫ (restrictFunctor y).map q) := by
-        simp only [Category.assoc]
-      _ = a ≫ s ≫ ((pullback y).map q ≫ ryi') :=
-        congrArg (fun k => a ≫ s ≫ k) hmove.symm
+  have htail : a ≫ s ≫ ryi ≫ (restrictFunctor y).map q =
+      a ≫ s ≫ (pullback y).map q ≫ ryi' :=
+    congrArg (fun k => a ≫ s ≫ k) hmove.symm
   simp only [restrictOpenCompIsoF, openPullbackRestrictIsoF,
     Iso.trans_hom, NatTrans.comp_app, Functor.map_comp,
     Functor.isoWhiskerRight_hom, Functor.isoWhiskerLeft_hom,
     Functor.whiskerRight_app, Functor.whiskerLeft_app, Iso.symm_hom]
   simp only [Category.assoc]
-  erw [htail]
-  rfl
+  let p₁ := (pullback fv).map
+    ((restrictFunctorCongr (X.homOfLE_ι (leOfHom i)).symm).hom.app M)
+  let p₂ := (pullback fv).map ((restrictFunctorComp x U.ι).hom.app M)
+  dsimp only [localPullbackNaturalityMiddle1F]
+  have hp := congrArg (fun k => p₁ ≫ p₂ ≫ k) htail
+  exact hp
 
 noncomputable def localPullbackNaturalityPrefixF (f : Y ⟶ X)
     (M : X.Modules) {U V : X.Opens} (i : V ⟶ U) :=
