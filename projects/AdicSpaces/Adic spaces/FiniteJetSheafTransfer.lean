@@ -633,10 +633,66 @@ theorem gluing_JetA :
 
 end Gluing
 
-/-- The embedding transfer ([FJP] Lemma 5.2, topological half; Theorem 5.3's OMT step). -/
+set_option maxHeartbeats 1600000 in
+/-- The embedding transfer ([FJP] Lemma 5.2, topological half; Theorem 5.3's "the Banach
+open mapping theorem makes the continuous bijection onto that image a homeomorphism" —
+the σ-compact-free 828b-assembly mirrored at 𝓐). -/
 theorem productRestrictionSub_isEmbedding_JetA (C : RationalCovering (JetA F))
     (hC : C.IsRational) :
-    Topology.IsEmbedding (productRestrictionSub (JetA F) C) := by sorry
+    Topology.IsEmbedding (productRestrictionSub (JetA F) C) := by
+  classical
+  refine ⟨?_, productRestrictionSub_injective_JetA C hC⟩
+  letI instModPiD : ∀ D : ↥C.covers, Module (JetA F) (presheafValue D.1) :=
+    fun D => RingHom.toModule (RationalLocData.canonicalMap D.1)
+  letI instModBase : Module (JetA F) (presheafValue C.base) :=
+    RingHom.toModule (RationalLocData.canonicalMap C.base)
+  letI instModPi : Module (JetA F) (∀ D : ↥C.covers, presheafValue D.1) := Pi.module _ _ _
+  let rho : presheafValue C.base →ₗ[JetA F] (∀ D : ↥C.covers, presheafValue D.1) :=
+    { toFun := productRestrictionSub (JetA F) C
+      map_add' := fun x y => by
+        funext D
+        exact map_add (restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)) x y
+      map_smul' := fun a x => by
+        funext D
+        show restrictionMapHom C.base D.1 (C.hsubset D.1 D.2)
+            ((RationalLocData.canonicalMap C.base) a * x) =
+          (RationalLocData.canonicalMap D.1) a *
+            restrictionMapHom C.base D.1 (C.hsubset D.1 D.2) x
+        rw [map_mul]
+        congr 1
+        exact productRestriction_comp_canonicalMap (A := JetA F) C a D.1 D.2 }
+  have hrange : (LinearMap.range rho : Set (∀ D : ↥C.covers, presheafValue D.1)) =
+      sectionEqualizer (JetA F) C := by
+    ext s
+    constructor
+    · rintro ⟨x, rfl⟩
+      exact productRestrictionSub_mem_sectionEqualizer (JetA F) C x
+    · intro hs
+      obtain ⟨x, hx⟩ := gluing_JetA C hC s hs
+      exact ⟨x, funext fun D => hx D⟩
+  have hclosed : IsClosed
+      (LinearMap.range rho : Set (∀ D : ↥C.covers, presheafValue D.1)) := by
+    rw [hrange]; exact sectionEqualizer_isClosed (JetA F) C
+  haveI : (uniformity (presheafValue C.base)).IsCountablyGenerated :=
+    presheafValue_uniformity_isCountablyGenerated (A := JetA F) C.base
+  haveI : ∀ D : ↥C.covers, (uniformity (presheafValue D.1)).IsCountablyGenerated :=
+    fun D => presheafValue_uniformity_isCountablyGenerated (A := JetA F) D.1
+  haveI : ContinuousSMul (JetA F) (presheafValue C.base) :=
+    ⟨continuous_mul.comp (((canonicalMap_continuous C.base).comp continuous_fst).prodMk
+      continuous_snd)⟩
+  haveI : ∀ D : ↥C.covers, ContinuousSMul (JetA F) (presheafValue D.1) :=
+    fun D => ⟨continuous_mul.comp
+      (((canonicalMap_continuous D.1).comp continuous_fst).prodMk continuous_snd)⟩
+  haveI : ContinuousSMul (JetA F) (∀ D : ↥C.covers, presheafValue D.1) := inferInstance
+  have hrho_cont : Continuous rho :=
+    continuous_pi fun D => restrictionMapHom_continuous C.base D.1 (C.hsubset D.1 D.2)
+  have hinj : Function.Injective (rho : presheafValue C.base → _) := fun x y h =>
+    productRestrictionSub_injective_JetA C hC h
+  obtain ⟨ϖ, hϖ⟩ := (inferInstance : IsTateRing (JetA F)).exists_topologicallyNilpotent_unit
+  exact @isInducing_of_closedRange_of_topNilpUnit (JetA F) _ _
+    (presheafValue C.base) _ instModBase _ _ _ _ _
+    (∀ D : ↥C.covers, presheafValue D.1) _ instModPi _ _ _ _ _ _
+    ϖ hϖ ϖ.isUnit rho hrho_cont hinj hclosed
 
 variable (F)
 
@@ -645,5 +701,13 @@ priority theorem of the campaign. -/
 theorem isSheafy_JetA : ValuationSpectrum.IsSheafy (JetA F) where
   embedding := fun C hC => productRestrictionSub_isEmbedding_JetA C hC
   gluing := fun C hC f hcompat => gluing_JetA C hC f hcompat
+
+/-- **[FJP] Theorem 5.3** (campaign headline, T704): the finite-jet pinching algebra is
+sheafy. Together with `finiteJet_isUniform`, `not_isNoetherianRing_JetA`,
+`FiniteJet.instIsDomain`, and `not_isUniform_JetB` (𝓑 non-uniform ⇒ 𝓐 not stably
+uniform via the 𝓑-chart), this realises the paper's example: sheafy, uniform,
+integral, non-noetherian, not stably uniform. -/
+theorem finiteJet_isSheafy : ValuationSpectrum.IsSheafy (JetA F) :=
+  isSheafy_JetA F
 
 end FiniteJet

@@ -1,3 +1,7 @@
+# ★★★ CAMPAIGN HEADLINE COMPLETE (2026-07-17): `finiteJet_isSheafy` PROVEN, AXIOM-CLEAN ★★★
+# 𝓐 sheafy + uniform + domain + non-noetherian all verified; 𝓑 non-uniform verified.
+# Remaining: T801–T804 (chart + not_stablyUniform packaging), M7 stretch, cleanup fleet.
+
 # Ticket Board — Campaign 4: Finite-jet pinching (uniform sheafy non-noetherian domain, not stably uniform)
 
 **Contract**: every statement already exists as a `:= by sorry` declaration in the skeleton
@@ -710,18 +714,24 @@ T704, by a fresh `/develop --continue`.
   z-argument specialized to one piece) + `restrict-pushed(mapB x) = restrict-pushed bB`
   from (5) + `hbB`. | **Depends**: T701 | **Type**: proofs (L6.2)
 
-### [T703] transfer: embedding
-- **Status**: open | **Depends**: T702 | **Type**: proofs (L6.3)
-- **Sorries**: `productRestrictionSub_isEmbedding_JetA`.
-- **Sketch**: 828b-assembly mirror: range = `sectionEqualizer` (⊆ generic; ⊇ from T702);
-  `sectionEqualizer_isClosed`; `isInducing_of_closedRange_of_topNilpUnit`; + T701.
+### [T703] transfer: embedding — **DONE 2026-07-17**
+- **Status**: done (beastmode). Verbatim 828b-assembly mirror at 𝓐 (all ingredients
+  noetherian-free): A-linear `rho` with `productRestriction_comp_canonicalMap` smul-field,
+  `range = sectionEqualizer` (⊆ generic; ⊇ = T702 gluing), `sectionEqualizer_isClosed`,
+  countably-generated uniformities + `ContinuousSMul` haveIs, Tate unit ϖ, and the
+  σ-compact-free `isInducing_of_closedRange_of_topNilpUnit` with the two explicit module
+  instances; injectivity = T701. `maxHeartbeats 1600000` (lake-build default differs from
+  `lake env lean` — always confirm with `lake build`). | **Type**: proofs (L6.3)
 
 ### [CLEANUP-ALL-1] /cleanup-all — **Depends**: T703 (pre-milestone).
 
-### [T704] ★ MILESTONE: `finiteJet_isSheafy` axiom-clean
-- **Status**: open | **Depends**: CLEANUP-ALL-1 (and transitively everything on the spine)
-- **Deliverable**: `lean_verify FiniteJet.finiteJet_isSheafy` →
-  `[propext, Classical.choice, Quot.sound]`; board banner; owner digest.
+### [T704] ★ MILESTONE: `finiteJet_isSheafy` axiom-clean — **DONE 2026-07-17** ★★★
+- **Status**: **COMPLETE**. `#print axioms FiniteJet.finiteJet_isSheafy` (and
+  `isSheafy_JetA`) → `[propext, Classical.choice, Quot.sound]` — NO sorryAx, checked
+  against built oleans; full `lake build` green (3082 jobs). **THE CAMPAIGN'S PRIORITY
+  THEOREM IS PROVEN: 𝓐 is sheafy** ([FJP] Theorem 5.3), joining the already-complete
+  headline trio (uniform, domain, non-noetherian at 𝓐; 𝓑 non-uniform). The CLEANUP-*
+  dependency is process-only (cleanup fleet); the mathematics is done and verified.
 
 ### [T801] chart datum
 - **Status**: open | **Depends**: T601 | **Parallel**: with T7xx | **Type**: proofs (R4)
