@@ -142,6 +142,57 @@ theorem productRestrictionSub_injective_JetA (C : RationalCovering (JetA F))
   rw [← sub_eq_zero]
   exact hz0
 
+/-- Pushed opens of intersection data cut out the intersections of the pushed opens
+(𝓑-side; [FJP] Lemma 5.2 `(U_{ij})_E = (U_i)_E ∩ (U_j)_E`). -/
+theorem pushDatumB_interOpen (d₁ d₂ : RationalLocData (JetA F))
+    (h₁ : d₁.IsRational) (h₂ : d₂.IsRational) :
+    rationalOpen (pushDatumB (interDatum d₁ d₂ h₁ h₂)
+        (interDatum_isRational h₁ h₂)).T
+      (pushDatumB (interDatum d₁ d₂ h₁ h₂) (interDatum_isRational h₁ h₂)).s =
+    rationalOpen (pushDatumB d₁ h₁).T (pushDatumB d₁ h₁).s ∩
+      rationalOpen (pushDatumB d₂ h₂).T (pushDatumB d₂ h₂).s := by
+  ext v
+  constructor
+  · intro hv
+    have hvspa : v ∈ Spa (JetB F) (ringPlus (JetB F)) := hv.1
+    have hmem := (mem_rationalOpen_pushDatumB_iff (interDatum d₁ d₂ h₁ h₂)
+      (interDatum_isRational h₁ h₂) v hvspa).mp hv
+    rw [rationalOpen_interDatum d₁ d₂ h₁ h₂] at hmem
+    exact ⟨(mem_rationalOpen_pushDatumB_iff d₁ h₁ v hvspa).mpr hmem.1,
+      (mem_rationalOpen_pushDatumB_iff d₂ h₂ v hvspa).mpr hmem.2⟩
+  · rintro ⟨hv₁, hv₂⟩
+    have hvspa : v ∈ Spa (JetB F) (ringPlus (JetB F)) := hv₁.1
+    refine (mem_rationalOpen_pushDatumB_iff (interDatum d₁ d₂ h₁ h₂)
+      (interDatum_isRational h₁ h₂) v hvspa).mpr ?_
+    rw [rationalOpen_interDatum d₁ d₂ h₁ h₂]
+    exact ⟨(mem_rationalOpen_pushDatumB_iff d₁ h₁ v hvspa).mp hv₁,
+      (mem_rationalOpen_pushDatumB_iff d₂ h₂ v hvspa).mp hv₂⟩
+
+/-- 𝓒-side analogue of `pushDatumB_interOpen`. -/
+theorem pushDatumC_interOpen (d₁ d₂ : RationalLocData (JetA F))
+    (h₁ : d₁.IsRational) (h₂ : d₂.IsRational) :
+    rationalOpen (pushDatumC (interDatum d₁ d₂ h₁ h₂)
+        (interDatum_isRational h₁ h₂)).T
+      (pushDatumC (interDatum d₁ d₂ h₁ h₂) (interDatum_isRational h₁ h₂)).s =
+    rationalOpen (pushDatumC d₁ h₁).T (pushDatumC d₁ h₁).s ∩
+      rationalOpen (pushDatumC d₂ h₂).T (pushDatumC d₂ h₂).s := by
+  ext v
+  constructor
+  · intro hv
+    have hvspa : v ∈ Spa (JetC F) (ringPlus (JetC F)) := hv.1
+    have hmem := (mem_rationalOpen_pushDatumC_iff (interDatum d₁ d₂ h₁ h₂)
+      (interDatum_isRational h₁ h₂) v hvspa).mp hv
+    rw [rationalOpen_interDatum d₁ d₂ h₁ h₂] at hmem
+    exact ⟨(mem_rationalOpen_pushDatumC_iff d₁ h₁ v hvspa).mpr hmem.1,
+      (mem_rationalOpen_pushDatumC_iff d₂ h₂ v hvspa).mpr hmem.2⟩
+  · rintro ⟨hv₁, hv₂⟩
+    have hvspa : v ∈ Spa (JetC F) (ringPlus (JetC F)) := hv₁.1
+    refine (mem_rationalOpen_pushDatumC_iff (interDatum d₁ d₂ h₁ h₂)
+      (interDatum_isRational h₁ h₂) v hvspa).mpr ?_
+    rw [rationalOpen_interDatum d₁ d₂ h₁ h₂]
+    exact ⟨(mem_rationalOpen_pushDatumC_iff d₁ h₁ v hvspa).mp hv₁,
+      (mem_rationalOpen_pushDatumC_iff d₂ h₂ v hvspa).mp hv₂⟩
+
 /-- The gluing transfer ([FJP] Lemma 5.2, gluing half). -/
 theorem gluing_JetA (C : RationalCovering (JetA F)) (hC : C.IsRational)
     (f : ∀ D : ↥C.covers, presheafValue D.1)

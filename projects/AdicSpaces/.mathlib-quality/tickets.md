@@ -670,10 +670,30 @@ T704, by a fresh `/develop --continue`.
   not syntactic); `RingHom.map_sub` only as a term-have. | **Type**: proofs (L6.1)
 
 ### [T702] transfer: gluing — **the sheafiness workhorse**
-- **Status**: open | **Depends**: T701 | **Type**: proofs (L6.2)
-- **Sorries**: `gluing_JetA`.
-- **Sketch**: the ten-step chain of L6.2 with the vertex-side-`D₃` resolution (L6.2 attack 1
-  — read it before starting). May be expanded into sub-tickets by /beastmode if > 1 session.
+- **Status**: IN PROGRESS (beastmode 2026-07-17). DONE so far: `pushDatumB/C_interOpen`
+  (pushed opens of `interDatum` = intersections, via the T605 iffs +
+  `rationalOpen_interDatum`) — in FiniteJetSheafTransfer, green.
+- **ARCHITECTURE (verified by dependency-chase, follow this)**: (1) pushed families `gB/gC`
+  on `(pushCoveringB/C C hC).covers` defined via `(Finset.mem_image.mp D'.2).choose` +
+  `choose_spec.2 ▸` transport; in proofs destructure `⟨DD, hDD⟩`, name
+  `b := (mem_image.mp hDD).choose`, `subst` its spec-eq — the `▸` then REDUCES
+  (definitional proof irrelevance), no cast-juggling. (2) `pushedCompatB/C` (arbitrary
+  vertex `D₃` ⊆ two pushed pieces): A-compat at `D₃ₐ := interDatum d₁ d₂` + T605
+  naturality (congrArg `mapB-inter`) + `pushDatum*_interOpen` to see `D₃ ⊆ pushed-inter`,
+  then `restrictionMap_comp` (containment proofs are definitionally irrelevant). (3)
+  vertex `IsSheafy.gluing` → `bB, bC`. (4) **𝓓-matching + Milnor transport REQUIRE
+  `bridgeFwdB/C` to be isomorphisms** — MIRROR THE A-SIDE REVERSE BLOCK at 𝓑 and 𝓒
+  (bridgeToRestrictedB/C [generic decay proof], bridgeGenB/C [divByS of jB/ι-images at
+  the pushed datum ∈ locSubring], bridgeEvalB/C via `mvEvalHomBounded`, kills `IB/IC`
+  via `rB_eq/rC_eq`, `bridgeRevB/C`, roundtrips via `polyToP_denseRange`-mirror; ~250
+  lines each — NO shortcut exists: every injectivity-free route loops back to the
+  conclusion). Also `mapBD := presheafValueMapOfHom (rhoB F)` (generic layer!) for the
+  𝓓-compat of `(bB, bC)`, using `square_commutes` + `Finset.image_image` to identify
+  `pushDatumD` with the `ρB`-push of `pushDatumB`. (5) `w := loc_row_exact`-witness;
+  `x := bridgeRevA w`; `mapB x = bB` via fwdB-injectivity (from the iso) + roundtrip
+  `locJB w = fwdB bB`. (6) piece-identification: piece-level pair-injectivity (T701's
+  z-argument specialized to one piece) + `restrict-pushed(mapB x) = restrict-pushed bB`
+  from (5) + `hbB`. | **Depends**: T701 | **Type**: proofs (L6.2)
 
 ### [T703] transfer: embedding
 - **Status**: open | **Depends**: T702 | **Type**: proofs (L6.3)
