@@ -617,6 +617,39 @@ lemma ChartPointTriple.eq_chartHom (W : WeierstrassCurve R) (k : Fin 3)
         chartAwayHomOfTriple_isLocalizationElem W k _ 1 hu hT m, mul_one]
     rfl
 
+/-- The chart-`2` Weierstrass hom of a chart-`k` point's `φ`-triple factors the spec point `g`
+through `chartι W 2`: whenever the triple is a solution (`hT`) whose `2`-coordinate is a unit
+(`hv`), `g` lies in the `Z`-chart with this explicit witness. (`k = 2` reads off directly via
+`ChartPointTriple.eq_chartHom`; `k ≠ 2` crosses charts via `chartι_comp_specMap_chartAwayHom_eq`.) -/
+private lemma chartAwayHomOfTriple_two_specMap_factors (W : WeierstrassCurve R) (k : Fin 3)
+    {K : Type u} [Field K] [Algebra R K]
+    (φ : chartAway W k →+* K)
+    (hφ : φ.comp (algebraMap R (chartAway W k)) = algebraMap R K)
+    (g : SpecPoints (projModel W) (projModelπ W) K)
+    (hg : Spec.map (CommRingCat.ofHom φ) ≫ chartι W k = g.1)
+    (hv : chartPointTriple W k φ 2 * (chartPointTriple W k φ 2)⁻¹ = 1)
+    (hT : (W.map (algebraMap R K)).toProjective.Equation (chartPointTriple W k φ)) :
+    Spec.map (CommRingCat.ofHom
+        (chartAwayHomOfTriple W 2 (chartPointTriple W k φ) (chartPointTriple W k φ 2)⁻¹
+          hv hT).toRingHom) ≫ chartι W 2 = g.1 := by
+  have hu1 : chartPointTriple W k φ k * 1 = 1 := by
+    rw [ChartPointTriple.self_eq_one, mul_one]
+  by_cases hk : k = 2
+  · subst hk
+    rw [← hg]
+    congr 2
+    have h1 : (chartPointTriple W 2 φ 2)⁻¹ = 1 := by
+      rw [ChartPointTriple.self_eq_one, inv_one]
+    rw [show (chartAwayHomOfTriple W 2 (chartPointTriple W 2 φ)
+        (chartPointTriple W 2 φ 2)⁻¹ hv hT) =
+      (chartAwayHomOfTriple W 2 (chartPointTriple W 2 φ) 1 hu1 hT) from by
+        simp only [h1]]
+    exact congrArg CommRingCat.ofHom (ChartPointTriple.eq_chartHom W 2 φ hφ hu1 hT).symm
+  · rw [chartι_comp_specMap_chartAwayHom_eq W 2 k hk
+      (chartPointTriple W k φ) (chartPointTriple W k φ 2)⁻¹ 1 hv hu1 hT, ← hg]
+    congr 2
+    exact congrArg CommRingCat.ofHom (ChartPointTriple.eq_chartHom W k φ hφ hu1 hT).symm
+
 /-- **[e5c-key] The dictionary reads any chart point as `toAffine` of its coordinate triple.** -/
 theorem Dictionary.eq_toAffine (W : WeierstrassCurve R) [W.IsElliptic] (k : Fin 3)
     {K : Type u} [Field K] [DecidableEq K] [Algebra R K]
@@ -656,28 +689,12 @@ theorem Dictionary.eq_toAffine (W : WeierstrassCurve R) [W.IsElliptic] (k : Fin 
       WeierstrassCurve.Projective.nonsingular_of_equation_of_ne_zero hT hne
     rw [WeierstrassCurve.Projective.Point.toAffine_of_Z_ne_zero hNS hz]
     -- the chart-2 form of the point
-    have hu1 : chartPointTriple W k φ k * 1 = 1 := by
-      rw [ChartPointTriple.self_eq_one, mul_one]
     have hv : chartPointTriple W k φ 2 * (chartPointTriple W k φ 2)⁻¹ = 1 :=
       mul_inv_cancel₀ hz
     have hfac2 : Spec.map (CommRingCat.ofHom
         (chartAwayHomOfTriple W 2 (chartPointTriple W k φ) (chartPointTriple W k φ 2)⁻¹
-          hv hT).toRingHom) ≫ chartι W 2 = g.1 := by
-      by_cases hk : k = 2
-      · subst hk
-        rw [← hg]
-        congr 2
-        have h1 : (chartPointTriple W 2 φ 2)⁻¹ = 1 := by
-          rw [ChartPointTriple.self_eq_one, inv_one]
-        rw [show (chartAwayHomOfTriple W 2 (chartPointTriple W 2 φ)
-            (chartPointTriple W 2 φ 2)⁻¹ hv hT) =
-          (chartAwayHomOfTriple W 2 (chartPointTriple W 2 φ) 1 hu1 hT) from by
-            simp only [h1]]
-        exact congrArg CommRingCat.ofHom (ChartPointTriple.eq_chartHom W 2 φ hφ hu1 hT).symm
-      · rw [chartι_comp_specMap_chartAwayHom_eq W 2 k hk
-          (chartPointTriple W k φ) (chartPointTriple W k φ 2)⁻¹ 1 hv hu1 hT, ← hg]
-        congr 2
-        exact congrArg CommRingCat.ofHom (ChartPointTriple.eq_chartHom W k φ hφ hu1 hT).symm
+          hv hT).toRingHom) ≫ chartι W 2 = g.1 :=
+      chartAwayHomOfTriple_two_specMap_factors W k φ hφ g hg hv hT
     have hZ : InZChart W g :=
       ⟨Spec.map (CommRingCat.ofHom
         (chartAwayHomOfTriple W 2 (chartPointTriple W k φ) (chartPointTriple W k φ 2)⁻¹
