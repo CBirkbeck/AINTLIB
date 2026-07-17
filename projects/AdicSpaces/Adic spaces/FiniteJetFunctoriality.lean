@@ -346,6 +346,13 @@ structure DatumEnum (D : RationalLocData (JetA F)) where
   /-- Enumeration lands in `T`. -/
   hf' : ∀ i, f i ∈ D.T
 
+/-- The canonical enumeration of a rational datum (via `Finset.equivFin`). -/
+noncomputable def datumEnum (D : RationalLocData (JetA F)) : DatumEnum D where
+  m := D.T.card
+  f := fun i => (D.T.equivFin.symm i : JetA F)
+  hf := fun t ht => ⟨D.T.equivFin ⟨t, ht⟩, by rw [Equiv.symm_apply_apply]⟩
+  hf' := fun i => (D.T.equivFin.symm i).2
+
 section GraphBridgeInfra
 
 open GraphKoszul
@@ -1218,6 +1225,58 @@ theorem graphBridgeA_continuous (D : RationalLocData (JetA F)) (hD : D.IsRationa
 theorem graphBridgeA_symm_continuous (D : RationalLocData (JetA F)) (hD : D.IsRational)
     (e : DatumEnum D) : Continuous (graphBridgeA D hD e).symm :=
   bridgeRev_continuous D e
+
+set_option synthInstance.maxHeartbeats 400000 in
+open GraphKoszul in
+/-- The 𝓑-side naturality square (mirror of `graphBridge_natural_C`, consumed by the
+transfer): `bridgeFwdB ∘ presheafValueMapB = locJB ∘ graphBridgeA`. -/
+theorem graphBridge_natural_B (D : RationalLocData (JetA F)) (hD : D.IsRational)
+    (e : DatumEnum D) :
+    (bridgeFwdB D e hD).comp (presheafValueMapB D hD) =
+      (locJB F e.m D.s e.f).comp
+        (graphBridgeA D hD e : presheafValue D →+* locA F e.m D.s e.f) := by
+  letI := D.uniformSpace
+  letI : IsTopologicalRing (Localization.Away D.s) := D.isTopologicalRing
+  letI : IsUniformAddGroup (Localization.Away D.s) := D.isUniformAddGroup
+  haveI hcl : IsClosed ((IB F e.m D.s e.f : Set (PB F e.m))) := isClosed_IB' D e
+  haveI : NormedAddCommGroup (locB F e.m D.s e.f) :=
+    Submodule.Quotient.normedAddCommGroup _
+  have hdense : DenseRange (D.coeRingHom : Localization.Away D.s → presheafValue D) :=
+    UniformSpace.Completion.denseRange_coe
+  have hcomp : ((bridgeFwdB D e hD).comp (presheafValueMapB D hD)).comp D.coeRingHom =
+      ((locJB F e.m D.s e.f).comp
+        (graphBridgeA D hD e : presheafValue D →+* locA F e.m D.s e.f)).comp
+        D.coeRingHom := by
+    refine IsLocalization.ringHom_ext (Submonoid.powers D.s) ?_
+    ext a
+    simp only [RingHom.comp_apply]
+    rw [show (D.coeRingHom (algebraMap (JetA F) (Localization.Away D.s) a)) =
+        D.canonicalMap a from rfl,
+      presheafValueMapB_canonicalMap,
+      show (pushDatumB D hD).canonicalMap (jB F a) =
+        (pushDatumB D hD).coeRingHom (algebraMap (JetB F)
+          (Localization.Away (pushDatumB D hD).s) (jB F a)) from rfl,
+      bridgeFwdB_coe, bridgeLocHomB_algebraMap,
+      show (graphBridgeA D hD e : presheafValue D →+* locA F e.m D.s e.f)
+        (D.canonicalMap a) = bridgeFwd D e hD (D.canonicalMap a) from rfl,
+      bridgeFwd_canonicalMap]
+    rw [show bridgeBase D e a =
+        Ideal.Quotient.mk (IA F e.m D.s e.f) (polyToP (MvPolynomial.C a)) from rfl,
+      locJB_mk,
+      show extJB F e.m (polyToP (MvPolynomial.C a)) =
+        polyToP (MvPolynomial.map (jB F) (MvPolynomial.C a)) from
+        mapRestricted_polyToP _ _ _ (MvPolynomial.C a),
+      MvPolynomial.map_C]
+    rfl
+  have h_eq : ⇑((bridgeFwdB D e hD).comp (presheafValueMapB D hD)) =
+      ⇑((locJB F e.m D.s e.f).comp
+        (graphBridgeA D hD e : presheafValue D →+* locA F e.m D.s e.f)) :=
+    hdense.equalizer
+      ((bridgeFwdB_continuous D e hD).comp (presheafValueMapB_continuous D hD))
+      ((locJB_lipschitz F e.m D.s e.f).continuous.comp
+        (graphBridgeA_continuous D hD e))
+      (by funext a; exact DFunLike.congr_fun hcomp a)
+  exact DFunLike.ext _ _ fun x => congrFun h_eq x
 
 set_option synthInstance.maxHeartbeats 400000 in
 open GraphKoszul in

@@ -655,9 +655,19 @@ T704, by a fresh `/develop --continue`.
 
 ### [CLEANUP-14] /cleanup `FiniteJetFunctoriality.lean` (final) — **Depends**: T605, T606.
 
-### [T701] transfer: separation
-- **Status**: open | **Depends**: CLEANUP-14 | **Type**: proofs (L6.1)
-- **Sorries**: `productRestrictionSub_injective_JetA`.
+### [T701] transfer: separation — **DONE 2026-07-17**
+- **Status**: done (beastmode). The L6.1 chase: `z := x - y` has vanishing piece
+  restrictions; `presheafValueMapB/C z = 0` by vertex `IsSheafy.separationSub` at the
+  pushed coverings (funext over attach-image pieces via the `⟨d, -, rfl⟩` destructuring +
+  T605 naturality applied backwards + `hres`); through the base bridge (`datumEnum` — new
+  canonical enum via `Finset.equivFin`), `graphBridge_natural_B` (NEW — 𝓑-mirror of the
+  𝓒-square, built with the full B-side forward bridge `bridgeFwdB` [@-application of
+  `extensionHom` to dodge an fvar-keyed instance-synthesis failure]) + `natural_C` give
+  vanishing of both `locJB`/`locIotaC`-images; `loc_pair_injective` + bridge injectivity
+  force `z = 0`. Gotchas: transfer file needs `open scoped Classical` (attach-image
+  membership) + `open StrictLoc`; `restrictionMap` vs `restrictionMapHom` and
+  `(pushCovering).base` vs `pushDatum` need `show`-retyping before rewrites (defeq,
+  not syntactic); `RingHom.map_sub` only as a term-have. | **Type**: proofs (L6.1)
 
 ### [T702] transfer: gluing — **the sheafiness workhorse**
 - **Status**: open | **Depends**: T701 | **Type**: proofs (L6.2)
