@@ -697,6 +697,68 @@ theorem canonicalMap_eq_zero_of_qSq (y : JetA F)
   rw [closure_singleton] at h0mem
   exact (Set.mem_singleton_iff.mp h0mem).symm
 
+/-! ### The 2-jet decomposition of 𝓐 (step 2 of the roundtrip plan) -/
+
+/-- `Q`'s underlying jet is the power-series variable. -/
+theorem Qa_val_eq : (((Qa F : JetA F) : JetC F)).1 = (PowerSeries.X : PowerSeries (L F)) := by
+  refine PowerSeries.ext fun n => ?_
+  show PowerSeries.coeff n (sectionD F (TrivSqZeroExt.inr (1 : L F))).1 = _
+  rw [show (sectionD F (TrivSqZeroExt.inr (1 : L F))).1 =
+    PowerSeries.mk (fun n => if n = 0 then (TrivSqZeroExt.inr (1 : L F) : JetD F).fst
+      else if n = 1 then (TrivSqZeroExt.inr (1 : L F) : JetD F).snd else 0) from rfl,
+    PowerSeries.coeff_mk, PowerSeries.coeff_X]
+  by_cases h1 : n = 1
+  · subst h1
+    norm_num
+  · rw [if_neg h1]
+    by_cases h0 : n = 0
+    · subst h0
+      norm_num
+    · rw [if_neg h0, if_neg h1]
+
+/-- The nonneg-constant lift `𝓐 ∋ constNN b` for a nonnegative Laurent series `b`. -/
+noncomputable def constNN (b : L F) (hb : b ∈ nonnegSubring K) : JetA F :=
+  ⟨constHomC F b, by
+    constructor
+    · rw [qCoeff_constHomC, if_pos rfl]
+      exact hb
+    · rw [qCoeff_constHomC, if_neg one_ne_zero]
+      exact zero_mem _⟩
+
+/-- The 2-jet decomposition: every `a ∈ 𝓐` splits as
+`constNN(a₀) + Q·constNN(a₁) + (Q²-part)`. -/
+theorem jet_decomposition (a : JetA F) :
+    ∃ y : JetA F, (qCoeff F 0 ((y : JetA F) : JetC F) = 0 ∧
+      qCoeff F 1 ((y : JetA F) : JetC F) = 0) ∧
+    a = constNN F (qCoeff F 0 ((a : JetA F) : JetC F)) a.2.1 +
+      Qa F * constNN F (qCoeff F 1 ((a : JetA F) : JetC F)) a.2.2 + y := by
+  refine ⟨a - (constNN F (qCoeff F 0 ((a : JetA F) : JetC F)) a.2.1 +
+    Qa F * constNN F (qCoeff F 1 ((a : JetA F) : JetC F)) a.2.2), ⟨?_, ?_⟩, by ring⟩
+  · show qCoeff F 0 (((a : JetA F) : JetC F) -
+      (constHomC F (qCoeff F 0 ((a : JetA F) : JetC F)) +
+        ((Qa F : JetA F) : JetC F) * constHomC F (qCoeff F 1 ((a : JetA F) : JetC F)))) = 0
+    rw [sub_eq_add_neg, qCoeff_add, qCoeff_neg, qCoeff_add, qCoeff_constHomC,
+      if_pos rfl, qCoeff_zero_mul]
+    rw [show qCoeff F 0 (((Qa F : JetA F) : JetC F)) = 0 from by
+      show qCoeff F 0 (sectionD F (TrivSqZeroExt.inr (1 : L F))) = 0
+      rw [qCoeff_sectionD]; norm_num]
+    ring
+  · show qCoeff F 1 (((a : JetA F) : JetC F) -
+      (constHomC F (qCoeff F 0 ((a : JetA F) : JetC F)) +
+        ((Qa F : JetA F) : JetC F) * constHomC F (qCoeff F 1 ((a : JetA F) : JetC F)))) = 0
+    rw [sub_eq_add_neg, qCoeff_add, qCoeff_neg, qCoeff_add, qCoeff_constHomC,
+      if_neg one_ne_zero, qCoeff_one_mul]
+    rw [show qCoeff F 0 (((Qa F : JetA F) : JetC F)) = 0 from by
+      show qCoeff F 0 (sectionD F (TrivSqZeroExt.inr (1 : L F))) = 0
+      rw [qCoeff_sectionD]; norm_num]
+    rw [show qCoeff F 1 (((Qa F : JetA F) : JetC F)) = 1 from by
+      show qCoeff F 1 (sectionD F (TrivSqZeroExt.inr (1 : L F))) = 1
+      rw [qCoeff_sectionD]; norm_num]
+    rw [qCoeff_constHomC]
+    norm_num
+    rw [qCoeff_constHomC, if_pos rfl]
+    ring
+
 /-! ### The forward map `𝒪_𝓐(chart) → 𝓑` (Prop 3.1's `ψ`-direction) -/
 
 theorem isUnit_thetaChart_s : IsUnit (thetaChart F (chartDatum F).s) := by
