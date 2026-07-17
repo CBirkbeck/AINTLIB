@@ -51,10 +51,9 @@ private lemma comap_ideal_top_ker_le_map [IsAffine X] [IsAffine Y]
     have h2 := congrArg (fun g : Γ(X, ⊤) ⟶ Γ(X, ⊤) => g.hom w) h1
     simp only [CommRingCat.hom_comp, RingHom.coe_comp, Function.comp_apply,
       CommRingCat.hom_id, RingHom.coe_id, id_eq] at h2
-    rw [show X.isoSpec.hom.appTop =
+    rwa [show X.isoSpec.hom.appTop =
         (Scheme.ΓSpecIso (CommRingCat.of (↑Γ(X, ⊤)))).hom from
       Scheme.toSpecΓ_appTop X] at h2
-    exact h2
   set K := (I.ideal ⟨⊤, hY⟩).map (f.appTop).hom with hK
   set ιX : Spec (.of (↑Γ(X, ⊤) ⧸ K)) ⟶ X :=
     Spec.map (CommRingCat.ofHom (Ideal.Quotient.mk K)) ≫ X.isoSpec.inv with hιX
@@ -146,8 +145,7 @@ theorem comap_ideal_top_of_isAffine [IsAffine X] [IsAffine Y]
       rw [show Ideal.Quotient.mk (I.ideal ⟨⊤, isAffineOpen_top Y⟩) x = 0 from
         Ideal.Quotient.eq_zero_iff_mem.mpr hx]
       exact map_zero _
-    rw [hz, map_zero] at hcomp
-    exact hcomp
+    rwa [hz, map_zero] at hcomp
 
 /-- Over affine schemes, the scheme-theoretic preimage of ideal sheaves is
 multiplicative. -/
