@@ -60,7 +60,7 @@ private lemma neg_X_eq_X_mod_two : (-Polynomial.X : Polynomial (ZMod 2)) = Polyn
 theorem alphaInOK_minpoly_factor_mod_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 7) :
     Polynomial.map (Int.castRingHom (ZMod 2)) (minpoly ℤ (alphaInOK p hp3)) =
       Polynomial.X * (Polynomial.X + Polynomial.C (1 : ZMod 2)) := by
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   rw [alphaInOK_minpoly_int_mod_q p hp3 2, pSuccDivFour_zero_mod_two_of_seven p hp3 hp7]
   rw [Polynomial.C_0, add_zero]
   calc (Polynomial.X ^ 2 - Polynomial.X : Polynomial (ZMod 2))
@@ -72,7 +72,7 @@ theorem alphaInOK_minpoly_factor_mod_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 
 theorem alphaInOK_minpoly_factor_mod_two_inert (hp3 : p % 4 = 3) (hp3_8 : p % 8 = 3) :
     Polynomial.map (Int.castRingHom (ZMod 2)) (minpoly ℤ (alphaInOK p hp3)) =
       Polynomial.X ^ 2 + Polynomial.X + Polynomial.C (1 : ZMod 2) := by
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   rw [alphaInOK_minpoly_int_mod_q p hp3 2, pSuccDivFour_one_mod_two_of_three p hp3 hp3_8]
   rw [sub_eq_add_neg, neg_X_eq_X_mod_two]
 
@@ -82,7 +82,7 @@ theorem monicFactorsMod_alpha_at_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 7) :
     RingOfIntegers.monicFactorsMod (alphaInOK p hp3) 2 =
       {Polynomial.X, Polynomial.X + Polynomial.C (1 : ZMod 2)} := by
   classical
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   simp only [RingOfIntegers.monicFactorsMod]
   rw [alphaInOK_minpoly_factor_mod_two_split p hp3 hp7]
   have hX_ne_zero : (Polynomial.X : Polynomial (ZMod 2)) ≠ 0 := Polynomial.X_ne_zero
@@ -117,7 +117,7 @@ theorem monicFactorsMod_alpha_at_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 7) :
 theorem monicFactorsMod_alpha_at_two_split_card (hp3 : p % 4 = 3) (hp7 : p % 8 = 7) :
     haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
     (RingOfIntegers.monicFactorsMod (alphaInOK p hp3) 2).card = 2 := by
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   rw [monicFactorsMod_alpha_at_two_split p hp3 hp7]
   rw [Finset.card_insert_of_notMem, Finset.card_singleton]
   simp only [Finset.mem_singleton]
@@ -159,7 +159,7 @@ theorem monicFactorsMod_alpha_at_two_inert (hp3 : p % 4 = 3) (hp3_8 : p % 8 = 3)
     RingOfIntegers.monicFactorsMod (alphaInOK p hp3) 2 =
       {Polynomial.X ^ 2 + Polynomial.X + Polynomial.C (1 : ZMod 2)} := by
   classical
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   have h_irred := irreducible_X_sq_add_X_add_one_mod_two
   have h_monic : (Polynomial.X ^ 2 + Polynomial.X + Polynomial.C (1 : ZMod 2) :
       Polynomial (ZMod 2)).Monic := by
@@ -183,7 +183,7 @@ theorem monicFactorsMod_alpha_at_two_inert (hp3 : p % 4 = 3) (hp3_8 : p % 8 = 3)
 theorem monicFactorsMod_alpha_at_two_inert_card (hp3 : p % 4 = 3) (hp3_8 : p % 8 = 3) :
     haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
     (RingOfIntegers.monicFactorsMod (alphaInOK p hp3) 2).card = 1 := by
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   rw [monicFactorsMod_alpha_at_two_inert p hp3 hp3_8]
   simp
 
@@ -191,7 +191,7 @@ theorem monicFactorsMod_alpha_at_two_inert_card (hp3 : p % 4 = 3) (hp3_8 : p % 8
 theorem ncard_primesOver_at_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 7) :
     (Ideal.primesOver (Ideal.span {((2 : ℕ) : ℤ)}) (𝓞 (Kminus p))).ncard = 2 := by
   classical
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   have h_exp : ¬ (2 : ℕ) ∣ RingOfIntegers.exponent (alphaInOK p hp3) :=
     not_dvd_exponent_alphaInOK p hp3 2
   have h_equiv :=
@@ -203,7 +203,7 @@ theorem ncard_primesOver_at_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 7) :
 theorem ncard_primesOver_at_two_inert (hp3 : p % 4 = 3) (hp3_8 : p % 8 = 3) :
     (Ideal.primesOver (Ideal.span {((2 : ℕ) : ℤ)}) (𝓞 (Kminus p))).ncard = 1 := by
   classical
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   have h_exp : ¬ (2 : ℕ) ∣ RingOfIntegers.exponent (alphaInOK p hp3) :=
     not_dvd_exponent_alphaInOK p hp3 2
   have h_equiv :=
@@ -217,7 +217,7 @@ theorem inertiaDeg_at_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 7)
     (hP : P ∈ Ideal.primesOver (Ideal.span {((2 : ℕ) : ℤ)}) (𝓞 (Kminus p))) :
     (Ideal.span {((2 : ℕ) : ℤ)}).inertiaDeg' P = 1 := by
   classical
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   have h_exp : ¬ (2 : ℕ) ∣ RingOfIntegers.exponent (alphaInOK p hp3) :=
     not_dvd_exponent_alphaInOK p hp3 2
   set e := NumberField.Ideal.primesOverSpanEquivMonicFactorsMod (K := Kminus p) h_exp
@@ -251,9 +251,9 @@ theorem absNorm_primeOver_at_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 7)
     (P : Ideal (𝓞 (Kminus p)))
     (hP : P ∈ Ideal.primesOver (Ideal.span {((2 : ℕ) : ℤ)}) (𝓞 (Kminus p))) :
     Ideal.absNorm P = 2 := by
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
-  haveI : P.IsPrime := hP.1
-  haveI : P.LiesOver (Ideal.span {(2 : ℤ)}) := hP.2
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : P.IsPrime := hP.1
+  have : P.LiesOver (Ideal.span {(2 : ℤ)}) := hP.2
   have h_ine : (Ideal.span {((2 : ℕ) : ℤ)}).inertiaDeg' P = 1 :=
     inertiaDeg_at_two_split p hp3 hp7 P hP
   calc Ideal.absNorm P
@@ -268,7 +268,7 @@ theorem inertiaDeg_at_two_inert (hp3 : p % 4 = 3) (hp3_8 : p % 8 = 3)
     (hP : P ∈ Ideal.primesOver (Ideal.span {((2 : ℕ) : ℤ)}) (𝓞 (Kminus p))) :
     (Ideal.span {((2 : ℕ) : ℤ)}).inertiaDeg' P = 2 := by
   classical
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   have h_exp : ¬ (2 : ℕ) ∣ RingOfIntegers.exponent (alphaInOK p hp3) :=
     not_dvd_exponent_alphaInOK p hp3 2
   set e := NumberField.Ideal.primesOverSpanEquivMonicFactorsMod (K := Kminus p) h_exp
@@ -313,9 +313,9 @@ theorem absNorm_primeOver_at_two_inert (hp3 : p % 4 = 3) (hp3_8 : p % 8 = 3)
     (P : Ideal (𝓞 (Kminus p)))
     (hP : P ∈ Ideal.primesOver (Ideal.span {((2 : ℕ) : ℤ)}) (𝓞 (Kminus p))) :
     Ideal.absNorm P = 4 := by
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
-  haveI : P.IsPrime := hP.1
-  haveI : P.LiesOver (Ideal.span {(2 : ℤ)}) := hP.2
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : P.IsPrime := hP.1
+  have : P.LiesOver (Ideal.span {(2 : ℤ)}) := hP.2
   have h_ine : (Ideal.span {((2 : ℕ) : ℤ)}).inertiaDeg' P = 2 :=
     inertiaDeg_at_two_inert p hp3 hp3_8 P hP
   calc Ideal.absNorm P
@@ -334,17 +334,17 @@ lemma ideal_decomp_at_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 7)
     (hI_norm : Ideal.absNorm I = 2 ^ k) :
     ∃ a ≤ k, I = P₁ ^ a * P₂ ^ (k - a) := by
   classical
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   have hqp : (2 : ℕ) ≠ p := by
     intro h_eq
     have : p % 4 = 2 % 4 := by rw [← h_eq]
     rw [hp3] at this; norm_num at this
   have hP₁_ne : P₁ ≠ ⊥ := primeOver_ne_bot p 2 P₁ hP₁_mem
   have hP₂_ne : P₂ ≠ ⊥ := primeOver_ne_bot p 2 P₂ hP₂_mem
-  haveI : P₁.IsPrime := hP₁_mem.1
-  haveI : P₂.IsPrime := hP₂_mem.1
-  haveI : P₁.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP₁_ne hP₁_mem.1
-  haveI : P₂.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP₂_ne hP₂_mem.1
+  have : P₁.IsPrime := hP₁_mem.1
+  have : P₂.IsPrime := hP₂_mem.1
+  have : P₁.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP₁_ne hP₁_mem.1
+  have : P₂.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP₂_ne hP₂_mem.1
   have habsNormP₁ : Ideal.absNorm P₁ = 2 := absNorm_primeOver_at_two_split p hp3 hp7 P₁ hP₁_mem
   have habsNormP₂ : Ideal.absNorm P₂ = 2 := absNorm_primeOver_at_two_split p hp3 hp7 P₂ hP₂_mem
   have hq_gt_one : (1 : ℕ) < 2 := by decide
@@ -371,7 +371,7 @@ lemma ideal_decomp_at_two_split (hp3 : p % 4 = 3) (hp7 : p % 8 = 7)
     have hRprime : R.IsPrime := hRfac.1
     have hQ₂_le_R : Q₂ ≤ R := hRfac.2
     have hR_ne : R ≠ ⊥ := fun h ↦ hQ₂_ne (le_bot_iff.mp (hQ₂_le_R.trans_eq h))
-    haveI : NeZero R := ⟨hR_ne⟩
+    have : NeZero R := ⟨hR_ne⟩
     have hQ₂_dvd_I : Ideal.absNorm Q₂ ∣ Ideal.absNorm I := by
       rw [hI_decomp, map_mul]; exact dvd_mul_left _ _
     have hR_dvd_2k : Ideal.absNorm R ∣ 2 ^ k := by
@@ -433,7 +433,7 @@ lemma pow_mul_pow_left_exponent_eq {P₁ P₂ : Ideal (𝓞 (Kminus p))}
 theorem idealNormMultiplicity_at_two_split_eq (hp3 : p % 4 = 3) (hp7 : p % 8 = 7) (k : ℕ) :
     idealNormMultiplicity (Kminus p) (2 ^ k) = k + 1 := by
   classical
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   have h_set_card := ncard_primesOver_at_two_split p hp3 hp7
   rw [Set.ncard_eq_two] at h_set_card
   obtain ⟨P₁, P₂, hP₁₂_ne, hP_eq⟩ := h_set_card
@@ -443,10 +443,10 @@ theorem idealNormMultiplicity_at_two_split_eq (hp3 : p % 4 = 3) (hp7 : p % 8 = 7
     rw [hP_eq]; exact Set.mem_insert_of_mem _ rfl
   have hP₁_ne : P₁ ≠ ⊥ := primeOver_ne_bot p 2 P₁ hP₁_mem
   have hP₂_ne : P₂ ≠ ⊥ := primeOver_ne_bot p 2 P₂ hP₂_mem
-  haveI : P₁.IsPrime := hP₁_mem.1
-  haveI : P₂.IsPrime := hP₂_mem.1
-  haveI : P₁.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP₁_ne hP₁_mem.1
-  haveI : P₂.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP₂_ne hP₂_mem.1
+  have : P₁.IsPrime := hP₁_mem.1
+  have : P₂.IsPrime := hP₂_mem.1
+  have : P₁.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP₁_ne hP₁_mem.1
+  have : P₂.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP₂_ne hP₂_mem.1
   have habsNormP₁ : Ideal.absNorm P₁ = 2 := absNorm_primeOver_at_two_split p hp3 hp7 P₁ hP₁_mem
   have habsNormP₂ : Ideal.absNorm P₂ = 2 := absNorm_primeOver_at_two_split p hp3 hp7 P₂ hP₂_mem
   have hq_gt_one : (1 : ℕ) < 2 := by decide
@@ -490,11 +490,11 @@ theorem idealNormMultiplicity_at_two_inert_odd (hp3 : p % 4 = 3) (hp3_8 : p % 8 
     {k : ℕ} (hk_odd : Odd k) :
     idealNormMultiplicity (Kminus p) (2 ^ k) = 0 := by
   classical
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   have hne : (Ideal.span {((2 : ℕ) : ℤ)} : Ideal ℤ) ≠ ⊥ := by
     simp only [ne_eq, Ideal.span_singleton_eq_bot, Nat.cast_ofNat]
     decide
-  haveI : (Ideal.span {((2 : ℕ) : ℤ)} : Ideal ℤ).IsMaximal :=
+  have : (Ideal.span {((2 : ℕ) : ℤ)} : Ideal ℤ).IsMaximal :=
     Int.ideal_span_isMaximal_of_prime 2
   have h_set_card := ncard_primesOver_at_two_inert p hp3 hp3_8
   rw [Set.ncard_eq_one] at h_set_card
@@ -502,9 +502,9 @@ theorem idealNormMultiplicity_at_two_inert_odd (hp3 : p % 4 = 3) (hp3_8 : p % 8 
   have hP_mem : P ∈ Ideal.primesOver (Ideal.span {((2 : ℕ) : ℤ)}) (𝓞 (Kminus p)) := by
     rw [hP_eq_set]; rfl
   have hP_ne : P ≠ ⊥ := primeOver_ne_bot p 2 P hP_mem
-  haveI : P.IsPrime := hP_mem.1
-  haveI : P.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP_ne hP_mem.1
-  haveI : P.LiesOver (Ideal.span {((2 : ℕ) : ℤ)}) := hP_mem.2
+  have : P.IsPrime := hP_mem.1
+  have : P.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP_ne hP_mem.1
+  have : P.LiesOver (Ideal.span {((2 : ℕ) : ℤ)}) := hP_mem.2
   have habsNormP : Ideal.absNorm P = 4 := absNorm_primeOver_at_two_inert p hp3 hp3_8 P hP_mem
   simp only [idealNormMultiplicity]
   rw [Nat.card_eq_zero]
@@ -524,7 +524,7 @@ theorem idealNormMultiplicity_at_two_inert_odd (hp3 : p % 4 = 3) (hp3_8 : p % 8 
     have hRprime : R.IsPrime := hRfac.1
     have hQ_le_R : Q ≤ R := hRfac.2
     have hR_ne : R ≠ ⊥ := fun hR_bot ↦ hQ_ne (le_bot_iff.mp (hQ_le_R.trans_eq hR_bot))
-    haveI : NeZero R := ⟨hR_ne⟩
+    have : NeZero R := ⟨hR_ne⟩
     have hI_le_Q : I ≤ Q := by rw [hIeq]; exact Ideal.mul_le_left
     have hR_dvd_I : Ideal.absNorm R ∣ 2 ^ k := by
       rw [← hI_norm]
@@ -557,11 +557,11 @@ theorem idealNormMultiplicity_at_two_inert_odd (hp3 : p % 4 = 3) (hp3_8 : p % 8 
 theorem idealNormMultiplicity_at_two_inert_even (hp3 : p % 4 = 3) (hp3_8 : p % 8 = 3) (m : ℕ) :
     idealNormMultiplicity (Kminus p) (2 ^ (2 * m)) = 1 := by
   classical
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   have hne : (Ideal.span {((2 : ℕ) : ℤ)} : Ideal ℤ) ≠ ⊥ := by
     simp only [ne_eq, Ideal.span_singleton_eq_bot, Nat.cast_ofNat]
     decide
-  haveI : (Ideal.span {((2 : ℕ) : ℤ)} : Ideal ℤ).IsMaximal :=
+  have : (Ideal.span {((2 : ℕ) : ℤ)} : Ideal ℤ).IsMaximal :=
     Int.ideal_span_isMaximal_of_prime 2
   have h_set_card := ncard_primesOver_at_two_inert p hp3 hp3_8
   rw [Set.ncard_eq_one] at h_set_card
@@ -569,12 +569,12 @@ theorem idealNormMultiplicity_at_two_inert_even (hp3 : p % 4 = 3) (hp3_8 : p % 8
   have hP_mem : P ∈ Ideal.primesOver (Ideal.span {((2 : ℕ) : ℤ)}) (𝓞 (Kminus p)) := by
     rw [hP_eq_set]; rfl
   have hP_ne : P ≠ ⊥ := primeOver_ne_bot p 2 P hP_mem
-  haveI : P.IsPrime := hP_mem.1
-  haveI : P.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP_ne hP_mem.1
-  haveI : P.LiesOver (Ideal.span {((2 : ℕ) : ℤ)}) := hP_mem.2
+  have : P.IsPrime := hP_mem.1
+  have : P.IsMaximal := Ring.DimensionLEOne.maximalOfPrime hP_ne hP_mem.1
+  have : P.LiesOver (Ideal.span {((2 : ℕ) : ℤ)}) := hP_mem.2
   have habsNormP : Ideal.absNorm P = 4 := absNorm_primeOver_at_two_inert p hp3 hp3_8 P hP_mem
   simp only [idealNormMultiplicity]
-  haveI : Unique {I : NonzeroIdeal (Kminus p) // Ideal.absNorm I.1 = 2 ^ (2 * m)} :=
+  have : Unique {I : NonzeroIdeal (Kminus p) // Ideal.absNorm I.1 = 2 ^ (2 * m)} :=
     { default := ⟨⟨P ^ m, pow_ne_zero m hP_ne⟩, by
           rw [map_pow, habsNormP]
           rw [show (4 : ℕ) = 2 ^ 2 from by norm_num, ← pow_mul]⟩
@@ -595,7 +595,7 @@ theorem idealNormMultiplicity_at_two_inert_even (hp3 : p % 4 = 3) (hp3_8 : p % 8
           have hQ_le_R : Q ≤ R := hRfac.2
           have hR_ne : R ≠ ⊥ :=
             fun hR_bot ↦ hQ_ne (le_bot_iff.mp (hQ_le_R.trans_eq hR_bot))
-          haveI : NeZero R := ⟨hR_ne⟩
+          have : NeZero R := ⟨hR_ne⟩
           have hI_le_Q : I ≤ Q := by rw [hIeq]; exact Ideal.mul_le_left
           have hR_dvd_I : Ideal.absNorm R ∣ 2 ^ (2 * m) := by
             rw [← hI_norm]
