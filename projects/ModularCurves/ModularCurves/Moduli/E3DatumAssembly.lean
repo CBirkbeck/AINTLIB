@@ -350,6 +350,8 @@ end ChartRecord
 
 end LocalPresentation
 
+
+
 open WeierstrassCurve in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
@@ -397,5 +399,135 @@ theorem isUnit_e3B {A : Type u} [CommRing A] {W : WeierstrassCurve A} {p q : A}
       rw [show (27 : A) = 3 ^ 3 by norm_num]
       exact h3.pow 3).mul (ha₃.pow 8)).mul (hfac.pow 2)
 
+
+open LocalPresentation WeierstrassCurve in
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 3200000 in
+/-- **([hArb] THE CONDITIONAL ASSEMBLY ★★★)** Modulo the two torsion→coordinate
+bridges (`BRIDGE-P`: the `a₂`-obstruction of an origin-marked chart vanishes;
+`BRIDGE-Q`: the flex-chart cubic at the second marked point — the KM-split content,
+board v10.310), EVERY naive full level-`3` structure is an `ℰ₃`-datum: the marking
+pipeline produces chart coordinates, translation and the `a₄`-shear normalize the
+chart (the `a₃`-unit certificate powers the shear), `BRIDGE-P` kills `a₂`, and all
+remaining `isE3Chart` inputs are proven (`isUnit_e3B` for the B-locus). -/
+theorem isE3Datum_of_bridges {R : CommRingCat.{u}} (X : EllObj R)
+    (hR : IsUnit (3 : R)) (L : X.curve.FullLevelPt 3)
+    (bridgeP : ∀ (V : X.base.affineOpens)
+      (Pr : LocalPresentation X.curve.toEllipticCurveGeom V)
+      (_ : Pr.MarksAt L.1.1.2 0 0),
+      Pr.W.a₂ * Pr.W.a₃ ^ 2 - Pr.W.a₄ * Pr.W.a₁ * Pr.W.a₃ - Pr.W.a₄ ^ 2 = 0)
+    (bridgeQ : ∀ (V : X.base.affineOpens)
+      (Pr : LocalPresentation X.curve.toEllipticCurveGeom V)
+      (_ : Pr.W.a₂ = 0) (_ : Pr.W.a₄ = 0) (_ : Pr.W.a₆ = 0)
+      (_ : Pr.MarksAt L.1.1.2 0 0) (p q : Γ(X.base, V.1))
+      (_ : Pr.MarksAt L.1.2.2 p q),
+      3 * p ^ 3 + Pr.W.a₁ ^ 2 * p ^ 2 + 3 * Pr.W.a₁ * Pr.W.a₃ * p
+        + 3 * Pr.W.a₃ ^ 2 = 0) :
+    IsE3Datum X L := by
+  refine isE3Datum_of_flexCharts X L (fun s => ?_)
+  classical
+  -- the atlas chart at `s`
+  obtain ⟨i, hsi⟩ := X.curve.toEllipticCurveGeom.atlas.covers s
+  -- fibrewise nonvanishing of the two marked sections
+  have hN : NIsInvertible X.base 3 := by
+    have h0 : NIsInvertible (Spec R) 3 := by
+      rw [NIsInvertible, Nat.cast_ofNat]
+      have := hR.map (Scheme.ΓSpecIso R).inv.hom
+      rwa [map_ofNat] at this
+    exact h0.of_hom X.structMap
+  have hneP := X.curve.pull_ne_zero_left_of_isNaiveFullLevel 3 (by norm_num) hN L.2
+  have hneQ := X.curve.pull_ne_zero_right_of_isNaiveFullLevel 3 (by norm_num) hN L.2
+  -- markings on the atlas chart
+  obtain ⟨p₀, q₀, hMP₀⟩ :=
+    (X.curve.toEllipticCurveGeom.atlas.presentation i).marksAt_of_forall_pull_ne_zero
+      L.1.1.2 hneP
+  obtain ⟨p₁, q₁, hMQ₀⟩ :=
+    (X.curve.toEllipticCurveGeom.atlas.presentation i).marksAt_of_forall_pull_ne_zero
+      L.1.2.2 hneQ
+  -- translate `P` to the origin
+  set C₁ : VariableChange ↑Γ(X.base, (X.curve.toEllipticCurveGeom.atlas.U i).1) :=
+    ⟨1, p₀, 0, q₀⟩ with hC₁
+  set Pr₁ := (X.curve.toEllipticCurveGeom.atlas.presentation i).ofVC C₁ with hPr₁
+  have hMP₁ : Pr₁.MarksAt L.1.1.2 0 0 :=
+    marksAt_origin_ofVC (X.curve.toEllipticCurveGeom.atlas.presentation i) hMP₀
+  have hMQ₁ := marksAt_ofVC_vc (X.curve.toEllipticCurveGeom.atlas.presentation i)
+    hMQ₀ C₁
+  -- the section-level killing of `P`
+  have hkillP : (3 : ℤ) • (⟨(L.1.1 : _ ⟶ _), L.1.1.2⟩ : X.curve.Section) = 0 := by
+    have h := L.2.1.1
+    exact_mod_cast h
+  -- the `a₃`-unit on the origin-marked chart
+  obtain ⟨heq₁, hMeq₁⟩ := id hMP₁
+  have ha₃ : IsUnit Pr₁.W.a₃ :=
+    isUnit_a₃_of_marked_origin Pr₁ heq₁ hMeq₁ hkillP hneP
+  -- the `a₄`-killing shear
+  set sSh : ↑Γ(X.base, (X.curve.toEllipticCurveGeom.atlas.U i).1) :=
+    Pr₁.W.a₄ * ((ha₃.unit⁻¹ : _ˣ) : _) with hsSh
+  set C₂ : VariableChange ↑Γ(X.base, (X.curve.toEllipticCurveGeom.atlas.U i).1) :=
+    ⟨1, 0, sSh, 0⟩ with hC₂
+  set Pr₂ := Pr₁.ofVC C₂ with hPr₂
+  have hMP₂ : Pr₂.MarksAt L.1.1.2 0 0 := by
+    have h := marksAt_ofVC_vc Pr₁ hMP₁ C₂
+    have hx : C₂.vcX 0 = 0 := by
+      simp [WeierstrassCurve.VariableChange.vcX, hC₂]
+    have hy : C₂.vcY 0 0 = 0 := by
+      simp [WeierstrassCurve.VariableChange.vcY, hC₂]
+    rwa [hx, hy] at h
+  have hMQ₂ := marksAt_ofVC_vc Pr₁ hMQ₁ C₂
+  -- the chart coefficients
+  have ha₃₂ : Pr₂.W.a₃ = Pr₁.W.a₃ := by
+    show (C₂ • Pr₁.W).a₃ = Pr₁.W.a₃
+    rw [WeierstrassCurve.variableChange_a₃]
+    simp [hC₂]
+  have ha₄₂ : Pr₂.W.a₄ = 0 := by
+    show (C₂ • Pr₁.W).a₄ = 0
+    rw [WeierstrassCurve.variableChange_a₄]
+    simp only [hC₂, hsSh]
+    rw [show ((⟨1, 0, sSh, 0⟩ : VariableChange _).u⁻¹ : _) = (1 : _ˣ) from by
+      simp [hC₂]]
+    push_cast
+    rw [show Pr₁.W.a₄ - Pr₁.W.a₄ * ((ha₃.unit⁻¹ : _ˣ) : _) * Pr₁.W.a₃
+        = Pr₁.W.a₄ * (1 - ((ha₃.unit⁻¹ : _ˣ) : _) * Pr₁.W.a₃) from by ring]
+    rw [show ((ha₃.unit⁻¹ : _ˣ) : _) * Pr₁.W.a₃
+        = ((ha₃.unit⁻¹ * ha₃.unit : _ˣ) : _) from by
+      rw [Units.val_mul, IsUnit.unit_spec]]
+    simp
+  have ha₆₂ : Pr₂.W.a₆ = 0 := by
+    obtain ⟨heq₂, -⟩ := id hMP₂
+    exact (WeierstrassCurve.Affine.equation_zero).mp heq₂
+  have ha₃u : IsUnit Pr₂.W.a₃ := by rw [ha₃₂]; exact ha₃
+  have ha₂₂ : Pr₂.W.a₂ = 0 := by
+    have hbr := bridgeP _ Pr₂ hMP₂
+    rw [ha₄₂] at hbr
+    have h2 : Pr₂.W.a₂ * Pr₂.W.a₃ ^ 2 = 0 := by linear_combination hbr
+    exact ((ha₃u.pow 2).mul_left_eq_zero).mp h2
+  -- the cubic (BRIDGE-Q)
+  have hcubic := bridgeQ _ Pr₂ ha₂₂ ha₄₂ ha₆₂ hMP₂ _ _ hMQ₂
+  -- `3` is a unit on the chart
+  have h3V : IsUnit (3 : ↑Γ(X.base, (X.curve.toEllipticCurveGeom.atlas.U i).1)) := by
+    have h1 := hR.map X.baseRingHom
+    rw [map_ofNat] at h1
+    have h2 := h1.map (Scheme.resLE
+      (le_top : (X.curve.toEllipticCurveGeom.atlas.U i).1 ≤ ⊤))
+    rwa [map_ofNat] at h2
+  -- the B-locus unit (`isUnit_e3B`)
+  obtain ⟨heqQ₂, -⟩ := id hMQ₂
+  have hcurveQ : (C₂.vcY (C₁.vcX p₁) (C₁.vcY p₁ q₁)) ^ 2
+      + Pr₂.W.a₁ * (C₂.vcX (C₁.vcX p₁)) * (C₂.vcY (C₁.vcX p₁) (C₁.vcY p₁ q₁))
+      + Pr₂.W.a₃ * (C₂.vcY (C₁.vcX p₁) (C₁.vcY p₁ q₁))
+      = (C₂.vcX (C₁.vcX p₁)) ^ 3 := by
+    have h := (WeierstrassCurve.Affine.equation_iff _ _).mp heqQ₂
+    rw [ha₂₂, ha₄₂, ha₆₂] at h
+    linear_combination h
+  have hfac : IsUnit (Pr₂.W.a₁ ^ 3 - 27 * Pr₂.W.a₃) := by
+    have hΔ : Pr₂.W.Δ = Pr₂.W.a₃ ^ 3 * (Pr₂.W.a₁ ^ 3 - 27 * Pr₂.W.a₃) := by
+      simp only [WeierstrassCurve.Δ, WeierstrassCurve.b₂, WeierstrassCurve.b₄,
+        WeierstrassCurve.b₆, WeierstrassCurve.b₈, ha₂₂, ha₄₂, ha₆₂]
+      ring
+    have hu := (WeierstrassCurve.isElliptic_iff Pr₂.W).mp Pr₂.elliptic
+    rw [hΔ] at hu
+    exact isUnit_of_mul_isUnit_right hu
+  have hB := isUnit_e3B (W := Pr₂.W) hcurveQ hcubic ha₃u h3V hfac
+  exact ⟨_, hsi, Pr₂, _, _, ha₂₂, ha₄₂, ha₆₂, hMP₂, hMQ₂, hcubic, ha₃u, h3V, hB⟩
 
 end ModularCurves
