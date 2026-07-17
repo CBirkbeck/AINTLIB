@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 module
 
 public import BernoulliRegular.LValueAtOne.Cosine
@@ -68,8 +73,7 @@ theorem even_LFunction_one_sub_const
   have hχ_zero : χ 0 = 0 := χ.map_zero' hp_ne_one
   have hsum_zero : ∑ a : ZMod p, χ a = 0 := MulChar.sum_eq_zero_of_ne_one hχ_ne_one
   have hsum_zero_erase : (Finset.univ.erase (0 : ZMod p)).sum χ = 0 := by
-    rw [Finset.sum_erase _ hχ_zero]
-    exact hsum_zero
+    rwa [Finset.sum_erase _ hχ_zero]
   calc
     DirichletCharacter.LFunction χ 1
         = ((p : ℂ)⁻¹) *
@@ -88,8 +92,6 @@ theorem even_LFunction_one_sub_const
             ← Finset.sum_sub_distrib]
           exact Finset.sum_congr rfl fun a _ => by ring
 
-/-- The L-function of the discrete Fourier transform of `χ⁻¹` equals the Gauss sum
-times the L-function of `χ`, for an even primitive character modulo `p`. -/
 private lemma LFunction_dft_inv_eq_gaussSum_mul_LFunction
     {χ : DirichletCharacter ℂ p} (hχ_even : χ.Even) (hχinv_prim : (χ⁻¹).IsPrimitive) :
     ZMod.LFunction (ZMod.dft (fun a : ZMod p => χ⁻¹ a)) 1 =
@@ -116,8 +118,6 @@ private lemma LFunction_dft_inv_eq_gaussSum_mul_LFunction
           rw [ZMod.LFunction]
           ring
 
-/-- For an even Dirichlet character, the exponential-zeta boundary sum reduces to the
-cosine-zeta sum, since the odd sine part vanishes. -/
 private lemma sum_mulChar_expZeta_neg_eq_sum_mulChar_cosZeta
     {χ : DirichletCharacter ℂ p} (hχinv_even : (χ⁻¹).Even) :
     ∑ a : ZMod p, χ⁻¹ a * HurwitzZeta.expZeta (ZMod.toAddCircle (-a)) 1 =
@@ -148,7 +148,6 @@ private lemma sum_mulChar_expZeta_neg_eq_sum_mulChar_cosZeta
     _ = ∑ a : ZMod p, χ⁻¹ a * HurwitzZeta.cosZeta (ZMod.toAddCircle a) 1 := by
           rw [hsum_isin_zero, sub_zero]
 
-/-- The cosine-zeta boundary sum of `χ⁻¹` equals `-evenLValueLogSum p χ`. -/
 private lemma sum_mulChar_cosZeta_eq_neg_evenLValueLogSum
     {χ : DirichletCharacter ℂ p} (hχinv_zero : χ⁻¹ 0 = 0) :
     ∑ a : ZMod p, χ⁻¹ a * HurwitzZeta.cosZeta (ZMod.toAddCircle a) 1 =
@@ -177,22 +176,12 @@ theorem even_LFunction_one_eq_evenLValueRhs
     {χ : DirichletCharacter ℂ p} (hχ_prim : χ.IsPrimitive) (hχ_even : χ.Even)
     (hχ_ne_one : χ ≠ 1) :
     DirichletCharacter.LFunction χ 1 = evenLValueRhs p χ := by
-  let _ := hχ_prim
   haveI : NeZero p := ⟨hp.out.ne_zero⟩
   change ZMod.LFunction (fun a : ZMod p => χ a) 1 = evenLValueRhs p χ
-  have hp_ne_one : p ≠ 1 := hp.out.ne_one
-  have hχinv_ne_one : χ⁻¹ ≠ 1 := fun h => hχ_ne_one (inv_eq_one.mp h)
   have hχinv_even : (χ⁻¹).Even := by
     rw [DirichletCharacter.Even] at hχ_even ⊢
-    rw [MulChar.inv_apply_eq_inv', hχ_even]
-    simp
-  have hχinv_prim : (χ⁻¹).IsPrimitive := by
-    rw [DirichletCharacter.isPrimitive_def]
-    have hdiv : (χ⁻¹).conductor ∣ p := DirichletCharacter.conductor_dvd_level (χ⁻¹)
-    rcases (Nat.dvd_prime hp.out).mp hdiv with hcond | hcond
-    · exact (hχinv_ne_one <| (DirichletCharacter.eq_one_iff_conductor_eq_one).2 hcond).elim
-    · exact hcond
-  have hχinv_zero : χ⁻¹ 0 = 0 := (χ⁻¹).map_zero' hp_ne_one
+    rw [MulChar.inv_apply_eq_inv', hχ_even, inv_one]
+  have hχinv_zero : χ⁻¹ 0 = 0 := (χ⁻¹).map_zero' hp.out.ne_one
   let χinv : ZMod p → ℂ := fun a => χ⁻¹ a
   have hdft :
       ZMod.LFunction (ZMod.dft χinv) 1 =
@@ -203,7 +192,8 @@ theorem even_LFunction_one_eq_evenLValueRhs
   have hleft :
       ZMod.LFunction (ZMod.dft χinv) 1 =
         gaussSum χ⁻¹ (ZMod.stdAddChar (N := p)) * ZMod.LFunction χ 1 :=
-    LFunction_dft_inv_eq_gaussSum_mul_LFunction p hχ_even hχinv_prim
+    LFunction_dft_inv_eq_gaussSum_mul_LFunction p hχ_even
+      ((DirichletCharacter.conductor_inv χ).trans hχ_prim)
   have hsum_exp :
       ∑ a : ZMod p, χ⁻¹ a * HurwitzZeta.expZeta (ZMod.toAddCircle (-a)) 1 =
         ∑ a : ZMod p, χ⁻¹ a * HurwitzZeta.cosZeta (ZMod.toAddCircle a) 1 :=
@@ -215,7 +205,8 @@ theorem even_LFunction_one_eq_evenLValueRhs
   have hcard_ne : (Fintype.card (ZMod p) : ℂ) ≠ 0 := by
     simpa [ZMod.card] using (show (p : ℂ) ≠ 0 by exact_mod_cast hp.out.ne_zero)
   have hgauss_ne : gaussSum χ⁻¹ (ZMod.stdAddChar (N := p)) ≠ 0 :=
-    gaussSum_ne_zero_of_nontrivial hcard_ne hχinv_ne_one (ZMod.isPrimitive_stdAddChar p)
+    gaussSum_ne_zero_of_nontrivial hcard_ne (inv_ne_one.mpr hχ_ne_one)
+      (ZMod.isPrimitive_stdAddChar p)
   apply (mul_left_cancel₀ hgauss_ne)
   calc
     gaussSum χ⁻¹ (ZMod.stdAddChar (N := p)) * ZMod.LFunction χ 1
