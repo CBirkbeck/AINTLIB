@@ -39,8 +39,8 @@ private theorem cechDifferential_eq :
           (FormalCoproduct.mk _ U).cech).obj F).δ k := by
   change ((FormalCoproduct.cochainComplexFunctor
     (FormalCoproduct.mk _ U).cech).obj F).d n (n + 1) = _
-  rw [FormalCoproduct.cochainComplexFunctor_obj_d, CochainComplex.of_d]
-  rfl
+  rw [FormalCoproduct.cochainComplexFunctor_obj_d]
+  exact (CochainComplex.of_d _ _ n).trans rfl
 
 private theorem addCommGrp_sum_apply_finset {A B : AddCommGrpCat} {κ : Type*}
     (s : Finset κ) (f : κ → (A ⟶ B)) (x : A) :
@@ -68,8 +68,12 @@ theorem cechCoface_apply (x : ((cechComplexFunctor U).obj F).X n)
         (SimplexCategory.δ k).toOrderHom.toFun).φ i).op
         (cechCochainAddEquiv F U n x
           (i ∘ (SimplexCategory.δ k).toOrderHom.toFun)) := by
-  rw [cechCochainAddEquiv_apply, cechCoface_eq]
-  rw [cechCochainAddEquiv_apply]
+  have hout := cechCochainAddEquiv_apply F U (n + 1)
+    (((FormalCoproduct.cosimplicialObjectFunctor
+      (FormalCoproduct.mk _ U).cech).obj F).δ k x) i
+  have hin := cechCochainAddEquiv_apply F U n x
+    (i ∘ (SimplexCategory.δ k).toOrderHom.toFun)
+  rw [hout, hin, cechCoface_eq]
   exact ConcreteCategory.congr_hom
     (Pi.lift_π (fun i : Fin (n + 2) → ι =>
       Pi.π (fun j : Fin (n + 1) → ι =>
@@ -90,6 +94,17 @@ theorem cechDifferential_apply (x : ((cechComplexFunctor U).obj F).X n)
           (cechCochainAddEquiv F U n x
             (i ∘ (SimplexCategory.δ k).toOrderHom.toFun)) := by
   rw [cechDifferential_eq]
+  have hmapSum :
+      cechCochainAddEquiv F U (n + 1)
+          (∑ k : Fin (n + 2),
+            (((-1 : ℤ) ^ (k : ℕ) •
+              ((FormalCoproduct.cosimplicialObjectFunctor
+                (FormalCoproduct.mk _ U).cech).obj F).δ k) x)) =
+        ∑ k : Fin (n + 2), cechCochainAddEquiv F U (n + 1)
+          (((-1 : ℤ) ^ (k : ℕ) •
+            ((FormalCoproduct.cosimplicialObjectFunctor
+              (FormalCoproduct.mk _ U).cech).obj F).δ k) x) := by
+    exact map_sum (cechCochainAddEquiv F U (n + 1)) _ Finset.univ
   calc
     _ = cechCochainAddEquiv F U (n + 1)
         (∑ k : Fin (n + 2),
@@ -103,7 +118,7 @@ theorem cechDifferential_apply (x : ((cechComplexFunctor U).obj F).X n)
           (((-1 : ℤ) ^ (k : ℕ) •
             ((FormalCoproduct.cosimplicialObjectFunctor
               (FormalCoproduct.mk _ U).cech).obj F).δ k) x)) i := by
-      rw [map_sum]
+      exact congrFun hmapSum i
     _ = ∑ k : Fin (n + 2),
         cechCochainAddEquiv F U (n + 1)
           (((-1 : ℤ) ^ (k : ℕ) •
