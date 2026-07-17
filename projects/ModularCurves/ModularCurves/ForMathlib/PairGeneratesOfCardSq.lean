@@ -153,3 +153,36 @@ theorem addSubgroup_closure_pair_eq_top_iff (hcard : Nat.card G = p ^ 2)
     · rw [← hb', Nat.eq_zero_of_dvd_of_lt hdb (ZMod.val_lt b), Nat.cast_zero]
 
 end ModularCurves
+
+/-- **(the independence → combos reduction at `p = 3`)** For `3`-torsion elements of any
+abelian group, the four independence conditions `P ≠ 0, Q ≠ 0, Q ≠ ±P` force all eight
+nontrivial `(ℤ/3)²`-combinations away from zero (`2•x = −x` collapses every case). -/
+theorem combos3_ne_zero {G : Type*} [AddCommGroup G] {P Q : G}
+    (hP3 : (3 : ℤ) • P = 0) (hQ3 : (3 : ℤ) • Q = 0)
+    (hP : P ≠ 0) (hQ : Q ≠ 0) (hQP : Q ≠ P) (hQnP : Q ≠ -P) :
+    ∀ ab : ZMod 3 × ZMod 3, ab ≠ 0 →
+      ((ab.1.val : ℤ)) • P + ((ab.2.val : ℤ)) • Q ≠ 0 := by
+  have h2P : (2 : ℤ) • P = -P := by
+    rw [show (2 : ℤ) = 3 - 1 by norm_num, sub_smul, hP3, one_zsmul, zero_sub]
+  have h2Q : (2 : ℤ) • Q = -Q := by
+    rw [show (2 : ℤ) = 3 - 1 by norm_num, sub_smul, hQ3, one_zsmul, zero_sub]
+  rintro ⟨a, b⟩ hab
+  show ((a.val : ℤ)) • P + ((b.val : ℤ)) • Q ≠ 0
+  have hval : ∀ c : ZMod 3, (c.val : ℤ) = 0 ∨ (c.val : ℤ) = 1 ∨ (c.val : ℤ) = 2 := by
+    intro c
+    have h := ZMod.val_lt c
+    omega
+  have hzero : ∀ c : ZMod 3, (c.val : ℤ) = 0 → c = 0 := fun c hc =>
+    (ZMod.val_eq_zero c).mp (Int.natCast_eq_zero.mp hc)
+  rcases hval a with ha | ha | ha <;> rcases hval b with hb | hb | hb <;>
+    rw [ha, hb] <;> simp only [zero_zsmul, one_zsmul, h2P, h2Q, zero_add, add_zero]
+  · exact absurd (Prod.ext (hzero a ha) (hzero b hb)) hab
+  · exact hQ
+  · exact fun hc => hQ (neg_eq_zero.mp hc)
+  · exact hP
+  · exact fun hc => hQnP (eq_neg_of_add_eq_zero_right hc)
+  · exact fun hc => hQP (neg_inj.mp (eq_neg_of_add_eq_zero_right hc))
+  · exact fun hc => hP (neg_eq_zero.mp hc)
+  · exact fun hc => hQP (neg_add_eq_zero.mp hc).symm
+  · exact fun hc => hQnP (eq_neg_of_add_eq_zero_right
+      (neg_eq_zero.mp (by rwa [← neg_add] at hc)))
