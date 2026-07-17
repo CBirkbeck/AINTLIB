@@ -276,6 +276,55 @@ def Qa : JetA F :=
         ⟨(1 : RestrictedLaurent K), (nonnegSubring K).one_mem⟩) = 1
       rw [ofRestricted_nonnegEquiv_symm]⟩
 
+/-! ### The (3.3) collapse data: `Q² = Wⁿ · (W⁻ⁿQ²)` with unit `W`-multiples -/
+
+/-- `W`'s underlying jet is the `Q⁰`-constant at the Laurent unit `W`. -/
+theorem Wa_val_eq : ((Wa F : JetA F) : JetC F) = constHomC F (Wu (R := K)).val := by
+  refine Subtype.ext ?_
+  refine PowerSeries.ext fun n => ?_
+  show PowerSeries.coeff n (sectionD F (TrivSqZeroExt.inl (Wu (R := K)).val)).1 = _
+  rw [show (sectionD F (TrivSqZeroExt.inl (Wu (R := K)).val)).1 =
+    PowerSeries.mk (fun n => if n = 0 then (Wu (R := K)).val else
+      if n = 1 then 0 else 0) from rfl]
+  rw [PowerSeries.coeff_mk]
+  show _ = PowerSeries.coeff n (PowerSeries.C ((Wu (R := K)).val) :
+    PowerSeries (L F))
+  rw [PowerSeries.coeff_C]
+  by_cases h0 : n = 0
+  · rw [if_pos h0, if_pos h0]
+  · rw [if_neg h0, if_neg h0]
+    by_cases h1 : n = 1
+    · rw [if_pos h1]
+    · rw [if_neg h1]
+
+/-- The `W⁻ⁿQ²`-family: `yQ n := W⁻ⁿ·Q²` as an element of 𝓐 (its `(0,1)`-jets vanish). -/
+noncomputable def yQ (n : ℕ) : JetA F :=
+  ⟨constHomC F (((Wu (R := K))⁻¹).val ^ n) * ((Qa F : JetA F) : JetC F) *
+    ((Qa F : JetA F) : JetC F), by
+    have hq0 : qCoeff F 0 (((Qa F : JetA F) : JetC F)) = 0 := by
+      show qCoeff F 0 (sectionD F (TrivSqZeroExt.inr (1 : L F))) = 0
+      rw [qCoeff_sectionD]
+      norm_num
+    constructor
+    · simp only [qCoeff_zero_mul, hq0, mul_zero]
+      exact zero_mem _
+    · simp only [qCoeff_one_mul, qCoeff_zero_mul, hq0, mul_zero, zero_mul,
+        add_zero, zero_add]
+      exact zero_mem _⟩
+
+/-- The collapse identity in 𝓐: `Wⁿ · (W⁻ⁿQ²) = Q²`. -/
+theorem Wa_pow_mul_yQ (n : ℕ) : Wa F ^ n * yQ F n = Qa F * Qa F := by
+  refine Subtype.ext ?_
+  show ((Wa F : JetA F) : JetC F) ^ n *
+    (constHomC F (((Wu (R := K))⁻¹).val ^ n) * ((Qa F : JetA F) : JetC F) *
+      ((Qa F : JetA F) : JetC F)) = ((Qa F : JetA F) : JetC F) * ((Qa F : JetA F) : JetC F)
+  rw [Wa_val_eq, ← map_pow, ← mul_assoc, ← mul_assoc, ← map_mul,
+    show (Wu (R := K)).val ^ n * ((Wu (R := K))⁻¹).val ^ n = 1 from by
+      rw [← mul_pow]
+      rw [show (Wu (R := K)).val * ((Wu (R := K))⁻¹).val = 1 from (Wu (R := K)).val_inv]
+      rw [one_pow],
+    map_one, one_mul]
+
 /-! ### The forward map `𝒪_𝓐(chart) → 𝓑` (Prop 3.1's `ψ`-direction) -/
 
 theorem isUnit_thetaChart_s : IsUnit (thetaChart F (chartDatum F).s) := by
