@@ -22867,3 +22867,31 @@ at `Q`, (iii) unit certificates (`a₃`, `3`, B-locus — fibrewise-unit ⟹ uni
 affines), (iv) the `isE3Chart` cover assembly. (i)+(ii) are the ONLY
 mathematically-deep gaps and sit in the KM-coordinated division-polynomial split; all
 other layers are now either DONE or mechanical. (STREAM-OMEGA)
+
+---
+
+## v10.310-OMEGA (2026-07-17, window cont.³) — ★★★ THE hB HYPOTHESIS IS REDUNDANT (integral norm certificate) + the bridge interface is EXACT; hArb = 2 KM bridges + mechanical assembly, nothing else
+
+**Two closing findings (CAS-verified, certificate script committed at
+`docs/certificates/hB-redundancy-certificate.py`):**
+
+1. **BRIDGE INTERFACE PINNED (ring form, KM inbox addendum):**
+   - BRIDGE-P: on a `P=(0,0)`-marked chart with `3•σP = 0`, `a₃`/`3` units:
+     `a₂a₃² − a₄a₁a₃ − a₄² = 0` (the only shear preserving an origin-marking is
+     `⟨1,0,s,0⟩`; `s := a₄/a₃` kills `a₄`; this is the residual `a₂`-obstruction —
+     matches the ε-example's `(a₄²)` exactly).
+   - BRIDGE-Q: on the flex chart, `isE3Chart`'s `hcubic` verbatim.
+2. **`hB` IS AUTOMATIC:** `Norm(B) = 27·a₃⁸·(a₁³−27a₃)² = 27·a₃²·Δ²` in the chart
+   quotient (6×6 multiplication matrix over the `{1,p,p²}⊗{1,q}` basis), and the lift is
+   INTEGRAL: `B·C = 27a₃⁸(a₁³−27a₃)² + λ₁·R1 + λ₂·R2` with `C = a₃⁴(a₁³−27a₃)·C₀`,
+   `C₀, λ₁, λ₂ ∈ ℤ[a₁,a₃,p,q]` (C₀ in the script; λ's regenerate deterministically).
+   So on every genuine chart `B` is a unit OUTRIGHT (`27a₃²Δ²` is a unit) — the
+   `isE3Form_of_threeTorsion`/`isE3Chart` B-locus hypothesis discharges ring-level, no
+   fibrewise argument, no sheet-fallback. (Also checked: the `B=0` locus with `a₃ ≠ 0`
+   is genuinely nonempty but lies entirely in `Δ = 0` — saturation unit-ideal in chars
+   0, 2, 5, 7, 11.)
+
+**hArb state after this window:** marking pipeline ✓, translation ✓, units ✓ (incl. hB
+now), assembly = mechanical wiring; the ONLY remaining mathematics = the two KM-split
+bridges. On their landing, hArb :95 closes and with it the ℤ[1/3] headline
+`naiveLevelThree_representable_by_affine`. (STREAM-OMEGA)
