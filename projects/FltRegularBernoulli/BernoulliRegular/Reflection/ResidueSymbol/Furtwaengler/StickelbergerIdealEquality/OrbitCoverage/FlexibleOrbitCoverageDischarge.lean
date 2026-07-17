@@ -266,6 +266,117 @@ theorem stickelbergerRepeatedExactExponentsOnOrbit_of_conjugate_descentPrime_emu
   rw [emultiplicity_conjugatePrime_span_eq_descentPrime_conjugateElement]
   exact h a
 
+/-- One divisibility of the Stickelberger span equality: the principal span
+`(γ)` divides the Stickelberger ideal, by comparing normalized-factor counts
+orbit-index by orbit-index (support containment gives every prime factor of
+`(γ)` is a conjugate, and the repeated-exact hypothesis matches its count). -/
+private theorem span_dvd_stickelbergerIdeal_of_supportInOrbit_of_repeatedExactOnOrbit
+    {γ : 𝓞 K} (hγ_ne : γ ≠ 0)
+    (h_sup : S.StickelbergerSupportInOrbit γ)
+    (h_exp : S.StickelbergerRepeatedExactExponentsOnOrbit γ) :
+    Ideal.span ({γ} : Set (𝓞 K)) ∣
+      stickelbergerIdeal (p := p) (K := K) S.concrete.descentPrime := by
+  classical
+  have := S.concrete.descentPrime_isPrime
+  have hspan_ne : Ideal.span ({γ} : Set (𝓞 K)) ≠ ⊥ := by
+    rwa [Ne, Ideal.span_singleton_eq_bot]
+  have hstick_ne :
+      stickelbergerIdeal (p := p) (K := K) S.concrete.descentPrime ≠ ⊥ :=
+    stickelbergerIdeal_ne_bot S.concrete.descentPrime_ne_bot
+  rw [UniqueFactorizationMonoid.dvd_iff_normalizedFactors_le_normalizedFactors
+    hspan_ne hstick_ne]
+  rw [Multiset.le_iff_count]
+  intro Q
+  by_cases hQ :
+      Q ∈ UniqueFactorizationMonoid.normalizedFactors
+        (Ideal.span ({γ} : Set (𝓞 K)))
+  · have hQ_orbit := h_sup Q hQ
+    obtain ⟨c, hc_eq⟩ :=
+      (mem_cyclotomicConjugates_iff (p := p) (K := K) _ Q).mp hQ_orbit
+    have hQ_prime := UniqueFactorizationMonoid.prime_of_normalized_factor Q hQ
+    have hQ_irred := hQ_prime.irreducible
+    have hcount_span :
+        emultiplicity Q (Ideal.span ({γ} : Set (𝓞 K))) =
+          ((UniqueFactorizationMonoid.normalizedFactors
+              (Ideal.span ({γ} : Set (𝓞 K)))).count
+            (normalize Q) : ℕ∞) :=
+      UniqueFactorizationMonoid.emultiplicity_eq_count_normalizedFactors
+        hQ_irred hspan_ne
+    have hnorm : normalize Q = Q := by rw [normalize_eq]
+    rw [hnorm] at hcount_span
+    have h_exp_Q := h_exp c⁻¹
+    rw [inv_inv, hc_eq] at h_exp_Q
+    have hcount_stick :=
+      S.normalizedFactors_stickelbergerIdeal_count_eq_repeatedMultiplicity Q
+    rw [← hcount_stick] at h_exp_Q
+    have h_eq_count :
+        ((UniqueFactorizationMonoid.normalizedFactors
+            (Ideal.span ({γ} : Set (𝓞 K)))).count Q : ℕ∞) =
+          (((UniqueFactorizationMonoid.normalizedFactors
+              (stickelbergerIdeal (p := p) (K := K)
+                S.concrete.descentPrime)).count Q) : ℕ∞) := by
+      rw [← hcount_span]
+      exact h_exp_Q
+    exact_mod_cast h_eq_count.le
+  · rw [Multiset.count_eq_zero.mpr hQ]
+    exact Nat.zero_le _
+
+/-- The reverse divisibility of the Stickelberger span equality: the
+Stickelberger ideal divides the principal span `(γ)`, by the same
+orbit-index count comparison in the opposite direction. -/
+private theorem stickelbergerIdeal_dvd_span_of_supportInOrbit_of_repeatedExactOnOrbit
+    {γ : 𝓞 K} (hγ_ne : γ ≠ 0)
+    (h_exp : S.StickelbergerRepeatedExactExponentsOnOrbit γ) :
+    stickelbergerIdeal (p := p) (K := K) S.concrete.descentPrime ∣
+      Ideal.span ({γ} : Set (𝓞 K)) := by
+  classical
+  have := S.concrete.descentPrime_isPrime
+  have hspan_ne : Ideal.span ({γ} : Set (𝓞 K)) ≠ ⊥ := by
+    rwa [Ne, Ideal.span_singleton_eq_bot]
+  have hstick_ne :
+      stickelbergerIdeal (p := p) (K := K) S.concrete.descentPrime ≠ ⊥ :=
+    stickelbergerIdeal_ne_bot S.concrete.descentPrime_ne_bot
+  rw [UniqueFactorizationMonoid.dvd_iff_normalizedFactors_le_normalizedFactors
+    hstick_ne hspan_ne]
+  rw [Multiset.le_iff_count]
+  intro Q
+  by_cases hQ :
+      Q ∈ UniqueFactorizationMonoid.normalizedFactors
+        (stickelbergerIdeal (p := p) (K := K) S.concrete.descentPrime)
+  · have hQ_orbit :
+        Q ∈ cyclotomicConjugates (p := p) (K := K) S.concrete.descentPrime :=
+      normalizedFactors_stickelbergerIdeal_subset (p := p) (K := K)
+        S.concrete.descentPrime_ne_bot hQ
+    obtain ⟨c, hc_eq⟩ :=
+      (mem_cyclotomicConjugates_iff (p := p) (K := K) _ Q).mp hQ_orbit
+    have hQ_prime := UniqueFactorizationMonoid.prime_of_normalized_factor Q hQ
+    have hQ_irred := hQ_prime.irreducible
+    have hcount_span :
+        emultiplicity Q (Ideal.span ({γ} : Set (𝓞 K))) =
+          ((UniqueFactorizationMonoid.normalizedFactors
+              (Ideal.span ({γ} : Set (𝓞 K)))).count
+            (normalize Q) : ℕ∞) :=
+      UniqueFactorizationMonoid.emultiplicity_eq_count_normalizedFactors
+        hQ_irred hspan_ne
+    have hnorm : normalize Q = Q := by rw [normalize_eq]
+    rw [hnorm] at hcount_span
+    have h_exp_Q := h_exp c⁻¹
+    rw [inv_inv, hc_eq] at h_exp_Q
+    have hcount_stick :=
+      S.normalizedFactors_stickelbergerIdeal_count_eq_repeatedMultiplicity Q
+    rw [← hcount_stick] at h_exp_Q
+    have h_eq_count :
+        (((UniqueFactorizationMonoid.normalizedFactors
+            (stickelbergerIdeal (p := p) (K := K)
+              S.concrete.descentPrime)).count Q) : ℕ∞) =
+          ((UniqueFactorizationMonoid.normalizedFactors
+              (Ideal.span ({γ} : Set (𝓞 K)))).count Q : ℕ∞) := by
+      rw [← hcount_span]
+      exact h_exp_Q.symm
+    exact_mod_cast h_eq_count.le
+  · rw [Multiset.count_eq_zero.mpr hQ]
+    exact Nat.zero_le _
+
 /-- Flexible repeated exact exponents on the orbit, plus support containment,
 imply the Stickelberger span equality.
 
@@ -278,97 +389,9 @@ theorem span_eq_stickelbergerIdeal_of_supportInOrbit_of_repeatedExactOnOrbit
     (h_exp : S.StickelbergerRepeatedExactExponentsOnOrbit γ) :
     Ideal.span ({γ} : Set (𝓞 K)) =
       stickelbergerIdeal (p := p) (K := K) S.concrete.descentPrime := by
-  classical
-  have := S.concrete.descentPrime_isPrime
-  have hspan_ne : Ideal.span ({γ} : Set (𝓞 K)) ≠ ⊥ := by
-    rwa [Ne, Ideal.span_singleton_eq_bot]
-  have hstick_ne :
-      stickelbergerIdeal (p := p) (K := K) S.concrete.descentPrime ≠ ⊥ :=
-    stickelbergerIdeal_ne_bot S.concrete.descentPrime_ne_bot
-  have h_dvd_left :
-      Ideal.span ({γ} : Set (𝓞 K)) ∣
-        stickelbergerIdeal (p := p) (K := K) S.concrete.descentPrime := by
-    rw [UniqueFactorizationMonoid.dvd_iff_normalizedFactors_le_normalizedFactors
-      hspan_ne hstick_ne]
-    rw [Multiset.le_iff_count]
-    intro Q
-    by_cases hQ :
-        Q ∈ UniqueFactorizationMonoid.normalizedFactors
-          (Ideal.span ({γ} : Set (𝓞 K)))
-    · have hQ_orbit := h_sup Q hQ
-      obtain ⟨c, hc_eq⟩ :=
-        (mem_cyclotomicConjugates_iff (p := p) (K := K) _ Q).mp hQ_orbit
-      have hQ_prime := UniqueFactorizationMonoid.prime_of_normalized_factor Q hQ
-      have hQ_irred := hQ_prime.irreducible
-      have hcount_span :
-          emultiplicity Q (Ideal.span ({γ} : Set (𝓞 K))) =
-            ((UniqueFactorizationMonoid.normalizedFactors
-                (Ideal.span ({γ} : Set (𝓞 K)))).count
-              (normalize Q) : ℕ∞) :=
-        UniqueFactorizationMonoid.emultiplicity_eq_count_normalizedFactors
-          hQ_irred hspan_ne
-      have hnorm : normalize Q = Q := by rw [normalize_eq]
-      rw [hnorm] at hcount_span
-      have h_exp_Q := h_exp c⁻¹
-      rw [inv_inv, hc_eq] at h_exp_Q
-      have hcount_stick :=
-        S.normalizedFactors_stickelbergerIdeal_count_eq_repeatedMultiplicity Q
-      rw [← hcount_stick] at h_exp_Q
-      have h_eq_count :
-          ((UniqueFactorizationMonoid.normalizedFactors
-              (Ideal.span ({γ} : Set (𝓞 K)))).count Q : ℕ∞) =
-            (((UniqueFactorizationMonoid.normalizedFactors
-                (stickelbergerIdeal (p := p) (K := K)
-                  S.concrete.descentPrime)).count Q) : ℕ∞) := by
-        rw [← hcount_span]
-        exact h_exp_Q
-      exact_mod_cast h_eq_count.le
-    · rw [Multiset.count_eq_zero.mpr hQ]
-      exact Nat.zero_le _
-  have h_dvd_right :
-      stickelbergerIdeal (p := p) (K := K) S.concrete.descentPrime ∣
-        Ideal.span ({γ} : Set (𝓞 K)) := by
-    rw [UniqueFactorizationMonoid.dvd_iff_normalizedFactors_le_normalizedFactors
-      hstick_ne hspan_ne]
-    rw [Multiset.le_iff_count]
-    intro Q
-    by_cases hQ :
-        Q ∈ UniqueFactorizationMonoid.normalizedFactors
-          (stickelbergerIdeal (p := p) (K := K) S.concrete.descentPrime)
-    · have hQ_orbit :
-          Q ∈ cyclotomicConjugates (p := p) (K := K) S.concrete.descentPrime :=
-        normalizedFactors_stickelbergerIdeal_subset (p := p) (K := K)
-          S.concrete.descentPrime_ne_bot hQ
-      obtain ⟨c, hc_eq⟩ :=
-        (mem_cyclotomicConjugates_iff (p := p) (K := K) _ Q).mp hQ_orbit
-      have hQ_prime := UniqueFactorizationMonoid.prime_of_normalized_factor Q hQ
-      have hQ_irred := hQ_prime.irreducible
-      have hcount_span :
-          emultiplicity Q (Ideal.span ({γ} : Set (𝓞 K))) =
-            ((UniqueFactorizationMonoid.normalizedFactors
-                (Ideal.span ({γ} : Set (𝓞 K)))).count
-              (normalize Q) : ℕ∞) :=
-        UniqueFactorizationMonoid.emultiplicity_eq_count_normalizedFactors
-          hQ_irred hspan_ne
-      have hnorm : normalize Q = Q := by rw [normalize_eq]
-      rw [hnorm] at hcount_span
-      have h_exp_Q := h_exp c⁻¹
-      rw [inv_inv, hc_eq] at h_exp_Q
-      have hcount_stick :=
-        S.normalizedFactors_stickelbergerIdeal_count_eq_repeatedMultiplicity Q
-      rw [← hcount_stick] at h_exp_Q
-      have h_eq_count :
-          (((UniqueFactorizationMonoid.normalizedFactors
-              (stickelbergerIdeal (p := p) (K := K)
-                S.concrete.descentPrime)).count Q) : ℕ∞) =
-            ((UniqueFactorizationMonoid.normalizedFactors
-                (Ideal.span ({γ} : Set (𝓞 K)))).count Q : ℕ∞) := by
-        rw [← hcount_span]
-        exact h_exp_Q.symm
-      exact_mod_cast h_eq_count.le
-    · rw [Multiset.count_eq_zero.mpr hQ]
-      exact Nat.zero_le _
-  exact associated_iff_eq.mp (associated_of_dvd_dvd h_dvd_left h_dvd_right)
+  exact associated_iff_eq.mp (associated_of_dvd_dvd
+    (span_dvd_stickelbergerIdeal_of_supportInOrbit_of_repeatedExactOnOrbit (S := S) hγ_ne h_sup h_exp)
+    (stickelbergerIdeal_dvd_span_of_supportInOrbit_of_repeatedExactOnOrbit (S := S) hγ_ne h_exp))
 
 /-- Flexible multiplicity count in the Stickelberger ideal under orbit
 faithfulness. -/
