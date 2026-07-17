@@ -2,6 +2,34 @@ module
 
 public import BernoulliRegular.CyclotomicUnits.DworkParameter.SamePrimeLog.ArtinHasseExpCoordLogHomogeneous
 
+/-!
+# The degree sum of the finite Artin--Hasse exp-coordinate homogeneous logarithm
+
+This file studies the *degree sum* of the finite (mod `lambda^(N+1)`) Artin--Hasse exp-coordinate
+homogeneous logarithm: it rewrites the degree sum as an evaluation sum, records the `lambda`-adic
+order and denominator bounds of the same-prime Artin--Hasse log terms, and identifies the degree
+sum with the same-prime finite Artin--Hasse log term — with the vanishing and `log`-term forms
+that feed the same-prime principal-unit argument.
+
+## Main definitions
+
+* `samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum`: the degree sum of the finite
+  Artin--Hasse exp-coordinate homogeneous logarithm.
+* `samePrimeArtinHasseLogTermOrder`: the forced `lambda`-adic order of the `r`-th same-prime
+  Artin--Hasse log term.
+* `samePrimeFiniteArtinHasseLogTerm`: the same-prime finite Artin--Hasse log term modulo
+  `lambda^(N+1)`.
+
+## Main results
+
+* `samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_eval_sum`: the degree sum equals
+  the corresponding evaluation sum.
+* `samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_zero_of_not_pow`: the degree sum
+  vanishes away from prime powers.
+* `samePrimeFiniteArtinHasseExpCoordLogHomogeneousDegreeSum_eq_logTerm`: the degree sum equals the
+  same-prime finite Artin--Hasse log term.
+-/
+
 @[expose] public section
 
 noncomputable section
