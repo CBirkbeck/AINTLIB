@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Chris Birkbeck. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Chris Birkbeck
+-/
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
 import Mathlib.AlgebraicGeometry.Morphisms.Separated
 import ModularCurves.ForMathlib.SchemeModuleBaseCechFlat
@@ -45,14 +50,11 @@ noncomputable def sectionsIsoUnitSectionsOfRestrictIso
       (e.hom.app (⊤ : U.toScheme.Opens)
         ((M.restrictAppIso U.ι (⊤ : U.toScheme.Opens)).inv
           (M.presheaf.map (eqToHom U.ι_image_top).op (r • x))))
-  rw [M.map_smul]
-  rw [smul_restrictAppIso_inv_apply]
-  rw [Hom.app_smul]
+  rw [M.map_smul, smul_restrictAppIso_inv_apply, Hom.app_smul]
   have hr : (U.ι.appIso (⊤ : U.toScheme.Opens)).hom
       (X.presheaf.map (eqToHom U.ι_image_top).op r) =
       U.topIso.inv r := by
-    rw [Scheme.Opens.topIso_inv]
-    rw [Scheme.Opens.ι_appIso]
+    rw [Scheme.Opens.topIso_inv, Scheme.Opens.ι_appIso]
     change X.presheaf.map (eqToHom U.ι_image_top).op r = _
     rfl
   rw [hr]
