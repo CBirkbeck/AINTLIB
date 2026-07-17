@@ -78,19 +78,24 @@ private lemma map_toRestrict_delta_eq_zero
     (hb : H.map ((toRestrict AddCommGrpCat U).app pres.X₃) (n + 1) b = 0) :
     H.map ((toRestrict AddCommGrpCat U).app pres.X₁) (n + 2)
       (CategoryTheory.Sheaf.H.δ presEx (n + 1) (n + 2) rfl b) = 0 := by
-  have hnat := CategoryTheory.Sheaf.H.δ_naturality
-    (n + 1) (n + 2) rfl presEx hrestricted
-    (pres.mapNatTrans (toRestrict AddCommGrpCat U)) b
-  change CategoryTheory.Sheaf.H.map
-    (pres.mapNatTrans (toRestrict AddCommGrpCat U)).τ₁ (n + 2)
-      (CategoryTheory.Sheaf.H.δ presEx (n + 1) (n + 2) rfl b) = 0
-  have hτ₃ : CategoryTheory.Sheaf.H.map
-      (pres.mapNatTrans (toRestrict AddCommGrpCat U)).τ₃ (n + 1) b = 0 := by
+  let res := pres.mapNatTrans (toRestrict AddCommGrpCat U)
+  let presU := pres.map (restrict AddCommGrpCat U.isOpenEmbedding ⋙
+    pushforward AddCommGrpCat U.inclusion')
+  let δPres : H pres.X₃ (n + 1) →+ H pres.X₁ (n + 2) :=
+    CategoryTheory.Sheaf.H.δ presEx (n + 1) (n + 2) rfl
+  let δPresU : H presU.X₃ (n + 1) →+ H presU.X₁ (n + 2) :=
+    CategoryTheory.Sheaf.H.δ hrestricted (n + 1) (n + 2) rfl
+  have hnat : δPresU (H.map res.τ₃ (n + 1) b) =
+      H.map res.τ₁ (n + 2) (δPres b) := by
+    exact CategoryTheory.Sheaf.H.δ_naturality
+      (n + 1) (n + 2) rfl presEx hrestricted res b
+  have hτ₃ : H.map res.τ₃ (n + 1) b = 0 := by
     change H.map ((toRestrict AddCommGrpCat U).app pres.X₃) (n + 1) b = 0
     exact hb
-  have hzero := congrArg
-    (CategoryTheory.Sheaf.H.δ hrestricted (n + 1) (n + 2) rfl) hτ₃
-  exact hnat.symm.trans (hzero.trans (map_zero _))
+  have hzero : δPresU (H.map res.τ₃ (n + 1) b) = 0 :=
+    (congrArg δPresU hτ₃).trans (map_zero δPresU)
+  change H.map res.τ₁ (n + 2) (δPres b) = 0
+  exact hnat.symm.trans hzero
 
 /-- Kempf's local-killing induction: if cohomology in degrees `1` through `n` vanishes on a
 basis stable under intersections, then every class in degree `n + 1` vanishes on a cover by
