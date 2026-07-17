@@ -4,7 +4,7 @@
 # `[propext, Classical.choice, Quot.sound]`, no sorryAx; `lake build «Adic spaces»` green
 # (root imports `FJP.FiniteJetMain`; FJP files live in `Adic spaces/FJP/`).
 # 𝓐 sheafy + uniform + domain + non-noetherian all verified; 𝓑 non-uniform verified.
-# Remaining: T801–T804 (chart + not_stablyUniform packaging), M7 stretch, cleanup fleet.
+# Remaining: NONE dispatchable — M7 stretch (needs /develop --continue), CLEANUP-* (cleanup fleet).
 
 # Ticket Board — Campaign 4: Finite-jet pinching (uniform sheafy non-noetherian domain, not stably uniform)
 
