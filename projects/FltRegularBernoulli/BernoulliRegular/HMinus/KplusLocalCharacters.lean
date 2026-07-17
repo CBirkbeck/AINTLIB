@@ -47,7 +47,7 @@ noncomputable section
 
 open NumberField
 open NumberField.IsCMField
-open scoped BigOperators Pointwise
+open scoped Pointwise
 
 namespace BernoulliRegular
 
@@ -318,7 +318,7 @@ lemma card_even_characters_kplus (hp_odd' : p ≠ 2) :
     simp only [E, O, Finset.mem_union, Finset.mem_filter, Finset.mem_univ, true_and, iff_true]
     exact DirichletCharacter.even_or_odd χ
   have hneg_ne_one : (-1 : ZMod p) ≠ 1 := by
-    haveI : Fact (2 < p) := ⟨lt_of_le_of_ne hp.out.two_le (Ne.symm hp_odd')⟩
+    have : Fact (2 < p) := ⟨lt_of_le_of_ne hp.out.two_le (Ne.symm hp_odd')⟩
     exact ZMod.neg_one_ne_one
   have hsum_zero :
       ∑ χ : DirichletCharacter ℂ p, χ (-1 : ZMod p) = 0 :=
