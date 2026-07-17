@@ -23007,3 +23007,34 @@ keystone lands, wire the `GammaHClosure` capstones + the three headliners to sor
 **DISPATCH:** the four charter-openers are in WORK-ORDERS.md (paste-ready, long-form). Owner re-fires a seat
 ONLY on its terminal report or a genuine all-fronts block — not per-item. OMEGA + G0 re-fire NOW (idle since
 v10.292/305); KM continues CHARTER-K (mid-flight on hpiece→K1); GH continues CHARTER-GH.
+
+---
+
+## v10.314-GH (2026-07-17, STREAM-GH) — CHARTER-GH opened: (GH1) T-H6 B2-SCOPED with counterexample-shape, b2-logged; (GH2) census re-verified
+
+**(GH1) T-H6 (`gammaHNaive_representable_of_rigid`, GammaH:508) — B2 VERDICT: FALSE AS STATED,
+owner decision requested.** Full scope (b2_log.jsonl appended, the protocol artifact):
+- The statement asserts Rigid → Representable for the **H-orbit PRESHEAF**. Representable presheaves
+  are fppf sheaves (descent of morphisms); the orbit presheaf FAILS the fppf sheaf axiom at rigid `H`.
+- **Counterexample shape** (classical, quotable without formalizing): `H` = unipotent upper-triangular
+  `{(1,*;0,1)}`, rigid for `N ≥ 4` (preimage torsion-free: unipotent trace ≡ 2 mod N kills elliptic
+  elements of trace ∈ {−1,0,1} once `N ≥ 4`; `−1` excluded for `N ≥ 3`). Take `E/ℚ` with
+  `E(ℚ)[N] = ⟨P⟩` and the complement direction twisted by a nontrivial cyclic cocycle
+  (`σQ = Q + b_σ·P`). Over the cyclic cover `L` the honest pair `(P, Q)` is a presheaf section whose
+  two pullbacks agree AS `H`-ORBITS (cocycle condition), but over `ℚ` no section exists — an orbit
+  representative would need a RATIONAL `Q`. Gluing fails ⟹ not an fppf sheaf ⟹ not representable
+  ⟹ Rigid → Representable is false at this `H`.
+- **In-tree corroboration:** [GHC3] (GammaHRep:3601+) already records the orbit/quotient comparison is
+  bijective ONLY over k̄ and "NOT an isomorphism of problems for `H ≠ ⊥`".
+- **Fix options for the owner:** (a) RECOMMENDED — restate at `qpd.prob` (the sheaf quotient; the true
+  statement is the existing `gammaH_representable` interface, proven modulo the engine); (b) add
+  fppf-sheafiness of the orbit presheaf as a hypothesis; (c) weaken the conclusion to geometric points
+  (GHC3's range). Statement-protected — no edit made.
+
+**(GH2) straggler census re-verified (post-v10.306):** GammaH 5 (483/496/508/1077/1090), Representability
+2 (631/646), EllCategory 2 (engine-⇐ pair), QuotientProblem 2 (engine), EndomorphismDegree = :179 + the
+five generals + :446 (CHARTER-K's set), Bootstrap 5 (CHARTER-O/G's set). NO new stragglers; v10.303
+classification stands.
+
+**(GH3) watches armed** on the three landing signals (KM :179 / OMEGA-hArb / G0-:206); **(GH4) the
+final-capstone receipt script staged** (7 headline receipts, one command). (STREAM-GH)
