@@ -3,6 +3,7 @@ Copyright (c) 2026. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 import «Adic spaces».FiniteJetStrictLocalization
+import «Adic spaces».FiniteJetUniformDomain
 import «Adic spaces».FaithfulLocLift
 
 /-!
@@ -1143,18 +1144,101 @@ theorem presheafValueMapB_restriction (D D' : RationalLocData (JetA F))
 
 /-! ### Coverage transfer ([FJP] Lemma 5.2, first display: `U_E = ⋃ᵢ (Uᵢ)_E`) -/
 
+/-- Power-bounded elements of 𝓐 stay power-bounded under any norm-nonincreasing ring map
+(the [FJP] "never bare continuity" transfer: 𝓐° = unit ball by Prop 2.3, and
+norm-≤-1 elements are power-bounded in any seminormed ring). -/
+theorem plus_le_comap_of_norm_le {E : Type*} [SeminormedCommRing E]
+    (φ : JetA F →+* E) (hφ : ∀ x, ‖φ x‖ ≤ ‖x‖) {x : JetA F}
+    (hx : TopologicalRing.IsPowerBounded x) :
+    TopologicalRing.IsPowerBounded (φ x) :=
+  isPowerBounded_of_norm_le_one
+    (le_trans (hφ x) ((isPowerBounded_JetA_iff F x).mp hx))
+
 /-- Inverse images preserve the rational inequalities: pushed rational opens are the
 `spaComap`-preimages. (Pointwise: `v ∈ rationalOpen (T_E, s_E) ↔ v ∘ ι ∈ rationalOpen (T, s)`
 for `v` in the vertex spectrum.) -/
 theorem mem_rationalOpen_pushDatumC_iff (D : RationalLocData (JetA F))
     (hD : D.IsRational) (v : Spv (JetC F)) (hv : v ∈ Spa (JetC F) (ringPlus (JetC F))) :
     v ∈ rationalOpen (pushDatumC D hD).T (pushDatumC D hD).s ↔
-      ValuationSpectrum.comap (iotaC F) v ∈ rationalOpen D.T D.s := by sorry
+      ValuationSpectrum.comap (iotaC F) v ∈ rationalOpen D.T D.s := by
+  have hcomap : ValuationSpectrum.comap (iotaC F) v ∈ Spa (JetA F) (ringPlus (JetA F)) :=
+    comap_mem_spa (continuous_iotaC) (fun x hx =>
+      plus_le_comap_of_norm_le (iotaC F) (fun a => le_of_eq (norm_iotaC F a)) hx) hv
+  constructor
+  · rintro ⟨-, hvle, hs0⟩
+    refine ⟨hcomap, fun t ht => ?_, fun h0 => hs0 ?_⟩
+    · rw [comap_vle]
+      exact hvle (iotaC F t) (Finset.mem_image_of_mem _ ht)
+    · have := (comap_vle (iotaC F) v D.s 0)
+      rw [map_zero] at this
+      rw [show (pushDatumC D hD).s = iotaC F D.s from rfl, ← this]
+      exact h0
+  · rintro ⟨-, hvle, hs0⟩
+    refine ⟨hv, fun t' ht' => ?_, fun h0 => hs0 ?_⟩
+    · obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp ht'
+      have := hvle t ht
+      rwa [comap_vle] at this
+    · have := (comap_vle (iotaC F) v D.s 0)
+      rw [map_zero] at this
+      rw [this]
+      exact h0
 
 theorem mem_rationalOpen_pushDatumB_iff (D : RationalLocData (JetA F))
     (hD : D.IsRational) (v : Spv (JetB F)) (hv : v ∈ Spa (JetB F) (ringPlus (JetB F))) :
     v ∈ rationalOpen (pushDatumB D hD).T (pushDatumB D hD).s ↔
-      ValuationSpectrum.comap (jB F) v ∈ rationalOpen D.T D.s := by sorry
+      ValuationSpectrum.comap (jB F) v ∈ rationalOpen D.T D.s := by
+  have hcomap : ValuationSpectrum.comap (jB F) v ∈ Spa (JetA F) (ringPlus (JetA F)) :=
+    comap_mem_spa (continuous_jB) (fun x hx =>
+      plus_le_comap_of_norm_le (jB F) (norm_jB_le F) hx) hv
+  constructor
+  · rintro ⟨-, hvle, hs0⟩
+    refine ⟨hcomap, fun t ht => ?_, fun h0 => hs0 ?_⟩
+    · rw [comap_vle]
+      exact hvle (jB F t) (Finset.mem_image_of_mem _ ht)
+    · have := (comap_vle (jB F) v D.s 0)
+      rw [map_zero] at this
+      rw [show (pushDatumB D hD).s = jB F D.s from rfl, ← this]
+      exact h0
+  · rintro ⟨-, hvle, hs0⟩
+    refine ⟨hv, fun t' ht' => ?_, fun h0 => hs0 ?_⟩
+    · obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp ht'
+      have := hvle t ht
+      rwa [comap_vle] at this
+    · have := (comap_vle (jB F) v D.s 0)
+      rw [map_zero] at this
+      rw [this]
+      exact h0
+
+/-- The 𝓓-side pointwise coverage transfer (supporting lemma for `pushCoveringD`). -/
+theorem mem_rationalOpen_pushDatumD_iff (D : RationalLocData (JetA F))
+    (hD : D.IsRational) (v : Spv (JetD F)) (hv : v ∈ Spa (JetD F) (ringPlus (JetD F))) :
+    v ∈ rationalOpen (pushDatumD D hD).T (pushDatumD D hD).s ↔
+      ValuationSpectrum.comap ((rhoC F).comp (iotaC F)) v ∈ rationalOpen D.T D.s := by
+  have hcomap : ValuationSpectrum.comap ((rhoC F).comp (iotaC F)) v ∈
+      Spa (JetA F) (ringPlus (JetA F)) :=
+    comap_mem_spa (by rw [RingHom.coe_comp]; exact (continuous_rhoC).comp (continuous_iotaC))
+      (fun x hx => Subring.mem_comap.mpr
+        (plus_le_comap_of_norm_le ((rhoC F).comp (iotaC F))
+          (fun a => le_trans (norm_rhoC_le F (iotaC F a)) (le_of_eq (norm_iotaC F a)))
+          (show TopologicalRing.IsPowerBounded x from hx))) hv
+  constructor
+  · rintro ⟨-, hvle, hs0⟩
+    refine ⟨hcomap, fun t ht => ?_, fun h0 => hs0 ?_⟩
+    · rw [comap_vle]
+      exact hvle (((rhoC F).comp (iotaC F)) t) (Finset.mem_image_of_mem _ ht)
+    · have := (comap_vle ((rhoC F).comp (iotaC F)) v D.s 0)
+      rw [map_zero] at this
+      rw [show (pushDatumD D hD).s = ((rhoC F).comp (iotaC F)) D.s from rfl, ← this]
+      exact h0
+  · rintro ⟨-, hvle, hs0⟩
+    refine ⟨hv, fun t' ht' => ?_, fun h0 => hs0 ?_⟩
+    · obtain ⟨t, ht, rfl⟩ := Finset.mem_image.mp ht'
+      have := hvle t ht
+      rwa [comap_vle] at this
+    · have := (comap_vle ((rhoC F).comp (iotaC F)) v D.s 0)
+      rw [map_zero] at this
+      rw [this]
+      exact h0
 
 /-- The pushed covering of a rational covering of 𝓐, at the 𝓒-vertex
 ([FJP] Lemma 5.2: "Inverse images preserve the defining valuation inequalities and unions.
@@ -1163,31 +1247,82 @@ def pushCoveringC (C : RationalCovering (JetA F)) (hC : C.IsRational) :
     RationalCovering (JetC F) where
   base := pushDatumC C.base hC.base
   covers := C.covers.attach.image fun d => pushDatumC d.1 (hC.piece d.2)
-  hsubset := by sorry
-  hcover := by sorry
+  hsubset := by
+    intro D' hD' v hv
+    obtain ⟨d, -, rfl⟩ := Finset.mem_image.mp hD'
+    have hvspa : v ∈ Spa (JetC F) (ringPlus (JetC F)) := hv.1
+    exact (mem_rationalOpen_pushDatumC_iff C.base hC.base v hvspa).mpr
+      (C.hsubset d.1 d.2
+        ((mem_rationalOpen_pushDatumC_iff d.1 (hC.piece d.2) v hvspa).mp hv))
+  hcover := by
+    intro v hv
+    have hvspa : v ∈ Spa (JetC F) (ringPlus (JetC F)) := hv.1
+    obtain ⟨D₀, hD₀, hmem⟩ := C.hcover _
+      ((mem_rationalOpen_pushDatumC_iff C.base hC.base v hvspa).mp hv)
+    exact ⟨pushDatumC D₀ (hC.piece hD₀),
+      Finset.mem_image.mpr ⟨⟨D₀, hD₀⟩, Finset.mem_attach _ _, rfl⟩,
+      (mem_rationalOpen_pushDatumC_iff D₀ (hC.piece hD₀) v hvspa).mpr hmem⟩
 
 def pushCoveringB (C : RationalCovering (JetA F)) (hC : C.IsRational) :
     RationalCovering (JetB F) where
   base := pushDatumB C.base hC.base
   covers := C.covers.attach.image fun d => pushDatumB d.1 (hC.piece d.2)
-  hsubset := by sorry
-  hcover := by sorry
+  hsubset := by
+    intro D' hD' v hv
+    obtain ⟨d, -, rfl⟩ := Finset.mem_image.mp hD'
+    have hvspa : v ∈ Spa (JetB F) (ringPlus (JetB F)) := hv.1
+    exact (mem_rationalOpen_pushDatumB_iff C.base hC.base v hvspa).mpr
+      (C.hsubset d.1 d.2
+        ((mem_rationalOpen_pushDatumB_iff d.1 (hC.piece d.2) v hvspa).mp hv))
+  hcover := by
+    intro v hv
+    have hvspa : v ∈ Spa (JetB F) (ringPlus (JetB F)) := hv.1
+    obtain ⟨D₀, hD₀, hmem⟩ := C.hcover _
+      ((mem_rationalOpen_pushDatumB_iff C.base hC.base v hvspa).mp hv)
+    exact ⟨pushDatumB D₀ (hC.piece hD₀),
+      Finset.mem_image.mpr ⟨⟨D₀, hD₀⟩, Finset.mem_attach _ _, rfl⟩,
+      (mem_rationalOpen_pushDatumB_iff D₀ (hC.piece hD₀) v hvspa).mpr hmem⟩
 
 def pushCoveringD (C : RationalCovering (JetA F)) (hC : C.IsRational) :
     RationalCovering (JetD F) where
   base := pushDatumD C.base hC.base
   covers := C.covers.attach.image fun d => pushDatumD d.1 (hC.piece d.2)
-  hsubset := by sorry
-  hcover := by sorry
+  hsubset := by
+    intro D' hD' v hv
+    obtain ⟨d, -, rfl⟩ := Finset.mem_image.mp hD'
+    have hvspa : v ∈ Spa (JetD F) (ringPlus (JetD F)) := hv.1
+    exact (mem_rationalOpen_pushDatumD_iff C.base hC.base v hvspa).mpr
+      (C.hsubset d.1 d.2
+        ((mem_rationalOpen_pushDatumD_iff d.1 (hC.piece d.2) v hvspa).mp hv))
+  hcover := by
+    intro v hv
+    have hvspa : v ∈ Spa (JetD F) (ringPlus (JetD F)) := hv.1
+    obtain ⟨D₀, hD₀, hmem⟩ := C.hcover _
+      ((mem_rationalOpen_pushDatumD_iff C.base hC.base v hvspa).mp hv)
+    exact ⟨pushDatumD D₀ (hC.piece hD₀),
+      Finset.mem_image.mpr ⟨⟨D₀, hD₀⟩, Finset.mem_attach _ _, rfl⟩,
+      (mem_rationalOpen_pushDatumD_iff D₀ (hC.piece hD₀) v hvspa).mpr hmem⟩
 
 theorem pushCoveringB_isRational {C : RationalCovering (JetA F)} (hC : C.IsRational) :
-    (pushCoveringB C hC).IsRational := by sorry
+    (pushCoveringB C hC).IsRational := by
+  refine ⟨pushDatumB_isRational hC.base, ?_⟩
+  intro D' hD'
+  obtain ⟨d, -, rfl⟩ := Finset.mem_image.mp hD'
+  exact pushDatumB_isRational (hC.piece d.2)
 
 theorem pushCoveringC_isRational {C : RationalCovering (JetA F)} (hC : C.IsRational) :
-    (pushCoveringC C hC).IsRational := by sorry
+    (pushCoveringC C hC).IsRational := by
+  refine ⟨pushDatumC_isRational hC.base, ?_⟩
+  intro D' hD'
+  obtain ⟨d, -, rfl⟩ := Finset.mem_image.mp hD'
+  exact pushDatumC_isRational (hC.piece d.2)
 
 theorem pushCoveringD_isRational {C : RationalCovering (JetA F)} (hC : C.IsRational) :
-    (pushCoveringD C hC).IsRational := by sorry
+    (pushCoveringD C hC).IsRational := by
+  refine ⟨pushDatumD_isRational hC.base, ?_⟩
+  intro D' hD'
+  obtain ⟨d, -, rfl⟩ := Finset.mem_image.mp hD'
+  exact pushDatumD_isRational (hC.piece d.2)
 
 /-! ### Intersection data ([FJP] Lemma 5.2: `(U_{ij})_E = (U_i)_E ∩ (U_j)_E`) -/
 
